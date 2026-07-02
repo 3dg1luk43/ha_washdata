@@ -5,7 +5,7 @@ Note: Despite the name, WashData also works well for other appliances (e.g., dry
 ## Overview
 
 This document covers the complete implementation of all major features:
-1. Variable cycle duration support (±15%)
+1. Variable cycle duration support (configurable tolerance)
 2. Smart progress management (100% on complete, 0% after unload)
 3. Self-learning feedback system
 4. Export/Import with full settings transfer
@@ -62,9 +62,9 @@ graph TD
     N --> O[Update Stats & Envelopes]
     O --> P{Check Confidence}
     
-    P -- "High (>0.75)" --> Q[Auto-Label Cycle]
-    P -- "Medium (0.15-0.75)" --> R[Request Feedback]
-    P -- "Low (<0.15)" --> S[Log to History]
+    P -- "High (>=0.9)" --> Q[Auto-Label Cycle]
+    P -- "Medium (0.6-0.9)" --> R[Request Feedback]
+    P -- "Low (<0.6)" --> S[Log to History]
     
     R --> T["User Confirms/Corrects"]
     T --> U["System Learns"]
@@ -93,7 +93,7 @@ How raw power sensor data is processed into cycle states.
      
      loop Every 5 Minutes
          Manager->>Matcher: async_match_profile(current_data)
-         Matcher->>Matcher: 3-Stage Pipeline (NumPy/DTW)
+         Matcher->>Matcher: 5-Stage Pipeline (NumPy/DTW)
          Matcher-->>Manager: MatchResult (Best Profile, Confidence)
          Manager->>Manager: Update Estimations
      end
@@ -105,45 +105,45 @@ How raw power sensor data is processed into cycle states.
  ```mermaid
  stateDiagram-v2
      [*] --> OFF
-     
-     OFF --> STARTING: Power > Threshold
-     STARTING --> RUNNING: Energy > Start_Threshold
-     STARTING --> OFF: Power < Threshold (Spike)
-     
-     RUNNING --> PAUSED: Power < Threshold
-     PAUSED --> RUNNING: Power > Threshold
-     
-     PAUSED --> ENDING: Time > Off_Delay
-     RUNNING --> ENDING: Time > Off_Delay (rare)
-     
-     ENDING --> OFF: Energy < End_Threshold
-     ENDING --> PAUSED: Energy > End_Threshold (False End)
-     
-     OFF --> [*]
+     OFF --> DELAY_WAIT: Standby band held (delay-start, opt-in)
+     DELAY_WAIT --> STARTING: Power >= start_threshold_w
+     DELAY_WAIT --> OFF: True-off or delay timeout
+     OFF --> STARTING: Power >= start_threshold_w (sustained)
+     STARTING --> RUNNING: time_above >= start_duration AND energy >= start_energy
+     STARTING --> OFF: Gates not met (spike)
+     RUNNING --> PAUSED: Power below pause threshold
+     PAUSED --> RUNNING: Power back above threshold
+     RUNNING --> INTERRUPTED: Abrupt drop early (< interrupted_min_seconds)
+     RUNNING --> ENDING: Low-power run begins
+     PAUSED --> ENDING: Low-power run sustained
+     ENDING --> RUNNING: Power/energy resumes (false end; ML end-guard may defer)
+     ENDING --> FINISHED: off_delay + energy gate, or Smart Termination near expected
+     ENDING --> FORCE_STOPPED: Watchdog / no-update timeout
+     FINISHED --> ANTI_WRINKLE: Dryer tumble pulses (opt-in)
+     ANTI_WRINKLE --> OFF: True-off after idle
+     FINISHED --> CLEAN: Door sensor configured, laundry not yet removed
+     CLEAN --> OFF: Door opened (unloaded)
+     FINISHED --> OFF: After progress-reset delay
+     FINISHED --> [*]
  ```
  
- ### 4. Matching Pipeline (3-Stage)
+ ### 4. Matching Pipeline (5-Stage)
  The logic used to identify which profile matches the current cycle.
  
  ```mermaid
  graph TD
-     A[Raw Power Data] --> B["Resampling (10s intervals)"]
-     B --> C{"Stage 1: Fast Reject"}
-     C -- "Duration Ratio < 0.75 or > 1.25" --> D[Discard]
-     C -- "Pass" --> E["Stage 2: Core Similarity"]
-     
-     E --> F["Calculate MAE, Correlation, Peak"]
-     F --> G{"Ambiguous Result?"}
-     
-     G -- "No (Clear Winner)" --> H[Select Top Candidate]
-     G -- "Yes (Close Scores)" --> I["Stage 3: DTW Refinement"]
-     
-     I --> J[Run Dynamic Time Warping]
-     J --> H
-     
-     H --> K{"Confidence > Threshold?"}
-     K -- Yes --> L[Match Confirmed]
-     K -- No --> M["Unknown / Detecting..."]
+     A[Raw Power Data] --> B[Adaptive resample and align]
+     B --> C{Stage 1: Fast Reject}
+     C -- "Duration ratio < 0.10 or > 1.5" --> D[Discard]
+     C -- Pass --> E["Stage 2: Core Similarity (0.45 corr + 0.55 peak-relative MAE)"]
+     E --> F["Stage 3: DTW-Lite refine top 5 (ensemble; always on when band > 0)"]
+     F --> G["Stage 4: Duration + Energy agreement (0.22 each)"]
+     G --> H["Stage 5: Profile groups (collapse cohesive near-duplicates, pick member)"]
+     H --> I{"Top-1 score >= 0.4 commit threshold?"}
+     I -- No --> M["Unknown / Detecting..."]
+     I -- Yes --> J{"Ambiguous? top1 - top2 < 0.05"}
+     J -- Yes --> R[Uncertain -> request feedback]
+     J -- No --> L[Match Confirmed]
  ```
 
 ### 5. Learning Mechanism (Feedback Loop)
@@ -153,17 +153,17 @@ How the system adapts to user corrections.
 graph LR
     A[Cycle Complete] --> B{Confidence Level}
     
-    B -- "High (>= 0.75)" --> C[Auto-Label Cycle]
+    B -- "High (>= 0.9)" --> C[Auto-Label Cycle]
     C --> D[Rebuild Envelope]
     
-    B -- "Moderate (0.15 - 0.75)" --> E[Emit Feedback Request]
+    B -- "Moderate (0.6 - 0.9)" --> E[Emit Feedback Request]
     E --> F[User Notification]
     F --> G{User Action?}
     
     G -- Confirm --> H[Boost Confidence]
     G -- Correct --> I[Update Profile Stats]
     
-    B -- "Low (< 0.15)" --> J["Log to History (No Action)"]
+    B -- "Low (< 0.6)" --> J["Log to History (No Action)"]
 ```
 
 
@@ -171,12 +171,12 @@ graph LR
 
 ## Features Implemented
 
-### 1. Variable Cycle Duration (±15%)
+### 1. Variable Cycle Duration (configurable tolerance)
 
 **Problem:** Real washers don't run for exact programmed times. Load size, water temperature, and soil level cause natural variance of 10-20%.
 
-**Solution:** 
-- Mock socket now simulates ±15% realistic duration variance
+**Solution:** (the matcher tolerance is configurable; current default **±25%** via `profile_duration_tolerance`)
+- Mock socket simulates ±15% realistic duration variance
 - Profile matching tolerates up to ±25% variance (was ±50%)
 - Better real-world detection accuracy, fewer false negatives
 
@@ -188,7 +188,7 @@ graph LR
 ```python
 # Profile matching logic (Initial Filter)
 duration_ratio = actual_duration / expected_duration
-# Accepts if within range (default: 0.75 - 1.25)
+# Accepts if within range (current default: 0.10 - 1.5; see const.py MATCH_* / CLAUDE.md)
 # This prevents comparing apples to oranges (e.g. 30min vs 2h cycles)
 ```
 
@@ -243,9 +243,9 @@ python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG
 
 **Solution:**
 - Progress reaches 100% immediately when cycle completes (clear signal)
-- Progress stays at 100% for 5 minutes (user unload time)
-- After 5 min idle, progress automatically resets to 0%
-- If new cycle starts within 5 min, reset is cancelled
+- Progress stays at 100% for the **Progress Reset Delay** (default **30 min**, `progress_reset_delay`) as the unload window
+- After that idle window, progress automatically resets to 0%
+- If a new cycle starts within the window, the reset is cancelled
 
 **Files Modified:**
 - `custom_components/ha_washdata/manager.py` - Complete implementation
@@ -280,7 +280,7 @@ sensor.washer_progress: "45"
 # Cycle ends
 sensor.washer_progress: "100"
 
-# After 5 min idle
+# After the reset-delay idle window (default 30 min)
 sensor.washer_progress: "0"
 ```
 
@@ -348,25 +348,27 @@ data:
   notes: "Was actually a delicate cycle"
 ```
 
-#### Learning Algorithm
+#### Learning Algorithm (current)
 
-When user corrects a cycle:
-1. Store correction in feedback history
-2. Update the corrected profile's average duration
-3. Use conservative weighting: **80% old + 20% new**
-4. Mark cycle with `feedback_corrected: true`
-5. Future matches use updated profile
+> **Updated:** the old EWMA nudge (`80% old + 20% new`) is **no longer used**. A
+> correction now **re-labels the cycle** onto the corrected profile (and fixes that
+> cycle's duration), then the profile's envelope is rebuilt and **all** statistics
+> (`avg_duration` / `min` / `max`) are **recomputed from the profile's labelled cycles**
+> - see `learning.py::_apply_correction_learning`. Expected duration is a **robust
+> statistic** over those cycles: `profile_store.filter_duration_outliers()` drops
+> outliers with Tukey IQR fences (1.5×IQR), falling back to a MAD-based robust-Z filter
+> (≤3.5) when the IQR collapses.
 
-**Example:**
-```python
-# Original profile average: 3600s (60 min)
-# User correction: 3300s (55 min)
-# New average = (3600 * 0.80) + (3300 * 0.20)
-#             = 2880 + 660
-#             = 3540s (59 min)  # Gradual adjustment
-```
+When a user confirms or corrects a cycle:
+1. Store the confirmation/correction in feedback history.
+2. On a correction, re-label the cycle onto the corrected profile and set its duration.
+3. Rebuild the profile envelope and **recompute** its duration statistics from all its
+   labelled cycles (outlier-filtered) - no single-correction weighting.
+4. Future matches use the recomputed profile stats.
 
-**Why 80/20?** Prevents overfitting to single corrections. System learns gradually from consistent feedback.
+This recompute-from-labelled-cycles approach is more accurate than a running average:
+one bad correction can be fixed by re-labelling, and the stats always reflect the
+current membership rather than the order corrections arrived in.
 
 #### Accessing Feedback Data
 
@@ -512,9 +514,9 @@ ProfileStore.async_run_maintenance()
 
 **Goal:** Improve precision for similar cycles and reduce "stuck" time estimates.
 
-#### A. Confidence Boosting (Shape Matching)
+#### A. Shape vs level weighting (Shape Matching)
 **Problem:** Cycles with identical duration but different phases (e.g. Eco vs Intensive) were hard to distinguish.
-**Solution:** If `numpy.corrcoef` > 0.85 (very strong shape match), the profile match score is heavily boosted (x1.2), allowing strict shape matching to override minor power amplitude differences.
+**Solution (current):** The old correlation "confidence boost" (×1.2 when `corrcoef > 0.85`) was **removed** in the matching overhaul; it hurt the leave-one-out net metric. Stage 2 now scores `45% correlation + 55% peak-relative MAE`, and near-duplicate same-device programs are separated by the Stage 4 duration/energy agreement term and Stage 5 profile groups instead. See `CLAUDE.md` → *Matching Pipeline Details*.
 
 #### B. Smart Time Prediction (Variance Locking)
 **Problem:** Time remaining jumped erratically during variable phases (e.g. heating water).
@@ -623,7 +625,7 @@ manager._cycle_completed_time  # When cycle finished (ISO)
 
 **Duration Matching:**
 - Tolerance: ±25% (was ±50%)
-- Rejects: duration_ratio < 0.75 or > 1.25
+- Rejects: duration_ratio < 0.10 or > 1.5
 - Accounts for realistic variance
 
 ## Recent Test Expansion Findings (2026-02-04)
@@ -650,7 +652,7 @@ The integration includes specialized handling for different appliance types to a
 - **Pump / Sump Pump**: Sharp on/off with no warm-down; stuck-alarm watchdog rather than profile matching is the primary feature.
 - **Other (Advanced)**: Generic bucket for appliances that do not fit one of the supported classes. Ships intentionally generic defaults that are not tuned for any specific appliance; no curated phase catalog; no device-type-specific runtime branching. The user is expected to configure thresholds, timeouts, and matching parameters themselves. Also the runtime fallback for entries whose device type is hard-removed after deprecation.
 
-**Deprecated (0.4.4.3, scheduled removal 0.6.0)**: Electric Vehicle, Coffee Machine, Heat Pump, and Oven. Existing setups continue to work; these types fail at least one of WashData's three appliance fit tests (user-selected discrete program, reproducible power signature, clean return to OFF) so matching produces noise rather than signal. The new-entry dropdown filters them out; the options flow surfaces a yellow warning recommending migration to one of the supported types or to **Other (Advanced)**.
+**Deprecated (0.4.4.3, scheduled removal 0.6.0)**: Electric Vehicle, Coffee Machine, Heat Pump, and Oven. Existing setups continue to work; these types fail at least one of WashData's three appliance fit tests (user-selected discrete program, reproducible power signature, clean return to OFF) so matching produces noise rather than signal. The new-entry dropdown filters them out, and existing entries on a deprecated type are recommended to migrate to a supported type or to **Other (Advanced)**.
 
 ---
 
@@ -695,28 +697,27 @@ SVG Visualization (Power Curve + Phase Spans)
 
 ```mermaid
 graph TD
-    A["Options Menu"] --> B{Action?}
+    A["WashData panel > Profiles tab"] --> B{Where?}
     
-    B -- "Manage Phase Catalog" --> D{Action?}
-    D -- "Create" --> E["Add New Custom Phase"]
-    D -- "Edit" --> F["Select Phase"]
-    F --> G["Edit Default or Custom"]
-    G --> H["Update Phase Metadata"]
-    D -- "Delete" --> I["Remove Custom Phase"]
+    B -- "Phase Catalog sub-tab" --> D{Action?}
+    D -- "Create" --> E["Add new custom phase"]
+    D -- "Edit" --> F["Select phase"]
+    F --> G["Edit default or custom"]
+    G --> H["Update phase metadata"]
+    D -- "Delete" --> I["Remove custom phase"]
     
-    E --> J["Phase Added to Catalog"]
+    E --> J["Phase added to catalog"]
     H --> J
-    I --> K["Phase Removed from Catalog"]
+    I --> K["Phase removed from catalog"]
     
-    B -- "Manage Profiles" --> L["Select Profile"]
-    L --> M["Assign Phase Ranges"]
-    M --> N["Choose Phases from Catalog"]
-    N --> O["Enter Time Ranges (min)"]
-    O --> P["Preview on SVG Chart"]
-    P --> Q["Save Profile with Phases"]
+    B -- "Open a profile" --> L["Phase-range editor"]
+    L --> N["Choose phases from catalog"]
+    N --> O["Drag boundaries over the average curve"]
+    O --> P["Live preview on the curve"]
+    P --> Q["Save profile phases"]
     
-    J --> R["Phases Available in Dropdowns"]
-    Q --> S["Phases Displayed in Event Data"]
+    J --> R["Phases available in dropdowns"]
+    Q --> S["Phases displayed in event data"]
 ```
 
 ### API Reference

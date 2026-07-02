@@ -17,6 +17,7 @@ from homeassistant.util import dt as dt_util
 from .const import (
     CONF_APPLY_SUGGESTIONS,
     CONF_AUTO_LABEL_CONFIDENCE,
+    CONF_NAME,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_DEVICE_TYPE,
     CONF_DOOR_SENSOR_ENTITY,
@@ -687,7 +688,11 @@ async def ws_set_options(
 
     new_options.pop(CONF_APPLY_SUGGESTIONS, None)
 
-    hass.config_entries.async_update_entry(entry, options=new_options)
+    update_kwargs: dict[str, Any] = {"options": new_options}
+    if CONF_NAME in new_options and new_options[CONF_NAME]:
+        update_kwargs["title"] = new_options[CONF_NAME].strip()
+
+    hass.config_entries.async_update_entry(entry, **update_kwargs)
     connection.send_result(msg["id"], {"success": True})
 
 

@@ -1,32 +1,26 @@
 # WashData Notifications, Events & Attributes
 
-WashData can tell you about a cycle in three independent ways. You can use any one of
-them, or mix them. This guide explains what each option does, how the notifications
-behave over the life of a cycle, and how to build your own automations on top.
+WashData can tell you about a cycle in two ways. You can use either, or both. This guide
+explains what each does, how the notifications behave over the life of a cycle, and how
+to build your own automations on top.
 
 > TL;DR
 > - Want a ready-made push to your phone? Fill in the **per-event notification targets**.
-> - Want full control (custom sound, conditions, TTS, only certain events)? Use a
->   **Notification Action** and branch on the `event_type` variable.
-> - Want to drive your own automations from scratch? Turn on **Fire Events** and trigger
->   on the bus events.
+> - Want full control (custom sound/channel, conditions, TTS, only certain events,
+>   lights, ...)? Build a normal **Home Assistant automation** triggered by WashData's
+>   cycle events. The panel's **Notifications → Automations** section finds and creates
+>   them for you. (This replaces the old built-in "custom actions" editor.)
 
 All of these are configured under **Settings -> Devices & Services -> WashData ->
 Configure -> Notifications**.
 
 ---
 
-## The three ways to send notifications
+## The two ways to send notifications
 
-WashData runs them in this order for every notification it produces:
-
-1. **Notification Action** (`notify_actions`) runs first, if set.
-2. **Per-event notification targets** (the start / finish / live service lists) run next.
-3. **Fire Events** (`notify_fire_events`) is independent and always fires on the bus when enabled.
-
-If a Notification Action fires *and* you left the matching per-event target list empty,
-WashData skips the service path for that event (the action already handled it). If both
-are set, both run.
+For every notification it produces, WashData runs the **per-event notification targets**
+(below), and independently emits **bus events** (`notify_fire_events`, default on) that
+your own automations can trigger on. Use whichever suits you; they are independent.
 
 ### 1. Per-event notification targets (the simple path)
 
@@ -49,53 +43,75 @@ Key behaviours:
 - Each list accepts both **notify services** (e.g. `notify.mobile_app_pixel`) and
   **notify entities** (e.g. those exposed by `telegram_bot`). Notify entities are
   delivered through the universal `notify.send_message` action automatically.
-- If **no** target is configured and there is no Notification Action, the message falls
-  back to a Home Assistant **persistent notification** (the bell icon in the sidebar).
+- If **no** target is configured, the message falls back to a Home Assistant
+  **persistent notification** (the bell icon in the sidebar).
 
-### 2. Notification Action (the powerful path)
+### 2. Automations (the powerful path)
 
-The **Notification Actions** option is a full Home Assistant action sequence (the same
-editor you use in automations). It runs for **every** notification event and receives a
-set of variables you can template against. This is the way to:
+For anything beyond a plain push - a custom sound or Android channel, TTS, conditions,
+only certain events, driving lights, and so on - build a normal Home Assistant
+**automation** triggered by the events WashData fires on the bus. This does everything
+the old built-in "custom actions" editor did, natively, so you get the full automation
+editor, conditions, and templating. Keep **Fire Automation Events** (`notify_fire_events`,
+default on) enabled so the events are emitted.
 
-- send only selected event types (branch on `{{ event_type }}`),
-- attach a custom sound / channel / criticality,
-- speak the message over TTS, gate on conditions, call multiple services, etc.
+**Find and create them from the panel.** Open **WashData → Settings → Notifications →
+Automations**. It lists the automations that already reference this device (each
+deep-links to the automation editor) and gives you a **New Automation** button: a blank
+one, or one prefilled with a *cycle started* or *cycle finished* trigger for this device.
 
-Variables available inside the action:
-
-| Variable | Meaning |
-| --- | --- |
-| `event_type` | `cycle_start`, `cycle_finish`, `cycle_live`, `pre_complete` (reminder), `cycle_clean` (laundry nag). On a live notification being cleared at cycle end, `message` is the literal `clear_notification`. |
-| `device` | The device title you configured |
-| `program` | Matched profile name (may be `detecting...` early in a cycle) |
-| `message`, `title`, `icon` | The rendered text/title and configured icon |
-| `tag` | Shared lifecycle tag (see [Lifecycle](#the-notification-lifecycle)) |
-| `timeout`, `channel`, `priority` | Present when configured / relevant |
-| `person_entity_id`, `person_name` | The at-home person resolved by presence gating, if any |
-| event extras | e.g. `minutes_left`, `duration_minutes`, `energy_kwh`, `cost`, `progress`, `progress_max` depending on the event |
-
-Example, "only notify when the cycle finishes, with a custom Android channel and sound":
+**How to configure them - using WashData's variables.** Inside an automation you read
+WashData's values from the trigger's **event data**. WashData fires
+`ha_washdata_cycle_started` and `ha_washdata_cycle_ended` (see
+[Events reference](#events-reference) for the full payloads). Example - notify with the
+program, duration and cost when a cycle finishes:
 
 ```yaml
-- choose:
-    - conditions: "{{ event_type == 'cycle_finish' }}"
-      sequence:
-        - service: notify.mobile_app_pixel
+automation:
+  - alias: "Notify when the washer finishes"
+    trigger:
+      - platform: event
+        event_type: ha_washdata_cycle_ended
+        # Optional: pin to one device. Omit event_data to match any WashData device.
+        event_data:
+          entry_id: <your device's entry_id>
+    action:
+      - service: notify.mobile_app_pixel
+        data:
+          title: "{{ trigger.event.data.device_name }} finished"
+          message: >-
+            {{ trigger.event.data.program }} took
+            {{ (trigger.event.data.duration / 60) | round(0) }} min, used
+            {{ trigger.event.data.cycle_data.energy_wh | round(0) }} Wh
+            ({{ trigger.event.data.cycle_data.cost }} in energy).
           data:
-            title: "{{ title }}"
-            message: "{{ message }}"
-            data:
-              channel: Laundry Done
-              tag: "{{ tag }}"
+            channel: Laundry Done
 ```
 
-### 3. Automation events (the DIY path)
+The variables you can template against come from `trigger.event.data`:
 
-Turn on **Fire Automation Events** (`notify_fire_events`, default on) and WashData emits
-events on the Home Assistant bus that you can use as automation triggers. This bypasses
-the notification options entirely and gives you full control. See
-[Events reference](#events-reference) below.
+| In an automation | Meaning |
+| --- | --- |
+| `{{ trigger.event.data.device_name }}` | The device title you configured |
+| `{{ trigger.event.data.program }}` | Matched profile name (`"unknown"` if none matched) |
+| `{{ trigger.event.data.duration }}` | Cycle length **in seconds** (divide by 60 for minutes) |
+| `{{ trigger.event.data.start_time }}` / `.end_time` | ISO timestamps (ended event) |
+| `{{ trigger.event.data.cycle_data.energy_wh }}` | Energy used, watt-hours (ended event) |
+| `{{ trigger.event.data.cycle_data.cost }}` | Energy cost, your HA currency (ended event, if a price is set) |
+| `{{ trigger.event.data.cycle_data.max_power }}` / `.status` | Peak watts / `completed`\|`interrupted`\|`force_stopped` |
+
+> **These `{{ trigger.event.data.* }}` templates are for automations.** The short
+> `{device}` / `{duration}` **[message placeholders](#message-placeholders)** below are a
+> different mechanism - they only substitute inside the built-in message templates in the
+> Notifications settings, not inside automations.
+
+> **Migrating from the old custom actions.** If you configured actions in a previous
+> version, they keep firing, and the **Automations** section shows a *legacy custom
+> actions* notice with a one-click **Convert to automation** (it creates an automation
+> prefilled with both cycle triggers plus your original action steps) and a **Remove**
+> button. Any `{device}` / `{duration}`-style placeholders inside those actions are not
+> templated in an automation - after converting, replace them with the
+> `{{ trigger.event.data.* }}` forms shown above.
 
 ---
 
@@ -123,7 +139,6 @@ Cycle start  ->  Live progress (recurring, replaces start)
 
 | Option | Key | What it does |
 | --- | --- | --- |
-| Notification Actions | `notify_actions` | Action sequence run for every event (see above). |
 | Delay Until People Home | `notify_people` | People entities used for presence gating. |
 | Delay Until Someone Home | `notify_only_when_home` | Hold notifications until a listed person is home; the latest live update is kept and the rest coalesced. |
 | Fire Automation Events | `notify_fire_events` | Emit bus events for automations (default on). |
@@ -238,6 +253,8 @@ data:
     duration: 13784.144562                  # seconds (float)
     max_power: 2063                         # watts (peak observed in the cycle)
     energy_wh: 1564.04                      # integrated energy over the cycle
+    cost: 0.42                              # energy cost frozen at completion (your HA currency); absent if no price is configured
+    energy_price: 0.27                      # price per kWh used to compute `cost` (absent if no price is configured)
     status: completed                       # completed | aborted | timeout
     termination_reason: timeout             # off_delay | smart_termination | timeout | force_end | zombie | ghost_suppressed
     profile_name: null                      # null when no profile was matched

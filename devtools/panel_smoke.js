@@ -82,9 +82,13 @@ check('_htmlHistory', () => el._htmlHistory());
 check('_htmlProfiles', () => el._htmlProfiles());
 check('_htmlSettings', () => el._htmlSettings());
 check('_htmlSettings (search)', () => { el._settingsSearch = 'threshold'; const h = el._htmlSettings(); el._settingsSearch = ''; return h; });
+check('_htmlAutomations', () => { el._deviceAutomations = [{ id: 'abc', name: 'Notify on finish', enabled: true }, { id: 'def', name: 'Off automation', enabled: false }]; return el._htmlAutomations(); });
+check('_htmlAutomations (legacy actions)', () => { const o = el._opts; el._opts = { ...o, notify_actions: [{ service: 'notify.phone', data: { message: 'done' } }] }; const h = el._htmlAutomations(); el._opts = o; return h; });
+check('_htmlSettings (notifications section)', () => { const s = el._settingsSec; el._settingsSec = 'notifications'; const h = el._htmlSettings(); el._settingsSec = s; return h; });
 check('_htmlPanel (advanced)', () => el._htmlPanel());
 check('_htmlDiagnostics', () => el._htmlDiagnostics());
 check('_htmlLogs', () => el._htmlLogs());
+check('_htmlMlTab', () => el._htmlMlTab());
 check('_htmlMlTrainingCard', () => el._htmlMlTrainingCard());
 check('_htmlMatchingTuningCard', () => el._htmlMatchingTuningCard());
 check('_htmlMatchingTuningCard (default)', () => { const s = el._mlTrainingStatus; el._mlTrainingStatus = { ...s, matching: { ...s.matching, tuned: null, active: 'default' } }; const h = el._htmlMatchingTuningCard(); el._mlTrainingStatus = s; return h; });
@@ -95,9 +99,6 @@ check('modal: profile-group (new)', () => { el._modal = { type: 'profile-group',
 check('modal: profile-group (edit)', () => { el._modal = { type: 'profile-group', orig: 'Cotton 2:47', name: 'Cotton 2:47', members: ['Cotton 60', 'Cotton 40'] }; return el._htmlModal(); });
 check('modal: cycle-detail review', () => { el._modal = { type: 'cycle-detail', mode: 'review', loaded: true, cycleId: 'c1', curve: { samples: [[0, 1], [10, 2]], full_duration_s: 1000, duration: 1000, profile_name: 'Cotton 60', start_time: new Date().toISOString() }, ml: null }; return el._htmlModal(); });
 check('modal: profile-panel stats', () => { el._modal = { type: 'profile-panel', name: 'Cotton 60', tab: 'stats', loaded: true, stats: el._profiles[0], env: {} }; return el._htmlModal(); });
-check('modal: notify-actions (rows)', () => { el._modal = { type: 'notify-actions', mode: 'rows', rows: [{ service: 'notify.phone', data: '{"message":"hi"}' }], raw: '[]' }; return el._htmlModal(); });
-check('modal: notify-actions (raw)', () => { el._modal = { type: 'notify-actions', mode: 'raw', rows: [], raw: '[{"service":"notify.phone"}]' }; return el._htmlModal(); });
-check('_naBuildActions rows', () => { el._modal = { type: 'notify-actions', mode: 'rows', rows: [{ service: 'notify.phone', data: '{"message":"x"}' }] }; const a = el._naBuildActions(el._modal); if (!Array.isArray(a) || a[0].service !== 'notify.phone') throw new Error('bad build'); });
 el._modal = null;
 
 console.log(failures ? `\nSMOKE FAILED (${failures})` : '\nSMOKE OK');

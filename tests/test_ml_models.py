@@ -16,9 +16,9 @@ _ML_DIR = Path(__file__).resolve().parent.parent / "custom_components" / "ha_was
 
 from custom_components.ha_washdata.ml import (
     CONF_ENABLE_ML_MODELS,
-    MLEngine,
     available_models,
     ml_models_enabled,
+    resolve_scorer,
 )
 
 MODEL_MODULES = [
@@ -46,27 +46,6 @@ def test_model_module_loads_and_scores(module_name: str) -> None:
     assert module.predict(features) == (module.score(features) >= module.THRESHOLD)
 
 
-def test_engine_disabled_by_default() -> None:
-    engine = MLEngine.from_options(None)
-    assert engine.enabled is False
-    assert engine.quality_problem_score({}) is None
-    assert engine.live_match_commit_confidence({}) is None
-    assert engine.end_confidence({}) is None
-    assert engine.end_is_final({}) is None
-
-
-def test_engine_enabled_scores() -> None:
-    engine = MLEngine.from_options({CONF_ENABLE_ML_MODELS: True})
-    assert engine.enabled is True
-    quality = engine.quality_problem_score({})
-    commit = engine.live_match_commit_confidence({})
-    end = engine.end_confidence({})
-    for value in (quality, commit, end):
-        assert value is not None
-        assert 0.0 <= value <= 1.0
-    assert isinstance(engine.end_is_final({}), bool)
-
-
 def test_ml_models_enabled_flag() -> None:
     assert ml_models_enabled(None) is False
     assert ml_models_enabled({}) is False
@@ -85,8 +64,8 @@ def test_available_models_manifest() -> None:
 
 
 def test_unknown_capability_returns_none() -> None:
-    engine = MLEngine(enabled=True)
-    assert engine._score("does_not_exist", {}) is None
+    score_fn, source = resolve_scorer("does_not_exist", None)
+    assert score_fn is None and source is None
 
 
 @pytest.mark.parametrize("module_name", MODEL_MODULES)

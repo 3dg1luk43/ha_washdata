@@ -18,30 +18,15 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 
 ## ✨ Features
 
-- **Multi-Device Support**: Track Washing Machines, Dryers, Washer-Dryer Combos, Dishwashers, Air Fryers, Bread Makers, and Pumps/Sump Pumps, each with device-specific defaults and phases. An **Other (Advanced)** bucket is available for appliances that do not fit one of the supported classes; it ships intentionally generic defaults and expects the user to tune thresholds, timeouts, and matching parameters themselves. Coffee Machines, Electric Vehicles, Heat Pumps, and Ovens are supported in 0.4.4.3 as deprecated types (existing setups continue to work) and scheduled for removal in 0.6.0.
-- **Smart Cycle Detection**: Automatically detects starts/stops with **Predictive End** logic. Includes **End Spike Protection** for dishwashers to capture final pump-outs.
-- **Power Spike Filtering**: Ignores brief boot spikes to prevent false starts.
-- **Shape-Correlation Matching**: Uses `numpy.corrcoef` with **Confidence Boosting** to distinguish similar cycles.
-- **Manual Training**: You define your profiles (e.g., "Cotton", "Quick") once; the system learns to recognize them thereafter. Integration **does not** auto-create profiles.
-- **Smart Time Estimation**: "Phase-aware" prediction detects variance (e.g., heating) and locks the countdown to prevent erratic jumps.
-- **Changeable Power Sensor**: Switch plugs without losing history.
-- **Tile Card** (Minimal Status Card): Optional custom Lovelace card.
-- **Manual Program Override**: Select the correct program manually if detection is uncertain; the system learns from your input.
-- **Manual Profile Creation**: Create profiles even without historical cycles by specifying a baseline duration (e.g., "Eco Mode - 3h").
-- **Unified Phase Catalog**: Manage phase vocabulary across all supported device types from one catalog view.
-- **Scoped Phase Assignment**: Phase assignment dialogs show only phases relevant to the configured device type.
-- **Ghost Cycle Suppression**: Intelligent filtering with **"Suspicious Window"** (20 mins) prevents end-spikes from triggering duplicate cycles. **Now Persistent**: Remembers cycle history across HA restarts to prevent ghost detections after reboots.
-- **Robust vNext State Machine**: Advanced filtering with `start_energy` and `end_energy` gates prevents false starts/ends.
-- **Multi-Stage Matching Pipeline**: Uses Fast Reject -> Core Similarity -> DTW-Lite tie-breaking for superior accuracy.
-- **Local Only**: No cloud dependency, no external services. All data stays in your Home Assistant.
-- **Notifications**: Integrated alerts for cycle start, finish, and **pre-completion** (e.g., 5 mins before finish).
-- **Self-Learning**: Gradually adjusts expected durations based on your confirmed historical data.
-- **Realistic Variance**: Handles natural cycle duration variations with configurable tolerance.
-- **Progress Tracking**: Clear cycle progress indicator with automatic reset after unload.
-- **Auto-Maintenance**: Nightly cleanup - removes broken profiles, merges fragmented cycles (**Empty/New profiles are safely preserved**).
-- **Export/Import**: Full configuration backup/restore with all settings and profiles via JSON. Import also accepts HA diagnostics download files directly.
-- **User-Triggered Pause/Resume**: Pause and resume active cycles via button entities or HA services. Elapsed time and time-remaining estimates automatically exclude the paused duration. Optional **Cut Power When Pausing** toggle for appliances that maintain their position after a power cut.
-- **Door Sensor & Clean State**: Optional binary sensor integration that sets verified pause when the door opens mid-cycle (add-clothes support), and tracks a **Clean** state after cycle end until the door is opened to remind you laundry is waiting.
+- **Automatic detection & program matching** - Detects cycle start/stop from the power trace and identifies *which program* ran by curve shape, duration, and energy. You teach it your programs once (it never auto-creates profiles); it recognises them thereafter and gives phase-aware time-remaining estimates.
+- **Full-screen management panel** - A **WashData** sidebar entry for live status, cycle and profile management, settings, diagnostics, and logs. Replaces the old multi-screen options flow.
+- **Many appliance types** - Washing machines, dryers, washer-dryer combos, dishwashers, air fryers, bread makers, and pumps/sump pumps, each with tuned defaults; plus an **Other (Advanced)** bucket you tune yourself. (Coffee machines, EVs, heat pumps, and ovens remain as deprecated types, scheduled for removal in 0.6.0.)
+- **Per-cycle energy & cost** - Energy and cost tracked for every cycle; cost is frozen at the price in effect when the cycle finished, so later price changes don't rewrite history.
+- **Automation-first notifications** - Ready-made per-event push alerts, or your own Home Assistant automations driven by WashData's cycle events - found and created from the panel. See [NOTIFICATIONS.md](NOTIFICATIONS.md).
+- **Pause/Resume, Door & Clean state** - Pause/resume active cycles (optionally cutting power), add-clothes support via a door sensor, and a "laundry still waiting" reminder after a cycle ends.
+- **Robust & self-correcting** - Energy-gated start/end detection, ghost-cycle suppression that persists across restarts, dishwasher end-spike handling, and learning feedback that refines estimates over time.
+- **Experimental on-device ML (opt-in, off by default)** - A gated, NumPy-only ML subsystem with a dedicated **ML Training** tab, running *alongside* the proven detection code and never replacing it.
+- **Local only** - No cloud, no external services; all data stays in your Home Assistant. An optional Lovelace **Tile Card** is included.
 
 ---
 
@@ -75,11 +60,13 @@ This integration is a default repository in HACS.
 Follow these steps to get accurate results quickly.
 
 ### 1. Initial Setup
-1. Go to **Settings > Devices & Services** > **Add Integration** > **WashData**.
+1. Go to **Settings > Devices & Services** > **Add Integration** > **WashData** — or use this one-click link: [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=ha_washdata). (You can later manage the entry and its devices from [Settings → Devices & Services → WashData](https://my.home-assistant.io/redirect/integration/?domain=ha_washdata).)
 2. **Name**: Name your appliance (e.g., "Washing Machine").
 3. **Device Type**: Select the type (Washer, Dryer, etc.) - this sets smart defaults for the internal logic.
 4. **Power Sensor**: Select your smart plug's power entity (Watts). *Note: The system is now optimized for polling intervals of 30-60 seconds (defaults adjusted automatically).*
 5. **Initial Profile (Optional)**: If you know your standard program (e.g. "Cotton"), create it now.
+
+> **Then open the WashData panel.** After setup, a **WashData** entry appears in the Home Assistant **sidebar** - that panel is where you do everything: **Overview** (live status + manual recording), **Cycles**, **Profiles**, **Settings**, **ML Training**, and **Advanced**. The integration's **Configure** dialog now keeps only three essentials (device type, power sensor, minimum power); every other setting and action moved into the panel.
 
 #### 💡 Tips for Zigbee2MQTT (Z2M) users
 If you are using Zigbee2MQTT with smart plugs, ensure your device reporting is responsive enough for accurate matching:
@@ -88,22 +75,18 @@ If you are using Zigbee2MQTT with smart plugs, ensure your device reporting is r
 - *Note*: These changes may slightly increase Zigbee network traffic.
 
 ### 2. The Golden Rule: "Teach" the Integration
-WashData **does not** come with pre-built profiles because every machine model is different. You must teach it what your cycles look like.
+WashData **does not** come with pre-built profiles because every machine model is different. You teach it your cycles from the **WashData panel** (the sidebar entry).
 #### Option A: Manual "Record Mode" (Recommended)
 This gives you the cleanest data.
 
-1. Go to **Settings > Devices & Services > WashData > Configure**.
-2. Open **Record Cycle (Manual)**, then start your machine.
-3. When finished, go to **Manage Cycles** and find the recording.
-4. Then open **Manage Profiles** and create a profile from that recording.
+1. On the panel's **Overview** screen, use the **Manual Recording** widget → **Start Recording**, then run your machine.
+2. When the cycle finishes, press **Stop**.
+3. Go to the **Profiles** tab and create a profile from that recording.
 
 #### Option B: The Natural Way
 If you prefer to just use it and label later:
-1. **Run a Cycle**: Use your machine as normal. WashData will track it as an "Unknown" cycle.
-2. **Label It**: After the cycle finishes:
-   - Go to **Manage Cycles** (via the Configure button or the Tile Card).
-   - Find the recent "Unknown" cycle.
-   - Open **Manage Profiles**, click **Create Profile**, name it (e.g., "Cotton 40"), and Save.
+1. **Run a Cycle**: Use your machine as normal. WashData tracks it as an "Unknown" cycle.
+2. **Label It**: In the panel's **Cycles** tab, open the finished "Unknown" cycle and assign it to a new profile (e.g., "Cotton 40").
 3. **Repeat**: Do this for your 2-3 most common programs.
 
 ### 3. Profile Granularity - How Detailed Should Profiles Be?
@@ -124,7 +107,7 @@ Programs with clearly different durations or power patterns are always distingui
 
 Programs that differ **only** in temperature or spin speed (e.g. Cotton 40°C vs Cotton 60°C) often produce similar power shapes and durations. The matcher will attempt to distinguish them using correlation and energy differences, but:
 
-- On first run the system may assign the wrong variant - **use the Learning Feedbacks menu to correct it**.
+- On first run the system may assign the wrong variant - **correct it from the feedback attention card** on the panel's Overview.
 - With a few confirmed corrections the system learns; 3–5 corrections per variant pair is usually enough.
 - If your machine's power draw barely changes between temperatures, the variants may remain hard to distinguish automatically. In that case, selecting the program manually via the Program Selector dropdown remains reliable.
 
@@ -136,15 +119,15 @@ Start with a small set of your most-used and most-different programs, then add t
 
 ### 4. Verification & Learning
 Once profiles are created, WashData starts **matching** new cycles automatically.
-- **Feedback**: If a match is found but confidence is moderate, you may get a "Verify Cycle" notification.
-- **Refinement**: Go to **Configure > Learning Feedbacks** to Confirm or Correct the detection.
+- **Feedback**: If a match is found but confidence is moderate, you may get a "Verify Cycle" notification, and the panel's **Status** tab surfaces it as an attention card.
+- **Refinement**: Confirm or correct the detection from that attention card on **Overview**.
 - **Self-Improving**: Confirming a cycle helps the system refine its duration models.
 
 ---
 
 ## 🔧 Troubleshooting & Tuning
 
-If "Auto-Detect" isn't working perfectly, use **Advanced Settings** to tune the logic for your specific machine.
+If "Auto-Detect" isn't working perfectly, use the panel's **Settings** tab to tune the logic for your specific machine (each field has a hover tooltip, and observed-cycle suggestions appear inline).
 
 > 📊 **[Click here for a Visual Guide to these settings](SETTINGS_VISUALIZED.md)** - Graphs explaining what the numbers actually do.
 
@@ -166,66 +149,43 @@ WashData exposes a diagnostic sensor: `sensor.<name>_suggested_settings`.
 - `0` means there are currently no actionable recommendations.
 - `> 0` means recommendations are ready to review.
 
-When this sensor is above 0:
-1. Go to **Settings > Devices & Services > WashData > Configure > Advanced Settings**.
-2. Enable **Apply Suggested Values**.
-3. Review the change summary step.
-4. Confirm to stage values, then save only the changes you agree with.
-
-Suggested values are optional and are never forced automatically.
+When this sensor is above 0, open the panel's **Settings** tab: suggested values appear
+inline next to the relevant fields with a one-click **Use** (or **Apply all**). Review
+them and **Save** only the changes you agree with. Suggested values are optional and are
+never forced automatically.
 
 ### 🏷️ Phase Catalog & Assignment
 
 Phases are descriptive labels for distinct power stages within a cycle (e.g., "Pre-Wash", "Heating", "Spin").
 
-- **Manage Phase Catalog**: Go to **Configure > Manage Phase Catalog** to add, edit, or remove phase labels for each device type.
-- **Assign Phases to a Profile**: In **Manage Profiles**, select **Assign Phase Ranges** and use the phase range editor to map time regions to phase labels.
+- **Manage Phase Catalog**: In the panel's **Profiles** tab, open the **Phase Catalog** sub-tab to add, edit, or remove phase labels for each device type.
+- **Assign Phases to a Profile**: In the **Profiles** tab, open a profile and use the phase-range editor to map time regions to phase labels over its average curve.
 - Phases are scoped to your device type - only relevant phases appear in the assignment dialog.
 
 ---
 
 ## 📊 Documentation & References
 
-- 🔔 **[NOTIFICATIONS.md](NOTIFICATIONS.md)** - Every notification option explained, the three ways to send notifications (per-event targets, Notification Actions, events), the cycle notification lifecycle, message placeholders, companion-app payload keys, the full Events reference, and entity attributes.
+- 🔔 **[NOTIFICATIONS.md](NOTIFICATIONS.md)** - Every notification option explained, the two ways to send notifications (per-event targets and native automations), how to build automations on WashData's cycle events (with the `{{ trigger.event.data.* }}` variables), the cycle notification lifecycle, message placeholders, companion-app payload keys, the full Events reference, and entity attributes.
 - 📗 **[IMPLEMENTATION.md](IMPLEMENTATION.md)** - Deep dive into NumPy matching, State Machine logic, and Learning algorithms.
 - 🧪 **[TESTING.md](TESTING.md)** - How to test with the virtual socket.
 
-<details>
-<summary>📸 <b>Screenshots</b> (Click to expand)</summary>
+### The WashData panel
 
-#### Devices Overview
-All your WashData-monitored appliances appear as devices with sensors and controls.
-![Devices](doc/images/devices.png)
+Everything is managed from the **WashData** panel in the Home Assistant sidebar. Its tabs:
 
-#### Main Menu
-The central hub for managing your appliance - access all features from here.
-![Main Menu](doc/images/main_menu.png)
+| Tab | What you do there |
+| --- | --- |
+| **Overview** | Live state, power chart, progress and time remaining, a program selector, attention cards for pending suggestions and feedback, and **Manual Recording** (start/stop) right here on the home screen. |
+| **Cycles** | Cycle history (with per-cycle energy **cost**); open a cycle to label, trim, split, merge, or delete it; a "needs review" filter. |
+| **Profiles** | Create (**+ New Profile**), rename, rebuild, group, and clean up profiles; a **Phase Catalog** sub-tab and a phase-range editor. |
+| **Settings** | All tunables (detection, matching, timing, notifications, energy price, ...), each with a tooltip and inline suggestions. **Notifications** includes an **Automations** section (see below). |
+| **ML Training** | The opt-in, experimental ML subsystem: on-device training, matcher tuning, and the runtime-models toggle. (Shown only when ML training is available.) |
+| **Advanced** | Sub-tabs for **My Preferences**, **Diagnostics** (storage stats, maintenance, and config **export / import**), **Logs**, **Panel Settings**, and **Access Control** (per-user RBAC). |
 
-#### Basic Settings
-Configure power sensor, device type, off delay, and notification preferences.
-![Settings](doc/images/settings.png)
+The integration's **Configure** dialog ([Settings → Devices & Services → WashData](https://my.home-assistant.io/redirect/integration/?domain=ha_washdata)) is now a small stub with just device type, power sensor, and minimum power - everything else lives in the panel. (The panel itself is a custom sidebar entry at `/ha-washdata`; open it from the Home Assistant sidebar.)
 
-#### Advanced Settings
-Fine-tune detection thresholds, matching parameters, and timeout values for your specific appliance.
-![Advanced Settings](doc/images/advanced_settings.png)
-
-#### Manage Profiles
-View, create, edit, or delete learned power profiles for different wash programs.
-![Manage Profiles](doc/images/manage_profiles.png)
-
-#### Manage Cycles
-Browse cycle history, label unknown cycles, merge fragments, or delete bad data.
-![Manage Cycles](doc/images/manage_cycles.png)
-
-#### Review Feedback
-Confirm or correct the system's profile matches to improve learning accuracy.
-![Review Feedback](doc/images/review_feedback.png)
-
-#### Diagnostics & Maintenance
-Run database cleanup, repair corrupted data, and export/import configurations.
-![Diagnostics & Maintenance](doc/images/diagnostics_maintenance.png)
-
-</details>
+> **Notifications are built on automations.** The old built-in custom-action editor has been removed; instead, Settings → Notifications → **Automations** lists the automations that use a device and creates new ones (blank, or prefilled with a cycle trigger). Any custom actions from an older setup keep firing and can be **converted to an automation or removed** from that section. See **[NOTIFICATIONS.md](NOTIFICATIONS.md)**.
 
 ### Entities Provided
 - **`sensor.<name>_state`**: Current status (Idle / Running / Detecting... / Clean).
@@ -243,7 +203,7 @@ Run database cleanup, repair corrupted data, and export/import configurations.
 - **`switch.<name>_auto_maintenance`**: Toggle nightly database cleanup.
 
 ### Services
-Most management is done via the **Interactive UI** (Configure > Manage Data), but services are available for automation:
+Most management is done from the **WashData panel**, but these services are available for automations:
 
 - **`ha_washdata.export_config`**: Full JSON backup of all settings, profiles, and cycle history.
 - **`ha_washdata.import_config`**: Restore from a JSON backup. Accepts regular WashData exports **and** HA diagnostics download files.
@@ -262,13 +222,18 @@ data:
 
 ### Notifications & Events
 
-WashData can notify you in three ways: ready-made push to **per-event targets**, a fully
-custom **Notification Action**, or your own automations triggered by **bus events**
-(`ha_washdata_cycle_started`, `ha_washdata_cycle_ended`, `ha_washdata_pump_stuck`).
+WashData notifies you in two ways: a ready-made push to **per-event targets**, or your own
+Home Assistant **automations** triggered by the **bus events** it fires
+(`ha_washdata_cycle_started`, `ha_washdata_cycle_ended`, `ha_washdata_pump_stuck`). The
+panel's **Notifications → Automations** section finds the automations that use a device
+and creates new ones (blank, or prefilled with a cycle-started / cycle-finished trigger).
+In an automation you template against the event data, e.g.
+`{{ trigger.event.data.duration }}`, `{{ trigger.event.data.program }}`,
+`{{ trigger.event.data.cycle_data.cost }}`.
 
-Every notification option, the cycle notification lifecycle, message placeholders,
-companion-app payload keys, and the full event payload reference are documented in
-**[NOTIFICATIONS.md](NOTIFICATIONS.md)**.
+Every notification option, how to build automations with these variables, the cycle
+notification lifecycle, message placeholders, companion-app payload keys, and the full
+event payload reference are documented in **[NOTIFICATIONS.md](NOTIFICATIONS.md)**.
 
 ### 🤝 Contribute Training Data
 
@@ -287,7 +252,7 @@ If you'd like to help, you can submit a diagnostics export directly from Home As
 
 > 🔒 **Privacy:** The export contains your appliance's power data and integration settings. It does **not** include your name, home details, location, or any other personal information.
 
-> 💡 **Tip:** The same diagnostics file you download here can be pasted directly into **Configure → Diagnostics & Maintenance → Export/Import JSON** to restore profiles and settings on a different HA instance — no manual format conversion needed.
+> 💡 **Tip:** The same diagnostics file you download here can be pasted directly into the panel's **Advanced → Diagnostics → Import** (config import accepts an HA diagnostics download) to restore profiles and settings on a different HA instance — no manual format conversion needed.
 
 ➡️ **[Submit your data here](https://forms.gle/m6iGfP8QTasXWg5z7)**
 

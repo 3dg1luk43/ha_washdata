@@ -25,79 +25,102 @@ const _PALETTE = [
 const _NOTIFY_VARS = '{device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}';
 const _SETTINGS_SECTIONS = [
   { id: 'basic', label: 'Basic', intro: 'Core identity and the essentials most setups need.', fields: [
-    { key: 'device_type', label: 'Device Type', type: 'devicetype' },
+    { key: 'name', label: 'Device Name', type: 'text',
+      doc: 'Display name shown in the HA integrations list and device registry.' },
+    { key: 'device_type', label: 'Device Type', type: 'devicetype',
+      doc: 'Appliance class. Sets sensible detection defaults (thresholds, off-delay, end handling) tuned for that appliance type; change it only if the device was originally set up as the wrong type.' },
     { key: 'power_sensor', label: 'Power Sensor', type: 'entity', domain: 'sensor',
-      hint: 'Entity providing live power in watts (e.g. sensor.washer_power).' },
+      doc: 'The sensor entity reporting live power in watts for this appliance (e.g. sensor.washer_power). All cycle detection is based on this signal.' },
     { key: 'min_power', label: 'Minimum Power', unit: 'W', type: 'number', step: 0.1, min: 0, def: 2.0,
       doc: 'Absolute minimum power considered active. Readings below this are treated as 0 W (standby), filtering out the phantom load of smart plugs and standby LEDs.' },
     { key: 'off_delay', label: 'Off Delay', unit: 's', type: 'number', min: 0, def: 180,
-      doc: 'Time to wait after power drops to 0 before declaring the cycle finished. If power resumes within this window the cycle continues (bridges pauses). The most important parameter for dishwashers.' },
+      doc: 'Time to wait after power drops before declaring the cycle finished. If power resumes within this window the cycle continues seamlessly - this bridges pauses between wash stages. Dishwashers have long drying phases (power off for 20-60 min) so the off-delay must exceed that to keep the whole wash+dry as one cycle.' },
     { key: 'linked_device', label: 'Group Under Device', type: 'device',
-      hint: 'Optionally nest this appliance under another device in the HA device registry.' },
+      doc: 'Optionally nest this WashData device under another device (e.g. the smart plug) in the HA device registry, shown as "Connected via ...".' },
   ] },
-  { id: 'detection', label: 'Detection', intro: 'How a cycle is detected as starting, running and finishing.', fields: [
-    { key: 'start_threshold_w', label: 'Start Threshold', unit: 'W', type: 'number', step: 1, min: 0,
-      doc: 'Power must rise above this to become ACTIVE. Combined with the Stop Threshold it forms a hysteresis band that prevents rapid on/off toggling.' },
-    { key: 'stop_threshold_w', label: 'Stop Threshold', unit: 'W', type: 'number', step: 0.1, min: 0,
-      doc: 'Power must fall below this to become IDLE. Set it below the Start Threshold to create a stable hysteresis band.' },
-    { key: 'start_duration_threshold', label: 'Start Duration', unit: 's', type: 'number', min: 0, def: 5,
-      doc: 'Power must stay above the start threshold this long to confirm a real start, preventing split-second on/off toggles from starting a cycle.' },
-    { key: 'start_energy_threshold', label: 'Start Energy', unit: 'Wh', type: 'number', step: 0.01, min: 0, def: 0.2,
-      doc: 'Energy (power x time) the appliance must consume before RUNNING. A brief high-power spike has very low energy and is ignored, preventing false starts.' },
-    { key: 'completion_min_seconds', label: 'Min Cycle Duration', unit: 's', type: 'number', min: 0, def: 600,
-      doc: 'Cycles shorter than this are discarded as ghost cycles (test runs, opening the door to add a sock).' },
-    { key: 'end_energy_threshold', label: 'End Energy', unit: 'Wh', type: 'number', step: 0.001, min: 0, def: 0.05,
-      doc: 'If accumulated energy during the off-delay exceeds this, the end timer resets, keeping slow spin-down or anti-crease tails alive.' },
-    { key: 'running_dead_zone', label: 'Running Dead Zone', unit: 's', type: 'number', min: 0, def: 3,
-      doc: 'For the first few seconds after start, ignore dips to 0 W so relay chatter at boot does not immediately self-terminate the cycle.' },
-    { key: 'end_repeat_count', label: 'End Repeat Count', type: 'number', min: 1, def: 1,
-      doc: 'Consecutive low-power readings required before ending, so one noisy sample does not prematurely stop detection.' },
-    { key: 'min_off_gap', label: 'Min Off Gap', unit: 's', type: 'number', min: 0,
-      doc: 'Pauses shorter than this gap are bridged into one continuous cycle rather than split into two. Useful for long soak or drying pauses.' },
-    { key: 'sampling_interval', label: 'Sampling Interval', unit: 's', type: 'number', min: 1, def: 30,
-      doc: 'Throttle for sensor updates. Low (2 s) is responsive but uses more CPU; high (30 s) is lighter and fine for most plugs.' },
-    { key: 'smoothing_window', label: 'Smoothing Window', type: 'number', min: 1, def: 2,
-      doc: 'How much the raw power signal is smoothed. Low (2) is responsive but noisy; high (5) smooths spikes but adds lag.' },
-    { key: 'abrupt_drop_watts', label: 'Abrupt Drop', unit: 'W', type: 'number', min: 0, def: 500,
-      doc: 'A power drop larger than this flags the cycle as Interrupted (manual cancel) rather than a natural finish.' },
-    { key: 'abrupt_drop_ratio', label: 'Abrupt Drop Ratio', type: 'number', step: 0.05, min: 0, max: 1, def: 0.6,
-      doc: 'A drop larger than this fraction of current power is also treated as abrupt (0.6 = a 60% drop). Complements the watts threshold across appliance sizes.' },
+  { id: 'detection', label: 'Detection', intro: 'How a cycle is detected as starting, running and finishing.', groups: [
+    { sub: 'Thresholds & Gap', fields: [
+      { key: 'start_threshold_w', label: 'Start Threshold', unit: 'W', type: 'number', step: 1, min: 0,
+        doc: 'Power must rise above this level to confirm a cycle has started. Setting it too low causes false starts from standby power; too high and slow-starting programs (cold fill) are missed. The suggestion engine sets this just above the machine\'s observed lowest active power.' },
+      { key: 'stop_threshold_w', label: 'Stop Threshold', unit: 'W', type: 'number', step: 0.1, min: 0,
+        doc: 'Power must fall below this level before the off-delay countdown begins. Set it below the Start Threshold - the gap between them is the hysteresis band that prevents flicker. If set too high, low-power phases (rinse holds, anti-crease) falsely trigger the end sequence.' },
+      { key: 'min_off_gap', label: 'Min Off Gap', unit: 's', type: 'number', min: 0,
+        doc: 'If the machine powers off for less than this time, the on/off/on sequence is treated as one continuous cycle. Prevents soak programs (machine powers off for several minutes mid-wash) from being split into two separate cycles. Set it shorter than the gap between your back-to-back loads if you want those counted as separate cycles. Device-type defaults protect the typical intra-cycle pause for each appliance.' },
+    ] },
+    { sub: 'Cycle Start', fields: [
+      { key: 'start_duration_threshold', label: 'Start Duration', unit: 's', type: 'number', min: 0, def: 5,
+        doc: 'Power must stay above the start threshold this long to confirm a real start, preventing split-second on/off toggles from starting a cycle.' },
+      { key: 'start_energy_threshold', label: 'Start Energy', unit: 'Wh', type: 'number', step: 0.01, min: 0, def: 0.2,
+        doc: 'Energy (power x time) the appliance must consume before RUNNING. A brief high-power spike has very low energy and is ignored, preventing false starts.' },
+      { key: 'completion_min_seconds', label: 'Min Cycle Duration', unit: 's', type: 'number', min: 0, def: 600,
+        doc: 'Cycles shorter than this are discarded as ghost cycles (test runs, opening the door to add a sock).' },
+      { key: 'running_dead_zone', label: 'Running Dead Zone', unit: 's', type: 'number', min: 0, def: 3,
+        doc: 'After a cycle starts, power dips within this window are ignored. Washing machines fill with cold water (dropping near 0 W before heating) - without this protection that fill phase looks like a cycle end. This does NOT skip data: the full power trace is recorded from T=0. The suggestion engine measures your machine\'s actual startup pattern and sizes this automatically.' },
+    ] },
+    { sub: 'Cycle End', fields: [
+      { key: 'end_energy_threshold', label: 'End Energy', unit: 'Wh', type: 'number', step: 0.001, min: 0, def: 0.05,
+        doc: 'During the off-delay countdown, accumulated energy (watts x time) is compared to this threshold. If exceeded, the countdown resets - keeping anti-crease tumbles and dishwasher drying tails attached to the cycle instead of cutting them short. Raise it if cycles end too early during cool-down; lower it if detection is sluggish.' },
+      { key: 'end_repeat_count', label: 'End Repeat Count', type: 'number', min: 1, def: 1,
+        doc: 'Number of consecutive below-stop-threshold readings required before the cycle ends. 1 is fine for most plugs. Raise to 2-3 if your smart plug occasionally reports a false-zero sample mid-cycle and your cycles are ending prematurely.' },
+    ] },
+    { sub: 'Signal Processing', fields: [
+      { key: 'sampling_interval', label: 'Sampling Interval', unit: 's', type: 'number', min: 1, def: 30,
+        doc: 'Expected time between sensor readings - used to size the smoothing window and start debounce correctly. Every sensor update is captured regardless of this value; it only calibrates the downstream calculations. The suggestion engine measures your sensor\'s actual cadence from past cycles and sets this automatically.' },
+      { key: 'smoothing_window', label: 'Smoothing Window', type: 'number', min: 1, def: 2,
+        doc: 'How much the raw power signal is smoothed. Low (2) is responsive but noisy; high (5) smooths spikes but adds lag.' },
+      { key: 'abrupt_drop_watts', label: 'Abrupt Drop', unit: 'W', type: 'number', min: 0, def: 500,
+        doc: 'A power drop larger than this flags the cycle as Interrupted (manual cancel) rather than a natural finish.' },
+      { key: 'abrupt_drop_ratio', label: 'Abrupt Drop Ratio', type: 'number', step: 0.05, min: 0, max: 1, def: 0.6,
+        doc: 'A drop larger than this fraction of current power is also treated as abrupt (0.6 = a 60% drop). Complements the watts threshold across appliance sizes.' },
+    ] },
   ] },
-  { id: 'matching', label: 'Matching', intro: 'How finished cycles are matched to learned profiles and labelled.', fields: [
-    { key: 'profile_match_threshold', label: 'Match Threshold', type: 'number', step: 0.01, min: 0, max: 1, def: 0.4,
-      doc: 'Minimum similarity score (0-1) to accept a profile match. Higher is stricter with fewer false positives. Default 0.4.' },
-    { key: 'profile_unmatch_threshold', label: 'Unmatch Threshold', type: 'number', step: 0.01, min: 0, max: 1, def: 0.35,
-      doc: 'Score below which an already-matched profile is dropped mid-cycle. Keep it below the match threshold to avoid flicker. Default 0.35.' },
-    { key: 'profile_match_min_duration_ratio', label: 'Min Duration Ratio', type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
-      doc: 'Minimum cycle length relative to the profile. 0.9 means a cycle must be at least 90% of the profile duration to match.' },
-    { key: 'profile_match_max_duration_ratio', label: 'Max Duration Ratio', type: 'number', step: 0.01, min: 0, def: 1.3,
-      doc: 'Maximum cycle length relative to the profile. 1.3 means a cycle must be under 130% of the profile duration to match.' },
-    { key: 'profile_match_interval', label: 'Match Interval', unit: 's', type: 'number', min: 0,
-      doc: 'How often to attempt profile matching during a running cycle. Default 300 s (5 minutes) balances detection speed and CPU.' },
-    { key: 'profile_duration_tolerance', label: 'Profile Duration Tolerance', type: 'number', step: 0.01, min: 0, max: 1, def: 0.25,
-      doc: 'The +/- band around a profile average duration used during matching. 0.25 means a 60 min profile matches 45-75 min cycles.' },
-    { key: 'duration_tolerance', label: 'Estimate Tolerance', type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
-      doc: 'Tolerance for time-remaining estimates (learning feedback, not matching). If the actual duration is within +/-X% of the estimate it counts as a good match.' },
-    { key: 'auto_label_confidence', label: 'Auto-Label Confidence', type: 'number', step: 0.01, min: 0, max: 1, def: 0.9,
-      doc: 'If a finished cycle matches above this confidence, its profile is assigned automatically without asking. Default 0.9.' },
-    { key: 'learning_confidence', label: 'Learning Confidence', type: 'number', step: 0.01, min: 0, max: 1, def: 0.6,
-      doc: 'If a finished cycle match confidence is above this, a feedback request is raised asking you to verify. Default 0.6.' },
-    { key: 'suppress_feedback_notifications', label: 'Suppress Feedback Notifications', type: 'checkbox',
-      doc: 'Do not raise a persistent notification when a finished cycle needs review; the feedback still appears in the Cycles review queue.' },
+  { id: 'matching', label: 'Matching', intro: 'How finished cycles are matched to learned profiles and labelled.', groups: [
+    { sub: 'Match Scoring', fields: [
+      { key: 'profile_match_threshold', label: 'Match Threshold', type: 'number', step: 0.01, min: 0, max: 1, def: 0.4,
+        doc: 'Minimum similarity score (0-1) required at cycle end to accept a program identification. Raise it to reduce wrong identifications; lower it if your machine\'s programs are not being matched. Default 0.4 is a conservative starting point.' },
+      { key: 'profile_unmatch_threshold', label: 'Unmatch Threshold', type: 'number', step: 0.01, min: 0, max: 1, def: 0.35,
+        doc: 'If a live mid-cycle match drops below this score, the tentative identification is cleared. Keep it a little below the Match Threshold so a brief dip in similarity does not flip the display back to unmatched.' },
+      { key: 'profile_match_interval', label: 'Match Interval', unit: 's', type: 'number', min: 0,
+        doc: 'How often to attempt profile matching during a running cycle. Default 300 s (5 minutes) balances detection speed and CPU.' },
+    ] },
+    { sub: 'Duration Gates', fields: [
+      { key: 'profile_match_min_duration_ratio', label: 'Min Duration Ratio', type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
+        doc: 'Minimum cycle length relative to the profile. 0.9 means a cycle must be at least 90% of the profile duration to match.' },
+      { key: 'profile_match_max_duration_ratio', label: 'Max Duration Ratio', type: 'number', step: 0.01, min: 0, def: 1.3,
+        doc: 'Maximum cycle length relative to the profile. 1.3 means a cycle must be under 130% of the profile duration to match.' },
+      { key: 'profile_duration_tolerance', label: 'Profile Duration Tolerance', type: 'number', step: 0.01, min: 0, max: 1, def: 0.25,
+        doc: 'The +/- band around a profile average duration used during matching. 0.25 means a 60 min profile matches 45-75 min cycles.' },
+      { key: 'duration_tolerance', label: 'Estimate Tolerance', type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
+        doc: 'Tolerance for time-remaining estimates (learning feedback, not matching). If the actual duration is within +/-X% of the estimate it counts as a good match.' },
+    ] },
+    { sub: 'Auto-Labeling', fields: [
+      { key: 'auto_label_confidence', label: 'Auto-Label Confidence', type: 'number', step: 0.01, min: 0, max: 1, def: 0.9,
+        doc: 'If the match score at cycle end is at or above this, the program is labeled automatically without any confirmation prompt. Raise it to require higher certainty before auto-labeling; lower it to automate more. Works in conjunction with Learning Confidence below it.' },
+      { key: 'learning_confidence', label: 'Learning Confidence', type: 'number', step: 0.01, min: 0, max: 1, def: 0.6,
+        doc: 'If the match score falls between this and Auto-Label Confidence, a feedback notification asks you to verify the identified program. Below this score the match is too uncertain to surface. Must be kept below Auto-Label Confidence.' },
+      { key: 'suppress_feedback_notifications', label: 'Suppress Feedback Notifications', type: 'checkbox',
+        doc: 'Do not raise a persistent notification when a finished cycle needs review; the feedback still appears in the Cycles review queue.' },
+    ] },
   ] },
-  { id: 'timing', label: 'Timing & Watchdog', intro: 'Background cadence, the offline watchdog and housekeeping.', fields: [
-    { key: 'watchdog_interval', label: 'Watchdog Interval', unit: 's', type: 'number', min: 1, def: 30,
-      doc: 'How often the background watchdog checks for stalled sensors and elapsed timeouts. Default 30 s.' },
-    { key: 'no_update_active_timeout', label: 'No-Update Timeout', unit: 's', type: 'number', min: 0, def: 600,
-      doc: 'If no power updates arrive for this long while running, assume the plug dropped offline and force-stop to avoid a zombie cycle. Default 600 s allows for cloud or mesh lag.' },
-    { key: 'progress_reset_delay', label: 'Progress Reset Delay', unit: 's', type: 'number', min: 0, def: 1800,
-      doc: 'After finishing, hold progress at 100% for this long so Completed is visible on dashboards before resetting to Idle.' },
-    { key: 'auto_maintenance', label: 'Auto Maintenance (nightly cleanup)', type: 'checkbox', def: true,
-      doc: 'Run nightly housekeeping: rebuild profile envelopes, recompute cycle health, prune debug traces and retain the most recent cycles.' },
-    { key: 'expose_debug_entities', label: 'Expose Debug Entities', type: 'checkbox',
-      doc: 'Publish extra diagnostic HA entities (match confidence, ambiguity, state internals). Off keeps the entity list clean for normal use.' },
-    { key: 'save_debug_traces', label: 'Save Debug Traces', type: 'checkbox',
-      doc: 'Store the full power trace and matching debug data for each cycle. Useful for troubleshooting but increases storage size.' },
+  { id: 'timing', label: 'Timing & Watchdog', intro: 'Background cadence, the offline watchdog and housekeeping.', groups: [
+    { sub: 'Watchdog', fields: [
+      { key: 'watchdog_interval', label: 'Watchdog Interval', unit: 's', type: 'number', min: 1, def: 30,
+        doc: 'How often the background watchdog checks for stalled sensors and elapsed timeouts. Default 30 s.' },
+      { key: 'no_update_active_timeout', label: 'No-Update Timeout', unit: 's', type: 'number', min: 0, def: 600,
+        doc: 'If no power updates arrive for this long while running, assume the plug dropped offline and force-stop to avoid a zombie cycle. Default 600 s allows for cloud or mesh lag.' },
+    ] },
+    { sub: 'Housekeeping', fields: [
+      { key: 'progress_reset_delay', label: 'Progress Reset Delay', unit: 's', type: 'number', min: 0, def: 1800,
+        doc: 'After finishing, hold progress at 100% for this long so Completed is visible on dashboards before resetting to Idle.' },
+      { key: 'auto_maintenance', label: 'Auto Maintenance (nightly cleanup)', type: 'checkbox', def: true,
+        doc: 'Run nightly housekeeping: rebuild profile envelopes, recompute cycle health, prune debug traces and retain the most recent cycles.' },
+    ] },
+    { sub: 'Debug', fields: [
+      { key: 'expose_debug_entities', label: 'Expose Debug Entities', type: 'checkbox',
+        doc: 'Publish extra diagnostic HA entities (match confidence, ambiguity, state internals). Off keeps the entity list clean for normal use.' },
+      { key: 'save_debug_traces', label: 'Save Debug Traces', type: 'checkbox',
+        doc: 'Store the full power trace and matching debug data for each cycle. Useful for troubleshooting but increases storage size.' },
+    ] },
   ] },
   { id: 'anti_wrinkle', label: 'Anti-Wrinkle', intro: 'Anti-wrinkle mode detects dryer tumble pulses after the main heat phase and shields them from being read as new cycles.', fields: [
     { key: 'anti_wrinkle_enabled', label: 'Enable Anti-Wrinkle Detection', type: 'checkbox',
@@ -110,39 +133,47 @@ const _SETTINGS_SECTIONS = [
       doc: 'Power must fall below this between pulses for anti-wrinkle mode to stay active.' },
   ] },
   { id: 'delay', label: 'Delay Start', intro: 'Delayed-start detection identifies when an appliance is powered but has not yet begun its cycle.', fields: [
-    { key: 'delay_start_detect_enabled', label: 'Enable Delay-Start Detection', type: 'checkbox' },
+    { key: 'delay_start_detect_enabled', label: 'Enable Delay-Start Detection', type: 'checkbox',
+      doc: 'Detect when the appliance is powered on and waiting (delayed start / standby) but has not begun its cycle, so standby draw is not mistaken for a running cycle.' },
     { key: 'delay_confirm_seconds', label: 'Confirm Seconds', unit: 's', type: 'number', min: 0, def: 60,
-      hint: 'Seconds power must stay in the standby band before DELAY_WAIT engages.' },
+      doc: 'Power must stay in the standby band for this long before the appliance is treated as waiting-to-start rather than running.' },
     { key: 'delay_timeout_hours', label: 'Timeout Hours', unit: 'h', type: 'number', step: 0.5, min: 0, def: 8.0,
-      hint: 'Give up waiting after this many hours.' },
+      doc: 'Stop waiting in delayed-start mode after this many hours and return to idle, so a machine left powered but never started does not wait forever.' },
   ] },
-  { id: 'triggers', label: 'Triggers & Door', intro: 'Optional external signals: end trigger, door sensor, pause switch.', fields: [
-    { key: 'external_end_trigger_enabled', label: 'Enable External End Trigger', type: 'checkbox' },
-    { key: 'external_end_trigger', label: 'External Trigger Entity', type: 'entity', domain: 'binary_sensor',
-      hint: 'Binary sensor used as an external cycle-end trigger.' },
-    { key: 'external_end_trigger_inverted', label: 'Invert External Trigger (trigger on OFF)', type: 'checkbox' },
-    { key: 'door_sensor_entity', label: 'Door Sensor Entity', type: 'entity', domain: 'binary_sensor',
-      hint: 'Optional binary_sensor for the machine door.' },
-    { key: 'pause_cuts_power', label: 'Pause Also Cuts Power (via switch)', type: 'checkbox' },
-    { key: 'switch_entity', label: 'Switch Entity', type: 'entity', domain: 'switch',
-      hint: 'Optional switch toggled on pause/resume.' },
-    { key: 'notify_unload_delay_minutes', label: 'Unload Nag Delay', unit: 'min', type: 'number', min: 0, def: 60,
-      hint: 'Minutes after a cycle ends before the still-waiting notification.' },
-    { key: 'pump_stuck_duration', label: 'Pump Stuck Duration', unit: 's', type: 'number', min: 0, def: 1800,
-      onlyDeviceType: 'pump', hint: 'Seconds before a running pump is flagged as stuck.' },
+  { id: 'triggers', label: 'Triggers & Door', intro: 'Optional external signals: an end trigger, a door sensor, a pause switch, and the unload reminder.', groups: [
+    { sub: 'External End Trigger', fields: [
+      { key: 'external_end_trigger_enabled', label: 'Enable External End Trigger', type: 'checkbox',
+        doc: 'Let an external binary sensor signal the end of a cycle, in addition to the built-in power-based detection.' },
+      { key: 'external_end_trigger', label: 'External Trigger Entity', type: 'entity', domain: 'binary_sensor',
+        doc: 'Binary sensor whose state change marks the cycle end (e.g. an appliance "finished" contact or a companion integration).' },
+      { key: 'external_end_trigger_inverted', label: 'Invert External Trigger (trigger on OFF)', type: 'checkbox',
+        doc: 'Treat the trigger sensor turning OFF (rather than ON) as the end-of-cycle signal.' },
+    ] },
+    { sub: 'Door & Pause', fields: [
+      { key: 'door_sensor_entity', label: 'Door Sensor Entity', type: 'entity', domain: 'binary_sensor',
+        doc: 'Optional door binary sensor. Used to detect when the appliance has been opened/unloaded after a cycle.' },
+      { key: 'pause_cuts_power', label: 'Pause Also Cuts Power (via switch)', type: 'checkbox',
+        doc: 'When a cycle is paused, also switch off the Switch Entity below. Only for appliances whose plug can safely be cut mid-cycle.' },
+      { key: 'switch_entity', label: 'Switch Entity', type: 'entity', domain: 'switch',
+        doc: 'Optional switch toggled off on pause and back on when resuming, used together with "Pause also cuts power".' },
+    ] },
+    { sub: 'Unload Reminder', fields: [
+      { key: 'notify_unload_delay_minutes', label: 'Unload Nag Delay', unit: 'min', type: 'number', min: 0, def: 60,
+        doc: 'Minutes after a cycle ends before sending the still-waiting "unload the machine" reminder. Set 0 to disable the reminder.' },
+      { key: 'pump_stuck_duration', label: 'Pump Stuck Duration', unit: 's', type: 'number', min: 0, def: 1800,
+        onlyDeviceType: 'pump', doc: 'Seconds a pump may run continuously before it is flagged as possibly stuck (fires the stuck-pump event).' },
+    ] },
   ] },
   { id: 'notifications', label: 'Notifications', groups: [
     { sub: 'Services', fields: [
       { key: 'notify_start_services', label: 'Start Services', type: 'entitylist', domain: 'notify', placeholder: 'add a notify service…',
-        hint: 'notify.* services fired when a cycle starts.' },
+        doc: 'notify.* services called when a cycle starts. Add one per target (phone, dashboard, etc.); leave empty for no start notification.' },
       { key: 'notify_finish_services', label: 'Finish Services', type: 'entitylist', domain: 'notify', placeholder: 'add a notify service…',
-        hint: 'notify.* services fired when a cycle finishes.' },
+        doc: 'notify.* services called when a cycle finishes. Add one per target; leave empty for no finish notification.' },
       { key: 'notify_live_services', label: 'Live Progress Services', type: 'entitylist', domain: 'notify', placeholder: 'add a notify service…',
-        hint: 'notify.* services fired for live progress updates.' },
+        doc: 'notify.* services called for live progress updates while a cycle runs. Leave empty to disable live-progress notifications.' },
       { key: 'notify_people', label: 'People (for Only When Home)', type: 'entitylist', domain: 'person', placeholder: 'add a person…',
         doc: 'person.* entities used by "Notify Only When Home" to decide whether anyone is home.' },
-      { key: 'notify_actions', label: 'Custom Actions', type: 'actions',
-        doc: 'Home Assistant actions run on cycle events (start/finish/live) - e.g. call a notify service, flash a light. Same as the Actions selector in the device Options.' },
       { key: 'notify_only_when_home', label: 'Notify Only When Home', type: 'checkbox',
         doc: 'Only send notifications when at least one of the linked people (above) is home.' },
       { key: 'notify_fire_events', label: 'Fire HA Events for Notifications', type: 'checkbox', def: true,
@@ -157,7 +188,8 @@ const _SETTINGS_SECTIONS = [
         doc: 'If a cycle runs past its estimate by more than this percentage, send an overrun alert.' },
       { key: 'notify_live_chronometer', label: 'Use Live Chronometer', type: 'checkbox',
         doc: 'Show a live-updating countdown timer in the notification (on platforms that support it) instead of a static estimate.' },
-      { key: 'notify_timeout_seconds', label: 'Auto-Dismiss After', unit: 's', type: 'number', min: 0, def: 0, hint: '0 = never auto-dismiss.' },
+      { key: 'notify_timeout_seconds', label: 'Auto-Dismiss After', unit: 's', type: 'number', min: 0, def: 0,
+        doc: 'Automatically dismiss the notification after this many seconds (on platforms that support it). 0 keeps it until dismissed manually.' },
     ] },
     { sub: 'Messages', fields: [
       { key: 'notify_title', label: 'Notification Title', type: 'text', def: 'WashData: {device}',
@@ -181,12 +213,14 @@ const _SETTINGS_SECTIONS = [
     ] },
     { sub: 'Energy', fields: [
       { key: 'energy_price_entity', label: 'Energy Price Entity', type: 'entity', domain: 'sensor',
-        hint: 'Entity with the current electricity price (e.g. sensor.electricity_price).' },
+        doc: 'Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Takes precedence over the static price below. Each cycle freezes the price in effect when it finished.' },
       { key: 'energy_price_static', label: 'Static Energy Price (per kWh)', type: 'number', step: 0.001, min: 0,
         doc: 'Fixed price per kWh used for cost figures when no live price entity is set above.' },
     ] },
   ] },
   { id: 'ml_training', label: 'ML Training', intro: "Experimental: retrain the ML models on this device's own reviewed cycles at a scheduled quiet hour. The shipped baseline is always kept unless a retrain scores better on held-out data.", fields: [
+    { key: 'enable_ml_models', label: 'Use ML Models at Runtime', type: 'checkbox', def: false,
+      doc: 'Let the ML models influence live detection. Currently drives the end-detection guard: when the model judges a low-power lull to be a pause rather than the true end, it defers a normal finish (it can only ever delay a finish, never end one early, and is bounded). Prefers your on-device-trained model, falls back to the shipped baseline. Off by default; the proven detection logic is unchanged when off.' },
     { key: 'ml_training_enabled', label: 'Enable On-Device Training', type: 'checkbox', def: false,
       doc: 'Nightly retrain the ML quality and end-detection models from your own labelled cycles. Off by default; falls back to the shipped baseline whenever a retrain is not clearly better.' },
     { key: 'ml_training_hour', label: 'Training Hour', unit: 'h', type: 'number', min: 0, max: 23, def: 2,
@@ -310,6 +344,7 @@ const _CSS = `
 .wd-filter-select { padding: 5px 8px; border-radius: 6px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color); font-size: .84em; }
 .wd-row-link { cursor: pointer; }
 .wd-pill { display: inline-block; padding: 2px 9px; border-radius: 4px; background: var(--secondary-background-color); color: var(--secondary-text-color); font-size: .78em; }
+.wd-tag { display: inline-flex; align-items: center; padding: 1px 6px; border-radius: 10px; font-size: .72em; font-weight: 600; vertical-align: middle; background: var(--secondary-background-color); color: var(--secondary-text-color); margin-left: 4px; }
 .wd-btn {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer;
@@ -339,6 +374,29 @@ const _CSS = `
 .wd-field textarea { min-height: 64px; resize: vertical; }
 .wd-field input[type=checkbox] { width: auto; margin-right: 8px; }
 .wd-field .wd-check-row { display: flex; align-items: center; cursor: pointer; text-transform: none; letter-spacing: normal; font-weight: 500; color: var(--primary-text-color); }
+/* Switch-style boolean settings (replaces the old plain checkbox). */
+.wd-field-switch label { margin: 0; }
+.wd-switch-row { display: flex; align-items: center; gap: 8px; }
+.wd-switch-lbl { display: flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; }
+/* Match the switch label to every other setting name (see .wd-field label). */
+.wd-switch-text { font-size: .82em; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--secondary-text-color); }
+#wd-settings-form .wd-switch-text, #wd-ml-form .wd-switch-text { color: var(--primary-text-color); }
+.wd-switch { position: relative; display: inline-flex; flex: 0 0 auto; width: 40px; height: 22px; }
+.wd-switch input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
+.wd-switch-slider { position: absolute; inset: 0; border-radius: 22px; background: var(--switch-unchecked-track-color, rgba(120,120,120,.5)); transition: background .2s; }
+.wd-switch-slider::before { content: ""; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px; border-radius: 50%; background: var(--switch-unchecked-button-color, #fafafa); box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: transform .2s; }
+.wd-switch input:checked + .wd-switch-slider { background: var(--switch-checked-track-color, var(--primary-color, #03a9f4)); }
+.wd-switch input:checked + .wd-switch-slider::before { transform: translateX(18px); background: var(--switch-checked-button-color, #fff); }
+.wd-switch input:focus-visible + .wd-switch-slider { outline: 2px solid var(--primary-color, #03a9f4); outline-offset: 2px; }
+/* Notifications > Automations: split "New" dropdown + pills. */
+.wd-auto-dd summary { cursor: pointer; list-style: none; }
+.wd-auto-dd summary::-webkit-details-marker { display: none; }
+.wd-auto-dd summary::marker { content: ''; }
+.wd-auto-pill { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; background: var(--secondary-background-color); border: 1px solid var(--divider-color); border-radius: 16px; padding: 3px 4px 3px 12px; }
+.wd-auto-pill-link { text-decoration: none; color: var(--primary-text-color); font-size: .92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wd-auto-pill-link:hover { text-decoration: underline; }
+.wd-auto-pill-x { flex: 0 0 auto; border: none; background: transparent; color: var(--secondary-text-color); cursor: pointer; font-size: 1.15em; line-height: 1; padding: 0 5px; border-radius: 50%; }
+.wd-auto-pill-x:hover { background: var(--error-color, #f44336); color: #fff; }
 .wd-field-hint { font-size: .78em; color: var(--secondary-text-color); margin-top: 4px; }
 /* Entity-pill multi-picker (compact chips + inline add input) */
 .wd-pillbox { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; padding: 5px 6px; min-height: 34px;
@@ -434,7 +492,7 @@ const _CSS = `
 .wd-modal h2 { margin: 0 0 16px; font-size: 1.1em; display: flex; align-items: center; gap: 10px; }
 .wd-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
 .wd-canvas-wrap { margin: 10px 0; background: var(--secondary-background-color); border-radius: 8px; padding: 6px; }
-.wd-canvas-wrap canvas { width: 100%; height: 240px; display: block; touch-action: none; }
+.wd-canvas-wrap canvas { width: 100%; height: 240px; display: block; touch-action: none; cursor: crosshair; }
 .wd-mode-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
 .wd-mini-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--divider-color); margin-bottom: 16px; flex-wrap: wrap; }
 .wd-mini-tab { padding: 7px 16px; border: none; background: transparent; color: var(--secondary-text-color); font-size: .82em; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; }
@@ -624,7 +682,10 @@ function _field(f, value, extra) {
 
   if (f.type === 'checkbox') {
     const chk = value ? 'checked' : '';
-    return `<div class="wd-field"><label class="wd-check-row"><input type="checkbox" data-opt="${key}" ${chk}> ${_esc(f.label)}</label>${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}</div>`;
+    // Switch style. The tooltip sits inline at the end of the row (outside the
+    // <label> so hovering/clicking it never toggles the switch), matching how
+    // non-checkbox fields render their tip.
+    return `<div class="wd-field wd-field-switch"><div class="wd-switch-row"><label class="wd-switch-lbl"><span class="wd-switch"><input type="checkbox" data-opt="${key}" ${chk}><span class="wd-switch-slider"></span></span><span class="wd-switch-text">${_esc(f.label)}</span></label>${tip}</div>${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}</div>`;
   }
 
   let input = '';
@@ -641,13 +702,6 @@ function _field(f, value, extra) {
     // Structured value (list/object) edited as JSON text; round-trips on save.
     const jt = (v === '' || v == null) ? '' : (typeof v === 'string' ? v : JSON.stringify(v, null, 2));
     input = `<textarea data-opt="${key}" data-ftype="json" rows="3" placeholder='[{"action":"ID","title":"Label"}]'>${_esc(jt)}</textarea>`;
-  } else if (f.type === 'actions') {
-    // A dedicated configurator (modal) manages this; not part of the form scan.
-    const n = Array.isArray(v) ? v.length : 0;
-    input = `<div style="display:flex;align-items:center;gap:10px">
-      <span class="wd-info" style="margin:0">${n ? `${n} action${n > 1 ? 's' : ''} configured` : 'No custom actions'}</span>
-      <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="notify-actions-edit">Configure…</button>
-    </div>`;
   } else if (f.type === 'entitylist') {
     // Chip/pill multi-picker: existing values as removable pills + a datalist
     // add-input. Managed by DOM (no re-render) and collected on save.
@@ -714,6 +768,17 @@ const _DIAGRAM_BY_KEY = {
   profile_duration_tolerance: 'duration_tolerance',
   profile_match_min_duration_ratio: 'match_ratios', profile_match_max_duration_ratio: 'match_ratios',
   progress_reset_delay: 'progress_reset', completion_min_seconds: 'min_duration',
+  // New diagrams
+  min_off_gap: 'min_off_gap',
+  start_duration_threshold: 'start_duration',
+  end_energy_threshold: 'end_energy_thresh',
+  end_repeat_count: 'end_repeat',
+  profile_match_threshold: 'confidence', profile_unmatch_threshold: 'confidence',
+  auto_label_confidence: 'confidence', learning_confidence: 'confidence',
+  no_update_active_timeout: 'watchdog_timeout',
+  anti_wrinkle_enabled: 'anti_wrinkle', anti_wrinkle_max_power: 'anti_wrinkle',
+  anti_wrinkle_max_duration: 'anti_wrinkle', anti_wrinkle_exit_power: 'anti_wrinkle',
+  sampling_interval: 'sampling',
 };
 
 // Tooltip popover with an optional JS-drawn SVG diagram above the text.
@@ -792,6 +857,84 @@ function _diagram(id) {
         <text x="20" y="44">too short</text>
         <polyline class="ln" points="90,78 100,40 150,40 160,78"/>
         <text x="106" y="34">kept</text>`);
+    case 'min_off_gap':
+      // Two cycle humps separated by an orange off-gap; gap bridged into one cycle.
+      return wrap(`${base}
+        <rect class="fw" x="68" y="32" width="48" height="46"/>
+        <polyline class="ln" points="8,78 14,78 26,44 38,32 52,44 68,78 116,78 128,32 150,32 162,44 174,78 192,78"/>
+        <text x="72" y="26">off-gap</text>
+        <text x="9" y="14">gap below min = one cycle</text>`);
+    case 'start_duration':
+      // Brief spike ignored; sustained power above threshold confirms start.
+      return wrap(`${base}
+        <line class="bad dash" x1="8" y1="50" x2="192" y2="50"/>
+        <polyline class="bad" points="34,78 36,28 38,78"/>
+        <polyline class="ln" points="8,78 100,78 112,50 192,50"/>
+        <rect class="fw" x="112" y="50" width="44" height="28"/>
+        <text x="26" y="24">spike: ignored</text>
+        <text x="114" y="46">confirmed</text>`);
+    case 'end_energy_thresh':
+      // Low-power tail after main cycle; accumulated energy compared to threshold.
+      return wrap(`${base}
+        <polyline class="ln" points="8,78 14,78 28,28 66,28 76,60 110,60 125,78 192,78"/>
+        <rect class="fz" x="76" y="60" width="49" height="18"/>
+        <line class="ax" x1="8" y1="68" x2="192" y2="68"/>
+        <text x="10" y="14">tail energy above thresh: timer resets</text>
+        <text x="78" y="56">accum</text>
+        <text x="168" y="65">thr</text>`);
+    case 'end_repeat':
+      // N consecutive readings below stop threshold before end is confirmed.
+      return wrap(`${base}
+        <line class="bad dash" x1="8" y1="54" x2="192" y2="54"/>
+        <polyline class="ln" points="8,78 16,78 28,30 78,30 88,60 108,60 128,60 148,60 162,78 192,78"/>
+        <line class="ax" x1="88" y1="54" x2="88" y2="78"/>
+        <line class="ax" x1="108" y1="54" x2="108" y2="78"/>
+        <line class="ax" x1="128" y1="54" x2="128" y2="78"/>
+        <line class="ax" x1="148" y1="54" x2="148" y2="78"/>
+        <text x="90" y="48">R1 R2 R3</text>
+        <text x="10" y="14">N reads below stop = end</text>`);
+    case 'confidence':
+      // Horizontal 0-1 score bar: red = no match, orange = feedback zone, blue = auto-label.
+      return wrap(`
+        <rect class="fb" x="8" y="40" width="56" height="22"/>
+        <rect class="fw" x="64" y="40" width="90" height="22"/>
+        <rect class="fz" x="154" y="40" width="38" height="22"/>
+        <line class="ax" x1="8" y1="40" x2="192" y2="40"/>
+        <line class="ax" x1="8" y1="62" x2="192" y2="62"/>
+        <text x="14" y="36">no match</text>
+        <text x="70" y="36">feedback</text>
+        <text x="156" y="36">auto</text>
+        <text x="8" y="74">0.0</text>
+        <text x="178" y="74">1.0</text>`);
+    case 'watchdog_timeout':
+      // Running cycle, then no-update silence (orange), then force-stop.
+      return wrap(`${base}
+        <polyline class="ln" points="8,40 74,40 82,78"/>
+        <rect class="fw" x="82" y="22" width="76" height="56"/>
+        <line class="bad" x1="164" y1="26" x2="176" y2="38"/>
+        <line class="bad" x1="176" y1="26" x2="164" y2="38"/>
+        <text x="86" y="18">no updates</text>
+        <text x="10" y="18">sensor offline: force-stop</text>`);
+    case 'anti_wrinkle':
+      // Main heat cycle followed by low-power tumble pulses (anti-wrinkle zone).
+      return wrap(`${base}
+        <rect class="fz" x="78" y="44" width="114" height="34"/>
+        <polyline class="ln" points="8,78 14,78 24,30 54,30 68,78 84,60 96,78 110,60 122,78 136,60 148,78 162,60 174,78 192,78"/>
+        <text x="10" y="14">heat phase</text>
+        <text x="82" y="40">tumble pulses kept</text>`);
+    case 'sampling':
+      // Vertical tick marks at regular intervals showing sensor cadence.
+      return wrap(`${base}
+        <line class="ok" x1="24" y1="30" x2="24" y2="78"/>
+        <line class="ok" x1="62" y1="30" x2="62" y2="78"/>
+        <line class="ok" x1="100" y1="30" x2="100" y2="78"/>
+        <line class="ok" x1="138" y1="30" x2="138" y2="78"/>
+        <line class="ok" x1="176" y1="30" x2="176" y2="78"/>
+        <line class="fz" x1="8" y1="54" x2="192" y2="54"/>
+        <text x="36" y="50">SI</text>
+        <text x="74" y="50">SI</text>
+        <text x="112" y="50">SI</text>
+        <text x="10" y="14">typical reading interval</text>`);
     default:
       return '';
   }
@@ -833,6 +976,8 @@ class HaWashdataPanel extends HTMLElement {
     this._tab = 'status';
     this._settingsSec = 'basic';
     this._settingsSearch = '';
+    this._settingsSugOnly = false;
+    this._canvasZoom = {};     // canvasId -> {xMin, xMax}; absent = full view
     this._toolsSubtab = 'recording';
     this._loading = true;
     this._tabLoading = false;
@@ -1065,6 +1210,8 @@ class HaWashdataPanel extends HTMLElement {
     this._matchDebug = null;
     this._profiles = []; this._opts = {}; this._suggestions = [];
     this._cycles = []; this._recState = null; this._diag = null; this._phases = [];
+    this._mlTrainingStatus = null;  // per-device; re-fetched by _fetchTabData
+    this._deviceAutomations = [];   // per-device; re-fetched on the settings tab
     this._selectMode = false; this._cycleSel = new Set();
     this._cycleFilter = { text: '', status: '' };
     this._profSubtab = 'profiles';
@@ -1131,7 +1278,9 @@ class HaWashdataPanel extends HTMLElement {
         }
       } else if (this._tab === 'profiles') {
         await this._fetchProfiles(eid);
-        await this._fetchProfileGroups(eid);
+        // Groups require DTW cohesion calculations - load in background so the
+        // profile list renders immediately while groups fill in behind it.
+        this._fetchProfileGroups(eid).then(() => { if (this._tab === 'profiles') this._render(); });
         if (this._profSubtab === 'phase-catalog') {
           try { const r = await this._ws({ type: `${_DOMAIN}/get_phase_catalog`, entry_id: eid }); this._phases = r.phases || []; } catch (_) {}
         }
@@ -1151,6 +1300,16 @@ class HaWashdataPanel extends HTMLElement {
         if (this._constants.mlTrainingAvailable) {
           this._loadMlTrainingStatus(eid).finally(() => { if (this._tab === 'settings') this._render(); });
         }
+        // Automations related to this device (for the Notifications > Automations list).
+        this._autoLoading = true;
+        this._loadDeviceAutomations(eid).finally(() => {
+          this._autoLoading = false;
+          if (this._tab === 'settings') this._render();
+        });
+      } else if (this._tab === 'ml') {
+        const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
+        this._opts = r.options || {};
+        this._loadMlTrainingStatus(eid).finally(() => { if (this._tab === 'ml') this._render(); });
       }
     } catch (err) {
       console.warn('[WashData panel] tab data fetch error:', err);
@@ -1256,13 +1415,16 @@ class HaWashdataPanel extends HTMLElement {
   _canFull() { const p = this._curPerm(); return this._isAdmin() || p === 'full'; }
 
   _visibleTabIds() {
-    // Four primary tabs. Diagnostics, Logs and Panel settings are folded into
-    // the "Advanced" drawer (the header gear button); ML insights are folded
-    // into the Cycles (health/review) and Tuning (Classic-vs-ML) tabs.
+    // Primary tabs. Diagnostics, Logs and Panel settings are folded into the
+    // "Advanced" drawer (the header gear button). All ML management (on-device
+    // training, matcher tuning, runtime-model opt-in) lives in the "ML Training"
+    // tab; per-cycle ML health/review stays inline in the Cycles tab as cycle
+    // metadata.
     const admin = this._isAdmin();
     const hidden = (!admin && this._panelCfg && this._panelCfg.panel && this._panelCfg.panel.hidden_tabs) || [];
     const ids = ['status', 'history', 'profiles'];
     if (this._canEdit()) ids.push('settings');
+    if (this._canEdit() && this._constants && this._constants.mlTrainingAvailable) ids.push('ml');
     // Advanced is also reachable from the header gear; expose it as a tab too.
     ids.push('advanced');
     return ids.filter(id => admin || !hidden.includes(id));
@@ -1356,7 +1518,7 @@ class HaWashdataPanel extends HTMLElement {
     if (!this._devices.length)
       return `<div class="wd-empty"><div class="wd-icon">🧺</div>No WashData devices configured yet.</div>`;
     const sugDot = this._suggestions.length ? ' 💡' : '';
-    const labels = { status: 'Overview', history: 'Cycles', profiles: 'Profiles', settings: 'Settings' + sugDot, advanced: 'Advanced' };
+    const labels = { status: 'Overview', history: 'Cycles', profiles: 'Profiles', settings: 'Settings' + sugDot, ml: 'ML Training', advanced: 'Advanced' };
     const visible = this._visibleTabIds();
     if (!visible.includes(this._tab)) this._tab = 'status';
     const tabBtns = visible.map(id =>
@@ -1372,6 +1534,7 @@ class HaWashdataPanel extends HTMLElement {
       ${pane('history', this._htmlHistory())}
       ${pane('profiles', this._htmlProfiles())}
       ${pane('settings', this._htmlSettings())}
+      ${pane('ml', this._htmlMlTab())}
       ${pane('advanced', this._htmlPanel())}
     `;
   }
@@ -1424,7 +1587,7 @@ class HaWashdataPanel extends HTMLElement {
     const tag = suffix ? `<span class="wd-prog-tag ${manual ? 'manual' : 'auto'}">${suffix}</span>` : '';
     // Program selection is allowed for any user who can see the device (read+),
     // since it only changes live detection, not stored data.
-    const programCtl = `<div class="wd-prog-ctl"><label>Program</label>
+    const programCtl = `<div class="wd-prog-ctl"><label>Program</label>${_tip('Override which profile is matched to the current cycle. Auto-detect lets the integration pick the best match automatically. Pin a specific program to force-match it when auto-detect is wrong or you know what is running.')}
           <select id="wd-status-prog">
             <option value="auto_detect" ${selVal === 'auto_detect' ? 'selected' : ''}>Auto-detect</option>
             ${profOpts}
@@ -1460,7 +1623,7 @@ class HaWashdataPanel extends HTMLElement {
       const conf = md.confidence != null ? `${(md.confidence * 100).toFixed(1)}%` : '-';
       const dRows = (md.candidates || []).map(c => `<tr><td>${_esc(c.profile_name)}</td><td>${c.confidence_pct}%</td><td>${c.mae}</td><td>${c.correlation}</td><td>${c.duration_ratio >= 0 ? '+' : ''}${c.duration_ratio}%</td></tr>`).join('');
       debugHtml = `<div class="wd-card">
-        <div class="wd-card-title">Live Match Debug</div>
+        <div class="wd-card-title">Live Match Debug ${_tip('Confidence: how closely the current power curve matches the top candidate profile (0-100%). Ambiguous: the two best candidates score within 5% of each other - the label is uncertain until the cycle finishes.')}</div>
         <div class="wd-kv" style="margin-bottom:12px">
           <div class="wd-kv-item"><div class="wd-kv-val">${conf}</div><div class="wd-kv-lbl">Confidence</div></div>
           <div class="wd-kv-item"><div class="wd-kv-val" style="font-size:1em;color:${md.ambiguous ? 'var(--warning-color,#ff9800)' : 'var(--success-color,#4caf50)'}">${md.ambiguous ? 'Ambiguous' : 'Clear'}</div><div class="wd-kv-lbl">Match</div></div>
@@ -1591,6 +1754,7 @@ class HaWashdataPanel extends HTMLElement {
       confidence: c => c.match_confidence,
       duration: c => c.duration,
       energy: c => c.energy_kwh != null ? c.energy_kwh : (c.energy_wh != null ? c.energy_wh / 1000 : null),
+      cost: c => c.cost != null ? c.cost : -1,
       status: c => c.status || 'completed',
       profile: c => (c.profile_name || c.matched_profile || '￿').toLowerCase(),
       health: c => { const h = healthOf(c); return h == null ? -1 : h; },
@@ -1618,6 +1782,8 @@ class HaWashdataPanel extends HTMLElement {
       return '';
     };
 
+    const cur = (this._hass && this._hass.config && this._hass.config.currency) || '';
+    const costCell = c => c.cost != null ? `${c.cost.toFixed(2)}${cur ? ' ' + cur : ''}` : '-';
     const rows = cycles.map(c => {
       const prog = c.profile_name || c.matched_profile;
       const conf = c.match_confidence != null ? c.match_confidence * 100 : null;
@@ -1634,6 +1800,7 @@ class HaWashdataPanel extends HTMLElement {
         <td class="wd-tc-date">${_fmtDate(c.start_time)}</td>
         <td class="wd-tc-num">${_fmtDuration(c.duration)}</td>
         <td class="wd-tc-num">${kwh != null ? _fmtEnergy(kwh) : '-'}</td>
+        <td class="wd-tc-num">${costCell(c)}</td>
         <td class="wd-tc-num">${conf != null ? conf.toFixed(0) + '%' : '-'}</td>
         <td class="wd-tc-num">${healthCell(c)}</td>
       </tr>`;
@@ -1641,12 +1808,13 @@ class HaWashdataPanel extends HTMLElement {
 
     const thead = `<thead><tr>
       <th style="width:26px;padding:6px 4px 6px 8px"></th>
-      ${_th('Profile', 'profile', col === 'profile', dir, 'cycsort')}
-      ${_th('Status', 'status', col === 'status', dir, 'cycsort')}
-      ${_th('Date', 'date', col === 'date', dir, 'cycsort')}
-      ${_th('Duration', 'duration', col === 'duration', dir, 'cycsort', 'right')}
-      ${_th('Energy', 'energy', col === 'energy', dir, 'cycsort', 'right')}
-      ${_th('Confidence', 'confidence', col === 'confidence', dir, 'cycsort', 'right')}
+      ${_th('Profile', 'profile', col === 'profile', dir, 'cycsort', '', 'Matched program name. Unlabelled means no profile matched at end of cycle.')}
+      ${_th('Status', 'status', col === 'status', dir, 'cycsort', '', 'Cycle outcome: Completed (natural end), Interrupted (abrupt power drop), Force Stopped (manual), or Needs Review (feedback pending).')}
+      ${_th('Date', 'date', col === 'date', dir, 'cycsort', '', 'Date and time the cycle started.')}
+      ${_th('Duration', 'duration', col === 'duration', dir, 'cycsort', 'right', 'Total cycle run time from start to end.')}
+      ${_th('Energy', 'energy', col === 'energy', dir, 'cycsort', 'right', 'Total energy consumed (kWh). Computed by integrating power over time.')}
+      ${_th('Cost', 'cost', col === 'cost', dir, 'cycsort', 'right', 'Energy cost for this cycle, frozen at completion using the price in effect then (energy x price per kWh). Set a price under Settings to populate it.')}
+      ${_th('Confidence', 'confidence', col === 'confidence', dir, 'cycsort', 'right', 'Profile match confidence (0-100%). How closely the cycle power curve matched the identified program.')}
       ${_th('Health', 'health', col === 'health', dir, 'cycsort', 'right', 'ML cycle health (higher = better). Click a cycle to inspect and review it.')}
     </tr></thead>`;
 
@@ -1727,9 +1895,12 @@ class HaWashdataPanel extends HTMLElement {
         ? `<span class="wd-badge" style="color:var(--success-color,#4caf50);background:rgba(76,175,80,.14)">cohesion ${cohPct}%</span>`
         : `<span class="wd-badge" style="color:var(--warning-color,#ff9800);background:rgba(255,152,0,.14)">⚠ low cohesion ${cohPct}%</span>`;
       const warn = g.cohesive ? '' : `<p class="wd-info" style="margin:0 0 8px;color:var(--warning-color,#ff9800)">These profiles aren't similar enough to group reliably, so matching treats them individually until you remove the outlier or split the group.</p>`;
+      const titleEl = canEdit
+        ? `<button class="wd-btn-link" style="font-size:1.05em;font-weight:600;text-align:left;padding:0;border:none;background:none;cursor:pointer;color:inherit" data-action="pg-edit" data-gname="${_esc(g.name)}">🔗 ${_esc(g.name)}</button>`
+        : `<span style="font-size:1.05em;font-weight:600">🔗 ${_esc(g.name)}</span>`;
       return `<div class="wd-card" style="margin-bottom:12px">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-          <div class="wd-card-title" style="margin:0">🔗 ${_esc(g.name)}</div>
+          ${titleEl}
           ${cohBadge}<span style="flex:1"></span>
           ${canEdit ? `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="pg-edit" data-gname="${_esc(g.name)}">Manage</button>` : ''}
         </div>
@@ -1802,78 +1973,9 @@ class HaWashdataPanel extends HTMLElement {
       <p class="wd-info" style="margin-top:10px">Group programs with the same shape that differ in temperature/spin (durations may vary). Matching scores the group as one candidate, then picks the best-fitting member. Pick at least 2; the overlay shows how alike they are.</p>
       <div class="wd-modal-actions">
         <button class="wd-btn wd-btn-secondary" data-maction="cancel">Cancel</button>
-        ${m.orig ? `<button class="wd-btn wd-btn-danger" data-maction="pg-delete">Delete Group</button>` : ''}
+        ${m.orig ? `<button class="wd-btn wd-btn-danger" data-maction="pg-delete" title="Delete this group only - the member profiles are kept">Delete Group</button>` : ''}
         <button class="wd-btn wd-btn-primary" data-maction="pg-save" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Saving…' : 'Save Group'}</button>
       </div>`;
-  }
-
-  _htmlNotifyActionsModal(m) {
-    const busy = this._busy.has('na-save');
-    let body;
-    if (m.mode === 'raw') {
-      body = `<p class="wd-info">Advanced: the full Home Assistant action list as JSON (service calls, conditions, templates…). This is the same structure as the Actions selector in device Options.</p>
-        <textarea id="wd-na-raw" class="wd-rev-notes" rows="10" placeholder='[{"service": "notify.mobile_app_phone", "data": {"message": "{device} finished"}}]'>${_esc(m.raw || '')}</textarea>
-        <div style="margin-top:8px"><button class="wd-btn wd-btn-secondary wd-btn-sm" data-maction="na-rows">Switch to simple rows</button></div>`;
-    } else {
-      const rows = (m.rows || []).map((r, i) => `
-        <div class="wd-na-row" style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px">
-          <input type="text" class="wd-na-svc" value="${_esc(r.service || '')}" placeholder="notify.mobile_app_phone" style="flex:1;min-width:150px">
-          <textarea class="wd-na-data" rows="2" placeholder='{"message": "{device} finished", "title": "Done"}' style="flex:2;min-width:180px">${_esc(r.data || '')}</textarea>
-          <button class="wd-btn wd-btn-danger wd-btn-sm" data-maction="na-rm" data-idx="${i}" title="Remove">✕</button>
-        </div>`).join('');
-      body = `<p class="wd-info">Each row is one Home Assistant service call run on cycle events. Data is JSON; template variables like <code>{device}</code>, <code>{duration}</code> are supported.</p>
-        ${rows || '<p class="wd-info">No actions yet.</p>'}
-        <div style="display:flex;gap:8px;margin-top:6px">
-          <button class="wd-btn wd-btn-secondary wd-btn-sm" data-maction="na-add">+ Add action</button>
-          <button class="wd-btn wd-btn-secondary wd-btn-sm" data-maction="na-raw">Advanced (raw JSON)</button>
-        </div>`;
-    }
-    return `<h2>Custom notification actions</h2>
-      ${body}
-      <div class="wd-modal-actions">
-        <button class="wd-btn wd-btn-secondary" data-maction="cancel">Cancel</button>
-        <button class="wd-btn wd-btn-primary" data-maction="na-save" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Saving…' : 'Save Actions'}</button>
-      </div>`;
-  }
-
-  // Read the notify-actions modal's current inputs back into modal state so
-  // add/remove/mode-switch/save don't lose in-progress edits.
-  _naSnapshot() {
-    const m = this._modal; const sr = this.shadowRoot;
-    if (!m || m.type !== 'notify-actions' || !sr) return;
-    if (m.mode === 'raw') { const t = sr.getElementById('wd-na-raw'); if (t) m.raw = t.value; return; }
-    const rows = [];
-    sr.querySelectorAll('.wd-na-row').forEach(row => {
-      rows.push({ service: (row.querySelector('.wd-na-svc')?.value || '').trim(), data: row.querySelector('.wd-na-data')?.value || '' });
-    });
-    m.rows = rows;
-  }
-
-  // Build the HA action list from the modal state. Returns the list, or null
-  // after toasting a validation error (invalid JSON).
-  _naBuildActions(m) {
-    if (m.mode === 'raw') {
-      let parsed;
-      try { parsed = JSON.parse(m.raw || '[]'); }
-      catch (_) { this._showToast('Raw JSON is invalid', 'error'); return null; }
-      if (!Array.isArray(parsed)) { this._showToast('Actions must be a JSON array', 'error'); return null; }
-      return parsed;
-    }
-    const out = [];
-    for (const r of (m.rows || [])) {
-      const svc = (r.service || '').trim();
-      if (!svc) continue;  // skip empty rows
-      const step = { service: svc };
-      const d = (r.data || '').trim();
-      if (d) {
-        let data;
-        try { data = JSON.parse(d); }
-        catch (_) { this._showToast(`Data for "${svc}" is not valid JSON`, 'error'); return null; }
-        step.data = data;
-      }
-      out.push(step);
-    }
-    return out;
   }
 
   _drawGroupCanvas() {
@@ -1903,21 +2005,27 @@ class HaWashdataPanel extends HTMLElement {
       const fields = sec.fields || (sec.groups || []).flatMap(g => g.fields || []);
       return fields.some(f => sugKeys.has(f.key));
     };
-    const visibleSections = _SETTINGS_SECTIONS.filter(
-      sec => sec.id !== 'ml_training' || this._constants.mlTrainingAvailable
-    );
+    // ml_training moved to its own "ML Training" tab; never show it under Settings.
+    const visibleSections = _SETTINGS_SECTIONS.filter(sec => sec.id !== 'ml_training');
     const nav = visibleSections.map(sec => {
       const hasSug = secHasSug(sec);
       return `<button class="wd-sec-btn ${this._settingsSec === sec.id ? 'active' : ''}" data-sec="${sec.id}">${_esc(sec.label)}${hasSug ? '<span class="wd-sec-sug-dot"></span>' : ''}</button>`;
     }).join('');
 
     const saveBusy = this._busy.has('save-settings');
-    const banner = this._suggestions.length ? `
+    const sugCount = this._suggestions.length;
+    const sugOnly = this._settingsSugOnly && !this._settingsSearch;
+    const banner = sugCount ? (sugOnly ? `
       <div class="wd-sug-banner">
-        <span>💡 <b>${this._suggestions.length}</b> tuning suggestion${this._suggestions.length > 1 ? 's' : ''} available from observed cycles. They appear beside the relevant fields.</span>
+        <span>💡 Showing <b>${sugCount}</b> setting${sugCount > 1 ? 's' : ''} with suggestions. Select a section above or <span style="text-decoration:underline;cursor:pointer" data-action="sug-show-all">show all settings</span>.</span>
+        <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="sug-apply-all">Apply all</button>
+      </div>` : `
+      <div class="wd-sug-banner">
+        <span>💡 <b>${sugCount}</b> tuning suggestion${sugCount > 1 ? 's' : ''} available from observed cycles. They appear beside the relevant fields.</span>
+        <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="goto-suggestions">Show only</button>
         <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="sug-apply-all">Apply all</button>
         <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="sug-dismiss">Dismiss</button>
-      </div>` : '';
+      </div>`) : '';
 
     const analyzeBusy = this._busy.has('sug-analyze');
     const analyzeBtn = `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="sug-analyze" ${analyzeBusy ? 'disabled' : ''} title="Analyze your recorded cycles now and refresh tuning suggestions">${analyzeBusy ? '<span class="wd-spin"></span> Analyzing…' : '🔍 Run suggestion analysis'}</button>`;
@@ -1925,6 +2033,8 @@ class HaWashdataPanel extends HTMLElement {
     const search = this._settingsSearch || '';
     const q = search.trim().toLowerCase();
     const searchInput = `<input type="text" id="wd-settings-search" class="wd-filter-input" placeholder="Search settings…" value="${_esc(search)}" autocomplete="off" style="max-width:240px">`;
+
+    const formContent = q ? this._htmlSettingsSearch(o, q) : (sugOnly ? this._htmlSettingsSugOnly(o) : this._htmlSettingsSection(o));
 
     return `
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
@@ -1937,7 +2047,7 @@ class HaWashdataPanel extends HTMLElement {
         ${searchInput}
       </div>
       <div class="wd-card">
-        <form id="wd-settings-form">${q ? this._htmlSettingsSearch(o, q) : this._htmlSettingsSection(o)}</form>
+        <form id="wd-settings-form">${formContent}</form>
         <div class="wd-card-actions" style="margin-top:20px">
           <button class="wd-btn wd-btn-primary" id="wd-settings-save" ${saveBusy ? 'disabled' : ''}>${saveBusy ? '<span class="wd-spin"></span> Saving…' : 'Save Settings'}</button>
           <button class="wd-btn wd-btn-secondary" id="wd-settings-reload">Refresh</button>
@@ -1983,9 +2093,153 @@ class HaWashdataPanel extends HTMLElement {
     return _field(f, value, extra);
   }
 
+  // Automations subcategory at the top of Notifications. Replaces the old custom
+  // action editor: WashData fires ha_washdata_cycle_started / _ended events and
+  // exposes entities, so users build native HA automations. This shows the
+  // automations already related to this device (deep-linking to the editor) and
+  // a split "New" button that opens a blank automation or one prefilled with a
+  // cycle-started / cycle-finished trigger for this device.
+  _htmlAutomations() {
+    const list = this._deviceAutomations || [];
+    const pills = list.length
+      ? list.map(a => `<span class="wd-auto-pill">` +
+          `<a class="wd-auto-pill-link" href="/config/automation/edit/${encodeURIComponent(a.id)}" target="_top" title="Open in the automation editor">🔗 ${_esc(a.name)}${a.enabled ? '' : ' <span style="opacity:.6">(off)</span>'}</a>` +
+          `<button type="button" class="wd-auto-pill-x" data-action="auto-delete" data-autoid="${_esc(a.id)}" data-autoname="${_esc(a.name)}" title="Delete this automation">×</button>` +
+        `</span>`).join('')
+      : `<span class="wd-info" style="margin:0">${this._autoLoading ? 'Loading…' : 'No automations reference this device yet.'}</span>`;
+    // Legacy custom actions from the removed editor: still fired by the backend,
+    // but no longer editable. Offer a one-click convert to a real automation.
+    const legacy = Array.isArray(this._opts.notify_actions) ? this._opts.notify_actions : [];
+    const legacyBlock = legacy.length ? `
+      <div style="border:1px solid var(--warning-color,#ff9800);border-radius:8px;padding:10px 12px;margin-bottom:12px;background:rgba(255,152,0,.08)">
+        <div style="font-weight:600;margin-bottom:4px">${legacy.length} legacy custom action${legacy.length > 1 ? 's' : ''} still running</div>
+        <p class="wd-info" style="margin:0 0 8px">Configured with the old actions editor (now removed). They still fire on cycle events but can no longer be edited here. Convert them into a normal automation, or remove them.</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-convert-legacy">Convert to automation</button>
+          <button type="button" class="wd-btn wd-btn-danger wd-btn-sm" data-action="auto-remove-legacy">Remove</button>
+        </div>
+      </div>` : '';
+    return `
+      <div class="wd-subhead">Automations</div>
+      <p class="wd-info" style="margin-bottom:10px">WashData fires <code>ha_washdata_cycle_started</code> / <code>ha_washdata_cycle_ended</code> events and exposes entities, so notifications and actions are best built as normal Home Assistant automations. Automations that use this device appear below.</p>
+      ${legacyBlock}
+      <div class="wd-auto-pills" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px">${pills}</div>
+      <div class="wd-auto-new" style="display:flex;gap:6px;align-items:center;margin-bottom:18px">
+        <button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-new">＋ New Automation</button>
+        <details class="wd-auto-dd" style="position:relative">
+          <summary class="wd-btn wd-btn-secondary wd-btn-sm">From template ▾</summary>
+          <div class="wd-auto-dd-menu" style="position:absolute;z-index:5;margin-top:4px;background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:8px;padding:6px;min-width:190px;box-shadow:0 4px 14px rgba(0,0,0,.25)">
+            <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="auto-new-started" style="width:100%;margin-bottom:4px">On cycle started</button>
+            <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="auto-new-finished" style="width:100%">On cycle finished</button>
+          </div>
+        </details>
+      </div>`;
+  }
+
+  // Load automations related to this device via HA's native related-items
+  // search, so the Notifications > Automations list mirrors the device page.
+  async _loadDeviceAutomations(entryId) {
+    this._deviceAutomations = [];
+    const hass = this._hass;
+    if (!hass || !hass.callWS) return;
+    try {
+      let deviceId = null;
+      const devices = hass.devices || {};
+      for (const d of Object.values(devices)) {
+        if ((d.config_entries || []).includes(entryId)) { deviceId = d.id; break; }
+      }
+      const related = deviceId
+        ? await hass.callWS({ type: 'search/related', item_type: 'device', item_id: deviceId })
+        : await hass.callWS({ type: 'search/related', item_type: 'config_entry', item_id: entryId });
+      const ents = (related && related.automation) || [];
+      const states = hass.states || {};
+      this._deviceAutomations = ents.map(ent => {
+        const attrs = (states[ent] && states[ent].attributes) || {};
+        return { entity_id: ent, id: attrs.id, name: attrs.friendly_name || ent, enabled: states[ent] ? states[ent].state === 'on' : true };
+      }).filter(a => a.id);
+    } catch (_) { this._deviceAutomations = []; }
+  }
+
+  // Navigate the HA frontend (e.g. to the automation editor) via the standard
+  // location-changed event so the app router handles it.
+  _navigate(path) {
+    try {
+      history.pushState(null, '', path);
+      this.dispatchEvent(new CustomEvent('location-changed', { bubbles: true, composed: true, detail: { replace: false } }));
+    } catch (_) { try { window.location.assign(path); } catch (__) { /* ignore */ } }
+  }
+
+  // Create an automation prefilled with a WashData cycle trigger for this
+  // device, then open it in the editor for the user to complete.
+  async _newAutomationFromEvent(kind) {
+    const dev = this._devices[this._selIdx];
+    if (!dev) return;
+    const hass = this._hass;
+    const eventType = kind === 'started' ? 'ha_washdata_cycle_started' : 'ha_washdata_cycle_ended';
+    const label = kind === 'started' ? 'started' : 'finished';
+    const config = {
+      alias: `${dev.title || 'WashData'}: cycle ${label}`,
+      description: `Runs when the WashData ${dev.title || ''} cycle ${label}. Add your actions (notify, lights, ...).`,
+      mode: 'single',
+      trigger: [{ platform: 'event', event_type: eventType, event_data: { entry_id: dev.entry_id } }],
+      condition: [],
+      action: [],
+    };
+    const id = 'washdata_' + Date.now().toString(36);
+    try {
+      if (hass && hass.callApi) {
+        await hass.callApi('POST', 'config/automation/config/' + id, config);
+        this._navigate('/config/automation/edit/' + id);
+      } else {
+        this._navigate('/config/automation/edit/new');
+      }
+    } catch (e) {
+      this._showToast('Could not create automation: ' + (e.message || e), 'error');
+    }
+  }
+
+  // Migrate legacy notify_actions (from the removed actions editor) into a real
+  // automation: it fired on start + finish + live, so prefill both cycle
+  // triggers plus the stored action steps, open it in the editor, then clear the
+  // legacy actions. notify_actions are already HA action-step dicts, so they drop
+  // straight into the automation's action list.
+  async _convertLegacyActions() {
+    const dev = this._devices[this._selIdx];
+    const hass = this._hass;
+    const actions = Array.isArray(this._opts.notify_actions) ? this._opts.notify_actions : [];
+    if (!dev || !actions.length) return;
+    const config = {
+      alias: `${dev.title || 'WashData'}: migrated custom actions`,
+      description: 'Migrated from WashData legacy custom actions (which ran on cycle start, finish and live). Trim the triggers as needed. Note: old {device}/{duration}-style placeholders are NOT templated here - replace them with Jinja templates such as {{ trigger.event.data.device_name }}.',
+      mode: 'single',
+      trigger: [
+        { platform: 'event', event_type: 'ha_washdata_cycle_started', event_data: { entry_id: dev.entry_id } },
+        { platform: 'event', event_type: 'ha_washdata_cycle_ended', event_data: { entry_id: dev.entry_id } },
+      ],
+      condition: [],
+      action: actions,
+    };
+    const id = 'washdata_' + Date.now().toString(36);
+    try {
+      if (!hass || !hass.callApi) { this._showToast('Cannot create automation here', 'error'); return; }
+      await hass.callApi('POST', 'config/automation/config/' + id, config);
+      await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: { notify_actions: [] } });
+      this._opts = { ...this._opts, notify_actions: [] };
+      this._showToast('Actions migrated to an automation; opening editor');
+      this._navigate('/config/automation/edit/' + id);
+    } catch (e) {
+      this._showToast('Convert failed: ' + (e.message || e), 'error');
+    }
+  }
+
   _htmlSettingsSection(o) {
-    const sec = _SETTINGS_SECTIONS.find(s => s.id === this._settingsSec) || _SETTINGS_SECTIONS[0];
+    // ml_training now lives in its own tab, so it must never resolve here even
+    // if _settingsSec still points at it.
+    const sec = _SETTINGS_SECTIONS.find(s => s.id === this._settingsSec && s.id !== 'ml_training')
+      || _SETTINGS_SECTIONS.find(s => s.id !== 'ml_training')
+      || _SETTINGS_SECTIONS[0];
     const intro = sec.intro ? `<p class="wd-sec-intro">${_esc(sec.intro)}</p>` : '';
+    const trainCard = '';
 
     if (sec.id === 'notifications') {
       const varsHint = `<p class="wd-info" style="margin-bottom:16px">Use <code>notify.&lt;name&gt;</code> service IDs (comma-separated for multiple). Template variables: <code>${_esc(_NOTIFY_VARS)}</code>.</p>`;
@@ -1993,20 +2247,26 @@ class HaWashdataPanel extends HTMLElement {
         const fields = grp.fields.map(f => this._renderField(f, o)).join('');
         return `<div class="wd-subhead">${_esc(grp.sub)}</div><div class="wd-form-grid">${fields}</div>`;
       }).join('');
-      return `${varsHint}${groups}`;
+      return `${this._htmlAutomations()}${varsHint}${groups}`;
+    }
+
+    if (sec.groups) {
+      const groups = sec.groups.map(grp => {
+        const sub = grp.sub ? `<div class="wd-subhead">${_esc(grp.sub)}</div>` : '';
+        const fields = (grp.fields || []).map(f => this._renderField(f, o)).filter(Boolean).join('');
+        return fields ? `${sub}<div class="wd-form-grid">${fields}</div>` : '';
+      }).join('');
+      return `${intro}${trainCard}${groups}`;
     }
 
     const fields = (sec.fields || []).map(f => this._renderField(f, o)).join('');
-    const trainCard = sec.id === 'ml_training' ? this._htmlMlTrainingCard() : '';
     return `${intro}${trainCard}<div class="wd-form-grid">${fields}</div>`;
   }
 
   // Cross-section field search: render every field (from all sections) whose
   // label / key / tooltip matches the query, grouped under its section heading.
   _htmlSettingsSearch(o, q) {
-    const sections = _SETTINGS_SECTIONS.filter(
-      s => s.id !== 'ml_training' || this._constants.mlTrainingAvailable
-    );
+    const sections = _SETTINGS_SECTIONS.filter(s => s.id !== 'ml_training');
     const match = f => (`${f.label || ''} ${f.key || ''} ${f.doc || ''} ${f.hint || ''}`).toLowerCase().includes(q);
     let out = '';
     let count = 0;
@@ -2022,10 +2282,59 @@ class HaWashdataPanel extends HTMLElement {
     return count ? out : `<p class="wd-info" style="padding:12px">No settings match "${_esc(q)}".</p>`;
   }
 
+  // Cross-section view showing only the fields that have active suggestions.
+  _htmlSettingsSugOnly(o) {
+    const sugKeys = new Set((this._suggestions || []).map(s => s.key));
+    if (!sugKeys.size) return '<p class="wd-info" style="padding:12px">No active suggestions.</p>';
+    const sections = _SETTINGS_SECTIONS.filter(s => s.id !== 'ml_training');
+    let out = '';
+    for (const sec of sections) {
+      const secFields = sec.fields || (sec.groups || []).flatMap(g => g.fields || []);
+      const hits = secFields.filter(f => sugKeys.has(f.key));
+      if (!hits.length) continue;
+      const rendered = hits.map(f => this._renderField(f, o)).filter(Boolean).join('');
+      if (!rendered) continue;
+      out += `<div class="wd-subhead">${_esc(sec.label)}</div><div class="wd-form-grid">${rendered}</div>`;
+    }
+    return out || '<p class="wd-info" style="padding:12px">No active suggestions.</p>';
+  }
+
   // Status + manual-trigger card shown atop the ML Training settings section.
+  // Dedicated "ML Training" tab: the single home for ML management - the
+  // runtime-model opt-in + on-device training config (the ml_training settings
+  // section, rendered here instead of under Settings), the training status /
+  // "Train now" card, and the matcher-tuning card. Options save through the same
+  // path as Settings (_saveSettings scans every [data-opt] in the shadow root).
+  _htmlMlTab() {
+    const o = this._opts;
+    if (!Object.keys(o).length)
+      return `<div class="wd-empty"><div class="wd-icon">🤖</div>Loading…</div>`;
+    const sec = _SETTINGS_SECTIONS.find(s => s.id === 'ml_training');
+    const intro = sec && sec.intro ? `<p class="wd-sec-intro">${_esc(sec.intro)}</p>` : '';
+    const fields = sec ? (sec.fields || []).map(f => this._renderField(f, o)).filter(Boolean).join('') : '';
+    const saveBusy = this._busy.has('save-settings');
+    return `
+      <div class="wd-card-title" style="margin:0 0 8px">ML Training</div>
+      <div class="wd-card">
+        ${intro}
+        <form id="wd-ml-form"><div class="wd-form-grid">${fields}</div></form>
+        <div class="wd-card-actions" style="margin-top:16px">
+          <button class="wd-btn wd-btn-primary" id="wd-ml-save" ${saveBusy ? 'disabled' : ''}>${saveBusy ? '<span class="wd-spin"></span> Saving…' : 'Save'}</button>
+        </div>
+        <p class="wd-info" style="margin-top:12px;font-size:.78em">Saving triggers an integration reload. HA entities may briefly show as unavailable.</p>
+      </div>
+      <div class="wd-card" style="margin-top:12px">${this._htmlMlTrainingCard()}</div>
+    `;
+  }
+
   _htmlMlTrainingCard() {
     const st = this._mlTrainingStatus;
-    const running = this._busy.has('ml-train-now') || (st && st.running);
+    const dev = this._devices[this._selIdx];
+    const eid = dev && dev.entry_id;
+    // Per-device busy key so a "Train now" on one device does not show every
+    // other device as training; st.running is the backend truth (per device,
+    // survives a page refresh).
+    const running = (eid && this._busy.has('ml-train-now:' + eid)) || (st && st.running);
     const btn = `<button class="wd-btn wd-btn-primary wd-btn-sm" data-action="ml-train-now" ${running ? 'disabled' : ''}>${running ? '<span class="wd-spin"></span> Training…' : 'Train now'}</button>`;
     let body;
     if (!st) {
@@ -2115,7 +2424,7 @@ class HaWashdataPanel extends HTMLElement {
       const isDefault = p.is_default;
       const desc = p.description || '';
       return `<tr>
-        <td>${_esc(p.name)} ${isDefault ? '<span class="wd-pill">built-in</span>' : ''}</td>
+        <td>${_esc(p.name)} ${isDefault ? '<span class="wd-tag">built-in</span>' : ''}</td>
         <td>${_esc(desc.length > 60 ? desc.slice(0, 57) + '…' : desc)}</td>
         <td>${!isDefault ? `
             <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="edit-phase" data-pid="${_esc(p.id)}" data-pname="${_esc(p.name)}" data-pdesc="${_esc(p.description || '')}">Edit</button>
@@ -2210,11 +2519,21 @@ class HaWashdataPanel extends HTMLElement {
     const cur = (this._panelCfg && this._panelCfg.prefs) || {};
     const tabsAll = [['', '(use panel default)'], ['status', 'Overview'], ['history', 'Cycles'], ['profiles', 'Profiles'], ['settings', 'Settings']];
     const opts = tabsAll.map(([v, l]) => `<option value="${v}" ${(cur.default_tab || '') === v ? 'selected' : ''}>${l}</option>`).join('');
+    const dateOpts = [['relative', 'Relative (e.g. 2 hours ago)'], ['absolute', 'Absolute (e.g. 14:32 on 2 Jul)']];
+    const dateOptHtml = dateOpts.map(([v, l]) => `<option value="${v}" ${(cur.date_format || 'relative') === v ? 'selected' : ''}>${l}</option>`).join('');
     return `<div class="wd-card">
       <div class="wd-card-title">My Preferences</div>
       <p class="wd-info" style="margin-bottom:12px">These apply to your Home Assistant account only.</p>
-      <div class="wd-field"><label>Default tab when opening the panel</label><select id="wd-pref-tab">${opts}</select></div>
-      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-debug" ${cur.show_debug ? 'checked' : ''}> Show live match debug on the Status page (confidence, ambiguity, top candidates)</label></div>
+      <div class="wd-subhead">Display</div>
+      <div class="wd-form-grid">
+        <div class="wd-field"><label>Default tab when opening the panel</label><select id="wd-pref-tab">${opts}</select></div>
+        <div class="wd-field"><label>Cycle date display</label><select id="wd-pref-datefmt">${dateOptHtml}</select></div>
+      </div>
+      <div class="wd-subhead">Status Graph</div>
+      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-expected" ${(cur.show_expected !== false) ? 'checked' : ''}> Show expected curve overlay (matched profile, orange)</label></div>
+      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-raw" ${cur.show_raw ? 'checked' : ''}> Show raw sensor readings (unsmoothed, grey)</label></div>
+      <div class="wd-subhead">Diagnostics</div>
+      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-debug" ${cur.show_debug ? 'checked' : ''}> Show live match debug card on the Status page (confidence, ambiguity, top candidates)</label></div>
       <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-prefs">Save Preferences</button></div>
     </div>`;
   }
@@ -2315,6 +2634,7 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   // Shared multi-series curve renderer. Returns the canvas hit-test map.
+  // Supports scroll-to-zoom (viewport stored in this._canvasZoom[canvasId]).
   _drawCurves(canvasId, opts) {
     const canvas = this.shadowRoot && this.shadowRoot.getElementById(canvasId);
     if (!canvas) return null;
@@ -2335,8 +2655,16 @@ class HaWashdataPanel extends HTMLElement {
     xMax = xMax || 1;
     let yMax = opts.yMax || 0;
     if (!yMax) { const scan = a => (a || []).forEach(p => { if (p[1] > yMax) yMax = p[1]; }); series.forEach(s => { if (!s.noScale) scan(s.points); }); if (opts.band) scan(opts.band.max); yMax = (yMax || 10) * 1.08; }
-    const X = x => padL + (x / xMax) * (cw - padL - padR);
+
+    // Zoom viewport (absent key = full view).
+    const zoom = this._canvasZoom && this._canvasZoom[canvasId];
+    const xMin = zoom ? zoom.xMin : 0;
+    const xViewMax = zoom ? zoom.xMax : xMax;
+
+    const plotW = cw - padL - padR;
+    const X = x => padL + ((x - xMin) / (xViewMax - xMin)) * plotW;
     const Y = y => ch - padB - (y / yMax) * (ch - padT - padB);
+
     ctx.clearRect(0, 0, cw, ch);
     ctx.strokeStyle = grid; ctx.lineWidth = dpr; ctx.fillStyle = txt; ctx.font = `${11 * dpr}px sans-serif`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
     for (let i = 0; i <= 2; i++) {
@@ -2344,6 +2672,12 @@ class HaWashdataPanel extends HTMLElement {
       ctx.beginPath(); ctx.moveTo(padL, yy); ctx.lineTo(cw - padR, yy); ctx.stroke();
       ctx.fillText(Math.round(yMax * (1 - i / 2)) + 'W', padL - 4 * dpr, yy);
     }
+
+    // Clip series/bands to the plot area so zoomed data doesn't bleed into margins.
+    ctx.save();
+    ctx.beginPath(); ctx.rect(padL, padT, plotW, ch - padT);
+    ctx.clip();
+
     (opts.bands || []).forEach(b => { ctx.fillStyle = b.fill; const xa = X(b.x0), xb = X(b.x1); ctx.fillRect(Math.min(xa, xb), padT, Math.abs(xb - xa), ch - padT - padB); });
     if (opts.band && (opts.band.min || []).length && (opts.band.max || []).length) {
       ctx.beginPath();
@@ -2370,15 +2704,25 @@ class HaWashdataPanel extends HTMLElement {
       if (v.handle) { ctx.fillStyle = v.color; ctx.beginPath(); ctx.arc(x, padT + 4 * dpr, 4.5 * dpr, 0, Math.PI * 2); ctx.fill(); }
       if (v.label) { ctx.fillStyle = v.color; ctx.fillText(v.label, x, padT + (v.handle ? 12 * dpr : 2 * dpr)); }
     });
-    ctx.fillStyle = txt; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
-    ctx.fillText((xMax / 60).toFixed(0) + ' min', cw - padR, ch - 2 * dpr);
+    ctx.restore();
+
+    // Axis time labels. When zoomed: show viewport start on the left edge too.
+    ctx.fillStyle = txt; ctx.font = `${11 * dpr}px sans-serif`; ctx.textBaseline = 'bottom';
+    if (zoom) {
+      ctx.textAlign = 'left';
+      ctx.fillText((xMin / 60).toFixed(1) + ' min', padL, ch - 2 * dpr);
+    }
+    ctx.textAlign = 'right';
+    ctx.fillText((xViewMax / 60).toFixed(0) + ' min', cw - padR, ch - 2 * dpr);
+
     canvas._wd = {
-      xMax, yMax, dpr, padT, padB, ch, primary,
+      xMax, xMin, xViewMax, yMax, dpr, padT, padB, ch, primary,
       Xpx: X, Ypx: Y,
       xToCss: x => X(x) / dpr,
-      cssToX: px => Math.max(0, Math.min(xMax, ((px * dpr - padL) / (cw - padL - padR)) * xMax)),
+      cssToX: px => Math.max(xMin, Math.min(xViewMax, xMin + ((px * dpr - padL) / plotW) * (xViewMax - xMin))),
       series: (opts.series || []).map(s => ({ points: s.points, stroke: s.stroke, name: s.name, cid: s.cid })),
       band: opts.band || null,
+      _opts: opts,
     };
     return canvas._wd;
   }
@@ -2402,6 +2746,13 @@ class HaWashdataPanel extends HTMLElement {
     else if (id === 'wd-env-canvas') this._drawProfileEnvelope();
     else if (id === 'wd-phase-canvas') this._drawPhaseEditor();
     else if (id === 'wd-spag-canvas') this._drawSpaghetti();
+    else if (id === 'wd-pg-canvas') this._drawGroupCanvas();
+    else {
+      // Generic fallback: replay _drawCurves with the stored opts so hover
+      // crosshairs on any other canvas don't accumulate stale traces.
+      const canvas = this.shadowRoot && this.shadowRoot.getElementById(id);
+      if (canvas && canvas._wd && canvas._wd._opts) this._drawCurves(id, canvas._wd._opts);
+    }
   }
 
   _pref(key, def) {
@@ -2442,6 +2793,32 @@ class HaWashdataPanel extends HTMLElement {
     if (!canvas) return;
     canvas.addEventListener('pointermove', e => this._onGraphHover(e, id));
     canvas.addEventListener('pointerleave', () => this._hideGraphTip());
+    canvas.addEventListener('wheel', e => {
+      const wd = canvas._wd;
+      if (!wd) return;
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const cursorXt = wd.cssToX(e.clientX - rect.left);
+      const curZoom = this._canvasZoom[id];
+      const fullXMax = wd.xMax;
+      const curXMin = curZoom ? curZoom.xMin : 0;
+      const curXMax = curZoom ? curZoom.xMax : fullXMax;
+      const range = curXMax - curXMin;
+      const newRange = range * (e.deltaY > 0 ? 1.3 : 0.75);
+      if (newRange >= fullXMax * 0.99) {
+        delete this._canvasZoom[id];
+      } else {
+        const ratio = (cursorXt - curXMin) / range;
+        const newXMax = Math.min(fullXMax, cursorXt - ratio * newRange + newRange);
+        const newXMin = Math.max(0, newXMax - newRange);
+        this._canvasZoom[id] = { xMin: newXMin, xMax: Math.min(fullXMax, newXMin + newRange) };
+      }
+      this._redrawCanvas(id);
+    }, { passive: false });
+    canvas.addEventListener('dblclick', () => {
+      delete this._canvasZoom[id];
+      this._redrawCanvas(id);
+    });
   }
 
   _onGraphHover(e, id) {
@@ -2485,6 +2862,7 @@ class HaWashdataPanel extends HTMLElement {
       const lo = _valueAt(wd.band.min, x), hi = _valueAt(wd.band.max, x);
       if (lo != null && hi != null) lines.push(`Envelope: ${lo.toFixed(0)}–${hi.toFixed(0)} W`);
     }
+    if (this._canvasZoom[id]) lines.push('<span style="opacity:.45">scroll to zoom · dblclick to reset</span>');
     ctx.restore();
     this._showGraphTip(e.clientX, e.clientY, lines);
   }
@@ -2526,7 +2904,6 @@ class HaWashdataPanel extends HTMLElement {
     if (m.type === 'cycle-detail') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg">${this._htmlCycleModal(m)}</div></div>`;
     if (m.type === 'profile-panel') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg">${this._htmlProfilePanel(m)}</div></div>`;
     if (m.type === 'profile-group') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg">${this._htmlProfileGroupModal(m)}</div></div>`;
-    if (m.type === 'notify-actions') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg">${this._htmlNotifyActionsModal(m)}</div></div>`;
 
     let body = '';
     if (m.type === 'confirm') {
@@ -2973,7 +3350,7 @@ class HaWashdataPanel extends HTMLElement {
     sr.querySelectorAll('[data-idx]').forEach(btn => btn.addEventListener('click', () => this._selectDevice(parseInt(btn.dataset.idx, 10))));
 
     sr.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => { this._tab = btn.dataset.tab; this._fetchTabData(); }));
-    sr.querySelectorAll('[data-sec]').forEach(btn => btn.addEventListener('click', () => { this._settingsSec = btn.dataset.sec; this._settingsSearch = ''; this._render(); }));
+    sr.querySelectorAll('[data-sec]').forEach(btn => btn.addEventListener('click', () => { this._settingsSec = btn.dataset.sec; this._settingsSearch = ''; this._settingsSugOnly = false; this._render(); }));
     sr.querySelectorAll('[data-ptab]').forEach(btn => btn.addEventListener('click', () => {
       const sub = this._panelSubtab = btn.dataset.ptab;
       this._render();
@@ -3021,6 +3398,7 @@ class HaWashdataPanel extends HTMLElement {
     if (setFT) setFT.addEventListener('input', e => {
       const pos = e.target.selectionStart;
       this._settingsSearch = setFT.value;
+      if (setFT.value.trim()) this._settingsSugOnly = false;
       this._render();
       const el = this.shadowRoot.getElementById('wd-settings-search');
       if (el) { el.focus(); el.setSelectionRange(pos, pos); }
@@ -3158,6 +3536,12 @@ class HaWashdataPanel extends HTMLElement {
 
     const saveBtn = sr.getElementById('wd-settings-save');
     if (saveBtn) saveBtn.addEventListener('click', () => this._saveSettings());
+    const mlSaveBtn = sr.getElementById('wd-ml-save');
+    if (mlSaveBtn) mlSaveBtn.addEventListener('click', () => this._saveSettings());
+    // Guard: a stray in-form button (or Enter) must never submit the settings
+    // form and reload the panel to "/?". Saving is explicit via the buttons above.
+    const settingsForm = sr.getElementById('wd-settings-form');
+    if (settingsForm) settingsForm.addEventListener('submit', e => e.preventDefault());
     const reloadBtn = sr.getElementById('wd-settings-reload');
     if (reloadBtn) reloadBtn.addEventListener('click', async () => {
       const dev = this._devices[this._selIdx];
@@ -3173,7 +3557,12 @@ class HaWashdataPanel extends HTMLElement {
       const numV = parseFloat(v);
       this._opts[k] = isNaN(numV) ? v : numV;
       this._stagedSuggestions = true;
+      // Live-only: drop the accepted suggestion so the category dot and the
+      // "N tuning suggestions" count update immediately. Not persisted - a
+      // refresh without saving re-fetches suggestions and restores it.
+      this._suggestions = this._suggestions.filter(s => s.key !== k);
       this._showToast(`Set ${k} = ${v}. Save to apply.`, 'info');
+      this._render();
     }));
 
     // Label profile select (show/hide new-name field).
@@ -3431,7 +3820,11 @@ class HaWashdataPanel extends HTMLElement {
         } catch (e) { this._showToast('Apply failed: ' + (e.message || e), 'error'); }
       });
 
+    } else if (a === 'sug-show-all') {
+      this._settingsSugOnly = false; this._render();
+
     } else if (a === 'sug-dismiss') {
+      this._settingsSugOnly = false;
       this._busyRun('save-settings', async () => {
         try { await this._ws({ type: `${_DOMAIN}/clear_suggestions`, entry_id: eid }); this._suggestions = []; this._showToast('Suggestions dismissed'); }
         catch (e) { this._showToast('Error: ' + (e.message || e), 'error'); }
@@ -3448,7 +3841,7 @@ class HaWashdataPanel extends HTMLElement {
       });
 
     } else if (a === 'ml-train-now') {
-      this._busyRun('ml-train-now', async () => {
+      this._busyRun('ml-train-now:' + eid, async () => {
         try {
           const r = await this._ws({ type: `${_DOMAIN}/trigger_ml_training`, entry_id: eid });
           if (r && r.ok) {
@@ -3470,13 +3863,39 @@ class HaWashdataPanel extends HTMLElement {
         } catch (e) { this._showToast('Revert failed: ' + (e.message || e), 'error'); }
       });
 
-    } else if (a === 'notify-actions-edit') {
-      const actions = Array.isArray(this._opts.notify_actions) ? this._opts.notify_actions : [];
-      const simple = a2 => a2 && typeof a2 === 'object' && a2.service && Object.keys(a2).every(k => k === 'service' || k === 'data');
-      const allSimple = actions.length === 0 || actions.every(simple);
-      this._modal = allSimple
-        ? { type: 'notify-actions', mode: 'rows', rows: actions.map(x => ({ service: x.service, data: x.data ? JSON.stringify(x.data) : '' })), raw: JSON.stringify(actions, null, 2) }
-        : { type: 'notify-actions', mode: 'raw', rows: [], raw: JSON.stringify(actions, null, 2) };
+    } else if (a === 'auto-new') {
+      this._navigate('/config/automation/edit/new');
+
+    } else if (a === 'auto-new-started') {
+      this._newAutomationFromEvent('started');
+
+    } else if (a === 'auto-new-finished') {
+      this._newAutomationFromEvent('finished');
+
+    } else if (a === 'auto-delete') {
+      const autoId = btn.dataset.autoid, autoName = btn.dataset.autoname || 'this automation';
+      this._modal = { type: 'confirm', title: 'Delete Automation', message: `Delete the automation "${autoName}" from Home Assistant? This cannot be undone.`, okLabel: 'Delete',
+        onOk: async () => {
+          try {
+            await this._hass.callApi('DELETE', 'config/automation/config/' + autoId);
+            this._showToast('Automation deleted');
+            await this._loadDeviceAutomations(eid);
+          } catch (e) { this._showToast('Delete failed: ' + (e.message || e), 'error'); }
+        } };
+      this._render();
+
+    } else if (a === 'auto-convert-legacy') {
+      this._convertLegacyActions();
+
+    } else if (a === 'auto-remove-legacy') {
+      this._modal = { type: 'confirm', title: 'Remove Legacy Actions', message: 'Remove the legacy custom actions? They will stop firing on cycle events. This cannot be undone from the panel.', okLabel: 'Remove',
+        onOk: async () => {
+          try {
+            await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: { notify_actions: [] } });
+            this._opts = { ...this._opts, notify_actions: [] };
+            this._showToast('Legacy actions removed');
+          } catch (e) { this._showToast('Remove failed: ' + (e.message || e), 'error'); }
+        } };
       this._render();
 
     } else if (a === 'auto-label') {
@@ -3604,7 +4023,7 @@ class HaWashdataPanel extends HTMLElement {
       };
       this._render();
     } else if (a === 'goto-suggestions') {
-      this._tab = 'settings'; this._fetchTabData();
+      this._settingsSugOnly = true; this._tab = 'settings'; this._fetchTabData();
     } else if (a === 'open-advanced') {
       // Overview action cards navigate to the Advanced tab at a given subtab.
       const sub = btn.dataset.sub;
@@ -3641,10 +4060,14 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'save-prefs') {
       const dt = sr.getElementById('wd-pref-tab')?.value || '';
       const dbg = !!sr.getElementById('wd-pref-debug')?.checked;
+      const showExpected = sr.getElementById('wd-pref-expected') ? !!sr.getElementById('wd-pref-expected').checked : true;
+      const showRaw = !!sr.getElementById('wd-pref-raw')?.checked;
+      const dateFmt = sr.getElementById('wd-pref-datefmt')?.value || 'relative';
+      const prefs = { default_tab: dt, show_debug: dbg, show_expected: showExpected, show_raw: showRaw, date_format: dateFmt };
       this._busyRun('save-prefs', async () => {
         try {
-          await this._ws({ type: `${_DOMAIN}/set_user_prefs`, prefs: { default_tab: dt, show_debug: dbg } });
-          if (this._panelCfg) this._panelCfg.prefs = { ...(this._panelCfg.prefs || {}), default_tab: dt, show_debug: dbg };
+          await this._ws({ type: `${_DOMAIN}/set_user_prefs`, prefs });
+          if (this._panelCfg) this._panelCfg.prefs = { ...(this._panelCfg.prefs || {}), ...prefs };
           this._showToast('Preferences saved');
         } catch (e) { this._showToast('Save failed: ' + (e.message || e), 'error'); }
       });
@@ -3760,44 +4183,6 @@ class HaWashdataPanel extends HTMLElement {
       }
     }
 
-    // ---- Notification custom-action configurator ----
-    if (m && m.type === 'notify-actions') {
-      if (action === 'na-add') { this._naSnapshot(); m.rows = [...(m.rows || []), { service: '', data: '' }]; this._render(); return; }
-      if (action === 'na-rm') { this._naSnapshot(); const i = parseInt(btn.dataset.idx, 10); if (i >= 0) m.rows.splice(i, 1); this._render(); return; }
-      if (action === 'na-raw') {
-        this._naSnapshot();
-        const arr = (m.rows || []).filter(r => (r.service || '').trim()).map(r => {
-          const step = { service: r.service.trim() };
-          const d = (r.data || '').trim();
-          if (d) { try { step.data = JSON.parse(d); } catch (_) { step.data = d; } }
-          return step;
-        });
-        m.raw = JSON.stringify(arr, null, 2); m.mode = 'raw'; this._render(); return;
-      }
-      if (action === 'na-rows') {
-        this._naSnapshot();
-        let parsed;
-        try { parsed = JSON.parse(m.raw || '[]'); } catch (_) { this._showToast('Raw JSON is invalid - fix it before switching', 'error'); return; }
-        const simple = a2 => a2 && typeof a2 === 'object' && a2.service && Object.keys(a2).every(k => k === 'service' || k === 'data');
-        if (!Array.isArray(parsed) || !parsed.every(simple)) { this._showToast('These actions are too advanced for simple rows; edit as raw JSON.', 'info'); return; }
-        m.rows = parsed.map(x => ({ service: x.service, data: x.data ? JSON.stringify(x.data) : '' }));
-        m.mode = 'rows'; this._render(); return;
-      }
-      if (action === 'na-save') {
-        this._naSnapshot();
-        let actions;
-        try { actions = this._naBuildActions(m); } catch (e) { this._showToast(e.message || 'Invalid action data', 'error'); return; }
-        if (actions === null) return;  // validation error already toasted
-        await this._busyRun('na-save', async () => {
-          try {
-            await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: { notify_actions: actions } });
-            this._opts = { ...this._opts, notify_actions: actions };
-            this._showToast('Actions saved; integration reloading'); this._modal = null; this._render();
-          } catch (e) { this._showToast('Save failed: ' + (e.message || e), 'error'); }
-        });
-        return;
-      }
-    }
 
     // ---- Cycle inspector ----
     if (m && m.type === 'cycle-detail') {

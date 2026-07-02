@@ -11,9 +11,10 @@ detection/matching/ETA code paths are unchanged by default.
 - `ENABLE_ML_SUGGESTIONS` - surface ML-calibrated setting suggestions alongside
   the classic ones (`MLSuggestionEngine`).
 - `ENABLE_ML_TRAINING` - allow the scheduled/manual on-device training loop.
-- `CONF_ENABLE_ML_MODELS` (per-device option) - let `MLEngine` feed ML signals
-  into runtime decisions (still opt-in; returns `None` when off so callers keep
-  existing behavior).
+- `CONF_ENABLE_ML_MODELS` (per-device option) - opt-in gate (via
+  `ml_models_enabled(options)`) for feeding ML signals into runtime decisions;
+  default off so callers keep existing behavior. (No runtime consumer wires this
+  yet - the live ML paths below run under their own flags.)
 
 ## What ships here
 
@@ -26,9 +27,10 @@ detection/matching/ETA code paths are unchanged by default.
 - `feature_extraction.py` - NumPy-only runtime feature extractors
   (`latest_end_event_features`, `live_match_features`, `quality_features`,
   `profile_expectation`, energy integration) matching the models' `FEATURE_COLUMNS`.
-- `engine.py` - `MLEngine` (opt-in gate) **and** `resolve_scorer(capability, store)`,
-  the single bridge that returns a scoring callable preferring an on-device
-  trained spec over the embedded baseline (`"on_device"` vs `"baseline"`).
+- `engine.py` - `resolve_scorer(capability, store)`, the single bridge that
+  returns a scoring callable preferring an on-device trained spec over the
+  embedded baseline (`"on_device"` vs `"baseline"`), plus `ml_models_enabled`
+  (opt-in gate) and `available_models` (manifest provenance).
 - `trainer.py` - NumPy-only logistic training: `fit_logistic`, `select_threshold`,
   `binary_metrics`, `auc`, and `build_spec`/`score_spec` (byte-compatible with the
   embedded `score()` math).

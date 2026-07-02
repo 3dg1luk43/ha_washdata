@@ -6,14 +6,14 @@ blobs. They are inert unless the user enables them. See engine.py and README.md.
 
 from .engine import (
     CONF_ENABLE_ML_MODELS,
-    MLEngine,
     available_models,
     ml_models_enabled,
+    resolve_scorer,
 )
 
 __all__ = [
     "CONF_ENABLE_ML_MODELS",
-    "MLEngine",
     "available_models",
     "ml_models_enabled",
+    "resolve_scorer",
 ]

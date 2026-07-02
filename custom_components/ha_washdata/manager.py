@@ -615,7 +615,9 @@ class WashDataManager:
             self._on_cycle_end,
             profile_matcher=profile_matcher_wrapper,
             device_name=config_entry.title,
+            end_confidence_provider=self._ml_end_confidence,
         )
+        self._ml_end_expectation_cache: tuple[str, dict[str, float]] | None = None
 
         self._remove_listener = None
         self._remove_external_trigger_listener = None  # External cycle end trigger
@@ -2964,6 +2966,99 @@ class WashDataManager:
         # Schedule heavy post-processing asynchronously
         self.hass.async_create_task(self._async_process_cycle_end(cycle_data))
 
+    def _ml_end_confidence(
+        self, points: list[tuple[float, float]], expected_duration: float
+    ) -> float | None:
+        """Opt-in ML end-guard provider handed to the CycleDetector.
+
+        Returns P(the latest low-power event is the true cycle end) from the
+        shipped or on-device-trained cycle-end model, or ``None`` when ML models
+        are disabled for this device, no profile is matched, or the model /
+        features are unavailable. ``None`` means the detector keeps its existing
+        power/energy-based behavior, so this can only ever *defer* a completion.
+        """
+        try:
+            from .ml.engine import ml_models_enabled, resolve_scorer
+
+            if not ml_models_enabled(self.config_entry.options):
+                return None
+            profile_name = self._current_program
+            if (
+                not profile_name
+                or profile_name in ("off", "detecting...", "restored...")
+                or profile_name not in self.profile_store.get_profiles()
+            ):
+                return None
+            end_fn, _ = resolve_scorer("end", self.profile_store)
+            if end_fn is None:
+                return None
+            expectation = self._profile_end_expectation(profile_name, expected_duration)
+            if expectation is None:
+                return None
+            from .ml.feature_extraction import latest_end_event_features
+
+            features = latest_end_event_features(points, expectation)
+            if features is None:
+                return None
+            return float(end_fn(features))
+        except Exception as err:  # noqa: BLE001 - ML must never break detection
+            self._logger.debug("ML end-guard scoring skipped: %s", err)
+            return None
+
+    def _profile_end_expectation(
+        self, profile_name: str, expected_duration: float
+    ) -> dict[str, float] | None:
+        """Median duration/energy/peak for a matched profile, for end features.
+
+        Cached per profile so the guard does not re-decompress history on every
+        low-power reading during ENDING. The detector's authoritative expected
+        duration overrides the median when available.
+        """
+        cache = self._ml_end_expectation_cache
+        if cache is not None and cache[0] == profile_name:
+            expectation = dict(cache[1])
+        else:
+            from .ml.feature_extraction import profile_expectation
+
+            points_list: list[list[tuple[float, float]]] = []
+            for cycle in self.profile_store.get_past_cycles():
+                if cycle.get("profile_name") != profile_name:
+                    continue
+                pts = decompress_power_data(cycle)
+                if pts:
+                    points_list.append(pts)
+            base = profile_expectation(points_list[-20:])
+            if base is None:
+                return None
+            self._ml_end_expectation_cache = (profile_name, dict(base))
+            expectation = dict(base)
+        if expected_duration and expected_duration > 0:
+            expectation["duration"] = float(expected_duration)
+        return expectation
+
+    def _resolve_energy_price(self) -> float | None:
+        """Current energy price per kWh, or None when none is configured.
+
+        A price entity (e.g. a dynamic tariff) takes precedence over the static
+        value. Used to freeze each cycle's cost at completion time.
+        """
+        options = self.config_entry.options
+        price_entity = options.get(CONF_ENERGY_PRICE_ENTITY)
+        if price_entity:
+            state = self.hass.states.get(price_entity)
+            if state is not None:
+                try:
+                    return float(state.state)
+                except (ValueError, TypeError):
+                    pass
+        static = options.get(CONF_ENERGY_PRICE_STATIC)
+        if static is not None:
+            try:
+                return float(static)
+            except (ValueError, TypeError):
+                pass
+        return None
+
     async def _async_process_cycle_end(self, cycle_data: dict[str, Any]) -> None:
         """Process cycle completion asynchronously (heavy tasks)."""
 
@@ -3010,6 +3105,14 @@ class WashDataManager:
                     res.best_profile,
                     res.confidence,
                 )
+
+        # Freeze the energy cost onto the cycle using the price in effect NOW, so
+        # later price changes never rewrite historical costs. Stored as a number
+        # (currency per the configured price's unit); absent when no price is set.
+        price = self._resolve_energy_price()
+        if price is not None:
+            cycle_data["energy_price"] = price
+            cycle_data["cost"] = round(cycle_data.get("energy_wh", 0.0) / 1000.0 * price, 4)
 
         # Add cycle to store immediately (still sync but offloadable parts optimized
         # internally if possible)
@@ -3077,25 +3180,9 @@ class WashDataManager:
 
             energy_kwh = round(cycle_data.get("energy_wh", 0.0) / 1000, 3)
 
-            # Resolve energy price: entity takes precedence over static value
-            options = self.config_entry.options
-            price: float | None = None
-            price_entity = options.get(CONF_ENERGY_PRICE_ENTITY)
-            if price_entity:
-                state = self.hass.states.get(price_entity)
-                if state is not None:
-                    try:
-                        price = float(state.state)
-                    except (ValueError, TypeError):
-                        price = None
-            if price is None:
-                static = options.get(CONF_ENERGY_PRICE_STATIC)
-                if static is not None:
-                    try:
-                        price = float(static)
-                    except (ValueError, TypeError):
-                        price = None
-            cost_str = f"{energy_kwh * price:.2f}" if price is not None else ""
+            # Reuse the cost frozen onto the cycle above (same price resolution).
+            cost_val = cycle_data.get("cost")
+            cost_str = f"{cost_val:.2f}" if cost_val is not None else ""
 
             msg = self._safe_format_template(
                 msg_template,

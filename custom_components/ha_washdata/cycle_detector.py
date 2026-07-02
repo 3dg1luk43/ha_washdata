@@ -43,6 +43,18 @@ from .const import (
 assert DISHWASHER_END_SPIKE_WAIT_SECONDS > 0, (
     "DISHWASHER_END_SPIKE_WAIT_SECONDS must be positive"
 )
+
+# Opt-in ML end-detection guard (Stage 6). When the manager injects an
+# end-confidence provider (only when the user enabled ML models for the device),
+# the cycle-end model can defer a *normal* completion if it judges the current
+# low-power event to be a pause rather than the true end. This is intentionally
+# asymmetric: it can only *delay* a completion, never end a cycle early, and it
+# is bounded, so a wrong model can slow a finish but can neither stop one early
+# nor hang the cycle. Force-stop / smart-termination / user paths never consult
+# it. Overridable emphasis lives here rather than const.py to keep the guard
+# self-contained (it is detector-internal policy, not user configuration).
+ML_END_GUARD_MIN_CONFIDENCE = 0.5        # P(true end) below this -> treat as a likely pause
+ML_END_GUARD_MAX_DEFER_SECONDS = 1800.0  # cap the extra wait the guard may add (30 min)
 assert 0 < DISHWASHER_END_SPIKE_MIN_PROGRESS < 1, (
     "DISHWASHER_END_SPIKE_MIN_PROGRESS must be a fraction in (0, 1)"
 )
@@ -180,6 +192,9 @@ class CycleDetector:
             | None
         ) = None,
         device_name: str = "",
+        end_confidence_provider: (
+            Callable[[list[tuple[float, float]], float], float | None] | None
+        ) = None,
     ) -> None:
         """Initialize the cycle detector."""
         self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
@@ -187,6 +202,12 @@ class CycleDetector:
         self._on_state_change = on_state_change
         self._on_cycle_end = on_cycle_end
         self._profile_matcher = profile_matcher
+        # Opt-in ML end-guard: (points, expected_duration) -> P(true end) or None.
+        # Injected by the manager; None disables the guard (existing behavior).
+        self._end_confidence_provider = end_confidence_provider
+        # Cycle duration (s) at which the ML guard first deferred the current
+        # ending episode; bounds how long the guard may keep deferring.
+        self._ml_defer_start_duration: float | None = None
 
         # State
         self._state = STATE_OFF
@@ -1206,6 +1227,11 @@ class CycleDetector:
         self._time_in_state = 0.0
         self._sub_state = new_state.capitalize()  # Default substate
 
+        # Bound each ENDING episode's ML-guard deferral independently: clear the
+        # tracker whenever we are not in ENDING (e.g. on resume back to RUNNING).
+        if new_state != STATE_ENDING:
+            self._ml_defer_start_duration = None
+
         # Reset energy accumulator on transition to OFF
         if new_state == STATE_OFF:
             self._energy_since_idle_wh = 0.0
@@ -1261,6 +1287,27 @@ class CycleDetector:
         current_duration = (dt_util.now() - start_time).total_seconds()
         return self._should_defer_finish(current_duration)
 
+    def _ml_end_confidence(self) -> float | None:
+        """P(the current low-power event is the true end) from the opt-in ML guard.
+
+        Builds the offset-second trace from the current cycle's readings and asks
+        the injected provider. Returns None when there is no provider, no cycle
+        start, or the provider declines (ML off / unmatched / model unavailable),
+        so the caller keeps the existing power/energy-based behavior.
+        """
+        provider = self._end_confidence_provider
+        if provider is None or self._current_cycle_start is None or not self._power_readings:
+            return None
+        start = self._current_cycle_start
+        points = [
+            ((ts - start).total_seconds(), float(power))
+            for ts, power in self._power_readings
+        ]
+        try:
+            return provider(points, float(self._expected_duration))
+        except Exception:  # noqa: BLE001 - ML must never break detection
+            return None
+
     def _should_defer_finish(self, duration: float) -> bool:
         """Check if we should defer termination based on expected duration."""
         # Check explicit verified pause override from manager
@@ -1280,6 +1327,31 @@ class CycleDetector:
                 DEFAULT_MAX_DEFERRAL_SECONDS,
             )
             return False
+
+        # Opt-in ML end-guard (asymmetric anti-premature-stop, bounded). If the
+        # cycle-end model judges this low-power event to be more likely a pause
+        # than the true end, defer the normal completion - but only for a bounded
+        # extra window, so a wrong model can delay, never hang, the cycle. As the
+        # low-power run lengthens the model's confidence rises, so a genuine end
+        # is released once the model agrees or the cap is reached.
+        if (
+            self._end_confidence_provider is not None
+            and self._last_match_confidence >= DEFAULT_DEFER_FINISH_CONFIDENCE
+        ):
+            confidence = self._ml_end_confidence()
+            if confidence is not None and confidence < ML_END_GUARD_MIN_CONFIDENCE:
+                if self._ml_defer_start_duration is None:
+                    self._ml_defer_start_duration = duration
+                if (duration - self._ml_defer_start_duration) < ML_END_GUARD_MAX_DEFER_SECONDS:
+                    self._logger.debug(
+                        "Deferring cycle finish: ML end-guard (P(true end)=%.2f < %.2f)",
+                        confidence,
+                        ML_END_GUARD_MIN_CONFIDENCE,
+                    )
+                    return True
+            elif confidence is not None:
+                # Model is confident this is the true end -> stop ML-deferring.
+                self._ml_defer_start_duration = None
 
         # Dishwasher passive drying protection:
         # Dishwashers can have 2+ hour passive drying phases at near-0W.  A terminal

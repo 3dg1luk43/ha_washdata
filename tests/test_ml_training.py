@@ -12,7 +12,6 @@ import numpy as np
 import pytest
 
 from custom_components.ha_washdata.ml import trainer as T
-from custom_components.ha_washdata.ml.engine import MLEngine
 from custom_components.ha_washdata.ml.training_task import train_from_cycles
 
 
@@ -163,37 +162,6 @@ def _user_spec(coef, bias=0.0):
     fit = {"center": np.array([0.0]), "scale": np.array([1.0]),
            "coef": np.array([coef]), "bias": bias}
     return T.build_spec(name="end", target="cycle_end", feature_columns=["x"], fit=fit, threshold=0.5)
-
-
-def test_engine_prefers_user_model() -> None:
-    eng = MLEngine(enabled=True, user_models={"end": _user_spec(10.0)})
-    assert eng.model_source("end") == "on_device"
-    assert eng.model_source("quality") == "baseline"
-    assert eng.end_confidence({"x": 1.0}) == pytest.approx(1.0, abs=1e-3)
-    assert eng.end_confidence({"x": -1.0}) == pytest.approx(0.0, abs=1e-3)
-
-
-def test_engine_falls_back_to_baseline() -> None:
-    # No user model for quality -> embedded baseline still scores.
-    eng = MLEngine(enabled=True, user_models={"end": _user_spec(10.0)})
-    assert eng.quality_problem_score(
-        {"has_trace": 1.0, "duration_log_ratio": 0.0}
-    ) is not None
-
-
-def test_engine_disabled_returns_none_even_with_user_model() -> None:
-    eng = MLEngine(enabled=False, user_models={"end": _user_spec(10.0)})
-    assert eng.end_confidence({"x": 1.0}) is None
-
-
-def test_engine_from_store_hydrates_user_models() -> None:
-    from unittest.mock import MagicMock
-
-    store = MagicMock()
-    store.get_ml_model_versions.return_value = {"end": {"spec": _user_spec(5.0)}}
-    eng = MLEngine.from_options_and_store({"enable_ml_models": True}, store)
-    assert eng.model_source("end") == "on_device"
-    assert eng.end_confidence({"x": 2.0}) > 0.9
 
 
 def test_resolve_scorer_prefers_on_device_spec() -> None:

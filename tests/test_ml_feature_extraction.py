@@ -109,18 +109,6 @@ def test_no_event_while_active() -> None:
     assert latest_end_event_features(points, {"duration": 1000.0, "energy": 300.0, "peak": 2000.0}) is None
 
 
-def test_engine_end_confidence_for_series_gated() -> None:
-    from custom_components.ha_washdata.ml import MLEngine
-
-    points = _active_then_off_cycle()
-    expectation = {"duration": 1000.0, "energy": 300.0, "peak": 2000.0}
-    assert MLEngine(enabled=False).end_confidence_for_series(points, expectation) is None
-    confidence = MLEngine(enabled=True).end_confidence_for_series(points, expectation)
-    assert confidence is not None and 0.0 <= confidence <= 1.0
-    active = [(float(t), 1000.0) for t in range(0, 901, 100)]
-    assert MLEngine(enabled=True).end_confidence_for_series(active, expectation) is None
-
-
 def test_short_dip_is_not_an_event() -> None:
     points = [(float(t), 1000.0) for t in range(0, 901, 100)]
     points += [(920.0, 0.0)]
@@ -211,22 +199,6 @@ def test_live_match_feeds_embedded_model() -> None:
     )
     score = live_match_commit_model.score(features)
     assert 0.0 <= score <= 1.0
-
-
-def test_engine_live_match_confidence_gated() -> None:
-    from custom_components.ha_washdata.ml import MLEngine
-
-    points = [(float(t), 800.0) for t in range(0, 600, 30)]
-    kwargs = dict(
-        elapsed_s=300.0,
-        top1_distance=0.1,
-        top2_distance=0.4,
-        top1_median_duration_s=600.0,
-        candidate_count=3,
-    )
-    assert MLEngine(enabled=False).live_match_confidence_for_prefix(points, **kwargs) is None
-    confidence = MLEngine(enabled=True).live_match_confidence_for_prefix(points, **kwargs)
-    assert confidence is not None and 0.0 <= confidence <= 1.0
 
 
 # ---------------------------------------------------------------------------
@@ -368,21 +340,3 @@ def test_quality_features_high_flag_count_raises_score() -> None:
     score_base = hybrid_curve_quality_model.score(base)
     score_susp = hybrid_curve_quality_model.score(suspicious)
     assert score_susp > score_base
-
-
-def test_engine_quality_score_gated() -> None:
-    from custom_components.ha_washdata.ml import MLEngine
-
-    points = _noisy_cycle()
-    kwargs = dict(
-        profile_median_duration_s=3600.0,
-        profile_median_energy_wh=500.0,
-        profile_median_peak_w=1000.0,
-        profile_distance=0.3,
-        label_margin=0.1,
-        profile_fit_score=0.9,
-        flag_count=0,
-    )
-    assert MLEngine(enabled=False).quality_score_for_cycle(points, **kwargs) is None
-    score = MLEngine(enabled=True).quality_score_for_cycle(points, **kwargs)
-    assert score is not None and 0.0 <= score <= 1.0
