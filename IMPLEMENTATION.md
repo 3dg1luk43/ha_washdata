@@ -33,18 +33,21 @@ This high-level flow describes how a user interacts with the integration, from i
 
 ```mermaid
 graph TD
-    A[Install Integration] --> B[Configure Settings]
-    B --> C{Action?}
+    A[Install Integration] --> B["Add Integration wizard<br/>(name · device type · power sensor · min power)"]
+    B --> B2{"Create first profile now?"}
+    B2 -- "Yes (name + approx. duration)" --> W[Open WashData panel]
+    B2 -- "Skip" --> W
+    W --> C{Action?}
     
-    C -- "Create Profile" --> D["Create Empty Profile"]
-    C -- "Record Cycle" --> E["Manual Rec. Start"]
+    C -- "Create Profile" --> D["Create Profile (Profiles tab)"]
+    C -- "Record Cycle" --> E["Start Recording (Overview)"]
     C -- "Normal Use (Recording mode: OFF)" -->  F["Run Appliance"]
     
     D -- "Recording mode: OFF" -->  F
     
     E --> G[Run Cycle]
     G -- "Recording mode: ON" --> F
-    F -- "Recording mode: ON" -->  H["Manual Rec. Stop"]
+    F -- "Recording mode: ON" -->  H["Stop Recording (Overview)"]
     H --> I[Save as Past Cycle]
     I --> J[Create Profile from Cycle]
 
@@ -432,10 +435,10 @@ manager.learning_manager.get_learning_stats()
 ```
 
 **UI Access:**
-- Options → Diagnostics → Export/Import JSON
-- Select "Export only" to copy JSON
-- Select "Import from JSON" to paste exported data
-- All settings automatically applied on import
+- Panel → **Advanced** tab → **Diagnostics** → **Export / Import**
+- **Export to JSON** downloads the full backup
+- **Import from JSON** pastes exported data (or an HA diagnostics download)
+- All settings and profiles are applied on import
 
 **Service Usage:**
 ```yaml
