@@ -189,6 +189,16 @@ DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
 DEFAULT_MATCH_REVERT_RATIO = 0.4  # Drop from peak score to revert to detecting
 DEFAULT_DEFER_FINISH_CONFIDENCE = 0.55  # Minimum confidence to defer cycle finish
 
+# ML live-match commit gate: P(top-1 is correct) threshold to commit a match
+# before the persistence counter is satisfied.  Set high to avoid false-early
+# commits; the model's owner-holdout precision is ~0.87 at this score.
+ML_MATCH_COMMIT_THRESHOLD = 0.85
+
+# ML quality gate: P(cycle is a problem) threshold above which even a high-
+# confidence auto-label is downgraded to a feedback request.  Tuned for a
+# specificity of ~0.84 (few false positives) so users are not flooded.
+ML_QUALITY_SUSPICIOUS_THRESHOLD = 0.65
+
 # Cycle interruption detection defaults (internal)
 DEFAULT_ABRUPT_DROP_WATTS = 500.0  # Power cliff detection threshold (W)
 DEFAULT_ABRUPT_DROP_RATIO = 0.6  # 60% drop considered abrupt

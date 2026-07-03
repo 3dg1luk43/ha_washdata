@@ -1212,6 +1212,66 @@ class ProfileStore:
                 out.append({"members": sorted(members), "existing_group": existing})
         return out
 
+    def compute_profile_health(self) -> dict[str, dict[str, Any]]:
+        """Compute per-profile health indicators from labeled cycle history.
+
+        For each profile that has at least 3 labeled cycles, returns a dict with:
+          ``cycle_count``      – number of labeled cycles used in the calculation
+          ``confidence_mean``  – mean match_confidence across those cycles (0–1)
+          ``duration_cv``      – coefficient of variation of cycle durations (lower = consistent)
+          ``health_score``     – composite 0–1 health score (1 = healthy, 0 = needs attention)
+          ``health_status``    – "healthy" / "fair" / "poor" / "unknown"
+
+        Profiles with fewer than 3 labeled cycles return ``health_status="unknown"``.
+        Never raises — returns an empty dict on any error.
+        """
+        try:
+            cycles = self.get_past_cycles()
+            from collections import defaultdict  # pylint: disable=import-outside-toplevel
+            by_profile: dict[str, list[dict[str, Any]]] = defaultdict(list)
+            for c in cycles:
+                name = c.get("profile_name")
+                if name:
+                    by_profile[str(name)].append(c)
+
+            result: dict[str, dict[str, Any]] = {}
+            for name, pcy in by_profile.items():
+                count = len(pcy)
+                durations = [float(c["duration"]) for c in pcy if c.get("duration")]
+                confidences = [float(c["match_confidence"]) for c in pcy if c.get("match_confidence")]
+
+                if count < 3 or not durations:
+                    result[name] = {"cycle_count": count, "health_status": "unknown"}
+                    continue
+
+                dur_arr = np.asarray(durations, dtype=float)
+                dur_mean = float(np.mean(dur_arr))
+                dur_cv = float(np.std(dur_arr) / dur_mean) if dur_mean > 0 else 0.0
+
+                conf_mean = float(np.mean(confidences)) if confidences else 0.5
+
+                # consistency: 1 at CV=0, linearly decays to 0 at CV=0.5+
+                consistency = max(0.0, 1.0 - dur_cv / 0.5)
+                health_score = round(0.5 * consistency + 0.5 * conf_mean, 3)
+
+                if health_score >= 0.65:
+                    status = "healthy"
+                elif health_score >= 0.40:
+                    status = "fair"
+                else:
+                    status = "poor"
+
+                result[name] = {
+                    "cycle_count": count,
+                    "confidence_mean": round(conf_mean, 3),
+                    "duration_cv": round(dur_cv, 3),
+                    "health_score": health_score,
+                    "health_status": status,
+                }
+            return result
+        except Exception:  # noqa: BLE001
+            return {}
+
     def _get_shared_custom_phases(self) -> list[dict[str, Any]]:
         """Return mutable shared custom phase list with legacy flattening."""
         raw = self._data.setdefault("custom_phases", [])

@@ -1176,6 +1176,7 @@ class HaWashdataPanel extends HTMLElement {
     try {
       const r = await this._ws({ type: `${_DOMAIN}/get_profiles`, entry_id: entryId });
       this._profiles = r.profiles || [];
+      this._profileHealth = r.profile_health || {};
     } catch (_) { /* keep previous */ }
     return this._profiles;
   }
@@ -1208,7 +1209,7 @@ class HaWashdataPanel extends HTMLElement {
     this._powerHistory = []; this._powerT0 = null; this._statusEnv = null; this._statusEnvName = null;
     this._powerData = { live: [], raw: [], cycle_active: false, cycle_elapsed_s: 0 };
     this._matchDebug = null;
-    this._profiles = []; this._opts = {}; this._suggestions = [];
+    this._profiles = []; this._profileHealth = {}; this._opts = {}; this._suggestions = [];
     this._cycles = []; this._recState = null; this._diag = null; this._phases = [];
     this._mlTrainingStatus = null;  // per-device; re-fetched by _fetchTabData
     this._deviceAutomations = [];   // per-device; re-fetched on the settings tab
@@ -1864,9 +1865,16 @@ class HaWashdataPanel extends HTMLElement {
     const energy = p.avg_energy != null ? ` · ${_fmtEnergy(p.avg_energy)}/cycle` : '';
     const total = (p.avg_energy != null && p.cycle_count)
       ? ` · <strong>${_fmtEnergy(p.avg_energy * p.cycle_count)}</strong> total` : '';
+    const h = (this._profileHealth || {})[p.name];
+    let healthBadge = '';
+    if (h && h.health_status === 'poor') {
+      healthBadge = `<span class="wd-badge" style="color:var(--error-color,#f44336);background:rgba(244,67,54,.12)" title="Inconsistent match history — consider rebuilding this profile">⚠ poor fit</span>`;
+    } else if (h && h.health_status === 'fair') {
+      healthBadge = `<span class="wd-badge" style="color:var(--warning-color,#ff9800);background:rgba(255,152,0,.12)" title="Moderate match consistency">fair fit</span>`;
+    }
     return `
       <div class="wd-profile-card" data-action="open-profile" data-pname="${_esc(p.name)}">
-        <div class="wd-profile-name">${_esc(p.name)}</div>
+        <div class="wd-profile-name">${_esc(p.name)}${healthBadge ? ' ' + healthBadge : ''}</div>
         <div class="wd-profile-meta">${p.cycle_count || 0} cycles · ${dur}${energy}${total}</div>
       </div>`;
   }
@@ -3155,6 +3163,19 @@ class HaWashdataPanel extends HTMLElement {
       const env = m.env || {};
       const total = (st.avg_energy != null && st.cycle_count) ? st.avg_energy * st.cycle_count : null;
       const mins = s => (s ? Math.round(s / 60) + 'm' : '-');
+      const ph = (this._profileHealth || {})[m.name];
+      const healthRow = ph && ph.health_status !== 'unknown' ? (() => {
+        const statusColors = { healthy: ['var(--success-color,#4caf50)', 'rgba(76,175,80,.12)'], fair: ['var(--warning-color,#ff9800)', 'rgba(255,152,0,.12)'], poor: ['var(--error-color,#f44336)', 'rgba(244,67,54,.12)'] };
+        const [col, bg] = statusColors[ph.health_status] || statusColors.fair;
+        const pct = Math.round((ph.health_score || 0) * 100);
+        const cvPct = ph.duration_cv != null ? ` · duration CV ${Math.round(ph.duration_cv * 100)}%` : '';
+        const confPct = ph.confidence_mean != null ? ` · avg confidence ${Math.round(ph.confidence_mean * 100)}%` : '';
+        return `<div style="margin:8px 0 4px;padding:8px 12px;border-radius:6px;background:${bg};border:1px solid ${col}22;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-weight:600;color:${col}">${ph.health_status === 'poor' ? '⚠ Poor match fit' : ph.health_status === 'fair' ? 'Fair match fit' : '✓ Good match fit'}</span>
+          <span style="font-size:.85em;opacity:.8">score ${pct}%${cvPct}${confPct}</span>
+          ${ph.health_status === 'poor' ? `<span style="font-size:.82em;opacity:.75;flex-basis:100%">Cycles assigned to this profile have inconsistent shapes or low confidence. Consider rebuilding the envelope or reviewing labelled cycles.</span>` : ''}
+        </div>`;
+      })() : '';
       body = `<div class="wd-sg-row">
           <div class="wd-sg">
             <div class="wd-sg-h">Duration</div>
@@ -3172,6 +3193,7 @@ class HaWashdataPanel extends HTMLElement {
             <div class="wd-sg-sub">last run ${st.last_run ? _fmtDate(st.last_run) : '-'}</div>
           </div>
         </div>
+        ${healthRow}
         ${env.avg && env.avg.length ? `<div class="wd-canvas-wrap"><canvas id="wd-env-canvas"></canvas></div>` : '<p class="wd-info">No envelope yet - rebuild after labelling cycles.</p>'}`;
     } else if (m.tab === 'phases') {
       const cat = m.catalog || [];

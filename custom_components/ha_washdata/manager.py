@@ -188,6 +188,8 @@ from .const import (
     DEFAULT_END_ENERGY_THRESHOLD,
     DEVICE_SMOOTHING_THRESHOLDS,
     DEVICE_COMPLETION_THRESHOLDS,
+    ML_MATCH_COMMIT_THRESHOLD,
+    ML_QUALITY_SUSPICIOUS_THRESHOLD,
     STATE_RUNNING,
     STATE_OFF,
     STATE_STARTING,
@@ -780,6 +782,60 @@ class WashDataManager:
 
             is_persistent = profile_name and self._match_persistence_counter.get(profile_name, 0) >= self._match_persistence
 
+            # --- ML early-commit gate (opt-in, live_match_commit model) ---
+            # When the user has opted into experimental ML models, query the
+            # live_match_commit model for P(top-1 is correct).  A high score
+            # allows committing to the match before the persistence counter is
+            # satisfied, cutting time-to-first-match on clear cycles.
+            ml_commit_score: float | None = None
+            if (
+                profile_name
+                and profile_name != "detecting..."
+                and not result.is_ambiguous
+                and self._current_program in ("detecting...",)
+            ):
+                try:
+                    from .ml.engine import ml_models_enabled, resolve_scorer
+                    from .ml.feature_extraction import live_match_features
+
+                    if ml_models_enabled(self.config_entry.options):
+                        match_fn, _ = resolve_scorer("live_match", self.profile_store)
+                        if match_fn is not None:
+                            first_ts = readings[0][0]
+                            pts = [
+                                ((ts - first_ts).total_seconds(), float(pw))
+                                for ts, pw in readings
+                            ]
+                            top1_dist = max(0.0, 1.0 - confidence)
+                            top2_dist: float | None = None
+                            if len(result.candidates) > 1:
+                                s2 = result.candidates[1].get("score", 0.0) or 0.0
+                                top2_dist = max(0.0, 1.0 - float(s2))
+                            n_profiles = len(self.profile_store.get_profiles())
+                            feat = live_match_features(
+                                points=pts,
+                                elapsed_s=current_duration,
+                                top1_distance=top1_dist,
+                                top2_distance=top2_dist,
+                                top1_median_duration_s=float(result.expected_duration or 0),
+                                candidate_count=max(1, n_profiles),
+                            )
+                            ml_commit_score = float(match_fn(feat))
+                            self._logger.debug(
+                                "Live-match ML commit score for '%s': %.3f (threshold %.2f)",
+                                profile_name,
+                                ml_commit_score,
+                                ML_MATCH_COMMIT_THRESHOLD,
+                            )
+                except Exception:  # noqa: BLE001 - ML must never break matching
+                    pass
+
+            ml_early_commit = (
+                ml_commit_score is not None
+                and ml_commit_score >= ML_MATCH_COMMIT_THRESHOLD
+                and confidence >= 0.30
+            )
+
             # Case 1: Initial Match from "detecting..."
             if (
                 profile_name
@@ -790,6 +846,11 @@ class WashDataManager:
                 if is_persistent:
                     should_switch = True
                     switch_reason = f"initial_match (persistent {self._match_persistence_counter[profile_name]}x)"
+                elif ml_early_commit:
+                    should_switch = True
+                    switch_reason = (
+                        f"initial_match (ML commit score {ml_commit_score:.3f} >= {ML_MATCH_COMMIT_THRESHOLD})"
+                    )
                 else:
                     self._logger.debug(
                         "Match persistence: %s at %d/%d matches. Stay at detecting...",
@@ -3036,6 +3097,78 @@ class WashDataManager:
             expectation["duration"] = float(expected_duration)
         return expectation
 
+    def _compute_cycle_quality_score(self, cycle_data: dict[str, Any]) -> None:
+        """Score a just-finished cycle with the hybrid_curve_quality model (opt-in).
+
+        When ML models are enabled for this device, computes P(cycle is a problem)
+        and stores it under ``cycle_data["ml_quality_score"]``.  A high score means
+        the cycle may be mis-detected or corrupt; the learning manager uses it to
+        downgrade auto-labeling to a feedback request so the user can confirm.
+        Never raises — scoring failure is silently ignored to keep cycle storage safe.
+        """
+        try:
+            from .ml.engine import ml_models_enabled, resolve_scorer
+            from .ml.feature_extraction import quality_features
+
+            if not ml_models_enabled(self.config_entry.options):
+                return
+            quality_fn, _ = resolve_scorer("quality", self.profile_store)
+            if quality_fn is None:
+                return
+
+            profile_name = cycle_data.get("profile_name")
+            if not profile_name:
+                return
+
+            points = decompress_power_data(cycle_data)
+            if not points or len(points) < 4:
+                return
+
+            # Build profile median stats from stored labeled cycles.
+            durations: list[float] = []
+            energies: list[float] = []
+            peaks: list[float] = []
+            for c in self.profile_store.get_past_cycles():
+                if c.get("profile_name") != profile_name:
+                    continue
+                if c.get("duration") is not None:
+                    durations.append(float(c["duration"]))
+                if c.get("energy_wh") is not None:
+                    energies.append(float(c["energy_wh"]))
+                if c.get("max_power") is not None:
+                    peaks.append(float(c["max_power"]))
+
+            if not durations:
+                return
+
+            med_dur = float(np.median(durations))
+            med_energy = float(np.median(energies)) if energies else 500.0
+            med_peak = float(np.median(peaks)) if peaks else 500.0
+
+            match_conf = float(cycle_data.get("match_confidence") or 0.0)
+            conf_known = match_conf > 0
+            proxy_dist = max(0.0, 1.0 - match_conf) if conf_known else 0.25
+            proxy_margin = match_conf if conf_known else 0.30
+            proxy_fit = match_conf if conf_known else 0.75
+
+            feat = quality_features(
+                points=points,
+                profile_median_duration_s=med_dur,
+                profile_median_energy_wh=med_energy,
+                profile_median_peak_w=med_peak,
+                profile_distance=proxy_dist,
+                label_margin=proxy_margin,
+                profile_fit_score=proxy_fit,
+                flag_count=0,
+            )
+            score = round(float(quality_fn(feat)), 3)
+            cycle_data["ml_quality_score"] = score
+            self._logger.debug(
+                "ML quality score (profile=%s): %.3f", profile_name, score
+            )
+        except Exception:  # noqa: BLE001 - never break cycle storage
+            pass
+
     def _resolve_energy_price(self) -> float | None:
         """Current energy price per kWh, or None when none is configured.
 
@@ -3208,6 +3341,10 @@ class WashDataManager:
                     "tag": self._lifecycle_tag,
                 },
             )
+
+        # Score cycle quality with the ML model (opt-in; stored on cycle_data so
+        # the learning manager can use it to gate auto-labeling vs. feedback).
+        self._compute_cycle_quality_score(cycle_data)
 
         # Request user feedback if we had a confident match.
         # AND perform learning analysis on the completed cycle.

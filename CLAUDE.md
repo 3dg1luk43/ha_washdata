@@ -55,6 +55,8 @@ python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG
 2. Core Similarity (NumPy correlation)
 3. DTW Refinement (Dynamic Time Warping via `signal_processing.py`)
 
+Also exposes `compute_profile_health()` — a pure-statistics (no ML) per-profile health heuristic that combines duration CV and mean match confidence into a `health_score` (0–1) + `health_status` (healthy/fair/poor/unknown). Surfaced via `ws_get_profiles` in `ws_api.py` and shown as health badges in the panel's Profiles tab.
+
 **`config_flow.py`** (~5300 lines) - Home Assistant UI with 180+ configuration options across multiple dialogs. Handles initial setup, options flow, and advanced settings.
 
 **`__init__.py`** (~850 lines) - Integration entry point. Registers services (`label_cycle`, `create_profile`, `delete_profile`, `auto_label_cycles`, `trim_cycle`, `submit_cycle_feedback`, `record_start/stop`, `export_config`, `import_config`, `pause_cycle`, `resume_cycle`, and — behind `ENABLE_ML_TRAINING` — `trigger_ml_training`), handles config migration, and wires together all components. All registered services must have matching entries in `services.yaml` and `strings.json`.
@@ -108,7 +110,11 @@ The `ml/` package adds ML *alongside* the proven detection/matching code — it 
 - `SHOW_ML_LAB` - ML insights in the panel. Per-cycle ML **health** and **review** live inline in the Cycles tab (each cycle's modal has a Review mode; the list has a "Needs review" filter) as cycle metadata, and the Classic-vs-ML settings comparison is inline beside the relevant Settings fields. All ML **management** (on-device training config + status + "Train now", matcher-tuning, and the `enable_ml_models` runtime opt-in) is consolidated in a dedicated **ML Training** tab (`_htmlMlTab`, gated on `ENABLE_ML_TRAINING`/`mlTrainingAvailable` + edit access); it renders the `ml_training` settings section (removed from the Settings tab) and saves through the shared `_saveSettings` path.
 - `ENABLE_ML_SUGGESTIONS` - `MLSuggestionEngine` and the Classic-vs-ML settings comparison.
 - `ENABLE_ML_TRAINING` - the scheduled/manual on-device training loop + `trigger_ml_training` service + `ml_training_*` options.
-- `CONF_ENABLE_ML_MODELS` (per-device option) - opt-in gate (`ml_models_enabled(options)`) for feeding ML signals into live decisions; default off. Runtime consumer: the **ML end-detection guard** (`cycle_detector._should_defer_finish` via the manager-injected `manager._ml_end_confidence` provider, which uses `resolve_scorer("end")` + `latest_end_event_features`). It is an *asymmetric anti-premature-stop guard* - it can only defer a normal completion when the end model says a low-power lull is a pause, never end a cycle early; bounded by `ML_END_GUARD_MAX_DEFER_SECONDS` and gated on `DEFAULT_DEFER_FINISH_CONFIDENCE`. Other live ML paths (panel `ml_health`, `MLSuggestionEngine`) go through `resolve_scorer` directly. The `enable_ml_models` toggle lives in the panel's **ML Training** tab (a `checkbox` field in the `ml_training` schema section, saved via `set_options`).
+- `CONF_ENABLE_ML_MODELS` (per-device option) - opt-in gate (`ml_models_enabled(options)`) for feeding ML signals into live decisions; default off. Three runtime consumers (all gated):
+  1. **ML end-detection guard** (`cycle_detector._should_defer_finish` via `manager._ml_end_confidence`): uses `resolve_scorer("end")` + `latest_end_event_features`. Asymmetric anti-premature-stop: can only defer, never end early; bounded by `ML_END_GUARD_MAX_DEFER_SECONDS`, gated on `DEFAULT_DEFER_FINISH_CONFIDENCE`.
+  2. **ML early match commit** (`manager._async_do_perform_matching`): uses `resolve_scorer("live_match")` + `live_match_features`. When `P(top-1 correct) >= ML_MATCH_COMMIT_THRESHOLD` (0.85), the initial match is committed without waiting for the persistence counter — cuts time-to-first-match on clear cycles.
+  3. **ML quality gate** (`manager._compute_cycle_quality_score` → `learning._maybe_request_feedback`): uses `resolve_scorer("quality")` + `quality_features` at cycle end. When `P(problem) >= ML_QUALITY_SUSPICIOUS_THRESHOLD` (0.65), auto-labeling is downgraded to a feedback request even for high-confidence matches.
+  Other live ML paths (panel `ml_health`, `MLSuggestionEngine`) go through `resolve_scorer` directly and are not gated on `CONF_ENABLE_ML_MODELS`. The toggle lives in the panel's **ML Training** tab.
 
 **Modules (`ml/`):**
 - `*_model.py` + `promoted_manifest.json` - embedded standardized-logistic baselines (`cycle_end_detector`, `hybrid_curve_quality`, `live_match_commit`), each exposing `score()`/`predict()`/`FEATURE_COLUMNS`. `*_feature_contract.json` documents feature sources; `*_parity.json` are golden fixtures the tests assert against.
@@ -171,10 +177,10 @@ constants" block (`MATCH_*`); the values below reference them.
 Resolved:
 - ~~Remove deprecated Smart Extension logic~~ — done. Dishwasher end-of-cycle handling is now the issue-#43 design: passive-drying deferral in `_should_defer_finish`, an end-spike/pump-out arm gated at `DISHWASHER_END_SPIKE_MIN_PROGRESS` (85% of expected), and Smart Termination with a `DISHWASHER_END_SPIKE_WAIT_SECONDS` (30 min) pump-out window.
 - ~~Remove deprecated constants~~ — the drain-spike (`delay_drain_*`), `record_mode`, and verification-poll constants have been removed.
+- ~~Gate predictive end when match is ambiguous~~ — done. `cycle_detector._match_ambiguous` is set from `result.is_ambiguous` on every match update; the Smart Termination block at `_STATE_ENDING` checks `and not self._match_ambiguous` before firing, so ambiguous matches fall through to the power-based timeout.
 
 Open:
 1. Per-device defaults: don't leak dicts into the Options schema.
-2. **Gate predictive end when match is ambiguous** — the "time remaining hits 0 → predict the cycle is about to end" shortcut currently fires even when `is_ambiguous` is true (top-1 and top-2 profiles score within `MATCH_AMBIGUITY_MARGIN`). When the matched profile is uncertain its expected duration is unreliable, so the prediction can end a cycle early. It should be suppressed (fall back to the power-based end) whenever the live match is ambiguous.
 
 ## Key Design Conventions
 

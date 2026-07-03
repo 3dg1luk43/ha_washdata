@@ -720,7 +720,13 @@ def ws_get_profiles(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error listing profiles for %s: %s", entry_id, exc)
 
-    connection.send_result(msg["id"], {"profiles": profiles})
+    health: dict[str, dict] = {}
+    try:
+        health = manager.profile_store.compute_profile_health()
+    except Exception:  # pylint: disable=broad-exception-caught
+        pass
+
+    connection.send_result(msg["id"], {"profiles": profiles, "profile_health": health})
 
 
 @websocket_api.websocket_command(

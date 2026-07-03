@@ -41,6 +41,7 @@ from .const import (
     DEFAULT_LEARNING_CONFIDENCE,
     DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
     DOMAIN,
+    ML_QUALITY_SUSPICIOUS_THRESHOLD,
     SIGNAL_WASHER_UPDATE,
 )
 from .suggestion_engine import SuggestionEngine
@@ -477,21 +478,39 @@ class LearningManager:
             CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE
         )
 
-        # Auto-label if very high confidence
+        # Auto-label if very high confidence — but skip auto-labeling when the ML
+        # quality model flagged this cycle as suspicious (P(problem) >= threshold),
+        # even if the matcher was confident.  Downgrade to a feedback request so
+        # the user can verify the match; this catches confident but wrong labels.
+        ml_quality = cycle_data.get("ml_quality_score")
+        ml_suspicious = (
+            isinstance(ml_quality, float)
+            and ml_quality >= ML_QUALITY_SUSPICIOUS_THRESHOLD
+        )
         if confidence >= auto_label_conf:
-            labeled = self.auto_label_high_confidence(
-                cycle_id=cycle_id,
-                profile_name=detected_profile,
-                confidence=confidence,
-                confidence_threshold=auto_label_conf,
-            )
-            if labeled:
-                # Rebuild envelope first, then persist (issue #131)
-                self.hass.async_create_task(
-                    self._async_rebuild_and_save_profile(detected_profile)
+            if ml_suspicious:
+                self._logger.info(
+                    "ML quality model flagged cycle %s as suspicious (score=%.3f >= %.2f); "
+                    "downgrading auto-label to feedback request.",
+                    cycle_id,
+                    ml_quality,
+                    ML_QUALITY_SUSPICIOUS_THRESHOLD,
                 )
-                self._logger.debug("Auto-labeled high-confidence cycle %s", cycle_id)
-            return
+                # Fall through to feedback-request path below.
+            else:
+                labeled = self.auto_label_high_confidence(
+                    cycle_id=cycle_id,
+                    profile_name=detected_profile,
+                    confidence=confidence,
+                    confidence_threshold=auto_label_conf,
+                )
+                if labeled:
+                    # Rebuild envelope first, then persist (issue #131)
+                    self.hass.async_create_task(
+                        self._async_rebuild_and_save_profile(detected_profile)
+                    )
+                    self._logger.debug("Auto-labeled high-confidence cycle %s", cycle_id)
+                return
 
         # Skip low-confidence matches below learning threshold
         if confidence < learning_conf:

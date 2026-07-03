@@ -398,6 +398,30 @@ manager.learning_manager.get_learning_stats()
 # }
 ```
 
+#### ML Quality Gate (0.5.0)
+
+When ML models are enabled (`enable_ml_models` option), `manager._compute_cycle_quality_score` runs the `hybrid_curve_quality` model at cycle end and stores `ml_quality_score` (0–1, P(problem)) on the cycle. `learning._maybe_request_feedback` then reads this: if the score is ≥ `ML_QUALITY_SUSPICIOUS_THRESHOLD` (0.65), the auto-label is downgraded to a feedback request even if matcher confidence is high — this catches confident-but-wrong labels caused by ghost cycles or corrupted data.
+
+#### ML Early Match Commit (0.5.0)
+
+During active matching (`manager._async_do_perform_matching`), the `live_match_commit` model scores P(top-1 is correct). When the score is ≥ `ML_MATCH_COMMIT_THRESHOLD` (0.85) AND raw confidence ≥ 0.30, the profile is committed immediately — bypassing the persistence counter (default: 3 consecutive matching calls). This cuts time-to-first-match for clear, distinctive cycles. Falls back to persistence if ML is disabled or the scorer raises.
+
+---
+
+### 3b. Profile Health Heuristic (0.5.0)
+
+**Problem:** Profiles can silently degrade over time as new cycles get assigned that don't actually match the profile's shape, or as the appliance behavior changes.
+
+**Solution:** `ProfileStore.compute_profile_health()` computes per-profile health indicators from labeled cycle history — no ML required, pure statistics:
+- `duration_cv`: coefficient of variation of cycle durations (low = consistent)
+- `confidence_mean`: mean match confidence across labeled cycles
+- `health_score`: `0.5 × (1 − duration_cv/0.5) + 0.5 × confidence_mean`
+- `health_status`: "healthy" (≥0.65) / "fair" (0.40–0.64) / "poor" (<0.40) / "unknown" (<3 cycles)
+
+Surfaced via `ws_get_profiles` (added to its response as `profile_health`) and shown as inline badges (⚠ poor fit, fair fit) on profile cards in the panel's Profiles tab and as a health banner in each profile's Overview modal.
+
+---
+
 ### 4. Export/Import with Full Settings Transfer
 
 **Problem:** Users needed to manually reconfigure all settings when setting up multiple devices or migrating to new instances.
