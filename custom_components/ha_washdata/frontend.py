@@ -21,6 +21,8 @@ PANEL_ELEMENT = "ha-washdata-panel"
 PANEL_URL_PATH = "ha-washdata"
 PANEL_REGISTERED_KEY = "ha_washdata_panel_registered"
 PANEL_STATIC_REGISTERED = "ha_washdata_panel_static_registered"
+PANEL_TRANSLATIONS_NAME = "panel-translations.json"
+PANEL_TRANSLATIONS_URL = f"/{LOCAL_SUBDIR}/{PANEL_TRANSLATIONS_NAME}"
 CARD_DEFERRED = "deferred"
 CARD_FAILED = "failed"
 CardRegisterResult = Literal["registered", "deferred", "failed"]
@@ -265,6 +267,22 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
         except Exception as exc:  # pylint: disable=broad-exception-caught
             _LOGGER.debug("Panel static path registration failed, falling back: %s", exc)
             _register_static_path(hass, PANEL_JS_URL, str(src))
+
+        # Register panel-translations.json for explicit per-user-language loading.
+        trans_src = Path(__file__).parent / "www" / PANEL_TRANSLATIONS_NAME
+        if trans_src.exists():
+            try:
+                from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
+
+                if hasattr(hass.http, "async_register_static_paths"):
+                    await hass.http.async_register_static_paths(
+                        [StaticPathConfig(PANEL_TRANSLATIONS_URL, str(trans_src), True)]
+                    )
+                else:
+                    _register_static_path(hass, PANEL_TRANSLATIONS_URL, str(trans_src))
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                _LOGGER.debug("Panel translations path registration failed: %s", exc)
+                _register_static_path(hass, PANEL_TRANSLATIONS_URL, str(trans_src))
 
     # Re-check after the await: with multiple WashData devices, all concurrent
     # setup_entry calls pass the initial guard before any one of them sets the

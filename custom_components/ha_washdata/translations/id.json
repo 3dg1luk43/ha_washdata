@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
+          "name": "Nama Perangkat",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -665,14 +666,14 @@
       "new_group": "+ Grup Baru",
       "apply_label": "Terapkan Label",
       "run_auto_label": "Jalankan Label Otomatis",
-      "save_review": "Simpan Ulasan",
+      "save_review": "Simpan Tinjauan",
       "apply_trim": "Terapkan Pangkas",
       "apply_split": "Terapkan Pemisahan",
       "process_recording": "Simpan Rekaman",
       "stop": "Berhenti",
       "process": "Proses",
       "add_device": "+ Tambahkan perangkat",
-      "train_now": "Berlatih sekarang",
+      "train_now": "Latih sekarang",
       "reset_to_defaults": "Atur ulang ke default",
       "reset_to_builtin": "Reset ke model bawaan",
       "save_preferences": "Simpan Preferensi",
@@ -919,7 +920,7 @@
       "json_required": "Data JSON diperlukan",
       "save_failed": "Gagal menyimpan: {error}",
       "delete_failed": "Gagal menghapus: {error}",
-      "apply_failed": "Permohonan gagal: {error}",
+      "apply_failed": "Gagal diterapkan: {error}",
       "rebuild_failed": "Gagal membangun kembali: {error}",
       "start_failed": "Gagal memulai: {error}",
       "stop_failed": "Penghentian gagal: {error}",
@@ -1002,7 +1003,12 @@
       "unsure_detected_prefix": "WashData tidak yakin itu terdeteksi",
       "no_suggestions": "Tidak ada saran aktif.",
       "no_profiles_overlay": "Tidak ada profil untuk dihamparkan.",
-      "compare_cycles_title": "Bandingkan {count} siklus"
+      "compare_cycles_title": "Bandingkan {count} siklus",
+      "profiles_intro": "Klik profil untuk melihat statistik, fase, dan pembersihan. Kelompokkan program yang hampir identik (bentuk/durasi sama, suhu atau putaran berbeda) agar pencocokan dapat memilih di antara mereka dengan andal.",
+      "search_placeholder": "Cari pengaturan…",
+      "automations_intro": "WashData memicu event {start} / {end} dan mengekspos entitas, sehingga notifikasi dan aksi sebaiknya dibuat sebagai otomasi Home Assistant biasa. Otomasi yang menggunakan perangkat ini ditampilkan di bawah.",
+      "notify_services_hint": "Gunakan ID layanan {entity} (dipisahkan koma untuk beberapa). Variabel template: {vars}.",
+      "rbac_hint": "Saat dimatikan, setiap pengguna Home Assistant memiliki akses penuh (default). Administrator selalu memiliki akses penuh dan dapat mengelola semua pengguna."
     },
     "modal": {
       "label_cycle": "Beri Label Siklus",
@@ -1200,7 +1206,7 @@
         "label": "Aktifkan Deteksi Anti-Kerut"
       },
       "anti_wrinkle_max_power": {
-        "label": "Kekuatan Anti-Kerut Maks"
+        "label": "Daya Anti-Kerut Maks"
       },
       "anti_wrinkle_max_duration": {
         "label": "Durasi Maks"

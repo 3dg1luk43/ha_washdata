@@ -53,6 +53,7 @@
         "title": "WashData nustatymai",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
+          "name": "Įrenginio pavadinimas",
           "device_type": "Įrenginio tipas",
           "power_sensor": "Galios jutiklis",
           "min_power": "Minimalios galios slenkstis (W)"
@@ -659,7 +660,7 @@
       "split": "Padalinti",
       "review": "Peržiūrėti",
       "inspect": "Apžiūrėti",
-      "label": "Etiketė",
+      "label": "Žymėti",
       "save_settings": "Išsaugoti nustatymus",
       "new_profile": "+ Naujas profilis",
       "new_group": "+ Nauja grupė",
@@ -672,9 +673,9 @@
       "stop": "Sustabdyti",
       "process": "Apdoroti",
       "add_device": "+ Pridėti įrenginį",
-      "train_now": "Mokyti dabar",
+      "train_now": "Apmokyti dabar",
       "reset_to_defaults": "Atstatyti į numatytuosius nustatymus",
-      "reset_to_builtin": "Iš naujo nustatyti įtaisytuosius modelius",
+      "reset_to_builtin": "Grąžinti įtaisytuosius modelius",
       "save_preferences": "Išsaugoti nuostatas",
       "save_panel_settings": "Išsaugoti skydelio nustatymus",
       "save_access_control": "Išsaugoti prieigos valdymą",
@@ -682,8 +683,8 @@
       "run_analysis": "🔍 Vykdyti pasiūlymų analizę",
       "apply_all": "Taikyti viską",
       "show_only": "Rodyti tik",
-      "dismiss": "Uždaryti",
-      "dismiss_all": "Uždaryti visus",
+      "dismiss": "Atmesti",
+      "dismiss_all": "Atmesti viską",
       "process_history": "Apdoroti dabar",
       "clear_debug": "Išvalyti derinimo duomenis",
       "wipe_all": "Išvalyti visus duomenis",
@@ -697,7 +698,7 @@
       "rebuild_envelope": "Atstatyti voką",
       "create_profile": "+ Sukurti profilį",
       "rec_stop": "Sustabdyti",
-      "pause_cycle": "Pauzė",
+      "pause_cycle": "Pristabdyti",
       "resume_cycle": "Tęsti",
       "force_stop": "Priverstinis sustabdymas",
       "save_phases": "Išsaugoti fazes",
@@ -714,7 +715,7 @@
       "new_automation": "＋ Naujas automatizavimas",
       "from_template": "Iš šablono ▾",
       "on_cycle_started": "Prasidėjus ciklui",
-      "on_cycle_finished": "Ciklas baigtas",
+      "on_cycle_finished": "Kai ciklas baigiasi",
       "save_group": "Išsaugoti grupę"
     },
     "hdr": {
@@ -745,7 +746,7 @@
       "automation_open": "Atidaryti automatizavimo rengyklėje",
       "automation_delete": "Ištrinti šį automatizavimą",
       "automation_needs_review": "Šį ciklą reikia peržiūrėti",
-      "automation_review_this_cycle": "Peržiūrėkite šį ciklą",
+      "automation_review_this_cycle": "Peržiūrėti šį ciklą",
       "no_automations": "Dar jokia automatika nenurodo šio įrenginio."
     },
     "lbl": {
@@ -779,24 +780,24 @@
       "json_data": "JSON duomenys",
       "expected_duration": "Numatoma trukmė (min.)",
       "rename_profile": "Pervardyti profilį",
-      "select_profile": "Pasirinkite Profilis",
+      "select_profile": "Pasirinkite profilį",
       "confidence_threshold": "Pasitikėjimo slenkstis",
       "resulting_profile": "Gautas profilis",
       "new_profile_name": "Naujas profilio pavadinimas",
       "save_mode": "Išsaugojimo režimas",
-      "head_trim": "Galvos apdaila (-ai)",
-      "tail_trim": "Uodegos apdaila (-ai)",
-      "gap_s": "Tarpas (-iai)",
+      "head_trim": "Pradžios apkarpymas (s)",
+      "tail_trim": "Pabaigos apkarpymas (s)",
+      "gap_s": "Tarpas (s)",
       "start": "Pradžia",
       "end": "Pabaiga",
       "quality": "Kokybė",
       "golden_reference": "Užregistruotas atskaitos ciklas",
-      "compare_profiles": "Palyginkite su profiliais",
+      "compare_profiles": "Palyginti su profiliais",
       "tags": "Žymos",
       "notes": "Pastabos",
       "default_tab": "Numatytasis skirtukas atidarant skydelį",
       "cycle_date_display": "Ciklo datos rodymas",
-      "refresh_interval": "Atnaujinimo intervalas (-ai)",
+      "refresh_interval": "Atnaujinimo intervalas (s)",
       "panel_default_tab": "Numatytasis skirtukas",
       "hide_tabs": "Slėpti skirtukus ne administratoriams",
       "enable_access_control": "Įgalinti kiekvieno vartotojo prieigos valdymą",
@@ -805,7 +806,7 @@
       "default_other": "Numatytasis (kiti įrenginiai)",
       "show_expected": "Rodyti numatomą kreivės perdangą (atitinkantį profilį, oranžinė)",
       "show_raw": "Rodyti neapdorotus jutiklio rodmenis (neišlygintus, pilkus)",
-      "show_debug": "Rodyti tiesioginio rungtynių derinimo kortelę būsenos puslapyje (pasitikėjimas, dviprasmiškumas, geriausi kandidatai)",
+      "show_debug": "Rodyti tiesioginės atitikties derinimo kortelę būsenos puslapyje (pasitikėjimas, dviprasmiškumas, geriausi kandidatai)",
       "mode_new_profile": "Sukurti naują profilį",
       "mode_existing_profile": "Pridėti prie esamo profilio",
       "auto_fine_tune_on": "automatinis tikslus įjungimas (apie {hour}:00)",
@@ -828,7 +829,7 @@
       "fair_fit": "tinkamas",
       "manual": "(rankiniu būdu pasirinkta)",
       "auto": "(aptikta automatiškai)",
-      "improving": "↗ tobulėjimas",
+      "improving": "↗ tobulėja",
       "declining": "↘ mažėja",
       "steady": "→ pastovus",
       "using_tuned": "Naudojant suderintus svorius",
@@ -847,7 +848,7 @@
       "ready": "Paruošta apdoroti",
       "idle": "Tuščia eiga",
       "auto_detect": "Automatinis aptikimas",
-      "fine_tuning": "patikslinu dabar...",
+      "fine_tuning": "tikslinama dabar...",
       "all_statuses": "Visos būsenos"
     },
     "ml": {
@@ -940,7 +941,7 @@
       "error": "Klaida: {error}",
       "could_not_load_cycle": "Nepavyko įkelti ciklo: {error}",
       "pause_failed": "Pristabdyti nepavyko: {error}",
-      "label_failed": "Etiketė nepavyko: {error}",
+      "label_failed": "Žymėjimas nepavyko: {error}",
       "invalid_json": "„{key}“ nėra tinkamas JSON – pataisykite arba išvalykite lauką prieš išsaugodami.",
       "processed": "Apdorota {bits}",
       "split_complete": "Padalinta į {count} ciklus"
@@ -969,7 +970,7 @@
       "no_cycles_profile": "Šiam profiliui nėra ciklų.",
       "saving_triggers_reload": "Išsaugojus suaktyvinamas integracijos įkėlimas iš naujo. HA objektai trumpam gali būti rodomi kaip nepasiekiami.",
       "prefs_personal": "Tai galioja tik jūsų Home Assistant paskyrai.",
-      "no_match_yet": "Kol kas nebandoma sutapti – tai užpildoma bėgimo ciklo metu.",
+      "no_match_yet": "Kol kas atitikties bandymų nebuvo – užpildoma vykstant ciklui.",
       "no_fine_tuned": "Dar nieko nesureguliuota – „WashData“ naudoja įmontuotus modelius.",
       "ml_learned_intro": "Modeliai, pritaikyti šiai mašinai. Viskas, kas nenurodyta, naudoja patikimą įmontuotą modelį.",
       "ml_settings_intro": "Du nepriklausomi jungikliai: vienas pritaiko modelius, kol veikia ciklas, kitas leidžia WashData laikui bėgant tiksliai suderinti juos su jūsų aparatu.",
@@ -989,8 +990,8 @@
       "appliance_monitor": "Prietaisų monitorius",
       "ml_loading": "įkeliamas ML…",
       "see_recorder": "Žiūrėkite įrašymo valdiklį žemiau",
-      "review_in_settings": "Peržiūrėkite nustatymuose",
-      "storage_diagnostics": "Sandėliavimo statistika, priežiūra, eksportas/importas",
+      "review_in_settings": "Peržiūrėti nustatymuose",
+      "storage_diagnostics": "Saugyklos statistika, priežiūra, eksportas/importas",
       "recent_logs": "Naujausi ha_washdata įrašai",
       "preferences_adv": "Parinktys",
       "preferences_admin": "Parinktys, skydelis ir prieigos valdymas",
@@ -1001,7 +1002,12 @@
       "unsure_detected_prefix": "„WashData“ nėra tikras, kad aptiko",
       "no_suggestions": "Nėra aktyvių pasiūlymų.",
       "no_profiles_overlay": "Nėra profilių, kuriuos būtų galima perdengti.",
-      "compare_cycles_title": "Palyginkite {count} ciklus"
+      "compare_cycles_title": "Palyginkite {count} ciklus",
+      "profiles_intro": "Spustelėkite profilį, kad matytumėte statistiką, fazes ir tvarkymą. Sugrupuokite beveik identiškas programas (ta pati forma/trukmė, skirtinga temperatūra ar išgręžimas), kad atitikimas patikimai jas atskirtų.",
+      "search_placeholder": "Ieškoti nustatymų…",
+      "automations_intro": "WashData skleidžia {start} / {end} įvykius ir atskleidžia objektus, todėl pranešimus ir veiksmus geriausia kurti kaip įprastus Home Assistant automatizavimus. Automatizavimai, naudojantys šį įrenginį, rodomi žemiau.",
+      "notify_services_hint": "Naudokite {entity} paslaugų ID (keliems – per kablelį). Šablono kintamieji: {vars}.",
+      "rbac_hint": "Kai išjungta, kiekvienas Home Assistant naudotojas turi pilną prieigą (numatytasis). Administratoriai visada turi pilną prieigą ir gali valdyti visus."
     },
     "modal": {
       "label_cycle": "Žymėti ciklą",
@@ -1175,7 +1181,7 @@
         "label": "Mokymosi patikimumas"
       },
       "suppress_feedback_notifications": {
-        "label": "Neleiskite atsiliepimų pranešimų"
+        "label": "Slopinti atsiliepimų pranešimus"
       },
       "watchdog_interval": {
         "label": "Watchdog intervalas"
@@ -1196,7 +1202,7 @@
         "label": "Išsaugoti derinimo pėdsakus"
       },
       "anti_wrinkle_enabled": {
-        "label": "Įjunkite raukšlių aptikimą"
+        "label": "Įjungti aptikimą nuo raukšlių"
       },
       "anti_wrinkle_max_power": {
         "label": "Maksimali galia nuo raukšlių"
@@ -1211,7 +1217,7 @@
         "label": "Įgalinti uždelsto paleidimo aptikimą"
       },
       "delay_confirm_seconds": {
-        "label": "Patvirtinkite sekundes"
+        "label": "Patvirtinimo sekundės"
       },
       "delay_timeout_hours": {
         "label": "Laiko pabaigos valandos"
@@ -1220,7 +1226,7 @@
         "label": "Įgalinti išorinį pabaigos aktyviklį"
       },
       "external_end_trigger": {
-        "label": "Išorinis paleidimo subjektas"
+        "label": "Išorinio pabaigos aktyviklio objektas"
       },
       "external_end_trigger_inverted": {
         "label": "Apversti išorinį paleidiklį (paleidiklis IŠJUNGUS)"
@@ -1232,16 +1238,16 @@
         "label": "Pauzė taip pat atjungia maitinimą (per jungiklį)"
       },
       "switch_entity": {
-        "label": "Perjungti objektą"
+        "label": "Jungiklio objektas"
       },
       "notify_unload_delay_minutes": {
-        "label": "Iškrovimo Nag Delay"
+        "label": "Iškrovimo priminimo vėlinimas"
       },
       "pump_stuck_duration": {
         "label": "Siurblio užstrigimo trukmė"
       },
       "notify_start_services": {
-        "label": "Pradėti Paslaugas"
+        "label": "Pradžios paslaugos"
       },
       "notify_finish_services": {
         "label": "Pabaigos paslaugos"
@@ -1268,7 +1274,7 @@
         "label": "Tiesioginis viršijimas % prieš įspėjimą"
       },
       "notify_live_chronometer": {
-        "label": "Naudokite tiesioginį chronometrą"
+        "label": "Naudoti tiesioginį chronometrą"
       },
       "notify_timeout_seconds": {
         "label": "Automatinis atsisakymas po"
@@ -1298,19 +1304,19 @@
         "label": "Android kanalas (baigti)"
       },
       "energy_price_entity": {
-        "label": "Energijos kainos subjektas"
+        "label": "Energijos kainos objektas"
       },
       "energy_price_static": {
         "label": "Statinės energijos kaina (už kWh)"
       },
       "enable_ml_models": {
-        "label": "Taikykite išmaniuosius modelius ciklo metu"
+        "label": "Taikyti išmaniuosius modelius ciklo metu"
       },
       "ml_training_enabled": {
-        "label": "Mokykitės iš šios mašinos"
+        "label": "Mokytis iš šio įrenginio"
       },
       "ml_training_hour": {
-        "label": "Mokykitės valandą"
+        "label": "Mokymosi valanda"
       },
       "ml_training_min_cycles": {
         "label": "Pirmiausia reikalingi ciklai"

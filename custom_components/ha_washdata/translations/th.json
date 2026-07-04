@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "การตั้งค่าทั้งหมด เช่น การตรวจจับ การจับคู่ เวลา การแจ้งเตือน โปรไฟล์ และรอบการซัก มีอยู่ในแผง WashData ใช้แบบฟอร์มนี้เพื่อเปลี่ยนเซ็นเซอร์พลังงาน ประเภทอุปกรณ์ หรือเกณฑ์สแตนด์บายเท่านั้น",
         "data": {
+          "name": "ชื่ออุปกรณ์",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -670,7 +671,7 @@
       "health": "สุขภาพ",
       "cost": "ค่าใช้จ่าย",
       "program": "โปรแกรม",
-      "cycle_health": "สุขภาพของวงจร",
+      "cycle_health": "สุขภาพของรอบ",
       "activity": "กิจกรรม",
       "unlabelled": "ไม่มีป้ายกำกับ",
       "unlabelled_paren": "(ไม่มีป้ายกำกับ)",
@@ -691,7 +692,7 @@
       "resulting_profile": "โปรไฟล์ผลลัพธ์",
       "new_profile_name": "ชื่อโปรไฟล์ใหม่",
       "save_mode": "โหมดบันทึก",
-      "head_trim": "ตัดแต่งส่วนหัว",
+      "head_trim": "ตัดแต่งส่วนหัว (s)",
       "tail_trim": "ตัดแต่งหาง (s)",
       "gap_s": "ช่องว่าง",
       "start": "เริ่ม",
@@ -837,7 +838,7 @@
       "compare_selected_cycles": "รอบที่เลือก (ทึบ) — แสดง / ซ่อน",
       "compare_overlay_profiles": "โปรไฟล์โอเวอร์เลย์ (จาง)",
       "no_profiles_compare": "ไม่มีโปรไฟล์ที่จะเปรียบเทียบ",
-      "saving_triggers_reload": "Saving triggers an integration reload. HA entities may briefly show as unavailable.",
+      "saving_triggers_reload": "การบันทึกจะโหลดการผสานรวมใหม่ เอนทิตี HA อาจแสดงว่าไม่พร้อมใช้งานชั่วครู่",
       "prefs_personal": "สิ่งเหล่านี้ใช้ได้กับบัญชี Home Assistant ของคุณเท่านั้น",
       "no_match_yet": "ยังไม่มีความพยายามในการจับคู่ - จะเกิดขึ้นระหว่างรอบการทำงาน",
       "no_fine_tuned": "ยังไม่มีการปรับแต่งใดๆ — WashData ใช้โมเดลในตัว",
@@ -865,7 +866,12 @@
       "unsure_detected_prefix": "WashData ไม่แน่ใจว่าตรวจพบแล้ว",
       "no_suggestions": "ไม่มีข้อเสนอแนะที่ใช้งานอยู่",
       "no_profiles_overlay": "ไม่มีโปรไฟล์ที่จะซ้อนทับ",
-      "compare_cycles_title": "เปรียบเทียบ {count} รอบ"
+      "compare_cycles_title": "เปรียบเทียบ {count} รอบ",
+      "profiles_intro": "คลิกที่โปรไฟล์เพื่อดูสถิติ ระยะ และการทำความสะอาด จัดกลุ่มโปรแกรมที่เกือบเหมือนกัน (รูปร่าง/ระยะเวลาเดียวกัน อุณหภูมิหรือการปั่นต่างกัน) เพื่อให้การจับคู่เลือกระหว่างกันได้อย่างน่าเชื่อถือ",
+      "search_placeholder": "ค้นหาการตั้งค่า…",
+      "automations_intro": "WashData ส่งสัญญาณเหตุการณ์ {start} / {end} และเปิดเผย entities ดังนั้นการแจ้งเตือนและการดำเนินการควรสร้างเป็น Home Assistant automations ปกติ automations ที่ใช้อุปกรณ์นี้จะแสดงด้านล่าง",
+      "notify_services_hint": "ใช้รหัสบริการ {entity} (คั่นด้วยเครื่องหมายจุลภาคสำหรับหลายรายการ) ตัวแปรเทมเพลต: {vars}.",
+      "rbac_hint": "เมื่อปิด ผู้ใช้ Home Assistant ทุกคนจะมีสิทธิ์เข้าถึงเต็มรูปแบบ (ค่าเริ่มต้น) ผู้ดูแลระบบมีสิทธิ์เข้าถึงเต็มรูปแบบเสมอและสามารถจัดการทุกคนได้"
     },
     "section": {
       "basic": {
@@ -1063,10 +1069,10 @@
         "label": "เอนทิตีเซ็นเซอร์ประตู"
       },
       "switch_entity": {
-        "label": "สลับเอนทิตี"
+        "label": "เอนทิตีสวิตช์"
       },
       "notify_unload_delay_minutes": {
-        "label": "ยกเลิกการโหลด Nag Delay"
+        "label": "เวลาหน่วงเตือนเก็บผ้า"
       },
       "pump_stuck_duration": {
         "label": "ระยะเวลาติดปั๊ม"
@@ -1123,16 +1129,16 @@
         "label": "Android ช่อง (เสร็จสิ้น)"
       },
       "energy_price_entity": {
-        "label": "นิติบุคคลราคาพลังงาน"
+        "label": "เอนทิตีราคาพลังงาน"
       },
       "ml_training_hour": {
         "label": "เรียนรู้ในชั่วโมง"
       },
       "ml_training_min_cycles": {
-        "label": "จำเป็นต้องมีรอบก่อน"
+        "label": "จำนวนรอบที่ต้องการ"
       },
       "ml_training_interval_days": {
-        "label": "ตรวจสอบมากที่สุดทุกครั้ง"
+        "label": "ตรวจสอบสูงสุดทุก"
       }
     },
     "tab": {
@@ -1165,7 +1171,7 @@
       "export": "ส่งออก",
       "import": "นำเข้า",
       "merge": "ผสาน",
-      "apply": "นำมาใช้",
+      "apply": "นำไปใช้",
       "refresh": "รีเฟรช",
       "create": "สร้าง",
       "select": "เลือก",
@@ -1186,7 +1192,7 @@
       "apply_split": "ใช้แยก",
       "process_recording": "บันทึกการบันทึก",
       "stop": "หยุด",
-      "process": "กระบวนการ",
+      "process": "ประมวลผล",
       "add_device": "+ เพิ่มอุปกรณ์",
       "train_now": "ฝึกเลย",
       "reset_to_defaults": "รีเซ็ตเป็นค่าเริ่มต้น",
@@ -1205,7 +1211,7 @@
       "wipe_all": "ล้างข้อมูลทั้งหมด",
       "export_json": "ส่งออกเป็น JSON",
       "import_json": "นำเข้าจาก JSON",
-      "correct": "ถูกต้อง…",
+      "correct": "แก้ไข…",
       "ignore": "ไม่สนใจ",
       "add_phase": "+ เพิ่มเฟส",
       "new_phase": "+ เฟสใหม่",
@@ -1230,7 +1236,7 @@
       "new_automation": "＋ ระบบอัตโนมัติใหม่",
       "from_template": "จากเทมเพลต ▾",
       "on_cycle_started": "เมื่อเริ่มรอบแล้ว",
-      "on_cycle_finished": "ออนไซเคิลเสร็จแล้ว",
+      "on_cycle_finished": "เมื่อรอบเสร็จสิ้น",
       "save_group": "บันทึกกลุ่ม"
     },
     "badge": {
@@ -1241,8 +1247,8 @@
       "improving": "↗ ปรับปรุง",
       "declining": "↘ ลดลง",
       "steady": "→ มั่นคง",
-      "using_tuned": "การใช้ตุ้มน้ำหนักที่ปรับแล้ว",
-      "using_defaults": "การใช้ค่าเริ่มต้นที่จัดส่ง",
+      "using_tuned": "ใช้ค่าน้ำหนักที่ปรับแล้ว",
+      "using_defaults": "ใช้ค่าเริ่มต้นของระบบ",
       "built_in_tag": "ในตัว"
     },
     "status": {
@@ -1252,7 +1258,7 @@
       "active": "ใช้งานอยู่",
       "ambiguous": "ไม่ชัดเจน",
       "clear": "ชัดเจน",
-      "working": "การทำงาน…",
+      "working": "กำลังทำงาน…",
       "recording": "กำลังบันทึก...",
       "ready": "พร้อมดำเนินการ",
       "idle": "ไม่ได้ใช้งาน",
@@ -1263,7 +1269,7 @@
     "ml": {
       "fit_strong": "แข็งแกร่ง",
       "fit_good": "ดี",
-      "fit_fair": "ยุติธรรม",
+      "fit_fair": "พอใช้",
       "fit_weak": "อ่อนแอ",
       "fit_slight": "เล็กน้อย",
       "fit_word": "พอดี",
@@ -1276,7 +1282,7 @@
       "create_profile": "สร้างโปรไฟล์",
       "new_phase": "เฟสใหม่",
       "edit_phase": "แก้ไขเฟส",
-      "process_recording": "การบันทึกกระบวนการ",
+      "process_recording": "ประมวลผลการบันทึก",
       "correct_feedback": "ข้อเสนอแนะที่ถูกต้อง",
       "import_config": "นำเข้าการกำหนดค่า",
       "auto_label": "รอบการติดฉลากอัตโนมัติ",
@@ -1284,9 +1290,9 @@
     },
     "tag": {
       "late_start": "เริ่มช้า",
-      "early_end": "จบต้น",
-      "merged": "วงจรรวม",
-      "split": "วงจรแยก",
+      "early_end": "จบเร็ว",
+      "merged": "รอบที่รวม",
+      "split": "รอบที่แยก",
       "noise": "เสียงรบกวน",
       "wrong_profile": "โปรไฟล์ผิด",
       "sensor_gap": "ช่องว่างเซ็นเซอร์"
@@ -1313,7 +1319,7 @@
       "down": "มีแนวโน้มลดลง"
     },
     "pref": {
-      "date_relative": "ญาติ (เช่น 2 ชั่วโมงที่แล้ว)",
+      "date_relative": "แบบสัมพัทธ์ (เช่น 2 ชั่วโมงที่แล้ว)",
       "date_absolute": "แน่นอน (เช่น 14:32 น. วันที่ 2 กรกฎาคม)"
     },
     "log": {

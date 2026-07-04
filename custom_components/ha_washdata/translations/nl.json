@@ -53,6 +53,7 @@
         "title": "WashData-instellingen",
         "description": "Alle instellingen -- detectie, overeenkomst, timing, meldingen, profielen en cycli -- zijn beschikbaar in het WashData-paneel. Gebruik dit formulier alleen om de vermogenssensor, het apparaattype of de standbydrempel te wijzigen.",
         "data": {
+          "name": "Apparaatnaam",
           "device_type": "Apparaattype",
           "power_sensor": "Vermogenssensor",
           "min_power": "Minimale vermogensdrempel (W)"
@@ -642,7 +643,7 @@
       "edit": "Bewerken",
       "add": "Toevoegen",
       "rebuild": "Enveloppen opnieuw opbouwen",
-      "record": "Begin met opnemen",
+      "record": "Opname starten",
       "compare": "Vergelijken",
       "confirm": "Bevestigen",
       "discard": "Weggooien",
@@ -652,7 +653,7 @@
       "apply": "Toepassen",
       "refresh": "Vernieuwen",
       "create": "Aanmaken",
-      "select": "Selecteer",
+      "select": "Selecteren",
       "done": "Klaar",
       "reset": "Opnieuw instellen",
       "trim": "Trimmen",
@@ -663,10 +664,10 @@
       "save_settings": "Instellingen opslaan",
       "new_profile": "+ Nieuw profiel",
       "new_group": "+ Nieuwe groep",
-      "apply_label": "Etiket toepassen",
-      "run_auto_label": "Voer Auto-Label uit",
+      "apply_label": "Label toepassen",
+      "run_auto_label": "Automatisch labelen uitvoeren",
       "save_review": "Beoordeling opslaan",
-      "apply_trim": "Pas trimmen toe",
+      "apply_trim": "Trimmen toepassen",
       "apply_split": "Splitsing toepassen",
       "process_recording": "Opname opslaan",
       "stop": "Stop",
@@ -674,7 +675,7 @@
       "add_device": "+ Apparaat toevoegen",
       "train_now": "Train nu",
       "reset_to_defaults": "Terugzetten naar standaardwaarden",
-      "reset_to_builtin": "Reset naar ingebouwde modellen",
+      "reset_to_builtin": "Terugzetten naar ingebouwde modellen",
       "save_preferences": "Voorkeuren opslaan",
       "save_panel_settings": "Paneelinstellingen opslaan",
       "save_access_control": "Toegangscontrole opslaan",
@@ -684,7 +685,7 @@
       "show_only": "Alleen weergeven",
       "dismiss": "Afwijzen",
       "dismiss_all": "Alles afwijzen",
-      "process_history": "Verwerk nu",
+      "process_history": "Nu verwerken",
       "clear_debug": "Wis foutopsporingsgegevens",
       "wipe_all": "Wis alle gegevens",
       "export_json": "Exporteren naar JSON",
@@ -712,9 +713,9 @@
       "trim_split": "Trimmen/splitsen",
       "convert_to_automation": "Converteren naar automatisering",
       "new_automation": "＋ Nieuwe automatisering",
-      "from_template": "Van sjabloon ▾",
-      "on_cycle_started": "Op cyclus gestart",
-      "on_cycle_finished": "Op cyclus klaar",
+      "from_template": "Uit sjabloon ▾",
+      "on_cycle_started": "Bij cyclusstart",
+      "on_cycle_finished": "Bij cycluseinde",
       "save_group": "Groep opslaan"
     },
     "hdr": {
@@ -738,14 +739,14 @@
       "status_graph": "Statusgrafiek",
       "diagnostics_pref": "Diagnostiek",
       "logs_diagnostics": "Diagnostiek",
-      "process_history": "Verwerk geschiedenis",
+      "process_history": "Geschiedenis verwerken",
       "clear_debug": "Wis foutopsporingssporen",
       "wipe_history": "Geschiedenis wissen",
       "automations": "Automatiseringen",
       "automation_open": "Openen in de automatiseringseditor",
-      "automation_delete": "Verwijder deze automatisering",
-      "automation_needs_review": "Deze cyclus moet worden herzien",
-      "automation_review_this_cycle": "Bekijk deze cyclus",
+      "automation_delete": "Deze automatisering verwijderen",
+      "automation_needs_review": "Deze cyclus moet worden beoordeeld",
+      "automation_review_this_cycle": "Deze cyclus beoordelen",
       "no_automations": "Er zijn nog geen automatiseringen die naar dit apparaat verwijzen."
     },
     "lbl": {
@@ -763,7 +764,7 @@
       "program": "Programma",
       "cycle_health": "Gezondheid van de cyclus",
       "activity": "Activiteit",
-      "unlabelled": "Zonder etiket",
+      "unlabelled": "Ongelabeld",
       "unlabelled_paren": "(ongelabeld)",
       "emphasis": "Nadruk",
       "default": "Standaard",
@@ -773,13 +774,13 @@
       "manual_duration": "Handmatige duur (min, optioneel)",
       "phase_name": "Fasenaam",
       "description": "Beschrijving",
-      "correct_profile": "Correct profiel",
-      "correct_duration": "Correcte duur (min, optioneel)",
+      "correct_profile": "Juist profiel",
+      "correct_duration": "Juiste duur (min, optioneel)",
       "load_from_file": "Laden uit bestand",
       "json_data": "JSON-gegevens",
       "expected_duration": "Verwachte duur (min)",
       "rename_profile": "Naam van profiel wijzigen",
-      "select_profile": "Selecteer Profiel",
+      "select_profile": "Profiel selecteren",
       "confidence_threshold": "Betrouwbaarheidsdrempel",
       "resulting_profile": "Resulterend profiel",
       "new_profile_name": "Nieuwe profielnaam",
@@ -796,7 +797,7 @@
       "notes": "Opmerkingen",
       "default_tab": "Standaardtabblad bij het openen van het paneel",
       "cycle_date_display": "Weergave cyclusdatum",
-      "refresh_interval": "Vernieuwingsinterval(s)",
+      "refresh_interval": "Vernieuwingsinterval (s)",
       "panel_default_tab": "Standaard tabblad",
       "hide_tabs": "Verberg tabbladen voor niet-beheerders",
       "enable_access_control": "Schakel toegangscontrole per gebruiker in",
@@ -804,14 +805,14 @@
       "administrators": "Beheerders",
       "default_other": "Standaard (andere apparaten)",
       "show_expected": "Verwachte curve-overlay weergeven (overeenkomend profiel, oranje)",
-      "show_raw": "Toon onbewerkte sensormetingen (ongeëffend, grijs)",
+      "show_raw": "Toon onbewerkte sensormetingen (niet-afgevlakt, grijs)",
       "show_debug": "Toon live overeenkomst-debugkaart op de statuspagina (betrouwbaarheid, dubbelzinnigheid, topkandidaten)",
       "mode_new_profile": "Nieuw profiel maken",
       "mode_existing_profile": "Toevoegen aan bestaand profiel",
       "auto_fine_tune_on": "automatische fijnafstemming ingeschakeld (rond {hour}:00)",
       "auto_fine_tune_off": "automatische fijnafstemming uit",
       "last_checked": "Laatst gecontroleerd:",
-      "remove_label": "- Etiket verwijderen -",
+      "remove_label": "- Label verwijderen -",
       "create_new_profile": "+ Nieuw profiel aanmaken…",
       "read_only": "Alleen-lezen",
       "actions": "Acties",
@@ -840,9 +841,9 @@
       "interrupted": "Onderbroken",
       "force_stopped": "Geforceerd gestopt",
       "active": "Actief",
-      "ambiguous": "Ambigu",
+      "ambiguous": "Dubbelzinnig",
       "clear": "Duidelijk",
-      "working": "Werken…",
+      "working": "Bezig…",
       "recording": "Opnemen…",
       "ready": "Klaar om te verwerken",
       "idle": "Inactief",
@@ -902,15 +903,15 @@
       "cycle_paused": "Cyclus onderbroken",
       "cycle_resumed": "Cyclus hervat",
       "cycle_force_stopped": "Cyclus geforceerd gestopt",
-      "ml_training_promoted": "Training voltooid: gepromote {count} model(len)",
+      "ml_training_promoted": "Training voltooid: {count} model(len) gepromoveerd",
       "ml_training_no_improvement": "Training voltooid: basislijn behouden (geen verbetering)",
-      "matching_reverted": "Overeenkomende gewichten zijn teruggezet naar de standaardwaarden",
+      "matching_reverted": "Matchgewichten teruggezet naar standaardwaarden",
       "models_reverted": "Modellen op het apparaat zijn teruggekeerd naar de basislijn",
       "analysis_complete": "Analyse voltooid: {count} suggestie(s)",
       "analysis_complete_none": "Analyse voltooid: geen nieuwe suggesties",
       "debug_cleared": "{count} foutopsporingssporen gewist",
       "all_wiped": "Alle gegevens gewist",
-      "no_split_found": "Er zijn geen lege gaten gevonden om op te splitsen",
+      "no_split_found": "Geen inactieve pauzes gevonden om op te splitsen",
       "group_name_required": "Groepsnaam is vereist",
       "min_2_profiles": "Selecteer minimaal 2 profielen voor een groep",
       "profile_name_required": "Profielnaam is vereist",
@@ -958,12 +959,12 @@
       "no_phases": "Geen fasen gedefinieerd.",
       "no_phases_assigned": "Geen fasen toegewezen.",
       "no_split_points": "Er zijn nog geen splitpunten.",
-      "no_envelope": "Nog geen envelop - herbouw na etiketteringscycli.",
-      "no_envelope_overlay": "Er is geen envelop beschikbaar om te bedekken.",
-      "no_other_users": "Geen andere Home Assistant gebruikers gevonden.",
+      "no_envelope": "Nog geen envelop - herbouw na het labelen van cycli.",
+      "no_envelope_overlay": "Er is geen envelop beschikbaar om over te leggen.",
+      "no_other_users": "Geen andere Home Assistant-gebruikers gevonden.",
       "maintenance_requires_access": "Onderhoud en export/import vereisen volledige toegang.",
       "loading_curve": "Laadcurve…",
-      "compare_selected_cycles": "Geselecteerde cycli (vast) — tonen/verbergen",
+      "compare_selected_cycles": "Geselecteerde cycli (doorgetrokken) — tonen/verbergen",
       "compare_overlay_profiles": "Overlay-profielen (vaag)",
       "no_profiles_compare": "Geen profielen om te vergelijken.",
       "no_cycles_profile": "Geen cycli voor dit profiel.",
@@ -977,9 +978,9 @@
       "matching_tuning_intro": "Tijdens het leren past WashData ook aan hoeveel programmamatching de vorm van een cyclus weegt ten opzichte van de duur en energie ervan.",
       "phase_catalog_intro": "Benoemde segmenten van een cyclus (Voorwas, Verwarming, Centrifugeren…). Wijs ze toe aan een profiel vanuit het configuratiescherm.",
       "phase_ranges_intro": "Fasebereiken (minuten vanaf het begin van de cyclus) over de gemiddelde curve heen. Bewerk waarden om live een voorbeeld te bekijken.",
-      "cleanup_intro": "Elke gelabelde cyclus wordt overlay. Vink uitschieters aan en verwijder deze om het profiel op te schonen.",
-      "split_intro": "Klik op de grafiek om een ​​splitspunt toe te voegen of te verwijderen, of om automatisch gaten in de grafiek te detecteren.",
-      "trim_intro": "Versleep de rode grepen of voer waarden in. Alles buiten het raam wordt verwijderd.",
+      "cleanup_intro": "Alle gelabelde cycli over elkaar heen. Vink uitschieters aan en verwijder ze om het profiel op te schonen.",
+      "split_intro": "Klik op de grafiek om een splitspunt toe te voegen of te verwijderen, of detecteer ze automatisch op basis van inactieve pauzes.",
+      "trim_intro": "Versleep de rode grepen of voer waarden in. Alles buiten het venster wordt verwijderd.",
       "import_intro": "Laad een geëxporteerd bestand of plak hieronder een JSON-payload.",
       "auto_label_intro": "Wijs profielen toe aan niet-gelabelde cycli waarvan het matchvertrouwen de drempel overschrijdt.",
       "merge_intro": "De geselecteerde cycli worden gecombineerd tot één (chronologische volgorde; gaten gevuld met 0 W). Kies het resulterende profiel.",
@@ -989,7 +990,7 @@
       "appliance_monitor": "Apparaatmonitor",
       "ml_loading": "ML laden...",
       "see_recorder": "Zie recorderwidget hieronder",
-      "review_in_settings": "Controleer in Instellingen",
+      "review_in_settings": "Beoordelen in Instellingen",
       "storage_diagnostics": "Opslagstatistieken, onderhoud, export/import",
       "recent_logs": "Recente ha_washdata-records",
       "preferences_adv": "Voorkeuren",
@@ -998,10 +999,15 @@
       "pending_feedback": "In afwachting van detectiefeedback",
       "recording_in_progress": "Opname bezig",
       "no_profiles_yet_short": "Nog geen profielen.",
-      "unsure_detected_prefix": "WashData weet niet zeker of het is gedetecteerd",
+      "unsure_detected_prefix": "WashData weet niet zeker of het dit heeft gedetecteerd:",
       "no_suggestions": "Geen actieve suggesties.",
       "no_profiles_overlay": "Geen profielen om over te leggen.",
-      "compare_cycles_title": "Vergelijk {count} cycli"
+      "compare_cycles_title": "Vergelijk {count} cycli",
+      "profiles_intro": "Klik op een profiel voor statistieken, fases en opruiming. Groepeer bijna identieke programma's (zelfde vorm/duur, andere temperatuur of centrifugering) zodat de koppeling betrouwbaar onderscheid maakt.",
+      "search_placeholder": "Instellingen zoeken…",
+      "automations_intro": "WashData stuurt {start} / {end}-events en stelt entiteiten beschikbaar, zodat meldingen en acties het best als gewone Home Assistant-automatiseringen worden gebouwd. Automatiseringen die dit apparaat gebruiken worden hieronder weergegeven.",
+      "notify_services_hint": "Gebruik {entity} service-ID's (kommagescheiden voor meerdere). Sjabloonvariabelen: {vars}.",
+      "rbac_hint": "Wanneer uitgeschakeld, heeft elke Home Assistant-gebruiker volledige toegang (standaard). Beheerders hebben altijd volledige toegang en kunnen iedereen beheren."
     },
     "modal": {
       "label_cycle": "Cyclus labelen",
@@ -1009,7 +1015,7 @@
       "new_phase": "Nieuwe Fase",
       "edit_phase": "Fase bewerken",
       "process_recording": "Opname verwerken",
-      "correct_feedback": "Correcte feedback",
+      "correct_feedback": "Feedback corrigeren",
       "import_config": "Configuratie importeren",
       "auto_label": "Cycli automatisch labelen",
       "cycle": "Cyclus"
@@ -1021,7 +1027,7 @@
       "split": "Gesplitste cyclus",
       "noise": "Ruis",
       "wrong_profile": "Verkeerd profiel",
-      "sensor_gap": "Sensorafstand"
+      "sensor_gap": "Sensoronderbreking"
     },
     "quality": {
       "good": "Goed",
@@ -1058,15 +1064,15 @@
       },
       "detection": {
         "label": "Detectie",
-        "intro": "Hoe een cyclus wordt gedetecteerd als starten, lopen en eindigen."
+        "intro": "Hoe het starten, lopen en eindigen van een cyclus wordt gedetecteerd."
       },
       "matching": {
         "label": "Overeenkomst",
         "intro": "Hoe voltooide cycli worden gekoppeld aan aangeleerde profielen en gelabeld."
       },
       "timing": {
-        "label": "Timing en waakhond",
-        "intro": "Achtergrondcadans, de offline waakhond en huishouding."
+        "label": "Timing en watchdog",
+        "intro": "Achtergrondritme, de offline watchdog en opschoning."
       },
       "anti_wrinkle": {
         "label": "Anti-rimpel",
@@ -1078,7 +1084,7 @@
       },
       "triggers": {
         "label": "Triggers en deur",
-        "intro": "Optionele externe signalen: een eindtrigger, een deursensor, een pauzeschakelaar en de losherinnering."
+        "intro": "Optionele externe signalen: een eindtrigger, een deursensor, een pauzeschakelaar en de uitlaadherinnering."
       },
       "notifications": {
         "label": "Meldingen",
@@ -1086,7 +1092,7 @@
       },
       "ml_training": {
         "label": "ML-training",
-        "intro": "Meld u aan voor slimme modellen die de detectie en timing op dit apparaat personaliseren."
+        "intro": "Optionele slimme modellen die detectie en timing personaliseren voor dit apparaat."
       }
     },
     "setting": {
@@ -1115,7 +1121,7 @@
         "label": "Stopdrempel"
       },
       "min_off_gap": {
-        "label": "Min Uit-afstand"
+        "label": "Min. uit-pauze"
       },
       "start_duration_threshold": {
         "label": "Startduur"
@@ -1163,7 +1169,7 @@
         "label": "Maximale duurverhouding"
       },
       "profile_duration_tolerance": {
-        "label": "Profiel Duur Tolerantie"
+        "label": "Profielduurtolerantie"
       },
       "duration_tolerance": {
         "label": "Schattingstolerantie"
@@ -1184,13 +1190,13 @@
         "label": "Time-out bij geen update"
       },
       "progress_reset_delay": {
-        "label": "Voortgang reset vertraging"
+        "label": "Vertraging voortgangsreset"
       },
       "auto_maintenance": {
         "label": "Automatisch onderhoud (nachtelijke schoonmaak)"
       },
       "expose_debug_entities": {
-        "label": "Debug-entiteiten blootleggen"
+        "label": "Debug-entiteiten beschikbaar maken"
       },
       "save_debug_traces": {
         "label": "Foutopsporingssporen opslaan"
@@ -1205,7 +1211,7 @@
         "label": "Maximale duur"
       },
       "anti_wrinkle_exit_power": {
-        "label": "Drempel voor verlaten"
+        "label": "Vermogensdrempel voor verlaten"
       },
       "delay_start_detect_enabled": {
         "label": "Schakel uitgestelde startdetectie in"
@@ -1241,16 +1247,16 @@
         "label": "Duur vastgelopen pomp"
       },
       "notify_start_services": {
-        "label": "Diensten starten"
+        "label": "Startdiensten"
       },
       "notify_finish_services": {
-        "label": "Voltooi diensten"
+        "label": "Voltooiingsdiensten"
       },
       "notify_live_services": {
         "label": "Live voortgangsdiensten"
       },
       "notify_people": {
-        "label": "Mensen (alleen voor thuis)"
+        "label": "Personen (voor 'Alleen wanneer thuis')"
       },
       "notify_only_when_home": {
         "label": "Alleen melden als u thuis bent"
@@ -1280,22 +1286,22 @@
         "label": "Meldingspictogram"
       },
       "notify_start_message": {
-        "label": "Bericht starten"
+        "label": "Startbericht"
       },
       "notify_finish_message": {
-        "label": "Bericht voltooien"
+        "label": "Voltooiingsbericht"
       },
       "notify_pre_complete_message": {
-        "label": "Vooraf voltooid bericht"
+        "label": "Bericht vóór voltooiing"
       },
       "notify_reminder_message": {
         "label": "Herinneringsbericht"
       },
       "notify_channel": {
-        "label": "Android Kanaal (start/live)"
+        "label": "Android-kanaal (start/live)"
       },
       "notify_finish_channel": {
-        "label": "Android Kanaal (voltooid)"
+        "label": "Android-kanaal (voltooid)"
       },
       "energy_price_entity": {
         "label": "Energieprijs-entiteit"

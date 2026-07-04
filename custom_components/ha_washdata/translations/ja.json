@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "すべての設定 (検出、マッチング、タイミング、通知、プロファイル、サイクル) は、WashData パネルで利用できます。このフォームは、パワー センサー、デバイス タイプ、またはスタンバイしきい値を変更する場合にのみ使用してください。",
         "data": {
+          "name": "デバイス名",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -631,16 +632,16 @@
       "maintenance": "メンテナンスアクション",
       "export_import": "エクスポート/インポート",
       "logs": "ログ",
-      "my_preferences": "私の好み",
+      "my_preferences": "個人設定",
       "access_control": "アクセス制御",
       "ml_smart_learning": "スマートラーニング",
       "ml_settings_card": "設定",
       "ml_matching_tuning": "プログラムマッチングの微調整",
-      "display": "画面",
+      "display": "表示",
       "status_graph": "ステータスグラフ",
       "diagnostics_pref": "診断",
       "logs_diagnostics": "診断",
-      "process_history": "プロセス履歴",
+      "process_history": "処理履歴",
       "clear_debug": "デバッグトレースをクリアする",
       "wipe_history": "履歴を消去",
       "automations": "自動化",
@@ -667,10 +668,10 @@
       "status": "状態",
       "date": "日付",
       "confidence": "信頼度",
-      "health": "健康",
+      "health": "状態",
       "cost": "料金",
       "program": "プログラム",
-      "cycle_health": "サイクルの健康",
+      "cycle_health": "サイクルの状態",
       "activity": "活動",
       "unlabelled": "ラベルなし",
       "unlabelled_paren": "(ラベルなし)",
@@ -691,8 +692,8 @@
       "resulting_profile": "結果として得られるプロファイル",
       "new_profile_name": "新しいプロファイル名",
       "save_mode": "セーブモード",
-      "head_trim": "ヘッドトリム (複数可)",
-      "tail_trim": "テールトリム (複数可)",
+      "head_trim": "ヘッドトリム（秒）",
+      "tail_trim": "テールトリム（秒）",
       "gap_s": "ギャップ",
       "start": "開始",
       "end": "終了",
@@ -712,7 +713,7 @@
       "mode_existing_profile": "既存のプロファイルに追加",
       "auto_fine_tune_on": "自動微調整オン ({hour}:00 頃)",
       "auto_fine_tune_off": "自動微調整オフ",
-      "last_checked": "最後にチェックした内容:",
+      "last_checked": "最終確認:",
       "remove_label": "- ラベルを剥がす -",
       "create_new_profile": "+ 新しいプロファイルを作成…",
       "read_only": "読み取り専用",
@@ -722,7 +723,7 @@
       "file_kb": "ファイル (kB)",
       "label": "ラベル",
       "seconds_from_start": "開始から数秒",
-      "clock_time": "時計の時間",
+      "clock_time": "時刻",
       "ungrouped": "グループ化されていない"
     },
     "toast": {
@@ -737,7 +738,7 @@
       "profile_created": "プロフィール「{name}」が作成されました",
       "profile_deleted": "プロフィール「{name}」が削除されました",
       "profile_renamed": "プロファイルの名前が変更されました",
-      "phases_saved": "保存されたフェーズ",
+      "phases_saved": "フェーズが保存されました",
       "phase_created": "フェーズ「{name}」が作成されました",
       "phase_deleted": "フェーズ「{name}」が削除されました",
       "phase_updated": "フェーズが更新されました",
@@ -755,7 +756,7 @@
       "cycle_deleted": "サイクルが削除されました",
       "cycles_deleted": "{count} サイクルが削除されました",
       "cycle_trimmed": "サイクルをトリミングしました",
-      "cycles_merged": "統合されたサイクル",
+      "cycles_merged": "サイクルが統合されました",
       "review_saved": "レビューが保存されました",
       "feedback_confirmed": "フィードバックが確認されました",
       "feedback_dismissed": "フィードバックは却下されました",
@@ -850,8 +851,8 @@
       "import_intro": "エクスポートされたファイルをロードするか、以下の JSON ペイロードを貼り付けます。",
       "auto_label_intro": "一致信頼度がしきい値をクリアするラベルのないサイクルにプロファイルを割り当てます。",
       "enough_data": "学習するのに十分なデータ ({current}/{min} サイクル)。",
-      "collecting_data": "データを収集しています — 微調整を開始できるようになるまでに、{need}さらにサイクル{plural}します ({current}/{min})。",
-      "updated": "{time}を更新しました",
+      "collecting_data": "データを収集中 — 微調整を開始するにはあと {need} サイクル{plural}必要です ({current}/{min})。",
+      "updated": "{time} に更新",
       "appliance_monitor": "アプライアンスモニター",
       "ml_loading": "ML を読み込み中…",
       "review_in_settings": "設定で確認する",
@@ -865,7 +866,12 @@
       "unsure_detected_prefix": "WashData が検出したかどうかは不明",
       "no_suggestions": "積極的な提案はありません。",
       "no_profiles_overlay": "オーバーレイするプロファイルがありません。",
-      "compare_cycles_title": "{count} サイクルを比較します"
+      "compare_cycles_title": "{count} サイクルを比較します",
+      "profiles_intro": "プロファイルをクリックすると、統計・フェーズ・整理が表示されます。ほぼ同一のプログラム（同じ形状・時間、異なる温度またはすすぎ回転数）をグループ化して、マッチングが確実に区別できるようにします。",
+      "search_placeholder": "設定を検索…",
+      "automations_intro": "WashDataは{start} / {end}イベントを発火し、エンティティを公開します。通知やアクションは通常のHome Assistantオートメーションとして作成することをお勧めします。このデバイスを使用するオートメーションは以下に表示されます。",
+      "notify_services_hint": "{entity}サービスIDを使用してください（複数の場合はカンマ区切り）。テンプレート変数: {vars}。",
+      "rbac_hint": "オフの場合、すべてのHome Assistantユーザーがフルアクセスを持ちます（デフォルト）。管理者は常にフルアクセスを持ち、全員を管理できます。"
     },
     "section": {
       "basic": {
@@ -901,7 +907,7 @@
         "intro": "サイクル イベントについての通知をいつ、どのように受け取るかを設定します。"
       },
       "ml_training": {
-        "label": "機械学習トレーニング",
+        "label": "MLトレーニング",
         "intro": "このデバイスの検出とタイミングをパーソナライズするオプトイン スマート モデル。"
       }
     },
@@ -940,7 +946,7 @@
         "label": "デバイスの種類"
       },
       "power_sensor": {
-        "label": "パワーセンサー"
+        "label": "電力センサー"
       },
       "min_power": {
         "label": "最小電力"
@@ -1009,7 +1015,7 @@
         "label": "プロファイル持続時間の許容範囲"
       },
       "duration_tolerance": {
-        "label": "許容誤差の推定"
+        "label": "推定誤差許容値"
       },
       "auto_label_confidence": {
         "label": "自動ラベル付けの信頼性"
@@ -1039,7 +1045,7 @@
         "label": "しわ防止検出を有効にする"
       },
       "anti_wrinkle_max_power": {
-        "label": "最大の抗シワ力"
+        "label": "しわ防止最大電力"
       },
       "anti_wrinkle_max_duration": {
         "label": "最大持続時間"
@@ -1066,7 +1072,7 @@
         "label": "スイッチエンティティ"
       },
       "notify_unload_delay_minutes": {
-        "label": "アンロードのナグ遅延"
+        "label": "取り出し催促の遅延"
       },
       "pump_stuck_duration": {
         "label": "ポンプのスタック期間"
@@ -1126,13 +1132,13 @@
         "label": "エネルギー価格エンティティ"
       },
       "ml_training_hour": {
-        "label": "時間単位で学習"
+        "label": "学習実行時間"
       },
       "ml_training_min_cycles": {
         "label": "最初に必要なサイクル"
       },
       "ml_training_interval_days": {
-        "label": "最大でも毎回チェックしてください"
+        "label": "最大確認間隔（日）"
       }
     },
     "tab": {
@@ -1140,12 +1146,12 @@
       "history": "サイクル",
       "profiles": "プロファイル",
       "settings": "設定",
-      "ml": "機械学習トレーニング",
-      "advanced": "高度な",
+      "ml": "MLトレーニング",
+      "advanced": "詳細",
       "diagnostics": "診断",
       "pp_overview": "概要",
       "pp_phases": "フェーズ",
-      "pp_cleanup": "掃除",
+      "pp_cleanup": "整理",
       "pp_manage": "管理",
       "subtab_profiles": "プロファイル",
       "subtab_phase_catalog": "フェーズカタログ"
@@ -1159,43 +1165,43 @@
       "add": "追加",
       "rebuild": "エンベロープを再構築する",
       "record": "記録を開始",
-      "compare": "比較する",
+      "compare": "比較",
       "confirm": "確認",
       "discard": "破棄",
       "export": "エクスポート",
       "import": "インポート",
       "merge": "マージ",
       "apply": "適用",
-      "refresh": "リフレッシュ",
+      "refresh": "更新",
       "create": "作成",
       "select": "選択",
       "done": "完了",
       "reset": "リセット",
       "trim": "トリム",
-      "split": "スプリット",
+      "split": "分割",
       "review": "レビュー",
-      "inspect": "検査する",
+      "inspect": "検査",
       "label": "ラベル",
       "save_settings": "設定の保存",
       "new_profile": "+ 新しいプロファイル",
       "new_group": "+ 新しいグループ",
-      "apply_label": "ラベルを適用する",
+      "apply_label": "ラベルを付ける",
       "run_auto_label": "自動ラベルの実行",
       "save_review": "レビューを保存",
       "apply_trim": "トリムを適用",
-      "apply_split": "分割を適用する",
+      "apply_split": "分割を適用",
       "process_recording": "記録を保存",
       "stop": "停止",
-      "process": "プロセス",
+      "process": "処理",
       "add_device": "+ デバイスを追加",
-      "train_now": "今すぐトレーニングする",
-      "reset_to_defaults": "デフォルトにリセットする",
+      "train_now": "今すぐトレーニング",
+      "reset_to_defaults": "デフォルトにリセット",
       "reset_to_builtin": "内蔵モデルにリセット",
       "save_preferences": "設定を保存",
       "save_panel_settings": "パネル設定の保存",
       "save_access_control": "アクセス制御の保存",
       "auto_label_cycles": "自動ラベル付けサイクル",
-      "run_analysis": "🔍 提案分析を実行する",
+      "run_analysis": "🔍 提案分析を実行",
       "apply_all": "全て適用",
       "show_only": "表示のみ",
       "dismiss": "却下する",
@@ -1206,7 +1212,7 @@
       "export_json": "JSON にエクスポート",
       "import_json": "JSONからインポート",
       "correct": "正しい…",
-      "ignore": "無視する",
+      "ignore": "無視",
       "add_phase": "+ フェーズを追加",
       "new_phase": "+ 新しいフェーズ",
       "delete_profile": "プロファイルを削除",
@@ -1230,7 +1236,7 @@
       "new_automation": "＋ 新しい自動化",
       "from_template": "テンプレートから▾",
       "on_cycle_started": "サイクル開始時",
-      "on_cycle_finished": "サイクルが終了しました",
+      "on_cycle_finished": "サイクル終了時",
       "save_group": "グループの保存"
     },
     "badge": {
@@ -1240,7 +1246,7 @@
       "auto": "(自動検出)",
       "improving": "↗ 改善中",
       "declining": "↘ 減少",
-      "steady": "→安定",
+      "steady": "→ 安定",
       "using_tuned": "調整された重みの使用",
       "using_defaults": "出荷時のデフォルトを使用する",
       "built_in_tag": "内蔵"
@@ -1253,7 +1259,7 @@
       "ambiguous": "あいまいな",
       "clear": "クリア",
       "working": "処理中…",
-      "recording": "録音中…",
+      "recording": "記録中…",
       "ready": "処理の準備ができました",
       "idle": "アイドル状態",
       "auto_detect": "自動検出",
@@ -1265,8 +1271,8 @@
       "fit_good": "良い",
       "fit_fair": "普通",
       "fit_weak": "弱い",
-      "fit_slight": "わずか",
-      "fit_word": "フィット",
+      "fit_slight": "ごく弱",
+      "fit_word": "適合度",
       "fine_tuned_at": "微調整された {when}",
       "personalized": "● このマシンに合わせて最適化済み",
       "builtin_models": "● 組み込みモデルの使用"

@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "כל ההגדרות - גילוי, התאמה, תזמון, הודעות, פרופילים ומחזוריים - זמינים בלוח נתונים של Washdata. השתמש טופס זה רק כדי לשנות את חיישן הכוח, סוג המכשיר, או לעמוד על סף.",
         "data": {
+          "name": "שם התקן",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -623,11 +624,11 @@
       "panel_settings": "הגדרות פאנל (כל המשתמשים)",
       "ml_learned": "מה שWashData למדה",
       "status": "סטטוס",
-      "live_power": "כוח חי",
+      "live_power": "הספק בזמן אמת",
       "manual_recording": "הקלטה ידנית",
       "tools_and_data": "כלים ונתונים",
       "phase_catalog": "קטלוג שלבים",
-      "storage_stats": "אחסון Stats",
+      "storage_stats": "סטטיסטיקות אחסון",
       "maintenance": "פעולות תחזוקה",
       "export_import": "ייצוא / ייבוא",
       "logs": "יומנים",
@@ -635,7 +636,7 @@
       "access_control": "בקרת גישה",
       "ml_smart_learning": "למידה חכמה",
       "ml_settings_card": "הגדרות",
-      "ml_matching_tuning": "תוכנית-התאמה טובה",
+      "ml_matching_tuning": "כוונון עדין להתאמת תוכניות",
       "display": "תצוגה",
       "status_graph": "גרף סטטוס",
       "diagnostics_pref": "אבחון",
@@ -644,10 +645,10 @@
       "clear_debug": "נקה עקבות ניפוי באגים",
       "wipe_history": "מחיקת היסטוריה",
       "automations": "אוטומציות",
-      "automation_open": "פתוח בעורך האוטומציה",
-      "automation_delete": "למחוק את האוטומציה",
+      "automation_open": "פתח בעורך האוטומציה",
+      "automation_delete": "מחק את האוטומציה",
       "automation_needs_review": "מחזור זה צריך סקירה",
-      "automation_review_this_cycle": "בדוק את המעגל הזה",
+      "automation_review_this_cycle": "בדוק מחזור זה",
       "no_automations": "אין אוטומציות שמתייחסות למכשיר זה עדיין."
     },
     "lbl": {
@@ -658,7 +659,7 @@
       "show_expected": "הצג עקומה צפויה (פרופיל תואם, כתום)",
       "show_raw": "הצג קריאות חיישן גולמי (לא מוחלק, אפור)",
       "show_debug": "הצג כרטיס ניפוי באגים חי בדף הסטטוס (ביטחון, עמימות, מועמדים מובילים)",
-      "power": "כוח",
+      "power": "הספק",
       "progress": "התקדמות",
       "remaining": "נותר",
       "duration": "משך",
@@ -666,29 +667,29 @@
       "profile": "פרופיל",
       "status": "סטטוס",
       "date": "תאריך",
-      "confidence": "אמון",
+      "confidence": "ביטחון",
       "health": "בריאות",
       "cost": "עלות",
-      "program": "תכנית",
+      "program": "תוכנית",
       "cycle_health": "בריאות מחזור",
       "activity": "פעילות",
       "unlabelled": "ללא תווית",
-      "unlabelled_paren": "(לא כתוב)",
+      "unlabelled_paren": "(ללא תווית)",
       "emphasis": "דגש",
-      "default": "בְּרִירַת מֶחדָל",
+      "default": "ברירת מחדל",
       "in_use": "בשימוש",
       "profile_name": "שם פרופיל",
       "ref_cycle": "מחזור ייחוס (אופציונלי)",
       "phase_name": "שם שלב",
       "description": "תיאור",
       "correct_profile": "פרופיל נכון",
-      "load_from_file": "מטען מקובץ",
+      "load_from_file": "טען מקובץ",
       "json_data": "נתונים JSON",
-      "expected_duration": "משך הזמן (min)",
+      "expected_duration": "משך זמן צפוי (דקות)",
       "rename_profile": "שנה שם פרופיל",
-      "select_profile": "פרופיל נבחר",
+      "select_profile": "בחר פרופיל",
       "confidence_threshold": "סף ביטחון",
-      "resulting_profile": "תוצאות פרופיל",
+      "resulting_profile": "הפרופיל המתקבל",
       "new_profile_name": "שם פרופיל חדש",
       "save_mode": "מצב שמירה",
       "head_trim": "חיתוך ראשי (s)",
@@ -702,18 +703,18 @@
       "tags": "תגיות",
       "notes": "הערות",
       "cycle_date_display": "תצוגת תאריך מחזור",
-      "refresh_interval": "מרווחי מרעננים (s)",
+      "refresh_interval": "מרווח רענון (s)",
       "panel_default_tab": "לשונית ברירת מחדל",
-      "hide_tabs": "כרטיסיות נסתרות עבור Non-מנהלים",
-      "enable_access_control": "בקרת גישה למשתמש",
-      "administrators": "מנהל",
-      "default_other": "Default (מכשירים אחרים)",
+      "hide_tabs": "הסתר כרטיסיות ממשתמשים שאינם מנהלים",
+      "enable_access_control": "הפעל בקרת גישה לפי משתמש",
+      "administrators": "מנהלי מערכת",
+      "default_other": "ברירת מחדל (מכשירים אחרים)",
       "mode_new_profile": "צור פרופיל חדש",
       "mode_existing_profile": "הוסף לפרופיל קיים",
       "auto_fine_tune_on": "כוונון אוטומטי מופעל (בסביבות {hour}:00)",
       "auto_fine_tune_off": "כוונון עדין אוטומטי כבוי",
       "last_checked": "בדיקה אחרונה:",
-      "remove_label": "הסרת התווית -",
+      "remove_label": "- הסר תווית -",
       "create_new_profile": "+ צור פרופיל חדש...",
       "read_only": "קריאה בלבד",
       "actions": "פעולות",
@@ -726,10 +727,10 @@
       "ungrouped": "לא מקובץ"
     },
     "toast": {
-      "settings_saved": "הגדרות נשמרות; אינטגרציה מחדש",
-      "import_successful": "ייבוא מוצלח; אינטגרציה מחדש",
-      "suggestions_applied": "הצעות ליישום; אינטגרציה reloading",
-      "ml_training_no_improvement": "אימון מלא: בסיס נשמר (ללא שיפור)",
+      "settings_saved": "ההגדרות נשמרו; האינטגרציה מתטענת מחדש",
+      "import_successful": "הייבוא הצליח; האינטגרציה מתטענת מחדש",
+      "suggestions_applied": "ההצעות יושמו; האינטגרציה מתטענת מחדש",
+      "ml_training_no_improvement": "האימון הושלם: הבסיס נשמר (ללא שיפור)",
       "could_not_load_cycle": "לא ניתן היה לטעון את המחזור: {error}",
       "preferences_saved": "ההעדפות נשמרו",
       "panel_settings_saved": "הגדרות הפאנל נשמרו",
@@ -757,9 +758,9 @@
       "cycle_trimmed": "מחזור נחתך",
       "cycles_merged": "מחזורים מוזגו",
       "review_saved": "הסקירה נשמרה",
-      "feedback_confirmed": "משוב שאושר",
+      "feedback_confirmed": "המשוב אושר",
       "feedback_dismissed": "המשוב נדחה",
-      "feedback_all_dismissed": "כל התגובות דחו",
+      "feedback_all_dismissed": "כל המשובים נדחו",
       "correction_submitted": "תיקון הוגש",
       "group_saved": "הקבוצה נשמרה",
       "group_deleted": "קבוצה נמחקה",
@@ -769,10 +770,10 @@
       "cycle_resumed": "המחזור חודש",
       "cycle_force_stopped": "המחזור נעצר בכוח",
       "ml_training_promoted": "ההכשרה הושלמה: {count} דגמים מקודמים",
-      "matching_reverted": "התאמת משקלים חזר לחדלות",
-      "models_reverted": "מודלים של On-device חזרו לבסיס",
+      "matching_reverted": "משקלי ההתאמה הוחזרו לברירות המחדל",
+      "models_reverted": "מודלי המכשיר הוחזרו לקו הבסיס",
       "analysis_complete": "הניתוח הושלם: {count} הצעות",
-      "analysis_complete_none": "ניתוח שלם: לא הצעות חדשות",
+      "analysis_complete_none": "הניתוח הושלם: אין הצעות חדשות",
       "debug_cleared": "ניקה {count} עקבות ניפוי באגים",
       "all_wiped": "כל המידע נמחק",
       "no_split_found": "לא נמצאו פערים נפרדים",
@@ -812,16 +813,16 @@
     },
     "msg": {
       "no_devices": "עדיין לא הוגדרו מכשירי WashData.",
-      "live_chart_loading": "תרשים כוח חי מופיע כקריאה מגיעה.",
+      "live_chart_loading": "תרשים ההספק בזמן אמת מופיע עם הגעת הנתונים.",
       "no_profiles_yet": "עדיין אין פרופילים. צור אחד ממחזור מסומן.",
       "no_logs": "עדיין אין תקליטי יומן.",
-      "no_envelope": "עדיין לא מעטפה - לבנות מחדש לאחר מחזורי תוויות.",
+      "no_envelope": "עדיין אין מעטפה – בנה מחדש לאחר תיוג מחזורים.",
       "no_cycles_profile": "אין מחזורים לפרופיל הזה.",
       "ml_learned_intro": "מודלים מותאמים היטב למכונה זו. כל דבר שאינו רשום משתמש במודל המובנה אמין.",
       "ml_intro": "WashData מגיע עם מודלים חכמים שמזהים מחזורים, מתאימים תוכניות ומעריכים זמן ואנרגיה — הם עובדים מיד.",
       "matching_tuning_intro": "בעת למידה, WashData גם מכוון כמה משקל מיוחס לצורת המחזור לעומת משכו ואנרגייתו בתהליך ההתאמה.",
       "phase_catalog_intro": "מקטעים בעלי שם של מחזור (שטיפה מוקדמת, חימום, סחיטה...). הקצה אותם לפרופיל מלוח הבקרה שלו.",
-      "cleanup_intro": "כל מחזור שכותרתו היה overlaid. טיק אאוטלריה ומחק כדי לנקות את הפרופיל.",
+      "cleanup_intro": "כל המחזורים המתויגים מוצגים בשכבות. סמן ערכים חריגים ומחק אותם לניקוי הפרופיל.",
       "merge_intro": "המחזורים שנבחרו משולבים לתוך אחד (סדר הכרונולוגי; פערים מלאים 0 W). בחרו את הפרופיל המתקבל",
       "see_recorder": "ראה ווידג'ט הקלטה למטה",
       "review_to_cycles": "פתח את תור סקירת המחזורים",
@@ -833,26 +834,26 @@
       "no_phases": "שום שלב לא מוגדר.",
       "no_phases_assigned": "אין שלב שהוקצה.",
       "no_split_points": "עדיין לא נקודות מפוצלות.",
-      "no_envelope_overlay": "אין מעטפה זמינה לOverlay.",
+      "no_envelope_overlay": "אין מעטפה זמינה לשכבה.",
       "no_other_users": "לא נמצאו משתמשים אחרים.",
-      "maintenance_requires_access": "תחזוקה ויצוא/ספורט דורשים גישה מלאה.",
+      "maintenance_requires_access": "תחזוקה וייצוא/ייבוא דורשים גישה מלאה.",
       "loading_curve": "טוען עקומה...",
       "compare_selected_cycles": "מחזורים נבחרים (מוצקים) — הצג / הסתר",
       "compare_overlay_profiles": "פרופילים לשכב (עמום)",
       "no_profiles_compare": "אין פרופילים להשוות.",
       "saving_triggers_reload": "חיסכון מעורר עומס אינטגרציה. ישויות עלולות להראות בקצרה כבלתי זמינות.",
       "prefs_personal": "אלה חלים על החשבון שלך בלבד.",
-      "no_match_yet": "אין ניסיון מתאים - המאוכלסים האלה במהלך מחזור ריצה.",
+      "no_match_yet": "לא בוצע ניסיון התאמה עדיין – הנתונים יופיעו במהלך מחזור פעיל.",
       "no_fine_tuned": "שום דבר לא עבר כוונון עדין עדיין — WashData משתמש במודלים המובנים שלו.",
       "ml_settings_intro": "שני מתגים עצמאיים: אחד מחיל את המודלים בזמן שמחזור פועל, השני מאפשר ל-WashData לכוון אותם לפי המכונה שלך לאורך זמן.",
-      "phase_ranges_intro": "טווחי שלב (כמה דקות ממחזור מתחילים) מלוטשים על העקומה הממוצעת. ערוך ערכים לחיים תצוגה מקדימה",
+      "phase_ranges_intro": "טווחי שלב (דקות מתחילת המחזור) מוצגים על העקומה הממוצעת. ערוך ערכים לתצוגה מקדימה חיה.",
       "split_intro": "לחץ על הגרף כדי להוסיף או להסיר נקודה מפוצלת, או auto-detect על ידי פערים.",
       "trim_intro": "גרור את הידיות האדומות, או הכנס ערכים. כל מה שמחוץ לחלון יוסר.",
       "import_intro": "לטעון קובץ מייצא או להדביק מטען JSON למטה.",
       "auto_label_intro": "הקצה פרופילים למחזורים ללא תווית שרמת הביטחון שלהם בהתאמה עוברת את הסף.",
       "enough_data": "מספיק נתונים ללמוד מהם ({current}/{min} מחזורים).",
       "collecting_data": "איסוף נתונים - {need} מחזור נוסף{plural} לפני שניתן להתחיל בכוונון עדין ({current}/{min}).",
-      "updated": "עדכון {time}",
+      "updated": "עודכן {time}",
       "appliance_monitor": "מוניטור מכשיר",
       "ml_loading": "טעינה ML...",
       "review_in_settings": "סקירה בהגדרות",
@@ -866,11 +867,16 @@
       "unsure_detected_prefix": "WashData אינו בטוח שזיהה",
       "no_suggestions": "אין הצעות פעילות.",
       "no_profiles_overlay": "אין פרופילים לשכב.",
-      "compare_cycles_title": "השווה {count} מחזורים"
+      "compare_cycles_title": "השווה {count} מחזורים",
+      "profiles_intro": "לחץ על פרופיל לצפייה בנתונים סטטיסטיים, שלבים וניקוי. קבץ תוכניות כמעט זהות (אותה צורה/משך, טמפרטורה או סיבוב שונה) כדי שהזיהוי יבדיל ביניהן בצורה אמינה.",
+      "search_placeholder": "חיפוש הגדרות…",
+      "automations_intro": "WashData מפעיל אירועי {start} / {end} וחושף ישויות, לכן עדיף לבנות התראות ופעולות כאוטומציות רגילות של Home Assistant. אוטומציות המשתמשות במכשיר זה מופיעות למטה.",
+      "notify_services_hint": "השתמש במזהי שירות {entity} (מופרדים בפסיקים עבור מספר). משתני תבנית: {vars}.",
+      "rbac_hint": "כשהאפשרות כבויה, לכל משתמש Home Assistant יש גישה מלאה (ברירת מחדל). למנהלי מערכת תמיד יש גישה מלאה והם יכולים לנהל את כולם."
     },
     "section": {
       "basic": {
-        "intro": "זהות הליבה והכישורים הדרושים.",
+        "intro": "הזהות הבסיסית והגדרות החיוניות שרוב התצורות זקוקות להן.",
         "label": "יסוד"
       },
       "detection": {
@@ -882,11 +888,11 @@
         "label": "התאמה"
       },
       "timing": {
-        "intro": "צוהר רקע, כלב השמירה והמשק הבית הלא מקוון.",
+        "intro": "קצב הרקע, כלב השמירה הלא מקוון ופעולות הסדר.",
         "label": "תזמון & Watchdog"
       },
       "anti_wrinkle": {
-        "intro": "מצב Anti-wrinkle מזהה דופק יבש יותר לאחר שלב החום הראשי.",
+        "intro": "מצב נגד קמטים מזהה פולסים של סיבוב התוף לאחר שלב החימום הראשי.",
         "label": "נגד קמטים"
       },
       "delay": {
@@ -903,30 +909,30 @@
       },
       "ml_training": {
         "label": "אימון ML",
-        "intro": "מודלים חכמים של Opt-in כי זיהוי אישי ותזמון למכשיר זה."
+        "intro": "מודלים חכמים להצטרפות מרצון שמתאימים אישית את הזיהוי והתזמון למכשיר זה."
       }
     },
     "setting": {
       "auto_maintenance": {
-        "label": "תחזוקה אוטומטית (לילה נקייה)"
+        "label": "תחזוקה אוטומטית (ניקוי לילי)"
       },
       "external_end_trigger_enabled": {
         "label": "הפעל טריגר סיום חיצוני"
       },
       "external_end_trigger_inverted": {
-        "label": "Invert חיצוני טריגר (trigger on off)"
+        "label": "הפוך טריגר חיצוני (הפעל בכיבוי)"
       },
       "pause_cuts_power": {
         "label": "השהיה גם מנתקת חשמל (דרך מתג)"
       },
       "notify_people": {
-        "label": "אנשים (רק כשבית)"
+        "label": "אנשים (רק כשבבית)"
       },
       "notify_only_when_home": {
-        "label": "רק כשהבית"
+        "label": "הודע רק כשבבית"
       },
       "energy_price_static": {
-        "label": "מחיר אנרגיה סטטי (per קילוואט)"
+        "label": "מחיר אנרגיה סטטי (לקילוואט-שעה)"
       },
       "enable_ml_models": {
         "label": "החל מודלים חכמים במהלך מחזור"
@@ -944,7 +950,7 @@
         "label": "חיישן הספק"
       },
       "min_power": {
-        "label": "כוח מינימום"
+        "label": "הספק מינימלי"
       },
       "off_delay": {
         "label": "עיכוב כיבוי"
@@ -953,13 +959,13 @@
         "label": "קבוצה תחת התקן"
       },
       "start_threshold_w": {
-        "label": "פתח את Threshold"
+        "label": "סף התחלה"
       },
       "stop_threshold_w": {
-        "label": "לעצור את Threshold"
+        "label": "סף עצירה"
       },
       "min_off_gap": {
-        "label": "Min Off Gap"
+        "label": "פרק זמן מינימלי בכיבוי"
       },
       "start_duration_threshold": {
         "label": "משך סף התחלה"
@@ -1007,19 +1013,19 @@
         "label": "יחס משך מקסימלי"
       },
       "profile_duration_tolerance": {
-        "label": "פרופיל משך tolerance"
+        "label": "סבילות משך הפרופיל"
       },
       "duration_tolerance": {
-        "label": "הסובלנות"
+        "label": "סבילות הערכה"
       },
       "auto_label_confidence": {
         "label": "ביטחון תיוג אוטומטי"
       },
       "learning_confidence": {
-        "label": "לימוד אמון"
+        "label": "ביטחון הלמידה"
       },
       "suppress_feedback_notifications": {
-        "label": "דחק הודעות משוב"
+        "label": "השתק התראות משוב"
       },
       "watchdog_interval": {
         "label": "מרווח כלב שמירה"
@@ -1082,7 +1088,7 @@
         "label": "שירותי התקדמות חי"
       },
       "notify_fire_events": {
-        "label": "שלח אירועי HA להתראות"
+        "label": "שלח אירועי HA עבור התראות"
       },
       "notify_before_end_minutes": {
         "label": "אזהרה מוקדמת"
@@ -1118,10 +1124,10 @@
         "label": "מסר מזכיר"
       },
       "notify_channel": {
-        "label": "ערוץ (Start / Living)"
+        "label": "ערוץ Android (התחלה/חי)"
       },
       "notify_finish_channel": {
-        "label": "ערוץ (finish)"
+        "label": "ערוץ Android (סיום)"
       },
       "energy_price_entity": {
         "label": "ישות מחיר אנרגיה"
@@ -1146,7 +1152,7 @@
       "diagnostics": "אבחון",
       "pp_overview": "סקירה",
       "pp_phases": "שלבים",
-      "pp_cleanup": "ניקוי נקי",
+      "pp_cleanup": "ניקוי",
       "pp_manage": "ניהול",
       "subtab_profiles": "פרופילים",
       "subtab_phase_catalog": "קטלוג שלבים"
@@ -1159,38 +1165,38 @@
       "edit": "ערוך",
       "add": "הוסף",
       "rebuild": "בנה מחדש מעטפות",
-      "record": "תחילת ההקלטה",
-      "compare": "השוואה",
+      "record": "התחל הקלטה",
+      "compare": "השווה",
       "confirm": "אישור",
-      "discard": "לְהַשְׁלִיך",
-      "export": "יצוא",
-      "import": "יבוא",
+      "discard": "בטל",
+      "export": "ייצא",
+      "import": "ייבא",
       "merge": "מזג",
       "apply": "החל",
-      "refresh": "מרעננים",
-      "create": "יצירת",
+      "refresh": "רענן",
+      "create": "צור",
       "select": "בחר",
-      "done": "עשה",
+      "done": "סיום",
       "reset": "איפוס",
-      "trim": "מְטוּפָּח",
+      "trim": "קצץ",
       "split": "פיצול",
-      "review": "סְקִירָה",
-      "inspect": "לִבדוֹק",
-      "label": "תוויות",
+      "review": "סקור",
+      "inspect": "בדוק",
+      "label": "תייג",
       "save_settings": "שמור הגדרות",
       "new_profile": "+ פרופיל חדש",
       "new_group": "+ קבוצה חדשה",
       "apply_label": "החל תווית",
       "run_auto_label": "הפעל Auto-Label",
       "save_review": "שמור סקירה",
-      "apply_trim": "החל חיתוך",
+      "apply_trim": "החל קציצה",
       "apply_split": "החל פיצול",
       "process_recording": "שמור הקלטה",
       "stop": "עצור",
       "process": "תהליך",
       "add_device": "+ הוספת מכשיר",
       "train_now": "אמן עכשיו",
-      "reset_to_defaults": "איפוס מחדל",
+      "reset_to_defaults": "אפס לברירות מחדל",
       "reset_to_builtin": "אפס למודלים מובנים",
       "save_preferences": "שמור העדפות",
       "save_panel_settings": "שמור הגדרות פאנל",
@@ -1219,9 +1225,9 @@
       "force_stop": "עצור בכוח",
       "save_phases": "שמור שלבים",
       "auto_detect_split": "זיהוי אוטומטי",
-      "clear_splits": "בָּרוּר",
+      "clear_splits": "נקה",
       "submit_correction": "הגשת תיקון",
-      "import_overwrite": "ייבוא (כולל נתונים)",
+      "import_overwrite": "ייבוא (מחליף נתונים)",
       "use": "השתמש",
       "manage": "ניהול",
       "remove": "להסיר",
@@ -1229,14 +1235,14 @@
       "trim_split": "Trim / פיצול",
       "convert_to_automation": "המרת אוטומציה",
       "new_automation": "＋ אוטומציה חדשה",
-      "from_template": "תבנית ▾",
+      "from_template": "מתבנית ▾",
       "on_cycle_started": "מחזור התחיל",
-      "on_cycle_finished": "על מחזור נגמר",
+      "on_cycle_finished": "בסיום המחזור",
       "save_group": "שמור קבוצה"
     },
     "badge": {
       "poor_fit": "התאמה ירודה",
-      "fair_fit": "התאמה סבירה",
+      "fair_fit": "התאמה ממוצעת",
       "manual": "(נבחר ידנית)",
       "auto": "(זוהה אוטומטית)",
       "improving": "↗ משתפר",
@@ -1247,13 +1253,13 @@
       "built_in_tag": "מובנה"
     },
     "status": {
-      "completed": "שלם",
-      "interrupted": "הפרעה",
+      "completed": "הושלם",
+      "interrupted": "הופסק",
       "force_stopped": "נעצר בכוח",
       "active": "פעיל",
       "ambiguous": "עמום",
-      "clear": "בָּרוּר",
-      "working": "עבודה...",
+      "clear": "ברור",
+      "working": "עובד...",
       "recording": "מקליט...",
       "ready": "מוכן לעיבוד",
       "idle": "לא פעיל",
@@ -1267,10 +1273,10 @@
       "fit_fair": "בינוני",
       "fit_weak": "חַלָשׁ",
       "fit_slight": "קל",
-      "fit_word": "מתאים",
+      "fit_word": "התאמה",
       "fine_tuned_at": "כוונון עדין {when}",
-      "personalized": "• מותאם אישית למכונה זו",
-      "builtin_models": "שימוש במודלים בנויים"
+      "personalized": "● מותאם אישית למכונה זו",
+      "builtin_models": "● שימוש במודלים המובנים"
     },
     "modal": {
       "label_cycle": "תייג מחזור",
@@ -1311,11 +1317,11 @@
     },
     "trend": {
       "up": "מגמה עולה",
-      "down": "טרנד למטה"
+      "down": "מגמה יורדת"
     },
     "pref": {
-      "date_relative": "Relative (למשל לפני שעתיים)",
-      "date_absolute": "Absolute (למשל 14:32 ב 2 ביולי)"
+      "date_relative": "יחסי (לדוגמה: לפני שעתיים)",
+      "date_absolute": "מוחלט (לדוגמה: 14:32 ב-2 ביולי)"
     },
     "log": {
       "all_levels": "כל הרמות"

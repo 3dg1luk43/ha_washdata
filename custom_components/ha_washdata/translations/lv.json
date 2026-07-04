@@ -53,6 +53,7 @@
         "title": "WashData iestatījumi",
         "description": "Visi iestatījumi -- noteikšana, saskaņošana, laiks, paziņojumi, profili un cikli -- ir pieejami WashData panelī. Izmantojiet šo veidlapu tikai, lai mainītu jaudas sensoru, ierīces veidu vai gaidstāves slieksni.",
         "data": {
+          "name": "Ierīces nosaukums",
           "device_type": "Ierīces veids",
           "power_sensor": "Jaudas sensors",
           "min_power": "Minimālās jaudas slieksnis (W)"
@@ -642,8 +643,8 @@
       "edit": "Rediģēt",
       "add": "Pievienot",
       "rebuild": "Pārbūvēt aploksnes",
-      "record": "Sāciet ierakstīšanu",
-      "compare": "Salīdziniet",
+      "record": "Sākt ierakstīšanu",
+      "compare": "Salīdzināt",
       "confirm": "Apstiprināt",
       "discard": "Izmest",
       "export": "Eksportēt",
@@ -657,7 +658,7 @@
       "reset": "Atiestatīt",
       "trim": "Apgriezt",
       "split": "Sadalīt",
-      "review": "Pārskats",
+      "review": "Pārskatīt",
       "inspect": "Pārbaudīt",
       "label": "Iezīmēt",
       "save_settings": "Saglabāt iestatījumus",
@@ -667,7 +668,7 @@
       "run_auto_label": "Palaist automātisko iezīmēšanu",
       "save_review": "Saglabāt atsauksmi",
       "apply_trim": "Piemērot apgriešanu",
-      "apply_split": "Lietot Split",
+      "apply_split": "Lietot sadalīšanu",
       "process_recording": "Saglabāt ierakstu",
       "stop": "Apturēt",
       "process": "Apstrādāt",
@@ -679,10 +680,10 @@
       "save_panel_settings": "Saglabāt paneļa iestatījumus",
       "save_access_control": "Saglabāt piekļuves kontroli",
       "auto_label_cycles": "Automātiskā ciklu iezīmēšana",
-      "run_analysis": "🔍 Palaidiet ieteikumu analīzi",
+      "run_analysis": "🔍 Palaist ieteikumu analīzi",
       "apply_all": "Lietot visu",
       "show_only": "Rādīt tikai",
-      "dismiss": "Atlaist",
+      "dismiss": "Noraidīt",
       "dismiss_all": "Noraidīt visu",
       "process_history": "Apstrādāt tūlīt",
       "clear_debug": "Notīrīt atkļūdošanas datus",
@@ -697,13 +698,13 @@
       "rebuild_envelope": "Pārbūvēt aploksni",
       "create_profile": "+ Izveidot profilu",
       "rec_stop": "Apturēt",
-      "pause_cycle": "Pauze",
+      "pause_cycle": "Pauzēt",
       "resume_cycle": "Atsākt",
       "force_stop": "Piespiedu apstāšanās",
       "save_phases": "Saglabāt fāzes",
       "auto_detect_split": "Automātiska noteikšana",
-      "clear_splits": "Skaidrs",
-      "submit_correction": "Iesniedziet labojumu",
+      "clear_splits": "Notīrīt",
+      "submit_correction": "Iesniegt labojumu",
       "import_overwrite": "Importēt (pārraksta datus)",
       "use": "Izmantot",
       "manage": "Pārvaldīt",
@@ -713,8 +714,8 @@
       "convert_to_automation": "Konvertēt uz automatizāciju",
       "new_automation": "＋ Jauna automatizācija",
       "from_template": "No veidnes ▾",
-      "on_cycle_started": "Cikls sākās",
-      "on_cycle_finished": "Cikls ir pabeigts",
+      "on_cycle_started": "Kad cikls sākas",
+      "on_cycle_finished": "Kad cikls beidzas",
       "save_group": "Saglabāt grupu"
     },
     "hdr": {
@@ -742,10 +743,10 @@
       "clear_debug": "Notīrīt atkļūdošanas pēdas",
       "wipe_history": "Dzēst vēsturi",
       "automations": "Automatizācijas",
-      "automation_open": "Atveriet automatizācijas redaktorā",
+      "automation_open": "Atvērt automatizācijas redaktorā",
       "automation_delete": "Dzēst šo automatizāciju",
       "automation_needs_review": "Šis cikls ir jāpārskata",
-      "automation_review_this_cycle": "Pārskatiet šo ciklu",
+      "automation_review_this_cycle": "Pārskatīt šo ciklu",
       "no_automations": "Vēl neviena automatizācija neatsaucas uz šo ierīci."
     },
     "lbl": {
@@ -779,7 +780,7 @@
       "json_data": "JSON dati",
       "expected_duration": "Paredzamais ilgums (min)",
       "rename_profile": "Pārdēvēt profilu",
-      "select_profile": "Atlasiet profilu",
+      "select_profile": "Atlasīt profilu",
       "confidence_threshold": "Pārliecības slieksnis",
       "resulting_profile": "Iegūtais profils",
       "new_profile_name": "Jauns profila nosaukums",
@@ -787,11 +788,11 @@
       "head_trim": "Galvas apgriešana (s)",
       "tail_trim": "Astes apgriešana (s)",
       "gap_s": "Atstarpe (s)",
-      "start": "Sākt",
+      "start": "Sākums",
       "end": "Beigas",
       "quality": "Kvalitāte",
       "golden_reference": "Reģistrēts atskaites cikls",
-      "compare_profiles": "Salīdziniet ar profiliem",
+      "compare_profiles": "Salīdzināt ar profiliem",
       "tags": "Tagi",
       "notes": "Piezīmes",
       "default_tab": "Noklusējuma cilne, atverot paneli",
@@ -811,7 +812,7 @@
       "auto_fine_tune_on": "automātiskā precizēšana ieslēgta (apmēram {hour}:00)",
       "auto_fine_tune_off": "automātiskā precizēšana izslēgta",
       "last_checked": "Pēdējoreiz pārbaudīts:",
-      "remove_label": "- Noņemiet etiķeti -",
+      "remove_label": "- Noņemt etiķeti -",
       "create_new_profile": "+ Izveidot jaunu profilu…",
       "read_only": "Tikai lasāms",
       "actions": "Darbības",
@@ -828,7 +829,7 @@
       "fair_fit": "viduvēja atbilstība",
       "manual": "(manuāli atlasīts)",
       "auto": "(noteikts automātiski)",
-      "improving": "↗ uzlabošanās",
+      "improving": "↗ uzlabojas",
       "declining": "↘ samazinās",
       "steady": "→ stabils",
       "using_tuned": "Izmantojot noregulētus svarus",
@@ -847,14 +848,14 @@
       "ready": "Gatavs apstrādei",
       "idle": "Dīkstāvē",
       "auto_detect": "Automātiska noteikšana",
-      "fine_tuning": "precizēt tagad...",
+      "fine_tuning": "tiek precizēts tagad...",
       "all_statuses": "Visi statusi"
     },
     "ml": {
       "fit_strong": "Spēcīgs",
       "fit_good": "Labi",
       "fit_fair": "Viduvējs",
-      "fit_weak": "Vāja",
+      "fit_weak": "Vājš",
       "fit_slight": "Neliels",
       "fit_word": "der",
       "fine_tuned_at": "precīzi noregulēts {when}",
@@ -919,7 +920,7 @@
       "json_required": "Ir nepieciešami JSON dati",
       "save_failed": "Saglabāt neizdevās: {error}",
       "delete_failed": "Neizdevās izdzēst: {error}",
-      "apply_failed": "Pieteikšanās neizdevās: {error}",
+      "apply_failed": "Lietot neizdevās: {error}",
       "rebuild_failed": "Pārbūve neizdevās: {error}",
       "start_failed": "Sākt neizdevās: {error}",
       "stop_failed": "Apturēšana neizdevās: {error}",
@@ -989,7 +990,7 @@
       "appliance_monitor": "Ierīces monitors",
       "ml_loading": "tiek ielādēts ML…",
       "see_recorder": "Skatiet ierakstītāja logrīku zemāk",
-      "review_in_settings": "Pārskatiet sadaļā Iestatījumi",
+      "review_in_settings": "Pārskatīt sadaļā Iestatījumi",
       "storage_diagnostics": "Uzglabāšanas statistika, apkope, eksports/imports",
       "recent_logs": "Jaunākie ha_washdata ieraksti",
       "preferences_adv": "Preferences",
@@ -1001,7 +1002,12 @@
       "unsure_detected_prefix": "WashData nav pārliecināts, ka tas ir atklāts",
       "no_suggestions": "Nav aktīvu ieteikumu.",
       "no_profiles_overlay": "Nav profilu, ko pārklāt.",
-      "compare_cycles_title": "Salīdziniet {count} ciklus"
+      "compare_cycles_title": "Salīdzināt {count} ciklus",
+      "profiles_intro": "Noklikšķiniet uz profila, lai skatītu statistiku, fāzes un tīrīšanu. Grupējiet gandrīz identiskas programmas (vienāda forma/ilgums, atšķirīga temperatūra vai grozīšana), lai atbilstība uzticami nošķirtu tās.",
+      "search_placeholder": "Meklēt iestatījumus…",
+      "automations_intro": "WashData izsūta {start} / {end} notikumus un atklāj entītijas, tāpēc paziņojumus un darbības vislabāk veidot kā parastos Home Assistant automatizācijas skriptus. Automatizācijas, kas izmanto šo ierīci, parādās zemāk.",
+      "notify_services_hint": "Izmantojiet {entity} pakalpojumu ID (vairākiem – ar komatu). Veidnes mainīgie: {vars}.",
+      "rbac_hint": "Ja izslēgts, katram Home Assistant lietotājam ir pilna piekļuve (noklusējums). Administratoriem vienmēr ir pilna piekļuve un viņi var pārvaldīt visus."
     },
     "modal": {
       "label_cycle": "Iezīmēt ciklu",
@@ -1106,7 +1112,7 @@
         "label": "Izslēgšanas aizkave"
       },
       "linked_device": {
-        "label": "Grupējiet zem ierīces"
+        "label": "Grupēt zem ierīces"
       },
       "start_threshold_w": {
         "label": "Sākuma slieksnis"
@@ -1133,7 +1139,7 @@
         "label": "Beigu enerģija"
       },
       "end_repeat_count": {
-        "label": "Beigt atkārtojumu skaitīšanu"
+        "label": "Beigu atkārtojumu skaits"
       },
       "sampling_interval": {
         "label": "Paraugu ņemšanas intervāls"
@@ -1154,7 +1160,7 @@
         "label": "Neatbilstības slieksnis"
       },
       "profile_match_interval": {
-        "label": "Spēles intervāls"
+        "label": "Saskaņošanas intervāls"
       },
       "profile_match_min_duration_ratio": {
         "label": "Minimālā ilguma attiecība"
@@ -1175,7 +1181,7 @@
         "label": "Mācīšanās pārliecība"
       },
       "suppress_feedback_notifications": {
-        "label": "Izslēdziet atsauksmju paziņojumus"
+        "label": "Izslēgt atsauksmju paziņojumus"
       },
       "watchdog_interval": {
         "label": "Sargsuņa intervāls"
@@ -1190,28 +1196,28 @@
         "label": "Automātiskā apkope (iknakts tīrīšana)"
       },
       "expose_debug_entities": {
-        "label": "Atklājiet atkļūdošanas entītijas"
+        "label": "Atklāt atkļūdošanas entītijas"
       },
       "save_debug_traces": {
-        "label": "Saglabājiet atkļūdošanas pēdas"
+        "label": "Saglabāt atkļūdošanas pēdas"
       },
       "anti_wrinkle_enabled": {
         "label": "Iespējot pretgrumbu noteikšanu"
       },
       "anti_wrinkle_max_power": {
-        "label": "Maksimālais pretgrumbu spēks"
+        "label": "Maksimālā pretgrumbu jauda"
       },
       "anti_wrinkle_max_duration": {
         "label": "Maksimālais ilgums"
       },
       "anti_wrinkle_exit_power": {
-        "label": "Iziet no jaudas sliekšņa"
+        "label": "Jaudas izejas slieksnis"
       },
       "delay_start_detect_enabled": {
         "label": "Iespējot aizkaves starta noteikšanu"
       },
       "delay_confirm_seconds": {
-        "label": "Apstipriniet sekundes"
+        "label": "Apstiprināšanas sekundes"
       },
       "delay_timeout_hours": {
         "label": "Noildzes stundas"
@@ -1232,7 +1238,7 @@
         "label": "Pauze arī pārtrauc barošanu (izmantojot slēdzi)"
       },
       "switch_entity": {
-        "label": "Pārslēgt entītiju"
+        "label": "Slēdža entītija"
       },
       "notify_unload_delay_minutes": {
         "label": "Izkraušanas atgādinājuma aizkave"
@@ -1241,7 +1247,7 @@
         "label": "Sūkņa iestrēgšanas ilgums"
       },
       "notify_start_services": {
-        "label": "Sāciet pakalpojumus"
+        "label": "Sākuma pakalpojumi"
       },
       "notify_finish_services": {
         "label": "Pabeigt pakalpojumus"
@@ -1256,7 +1262,7 @@
         "label": "Paziņot tikai mājās"
       },
       "notify_fire_events": {
-        "label": "Fire HA notikumi paziņojumiem"
+        "label": "HA notikumi paziņojumiem"
       },
       "notify_before_end_minutes": {
         "label": "Pirms beigu brīdinājums"
@@ -1268,7 +1274,7 @@
         "label": "Tiešā pārtēriņa % pirms brīdinājuma"
       },
       "notify_live_chronometer": {
-        "label": "Izmantojiet tiešo hronometru"
+        "label": "Izmantot tiešo hronometru"
       },
       "notify_timeout_seconds": {
         "label": "Automātiski noraidīt pēc"
@@ -1295,7 +1301,7 @@
         "label": "Android kanāls (sākums/tiešraide)"
       },
       "notify_finish_channel": {
-        "label": "Android kanāls (pabeigt)"
+        "label": "Android kanāls (pabeigšana)"
       },
       "energy_price_entity": {
         "label": "Enerģijas cenas entītija"
@@ -1304,19 +1310,19 @@
         "label": "Statiskās enerģijas cena (par kWh)"
       },
       "enable_ml_models": {
-        "label": "Lietojiet viedos modeļus cikla laikā"
+        "label": "Lietot viedos modeļus cikla laikā"
       },
       "ml_training_enabled": {
-        "label": "Mācieties no šīs mašīnas"
+        "label": "Mācīties no šīs ierīces"
       },
       "ml_training_hour": {
-        "label": "Mācieties stundā"
+        "label": "Mācīšanās stunda"
       },
       "ml_training_min_cycles": {
         "label": "Vispirms nepieciešami cikli"
       },
       "ml_training_interval_days": {
-        "label": "Pārbaudiet ne vairāk kā katru"
+        "label": "Pārbaudīt ne biežāk kā ik"
       }
     }
   }

@@ -53,6 +53,7 @@
         "title": "WashData Astellungen",
         "description": "All Astellungen -- Detektioun, Matching, Timing, Notifikatiounen, Profiler a Zyklen -- sinn am WashData Panel verfügbar. Benotzt dëst Formular nëmmen fir de Stromsensor, den Apparattyp oder d'Standby-Schwell ze änneren.",
         "data": {
+          "name": "Apparat Numm",
           "device_type": "Apparat Typ",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Schwell (W)"
@@ -1001,7 +1002,12 @@
       "unsure_detected_prefix": "WashData ass net sécher datt et entdeckt gouf",
       "no_suggestions": "Keng aktiv Virschléi.",
       "no_profiles_overlay": "Keng Profiler ze iwwerlageren.",
-      "compare_cycles_title": "Vergläichen {count} Zyklen"
+      "compare_cycles_title": "Vergläichen {count} Zyklen",
+      "profiles_intro": "Klickt op e Profil fir Statistiken, Phasen an Opreenung. Gruppéiert bal-identisch Programmer (selwecht Form/Dauer, ënnerschiddlech Temperatur oder Schleuder), fir datt d'Erkennung zouverlässeg tëscht hinnen ënnerscheet.",
+      "search_placeholder": "Astellungen sichen…",
+      "automations_intro": "WashData schéckt {start} / {end} Eventer a stellt Entitéiten bereet, dofir ginn Notifizéierungen an Aktiounen am beschten als normal Home Assistant Automatiounen gebaut. Automatiounen, déi dëst Apparat benotzen, ginn hei ënnen ugewisen.",
+      "notify_services_hint": "{entity} Service-IDs benotzen (fir méi eng, mat Komma getrennt). Template-Variabelen: {vars}.",
+      "rbac_hint": "Wann ausgeschalt, huet all Home Assistant Benotzer vollen Zougang (Standard). Administrateuren hunn ëmmer vollen Zougang a kënnen jiddereen verwalten."
     },
     "modal": {
       "label_cycle": "Zyklus etikettéieren",

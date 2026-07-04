@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
+          "name": "Toestelnaam",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -1039,7 +1040,12 @@
       "unsure_detected_prefix": "WashData is onseker of dit bespeur is",
       "no_suggestions": "Geen aktiewe voorstelle nie.",
       "no_profiles_overlay": "Geen profiele om te oorlê nie.",
-      "compare_cycles_title": "Vergelyk {count} siklusse"
+      "compare_cycles_title": "Vergelyk {count} siklusse",
+      "profiles_intro": "Klik op 'n profiel vir statistieke, fases en opruiming. Groepeer byna identiese programme (dieselfde vorm/duur, verskillende temperatuur of spin) sodat die passing betroubaar tussen hulle kies.",
+      "search_placeholder": "Soek instellings…",
+      "automations_intro": "WashData stuur {start} / {end} gebeure en stel entiteite bloot, so kennisgewings en aksies word die beste as normale Home Assistant-outomatiserings gebou. Outomatiserings wat hierdie toestel gebruik, verskyn hieronder.",
+      "notify_services_hint": "Gebruik {entity} diensidentifiseerders (komma-geskei vir meerdere). Sjabloonveranderlikes: {vars}.",
+      "rbac_hint": "Wanneer afgeskakel, het elke Home Assistant-gebruiker volle toegang (die verstek). Administrateurs het altyd volle toegang en kan almal bestuur."
     },
     "modal": {
       "label_cycle": "Etiketsiklus",

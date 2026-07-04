@@ -47,6 +47,9 @@
           "manage_phase_catalog": "Hantera faskatalog",
           "record_cycle": "Spela in cykel (manuell)",
           "diagnostics": "Diagnostik & underhåll"
+        },
+        "data": {
+          "name": "Enhetsnamn"
         }
       },
       "apply_suggestions": {
@@ -1360,7 +1363,7 @@
       "apply_split": "Tillämpa delning",
       "apply_trim": "Tillämpa trimning",
       "auto_detect_split": "Detektera automatiskt",
-      "auto_label_cycles": "Etikettcykler automatiskt",
+      "auto_label_cycles": "Etikettera cykler automatiskt",
       "cancel": "Avbryt",
       "clear_debug": "Rensa felsökningsdata",
       "clear_splits": "Rensa",
@@ -1374,7 +1377,7 @@
       "delete": "Ta bort",
       "delete_group": "Ta bort grupp",
       "delete_profile": "Ta bort profil",
-      "discard": "Kasta",
+      "discard": "Kassera",
       "dismiss": "Avvisa",
       "dismiss_all": "Avvisa alla",
       "done": "Klar",
@@ -1387,7 +1390,7 @@
       "import": "Importera",
       "import_json": "Importera från JSON",
       "import_overwrite": "Importera (skriver över data)",
-      "inspect": "Granska",
+      "inspect": "Inspektera",
       "label": "Etikettera",
       "manage": "Hantera",
       "merge": "Slå ihop",
@@ -1401,8 +1404,8 @@
       "process": "Bearbeta",
       "process_history": "Bearbeta nu",
       "process_recording": "Spara inspelning",
-      "rebuild": "Bygg om kuvert",
-      "rebuild_envelope": "Bygg om kuvert",
+      "rebuild": "Bygg om envelopper",
+      "rebuild_envelope": "Bygg om envelopp",
       "rec_stop": "Stopp",
       "record": "Starta inspelning",
       "refresh": "Uppdatera",
@@ -1478,7 +1481,7 @@
       "correct_profile": "Korrekt profil",
       "cost": "Kostnad",
       "create_new_profile": "+ Skapa ny profil…",
-      "cycle_date_display": "Visning av cykeldata",
+      "cycle_date_display": "Visning av cykeldatum",
       "cycle_health": "Cykelhälsa",
       "cycles_count": "Cykler",
       "date": "Datum",
@@ -1530,7 +1533,7 @@
       "select_profile": "Välj profil",
       "show_debug": "Visa live-matchfelsökningskort på statussidan (konfidens, tvetydighet, toppkandidater)",
       "show_expected": "Visa förväntad kurva (matchad profil, orange)",
-      "show_raw": "Visa råa sensorvärden (oglättat, grått)",
+      "show_raw": "Visa råa sensorvärden (outjämnade, grå)",
       "start": "Start",
       "status": "Status",
       "tags": "Taggar",
@@ -1542,9 +1545,9 @@
     "badge": {
       "auto": "(automatiskt detekterad)",
       "built_in_tag": "inbyggd",
-      "declining": "↘ sjunkande",
+      "declining": "↘ försämras",
       "fair_fit": "godtagbar passning",
-      "improving": "↗ förbättring",
+      "improving": "↗ förbättras",
       "manual": "(manuellt vald)",
       "poor_fit": "dålig passning",
       "steady": "→ stabil",
@@ -1556,7 +1559,7 @@
       "all_statuses": "Alla statusar",
       "ambiguous": "Tvetydig",
       "auto_detect": "Detektera automatiskt",
-      "clear": "Klar",
+      "clear": "Entydig",
       "completed": "Slutförd",
       "fine_tuning": "finjusterar nu…",
       "force_stopped": "Tvångsstoppad",
@@ -1602,8 +1605,8 @@
       "debug_cleared": "Raderade {count} felsökningsspår",
       "delete_failed": "Borttagning misslyckades: {error}",
       "discard_failed": "Kassering misslyckades: {error}",
-      "envelope_rebuilt": "Kuvert återskapat",
-      "envelopes_rebuilt": "Kuvert återskapade",
+      "envelope_rebuilt": "Envelopp återskapad",
+      "envelopes_rebuilt": "Envelopper återskapade",
       "error": "Fel: {error}",
       "export_downloaded": "Export hämtad",
       "export_failed": "Export misslyckades: {error}",
@@ -1615,7 +1618,7 @@
       "group_saved": "Grupp sparad",
       "import_failed": "Import misslyckades: {error}",
       "import_successful": "Import lyckades; integrationen laddas om",
-      "invalid_json": "«{key}» är inte giltig JSON — åtgärda eller rensa fältet innan du sparar.",
+      "invalid_json": "\"{key}\" är inte giltig JSON — åtgärda eller rensa fältet innan du sparar.",
       "json_required": "JSON-data krävs",
       "label_failed": "Etikettering misslyckades: {error}",
       "legacy_removed": "Äldre åtgärder borttagna",
@@ -1624,7 +1627,7 @@
       "merge_failed": "Sammanslagning misslyckades: {error}",
       "min_2_profiles": "Välj minst 2 profiler för en grupp",
       "ml_training_no_improvement": "Träning klar: originalmodell behållen (ingen förbättring)",
-      "ml_training_promoted": "Träning klar: befordrade {count} modell(er)",
+      "ml_training_promoted": "Träning klar: uppgraderade {count} modell(er)",
       "models_reverted": "Modeller på enheten återställda till originalmodell",
       "name_required": "Namn krävs",
       "no_split_found": "Inga tomgångsluckor hittades att dela på",
@@ -1664,11 +1667,11 @@
     "msg": {
       "appliance_monitor": "Apparatövervakning",
       "auto_label_intro": "Tilldela profiler till ej etiketterade cykler vars matchkonfidens överstiger tröskeln.",
-      "cleanup_intro": "Varje etiketterad cykel visas. Markera avvikare och ta bort för att rensa profilen.",
+      "cleanup_intro": "Varje etiketterad cykel överlagras. Markera avvikande värden och ta bort dem för att rensa profilen.",
       "collecting_data": "Samlar in data — {need} fler cykel{plural} innan finjustering kan starta ({current}/{min}).",
       "compare_cycles_title": "Jämför {count} cykler",
-      "compare_overlay_profiles": "Lägg profiler som overlay (svagt)",
-      "compare_selected_cycles": "Valda cykler (solida) — visa / dölj",
+      "compare_overlay_profiles": "Överlagrade profiler (svaga)",
+      "compare_selected_cycles": "Valda cykler (heldragna) — visa / dölj",
       "enough_data": "Tillräckligt med data för att lära sig av ({current}/{min} cykler).",
       "import_intro": "Läs in en exporterad fil eller klistra in JSON-data nedan.",
       "live_chart_loading": "Realtidseffektdiagram visas när avläsningarna anländer.",
@@ -1687,8 +1690,8 @@
       "no_cycles_yet": "Inga cykler registrerade ännu.",
       "no_device_selected": "Ingen enhet vald.",
       "no_devices": "Inga WashData-enheter konfigurerade ännu.",
-      "no_envelope": "Inget kuvert ännu — bygg om efter etiketterade cykler.",
-      "no_envelope_overlay": "Inget kuvert tillgängligt för overlay.",
+      "no_envelope": "Ingen envelopp ännu — bygg om efter att cykler etiketterats.",
+      "no_envelope_overlay": "Ingen envelopp tillgänglig för överlägg.",
       "no_fine_tuned": "Inget finjusterat ännu — WashData använder sina inbyggda modeller.",
       "no_logs": "Inga loggposter buffrade ännu.",
       "no_match_yet": "Inget matchningsförsök ännu — detta fylls i under en pågående cykel.",
@@ -1696,7 +1699,7 @@
       "no_phases": "Inga faser definierade.",
       "no_phases_assigned": "Inga faser tilldelade.",
       "no_profiles_compare": "Inga profiler att jämföra.",
-      "no_profiles_overlay": "Inga profiler att lägga som overlay.",
+      "no_profiles_overlay": "Inga profiler att överlagra.",
       "no_profiles_yet": "Inga profiler ännu. Skapa en från en etiketterad cykel.",
       "no_profiles_yet_short": "Inga profiler ännu.",
       "no_split_points": "Inga delningspunkter ännu.",
@@ -1711,16 +1714,21 @@
       "recording_in_progress": "Inspelning pågår",
       "review_in_settings": "Granska i Inställningar",
       "review_to_cycles": "Öppna granskningskön för cykler",
-      "saving_triggers_reload": "Sparning utlöser en omstart av integrationen. HA-enheter kan kort visas som otillgängliga.",
+      "saving_triggers_reload": "Sparning utlöser en omstart av integrationen. HA-entiteter kan kort visas som otillgängliga.",
       "see_recorder": "Se inspelningswidgeten nedan",
       "split_intro": "Klicka på grafen för att lägga till eller ta bort en delningspunkt, eller detektera automatiskt via tomgångsluckor.",
       "storage_diagnostics": "Lagringsstatistik, underhåll, export/import",
       "trim_intro": "Dra de röda handtagen eller ange värden. Allt utanför fönstret tas bort.",
-      "unsure_detected_prefix": "WashData är osäker på om den detekterade",
-      "updated": "Uppdaterad {time}"
+      "unsure_detected_prefix": "WashData är osäker på om den detekterade:",
+      "updated": "Uppdaterad {time}",
+      "profiles_intro": "Klicka på en profil för statistik, faser och rensning. Gruppera nästan identiska program (samma form/varaktighet, olika temperatur eller centrifugering) så att matchningen tillförlitligt väljer mellan dem.",
+      "search_placeholder": "Sök inställningar…",
+      "automations_intro": "WashData utlöser {start} / {end}-händelser och exponerar entiteter, så aviseringar och åtgärder byggs bäst som vanliga Home Assistant-automatiseringar. Automatiseringar som använder den här enheten visas nedan.",
+      "notify_services_hint": "Använd {entity} tjänste-ID:n (kommaseparerade för flera). Mallvariabler: {vars}.",
+      "rbac_hint": "När det är avstängt har alla Home Assistant-användare full åtkomst (standard). Administratörer har alltid full åtkomst och kan hantera alla."
     },
     "modal": {
-      "auto_label": "Etikettcykler automatiskt",
+      "auto_label": "Etikettera cykler automatiskt",
       "correct_feedback": "Korrigera återkoppling",
       "create_profile": "Skapa profil",
       "cycle": "Cykel",
@@ -1746,7 +1754,7 @@
     },
     "access": {
       "edit": "Redigera",
-      "full": "Full",
+      "full": "Fullständig",
       "inherit": "Ärv",
       "none": "Ingen (dold)",
       "read": "Läs"
@@ -1807,10 +1815,10 @@
     },
     "setting": {
       "abrupt_drop_ratio": {
-        "label": "Abrupt droppförhållande"
+        "label": "Abrupt fallförhållande"
       },
       "abrupt_drop_watts": {
-        "label": "Abrupt dropp"
+        "label": "Abrupt fall"
       },
       "anti_wrinkle_enabled": {
         "label": "Aktivera anti-skrynkeldetektering"
@@ -1846,10 +1854,10 @@
         "label": "Enhetstyp"
       },
       "door_sensor_entity": {
-        "label": "Dörrsensorenhet"
+        "label": "Dörrsensorentitet"
       },
       "duration_tolerance": {
-        "label": "Beräkningstolerans"
+        "label": "Uppskattningstolerans"
       },
       "enable_ml_models": {
         "label": "Tillämpa smarta modeller under en cykel"
@@ -1861,16 +1869,16 @@
         "label": "Antal upprepningar vid slut"
       },
       "energy_price_entity": {
-        "label": "Energiprisenhet"
+        "label": "Energiprisentitet"
       },
       "energy_price_static": {
         "label": "Statiskt energipris (per kWh)"
       },
       "expose_debug_entities": {
-        "label": "Exponera felsökningsenheter"
+        "label": "Exponera felsökningsentiteter"
       },
       "external_end_trigger": {
-        "label": "Extern triggerenhet"
+        "label": "Extern triggerentitet"
       },
       "external_end_trigger_enabled": {
         "label": "Aktivera extern sluttrigger"
@@ -1921,7 +1929,7 @@
         "label": "Avslutningsmeddelande"
       },
       "notify_finish_services": {
-        "label": "Avslutingstjänster"
+        "label": "Avslutningstjänster"
       },
       "notify_fire_events": {
         "label": "Utlös HA-händelser för notifikationer"
@@ -1930,25 +1938,25 @@
         "label": "Notifikationsikon"
       },
       "notify_live_chronometer": {
-        "label": "Använd levande kronometer"
+        "label": "Använd realtidskronometer"
       },
       "notify_live_interval_seconds": {
-        "label": "Intervall för levande uppdateringar"
+        "label": "Intervall för realtidsuppdateringar"
       },
       "notify_live_overrun_percent": {
-        "label": "Levande överskridning % innan avisering"
+        "label": "Realtidsöverskridning % innan avisering"
       },
       "notify_live_services": {
-        "label": "Tjänster för levande förlopp"
+        "label": "Tjänster för förlopp i realtid"
       },
       "notify_only_when_home": {
         "label": "Meddela bara när hemma"
       },
       "notify_people": {
-        "label": "Personer (för bara när hemma)"
+        "label": "Personer (för Meddela bara när hemma)"
       },
       "notify_pre_complete_message": {
-        "label": "Förhandsavslutningsmeddelande"
+        "label": "Meddelande före slutförande"
       },
       "notify_reminder_message": {
         "label": "Påminnelsemeddelande"
@@ -1999,10 +2007,10 @@
         "label": "Fördröjning för återställning av förlopp"
       },
       "pump_stuck_duration": {
-        "label": "Pump fast-varaktighet"
+        "label": "Varaktighet för fastnad pump"
       },
       "running_dead_zone": {
-        "label": "Körningens döda zon"
+        "label": "Död zon under drift"
       },
       "sampling_interval": {
         "label": "Samplingsintervall"
@@ -2029,7 +2037,7 @@
         "label": "Undertrycka återkopplingsnotifikationer"
       },
       "switch_entity": {
-        "label": "Switchenhet"
+        "label": "Switchentitet"
       },
       "watchdog_interval": {
         "label": "Väktarintervall"

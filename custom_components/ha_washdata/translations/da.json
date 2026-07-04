@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
+          "name": "Enhedsnavn",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -646,7 +647,7 @@
       "compare": "Sammenlign",
       "confirm": "Bekræft",
       "discard": "Kassér",
-      "export": "Eksport",
+      "export": "Eksportér",
       "import": "Importér",
       "merge": "Sammenflet",
       "apply": "Anvend",
@@ -664,7 +665,7 @@
       "new_profile": "+ Ny profil",
       "new_group": "+ Ny gruppe",
       "apply_label": "Anvend etiket",
-      "run_auto_label": "Kør auto- etiket",
+      "run_auto_label": "Kør auto-mærkning",
       "save_review": "Gem gennemgang",
       "apply_trim": "Anvend trim",
       "apply_split": "Anvend split",
@@ -678,7 +679,7 @@
       "save_preferences": "Gem indstillinger",
       "save_panel_settings": "Gem panelindstillinger",
       "save_access_control": "Gem adgangskontrol",
-      "auto_label_cycles": "Auto-etiket cyklusser",
+      "auto_label_cycles": "Etikettér cyklusser automatisk",
       "run_analysis": "🔍 Kør forslagsanalyse",
       "apply_all": "Anvend alle",
       "show_only": "Vis kun",
@@ -712,7 +713,7 @@
       "trim_split": "Trim / split",
       "convert_to_automation": "Konvertér til automatisering",
       "new_automation": "＋ Ny automatisering",
-      "from_template": "Fra skabelon",
+      "from_template": "Fra skabelon ▾",
       "on_cycle_started": "Når cyklus starter",
       "on_cycle_finished": "Når cyklus er færdig",
       "save_group": "Gem gruppe"
@@ -720,11 +721,11 @@
     "hdr": {
       "status": "Status",
       "live_power": "Live effekt",
-      "manual_recording": "Manuel registrering",
+      "manual_recording": "Manuel optagelse",
       "tools_and_data": "Værktøjer & data",
       "phase_catalog": "Fasekatalog",
       "storage_stats": "Lagerstatistik",
-      "maintenance": "Vedligeholdelsesaktioner",
+      "maintenance": "Vedligeholdelseshandlinger",
       "export_import": "Eksport / import",
       "logs": "Logge",
       "my_preferences": "Mine indstillinger",
@@ -734,7 +735,7 @@
       "ml_settings_card": "Indstillinger",
       "ml_learned": "Hvad WashData har lært",
       "ml_matching_tuning": "Finjustering af programmatchning",
-      "display": "Vis",
+      "display": "Visning",
       "status_graph": "Statusdiagram",
       "diagnostics_pref": "Diagnostik",
       "logs_diagnostics": "Diagnostik",
@@ -744,9 +745,9 @@
       "automations": "Automatiseringer",
       "automation_open": "Åbn i automatiseringseditoren",
       "automation_delete": "Slet denne automatisering",
-      "automation_needs_review": "Denne cyklus skal revideres",
-      "automation_review_this_cycle": "Gennemgang af denne cyklus",
-      "no_automations": "Ingen automatiseringer refererer denne enhed endnu."
+      "automation_needs_review": "Denne cyklus skal gennemgås",
+      "automation_review_this_cycle": "Gennemgå denne cyklus",
+      "no_automations": "Ingen automatiseringer refererer til denne enhed endnu."
     },
     "lbl": {
       "power": "Effekt",
@@ -757,7 +758,7 @@
       "profile": "Profil",
       "status": "Status",
       "date": "Dato",
-      "confidence": "Tillid",
+      "confidence": "Konfidens",
       "health": "Sundhed",
       "cost": "Omkostninger",
       "program": "Program",
@@ -783,10 +784,10 @@
       "confidence_threshold": "Konfidenstærskel",
       "resulting_profile": "Resultatprofil",
       "new_profile_name": "Nyt profilnavn",
-      "save_mode": "Gem tilstand",
+      "save_mode": "Gemtilstand",
       "head_trim": "Start-trim (s)",
       "tail_trim": "Slut-trim (s)",
-      "gap_s": "Gap (r)",
+      "gap_s": "Mellemrum (s)",
       "start": "Start",
       "end": "Slut",
       "quality": "Kvalitet",
@@ -798,14 +799,14 @@
       "cycle_date_display": "Datovisning for cyklus",
       "refresh_interval": "Opdateringsinterval (s)",
       "panel_default_tab": "Standardfaneblad",
-      "hide_tabs": "Skjul faneblade for ikke- administratorer",
+      "hide_tabs": "Skjul faneblade for ikke-administratorer",
       "enable_access_control": "Aktivér adgangskontrol pr. bruger",
       "default_access_level": "Standardniveau for brugere, der ikke er anført nedenfor",
       "administrators": "Administratorer",
       "default_other": "Standard (andre enheder)",
-      "show_expected": "Vis forventet kurve overlay (matchende profil, orange)",
-      "show_raw": "Vis rå sensoraflæsninger (uglattet, grå)",
-      "show_debug": "Vis live match debug kort på statussiden (tillid, tvetydighed, top kandidater)",
+      "show_expected": "Vis overlejring af forventet kurve (matchende profil, orange)",
+      "show_raw": "Vis rå sensoraflæsninger (uudjævnet, grå)",
+      "show_debug": "Vis live-match-fejlretningskort på statussiden (konfidens, tvetydighed, topkandidater)",
       "mode_new_profile": "Opret ny profil",
       "mode_existing_profile": "Tilføj til eksisterende profil",
       "auto_fine_tune_on": "auto finjustering til (ca. {hour}:00)",
@@ -816,7 +817,7 @@
       "read_only": "Skrivebeskyttet",
       "actions": "Handlinger",
       "cycles_count": "Cykler",
-      "debug_traces": "Fejlmeldingsspor",
+      "debug_traces": "Fejlretningsspor",
       "file_kb": "Fil (kB)",
       "label": "Etiket",
       "seconds_from_start": "Sekunder fra start",
@@ -828,21 +829,21 @@
       "fair_fit": "rimelig pasform",
       "manual": "(manuelt valgt)",
       "auto": "(autodetekteret)",
-      "improving": "↗ forbedring",
-      "declining": "↘ aftagende",
+      "improving": "↗ forbedres",
+      "declining": "↘ forværres",
       "steady": "→ stabil",
-      "using_tuned": "Brug af tunede vægte",
-      "using_defaults": "Brug af leverede standardværdier",
+      "using_tuned": "Bruger justerede vægte",
+      "using_defaults": "Bruger leverede standardværdier",
       "built_in_tag": "indbygget"
     },
     "status": {
-      "completed": "Færdiggjort",
-      "interrupted": "Afbrydt",
+      "completed": "Fuldført",
+      "interrupted": "Afbrudt",
       "force_stopped": "Tvangsstoppet",
       "active": "Aktiv",
       "ambiguous": "Tvetydigt",
-      "clear": "Ryd",
-      "working": "Arbejde...",
+      "clear": "Entydigt",
+      "working": "Arbejder…",
       "recording": "Optagelse...",
       "ready": "Klar til behandling",
       "idle": "Tomgang",
@@ -857,7 +858,7 @@
       "fit_weak": "Svag",
       "fit_slight": "Let",
       "fit_word": "tilpasning",
-      "fine_tuned_at": "fine- tunet {when}",
+      "fine_tuned_at": "finjusteret {when}",
       "personalized": "● Personaliseret til denne maskine",
       "builtin_models": "● Bruger indbyggede modeller"
     },
@@ -869,48 +870,48 @@
       "profile_created": "Profil \"{name}\" oprettet",
       "profile_deleted": "Profil \"{name}\" slettet",
       "profile_renamed": "Profil omdøbt",
-      "phases_saved": "Gemte faser",
+      "phases_saved": "Faser gemt",
       "phase_created": "Fase \"{name}\" oprettet",
       "phase_deleted": "Fase \"{name}\" slettet",
       "phase_updated": "Fase opdateret",
       "recording_started": "Optagelse påbegyndt",
       "recording_stopped": "Optagelse stoppet",
       "recording_discarded": "Optagelse kasseret",
-      "recording_saved": "Registrering gemt til profil",
-      "export_downloaded": "Eksportér downloadet",
-      "logs_exported": "Eksport af logs",
+      "recording_saved": "Optagelse gemt til profil",
+      "export_downloaded": "Eksport downloadet",
+      "logs_exported": "Logge eksporteret",
       "import_successful": "Import vellykket; genindlæsning af integration",
-      "envelopes_rebuilt": "Genopbyggede konvolutter",
-      "envelope_rebuilt": "Konvolut genopbygget",
-      "suggestions_applied": "Anvendte forslag; genindlæsning af integration",
+      "envelopes_rebuilt": "Enveloppekurver genopbygget",
+      "envelope_rebuilt": "Enveloppekurve genopbygget",
+      "suggestions_applied": "Forslag anvendt; genindlæsning af integration",
       "suggestions_dismissed": "Forslag afvist",
       "auto_label_complete": "Auto-mærkning fuldført",
       "cycle_labelled": "Cyklus etiketteret",
       "cycle_deleted": "Cyklus slettet",
       "cycles_deleted": "{count} cyklus(ser) slettet",
       "cycle_trimmed": "Cyklus trimmet",
-      "cycles_merged": "Cykler fusioneret",
-      "review_saved": "Anmeldelse gemt",
+      "cycles_merged": "Cykler sammenflettet",
+      "review_saved": "Gennemgang gemt",
       "feedback_confirmed": "Feedback bekræftet",
       "feedback_dismissed": "Feedback afvist",
       "feedback_all_dismissed": "Alle feedbacks afvist",
       "correction_submitted": "Rettelse indsendt",
-      "group_saved": "Gruppegemt",
+      "group_saved": "Gruppe gemt",
       "group_deleted": "Gruppe slettet",
       "automation_deleted": "Automatisering slettet",
-      "legacy_removed": "Legacy handlinger fjernet",
+      "legacy_removed": "Forældede handlinger fjernet",
       "cycle_paused": "Cyklus sat på pause",
       "cycle_resumed": "Cyklus genoptaget",
       "cycle_force_stopped": "Cyklus tvangsstoppet",
       "ml_training_promoted": "Træning fuldført: {count} model(ler) forfremmet",
-      "ml_training_no_improvement": "Træning komplet: Basal bevarede (ingen forbedring)",
-      "matching_reverted": "Matchende vægte vendt tilbage til standardværdier",
-      "models_reverted": "On- enhedsmodeller vendt tilbage til baseline",
-      "analysis_complete": "Analyse komplet: {count} forslag (r)",
-      "analysis_complete_none": "Analyse komplet: ingen nye forslag",
+      "ml_training_no_improvement": "Træning fuldført: basismodel bevaret (ingen forbedring)",
+      "matching_reverted": "Matchvægte nulstillet til standardværdier",
+      "models_reverted": "Enhedsmodeller nulstillet til basismodel",
+      "analysis_complete": "Analyse fuldført: {count} forslag",
+      "analysis_complete_none": "Analyse fuldført: ingen nye forslag",
       "debug_cleared": "Ryddede {count} fejlretningsspor",
       "all_wiped": "Alle data slettet",
-      "no_split_found": "Ingen tomrum fundet at splitte på",
+      "no_split_found": "Ingen inaktive mellemrum at opdele på",
       "group_name_required": "Gruppenavn er påkrævet",
       "min_2_profiles": "Vælg mindst 2 profiler for en gruppe",
       "profile_name_required": "Profilnavn er påkrævet",
@@ -941,67 +942,72 @@
       "could_not_load_cycle": "Kunne ikke indlæse cyklus: {error}",
       "pause_failed": "Pause mislykkedes: {error}",
       "label_failed": "Etiket mislykkedes: {error}",
-      "invalid_json": "\"{key}\" er ikke gyldig JSON - fiks det eller ryd feltet før du gemmer.",
+      "invalid_json": "\"{key}\" er ikke gyldig JSON — ret det, eller ryd feltet, før du gemmer.",
       "processed": "Forarbejdet {bits}",
-      "split_complete": "Opdel i {count} cyklusser"
+      "split_complete": "Opdelt i {count} cyklusser"
     },
     "msg": {
-      "no_devices": "Ingen WashData enheder konfigureret endnu.",
+      "no_devices": "Ingen WashData-enheder konfigureret endnu.",
       "no_device_selected": "Ingen enhed valgt.",
       "loading": "Indlæser...",
       "loading_settings": "Indlæser indstillinger...",
-      "live_chart_loading": "Live strømgraf vises, når aflæsninger ankommer.",
+      "live_chart_loading": "Live effektgraf vises, når aflæsninger ankommer.",
       "no_cycles_match": "Ingen cyklusser matcher det aktuelle filter.",
       "no_cycles_yet": "Ingen cykler optaget endnu.",
       "no_profiles_yet": "Ingen profiler endnu. Opret en fra en mærket cyklus.",
-      "no_logs": "Ingen journaler bufferet endnu.",
+      "no_logs": "Ingen logposter i buffer endnu.",
       "no_phases": "Ingen faser defineret.",
       "no_phases_assigned": "Ingen faser tildelt.",
       "no_split_points": "Ingen splitpoint endnu.",
       "no_envelope": "Ingen enveloppekurve endnu — genopbyg efter mærkning af cyklusser.",
-      "no_envelope_overlay": "Der er ingen kuvert til rådighed.",
-      "no_other_users": "Ingen andre Home Assistant brugere fundet.",
+      "no_envelope_overlay": "Ingen enveloppekurve tilgængelig til overlejring.",
+      "no_other_users": "Ingen andre Home Assistant-brugere fundet.",
       "maintenance_requires_access": "Vedligeholdelse og eksport / import kræver fuld adgang.",
       "loading_curve": "Indlæser kurve...",
-      "compare_selected_cycles": "Udvalgte cyklusser (fast) - show / hide",
+      "compare_selected_cycles": "Valgte cyklusser (fuldt optrukne) — vis / skjul",
       "compare_overlay_profiles": "Overlejrede profiler (svage)",
       "no_profiles_compare": "Ingen profiler at sammenligne.",
       "no_cycles_profile": "Ingen cykler til denne profil.",
-      "saving_triggers_reload": "Gemning udløser en integrationsreload. HA enheder kan kort vise, at de ikke er tilgængelige.",
-      "prefs_personal": "Disse gælder kun for din Home Assistant konto.",
+      "saving_triggers_reload": "Gemning udløser en genindlæsning af integrationen. HA-entiteter kan kortvarigt fremstå som utilgængelige.",
+      "prefs_personal": "Disse gælder kun for din Home Assistant-konto.",
       "no_match_yet": "Ingen matchforsøg endnu — dette udfyldes under en kørende cyklus.",
       "no_fine_tuned": "Intet finjusteret endnu — WashData bruger sine indbyggede modeller.",
       "ml_learned_intro": "Modeller finjusteret til denne maskine. Alt, der ikke er opført, bruger den pålidelige indbyggede model.",
       "ml_settings_intro": "To uafhængige kontakter: den ene anvender modellerne, mens en cyklus kører, den anden lader WashData finjustere dem til din maskine over tid.",
       "ml_intro": "WashData leveres med smarte modeller, der registrerer cyklusser, matcher programmer og estimerer tid og energi — de virker ud af boksen.",
-      "matching_tuning_intro": "Når du lærer, WashData også justerer, hvor meget program matching vejer en cyklus form versus dens varighed og energi.",
-      "phase_catalog_intro": "Opkaldt segmenter af en cyklus (Forvask, Varme, Spin...). Tildel dem til en profil fra kontrolpanelet.",
-      "phase_ranges_intro": "Faseområder (minutter fra cyklusstart) overhalet på den gennemsnitlige kurve. Redigér værdier for at få vist live.",
-      "cleanup_intro": "Hver markeret cyklus overhalet. Tik outliers og slet for at rydde op i profilen.",
-      "split_intro": "Klik på grafen for at tilføje eller fjerne et split point, eller automatisk detektere ved tomrum.",
-      "trim_intro": "Træk de røde håndtag eller indtast værdier. Alt udenfor vinduet er fjernet.",
+      "matching_tuning_intro": "Under indlæring justerer WashData også, hvor meget programmatchningen vægter en cyklus' form i forhold til dens varighed og energi.",
+      "phase_catalog_intro": "Navngivne segmenter af en cyklus (Forvask, Opvarmning, Centrifugering…). Tildel dem til en profil fra dens kontrolpanel.",
+      "phase_ranges_intro": "Faseområder (minutter fra cyklusstart) overlejret på gennemsnitskurven. Redigér værdier for at forhåndsvise live.",
+      "cleanup_intro": "Hver mærket cyklus overlejret. Markér afvigere og slet for at rydde op i profilen.",
+      "split_intro": "Klik på grafen for at tilføje eller fjerne et opdelingspunkt, eller detektér automatisk ud fra inaktive mellemrum.",
+      "trim_intro": "Træk de røde håndtag, eller indtast værdier. Alt uden for vinduet fjernes.",
       "import_intro": "Indlæs en eksporteret fil eller indsæt en JSON nyttelast nedenfor.",
-      "auto_label_intro": "Tildel profiler til umærkede cyklusser, hvis matchsikkerhed fjerner tærsklen.",
-      "merge_intro": "De valgte cyklusser kombineres i én (kronologisk orden; mellemrum fyldt med 0 W). Vælg den resulterende profil.",
+      "auto_label_intro": "Tildel profiler til umærkede cyklusser, hvis matchkonfidens overstiger tærsklen.",
+      "merge_intro": "De valgte cyklusser kombineres til én (kronologisk orden; mellemrum fyldt med 0 W). Vælg den resulterende profil.",
       "enough_data": "Nok data til at lære af ({current} / {min} cykler).",
       "collecting_data": "Indsamling af data - {need} mere cyklus {plural} før finjustering kan starte ({current} / {min}).",
       "updated": "Opdateret {time}",
       "appliance_monitor": "Apparatovervågning",
       "ml_loading": "indlæsning af ML...",
       "see_recorder": "Se optagerwidget nedenfor",
-      "review_in_settings": "Gennemgang i Indstillinger",
+      "review_in_settings": "Gennemse i Indstillinger",
       "storage_diagnostics": "Lagerstatistik, vedligeholdelse, eksport / import",
-      "recent_logs": "Seneste ha _ washdata records",
+      "recent_logs": "Seneste ha_washdata-poster",
       "preferences_adv": "Indstillinger",
       "preferences_admin": "Indstillinger, panel- og adgangskontrol",
-      "review_to_cycles": "Åbn Cykler gennemgang kø",
+      "review_to_cycles": "Åbn gennemgangskøen for cyklusser",
       "pending_feedback": "Afventer detektionsfeedback",
       "recording_in_progress": "Optagelse i gang",
       "no_profiles_yet_short": "Ingen profiler endnu.",
-      "unsure_detected_prefix": "WashData er usikker det opdaget",
+      "unsure_detected_prefix": "WashData er usikker på, om den registrerede:",
       "no_suggestions": "Ingen aktive forslag.",
       "no_profiles_overlay": "Ingen profiler at overlægge.",
-      "compare_cycles_title": "Sammenlign {count} cykler"
+      "compare_cycles_title": "Sammenlign {count} cykler",
+      "profiles_intro": "Klik på en profil for statistik, faser og oprydning. Gruppér næsten identiske programmer (samme form/varighed, forskellig temperatur eller centrifugering), så matchning pålideligt vælger imellem dem.",
+      "search_placeholder": "Søg i indstillinger…",
+      "automations_intro": "WashData udløser {start} / {end}-hændelser og eksponerer entiteter, så notifikationer og handlinger bygges bedst som normale Home Assistant-automatiseringer. Automatiseringer der bruger denne enhed vises nedenfor.",
+      "notify_services_hint": "Brug {entity} service-ID'er (kommasepareret for flere). Skabelonvariabler: {vars}.",
+      "rbac_hint": "Når det er slået fra, har alle Home Assistant-brugere fuld adgang (standard). Administratorer har altid fuld adgang og kan administrere alle."
     },
     "modal": {
       "label_cycle": "Etiketér cyklus",
@@ -1009,16 +1015,16 @@
       "new_phase": "Ny fase",
       "edit_phase": "Redigér fase",
       "process_recording": "Behandl optagelse",
-      "correct_feedback": "Korrekt feedback",
-      "import_config": "Importér indstilling",
-      "auto_label": "Auto-etiket cyklusser",
+      "correct_feedback": "Ret feedback",
+      "import_config": "Importér konfiguration",
+      "auto_label": "Etikettér cyklusser automatisk",
       "cycle": "Cyklus"
     },
     "tag": {
       "late_start": "Sen start",
       "early_end": "Tidlig afslutning",
       "merged": "Sammenlagte cyklusser",
-      "split": "Split cyklus",
+      "split": "Opdelt cyklus",
       "noise": "Støj",
       "wrong_profile": "Forkert profil",
       "sensor_gap": "Sensormellemrum"
@@ -1032,7 +1038,7 @@
       "none": "Ingen (skjult)",
       "read": "Læs",
       "edit": "Redigér",
-      "full": "Fuld",
+      "full": "Fuld adgang",
       "inherit": "Arve"
     },
     "health": {
@@ -1041,12 +1047,12 @@
       "good": "✓ God pasform"
     },
     "trend": {
-      "up": "Udvikling",
+      "up": "Trend opad",
       "down": "Trend nedad"
     },
     "pref": {
       "date_relative": "Relativ (f.eks. for 2 timer siden)",
-      "date_absolute": "Absolut (f.eks. 14: 32 den 2. jul)"
+      "date_absolute": "Absolut (f.eks. 14:32 den 2. jul)"
     },
     "log": {
       "all_levels": "Alle niveauer"
@@ -1057,20 +1063,20 @@
         "intro": "Kerneidentitet og det vigtigste for de fleste opsætninger."
       },
       "detection": {
-        "label": "Påvisning",
+        "label": "Detektering",
         "intro": "Hvordan en cyklus detekteres som start, kørsel og afslutning."
       },
       "matching": {
         "label": "Matchning",
-        "intro": "Hvordan færdige cykler er matchet til indlærte profiler og mærket."
+        "intro": "Hvordan færdige cyklusser matches med indlærte profiler og mærkes."
       },
       "timing": {
         "label": "Timing & Watchdog",
-        "intro": "Baggrund kadence, offline vagthund og husholdning."
+        "intro": "Baggrundskadence, offline-watchdog og oprydning."
       },
       "anti_wrinkle": {
-        "label": "Anti- Wrinkle",
-        "intro": "Anti- rynke tilstand registrerer tørretumbler pulser efter hovedvarmefasen."
+        "label": "Anti-krøl",
+        "intro": "Anti-krøl-tilstand registrerer tørretumblerens tumlepulser efter hovedvarmefasen."
       },
       "delay": {
         "label": "Forsinket start",
@@ -1086,7 +1092,7 @@
       },
       "ml_training": {
         "label": "ML-træning",
-        "intro": "Opt- i smarte modeller, der personliggør detektion og timing til denne enhed."
+        "intro": "Valgfrie smarte modeller, der tilpasser detektion og timing til denne enhed."
       }
     },
     "setting": {
@@ -1100,7 +1106,7 @@
         "label": "Strømsensor"
       },
       "min_power": {
-        "label": "Minimum effekt"
+        "label": "Minimumseffekt"
       },
       "off_delay": {
         "label": "Sluk-forsinkelse"
@@ -1109,22 +1115,22 @@
         "label": "Gruppe under enhed"
       },
       "start_threshold_w": {
-        "label": "Start tærskelværdi"
+        "label": "Starttærskel"
       },
       "stop_threshold_w": {
-        "label": "Stop tærskelværdi"
+        "label": "Stoptærskel"
       },
       "min_off_gap": {
-        "label": "Min. Off Gap"
+        "label": "Min. slukket-mellemrum"
       },
       "start_duration_threshold": {
         "label": "Startvarighed"
       },
       "start_energy_threshold": {
-        "label": "Start energi"
+        "label": "Startenergi"
       },
       "completion_min_seconds": {
-        "label": "min cyklusvarighed"
+        "label": "Min. cyklusvarighed"
       },
       "running_dead_zone": {
         "label": "Aktiv dødzone"
@@ -1133,7 +1139,7 @@
         "label": "Slutenergi"
       },
       "end_repeat_count": {
-        "label": "Slut gentagelsestælling"
+        "label": "Antal slutgentagelser"
       },
       "sampling_interval": {
         "label": "Prøveudtagningsinterval"
@@ -1148,127 +1154,127 @@
         "label": "Pludselig faldratio"
       },
       "profile_match_threshold": {
-        "label": "Match tærskelværdi"
+        "label": "Matchtærskel"
       },
       "profile_unmatch_threshold": {
         "label": "Uoverensstemmende tærskelværdi"
       },
       "profile_match_interval": {
-        "label": "Match- interval"
+        "label": "Matchinterval"
       },
       "profile_match_min_duration_ratio": {
-        "label": "Minimumsvarighed"
+        "label": "Minimalt varighedsforhold"
       },
       "profile_match_max_duration_ratio": {
         "label": "Maksimalt varighedsforhold"
       },
       "profile_duration_tolerance": {
-        "label": "Profilvarighed Tolerance"
+        "label": "Profilvarighedstolerance"
       },
       "duration_tolerance": {
         "label": "Estimeringstolerance"
       },
       "auto_label_confidence": {
-        "label": "Auto- Label tillid"
+        "label": "Konfidens for automærkning"
       },
       "learning_confidence": {
-        "label": "Indlæringstillid"
+        "label": "Indlæringskonfidens"
       },
       "suppress_feedback_notifications": {
         "label": "Undertryk feedbacknotifikationer"
       },
       "watchdog_interval": {
-        "label": "Watchdog Interval"
+        "label": "Watchdog-interval"
       },
       "no_update_active_timeout": {
-        "label": "No- Opdatér tidsudløb"
+        "label": "Tidsudløb uden opdatering"
       },
       "progress_reset_delay": {
-        "label": "Forsinket fremskridt"
+        "label": "Forsinkelse for nulstilling af fremskridt"
       },
       "auto_maintenance": {
-        "label": "Auto vedligeholdelse (natlig oprydning)"
+        "label": "Automatisk vedligeholdelse (natlig oprydning)"
       },
       "expose_debug_entities": {
-        "label": "Udsend fejlretningsenheder"
+        "label": "Eksponér fejlretningsentiteter"
       },
       "save_debug_traces": {
         "label": "Gem fejlretningsspor"
       },
       "anti_wrinkle_enabled": {
-        "label": "Aktivér anti- Wrinkle Detection"
+        "label": "Aktivér anti-krøl-registrering"
       },
       "anti_wrinkle_max_power": {
-        "label": "Max anti-wrinkle effekt"
+        "label": "Maks. anti-krøl-effekt"
       },
       "anti_wrinkle_max_duration": {
         "label": "Maks. varighed"
       },
       "anti_wrinkle_exit_power": {
-        "label": "Exit effekttærskel"
+        "label": "Effekttærskel for afslutning"
       },
       "delay_start_detect_enabled": {
-        "label": "Aktivér forsinkelse - start detektering"
+        "label": "Aktivér registrering af forsinket start"
       },
       "delay_confirm_seconds": {
         "label": "Bekræft sekunder"
       },
       "delay_timeout_hours": {
-        "label": "Timeout timer"
+        "label": "Timeout-timer"
       },
       "external_end_trigger_enabled": {
         "label": "Aktivér ekstern slutudløser"
       },
       "external_end_trigger": {
-        "label": "Ekstern udløsningsenhed"
+        "label": "Ekstern udløserentitet"
       },
       "external_end_trigger_inverted": {
-        "label": "Invertér ekstern udløser (trigger on OFF)"
+        "label": "Invertér ekstern udløser (udløs ved SLUK)"
       },
       "door_sensor_entity": {
-        "label": "Dørsensorenhed"
+        "label": "Dørsensorentitet"
       },
       "pause_cuts_power": {
-        "label": "Pause også klipper strøm (via kontakt)"
+        "label": "Pause afbryder også strømmen (via kontakt)"
       },
       "switch_entity": {
-        "label": "Skift enhed"
+        "label": "Kontaktentitet"
       },
       "notify_unload_delay_minutes": {
-        "label": "Forsinkelse til udlosningspåmindelse"
+        "label": "Forsinkelse for tømningspåmindelse"
       },
       "pump_stuck_duration": {
-        "label": "Pumpestop-varighed"
+        "label": "Varighed for fastsiddende pumpe"
       },
       "notify_start_services": {
         "label": "Starttjenester"
       },
       "notify_finish_services": {
-        "label": "Afslut tjenester"
+        "label": "Afslutningstjenester"
       },
       "notify_live_services": {
-        "label": "Levende fremgangstjenester"
+        "label": "Live fremgangstjenester"
       },
       "notify_people": {
-        "label": "Mennesker (kun når hjem)"
+        "label": "Personer (til 'Advisér kun når hjemme')"
       },
       "notify_only_when_home": {
-        "label": "Advisér kun når hjem"
+        "label": "Advisér kun når hjemme"
       },
       "notify_fire_events": {
-        "label": "Fire HA Events for notifications"
+        "label": "Udløs HA-hændelser for notifikationer"
       },
       "notify_before_end_minutes": {
-        "label": "For- end alarm"
+        "label": "Alarm før afslutning"
       },
       "notify_live_interval_seconds": {
         "label": "Live opdateringsinterval"
       },
       "notify_live_overrun_percent": {
-        "label": "Overløb af live% før alarmering"
+        "label": "Live-overløb % før alarm"
       },
       "notify_live_chronometer": {
-        "label": "Brug levende kronometer"
+        "label": "Brug live-kronometer"
       },
       "notify_timeout_seconds": {
         "label": "Afvis automatisk efter"
@@ -1292,13 +1298,13 @@
         "label": "Påmindelsesbesked"
       },
       "notify_channel": {
-        "label": "Android Kanal (start / live)"
+        "label": "Android-kanal (start/live)"
       },
       "notify_finish_channel": {
-        "label": "Android Kanal (slut)"
+        "label": "Android-kanal (slut)"
       },
       "energy_price_entity": {
-        "label": "Energiprisenheden"
+        "label": "Energiprisentitet"
       },
       "energy_price_static": {
         "label": "Statisk energipris (pr. kWh)"

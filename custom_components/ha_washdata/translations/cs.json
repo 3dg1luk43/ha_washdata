@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
+          "name": "Název zařízení",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -654,7 +655,7 @@
       "create": "Vytvořit",
       "select": "Vybrat",
       "done": "Hotovo",
-      "reset": "Obnovit",
+      "reset": "Resetovat",
       "trim": "Oříznout",
       "split": "Rozdělit",
       "review": "Přezkoumat",
@@ -733,7 +734,7 @@
       "ml_smart_learning": "Chytré učení",
       "ml_settings_card": "Nastavení",
       "ml_learned": "Co se WashData naučilo",
-      "ml_matching_tuning": "Jemné doladění párování programů",
+      "ml_matching_tuning": "Přizpůsobení párování programů",
       "display": "Zobrazit",
       "status_graph": "Graf stavu",
       "diagnostics_pref": "Diagnostika",
@@ -746,7 +747,7 @@
       "automation_delete": "Smazat tuto automatizaci",
       "automation_needs_review": "Tento cyklus potřebuje přezkoumání",
       "automation_review_this_cycle": "Přezkum tohoto cyklu",
-      "no_automations": "Ještě žádná automatizace to zařízení nepoukázala."
+      "no_automations": "Pro toto zařízení zatím neexistuje žádná automatizace."
     },
     "lbl": {
       "power": "Výkon",
@@ -808,8 +809,8 @@
       "show_debug": "Zobrazit kartu live match debug na stránce Status (důvěra, nejednoznačnost, top kandidáti)",
       "mode_new_profile": "Vytvořit nový profil",
       "mode_existing_profile": "Přidat do existujícího profilu",
-      "auto_fine_tune_on": "automatické doladění zapnuto (kolem {hour}:00)",
-      "auto_fine_tune_off": "automatické doladění vypnuto",
+      "auto_fine_tune_on": "automatické přizpůsobování zapnuto (kolem {hour}:00)",
+      "auto_fine_tune_off": "automatické přizpůsobování vypnuto",
       "last_checked": "Poslední kontrola:",
       "remove_label": "- Odstranit štítek -",
       "create_new_profile": "+ Vytvořit nový profil...",
@@ -831,8 +832,8 @@
       "improving": "↗ zlepšení",
       "declining": "↘ klesající",
       "steady": "→ stabilní",
-      "using_tuned": "Použití laděných závaží",
-      "using_defaults": "Použití výchozích hodnot",
+      "using_tuned": "Používá přizpůsobené váhy",
+      "using_defaults": "Používá výchozí hodnoty",
       "built_in_tag": "vestavěný"
     },
     "status": {
@@ -847,17 +848,17 @@
       "ready": "Připraven ke zpracování",
       "idle": "Nečinný",
       "auto_detect": "Automatická detekce",
-      "fine_tuning": "probíhá doladění…",
+      "fine_tuning": "probíhá přizpůsobování…",
       "all_statuses": "Všechny stavy"
     },
     "ml": {
-      "fit_strong": "Silný",
-      "fit_good": "Dobrý",
-      "fit_fair": "Přijatelný",
-      "fit_weak": "Slabý",
-      "fit_slight": "Lehké",
-      "fit_word": "fit",
-      "fine_tuned_at": "jemně doladěno {when}",
+      "fit_strong": "Silná",
+      "fit_good": "Dobrá",
+      "fit_fair": "Přijatelná",
+      "fit_weak": "Slabá",
+      "fit_slight": "Nepatrná",
+      "fit_word": "shoda",
+      "fine_tuned_at": "přizpůsobeno {when}",
       "personalized": "● Přizpůsobeno tomuto stroji",
       "builtin_models": "● Použití vestavěných modelů"
     },
@@ -970,12 +971,12 @@
       "saving_triggers_reload": "Uložení spustí obnovení integrace. Entity HA se mohou krátce zobrazit jako nedostupné.",
       "prefs_personal": "Ty se vztahují pouze na váš účet Home Assistant.",
       "no_match_yet": "Zatím žádný pokus o shodu — to se plní během probíhajícího cyklu.",
-      "no_fine_tuned": "Zatím nic jemně doladěno — WashData používá vestavěné modely.",
-      "ml_learned_intro": "Modely jsou přesně naladěny na tento stroj. Vše, co není uvedeno v seznamu, používá spolehlivý model.",
-      "ml_settings_intro": "Dva nezávislé přepínače: jeden aplikuje modely, zatímco cyklus běží, druhý umožňuje WashData fine- ladit je na váš stroj v průběhu času.",
+      "no_fine_tuned": "Zatím žádné přizpůsobení — WashData používá vestavěné modely.",
+      "ml_learned_intro": "Modely přizpůsobené tomuto zařízení. Vše, co není uvedeno, používá spolehlivý vestavěný model.",
+      "ml_settings_intro": "Dva nezávislé přepínače: jeden aplikuje modely v průběhu cyklu, druhý umožňuje WashData přizpůsobovat je tomuto zařízení v průběhu času.",
       "ml_intro": "WashData je dodáván s chytrými modely, které detekují cykly, párují programy a odhadují čas a energii — fungují hned po instalaci.",
       "matching_tuning_intro": "Při učení WashData také upravuje, jak moc párování programů zohledňuje tvar cyklu oproti jeho délce a energii.",
-      "phase_catalog_intro": "Pojmenované segmenty cyklu (Pre- wash, Topení, Spin...). Přiřaďte je na profil z jeho ovládacího panelu.",
+      "phase_catalog_intro": "Pojmenované segmenty cyklu (Předpírka, Topení, Spin...). Přiřaďte je k profilu z jeho ovládacího panelu.",
       "phase_ranges_intro": "Fázové rozpětí (minuty od začátku cyklu) překrývané na průměrné křivce. Upravit hodnoty na náhled live.",
       "cleanup_intro": "Každý označený cyklus je překrytý. Tik outliers a smazat vyčistit profil.",
       "split_intro": "Kliknutím na graf přidáte nebo odstraníte bod rozdělení nebo automaticky detekujete mezery.",
@@ -984,7 +985,7 @@
       "auto_label_intro": "Přiřadit profily k neoznačeným cyklům, jejichž shoda je spolehlivá.",
       "merge_intro": "Vybrané cykly se kombinují do jednoho (chronologické pořadí; mezery naplněné 0 W). Vyberte výsledný profil.",
       "enough_data": "Dostatek dat k poučení z ({current} / {min} cyklů).",
-      "collecting_data": "Shromažďování dat - {need} více cyklů {plural} před tím, než může začít finální ladění ({current} / {min}).",
+      "collecting_data": "Shromažďování dat — potřeba {need} dalšího cyklu{plural} před spuštěním přizpůsobování ({current}/{min}).",
       "updated": "Aktualizováno {time}",
       "appliance_monitor": "Monitorovací zařízení",
       "ml_loading": "načítání ML...",
@@ -992,7 +993,7 @@
       "review_in_settings": "Přezkum v Nastavení",
       "storage_diagnostics": "Statistiky skladování, údržba, vývoz / dovoz",
       "recent_logs": "Nedávné záznamy ha_washdata",
-      "preferences_adv": "Předvolby",
+      "preferences_adv": "Nastavení",
       "preferences_admin": "Nastavení, ovládání panelu a přístupu",
       "review_to_cycles": "Otevřít frontu recenzí Cyklů",
       "pending_feedback": "Až do zpětné vazby od detekce",
@@ -1001,7 +1002,12 @@
       "unsure_detected_prefix": "WashData si není jistá, zda byl zjištěn.",
       "no_suggestions": "Žádné aktivní návrhy.",
       "no_profiles_overlay": "Žádné profily na překrytí.",
-      "compare_cycles_title": "Porovnat {count} cykly"
+      "compare_cycles_title": "Porovnat {count} cykly",
+      "profiles_intro": "Klikněte na profil pro statistiky, fáze a úklid. Seskupte téměř identické programy (stejný tvar/délka, různá teplota nebo otáčky), aby párování mezi nimi spolehlivě rozlišilo.",
+      "search_placeholder": "Hledat v nastavení…",
+      "automations_intro": "WashData spouští události {start} / {end} a zpřístupňuje entity, takže oznámení a akce je nejlepší sestavit jako běžné automatizace Home Assistant. Automatizace využívající toto zařízení se zobrazí níže.",
+      "notify_services_hint": "Použijte ID služeb {entity} (více hodnot oddělte čárkou). Proměnné šablony: {vars}.",
+      "rbac_hint": "Pokud je vypnuto, má každý uživatel Home Assistant plný přístup (výchozí stav). Správci mají vždy plný přístup a mohou spravovat všechny uživatele."
     },
     "modal": {
       "label_cycle": "Označit cyklus",
@@ -1086,7 +1092,7 @@
       },
       "ml_training": {
         "label": "Trénink ML",
-        "intro": "Opt- v chytrých modelech, které personalizují detekci a načasování tohoto zařízení."
+        "intro": "Aktivujte chytré modely přizpůsobující detekci a načasování tomuto zařízení."
       }
     },
     "setting": {

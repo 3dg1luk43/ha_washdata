@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
+          "name": "Numele dispozitivului",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -641,71 +642,71 @@
       "close": "Închide",
       "edit": "Editează",
       "add": "Adaugă",
-      "rebuild": "Reconstruiți plicurile",
-      "record": "Începeți înregistrarea",
-      "compare": "Comparați",
+      "rebuild": "Reconstruiește plicurile",
+      "record": "Începe înregistrarea",
+      "compare": "Compară",
       "confirm": "Confirmă",
-      "discard": "Aruncă",
+      "discard": "Renunță",
       "export": "Export",
       "import": "Import",
-      "merge": "Îmbinați",
-      "apply": "Aplicați",
+      "merge": "Îmbină",
+      "apply": "Aplică",
       "refresh": "Actualizează",
       "create": "Creează",
-      "select": "Selectați",
+      "select": "Selectează",
       "done": "Gata",
-      "reset": "Resetați",
-      "trim": "Tăiați",
+      "reset": "Resetează",
+      "trim": "Taie",
       "split": "Despică",
-      "review": "Revizuiți",
-      "inspect": "Inspectați",
-      "label": "Eticheta",
-      "save_settings": "Salvați setările",
+      "review": "Revizuiește",
+      "inspect": "Inspectează",
+      "label": "Etichetează",
+      "save_settings": "Salvează setările",
       "new_profile": "+ Profil nou",
       "new_group": "+ Grup nou",
-      "apply_label": "Aplicați eticheta",
-      "run_auto_label": "Rulați Auto-Label",
-      "save_review": "Salvează recenzia",
-      "apply_trim": "Aplicați Trim",
-      "apply_split": "Aplicați Split",
-      "process_recording": "Salvați înregistrarea",
+      "apply_label": "Aplică eticheta",
+      "run_auto_label": "Rulează etichetare automată",
+      "save_review": "Salvează evaluarea",
+      "apply_trim": "Aplică tăierea",
+      "apply_split": "Aplică împărțirea",
+      "process_recording": "Salvează înregistrarea",
       "stop": "Stop",
-      "process": "Procesați",
-      "add_device": "+ Adăugați dispozitiv",
-      "train_now": "Antrenați acum",
-      "reset_to_defaults": "Resetați la valorile implicite",
-      "reset_to_builtin": "Resetați la modelele încorporate",
-      "save_preferences": "Salvați preferințe",
-      "save_panel_settings": "Salvați setările panoului",
-      "save_access_control": "Salvați controlul accesului",
-      "auto_label_cycles": "Cicluri de etichetare automată",
-      "run_analysis": "🔍 Rulați analiza sugestiilor",
-      "apply_all": "Aplicați toate",
+      "process": "Procesează",
+      "add_device": "+ Adaugă dispozitiv",
+      "train_now": "Antrenează acum",
+      "reset_to_defaults": "Resetează la valorile implicite",
+      "reset_to_builtin": "Resetează la modelele încorporate",
+      "save_preferences": "Salvează preferințele",
+      "save_panel_settings": "Salvează setările panoului",
+      "save_access_control": "Salvează controlul accesului",
+      "auto_label_cycles": "Etichetare automată a ciclurilor",
+      "run_analysis": "🔍 Rulează analiza sugestiilor",
+      "apply_all": "Aplică tot",
       "show_only": "Arată numai",
-      "dismiss": "Respingeți",
+      "dismiss": "Respinge",
       "dismiss_all": "Respinge toate",
       "process_history": "Procesează acum",
-      "clear_debug": "Ștergeți datele de depanare",
-      "wipe_all": "Ștergeți toate datele",
-      "export_json": "Exportați în JSON",
+      "clear_debug": "Șterge datele de depanare",
+      "wipe_all": "Șterge toate datele",
+      "export_json": "Exportă în JSON",
       "import_json": "Importă din JSON",
       "correct": "Corectează…",
       "ignore": "Ignoră",
       "add_phase": "+ Adăugați faza",
-      "new_phase": "+ Faza Noua",
-      "delete_profile": "Ștergeți profilul",
-      "rebuild_envelope": "Reconstruiți plicul",
+      "new_phase": "+ Fază nouă",
+      "delete_profile": "Șterge profilul",
+      "rebuild_envelope": "Reconstruiește plicul",
       "create_profile": "+ Creați un profil",
       "rec_stop": "Stop",
       "pause_cycle": "Pauză",
       "resume_cycle": "Reluați",
       "force_stop": "Oprire forțată",
-      "save_phases": "Salvați faze",
+      "save_phases": "Salvează fazele",
       "auto_detect_split": "Detectare automată",
       "clear_splits": "Ștergeți",
-      "submit_correction": "Trimiteți corecția",
+      "submit_correction": "Trimite corecția",
       "import_overwrite": "Import (suprascrie datele)",
-      "use": "Utilizați",
+      "use": "Utilizează",
       "manage": "Gestionează",
       "remove": "Elimină",
       "delete_group": "Șterge grupul",
@@ -715,7 +716,7 @@
       "from_template": "Din șablon ▾",
       "on_cycle_started": "La pornirea ciclului",
       "on_cycle_finished": "La finalizarea ciclului",
-      "save_group": "Salvați grupul"
+      "save_group": "Salvează grupul"
     },
     "hdr": {
       "status": "Stare",
@@ -739,11 +740,11 @@
       "diagnostics_pref": "Diagnosticare",
       "logs_diagnostics": "Diagnosticare",
       "process_history": "Reprocesare date",
-      "clear_debug": "Ștergeți urmele de depanare",
+      "clear_debug": "Șterge urmele de depanare",
       "wipe_history": "Ștergeți istoricul",
       "automations": "Automatizări",
-      "automation_open": "Deschideți în editorul de automatizare",
-      "automation_delete": "Ștergeți această automatizare",
+      "automation_open": "Deschide în editorul de automatizare",
+      "automation_delete": "Șterge această automatizare",
       "automation_needs_review": "Acest ciclu trebuie revizuit",
       "automation_review_this_cycle": "Examinați acest ciclu",
       "no_automations": "Nicio automatizare nu face referire la acest dispozitiv încă."
@@ -784,9 +785,9 @@
       "resulting_profile": "Profilul rezultat",
       "new_profile_name": "Nume de profil nou",
       "save_mode": "Mod de salvare",
-      "head_trim": "Trim (e) pentru cap",
-      "tail_trim": "Trim (e) de coadă",
-      "gap_s": "Gap (e)",
+      "head_trim": "Tăiere la început (s)",
+      "tail_trim": "Tăiere la sfârșit (s)",
+      "gap_s": "Interval (s)",
       "start": "Început",
       "end": "Sfârşit",
       "quality": "Calitate",
@@ -796,7 +797,7 @@
       "notes": "Note",
       "default_tab": "Filă implicită la deschiderea panoului",
       "cycle_date_display": "Afișarea datei ciclului",
-      "refresh_interval": "Interval(e) de reîmprospătare",
+      "refresh_interval": "Interval de reîmprospătare (s)",
       "panel_default_tab": "Filă implicită",
       "hide_tabs": "Ascundeți filele pentru non-administratori",
       "enable_access_control": "Activați controlul accesului pentru fiecare utilizator",
@@ -818,8 +819,8 @@
       "cycles_count": "Cicluri",
       "debug_traces": "Urme de depanare",
       "file_kb": "Fișier (kB)",
-      "label": "Eticheta",
-      "seconds_from_start": "La câteva secunde de la început",
+      "label": "Etichetă",
+      "seconds_from_start": "Secunde de la start",
       "clock_time": "Ora ceasului",
       "ungrouped": "Negrupat"
     },
@@ -853,11 +854,11 @@
     "ml": {
       "fit_strong": "Puternic",
       "fit_good": "Bun",
-      "fit_fair": "Corect",
+      "fit_fair": "Acceptabil",
       "fit_weak": "Slab",
       "fit_slight": "Uşor",
       "fit_word": "potrivire",
-      "fine_tuned_at": "ajustat {when}",
+      "fine_tuned_at": "reglat fin {when}",
       "personalized": "● Personalizat pentru acest aparat",
       "builtin_models": "● Utilizarea modelelor încorporate"
     },
@@ -1001,17 +1002,22 @@
       "unsure_detected_prefix": "WashData nu este sigur că a fost detectat",
       "no_suggestions": "Nicio sugestie activă.",
       "no_profiles_overlay": "Nu există profiluri de suprapus.",
-      "compare_cycles_title": "Comparați {count} cicluri"
+      "compare_cycles_title": "Comparați {count} cicluri",
+      "profiles_intro": "Faceți clic pe un profil pentru statistici, faze și curățare. Grupați programele aproape identice (aceeași formă/durată, temperatură sau turație diferită) pentru ca potrivirea să aleagă fiabil între ele.",
+      "search_placeholder": "Căutare setări…",
+      "automations_intro": "WashData declanșează evenimentele {start} / {end} și expune entități, astfel că notificările și acțiunile se construiesc cel mai bine ca automatizări normale Home Assistant. Automatizările care utilizează acest dispozitiv apar mai jos.",
+      "notify_services_hint": "Utilizați ID-urile serviciului {entity} (separate prin virgulă pentru mai multe). Variabile șablon: {vars}.",
+      "rbac_hint": "Când este dezactivat, fiecare utilizator Home Assistant are acces complet (implicit). Administratorii au întotdeauna acces complet și pot gestiona toți utilizatorii."
     },
     "modal": {
       "label_cycle": "Etichetare ciclu",
-      "create_profile": "Creați un profil",
-      "new_phase": "Faza Noua",
+      "create_profile": "Creează profil",
+      "new_phase": "Fază nouă",
       "edit_phase": "Editare fază",
       "process_recording": "Procesare înregistrare",
-      "correct_feedback": "Feedback corect",
-      "import_config": "Importați configurația",
-      "auto_label": "Cicluri de etichetare automată",
+      "correct_feedback": "Corectează feedback-ul",
+      "import_config": "Importă configurația",
+      "auto_label": "Etichetare automată a ciclurilor",
       "cycle": "Ciclu"
     },
     "tag": {
@@ -1190,28 +1196,28 @@
         "label": "Întreținere automată (curățare nocturnă)"
       },
       "expose_debug_entities": {
-        "label": "Expune entitățile de depanare"
+        "label": "Afișează entitățile de depanare"
       },
       "save_debug_traces": {
-        "label": "Salvați urmele de depanare"
+        "label": "Salvează urmele de depanare"
       },
       "anti_wrinkle_enabled": {
-        "label": "Activați detectarea antirid"
+        "label": "Activează detectarea anti-rid"
       },
       "anti_wrinkle_max_power": {
-        "label": "Puterea maximă antirid"
+        "label": "Putere maximă anti-rid"
       },
       "anti_wrinkle_max_duration": {
         "label": "Durata maximă"
       },
       "anti_wrinkle_exit_power": {
-        "label": "Ieșire din pragul de putere"
+        "label": "Prag putere de ieșire"
       },
       "delay_start_detect_enabled": {
         "label": "Activați Detectarea pornirii întârziate"
       },
       "delay_confirm_seconds": {
-        "label": "Confirmați secundele"
+        "label": "Secunde de confirmare"
       },
       "delay_timeout_hours": {
         "label": "Timeout Ore"
@@ -1223,7 +1229,7 @@
         "label": "Entitate de declanșare externă"
       },
       "external_end_trigger_inverted": {
-        "label": "Inversați declanșatorul extern (declanșatorul este dezactivat)"
+        "label": "Inversează declanșatorul extern (declanșare la OPRIT)"
       },
       "door_sensor_entity": {
         "label": "Entitate senzor ușă"
@@ -1241,10 +1247,10 @@
         "label": "Durata de blocare a pompei"
       },
       "notify_start_services": {
-        "label": "Porniți Servicii"
+        "label": "Servicii de pornire"
       },
       "notify_finish_services": {
-        "label": "Servicii de finisare"
+        "label": "Servicii de finalizare"
       },
       "notify_live_services": {
         "label": "Servicii Live Progress"
@@ -1256,7 +1262,7 @@
         "label": "Notificați numai când sunteți acasă"
       },
       "notify_fire_events": {
-        "label": "Fire HA Events pentru notificări"
+        "label": "Declanșează evenimente HA pentru notificări"
       },
       "notify_before_end_minutes": {
         "label": "Alertă de pre-terminare"
@@ -1283,10 +1289,10 @@
         "label": "Mesaj de pornire"
       },
       "notify_finish_message": {
-        "label": "Terminați mesajul"
+        "label": "Mesaj de finalizare"
       },
       "notify_pre_complete_message": {
-        "label": "Mesaj pre-completat"
+        "label": "Mesaj pre-finalizare"
       },
       "notify_reminder_message": {
         "label": "Mesaj de memento"
@@ -1298,7 +1304,7 @@
         "label": "Canal Android (terminare)"
       },
       "energy_price_entity": {
-        "label": "Entitatea Prețul Energiei"
+        "label": "Entitate preț energie"
       },
       "energy_price_static": {
         "label": "Prețul energiei statice (pe kWh)"

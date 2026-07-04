@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
+          "name": "Naziv uređaja",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -624,7 +625,7 @@
       "history": "Ciklusi",
       "profiles": "Profili",
       "settings": "Postavke",
-      "ml": "ML Training",
+      "ml": "ML obuka",
       "advanced": "Napredno",
       "diagnostics": "Dijagnostika",
       "pp_overview": "Pregled",
@@ -643,22 +644,22 @@
       "add": "Dodaj",
       "rebuild": "Obnovi omotnice",
       "record": "Započni snimanje",
-      "compare": "Uporedite",
+      "compare": "Poredi",
       "confirm": "Potvrdi",
       "discard": "Odbaci",
-      "export": "Izvoz",
-      "import": "Uvoz",
+      "export": "Izvezi",
+      "import": "Uvezi",
       "merge": "Spoji",
       "apply": "Primijeni",
       "refresh": "Osvježi",
       "create": "Kreiraj",
-      "select": "Odaberite",
+      "select": "Odaberi",
       "done": "Gotovo",
-      "reset": "Reset",
-      "trim": "Trim",
-      "split": "Split",
-      "review": "Pregled",
-      "inspect": "Pregled",
+      "reset": "Poništi",
+      "trim": "Skrati",
+      "split": "Podijeli",
+      "review": "Pregledaj",
+      "inspect": "Provjeri",
       "label": "Označi",
       "save_settings": "Sačuvaj postavke",
       "new_profile": "+ Novi profil",
@@ -666,20 +667,20 @@
       "apply_label": "Primijeni oznaku",
       "run_auto_label": "Pokreni automatsko označavanje",
       "save_review": "Sačuvaj recenziju",
-      "apply_trim": "Primijeni trim",
+      "apply_trim": "Primijeni skraćivanje",
       "apply_split": "Primijeni podjelu",
       "process_recording": "Sačuvaj snimanje",
-      "stop": "Stani",
+      "stop": "Zaustavi",
       "process": "Obradi",
       "add_device": "+ Dodaj uređaj",
       "train_now": "Treniraj sada",
-      "reset_to_defaults": "Vratite na zadane postavke",
-      "reset_to_builtin": "Vratite se na ugrađene modele",
-      "save_preferences": "Spremi postavke",
+      "reset_to_defaults": "Vrati na zadane postavke",
+      "reset_to_builtin": "Vrati na ugrađene modele",
+      "save_preferences": "Sačuvaj postavke",
       "save_panel_settings": "Sačuvaj postavke panela",
-      "save_access_control": "Sačuvajte kontrolu pristupa",
-      "auto_label_cycles": "Ciklusi automatskog označavanja",
-      "run_analysis": "🔍 Pokrenite analizu prijedloga",
+      "save_access_control": "Sačuvaj kontrolu pristupa",
+      "auto_label_cycles": "Automatski označi cikluse",
+      "run_analysis": "🔍 Pokreni analizu prijedloga",
       "apply_all": "Primijeni sve",
       "show_only": "Pokaži samo",
       "dismiss": "Odbaci",
@@ -696,7 +697,7 @@
       "delete_profile": "Izbriši profil",
       "rebuild_envelope": "Obnovi omotnicu",
       "create_profile": "+ Kreirajte profil",
-      "rec_stop": "Stani",
+      "rec_stop": "Zaustavi",
       "pause_cycle": "Pauza",
       "resume_cycle": "Nastavi",
       "force_stop": "Prisilno zaustavi",
@@ -709,13 +710,13 @@
       "manage": "Upravljaj",
       "remove": "Ukloni",
       "delete_group": "Izbriši grupu",
-      "trim_split": "Uredi / Podijeli",
+      "trim_split": "Skrati / Podijeli",
       "convert_to_automation": "Pretvorite u automatizaciju",
       "new_automation": "＋ Nova automatizacija",
       "from_template": "Iz šablona ▾",
       "on_cycle_started": "Započeo ciklus",
       "on_cycle_finished": "Završen ciklus",
-      "save_group": "Spremi grupu"
+      "save_group": "Sačuvaj grupu"
     },
     "hdr": {
       "status": "Status",
@@ -738,12 +739,12 @@
       "status_graph": "Graf statusa",
       "diagnostics_pref": "Dijagnostika",
       "logs_diagnostics": "Dijagnostika",
-      "process_history": "Istorija procesa",
-      "clear_debug": "Obrišite tragove za otklanjanje grešaka",
+      "process_history": "Obradi historiju",
+      "clear_debug": "Obriši tragove za otklanjanje grešaka",
       "wipe_history": "Obriši historiju",
       "automations": "Automatizacije",
-      "automation_open": "Otvorite u uređivaču automatizacije",
-      "automation_delete": "Izbrišite ovu automatizaciju",
+      "automation_open": "Otvori u uređivaču automatizacije",
+      "automation_delete": "Izbriši ovu automatizaciju",
       "automation_needs_review": "Ovaj ciklus treba revidirati",
       "automation_review_this_cycle": "Pregledajte ovaj ciklus",
       "no_automations": "Još nijedna automatizacija ne spominje ovaj uređaj."
@@ -779,19 +780,19 @@
       "json_data": "JSON podaci",
       "expected_duration": "Očekivano trajanje (min)",
       "rename_profile": "Preimenuj profil",
-      "select_profile": "Odaberite Profil",
+      "select_profile": "Odaberi profil",
       "confidence_threshold": "Prag povjerenja",
       "resulting_profile": "Rezultirajući profil",
       "new_profile_name": "Novo ime profila",
       "save_mode": "Način pohrane",
-      "head_trim": "Trim početka (s)",
-      "tail_trim": "Trim kraja (s)",
-      "gap_s": "jaz (s)",
-      "start": "Počni",
+      "head_trim": "Skraćivanje početka (s)",
+      "tail_trim": "Skraćivanje kraja (s)",
+      "gap_s": "Razmak (s)",
+      "start": "Početak",
       "end": "Kraj",
       "quality": "Kvaliteta",
       "golden_reference": "Snimljeni referentni ciklus",
-      "compare_profiles": "Uporedite sa profilima",
+      "compare_profiles": "Poredi sa profilima",
       "tags": "Oznake",
       "notes": "Bilješke",
       "default_tab": "Podrazumevana kartica prilikom otvaranja panela",
@@ -806,7 +807,7 @@
       "show_expected": "Prikaži očekivani prekrivač krivulje (podudarni profil, narandžasta)",
       "show_raw": "Prikaži neobrađena očitanja senzora (neuglađena, siva)",
       "show_debug": "Prikaži karticu za otklanjanje grešaka utakmice uživo na stranici Status (pouzdanje, dvosmislenost, najbolji kandidati)",
-      "mode_new_profile": "Kreirajte novi profil",
+      "mode_new_profile": "Kreiraj novi profil",
       "mode_existing_profile": "Dodaj postojećem profilu",
       "auto_fine_tune_on": "automatsko fino podešavanje uključeno (oko {hour}:00)",
       "auto_fine_tune_off": "automatsko fino podešavanje isključeno",
@@ -825,7 +826,7 @@
     },
     "badge": {
       "poor_fit": "loše uklapanje",
-      "fair_fit": "fair fit",
+      "fair_fit": "umjereno uklapanje",
       "manual": "(ručno odabrano)",
       "auto": "(automatski otkriveno)",
       "improving": "↗ poboljšanje",
@@ -845,8 +846,8 @@
       "working": "Radi…",
       "recording": "Snimanje…",
       "ready": "Spreman za obradu",
-      "idle": "Idle",
-      "auto_detect": "Auto-detect",
+      "idle": "U mirovanju",
+      "auto_detect": "Automatsko otkrivanje",
       "fine_tuning": "sada fino podešavanje…",
       "all_statuses": "Svi statusi"
     },
@@ -943,7 +944,7 @@
       "label_failed": "Oznaka nije uspjela: {error}",
       "invalid_json": "\"{key}\" nije važeći JSON - popravite to ili obrišite polje prije spremanja.",
       "processed": "Obrađeno {bits}",
-      "split_complete": "Podijelite na {count} ciklusa"
+      "split_complete": "Podijeljeno na {count} ciklusa"
     },
     "msg": {
       "no_devices": "Još nema konfiguriranih uređaja WashData.",
@@ -1001,24 +1002,29 @@
       "unsure_detected_prefix": "WashData nije siguran da je otkriven",
       "no_suggestions": "Nema aktivnih prijedloga.",
       "no_profiles_overlay": "Nema profila za preklapanje.",
-      "compare_cycles_title": "Uporedite {count} ciklusa"
+      "compare_cycles_title": "Uporedite {count} ciklusa",
+      "profiles_intro": "Kliknite na profil za statistike, faze i čišćenje. Grupišite gotovo identične programe (isti oblik/trajanje, različita temperatura ili okretanje) kako bi podudaranje pouzdano biralo između njih.",
+      "search_placeholder": "Pretraži postavke…",
+      "automations_intro": "WashData pokreće {start} / {end} događaje i izlaže entitete, pa se obavještenja i radnje najbolje grade kao uobičajene Home Assistant automatizacije. Automatizacije koje koriste ovaj uređaj prikazane su ispod.",
+      "notify_services_hint": "Koristite ID-ove usluge {entity} (odvojeni zarezom za više). Varijable predloška: {vars}.",
+      "rbac_hint": "Kada je isključeno, svaki korisnik Home Assistanta ima potpun pristup (zadano). Administratori uvijek imaju potpun pristup i mogu upravljati svima."
     },
     "modal": {
       "label_cycle": "Označi ciklus",
       "create_profile": "Kreirajte profil",
       "new_phase": "Nova faza",
       "edit_phase": "Uredi fazu",
-      "process_recording": "Snimanje procesa",
+      "process_recording": "Obrada snimanja",
       "correct_feedback": "Ispravne povratne informacije",
       "import_config": "Uvoz konfiguracije",
-      "auto_label": "Ciklusi automatskog označavanja",
+      "auto_label": "Automatsko označavanje ciklusa",
       "cycle": "Ciklus"
     },
     "tag": {
       "late_start": "Kasni početak",
       "early_end": "Rani kraj",
       "merged": "Spojeni ciklusi",
-      "split": "Split ciklus",
+      "split": "Podijeljeni ciklus",
       "noise": "Buka",
       "wrong_profile": "Pogrešan profil",
       "sensor_gap": "Razmak senzora"
@@ -1166,7 +1172,7 @@
         "label": "Tolerancija trajanja profila"
       },
       "duration_tolerance": {
-        "label": "Procijenite toleranciju"
+        "label": "Tolerancija procjene"
       },
       "auto_label_confidence": {
         "label": "Pouzdanost auto-označavanja"
@@ -1190,10 +1196,10 @@
         "label": "Automatsko održavanje (noćno čišćenje)"
       },
       "expose_debug_entities": {
-        "label": "Izložite entitete za otklanjanje grešaka"
+        "label": "Izloži entitete za otklanjanje grešaka"
       },
       "save_debug_traces": {
-        "label": "Sačuvajte tragove za otklanjanje grešaka"
+        "label": "Sačuvaj tragove za otklanjanje grešaka"
       },
       "anti_wrinkle_enabled": {
         "label": "Omogućite detekciju protiv bora"
@@ -1202,7 +1208,7 @@
         "label": "Maksimalna snaga protiv bora"
       },
       "anti_wrinkle_max_duration": {
-        "label": "Max Duration"
+        "label": "Maksimalno trajanje"
       },
       "anti_wrinkle_exit_power": {
         "label": "Izađite iz praga snage"
@@ -1265,7 +1271,7 @@
         "label": "Interval ažuriranja uživo"
       },
       "notify_live_overrun_percent": {
-        "label": "Live Overrun % prije upozorenja"
+        "label": "Prekoračenje uživo % prije upozorenja"
       },
       "notify_live_chronometer": {
         "label": "Koristite kronometar uživo"
@@ -1280,10 +1286,10 @@
         "label": "Ikona obavijesti"
       },
       "notify_start_message": {
-        "label": "Pokreni poruku"
+        "label": "Početna poruka"
       },
       "notify_finish_message": {
-        "label": "Završi poruku"
+        "label": "Završna poruka"
       },
       "notify_pre_complete_message": {
         "label": "Poruka pred završetak"

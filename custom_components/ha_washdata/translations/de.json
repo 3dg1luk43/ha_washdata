@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
+          "name": "Name des Geräts",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -629,7 +630,7 @@
       "diagnostics": "Diagnostik",
       "pp_overview": "Überblick",
       "pp_phases": "Phasen",
-      "pp_cleanup": "Reinigung",
+      "pp_cleanup": "Bereinigung",
       "pp_manage": "Verwalten",
       "subtab_profiles": "Profile",
       "subtab_phase_catalog": "Phasenkatalog"
@@ -642,7 +643,7 @@
       "edit": "Bearbeiten",
       "add": "Hinzufügen",
       "rebuild": "Hüllkurven neu erstellen",
-      "record": "Aufnahme starten",
+      "record": "Aufzeichnung starten",
       "compare": "Vergleichen",
       "confirm": "Bestätigen",
       "discard": "Verwerfen",
@@ -655,7 +656,7 @@
       "select": "Wählen",
       "done": "Fertig",
       "reset": "Zurücksetzen",
-      "trim": "Trimm",
+      "trim": "Zuschneiden",
       "split": "Teilen",
       "review": "Überprüfen",
       "inspect": "Prüfen",
@@ -674,9 +675,9 @@
       "add_device": "+ Gerät hinzufügen",
       "train_now": "Jetzt trainieren",
       "reset_to_defaults": "Auf Standardeinstellungen zurücksetzen",
-      "reset_to_builtin": "Zurücksetzen auf eingebaute Modelle",
-      "save_preferences": "Einstellungen speichern",
-      "save_panel_settings": "Systemeinstellungen speichern",
+      "reset_to_builtin": "Auf eingebaute Modelle zurücksetzen",
+      "save_preferences": "Präferenzen speichern",
+      "save_panel_settings": "Panel-Einstellungen speichern",
       "save_access_control": "Zugriffskontrolle speichern",
       "auto_label_cycles": "Zyklen automatisch beschriften",
       "run_analysis": "🔍 Vorschlagsanalyse starten",
@@ -685,10 +686,10 @@
       "dismiss": "Verwerfen",
       "dismiss_all": "Alle verwerfen",
       "process_history": "Jetzt verarbeiten",
-      "clear_debug": "Löschen von Debug-Daten",
+      "clear_debug": "Debug-Daten löschen",
       "wipe_all": "Alle Daten löschen",
-      "export_json": "Export nach JSON",
-      "import_json": "Import von JSON",
+      "export_json": "Als JSON exportieren",
+      "import_json": "Aus JSON importieren",
       "correct": "Korrigieren…",
       "ignore": "Ignorieren",
       "add_phase": "+ Phase hinzufügen",
@@ -699,20 +700,20 @@
       "rec_stop": "Stopp",
       "pause_cycle": "Pause",
       "resume_cycle": "Fortsetzen",
-      "force_stop": "Erzwungen beenden",
+      "force_stop": "Beenden erzwingen",
       "save_phases": "Phasen speichern",
       "auto_detect_split": "Auto-Erkennung",
-      "clear_splits": "Klar.",
-      "submit_correction": "Berichtigung einreichen",
+      "clear_splits": "Leeren",
+      "submit_correction": "Korrektur einreichen",
       "import_overwrite": "Import (Daten überschreiben)",
-      "use": "Verwendung",
+      "use": "Verwenden",
       "manage": "Verwalten",
       "remove": "Entfernen",
-      "delete_group": "Löschen der Gruppe",
+      "delete_group": "Gruppe löschen",
       "trim_split": "Trimmen / Teilen",
       "convert_to_automation": "In Automatisierung umwandeln",
       "new_automation": "+ Neue Automatisierung",
-      "from_template": "Aus der Vorlage",
+      "from_template": "Aus Vorlage ▾",
       "on_cycle_started": "Wenn Zyklus gestartet",
       "on_cycle_finished": "Wenn Zyklus beendet",
       "save_group": "Gruppe speichern"
@@ -720,20 +721,20 @@
     "hdr": {
       "status": "Status",
       "live_power": "Live-Leistung",
-      "manual_recording": "Manuelle Aufnahme",
+      "manual_recording": "Manuelle Aufzeichnung",
       "tools_and_data": "Werkzeuge und Daten",
       "phase_catalog": "Phasenkatalog",
       "storage_stats": "Speicherstatistiken",
-      "maintenance": "Instandhaltungsmaßnahmen",
+      "maintenance": "Wartungsaktionen",
       "export_import": "Exportieren / Importieren",
       "logs": "Protokolle",
-      "my_preferences": "Meine Vorlieben",
+      "my_preferences": "Meine Präferenzen",
       "panel_settings": "Panel-Einstellungen (alle Benutzer)",
       "access_control": "Zugriffskontrolle",
       "ml_smart_learning": "Intelligentes Lernen",
       "ml_settings_card": "Einstellungen",
       "ml_learned": "Was WashData gelernt hat",
-      "ml_matching_tuning": "Programmanpassung Feinabstimmung",
+      "ml_matching_tuning": "Feinabstimmung des Programmabgleichs",
       "display": "Anzeige",
       "status_graph": "Statusdiagramm",
       "diagnostics_pref": "Diagnostik",
@@ -743,10 +744,10 @@
       "wipe_history": "Verlauf löschen",
       "automations": "Automatisierungen",
       "automation_open": "Im Automatisierungs-Editor öffnen",
-      "automation_delete": "Löschen Sie diese Automatisierung",
-      "automation_needs_review": "Dieser Zyklus braucht Überprüfung",
-      "automation_review_this_cycle": "Überprüfen Sie diesen Zyklus",
-      "no_automations": "Noch keine Automatisierungen verweisen auf dieses Gerät."
+      "automation_delete": "Diese Automatisierung löschen",
+      "automation_needs_review": "Dieser Zyklus muss überprüft werden",
+      "automation_review_this_cycle": "Diesen Zyklus überprüfen",
+      "no_automations": "Bislang verweisen keine Automatisierungen auf dieses Gerät."
     },
     "lbl": {
       "power": "Leistung",
@@ -757,18 +758,18 @@
       "profile": "Profil",
       "status": "Status",
       "date": "Datum",
-      "confidence": "Vertrauen",
-      "health": "Gesundheit",
+      "confidence": "Konfidenz",
+      "health": "Zustand",
       "cost": "Kosten",
       "program": "Programm",
-      "cycle_health": "Zyklusgesundheit",
-      "activity": "Tätigkeit",
+      "cycle_health": "Zyklus-Zustand",
+      "activity": "Aktivität",
       "unlabelled": "Unbeschriftet",
       "unlabelled_paren": "(unbeschriftet)",
-      "emphasis": "Schwerpunkte",
+      "emphasis": "Gewichtung",
       "default": "Standard",
-      "in_use": "Verwendung",
-      "profile_name": "Profil Name",
+      "in_use": "In Verwendung",
+      "profile_name": "Profilname",
       "ref_cycle": "Referenzzyklus (optional)",
       "manual_duration": "Manuelle Dauer (min, optional)",
       "phase_name": "Phasenname",
@@ -776,45 +777,45 @@
       "correct_profile": "Richtiges Profil",
       "correct_duration": "Richtige Dauer (min, optional)",
       "load_from_file": "Aus Datei laden",
-      "json_data": "JSON Daten",
+      "json_data": "JSON-Daten",
       "expected_duration": "Voraussichtliche Dauer (min)",
       "rename_profile": "Profil umbenennen",
       "select_profile": "Profil auswählen",
-      "confidence_threshold": "Sicherheitsschwelle",
+      "confidence_threshold": "Konfidenzschwelle",
       "resulting_profile": "Ergebnisprofil",
       "new_profile_name": "Neuer Profilname",
       "save_mode": "Speichermodus",
-      "head_trim": "Kopfbesatz(e)",
-      "tail_trim": "Heckverkleidung(en)",
-      "gap_s": "Lücke(n)",
+      "head_trim": "Zuschnitt Anfang (s)",
+      "tail_trim": "Zuschnitt Ende (s)",
+      "gap_s": "Lücke (s)",
       "start": "Start",
       "end": "Ende",
       "quality": "Qualität",
-      "golden_reference": "Aufgenommener Referenzzyklus",
+      "golden_reference": "Aufgezeichneter Referenzzyklus",
       "compare_profiles": "Vergleich mit Profilen",
       "tags": "Schlagwörter",
       "notes": "Anmerkungen",
-      "default_tab": "Default Tab beim Öffnen des Panels",
-      "cycle_date_display": "Uhrzeitanzeige",
-      "refresh_interval": "Refresh-Intervall (s)",
-      "panel_default_tab": "Default Tab",
+      "default_tab": "Standard-Tab beim Öffnen des Panels",
+      "cycle_date_display": "Anzeige des Zyklusdatums",
+      "refresh_interval": "Aktualisierungsintervall (s)",
+      "panel_default_tab": "Standard-Tab",
       "hide_tabs": "Tabs für Nicht-Admins verbergen",
       "enable_access_control": "Per-User Zugriffskontrolle aktivieren",
-      "default_access_level": "Default Level für Benutzer, die nicht unten aufgeführt sind",
+      "default_access_level": "Standardstufe für unten nicht aufgeführte Benutzer",
       "administrators": "Administratoren",
       "default_other": "Standard (andere Geräte)",
-      "show_expected": "erwartete Kurvenüberlagerung anzeigen (gestricheltes Profil, orange)",
+      "show_expected": "Erwartete Kurvenüberlagerung anzeigen (abgeglichenes Profil, orange)",
       "show_raw": "Rohe Sensorwerte anzeigen (unglättet, grau)",
       "show_debug": "Zeige Live-Match-Debug-Karte auf der Statusseite (Konfidenz, Mehrdeutigkeit, Top-Kandidaten)",
       "mode_new_profile": "Neues Profil erstellen",
       "mode_existing_profile": "Zu bestehendem Profil hinzufügen",
-      "auto_fine_tune_on": "Automatisches Feintun auf (ca. {hour}:00)",
-      "auto_fine_tune_off": "Automatische Feinabstimmung",
+      "auto_fine_tune_on": "Automatische Feinabstimmung ein (gegen {hour}:00)",
+      "auto_fine_tune_off": "Automatische Feinabstimmung aus",
       "last_checked": "Letzte Prüfung:",
-      "remove_label": "- Etikett entfernen -",
+      "remove_label": "- Beschriftung entfernen -",
       "create_new_profile": "+ Neues Profil erstellen...",
-      "read_only": "Nur lesen",
-      "actions": "Maßnahmen",
+      "read_only": "Schreibgeschützt",
+      "actions": "Aktionen",
       "cycles_count": "Zyklen",
       "debug_traces": "Debug-Traces",
       "file_kb": "Datei (kB)",
@@ -828,20 +829,20 @@
       "fair_fit": "mäßige Übereinstimmung",
       "manual": "(manuell ausgewählt)",
       "auto": "(automatisch erkannt)",
-      "improving": "↗ Verbesserung",
-      "declining": "↘ Abnahme",
+      "improving": "↗ verbessert sich",
+      "declining": "↘ verschlechtert sich",
       "steady": "→ stabil",
-      "using_tuned": "Verwendung abgestimmter Gewichte",
-      "using_defaults": "Verschiffte Standardeinstellungen verwenden",
+      "using_tuned": "Abgestimmte Gewichte",
+      "using_defaults": "Standardgewichte",
       "built_in_tag": "eingebaut"
     },
     "status": {
-      "completed": "abgeschlossen",
+      "completed": "Abgeschlossen",
       "interrupted": "Unterbrochen",
       "force_stopped": "Erzwungen gestoppt",
       "active": "Aktiv",
       "ambiguous": "Mehrdeutig",
-      "clear": "Klar",
+      "clear": "Eindeutig",
       "working": "Verarbeitung...",
       "recording": "Aufzeichnung...",
       "ready": "Bereit zu verarbeiten",
@@ -858,13 +859,13 @@
       "fit_slight": "Leicht",
       "fit_word": "Übereinstimmung",
       "fine_tuned_at": "Feinabstimmung {when}",
-      "personalized": "● Personalisiert auf diese Maschine",
+      "personalized": "● Für diese Maschine personalisiert",
       "builtin_models": "● Mit eingebauten Modellen"
     },
     "toast": {
-      "settings_saved": "Einstellungen gespeichert; Integrations-Reloading",
+      "settings_saved": "Einstellungen gespeichert; Integration wird neu geladen",
       "preferences_saved": "Einstellungen gespeichert",
-      "panel_settings_saved": "Systemeinstellungen gespeichert",
+      "panel_settings_saved": "Panel-Einstellungen gespeichert",
       "access_saved": "Zugriffskontrolle gespeichert",
       "profile_created": "Profil \"{name}\" erstellt",
       "profile_deleted": "Profil \"{name}\" gelöscht",
@@ -876,25 +877,25 @@
       "recording_started": "Aufnahme gestartet",
       "recording_stopped": "Aufzeichnung gestoppt",
       "recording_discarded": "Aufzeichnung verworfen",
-      "recording_saved": "Aufzeichnung gespeichert zum Profil",
+      "recording_saved": "Aufzeichnung im Profil gespeichert",
       "export_downloaded": "Export heruntergeladen",
-      "logs_exported": "Logs exportiert",
+      "logs_exported": "Protokolle exportiert",
       "import_successful": "Import erfolgreich; Integration wird neu geladen",
       "envelopes_rebuilt": "Hüllkurven neu erstellt",
       "envelope_rebuilt": "Hüllkurve neu erstellt",
-      "suggestions_applied": "Angewendete Vorschläge; Integrationsnachladung",
-      "suggestions_dismissed": "Abgelehnte Vorschläge",
+      "suggestions_applied": "Vorschläge angewendet; Integration wird neu geladen",
+      "suggestions_dismissed": "Vorschläge verworfen",
       "auto_label_complete": "Auto-Beschriftung abgeschlossen",
       "cycle_labelled": "Zyklus beschriftet",
       "cycle_deleted": "Zyklus gelöscht",
       "cycles_deleted": "{count} Zyklus(e) gelöscht",
       "cycle_trimmed": "Zyklus zugeschnitten",
-      "cycles_merged": "Zusammengeführte Zyklen",
+      "cycles_merged": "Zyklen zusammengeführt",
       "review_saved": "Bewertung gespeichert",
       "feedback_confirmed": "Feedback bestätigt",
-      "feedback_dismissed": "Rückmeldung abgelehnt",
-      "feedback_all_dismissed": "Alle Rückmeldungen abgewiesen",
-      "correction_submitted": "Berichtigung vorgelegt",
+      "feedback_dismissed": "Feedback verworfen",
+      "feedback_all_dismissed": "Alle Feedbacks verworfen",
+      "correction_submitted": "Korrektur übermittelt",
       "group_saved": "Gruppe gespeichert",
       "group_deleted": "Gruppe gelöscht",
       "automation_deleted": "Automatisierung gelöscht",
@@ -903,14 +904,14 @@
       "cycle_resumed": "Zyklus wieder aufgenommen",
       "cycle_force_stopped": "Zyklus erzwungen gestoppt",
       "ml_training_promoted": "Training abgeschlossen: {count} Modell(e) aktualisiert",
-      "ml_training_no_improvement": "Ausbildung abgeschlossen: Basis beibehalten (keine Verbesserung)",
-      "matching_reverted": "Passende Gewichte, die auf Standardeinstellungen zurückversetzt werden",
-      "models_reverted": "On-Device-Modelle zurück zur Basislinie",
+      "ml_training_no_improvement": "Training abgeschlossen: Basismodell beibehalten (keine Verbesserung)",
+      "matching_reverted": "Abgleich-Gewichte auf Standardwerte zurückgesetzt",
+      "models_reverted": "Gerätemodelle auf Basismodell zurückgesetzt",
       "analysis_complete": "Analyse abgeschlossen: {count} Vorschlag/Vorschläge",
       "analysis_complete_none": "Analyse komplett: keine neuen Vorschläge",
-      "debug_cleared": "Gelöschte {count} Debugspuren",
-      "all_wiped": "Alle Daten werden gelöscht",
-      "no_split_found": "Keine Leere Lücken gefunden zu teilen",
+      "debug_cleared": "{count} Debug-Traces gelöscht",
+      "all_wiped": "Alle Daten gelöscht",
+      "no_split_found": "Keine Leerlaufpausen zum Teilen gefunden",
       "group_name_required": "Gruppenname ist erforderlich",
       "min_2_profiles": "Wählen Sie mindestens 2 Profile für eine Gruppe",
       "profile_name_required": "Profilname ist erforderlich",
@@ -919,109 +920,114 @@
       "json_required": "JSON-Daten sind erforderlich",
       "save_failed": "Speichern fehlgeschlagen: {error}",
       "delete_failed": "Löschen fehlgeschlagen: {error}",
-      "apply_failed": "Anwenden scheiterte: {error}",
+      "apply_failed": "Anwenden fehlgeschlagen: {error}",
       "rebuild_failed": "Neu erstellen fehlgeschlagen: {error}",
       "start_failed": "Start fehlgeschlagen: {error}",
-      "stop_failed": "Stop fehlgeschlagen: {error}",
-      "discard_failed": "Discard fehlgeschlagen: {error}",
+      "stop_failed": "Stoppen fehlgeschlagen: {error}",
+      "discard_failed": "Verwerfen fehlgeschlagen: {error}",
       "trim_failed": "Zuschneiden fehlgeschlagen: {error}",
       "split_failed": "Teilen fehlgeschlagen: {error}",
       "merge_failed": "Zusammenführen fehlgeschlagen: {error}",
       "create_failed": "Erstellen fehlgeschlagen: {error}",
       "update_failed": "Aktualisierung fehlgeschlagen: {error}",
       "rename_failed": "Umbenennen fehlgeschlagen: {error}",
-      "revert_failed": "Zurück fehlgeschlagen: {error}",
+      "revert_failed": "Zurücksetzen fehlgeschlagen: {error}",
       "training_failed": "Training fehlgeschlagen: {error}",
       "export_failed": "Export fehlgeschlagen: {error}",
       "import_failed": "Import fehlgeschlagen: {error}",
       "auto_label_failed": "Auto-Label fehlgeschlagen: {error}",
       "analysis_failed": "Analyse fehlgeschlagen: {error}",
-      "auto_detect_failed": "Auto-Detektiv fehlgeschlagen: {error}",
+      "auto_detect_failed": "Auto-Erkennung fehlgeschlagen: {error}",
       "error": "Fehler: {error}",
-      "could_not_load_cycle": "Nicht laden Zyklus: {error}",
-      "pause_failed": "Pause versagt: {error}",
-      "label_failed": "Label versagt: {error}",
-      "invalid_json": "\"{key}\" ist nicht gültig JSON — fixieren oder löschen Sie das Feld vor dem Speichern.",
+      "could_not_load_cycle": "Zyklus konnte nicht geladen werden: {error}",
+      "pause_failed": "Pausieren fehlgeschlagen: {error}",
+      "label_failed": "Beschriften fehlgeschlagen: {error}",
+      "invalid_json": "\"{key}\" ist kein gültiges JSON — korrigieren Sie es oder leeren Sie das Feld vor dem Speichern.",
       "processed": "Verarbeitet {bits}",
-      "split_complete": "In {count} Zyklen teilen"
+      "split_complete": "In {count} Zyklen geteilt"
     },
     "msg": {
       "no_devices": "Noch keine WashData-Geräte konfiguriert.",
       "no_device_selected": "Kein Gerät ausgewählt.",
       "loading": "Laden…",
       "loading_settings": "Einstellungen laden...",
-      "live_chart_loading": "Live-Power-Diagramm erscheint als Messwerte ankommen.",
+      "live_chart_loading": "Live-Leistungsdiagramm erscheint, sobald Messwerte eintreffen.",
       "no_cycles_match": "Keine Zyklen entsprechen dem aktuellen Filter.",
       "no_cycles_yet": "Noch keine Zyklen aufgezeichnet.",
-      "no_profiles_yet": "Noch keine Profile. Erstellen Sie eine aus einem markierten Zyklus.",
+      "no_profiles_yet": "Noch keine Profile. Erstellen Sie eines aus einem beschrifteten Zyklus.",
       "no_logs": "Noch keine Protokolle gepuffert.",
       "no_phases": "Keine Phasen definiert.",
       "no_phases_assigned": "Keine Phasen zugeordnet.",
       "no_split_points": "Noch keine Splitpunkte.",
-      "no_envelope": "Noch kein Umschlag - nach Etikettierzyklen wieder aufbauen.",
-      "no_envelope_overlay": "Kein Umschlag zur Überlagerung verfügbar.",
+      "no_envelope": "Noch keine Hüllkurve – nach dem Beschriften von Zyklen neu erstellen.",
+      "no_envelope_overlay": "Keine Hüllkurve zur Überlagerung verfügbar.",
       "no_other_users": "Keine anderen Home Assistant-Benutzer gefunden.",
       "maintenance_requires_access": "Wartung und Export/Import benötigen vollen Zugriff.",
       "loading_curve": "Kurve wird geladen...",
-      "compare_selected_cycles": "Ausgewählte Zyklen (fest) — anzeigen / verstecken",
-      "compare_overlay_profiles": "Overlay-Profile (blass)",
+      "compare_selected_cycles": "Ausgewählte Zyklen (durchgezogen) — ein-/ausblenden",
+      "compare_overlay_profiles": "Überlagerte Profile (blass)",
       "no_profiles_compare": "Keine Profile zu vergleichen.",
       "no_cycles_profile": "Keine Zyklen für dieses Profil.",
       "saving_triggers_reload": "Das Speichern löst einen Neustart der Integration aus. HA-Entitäten können kurz als nicht verfügbar erscheinen.",
       "prefs_personal": "Diese gelten nur für Ihr Home Assistant-Konto.",
       "no_match_yet": "Noch kein Abgleichversuch — wird während eines laufenden Zyklus ausgefüllt.",
       "no_fine_tuned": "Noch keine Feinabstimmung — WashData verwendet seine eingebauten Modelle.",
-      "ml_learned_intro": "Modelle fein abgestimmt auf diese Maschine. Alles, was nicht aufgeführt ist, nutzt das zuverlässige eingebaute Modell.",
-      "ml_settings_intro": "Zwei unabhängige Schalter: Einer wendet die Modelle während eines Zyklus an, der andere lässt WashData sie im Laufe der Zeit auf Ihre Maschine feinabstimmen.",
+      "ml_learned_intro": "An diese Maschine angepasste Modelle. Alles, was nicht aufgeführt ist, nutzt das zuverlässige eingebaute Modell.",
+      "ml_settings_intro": "Zwei unabhängige Schalter: Einer wendet die Modelle während eines Zyklus an, der andere lässt WashData sie mit der Zeit an Ihre Maschine anpassen.",
       "ml_intro": "WashData wird mit intelligenten Modellen geliefert, die Zyklen erkennen, Programme abgleichen und Zeit & Energie schätzen — direkt einsatzbereit.",
-      "matching_tuning_intro": "WashData passt beim Lernen auch, wie viel Programmanpassung die Form eines Zyklus im Vergleich zu seiner Dauer und Energie abwägt.",
-      "phase_catalog_intro": "Benannte Abschnitte eines Zyklus (Vorwäsche, Heizen, Schleudern…). Weisen Sie einem Profil in seinem Kontrollbereich zu.",
+      "matching_tuning_intro": "Beim Lernen passt WashData auch an, wie stark der Programmabgleich die Form eines Zyklus gegenüber seiner Dauer und Energie gewichtet.",
+      "phase_catalog_intro": "Benannte Abschnitte eines Zyklus (Vorwäsche, Heizen, Schleudern…). Weisen Sie einem Profil über dessen Bedienfeld zu.",
       "phase_ranges_intro": "Phasenbereiche (Minuten vom Zyklusstart) überlagert auf der mittleren Kurve. Bearbeiten Sie Werte, um live vorzuschauen.",
       "cleanup_intro": "Jeder markierte Zyklus überlagert. Ausreißer markieren und löschen, um das Profil zu bereinigen.",
       "split_intro": "Klicken Sie auf das Diagramm, um einen Splitpunkt hinzuzufügen oder zu entfernen, oder automatische Erkennung durch Leerlaufpausen.",
       "trim_intro": "Ziehen Sie die roten Griffe oder geben Sie Werte ein. Alles außerhalb des Fensters wird entfernt.",
       "import_intro": "Laden Sie eine exportierte Datei oder fügen Sie unten eine JSON-Payload ein.",
       "auto_label_intro": "Profile nicht beschrifteten Zyklen zuordnen, deren Übereinstimmungskonfidenz die Schwelle überschreitet.",
-      "merge_intro": "Die ausgewählten Zyklen werden in eine (chronologische Reihenfolge; mit 0 W gefüllte Lücken) zusammengefaßt. Wählen Sie das resultierende Profil aus.",
+      "merge_intro": "Die ausgewählten Zyklen werden zu einem zusammengefasst (chronologische Reihenfolge; Lücken mit 0 W gefüllt). Wählen Sie das resultierende Profil aus.",
       "enough_data": "Genug Daten zum Lernen ({current}/{min} Zyklen).",
-      "collecting_data": "Sammeln von Daten — {need} mehr Zyklus{plural} bevor die Feinabstimmung beginnen kann ({current}/{min}).",
+      "collecting_data": "Daten werden gesammelt – noch {need} Zyklen, bevor die Feinabstimmung beginnen kann ({current}/{min}).",
       "updated": "Aktualisiert {time}",
       "appliance_monitor": "Gerätemonitor",
-      "ml_loading": "Laden ML...",
-      "see_recorder": "Siehe Recorder Widget unten",
+      "ml_loading": "ML wird geladen…",
+      "see_recorder": "Siehe Aufzeichnungs-Widget unten",
       "review_in_settings": "Bewertung in Einstellungen",
-      "storage_diagnostics": "Lagerstatistik, Wartung, Export/Import",
-      "recent_logs": "Aktuelle ha washdata Aufzeichnungen",
+      "storage_diagnostics": "Speicherstatistik, Wartung, Export/Import",
+      "recent_logs": "Aktuelle ha_washdata-Protokolle",
       "preferences_adv": "Präferenzen",
-      "preferences_admin": "Einstellungen, Panel & Zutrittskontrolle",
-      "review_to_cycles": "Öffnen Sie die Warteschlange der Zyklen",
-      "pending_feedback": "Erkennungs-Feedback",
+      "preferences_admin": "Präferenzen, Panel & Zugriffskontrolle",
+      "review_to_cycles": "Überprüfungs-Warteschlange der Zyklen öffnen",
+      "pending_feedback": "Ausstehendes Erkennungs-Feedback",
       "recording_in_progress": "Aufzeichnung läuft",
       "no_profiles_yet_short": "Noch keine Profile.",
-      "unsure_detected_prefix": "WashData ist unsicher, es erkannt",
+      "unsure_detected_prefix": "WashData ist sich nicht sicher, ob es erkannt hat:",
       "no_suggestions": "Keine aktiven Vorschläge.",
       "no_profiles_overlay": "Keine Profile zu überlagern.",
-      "compare_cycles_title": "Vergleiche {count} Zyklen"
+      "compare_cycles_title": "Vergleich von {count} Zyklen",
+      "profiles_intro": "Klicken Sie auf ein Profil für Statistiken, Phasen und Bereinigung. Fassen Sie nahezu identische Programme (gleiche Form/Dauer, unterschiedliche Temperatur oder Schleudergang) zu Gruppen zusammen, damit der Abgleich zuverlässig zwischen ihnen wählt.",
+      "search_placeholder": "Einstellungen durchsuchen…",
+      "automations_intro": "WashData löst {start} / {end}-Ereignisse aus und stellt Entitäten bereit, daher werden Benachrichtigungen und Aktionen am besten als normale Home Assistant-Automatisierungen erstellt. Automatisierungen, die dieses Gerät verwenden, werden unten angezeigt.",
+      "notify_services_hint": "Verwenden Sie {entity}-Dienst-IDs (kommagetrennt für mehrere). Vorlagenvariablen: {vars}.",
+      "rbac_hint": "Wenn deaktiviert, hat jeder Home Assistant-Benutzer vollen Zugriff (Standard). Administratoren haben immer vollen Zugriff und können alle verwalten."
     },
     "modal": {
       "label_cycle": "Zyklus beschriften",
       "create_profile": "Profil erstellen",
       "new_phase": "Neue Phase",
       "edit_phase": "Phase bearbeiten",
-      "process_recording": "Prozessaufzeichnung",
+      "process_recording": "Aufzeichnung verarbeiten",
       "correct_feedback": "Feedback korrigieren",
       "import_config": "Konfiguration importieren",
-      "auto_label": "Auto-Label-Zyklus",
+      "auto_label": "Zyklen automatisch beschriften",
       "cycle": "Zyklus"
     },
     "tag": {
       "late_start": "Späterer Start",
       "early_end": "Frühes Ende",
-      "merged": "Zusammengefügte Zyklen",
-      "split": "Split Zyklus",
-      "noise": "Lärm",
+      "merged": "Zusammengeführte Zyklen",
+      "split": "Geteilter Zyklus",
+      "noise": "Rauschen",
       "wrong_profile": "Falsches Profil",
-      "sensor_gap": "Sensorspalt"
+      "sensor_gap": "Sensorlücke"
     },
     "quality": {
       "good": "Gut",
@@ -1032,8 +1038,8 @@
       "none": "Keine (ausgeblendet)",
       "read": "Lesen",
       "edit": "Bearbeiten",
-      "full": "Vollständig",
-      "inherit": "Vererbung"
+      "full": "Voll",
+      "inherit": "Erben"
     },
     "health": {
       "poor": "⚠ Schlechte Übereinstimmung",
@@ -1045,11 +1051,11 @@
       "down": "Abwärtstrend"
     },
     "pref": {
-      "date_relative": "Relativ (z.B. vor 2 Stunden)",
-      "date_absolute": "Absolut (z.B. 14:32 am 2 Jul)"
+      "date_relative": "Relativ (z. B. vor 2 Stunden)",
+      "date_absolute": "Absolut (z. B. 14:32 am 2. Juli)"
     },
     "log": {
-      "all_levels": "Alle Ebenen"
+      "all_levels": "Alle Stufen"
     },
     "section": {
       "basic": {
@@ -1058,23 +1064,23 @@
       },
       "detection": {
         "label": "Erkennung",
-        "intro": "Wie ein Zyklus als Start, Laufen und Finish erkannt wird."
+        "intro": "Wie Beginn, Lauf und Ende eines Zyklus erkannt werden."
       },
       "matching": {
         "label": "Abgleich",
-        "intro": "Wie fertige Zyklen an gelernte Profile angepasst und markiert werden."
+        "intro": "Wie abgeschlossene Zyklen mit gelernten Profilen abgeglichen und beschriftet werden."
       },
       "timing": {
         "label": "Timing und Watchdog",
-        "intro": "Hintergrundtakt, der Offline-Watchdog und Housekeeping."
+        "intro": "Hintergrundtakt, der Offline-Watchdog und Aufräumarbeiten."
       },
       "anti_wrinkle": {
-        "label": "Anti-Falten",
+        "label": "Knitterschutz",
         "intro": "Der Knitterschutz-Modus erkennt Trockner-Trommel-Pulse nach der Hauptwärmephase."
       },
       "delay": {
         "label": "Verzögerter Start",
-        "intro": "Delayed-Start-Erkennung identifiziert, wenn ein Gerät betrieben wird, aber noch nicht seinen Zyklus begonnen hat."
+        "intro": "Die Erkennung des verzögerten Starts erkennt, wenn ein Gerät eingeschaltet ist, aber seinen Zyklus noch nicht begonnen hat."
       },
       "triggers": {
         "label": "Auslöser und Tür",
@@ -1086,7 +1092,7 @@
       },
       "ml_training": {
         "label": "ML-Training",
-        "intro": "Opt-in smart Modelle, die Erkennung und Timing auf dieses Gerät personalisieren."
+        "intro": "Optionale intelligente Modelle, die Erkennung und Timing an dieses Gerät anpassen."
       }
     },
     "setting": {
@@ -1115,19 +1121,19 @@
         "label": "Stopp-Schwelle"
       },
       "min_off_gap": {
-        "label": "Min. Off-Gap"
+        "label": "Minimale Aus-Pause"
       },
       "start_duration_threshold": {
-        "label": "Beginn der Dauer"
+        "label": "Startdauer"
       },
       "start_energy_threshold": {
-        "label": "Start Energie"
+        "label": "Startenergie"
       },
       "completion_min_seconds": {
         "label": "Mindestzyklusdauer"
       },
       "running_dead_zone": {
-        "label": "Laufende Totzone"
+        "label": "Totzone im Betrieb"
       },
       "end_energy_threshold": {
         "label": "Endenergie"
@@ -1145,19 +1151,19 @@
         "label": "Abrupter Abfall"
       },
       "abrupt_drop_ratio": {
-        "label": "Abrupte Tropfenrate"
+        "label": "Verhältnis für abrupten Abfall"
       },
       "profile_match_threshold": {
         "label": "Übereinstimmungsschwelle"
       },
       "profile_unmatch_threshold": {
-        "label": "Unübertroffene Schwelle"
+        "label": "Nichtübereinstimmungs-Schwelle"
       },
       "profile_match_interval": {
         "label": "Abgleich-Intervall"
       },
       "profile_match_min_duration_ratio": {
-        "label": "Mindestdauer"
+        "label": "Min. Dauerverhältnis"
       },
       "profile_match_max_duration_ratio": {
         "label": "Max Dauerverhältnis"
@@ -1196,19 +1202,19 @@
         "label": "Debug Traces speichern"
       },
       "anti_wrinkle_enabled": {
-        "label": "Anti-Falten-Detection aktivieren"
+        "label": "Knitterschutz-Erkennung aktivieren"
       },
       "anti_wrinkle_max_power": {
-        "label": "Maximale Anti-Falten-Wirkung"
+        "label": "Maximale Knitterschutz-Leistung"
       },
       "anti_wrinkle_max_duration": {
         "label": "Maximale Dauer"
       },
       "anti_wrinkle_exit_power": {
-        "label": "Ausgangsleistungsschwelle"
+        "label": "Ausstiegs-Leistungsschwelle"
       },
       "delay_start_detect_enabled": {
-        "label": "Delay-Start-Detection aktivieren"
+        "label": "Erkennung des verzögerten Starts aktivieren"
       },
       "delay_confirm_seconds": {
         "label": "Bestätigung (Sekunden)"
@@ -1220,19 +1226,19 @@
         "label": "Externer Endauslöser aktivieren"
       },
       "external_end_trigger": {
-        "label": "Externe Trigger-Eingabe"
+        "label": "Externe Trigger-Entität"
       },
       "external_end_trigger_inverted": {
-        "label": "Invert Externer Trigger (Trigger auf OFF)"
+        "label": "Externen Trigger invertieren (bei AUS auslösen)"
       },
       "door_sensor_entity": {
-        "label": "Türsensor Eingang"
+        "label": "Türsensor-Entität"
       },
       "pause_cuts_power": {
-        "label": "Pause Auch Schneidet Leistung (über Schalter)"
+        "label": "Pause unterbricht auch die Stromzufuhr (über Schalter)"
       },
       "switch_entity": {
-        "label": "Schalteingabe"
+        "label": "Schalter-Entität"
       },
       "notify_unload_delay_minutes": {
         "label": "Entnahme-Erinnerungsverzögerung"
@@ -1241,16 +1247,16 @@
         "label": "Pumpenstillstandsdauer"
       },
       "notify_start_services": {
-        "label": "Starten Sie Dienste"
+        "label": "Start-Dienste"
       },
       "notify_finish_services": {
-        "label": "Abschlussdienste"
+        "label": "Abschluss-Dienste"
       },
       "notify_live_services": {
         "label": "Live-Fortschrittsdienste"
       },
       "notify_people": {
-        "label": "Menschen (nur nach Hause)"
+        "label": "Personen (für „Nur wenn zu Hause“)"
       },
       "notify_only_when_home": {
         "label": "Nur wenn zu Hause benachrichtigen"
@@ -1259,49 +1265,49 @@
         "label": "HA-Ereignisse für Benachrichtigungen auslösen"
       },
       "notify_before_end_minutes": {
-        "label": "Voraus-Alarm (Minuten)"
+        "label": "Vorwarnung vor Ende"
       },
       "notify_live_interval_seconds": {
         "label": "Live-Update-Intervall"
       },
       "notify_live_overrun_percent": {
-        "label": "Live Overrun % vor dem Alarm"
+        "label": "Live-Überschreitung % vor Alarm"
       },
       "notify_live_chronometer": {
-        "label": "Live Chronometer verwenden"
+        "label": "Live-Chronometer verwenden"
       },
       "notify_timeout_seconds": {
-        "label": "Auto-Dismiss nach"
+        "label": "Automatisch ausblenden nach"
       },
       "notify_title": {
         "label": "Benachrichtigungstitel"
       },
       "notify_icon": {
-        "label": "Notifikation Icon"
+        "label": "Benachrichtigungssymbol"
       },
       "notify_start_message": {
-        "label": "Start Nachricht"
+        "label": "Startnachricht"
       },
       "notify_finish_message": {
-        "label": "Ende Nachricht"
+        "label": "Endnachricht"
       },
       "notify_pre_complete_message": {
-        "label": "Vor-Komplett-Nachricht"
+        "label": "Nachricht vor Abschluss"
       },
       "notify_reminder_message": {
         "label": "Erinnerungsnachricht"
       },
       "notify_channel": {
-        "label": "Android Kanal (Start/live)"
+        "label": "Android-Kanal (Start/Live)"
       },
       "notify_finish_channel": {
-        "label": "Android Kanal (finish)"
+        "label": "Android-Kanal (Ende)"
       },
       "energy_price_entity": {
         "label": "Energiepreis-Entität"
       },
       "energy_price_static": {
-        "label": "Statische Energiepreis (pro kWh)"
+        "label": "Statischer Energiepreis (pro kWh)"
       },
       "enable_ml_models": {
         "label": "Intelligente Modelle während eines Zyklus anwenden"

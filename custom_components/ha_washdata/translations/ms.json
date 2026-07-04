@@ -53,6 +53,7 @@
         "title": "Tetapan WashData",
         "description": "Semua tetapan -- pengesanan, pemadanan, masa, pemberitahuan, profil, dan kitaran -- tersedia di panel WashData. Gunakan borang ini hanya untuk menukar penderia kuasa, jenis peranti, atau ambang siaga.",
         "data": {
+          "name": "Nama Peranti",
           "device_type": "Jenis Peranti",
           "power_sensor": "Penderia Kuasa",
           "min_power": "Ambang Kuasa Minimum (W)"
@@ -665,7 +666,7 @@
       "new_group": "+ Grup Baru",
       "apply_label": "Terapkan Label",
       "run_auto_label": "Jalankan Label Automatik",
-      "save_review": "Simpan Ulasan",
+      "save_review": "Simpan Tinjauan",
       "apply_trim": "Terapkan Pangkas",
       "apply_split": "Terapkan Pemisahan",
       "process_recording": "Simpan Rakaman",
@@ -1002,7 +1003,12 @@
       "unsure_detected_prefix": "WashData tidak yakin itu dikesan",
       "no_suggestions": "Tidak ada saran aktif.",
       "no_profiles_overlay": "Tidak ada profil untuk dihamparkan.",
-      "compare_cycles_title": "Bandingkan {count} kitaran"
+      "compare_cycles_title": "Bandingkan {count} kitaran",
+      "profiles_intro": "Klik profil untuk statistik, fasa dan pembersihan. Kumpulkan program yang hampir sama (bentuk/tempoh yang sama, suhu atau putaran berbeza) supaya padanan dapat membezakan antara mereka dengan tepat.",
+      "search_placeholder": "Cari tetapan…",
+      "automations_intro": "WashData mencetuskan peristiwa {start} / {end} dan mendedahkan entiti, jadi pemberitahuan dan tindakan paling baik dibina sebagai automasi Home Assistant biasa. Automasi yang menggunakan peranti ini dipaparkan di bawah.",
+      "notify_services_hint": "Gunakan ID perkhidmatan {entity} (dipisahkan koma untuk berbilang). Pembolehubah templat: {vars}.",
+      "rbac_hint": "Apabila dimatikan, setiap pengguna Home Assistant mempunyai akses penuh (lalai). Pentadbir sentiasa mempunyai akses penuh dan boleh mengurus semua orang."
     },
     "modal": {
       "label_cycle": "Beri Label Kitaran",
@@ -1200,7 +1206,7 @@
         "label": "Aktifkan Pengesanan Anti-Kerut"
       },
       "anti_wrinkle_max_power": {
-        "label": "Kekuatan Anti-Kerut Maks"
+        "label": "Daya Anti-Kerut Maks"
       },
       "anti_wrinkle_max_duration": {
         "label": "Durasi Maks"

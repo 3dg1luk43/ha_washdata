@@ -997,6 +997,7 @@ class HaWashdataPanel extends HTMLElement {
     this._stagedSuggestions = false;   // a suggestion was applied to a field this session
     this._busy = new Set();            // in-flight long operations (drives spinners)
     this._panelCfg = null;             // panel settings + RBAC + current-user info
+    this._panelTrans = null;           // loaded from /ha_washdata/panel-translations.json
     this._pollMs = _POLL_MS;
     this._panelSubtab = 'prefs';
     this._logs = [];
@@ -1034,8 +1035,19 @@ class HaWashdataPanel extends HTMLElement {
     this._gtip = document.createElement('div');
     this._gtip.className = 'wd-gtip';
     shadow.appendChild(this._gtip);
-    this._fetchAll();
-    this._startPoll();
+    // Load per-user-language panel translations before first render.
+    // Falls back to JS-embedded strings if the fetch fails.
+    this._loadPanelTranslations().catch(() => {}).finally(() => {
+      this._fetchAll();
+      this._startPoll();
+    });
+  }
+
+  async _loadPanelTranslations() {
+    try {
+      const r = await fetch('/ha_washdata/panel-translations.json');
+      if (r.ok) this._panelTrans = await r.json();
+    } catch (_) { /* non-fatal — fall back to JS-embedded strings */ }
   }
 
   _startPoll() { this._stopPoll(); this._pollTimer = setInterval(() => this._fetchAll(), this._pollMs); }
@@ -1376,8 +1388,24 @@ class HaWashdataPanel extends HTMLElement {
     } catch (_) { return fallback; }
   }
 
+  _tLookup(key, lang) {
+    // Walk dot-separated key path into the language's panel translation dict.
+    const dict = this._panelTrans && (this._panelTrans[lang] || this._panelTrans['en']);
+    if (!dict) return null;
+    const val = key.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), dict);
+    return (val && typeof val === 'string') ? val : null;
+  }
+
   _t(key, vars = {}, fallback = '') {
-    let s = this._localize(`component.${_DOMAIN}.panel.${key}`, fallback);
+    let s;
+    const lang = this._hass && this._hass.locale && this._hass.locale.language;
+    if (this._panelTrans) {
+      // Explicit user-language lookup: user pref → en → JS fallback
+      s = (lang && this._tLookup(key, lang)) || this._tLookup(key, 'en') || fallback;
+    } else {
+      // Bundle not yet loaded: use HA's localize (also user-language) or JS fallback
+      s = this._localize(`component.${_DOMAIN}.panel.${key}`, fallback);
+    }
     for (const [k, v] of Object.entries(vars)) {
       s = s.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
     }
@@ -1661,7 +1689,7 @@ class HaWashdataPanel extends HTMLElement {
     const advCards = [];
     if (this._canEdit()) advCards.push(`<div class="wd-attn-card" data-action="open-advanced" data-sub="diagnostics"><span class="wd-attn-icon">🩺</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('hdr.logs_diagnostics', {}, 'Diagnostics')}</div><div class="wd-attn-sub">${this._t('msg.storage_diagnostics', {}, 'Storage stats, maintenance, export/import')}</div></div></div>`);
     if (this._isAdmin()) advCards.push(`<div class="wd-attn-card" data-action="open-advanced" data-sub="logs"><span class="wd-attn-icon">📜</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('hdr.logs', {}, 'Logs')}</div><div class="wd-attn-sub">${this._t('msg.recent_logs', {}, 'Recent ha_washdata records')}</div></div></div>`);
-    advCards.push(`<div class="wd-attn-card" data-action="open-advanced" data-sub="prefs"><span class="wd-attn-icon">⚙️</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('tab.advanced', {}, 'Advanced')}</div><div class="wd-attn-sub">Preferences${this._isAdmin() ? this._t('msg.preferences_admin', {}, 'Preferences, panel & access control') : this._t('msg.preferences_adv', {}, 'Preferences')}</div></div></div>`);
+    advCards.push(`<div class="wd-attn-card" data-action="open-advanced" data-sub="prefs"><span class="wd-attn-icon">⚙️</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('tab.advanced', {}, 'Advanced')}</div><div class="wd-attn-sub">${this._isAdmin() ? this._t('msg.preferences_admin', {}, 'Preferences, panel & access control') : this._t('msg.preferences_adv', {}, 'Preferences')}</div></div></div>`);
     const advHtml = `<div class="wd-card"><div class="wd-card-title">${this._t('hdr.tools_and_data', {}, 'Tools & Data')}</div><div class="wd-attn" style="margin-bottom:0;margin-top:12px">${advCards.join('')}</div></div>`;
 
     const cycleCtrlHtml = (() => {
@@ -1996,8 +2024,8 @@ class HaWashdataPanel extends HTMLElement {
 
     const profilesHtml = `
       <div class="wd-card">
-        <div class="wd-card-title">Profiles (${this._profiles.length})</div>
-        <p class="wd-info">Click a profile for stats, phases and cleanup. Group near-identical programs (same shape/duration, different temperature or spin) so matching reliably picks between them.</p>
+        <div class="wd-card-title">${this._t('tab.profiles', {}, 'Profiles')} (${this._profiles.length})</div>
+        <p class="wd-info">${this._t('msg.profiles_intro', {}, 'Click a profile for stats, phases and cleanup. Group near-identical programs (same shape/duration, different temperature or spin) so matching reliably picks between them.')}</p>
         ${canEdit ? `<div class="wd-card-actions">
           <button class="wd-btn wd-btn-primary" data-action="create-profile">${this._t('btn.new_profile', {}, '+ New Profile')}</button>
           <button class="wd-btn wd-btn-secondary" data-action="pg-new">${this._t('btn.new_group', {}, '+ New Group')}</button>
@@ -2118,7 +2146,7 @@ class HaWashdataPanel extends HTMLElement {
 
     const search = this._settingsSearch || '';
     const q = search.trim().toLowerCase();
-    const searchInput = `<input type="text" id="wd-settings-search" class="wd-filter-input" placeholder="Search settings…" value="${_esc(search)}" autocomplete="off" style="max-width:240px">`;
+    const searchInput = `<input type="text" id="wd-settings-search" class="wd-filter-input" placeholder="${this._t('msg.search_placeholder', {}, 'Search settings…')}" value="${_esc(search)}" autocomplete="off" style="max-width:240px">`;
 
     const formContent = q ? this._htmlSettingsSearch(o, q) : (sugOnly ? this._htmlSettingsSugOnly(o) : this._htmlSettingsSection(o));
 
@@ -2138,7 +2166,7 @@ class HaWashdataPanel extends HTMLElement {
           <button class="wd-btn wd-btn-primary" id="wd-settings-save" ${saveBusy ? 'disabled' : ''}>${saveBusy ? '<span class="wd-spin"></span> Saving…' : this._t('btn.save_settings', {}, 'Save Settings')}</button>
           <button class="wd-btn wd-btn-secondary" id="wd-settings-reload">${this._t('btn.refresh', {}, 'Refresh')}</button>
         </div>
-        <p class="wd-info" style="margin-top:12px;font-size:.78em">Saving triggers an integration reload. HA entities may briefly show as unavailable.</p>
+        <p class="wd-info" style="margin-top:12px;font-size:.78em">${this._t('msg.saving_triggers_reload', {}, 'Saving triggers an integration reload. HA entities may briefly show as unavailable.')}</p>
       </div>
     `;
   }
@@ -2209,7 +2237,7 @@ class HaWashdataPanel extends HTMLElement {
       </div>` : '';
     return `
       <div class="wd-subhead">${this._t('hdr.automations', {}, 'Automations')}</div>
-      <p class="wd-info" style="margin-bottom:10px">WashData fires <code>ha_washdata_cycle_started</code> / <code>ha_washdata_cycle_ended</code> events and exposes entities, so notifications and actions are best built as normal Home Assistant automations. Automations that use this device appear below.</p>
+      <p class="wd-info" style="margin-bottom:10px">${this._t('msg.automations_intro', {start: '<code>ha_washdata_cycle_started</code>', end: '<code>ha_washdata_cycle_ended</code>'}, 'WashData fires {start} / {end} events and exposes entities, so notifications and actions are best built as normal Home Assistant automations. Automations that use this device appear below.')}</p>
       ${legacyBlock}
       <div class="wd-auto-pills" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px">${pills}</div>
       <div class="wd-auto-new" style="display:flex;gap:6px;align-items:center;margin-bottom:18px">
@@ -2331,7 +2359,7 @@ class HaWashdataPanel extends HTMLElement {
     const trainCard = '';
 
     if (sec.id === 'notifications') {
-      const varsHint = `<p class="wd-info" style="margin-bottom:16px">Use <code>notify.&lt;name&gt;</code> service IDs (comma-separated for multiple). Template variables: <code>${_esc(_NOTIFY_VARS)}</code>.</p>`;
+      const varsHint = `<p class="wd-info" style="margin-bottom:16px">${this._t('msg.notify_services_hint', {entity: '<code>notify.&lt;name&gt;</code>', vars: '<code>' + _esc(_NOTIFY_VARS) + '</code>'}, 'Use {entity} service IDs (comma-separated for multiple). Template variables: {vars}.')}</p>`;
       const groups = sec.groups.map(grp => {
         const fields = grp.fields.map(f => this._renderField(f, o)).join('');
         return `<div class="wd-subhead">${_esc(grp.sub)}</div><div class="wd-form-grid">${fields}</div>`;
@@ -2603,7 +2631,7 @@ class HaWashdataPanel extends HTMLElement {
     return `
       <div class="wd-card">
         <div class="wd-card-title">${this._t('hdr.phase_catalog', {}, 'Phase Catalog')}</div>
-        <p class="wd-info" style="margin-bottom:14px">Named segments of a cycle (Pre-wash, Heating, Spin…). Assign them to a profile from its control panel.</p>
+        <p class="wd-info" style="margin-bottom:14px">${this._t('msg.phase_catalog_intro', {}, 'Named segments of a cycle (Pre-wash, Heating, Spin…). Assign them to a profile from its control panel.')}</p>
         <div class="wd-card-actions" style="margin-bottom:14px"><button class="wd-btn wd-btn-primary" data-action="create-phase" data-dtype="${_esc(devType)}">${this._t('btn.new_phase', {}, '+ New Phase')}</button></div>
         ${this._phases.length === 0 ? `<p class="wd-info">${this._t('msg.no_phases', {}, 'No phases defined.')}</p>`
           : `<table class="wd-table"><thead><tr><th>${this._t('lbl.phase_name', {}, 'Name')}</th><th>${this._t('lbl.description', {}, 'Description')}</th><th>${this._t('lbl.actions', {}, 'Actions')}</th></tr></thead><tbody>${rows}</tbody></table>`}
@@ -2743,7 +2771,7 @@ class HaWashdataPanel extends HTMLElement {
     return `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.access_control', {}, 'Access Control')}</div>
       <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-rbac-enabled" ${rbac.enabled ? 'checked' : ''}> ${this._t('lbl.enable_access_control', {}, 'Enable per-user access control')}</label>
-        <div class="wd-field-hint">When off, every Home Assistant user has full access (the default). Administrators always have full access and can manage everyone.</div></div>
+        <div class="wd-field-hint">${this._t('msg.rbac_hint', {}, 'When off, every Home Assistant user has full access (the default). Administrators always have full access and can manage everyone.')}</div></div>
       <div class="wd-field"><label>${this._t('lbl.default_access_level', {}, 'Default level for users not listed below')}</label>${this._levelSelect('id="wd-rbac-default"', rbac.default_level || 'none', false)}</div>
       ${adminNote ? `<div class="wd-field"><label>${this._t('lbl.administrators', {}, 'Administrators')}</label><div>${adminNote}</div></div>` : ''}
       <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-rbac">${this._t('btn.save_access_control', {}, 'Save Access Control')}</button></div>

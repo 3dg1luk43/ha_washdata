@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
+          "name": "Apparaat Namme",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -1003,7 +1004,12 @@
       "unsure_detected_prefix": "WashData is net wis dat it ûntdutsen is",
       "no_suggestions": "Gjin aktive suggestjes.",
       "no_profiles_overlay": "Gjin profilen te overlay.",
-      "compare_cycles_title": "Ferlykje {count} syklusen"
+      "compare_cycles_title": "Ferlykje {count} syklusen",
+      "profiles_intro": "Klik op in profyl foar statistiken, faazen en opromjen. Groepearje hast identike programma's (selde foarm/doer, ferskillende temperatuer of slinger) sadat passende betrouber tusken har ûnderskiede kin.",
+      "search_placeholder": "Sykje ynstellingen…",
+      "automations_intro": "WashData fiert {start} / {end} barrens en eksponearret entiteiten, dus notifikaasjes en aksjes wurde it bêste boud as normale Home Assistant-automatisearringen. Automatisearringen dy't dit apparaat brûke ferskine hjirûnder.",
+      "notify_services_hint": "Brûk {entity} tsjinst-ID's (komma-skieden foar meardere). Sjabloanfariabelen: {vars}.",
+      "rbac_hint": "As it út is, hat elke Home Assistant-brûker folsleine tagong (de standert). Behearders hawwe altyd folsleine tagong en kinne elkenien beheare."
     },
     "modal": {
       "label_cycle": "Syklus labele",

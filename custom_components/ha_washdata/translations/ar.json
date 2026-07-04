@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "وتتاح في فريق واشداتا جميع البيئات - الكشف، والمطابقة، والتوقيت، والإخطارات، والموجزات، والدورات. استخدام هذا النموذج فقط لتغيير جهاز استشعار الطاقة، نوع الجهاز، أو العتبة الاحتياطية.",
         "data": {
+          "name": "اسم الجهاز",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -626,13 +627,13 @@
       "live_power": "الطاقة الحية",
       "manual_recording": "التسجيل اليدوي",
       "tools_and_data": "الأدوات والبيانات",
-      "phase_catalog": "كتيب المرحلة",
+      "phase_catalog": "فهرس المراحل",
       "storage_stats": "إحصاءات التخزين",
       "maintenance": "إجراءات الصيانة",
       "export_import": "الصادرات/الواردات",
       "logs": "السجلات",
       "my_preferences": "أفضلياتي",
-      "access_control": "مراقبة الدخول",
+      "access_control": "التحكم في الوصول",
       "ml_smart_learning": "التعلم الذكي",
       "ml_settings_card": "الإعدادات",
       "ml_matching_tuning": "ضبط مطابقة البرنامج",
@@ -640,7 +641,7 @@
       "status_graph": "الرسم البياني للحالة",
       "diagnostics_pref": "التشخيص",
       "logs_diagnostics": "التشخيص",
-      "process_history": "العملية التاريخية",
+      "process_history": "معالجة السجل",
       "clear_debug": "مسح آثار التصحيح",
       "wipe_history": "مسح السجل",
       "automations": "الأتمتة",
@@ -655,15 +656,15 @@
       "correct_duration": "المدة الصحيحة (دقائق، اختياري)",
       "default_tab": "التبويب الافتراضي عند فتح اللوحة",
       "default_access_level": "المستوى الافتراضي للمستعملين غير المدرجين أدناه",
-      "show_expected": "العرض المتوقع لتجاوز المنحنى (الوصف المطابق، البرتقالي)",
-      "show_raw": "نعرض قراءات الاستشعار الخام (غير ملوثة، رمادية)",
-      "show_debug": "تظهر بطاقة تطابق حية في صفحة المركز (الثقة، الغموض، كبار المرشحين)",
-      "power": "القوة",
+      "show_expected": "إظهار تراكب المنحنى المتوقع (الملف المطابق، برتقالي)",
+      "show_raw": "إظهار قراءات المستشعر الخام (غير مُنعَّمة، رمادية)",
+      "show_debug": "إظهار بطاقة تشخيص المطابقة الحية في صفحة الحالة (الثقة، الغموض، كبار المرشحين)",
+      "power": "القدرة",
       "progress": "التقدم",
-      "remaining": "البقاء",
+      "remaining": "المتبقي",
       "duration": "المدة",
       "energy": "الطاقة",
-      "profile": "حساب تعريفي",
+      "profile": "ملف تعريفي",
       "status": "الحالة",
       "date": "التاريخ",
       "confidence": "الثقة",
@@ -675,45 +676,45 @@
       "unlabelled": "غير مسمى",
       "unlabelled_paren": "(غير مُصنَّف)",
       "emphasis": "التركيز",
-      "default": "التقصير",
+      "default": "الافتراضي",
       "in_use": "في الاستخدام",
-      "profile_name": "اسم الملف الشخصي",
+      "profile_name": "اسم الملف التعريفي",
       "ref_cycle": "دورة مرجعية (اختيارية)",
       "phase_name": "اسم المرحلة",
       "description": "الوصف",
-      "correct_profile": "الملف الشخصي الصحيح",
+      "correct_profile": "الملف التعريفي الصحيح",
       "load_from_file": "تحميل من ملف",
       "json_data": "بيانات JSON",
       "expected_duration": "المدة المتوقعة (م)",
-      "rename_profile": "إعادة تسمية الملف الشخصي",
-      "select_profile": "اختر ملفاً شخصياً",
+      "rename_profile": "إعادة تسمية الملف التعريفي",
+      "select_profile": "اختر ملفاً تعريفياً",
       "confidence_threshold": "عتبة الثقة",
-      "resulting_profile": "الملف الشخصي الناتج",
-      "new_profile_name": "اسم جديد",
+      "resulting_profile": "الملف التعريفي الناتج",
+      "new_profile_name": "اسم الملف التعريفي الجديد",
       "save_mode": "وضع الحفظ",
       "head_trim": "تقليم الرأس (ق)",
       "tail_trim": "تقليم الذيل (ق)",
       "gap_s": "الفجوة (الفجوات)",
       "start": "ابدأ",
       "end": "النهاية",
-      "quality": "النوعية",
+      "quality": "الجودة",
       "golden_reference": "الدورة المرجعية المسجلة",
       "compare_profiles": "قارن مع الملفات الشخصية",
       "tags": "العلامات",
-      "notes": "الحواشي",
+      "notes": "ملاحظات",
       "cycle_date_display": "عرض تاريخ الدورة",
       "refresh_interval": "فترات التجديد (ق)",
-      "panel_default_tab": "الخانة الافتراضية(ب)",
+      "panel_default_tab": "علامة التبويب الافتراضية",
       "hide_tabs": "إخفاء التبويبات عن غير المشرفين",
       "enable_access_control": "مراقبة دخول المستعمل الواحد",
       "administrators": "المديرون",
-      "default_other": "التخلف (أجهزة أخرى)",
+      "default_other": "الافتراضي (أجهزة أخرى)",
       "mode_new_profile": "إنشاء ملف تعريف جديد",
-      "mode_existing_profile": "مضافا إليها",
+      "mode_existing_profile": "إضافة إلى ملف تعريفي موجود",
       "auto_fine_tune_on": "تشغيل الضبط التلقائي (حوالي {hour}:00)",
       "auto_fine_tune_off": "إيقاف الضبط التلقائي",
       "last_checked": "آخر فحص:",
-      "remove_label": "-علامة إزالة",
+      "remove_label": "- إزالة التسمية -",
       "create_new_profile": "+ إنشاء ملف تعريف جديد...",
       "read_only": "القراءة فقط",
       "actions": "الإجراءات",
@@ -726,62 +727,62 @@
       "ungrouped": "غير مجمّعة"
     },
     "toast": {
-      "settings_saved": "عمليات حفظ النظام؛ إعادة تحميل التكامل",
+      "settings_saved": "تم حفظ الإعدادات؛ إعادة تحميل التكامل",
       "import_successful": "النجاح في الاستيراد؛ إعادة تحميل التكامل",
       "suggestions_applied": "الاقتراحات المطبقة؛ إعادة تحميل التكامل",
-      "ml_training_no_improvement": "استكمال التدريب: خط الأساس المحتفظ به (لا يوجد تحسن)",
-      "could_not_load_cycle": "لا يمكن أن تكون دورة تحميل: {error}",
+      "ml_training_no_improvement": "اكتمل التدريب: تم الاحتفاظ بالخط الأساسي (لا يوجد تحسن)",
+      "could_not_load_cycle": "تعذّر تحميل الدورة: {error}",
       "preferences_saved": "تم توفير الأفضليات",
       "panel_settings_saved": "تم حفظ إعدادات اللوحة",
-      "access_saved": "مراقبة الدخول",
-      "profile_created": "Profile \" {name}\" created",
+      "access_saved": "تم حفظ التحكم في الوصول",
+      "profile_created": "تم إنشاء الملف التعريفي \"{name}\"",
       "profile_deleted": "تم حذف الملف الشخصي \"{name}\".",
       "profile_renamed": "تمت إعادة تسمية الملف الشخصي",
       "phases_saved": "تم حفظ المراحل",
-      "phase_created": "المرحلة \" {name}\"أُنشئت",
-      "phase_deleted": "حذفت المرحلة {name}\"",
-      "phase_updated": "استكمال المرحلة",
+      "phase_created": "تم إنشاء المرحلة \"{name}\"",
+      "phase_deleted": "تم حذف المرحلة \"{name}\"",
+      "phase_updated": "تم تحديث المرحلة",
       "recording_started": "التسجيل بدأ",
       "recording_stopped": "التسجيل توقف",
-      "recording_discarded": "التسجيل المفصول",
+      "recording_discarded": "تم تجاهل التسجيل",
       "recording_saved": "تم حفظ التسجيل في الملف الشخصي",
       "export_downloaded": "تنزيل الصادرات",
       "logs_exported": "تم تصدير السجلات",
       "envelopes_rebuilt": "إعادة بناء المظاريف",
-      "envelope_rebuilt": "Envelope rebuil",
-      "suggestions_dismissed": "الاقتراحات المرفوعة",
+      "envelope_rebuilt": "تم إعادة بناء المغلف",
+      "suggestions_dismissed": "تم رفض الاقتراحات",
       "auto_label_complete": "اكتمل وضع العلامات التلقائي",
       "cycle_labelled": "تم وضع علامة على الدورة",
-      "cycle_deleted": "مسح",
+      "cycle_deleted": "تم حذف الدورة",
       "cycles_deleted": "{count}دورة (دورات) حذفت",
       "cycle_trimmed": "قلصت الدورة",
       "cycles_merged": "تم دمج الدورات",
       "review_saved": "تم حفظ المراجعة",
       "feedback_confirmed": "تم تأكيد الملاحظات",
       "feedback_dismissed": "تم رفض الملاحظات",
-      "feedback_all_dismissed": "All feedback dismissed",
+      "feedback_all_dismissed": "تم رفض جميع الملاحظات",
       "correction_submitted": "تصويب مقدم",
       "group_saved": "تم حفظ المجموعة",
-      "group_deleted": "المجموعة المحذوفة",
+      "group_deleted": "تم حذف المجموعة",
       "automation_deleted": "تم حذف التلقائية",
       "legacy_removed": "إلغاء إجراءات الإرث",
       "cycle_paused": "توقفت الدورة مؤقتًا",
       "cycle_resumed": "استؤنفت الدورة",
       "cycle_force_stopped": "توقفت قوة الدورة",
-      "ml_training_promoted": "استكمال التدريب: نموذج (نموذج) معزز {count}",
-      "matching_reverted": "إعادة تحديد الأوزان إلى حالات العجز",
-      "models_reverted": "نماذج الارتفاع المرتدة إلى خط الأساس",
-      "analysis_complete": "استكمال التحليل: {count}اقتراح (اقتراحات)",
+      "ml_training_promoted": "اكتمل التدريب: تمت ترقية {count} نموذج",
+      "matching_reverted": "تمت إعادة أوزان المطابقة إلى الإعدادات الافتراضية",
+      "models_reverted": "تمت إعادة النماذج الموجودة على الجهاز إلى الخط الأساسي",
+      "analysis_complete": "اكتمل التحليل: {count} اقتراح",
       "analysis_complete_none": "استكمال التحليل: لا توجد اقتراحات جديدة",
       "debug_cleared": "تم مسح {count} أثر تصحيح",
-      "all_wiped": "جميع البيانات الممسحة",
+      "all_wiped": "تم مسح جميع البيانات",
       "no_split_found": "لا توجد فجوات متقطعة تفرقت",
       "group_name_required": "اسم المجموعة مطلوب",
       "min_2_profiles": "اختيار ملفين على الأقل لمجموعة",
       "profile_name_required": "الاسم المستعار مطلوب",
       "phase_name_required": "اسم المرحلة مطلوب",
       "name_required": "الاسم المطلوب",
-      "json_required": "ولا بد من الحصول على بيانات من مؤسسة &quot; جوسون &quot; .",
+      "json_required": "بيانات JSON مطلوبة",
       "save_failed": "فشل الحفظ: {error}",
       "delete_failed": "تحذف: {error}",
       "apply_failed": "فشل التطبيق: {error}",
@@ -813,17 +814,17 @@
       "no_devices": "لم يتم تركيب أجهزة واشداتا بعد",
       "live_chart_loading": "مخطّط الطاقة الحيّة يظهر كما تصل القراءات",
       "no_cycles_match": "لا توجد دورات تطابق الفلتر الحالي",
-      "no_profiles_yet": "لا ملف بعد اصنع واحدة من دورة ملصقة",
+      "no_profiles_yet": "لا ملفات تعريفية بعد. أنشئ واحداً من دورة مُسمَّاة.",
       "no_logs": "لا توجد سجلات للسجلات بعد",
       "no_envelope": "لا مظروف بعد إعادة البناء بعد دورات التوسيم",
       "no_cycles_profile": "لا دورات لهذا الملف",
       "saving_triggers_reload": "الحفظ يؤدي إلى إعادة تحميل التكامل. قد تظهر كيانات HA باختصار على أنها غير متاحة.",
-      "ml_learned_intro": "نماذج مصممة على هذه الآلة أي شيء غير مدرج يستعمل النموذج الموثوق به",
-      "ml_intro": "سفن واشداتا ذات نماذج ذكية تكتشف الدورات، وبرامج المطابقة، وتقدير الوقت &quot; الطاقة - وهي تعمل خارج الصندوق.",
-      "matching_tuning_intro": "عندما يتعلّم، (واشاداتا) تُعدّل أيضاً كم يُضاهي البرنامج الذي يُزن شكل الدورة مقابل مدّتها وطاقتها.",
-      "phase_catalog_intro": "أجزاء مسمّاة من دورة أرسلهم إلى ملف من لوحة التحكم",
-      "phase_ranges_intro": "وتتجاوز حدود المرحلة (الدقائق من بداية الدورة) متوسط المنحنى. (إيديت) يُقدّر أن يعيش قبل المقابلة",
-      "cleanup_intro": "كُلّ دورة مسمّاة فوق. تزحلق وتحذف لتنظيف الملف",
+      "ml_learned_intro": "نماذج مُعدَّلة لهذه الآلة. أي شيء غير مدرج يستخدم النموذج المدمج الموثوق.",
+      "ml_intro": "يأتي WashData مزوداً بنماذج ذكية تكتشف دورات الغسيل، وتطابق البرامج، وتقدر الوقت والطاقة — وهي تعمل فور الاستخدام.",
+      "matching_tuning_intro": "عند التعلم، يُعدّل WashData أيضاً مقدار الوزن الذي تمنحه مطابقة البرنامج لشكل الدورة مقارنةً بمدتها وطاقتها.",
+      "phase_catalog_intro": "أقسام مُسمَّاة من دورة الغسيل (غسيل مسبق، تسخين، عصر...). خصصها لملف تعريفي من لوحة التحكم.",
+      "phase_ranges_intro": "نطاقات المراحل (بالدقائق من بداية الدورة) مُركَّبة على المنحنى المتوسط. عدّل القيم للمعاينة الحية.",
+      "cleanup_intro": "جميع الدورات المُسمَّاة مُتراكبة. ضع علامة على الشواذ واحذفها لتنظيف الملف التعريفي.",
       "trim_intro": "إسحب المقبض الأحمر أو أدخل القيم كل شيء خارج النافذة تم إزالتها",
       "auto_label_intro": "نبذات عن الدورات غير الملصقة التي تطابق ثقتها تزيل العتبة",
       "merge_intro": "وتدمج الدورات المختارة في دورة واحدة (النظام الزمني؛ والثغرات المليئة بـ صفر واء). اختر الملف الناتج",
@@ -836,23 +837,23 @@
       "no_phases": "لا توجد مراحل محددة.",
       "no_phases_assigned": "لا توجد مراحل محددة",
       "no_split_points": "لا نقاط انقسام بعد",
-      "no_envelope_overlay": "لا مظروف متاح للنفقة",
+      "no_envelope_overlay": "لا مغلف متاح للتراكب",
       "no_other_users": "لم يجد مستعملون آخرون",
       "maintenance_requires_access": "وتتطلب الصيانة والتصدير/الواردات الوصول الكامل.",
-      "loading_curve": "منحنى التعبئة...",
+      "loading_curve": "تحميل المنحنى...",
       "compare_selected_cycles": "الدورات المختارة (صلبة) — عرض/إخفاء",
       "compare_overlay_profiles": "ملفات التراكب (شفافة)",
       "no_profiles_compare": "لا توجد ملفات شخصية للمقارنة",
       "prefs_personal": "هذه تنطبق على حسابك فقط",
       "no_match_yet": "لا مُحاولة مُطابقة لحد الآن، هذا يُظهر خلال دورة تشغيل.",
-      "no_fine_tuned": "لا شيء جيد حتى الآن - واشداتا تستخدم نماذجها المبنية.",
+      "no_fine_tuned": "لم يُضبط أي شيء بعد — يستخدم WashData نماذجه المدمجة.",
       "ml_settings_intro": "مفتاحان مستقلان: أحدهما يطبق النماذج بينما تدور دورة، والآخر يدع (واشالداتا) يضبطها على آلتك بمرور الوقت.",
       "split_intro": "اضغطي الرسم البياني لإضافة أو إزالة نقطة انقسام، أو تشخيص ذاتي بالثغرات العالقة.",
       "import_intro": "قم بتحميل ملف تم تصديره أو الصق حمولة JSON أدناه.",
       "enough_data": "بيانات كافية للتعلم منها (دورات {current}/{min}).",
       "collecting_data": "تجميع البيانات — {need} دورة إضافية{plural} قبل بدء الضبط الدقيق ({current}/{min}).",
       "updated": "تم التحديث {time}",
-      "appliance_monitor": "رصد التطبيق",
+      "appliance_monitor": "مراقب الجهاز",
       "ml_loading": "تحميل ML...",
       "review_in_settings": "المراجعة في الإعدادات",
       "storage_diagnostics": "إحصاءات التخزين والصيانة والتصدير/الواردات",
@@ -860,12 +861,17 @@
       "preferences_adv": "الأفضليات",
       "preferences_admin": "الأفضليات، هيئة مراقبة الدخول",
       "pending_feedback": "تعليقات الكشف",
-      "recording_in_progress": "تسجيل التقدم المحرز",
-      "no_profiles_yet_short": "لا ملف بعد",
+      "recording_in_progress": "التسجيل جارٍ",
+      "no_profiles_yet_short": "لا ملفات تعريفية بعد.",
       "unsure_detected_prefix": "واشداتا غير متأكد من أنه تم اكتشافه",
       "no_suggestions": "لا اقتراحات نشطة.",
       "no_profiles_overlay": "لا توجد ملفات شخصية للتراكب",
-      "compare_cycles_title": "قارن {count} دورات"
+      "compare_cycles_title": "قارن {count} دورات",
+      "profiles_intro": "انقر على ملف تعريف للاطلاع على الإحصائيات والمراحل والتنظيف. قم بتجميع البرامج المتشابهة تقريباً (نفس الشكل/المدة، درجة حرارة أو دوران مختلف) حتى يختار النظام بينها بشكل موثوق.",
+      "search_placeholder": "البحث في الإعدادات…",
+      "automations_intro": "يُطلق WashData أحداث {start} / {end} ويعرض الكيانات، لذلك يُفضَّل بناء الإشعارات والإجراءات كأتمتة Home Assistant عادية. تظهر الأتمتة التي تستخدم هذا الجهاز أدناه.",
+      "notify_services_hint": "استخدم معرّفات خدمة {entity} (مفصولة بفواصل لأكثر من واحدة). متغيرات القالب: {vars}.",
+      "rbac_hint": "عند التعطيل، يحصل كل مستخدم في Home Assistant على وصول كامل (الإعداد الافتراضي). يتمتع المسؤولون دائماً بوصول كامل ويمكنهم إدارة الجميع."
     },
     "section": {
       "basic": {
@@ -877,15 +883,15 @@
         "label": "الكشف"
       },
       "matching": {
-        "intro": "كَمْ تُطابقُ الدوراتَ المُنتَهَمةَ مِنْ الملامحِ المتعلّمةِ و مُوَسمَ.",
+        "intro": "كيفية مطابقة الدورات المكتملة بالملفات التعريفية المُتعلَّمة ووضع تسميات عليها.",
         "label": "المطابقة"
       },
       "timing": {
-        "intro": "كوادر معلومات أساسية، المراقبة الخارجية وخدمة المنازل",
+        "intro": "الإيقاع الخلفي ومراقب الاتصال وأعمال الصيانة الدورية.",
         "label": "التوقيت والمراقبة"
       },
       "anti_wrinkle": {
-        "intro": "ويكتشف نمط مكافحة الدرن نبضات مجففة بعد مرحلة الحرارة الرئيسية.",
+        "intro": "يكتشف وضع مكافحة التجعد نبضات الدوران في المجفف بعد مرحلة التسخين الرئيسية.",
         "label": "مضاد للتجاعيد"
       },
       "delay": {
@@ -894,7 +900,7 @@
       },
       "triggers": {
         "intro": "الإشارات الخارجية الاختيارية: محفز نهائي، مجس للباب، مفتاح توقف، وتذكير تفريغ.",
-        "label": "الأبواب"
+        "label": "المحفزات والأبواب"
       },
       "notifications": {
         "label": "الإخطارات",
@@ -902,12 +908,12 @@
       },
       "ml_training": {
         "label": "تدريب الذكاء الاصطناعي",
-        "intro": "العارضات الذكية التي تجعل الكشف عن هذا الجهاز وتوقيته شخصياً"
+        "intro": "نماذج ذكية اختيارية تُخصِّص الكشف والتوقيت لهذا الجهاز."
       }
     },
     "setting": {
       "auto_maintenance": {
-        "label": "صيانة السيارات (التنظيف الليلي)"
+        "label": "الصيانة التلقائية (التنظيف الليلي)"
       },
       "external_end_trigger_enabled": {
         "label": "تمكين مشغل النهاية الخارجية"
@@ -940,10 +946,10 @@
         "label": "نوع الجهاز"
       },
       "power_sensor": {
-        "label": "جهاز استشعار السلطة"
+        "label": "مستشعر الطاقة الكهربائية"
       },
       "min_power": {
-        "label": "الحد الأدنى من القوة"
+        "label": "الحد الأدنى للطاقة"
       },
       "off_delay": {
         "label": "تأخير الإيقاف"
@@ -976,7 +982,7 @@
         "label": "نهاية الطاقة"
       },
       "end_repeat_count": {
-        "label": "End Repeat count"
+        "label": "عدد تكرارات النهاية"
       },
       "sampling_interval": {
         "label": "فترات أخذ العينات"
@@ -988,13 +994,13 @@
         "label": "هبوط مفاجئ (واط)"
       },
       "abrupt_drop_ratio": {
-        "label": "النسبة المفاجئة"
+        "label": "نسبة الانخفاض المفاجئ"
       },
       "profile_match_threshold": {
-        "label": "عتبة المباراة"
+        "label": "عتبة المطابقة"
       },
       "profile_unmatch_threshold": {
-        "label": "عتبة غير متطابقة"
+        "label": "عتبة عدم المطابقة"
       },
       "profile_match_interval": {
         "label": "الفترة الفاصلة"
@@ -1009,7 +1015,7 @@
         "label": "مدة التسامح"
       },
       "duration_tolerance": {
-        "label": "تقدير التسامح"
+        "label": "هامش التقدير"
       },
       "auto_label_confidence": {
         "label": "الثقة في التسمية التلقائية"
@@ -1018,7 +1024,7 @@
         "label": "ثقة التعلم"
       },
       "suppress_feedback_notifications": {
-        "label": "الإخطارات المتعلقة برد الفعل"
+        "label": "إيقاف إشعارات التغذية الراجعة"
       },
       "watchdog_interval": {
         "label": "فترة المراقبة"
@@ -1090,7 +1096,7 @@
         "label": "فاصل التحديث المباشر (ث)"
       },
       "notify_live_overrun_percent": {
-        "label": "متجاوزات الحياة٪ قبل إنذار"
+        "label": "نسبة التجاوز المباشر% قبل الإنذار"
       },
       "notify_live_chronometer": {
         "label": "استخدم الكرونومتر المباشر"
@@ -1105,19 +1111,19 @@
         "label": "أيقونة الإشعار"
       },
       "notify_start_message": {
-        "label": "بدء الرسالة"
+        "label": "رسالة البداية"
       },
       "notify_finish_message": {
-        "label": "الرسالة المنتهية"
+        "label": "رسالة الإنهاء"
       },
       "notify_pre_complete_message": {
-        "label": "ما قبل الرسالة الشاملة"
+        "label": "رسالة ما قبل الاكتمال"
       },
       "notify_reminder_message": {
         "label": "رسالة تذكير"
       },
       "notify_channel": {
-        "label": "Android القناة (البداية/العمر)"
+        "label": "قناة Android (البداية/المباشر)"
       },
       "notify_finish_channel": {
         "label": "قناة Android (الإنهاء)"
@@ -1146,9 +1152,9 @@
       "pp_overview": "لمحة عامة",
       "pp_phases": "المراحل",
       "pp_cleanup": "التنظيف",
-      "pp_manage": "يدير",
+      "pp_manage": "إدارة",
       "subtab_profiles": "الملامح",
-      "subtab_phase_catalog": "كتيب المرحلة"
+      "subtab_phase_catalog": "فهرس المراحل"
     },
     "btn": {
       "save": "حفظ",
@@ -1182,11 +1188,11 @@
       "apply_label": "تطبيق التسمية",
       "run_auto_label": "تشغيل التصنيف التلقائي",
       "save_review": "حفظ المراجعة",
-      "apply_trim": "تطبيق تريم",
-      "apply_split": "تطبيق سبليت",
+      "apply_trim": "تطبيق التقليم",
+      "apply_split": "تطبيق التقسيم",
       "process_recording": "حفظ السجلات",
       "stop": "توقف",
-      "process": "العملية",
+      "process": "معالجة",
       "add_device": "+ إضافة جهاز",
       "train_now": "التدريب الآن",
       "reset_to_defaults": "إعادة تعيين إلى الافتراضيات",
@@ -1195,38 +1201,38 @@
       "save_panel_settings": "حفظ إعدادات اللوحة",
       "save_access_control": "حفظ التحكم في الوصول",
       "auto_label_cycles": "تصنيف الدورات تلقائياً",
-      "run_analysis": "إجراء تحليل للاقتراحات",
+      "run_analysis": "🔍 تشغيل تحليل الاقتراحات",
       "apply_all": "تطبيق كل شيء",
       "show_only": "العرض فقط",
       "dismiss": "رفض",
       "dismiss_all": "رفض الكل",
-      "process_history": "العملية الآن",
+      "process_history": "معالجة الآن",
       "clear_debug": "مسح بيانات التصحيح",
       "wipe_all": "مسح جميع البيانات",
       "export_json": "تصدير إلى JSON",
       "import_json": "استيراد من JSON",
-      "correct": "صحيح",
-      "ignore": "يتجاهل",
-      "add_phase": "+ مرحلة إضافة",
-      "new_phase": "+ المرحلة الجديدة",
+      "correct": "تصحيح…",
+      "ignore": "تجاهل",
+      "add_phase": "+ إضافة مرحلة",
+      "new_phase": "+ مرحلة جديدة",
       "delete_profile": "حذف الملف الشخصي",
       "rebuild_envelope": "إعادة بناء المغلف",
       "create_profile": "+ إنشاء الملف الشخصي",
       "rec_stop": "توقف",
-      "pause_cycle": "وقف",
+      "pause_cycle": "إيقاف مؤقت",
       "resume_cycle": "استئناف الدورة",
-      "force_stop": "توقف",
+      "force_stop": "إيقاف إجباري",
       "save_phases": "حفظ المراحل",
       "auto_detect_split": "الكشف التلقائي",
       "clear_splits": "مسح نقاط الانقسام",
       "submit_correction": "إرسال التصحيح",
       "import_overwrite": "استيراد (يستبدل البيانات)",
-      "use": "الاستخدام",
-      "manage": "يدير",
+      "use": "استخدم",
+      "manage": "إدارة",
       "remove": "إزالة",
       "delete_group": "حذف المجموعة",
-      "trim_split": "تقليم / سبليت",
-      "convert_to_automation": "تحويل إلى التشغيل الآلي",
+      "trim_split": "تقليم / تقسيم",
+      "convert_to_automation": "تحويل إلى أتمتة",
       "new_automation": "+ أتمتة جديدة",
       "from_template": "من النموذج",
       "on_cycle_started": "بدء الدورة",
@@ -1240,7 +1246,7 @@
       "auto": "(مُكتشف تلقائياً)",
       "improving": "↗ تحسّن",
       "declining": "↘ انخفاض",
-      "steady": "ثابت",
+      "steady": "→ ثابت",
       "using_tuned": "استخدام الأوزان المضبوطة",
       "using_defaults": "استخدام الإعدادات الافتراضية المشحونة",
       "built_in_tag": "مضمّن"
@@ -1249,10 +1255,10 @@
       "completed": "مكتملة",
       "interrupted": "متقطع",
       "force_stopped": "توقفت قسراً",
-      "active": "النشاط",
+      "active": "نشط",
       "ambiguous": "غامض",
       "clear": "واضح",
-      "working": "العمل...",
+      "working": "جارٍ العمل...",
       "recording": "تسجيل...",
       "ready": "جاهز للتجهيز",
       "idle": "عاطل",
@@ -1269,15 +1275,15 @@
       "fit_word": "مناسبة",
       "fine_tuned_at": "مضبوط دقيقاً بتاريخ {when}",
       "personalized": "● مُخصَّص لهذه الآلة",
-      "builtin_models": "● استخدام نماذج البناء"
+      "builtin_models": "● استخدام النماذج المدمجة"
     },
     "modal": {
       "label_cycle": "وضع علامة على الدورة",
       "create_profile": "إنشاء ملف تعريف",
       "new_phase": "المرحلة الجديدة",
       "edit_phase": "تعديل المرحلة",
-      "process_recording": "تسجيل العملية",
-      "correct_feedback": "التغذية الصحيحة",
+      "process_recording": "معالجة التسجيل",
+      "correct_feedback": "تصحيح التغذية الراجعة",
       "import_config": "استيراد الإعدادات",
       "auto_label": "وضع علامات تلقائية",
       "cycle": "دورة"

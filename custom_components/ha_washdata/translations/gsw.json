@@ -53,6 +53,7 @@
         "title": "WashData-Einstellungen",
         "description": "Alle Einstellungen – Erkennung, Abgleich, Timing, Benachrichtigungen, Profile und Zyklen – sind im WashData-Panel verfügbar. Dieses Formular nur verwenden, um den Leistungssensor, Gerätetyp oder Standby-Schwellenwert zu ändern.",
         "data": {
+          "name": "Gerätename",
           "device_type": "Gerätetyp",
           "power_sensor": "Leistungssensor",
           "min_power": "Mindestleistungsschwelle (W)"
@@ -1001,7 +1002,12 @@
       "unsure_detected_prefix": "WashData ist unsicher, ob erkannt wurde:",
       "no_suggestions": "Keine aktiven Vorschläge.",
       "no_profiles_overlay": "Keine Profile zum Überlagern.",
-      "compare_cycles_title": "{count} Zyklen vergleichen"
+      "compare_cycles_title": "{count} Zyklen vergleichen",
+      "profiles_intro": "Klicken Sie auf ein Profil, um Statistiken, Phasen und Bereinigung anzuzeigen. Gruppieren Sie nahezu identische Programme (gleiche Form/Dauer, unterschiedliche Temperatur oder Schleudergang), damit die Erkennung zuverlässig zwischen ihnen unterscheidet.",
+      "search_placeholder": "Einstellungen suchen…",
+      "automations_intro": "WashData löst {start}/{end}-Ereignisse aus und stellt Entitäten bereit, daher lassen sich Benachrichtigungen und Aktionen am besten als normale Home-Assistant-Automationen erstellen. Automationen, die dieses Gerät verwenden, werden unten angezeigt.",
+      "notify_services_hint": "Verwenden Sie {entity}-Dienst-IDs (kommagetrennt für mehrere). Vorlagenvariablen: {vars}.",
+      "rbac_hint": "Wenn deaktiviert, hat jeder Home-Assistant-Benutzer vollen Zugriff (Standard). Administratoren haben immer vollen Zugriff und können alle verwalten."
     },
     "modal": {
       "label_cycle": "Zyklus beschriften",

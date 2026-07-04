@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
+          "name": "Nafn tækis",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -1001,7 +1002,12 @@
       "unsure_detected_prefix": "WashData er ekki viss um að það hafi fundist",
       "no_suggestions": "Engar virkar tillögur.",
       "no_profiles_overlay": "Engir snið til að leggja yfir.",
-      "compare_cycles_title": "Berðu saman {count} lotur"
+      "compare_cycles_title": "Berðu saman {count} lotur",
+      "profiles_intro": "Smelltu á prófíl til að sjá tölfræði, stig og hreinsun. Flokkaðu nánast eins forrit (sama lögun/lengd, mismunandi hiti eða þvottahraði) til að samsvörun velji milli þeirra á áreiðanlegan hátt.",
+      "search_placeholder": "Leita í stillingum…",
+      "automations_intro": "WashData kveikir á {start} / {end} tilvikum og sýnir einingar, þannig að tilkynningar og aðgerðir eru best byggðar sem venjulegar Home Assistant sjálfvirkingar. Sjálfvirkingar sem nota þetta tæki birtast hér að neðan.",
+      "notify_services_hint": "Notaðu {entity} þjónustu-auðkenni (kommuaðskilin fyrir mörg). Sniðmátsbreytur: {vars}.",
+      "rbac_hint": "Þegar slökkt er, hefur sérhver Home Assistant notandi fulla aðgang (sjálfgefið). Stjórnendur hafa alltaf fulla aðgang og geta stjórnað öllum."
     },
     "modal": {
       "label_cycle": "Merkja hringrás",

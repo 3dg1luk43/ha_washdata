@@ -233,11 +233,22 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         )
 
         if user_input is not None:
+            new_name = str(user_input.get(CONF_NAME, "")).strip()
             new_options = {**entry.data, **entry.options, **user_input}
+            if new_name and new_name != entry.title:
+                self.hass.config_entries.async_update_entry(
+                    entry,
+                    title=new_name,
+                    data={**entry.data, CONF_NAME: new_name},
+                )
             return self.async_create_entry(title="", data=new_options)
 
         schema = vol.Schema(
             {
+                vol.Required(
+                    CONF_NAME,
+                    default=entry.title,
+                ): str,
                 vol.Required(
                     CONF_DEVICE_TYPE,
                     default=current_device_type,

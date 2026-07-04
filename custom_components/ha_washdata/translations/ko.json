@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "감지, 매칭, 타이밍, 알림, 프로필, 주기 등 모든 설정을 WashData 패널에서 사용할 수 있습니다. 전원 센서, 장치 유형 또는 대기 임계값을 변경하는 경우에만 이 양식을 사용하십시오.",
         "data": {
+          "name": "장치 이름",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -623,8 +624,8 @@
       "panel_settings": "패널 설정(모든 사용자)",
       "ml_learned": "WashData가 배운 것",
       "status": "상태",
-      "live_power": "라이브 파워",
-      "manual_recording": "수동녹화",
+      "live_power": "실시간 전력",
+      "manual_recording": "수동 기록",
       "tools_and_data": "도구 및 데이터",
       "phase_catalog": "단계 카탈로그",
       "storage_stats": "스토리지 통계",
@@ -632,8 +633,8 @@
       "export_import": "내보내기/가져오기",
       "logs": "로그",
       "my_preferences": "내 환경설정",
-      "access_control": "접근 제어",
-      "ml_smart_learning": "스마트러닝",
+      "access_control": "액세스 제어",
+      "ml_smart_learning": "스마트 러닝",
       "ml_settings_card": "설정",
       "ml_matching_tuning": "프로그램 매칭 미세 조정",
       "display": "표시",
@@ -661,16 +662,16 @@
       "power": "전력",
       "progress": "진전",
       "remaining": "남은",
-      "duration": "지속",
+      "duration": "소요 시간",
       "energy": "에너지",
       "profile": "프로필",
       "status": "상태",
       "date": "날짜",
-      "confidence": "신뢰",
-      "health": "건강",
+      "confidence": "신뢰도",
+      "health": "상태",
       "cost": "비용",
       "program": "프로그램",
-      "cycle_health": "사이클 건강",
+      "cycle_health": "사이클 상태",
       "activity": "활동",
       "unlabelled": "라벨이 지정되지 않음",
       "unlabelled_paren": "(라벨 없음)",
@@ -691,9 +692,9 @@
       "resulting_profile": "결과 프로필",
       "new_profile_name": "새 프로필 이름",
       "save_mode": "저장 모드",
-      "head_trim": "헤드 트림(들)",
-      "tail_trim": "테일 트림(들)",
-      "gap_s": "간격(들)",
+      "head_trim": "헤드 트림(초)",
+      "tail_trim": "테일 트림(초)",
+      "gap_s": "간격(초)",
       "start": "시작",
       "end": "끝",
       "quality": "품질",
@@ -722,7 +723,7 @@
       "file_kb": "파일(KB)",
       "label": "라벨",
       "seconds_from_start": "시작부터 몇 초",
-      "clock_time": "시계 시간",
+      "clock_time": "시각",
       "ungrouped": "그룹 해제됨"
     },
     "toast": {
@@ -741,14 +742,14 @@
       "phase_created": "\"{name}\" 단계가 생성되었습니다.",
       "phase_deleted": "\"{name}\" 단계가 삭제되었습니다.",
       "phase_updated": "단계가 업데이트되었습니다.",
-      "recording_started": "녹음이 시작되었습니다",
-      "recording_stopped": "녹음이 중지되었습니다.",
-      "recording_discarded": "녹음이 삭제되었습니다.",
-      "recording_saved": "프로필에 녹음이 저장되었습니다.",
+      "recording_started": "기록이 시작되었습니다",
+      "recording_stopped": "기록이 중지되었습니다.",
+      "recording_discarded": "기록이 삭제되었습니다.",
+      "recording_saved": "프로필에 기록이 저장되었습니다.",
       "export_downloaded": "내보내기가 다운로드됨",
       "logs_exported": "내보낸 로그",
-      "envelopes_rebuilt": "봉투 재구축",
-      "envelope_rebuilt": "봉투 재구축",
+      "envelopes_rebuilt": "엔벨로프 재구축됨",
+      "envelope_rebuilt": "엔벨로프 재구축됨",
       "suggestions_dismissed": "제안이 무시되었습니다.",
       "auto_label_complete": "자동 라벨 완료",
       "cycle_labelled": "라벨이 붙은 사이클",
@@ -814,13 +815,13 @@
       "live_chart_loading": "판독값이 도착하면 실시간 전력 차트가 나타납니다.",
       "no_profiles_yet": "아직 프로필이 없습니다. 레이블이 지정된 주기에서 하나를 만듭니다.",
       "no_logs": "아직 버퍼링된 로그 레코드가 없습니다.",
-      "no_envelope": "아직 봉투가 없습니다. 라벨링 주기 후에 재구축하세요.",
+      "no_envelope": "아직 엔벨로프가 없습니다. 주기에 레이블을 지정한 후 재구축하세요.",
       "no_cycles_profile": "이 프로필에는 사이클이 없습니다.",
       "ml_learned_intro": "이 기계에 맞게 미세 조정된 모델입니다. 나열되지 않은 모든 항목은 신뢰할 수 있는 내장 모델을 사용합니다.",
       "ml_intro": "WashData는 주기를 감지하고, 프로그램을 일치시키고, 시간과 에너지를 추정하는 스마트 모델과 함께 제공됩니다.",
       "matching_tuning_intro": "학습할 때 WashData는 또한 프로그램 일치가 주기의 모양과 지속 시간 및 에너지에 얼마나 큰 영향을 미치는지 조정합니다.",
       "merge_intro": "선택한 사이클이 하나로 결합됩니다(연대순, 간격이 0W로 채워짐). 결과 프로필을 선택합니다.",
-      "see_recorder": "아래의 녹음기 위젯을 참조하세요",
+      "see_recorder": "아래의 기록기 위젯을 참조하세요",
       "review_to_cycles": "사이클 검토 대기열 열기",
       "no_device_selected": "선택한 장치가 없습니다.",
       "loading": "로드 중…",
@@ -830,7 +831,7 @@
       "no_phases": "정의된 단계가 없습니다.",
       "no_phases_assigned": "할당된 단계가 없습니다.",
       "no_split_points": "아직 분할 지점이 없습니다.",
-      "no_envelope_overlay": "오버레이할 수 있는 봉투가 없습니다.",
+      "no_envelope_overlay": "오버레이할 수 있는 엔벨로프가 없습니다.",
       "no_other_users": "다른 Home Assistant명의 사용자를 찾을 수 없습니다.",
       "maintenance_requires_access": "유지 관리 및 내보내기/가져오기에는 전체 액세스 권한이 필요합니다.",
       "loading_curve": "곡선 로드 중…",
@@ -860,12 +861,17 @@
       "preferences_adv": "환경설정",
       "preferences_admin": "환경 설정, 패널 및 액세스 제어",
       "pending_feedback": "보류 중인 감지 피드백",
-      "recording_in_progress": "녹음 진행 중",
+      "recording_in_progress": "기록 진행 중",
       "no_profiles_yet_short": "아직 프로필이 없습니다.",
       "unsure_detected_prefix": "WashData가 감지되었는지 확실하지 않습니다.",
       "no_suggestions": "활성 제안이 없습니다.",
       "no_profiles_overlay": "오버레이할 프로필이 없습니다.",
-      "compare_cycles_title": "{count}주기 비교"
+      "compare_cycles_title": "{count}주기 비교",
+      "profiles_intro": "프로필을 클릭하면 통계, 단계 및 정리를 볼 수 있습니다. 거의 동일한 프로그램(모양/지속 시간이 같고 온도 또는 회전 속도가 다른)은 그룹으로 묶어 매칭이 정확하게 구분할 수 있도록 하세요.",
+      "search_placeholder": "설정 검색…",
+      "automations_intro": "WashData는 {start} / {end} 이벤트를 발생시키고 엔터티를 노출하므로, 알림과 동작은 일반 Home Assistant 자동화로 구성하는 것이 좋습니다. 이 장치를 사용하는 자동화가 아래에 표시됩니다.",
+      "notify_services_hint": "{entity} 서비스 ID를 사용하세요(여러 개는 쉼표로 구분). 템플릿 변수: {vars}.",
+      "rbac_hint": "끄면 모든 Home Assistant 사용자가 전체 액세스 권한을 가집니다(기본값). 관리자는 항상 전체 액세스 권한을 가지며 모든 사람을 관리할 수 있습니다."
     },
     "section": {
       "basic": {
@@ -931,7 +937,7 @@
         "label": "주기 동안 스마트 모델 적용"
       },
       "ml_training_enabled": {
-        "label": "이 기계에서 배우세요"
+        "label": "이 기기에서 학습"
       },
       "name": {
         "label": "장치 이름"
@@ -940,7 +946,7 @@
         "label": "장치 유형"
       },
       "power_sensor": {
-        "label": "파워 센서"
+        "label": "전력 센서"
       },
       "min_power": {
         "label": "최소 전력"
@@ -973,7 +979,7 @@
         "label": "러닝 데드존"
       },
       "end_energy_threshold": {
-        "label": "엔드에너지"
+        "label": "종료 에너지 임계값"
       },
       "end_repeat_count": {
         "label": "반복 횟수 종료"
@@ -1009,13 +1015,13 @@
         "label": "프로필 기간 허용 한도"
       },
       "duration_tolerance": {
-        "label": "공차 추정"
+        "label": "추정 오차 허용값"
       },
       "auto_label_confidence": {
         "label": "자동 라벨 신뢰도"
       },
       "learning_confidence": {
-        "label": "학습 자신감"
+        "label": "학습 신뢰도"
       },
       "suppress_feedback_notifications": {
         "label": "피드백 알림 억제"
@@ -1063,10 +1069,10 @@
         "label": "도어 센서 엔터티"
       },
       "switch_entity": {
-        "label": "엔터티 전환"
+        "label": "스위치 엔터티"
       },
       "notify_unload_delay_minutes": {
-        "label": "언로드 잔소리 지연"
+        "label": "꺼내기 알림 지연"
       },
       "pump_stuck_duration": {
         "label": "펌프 정체 기간"
@@ -1123,16 +1129,16 @@
         "label": "Android 채널(완료)"
       },
       "energy_price_entity": {
-        "label": "에너지 가격 주체"
+        "label": "에너지 가격 엔터티"
       },
       "ml_training_hour": {
-        "label": "한 시간에 배우기"
+        "label": "학습 실행 시간"
       },
       "ml_training_min_cycles": {
-        "label": "먼저 필요한 사이클"
+        "label": "최소 필요 사이클 수"
       },
       "ml_training_interval_days": {
-        "label": "최대 1회 확인"
+        "label": "최대 확인 주기(일)"
       }
     },
     "tab": {
@@ -1145,7 +1151,7 @@
       "diagnostics": "진단",
       "pp_overview": "개요",
       "pp_phases": "단계",
-      "pp_cleanup": "대청소",
+      "pp_cleanup": "정리",
       "pp_manage": "관리",
       "subtab_profiles": "프로필",
       "subtab_phase_catalog": "단계 카탈로그"
@@ -1157,8 +1163,8 @@
       "close": "닫기",
       "edit": "편집",
       "add": "추가",
-      "rebuild": "봉투 다시 작성",
-      "record": "녹음 시작",
+      "rebuild": "엔벨로프 재구축",
+      "record": "기록 시작",
       "compare": "비교",
       "confirm": "확인",
       "discard": "버리기",
@@ -1170,7 +1176,7 @@
       "create": "만들기",
       "select": "선택",
       "done": "완료",
-      "reset": "다시 놓기",
+      "reset": "초기화",
       "trim": "손질",
       "split": "분할",
       "review": "검토",
@@ -1188,7 +1194,7 @@
       "stop": "중지",
       "process": "처리",
       "add_device": "+ 장치 추가",
-      "train_now": "지금 훈련하세요",
+      "train_now": "지금 훈련",
       "reset_to_defaults": "기본값으로 재설정",
       "reset_to_builtin": "내장 모델로 재설정",
       "save_preferences": "환경설정 저장",
@@ -1200,7 +1206,7 @@
       "show_only": "표시만",
       "dismiss": "닫기",
       "dismiss_all": "모두 닫기",
-      "process_history": "지금 처리하세요",
+      "process_history": "지금 처리",
       "clear_debug": "디버그 데이터 지우기",
       "wipe_all": "모든 데이터 지우기",
       "export_json": "JSON으로 내보내기",
@@ -1210,7 +1216,7 @@
       "add_phase": "+ 단계 추가",
       "new_phase": "+ 새로운 단계",
       "delete_profile": "프로필 삭제",
-      "rebuild_envelope": "봉투 재구축",
+      "rebuild_envelope": "엔벨로프 재구축",
       "create_profile": "+ 프로필 만들기",
       "rec_stop": "중지",
       "pause_cycle": "일시 정지",
@@ -1235,14 +1241,14 @@
     },
     "badge": {
       "poor_fit": "적합하지 않음",
-      "fair_fit": "적당한 핏",
+      "fair_fit": "보통 적합도",
       "manual": "(수동으로 선택)",
       "auto": "(자동 감지)",
       "improving": "↗ 개선",
       "declining": "↘ 감소",
-      "steady": "→ 꾸준한",
+      "steady": "→ 안정적",
       "using_tuned": "조정된 가중치 사용",
-      "using_defaults": "배송된 기본값 사용",
+      "using_defaults": "기본값 사용",
       "built_in_tag": "내장"
     },
     "status": {
@@ -1251,9 +1257,9 @@
       "force_stopped": "강제 정지됨",
       "active": "활성",
       "ambiguous": "모호한",
-      "clear": "분명한",
+      "clear": "정상",
       "working": "처리 중…",
-      "recording": "녹음…",
+      "recording": "기록 중…",
       "ready": "처리 준비 완료",
       "idle": "대기 중",
       "auto_detect": "자동 감지",
@@ -1261,22 +1267,22 @@
       "all_statuses": "모든 상태"
     },
     "ml": {
-      "fit_strong": "강한",
-      "fit_good": "좋은",
-      "fit_fair": "적당한",
-      "fit_weak": "약한",
-      "fit_slight": "근소한",
-      "fit_word": "맞다",
+      "fit_strong": "우수",
+      "fit_good": "양호",
+      "fit_fair": "보통",
+      "fit_weak": "미흡",
+      "fit_slight": "미약",
+      "fit_word": "적합도",
       "fine_tuned_at": "미세 조정된 {when}",
       "personalized": "● 이 기계에 맞춤화됨",
       "builtin_models": "● 내장 모델 사용"
     },
     "modal": {
-      "label_cycle": "사이클 라벨",
+      "label_cycle": "주기 레이블 지정",
       "create_profile": "프로필 만들기",
       "new_phase": "새로운 단계",
       "edit_phase": "단계 편집",
-      "process_recording": "프로세스 기록",
+      "process_recording": "기록 처리",
       "correct_feedback": "올바른 피드백",
       "import_config": "구성 가져오기",
       "auto_label": "사이클 자동 라벨",
@@ -1304,9 +1310,9 @@
       "inherit": "상속"
     },
     "health": {
-      "poor": "⚠ 매치 핏이 좋지 않음",
-      "fair": "적당한 매치핏",
-      "good": "✓ 일치가 잘 됨"
+      "poor": "⚠ 일치도 낮음",
+      "fair": "보통 일치도",
+      "good": "✓ 일치도 양호"
     },
     "trend": {
       "up": "추세 상승",

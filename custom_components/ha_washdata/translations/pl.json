@@ -53,6 +53,7 @@
         "title": "Ustawienia WashData",
         "description": "Wszystkie ustawienia -- wykrywanie, dopasowanie, timing, powiadomienia, profile i cykle -- są dostępne w panelu WashData. Użyj tego formularza tylko do zmiany czujnika mocy, typu urządzenia lub progu trybu gotowości.",
         "data": {
+          "name": "Nazwa urządzenia",
           "device_type": "Typ urządzenia",
           "power_sensor": "Czujnik mocy",
           "min_power": "Minimalny próg mocy (W)"
@@ -665,8 +666,8 @@
       "new_group": "+ Nowa grupa",
       "apply_label": "Zastosuj etykietę",
       "run_auto_label": "Uruchom automatyczne etykietowanie",
-      "save_review": "Zapisz recenzję",
-      "apply_trim": "Zastosuj Przytnij",
+      "save_review": "Zapisz ocenę",
+      "apply_trim": "Zastosuj przycięcie",
       "apply_split": "Zastosuj podział",
       "process_recording": "Zapisz nagranie",
       "stop": "Zatrzymaj",
@@ -678,13 +679,13 @@
       "save_preferences": "Zapisz preferencje",
       "save_panel_settings": "Zapisz ustawienia panelu",
       "save_access_control": "Zapisz kontrolę dostępu",
-      "auto_label_cycles": "Automatycznie etykietuj cykle",
+      "auto_label_cycles": "Automatycznie oznaczaj cykle",
       "run_analysis": "🔍 Przeprowadź analizę sugestii",
       "apply_all": "Zastosuj wszystko",
       "show_only": "Pokaż tylko",
       "dismiss": "Odrzuć",
       "dismiss_all": "Odrzuć wszystko",
-      "process_history": "Przetwarzaj teraz",
+      "process_history": "Przetwórz teraz",
       "clear_debug": "Wyczyść dane debugowania",
       "wipe_all": "Wyczyść wszystkie dane",
       "export_json": "Eksportuj do JSON",
@@ -738,7 +739,7 @@
       "status_graph": "Wykres stanu",
       "diagnostics_pref": "Diagnostyka",
       "logs_diagnostics": "Diagnostyka",
-      "process_history": "Przetwarzaj historię",
+      "process_history": "Historia przetworzeń",
       "clear_debug": "Wyczyść ślady debugowania",
       "wipe_history": "Wyczyść historię",
       "automations": "Automatyzacje",
@@ -751,7 +752,7 @@
     "lbl": {
       "power": "Moc",
       "progress": "Postęp",
-      "remaining": "Pozostały",
+      "remaining": "Pozostało",
       "duration": "Czas trwania",
       "energy": "Energia",
       "profile": "Profil",
@@ -816,12 +817,12 @@
       "read_only": "Tylko do odczytu",
       "actions": "Działania",
       "cycles_count": "Cykle",
-      "debug_traces": "Debuguj ślady",
+      "debug_traces": "Ślady debugowania",
       "file_kb": "Plik (kB)",
       "label": "Etykieta",
       "seconds_from_start": "Sekundy od początku",
       "clock_time": "Czas zegarowy",
-      "ungrouped": "Rozgrupowane"
+      "ungrouped": "Niezgrupowane"
     },
     "badge": {
       "poor_fit": "słabe dopasowanie",
@@ -831,8 +832,8 @@
       "improving": "↗ poprawa",
       "declining": "↘ maleje",
       "steady": "→ stały",
-      "using_tuned": "Używanie dostrojonych ciężarków",
-      "using_defaults": "Używanie dostarczonych ustawień domyślnych",
+      "using_tuned": "Używanie dostrojonych wag",
+      "using_defaults": "Używanie domyślnych ustawień",
       "built_in_tag": "wbudowany"
     },
     "status": {
@@ -857,7 +858,7 @@
       "fit_weak": "Słaby",
       "fit_slight": "Niewielki",
       "fit_word": "dopasowanie",
-      "fine_tuned_at": "dopracowany {when}",
+      "fine_tuned_at": "dostrojono {when}",
       "personalized": "● Spersonalizowane dla tego urządzenia",
       "builtin_models": "● Korzystanie z wbudowanych modeli"
     },
@@ -869,8 +870,8 @@
       "profile_created": "Profil „{name}” został utworzony",
       "profile_deleted": "Profil „{name}” został usunięty",
       "profile_renamed": "Zmieniono nazwę profilu",
-      "phases_saved": "Fazy ​​zapisane",
-      "phase_created": "Utworzono fazę „{name}”.",
+      "phases_saved": "Fazy zapisane",
+      "phase_created": "Utworzono fazę „{name}\"",
       "phase_deleted": "Faza „{name}” została usunięta",
       "phase_updated": "Faza zaktualizowana",
       "recording_started": "Rozpoczęło się nagrywanie",
@@ -889,8 +890,8 @@
       "cycle_deleted": "Cykl usunięty",
       "cycles_deleted": "Usunięto {count} cykli",
       "cycle_trimmed": "Cykl przycięty",
-      "cycles_merged": "Cykle połączyły się",
-      "review_saved": "Recenzja zapisana",
+      "cycles_merged": "Cykle zostały połączone",
+      "review_saved": "Ocena zapisana",
       "feedback_confirmed": "Opinia potwierdzona",
       "feedback_dismissed": "Opinia odrzucona",
       "feedback_all_dismissed": "Wszystkie opinie odrzucone",
@@ -902,11 +903,11 @@
       "cycle_paused": "Cykl wstrzymany",
       "cycle_resumed": "Cykl wznowiony",
       "cycle_force_stopped": "Cykl wymuszony zatrzymany",
-      "ml_training_promoted": "Szkolenie ukończone: promowane modele ({count})",
+      "ml_training_promoted": "Szkolenie ukończone: promowano {count} modeli",
       "ml_training_no_improvement": "Trening ukończony: poziom bazowy utrzymany (brak poprawy)",
       "matching_reverted": "Dopasowane wagi przywrócono do wartości domyślnych",
       "models_reverted": "Modele na urządzeniu przywrócono do stanu bazowego",
-      "analysis_complete": "Analiza ukończona: sugestia ({count})",
+      "analysis_complete": "Analiza ukończona: {count} sugestii",
       "analysis_complete_none": "Analiza ukończona: brak nowych sugestii",
       "debug_cleared": "Wyczyszczono {count} śladów debugowania",
       "all_wiped": "Wszystkie dane zostały usunięte",
@@ -915,7 +916,7 @@
       "min_2_profiles": "Wybierz co najmniej 2 profile dla grupy",
       "profile_name_required": "Nazwa profilu jest wymagana",
       "phase_name_required": "Nazwa fazy jest wymagana",
-      "name_required": "Wymagane imię i nazwisko",
+      "name_required": "Wymagana nazwa",
       "json_required": "Wymagane są dane JSON",
       "save_failed": "Zapisanie nie powiodło się: {error}",
       "delete_failed": "Usunięcie nie powiodło się: {error}",
@@ -943,7 +944,7 @@
       "label_failed": "Etykieta nie powiodła się: {error}",
       "invalid_json": "„{key}” nie jest prawidłowym kodem JSON — popraw to lub wyczyść pole przed zapisaniem.",
       "processed": "Przetworzone {bits}",
-      "split_complete": "Podziel na {count} cykli"
+      "split_complete": "Podzielono na {count} cykli"
     },
     "msg": {
       "no_devices": "Nie skonfigurowano jeszcze żadnych urządzeń WashData.",
@@ -967,7 +968,7 @@
       "compare_overlay_profiles": "Profile nakładkowe (słabe)",
       "no_profiles_compare": "Brak profili do porównania.",
       "no_cycles_profile": "Brak cykli dla tego profilu.",
-      "saving_triggers_reload": "Zapisanie powoduje przeładowanie integracji. Jednostki HA mogą przez chwilę być wyświetlane jako niedostępne.",
+      "saving_triggers_reload": "Zapisanie powoduje przeładowanie integracji. Encje HA mogą przez chwilę być wyświetlane jako niedostępne.",
       "prefs_personal": "Dotyczą one tylko Twojego konta Home Assistant.",
       "no_match_yet": "Brak jeszcze próby dopasowania — komunikat pojawia się podczas trwającego cyklu.",
       "no_fine_tuned": "Nic jeszcze nie zostało dopracowane — WashData korzysta z wbudowanych modeli.",
@@ -1001,7 +1002,12 @@
       "unsure_detected_prefix": "WashData nie jest pewien, czy został wykryty",
       "no_suggestions": "Brak aktywnych sugestii.",
       "no_profiles_overlay": "Brak profili do nałożenia.",
-      "compare_cycles_title": "Porównaj {count} cykli"
+      "compare_cycles_title": "Porównaj {count} cykli",
+      "profiles_intro": "Kliknij profil, aby zobaczyć statystyki, fazy i porządkowanie. Grupuj prawie identyczne programy (ten sam kształt/czas trwania, inna temperatura lub wirowanie), aby dopasowanie niezawodnie rozróżniało między nimi.",
+      "search_placeholder": "Szukaj ustawień…",
+      "automations_intro": "WashData wyzwala zdarzenia {start} / {end} i udostępnia encje, dlatego powiadomienia i akcje najlepiej budować jako zwykłe automatyzacje Home Assistant. Automatyzacje korzystające z tego urządzenia są widoczne poniżej.",
+      "notify_services_hint": "Użyj identyfikatorów usług {entity} (oddzielone przecinkami dla wielu). Zmienne szablonu: {vars}.",
+      "rbac_hint": "Gdy wyłączone, każdy użytkownik Home Assistant ma pełny dostęp (domyślnie). Administratorzy zawsze mają pełny dostęp i mogą zarządzać wszystkimi."
     },
     "modal": {
       "label_cycle": "Oznacz cykl",
@@ -1009,7 +1015,7 @@
       "new_phase": "Nowa faza",
       "edit_phase": "Edytuj fazę",
       "process_recording": "Przetwórz nagranie",
-      "correct_feedback": "Prawidłowa informacja zwrotna",
+      "correct_feedback": "Korekta informacji zwrotnej",
       "import_config": "Importuj konfigurację",
       "auto_label": "Automatyczne oznaczanie cykli",
       "cycle": "Cykl"
@@ -1021,7 +1027,7 @@
       "split": "Podzielony cykl",
       "noise": "Szum",
       "wrong_profile": "Zły profil",
-      "sensor_gap": "Szczelina czujnika"
+      "sensor_gap": "Przerwa czujnika"
     },
     "quality": {
       "good": "Dobry",
@@ -1065,7 +1071,7 @@
         "intro": "W jaki sposób ukończone cykle są dopasowywane do wyuczonych profili i etykietowane."
       },
       "timing": {
-        "label": "Timing i Watchdog",
+        "label": "Czas i Watchdog",
         "intro": "Kadencja w tle, strażnik offline i sprzątanie."
       },
       "anti_wrinkle": {
@@ -1115,7 +1121,7 @@
         "label": "Próg zatrzymania"
       },
       "min_off_gap": {
-        "label": "Min. wył. luki"
+        "label": "Min. przerwa wyłączenia"
       },
       "start_duration_threshold": {
         "label": "Czas trwania uruchomienia"
@@ -1190,7 +1196,7 @@
         "label": "Konserwacja automatyczna (nocne sprzątanie)"
       },
       "expose_debug_entities": {
-        "label": "Ujawnij elementy debugowania"
+        "label": "Ujawnij encje debugowania"
       },
       "save_debug_traces": {
         "label": "Zapisz ślady debugowania"
@@ -1205,13 +1211,13 @@
         "label": "Maksymalny czas trwania"
       },
       "anti_wrinkle_exit_power": {
-        "label": "Wyjdź z progu mocy"
+        "label": "Próg mocy wyjścia"
       },
       "delay_start_detect_enabled": {
         "label": "Włącz wykrywanie opóźnienia startu"
       },
       "delay_confirm_seconds": {
-        "label": "Potwierdź sekundy"
+        "label": "Sekundy potwierdzenia"
       },
       "delay_timeout_hours": {
         "label": "Godziny przekroczenia limitu czasu"
@@ -1220,19 +1226,19 @@
         "label": "Włącz zewnętrzny wyzwalacz końcowy"
       },
       "external_end_trigger": {
-        "label": "Zewnętrzna jednostka wyzwalająca"
+        "label": "Zewnętrzna encja wyzwalacza"
       },
       "external_end_trigger_inverted": {
         "label": "Odwróć zewnętrzny wyzwalacz (wyzwalacz wyłączony)"
       },
       "door_sensor_entity": {
-        "label": "Jednostka czujnika drzwi"
+        "label": "Encja czujnika drzwi"
       },
       "pause_cuts_power": {
         "label": "Pauza powoduje również odcięcie zasilania (za pomocą przełącznika)"
       },
       "switch_entity": {
-        "label": "Jednostka przełącznika"
+        "label": "Encja przełącznika"
       },
       "notify_unload_delay_minutes": {
         "label": "Opóźnienie przypomnienia o rozładunku"
@@ -1241,10 +1247,10 @@
         "label": "Czas zablokowania pompy"
       },
       "notify_start_services": {
-        "label": "Uruchom usługi"
+        "label": "Usługi startu"
       },
       "notify_finish_services": {
-        "label": "Zakończ usługi"
+        "label": "Usługi zakończenia"
       },
       "notify_live_services": {
         "label": "Usługi postępu na żywo"
@@ -1280,13 +1286,13 @@
         "label": "Ikona powiadomienia"
       },
       "notify_start_message": {
-        "label": "Rozpocznij wiadomość"
+        "label": "Wiadomość przy starcie"
       },
       "notify_finish_message": {
-        "label": "Zakończ wiadomość"
+        "label": "Wiadomość przy zakończeniu"
       },
       "notify_pre_complete_message": {
-        "label": "Wstępnie ukończona wiadomość"
+        "label": "Wiadomość przed zakończeniem"
       },
       "notify_reminder_message": {
         "label": "Wiadomość przypominająca"
@@ -1298,7 +1304,7 @@
         "label": "Android Kanał (zakończenie)"
       },
       "energy_price_entity": {
-        "label": "Jednostka ceny energii"
+        "label": "Encja ceny energii"
       },
       "energy_price_static": {
         "label": "Cena energii statycznej (za kWh)"
@@ -1316,7 +1322,7 @@
         "label": "Najpierw potrzebne cykle"
       },
       "ml_training_interval_days": {
-        "label": "Sprawdź co najwyżej każdy"
+        "label": "Sprawdzaj co najwyżej co"
       }
     }
   }

@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
+          "name": "Cihaz Adı",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -629,7 +630,7 @@
       "diagnostics": "Teşhis",
       "pp_overview": "Genel Bakış",
       "pp_phases": "Aşamalar",
-      "pp_cleanup": "Temizlemek",
+      "pp_cleanup": "Temizlik",
       "pp_manage": "Yönet",
       "subtab_profiles": "Profiller",
       "subtab_phase_catalog": "Faz Kataloğu"
@@ -657,9 +658,9 @@
       "reset": "Sıfırla",
       "trim": "Kırp",
       "split": "Böl",
-      "review": "İncele",
+      "review": "Gözden Geçir",
       "inspect": "İncele",
-      "label": "Etiket",
+      "label": "Etiketle",
       "save_settings": "Ayarları Kaydet",
       "new_profile": "+ Yeni Profil",
       "new_group": "+ Yeni Grup",
@@ -670,12 +671,12 @@
       "apply_split": "Bölmeyi Uygula",
       "process_recording": "Kaydı Kaydet",
       "stop": "Durdur",
-      "process": "İşlem",
+      "process": "İşle",
       "add_device": "+ Cihaz ekle",
       "train_now": "Şimdi eğitin",
       "reset_to_defaults": "Varsayılanlara sıfırla",
       "reset_to_builtin": "Yerleşik modellere sıfırla",
-      "save_preferences": "Tercihleri ​​Kaydet",
+      "save_preferences": "Tercihleri Kaydet",
       "save_panel_settings": "Panel Ayarlarını Kaydet",
       "save_access_control": "Erişim Kontrolünü Kaydet",
       "auto_label_cycles": "Döngüleri Otomatik Etiketle",
@@ -713,7 +714,7 @@
       "convert_to_automation": "Otomasyona dönüştürün",
       "new_automation": "＋ Yeni Otomasyon",
       "from_template": "Şablondan ▾",
-      "on_cycle_started": "Döngü başlatıldığında",
+      "on_cycle_started": "Döngü başladığında",
       "on_cycle_finished": "Döngü bittiğinde",
       "save_group": "Grubu Kaydet"
     },
@@ -784,9 +785,9 @@
       "resulting_profile": "Ortaya çıkan profil",
       "new_profile_name": "Yeni profil adı",
       "save_mode": "Kaydetme Modu",
-      "head_trim": "Kafa Trim(ler)i",
-      "tail_trim": "Kuyruk Trim(ler)i",
-      "gap_s": "Boşluk (lar)",
+      "head_trim": "Baş Kırpma (s)",
+      "tail_trim": "Kuyruk Kırpma (s)",
+      "gap_s": "Boşluk (s)",
       "start": "Başlangıç",
       "end": "Son",
       "quality": "Kalite",
@@ -825,14 +826,14 @@
     },
     "badge": {
       "poor_fit": "zayıf uyum",
-      "fair_fit": "adil uyum",
+      "fair_fit": "orta uyum",
       "manual": "(manuel olarak seçilmiş)",
       "auto": "(otomatik olarak algılandı)",
-      "improving": "↗ iyileştirme",
-      "declining": "↘ azalıyor",
+      "improving": "↗ iyileşiyor",
+      "declining": "↘ kötüleşiyor",
       "steady": "→ sabit",
       "using_tuned": "Ayarlanmış ağırlıkların kullanılması",
-      "using_defaults": "Gönderilen varsayılanları kullanma",
+      "using_defaults": "Varsayılan değerleri kullanıyor",
       "built_in_tag": "yerleşik"
     },
     "status": {
@@ -857,7 +858,7 @@
       "fit_weak": "Zayıf",
       "fit_slight": "Hafif",
       "fit_word": "uyum",
-      "fine_tuned_at": "ince ayarlı {when}",
+      "fine_tuned_at": "ince ayar yapıldı: {when}",
       "personalized": "● Bu makineye göre kişiselleştirilmiş",
       "builtin_models": "● Yerleşik modelleri kullanma"
     },
@@ -877,15 +878,15 @@
       "recording_stopped": "Kayıt durduruldu",
       "recording_discarded": "Kayıt silindi",
       "recording_saved": "Kayıt profile kaydedildi",
-      "export_downloaded": "İndirilenleri dışa aktar",
-      "logs_exported": "Dışa aktarılan günlükler",
+      "export_downloaded": "Dışa aktarma indirildi",
+      "logs_exported": "Günlükler dışa aktarıldı",
       "import_successful": "İçe aktarma başarılı; entegrasyon yeniden yükleniyor",
       "envelopes_rebuilt": "Zarflar yeniden oluşturuldu",
       "envelope_rebuilt": "Zarf yeniden oluşturuldu",
       "suggestions_applied": "Uygulanan öneriler; entegrasyon yeniden yükleniyor",
       "suggestions_dismissed": "Öneriler reddedildi",
       "auto_label_complete": "Otomatik etiketleme tamamlandı",
-      "cycle_labelled": "Döngü etiketli",
+      "cycle_labelled": "Döngü etiketlendi",
       "cycle_deleted": "Döngü silindi",
       "cycles_deleted": "{count} döngü silindi",
       "cycle_trimmed": "Döngü kırpıldı",
@@ -903,7 +904,7 @@
       "cycle_resumed": "Döngü devam ettirildi",
       "cycle_force_stopped": "Döngü zorla durduruldu",
       "ml_training_promoted": "Eğitim tamamlandı: tanıtılan {count} model",
-      "ml_training_no_improvement": "Eğitim tamamlandı: başlangıç ​​düzeyi korundu (iyileşme yok)",
+      "ml_training_no_improvement": "Eğitim tamamlandı: başlangıç düzeyi korundu (iyileşme yok)",
       "matching_reverted": "Eşleşen ağırlıklar varsayılanlara döndürüldü",
       "models_reverted": "Cihazdaki modeller temel seviyeye geri döndürüldü",
       "analysis_complete": "Analiz tamamlandı: {count} öneri",
@@ -975,7 +976,7 @@
       "ml_settings_intro": "İki bağımsız anahtar: biri modelleri bir döngü çalışırken uygular, diğeri ise WashData'nın bunları zaman içinde makinenize göre hassas şekilde ayarlamasına olanak tanır.",
       "ml_intro": "WashData, döngüleri tespit eden, programları eşleştiren ve zaman ile enerjiyi tahmin eden akıllı modellerle birlikte gelir; bunlar kutudan çıktığı gibi çalışır.",
       "matching_tuning_intro": "WashData, öğrenirken aynı zamanda program eşleşmesinin bir döngünün şekline, süresine ve enerjisine ne kadar ağırlık verdiğini de ayarlar.",
-      "phase_catalog_intro": "Bir programın adlandırılmış bölümleri (Ön Yıkama, Isıtma, Sıkma…). Bunları kontrol panelinden bir profile atayın.",
+      "phase_catalog_intro": "Bir döngünün adlandırılmış bölümleri (Ön Yıkama, Isıtma, Sıkma…). Bunları kontrol panelinden bir profile atayın.",
       "phase_ranges_intro": "Faz aralıkları (döngü başlangıcından dakikalar sonra) ortalama eğrinin üzerine yerleştirilmiştir. Canlı önizleme için değerleri düzenleyin.",
       "cleanup_intro": "Her etiketli döngü üst üste bindirilmiştir. Profili temizlemek için aykırı değerleri işaretleyin ve silin.",
       "split_intro": "Bir bölme noktası eklemek veya kaldırmak ya da boştaki boşluklara göre otomatik algılama yapmak için grafiğe tıklayın.",
@@ -1001,17 +1002,23 @@
       "unsure_detected_prefix": "WashData algılandığından emin değil",
       "no_suggestions": "Aktif öneri yok.",
       "no_profiles_overlay": "Bindirilecek profil yok.",
-      "compare_cycles_title": "{count} döngüyü karşılaştırın"
+      "compare_cycles_title": "{count} döngüyü karşılaştırın",
+      "profiles_intro": "İstatistikler, aşamalar ve temizlik için bir profile tıklayın. Neredeyse özdeş programları (aynı şekil/süre, farklı sıcaklık veya sıkma) gruplandırın, böylece eşleştirme aralarında güvenilir biçimde seçim yapabilsin.",
+      "search_placeholder": "Ayarları ara…",
+      "automations_intro": "WashData {start} / {end} olaylarını tetikler ve varlıkları açığa çıkarır; bu nedenle bildirimler ve eylemler en iyi normal Home Assistant otomasyonları olarak oluşturulur. Bu cihazı kullanan otomasyonlar aşağıda görünür.",
+      "notify_services_hint": "{entity} hizmet kimliklerini kullanın (birden fazla için virgülle ayrılmış). Şablon değişkenleri: {vars}.",
+      "rbac_hint": "Kapalıyken, her Home Assistant kullanıcısının tam erişimi vardır (varsayılan). Yöneticiler her zaman tam erişime sahiptir ve herkesi yönetebilir.",
+      "no_split_found": "Bölmek için boş süre bulunamadı"
     },
     "modal": {
       "label_cycle": "Etiket Döngüsü",
       "create_profile": "Profil Oluştur",
       "new_phase": "Yeni Aşama",
       "edit_phase": "Aşamayı Düzenle",
-      "process_recording": "Süreç Kaydı",
+      "process_recording": "Kaydı İşle",
       "correct_feedback": "Doğru Geribildirim",
       "import_config": "Yapılandırmayı İçe Aktar",
-      "auto_label": "Otomatik Etiket Döngüleri",
+      "auto_label": "Döngüleri Otomatik Etiketle",
       "cycle": "Döngü"
     },
     "tag": {
@@ -1038,7 +1045,7 @@
     "health": {
       "poor": "⚠ Kötü eşleşme uyumu",
       "fair": "Adil maç uyumu",
-      "good": "✓ İyi uyum uyumu"
+      "good": "✓ İyi eşleşme uyumu"
     },
     "trend": {
       "up": "Yükseliyor",
@@ -1109,16 +1116,16 @@
         "label": "Cihaz Altında Gruplandır"
       },
       "start_threshold_w": {
-        "label": "Eşiği Başlat"
+        "label": "Başlangıç Eşiği"
       },
       "stop_threshold_w": {
-        "label": "Eşiği Durdur"
+        "label": "Durdurma Eşiği"
       },
       "min_off_gap": {
         "label": "Minimum Kapalı Boşluk"
       },
       "start_duration_threshold": {
-        "label": "Başlangıç ​​Süresi"
+        "label": "Başlangıç Süresi"
       },
       "start_energy_threshold": {
         "label": "Enerjiyi Başlat"
@@ -1127,7 +1134,7 @@
         "label": "Minimum Döngü Süresi"
       },
       "running_dead_zone": {
-        "label": "Ölü Bölgeyi Çalıştırmak"
+        "label": "Çalışan Ölü Bölge"
       },
       "end_energy_threshold": {
         "label": "Son Enerji"
@@ -1139,7 +1146,7 @@
         "label": "Örnekleme Aralığı"
       },
       "smoothing_window": {
-        "label": "Pencereyi Pürüzsüzleştirme"
+        "label": "Düzleştirme Penceresi"
       },
       "abrupt_drop_watts": {
         "label": "Ani Düşüş"
@@ -1148,13 +1155,13 @@
         "label": "Ani Düşme Oranı"
       },
       "profile_match_threshold": {
-        "label": "Maç Eşiği"
-      },
-      "profile_unmatch_threshold": {
         "label": "Eşleşme Eşiği"
       },
+      "profile_unmatch_threshold": {
+        "label": "Eşleşmeme Eşiği"
+      },
       "profile_match_interval": {
-        "label": "Maç Aralığı"
+        "label": "Eşleşme Aralığı"
       },
       "profile_match_min_duration_ratio": {
         "label": "Minimum Süre Oranı"
@@ -1166,7 +1173,7 @@
         "label": "Profil Süresi Toleransı"
       },
       "duration_tolerance": {
-        "label": "Toleransı Tahmin Et"
+        "label": "Tahmin Toleransı"
       },
       "auto_label_confidence": {
         "label": "Otomatik Etiketleme Güvenirliği"
@@ -1190,7 +1197,7 @@
         "label": "Oto Bakım (gece temizliği)"
       },
       "expose_debug_entities": {
-        "label": "Hata Ayıklama Varlıklarını Açığa Çıkarın"
+        "label": "Hata Ayıklama Varlıklarını Aç"
       },
       "save_debug_traces": {
         "label": "Hata Ayıklama İzlerini Kaydet"
@@ -1232,19 +1239,19 @@
         "label": "Duraklatma Aynı zamanda Gücü de Keser (anahtar aracılığıyla)"
       },
       "switch_entity": {
-        "label": "Varlık Değiştir"
+        "label": "Anahtar Varlığı"
       },
       "notify_unload_delay_minutes": {
-        "label": "Nag Gecikmesini Kaldır"
+        "label": "Boşaltma Hatırlatma Gecikmesi"
       },
       "pump_stuck_duration": {
         "label": "Pompanın Sıkışma Süresi"
       },
       "notify_start_services": {
-        "label": "Hizmetleri Başlat"
+        "label": "Başlangıç Bildirim Hizmetleri"
       },
       "notify_finish_services": {
-        "label": "Hizmetleri Bitir"
+        "label": "Bitiş Bildirim Hizmetleri"
       },
       "notify_live_services": {
         "label": "Canlı İlerleme Hizmetleri"
@@ -1256,7 +1263,7 @@
         "label": "Yalnızca Evdeyken Bildir"
       },
       "notify_fire_events": {
-        "label": "Bildirimler için Fire HA Olayları"
+        "label": "Bildirimler için HA Olayları Gönder"
       },
       "notify_before_end_minutes": {
         "label": "Son Öncesi Uyarı"
@@ -1310,13 +1317,13 @@
         "label": "Bu makineden öğrenin"
       },
       "ml_training_hour": {
-        "label": "saatte öğren"
+        "label": "Öğrenme saati"
       },
       "ml_training_min_cycles": {
-        "label": "İlk önce döngüler gerekli"
+        "label": "Önce gereken döngü sayısı"
       },
       "ml_training_interval_days": {
-        "label": "En fazla her şeyi kontrol edin"
+        "label": "En fazla her kaç günde kontrol et"
       }
     }
   }

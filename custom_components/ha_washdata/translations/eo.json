@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
+          "name": "Nomo de aparato",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -1001,7 +1002,12 @@
       "unsure_detected_prefix": "WashData estas necerta, ĝi detektis",
       "no_suggestions": "Neniuj aktivaj sugestoj.",
       "no_profiles_overlay": "Neniuj profiloj al overlay.",
-      "compare_cycles_title": "Komparu {count} ciklojn"
+      "compare_cycles_title": "Komparu {count} ciklojn",
+      "profiles_intro": "Klaku profilon por statistikoj, fazoj kaj purigado. Grupigu preskaŭ-identajn programojn (sama formo/daŭro, malsama temperaturo aŭ centrifugado) por ke kongruo fidinde distingas inter ili.",
+      "search_placeholder": "Serĉi agordojn…",
+      "automations_intro": "WashData aktivigas {start} / {end} eventojn kaj eksponas entitojn, do sciigoj kaj agoj plej bone estas konstruitaj kiel normalaj Home Assistant aŭtomatizilaĵoj. Aŭtomatizilaĵoj kiuj uzas ĉi tiun aparaton aperas sube.",
+      "notify_services_hint": "Uzu {entity} servajn IDojn (komoseparataj por multoblaj). Ŝablonaj variabloj: {vars}.",
+      "rbac_hint": "Se malŝaltita, ĉiu Home Assistant uzanto havas plenan aliron (la defaŭlto). Administrantoj ĉiam havas plenan aliron kaj povas administri ĉiujn."
     },
     "modal": {
       "label_cycle": "Etikedi ciklon",

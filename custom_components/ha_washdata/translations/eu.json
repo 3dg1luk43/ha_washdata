@@ -53,6 +53,7 @@
         "title": "WashData Ezarpenak",
         "description": "Ezarpen guztiak — detekzioa, bat-etortzea, denbora, jakinarazpenak, profilak eta zikloak — WashData panelean daude eskuragarri. Erabili formulario hau soilik potentzia-sentsorea, gailu mota edo zain-atalasea aldatzeko.",
         "data": {
+          "name": "Gailuaren izena",
           "device_type": "Gailu mota",
           "power_sensor": "Potentzia-sentsorea",
           "min_power": "Potentzia minimoaren atalasea (W)"
@@ -1001,7 +1002,12 @@
       "unsure_detected_prefix": "WashData ez dago ziur detektatuta",
       "no_suggestions": "Ez dago iradokizun aktiborik.",
       "no_profiles_overlay": "Ez dago profilik gainjartzeko.",
-      "compare_cycles_title": "Konparatu {count} zikloak"
+      "compare_cycles_title": "Konparatu {count} zikloak",
+      "profiles_intro": "Egin klik profil batean estatistikak, faseak eta garbiketa ikusteko. Taldekatu ia identikoak diren programak (forma/iraupena bera, tenperatura edo zentrifugatze desberdina) bat-etortzeak haien artean fidagarritasunez bereiz dezan.",
+      "search_placeholder": "Bilatu ezarpenak…",
+      "automations_intro": "WashData-k {start} / {end} gertaerak abiarazten ditu eta entitateak agertzen ditu; beraz, jakinarazpenak eta ekintzak Home Assistant-en ohiko automatizazioen bidez sortzea da hobe. Gailu hau erabiltzen duten automatizazioak behean agertzen dira.",
+      "notify_services_hint": "Erabili {entity} zerbitzu IDak (komaz bereizita, bat baino gehiago izanez gero). Txantiloi-aldagaiak: {vars}.",
+      "rbac_hint": "Desaktibatuta dagoenean, Home Assistant erabiltzaile guztiek sarbide osoa dute (lehenetsia). Administratzaileek beti dute sarbide osoa eta guztiak kudeatu ditzakete."
     },
     "modal": {
       "label_cycle": "Etiketa-zikloa",

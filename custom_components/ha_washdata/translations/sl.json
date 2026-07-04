@@ -47,6 +47,9 @@
           "manage_phase_catalog": "Upravljanje kataloga faz",
           "record_cycle": "Snemanje cikla (ročno)",
           "diagnostics": "Diagnostika in vzdrževanje"
+        },
+        "data": {
+          "name": "Ime naprave"
         }
       },
       "apply_suggestions": {
@@ -1381,13 +1384,13 @@
       "edit": "Uredi",
       "export": "Izvozi",
       "export_json": "Izvozi v JSON",
-      "force_stop": "Prisilen zaustavitev",
+      "force_stop": "Prisilna zaustavitev",
       "from_template": "Iz predloge ▾",
       "ignore": "Prezri",
       "import": "Uvozi",
       "import_json": "Uvozi iz JSON",
       "import_overwrite": "Uvozi (prepiše podatke)",
-      "inspect": "Preglej",
+      "inspect": "Preveri",
       "label": "Označi",
       "manage": "Upravljaj",
       "merge": "Spoji",
@@ -1397,7 +1400,7 @@
       "new_profile": "+ Nov profil",
       "on_cycle_finished": "Ko se cikel konča",
       "on_cycle_started": "Ko se cikel začne",
-      "pause_cycle": "Zaustavi",
+      "pause_cycle": "Premor",
       "process": "Obdelaj",
       "process_history": "Obdelaj zdaj",
       "process_recording": "Shrani posnetek",
@@ -1427,7 +1430,7 @@
       "split": "Razdeli",
       "stop": "Ustavi",
       "submit_correction": "Pošlji popravek",
-      "train_now": "Učiti zdaj",
+      "train_now": "Nauči zdaj",
       "trim": "Obreži",
       "trim_split": "Obreži / Razdeli",
       "use": "Uporabi",
@@ -1717,7 +1720,12 @@
       "storage_diagnostics": "Statistika shranjevanja, vzdrževanje, izvoz/uvoz",
       "trim_intro": "Povlecite rdeče ročke ali vnesite vrednosti. Vse zunaj okna je odstranjeno.",
       "unsure_detected_prefix": "WashData ni prepričan, da je zaznal",
-      "updated": "Posodobljeno {time}"
+      "updated": "Posodobljeno {time}",
+      "profiles_intro": "Kliknite profil za statistike, faze in čiščenje. Združite skoraj enake programe (enaka oblika/trajanje, različna temperatura ali centrifugiranje), da ujemanje zanesljivo razlikuje med njimi.",
+      "search_placeholder": "Iskanje nastavitev…",
+      "automations_intro": "WashData sproži dogodke {start} / {end} in izpostavi entitete, zato je obvestila in dejanja najbolje graditi kot navadne avtomatizacije Home Assistant. Avtomatizacije, ki uporabljajo to napravo, so prikazane spodaj.",
+      "notify_services_hint": "Uporabite ID-je storitve {entity} (ločeni z vejico za več). Spremenljivke predloge: {vars}.",
+      "rbac_hint": "Ko je izklopljeno, ima vsak uporabnik Home Assistant poln dostop (privzeto). Skrbniki imajo vedno poln dostop in lahko upravljajo vse."
     },
     "modal": {
       "auto_label": "Samodejno označi cikle",

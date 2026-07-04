@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "تمام تنظیمات - تشخیص، تطبیق، زمان، اعلان ها، پروفایل ها و چرخه ها - در پانل WashData در دسترس هستند. از این فرم فقط برای تغییر سنسور برق، نوع دستگاه یا آستانه آماده سازی استفاده کنید.",
         "data": {
+          "name": "نام دستگاه",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -623,14 +624,14 @@
       "panel_settings": "تنظیمات پنل (همه کاربران)",
       "ml_learned": "آنچه که WashData آموخته است",
       "status": "وضعیت",
-      "live_power": "قدرت زنده",
+      "live_power": "توان زنده",
       "manual_recording": "ضبط دستی",
       "tools_and_data": "ابزارها و داده ها",
       "phase_catalog": "کاتالوگ فازها",
       "storage_stats": "ویژگی های ذخیره سازی",
       "maintenance": "اقدامات تعمیر و نگهداری",
       "export_import": "صادرات / واردات",
-      "logs": "سیاههها",
+      "logs": "گزارش‌ها",
       "my_preferences": "ترجیحات من",
       "access_control": "کنترل دسترسی",
       "ml_smart_learning": "یادگیری هوشمند",
@@ -658,7 +659,7 @@
       "show_expected": "نمایش منحنی انتظار (پروفایل تطابق، نارنجی)",
       "show_raw": "نمایش داده‌های خام سنسور (هموار نشده، خاکستری)",
       "show_debug": "نمایش کارت اشکال‌زدایی زنده در صفحه وضعیت (اطمینان، ابهام، نامزدهای برتر)",
-      "power": "قدرت",
+      "power": "توان",
       "progress": "پیشرفت",
       "remaining": "باقی مانده",
       "duration": "مدت زمان",
@@ -786,7 +787,7 @@
       "delete_failed": "حذف ناموفق: {error}",
       "apply_failed": "اعمال ناموفق: {error}",
       "rebuild_failed": "بازسازی شکست خورد: {error}",
-      "start_failed": "شروع شکست: {error}",
+      "start_failed": "شروع ناموفق: {error}",
       "stop_failed": "توقف انجام نشد: {error}",
       "discard_failed": "حذف ناموفق: {error}",
       "trim_failed": "برش ناموفق: {error}",
@@ -794,7 +795,7 @@
       "merge_failed": "ادغام ناموفق: {error}",
       "create_failed": "ایجاد ناموفق بود: {error}",
       "update_failed": "به‌روزرسانی انجام نشد: {error}",
-      "rename_failed": "نام شکست خورده: {error}",
+      "rename_failed": "تغییر نام ناموفق: {error}",
       "revert_failed": "بازگشت ناموفق: {error}",
       "training_failed": "آموزش شکست خورده: {error}",
       "export_failed": "صادرات شکست خورد: {error}",
@@ -805,7 +806,7 @@
       "error": "خطای: {error}",
       "pause_failed": "توقف موقت ناموفق: {error}",
       "label_failed": "برچسب‌گذاری ناموفق: {error}",
-      "invalid_json": "\"{key} JSON معتبر نیست - آن را تعمیر یا پاکسازی زمینه قبل از پس انداز.",
+      "invalid_json": "\"{key}\" JSON معتبر نیست — آن را تعمیر یا پاک‌سازی فیلد قبل از ذخیره.",
       "processed": "پردازش {bits}",
       "split_complete": "تقسیم به چرخه های {count}"
     },
@@ -865,7 +866,12 @@
       "unsure_detected_prefix": "WashData مطمئن نیست که شناسایی کرده",
       "no_suggestions": "هیچ پیشنهاد فعال نیست.",
       "no_profiles_overlay": "هیچ پروفایلی برای اضافه کردن",
-      "compare_cycles_title": "مقایسه چرخه های {count}"
+      "compare_cycles_title": "مقایسه چرخه های {count}",
+      "profiles_intro": "برای مشاهده آمار، مراحل و پاکسازی روی یک پروفایل کلیک کنید. برنامه‌های تقریباً یکسان (شکل/مدت‌زمان یکسان، دما یا دور متفاوت) را گروه‌بندی کنید تا تطبیق بتواند به‌طور قابل‌اعتماد بین آن‌ها تمایز قائل شود.",
+      "search_placeholder": "جستجوی تنظیمات…",
+      "automations_intro": "WashData رویدادهای {start} / {end} را فعال می‌کند و موجودیت‌ها را در دسترس قرار می‌دهد، بنابراین اعلان‌ها و اقدامات بهتر است به‌صورت اتوماسیون‌های معمولی Home Assistant ساخته شوند. اتوماسیون‌هایی که از این دستگاه استفاده می‌کنند در زیر نمایش داده می‌شوند.",
+      "notify_services_hint": "از شناسه‌های سرویس {entity} استفاده کنید (برای چندین مورد با کاما جدا کنید). متغیرهای الگو: {vars}.",
+      "rbac_hint": "وقتی خاموش است، هر کاربر Home Assistant دسترسی کامل دارد (پیش‌فرض). مدیران همیشه دسترسی کامل دارند و می‌توانند همه را مدیریت کنند."
     },
     "section": {
       "basic": {
@@ -940,10 +946,10 @@
         "label": "نوع دستگاه"
       },
       "power_sensor": {
-        "label": "سنسور قدرت"
+        "label": "سنسور توان"
       },
       "min_power": {
-        "label": "حداقل قدرت"
+        "label": "حداقل توان"
       },
       "off_delay": {
         "label": "تاخیر خاموش شدن"
@@ -1154,7 +1160,7 @@
       "save": "ذخیره",
       "cancel": "لغو",
       "delete": "حذف",
-      "close": "نزدیک",
+      "close": "بستن",
       "edit": "ویرایش",
       "add": "افزودن",
       "rebuild": "بازسازی پوشش‌ها",
@@ -1165,7 +1171,7 @@
       "export": "صادرات",
       "import": "واردات",
       "merge": "ادغام",
-      "apply": "درخواست",
+      "apply": "اعمال",
       "refresh": "به‌روزرسانی",
       "create": "ایجاد",
       "select": "انتخاب",
@@ -1206,7 +1212,7 @@
       "export_json": "صادرات به JSON",
       "import_json": "واردات از JSON",
       "correct": "درست ...",
-      "ignore": "غفلت",
+      "ignore": "نادیده بگیر",
       "add_phase": "اضافه کردن فاز",
       "new_phase": "+ فاز جدید",
       "delete_profile": "حذف پروفایل",
@@ -1243,12 +1249,12 @@
       "steady": "ثابت",
       "using_tuned": "استفاده از وزنه های تنظیم شده",
       "using_defaults": "استفاده از پیش فرض های حمل شده",
-      "built_in_tag": "ساخته شده-in"
+      "built_in_tag": "داخلی"
     },
     "status": {
       "completed": "تکمیل شده",
       "interrupted": "قطع شد",
-      "force_stopped": "نیروهای متوقف شده",
+      "force_stopped": "اجباری متوقف",
       "active": "فعال",
       "ambiguous": "مبهم",
       "clear": "پاک",
@@ -1263,7 +1269,7 @@
     "ml": {
       "fit_strong": "قوی",
       "fit_good": "خوب",
-      "fit_fair": "منصفانه",
+      "fit_fair": "متوسط",
       "fit_weak": "ضعیف",
       "fit_slight": "خفیف",
       "fit_word": "مناسب",

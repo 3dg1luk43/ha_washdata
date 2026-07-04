@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
+          "name": "Nome do dispositivo",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -624,13 +625,13 @@
       "history": "Ciclos",
       "profiles": "Perfis",
       "settings": "Configurações",
-      "ml": "Treinamento de aprendizado de máquina",
+      "ml": "Treinamento de ML",
       "advanced": "Avançado",
       "diagnostics": "Diagnóstico",
       "pp_overview": "Visão geral",
       "pp_phases": "Fases",
-      "pp_cleanup": "Limpar",
-      "pp_manage": "Gerenciar",
+      "pp_cleanup": "Limpeza",
+      "pp_manage": "Gerenciamento",
       "subtab_profiles": "Perfis",
       "subtab_phase_catalog": "Catálogo de Fases"
     },
@@ -652,7 +653,7 @@
       "apply": "Aplicar",
       "refresh": "Atualizar",
       "create": "Criar",
-      "select": "Selecione",
+      "select": "Selecionar",
       "done": "Feito",
       "reset": "Reiniciar",
       "trim": "Aparar",
@@ -679,7 +680,7 @@
       "save_panel_settings": "Salvar configurações do painel",
       "save_access_control": "Salvar controle de acesso",
       "auto_label_cycles": "Etiquetagem automática de ciclos",
-      "run_analysis": "🔍 Execute análise de sugestões",
+      "run_analysis": "🔍 Executar análise de sugestões",
       "apply_all": "Aplicar tudo",
       "show_only": "Mostrar apenas",
       "dismiss": "Dispensar",
@@ -724,7 +725,7 @@
       "tools_and_data": "Ferramentas e dados",
       "phase_catalog": "Catálogo de Fases",
       "storage_stats": "Estatísticas de armazenamento",
-      "maintenance": "Ações de Manutenção",
+      "maintenance": "Ações de manutenção",
       "export_import": "Exportar/Importar",
       "logs": "Registros",
       "my_preferences": "Minhas preferências",
@@ -734,18 +735,18 @@
       "ml_settings_card": "Configurações",
       "ml_learned": "O que WashData aprendeu",
       "ml_matching_tuning": "Ajuste fino de correspondência de programa",
-      "display": "Mostrar",
+      "display": "Visualização",
       "status_graph": "Gráfico de status",
       "diagnostics_pref": "Diagnóstico",
       "logs_diagnostics": "Diagnóstico",
-      "process_history": "Histórico de Processamento",
+      "process_history": "Histórico de processamento",
       "clear_debug": "Limpar rastreamentos de depuração",
       "wipe_history": "Limpar histórico",
       "automations": "Automações",
-      "automation_open": "Abra no editor de automação",
+      "automation_open": "Abrir no editor de automação",
       "automation_delete": "Excluir esta automação",
       "automation_needs_review": "Este ciclo precisa de revisão",
-      "automation_review_this_cycle": "Revise este ciclo",
+      "automation_review_this_cycle": "Revisar este ciclo",
       "no_automations": "Nenhuma automação faz referência a este dispositivo ainda."
     },
     "lbl": {
@@ -779,33 +780,33 @@
       "json_data": "Dados JSON",
       "expected_duration": "Duração Esperada (min)",
       "rename_profile": "Renomear perfil",
-      "select_profile": "Selecione o perfil",
+      "select_profile": "Selecionar perfil",
       "confidence_threshold": "Limite de confiança",
       "resulting_profile": "Perfil resultante",
       "new_profile_name": "Novo nome de perfil",
       "save_mode": "Modo Salvar",
-      "head_trim": "Corte(s) de cabeça",
-      "tail_trim": "Corte(s) de cauda",
-      "gap_s": "Lacuna(s)",
-      "start": "Começar",
+      "head_trim": "Corte inicial (s)",
+      "tail_trim": "Corte final (s)",
+      "gap_s": "Intervalo (s)",
+      "start": "Início",
       "end": "Fim",
       "quality": "Qualidade",
       "golden_reference": "Ciclo de referência gravado",
-      "compare_profiles": "Compare com perfis",
+      "compare_profiles": "Comparar com perfis",
       "tags": "Etiquetas",
       "notes": "Notas",
       "default_tab": "Guia padrão ao abrir o painel",
       "cycle_date_display": "Exibição da data do ciclo",
-      "refresh_interval": "Intervalo(s) de atualização",
+      "refresh_interval": "Intervalo de atualização (s)",
       "panel_default_tab": "Guia padrão",
       "hide_tabs": "Ocultar guias para não administradores",
-      "enable_access_control": "Habilite o controle de acesso por usuário",
+      "enable_access_control": "Habilitar controle de acesso por usuário",
       "default_access_level": "Nível padrão para usuários não listados abaixo",
       "administrators": "Administradores",
       "default_other": "Padrão (outros dispositivos)",
       "show_expected": "Mostrar sobreposição de curva esperada (perfil correspondente, laranja)",
       "show_raw": "Mostrar leituras brutas do sensor (sem suavização, cinza)",
-      "show_debug": "Mostrar cartão de depuração da partida ao vivo na página de status (confiança, ambiguidade, principais candidatos)",
+      "show_debug": "Mostrar cartão de depuração da correspondência ao vivo na página de status (confiança, ambiguidade, principais candidatos)",
       "mode_new_profile": "Criar novo perfil",
       "mode_existing_profile": "Adicionar ao perfil existente",
       "auto_fine_tune_on": "ajuste fino automático ativado (por volta de {hour}:00)",
@@ -825,14 +826,14 @@
     },
     "badge": {
       "poor_fit": "ajuste ruim",
-      "fair_fit": "ajuste justo",
+      "fair_fit": "ajuste razoável",
       "manual": "(selecionado manualmente)",
       "auto": "(detectado automaticamente)",
       "improving": "↗ melhorando",
       "declining": "↘ em declínio",
       "steady": "→ constante",
       "using_tuned": "Usando pesos ajustados",
-      "using_defaults": "Usando padrões enviados",
+      "using_defaults": "Usando padrões de fábrica",
       "built_in_tag": "embutido"
     },
     "status": {
@@ -845,7 +846,7 @@
       "working": "Trabalhando…",
       "recording": "Gravação…",
       "ready": "Pronto para processar",
-      "idle": "Parado",
+      "idle": "Inativo",
       "auto_detect": "Detecção automática",
       "fine_tuning": "ajustando agora…",
       "all_statuses": "Todos os status"
@@ -853,10 +854,10 @@
     "ml": {
       "fit_strong": "Forte",
       "fit_good": "Bom",
-      "fit_fair": "Justo",
+      "fit_fair": "Razoável",
       "fit_weak": "Fraco",
-      "fit_slight": "Pouco",
-      "fit_word": "ajustar",
+      "fit_slight": "Leve",
+      "fit_word": "ajuste",
       "fine_tuned_at": "ajustado {when}",
       "personalized": "● Personalizado para esta máquina",
       "builtin_models": "● Usando modelos integrados"
@@ -890,7 +891,7 @@
       "cycles_deleted": "{count} ciclo(s) excluído(s)",
       "cycle_trimmed": "Ciclo cortado",
       "cycles_merged": "Ciclos mesclados",
-      "review_saved": "Comentário salvo",
+      "review_saved": "Revisão salva",
       "feedback_confirmed": "Feedback confirmado",
       "feedback_dismissed": "Feedback dispensado",
       "feedback_all_dismissed": "Todos os feedbacks foram descartados",
@@ -943,7 +944,7 @@
       "label_failed": "Falha no rótulo: {error}",
       "invalid_json": "\"{key}\" não é JSON válido. Corrija-o ou limpe o campo antes de salvar.",
       "processed": "Processado {bits}",
-      "split_complete": "Dividir em {count} ciclos"
+      "split_complete": "Dividido em {count} ciclos"
     },
     "msg": {
       "no_devices": "Nenhum dispositivo WashData configurado ainda.",
@@ -960,15 +961,15 @@
       "no_split_points": "Ainda não há pontos de divisão.",
       "no_envelope": "Nenhum envelope ainda – reconstrua após os ciclos de etiquetagem.",
       "no_envelope_overlay": "Nenhum envelope disponível para sobreposição.",
-      "no_other_users": "Nenhum outro Home Assistant usuário encontrado.",
+      "no_other_users": "Nenhum outro usuário Home Assistant encontrado.",
       "maintenance_requires_access": "Manutenção e exportação/importação requerem acesso total.",
-      "loading_curve": "Curva de carregamento…",
+      "loading_curve": "Carregando curva…",
       "compare_selected_cycles": "Ciclos selecionados (sólidos) — mostrar/ocultar",
-      "compare_overlay_profiles": "Perfis de sobreposição (fracos)",
+      "compare_overlay_profiles": "Perfis sobrepostos (tênues)",
       "no_profiles_compare": "Não há perfis para comparar.",
       "no_cycles_profile": "Não há ciclos para este perfil.",
       "saving_triggers_reload": "Salvar aciona uma recarga de integração. As entidades HA podem aparecer brevemente como indisponíveis.",
-      "prefs_personal": "Eles se aplicam apenas à sua conta Home Assistant.",
+      "prefs_personal": "Estas configurações se aplicam apenas à sua conta do Home Assistant.",
       "no_match_yet": "Nenhuma tentativa de correspondência ainda - isto é preenchido durante um ciclo de execução.",
       "no_fine_tuned": "Nada ajustado ainda – WashData está usando seus modelos integrados.",
       "ml_learned_intro": "Modelos ajustados para esta máquina. Qualquer coisa não listada usa o modelo integrado confiável.",
@@ -989,19 +990,24 @@
       "appliance_monitor": "Monitor de eletrodomésticos",
       "ml_loading": "carregando ML…",
       "see_recorder": "Veja o widget do gravador abaixo",
-      "review_in_settings": "Revise nas configurações",
+      "review_in_settings": "Revisar nas configurações",
       "storage_diagnostics": "Estatísticas de armazenamento, manutenção, exportação/importação",
       "recent_logs": "Registros ha_washdata recentes",
       "preferences_adv": "Preferências",
       "preferences_admin": "Preferências, painel e controle de acesso",
-      "review_to_cycles": "Abra a fila de revisão do Ciclos",
+      "review_to_cycles": "Abrir a fila de revisão dos Ciclos",
       "pending_feedback": "Feedback de detecção pendente",
       "recording_in_progress": "Gravação em andamento",
       "no_profiles_yet_short": "Ainda não há perfis.",
-      "unsure_detected_prefix": "WashData não tem certeza se foi detectado",
+      "unsure_detected_prefix": "WashData não tem certeza se detectou",
       "no_suggestions": "Nenhuma sugestão ativa.",
       "no_profiles_overlay": "Nenhum perfil para sobrepor.",
-      "compare_cycles_title": "Comparar {count} ciclos"
+      "compare_cycles_title": "Comparar {count} ciclos",
+      "profiles_intro": "Clique em um perfil para ver estatísticas, fases e limpeza. Agrupe programas quase idênticos (mesma forma/duração, temperatura ou centrifugação diferentes) para que a correspondência os distinga com confiabilidade.",
+      "search_placeholder": "Pesquisar configurações…",
+      "automations_intro": "O WashData dispara eventos {start} / {end} e expõe entidades, portanto as notificações e ações são melhor criadas como automações normais do Home Assistant. As automações que usam este dispositivo aparecem abaixo.",
+      "notify_services_hint": "Use os IDs de serviço de {entity} (separados por vírgula para múltiplos). Variáveis de modelo: {vars}.",
+      "rbac_hint": "Quando desativado, todos os usuários do Home Assistant têm acesso total (padrão). Os administradores sempre têm acesso total e podem gerenciar todos."
     },
     "modal": {
       "label_cycle": "Rotular ciclo",
@@ -1011,7 +1017,7 @@
       "process_recording": "Processar gravação",
       "correct_feedback": "Feedback correto",
       "import_config": "Importar configuração",
-      "auto_label": "Ciclos de etiquetagem automática",
+      "auto_label": "Etiquetagem automática de ciclos",
       "cycle": "Ciclo"
     },
     "tag": {
@@ -1019,9 +1025,9 @@
       "early_end": "Fim antecipado",
       "merged": "Ciclos mesclados",
       "split": "Ciclo dividido",
-      "noise": "Barulho",
+      "noise": "Ruído",
       "wrong_profile": "Perfil errado",
-      "sensor_gap": "Folga do sensor"
+      "sensor_gap": "Lacuna do sensor"
     },
     "quality": {
       "good": "Bom",
@@ -1037,7 +1043,7 @@
     },
     "health": {
       "poor": "⚠ Ajuste inadequado",
-      "fair": "Ajuste justo",
+      "fair": "Ajuste aceitável",
       "good": "✓ Bom ajuste"
     },
     "trend": {
@@ -1065,8 +1071,8 @@
         "intro": "Como os ciclos concluídos são combinados com os perfis aprendidos e rotulados."
       },
       "timing": {
-        "label": "Tempo e cão de guarda",
-        "intro": "Cadência de fundo, o cão de guarda off-line e a limpeza."
+        "label": "Cadência e vigilância",
+        "intro": "Cadência de fundo, o cão de guarda offline e a limpeza."
       },
       "anti_wrinkle": {
         "label": "Antirrugas",
@@ -1085,7 +1091,7 @@
         "intro": "Configure quando e como você será notificado sobre eventos de ciclo."
       },
       "ml_training": {
-        "label": "Treinamento de aprendizado de máquina",
+        "label": "Treinamento de ML",
         "intro": "Modelos inteligentes opcionais que personalizam a detecção e o tempo para este dispositivo."
       }
     },
@@ -1100,13 +1106,13 @@
         "label": "Sensor de potência"
       },
       "min_power": {
-        "label": "Potência Mínima"
+        "label": "Potência mínima"
       },
       "off_delay": {
         "label": "Atraso desligado"
       },
       "linked_device": {
-        "label": "Grupo no dispositivo"
+        "label": "Agrupar sob dispositivo"
       },
       "start_threshold_w": {
         "label": "Limite inicial"
@@ -1115,13 +1121,13 @@
         "label": "Limite de parada"
       },
       "min_off_gap": {
-        "label": "Intervalo mínimo de folga"
+        "label": "Intervalo mínimo de inatividade"
       },
       "start_duration_threshold": {
         "label": "Duração inicial"
       },
       "start_energy_threshold": {
-        "label": "Iniciar Energia"
+        "label": "Energia de início"
       },
       "completion_min_seconds": {
         "label": "Duração mínima do ciclo"
@@ -1130,10 +1136,10 @@
         "label": "Zona morta em operação"
       },
       "end_energy_threshold": {
-        "label": "Fim da Energia"
+        "label": "Energia de fim"
       },
       "end_repeat_count": {
-        "label": "Finalizar contagem de repetições"
+        "label": "Contagem de repetições de fim"
       },
       "sampling_interval": {
         "label": "Intervalo de amostragem"
@@ -1166,7 +1172,7 @@
         "label": "Tolerância de duração do perfil"
       },
       "duration_tolerance": {
-        "label": "Estimar tolerância"
+        "label": "Tolerância estimada"
       },
       "auto_label_confidence": {
         "label": "Confiança na etiqueta automática"
@@ -1205,7 +1211,7 @@
         "label": "Duração máxima"
       },
       "anti_wrinkle_exit_power": {
-        "label": "Sair do limite de energia"
+        "label": "Limiar de potência de saída"
       },
       "delay_start_detect_enabled": {
         "label": "Ativar detecção de início retardado"
@@ -1223,19 +1229,19 @@
         "label": "Entidade de gatilho externa"
       },
       "external_end_trigger_inverted": {
-        "label": "Inverter gatilho externo (gatilho desligado)"
+        "label": "Inverter gatilho externo (acionar no DESLIGADO)"
       },
       "door_sensor_entity": {
-        "label": "Entidade Sensor de Porta"
+        "label": "Entidade do sensor de porta"
       },
       "pause_cuts_power": {
-        "label": "Pausa também corta energia (via switch)"
+        "label": "Pausa também corta energia (via interruptor)"
       },
       "switch_entity": {
         "label": "Entidade do interruptor"
       },
       "notify_unload_delay_minutes": {
-        "label": "Descarregar atraso de Nag"
+        "label": "Atraso do aviso de descarga"
       },
       "pump_stuck_duration": {
         "label": "Duração da bomba presa"
@@ -1244,7 +1250,7 @@
         "label": "Iniciar serviços"
       },
       "notify_finish_services": {
-        "label": "Terminar serviços"
+        "label": "Serviços de fim"
       },
       "notify_live_services": {
         "label": "Serviços de progresso ao vivo"
@@ -1268,10 +1274,10 @@
         "label": "% de ultrapassagem em tempo real antes do alerta"
       },
       "notify_live_chronometer": {
-        "label": "Use o cronômetro ao vivo"
+        "label": "Usar cronômetro ao vivo"
       },
       "notify_timeout_seconds": {
-        "label": "Dispensar automaticamente depois"
+        "label": "Fechar automaticamente após"
       },
       "notify_title": {
         "label": "Título da notificação"
@@ -1283,40 +1289,40 @@
         "label": "Mensagem inicial"
       },
       "notify_finish_message": {
-        "label": "Concluir mensagem"
+        "label": "Mensagem de fim"
       },
       "notify_pre_complete_message": {
-        "label": "Mensagem Pré-Completa"
+        "label": "Mensagem pré-fim"
       },
       "notify_reminder_message": {
         "label": "Mensagem de lembrete"
       },
       "notify_channel": {
-        "label": "Android Canal (inicial/ao vivo)"
+        "label": "Canal Android (início/ao vivo)"
       },
       "notify_finish_channel": {
-        "label": "Android Canal (concluir)"
+        "label": "Canal Android (fim)"
       },
       "energy_price_entity": {
-        "label": "Entidade de Preço de Energia"
+        "label": "Entidade de preço de energia"
       },
       "energy_price_static": {
-        "label": "Preço da Energia Estática (por kWh)"
+        "label": "Preço estático de energia (por kWh)"
       },
       "enable_ml_models": {
         "label": "Aplicar modelos inteligentes durante um ciclo"
       },
       "ml_training_enabled": {
-        "label": "Aprenda com esta máquina"
+        "label": "Aprender com esta máquina"
       },
       "ml_training_hour": {
-        "label": "Aprenda por hora"
+        "label": "Hora de aprendizado"
       },
       "ml_training_min_cycles": {
         "label": "Ciclos necessários primeiro"
       },
       "ml_training_interval_days": {
-        "label": "Verifique no máximo cada"
+        "label": "Verificar no máximo a cada"
       }
     }
   }

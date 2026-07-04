@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
+          "name": "Enw Dyfais",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -1001,7 +1002,12 @@
       "unsure_detected_prefix": "Nid yw WashData yn siŵr ei fod wedi'i ganfod",
       "no_suggestions": "Dim awgrymiadau gweithredol.",
       "no_profiles_overlay": "Dim proffiliau i'w troshaenu.",
-      "compare_cycles_title": "Cymharwch {count} gylchred"
+      "compare_cycles_title": "Cymharwch {count} gylchred",
+      "profiles_intro": "Cliciwch ar broffil am ystadegau, cyfnodau a glanhau. Grwpiwch raglenni bron-union (un siâp/hyd, tymheredd neu droi gwahanol) fel bod cyfatebiad yn dewis rhyngddynt yn ddibynadwy.",
+      "search_placeholder": "Chwilio gosodiadau…",
+      "automations_intro": "Mae WashData yn tanio digwyddiadau {start} / {end} ac yn datgelu endidau, felly mae'n well adeiladu hysbysiadau a chamau gweithredu fel awtomeiddiadau Home Assistant arferol. Mae'r awtomeiddiadau sy'n defnyddio'r ddyfais hon yn ymddangos isod.",
+      "notify_services_hint": "Defnyddiwch IDau gwasanaeth {entity} (wedi'u gwahanu gan gomas am fwy nag un). Newidynnau templed: {vars}.",
+      "rbac_hint": "Pan fo i ffwrdd, mae gan bob defnyddiwr Home Assistant fynediad llawn (y rhagosodiad). Mae gan weinyddwyr fynediad llawn bob amser a gallant reoli pawb."
     },
     "modal": {
       "label_cycle": "Labelu Cylch",

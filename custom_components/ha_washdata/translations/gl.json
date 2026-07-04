@@ -53,6 +53,7 @@
         "title": "Configuración de WashData",
         "description": "Todos os axustes -- detección, coincidencia, temporización, notificacións, perfís e ciclos -- están dispoñibles no panel de WashData. Usa este formulario só para cambiar o sensor de potencia, o tipo de dispositivo ou o limiar de espera.",
         "data": {
+          "name": "Nome do dispositivo",
           "device_type": "Tipo de dispositivo",
           "power_sensor": "Sensor de potencia",
           "min_power": "Limiar de potencia mínima (W)"
@@ -1002,7 +1003,12 @@
       "unsure_detected_prefix": "WashData non está seguro de ter detectado",
       "no_suggestions": "Sen propostas activas.",
       "no_profiles_overlay": "Non hai perfís para superpor.",
-      "compare_cycles_title": "Compara {count} ciclos"
+      "compare_cycles_title": "Compara {count} ciclos",
+      "profiles_intro": "Fai clic nun perfil para ver estatísticas, fases e opcións de limpeza. Agrupa programas case idénticos (mesma forma/duración, temperatura ou centrifugado diferente) para que a correspondencia os distinga de forma fiable.",
+      "search_placeholder": "Buscar axustes…",
+      "automations_intro": "WashData dispara eventos {start} / {end} e expón entidades, polo que as notificacións e accións créanse mellor como automatizacións normais de Home Assistant. As automatizacións que usan este dispositivo aparecen a continuación.",
+      "notify_services_hint": "Usa os ID de servizo de {entity} (separados por comas para varios). Variables de modelo: {vars}.",
+      "rbac_hint": "Cando está desactivado, todos os usuarios de Home Assistant teñen acceso completo (o valor predeterminado). Os administradores sempre teñen acceso completo e poden xestionar a todos."
     },
     "modal": {
       "label_cycle": "Ciclo de etiquetas",

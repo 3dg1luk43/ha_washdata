@@ -53,6 +53,7 @@
         "title": "WashData podešavanja",
         "description": "Sva podešavanja -- detekcija, podudaranje, tajming, obaveštenja, profili i ciklusi -- dostupna su u WashData panelu. Koristi ovaj obrazac samo da promeniš senzor snage, tip uređaja ili prag mirovanja.",
         "data": {
+          "name": "Naziv uređaja",
           "device_type": "Tip uređaja",
           "power_sensor": "Senzor snage",
           "min_power": "Minimalni prag snage (W)"
@@ -664,7 +665,7 @@
       "new_profile": "+ Novi profil",
       "new_group": "+ Nova grupa",
       "apply_label": "Primeni oznaku",
-      "run_auto_label": "Pokr. auto-označavanje",
+      "run_auto_label": "Pokreni auto-označavanje",
       "save_review": "Sačuvaj pregled",
       "apply_trim": "Primeni isecanje",
       "apply_split": "Primeni deljenje",
@@ -678,7 +679,7 @@
       "save_preferences": "Sačuvaj preference",
       "save_panel_settings": "Sačuvaj podešavanja panela",
       "save_access_control": "Sačuvaj kontrolu pristupa",
-      "auto_label_cycles": "Auto-označavanje ciklusa",
+      "auto_label_cycles": "Automatski označi cikluse",
       "run_analysis": "🔍 Pokreni analizu sugestija",
       "apply_all": "Primeni sve",
       "show_only": "Prikaži samo",
@@ -712,7 +713,7 @@
       "trim_split": "Iseci / Podeli",
       "convert_to_automation": "Pretvori u automatizaciju",
       "new_automation": "＋ Nova automatizacija",
-      "from_template": "Iz predloška ▾",
+      "from_template": "Iz šablona ▾",
       "on_cycle_started": "Kada je ciklus počeo",
       "on_cycle_finished": "Kada je ciklus završen",
       "save_group": "Sačuvaj grupu"
@@ -1001,7 +1002,12 @@
       "unsure_detected_prefix": "WashData nije siguran da je otkrio",
       "no_suggestions": "Nema aktivnih sugestija.",
       "no_profiles_overlay": "Nema profila za prekrivanje.",
-      "compare_cycles_title": "Uporedi {count} ciklusa"
+      "compare_cycles_title": "Uporedi {count} ciklusa",
+      "profiles_intro": "Kliknite na profil za statistike, faze i čišćenje. Grupišite gotovo identične programe (isti oblik/trajanje, različita temperatura ili centrifuga) da bi uparivanje pouzdano biralo između njih.",
+      "search_placeholder": "Pretraga podešavanja…",
+      "automations_intro": "WashData pokreće {start} / {end} događaje i izlaže entitete, pa je obaveštenja i radnje najbolje graditi kao normalne Home Assistant automatizacije. Automatizacije koje koriste ovaj uređaj prikazuju se ispod.",
+      "notify_services_hint": "Koristite ID-ove servisa {entity} (odvojene zarezom za više). Promenljive šablona: {vars}.",
+      "rbac_hint": "Kada je isključeno, svaki korisnik Home Assistant-a ima pun pristup (podrazumevano). Administratori uvek imaju pun pristup i mogu da upravljaju svima."
     },
     "modal": {
       "label_cycle": "Označi ciklus",

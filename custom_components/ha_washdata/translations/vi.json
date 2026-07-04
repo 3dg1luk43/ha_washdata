@@ -53,6 +53,7 @@
         "title": "WashData Settings",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
+          "name": "Tên thiết bị",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor",
           "min_power": "Minimum Power Threshold (W)"
@@ -624,7 +625,7 @@
       "history": "Chu kỳ",
       "profiles": "Hồ sơ",
       "settings": "Cài đặt",
-      "ml": "Đào tạo ML",
+      "ml": "Huấn luyện ML",
       "advanced": "Trình độ cao",
       "diagnostics": "Chẩn đoán",
       "pp_overview": "Tổng quan",
@@ -641,7 +642,7 @@
       "close": "Đóng",
       "edit": "Chỉnh sửa",
       "add": "Thêm vào",
-      "rebuild": "Xây dựng lại phong bì",
+      "rebuild": "Xây dựng lại đường bao",
       "record": "Bắt đầu ghi",
       "compare": "So sánh",
       "confirm": "Xác nhận",
@@ -651,14 +652,14 @@
       "merge": "Hợp nhất",
       "apply": "Áp dụng",
       "refresh": "Làm mới",
-      "create": "Tạo nên",
+      "create": "Tạo",
       "select": "Lựa chọn",
       "done": "Xong",
       "reset": "Cài lại",
       "trim": "Cắt tỉa",
       "split": "Tách ra",
       "review": "Đánh giá",
-      "inspect": "Thanh tra",
+      "inspect": "Kiểm tra",
       "label": "Nhãn",
       "save_settings": "Lưu cài đặt",
       "new_profile": "+ Hồ sơ mới",
@@ -672,7 +673,7 @@
       "stop": "Dừng lại",
       "process": "Quá trình",
       "add_device": "+ Thêm thiết bị",
-      "train_now": "Đào tạo ngay bây giờ",
+      "train_now": "Huấn luyện ngay",
       "reset_to_defaults": "Đặt lại về mặc định",
       "reset_to_builtin": "Đặt lại về các mô hình tích hợp",
       "save_preferences": "Lưu tùy chọn",
@@ -689,12 +690,12 @@
       "wipe_all": "Xóa tất cả dữ liệu",
       "export_json": "Xuất sang JSON",
       "import_json": "Nhập từ JSON",
-      "correct": "Chính xác…",
+      "correct": "Sửa…",
       "ignore": "Phớt lờ",
       "add_phase": "+ Thêm pha",
       "new_phase": "+ Giai đoạn mới",
       "delete_profile": "Xóa hồ sơ",
-      "rebuild_envelope": "Xây dựng lại phong bì",
+      "rebuild_envelope": "Xây dựng lại đường bao",
       "create_profile": "+ Tạo hồ sơ",
       "rec_stop": "Dừng lại",
       "pause_cycle": "Tạm dừng",
@@ -713,13 +714,13 @@
       "convert_to_automation": "Chuyển đổi sang tự động hóa",
       "new_automation": "＋ Tự động hóa mới",
       "from_template": "Từ mẫu ▾",
-      "on_cycle_started": "Vào chu kỳ bắt đầu",
-      "on_cycle_finished": "Trên chu kỳ kết thúc",
+      "on_cycle_started": "Khi bắt đầu chu kỳ",
+      "on_cycle_finished": "Khi kết thúc chu kỳ",
       "save_group": "Lưu nhóm"
     },
     "hdr": {
       "status": "Trạng thái",
-      "live_power": "Nguồn điện trực tiếp",
+      "live_power": "Công suất trực tiếp",
       "manual_recording": "Ghi thủ công",
       "tools_and_data": "Công cụ & Dữ liệu",
       "phase_catalog": "Danh mục pha",
@@ -761,7 +762,7 @@
       "health": "Sức khỏe",
       "cost": "Chi phí",
       "program": "Chương trình",
-      "cycle_health": "Chu kỳ sức khỏe",
+      "cycle_health": "Tình trạng chu kỳ",
       "activity": "Hoạt động",
       "unlabelled": "Chưa được gắn nhãn",
       "unlabelled_paren": "(không có nhãn)",
@@ -777,16 +778,16 @@
       "correct_duration": "Thời lượng chính xác (phút, tùy chọn)",
       "load_from_file": "Tải từ tập tin",
       "json_data": "Dữ liệu JSON",
-      "expected_duration": "Thời lượng dự kiến ​​(phút)",
+      "expected_duration": "Thời lượng dự kiến (phút)",
       "rename_profile": "Đổi tên hồ sơ",
       "select_profile": "Chọn hồ sơ",
       "confidence_threshold": "Ngưỡng tin cậy",
       "resulting_profile": "Hồ sơ kết quả",
       "new_profile_name": "Tên hồ sơ mới",
       "save_mode": "Chế độ lưu",
-      "head_trim": "Đầu trang trí (s)",
-      "tail_trim": "Cắt đuôi",
-      "gap_s": "(Các) khoảng trống",
+      "head_trim": "Cắt đầu (s)",
+      "tail_trim": "Cắt đuôi (s)",
+      "gap_s": "Khoảng cách (s)",
       "start": "Bắt đầu",
       "end": "Kết thúc",
       "quality": "Chất lượng",
@@ -796,7 +797,7 @@
       "notes": "Ghi chú",
       "default_tab": "Tab mặc định khi mở bảng điều khiển",
       "cycle_date_display": "Hiển thị ngày chu kỳ",
-      "refresh_interval": "Khoảng thời gian làm mới (các)",
+      "refresh_interval": "Khoảng thời gian làm mới (s)",
       "panel_default_tab": "Tab mặc định",
       "hide_tabs": "Ẩn các tab cho người không phải quản trị viên",
       "enable_access_control": "Bật kiểm soát quyền truy cập của mỗi người dùng",
@@ -805,7 +806,7 @@
       "default_other": "Mặc định (các thiết bị khác)",
       "show_expected": "Hiển thị lớp phủ đường cong dự kiến ​​(cấu hình phù hợp, màu cam)",
       "show_raw": "Hiển thị số đọc cảm biến thô (không được làm mịn, màu xám)",
-      "show_debug": "Hiển thị thẻ gỡ lỗi trận đấu trực tiếp trên trang Trạng thái (độ tin cậy, mơ hồ, ứng viên hàng đầu)",
+      "show_debug": "Hiển thị thẻ gỡ lỗi so khớp trực tiếp trên trang Trạng thái (độ tin cậy, mơ hồ, ứng viên hàng đầu)",
       "mode_new_profile": "Tạo hồ sơ mới",
       "mode_existing_profile": "Thêm vào hồ sơ hiện có",
       "auto_fine_tune_on": "bật tính năng tự động tinh chỉnh (khoảng {hour}:00)",
@@ -814,7 +815,7 @@
       "remove_label": "- Xóa nhãn -",
       "create_new_profile": "+ Tạo hồ sơ mới…",
       "read_only": "Chỉ đọc",
-      "actions": "hành động",
+      "actions": "Hành động",
       "cycles_count": "Chu kỳ",
       "debug_traces": "Dấu vết gỡ lỗi",
       "file_kb": "Tệp (kB)",
@@ -832,7 +833,7 @@
       "declining": "↘ giảm dần",
       "steady": "→ ổn định",
       "using_tuned": "Sử dụng trọng lượng đã điều chỉnh",
-      "using_defaults": "Sử dụng mặc định được vận chuyển",
+      "using_defaults": "Sử dụng mặc định cài sẵn",
       "built_in_tag": "tích hợp sẵn"
     },
     "status": {
@@ -840,7 +841,7 @@
       "interrupted": "Bị gián đoạn",
       "force_stopped": "Đã buộc dừng",
       "active": "Đang hoạt động",
-      "ambiguous": "mơ hồ",
+      "ambiguous": "Mơ hồ",
       "clear": "Rõ ràng",
       "working": "Đang làm việc…",
       "recording": "Đang ghi…",
@@ -853,9 +854,9 @@
     "ml": {
       "fit_strong": "Mạnh",
       "fit_good": "Tốt",
-      "fit_fair": "Hội chợ",
-      "fit_weak": "Yếu đuối",
-      "fit_slight": "nhẹ",
+      "fit_fair": "Tạm ổn",
+      "fit_weak": "Yếu",
+      "fit_slight": "Nhẹ",
       "fit_word": "phù hợp",
       "fine_tuned_at": "tinh chỉnh {when}",
       "personalized": "● Được cá nhân hóa cho máy này",
@@ -880,8 +881,8 @@
       "export_downloaded": "Xuất đã tải xuống",
       "logs_exported": "Nhật ký đã xuất",
       "import_successful": "Nhập thành công; tải lại tích hợp",
-      "envelopes_rebuilt": "Phong bì được làm lại",
-      "envelope_rebuilt": "Phong bì được làm lại",
+      "envelopes_rebuilt": "Đã xây dựng lại đường bao",
+      "envelope_rebuilt": "Đã xây dựng lại đường bao",
       "suggestions_applied": "Đề xuất được áp dụng; tải lại tích hợp",
       "suggestions_dismissed": "Đã loại bỏ đề xuất",
       "auto_label_complete": "Tự động gắn nhãn hoàn tất",
@@ -902,8 +903,8 @@
       "cycle_paused": "Chu kỳ bị tạm dừng",
       "cycle_resumed": "Chu kỳ tiếp tục",
       "cycle_force_stopped": "Chu kỳ bị dừng lại",
-      "ml_training_promoted": "Quá trình đào tạo đã hoàn tất: {count} mô hình đã được thăng cấp",
-      "ml_training_no_improvement": "Hoàn thành đào tạo: giữ nguyên đường cơ sở (không cải thiện)",
+      "ml_training_promoted": "Huấn luyện hoàn tất: {count} mô hình đã được thăng cấp",
+      "ml_training_no_improvement": "Huấn luyện hoàn tất: giữ nguyên đường cơ sở (không cải thiện)",
       "matching_reverted": "Trọng số phù hợp được hoàn nguyên về mặc định",
       "models_reverted": "Các mẫu trên thiết bị đã hoàn nguyên về giá trị cơ sở",
       "analysis_complete": "Phân tích hoàn tất: {count} đề xuất",
@@ -931,7 +932,7 @@
       "update_failed": "Cập nhật không thành công: {error}",
       "rename_failed": "Đổi tên không thành công: {error}",
       "revert_failed": "Hoàn nguyên không thành công: {error}",
-      "training_failed": "Đào tạo không thành công: {error}",
+      "training_failed": "Huấn luyện không thành công: {error}",
       "export_failed": "Xuất không thành công: {error}",
       "import_failed": "Nhập không thành công: {error}",
       "auto_label_failed": "Tự động gắn nhãn không thành công: {error}",
@@ -953,13 +954,13 @@
       "live_chart_loading": "Biểu đồ công suất trực tiếp xuất hiện khi các số đọc đến.",
       "no_cycles_match": "Không có chu kỳ nào phù hợp với bộ lọc hiện tại.",
       "no_cycles_yet": "Chưa có chu kỳ nào được ghi lại.",
-      "no_profiles_yet": "Chưa có hồ sơ nào. Tạo một cái từ một chu trình được dán nhãn.",
+      "no_profiles_yet": "Chưa có hồ sơ nào. Tạo một hồ sơ từ chu kỳ được dán nhãn.",
       "no_logs": "Chưa có bản ghi nhật ký nào được đệm.",
       "no_phases": "Không có giai đoạn nào được xác định.",
       "no_phases_assigned": "Không có giai đoạn nào được chỉ định.",
       "no_split_points": "Chưa có điểm chia.",
-      "no_envelope": "Chưa có phong bì - hãy xây dựng lại sau chu kỳ dán nhãn.",
-      "no_envelope_overlay": "Không có phong bì có sẵn để phủ.",
+      "no_envelope": "Chưa có đường bao - hãy xây dựng lại sau chu kỳ dán nhãn.",
+      "no_envelope_overlay": "Không có đường bao có sẵn để phủ.",
       "no_other_users": "Không tìm thấy người dùng Home Assistant nào khác.",
       "maintenance_requires_access": "Việc bảo trì và xuất/nhập yêu cầu quyền truy cập đầy đủ.",
       "loading_curve": "Đang tải đường cong…",
@@ -996,22 +997,27 @@
       "preferences_admin": "Tùy chọn, bảng điều khiển và kiểm soát truy cập",
       "review_to_cycles": "Mở hàng đợi xem xét Chu kỳ",
       "pending_feedback": "Đang chờ phản hồi phát hiện",
-      "recording_in_progress": "Đang ghi âm",
+      "recording_in_progress": "Đang ghi lại",
       "no_profiles_yet_short": "Chưa có hồ sơ nào.",
       "unsure_detected_prefix": "WashData không chắc chắn nó đã phát hiện được",
       "no_suggestions": "Không có đề xuất nào đang hoạt động.",
       "no_profiles_overlay": "Không có hồ sơ nào để phủ lên.",
-      "compare_cycles_title": "So sánh {count} chu kỳ"
+      "compare_cycles_title": "So sánh {count} chu kỳ",
+      "profiles_intro": "Nhấp vào hồ sơ để xem thống kê, giai đoạn và dọn dẹp. Nhóm các chương trình gần giống nhau (cùng hình dạng/thời lượng, nhiệt độ hoặc vắt khác nhau) để khớp lệnh có thể chọn giữa chúng một cách đáng tin cậy.",
+      "search_placeholder": "Tìm kiếm cài đặt…",
+      "automations_intro": "WashData kích hoạt các sự kiện {start} / {end} và hiển thị các thực thể, vì vậy các thông báo và hành động được xây dựng tốt nhất là các tự động hóa Home Assistant thông thường. Các tự động hóa sử dụng thiết bị này xuất hiện bên dưới.",
+      "notify_services_hint": "Sử dụng ID dịch vụ {entity} (phân cách bằng dấu phẩy cho nhiều). Biến mẫu: {vars}.",
+      "rbac_hint": "Khi tắt, mọi người dùng Home Assistant đều có quyền truy cập đầy đủ (mặc định). Quản trị viên luôn có quyền truy cập đầy đủ và có thể quản lý tất cả mọi người."
     },
     "modal": {
-      "label_cycle": "Chu kỳ nhãn",
+      "label_cycle": "Gắn nhãn chu kỳ",
       "create_profile": "Tạo hồ sơ",
       "new_phase": "Giai đoạn mới",
       "edit_phase": "Chỉnh sửa giai đoạn",
-      "process_recording": "Ghi lại quá trình",
-      "correct_feedback": "Phản hồi đúng",
+      "process_recording": "Xử lý bản ghi",
+      "correct_feedback": "Sửa phản hồi",
       "import_config": "Nhập cấu hình",
-      "auto_label": "Chu kỳ dán nhãn tự động",
+      "auto_label": "Dán nhãn chu kỳ tự động",
       "cycle": "Chu kỳ"
     },
     "tag": {
@@ -1085,7 +1091,7 @@
         "intro": "Định cấu hình thời điểm và cách thức bạn được thông báo về các sự kiện chu kỳ."
       },
       "ml_training": {
-        "label": "Đào tạo ML",
+        "label": "Huấn luyện ML",
         "intro": "Chọn tham gia các mô hình thông minh giúp cá nhân hóa khả năng phát hiện và định thời gian cho thiết bị này."
       }
     },
@@ -1127,7 +1133,7 @@
         "label": "Thời lượng chu kỳ tối thiểu"
       },
       "running_dead_zone": {
-        "label": "Chạy vùng chết"
+        "label": "Vùng chết hoạt động"
       },
       "end_energy_threshold": {
         "label": "Năng lượng cuối"
@@ -1139,7 +1145,7 @@
         "label": "Khoảng thời gian lấy mẫu"
       },
       "smoothing_window": {
-        "label": "Làm mịn cửa sổ"
+        "label": "Cửa sổ làm mịn"
       },
       "abrupt_drop_watts": {
         "label": "Thả đột ngột"
@@ -1154,7 +1160,7 @@
         "label": "Ngưỡng không khớp"
       },
       "profile_match_interval": {
-        "label": "Khoảng thời gian trận đấu"
+        "label": "Khoảng thời gian so khớp"
       },
       "profile_match_min_duration_ratio": {
         "label": "Tỷ lệ thời lượng tối thiểu"
@@ -1172,7 +1178,7 @@
         "label": "Độ tin cậy của nhãn tự động"
       },
       "learning_confidence": {
-        "label": "Học tập sự tự tin"
+        "label": "Độ tin cậy học tập"
       },
       "suppress_feedback_notifications": {
         "label": "Ngăn chặn thông báo phản hồi"
@@ -1235,7 +1241,7 @@
         "label": "Chuyển đổi thực thể"
       },
       "notify_unload_delay_minutes": {
-        "label": "Dỡ bỏ độ trễ Nag"
+        "label": "Thời gian trễ nhắc nhở dỡ đồ"
       },
       "pump_stuck_duration": {
         "label": "Thời gian bơm bị kẹt"
@@ -1256,7 +1262,7 @@
         "label": "Chỉ thông báo khi về nhà"
       },
       "notify_fire_events": {
-        "label": "Sự kiện Fire HA để thông báo"
+        "label": "Kích hoạt sự kiện HA cho thông báo"
       },
       "notify_before_end_minutes": {
         "label": "Cảnh báo trước khi kết thúc"
@@ -1265,7 +1271,7 @@
         "label": "Khoảng thời gian cập nhật trực tiếp"
       },
       "notify_live_overrun_percent": {
-        "label": "% tràn ngập trực tiếp trước khi cảnh báo"
+        "label": "% vượt quá trực tiếp trước cảnh báo"
       },
       "notify_live_chronometer": {
         "label": "Sử dụng Đồng hồ bấm giờ trực tiếp"
@@ -1316,7 +1322,7 @@
         "label": "Chu kỳ cần thiết đầu tiên"
       },
       "ml_training_interval_days": {
-        "label": "Kiểm tra nhiều nhất mọi"
+        "label": "Kiểm tra tối đa mỗi"
       }
     }
   }
