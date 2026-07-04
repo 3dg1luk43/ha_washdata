@@ -24,778 +24,49 @@
           "profile_name": "Profiili nimi (valikuline)",
           "manual_duration": "Hinnanguline kestus (minutites)"
         }
+      },
+      "reconfigure": {
+        "title": "WashData uuesti seadistamine",
+        "description": "Uuendage seadme nime, seadmetüüpi või võimsusandurit.",
+        "data": {
+          "name": "Seadme nimi",
+          "device_type": "Seadme tüüp",
+          "power_sensor": "Võimsusandur",
+          "min_power": "Minimaalne võimsuslävi (W)"
+        }
       }
     },
     "error": {
       "cannot_connect": "Ühenduse loomine ebaõnnestus",
       "invalid_auth": "Kehtetu autentimine",
-      "unknown": "Ootamatu viga"
+      "unknown": "Ootamatu viga",
+      "invalid_power": "Võimsuslävi peab olema suurem kui 0"
     },
     "abort": {
-      "already_configured": "Seade on juba konfigureeritud"
+      "already_configured": "Seade on juba konfigureeritud",
+      "reconfigure_successful": "Uuesti seadistamine õnnestus"
     }
   },
   "options": {
     "step": {
       "init": {
-        "menu_options": {
-          "learning_feedbacks": "Vaadake läbi õppe tagasiside",
-          "settings": "Seaded",
-          "notifications": "Märguanded",
-          "manage_cycles": "Tsükleid hallata",
-          "manage_profiles": "Profiilide haldamine",
-          "manage_phase_catalog": "Halda faasikataloogi",
-          "record_cycle": "Tsükli salvestamine (käsitsi)",
-          "diagnostics": "Diagnostika ja hooldus"
-        }
-      },
-      "apply_suggestions": {
-        "title": "Kopeerige soovitatud väärtused",
-        "description": "See kopeerib praegused soovitatud väärtused teie salvestatud sätetesse. See on ühekordne toiming ega võimalda automaatset ülekirjutamist.\n\nSoovitatud väärtused kopeerimiseks:\n{suggested}",
+        "title": "WashData seadistused",
+        "description": "Kõik seadistused — tuvastamine, sobitamine, ajastamine, teated, profiilid ja tsüklid — on saadaval WashData paneelil. Kasutage seda vormi ainult võimsusanduri, seadmetüübi või ooterežiimi läve muutmiseks.",
         "data": {
-          "confirm": "Kopeerimistoimingu kinnitamine"
-        }
-      },
-      "apply_suggestions_confirm": {
-        "title": "Vaadake üle soovitatud muudatused",
-        "description": "WashData leitud **{pending_count}** soovitatud väärtus(t) rakendada.\n\nMuudatused:\n{changes}\n\n✅ Muudatuste koheseks rakendamiseks ja salvestamiseks märkige allolev ruut ja klõpsake nuppu **Esita**.\n❌ Jätke see märkimata ja klõpsake tühistamiseks ja tagasi minemiseks nuppu **Esita**.",
-        "data": {
-          "confirm_apply_suggestions": "Rakendage ja salvestage need muudatused"
-        }
-      },
-      "settings": {
-        "title": "Seaded",
-        "description": "{deprecation_warning}Tuvastamise lävede, õppimise ja täiustatud käitumise häälestamine. Vaikimisi töötavad enamiku seadistuste puhul hästi.\n\nPraegu saadaolevate soovituslike seadete arv: {suggestions_count}.\nKui see on suurem kui 0, ava Täpsemad seaded ja kasuta Rakenda soovituslikud väärtused soovituste ülevaatamiseks.",
-        "data": {
-          "apply_suggestions": "Rakendage soovitatud väärtused",
           "device_type": "Seadme tüüp",
-          "power_sensor": "Toiteanduri üksus",
-          "min_power": "Minimaalne võimsus (W)",
-          "off_delay": "Tsükli lõpu viivitus (id)",
-          "notify_actions": "Teavitustoimingud",
-          "notify_people": "Viivitada kohaletoimetamisega, kuni need inimesed koju jõuavad",
-          "notify_only_when_home": "Viivitage teatised, kuni valitud inimene on kodus",
-          "notify_fire_events": "Automaatikaürituste käivitamine",
-          "notify_start_services": "Tsükli algus – teavituse sihtmärgid",
-          "notify_finish_services": "Tsükli lõpetamine – teavituse sihtmärgid",
-          "notify_live_services": "Reaalajas edenemine – teavituste sihtmärgid",
-          "notify_before_end_minutes": "Lõpetamiseelne teatis (minutid enne lõppu)",
-          "notify_title": "Teatise pealkiri",
-          "notify_icon": "Teavituse ikoon",
-          "notify_start_message": "Käivitussõnumi vorming",
-          "notify_finish_message": "Lõpusõnumi vorming",
-          "notify_pre_complete_message": "Lõpetamiseelne sõnumivorming",
-          "show_advanced": "Muuda täpsemaid seadeid (järgmine samm)"
-        },
-        "data_description": {
-          "apply_suggestions": "Märkige see ruut, et kopeerida vormile õppealgoritmi soovitatud väärtused. Enne salvestamist vaadake üle.\n\nSoovitatav (õppimisest):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "device_type": "Vali seadme tüüp (pesumasin, kuivati, nõudepesumasin, kohvimasin, EV). See silt salvestatakse paremaks korraldamiseks iga tsükliga.",
-          "power_sensor": "Anduri olem, mis annab aru reaalajas võimsusest (vattides). Saate seda igal ajal muuta ilma ajaloolisi andmeid kaotamata – see on kasulik, kui vahetate nutika pistiku.",
-          "min_power": "Sellest läviväärtusest kõrgemad võimsusnäidud (vattides) näitavad, et seade töötab. Enamiku seadmete puhul alustage 2W-st.",
-          "off_delay": "Sekundite jooksul peab tasandatud võimsus jääma allapoole peatumisläve, et tähistada lõpetamist. Vaikimisi: 120 s.",
-          "notify_actions": "Valikuline koduabilise toimingujada märguannete jaoks (skriptid, teavitus, TTS jne). Kui see on määratud, käitatakse toimingud enne varuteatiste teenust.",
-          "notify_people": "Kohaloleku väravaks kasutatavad isikud. Kui see on lubatud, lükatakse teavituste edastamine edasi, kuni vähemalt üks valitud inimene on kodus.",
-          "notify_only_when_home": "Kui see on lubatud, viivitage märguanded, kuni vähemalt üks valitud inimene on kodus.",
-          "notify_fire_events": "Kui see on lubatud, käivitage koduabilise tsükli alguse ja lõpu sündmused (ha_washdata_cycle_started ja ha_washdata_cycle_ended), et juhtida automatiseerimist.",
-          "notify_start_services": "Üks või mitu teenust teavitavad tsükli algusest. Alustamise märguannete vahelejätmiseks jätke tühjaks.",
-          "notify_finish_services": "Üks või mitu teenust teavitavad, kui tsükkel lõppeb või läheneb lõpule. Lõpetamismärguannete vahelejätmiseks jätke tühjaks.",
-          "notify_live_services": "Üks või mitu teavitavat teenust, et saada tsükli ajal reaalajas edenemise värskendusi (ainult mobiilirakendus). Reaalajas värskenduste vahelejätmiseks jätke tühjaks.",
-          "notify_before_end_minutes": "Minutid enne tsükli hinnangulist lõppu, et käivitada teatis. Keelamiseks määrake 0. Vaikimisi: 0.",
-          "notify_title": "Kohandatud pealkiri teatiste jaoks. Toetab kohatäidet {device}.",
-          "notify_icon": "Märguannete jaoks kasutatav ikoon (nt mdi:pesumasin). Ikooni saatmata jätmiseks jätke tühjaks.",
-          "notify_start_message": "Sõnum saadetakse, kui tsükkel algab. Toetab kohatäidet {device}.",
-          "notify_finish_message": "Sõnum saadetakse pärast tsükli lõppemist. Toetab kohahoidjaid {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Korduva reaalajas edenemise tekst värskendatakse tsükli jooksul. Toetab kohahoidjaid {device}, {minutes}, {program}."
-        }
-      },
-      "notifications": {
-        "title": "Märguanded",
-        "description": "Seadistage teavituskanalid, mallid ja valikulised reaalajas mobiili edenemise värskendused.",
-        "data": {
-          "notify_actions": "Teavitustoimingud",
-          "notify_people": "Viivitada kohaletoimetamisega, kuni need inimesed koju jõuavad",
-          "notify_only_when_home": "Viivitage teatised, kuni valitud inimene on kodus",
-          "notify_fire_events": "Automaatikaürituste käivitamine",
-          "notify_start_services": "Tsükli algus – teavituse sihtmärgid",
-          "notify_finish_services": "Tsükli lõpetamine – teavituse sihtmärgid",
-          "notify_live_services": "Reaalajas edenemine – teavituste sihtmärgid",
-          "notify_before_end_minutes": "Lõpetamiseelne teatis (minutid enne lõppu)",
-          "notify_live_interval_seconds": "Reaalajas värskendamise intervall (sekundites)",
-          "notify_live_overrun_percent": "Reaalajas värskenduse ületamise luba (%)",
-          "notify_live_chronometer": "Kronomeetri Taimer",
-          "notify_title": "Teatise pealkiri",
-          "notify_icon": "Teavituse ikoon",
-          "notify_start_message": "Käivitussõnumi vorming",
-          "notify_finish_message": "Lõpusõnumi vorming",
-          "notify_pre_complete_message": "Lõpetamiseelne sõnumivorming",
-          "energy_price_entity": "Energiahind – üksus (valikuline)",
-          "energy_price_static": "Energia hind – staatiline väärtus (valikuline)",
-          "go_back": "Mine tagasi salvestamata",
-          "notify_reminder_message": "Meeldetuletuse kirja vorming",
-          "notify_timeout_seconds": "Automaatne loobumine pärast (sekundeid)",
-          "notify_channel": "Teavitamiskanal (staatus/otseülekanne/meeldetuletus)",
-          "notify_finish_channel": "Lõpetatud teavituskanal"
-        },
-        "data_description": {
-          "go_back": "Märkige see ja klõpsake Esita, et ülaltoodud muudatused ära visata ja põhimenüüsse naasta.",
-          "notify_actions": "Valikuline koduabilise toimingujada märguannete jaoks (skriptid, teavitus, TTS jne). Kui see on määratud, käitatakse toimingud enne varuteatiste teenust.",
-          "notify_people": "Kohaloleku väravaks kasutatavad isikud. Kui see on lubatud, lükatakse teavituste edastamine edasi, kuni vähemalt üks valitud inimene on kodus.",
-          "notify_only_when_home": "Kui see on lubatud, viivitage märguanded, kuni vähemalt üks valitud inimene on kodus.",
-          "notify_fire_events": "Kui see on lubatud, käivitage koduabilise tsükli alguse ja lõpu sündmused (ha_washdata_cycle_started ja ha_washdata_cycle_ended), et juhtida automatiseerimist.",
-          "notify_start_services": "Üks või mitu teavitusteenust, mis hoiatavad tsükli alguses (nt notify.mobile_app_my_phone). Alustamise märguannete vahelejätmiseks jätke tühjaks.",
-          "notify_finish_services": "Üks või mitu teenust teavitavad, kui tsükkel lõppeb või läheneb lõpule. Lõpetamismärguannete vahelejätmiseks jätke tühjaks.",
-          "notify_live_services": "Üks või mitu teavitavat teenust, et saada tsükli ajal reaalajas edenemise värskendusi (ainult mobiilirakendus). Reaalajas värskenduste vahelejätmiseks jätke tühjaks.",
-          "notify_before_end_minutes": "Minutid enne tsükli hinnangulist lõppu, et käivitada teatis. Keelamiseks määrake 0. Vaikimisi: 0.",
-          "notify_live_interval_seconds": "Kui sageli edenemise värskendusi töötamise ajal saadetakse. Madalamad väärtused reageerivad paremini, kuid tarbivad rohkem märguandeid. Jõustatakse vähemalt 30 sekundit – alla 30 s väärtused ümardatakse automaatselt 30 sekundini.",
-          "notify_live_overrun_percent": "Ohutusvaru, mis ületab hinnangulist värskenduste arvu pikkade/ülejooksvate tsüklite korral (näiteks 20% võimaldab 1,2-kordset hinnangulist värskendust).",
-          "notify_live_chronometer": "Kui see on lubatud, sisaldab iga reaalajas värskendus kronomeetri pöördloendust hinnangulise lõpuajani. Teavituste taimer tiksub seadmes automaatselt värskenduste vahel (ainult Androidi kaasrakendus).",
-          "notify_title": "Kohandatud pealkiri teatiste jaoks. Toetab kohatäidet {device}.",
-          "notify_icon": "Märguannete jaoks kasutatav ikoon (nt mdi:pesumasin). Ikooni saatmata jätmiseks jätke tühjaks.",
-          "notify_start_message": "Sõnum saadetakse, kui tsükkel algab. Toetab kohatäidet {device}.",
-          "notify_finish_message": "Sõnum saadetakse pärast tsükli lõppemist. Toetab kohahoidjaid {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "energy_price_entity": "Valige numbriline olem, millel on praegune elektrihind (nt sensor.electricity_price, input_number.energy_rate). Kui see on määratud, lubab kohahoidja {cost}. Kui mõlemad on konfigureeritud, on see ülimuslik staatilise väärtuse suhtes.",
-          "energy_price_static": "Fikseeritud elektrihind kWh kohta. Kui see on määratud, lubab kohahoidja {cost}. Ignoreeritakse, kui olem on ülal konfigureeritud. Lisa oma valuuta sümbol sõnumimalli, nt. {cost} €.",
-          "notify_reminder_message": "Ühekordse meeldetuletuse tekst saatis seadistatud minutite arvu enne eeldatavat lõppu. Erinevus korduvatest live-uuendustest ülalpool. Toetab {device}, {minutes}, {program} kohahoidjaid.",
-          "notify_timeout_seconds": "Pärast seda mitu sekundit automaatselt teated välja jätta (edasi saadetud kui kaasrakenduse aegumine). Seadke 0, et hoida neid kuni vallandamiseni. Vaikimisi: 0.",
-          "notify_channel": "Android kaaslase rakenduse teavituskanal oleku, live progressi ja meeldetuletuste jaoks. Kanali heli ja tähtsus on konfigureeritud kaaslase rakenduses kanali nime esmakordsel kasutamisel - WashData määrab ainult kanali nime. Jäta rakenduse vaikeväärtus tühjaks.",
-          "notify_finish_channel": "Eraldi Android kanal lõpetatud hoiatuse jaoks (kasutab ka meeldetuletus ja pesu ootamise korduv meeldetuletus), et sellel oleks oma heli. Jäta tühjaks, et kanalit uuesti kasutada.",
-          "notify_pre_complete_message": "Korduva reaalajas edenemise tekst värskendatakse tsükli jooksul. Toetab kohahoidjaid {device}, {minutes}, {program}."
-        }
-      },
-      "advanced_settings": {
-        "title": "Täpsemad seaded",
-        "description": "Tuvastamise lävede, õppimise ja täiustatud käitumise häälestamine. Vaikimisi seaded töötavad enamiku seadistuste puhul hästi.",
-        "sections": {
-          "suggestions_section": {
-            "name": "Soovituslikud seaded",
-            "description": "{suggestions_count} õpitud soovitust saadaval. Märkige Rakenda soovituslikud väärtused, et kavandatud muudatused enne salvestamist üle vaadata.",
-            "data": {
-              "apply_suggestions": "Rakendage soovitatud väärtused"
-            },
-            "data_description": {
-              "apply_suggestions": "Märkige see ruut, et avada õppealgoritmi soovitatud väärtuste ülevaatamise etapp. Midagi ei salvestata automaatselt.\n\nSoovitatav (õppimisest):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}"
-            }
-          },
-          "detection_section": {
-            "name": "Tuvastus ja võimsusläved",
-            "description": "Millal seadet loetakse SISSE või VÄLJA lülitatuks, energiapiirid ja olekuüleminekute ajastus.",
-            "data": {
-              "start_duration_threshold": "Tagasilükkamise alustamise kestus (id)",
-              "start_energy_threshold": "Start Energy Gate (Wh)",
-              "completion_min_seconds": "Minimaalne valmimisaeg (sekundites)",
-              "start_threshold_w": "Alguslävi (W)",
-              "stop_threshold_w": "Peatuslävi (W)",
-              "end_energy_threshold": "End Energy Gate (Wh)",
-              "running_dead_zone": "Jooksu surnud tsoon (sekundites)",
-              "end_repeat_count": "Lõpeta korduste loendus",
-              "min_off_gap": "Minimaalne vahe tsüklite vahel (s)",
-              "sampling_interval": "Proovivõtu intervall (id)"
-            },
-            "data_description": {
-              "start_duration_threshold": "Ignoreerige sellest kestusest (sekundites) lühemaid lühiajalisi võimsuse hüppeid. Filtreerib algkäivitusnaelu (nt 60 W 2 sekundi jooksul) enne tegeliku tsükli algust. Vaikimisi: 5s.",
-              "start_energy_threshold": "Kinnitamiseks peab tsükkel START-faasi ajal koguma vähemalt nii palju energiat (Wh). Vaikimisi: 0,005 Wh.",
-              "completion_min_seconds": "Sellest lühemad tsüklid märgitakse katkestatuks, isegi kui need lõppevad loomulikult. Vaikimisi: 600 s.",
-              "start_threshold_w": "Tsükli alustamiseks peab võimsus tõusma ÜLE selle läve. Seadistage ooterežiimi võimsusest kõrgemaks. Vaikimisi: min_võimsus + 1 W.",
-              "stop_threshold_w": "Tsükli LÕPPEKS peab võimsus langema ALLALLA seda läve. Seadke nullist veidi kõrgemale, et vältida müra, mis käivitaks valeotste. Vaikimisi: 0,6 * min_võimsus.",
-              "end_energy_threshold": "Tsükkel lõpeb ainult siis, kui energia viimases Off-Delay aknas on sellest väärtusest (Wh) väiksem. Hoiab ära valeotsad, kui võimsus kõigub nulli lähedal. Vaikimisi: 0,05 Wh.",
-              "running_dead_zone": "Pärast tsükli algust ignoreerige võimsuse langusi nii paljude sekundite jooksul, et vältida vale lõpu tuvastamist esialgses pöörlemisfaasis. Keelamiseks määrake 0. Vaikimisi: 0s.",
-              "end_repeat_count": "Enne tsükli lõpetamist tuleb lõputingimuse (võimsus alla väljalülitusviivituse läve) järjestikuste täitmiste arv. Kõrgemad väärtused hoiavad ära valelõpud pauside ajal. Vaikimisi: 1.",
-              "min_off_gap": "Kui tsükkel algab selle mitme sekundi jooksul pärast eelmise lõppemist, LIIDEtakse need üheks tsükliks.",
-              "sampling_interval": "Minimaalne proovivõtu intervall sekundites. Sellest kiirusest kiiremaid värskendusi eiratakse. Vaikimisi: 30 s (2 s pesumasinate, pesumasin-kuivatite ja nõudepesumasinate jaoks)."
-            }
-          },
-          "matching_section": {
-            "name": "Profiilide sobitamine ja õppimine",
-            "description": "Kui agressiivselt WashData sobitab käimasolevaid tsükleid õpitud profiilidega ja millal tagasisidet küsida.",
-            "data": {
-              "profile_match_min_duration_ratio": "Profiilivaste minimaalse kestuse suhe (0,1–1,0)",
-              "profile_match_interval": "Profiili vaste intervall (sekundites)",
-              "profile_match_threshold": "Profiili vaste lävi",
-              "profile_unmatch_threshold": "Profiili mittevastavuse lävi",
-              "auto_label_confidence": "Automaatsiltide usaldusväärsus (0-1)",
-              "learning_confidence": "Tagasisidetaotluse usaldus (0-1)",
-              "suppress_feedback_notifications": "Tagasiside märguannete väljalülitamine",
-              "duration_tolerance": "Kestuse tolerants (0–0,5)",
-              "smoothing_window": "Silumisaken (näidised)",
-              "profile_duration_tolerance": "Profiilivaste kestuse tolerants (0–0,5)"
-            },
-            "data_description": {
-              "profile_match_min_duration_ratio": "Profiili sobitamise minimaalne kestuse suhe. Töötsükkel peab vastamiseks olema vähemalt selle murdosa profiili kestusest. Madalam = varasem sobivus. Vaikimisi: 0,50 (50%).",
-              "profile_match_interval": "Kui sageli (sekundites) tsükli jooksul profiili sobitamist proovida. Madalamad väärtused tagavad kiirema tuvastamise, kuid kasutavad rohkem protsessorit. Vaikimisi: 300 s (5 minutit).",
-              "profile_match_threshold": "Minimaalne DTW sarnasusskoor (0,0–1,0), mis on vajalik profiili vastena käsitlemiseks. Kõrgem = rangem sobitamine, vähem valepositiivseid tulemusi. Vaikimisi: 0,4.",
-              "profile_unmatch_threshold": "DTW sarnasusskoor (0,0–1,0), millest madalamal varem sobitatud profiil tagasi lükatakse. Virvenduse vältimiseks peaks olema vaste läviväärtusest madalam. Vaikimisi: 0,35.",
-              "auto_label_confidence": "Märgista tsüklid automaatselt selle usaldusväärsusega või sellest kõrgemal pärast lõpetamist (0,0–1,0).",
-              "learning_confidence": "Minimaalne usaldus, et taotleda kasutaja kinnitust sündmuse kaudu (0,0–1,0).",
-              "suppress_feedback_notifications": "Kui see on lubatud, jälgib WashData endiselt sisemist tagasisidet ja küsib seda, kuid ei näita püsivaid teatisi, mis paluvad teil tsükleid kinnitada. Kasulik, kui tsüklid tuvastatakse alati õigesti ja juhised häirivad teie tähelepanu.",
-              "duration_tolerance": "Järelejäänud aja hinnangute tolerants jooksu ajal (0,0–0,5 vastab 0–50%).",
-              "smoothing_window": "Liikuva keskmise silumiseks kasutatud hiljutiste võimsusnäitude arv.",
-              "profile_duration_tolerance": "Tolerants, mida kasutatakse profiilide sobitamisel kogukestuse dispersiooni jaoks (0,0–0,5). Vaikimisi käitumine: ±25%."
-            }
-          },
-          "timing_section": {
-            "name": "Ajastus, hooldus ja silumine",
-            "description": "Valveprotsess, edenemise lähtestamine, automaathooldus ja silumisolemite nähtavaks tegemine.",
-            "data": {
-              "watchdog_interval": "Valvekoera intervall (sekundites)",
-              "no_update_active_timeout": "Värskendusteta aeg (id)",
-              "progress_reset_delay": "Lähtestamise edenemise viivitus (sekundites)",
-              "auto_maintenance": "Luba automaatne hooldus",
-              "expose_debug_entities": "Avage silumisüksused",
-              "save_debug_traces": "Salvestage silumisjäljed"
-            },
-            "data_description": {
-              "watchdog_interval": "Sekundid jooksmise ajal valvekoera kontrollide vahel. Vaikimisi: 5s. HOIATUS: veenduge, et see oleks KÕRGEM kui teie anduri värskendusintervall, et vältida valepeatusi (nt kui andurit värskendatakse iga 60 sekundi järel, kasutage 65+).",
-              "no_update_active_timeout": "Muutmisel avaldatavate andurite puhul: AKTIIVNE tsükkel sunnitud lõpetada ainult siis, kui selle sekundi jooksul värskendusi ei saabu. Madala võimsusega lõpetamine kasutab endiselt väljalülitusviivitust.",
-              "progress_reset_delay": "Pärast tsükli lõppemist (100%) oodake nii palju sekundeid jõudeolekut, enne kui lähtestate edenemise 0%-le. Vaikimisi: 300 s.",
-              "auto_maintenance": "Automaathoolduse lubamine (proovide parandamine, fragmentide liitmine).",
-              "expose_debug_entities": "Kuva silumiseks täiustatud andurid (usaldus, faas, mitmetähenduslikkus).",
-              "save_debug_traces": "Salvestage ajaloos üksikasjalikud järjestuse ja võimsuse jälgimise andmed (suurendab salvestusruumi kasutamist)."
-            }
-          },
-          "anti_wrinkle_section": {
-            "name": "Kortsumisvastane kaitse (Kuivatid)",
-            "description": "Eira tsüklijärgseid trumlipöördeid, et vältida kummitustsükleid. Ainult kuivati / pesu-kuivati.",
-            "data": {
-              "anti_wrinkle_enabled": "Kortsudevastane kaitse (ainult kuivati)",
-              "anti_wrinkle_max_power": "Kortsudevastane maksimaalne võimsus (W)",
-              "anti_wrinkle_max_duration": "Kortsudevastane maksimaalne kestus (s)",
-              "anti_wrinkle_exit_power": "Kortsudevastane väljumisvõimsus (W)"
-            },
-            "data_description": {
-              "anti_wrinkle_enabled": "Ignoreerige lühikesi väikese võimsusega trumli pöörlemisi pärast tsükli lõppu, et vältida kummitustsükliid (ainult kuivati/pesumasin-kuivati).",
-              "anti_wrinkle_max_power": "Selle võimsusega või sellest madalamal olevaid purskeid käsitletakse uute tsüklite asemel kortsudevastaste pöördetena. Kehtib ainult siis, kui kortsudevastane kaitse on sisse lülitatud.",
-              "anti_wrinkle_max_duration": "Maksimaalne katkestuspikkus, mida käsitleda kortsudevastase pöörlemisena. Kehtib ainult siis, kui kortsudevastane kaitse on sisse lülitatud.",
-              "anti_wrinkle_exit_power": "Kui võimsus langeb alla selle taseme, väljuge kohe kortsudevastasest funktsioonist (true off). Kehtib ainult siis, kui kortsudevastane kaitse on sisse lülitatud."
-            }
-          },
-          "delay_start_section": {
-            "name": "Viitkäivituse tuvastus",
-            "description": "Käsitle püsivat madala võimsusega ooterežiimi kui 'Ootab käivitumist', kuni tsükkel tegelikult algab.",
-            "data": {
-              "delay_start_detect_enabled": "Luba viivitusega käivitamise tuvastamine",
-              "delay_confirm_seconds": "Viitkäivitus: ooterežiimi kinnitusaeg (s)",
-              "delay_timeout_hours": "Viitstart: maksimaalne ooteaeg (h)"
-            },
-            "data_description": {
-              "delay_start_detect_enabled": "Kui see on lubatud, tuvastatakse viitkäivitusena lühike väikese võimsusega äravoolupiik, millele järgneb pidev ooterežiimi toide. Olekuandur näitab viivituse ajal teadet \"Ootab käivitumist\". Programmi aega ega edenemist ei jälgita enne, kui tsükkel tegelikult algab. Nõuab start_threshold_w seadistamist äravoolu võimsusest kõrgemale.",
-              "delay_confirm_seconds": "Võimsus peab püsima Stoppläve (W) ja Käivitusläve (W) vahel nii mitu sekundit, enne kui WashData läheb olekusse 'Ootab käivitumist'. Filtreerib välja lühikesed menüüliikumise tipud. Vaikimisi: 60 s.",
-              "delay_timeout_hours": "Ohutuse ajalõpp: kui masin on pärast seda mitu tundi endiselt režiimis „Ootab käivitumist”, lähtestatakse WashData olekusse Väljas. Vaikimisi: 8 h."
-            }
-          },
-          "external_triggers_section": {
-            "name": "Välised päästikud, uks ja paus",
-            "description": "Valikuline väline lõputriggeri andur, ukseandur pausi/puhta oleku tuvastuseks ja pausi ajal voolu katkestav lüliti.",
-            "data": {
-              "external_end_trigger_enabled": "Luba väline tsükli lõpu päästik",
-              "external_end_trigger": "Väline tsükli lõpu andur",
-              "external_end_trigger_inverted": "Pöörake päästiku loogika ümber (päästik VÄLJAS-sündmusel)",
-              "door_sensor_entity": "Ukse andur",
-              "pause_cuts_power": "Katkesta voolu peatamise ajal",
-              "switch_entity": "Lüliti olem (toitekatkestuse peatamiseks)",
-              "notify_unload_delay_minutes": "Pesu ootamise teatise viivitus (min)"
-            },
-            "data_description": {
-              "external_end_trigger_enabled": "Lubage välise binaaranduri jälgimine, et käivitada tsükli lõpetamine.",
-              "external_end_trigger": "Valige binaarne anduri olem. Kui see andur käivitub, lõpeb praegune tsükkel olekuga \"lõpetatud\".",
-              "external_end_trigger_inverted": "Vaikimisi käivitub päästik, kui andur lülitub SISSE. Märkige see ruut, kui soovite selle asemel käivituda, kui andur lülitub VÄLJA.",
-              "door_sensor_entity": "Valikuline binaarandur masina ukse jaoks (sees = avatud, väljas = suletud). Kui uks aktiivse tsükli ajal avaneb, kinnitab WashData, et tsükkel on tahtlikult peatatud. Kui uks on endiselt suletud, muutub pärast tsükli lõppu olek \"Puhasta\", kuni uks avatakse. Märkus: ukse sulgemine EI jätka automaatselt peatatud tsüklit – jätkamine tuleb käivitada käsitsi nupu Resume Cycle või teenuse kaudu.",
-              "pause_cuts_power": "Kui peatate nupu Pause Cycle või teenuse kaudu, lülitage välja ka konfigureeritud lüliti olem. Jõuab ainult siis, kui selle seadme jaoks on konfigureeritud lüliti olem.",
-              "switch_entity": "Peatamisel või jätkamisel lülituv olem. Nõutav, kui 'Katkesta voolu peatamisel' on lubatud.",
-              "notify_unload_delay_minutes": "Kui tsükkel on lõppenud ja ust pole nii mitu minutit avatud, saatke teavitus finišiteatekanali kaudu (vajalik on ukseandur). Keelamiseks määrake 0. Vaikimisi: 60 min."
-            }
-          },
-          "pump_section": {
-            "name": "Pumba jälgimine",
-            "description": "Ainult pumba seadmetüübile. Käivitab sündmuse, kui pumbatsükkel kestab sellest kauem.",
-            "data": {
-              "pump_stuck_duration": "Pumba kinnijäämise hoiatuslävi (ainult pumbad)"
-            },
-            "data_description": {
-              "pump_stuck_duration": "Kui pumbatsükkel töötab ka pärast seda mitu sekundit, käivitatakse üks kord sündmus ha_washdata_pump_stuck. Kasutage seda kinnikiilunud mootori tuvastamiseks (tavaline karteripumba tööaeg on alla 60 s). Vaikimisi: 1800 s (30 min). Ainult pumba seadme tüüp."
-            }
-          },
-          "device_link_section": {
-            "name": "Seadme link",
-            "description": "Lisavõimalusena ühendage see WashData seade olemasoleva Home Assistant seadmega (näiteks nutipistik või seade ise). Seejärel kuvatakse WashData seade selle seadme kaudu \"ühendatud\". Jäta tühjaks, et WashData jääks eraldiseisvaks seadmeks.",
-            "data": {
-              "linked_device": "Ühendatud seade"
-            },
-            "data_description": {
-              "linked_device": "Valige seade WashData ühendamiseks. See lisab seadmeregistrisse viite 'ühendatud läbi'; WashData säilitab oma seadmekaardi ja olemid. Puhasta valik lingi eemaldamiseks."
-            }
-          }
-        }
-      },
-      "diagnostics": {
-        "title": "Diagnostika ja hooldus",
-        "description": "Käivitage hooldustoiminguid, nagu killustatud tsüklite liitmine või salvestatud andmete migreerimine.\n\n**Salvestusruumi kasutamine**\n\n- Faili suurus: {file_size_kb} KB\n- Tsüklid: {cycle_count}\n- Profiilid: {profile_count}\n- Silumisjäljed: {debug_count}",
-        "menu_options": {
-          "reprocess_history": "Hooldus: andmete ümbertöötlemine ja optimeerimine",
-          "clear_debug_data": "Silumisandmete kustutamine (ruumi vabastamine)",
-          "wipe_history": "Tühjendage selle seadme KÕIK andmed (pöördumatu)",
-          "export_import": "JSON-i eksportimine/importimine seadetega (kopeeri/kleebi)",
-          "menu_back": "← Tagasi"
-        }
-      },
-      "clear_debug_data": {
-        "title": "Silumisandmete kustutamine",
-        "description": "Kas olete kindel, et soovite kustutada kõik salvestatud silumisjäljed? See vabastab ruumi, kuid eemaldab eelmistest tsüklitest üksikasjaliku järjestusteabe."
-      },
-      "manage_cycles": {
-        "title": "Tsükleid hallata",
-        "description": "Viimased tsüklid:\n{recent_cycles}",
-        "menu_options": {
-          "auto_label_cycles": "Vanade tsüklite automaatne sildistamine",
-          "select_cycle_to_label": "Sildi konkreetne tsükkel",
-          "select_cycle_to_delete": "Kustuta tsükkel",
-          "interactive_editor": "Interaktiivne redaktori ühendamine/tükeldamine",
-          "trim_cycle_select": "Kärpimistsükli andmed",
-          "menu_back": "← Tagasi"
-        }
-      },
-      "manage_cycles_empty": {
-        "title": "Tsükleid hallata",
-        "description": "Tsükleid pole veel salvestatud.",
-        "menu_options": {
-          "auto_label_cycles": "Vanade tsüklite automaatne sildistamine",
-          "menu_back": "← Tagasi"
-        }
-      },
-      "manage_profiles": {
-        "title": "Profiilide haldamine",
-        "description": "Profiili kokkuvõte:\n{profile_summary}",
-        "menu_options": {
-          "create_profile": "Loo uus profiil",
-          "edit_profile": "Redigeeri/nimeta ümber profiili",
-          "delete_profile_select": "Kustuta profiil",
-          "profile_stats": "Profiili statistika",
-          "cleanup_profile": "Ajaloo puhastamine – graafik ja kustutamine",
-          "assign_profile_phases_select": "Määrake faasivahemikud",
-          "menu_back": "← Tagasi"
-        }
-      },
-      "manage_profiles_empty": {
-        "title": "Profiilide haldamine",
-        "description": "Ühtegi profiili pole veel loodud.",
-        "menu_options": {
-          "create_profile": "Loo uus profiil",
-          "menu_back": "← Tagasi"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "Halda faasikataloogi",
-        "description": "Faaside kataloog (selle seadme vaikeseaded + kohandatud faasid):\n{phase_summary}",
-        "menu_options": {
-          "phase_catalog_create": "Loo uus faas",
-          "phase_catalog_edit_select": "Redigeeri faasi",
-          "phase_catalog_delete": "Kustuta faas",
-          "menu_back": "← Tagasi"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "Loo kohandatud faas",
-        "description": "Looge kohandatud faasi nimi ja kirjeldus ning valige, millist seadmetüüpi see kehtib.",
-        "data": {
-          "target_device_type": "Sihtseadme tüüp",
-          "phase_name": "Faasi nimi",
-          "phase_description": "Faasi kirjeldus"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "Muuda kohandatud faasi",
-        "description": "Valige muutmiseks kohandatud faas.",
-        "data": {
-          "phase_name": "Kohandatud faas"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "Muuda kohandatud faasi",
-        "description": "Redigeerimisfaas: {phase_name}",
-        "data": {
-          "phase_name": "Faasi nimi",
-          "phase_description": "Faasi kirjeldus"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "Kustuta kohandatud faas",
-        "description": "Valige kustutamiseks kohandatud faas. Kõik seda faasi kasutavad määratud vahemikud eemaldatakse.",
-        "data": {
-          "phase_name": "Kohandatud faas"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "Määrake faasivahemikud",
-        "description": "Profiili faasi eelvaade: **{profile_name}**\n\n{timeline_svg}\n\n**Praegused vahemikud:**\n{current_ranges}\n\nKasutage allolevaid toiminguid vahemike lisamiseks, muutmiseks, kustutamiseks või salvestamiseks.",
-        "menu_options": {
-          "assign_profile_phases_add": "Lisa faasivahemik",
-          "assign_profile_phases_edit_select": "Redigeeri faasivahemikku",
-          "assign_profile_phases_delete": "Kustuta faasivahemik",
-          "phase_ranges_clear": "Kustuta kõik vahemikud",
-          "assign_profile_phases_auto_detect": "Faaside automaatne tuvastamine",
-          "phase_ranges_save": "Salvesta ja tagasta",
-          "menu_back": "← Tagasi"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "Lisa faasivahemik",
-        "description": "Lisage praegusele mustandile üks faasivahemik.",
-        "data": {
-          "phase_name": "Faas",
-          "start_min": "Alguse minut",
-          "end_min": "Lõpu minut"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "Redigeeri faasivahemikku",
-        "description": "Valige redigeeritav vahemik.",
-        "data": {
-          "range_index": "Faasi vahemik"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "Redigeeri faasivahemikku",
-        "description": "Värskendage valitud faasivahemikku.",
-        "data": {
-          "phase_name": "Faas",
-          "start_min": "Alguse minut",
-          "end_min": "Lõpu minut"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "Kustuta faasivahemik",
-        "description": "Valige mustandist eemaldatav vahemik.",
-        "data": {
-          "range_index": "Faasi vahemik"
-        }
-      },
-      "assign_profile_phases_auto_detect": {
-        "title": "Automaatselt tuvastatud faasid",
-        "description": "Profiil: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} faasi tuvastati automaatselt.** Valige allpool toiming.",
-        "data": {
-          "action": "Tegevus"
-        }
-      },
-      "assign_profile_phases_auto_detect_name": {
-        "title": "Nimetage tuvastatud faasid",
-        "description": "Profiil: **{profile_name}**\n\n**Tuvastati {detected_count} faasi(t):**\n{ranges_summary}\n\nMäärake igale faasile nimi."
-      },
-      "assign_profile_phases_select": {
-        "title": "Määrake faasivahemikud",
-        "description": "Valige faasivahemike konfigureerimiseks profiil.",
-        "data": {
-          "profile": "Profiil"
-        }
-      },
-      "profile_stats": {
-        "title": "Profiili statistika",
-        "description": "{stats_table}"
-      },
-      "create_profile": {
-        "title": "Loo uus profiil",
-        "description": "Looge uus profiil käsitsi või eelmisest tsüklist.\n\nProfiilinimede näited: „Delicates”, „Heavy Duty”, „Quick Wash”",
-        "data": {
-          "profile_name": "Profiili nimi",
-          "reference_cycle": "Võrdlustsükkel (valikuline)",
-          "manual_duration": "Käsitsi kestus (minutites)"
-        }
-      },
-      "edit_profile": {
-        "title": "Redigeeri profiili",
-        "description": "Valige ümbernimetamiseks profiil",
-        "data": {
-          "profile": "Profiil"
-        }
-      },
-      "rename_profile": {
-        "title": "Redigeeri profiili üksikasju",
-        "description": "Praegune profiil: {current_name}",
-        "data": {
-          "new_name": "Profiili nimi",
-          "manual_duration": "Käsitsi kestus (minutites)"
-        }
-      },
-      "delete_profile_select": {
-        "title": "Kustuta profiil",
-        "description": "Valige kustutamiseks profiil",
-        "data": {
-          "profile": "Profiil"
-        }
-      },
-      "delete_profile_confirm": {
-        "title": "Kinnitage profiili kustutamine",
-        "description": "⚠️ See kustutab jäädavalt profiili: {profile_name}",
-        "data": {
-          "unlabel_cycles": "Eemaldage silt seda profiili kasutades tsüklitelt"
-        }
-      },
-      "auto_label_cycles": {
-        "title": "Vanade tsüklite automaatne sildistamine",
-        "description": "Leiti kokku {total_count} tsüklit. Profiilid: {profiles}",
-        "data": {
-          "confidence_threshold": "Minimaalne usaldus (0,50–0,95)"
-        }
-      },
-      "select_cycle_to_label": {
-        "title": "Valige Tsükli märgistamiseks",
-        "description": "✓ = lõpetatud, ⚠ = jätkatud, ✗ = katkestatud",
-        "data": {
-          "cycle_id": "Tsükkel"
-        }
-      },
-      "select_cycle_to_delete": {
-        "title": "Kustuta tsükkel",
-        "description": "⚠️ See kustutab valitud tsükli jäädavalt",
-        "data": {
-          "cycle_id": "Tsükli kustutamiseks"
-        }
-      },
-      "label_cycle": {
-        "title": "Sildi tsükkel",
-        "description": "{cycle_info}",
-        "data": {
-          "profile_name": "Profiil",
-          "new_profile_name": "Uus profiilinimi (kui luuakse)"
-        }
-      },
-      "post_process": {
-        "title": "Protsessi ajalugu (ühenda/jaga)",
-        "description": "Puhastage tsüklite ajalugu, ühendades killustatud jooksud ja jagades valesti ühendatud tsüklid ajaaknas. Sisestage tagasivaatamiseks kuluvate tundide arv (kasutage kõigi jaoks 999999).",
-        "data": {
-          "time_range": "Tagasivaate aken (tundides)",
-          "gap_seconds": "Ühenda/jaga vahe (sekundites)"
-        },
-        "data_description": {
-          "time_range": "Tundide arv killustatud tsüklite ühendamiseks otsimiseks. Kasutage kõigi ajalooliste andmete töötlemiseks numbrit 999999.",
-          "gap_seconds": "Lõikamise ja ühendamise otsustamise künnis. Sellest LÜHEMEMAD lüngad liidetakse. Sellest PIKEMAD lüngad on jagatud. Valesti liidetud tsükli jagamise sundimiseks langetage seda."
-        }
-      },
-      "cleanup_profile": {
-        "title": "Ajaloo puhastamine – valige profiil",
-        "description": "Valige visualiseerimiseks profiil. See loob graafiku, mis näitab selle profiili kõiki möödunud tsükleid, et aidata tuvastada kõrvalekaldeid.",
-        "data": {
-          "profile": "Profiil"
-        }
-      },
-      "cleanup_select": {
-        "title": "Ajaloo puhastamine – graafik ja kustutamine",
-        "description": "![Graafik]({graph_url})\n\n**Visualiseerimine {profile_name}**\n\nGraafik näitab üksikuid tsükleid värviliste joontena. Nende kustutamiseks tuvastage allolevas loendis kõrvalekalded (grupist kaugel olevad jooned) ja sobitage nende värv.\n\n**Valige tsüklid, mida PÜDAVALT kustutada:**",
-        "data": {
-          "cycles_to_delete": "Tsükleid kustutamiseks (kontrollige sobivaid värve)"
-        }
-      },
-      "interactive_editor": {
-        "title": "Interaktiivne redaktori ühendamine/tükeldamine",
-        "description": "Valige käsitsi toiming, mida oma tsükli ajaloos teha.",
-        "menu_options": {
-          "editor_split": "Tsükli poolitamine (lünkade leidmine)",
-          "editor_merge": "Tsüklite ühendamine (fragmentide ühendamine)",
-          "editor_delete": "Kustuta tsükkel(id)",
-          "menu_back": "← Tagasi"
-        }
-      },
-      "editor_select": {
-        "title": "Valige Tsüklid",
-        "description": "Valige töödeldav(ad) tsükkel(id).\n\n{info_text}",
-        "data": {
-          "selected_cycles": "Tsüklid"
-        }
-      },
-      "editor_configure": {
-        "title": "Seadista ja rakenda",
-        "description": "{preview_md}",
-        "data": {
-          "confirm_action": "Tegevus",
-          "merged_profile": "Tulemuseks olev profiil",
-          "new_profile_name": "Uus profiilinimi",
-          "confirm_commit": "Jah, ma kinnitan seda tegevust",
-          "segment_0_profile": "1. segmendi profiil",
-          "segment_1_profile": "2. segmendi profiil",
-          "segment_2_profile": "3. segmendi profiil",
-          "segment_3_profile": "4. segmendi profiil",
-          "segment_4_profile": "5. segmendi profiil",
-          "segment_5_profile": "6. segmendi profiil",
-          "segment_6_profile": "Segmendi 7 profiil",
-          "segment_7_profile": "8. segmendi profiil",
-          "segment_8_profile": "Segmendi 9 profiil",
-          "segment_9_profile": "Segmendi 10 profiil"
-        }
-      },
-      "editor_split_params": {
-        "title": "Tükeldatud konfiguratsioon",
-        "description": "Reguleerige selle tsükli jagamise tundlikkust. Sellest pikem tühikäigu vahe põhjustab lõhenemist.",
-        "data": {
-          "split_mode": "Jagamismeetod"
-        }
-      },
-      "editor_split_auto_params": {
-        "title": "Automaatse jagamise seadistus",
-        "description": "Kohandage selle tsükli jagamise tundlikkust. Iga sellest pikem jõudevahe põhjustab jagamise.",
-        "data": {
-          "min_gap_seconds": "Jagamisvahe lävi (sekundid)"
-        }
-      },
-      "editor_split_manual_params": {
-        "title": "Käsitsi jagamise ajatemplid",
-        "description": "{preview_md}Tsükli aken: **{cycle_start_wallclock} → {cycle_end_wallclock}** kuupäeval {cycle_date}.\n\nSisestage üks või mitu jagamise ajatemplit (`HH:MM` või `HH:MM:SS`), üks rea kohta. Tsükkel lõigatakse iga ajatempli juures — N ajatemplit annavad N+1 segmenti.",
-        "data": {
-          "split_timestamps": "Jagamise ajatemplid"
-        }
-      },
-      "reprocess_history": {
-        "title": "Hooldus: andmete ümbertöötlemine ja optimeerimine",
-        "description": "Teostab ajalooliste andmete sügavpuhastuse:\n1. Kärbib nullvõimsuse näitu (vaikus).\n2. Kinnitab tsükli ajastuse/kestuse.\n3. Arvutab ümber kõik statistilised mudelid (ümbrikud).\n\n**Käitage seda andmete probleemide lahendamiseks või uute algoritmide rakendamiseks.**"
-      },
-      "wipe_history": {
-        "title": "Ajaloo kustutamine (ainult testimine)",
-        "description": "⚠️ See kustutab jäädavalt KÕIK selle seadme salvestatud tsüklid ja profiilid. Seda ei saa tagasi võtta!"
-      },
-      "export_import": {
-        "title": "Ekspordi/impordi JSON",
-        "description": "Selle seadme tsüklite, profiilide JA seadete kopeerimine/kleepimine. Eksportige allpool või kleepige importimiseks JSON.",
-        "data": {
-          "mode": "Tegevus",
-          "json_payload": "JSON täielik konfigureerimine"
-        },
-        "data_description": {
-          "mode": "Valige Ekspordi, et kopeerida praegused andmed ja seaded, või Import, et kleepida eksporditud andmed teisest WashData seadmest.",
-          "json_payload": "Ekspordiks: kopeerige see JSON (sisaldab tsükleid, profiile ja kõiki peenhäälestatud sätteid). Importimiseks: kleepige WashDatast eksporditud JSON."
-        }
-      },
-      "record_cycle": {
-        "title": "Salvestustsükkel",
-        "description": "Salvestage tsükkel käsitsi, et luua häireteta puhas profiil.\n\nOlek: **{status}**\nKestus: {duration} s\nNäidised: {samples}",
-        "menu_options": {
-          "record_refresh": "Värskenda olekut",
-          "record_stop": "Peata salvestamine (salvesta ja töötle)",
-          "record_start": "Alusta uut salvestust",
-          "record_process": "Viimase salvestuse töötlemine (kärbi ja salvesta)",
-          "record_discard": "Loobu viimane salvestis",
-          "menu_back": "← Tagasi"
-        }
-      },
-      "record_process": {
-        "title": "Protsessi salvestamine",
-        "description": "![Graafik]({graph_url})\n\n**Graafik näitab töötlemata salvestust.** Sinine = säilita, punane = kavandatud kärpimine.\n*Graafik on staatiline ja seda ei värskendata vormimuudatustega.*\n\nSalvestamine peatus. Kärbimised on joondatud tuvastatud diskreetimissagedusega (~{sampling_rate} s).\n\nToores kestus: {duration} s\nNäidised: {samples}",
-        "data": {
-          "head_trim": "Kärbi algus (sekundites)",
-          "tail_trim": "Kärbi lõpp (sekundites)",
-          "save_mode": "Salvesta sihtkoht",
-          "profile_name": "Profiili nimi"
-        }
-      },
-      "learning_feedbacks": {
-        "title": "Õppimise tagasiside",
-        "description": "Ootel tagasiside: {count}\n\n{pending_table}\n\nValige töötlemiseks tsükli ülevaatuse taotlus.",
-        "menu_options": {
-          "learning_feedbacks_pick": "Vaata ootel tagasisidet",
-          "learning_feedbacks_dismiss_all": "Lükka kõik ootel tagasisided tagasi",
-          "menu_back": "← Tagasi"
-        }
-      },
-      "learning_feedbacks_pick": {
-        "title": "Valige läbivaatamiseks tagasiside",
-        "description": "Valige avamiseks tsükli ülevaatuse taotlus.",
-        "data": {
-          "selected_feedback": "Valige läbivaatamiseks tsükkel"
-        }
-      },
-      "learning_feedbacks_empty": {
-        "title": "Õppimise tagasiside",
-        "description": "Ootel tagasisidetaotlusi ei leitud.",
-        "menu_options": {
-          "menu_back": "← Tagasi"
-        }
-      },
-      "learning_feedbacks_dismiss_all": {
-        "title": "Lükka kõik ootel tagasisided tagasi",
-        "description": "Te kavatsete tagasi lükata **{count}** ootel tagasisidetaotlust. Tagasi lükatud tsüklid jäävad teie ajalukku, kuid ei anna uut õppesignaali. Seda ei saa tagasi võtta.\n\n✅ Märkige allolev ruut ja klõpsake nuppu **Esita**, et kõik tagasi lükata.\n❌ Jätke see märkimata ja klõpsake nuppu **Esita**, et tühistada ja minna tagasi.",
-        "data": {
-          "confirm_dismiss_all": "Kinnita: lükka kõik ootel tagasisidetaotlused tagasi"
-        }
-      },
-      "resolve_feedback": {
-        "title": "Lahendage tagasiside",
-        "description": "{comparison_img}{candidates_table}\n**Tuvastatud profiil**: {detected_profile} ({confidence_pct}%)\n**Eeldatav kestus**: {est_duration_min} min\n**Tegelik kestus**: {act_duration_min} min\n\n__Valige allpool toiming:__",
-        "data": {
-          "action": "Mida sa teha tahaksid?",
-          "corrected_profile": "Õige programm (kui parandate)",
-          "corrected_duration": "Õige kestus sekundites (kui parandate)"
-        }
-      },
-      "trim_cycle_select": {
-        "title": "Kärpimistsükkel - valige Tsükkel",
-        "description": "Valige kärpimiseks tsükkel. ✓ = lõpetatud, ⚠ = jätkatud, ✗ = katkestatud",
-        "data": {
-          "cycle_id": "Tsükkel"
-        }
-      },
-      "trim_cycle": {
-        "title": "Kärpimistsükkel",
-        "description": "Praegune aken: {trim_summary}\n\n{trim_svg}",
-        "data": {
-          "action": "Tegevus"
-        }
-      },
-      "trim_cycle_start": {
-        "title": "Määra kärpimise algus",
-        "description": "Tsükli aken: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nPraegune algus: **{current_wallclock}** (+{current_offset_min} min tsükli algusest)\n\nValige alloleva kellavalija abil uus algusaeg.",
-        "data": {
-          "trim_start_time": "Uus algusaeg",
-          "trim_start_min": "Uus algus (minutid alates tsükli algusest)"
-        }
-      },
-      "trim_cycle_end": {
-        "title": "Määra kärpimise lõpp",
-        "description": "Tsükli aken: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nPraegune lõpp: **{current_wallclock}** (+{current_offset_min} min tsükli algusest)\n\nValige alloleva kellavalija abil uus lõpuaeg.",
-        "data": {
-          "trim_end_time": "Uus lõpuaeg",
-          "trim_end_min": "Uus lõpp (minutid alates tsükli algusest)"
+          "power_sensor": "Võimsusandur",
+          "min_power": "Minimaalne võimsuslävi (W)"
         }
       }
     },
     "error": {
-      "import_failed": "Import ebaõnnestus. Kleepige kehtiv WashData ekspordi JSON.",
-      "select_exactly_one": "Valige selle toimingu jaoks täpselt üks tsükkel.",
-      "select_at_least_one": "Valige selle toimingu jaoks vähemalt üks tsükkel.",
-      "select_at_least_two": "Valige selle toimingu jaoks vähemalt kaks tsüklit.",
-      "profile_exists": "Selle nimega profiil on juba olemas",
-      "rename_failed": "Profiili ümbernimetamine ebaõnnestus. Profiili ei pruugi olla või uus nimi on juba võetud.",
-      "assignment_failed": "Tsüklile profiili määramine ebaõnnestus",
-      "duplicate_phase": "Selle nimega faas on juba olemas.",
-      "phase_not_found": "Valitud faasi ei leitud.",
-      "invalid_phase_name": "Faasi nimi ei tohi olla tühi.",
-      "phase_name_too_long": "Etapi nimi on liiga pikk.",
-      "invalid_phase_range": "Faasivahemik on kehtetu. Lõpp peab olema algusest suurem.",
-      "invalid_phase_timestamp": "Ajatempel on kehtetu. Kasutage vormingut AAAA-KK-PP HH:MM või HH:MM.",
-      "overlapping_phase_ranges": "Faasivahemikud kattuvad. Reguleerige vahemikke ja proovige uuesti.",
-      "incomplete_phase_row": "Iga faasirida peab sisaldama valitud režiimi faasi pluss täielikke algus-/lõpuväärtusi.",
-      "timestamp_mode_cycle_required": "Valige ajatemplirežiimi kasutamisel allika tsükkel.",
-      "no_phase_ranges": "Selle toimingu jaoks pole veel faasivahemikke saadaval.",
       "feedback_notification_title": "WashData: kontrolli tsükkel ({device})",
       "feedback_notification_message": "**Seade**: {device}\n**Programm**: {program} ({confidence}% usaldusväärsus)\n**Aeg**: {time}\n\nWashData vajab tuvastatud tsükli kontrollimiseks teie abi.\n\nSelle tulemuse kinnitamiseks või parandamiseks minge jaotisse **Seaded > Seadmed ja teenused > WashData > Seadistamine > Tagasiside õppimine**.",
       "suggestions_ready_notification_title": "WashData: soovituslikud seaded on valmis ({device})",
       "suggestions_ready_notification_message": "Andur **Soovitatud seaded** annab nüüd **{count}** rakendatavaid soovitusi.\n\nNende ülevaatamiseks ja rakendamiseks tehke järgmist. **Seaded > Seadmed ja teenused > WashData > Seadistamine > Täpsemad seaded > Rakenda soovitatud väärtused**.\n\nSoovitused on valikulised ja neid kuvatakse enne salvestamist ülevaatamiseks.",
-      "trim_range_invalid": "Algus peab olema enne lõppu. Palun kohandage oma trimmipunkte.",
-      "trim_failed": "Kärpimine ebaõnnestus. Tsüklit ei pruugi enam eksisteerida või aken on tühi.",
-      "invalid_split_timestamp": "Ajatempel on kehtetu või jääb tsükli ajavahemikust välja. Kasutage tsükli aknas vormingut HH:MM või HH:MM:SS.",
-      "no_split_segments_found": "Nendest ajatemplidest ei saanud ühtegi kehtivat segmenti luua. Veenduge, et iga ajatempel jääb tsükli aknasse ja segmendid on vähemalt 1 minuti pikkused.",
       "auto_tune_suggestion": "{device_type} {device_title} tuvastas kummitustsüklit. Soovitatav min_võimsuse muutus: {current_min}W -> {new_min}W (ei rakendata automaatselt).",
       "auto_tune_title": "WashData automaatne häälestus",
       "auto_tune_fallback": "{device_type} {device_title} tuvastas kummitustsüklit. Soovitatav min_võimsuse muutus: {current_min}W -> {new_min}W (ei rakendata automaatselt)."
-    },
-    "abort": {
-      "no_cycles_found": "Tsükleid ei leitud",
-      "no_split_segments_found": "Valitud tsüklist ei leitud ühtegi jagatavat segmenti.",
-      "cycle_not_found": "Valitud tsüklit ei saanud laadida.",
-      "no_power_data": "Valitud tsükli kohta pole võimsuse jälgimise andmeid saadaval.",
-      "no_profiles_found": "Ühtegi profiili ei leitud. Esmalt looge profiil.",
-      "no_profiles_for_matching": "Ühtegi profiili pole sobitamiseks saadaval. Esmalt looge profiilid.",
-      "no_unlabeled_cycles": "Kõik tsüklid on juba märgistatud",
-      "no_suggestions": "Soovitatud väärtusi pole veel saadaval. Käivitage paar tsüklit ja proovige uuesti.",
-      "no_predictions": "Ei mingeid ennustusi",
-      "no_custom_phases": "Kohandatud faase ei leitud.",
-      "reprocess_success": "{count} tsüklit edukalt uuesti töödeldud.",
-      "debug_data_cleared": "Silumisandmete kustutamine {count} tsüklist õnnestus."
     }
   },
   "selector": {
@@ -806,6 +77,18 @@
         "cycle_live": "Otseülekanne"
       }
     },
+    "device_type": {
+      "options": {
+        "washing_machine": "Pesumasin",
+        "dryer": "Kuivati",
+        "washer_dryer": "Kombineeritud pesumasin-kuivati",
+        "dishwasher": "Nõudepesumasin",
+        "air_fryer": "Õhufritüür",
+        "bread_maker": "Leivaküpsetaja",
+        "pump": "Pump / Äravoolupump",
+        "other": "Muu (täpsem)"
+      }
+    },
     "common_text": {
       "options": {
         "unlabeled": "(Märgistamata)",
@@ -814,6 +97,10 @@
         "no_reference_cycle": "(Ei võrdlustsüklit)",
         "all_device_types": "Kõik seadmetüübid",
         "current_suffix": "(praegune)",
+        "phase_builtin_suffix": "(sisseehitatud)",
+        "phase_none_available": "Faase pole saadaval.",
+        "phase_other_device_types": "Muud seadmetüübid:",
+        "settings_deprecation_warning": "⚠️ **Tuginemata seadme tüüp:** {device_type} eemaldatakse tulevases versioonis. WashData sobituskonveier ei anna selle seadmeklassi jaoks usaldusväärseid tulemusi. Teie integratsioon toimib kogu aegumisperioodi jooksul; selle hoiatuse vaigistamiseks valige **Seadme tüüp** allpool ühele toetatud tüübile (pesumasin, kuivati, pesumasin-kuivati, nõudepesumasin, õhufritüür, leivamasin või pump) või valikule **Muu (täiustatud)**, kui teie seade ei vasta ühelegi toetatud tüübile. **Muu (täiustatud)** tarnib tahtlikult üldisi vaikeseadeid, mis ei ole häälestatud ühegi konkreetse seadme jaoks, seega peate läved, ajalõpud ja sobivad parameetrid ise konfigureerima; vahetamisel säilitatakse kõik teie olemasolevad seaded.",
         "editor_select_info": "Valige poolitamiseks 1 tsükkel või ühendamiseks 2+ tsüklit.",
         "editor_select_info_split": "Jagamiseks valige 1 tsükkel.",
         "editor_select_info_merge": "Ühendamiseks valige 2+ tsüklit.",
@@ -889,11 +176,7 @@
         "table_avg_energy": "Keskm. energia",
         "table_detected_program": "Tuvastatud programm",
         "table_confidence": "Usaldus",
-        "table_reported": "Teatatud",
-        "phase_builtin_suffix": "(sisseehitatud)",
-        "phase_none_available": "Faase pole saadaval.",
-        "settings_deprecation_warning": "⚠️ **Tuginemata seadme tüüp:** {device_type} eemaldatakse tulevases versioonis. WashData sobituskonveier ei anna selle seadmeklassi jaoks usaldusväärseid tulemusi. Teie integratsioon toimib kogu aegumisperioodi jooksul; selle hoiatuse vaigistamiseks valige **Seadme tüüp** allpool ühele toetatud tüübile (pesumasin, kuivati, pesumasin-kuivati, nõudepesumasin, õhufritüür, leivamasin või pump) või valikule **Muu (täiustatud)**, kui teie seade ei vasta ühelegi toetatud tüübile. **Muu (täiustatud)** tarnib tahtlikult üldisi vaikeseadeid, mis ei ole häälestatud ühegi konkreetse seadme jaoks, seega peate läved, ajalõpud ja sobivad parameetrid ise konfigureerima; vahetamisel säilitatakse kõik teie olemasolevad seaded.",
-        "phase_other_device_types": "Muud seadmetüübid:"
+        "table_reported": "Teatatud"
       }
     },
     "interactive_editor_action": {
@@ -949,6 +232,12 @@
         "delete_custom_phase": "Kustuta faas"
       }
     },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Nimetage ja rakendage faase",
+        "cancel": "Minge tagasi ilma muudatusteta"
+      }
+    },
     "assign_profile_phases_action": {
       "options": {
         "add_range": "Lisa faasivahemik",
@@ -983,12 +272,6 @@
         "delete": "Kustuta – eemalda ajaloost"
       }
     },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Nimetage ja rakendage faase",
-        "cancel": "Minge tagasi ilma muudatusteta"
-      }
-    },
     "trim_cycle_action": {
       "options": {
         "set_start": "Määra alguspunkt",
@@ -996,18 +279,6 @@
         "reset": "Lähtestage täiskestusele",
         "apply": "Rakenda kärpimine",
         "cancel": "Tühista"
-      }
-    },
-    "device_type": {
-      "options": {
-        "washing_machine": "Pesumasin",
-        "dryer": "Kuivati",
-        "washer_dryer": "Kombineeritud pesumasin-kuivati",
-        "dishwasher": "Nõudepesumasin",
-        "air_fryer": "Õhufritüür",
-        "bread_maker": "Leivaküpsetaja",
-        "pump": "Pump / Äravoolupump",
-        "other": "Muu (täpsem)"
       }
     }
   },
@@ -1203,6 +474,16 @@
           "description": "WashData seade jätkamiseks."
         }
       }
+    },
+    "trigger_ml_training": {
+      "name": "Käivita ML koolitus",
+      "description": "Treeni käsitsi seadme ML-mudeleid uuesti selle seadme enda märgistatud tsüklite põhjal (eksperimentaalne).",
+      "fields": {
+        "device_id": {
+          "name": "Seade",
+          "description": "WashData seade, mille mudeleid uuesti treenida."
+        }
+      }
     }
   },
   "entity": {
@@ -1227,12 +508,12 @@
           "ending": "Lõpetamine",
           "finished": "Valmis",
           "anti_wrinkle": "Kortsudevastane",
-          "delay_wait": "Ootab algust",
           "interrupted": "Katkestatud",
           "force_stopped": "Sundpeatatud",
           "rinse": "Loputamine",
           "unknown": "Tundmatu",
-          "clean": "Puhas"
+          "clean": "Puhas",
+          "delay_wait": "Ootab algust"
         }
       },
       "washer_program": {
@@ -1264,6 +545,9 @@
         "state": {
           "none": "Mitte ühtegi"
         }
+      },
+      "ambiguity": {
+        "name": "Vaste ebamäärasus"
       },
       "current_phase": {
         "name": "Praegune faas"
@@ -1332,6 +616,708 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s peab olema suurem kui trim_start_s."
+    }
+  },
+  "panel": {
+    "tab": {
+      "status": "Ülevaade",
+      "history": "Tsüklid",
+      "profiles": "Profiilid",
+      "settings": "Seadistused",
+      "ml": "ML koolitus",
+      "advanced": "Täpsem",
+      "diagnostics": "Diagnostika",
+      "pp_overview": "Ülevaade",
+      "pp_phases": "Faasid",
+      "pp_cleanup": "Puhastus",
+      "pp_manage": "Halda",
+      "subtab_profiles": "Profiilid",
+      "subtab_phase_catalog": "Faasikataloog"
+    },
+    "btn": {
+      "save": "Salvesta",
+      "cancel": "Tühista",
+      "delete": "Kustuta",
+      "close": "Sulge",
+      "edit": "Muuda",
+      "add": "Lisa",
+      "rebuild": "Taasta ümbrised",
+      "record": "Alusta salvestamist",
+      "compare": "Võrdle",
+      "confirm": "Kinnita",
+      "discard": "Hülga",
+      "export": "Eksport",
+      "import": "Import",
+      "merge": "Ühenda",
+      "apply": "Rakenda",
+      "refresh": "Värskenda",
+      "create": "Loo",
+      "select": "Vali",
+      "done": "Tehtud",
+      "reset": "Lähtesta",
+      "trim": "Kärbi",
+      "split": "Jaga",
+      "review": "Vaata üle",
+      "inspect": "Inspekteeri",
+      "label": "Silt",
+      "save_settings": "Salvesta seadistused",
+      "new_profile": "+ Uus profiil",
+      "new_group": "+ Uus grupp",
+      "apply_label": "Rakenda silt",
+      "run_auto_label": "Käivita automaatsildistamine",
+      "save_review": "Salvesta ülevaade",
+      "apply_trim": "Rakenda trimmi",
+      "apply_split": "Rakenda jaga",
+      "process_recording": "Salvesta salvestus",
+      "stop": "Peata",
+      "process": "Protsess",
+      "add_device": "+ Lisage seade",
+      "train_now": "Treeni nüüd",
+      "reset_to_defaults": "Lähtesta vaikeväärtustele",
+      "reset_to_builtin": "Lähtesta sisseehitatud mudelitele",
+      "save_preferences": "Salvesta eelistused",
+      "save_panel_settings": "Salvesta paneeli seadistused",
+      "save_access_control": "Salvesta juurdepääsu kontroll",
+      "auto_label_cycles": "Automaatse märgistusega tsüklid",
+      "run_analysis": "🔍 Soovituste analüüsi käivitamine",
+      "apply_all": "Rakenda kõik",
+      "show_only": "Näita ainult",
+      "dismiss": "Tühista",
+      "dismiss_all": "Tühista kõik",
+      "process_history": "Töötle nüüd",
+      "clear_debug": "Puhasta silumisandmed",
+      "wipe_all": "Kustuta kõik andmed",
+      "export_json": "Eksport JSON- i",
+      "import_json": "Import JSONist",
+      "correct": "Õige...",
+      "ignore": "Ignoreeri",
+      "add_phase": "+ Lisa faas",
+      "new_phase": "+ Uus faas",
+      "delete_profile": "Kustuta profiil",
+      "rebuild_envelope": "Taasta ümbrik",
+      "create_profile": "+ Loo profiil",
+      "rec_stop": "Lõpeta",
+      "pause_cycle": "Paus",
+      "resume_cycle": "Jätka",
+      "force_stop": "Jõupeatus",
+      "save_phases": "Salvesta faasid",
+      "auto_detect_split": "Automaatne tuvastamine",
+      "clear_splits": "Kustuta",
+      "submit_correction": "Esita parandus",
+      "import_overwrite": "Import (andmete ülekirjutamine)",
+      "use": "Kasuta",
+      "manage": "Halda",
+      "remove": "Eemalda",
+      "delete_group": "Kustuta grupp",
+      "trim_split": "Trimmimine / poolitamine",
+      "convert_to_automation": "Teisenda automaatikaks",
+      "new_automation": "+ Uus automatiseerimine",
+      "from_template": "Mallilt ▾",
+      "on_cycle_started": "Tsükli algus",
+      "on_cycle_finished": "Tsükkel lõpetatud",
+      "save_group": "Salvesta grupp"
+    },
+    "hdr": {
+      "status": "Staatus",
+      "live_power": "Reaalajas võimsus",
+      "manual_recording": "Käsitsi salvestamine",
+      "tools_and_data": "Tööriistad ja andmed",
+      "phase_catalog": "Faasikataloog",
+      "storage_stats": "Säilitamise statistika",
+      "maintenance": "Hooldusmeetmed",
+      "export_import": "Eksport / import",
+      "logs": "Logid",
+      "my_preferences": "Minu eelistused",
+      "panel_settings": "Paneeli seadistused (kõik kasutajad)",
+      "access_control": "Juurdepääsukontroll",
+      "ml_smart_learning": "Arukas õppimine",
+      "ml_settings_card": "Seadistused",
+      "ml_learned": "Mida WashData õppis",
+      "ml_matching_tuning": "Programmide sobitamise peenhäälestus",
+      "display": "Kuvamine",
+      "status_graph": "Olekugraafik",
+      "diagnostics_pref": "Diagnostika",
+      "logs_diagnostics": "Diagnostika",
+      "process_history": "Töötle ajalugu",
+      "clear_debug": "Silumisjälgede puhastamine",
+      "wipe_history": "Kustuta ajalugu",
+      "automations": "Automaatikad",
+      "automation_open": "Ava automaatikaredaktoris",
+      "automation_delete": "Kustuta see automatiseerimine",
+      "automation_needs_review": "See tsükkel vajab läbivaatamist",
+      "automation_review_this_cycle": "Ülevaade tsüklist",
+      "no_automations": "Automaatika ei viita sellele seadmele veel."
+    },
+    "lbl": {
+      "power": "Võimsus",
+      "progress": "Edusammud",
+      "remaining": "Järelejäänud",
+      "duration": "Kestus",
+      "energy": "Energia",
+      "profile": "Profiil",
+      "status": "Staatus",
+      "date": "Kuupäev",
+      "confidence": "Usaldus",
+      "health": "Tervis",
+      "cost": "Kulu",
+      "program": "Programm",
+      "cycle_health": "Tsükli tervis",
+      "activity": "Aktiivsus",
+      "unlabelled": "Märgistamata",
+      "unlabelled_paren": "(märgistamata)",
+      "emphasis": "Rõhk",
+      "default": "Vaikimisi",
+      "in_use": "Kasutusel",
+      "profile_name": "Profiili nimi",
+      "ref_cycle": "Võrdlustsükkel (valikuline)",
+      "manual_duration": "Manuaalne kestus (min, valikuline)",
+      "phase_name": "Faasi nimi",
+      "description": "Kirjeldus",
+      "correct_profile": "Õige profiil",
+      "correct_duration": "Õige kestus (min, valikuline)",
+      "load_from_file": "Failist laadimine",
+      "json_data": "JSONi andmed",
+      "expected_duration": "Oodatav kestus (min)",
+      "rename_profile": "Profiili ümbernimetamine",
+      "select_profile": "Profiili valimine",
+      "confidence_threshold": "Usalduslävi",
+      "resulting_profile": "Tulemusprofiil",
+      "new_profile_name": "Uus profiilinimi",
+      "save_mode": "Salvesta režiim",
+      "head_trim": "Peakärp (s)",
+      "tail_trim": "Sabakärp (s)",
+      "gap_s": "Tühikud",
+      "start": "Algus",
+      "end": "Lõpp",
+      "quality": "Kvaliteet",
+      "golden_reference": "Registreeritud etalontsükkel",
+      "compare_profiles": "Võrdle profiilidega",
+      "tags": "Sildid",
+      "notes": "Märkmed",
+      "default_tab": "Vaikimisi kaart paneeli avamisel",
+      "cycle_date_display": "Tsükli kuupäeva näitamine",
+      "refresh_interval": "Värskendamisintervall (s)",
+      "panel_default_tab": "Vaikimisi kaart",
+      "hide_tabs": "Mitte- administraatorite kaardid peidetakse",
+      "enable_access_control": "Juurdepääsukontrolli lubamine kasutaja kohta",
+      "default_access_level": "Vaiketase allpool loetlemata kasutajate puhul",
+      "administrators": "Administraatorid",
+      "default_other": "Vaikimisi (muud seadmed)",
+      "show_expected": "Eeldatava kõvera ülekatte näitamine (sobiv profiil, oranž)",
+      "show_raw": "Anduri töötlemata näidu näitamine (silestamata, hall)",
+      "show_debug": "Reaalajas sobitamise silumiskaardi näitamine oleku lehel (usaldus, mitmetähenduslikkus, tippkandidaadid)",
+      "mode_new_profile": "Uue profiili loomine",
+      "mode_existing_profile": "Lisa olemasolevasse profiili",
+      "auto_fine_tune_on": "Automaatne peenhäälestus sees (umbes {hour}:00)",
+      "auto_fine_tune_off": "Automaatne peenhäälestus väljas",
+      "last_checked": "Viimati kontrollitud:",
+      "remove_label": "- Eemalda silt -",
+      "create_new_profile": "+ Loo uus profiil...",
+      "read_only": "Ainult lugemisõigusega",
+      "actions": "Tegevused",
+      "cycles_count": "Tsüklid",
+      "debug_traces": "Silumisjäljed",
+      "file_kb": "Fail (kB)",
+      "label": "Silt",
+      "seconds_from_start": "Sekundeid algusest",
+      "clock_time": "Kellaaeg",
+      "ungrouped": "Grupeerimata"
+    },
+    "badge": {
+      "poor_fit": "kehvasti",
+      "fair_fit": "sobib",
+      "manual": "(käsitsi valitud)",
+      "auto": "(automaatne tuvastamine)",
+      "improving": "↗ paraneb",
+      "declining": "↘ kahaneb",
+      "steady": "→ stabiilne",
+      "using_tuned": "Häälestatud kaalude kasutamine",
+      "using_defaults": "Saadetud vaikeväärtuste kasutamine",
+      "built_in_tag": "sisseehitatud"
+    },
+    "status": {
+      "completed": "Lõpetatud",
+      "interrupted": "Katkestatud",
+      "force_stopped": "Sundpeatatud",
+      "active": "Aktiivne",
+      "ambiguous": "Mitmetähenduslik",
+      "clear": "Selge",
+      "working": "Töötlemine...",
+      "recording": "Salvestamine...",
+      "ready": "Valmis töötlema",
+      "idle": "Jõudeolek",
+      "auto_detect": "Automaatne tuvastamine",
+      "fine_tuning": "peenhäälestus käimas...",
+      "all_statuses": "Kõik staatused"
+    },
+    "ml": {
+      "fit_strong": "Tugev",
+      "fit_good": "Hea",
+      "fit_fair": "Rahuldav",
+      "fit_weak": "Nõrk",
+      "fit_slight": "Kerge",
+      "fit_word": "sobivus",
+      "fine_tuned_at": "peenhäälestusega {when}",
+      "personalized": "● Isikupärastatud sellele masinale",
+      "builtin_models": "● Sisseehitatud mudelite kasutamine"
+    },
+    "toast": {
+      "settings_saved": "Salvestatud seadistused; integratsiooni taaslaadimine",
+      "preferences_saved": "Salvestatud eelistused",
+      "panel_settings_saved": "Salvestatud paneeli seadistused",
+      "access_saved": "Juurdepääsu kontroll on salvestatud",
+      "profile_created": "Profiil \"{name}\" loodud",
+      "profile_deleted": "Profiil \"{name}\" kustutatud",
+      "profile_renamed": "Profiil nimetati ümber",
+      "phases_saved": "Faasid salvestatud",
+      "phase_created": "Faas \"{name}\" loodud",
+      "phase_deleted": "Faas \"{name}\" kustutatud",
+      "phase_updated": "Uuendatud faas",
+      "recording_started": "Salvestamine algas",
+      "recording_stopped": "Salvestamine peatus",
+      "recording_discarded": "Salvestis kõrvaldatud",
+      "recording_saved": "Salvestis salvestatud profiili",
+      "export_downloaded": "Allalaaditud eksport",
+      "logs_exported": "Logid eksporditud",
+      "import_successful": "Import edukas; integratsiooni uuesti laadimine",
+      "envelopes_rebuilt": "Ümberehitatud ümbrikud",
+      "envelope_rebuilt": "Ümberehitatud ümbrik",
+      "suggestions_applied": "Rakendatud ettepanekud; integratsiooni ümberlaadimine",
+      "suggestions_dismissed": "Ettepanekud lükati tagasi",
+      "auto_label_complete": "Automaatne märgistus valmis",
+      "cycle_labelled": "Märgistatud tsükkel",
+      "cycle_deleted": "Tsükkel kustutatud",
+      "cycles_deleted": "{count} tsükkel(id) kustutatud",
+      "cycle_trimmed": "Tsükkel kärbitud",
+      "cycles_merged": "Tsüklid ühendatud",
+      "review_saved": "Ülevaade salvestatud",
+      "feedback_confirmed": "Tagasiside kinnitatud",
+      "feedback_dismissed": "Tagasiside lükati tagasi",
+      "feedback_all_dismissed": "Kõik tagasiside tagasi lükatud",
+      "correction_submitted": "Parandus esitatud",
+      "group_saved": "Grupp salvestatud",
+      "group_deleted": "Grupp kustutatud",
+      "automation_deleted": "Automatiseerimine kustutatud",
+      "legacy_removed": "Pärandtoimingud eemaldatud",
+      "cycle_paused": "Tsükkel on peatatud",
+      "cycle_resumed": "Tsükkel jätkus",
+      "cycle_force_stopped": "Tsükli jõu peatamine",
+      "ml_training_promoted": "Koolitus lõpetatud: edutatud {count} mudel(id)",
+      "ml_training_no_improvement": "Koolitus on lõpetatud: baastaseme säilitamine (paranemist ei ole)",
+      "matching_reverted": "Sobitamise kaalud lähtestatud vaikimisi",
+      "models_reverted": "Seadmemudelid taastatakse baastasemele",
+      "analysis_complete": "Analüüs lõpetatud: {count} soovitus(ed)",
+      "analysis_complete_none": "Analüüs lõpetatud: uusi ettepanekuid ei ole",
+      "debug_cleared": "Kustutati {count} silumisjälge",
+      "all_wiped": "Kõik andmed on kustutatud",
+      "no_split_found": "Puuduvad tühimikud, mis jaguneksid",
+      "group_name_required": "Nõutav on grupi nimi",
+      "min_2_profiles": "Vali grupile vähemalt 2 profiili",
+      "profile_name_required": "Profiili nimi on nõutav",
+      "phase_name_required": "Nõutav on faasi nimi",
+      "name_required": "Nõutav nimi",
+      "json_required": "JSON-andmed on nõutavad",
+      "save_failed": "Salvestamine nurjus: {error}",
+      "delete_failed": "Kustutamine nurjus: {error}",
+      "apply_failed": "Rakendamine nurjus: {error}",
+      "rebuild_failed": "Taastamine nurjus: {error}",
+      "start_failed": "Start nurjus: {error}",
+      "stop_failed": "Peatus nurjus: {error}",
+      "discard_failed": "Kõrvaldamine nurjus: {error}",
+      "trim_failed": "Trimmimine nurjus: {error}",
+      "split_failed": "Poolitamine nurjus: {error}",
+      "merge_failed": "Ühendamine nurjus: {error}",
+      "create_failed": "Loomine nurjus: {error}",
+      "update_failed": "Uuendamine nurjus: {error}",
+      "rename_failed": "Ümbernimetamine nurjus: {error}",
+      "revert_failed": "Taastamine nurjus: {error}",
+      "training_failed": "Treening nurjus: {error}",
+      "export_failed": "Eksport nurjus: {error}",
+      "import_failed": "Import nurjus: {error}",
+      "auto_label_failed": "Automaatne sildistamine nurjus: {error}",
+      "analysis_failed": "Analüüs nurjus: {error}",
+      "auto_detect_failed": "Automaatne tuvastamine nurjus: {error}",
+      "error": "Viga: {error}",
+      "could_not_load_cycle": "Tsükli laadimine nurjus: {error}",
+      "pause_failed": "Paus nurjus: {error}",
+      "label_failed": "Silt nurjus: {error}",
+      "invalid_json": "\"{key}\" ei ole korrektne JSON - paranda see või puhasta välja enne salvestamist.",
+      "processed": "Töödeldud {bits}",
+      "split_complete": "Jaotus {count} tsükliteks"
+    },
+    "msg": {
+      "no_devices": "WashData seadmeid pole veel seadistatud.",
+      "no_device_selected": "Seadet pole valitud.",
+      "loading": "Laadimine...",
+      "loading_settings": "Seadistuste laadimine...",
+      "live_chart_loading": "Reaalajas võimsusgraft ilmub näitude saabumisel.",
+      "no_cycles_match": "Ükski tsükkel ei sobi aktiivse filtriga.",
+      "no_cycles_yet": "Tsüklid pole veel registreeritud.",
+      "no_profiles_yet": "Profiile veel pole. Loo üks märgistatud tsüklist.",
+      "no_logs": "Ühtegi logikirjet pole veel puhverdatud.",
+      "no_phases": "Faase pole defineeritud.",
+      "no_phases_assigned": "Faase pole määratud.",
+      "no_split_points": "Jagamispunkte veel pole.",
+      "no_envelope": "Ümbrikut veel pole — taasta pärast tsüklite märgistamist.",
+      "no_envelope_overlay": "Ülekatteks pole ümbrikut.",
+      "no_other_users": "Teisi Home Assistant kasutajaid ei leitud.",
+      "maintenance_requires_access": "Hooldus ja eksport/import nõuavad täielikku juurdepääsu.",
+      "loading_curve": "Laadimiskõver...",
+      "compare_selected_cycles": "Valitud tsüklid (pidev) — kuva / peida",
+      "compare_overlay_profiles": "Katteprofiilid (kahvatu)",
+      "no_profiles_compare": "Profiile pole võrrelda.",
+      "no_cycles_profile": "Sellel profiilil pole tsükleid.",
+      "saving_triggers_reload": "Salvestamine käivitab integratsiooni uuesti laadimise. HA üksused võivad lühidalt näidata kui kättesaamatud.",
+      "prefs_personal": "See kehtib ainult teie Home Assistant konto kohta.",
+      "no_match_yet": "Sobitamiskatseid veel pole — see täitub käimasoleva tsükli ajal.",
+      "no_fine_tuned": "Midagi pole veel viimistletud - WashData kasutab oma sisseehitatud mudeleid.",
+      "ml_learned_intro": "Mudelid on sellele masinale kohandatud. Kõik, mida pole loetletud, kasutab usaldusväärset sisseehitatud mudelit.",
+      "ml_settings_intro": "Kaks sõltumatut lülitit: üks rakendab mudeleid, kui tsükkel töötab, teine võimaldab WashData-l neid aja jooksul oma masinale kohandada.",
+      "ml_intro": "WashData tarnitakse nutikate mudelitega, mis tuvastavad tsükleid, sobitavad programme ning hindavad aega ja energiat — need töötavad kohe kastist väljas.",
+      "matching_tuning_intro": "Õppides kohandab WashData ka seda, kui palju programmi sobitamine kaalub tsükli kuju võrreldes selle kestuse ja energiaga.",
+      "phase_catalog_intro": "Tsükli nimetatud segmendid (eelpesu, kuumutamine, ketramine...). Määrake need oma juhtpaneeli profiilile.",
+      "phase_ranges_intro": "Faasivahemikud (minutites tsükli algusest) kattuvad keskmise kõveraga. Muuda väärtusi otseülekande eelvaatluseks.",
+      "cleanup_intro": "Iga märgistatud tsükkel kattub. Märkige välja ja kustutage profiili puhastamiseks.",
+      "split_intro": "Klõpsa graafikul jaotuspunkti lisamiseks või eemaldamiseks või tuvasta automaatselt tühikäiguvahede abil.",
+      "trim_intro": "Lohista punased käepidemed või sisesta väärtused. Kõik väljaspool akent on eemaldatud.",
+      "import_intro": "Laadige eksporditud fail või kleepige JSON-andmed allpool.",
+      "auto_label_intro": "Määrake profiilid märgistamata tsüklitele, mille sobivuse usaldus puhastab läve.",
+      "merge_intro": "Valitud tsüklid kombineeritakse üheks (kronoloogilises järjekorras; tühikud täidetakse 0 W-ga). Vali saadud profiil.",
+      "enough_data": "Piisavalt andmeid, et õppida ({current}/{min} tsüklid).",
+      "collecting_data": "Andmete kogumine – {need} rohkem tsüklit{plural} enne, kui peenhäälestus saab alata ({current}/{min}).",
+      "updated": "Uuendatud {time}",
+      "appliance_monitor": "Seadmemonitor",
+      "ml_loading": "Laadige ML...",
+      "see_recorder": "Vaata salvesti vidinat allpool",
+      "review_in_settings": "Läbivaatamine seadistustes",
+      "storage_diagnostics": "Säilitamise statistika, hooldus, eksport/import",
+      "recent_logs": "Viimased ha washdata andmed",
+      "preferences_adv": "Eelistused",
+      "preferences_admin": "Eelistused, paneeli ja ligipääsu kontroll",
+      "review_to_cycles": "Ava Tsüklite läbivaatamise järjekord",
+      "pending_feedback": "Oodatav tuvastamise tagasiside",
+      "recording_in_progress": "Käimasolev salvestamine",
+      "no_profiles_yet_short": "Profiile veel pole.",
+      "unsure_detected_prefix": "WashData ei ole kindel, kas see avastati",
+      "no_suggestions": "Aktiivseid ettepanekuid pole.",
+      "no_profiles_overlay": "Profiile pole üle kanda.",
+      "compare_cycles_title": "Võrdle {count} tsükleid"
+    },
+    "modal": {
+      "label_cycle": "Märgista tsükkel",
+      "create_profile": "Loo profiil",
+      "new_phase": "Uus faas",
+      "edit_phase": "Muuda faasi",
+      "process_recording": "Töötle salvestis",
+      "correct_feedback": "Õige tagasiside",
+      "import_config": "Impordi seadistused",
+      "auto_label": "Automaatne tsüklite märgistamine",
+      "cycle": "Tsükkel"
+    },
+    "tag": {
+      "late_start": "Hiline algus",
+      "early_end": "Varajane lõpp",
+      "merged": "Ühendatud tsüklid",
+      "split": "Jagatud tsükkel",
+      "noise": "Müra",
+      "wrong_profile": "Vale profiil",
+      "sensor_gap": "Sensorivahe"
+    },
+    "quality": {
+      "good": "Hea",
+      "bad": "Halb",
+      "unusable": "Kasutamatu"
+    },
+    "access": {
+      "none": "Puudub (peidetud)",
+      "read": "Loe",
+      "edit": "Muuda",
+      "full": "Täis",
+      "inherit": "Päriti"
+    },
+    "health": {
+      "poor": "⚠ Halb sobivus",
+      "fair": "Rahuldav sobivus",
+      "good": "✓ Hea sobivus"
+    },
+    "trend": {
+      "up": "Kasvav",
+      "down": "Kahanev"
+    },
+    "pref": {
+      "date_relative": "Suhteline (nt 2 tundi tagasi)",
+      "date_absolute": "Absoluutne (nt 14.32 2. juulil)"
+    },
+    "log": {
+      "all_levels": "Kõik tasandid"
+    },
+    "section": {
+      "basic": {
+        "label": "Põhiline",
+        "intro": "Põhiline identiteet ja olulisemad seadistused."
+      },
+      "detection": {
+        "label": "Avastamine",
+        "intro": "Kuidas tsükkel tuvastatakse alguse, kulgemise ja lõpetamisena."
+      },
+      "matching": {
+        "label": "Sobitamine",
+        "intro": "Kuidas lõpetatud tsüklid sobitatakse õpitud profiilidega ja märgistatakse."
+      },
+      "timing": {
+        "label": "Ajastamine ja valvekoer",
+        "intro": "Taustkaader, offline valvekoer ja majapidamine."
+      },
+      "anti_wrinkle": {
+        "label": "Kortsuvastane",
+        "intro": "Kortsuvastane režiim tuvastab kuivati trummelimpulsid pärast peamist kuumfaasi."
+      },
+      "delay": {
+        "label": "Viivituskäivitus",
+        "intro": "Viivitusega käivitumise tuvastamine tuvastab, kui seade töötab, kuid ei ole veel tsüklit alustanud."
+      },
+      "triggers": {
+        "label": "Käivitajad ja uks",
+        "intro": "Valikulised välissignaalid: otsapäästik, ukseandur, pausilüliti ja mahalaadimise meeldetuletus."
+      },
+      "notifications": {
+        "label": "Teated",
+        "intro": "Võimaldab määrata, millal ja kuidas teid tsükli sündmustest teavitatakse."
+      },
+      "ml_training": {
+        "label": "ML koolitus",
+        "intro": "Opt-in nutikad mudelid, mis isikustavad selle seadme avastamist ja ajastust."
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Seadme nimi"
+      },
+      "device_type": {
+        "label": "Seadmetüüp"
+      },
+      "power_sensor": {
+        "label": "Võimsusandur"
+      },
+      "min_power": {
+        "label": "Minimaalne võimsus"
+      },
+      "off_delay": {
+        "label": "Väljalülituse viivitus"
+      },
+      "linked_device": {
+        "label": "Rühm seadme all"
+      },
+      "start_threshold_w": {
+        "label": "Käivita lävi"
+      },
+      "stop_threshold_w": {
+        "label": "Peatumislävi"
+      },
+      "min_off_gap": {
+        "label": "Minimaalne väljalülituslünk"
+      },
+      "start_duration_threshold": {
+        "label": "Käivituskestus"
+      },
+      "start_energy_threshold": {
+        "label": "Käivita energia"
+      },
+      "completion_min_seconds": {
+        "label": "Minimaalne tsükli kestus"
+      },
+      "running_dead_zone": {
+        "label": "Surnud tsoon"
+      },
+      "end_energy_threshold": {
+        "label": "Lõppenergia"
+      },
+      "end_repeat_count": {
+        "label": "Lõpukorduste arv"
+      },
+      "sampling_interval": {
+        "label": "Proovivõtu intervall"
+      },
+      "smoothing_window": {
+        "label": "Sujuv aken"
+      },
+      "abrupt_drop_watts": {
+        "label": "Järsk langus"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Järsku langemise suhe"
+      },
+      "profile_match_threshold": {
+        "label": "Sobivuslävi"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Lahtisobivuse lävi"
+      },
+      "profile_match_interval": {
+        "label": "Sobitamisintervall"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Minimaalse kestvuse suhtarv"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Maksimaalne kestvussuhe"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profiili kestuse tolerants"
+      },
+      "duration_tolerance": {
+        "label": "Hinnanguline sallivus"
+      },
+      "auto_label_confidence": {
+        "label": "Automaatse sildi kindlus"
+      },
+      "learning_confidence": {
+        "label": "Õppimise usaldusväärsus"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Tagasiside märguannete tühistamine"
+      },
+      "watchdog_interval": {
+        "label": "Valvuri intervall"
+      },
+      "no_update_active_timeout": {
+        "label": "Uuendusteta ajalõpp"
+      },
+      "progress_reset_delay": {
+        "label": "Edenemise lähtestamise viivitus"
+      },
+      "auto_maintenance": {
+        "label": "Auto hooldus (öine puhastus)"
+      },
+      "expose_debug_entities": {
+        "label": "Silumisüksuste avaldamine"
+      },
+      "save_debug_traces": {
+        "label": "Silumisjälgede salvestamine"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Kortsuvastase tuvastamise lubamine"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Maksimaalne kortsudevastane võimsus"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Maksimaalne kestus"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Väljumisvõimsuse lävi"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Viivituse käivitamise tuvastamise lubamine"
+      },
+      "delay_confirm_seconds": {
+        "label": "Kinnita sekundeid"
+      },
+      "delay_timeout_hours": {
+        "label": "Aegumistunnid"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Välise lõpu käivitaja lubamine"
+      },
+      "external_end_trigger": {
+        "label": "Väline käivitaja olem"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Inverteeri väline käivitaja (käivitaja väljalülitamisel)"
+      },
+      "door_sensor_entity": {
+        "label": "Ukseanduri üksus"
+      },
+      "pause_cuts_power": {
+        "label": "Paus vähendab ka voolu (lüliti abil)"
+      },
+      "switch_entity": {
+        "label": "Lüliti entiteet"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Mahalaadimisnõude viivitus"
+      },
+      "pump_stuck_duration": {
+        "label": "Pump kinni jäänud kestus"
+      },
+      "notify_start_services": {
+        "label": "Käivita teenused"
+      },
+      "notify_finish_services": {
+        "label": "Viimistlusteenused"
+      },
+      "notify_live_services": {
+        "label": "Reaalajas edenemise teenused"
+      },
+      "notify_people": {
+        "label": "Inimesed (ainult kodus)"
+      },
+      "notify_only_when_home": {
+        "label": "Teatamine ainult kodus"
+      },
+      "notify_fire_events": {
+        "label": "HA sündmuste saatmine teadete jaoks"
+      },
+      "notify_before_end_minutes": {
+        "label": "Lõpueelne hoiatus"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Otseuuendamise intervall"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Otseülekanne% enne häiret"
+      },
+      "notify_live_chronometer": {
+        "label": "Live kronomeetri kasutamine"
+      },
+      "notify_timeout_seconds": {
+        "label": "Automaatne sulgemine pärast"
+      },
+      "notify_title": {
+        "label": "Teatise pealkiri"
+      },
+      "notify_icon": {
+        "label": "Teatise ikoon"
+      },
+      "notify_start_message": {
+        "label": "Käivita teade"
+      },
+      "notify_finish_message": {
+        "label": "Lõpusõnum"
+      },
+      "notify_pre_complete_message": {
+        "label": "Eelne lõpusõnum"
+      },
+      "notify_reminder_message": {
+        "label": "Meeldetuletuse teade"
+      },
+      "notify_channel": {
+        "label": "Android Kanal (start/ live)"
+      },
+      "notify_finish_channel": {
+        "label": "Android Kanal (finish)"
+      },
+      "energy_price_entity": {
+        "label": "Energiahinna üksus"
+      },
+      "energy_price_static": {
+        "label": "Staatiline energiahind (kWh kohta)"
+      },
+      "enable_ml_models": {
+        "label": "Nutikate mudelite rakendamine tsükli jooksul"
+      },
+      "ml_training_enabled": {
+        "label": "Õppige sellest masinast"
+      },
+      "ml_training_hour": {
+        "label": "Õppige tunnis"
+      },
+      "ml_training_min_cycles": {
+        "label": "Esimesed tsüklid"
+      },
+      "ml_training_interval_days": {
+        "label": "Kontrolli kõige rohkem iga"
+      }
     }
   }
 }

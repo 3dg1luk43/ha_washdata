@@ -617,5 +617,707 @@
     "trim_invalid_range": {
       "message": "trim_end_s must be greater than trim_start_s."
     }
+  },
+  "panel": {
+    "tab": {
+      "status": "Overview",
+      "history": "Cycles",
+      "profiles": "Profiles",
+      "settings": "Settings",
+      "ml": "ML Training",
+      "advanced": "Advanced",
+      "diagnostics": "Diagnostics",
+      "pp_overview": "Overview",
+      "pp_phases": "Phases",
+      "pp_cleanup": "Cleanup",
+      "pp_manage": "Manage",
+      "subtab_profiles": "Profiles",
+      "subtab_phase_catalog": "Phase Catalog"
+    },
+    "btn": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "close": "Close",
+      "edit": "Edit",
+      "add": "Add",
+      "rebuild": "Rebuild Envelopes",
+      "record": "Start Recording",
+      "compare": "Compare",
+      "confirm": "Confirm",
+      "discard": "Discard",
+      "export": "Export",
+      "import": "Import",
+      "merge": "Merge",
+      "apply": "Apply",
+      "refresh": "Refresh",
+      "create": "Create",
+      "select": "Select",
+      "done": "Done",
+      "reset": "Reset",
+      "trim": "Trim",
+      "split": "Split",
+      "review": "Review",
+      "inspect": "Inspect",
+      "label": "Label",
+      "save_settings": "Save Settings",
+      "new_profile": "+ New Profile",
+      "new_group": "+ New Group",
+      "apply_label": "Apply Label",
+      "run_auto_label": "Run Auto-Label",
+      "save_review": "Save Review",
+      "apply_trim": "Apply Trim",
+      "apply_split": "Apply Split",
+      "process_recording": "Save Recording",
+      "stop": "Stop",
+      "process": "Process",
+      "add_device": "+ Add device",
+      "train_now": "Train now",
+      "reset_to_defaults": "Reset to defaults",
+      "reset_to_builtin": "Reset to built-in models",
+      "save_preferences": "Save Preferences",
+      "save_panel_settings": "Save Panel Settings",
+      "save_access_control": "Save Access Control",
+      "auto_label_cycles": "Auto-label cycles",
+      "run_analysis": "🔍 Run suggestion analysis",
+      "apply_all": "Apply all",
+      "show_only": "Show only",
+      "dismiss": "Dismiss",
+      "dismiss_all": "Dismiss All",
+      "process_history": "Process Now",
+      "clear_debug": "Clear Debug Data",
+      "wipe_all": "Wipe All Data",
+      "export_json": "Export to JSON",
+      "import_json": "Import from JSON",
+      "correct": "Correct…",
+      "ignore": "Ignore",
+      "add_phase": "+ Add phase",
+      "new_phase": "+ New Phase",
+      "delete_profile": "Delete Profile",
+      "rebuild_envelope": "Rebuild Envelope",
+      "create_profile": "+ Create profile",
+      "rec_stop": "Stop",
+      "pause_cycle": "Pause",
+      "resume_cycle": "Resume",
+      "force_stop": "Force Stop",
+      "save_phases": "Save phases",
+      "auto_detect_split": "Auto-detect",
+      "clear_splits": "Clear",
+      "submit_correction": "Submit Correction",
+      "import_overwrite": "Import (overwrites data)",
+      "use": "Use",
+      "manage": "Manage",
+      "remove": "Remove",
+      "delete_group": "Delete Group",
+      "trim_split": "Trim / Split",
+      "convert_to_automation": "Convert to automation",
+      "new_automation": "＋ New Automation",
+      "from_template": "From template ▾",
+      "on_cycle_started": "On cycle started",
+      "on_cycle_finished": "On cycle finished",
+      "save_group": "Save Group"
+    },
+    "hdr": {
+      "status": "Status",
+      "live_power": "Live Power",
+      "manual_recording": "Manual Recording",
+      "tools_and_data": "Tools & Data",
+      "phase_catalog": "Phase Catalog",
+      "storage_stats": "Storage Stats",
+      "maintenance": "Maintenance Actions",
+      "export_import": "Export / Import",
+      "logs": "Logs",
+      "my_preferences": "My Preferences",
+      "panel_settings": "Panel Settings (all users)",
+      "access_control": "Access Control",
+      "ml_smart_learning": "Smart Learning",
+      "ml_settings_card": "Settings",
+      "ml_learned": "What WashData has learned",
+      "ml_matching_tuning": "Program-matching fine-tuning",
+      "display": "Display",
+      "status_graph": "Status Graph",
+      "diagnostics_pref": "Diagnostics",
+      "logs_diagnostics": "Diagnostics",
+      "process_history": "Process History",
+      "clear_debug": "Clear Debug Traces",
+      "wipe_history": "Wipe History",
+      "automations": "Automations",
+      "automation_open": "Open in the automation editor",
+      "automation_delete": "Delete this automation",
+      "automation_needs_review": "This cycle needs review",
+      "automation_review_this_cycle": "Review this cycle",
+      "no_automations": "No automations reference this device yet."
+    },
+    "lbl": {
+      "power": "Power",
+      "progress": "Progress",
+      "remaining": "Remaining",
+      "duration": "Duration",
+      "energy": "Energy",
+      "profile": "Profile",
+      "status": "Status",
+      "date": "Date",
+      "confidence": "Confidence",
+      "health": "Health",
+      "cost": "Cost",
+      "program": "Program",
+      "cycle_health": "Cycle health",
+      "activity": "Activity",
+      "unlabelled": "Unlabelled",
+      "unlabelled_paren": "(unlabelled)",
+      "emphasis": "Emphasis",
+      "default": "Default",
+      "in_use": "In use",
+      "profile_name": "Profile Name",
+      "ref_cycle": "Reference Cycle (optional)",
+      "manual_duration": "Manual Duration (min, optional)",
+      "phase_name": "Phase Name",
+      "description": "Description",
+      "correct_profile": "Correct Profile",
+      "correct_duration": "Correct Duration (min, optional)",
+      "load_from_file": "Load from file",
+      "json_data": "JSON Data",
+      "expected_duration": "Expected Duration (min)",
+      "rename_profile": "Rename Profile",
+      "select_profile": "Select Profile",
+      "confidence_threshold": "Confidence threshold",
+      "resulting_profile": "Resulting profile",
+      "new_profile_name": "New profile name",
+      "save_mode": "Save Mode",
+      "head_trim": "Head Trim (s)",
+      "tail_trim": "Tail Trim (s)",
+      "gap_s": "Gap (s)",
+      "start": "Start",
+      "end": "End",
+      "quality": "Quality",
+      "golden_reference": "Recorded reference cycle",
+      "compare_profiles": "Compare with profiles",
+      "tags": "Tags",
+      "notes": "Notes",
+      "default_tab": "Default tab when opening the panel",
+      "cycle_date_display": "Cycle date display",
+      "refresh_interval": "Refresh interval (s)",
+      "panel_default_tab": "Default tab",
+      "hide_tabs": "Hide tabs for non-admins",
+      "enable_access_control": "Enable per-user access control",
+      "default_access_level": "Default level for users not listed below",
+      "administrators": "Administrators",
+      "default_other": "Default (other devices)",
+      "show_expected": "Show expected curve overlay (matched profile, orange)",
+      "show_raw": "Show raw sensor readings (unsmoothed, grey)",
+      "show_debug": "Show live match debug card on the Status page (confidence, ambiguity, top candidates)",
+      "mode_new_profile": "Create New Profile",
+      "mode_existing_profile": "Add to Existing Profile",
+      "auto_fine_tune_on": "auto fine-tune on (around {hour}:00)",
+      "auto_fine_tune_off": "auto fine-tune off",
+      "last_checked": "Last checked:",
+      "remove_label": "- Remove label -",
+      "create_new_profile": "+ Create new profile…",
+      "read_only": "Read-only",
+      "actions": "Actions",
+      "cycles_count": "Cycles",
+      "debug_traces": "Debug Traces",
+      "file_kb": "File (kB)",
+      "label": "Label",
+      "seconds_from_start": "Seconds from start",
+      "clock_time": "Clock time",
+      "ungrouped": "Ungrouped"
+    },
+    "badge": {
+      "poor_fit": "poor fit",
+      "fair_fit": "fair fit",
+      "manual": "(manually selected)",
+      "auto": "(auto-detected)",
+      "improving": "↗ improving",
+      "declining": "↘ declining",
+      "steady": "→ steady",
+      "using_tuned": "Using tuned weights",
+      "using_defaults": "Using shipped defaults",
+      "built_in_tag": "built-in"
+    },
+    "status": {
+      "completed": "Completed",
+      "interrupted": "Interrupted",
+      "force_stopped": "Force stopped",
+      "active": "Active",
+      "ambiguous": "Ambiguous",
+      "clear": "Clear",
+      "working": "Working…",
+      "recording": "Recording…",
+      "ready": "Ready to process",
+      "idle": "Idle",
+      "auto_detect": "Auto-detect",
+      "fine_tuning": "fine-tuning now…",
+      "all_statuses": "All statuses"
+    },
+    "ml": {
+      "fit_strong": "Strong",
+      "fit_good": "Good",
+      "fit_fair": "Fair",
+      "fit_weak": "Weak",
+      "fit_slight": "Slight",
+      "fit_word": "fit",
+      "fine_tuned_at": "fine-tuned {when}",
+      "personalized": "● Personalized to this machine",
+      "builtin_models": "● Using built-in models"
+    },
+    "toast": {
+      "settings_saved": "Settings saved; integration reloading",
+      "preferences_saved": "Preferences saved",
+      "panel_settings_saved": "Panel settings saved",
+      "access_saved": "Access control saved",
+      "profile_created": "Profile \"{name}\" created",
+      "profile_deleted": "Profile \"{name}\" deleted",
+      "profile_renamed": "Profile renamed",
+      "phases_saved": "Phases saved",
+      "phase_created": "Phase \"{name}\" created",
+      "phase_deleted": "Phase \"{name}\" deleted",
+      "phase_updated": "Phase updated",
+      "recording_started": "Recording started",
+      "recording_stopped": "Recording stopped",
+      "recording_discarded": "Recording discarded",
+      "recording_saved": "Recording saved to profile",
+      "export_downloaded": "Export downloaded",
+      "logs_exported": "Logs exported",
+      "import_successful": "Import successful; integration reloading",
+      "envelopes_rebuilt": "Envelopes rebuilt",
+      "envelope_rebuilt": "Envelope rebuilt",
+      "suggestions_applied": "Suggestions applied; integration reloading",
+      "suggestions_dismissed": "Suggestions dismissed",
+      "auto_label_complete": "Auto-label complete",
+      "cycle_labelled": "Cycle labelled",
+      "cycle_deleted": "Cycle deleted",
+      "cycles_deleted": "{count} cycle(s) deleted",
+      "cycle_trimmed": "Cycle trimmed",
+      "cycles_merged": "Cycles merged",
+      "review_saved": "Review saved",
+      "feedback_confirmed": "Feedback confirmed",
+      "feedback_dismissed": "Feedback dismissed",
+      "feedback_all_dismissed": "All feedbacks dismissed",
+      "correction_submitted": "Correction submitted",
+      "group_saved": "Group saved",
+      "group_deleted": "Group deleted",
+      "automation_deleted": "Automation deleted",
+      "legacy_removed": "Legacy actions removed",
+      "cycle_paused": "Cycle paused",
+      "cycle_resumed": "Cycle resumed",
+      "cycle_force_stopped": "Cycle force-stopped",
+      "ml_training_promoted": "Training complete: promoted {count} model(s)",
+      "ml_training_no_improvement": "Training complete: baseline kept (no improvement)",
+      "matching_reverted": "Matching weights reverted to defaults",
+      "models_reverted": "On-device models reverted to baseline",
+      "analysis_complete": "Analysis complete: {count} suggestion(s)",
+      "analysis_complete_none": "Analysis complete: no new suggestions",
+      "debug_cleared": "Cleared {count} debug traces",
+      "all_wiped": "All data wiped",
+      "no_split_found": "No idle gaps found to split on",
+      "group_name_required": "Group name is required",
+      "min_2_profiles": "Select at least 2 profiles for a group",
+      "profile_name_required": "Profile name is required",
+      "phase_name_required": "Phase name is required",
+      "name_required": "Name required",
+      "json_required": "JSON data is required",
+      "save_failed": "Save failed: {error}",
+      "delete_failed": "Delete failed: {error}",
+      "apply_failed": "Apply failed: {error}",
+      "rebuild_failed": "Rebuild failed: {error}",
+      "start_failed": "Start failed: {error}",
+      "stop_failed": "Stop failed: {error}",
+      "discard_failed": "Discard failed: {error}",
+      "trim_failed": "Trim failed: {error}",
+      "split_failed": "Split failed: {error}",
+      "merge_failed": "Merge failed: {error}",
+      "create_failed": "Create failed: {error}",
+      "update_failed": "Update failed: {error}",
+      "rename_failed": "Rename failed: {error}",
+      "revert_failed": "Revert failed: {error}",
+      "training_failed": "Training failed: {error}",
+      "export_failed": "Export failed: {error}",
+      "import_failed": "Import failed: {error}",
+      "auto_label_failed": "Auto-label failed: {error}",
+      "analysis_failed": "Analysis failed: {error}",
+      "auto_detect_failed": "Auto-detect failed: {error}",
+      "error": "Error: {error}",
+      "could_not_load_cycle": "Could not load cycle: {error}",
+      "pause_failed": "Pause failed: {error}",
+      "label_failed": "Label failed: {error}",
+      "invalid_json": "\"{key}\" is not valid JSON — fix it or clear the field before saving.",
+      "processed": "Processed {bits}",
+      "split_complete": "Split into {count} cycles"
+    },
+    "msg": {
+      "no_devices": "No WashData devices configured yet.",
+      "no_device_selected": "No device selected.",
+      "loading": "Loading…",
+      "loading_settings": "Loading settings…",
+      "live_chart_loading": "Live power chart appears as readings arrive.",
+      "no_cycles_match": "No cycles match the current filter.",
+      "no_cycles_yet": "No cycles recorded yet.",
+      "no_profiles_yet": "No profiles yet. Create one from a labelled cycle.",
+      "no_profiles_yet_short": "No profiles yet.",
+      "no_logs": "No log records buffered yet.",
+      "no_phases": "No phases defined.",
+      "no_phases_assigned": "No phases assigned.",
+      "no_split_points": "No split points yet.",
+      "no_envelope": "No envelope yet - rebuild after labelling cycles.",
+      "no_envelope_overlay": "No envelope available to overlay.",
+      "no_other_users": "No other Home Assistant users found.",
+      "maintenance_requires_access": "Maintenance and export/import require full access.",
+      "loading_curve": "Loading curve…",
+      "compare_selected_cycles": "Selected cycles (solid) — show / hide",
+      "compare_overlay_profiles": "Overlay profiles (faint)",
+      "no_profiles_compare": "No profiles to compare.",
+      "no_cycles_profile": "No cycles for this profile.",
+      "saving_triggers_reload": "Saving triggers an integration reload. HA entities may briefly show as unavailable.",
+      "prefs_personal": "These apply to your Home Assistant account only.",
+      "no_match_yet": "No match attempt yet - this populates during a running cycle.",
+      "no_fine_tuned": "Nothing fine-tuned yet — WashData is using its built-in models.",
+      "ml_learned_intro": "Models fine-tuned to this machine. Anything not listed uses the reliable built-in model.",
+      "ml_settings_intro": "Two independent switches: one applies the models while a cycle runs, the other lets WashData fine-tune them to your machine over time.",
+      "ml_intro": "WashData ships with smart models that detect cycles, match programs, and estimate time & energy — they work out of the box.",
+      "matching_tuning_intro": "When learning, WashData also adjusts how much program matching weighs a cycle's shape versus its duration and energy.",
+      "phase_catalog_intro": "Named segments of a cycle (Pre-wash, Heating, Spin…). Assign them to a profile from its control panel.",
+      "phase_ranges_intro": "Phase ranges (minutes from cycle start) overlaid on the average curve. Edit values to preview live.",
+      "cleanup_intro": "Every labelled cycle overlaid. Tick outliers and delete to clean up the profile.",
+      "split_intro": "Click the graph to add or remove a split point, or auto-detect by idle gaps.",
+      "trim_intro": "Drag the red handles, or enter values. Everything outside the window is removed.",
+      "import_intro": "Load an exported file or paste a JSON payload below.",
+      "auto_label_intro": "Assign profiles to unlabelled cycles whose match confidence clears the threshold.",
+      "merge_intro": "The selected cycles are combined into one (chronological order; gaps filled with 0 W). Pick the resulting profile.",
+      "enough_data": "Enough data to learn from ({current}/{min} cycles).",
+      "collecting_data": "Collecting data — {need} more cycle{plural} before fine-tuning can start ({current}/{min}).",
+      "updated": "Updated {time}",
+      "appliance_monitor": "Appliance monitor",
+      "ml_loading": "loading ML…",
+      "see_recorder": "See recorder widget below",
+      "review_in_settings": "Review in Settings",
+      "storage_diagnostics": "Storage stats, maintenance, export/import",
+      "recent_logs": "Recent ha_washdata records",
+      "preferences_adv": "Preferences",
+      "preferences_admin": "Preferences, panel & access control",
+      "review_to_cycles": "Open the Cycles review queue",
+      "pending_feedback": "Pending detection feedback",
+      "recording_in_progress": "Recording in progress",
+      "unsure_detected_prefix": "WashData is unsure it detected",
+      "no_suggestions": "No active suggestions.",
+      "no_profiles_overlay": "No profiles to overlay.",
+      "compare_cycles_title": "Compare {count} cycles"
+    },
+    "modal": {
+      "label_cycle": "Label Cycle",
+      "create_profile": "Create Profile",
+      "new_phase": "New Phase",
+      "edit_phase": "Edit Phase",
+      "process_recording": "Process Recording",
+      "correct_feedback": "Correct Feedback",
+      "import_config": "Import Configuration",
+      "auto_label": "Auto-Label Cycles",
+      "cycle": "Cycle"
+    },
+    "tag": {
+      "late_start": "Late start",
+      "early_end": "Early end",
+      "merged": "Merged cycles",
+      "split": "Split cycle",
+      "noise": "Noise",
+      "wrong_profile": "Wrong profile",
+      "sensor_gap": "Sensor gap"
+    },
+    "quality": {
+      "good": "Good",
+      "bad": "Bad",
+      "unusable": "Unusable"
+    },
+    "access": {
+      "none": "None (hidden)",
+      "read": "Read",
+      "edit": "Edit",
+      "full": "Full",
+      "inherit": "Inherit"
+    },
+    "health": {
+      "poor": "⚠ Poor match fit",
+      "fair": "Fair match fit",
+      "good": "✓ Good match fit"
+    },
+    "trend": {
+      "up": "Trending up",
+      "down": "Trending down"
+    },
+    "pref": {
+      "date_relative": "Relative (e.g. 2 hours ago)",
+      "date_absolute": "Absolute (e.g. 14:32 on 2 Jul)"
+    },
+    "log": {
+      "all_levels": "All levels"
+    },
+    "section": {
+      "basic": {
+        "label": "Basic",
+        "intro": "Core identity and the essentials most setups need."
+      },
+      "detection": {
+        "label": "Detection",
+        "intro": "How a cycle is detected as starting, running and finishing."
+      },
+      "matching": {
+        "label": "Matching",
+        "intro": "How finished cycles are matched to learned profiles and labelled."
+      },
+      "timing": {
+        "label": "Timing & Watchdog",
+        "intro": "Background cadence, the offline watchdog and housekeeping."
+      },
+      "anti_wrinkle": {
+        "label": "Anti-Wrinkle",
+        "intro": "Anti-wrinkle mode detects dryer tumble pulses after the main heat phase."
+      },
+      "delay": {
+        "label": "Delay Start",
+        "intro": "Delayed-start detection identifies when an appliance is powered but has not yet begun its cycle."
+      },
+      "triggers": {
+        "label": "Triggers & Door",
+        "intro": "Optional external signals: an end trigger, a door sensor, a pause switch, and the unload reminder."
+      },
+      "notifications": {
+        "label": "Notifications",
+        "intro": "Configure when and how you are notified about cycle events."
+      },
+      "ml_training": {
+        "label": "ML Training",
+        "intro": "Opt-in smart models that personalise detection and timing to this device."
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Device Name"
+      },
+      "device_type": {
+        "label": "Device Type"
+      },
+      "power_sensor": {
+        "label": "Power Sensor"
+      },
+      "min_power": {
+        "label": "Minimum Power"
+      },
+      "off_delay": {
+        "label": "Off Delay"
+      },
+      "linked_device": {
+        "label": "Group Under Device"
+      },
+      "start_threshold_w": {
+        "label": "Start Threshold"
+      },
+      "stop_threshold_w": {
+        "label": "Stop Threshold"
+      },
+      "min_off_gap": {
+        "label": "Min Off Gap"
+      },
+      "start_duration_threshold": {
+        "label": "Start Duration"
+      },
+      "start_energy_threshold": {
+        "label": "Start Energy"
+      },
+      "completion_min_seconds": {
+        "label": "Min Cycle Duration"
+      },
+      "running_dead_zone": {
+        "label": "Running Dead Zone"
+      },
+      "end_energy_threshold": {
+        "label": "End Energy"
+      },
+      "end_repeat_count": {
+        "label": "End Repeat Count"
+      },
+      "sampling_interval": {
+        "label": "Sampling Interval"
+      },
+      "smoothing_window": {
+        "label": "Smoothing Window"
+      },
+      "abrupt_drop_watts": {
+        "label": "Abrupt Drop"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Abrupt Drop Ratio"
+      },
+      "profile_match_threshold": {
+        "label": "Match Threshold"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Unmatch Threshold"
+      },
+      "profile_match_interval": {
+        "label": "Match Interval"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Min Duration Ratio"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Max Duration Ratio"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profile Duration Tolerance"
+      },
+      "duration_tolerance": {
+        "label": "Estimate Tolerance"
+      },
+      "auto_label_confidence": {
+        "label": "Auto-Label Confidence"
+      },
+      "learning_confidence": {
+        "label": "Learning Confidence"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Suppress Feedback Notifications"
+      },
+      "watchdog_interval": {
+        "label": "Watchdog Interval"
+      },
+      "no_update_active_timeout": {
+        "label": "No-Update Timeout"
+      },
+      "progress_reset_delay": {
+        "label": "Progress Reset Delay"
+      },
+      "auto_maintenance": {
+        "label": "Auto Maintenance (nightly cleanup)"
+      },
+      "expose_debug_entities": {
+        "label": "Expose Debug Entities"
+      },
+      "save_debug_traces": {
+        "label": "Save Debug Traces"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Enable Anti-Wrinkle Detection"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Max Anti-Wrinkle Power"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Max Duration"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Exit Power Threshold"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Enable Delay-Start Detection"
+      },
+      "delay_confirm_seconds": {
+        "label": "Confirm Seconds"
+      },
+      "delay_timeout_hours": {
+        "label": "Timeout Hours"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Enable External End Trigger"
+      },
+      "external_end_trigger": {
+        "label": "External Trigger Entity"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Invert External Trigger (trigger on OFF)"
+      },
+      "door_sensor_entity": {
+        "label": "Door Sensor Entity"
+      },
+      "pause_cuts_power": {
+        "label": "Pause Also Cuts Power (via switch)"
+      },
+      "switch_entity": {
+        "label": "Switch Entity"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Unload Nag Delay"
+      },
+      "pump_stuck_duration": {
+        "label": "Pump Stuck Duration"
+      },
+      "notify_start_services": {
+        "label": "Start Services"
+      },
+      "notify_finish_services": {
+        "label": "Finish Services"
+      },
+      "notify_live_services": {
+        "label": "Live Progress Services"
+      },
+      "notify_people": {
+        "label": "People (for Only When Home)"
+      },
+      "notify_only_when_home": {
+        "label": "Notify Only When Home"
+      },
+      "notify_fire_events": {
+        "label": "Fire HA Events for Notifications"
+      },
+      "notify_before_end_minutes": {
+        "label": "Pre-End Alert"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Live Update Interval"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Live Overrun % Before Alert"
+      },
+      "notify_live_chronometer": {
+        "label": "Use Live Chronometer"
+      },
+      "notify_timeout_seconds": {
+        "label": "Auto-Dismiss After"
+      },
+      "notify_title": {
+        "label": "Notification Title"
+      },
+      "notify_icon": {
+        "label": "Notification Icon"
+      },
+      "notify_start_message": {
+        "label": "Start Message"
+      },
+      "notify_finish_message": {
+        "label": "Finish Message"
+      },
+      "notify_pre_complete_message": {
+        "label": "Pre-Complete Message"
+      },
+      "notify_reminder_message": {
+        "label": "Reminder Message"
+      },
+      "notify_channel": {
+        "label": "Android Channel (start/live)"
+      },
+      "notify_finish_channel": {
+        "label": "Android Channel (finish)"
+      },
+      "energy_price_entity": {
+        "label": "Energy Price Entity"
+      },
+      "energy_price_static": {
+        "label": "Static Energy Price (per kWh)"
+      },
+      "enable_ml_models": {
+        "label": "Apply smart models during a cycle"
+      },
+      "ml_training_enabled": {
+        "label": "Learn from this machine"
+      },
+      "ml_training_hour": {
+        "label": "Learn at hour"
+      },
+      "ml_training_min_cycles": {
+        "label": "Cycles needed first"
+      },
+      "ml_training_interval_days": {
+        "label": "Check at most every"
+      }
+    }
   }
 }

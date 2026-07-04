@@ -24,778 +24,49 @@
           "profile_name": "Profilaren izena (aukerakoa)",
           "manual_duration": "Iraupena estimatua (minutuak)"
         }
+      },
+      "reconfigure": {
+        "title": "WashData berriro konfiguratu",
+        "description": "Eguneratu gailuaren izena, tresna mota edo potentzia-sentsorea.",
+        "data": {
+          "name": "Gailuaren izena",
+          "device_type": "Gailu mota",
+          "power_sensor": "Potentzia-sentsorea",
+          "min_power": "Potentzia minimoaren atalasea (W)"
+        }
       }
     },
     "error": {
       "cannot_connect": "Ezin izan da konektatu",
       "invalid_auth": "Autentifikazio baliogabea",
-      "unknown": "Ustekabeko errorea"
+      "unknown": "Ustekabeko errorea",
+      "invalid_power": "Potentzia-atalaseak 0 baino handiagoa izan behar du"
     },
     "abort": {
-      "already_configured": "Gailua dagoeneko konfiguratuta dago"
+      "already_configured": "Gailua dagoeneko konfiguratuta dago",
+      "reconfigure_successful": "Berrekonfigurazioa arrakastatsua izan da"
     }
   },
   "options": {
     "step": {
       "init": {
-        "menu_options": {
-          "learning_feedbacks": "Berrikusi Ikaskuntzaren Iritziak",
-          "settings": "Ezarpenak",
-          "notifications": "Jakinarazpenak",
-          "manage_cycles": "Kudeatu Zikloak",
-          "manage_profiles": "Kudeatu profilak",
-          "manage_phase_catalog": "Kudeatu Faseen Katalogoa",
-          "record_cycle": "Zikloa erregistratu (eskuz)",
-          "diagnostics": "Diagnostikoa eta mantentze-lanak"
-        }
-      },
-      "apply_suggestions": {
-        "title": "Kopiatu iradokitako balioak",
-        "description": "Honek uneko iradokitako balioak gordetako ezarpenetan kopiatuko ditu. Hau behin-behineko ekintza da eta ez du gaitzen automatikoki gainidazketa.\n\nKopiatzeko iradokitako balioak:\n{suggested}",
+        "title": "WashData Ezarpenak",
+        "description": "Ezarpen guztiak — detekzioa, bat-etortzea, denbora, jakinarazpenak, profilak eta zikloak — WashData panelean daude eskuragarri. Erabili formulario hau soilik potentzia-sentsorea, gailu mota edo zain-atalasea aldatzeko.",
         "data": {
-          "confirm": "Berretsi kopiatzeko ekintza"
-        }
-      },
-      "apply_suggestions_confirm": {
-        "title": "Berrikusi Iradokitako Aldaketak",
-        "description": "WashData-k aplikatu beharreko iradokitako balio(k) **{pending_count}** aurkitu du.\n\nAldaketak:\n{changes}\n\n✅ Markatu beheko laukia eta egin klik **Bidali** aldaketa hauek berehala aplikatzeko eta gordetzeko.\n❌ Utzi markarik gabe eta egin klik **Bidali** bertan behera uzteko eta atzera egiteko.",
-        "data": {
-          "confirm_apply_suggestions": "Aplikatu eta gorde aldaketa hauek"
-        }
-      },
-      "settings": {
-        "title": "Ezarpenak",
-        "description": "{deprecation_warning}Sintonizatu detektatzeko atalaseak, ikaskuntza eta portaera aurreratua. Lehenetsiek ondo funtzionatzen dute konfigurazio gehienetarako.\n\nEskuragarri dauden iradokizun-ezarpenen kopurua: {suggestions_count}.\n0 baino handiagoa bada, ireki Ezarpen aurreratuak eta erabili Aplikatu iradokitako balioak gomendazioak berrikusteko.",
-        "data": {
-          "apply_suggestions": "Aplikatu iradokitako balioak",
           "device_type": "Gailu mota",
-          "power_sensor": "Potentzia Sentsore Entitatea",
-          "min_power": "Gutxieneko potentzia (W)",
-          "off_delay": "Zikloaren amaierako atzerapena (k)",
-          "notify_actions": "Jakinarazpen Ekintzak",
-          "notify_people": "Atzeratu Entrega Pertsona hauek Etxera arte",
-          "notify_only_when_home": "Atzeratu jakinarazpenak hautatutako pertsona etxean egon arte",
-          "notify_fire_events": "Automatizazio-gertaerak abiarazi",
-          "notify_start_services": "Zikloaren hasiera - Jakinarazpen-helburuak",
-          "notify_finish_services": "Zikloaren amaiera - Jakinarazpen-helburuak",
-          "notify_live_services": "Zuzeneko aurrerapena - Jakinarazpen-helburuak",
-          "notify_before_end_minutes": "Osatu aurretiko jakinarazpena (amaitu baino minutu batzuk lehenago)",
-          "notify_title": "Jakinarazpenaren izenburua",
-          "notify_icon": "Jakinarazpenen ikonoa",
-          "notify_start_message": "Hasi mezu formatua",
-          "notify_finish_message": "Amaitu mezuen formatua",
-          "notify_pre_complete_message": "Osatu aurretiko mezu formatua",
-          "show_advanced": "Editatu ezarpen aurreratuak (Hurrengo urratsa)"
-        },
-        "data_description": {
-          "apply_suggestions": "Markatu lauki hau ikaskuntza-algoritmoak iradokitako balioak formulariora kopiatzeko. Berrikusi gorde aurretik.\n\nIradokitako (ikaskuntzatik):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "device_type": "Hautatu tresna mota (garbigailua, lehorgailua, ontzi-garbigailua, kafe-makina, EV). Etiketa hau ziklo bakoitzean gordetzen da hobeto antolatzeko.",
-          "power_sensor": "Denbora errealeko potentziaren berri ematen duen sentsore-entitatea (wattetan). Hau edonoiz alda dezakezu datu historikoak galdu gabe; erabilgarria entxufe adimenduna ordezkatzen baduzu.",
-          "min_power": "Atalase horretatik gorako potentzia-irakurketak (wattetan) aparatua martxan dagoela adierazten du. Hasi 2W gailu gehienetarako.",
-          "off_delay": "Segundotan, leundutako potentzia geldialdiaren atalasearen azpitik egon behar da amaitutakoa markatzeko. Lehenetsia: 120s.",
-          "notify_actions": "Home Assistant aukerako ekintza-sekuentzia jakinarazpenetarako exekutatzeko (scriptak, jakinarazpena, TTS, etab.). Ezarrita badago, ekintzak abiaraztearen jakinarazpen-zerbitzuaren aurretik egingo dira.",
-          "notify_people": "Presentzia ateratzeko erabiltzen diren pertsona-entitateak. Gaituta dagoenean, jakinarazpenak bidaltzea atzeratzen da, gutxienez hautatutako pertsona bat etxean egon arte.",
-          "notify_only_when_home": "Gaituta badago, atzeratu jakinarazpenak gutxienez hautatutako pertsona bat etxean egon arte.",
-          "notify_fire_events": "Gaituta badago, piztu Home Assistant-eko gertaerak zikloaren hasiera eta amaierarako (ha_washdata_cycle_started eta ha_washdata_cycle_ended) automatizazioak gidatzeko.",
-          "notify_start_services": "Zerbitzu bati edo gehiagori jakinaraztea ziklo bat hasten denean abisatzeko. Utzi hutsik hasierako jakinarazpenak saltatzeko.",
-          "notify_finish_services": "Zerbitzu bati edo gehiagori jakinaraztea ziklo bat amaitzen denean edo amaitzen denean abisatzeko. Utzi hutsik amaierako jakinarazpenak saltatzeko.",
-          "notify_live_services": "Zerbitzu bati edo gehiagori jakinarazpena eman diezaiokete zuzeneko aurrerapen-eguneratzeak zikloa martxan dagoen bitartean (mugikorretarako aplikazio osagarria soilik). Utzi hutsik zuzeneko eguneraketak saltatzeko.",
-          "notify_before_end_minutes": "Zikloaren amaiera estimatua baino minutu batzuk lehenago jakinarazpen bat abiarazteko. Ezarri 0 desgaitzeko. Lehenetsia: 0.",
-          "notify_title": "Jakinarazpenetarako izenburu pertsonalizatua. {device} leku-marka onartzen du.",
-          "notify_icon": "Jakinarazpenetarako erabiltzeko ikonoa (adibidez, mdi:washing-machine). Utzi hutsik ikonorik gabe bidaltzeko.",
-          "notify_start_message": "Ziklo bat hasten denean bidalitako mezua. {device} leku-marka onartzen du.",
-          "notify_finish_message": "Ziklo bat amaitzean bidalitako mezua. {device}, {duration}, {program}, {energy_kwh}, {cost} leku-markak onartzen ditu.",
-          "notify_pre_complete_message": "Zikloa exekutatzen den bitartean errepikatzen diren zuzeneko aurrerapenen eguneratzeen testua. {device}, {minutes}, {program} leku-markak onartzen ditu."
-        }
-      },
-      "notifications": {
-        "title": "Jakinarazpenak",
-        "description": "Konfiguratu jakinarazpen-kanalak, txantiloiak eta mugikorren zuzeneko aukerako aurrerapen eguneraketak.",
-        "data": {
-          "notify_actions": "Jakinarazpen Ekintzak",
-          "notify_people": "Atzeratu Entrega Pertsona hauek Etxera arte",
-          "notify_only_when_home": "Atzeratu jakinarazpenak hautatutako pertsona etxean egon arte",
-          "notify_fire_events": "Automatizazio-gertaerak abiarazi",
-          "notify_start_services": "Zikloaren hasiera - Jakinarazpen-helburuak",
-          "notify_finish_services": "Zikloaren amaiera - Jakinarazpen-helburuak",
-          "notify_live_services": "Zuzeneko aurrerapena - Jakinarazpen-helburuak",
-          "notify_before_end_minutes": "Osatu aurretiko jakinarazpena (amaitu baino minutu batzuk lehenago)",
-          "notify_live_interval_seconds": "Zuzeneko eguneratze-tartea (segundoak)",
-          "notify_live_overrun_percent": "Zuzeneko eguneraketa gainditze hobaria (%)",
-          "notify_live_chronometer": "Kronometroa atzerako kontaketa tenporizadorea",
-          "notify_title": "Jakinarazpenaren izenburua",
-          "notify_icon": "Jakinarazpenen ikonoa",
-          "notify_start_message": "Hasi mezu formatua",
-          "notify_finish_message": "Amaitu mezuen formatua",
-          "notify_pre_complete_message": "Osatu aurretiko mezu formatua",
-          "energy_price_entity": "Energiaren prezioa - Entitatea (aukerakoa)",
-          "energy_price_static": "Energiaren prezioa - Balio estatikoa (aukerakoa)",
-          "go_back": "Itzuli gorde gabe",
-          "notify_reminder_message": "Mezuaren formatua",
-          "notify_timeout_seconds": "Auto-desmuntatu ondoren (segundoak)",
-          "notify_channel": "Jakinarazpen-kanala (egoera/bizitza/irakurlea)",
-          "notify_finish_channel": "Jakinarazpen-kanala amaituta"
-        },
-        "data_description": {
-          "go_back": "Markatu hau eta egin klik Bidali aukeran goiko aldaketak baztertzeko eta menu nagusira itzultzeko.",
-          "notify_actions": "Home Assistant aukerako ekintza-sekuentzia jakinarazpenetarako exekutatzeko (scriptak, jakinarazpena, TTS, etab.). Ezarrita badago, ekintzak abiaraztearen jakinarazpen-zerbitzuaren aurretik egingo dira.",
-          "notify_people": "Presentzia ateratzeko erabiltzen diren pertsona-entitateak. Gaituta dagoenean, jakinarazpenak bidaltzea atzeratzen da, gutxienez hautatutako pertsona bat etxean egon arte.",
-          "notify_only_when_home": "Gaituta badago, atzeratu jakinarazpenak gutxienez hautatutako pertsona bat etxean egon arte.",
-          "notify_fire_events": "Gaituta badago, piztu Home Assistant-eko gertaerak zikloaren hasiera eta amaierarako (ha_washdata_cycle_started eta ha_washdata_cycle_ended) automatizazioak gidatzeko.",
-          "notify_start_services": "Ziklo bat hasten denean abisatzeko zerbitzu bat edo gehiago jakinarazteko (adibidez, notify.mobile_app_my_phone). Utzi hutsik hasierako jakinarazpenak saltatzeko.",
-          "notify_finish_services": "Zerbitzu bati edo gehiagori jakinaraztea ziklo bat amaitzen denean edo amaitzen denean abisatzeko. Utzi hutsik amaierako jakinarazpenak saltatzeko.",
-          "notify_live_services": "Zerbitzu bati edo gehiagori jakinarazpena eman diezaiokete zuzeneko aurrerapen-eguneratzeak zikloa martxan dagoen bitartean (mugikorretarako aplikazio osagarria soilik). Utzi hutsik zuzeneko eguneraketak saltatzeko.",
-          "notify_before_end_minutes": "Zikloaren amaiera estimatua baino minutu batzuk lehenago jakinarazpen bat abiarazteko. Ezarri 0 desgaitzeko. Lehenetsia: 0.",
-          "notify_live_interval_seconds": "Aurrerapen-eguneratzeak zenbateko maiztasuna bidaltzen diren exekutatzen ari zaren bitartean. Balio baxuagoek erantzun handiagoa dute baina jakinarazpen gehiago kontsumitzen dute. Gutxienez 30 segundo behar dira; 30 s-tik beherako balioak automatikoki 30 s-ra biribiltzen dira.",
-          "notify_live_overrun_percent": "Segurtasun-marjina zenbatetsitako eguneratze-kopurutik gorako ziklo luzeak/gainekotan (adibidez, % 20ak 1,2 aldiz zenbatetsitako eguneratzeak onartzen ditu).",
-          "notify_live_chronometer": "Gaituta dagoenean, zuzeneko eguneratze bakoitzak kronometroko atzerako kontaketa bat du estimatutako amaiera-orduraino. Jakinarazpen-tenporizadorea automatikoki deskargatzen da gailuan eguneratzeen artean (Android-en aplikazio osagarria soilik).",
-          "notify_title": "Jakinarazpenetarako izenburu pertsonalizatua. {device} leku-marka onartzen du.",
-          "notify_icon": "Jakinarazpenetarako erabiltzeko ikonoa (adibidez, mdi:washing-machine). Utzi hutsik ikonorik gabe bidaltzeko.",
-          "notify_start_message": "Ziklo bat hasten denean bidalitako mezua. {device} leku-marka onartzen du.",
-          "notify_finish_message": "Ziklo bat amaitzean bidalitako mezua. {device}, {duration}, {program}, {energy_kwh}, {cost} leku-markak onartzen ditu.",
-          "energy_price_entity": "Hautatu uneko elektrizitatearen prezioari eusten dion zenbakizko entitate bat (adibidez, sentsorea.electricity_price, input_number.energy_rate). Ezarritakoan, {cost} leku-marka gaitu. Balio estatikoari lehentasuna ematen dio biak konfiguratuta badaude.",
-          "energy_price_static": "Elektrizitatearen prezio finkoa kWh bakoitzeko. Ezarritakoan, {cost} leku-marka gaitu. Ez ikusi egingo da goiko entitate bat konfiguratuta badago. Gehitu zure moneta ikurra mezu-txantiloian, adibidez. {cost} €.",
-          "notify_reminder_message": "Ordu bateko oroigarriaren testuak aurreikusitako amaiera baino minutu batzuk lehenago bidali zuen konfiguratutako kopurua. Goiko zuzeneko eguneraketa errepikatuetatik aldendu. {device}, {minutes}, {program} leku-markak onartzen ditu.",
-          "notify_timeout_seconds": "Automatikoki baztertu jakinarazpenak segundo askoren ondoren (lagunaren aplikazioaren 'denbora-muga' gisa aurrera). '0' balioarekin itxi arte. Lehenetsia: 0.",
-          "notify_channel": "Android aplikazio lagunaren jakinarazpen-kanala egoerarako, aurrerapen bizietarako eta abisuetarako. Kanal baten soinua eta garrantzia kanalaren aplikazioan konfiguratzen dira kanalaren izena erabiltzen den lehen aldian - WashData-k kanalaren izena bakarrik ezartzen du. Utzi hutsik aplikazioa lehenetsi gisa.",
-          "notify_finish_channel": "Android kanala bereizia amaitutako alertarako (abisuak eta garbitegiaren zain dagoen nagak ere erabiltzen dute) bere soinua izan dezan. Utzi hutsik goiko kanala berrerabiltzeko.",
-          "notify_pre_complete_message": "Zikloa exekutatzen den bitartean errepikatzen diren zuzeneko aurrerapenen eguneratzeen testua. {device}, {minutes}, {program} leku-markak onartzen ditu."
-        }
-      },
-      "advanced_settings": {
-        "title": "Ezarpen aurreratuak",
-        "description": "Doitu detekzio-atalaseak, ikasketa eta portaera aurreratua. Lehenetsiek ondo funtzionatzen dute konfigurazio gehienetan.",
-        "sections": {
-          "suggestions_section": {
-            "name": "Iradokitako ezarpenak",
-            "description": "{suggestions_count} ikasitako iradokizun daude erabilgarri. Markatu Aplikatu iradokitako balioak gorde aurretik proposatutako aldaketak berrikusteko.",
-            "data": {
-              "apply_suggestions": "Aplikatu iradokitako balioak"
-            },
-            "data_description": {
-              "apply_suggestions": "Markatu lauki hau ikaskuntza-algoritmoan iradokitako balioen berrikuspen-urrats bat irekitzeko. Ezer ez da automatikoki gordetzen.\n\nIradokitako (ikaskuntzatik):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}"
-            }
-          },
-          "detection_section": {
-            "name": "Detekzioa eta potentzia-atalaseak",
-            "description": "Noiz jotzen den gailua PIZTUTA edo ITZALITA dagoela, energia-atalaseak eta egoera-trantsizioen denborak.",
-            "data": {
-              "start_duration_threshold": "Hasi errebotearen iraupena (s)",
-              "start_energy_threshold": "Hasi Energy Gate (Wh)",
-              "completion_min_seconds": "Osatzeko gutxieneko exekuzio-denbora (segundoak)",
-              "start_threshold_w": "Hasierako atalasea (W)",
-              "stop_threshold_w": "Gelditzeko atalasea (W)",
-              "end_energy_threshold": "Amaierako energia-atea (Wh)",
-              "running_dead_zone": "Running Dead Zone (segundoak)",
-              "end_repeat_count": "Amaitu Errepikatu Zenbaketa",
-              "min_off_gap": "Zikloen arteko gutxieneko tartea (k)",
-              "sampling_interval": "Laginketa-tartea (k)"
-            },
-            "data_description": {
-              "start_duration_threshold": "Ez ikusi iraupen hori (segundo) baino laburragoak diren potentzia-puntu laburrak. Abiarazte-puntak iragazten ditu (adibidez, 60 W 2 segundotan) ziklo erreala hasi baino lehen. Lehenetsia: 5s.",
-              "start_energy_threshold": "Zikloak gutxienez energia hori (Wh) metatu behar du HASIERA fasean baieztatzeko. Lehenetsia: 0,005 Wh.",
-              "completion_min_seconds": "Hau baino laburragoak diren zikloak \"eten\" gisa markatuko dira, modu naturalean amaitu arren. Lehenetsia: 600s.",
-              "start_threshold_w": "Potentzia atalase honetatik GAINetik igo behar da ziklo bat HASTEKO. Ezarri zure egonean dagoen potentzia baino handiagoa. Lehenetsia: min_potentzia + 1 W.",
-              "stop_threshold_w": "Potentzia atalase honetatik BEHERA jaitsi behar da ziklo bat AMAITZEKO. Ezarri zeroren gainetik zaratak amaiera faltsuak abiarazteko. Lehenetsia: 0,6 * min_potentzia.",
-              "end_energy_threshold": "Zikloa amaitzen da azken Off-Delay leihoko energia balio honen (Wh) azpitik badago. Bukaera faltsuak eragozten ditu potentzia zerotik gertu aldatzen bada. Lehenetsia: 0,05 Wh.",
-              "running_dead_zone": "Zikloa hasi ondoren, jaramonik egin segundo horrenbesteko potentzia-jauziak, hasierako biraketa fasean amaiera faltsuak hautemateko saihesteko. Ezarri 0 desgaitzeko. Lehenetsia: 0s.",
-              "end_repeat_count": "Amaiera-baldintza (off_delay-ren atalasearen azpiko potentzia) jarraian bete behar den zikloa amaitu aurretik. Balio altuagoek amaiera faltsuak saihesten dituzte pausaldietan. Lehenetsia: 1.",
-              "min_off_gap": "Ziklo bat aurrekoa amaitzen denetik segundo horren barruan hasten bada, ziklo bakarrean BATUA izango dira.",
-              "sampling_interval": "Laginketa-tarte minimoa segundotan. Tarifa hori baino azkarrago eguneratzeak ez dira aintzat hartuko. Lehenetsia: 30 s (2 s garbigailuetarako, garbigailu-lehorgailuetarako eta ontzi-garbigailuetarako)."
-            }
-          },
-          "matching_section": {
-            "name": "Profilen parekatzea eta ikasketa",
-            "description": "WashData-k martxan dauden zikloak ikasitako profilekin zenbateraino parekatzen dituen eta noiz eskatu behar duen iritzia.",
-            "data": {
-              "profile_match_min_duration_ratio": "Profilaren bat-etortzeen gutxieneko iraupen-erlazioa (0,1-1,0)",
-              "profile_match_interval": "Profilaren bat-etortze-tartea (segundoak)",
-              "profile_match_threshold": "Profila bat etortzeko atalasea",
-              "profile_unmatch_threshold": "Profila bat ez datorren atalasea",
-              "auto_label_confidence": "Etiketa automatikoko konfiantza (0-1)",
-              "learning_confidence": "Iritzia eskatzeko konfiantza (0-1)",
-              "suppress_feedback_notifications": "Ezabatu Iritzien jakinarazpenak",
-              "duration_tolerance": "Iraupen-tolerantzia (0-0,5)",
-              "smoothing_window": "Leuntzeko leihoa (laginak)",
-              "profile_duration_tolerance": "Profilaren bat-etortzearen iraupen-perdoia (0-0,5)"
-            },
-            "data_description": {
-              "profile_match_min_duration_ratio": "Profila parekatzeko gutxieneko iraupen-ratioa. Korrika-zikloak profilaren iraupenaren zati hori izan behar du gutxienez bat etortzeko. Behea = lehenago bat etortzea. Lehenetsia: 0,50 (%50).",
-              "profile_match_interval": "Zenbateko maiztasuna (segundotan) ziklo batean profila parekatzen saiatzea. Balio baxuagoek detekzio azkarragoa eskaintzen dute baina CPU gehiago erabiltzen dute. Lehenetsia: 300s (5 minutu).",
-              "profile_match_threshold": "DTW antzekotasun puntuazio minimoa (0,0-1,0) behar da profil bat parekotzat hartzeko. Handiagoa = parekatze zorrotzagoa, positibo faltsu gutxiago. Lehenetsia: 0,4.",
-              "profile_unmatch_threshold": "DTW antzekotasun puntuazioa (0,0-1,0) eta horren azpitik aurrez parekatuta dagoen profil bat baztertzen da. Bat-etortzearen atalasea baino baxuagoa izan behar da keinurik ez egiteko. Lehenetsia: 0,35.",
-              "auto_label_confidence": "Automatikoki etiketa ezazu zikloak konfiantza hori amaitzean (0,0-1,0).",
-              "learning_confidence": "Erabiltzaileen egiaztapena gertaera baten bidez eskatzeko gutxieneko konfiantza (0.0-1.0).",
-              "suppress_feedback_notifications": "Gaituta dagoenean, WashData-k barnean jarraipena egingo du eta iritzia eskatuko du, baina ez du zikloak berresteko eskatzen dizuten jakinarazpen iraunkorrik erakutsiko. Erabilgarria zikloak beti behar bezala hautematen direnean eta oharrak distraitzen dizutenean.",
-              "duration_tolerance": "Korrika batean zehar geratzen den denboraren kalkuluekiko tolerantzia (0,0-0,5 % 0-50 da).",
-              "smoothing_window": "Batez besteko leuntzeko erabilitako azken potentzia-irakurketa kopurua.",
-              "profile_duration_tolerance": "Profilen bat etortzeak iraupen osoaren bariantzarako erabiltzen duen tolerantzia (0,0-0,5). Portaera lehenetsia: % ±25."
-            }
-          },
-          "timing_section": {
-            "name": "Denborak, mantentzea eta arazketa",
-            "description": "Watchdog-a, aurrerapenaren berrezarpena, auto-mantentzea eta debug entitateen erakustea.",
-            "data": {
-              "watchdog_interval": "Watchdog tartea (segundoak)",
-              "no_update_active_timeout": "Eguneratzerik gabeko denbora-muga (k)",
-              "progress_reset_delay": "Aurrerapena berrezarri atzerapena (segundoak)",
-              "auto_maintenance": "Gaitu Mantentze automatikoa",
-              "expose_debug_entities": "Erakutsi arazketa-entitateak",
-              "save_debug_traces": "Gorde arazketa arrastoak"
-            },
-            "data_description": {
-              "watchdog_interval": "Zailatzaileen egiaztapenen arteko segundoak korrika egiten ari zaren bitartean. Lehenetsia: 5s. OHARRA: Ziurtatu sentsorearen eguneratze-tartea baino HANDIAGOA dela geldialdi faltsuak ekiditeko (adibidez, sentsorea 60 segundotan behin eguneratzen bada, erabili 65 segundo).",
-              "no_update_active_timeout": "Argitaratze-aldaketako sentsoreetarako: behartu bakarrik amaitu ziklo AKTIBO bat eguneratzerik iristen ez bada segundo askotan. Potentzia gutxiko osatzeak itzaltzeko atzerapena erabiltzen du oraindik.",
-              "progress_reset_delay": "Ziklo bat amaitu ondoren (% 100), itxaron segundo asko inaktiboen aurrerapena % 0ra berrezarri aurretik. Lehenetsia: 300s.",
-              "auto_maintenance": "Gaitu mantentze-lan automatikoa (konponketa laginak, batu zatiak).",
-              "expose_debug_entities": "Erakutsi sentsore aurreratuak (konfiantza, fasea, anbiguotasuna) arazketarako.",
-              "save_debug_traces": "Gorde sailkapen zehatza eta potentzia-aztarna datu historian (biltegiratze-erabilera areagotzen du)."
-            }
-          },
-          "anti_wrinkle_section": {
-            "name": "Zimurren aurkako babesa (Lehorgailuak)",
-            "description": "Ez ikusi ziklo osteko danbor-biraketei ziklo mamuak saihesteko. Lehorgailua / garbigailu-lehorgailua soilik.",
-            "data": {
-              "anti_wrinkle_enabled": "Zimurren aurkako babesa (lehorgailua soilik)",
-              "anti_wrinkle_max_power": "Zimurren aurkako potentzia maximoa (W)",
-              "anti_wrinkle_max_duration": "Zimurren aurkako gehienezko iraupena (k)",
-              "anti_wrinkle_exit_power": "Zimurren aurkako irteera-potentzia (W)"
-            },
-            "data_description": {
-              "anti_wrinkle_enabled": "Ez ikusi potentzia baxuko danborraren biraketa laburrak ziklo bat amaitu ondoren, ziklo mamuak saihesteko (lehorgailua/garbigailua-lehorgailua soilik).",
-              "anti_wrinkle_max_power": "Potentzia horren edo beheragoko leherketak zimurren aurkako biraketa gisa tratatzen dira, ziklo berrien ordez. Zimurren aurkako babesa gaituta dagoenean bakarrik aplikatzen da.",
-              "anti_wrinkle_max_duration": "Leherketaren gehienezko luzera zimurren aurkako biraketa gisa tratatzeko. Zimurren aurkako babesa gaituta dagoenean bakarrik aplikatzen da.",
-              "anti_wrinkle_exit_power": "Potentzia maila horretatik behera jaisten bada, irten zimurren aurkako berehala (egia desaktibatuta). Zimurren aurkako babesa gaituta dagoenean bakarrik aplikatzen da."
-            }
-          },
-          "delay_start_section": {
-            "name": "Atzeratutako hasieraren detekzioa",
-            "description": "Tratatu potentzia baxuko standby iraunkorra 'Hasteko zain' gisa, zikloa benetan hasi arte.",
-            "data": {
-              "delay_start_detect_enabled": "Gaitu Abiatze atzeratua detektatzeko",
-              "delay_confirm_seconds": "Atzeratutako hasiera: standby berrespen-denbora (s)",
-              "delay_timeout_hours": "Hasiera atzeratua: Gehienezko itxaron-denbora (h)"
-            },
-            "data_description": {
-              "delay_start_detect_enabled": "Gaituta dagoenean, potentzia baxuko drainatze-puntu labur bat eta jarraian egonean dagoen potentziaren ondoren abiarazte atzeratu gisa hautematen da. Egoera-sentsoreak 'Hasteko zain' erakusten du atzerapenean. Ez da programaren denborarik edo aurrerapenik egiten zikloa benetan hasi arte. Start_threshold_w drainatze-potentziaren gainetik ezarri behar da.",
-              "delay_confirm_seconds": "Potentziak Gelditzeko atala (W) eta Hasteko atala (W) artean egon behar du segundo kopuru honetan WashData 'Hasteko zain' egoeran sartu aurretik. Menuetan nabigatzean sortzen diren gailur laburrak iragazten ditu. Lehenetsia: 60 s.",
-              "delay_timeout_hours": "Segurtasun-denbora-muga: ordu asko igaro ondoren makina oraindik 'Hasteko zain' moduan badago, WashData desaktibatuta berrezartzen da. Lehenetsia: 8 h."
-            }
-          },
-          "external_triggers_section": {
-            "name": "Kanpoko abiarazleak, atea eta pausa",
-            "description": "Aukerako kanpoko amaiera-abiarazle sentsorea, ate-sentsorea pausa/garbi detektatzeko, eta pausatzean potentzia eteten duen etengailua.",
-            "data": {
-              "external_end_trigger_enabled": "Gaitu kanpoko ziklo amaierako abiarazlea",
-              "external_end_trigger": "Kanpoko Ziklo amaierako sentsorea",
-              "external_end_trigger_inverted": "Alderantzikatu Trigger Logika (Trigger aktibatuta)",
-              "door_sensor_entity": "Ate-sentsorea",
-              "pause_cuts_power": "Moztu energia pausatzean",
-              "switch_entity": "Aldatu entitatea (Pausatu energia mozterako)",
-              "notify_unload_delay_minutes": "Garbitegia zain jakinarazpenaren atzerapena (min)"
-            },
-            "data_description": {
-              "external_end_trigger_enabled": "Gaitu kanpoko sentsore bitar baten jarraipena zikloa osatzea abiarazteko.",
-              "external_end_trigger": "Hautatu sentsore entitate bitar bat. Sentsore hau abiaraztean, uneko zikloa 'osatu' egoerarekin amaituko da.",
-              "external_end_trigger_inverted": "Lehenespenez, abiarazleak sentsorea pizten denean pizten da. Markatu lauki hau sentsorea itzaltzen denean pizteko.",
-              "door_sensor_entity": "Makinaren atearen aukerako sentsore bitarra (aktibatuta = irekita, itzalita = itxita). Ziklo aktibo batean atea irekitzen denean, WashData-k zikloa nahita pausatu dela baieztatuko du. Zikloa amaitu ondoren, atea oraindik itxita badago, egoera 'Garbitu'-ra aldatzen da atea ireki arte. Oharra: atea ixteak EZ du pausatutako ziklo bat automatikoki berresten; eskuz abiarazi behar da berrezartzea Zikloa berrekin batera botoiaren edo zerbitzuaren bidez.",
-              "pause_cuts_power": "Etenaldiaren zikloa botoiaren edo zerbitzuaren bidez pausatzen duzunean, desaktibatu konfiguratutako etengailu-entitatea ere. Gailu honetarako aldatzeko entitate bat konfiguratuta badago bakarrik izango du eragina.",
-              "switch_entity": "Etenaldian edo berriro hastean aldatzeko entitatea. Beharrezkoa da \"Moztu energia pausatzean\" gaituta dagoenean.",
-              "notify_unload_delay_minutes": "Bidali jakinarazpena amaierako jakinarazpen-kanalaren bidez, zikloa amaitu eta atea minutu askotan ireki ez denean (ate-sentsorea behar da). Ezarri 0 desgaitzeko. Lehenetsia: 60 min."
-            }
-          },
-          "pump_section": {
-            "name": "Ponparen monitorea",
-            "description": "Ponpa gailu motarentzat bakarrik. Gertaera bat jaurtitzen du ponparen zikloa iraupen hau baino gehiago luzatzen bada.",
-            "data": {
-              "pump_stuck_duration": "Ponpa trabatuta dagoen alerta-atalasea (k) (ponpa soilik)"
-            },
-            "data_description": {
-              "pump_stuck_duration": "Segundo horren ondoren ponpaketa-ziklo bat martxan badago, ha_washdata_pump_stuck gertaera bat piztuko da behin. Erabili hau trabatuta dagoen motor bat detektatzeko (putzu-ponparen funtzionamendu arrunta 60 s baino gutxiagokoa da). Lehenetsia: 1800 s (30 min). Ponpa-gailu mota soilik."
-            }
-          },
-          "device_link_section": {
-            "name": "Gailuaren esteka",
-            "description": "Aukeran, konektatu WashData gailu hau lehendik dagoen Home Assistant gailu batera (adibidez, entxufe azkarra edo aplikazioa bera). Orduan, WashData gailua gailu hori \"Konektatuta\" gisa erakusten da. Utzi hutsik WashData gailu bakar gisa mantentzeko.",
-            "data": {
-              "linked_device": "Konektatutako gailua"
-            },
-            "data_description": {
-              "linked_device": "Hautatu gailua WashData konektatzeko. Honek \"Konektatutako bidez\" erreferentzia gehitzen du gailuen erregistroan; WashData-k bere gailu-txartela eta entitateak gordetzen ditu. Garbitu hautapena esteka kentzeko."
-            }
-          }
-        }
-      },
-      "diagnostics": {
-        "title": "Diagnostikoa eta mantentze-lanak",
-        "description": "Exekutatu mantentze-ekintzak, esate baterako, zatitutako zikloak bateratzea edo gordetako datuak migratzea.\n\n**Biltegiratze erabilera**\n\n- Fitxategiaren tamaina: {file_size_kb} KB\n- Zikloak: {cycle_count}\n- Profilak: {profile_count}\n- Araztu arrastoak: {debug_count}",
-        "menu_options": {
-          "reprocess_history": "Mantentze-lanak: birprozesatu eta optimizatu datuak",
-          "clear_debug_data": "Garbitu arazketa-datuak (askatu espazioa)",
-          "wipe_history": "Garbitu gailu honen datu GUZTIAK (itzulezina)",
-          "export_import": "Esportatu/Inportatu JSON ezarpenekin (kopiatu/itsatsi)",
-          "menu_back": "← Atzera"
-        }
-      },
-      "clear_debug_data": {
-        "title": "Garbitu arazketa-datuak",
-        "description": "Ziur gordetako arazketa-arrasto guztiak ezabatu nahi dituzula? Honek lekua askatuko du, baina iraganeko zikloetako sailkapenaren informazio zehatza kenduko du."
-      },
-      "manage_cycles": {
-        "title": "Kudeatu Zikloak",
-        "description": "Azken zikloak:\n{recent_cycles}",
-        "menu_options": {
-          "auto_label_cycles": "Auto-etiketatu Ziklo Zaharrak",
-          "select_cycle_to_label": "Etiketatu ziklo espezifiko bat",
-          "select_cycle_to_delete": "Ezabatu Zikloa",
-          "interactive_editor": "Batu/Zatitu Editore Interaktiboa",
-          "trim_cycle_select": "Moztu Zikloaren Datuak",
-          "menu_back": "← Atzera"
-        }
-      },
-      "manage_cycles_empty": {
-        "title": "Kudeatu Zikloak",
-        "description": "Oraindik ez dago ziklorik erregistratu.",
-        "menu_options": {
-          "auto_label_cycles": "Auto-etiketatu Ziklo Zaharrak",
-          "menu_back": "← Atzera"
-        }
-      },
-      "manage_profiles": {
-        "title": "Kudeatu profilak",
-        "description": "Profilaren laburpena:\n{profile_summary}",
-        "menu_options": {
-          "create_profile": "Sortu profil berria",
-          "edit_profile": "Editatu/Aldatu izena profila",
-          "delete_profile_select": "Ezabatu profila",
-          "profile_stats": "Profilen Estatistikak",
-          "cleanup_profile": "Garbitu historia - Grafikoa eta ezabatu",
-          "assign_profile_phases_select": "Esleitu fase-barrutiak",
-          "menu_back": "← Atzera"
-        }
-      },
-      "manage_profiles_empty": {
-        "title": "Kudeatu profilak",
-        "description": "Ez dago profilik sortu oraindik.",
-        "menu_options": {
-          "create_profile": "Sortu profil berria",
-          "menu_back": "← Atzera"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "Kudeatu Faseen Katalogoa",
-        "description": "Faseen katalogoa (gailu honen lehenetsiak + fase pertsonalizatuak):\n{phase_summary}",
-        "menu_options": {
-          "phase_catalog_create": "Sortu Fase Berria",
-          "phase_catalog_edit_select": "Editatu Fasea",
-          "phase_catalog_delete": "Ezabatu Fasea",
-          "menu_back": "← Atzera"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "Sortu Fase pertsonalizatua",
-        "description": "Sortu fase-izen eta deskribapen pertsonalizatu bat eta aukeratu zein gailu motari aplikatzen zaion.",
-        "data": {
-          "target_device_type": "Helburuko gailu mota",
-          "phase_name": "Fasearen izena",
-          "phase_description": "Fasearen Deskribapena"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "Editatu Fase pertsonalizatua",
-        "description": "Hautatu editatzeko fase pertsonalizatu bat.",
-        "data": {
-          "phase_name": "Fase pertsonalizatua"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "Editatu Fase pertsonalizatua",
-        "description": "Edizio fasea: {phase_name}",
-        "data": {
-          "phase_name": "Fasearen izena",
-          "phase_description": "Fasearen Deskribapena"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "Ezabatu Fase pertsonalizatua",
-        "description": "Hautatu ezabatzeko fase pertsonalizatu bat. Fase hau erabiliz esleitutako barrutiak kenduko dira.",
-        "data": {
-          "phase_name": "Fase pertsonalizatua"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "Esleitu fase-barrutiak",
-        "description": "Profilaren fasearen aurrebista: **{profile_name}**\n\n{timeline_svg}\n\n**Oraingo barrutiak:**\n{current_ranges}\n\nErabili beheko ekintzak barrutiak gehitzeko, editatzeko, ezabatzeko edo gordetzeko.",
-        "menu_options": {
-          "assign_profile_phases_add": "Gehitu Fase Barrutia",
-          "assign_profile_phases_edit_select": "Editatu fase-barrutia",
-          "assign_profile_phases_delete": "Ezabatu fase-barrutia",
-          "phase_ranges_clear": "Garbitu barruti guztiak",
-          "assign_profile_phases_auto_detect": "Auto-detektatzeko faseak",
-          "phase_ranges_save": "Gorde eta Itzuli",
-          "menu_back": "← Atzera"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "Gehitu Fase Barrutia",
-        "description": "Gehitu fase-barruti bat uneko zirriborroari.",
-        "data": {
-          "phase_name": "Fasea",
-          "start_min": "Hasierako minutua",
-          "end_min": "Amaiera Minutua"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "Editatu fase-barrutia",
-        "description": "Hautatu editatzeko barruti bat.",
-        "data": {
-          "range_index": "Fase barrutia"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "Editatu fase-barrutia",
-        "description": "Eguneratu hautatutako fase-barrutia.",
-        "data": {
-          "phase_name": "Fasea",
-          "start_min": "Hasierako minutua",
-          "end_min": "Amaiera Minutua"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "Ezabatu fase-barrutia",
-        "description": "Hautatu zirriborrotik kentzeko barrutia.",
-        "data": {
-          "range_index": "Fase barrutia"
-        }
-      },
-      "assign_profile_phases_auto_detect": {
-        "title": "Auto-detektaturiko faseak",
-        "description": "Profila: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fase(k) automatikoki detektatu dira.** Aukeratu ekintza bat behean.",
-        "data": {
-          "action": "Ekintza"
-        }
-      },
-      "assign_profile_phases_auto_detect_name": {
-        "title": "Izena detektaturiko faseak",
-        "description": "Profila: **{profile_name}**\n\n**{detected_count} fase(k) detektatu dira:**\n{ranges_summary}\n\nIzen bat eman fase bakoitzari."
-      },
-      "assign_profile_phases_select": {
-        "title": "Esleitu fase-barrutiak",
-        "description": "Hautatu profil bat fase-barrutiak konfiguratzeko.",
-        "data": {
-          "profile": "Profila"
-        }
-      },
-      "profile_stats": {
-        "title": "Profilen Estatistikak",
-        "description": "{stats_table}"
-      },
-      "create_profile": {
-        "title": "Sortu profil berria",
-        "description": "Sortu profil berri bat eskuz edo iraganeko ziklo batetik.\n\nProfilaren izenaren adibideak: 'Delikatuak', 'Erresistentzia gogorra', 'Garbiketa azkarra'",
-        "data": {
-          "profile_name": "Profilaren izena",
-          "reference_cycle": "Erreferentzia Zikloa (aukerakoa)",
-          "manual_duration": "Eskuzko iraupena (minutuak)"
-        }
-      },
-      "edit_profile": {
-        "title": "Editatu profila",
-        "description": "Hautatu izena aldatzeko profil bat",
-        "data": {
-          "profile": "Profila"
-        }
-      },
-      "rename_profile": {
-        "title": "Editatu profilaren xehetasunak",
-        "description": "Uneko profila: {current_name}",
-        "data": {
-          "new_name": "Profilaren izena",
-          "manual_duration": "Eskuzko iraupena (minutuak)"
-        }
-      },
-      "delete_profile_select": {
-        "title": "Ezabatu profila",
-        "description": "Hautatu ezabatzeko profil bat",
-        "data": {
-          "profile": "Profila"
-        }
-      },
-      "delete_profile_confirm": {
-        "title": "Berretsi ezabatu profila",
-        "description": "⚠️ Honek betiko ezabatuko du profila: {profile_name}",
-        "data": {
-          "unlabel_cycles": "Kendu etiketa zikloetatik profil hau erabiliz"
-        }
-      },
-      "auto_label_cycles": {
-        "title": "Auto-etiketatu Ziklo Zaharrak",
-        "description": "Guztira {total_count} ziklo aurkitu dira. Profilak: {profiles}",
-        "data": {
-          "confidence_threshold": "Gutxieneko konfiantza (0,50-0,95)"
-        }
-      },
-      "select_cycle_to_label": {
-        "title": "Hautatu Zikloa etiketatzera",
-        "description": "✓ = amaitu, ⚠ = berriro hasi, ✗ = eten",
-        "data": {
-          "cycle_id": "Zikloa"
-        }
-      },
-      "select_cycle_to_delete": {
-        "title": "Ezabatu Zikloa",
-        "description": "⚠️ Honek betiko ezabatuko du hautatutako zikloa",
-        "data": {
-          "cycle_id": "Ezabatzeko zikloa"
-        }
-      },
-      "label_cycle": {
-        "title": "Etiketa Zikloa",
-        "description": "{cycle_info}",
-        "data": {
-          "profile_name": "Profila",
-          "new_profile_name": "Profilaren izen berria (sortuz gero)"
-        }
-      },
-      "post_process": {
-        "title": "Prozesuaren historia (Bateatu/Zatitu)",
-        "description": "Garbitu zikloaren historia zatitutako exekuzioak batuz eta gaizki bateratutako zikloak denbora-leiho batean banatuz. Idatzi atzera begiratzeko ordu kopurua (erabili 999999 guztientzako).",
-        "data": {
-          "time_range": "Atzera begiratzeko leihoa (orduak)",
-          "gap_seconds": "Batu/Zatitu hutsunea (segundoak)"
-        },
-        "data_description": {
-          "time_range": "Ziklo zatikatuak batzeko eskaneatzeko ordu kopurua. Erabili 999999 datu historiko guztiak prozesatzeko.",
-          "gap_seconds": "Banaketa eta batzea erabakitzeko atalasea. Hau baino LABURRATZEKO hutsuneak batzen dira. Hau baino LUZEAGOKO hutsuneak banatuta daude. Jaitsi hau gaizki batu den ziklo batean zatiketa bat behartzeko."
-        }
-      },
-      "cleanup_profile": {
-        "title": "Garbitu historia - Hautatu profila",
-        "description": "Hautatu bistaratzeko profil bat. Honen bidez, grafiko bat sortuko da profil honen iraganeko ziklo guztiak erakusten dituena, kanpokoak identifikatzen laguntzeko.",
-        "data": {
-          "profile": "Profila"
-        }
-      },
-      "cleanup_select": {
-        "title": "Garbitu historia - Grafikoa eta ezabatu",
-        "description": "![Grafikoa]({graph_url})\n\n**{profile_name}** bistaratzen\n\nGrafikoak ziklo indibidualak koloretako lerro gisa erakusten ditu. Identifikatu kanpokoak (taldetik urrun dauden lerroak) eta haien kolorea bat etortzea beheko zerrendan ezabatzeko.\n\n**Hautatu BEHIKO ezabatzeko zikloak:**",
-        "data": {
-          "cycles_to_delete": "Ezabatu beharreko zikloak (ikusi bat datozen koloreak)"
-        }
-      },
-      "interactive_editor": {
-        "title": "Batu/Zatitu Editore Interaktiboa",
-        "description": "Hautatu eskuzko ekintza bat zure zikloaren historian egiteko.",
-        "menu_options": {
-          "editor_split": "Ziklo bat zatitu (aurkitu hutsuneak)",
-          "editor_merge": "Bateratu zikloak (Batu zatiak)",
-          "editor_delete": "Ezabatu zikloa(k)",
-          "menu_back": "← Atzera"
-        }
-      },
-      "editor_select": {
-        "title": "Hautatu Zikloak",
-        "description": "Hautatu prozesatu beharreko zikloa(k).\n\n{info_text}",
-        "data": {
-          "selected_cycles": "Zikloak"
-        }
-      },
-      "editor_configure": {
-        "title": "Konfiguratu eta Aplikatu",
-        "description": "{preview_md}",
-        "data": {
-          "confirm_action": "Ekintza",
-          "merged_profile": "Sortutako profila",
-          "new_profile_name": "Profilaren izen berria",
-          "confirm_commit": "Bai, ekintza hau berresten dut",
-          "segment_0_profile": "1. segmentuaren profila",
-          "segment_1_profile": "2. segmentuaren profila",
-          "segment_2_profile": "3. segmentuaren profila",
-          "segment_3_profile": "4. segmentuaren profila",
-          "segment_4_profile": "5. segmentuaren profila",
-          "segment_5_profile": "6. segmentuaren profila",
-          "segment_6_profile": "7. segmentuaren profila",
-          "segment_7_profile": "8. segmentuaren profila",
-          "segment_8_profile": "9. segmentua profila",
-          "segment_9_profile": "10. segmentuaren profila"
-        }
-      },
-      "editor_split_params": {
-        "title": "Zatitu konfigurazioa",
-        "description": "Doitu ziklo hau zatitzeko sentikortasuna. Hau baino luzeagoa den hutsuneak zatiketa eragingo du.",
-        "data": {
-          "split_mode": "Zatitze metodoa"
-        }
-      },
-      "editor_split_auto_params": {
-        "title": "Zatiketa automatikoaren konfigurazioa",
-        "description": "Doitu ziklo hau zatitzeko sentikortasuna. Hori baino luzeagoa den geldialdi-tarte orok zatiketa eragingo du.",
-        "data": {
-          "min_gap_seconds": "Zatiketa-tartearen atalasea (segundoak)"
-        }
-      },
-      "editor_split_manual_params": {
-        "title": "Eskuzko zatiketa-denbora markak",
-        "description": "{preview_md}Zikloaren leihoa: **{cycle_start_wallclock} → {cycle_end_wallclock}** {cycle_date} egunean.\n\nSartu zatiketa-denbora marka bat edo gehiago (`HH:MM` edo `HH:MM:SS`), bat lerro bakoitzean. Zikloa denbora marka bakoitzean ebakiko da — N denbora markek N+1 segmentu sortzen dituzte.",
-        "data": {
-          "split_timestamps": "Zatiketa-denbora zigiluak"
-        }
-      },
-      "reprocess_history": {
-        "title": "Mantentze-lanak: birprozesatu eta optimizatu datuak",
-        "description": "Datu historikoen garbiketa sakona egiten du:\n1. Zero potentziako irakurketak mozten ditu (isiltasuna).\n2. Zikloaren denbora/iraupena konpontzen du.\n3. Eredu estatistiko guztiak (kartazalak) birkalkulatzen ditu.\n\n**Exekutatu hau datu-arazoak konpontzeko edo algoritmo berriak aplikatzeko.**"
-      },
-      "wipe_history": {
-        "title": "Garbitu historia (probak soilik)",
-        "description": "⚠️ Honek betiko ezabatuko ditu gailu honen gordetako ziklo eta profil GUZTIAK. Hau ezin da desegin!"
-      },
-      "export_import": {
-        "title": "Esportatu/Inportatu JSON",
-        "description": "Kopiatu/itsatsi gailu honen zikloak, profilak ETA ezarpenak. Esportatu behean edo itsatsi JSON inportatzeko.",
-        "data": {
-          "mode": "Ekintza",
-          "json_payload": "Osatu JSON konfigurazioa"
-        },
-        "data_description": {
-          "mode": "Aukeratu Esportatu uneko datuak eta ezarpenak kopiatzeko, edo Inportatu esportatutako datuak beste WashData gailu batetik itsasteko.",
-          "json_payload": "Esportatzeko: kopiatu JSON hau (zikloak, profilak eta doitutako ezarpen guztiak barne). Inportatzeko: itsatsi WashData-tik esportatutako JSON."
-        }
-      },
-      "record_cycle": {
-        "title": "Erregistro Zikloa",
-        "description": "Grabatu eskuz ziklo bat interferentziarik gabe profil garbi bat sortzeko.\n\nEgoera: **{status}**\nIraupena: {duration} s\nLaginak: {samples}",
-        "menu_options": {
-          "record_refresh": "Freskatu egoera",
-          "record_stop": "Gelditu grabaketa (Gorde eta prozesatu)",
-          "record_start": "Hasi Grabaketa Berria",
-          "record_process": "Azken grabaketa prozesatu (moztu eta gorde)",
-          "record_discard": "Baztertu azken grabaketa",
-          "menu_back": "← Atzera"
-        }
-      },
-      "record_process": {
-        "title": "Prozesuaren Grabaketa",
-        "description": "![Grafikoa]({graph_url})\n\n**Grafikoak grabaketa gordina erakusten du.** Urdina = Mantendu, Gorria = Proposatutako mozketa.\n* Grafikoa estatikoa da eta ez da inprimaki-aldaketekin eguneratzen.*\n\nGrabaketa gelditu da. Mozketak detektatutako laginketa-tasarekin (~{sampling_rate} s) lerrokatzen dira.\n\nIraupena gordina: {duration} s\nLaginak: {samples}",
-        "data": {
-          "head_trim": "Moztu hasiera (segundoak)",
-          "tail_trim": "Moztu amaiera (segundoak)",
-          "save_mode": "Gorde helmuga",
-          "profile_name": "Profilaren izena"
-        }
-      },
-      "learning_feedbacks": {
-        "title": "Ikasteko Iritziak",
-        "description": "Zain dauden iritziak: {count}\n\n{pending_table}\n\nHautatu ziklo berrikusteko eskaera bat prozesatzeko.",
-        "menu_options": {
-          "learning_feedbacks_pick": "Berrikusi zain dagoen iritzi bat",
-          "learning_feedbacks_dismiss_all": "Baztertu zain dauden iritzi guztiak",
-          "menu_back": "← Atzera"
-        }
-      },
-      "learning_feedbacks_pick": {
-        "title": "Berrikusteko iritziak aukeratu",
-        "description": "Irekitzeko zikloaren berrikuspen-eskaera bat hautatu.",
-        "data": {
-          "selected_feedback": "Berrikusteko zikloa hautatu"
-        }
-      },
-      "learning_feedbacks_empty": {
-        "title": "Ikasteko Iritziak",
-        "description": "Ez da aurkitu zain dagoen iritzi-eskaerarik.",
-        "menu_options": {
-          "menu_back": "← Atzera"
-        }
-      },
-      "learning_feedbacks_dismiss_all": {
-        "title": "Zain dauden iritzi guztiak baztertu",
-        "description": "**{count}** zain dauden iritzi-eskaera baztertzeko zorian zaude. Baztertutako zikloak zure historian geratuko dira, baina ez dute ikaskuntza-seinale berririk emango. Ezin da hau desegin.\n\n✅ Markatu beheko laukia eta egin klik **Bidali** guztiak baztertzeko.\n❌ Utzi markarik gabe eta egin klik **Bidali** bertan behera uzteko eta atzera egiteko.",
-        "data": {
-          "confirm_dismiss_all": "Berretsi: baztertu zain dauden iritzi-eskaera guztiak"
-        }
-      },
-      "resolve_feedback": {
-        "title": "Ebatzi Iritzia",
-        "description": "{comparison_img}{candidates_table}\n**Hautsitako profila**: {detected_profile} (% {confidence_pct})\n**Gutxi gorabeherako iraupena**: {est_duration_min} min\n**Egiazko iraupena**: {act_duration_min} min\n\n__Aukeratu beheko ekintza bat:__",
-        "data": {
-          "action": "Zer egin nahiko zenuke?",
-          "corrected_profile": "Programa zuzena (zuzentzen bada)",
-          "corrected_duration": "Zuzena iraupena segundutan (zuzentzen bada)"
-        }
-      },
-      "trim_cycle_select": {
-        "title": "Moztu Zikloa - Hautatu Zikloa",
-        "description": "Hautatu mozteko ziklo bat. ✓ = amaitu, ⚠ = berriro hasi, ✗ = eten",
-        "data": {
-          "cycle_id": "Zikloa"
-        }
-      },
-      "trim_cycle": {
-        "title": "Moztu Zikloa",
-        "description": "Uneko leihoa: {trim_summary}\n\n{trim_svg}",
-        "data": {
-          "action": "Ekintza"
-        }
-      },
-      "trim_cycle_start": {
-        "title": "Ezarri Moztu Hasiera",
-        "description": "Zikloaren leihoa: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nUneko hasiera: **{current_wallclock}** (zikloaren hasieratik {current_offset_min} min)\n\nAukeratu hasiera-ordu berria beheko erloju-hautatzailea erabiliz.",
-        "data": {
-          "trim_start_time": "Hasiera ordu berria",
-          "trim_start_min": "Irteera berria (zikloaren hasieratik minutu batzuk)"
-        }
-      },
-      "trim_cycle_end": {
-        "title": "Ezarri Moztu Amaiera",
-        "description": "Zikloaren leihoa: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nUneko amaiera: **{current_wallclock}** (zikloaren hasieratik {current_offset_min} min)\n\nAukeratu amaiera ordu berri bat beheko erloju-hautatzailea erabiliz.",
-        "data": {
-          "trim_end_time": "Amaiera ordu berria",
-          "trim_end_min": "Amaiera berria (zikloaren hasieratik minutu batzuk)"
+          "power_sensor": "Potentzia-sentsorea",
+          "min_power": "Potentzia minimoaren atalasea (W)"
         }
       }
     },
     "error": {
-      "import_failed": "Ezin izan da inportatu. Mesedez, itsatsi baliozko WashData esportazio JSON bat.",
-      "select_exactly_one": "Hautatu zehazki ziklo bat ekintza honetarako.",
-      "select_at_least_one": "Hautatu gutxienez ziklo bat ekintza honetarako.",
-      "select_at_least_two": "Hautatu gutxienez bi ziklo ekintza honetarako.",
-      "profile_exists": "Badago izen hau duen profil bat",
-      "rename_failed": "Ezin izan da profilaren izena aldatu. Baliteke profila ez egotea edo izen berria dagoeneko hartua izatea.",
-      "assignment_failed": "Ezin izan zaio profila esleitu zikloari",
-      "duplicate_phase": "Izen hau duen fase bat badago jada.",
-      "phase_not_found": "Hautatutako fasea ez da aurkitu.",
-      "invalid_phase_name": "Fasearen izena ezin da hutsik egon.",
-      "phase_name_too_long": "Fasearen izena luzeegia da.",
-      "invalid_phase_range": "Fase-barrutia baliogabea da. Amaierak hasiera baino handiagoa izan behar du.",
-      "invalid_phase_timestamp": "Denbora-zigilua baliogabea da. Erabili YYYY-MM-DD HH:MM edo HH:MM formatua.",
-      "overlapping_phase_ranges": "Fase barrutiak gainjartzen dira. Doitu barrutiak eta saiatu berriro.",
-      "incomplete_phase_row": "Fase errenkada bakoitzak fase bat gehi hasiera/amaiera balio osoak sartu behar ditu hautatutako modurako.",
-      "timestamp_mode_cycle_required": "Mesedez, hautatu iturburu-ziklo bat denbora-zigilu modua erabiltzean.",
-      "no_phase_ranges": "Oraindik ez dago fase-barrutirik erabilgarri ekintza horretarako.",
       "feedback_notification_title": "WashData: Egiaztatu Zikloa ({device})",
       "feedback_notification_message": "**Gailua**: {device}\n**Programa**: {program} (% {confidence} konfiantza)\n**Ordua**: {time}\n\nWashData-k zure laguntza behar du hautemandako ziklo hau egiaztatzeko.\n\nMesedez, joan **Ezarpenak > Gailuak eta zerbitzuak > WashData > Konfiguratu > Ikaskuntza-iritziak** atalera emaitza hau berresteko edo zuzentzeko.",
       "suggestions_ready_notification_title": "WashData: iradokitako ezarpenak prest ({device})",
       "suggestions_ready_notification_message": "**Iradokitako ezarpenak** sentsoreak **{count}** gomendio akziogarriak ematen ditu orain.\n\nHoriek berrikusteko eta aplikatzeko: **Ezarpenak > Gailuak eta zerbitzuak > WashData > Konfiguratu > Ezarpen aurreratuak > Aplikatu iradokitako balioak**.\n\nIradokizunak aukerakoak dira eta gorde aurretik berrikusteko erakusten dira.",
-      "trim_range_invalid": "Hasiera amaiera baino lehen izan behar da. Mesedez, egokitu zure mozketa-puntuak.",
-      "trim_failed": "Moztu huts egin du. Baliteke zikloa ez egotea edo leihoa hutsik egotea.",
-      "invalid_split_timestamp": "Denbora-zigilua baliogabea da edo zikloaren leihoaz kanpo dago. Erabili HH:MM edo HH:MM:SS zikloaren leihoaren barruan.",
-      "no_split_segments_found": "Ezin izan da baliozko segmenturik sortu denbora-zigilu hauetatik. Ziurtatu denbora-zigilu bakoitza zikloaren leihoaren barruan dagoela eta segmentuek gutxienez minutu 1 dutela.",
       "auto_tune_suggestion": "{device_type} {device_title} mamu-zikloak detektatu ditu. Iradokitako potentzia minimoaren aldaketa: {current_min}W -> {new_min}W (ez da automatikoki aplikatu).",
       "auto_tune_title": "WashData Auto-Tune",
       "auto_tune_fallback": "{device_type} {device_title} mamu-zikloak detektatu ditu. Iradokitako potentzia minimoaren aldaketa: {current_min}W -> {new_min}W (ez da automatikoki aplikatu)."
-    },
-    "abort": {
-      "no_cycles_found": "Ez da ziklorik aurkitu",
-      "no_split_segments_found": "Ez da segmentu zatigarririk aurkitu hautatutako zikloan.",
-      "cycle_not_found": "Ezin izan da hautatutako zikloa kargatu.",
-      "no_power_data": "Ez dago potentzia-aztarna daturik aukeratutako ziklorako.",
-      "no_profiles_found": "Ez da profilik aurkitu. Sortu profil bat lehenik.",
-      "no_profiles_for_matching": "Ez dago profilik bat etortzeko erabilgarri. Sortu profilak lehenik.",
-      "no_unlabeled_cycles": "Ziklo guztiak dagoeneko etiketatuta daude",
-      "no_suggestions": "Oraindik ez dago iradokitako baliorik eskuragarri. Exekutatu ziklo batzuk eta saiatu berriro.",
-      "no_predictions": "Iragarpenik ez",
-      "no_custom_phases": "Ez da fase pertsonalizaturik aurkitu.",
-      "reprocess_success": "Behar bezala birprozesatu dira {count} ziklo.",
-      "debug_data_cleared": "Behar bezala garbitu dira {count} zikloetako arazketa-datuak."
     }
   },
   "selector": {
@@ -806,6 +77,18 @@
         "cycle_live": "Zuzeneko Aurrerapena"
       }
     },
+    "device_type": {
+      "options": {
+        "washing_machine": "Garbigailua",
+        "dryer": "Lehorgailua",
+        "washer_dryer": "Garbigailua-lehorgailua konbinazioa",
+        "dishwasher": "Ontzi-garbigailua",
+        "air_fryer": "Aire frijigailua",
+        "bread_maker": "Ogi Egilea",
+        "pump": "Ponpa",
+        "other": "Beste batzuk (aurreratua)"
+      }
+    },
     "common_text": {
       "options": {
         "unlabeled": "(Etiketarik gabe)",
@@ -814,6 +97,10 @@
         "no_reference_cycle": "(Ez dago erreferentzia-ziklorik)",
         "all_device_types": "Gailu mota guztiak",
         "current_suffix": "(egungoa)",
+        "phase_builtin_suffix": "(Sortua)",
+        "phase_none_available": "Ez dago faserik eskuragarri.",
+        "phase_other_device_types": "Beste gailu mota batzuk:",
+        "settings_deprecation_warning": "⚠️ **Gailu mota zaharkitua:** {device_type} etorkizuneko bertsio batean kentzeko aurreikusita dago. WashData-ren bat datorren kanalizazioak ez du emaitza fidagarriak ematen tresna-klase honetarako. Zure integrazioak funtzionatzen jarraitzen du zaharkitze-aldian zehar; abisu hau isilarazteko, aldatu beheko **Gailu mota** onartzen den mota batera (garbigailua, lehorgailua, garbigailua-lehorgailua konbinatua, ontzi-garbigailua, aire frijigailua, ogi-egilea edo ponpa) edo **Besteak (aurreratua)** aukerara, zure gailuak onartzen ez badituzu. **Beste batzuk (Aurreratuak)** nahita inongo tresna zehatzetarako sintonizatuta ez dauden lehenespen generikoak bidaltzen ditu, beraz, zuk zeuk konfiguratu beharko dituzu atalaseak, denbora-muga eta bat datozen parametroak; Lehendik dituzun ezarpen guztiak gordetzen dira aldatzen zarenean.",
         "editor_select_info": "Hautatu 1 ziklo zatitzeko, edo 2 ziklo baino gehiago batzeko.",
         "editor_select_info_split": "Hautatu zatitzeko 1 ziklo.",
         "editor_select_info_merge": "Hautatu bateratzeko 2+ ziklo.",
@@ -889,11 +176,7 @@
         "table_avg_energy": "Batez best. energia",
         "table_detected_program": "Detektatutako programa",
         "table_confidence": "Konfiantza",
-        "table_reported": "Jakinarazia",
-        "phase_builtin_suffix": "(Sortua)",
-        "phase_none_available": "Ez dago faserik eskuragarri.",
-        "settings_deprecation_warning": "⚠️ **Gailu mota zaharkitua:** {device_type} etorkizuneko bertsio batean kentzeko aurreikusita dago. WashData-ren bat datorren kanalizazioak ez du emaitza fidagarriak ematen tresna-klase honetarako. Zure integrazioak funtzionatzen jarraitzen du zaharkitze-aldian zehar; abisu hau isilarazteko, aldatu beheko **Gailu mota** onartzen den mota batera (garbigailua, lehorgailua, garbigailua-lehorgailua konbinatua, ontzi-garbigailua, aire frijigailua, ogi-egilea edo ponpa) edo **Besteak (aurreratua)** aukerara, zure gailuak onartzen ez badituzu. **Beste batzuk (Aurreratuak)** nahita inongo tresna zehatzetarako sintonizatuta ez dauden lehenespen generikoak bidaltzen ditu, beraz, zuk zeuk konfiguratu beharko dituzu atalaseak, denbora-muga eta bat datozen parametroak; Lehendik dituzun ezarpen guztiak gordetzen dira aldatzen zarenean.",
-        "phase_other_device_types": "Beste gailu mota batzuk:"
+        "table_reported": "Jakinarazia"
       }
     },
     "interactive_editor_action": {
@@ -949,6 +232,12 @@
         "delete_custom_phase": "Ezabatu Fasea"
       }
     },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Faseak izendatu eta aplikatu",
+        "cancel": "Atzera egin aldaketarik gabe"
+      }
+    },
     "assign_profile_phases_action": {
       "options": {
         "add_range": "Gehitu Fase Barrutia",
@@ -983,12 +272,6 @@
         "delete": "Ezabatu - Kendu historiatik"
       }
     },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Faseak izendatu eta aplikatu",
-        "cancel": "Atzera egin aldaketarik gabe"
-      }
-    },
     "trim_cycle_action": {
       "options": {
         "set_start": "Ezarri Abiapuntua",
@@ -996,18 +279,6 @@
         "reset": "Berrezarri iraupen osoa",
         "apply": "Aplikatu mozketa",
         "cancel": "Utzi"
-      }
-    },
-    "device_type": {
-      "options": {
-        "washing_machine": "Garbigailua",
-        "dryer": "Lehorgailua",
-        "washer_dryer": "Garbigailua-lehorgailua konbinazioa",
-        "dishwasher": "Ontzi-garbigailua",
-        "air_fryer": "Aire frijigailua",
-        "bread_maker": "Ogi Egilea",
-        "pump": "Ponpa",
-        "other": "Beste batzuk (aurreratua)"
       }
     }
   },
@@ -1195,12 +466,22 @@
       }
     },
     "resume_cycle": {
-      "name": "Zikloa berreskuratzea",
+      "name": "Berrekin zikloa",
       "description": "Berrekin pausatutako ziklo bati WashData gailu baterako.",
       "fields": {
         "device_id": {
           "name": "Gailua",
           "description": "Berrekiteko WashData gailua."
+        }
+      }
+    },
+    "trigger_ml_training": {
+      "name": "Abiarazi ML entrenamendua",
+      "description": "Gailu honetako ML ereduak berriro entrenatu eskuz, gailuaren etiketatutako ziklo propioetan oinarrituta (esperimentala).",
+      "fields": {
+        "device_id": {
+          "name": "Gailua",
+          "description": "Ereduak berriro entrenatzeko WashData gailua."
         }
       }
     }
@@ -1227,12 +508,12 @@
           "ending": "Amaitze bidean",
           "finished": "Amaituta",
           "anti_wrinkle": "Zimur-aurkakoa",
-          "delay_wait": "Hasteko zain",
           "interrupted": "Etenduta",
           "force_stopped": "Beharrez gelditu",
           "rinse": "Garbiketa",
           "unknown": "Ezezaguna",
-          "clean": "Garbitu"
+          "clean": "Garbitu",
+          "delay_wait": "Hasteko zain"
         }
       },
       "washer_program": {
@@ -1264,6 +545,9 @@
         "state": {
           "none": "Bat ere ez"
         }
+      },
+      "ambiguity": {
+        "name": "Bat-etortze anbiguotasuna"
       },
       "current_phase": {
         "name": "Egungo Fasea"
@@ -1301,7 +585,7 @@
         "name": "Eten zikloa"
       },
       "resume_cycle": {
-        "name": "Zikloa berreskuratzea"
+        "name": "Jarraitu zikloa"
       }
     }
   },
@@ -1332,6 +616,708 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s trim_start_s baino handiagoa izan behar du."
+    }
+  },
+  "panel": {
+    "tab": {
+      "status": "Ikuspegi orokorra",
+      "history": "Zikloak",
+      "profiles": "Profilak",
+      "settings": "Ezarpenak",
+      "ml": "ML prestakuntza",
+      "advanced": "Aurreratua",
+      "diagnostics": "Diagnostikoa",
+      "pp_overview": "Ikuspegi orokorra",
+      "pp_phases": "Faseak",
+      "pp_cleanup": "Garbiketa",
+      "pp_manage": "Kudeatu",
+      "subtab_profiles": "Profilak",
+      "subtab_phase_catalog": "Fasearen katalogoa"
+    },
+    "btn": {
+      "save": "Gorde",
+      "cancel": "Utzi",
+      "delete": "Ezabatu",
+      "close": "Itxi",
+      "edit": "Editatu",
+      "add": "Gehitu",
+      "rebuild": "Berreraiki gutun-azalak",
+      "record": "Hasi grabatzen",
+      "compare": "Konparatu",
+      "confirm": "Berretsi",
+      "discard": "Baztertu",
+      "export": "Esportatu",
+      "import": "Inportatu",
+      "merge": "Batu",
+      "apply": "Aplikatu",
+      "refresh": "Freskatu",
+      "create": "Sortu",
+      "select": "Hautatu",
+      "done": "Eginda",
+      "reset": "Berrezarri",
+      "trim": "Moztu",
+      "split": "Zatitu",
+      "review": "Berrikusi",
+      "inspect": "Aztertu",
+      "label": "Etiketa",
+      "save_settings": "Gorde ezarpenak",
+      "new_profile": "+ Profil berria",
+      "new_group": "+ Talde berria",
+      "apply_label": "Aplikatu etiketa",
+      "run_auto_label": "Exekutatu Auto-Label",
+      "save_review": "Gorde berrikuspena",
+      "apply_trim": "Aplikatu Trim",
+      "apply_split": "Aplikatu zatiketa",
+      "process_recording": "Gorde grabazioa",
+      "stop": "Gelditu",
+      "process": "Prozesua",
+      "add_device": "+ Gehitu gailua",
+      "train_now": "Entrenatu orain",
+      "reset_to_defaults": "Berrezarri lehenetsietara",
+      "reset_to_builtin": "Berrezarri eredu integratuetara",
+      "save_preferences": "Gorde hobespenak",
+      "save_panel_settings": "Gorde panelaren ezarpenak",
+      "save_access_control": "Gorde sarbide-kontrola",
+      "auto_label_cycles": "Etiketa automatikoki zikloak",
+      "run_analysis": "🔍 Exekutatu iradokizunen analisia",
+      "apply_all": "Aplikatu dena",
+      "show_only": "Erakutsi soilik",
+      "dismiss": "Baztertu",
+      "dismiss_all": "Baztertu denak",
+      "process_history": "Prozesatu orain",
+      "clear_debug": "Garbitu arazketa-datuak",
+      "wipe_all": "Garbitu datu guztiak",
+      "export_json": "Esportatu JSON-era",
+      "import_json": "Inportatu JSON-etik",
+      "correct": "Zuzena...",
+      "ignore": "Ez ikusi egin",
+      "add_phase": "+ Gehitu fasea",
+      "new_phase": "+ Fase berria",
+      "delete_profile": "Ezabatu profila",
+      "rebuild_envelope": "Berreraiki gutun-azala",
+      "create_profile": "+ Sortu profila",
+      "rec_stop": "Gelditu",
+      "pause_cycle": "Pausatu",
+      "resume_cycle": "Jarraitu",
+      "force_stop": "Behartuta gelditu",
+      "save_phases": "Gorde faseak",
+      "auto_detect_split": "Autodetektatu",
+      "clear_splits": "Garbitu",
+      "submit_correction": "Bidali zuzenketa",
+      "import_overwrite": "Inportatu (datuak gainidatzi)",
+      "use": "Erabili",
+      "manage": "Kudeatu",
+      "remove": "Kendu",
+      "delete_group": "Ezabatu taldea",
+      "trim_split": "Moztu / Zatitu",
+      "convert_to_automation": "Bihurtu automatizaziora",
+      "new_automation": "+ Automatismo berria",
+      "from_template": "Txantiloitik ▾",
+      "on_cycle_started": "Zikloa hasten denean",
+      "on_cycle_finished": "Zikloa amaitean",
+      "save_group": "Gorde taldea"
+    },
+    "hdr": {
+      "status": "Egoera",
+      "live_power": "Zuzeneko potentzia",
+      "manual_recording": "Eskuzko grabazioa",
+      "tools_and_data": "Tresnak eta datuak",
+      "phase_catalog": "Fasearen katalogoa",
+      "storage_stats": "Biltegiratze-estatistikak",
+      "maintenance": "Mantentze-ekintzak",
+      "export_import": "Esportatu / Inportatu",
+      "logs": "Egunkariak",
+      "my_preferences": "Nire hobespenak",
+      "panel_settings": "Panelaren ezarpenak (erabiltzaile guztiak)",
+      "access_control": "Sarbide-kontrola",
+      "ml_smart_learning": "Ikaskuntza azkarra",
+      "ml_settings_card": "Ezarpenak",
+      "ml_learned": "Zer ikasi du WashData-k",
+      "ml_matching_tuning": "Programen parekatze-doikuntza",
+      "display": "Bistaratu",
+      "status_graph": "Egoera grafikoa",
+      "diagnostics_pref": "Diagnostikoa",
+      "logs_diagnostics": "Diagnostikoa",
+      "process_history": "Prozesuaren historia",
+      "clear_debug": "Garbitu arazketa-aztarnak",
+      "wipe_history": "Garbitu historia",
+      "automations": "Automatizazioak",
+      "automation_open": "Ireki automatizazio-editorean",
+      "automation_delete": "Ezabatu automatizazio hau",
+      "automation_needs_review": "Ziklo honek berrikuspena behar du",
+      "automation_review_this_cycle": "Berrikusi ziklo hau",
+      "no_automations": "Oraindik ez dago automatizaziorik gailu hau erreferentziatzen duenik."
+    },
+    "lbl": {
+      "power": "Potentzia",
+      "progress": "Aurrerapena",
+      "remaining": "Geratzen dena",
+      "duration": "Iraupena",
+      "energy": "Energia",
+      "profile": "Profila",
+      "status": "Egoera",
+      "date": "Data",
+      "confidence": "Konfiantza",
+      "health": "Osasuna",
+      "cost": "Kostua",
+      "program": "Programa",
+      "cycle_health": "Zikloaren osasuna",
+      "activity": "Jarduera",
+      "unlabelled": "Etiketatu gabe",
+      "unlabelled_paren": "(etiketatu gabe)",
+      "emphasis": "Enfasia",
+      "default": "Lehenetsia",
+      "in_use": "Erabilpean",
+      "profile_name": "Profilaren izena",
+      "ref_cycle": "Erreferentzia-zikloa (aukerakoa)",
+      "manual_duration": "Eskuzko iraupena (min, aukerakoa)",
+      "phase_name": "Fasearen izena",
+      "description": "Azalpena",
+      "correct_profile": "Profil zuzena",
+      "correct_duration": "Zuzendutako iraupena (min, aukerakoa)",
+      "load_from_file": "Kargatu fitxategitik",
+      "json_data": "JSON datuak",
+      "expected_duration": "Iraupena espero zen (min)",
+      "rename_profile": "Aldatu profilaren izena",
+      "select_profile": "Hautatu profila",
+      "confidence_threshold": "Konfiantzaren atalasea",
+      "resulting_profile": "Profilaren emaitza",
+      "new_profile_name": "Profil berriaren izena",
+      "save_mode": "Gorde modua",
+      "head_trim": "Buru moztu (k)",
+      "tail_trim": "Buztana moztu (k)",
+      "gap_s": "Hutsune (k)",
+      "start": "Hasi",
+      "end": "Amaiera",
+      "quality": "Kalitatea",
+      "golden_reference": "Grabatutako erreferentzia-zikloa",
+      "compare_profiles": "Konparatu profilekin",
+      "tags": "Etiketak",
+      "notes": "Oharrak",
+      "default_tab": "Fitxa lehenetsia panela irekitzean",
+      "cycle_date_display": "Ziklo-dataren pantaila",
+      "refresh_interval": "Freskatze-tartea (s)",
+      "panel_default_tab": "Fitxa lehenetsia",
+      "hide_tabs": "Ezkutatu fitxak ez-adminentzat",
+      "enable_access_control": "Erabiltzaileko sarbide-kontrola gaitzen du",
+      "default_access_level": "Maila lehenetsia behean zerrendatuta ez dauden erabiltzaileentzat",
+      "administrators": "Administratzaileak",
+      "default_other": "Lehenetsia (beste gailu batzuk)",
+      "show_expected": "Erakutsi espero zen kurbaren gainjartzea (profila, laranja)",
+      "show_raw": "Erakutsi sentsorearen irakurketa gordinak (leundu gabeak, grisak)",
+      "show_debug": "Erakutsi eguneratze zuzeneko sokatze arazketa-txartela Egoera orrian (konfiantza, anbiguotasuna, hautagai nagusiak)",
+      "mode_new_profile": "Sortu profil berria",
+      "mode_existing_profile": "Gehitu lehendik dagoen profilari",
+      "auto_fine_tune_on": "doikuntza automatikoa aktibo (gutxi gorabehera {hour}:00)",
+      "auto_fine_tune_off": "doikuntza automatikoa desaktibo",
+      "last_checked": "Azken egiaztaketa:",
+      "remove_label": "- Kendu etiketa -",
+      "create_new_profile": "+ Sortu profil berria...",
+      "read_only": "Irakurtzeko soilik",
+      "actions": "Ekintzak",
+      "cycles_count": "Zikloak",
+      "debug_traces": "Araztu aztarnak",
+      "file_kb": "Fitxategia (kB)",
+      "label": "Etiketa",
+      "seconds_from_start": "Segundoak hasieratik",
+      "clock_time": "Erlojuaren ordua",
+      "ungrouped": "Elkartu gabe"
+    },
+    "badge": {
+      "poor_fit": "egokitze eskasa",
+      "fair_fit": "egokitze nahikoa",
+      "manual": "(eskuz hautatua)",
+      "auto": "(automatikoki detektatua)",
+      "improving": "↗ hobetzen",
+      "declining": "↘ gainbehera",
+      "steady": "→ egonkorra",
+      "using_tuned": "Pisu sintonizatuak erabiltzea",
+      "using_defaults": "Bidalitako lehenetsiak erabiltzea",
+      "built_in_tag": "integratua"
+    },
+    "status": {
+      "completed": "Eginda",
+      "interrupted": "Etenda",
+      "force_stopped": "Behartuta gelditu",
+      "active": "Aktibo",
+      "ambiguous": "Anbiguoa",
+      "clear": "Garbia",
+      "working": "Lanean...",
+      "recording": "Grabatzen...",
+      "ready": "Prozesatzeko prest",
+      "idle": "Geldirik",
+      "auto_detect": "Autodetektatu",
+      "fine_tuning": "doikuntza egiten ari...",
+      "all_statuses": "Egoera guztiak"
+    },
+    "ml": {
+      "fit_strong": "Indartsua",
+      "fit_good": "Ona",
+      "fit_fair": "Egokia",
+      "fit_weak": "Ahul",
+      "fit_slight": "Txikia",
+      "fit_word": "egokitze",
+      "fine_tuned_at": "ongi-doituta {when}",
+      "personalized": "● Pertsonalizatu makina honetan",
+      "builtin_models": "● Eredu integratuak erabiltzea"
+    },
+    "toast": {
+      "settings_saved": "Ezarpenak gordeta; integrazioa birkargatzen",
+      "preferences_saved": "Hobespenak gordeta",
+      "panel_settings_saved": "Panelaren ezarpenak gorde dira",
+      "access_saved": "Sarbide-kontrola gordeta",
+      "profile_created": "Profila \"{name}\" sortu da",
+      "profile_deleted": "\"{name}\" profila ezabatu da",
+      "profile_renamed": "Profila izenez aldatuta",
+      "phases_saved": "Faseak gorde dira",
+      "phase_created": "\"{name}\" fasea sortu zen",
+      "phase_deleted": "\"{name}\" fasea ezabatuta",
+      "phase_updated": "Fasea eguneratua",
+      "recording_started": "Grabazioa hasi da",
+      "recording_stopped": "Grabazioa gelditu egin da",
+      "recording_discarded": "Grabazioa baztertua",
+      "recording_saved": "Profilan gordetako grabazioa",
+      "export_downloaded": "Esportatu deskargatuta",
+      "logs_exported": "Egunkariak esportatuta",
+      "import_successful": "Inportatzeak arrakasta izan du; integrazioa birkargatzen",
+      "envelopes_rebuilt": "Gutun-azalak berreraikita",
+      "envelope_rebuilt": "Gutun-azala berreraikia",
+      "suggestions_applied": "Iradokizunak aplikatuta; integrazioa birkargatzen",
+      "suggestions_dismissed": "Iradokizunak baztertu dira",
+      "auto_label_complete": "Etiketa automatikoa osatu da",
+      "cycle_labelled": "Zikloa etiketatuta",
+      "cycle_deleted": "Zikloa ezabatuta",
+      "cycles_deleted": "{count} zikloa ezabatuta",
+      "cycle_trimmed": "Zikloa moztuta",
+      "cycles_merged": "Batutako zikloak",
+      "review_saved": "Berrikusia gordeta",
+      "feedback_confirmed": "Ohar-bidaltzea baieztatuta",
+      "feedback_dismissed": "Ohar-bidaltzea bertan behera utzi da",
+      "feedback_all_dismissed": "Iritzi guztiak baztertuak",
+      "correction_submitted": "Zuzenketa aurkeztu da",
+      "group_saved": "Taldea gorde da",
+      "group_deleted": "Taldea ezabatuta",
+      "automation_deleted": "Automatizazioa ezabatuta",
+      "legacy_removed": "Ekintza zaharkituak kendu dira",
+      "cycle_paused": "Zikloa pausarazita",
+      "cycle_resumed": "Zikloa berriro hasi da",
+      "cycle_force_stopped": "Zikloa behartuta gelditu da",
+      "ml_training_promoted": "Prestakuntza osoa: {count} eredu sustatua(k)",
+      "ml_training_no_improvement": "Prestakuntza osoa: oinarrizko lerroa mantenduta (hobekuntzarik ez)",
+      "matching_reverted": "Bat datozen pisuak lehenetsietara itzuli dira",
+      "models_reverted": "Gailu-ereduak oinarri-lerrora itzuli dira",
+      "analysis_complete": "Analisia burutua: {count} iradokizuna(k)",
+      "analysis_complete_none": "Analisia burututa: iradokizun berririk ez",
+      "debug_cleared": "Garbitu {count} arazketa-aztarnak",
+      "all_wiped": "Datu guztiak ezabatuta",
+      "no_split_found": "Ez da tarte inaktiborik aurkitu zatitzeko",
+      "group_name_required": "Taldearen izena behar da",
+      "min_2_profiles": "Hautatu gutxienez bi profil talde batentzat",
+      "profile_name_required": "Profilaren izena behar da",
+      "phase_name_required": "Fasearen izena behar da",
+      "name_required": "Beharrezko izena",
+      "json_required": "JSON datuak behar dira",
+      "save_failed": "Huts egin du gordetzean: {error}",
+      "delete_failed": "Huts egin du ezabatzean: {error}",
+      "apply_failed": "Aplikatuak huts egin du: {error}",
+      "rebuild_failed": "Berreraikitzeak huts egin du: {error}",
+      "start_failed": "Hasierak huts egin du: {error}",
+      "stop_failed": "Huts egin du gelditzean: {error}",
+      "discard_failed": "Baztertuak huts egin du: {error}",
+      "trim_failed": "Mozketa huts egin du: {error}",
+      "split_failed": "Zatiketak huts egin du: {error}",
+      "merge_failed": "Batuketak huts egin du: {error}",
+      "create_failed": "Sortzeak huts egin du: {error}",
+      "update_failed": "Eguneraketak huts egin du: {error}",
+      "rename_failed": "Huts egin du izena aldatzean: {error}",
+      "revert_failed": "Huts egin du leheneratzean: {error}",
+      "training_failed": "Prestakuntzak huts egin du: {error}",
+      "export_failed": "Esportazioak huts egin du: {error}",
+      "import_failed": "Inportazioak huts egin du: {error}",
+      "auto_label_failed": "Huts egin du etiketa automatikoan: {error}",
+      "analysis_failed": "Analisiak huts egin du: {error}",
+      "auto_detect_failed": "Autodetektatuak huts egin du: {error}",
+      "error": "Errorea: {error}",
+      "could_not_load_cycle": "Ezin izan da zikloa kargatu: {error}",
+      "pause_failed": "Pausaldiak huts egin du: {error}",
+      "label_failed": "Etiketa huts egin du: {error}",
+      "invalid_json": "\"{key}\" ez da JSON baliozkoa, konpondu edo garbitu eremua gorde aurretik.",
+      "processed": "Prozesatua {bits}",
+      "split_complete": "Zatitu {count} zikloetan"
+    },
+    "msg": {
+      "no_devices": "Ez da WashData gailurik konfiguratu oraindik.",
+      "no_device_selected": "Ez da gailurik hautatu.",
+      "loading": "Kargatzen...",
+      "loading_settings": "Ezarpenak kargatzen...",
+      "live_chart_loading": "Energia aktiboaren diagrama irakurketak iritsi ahala ematen da.",
+      "no_cycles_match": "Ez dago ziklorik bat datorren uneko iragazkiarekin.",
+      "no_cycles_yet": "Oraindik ez da ziklorik grabatu.",
+      "no_profiles_yet": "Oraindik ez dago profilik. Sortu ziklo etiketatu batetik.",
+      "no_logs": "Oraindik ez dago erregistrorik itxita.",
+      "no_phases": "Ez dago faserik definituta.",
+      "no_phases_assigned": "Ez da faserik esleitu.",
+      "no_split_points": "Oraindik ez dago zatitze-punturik.",
+      "no_envelope": "Ez dago gutun-azalik oraindik — berreraiki zikloak etiketatu ondoren.",
+      "no_envelope_overlay": "Ez dago gainjartzeko gutun-azalik.",
+      "no_other_users": "Ez da beste Home Assistant erabiltzailerik aurkitu.",
+      "maintenance_requires_access": "Mantentzeak eta esportazioak sarbide osoa behar dute.",
+      "loading_curve": "Kurba kargatzen...",
+      "compare_selected_cycles": "Hautatutako zikloak (sendoak) - erakutsi / ezkutatu",
+      "compare_overlay_profiles": "Gainjarri profilak (argiak)",
+      "no_profiles_compare": "Ez dago konparatzeko profilik.",
+      "no_cycles_profile": "Ez dago ziklorik profil honetarako.",
+      "saving_triggers_reload": "Gordetzeak integrazioa birkargatzen du. HA entitateak laburki ez erabilgarri ager daitezke.",
+      "prefs_personal": "Hauek zure Home Assistant kontuari bakarrik aplikatzen zaizkio.",
+      "no_match_yet": "Oraindik ez dago bat datorren saiakerarik.",
+      "no_fine_tuned": "Oraindik ez dago ezer ongi doitua - WashData modeloak erabiltzen ari da.",
+      "ml_learned_intro": "Makina honekin ondo moldatutako modeloak. Zerrendatu ez den edozerk eredu fidagarria erabiltzen du.",
+      "ml_settings_intro": "Bi kommutadore independente: batak modeloak aplikatzen ditu ziklo bat exekutatzen den bitartean, besteak WashDatari denboran zehar zure makinara egokitzen uzten dio.",
+      "ml_intro": "WashData eredu adimendun txertatuak ditu, zikloak detektatzeko, programak identifikatzeko eta denbora eta energia kalkulatzeko — berehala funtzionatzen dute.",
+      "matching_tuning_intro": "Ikasteko, WashData-k ere egokitzen du ziklo baten forma bere iraupenaren eta energiaren aurka zenbat balio duen.",
+      "phase_catalog_intro": "Ziklo baten segmentu izendunak (aurre-garbiketa, beroketa, zentrifugatua...). Eman profil bati kontrol-paneletik.",
+      "phase_ranges_intro": "Fase-barrutiak (zikloaren hasieratik minutuak) batez besteko kurban gainjartzen dira. Editatu balioak zuzenean ikusteko.",
+      "cleanup_intro": "Markatutako ziklo bakoitza gainjarri da. Ezabatu profila garbitzeko.",
+      "split_intro": "Egin klik grafikoan zatitze-puntu bat gehitu edo kentzeko, edo automatikoki detektatu hutsune inaktiboen bidez.",
+      "trim_intro": "Arrastatu helduleku gorriak, edo sartu balioak. Leihotik kanpoko guztia kentzen da.",
+      "import_intro": "Kargatu esportatutako fitxategi bat edo itsatsi JSON payload bat behean.",
+      "auto_label_intro": "Esleitu profilak etiketarik gabeko zikloei, zeinek bat egiten duten konfiantzak atalasea garbitzen duen.",
+      "merge_intro": "Hautatutako zikloak bat eginda daude (ordena kronologikoa, 0 W-z betetako hutsuneak). Aukeratu emaitzaren profila.",
+      "enough_data": "Nahikoa datu ikasteko ({current}/{min} zikloetatik).",
+      "collecting_data": "Datuak biltzen: {need} ziklo gehiago {plural} isunak hasi aurretik ({current}/{min}).",
+      "updated": "{time} eguneratua",
+      "appliance_monitor": "Etxetresna elektrikoen monitorea",
+      "ml_loading": "ML kargatzen...",
+      "see_recorder": "Ikusi grabagailuaren trepeta behean",
+      "review_in_settings": "Berrikusi ezarpenetan",
+      "storage_diagnostics": "Biltegi-estatistikak, mantentze-lanak, esportazioa/inportazioa",
+      "recent_logs": "Azken ha_washdata erregistroak",
+      "preferences_adv": "Hobespenak",
+      "preferences_admin": "Hobespenak, panela eta sarbide-kontrola",
+      "review_to_cycles": "Ireki Zikloen berrikuspenaren ilara",
+      "pending_feedback": "Detekzio-iritzi zain",
+      "recording_in_progress": "Grabazioa lantzen ari da",
+      "no_profiles_yet_short": "Oraindik ez dago profilik.",
+      "unsure_detected_prefix": "WashData ez dago ziur detektatuta",
+      "no_suggestions": "Ez dago iradokizun aktiborik.",
+      "no_profiles_overlay": "Ez dago profilik gainjartzeko.",
+      "compare_cycles_title": "Konparatu {count} zikloak"
+    },
+    "modal": {
+      "label_cycle": "Etiketa-zikloa",
+      "create_profile": "Sortu profila",
+      "new_phase": "Fase berria",
+      "edit_phase": "Editatu fasea",
+      "process_recording": "Prozesatu grabazioa",
+      "correct_feedback": "Zuzendu iritzia",
+      "import_config": "Inportatu konfigurazioa",
+      "auto_label": "Zikloen etiketa automatikoa",
+      "cycle": "Zikloa"
+    },
+    "tag": {
+      "late_start": "Hasiera berandua",
+      "early_end": "Amaiera goiztiarra",
+      "merged": "Batutako zikloak",
+      "split": "Zatitu zikloa",
+      "noise": "Zarata",
+      "wrong_profile": "Profil okerra",
+      "sensor_gap": "Sentsorearen hutsunea"
+    },
+    "quality": {
+      "good": "Ona",
+      "bad": "Txarra",
+      "unusable": "Ezin da erabili"
+    },
+    "access": {
+      "none": "Bat ere ez (ezkutuan)",
+      "read": "Irakurri",
+      "edit": "Editatu",
+      "full": "Osoa",
+      "inherit": "Heredatu"
+    },
+    "health": {
+      "poor": "⚠ Egokitze txarra",
+      "fair": "Egokitze nahikoa",
+      "good": "✓ Egokitze ona"
+    },
+    "trend": {
+      "up": "↑ Joera gora",
+      "down": "↓ Joera behera"
+    },
+    "pref": {
+      "date_relative": "erlatiboa (adib. duela 2 ordu)",
+      "date_absolute": "Absolutua (adibidez, 14:32 uztailaren 2an)"
+    },
+    "log": {
+      "all_levels": "Maila guztiak"
+    },
+    "section": {
+      "basic": {
+        "label": "Oinarrizkoa",
+        "intro": "Oinarrizko identitatea eta konfigurazio gehien behar dituzten oinarriak."
+      },
+      "detection": {
+        "label": "Detekzioa",
+        "intro": "Ziklo bat nola detektatzen den abiarazteko, korrika egiteko eta amaitzeko."
+      },
+      "matching": {
+        "label": "Bat datozenak",
+        "intro": "Amaitutako zikloak profil ikasiekin eta etiketarekin bat datoz."
+      },
+      "timing": {
+        "label": "Denbora eta Watchdog",
+        "intro": "Atzeko planoko kadentzia, lineaz kanpoko zaindaria eta etxeko zaintza."
+      },
+      "anti_wrinkle": {
+        "label": "AntiWrinkle",
+        "intro": "Urikaren aurkako moduak pultsu lehortzaileak detektatzen ditu bero-fase nagusiaren ondoren."
+      },
+      "delay": {
+        "label": "Atzerapena",
+        "intro": "Atzeratutako detekzioak identifikatzen du aplikazio bat piztuta dagoenean, baina oraindik ez du bere zikloa hasi."
+      },
+      "triggers": {
+        "label": "Abiarazleak eta atea",
+        "intro": "Aukerako kanpoko seinaleak: amaierako abiarazle bat, ate-sentsore bat, etengailua eta deskarga-abisua."
+      },
+      "notifications": {
+        "label": "Jakinarazpenak",
+        "intro": "Konfiguratu noiz eta nola jakinarazi zaizun ziklo-gertaerak."
+      },
+      "ml_training": {
+        "label": "ML prestakuntza",
+        "intro": "Gailu honen detekzioa eta denbora pertsonalizatzen dituzten eredu adimendunak."
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Gailuaren izena"
+      },
+      "device_type": {
+        "label": "Gailu mota"
+      },
+      "power_sensor": {
+        "label": "Energia sentsorea"
+      },
+      "min_power": {
+        "label": "Gutxieneko potentzia"
+      },
+      "off_delay": {
+        "label": "Atzerapena"
+      },
+      "linked_device": {
+        "label": "Taldea gailu azpian"
+      },
+      "start_threshold_w": {
+        "label": "Hasierako atalasea"
+      },
+      "stop_threshold_w": {
+        "label": "Gelditzeko atalasea"
+      },
+      "min_off_gap": {
+        "label": "Gutxieneko geldialdi-tartea"
+      },
+      "start_duration_threshold": {
+        "label": "Hasi iraupena"
+      },
+      "start_energy_threshold": {
+        "label": "Hasi energia"
+      },
+      "completion_min_seconds": {
+        "label": "Zikloaren iraupena"
+      },
+      "running_dead_zone": {
+        "label": "Eremu inertea"
+      },
+      "end_energy_threshold": {
+        "label": "Amaierako energia"
+      },
+      "end_repeat_count": {
+        "label": "Amaitu Errepikatu Zenbaketa"
+      },
+      "sampling_interval": {
+        "label": "Laginketa-tartea"
+      },
+      "smoothing_window": {
+        "label": "Leihoa leuntzen"
+      },
+      "abrupt_drop_watts": {
+        "label": "Erori"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Hauts-tanta"
+      },
+      "profile_match_threshold": {
+        "label": "Parekatze-muga"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Ez dator bat"
+      },
+      "profile_match_interval": {
+        "label": "Parekatze-tartea"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Gutxieneko Iraupen Ratioa"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Gehienezko Iraupen Ratioa"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profilaren iraupena tolerantzia"
+      },
+      "duration_tolerance": {
+        "label": "Tolerantzia"
+      },
+      "auto_label_confidence": {
+        "label": "Auto-Label konfiantza"
+      },
+      "learning_confidence": {
+        "label": "Konfiantza ikasten"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Kendu iritzi-jakinarazpenak"
+      },
+      "watchdog_interval": {
+        "label": "Watchdog tartea"
+      },
+      "no_update_active_timeout": {
+        "label": "Eguneratu gabeko denbora-muga"
+      },
+      "progress_reset_delay": {
+        "label": "Progresioaren atzerapena"
+      },
+      "auto_maintenance": {
+        "label": "Mantentze automatikoa (gaueko garbiketa)"
+      },
+      "expose_debug_entities": {
+        "label": "Araztu entitateak"
+      },
+      "save_debug_traces": {
+        "label": "Gorde arazketa-aztarnak"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Gaitu zimur-aurkako detekzioa"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Gehienezko zimur-aurkako potentzia"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Gehienezko iraupena"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Irten energia-mugatik"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Gaitu atzerapenaren hasiera-detekzioa"
+      },
+      "delay_confirm_seconds": {
+        "label": "Berretsi segundoak"
+      },
+      "delay_timeout_hours": {
+        "label": "Denbora-mugak"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Gaitu kanpoko bukaerako trigger-a"
+      },
+      "external_end_trigger": {
+        "label": "Kanpoko Trigger Entitatea"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Alderantzikatu kanpo-triborroa (triga OFF-n)"
+      },
+      "door_sensor_entity": {
+        "label": "Ate-sentsorearen entitatea"
+      },
+      "pause_cuts_power": {
+        "label": "Pausatu ere indarra ebakitzen du (kommutadorearen bidez)"
+      },
+      "switch_entity": {
+        "label": "Aldatu entitatea"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Deskarga-oharra atzerapena"
+      },
+      "pump_stuck_duration": {
+        "label": "Bonba blokeatuta denbora"
+      },
+      "notify_start_services": {
+        "label": "Hasi zerbitzuak"
+      },
+      "notify_finish_services": {
+        "label": "Amaierako zerbitzuak"
+      },
+      "notify_live_services": {
+        "label": "Progresio zuzeneko zerbitzuak"
+      },
+      "notify_people": {
+        "label": "Jendea (etxerako bakarrik)"
+      },
+      "notify_only_when_home": {
+        "label": "Jakinarazi etxean bakarrik"
+      },
+      "notify_fire_events": {
+        "label": "Bidali HA gertaerak jakinarazpenetarako"
+      },
+      "notify_before_end_minutes": {
+        "label": "Amaierako alerta aurrea"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Zuzeneko eguneratze-tartea"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Live Overrun % Alerta aurretik"
+      },
+      "notify_live_chronometer": {
+        "label": "Erabili zuzeneko kronometroa"
+      },
+      "notify_timeout_seconds": {
+        "label": "Auto-baztertu ondoren"
+      },
+      "notify_title": {
+        "label": "Jakinarazpenaren izenburua"
+      },
+      "notify_icon": {
+        "label": "Jakinarazpen-ikonoa"
+      },
+      "notify_start_message": {
+        "label": "Hasi mezua"
+      },
+      "notify_finish_message": {
+        "label": "Amaitu mezua"
+      },
+      "notify_pre_complete_message": {
+        "label": "Aldez aurretiko amaierako mezua"
+      },
+      "notify_reminder_message": {
+        "label": "Oroitarazi-mezua"
+      },
+      "notify_channel": {
+        "label": "Kanala (hasiera/bizia)"
+      },
+      "notify_finish_channel": {
+        "label": "Android kanala (finish)"
+      },
+      "energy_price_entity": {
+        "label": "Energia-prezioen entitatea"
+      },
+      "energy_price_static": {
+        "label": "Energia estatikoaren prezioa (kWh bakoitzeko)"
+      },
+      "enable_ml_models": {
+        "label": "Aplikatu eredu adimendunak zikloan zehar"
+      },
+      "ml_training_enabled": {
+        "label": "Ikasi makina honetatik"
+      },
+      "ml_training_hour": {
+        "label": "Ikasi orduko"
+      },
+      "ml_training_min_cycles": {
+        "label": "Lehen zikloak behar ziren"
+      },
+      "ml_training_interval_days": {
+        "label": "Gehienez zenbatero egiaztatu"
+      }
     }
   }
 }

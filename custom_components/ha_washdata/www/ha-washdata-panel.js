@@ -737,7 +737,7 @@ function _field(f, value, extra) {
   const mlSug = extra.mlSuggestion;
   const classicVal = (sug && sug.suggested != null && !_sugSame(sug.suggested, value)) ? sug.suggested : null;
   const mlVal = (mlSug && mlSug.value != null && !_sugSame(mlSug.value, value)) ? mlSug.value : null;
-  const useBtn = (val) => `<button type="button" class="wd-sug-use" data-sugkey="${key}" data-sugval="${_esc(val)}">Use</button>`;
+  const useBtn = (val) => `<button type="button" class="wd-sug-use" data-sugkey="${key}" data-sugval="${_esc(val)}">${extra.useBtnLabel || 'Use'}</button>`;
   let sugHtml = '';
   if (classicVal != null && mlVal != null && _sugSame(classicVal, mlVal)) {
     const reason = _tip([sug.reason, mlSug.reason ? `ML: ${mlSug.reason}` : ''].filter(Boolean).join('\n\n'));
@@ -1376,6 +1376,14 @@ class HaWashdataPanel extends HTMLElement {
     } catch (_) { return fallback; }
   }
 
+  _t(key, vars = {}, fallback = '') {
+    let s = this._localize(`component.${_DOMAIN}.panel.${key}`, fallback);
+    for (const [k, v] of Object.entries(vars)) {
+      s = s.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+    }
+    return s;
+  }
+
   _stateColor(s) {
     const c = this._constants.stateColors || {};
     return c[s] || c.unknown || 'var(--disabled-color, #bdbdbd)';
@@ -1506,7 +1514,7 @@ class HaWashdataPanel extends HTMLElement {
   _htmlHeader() {
     const ts = this._lastRefresh ? this._lastRefresh.toLocaleTimeString() : '…';
     const working = this._busy.size > 0
-      ? `<span class="wd-badge" style="margin:0 0 0 12px;color:var(--app-header-text-color,#fff);background:rgba(255,255,255,.15)"><span class="wd-spin"></span> Working…</span>`
+      ? `<span class="wd-badge" style="margin:0 0 0 12px;color:var(--app-header-text-color,#fff);background:rgba(255,255,255,.15)">${this._t('status.working', {}, 'Working…')}</span>`
       : '';
     const logo = `<svg class="wd-logo" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
       <rect x="4" y="2.5" width="16" height="19" rx="2.5"/>
@@ -1521,9 +1529,9 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-header">
         ${burger}
         ${logo}
-        <div><h1>WashData</h1><div class="wd-sub">Appliance monitor</div></div>
+        <div><h1>WashData</h1><div class="wd-sub">${this._t('msg.appliance_monitor', {}, 'Appliance monitor')}</div></div>
         ${working}
-        <span class="wd-ts">Updated ${ts}</span>
+        <span class="wd-ts">${this._t('msg.updated', {time: ts}, 'Updated') + ' ' + ts}</span>
         ${this._isAdmin() ? `<button class="wd-gear-btn" data-action="open-advanced" data-sub="logs" title="Logs" aria-label="Logs"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16"/><path d="M4 10h16"/><path d="M4 15h10"/><path d="M4 20h7"/></svg></button>` : ''}
       </div>
     `;
@@ -1531,9 +1539,9 @@ class HaWashdataPanel extends HTMLElement {
 
   _htmlBody() {
     if (!this._devices.length)
-      return `<div class="wd-empty"><div class="wd-icon">🧺</div>No WashData devices configured yet.</div>`;
+      return `<div class="wd-empty"><div class="wd-icon">🧺</div>${this._t('msg.no_devices', {}, 'No WashData devices configured yet.')}</div>`;
     const sugDot = this._suggestions.length ? ' 💡' : '';
-    const labels = { status: 'Overview', history: 'Cycles', profiles: 'Profiles', settings: 'Settings' + sugDot, ml: 'ML Training', advanced: 'Advanced' };
+    const labels = { status: this._t('tab.status',{},'Overview'), history: this._t('tab.history',{},'Cycles'), profiles: this._t('tab.profiles',{},'Profiles'), settings: this._t('tab.settings',{},'Settings') + sugDot, ml: this._t('tab.ml',{},'ML Training'), advanced: this._t('tab.advanced',{},'Advanced') };
     const visible = this._visibleTabIds();
     if (!visible.includes(this._tab)) this._tab = 'status';
     const tabBtns = visible.map(id =>
@@ -1559,7 +1567,7 @@ class HaWashdataPanel extends HTMLElement {
   _htmlDeviceBar() {
     // Always offer onboarding another device; show the picker only when >1.
     const addBtn = this._isAdmin()
-      ? `<button class="wd-devcard wd-devadd" data-action="add-device" title="Add another WashData device"><span class="wd-devadd-plus">+</span> Add device</button>`
+      ? `<button class="wd-devcard wd-devadd" data-action="add-device" title="Add another WashData device"><span class="wd-devadd-plus">+</span> ${this._t('btn.add_device', {}, '+ Add device')}</button>`
       : '';
     if (this._devices.length <= 1) return addBtn ? `<div class="wd-devbar">${addBtn}</div>` : '';
     return `<div class="wd-devbar">${this._devices.map((d, i) => {
@@ -1581,7 +1589,7 @@ class HaWashdataPanel extends HTMLElement {
 
   _htmlStatus() {
     const dev = this._devices[this._selIdx];
-    if (!dev) return '<div class="wd-empty">No device selected.</div>';
+    if (!dev) return `<div class="wd-empty">${this._t('msg.no_device_selected', {}, 'No device selected.')}</div>`;
     const state = dev.detector_state || 'unknown';
     const rec = !!dev.recording;
     const isUserPaused = !!dev.is_user_paused;
@@ -1598,20 +1606,20 @@ class HaWashdataPanel extends HTMLElement {
     if (matched && !profNames.includes(matched)) profNames.unshift(matched);
     const profOpts = profNames.map(n =>
       `<option value="${_esc(n)}" ${selVal === n ? 'selected' : ''}>${_esc(n)}</option>`).join('');
-    const suffix = matched ? (manual ? '(manually selected)' : '(auto-detected)') : '';
+    const suffix = matched ? (manual ? this._t('badge.manual', {}, '(manually selected)') : this._t('badge.auto', {}, '(auto-detected)')) : '';
     const tag = suffix ? `<span class="wd-prog-tag ${manual ? 'manual' : 'auto'}">${suffix}</span>` : '';
     // Program selection is allowed for any user who can see the device (read+),
     // since it only changes live detection, not stored data.
     const programCtl = `<div class="wd-prog-ctl"><label>Program</label>${_tip('Override which profile is matched to the current cycle. Auto-detect lets the integration pick the best match automatically. Pin a specific program to force-match it when auto-detect is wrong or you know what is running.')}
           <select id="wd-status-prog">
-            <option value="auto_detect" ${selVal === 'auto_detect' ? 'selected' : ''}>Auto-detect</option>
+            <option value="auto_detect" ${selVal === 'auto_detect' ? 'selected' : ''}>${this._t('status.auto_detect', {}, 'Auto-detect')}</option>
             ${profOpts}
           </select>${tag}</div>`;
 
     const attn = [];
-    if (dev.recording && this._canEdit()) attn.push(`<div class="wd-attn-card"><span class="wd-attn-icon">●</span><div class="wd-attn-body"><div class="wd-attn-title">Recording in progress</div><div class="wd-attn-sub">See recorder widget below</div></div></div>`);
-    if (dev.feedback_count && this._canEdit()) attn.push(`<div class="wd-attn-card" data-action="goto-feedbacks"><span class="wd-attn-icon">💬</span><div class="wd-attn-body"><div class="wd-attn-title">${dev.feedback_count} cycle${dev.feedback_count > 1 ? 's' : ''} to review</div><div class="wd-attn-sub">Open the Cycles review queue</div></div></div>`);
-    if (dev.suggestions_count && this._canEdit()) attn.push(`<div class="wd-attn-card" data-action="goto-suggestions"><span class="wd-attn-icon">💡</span><div class="wd-attn-body"><div class="wd-attn-title">${dev.suggestions_count} tuning suggestion${dev.suggestions_count > 1 ? 's' : ''}</div><div class="wd-attn-sub">Review in Settings</div></div></div>`);
+    if (dev.recording && this._canEdit()) attn.push(`<div class="wd-attn-card"><span class="wd-attn-icon">●</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.recording_in_progress', {}, 'Recording in progress')}</div><div class="wd-attn-sub">${this._t('msg.see_recorder', {}, 'See recorder widget below')}</div></div></div>`);
+    if (dev.feedback_count && this._canEdit()) attn.push(`<div class="wd-attn-card" data-action="goto-feedbacks"><span class="wd-attn-icon">💬</span><div class="wd-attn-body"><div class="wd-attn-title">${dev.feedback_count} cycle${dev.feedback_count > 1 ? 's' : ''} to review</div><div class="wd-attn-sub">${this._t('msg.review_to_cycles', {}, 'Open the Cycles review queue')}</div></div></div>`);
+    if (dev.suggestions_count && this._canEdit()) attn.push(`<div class="wd-attn-card" data-action="goto-suggestions"><span class="wd-attn-icon">💡</span><div class="wd-attn-body"><div class="wd-attn-title">${dev.suggestions_count} tuning suggestion${dev.suggestions_count > 1 ? 's' : ''}</div><div class="wd-attn-sub">${this._t('msg.review_in_settings', {}, 'Review in Settings')}</div></div></div>`);
     const attnHtml = attn.length ? `<div class="wd-attn">${attn.join('')}</div>` : '';
 
     const progressHtml = (isRunning && prog != null) ? `
@@ -1629,7 +1637,7 @@ class HaWashdataPanel extends HTMLElement {
     </div>`;
     const curveHtml = hasCurve
       ? `<div class="wd-canvas-wrap" style="margin-top:14px"><canvas id="wd-status-canvas" style="height:160px"></canvas></div>${legend}`
-      : `<p class="wd-info" style="margin-top:12px">Live power chart appears as readings arrive.</p>`;
+      : `<p class="wd-info" style="margin-top:12px">${this._t('msg.live_chart_loading', {}, 'Live power chart appears as readings arrive.')}</p>`;
 
     const showDebug = this._pref('show_debug', false);
     let debugHtml = '';
@@ -1640,10 +1648,10 @@ class HaWashdataPanel extends HTMLElement {
       debugHtml = `<div class="wd-card">
         <div class="wd-card-title">Live Match Debug ${_tip('Confidence: how closely the current power curve matches the top candidate profile (0-100%). Ambiguous: the two best candidates score within 5% of each other - the label is uncertain until the cycle finishes.')}</div>
         <div class="wd-kv" style="margin-bottom:12px">
-          <div class="wd-kv-item"><div class="wd-kv-val">${conf}</div><div class="wd-kv-lbl">Confidence</div></div>
-          <div class="wd-kv-item"><div class="wd-kv-val" style="font-size:1em;color:${md.ambiguous ? 'var(--warning-color,#ff9800)' : 'var(--success-color,#4caf50)'}">${md.ambiguous ? 'Ambiguous' : 'Clear'}</div><div class="wd-kv-lbl">Match</div></div>
+          <div class="wd-kv-item"><div class="wd-kv-val">${conf}</div><div class="wd-kv-lbl">${this._t('lbl.confidence', {}, 'Confidence')}</div></div>
+          <div class="wd-kv-item"><div class="wd-kv-val" style="font-size:1em;color:${md.ambiguous ? 'var(--warning-color,#ff9800)' : 'var(--success-color,#4caf50)'}">${md.ambiguous ? this._t('status.ambiguous', {}, 'Ambiguous') : this._t('status.clear', {}, 'Clear')}</div><div class="wd-kv-lbl">${this._t('lbl.label', {}, 'Match')}</div></div>
         </div>
-        ${dRows ? `<table class="wd-table"><thead><tr><th>Profile</th><th>Conf</th><th>MAE</th><th>Corr</th><th>Duration</th></tr></thead><tbody>${dRows}</tbody></table>` : '<p class="wd-info">No match attempt yet - this populates during a running cycle.</p>'}
+        ${dRows ? `<table class="wd-table"><thead><tr><th>Profile</th><th>Conf</th><th>MAE</th><th>Corr</th><th>Duration</th></tr></thead><tbody>${dRows}</tbody></table>` : `<p class="wd-info">${this._t('msg.no_match_yet', {}, 'No match attempt yet - this populates during a running cycle.')}</p>`}
       </div>`;
     }
 
@@ -1651,10 +1659,10 @@ class HaWashdataPanel extends HTMLElement {
     // Logs, and the rest of the Advanced drawer). They open the gear drawer at
     // the relevant subtab so the merged 4-tab layout stays discoverable.
     const advCards = [];
-    if (this._canEdit()) advCards.push(`<div class="wd-attn-card" data-action="open-advanced" data-sub="diagnostics"><span class="wd-attn-icon">🩺</span><div class="wd-attn-body"><div class="wd-attn-title">Diagnostics</div><div class="wd-attn-sub">Storage stats, maintenance, export/import</div></div></div>`);
-    if (this._isAdmin()) advCards.push(`<div class="wd-attn-card" data-action="open-advanced" data-sub="logs"><span class="wd-attn-icon">📜</span><div class="wd-attn-body"><div class="wd-attn-title">Logs</div><div class="wd-attn-sub">Recent ha_washdata records</div></div></div>`);
-    advCards.push(`<div class="wd-attn-card" data-action="open-advanced" data-sub="prefs"><span class="wd-attn-icon">⚙️</span><div class="wd-attn-body"><div class="wd-attn-title">Advanced</div><div class="wd-attn-sub">Preferences${this._isAdmin() ? ', panel & access control' : ''}</div></div></div>`);
-    const advHtml = `<div class="wd-card"><div class="wd-card-title">Tools &amp; Data</div><div class="wd-attn" style="margin-bottom:0;margin-top:12px">${advCards.join('')}</div></div>`;
+    if (this._canEdit()) advCards.push(`<div class="wd-attn-card" data-action="open-advanced" data-sub="diagnostics"><span class="wd-attn-icon">🩺</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('hdr.logs_diagnostics', {}, 'Diagnostics')}</div><div class="wd-attn-sub">${this._t('msg.storage_diagnostics', {}, 'Storage stats, maintenance, export/import')}</div></div></div>`);
+    if (this._isAdmin()) advCards.push(`<div class="wd-attn-card" data-action="open-advanced" data-sub="logs"><span class="wd-attn-icon">📜</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('hdr.logs', {}, 'Logs')}</div><div class="wd-attn-sub">${this._t('msg.recent_logs', {}, 'Recent ha_washdata records')}</div></div></div>`);
+    advCards.push(`<div class="wd-attn-card" data-action="open-advanced" data-sub="prefs"><span class="wd-attn-icon">⚙️</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('tab.advanced', {}, 'Advanced')}</div><div class="wd-attn-sub">Preferences${this._isAdmin() ? this._t('msg.preferences_admin', {}, 'Preferences, panel & access control') : this._t('msg.preferences_adv', {}, 'Preferences')}</div></div></div>`);
+    const advHtml = `<div class="wd-card"><div class="wd-card-title">${this._t('hdr.tools_and_data', {}, 'Tools & Data')}</div><div class="wd-attn" style="margin-bottom:0;margin-top:12px">${advCards.join('')}</div></div>`;
 
     const cycleCtrlHtml = (() => {
       if (!this._canEdit()) return '';
@@ -1665,9 +1673,9 @@ class HaWashdataPanel extends HTMLElement {
       const showStop = cycleActive || isUserPaused;
       if (!showPause && !showResume && !showStop) return '';
       return `<div class="wd-cycle-ctrl" style="margin-top:0">
-        ${showResume ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="resume-cycle">Resume</button>` : ''}
-        ${showPause ? `<button class="wd-btn wd-btn-sm" data-action="pause-cycle">Pause</button>` : ''}
-        ${showStop ? `<button class="wd-btn wd-btn-sm wd-btn-danger" data-action="terminate-cycle">Force Stop</button>` : ''}
+        ${showResume ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="resume-cycle">${this._t('btn.resume_cycle', {}, 'Resume')}</button>` : ''}
+        ${showPause ? `<button class="wd-btn wd-btn-sm" data-action="pause-cycle">${this._t('btn.pause_cycle', {}, 'Pause')}</button>` : ''}
+        ${showStop ? `<button class="wd-btn wd-btn-sm wd-btn-danger" data-action="terminate-cycle">${this._t('btn.force_stop', {}, 'Force Stop')}</button>` : ''}
       </div>`;
     })();
 
@@ -1684,12 +1692,12 @@ class HaWashdataPanel extends HTMLElement {
         </div>
         ${programCtl}
         <div class="wd-stats">
-          <div class="wd-stat"><div class="wd-stat-val">${_fmtPower(dev.current_power_w)}</div><div class="wd-stat-lbl">Power</div></div>
-          <div class="wd-stat"><div class="wd-stat-val">${prog != null ? prog.toFixed(0) + '%' : '-'}</div><div class="wd-stat-lbl">Progress</div></div>
-          <div class="wd-stat"><div class="wd-stat-val">${_fmtDuration(rem)}</div><div class="wd-stat-lbl">Remaining</div></div>
+          <div class="wd-stat"><div class="wd-stat-val">${_fmtPower(dev.current_power_w)}</div><div class="wd-stat-lbl">${this._t('lbl.power', {}, 'Power')}</div></div>
+          <div class="wd-stat"><div class="wd-stat-val">${prog != null ? prog.toFixed(0) + '%' : '-'}</div><div class="wd-stat-lbl">${this._t('lbl.progress', {}, 'Progress')}</div></div>
+          <div class="wd-stat"><div class="wd-stat-val">${_fmtDuration(rem)}</div><div class="wd-stat-lbl">${this._t('lbl.remaining', {}, 'Remaining')}</div></div>
         </div>
         ${progressHtml}
-        <div class="wd-card-title" style="margin-top:18px">Live Power</div>
+        <div class="wd-card-title" style="margin-top:18px">${this._t('hdr.live_power', {}, 'Live Power')}</div>
         ${curveHtml}
       </div>
       ${this._canEdit() ? this._htmlRecordingWidget() : ''}
@@ -1702,21 +1710,21 @@ class HaWashdataPanel extends HTMLElement {
     const rs = this._recState;
     const state = rs ? rs.state : 'idle';
     const dotCls = state === 'recording' ? 'wd-rec-active' : state === 'stopped' ? 'wd-rec-ready' : 'wd-rec-idle';
-    const stateLabel = state === 'recording' ? 'Recording…' : state === 'stopped' ? 'Ready to process' : 'Idle';
+    const stateLabel = state === 'recording' ? this._t('status.recording', {}, 'Recording…') : state === 'stopped' ? this._t('status.ready', {}, 'Ready to process') : this._t('status.idle', {}, 'Idle');
     let detail = '';
     if (state === 'recording') detail = `${_fmtDuration(rs.duration_s)} · ${rs.sample_count || 0} samples`;
     else if (state === 'stopped') detail = `${rs.sample_count || 0} samples · ${_fmtDuration(rs.duration_s)}`;
     const buttons = state === 'recording'
-      ? `<button class="wd-btn wd-btn-danger wd-btn-sm" data-action="rec-stop">Stop</button>`
+      ? `<button class="wd-btn wd-btn-danger wd-btn-sm" data-action="rec-stop">${this._t('btn.rec_stop', {}, 'Stop')}</button>`
       : state === 'stopped'
-        ? `<button class="wd-btn wd-btn-primary wd-btn-sm" data-action="rec-process-open">Process</button>
-           <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="rec-discard">Discard</button>`
-        : `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="rec-start">Start Recording</button>`;
+        ? `<button class="wd-btn wd-btn-primary wd-btn-sm" data-action="rec-process-open">${this._t('btn.process', {}, 'Process')}</button>
+           <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="rec-discard">${this._t('btn.discard', {}, 'Discard')}</button>`
+        : `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="rec-start">${this._t('btn.record', {}, 'Start Recording')}</button>`;
     return `<div class="wd-card" style="margin-top:0">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:8px">
           <div class="wd-rec-dot ${dotCls}"></div>
-          <div><strong>Manual Recording</strong>${detail ? `<span class="wd-field-hint" style="margin-left:8px">${detail}</span>` : ''}</div>
+          <div><strong>${this._t('hdr.manual_recording', {}, 'Manual Recording')}</strong>${detail ? `<span class="wd-field-hint" style="margin-left:8px">${detail}</span>` : ''}</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">${buttons}</div>
       </div>
@@ -1817,10 +1825,10 @@ class HaWashdataPanel extends HTMLElement {
       const check = selMode
         ? `<input type="checkbox" class="wd-csel" ${sel.has(c.id) ? 'checked' : ''} style="width:auto;margin:0">`
         : `<span class="wd-devdot" style="background:${statusDotColor(st)}" title="${_esc(st)}"></span>`;
-      const stLabel = { completed: 'Completed', interrupted: 'Interrupted', force_stopped: 'Force stopped', active: 'Active' }[st] || st;
+      const stLabel = { completed: this._t('status.completed',{},'Completed'), interrupted: this._t('status.interrupted',{},'Interrupted'), force_stopped: this._t('status.force_stopped',{},'Force stopped'), active: this._t('status.active',{},'Active') }[st] || st;
       return `<tr data-cid="${_esc(c.id)}" data-selmode="${selMode ? 1 : 0}" style="cursor:pointer">
         <td style="width:26px;padding:6px 4px 6px 8px">${check}</td>
-        <td>${prog ? _esc(prog) : `<span style="color:var(--secondary-text-color)">Unlabelled</span>`}${reviewBadge(c)}${overrunBadge(c)}${artifactBadge(c)}</td>
+        <td>${prog ? _esc(prog) : `<span style="color:var(--secondary-text-color)">${this._t('lbl.unlabelled', {}, 'Unlabelled')}</span>`}${reviewBadge(c)}${overrunBadge(c)}${artifactBadge(c)}</td>
         <td><span style="color:${statusDotColor(st)};font-size:.9em">${_esc(stLabel)}</span></td>
         <td class="wd-tc-date">${_fmtDate(c.start_time)}</td>
         <td class="wd-tc-num">${_fmtDuration(c.duration)}</td>
@@ -1833,25 +1841,25 @@ class HaWashdataPanel extends HTMLElement {
 
     const thead = `<thead><tr>
       <th style="width:26px;padding:6px 4px 6px 8px"></th>
-      ${_th('Profile', 'profile', col === 'profile', dir, 'cycsort', '', 'Matched program name. Unlabelled means no profile matched at end of cycle.')}
-      ${_th('Status', 'status', col === 'status', dir, 'cycsort', '', 'Cycle outcome: Completed (natural end), Interrupted (abrupt power drop), Force Stopped (manual), or Needs Review (feedback pending).')}
-      ${_th('Date', 'date', col === 'date', dir, 'cycsort', '', 'Date and time the cycle started.')}
-      ${_th('Duration', 'duration', col === 'duration', dir, 'cycsort', 'right', 'Total cycle run time from start to end.')}
-      ${_th('Energy', 'energy', col === 'energy', dir, 'cycsort', 'right', 'Total energy consumed (kWh). Computed by integrating power over time.')}
-      ${_th('Cost', 'cost', col === 'cost', dir, 'cycsort', 'right', 'Energy cost for this cycle, frozen at completion using the price in effect then (energy x price per kWh). Set a price under Settings to populate it.')}
-      ${_th('Confidence', 'confidence', col === 'confidence', dir, 'cycsort', 'right', 'Profile match confidence (0-100%). How closely the cycle power curve matched the identified program.')}
-      ${_th('Health', 'health', col === 'health', dir, 'cycsort', 'right', 'ML cycle health (higher = better). Click a cycle to inspect and review it.')}
+      ${_th(this._t('lbl.profile', {}, 'Profile'), 'profile', col === 'profile', dir, 'cycsort', '', 'Matched program name. Unlabelled means no profile matched at end of cycle.')}
+      ${_th(this._t('lbl.status', {}, 'Status'), 'status', col === 'status', dir, 'cycsort', '', 'Cycle outcome: Completed (natural end), Interrupted (abrupt power drop), Force Stopped (manual), or Needs Review (feedback pending).')}
+      ${_th(this._t('lbl.date', {}, 'Date'), 'date', col === 'date', dir, 'cycsort', '', 'Date and time the cycle started.')}
+      ${_th(this._t('lbl.duration', {}, 'Duration'), 'duration', col === 'duration', dir, 'cycsort', 'right', 'Total cycle run time from start to end.')}
+      ${_th(this._t('lbl.energy', {}, 'Energy'), 'energy', col === 'energy', dir, 'cycsort', 'right', 'Total energy consumed (kWh). Computed by integrating power over time.')}
+      ${_th(this._t('lbl.cost', {}, 'Cost'), 'cost', col === 'cost', dir, 'cycsort', 'right', 'Energy cost for this cycle, frozen at completion using the price in effect then (energy x price per kWh). Set a price under Settings to populate it.')}
+      ${_th(this._t('lbl.confidence', {}, 'Confidence'), 'confidence', col === 'confidence', dir, 'cycsort', 'right', 'Profile match confidence (0-100%). How closely the cycle power curve matched the identified program.')}
+      ${_th(this._t('lbl.health', {}, 'Health'), 'health', col === 'health', dir, 'cycsort', 'right', 'ML cycle health (higher = better). Click a cycle to inspect and review it.')}
     </tr></thead>`;
 
     const filterBar = `<div class="wd-filter-bar">
       <input type="text" class="wd-filter-input" id="wd-cyc-filter-text" placeholder="Filter by profile…" value="${_esc(text)}" autocomplete="off">
       <select id="wd-cyc-filter-status" class="wd-filter-select">
-        <option value="" ${!fStatus ? 'selected' : ''}>All statuses</option>
+        <option value="" ${!fStatus ? 'selected' : ''}>${this._t('status.all_statuses', {}, 'All statuses')}</option>
         <option value="needs_review" ${fStatus === 'needs_review' ? 'selected' : ''}>Needs review${needsReviewCount ? ` (${needsReviewCount})` : ''}</option>
-        <option value="completed" ${fStatus === 'completed' ? 'selected' : ''}>Completed</option>
-        <option value="interrupted" ${fStatus === 'interrupted' ? 'selected' : ''}>Interrupted</option>
-        <option value="force_stopped" ${fStatus === 'force_stopped' ? 'selected' : ''}>Force stopped</option>
-        <option value="unlabelled" ${fStatus === 'unlabelled' ? 'selected' : ''}>Unlabelled</option>
+        <option value="completed" ${fStatus === 'completed' ? 'selected' : ''}>${this._t('status.completed', {}, 'Completed')}</option>
+        <option value="interrupted" ${fStatus === 'interrupted' ? 'selected' : ''}>${this._t('status.interrupted', {}, 'Interrupted')}</option>
+        <option value="force_stopped" ${fStatus === 'force_stopped' ? 'selected' : ''}>${this._t('status.force_stopped', {}, 'Force stopped')}</option>
+        <option value="unlabelled" ${fStatus === 'unlabelled' ? 'selected' : ''}>${this._t('lbl.unlabelled', {}, 'Unlabelled')}</option>
       </select>
     </div>`;
 
@@ -1859,15 +1867,15 @@ class HaWashdataPanel extends HTMLElement {
     const title = `Cycles (${allCycles.length}${shown})`;
 
     const toolbar = canEdit ? `<div class="wd-card-actions" style="margin:0 0 4px;justify-content:flex-end">
-      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-auto-open">Auto-label cycles</button>
-      <button class="wd-btn ${selMode ? 'wd-btn-primary' : 'wd-btn-secondary'} wd-btn-sm" data-action="cyc-select-toggle">${selMode ? 'Done' : 'Select'}</button>
+      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-auto-open">${this._t('btn.auto_label_cycles', {}, 'Auto-label cycles')}</button>
+      <button class="wd-btn ${selMode ? 'wd-btn-primary' : 'wd-btn-secondary'} wd-btn-sm" data-action="cyc-select-toggle">${selMode ? this._t('btn.done', {}, 'Done') : this._t('btn.select', {}, 'Select')}</button>
     </div>` : '';
 
     const bulk = selMode ? `<div class="wd-card-actions" style="margin:0 0 10px">
       <span class="wd-info" style="margin:0">${sel.size} selected</span>
-      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-compare" ${sel.size < 2 ? 'disabled' : ''}>Compare${sel.size >= 2 ? ` (${sel.size})` : ''}</button>
-      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-merge" ${sel.size < 2 ? 'disabled' : ''}>Merge${sel.size >= 2 ? ` (${sel.size})` : ''}</button>
-      <button class="wd-btn wd-btn-danger wd-btn-sm" data-action="cyc-bulk-del" ${sel.size < 1 ? 'disabled' : ''}>Delete${sel.size >= 1 ? ` (${sel.size})` : ''}</button>
+      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-compare" ${sel.size < 2 ? 'disabled' : ''}>${this._t('btn.compare', {}, 'Compare')}${sel.size >= 2 ? ` (${sel.size})` : ''}</button>
+      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-merge" ${sel.size < 2 ? 'disabled' : ''}>${this._t('btn.merge', {}, 'Merge')}${sel.size >= 2 ? ` (${sel.size})` : ''}</button>
+      <button class="wd-btn wd-btn-danger wd-btn-sm" data-action="cyc-bulk-del" ${sel.size < 1 ? 'disabled' : ''}>${this._t('btn.delete', {}, 'Delete')}${sel.size >= 1 ? ` (${sel.size})` : ''}</button>
     </div>` : '';
 
     const cyclesHtml = `
@@ -1876,7 +1884,7 @@ class HaWashdataPanel extends HTMLElement {
         ${filterBar}
         ${toolbar}${bulk}
         ${cycles.length === 0
-          ? `<div class="wd-empty" style="padding:24px"><div class="wd-icon">📋</div>${allCycles.length ? 'No cycles match the current filter.' : 'No cycles recorded yet.'}</div>`
+          ? `<div class="wd-empty" style="padding:24px"><div class="wd-icon">📋</div>${allCycles.length ? this._t('msg.no_cycles_match', {}, 'No cycles match the current filter.') : this._t('msg.no_cycles_yet', {}, 'No cycles recorded yet.')}</div>`
           : `<div class="wd-table-wrap"><table class="wd-table">${thead}<tbody>${rows}</tbody></table></div>`}
       </div>`;
 
@@ -1886,8 +1894,8 @@ class HaWashdataPanel extends HTMLElement {
   // ── Profiles tab ──────────────────────────────────────────────────────────
 
   _trendIcon(trend) {
-    if (trend === 'up') return '<span title="Trending up" style="color:var(--warning-color,#ff9800)">↑</span>';
-    if (trend === 'down') return '<span title="Trending down" style="color:var(--info-color,#2196f3)">↓</span>';
+    if (trend === 'up') return `<span title="${_esc(this._t('trend.up', {}, 'Trending up'))}" style="color:var(--warning-color,#ff9800)">↑</span>`;
+    if (trend === 'down') return `<span title="${_esc(this._t('trend.down', {}, 'Trending down'))}" style="color:var(--info-color,#2196f3)">↓</span>`;
     return '';
   }
 
@@ -1900,9 +1908,9 @@ class HaWashdataPanel extends HTMLElement {
     const t = (this._profileTrends || {})[p.name];
     let healthBadge = '';
     if (h && h.health_status === 'poor') {
-      healthBadge = `<span class="wd-badge" style="color:var(--error-color,#f44336);background:rgba(244,67,54,.12)" title="Inconsistent match history — consider rebuilding this profile">⚠ poor fit</span>`;
+      healthBadge = `<span class="wd-badge" style="color:var(--error-color,#f44336);background:rgba(244,67,54,.12)" title="Inconsistent match history — consider rebuilding this profile">⚠ ${this._t('badge.poor_fit', {}, 'poor fit')}</span>`;
     } else if (h && h.health_status === 'fair') {
-      healthBadge = `<span class="wd-badge" style="color:var(--warning-color,#ff9800);background:rgba(255,152,0,.12)" title="Moderate match consistency — some cycles assigned to this profile have lower confidence scores. Label more cycles or re-record the profile to improve accuracy.">fair fit</span>`;
+      healthBadge = `<span class="wd-badge" style="color:var(--warning-color,#ff9800);background:rgba(255,152,0,.12)" title="Moderate match consistency — some cycles assigned to this profile have lower confidence scores. Label more cycles or re-record the profile to improve accuracy.">${this._t('badge.fair_fit', {}, 'fair fit')}</span>`;
     }
     // Trend badge: show if duration is drifting (up = slower/longer, concerning for lime buildup etc.)
     let trendBadge = '';
@@ -1948,7 +1956,7 @@ class HaWashdataPanel extends HTMLElement {
       const clusterHints = clusters.map(cl => `~${cl.duration_bucket_min}–${cl.duration_bucket_min + 15} min (${cl.count}×)`).join(', ');
       return `<div class="wd-sug-banner" style="border-color:var(--info-color,#2196f3);background:rgba(33,150,243,.07)">
         <span>📂 <b>${cg.unmatched_count}</b> recent cycles have no matching profile (${Math.round(cg.unmatched_rate * 100)}% of last 30).${clusterHints ? ` Durations: ${clusterHints}.` : ''} Consider creating a new profile.</span>
-        ${canEdit ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="create-profile">+ Create profile</button>` : ''}
+        ${canEdit ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="create-profile">${this._t('btn.create_profile', {}, '+ Create profile')}</button>` : ''}
       </div>`;
     })() : '';
 
@@ -1976,7 +1984,7 @@ class HaWashdataPanel extends HTMLElement {
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
           ${titleEl}
           ${cohBadge}<span style="flex:1"></span>
-          ${canEdit ? `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="pg-edit" data-gname="${_esc(g.name)}">Manage</button>` : ''}
+          ${canEdit ? `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="pg-edit" data-gname="${_esc(g.name)}">${this._t('btn.manage', {}, 'Manage')}</button>` : ''}
         </div>
         ${warn}
         <div class="wd-profiles-grid">${memCards}</div>
@@ -1991,9 +1999,9 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-card-title">Profiles (${this._profiles.length})</div>
         <p class="wd-info">Click a profile for stats, phases and cleanup. Group near-identical programs (same shape/duration, different temperature or spin) so matching reliably picks between them.</p>
         ${canEdit ? `<div class="wd-card-actions">
-          <button class="wd-btn wd-btn-primary" data-action="create-profile">+ New Profile</button>
-          <button class="wd-btn wd-btn-secondary" data-action="pg-new">+ New Group</button>
-          <button class="wd-btn wd-btn-secondary" data-action="rebuild-envelopes" ${rebuildBusy ? 'disabled' : ''}>${rebuildBusy ? '<span class="wd-spin"></span> Rebuilding…' : 'Rebuild Envelopes'}</button>
+          <button class="wd-btn wd-btn-primary" data-action="create-profile">${this._t('btn.new_profile', {}, '+ New Profile')}</button>
+          <button class="wd-btn wd-btn-secondary" data-action="pg-new">${this._t('btn.new_group', {}, '+ New Group')}</button>
+          <button class="wd-btn wd-btn-secondary" data-action="rebuild-envelopes" ${rebuildBusy ? 'disabled' : ''}>${rebuildBusy ? '<span class="wd-spin"></span> Rebuilding…' : this._t('btn.rebuild', {}, 'Rebuild Envelopes')}</button>
         </div>` : ''}
       </div>
       ${sugBanner}
@@ -2001,13 +2009,15 @@ class HaWashdataPanel extends HTMLElement {
       ${advBanner}
       ${groupSections}
       ${this._profiles.length === 0
-        ? `<div class="wd-empty"><div class="wd-icon">📊</div>No profiles yet. Create one from a labelled cycle.</div>`
+        ? `<div class="wd-empty"><div class="wd-icon">📊</div>${this._t('msg.no_profiles_yet', {}, 'No profiles yet. Create one from a labelled cycle.')}</div>`
         : (ungrouped.length
-          ? `${groupSections ? '<div class="wd-card-title" style="margin:6px 0 8px">Ungrouped</div>' : ''}<div class="wd-profiles-grid">${ungroupedCards}</div>`
+          ? `${groupSections ? `<div class="wd-card-title" style="margin:6px 0 8px">${this._t('lbl.ungrouped', {}, 'Ungrouped')}</div>` : ''}<div class="wd-profiles-grid">${ungroupedCards}</div>`
           : '')}`;
 
-    const subtabBtns = [['profiles', 'Profiles'], ['phase-catalog', 'Phase Catalog']]
-      .map(([id, lbl]) => `<button class="wd-subtab ${this._profSubtab === id ? 'active' : ''}" data-proftab="${id}">${lbl}</button>`).join('');
+    const subtabBtns = [
+      ['profiles', this._t('tab.subtab_profiles', {}, 'Profiles')],
+      ['phase-catalog', this._t('tab.subtab_phase_catalog', {}, 'Phase Catalog')],
+    ].map(([id, lbl]) => `<button class="wd-subtab ${this._profSubtab === id ? 'active' : ''}" data-proftab="${id}">${lbl}</button>`).join('');
 
     return `
       <div class="wd-subtabs">${subtabBtns}</div>
@@ -2045,12 +2055,12 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-field" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><label style="margin:0">Group name</label><input type="text" id="wd-pg-name" value="${_esc(m.name || '')}" placeholder="e.g. Cotton 2:47" style="flex:1;min-width:180px">${cohInfo}</div>
       ${canvas}
       <div class="wd-rev-sub">Members ${members.length ? `(${members.length})` : ''}</div>
-      <div class="wd-rev-tags">${checks || '<span class="wd-info">No profiles yet.</span>'}</div>
+      <div class="wd-rev-tags">${checks || `<span class="wd-info">${this._t('msg.no_profiles_yet_short', {}, 'No profiles yet.')}</span>`}</div>
       <p class="wd-info" style="margin-top:10px">Group programs with the same shape that differ in temperature/spin (durations may vary). Matching scores the group as one candidate, then picks the best-fitting member. Pick at least 2; the overlay shows how alike they are.</p>
       <div class="wd-modal-actions">
-        <button class="wd-btn wd-btn-secondary" data-maction="cancel">Cancel</button>
-        ${m.orig ? `<button class="wd-btn wd-btn-danger" data-maction="pg-delete" title="Delete this group only - the member profiles are kept">Delete Group</button>` : ''}
-        <button class="wd-btn wd-btn-primary" data-maction="pg-save" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Saving…' : 'Save Group'}</button>
+        <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        ${m.orig ? `<button class="wd-btn wd-btn-danger" data-maction="pg-delete" title="Delete this group only - the member profiles are kept">${this._t('btn.delete_group', {}, 'Delete Group')}</button>` : ''}
+        <button class="wd-btn wd-btn-primary" data-maction="pg-save" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Saving…' : this._t('btn.save_group', {}, 'Save Group')}</button>
       </div>`;
   }
 
@@ -2074,7 +2084,7 @@ class HaWashdataPanel extends HTMLElement {
   _htmlSettings() {
     const o = this._opts;
     if (!Object.keys(o).length)
-      return `<div class="wd-empty"><div class="wd-icon">⚙️</div>Loading settings…</div>`;
+      return `<div class="wd-empty"><div class="wd-icon">⚙️</div>${this._t('msg.loading_settings', {}, 'Loading settings…')}</div>`;
 
     const sugKeys = new Set((this._suggestions || []).map(s => s.key));
     const secHasSug = (sec) => {
@@ -2085,7 +2095,7 @@ class HaWashdataPanel extends HTMLElement {
     const visibleSections = _SETTINGS_SECTIONS.filter(sec => sec.id !== 'ml_training');
     const nav = visibleSections.map(sec => {
       const hasSug = secHasSug(sec);
-      return `<button class="wd-sec-btn ${this._settingsSec === sec.id ? 'active' : ''}" data-sec="${sec.id}">${_esc(sec.label)}${hasSug ? '<span class="wd-sec-sug-dot"></span>' : ''}</button>`;
+      return `<button class="wd-sec-btn ${this._settingsSec === sec.id ? 'active' : ''}" data-sec="${sec.id}">${_esc(this._t('section.' + sec.id + '.label', {}, sec.label))}${hasSug ? '<span class="wd-sec-sug-dot"></span>' : ''}</button>`;
     }).join('');
 
     const saveBusy = this._busy.has('save-settings');
@@ -2094,17 +2104,17 @@ class HaWashdataPanel extends HTMLElement {
     const banner = sugCount ? (sugOnly ? `
       <div class="wd-sug-banner">
         <span>💡 Showing <b>${sugCount}</b> setting${sugCount > 1 ? 's' : ''} with suggestions. Select a section above or <span style="text-decoration:underline;cursor:pointer" data-action="sug-show-all">show all settings</span>.</span>
-        <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="sug-apply-all">Apply all</button>
+        <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="sug-apply-all">${this._t('btn.apply_all', {}, 'Apply all')}</button>
       </div>` : `
       <div class="wd-sug-banner">
         <span>💡 <b>${sugCount}</b> tuning suggestion${sugCount > 1 ? 's' : ''} available from observed cycles. They appear beside the relevant fields.</span>
-        <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="goto-suggestions">Show only</button>
-        <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="sug-apply-all">Apply all</button>
-        <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="sug-dismiss">Dismiss</button>
+        <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="goto-suggestions">${this._t('btn.show_only', {}, 'Show only')}</button>
+        <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="sug-apply-all">${this._t('btn.apply_all', {}, 'Apply all')}</button>
+        <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="sug-dismiss">${this._t('btn.dismiss', {}, 'Dismiss')}</button>
       </div>`) : '';
 
     const analyzeBusy = this._busy.has('sug-analyze');
-    const analyzeBtn = `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="sug-analyze" ${analyzeBusy ? 'disabled' : ''} title="Analyze your recorded cycles now and refresh tuning suggestions">${analyzeBusy ? '<span class="wd-spin"></span> Analyzing…' : '🔍 Run suggestion analysis'}</button>`;
+    const analyzeBtn = `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="sug-analyze" ${analyzeBusy ? 'disabled' : ''} title="Analyze your recorded cycles now and refresh tuning suggestions">${analyzeBusy ? '<span class="wd-spin"></span> Analyzing…' : this._t('btn.run_analysis', {}, '🔍 Run suggestion analysis')}</button>`;
 
     const search = this._settingsSearch || '';
     const q = search.trim().toLowerCase();
@@ -2114,7 +2124,7 @@ class HaWashdataPanel extends HTMLElement {
 
     return `
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
-        <div class="wd-card-title" style="margin:0">Settings${this._mlSettingsLoading ? ' <span style="font-size:.6em;color:var(--secondary-text-color);font-weight:400">loading ML…</span>' : ''}</div>
+        <div class="wd-card-title" style="margin:0">${this._t('tab.settings', {}, 'Settings')}${this._mlSettingsLoading ? ` <span style="font-size:.6em;color:var(--secondary-text-color);font-weight:400">${this._t('msg.ml_loading', {}, 'loading ML…')}</span>` : ''}</div>
         ${analyzeBtn}
       </div>
       ${banner}
@@ -2125,8 +2135,8 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-card">
         <form id="wd-settings-form">${formContent}</form>
         <div class="wd-card-actions" style="margin-top:20px">
-          <button class="wd-btn wd-btn-primary" id="wd-settings-save" ${saveBusy ? 'disabled' : ''}>${saveBusy ? '<span class="wd-spin"></span> Saving…' : 'Save Settings'}</button>
-          <button class="wd-btn wd-btn-secondary" id="wd-settings-reload">Refresh</button>
+          <button class="wd-btn wd-btn-primary" id="wd-settings-save" ${saveBusy ? 'disabled' : ''}>${saveBusy ? '<span class="wd-spin"></span> Saving…' : this._t('btn.save_settings', {}, 'Save Settings')}</button>
+          <button class="wd-btn wd-btn-secondary" id="wd-settings-reload">${this._t('btn.refresh', {}, 'Refresh')}</button>
         </div>
         <p class="wd-info" style="margin-top:12px;font-size:.78em">Saving triggers an integration reload. HA entities may briefly show as unavailable.</p>
       </div>
@@ -2166,7 +2176,9 @@ class HaWashdataPanel extends HTMLElement {
     const mlc = (this._mlSettings || {})[f.key];
     if (mlc && mlc.ml_value != null) extra.mlSuggestion = { value: mlc.ml_value, reason: mlc.ml_reason };
 
-    return _field(f, value, extra);
+    extra.useBtnLabel = this._t('btn.use', {}, 'Use');
+    const tf = Object.assign({}, f, { label: this._t('setting.' + f.key + '.label', {}, f.label || ''), doc: f.doc != null ? this._t('setting.' + f.key + '.doc', {}, f.doc) : f.doc });
+    return _field(tf, value, extra);
   }
 
   // Automations subcategory at the top of Notifications. Replaces the old custom
@@ -2179,10 +2191,10 @@ class HaWashdataPanel extends HTMLElement {
     const list = this._deviceAutomations || [];
     const pills = list.length
       ? list.map(a => `<span class="wd-auto-pill">` +
-          `<a class="wd-auto-pill-link" href="/config/automation/edit/${encodeURIComponent(a.id)}" target="_top" title="Open in the automation editor">🔗 ${_esc(a.name)}${a.enabled ? '' : ' <span style="opacity:.6">(off)</span>'}</a>` +
-          `<button type="button" class="wd-auto-pill-x" data-action="auto-delete" data-autoid="${_esc(a.id)}" data-autoname="${_esc(a.name)}" title="Delete this automation">×</button>` +
+          `<a class="wd-auto-pill-link" href="/config/automation/edit/${encodeURIComponent(a.id)}" target="_top" title="${this._t('hdr.automation_open', {}, 'Open in the automation editor')}">🔗 ${_esc(a.name)}${a.enabled ? '' : ' <span style="opacity:.6">(off)</span>'}</a>` +
+          `<button type="button" class="wd-auto-pill-x" data-action="auto-delete" data-autoid="${_esc(a.id)}" data-autoname="${_esc(a.name)}" title="${this._t('hdr.automation_delete', {}, 'Delete this automation')}">×</button>` +
         `</span>`).join('')
-      : `<span class="wd-info" style="margin:0">${this._autoLoading ? 'Loading…' : 'No automations reference this device yet.'}</span>`;
+      : `<span class="wd-info" style="margin:0">${this._autoLoading ? this._t('msg.loading', {}, 'Loading…') : this._t('hdr.no_automations', {}, 'No automations reference this device yet.')}</span>`;
     // Legacy custom actions from the removed editor: still fired by the backend,
     // but no longer editable. Offer a one-click convert to a real automation.
     const legacy = Array.isArray(this._opts.notify_actions) ? this._opts.notify_actions : [];
@@ -2191,22 +2203,22 @@ class HaWashdataPanel extends HTMLElement {
         <div style="font-weight:600;margin-bottom:4px">${legacy.length} legacy custom action${legacy.length > 1 ? 's' : ''} still running</div>
         <p class="wd-info" style="margin:0 0 8px">Configured with the old actions editor (now removed). They still fire on cycle events but can no longer be edited here. Convert them into a normal automation, or remove them.</p>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-convert-legacy">Convert to automation</button>
-          <button type="button" class="wd-btn wd-btn-danger wd-btn-sm" data-action="auto-remove-legacy">Remove</button>
+          <button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-convert-legacy">${this._t('btn.convert_to_automation', {}, 'Convert to automation')}</button>
+          <button type="button" class="wd-btn wd-btn-danger wd-btn-sm" data-action="auto-remove-legacy">${this._t('btn.remove', {}, 'Remove')}</button>
         </div>
       </div>` : '';
     return `
-      <div class="wd-subhead">Automations</div>
+      <div class="wd-subhead">${this._t('hdr.automations', {}, 'Automations')}</div>
       <p class="wd-info" style="margin-bottom:10px">WashData fires <code>ha_washdata_cycle_started</code> / <code>ha_washdata_cycle_ended</code> events and exposes entities, so notifications and actions are best built as normal Home Assistant automations. Automations that use this device appear below.</p>
       ${legacyBlock}
       <div class="wd-auto-pills" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px">${pills}</div>
       <div class="wd-auto-new" style="display:flex;gap:6px;align-items:center;margin-bottom:18px">
-        <button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-new">＋ New Automation</button>
+        <button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-new">${this._t('btn.new_automation', {}, '＋ New Automation')}</button>
         <details class="wd-auto-dd" style="position:relative">
-          <summary class="wd-btn wd-btn-secondary wd-btn-sm">From template ▾</summary>
+          <summary class="wd-btn wd-btn-secondary wd-btn-sm">${this._t('btn.from_template', {}, 'From template ▾')}</summary>
           <div class="wd-auto-dd-menu" style="position:absolute;z-index:5;margin-top:4px;background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:8px;padding:6px;min-width:190px;box-shadow:0 4px 14px rgba(0,0,0,.25)">
-            <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="auto-new-started" style="width:100%;margin-bottom:4px">On cycle started</button>
-            <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="auto-new-finished" style="width:100%">On cycle finished</button>
+            <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="auto-new-started" style="width:100%;margin-bottom:4px">${this._t('btn.on_cycle_started', {}, 'On cycle started')}</button>
+            <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="auto-new-finished" style="width:100%">${this._t('btn.on_cycle_finished', {}, 'On cycle finished')}</button>
           </div>
         </details>
       </div>`;
@@ -2314,7 +2326,8 @@ class HaWashdataPanel extends HTMLElement {
     const sec = _SETTINGS_SECTIONS.find(s => s.id === this._settingsSec && s.id !== 'ml_training')
       || _SETTINGS_SECTIONS.find(s => s.id !== 'ml_training')
       || _SETTINGS_SECTIONS[0];
-    const intro = sec.intro ? `<p class="wd-sec-intro">${_esc(sec.intro)}</p>` : '';
+    const intro = (sec.intro || this._t('section.' + sec.id + '.intro', {}, ''))
+      ? `<p class="wd-sec-intro">${_esc(this._t('section.' + sec.id + '.intro', {}, sec.intro || ''))}</p>` : '';
     const trainCard = '';
 
     if (sec.id === 'notifications') {
@@ -2353,7 +2366,7 @@ class HaWashdataPanel extends HTMLElement {
       const rendered = hits.map(f => this._renderField(f, o)).filter(Boolean).join('');
       if (!rendered) continue;
       count += hits.length;
-      out += `<div class="wd-subhead">${_esc(sec.label)}</div><div class="wd-form-grid">${rendered}</div>`;
+      out += `<div class="wd-subhead">${_esc(this._t('section.' + sec.id + '.label', {}, sec.label))}</div><div class="wd-form-grid">${rendered}</div>`;
     }
     return count ? out : `<p class="wd-info" style="padding:12px">No settings match "${_esc(q)}".</p>`;
   }
@@ -2361,7 +2374,7 @@ class HaWashdataPanel extends HTMLElement {
   // Cross-section view showing only the fields that have active suggestions.
   _htmlSettingsSugOnly(o) {
     const sugKeys = new Set((this._suggestions || []).map(s => s.key));
-    if (!sugKeys.size) return '<p class="wd-info" style="padding:12px">No active suggestions.</p>';
+    if (!sugKeys.size) return `<p class="wd-info" style="padding:12px">${this._t('msg.no_suggestions', {}, 'No active suggestions.')}</p>`;
     const sections = _SETTINGS_SECTIONS.filter(s => s.id !== 'ml_training');
     let out = '';
     for (const sec of sections) {
@@ -2370,9 +2383,9 @@ class HaWashdataPanel extends HTMLElement {
       if (!hits.length) continue;
       const rendered = hits.map(f => this._renderField(f, o)).filter(Boolean).join('');
       if (!rendered) continue;
-      out += `<div class="wd-subhead">${_esc(sec.label)}</div><div class="wd-form-grid">${rendered}</div>`;
+      out += `<div class="wd-subhead">${_esc(this._t('section.' + sec.id + '.label', {}, sec.label))}</div><div class="wd-form-grid">${rendered}</div>`;
     }
-    return out || '<p class="wd-info" style="padding:12px">No active suggestions.</p>';
+    return out || `<p class="wd-info" style="padding:12px">${this._t('msg.no_suggestions', {}, 'No active suggestions.')}</p>`;
   }
 
   // Dedicated "ML Training" tab: the single home for all ML, laid out as a plain
@@ -2382,7 +2395,7 @@ class HaWashdataPanel extends HTMLElement {
   _htmlMlTab() {
     const o = this._opts;
     if (!Object.keys(o).length)
-      return `<div class="wd-empty"><div class="wd-icon">🤖</div>Loading…</div>`;
+      return `<div class="wd-empty"><div class="wd-icon">🤖</div>${this._t('msg.loading', {}, 'Loading…')}</div>`;
     const st = this._mlTrainingStatus;
     const dev = this._devices[this._selIdx];
     const eid = dev && dev.entry_id;
@@ -2390,19 +2403,19 @@ class HaWashdataPanel extends HTMLElement {
     const fields = sec ? (sec.fields || []).map(f => this._renderField(f, o)).filter(Boolean).join('') : '';
     const saveBusy = this._busy.has('save-settings');
     return `
-      <div class="wd-card-title" style="margin:0 0 4px">Smart Learning</div>
-      <p class="wd-sec-intro">WashData ships with smart models that detect cycles, match programs, and estimate time &amp; energy — they work out of the box. It can also fine-tune them to <em>this</em> machine as it sees more of your cycles, keeping a change only when it is genuinely more accurate. Everything here is optional.</p>
+      <div class="wd-card-title" style="margin:0 0 4px">${this._t('hdr.ml_smart_learning', {}, 'Smart Learning')}</div>
+      <p class="wd-sec-intro">${this._t('msg.ml_intro', {}, 'WashData ships with smart models that work out of the box.')}</p>
 
       ${this._htmlMlStatusSection(st, eid)}
 
       <div class="wd-card" style="margin-top:12px">
-        <div class="wd-card-title" style="margin:0 0 4px">Settings</div>
-        <p class="wd-info" style="margin:0 0 12px">Two independent switches: one applies the models while a cycle runs, the other lets WashData fine-tune them to your machine over time.</p>
+        <div class="wd-card-title" style="margin:0 0 4px">${this._t('hdr.ml_settings_card', {}, 'Settings')}</div>
+        <p class="wd-info" style="margin:0 0 12px">${this._t('msg.ml_settings_intro', {}, 'Two independent switches: one applies the models while a cycle runs, the other lets WashData fine-tune them to your machine over time.')}</p>
         <form id="wd-ml-form"><div class="wd-form-grid">${fields}</div></form>
         <div class="wd-card-actions" style="margin-top:12px">
-          <button class="wd-btn wd-btn-primary" id="wd-ml-save" ${saveBusy ? 'disabled' : ''}>${saveBusy ? '<span class="wd-spin"></span> Saving…' : 'Save'}</button>
+          <button class="wd-btn wd-btn-primary" id="wd-ml-save" ${saveBusy ? 'disabled' : ''}>${saveBusy ? '<span class="wd-spin"></span> Saving…' : this._t('btn.save', {}, 'Save')}</button>
         </div>
-        <p class="wd-info" style="margin-top:10px;font-size:.78em">Saving triggers an integration reload; HA entities may briefly show as unavailable.</p>
+        <p class="wd-info" style="margin-top:10px;font-size:.78em">${this._t('msg.saving_triggers_reload', {}, 'Saving triggers an integration reload.')}</p>
       </div>
 
       ${this._htmlMlLearnedSection(st)}
@@ -2414,36 +2427,36 @@ class HaWashdataPanel extends HTMLElement {
   _htmlMlStatusSection(st, eid) {
     const running = (eid && this._busy.has('ml-train-now:' + eid)) || (st && st.running);
     const trainBtn = this._canEdit()
-      ? `<button class="wd-btn wd-btn-primary wd-btn-sm" data-action="ml-train-now" ${running ? 'disabled' : ''}>${running ? '<span class="wd-spin"></span> Training…' : 'Train now'}</button>`
+      ? `<button class="wd-btn wd-btn-primary wd-btn-sm" data-action="ml-train-now" ${running ? 'disabled' : ''}>${running ? '<span class="wd-spin"></span> Training…' : this._t('btn.train_now', {}, 'Train now')}</button>`
       : '';
     if (!st) {
-      return `<div class="wd-card"><div class="wd-card-title" style="margin:0 0 4px">Status</div><p class="wd-info" style="margin:0">Loading…</p></div>`;
+      return `<div class="wd-card"><div class="wd-card-title" style="margin:0 0 4px">${this._t('hdr.status', {}, 'Status')}</div><p class="wd-info" style="margin:0">${this._t('msg.loading', {}, 'Loading…')}</p></div>`;
     }
     const nModels = Object.keys(st.on_device_models || {}).length;
     const source = nModels
-      ? `<span style="color:var(--success-color,#4caf50);font-weight:600">● Personalized to this machine</span> <span style="color:var(--secondary-text-color)">(${nModels} model${nModels > 1 ? 's' : ''} fine-tuned)</span>`
-      : `<span style="color:var(--secondary-text-color)">● Using built-in models</span>`;
+      ? `<span style="color:var(--success-color,#4caf50);font-weight:600">${this._t('ml.personalized', {}, '● Personalized to this machine')}</span> <span style="color:var(--secondary-text-color)">(${nModels} model${nModels > 1 ? 's' : ''} fine-tuned)</span>`
+      : `<span style="color:var(--secondary-text-color)">${this._t('ml.builtin_models', {}, '● Using built-in models')}</span>`;
     const cyc = st.cycle_count || 0, min = st.min_cycles || 0;
     const enough = cyc >= min;
     const pct = min > 0 ? Math.min(100, Math.round(cyc / min * 100)) : 100;
     const barCol = enough ? 'var(--success-color,#4caf50)' : 'var(--warning-color,#ff9800)';
     const need = Math.max(0, min - cyc);
     const dataLine = enough
-      ? `Enough data to learn from (${cyc}/${min} cycles).`
-      : `Collecting data — ${need} more cycle${need === 1 ? '' : 's'} before fine-tuning can start (${cyc}/${min}).`;
+      ? this._t('msg.enough_data', {current: cyc, min: min}, `Enough data to learn from (${cyc}/${min} cycles).`)
+      : this._t('msg.collecting_data', {need: need, current: cyc, min: min, plural: need === 1 ? '' : 's'}, `Collecting data — ${need} more cycle${need === 1 ? '' : 's'} before fine-tuning can start (${cyc}/${min}).`);
     const bar = `<div style="height:8px;border-radius:6px;background:var(--secondary-background-color);overflow:hidden;margin:8px 0"><div style="width:${pct}%;height:100%;background:${barCol}"></div></div>`;
     const last = st.last_trained ? _fmtDate(st.last_trained) : 'never';
     const state = running
-      ? `<span style="color:var(--info-color,#2196f3)"><span class="wd-spin"></span> fine-tuning now…</span>`
-      : (st.enabled ? `auto fine-tune on (around ${String(st.hour).padStart(2, '0')}:00)` : `auto fine-tune off — use “Train now” to run it manually`);
+      ? `<span style="color:var(--info-color,#2196f3)"><span class="wd-spin"></span> ${this._t('status.fine_tuning', {}, 'fine-tuning now…')}</span>`
+      : (st.enabled ? this._t('lbl.auto_fine_tune_on', {hour: String(st.hour).padStart(2, '0')}, `auto fine-tune on (around ${String(st.hour).padStart(2, '0')}:00)`) : this._t('lbl.auto_fine_tune_off', {}, 'auto fine-tune off'));
     return `<div class="wd-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
-        <div class="wd-card-title" style="margin:0">Status</div>${trainBtn}
+        <div class="wd-card-title" style="margin:0">${this._t('hdr.status', {}, 'Status')}</div>${trainBtn}
       </div>
       <div style="margin:8px 0 2px">${source}</div>
       <p class="wd-info" style="margin:0">${dataLine}</p>
       ${bar}
-      <p class="wd-info" style="margin:0">Last checked: <strong>${_esc(last)}</strong> · ${state}</p>
+      <p class="wd-info" style="margin:0">${this._t('lbl.last_checked', {}, 'Last checked:')} <strong>${_esc(last)}</strong> · ${state}</p>
     </div>`;
   }
 
@@ -2456,7 +2469,7 @@ class HaWashdataPanel extends HTMLElement {
     const reverting = this._busy.has('ml-revert-models');
     let body;
     if (!keys.length) {
-      body = `<p class="wd-info" style="margin:0">Nothing fine-tuned yet — WashData is using its built-in models. Once enough cycles are collected and “Learn from this machine” is on (or you press Train now), any model it can improve will appear here.</p>`;
+      body = `<p class="wd-info" style="margin:0">${this._t('msg.no_fine_tuned', {}, 'Nothing fine-tuned yet — WashData is using its built-in models.')}</p>`;
     } else {
       const rows = keys.map(cap => {
         const m = models[cap] || {};
@@ -2464,19 +2477,19 @@ class HaWashdataPanel extends HTMLElement {
         return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--divider-color)">
           <div style="flex:1;min-width:0">
             <div style="font-weight:600">${_esc(m.label || cap)}${this._mlTrendBadge(m.trend)}</div>
-            <div class="wd-info" style="font-size:.8em;margin:0">${_esc(m.blurb || '')} · fine-tuned ${_esc(when)}</div>
+            <div class="wd-info" style="font-size:.8em;margin:0">${_esc(m.blurb || '')} · ${this._t('ml.fine_tuned_at', {when: _esc(when)}, 'fine-tuned ' + _esc(when))}</div>
           </div>
           ${this._mlQualityChip(m)}
         </div>`;
       }).join('');
       const resetBtn = this._canEdit()
-        ? `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="ml-revert-models" ${reverting ? 'disabled' : ''} title="Discard the fine-tuned models and go back to the built-in ones. WashData can re-learn them later." style="margin-top:12px">${reverting ? '<span class="wd-spin"></span> Resetting…' : 'Reset to built-in models'}</button>`
+        ? `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="ml-revert-models" ${reverting ? 'disabled' : ''} title="Discard the fine-tuned models and go back to the built-in ones. WashData can re-learn them later." style="margin-top:12px">${reverting ? '<span class="wd-spin"></span> Resetting…' : this._t('btn.reset_to_builtin', {}, 'Reset to built-in models')}</button>`
         : '';
       body = `<div>${rows}</div>${resetBtn}`;
     }
     return `<div class="wd-card" style="margin-top:12px">
-      <div class="wd-card-title" style="margin:0 0 4px">What WashData has learned</div>
-      <p class="wd-info" style="margin:0 0 10px">Models fine-tuned to this machine. Anything not listed uses the reliable built-in model.</p>
+      <div class="wd-card-title" style="margin:0 0 4px">${this._t('hdr.ml_learned', {}, 'What WashData has learned')}</div>
+      <p class="wd-info" style="margin:0 0 10px">${this._t('msg.ml_learned_intro', {}, 'Models fine-tuned to this machine.')}</p>
       ${body}
     </div>`;
   }
@@ -2488,18 +2501,18 @@ class HaWashdataPanel extends HTMLElement {
     let pct = 0, word = '', title = m.metric || '';
     if (m.auc != null) {
       pct = Math.max(0, Math.min(1, (m.auc - 0.5) / 0.5)) * 100;
-      word = m.auc >= 0.85 ? 'Strong' : m.auc >= 0.75 ? 'Good' : m.auc >= 0.65 ? 'Fair' : 'Weak';
+      word = m.auc >= 0.85 ? this._t('ml.fit_strong',{},'Strong') : m.auc >= 0.75 ? this._t('ml.fit_good',{},'Good') : m.auc >= 0.65 ? this._t('ml.fit_fair',{},'Fair') : this._t('ml.fit_weak',{},'Weak');
     } else if (m.model_mae != null && m.naive_mae != null && m.naive_mae > 0) {
       const impr = Math.max(0, (m.naive_mae - m.model_mae) / m.naive_mae);
       pct = Math.min(1, impr) * 100;
-      word = impr >= 0.5 ? 'Strong' : impr >= 0.2 ? 'Good' : 'Slight';
+      word = impr >= 0.5 ? this._t('ml.fit_strong',{},'Strong') : impr >= 0.2 ? this._t('ml.fit_good',{},'Good') : this._t('ml.fit_slight',{},'Slight');
       title = `${(impr * 100).toFixed(0)}% better than the baseline estimate (${title})`;
     } else {
       return '';
     }
     const col = pct >= 70 ? 'var(--success-color,#4caf50)' : pct >= 40 ? 'var(--warning-color,#ff9800)' : 'var(--secondary-text-color)';
     return `<div title="${_esc(title)}" style="text-align:right;flex:0 0 auto">
-      <div style="font-size:.8em;font-weight:600;color:${col}">${word} fit</div>
+      <div style="font-size:.8em;font-weight:600;color:${col}">${word} ${this._t('ml.fit_word', {}, 'fit')}</div>
       <div style="height:6px;width:90px;border-radius:5px;background:var(--secondary-background-color);overflow:hidden;margin:3px 0 0 auto"><div style="width:${pct.toFixed(0)}%;height:100%;background:${col}"></div></div>
     </div>`;
   }
@@ -2509,9 +2522,9 @@ class HaWashdataPanel extends HTMLElement {
   _mlTrendBadge(trend) {
     if (!trend) return '';
     const map = {
-      improving: ['↗ improving', 'var(--success-color,#4caf50)', "This model's fit has improved across recent re-checks."],
-      declining: ['↘ declining', 'var(--warning-color,#ff9800)', "This model's fit has slipped across recent re-checks — reviewing more cycles may help it re-learn."],
-      steady: ['→ steady', 'var(--secondary-text-color)', "This model's fit has held roughly steady across recent re-checks."],
+      improving: [this._t('badge.improving',{},'↗ improving'), 'var(--success-color,#4caf50)', "This model's fit has improved across recent re-checks."],
+      declining: [this._t('badge.declining',{},'↘ declining'), 'var(--warning-color,#ff9800)', "This model's fit has slipped across recent re-checks — reviewing more cycles may help it re-learn."],
+      steady: [this._t('badge.steady',{},'→ steady'), 'var(--secondary-text-color)', "This model's fit has held roughly steady across recent re-checks."],
     };
     const e = map[trend];
     if (!e) return '';
@@ -2545,8 +2558,8 @@ class HaWashdataPanel extends HTMLElement {
       </tr>`;
     }).join('');
     const badge = tuned
-      ? `<span class="wd-badge" style="color:var(--success-color,#4caf50);background:rgba(76,175,80,.14)">Using tuned weights</span>`
-      : `<span class="wd-badge" style="color:var(--secondary-text-color);background:var(--secondary-background-color)">Using shipped defaults</span>`;
+      ? `<span class="wd-badge" style="color:var(--success-color,#4caf50);background:rgba(76,175,80,.14)">${this._t('badge.using_tuned', {}, 'Using tuned weights')}</span>`
+      : `<span class="wd-badge" style="color:var(--secondary-text-color);background:var(--secondary-background-color)">${this._t('badge.using_defaults', {}, 'Using shipped defaults')}</span>`;
     let meta = '';
     if (tuned) {
       const when = rec.trained_at ? _fmtDate(rec.trained_at) : 'unknown';
@@ -2556,16 +2569,16 @@ class HaWashdataPanel extends HTMLElement {
       meta = `<p class="wd-info" style="margin:8px 0 0">Tuned ${_esc(when)} from ${rec.cycle_count || 0} cycles${gain}.</p>`;
     }
     const revertBtn = tuned
-      ? `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="ml-revert-match" ${reverting ? 'disabled' : ''}>${reverting ? '<span class="wd-spin"></span> Reverting…' : 'Reset to defaults'}</button>`
+      ? `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="ml-revert-match" ${reverting ? 'disabled' : ''}>${reverting ? '<span class="wd-spin"></span> Reverting…' : this._t('btn.reset_to_defaults', {}, 'Reset to defaults')}</button>`
       : '';
     return `<div class="wd-card" style="margin-top:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px">
-        <div class="wd-card-title" style="margin:0">Program-matching fine-tuning</div>${revertBtn}
+        <div class="wd-card-title" style="margin:0">${this._t('hdr.ml_matching_tuning', {}, 'Program-matching fine-tuning')}</div>${revertBtn}
       </div>
-      <p class="wd-info" style="margin:0 0 8px">When learning, WashData also adjusts how much program matching weighs a cycle's <em>shape</em> versus its <em>duration</em> and <em>energy</em> — adopting machine-specific weights only when they identify programs more accurately on held-out cycles than the shipped defaults.</p>
+      <p class="wd-info" style="margin:0 0 8px">${this._t('msg.matching_tuning_intro', {}, 'When learning, WashData also adjusts how much program matching weighs shape versus duration and energy.')}</p>
       <div style="margin-bottom:8px">${badge}</div>
       <table class="wd-table" style="max-width:420px">
-        <thead><tr><th>Emphasis</th><th style="text-align:right">Default</th><th style="text-align:right">In use</th></tr></thead>
+        <thead><tr><th>${this._t('lbl.emphasis', {}, 'Emphasis')}</th><th style="text-align:right">${this._t('lbl.default', {}, 'Default')}</th><th style="text-align:right">${this._t('lbl.in_use', {}, 'In use')}</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
       ${meta}
@@ -2579,21 +2592,21 @@ class HaWashdataPanel extends HTMLElement {
       const isDefault = p.is_default;
       const desc = p.description || '';
       return `<tr>
-        <td>${_esc(p.name)} ${isDefault ? '<span class="wd-tag">built-in</span>' : ''}</td>
+        <td>${_esc(p.name)} ${isDefault ? `<span class="wd-tag">${this._t('badge.built_in_tag', {}, 'built-in')}</span>` : ''}</td>
         <td>${_esc(desc.length > 60 ? desc.slice(0, 57) + '…' : desc)}</td>
         <td>${!isDefault ? `
-            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="edit-phase" data-pid="${_esc(p.id)}" data-pname="${_esc(p.name)}" data-pdesc="${_esc(p.description || '')}">Edit</button>
-            <button class="wd-btn wd-btn-danger wd-btn-sm" data-action="del-phase" data-pid="${_esc(p.id)}" data-pname="${_esc(p.name)}" style="margin-left:4px">Delete</button>`
-          : '<span style="color:var(--secondary-text-color);font-size:.78em">Read-only</span>'}</td>
+            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="edit-phase" data-pid="${_esc(p.id)}" data-pname="${_esc(p.name)}" data-pdesc="${_esc(p.description || '')}">${this._t('btn.edit', {}, 'Edit')}</button>
+            <button class="wd-btn wd-btn-danger wd-btn-sm" data-action="del-phase" data-pid="${_esc(p.id)}" data-pname="${_esc(p.name)}" style="margin-left:4px">${this._t('btn.delete', {}, 'Delete')}</button>`
+          : `<span style="color:var(--secondary-text-color);font-size:.78em">${this._t('lbl.read_only', {}, 'Read-only')}</span>`}</td>
       </tr>`;
     }).join('');
     return `
       <div class="wd-card">
-        <div class="wd-card-title">Phase Catalog</div>
+        <div class="wd-card-title">${this._t('hdr.phase_catalog', {}, 'Phase Catalog')}</div>
         <p class="wd-info" style="margin-bottom:14px">Named segments of a cycle (Pre-wash, Heating, Spin…). Assign them to a profile from its control panel.</p>
-        <div class="wd-card-actions" style="margin-bottom:14px"><button class="wd-btn wd-btn-primary" data-action="create-phase" data-dtype="${_esc(devType)}">+ New Phase</button></div>
-        ${this._phases.length === 0 ? '<p class="wd-info">No phases defined.</p>'
-          : `<table class="wd-table"><thead><tr><th>Name</th><th>Description</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`}
+        <div class="wd-card-actions" style="margin-bottom:14px"><button class="wd-btn wd-btn-primary" data-action="create-phase" data-dtype="${_esc(devType)}">${this._t('btn.new_phase', {}, '+ New Phase')}</button></div>
+        ${this._phases.length === 0 ? `<p class="wd-info">${this._t('msg.no_phases', {}, 'No phases defined.')}</p>`
+          : `<table class="wd-table"><thead><tr><th>${this._t('lbl.phase_name', {}, 'Name')}</th><th>${this._t('lbl.description', {}, 'Description')}</th><th>${this._t('lbl.actions', {}, 'Actions')}</th></tr></thead><tbody>${rows}</tbody></table>`}
       </div>`;
   }
 
@@ -2604,39 +2617,39 @@ class HaWashdataPanel extends HTMLElement {
       statsHtml = `<p class="wd-info" style="color:var(--error-color)">Could not load diagnostics: ${_esc(d._error)}</p>`;
     } else if (d) {
       statsHtml = `<div class="wd-diag-grid">
-        <div class="wd-diag-stat"><div class="wd-diag-val">${d.total_cycles ?? '-'}</div><div class="wd-diag-lbl">Cycles</div></div>
-        <div class="wd-diag-stat"><div class="wd-diag-val">${d.total_profiles ?? '-'}</div><div class="wd-diag-lbl">Profiles</div></div>
-        <div class="wd-diag-stat"><div class="wd-diag-val">${d.debug_traces_count ?? '-'}</div><div class="wd-diag-lbl">Debug Traces</div></div>
-        <div class="wd-diag-stat"><div class="wd-diag-val">${d.file_size_kb != null ? d.file_size_kb.toFixed(1) : '-'}</div><div class="wd-diag-lbl">File (kB)</div></div>
+        <div class="wd-diag-stat"><div class="wd-diag-val">${d.total_cycles ?? '-'}</div><div class="wd-diag-lbl">${this._t('lbl.cycles_count', {}, 'Cycles')}</div></div>
+        <div class="wd-diag-stat"><div class="wd-diag-val">${d.total_profiles ?? '-'}</div><div class="wd-diag-lbl">${this._t('tab.profiles', {}, 'Profiles')}</div></div>
+        <div class="wd-diag-stat"><div class="wd-diag-val">${d.debug_traces_count ?? '-'}</div><div class="wd-diag-lbl">${this._t('lbl.debug_traces', {}, 'Debug Traces')}</div></div>
+        <div class="wd-diag-stat"><div class="wd-diag-val">${d.file_size_kb != null ? d.file_size_kb.toFixed(1) : '-'}</div><div class="wd-diag-lbl">${this._t('lbl.file_kb', {}, 'File (kB)')}</div></div>
       </div>`;
     } else {
       statsHtml = '<p class="wd-info">Loading diagnostics…</p>';
     }
     return `
       <div class="wd-card">
-        <div class="wd-card-title">Storage Stats</div>
+        <div class="wd-card-title">${this._t('hdr.storage_stats', {}, 'Storage Stats')}</div>
         ${statsHtml}
-        <div class="wd-card-actions"><button class="wd-btn wd-btn-secondary" data-action="diag-refresh">Refresh</button></div>
+        <div class="wd-card-actions"><button class="wd-btn wd-btn-secondary" data-action="diag-refresh">${this._t('btn.refresh', {}, 'Refresh')}</button></div>
       </div>
       ${this._canFull() ? `<div class="wd-card">
-        <div class="wd-card-title">Maintenance Actions</div>
+        <div class="wd-card-title">${this._t('hdr.maintenance', {}, 'Maintenance Actions')}</div>
         <div style="display:flex;flex-direction:column;gap:12px">
-          <div><strong>Process History</strong><p class="wd-info" style="margin:4px 0">Re-run matching on all stored cycles, refresh tuning suggestions, retrain the ML models (if enabled), and recompute cycle health. Run this after a batch of reviews.</p>
-            <button class="wd-btn wd-btn-secondary" data-action="reprocess-history">Process Now</button></div>
-          <div><strong>Clear Debug Traces</strong><p class="wd-info" style="margin:4px 0">Remove stored debug data to free space.</p>
-            <button class="wd-btn wd-btn-secondary" data-action="clear-debug">Clear Debug Data</button></div>
-          <div><strong>Wipe History</strong><p class="wd-info" style="margin:4px 0">Permanently delete all cycles and profiles. Cannot be undone.</p>
-            <button class="wd-btn wd-btn-danger" data-action="wipe-history">Wipe All Data</button></div>
+          <div><strong>${this._t('hdr.process_history', {}, 'Process History')}</strong><p class="wd-info" style="margin:4px 0">Re-run matching on all stored cycles, refresh tuning suggestions, retrain the ML models (if enabled), and recompute cycle health. Run this after a batch of reviews.</p>
+            <button class="wd-btn wd-btn-secondary" data-action="reprocess-history">${this._t('btn.process_history', {}, 'Process Now')}</button></div>
+          <div><strong>${this._t('hdr.clear_debug', {}, 'Clear Debug Traces')}</strong><p class="wd-info" style="margin:4px 0">Remove stored debug data to free space.</p>
+            <button class="wd-btn wd-btn-secondary" data-action="clear-debug">${this._t('btn.clear_debug', {}, 'Clear Debug Data')}</button></div>
+          <div><strong>${this._t('hdr.wipe_history', {}, 'Wipe History')}</strong><p class="wd-info" style="margin:4px 0">Permanently delete all cycles and profiles. Cannot be undone.</p>
+            <button class="wd-btn wd-btn-danger" data-action="wipe-history">${this._t('btn.wipe_all', {}, 'Wipe All Data')}</button></div>
         </div>
       </div>
       <div class="wd-card">
-        <div class="wd-card-title">Export / Import</div>
+        <div class="wd-card-title">${this._t('hdr.export_import', {}, 'Export / Import')}</div>
         <p class="wd-info" style="margin-bottom:12px">Export all profiles and cycles to JSON, or restore from a previous export.</p>
         <div class="wd-card-actions">
-          <button class="wd-btn wd-btn-secondary" data-action="export-config">Export to JSON</button>
-          <button class="wd-btn wd-btn-secondary" data-action="import-config-open">Import from JSON</button>
+          <button class="wd-btn wd-btn-secondary" data-action="export-config">${this._t('btn.export_json', {}, 'Export to JSON')}</button>
+          <button class="wd-btn wd-btn-secondary" data-action="import-config-open">${this._t('btn.import_json', {}, 'Import from JSON')}</button>
         </div>
-      </div>` : '<div class="wd-card"><p class="wd-info">Maintenance and export/import require full access.</p></div>'}`;
+      </div>` : `<div class="wd-card"><p class="wd-info">${this._t('msg.maintenance_requires_access', {}, 'Maintenance and export/import require full access.')}</p></div>`}`;
   }
 
   // ── Panel tab (preferences + admin settings + RBAC) ─────────────────────────
@@ -2652,9 +2665,9 @@ class HaWashdataPanel extends HTMLElement {
     if (admin) { allowed.add('logs'); allowed.add('settings'); allowed.add('access'); }
     let sub = this._panelSubtab;
     if (!allowed.has(sub)) sub = this._panelSubtab = 'prefs';
-    const subtabs = [['prefs', 'My Preferences']];
-    if (canEdit) subtabs.push(['diagnostics', 'Diagnostics']);
-    if (admin) subtabs.push(['logs', 'Logs'], ['settings', 'Panel Settings'], ['access', 'Access Control']);
+    const subtabs = [['prefs', this._t('hdr.my_preferences', {}, 'My Preferences')]];
+    if (canEdit) subtabs.push(['diagnostics', this._t('tab.diagnostics', {}, 'Diagnostics')]);
+    if (admin) subtabs.push(['logs', this._t('hdr.logs', {}, 'Logs')], ['settings', this._t('hdr.panel_settings', {}, 'Panel Settings')], ['access', this._t('hdr.access_control', {}, 'Access Control')]);
     const stBtns = subtabs.map(([id, lbl]) => `<button class="wd-subtab ${sub === id ? 'active' : ''}" data-ptab="${id}">${lbl}</button>`).join('');
     const body = sub === 'diagnostics' && canEdit ? this._htmlDiagnostics()
       : sub === 'logs' && admin ? this._htmlLogs()
@@ -2665,8 +2678,8 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   _levelSelect(attrs, val, withInherit) {
-    const opts = (withInherit ? [['inherit', 'Inherit']] : [])
-      .concat([['none', 'None (hidden)'], ['read', 'Read'], ['edit', 'Edit'], ['full', 'Full']]);
+    const opts = (withInherit ? [["inherit", this._t("access.inherit",{},"Inherit")]] : [])
+      .concat([["none", this._t("access.none",{},"None (hidden)")], ["read", this._t("access.read",{},"Read")], ["edit", this._t("access.edit",{},"Edit")], ["full", this._t("access.full",{},"Full")]]);
     return `<select ${attrs}>${opts.map(([v, l]) => `<option value="${v}" ${val === v ? 'selected' : ''}>${l}</option>`).join('')}</select>`;
   }
 
@@ -2674,22 +2687,22 @@ class HaWashdataPanel extends HTMLElement {
     const cur = (this._panelCfg && this._panelCfg.prefs) || {};
     const tabsAll = [['', '(use panel default)'], ['status', 'Overview'], ['history', 'Cycles'], ['profiles', 'Profiles'], ['settings', 'Settings']];
     const opts = tabsAll.map(([v, l]) => `<option value="${v}" ${(cur.default_tab || '') === v ? 'selected' : ''}>${l}</option>`).join('');
-    const dateOpts = [['relative', 'Relative (e.g. 2 hours ago)'], ['absolute', 'Absolute (e.g. 14:32 on 2 Jul)']];
+    const dateOpts = [['relative', this._t('pref.date_relative', {}, 'Relative (e.g. 2 hours ago)')], ['absolute', this._t('pref.date_absolute', {}, 'Absolute (e.g. 14:32 on 2 Jul)')]];
     const dateOptHtml = dateOpts.map(([v, l]) => `<option value="${v}" ${(cur.date_format || 'relative') === v ? 'selected' : ''}>${l}</option>`).join('');
     return `<div class="wd-card">
-      <div class="wd-card-title">My Preferences</div>
-      <p class="wd-info" style="margin-bottom:12px">These apply to your Home Assistant account only.</p>
-      <div class="wd-subhead">Display</div>
+      <div class="wd-card-title">${this._t('hdr.my_preferences', {}, 'My Preferences')}</div>
+      <p class="wd-info" style="margin-bottom:12px">${this._t('msg.prefs_personal', {}, 'These apply to your Home Assistant account only.')}</p>
+      <div class="wd-subhead">${this._t('hdr.display', {}, 'Display')}</div>
       <div class="wd-form-grid">
-        <div class="wd-field"><label>Default tab when opening the panel</label><select id="wd-pref-tab">${opts}</select></div>
-        <div class="wd-field"><label>Cycle date display</label><select id="wd-pref-datefmt">${dateOptHtml}</select></div>
+        <div class="wd-field"><label>${this._t('lbl.default_tab', {}, 'Default tab when opening the panel')}</label><select id="wd-pref-tab">${opts}</select></div>
+        <div class="wd-field"><label>${this._t('lbl.cycle_date_display', {}, 'Cycle date display')}</label><select id="wd-pref-datefmt">${dateOptHtml}</select></div>
       </div>
-      <div class="wd-subhead">Status Graph</div>
-      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-expected" ${(cur.show_expected !== false) ? 'checked' : ''}> Show expected curve overlay (matched profile, orange)</label></div>
-      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-raw" ${cur.show_raw ? 'checked' : ''}> Show raw sensor readings (unsmoothed, grey)</label></div>
-      <div class="wd-subhead">Diagnostics</div>
-      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-debug" ${cur.show_debug ? 'checked' : ''}> Show live match debug card on the Status page (confidence, ambiguity, top candidates)</label></div>
-      <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-prefs">Save Preferences</button></div>
+      <div class="wd-subhead">${this._t('hdr.status_graph', {}, 'Status Graph')}</div>
+      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-expected" ${(cur.show_expected !== false) ? 'checked' : ''}> ${this._t('lbl.show_expected', {}, 'Show expected curve overlay (matched profile, orange)')}</label></div>
+      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-raw" ${cur.show_raw ? 'checked' : ''}> ${this._t('lbl.show_raw', {}, 'Show raw sensor readings (unsmoothed, grey)')}</label></div>
+      <div class="wd-subhead">${this._t('hdr.diagnostics_pref', {}, 'Diagnostics')}</div>
+      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-debug" ${cur.show_debug ? 'checked' : ''}> ${this._t('lbl.show_debug', {}, 'Show live match debug card on the Status page (confidence, ambiguity, top candidates)')}</label></div>
+      <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-prefs">${this._t('btn.save_preferences', {}, 'Save Preferences')}</button></div>
     </div>`;
   }
 
@@ -2701,13 +2714,13 @@ class HaWashdataPanel extends HTMLElement {
     const hideChecks = [['history', 'Cycles'], ['profiles', 'Profiles'], ['settings', 'Settings']]
       .map(([v, l]) => `<label class="wd-check-row" style="margin-right:14px;display:inline-flex"><input type="checkbox" data-hidetab="${v}" ${hidden.includes(v) ? 'checked' : ''}> ${l}</label>`).join('');
     return `<div class="wd-card">
-      <div class="wd-card-title">Panel Settings (all users)</div>
+      <div class="wd-card-title">${this._t('hdr.panel_settings', {}, 'Panel Settings (all users)')}</div>
       <div class="wd-form-grid">
-        <div class="wd-field"><label>Refresh interval (s)</label><input type="number" id="wd-ps-poll" min="2" max="60" value="${p.poll_interval_s || 5}"></div>
-        <div class="wd-field"><label>Default tab</label><select id="wd-ps-deftab">${dtOpts}</select></div>
+        <div class="wd-field"><label>${this._t('lbl.refresh_interval', {}, 'Refresh interval (s)')}</label><input type="number" id="wd-ps-poll" min="2" max="60" value="${p.poll_interval_s || 5}"></div>
+        <div class="wd-field"><label>${this._t('lbl.panel_default_tab', {}, 'Default tab')}</label><select id="wd-ps-deftab">${dtOpts}</select></div>
       </div>
-      <div class="wd-field"><label>Hide tabs for non-admins</label><div style="display:flex;flex-wrap:wrap;gap:4px">${hideChecks}</div></div>
-      <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-panel">Save Panel Settings</button></div>
+      <div class="wd-field"><label>${this._t('lbl.hide_tabs', {}, 'Hide tabs for non-admins')}</label><div style="display:flex;flex-wrap:wrap;gap:4px">${hideChecks}</div></div>
+      <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-panel">${this._t('btn.save_panel_settings', {}, 'Save Panel Settings')}</button></div>
     </div>`;
   }
 
@@ -2722,40 +2735,40 @@ class HaWashdataPanel extends HTMLElement {
       ).join('');
       return `<div class="wd-card" style="background:var(--secondary-background-color)">
         <div class="wd-profile-name">${_esc(u.name)}</div>
-        <div class="wd-seg-row"><span style="min-width:160px">Default (other devices)</span>${this._levelSelect(`data-rbacuser="${_esc(u.id)}" data-rbacdev="__default__"`, uc.default || 'none', false)}</div>
+        <div class="wd-seg-row"><span style="min-width:160px">${this._t('lbl.default_other', {}, 'Default (other devices)')}</span>${this._levelSelect(`data-rbacuser="${_esc(u.id)}" data-rbacdev="__default__"`, uc.default || 'none', false)}</div>
         ${devRows}
       </div>`;
     }).join('');
     const adminNote = users.filter(u => u.is_admin).map(u => `<span class="wd-pill">${_esc(u.name)} - full (admin)</span>`).join(' ');
     return `<div class="wd-card">
-      <div class="wd-card-title">Access Control</div>
-      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-rbac-enabled" ${rbac.enabled ? 'checked' : ''}> Enable per-user access control</label>
+      <div class="wd-card-title">${this._t('hdr.access_control', {}, 'Access Control')}</div>
+      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-rbac-enabled" ${rbac.enabled ? 'checked' : ''}> ${this._t('lbl.enable_access_control', {}, 'Enable per-user access control')}</label>
         <div class="wd-field-hint">When off, every Home Assistant user has full access (the default). Administrators always have full access and can manage everyone.</div></div>
-      <div class="wd-field"><label>Default level for users not listed below</label>${this._levelSelect('id="wd-rbac-default"', rbac.default_level || 'none', false)}</div>
-      ${adminNote ? `<div class="wd-field"><label>Administrators</label><div>${adminNote}</div></div>` : ''}
-      <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-rbac">Save Access Control</button></div>
+      <div class="wd-field"><label>${this._t('lbl.default_access_level', {}, 'Default level for users not listed below')}</label>${this._levelSelect('id="wd-rbac-default"', rbac.default_level || 'none', false)}</div>
+      ${adminNote ? `<div class="wd-field"><label>${this._t('lbl.administrators', {}, 'Administrators')}</label><div>${adminNote}</div></div>` : ''}
+      <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-rbac">${this._t('btn.save_access_control', {}, 'Save Access Control')}</button></div>
     </div>
-    ${userCards || '<div class="wd-card"><p class="wd-info">No other Home Assistant users found.</p></div>'}`;
+    ${userCards || `<div class="wd-card"><p class="wd-info">${this._t('msg.no_other_users', {}, 'No other Home Assistant users found.')}</p></div>`}`;
   }
 
   // ── Logs page ───────────────────────────────────────────────────────────────
 
   _htmlLogs() {
     const levels = ['', 'DEBUG', 'INFO', 'WARNING', 'ERROR'];
-    const sel = levels.map(l => `<option value="${l}" ${this._logLevel === l ? 'selected' : ''}>${l || 'All levels'}</option>`).join('');
+    const sel = levels.map(l => `<option value="${l}" ${this._logLevel === l ? 'selected' : ''}>${l || this._t('log.all_levels', {}, 'All levels')}</option>`).join('');
     const lines = (this._logs || []).slice().reverse().map(r => {
       const t = new Date(r.ts * 1000).toLocaleTimeString();
       return `<div class="wd-logline"><span class="wd-logts">${t}</span><span class="wd-loglvl wd-lvl-${_esc(r.level)}">${_esc(r.level)}</span>${_esc(r.msg)}</div>`;
     }).join('');
     return `<div class="wd-card">
-      <div class="wd-card-title">Logs</div>
+      <div class="wd-card-title">${this._t('hdr.logs', {}, 'Logs')}</div>
       <div class="wd-logbar">
         <select id="wd-log-level">${sel}</select>
-        <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="logs-refresh">Refresh</button>
-        <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="logs-export">Export</button>
+        <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="logs-refresh">${this._t('btn.refresh', {}, 'Refresh')}</button>
+        <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="logs-export">${this._t('btn.export', {}, 'Export')}</button>
         <span class="wd-field-hint" style="margin:0">Newest first · buffers the last 500 ha_washdata records since restart · drag the bottom edge to resize.</span>
       </div>
-      ${lines ? `<div class="wd-logs">${lines}</div>` : '<p class="wd-info">No log records buffered yet.</p>'}
+      ${lines ? `<div class="wd-logs">${lines}</div>` : `<p class="wd-info">${this._t('msg.no_logs', {}, 'No log records buffered yet.')}</p>`}
     </div>`;
   }
 
@@ -3072,73 +3085,73 @@ class HaWashdataPanel extends HTMLElement {
     let body = '';
     if (m.type === 'confirm') {
       body = `<h2>${_esc(m.title)}</h2><p class="wd-info">${_esc(m.message)}</p>
-        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">Cancel</button>
-        <button class="wd-btn wd-btn-danger" data-maction="ok">${_esc(m.okLabel || 'Confirm')}</button></div>`;
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-danger" data-maction="ok">${_esc(m.okLabel || this._t('btn.confirm', {}, 'Confirm'))}</button></div>`;
     } else if (m.type === 'label-cycle') {
-      body = `<h2>Label Cycle</h2>
-        <div class="wd-field"><label>Select Profile</label>
-          <select id="wd-label-profile"><option value="">- Remove label -</option><option value="__create_new__">+ Create new profile…</option>${this._profileOptions()}</select></div>
+      body = `<h2>${this._t('modal.label_cycle', {}, 'Label Cycle')}</h2>
+        <div class="wd-field"><label>${this._t('lbl.select_profile', {}, 'Select Profile')}</label>
+          <select id="wd-label-profile"><option value="">${this._t('lbl.remove_label', {}, '- Remove label -')}</option><option value="__create_new__">${this._t('lbl.create_new_profile', {}, '+ Create new profile…')}</option>${this._profileOptions()}</select></div>
         <div id="wd-new-profile-row" class="wd-field" style="display:none"><label>New Profile Name</label><input type="text" id="wd-new-profile-name" placeholder="e.g. Cotton 40°C"></div>
-        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">Cancel</button>
-        <button class="wd-btn wd-btn-primary" data-maction="label-ok">Apply Label</button></div>`;
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="label-ok">${this._t('btn.apply_label', {}, 'Apply Label')}</button></div>`;
     } else if (m.type === 'create-profile') {
       const cycleOpts = (this._cycles || []).slice(0, 40).map(c =>
         `<option value="${_esc(c.id)}">${_fmtDate(c.start_time)} - ${Math.round((c.duration || 0) / 60)}m - ${_esc(c.profile_name || 'Unlabelled')}</option>`).join('');
-      body = `<h2>Create Profile</h2>
-        <div class="wd-field"><label>Profile Name</label><input type="text" id="wd-cp-name" placeholder="e.g. Cotton 40°C"></div>
-        <div class="wd-field"><label>Reference Cycle (optional)</label><select id="wd-cp-cycle"><option value="">None</option>${cycleOpts}</select></div>
-        <div class="wd-field"><label>Manual Duration (min, optional)</label><input type="number" id="wd-cp-dur" min="0" max="600" value="0"></div>
-        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">Cancel</button>
-        <button class="wd-btn wd-btn-primary" data-maction="create-profile-ok">Create</button></div>`;
+      body = `<h2>${this._t('modal.create_profile', {}, 'Create Profile')}</h2>
+        <div class="wd-field"><label>${this._t('lbl.profile_name', {}, 'Profile Name')}</label><input type="text" id="wd-cp-name" placeholder="e.g. Cotton 40°C"></div>
+        <div class="wd-field"><label>${this._t('lbl.ref_cycle', {}, 'Reference Cycle (optional)')}</label><select id="wd-cp-cycle"><option value="">None</option>${cycleOpts}</select></div>
+        <div class="wd-field"><label>${this._t('lbl.manual_duration', {}, 'Manual Duration (min, optional)')}</label><input type="number" id="wd-cp-dur" min="0" max="600" value="0"></div>
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="create-profile-ok">${this._t('btn.create', {}, 'Create')}</button></div>`;
     } else if (m.type === 'create-phase') {
-      body = `<h2>New Phase</h2>
-        <div class="wd-field"><label>Phase Name</label><input type="text" id="wd-ph-name" placeholder="e.g. Pre-wash"></div>
-        <div class="wd-field"><label>Description</label><textarea id="wd-ph-desc" rows="3"></textarea></div>
-        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">Cancel</button>
-        <button class="wd-btn wd-btn-primary" data-maction="create-phase-ok">Create</button></div>`;
+      body = `<h2>${this._t('modal.new_phase', {}, 'New Phase')}</h2>
+        <div class="wd-field"><label>${this._t('lbl.phase_name', {}, 'Phase Name')}</label><input type="text" id="wd-ph-name" placeholder="e.g. Pre-wash"></div>
+        <div class="wd-field"><label>${this._t('lbl.description', {}, 'Description')}</label><textarea id="wd-ph-desc" rows="3"></textarea></div>
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="create-phase-ok">${this._t('btn.create', {}, 'Create')}</button></div>`;
     } else if (m.type === 'edit-phase') {
-      body = `<h2>Edit Phase</h2>
-        <div class="wd-field"><label>Phase Name</label><input type="text" id="wd-eph-name" value="${_esc(m.phaseName)}"></div>
-        <div class="wd-field"><label>Description</label><textarea id="wd-eph-desc" rows="3">${_esc(m.phaseDesc)}</textarea></div>
-        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">Cancel</button>
-        <button class="wd-btn wd-btn-primary" data-maction="edit-phase-ok">Save</button></div>`;
+      body = `<h2>${this._t('modal.edit_phase', {}, 'Edit Phase')}</h2>
+        <div class="wd-field"><label>${this._t('lbl.phase_name', {}, 'Phase Name')}</label><input type="text" id="wd-eph-name" value="${_esc(m.phaseName)}"></div>
+        <div class="wd-field"><label>${this._t('lbl.description', {}, 'Description')}</label><textarea id="wd-eph-desc" rows="3">${_esc(m.phaseDesc)}</textarea></div>
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="edit-phase-ok">${this._t('btn.save', {}, 'Save')}</button></div>`;
     } else if (m.type === 'process-recording') {
-      body = `<h2>Process Recording</h2>
-        <div class="wd-field"><label>Save Mode</label><select id="wd-pr-mode"><option value="new_profile">Create New Profile</option><option value="existing_profile">Add to Existing Profile</option></select></div>
-        <div class="wd-field"><label>Profile Name</label><input type="text" id="wd-pr-profile" placeholder="e.g. Cotton 40°C">
+      body = `<h2>${this._t('modal.process_recording', {}, 'Process Recording')}</h2>
+        <div class="wd-field"><label>${this._t('lbl.save_mode', {}, 'Save Mode')}</label><select id="wd-pr-mode"><option value="new_profile">${this._t('lbl.mode_new_profile', {}, 'Create New Profile')}</option><option value="existing_profile">${this._t('lbl.mode_existing_profile', {}, 'Add to Existing Profile')}</option></select></div>
+        <div class="wd-field"><label>${this._t('lbl.profile_name', {}, 'Profile Name')}</label><input type="text" id="wd-pr-profile" placeholder="e.g. Cotton 40°C">
           <div id="wd-pr-existing" style="display:none;margin-top:4px"><select id="wd-pr-profile-sel">${this._profileOptions()}</select></div></div>
-        <div class="wd-field"><label>Head Trim (s)</label><input type="number" id="wd-pr-head" min="0" value="0" step="1"><div class="wd-field-hint">Remove this many seconds from the start</div></div>
-        <div class="wd-field"><label>Tail Trim (s)</label><input type="number" id="wd-pr-tail" min="0" value="0" step="1"><div class="wd-field-hint">Remove this many seconds from the end</div></div>
-        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">Cancel</button>
-        <button class="wd-btn wd-btn-primary" data-maction="process-rec-ok">Save Recording</button></div>`;
+        <div class="wd-field"><label>${this._t('lbl.head_trim', {}, 'Head Trim (s)')}</label><input type="number" id="wd-pr-head" min="0" value="0" step="1"><div class="wd-field-hint">Remove this many seconds from the start</div></div>
+        <div class="wd-field"><label>${this._t('lbl.tail_trim', {}, 'Tail Trim (s)')}</label><input type="number" id="wd-pr-tail" min="0" value="0" step="1"><div class="wd-field-hint">Remove this many seconds from the end</div></div>
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="process-rec-ok">${this._t('btn.process_recording', {}, 'Save Recording')}</button></div>`;
     } else if (m.type === 'correct-feedback') {
-      body = `<h2>Correct Feedback</h2>
+      body = `<h2>${this._t('modal.correct_feedback', {}, 'Correct Feedback')}</h2>
         <p class="wd-info">WashData detected: <strong>${_esc(m.detectedProfile)}</strong></p>
-        <div class="wd-field"><label>Correct Profile</label><select id="wd-fb-profile">${this._profileOptions()}</select></div>
-        <div class="wd-field"><label>Correct Duration (min, optional)</label><input type="number" id="wd-fb-dur" min="0" value=""></div>
-        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">Cancel</button>
-        <button class="wd-btn wd-btn-primary" data-maction="correct-fb-ok">Submit Correction</button></div>`;
+        <div class="wd-field"><label>${this._t('lbl.correct_profile', {}, 'Correct Profile')}</label><select id="wd-fb-profile">${this._profileOptions()}</select></div>
+        <div class="wd-field"><label>${this._t('lbl.correct_duration', {}, 'Correct Duration (min, optional)')}</label><input type="number" id="wd-fb-dur" min="0" value=""></div>
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="correct-fb-ok">${this._t('btn.submit_correction', {}, 'Submit Correction')}</button></div>`;
     } else if (m.type === 'import-config') {
-      body = `<h2>Import Configuration</h2>
-        <p class="wd-info" style="margin-bottom:12px">Load an exported file or paste a JSON payload below.</p>
-        <div class="wd-field"><label>Load from file</label><input type="file" id="wd-import-file" accept=".json,application/json"></div>
-        <div class="wd-field"><label>JSON Data</label><textarea id="wd-import-json" style="min-height:150px;font-family:monospace;font-size:.78em" placeholder='{"profiles": [...], "cycles": [...]}'></textarea></div>
-        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">Cancel</button>
-        <button class="wd-btn wd-btn-danger" data-maction="import-ok">Import (overwrites data)</button></div>`;
+      body = `<h2>${this._t('modal.import_config', {}, 'Import Configuration')}</h2>
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.import_intro', {}, 'Load an exported file or paste a JSON payload below.')}</p>
+        <div class="wd-field"><label>${this._t('lbl.load_from_file', {}, 'Load from file')}</label><input type="file" id="wd-import-file" accept=".json,application/json"></div>
+        <div class="wd-field"><label>${this._t('lbl.json_data', {}, 'JSON Data')}</label><textarea id="wd-import-json" style="min-height:150px;font-family:monospace;font-size:.78em" placeholder='{"profiles": [...], "cycles": [...]}'></textarea></div>
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-danger" data-maction="import-ok">${this._t('btn.import_overwrite', {}, 'Import (overwrites data)')}</button></div>`;
     } else if (m.type === 'auto-label') {
-      body = `<h2>Auto-Label Cycles</h2>
-        <p class="wd-info" style="margin-bottom:12px">Assign profiles to unlabelled cycles whose match confidence clears the threshold.</p>
-        <div class="wd-field"><label>Confidence threshold</label><input type="number" id="wd-al-thr" value="0.75" min="0.5" max="0.95" step="0.05"></div>
-        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">Cancel</button>
-        <button class="wd-btn wd-btn-primary" data-maction="auto-run">Run Auto-Label</button></div>`;
+      body = `<h2>${this._t('modal.auto_label', {}, 'Auto-Label Cycles')}</h2>
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.auto_label_intro', {}, 'Assign profiles to unlabelled cycles whose match confidence clears the threshold.')}</p>
+        <div class="wd-field"><label>${this._t('lbl.confidence_threshold', {}, 'Confidence threshold')}</label><input type="number" id="wd-al-thr" value="0.75" min="0.5" max="0.95" step="0.05"></div>
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="auto-run">${this._t('btn.run_auto_label', {}, 'Run Auto-Label')}</button></div>`;
     } else if (m.type === 'merge-cycles') {
       body = `<h2>Merge ${m.ids.length} Cycles</h2>
         <p class="wd-info" style="margin-bottom:12px">The selected cycles are combined into one (chronological order; gaps filled with 0 W). Pick the resulting profile.</p>
-        <div class="wd-field"><label>Resulting profile</label>
-          <select id="wd-merge-prof"><option value="">(unlabelled)</option><option value="__create_new__">+ Create new profile…</option>${this._profileOptions()}</select></div>
-        <div id="wd-merge-new" class="wd-field" style="display:none"><label>New profile name</label><input type="text" id="wd-merge-newname" placeholder="e.g. Cotton 40°C"></div>
-        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">Cancel</button>
-        <button class="wd-btn wd-btn-primary" data-maction="merge-ok">Merge</button></div>`;
+        <div class="wd-field"><label>${this._t('lbl.resulting_profile', {}, 'Resulting profile')}</label>
+          <select id="wd-merge-prof"><option value="">${this._t('lbl.unlabelled_paren', {}, '(unlabelled)')}</option><option value="__create_new__">+ Create new profile…</option>${this._profileOptions()}</select></div>
+        <div id="wd-merge-new" class="wd-field" style="display:none"><label>${this._t('lbl.new_profile_name', {}, 'New profile name')}</label><input type="text" id="wd-merge-newname" placeholder="e.g. Cotton 40°C"></div>
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="merge-ok">${this._t('btn.merge', {}, 'Merge')}</button></div>`;
     }
     return `<div class="wd-overlay"><div class="wd-modal">${body}</div></div>`;
   }
@@ -3146,8 +3159,8 @@ class HaWashdataPanel extends HTMLElement {
   // Interactive cycle inspector: view / trim / split.
   _htmlCycleModal(m) {
     if (!m.loaded) {
-      return `<h2>Cycle</h2><div class="wd-empty" style="padding:32px"><div class="wd-icon">⏳</div>Loading curve…</div>
-        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">Close</button></div>`;
+      return `<h2>${this._t('modal.cycle', {}, 'Cycle')}</h2><div class="wd-empty" style="padding:32px"><div class="wd-icon">⏳</div>${this._t('msg.loading_curve', {}, 'Loading curve…')}</div>
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button></div>`;
     }
     const cur = m.curve || {};
     const full = cur.full_duration_s || cur.duration || 0;
@@ -3159,13 +3172,13 @@ class HaWashdataPanel extends HTMLElement {
       const lbl = ml.ml_quality_label;
       const col = lbl === 'ok' ? 'var(--success-color,#4caf50)' : lbl === 'uncertain' ? 'var(--warning-color,#ff9800)' : 'var(--error-color,#f44336)';
       const health = Math.round((1 - ml.ml_quality_score) * 100);
-      healthCell = `<div class="wd-kv-item"><div class="wd-kv-val" style="font-size:.95em;color:${col}">${health}%</div><div class="wd-kv-lbl">Cycle health</div></div>`;
+      healthCell = `<div class="wd-kv-item"><div class="wd-kv-val" style="font-size:.95em;color:${col}">${health}%</div><div class="wd-kv-lbl">${this._t('lbl.cycle_health', {}, 'Cycle health')}</div></div>`;
     }
     const meta = `<div class="wd-kv">
-      <div class="wd-kv-item"><div class="wd-kv-val">${_fmtDuration(cur.duration || full)}</div><div class="wd-kv-lbl">Duration</div></div>
-      <div class="wd-kv-item"><div class="wd-kv-val">${_fmtEnergy(kwh)}</div><div class="wd-kv-lbl">Energy</div></div>
-      <div class="wd-kv-item"><div class="wd-kv-val" style="font-size:.95em">${_esc(cur.profile_name || 'unlabelled')}</div><div class="wd-kv-lbl">Profile</div></div>
-      <div class="wd-kv-item"><div class="wd-kv-val" style="font-size:.95em">${_esc(cur.status || '-')}</div><div class="wd-kv-lbl">Status</div></div>
+      <div class="wd-kv-item"><div class="wd-kv-val">${_fmtDuration(cur.duration || full)}</div><div class="wd-kv-lbl">${this._t('lbl.duration', {}, 'Duration')}</div></div>
+      <div class="wd-kv-item"><div class="wd-kv-val">${_fmtEnergy(kwh)}</div><div class="wd-kv-lbl">${this._t('lbl.energy', {}, 'Energy')}</div></div>
+      <div class="wd-kv-item"><div class="wd-kv-val" style="font-size:.95em">${_esc(cur.profile_name || 'unlabelled')}</div><div class="wd-kv-lbl">${this._t('lbl.profile', {}, 'Profile')}</div></div>
+      <div class="wd-kv-item"><div class="wd-kv-val" style="font-size:.95em">${_esc(cur.status || '-')}</div><div class="wd-kv-lbl">${this._t('lbl.status', {}, 'Status')}</div></div>
       ${healthCell}
     </div>`;
     // Does this cycle still need a review? (mirrors the Cycles-list badge, so a
@@ -3179,21 +3192,21 @@ class HaWashdataPanel extends HTMLElement {
       ['force_stopped', 'interrupted'].includes(cur.status)
     );
     const reviewDot = (needsReview && m.mode !== 'review')
-      ? ' <span title="This cycle needs review" style="color:var(--warning-color,#ff9800);font-size:1.1em;line-height:0">●</span>'
+      ? ` <span title="${this._t('hdr.automation_needs_review', {}, 'This cycle needs review')}" style="color:var(--warning-color,#ff9800);font-size:1.1em;line-height:0">●</span>`
       : '';
     const modeBar = this._canEdit() ? `<div class="wd-mode-bar">
-      <button class="wd-btn wd-btn-sm ${m.mode === 'view' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-view">Inspect</button>
-      <button class="wd-btn wd-btn-sm ${m.mode === 'trim' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-trim">Trim</button>
-      <button class="wd-btn wd-btn-sm ${m.mode === 'split' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-split">Split</button>
-      <button class="wd-btn wd-btn-sm ${m.mode === 'review' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-review" title="${needsReview ? 'This cycle needs review' : 'Review this cycle'}">Review${reviewDot}</button>
+      <button class="wd-btn wd-btn-sm ${m.mode === 'view' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-view">${this._t('btn.inspect', {}, 'Inspect')}</button>
+      <button class="wd-btn wd-btn-sm ${m.mode === 'trim' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-trim">${this._t('btn.trim', {}, 'Trim')}</button>
+      <button class="wd-btn wd-btn-sm ${m.mode === 'split' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-split">${this._t('btn.split', {}, 'Split')}</button>
+      <button class="wd-btn wd-btn-sm ${m.mode === 'review' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-review" title="${needsReview ? this._t('hdr.automation_needs_review', {}, 'This cycle needs review') : this._t('hdr.automation_review_this_cycle', {}, 'Review this cycle')}">${this._t('btn.review', {}, 'Review')}${reviewDot}</button>
     </div>` : '';
 
     let controls = '';
     if (m.mode === 'view') {
       controls = `<div class="wd-modal-actions">
-        <button class="wd-btn wd-btn-secondary" data-maction="cancel">Close</button>
-        ${this._canEdit() ? `<button class="wd-btn wd-btn-danger" data-maction="cyc-delete">Delete</button>
-        <button class="wd-btn wd-btn-primary" data-maction="cyc-label">Label</button>` : ''}</div>`;
+        <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
+        ${this._canEdit() ? `<button class="wd-btn wd-btn-danger" data-maction="cyc-delete">${this._t('btn.delete', {}, 'Delete')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="cyc-label">${this._t('btn.label', {}, 'Label')}</button>` : ''}</div>`;
     } else if (m.mode === 'trim') {
       const busy = this._busy.has('cyc-trim-apply');
       const tm = m.timeMode || 's';
@@ -3205,17 +3218,17 @@ class HaWashdataPanel extends HTMLElement {
       controls = `<p class="wd-info" style="margin:4px 0 8px">Drag the red handles, or enter values. Everything outside the window is removed.</p>
         <div class="wd-mode-bar" style="margin-bottom:8px;align-items:center">
           <span class="wd-info" style="margin:0">Input:</span>
-          <button class="wd-btn wd-btn-sm ${tm === 's' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="trim-mode-s">Seconds from start</button>
-          <button class="wd-btn wd-btn-sm ${tm === 'clock' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="trim-mode-clock">Clock time</button>
+          <button class="wd-btn wd-btn-sm ${tm === 's' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="trim-mode-s">${this._t('lbl.seconds_from_start', {}, 'Seconds from start')}</button>
+          <button class="wd-btn wd-btn-sm ${tm === 'clock' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="trim-mode-clock">${this._t('lbl.clock_time', {}, 'Clock time')}</button>
         </div>
         <div class="wd-form-grid">
           <div class="wd-field"><label>Start${ulbl}</label><input type="${itype}" id="wd-trim-start" ${iattr} value="${sv}"></div>
           <div class="wd-field"><label>End${ulbl}</label><input type="${itype}" id="wd-trim-end" ${iattr} value="${ev}"></div>
         </div>
         <div class="wd-modal-actions">
-          <button class="wd-btn wd-btn-secondary" data-maction="cancel">Close</button>
-          <button class="wd-btn wd-btn-secondary" data-maction="cyc-reset-trim">Reset</button>
-          <button class="wd-btn wd-btn-primary" data-maction="cyc-apply-trim" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Trimming…' : 'Apply Trim'}</button>
+          <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
+          <button class="wd-btn wd-btn-secondary" data-maction="cyc-reset-trim">${this._t('btn.reset', {}, 'Reset')}</button>
+          <button class="wd-btn wd-btn-primary" data-maction="cyc-apply-trim" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Trimming…' : this._t('btn.apply_trim', {}, 'Apply Trim')}</button>
         </div>`;
     } else if (m.mode === 'split') {
       const busy = this._busy.has('cyc-split-apply');
@@ -3227,22 +3240,30 @@ class HaWashdataPanel extends HTMLElement {
           <span style="min-width:120px">${_fmtDuration(s)} – ${_fmtDuration(e)}</span>
           <select data-segidx="${i}"><option value="">(unlabelled)</option>${this._profileOptions(m.split.profiles[i])}</select></div>`;
       }).join('');
-      controls = `<p class="wd-info" style="margin:4px 0 8px">Click the graph to add or remove a split point, or auto-detect by idle gaps. Each resulting segment can get its own profile.</p>
+      controls = `<p class="wd-info" style="margin:4px 0 8px">${this._t('msg.split_intro', {}, 'Click the graph to add or remove a split point, or auto-detect by idle gaps. Each resulting segment can get its own profile.')}</p>
         <div class="wd-mode-bar">
-          <div class="wd-field" style="margin:0;display:flex;align-items:center;gap:6px"><label style="margin:0;text-transform:none;letter-spacing:0">Gap (s)</label><input type="number" id="wd-split-gap" value="900" min="30" step="30" style="width:80px"></div>
-          <button class="wd-btn wd-btn-sm wd-btn-secondary" data-maction="cyc-auto-split">Auto-detect</button>
-          <button class="wd-btn wd-btn-sm wd-btn-secondary" data-maction="cyc-clear-split">Clear</button>
+          <div class="wd-field" style="margin:0;display:flex;align-items:center;gap:6px"><label style="margin:0;text-transform:none;letter-spacing:0">${this._t('lbl.gap_s', {}, 'Gap (s)')}</label><input type="number" id="wd-split-gap" value="900" min="30" step="30" style="width:80px"></div>
+          <button class="wd-btn wd-btn-sm wd-btn-secondary" data-maction="cyc-auto-split">${this._t('btn.auto_detect_split', {}, 'Auto-detect')}</button>
+          <button class="wd-btn wd-btn-sm wd-btn-secondary" data-maction="cyc-clear-split">${this._t('btn.clear_splits', {}, 'Clear')}</button>
         </div>
-        <div style="margin:10px 0">${offs.length ? segRows : '<p class="wd-info">No split points yet.</p>'}</div>
+        <div style="margin:10px 0">${offs.length ? segRows : `<p class="wd-info">${this._t('msg.no_split_points', {}, 'No split points yet.')}</p>`}</div>
         <div class="wd-modal-actions">
-          <button class="wd-btn wd-btn-secondary" data-maction="cancel">Close</button>
-          <button class="wd-btn wd-btn-primary" data-maction="cyc-apply-split" ${busy || !offs.length ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Splitting…' : 'Apply Split'}</button>
+          <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
+          <button class="wd-btn wd-btn-primary" data-maction="cyc-apply-split" ${busy || !offs.length ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Splitting…' : this._t('btn.apply_split', {}, 'Apply Split')}</button>
         </div>`;
     } else if (m.mode === 'review') {
       const rv = (ml && ml.ml_review) || {};
       const busy = this._busy.has('cyc-review-save');
       const qOpt = (v, label) => `<option value="${v}" ${(rv.quality || '') === v ? 'selected' : ''}>${label}</option>`;
-      const TAGS = [['late_start', 'Late start'], ['early_end', 'Early end'], ['merged', 'Merged cycles'], ['split', 'Split cycle'], ['noise', 'Noise'], ['wrong_profile', 'Wrong profile'], ['sensor_gap', 'Sensor gap']];
+      const TAGS = [
+        ['late_start', this._t('tag.late_start', {}, 'Late start')],
+        ['early_end', this._t('tag.early_end', {}, 'Early end')],
+        ['merged', this._t('tag.merged', {}, 'Merged cycles')],
+        ['split', this._t('tag.split', {}, 'Split cycle')],
+        ['noise', this._t('tag.noise', {}, 'Noise')],
+        ['wrong_profile', this._t('tag.wrong_profile', {}, 'Wrong profile')],
+        ['sensor_gap', this._t('tag.sensor_gap', {}, 'Sensor gap')],
+      ];
       const tagChecks = TAGS.map(([v, l]) => `<label class="wd-rev-tag"><input type="checkbox" class="wd-cyc-rev-tag" value="${v}" ${(rv.tags || []).includes(v) ? 'checked' : ''}> ${l}</label>`).join('');
       const reviewedBadge = rv.reviewed_at ? `<span style="font-size:.75em;color:var(--secondary-text-color)">reviewed ${new Date(rv.reviewed_at).toLocaleDateString()}</span>` : '';
       // If this cycle has a pending detection feedback (the learning loop is
@@ -3252,12 +3273,12 @@ class HaWashdataPanel extends HTMLElement {
       const fbProf = pendingFb ? (pendingFb.detected_profile || pendingFb.profile_name || 'Unknown') : '';
       const fbBanner = pendingFb ? `
         <div class="wd-card" style="background:var(--secondary-background-color);border-left:3px solid var(--warning-color,#ff9800);margin:0 0 12px;padding:12px">
-          <div style="font-weight:600;margin-bottom:4px">⚠ Pending detection feedback</div>
-          <p class="wd-info" style="margin:0 0 8px">WashData is unsure it detected <strong>${_esc(fbProf)}</strong>${pendingFb.confidence != null ? ` (confidence ${(pendingFb.confidence * 100).toFixed(0)}%)` : ''}. Confirm it was right, correct the program, or ignore.</p>
+          <div style="font-weight:600;margin-bottom:4px">⚠ ${this._t('msg.pending_feedback', {}, 'Pending detection feedback')}</div>
+          <p class="wd-info" style="margin:0 0 8px">${this._t('msg.unsure_detected_prefix', {}, 'WashData is unsure it detected')} <strong>${_esc(fbProf)}</strong>${pendingFb.confidence != null ? ` (confidence ${(pendingFb.confidence * 100).toFixed(0)}%)` : ''}. Confirm it was right, correct the program, or ignore.</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="fb-confirm" data-cid="${_esc(m.cycleId)}">Confirm</button>
-            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-correct" data-cid="${_esc(m.cycleId)}" data-prof="${_esc(fbProf)}">Correct…</button>
-            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-ignore" data-cid="${_esc(m.cycleId)}">Ignore</button>
+            <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="fb-confirm" data-cid="${_esc(m.cycleId)}">${this._t('btn.confirm', {}, 'Confirm')}</button>
+            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-correct" data-cid="${_esc(m.cycleId)}" data-prof="${_esc(fbProf)}">${this._t('btn.correct', {}, 'Correct…')}</button>
+            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-ignore" data-cid="${_esc(m.cycleId)}">${this._t('btn.ignore', {}, 'Ignore')}</button>
           </div>
         </div>` : '';
       const tProfile = _tip('The program this cycle is labelled as. If the auto-detected program was wrong, correct it here - labelling teaches matching for future cycles.');
@@ -3276,7 +3297,7 @@ class HaWashdataPanel extends HTMLElement {
             <select id="wd-cyc-rev-label" class="wd-filter-select"><option value="">(unlabelled)</option>${this._profileOptions(cur.profile_name)}</select>
           </label>
           <label style="display:inline-flex;align-items:center;gap:6px">Quality${tQuality}
-            <select id="wd-cyc-rev-quality" class="wd-filter-select">${qOpt('', '-')}${qOpt('good', 'Good')}${qOpt('bad', 'Bad')}${qOpt('unusable', 'Unusable')}</select>
+            <select id="wd-cyc-rev-quality" class="wd-filter-select">${qOpt('', '-')}${qOpt('good', this._t('quality.good', {}, 'Good'))}${qOpt('bad', this._t('quality.bad', {}, 'Bad'))}${qOpt('unusable', this._t('quality.unusable', {}, 'Unusable'))}</select>
           </label>
           <label style="display:inline-flex;align-items:center;gap:6px"><input type="checkbox" id="wd-cyc-rev-golden" ${rv.golden ? 'checked' : ''}> Recorded reference cycle${tRecorded}</label>
           ${reviewedBadge}
@@ -3286,14 +3307,14 @@ class HaWashdataPanel extends HTMLElement {
           const on = (m.overlays || []).includes(p.name);
           const sw = on ? `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${_PALETTE[Math.max(0, this._profiles.findIndex(x => x.name === p.name)) % _PALETTE.length]};margin:0 2px"></span>` : '';
           return `<label class="wd-rev-tag"><input type="checkbox" class="wd-cyc-overlay" value="${_esc(p.name)}" ${on ? 'checked' : ''}> ${sw}${_esc(p.name)}</label>`;
-        }).join('') || '<span class="wd-info">No profiles to compare.</span>'}</div>
+        }).join('') || `<span class="wd-info">${this._t('msg.no_profiles_compare', {}, 'No profiles to compare.')}</span>`}</div>
         <div class="wd-rev-sub">Tags${tTags}</div>
         <div class="wd-rev-tags">${tagChecks}</div>
         <div class="wd-rev-sub">Notes${tNotes}</div>
         <textarea id="wd-cyc-rev-notes" class="wd-rev-notes" rows="3" placeholder="Notes (optional)">${_esc(rv.notes || '')}</textarea>
         <div class="wd-modal-actions" style="margin-top:16px">
-          <button class="wd-btn wd-btn-secondary" data-maction="cancel">Close</button>
-          <button class="wd-btn wd-btn-primary" data-maction="cyc-review-save" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Saving…' : 'Save Review'}</button>
+          <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
+          <button class="wd-btn wd-btn-primary" data-maction="cyc-review-save" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Saving…' : this._t('btn.save_review', {}, 'Save Review')}</button>
         </div>`;
     }
 
@@ -3320,8 +3341,8 @@ class HaWashdataPanel extends HTMLElement {
   _htmlProfilePanel(m) {
     const canEdit = this._canEdit();
     if (m.tab === 'danger' && !canEdit) m.tab = 'stats';
-    const tabs = [['stats', 'Overview'], ['phases', 'Phases'], ['cleanup', 'Cleanup']];
-    if (canEdit) tabs.push(['danger', 'Manage']);
+    const tabs = [['stats', this._t('tab.pp_overview',{},'Overview')], ['phases', this._t('tab.pp_phases',{},'Phases')], ['cleanup', this._t('tab.pp_cleanup',{},'Cleanup')]];
+    if (canEdit) tabs.push(['danger', this._t('tab.pp_manage',{},'Manage')]);
     const tabBar = tabs.map(([id, lbl]) => `<button class="wd-mini-tab ${m.tab === id ? 'active' : ''}" data-maction="pp-tab-${id}">${lbl}</button>`).join('');
     let body = '';
 
@@ -3341,7 +3362,7 @@ class HaWashdataPanel extends HTMLElement {
         const cvPct = ph.duration_cv != null ? ` · duration CV ${Math.round(ph.duration_cv * 100)}%` : '';
         const confPct = ph.confidence_mean != null ? ` · avg confidence ${Math.round(ph.confidence_mean * 100)}%` : '';
         return `<div style="margin:8px 0 4px;padding:8px 12px;border-radius:6px;background:${bg};border:1px solid ${col}22;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span style="font-weight:600;color:${col}">${ph.health_status === 'poor' ? '⚠ Poor match fit' : ph.health_status === 'fair' ? 'Fair match fit' : '✓ Good match fit'}</span>
+          <span style="font-weight:600;color:${col}">${ph.health_status === 'poor' ? this._t('health.poor', {}, '⚠ Poor match fit') : ph.health_status === 'fair' ? this._t('health.fair', {}, 'Fair match fit') : this._t('health.good', {}, '✓ Good match fit')}</span>
           <span style="font-size:.85em;opacity:.8">score ${pct}%${cvPct}${confPct}</span>
           ${ph.health_status === 'poor' ? `<span style="font-size:.82em;opacity:.75;flex-basis:100%">Cycles assigned to this profile have inconsistent shapes or low confidence. Consider rebuilding the envelope or reviewing labelled cycles.</span>` : ''}
         </div>`;
@@ -3364,24 +3385,24 @@ class HaWashdataPanel extends HTMLElement {
       })() : '';
       body = `<div class="wd-sg-row">
           <div class="wd-sg">
-            <div class="wd-sg-h">Duration</div>
+            <div class="wd-sg-h">${this._t('lbl.duration', {}, 'Duration')}</div>
             <div class="wd-sg-main">${mins(st.avg_duration)}<span>avg</span></div>
             <div class="wd-sg-sub">min ${mins(st.min_duration)} · max ${mins(st.max_duration)}${env.duration_std_dev != null ? ` · consistency ±${Math.round(env.duration_std_dev / 60)}m` : ''}</div>
           </div>
           <div class="wd-sg">
-            <div class="wd-sg-h">Energy</div>
+            <div class="wd-sg-h">${this._t('lbl.energy', {}, 'Energy')}</div>
             <div class="wd-sg-main">${_fmtEnergy(st.avg_energy)}<span>avg</span></div>
             <div class="wd-sg-sub">total ${_fmtEnergy(total)}</div>
           </div>
           <div class="wd-sg">
-            <div class="wd-sg-h">Activity</div>
+            <div class="wd-sg-h">${this._t('lbl.activity', {}, 'Activity')}</div>
             <div class="wd-sg-main">${st.cycle_count || 0}<span>cycles</span></div>
             <div class="wd-sg-sub">last run ${st.last_run ? _fmtDate(st.last_run) : '-'}</div>
           </div>
         </div>
         ${healthRow}
         ${trendRow}
-        ${env.avg && env.avg.length ? `<div class="wd-canvas-wrap"><canvas id="wd-env-canvas"></canvas></div>` : '<p class="wd-info">No envelope yet - rebuild after labelling cycles.</p>'}`;
+        ${env.avg && env.avg.length ? `<div class="wd-canvas-wrap"><canvas id="wd-env-canvas"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_envelope', {}, 'No envelope yet - rebuild after labelling cycles.')}</p>`}`;
     } else if (m.tab === 'phases') {
       const cat = m.catalog || [];
       const rows = (m.phases || []).map((ph, i) => {
@@ -3394,11 +3415,11 @@ class HaWashdataPanel extends HTMLElement {
       }).join('');
       const busy = this._busy.has('pp-phase-save');
       body = `<p class="wd-info" style="margin-bottom:10px">Phase ranges (minutes from cycle start) overlaid on the average curve. Edit values to preview live.</p>
-        ${m.env && m.env.avg && m.env.avg.length ? `<div class="wd-canvas-wrap"><canvas id="wd-phase-canvas"></canvas></div>` : '<p class="wd-info">No envelope available to overlay.</p>'}
-        <div style="margin:10px 0">${rows || '<p class="wd-info">No phases assigned.</p>'}</div>
+        ${m.env && m.env.avg && m.env.avg.length ? `<div class="wd-canvas-wrap"><canvas id="wd-phase-canvas"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_envelope_overlay', {}, 'No envelope available to overlay.')}</p>`}
+        <div style="margin:10px 0">${rows || `<p class="wd-info">${this._t('msg.no_phases_assigned', {}, 'No phases assigned.')}</p>`}</div>
         ${canEdit ? `<div class="wd-mode-bar">
-          <button class="wd-btn wd-btn-sm wd-btn-secondary" data-maction="pp-phase-add">+ Add phase</button>
-          <button class="wd-btn wd-btn-sm wd-btn-primary" data-maction="pp-phase-save" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Saving…' : 'Save phases'}</button>
+          <button class="wd-btn wd-btn-sm wd-btn-secondary" data-maction="pp-phase-add">${this._t('btn.add_phase', {}, '+ Add phase')}</button>
+          <button class="wd-btn wd-btn-sm wd-btn-primary" data-maction="pp-phase-save" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Saving…' : this._t('btn.save_phases', {}, 'Save phases')}</button>
         </div>` : ''}`;
     } else if (m.tab === 'cleanup') {
       const allCyc = (m.cleanup && m.cleanup.cycles) || [];
@@ -3414,7 +3435,7 @@ class HaWashdataPanel extends HTMLElement {
       const rows = cyc.map((c, i) => {
         const origIdx = allCyc.indexOf(c);
         const editBtn = canEdit ? `<td style="padding:4px 6px 4px 2px;white-space:nowrap">
-          <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cleanup-edit-cycle" data-cid="${_esc(c.cycle_id)}">Trim / Split</button>
+          <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cleanup-edit-cycle" data-cid="${_esc(c.cycle_id)}">${this._t('btn.trim_split', {}, 'Trim / Split')}</button>
         </td>` : '';
         return `<tr>
           <td style="width:26px;padding:6px 4px"><input type="checkbox" data-cleanidx="${origIdx}" ${sel.has(c.cycle_id) ? 'checked' : ''}></td>
@@ -3428,34 +3449,34 @@ class HaWashdataPanel extends HTMLElement {
       }).join('');
       const thead = `<thead><tr>
         <th style="width:26px;padding:6px 4px"></th><th style="width:10px;padding:6px 2px"></th>
-        ${_th('Date', 'date', clCol === 'date', clDir, 'cleanupsort')}
-        ${_th('Duration', 'duration', clCol === 'duration', clDir, 'cleanupsort', 'right')}
-        ${_th('Energy', 'energy', clCol === 'energy', clDir, 'cleanupsort', 'right')}
-        ${_th('Status', 'status', clCol === 'status', clDir, 'cleanupsort')}
+        ${_th(this._t('lbl.date', {}, 'Date'), 'date', clCol === 'date', clDir, 'cleanupsort')}
+        ${_th(this._t('lbl.duration', {}, 'Duration'), 'duration', clCol === 'duration', clDir, 'cleanupsort', 'right')}
+        ${_th(this._t('lbl.energy', {}, 'Energy'), 'energy', clCol === 'energy', clDir, 'cleanupsort', 'right')}
+        ${_th(this._t('lbl.status', {}, 'Status'), 'status', clCol === 'status', clDir, 'cleanupsort')}
         ${canEdit ? '<th></th>' : ''}
       </tr></thead>`;
       const busy = this._busy.has('pp-cleanup-del');
       body = `<p class="wd-info" style="margin-bottom:10px">Every labelled cycle overlaid. Tick outliers and delete to clean up the profile.</p>
-        ${allCyc.length ? `<div class="wd-canvas-wrap"><canvas id="wd-spag-canvas"></canvas></div>` : '<p class="wd-info">No cycles for this profile.</p>'}
+        ${allCyc.length ? `<div class="wd-canvas-wrap"><canvas id="wd-spag-canvas"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_cycles_profile', {}, 'No cycles for this profile.')}</p>`}
         ${allCyc.length ? `<div class="wd-table-wrap" style="max-height:420px;overflow:auto;margin:10px 0"><table class="wd-table">${thead}<tbody>${rows}</tbody></table></div>` : ''}
         ${canEdit ? `<div class="wd-modal-actions"><button class="wd-btn wd-btn-danger" data-maction="pp-cleanup-del" ${busy || sel.size === 0 ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Deleting…' : `Delete selected (${sel.size})`}</button></div>` : ''}`;
     } else if (m.tab === 'danger') {
       const busyR = this._busy.has('pp-rebuild');
       const curDurMin = (m.stats && m.stats.avg_duration) ? Math.round(m.stats.avg_duration / 60) : 0;
-      body = `<div class="wd-field"><label>Rename Profile</label><input type="text" id="wd-pp-rename" value="${_esc(m.name)}"></div>
-        <div class="wd-field"><label>Expected Duration (min)</label><input type="number" id="wd-pp-dur" min="0" max="600" value="${curDurMin}">
+      body = `<div class="wd-field"><label>${this._t('lbl.rename_profile', {}, 'Rename Profile')}</label><input type="text" id="wd-pp-rename" value="${_esc(m.name)}"></div>
+        <div class="wd-field"><label>${this._t('lbl.expected_duration', {}, 'Expected Duration (min)')}</label><input type="number" id="wd-pp-dur" min="0" max="600" value="${curDurMin}">
           <div class="wd-field-hint">The profile's average/expected cycle length, used for time-remaining estimates. Edit to set it; leaving it unchanged keeps the current value.</div></div>
         <div class="wd-card-actions">
-          <button class="wd-btn wd-btn-primary" data-maction="pp-rename">Save</button>
-          <button class="wd-btn wd-btn-secondary" data-maction="pp-rebuild" ${busyR ? 'disabled' : ''}>${busyR ? '<span class="wd-spin"></span> Rebuilding…' : 'Rebuild Envelope'}</button>
-          <button class="wd-btn wd-btn-danger" data-maction="pp-delete">Delete Profile</button>
+          <button class="wd-btn wd-btn-primary" data-maction="pp-rename">${this._t('btn.save', {}, 'Save')}</button>
+          <button class="wd-btn wd-btn-secondary" data-maction="pp-rebuild" ${busyR ? 'disabled' : ''}>${busyR ? '<span class="wd-spin"></span> Rebuilding…' : this._t('btn.rebuild_envelope', {}, 'Rebuild Envelope')}</button>
+          <button class="wd-btn wd-btn-danger" data-maction="pp-delete">${this._t('btn.delete_profile', {}, 'Delete Profile')}</button>
         </div>`;
     }
 
     return `<h2>Profile · ${_esc(m.name)}</h2>
       <div class="wd-mini-tabs">${tabBar}</div>
       ${body}
-      <div class="wd-modal-actions" style="margin-top:14px"><button class="wd-btn wd-btn-secondary" data-maction="cancel">Close</button></div>`;
+      <div class="wd-modal-actions" style="margin-top:14px"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button></div>`;
   }
 
   _drawCycleEditor() {
@@ -3531,16 +3552,16 @@ class HaWashdataPanel extends HTMLElement {
       const col = _PALETTE[Math.max(0, (this._profiles || []).findIndex(x => x.name === p.name)) % _PALETTE.length];
       const sw = on ? `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${col};margin:0 2px;opacity:.55"></span>` : '';
       return `<label class="wd-rev-tag"><input type="checkbox" class="wd-compare-overlay" value="${_esc(p.name)}" ${on ? 'checked' : ''}> ${sw}${_esc(p.name)}</label>`;
-    }).join('') || '<span class="wd-info">No profiles to overlay.</span>';
-    return `<h2>Compare ${ids.length} cycles</h2>
-      ${m.loaded ? '' : '<div class="wd-info" style="margin-bottom:6px">Loading cycle data…</div>'}
+    }).join('') || `<span class="wd-info">${this._t('msg.no_profiles_overlay', {}, 'No profiles to overlay.')}</span>`;
+    return `<h2>${this._t('msg.compare_cycles_title', { count: ids.length }, `Compare ${ids.length} cycles`)}</h2>
+      ${m.loaded ? '' : `<div class="wd-info" style="margin-bottom:6px">${this._t('msg.loading', {}, 'Loading…')}</div>`}
       <div class="wd-canvas-wrap"><canvas id="wd-compare-canvas"></canvas></div>
-      <div class="wd-rev-sub" style="margin-top:10px">Selected cycles (solid) — show / hide</div>
+      <div class="wd-rev-sub" style="margin-top:10px">${this._t('msg.compare_selected_cycles', {}, 'Selected cycles (solid) — show / hide')}</div>
       <div class="wd-rev-tags">${cycRows}</div>
-      <div class="wd-rev-sub">Overlay profiles (faint)${_tip('Overlay learned profile envelopes to see which program each cycle resembles.')}</div>
+      <div class="wd-rev-sub">${this._t('msg.compare_overlay_profiles', {}, 'Overlay profiles (faint)')}${_tip('Overlay learned profile envelopes to see which program each cycle resembles.')}</div>
       <div class="wd-rev-tags">${profRows}</div>
       <div class="wd-modal-actions" style="margin-top:16px">
-        <button class="wd-btn wd-btn-secondary" data-maction="cancel">Close</button>
+        <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
       </div>`;
   }
 
@@ -4090,7 +4111,7 @@ class HaWashdataPanel extends HTMLElement {
       this._render();
       this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: eid, cycle_id: cid })
         .then(r => { if (this._modal && this._modal.cycleId === cid) { this._modal.curve = r; this._modal.loaded = true; this._modal.trim = { start: 0, end: r.full_duration_s || 0 }; this._render(); if (r.profile_name) this._fetchCycleProfileEnv(eid, r.profile_name); } })
-        .catch(e => this._showToast('Could not load cycle: ' + (e.message || e), 'error'));
+        .catch(e => this._showToast(this._t('toast.could_not_load_cycle', {error: e.message || e}, 'Could not load cycle: ' + (e.message || e)), 'error'));
 
     } else if (a === 'cleanup-edit-cycle') {
       const cid = btn.dataset.cid;
@@ -4100,7 +4121,7 @@ class HaWashdataPanel extends HTMLElement {
       this._render();
       this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: eid, cycle_id: cid })
         .then(r => { if (this._modal && this._modal.cycleId === cid) { this._modal.curve = r; this._modal.loaded = true; this._modal.trim = { start: 0, end: r.full_duration_s || 0 }; this._render(); if (r.profile_name) this._fetchCycleProfileEnv(eid, r.profile_name); } })
-        .catch(e => this._showToast('Could not load cycle: ' + (e.message || e), 'error'));
+        .catch(e => this._showToast(this._t('toast.could_not_load_cycle', {error: e.message || e}, 'Could not load cycle: ' + (e.message || e)), 'error'));
 
     } else if (a === 'open-profile') {
       const name = btn.dataset.pname;
@@ -4126,11 +4147,11 @@ class HaWashdataPanel extends HTMLElement {
       this._busyRun('save-settings', async () => {
         try {
           await this._ws({ type: `${_DOMAIN}/apply_suggestions`, entry_id: eid, keys });
-          this._showToast('Suggestions applied; integration reloading');
+          this._showToast(this._t('toast.suggestions_applied', {}, 'Suggestions applied; integration reloading'));
           await this._fetchSuggestions(eid);
           const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
           this._opts = r.options || {};
-        } catch (e) { this._showToast('Apply failed: ' + (e.message || e), 'error'); }
+        } catch (e) { this._showToast(this._t('toast.apply_failed', {error: e.message || e}, 'Apply failed: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'sug-show-all') {
@@ -4139,8 +4160,8 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'sug-dismiss') {
       this._settingsSugOnly = false;
       this._busyRun('save-settings', async () => {
-        try { await this._ws({ type: `${_DOMAIN}/clear_suggestions`, entry_id: eid }); this._suggestions = []; this._showToast('Suggestions dismissed'); }
-        catch (e) { this._showToast('Error: ' + (e.message || e), 'error'); }
+        try { await this._ws({ type: `${_DOMAIN}/clear_suggestions`, entry_id: eid }); this._suggestions = []; this._showToast(this._t('toast.suggestions_dismissed', {}, 'Suggestions dismissed')); }
+        catch (e) { this._showToast(this._t('toast.error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'sug-analyze') {
@@ -4148,9 +4169,9 @@ class HaWashdataPanel extends HTMLElement {
         try {
           const r = await this._ws({ type: `${_DOMAIN}/run_suggestion_analysis`, entry_id: eid });
           const n = (r && r.count) || 0;
-          this._showToast(n ? `Analysis complete: ${n} suggestion(s)` : 'Analysis complete: no new suggestions');
+          this._showToast(n ? this._t('toast.analysis_complete', {count: n}, `Analysis complete: ${n} suggestion(s)`) : this._t('toast.analysis_complete_none', {}, 'Analysis complete: no new suggestions'));
           await this._fetchSuggestions(eid);
-        } catch (e) { this._showToast('Analysis failed: ' + (e.message || e), 'error'); }
+        } catch (e) { this._showToast(this._t('toast.analysis_failed', {error: e.message || e}, 'Analysis failed: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'ml-train-now') {
@@ -4159,28 +4180,28 @@ class HaWashdataPanel extends HTMLElement {
           const r = await this._ws({ type: `${_DOMAIN}/trigger_ml_training`, entry_id: eid });
           if (r && r.ok) {
             const promoted = (r.promoted || []).length;
-            this._showToast(promoted ? `Training complete: promoted ${promoted} model(s)` : 'Training complete: baseline kept (no improvement)');
+            this._showToast(promoted ? this._t('toast.ml_training_promoted', {count: promoted}, `Training complete: promoted ${promoted} model(s)`) : this._t('toast.ml_training_no_improvement', {}, 'Training complete: baseline kept (no improvement)'));
           } else {
-            this._showToast('Training did not run: ' + ((r && r.reason) || 'unknown'), 'info');
+            this._showToast(this._t('toast.ml_training_no_improvement', {}, 'Training complete: baseline kept (no improvement)'), 'info');
           }
           await this._loadMlTrainingStatus(eid);
-        } catch (e) { this._showToast('Training failed: ' + (e.message || e), 'error'); }
+        } catch (e) { this._showToast(this._t('toast.training_failed', {error: e.message || e}, 'Training failed: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'ml-revert-match') {
       this._busyRun('ml-revert-match', async () => {
         try {
           await this._ws({ type: `${_DOMAIN}/revert_matching_config`, entry_id: eid });
-          this._showToast('Matching weights reverted to defaults');
+          this._showToast(this._t('toast.matching_reverted', {}, 'Matching weights reverted to defaults'));
           await this._loadMlTrainingStatus(eid);
-        } catch (e) { this._showToast('Revert failed: ' + (e.message || e), 'error'); }
+        } catch (e) { this._showToast(this._t('toast.revert_failed', {error: e.message || e}, 'Revert failed: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'ml-revert-models') {
       this._busyRun('ml-revert-models', async () => {
         try {
           await this._ws({ type: `${_DOMAIN}/revert_ml_models`, entry_id: eid });
-          this._showToast('On-device models reverted to baseline');
+          this._showToast(this._t('toast.models_reverted', {}, 'On-device models reverted to baseline'));
           await this._loadMlTrainingStatus(eid);
         } catch (e) { this._showToast('Revert failed: ' + (e.message || e), 'error'); }
       });
@@ -4200,9 +4221,9 @@ class HaWashdataPanel extends HTMLElement {
         onOk: async () => {
           try {
             await this._hass.callApi('DELETE', 'config/automation/config/' + autoId);
-            this._showToast('Automation deleted');
+            this._showToast(this._t('toast.automation_deleted', {}, 'Automation deleted'));
             await this._loadDeviceAutomations(eid);
-          } catch (e) { this._showToast('Delete failed: ' + (e.message || e), 'error'); }
+          } catch (e) { this._showToast(this._t('toast.delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); }
         } };
       this._render();
 
@@ -4215,16 +4236,16 @@ class HaWashdataPanel extends HTMLElement {
           try {
             await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: { notify_actions: [] } });
             this._opts = { ...this._opts, notify_actions: [] };
-            this._showToast('Legacy actions removed');
-          } catch (e) { this._showToast('Remove failed: ' + (e.message || e), 'error'); }
+            this._showToast(this._t('toast.legacy_removed', {}, 'Legacy actions removed'));
+          } catch (e) { this._showToast(this._t('toast.delete_failed', {error: e.message || e}, 'Remove failed: ' + (e.message || e)), 'error'); }
         } };
       this._render();
 
     } else if (a === 'auto-label') {
       const thr = parseFloat(sr.getElementById('wd-auto-label-threshold')?.value || '0.75');
       this._busyRun('auto-label', async () => {
-        try { await this._ws({ type: `${_DOMAIN}/auto_label_cycles`, entry_id: eid, confidence_threshold: thr }); this._showToast('Auto-label complete'); await this._fetchCycles(eid); }
-        catch (e) { this._showToast('Auto-label failed: ' + (e.message || e), 'error'); }
+        try { await this._ws({ type: `${_DOMAIN}/auto_label_cycles`, entry_id: eid, confidence_threshold: thr }); this._showToast(this._t('toast.auto_label_complete', {}, 'Auto-label complete')); await this._fetchCycles(eid); }
+        catch (e) { this._showToast(this._t('toast.auto_label_failed', {error: e.message || e}, 'Auto-label failed: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'create-profile') {
@@ -4250,30 +4271,30 @@ class HaWashdataPanel extends HTMLElement {
 
     } else if (a === 'rebuild-envelopes') {
       this._busyRun('rebuild-envelopes', async () => {
-        try { await this._ws({ type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid }); this._showToast('Envelopes rebuilt'); await this._fetchProfiles(eid); }
-        catch (e) { this._showToast('Rebuild failed: ' + (e.message || e), 'error'); }
+        try { await this._ws({ type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid }); this._showToast(this._t('toast.envelopes_rebuilt', {}, 'Envelopes rebuilt')); await this._fetchProfiles(eid); }
+        catch (e) { this._showToast(this._t('toast.rebuild_failed', {error: e.message || e}, 'Rebuild failed: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'rec-start') {
-      this._ws({ type: `${_DOMAIN}/start_recording`, entry_id: eid }).then(() => { this._showToast('Recording started'); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast('Start failed: ' + (e.message || e), 'error'));
+      this._ws({ type: `${_DOMAIN}/start_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_started', {}, 'Recording started')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('toast.start_failed', {error: e.message || e}, 'Start failed: ' + (e.message || e)), 'error'));
     } else if (a === 'rec-stop') {
-      this._ws({ type: `${_DOMAIN}/stop_recording`, entry_id: eid }).then(() => { this._showToast('Recording stopped'); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast('Stop failed: ' + (e.message || e), 'error'));
+      this._ws({ type: `${_DOMAIN}/stop_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_stopped', {}, 'Recording stopped')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('toast.stop_failed', {error: e.message || e}, 'Stop failed: ' + (e.message || e)), 'error'));
     } else if (a === 'rec-process-open') {
       this._fetchProfiles(eid).then(() => { this._modal = { type: 'process-recording' }; this._render(); });
     } else if (a === 'rec-discard') {
       this._modal = { type: 'confirm', title: 'Discard Recording', message: 'Discard the saved recording? This cannot be undone.', okLabel: 'Discard',
-        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/discard_recording`, entry_id: eid }); this._showToast('Recording discarded'); await this._fetchRecState(eid); } catch (e) { this._showToast('Discard failed: ' + (e.message || e), 'error'); } } };
+        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/discard_recording`, entry_id: eid }); this._showToast(this._t('toast.recording_discarded', {}, 'Recording discarded')); await this._fetchRecState(eid); } catch (e) { this._showToast(this._t('toast.discard_failed', {error: e.message || e}, 'Discard failed: ' + (e.message || e)), 'error'); } } };
       this._render();
 
     } else if (a === 'fb-confirm') {
-      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'confirm' }).then(() => { this._showToast('Feedback confirmed'); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast('Error: ' + (e.message || e), 'error'));
+      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'confirm' }).then(() => { this._showToast(this._t('toast.feedback_confirmed', {}, 'Feedback confirmed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast('Error: ' + (e.message || e), 'error'));
     } else if (a === 'fb-ignore') {
-      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'ignore' }).then(() => { this._showToast('Feedback dismissed'); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast('Error: ' + (e.message || e), 'error'));
+      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'ignore' }).then(() => { this._showToast(this._t('toast.feedback_dismissed', {}, 'Feedback dismissed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast('Error: ' + (e.message || e), 'error'));
     } else if (a === 'fb-correct') {
       this._fetchProfiles(eid).then(() => { this._modal = { type: 'correct-feedback', cycleId: btn.dataset.cid, detectedProfile: btn.dataset.prof }; this._render(); });
     } else if (a === 'fb-dismiss-all') {
       this._modal = { type: 'confirm', title: 'Dismiss All Feedbacks', message: `Dismiss all ${this._feedbacks.length} pending feedback requests?`, okLabel: 'Dismiss All',
-        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/dismiss_all_feedbacks`, entry_id: eid }); this._showToast('All feedbacks dismissed'); await this._fetchFeedbacks(eid); } catch (e) { this._showToast('Error: ' + (e.message || e), 'error'); } } };
+        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/dismiss_all_feedbacks`, entry_id: eid }); this._showToast(this._t('toast.feedback_all_dismissed', {}, 'All feedbacks dismissed')); await this._fetchFeedbacks(eid); } catch (e) { this._showToast('Error: ' + (e.message || e), 'error'); } } };
       this._render();
 
     } else if (a === 'create-phase') {
@@ -4283,7 +4304,7 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'del-phase') {
       const pname = btn.dataset.pname, pid = btn.dataset.pid;
       this._modal = { type: 'confirm', title: 'Delete Phase', message: `Delete phase "${pname}"?`, okLabel: 'Delete',
-        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_phase`, entry_id: eid, phase_id: pid }); this._showToast(`Phase "${pname}" deleted`); await this._fetchPhases(eid); } catch (e) { this._showToast('Delete failed: ' + (e.message || e), 'error'); } } };
+        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_phase`, entry_id: eid, phase_id: pid }); this._showToast(this._t('toast.phase_deleted', {name: pname}, `Phase "${pname}" deleted`)); await this._fetchPhases(eid); } catch (e) { this._showToast('Delete failed: ' + (e.message || e), 'error'); } } };
       this._render();
 
     } else if (a === 'diag-refresh') {
@@ -4296,18 +4317,18 @@ class HaWashdataPanel extends HTMLElement {
             const bits = [`${r.count || 0} cycles`];
             if (r.suggestions != null) bits.push(`${r.suggestions} suggestion(s)`);
             if (r.ml_training && r.ml_training.ok && (r.ml_training.promoted || []).length) bits.push(`${r.ml_training.promoted.length} model(s) promoted`);
-            this._showToast('Processed ' + bits.join(', '));
+            this._showToast(this._t('toast.processed', {bits: bits.join(', ')}, 'Processed ' + bits.join(', ')));
             await this._fetchToolsData(eid);
           } catch (e) { this._showToast('Error: ' + (e.message || e), 'error'); }
         }) };
       this._render();
     } else if (a === 'clear-debug') {
       this._modal = { type: 'confirm', title: 'Clear Debug Data', message: 'Delete all stored debug traces?', okLabel: 'Clear',
-        onOk: () => this._busyRun('clear-debug', async () => { try { const r = await this._ws({ type: `${_DOMAIN}/clear_debug_data`, entry_id: eid }); this._showToast(`Cleared ${r.count || 0} debug traces`); await this._fetchToolsData(eid); } catch (e) { this._showToast('Error: ' + (e.message || e), 'error'); } }) };
+        onOk: () => this._busyRun('clear-debug', async () => { try { const r = await this._ws({ type: `${_DOMAIN}/clear_debug_data`, entry_id: eid }); this._showToast(this._t('toast.debug_cleared', {count: r.count || 0}, `Cleared ${r.count || 0} debug traces`)); await this._fetchToolsData(eid); } catch (e) { this._showToast('Error: ' + (e.message || e), 'error'); } }) };
       this._render();
     } else if (a === 'wipe-history') {
       this._modal = { type: 'confirm', title: 'Wipe All Data', message: '⚠️ This permanently deletes ALL cycles and profiles. This cannot be undone.', okLabel: 'Wipe Everything',
-        onOk: () => this._busyRun('wipe', async () => { try { await this._ws({ type: `${_DOMAIN}/wipe_history`, entry_id: eid }); this._showToast('All data wiped'); this._cycles = []; this._profiles = []; await this._fetchToolsData(eid); } catch (e) { this._showToast('Error: ' + (e.message || e), 'error'); } }) };
+        onOk: () => this._busyRun('wipe', async () => { try { await this._ws({ type: `${_DOMAIN}/wipe_history`, entry_id: eid }); this._showToast(this._t('toast.all_wiped', {}, 'All data wiped')); this._cycles = []; this._profiles = []; await this._fetchToolsData(eid); } catch (e) { this._showToast('Error: ' + (e.message || e), 'error'); } }) };
       this._render();
 
     } else if (a === 'export-config') {
@@ -4317,8 +4338,8 @@ class HaWashdataPanel extends HTMLElement {
         const a2 = document.createElement('a');
         a2.href = url; a2.download = `washdata_export_${eid.slice(0, 8)}.json`;
         document.body.appendChild(a2); a2.click(); document.body.removeChild(a2); URL.revokeObjectURL(url);
-        this._showToast('Export downloaded');
-      }).catch(e => this._showToast('Export failed: ' + (e.message || e), 'error'));
+        this._showToast(this._t('toast.export_downloaded', {}, 'Export downloaded'));
+      }).catch(e => this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
     } else if (a === 'cyc-select-toggle') {
       this._selectMode = !this._selectMode;
       if (!this._selectMode) this._cycleSel.clear();
@@ -4354,7 +4375,7 @@ class HaWashdataPanel extends HTMLElement {
         onOk: () => this._busyRun('cyc-bulk-del', async () => {
           try {
             for (const cid of ids) await this._ws({ type: `${_DOMAIN}/delete_cycle`, entry_id: eid, cycle_id: cid });
-            this._showToast(`Deleted ${ids.length} cycle(s)`);
+            this._showToast(this._t('toast.cycles_deleted', {count: ids.length}, `Deleted ${ids.length} cycle(s)`));
             this._cycleSel.clear(); this._selectMode = false;
             await this._fetchCycles(eid);
           } catch (e) { this._showToast('Delete failed: ' + (e.message || e), 'error'); }
@@ -4387,8 +4408,8 @@ class HaWashdataPanel extends HTMLElement {
         const a2 = document.createElement('a');
         a2.href = url; a2.download = `washdata_logs_${Date.now()}.txt`;
         document.body.appendChild(a2); a2.click(); document.body.removeChild(a2); URL.revokeObjectURL(url);
-        this._showToast('Logs exported');
-      }).catch(e => this._showToast('Export failed: ' + (e.message || e), 'error'));
+        this._showToast(this._t('toast.logs_exported', {}, 'Logs exported'));
+      }).catch(e => this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
     } else if (a === 'import-config-open') {
       this._modal = { type: 'import-config' }; this._render();
 
@@ -4403,8 +4424,8 @@ class HaWashdataPanel extends HTMLElement {
         try {
           await this._ws({ type: `${_DOMAIN}/set_user_prefs`, prefs });
           if (this._panelCfg) this._panelCfg.prefs = { ...(this._panelCfg.prefs || {}), ...prefs };
-          this._showToast('Preferences saved');
-        } catch (e) { this._showToast('Save failed: ' + (e.message || e), 'error'); }
+          this._showToast(this._t('toast.preferences_saved', {}, 'Preferences saved'));
+        } catch (e) { this._showToast(this._t('toast.save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'save-panel') {
@@ -4419,18 +4440,18 @@ class HaWashdataPanel extends HTMLElement {
           this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
           this._tabInitialized = true;  // keep the user on the current tab
           this._applyPanelConfig();
-          this._showToast('Panel settings saved');
+          this._showToast(this._t('toast.panel_settings_saved', {}, 'Panel settings saved'));
         } catch (e) { this._showToast('Save failed: ' + (e.message || e), 'error'); }
       });
 
     } else if (a === 'pause-cycle') {
       this._ws({ type: `${_DOMAIN}/pause_cycle`, entry_id: eid })
-        .then(() => { this._showToast('Cycle paused'); return this._fetchAll(); })
-        .catch(e => this._showToast('Pause failed: ' + (e.message || e), 'error'));
+        .then(() => { this._showToast(this._t('toast.cycle_paused', {}, 'Cycle paused')); return this._fetchAll(); })
+        .catch(e => this._showToast(this._t('toast.pause_failed', {error: e.message || e}, 'Pause failed: ' + (e.message || e)), 'error'));
 
     } else if (a === 'resume-cycle') {
       this._ws({ type: `${_DOMAIN}/resume_cycle`, entry_id: eid })
-        .then(() => { this._showToast('Cycle resumed'); return this._fetchAll(); })
+        .then(() => { this._showToast(this._t('toast.cycle_resumed', {}, 'Cycle resumed')); return this._fetchAll(); })
         .catch(e => this._showToast('Resume failed: ' + (e.message || e), 'error'));
 
     } else if (a === 'terminate-cycle') {
@@ -4442,7 +4463,7 @@ class HaWashdataPanel extends HTMLElement {
         onOk: async () => {
           try {
             await this._ws({ type: `${_DOMAIN}/terminate_cycle`, entry_id: eid });
-            this._showToast('Cycle force-stopped');
+            this._showToast(this._t('toast.cycle_force_stopped', {}, 'Cycle force-stopped'));
             await this._fetchAll();
           } catch (e) { this._showToast('Force stop failed: ' + (e.message || e), 'error'); }
         },
@@ -4463,7 +4484,7 @@ class HaWashdataPanel extends HTMLElement {
         try {
           await this._ws({ type: `${_DOMAIN}/set_panel_config`, rbac: { enabled, default_level, users: usersMap } });
           this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
-          this._showToast('Access control saved');
+          this._showToast(this._t('toast.access_saved', {}, 'Access control saved'));
         } catch (e) { this._showToast('Save failed: ' + (e.message || e), 'error'); }
       });
     }
@@ -4491,15 +4512,15 @@ class HaWashdataPanel extends HTMLElement {
       if (action === 'pg-save') {
         const name = sr.getElementById('wd-pg-name')?.value?.trim();
         const members = Array.from(sr.querySelectorAll('.wd-pg-mem')).filter(c => c.checked).map(c => c.value);
-        if (!name) { this._showToast('Group name is required', 'error'); return; }
-        if (members.length < 2) { this._showToast('Select at least 2 profiles for a group', 'error'); return; }
+        if (!name) { this._showToast(this._t('toast.group_name_required', {}, 'Group name is required'), 'error'); return; }
+        if (members.length < 2) { this._showToast(this._t('toast.min_2_profiles', {}, 'Select at least 2 profiles for a group'), 'error'); return; }
         await this._busyRun('pg-save', async () => {
           try {
             if (m.orig && m.orig !== name) {
               await this._ws({ type: `${_DOMAIN}/rename_profile_group`, entry_id: eid, name: m.orig, new_name: name });
             }
             await this._ws({ type: `${_DOMAIN}/save_profile_group`, entry_id: eid, name, members });
-            this._showToast('Group saved'); this._modal = null;
+            this._showToast(this._t('toast.group_saved', {}, 'Group saved')); this._modal = null;
             await this._fetchProfileGroups(eid);
           } catch (e) { this._showToast('Save failed: ' + (e.message || e), 'error'); }
         });
@@ -4509,7 +4530,7 @@ class HaWashdataPanel extends HTMLElement {
         await this._busyRun('pg-save', async () => {
           try {
             await this._ws({ type: `${_DOMAIN}/delete_profile_group`, entry_id: eid, name: m.orig });
-            this._showToast('Group deleted'); this._modal = null;
+            this._showToast(this._t('toast.group_deleted', {}, 'Group deleted')); this._modal = null;
             await this._fetchProfileGroups(eid);
           } catch (e) { this._showToast('Delete failed: ' + (e.message || e), 'error'); }
         });
@@ -4538,7 +4559,7 @@ class HaWashdataPanel extends HTMLElement {
             if (newLabel !== curLabel) {
               await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: cid, profile_name: newLabel || null });
             }
-            this._showToast('Review saved');
+            this._showToast(this._t('toast.review_saved', {}, 'Review saved'));
             await this._fetchCycles(eid);
             await this._loadMlIndex(eid);
             if (this._modal && this._modal.cycleId === cid) this._modal.ml = (this._mlById || {})[cid] || this._modal.ml;
@@ -4554,30 +4575,30 @@ class HaWashdataPanel extends HTMLElement {
       if (action === 'cyc-delete') {
         const cid = m.cycleId;
         this._modal = { type: 'confirm', title: 'Delete Cycle', message: 'Permanently delete this cycle? This cannot be undone.', okLabel: 'Delete',
-          onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_cycle`, entry_id: eid, cycle_id: cid }); this._showToast('Cycle deleted'); await this._fetchCycles(eid); } catch (e) { this._showToast('Delete failed: ' + (e.message || e), 'error'); } } };
+          onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_cycle`, entry_id: eid, cycle_id: cid }); this._showToast(this._t('toast.cycle_deleted', {}, 'Cycle deleted')); await this._fetchCycles(eid); } catch (e) { this._showToast('Delete failed: ' + (e.message || e), 'error'); } } };
         this._render(); return;
       }
       if (action === 'cyc-auto-split') {
         const gap = parseInt(sr.getElementById('wd-split-gap')?.value || '900', 10);
         await this._busyRun('cyc-auto', async () => {
-          try { const r = await this._ws({ type: `${_DOMAIN}/analyze_split`, entry_id: eid, cycle_id: m.cycleId, gap_seconds: gap }); m.split.offsets = (r.split_offsets || []).slice(); m.split.profiles = []; if (!m.split.offsets.length) this._showToast('No idle gaps found to split on', 'info'); }
-          catch (e) { this._showToast('Auto-detect failed: ' + (e.message || e), 'error'); }
+          try { const r = await this._ws({ type: `${_DOMAIN}/analyze_split`, entry_id: eid, cycle_id: m.cycleId, gap_seconds: gap }); m.split.offsets = (r.split_offsets || []).slice(); m.split.profiles = []; if (!m.split.offsets.length) this._showToast(this._t('toast.no_split_found', {}, 'No idle gaps found to split on'), 'info'); }
+          catch (e) { this._showToast(this._t('toast.auto_detect_failed', {error: e.message || e}, 'Auto-detect failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
       if (action === 'cyc-apply-trim') {
         const cid = m.cycleId, s = m.trim.start, e2 = m.trim.end;
         await this._busyRun('cyc-trim-apply', async () => {
-          try { await this._ws({ type: `${_DOMAIN}/trim_cycle`, entry_id: eid, cycle_id: cid, start_s: s, end_s: e2 }); this._showToast('Cycle trimmed'); await this._closeCycleDetail(eid); await this._fetchCycles(eid); }
-          catch (e) { this._showToast('Trim failed: ' + (e.message || e), 'error'); }
+          try { await this._ws({ type: `${_DOMAIN}/trim_cycle`, entry_id: eid, cycle_id: cid, start_s: s, end_s: e2 }); this._showToast(this._t('toast.cycle_trimmed', {}, 'Cycle trimmed')); await this._closeCycleDetail(eid); await this._fetchCycles(eid); }
+          catch (e) { this._showToast(this._t('toast.trim_failed', {error: e.message || e}, 'Trim failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
       if (action === 'cyc-apply-split') {
         const cid = m.cycleId, offs = m.split.offsets.slice(), profs = m.split.profiles.slice();
         await this._busyRun('cyc-split-apply', async () => {
-          try { const r = await this._ws({ type: `${_DOMAIN}/apply_split`, entry_id: eid, cycle_id: cid, split_offsets: offs, segment_profiles: profs }); this._showToast(`Split into ${(r.new_ids || []).length || ''} cycles`.trim()); await this._closeCycleDetail(eid); await this._fetchCycles(eid); await this._fetchProfiles(eid); }
-          catch (e) { this._showToast('Split failed: ' + (e.message || e), 'error'); }
+          try { const r = await this._ws({ type: `${_DOMAIN}/apply_split`, entry_id: eid, cycle_id: cid, split_offsets: offs, segment_profiles: profs }); this._showToast(this._t('toast.split_complete', {count: (r.new_ids || []).length}, `Split into ${(r.new_ids || []).length} cycles`)); await this._closeCycleDetail(eid); await this._fetchCycles(eid); await this._fetchProfiles(eid); }
+          catch (e) { this._showToast(this._t('toast.split_failed', {error: e.message || e}, 'Split failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -4605,7 +4626,7 @@ class HaWashdataPanel extends HTMLElement {
       if (action === 'pp-phase-save') {
         const phases = m.phases.filter(p => p.name).map(p => ({ name: p.name, start: p.start, end: p.end }));
         await this._busyRun('pp-phase-save', async () => {
-          try { await this._ws({ type: `${_DOMAIN}/set_profile_phases`, entry_id: eid, profile_name: m.name, phases }); this._showToast('Phases saved'); }
+          try { await this._ws({ type: `${_DOMAIN}/set_profile_phases`, entry_id: eid, profile_name: m.name, phases }); this._showToast(this._t('toast.phases_saved', {}, 'Phases saved')); }
           catch (e) { this._showToast('Save failed: ' + (e.message || e), 'error'); }
         });
         return;
@@ -4616,7 +4637,7 @@ class HaWashdataPanel extends HTMLElement {
         await this._busyRun('pp-cleanup-del', async () => {
           try {
             for (const cid of sel) await this._ws({ type: `${_DOMAIN}/delete_cycle`, entry_id: eid, cycle_id: cid });
-            this._showToast(`Deleted ${sel.length} cycle(s)`);
+            this._showToast(this._t('toast.cycles_deleted', {count: sel.length}, `Deleted ${sel.length} cycle(s)`));
             const r = await this._ws({ type: `${_DOMAIN}/get_profile_cycles`, entry_id: eid, profile_name: m.name });
             if (this._modal) this._modal.cleanup = { cycles: r.cycles || [], selected: new Set() };
             await this._fetchProfiles(eid);
@@ -4630,14 +4651,14 @@ class HaWashdataPanel extends HTMLElement {
         if (!nn) { this._showToast('Name required', 'error'); return; }
         try {
           await this._ws({ type: `${_DOMAIN}/rename_profile`, entry_id: eid, profile_name: m.name, new_name: nn, manual_duration_min: dur > 0 ? dur : null });
-          this._showToast('Profile renamed'); m.name = nn; await this._fetchProfiles(eid);
+          this._showToast(this._t('toast.profile_renamed', {}, 'Profile renamed')); m.name = nn; await this._fetchProfiles(eid);
           m.stats = (this._profiles || []).find(p => p.name === nn) || m.stats; this._render();
-        } catch (e) { this._showToast('Rename failed: ' + (e.message || e), 'error'); }
+        } catch (e) { this._showToast(this._t('toast.rename_failed', {error: e.message || e}, 'Rename failed: ' + (e.message || e)), 'error'); }
         return;
       }
       if (action === 'pp-rebuild') {
         await this._busyRun('pp-rebuild', async () => {
-          try { await this._ws({ type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid }); const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: eid, profile_name: m.name }); if (this._modal) this._modal.env = r.envelope; this._showToast('Envelope rebuilt'); }
+          try { await this._ws({ type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid }); const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: eid, profile_name: m.name }); if (this._modal) this._modal.env = r.envelope; this._showToast(this._t('toast.envelope_rebuilt', {}, 'Envelope rebuilt')); }
           catch (e) { this._showToast('Rebuild failed: ' + (e.message || e), 'error'); }
         });
         return;
@@ -4645,7 +4666,7 @@ class HaWashdataPanel extends HTMLElement {
       if (action === 'pp-delete') {
         const name = m.name;
         this._modal = { type: 'confirm', title: 'Delete Profile', message: `Delete profile "${name}"? Labelled cycles will be unlabelled.`, okLabel: 'Delete',
-          onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_profile`, entry_id: eid, profile_name: name, unlabel_cycles: true }); this._showToast(`Profile "${name}" deleted`); await this._fetchProfiles(eid); } catch (e) { this._showToast('Delete failed: ' + (e.message || e), 'error'); } } };
+          onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_profile`, entry_id: eid, profile_name: name, unlabel_cycles: true }); this._showToast(this._t('toast.profile_deleted', {name}, `Profile "${name}" deleted`)); await this._fetchProfiles(eid); } catch (e) { this._showToast('Delete failed: ' + (e.message || e), 'error'); } } };
         this._render(); return;
       }
     }
@@ -4656,33 +4677,33 @@ class HaWashdataPanel extends HTMLElement {
       const profileName = sel ? sel.value : null;
       const newName = sr.getElementById('wd-new-profile-name')?.value?.trim() || null;
       this._modal = null;
-      try { await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: m.cycleId, profile_name: profileName || null, new_profile_name: newName }); this._showToast('Cycle labelled'); await this._fetchCycles(eid); await this._fetchProfiles(eid); }
-      catch (e) { this._showToast('Label failed: ' + (e.message || e), 'error'); }
+      try { await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: m.cycleId, profile_name: profileName || null, new_profile_name: newName }); this._showToast(this._t('toast.cycle_labelled', {}, 'Cycle labelled')); await this._fetchCycles(eid); await this._fetchProfiles(eid); }
+      catch (e) { this._showToast(this._t('toast.label_failed', {error: e.message || e}, 'Label failed: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'create-profile-ok' && eid) {
       const name = sr.getElementById('wd-cp-name')?.value?.trim();
       const cycle = sr.getElementById('wd-cp-cycle')?.value || null;
       const dur = parseFloat(sr.getElementById('wd-cp-dur')?.value || 0);
       this._modal = null;
-      if (!name) { this._showToast('Profile name is required', 'error'); this._render(); return; }
-      try { await this._ws({ type: `${_DOMAIN}/create_profile`, entry_id: eid, name, reference_cycle: cycle || null, manual_duration_min: dur > 0 ? dur : null }); this._showToast(`Profile "${name}" created`); await this._fetchProfiles(eid); }
-      catch (e) { this._showToast('Create failed: ' + (e.message || e), 'error'); }
+      if (!name) { this._showToast(this._t('toast.profile_name_required', {}, 'Profile name is required'), 'error'); this._render(); return; }
+      try { await this._ws({ type: `${_DOMAIN}/create_profile`, entry_id: eid, name, reference_cycle: cycle || null, manual_duration_min: dur > 0 ? dur : null }); this._showToast(this._t('toast.profile_created', {name}, `Profile "${name}" created`)); await this._fetchProfiles(eid); }
+      catch (e) { this._showToast(this._t('toast.create_failed', {error: e.message || e}, 'Create failed: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'create-phase-ok' && eid) {
       const name = sr.getElementById('wd-ph-name')?.value?.trim();
       const desc = sr.getElementById('wd-ph-desc')?.value?.trim() || '';
       this._modal = null;
-      if (!name) { this._showToast('Phase name is required', 'error'); this._render(); return; }
-      try { await this._ws({ type: `${_DOMAIN}/create_phase`, entry_id: eid, device_type: m.deviceType || '', name, description: desc }); this._showToast(`Phase "${name}" created`); await this._fetchPhases(eid); }
+      if (!name) { this._showToast(this._t('toast.phase_name_required', {}, 'Phase name is required'), 'error'); this._render(); return; }
+      try { await this._ws({ type: `${_DOMAIN}/create_phase`, entry_id: eid, device_type: m.deviceType || '', name, description: desc }); this._showToast(this._t('toast.phase_created', {name}, `Phase "${name}" created`)); await this._fetchPhases(eid); }
       catch (e) { this._showToast('Create failed: ' + (e.message || e), 'error'); }
       this._render();
     } else if (action === 'edit-phase-ok' && eid) {
       const newName = sr.getElementById('wd-eph-name')?.value?.trim();
       const desc = sr.getElementById('wd-eph-desc')?.value?.trim() || '';
       this._modal = null;
-      if (!newName) { this._showToast('Name is required', 'error'); this._render(); return; }
-      try { await this._ws({ type: `${_DOMAIN}/update_phase`, entry_id: eid, phase_id: m.phaseId, new_name: newName, description: desc }); this._showToast('Phase updated'); await this._fetchPhases(eid); }
-      catch (e) { this._showToast('Update failed: ' + (e.message || e), 'error'); }
+      if (!newName) { this._showToast(this._t('toast.name_required', {}, 'Name required'), 'error'); this._render(); return; }
+      try { await this._ws({ type: `${_DOMAIN}/update_phase`, entry_id: eid, phase_id: m.phaseId, new_name: newName, description: desc }); this._showToast(this._t('toast.phase_updated', {}, 'Phase updated')); await this._fetchPhases(eid); }
+      catch (e) { this._showToast(this._t('toast.update_failed', {error: e.message || e}, 'Update failed: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'process-rec-ok' && eid) {
       const mode = sr.getElementById('wd-pr-mode')?.value;
@@ -4692,22 +4713,22 @@ class HaWashdataPanel extends HTMLElement {
       const tail = parseFloat(sr.getElementById('wd-pr-tail')?.value || 0);
       this._modal = null;
       if (!profileName) { this._showToast('Profile name is required', 'error'); this._render(); return; }
-      try { await this._ws({ type: `${_DOMAIN}/process_recording`, entry_id: eid, profile_name: profileName, save_mode: mode, head_trim: head, tail_trim: tail }); this._showToast('Recording saved to profile'); await this._fetchRecState(eid); await this._fetchProfiles(eid); }
+      try { await this._ws({ type: `${_DOMAIN}/process_recording`, entry_id: eid, profile_name: profileName, save_mode: mode, head_trim: head, tail_trim: tail }); this._showToast(this._t('toast.recording_saved', {}, 'Recording saved to profile')); await this._fetchRecState(eid); await this._fetchProfiles(eid); }
       catch (e) { this._showToast('Save failed: ' + (e.message || e), 'error'); }
       this._render();
     } else if (action === 'correct-fb-ok' && eid) {
       const corrected = sr.getElementById('wd-fb-profile')?.value;
       const dur = parseFloat(sr.getElementById('wd-fb-dur')?.value || 0) || null;
       this._modal = null;
-      try { await this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: m.cycleId, action: 'correct', corrected_profile: corrected, corrected_duration_min: dur }); this._showToast('Correction submitted'); await this._fetchFeedbacks(eid); }
+      try { await this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: m.cycleId, action: 'correct', corrected_profile: corrected, corrected_duration_min: dur }); this._showToast(this._t('toast.correction_submitted', {}, 'Correction submitted')); await this._fetchFeedbacks(eid); }
       catch (e) { this._showToast('Error: ' + (e.message || e), 'error'); }
       this._render();
     } else if (action === 'import-ok' && eid) {
       const jsonData = sr.getElementById('wd-import-json')?.value;
       this._modal = null;
-      if (!jsonData?.trim()) { this._showToast('JSON data is required', 'error'); this._render(); return; }
-      try { await this._ws({ type: `${_DOMAIN}/import_config`, entry_id: eid, json_data: jsonData }); this._showToast('Import successful; integration reloading'); await this._fetchCycles(eid); }
-      catch (e) { this._showToast('Import failed: ' + (e.message || e), 'error'); }
+      if (!jsonData?.trim()) { this._showToast(this._t('toast.json_required', {}, 'JSON data is required'), 'error'); this._render(); return; }
+      try { await this._ws({ type: `${_DOMAIN}/import_config`, entry_id: eid, json_data: jsonData }); this._showToast(this._t('toast.import_successful', {}, 'Import successful; integration reloading')); await this._fetchCycles(eid); }
+      catch (e) { this._showToast(this._t('toast.import_failed', {error: e.message || e}, 'Import failed: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'auto-run' && eid) {
       const thr = parseFloat(sr.getElementById('wd-al-thr')?.value || '0.75');
@@ -4724,10 +4745,10 @@ class HaWashdataPanel extends HTMLElement {
       await this._busyRun('cyc-merge', async () => {
         try {
           await this._ws({ type: `${_DOMAIN}/apply_merge`, entry_id: eid, cycle_ids: ids, target_profile: target || null, new_profile_name: newName });
-          this._showToast('Cycles merged');
+          this._showToast(this._t('toast.cycles_merged', {}, 'Cycles merged'));
           this._cycleSel.clear(); this._selectMode = false;
           await this._fetchCycles(eid); await this._fetchProfiles(eid);
-        } catch (e) { this._showToast('Merge failed: ' + (e.message || e), 'error'); }
+        } catch (e) { this._showToast(this._t('toast.merge_failed', {error: e.message || e}, 'Merge failed: ' + (e.message || e)), 'error'); }
       });
     }
   }
@@ -4762,7 +4783,7 @@ class HaWashdataPanel extends HTMLElement {
     });
 
     if (this._invalidJson) {
-      this._showToast(`"${this._invalidJson}" is not valid JSON - fix it or clear the field before saving.`, 'error');
+      this._showToast(this._t('toast.invalid_json', {key: this._invalidJson}, `"${this._invalidJson}" is not valid JSON - fix it or clear the field before saving.`), 'error');
       return;
     }
     await this._busyRun('save-settings', async () => {
@@ -4776,7 +4797,7 @@ class HaWashdataPanel extends HTMLElement {
           try { await this._ws({ type: `${_DOMAIN}/clear_suggestions`, entry_id: dev.entry_id }); } catch (_) { /* non-fatal */ }
           this._stagedSuggestions = false; this._suggestions = [];
         }
-        this._showToast('Settings saved; integration reloading');
+        this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
       } catch (e) { this._showToast('Save failed: ' + (e.message || e), 'error'); }
     });
   }

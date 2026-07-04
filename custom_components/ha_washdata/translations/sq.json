@@ -24,778 +24,49 @@
           "profile_name": "Emri i profilit (opsionale)",
           "manual_duration": "Kohëzgjatja e parashikuar (minuta)"
         }
+      },
+      "reconfigure": {
+        "title": "Rikonfiguro WashData",
+        "description": "Përditëso emrin e pajisjes, llojin e pajisjes ose sensorin e fuqisë.",
+        "data": {
+          "name": "Emri i pajisjes",
+          "device_type": "Lloji i pajisjes",
+          "power_sensor": "Sensori i fuqisë",
+          "min_power": "Pragu minimal i fuqisë (W)"
+        }
       }
     },
     "error": {
       "cannot_connect": "Lidhja dështoi",
       "invalid_auth": "Vërtetim i pavlefshëm",
-      "unknown": "Gabim i papritur"
+      "unknown": "Gabim i papritur",
+      "invalid_power": "Pragu i fuqisë duhet të jetë më i madh se 0"
     },
     "abort": {
-      "already_configured": "Pajisja është konfiguruar tashmë"
+      "already_configured": "Pajisja është konfiguruar tashmë",
+      "reconfigure_successful": "Rikonfigurimi ishte i suksesshëm"
     }
   },
   "options": {
     "step": {
       "init": {
-        "menu_options": {
-          "learning_feedbacks": "Rishikoni reagimet e të mësuarit",
-          "settings": "Cilësimet",
-          "notifications": "Njoftimet",
-          "manage_cycles": "Menaxhoni ciklet",
-          "manage_profiles": "Menaxho profilet",
-          "manage_phase_catalog": "Menaxho katalogun e fazave",
-          "record_cycle": "Regjistro ciklin (manual)",
-          "diagnostics": "Diagnostikimi dhe mirëmbajtja"
-        }
-      },
-      "apply_suggestions": {
-        "title": "Kopjo vlerat e sugjeruara",
-        "description": "Kjo do të kopjojë vlerat aktuale të sugjeruara në cilësimet tuaja të ruajtura. Ky është një veprim një herë dhe nuk mundëson mbishkrime automatike.\n\nVlerat e sugjeruara për të kopjuar:\n{suggested}",
+        "title": "Cilësimet WashData",
+        "description": "Të gjitha cilësimet -- zbulimi, përputhja, koha, njoftimet, profilet dhe ciklet -- janë të disponueshme në panelin WashData. Përdorni këtë formular vetëm për të ndryshuar sensorin e fuqisë, llojin e pajisjes ose pragun e gatishmërisë.",
         "data": {
-          "confirm": "Konfirmo veprimin e kopjimit"
-        }
-      },
-      "apply_suggestions_confirm": {
-        "title": "Rishiko ndryshimet e sugjeruara",
-        "description": "WashData u gjet **{pending_count}** vlera(t) e sugjeruara për t'u aplikuar.\n\nNdryshimet:\n{changes}\n\n✅ Kontrolloni kutinë më poshtë dhe klikoni **Dërgo** për të aplikuar dhe ruajtur menjëherë këto ndryshime.\n❌ Lëreni të pazgjedhur dhe klikoni **Dërgo** për ta anuluar dhe për t'u kthyer prapa.",
-        "data": {
-          "confirm_apply_suggestions": "Aplikoni dhe ruani këto ndryshime"
-        }
-      },
-      "settings": {
-        "title": "Cilësimet",
-        "description": "{deprecation_warning}Rregulloni pragjet e zbulimit, të mësuarit dhe sjelljen e avancuar. Parazgjedhjet funksionojnë mirë për shumicën e konfigurimeve.\n\nCilësimet e sugjeruara aktualisht të disponueshme: {suggestions_count}.\nNëse kjo është mbi 0, hapni Cilësimet e Avancuara dhe përdorni Apliko Vlerat e Sugjeruara për të rishikuar rekomandimet.",
-        "data": {
-          "apply_suggestions": "Apliko vlerat e sugjeruara",
           "device_type": "Lloji i pajisjes",
-          "power_sensor": "Njësia e sensorit të energjisë",
-          "min_power": "Fuqia minimale (W)",
-          "off_delay": "Vonesa e përfundimit të ciklit (s)",
-          "notify_actions": "Veprimet e njoftimit",
-          "notify_people": "Vono dorëzimin derisa këta njerëz të jenë në shtëpi",
-          "notify_only_when_home": "Vono njoftimet derisa personi i përzgjedhur të jetë në shtëpi",
-          "notify_fire_events": "Aktivizo ngjarjet e automatizimit",
-          "notify_start_services": "Fillimi i ciklit - Objektivat e njoftimit",
-          "notify_finish_services": "Përfundimi i ciklit - Objektivat e njoftimit",
-          "notify_live_services": "Progresi i drejtpërdrejtë - Objektivat e njoftimeve",
-          "notify_before_end_minutes": "Njoftim para përfundimit (minuta para fundit)",
-          "notify_title": "Titulli i njoftimit",
-          "notify_icon": "Ikona e njoftimit",
-          "notify_start_message": "Formati i mesazhit të fillimit",
-          "notify_finish_message": "Formati i mesazhit të përfundimit",
-          "notify_pre_complete_message": "Formati i mesazhit para përfundimit",
-          "show_advanced": "Redakto cilësimet e avancuara (hapi tjetër)"
-        },
-        "data_description": {
-          "apply_suggestions": "Zgjidhni këtë kuti për të kopjuar vlerat e sugjeruara nga algoritmi i të mësuarit në formë. Rishikoni përpara se të ruani.\n\nSugjeruar (nga të mësuarit):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "device_type": "Zgjidhni llojin e pajisjes (lavatriçe, tharëse, pjatalarëse, makinë kafeje, EV). Ky etiketë ruhet me çdo cikël për organizim më të mirë.",
-          "power_sensor": "Njësia e sensorit që raporton fuqinë në kohë reale (në vat). Mund ta ndryshoni këtë në çdo kohë pa humbur të dhënat historike - e dobishme nëse zëvendësoni një prizë inteligjente.",
-          "min_power": "Leximet e fuqisë mbi këtë prag (në vat) tregojnë se pajisja është në punë. Filloni me 2 W për shumicën e pajisjeve.",
-          "off_delay": "Sekonda fuqia e zbutur duhet të qëndrojë nën pragun e ndalimit për të shënuar përfundimin. Parazgjedhja: 120 s.",
-          "notify_actions": "Sekuenca opsionale e veprimeve të Home Assistant për t'u ekzekutuar për njoftimet (skriptet, njoftimet, TTS, etj.). Nëse caktohet, veprimet ekzekutohen përpara shërbimit të njoftimit të sërishëm.",
-          "notify_people": "Njësitë e njerëzve që përdoren për kontrollin e pranisë. Kur aktivizohet, dërgimi i njoftimit vonohet derisa të paktën një person i përzgjedhur të jetë në shtëpi.",
-          "notify_only_when_home": "Nëse aktivizohet, vononi njoftimet derisa të paktën një person i zgjedhur të jetë në shtëpi.",
-          "notify_fire_events": "Nëse aktivizohet, aktivizohen ngjarjet e Home Assistant për fillimin dhe përfundimin e ciklit (ha_washdata_cycle_started dhe ha_washdata_cycle_ended) për të drejtuar automatizimet.",
-          "notify_start_services": "Një ose më shumë shërbime njoftojnë për të sinjalizuar kur fillon një cikël. Lëreni bosh për të kapërcyer njoftimet e fillimit.",
-          "notify_finish_services": "Një ose më shumë shërbime njoftojnë për të sinjalizuar kur një cikël përfundon ose i afrohet përfundimit. Lëreni bosh për të kapërcyer njoftimet e përfundimit.",
-          "notify_live_services": "Një ose më shumë shërbime të njoftimit për të marrë përditësime të drejtpërdrejta të progresit gjatë ekzekutimit të ciklit (vetëm aplikacioni shoqërues celular). Lëreni bosh për të kapërcyer përditësimet e drejtpërdrejta.",
-          "notify_before_end_minutes": "Minuta para përfundimit të parashikuar të ciklit për të aktivizuar një njoftim. Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 0.",
-          "notify_title": "Titulli i personalizuar për njoftimet. Mbështet mbajtësin e vendndodhjes {device}.",
-          "notify_icon": "Ikona për t'u përdorur për njoftime (p.sh. mdi:washing-machine). Lëreni bosh për të dërguar pa ikonë.",
-          "notify_start_message": "Mesazhi dërgohet kur fillon një cikël. Mbështet mbajtësin e vendndodhjes {device}.",
-          "notify_finish_message": "Mesazhi dërgohet kur përfundon një cikël. Mbështet {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Teksti i përditësimeve të përsëritura të progresit të drejtpërdrejtë gjatë ekzekutimit të ciklit. Mbështet {device}, {minutes}, {program} vendmbajtësit."
-        }
-      },
-      "notifications": {
-        "title": "Njoftimet",
-        "description": "Konfiguro kanalet e njoftimeve, shabllonet dhe përditësimet opsionale të progresit të drejtpërdrejtë.",
-        "data": {
-          "notify_actions": "Veprimet e njoftimit",
-          "notify_people": "Vono dorëzimin derisa këta njerëz të jenë në shtëpi",
-          "notify_only_when_home": "Vono njoftimet derisa personi i përzgjedhur të jetë në shtëpi",
-          "notify_fire_events": "Aktivizo ngjarjet e automatizimit",
-          "notify_start_services": "Fillimi i ciklit - Objektivat e njoftimit",
-          "notify_finish_services": "Përfundimi i ciklit - Objektivat e njoftimit",
-          "notify_live_services": "Progresi i drejtpërdrejtë - Objektivat e njoftimeve",
-          "notify_before_end_minutes": "Njoftim para përfundimit (minuta para fundit)",
-          "notify_live_interval_seconds": "Intervali i përditësimit të drejtpërdrejtë (sekonda)",
-          "notify_live_overrun_percent": "Leja e tejkalimit të përditësimeve të drejtpërdrejta (%)",
-          "notify_live_chronometer": "Kohëmatësi i numërimit të kronometrit",
-          "notify_title": "Titulli i njoftimit",
-          "notify_icon": "Ikona e njoftimit",
-          "notify_start_message": "Formati i mesazhit të fillimit",
-          "notify_finish_message": "Formati i mesazhit të përfundimit",
-          "notify_pre_complete_message": "Formati i mesazhit para përfundimit",
-          "energy_price_entity": "Çmimi i energjisë - Njësia ekonomike (opsionale)",
-          "energy_price_static": "Çmimi i energjisë - Vlera statike (opsionale)",
-          "go_back": "Kthehu pa ruajtur",
-          "notify_reminder_message": "Formati i mesazhit përkujtues",
-          "notify_timeout_seconds": "Hiq automatikisht pas (sekonda)",
-          "notify_channel": "Kanali i njoftimeve (statusi/drejtpërdrejt/kujtues)",
-          "notify_finish_channel": "Kanali i Njoftimeve i Përfunduar"
-        },
-        "data_description": {
-          "go_back": "Shënoni këtë dhe klikoni Dërgo për të hedhur poshtë çdo ndryshim më sipër dhe për t'u kthyer te menyja kryesore.",
-          "notify_actions": "Sekuenca opsionale e veprimeve të Home Assistant për t'u ekzekutuar për njoftimet (skriptet, njoftimet, TTS, etj.). Nëse caktohet, veprimet ekzekutohen përpara shërbimit të njoftimit të sërishëm.",
-          "notify_people": "Njësitë e njerëzve që përdoren për kontrollin e pranisë. Kur aktivizohet, dërgimi i njoftimit vonohet derisa të paktën një person i përzgjedhur të jetë në shtëpi.",
-          "notify_only_when_home": "Nëse aktivizohet, vononi njoftimet derisa të paktën një person i zgjedhur të jetë në shtëpi.",
-          "notify_fire_events": "Nëse aktivizohet, aktivizohen ngjarjet e Home Assistant për fillimin dhe përfundimin e ciklit (ha_washdata_cycle_started dhe ha_washdata_cycle_ended) për të drejtuar automatizimet.",
-          "notify_start_services": "Një ose më shumë shërbime të njoftimit për të sinjalizuar kur fillon një cikël (p.sh. notify.mobile_app_my_phone). Lëreni bosh për të kapërcyer njoftimet e fillimit.",
-          "notify_finish_services": "Një ose më shumë shërbime njoftojnë për të sinjalizuar kur një cikël përfundon ose i afrohet përfundimit. Lëreni bosh për të kapërcyer njoftimet e përfundimit.",
-          "notify_live_services": "Një ose më shumë shërbime të njoftimit për të marrë përditësime të drejtpërdrejta të progresit gjatë ekzekutimit të ciklit (vetëm aplikacioni shoqërues celular). Lëreni bosh për të kapërcyer përditësimet e drejtpërdrejta.",
-          "notify_before_end_minutes": "Minuta para përfundimit të parashikuar të ciklit për të aktivizuar një njoftim. Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 0.",
-          "notify_live_interval_seconds": "Sa shpesh dërgohen përditësimet e progresit gjatë ekzekutimit. Vlerat më të ulëta janë më të përgjegjshme, por konsumojnë më shumë njoftime. Zbatohet një minimum prej 30 sekondash - vlerat nën 30 s rrumbullakohen automatikisht në 30 s.",
-          "notify_live_overrun_percent": "Marzhi i sigurisë mbi numrin e përllogaritur të përditësimeve për cikle të gjata/tejkaluese (për shembull 20% lejon 1.2 herë përditësimet e vlerësuara).",
-          "notify_live_chronometer": "Kur aktivizohet, çdo përditësim i drejtpërdrejtë përfshin një numërim kronometër deri në kohën e parashikuar të përfundimit. Kohëmatësi i njoftimeve shënon automatikisht në pajisje ndërmjet përditësimeve (vetëm aplikacioni shoqërues i Android).",
-          "notify_title": "Titulli i personalizuar për njoftimet. Mbështet mbajtësin e vendndodhjes {device}.",
-          "notify_icon": "Ikona për t'u përdorur për njoftime (p.sh. mdi:washing-machine). Lëreni bosh për të dërguar pa ikonë.",
-          "notify_start_message": "Mesazhi dërgohet kur fillon një cikël. Mbështet mbajtësin e vendndodhjes {device}.",
-          "notify_finish_message": "Mesazhi dërgohet kur përfundon një cikël. Mbështet {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "energy_price_entity": "Zgjidh një entitet numerik që mban çmimin aktual të energjisë elektrike (p.sh. sensor.çmimi_energjisë_elektrike, numri_input.norma_energjie). Kur caktohet, aktivizon mbajtësin e vendndodhjes {cost}. Ka përparësi ndaj vlerës statike nëse të dyja janë të konfiguruara.",
-          "energy_price_static": "Çmimi fiks i energjisë elektrike për kWh. Kur caktohet, aktivizon mbajtësin e vendndodhjes {cost}. Injorohet nëse një entitet është konfiguruar më sipër. Shtoni simbolin tuaj të monedhës në shabllonin e mesazhit, p.sh. {cost} €.",
-          "notify_reminder_message": "Teksti i kujtesës një herë dërgoi numrin e konfiguruar të minutave përpara përfundimit të parashikuar. Ndryshe nga përditësimet e përsëritura të drejtpërdrejta më sipër. Mbështet {device}, {minutes}, {program} vendmbajtësit.",
-          "notify_timeout_seconds": "Hiq automatikisht njoftimet pas kaq shumë sekondash (të përcjella si 'përfundimi i kohës' i aplikacionit shoqërues). Vendoseni në 0 për t'i mbajtur ato derisa të hiqen. Parazgjedhja: 0.",
-          "notify_channel": "Android kanali i njoftimeve të aplikacionit shoqërues për statusin, përparimin e drejtpërdrejtë dhe njoftimet rikujtuese. Tingulli dhe rëndësia e një kanali konfigurohen në aplikacionin shoqërues herën e parë që përdoret emri i kanalit - WashData cakton vetëm emrin e kanalit. Lëreni bosh për parazgjedhjen e aplikacionit.",
-          "notify_finish_channel": "Ndani kanalin Android për sinjalizimin e përfunduar (përdoret edhe nga rikujtuesi dhe rënkimi i pritjes së rrobave) në mënyrë që të ketë zërin e vet. Lëreni bosh për të ripërdorur kanalin e mësipërm.",
-          "notify_pre_complete_message": "Teksti i përditësimeve të përsëritura të progresit të drejtpërdrejtë gjatë ekzekutimit të ciklit. Mbështet {device}, {minutes}, {program} vendmbajtësit."
-        }
-      },
-      "advanced_settings": {
-        "title": "Cilësimet e avancuara",
-        "description": "Rregulloni pragjet e zbulimit, të mësuarit dhe sjelljen e avancuar. Vlerat parazgjedhje funksionojnë mirë për shumicën e konfigurimeve.",
-        "sections": {
-          "suggestions_section": {
-            "name": "Cilësimet e sugjeruara",
-            "description": "{suggestions_count} sugjerime të mësuara janë në dispozicion. Shënoni Apliko vlerat e sugjeruara për të shqyrtuar ndryshimet e propozuara përpara ruajtjes.",
-            "data": {
-              "apply_suggestions": "Apliko vlerat e sugjeruara"
-            },
-            "data_description": {
-              "apply_suggestions": "Zgjidhni këtë kuti për të hapur një hap rishikimi për vlerat e sugjeruara nga algoritmi i të mësuarit. Asgjë nuk ruhet automatikisht.\n\nSugjeruar (nga të mësuarit):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}"
-            }
-          },
-          "detection_section": {
-            "name": "Zbulimi dhe pragjet e fuqisë",
-            "description": "Kur pajisja konsiderohet E NDEZUR ose E FIKUR, portat e energjisë dhe kohëzimi për kalimet e gjendjes.",
-            "data": {
-              "start_duration_threshold": "Kohëzgjatja e pragut të fillimit (s)",
-              "start_energy_threshold": "Porta e energjisë e fillimit (Wh)",
-              "completion_min_seconds": "Koha minimale e ekzekutimit për përfundim (sekonda)",
-              "start_threshold_w": "Pragu i fillimit (W)",
-              "stop_threshold_w": "Pragu i ndalimit (W)",
-              "end_energy_threshold": "Porta e energjisë e fundit (Wh)",
-              "running_dead_zone": "Zona e vdekur e fillimit (sekonda)",
-              "end_repeat_count": "Numri i përsëritjeve të kushtit të fundit",
-              "min_off_gap": "Hendeku minimal ndërmjet cikleve (s)",
-              "sampling_interval": "Intervali i kampionimit (s)"
-            },
-            "data_description": {
-              "start_duration_threshold": "Injoroni pikat e shkurtra të fuqisë më të shkurtra se kjo kohëzgjatje (sekonda). Filtron majat e nisjes (p.sh., 60 W për 2 s) përpara fillimit të ciklit real. Parazgjedhja: 5 s.",
-              "start_energy_threshold": "Cikli duhet të grumbullojë të paktën kaq shumë energji (Wh) gjatë fazës START për t'u konfirmuar. Parazgjedhja: 0,005 Wh.",
-              "completion_min_seconds": "Ciklet më të shkurtra se kjo do të shënohen si 'të ndërprera' edhe nëse përfundojnë natyrshëm. Parazgjedhja: 600 s.",
-              "start_threshold_w": "Fuqia duhet të rritet MBI këtë prag për të filluar një cikël. Vendoseni më lart se fuqia e gatishmërisë. Parazgjedhja: min_power + 1 W.",
-              "stop_threshold_w": "Fuqia duhet të bjerë POSHTË këtij pragu për të përfunduar një cikël. Vendoseni pak mbi zero për të shmangur zhurmën që shkakton skajet e rreme. Parazgjedhja: 0,6 × min_power.",
-              "end_energy_threshold": "Cikli përfundon vetëm nëse energjia në dritaren e fundit Off-Delay është nën këtë vlerë (Wh). Parandalon skajet e rreme nëse fuqia luhatet afër zeros. Parazgjedhja: 0,05 Wh.",
-              "running_dead_zone": "Pas fillimit të ciklit, injoroni uljen e energjisë për kaq shumë sekonda për të parandaluar zbulimin e rremë të fundit gjatë fazës fillestare të rrotullimit. Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 0 s.",
-              "end_repeat_count": "Numri i herëve që kushti i fundit (energjia nën pragun për off_delay) duhet të plotësohet njëpasnjëshëm përpara përfundimit të ciklit. Vlerat më të larta parandalojnë përfundimet e rreme gjatë pauzave. Parazgjedhja: 1.",
-              "min_off_gap": "Nëse një cikël fillon brenda kaq shumë sekondash nga mbarimi i atij të mëparshëm, ato do të shkrihen në një cikël të vetëm.",
-              "sampling_interval": "Intervali minimal i marrjes së mostrave në sekonda. Përditësimet më të shpejta se kjo normë do të shpërfillen. Parazgjedhja: 30s (2 për lavatriçe, lavatriçe-tharëse dhe pjatalarëse)."
-            }
-          },
-          "matching_section": {
-            "name": "Përputhja e profilit dhe mësimi",
-            "description": "Sa agresivisht WashData përputh ciklet në ekzekutim me profilet e mësuara dhe kur të kërkohet reagim.",
-            "data": {
-              "profile_match_min_duration_ratio": "Raporti minimal i kohëzgjatjes së përputhjes së profilit (0,1–1,0)",
-              "profile_match_interval": "Intervali i përputhjes së profilit (sekonda)",
-              "profile_match_threshold": "Pragu i përputhjes së profilit",
-              "profile_unmatch_threshold": "Pragu i mospërputhjes së profilit",
-              "auto_label_confidence": "Besueshmëria e etiketimit automatik (0–1)",
-              "learning_confidence": "Besueshmëria e kërkesës për komente (0–1)",
-              "suppress_feedback_notifications": "Mbyll njoftimet e komenteve",
-              "duration_tolerance": "Toleranca e kohëzgjatjes (0–0,5)",
-              "smoothing_window": "Dritare zbutëse (mostra)",
-              "profile_duration_tolerance": "Toleranca e kohëzgjatjes së përputhjes së profilit (0–0,5)"
-            },
-            "data_description": {
-              "profile_match_min_duration_ratio": "Raporti minimal i kohëzgjatjes për përputhjen e profilit. Cikli aktiv duhet të jetë së paku kjo pjesë e kohëzgjatjes së profilit që të përputhet. Më e ulët = përputhje më e hershme. Parazgjedhja: 0,50 (50%).",
-              "profile_match_interval": "Sa shpesh (në sekonda) të provoni përputhjen e profilit gjatë një cikli. Vlerat më të ulëta ofrojnë zbulim më të shpejtë, por përdorin më shumë CPU. Parazgjedhja: 300 s (5 minuta).",
-              "profile_match_threshold": "Rezultati minimal i ngjashmërisë DTW (0,0–1,0) kërkohet për të konsideruar një profil si përputhje. Më e lartë = përputhje më e rreptë, më pak pozitive të rreme. Parazgjedhja: 0,4.",
-              "profile_unmatch_threshold": "Rezultati i ngjashmërisë DTW (0,0–1,0) nën të cilin një profil i përputhur më parë refuzohet. Duhet të jetë më e ulët se pragu i përputhjes për të parandaluar ndryshimet e shpeshta. Parazgjedhja: 0,35.",
-              "auto_label_confidence": "Etiketoni automatikisht ciklet në ose mbi këtë besueshmëri pas përfundimit (0,0–1,0).",
-              "learning_confidence": "Besueshmëri minimale për të kërkuar verifikimin e përdoruesit nëpërmjet një ngjarjeje (0,0–1,0).",
-              "suppress_feedback_notifications": "Kur aktivizohet, WashData do të vazhdojë të gjurmojë dhe të kërkojë reagime nga brenda, por nuk do të shfaqë njoftime të vazhdueshme që ju kërkojnë të konfirmoni ciklet. E dobishme kur ciklet zbulohen gjithmonë në mënyrë korrekte dhe ju i shihni kërkesat që shpërqendrojnë.",
-              "duration_tolerance": "Toleranca për vlerësimet e kohës së mbetur gjatë një cikli (0,0–0,5 korrespondon me 0–50%).",
-              "smoothing_window": "Numri i leximeve të fundit të fuqisë të përdorura për zbutjen mesatare lëvizëse.",
-              "profile_duration_tolerance": "Toleranca e përdorur nga përputhja e profilit për variancën totale të kohëzgjatjes (0,0–0,5). Sjellja e parazgjedhur: ±25%."
-            }
-          },
-          "timing_section": {
-            "name": "Koha, mirëmbajtja dhe debugimi",
-            "description": "Watchdog, rivendosja e progresit, mirëmbajtja automatike dhe ekspozimi i entiteteve të debugimit.",
-            "data": {
-              "watchdog_interval": "Intervali i ndjekësit (sekonda)",
-              "no_update_active_timeout": "Koha e fundit pa përditësime (s)",
-              "progress_reset_delay": "Vonesa e rivendosjes së progresit (sekonda)",
-              "auto_maintenance": "Aktivizo mirëmbajtjen automatike",
-              "expose_debug_entities": "Ekspono njësitë e korrigjimit",
-              "save_debug_traces": "Ruaj gjurmët e korrigjimit"
-            },
-            "data_description": {
-              "watchdog_interval": "Sekonda midis kontrolleve të ndjekësit gjatë ekzekutimit. Parazgjedhja: 5 s. PARALAJMËRIM: Sigurohuni që kjo të jetë MË LARTË se intervali i përditësimit të sensorit tuaj për të shmangur ndalesat e rreme (p.sh., nëse sensori përditësohet çdo 60 s, përdorni 65 s+).",
-              "no_update_active_timeout": "Për sensorët publikim-në-ndryshim: mbyllni me forcë një cikël AKTIV vetëm nëse nuk vijnë përditësime për kaq shumë sekonda. Përfundimi me energji të ulët ende përdor vonesën e çaktivizimit.",
-              "progress_reset_delay": "Pasi të përfundojë një cikël (100%), prisni kaq shumë sekonda papune përpara se të rivendosni progresin në 0%. Parazgjedhja: 300 s.",
-              "auto_maintenance": "Aktivizo mirëmbajtjen automatike (riparimi i mostrave, bashkimi i fragmenteve).",
-              "expose_debug_entities": "Shfaq sensorë të avancuar (besueshmëria, faza, paqartësia) për korrigjimin e gabimeve.",
-              "save_debug_traces": "Ruani të dhënat e detajuara të renditjes dhe gjurmës së fuqisë në histori (rrit përdorimin e ruajtjes)."
-            }
-          },
-          "anti_wrinkle_section": {
-            "name": "Mbrojtja kundër rrudhave (Tharëset)",
-            "description": "Injoroni rrotullimet e kazanit pas ciklit për të parandaluar ciklet fantazmë. Vetëm për tharëse / lavatriçe-tharëse.",
-            "data": {
-              "anti_wrinkle_enabled": "Mbrojtja kundër rrudhave (vetëm tharëse)",
-              "anti_wrinkle_max_power": "Fuqia maksimale kundër rrudhave (W)",
-              "anti_wrinkle_max_duration": "Kohëzgjatja maksimale kundër rrudhave (s)",
-              "anti_wrinkle_exit_power": "Fuqia e daljes kundër rrudhave (W)"
-            },
-            "data_description": {
-              "anti_wrinkle_enabled": "Injoroni rrotullimet e shkurtra të kazanit me fuqi të ulët pas përfundimit të një cikli për të parandaluar ciklet e dyfishta (vetëm tharëse/lavatriçe-tharëse).",
-              "anti_wrinkle_max_power": "Shpërthimet në ose nën këtë fuqi trajtohen si rrotullime kundër rrudhave në vend të cikleve të reja. Zbatohet vetëm kur është aktivizuar mbrojtja kundër rrudhave.",
-              "anti_wrinkle_max_duration": "Gjatësia maksimale e shpërthimit për t'u trajtuar si rrotullim kundër rrudhave. Zbatohet vetëm kur është aktivizuar mbrojtja kundër rrudhave.",
-              "anti_wrinkle_exit_power": "Nëse fuqia bie nën këtë nivel, dilni menjëherë nga mbrojtja kundër rrudhave (fikje e vërtetë). Zbatohet vetëm kur është aktivizuar mbrojtja kundër rrudhave."
-            }
-          },
-          "delay_start_section": {
-            "name": "Zbulimi i nisjes së vonuar",
-            "description": "Trajtojeni pritjen e vazhdueshme me fuqi të ulët si 'Në pritje për të nisur' derisa cikli të fillojë realisht.",
-            "data": {
-              "delay_start_detect_enabled": "Aktivizo zbulimin e fillimit të vonuar",
-              "delay_confirm_seconds": "Nisje e vonuar: Koha e konfirmimit të pritjes (s)",
-              "delay_timeout_hours": "Fillimi i vonuar: Koha maksimale e pritjes (h)"
-            },
-            "data_description": {
-              "delay_start_detect_enabled": "Kur aktivizohet, zbulohet si një nisje me vonesë, një rritje e shkurtër e shkarkimit me fuqi të ulët e ndjekur nga energjia e qëndrueshme e gatishmërisë. Sensori i gjendjes tregon 'Në pritje për të nisur' gjatë vonesës. Asnjë kohë ose përparim i programit nuk gjurmohet derisa të fillojë realisht cikli. Kërkon që start_threshold_w të vendoset mbi fuqinë e pikës së shkarkimit.",
-              "delay_confirm_seconds": "Fuqia duhet të qëndrojë midis Pragut të Ndalimit (W) dhe Pragut të Nisjes (W) për kaq sekonda para se WashData të hyjë në gjendjen 'Në pritje për të nisur'. Filtron kulmet e shkurtra gjatë lundrimit në menu. Parazgjedhja: 60 s.",
-              "delay_timeout_hours": "Kohëzgjatja e sigurisë: nëse pajisja është ende në \"Prit për të nisur\" pas kaq shumë orësh, WashData rivendoset në Off. Parazgjedhja: 8 orë."
-            }
-          },
-          "external_triggers_section": {
-            "name": "Shkaktues të jashtëm, dera dhe pauza",
-            "description": "Sensor opsional i jashtëm për fundin, sensor dere për zbulim të pauzës/pastërtisë dhe ndërprerës për prerjen e energjisë gjatë pauzës.",
-            "data": {
-              "external_end_trigger_enabled": "Aktivizo aktivizimin e jashtëm të fundit të ciklit",
-              "external_end_trigger": "Sensori i jashtëm i fundit të ciklit",
-              "external_end_trigger_inverted": "Përmbys logjikën e aktivizuesit (aktivizohet kur fiket)",
-              "door_sensor_entity": "Sensori i derës",
-              "pause_cuts_power": "Ndërpreni energjinë kur ndaloni",
-              "switch_entity": "Ndërro entitetin (për ndërprerjen e energjisë në pauzë)",
-              "notify_unload_delay_minutes": "Vonesa e njoftimit në pritje të rrobave (min.)"
-            },
-            "data_description": {
-              "external_end_trigger_enabled": "Aktivizo monitorimin e një sensori binar të jashtëm për të shkaktuar përfundimin e ciklit.",
-              "external_end_trigger": "Zgjidhni një njësi sensor binar. Kur ky sensor aktivizohet, cikli aktual do të përfundojë me statusin \"përfunduar\".",
-              "external_end_trigger_inverted": "Si parazgjedhje, aktivizuesi ndizet kur sensori ndizet. Zgjidhni këtë kuti për të ndezur kur sensori fiket në vend të kësaj.",
-              "door_sensor_entity": "Sensori binar opsional për derën e makinës (ndezur = hapur, fikur = mbyllur). Kur dera hapet gjatë një cikli aktiv, WashData do të konfirmojë ciklin si të ndërprerë qëllimisht. Pas përfundimit të ciklit, nëse dera është ende e mbyllur, gjendja ndryshon në \"Pastrim\" derisa të hapet dera. Shënim: mbyllja e derës NUK rifillon automatikisht një cikël të ndërprerë - rifillimi duhet të aktivizohet manualisht nëpërmjet butonit ose shërbimit të Ciklit të Rifillimit.",
-              "pause_cuts_power": "Kur bëni pauzë nëpërmjet butonit ose shërbimit të Ciklit të Pauzës, fikni gjithashtu entitetin e konfiguruar të ndërprerës. Hyn në fuqi vetëm nëse për këtë pajisje është konfiguruar një ent ndërruesi.",
-              "switch_entity": "Njësia e ndërrimit për t'u ndërruar kur ndalon ose rifillon. Kërkohet kur aktivizohet \"Prini energjinë kur ndalon\".",
-              "notify_unload_delay_minutes": "Dërgoni një njoftim nëpërmjet kanalit të njoftimit të përfundimit pasi të përfundojë cikli dhe dera nuk është hapur për kaq shumë minuta (kërkon Sensori i derës). Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 60 min."
-            }
-          },
-          "pump_section": {
-            "name": "Monitori i pompës",
-            "description": "Vetëm për llojin e pajisjes pompë. Dërgon një ngjarje nëse një cikël pompe zgjat më shumë se kjo kohëzgjatje.",
-            "data": {
-              "pump_stuck_duration": "Pragu i alarmit të bllokimit të pompës (vetëm pompa)"
-            },
-            "data_description": {
-              "pump_stuck_duration": "Nëse një cikël pompe vazhdon të funksionojë pas kaq shumë sekondash, një ngjarje ha_washdata_pump_stuck aktivizohet një herë. Përdoreni këtë për të zbuluar një motor të bllokuar (punimi tipik i pompës së gropës është nën 60 s). Parazgjedhja: 1800 s (30 min). Vetëm lloji i pajisjes së pompës."
-            }
-          },
-          "device_link_section": {
-            "name": "Lidhja e pajisjes",
-            "description": "Lidhni opsionalisht këtë pajisje WashData me një pajisje ekzistuese Home Assistant (për shembull spinën inteligjente ose vetë pajisjen). Pajisja WashData më pas shfaqet si \"Connected via\" nga ajo pajisje. Lëreni bosh për të mbajtur WashData si një pajisje të pavarur.",
-            "data": {
-              "linked_device": "Pajisja e lidhur"
-            },
-            "data_description": {
-              "linked_device": "Zgjidhni pajisjen me të cilën do të lidhni WashData. Kjo shton një referencë 'Connected via' në regjistrin e pajisjes; WashData ruan kartën dhe entitetet e veta të pajisjes. Fshi përzgjedhjen për të hequr lidhjen."
-            }
-          }
-        }
-      },
-      "diagnostics": {
-        "title": "Diagnostikimi dhe mirëmbajtja",
-        "description": "Kryeni veprime të mirëmbajtjes si bashkimi i cikleve të fragmentuara ose migrimi i të dhënave të ruajtura.\n\n**Përdorimi i hapësirës ruajtëse**\n\n- Madhësia e skedarit: {file_size_kb} KB\n- Ciklet: {cycle_count}\n- Profilet: {profile_count}\n- Gjurmët e korrigjimit: {debug_count}",
-        "menu_options": {
-          "reprocess_history": "Mirëmbajtja: ripërpunoni dhe optimizoni të dhënat",
-          "clear_debug_data": "Pastro të dhënat e korrigjimit (liro hapësirë)",
-          "wipe_history": "Fshi TË GJITHA të dhënat për këtë pajisje (të pakthyeshme)",
-          "export_import": "Eksporto/importo JSON me cilësimet (kopjo/ngjit)",
-          "menu_back": "← Mbrapa"
-        }
-      },
-      "clear_debug_data": {
-        "title": "Pastro të dhënat e korrigjimit",
-        "description": "Jeni i sigurt që dëshironi të fshini të gjitha gjurmët e ruajtura të korrigjimit? Kjo do të lirojë hapësirë, por do të heqë informacionin e detajuar të renditjes nga ciklet e kaluara."
-      },
-      "manage_cycles": {
-        "title": "Menaxhoni ciklet",
-        "description": "Ciklet e fundit:\n{recent_cycles}",
-        "menu_options": {
-          "auto_label_cycles": "Etiketimi automatik i cikleve të vjetra",
-          "select_cycle_to_label": "Etiketoni ciklin specifik",
-          "select_cycle_to_delete": "Fshi ciklin",
-          "interactive_editor": "Redaktuesi interaktiv bashkim/ndarje",
-          "trim_cycle_select": "Prit të dhënat e ciklit",
-          "menu_back": "← Mbrapa"
-        }
-      },
-      "manage_cycles_empty": {
-        "title": "Menaxhoni ciklet",
-        "description": "Nuk është regjistruar ende asnjë cikël.",
-        "menu_options": {
-          "auto_label_cycles": "Etiketimi automatik i cikleve të vjetra",
-          "menu_back": "← Mbrapa"
-        }
-      },
-      "manage_profiles": {
-        "title": "Menaxho profilet",
-        "description": "Përmbledhje e profilit:\n{profile_summary}",
-        "menu_options": {
-          "create_profile": "Krijo një profil të ri",
-          "edit_profile": "Redakto/riemërto profilin",
-          "delete_profile_select": "Fshi profilin",
-          "profile_stats": "Statistikat e profilit",
-          "cleanup_profile": "Pastroni historikun – grafiku dhe fshirja",
-          "assign_profile_phases_select": "Cakto intervalet e fazave",
-          "menu_back": "← Mbrapa"
-        }
-      },
-      "manage_profiles_empty": {
-        "title": "Menaxho profilet",
-        "description": "Nuk janë krijuar ende profile.",
-        "menu_options": {
-          "create_profile": "Krijo një profil të ri",
-          "menu_back": "← Mbrapa"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "Menaxho katalogun e fazave",
-        "description": "Katalogu i fazave (parazgjedhjet për këtë pajisje + fazat e personalizuara):\n{phase_summary}",
-        "menu_options": {
-          "phase_catalog_create": "Krijo një fazë të re",
-          "phase_catalog_edit_select": "Modifiko fazën",
-          "phase_catalog_delete": "Fshi fazën",
-          "menu_back": "← Mbrapa"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "Krijo një fazë të personalizuar",
-        "description": "Krijoni një emër dhe përshkrim të personalizuar të fazës dhe zgjidhni llojin e pajisjes për të cilën zbatohet.",
-        "data": {
-          "target_device_type": "Lloji i pajisjes së synuar",
-          "phase_name": "Emri i fazës",
-          "phase_description": "Përshkrimi i fazës"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "Redakto fazën e personalizuar",
-        "description": "Zgjidhni një fazë të personalizuar për të modifikuar.",
-        "data": {
-          "phase_name": "Faza e personalizuar"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "Redakto fazën e personalizuar",
-        "description": "Redaktimi i fazës: {phase_name}",
-        "data": {
-          "phase_name": "Emri i fazës",
-          "phase_description": "Përshkrimi i fazës"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "Fshi fazën e personalizuar",
-        "description": "Zgjidhni një fazë të personalizuar për ta fshirë. Çdo interval i caktuar duke përdorur këtë fazë do të hiqet.",
-        "data": {
-          "phase_name": "Faza e personalizuar"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "Cakto intervalet e fazave",
-        "description": "Pamja paraprake e fazës për profilin: **{profile_name}**\n\n{timeline_svg}\n\n**Intervalet aktuale:**\n{current_ranges}\n\nPërdorni veprimet e mëposhtme për të shtuar, modifikuar, fshirë ose ruajtur intervalet.",
-        "menu_options": {
-          "assign_profile_phases_add": "Shto interval fazor",
-          "assign_profile_phases_edit_select": "Redakto intervalin e fazës",
-          "assign_profile_phases_delete": "Fshi intervalin e fazës",
-          "phase_ranges_clear": "Pastro të gjitha intervalet",
-          "assign_profile_phases_auto_detect": "Zbulo automatikisht fazat",
-          "phase_ranges_save": "Ruaj dhe kthehu",
-          "menu_back": "← Mbrapa"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "Shto interval fazor",
-        "description": "Shtoni një interval fazor në draftin aktual.",
-        "data": {
-          "phase_name": "Faza",
-          "start_min": "Minuta e fillimit",
-          "end_min": "Minuta e fundit"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "Redakto intervalin e fazës",
-        "description": "Zgjidhni një interval për të modifikuar.",
-        "data": {
-          "range_index": "Intervali i fazës"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "Redakto intervalin e fazës",
-        "description": "Përditësoni intervalin e zgjedhur të fazave.",
-        "data": {
-          "phase_name": "Faza",
-          "start_min": "Minuta e fillimit",
-          "end_min": "Minuta e fundit"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "Fshi intervalin e fazës",
-        "description": "Zgjidhni një interval për të hequr nga drafti.",
-        "data": {
-          "range_index": "Intervali i fazës"
-        }
-      },
-      "assign_profile_phases_auto_detect": {
-        "title": "Fazat e zbuluara automatikisht",
-        "description": "Profili: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} faza u zbuluan automatikisht.** Zgjidhni një veprim më poshtë.",
-        "data": {
-          "action": "Veprimi"
-        }
-      },
-      "assign_profile_phases_auto_detect_name": {
-        "title": "Emërtoni fazat e zbuluara",
-        "description": "Profili: **{profile_name}**\n\n**{detected_count} faza të zbuluara:**\n{ranges_summary}\n\nCaktoni një emër për secilën fazë."
-      },
-      "assign_profile_phases_select": {
-        "title": "Cakto intervalet e fazave",
-        "description": "Zgjidhni një profil për të konfiguruar intervalet e fazave.",
-        "data": {
-          "profile": "Profili"
-        }
-      },
-      "profile_stats": {
-        "title": "Statistikat e profilit",
-        "description": "{stats_table}"
-      },
-      "create_profile": {
-        "title": "Krijo një profil të ri",
-        "description": "Krijo një profil të ri me dorë ose nga një cikël i kaluar.\n\nShembuj të emrit të profilit: 'Delikate', 'Ngarkesë e rëndë', 'Larje e shpejtë'",
-        "data": {
-          "profile_name": "Emri i profilit",
-          "reference_cycle": "Cikli i referencës (opsionale)",
-          "manual_duration": "Kohëzgjatja manuale (minuta)"
-        }
-      },
-      "edit_profile": {
-        "title": "Redakto profilin",
-        "description": "Zgjidhni një profil për ta riemërtuar",
-        "data": {
-          "profile": "Profili"
-        }
-      },
-      "rename_profile": {
-        "title": "Redakto detajet e profilit",
-        "description": "Profili aktual: {current_name}",
-        "data": {
-          "new_name": "Emri i profilit",
-          "manual_duration": "Kohëzgjatja manuale (minuta)"
-        }
-      },
-      "delete_profile_select": {
-        "title": "Fshi profilin",
-        "description": "Zgjidhni një profil për të fshirë",
-        "data": {
-          "profile": "Profili"
-        }
-      },
-      "delete_profile_confirm": {
-        "title": "Konfirmo fshirjen e profilit",
-        "description": "⚠️ Kjo do të fshijë përgjithmonë profilin: {profile_name}",
-        "data": {
-          "unlabel_cycles": "Hiq etiketën nga ciklet që përdorin këtë profil"
-        }
-      },
-      "auto_label_cycles": {
-        "title": "Etiketimi automatik i cikleve të vjetra",
-        "description": "U gjetën {total_count} cikle gjithsej. Profilet: {profiles}",
-        "data": {
-          "confidence_threshold": "Besueshmëria minimale (0,50–0,95)"
-        }
-      },
-      "select_cycle_to_label": {
-        "title": "Zgjidhni ciklin për të etiketuar",
-        "description": "✓ = përfunduar, ⚠ = rifilluar, ✗ = ndërprerë",
-        "data": {
-          "cycle_id": "Cikli"
-        }
-      },
-      "select_cycle_to_delete": {
-        "title": "Fshi ciklin",
-        "description": "⚠️ Kjo do të fshijë përgjithmonë ciklin e zgjedhur",
-        "data": {
-          "cycle_id": "Cikli për të fshirë"
-        }
-      },
-      "label_cycle": {
-        "title": "Etiketoni ciklin",
-        "description": "{cycle_info}",
-        "data": {
-          "profile_name": "Profili",
-          "new_profile_name": "Emri i profilit të ri (nëse krijohet)"
-        }
-      },
-      "post_process": {
-        "title": "Historiku i procesit (bashkim/ndarje)",
-        "description": "Pastroni historinë e ciklit duke bashkuar ekzekutimet e fragmentuara dhe duke ndarë ciklet e bashkuara gabimisht brenda një dritareje kohore. Fut numrin e orëve për të parë prapa (përdor 999999 për të gjithë).",
-        "data": {
-          "time_range": "Dritarja e rishikimit (orë)",
-          "gap_seconds": "Hendeku bashkim/ndarje (sekonda)"
-        },
-        "data_description": {
-          "time_range": "Numri i orëve për të skanuar për cikle të fragmentuara për t'u bashkuar. Përdorni 999999 për të përpunuar të gjitha të dhënat historike.",
-          "gap_seconds": "Pragu për të vendosur ndarjen kundër bashkimit. Boshllëqet MË SHKURTËR se kjo bashkohen. Boshllëqet MË TË GJATA se kjo ndahen. Uleni këtë për të detyruar një ndarje në një cikël që është bashkuar gabimisht."
-        }
-      },
-      "cleanup_profile": {
-        "title": "Pastrimi i historikut – zgjidhni profilin",
-        "description": "Zgjidhni një profil për të vizualizuar. Kjo do të gjenerojë një grafik që tregon të gjitha ciklet e kaluara për këtë profil për të ndihmuar në identifikimin e vlerave të jashtme.",
-        "data": {
-          "profile": "Profili"
-        }
-      },
-      "cleanup_select": {
-        "title": "Pastroni historikun – grafiku dhe fshirja",
-        "description": "![Grafiku]({graph_url})\n\n**Vizualizimi i {profile_name}**\n\nGrafiku tregon ciklet individuale si vija me ngjyra. Identifikoni vlerat e jashtme (vijat larg grupit) dhe gjeni ngjyrën e tyre në listën e mëposhtme për t'i fshirë ato.\n\n**Zgjidhni ciklet për t'i fshirë përgjithmonë:**",
-        "data": {
-          "cycles_to_delete": "Ciklet për fshirje (kontrollo ngjyrat që përputhen)"
-        }
-      },
-      "interactive_editor": {
-        "title": "Redaktuesi interaktiv bashkim/ndarje",
-        "description": "Zgjidhni një veprim manual për të kryer në historikun e ciklit.",
-        "menu_options": {
-          "editor_split": "Ndaj ciklin (gjej boshllëqet)",
-          "editor_merge": "Bashko ciklet (bashko fragmentet)",
-          "editor_delete": "Fshi ciklet",
-          "menu_back": "← Mbrapa"
-        }
-      },
-      "editor_select": {
-        "title": "Zgjidhni ciklet",
-        "description": "Zgjidhni ciklin(et) që do të përpunoni.\n\n{info_text}",
-        "data": {
-          "selected_cycles": "Ciklet"
-        }
-      },
-      "editor_configure": {
-        "title": "Konfiguro dhe apliko",
-        "description": "{preview_md}",
-        "data": {
-          "confirm_action": "Veprimi",
-          "merged_profile": "Profili që rezulton",
-          "new_profile_name": "Emri i profilit të ri",
-          "confirm_commit": "Po, e konfirmoj këtë veprim",
-          "segment_0_profile": "Profili i segmentit 1",
-          "segment_1_profile": "Profili i segmentit 2",
-          "segment_2_profile": "Profili i segmentit 3",
-          "segment_3_profile": "Profili i segmentit 4",
-          "segment_4_profile": "Profili i segmentit 5",
-          "segment_5_profile": "Profili i segmentit 6",
-          "segment_6_profile": "Profili i segmentit 7",
-          "segment_7_profile": "Profili i segmentit 8",
-          "segment_8_profile": "Profili i segmentit 9",
-          "segment_9_profile": "Profili i segmentit 10"
-        }
-      },
-      "editor_split_params": {
-        "title": "Konfigurimi i ndarjes",
-        "description": "Rregulloni ndjeshmërinë për ndarjen e këtij cikli. Çdo boshllëk më i gjatë se kjo do të shkaktojë një ndarje.",
-        "data": {
-          "split_mode": "Metoda e ndarjes"
-        }
-      },
-      "editor_split_auto_params": {
-        "title": "Konfigurimi i ndarjes automatike",
-        "description": "Rregulloni ndjeshmërinë për ndarjen e këtij cikli. Çdo boshllëk pasiv më i gjatë se ky do të shkaktojë ndarje.",
-        "data": {
-          "min_gap_seconds": "Pragu i boshllëkut të ndarjes (sekonda)"
-        }
-      },
-      "editor_split_manual_params": {
-        "title": "Vula kohore të ndarjes manuale",
-        "description": "{preview_md}Dritarja e ciklit: **{cycle_start_wallclock} → {cycle_end_wallclock}** më {cycle_date}.\n\nFut një ose më shumë vula kohore ndarjeje (`HH:MM` ose `HH:MM:SS`), një për çdo rresht. Cikli do të pritet në çdo vulë kohore — N vula kohore prodhojnë N+1 segmente.",
-        "data": {
-          "split_timestamps": "Vulat kohore të ndarjes"
-        }
-      },
-      "reprocess_history": {
-        "title": "Mirëmbajtja: ripërpunoni dhe optimizoni të dhënat",
-        "description": "Kryen pastrim të thellë të të dhënave historike:\n1. Shkurton leximet me fuqi zero (heshtje).\n2. Rregullon kohën/kohëzgjatjen e ciklit.\n3. Rillogarit të gjitha modelet statistikore (zarfet).\n\n**Ekzekutoni këtë për të rregulluar problemet e të dhënave ose për të aplikuar algoritme të reja.**"
-      },
-      "wipe_history": {
-        "title": "Fshi historikun (vetëm për testim)",
-        "description": "⚠️ Kjo do të fshijë përgjithmonë TË GJITHA ciklet dhe profilet e ruajtura për këtë pajisje. Kjo nuk mund të zhbëhet!"
-      },
-      "export_import": {
-        "title": "Eksporto/Importo JSON",
-        "description": "Kopjo/ngjit ciklet, profilet dhe cilësimet për këtë pajisje. Eksporto më poshtë ose ngjit JSON për të importuar.",
-        "data": {
-          "mode": "Veprimi",
-          "json_payload": "Konfigurimi i plotë JSON"
-        },
-        "data_description": {
-          "mode": "Zgjidhni Eksporto për të kopjuar të dhënat dhe cilësimet aktuale, ose Importo për të ngjitur të dhënat e eksportuara nga një pajisje tjetër WashData.",
-          "json_payload": "Për eksport: kopjoni këtë JSON (përfshin ciklet, profilet dhe të gjitha cilësimet e rregulluara mirë). Për import: ngjitni JSON të eksportuar nga WashData."
-        }
-      },
-      "record_cycle": {
-        "title": "Regjistrimi i ciklit",
-        "description": "Regjistroni manualisht një cikël për të krijuar një profil të pastër pa ndërhyrje.\n\nStatusi: **{status}**\nKohëzgjatja: {duration} s\nMostrat: {samples}",
-        "menu_options": {
-          "record_refresh": "Rifresko statusin",
-          "record_stop": "Ndalo regjistrimin (ruaj dhe përpuno)",
-          "record_start": "Fillo regjistrimin e ri",
-          "record_process": "Përpuno regjistrimin e fundit (pre dhe ruaj)",
-          "record_discard": "Hiq regjistrimin e fundit",
-          "menu_back": "← Mbrapa"
-        }
-      },
-      "record_process": {
-        "title": "Procesi i regjistrimit",
-        "description": "![Grafiku]({graph_url})\n\n**Grafiku tregon regjistrimin e papërpunuar.** Blu = Mbaj, e kuqe = Prerje e propozuar.\n*Grafiku është statik dhe nuk përditësohet me ndryshimet e formës.*\n\nRegjistrimi u ndal. Prerjet janë rreshtuar me shpejtësinë e zbuluar të kampionimit (~{sampling_rate} s).\n\nKohëzgjatja e papërpunuar: {duration} s\nMostrat: {samples}",
-        "data": {
-          "head_trim": "Prerja e fillimit (sekonda)",
-          "tail_trim": "Prerja e fundit (sekonda)",
-          "save_mode": "Destinacioni i ruajtjes",
-          "profile_name": "Emri i profilit"
-        }
-      },
-      "learning_feedbacks": {
-        "title": "Reagimet e të mësuarit",
-        "description": "Komente në pritje: {count}\n\n{pending_table}\n\nZgjidhni një kërkesë për rishikim cikli për ta përpunuar.",
-        "menu_options": {
-          "learning_feedbacks_pick": "Rishiko një koment në pritje",
-          "learning_feedbacks_dismiss_all": "Hidh poshtë të gjitha komentet në pritje",
-          "menu_back": "← Mbrapa"
-        }
-      },
-      "learning_feedbacks_pick": {
-        "title": "Zgjidh reagimet për rishikim",
-        "description": "Zgjidh një kërkesë për rishikim cikli për ta hapur.",
-        "data": {
-          "selected_feedback": "Zgjidh ciklin për rishikim"
-        }
-      },
-      "learning_feedbacks_empty": {
-        "title": "Reagimet e të mësuarit",
-        "description": "Nuk u gjet asnjë kërkesë për komente në pritje.",
-        "menu_options": {
-          "menu_back": "← Mbrapa"
-        }
-      },
-      "learning_feedbacks_dismiss_all": {
-        "title": "Hidh poshtë të gjitha reagimet në pritje",
-        "description": "Ju jeni gati të hidhni poshtë **{count}** kërkesa reagimi në pritje. Ciklet e hedhura poshtë mbeten në historikun tuaj, por nuk do të kontribuojnë me sinjal të ri mësimor. Kjo nuk mund të zhbëhet.\n\n✅ Kontrolloni kutinë më poshtë dhe klikoni **Dërgo** për t'i hedhur poshtë të gjitha.\n❌ Lëreni të pazgjedhur dhe klikoni **Dërgo** për ta anuluar dhe për t'u kthyer prapa.",
-        "data": {
-          "confirm_dismiss_all": "Konfirmo: hidh poshtë të gjitha kërkesat e komenteve në pritje"
-        }
-      },
-      "resolve_feedback": {
-        "title": "Zgjidhni komentet",
-        "description": "{comparison_img}{candidates_table}\n**Profili i zbuluar**: {detected_profile} ({confidence_pct}%)\n**Kohëzgjatja e parashikuar**: {est_duration_min} min\n**Kohëzgjatja aktuale**: {act_duration_min} min\n\n__Zgjidhni një veprim më poshtë:__",
-        "data": {
-          "action": "Çfarë dëshironi të bëni?",
-          "corrected_profile": "Programi i saktë (nëse korrigjohet)",
-          "corrected_duration": "Kohëzgjatja e saktë në sekonda (nëse korrigjohet)"
-        }
-      },
-      "trim_cycle_select": {
-        "title": "Prerja e ciklit - zgjidhni ciklin",
-        "description": "Zgjidhni një cikël për të prerë. ✓ = përfunduar, ⚠ = rifilluar, ✗ = ndërprerë",
-        "data": {
-          "cycle_id": "Cikli"
-        }
-      },
-      "trim_cycle": {
-        "title": "Prerja e ciklit",
-        "description": "Dritarja aktuale: {trim_summary}\n\n{trim_svg}",
-        "data": {
-          "action": "Veprimi"
-        }
-      },
-      "trim_cycle_start": {
-        "title": "Cakto fillimin e prerjes",
-        "description": "Dritarja e ciklit: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nFillimi aktual: **{current_wallclock}** (+{current_offset_min} min nga fillimi i ciklit)\n\nZgjidh një orë të re fillimi duke përdorur zgjedhësin e orës më poshtë.",
-        "data": {
-          "trim_start_time": "Koha e re e fillimit",
-          "trim_start_min": "Fillimi i ri (minuta nga fillimi i ciklit)"
-        }
-      },
-      "trim_cycle_end": {
-        "title": "Cakto fundin e prerjes",
-        "description": "Dritarja e ciklit: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nFundi aktual: **{current_wallclock}** (+{current_offset_min} min nga fillimi i ciklit)\n\nZgjidh një kohë të re përfundimi duke përdorur zgjedhësin e orës më poshtë.",
-        "data": {
-          "trim_end_time": "Koha e re e përfundimit",
-          "trim_end_min": "Fundi i ri (minuta nga fillimi i ciklit)"
+          "power_sensor": "Sensori i fuqisë",
+          "min_power": "Pragu minimal i fuqisë (W)"
         }
       }
     },
     "error": {
-      "import_failed": "Importi dështoi. Ju lutemi ngjisni një JSON të vlefshëm të eksportit të WashData.",
-      "select_exactly_one": "Zgjidhni saktësisht një cikël për këtë veprim.",
-      "select_at_least_one": "Zgjidhni të paktën një cikël për këtë veprim.",
-      "select_at_least_two": "Zgjidhni të paktën dy cikle për këtë veprim.",
-      "profile_exists": "Një profil me këtë emër ekziston tashmë",
-      "rename_failed": "Riemërtimi i profilit dështoi. Profili mund të mos ekzistojë ose emri i ri është marrë tashmë.",
-      "assignment_failed": "Caktimi i profilit për cikël dështoi",
-      "duplicate_phase": "Një fazë me këtë emër ekziston tashmë.",
-      "phase_not_found": "Faza e përzgjedhur nuk u gjet.",
-      "invalid_phase_name": "Emri i fazës nuk mund të jetë bosh.",
-      "phase_name_too_long": "Emri i fazës është shumë i gjatë.",
-      "invalid_phase_range": "Intervali i fazës është i pavlefshëm. Fundi duhet të jetë më i madh se fillimi.",
-      "invalid_phase_timestamp": "Vula kohore është e pavlefshme. Përdor formatin VVVV-MM-DD HH:MM ose HH:MM.",
-      "overlapping_phase_ranges": "Intervalet e fazave mbivendosen. Rregulloni intervalet dhe provoni përsëri.",
-      "incomplete_phase_row": "Çdo rresht fazor duhet të përfshijë një fazë plus vlerat e plota të fillimit/mbarimit për modalitetin e zgjedhur.",
-      "timestamp_mode_cycle_required": "Ju lutemi zgjidhni një cikël burimi kur përdorni modalitetin e vulës kohore.",
-      "no_phase_ranges": "Nuk disponohet ende asnjë interval fazor për atë veprim.",
       "feedback_notification_title": "WashData: verifiko ciklin ({device})",
       "feedback_notification_message": "**Pajisja**: {device}\n**Programi**: {program} ({confidence}% besueshmëri)\n**Koha**: {time}\n\nWashData ka nevojë për ndihmën tuaj për të verifikuar këtë cikël të zbuluar.\n\nJu lutemi, shkoni te **Cilësimet > Pajisjet dhe shërbimet > WashData > Konfiguro > Reagimet e të mësuarit** për të konfirmuar ose korrigjuar këtë rezultat.",
       "suggestions_ready_notification_title": "WashData: cilësimet e sugjeruara janë gati ({device})",
       "suggestions_ready_notification_message": "Sensori **Cilësimet e sugjeruara** raporton tani **{count}** rekomandime të zbatueshme.\n\nPër t'i rishikuar dhe zbatuar ato: **Cilësimet > Pajisjet dhe shërbimet > WashData > Konfiguro > Cilësimet e avancuara > Apliko vlerat e sugjeruara**.\n\nSugjerimet janë opsionale dhe shfaqen për shqyrtim përpara se të ruani.",
-      "trim_range_invalid": "Fillimi duhet të jetë para fundit. Ju lutemi rregulloni pikat tuaja të prerjes.",
-      "trim_failed": "Prerja dështoi. Cikli mund të mos ekzistojë më ose dritarja është bosh.",
-      "invalid_split_timestamp": "Vula kohore është e pavlefshme ose jashtë dritares së ciklit. Përdorni HH:MM ose HH:MM:SS brenda dritares së ciklit.",
-      "no_split_segments_found": "Nuk u prodhuan segmente të vlefshme nga këto vula kohore. Sigurohuni që çdo vulë kohore të jetë brenda dritares së ciklit dhe segmentet të jenë të paktën 1 minutë të gjata.",
       "auto_tune_suggestion": "{device_type} {device_title} zbuloi cikle fantazmë. Ndryshimi i sugjeruar min_fuqi: {current_min}W -> {new_min}W (nuk zbatohet automatikisht).",
-      "auto_tune_title": "Përshtatja automatike e të dhënave të larjes",
+      "auto_tune_title": "Rregullimi automatik WashData",
       "auto_tune_fallback": "{device_type} {device_title} zbuloi cikle fantazmë. Ndryshimi i sugjeruar min_fuqi: {current_min}W -> {new_min}W (nuk zbatohet automatikisht)."
-    },
-    "abort": {
-      "no_cycles_found": "Nuk u gjetën cikle",
-      "no_split_segments_found": "Nuk u gjetën segmente të ndashme në ciklin e zgjedhur.",
-      "cycle_not_found": "Cikli i zgjedhur nuk mund të ngarkohej.",
-      "no_power_data": "Nuk ka të dhëna për gjurmët e fuqisë për ciklin e zgjedhur.",
-      "no_profiles_found": "Nuk u gjet asnjë profil. Krijoni fillimisht një profil.",
-      "no_profiles_for_matching": "Nuk ka profile të disponueshme për përputhje. Fillimisht krijoni profile.",
-      "no_unlabeled_cycles": "Të gjitha ciklet tashmë janë etiketuar",
-      "no_suggestions": "Nuk ka ende vlera të sugjeruara. Kryeni disa cikle dhe provoni përsëri.",
-      "no_predictions": "Asnjë parashikim",
-      "no_custom_phases": "Nuk u gjetën faza të personalizuara.",
-      "reprocess_success": "{count} cikle u ripërpunuan me sukses.",
-      "debug_data_cleared": "Të dhënat e korrigjimit u pastruan me sukses nga {count} cikle."
     }
   },
   "selector": {
@@ -806,6 +77,18 @@
         "cycle_live": "Progresi i drejtpërdrejtë"
       }
     },
+    "device_type": {
+      "options": {
+        "washing_machine": "Makinë larëse",
+        "dryer": "Tharëse",
+        "washer_dryer": "Kombinim larëse-tharëse",
+        "dishwasher": "Pjatalarëse",
+        "air_fryer": "Fryerja me ajër",
+        "bread_maker": "Bukëbërës",
+        "pump": "Pompë / Pompë kullimi",
+        "other": "Të tjera (të avancuara)"
+      }
+    },
     "common_text": {
       "options": {
         "unlabeled": "(i paetiketuar)",
@@ -814,19 +97,23 @@
         "no_reference_cycle": "(Nuk ka cikël referimi)",
         "all_device_types": "Të gjitha llojet e pajisjeve",
         "current_suffix": "(aktual)",
-        "editor_select_info": "Zgjidhni 1 cikël për t'u ndarë ose 2+ cikle për t'u bashkuar.",
+        "phase_builtin_suffix": "(I integruar)",
+        "phase_none_available": "Nuk ka faza të disponueshme.",
+        "phase_other_device_types": "Llojet e tjera të pajisjeve:",
+        "settings_deprecation_warning": "⚠️ **Lloji i vjetër i pajisjes:** {device_type} është planifikuar të hiqet në një version të ardhshëm. Tubacioni i përputhjes së WashData nuk prodhon rezultate të besueshme për këtë klasë pajisjesh. Integrimi juaj vazhdon të funksionojë gjatë periudhës së zhvlerësimit; për të heshtur këtë paralajmërim, kaloni **Lloji i pajisjes** më poshtë në një nga llojet e mbështetura (Makinë larëse, Tharëse, Kombinim larëse-tharëse, Pjatalarëse, Fryerje me ajër, Bukëbërës ose Pompë) ose në **Të tjera (të avancuara)** nëse pajisja juaj nuk përputhet me asnjë nga llojet e mbështetur. **Të tjera (të avancuara)** dërgon qëllimisht standarde gjenerike që nuk janë të akorduara për ndonjë pajisje specifike, kështu që do t'ju duhet të konfiguroni vetë pragjet, afatet kohore dhe parametrat që përputhen; të gjitha cilësimet tuaja ekzistuese ruhen kur kaloni.",
+        "editor_select_info": "Zgjidhni 1 cikël për ta ndarë ose 2+ cikle për t'i bashkuar.",
         "editor_select_info_split": "Zgjidhni 1 cikël për ta ndarë.",
         "editor_select_info_merge": "Zgjidhni 2+ cikle për t'i bashkuar.",
         "editor_select_info_delete": "Zgjidhni 1+ cikël(e) për t'i fshirë.",
         "no_cycles_recorded": "Nuk është regjistruar ende asnjë cikël.",
-        "profile_summary_line": "- **{name}**: {count} cikle, mesatarisht {avg} m",
+        "profile_summary_line": "- **{name}**: {count} cikle, mesatarisht {avg} min",
         "no_profiles_created": "Nuk janë krijuar ende profile.",
         "phase_preview": "Pamja paraprake e fazës",
-        "phase_preview_no_curve": "Kurba e profilit mesatar nuk është ende e disponueshme. Ekzekuto/etiketoni më shumë cikle për këtë profil.",
+        "phase_preview_no_curve": "Kurba e profilit mesatar nuk është ende e disponueshme. Ekzekuto/etiketo më shumë cikle për këtë profil.",
         "average_power_curve": "Kurba e fuqisë mesatare",
         "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} cikle, ~{duration} m mesatarisht)",
-        "profile_option_short_fmt": "{name} ({count} cikle, ~{duration} m)",
+        "profile_option_fmt": "{name} ({count} cikle, ~{duration} min mesatarisht)",
+        "profile_option_short_fmt": "{name} ({count} cikle, ~{duration} min)",
         "deleted_cycles_from_profile": "U fshinë {count} cikle nga {profile}.",
         "not_enough_data_graph": "Nuk ka të dhëna të mjaftueshme për të krijuar grafikun.",
         "no_profiles_found": "Nuk u gjet asnjë profil.",
@@ -841,10 +128,10 @@
         "actual_duration": "Kohëzgjatja aktuale",
         "choose_action": "__Zgjidhni një veprim më poshtë:__",
         "tbl_count": "Nr.",
-        "tbl_avg": "Mesatar",
+        "tbl_avg": "Mes.",
         "tbl_min": "Min",
         "tbl_max": "Maks",
-        "tbl_energy_avg": "Energjia (mesatare)",
+        "tbl_energy_avg": "Energjia (mes.)",
         "tbl_energy_total": "Energjia (total)",
         "tbl_consistency": "Konz.",
         "tbl_last_run": "Ekzekutimi i fundit",
@@ -857,11 +144,11 @@
         "split_preview_found_fmt": "U gjetën {count} segmente.",
         "split_preview_confirm_fmt": "Kliko Konfirmo për ta ndarë këtë cikël në {count} cikle të veçanta.",
         "merge_preview_title": "Pamja paraprake e bashkimit",
-        "merge_preview_joining_fmt": "Po bashkohet me {count} cikle. Boshllëqet do të mbushen me lexime 0 W.",
+        "merge_preview_joining_fmt": "Po bashkohen {count} cikle. Boshllëqet do të mbushen me lexime 0 W.",
         "editor_delete_preview_title": "Pamja paraprake e fshirjes",
         "editor_delete_preview_intro": "Ciklet e zgjedhura do të fshihen përgjithmonë:",
         "editor_delete_preview_confirm": "Klikoni Konfirmo për t'i fshirë përgjithmonë këto regjistrime cikli.",
-        "no_power_preview": "*Nuk ka të dhëna për energjinë e disponueshme për shikim paraprak.*",
+        "no_power_preview": "*Nuk ka të dhëna për fuqinë e disponueshme për shikim paraprak.*",
         "profile_comparison": "Krahasimi i profilit",
         "actual_cycle_label": "Ky cikël (aktual)",
         "storage_usage_header": "Përdorimi i hapësirës ruajtëse",
@@ -876,7 +163,7 @@
         "profile_summary_header": "Përmbledhje e profilit",
         "recent_cycles_header": "Ciklet e fundit",
         "trim_cycle_preview_title": "Pamja paraprake e prerjes së ciklit",
-        "trim_cycle_preview_no_data": "Nuk ka të dhëna për energjinë për këtë cikël.",
+        "trim_cycle_preview_no_data": "Nuk ka të dhëna për fuqinë për këtë cikël.",
         "trim_cycle_preview_kept_suffix": "mbajtur",
         "table_program": "Programi",
         "table_when": "Kur",
@@ -889,11 +176,7 @@
         "table_avg_energy": "Mes. energji",
         "table_detected_program": "Programi i zbuluar",
         "table_confidence": "Besueshmëria",
-        "table_reported": "Raportuar",
-        "phase_builtin_suffix": "(I integruar)",
-        "phase_none_available": "Nuk ka faza të disponueshme.",
-        "settings_deprecation_warning": "⚠️ **Lloji i vjetër i pajisjes:** {device_type} është planifikuar të hiqet në një version të ardhshëm. Tubacioni i përputhjes së WashData nuk prodhon rezultate të besueshme për këtë klasë pajisjesh. Integrimi juaj vazhdon të funksionojë gjatë periudhës së zhvlerësimit; për të heshtur këtë paralajmërim, kaloni **Lloji i pajisjes** më poshtë në një nga llojet e mbështetura (Makineri larëse, Tharëse, Kombinimi Lavastovilje-Tharrëse, Enëlarëse, Frytese me ajër, Prodhues buke ose Pompë) ose në **Të tjera (të avancuara)** nëse pajisja juaj nuk përputhet me asnjë nga llojet e mbështetur. **Të tjera (të avancuara)** dërgon qëllimisht standarde gjenerike që nuk janë të akorduara për ndonjë pajisje specifike, kështu që do t'ju duhet të konfiguroni vetë pragjet, afatet kohore dhe parametrat që përputhen; të gjitha cilësimet tuaja ekzistuese ruhen kur kaloni.",
-        "phase_other_device_types": "Llojet e tjera të pajisjeve:"
+        "table_reported": "Raportuar"
       }
     },
     "interactive_editor_action": {
@@ -911,7 +194,7 @@
     },
     "diagnostics_action": {
       "options": {
-        "reprocess_history": "Mirëmbajtja: ripërpunoni dhe optimizoni të dhënat",
+        "reprocess_history": "Mirëmbajtja: ripërpuno dhe optimizo të dhënat",
         "clear_debug_data": "Pastro të dhënat e korrigjimit (liro hapësirë)",
         "wipe_history": "Fshi TË GJITHA të dhënat për këtë pajisje (të pakthyeshme)",
         "export_import": "Eksporto/importo JSON me cilësimet (kopjo/ngjit)"
@@ -929,7 +212,7 @@
         "select_cycle_to_label": "Etiketoni ciklin specifik",
         "select_cycle_to_delete": "Fshi ciklin",
         "interactive_editor": "Redaktuesi interaktiv bashkim/ndarje",
-        "trim_cycle": "Prit të dhënat e ciklit"
+        "trim_cycle": "Priti të dhënat e ciklit"
       }
     },
     "manage_profiles_action": {
@@ -938,7 +221,7 @@
         "edit_profile": "Redakto/riemërto profilin",
         "delete_profile": "Fshi profilin",
         "profile_stats": "Statistikat e profilit",
-        "cleanup_profile": "Pastroni historikun – grafiku dhe fshirja",
+        "cleanup_profile": "Pastro historikun – grafiku dhe fshirja",
         "assign_phases": "Cakto intervalet e fazave"
       }
     },
@@ -947,6 +230,12 @@
         "create_custom_phase": "Krijo një fazë të re",
         "edit_custom_phase": "Modifiko fazën",
         "delete_custom_phase": "Fshi fazën"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Emërto dhe apliko fazat",
+        "cancel": "Kthehu pa ndryshime"
       }
     },
     "assign_profile_phases_action": {
@@ -979,14 +268,8 @@
       "options": {
         "confirm": "Konfirmo – zbulimi i saktë",
         "correct": "Korrigjo – zgjidhni programin/kohëzgjatjen",
-        "ignore": "Injoro – cikël i rremë pozitiv/zhurmë",
+        "ignore": "Injoro – cikël i rremë pozitiv/me zhurmë",
         "delete": "Fshi – hiq nga historiku"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Emërtoni dhe aplikoni fazat",
-        "cancel": "Kthehu pa ndryshime"
       }
     },
     "trim_cycle_action": {
@@ -997,32 +280,20 @@
         "apply": "Apliko prerjen",
         "cancel": "Anulo"
       }
-    },
-    "device_type": {
-      "options": {
-        "washing_machine": "Makinë larëse",
-        "dryer": "Tharëse",
-        "washer_dryer": "Kombinim larëse-tharëse",
-        "dishwasher": "Lavastovilje",
-        "air_fryer": "Fryerja e ajrit",
-        "bread_maker": "Bukëbërës",
-        "pump": "Pompë / Pompë gropë",
-        "other": "Të tjera (të avancuara)"
-      }
     }
   },
   "services": {
     "label_cycle": {
-      "name": "Etiketoni ciklin",
-      "description": "Caktoni një profil ekzistues në një cikël të kaluar ose hiqni etiketën.",
+      "name": "Etiketoje ciklin",
+      "description": "Cakto një profil ekzistues për një cikël të kaluar ose hiq etiketën.",
       "fields": {
         "device_id": {
           "name": "Pajisja",
-          "description": "Pajisja e makinës larëse për të etiketuar."
+          "description": "Pajisja WashData për etiketim."
         },
         "cycle_id": {
           "name": "ID e ciklit",
-          "description": "ID-ja e ciklit për të etiketuar."
+          "description": "ID-ja e ciklit për t'u etiketuar."
         },
         "profile_name": {
           "name": "Emri i profilit",
@@ -1036,7 +307,7 @@
       "fields": {
         "device_id": {
           "name": "Pajisja",
-          "description": "Pajisja e makinës larëse."
+          "description": "Pajisja WashData."
         },
         "profile_name": {
           "name": "Emri i profilit",
@@ -1050,29 +321,29 @@
     },
     "delete_profile": {
       "name": "Fshi profilin",
-      "description": "Fshini një profil dhe opsionalisht hiqni etiketat nga ciklet që e përdorin atë.",
+      "description": "Fshi një profil dhe opsionalisht hiq etiketat nga ciklet që e përdorin atë.",
       "fields": {
         "device_id": {
           "name": "Pajisja",
-          "description": "Pajisja e makinës larëse."
+          "description": "Pajisja WashData."
         },
         "profile_name": {
           "name": "Emri i profilit",
-          "description": "Profili për të fshirë."
+          "description": "Profili për t'u fshirë."
         },
         "unlabel_cycles": {
           "name": "Hiq etiketën e cikleve",
-          "description": "Hiqni etiketën e profilit nga ciklet që përdorin këtë profil."
+          "description": "Hiq etiketën e profilit nga ciklet që përdorin këtë profil."
         }
       }
     },
     "auto_label_cycles": {
       "name": "Etiketimi automatik i cikleve të vjetra",
-      "description": "Etiketoni në mënyrë retroaktive ciklet e paetiketuara duke përdorur përputhjen e profilit.",
+      "description": "Etiketo në mënyrë retroaktive ciklet e paetiketuara duke përdorur përputhjen e profilit.",
       "fields": {
         "device_id": {
           "name": "Pajisja",
-          "description": "Pajisja e makinës larëse."
+          "description": "Pajisja WashData."
         },
         "confidence_threshold": {
           "name": "Pragu i besueshmërisë",
@@ -1082,11 +353,11 @@
     },
     "export_config": {
       "name": "Eksporto konfigurimin",
-      "description": "Eksporto profilet, ciklet dhe cilësimet e kësaj pajisjeje në një skedar JSON (në server).",
+      "description": "Eksporto profilet, ciklet dhe cilësimet e kësaj pajisjeje në një skedar JSON (për pajisje).",
       "fields": {
         "device_id": {
           "name": "Pajisja",
-          "description": "Pajisja e makinës larëse për eksport."
+          "description": "Pajisja WashData për eksport."
         },
         "path": {
           "name": "Rruga",
@@ -1096,11 +367,11 @@
     },
     "import_config": {
       "name": "Importo konfigurimin",
-      "description": "Importoni profilet, ciklet dhe cilësimet për këtë pajisje nga një skedar eksporti JSON (cilësimet mund të mbishkruhen).",
+      "description": "Importo profilet, ciklet dhe cilësimet për këtë pajisje nga një skedar eksporti JSON (cilësimet mund të mbishkruhen).",
       "fields": {
         "device_id": {
           "name": "Pajisja",
-          "description": "Pajisja e makinës larëse për t'u importuar."
+          "description": "Pajisja WashData për t'u importuar."
         },
         "path": {
           "name": "Rruga",
@@ -1109,8 +380,8 @@
       }
     },
     "submit_cycle_feedback": {
-      "name": "Dërgo komentet e ciklit",
-      "description": "Konfirmoni ose korrigjoni një program të zbuluar automatikisht pas një cikli të përfunduar. Jepni `entry_id` (i avancuar) ose `device_id` (rekomandohet).",
+      "name": "Dërgo komente për ciklin",
+      "description": "Konfirmo ose korrigjo një program të zbuluar automatikisht pas një cikli të përfunduar. Jep `entry_id` (i avancuar) ose `device_id` (rekomandohet).",
       "fields": {
         "device_id": {
           "name": "Pajisja",
@@ -1130,7 +401,7 @@
         },
         "corrected_profile": {
           "name": "Profili i korrigjuar",
-          "description": "Nëse nuk konfirmohet, jepni emrin e saktë të profilit/programit."
+          "description": "Nëse nuk konfirmohet, jep emrin e saktë të profilit/programit."
         },
         "corrected_duration": {
           "name": "Kohëzgjatja e korrigjuar (sekonda)",
@@ -1144,11 +415,11 @@
     },
     "record_start": {
       "name": "Fillo regjistrimin e ciklit",
-      "description": "Filloni të regjistroni manualisht një cikël të pastër (anashkalon të gjithë logjikën e përputhjes).",
+      "description": "Fillo të regjistrosh manualisht një cikël të pastër (anashkalon të gjithë logjikën e përputhjes).",
       "fields": {
         "device_id": {
           "name": "Pajisja",
-          "description": "Pajisja e makinës larëse për të regjistruar."
+          "description": "Pajisja WashData për t'u regjistruar."
         }
       }
     },
@@ -1158,13 +429,13 @@
       "fields": {
         "device_id": {
           "name": "Pajisja",
-          "description": "Pajisja e makinës larëse për të ndaluar regjistrimin."
+          "description": "Pajisja WashData për të ndaluar regjistrimin."
         }
       }
     },
     "trim_cycle": {
-      "name": "Prit ciklin",
-      "description": "Pritini të dhënat e fuqisë së një cikli të kaluar në një dritare kohe specifike.",
+      "name": "Priti ciklin",
+      "description": "Priti të dhënat e fuqisë së një cikli të kaluar në një dritare kohe specifike.",
       "fields": {
         "device_id": {
           "name": "Pajisja",
@@ -1176,31 +447,41 @@
         },
         "trim_start_s": {
           "name": "Fillimi i prerjes (sekonda)",
-          "description": "Mbajini të dhënat nga ky kompensim në sekonda. Parazgjedhja: 0."
+          "description": "Mbaji të dhënat nga ky kompensim në sekonda. Parazgjedhja: 0."
         },
         "trim_end_s": {
           "name": "Fundi i prerjes (sekonda)",
-          "description": "Mbani të dhënat deri në këtë kompensim në sekonda. Parazgjedhja = kohëzgjatja e plotë."
+          "description": "Mbaji të dhënat deri në këtë kompensim në sekonda. Parazgjedhja = kohëzgjatja e plotë."
         }
       }
     },
     "pause_cycle": {
-      "name": "Cikli i pauzës",
-      "description": "Ndalo ciklin aktiv për një pajisje WashData.",
+      "name": "Ndalo ciklin",
+      "description": "Ndal ciklin aktiv për një pajisje WashData.",
       "fields": {
         "device_id": {
           "name": "Pajisja",
-          "description": "Pajisja WashData në pauzë."
+          "description": "Pajisja WashData për t'u ndalur."
         }
       }
     },
     "resume_cycle": {
-      "name": "Cikli i rifillimit",
-      "description": "Rifilloni një cikël të ndërprerë për një pajisje WashData.",
+      "name": "Rifillo ciklin",
+      "description": "Rifillo një cikël të ndërprerë për një pajisje WashData.",
       "fields": {
         "device_id": {
           "name": "Pajisja",
           "description": "Pajisja WashData për të rifilluar."
+        }
+      }
+    },
+    "trigger_ml_training": {
+      "name": "Aktivizo trajnimin ML",
+      "description": "Ritrajno manualisht modelet ML të pajisjes nga ciklet e etiketuara të kësaj pajisjeje (eksperimental).",
+      "fields": {
+        "device_id": {
+          "name": "Pajisja",
+          "description": "Pajisja WashData për të ritrajnuar modelet."
         }
       }
     }
@@ -1227,12 +508,12 @@
           "ending": "Duke përfunduar",
           "finished": "Përfunduar",
           "anti_wrinkle": "Kundër rrudhave",
-          "delay_wait": "Në pritje për të filluar",
           "interrupted": "E ndërprerë",
           "force_stopped": "Ndaluar me forcë",
           "rinse": "Shpëlarje",
           "unknown": "E panjohur",
-          "clean": "I pastër"
+          "clean": "I pastër",
+          "delay_wait": "Në pritje për të filluar"
         }
       },
       "washer_program": {
@@ -1265,6 +546,9 @@
           "none": "Asnjë"
         }
       },
+      "ambiguity": {
+        "name": "Paqartësia e përputhjes"
+      },
       "current_phase": {
         "name": "Faza aktuale"
       },
@@ -1282,7 +566,7 @@
         "name": "Punimet e pompës (24 orët e fundit)"
       },
       "cycle_count": {
-        "name": "Numërimi i ciklit"
+        "name": "Numri i cikleve"
       }
     },
     "select": {
@@ -1298,10 +582,10 @@
         "name": "Forco përfundimin e ciklit"
       },
       "pause_cycle": {
-        "name": "Cikli i pauzës"
+        "name": "Ndalo ciklin"
       },
       "resume_cycle": {
-        "name": "Cikli i rifillimit"
+        "name": "Rifillo ciklin"
       }
     }
   },
@@ -1310,10 +594,10 @@
       "message": "Kërkohet një ID e vlefshme e pajisjes."
     },
     "cycle_id_required": {
-      "message": "Kërkohet një cikli_id i vlefshëm."
+      "message": "Kërkohet një ID e vlefshme e ciklit."
     },
     "profile_name_required": {
-      "message": "Kërkohet një emër_profili i vlefshëm."
+      "message": "Kërkohet një emër i vlefshëm profili."
     },
     "device_not_found": {
       "message": "Pajisja nuk u gjet."
@@ -1325,13 +609,715 @@
       "message": "Integrimi nuk është ngarkuar për këtë pajisje."
     },
     "cycle_not_found_or_no_power": {
-      "message": "Cikli nuk u gjet ose nuk ka të dhëna për energjinë."
+      "message": "Cikli nuk u gjet ose nuk ka të dhëna për fuqinë."
     },
     "trim_failed_empty_window": {
-      "message": "Prerja dështoi - cikli nuk u gjet, nuk ka të dhëna të energjisë ose dritarja që rezulton është bosh."
+      "message": "Prerja dështoi - cikli nuk u gjet, nuk ka të dhëna të fuqisë ose dritarja që rezulton është bosh."
     },
     "trim_invalid_range": {
       "message": "trim_end_s duhet të jetë më i madh se trim_start_s."
+    }
+  },
+  "panel": {
+    "tab": {
+      "status": "Vështrim i përgjithshëm",
+      "history": "Ciklet",
+      "profiles": "Profilet",
+      "settings": "Cilësimet",
+      "ml": "Trajnim ML",
+      "advanced": "E avancuar",
+      "diagnostics": "Diagnostifikim",
+      "pp_overview": "Vështrim i përgjithshëm",
+      "pp_phases": "Fazat",
+      "pp_cleanup": "Pastrim",
+      "pp_manage": "Menaxho",
+      "subtab_profiles": "Profilet",
+      "subtab_phase_catalog": "Katalogu i Fazave"
+    },
+    "btn": {
+      "save": "Ruaj",
+      "cancel": "Anulo",
+      "delete": "Fshije",
+      "close": "Mbyll",
+      "edit": "Redakto",
+      "add": "Shto",
+      "rebuild": "Rindërto zarfat",
+      "record": "Fillo regjistrimin",
+      "compare": "Krashaso",
+      "confirm": "Konfirmo",
+      "discard": "Hidhe",
+      "export": "Eksporto",
+      "import": "Importo",
+      "merge": "Bashko",
+      "apply": "Apliko",
+      "refresh": "Rifresko",
+      "create": "Krijo",
+      "select": "Zgjidh",
+      "done": "U krye",
+      "reset": "Rivendos",
+      "trim": "Pre",
+      "split": "Ndaj",
+      "review": "Rishiko",
+      "inspect": "Inspekto",
+      "label": "Etiketoje",
+      "save_settings": "Ruaj cilësimet",
+      "new_profile": "+ Profil i ri",
+      "new_group": "+ Grup i ri",
+      "apply_label": "Apliko etiketën",
+      "run_auto_label": "Ekzekuto auto-etiketimin",
+      "save_review": "Ruaj rishikimin",
+      "apply_trim": "Apliko prerjen",
+      "apply_split": "Apliko ndarjen",
+      "process_recording": "Ruaj regjistrimin",
+      "stop": "Ndalo",
+      "process": "Përpuno",
+      "add_device": "+ Shto pajisje",
+      "train_now": "Trajno tani",
+      "reset_to_defaults": "Rivendos në parazgjedhje",
+      "reset_to_builtin": "Rivendos në modelet e integruara",
+      "save_preferences": "Ruaj preferencat",
+      "save_panel_settings": "Ruaj cilësimet e panelit",
+      "save_access_control": "Ruaj kontrollin e aksesit",
+      "auto_label_cycles": "Auto-etiketim ciklesh",
+      "run_analysis": "🔍 Ekzekuto analizë sugjerimesh",
+      "apply_all": "Apliko të gjitha",
+      "show_only": "Shfaq vetëm",
+      "dismiss": "Hiqe",
+      "dismiss_all": "Hiq të gjitha",
+      "process_history": "Përpuno tani",
+      "clear_debug": "Pastro të dhënat e korrigjimit",
+      "wipe_all": "Fshi të gjitha të dhënat",
+      "export_json": "Eksporto në JSON",
+      "import_json": "Importo nga JSON",
+      "correct": "Korrigjo…",
+      "ignore": "Injoro",
+      "add_phase": "+ Shto fazë",
+      "new_phase": "+ Fazë e re",
+      "delete_profile": "Fshi profilin",
+      "rebuild_envelope": "Rindërto zarfin",
+      "create_profile": "+ Krijo profil",
+      "rec_stop": "Ndalo",
+      "pause_cycle": "Ndalo",
+      "resume_cycle": "Rifillo",
+      "force_stop": "Ndalim me forcë",
+      "save_phases": "Ruaj fazat",
+      "auto_detect_split": "Zbulim automatik",
+      "clear_splits": "Pastro",
+      "submit_correction": "Paraqit korrigjimin",
+      "import_overwrite": "Importo (mbishkruan të dhënat)",
+      "use": "Përdor",
+      "manage": "Menaxho",
+      "remove": "Hiq",
+      "delete_group": "Fshi grupin",
+      "trim_split": "Pre / Ndaj",
+      "convert_to_automation": "Konverto në automatizim",
+      "new_automation": "＋ Automatizim i ri",
+      "from_template": "Nga shablloni ▾",
+      "on_cycle_started": "Kur cikli filloi",
+      "on_cycle_finished": "Kur cikli përfundoi",
+      "save_group": "Ruaj grupin"
+    },
+    "hdr": {
+      "status": "Statusi",
+      "live_power": "Fuqia e drejtpërdrejtë",
+      "manual_recording": "Regjistrimi manual",
+      "tools_and_data": "Mjetet dhe të dhënat",
+      "phase_catalog": "Katalogu i Fazave",
+      "storage_stats": "Statistikat e ruajtjes",
+      "maintenance": "Veprimet e mirëmbajtjes",
+      "export_import": "Eksporti / Importi",
+      "logs": "Regjistrat",
+      "my_preferences": "Preferencat e mia",
+      "panel_settings": "Cilësimet e panelit (të gjithë përdoruesit)",
+      "access_control": "Kontrolli i aksesit",
+      "ml_smart_learning": "Mësimi i zgjuar",
+      "ml_settings_card": "Cilësimet",
+      "ml_learned": "Çfarë ka mësuar WashData",
+      "ml_matching_tuning": "Rregullimi i saktë i përputhjes së programit",
+      "display": "Paraqitja",
+      "status_graph": "Grafiku i statusit",
+      "diagnostics_pref": "Diagnostifikim",
+      "logs_diagnostics": "Diagnostifikim",
+      "process_history": "Historia e procesit",
+      "clear_debug": "Pastro gjurmët e korrigjimit",
+      "wipe_history": "Fshi historikun",
+      "automations": "Automatizime",
+      "automation_open": "Hap në redaktuesin e automatizimit",
+      "automation_delete": "Fshi këtë automatizim",
+      "automation_needs_review": "Ky cikël ka nevojë për rishikim",
+      "automation_review_this_cycle": "Rishiko këtë cikël",
+      "no_automations": "Asnjë automatizim ende nuk e referon këtë pajisje."
+    },
+    "lbl": {
+      "power": "Fuqia",
+      "progress": "Progresi",
+      "remaining": "E mbetur",
+      "duration": "Kohëzgjatja",
+      "energy": "Energjia",
+      "profile": "Profili",
+      "status": "Statusi",
+      "date": "Data",
+      "confidence": "Besueshmëria",
+      "health": "Cilësia",
+      "cost": "Kostoja",
+      "program": "Programi",
+      "cycle_health": "Cilësia e ciklit",
+      "activity": "Aktiviteti",
+      "unlabelled": "E paetiketuar",
+      "unlabelled_paren": "(e paetiketuar)",
+      "emphasis": "Theksimi",
+      "default": "E paracaktuar",
+      "in_use": "Në përdorim",
+      "profile_name": "Emri i profilit",
+      "ref_cycle": "Cikli i referencës (opsionale)",
+      "manual_duration": "Kohëzgjatja manuale (min, opsionale)",
+      "phase_name": "Emri i fazës",
+      "description": "Përshkrimi",
+      "correct_profile": "Profili i saktë",
+      "correct_duration": "Kohëzgjatja e saktë (min, opsionale)",
+      "load_from_file": "Ngarko nga skedari",
+      "json_data": "Të dhënat JSON",
+      "expected_duration": "Kohëzgjatja e pritshme (min)",
+      "rename_profile": "Riemërto profilin",
+      "select_profile": "Zgjidh profilin",
+      "confidence_threshold": "Pragu i besueshmërisë",
+      "resulting_profile": "Profili që rezulton",
+      "new_profile_name": "Emri i ri i profilit",
+      "save_mode": "Mënyra e ruajtjes",
+      "head_trim": "Prerja e fillimit (s)",
+      "tail_trim": "Prerja e fundit (s)",
+      "gap_s": "Boshllëku (s)",
+      "start": "Fillim",
+      "end": "Fund",
+      "quality": "Cilësia",
+      "golden_reference": "Cikli referues i regjistruar",
+      "compare_profiles": "Krashaso me profilet",
+      "tags": "Etiketat",
+      "notes": "Shënime",
+      "default_tab": "Skeda e parazgjedhur kur hapet paneli",
+      "cycle_date_display": "Shfaqja e datës së ciklit",
+      "refresh_interval": "Intervali i rifreskimit (s)",
+      "panel_default_tab": "Skeda e parazgjedhur",
+      "hide_tabs": "Fshih skedat për jo-administratorët",
+      "enable_access_control": "Aktivizo kontrollin e aksesit për çdo përdorues",
+      "default_access_level": "Niveli i parazgjedhur për përdoruesit që nuk renditen më poshtë",
+      "administrators": "Administratorët",
+      "default_other": "Parazgjedhja (pajisje të tjera)",
+      "show_expected": "Shfaq mbivendosjen e pritur të kurbës (profili i përputhur, portokalli)",
+      "show_raw": "Shfaq leximet e papërpunuara të sensorit (të paglatura, gri)",
+      "show_debug": "Shfaq kartën e korrigjimit të përputhjes drejtpërdrejt në faqen e statusit (besueshmëria, paqartësia, kandidatët kryesorë)",
+      "mode_new_profile": "Krijo profil të ri",
+      "mode_existing_profile": "Shto në profilin ekzistues",
+      "auto_fine_tune_on": "rregullimi automatik aktiv (rreth {hour}:00)",
+      "auto_fine_tune_off": "rregullimi automatik joaktiv",
+      "last_checked": "Kontrolli i fundit:",
+      "remove_label": "- Hiq etiketën -",
+      "create_new_profile": "+ Krijo profil të ri…",
+      "read_only": "Vetëm për lexim",
+      "actions": "Veprimet",
+      "cycles_count": "Ciklet",
+      "debug_traces": "Gjurmët e korrigjimit",
+      "file_kb": "Skedari (kB)",
+      "label": "Etiketa",
+      "seconds_from_start": "Sekonda nga fillimi",
+      "clock_time": "Ora",
+      "ungrouped": "I pagrupuar"
+    },
+    "badge": {
+      "poor_fit": "përputhje e dobët",
+      "fair_fit": "përputhje mesatare",
+      "manual": "(e zgjedhur me dorë)",
+      "auto": "(zbulohet automatikisht)",
+      "improving": "↗ duke u përmirësuar",
+      "declining": "↘ në rënie",
+      "steady": "→ e qëndrueshme",
+      "using_tuned": "Peshat e rregulluara aktive",
+      "using_defaults": "Peshat e parazgjedhura aktive",
+      "built_in_tag": "i integruar"
+    },
+    "status": {
+      "completed": "E përfunduar",
+      "interrupted": "E ndërprerë",
+      "force_stopped": "Ndaluar me forcë",
+      "active": "Aktiv",
+      "ambiguous": "I paqartë",
+      "clear": "E qartë",
+      "working": "Punon…",
+      "recording": "Po regjistron…",
+      "ready": "Gati për përpunim",
+      "idle": "Në pritje",
+      "auto_detect": "Zbulim automatik",
+      "fine_tuning": "rregullim i imët tani…",
+      "all_statuses": "Të gjitha statuset"
+    },
+    "ml": {
+      "fit_strong": "E fortë",
+      "fit_good": "E mirë",
+      "fit_fair": "Mesatare",
+      "fit_weak": "E dobët",
+      "fit_slight": "E lehtë",
+      "fit_word": "përputhje",
+      "fine_tuned_at": "rregulluar mirë {when}",
+      "personalized": "● Personalizuar për këtë makinë",
+      "builtin_models": "● Modelet e integruara aktive"
+    },
+    "toast": {
+      "settings_saved": "Cilësimet u ruajtën; integrimi po ringarkohet",
+      "preferences_saved": "Preferencat u ruajtën",
+      "panel_settings_saved": "Cilësimet e panelit u ruajtën",
+      "access_saved": "Kontrolli i aksesit u ruajt",
+      "profile_created": "Profili \"{name}\" u krijua",
+      "profile_deleted": "Profili \"{name}\" u fshi",
+      "profile_renamed": "Profili u riemërua",
+      "phases_saved": "Fazat u ruajtën",
+      "phase_created": "Faza \"{name}\" u krijua",
+      "phase_deleted": "Faza \"{name}\" u fshi",
+      "phase_updated": "Faza u përditësua",
+      "recording_started": "Regjistrimi filloi",
+      "recording_stopped": "Regjistrimi u ndal",
+      "recording_discarded": "Regjistrimi u hodh",
+      "recording_saved": "Regjistrimi u ruajt në profil",
+      "export_downloaded": "Eksporti u shkarkua",
+      "logs_exported": "Regjistrat u eksportuan",
+      "import_successful": "Importi i suksesshëm; integrimi po ringarkohet",
+      "envelopes_rebuilt": "Zarfat u rindërtuan",
+      "envelope_rebuilt": "Zarfi u rindërtua",
+      "suggestions_applied": "Sugjerimet u aplikuan; integrimi po ringarkohet",
+      "suggestions_dismissed": "Sugjerimet u hodhën poshtë",
+      "auto_label_complete": "Etiketimi automatik përfundoi",
+      "cycle_labelled": "Cikli u etiketua",
+      "cycle_deleted": "Cikli u fshi",
+      "cycles_deleted": "{count} cikël(e) u fshinë",
+      "cycle_trimmed": "Cikli u pre",
+      "cycles_merged": "Ciklet u bashkuan",
+      "review_saved": "Rishikimi u ruajt",
+      "feedback_confirmed": "Reagimet u konfirmuan",
+      "feedback_dismissed": "Reagimet u hodhën poshtë",
+      "feedback_all_dismissed": "Të gjitha reagimet u hodhën poshtë",
+      "correction_submitted": "Korrigjimi u paraqit",
+      "group_saved": "Grupi u ruajt",
+      "group_deleted": "Grupi u fshi",
+      "automation_deleted": "Automatizimi u fshi",
+      "legacy_removed": "Veprimet e vjetra u hoqën",
+      "cycle_paused": "Cikli u ndal",
+      "cycle_resumed": "Cikli rifilloi",
+      "cycle_force_stopped": "Cikli u ndal me forcë",
+      "ml_training_promoted": "Trajnimi përfundoi: {count} model(e) të promovuara",
+      "ml_training_no_improvement": "Trajnimi përfundoi: modeli bazë u ruajt (pa përmirësim)",
+      "matching_reverted": "Peshat e përputhjes u kthyen në parazgjedhje",
+      "models_reverted": "Modelet e pajisjes u kthyen në bazë",
+      "analysis_complete": "Analiza përfundoi: {count} sugjerime",
+      "analysis_complete_none": "Analiza përfundoi: nuk ka sugjerime të reja",
+      "debug_cleared": "U pastruan {count} gjurmë korrigjimi",
+      "all_wiped": "Të gjitha të dhënat u fshinë",
+      "no_split_found": "Nuk u gjetën boshllëqe pushimi për ndarje",
+      "group_name_required": "Kërkohet emri i grupit",
+      "min_2_profiles": "Zgjidhni të paktën 2 profile për një grup",
+      "profile_name_required": "Kërkohet emri i profilit",
+      "phase_name_required": "Kërkohet emri i fazës",
+      "name_required": "Kërkohet emri",
+      "json_required": "Kërkohen të dhëna JSON",
+      "save_failed": "Ruajtja dështoi: {error}",
+      "delete_failed": "Fshirja dështoi: {error}",
+      "apply_failed": "Aplikimi dështoi: {error}",
+      "rebuild_failed": "Rindërtimi dështoi: {error}",
+      "start_failed": "Fillimi dështoi: {error}",
+      "stop_failed": "Ndalimi dështoi: {error}",
+      "discard_failed": "Heqja dështoi: {error}",
+      "trim_failed": "Prerja dështoi: {error}",
+      "split_failed": "Ndarja dështoi: {error}",
+      "merge_failed": "Bashkimi dështoi: {error}",
+      "create_failed": "Krijimi dështoi: {error}",
+      "update_failed": "Përditësimi dështoi: {error}",
+      "rename_failed": "Riemërtimi dështoi: {error}",
+      "revert_failed": "Rikthimi dështoi: {error}",
+      "training_failed": "Trajnimi dështoi: {error}",
+      "export_failed": "Eksporti dështoi: {error}",
+      "import_failed": "Importi dështoi: {error}",
+      "auto_label_failed": "Etiketimi automatik dështoi: {error}",
+      "analysis_failed": "Analiza dështoi: {error}",
+      "auto_detect_failed": "Zbulimi automatik dështoi: {error}",
+      "error": "Gabim: {error}",
+      "could_not_load_cycle": "Cikli nuk mund të ngarkohej: {error}",
+      "pause_failed": "Ndalimi dështoi: {error}",
+      "label_failed": "Etiketimi dështoi: {error}",
+      "invalid_json": "\"{key}\" nuk është JSON i vlefshëm — rregullojeni ose pastroni fushën përpara se ta ruani.",
+      "processed": "Përpunuar {bits}",
+      "split_complete": "Ndarë në {count} cikle"
+    },
+    "msg": {
+      "no_devices": "Nuk është konfiguruar ende asnjë pajisje WashData.",
+      "no_device_selected": "Asnjë pajisje e zgjedhur.",
+      "loading": "Po ngarkohet…",
+      "loading_settings": "Po ngarkon cilësimet…",
+      "live_chart_loading": "Grafiku i fuqisë drejtpërdrejtë shfaqet kur arrijnë leximet.",
+      "no_cycles_match": "Asnjë cikël nuk përputhet me filtrin aktual.",
+      "no_cycles_yet": "Nuk është regjistruar ende asnjë cikël.",
+      "no_profiles_yet": "Nuk ka ende profile. Krijo një nga një cikël i etiketuar.",
+      "no_profiles_yet_short": "Nuk ka ende profile.",
+      "no_logs": "Asnjë regjistrim nuk është ruajtur ende.",
+      "no_phases": "Nuk ka faza të përcaktuara.",
+      "no_phases_assigned": "Nuk janë caktuar faza.",
+      "no_split_points": "Ende nuk ka pika ndarjeje.",
+      "no_envelope": "Nuk ka ende zarf - rindërto pas etiketimit të cikleve.",
+      "no_envelope_overlay": "Nuk ka zarf të disponueshëm për mbivendosje.",
+      "no_other_users": "Nuk u gjetën përdorues të tjerë të Home Assistant.",
+      "maintenance_requires_access": "Mirëmbajtja dhe eksporti/importi kërkojnë akses të plotë.",
+      "loading_curve": "Po ngarkohet kurba…",
+      "compare_selected_cycles": "Ciklet e zgjedhura (të ngurta) — shfaq / fshih",
+      "compare_overlay_profiles": "Profilet e mbivendosjes (të zbehta)",
+      "no_profiles_compare": "Nuk ka profile për të krahasuar.",
+      "no_cycles_profile": "Nuk ka cikle për këtë profil.",
+      "saving_triggers_reload": "Ruajtja shkakton një ringarkim të integrimit. Entitetet HA mund të shfaqen shkurtimisht si të padisponueshme.",
+      "prefs_personal": "Këto zbatohen vetëm për llogarinë tuaj Home Assistant.",
+      "no_match_yet": "Nuk ka ende përpjekje për përputhje — kjo mbushet gjatë një cikli aktiv.",
+      "no_fine_tuned": "Asgjë ende e rregulluar imët — WashData po përdor modelet e saj të integruara.",
+      "ml_learned_intro": "Modele të rregulluara imët me këtë makinë. Çdo gjë që nuk renditet përdor modelin e integruar të besueshëm.",
+      "ml_settings_intro": "Dy çelësa të pavarur: njëri i aplikon modelet ndërsa një cikël funksionon, tjetri lejon që WashData t'i rregullojë ato në pajisjen tuaj me kalimin e kohës.",
+      "ml_intro": "WashData dërgohet me modele inteligjente që zbulojnë ciklet, përputhin programet dhe vlerësojnë kohën dhe energjinë — ato funksionojnë menjëherë.",
+      "matching_tuning_intro": "Kur mëson, WashData rregullon gjithashtu se sa përputhja e programit peshon formën e një cikli kundrejt kohëzgjatjes dhe energjisë së tij.",
+      "phase_catalog_intro": "Segmente të emërtuara të një cikli (paralarje, ngrohje, centrifugim…). Caktoji ato në një profil nga paneli i tij i kontrollit.",
+      "phase_ranges_intro": "Gama e fazave (minuta nga fillimi i ciklit) të mbivendosura në kurbën mesatare. Modifiko vlerat për të parë paraprakisht drejtpërdrejt.",
+      "cleanup_intro": "Çdo cikël i etiketuar mbivendoset. Shëno pikat e jashtme dhe fshiji për të pastruar profilin.",
+      "split_intro": "Kliko grafikun për të shtuar ose hequr një pikë ndarjeje ose për të zbuluar automatikisht nga boshllëqet e pushimit.",
+      "trim_intro": "Zvarrit dorezat e kuqe ose fut vlerat. Gjithçka jashtë dritares hiqet.",
+      "import_intro": "Ngarko një skedar të eksportuar ose ngjit një ngarkesë JSON më poshtë.",
+      "auto_label_intro": "Cakto profile për cikle të paetiketuara, besueshmëria e përputhjes së të cilave kalon pragun.",
+      "merge_intro": "Ciklet e zgjedhura kombinohen në një (rendi kronologjik; boshllëqet e mbushura me 0 W). Zgjidh profilin që rezulton.",
+      "enough_data": "Të dhëna të mjaftueshme për të mësuar ({current}/{min} cikle).",
+      "collecting_data": "Mbledhja e të dhënave — {need} cikël{plural} shtesë para se të fillojë rregullimi imët ({current}/{min}).",
+      "updated": "Përditësuar {time}",
+      "appliance_monitor": "Monitori i pajisjes",
+      "ml_loading": "po ngarkon ML…",
+      "see_recorder": "Shiko miniaplikacionin e regjistruesit më poshtë",
+      "review_in_settings": "Rishiko te Cilësimet",
+      "storage_diagnostics": "Statistikat e ruajtjes, mirëmbajtja, eksporti/importi",
+      "recent_logs": "Regjistrimet e fundit ha_washdata",
+      "preferences_adv": "Preferencat",
+      "preferences_admin": "Preferencat, paneli dhe kontrolli i aksesit",
+      "review_to_cycles": "Hap radhën e rishikimit të cikleve",
+      "pending_feedback": "Reagimet në pritje për zbulim",
+      "recording_in_progress": "Regjistrimi në vazhdim",
+      "unsure_detected_prefix": "WashData nuk është i sigurt se ka zbuluar",
+      "no_suggestions": "Nuk ka sugjerime aktive.",
+      "no_profiles_overlay": "Nuk ka profile për mbivendosje.",
+      "compare_cycles_title": "Krashaso {count} cikle"
+    },
+    "modal": {
+      "label_cycle": "Etiketoje ciklin",
+      "create_profile": "Krijo profilin",
+      "new_phase": "Fazë e re",
+      "edit_phase": "Modifiko fazën",
+      "process_recording": "Përpuno regjistrimin",
+      "correct_feedback": "Korrigjo reagimet",
+      "import_config": "Importo konfigurimin",
+      "auto_label": "Etiketim automatik i cikleve",
+      "cycle": "Cikli"
+    },
+    "tag": {
+      "late_start": "Fillim me vonesë",
+      "early_end": "Fund i hershëm",
+      "merged": "Cikle të bashkuara",
+      "split": "Cikël i ndarë",
+      "noise": "Zhurmë",
+      "wrong_profile": "Profil i gabuar",
+      "sensor_gap": "Boshllëk sensori"
+    },
+    "quality": {
+      "good": "Mirë",
+      "bad": "Keq",
+      "unusable": "I papërdorshëm"
+    },
+    "access": {
+      "none": "Asnjë (i fshehur)",
+      "read": "Lexim",
+      "edit": "Redaktim",
+      "full": "I plotë",
+      "inherit": "Trashëgo"
+    },
+    "health": {
+      "poor": "⚠ Përputhje e dobët",
+      "fair": "Përputhje mesatare",
+      "good": "✓ Përputhje e mirë"
+    },
+    "trend": {
+      "up": "Trend rritës",
+      "down": "Trend zbritës"
+    },
+    "pref": {
+      "date_relative": "Relative (p.sh. 2 orë më parë)",
+      "date_absolute": "Absolute (p.sh. 14:32 më 2 korrik)"
+    },
+    "log": {
+      "all_levels": "Të gjitha nivelet"
+    },
+    "section": {
+      "basic": {
+        "label": "Bazë",
+        "intro": "Identiteti kryesor dhe gjërat thelbësore që kanë nevojë shumicën e konfigurimeve."
+      },
+      "detection": {
+        "label": "Zbulimi",
+        "intro": "Si zbulohet një cikël si fillim, ekzekutim dhe mbarim."
+      },
+      "matching": {
+        "label": "Përputhja",
+        "intro": "Si përputhen ciklet e përfunduara me profilet e mësuara dhe etiketohen."
+      },
+      "timing": {
+        "label": "Koha dhe Mbrojtja",
+        "intro": "Kadenca e sfondit, kujdestari jashtë linje dhe mirëmbajtja."
+      },
+      "anti_wrinkle": {
+        "label": "Kundër rrudhave",
+        "intro": "Modaliteti kundër rrudhave zbulon pulset e tharëses pas fazës kryesore të nxehtësisë."
+      },
+      "delay": {
+        "label": "Vonesa e fillimit",
+        "intro": "Zbulimi i fillimit me vonesë identifikon kur një pajisje është e ndezur, por nuk e ka filluar ende ciklin e saj."
+      },
+      "triggers": {
+        "label": "Këmbëza & Dera",
+        "intro": "Sinjalet e jashtme opsionale: një këmbëzë fundi, një sensor dere, një ndërprerës pauzë dhe kujtues shkarkimi."
+      },
+      "notifications": {
+        "label": "Njoftimet",
+        "intro": "Konfiguro kur dhe si njoftohesh për ngjarjet e ciklit."
+      },
+      "ml_training": {
+        "label": "Trajnim ML",
+        "intro": "Modele inteligjente opsionale që personalizojnë zbulimin dhe kohën për këtë pajisje."
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Emri i pajisjes"
+      },
+      "device_type": {
+        "label": "Lloji i pajisjes"
+      },
+      "power_sensor": {
+        "label": "Sensori i fuqisë"
+      },
+      "min_power": {
+        "label": "Fuqia minimale"
+      },
+      "off_delay": {
+        "label": "Vonesa e çaktivizimit"
+      },
+      "linked_device": {
+        "label": "Grupo nën pajisje"
+      },
+      "start_threshold_w": {
+        "label": "Pragu i fillimit"
+      },
+      "stop_threshold_w": {
+        "label": "Pragu i ndalimit"
+      },
+      "min_off_gap": {
+        "label": "Boshllëku min. joaktiv"
+      },
+      "start_duration_threshold": {
+        "label": "Kohëzgjatja e fillimit"
+      },
+      "start_energy_threshold": {
+        "label": "Energjia e fillimit"
+      },
+      "completion_min_seconds": {
+        "label": "Kohëzgjatja min. e ciklit"
+      },
+      "running_dead_zone": {
+        "label": "Zona e vdekur e ekzekutimit"
+      },
+      "end_energy_threshold": {
+        "label": "Energjia e fundit"
+      },
+      "end_repeat_count": {
+        "label": "Numri i përsëritjeve të fundit"
+      },
+      "sampling_interval": {
+        "label": "Intervali i kampionimit"
+      },
+      "smoothing_window": {
+        "label": "Dritarja e zbutjes"
+      },
+      "abrupt_drop_watts": {
+        "label": "Rënie e papritur"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Raporti i rënies së papritur"
+      },
+      "profile_match_threshold": {
+        "label": "Pragu i përputhjes"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Pragu i mosperputjes"
+      },
+      "profile_match_interval": {
+        "label": "Intervali i përputhjes"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Raporti minimal i kohëzgjatjes"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Raporti maksimal i kohëzgjatjes"
+      },
+      "profile_duration_tolerance": {
+        "label": "Toleranca e kohëzgjatjes së profilit"
+      },
+      "duration_tolerance": {
+        "label": "Toleranca e vlerësimit"
+      },
+      "auto_label_confidence": {
+        "label": "Besueshmëria e auto-etiketimit"
+      },
+      "learning_confidence": {
+        "label": "Besueshmëria e të mësuarit"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Mbyll njoftimet e reagimeve"
+      },
+      "watchdog_interval": {
+        "label": "Intervali i rojes"
+      },
+      "no_update_active_timeout": {
+        "label": "Skadimi pa përditësim"
+      },
+      "progress_reset_delay": {
+        "label": "Vonesa e rivendosjes së progresit"
+      },
+      "auto_maintenance": {
+        "label": "Mirëmbajtja automatike (pastrim gjatë natës)"
+      },
+      "expose_debug_entities": {
+        "label": "Ekspono entitetet e korrigjimit"
+      },
+      "save_debug_traces": {
+        "label": "Ruaj gjurmët e korrigjimit"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Aktivizo zbulimin kundër rrudhave"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Fuqia maksimale kundër rrudhave"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Kohëzgjatja maksimale"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Pragu i fuqisë së daljes"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Aktivizo zbulimin e fillimit me vonesë"
+      },
+      "delay_confirm_seconds": {
+        "label": "Sekonda e konfirmimit"
+      },
+      "delay_timeout_hours": {
+        "label": "Orët e skadimit"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Aktivizo këmbëzën e jashtme të fundit"
+      },
+      "external_end_trigger": {
+        "label": "Entiteti i këmbëzës së jashtme"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Inverto këmbëzën e jashtme (aktivizim me JO-aktiv)"
+      },
+      "door_sensor_entity": {
+        "label": "Entiteti i sensorit të derës"
+      },
+      "pause_cuts_power": {
+        "label": "Pauza gjithashtu ndërpret fuqinë (nëpërmjet çelësit)"
+      },
+      "switch_entity": {
+        "label": "Entiteti i çelësit"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Vonesa e kujtuesit të shkarkimit"
+      },
+      "pump_stuck_duration": {
+        "label": "Kohëzgjatja e bllokimit të pompës"
+      },
+      "notify_start_services": {
+        "label": "Shërbimet e fillimit"
+      },
+      "notify_finish_services": {
+        "label": "Shërbimet e përfundimit"
+      },
+      "notify_live_services": {
+        "label": "Shërbimet e progresit drejtpërdrejtë"
+      },
+      "notify_people": {
+        "label": "Njerëzit (vetëm kur janë në shtëpi)"
+      },
+      "notify_only_when_home": {
+        "label": "Njofto vetëm kur jeni në shtëpi"
+      },
+      "notify_fire_events": {
+        "label": "Aktivizo ngjarjet HA për njoftimet"
+      },
+      "notify_before_end_minutes": {
+        "label": "Sinjalizim para përfundimit"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Intervali i përditësimit drejtpërdrejtë"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Tejkalimi drejtpërdrejtë % para sinjalizimit"
+      },
+      "notify_live_chronometer": {
+        "label": "Përdor kronometrin drejtpërdrejtë"
+      },
+      "notify_timeout_seconds": {
+        "label": "Hiq automatikisht pas"
+      },
+      "notify_title": {
+        "label": "Titulli i njoftimit"
+      },
+      "notify_icon": {
+        "label": "Ikona e njoftimit"
+      },
+      "notify_start_message": {
+        "label": "Mesazhi i fillimit"
+      },
+      "notify_finish_message": {
+        "label": "Mesazhi i përfundimit"
+      },
+      "notify_pre_complete_message": {
+        "label": "Mesazhi para përfundimit"
+      },
+      "notify_reminder_message": {
+        "label": "Mesazhi i kujtuesit"
+      },
+      "notify_channel": {
+        "label": "Kanali Android (fillim/drejtpërdrejtë)"
+      },
+      "notify_finish_channel": {
+        "label": "Kanali Android (përfundim)"
+      },
+      "energy_price_entity": {
+        "label": "Entiteti i çmimit të energjisë"
+      },
+      "energy_price_static": {
+        "label": "Çmimi statik i energjisë (për kWh)"
+      },
+      "enable_ml_models": {
+        "label": "Apliko modele inteligjente gjatë një cikli"
+      },
+      "ml_training_enabled": {
+        "label": "Mëso nga kjo makinë"
+      },
+      "ml_training_hour": {
+        "label": "Mëso në orën"
+      },
+      "ml_training_min_cycles": {
+        "label": "Ciklet e nevojshme fillimisht"
+      },
+      "ml_training_interval_days": {
+        "label": "Kontrollo më së shumti çdo"
+      }
     }
   }
 }

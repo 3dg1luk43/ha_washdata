@@ -24,778 +24,49 @@
           "profile_name": "Nom del perfil (opcional)",
           "manual_duration": "Durada estimada (minuts)"
         }
+      },
+      "reconfigure": {
+        "title": "Reconfigure WashData",
+        "description": "Update the device name, appliance type, or power sensor.",
+        "data": {
+          "name": "Device Name",
+          "device_type": "Device Type",
+          "power_sensor": "Power Sensor",
+          "min_power": "Minimum Power Threshold (W)"
+        }
       }
     },
     "error": {
       "cannot_connect": "No s'ha pogut connectar",
       "invalid_auth": "Autenticació no vàlida",
-      "unknown": "Error inesperat"
+      "unknown": "Error inesperat",
+      "invalid_power": "Power threshold must be greater than 0"
     },
     "abort": {
-      "already_configured": "El dispositiu ja està configurat"
+      "already_configured": "El dispositiu ja està configurat",
+      "reconfigure_successful": "Reconfiguration was successful"
     }
   },
   "options": {
     "step": {
       "init": {
-        "menu_options": {
-          "learning_feedbacks": "Revisar els comentaris d'aprenentatge",
-          "settings": "Configuració",
-          "notifications": "Notificacions",
-          "manage_cycles": "Gestionar cicles",
-          "manage_profiles": "Gestionar perfils",
-          "manage_phase_catalog": "Gestionar el catàleg de fases",
-          "record_cycle": "Cicle de gravació (manual)",
-          "diagnostics": "Diagnòstic i Manteniment"
-        }
-      },
-      "apply_suggestions": {
-        "title": "Copia els valors suggerits",
-        "description": "Això copiarà els valors actuals suggerits a la configuració desada. Aquesta és una acció única i no activa la sobreescritura automàtica.\n\nValors suggerits per copiar:\n{suggested}",
+        "title": "WashData Settings",
+        "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
-          "confirm": "Confirmeu l'acció de còpia"
-        }
-      },
-      "apply_suggestions_confirm": {
-        "title": "Reviseu els canvis suggerits",
-        "description": "WashData ha trobat **{pending_count}** valors suggerits per aplicar.\n\nCanvis:\n{changes}\n\n✅ Marqueu la casella de sota i feu clic a **Envia** per aplicar i desar aquests canvis immediatament.\n❌ Deixeu-lo sense marcar i feu clic a **Envia** per cancel·lar-lo i tornar enrere.",
-        "data": {
-          "confirm_apply_suggestions": "Apliqueu i deseu aquests canvis"
-        }
-      },
-      "settings": {
-        "title": "Configuració",
-        "description": "{deprecation_warning}Ajusta els llindars de detecció, l'aprenentatge i el comportament avançat. Els valors predeterminats funcionen bé per a la majoria de configuracions.\n\nConfiguració suggerida disponible actualment: {suggestions_count}.\nSi és superior a 0, obre la Configuració avançada i usa 'Aplica els valors suggerits' per revisar les recomanacions.",
-        "data": {
-          "apply_suggestions": "Aplicar els valors suggerits",
-          "device_type": "Tipus de dispositiu",
-          "power_sensor": "Entitat del sensor de potència",
-          "min_power": "Potència mínima (W)",
-          "off_delay": "Retard de finalització de cicle (s)",
-          "notify_actions": "Accions de notificació",
-          "notify_people": "Endarrerir el lliurament fins que aquestes persones siguin a casa",
-          "notify_only_when_home": "Retarda les notificacions fins que la persona seleccionada sigui a casa",
-          "notify_fire_events": "Activar esdeveniments d'automatització",
-          "notify_start_services": "Inici del cicle - Objectius de notificació",
-          "notify_finish_services": "Finalització del cicle: objectius de notificació",
-          "notify_live_services": "Progrés en directe: objectius de notificació",
-          "notify_before_end_minutes": "Notificació prèvia a la finalització (minuts abans del final)",
-          "notify_title": "Títol de la notificació",
-          "notify_icon": "Icona de notificació",
-          "notify_start_message": "Inicieu el format del missatge",
-          "notify_finish_message": "Finalitza el format del missatge",
-          "notify_pre_complete_message": "Format de missatge previ a la finalització",
-          "show_advanced": "Edita la configuració avançada (pas següent)"
-        },
-        "data_description": {
-          "apply_suggestions": "Marqueu aquesta casella per copiar els valors suggerits per l'algoritme d'aprenentatge al formulari. Revisa abans de desar.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "device_type": "Seleccioneu el tipus d'aparell (rentadora, assecadora, rentavaixelles, cafetera, EV). Aquesta etiqueta s'emmagatzema amb cada cicle per a una millor organització.",
-          "power_sensor": "L'entitat sensora que informa de la potència en temps real (en watts). Podeu canviar-ho en qualsevol moment sense perdre les dades històriques; és útil si substituïu un connector intel·ligent.",
-          "min_power": "Les lectures de potència per sobre d'aquest llindar (en watts) indiquen que l'aparell està en funcionament. Comenceu amb 2 W per a la majoria de dispositius.",
-          "off_delay": "En segons, la potència suavitzada s'ha de mantenir per sota del llindar d'aturada per marcar la finalització. Per defecte: 120 s.",
-          "notify_actions": "Seqüència d'accions de Home Assistant opcional per executar-se per a les notificacions (scripts, notificació, TTS, etc.). Si s'estableix, les accions s'executen abans del servei de notificació alternativa.",
-          "notify_people": "Entitats de persones que s'utilitzen per al control de presència. Quan està activat, l'entrega de notificacions es retarda fins que almenys una persona seleccionada és a casa.",
-          "notify_only_when_home": "Si està activat, retarda les notificacions fins que almenys una persona seleccionada sigui a casa.",
-          "notify_fire_events": "Si està activat, activa els esdeveniments de Home Assistant per a l'inici i el final del cicle (ha_washdata_cycle_started i ha_washdata_cycle_ended) per impulsar les automatitzacions.",
-          "notify_start_services": "Un o més serveis de notificació per avisar quan comença un cicle. Deixa en blanc per saltar les notificacions d'inici.",
-          "notify_finish_services": "Un o més serveis de notificació per avisar quan un cicle acaba o s'apropa a la seva finalització. Deixa en blanc per saltar les notificacions de finalització.",
-          "notify_live_services": "Un o més serveis de notificació per rebre actualitzacions de progrés en directe mentre s'executa el cicle (només l'aplicació mòbil complementària). Deixeu el camp buit per saltar les actualitzacions en directe.",
-          "notify_before_end_minutes": "Minuts abans del final estimat del cicle per activar una notificació. Establiu a 0 per desactivar. Per defecte: 0.",
-          "notify_title": "Títol personalitzat per a les notificacions. Admet {device} marcador de posició.",
-          "notify_icon": "Icona per utilitzar per a les notificacions (p. ex. mdi:washing-machine). Deixeu-lo en blanc per enviar sense icona.",
-          "notify_start_message": "Missatge enviat quan comença un cicle. Admet {device} marcador de posició.",
-          "notify_finish_message": "Missatge enviat quan acaba un cicle. Admet marcadors de posició {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "El text de les actualitzacions recurrents de progrés en directe mentre s'executa el cicle. Admet marcadors de posició {device}, {minutes}, {program}."
-        }
-      },
-      "notifications": {
-        "title": "Notificacions",
-        "description": "Configura canals de notificació, plantilles i actualitzacions opcionals de progrés mòbils en directe.",
-        "data": {
-          "notify_actions": "Accions de notificació",
-          "notify_people": "Endarrerir el lliurament fins que aquestes persones siguin a casa",
-          "notify_only_when_home": "Retarda les notificacions fins que la persona seleccionada sigui a casa",
-          "notify_fire_events": "Activar esdeveniments d'automatització",
-          "notify_start_services": "Inici del cicle - Objectius de notificació",
-          "notify_finish_services": "Finalització del cicle: objectius de notificació",
-          "notify_live_services": "Progrés en directe: objectius de notificació",
-          "notify_before_end_minutes": "Notificació prèvia a la finalització (minuts abans del final)",
-          "notify_live_interval_seconds": "Interval d'actualització en directe (segons)",
-          "notify_live_overrun_percent": "Marge de seguretat per a sobrecàrrega d'actualitzacions en directe (%)",
-          "notify_live_chronometer": "Temporitzador de compte enrere del cronòmetre",
-          "notify_title": "Títol de la notificació",
-          "notify_icon": "Icona de notificació",
-          "notify_start_message": "Inicieu el format del missatge",
-          "notify_finish_message": "Finalitza el format del missatge",
-          "notify_pre_complete_message": "Format de missatge previ a la finalització",
-          "energy_price_entity": "Preu de l'energia - Entitat (opcional)",
-          "energy_price_static": "Preu de l'energia: valor estàtic (opcional)",
-          "go_back": "Torna enrere sense desar",
-          "notify_reminder_message": "Format de missatge de recordatori",
-          "notify_timeout_seconds": "Auto-ismes després (segons)",
-          "notify_channel": "Canal de notificació (estat/ viu/reminder)",
-          "notify_finish_channel": "Canal de notificació finalitzada"
-        },
-        "data_description": {
-          "go_back": "Marqueu això i feu clic a Envia per descartar qualsevol canvi anterior i tornar al menú principal.",
-          "notify_actions": "Seqüència d'accions de Home Assistant opcional per executar-se per a les notificacions (scripts, notificació, TTS, etc.). Si s'estableix, les accions s'executen abans del servei de notificació alternativa.",
-          "notify_people": "Entitats de persones que s'utilitzen per al control de presència. Quan està activat, l'entrega de notificacions es retarda fins que almenys una persona seleccionada és a casa.",
-          "notify_only_when_home": "Si està activat, retarda les notificacions fins que almenys una persona seleccionada sigui a casa.",
-          "notify_fire_events": "Si està activat, activa els esdeveniments de Home Assistant per a l'inici i el final del cicle (ha_washdata_cycle_started i ha_washdata_cycle_ended) per impulsar les automatitzacions.",
-          "notify_start_services": "Un o més serveis de notificació per avisar quan comença un cicle (p. ex., notify.mobile_app_my_phone). Deixa en blanc per saltar les notificacions d'inici.",
-          "notify_finish_services": "Un o més serveis de notificació per avisar quan un cicle acaba o s'apropa a la seva finalització. Deixa en blanc per saltar les notificacions de finalització.",
-          "notify_live_services": "Un o més serveis de notificació per rebre actualitzacions de progrés en directe mentre s'executa el cicle (només l'aplicació mòbil complementària). Deixeu el camp buit per saltar les actualitzacions en directe.",
-          "notify_before_end_minutes": "Minuts abans del final estimat del cicle per activar una notificació. Establiu a 0 per desactivar. Per defecte: 0.",
-          "notify_live_interval_seconds": "Amb quina freqüència s'envien les actualitzacions de progrés mentre s'executen. Els valors més baixos són més sensibles, però consumeixen més notificacions. S'aplica un mínim de 30 segons: els valors inferiors a 30 s s'arrodoneixen automàticament a 30 s.",
-          "notify_live_overrun_percent": "Marge de seguretat per sobre del recompte d'actualitzacions estimat per a cicles llargs/excedits (per exemple, el 20% permet actualitzacions 1,2 vegades estimades).",
-          "notify_live_chronometer": "Quan està activat, cada actualització en directe inclou un compte enrere del cronòmetre fins a l'hora d'acabament estimada. El temporitzador de notificacions s'activa automàticament al dispositiu entre les actualitzacions (només l'aplicació complementària d'Android).",
-          "notify_title": "Títol personalitzat per a les notificacions. Admet {device} marcador de posició.",
-          "notify_icon": "Icona per utilitzar per a les notificacions (p. ex. mdi:washing-machine). Deixeu-lo en blanc per enviar sense icona.",
-          "notify_start_message": "Missatge enviat quan comença un cicle. Admet {device} marcador de posició.",
-          "notify_finish_message": "Missatge enviat quan acaba un cicle. Admet marcadors de posició {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "energy_price_entity": "Seleccioneu una entitat numèrica que contingui el preu actual de l'electricitat (p. ex., sensor.electricity_price, input_number.energy_rate). Quan s'estableix, activa el marcador de posició {cost}. Té prioritat sobre el valor estàtic si tots dos estan configurats.",
-          "energy_price_static": "Preu fix de l'electricitat per kWh. Quan s'estableix, activa el marcador de posició {cost}. S'ignora si una entitat està configurada més amunt. Afegiu el vostre símbol de moneda a la plantilla del missatge, p. ex. {cost} €.",
-          "notify_reminder_message": "Text del recordatori d' una vegada enviat el nombre de minuts configurats abans del final estimat. Discinta des de les actualitzacions de la vida recurrent a dalt. Implementació {device}, {minutes}, variable {program}.",
-          "notify_timeout_seconds": "Mostra automàticament les notificacions després d' aquests molts segons (reprodueix- les com a 'timeout' del company). Posa a 0 per a mantenir-los fins que es desconnectin. Omissió: 0.",
-          "notify_channel": "Canal de notificació Android per a l' estat, progrés i notificacions de recordatori. El so i la importància d' un canal estan configurats en l' aplicació del company la primera vegada que s' usa el nom del canal - RenshData només estableix el nom del canal. Deixa buit per omissió l' aplicació.",
-          "notify_finish_channel": "Separa el canal Android per a l' alerta finalitzada (també usat pel recordatori i l' expulsió de la roba) per tal que pugui tenir el seu propi so. Deixa buit per a tornar a utilitzar el canal de dalt.",
-          "notify_pre_complete_message": "El text de les actualitzacions recurrents de progrés en directe mentre s'executa el cicle. Admet marcadors de posició {device}, {minutes}, {program}."
-        }
-      },
-      "advanced_settings": {
-        "title": "Configuració avançada",
-        "description": "Ajusta els llindars de detecció, l'aprenentatge i el comportament avançat. Els valors predeterminats funcionen bé per a la majoria de configuracions.",
-        "sections": {
-          "suggestions_section": {
-            "name": "Configuració suggerida",
-            "description": "{suggestions_count} suggeriments apresos disponibles. Marqueu Aplica els valors suggerits per revisar els canvis proposats abans de desar.",
-            "data": {
-              "apply_suggestions": "Aplicar els valors suggerits"
-            },
-            "data_description": {
-              "apply_suggestions": "Marqueu aquesta casella per obrir un pas de revisió dels valors suggerits de l'algoritme d'aprenentatge. No es desa res automàticament.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}"
-            }
-          },
-          "detection_section": {
-            "name": "Detecció i llindars de potència",
-            "description": "Quan l'aparell es considera ENCÈS o APAGAT, llindars d'energia i temporització per a les transicions d'estat.",
-            "data": {
-              "start_duration_threshold": "Durada d'inici de rebot (s)",
-              "start_energy_threshold": "Inici Energy Gate (Wh)",
-              "completion_min_seconds": "Temps d'execució mínim de finalització (segons)",
-              "start_threshold_w": "Llindar inicial (W)",
-              "stop_threshold_w": "Llindar d'aturada (W)",
-              "end_energy_threshold": "Porta d'energia final (Wh)",
-              "running_dead_zone": "Running Dead Zone (segons)",
-              "end_repeat_count": "Finalitza el recompte de repeticions",
-              "min_off_gap": "Bretxa mínima entre cicles (s)",
-              "sampling_interval": "Interval (s) de mostreig"
-            },
-            "data_description": {
-              "start_duration_threshold": "Ignoreu pics de potència breus més curts que aquesta durada (segons). Filtra els pics d'arrencada (p. ex., 60 W durant 2 segons) abans que comenci el cicle real. Per defecte: 5 s.",
-              "start_energy_threshold": "El cicle ha d'acumular almenys aquesta quantitat d'energia (Wh) durant la fase d'arrencada per confirmar-se. Per defecte: 0,005 Wh.",
-              "completion_min_seconds": "Els cicles més curts que aquest es marcaran com a \"interromputs\", encara que acabin de manera natural. Per defecte: 600 s.",
-              "start_threshold_w": "La potència ha de pujar per sobre d'aquest llindar per iniciar un cicle. Estableix una potència superior a la teva en espera. Per defecte: min_power + 1 W.",
-              "stop_threshold_w": "L'energia ha de baixar per sota d'aquest llindar per FINALITZAR un cicle. Establiu just per sobre de zero per evitar que el soroll provoqui finals falsos. Per defecte: 0,6 * min_power.",
-              "end_energy_threshold": "El cicle acaba només si l'energia de l'última finestra de retard d'apagada està per sota d'aquest valor (Wh). Impedeix finals falsos si la potència fluctua prop de zero. Per defecte: 0,05 Wh.",
-              "running_dead_zone": "Després d'iniciar el cicle, ignoreu les caigudes de potència durant aquests segons per evitar la detecció de finals falsos durant la fase inicial d'engegada. Establiu a 0 per desactivar. Per defecte: 0 s.",
-              "end_repeat_count": "Nombre de vegades que la condició final (potència per sota del llindar per off_delay) s'ha de complir consecutivament abans d'acabar el cicle. Els valors més alts eviten finals falsos durant les pauses. Per defecte: 1.",
-              "min_off_gap": "Si un cicle s'inicia en tants segons des de la finalització de l'anterior, es FUSIONARÀ en un sol cicle.",
-              "sampling_interval": "Interval mínim de mostreig en segons. Les actualitzacions més ràpides que aquesta velocitat s'ignoraran. Per defecte: 30 s (2 s per a rentadores, rentadores-assecadores i rentavaixelles)."
-            }
-          },
-          "matching_section": {
-            "name": "Coincidència de perfils i aprenentatge",
-            "description": "Com d'agressivament WashData fa coincidir els cicles en execució amb els perfils apresos i quan demanar comentaris.",
-            "data": {
-              "profile_match_min_duration_ratio": "Relació de durada mínima de la coincidència del perfil (0,1-1,0)",
-              "profile_match_interval": "Interval de concordança del perfil (segons)",
-              "profile_match_threshold": "Llindar de concordança del perfil",
-              "profile_unmatch_threshold": "Llindar de no coincidència del perfil",
-              "auto_label_confidence": "Confiança de l'etiqueta automàtica (0-1)",
-              "learning_confidence": "Confiança de la sol·licitud de comentaris (0-1)",
-              "suppress_feedback_notifications": "Suprimeix les notificacions de comentaris",
-              "duration_tolerance": "Tolerància a la durada (0-0,5)",
-              "smoothing_window": "Finestra de suavització (mostres)",
-              "profile_duration_tolerance": "Tolerància a la durada de la coincidència del perfil (0-0,5)"
-            },
-            "data_description": {
-              "profile_match_min_duration_ratio": "Relació de durada mínima per a la concordança del perfil. El cicle d'execució ha de ser com a mínim aquesta fracció de la durada del perfil perquè coincideixi. Inferior = coincidència anterior. Per defecte: 0,50 (50%).",
-              "profile_match_interval": "Amb quina freqüència (en segons) intentar la concordança del perfil durant un cicle. Els valors més baixos proporcionen una detecció més ràpida, però utilitzen més CPU. Per defecte: 300 s (5 minuts).",
-              "profile_match_threshold": "La puntuació mínima de similitud DTW (0,0–1,0) necessària per considerar un perfil com a coincidència. Major = concordança més estricta, menys falsos positius. Per defecte: 0,4.",
-              "profile_unmatch_threshold": "Puntuació de similitud DTW (0,0–1,0) per sota de la qual es rebutja un perfil coincident anteriorment. Hauria de ser inferior al llindar de coincidència per evitar el parpelleig. Per defecte: 0,35.",
-              "auto_label_confidence": "Etiqueteu automàticament els cicles amb aquesta confiança o per sobre en finalitzar (0,0-1,0).",
-              "learning_confidence": "Confiança mínima per sol·licitar la verificació de l'usuari mitjançant un esdeveniment (0,0–1,0).",
-              "suppress_feedback_notifications": "Quan està activat, WashData seguirà fent un seguiment i sol·licitant comentaris internament, però no mostrarà notificacions persistents que us demanin que confirmeu els cicles. Útil quan els cicles sempre es detecten correctament i trobeu que les indicacions distreuen.",
-              "duration_tolerance": "Tolerància per a les estimacions del temps restant durant una carrera (0,0-0,5 correspon al 0-50%).",
-              "smoothing_window": "Nombre de lectures de potència recents utilitzades per a la suavització de mitjana mòbil.",
-              "profile_duration_tolerance": "Tolerància utilitzada per la concordança de perfils per a la variació de la durada total (0,0-0,5). Comportament per defecte: ±25%."
-            }
-          },
-          "timing_section": {
-            "name": "Temporització, manteniment i depuració",
-            "description": "Watchdog, reinici del progrés, manteniment automàtic i exposició d'entitats de depuració.",
-            "data": {
-              "watchdog_interval": "Interval de control (segons)",
-              "no_update_active_timeout": "Temps d'espera sense actualització (s)",
-              "progress_reset_delay": "Retard de restabliment del progrés (segons)",
-              "auto_maintenance": "Activa el manteniment automàtic",
-              "expose_debug_entities": "Exposa entitats de depuració",
-              "save_debug_traces": "Desa les traces de depuració"
-            },
-            "data_description": {
-              "watchdog_interval": "Segons entre comprovacions del gos vigilant mentre s'executa. Per defecte: 5 s. ADVERTÈNCIA: assegureu-vos que sigui SUPERIOR que l'interval d'actualització del vostre sensor per evitar falses parades (p. ex., si el sensor s'actualitza cada 60 s, utilitzeu 65 s o més).",
-              "no_update_active_timeout": "Per als sensors de publicació al canvi: només s'ha de forçar la finalització d'un cicle ACTIV si no arriben actualitzacions durant tants segons. La finalització de baix consum encara utilitza el retard d'apagat.",
-              "progress_reset_delay": "Un cop finalitzat un cicle (100%), espereu aquests segons d'inactivitat abans de restablir el progrés al 0%. Per defecte: 300 s.",
-              "auto_maintenance": "Habiliteu el manteniment automàtic (repareu mostres, fusioneu fragments).",
-              "expose_debug_entities": "Mostra sensors avançats (confiança, fase, ambigüitat) per a la depuració.",
-              "save_debug_traces": "Emmagatzema dades detallades de classificació i traça de potència a l'historial (augmenta l'ús d'emmagatzematge)."
-            }
-          },
-          "anti_wrinkle_section": {
-            "name": "Escut antiarrugues (assecadores)",
-            "description": "Ignora les rotacions del tambor després del cicle per evitar cicles fantasma. Només assecadora / rentadora-assecadora.",
-            "data": {
-              "anti_wrinkle_enabled": "Escut antiarrugues (només assecador)",
-              "anti_wrinkle_max_power": "Potència màxima antiarrugues (W)",
-              "anti_wrinkle_max_duration": "Durada màxima anti-arrugues (s)",
-              "anti_wrinkle_exit_power": "Potència de sortida anti-arrugues (W)"
-            },
-            "data_description": {
-              "anti_wrinkle_enabled": "Ignoreu les rotacions curtes de tambor de baixa potència després d'acabar un cicle per evitar cicles fantasma (només assecadora/rentadora-assecadora).",
-              "anti_wrinkle_max_power": "Les ràfegues amb aquesta potència o per sota es tracten com a rotacions anti-arrugues en lloc de nous cicles. Només s'aplica quan l'escut antiarrugues està activat.",
-              "anti_wrinkle_max_duration": "Longitud màxima de l'esclat per tractar-se com a rotació anti-arrugues. Només s'aplica quan l'escut antiarrugues està activat.",
-              "anti_wrinkle_exit_power": "Si la potència cau per sota d'aquest nivell, sortiu de l'antiarrugues immediatament (apagat veritablement). Només s'aplica quan l'escut antiarrugues està activat."
-            }
-          },
-          "delay_start_section": {
-            "name": "Detecció d'inici diferit",
-            "description": "Tracta l'espera sostinguda de baixa potència com a 'En espera per començar' fins que el cicle comenci realment.",
-            "data": {
-              "delay_start_detect_enabled": "Activa la detecció d'inici retardat",
-              "delay_confirm_seconds": "Inici diferit: temps de confirmació d'espera (s)",
-              "delay_timeout_hours": "Inici retardat: temps d'espera màxim (h)"
-            },
-            "data_description": {
-              "delay_start_detect_enabled": "Quan està activat, es detecta un augment de drenatge breu de baixa potència seguit d'una potència en espera sostinguda com a inici retardat. El sensor d'estat mostra \"Esperant per començar\" durant el retard. No es fa un seguiment del temps ni del progrés del programa fins que el cicle comença realment. Requereix que start_threshold_w s'estableixi per sobre de la potència del pic de drenatge.",
-              "delay_confirm_seconds": "La potència ha de romandre entre el Llindar d'aturada (W) i el Llindar d'inici (W) durant aquest nombre de segons abans que WashData entri a 'En espera per començar'. Filtra els pics breus de navegació pels menús. Per defecte: 60 s.",
-              "delay_timeout_hours": "Temps d'espera de seguretat: si la màquina encara està en \"Esperant per iniciar\" després d'aquestes moltes hores, WashData es restableix a Off. Per defecte: 8 h."
-            }
-          },
-          "external_triggers_section": {
-            "name": "Activadors externs, porta i pausa",
-            "description": "Sensor extern opcional de fi de cicle, sensor de porta per a la detecció de pausa/net i interruptor de tall d'alimentació en pausar.",
-            "data": {
-              "external_end_trigger_enabled": "Activa l'activador de final de cicle extern",
-              "external_end_trigger": "Sensor de final de cicle extern",
-              "external_end_trigger_inverted": "Inverteix la lògica de l'activació (disparador desactivat)",
-              "door_sensor_entity": "Sensor de porta",
-              "pause_cuts_power": "Talleu l'alimentació quan feu una pausa",
-              "switch_entity": "Canvia d'entitat (per a la pausa del tall d'alimentació)",
-              "notify_unload_delay_minutes": "Retard de notificació d'espera de bugaderia (min)"
-            },
-            "data_description": {
-              "external_end_trigger_enabled": "Habiliteu la supervisió d'un sensor binari extern per activar la finalització del cicle.",
-              "external_end_trigger": "Seleccioneu una entitat de sensor binari. Quan aquest sensor s'activa, el cicle actual finalitzarà amb l'estat \"complet\".",
-              "external_end_trigger_inverted": "De manera predeterminada, el disparador s'activa quan el sensor s'activa. Marqueu aquesta casella per activar-se quan el sensor s'apagui.",
-              "door_sensor_entity": "Sensor binari opcional per a la porta de la màquina (encesa = oberta, apagada = tancada). Quan la porta s'obre durant un cicle actiu, WashData confirmarà el cicle com a pausa intencionada. Un cop finalitza el cicle, si la porta encara està tancada, l'estat canvia a \"Neteja\" fins que la porta s'obre. Nota: el tancament de la porta NO reprèn automàticament un cicle en pausa; el reinici s'ha d'activar manualment mitjançant el botó o el servei Reprèn el cicle.",
-              "pause_cuts_power": "Quan feu una pausa mitjançant el botó o el servei de pausa del cicle, també desactiveu l'entitat de commutació configurada. Només té efecte si es configura una entitat de commutació per a aquest dispositiu.",
-              "switch_entity": "L'entitat de commutació per alternar quan s'atura o es reprèn. Necessari quan l'opció \"Tallar l'alimentació en pausa\" està activada.",
-              "notify_unload_delay_minutes": "Envieu una notificació a través del canal de notificació d'acabament un cop finalitzi el cicle i la porta no s'hagi obert durant tants minuts (requereix el sensor de la porta). Establiu a 0 per desactivar. Per defecte: 60 min."
-            }
-          },
-          "pump_section": {
-            "name": "Monitor de bomba",
-            "description": "Només per al tipus de dispositiu bomba. Dispara un esdeveniment si un cicle de bomba supera aquesta durada.",
-            "data": {
-              "pump_stuck_duration": "Llindar (s) d'alerta de bomba bloquejada (només bomba)"
-            },
-            "data_description": {
-              "pump_stuck_duration": "Si un cicle de bomba encara s'està executant després d'aquests segons, s'activa un esdeveniment ha_washdata_pump_stuck. Utilitzeu-ho per detectar un motor encallat (el funcionament típic de la bomba de carter és inferior a 60 s). Per defecte: 1800 s (30 min). Només tipus de dispositiu de bomba."
-            }
-          },
-          "device_link_section": {
-            "name": "Enllaç de dispositiu",
-            "description": "Enllaç opcional aquest dispositiu RenshData a un dispositiu Home Assistant existent (per exemple el connector intel· ligent o el mateix aparell). El dispositiu RenshData es mostra llavors com \"Connectat via\" aquest dispositiu. Deixa buit per mantenir RenshData com a un dispositiu independent.",
-            "data": {
-              "linked_device": "Dispositiu enllaçat"
-            },
-            "data_description": {
-              "linked_device": "Seleccioneu el dispositiu a on connectar RenshData. Això afegeix una 'Connectada via' referència al registre del dispositiu; RenshData manté la seva pròpia targeta de dispositiu i entitats. Neteja la selecció per eliminar l' enllaç."
-            }
-          }
-        }
-      },
-      "diagnostics": {
-        "title": "Diagnòstic i Manteniment",
-        "description": "Executeu accions de manteniment, com ara combinar cicles fragmentats o migrar les dades emmagatzemades.\n\n**Ús d'emmagatzematge**\n\n- Mida del fitxer: {file_size_kb} KB\n- Cicles: {cycle_count}\n- Perfils: {profile_count}\n- Traces de depuració: {debug_count}",
-        "menu_options": {
-          "reprocess_history": "Manteniment: reprocessament i optimització de dades",
-          "clear_debug_data": "Esborra les dades de depuració (allibera espai)",
-          "wipe_history": "Esborra TOTES les dades d'aquest dispositiu (irreversible)",
-          "export_import": "Exportar/Importar JSON amb la configuració (copiar/enganxar)",
-          "menu_back": "← Enrere"
-        }
-      },
-      "clear_debug_data": {
-        "title": "Esborra les dades de depuració",
-        "description": "Esteu segur que voleu suprimir tots els rastres de depuració emmagatzemats? Això alliberarà espai però eliminarà la informació detallada de la classificació dels cicles anteriors."
-      },
-      "manage_cycles": {
-        "title": "Gestionar cicles",
-        "description": "Cicles recents:\n{recent_cycles}",
-        "menu_options": {
-          "auto_label_cycles": "Etiqueta automàtica de cicles antics",
-          "select_cycle_to_label": "Cicle específic de l'etiqueta",
-          "select_cycle_to_delete": "Suprimeix el cicle",
-          "interactive_editor": "Combinar/dividir Editor interactiu",
-          "trim_cycle_select": "Dades del cicle de retallada",
-          "menu_back": "← Enrere"
-        }
-      },
-      "manage_cycles_empty": {
-        "title": "Gestionar cicles",
-        "description": "Encara no s'han registrat cicles.",
-        "menu_options": {
-          "auto_label_cycles": "Etiqueta automàtica de cicles antics",
-          "menu_back": "← Enrere"
-        }
-      },
-      "manage_profiles": {
-        "title": "Gestionar perfils",
-        "description": "Resum del perfil:\n{profile_summary}",
-        "menu_options": {
-          "create_profile": "Crea un perfil nou",
-          "edit_profile": "Edita/canvia el nom del perfil",
-          "delete_profile_select": "Suprimeix el perfil",
-          "profile_stats": "Estadístiques de perfil",
-          "cleanup_profile": "Neteja l'historial: gràfic i suprimir",
-          "assign_profile_phases_select": "Assignar intervals de fase",
-          "menu_back": "← Enrere"
-        }
-      },
-      "manage_profiles_empty": {
-        "title": "Gestionar perfils",
-        "description": "Encara no s'ha creat cap perfil.",
-        "menu_options": {
-          "create_profile": "Crea un perfil nou",
-          "menu_back": "← Enrere"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "Gestionar el catàleg de fases",
-        "description": "Catàleg de fases (valors per defecte per a aquest dispositiu + fases personalitzades):\n{phase_summary}",
-        "menu_options": {
-          "phase_catalog_create": "Crea una nova fase",
-          "phase_catalog_edit_select": "Fase d'edició",
-          "phase_catalog_delete": "Suprimeix la fase",
-          "menu_back": "← Enrere"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "Crea una fase personalitzada",
-        "description": "Creeu un nom i una descripció de fase personalitzats i trieu a quin tipus de dispositiu s'aplica.",
-        "data": {
-          "target_device_type": "Tipus de dispositiu objectiu",
-          "phase_name": "Nom de la fase",
-          "phase_description": "Descripció de la fase"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "Edita la fase personalitzada",
-        "description": "Seleccioneu una fase personalitzada per editar.",
-        "data": {
-          "phase_name": "Fase personalitzada"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "Edita la fase personalitzada",
-        "description": "Fase d'edició: {phase_name}",
-        "data": {
-          "phase_name": "Nom de la fase",
-          "phase_description": "Descripció de la fase"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "Suprimeix la fase personalitzada",
-        "description": "Seleccioneu una fase personalitzada per suprimir. Tots els intervals assignats que utilitzin aquesta fase s'eliminaran.",
-        "data": {
-          "phase_name": "Fase personalitzada"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "Assignar intervals de fase",
-        "description": "Fase de previsualització del perfil: **{profile_name}**\n\n{timeline_svg}\n\n**Intervals actuals:**\n{current_ranges}\n\nFeu servir les accions següents per afegir, editar, suprimir o desar intervals.",
-        "menu_options": {
-          "assign_profile_phases_add": "Afegeix l'interval de fases",
-          "assign_profile_phases_edit_select": "Edita l'interval de fases",
-          "assign_profile_phases_delete": "Suprimeix l'interval de fases",
-          "phase_ranges_clear": "Esborra tots els intervals",
-          "assign_profile_phases_auto_detect": "Autodetecció de fases",
-          "phase_ranges_save": "Guarda i torna",
-          "menu_back": "← Enrere"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "Afegeix l'interval de fases",
-        "description": "Afegiu un interval de fase a l'esborrany actual.",
-        "data": {
-          "phase_name": "Fase",
-          "start_min": "Minut d'inici",
-          "end_min": "Minut final"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "Edita l'interval de fases",
-        "description": "Seleccioneu un interval per editar.",
-        "data": {
-          "range_index": "Interval de fases"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "Edita l'interval de fases",
-        "description": "Actualitza l'interval de fase seleccionat.",
-        "data": {
-          "phase_name": "Fase",
-          "start_min": "Minut d'inici",
-          "end_min": "Minut final"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "Suprimeix l'interval de fases",
-        "description": "Seleccioneu un interval per eliminar-lo de l'esborrany.",
-        "data": {
-          "range_index": "Interval de fases"
-        }
-      },
-      "assign_profile_phases_auto_detect": {
-        "title": "Fases detectades automàticament",
-        "description": "Perfil: **{profile_name}**\n\n{timeline_svg}\n\n**S'han detectat {detected_count} fases automàticament.** Trieu una acció a continuació.",
-        "data": {
-          "action": "Acció"
-        }
-      },
-      "assign_profile_phases_auto_detect_name": {
-        "title": "Nom Fases detectades",
-        "description": "Perfil: **{profile_name}**\n\n**S'han detectat {detected_count} fases:**\n{ranges_summary}\n\nAssigna un nom a cada fase."
-      },
-      "assign_profile_phases_select": {
-        "title": "Assignar intervals de fase",
-        "description": "Seleccioneu un perfil per configurar els intervals de fase.",
-        "data": {
-          "profile": "Perfil"
-        }
-      },
-      "profile_stats": {
-        "title": "Estadístiques de perfil",
-        "description": "{stats_table}"
-      },
-      "create_profile": {
-        "title": "Crea un perfil nou",
-        "description": "Creeu un perfil nou manualment o a partir d'un cicle anterior.\n\nExemples de noms de perfil: \"Delicats\", \"Heavy Duty\", \"Quick Wash\"",
-        "data": {
-          "profile_name": "Nom del perfil",
-          "reference_cycle": "Cicle de referència (opcional)",
-          "manual_duration": "Durada manual (minuts)"
-        }
-      },
-      "edit_profile": {
-        "title": "Edita el perfil",
-        "description": "Seleccioneu un perfil per canviar el nom",
-        "data": {
-          "profile": "Perfil"
-        }
-      },
-      "rename_profile": {
-        "title": "Edita els detalls del perfil",
-        "description": "Perfil actual: {current_name}",
-        "data": {
-          "new_name": "Nom del perfil",
-          "manual_duration": "Durada manual (minuts)"
-        }
-      },
-      "delete_profile_select": {
-        "title": "Suprimeix el perfil",
-        "description": "Seleccioneu un perfil per suprimir",
-        "data": {
-          "profile": "Perfil"
-        }
-      },
-      "delete_profile_confirm": {
-        "title": "Confirmeu la supressió del perfil",
-        "description": "⚠️ Això suprimirà permanentment el perfil: {profile_name}",
-        "data": {
-          "unlabel_cycles": "Elimina l'etiqueta dels cicles amb aquest perfil"
-        }
-      },
-      "auto_label_cycles": {
-        "title": "Etiqueta automàtica de cicles antics",
-        "description": "S'han trobat {total_count} cicles totals. Perfils: {profiles}",
-        "data": {
-          "confidence_threshold": "Confiança mínima (0,50-0,95)"
-        }
-      },
-      "select_cycle_to_label": {
-        "title": "Seleccioneu Cicle per etiquetar",
-        "description": "✓ = completat, ⚠ = reprès, ✗ = interromput",
-        "data": {
-          "cycle_id": "Cicle"
-        }
-      },
-      "select_cycle_to_delete": {
-        "title": "Suprimeix el cicle",
-        "description": "⚠️ Això suprimirà permanentment el cicle seleccionat",
-        "data": {
-          "cycle_id": "Cicle per esborrar"
-        }
-      },
-      "label_cycle": {
-        "title": "Cicle d'etiquetes",
-        "description": "{cycle_info}",
-        "data": {
-          "profile_name": "Perfil",
-          "new_profile_name": "Nom del perfil nou (si s'està creant)"
-        }
-      },
-      "post_process": {
-        "title": "Historial de processos (fusionar/dividir)",
-        "description": "Netegeu l'historial de cicles combinant execucions fragmentades i dividint cicles combinats incorrectament dins d'una finestra de temps. Introduïu el nombre d'hores per mirar enrere (utilitza 999999 per a tots).",
-        "data": {
-          "time_range": "Finestra de consulta (hores)",
-          "gap_seconds": "Combinació/Divisió de la bretxa (segons)"
-        },
-        "data_description": {
-          "time_range": "Nombre d'hores per buscar cicles fragmentats per combinar-los. Utilitzeu 999999 per processar totes les dades històriques.",
-          "gap_seconds": "Llindar per decidir dividir o combinar. Els buits MÉS CURTS que aquest es combinen. Els buits MÉS LLARG que aquest es divideixen. Baixeu-ho per forçar una divisió en un cicle que s'ha fusionat incorrectament."
-        }
-      },
-      "cleanup_profile": {
-        "title": "Neteja l'historial: seleccioneu el perfil",
-        "description": "Seleccioneu un perfil per visualitzar. Això generarà un gràfic que mostra tots els cicles passats d'aquest perfil per ajudar a identificar els valors atípics.",
-        "data": {
-          "profile": "Perfil"
-        }
-      },
-      "cleanup_select": {
-        "title": "Neteja l'historial: gràfic i suprimir",
-        "description": "![Gràfic]({graph_url})\n\n**Visualització de {profile_name}**\n\nEl gràfic mostra els cicles individuals com a línies de colors. Identifiqueu els valors atípics (línies allunyades del grup) i feu coincidir el seu color a la llista següent per eliminar-los.\n\n**Seleccioneu els cicles per suprimir PERMANENTMENT:**",
-        "data": {
-          "cycles_to_delete": "Cicles per suprimir (comprova els colors coincidents)"
-        }
-      },
-      "interactive_editor": {
-        "title": "Combinar/dividir Editor interactiu",
-        "description": "Seleccioneu una acció manual per dur a terme al vostre historial de cicles.",
-        "menu_options": {
-          "editor_split": "Dividir un cicle (Trobar buits)",
-          "editor_merge": "Cicles de combinació (uneix fragments)",
-          "editor_delete": "Suprimeix cicles",
-          "menu_back": "← Enrere"
-        }
-      },
-      "editor_select": {
-        "title": "Seleccioneu Cicles",
-        "description": "Seleccioneu els cicles a processar.\n\n{info_text}",
-        "data": {
-          "selected_cycles": "Cicles"
-        }
-      },
-      "editor_configure": {
-        "title": "Configura i aplica",
-        "description": "{preview_md}",
-        "data": {
-          "confirm_action": "Acció",
-          "merged_profile": "Perfil resultant",
-          "new_profile_name": "Nom del perfil nou",
-          "confirm_commit": "Sí, confirmo aquesta acció",
-          "segment_0_profile": "Perfil del segment 1",
-          "segment_1_profile": "Perfil del segment 2",
-          "segment_2_profile": "Perfil del segment 3",
-          "segment_3_profile": "Perfil del segment 4",
-          "segment_4_profile": "Perfil del segment 5",
-          "segment_5_profile": "Perfil del segment 6",
-          "segment_6_profile": "Perfil del segment 7",
-          "segment_7_profile": "Perfil del segment 8",
-          "segment_8_profile": "Perfil del segment 9",
-          "segment_9_profile": "Perfil del segment 10"
-        }
-      },
-      "editor_split_params": {
-        "title": "Configuració dividida",
-        "description": "Ajusteu la sensibilitat per dividir aquest cicle. Qualsevol espai inactiu més llarg que això provocarà una divisió.",
-        "data": {
-          "split_mode": "Mètode de divisió"
-        }
-      },
-      "editor_split_auto_params": {
-        "title": "Configuració de divisió automàtica",
-        "description": "Ajusteu la sensibilitat per dividir aquest cicle. Qualsevol interval d'inactivitat més llarg que aquest provocarà una divisió.",
-        "data": {
-          "min_gap_seconds": "Llindar de l'interval de divisió (segons)"
-        }
-      },
-      "editor_split_manual_params": {
-        "title": "Marques horàries de divisió manual",
-        "description": "{preview_md}Finestra del cicle: **{cycle_start_wallclock} → {cycle_end_wallclock}** el {cycle_date}.\n\nIntroduïu una o més marques horàries de divisió (`HH:MM` o `HH:MM:SS`), una per línia. El cicle es tallarà a cada marca horària — N marques horàries produeixen N+1 segments.",
-        "data": {
-          "split_timestamps": "Marques horàries de divisió"
-        }
-      },
-      "reprocess_history": {
-        "title": "Manteniment: reprocessament i optimització de dades",
-        "description": "Realitza una neteja profunda de les dades històriques:\n1. Retalla les lectures de potència zero (silenci).\n2. Arregla el temps/durada del cicle.\n3. Recalcula tots els models estadístics (sobres).\n\n**Executa això per solucionar problemes de dades o aplicar algorismes nous.**"
-      },
-      "wipe_history": {
-        "title": "Esborra l'historial (només proves)",
-        "description": "⚠️ Això suprimirà permanentment TOTS els cicles i perfils emmagatzemats per a aquest dispositiu. Això no es pot desfer!"
-      },
-      "export_import": {
-        "title": "Exporta/Importa JSON",
-        "description": "Copieu/enganxeu cicles, perfils I configuració d'aquest dispositiu. Exporteu a continuació o enganxeu JSON per importar.",
-        "data": {
-          "mode": "Acció",
-          "json_payload": "Configuració completa JSON"
-        },
-        "data_description": {
-          "mode": "Trieu Exporta per copiar les dades i la configuració actuals, o Importa per enganxar les dades exportades des d'un altre dispositiu WashData.",
-          "json_payload": "Per a l'exportació: copieu aquest JSON (inclou cicles, perfils i tota la configuració ajustada). Per a la importació: enganxeu JSON exportat des de WashData."
-        }
-      },
-      "record_cycle": {
-        "title": "Cicle de gravació",
-        "description": "Enregistreu manualment un cicle per crear un perfil net sense interferències.\n\nEstat: **{status}**\nDurada: {duration} s\nMostres: {samples}",
-        "menu_options": {
-          "record_refresh": "Estat d'actualització",
-          "record_stop": "Atura la gravació (Desa i processa)",
-          "record_start": "Comença una nova gravació",
-          "record_process": "Processa l'últim enregistrament (retalla i desa)",
-          "record_discard": "Descarta l'última gravació",
-          "menu_back": "← Enrere"
-        }
-      },
-      "record_process": {
-        "title": "Enregistrament del procés",
-        "description": "![Gràfic]({graph_url})\n\n**El gràfic mostra l'enregistrament en brut.** Blau = Mantenir, Vermell = Retall proposat.\n*El gràfic és estàtic i no s'actualitza amb els canvis de formulari.*\n\nS'ha aturat la gravació. Els retalls s'alineen amb la freqüència de mostreig detectada (~{sampling_rate}s).\n\nDurada bruta: {duration} s\nMostres: {samples}",
-        "data": {
-          "head_trim": "Inici de retall (segons)",
-          "tail_trim": "Final de retall (segons)",
-          "save_mode": "Desa la destinació",
-          "profile_name": "Nom del perfil"
-        }
-      },
-      "learning_feedbacks": {
-        "title": "Feedbacks d'aprenentatge",
-        "description": "Comentaris pendents: {count}\n\n{pending_table}\n\nSeleccioneu una sol·licitud de revisió de cicle per processar.",
-        "menu_options": {
-          "learning_feedbacks_pick": "Revisa un comentari pendent",
-          "learning_feedbacks_dismiss_all": "Descarta tots els comentaris pendents",
-          "menu_back": "← Enrere"
-        }
-      },
-      "learning_feedbacks_pick": {
-        "title": "Trieu comentaris per revisar",
-        "description": "Seleccioneu una sol·licitud de revisió de cicle per obrir.",
-        "data": {
-          "selected_feedback": "Selecciona el cicle per revisar"
-        }
-      },
-      "learning_feedbacks_empty": {
-        "title": "Feedbacks d'aprenentatge",
-        "description": "No s'han trobat sol·licituds de comentaris pendents.",
-        "menu_options": {
-          "menu_back": "← Enrere"
-        }
-      },
-      "learning_feedbacks_dismiss_all": {
-        "title": "Descartar tots els comentaris pendents",
-        "description": "Esteu a punt de descartar **{count}** sol·licituds de comentaris pendents. Els cicles descartats continuaran a l'historial, però no aportaran cap senyal d'aprenentatge nou. Això no es pot desfer.\n\n✅ Marqueu la casella de sota i feu clic a **Envia** per descartar-ho tot.\n❌ Deixeu-la sense marcar i feu clic a **Envia** per cancel·lar i tornar enrere.",
-        "data": {
-          "confirm_dismiss_all": "Confirma: descarta totes les sol·licituds de comentaris pendents"
-        }
-      },
-      "resolve_feedback": {
-        "title": "Resol comentaris",
-        "description": "{comparison_img}{candidates_table}\n**Perfil detectat**: {detected_profile} ({confidence_pct}%)\n**Durada estimada**: {est_duration_min} min\n**Durada real**: {act_duration_min} min\n\n__Tria una acció a continuació:__",
-        "data": {
-          "action": "Què t'agradaria fer?",
-          "corrected_profile": "Programa correcte (si es corregeix)",
-          "corrected_duration": "Durada correcta en segons (si es corregeix)"
-        }
-      },
-      "trim_cycle_select": {
-        "title": "Cicle de retall: seleccioneu Cicle",
-        "description": "Seleccioneu un cicle per retallar. ✓ = completat, ⚠ = reprès, ✗ = interromput",
-        "data": {
-          "cycle_id": "Cicle"
-        }
-      },
-      "trim_cycle": {
-        "title": "Cicle de tall",
-        "description": "Finestra actual: {trim_summary}\n\n{trim_svg}",
-        "data": {
-          "action": "Acció"
-        }
-      },
-      "trim_cycle_start": {
-        "title": "Estableix Trim Start",
-        "description": "Finestra de cicle: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nInici actual: **{current_wallclock}** (+{current_offset_min} min des de l'inici del cicle)\n\nTrieu una nova hora d'inici utilitzant el selector de rellotges que hi ha a continuació.",
-        "data": {
-          "trim_start_time": "Nova hora d'inici",
-          "trim_start_min": "Nou inici (minuts des de l'inici del cicle)"
-        }
-      },
-      "trim_cycle_end": {
-        "title": "Estableix el final de retall",
-        "description": "Finestra de cicle: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nFinal actual: **{current_wallclock}** (+{current_offset_min} min des de l'inici del cicle)\n\nTrieu una nova hora de finalització amb el selector de rellotge que hi ha a continuació.",
-        "data": {
-          "trim_end_time": "Nova hora de finalització",
-          "trim_end_min": "Nou final (minuts des de l'inici del cicle)"
+          "device_type": "Device Type",
+          "power_sensor": "Power Sensor",
+          "min_power": "Minimum Power Threshold (W)"
         }
       }
     },
     "error": {
-      "import_failed": "La importació ha fallat. Enganxeu un JSON d'exportació de WashData vàlid.",
-      "select_exactly_one": "Seleccioneu exactament un cicle per a aquesta acció.",
-      "select_at_least_one": "Seleccioneu almenys un cicle per a aquesta acció.",
-      "select_at_least_two": "Seleccioneu almenys dos cicles per a aquesta acció.",
-      "profile_exists": "Ja existeix un perfil amb aquest nom",
-      "rename_failed": "No s'ha pogut canviar el nom del perfil. És possible que el perfil no existeixi o que ja s'ha pres un nom nou.",
-      "assignment_failed": "No s'ha pogut assignar el perfil al cicle",
-      "duplicate_phase": "Ja existeix una fase amb aquest nom.",
-      "phase_not_found": "No s'ha trobat la fase seleccionada.",
-      "invalid_phase_name": "El nom de la fase no pot estar buit.",
-      "phase_name_too_long": "El nom de la fase és massa llarg.",
-      "invalid_phase_range": "L'interval de fases no és vàlid. El final ha de ser més gran que l'inici.",
-      "invalid_phase_timestamp": "La marca de temps no és vàlida. Utilitzeu el format AAAA-MM-DD HH:MM o HH:MM.",
-      "overlapping_phase_ranges": "Els intervals de fase es superposen. Ajusteu els intervals i torneu-ho a provar.",
-      "incomplete_phase_row": "Cada fila de fase ha d'incloure una fase més els valors d'inici i finalització complets per al mode seleccionat.",
-      "timestamp_mode_cycle_required": "Seleccioneu un cicle d'origen quan utilitzeu el mode de marca de temps.",
-      "no_phase_ranges": "Encara no hi ha rangs de fase disponibles per a aquesta acció.",
       "feedback_notification_title": "WashData: verifica el cicle ({device})",
       "feedback_notification_message": "**Dispositiu**: {device}\n**Programa**: {program} ({confidence}% de confiança)\n**Hora**: {time}\n\nWashData necessita la teva ajuda per verificar aquest cicle detectat.\n\nAneu a **Configuració > Dispositius i serveis > WashData > Configura > Comentaris d'aprenentatge** per confirmar o corregir aquest resultat.",
       "suggestions_ready_notification_title": "WashData: configuracions suggerides a punt ({device})",
       "suggestions_ready_notification_message": "El sensor de **Configuració suggerida** ara informa de **{count}** recomanacions accionables.\n\nPer revisar-los i aplicar-los: **Configuració > Dispositius i serveis > WashData > Configura > Configuració avançada > Aplica els valors suggerits**.\n\nEls suggeriments són opcionals i es mostren per revisar-los abans de desar-los.",
-      "trim_range_invalid": "L'inici ha de ser abans del final. Ajusteu els vostres punts de retallat.",
-      "trim_failed": "Ha fallat el retall. És possible que el cicle ja no existeixi o que la finestra estigui buida.",
-      "invalid_split_timestamp": "La marca horària no és vàlida o queda fora de la finestra del cicle. Feu servir HH:MM o HH:MM:SS dins de la finestra del cicle.",
-      "no_split_segments_found": "No s'han pogut produir segments vàlids a partir d'aquestes marques horàries. Assegureu-vos que cada marca horària és dins de la finestra del cicle i que els segments duren com a mínim 1 minut.",
       "auto_tune_suggestion": "{device_type} {device_title} han detectat cicles fantasmes. Canvi de min_power suggerit: {current_min}W -> {new_min}W (no s'aplica automàticament).",
       "auto_tune_title": "Sintonització automàtica de WashData",
       "auto_tune_fallback": "{device_type} {device_title} han detectat cicles fantasmes. Canvi de min_power suggerit: {current_min}W -> {new_min}W (no s'aplica automàticament)."
-    },
-    "abort": {
-      "no_cycles_found": "No s'han trobat cicles",
-      "no_split_segments_found": "No s'han trobat segments divisibles al cicle seleccionat.",
-      "cycle_not_found": "No s'ha pogut carregar el cicle seleccionat.",
-      "no_power_data": "No hi ha dades de traça de potència disponibles per al cicle seleccionat.",
-      "no_profiles_found": "No s'han trobat perfils. Creeu primer un perfil.",
-      "no_profiles_for_matching": "No hi ha perfils disponibles per fer coincidir. Creeu perfils primer.",
-      "no_unlabeled_cycles": "Tots els cicles ja estan etiquetats",
-      "no_suggestions": "Encara no hi ha valors suggerits disponibles. Executeu uns quants cicles i torneu-ho a provar.",
-      "no_predictions": "Sense prediccions",
-      "no_custom_phases": "No s'han trobat fases personalitzades.",
-      "reprocess_success": "S'han reprocessat correctament {count} cicles.",
-      "debug_data_cleared": "S'han esborrat correctament les dades de depuració de {count} cicles."
     }
   },
   "selector": {
@@ -806,6 +77,18 @@
         "cycle_live": "Progrés en viu"
       }
     },
+    "device_type": {
+      "options": {
+        "washing_machine": "Rentadora",
+        "dryer": "Assecador",
+        "washer_dryer": "Combo de rentadora-assecadora",
+        "dishwasher": "Rentaplats",
+        "air_fryer": "Fregidora d'aire",
+        "bread_maker": "Panificadora",
+        "pump": "Bomba / Bomba de sumidero",
+        "other": "Altres (avançat)"
+      }
+    },
     "common_text": {
       "options": {
         "unlabeled": "(Sense etiquetar)",
@@ -814,6 +97,10 @@
         "no_reference_cycle": "(Sense cicle de referència)",
         "all_device_types": "Tots els tipus de dispositius",
         "current_suffix": "(actual)",
+        "phase_builtin_suffix": "(Incorporat)",
+        "phase_none_available": "No hi ha fases disponibles.",
+        "phase_other_device_types": "Altres tipus de dispositius:",
+        "settings_deprecation_warning": "⚠️ **Tipus de dispositiu obsolet:** {device_type} està previst que s'elimini en una versió futura. El pipeline de concordança de WashData no produeix resultats fiables per a aquesta classe d'aparell. La vostra integració continua funcionant durant el període d'abandonament; per silenciar aquest avís, canvieu el **Tipus de dispositiu** a continuació a un dels tipus admesos (rentadora, assecadora, rentadora-assecadora combinada, rentavaixelles, fregidora d'aire, màquina de pa o bomba) o a **Altres (avançat)** si el vostre aparell no coincideix amb cap dels tipus admesos. **Altres (avançat)** inclou valors predeterminats genèrics intencionadament que no estan ajustats per a cap aparell específic, de manera que haureu de configurar vosaltres mateixos els llindars, els temps d'espera i els paràmetres coincidents; tots els vostres paràmetres existents es conserven quan canvieu.",
         "editor_select_info": "Seleccioneu 1 cicle per dividir o 2 o més cicles per combinar.",
         "editor_select_info_split": "Seleccioneu 1 cicle per dividir.",
         "editor_select_info_merge": "Seleccioneu 2 o més cicles per fusionar.",
@@ -889,11 +176,7 @@
         "table_avg_energy": "Energia mitjana",
         "table_detected_program": "Programa detectat",
         "table_confidence": "Confiança",
-        "table_reported": "Informat",
-        "phase_builtin_suffix": "(Incorporat)",
-        "phase_none_available": "No hi ha fases disponibles.",
-        "settings_deprecation_warning": "⚠️ **Tipus de dispositiu obsolet:** {device_type} està previst que s'elimini en una versió futura. El pipeline de concordança de WashData no produeix resultats fiables per a aquesta classe d'aparell. La vostra integració continua funcionant durant el període d'abandonament; per silenciar aquest avís, canvieu el **Tipus de dispositiu** a continuació a un dels tipus admesos (rentadora, assecadora, rentadora-assecadora combinada, rentavaixelles, fregidora d'aire, màquina de pa o bomba) o a **Altres (avançat)** si el vostre aparell no coincideix amb cap dels tipus admesos. **Altres (avançat)** inclou valors predeterminats genèrics intencionadament que no estan ajustats per a cap aparell específic, de manera que haureu de configurar vosaltres mateixos els llindars, els temps d'espera i els paràmetres coincidents; tots els vostres paràmetres existents es conserven quan canvieu.",
-        "phase_other_device_types": "Altres tipus de dispositius:"
+        "table_reported": "Informat"
       }
     },
     "interactive_editor_action": {
@@ -949,6 +232,12 @@
         "delete_custom_phase": "Suprimeix la fase"
       }
     },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Anomena i aplica les fases",
+        "cancel": "Tornar enrere sense canvis"
+      }
+    },
     "assign_profile_phases_action": {
       "options": {
         "add_range": "Afegeix l'interval de fases",
@@ -983,12 +272,6 @@
         "delete": "Suprimeix - Elimina de l'historial"
       }
     },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Anomena i aplica les fases",
-        "cancel": "Tornar enrere sense canvis"
-      }
-    },
     "trim_cycle_action": {
       "options": {
         "set_start": "Estableix el punt d'inici",
@@ -996,18 +279,6 @@
         "reset": "Restableix a la durada completa",
         "apply": "Aplicar Trim",
         "cancel": "Cancel·la"
-      }
-    },
-    "device_type": {
-      "options": {
-        "washing_machine": "Rentadora",
-        "dryer": "Assecador",
-        "washer_dryer": "Combo de rentadora-assecadora",
-        "dishwasher": "Rentaplats",
-        "air_fryer": "Fregidora d'aire",
-        "bread_maker": "Panificadora",
-        "pump": "Bomba / Bomba de sumidero",
-        "other": "Altres (avançat)"
       }
     }
   },
@@ -1203,12 +474,22 @@
           "description": "El dispositiu WashData per reprendre."
         }
       }
+    },
+    "trigger_ml_training": {
+      "name": "Activar l'entrenament ML",
+      "description": "Torneu a entrenar manualment els models ML al dispositiu a partir dels cicles etiquetats d'aquest dispositiu (experimental).",
+      "fields": {
+        "device_id": {
+          "name": "Dispositiu",
+          "description": "El dispositiu WashData per tornar a entrenar els models."
+        }
+      }
     }
   },
   "entity": {
     "binary_sensor": {
       "running": {
-        "name": "Córrer"
+        "name": "En marxa"
       },
       "match_ambiguity": {
         "name": "Ambigüitat de la coincidència"
@@ -1221,18 +502,18 @@
           "off": "Apagat",
           "idle": "Inactiu",
           "starting": "Començant",
-          "running": "Córrer",
+          "running": "En marxa",
           "paused": "En pausa",
           "user_paused": "En pausa per l'usuari",
           "ending": "Finalització",
           "finished": "Acabat",
           "anti_wrinkle": "Antiarrugues",
-          "delay_wait": "Esperant per començar",
           "interrupted": "Interromput",
           "force_stopped": "Força aturada",
           "rinse": "Esbandida",
           "unknown": "Desconegut",
-          "clean": "Neteja"
+          "clean": "Neteja",
+          "delay_wait": "Esperant per començar"
         }
       },
       "washer_program": {
@@ -1264,6 +545,9 @@
         "state": {
           "none": "Cap"
         }
+      },
+      "ambiguity": {
+        "name": "Ambigüitat de coincidència"
       },
       "current_phase": {
         "name": "Fase actual"
@@ -1332,6 +616,708 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s ha de ser més gran que trim_start_s."
+    }
+  },
+  "panel": {
+    "tab": {
+      "status": "Resum",
+      "history": "Cicles",
+      "profiles": "Perfils",
+      "settings": "Arranjament",
+      "ml": "Entrenament ML",
+      "advanced": "Avançat",
+      "diagnostics": "Diagnòstics",
+      "pp_overview": "Resum",
+      "pp_phases": "Fases",
+      "pp_cleanup": "Neteja",
+      "pp_manage": "Gestiona",
+      "subtab_profiles": "Perfils",
+      "subtab_phase_catalog": "Catàleg de fases"
+    },
+    "btn": {
+      "save": "Desa",
+      "cancel": "Cancel· la",
+      "delete": "Esborra",
+      "close": "Tanca",
+      "edit": "Edita",
+      "add": "Afegeix",
+      "rebuild": "Reconstrueix els sobres",
+      "record": "Comença la gravació",
+      "compare": "Compara",
+      "confirm": "Confirmeu",
+      "discard": "Descarta",
+      "export": "Exporta",
+      "import": "Importa",
+      "merge": "Fusiona",
+      "apply": "Aplica",
+      "refresh": "Refresca",
+      "create": "Crea",
+      "select": "Selecciona",
+      "done": "Fet",
+      "reset": "Inicialitza",
+      "trim": "Tallar",
+      "split": "Divideix",
+      "review": "Revisió",
+      "inspect": "Inspecciona",
+      "label": "Etiqueta",
+      "save_settings": "Desa l'arranjament",
+      "new_profile": "+ nou perfil",
+      "new_group": "+ grup nou",
+      "apply_label": "Aplica l'etiqueta",
+      "run_auto_label": "Executar etiqueta automàtica",
+      "save_review": "Desa la revisió",
+      "apply_trim": "Aplica el Trim",
+      "apply_split": "Aplica la divisió",
+      "process_recording": "Desa la gravació",
+      "stop": "Atura",
+      "process": "Processa",
+      "add_device": "+ Afegeix dispositiu",
+      "train_now": "Entrena ara",
+      "reset_to_defaults": "Reinicialitza als valors per defecte",
+      "reset_to_builtin": "Reinicialitza als models integrats",
+      "save_preferences": "Desa les preferències",
+      "save_panel_settings": "Desa l'arranjament del plafó",
+      "save_access_control": "Desa el control d'accés",
+      "auto_label_cycles": "Cicles d'etiquetatge automàtic",
+      "run_analysis": "🔍 Executa l'anàlisi de suggeriments",
+      "apply_all": "Aplica-ho tot",
+      "show_only": "Mostra només",
+      "dismiss": "Descarta",
+      "dismiss_all": "Descarta-ho tot",
+      "process_history": "Procés ara",
+      "clear_debug": "Neteja les dades de depuració",
+      "wipe_all": "Esborra totes les dades",
+      "export_json": "Exporta a JSON",
+      "import_json": "Importa des de JSON",
+      "correct": "Corregeix...",
+      "ignore": "Ignora",
+      "add_phase": "+ Afegeix fase",
+      "new_phase": "+ Nova fase",
+      "delete_profile": "Esborra el perfil",
+      "rebuild_envelope": "Reconstrueix el sobre",
+      "create_profile": "+ Crea un perfil",
+      "rec_stop": "Atura",
+      "pause_cycle": "Pausa",
+      "resume_cycle": "Continua",
+      "force_stop": "Força la parada",
+      "save_phases": "Desa les fases",
+      "auto_detect_split": "Detecta automàticament",
+      "clear_splits": "Neteja",
+      "submit_correction": "Envia la correcció",
+      "import_overwrite": "Importa (sobreescriptura)",
+      "use": "Utilitza",
+      "manage": "Gestiona",
+      "remove": "Elimina",
+      "delete_group": "Elimina el grup",
+      "trim_split": "Trim / Divideix",
+      "convert_to_automation": "Converteix a l' automació",
+      "new_automation": "＋ Nova automatització",
+      "from_template": "Des de la plantilla ▾",
+      "on_cycle_started": "En iniciar el cicle",
+      "on_cycle_finished": "En acabar el cicle",
+      "save_group": "Desa el grup"
+    },
+    "hdr": {
+      "status": "Estat",
+      "live_power": "Potència en directe",
+      "manual_recording": "Gravació manual",
+      "tools_and_data": "Eines & Dades",
+      "phase_catalog": "Catàleg de fase",
+      "storage_stats": "Estadístiques d' emmagatzematge",
+      "maintenance": "Accions del manteniment",
+      "export_import": "Exporta / importa",
+      "logs": "Registres",
+      "my_preferences": "Les meves preferències",
+      "panel_settings": "Arranjament del plafó (tots els usuaris)",
+      "access_control": "Control d' accés",
+      "ml_smart_learning": "Aprenentatge intel· ligent",
+      "ml_settings_card": "Arranjament",
+      "ml_learned": "El que en WashData ha après",
+      "ml_matching_tuning": "Ajust fi de la coincidència de programes",
+      "display": "Visualització",
+      "status_graph": "Gràfica d' estat",
+      "diagnostics_pref": "Diagnòstics",
+      "logs_diagnostics": "Diagnòstics",
+      "process_history": "Historial de processos",
+      "clear_debug": "Neteja les traces de depuració",
+      "wipe_history": "Esborrat d' historial",
+      "automations": "Automatitzacions",
+      "automation_open": "Obre a l' editor d' automatització",
+      "automation_delete": "Esborra aquesta automació",
+      "automation_needs_review": "Aquest cicle necessita revisar",
+      "automation_review_this_cycle": "Revisió d' aquest cicle",
+      "no_automations": "Encara no hi ha referències automàtica a aquest dispositiu."
+    },
+    "lbl": {
+      "power": "Potència",
+      "progress": "Progrés",
+      "remaining": "Restant",
+      "duration": "Durada",
+      "energy": "Energia",
+      "profile": "Perfil",
+      "status": "Estat",
+      "date": "Data",
+      "confidence": "Confiança",
+      "health": "Salut",
+      "cost": "Cost",
+      "program": "Programa",
+      "cycle_health": "La salut del cicle",
+      "activity": "Activitat",
+      "unlabelled": "Sense etiqueta",
+      "unlabelled_paren": "(sense etiquetat)",
+      "emphasis": "Èmfasi",
+      "default": "Per defecte",
+      "in_use": "En ús",
+      "profile_name": "Nom del perfil",
+      "ref_cycle": "Cicle de referència (opcional)",
+      "manual_duration": "Durada manual (min, opcional)",
+      "phase_name": "Nom de la fase",
+      "description": "Descripció",
+      "correct_profile": "Corregeix el perfil",
+      "correct_duration": "Durada correcta (min, opcional)",
+      "load_from_file": "Carrega des del fitxer",
+      "json_data": "JSON Dades",
+      "expected_duration": "Durada esperada (min)",
+      "rename_profile": "Reanomena el perfil",
+      "select_profile": "Selecciona el perfil",
+      "confidence_threshold": "Llindar de confiança",
+      "resulting_profile": "Perfil resultant",
+      "new_profile_name": "Nou nom de perfil",
+      "save_mode": "Mode de desat",
+      "head_trim": "Retall inicial (s)",
+      "tail_trim": "Tall de cua (s)",
+      "gap_s": "Buit (s)",
+      "start": "Inicia",
+      "end": "Final",
+      "quality": "Qualitat",
+      "golden_reference": "cicle de referència gravada",
+      "compare_profiles": "Compara amb perfils",
+      "tags": "Etiquetes",
+      "notes": "Notes",
+      "default_tab": "Pestanya per omissió en obrir el plafó",
+      "cycle_date_display": "Visualització de la data del cicle",
+      "refresh_interval": "Interval de refresc (s)",
+      "panel_default_tab": "Pestanya per omissió",
+      "hide_tabs": "Oculta les pestanyes per als no administradors",
+      "enable_access_control": "Habilita el control d' accés per usuari",
+      "default_access_level": "Nivell per defecte per als usuaris no llistats",
+      "administrators": "Administradors",
+      "default_other": "Omissió (altres dispositius)",
+      "show_expected": "Mostra el recobriment de corba esperat ( perfil sense parella, taronja)",
+      "show_raw": "Mostra les lectures dels sensors crus (sense suavitzat, gris)",
+      "show_debug": "Mostra en directe la targeta de depuració a la pàgina Estat (confiança, ambigüitat, candidats superiors)",
+      "mode_new_profile": "Crea un nou perfil",
+      "mode_existing_profile": "Afegeix al perfil existent",
+      "auto_fine_tune_on": "ajust fi automàtic activat (al voltant de les {hour}:00)",
+      "auto_fine_tune_off": "ajust fi automàtic desactivat",
+      "last_checked": "Última comprovació:",
+      "remove_label": "- Elimina etiqueta -",
+      "create_new_profile": "+ Crea un nou perfil...",
+      "read_only": "Només lectura",
+      "actions": "Accions",
+      "cycles_count": "Cicles",
+      "debug_traces": "Traces de depuració",
+      "file_kb": "Fitxer (kB)",
+      "label": "Etiqueta",
+      "seconds_from_start": "Segons des d' inici",
+      "clock_time": "Temps del rellotge",
+      "ungrouped": "Desagrupat"
+    },
+    "badge": {
+      "poor_fit": "ajust pobre",
+      "fair_fit": "Ajust just",
+      "manual": "(seleccionat manualment)",
+      "auto": "(autodetecció)",
+      "improving": "↗ millorant",
+      "declining": "↘ decreixent",
+      "steady": "→ constant",
+      "using_tuned": "Usant pesos ajustats",
+      "using_defaults": "Usant valors per defecte",
+      "built_in_tag": "integrat"
+    },
+    "status": {
+      "completed": "Completat",
+      "interrupted": "S' ha interromput",
+      "force_stopped": "Força aturat",
+      "active": "Actiu",
+      "ambiguous": "Ambigu",
+      "clear": "Neteja",
+      "working": "Processant...",
+      "recording": "Gravació...",
+      "ready": "Preparat per processar",
+      "idle": "Inactiu",
+      "auto_detect": "Detecta automàticament",
+      "fine_tuning": "ajustant finament ara…",
+      "all_statuses": "Tots els estats"
+    },
+    "ml": {
+      "fit_strong": "Fort",
+      "fit_good": "Bo",
+      "fit_fair": "Acceptable",
+      "fit_weak": "Dèbil",
+      "fit_slight": "Lleuger",
+      "fit_word": "ajust",
+      "fine_tuned_at": "afinat {when}",
+      "personalized": "● Personalitzat per a aquesta màquina",
+      "builtin_models": "● Usant models integrats"
+    },
+    "toast": {
+      "settings_saved": "Arranjament desat; recàrrega d' integració",
+      "preferences_saved": "Preferències desades",
+      "panel_settings_saved": "S' ha desat l' arranjament del plafó",
+      "access_saved": "S' ha desat el control d' accés",
+      "profile_created": "Perfil \"{name}\" creat",
+      "profile_deleted": "Perfil \"{name}\" eliminat",
+      "profile_renamed": "S' ha reanomenat el perfil",
+      "phases_saved": "Fases desades",
+      "phase_created": "S' ha creat la fase \"{name}\"",
+      "phase_deleted": "S' ha esborrat la fase \"{name}\"",
+      "phase_updated": "Fase actualitzat",
+      "recording_started": "S' ha engegat la gravació",
+      "recording_stopped": "S' ha aturat la gravació",
+      "recording_discarded": "S' ha eliminat la gravació",
+      "recording_saved": "S' ha desat la gravació al perfil",
+      "export_downloaded": "Exportació descarregada",
+      "logs_exported": "S' han exportat els registres",
+      "import_successful": "Importa amb èxit; recàrrega d' integració",
+      "envelopes_rebuilt": "Sobres reconstruides",
+      "envelope_rebuilt": "Sobre reconstruit",
+      "suggestions_applied": "Suggeriments aplicats; recàrrega d' integració",
+      "suggestions_dismissed": "Suggeriments descartats",
+      "auto_label_complete": "S' ha completat l' etiqueta automàtica",
+      "cycle_labelled": "Cicle etiquetat",
+      "cycle_deleted": "El cicle s' ha esborrat",
+      "cycles_deleted": "S' ha esborrat {count} cicle(s)",
+      "cycle_trimmed": "S' ha retallat el cicle",
+      "cycles_merged": "Cicles fusionats",
+      "review_saved": "Revisió desada",
+      "feedback_confirmed": "Comentaris confirmats",
+      "feedback_dismissed": "Comentaris descartats",
+      "feedback_all_dismissed": "Tots els comentaris descartats",
+      "correction_submitted": "S' ha enviat la correcció",
+      "group_saved": "Grup desat",
+      "group_deleted": "S' ha esborrat el grup",
+      "automation_deleted": "S' ha esborrat l' automatització",
+      "legacy_removed": "S' han eliminat les accions heretates",
+      "cycle_paused": "Cicle en pausa",
+      "cycle_resumed": "El cicle ha reprès",
+      "cycle_force_stopped": "S' ha aturat el cicle de força",
+      "ml_training_promoted": "Entrenament completat: {count} model(s) promogut(s)",
+      "ml_training_no_improvement": "Entrenament completat: s'ha mantingut la línia de base (sense millora)",
+      "matching_reverted": "Els pesos coincidents es revertiran als valors per defecte",
+      "models_reverted": "S' han tornat a carregar els models del dispositiu al punt de partida",
+      "analysis_complete": "Completa l' anàlisi: {count} suggeriment(s)",
+      "analysis_complete_none": "Anàlisi completada: sense nous suggeriments",
+      "debug_cleared": "S' ha netejat les traces de depuració {count}",
+      "all_wiped": "Totes les dades esborrades",
+      "no_split_found": "No s' ha trobat cap lloc lliure en el que dividir",
+      "group_name_required": "Es requereix nom de grup",
+      "min_2_profiles": "Seleccioneu com a mínim dos perfils per a un grup",
+      "profile_name_required": "Es requereix el nom del perfil",
+      "phase_name_required": "Es requereix el nom de la fase",
+      "name_required": "Nom requerit",
+      "json_required": "Es necessiten dades JSON",
+      "save_failed": "Ha fallat en desar: {error}",
+      "delete_failed": "Ha fallat la supressió: {error}",
+      "apply_failed": "Ha fallat en aplicar: {error}",
+      "rebuild_failed": "Ha fallat la reconstrucció: {error}",
+      "start_failed": "Ha fallat l' inici: {error}",
+      "stop_failed": "Ha fallat en aturar: {error}",
+      "discard_failed": "Descarta ha fallat: {error}",
+      "trim_failed": "Ha fallat la Trim: {error}",
+      "split_failed": "Ha fallat la divisió: {error}",
+      "merge_failed": "Ha fallat la fusió: {error}",
+      "create_failed": "Ha fallat la creació: {error}",
+      "update_failed": "Ha fallat l' actualització: {error}",
+      "rename_failed": "El nom ha fallat: {error}",
+      "revert_failed": "Ha fallat en desfer: {error}",
+      "training_failed": "L' entrenament ha fallat: {error}",
+      "export_failed": "Ha fallat l' exportació: {error}",
+      "import_failed": "Ha fallat la importació: {error}",
+      "auto_label_failed": "Ha fallat l' etiqueta automàtica: {error}",
+      "analysis_failed": "Ha fallat l' anàlisi: {error}",
+      "auto_detect_failed": "Ha fallat la detecció automàtica: {error}",
+      "error": "Error: {error}",
+      "could_not_load_cycle": "No s' ha pogut carregar el cicle: {error}",
+      "pause_failed": "La pausa ha fallat: {error}",
+      "label_failed": "L' etiqueta ha fallat: {error}",
+      "invalid_json": "\"{key}\" no és vàlid que JSON allò fixi o net el camp abans de desar.",
+      "processed": "Processat {bits}",
+      "split_complete": "Divideix en cicles {count}"
+    },
+    "msg": {
+      "no_devices": "Encara no s'ha configurat cap dispositiu WashData.",
+      "no_device_selected": "No s' ha seleccionat cap dispositiu.",
+      "loading": "S' està carregant...",
+      "loading_settings": "S' estan carregant els paràmetres...",
+      "live_chart_loading": "El diagrama d'energia en directe apareix com a lectures que arriben.",
+      "no_cycles_match": "No hi ha cicles que coincideixin amb el filtre actual.",
+      "no_cycles_yet": "Encara no s'han registrat cicles.",
+      "no_profiles_yet": "Encara no hi ha perfils. Crea'n un des d'un cicle etiquetat.",
+      "no_logs": "Encara no hi ha cap registre emmagatzemat.",
+      "no_phases": "No s' ha definit cap fases.",
+      "no_phases_assigned": "No s' han assignat fases.",
+      "no_split_points": "Encara no es divideixen els punts.",
+      "no_envelope": "Encara no hi ha sobres - es reconstrueix després de etiquetar els cicles.",
+      "no_envelope_overlay": "No hi ha sobres disponibles per recobriment.",
+      "no_other_users": "No s' ha trobat cap altre usuari Home Assistant.",
+      "maintenance_requires_access": "Manteniment i exportació/ import requereix accés complet.",
+      "loading_curve": "S' està carregant la corba...",
+      "compare_selected_cycles": "Cicles seleccionats (sòlid) — mostra / amaga",
+      "compare_overlay_profiles": "Perfils superposats (tènue)",
+      "no_profiles_compare": "No hi ha perfils per comparar.",
+      "no_cycles_profile": "No hi ha cicles per aquest perfil.",
+      "saving_triggers_reload": "S' està desant l' acció de tornar a carregar la integració. Les entitats HA poden mostrar breument com no disponibles.",
+      "prefs_personal": "Això només s' aplica al vostre compte Home Assistant.",
+      "no_match_yet": "Encara no hi ha cap intent de coincidència - això s'acaba durant un cicle en execució.",
+      "no_fine_tuned": "Encara no s'ha ajustat res — WashData utilitza els seus models integrats.",
+      "ml_learned_intro": "Models ben avaluats a aquesta màquina. Qualsevol cosa que no estigui llistada usa el model de confiança integrat.",
+      "ml_settings_intro": "Dos interruptors independents: un aplica els models mentre un cicle funciona, l'altre permet que s'afini bé a la vostra màquina al llarg del temps.",
+      "ml_intro": "WashData inclou models intel·ligents que detecten cicles, fan coincidir programes i estimen temps i energia, i funcionen de sèrie.",
+      "matching_tuning_intro": "Quan s'aprèn, WashData també ajusta quant de programa coincideix amb la forma del cicle i la seva durada i energia.",
+      "phase_catalog_intro": "segments amb nom d' un cicle (Pre- rentat, Heing, Spin...). Assignar-los a un perfil del seu plafó de control.",
+      "phase_ranges_intro": "Abast de fase (minuts de l' inici del cicle) a la corba mitjana. Edita els valors a viure de vista prèvia.",
+      "cleanup_intro": "Totes les etiquetes s'etiquetaven a quadres. Tickoutiers i esborra per netejar el perfil.",
+      "split_intro": "Feu clic en la gràfica per afegir o eliminar un punt de partida, o automàticament sense detectar buits.",
+      "trim_intro": "Arrossegueu els comandaments vermells o introduïu valors. Tot fora de la finestra està eliminat.",
+      "import_intro": "Carrega un fitxer exportat o enganxa una càrrega de JSON a sota.",
+      "auto_label_intro": "Assigna els perfils als cicles sense etiquetar els que coincideixen amb la confiança del llindar.",
+      "merge_intro": "Els cicles seleccionats es combinen en un (ordre cronològic; buits omplerts amb 0 W). Escull el perfil resultant.",
+      "enough_data": "Prou dades per aprendre ({current}/{min} cicles).",
+      "collecting_data": "Recollint dades — {need} cicle{plural} més abans que es pugui iniciar l'ajust fi ({current}/{min}).",
+      "updated": "Actualitzat {time}",
+      "appliance_monitor": "Monitor de l'aplicació",
+      "ml_loading": "Carregant ML...",
+      "see_recorder": "Mireu l' estri de gravació a sota",
+      "review_in_settings": "Revisió en els arranjaments",
+      "storage_diagnostics": "Estadístiques d' emmagatzematge, manteniment, exportació/ import",
+      "recent_logs": "Registres recents de dades de rentat",
+      "preferences_adv": "Preferències",
+      "preferences_admin": "Preferències, control d' accés al plafó",
+      "review_to_cycles": "Obre la cua de revisió dels cicles",
+      "pending_feedback": "Comentaris de detecció pendents",
+      "recording_in_progress": "Gravació en curs",
+      "no_profiles_yet_short": "Encara no hi ha perfils.",
+      "unsure_detected_prefix": "WashData no n'està segur que hagi detectat",
+      "no_suggestions": "No hi ha suggeriments actives.",
+      "no_profiles_overlay": "No hi ha perfils al recobriment.",
+      "compare_cycles_title": "Compara els cicles {count}"
+    },
+    "modal": {
+      "label_cycle": "Etiquetar cicle",
+      "create_profile": "Crea un perfil",
+      "new_phase": "Nova fase",
+      "edit_phase": "Edita la fase",
+      "process_recording": "Processa la gravació",
+      "correct_feedback": "Comentaris correctes",
+      "import_config": "Configuració d' importació",
+      "auto_label": "Cicles d'etiquetatge automàtic",
+      "cycle": "Cicle"
+    },
+    "tag": {
+      "late_start": "Inici tardà",
+      "early_end": "Final primerenc",
+      "merged": "cicles fusionats",
+      "split": "Divideix el cicle",
+      "noise": "Soroll",
+      "wrong_profile": "Perfil incorrecte",
+      "sensor_gap": "Buit del sensor"
+    },
+    "quality": {
+      "good": "Bo",
+      "bad": "Dolent",
+      "unusable": "No es pot determinar"
+    },
+    "access": {
+      "none": "Cap (ocult)",
+      "read": "Lectura",
+      "edit": "Edita",
+      "full": "Complet",
+      "inherit": "Hereta"
+    },
+    "health": {
+      "poor": "⚠ Ajust pobre",
+      "fair": "Ajust acceptable",
+      "good": "✓ Bon ajust"
+    },
+    "trend": {
+      "up": "Augmentant",
+      "down": "Decreixent"
+    },
+    "pref": {
+      "date_relative": "Relatiu (p. ex. 2 hores enrere)",
+      "date_absolute": "absolut (p. ex. 14: 32 el 2 Jul)"
+    },
+    "log": {
+      "all_levels": "Tots els nivells"
+    },
+    "section": {
+      "basic": {
+        "label": "Bàsic",
+        "intro": "La identitat principal i la més essencial necessiten configuracions."
+      },
+      "detection": {
+        "label": "Detecció",
+        "intro": "Com es detecta un cicle com a inici, en execució i acabant."
+      },
+      "matching": {
+        "label": "Coincidència",
+        "intro": "Com coincideixen els cicles acabats amb els perfils apreses i marcats."
+      },
+      "timing": {
+        "label": "Timing i Watchdog",
+        "intro": "Cadència de fons, el guardià fora de línia i neteja."
+      },
+      "anti_wrinkle": {
+        "label": "Antiarrugues",
+        "intro": "El mode antiarrugues detecta els impulsos de la secadora després de la fase principal de calor."
+      },
+      "delay": {
+        "label": "Inici de retard",
+        "intro": "Detecció retardada identificada quan un aparell està alimentat, però encara no ha començat el seu cicle."
+      },
+      "triggers": {
+        "label": "Disparadors i Porta",
+        "intro": "Senyals externes opcionals: un disparador final, un sensor de porta, un canvi de pausa, i el recordatori de descàrrega."
+      },
+      "notifications": {
+        "label": "Notificacions",
+        "intro": "Configureu quan i com se us notifica sobre esdeveniments de cicle."
+      },
+      "ml_training": {
+        "label": "Entrenament ML",
+        "intro": "Opte en models intel·ligents que van detectar i temps personals a aquest dispositiu."
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Nom del dispositiu"
+      },
+      "device_type": {
+        "label": "Tipus de dispositiu"
+      },
+      "power_sensor": {
+        "label": "Sensor d' energia"
+      },
+      "min_power": {
+        "label": "Potència mínima"
+      },
+      "off_delay": {
+        "label": "Retard d'apagada"
+      },
+      "linked_device": {
+        "label": "Agrupa sota el dispositiu"
+      },
+      "start_threshold_w": {
+        "label": "Llindar d' inici"
+      },
+      "stop_threshold_w": {
+        "label": "Atura el llindar"
+      },
+      "min_off_gap": {
+        "label": "Buit mínim d'apagada"
+      },
+      "start_duration_threshold": {
+        "label": "Durada inicial"
+      },
+      "start_energy_threshold": {
+        "label": "Energia inicial"
+      },
+      "completion_min_seconds": {
+        "label": "Durada del cicle mínim"
+      },
+      "running_dead_zone": {
+        "label": "Zona morta en execució"
+      },
+      "end_energy_threshold": {
+        "label": "Energia final"
+      },
+      "end_repeat_count": {
+        "label": "Finalitza el compte de repetició"
+      },
+      "sampling_interval": {
+        "label": "Interval de mostreig"
+      },
+      "smoothing_window": {
+        "label": "Finestra suau"
+      },
+      "abrupt_drop_watts": {
+        "label": "Caiguda sobtada"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Ràtio de caiguda sobtada"
+      },
+      "profile_match_threshold": {
+        "label": "Coincidència del llindar"
+      },
+      "profile_unmatch_threshold": {
+        "label": "El llindar no coincideix"
+      },
+      "profile_match_interval": {
+        "label": "Interval de coincidència"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Relació de durada mínima"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Relació màxima de durada"
+      },
+      "profile_duration_tolerance": {
+        "label": "Tolerància de durada del perfil"
+      },
+      "duration_tolerance": {
+        "label": "Tolerància de l'estimació"
+      },
+      "auto_label_confidence": {
+        "label": "Confiança d'etiquetatge automàtic"
+      },
+      "learning_confidence": {
+        "label": "Confiança d' aprenentatge"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Suprimeix les notificacions de comentaris"
+      },
+      "watchdog_interval": {
+        "label": "Interval de vigilància"
+      },
+      "no_update_active_timeout": {
+        "label": "Sense temps d' actualització"
+      },
+      "progress_reset_delay": {
+        "label": "Retard de reinici del progrés"
+      },
+      "auto_maintenance": {
+        "label": "Manteniment automàtic (neteja nocturna)"
+      },
+      "expose_debug_entities": {
+        "label": "Exposar entitats de depuració"
+      },
+      "save_debug_traces": {
+        "label": "Desa les traces de depuració"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Habilita la detecció antiarrugues"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Potència màx. antiarrugues"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Durada màx."
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Surt del llindar d' energia"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Habilita la detecció d'inici diferit"
+      },
+      "delay_confirm_seconds": {
+        "label": "Confirma els segons"
+      },
+      "delay_timeout_hours": {
+        "label": "Temps d' expiració"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Habilita el disparador del final extern"
+      },
+      "external_end_trigger": {
+        "label": "Entitat d' activació externa"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Inverteix el disparador extern (activa en APAGAT)"
+      },
+      "door_sensor_entity": {
+        "label": "Entitat del sensor de porta"
+      },
+      "pause_cuts_power": {
+        "label": "La pausa també talla l'alimentació (via interruptor)"
+      },
+      "switch_entity": {
+        "label": "Commuta d' entitat"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Retard del recordatori de descàrrega"
+      },
+      "pump_stuck_duration": {
+        "label": "Durada de la bomba encallada"
+      },
+      "notify_start_services": {
+        "label": "Inicia els serveis"
+      },
+      "notify_finish_services": {
+        "label": "Finalitza els serveis"
+      },
+      "notify_live_services": {
+        "label": "Serveis de progrés en directe"
+      },
+      "notify_people": {
+        "label": "Gent (només per quan llar)"
+      },
+      "notify_only_when_home": {
+        "label": "Notifica només quan sigui a casa"
+      },
+      "notify_fire_events": {
+        "label": "Llençar esdeveniments HA per a notificacions"
+      },
+      "notify_before_end_minutes": {
+        "label": "Alerta pre- final"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Interval d' actualització en directe"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Desbordament en directe % abans d'alertar"
+      },
+      "notify_live_chronometer": {
+        "label": "Usa el Cromòmetre en directe"
+      },
+      "notify_timeout_seconds": {
+        "label": "Tanca automàticament després de"
+      },
+      "notify_title": {
+        "label": "Títol de les notificacions"
+      },
+      "notify_icon": {
+        "label": "Icona de notificació"
+      },
+      "notify_start_message": {
+        "label": "Inicia el missatge"
+      },
+      "notify_finish_message": {
+        "label": "Finalitza el missatge"
+      },
+      "notify_pre_complete_message": {
+        "label": "Missatge previ a la finalització"
+      },
+      "notify_reminder_message": {
+        "label": "Missatge de recordatori"
+      },
+      "notify_channel": {
+        "label": "Android Canal (inici/live)"
+      },
+      "notify_finish_channel": {
+        "label": "Android Canal (finish)"
+      },
+      "energy_price_entity": {
+        "label": "Entitat del preu d'energia"
+      },
+      "energy_price_static": {
+        "label": "Preu d' energia estàtic (per kWh)"
+      },
+      "enable_ml_models": {
+        "label": "Aplica els models intel· ligents durant un cicle"
+      },
+      "ml_training_enabled": {
+        "label": "Aprèn d' aquesta màquina"
+      },
+      "ml_training_hour": {
+        "label": "Aprèn a les hores"
+      },
+      "ml_training_min_cycles": {
+        "label": "Els cicles necessaris primer"
+      },
+      "ml_training_interval_days": {
+        "label": "Comprova com a màxim cada"
+      }
     }
   }
 }

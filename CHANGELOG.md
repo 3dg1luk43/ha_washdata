@@ -72,11 +72,14 @@ The first release since 0.4.5.2, and a large one — everything below is new rel
 
 ### 🐛 Bug Fixes
 
+- **"Fair fit" profile badge tooltip** now explains what the rating means and suggests labelling more cycles or re-recording, making it actionable for new users.
+- **Add Device button** in the panel now uses the SPA navigation API instead of a hard redirect, so clicking it no longer causes a silent failure or hard-reload in the panel iframe.
 - **`Clean` State Never Shown for Washing Machines** (#282, #283): A completed cycle ends in `STATE_FINISHED`, but `check_state()` only surfaced `STATE_CLEAN` for `STATE_OFF`, so with a Door Sensor configured the `Clean` state was unreachable and `sensor.<name>_state` showed `Finished`. `check_state()` now reports `Clean` for finished cycles too. Reported and fixed by @Olen.
 - **Manual Recording widget froze at `0s · 0 samples`**: while a recording was running the panel's Status-tab widget kept showing its start-of-recording snapshot. The backend reported live duration / sample count all along; the panel's status poll simply never re-fetched the recording state. The poll now refreshes `get_recording_state` while a recording is active, so duration and sample count tick up live.
 
 ### 🛠 Internal / Developer Experience
 
+- **Panel fully localised**: All UI strings in the management panel are now surfaced through Home Assistant's standard `hass.localize` mechanism (`strings.json` + `translations/`). The panel renders in the user's HA language automatically — no embedded JS translation tables. The config-flow translation files were also audited and updated to match the current options flow (removed ~40 obsolete multi-step flow keys, added 13 new keys for the reconfigure step and simplified options flow).
 - New WebSocket command surface (`ws_api.py`) backing the panel (settings, profiles, cycles, phases, recording, feedback, diagnostics, suggestions, curve and envelope data, merge / split / trim, logs, panel config, and RBAC), plus commands for profile groups, ML shadow-comparison / per-cycle review, ML training status / trigger, and matcher-tuning revert. Every async handler is registered with `@websocket_api.async_response`, and all commands pass through a single server-side RBAC guard.
 - `ProfileStore.get_storage_stats()` no longer runs blocking file I/O or serialises the full dataset on the event loop, which could stall the diagnostics view.
 - `manifest.json` declares the panel's prerequisites: `frontend`, `websocket_api`, and `recorder` are added as `after_dependencies` (the recorder is optional and used only for the raw-socket overlay).

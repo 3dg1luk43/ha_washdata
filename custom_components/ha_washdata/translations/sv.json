@@ -1333,5 +1333,707 @@
     "trim_invalid_range": {
       "message": "trim_end_s måste vara större än trim_start_s."
     }
+  },
+  "panel": {
+    "tab": {
+      "status": "Översikt",
+      "history": "Cykler",
+      "profiles": "Profiler",
+      "settings": "Inställningar",
+      "ml": "ML-träning",
+      "advanced": "Avancerat",
+      "diagnostics": "Diagnostik",
+      "pp_overview": "Översikt",
+      "pp_manage": "Hantera",
+      "pp_cleanup": "Rensning",
+      "pp_phases": "Faser",
+      "subtab_profiles": "Profiler",
+      "subtab_phase_catalog": "Faskatalog"
+    },
+    "btn": {
+      "add": "Lägg till",
+      "add_device": "+ Lägg till enhet",
+      "add_phase": "+ Lägg till fas",
+      "apply": "Tillämpa",
+      "apply_all": "Tillämpa alla",
+      "apply_label": "Tillämpa etikett",
+      "apply_split": "Tillämpa delning",
+      "apply_trim": "Tillämpa trimning",
+      "auto_detect_split": "Detektera automatiskt",
+      "auto_label_cycles": "Etikettcykler automatiskt",
+      "cancel": "Avbryt",
+      "clear_debug": "Rensa felsökningsdata",
+      "clear_splits": "Rensa",
+      "close": "Stäng",
+      "compare": "Jämför",
+      "confirm": "Bekräfta",
+      "convert_to_automation": "Konvertera till automatisering",
+      "correct": "Korrigera…",
+      "create": "Skapa",
+      "create_profile": "+ Skapa profil",
+      "delete": "Ta bort",
+      "delete_group": "Ta bort grupp",
+      "delete_profile": "Ta bort profil",
+      "discard": "Kasta",
+      "dismiss": "Avvisa",
+      "dismiss_all": "Avvisa alla",
+      "done": "Klar",
+      "edit": "Redigera",
+      "export": "Exportera",
+      "export_json": "Exportera till JSON",
+      "force_stop": "Tvångsstopp",
+      "from_template": "Från mall ▾",
+      "ignore": "Ignorera",
+      "import": "Importera",
+      "import_json": "Importera från JSON",
+      "import_overwrite": "Importera (skriver över data)",
+      "inspect": "Granska",
+      "label": "Etikettera",
+      "manage": "Hantera",
+      "merge": "Slå ihop",
+      "new_automation": "＋ Ny automatisering",
+      "new_group": "+ Ny grupp",
+      "new_phase": "+ Ny fas",
+      "new_profile": "+ Ny profil",
+      "on_cycle_finished": "När cykeln är klar",
+      "on_cycle_started": "När cykeln startar",
+      "pause_cycle": "Pausa",
+      "process": "Bearbeta",
+      "process_history": "Bearbeta nu",
+      "process_recording": "Spara inspelning",
+      "rebuild": "Bygg om kuvert",
+      "rebuild_envelope": "Bygg om kuvert",
+      "rec_stop": "Stopp",
+      "record": "Starta inspelning",
+      "refresh": "Uppdatera",
+      "remove": "Ta bort",
+      "reset": "Återställ",
+      "reset_to_builtin": "Återställ till inbyggda modeller",
+      "reset_to_defaults": "Återställ standardvärden",
+      "resume_cycle": "Återuppta",
+      "review": "Granska",
+      "run_analysis": "🔍 Kör förslagsanalys",
+      "run_auto_label": "Kör auto-etikettering",
+      "save": "Spara",
+      "save_access_control": "Spara åtkomstkontroll",
+      "save_group": "Spara grupp",
+      "save_panel_settings": "Spara panelinställningar",
+      "save_phases": "Spara faser",
+      "save_preferences": "Spara inställningar",
+      "save_review": "Spara granskning",
+      "save_settings": "Spara inställningar",
+      "select": "Välj",
+      "show_only": "Visa endast",
+      "split": "Dela",
+      "stop": "Stopp",
+      "submit_correction": "Skicka korrigering",
+      "train_now": "Träna nu",
+      "trim": "Trimma",
+      "trim_split": "Trimma / Dela",
+      "use": "Använd",
+      "wipe_all": "Radera all data"
+    },
+    "hdr": {
+      "access_control": "Åtkomstkontroll",
+      "automation_delete": "Ta bort denna automatisering",
+      "automation_needs_review": "Denna cykel behöver granskas",
+      "automation_open": "Öppna i automatiseringsredigeraren",
+      "automation_review_this_cycle": "Granska denna cykel",
+      "automations": "Automatiseringar",
+      "clear_debug": "Rensa felsökningsspår",
+      "diagnostics_pref": "Diagnostik",
+      "display": "Visning",
+      "export_import": "Exportera / Importera",
+      "live_power": "Effekt i realtid",
+      "logs": "Loggar",
+      "logs_diagnostics": "Diagnostik",
+      "maintenance": "Underhållsåtgärder",
+      "manual_recording": "Manuell inspelning",
+      "ml_learned": "Vad WashData har lärt sig",
+      "ml_matching_tuning": "Finjustering av programmatchning",
+      "ml_settings_card": "Inställningar",
+      "ml_smart_learning": "Smart inlärning",
+      "my_preferences": "Mina inställningar",
+      "no_automations": "Inga automatiseringar refererar till denna enhet ännu.",
+      "panel_settings": "Panelinställningar (alla användare)",
+      "phase_catalog": "Faskatalog",
+      "process_history": "Bearbeta historik",
+      "status": "Status",
+      "status_graph": "Statusgraf",
+      "storage_stats": "Lagringsstatistik",
+      "tools_and_data": "Verktyg och data",
+      "wipe_history": "Rensa historik"
+    },
+    "lbl": {
+      "actions": "Åtgärder",
+      "activity": "Aktivitet",
+      "administrators": "Administratörer",
+      "auto_fine_tune_off": "automatisk finjustering av",
+      "auto_fine_tune_on": "automatisk finjustering på (runt {hour}:00)",
+      "clock_time": "Klocktid",
+      "compare_profiles": "Jämför med profiler",
+      "confidence": "Konfidens",
+      "confidence_threshold": "Konfidenströskel",
+      "correct_duration": "Korrekt varaktighet (min, valfritt)",
+      "correct_profile": "Korrekt profil",
+      "cost": "Kostnad",
+      "create_new_profile": "+ Skapa ny profil…",
+      "cycle_date_display": "Visning av cykeldata",
+      "cycle_health": "Cykelhälsa",
+      "cycles_count": "Cykler",
+      "date": "Datum",
+      "debug_traces": "Felsökningsspår",
+      "default": "Standard",
+      "default_access_level": "Standardnivå för användare som inte är listade nedan",
+      "default_other": "Standard (andra enheter)",
+      "default_tab": "Standardflik när panelen öppnas",
+      "description": "Beskrivning",
+      "duration": "Varaktighet",
+      "emphasis": "Betoning",
+      "enable_access_control": "Aktivera åtkomstkontroll per användare",
+      "end": "Slut",
+      "energy": "Energi",
+      "expected_duration": "Förväntad varaktighet (min)",
+      "file_kb": "Fil (kB)",
+      "gap_s": "Lucka (s)",
+      "golden_reference": "Inspelad referenscykel",
+      "head_trim": "Inledande trimning (s)",
+      "health": "Hälsa",
+      "hide_tabs": "Dölj flikar för icke-administratörer",
+      "in_use": "Används",
+      "json_data": "JSON-data",
+      "label": "Etikett",
+      "last_checked": "Senast kontrollerad:",
+      "load_from_file": "Läs in från fil",
+      "manual_duration": "Manuell varaktighet (min, valfritt)",
+      "mode_existing_profile": "Lägg till i befintlig profil",
+      "mode_new_profile": "Skapa ny profil",
+      "new_profile_name": "Nytt profilnamn",
+      "notes": "Anteckningar",
+      "panel_default_tab": "Standardflik",
+      "phase_name": "Fasnamn",
+      "power": "Effekt",
+      "profile": "Profil",
+      "profile_name": "Profilnamn",
+      "program": "Program",
+      "progress": "Förlopp",
+      "quality": "Kvalitet",
+      "read_only": "Skrivskyddad",
+      "ref_cycle": "Referenscykel (valfritt)",
+      "refresh_interval": "Uppdateringsintervall (s)",
+      "remaining": "Återstående",
+      "remove_label": "- Ta bort etikett -",
+      "rename_profile": "Byt namn på profil",
+      "resulting_profile": "Resulterande profil",
+      "save_mode": "Sparläge",
+      "seconds_from_start": "Sekunder från start",
+      "select_profile": "Välj profil",
+      "show_debug": "Visa live-matchfelsökningskort på statussidan (konfidens, tvetydighet, toppkandidater)",
+      "show_expected": "Visa förväntad kurva (matchad profil, orange)",
+      "show_raw": "Visa råa sensorvärden (oglättat, grått)",
+      "start": "Start",
+      "status": "Status",
+      "tags": "Taggar",
+      "tail_trim": "Avslutande trimning (s)",
+      "ungrouped": "Ej grupperad",
+      "unlabelled": "Ej etiketterad",
+      "unlabelled_paren": "(ej etiketterad)"
+    },
+    "badge": {
+      "auto": "(automatiskt detekterad)",
+      "built_in_tag": "inbyggd",
+      "declining": "↘ sjunkande",
+      "fair_fit": "godtagbar passning",
+      "improving": "↗ förbättring",
+      "manual": "(manuellt vald)",
+      "poor_fit": "dålig passning",
+      "steady": "→ stabil",
+      "using_defaults": "Använder standardinställningar",
+      "using_tuned": "Använder justerade vikter"
+    },
+    "status": {
+      "active": "Aktiv",
+      "all_statuses": "Alla statusar",
+      "ambiguous": "Tvetydig",
+      "auto_detect": "Detektera automatiskt",
+      "clear": "Klar",
+      "completed": "Slutförd",
+      "fine_tuning": "finjusterar nu…",
+      "force_stopped": "Tvångsstoppad",
+      "idle": "Inaktiv",
+      "interrupted": "Avbruten",
+      "ready": "Redo att bearbeta",
+      "recording": "Spelar in…",
+      "working": "Arbetar…"
+    },
+    "ml": {
+      "builtin_models": "● Använder inbyggda modeller",
+      "fine_tuned_at": "finjusterad {when}",
+      "fit_fair": "Godtagbar",
+      "fit_good": "Bra",
+      "fit_slight": "Liten",
+      "fit_strong": "Stark",
+      "fit_weak": "Svag",
+      "fit_word": "passning",
+      "personalized": "● Anpassad till denna maskin"
+    },
+    "toast": {
+      "access_saved": "Åtkomstkontroll sparad",
+      "all_wiped": "All data raderad",
+      "analysis_complete": "Analys klar: {count} förslag",
+      "analysis_complete_none": "Analys klar: inga nya förslag",
+      "analysis_failed": "Analys misslyckades: {error}",
+      "apply_failed": "Tillämpning misslyckades: {error}",
+      "auto_detect_failed": "Automatisk detektering misslyckades: {error}",
+      "auto_label_complete": "Automatisk etikettering klar",
+      "auto_label_failed": "Automatisk etikettering misslyckades: {error}",
+      "automation_deleted": "Automatisering borttagen",
+      "correction_submitted": "Korrigering skickad",
+      "could_not_load_cycle": "Kunde inte läsa in cykel: {error}",
+      "create_failed": "Skapandet misslyckades: {error}",
+      "cycle_deleted": "Cykel borttagen",
+      "cycle_force_stopped": "Cykel tvångsstoppad",
+      "cycle_labelled": "Cykel etiketterad",
+      "cycle_paused": "Cykel pausad",
+      "cycle_resumed": "Cykel återupptagen",
+      "cycle_trimmed": "Cykel trimmad",
+      "cycles_deleted": "{count} cykel(er) borttagna",
+      "cycles_merged": "Cykler sammanslagda",
+      "debug_cleared": "Raderade {count} felsökningsspår",
+      "delete_failed": "Borttagning misslyckades: {error}",
+      "discard_failed": "Kassering misslyckades: {error}",
+      "envelope_rebuilt": "Kuvert återskapat",
+      "envelopes_rebuilt": "Kuvert återskapade",
+      "error": "Fel: {error}",
+      "export_downloaded": "Export hämtad",
+      "export_failed": "Export misslyckades: {error}",
+      "feedback_all_dismissed": "Alla återkopplingar avvisade",
+      "feedback_confirmed": "Återkoppling bekräftad",
+      "feedback_dismissed": "Återkoppling avvisad",
+      "group_deleted": "Grupp borttagen",
+      "group_name_required": "Gruppnamn krävs",
+      "group_saved": "Grupp sparad",
+      "import_failed": "Import misslyckades: {error}",
+      "import_successful": "Import lyckades; integrationen laddas om",
+      "invalid_json": "«{key}» är inte giltig JSON — åtgärda eller rensa fältet innan du sparar.",
+      "json_required": "JSON-data krävs",
+      "label_failed": "Etikettering misslyckades: {error}",
+      "legacy_removed": "Äldre åtgärder borttagna",
+      "logs_exported": "Loggar exporterade",
+      "matching_reverted": "Matchningsvikter återställda till standard",
+      "merge_failed": "Sammanslagning misslyckades: {error}",
+      "min_2_profiles": "Välj minst 2 profiler för en grupp",
+      "ml_training_no_improvement": "Träning klar: originalmodell behållen (ingen förbättring)",
+      "ml_training_promoted": "Träning klar: befordrade {count} modell(er)",
+      "models_reverted": "Modeller på enheten återställda till originalmodell",
+      "name_required": "Namn krävs",
+      "no_split_found": "Inga tomgångsluckor hittades att dela på",
+      "panel_settings_saved": "Panelinställningar sparade",
+      "pause_failed": "Paus misslyckades: {error}",
+      "phase_created": "Fas \"{name}\" skapad",
+      "phase_deleted": "Fas \"{name}\" borttagen",
+      "phase_name_required": "Fasnamn krävs",
+      "phase_updated": "Fas uppdaterad",
+      "phases_saved": "Faser sparade",
+      "preferences_saved": "Inställningar sparade",
+      "processed": "Bearbetade {bits}",
+      "profile_created": "Profil \"{name}\" skapad",
+      "profile_deleted": "Profil \"{name}\" borttagen",
+      "profile_name_required": "Profilnamn krävs",
+      "profile_renamed": "Profil omdöpt",
+      "rebuild_failed": "Återskapning misslyckades: {error}",
+      "recording_discarded": "Inspelning kasserad",
+      "recording_saved": "Inspelning sparad till profil",
+      "recording_started": "Inspelning startad",
+      "recording_stopped": "Inspelning stoppad",
+      "rename_failed": "Namnbyte misslyckades: {error}",
+      "revert_failed": "Återställning misslyckades: {error}",
+      "review_saved": "Granskning sparad",
+      "save_failed": "Sparning misslyckades: {error}",
+      "settings_saved": "Inställningar sparade; integrationen laddas om",
+      "split_complete": "Delad i {count} cykler",
+      "split_failed": "Delning misslyckades: {error}",
+      "start_failed": "Start misslyckades: {error}",
+      "stop_failed": "Stopp misslyckades: {error}",
+      "suggestions_applied": "Förslag tillämpade; integrationen laddas om",
+      "suggestions_dismissed": "Förslag avvisade",
+      "training_failed": "Träning misslyckades: {error}",
+      "trim_failed": "Trimning misslyckades: {error}",
+      "update_failed": "Uppdatering misslyckades: {error}"
+    },
+    "msg": {
+      "appliance_monitor": "Apparatövervakning",
+      "auto_label_intro": "Tilldela profiler till ej etiketterade cykler vars matchkonfidens överstiger tröskeln.",
+      "cleanup_intro": "Varje etiketterad cykel visas. Markera avvikare och ta bort för att rensa profilen.",
+      "collecting_data": "Samlar in data — {need} fler cykel{plural} innan finjustering kan starta ({current}/{min}).",
+      "compare_cycles_title": "Jämför {count} cykler",
+      "compare_overlay_profiles": "Lägg profiler som overlay (svagt)",
+      "compare_selected_cycles": "Valda cykler (solida) — visa / dölj",
+      "enough_data": "Tillräckligt med data för att lära sig av ({current}/{min} cykler).",
+      "import_intro": "Läs in en exporterad fil eller klistra in JSON-data nedan.",
+      "live_chart_loading": "Realtidseffektdiagram visas när avläsningarna anländer.",
+      "loading": "Laddar…",
+      "loading_curve": "Laddar kurva…",
+      "loading_settings": "Laddar inställningar…",
+      "maintenance_requires_access": "Underhåll och export/import kräver full åtkomst.",
+      "matching_tuning_intro": "Under inlärning justerar WashData också hur mycket programmatchning väger en cykels form mot dess varaktighet och energi.",
+      "merge_intro": "De valda cyklerna kombineras till en (kronologisk ordning; luckor fylls med 0 W). Välj den resulterande profilen.",
+      "ml_intro": "WashData levereras med smarta modeller som detekterar cykler, matchar program och beräknar tid och energi — de fungerar direkt.",
+      "ml_learned_intro": "Modeller finjusterade till denna maskin. Allt som inte listas använder den pålitliga inbyggda modellen.",
+      "ml_loading": "laddar ML…",
+      "ml_settings_intro": "Två oberoende switchar: den ena tillämpar modellerna medan en cykel körs, den andra låter WashData finjustera dem till din maskin över tid.",
+      "no_cycles_match": "Inga cykler matchar det aktuella filtret.",
+      "no_cycles_profile": "Inga cykler för denna profil.",
+      "no_cycles_yet": "Inga cykler registrerade ännu.",
+      "no_device_selected": "Ingen enhet vald.",
+      "no_devices": "Inga WashData-enheter konfigurerade ännu.",
+      "no_envelope": "Inget kuvert ännu — bygg om efter etiketterade cykler.",
+      "no_envelope_overlay": "Inget kuvert tillgängligt för overlay.",
+      "no_fine_tuned": "Inget finjusterat ännu — WashData använder sina inbyggda modeller.",
+      "no_logs": "Inga loggposter buffrade ännu.",
+      "no_match_yet": "Inget matchningsförsök ännu — detta fylls i under en pågående cykel.",
+      "no_other_users": "Inga andra Home Assistant-användare hittades.",
+      "no_phases": "Inga faser definierade.",
+      "no_phases_assigned": "Inga faser tilldelade.",
+      "no_profiles_compare": "Inga profiler att jämföra.",
+      "no_profiles_overlay": "Inga profiler att lägga som overlay.",
+      "no_profiles_yet": "Inga profiler ännu. Skapa en från en etiketterad cykel.",
+      "no_profiles_yet_short": "Inga profiler ännu.",
+      "no_split_points": "Inga delningspunkter ännu.",
+      "no_suggestions": "Inga aktiva förslag.",
+      "pending_feedback": "Väntande detekteringsåterkoppling",
+      "phase_catalog_intro": "Namngivna segment av en cykel (förtvätt, uppvärmning, centrifugering…). Tilldela dem till en profil från dess kontrollpanel.",
+      "phase_ranges_intro": "Fasintervall (minuter från cykelstart) överlappade på genomsnittskurvan. Redigera värden för att förhandsvisa i realtid.",
+      "preferences_admin": "Inställningar, panel och åtkomstkontroll",
+      "preferences_adv": "Inställningar",
+      "prefs_personal": "Dessa gäller endast ditt Home Assistant-konto.",
+      "recent_logs": "Senaste ha_washdata-poster",
+      "recording_in_progress": "Inspelning pågår",
+      "review_in_settings": "Granska i Inställningar",
+      "review_to_cycles": "Öppna granskningskön för cykler",
+      "saving_triggers_reload": "Sparning utlöser en omstart av integrationen. HA-enheter kan kort visas som otillgängliga.",
+      "see_recorder": "Se inspelningswidgeten nedan",
+      "split_intro": "Klicka på grafen för att lägga till eller ta bort en delningspunkt, eller detektera automatiskt via tomgångsluckor.",
+      "storage_diagnostics": "Lagringsstatistik, underhåll, export/import",
+      "trim_intro": "Dra de röda handtagen eller ange värden. Allt utanför fönstret tas bort.",
+      "unsure_detected_prefix": "WashData är osäker på om den detekterade",
+      "updated": "Uppdaterad {time}"
+    },
+    "modal": {
+      "auto_label": "Etikettcykler automatiskt",
+      "correct_feedback": "Korrigera återkoppling",
+      "create_profile": "Skapa profil",
+      "cycle": "Cykel",
+      "edit_phase": "Redigera fas",
+      "import_config": "Importera konfiguration",
+      "label_cycle": "Etikettera cykel",
+      "new_phase": "Ny fas",
+      "process_recording": "Bearbeta inspelning"
+    },
+    "tag": {
+      "early_end": "Tidigt slut",
+      "late_start": "Sen start",
+      "merged": "Sammanslagda cykler",
+      "noise": "Brus",
+      "sensor_gap": "Sensorlucka",
+      "split": "Delad cykel",
+      "wrong_profile": "Fel profil"
+    },
+    "quality": {
+      "bad": "Dålig",
+      "good": "Bra",
+      "unusable": "Oanvändbar"
+    },
+    "access": {
+      "edit": "Redigera",
+      "full": "Full",
+      "inherit": "Ärv",
+      "none": "Ingen (dold)",
+      "read": "Läs"
+    },
+    "health": {
+      "fair": "Godtagbar matchkvalitet",
+      "good": "✓ Bra matchkvalitet",
+      "poor": "⚠ Dålig matchkvalitet"
+    },
+    "trend": {
+      "down": "Sjunkande trend",
+      "up": "Stigande trend"
+    },
+    "pref": {
+      "date_absolute": "Absolut (t.ex. 14:32 den 2 jul)",
+      "date_relative": "Relativ (t.ex. för 2 timmar sedan)"
+    },
+    "log": {
+      "all_levels": "Alla nivåer"
+    },
+    "section": {
+      "anti_wrinkle": {
+        "intro": "Anti-skrynkelläge detekterar torktumlarens tumlarpulser efter den huvudsakliga värmefasen.",
+        "label": "Anti-skrynkel"
+      },
+      "basic": {
+        "intro": "Kärnidentitet och grundläggande inställningar som de flesta konfigurationer behöver.",
+        "label": "Grundläggande"
+      },
+      "delay": {
+        "intro": "Fördröjd startdetektering identifierar när en apparat är påslagen men ännu inte startat sin cykel.",
+        "label": "Fördröjd start"
+      },
+      "detection": {
+        "intro": "Hur en cykel detekteras som startad, pågående och avslutad.",
+        "label": "Detektering"
+      },
+      "matching": {
+        "intro": "Hur avslutade cykler matchas mot inlärda profiler och etiketteras.",
+        "label": "Matchning"
+      },
+      "ml_training": {
+        "intro": "Valfria smarta modeller som anpassar detektering och timing till denna enhet.",
+        "label": "ML-träning"
+      },
+      "notifications": {
+        "intro": "Konfigurera när och hur du meddelas om cykelhändelser.",
+        "label": "Notifikationer"
+      },
+      "timing": {
+        "intro": "Bakgrundskadensen, den offlineväktaren och städning.",
+        "label": "Timing och väktare"
+      },
+      "triggers": {
+        "intro": "Valfria externa signaler: en sluttrigger, en dörrsensor, en pausbrytare och påminnelse om tömning.",
+        "label": "Triggers och dörr"
+      }
+    },
+    "setting": {
+      "abrupt_drop_ratio": {
+        "label": "Abrupt droppförhållande"
+      },
+      "abrupt_drop_watts": {
+        "label": "Abrupt dropp"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Aktivera anti-skrynkeldetektering"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Effekttröskel för avslut"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Maximal varaktighet"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Maximal anti-skrynkeleffekt"
+      },
+      "auto_label_confidence": {
+        "label": "Konfidens för automatisk etikettering"
+      },
+      "auto_maintenance": {
+        "label": "Automatiskt underhåll (nattlig städning)"
+      },
+      "completion_min_seconds": {
+        "label": "Minsta cykelvaraktighet"
+      },
+      "delay_confirm_seconds": {
+        "label": "Bekräftelsesekunder"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Aktivera detektering av fördröjd start"
+      },
+      "delay_timeout_hours": {
+        "label": "Tidsgränstimmar"
+      },
+      "device_type": {
+        "label": "Enhetstyp"
+      },
+      "door_sensor_entity": {
+        "label": "Dörrsensorenhet"
+      },
+      "duration_tolerance": {
+        "label": "Beräkningstolerans"
+      },
+      "enable_ml_models": {
+        "label": "Tillämpa smarta modeller under en cykel"
+      },
+      "end_energy_threshold": {
+        "label": "Slutenergi"
+      },
+      "end_repeat_count": {
+        "label": "Antal upprepningar vid slut"
+      },
+      "energy_price_entity": {
+        "label": "Energiprisenhet"
+      },
+      "energy_price_static": {
+        "label": "Statiskt energipris (per kWh)"
+      },
+      "expose_debug_entities": {
+        "label": "Exponera felsökningsenheter"
+      },
+      "external_end_trigger": {
+        "label": "Extern triggerenhet"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Aktivera extern sluttrigger"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Invertera extern trigger (triggar på AV)"
+      },
+      "learning_confidence": {
+        "label": "Inlärningskonfidens"
+      },
+      "linked_device": {
+        "label": "Gruppera under enhet"
+      },
+      "min_off_gap": {
+        "label": "Minsta av-lucka"
+      },
+      "min_power": {
+        "label": "Minsta effekt"
+      },
+      "ml_training_enabled": {
+        "label": "Lär av denna maskin"
+      },
+      "ml_training_hour": {
+        "label": "Lär vid timme"
+      },
+      "ml_training_interval_days": {
+        "label": "Kontrollera som mest var"
+      },
+      "ml_training_min_cycles": {
+        "label": "Cykler som krävs först"
+      },
+      "name": {
+        "label": "Enhetsnamn"
+      },
+      "no_update_active_timeout": {
+        "label": "Tidsgräns utan uppdatering"
+      },
+      "notify_before_end_minutes": {
+        "label": "Förhandsavisering"
+      },
+      "notify_channel": {
+        "label": "Android-kanal (start/live)"
+      },
+      "notify_finish_channel": {
+        "label": "Android-kanal (avslut)"
+      },
+      "notify_finish_message": {
+        "label": "Avslutningsmeddelande"
+      },
+      "notify_finish_services": {
+        "label": "Avslutingstjänster"
+      },
+      "notify_fire_events": {
+        "label": "Utlös HA-händelser för notifikationer"
+      },
+      "notify_icon": {
+        "label": "Notifikationsikon"
+      },
+      "notify_live_chronometer": {
+        "label": "Använd levande kronometer"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Intervall för levande uppdateringar"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Levande överskridning % innan avisering"
+      },
+      "notify_live_services": {
+        "label": "Tjänster för levande förlopp"
+      },
+      "notify_only_when_home": {
+        "label": "Meddela bara när hemma"
+      },
+      "notify_people": {
+        "label": "Personer (för bara när hemma)"
+      },
+      "notify_pre_complete_message": {
+        "label": "Förhandsavslutningsmeddelande"
+      },
+      "notify_reminder_message": {
+        "label": "Påminnelsemeddelande"
+      },
+      "notify_start_message": {
+        "label": "Startmeddelande"
+      },
+      "notify_start_services": {
+        "label": "Starttjänster"
+      },
+      "notify_timeout_seconds": {
+        "label": "Avvisa automatiskt efter"
+      },
+      "notify_title": {
+        "label": "Notifikationstitel"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Fördröjning för tömningspåminnelse"
+      },
+      "off_delay": {
+        "label": "Av-fördröjning"
+      },
+      "pause_cuts_power": {
+        "label": "Paus stänger även av effekt (via switch)"
+      },
+      "power_sensor": {
+        "label": "Effektsensor"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profilvaraktighetstolerans"
+      },
+      "profile_match_interval": {
+        "label": "Matchningsintervall"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Max varaktighetsförhållande"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Min varaktighetsförhållande"
+      },
+      "profile_match_threshold": {
+        "label": "Matchningströskel"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Avmatchningströskel"
+      },
+      "progress_reset_delay": {
+        "label": "Fördröjning för återställning av förlopp"
+      },
+      "pump_stuck_duration": {
+        "label": "Pump fast-varaktighet"
+      },
+      "running_dead_zone": {
+        "label": "Körningens döda zon"
+      },
+      "sampling_interval": {
+        "label": "Samplingsintervall"
+      },
+      "save_debug_traces": {
+        "label": "Spara felsökningsspår"
+      },
+      "smoothing_window": {
+        "label": "Utjämningsfönster"
+      },
+      "start_duration_threshold": {
+        "label": "Startvaraktighet"
+      },
+      "start_energy_threshold": {
+        "label": "Startenergi"
+      },
+      "start_threshold_w": {
+        "label": "Starttröskel"
+      },
+      "stop_threshold_w": {
+        "label": "Stopptröskel"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Undertrycka återkopplingsnotifikationer"
+      },
+      "switch_entity": {
+        "label": "Switchenhet"
+      },
+      "watchdog_interval": {
+        "label": "Väktarintervall"
+      }
+    }
   }
 }

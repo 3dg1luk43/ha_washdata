@@ -1333,5 +1333,707 @@
     "trim_invalid_range": {
       "message": "trim_end_s mora biti večje od trim_start_s."
     }
+  },
+  "panel": {
+    "tab": {
+      "status": "Pregled",
+      "history": "Cikli",
+      "profiles": "Profili",
+      "settings": "Nastavitve",
+      "ml": "Učenje ML",
+      "advanced": "Napredno",
+      "diagnostics": "Diagnostika",
+      "pp_overview": "Pregled",
+      "pp_manage": "Upravljanje",
+      "pp_cleanup": "Čiščenje",
+      "pp_phases": "Faze",
+      "subtab_profiles": "Profili",
+      "subtab_phase_catalog": "Katalog faz"
+    },
+    "btn": {
+      "add": "Dodaj",
+      "add_device": "+ Dodaj napravo",
+      "add_phase": "+ Dodaj fazo",
+      "apply": "Uporabi",
+      "apply_all": "Uporabi vse",
+      "apply_label": "Uporabi oznako",
+      "apply_split": "Uporabi razdelitev",
+      "apply_trim": "Uporabi obrezovanje",
+      "auto_detect_split": "Samodejno zaznaj",
+      "auto_label_cycles": "Samodejno označi cikle",
+      "cancel": "Prekliči",
+      "clear_debug": "Počisti podatke za odpravljanje napak",
+      "clear_splits": "Počisti",
+      "close": "Zapri",
+      "compare": "Primerjaj",
+      "confirm": "Potrdi",
+      "convert_to_automation": "Pretvori v avtomatizacijo",
+      "correct": "Popravi…",
+      "create": "Ustvari",
+      "create_profile": "+ Ustvari profil",
+      "delete": "Izbriši",
+      "delete_group": "Izbriši skupino",
+      "delete_profile": "Izbriši profil",
+      "discard": "Zavrzi",
+      "dismiss": "Opusti",
+      "dismiss_all": "Opusti vse",
+      "done": "Končano",
+      "edit": "Uredi",
+      "export": "Izvozi",
+      "export_json": "Izvozi v JSON",
+      "force_stop": "Prisilen zaustavitev",
+      "from_template": "Iz predloge ▾",
+      "ignore": "Prezri",
+      "import": "Uvozi",
+      "import_json": "Uvozi iz JSON",
+      "import_overwrite": "Uvozi (prepiše podatke)",
+      "inspect": "Preglej",
+      "label": "Označi",
+      "manage": "Upravljaj",
+      "merge": "Spoji",
+      "new_automation": "＋ Nova avtomatizacija",
+      "new_group": "+ Nova skupina",
+      "new_phase": "+ Nova faza",
+      "new_profile": "+ Nov profil",
+      "on_cycle_finished": "Ko se cikel konča",
+      "on_cycle_started": "Ko se cikel začne",
+      "pause_cycle": "Zaustavi",
+      "process": "Obdelaj",
+      "process_history": "Obdelaj zdaj",
+      "process_recording": "Shrani posnetek",
+      "rebuild": "Obnovi ovojnice",
+      "rebuild_envelope": "Obnovi ovojnico",
+      "rec_stop": "Ustavi",
+      "record": "Začni snemanje",
+      "refresh": "Osveži",
+      "remove": "Odstrani",
+      "reset": "Ponastavi",
+      "reset_to_builtin": "Ponastavi na vgrajene modele",
+      "reset_to_defaults": "Ponastavi na privzete vrednosti",
+      "resume_cycle": "Nadaljuj",
+      "review": "Preglej",
+      "run_analysis": "🔍 Zaženi analizo predlogov",
+      "run_auto_label": "Zaženi samodejno označevanje",
+      "save": "Shrani",
+      "save_access_control": "Shrani nadzor dostopa",
+      "save_group": "Shrani skupino",
+      "save_panel_settings": "Shrani nastavitve plošče",
+      "save_phases": "Shrani faze",
+      "save_preferences": "Shrani nastavitve",
+      "save_review": "Shrani pregled",
+      "save_settings": "Shrani nastavitve",
+      "select": "Izberi",
+      "show_only": "Prikaži samo",
+      "split": "Razdeli",
+      "stop": "Ustavi",
+      "submit_correction": "Pošlji popravek",
+      "train_now": "Učiti zdaj",
+      "trim": "Obreži",
+      "trim_split": "Obreži / Razdeli",
+      "use": "Uporabi",
+      "wipe_all": "Izbriši vse podatke"
+    },
+    "hdr": {
+      "access_control": "Nadzor dostopa",
+      "automation_delete": "Izbriši to avtomatizacijo",
+      "automation_needs_review": "Ta cikel zahteva pregled",
+      "automation_open": "Odpri v urejevalniku avtomatizacij",
+      "automation_review_this_cycle": "Preglej ta cikel",
+      "automations": "Avtomatizacije",
+      "clear_debug": "Počisti sledi za odpravljanje napak",
+      "diagnostics_pref": "Diagnostika",
+      "display": "Prikaz",
+      "export_import": "Izvoz / Uvoz",
+      "live_power": "Moč v živo",
+      "logs": "Dnevniki",
+      "logs_diagnostics": "Diagnostika",
+      "maintenance": "Vzdrževalna dejanja",
+      "manual_recording": "Ročno snemanje",
+      "ml_learned": "Kaj se je WashData naučil",
+      "ml_matching_tuning": "Natančno uglaševanje ujemanja programov",
+      "ml_settings_card": "Nastavitve",
+      "ml_smart_learning": "Pametno učenje",
+      "my_preferences": "Moje nastavitve",
+      "no_automations": "Na to napravo se še ne sklicuje nobena avtomatizacija.",
+      "panel_settings": "Nastavitve plošče (vsi uporabniki)",
+      "phase_catalog": "Katalog faz",
+      "process_history": "Obdelaj zgodovino",
+      "status": "Stanje",
+      "status_graph": "Graf stanja",
+      "storage_stats": "Statistika shranjevanja",
+      "tools_and_data": "Orodja in podatki",
+      "wipe_history": "Izbriši zgodovino"
+    },
+    "lbl": {
+      "actions": "Dejanja",
+      "activity": "Aktivnost",
+      "administrators": "Administratorji",
+      "auto_fine_tune_off": "samodejno natančno uglaševanje izklopljeno",
+      "auto_fine_tune_on": "samodejno natančno uglaševanje vklopljeno (okoli {hour}:00)",
+      "clock_time": "Čas ure",
+      "compare_profiles": "Primerjaj s profili",
+      "confidence": "Zaupanje",
+      "confidence_threshold": "Prag zaupanja",
+      "correct_duration": "Pravilno trajanje (min, neobvezno)",
+      "correct_profile": "Pravilen profil",
+      "cost": "Strošek",
+      "create_new_profile": "+ Ustvari nov profil…",
+      "cycle_date_display": "Prikaz datuma cikla",
+      "cycle_health": "Zdravje cikla",
+      "cycles_count": "Cikli",
+      "date": "Datum",
+      "debug_traces": "Sledi za odpravljanje napak",
+      "default": "Privzeto",
+      "default_access_level": "Privzeta raven za uporabnike, ki niso navedeni spodaj",
+      "default_other": "Privzeto (druge naprave)",
+      "default_tab": "Privzeti zavihek pri odprtju plošče",
+      "description": "Opis",
+      "duration": "Trajanje",
+      "emphasis": "Poudarek",
+      "enable_access_control": "Omogoči nadzor dostopa za posameznega uporabnika",
+      "end": "Konec",
+      "energy": "Energija",
+      "expected_duration": "Pričakovano trajanje (min)",
+      "file_kb": "Datoteka (kB)",
+      "gap_s": "Presledek (s)",
+      "golden_reference": "Posneti referenčni cikel",
+      "head_trim": "Obrezovanje začetka (s)",
+      "health": "Zdravje",
+      "hide_tabs": "Skrij zavihke za ne-administratorje",
+      "in_use": "V uporabi",
+      "json_data": "Podatki JSON",
+      "label": "Oznaka",
+      "last_checked": "Nazadnje prevereno:",
+      "load_from_file": "Naloži iz datoteke",
+      "manual_duration": "Ročno trajanje (min, neobvezno)",
+      "mode_existing_profile": "Dodaj k obstoječemu profilu",
+      "mode_new_profile": "Ustvari nov profil",
+      "new_profile_name": "Novo ime profila",
+      "notes": "Opombe",
+      "panel_default_tab": "Privzeti zavihek",
+      "phase_name": "Ime faze",
+      "power": "Moč",
+      "profile": "Profil",
+      "profile_name": "Ime profila",
+      "program": "Program",
+      "progress": "Napredek",
+      "quality": "Kakovost",
+      "read_only": "Samo za branje",
+      "ref_cycle": "Referenčni cikel (neobvezno)",
+      "refresh_interval": "Interval osveževanja (s)",
+      "remaining": "Preostalo",
+      "remove_label": "- Odstrani oznako -",
+      "rename_profile": "Preimenuj profil",
+      "resulting_profile": "Nastali profil",
+      "save_mode": "Način shranjevanja",
+      "seconds_from_start": "Sekunde od začetka",
+      "select_profile": "Izberi profil",
+      "show_debug": "Prikaži kartico za razhroščevanje ujemanja v živo na strani Stanje (zaupanje, dvoumnost, najboljši kandidati)",
+      "show_expected": "Prikaži pričakovano krivuljo (ujemajoči profil, oranžna)",
+      "show_raw": "Prikaži neobdelane vrednosti senzorja (neizglajena, siva)",
+      "start": "Začetek",
+      "status": "Stanje",
+      "tags": "Oznake",
+      "tail_trim": "Obrezovanje konca (s)",
+      "ungrouped": "Nerazvrščeno",
+      "unlabelled": "Neoznačeno",
+      "unlabelled_paren": "(neoznačeno)"
+    },
+    "badge": {
+      "auto": "(samodejno zaznano)",
+      "built_in_tag": "vgrajeno",
+      "declining": "↘ upadanje",
+      "fair_fit": "sprejemljivo ujemanje",
+      "improving": "↗ izboljšanje",
+      "manual": "(ročno izbrano)",
+      "poor_fit": "slabo ujemanje",
+      "steady": "→ stabilno",
+      "using_defaults": "Uporaba privzetih vrednosti",
+      "using_tuned": "Uporaba uglašenih uteži"
+    },
+    "status": {
+      "active": "Aktivno",
+      "all_statuses": "Vsa stanja",
+      "ambiguous": "Dvoumno",
+      "auto_detect": "Samodejno zaznaj",
+      "clear": "Jasno",
+      "completed": "Dokončano",
+      "fine_tuning": "natančno uglaševanje…",
+      "force_stopped": "Prisilno ustavljeno",
+      "idle": "V mirovanju",
+      "interrupted": "Prekinjeno",
+      "ready": "Pripravljen za obdelavo",
+      "recording": "Snemanje…",
+      "working": "Deluje…"
+    },
+    "ml": {
+      "builtin_models": "● Uporaba vgrajenih modelov",
+      "fine_tuned_at": "natančno uglašeno {when}",
+      "fit_fair": "Zmerno",
+      "fit_good": "Dobro",
+      "fit_slight": "Rahlo",
+      "fit_strong": "Močno",
+      "fit_weak": "Šibko",
+      "fit_word": "ujemanje",
+      "personalized": "● Prilagojeno tej napravi"
+    },
+    "toast": {
+      "access_saved": "Nadzor dostopa shranjen",
+      "all_wiped": "Vsi podatki izbrisani",
+      "analysis_complete": "Analiza dokončana: {count} predlog(ov)",
+      "analysis_complete_none": "Analiza dokončana: ni novih predlogov",
+      "analysis_failed": "Analiza ni uspela: {error}",
+      "apply_failed": "Uporaba ni uspela: {error}",
+      "auto_detect_failed": "Samodejno zaznavanje ni uspelo: {error}",
+      "auto_label_complete": "Samodejno označevanje dokončano",
+      "auto_label_failed": "Samodejno označevanje ni uspelo: {error}",
+      "automation_deleted": "Avtomatizacija izbrisana",
+      "correction_submitted": "Popravek poslan",
+      "could_not_load_cycle": "Cikla ni mogoče naložiti: {error}",
+      "create_failed": "Ustvarjanje ni uspelo: {error}",
+      "cycle_deleted": "Cikel izbrisan",
+      "cycle_force_stopped": "Cikel prisilno ustavljen",
+      "cycle_labelled": "Cikel označen",
+      "cycle_paused": "Cikel zaustavljen",
+      "cycle_resumed": "Cikel nadaljeval",
+      "cycle_trimmed": "Cikel obrezan",
+      "cycles_deleted": "{count} cikel(ov) izbrisanih",
+      "cycles_merged": "Cikli spojeni",
+      "debug_cleared": "Izbrisanih {count} sledi za odpravljanje napak",
+      "delete_failed": "Brisanje ni uspelo: {error}",
+      "discard_failed": "Zavrnitev ni uspela: {error}",
+      "envelope_rebuilt": "Ovojnica obnovljena",
+      "envelopes_rebuilt": "Ovojnice obnovljene",
+      "error": "Napaka: {error}",
+      "export_downloaded": "Izvoz prenesen",
+      "export_failed": "Izvoz ni uspel: {error}",
+      "feedback_all_dismissed": "Vse povratne informacije opuščene",
+      "feedback_confirmed": "Povratna informacija potrjena",
+      "feedback_dismissed": "Povratna informacija opuščena",
+      "group_deleted": "Skupina izbrisana",
+      "group_name_required": "Ime skupine je obvezno",
+      "group_saved": "Skupina shranjena",
+      "import_failed": "Uvoz ni uspel: {error}",
+      "import_successful": "Uvoz uspešen; integracija se znova nalaga",
+      "invalid_json": "»{key}« ni veljavni JSON — popravite ali počistite polje pred shranjevanjem.",
+      "json_required": "Potrebni so podatki JSON",
+      "label_failed": "Označevanje ni uspelo: {error}",
+      "legacy_removed": "Podedovana dejanja odstranjena",
+      "logs_exported": "Dnevniki izvoženi",
+      "matching_reverted": "Uteži ujemanja ponastavljene na privzeto",
+      "merge_failed": "Spajanje ni uspelo: {error}",
+      "min_2_profiles": "Za skupino izberite vsaj 2 profila",
+      "ml_training_no_improvement": "Učenje dokončano: osnova ohranjena (ni izboljšave)",
+      "ml_training_promoted": "Učenje dokončano: promoviranih {count} model(ov)",
+      "models_reverted": "Modeli na napravi povrnjeni na osnovo",
+      "name_required": "Ime je obvezno",
+      "no_split_found": "Ni najdenih presledkov za razdelitev",
+      "panel_settings_saved": "Nastavitve plošče shranjene",
+      "pause_failed": "Zaustavitev ni uspela: {error}",
+      "phase_created": "Faza »{name}« ustvarjena",
+      "phase_deleted": "Faza »{name}« izbrisana",
+      "phase_name_required": "Ime faze je obvezno",
+      "phase_updated": "Faza posodobljena",
+      "phases_saved": "Faze shranjene",
+      "preferences_saved": "Nastavitve shranjene",
+      "processed": "Obdelano {bits}",
+      "profile_created": "Profil »{name}« ustvarjen",
+      "profile_deleted": "Profil »{name}« izbrisan",
+      "profile_name_required": "Ime profila je obvezno",
+      "profile_renamed": "Profil preimenovan",
+      "rebuild_failed": "Obnova ni uspela: {error}",
+      "recording_discarded": "Posnetek zavrnjen",
+      "recording_saved": "Posnetek shranjen v profil",
+      "recording_started": "Snemanje začeto",
+      "recording_stopped": "Snemanje ustavljeno",
+      "rename_failed": "Preimenovanje ni uspelo: {error}",
+      "revert_failed": "Povrnitev ni uspela: {error}",
+      "review_saved": "Pregled shranjen",
+      "save_failed": "Shranjevanje ni uspelo: {error}",
+      "settings_saved": "Nastavitve shranjene; integracija se znova nalaga",
+      "split_complete": "Razdeljeno na {count} ciklov",
+      "split_failed": "Razdelitev ni uspela: {error}",
+      "start_failed": "Začetek ni uspel: {error}",
+      "stop_failed": "Zaustavitev ni uspela: {error}",
+      "suggestions_applied": "Predlogi uporabljeni; integracija se znova nalaga",
+      "suggestions_dismissed": "Predlogi opuščeni",
+      "training_failed": "Učenje ni uspelo: {error}",
+      "trim_failed": "Obrezovanje ni uspelo: {error}",
+      "update_failed": "Posodobitev ni uspela: {error}"
+    },
+    "msg": {
+      "appliance_monitor": "Nadzor gospodinjskih aparatov",
+      "auto_label_intro": "Dodelite profile neoznačenim ciklom, katerih zaupanje ujemanja preseže prag.",
+      "cleanup_intro": "Vsak označen cikel je prikazan. Označite izstopne vrednosti in jih izbrišite za čiščenje profila.",
+      "collecting_data": "Zbiranje podatkov — {need} še cikel{plural} pred začetkom natančnega uglaševanja ({current}/{min}).",
+      "compare_cycles_title": "Primerjaj {count} ciklov",
+      "compare_overlay_profiles": "Prekrij profile (bledo)",
+      "compare_selected_cycles": "Izbrani cikli (polni) — prikaži / skrij",
+      "enough_data": "Dovolj podatkov za učenje ({current}/{min} ciklov).",
+      "import_intro": "Naložite izvoženo datoteko ali prilepite vsebino JSON spodaj.",
+      "live_chart_loading": "Graf moči v živo se pojavi ob prihodu odčitkov.",
+      "loading": "Nalaganje…",
+      "loading_curve": "Nalaganje krivulje…",
+      "loading_settings": "Nalaganje nastavitev…",
+      "maintenance_requires_access": "Vzdrževanje in izvoz/uvoz zahtevata poln dostop.",
+      "matching_tuning_intro": "Med učenjem WashData prav tako prilagodi, kako močno ujemanje programov upošteva obliko cikla v primerjavi z njegovim trajanjem in energijo.",
+      "merge_intro": "Izbrani cikli so združeni v enega (v kronološkem vrstnem redu; vrzeli zapolnjene z 0 W). Izberite nastali profil.",
+      "ml_intro": "WashData ima vgrajene pametne modele, ki zaznavajo cikle, ujemajo programe in ocenjujejo čas ter energijo — delujejo takoj.",
+      "ml_learned_intro": "Modeli natančno uglašeni za to napravo. Vse, kar ni navedeno, uporablja zanesljiv vgrajeni model.",
+      "ml_loading": "nalaganje ML…",
+      "ml_settings_intro": "Dva neodvisna stikala: eno uporablja modele med potekom cikla, drugo pa WashDatau omogoča, da jih sčasoma prilagodi vaši napravi.",
+      "no_cycles_match": "Noben cikel ne ustreza trenutnemu filtru.",
+      "no_cycles_profile": "Za ta profil ni ciklov.",
+      "no_cycles_yet": "Še ni zabeleženih ciklov.",
+      "no_device_selected": "Nobena naprava ni izbrana.",
+      "no_devices": "Še ni konfiguriranih naprav WashData.",
+      "no_envelope": "Še ni ovojnice — obnovite po označevanju ciklov.",
+      "no_envelope_overlay": "Ni razpoložljive ovojnice za prekrivanje.",
+      "no_fine_tuned": "Še ni natančno uglašenega — WashData uporablja svoje vgrajene modele.",
+      "no_logs": "Še ni shranjenih vnosov dnevnika.",
+      "no_match_yet": "Še ni poskusa ujemanja — to se zapolni med potekom cikla.",
+      "no_other_users": "Ni najdenih drugih uporabnikov Home Assistant.",
+      "no_phases": "Ni definiranih faz.",
+      "no_phases_assigned": "Ni dodeljenih faz.",
+      "no_profiles_compare": "Ni profilov za primerjavo.",
+      "no_profiles_overlay": "Ni profilov za prekrivanje.",
+      "no_profiles_yet": "Še ni profilov. Ustvarite enega iz označenega cikla.",
+      "no_profiles_yet_short": "Še ni profilov.",
+      "no_split_points": "Še ni točk razdelitve.",
+      "no_suggestions": "Ni aktivnih predlogov.",
+      "pending_feedback": "Čakajočo povratno informacijo zaznavanja",
+      "phase_catalog_intro": "Poimenovani segmenti cikla (predpranje, segrevanje, centrifugiranje…). Dodelite jih profilu iz nadzorne plošče.",
+      "phase_ranges_intro": "Razponi faz (minute od začetka cikla) prekriti na povprečno krivuljo. Uredite vrednosti za predogled v živo.",
+      "preferences_admin": "Nastavitve, plošča in nadzor dostopa",
+      "preferences_adv": "Nastavitve",
+      "prefs_personal": "Te nastavitve veljajo samo za vaš račun Home Assistant.",
+      "recent_logs": "Nedavni vnosi ha_washdata",
+      "recording_in_progress": "Snemanje poteka",
+      "review_in_settings": "Preglej v Nastavitvah",
+      "review_to_cycles": "Odpri čakalno vrsto za pregled ciklov",
+      "saving_triggers_reload": "Shranjevanje sproži ponovni zagon integracije. Entitete HA se lahko kratko pokažejo kot nedosegljive.",
+      "see_recorder": "Oglejte si pripomoček za snemanje spodaj",
+      "split_intro": "Kliknite na graf za dodajanje ali odstranitev točke razdelitve ali samodejno zaznajte prek presledkov mirovanja.",
+      "storage_diagnostics": "Statistika shranjevanja, vzdrževanje, izvoz/uvoz",
+      "trim_intro": "Povlecite rdeče ročke ali vnesite vrednosti. Vse zunaj okna je odstranjeno.",
+      "unsure_detected_prefix": "WashData ni prepričan, da je zaznal",
+      "updated": "Posodobljeno {time}"
+    },
+    "modal": {
+      "auto_label": "Samodejno označi cikle",
+      "correct_feedback": "Popravi povratno informacijo",
+      "create_profile": "Ustvari profil",
+      "cycle": "Cikel",
+      "edit_phase": "Uredi fazo",
+      "import_config": "Uvozi konfiguracijo",
+      "label_cycle": "Označi cikel",
+      "new_phase": "Nova faza",
+      "process_recording": "Obdelaj posnetek"
+    },
+    "tag": {
+      "early_end": "Zgodnji konec",
+      "late_start": "Pozen začetek",
+      "merged": "Spojeni cikli",
+      "noise": "Šum",
+      "sensor_gap": "Presledek senzorja",
+      "split": "Razdeljen cikel",
+      "wrong_profile": "Napačen profil"
+    },
+    "quality": {
+      "bad": "Slabo",
+      "good": "Dobro",
+      "unusable": "Neuporabno"
+    },
+    "access": {
+      "edit": "Uredi",
+      "full": "Polno",
+      "inherit": "Podeduj",
+      "none": "Brez (skrito)",
+      "read": "Branje"
+    },
+    "health": {
+      "fair": "Sprejemljivo ujemanje",
+      "good": "✓ Dobro ujemanje",
+      "poor": "⚠ Slabo ujemanje"
+    },
+    "trend": {
+      "down": "Trend navzdol",
+      "up": "Trend navzgor"
+    },
+    "pref": {
+      "date_absolute": "Absolutno (npr. 14:32 dne 2. jul)",
+      "date_relative": "Relativno (npr. pred 2 urami)"
+    },
+    "log": {
+      "all_levels": "Vse ravni"
+    },
+    "section": {
+      "anti_wrinkle": {
+        "intro": "Način za preprečevanje gub zaznava pulze bubnja sušilnika po glavni fazi segrevanja.",
+        "label": "Preprečevanje gub"
+      },
+      "basic": {
+        "intro": "Osnovna identiteta in bistvene nastavitve, ki jih potrebuje večina konfiguracij.",
+        "label": "Osnovno"
+      },
+      "delay": {
+        "intro": "Zaznavanje zapoznelega zagona prepozna, kdaj je aparat vklopljen, a še ni začel cikla.",
+        "label": "Zapozneli zagon"
+      },
+      "detection": {
+        "intro": "Kako se cikel zazna kot začet, aktiven in dokončan.",
+        "label": "Zaznavanje"
+      },
+      "matching": {
+        "intro": "Kako se dokončani cikli ujemajo z naučenimi profili in označijo.",
+        "label": "Ujemanje"
+      },
+      "ml_training": {
+        "intro": "Izbirni pametni modeli, ki prilagodijo zaznavanje in časovni razpored tej napravi.",
+        "label": "Učenje ML"
+      },
+      "notifications": {
+        "intro": "Konfigurirajte, kdaj in kako vas obvestijo o ciklih.",
+        "label": "Obvestila"
+      },
+      "timing": {
+        "intro": "Ozadni ritem, čuvaj brez povezave in vzdrževanje.",
+        "label": "Čas in čuvaj"
+      },
+      "triggers": {
+        "intro": "Neobvezni zunanji signali: sprožilec konca, senzor vrat, stikalo za premor in opomnik za razkladanje.",
+        "label": "Sprožilci in vrata"
+      }
+    },
+    "setting": {
+      "abrupt_drop_ratio": {
+        "label": "Razmerje nenadnega upada"
+      },
+      "abrupt_drop_watts": {
+        "label": "Nenadni upad"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Omogoči zaznavanje gub"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Prag moči za izhod"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Največje trajanje"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Največja moč za preprečevanje gub"
+      },
+      "auto_label_confidence": {
+        "label": "Zaupanje za samodejno označevanje"
+      },
+      "auto_maintenance": {
+        "label": "Samodejno vzdrževanje (nočno čiščenje)"
+      },
+      "completion_min_seconds": {
+        "label": "Najmanjše trajanje cikla"
+      },
+      "delay_confirm_seconds": {
+        "label": "Sekunde potrditve"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Omogoči zaznavanje zapoznelega zagona"
+      },
+      "delay_timeout_hours": {
+        "label": "Ure časovne omejitve"
+      },
+      "device_type": {
+        "label": "Vrsta naprave"
+      },
+      "door_sensor_entity": {
+        "label": "Entiteta senzorja vrat"
+      },
+      "duration_tolerance": {
+        "label": "Toleranca ocene"
+      },
+      "enable_ml_models": {
+        "label": "Uporabi pametne modele med ciklom"
+      },
+      "end_energy_threshold": {
+        "label": "Energija ob koncu"
+      },
+      "end_repeat_count": {
+        "label": "Število ponovitev ob koncu"
+      },
+      "energy_price_entity": {
+        "label": "Entiteta cene energije"
+      },
+      "energy_price_static": {
+        "label": "Statična cena energije (na kWh)"
+      },
+      "expose_debug_entities": {
+        "label": "Razkrij entitete za odpravljanje napak"
+      },
+      "external_end_trigger": {
+        "label": "Zunanja sprožilna entiteta"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Omogoči zunanji sprožilec konca"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Obrni zunanji sprožilec (sproži pri IZKLOP)"
+      },
+      "learning_confidence": {
+        "label": "Zaupanje pri učenju"
+      },
+      "linked_device": {
+        "label": "Združi pod napravo"
+      },
+      "min_off_gap": {
+        "label": "Najm. presledek izklopa"
+      },
+      "min_power": {
+        "label": "Najmanjša moč"
+      },
+      "ml_training_enabled": {
+        "label": "Uči se od te naprave"
+      },
+      "ml_training_hour": {
+        "label": "Uči se ob uri"
+      },
+      "ml_training_interval_days": {
+        "label": "Preveri največ vsake"
+      },
+      "ml_training_min_cycles": {
+        "label": "Najprej potrebovani cikli"
+      },
+      "name": {
+        "label": "Ime naprave"
+      },
+      "no_update_active_timeout": {
+        "label": "Časovna omejitev brez posodobitve"
+      },
+      "notify_before_end_minutes": {
+        "label": "Opozorilo pred koncem"
+      },
+      "notify_channel": {
+        "label": "Kanal Android (začetek/v živo)"
+      },
+      "notify_finish_channel": {
+        "label": "Kanal Android (zaključek)"
+      },
+      "notify_finish_message": {
+        "label": "Sporočilo ob zaključku"
+      },
+      "notify_finish_services": {
+        "label": "Storitve ob zaključku"
+      },
+      "notify_fire_events": {
+        "label": "Sproži HA-dogodke za obvestila"
+      },
+      "notify_icon": {
+        "label": "Ikona obvestila"
+      },
+      "notify_live_chronometer": {
+        "label": "Uporabi kronometer v živo"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Interval posodobitev v živo"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Prekoračitev v živo % pred opozorilom"
+      },
+      "notify_live_services": {
+        "label": "Storitve za napredek v živo"
+      },
+      "notify_only_when_home": {
+        "label": "Obvesti samo, ko ste doma"
+      },
+      "notify_people": {
+        "label": "Osebe (za samo, ko ste doma)"
+      },
+      "notify_pre_complete_message": {
+        "label": "Sporočilo pred zaključkom"
+      },
+      "notify_reminder_message": {
+        "label": "Opomnik"
+      },
+      "notify_start_message": {
+        "label": "Sporočilo ob začetku"
+      },
+      "notify_start_services": {
+        "label": "Storitve ob začetku"
+      },
+      "notify_timeout_seconds": {
+        "label": "Samodejno opusti po"
+      },
+      "notify_title": {
+        "label": "Naslov obvestila"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Zamuda opomnika za razkladanje"
+      },
+      "off_delay": {
+        "label": "Zamik izklopa"
+      },
+      "pause_cuts_power": {
+        "label": "Premor prav tako izklopi napajanje (prek stikala)"
+      },
+      "power_sensor": {
+        "label": "Senzor moči"
+      },
+      "profile_duration_tolerance": {
+        "label": "Toleranca trajanja profila"
+      },
+      "profile_match_interval": {
+        "label": "Interval ujemanja"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Največje razmerje trajanja"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Najmanjše razmerje trajanja"
+      },
+      "profile_match_threshold": {
+        "label": "Prag ujemanja"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Prag neujemanja"
+      },
+      "progress_reset_delay": {
+        "label": "Zamik ponastavitve napredka"
+      },
+      "pump_stuck_duration": {
+        "label": "Trajanje zastale črpalke"
+      },
+      "running_dead_zone": {
+        "label": "Mrtva cona delovanja"
+      },
+      "sampling_interval": {
+        "label": "Interval vzorčenja"
+      },
+      "save_debug_traces": {
+        "label": "Shrani sledi za odpravljanje napak"
+      },
+      "smoothing_window": {
+        "label": "Okno glajenja"
+      },
+      "start_duration_threshold": {
+        "label": "Trajanje zagona"
+      },
+      "start_energy_threshold": {
+        "label": "Energija zagona"
+      },
+      "start_threshold_w": {
+        "label": "Prag zagona"
+      },
+      "stop_threshold_w": {
+        "label": "Prag zaustavitve"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Zavre obvestila o povratnih informacijah"
+      },
+      "switch_entity": {
+        "label": "Entiteta stikala"
+      },
+      "watchdog_interval": {
+        "label": "Interval čuvaja"
+      }
+    }
   }
 }
