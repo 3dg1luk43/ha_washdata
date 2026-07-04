@@ -75,7 +75,7 @@ async def test_migration_with_harness_moves_and_preserves_fields(
     hass.config_entries.async_update_entry.assert_called_once()
 
     assert legacy_entry.version == 3
-    assert legacy_entry.minor_version == 5
+    assert legacy_entry.minor_version == 6
 
     assert legacy_entry.options[CONF_MIN_POWER] == 5.0
     assert legacy_entry.options[CONF_OFF_DELAY] == 120
@@ -107,7 +107,7 @@ async def test_migration_with_harness_moves_and_preserves_fields(
 async def test_migration_is_idempotent_after_first_run(
     hass: HomeAssistant, legacy_entry: DummyEntry
 ) -> None:
-    """Once migrated to 3.5, additional migration calls should no-op."""
+    """Once migrated to 3.6, additional migration calls should no-op."""
 
     def _apply_update(entry: DummyEntry, **kwargs: Any) -> None:
         entry.data = kwargs["data"]
@@ -130,11 +130,59 @@ async def test_migration_is_idempotent_after_first_run(
 
 @pytest.mark.asyncio
 async def test_migration_latest_version_is_noop(hass: HomeAssistant) -> None:
-    """Entries already at 3.5 should not trigger updates."""
-    entry = DummyEntry(version=3, minor_version=5, data={}, options={})
+    """Entries already at 3.6 should not trigger updates."""
+    entry = DummyEntry(version=3, minor_version=6, data={}, options={})
     hass.config_entries.async_update_entry = MagicMock()
 
     migrated = await async_migrate_entry(hass, entry)
 
     assert migrated is True
     hass.config_entries.async_update_entry.assert_not_called()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("removed_type", ["coffee_machine", "ev", "heat_pump", "oven"])
+async def test_migration_remaps_removed_device_types_to_other(
+    hass: HomeAssistant, removed_type: str
+) -> None:
+    """A removed device_type is migrated to 'other', preserving tuned options."""
+
+    def _apply_update(entry: DummyEntry, **kwargs: Any) -> None:
+        entry.data = kwargs["data"]
+        entry.options = kwargs["options"]
+        entry.version = kwargs["version"]
+        entry.minor_version = kwargs["minor_version"]
+
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_update)
+    entry = DummyEntry(
+        version=3, minor_version=5,
+        data={}, options={CONF_DEVICE_TYPE: removed_type, CONF_MIN_POWER: 7.0},
+    )
+
+    migrated = await async_migrate_entry(hass, entry)
+
+    assert migrated is True
+    assert entry.options[CONF_DEVICE_TYPE] == "other"
+    # Tuned options are preserved through the remap.
+    assert entry.options[CONF_MIN_POWER] == 7.0
+    assert entry.minor_version == 6
+
+
+@pytest.mark.asyncio
+async def test_migration_keeps_supported_device_type(hass: HomeAssistant) -> None:
+    """A supported device_type is left unchanged by the 3.6 remap."""
+
+    def _apply_update(entry: DummyEntry, **kwargs: Any) -> None:
+        entry.data = kwargs["data"]
+        entry.options = kwargs["options"]
+        entry.version = kwargs["version"]
+        entry.minor_version = kwargs["minor_version"]
+
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_update)
+    entry = DummyEntry(
+        version=3, minor_version=5, data={}, options={CONF_DEVICE_TYPE: "dishwasher"},
+    )
+
+    await async_migrate_entry(hass, entry)
+
+    assert entry.options[CONF_DEVICE_TYPE] == "dishwasher"

@@ -1004,13 +1004,9 @@
         "dryer": "Þurrkari",
         "washer_dryer": "Þvottavél-þurrkari samsettur",
         "dishwasher": "Uppþvottavél",
-        "coffee_machine": "Kaffivél (úrelt)",
-        "ev": "Rafmagns ökutæki (úrelt)",
         "air_fryer": "Air Fryer",
-        "heat_pump": "Varmadæla (úrelt)",
         "bread_maker": "Brauðgerðarmaður",
         "pump": "Dæla / Sump Pump",
-        "oven": "Ofn (úreltur)",
         "other": "Annað (háþróað)"
       }
     }

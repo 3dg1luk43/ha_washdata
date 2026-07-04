@@ -13,6 +13,7 @@ class TerminationReason(StrEnum):
     SMART = "smart"              # smart-termination heuristic finished the cycle
     FORCE_STOPPED = "force_stopped"  # watchdog / no-update force end
     USER = "user"                # user manually stopped the cycle
+    TERMINAL_DROP = "terminal_drop"  # anomalously-early hard cliff-to-0 (opt-in)
 
 
 # Completed dryers stay eligible for anti-wrinkle handling only for these
@@ -62,10 +63,8 @@ CONF_WATCHDOG_INTERVAL = "watchdog_interval"  # Derived from sampling_interval
 CONF_MATCH_PERSISTENCE = "match_persistence"
 CONF_COMPLETION_MIN_SECONDS = "completion_min_seconds"
 CONF_NOTIFY_BEFORE_END_MINUTES = "notify_before_end_minutes"
-CONF_APPLY_SUGGESTIONS = "apply_suggestions"
 CONF_RUNNING_DEAD_ZONE = "running_dead_zone"  # Seconds after start to ignore power dips
 CONF_END_REPEAT_COUNT = "end_repeat_count"  # Number of times end condition must be met
-CONF_SHOW_ADVANCED = "show_advanced"  # Toggle advanced settings
 CONF_MIN_OFF_GAP = "min_off_gap"  # Minimum gap to separate cycles (seconds)
 CONF_START_ENERGY_THRESHOLD = "start_energy_threshold"  # Wh required to confirm start
 CONF_END_ENERGY_THRESHOLD = "end_energy_threshold"  # Wh allowed during end candidates
@@ -154,7 +153,6 @@ DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT = 600  # 10 minutes
 DEFAULT_SMOOTHING_WINDOW = 2
 DEFAULT_SAMPLING_INTERVAL = 30.0  # Seconds
 DEFAULT_START_DURATION_THRESHOLD = 5.0  # Seconds (debounce)
-DEFAULT_START_ENERGY_THRESHOLD = 0.2  # Wh - Require some energy accumulation before starting
 DEFAULT_END_ENERGY_THRESHOLD = 0.05  # Wh - Require effectively zero energy to end
 DEFAULT_DEVICE_TYPE = "washing_machine"
 DEFAULT_PROFILE_DURATION_TOLERANCE = 0.25
@@ -198,6 +196,41 @@ ML_MATCH_COMMIT_THRESHOLD = 0.85
 # confidence auto-label is downgraded to a feedback request.  Tuned for a
 # specificity of ~0.84 (few false positives) so users are not flooded.
 ML_QUALITY_SUSPICIOUS_THRESHOLD = 0.65
+
+# Match ranking history: maximum number of per-cycle snapshots retained on-device.
+# Each snapshot stores pre-computed live_match feature scalars (not traces) so
+# footprint is small; 500 snapshots cover ~6–12 months of typical usage and are
+# enough to build a per-device live_match training dataset.
+MATCH_RANKING_HISTORY_MAX = 500
+
+# Runtime overrun anomaly: a *soft, visible* signal (attribute + cycle metadata,
+# never a notification) flagged once a running cycle exceeds its matched
+# profile's expected duration by this ratio. Distinct from the 300% zombie-kill
+# hard limit: this only surfaces "running longer than usual" for the UI. Kept
+# below the zombie threshold so it lights up well before any termination.
+CYCLE_OVERRUN_ANOMALY_RATIO = 1.5
+
+# Terminal-drop fast finalize (opt-in; gated on CONF_ENABLE_ML_MODELS via the
+# manager provider). A hard cliff-to-~0 at an elapsed offset EARLIER than this
+# device has ever legitimately gone quiet (learned from its own completed
+# cycles) is an anomaly - almost certainly a real stop (plug pulled / cancelled)
+# rather than a soak pause - so the cycle is finalized quickly instead of waiting
+# out the full soak-bridging min_off_gap (up to 8 min for washers, 1 h for
+# dishwashers). Asymmetric like the ML end-guard, but the opposite direction: it
+# can only SHORTEN the end wait, and only for anomalously-early drops.
+TERMINAL_DROP_OFF_DELAY_SECONDS = 90    # shortened below-threshold wait once terminal
+TERMINAL_DROP_MIN_CLEAN_CYCLES = 3      # completed cycles needed before we trust the baseline
+TERMINAL_DROP_MIN_QUIET_SPAN_S = 60     # sustained sub-threshold span that counts as a legit quiet period
+TERMINAL_DROP_EARLINESS_RATIO = 0.8     # fire only if drop starts < ratio * earliest-ever-quiet offset
+TERMINAL_DROP_MIN_PEAK_RATIO = 5.0      # cycle must have been clearly ON (peak >= ratio * stop_threshold)
+# Familiarity/novelty gate: an early hard drop is only trusted as terminal when
+# the cycle's power level is one this device has produced before.  A very early
+# drop (below the matcher's duration gate) can't be confirmed by match
+# confidence, so power level is the signal available that early: a cycle peaking
+# outside the device's historical peak range (widened by this tolerance) is
+# treated as potentially a NEW program and DEFERRED to the proven slow path
+# rather than assumed to be a stop.
+TERMINAL_DROP_PEAK_FAMILIAR_TOL = 0.4
 
 # Cycle interruption detection defaults (internal)
 DEFAULT_ABRUPT_DROP_WATTS = 500.0  # Power cliff detection threshold (W)
@@ -250,8 +283,7 @@ DEFAULT_DTW_BANDWIDTH = 0.20  # 20% Sakoe-Chiba constraint
 # lifted leave-one-out top-1 74%->79.5% AND the recall/FP net 10.7%->13.7% (FP
 # flat), i.e. a genuine discrimination gain, not confidence inflation. 0.35-0.45
 # is a broad plateau; 0.45 is best on top-1/MRR.
-MATCH_CORR_WEIGHT = 0.45
-MATCH_MAE_WEIGHT = 0.55
+MATCH_CORR_WEIGHT = 0.45           # MAE weight is (1 - MATCH_CORR_WEIGHT), computed inline
 MATCH_MAE_SCALE = 100.0            # half-saturation point of the MAE score curve
 # Scale-invariant MAE (5c): the raw MAE is expressed relative to the current
 # cycle's peak power before scoring, so the same *proportional* error yields the
@@ -325,8 +357,7 @@ STATE_CLEAN = "clean"  # Cycle ended but door not yet opened (laundry still insi
 # full-screen panel (and any other frontend), surfaced over the WebSocket
 # get_constants command so colors are defined in exactly one place. Values are
 # CSS colors using Home Assistant theme variables with a hex fallback, so they
-# adapt to the active theme. The "recording" key mirrors STATE_RECORDING, which
-# is defined later in this module alongside the recorder constants.
+# adapt to the active theme. The "recording" key covers the manual recorder state.
 STATE_COLORS = {
     STATE_OFF: "var(--state-inactive-color, #9e9e9e)",
     STATE_IDLE: "var(--state-inactive-color, #9e9e9e)",
@@ -346,33 +377,21 @@ STATE_COLORS = {
     "recording": "var(--error-color, #f44336)",
 }
 
-# Cycle Status (how the cycle ended)
-CYCLE_STATUS_COMPLETED = "completed"  # Natural completion (power dropped)
-CYCLE_STATUS_INTERRUPTED = (
-    "interrupted"  # Abnormal/short run or abrupt power cliff (likely user/power abort)
-)
-CYCLE_STATUS_FORCE_STOPPED = "force_stopped"  # Watchdog forced end (sensor offline)
-CYCLE_STATUS_RESUMED = "resumed"  # Cycle was restored from storage after restart
-
 # Device Types
 DEVICE_TYPE_WASHING_MACHINE = "washing_machine"
 DEVICE_TYPE_DRYER = "dryer"
 DEVICE_TYPE_WASHER_DRYER = "washer_dryer"
 DEVICE_TYPE_DISHWASHER = "dishwasher"
-DEVICE_TYPE_COFFEE_MACHINE = "coffee_machine"
-DEVICE_TYPE_EV = "ev"
 DEVICE_TYPE_AIR_FRYER = "air_fryer"
-DEVICE_TYPE_HEAT_PUMP = "heat_pump"
 DEVICE_TYPE_BREAD_MAKER = "bread_maker"
 DEVICE_TYPE_PUMP = "pump"
-DEVICE_TYPE_OVEN = "oven"
 # Generic / unsupported bucket. Ships intentionally generic defaults that are
 # not tuned for any specific appliance, so the user must configure thresholds,
-# timeouts, and matching parameters themselves. Also serves as the runtime
-# fallback when a deprecated device type is hard-removed (see
-# DEPRECATED_DEVICE_TYPE_FALLBACK below). No curated phase catalog and no
+# timeouts, and matching parameters themselves. No curated phase catalog and no
 # device-type-specific branches in the runtime, so behavior is whatever the
-# user dials in.
+# user dials in. Config entries whose stored device_type is no longer supported
+# are migrated to this bucket on load (see __init__.py), preserving their tuned
+# options.
 DEVICE_TYPE_OTHER = "other"
 
 DEVICE_TYPES = {
@@ -380,48 +399,19 @@ DEVICE_TYPES = {
     DEVICE_TYPE_DRYER: "Dryer",
     DEVICE_TYPE_WASHER_DRYER: "Washer-Dryer Combo",
     DEVICE_TYPE_DISHWASHER: "Dishwasher",
-    DEVICE_TYPE_COFFEE_MACHINE: "Coffee Machine",
-    DEVICE_TYPE_EV: "Electric Vehicle",
     DEVICE_TYPE_AIR_FRYER: "Air Fryer",
-    DEVICE_TYPE_HEAT_PUMP: "Heat Pump",
     DEVICE_TYPE_BREAD_MAKER: "Bread Maker",
     DEVICE_TYPE_PUMP: "Pump / Sump Pump",
-    DEVICE_TYPE_OVEN: "Oven",
     DEVICE_TYPE_OTHER: "Other (Advanced)",
 }
-
-# Device types that ship as deprecated. They fail one of WashData's three fit
-# tests (user-selected discrete program, reproducible power signature, clean
-# return to OFF) so profile matching and time-remaining estimation produce
-# noise rather than signal. Kept in DEVICE_TYPES so existing config entries
-# load unchanged; filtered out of the new-entry picker in the config flow,
-# shown with a "(deprecated)" suffix when an existing entry already uses one,
-# and surfaced via a one-shot persistent_notification on integration startup.
-# Planned hard removal: 0.6.0 (deferred from 0.4.6, which 0.5.0 superseded).
-DEPRECATED_DEVICE_TYPES = frozenset({
-    DEVICE_TYPE_COFFEE_MACHINE,
-    DEVICE_TYPE_EV,
-    DEVICE_TYPE_HEAT_PUMP,
-    DEVICE_TYPE_OVEN,
-})
-
-# Fallback device_type used at runtime once a deprecated type is hard-removed.
-# "Other (Advanced)" intentionally ships generic defaults so the integration
-# does not silently pretend an orphaned entry behaves like a washing machine.
-# Stored options are preserved as-is, so a user who had hand-tuned thresholds
-# on the old deprecated type keeps those values; the integration just stops
-# layering device-specific defaults underneath them.
-DEPRECATED_DEVICE_TYPE_FALLBACK = DEVICE_TYPE_OTHER
 
 # Device Type Defaults
 # Device Type Defaults (Maps)
 
 DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 14400,  # 4 hours (Drying can be long)
-    DEVICE_TYPE_HEAT_PUMP: 14400,  # 4 hours (Heat pumps can run a long time with slow updates)
     DEVICE_TYPE_BREAD_MAKER: 7200,  # 2 hours (Proving/Rising is very low-power for extended periods)
     DEVICE_TYPE_PUMP: DEFAULT_PUMP_STUCK_DURATION + 60,  # Must exceed stuck-alarm threshold so the alarm fires before the watchdog
-    DEVICE_TYPE_OVEN: 14400,  # 4 hours (Slow roasts and pyrolytic self-clean can run for hours with thermostat-driven silence)
 }
 
 DEFAULT_MAX_DEFERRAL_SECONDS = 14400  # 4 hours max safe deferral
@@ -455,11 +445,8 @@ DISHWASHER_END_SPIKE_WAIT_SECONDS = 1800.0
 
 DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 1800,  # 30 min (Drying)
-    DEVICE_TYPE_COFFEE_MACHINE: 300,  # 5 min (Warming/Pause handling)
-    DEVICE_TYPE_HEAT_PUMP: 600,  # 10 min (Defrosting pauses)
     DEVICE_TYPE_BREAD_MAKER: 300,  # 5 min (Keep-warm phase after baking)
     DEVICE_TYPE_PUMP: 20,  # 20 s (Pumps cut off sharply; no warm-down phase)
-    DEVICE_TYPE_OVEN: 600,  # 10 min (Thermostat off-cycles can be long while holding temp)
 }
 
 # Device-specific progress smoothing thresholds (percentage points)
@@ -469,12 +456,9 @@ DEVICE_SMOOTHING_THRESHOLDS = {
     DEVICE_TYPE_DRYER: 3.0,  # More linear, less phase repetition
     DEVICE_TYPE_WASHER_DRYER: 5.0,  # Combined washer+dryer, use washer defaults
     DEVICE_TYPE_DISHWASHER: 5.0,  # Similar to washing machine with distinct phases
-    DEVICE_TYPE_COFFEE_MACHINE: 2.0,  # Short cycles, rapid transitions, less tolerance
     DEVICE_TYPE_AIR_FRYER: 2.0,  # Constant load with sudden drop
-    DEVICE_TYPE_HEAT_PUMP: 5.0,  # Variable load, long periods
     DEVICE_TYPE_BREAD_MAKER: 5.0,  # Large power swings between kneading, proving, baking
     DEVICE_TYPE_PUMP: 2.0,  # Binary on/off spikes; minimal smoothing needed
-    DEVICE_TYPE_OVEN: 5.0,  # Bistable thermostat cycling between full heat and 0 W
 }
 
 # Device specific completion thresholds (min run time to be considered a valid "completed" cycle)
@@ -483,13 +467,9 @@ DEVICE_COMPLETION_THRESHOLDS = {
     DEVICE_TYPE_DRYER: 600,  # 10 min
     DEVICE_TYPE_WASHER_DRYER: 600,  # 10 min (same as washer)
     DEVICE_TYPE_DISHWASHER: 900,  # 15 min
-    DEVICE_TYPE_COFFEE_MACHINE: 60,  # 1 min (Filter coffee cycle)
-    DEVICE_TYPE_EV: 600,  # 10 min
     DEVICE_TYPE_AIR_FRYER: 300,  # 5 min minimum
-    DEVICE_TYPE_HEAT_PUMP: 900,  # 15 min minimum
     DEVICE_TYPE_BREAD_MAKER: 1800,  # 30 min (even express bread takes 30+ min)
     DEVICE_TYPE_PUMP: 5,  # 5 s - pump cycles can be under 30 seconds
-    DEVICE_TYPE_OVEN: 600,  # 10 min (covers quick reheats and ignores brief preheating tests)
 }
 
 # Default min_off_gap by device type (seconds)
@@ -503,13 +483,9 @@ DEFAULT_MIN_OFF_GAP_BY_DEVICE = {
     DEVICE_TYPE_DRYER: 300,  # 5 min (Cool down gaps?)
     DEVICE_TYPE_WASHER_DRYER: 600,  # 10 min (longer for combined cycles)
     DEVICE_TYPE_DISHWASHER: 3600,  # 1 hour (Drying pauses)
-    DEVICE_TYPE_COFFEE_MACHINE: 120,  # 2 min (Session grouping)
-    DEVICE_TYPE_EV: 900,  # 15 min (Brief unplug/replug)
     DEVICE_TYPE_AIR_FRYER: 120,  # 2 min (Shaking food)
-    DEVICE_TYPE_HEAT_PUMP: 1800,  # 30 min (Defrost cycle / resting gap)
     DEVICE_TYPE_BREAD_MAKER: 600,  # 10 min (Resting between knead/prove keeps same cycle together)
     DEVICE_TYPE_PUMP: 60,  # 1 min (Pumps can cycle every 3-5 min in heavy rain)
-    DEVICE_TYPE_OVEN: 900,  # 15 min (Bridge thermostat off-windows so one bake stays a single cycle)
 }
 DEFAULT_MIN_OFF_GAP = 60  # Scalar fallback
 
@@ -521,13 +497,9 @@ DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
     DEVICE_TYPE_DRYER: 0.5,  # Heater kicks in hard
     DEVICE_TYPE_WASHER_DRYER: 0.3,  # Mix of washer and dryer
     DEVICE_TYPE_DISHWASHER: 0.2,  # Pump/Heater
-    DEVICE_TYPE_COFFEE_MACHINE: 0.05,  # Short heater burst
-    DEVICE_TYPE_EV: 0.5,  # High power charging
     DEVICE_TYPE_AIR_FRYER: 0.2,  # Heater kicks in
-    DEVICE_TYPE_HEAT_PUMP: 0.2,  # Compressor spins up
     DEVICE_TYPE_BREAD_MAKER: 0.2,  # Kneading motor starts (~200W for a few seconds)
     DEVICE_TYPE_PUMP: 0.003,  # ~100W motor for ~0.1 s is enough to confirm a pump cycle
-    DEVICE_TYPE_OVEN: 0.5,  # Heating element kicks in hard (~2-3 kW) - high gate filters incidental light/fan draws
 }
 # Default sampling interval by device type
 DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
@@ -536,7 +508,6 @@ DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
     DEVICE_TYPE_WASHING_MACHINE: 2.0,
     DEVICE_TYPE_WASHER_DRYER: 2.0,
     DEVICE_TYPE_DISHWASHER: 2.0,
-    DEVICE_TYPE_COFFEE_MACHINE: 10.0,  # 10s is sufficient for brew cycles
     DEVICE_TYPE_PUMP: 10.0,  # 10s - pump cycles can be <30 s; 30s default would miss them
 }
 
@@ -558,7 +529,13 @@ GROUP_MIN_COHESION = 0.80
 # Storage
 # v6: backfill ml_review.golden=True for manually-recorded cycles (recorded ==
 # golden reference; a single flag, no duplicate "recorded" field).
-STORAGE_VERSION = 6
+# v7: re-run that backfill (broadened to the meta.original_samples marker) so
+# installs already at v6 that carry unflagged recorded cycles are caught too —
+# the v6 step only ran for installs upgrading from below v6.
+# v8: re-run again after _is_recorded_cycle gained the structural fallback
+# (completed + no max_power/termination_reason) so OLD recordings that carry
+# only meta:None — which the marker-only v6/v7 backfill missed — are tagged.
+STORAGE_VERSION = 8
 STORAGE_KEY = "ha_washdata"
 
 # Notification events
@@ -573,15 +550,6 @@ SIGNAL_WASHER_UPDATE = "ha_washdata_update_{}"
 SERVICE_SUBMIT_FEEDBACK = (
     "ha_washdata.submit_cycle_feedback"  # Service to submit feedback
 )
-
-# Recorder
-STATE_RECORDING = "recording"
-SERVICE_RECORD_START = "record_start"
-SERVICE_RECORD_STOP = "record_stop"
-
-# Thresholds for trim suggestions
-SHORT_SILENCE_THRESHOLD_S = 600  # 10 minutes
-TRIM_BUFFER_S = 60.0  # 1 minute buffer
 
 # ─── Feature flags (staged rollout) ───────────────────────────────────────────
 # These gate preproduction / ML features so they can be shipped dark and unlocked
@@ -619,6 +587,25 @@ DEFAULT_ML_TRAINING_INTERVAL_DAYS = 7 # retrain at most weekly
 # allowed so personalisation can win even at a tiny AUC cost.
 ML_TRAINING_AUC_MARGIN = 0.02
 ML_TRAINING_MIN_POSITIVES = 20  # need at least this many positive examples to trust a fit
+
+# Per-capability held-out-score history kept across training runs, so the panel
+# can show whether a model's fit is improving, steady, or declining over time
+# (drift). Compact (one number per capability per run); this caps how many runs
+# are retained.
+ML_TRAINING_HISTORY_MAX = 30
+
+# Remaining-time regressor (standardized_linear). Unlike the classifier heads it
+# has no shipped baseline; it is only promoted when its held-out mean-absolute
+# error on the completion-fraction target beats the naive elapsed/expected
+# estimate by at least this relative margin (5% lower MAE). Trained from prefixes
+# of the device's own clean cycles.
+ML_TRAINING_REGRESSION_MARGIN = 0.05
+ML_TRAINING_MIN_REGRESSION_ROWS = 30  # synthesized prefix rows needed to fit
+# How strongly a promoted remaining-time regressor influences the live progress
+# estimate. The ML completion-fraction is blended with the phase-aware estimate
+# at this weight before the existing EMA smoothing/monotonicity guards run, so a
+# bad model can never wholly override the proven phase estimator.
+ML_PROGRESS_BLEND_WEIGHT = 0.5
 
 # Service + event names for the training loop.
 SERVICE_TRIGGER_ML_TRAINING = "trigger_ml_training"

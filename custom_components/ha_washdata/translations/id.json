@@ -1004,13 +1004,9 @@
         "dryer": "Pengering",
         "washer_dryer": "Kombo Mesin Cuci-Pengering",
         "dishwasher": "Mesin pencuci piring",
-        "coffee_machine": "Mesin Kopi (tidak digunakan lagi)",
-        "ev": "Kendaraan Listrik (tidak digunakan lagi)",
         "air_fryer": "Penggorengan Udara",
-        "heat_pump": "Pompa Panas (tidak digunakan lagi)",
         "bread_maker": "Pembuat Roti",
         "pump": "Pompa / Pompa Bah",
-        "oven": "Oven (tidak digunakan lagi)",
         "other": "Lainnya (Lanjutan)"
       }
     }

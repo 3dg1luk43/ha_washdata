@@ -33,6 +33,7 @@ from .const import (
     DEFAULT_DEFER_FINISH_CONFIDENCE,
     DISHWASHER_END_SPIKE_MIN_PROGRESS,
     DISHWASHER_END_SPIKE_WAIT_SECONDS,
+    TERMINAL_DROP_OFF_DELAY_SECONDS,
 )
 
 # The dishwasher end-spike wait window is shared between two code paths
@@ -109,13 +110,6 @@ class CycleDetectorConfig:
     delay_timeout_seconds: float = 28800.0
 
 
-@dataclass
-class CycleDetectorState:
-    """Internal state storage for save/restore."""
-
-    state: str = STATE_OFF
-    sub_state: str | None = None
-    accumulated_energy_wh: float = 0.0
     # Add other fields as needed
 
 
@@ -195,6 +189,9 @@ class CycleDetector:
         end_confidence_provider: (
             Callable[[list[tuple[float, float]], float], float | None] | None
         ) = None,
+        terminal_drop_provider: (
+            Callable[[list[tuple[float, float]], float], bool | None] | None
+        ) = None,
     ) -> None:
         """Initialize the cycle detector."""
         self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
@@ -205,6 +202,13 @@ class CycleDetector:
         # Opt-in ML end-guard: (points, expected_duration) -> P(true end) or None.
         # Injected by the manager; None disables the guard (existing behavior).
         self._end_confidence_provider = end_confidence_provider
+        # Opt-in terminal-drop detector: (points, expected_duration) -> bool.
+        # True means the current low-power event is an anomalously-early hard
+        # cliff-to-0 (never seen this early on this device), so the cycle may be
+        # finalized without waiting out the full soak-bridging min_off_gap.
+        # Injected by the manager; None disables it (existing behavior). Opposite
+        # asymmetry to the end-guard: it can only ever *shorten* the end wait.
+        self._terminal_drop_provider = terminal_drop_provider
         # Cycle duration (s) at which the ML guard first deferred the current
         # ending episode; bounds how long the guard may keep deferring.
         self._ml_defer_start_duration: float | None = None
@@ -1169,6 +1173,39 @@ class CycleDetector:
                     effective_off_delay = min(effective_off_delay, 1800)
                     gate_window = effective_off_delay
 
+                # Opt-in terminal-drop fast finalize (asymmetric, shorten-only):
+                # a hard cliff-to-~0 sustained for TERMINAL_DROP_OFF_DELAY_SECONDS
+                # that began earlier than this device has ever legitimately gone
+                # quiet is almost certainly a real stop (plug pulled / cancelled),
+                # not a soak.  Finalize now instead of waiting out the full
+                # soak-bridging min_off_gap.  Only consulted when there is a longer
+                # wait to shorten and the provider is wired (ML/anomaly opt-in);
+                # the energy/defer gates are bypassed because the sustained sub-
+                # threshold span already proves the appliance is off, and the
+                # anomaly check has ruled out a legitimate early pause.
+                if (
+                    self._terminal_drop_provider is not None
+                    and effective_off_delay > TERMINAL_DROP_OFF_DELAY_SECONDS
+                    and self._time_below_threshold >= TERMINAL_DROP_OFF_DELAY_SECONDS
+                    and self._is_terminal_drop()
+                ):
+                    start_time = self._current_cycle_start or timestamp
+                    current_duration = (timestamp - start_time).total_seconds()
+                    self._logger.info(
+                        "Terminal drop: anomalously-early power cliff after %.0fs "
+                        "(device never quiet this early) - finalizing without the "
+                        "full %.0fs soak wait.",
+                        current_duration,
+                        effective_off_delay,
+                    )
+                    self._finish_cycle(
+                        timestamp,
+                        status="interrupted",
+                        termination_reason=TerminationReason.TERMINAL_DROP,
+                        keep_tail=False,
+                    )
+                    return
+
                 if self._time_below_threshold >= effective_off_delay:
 
                     recent_window = [
@@ -1278,15 +1315,6 @@ class CycleDetector:
         self._logger.debug("Transition: %s -> %s at %s", old_state, new_state, timestamp)
         self._on_state_change(old_state, new_state)
 
-    def should_defer_for_profile(self) -> bool:
-        """Check if we should defer termination for profile matching (public)."""
-        start_time = self._current_cycle_start
-        if not self._matched_profile or self._expected_duration <= 0 or not start_time:
-            return False
-
-        current_duration = (dt_util.now() - start_time).total_seconds()
-        return self._should_defer_finish(current_duration)
-
     def _ml_end_confidence(self) -> float | None:
         """P(the current low-power event is the true end) from the opt-in ML guard.
 
@@ -1307,6 +1335,28 @@ class CycleDetector:
             return provider(points, float(self._expected_duration))
         except Exception:  # noqa: BLE001 - ML must never break detection
             return None
+
+    def _is_terminal_drop(self) -> bool:
+        """Whether the current low-power event is an anomalously-early hard drop.
+
+        Mirrors ``_ml_end_confidence``: builds the offset-second trace from the
+        current cycle's readings and asks the injected terminal-drop provider.
+        Returns ``False`` when there is no provider, no cycle start, or the
+        provider declines/raises (ML off / too little history / not anomalous),
+        so the caller keeps the proven soak-bridging end-detection.
+        """
+        provider = self._terminal_drop_provider
+        if provider is None or self._current_cycle_start is None or not self._power_readings:
+            return False
+        start = self._current_cycle_start
+        points = [
+            ((ts - start).total_seconds(), float(power))
+            for ts, power in self._power_readings
+        ]
+        try:
+            return bool(provider(points, float(self._expected_duration)))
+        except Exception:  # noqa: BLE001 - ML must never break detection
+            return False
 
     def _should_defer_finish(self, duration: float) -> bool:
         """Check if we should defer termination based on expected duration."""
@@ -1611,16 +1661,6 @@ class CycleDetector:
             self._state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
             and self._time_below_threshold > 0
         )
-
-    def low_power_elapsed(self, now: datetime) -> float:
-        """Return duration of current low power spell including time since last process."""
-        if self._time_below_threshold > 0 and self._last_process_time:
-            # Add time since last processing
-            return (
-                self._time_below_threshold
-                + (now - self._last_process_time).total_seconds()
-            )
-        return self._time_below_threshold
 
     def restore_state_snapshot(self, snapshot: dict[str, Any]) -> None:
         """Restore state from snapshot."""

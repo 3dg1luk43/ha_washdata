@@ -20,43 +20,18 @@ from .const import (
     DEFAULT_MIN_POWER,
     DEFAULT_DEVICE_TYPE,
     DEVICE_TYPES,
-    DEPRECATED_DEVICE_TYPES,
 )
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
-def _format_duration_label(seconds: int) -> str:
-    """Render a duration in seconds as '1h 25m' or '42m'."""
-    minutes = max(0, int(seconds) // 60)
-    if minutes < 60:
-        return f"{minutes}m"
-    return f"{minutes // 60}h {minutes % 60:02d}m"
-
-
 def _device_type_options(
-    current: str | None = None,
+    current: str | None = None,  # pylint: disable=unused-argument
 ) -> list[str]:
-    """Build the device-type dropdown option keys.
+    """Build the device-type dropdown option keys."""
+    return list(DEVICE_TYPES)
 
-    Deprecated types are hidden for new entries; for an existing entry whose
-    saved device_type is deprecated, that type is kept in the list so the user
-    can switch without losing it from the dropdown.
-    """
-    return [
-        key
-        for key in DEVICE_TYPES
-        if key not in DEPRECATED_DEVICE_TYPES or key == current
-    ]
-
-
-def _escape_markdown(text: Any) -> str:
-    """Make a user-supplied label safe to embed in markdown descriptions."""
-    collapsed = " ".join(str(text).split())
-    for char in ("\\", "`", "*", "_", "[", "]", "~", "|"):
-        collapsed = collapsed.replace(char, f"\\{char}")
-    return collapsed
 
 
 STEP_USER_DATA_SCHEMA = vol.Schema(

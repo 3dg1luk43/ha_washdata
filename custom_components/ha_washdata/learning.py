@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Any, Optional, TYPE_CHECKING, cast
+from typing import Any, Optional, TYPE_CHECKING
 
 import numpy as np
 from homeassistant.core import HomeAssistant
@@ -42,7 +42,6 @@ from .const import (
     DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
     DOMAIN,
     ML_QUALITY_SUSPICIOUS_THRESHOLD,
-    SIGNAL_WASHER_UPDATE,
 )
 from .suggestion_engine import SuggestionEngine
 from .log_utils import DeviceLoggerAdapter
@@ -274,9 +273,9 @@ class LearningManager:
             return
 
         self._last_batch_simulation_count = current_count
-        self.hass.async_create_task(self._async_run_batch_simulation(labeled_cycles, current_count))
+        self.hass.async_create_task(self._async_run_batch_simulation(labeled_cycles))
 
-    async def _async_run_batch_simulation(self, cycles: list[dict[str, Any]], expected_count: int) -> None:
+    async def _async_run_batch_simulation(self, cycles: list[dict[str, Any]]) -> None:
         """Run multi-cycle batch simulation asynchronously."""
         try:
             new_suggestions = await self.hass.async_add_executor_job(
@@ -421,25 +420,6 @@ class LearningManager:
         except Exception:  # pylint: disable=broad-exception-caught
             self._logger.exception("Failed to create suggestions-ready notification")
 
-    def _set_suggestion(self, key: str, value: Any, reason: str) -> None:
-        """Persist a suggested setting."""
-        current: Any = self.profile_store.get_suggestions().get(key, {})
-        if isinstance(current, dict):
-            current_dict = cast(dict[str, Any], current)
-            if current_dict.get("value") == value:
-                return  # No change
-
-        self.profile_store.set_suggestion(key, value, reason=reason)
-        # We fire a background save task if possible, or rely on next periodic save.
-        # Since learning manager doesn't hold reference to hass task creation easily,
-        # we can just rely on ProfileStore's periodic save or trigger one if referenced.
-        # Ideally ProfileStore handles dirtiness.
-        # But wait, Manager calls save periodically. We should just mark it dirty?
-        # ProfileStore.async_save() is needed.
-        # We'll just trigger it via hass if available.
-        if self.hass:
-            self.hass.async_create_task(self.profile_store.async_save())
-
     def _maybe_request_feedback(
         self,
         cycle_data: dict[str, Any],
@@ -487,15 +467,28 @@ class LearningManager:
             isinstance(ml_quality, float)
             and ml_quality >= ML_QUALITY_SUSPICIOUS_THRESHOLD
         )
+        # Also downgrade when the cycle's power trace is mostly outside the
+        # profile envelope band (low conformance = the shape matched but the
+        # actual power levels are inconsistent with the profile).
+        _conformance = cycle_data.get("envelope_conformance")
+        envelope_suspicious = (
+            isinstance(_conformance, float)
+            and _conformance < 0.40
+        )
         if confidence >= auto_label_conf:
-            if ml_suspicious:
-                self._logger.info(
-                    "ML quality model flagged cycle %s as suspicious (score=%.3f >= %.2f); "
-                    "downgrading auto-label to feedback request.",
-                    cycle_id,
-                    ml_quality,
-                    ML_QUALITY_SUSPICIOUS_THRESHOLD,
-                )
+            if ml_suspicious or envelope_suspicious:
+                if ml_suspicious:
+                    self._logger.info(
+                        "ML quality model flagged cycle %s as suspicious (score=%.3f >= %.2f); "
+                        "downgrading auto-label to feedback request.",
+                        cycle_id, ml_quality, ML_QUALITY_SUSPICIOUS_THRESHOLD,
+                    )
+                if envelope_suspicious:
+                    self._logger.info(
+                        "Envelope conformance for cycle %s is low (%.2f < 0.40); "
+                        "downgrading auto-label to feedback request.",
+                        cycle_id, _conformance,
+                    )
                 # Fall through to feedback-request path below.
             else:
                 labeled = self.auto_label_high_confidence(
@@ -619,16 +612,6 @@ class LearningManager:
             )
         except Exception:  # pylint: disable=broad-exception-caught
             self._logger.exception("Failed to create feedback notification")
-
-    def _send_feedback_notification(
-        self, device_title: str, cycle_data: dict[str, Any], profile: str, confidence: float
-    ) -> None:
-        """Deprecated sync wrapper."""
-        self.hass.async_create_task(
-            self._async_send_feedback_notification(
-                device_title, cycle_data, profile, confidence
-            )
-        )
 
     def request_cycle_verification(
         self,

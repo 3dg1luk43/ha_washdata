@@ -1004,13 +1004,9 @@
         "dryer": "Uscător",
         "washer_dryer": "Combo mașină de spălat cu uscător",
         "dishwasher": "Maşină de spălat vase",
-        "coffee_machine": "Aparat de cafea (învechit)",
-        "ev": "Vehicul electric (învechit)",
         "air_fryer": "Friteuza cu aer",
-        "heat_pump": "Pompă de căldură (învechită)",
         "bread_maker": "Aparat de paine",
         "pump": "Pompă / Pompă de colector",
-        "oven": "Cuptor (depreciat)",
         "other": "Altele (avansate)"
       }
     }

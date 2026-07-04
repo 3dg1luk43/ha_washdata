@@ -8,7 +8,6 @@ import numpy as np
 
 from .const import (
     DEFAULT_DTW_MODE,
-    MATCH_AMBIGUITY_MARGIN,
     MATCH_CORR_WEIGHT,
     MATCH_DDTW_DIST_SCALE,
     MATCH_DTW_BLEND,

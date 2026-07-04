@@ -1004,13 +1004,9 @@
         "dryer": "Asciugatrice",
         "washer_dryer": "Combinazione lavatrice-asciugatrice",
         "dishwasher": "Lavastoviglie",
-        "coffee_machine": "Macchina da caffè (obsoleta)",
-        "ev": "Veicolo elettrico (obsoleto)",
         "air_fryer": "Friggitrice ad aria",
-        "heat_pump": "Pompa di calore (obsoleto)",
         "bread_maker": "Macchina per il pane",
         "pump": "Pompa / Pompa di raccolta",
-        "oven": "Forno (deprecato)",
         "other": "Altro (Avanzato)"
       }
     }

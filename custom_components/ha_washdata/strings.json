@@ -83,13 +83,9 @@
         "dryer": "Dryer",
         "washer_dryer": "Washer-Dryer Combo",
         "dishwasher": "Dishwasher",
-        "coffee_machine": "Coffee Machine (deprecated)",
-        "ev": "Electric Vehicle (deprecated)",
         "air_fryer": "Air Fryer",
-        "heat_pump": "Heat Pump (deprecated)",
         "bread_maker": "Bread Maker",
         "pump": "Pump / Sump Pump",
-        "oven": "Oven (deprecated)",
         "other": "Other (Advanced)"
       }
     },

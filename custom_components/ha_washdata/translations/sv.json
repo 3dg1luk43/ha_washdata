@@ -1004,13 +1004,9 @@
         "dryer": "Torktumlare",
         "washer_dryer": "Kombination av tvättmaskin och torktumlare",
         "dishwasher": "Diskmaskin",
-        "coffee_machine": "Kaffemaskin (utfasad)",
-        "ev": "Elfordon (utfasad)",
         "air_fryer": "Air Fryer",
-        "heat_pump": "Värmepump (utfasad)",
         "bread_maker": "Brödmaskin",
         "pump": "Pump / Sump Pump",
-        "oven": "Ugn (utfasad)",
         "other": "Annat (avancerat)"
       }
     }

@@ -117,7 +117,7 @@ async def test_proposal_flow():
     # But wait, logic calls self.add_cycle inside _apply_split_proposal.
     # self.add_cycle computes signature which might fail without real data.
     # We should mock add_cycle to be safe, or ensure _apply_split_proposal can run.
-    # It calls _decompress_power_data -> assumes ISO strings.
+    # It calls decompress_power_data -> assumes ISO strings.
     # It calls add_cycle -> calls compute_signature.
     
     # Let's mock add_cycle to avoid signature complexity in test

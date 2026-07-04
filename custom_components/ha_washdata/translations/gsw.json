@@ -1004,13 +1004,9 @@
         "dryer": "Trockner",
         "washer_dryer": "Waschmaschine-Trockner-Kombination",
         "dishwasher": "Spülmaschine",
-        "coffee_machine": "Kaffeemaschine (veraltet)",
-        "ev": "Elektrofahrzeug (veraltet)",
         "air_fryer": "Luftfritteuse",
-        "heat_pump": "Wärmepumpe (veraltet)",
         "bread_maker": "Brotbackautomat",
         "pump": "Pumpe / Sumpfpumpe",
-        "oven": "Ofen (veraltet)",
         "other": "Andere (Fortgeschrittene)"
       }
     }

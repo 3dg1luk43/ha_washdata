@@ -1004,13 +1004,9 @@
         "dryer": "Kuivausrumpu",
         "washer_dryer": "Pesukone-kuivausrumpu yhdistelmä",
         "dishwasher": "Astianpesukone",
-        "coffee_machine": "Kahvinkeitin (poistettu käytöstä)",
-        "ev": "Sähköajoneuvo (vanhentunut)",
         "air_fryer": "Air Fryer",
-        "heat_pump": "Lämpöpumppu (vanhentunut)",
         "bread_maker": "Leipäkone",
         "pump": "Pumppu / sumpupumppu",
-        "oven": "Uuni (poistettu käytöstä)",
         "other": "Muu (edistynyt)"
       }
     }

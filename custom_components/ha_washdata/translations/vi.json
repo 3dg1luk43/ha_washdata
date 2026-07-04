@@ -1004,13 +1004,9 @@
         "dryer": "Máy sấy",
         "washer_dryer": "Combo Máy Giặt-Sấy",
         "dishwasher": "Máy rửa chén",
-        "coffee_machine": "Máy pha cà phê (không dùng nữa)",
-        "ev": "Xe điện (không dùng nữa)",
         "air_fryer": "Nồi chiên không khí",
-        "heat_pump": "Bơm nhiệt (không dùng nữa)",
         "bread_maker": "Máy làm bánh mì",
         "pump": "Máy bơm / Máy bơm bể phốt",
-        "oven": "Lò nướng (không dùng nữa)",
         "other": "Khác (Nâng cao)"
       }
     }

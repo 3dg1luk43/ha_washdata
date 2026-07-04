@@ -1004,13 +1004,9 @@
         "dryer": "Žāvētājs",
         "washer_dryer": "Kombinētais veļas mazgājamās mašīnas-žāvētājs",
         "dishwasher": "Trauku mazgājamā mašīna",
-        "coffee_machine": "Kafijas automāts (novecojis)",
-        "ev": "Elektriskais transportlīdzeklis (novecojis)",
         "air_fryer": "Gaisa cepeškrāsns",
-        "heat_pump": "Siltumsūknis (novecojis)",
         "bread_maker": "Maizes gatavotājs",
         "pump": "Sūknis / Sūknis",
-        "oven": "Cepeškrāsns (novecojusi)",
         "other": "Cits (uzlabots)"
       }
     }

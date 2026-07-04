@@ -1004,13 +1004,9 @@
         "dryer": "Secador",
         "washer_dryer": "Combo lavadora-secadora",
         "dishwasher": "Lavalouza",
-        "coffee_machine": "Máquina de café (obsoleta)",
-        "ev": "Vehículo eléctrico (obsoleto)",
         "air_fryer": "Freidora de aire",
-        "heat_pump": "Bomba de calor (obsoleta)",
         "bread_maker": "Máquina de Pan",
         "pump": "Bomba / Bomba de sumidoiro",
-        "oven": "Forno (obsoleto)",
         "other": "Outros (Avanzado)"
       }
     }

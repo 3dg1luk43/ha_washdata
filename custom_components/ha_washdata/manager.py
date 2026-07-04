@@ -188,8 +188,14 @@ from .const import (
     DEFAULT_END_ENERGY_THRESHOLD,
     DEVICE_SMOOTHING_THRESHOLDS,
     DEVICE_COMPLETION_THRESHOLDS,
+    CYCLE_OVERRUN_ANOMALY_RATIO,
+    TERMINAL_DROP_MIN_CLEAN_CYCLES,
+    TERMINAL_DROP_MIN_QUIET_SPAN_S,
+    TERMINAL_DROP_EARLINESS_RATIO,
+    TERMINAL_DROP_MIN_PEAK_RATIO,
+    TERMINAL_DROP_PEAK_FAMILIAR_TOL,
     ML_MATCH_COMMIT_THRESHOLD,
-    ML_QUALITY_SUSPICIOUS_THRESHOLD,
+    ML_PROGRESS_BLEND_WEIGHT,
     STATE_RUNNING,
     STATE_OFF,
     STATE_STARTING,
@@ -203,7 +209,14 @@ from .const import (
 )
 from .cycle_detector import CycleDetector, CycleDetectorConfig
 from .learning import LearningManager
-from .profile_store import ProfileStore, decompress_power_data
+from .profile_store import (
+    ProfileStore,
+    decompress_power_data,
+    device_active_peak_range,
+    earliest_sustained_quiet_offset,
+    is_terminal_drop,
+)
+from .signal_processing import integrate_wh, energy_gap_threshold_s
 from .recorder import CycleRecorder
 from .diag_buffer import DiagBuffer
 from .log_utils import DeviceLoggerAdapter
@@ -618,8 +631,15 @@ class WashDataManager:
             profile_matcher=profile_matcher_wrapper,
             device_name=config_entry.title,
             end_confidence_provider=self._ml_end_confidence,
+            terminal_drop_provider=self._terminal_drop_provider,
         )
         self._ml_end_expectation_cache: tuple[str, dict[str, float]] | None = None
+        # (cycle_count, earliest_quiet_offset|None, peak_range|None) for the
+        # terminal-drop baselines; keyed by cycle count so it auto-invalidates
+        # when history grows.
+        self._terminal_drop_cache: (
+            tuple[int, float | None, tuple[float, float] | None] | None
+        ) = None
 
         self._remove_listener = None
         self._remove_external_trigger_listener = None  # External cycle end trigger
@@ -645,6 +665,17 @@ class WashDataManager:
         self._last_total_duration_update: datetime | None = None
         self._cycle_progress: float = 0.0
         self._smoothed_progress: float = 0.0  # Smoothed progress tracking for EMA
+        # Live projected total energy/cost for the running cycle (None until a
+        # reliable progress estimate exists). Derived from accumulated energy and
+        # the (ML-blended) progress fraction; surfaced as progress-sensor attrs.
+        self._projected_energy_wh: float | None = None
+        self._projected_cost: float | None = None
+        # Runtime overrun anomaly (soft, visible; never a notification). "none"
+        # or "overrun" once a running cycle exceeds its matched profile's expected
+        # duration by CYCLE_OVERRUN_ANOMALY_RATIO. Surfaced as a state-sensor attr
+        # and frozen onto the cycle at end for panel badging.
+        self._cycle_anomaly: str = "none"
+        self._overrun_ratio: float = 0.0
         self._cycle_completed_time: datetime | None = None  # Track when cycle finished
         self._progress_reset_delay: int = int(
             progress_reset_delay
@@ -782,12 +813,14 @@ class WashDataManager:
 
             is_persistent = profile_name and self._match_persistence_counter.get(profile_name, 0) >= self._match_persistence
 
-            # --- ML early-commit gate (opt-in, live_match_commit model) ---
-            # When the user has opted into experimental ML models, query the
-            # live_match_commit model for P(top-1 is correct).  A high score
-            # allows committing to the match before the persistence counter is
-            # satisfied, cutting time-to-first-match on clear cycles.
+            # --- Live-match features: compute always for ranking history + ML gate ---
+            # Features are cheap scalars derived from the current trace.  We compute
+            # them whenever there is a non-ambiguous candidate so they can be recorded
+            # as a training snapshot regardless of whether ML models are opted in.
+            # The opt-in ML commit check then uses the same features when enabled.
             ml_commit_score: float | None = None
+            _live_feat: dict[str, float] | None = None
+            _top2_score: float | None = None
             if (
                 profile_name
                 and profile_name != "detecting..."
@@ -795,39 +828,63 @@ class WashDataManager:
                 and self._current_program in ("detecting...",)
             ):
                 try:
-                    from .ml.engine import ml_models_enabled, resolve_scorer
-                    from .ml.feature_extraction import live_match_features
+                    from .ml.feature_extraction import live_match_features  # noqa: PLC0415
 
-                    if ml_models_enabled(self.config_entry.options):
-                        match_fn, _ = resolve_scorer("live_match", self.profile_store)
-                        if match_fn is not None:
-                            first_ts = readings[0][0]
-                            pts = [
-                                ((ts - first_ts).total_seconds(), float(pw))
-                                for ts, pw in readings
-                            ]
-                            top1_dist = max(0.0, 1.0 - confidence)
-                            top2_dist: float | None = None
-                            if len(result.candidates) > 1:
-                                s2 = result.candidates[1].get("score", 0.0) or 0.0
-                                top2_dist = max(0.0, 1.0 - float(s2))
-                            n_profiles = len(self.profile_store.get_profiles())
-                            feat = live_match_features(
-                                points=pts,
-                                elapsed_s=current_duration,
-                                top1_distance=top1_dist,
-                                top2_distance=top2_dist,
-                                top1_median_duration_s=float(result.expected_duration or 0),
-                                candidate_count=max(1, n_profiles),
-                            )
-                            ml_commit_score = float(match_fn(feat))
-                            self._logger.debug(
-                                "Live-match ML commit score for '%s': %.3f (threshold %.2f)",
-                                profile_name,
-                                ml_commit_score,
-                                ML_MATCH_COMMIT_THRESHOLD,
-                            )
+                    first_ts = readings[0][0]
+                    pts = [
+                        ((ts - first_ts).total_seconds(), float(pw))
+                        for ts, pw in readings
+                    ]
+                    top1_dist = max(0.0, 1.0 - confidence)
+                    top2_raw: float | None = None
+                    if len(result.candidates) > 1:
+                        s2 = result.candidates[1].get("score", 0.0) or 0.0
+                        top2_raw = max(0.0, 1.0 - float(s2))
+                        _top2_score = float(result.candidates[1].get("score", 0.0) or 0.0)
+                    n_profiles = len(self.profile_store.get_profiles())
+                    _live_feat = live_match_features(
+                        points=pts,
+                        elapsed_s=current_duration,
+                        top1_distance=top1_dist,
+                        top2_distance=top2_raw,
+                        top1_median_duration_s=float(result.expected_duration or 0),
+                        candidate_count=max(1, n_profiles),
+                    )
+                    # --- ML early-commit gate (opt-in) ---
+                    # When the user has opted into experimental ML models, query the
+                    # live_match_commit model for P(top-1 is correct).
+                    try:
+                        from .ml.engine import ml_models_enabled, resolve_scorer  # noqa: PLC0415
+                        if ml_models_enabled(self.config_entry.options):
+                            match_fn, _ = resolve_scorer("live_match", self.profile_store)
+                            if match_fn is not None:
+                                ml_commit_score = float(match_fn(_live_feat))
+                                self._logger.debug(
+                                    "Live-match ML commit score for '%s': %.3f (threshold %.2f)",
+                                    profile_name,
+                                    ml_commit_score,
+                                    ML_MATCH_COMMIT_THRESHOLD,
+                                )
+                    except Exception:  # noqa: BLE001
+                        pass
                 except Exception:  # noqa: BLE001 - ML must never break matching
+                    pass
+
+            # --- Record ranking snapshot for live_match on-device training ---
+            # Snapshot is recorded unconditionally (not gated on ML opt-in) so that
+            # training data accumulates even before the user enables ML models.
+            # Confirmed labels are back-filled at cycle end.
+            if _live_feat is not None and self._cycle_start_time:
+                try:
+                    self.profile_store.record_match_ranking_snapshot(
+                        start_time_iso=self._cycle_start_time.isoformat(),
+                        features=_live_feat,
+                        top1_profile=profile_name or "",
+                        top1_score=float(confidence),
+                        top2_score=_top2_score,
+                        candidate_count=max(1, len(self.profile_store.get_profiles())),
+                    )
+                except Exception:  # noqa: BLE001 - never break matching
                     pass
 
             ml_early_commit = (
@@ -1028,11 +1085,6 @@ class WashDataManager:
                     phase_name = "Spinning"
                 elif self.device_type == "washing_machine" and self.detector.is_waiting_low_power():
                     phase_name = "Rinsing/Soaking"
-                elif self.device_type == "ev":
-                    if current_power > 100:
-                        phase_name = "Charging"
-                    elif self.detector.is_waiting_low_power():
-                        phase_name = "Maintenance"
 
             # Push updates to detector
             self.detector.set_verified_pause(verified_pause)
@@ -1125,12 +1177,49 @@ class WashDataManager:
 
     @property
     def phase_description(self) -> str:
-        """Return a description of the current phase."""
+        """Return a description of the current phase.
+
+        Prefers the *functional* progress-driven phase (the visual per-profile
+        phase configurator's ranges, indexed by the live ML-blended progress) so
+        the readout stays accurate even when a cycle runs longer/shorter than the
+        profile's nominal timeline. Falls back to the matcher's phase, then the
+        detector sub-state/state.
+        """
+        live = self._current_phase_from_progress()
+        if live:
+            return live
         if self._last_match_result and self._last_match_result.matched_phase:
             return self._last_match_result.matched_phase
         if self.detector.sub_state:
             return self.detector.sub_state
         return self.detector.state
+
+    def _current_phase_from_progress(self) -> str | None:
+        """Live phase from the profile's configured ranges + ML-blended progress.
+
+        This is the *merge* of the visual phase configurator with the runtime
+        estimator: one phase definition (the per-profile ranges the user draws),
+        indexed by the smoothed progress fraction rather than raw elapsed seconds,
+        so overrun/underrun cycles still name the phase correctly. Returns None
+        (caller falls back) when not running, no profile is matched, or the
+        profile has no configured phase ranges. Never raises.
+        """
+        try:
+            if self.detector.state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+                return None
+            profile = self._current_program
+            if not profile or profile in ("off", "detecting...", "restored...", "none", "unknown"):
+                return None
+            ranges = self.profile_store.get_profile_phase_ranges(profile)
+            if not ranges:
+                return None
+            nominal = max((float(r.get("end") or 0.0) for r in ranges), default=0.0)
+            if nominal <= 0.0:
+                return None
+            frac = max(0.0, min(1.0, float(self._cycle_progress) / 100.0))
+            return self.profile_store.check_phase_match(profile, frac * nominal)
+        except Exception:  # noqa: BLE001 - phase readout must never break
+            return None
 
     @property
     def match_ambiguity(self) -> bool:
@@ -2243,6 +2332,20 @@ class WashDataManager:
         # of model promotion; runs on every training pass.
         matching = await self._tune_matching_config(cycles)
 
+        # Record that training *ran* now, regardless of whether anything was
+        # promoted, so "Last trained" advances on every run (a run that doesn't
+        # beat the baseline previously left the timestamp stuck at the last
+        # promotion). Never let a persistence hiccup break the run.
+        try:
+            _run_iso = dt_util.now().isoformat()
+            await self.profile_store.set_ml_last_training_run(_run_iso)
+            # Track each capability's held-out score over time (drift/fit trend).
+            await self.profile_store.append_ml_training_history(
+                _run_iso, summary.get("results", [])
+            )
+        except Exception as err:  # noqa: BLE001
+            self._logger.debug("Failed to persist last-training-run timestamp: %s", err)
+
         self.hass.bus.async_fire(
             EVENT_ML_TRAINING_COMPLETE,
             {
@@ -2332,7 +2435,18 @@ class WashDataManager:
         return int(result.get("evaluated_count", 0))
 
     def _last_ml_training_at(self) -> datetime | None:
-        """Most recent trained_at across stored on-device models, or None."""
+        """When on-device training last *ran* (not just last promoted a model).
+
+        Prefers the persisted last-run timestamp so a manual/scheduled run that
+        produced no promotable model still advances "Last trained" and the retrain
+        interval. Falls back to the newest promoted model's ``trained_at`` for
+        installs from before run-time tracking existed.
+        """
+        run_iso = self.profile_store.get_ml_last_training_run()
+        if isinstance(run_iso, str):
+            parsed = dt_util.parse_datetime(run_iso)
+            if parsed is not None:
+                return parsed
         latest: datetime | None = None
         for record in (self.profile_store.get_ml_model_versions() or {}).values():
             ts = record.get("trained_at") if isinstance(record, dict) else None
@@ -2988,11 +3102,11 @@ class WashDataManager:
                     valid.sort(key=lambda x: x[0])
                     ts = np.array([v[0] for v in valid])
                     ps = np.array([v[1] for v in valid])
-                    dt_h = np.diff(ts) / 3600.0
-                    _MAX_GAP_H = 1.0  # skip segments longer than 1 hour
-                    mask = (dt_h > 0) & (dt_h <= _MAX_GAP_H)
-                    avg_p = (ps[:-1] + ps[1:]) / 2
-                    cycle_energy_wh = float(np.sum(avg_p[mask] * dt_h[mask]))
+                    # Shared trapezoidal integrator with a data-driven outage gap
+                    # (single source with ProfileStore.add_cycle).
+                    cycle_energy_wh = integrate_wh(
+                        ts, ps, max_gap_s=energy_gap_threshold_s(ts)
+                    )
                 except (TypeError, ValueError, ArithmeticError):
                     cycle_energy_wh = 0.0
 
@@ -3096,6 +3210,179 @@ class WashDataManager:
         if expected_duration and expected_duration > 0:
             expectation["duration"] = float(expected_duration)
         return expectation
+
+    def _terminal_drop_provider(
+        self, points: list[tuple[float, float]], expected_duration: float
+    ) -> bool:
+        """Opt-in terminal-drop detector handed to the CycleDetector.
+
+        Returns ``True`` when the current low-power event is a hard cliff-to-~0
+        that began at an elapsed offset EARLIER than this device has ever
+        legitimately gone quiet (learned from its own completed cycles) - i.e. an
+        anomalously-early drop that is almost certainly a real stop (plug pulled /
+        cancelled), not a soak pause.  The detector then finalizes quickly instead
+        of waiting out the full soak-bridging ``min_off_gap``.
+
+        A very early drop is below the matcher's duration gate, so match
+        confidence is not available to confirm familiarity; instead the cycle's
+        **power level** must be one this device has produced before (see
+        ``is_terminal_drop``) - a cycle drawing power unlike anything in its
+        history is treated as a possible new program and deferred.
+
+        Returns ``False`` (keep the proven slow path) when the ML/anomaly opt-in
+        is off, there is too little history to trust the baseline, the cycle
+        looks novel, or the drop is not anomalously early.  Never raises - the
+        anomaly signal must never break detection.
+        """
+        try:
+            from .ml.engine import ml_models_enabled
+
+            if not ml_models_enabled(self.config_entry.options):
+                return False
+            earliest, peak_range = self._terminal_drop_baseline()
+            return is_terminal_drop(
+                points,
+                earliest,
+                peak_range,
+                float(self.detector.config.stop_threshold_w),
+                TERMINAL_DROP_EARLINESS_RATIO,
+                TERMINAL_DROP_MIN_PEAK_RATIO,
+                TERMINAL_DROP_PEAK_FAMILIAR_TOL,
+            )
+        except Exception as err:  # noqa: BLE001 - anomaly signal must never break detection
+            self._logger.debug("Terminal-drop detection skipped: %s", err)
+            return False
+
+    def _terminal_drop_baseline(self) -> tuple[float | None, tuple[float, float] | None]:
+        """Cached (earliest-quiet-offset, historical-peak-range) for this device.
+
+        Both are learned from the device's completed cycles and used by the
+        terminal-drop detector (anomaly + familiarity gates).  Keyed by cycle
+        count so it refreshes as history grows without re-decompressing every
+        trace on each low-power reading."""
+        cycles = self.profile_store.get_past_cycles()
+        n = len(cycles)
+        cache = self._terminal_drop_cache
+        if cache is not None and cache[0] == n:
+            return cache[1], cache[2]
+        stop_threshold = float(self.detector.config.stop_threshold_w)
+        earliest = earliest_sustained_quiet_offset(
+            cycles,
+            stop_threshold,
+            TERMINAL_DROP_MIN_QUIET_SPAN_S,
+            TERMINAL_DROP_MIN_CLEAN_CYCLES,
+        )
+        peak_range = device_active_peak_range(cycles, TERMINAL_DROP_MIN_CLEAN_CYCLES)
+        self._terminal_drop_cache = (n, earliest, peak_range)
+        return earliest, peak_range
+
+    def _ml_progress_percent(
+        self,
+        trace: list[tuple[datetime, float]],
+        profile_name: str,
+    ) -> float | None:
+        """ML completion-fraction estimate (0-100) for the running cycle, or None.
+
+        Uses the on-device ``remaining_time`` regressor (a ``standardized_linear``
+        head with no shipped baseline) to predict how far through the cycle we
+        are, learning this device's own progress curve rather than assuming the
+        matched profile's median duration. Gated on the ML opt-in and only active
+        once training has promoted a regressor; otherwise returns ``None`` so the
+        caller keeps the proven phase-aware estimate untouched. Never raises.
+        """
+        try:
+            from .ml.engine import ml_models_enabled, resolve_regressor
+
+            if not ml_models_enabled(self.config_entry.options):
+                return None
+            if (
+                not profile_name
+                or profile_name in ("off", "detecting...", "restored...")
+                or profile_name not in self.profile_store.get_profiles()
+            ):
+                return None
+            predict_fn, _src = resolve_regressor("remaining_time", self.profile_store)
+            if predict_fn is None:
+                return None
+            if not trace or len(trace) < 4:
+                return None
+            expectation = self._profile_end_expectation(
+                profile_name, float(self._matched_profile_duration or 0.0)
+            )
+            if expectation is None:
+                return None
+            t0 = trace[0][0]
+            pts = [(float((t - t0).total_seconds()), float(p)) for t, p in trace]
+            from .ml.feature_extraction import progress_features
+
+            feat = progress_features(pts, expectation)
+            if feat is None:
+                return None
+            frac = float(predict_fn(feat))
+            if not math.isfinite(frac):
+                return None
+            return float(min(max(frac, 0.0), 0.99)) * 100.0
+        except Exception as err:  # noqa: BLE001 - ML must never break estimates
+            self._logger.debug("ML progress estimate skipped: %s", err)
+            return None
+
+    def _ml_energy_total(
+        self,
+        trace: list[tuple[datetime, float]],
+        profile_name: str,
+    ) -> float | None:
+        """Predicted total cycle energy (Wh) from the on-device ``total_energy``
+        regressor, or None.
+
+        The regressor predicts the *energy-completion fraction* (energy so far ÷
+        final energy); total = ``energy_so_far / fraction``. Because energy
+        accumulates non-linearly (heating front-loads it), this is more stable —
+        especially early — than dividing accumulated energy by *time* progress
+        (the fallback in :meth:`_update_projected_energy`). Same gating as the
+        remaining-time regressor: opt-in, inert until a model is promoted. Never
+        raises.
+        """
+        try:
+            from .ml.engine import ml_models_enabled, resolve_regressor
+
+            if not ml_models_enabled(self.config_entry.options):
+                return None
+            if (
+                not profile_name
+                or profile_name in ("off", "detecting...", "restored...")
+                or profile_name not in self.profile_store.get_profiles()
+            ):
+                return None
+            predict_fn, _src = resolve_regressor("total_energy", self.profile_store)
+            if predict_fn is None:
+                return None
+            if not trace or len(trace) < 4:
+                return None
+            expectation = self._profile_end_expectation(
+                profile_name, float(self._matched_profile_duration or 0.0)
+            )
+            if expectation is None:
+                return None
+            t0 = trace[0][0]
+            pts = [(float((t - t0).total_seconds()), float(p)) for t, p in trace]
+            from .ml.feature_extraction import progress_features, cumulative_energy_wh
+
+            feat = progress_features(pts, expectation)
+            if feat is None:
+                return None
+            frac = float(predict_fn(feat))
+            # Floor the fraction so an under-confident prediction can't blow the
+            # projection up; below the floor, defer to the time-based fallback.
+            if not math.isfinite(frac) or frac < 0.05:
+                return None
+            energy_so_far = float(cumulative_energy_wh(pts)[-1])
+            if energy_so_far <= 0.0:
+                return None
+            total = energy_so_far / min(max(frac, 0.05), 1.0)
+            return max(total, energy_so_far)  # never below what's already consumed
+        except Exception as err:  # noqa: BLE001 - ML must never break estimates
+            self._logger.debug("ML energy projection skipped: %s", err)
+            return None
 
     def _compute_cycle_quality_score(self, cycle_data: dict[str, Any]) -> None:
         """Score a just-finished cycle with the hybrid_curve_quality model (opt-in).
@@ -3238,6 +3525,45 @@ class WashDataManager:
                     res.best_profile,
                     res.confidence,
                 )
+
+        # Back-fill confirmed label on any ranking snapshots captured during this cycle
+        # so the live_match on-device trainer can use them as labelled examples.
+        _start_iso = cycle_data.get("start_time")
+        _confirmed_profile = cycle_data.get("profile_name")
+        if _start_iso and _confirmed_profile:
+            try:
+                self.profile_store.confirm_match_ranking_snapshots(_start_iso, _confirmed_profile)
+            except Exception:  # noqa: BLE001
+                pass
+
+        # Compute envelope conformance for the matched profile.
+        # Stored as cycle_data["envelope_conformance"] so the panel and quality
+        # gate can display/use it.  Only runs when we have a profile + power trace.
+        _ep = cycle_data.get("profile_name")
+        _pd = cycle_data.get("power_data")
+        if _ep and isinstance(_pd, list) and len(_pd) >= 4:
+            try:
+                from .time_utils import power_data_to_offsets  # noqa: PLC0415
+                _pts = [(float(o), float(p)) for o, p in power_data_to_offsets(_pd, _start_iso)]
+                if len(_pts) >= 4:
+                    conformance_rec = self.profile_store.compute_envelope_conformance(_ep, _pts)
+                    if conformance_rec is not None:
+                        cycle_data["envelope_conformance"] = conformance_rec.get("conformance")
+                    # Transient artifacts (door-open pauses, out-of-band dips/spikes)
+                    # for graph markers + a Cycles-list badge; [] when none.
+                    artifacts = self.profile_store.detect_cycle_artifacts(_ep, _pts)
+                    if artifacts:
+                        cycle_data["artifacts"] = artifacts
+            except Exception:  # noqa: BLE001
+                pass
+
+        # Freeze the runtime overrun anomaly onto the cycle for panel badging.
+        # "overrun" means the cycle ran materially longer than its matched
+        # profile's typical duration; purely informational (never a notification).
+        if self._cycle_anomaly and self._cycle_anomaly != "none":
+            cycle_data["anomaly"] = self._cycle_anomaly
+            if self._overrun_ratio > 0:
+                cycle_data["overrun_ratio"] = round(float(self._overrun_ratio), 3)
 
         # Freeze the energy cost onto the cycle using the price in effect NOW, so
         # later price changes never rewrite historical costs. Stored as a number
@@ -3402,10 +3728,6 @@ class WashDataManager:
     def suggestions(self) -> dict[str, Any]:
         """Suggested settings computed by learning/heuristics (never auto-applied)."""
         return self.profile_store.get_suggestions()
-
-    def _send_notification(self, message: str, title: str | None = None, icon: str | None = None) -> None:
-        """Dispatch notification through actions or notify service."""
-        self._dispatch_notification(message, title=title, icon=icon)
 
     def _safe_format_template(
         self,
@@ -3863,6 +4185,10 @@ class WashDataManager:
             self._time_remaining = None
             self._total_duration = None
             self._cycle_progress = 0.0
+            self._projected_energy_wh = None
+            self._projected_cost = None
+            self._cycle_anomaly = "none"
+            self._overrun_ratio = 0.0
             self._last_match_result = None
             self._notify_update()
             return
@@ -4224,6 +4550,69 @@ class WashDataManager:
             )
             self._logger.info("Sent pre-completion notification: %s", msg)
 
+    #: Progress floor below which an energy projection is too noisy to publish.
+    _PROJECTION_MIN_PROGRESS = 3.0
+
+    def _update_projected_energy(self) -> None:
+        """Project total energy/cost for the running cycle.
+
+        Prefers the on-device ``total_energy`` regressor (which models energy's
+        non-linear accumulation); otherwise falls back to
+        ``energy_so_far / progress_fraction`` (progress already carries the ML
+        remaining-time blend, so it personalizes to this device's real cycle
+        length). Cost uses the same price resolution that freezes each completed
+        cycle's cost, so a running estimate and the final frozen value are
+        consistent. Clears to ``None`` when progress is too low, there is no energy
+        yet, or projection would be implausible. Never raises — a projection
+        failure must not disturb the estimate loop.
+        """
+        try:
+            progress = float(self._cycle_progress or 0.0)
+            energy_so_far = float(getattr(self.detector, "_energy_since_idle_wh", 0.0) or 0.0)
+            if progress < self._PROJECTION_MIN_PROGRESS or energy_so_far <= 0.0:
+                self._projected_energy_wh = None
+                self._projected_cost = None
+                return
+            # Prefer the learned energy regressor; fall back to the time-progress
+            # division when it's unavailable/inert.
+            projected_wh = self._ml_energy_total(
+                self.detector.get_power_trace(), self._current_program
+            )
+            if projected_wh is None:
+                projected_wh = energy_so_far / (progress / 100.0)
+            # Never project below what has already been consumed.
+            projected_wh = max(projected_wh, energy_so_far)
+            self._projected_energy_wh = projected_wh
+            price = self._resolve_energy_price()
+            self._projected_cost = (
+                (projected_wh / 1000.0) * float(price) if price else None
+            )
+        except Exception:  # noqa: BLE001 - projection must never break estimates
+            self._projected_energy_wh = None
+            self._projected_cost = None
+
+    def _update_cycle_anomaly(self, duration_so_far: float) -> None:
+        """Flag a *soft* runtime overrun anomaly for the running cycle.
+
+        Sets ``_overrun_ratio = elapsed / expected`` and ``_cycle_anomaly`` to
+        ``"overrun"`` once the ratio crosses ``CYCLE_OVERRUN_ANOMALY_RATIO``. This
+        is purely a visible signal (state-sensor attribute + cycle metadata); it
+        never notifies and never terminates (the zombie-killer owns hard limits).
+        No-op / cleared when no profile duration is known. Never raises.
+        """
+        try:
+            expected = float(self._matched_profile_duration or 0.0)
+            if expected <= 0.0 or duration_so_far <= 0.0:
+                self._overrun_ratio = 0.0
+                self._cycle_anomaly = "none"
+                return
+            ratio = duration_so_far / expected
+            self._overrun_ratio = ratio
+            self._cycle_anomaly = "overrun" if ratio >= CYCLE_OVERRUN_ANOMALY_RATIO else "none"
+        except Exception:  # noqa: BLE001 - anomaly signal must never break estimates
+            self._overrun_ratio = 0.0
+            self._cycle_anomaly = "none"
+
     def _update_remaining_only(self) -> None:
         """Recompute remaining/progress using phase-aware estimation."""
         # Throttle updates and only clear on truly dead states
@@ -4232,6 +4621,10 @@ class WashDataManager:
             self._total_duration = None
             self._cycle_progress = 0.0
             self._smoothed_progress = 0.0
+            self._projected_energy_wh = None
+            self._projected_cost = None
+            self._cycle_anomaly = "none"
+            self._overrun_ratio = 0.0
             return
 
         now = dt_util.now()
@@ -4249,8 +4642,6 @@ class WashDataManager:
         if self._matched_profile_duration and self._matched_profile_duration > 0:
             # Get current power trace for phase analysis
             trace = self.detector.get_power_trace()
-            # current_power_data = [(t.isoformat(), p) for t, p in trace]
-            # DEPRECATED: avoid O(N) conversion
 
             # --- PHASE-AWARE ESTIMATION ---
             if len(trace) >= 10 and self._current_program != "detecting...":
@@ -4259,6 +4650,16 @@ class WashDataManager:
                 )
                 if phase_result is not None:
                     phase_progress, phase_variance = phase_result
+
+                    # Blend an on-device remaining-time regressor (opt-in, no
+                    # shipped baseline) into the raw phase estimate BEFORE the EMA
+                    # smoothing/monotonicity guards run, so a bad model can never
+                    # wholly override the proven phase estimator. No-op unless a
+                    # regressor has been trained and ML models are enabled.
+                    ml_pct = self._ml_progress_percent(trace, self._current_program)
+                    if ml_pct is not None:
+                        w = ML_PROGRESS_BLEND_WEIGHT
+                        phase_progress = (1.0 - w) * phase_progress + w * ml_pct
 
                     # Smoothing: Exponential Moving Average
                     # If this is the first reliable estimate, snap to it.
@@ -4331,12 +4732,22 @@ class WashDataManager:
                         self._cycle_progress,
                         int(remaining / 60),
                     )
+                    self._update_projected_energy()
+                    self._update_cycle_anomaly(duration_so_far)
                     return
 
             # --- LINEAR FALLBACK (if phase analysis unavailable) ---
             matched_dur = float(self._matched_profile_duration)
             remaining = max(matched_dur - duration_so_far, 0.0)
             progress = (duration_so_far / matched_dur) * 100.0
+
+            # Same opt-in ML regressor blend as the phase-aware branch, so the
+            # personalised progress curve is used even without phase lock.
+            ml_pct = self._ml_progress_percent(trace, self._current_program)
+            if ml_pct is not None:
+                w = ML_PROGRESS_BLEND_WEIGHT
+                progress = (1.0 - w) * progress + w * ml_pct
+                remaining = max(matched_dur * (1.0 - progress / 100.0), 0.0)
 
             # Blend linear estimate into smoothed tracker too, to prevent
             # jumps if we lose phase lock
@@ -4357,6 +4768,8 @@ class WashDataManager:
                 int(remaining / 60),
                 self._cycle_progress,
             )
+            self._update_projected_energy()
+            self._update_cycle_anomaly(duration_so_far)
         else:
             # No profile matched - don't provide misleading time estimates
             # Just show that we're detecting (no Smart Resume based on history)
@@ -4364,6 +4777,10 @@ class WashDataManager:
             self._total_duration = None
             self._cycle_progress = 0.0
             self._smoothed_progress = 0.0
+            self._projected_energy_wh = None
+            self._projected_cost = None
+            self._cycle_anomaly = "none"
+            self._overrun_ratio = 0.0
             self._logger.debug(
                 "No profile matched yet, elapsed=%smin", int(duration_so_far / 60)
             )
@@ -4702,6 +5119,26 @@ class WashDataManager:
     def cycle_progress(self):
         """Return cycle progress as a percentage."""
         return self._cycle_progress
+
+    @property
+    def projected_energy_wh(self) -> float | None:
+        """Projected total energy (Wh) for the running cycle, or None."""
+        return self._projected_energy_wh
+
+    @property
+    def projected_cost(self) -> float | None:
+        """Projected total cost for the running cycle, or None when no price."""
+        return self._projected_cost
+
+    @property
+    def cycle_anomaly(self) -> str:
+        """Runtime anomaly state for the current cycle ("none" | "overrun")."""
+        return self._cycle_anomaly
+
+    @property
+    def overrun_ratio(self) -> float:
+        """Elapsed / expected duration for the running cycle (0.0 when unknown)."""
+        return self._overrun_ratio
 
     @property
     def current_power(self):

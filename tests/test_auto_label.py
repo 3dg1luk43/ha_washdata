@@ -70,7 +70,7 @@ async def test_auto_label_cycles_basic(store):
     
     # Mock match_profile
     with patch.object(store, "async_match_profile") as mock_match, \
-         patch.object(store, "_decompress_power_data") as mock_decomp:
+         patch("custom_components.ha_washdata.profile_store.decompress_power_data") as mock_decomp:
         
         # Fake power data to pass length check
         mock_decomp.return_value = [("t", 1.0)] * 20
@@ -109,7 +109,7 @@ async def test_auto_label_cycles_overwrite(store):
     ]
     
     with patch.object(store, "async_match_profile") as mock_match, \
-         patch.object(store, "_decompress_power_data") as mock_decomp:
+         patch("custom_components.ha_washdata.profile_store.decompress_power_data") as mock_decomp:
         
         mock_decomp.return_value = [("t", 1.0)] * 20
         

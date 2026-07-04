@@ -1004,13 +1004,9 @@
         "dryer": "Tørretumbler",
         "washer_dryer": "Vaske-tørretumbler kombi",
         "dishwasher": "Opvaskemaskine",
-        "coffee_machine": "Kaffemaskine (forældet)",
-        "ev": "Elektrisk køretøj (udfaset)",
         "air_fryer": "Air Fryer",
-        "heat_pump": "Varmepumpe (udgået)",
         "bread_maker": "Brødmaskine",
         "pump": "Pumpe / Sump Pumpe",
-        "oven": "Ovn (forældet)",
         "other": "Andet (avanceret)"
       }
     }

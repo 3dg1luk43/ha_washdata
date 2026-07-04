@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import dataclasses
 import hashlib
-import html
 import logging
 import math
 import os
@@ -12,7 +11,6 @@ import re
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, TypeAlias, cast
-import json
 
 import numpy as np
 
@@ -31,7 +29,7 @@ from .const import (
     DEFAULT_DTW_BANDWIDTH,
 )
 from .features import compute_signature
-from .signal_processing import resample_uniform, resample_adaptive, Segment
+from .signal_processing import resample_uniform, resample_adaptive, Segment, integrate_wh, energy_gap_threshold_s
 from . import analysis
 from .time_utils import (
     migrate_power_data_to_offsets,
@@ -58,14 +56,48 @@ JSONDict: TypeAlias = dict[str, Any]
 CycleDict: TypeAlias = dict[str, Any]
 
 
+def _is_recorded_cycle(cycle: dict[str, Any]) -> bool:
+    """True when a cycle was produced by the manual recorder.
+
+    Two independent signals, because the explicit marker did not always exist:
+
+    1. **Explicit meta marker** (recent recorder builds): ``meta.source ==
+       "recorder"`` and, equivalently, ``meta.original_samples`` (the pre-trim
+       sample count). (In exported diagnostics ``meta.source`` is redacted, but
+       the real stored value is ``"recorder"`` — the migration runs against the
+       real store, not the export.)
+
+    2. **Structural signature** (old recordings, ``meta`` is ``None``): the
+       recorder builds the cycle dict directly (``ws_process_recording``) and
+       never sets ``max_power`` or ``termination_reason``, whereas *every*
+       auto-detected cycle goes through ``CycleDetector._finish_cycle`` which
+       stamps ``max_power`` unconditionally (in every version — ``termination_reason``
+       was added later, so old *auto* cycles can lack it but never lack
+       ``max_power``). So a **completed** cycle missing *both* fields is a
+       recording that predates the meta marker. Verified against real exports:
+       this recovers old recordings that carry only ``meta: None`` — which the
+       marker-only check silently missed.
+    """
+    meta = cycle.get("meta")
+    if isinstance(meta, dict) and (
+        meta.get("source") == "recorder" or "original_samples" in meta
+    ):
+        return True
+    return (
+        cycle.get("status") == "completed"
+        and "max_power" not in cycle
+        and "termination_reason" not in cycle
+    )
+
+
 def _flag_recorded_cycles_golden(cycles: list[dict[str, Any]]) -> int:
     """Mark manually-recorded cycles as golden references (recorded == golden).
 
-    A recorded cycle carries ``meta.source == "recorder"``; such cycles are, by
-    definition, hand-picked clean examples, so they become the profile's golden
-    reference. The flag lives in the single ``ml_review`` dict (no duplicate
-    ``recorded`` field). Idempotent: already-golden cycles are skipped, so it is
-    safe to re-run from the migration and the diagnostics processing trigger.
+    A recorded cycle (see :func:`_is_recorded_cycle`) is, by definition, a
+    hand-picked clean example, so it becomes the profile's golden reference. The
+    flag lives in the single ``ml_review`` dict (no duplicate ``recorded`` field).
+    Idempotent: already-golden cycles are skipped, so it is safe to re-run from the
+    migration and the diagnostics processing trigger.
 
     Returns the number of cycles newly flagged.
     """
@@ -76,8 +108,7 @@ def _flag_recorded_cycles_golden(cycles: list[dict[str, Any]]) -> int:
         review = cycle.get("ml_review")
         if isinstance(review, dict) and review.get("golden"):
             continue
-        meta = cycle.get("meta")
-        if not (isinstance(meta, dict) and meta.get("source") == "recorder"):
+        if not _is_recorded_cycle(cycle):
             continue
         review = dict(review) if isinstance(review, dict) else {}
         review["golden"] = True
@@ -227,111 +258,6 @@ def filter_duration_outliers(durations: list[float]) -> list[float]:
     return durations
 
 
-@dataclasses.dataclass
-class SVGCurve:
-    """Definition for a curve in the SVG chart."""
-    points: list[tuple[float, float]]  # (x, y)
-    color: str
-    opacity: float = 1.0
-    stroke_width: int = 2
-    dasharray: str | None = None
-    is_polygon: bool = False
-
-
-def _generate_generic_svg(
-    title: str,
-    curves: list[SVGCurve],
-    width: int = 800,
-    height: int = 400,
-    max_x_override: float | None = None,
-    max_y_override: float | None = None,
-    markers: list[dict[str, Any]] | None = None, # {x, label, color}
-) -> str:
-    """Generate a generic time-series SVG chart."""
-    if not curves:
-        return ""
-
-    padding_x = 50
-    padding_y = 40
-    graph_w = width - 2 * padding_x
-    graph_h = height - 2 * padding_y
-
-    # Determine bounds
-    all_x = [p[0] for c in curves for p in c.points]
-    all_y = [p[1] for c in curves for p in c.points]
-
-    if not all_x:
-        return ""
-
-    max_x = max_x_override if max_x_override is not None else max(all_x)
-    max_y = max_y_override if max_y_override is not None else max(all_y, default=1.0)
-
-    # Headroom
-    max_y = max(max_y, 10.0) * 1.05
-    max_x = max(max_x, 1.0) # Ensure no div by zero
-
-    def to_x(t: float) -> float:
-        return padding_x + (t / max_x) * graph_w
-
-    def to_y(p: float) -> float:
-        return height - padding_y - (p / max_y) * graph_h
-
-    # Build Paths
-    paths: list[str] = []
-    for c in curves:
-        if not c.points:
-            continue
-
-        pts: list[str] = []
-        # Optimization: verify step size if huge data
-        for x_val, y_val in c.points:
-            pts.append(f"{to_x(x_val):.1f},{to_y(y_val):.1f}")
-
-        path_d = " ".join(pts)
-        if c.is_polygon:
-            style = f'fill="{c.color}" fill-opacity="{c.opacity}" stroke="none"'
-            paths.append(f'<polygon points="{path_d}" {style} />')
-        else:
-            style = f'stroke="{c.color}" stroke-width="{c.stroke_width}" stroke-opacity="{c.opacity}" fill="none"'
-            if c.dasharray:
-                style += f' stroke-dasharray="{c.dasharray}"'
-            paths.append(f'<polyline points="{path_d}" {style} />')
-
-    # Build Markers
-    marker_svgs: list[str] = []
-    if markers:
-        for m in markers:
-            mx = m["x"]
-            if 0 <= mx <= max_x:
-                screen_x = to_x(mx)
-                color = m.get("color", "#aaa")
-                label = m.get("label", "")
-                marker_svgs.append(
-                    f'<line x1="{screen_x:.1f}" y1="{padding_y}" x2="{screen_x:.1f}" y2="{height - padding_y}" '
-                    f'stroke="{color}" stroke-dasharray="4" stroke-width="1" />'
-                )
-                if label:
-                    marker_svgs.append(
-                        f'<text x="{screen_x:.1f}" y="{height - padding_y + 15}" '
-                        f'fill="{color}" font-size="12" text-anchor="middle">{label}</text>'
-                    )
-
-    # Grid & Axes (border + mid lines)
-    grid = f"""
-    <rect x="0" y="0" width="{width}" height="{height}" fill="#1c1c1c" />
-    <line x1="{padding_x}" y1="{height - padding_y}" x2="{width - padding_x}" y2="{height - padding_y}" stroke="#444" stroke-width="2" />
-    <line x1="{padding_x}" y1="{padding_y}" x2="{padding_x}" y2="{height - padding_y}" stroke="#444" stroke-width="2" />
-    <text x="{padding_x}" y="{padding_y - 15}" fill="#aaa" font-size="16">{int(max_y)}W</text>
-    <text x="{width - padding_x}" y="{height - 10}" fill="#aaa" font-size="16" text-anchor="middle">{int(max_x)}s</text>
-    <text x="{width / 2}" y="{padding_y - 15}" fill="#fff" font-size="20" text-anchor="middle" font-weight="bold">{title}</text>
-    """
-
-    header = (
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
-        'style="background-color: #1c1c1c; font-family: sans-serif;">'
-    )
-
-    return header + grid + "".join(paths) + "".join(marker_svgs) + "</svg>"
 
 
 
@@ -410,6 +336,131 @@ def decompress_power_data(cycle: CycleDict) -> list[tuple[float, float]]:
         start_time_iso = start_time_raw.isoformat()
     offsets = power_data_to_offsets(cast(list[list[Any] | tuple[Any, ...]], raw), start_time_iso)
     return [(float(o), float(p)) for o, p in offsets]
+
+
+def earliest_sustained_quiet_offset(
+    cycles: list[CycleDict],
+    stop_threshold_w: float,
+    min_quiet_span_s: float,
+    min_clean_cycles: int,
+) -> float | None:
+    """Smallest elapsed offset (s) at which any *completed* cycle first shows a
+    sustained (>= ``min_quiet_span_s``) near-zero (< ``stop_threshold_w``) span.
+
+    This is the device's learned "we have never legitimately been quiet before
+    this many seconds into a cycle" baseline, used by the opt-in terminal-drop
+    detector: a hard cliff-to-~0 that begins *earlier* than this is anomalous and
+    almost certainly a real stop rather than a soak pause.
+
+    Only ``completed`` cycles seed the baseline - interrupted / force-stopped /
+    terminal-drop cycles are exactly the anomalies we are trying to catch, so
+    including them would poison the baseline and suppress detection. Returns
+    ``None`` when there are fewer than ``min_clean_cycles`` completed cycles with
+    usable traces, so the caller keeps the proven slow end-detection.
+
+    Using the strict *minimum* (rather than a higher percentile) is deliberately
+    conservative: one cycle that happened to go quiet early only lowers the
+    baseline, making the detector fire *less* often - never more.
+    """
+    if not cycles:
+        return None
+    earliest: float | None = None
+    clean = 0
+    for cycle in cycles:
+        if cycle.get("status") != "completed":
+            continue
+        points = decompress_power_data(cycle)
+        if not points:
+            continue
+        clean += 1
+        span_start: float | None = None
+        for offset, power in points:
+            if power < stop_threshold_w:
+                if span_start is None:
+                    span_start = offset
+                elif (offset - span_start) >= min_quiet_span_s:
+                    if earliest is None or span_start < earliest:
+                        earliest = span_start
+                    break
+            else:
+                span_start = None
+    if clean < min_clean_cycles:
+        return None
+    return earliest
+
+
+def device_active_peak_range(
+    cycles: list[CycleDict], min_clean_cycles: int
+) -> tuple[float, float] | None:
+    """(min_peak, max_peak) across the device's **completed** cycles.
+
+    The peak of a cycle is its maximum power.  This is the device's learned
+    "power levels we have produced before" band, used by the terminal-drop
+    familiarity gate: a running cycle peaking outside this range (widened by a
+    tolerance) is drawing power unlike anything in its history and may be a new
+    program, so an early drop on it is deferred rather than assumed terminal.
+
+    Returns ``None`` below ``min_clean_cycles`` completed cycles with usable
+    traces (same guard as the quiet-offset baseline)."""
+    peaks: list[float] = []
+    for cycle in cycles:
+        if cycle.get("status") != "completed":
+            continue
+        points = decompress_power_data(cycle)
+        if not points:
+            continue
+        peaks.append(max(p for _, p in points))
+    if len(peaks) < min_clean_cycles:
+        return None
+    return (min(peaks), max(peaks))
+
+
+def is_terminal_drop(
+    points: list[tuple[float, float]],
+    earliest_quiet: float | None,
+    peak_range: tuple[float, float] | None,
+    stop_threshold_w: float,
+    earliness_ratio: float,
+    min_peak_ratio: float,
+    peak_familiar_tol: float,
+) -> bool:
+    """Whether a running cycle's current low-power event is an anomalously-early
+    terminal drop (plug pulled / cancelled) rather than a soak pause.
+
+    Pure decision logic (no store / no I/O) so it is unit-testable in isolation;
+    the manager wires the learned ``earliest_quiet`` / ``peak_range`` baselines
+    and gates on the ML opt-in. All three checks must hold:
+
+    * **Clearly ON** - the cycle peaked >= ``min_peak_ratio`` x stop-threshold
+      (a low-power idling device can't trip it).
+    * **Familiar** - the peak is within the device's historical peak range
+      widened by ``peak_familiar_tol``.  A peak outside that band means the cycle
+      is drawing power unlike anything seen before (possibly a new program), so
+      we DEFER (return ``False``) rather than assume a stop.
+    * **Anomalous** - the trailing sub-threshold span began at an offset
+      ``< earliest_quiet * earliness_ratio`` - earlier than this device has ever
+      legitimately gone quiet.
+
+    Returns ``False`` (keep the proven slow path) whenever a baseline is missing
+    or any check fails."""
+    if not points or earliest_quiet is None or peak_range is None:
+        return False
+    peak = max(p for _, p in points)
+    if peak < min_peak_ratio * max(stop_threshold_w, 1.0):
+        return False
+    lo, hi = peak_range
+    if not (lo * (1.0 - peak_familiar_tol) <= peak <= hi * (1.0 + peak_familiar_tol)):
+        return False
+    drop_start: float | None = None
+    for offset, power in points:
+        if power < stop_threshold_w:
+            if drop_start is None:
+                drop_start = offset
+        else:
+            drop_start = None
+    if drop_start is None:
+        return False
+    return drop_start < earliest_quiet * earliness_ratio
 
 
 def compress_power_data(cycle: CycleDict) -> list[Any] | None:
@@ -632,6 +683,38 @@ class WashDataStore(Store[JSONDict]):
                 "Migration v5->v6: flagged %s recorded cycle(s) as golden references", flagged
             )
 
+        if old_major_version < 7:
+            # The v6 step only ran when upgrading from below v6, so recorded
+            # cycles on installs already at v6 (e.g. recorded by an older build
+            # that didn't set the golden flag) were never tagged. Re-run the now
+            # broadened backfill once so every historical recorded cycle is
+            # recognised. Idempotent: already-golden cycles are skipped.
+            _LOGGER.info("Migrating storage from v%s to v7", old_major_version)
+            cycles_raw = old_data.get("past_cycles", [])
+            cycles = cast(list[dict[str, Any]], cycles_raw) if isinstance(cycles_raw, list) else []
+            flagged = _flag_recorded_cycles_golden(cycles)
+            _LOGGER.info(
+                "Migration v6->v7: tagged %s previously-unmarked recorded cycle(s) as golden",
+                flagged,
+            )
+
+        if old_major_version < 8:
+            # The v6->v7 backfill identified recordings only by the explicit
+            # ``meta.source``/``original_samples`` marker, which OLD recordings
+            # (made before that marker existed, ``meta: None``) do not carry — so
+            # they stayed untagged. _is_recorded_cycle now also recognises them by
+            # their structural signature (completed + no max_power/termination_reason).
+            # Re-run the backfill once more so those old recordings are finally
+            # tagged. Idempotent: already-golden cycles are skipped.
+            _LOGGER.info("Migrating storage from v%s to v8", old_major_version)
+            cycles_raw = old_data.get("past_cycles", [])
+            cycles = cast(list[dict[str, Any]], cycles_raw) if isinstance(cycles_raw, list) else []
+            flagged = _flag_recorded_cycles_golden(cycles)
+            _LOGGER.info(
+                "Migration v7->v8: tagged %s old recorded cycle(s) (no meta marker) as golden",
+                flagged,
+            )
+
         return old_data
 
     async def get_storage_stats(self) -> dict[str, Any]:
@@ -681,6 +764,19 @@ class WashDataStore(Store[JSONDict]):
             _LOGGER.info("Cleared debug data from %s cycles", count)
 
         return count
+
+
+def _ambiguity_from_candidates(candidates: list[dict]) -> tuple[float, bool]:
+    """Top1-vs-top2 score margin and whether the match is ambiguous.
+
+    Single source for the ambiguity rule shared by both match paths:
+    ``is_ambiguous = margin < MATCH_AMBIGUITY_MARGIN``. ``margin`` defaults to
+    1.0 when there is only one candidate.
+    """
+    margin = 1.0
+    if len(candidates) > 1:
+        margin = candidates[0]["score"] - candidates[1]["score"]
+    return margin, margin < MATCH_AMBIGUITY_MARGIN
 
 
 class ProfileStore:
@@ -788,6 +884,64 @@ class ProfileStore:
         """Drop all on-device trained models (reverts to embedded baselines)."""
         self._data["ml_model_versions"] = {}
         await self.async_save()
+
+    def get_ml_last_training_run(self) -> str | None:
+        """ISO timestamp of the last *completed* on-device training run, or None.
+
+        Distinct from each model's ``trained_at`` (the promotion time): this
+        advances on every run even when no model beat the baseline, so the panel's
+        "Last trained" reflects that training actually ran.
+        """
+        ts = self._data.get("ml_last_training_run")
+        return ts if isinstance(ts, str) else None
+
+    async def set_ml_last_training_run(self, iso: str) -> None:
+        """Record when on-device training last completed (regardless of promotion)."""
+        self._data["ml_last_training_run"] = iso
+        await self.async_save()
+
+    def get_ml_training_history(self) -> dict[str, list[dict[str, Any]]]:
+        """Per-capability held-out-score history across training runs.
+
+        ``{capability: [{"ts": iso, "score": float, "higher_better": bool}, ...]}``
+        oldest-first. Lets the panel show whether a model's fit is improving,
+        steady, or declining over time. Empty until training has run.
+        """
+        raw = self._data.get("ml_training_history")
+        return cast(dict[str, list[dict[str, Any]]], raw) if isinstance(raw, dict) else {}
+
+    async def append_ml_training_history(self, run_iso: str, results: list[dict[str, Any]]) -> None:
+        """Append each capability's held-out score from a training run.
+
+        ``results`` is ``train_from_cycles``'s per-capability records; classifiers
+        report ``new_auc`` (higher is better), regressors ``model_mae`` (lower is
+        better). Capabilities without a held-out metric this run (insufficient
+        data) are skipped. Retains at most ``ML_TRAINING_HISTORY_MAX`` runs each.
+        """
+        from .const import ML_TRAINING_HISTORY_MAX  # noqa: PLC0415
+
+        hist: JSONDict = self._data.setdefault("ml_training_history", {})
+        changed = False
+        for rec in results or []:
+            if not isinstance(rec, dict):
+                continue
+            cap = rec.get("capability")
+            if not isinstance(cap, str) or not cap:
+                continue
+            if rec.get("new_auc") is not None:
+                score, higher_better = float(rec["new_auc"]), True
+            elif rec.get("model_mae") is not None:
+                score, higher_better = float(rec["model_mae"]), False
+            else:
+                continue
+            series = hist.setdefault(cap, [])
+            if not isinstance(series, list):
+                series = hist[cap] = []
+            series.append({"ts": run_iso, "score": round(score, 5), "higher_better": higher_better})
+            del series[:-ML_TRAINING_HISTORY_MAX]
+            changed = True
+        if changed:
+            await self.async_save()
 
     # ─── On-device matching-config tuning (Stage 4/5, opt-in) ──────────────────
 
@@ -908,12 +1062,6 @@ class ProfileStore:
         feedbacks[cycle_id] = request_data
         # Caller must ensure save is called eventually
 
-    def remove_pending_feedback(self, cycle_id: str) -> None:
-        """Remove a pending feedback request."""
-        feedbacks = self.get_pending_feedback()
-        if cycle_id in feedbacks:
-            del feedbacks[cycle_id]
-
 
     def get_profile(self, name: str) -> JSONDict | None:
         """Return a single profile by name with calculated stats (via list_profiles)."""
@@ -1000,13 +1148,6 @@ class ProfileStore:
         await self.async_save()
         self._logger.info("Deleted profile group %r", name)
         return True
-
-    def _group_of(self, profile_name: str) -> str | None:
-        """Return the group name a profile belongs to, or None."""
-        for gname, g in self.get_profile_groups().items():
-            if isinstance(g, dict) and profile_name in (g.get("members") or []):
-                return gname
-        return None
 
     def _profile_curve(self, name: str, n: int = 150) -> np.ndarray | None:
         """A profile's envelope average resampled to n points, or None."""
@@ -1272,6 +1413,313 @@ class ProfileStore:
         except Exception:  # noqa: BLE001
             return {}
 
+    # ------------------------------------------------------------------
+    # Coverage gap detection (unmatched cycle clustering)
+    # ------------------------------------------------------------------
+
+    def suggest_coverage_gaps(
+        self,
+        recent_window: int = 30,
+        min_unmatched: int = 5,
+        min_unmatched_rate: float = 0.20,
+        low_confidence_threshold: float = 0.40,
+        duration_bucket_s: float = 900.0,
+    ) -> dict[str, Any]:
+        """Detect gaps in profile coverage from recent unlabelled cycles.
+
+        Looks at the ``recent_window`` most recent cycles.  When there are
+        enough unmatched (no ``profile_name``) or low-confidence cycles,
+        returns a record with:
+
+          ``unmatched_count``       – number of cycles with no profile label
+          ``low_confidence_count``  – number of labelled cycles below the confidence
+                                      threshold (potential mis-matches)
+          ``unmatched_rate``        – fraction of recent cycles that are unmatched
+          ``suggest_create``        – True when unmatched_count >= min_unmatched
+                                      AND unmatched_rate >= min_unmatched_rate
+          ``duration_clusters``     – list of duration-cluster dicts for unmatched
+                                      cycles: ``{"duration_bucket_min": int,
+                                      "count": int, "avg_duration_s": float}``
+                                      sorted descending by count. Only clusters
+                                      with ≥ 2 members are returned.
+
+        Returns an empty dict when there are fewer than ``min_unmatched``
+        unmatched cycles or on any error (never raises).
+        """
+        try:
+            cycles = self.get_past_cycles()
+            recent = cycles[-recent_window:] if len(cycles) > recent_window else cycles
+            if not recent:
+                return {}
+
+            unmatched: list[dict[str, Any]] = []
+            low_conf: list[dict[str, Any]] = []
+            for c in recent:
+                name = c.get("profile_name")
+                if not name:
+                    unmatched.append(c)
+                else:
+                    conf = c.get("match_confidence")
+                    if (
+                        isinstance(conf, (int, float))
+                        and not isinstance(conf, bool)
+                        and conf < low_confidence_threshold
+                    ):
+                        low_conf.append(c)
+
+            n_unmatched = len(unmatched)
+            n_total = len(recent)
+            rate = n_unmatched / n_total if n_total > 0 else 0.0
+
+            if n_unmatched < min_unmatched:
+                return {}
+
+            # Cluster unmatched cycles by duration bucket (simple histogram)
+            bucket_dur: dict[int, list[float]] = {}
+            for c in unmatched:
+                dur = c.get("duration")
+                if isinstance(dur, (int, float)) and not isinstance(dur, bool) and dur > 0:
+                    bucket = int(dur // duration_bucket_s)
+                    bucket_dur.setdefault(bucket, []).append(float(dur))
+
+            clusters = []
+            for bucket, durs in sorted(bucket_dur.items(), key=lambda kv: -len(kv[1])):
+                if len(durs) >= 2:
+                    clusters.append({
+                        "duration_bucket_min": int(bucket * duration_bucket_s / 60),
+                        "count": len(durs),
+                        "avg_duration_s": round(float(np.mean(durs)), 1),
+                    })
+
+            return {
+                "unmatched_count": n_unmatched,
+                "low_confidence_count": len(low_conf),
+                "unmatched_rate": round(rate, 3),
+                "suggest_create": bool(n_unmatched >= min_unmatched and rate >= min_unmatched_rate),
+                "duration_clusters": clusters,
+            }
+        except Exception:  # noqa: BLE001
+            return {}
+
+    # ------------------------------------------------------------------
+    # Profile trend analysis (pure stats, appliance performance drift)
+    # ------------------------------------------------------------------
+
+    def compute_profile_trends(
+        self,
+        min_cycles: int = 12,
+        recent_window: int = 8,
+        slope_threshold_pct: float = 0.08,
+    ) -> dict[str, dict[str, Any]]:
+        """Detect per-profile duration / energy drift using ordinary least-squares.
+
+        Uses all labeled cycles in chronological order.  For each profile with at
+        least ``min_cycles`` labeled cycles:
+
+        * Fits a linear trend (OLS via NumPy) to the most-recent N=``len(cycles)``
+          values (not just the window — the window is used only for the *recent
+          mean* display; the slope is computed on all data so short histories don't
+          give noisy slopes).
+        * Expresses the slope as percent-change-per-cycle relative to the mean,
+          so the magnitude is comparable across low- and high-duration profiles.
+        * Classifies as ``"up"`` / ``"down"`` / ``"stable"`` per metric when the
+          normalized slope exceeds ``slope_threshold_pct`` (default 8%/cycle).
+
+        Returns a dict mapping profile_name → trend record:
+          ``duration_trend``            – "up" / "down" / "stable"
+          ``duration_slope_pct``        – normalized slope (%/cycle)
+          ``duration_recent_mean_s``    – mean duration of the last N cycles (s)
+          ``energy_trend``              – "up" / "down" / "stable" (if available)
+          ``energy_slope_pct``          – normalized slope (%/cycle)
+          ``energy_recent_mean_wh``     – mean energy of the last N cycles (Wh)
+          ``cycle_count``               – number of labeled cycles used
+          ``recent_window``             – how many cycles the recent means cover
+
+        Profiles with fewer than ``min_cycles`` labeled cycles are omitted.
+        Never raises — returns ``{}`` on any error.
+        """
+        try:
+            cycles = self.get_past_cycles()
+            from collections import defaultdict  # pylint: disable=import-outside-toplevel
+            by_profile: dict[str, list[dict[str, Any]]] = defaultdict(list)
+            for c in cycles:
+                name = c.get("profile_name")
+                if name:
+                    by_profile[str(name)].append(c)
+
+            result: dict[str, dict[str, Any]] = {}
+            for name, pcy in by_profile.items():
+                if len(pcy) < min_cycles:
+                    continue
+                # Preserve insertion order (chronological from get_past_cycles)
+                durations = [float(c["duration"]) for c in pcy if c.get("duration")]
+                energies = [float(c["energy_wh"]) for c in pcy if c.get("energy_wh")]
+
+                if len(durations) < min_cycles:
+                    continue
+
+                def _slope_pct(values: list[float]) -> float:
+                    """OLS slope as % of mean per cycle."""
+                    arr = np.asarray(values, dtype=float)
+                    n = len(arr)
+                    x = np.arange(n, dtype=float)
+                    x -= x.mean()
+                    denom = float(np.dot(x, x))
+                    if denom < 1e-9:
+                        return 0.0
+                    slope = float(np.dot(x, arr)) / denom
+                    mean_val = float(np.mean(arr))
+                    return (slope / mean_val) if abs(mean_val) > 1e-9 else 0.0
+
+                def _classify(slope_pct: float) -> str:
+                    if slope_pct > slope_threshold_pct:
+                        return "up"
+                    if slope_pct < -slope_threshold_pct:
+                        return "down"
+                    return "stable"
+
+                dur_slope = _slope_pct(durations)
+                dur_recent = float(np.mean(durations[-recent_window:]))
+
+                rec: dict[str, Any] = {
+                    "cycle_count": len(pcy),
+                    "recent_window": min(recent_window, len(durations)),
+                    "duration_trend": _classify(dur_slope),
+                    "duration_slope_pct": round(dur_slope * 100, 2),
+                    "duration_recent_mean_s": round(dur_recent, 1),
+                }
+                if len(energies) >= min_cycles:
+                    en_slope = _slope_pct(energies)
+                    en_recent = float(np.mean(energies[-recent_window:]))
+                    rec["energy_trend"] = _classify(en_slope)
+                    rec["energy_slope_pct"] = round(en_slope * 100, 2)
+                    rec["energy_recent_mean_wh"] = round(en_recent, 1)
+                result[name] = rec
+            return result
+        except Exception:  # noqa: BLE001
+            return {}
+
+    def compute_profile_advisories(self) -> list[dict[str, Any]]:
+        """Actionable per-profile maintenance advisories from existing signals.
+
+        Pure statistics (no ML): consolidates :meth:`compute_profile_health` and
+        :meth:`compute_profile_trends` into a small ranked list of human-readable,
+        actionable recommendations (e.g. "durations trending longer -> re-record").
+        These surface as recommendations in the Profiles tab - never a
+        notification. Each item is ``{profile, severity, code, message}``; severity
+        is ``"warning"`` or ``"info"``. Returns ``[]`` on error (never raises).
+        """
+        try:
+            advisories: list[dict[str, Any]] = []
+            health = self.compute_profile_health() or {}
+            trends = self.compute_profile_trends() or {}
+
+            for name, h in health.items():
+                if h.get("health_status") == "poor":
+                    advisories.append({
+                        "profile": name, "severity": "warning", "code": "poor_health",
+                        "message": (
+                            f"'{name}' has a low fit score - its recent cycles vary "
+                            "a lot or match weakly. Review its cycles or re-record "
+                            "the profile so matching and time estimates stay accurate."
+                        ),
+                    })
+
+            for name, t in trends.items():
+                # Skip profiles already flagged poor to avoid double advice.
+                if health.get(name, {}).get("health_status") == "poor":
+                    continue
+                if t.get("duration_trend") == "up":
+                    pct = abs(float(t.get("duration_slope_pct") or 0.0)) * 100.0
+                    advisories.append({
+                        "profile": name, "severity": "info", "code": "duration_trend_up",
+                        "message": (
+                            f"'{name}' cycles are running progressively longer "
+                            f"(about +{pct:.0f}% per cycle). If the appliance's "
+                            "behaviour changed, re-record or rebuild this profile."
+                        ),
+                    })
+                elif t.get("energy_trend") == "up":
+                    pct = abs(float(t.get("energy_slope_pct") or 0.0)) * 100.0
+                    advisories.append({
+                        "profile": name, "severity": "info", "code": "energy_trend_up",
+                        "message": (
+                            f"'{name}' is drawing progressively more energy "
+                            f"(about +{pct:.0f}% per cycle) - worth checking the "
+                            "appliance if that is unexpected."
+                        ),
+                    })
+
+            order = {"warning": 0, "info": 1}
+            advisories.sort(key=lambda a: order.get(a["severity"], 2))
+            return advisories
+        except Exception:  # noqa: BLE001
+            return []
+
+    # ------------------------------------------------------------------
+    # Match ranking history (per-cycle ML commit snapshots)
+    # ------------------------------------------------------------------
+
+    def record_match_ranking_snapshot(
+        self,
+        start_time_iso: str,
+        features: dict[str, float],
+        top1_profile: str,
+        top1_score: float,
+        top2_score: float | None,
+        candidate_count: int,
+    ) -> None:
+        """Append a live-match ranking snapshot for the active cycle.
+
+        Snapshots are keyed by ``start_time_iso`` so that ``confirm_match_ranking_snapshots``
+        can back-fill the confirmed label when the cycle ends.  Pre-computed feature
+        scalars are stored (not raw traces) to keep footprint small.  The store is
+        NOT persisted here — the caller must schedule ``async_save``.
+        """
+        from .const import MATCH_RANKING_HISTORY_MAX  # pylint: disable=import-outside-toplevel
+        history: list[dict[str, Any]] = self._data.setdefault("match_ranking_history", [])
+        history.append({
+            "start_time_iso": start_time_iso,
+            "features": dict(features),
+            "top1_profile": str(top1_profile),
+            "top1_score": round(float(top1_score), 4),
+            "top2_score": round(float(top2_score), 4) if top2_score is not None else None,
+            "candidate_count": int(candidate_count),
+            "confirmed_label": None,
+        })
+        # Trim to the most recent N snapshots.
+        if len(history) > MATCH_RANKING_HISTORY_MAX:
+            del history[: len(history) - MATCH_RANKING_HISTORY_MAX]
+
+    def confirm_match_ranking_snapshots(
+        self,
+        start_time_iso: str,
+        confirmed_label: str,
+    ) -> int:
+        """Back-fill the confirmed label for all snapshots belonging to a cycle.
+
+        Matches by ``start_time_iso`` (set at record time, equals cycle's start_time).
+        Returns the number of snapshots updated.
+        """
+        history = self._data.get("match_ranking_history")
+        if not isinstance(history, list):
+            return 0
+        updated = 0
+        for snap in history:
+            if isinstance(snap, dict) and snap.get("start_time_iso") == start_time_iso:
+                snap["confirmed_label"] = str(confirmed_label)
+                updated += 1
+        return updated
+
+    def get_match_ranking_history(self) -> list[dict[str, Any]]:
+        """Return all ranking snapshots (confirmed and pending).
+
+        Callers that build a training dataset should filter to snapshots where
+        ``confirmed_label`` is not None.
+        """
+        raw = self._data.get("match_ranking_history")
+        return list(raw) if isinstance(raw, list) else []
+
     def _get_shared_custom_phases(self) -> list[dict[str, Any]]:
         """Return mutable shared custom phase list with legacy flattening."""
         raw = self._data.setdefault("custom_phases", [])
@@ -1426,21 +1874,6 @@ class ProfileStore:
                     assigned["name"] = target_name
 
         await self.async_save()
-
-    def count_phase_usage(self, phase_name: str) -> int:
-        """Count how many profile assignments use a phase name."""
-        used = 0
-        for profile in self.get_profiles().values():
-            phases_assigned = profile.get("phases", [])
-            if not isinstance(phases_assigned, list):
-                continue
-            assigned_list = cast(list[dict[str, Any]], phases_assigned)
-            used += sum(
-                1
-                for phase in assigned_list
-                if str(phase.get("name", "")).casefold() == phase_name.casefold()
-            )
-        return used
 
     async def async_delete_custom_phase(self, phase_id: str) -> int:
         """Delete a custom phase by id and remove matching profile assignments.
@@ -1641,12 +2074,6 @@ class ProfileStore:
             await self.async_save()
 
     # _migrate_v1_to_v2 and _decompress_power_from_raw removed; logic moved to WashDataStore
-
-    def _decompress_power_from_raw(
-        self, cycle: CycleDict
-    ) -> list[tuple[float, float, float]] | None:
-        # Helper not needed if we use _decompress_power_data
-        pass
 
     async def async_repair_profile_samples(self) -> dict[str, int]:
         """Repair profile sample references after retention or migrations.
@@ -1863,20 +2290,16 @@ class ProfileStore:
                 sig = compute_signature(ts_arr, p_arr)
                 cycle_data["signature"] = dataclasses.asdict(sig)
 
-            # Compute and store energy (Wh) if not already set (e.g. by manager)
+            # Compute and store energy (Wh) if not already set (e.g. by manager).
+            # Shared trapezoidal integrator + data-driven outage gap (single source
+            # with manager._on_cycle_end).
             if "energy_wh" not in cycle_data and len(ts_arr) > 1:
                 sort_idx = np.argsort(ts_arr)
                 ts_s = ts_arr[sort_idx]
                 p_s = p_arr[sort_idx]
-                dt_h = np.diff(ts_s) / 3600.0
-                # Use a data-driven gap threshold: 10x the median sampling interval,
-                # clamped to at least 60 s and at most 1 h, to skip sensor outages
-                # without masking valid slow-sampling configurations.
-                _gap_s = float(np.clip(10.0 * sampling_interval, 60.0, 3600.0))
-                _MAX_GAP_H = _gap_s / 3600.0
-                mask = (dt_h > 0) & (dt_h <= _MAX_GAP_H)
-                avg_p = (p_s[:-1] + p_s[1:]) / 2
-                cycle_data["energy_wh"] = round(float(np.sum(avg_p[mask] * dt_h[mask])), 3)
+                cycle_data["energy_wh"] = round(
+                    integrate_wh(ts_s, p_s, max_gap_s=energy_gap_threshold_s(ts_s)), 3
+                )
 
             self._logger.debug(
                 "add_cycle: stored %s samples at %.1fs intervals",
@@ -2274,7 +2697,7 @@ class ProfileStore:
         # dishwasher and a low-power pump).
         parsed: list[tuple[list[float], list[float], float, bool, float]] = []
         for cycle in labeled_cycles:
-            pairs = self._decompress_power_data(cycle)
+            pairs = decompress_power_data(cycle)
             if len(pairs) < 3:
                 continue
             offsets = [p[0] for p in pairs]
@@ -2340,7 +2763,7 @@ class ProfileStore:
 
     def _cycle_peak(self, cycle: CycleDict) -> float:
         """Peak power of a cycle's trace (0.0 if it has none)."""
-        pairs = self._decompress_power_data(cycle)
+        pairs = decompress_power_data(cycle)
         return max((p[1] for p in pairs), default=0.0) if pairs else 0.0
 
     def _select_reference_cycle_id(
@@ -2545,23 +2968,9 @@ class ProfileStore:
         # Calculate scalar stats
         duration_std_dev = float(np.std(durations)) if durations else 0.0
 
-        # Calculate Energy from Average Curve (Trapezoidal Integration)
-        avg_energy = 0.0
-        if len(time_grid) > 1:
-            # P(W) * dt(h) = Wh
-            # avg_curve is in Watts, time_grid is in Seconds
-            dt_h = np.diff(time_grid) / 3600.0
-            avg_p = (np.array(avg_curve[:-1]) + np.array(avg_curve[1:])) / 2.0
-            avg_energy = float(np.sum(avg_p * dt_h)) / 1000.0 # Convert to kWh for display? No, config flow expects kWh?
-            # Config flow line 1552: f"{envelope.get('avg_energy', 0):.2f}"
-            # If line 1552 says "kwh", then we should store as kWh or Wh?
-            # Config flow label says "Energy ... kWh" in table row (line 1587).
-            # Let's check config flow usage again.
-            # line 1552: kwh = f"{envelope.get('avg_energy', 0):.2f}"
-            # line 1587: ... | {kwh} kWh | ...
-            # So if we store 1.5, it displays "1.50 kWh".
-            # My calculation above gives Wh. So divide by 1000.
-            # avg_energy is already in kWh from line above.
+        # Average-curve energy (kWh) via the shared trapezoidal integrator.
+        # avg_curve is in Watts, time_grid in seconds; integrate_wh returns Wh.
+        avg_energy = integrate_wh(time_grid, avg_curve) / 1000.0
 
         envelope_data: dict[str, Any] = {
             "time_grid": time_grid,  # Time grid used by manager for phase estimation
@@ -2585,241 +2994,7 @@ class ProfileStore:
 
 
 
-    def generate_profile_svg(self, profile_name: str) -> str | None:
-        """Generate an SVG string for the profile's power envelope."""
-        envelope = self.get_envelope(profile_name)
-        if not envelope or not envelope.get("time_grid"):
-            return None
 
-        try:
-            time_grid = cast(list[float], envelope["time_grid"])
-            # Envelope curves are stored as list of [t, y] points.
-            # Extract Y values for SVG generation logic.
-            avg_curve = [float(p[1]) for p in cast(list[list[Any] | tuple[Any, ...]], envelope["avg"])]
-            min_curve = [float(p[1]) for p in cast(list[list[Any] | tuple[Any, ...]], envelope["min"])]
-            max_curve = [float(p[1]) for p in cast(list[list[Any] | tuple[Any, ...]], envelope["max"])]
-
-            # Canvas configuration (Scaled up 50% for High DPI)
-            width, height = 1200, 450
-            padding_x, padding_y = 60, 45
-            graph_w = width - 2 * padding_x
-            graph_h = height - 2 * padding_y
-
-            max_time = time_grid[-1]
-            # Add 5% headroom for power
-            max_power = max(*max_curve, 10.0) * 1.05
-
-            def to_x(t: float) -> float:
-                return padding_x + (t / max_time) * graph_w
-
-            def to_y(p: float) -> float:
-                return height - padding_y - (p / max_power) * graph_h
-
-            # Generate polygon points for min/max band
-            # Top edge (max) forward, Bottom edge (min) backward
-            points_max: list[str] = []
-            points_min: list[str] = []
-            points_avg: list[str] = []
-
-            for i, t in enumerate(time_grid):
-                x = to_x(t)
-                points_max.append(f"{x},{to_y(max_curve[i])}")
-                points_min.append(f"{x},{to_y(min_curve[i])}")
-                points_avg.append(f"{x},{to_y(avg_curve[i])}")
-
-            # Band path: Max curve -> Reverse Min curve -> Close
-            band_path = " ".join(points_max + list(reversed(points_min)))
-            avg_path = " ".join(points_avg)
-
-            # Metadata text
-            avg_energy = envelope.get("avg_energy", 0)
-            avg_duration = envelope.get("target_duration", 0) / 60.0
-            title = f"{profile_name} ({avg_duration:.0f} min, ~{avg_energy:.2f} kWh)"
-
-            svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" style="background-color: #1c1c1c; font-family: sans-serif;">
-            <!-- Grid & Axes -->
-            <rect x="0" y="0" width="{width}" height="{height}" fill="#1c1c1c" />
-            <line x1="{padding_x}" y1="{height - padding_y}" x2="{width - padding_x}" y2="{height - padding_y}" stroke="#444" stroke-width="3" />
-            <line x1="{padding_x}" y1="{padding_y}" x2="{padding_x}" y2="{height - padding_y}" stroke="#444" stroke-width="3" />
-
-            <!-- Axis Labels -->
-            <text x="{padding_x}" y="{padding_y - 15}" fill="#aaa" font-size="18">{int(max_power)}W</text>
-            <text x="{width - padding_x}" y="{height - 10}" fill="#aaa" font-size="18" text-anchor="middle">{int(max_time / 60)}m</text>
-            <text x="{width / 2}" y="{padding_y - 15}" fill="#fff" font-size="24" text-anchor="middle" font-weight="bold">{title}</text>
-
-            <!-- Envelope Band (Min/Max) -->
-            <polygon points="{band_path}" fill="#3498db" fill-opacity="0.3" stroke="none" />
-
-            <!-- Average Line -->
-            <polyline points="{avg_path}" fill="none" stroke="#3498db" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>"""
-
-            return svg
-
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            self._logger.error("Error generating SVG for %s: %s", profile_name, e)
-            return None
-
-
-
-    def generate_profile_spaghetti_svg(
-        self, profile_name: str, overview_suffix: str = "Overview"
-    ) -> tuple[str | None, dict[str, str]]:
-        """
-        Generate a 'Spaghetti Plot' SVG showing ALL individual cycles for a profile.
-        Returns (svg_string, cycle_metadata_map).
-        """
-        # Get ALL completed cycles labeled with this profile
-        labeled_cycles = [
-            c
-            for c in self._data["past_cycles"]
-            if c.get("profile_name") == profile_name
-            and c.get("status") in ("completed", "force_stopped")
-        ]
-
-        if not labeled_cycles:
-            return None, {}
-
-        # Sort by date
-        labeled_cycles.sort(key=lambda x: x["start_time"])
-
-        palette = [
-            "#e6194b", "#3cb44b", "#ffe119", "#4363d8", "#f58231",
-            "#911eb4", "#42d4f4", "#f032e6", "#bfef45", "#fabed4",
-            "#469990", "#dcbeff", "#9A6324", "#fffac8", "#800000",
-            "#aaffc3", "#808000", "#ffd8b1", "#000075", "#a9a9a9",
-        ]
-
-        cycle_metadata: dict[str, str] = {}
-        svg_curves: list[SVGCurve] = []
-
-        for i, cycle in enumerate(labeled_cycles):
-            power_data_raw = cycle.get("power_data", [])
-            cid = cycle["id"]
-
-            # Decompress
-            pairs: list[tuple[float, float]] = []
-            if isinstance(power_data_raw, list):
-                for item in cast(list[Any], power_data_raw):
-                    if isinstance(item, (list, tuple)):
-                        item_seq = cast(list[Any] | tuple[Any, ...], item)
-                        if len(item_seq) < 2:
-                            continue
-                        try:
-                            pairs.append((float(item_seq[0]), float(item_seq[1])))
-                        except (ValueError, TypeError):
-                            continue
-
-            if len(pairs) < 3:
-                continue
-
-            offsets = [p[0] for p in pairs]
-            values = [p[1] for p in pairs]
-
-            if not offsets:
-                continue
-
-            # Assign color
-            color = palette[i % len(palette)]
-            cycle_metadata[cid] = color
-
-            # Subsample for rendering performance
-            step = max(1, len(pairs) // 500)
-            subsampled_points = [(offsets[j], values[j]) for j in range(0, len(pairs), step)]
-
-            svg_curves.append(SVGCurve(
-                points=subsampled_points,
-                color=color,
-                opacity=0.8,
-                stroke_width=2
-            ))
-
-        if not svg_curves:
-            return None, {}
-
-        svg_content = _generate_generic_svg(
-            title=f"{profile_name} ({overview_suffix})",
-            curves=svg_curves,
-            width=1000,
-            height=400
-        )
-
-        return svg_content, cycle_metadata
-
-    def generate_preview_svg(
-        self,
-        power_data: list[tuple[str, float]],
-        head_trim: float,
-        tail_trim: float,
-        title: str = "Recording Preview",
-        trim_start_label: str = "Trim Start",
-        trim_end_label: str = "Trim End",
-    ) -> str:
-        """
-        Generate a preview SVG for a recorded cycle, highlighting trimmed areas.
-        Blue = Keep, Red = Trim.
-        """
-        if not power_data:
-            return ""
-
-        # Parse data
-        points: list[tuple[float, float]] = []
-        try:
-            start_dt = dt_util.parse_datetime(power_data[0][0])
-            if start_dt is None:
-                return ""
-            start_ts = start_dt.timestamp()
-            for t_str, p in power_data:
-                parsed = dt_util.parse_datetime(t_str)
-                if parsed is None:
-                    continue
-                t = parsed.timestamp() - start_ts
-                points.append((t, float(p)))
-        except (ValueError, TypeError, IndexError):
-            return ""
-
-        if not points:
-            return ""
-
-        total_duration = points[-1][0]
-
-        keep_start = head_trim
-        keep_end = max(keep_start, total_duration - tail_trim)
-
-        # Prepare curves
-        curves: list[SVGCurve] = []
-
-        # 1. Background (All Red)
-        curves.append(SVGCurve(
-            points=points,
-            color="#e6194b",
-            opacity=0.5,
-            stroke_width=2
-        ))
-
-        # 2. Keep (Blue)
-        keep_points = [pt for pt in points if keep_start <= pt[0] <= keep_end]
-        if keep_points:
-            curves.append(SVGCurve(
-                points=keep_points,
-                color="#4363d8",
-                opacity=1.0,
-                stroke_width=2
-            ))
-
-        # Markers
-        markers: list[dict[str, Any]] = [
-            {"x": keep_start, "label": trim_start_label, "color": "#e6194b"},
-            {"x": keep_end, "label": trim_end_label, "color": "#e6194b"},
-        ]
-
-        return _generate_generic_svg(
-            title=title,
-            curves=curves,
-            width=800,
-            height=400,
-            markers=markers
-        )
 
     def get_envelope(self, profile_name: str) -> JSONDict | None:
         """Get cached envelope for a profile, or None if not available."""
@@ -2830,351 +3005,178 @@ class ProfileStore:
             return cast(JSONDict, env) if isinstance(env, dict) else None
         return None
 
-    def generate_feedback_comparison_svg(
-        self, profile_name: str, actual_cycle: CycleDict
-    ) -> str | None:
-        """Generate SVG comparing expected profile envelope with actual recorded cycle.
-
-        Displays:
-        - Light blue band: min/max envelope from all labeled cycles
-        - Darker blue line: average expected profile
-        - Orange line: actual recorded power data from the cycle
-
-        Args:
-            profile_name: Name of the detected/expected profile
-            actual_cycle: CycleDict with power_data and duration
-
-        Returns:
-            SVG string or None if data unavailable
-        """
-        try:
-            # Get envelope for the profile
-            envelope = self.get_envelope(profile_name)
-            if not envelope or not envelope.get("time_grid"):
-                return None
-
-            # Decompress actual cycle power data (handles both ISO-timestamp and offset formats)
-            actual_pairs = decompress_power_data(actual_cycle)
-
-            if len(actual_pairs) < 3:
-                return None
-
-            # Extract envelope curves (already have [t, y] format)
-            time_grid = envelope["time_grid"]
-            avg_curve = envelope.get("avg", [])
-            min_curve = envelope.get("min", [])
-            max_curve = envelope.get("max", [])
-
-            if not avg_curve or not min_curve or not max_curve:
-                return None
-
-            # Build envelope curves for SVG
-            avg_points = [(p[0], p[1]) for p in avg_curve]
-            min_points = [(p[0], p[1]) for p in min_curve]
-            max_points = [(p[0], p[1]) for p in max_curve]
-
-            # For the expected envelope band, we'll create a special visualization
-            # Canvas configuration (same as profile stats)
-            width, height = 1200, 450
-
-            # Use max time from actual data or envelope, whichever is larger
-            max_time_envelope = time_grid[-1] if time_grid else 1.0
-            max_time_actual = actual_pairs[-1][0] if actual_pairs else 1.0
-            max_time = max(max_time_envelope, max_time_actual)
-
-            # Determine max power for scaling
-            all_power = (
-                [p[1] for p in min_curve] +
-                [p[1] for p in avg_curve] +
-                [p[1] for p in max_curve] +
-                [p[1] for p in actual_pairs]
-            )
-            max_power = max(all_power, default=1.0) * 1.05
-
-            # Build SVG curves
-            svg_curves: list[SVGCurve] = []
-
-            # 1. Envelope band (min/max as polygon fill)
-            envelope_band_points = (
-                max_points +
-                list(reversed(min_points))
-            )
-            svg_curves.append(SVGCurve(
-                points=envelope_band_points,
-                color="#3498db",
-                opacity=0.3,
-                stroke_width=0,
-                is_polygon=True,
-            ))
-
-            # 2. Average curve (darker blue line)
-            svg_curves.append(SVGCurve(
-                points=avg_points,
-                color="#3498db",
-                opacity=1.0,
-                stroke_width=4
-            ))
-
-            # 3. Actual cycle (orange line)
-            svg_curves.append(SVGCurve(
-                points=actual_pairs,
-                color="#f39c12",
-                opacity=0.95,
-                stroke_width=3
-            ))
-
-            # Get profile info for title
-            profile = self.get_profile(profile_name)
-            avg_duration = (
-                profile.get("avg_duration", 0) / 60.0
-                if profile
-                else max_time / 60.0
-            )
-            avg_energy = (
-                profile.get("avg_energy")
-                if profile
-                else envelope.get("avg_energy", 0)
-            )
-
-            title = (
-                f"Power Profile Comparison: {profile_name} "
-                f"({avg_duration:.0f}m, ~{avg_energy:.2f}kWh)"
-            )
-
-            # Create SVG using generic generator
-            svg = _generate_generic_svg(
-                title=title,
-                curves=svg_curves,
-                width=width,
-                height=height,
-                max_x_override=max_time,
-                max_y_override=max_power
-            )
-
-            # Add a single-row legend below the chart
-            if svg:
-                legend_height = 34
-                total_height = height + legend_height
-                svg = svg.replace(
-                    f'viewBox="0 0 {width} {height}"',
-                    f'viewBox="0 0 {width} {total_height}"',
-                    1
-                )
-                ly = height + 22  # Vertical mid-line for all legend items
-                legend = (
-                    f'<!-- Legend (single row) -->\n'
-                    f'<g>\n'
-                    # Item 1: band swatch
-                    f'  <rect x="65" y="{ly - 11}" width="28" height="16" '
-                    f'fill="#3498db" fill-opacity="0.35" stroke="#3498db" stroke-width="1.5" />\n'
-                    f'  <text x="102" y="{ly + 4}" fill="#aaa" font-size="18">'
-                    f'Expected range</text>\n'
-                    # Item 2: avg line
-                    f'  <line x1="390" y1="{ly}" x2="418" y2="{ly}" '
-                    f'stroke="#3498db" stroke-width="4" />\n'
-                    f'  <text x="428" y="{ly + 4}" fill="#aaa" font-size="18">'
-                    f'Average profile</text>\n'
-                    # Item 3: actual line
-                    f'  <line x1="720" y1="{ly}" x2="748" y2="{ly}" '
-                    f'stroke="#f39c12" stroke-width="3" />\n'
-                    f'  <text x="758" y="{ly + 4}" fill="#aaa" font-size="18">'
-                    f'This cycle (actual)</text>\n'
-                    f'</g>\n'
-                )
-                return svg.replace("</svg>", legend + "</svg>", 1)
-
-            return svg
-
-        except Exception:  # pylint: disable=broad-exception-caught
-            self._logger.exception("Error generating feedback comparison SVG")
-            return None
-
-    def generate_feedback_multi_profile_svg(
+    def compute_envelope_conformance(
         self,
-        profile_names: list[str],
-        detected_profile: str,
-        actual_cycle: CycleDict,
-        chart_title_prefix: str = "Profile Comparison",
-        actual_cycle_label: str = "This cycle (actual)",
-    ) -> str | None:
-        """Generate a single SVG overlaying all profiles' avg curves with the actual cycle.
+        profile_name: str,
+        points: list[tuple[float, float]],
+    ) -> dict[str, Any] | None:
+        """Score how well the current power trace conforms to the profile envelope band.
 
-        The detected profile also shows a min/max envelope band.
-        Each profile gets a distinct colour; the actual cycle is orange.
-        A compact multi-column legend is appended below the chart.
+        Resamples ``points`` to the envelope's time grid (scaling by the ratio of
+        the current elapsed time to the envelope duration) and computes the fraction
+        of samples that land within the [lower, upper] band.  Returns a dict:
+
+          ``conformance``     – fraction of samples inside the envelope band (0–1)
+          ``outside_frac``    – fraction outside the band (1 - conformance)
+          ``samples``         – number of samples compared
+          ``envelope_name``   – profile_name used
+
+        Returns ``None`` if the envelope or points are unavailable / too short.
+        Never raises.
+
+        This is a complementary signal to match confidence: confidence measures
+        shape correlation, while conformance measures absolute level/spread.  A
+        high-confidence but low-conformance score may indicate the cycle was
+        mis-detected (merged cycles, offset start) or the appliance is running
+        anomalously.
         """
         try:
-            # Colours: orange (#f39c12) is reserved for the actual cycle
-            palette = [
-                "#3498db",  # blue   – detected profile (matches envelope tint)
-                "#2ecc71",  # green
-                "#9b59b6",  # purple
-                "#e74c3c",  # red
-                "#1abc9c",  # teal
-                "#f1c40f",  # yellow
-                "#36a2eb",  # sky-blue
-                "#8e44ad",  # dark purple
-                "#16a085",  # dark teal
-                "#c0392b",  # dark red
-            ]
-
-            # Load envelope data for every profile that has one
-            profile_envs: dict[str, JSONDict] = {}
-            for pname in profile_names:
-                env = self.get_envelope(pname)
-                if env and env.get("time_grid") and env.get("avg"):
-                    profile_envs[pname] = env
-
-            if not profile_envs:
+            if not points or len(points) < 4:
+                return None
+            env = self.get_envelope(profile_name)
+            if not env:
+                return None
+            time_grid = env.get("time_grid")
+            lower = env.get("lower")
+            upper = env.get("upper")
+            if not time_grid or not lower or not upper:
                 return None
 
-            # Decompress actual cycle power data (handles both ISO-timestamp and offset formats)
-            actual_pairs = decompress_power_data(actual_cycle)
+            tg = np.asarray(time_grid, dtype=float)
+            lo = np.asarray(lower, dtype=float)
+            hi = np.asarray(upper, dtype=float)
+            env_duration = float(tg[-1]) if len(tg) > 1 else 1.0
 
-            if len(actual_pairs) < 3:
-                return None
+            # Normalise observed trace to [0, env_duration] time range
+            t_obs = np.asarray([t for t, _ in points], dtype=float)
+            p_obs = np.asarray([p for _, p in points], dtype=float)
+            obs_duration = float(t_obs[-1]) if len(t_obs) > 1 else 1.0
+            t_scaled = t_obs * (env_duration / obs_duration) if obs_duration > 0 else t_obs
 
-            # Global bounds
-            max_time = actual_pairs[-1][0]
-            for env in profile_envs.values():
-                tg = env.get("time_grid", [])
-                if tg:
-                    max_time = max(max_time, tg[-1])
+            # Interpolate envelope bounds at scaled observed time points (clamp ends)
+            t_clamped = np.clip(t_scaled, tg[0], tg[-1])
+            lo_interp = np.interp(t_clamped, tg, lo)
+            hi_interp = np.interp(t_clamped, tg, hi)
 
-            all_power: list[float] = [p[1] for p in actual_pairs]
-            for env in profile_envs.values():
-                all_power += [p[1] for p in env.get("max", [])]
-                all_power += [p[1] for p in env.get("avg", [])]
-            max_power = max(all_power, default=1.0) * 1.05
+            inside = np.sum((p_obs >= lo_interp) & (p_obs <= hi_interp))
+            n = len(p_obs)
+            conformance = float(inside) / n if n > 0 else 0.0
 
-            # Canvas
-            width, height = 1200, 450
-            padding_x, padding_y = 60, 45
-            graph_w = width - 2 * padding_x
-            graph_h = height - 2 * padding_y
-
-            def _x(t: float) -> str:
-                return f"{padding_x + (t / max_time) * graph_w:.1f}" if max_time > 0 else str(padding_x)
-
-            def _y(p: float) -> str:
-                return f"{height - padding_y - (p / max_power) * graph_h:.1f}" if max_power > 0 else str(height - padding_y)
-
-            # Assign colours; detected profile always gets palette[0]
-            colors: dict[str, str] = {}
-            color_idx = 1
-            if detected_profile in profile_envs:
-                colors[detected_profile] = palette[0]
-            for pname in profile_names:
-                if pname in profile_envs and pname != detected_profile:
-                    colors[pname] = palette[color_idx % len(palette)]
-                    color_idx += 1
-
-            elems: list[str] = []
-
-            # Background + axes
-            elems.append(
-                f'<rect x="0" y="0" width="{width}" height="{height}" fill="#1c1c1c" />'
-            )
-            elems.append(
-                f'<line x1="{padding_x}" y1="{height - padding_y}" '
-                f'x2="{width - padding_x}" y2="{height - padding_y}" stroke="#444" stroke-width="2" />'
-            )
-            elems.append(
-                f'<line x1="{padding_x}" y1="{padding_y}" '
-                f'x2="{padding_x}" y2="{height - padding_y}" stroke="#444" stroke-width="2" />'
-            )
-            elems.append(
-                f'<text x="{padding_x}" y="{padding_y - 15}" fill="#aaa" font-size="20">{int(max_power)}W</text>'
-            )
-            elems.append(
-                f'<text x="{width - padding_x}" y="{height - 10}" fill="#aaa" font-size="20" '
-                f'text-anchor="middle">{int(max_time / 60)}m</text>'
-            )
-            elems.append(
-                f'<text x="{width / 2:.0f}" y="{padding_y - 15}" fill="#fff" font-size="26" '
-                f'text-anchor="middle" font-weight="bold">{chart_title_prefix}: {detected_profile}</text>'
-            )
-
-            # Detected-profile envelope band (drawn first, behind all lines)
-            if detected_profile in profile_envs:
-                env = profile_envs[detected_profile]
-                max_c = env.get("max", [])
-                min_c = env.get("min", [])
-                if max_c and min_c:
-                    fwd = " ".join(f"{_x(p[0])},{_y(p[1])}" for p in max_c)
-                    rev = " ".join(f"{_x(p[0])},{_y(p[1])}" for p in reversed(min_c))
-                    band_color = colors.get(detected_profile, palette[0])
-                    elems.append(
-                        f'<polygon points="{fwd} {rev}" fill="{band_color}" fill-opacity="0.2" stroke="none" />'
-                    )
-
-            # Average lines for every profile
-            for pname in profile_names:
-                if pname not in profile_envs:
-                    continue
-                avg_c = profile_envs[pname].get("avg", [])
-                if not avg_c:
-                    continue
-                color = colors.get(pname, "#aaa")
-                pts = " ".join(f"{_x(p[0])},{_y(p[1])}" for p in avg_c)
-                sw = 4 if pname == detected_profile else 2
-                elems.append(
-                    f'<polyline points="{pts}" fill="none" stroke="{color}" '
-                    f'stroke-width="{sw}" stroke-linecap="round" stroke-linejoin="round" />'
-                )
-
-            # Actual cycle on top
-            actual_pts = " ".join(f"{_x(p[0])},{_y(p[1])}" for p in actual_pairs)
-            elems.append(
-                f'<polyline points="{actual_pts}" fill="none" stroke="#f39c12" '
-                f'stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />'
-            )
-
-            # Legend (compact multi-column below the chart)
-            legend_items: list[tuple[str, str, int]] = []  # (color, label, stroke_width)
-            for pname in profile_names:
-                if pname not in profile_envs:
-                    continue
-                color = colors.get(pname, "#aaa")
-                label = f"\u2605 {pname}" if pname == detected_profile else pname
-                legend_items.append((color, label, 4 if pname == detected_profile else 2))
-            legend_items.append(("#f39c12", actual_cycle_label, 3))
-
-            items_per_row = 3
-            col_w = (width - 2 * padding_x) // items_per_row
-            row_h = 34
-            n_rows = (len(legend_items) + items_per_row - 1) // items_per_row
-            legend_h = n_rows * row_h + 22
-            total_height = height + legend_h
-
-            leg_elems: list[str] = []
-            for i, (color, label, sw) in enumerate(legend_items):
-                col = i % items_per_row
-                row = i // items_per_row
-                lx = padding_x + col * col_w
-                ly = height + 26 + row * row_h
-                leg_elems.append(
-                    f'<line x1="{lx}" y1="{ly}" x2="{lx + 32}" y2="{ly}" '
-                    f'stroke="{color}" stroke-width="{sw}" />'
-                )
-                max_chars = 22
-                display = label[:max_chars] + "\u2026" if len(label) > max_chars else label
-                leg_elems.append(
-                    f'<text x="{lx + 42}" y="{ly + 6}" fill="#aaa" font-size="22">{display}</text>'
-                )
-
-            return (
-                f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {total_height}" '
-                'style="background-color: #1c1c1c; font-family: sans-serif;">\n'
-                + "\n".join(elems)
-                + "\n<!-- Legend -->\n"
-                + "\n".join(leg_elems)
-                + "\n</svg>"
-            )
-
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            self._logger.error("Error generating multi-profile comparison SVG: %s", e)
+            return {
+                "conformance": round(conformance, 3),
+                "outside_frac": round(1.0 - conformance, 3),
+                "samples": n,
+                "envelope_name": profile_name,
+            }
+        except Exception:  # noqa: BLE001
             return None
+
+    def detect_cycle_artifacts(
+        self,
+        profile_name: str,
+        points: list[tuple[float, float]],
+    ) -> list[dict[str, Any]]:
+        """Detect transient artifacts in a cycle by comparing it to the profile band.
+
+        Walks the trace against the matched profile's envelope and flags contiguous
+        segments that deviate from what the program normally does:
+
+          * ``pause``  – power fell to ~0 where the profile expects activity and then
+            resumed (e.g. the door was opened mid-cycle to add an item, or a manual
+            pause); excluded at the very end (that's just the cycle finishing).
+          * ``dip``    – ran sustainedly below the usual power band.
+          * ``spike``  – ran sustainedly above the usual power band.
+
+        Returns a chronological list of ``{type, start_s, end_s, detail, severity}``
+        in the trace's own time offsets (so the panel can mark them on the graph),
+        capped to the most significant few. ``[]`` when unavailable. Pure statistics
+        (no ML), never raises — and the events double as candidate labels for a
+        future supervised anomaly model.
+        """
+        try:
+            if not points or len(points) < 6:
+                return []
+            env = self.get_envelope(profile_name)
+            if not env:
+                return []
+            tg = np.asarray(env.get("time_grid") or [], dtype=float)
+            lo = np.asarray(env.get("lower") or [], dtype=float)
+            hi = np.asarray(env.get("upper") or [], dtype=float)
+            avg_raw = env.get("avg") or []
+            avg = np.asarray(avg_raw, dtype=float)
+            if tg.size < 2 or lo.size != tg.size or hi.size != tg.size:
+                return []
+
+            t_obs = np.asarray([t for t, _ in points], dtype=float)
+            p_obs = np.asarray([max(0.0, float(p)) for _, p in points], dtype=float)
+            obs_dur = float(t_obs[-1]) if t_obs.size > 1 else 1.0
+            env_dur = float(tg[-1]) if tg.size > 1 else 1.0
+            if obs_dur <= 0 or env_dur <= 0:
+                return []
+
+            # Map each observed time to the envelope grid (same scaling as
+            # compute_envelope_conformance) so the band is aligned to progress.
+            t_scaled = np.clip(t_obs * (env_dur / obs_dur), tg[0], tg[-1])
+            lo_i = np.interp(t_scaled, tg, lo)
+            hi_i = np.interp(t_scaled, tg, hi)
+            avg_i = np.interp(t_scaled, tg, avg) if avg.size == tg.size else (lo_i + hi_i) / 2.0
+
+            peak = max(float(np.max(hi)), 1.0)
+            active_thr = max(5.0, 0.05 * peak)   # profile expects real power here
+            pause_thr = max(2.0, 0.03 * peak)    # observed effectively off
+            margin = max(10.0, 0.08 * peak)      # band slack to ignore edge noise
+
+            states: list[str] = []
+            for i in range(len(p_obs)):
+                expects_power = avg_i[i] > active_thr
+                if expects_power and p_obs[i] <= pause_thr:
+                    states.append("pause")
+                elif expects_power and p_obs[i] < lo_i[i] - margin:
+                    states.append("dip")
+                elif p_obs[i] > hi_i[i] + margin:
+                    states.append("spike")
+                else:
+                    states.append("ok")
+
+            min_dur = {"pause": 25.0, "dip": 45.0, "spike": 30.0}
+            sev_scale = {"pause": 300.0, "dip": 600.0, "spike": 300.0}
+            events: list[dict[str, Any]] = []
+            n = len(states)
+            i = 0
+            while i < n:
+                s = states[i]
+                if s == "ok":
+                    i += 1
+                    continue
+                j = i
+                while j + 1 < n and states[j + 1] == s:
+                    j += 1
+                start_s, end_s = float(t_obs[i]), float(t_obs[j])
+                dur = end_s - start_s
+                resumes = (j + 1 < n) and float(np.max(p_obs[j + 1:])) > active_thr
+                if dur >= min_dur[s] and (s != "pause" or resumes):
+                    if s == "pause":
+                        detail = (f"Power dropped to near zero for ~{int(dur)}s then resumed — "
+                                  "likely the door was opened mid-cycle or the cycle was paused.")
+                    elif s == "dip":
+                        detail = f"Drew below the usual power band for ~{int(dur)}s."
+                    else:
+                        detail = f"Drew above the usual power band for ~{int(dur)}s."
+                    events.append({
+                        "type": s,
+                        "start_s": round(start_s, 1),
+                        "end_s": round(end_s, 1),
+                        "detail": detail,
+                        "severity": round(min(1.0, dur / sev_scale[s]), 3),
+                    })
+                i = j + 1
+
+            events.sort(key=lambda e: -e["severity"])
+            events = events[:6]
+            events.sort(key=lambda e: e["start_s"])
+            return events
+        except Exception:  # noqa: BLE001
+            return []
 
     def get_match_candidates_summary(
         self, match_result: MatchResult, limit: int = 3
@@ -3467,15 +3469,10 @@ class ProfileStore:
 
         best = candidates[0]
 
-        # Reconstruct MatchResult
-        # Need to handle margin/ambiguity
-        margin = 1.0
-        if len(candidates) > 1:
-            margin = best["score"] - candidates[1]["score"]
-
-        # Top-level ambiguity (safeguard #1): a close group-vs-runner-up call is
-        # flagged so it goes to the uncertain/feedback path, not a confident commit.
-        is_ambiguous = margin < MATCH_AMBIGUITY_MARGIN
+        # Reconstruct MatchResult. Top-level ambiguity (safeguard #1): a close
+        # group-vs-runner-up call is flagged so it goes to the uncertain/feedback
+        # path, not a confident commit.
+        margin, is_ambiguous = _ambiguity_from_candidates(candidates)
 
         best_name = best["name"]
         best_duration = best["profile_duration"]
@@ -3529,7 +3526,7 @@ class ProfileStore:
                 continue
 
             # Decompress sample data
-            sample_p_data = self._decompress_power_data(sample_cycle)
+            sample_p_data = decompress_power_data(sample_cycle)
             if not sample_p_data:
                 continue
 
@@ -3556,12 +3553,7 @@ class ProfileStore:
 
         best = candidates[0]
 
-        # Calculate ambiguity
-        margin = 1.0
-        if len(candidates) > 1:
-            margin = best["score"] - candidates[1]["score"]
-
-        is_ambiguous = margin < MATCH_AMBIGUITY_MARGIN
+        margin, is_ambiguous = _ambiguity_from_candidates(candidates)
 
         return MatchResult(
             best["name"],
@@ -3641,8 +3633,6 @@ class ProfileStore:
 
         return is_confirmed, mapped_time, mapped_power
 
-
-    # match_profile (sync) removed in favor of async_match_profile
 
     def check_phase_match(self, profile_name: str, duration: float) -> str | None:
         """
@@ -3972,7 +3962,7 @@ class ProfileStore:
 
         for cycle in target_cycles:
             # Reconstruct power data for matching
-            power_data = self._decompress_power_data(cycle)
+            power_data = decompress_power_data(cycle)
             if not power_data or len(power_data) < 10:
                 stats["skipped"] += 1
                 continue
@@ -4050,7 +4040,7 @@ class ProfileStore:
             profile_name = cycle.get("profile_name")
             if not profile_name:
                 continue
-            power_data = self._decompress_power_data(cycle)
+            power_data = decompress_power_data(cycle)
             if not power_data or len(power_data) < 10:
                 continue
             try:
@@ -4066,23 +4056,6 @@ class ProfileStore:
             await self.async_save()
             self._logger.info("Backfilled match_confidence on %d cycles", updated)
         return updated
-
-    def _decompress_power_data(self, cycle: CycleDict) -> list[tuple[float, float]]:
-        """Decompress cycle power data for matching (wrapper)."""
-        return [(float(offset), float(power)) for offset, power in decompress_power_data(cycle)]
-
-    async def async_save_cycle(self, cycle_data: dict[str, Any]) -> None:
-        """Add and save a cycle. Rebuilds envelope if cycle is labeled."""
-        self.add_cycle(cycle_data)
-
-        # If cycle has a profile, rebuild that profile's envelope
-        profile_name = cycle_data.get("profile_name")
-        if profile_name:
-            await self.async_rebuild_envelope(profile_name)
-
-        await self.async_save()
-        # Trigger smart processing on new cycle
-        await self.async_smart_process_history()
 
     async def async_migrate_cycles_to_compressed(self) -> int:
         """
@@ -4125,106 +4098,6 @@ class ProfileStore:
 
 
 
-    async def async_split_cycles_smart(
-        self, cycle_id: str, min_gap_s: int = 900, idle_power: float = 2.0
-    ) -> list[str]:
-        """Scan a cycle for significant idle gaps and split if parts match better (offloaded)."""
-        cycles = cast(list[CycleDict], self._data.get("past_cycles", []))
-        idx = next((i for i, c in enumerate(cycles) if c.get("id") == cycle_id), -1)
-
-        if idx == -1:
-            return []
-
-        cycle = cycles[idx]
-
-        # Offload analysis
-        seg_ranges = await self.hass.async_add_executor_job(
-            self.analyze_split_sync, cycle, min_gap_s, idle_power
-        )
-
-        if not seg_ranges:
-            return [cycle_id]
-
-        # Apply Split (Main Thread)
-        cycles.pop(idx)
-        new_ids: list[str] = []
-        original_profile = cycle.get("profile_name")
-        start_dt_base_parsed = _parse_start_dt(cycle["start_time"])
-        if not start_dt_base_parsed:
-            # Should not happen as analyze checked it, but safety
-            self._logger.warning("Failed to parse start time during split apply for %s", cycle_id)
-            return [cycle_id]
-
-        start_dt_base: datetime = start_dt_base_parsed
-        # Use decompress_power_data which handles all format variations
-        p_data_tuples = self._decompress_power_data(cycle)
-
-        if not p_data_tuples:
-            self._logger.warning("Failed to decompress data during split for %s", cycle_id)
-            return [cycle_id]
-
-        # Convert to relative seconds for array logic.
-        # _decompress_power_data returns (offset_seconds, power).
-
-        points: list[tuple[float, float]] = []
-        for offset_seconds, val in p_data_tuples:
-            points.append((float(offset_seconds), float(val)))
-
-        for seg_start, seg_end in seg_ranges:
-            # Construct new cycle logic
-            seg_dur = seg_end - seg_start
-            new_cycle_start = start_dt_base + timedelta(seconds=seg_start)
-            new_cycle_start_ts = new_cycle_start.timestamp()
-
-            # Extract points
-            p_data_abs: list[list[float]] = []
-            state_val = 0.0
-            for t, p in points:
-                if t <= seg_start:
-                    state_val = p
-                else:
-                    break
-            p_data_abs.append([round(new_cycle_start_ts, 1), state_val])
-
-            for t, p in points:
-                if seg_start < t <= seg_end:
-                    if start_dt_base:
-                        p_data_abs.append([round(start_dt_base.timestamp() + t, 1), p])
-
-            new_cycle: dict[str, Any] = {
-                "start_time": new_cycle_start.isoformat(),
-                "end_time": (new_cycle_start + timedelta(seconds=seg_dur)).isoformat(),
-               "duration": round(seg_dur, 1),
-               "status": "completed",
-               "power_data": p_data_abs,
-               "profile_name": None
-            }
-            self.add_cycle(new_cycle)
-            new_ids.append(new_cycle["id"])
-
-        # Fix profile refs (same as original logic)
-        original_sample_id = cycle.get("id")
-        best_replacement_id = None
-        longest_dur = 0
-        new_cycles_objs = [c for c in cycles if c["id"] in new_ids]
-
-        for c in new_cycles_objs:
-            d = c.get("duration", 0)
-            if d > longest_dur:
-                longest_dur = d
-                best_replacement_id = c["id"]
-
-        if best_replacement_id and original_profile:
-            p_data = self._data["profiles"].get(original_profile)
-            if p_data and p_data.get("sample_cycle_id") == original_sample_id:
-                p_data["sample_cycle_id"] = best_replacement_id
-
-            # Rebuild envelope because dataset changed
-            await self.async_rebuild_envelope(original_profile)
-
-        await self.async_save()
-        return new_ids
-
     async def async_smart_process_history(
         self
     ) -> dict[str, int]:
@@ -4247,31 +4120,6 @@ class ProfileStore:
         return stats
 
 
-
-    def log_adjustment(
-        self, setting_name: str, old_value: Any, new_value: Any, reason: str
-    ) -> None:
-        # Log an automatic adjustment to a setting.
-        if old_value == new_value:
-            return
-        adjustment: JSONDict = {
-            "timestamp": dt_util.now().isoformat(),
-            "setting": setting_name,
-            "old_value": old_value,
-            "new_value": new_value,
-            "reason": reason,
-        }
-        self._data.setdefault("auto_adjustments", []).append(adjustment)
-        # Keep last 50 adjustments
-        if len(self._data["auto_adjustments"]) > 50:
-            self._data["auto_adjustments"] = self._data["auto_adjustments"][-50:]
-        self._logger.info(
-            "Auto-adjustment: %s changed from %s to %s (%s)",
-            setting_name,
-            old_value,
-            new_value,
-            reason,
-        )
 
     def export_data(
         self, entry_data: JSONDict | None = None, entry_options: JSONDict | None = None
@@ -4397,7 +4245,7 @@ class ProfileStore:
         )
         if cycle is None:
             return []
-        return self._decompress_power_data(cycle)
+        return decompress_power_data(cycle)
 
     async def trim_cycle_power_data(
         self,
@@ -4419,7 +4267,7 @@ class ProfileStore:
         if cycle is None:
             return False
 
-        p_data = self._decompress_power_data(cycle)
+        p_data = decompress_power_data(cycle)
         if not p_data:
             return False
 
@@ -4502,7 +4350,7 @@ class ProfileStore:
         self, cycle: CycleDict, min_gap_s: int = 900, idle_power: float = 2.0
     ) -> list[tuple[float, float]]:
         """Analyze cycle for potential splits (sync for executor)."""
-        p_data = self._decompress_power_data(cycle)
+        p_data = decompress_power_data(cycle)
         if not p_data:
             return []
 
@@ -4557,7 +4405,7 @@ class ProfileStore:
         or producing a sub-`min_segment_s` slice are dropped. Returns [] if fewer than two
         segments would result.
         """
-        p_data = self._decompress_power_data(cycle)
+        p_data = decompress_power_data(cycle)
         if not p_data:
             return []
 
@@ -4629,7 +4477,7 @@ class ProfileStore:
         start_ts = start_dt_base_parsed.timestamp()
 
         # Decompress original data
-        p_data_tuples = self._decompress_power_data(cycle)
+        p_data_tuples = decompress_power_data(cycle)
         if not p_data_tuples:
             return []
 
@@ -4771,7 +4619,7 @@ class ProfileStore:
         # Helper to get parsed points from a cycle
         def get_points(cy: CycleDict) -> list[tuple[float, float, float]]:
             # content: [(timestamp, offset, power)]
-            raw = self._decompress_power_data(cy)
+            raw = decompress_power_data(cy)
             res: list[tuple[float, float, float]] = []
             if not raw:
                 return []
@@ -4893,136 +4741,3 @@ class ProfileStore:
 
         return new_id
 
-    def generate_interactive_split_svg(
-        self,
-        cycle_id: str,
-        segments: list[tuple[float, float]],
-        width: int = 600,
-        height: int = 300,
-        title_prefix: str = "Split Preview",
-        unlabeled_text: str = "Unlabeled",
-    ) -> str:
-        """Generate SVG for split preview."""
-        cycle = next((c for c in self.get_past_cycles() if c["id"] == cycle_id), None)
-        if not cycle:
-            return ""
-
-        p_data = self._decompress_power_data(cycle)
-        if not p_data:
-            return ""
-
-        start_dt = _parse_start_dt(cycle["start_time"])
-        if start_dt is None:
-            return ""
-        points: list[tuple[float, float]] = []
-        for offset_seconds, val in p_data:
-            points.append((float(offset_seconds), float(val)))
-
-        curves: list[SVGCurve] = [SVGCurve(points=points, color="#9E9E9E", opacity=0.5)] # Base ghost
-        markers: list[dict[str, Any]] = []
-
-        # Highlight Segments
-        colors = ["#2196F3", "#4CAF50", "#FF9800", "#9C27B0"]
-        for i, (seg_start, seg_end) in enumerate(segments):
-            seg_pts = [(t, p) for t, p in points if seg_start <= t <= seg_end]
-            if seg_pts:
-                color = colors[i % len(colors)]
-                curves.append(SVGCurve(points=seg_pts, color=color, stroke_width=2))
-                markers.append({"x": seg_start, "label": f"S{i+1}", "color": color})
-
-        return _generate_generic_svg(
-            f"{title_prefix}: {cycle.get('profile_name') or unlabeled_text}",
-            curves,
-            width,
-            height,
-            markers=markers,
-        )
-
-    def generate_interactive_merge_svg(
-        self,
-        cycle_ids: list[str],
-        width: int = 600,
-        height: int = 300,
-        title: str = "Merge Preview",
-        no_data_label: str | None = None,
-    ) -> str:
-        """
-        Generate an SVG preview that overlays power traces from the specified past cycles to illustrate the result of merging them.
-        
-        Cycles are ordered by their parsed start_time and each cycle's power data is aligned to the earliest cycle start to form overlaid curves.
-        
-        Parameters:
-            cycle_ids (list[str]): IDs of past cycles to include in the preview.
-            width (int): Width of the generated SVG in pixels.
-            height (int): Height of the generated SVG in pixels.
-            title (str): Title text shown in the SVG header.
-            no_data_label (str | None): Message rendered in the placeholder SVG when cycles are
-                present but contain no recorded power data. Defaults to None (empty message).
-
-        Returns:
-            str: SVG markup for the merge preview. Returns an empty string if no valid cycles or
-            if the first cycle's start_time cannot be parsed. If cycles are present but none
-            contain power data, returns a placeholder SVG using no_data_label as the descriptive
-            message instead of a fixed string.
-        """
-        cycles = [c for c in self.get_past_cycles() if c["id"] in cycle_ids]
-
-        def _sort_ts(c: CycleDict) -> float:
-            """
-            Provide a numeric sort key for a cycle by converting its `start_time` to a UNIX timestamp.
-            
-            Parameters:
-                c (CycleDict): Cycle mapping that may contain a `start_time` value in any parseable datetime form.
-            
-            Returns:
-                float: UNIX timestamp in seconds parsed from `start_time`, or `float('inf')` when `start_time` is missing or cannot be parsed so the cycle sorts after valid-dated cycles.
-            """
-            dt = _parse_start_dt(c.get("start_time"))
-            return dt.timestamp() if dt is not None else float("inf")
-
-        cycles.sort(key=_sort_ts)
-
-        if not cycles:
-            return ""
-
-        first_start_dt = _parse_start_dt(cycles[0].get("start_time"))
-        if first_start_dt is None:
-            return ""
-        first_start = first_start_dt.timestamp()
-        curves: list[SVGCurve] = []
-
-        colors = ["#2196F3", "#FF9800", "#4CAF50", "#9C27B0"]
-
-        for i, c in enumerate(cycles):
-            p_data = self._decompress_power_data(c)
-            if not p_data:
-                continue
-            points: list[tuple[float, float]] = []
-            cycle_start_raw = c.get("start_time")
-            cycle_start_dt = _parse_start_dt(cycle_start_raw)
-            if cycle_start_dt is None:
-                continue
-            cycle_start = cycle_start_dt.timestamp()
-            for offset_seconds, val in p_data:
-                rel_t = (cycle_start + float(offset_seconds)) - first_start
-                points.append((rel_t, float(val)))
-
-            if points:
-                curves.append(SVGCurve(points=points, color=colors[i % len(colors)], stroke_width=2))
-
-        if not curves:
-            # No power data available - return a placeholder SVG with a message
-            safe_title = html.escape(title)
-            safe_label = html.escape(no_data_label or "")
-            return (
-                f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
-                f'style="background-color: #1c1c1c; font-family: sans-serif;">'
-                f'<rect x="0" y="0" width="{width}" height="{height}" fill="#1c1c1c" />'
-                f'<text x="{width // 2}" y="{height // 2 - 10}" fill="#aaa" font-size="16" '
-                f'text-anchor="middle">{safe_title}</text>'
-                f'<text x="{width // 2}" y="{height // 2 + 14}" fill="#666" font-size="13" '
-                f'text-anchor="middle">{safe_label}</text>'
-                f'</svg>'
-            )
-
-        return _generate_generic_svg(html.escape(title), curves, width, height)

@@ -1004,13 +1004,9 @@
         "dryer": "Tørketrommel",
         "washer_dryer": "Vaske-tørketrommel kombi",
         "dishwasher": "Oppvaskmaskin",
-        "coffee_machine": "Kaffemaskin (avviklet)",
-        "ev": "Elektrisk kjøretøy (avviklet)",
         "air_fryer": "Air Fryer",
-        "heat_pump": "Varmepumpe (avviklet)",
         "bread_maker": "Brødbaker",
         "pump": "Pumpe / Sump Pump",
-        "oven": "Ovn (avviklet)",
         "other": "Annet (avansert)"
       }
     }

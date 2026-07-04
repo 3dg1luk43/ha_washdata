@@ -1004,13 +1004,9 @@
         "dryer": "Sušička",
         "washer_dryer": "Kombinovaná práčka so sušičkou",
         "dishwasher": "Umývačka riadu",
-        "coffee_machine": "Kávovar (zastaraný)",
-        "ev": "Elektrické vozidlo (zastarané)",
         "air_fryer": "Vzduchová fritéza",
-        "heat_pump": "Tepelné čerpadlo (zastarané)",
         "bread_maker": "Pekáreň na chlieb",
         "pump": "Čerpadlo / Kalové čerpadlo",
-        "oven": "Rúra (zastaraná)",
         "other": "Iné (pokročilé)"
       }
     }

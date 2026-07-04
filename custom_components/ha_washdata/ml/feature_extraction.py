@@ -83,6 +83,38 @@ def profile_expectation(cycles_points: Sequence[Sequence[Point]]) -> dict[str, f
     }
 
 
+def profile_expectations(cycles: list[dict]) -> dict[str, dict[str, float]]:
+    """Median duration/energy/peak per profile from stored cycle dicts.
+
+    The dict-based counterpart of :func:`profile_expectation` (which works from
+    decompressed traces): reads the ``duration``/``energy_wh``/``max_power``
+    scalar fields already stored on each cycle. Shared by on-device training
+    (``training_task``) and the ML suggestion engine so the "profile expectation"
+    definition lives in one place. Profiles with no usable duration are skipped;
+    missing energy/peak default to 500.
+    """
+    stats: dict[str, dict[str, list[float]]] = {}
+    for c in cycles:
+        name = c.get("profile_name")
+        if not isinstance(name, str) or not name:
+            continue
+        s = stats.setdefault(name, {"d": [], "e": [], "p": []})
+        for key, field in (("d", "duration"), ("e", "energy_wh"), ("p", "max_power")):
+            v = c.get(field)
+            if isinstance(v, (int, float)) and not isinstance(v, bool):
+                s[key].append(float(v))
+    out: dict[str, dict[str, float]] = {}
+    for name, s in stats.items():
+        if not s["d"]:
+            continue
+        out[name] = {
+            "duration": float(np.median(s["d"])),
+            "energy": float(np.median(s["e"])) if s["e"] else 500.0,
+            "peak": float(np.median(s["p"])) if s["p"] else 500.0,
+        }
+    return out
+
+
 def latest_end_event_features(
     points: Sequence[Point],
     expectation: dict[str, float],
@@ -206,6 +238,84 @@ def live_match_features(
         "candidate_count_log": float(math.log1p(max(0, int(candidate_count)))),
         "prefix_active_fraction": float(prefix_active_fraction),
         "duration_ratio_top1": float(min(progress, 2.0)),
+        "elapsed_log": float(math.log1p(elapsed)),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Remaining-time / progress regressor
+# ---------------------------------------------------------------------------
+
+# Feature columns for the on-device remaining-time regressor. Unlike the three
+# classifier heads this model is a ``standardized_linear`` regressor whose target
+# is the cycle completion fraction (elapsed / total_actual). There is no shipped
+# baseline: the model exists only once on-device training promotes one over the
+# naive elapsed/expected estimate (``elapsed_over_expected`` is deliberately the
+# first column so the naive baseline is trivially recoverable). The same
+# extractor runs at training time on synthesized prefixes and at inference on the
+# live trace, so the columns cannot drift.
+PROGRESS_FEATURE_COLUMNS = [
+    "elapsed_over_expected",
+    "energy_over_expected",
+    "mean_power_over_peak",
+    "recent_power_over_peak",
+    "tail_slope_norm",
+    "active_fraction",
+    "elapsed_log",
+]
+
+
+def progress_features(
+    points: Sequence[Point],
+    expectation: dict[str, float],
+) -> dict[str, float] | None:
+    """Features for the remaining-time regressor from a running-cycle prefix.
+
+    Args:
+        points: Observed prefix power readings (offset_s, watts).
+        expectation: Matched profile's median ``duration``/``energy``/``peak``
+            (as produced by :func:`profile_expectation`).
+
+    Returns a dict with exactly ``PROGRESS_FEATURE_COLUMNS`` keys, or ``None``
+    when there is too little data to characterise progress.
+    """
+    pts = _clean_points(points)
+    if len(pts) < 4 or not expectation:
+        return None
+    offsets = np.asarray([o for o, _ in pts], dtype=float)
+    powers = np.asarray([p for _, p in pts], dtype=float)
+    elapsed = max(float(offsets[-1] - offsets[0]), 1.0)
+    exp_dur = max(float(expectation.get("duration") or 0.0), 1.0)
+    exp_energy = max(float(expectation.get("energy") or 0.0), 1e-6)
+    exp_peak = max(float(expectation.get("peak") or 0.0), 1.0)
+
+    energy_so_far = float(cumulative_energy_wh(pts)[-1])
+    active_thr = max(1.0, 0.05 * exp_peak)
+    active_mask = powers > active_thr
+    active = powers[active_mask]
+    mean_power = float(np.mean(active)) if active.size else 0.0
+    # Recent power: mean of the trailing ~5% of samples (min one sample).
+    tail_n = max(1, len(pts) // 20)
+    recent_power = float(np.mean(powers[-tail_n:]))
+    # Tail slope over the last quarter (W per sample), normalised by peak: a
+    # declining tail is a strong "near the end" signal.
+    quarter = max(2, len(pts) // 4)
+    tail = powers[-quarter:]
+    if tail.size >= 2:
+        x = np.arange(tail.size, dtype=float)
+        xm = x - float(np.mean(x))
+        denom = float(np.dot(xm, xm))
+        slope = float(np.dot(xm, tail - float(np.mean(tail))) / denom) if denom > 1e-9 else 0.0
+    else:
+        slope = 0.0
+
+    return {
+        "elapsed_over_expected": float(min(elapsed / exp_dur, 3.0)),
+        "energy_over_expected": float(min(energy_so_far / exp_energy, 3.0)),
+        "mean_power_over_peak": float(min(mean_power / exp_peak, 2.0)),
+        "recent_power_over_peak": float(min(recent_power / exp_peak, 2.0)),
+        "tail_slope_norm": float(np.clip(slope / exp_peak, -2.0, 2.0)),
+        "active_fraction": float(np.mean(active_mask)) if powers.size else 0.0,
         "elapsed_log": float(math.log1p(elapsed)),
     }
 

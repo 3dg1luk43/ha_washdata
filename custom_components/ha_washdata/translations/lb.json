@@ -1004,13 +1004,9 @@
         "dryer": "Dryer",
         "washer_dryer": "Wäschmaschinn-Trockner Combo",
         "dishwasher": "Spullmaschinn",
-        "coffee_machine": "Kaffismaschinn (ofgeschaaft)",
-        "ev": "Elektresch Gefier (ofgeschaaft)",
         "air_fryer": "Air Fryer",
-        "heat_pump": "Wärmepompel (deprecéiert)",
         "bread_maker": "Brout Maker",
         "pump": "Pompel / Pompel Pompel",
-        "oven": "Uewen (ofgeschaaft)",
         "other": "Aner (fortgeschratt)"
       }
     }

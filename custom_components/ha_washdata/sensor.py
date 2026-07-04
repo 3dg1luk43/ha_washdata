@@ -7,10 +7,9 @@ import hashlib
 import logging
 from typing import Any
 
-from homeassistant.components.sensor import SensorEntity, SensorEntityDescription, SensorDeviceClass, SensorStateClass
+from homeassistant.components.sensor import SensorEntity, SensorEntityDescription, SensorDeviceClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.const import EntityCategory
 from homeassistant.helpers import entity_registry
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
@@ -257,18 +256,10 @@ class WasherStateSensor(WasherBaseSensor):
             return "mdi:tumble-dryer"
         if dtype == "dishwasher":
             return "mdi:dishwasher"
-        if dtype == "ev":
-            return "mdi:car-electric"
-        if dtype == "coffee_machine":
-            return "mdi:coffee-maker"
         if dtype == "air_fryer":
             return "mdi:pot-steam"
-        if dtype == "heat_pump":
-            return "mdi:heat-pump"
         if dtype == "pump":
             return "mdi:water-pump"
-        if dtype == "oven":
-            return "mdi:stove"
         return "mdi:washing-machine"
 
     @property
@@ -284,6 +275,13 @@ class WasherStateSensor(WasherBaseSensor):
         }
         if self._manager.device_type == DEVICE_TYPE_PUMP:
             attrs["pump_stuck"] = self._manager.pump_stuck
+        # Runtime anomaly signal (visible only; never a notification). Present the
+        # overrun ratio while a cycle is overrunning its usual duration so users /
+        # automations can react without a push.
+        anomaly = self._manager.cycle_anomaly
+        if anomaly and anomaly != "none":
+            attrs["cycle_anomaly"] = anomaly
+            attrs["overrun_ratio"] = round(self._manager.overrun_ratio, 2)
         return attrs
 
 
@@ -428,6 +426,23 @@ class WasherProgressSensor(WasherBaseSensor):
     @property
     def native_value(self):  # type: ignore[override]
         return self._manager.cycle_progress
+
+    @property
+    def extra_state_attributes(self):  # type: ignore[override]
+        """Expose the live projected total energy/cost for the running cycle.
+
+        Derived from accumulated energy and the (ML-blended) progress estimate.
+        Keys are present only while a projection is available, so the attributes
+        stay clean when idle or early in a cycle.
+        """
+        attrs: dict[str, float] = {}
+        projected_wh = self._manager.projected_energy_wh
+        if projected_wh is not None:
+            attrs["projected_energy_kwh"] = round(float(projected_wh) / 1000.0, 3)
+        projected_cost = self._manager.projected_cost
+        if projected_cost is not None:
+            attrs["projected_cost"] = round(float(projected_cost), 2)
+        return attrs or None
 
 
 class WasherPowerSensor(WasherBaseSensor):

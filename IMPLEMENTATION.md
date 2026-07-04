@@ -406,6 +406,69 @@ When ML models are enabled (`enable_ml_models` option), `manager._compute_cycle_
 
 During active matching (`manager._async_do_perform_matching`), the `live_match_commit` model scores P(top-1 is correct). When the score is ≥ `ML_MATCH_COMMIT_THRESHOLD` (0.85) AND raw confidence ≥ 0.30, the profile is committed immediately — bypassing the persistence counter (default: 3 consecutive matching calls). This cuts time-to-first-match for clear, distinctive cycles. Falls back to persistence if ML is disabled or the scorer raises.
 
+#### ML Remaining-Time Regressor (0.5.0)
+
+**Problem:** Time-remaining was `matched_profile_duration × (1 − progress)`, i.e. it assumes every run of a program takes the profile's median duration. Real appliances drift — an aging washer, a heavier load, or an eco variant can run materially longer/shorter — and the naive estimate is systematically wrong for those runs.
+
+**Solution:** the first **regression** head in the ML subsystem (all others are logistic classifiers). It predicts the cycle **completion fraction** (elapsed / actual-total) from duration-*invariant* shape features, so a run that will take 1.5× the median is recognized as only half-done when the naive elapsed/median says 75%.
+
+- **Model kind:** `standardized_linear` (ridge). `trainer.fit_ridge` standardizes both features and target and solves the ridge normal equations in closed form (NumPy only); `predict_matrix_spec`/`predict_value_spec` un-standardize via the spec's `output_center`/`output_scale`. No sigmoid, no threshold.
+- **No shipped baseline:** unlike the three classifier heads there is no embedded `*_model.py`. `engine.resolve_regressor("remaining_time", store)` returns a predictor only once on-device training has promoted one; otherwise `(None, None)` and live behavior is unchanged.
+- **Features** (`feature_extraction.PROGRESS_FEATURE_COLUMNS`): `elapsed_over_expected` (the naive estimate, kept as the first column so the baseline is trivially recoverable), `energy_over_expected`, `mean_power_over_peak`, `recent_power_over_peak`, `tail_slope_norm` (a declining tail ⇒ near the end), `active_fraction`, `elapsed_log`.
+- **Training data** (`training_task._progress_dataset`): each clean completed cycle is cut at several elapsed fractions (0.15…0.90); the target is the prefix's true completion fraction. Every stored trace becomes a handful of supervised examples — no manual labeling.
+- **Promotion gate** (`training_task._train_regression_capability`): the trained regressor is promoted only when its held-out MAE beats the naive elapsed/expected estimate (feature column 0) by `ML_TRAINING_REGRESSION_MARGIN` (5%). On synthetic variable-duration cycles the model reaches ~0.003 MAE vs ~0.12 naive.
+- **Runtime blend** (`manager._ml_progress_percent` → `_update_remaining_only`): the predicted fraction is blended into the phase-aware `phase_progress` at `ML_PROGRESS_BLEND_WEIGHT` (0.5) **before** the existing EMA smoothing/monotonicity guards, and also into the linear-fallback progress. Gated on `enable_ml_models`; a bad model can only nudge, never override, the proven phase estimator, and everything downstream (remaining/total back-calculation) stays consistent because we blend *progress*, not *seconds*.
+
+#### Terminal-Drop Fast Finalize (0.5.0)
+
+**Problem:** When power drops to zero, the detector holds the cycle open for `effective_off_delay = max(off_delay, min_off_gap)` before finalizing — up to **8 min for washing machines**, **1 h for dishwashers** — because a drop to 0 W is indistinguishable from a legitimate soak / drying pause. So a genuinely-stopped cycle (plug pulled, program cancelled) sits "running" for minutes before the integration reacts, even though it correctly labels it *Interrupted* afterwards.
+
+**Solution:** a per-device **anomaly** heuristic (pure statistics, no trained model, like `compute_profile_health`) that lets the detector recognize a drop as *terminal* and finalize fast. It learns, from the device's own history, the earliest point at which that appliance has ever legitimately gone quiet — a drop earlier than that is an anomaly.
+
+- **Baseline** (`profile_store.earliest_sustained_quiet_offset`): the smallest elapsed offset at which any **completed** cycle first shows a sustained (≥ `TERMINAL_DROP_MIN_QUIET_SPAN_S`, 60 s) near-zero span. Only completed cycles seed it — interrupted / force-stopped / terminal-drop cycles are exactly the anomalies being caught, so including them would poison the baseline. The strict *minimum* (not a percentile) is deliberately conservative: one cycle that went quiet early only lowers the baseline, making the detector fire *less* often. Returns `None` (⇒ keep the slow path) below `TERMINAL_DROP_MIN_CLEAN_CYCLES` (3) completed cycles.
+- **Familiarity / novelty gate** (`device_active_peak_range` + the `TERMINAL_DROP_PEAK_FAMILIAR_TOL`, 0.4, check in `is_terminal_drop`): an early drop is only trusted as terminal when the cycle's **power level** is one the device has produced before — its peak within the historical `[min, max]` peak band widened by ±40%. A very early drop is *below the matcher's duration gate* (`min_duration_ratio` 0.10), so match confidence is not available that early to confirm the cycle is recognized; power level is the familiarity signal that *is* available. A cycle drawing power unlike anything in its history is treated as a possible **new program** and **deferred** to the proven slow path rather than assumed to be a stop — the guard against a first-ever program that legitimately goes quiet early being mistaken for a pulled plug.
+- **Provider** (`manager._terminal_drop_provider`, baselines cached via `_terminal_drop_baseline` keyed by cycle count): delegates to the pure `profile_store.is_terminal_drop(...)`, which requires all of — clearly ON (peak ≥ `TERMINAL_DROP_MIN_PEAK_RATIO` × stop-threshold), familiar (above), and anomalous (trailing cliff began `< TERMINAL_DROP_EARLINESS_RATIO` × quiet-baseline). Gated on `enable_ml_models`; returns `False` (fully inert) when off.
+- **Runtime** (`cycle_detector._is_terminal_drop` in the `STATE_ENDING` fallback): when the provider confirms terminal, the cycle finalizes once power has been sub-threshold for `TERMINAL_DROP_OFF_DELAY_SECONDS` (90 s) — bypassing the energy/defer gates, because the sustained quiet span already proves the appliance is off and the anomaly check has ruled out an early pause — stamping `TerminationReason.TERMINAL_DROP` and status `interrupted`. Reaction drops from ~8–10 min to ~2 min.
+- **Asymmetry:** the exact mirror-image of the ML end-guard. The end-guard can only ever *defer* a finish (never end early); the terminal-drop detector can only ever *shorten* the wait (never end a normal cycle early, since a normal end's drop is not earlier than the device's learned quiet baseline).
+
+#### Cycle Artifact Detection (0.5.0)
+
+**Problem:** Real cycles contain transient artifacts — most commonly a user opening a dishwasher/washer mid-cycle to add an item (power drops to ~0 and resumes), plus sustained out-of-band dips/spikes. These were invisible: nothing flagged them or explained an odd-looking trace.
+
+**Solution:** `ProfileStore.detect_cycle_artifacts(profile_name, points)` reuses the envelope-conformance resampling to compare the trace against the matched profile's `[lower, upper]` band and classify contiguous deviating segments: a **`pause`** (near-zero where the profile expects activity *and* it resumes afterward — excluded at the very end, which is just the cycle finishing), a sustained below-band **`dip`**, or above-band **`spike`**. Each event is `{type, start_s, end_s, detail (plain English), severity}` in the trace's own time offsets; the list is capped to the most significant few, chronological. Pure statistics (no ML), never raises.
+
+Frozen onto `cycle_data["artifacts"]` at cycle end (`manager._async_process_cycle_end`) and served by `ws_get_cycle_power_data` (stored, or computed on the fly for older cycles). The panel **shades each artifact span** on the cycle graph (`_drawCycleEditor` bands), surfaces the detail in the existing hover readout (`_onGraphHover` reads `wd.artifacts`), lists them under the graph, and shows a ⚠ badge in the Cycles list. No new notification — artifacts live on the graph where users inspect. The events also double as candidate labels for a future supervised anomaly model (the "runtime anomaly model" idea), which needs labeled examples this detector begins to accumulate.
+
+#### Runtime Overrun Anomaly (0.5.0)
+
+**Problem:** Users had no *visible*, device-agnostic signal that a running cycle is taking materially longer than usual. Pump-stuck fires an event (pump-only), and the zombie-killer only acts at 300% (hard termination) — nothing surfaced the common "this ran long" case for the UI.
+
+**Solution:** `manager._update_cycle_anomaly` sets `_overrun_ratio = elapsed / expected` each estimate tick and flags `_cycle_anomaly = "overrun"` once the ratio crosses `CYCLE_OVERRUN_ANOMALY_RATIO` (1.5). It is deliberately **soft**: purely a visible signal, **never a notification** and **never a termination** (the zombie-killer still owns hard limits). Surfaced three ways, all in existing places: (1) `cycle_anomaly`/`overrun_ratio` attributes on the **State** sensor while running; (2) frozen onto the cycle as `cycle_data["anomaly"]`/`["overrun_ratio"]` at end; (3) an ⏱ badge in the panel's Cycles list. Cleared on idle/off and when no profile is matched; never raises.
+
+#### Profile Advisories (0.5.0)
+
+**Problem:** The per-profile signals (health, duration/energy trends) were surfaced as scattered badges; users had no consolidated, *actionable* "what should I do about this profile" view.
+
+**Solution:** `ProfileStore.compute_profile_advisories` (pure statistics; reuses `compute_profile_health` + `compute_profile_trends`) returns a ranked list of `{profile, severity, code, message}` recommendations — e.g. poor fit → "review its cycles or re-record", durations trending longer → "if the appliance changed, re-record/rebuild", energy trending up → "worth checking the appliance". A profile already flagged `poor` suppresses its (redundant) trend advice. Returned by `ws_get_profiles` as `profile_advisories` and rendered as a **Recommendations** banner in the panel's Profiles tab — an existing surface, **never a notification**. Warnings rank before info; `[]` on error.
+
+#### Progress-Driven Phase Estimate (0.5.0)
+
+**Problem:** The per-profile phase configurator (users draw phase ranges on a profile's envelope; `get_profile_phase_ranges`) fed `check_phase_match`, but keyed on **raw elapsed seconds**. When a cycle runs longer/shorter than the profile's nominal timeline the phase readout drifts (e.g. shows "Spin" while still washing). It was effectively a *visual* configurator whose output didn't track reality.
+
+**Solution:** `manager._current_phase_from_progress` makes that one configurator *functional* by indexing the same phase ranges with the **live ML-blended progress fraction** instead of raw elapsed: `position = progress_fraction × (max phase end)`, then the existing `check_phase_match` lookup. `phase_description` prefers this live phase, falling back to the matcher's `matched_phase` then the detector state. No second phase system — one definition (the visual ranges), driven by the progress estimator (which already carries the remaining-time regressor blend). Returns `None` (clean fallback) when not running, no profile is matched, or the profile has no configured ranges, so existing setups are unaffected. This also lays the groundwork for a future on-device phase classifier: the per-profile ranges + labelled cycles are the training labels — no separate per-cycle labeler needed.
+
+#### Projected Energy & Cost (0.5.0)
+
+**Problem:** WashData already freezes each *completed* cycle's `energy_kwh`/`cost` from a configured price (`CONF_ENERGY_PRICE_STATIC`/`CONF_ENERGY_PRICE_ENTITY`), but users had no in-flight estimate of what the *running* cycle will use/cost.
+
+**Solution:** `manager._update_projected_energy` prefers the on-device `total_energy` regressor (`manager._ml_energy_total`) and falls back to `accumulated_energy ÷ progress_fraction` when it is unavailable/inert. Cost uses the same price resolution used at cycle end (so the running estimate and the final frozen value are consistent). It clears below a `_PROJECTION_MIN_PROGRESS` (3%) floor, never projects below energy already consumed, and never raises. Surfaced as `projected_energy_kwh` / `projected_cost` **attributes** on `WasherProgressSensor` (no new entity or translations); keys are omitted when idle or too early in a cycle.
+
+#### Total-Energy Regressor (0.5.0)
+
+**Problem:** the `energy_so_far ÷ progress_fraction` projection assumes energy accumulates *linearly with time*. It doesn't — appliances with an early heating phase front-load energy (at 40% of the way through time you may already be at ~85% of total energy), so the time-based projection reads high early in the cycle.
+
+**Solution:** a second `standardized_linear` on-device regressor (capability `total_energy`, target = **energy-completion fraction** `energy_so_far / final_energy`) built on the *same* feature vector as the remaining-time model (`progress_features` / `PROGRESS_FEATURE_COLUMNS`) — only the training label differs. `training_task._energy_dataset` synthesizes the labels from cut prefixes of clean cycles. Its held-out MAE is gated against the naive `elapsed_over_expected` baseline (which *is* the current time-based projection), so it is promoted **only when it beats the existing method**. `manager._ml_energy_total` predicts the fraction and returns `energy_so_far / fraction` (floored so an under-confident prediction can't blow up), which `_update_projected_energy` prefers. No shipped baseline → inert until on-device training promotes one; behaviour is unchanged when the ML opt-in is off.
+
 ---
 
 ### 3b. Profile Health Heuristic (0.5.0)
@@ -419,6 +482,27 @@ During active matching (`manager._async_do_perform_matching`), the `live_match_c
 - `health_status`: "healthy" (≥0.65) / "fair" (0.40–0.64) / "poor" (<0.40) / "unknown" (<3 cycles)
 
 Surfaced via `ws_get_profiles` (added to its response as `profile_health`) and shown as inline badges (⚠ poor fit, fair fit) on profile cards in the panel's Profiles tab and as a health banner in each profile's Overview modal.
+
+---
+
+### 3c. Profile Trends, Coverage Gaps & Envelope Conformance (0.5.0)
+
+Three more **pure-statistics (no ML)** heuristics extend the health picture. All live in `profile_store.py`, never raise (return empty/`None` on error), and — for the first two — ride along in the `ws_get_profiles` response next to `profile_health`.
+
+**Profile Trends** — `compute_profile_trends(min_cycles=12, recent_window=8, slope_threshold_pct=0.08)`
+- Fits an ordinary-least-squares line to each profile's per-cycle duration (and energy, when the cycles carry it), then normalizes the slope to **% of the profile mean per cycle** so it is comparable across appliances.
+- Classifies each series `up` / `down` / `stable` against `slope_threshold_pct`; returns `duration_trend`, `duration_slope_pct`, `duration_recent_mean_s` (+ the energy analogues), `cycle_count`, and `recent_window`.
+- A rising duration trend is a maintenance signal (e.g. a washer taking progressively longer). Surfaced as a trend badge (↑/↓) on profile cards and a drift banner with a maintenance advisory in the Profiles stats tab. Response key: `profile_trends`.
+
+**Coverage Gaps** — `suggest_coverage_gaps(recent_window=30, min_unmatched=5, min_unmatched_rate=0.20, low_confidence_threshold=0.40, duration_bucket_s=900.0)`
+- Scans the most recent `recent_window` cycles, counting unmatched (no `profile_name`) and low-confidence cycles, and buckets the unmatched ones into 15-minute duration bins (only bins with ≥2 members become clusters).
+- Sets `suggest_create` when unmatched count ≥ `min_unmatched` **and** unmatched rate ≥ `min_unmatched_rate`. Returns `unmatched_count`, `low_confidence_count`, `unmatched_rate`, `suggest_create`, and `duration_clusters` (largest first). `{}` when below the floor or on error.
+- Drives a coverage-gap banner (unmatched count/rate + duration-cluster hints + a `data-action="create-profile"` button) in the Profiles tab. Response key: `coverage_gaps`.
+
+**Envelope Conformance** — `compute_envelope_conformance(profile_name, points)`
+- Resamples a completed cycle's trace onto the matched profile envelope's time grid (scaling by `elapsed/env_duration`, clamping to the grid ends so shorter/longer cycles still score), then returns the fraction of samples inside the `[lower, upper]` band as `conformance` (`outside_frac = 1 − conformance`), plus `samples`/`envelope_name`. `None` when there is no envelope or fewer than 4 points.
+- Complementary to `MatchResult.confidence`: confidence measures shape **correlation**, conformance measures absolute power **level/spread**. A cycle can correlate well in shape yet run at the wrong wattage.
+- Computed at cycle end in `manager._async_process_cycle_end` and stored on `cycle_data["envelope_conformance"]`. `learning._maybe_request_feedback` treats `conformance < 0.40` as a second auto-label downgrade trigger (independent of the ML quality gate): a high-confidence match whose power level is inconsistent with the profile is downgraded to a feedback request rather than silently auto-labeled.
 
 ---
 

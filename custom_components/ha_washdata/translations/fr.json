@@ -1004,13 +1004,9 @@
         "dryer": "Séchoir",
         "washer_dryer": "Combo laveuse-sécheuse",
         "dishwasher": "Lave-vaisselle",
-        "coffee_machine": "Machine à café (obsolète)",
-        "ev": "Véhicule électrique (obsolète)",
         "air_fryer": "Friteuse à air",
-        "heat_pump": "Pompe à chaleur (obsolète)",
         "bread_maker": "Machine à pain",
         "pump": "Pompe / Pompe de puisard",
-        "oven": "Four (obsolète)",
         "other": "Autre (avancé)"
       }
     }

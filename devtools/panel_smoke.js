@@ -66,7 +66,11 @@ el._cycles = [{ id: 'c1', profile_name: 'Cotton 60', status: 'completed', durati
 el._suggestions = [{ key: 'off_delay', suggested: 120, current: 180, reason: 'test' }];
 el._mlSettings = { off_delay: { ml_value: 130, ml_reason: 'ml' } };
 el._mlById = {};
-el._mlTrainingStatus = { available: true, enabled: true, running: false, last_trained: null, cycle_count: 10, min_cycles: 30, hour: 2, on_device_models: {},
+el._mlTrainingStatus = { available: true, enabled: true, running: false, last_trained: new Date().toISOString(), cycle_count: 35, min_cycles: 30, hour: 2,
+  on_device_models: {
+    end: { trained_at: new Date().toISOString(), cycle_count: 40, kind: 'standardized_logistic', label: 'Cycle-end detection', blurb: "Knowing when a cycle has truly finished", auc: 0.91, metric: 'AUC 0.91 on held-out data', trend: 'improving' },
+    remaining_time: { trained_at: new Date().toISOString(), cycle_count: 40, kind: 'standardized_linear', label: 'Time-remaining estimate', blurb: 'Predicting how long is left', model_mae: 0.02, naive_mae: 0.12, metric: 'error 0.020 vs 0.120 baseline', trend: 'declining' },
+  },
   matching: { defaults: { corr_weight: 0.45, duration_weight: 0.22, energy_weight: 0.22, dtw_ensemble_w: 0.7 }, tuned: { config: { corr_weight: 0.5, duration_weight: 0.15, energy_weight: 0.15, dtw_ensemble_w: 0.85 }, trained_at: new Date().toISOString(), cycle_count: 40, baseline_test_top1: 0.7, tuned_test_top1: 0.8 }, active: 'tuned' } };
 el._powerData = { live: [], raw: [], cycle_active: true };
 el._diag = { total_cycles: 10, total_profiles: 3, debug_traces_count: 0, file_size_kb: 12.3 };
@@ -89,7 +93,9 @@ check('_htmlPanel (advanced)', () => el._htmlPanel());
 check('_htmlDiagnostics', () => el._htmlDiagnostics());
 check('_htmlLogs', () => el._htmlLogs());
 check('_htmlMlTab', () => el._htmlMlTab());
-check('_htmlMlTrainingCard', () => el._htmlMlTrainingCard());
+check('_htmlMlStatusSection', () => el._htmlMlStatusSection(el._mlTrainingStatus, 'entry-1'));
+check('_htmlMlLearnedSection', () => el._htmlMlLearnedSection(el._mlTrainingStatus));
+check('_htmlMlLearnedSection (empty)', () => { const s = el._mlTrainingStatus; el._mlTrainingStatus = { ...s, on_device_models: {} }; const h = el._htmlMlLearnedSection(el._mlTrainingStatus); el._mlTrainingStatus = s; return h; });
 check('_htmlMatchingTuningCard', () => el._htmlMatchingTuningCard());
 check('_htmlMatchingTuningCard (default)', () => { const s = el._mlTrainingStatus; el._mlTrainingStatus = { ...s, matching: { ...s.matching, tuned: null, active: 'default' } }; const h = el._htmlMatchingTuningCard(); el._mlTrainingStatus = s; return h; });
 check('_buildHtml', () => el._buildHtml());
@@ -97,8 +103,20 @@ check('_buildHtml', () => el._buildHtml());
 // Modals
 check('modal: profile-group (new)', () => { el._modal = { type: 'profile-group', orig: null, name: '', members: [] }; return el._htmlModal(); });
 check('modal: profile-group (edit)', () => { el._modal = { type: 'profile-group', orig: 'Cotton 2:47', name: 'Cotton 2:47', members: ['Cotton 60', 'Cotton 40'] }; return el._htmlModal(); });
-check('modal: cycle-detail review', () => { el._modal = { type: 'cycle-detail', mode: 'review', loaded: true, cycleId: 'c1', curve: { samples: [[0, 1], [10, 2]], full_duration_s: 1000, duration: 1000, profile_name: 'Cotton 60', start_time: new Date().toISOString() }, ml: null }; return el._htmlModal(); });
+check('modal: cycle-detail review', () => { el._modal = { type: 'cycle-detail', mode: 'review', loaded: true, cycleId: 'c1', curve: { samples: [[0, 1], [10, 2]], full_duration_s: 1000, duration: 1000, profile_name: 'Cotton 60', start_time: new Date().toISOString(), artifacts: [{ type: 'pause', start_s: 300, end_s: 420, detail: 'Power dropped to near zero for ~120s then resumed — likely the door was opened.', severity: 0.4 }] }, ml: null }; return el._htmlModal(); });
+check('modal: cycle-detail inspect (draw w/ artifacts)', () => { el._modal = { type: 'cycle-detail', mode: 'view', loaded: true, cycleId: 'c1', curve: { samples: [[0, 900], [300, 950], [360, 3], [420, 940], [1000, 900]], full_duration_s: 1000, profile_name: 'Cotton 60', start_time: new Date().toISOString(), artifacts: [{ type: 'pause', start_s: 300, end_s: 420, detail: 'door opened', severity: 0.4 }] }, ml: null }; const h = el._htmlModal(); el._drawCycleEditor(); return h; });
 check('modal: profile-panel stats', () => { el._modal = { type: 'profile-panel', name: 'Cotton 60', tab: 'stats', loaded: true, stats: el._profiles[0], env: {} }; return el._htmlModal(); });
+check('modal: compare-cycles (html + draw)', () => {
+  el._cycles = [
+    { id: 'c1', start_time: new Date().toISOString(), duration: 1000, profile_name: 'Cotton 60' },
+    { id: 'c2', start_time: new Date().toISOString(), duration: 1200, profile_name: 'Cotton 40' },
+  ];
+  el._modal = {
+    type: 'compare-cycles', ids: ['c1', 'c2'], hidden: new Set(['c2']), overlays: ['Cotton 60'], loaded: true,
+    cycles: { c1: { samples: [[0, 900], [500, 800], [1000, 5]], full_duration_s: 1000 }, c2: { samples: [[0, 950], [1200, 3]], full_duration_s: 1200 } },
+  };
+  const h = el._htmlModal(); el._drawCompareCanvas(); return h;
+});
 el._modal = null;
 
 console.log(failures ? `\nSMOKE FAILED (${failures})` : '\nSMOKE OK');

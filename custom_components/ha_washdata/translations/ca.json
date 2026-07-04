@@ -1004,13 +1004,9 @@
         "dryer": "Assecador",
         "washer_dryer": "Combo de rentadora-assecadora",
         "dishwasher": "Rentaplats",
-        "coffee_machine": "Màquina de cafè (obsoleta)",
-        "ev": "Vehicle elèctric (obsolet)",
         "air_fryer": "Fregidora d'aire",
-        "heat_pump": "Bomba de calor (obsoleta)",
         "bread_maker": "Panificadora",
         "pump": "Bomba / Bomba de sumidero",
-        "oven": "Forn (obsolet)",
         "other": "Altres (avançat)"
       }
     }

@@ -1004,13 +1004,9 @@
         "dryer": "Triomadóir",
         "washer_dryer": "Teaglama Washer-Triomadóir",
         "dishwasher": "Miasniteoir",
-        "coffee_machine": "Meaisín Caife (neamhcheadaithe)",
-        "ev": "Feithicil Leictreach (neamhlaghdaithe)",
         "air_fryer": "Fryer Aeir",
-        "heat_pump": "Caidéal Teasa (neamhlaghdaithe)",
         "bread_maker": "Déantóir Arán",
         "pump": "Caidéal / Sump Caidéal",
-        "oven": "oigheann (neamhlaghdaithe)",
         "other": "Eile (Ardleibhéal)"
       }
     }

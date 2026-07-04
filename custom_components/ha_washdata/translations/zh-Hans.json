@@ -1004,13 +1004,9 @@
         "dryer": "烘干机",
         "washer_dryer": "洗衣机烘干机组合",
         "dishwasher": "洗碗机",
-        "coffee_machine": "咖啡机（已弃用）",
-        "ev": "电动汽车（已弃用）",
         "air_fryer": "空气炸锅",
-        "heat_pump": "热泵（已弃用）",
         "bread_maker": "面包机",
         "pump": "泵/污水泵",
-        "oven": "烤箱（已弃用）",
         "other": "其他（高级）"
       }
     }

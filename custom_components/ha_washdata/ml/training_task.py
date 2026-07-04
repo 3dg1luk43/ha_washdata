@@ -24,7 +24,12 @@ import numpy as np
 
 _LOGGER = logging.getLogger(__name__)
 
-from ..const import ML_TRAINING_AUC_MARGIN, ML_TRAINING_MIN_POSITIVES
+from ..const import (
+    ML_TRAINING_AUC_MARGIN,
+    ML_TRAINING_MIN_POSITIVES,
+    ML_TRAINING_MIN_REGRESSION_ROWS,
+    ML_TRAINING_REGRESSION_MARGIN,
+)
 from ..time_utils import power_data_to_offsets
 from . import trainer as T
 
@@ -32,7 +37,19 @@ from . import trainer as T
 _CAPABILITIES = {
     "end": ("cycle_end_detector_model", "cycle_end"),
     "quality": ("hybrid_curve_quality_model", "cycle_quality"),
+    "live_match": ("live_match_commit_model", "match_correct"),
 }
+
+# Regression capabilities have no embedded baseline module - they are promoted
+# only when they beat a naive analytic estimate on held-out data. capability ->
+# (target label, target units).
+_REGRESSION_CAPABILITIES = {
+    "remaining_time": ("progress_fraction", "fraction"),
+    "total_energy": ("energy_fraction", "fraction"),
+}
+
+# Elapsed fractions at which each clean cycle is cut to synthesize a training row.
+_PROGRESS_CUT_FRACTIONS = (0.15, 0.30, 0.45, 0.60, 0.75, 0.90)
 
 _ACTIVE_FLOOR_RATIO = 0.02
 _MIN_ROWS = 40
@@ -48,29 +65,6 @@ def _read_points(cycle: dict[str, Any]) -> list[tuple[float, float]]:
         return [(float(o), float(p)) for o, p in pairs]
     except (TypeError, ValueError):
         return []
-
-
-def _profile_expectations(cycles: list[dict[str, Any]]) -> dict[str, dict[str, float]]:
-    stats: dict[str, dict[str, list[float]]] = {}
-    for c in cycles:
-        name = c.get("profile_name")
-        if not isinstance(name, str) or not name:
-            continue
-        s = stats.setdefault(name, {"d": [], "e": [], "p": []})
-        for k, field in (("d", "duration"), ("e", "energy_wh"), ("p", "max_power")):
-            v = c.get(field)
-            if isinstance(v, (int, float)) and not isinstance(v, bool):
-                s[k].append(float(v))
-    out: dict[str, dict[str, float]] = {}
-    for name, s in stats.items():
-        if not s["d"]:
-            continue
-        out[name] = {
-            "duration": float(np.median(s["d"])),
-            "energy": float(np.median(s["e"])) if s["e"] else 500.0,
-            "peak": float(np.median(s["p"])) if s["p"] else 500.0,
-        }
-    return out
 
 
 def _matrix(rows: list[dict[str, float]], columns: list[str]) -> np.ndarray:
@@ -178,6 +172,213 @@ def _quality_dataset(
     return _matrix(rows, list(QUALITY_FEATURE_COLUMNS)), np.array(labels, dtype=float), list(QUALITY_FEATURE_COLUMNS)
 
 
+def _live_match_dataset(
+    snapshots: list[dict[str, Any]],
+) -> tuple[np.ndarray, np.ndarray, list[str]]:
+    """Build a training matrix from accumulated match ranking snapshots.
+
+    Each snapshot was captured mid-cycle; at cycle end the confirmed profile
+    was back-filled as ``confirmed_label``.  We label by whether the model's
+    top-1 candidate at recording time matched the final confirmed label:
+    1.0 = top-1 was correct (should commit), 0.0 = wrong (should not commit).
+    Snapshots without a confirmed label are skipped.
+    """
+    from .feature_extraction import LIVE_MATCH_FEATURE_COLUMNS
+
+    columns = list(LIVE_MATCH_FEATURE_COLUMNS)
+    rows: list[dict[str, float]] = []
+    labels: list[float] = []
+    for snap in snapshots:
+        if not isinstance(snap, dict):
+            continue
+        confirmed = snap.get("confirmed_label")
+        if not isinstance(confirmed, str) or not confirmed:
+            continue
+        top1 = snap.get("top1_profile")
+        if not isinstance(top1, str):
+            continue
+        feat = snap.get("features")
+        if not isinstance(feat, dict):
+            continue
+        label = 1.0 if confirmed == top1 else 0.0
+        rows.append({col: float(feat.get(col) or 0.0) for col in columns})
+        labels.append(label)
+    return _matrix(rows, columns), np.array(labels, dtype=float), columns
+
+
+def _progress_dataset(
+    clean: list[dict[str, Any]],
+    expectations: dict[str, dict[str, float]],
+) -> tuple[np.ndarray, np.ndarray, list[str]]:
+    """Synthesize (features, completion_fraction) rows for the remaining-time model.
+
+    Each clean completed cycle is cut at several elapsed fractions; the target is
+    the true completion fraction of the prefix (``prefix_elapsed / total``). This
+    turns every stored trace into a handful of supervised progress examples, so
+    the regressor learns the device's own progress curve (e.g. a program that
+    reliably runs longer than its labelled duration) rather than the naive
+    elapsed/expected assumption.
+    """
+    from .feature_extraction import PROGRESS_FEATURE_COLUMNS, progress_features
+
+    columns = list(PROGRESS_FEATURE_COLUMNS)
+    rows: list[dict[str, float]] = []
+    labels: list[float] = []
+    for c in clean:
+        exp = expectations.get(c.get("profile_name"))
+        if not exp:
+            continue
+        points = _read_points(c)
+        if len(points) < 12:
+            continue
+        t0 = points[0][0]
+        total = points[-1][0] - t0
+        if total <= 60.0:
+            continue
+        for frac in _PROGRESS_CUT_FRACTIONS:
+            cut_t = t0 + frac * total
+            prefix = [(o, p) for o, p in points if o <= cut_t]
+            if len(prefix) < 4:
+                continue
+            feat = progress_features(prefix, exp)
+            if feat is None:
+                continue
+            actual_elapsed = prefix[-1][0] - t0
+            label = actual_elapsed / total if total > 0 else frac
+            rows.append(feat)
+            labels.append(float(min(max(label, 0.0), 1.0)))
+    return _matrix(rows, columns), np.array(labels, dtype=float), columns
+
+
+def _energy_dataset(
+    clean: list[dict[str, Any]],
+    expectations: dict[str, dict[str, float]],
+) -> tuple[np.ndarray, np.ndarray, list[str]]:
+    """Synthesize (features, energy_completion_fraction) rows for the total-energy
+    model. Same feature vector as the remaining-time model; the label is
+    ``energy_so_far / total_energy`` at each cut, so the regressor learns how
+    energy accumulates *non-linearly* over the cycle (heating front-loads it)
+    rather than assuming it tracks elapsed time. The naive baseline in
+    ``_train_regression_capability`` is ``elapsed_over_expected`` (time progress),
+    which is exactly the current ``energy_so_far / progress`` projection — so a
+    model is only promoted when it beats that.
+    """
+    from .feature_extraction import (
+        PROGRESS_FEATURE_COLUMNS,
+        progress_features,
+        cumulative_energy_wh,
+    )
+
+    columns = list(PROGRESS_FEATURE_COLUMNS)
+    rows: list[dict[str, float]] = []
+    labels: list[float] = []
+    for c in clean:
+        exp = expectations.get(c.get("profile_name"))
+        if not exp:
+            continue
+        points = _read_points(c)
+        if len(points) < 12:
+            continue
+        t0 = points[0][0]
+        total_dur = points[-1][0] - t0
+        if total_dur <= 60.0:
+            continue
+        total_energy = float(cumulative_energy_wh(points)[-1])
+        if total_energy <= 1e-6:
+            continue
+        for frac in _PROGRESS_CUT_FRACTIONS:
+            cut_t = t0 + frac * total_dur
+            prefix = [(o, p) for o, p in points if o <= cut_t]
+            if len(prefix) < 4:
+                continue
+            feat = progress_features(prefix, exp)
+            if feat is None:
+                continue
+            energy_so_far = float(cumulative_energy_wh(prefix)[-1])
+            label = energy_so_far / total_energy
+            rows.append(feat)
+            labels.append(float(min(max(label, 0.0), 1.0)))
+    return _matrix(rows, columns), np.array(labels, dtype=float), columns
+
+
+def _regression_split(
+    X: np.ndarray, y: np.ndarray, *, frac: float = 0.2, seed: int = 0
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Seeded random train/test split for regression (no class balancing)."""
+    n = X.shape[0]
+    rng = np.random.default_rng(seed)
+    idx = rng.permutation(n)
+    n_test = max(1, int(round(n * frac)))
+    if n - n_test < 2:  # keep at least a couple of training rows
+        return X, y, X, y
+    test_idx, train_idx = idx[:n_test], idx[n_test:]
+    return X[train_idx], y[train_idx], X[test_idx], y[test_idx]
+
+
+def _train_regression_capability(
+    capability: str,
+    target: str,
+    target_units: str,
+    X: np.ndarray,
+    y: np.ndarray,
+    columns: list[str],
+    trained_at: str,
+) -> dict[str, Any]:
+    """Fit + gate one regression capability against a naive analytic baseline.
+
+    The naive baseline for the completion-fraction target is
+    ``elapsed_over_expected`` (the first feature column) clamped to [0, 1] - i.e.
+    the current profile-duration assumption. A trained regressor is only promoted
+    when its held-out MAE is at least ``ML_TRAINING_REGRESSION_MARGIN`` lower.
+    """
+    n = X.shape[0]
+    if n < ML_TRAINING_MIN_REGRESSION_ROWS:
+        return {"capability": capability, "promoted": False,
+                "reason": f"insufficient data (rows={n})"}
+
+    X_tr, y_tr, X_te, y_te = _regression_split(X, y)
+    try:
+        fit = T.fit_ridge(X_tr, y_tr, alpha=1.0)
+    except ValueError as err:
+        return {"capability": capability, "promoted": False, "reason": str(err)}
+
+    spec_probe = {
+        "center": fit["center"], "scale": fit["scale"], "coef": fit["coef"],
+        "bias": fit["bias"], "output_center": fit["y_center"], "output_scale": fit["y_scale"],
+        "feature_columns": columns,
+    }
+    preds = np.clip(T.predict_matrix_spec(spec_probe, X_te), 0.0, 1.0)
+    metrics = T.regression_metrics(y_te, preds)
+    model_mae = float(metrics.get("mae") or 1.0)
+
+    naive_col = columns.index("elapsed_over_expected") if "elapsed_over_expected" in columns else 0
+    naive = np.clip(X_te[:, naive_col], 0.0, 1.0)
+    naive_mae = float(np.mean(np.abs(naive - y_te))) if y_te.size else 1.0
+
+    promote = model_mae <= naive_mae * (1.0 - ML_TRAINING_REGRESSION_MARGIN)
+    record: dict[str, Any] = {
+        "capability": capability,
+        "promoted": bool(promote),
+        "rows": n,
+        "model_mae": round(model_mae, 5),
+        "naive_mae": round(naive_mae, 5),
+        "metrics": metrics,
+    }
+    if promote:
+        record["spec"] = T.build_regression_spec(
+            name=capability, target=target, feature_columns=columns, fit=fit,
+            target_units=target_units,
+            metrics={"holdout": metrics, "model_mae": round(model_mae, 5),
+                     "naive_mae": round(naive_mae, 5)},
+            trained_at=trained_at, cycle_count=n,
+        )
+        record["trained_at"] = trained_at
+        record["cycle_count"] = n
+    else:
+        record["reason"] = f"MAE {model_mae:.4f} not below naive {naive_mae:.4f} - margin"
+    return record
+
+
 def _holdout_split(
     X: np.ndarray, y: np.ndarray, *, frac: float = 0.2, seed: int = 0
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
@@ -281,20 +482,27 @@ def train_from_cycles(
     device_type: str | None,
     stop_threshold_w: float = 2.0,
     trained_at: str = "",
+    ranking_history: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Pure function (executor-safe): build datasets, train, gate all capabilities.
 
     Returns ``{"results": [record, ...], "promoted": {capability: record}}``.
     Caller persists the promoted records via ``profile_store.set_ml_model_version``.
+
+    ``ranking_history`` is the accumulated match ranking snapshots from the store
+    (see :meth:`.ProfileStore.get_match_ranking_history`).  When provided it
+    unlocks on-device training for the ``live_match`` capability.
     """
     from ..suggestion_engine import select_clean_cycles
+    from .feature_extraction import profile_expectations
 
     clean, _excluded = select_clean_cycles(cycles, stop_threshold_w=stop_threshold_w)
-    expectations = _profile_expectations(cycles)
+    expectations = profile_expectations(cycles)
 
-    datasets = {
+    datasets: dict[str, tuple[np.ndarray, np.ndarray, list[str]]] = {
         "end": _end_dataset(clean, expectations, stop_threshold_w),
         "quality": _quality_dataset(cycles, expectations),
+        "live_match": _live_match_dataset(ranking_history or []),
     }
 
     results: list[dict[str, Any]] = []
@@ -311,6 +519,27 @@ def train_from_cycles(
                 "metrics": record["metrics"],
                 "new_auc": record["new_auc"],
                 "baseline_auc": record["baseline_auc"],
+            }
+
+    # Regression capabilities (no embedded baseline; gated against a naive estimate).
+    reg_datasets: dict[str, tuple[np.ndarray, np.ndarray, list[str]]] = {
+        "remaining_time": _progress_dataset(clean, expectations),
+        "total_energy": _energy_dataset(clean, expectations),
+    }
+    for capability, (target, target_units) in _REGRESSION_CAPABILITIES.items():
+        X, y, columns = reg_datasets[capability]
+        record = _train_regression_capability(
+            capability, target, target_units, X, y, columns, trained_at
+        )
+        results.append(record)
+        if record.get("promoted") and "spec" in record:
+            promoted[capability] = {
+                "spec": record["spec"],
+                "trained_at": trained_at,
+                "cycle_count": record["cycle_count"],
+                "metrics": record["metrics"],
+                "model_mae": record["model_mae"],
+                "naive_mae": record["naive_mae"],
             }
     return {"results": results, "promoted": promoted}
 
@@ -340,16 +569,25 @@ async def async_run_training(hass: Any, manager: Any) -> dict[str, Any]:
 
     trained_at = dt_util.now().isoformat()
     cycles = store.get_past_cycles()
+    ranking_history = store.get_match_ranking_history()
 
     _LOGGER.info(
-        "On-device ML training starting: %d cycles, device_type=%s, stop_threshold=%.1fW",
-        len(cycles), manager.device_type, stop_thr,
+        "On-device ML training starting: %d cycles, %d ranking snapshots, "
+        "device_type=%s, stop_threshold=%.1fW",
+        len(cycles), len(ranking_history), manager.device_type, stop_thr,
     )
     summary = await hass.async_add_executor_job(
-        train_from_cycles, cycles, manager.device_type, stop_thr, trained_at
+        train_from_cycles, cycles, manager.device_type, stop_thr, trained_at, ranking_history
     )
     for record in summary.get("results", []):
-        if record.get("promoted"):
+        is_regression = "model_mae" in record
+        if record.get("promoted") and is_regression:
+            _LOGGER.info(
+                "ML training PROMOTED %s: MAE %.4f vs naive %.4f (rows=%s)",
+                record["capability"], record.get("model_mae", 0), record.get("naive_mae", 0),
+                record.get("rows"),
+            )
+        elif record.get("promoted"):
             _LOGGER.info(
                 "ML training PROMOTED %s: AUC %.3f vs baseline %.3f (rows=%s, pos=%s)",
                 record["capability"], record.get("new_auc", 0), record.get("baseline_auc", 0),

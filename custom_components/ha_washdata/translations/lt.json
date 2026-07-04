@@ -1004,13 +1004,9 @@
         "dryer": "Džiovintuvas",
         "washer_dryer": "Skalbimo-džiovinimo kombinacija",
         "dishwasher": "Indaplovė",
-        "coffee_machine": "Kavos aparatas (nebenaudojamas)",
-        "ev": "Elektrinė transporto priemonė (nebenaudojama)",
         "air_fryer": "Oro gruzdintuvė",
-        "heat_pump": "Šilumos siurblys (nebenaudojamas)",
         "bread_maker": "Duonkepė",
         "pump": "Siurblys / Drenažinis siurblys",
-        "oven": "Orkaitė (nebenaudojama)",
         "other": "Kita (išplėstinė)"
       }
     }

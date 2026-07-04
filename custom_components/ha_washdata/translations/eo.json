@@ -1004,13 +1004,9 @@
         "dryer": "Sekigilo",
         "washer_dryer": "Kombo Lav-Sekigilo",
         "dishwasher": "Vazlavilo",
-        "coffee_machine": "Kafomaŝino (malrekomendita)",
-        "ev": "Elektra Veturilo (malrekomendita)",
         "air_fryer": "Aera Fritilo",
-        "heat_pump": "Varmopumpilo (malrekomendita)",
         "bread_maker": "Panfaristo",
         "pump": "Pumpilo / Sumpa pumpilo",
-        "oven": "Forno (malrekomendita)",
         "other": "Aliaj (Altnivelaj)"
       }
     }

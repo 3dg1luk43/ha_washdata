@@ -28,12 +28,37 @@ class Segment:
     # Future extensibility: might add other channels here
 
 
-def integrate_wh(timestamps: np.ndarray, power: np.ndarray) -> float:
+def energy_gap_threshold_s(timestamps: np.ndarray) -> float:
+    """Data-driven gap threshold (seconds) for energy integration.
+
+    Ten times the median sample interval, clamped to ``[60, 3600]``. Segments
+    longer than this are treated as sensor outages and excluded from the energy
+    sum, without masking valid slow-sampling configurations. Single source for
+    both persistence paths (``manager._on_cycle_end`` / ``ProfileStore.add_cycle``).
+    """
+    ts = np.asarray(timestamps, dtype=float)
+    if ts.size < 2:
+        return 3600.0
+    intervals = np.diff(np.sort(ts))
+    positive = intervals[intervals > 0]
+    median_interval = float(np.median(positive)) if positive.size > 0 else 0.0
+    return float(np.clip(10.0 * median_interval, 60.0, 3600.0))
+
+
+def integrate_wh(
+    timestamps: np.ndarray,
+    power: np.ndarray,
+    *,
+    max_gap_s: float | None = None,
+) -> float:
     """Compute energy in Wh using trapezoidal integration.
 
     Args:
-        timestamps: Array of timestamps in seconds.
+        timestamps: Array of timestamps in seconds (must be ascending).
         power: Array of power values in Watts.
+        max_gap_s: When set, segments whose ``dt`` exceeds this (or is non-positive)
+            are excluded, so sensor-outage gaps don't inflate the total. When
+            ``None`` (default) every segment is integrated - the original behaviour.
 
     Returns:
         Energy in Watt-hours.
@@ -41,95 +66,19 @@ def integrate_wh(timestamps: np.ndarray, power: np.ndarray) -> float:
     if len(timestamps) < 2:
         return 0.0
 
-    # Calculate dt in hours
-    # np.diff(timestamps) is in seconds, divide by 3600 for hours
-    dt_hours = np.diff(timestamps) / 3600.0
+    # np.diff(timestamps) is in seconds; divide by 3600 for hours.
+    dt_hours = np.diff(np.asarray(timestamps, dtype=float)) / 3600.0
+    power = np.asarray(power, dtype=float)
 
     # Trapezoidal rule: (p[i] + p[i+1]) / 2 * dt
     avg_power = (power[:-1] + power[1:]) * 0.5
 
-    return float(np.sum(avg_power * dt_hours))
+    if max_gap_s is None:
+        return float(np.sum(avg_power * dt_hours))
 
+    mask = (dt_hours > 0) & (dt_hours <= float(max_gap_s) / 3600.0)
+    return float(np.sum(avg_power[mask] * dt_hours[mask]))
 
-def robust_smooth(
-    power: np.ndarray, timestamps: np.ndarray, time_constant_s: float = 30.0
-) -> np.ndarray:
-    """Apply robust smoothing to power data.
-
-    Combines a median filter (spike rejection) with an Exponential Moving Average (EMA).
-    EMA is calculated using time-weighted alpha to handle irregular jitter.
-
-    Args:
-        power: Array of power values.
-        timestamps: Array of timestamps in seconds.
-        time_constant_s: EMA time constant in seconds.
-                         alpha = 1 - exp(-dt / time_constant)
-
-    Returns:
-        Smoothed power array.
-    """
-    if len(power) == 0:
-        return np.array([])
-    if len(power) < 3:
-        return power.copy()
-
-    # 1. Median filter (3-point) using pure NumPy
-    p_med = power.copy()
-
-    # Vectorized 3-point median: y[i] = median(x[i-1], x[i], x[i+1])
-    # Edge handling: repeat values (first and last)
-    if len(power) >= 3:
-        # Pad with edge values
-        p_padded = np.empty(len(power) + 2)
-        p_padded[0] = power[0]
-        p_padded[-1] = power[-1]
-        p_padded[1:-1] = power
-
-        # Stack shifted views
-        # Left neighbor: p_padded[0:-2] -> indices 0..N
-        # Center:        p_padded[1:-1] -> indices 1..N+1 (original)
-        # Right neighbor: p_padded[2:]  -> indices 2..N+2
-        stack = np.vstack(
-            [p_padded[0 : len(power)], p_padded[1 : len(power) + 1], p_padded[2:]]
-        )
-
-        # Compute median down columns
-        p_med = np.median(stack, axis=0)
-
-    # 2. Time-aware EMA
-    # y[i] = alpha * x[i] + (1-alpha) * y[i-1]
-    # alpha = 1 - exp(-dt / tau)
-
-    smoothed = np.zeros_like(p_med, dtype=float)
-    smoothed[0] = p_med[0]
-
-    # We Iterate because alpha changes with dt.
-    # Vectorization is possible but complex for IIR filter with variable coefs.
-    # Python loop is fine for typical cycle lengths (points < 10k).
-
-    prev_y = p_med[0]
-    prev_t = timestamps[0]
-
-    for i in range(1, len(p_med)):
-        dt = timestamps[i] - prev_t
-        if dt <= 0:
-            # Duplicate or disorderly timestamp, just carry forward
-            smoothed[i] = prev_y
-            continue
-
-        current_val = p_med[i]
-
-        # Adaptive alpha based on dt
-        alpha = 1.0 - np.exp(-dt / time_constant_s)
-
-        # Apply EMA
-        y = alpha * current_val + (1.0 - alpha) * prev_y
-
-        smoothed[i] = y
-        prev_y = y
-        prev_t = timestamps[i]
-
-    return smoothed
 
 
 def resample_uniform(
@@ -246,21 +195,3 @@ def resample_adaptive(
     return segments, target_dt
 
 
-def estimate_idle_baseline(power: np.ndarray) -> Tuple[float, float]:
-    """Estimate idle baseline level using robust statistics.
-
-    Args:
-        power: Power samples (ideally from a period known or suspected to be IDLE/lower).
-               If mixed data is passed, the median might be biased if active time > idle time.
-
-    Returns:
-        (baseline_median, baseline_mad)
-    """
-    if len(power) == 0:
-        return 0.0, 0.0
-
-    median = float(np.median(power))
-    # Median Absolute Deviation
-    mad = float(np.median(np.abs(power - median)))
-
-    return median, mad

@@ -1004,13 +1004,9 @@
         "dryer": "Kuivati",
         "washer_dryer": "Kombineeritud pesumasin-kuivati",
         "dishwasher": "Nõudepesumasin",
-        "coffee_machine": "Kohvimasin (aegunud)",
-        "ev": "Elektrisõiduk (aegunud)",
         "air_fryer": "Õhufritüür",
-        "heat_pump": "Soojuspump (aegunud)",
         "bread_maker": "Leivaküpsetaja",
         "pump": "Pump / Äravoolupump",
-        "oven": "Ahi (aegunud)",
         "other": "Muu (täpsem)"
       }
     }

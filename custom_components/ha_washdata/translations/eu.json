@@ -1004,13 +1004,9 @@
         "dryer": "Lehorgailua",
         "washer_dryer": "Garbigailua-lehorgailua konbinazioa",
         "dishwasher": "Ontzi-garbigailua",
-        "coffee_machine": "Kafe-makina (zaharkitua)",
-        "ev": "Ibilgailu elektrikoa (zaharkitua)",
         "air_fryer": "Aire frijigailua",
-        "heat_pump": "Bero-ponpa (zaharkitua)",
         "bread_maker": "Ogi Egilea",
         "pump": "Ponpa",
-        "oven": "Labea (zaharkitua)",
         "other": "Beste batzuk (aurreratua)"
       }
     }

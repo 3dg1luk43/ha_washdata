@@ -1004,13 +1004,9 @@
         "dryer": "Sychwr",
         "washer_dryer": "Combo Golchwr-Sychwr",
         "dishwasher": "Peiriant golchi llestri",
-        "coffee_machine": "Peiriant Coffi (anghymeradwy)",
-        "ev": "Cerbyd Trydan (anghymeradwy)",
         "air_fryer": "Fryer aer",
-        "heat_pump": "Pwmp Gwres (anghymeradwy)",
         "bread_maker": "Gwneuthurwr Bara",
         "pump": "Pwmp / Swmp Pwmp",
-        "oven": "Popty (anghymeradwy)",
         "other": "Arall (Uwch)"
       }
     }

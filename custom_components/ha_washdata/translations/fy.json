@@ -1004,13 +1004,9 @@
         "dryer": "Droger",
         "washer_dryer": "Washer-Dryer Combo",
         "dishwasher": "Dishwasher",
-        "coffee_machine": "Kofjemasine (ferâldere)",
-        "ev": "Elektrysk auto (ferâldere)",
         "air_fryer": "Air Fryer",
-        "heat_pump": "Warmtepomp (ferâldere)",
         "bread_maker": "Bread Maker",
         "pump": "Pomp / Sump Pomp",
-        "oven": "Oven (ferâldere)",
         "other": "Oare (Avansearre)"
       }
     }

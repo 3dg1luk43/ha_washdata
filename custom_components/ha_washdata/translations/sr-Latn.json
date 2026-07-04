@@ -1004,13 +1004,9 @@
         "dryer": "Sušač",
         "washer_dryer": "Kombinovana mašina za pranje i sušenje",
         "dishwasher": "Mašina za pranje sudova",
-        "coffee_machine": "Aparat za kafu (zastareo)",
-        "ev": "Električno vozilo (zastarelo)",
         "air_fryer": "Air Fryer",
-        "heat_pump": "Toplotna pumpa (zastarelo)",
         "bread_maker": "Bread Maker",
         "pump": "Pumpa / Sump Pumpa",
-        "oven": "Rerna (zastarela)",
         "other": "Drugo (napredno)"
       }
     }

@@ -1004,13 +1004,9 @@
         "dryer": "Tharëse",
         "washer_dryer": "Kombinim larëse-tharëse",
         "dishwasher": "Lavastovilje",
-        "coffee_machine": "Makinë kafeje (e vjetëruar)",
-        "ev": "Automjeti elektrik (i vjetëruar)",
         "air_fryer": "Fryerja e ajrit",
-        "heat_pump": "Pompë nxehtësie (e vjetëruar)",
         "bread_maker": "Bukëbërës",
         "pump": "Pompë / Pompë gropë",
-        "oven": "Furra (e vjetëruar)",
         "other": "Të tjera (të avancuara)"
       }
     }

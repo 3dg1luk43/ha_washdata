@@ -13,7 +13,6 @@ from custom_components.ha_washdata.config_flow import (
     ConfigFlow,
     OptionsFlowHandler,
     _device_type_options,
-    _escape_markdown,
 )
 from custom_components.ha_washdata.const import (
     CONF_DEVICE_TYPE,
@@ -21,7 +20,6 @@ from custom_components.ha_washdata.const import (
     CONF_NAME,
     CONF_POWER_SENSOR,
     DEFAULT_MIN_POWER,
-    DEPRECATED_DEVICE_TYPES,
     DEVICE_TYPES,
     DOMAIN,
 )
@@ -31,40 +29,16 @@ from custom_components.ha_washdata.const import (
 # Helper functions
 # ---------------------------------------------------------------------------
 
-def test_device_type_options_excludes_deprecated():
+def test_device_type_options_lists_all_supported_types():
     opts = _device_type_options()
-    for dep in DEPRECATED_DEVICE_TYPES:
-        assert dep not in opts
+    assert set(opts) == set(DEVICE_TYPES)
 
 
-def test_device_type_options_keeps_current_deprecated():
-    for dep in DEPRECATED_DEVICE_TYPES:
-        opts = _device_type_options(current=dep)
-        assert dep in opts
-
-
-def test_device_type_options_all_non_deprecated_present():
+def test_device_type_options_excludes_removed_types():
+    # coffee_machine / ev / heat_pump / oven were removed in 0.5.0.
     opts = _device_type_options()
-    for key in DEVICE_TYPES:
-        if key not in DEPRECATED_DEVICE_TYPES:
-            assert key in opts
-
-
-def test_escape_markdown_basic():
-    assert _escape_markdown("hello") == "hello"
-
-
-def test_escape_markdown_special_chars():
-    result = _escape_markdown("a*b_c[d]e")
-    assert "*" not in result.replace("\\*", "")
-    assert "_" not in result.replace("\\_", "")
-    # All metacharacters are backslash-escaped
-    assert "\\*" in result
-    assert "\\_" in result
-
-
-def test_escape_markdown_collapses_whitespace():
-    assert _escape_markdown("  a\n\nb  ") == "a b"
+    for removed in ("coffee_machine", "ev", "heat_pump", "oven"):
+        assert removed not in opts
 
 
 # ---------------------------------------------------------------------------

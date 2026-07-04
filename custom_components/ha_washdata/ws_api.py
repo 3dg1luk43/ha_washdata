@@ -15,7 +15,6 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .const import (
-    CONF_APPLY_SUGGESTIONS,
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_NAME,
     CONF_COMPLETION_MIN_SECONDS,
@@ -48,7 +47,6 @@ from .const import (
     DEFAULT_DEVICE_TYPE,
     DEFAULT_OFF_DELAY,
     DEFAULT_OFF_DELAY_BY_DEVICE,
-    DEPRECATED_DEVICE_TYPES,
     DEVICE_TYPE_PUMP,
     DEVICE_TYPES,
     DOMAIN,
@@ -297,7 +295,7 @@ class _RingLogHandler(logging.Handler):
 
 def _default_panel_cfg() -> dict[str, Any]:
     return {
-        "panel": {"poll_interval_s": 5, "default_tab": "status", "hidden_tabs": [], "hide_deprecated": False},
+        "panel": {"poll_interval_s": 5, "default_tab": "status", "hidden_tabs": []},
         "rbac": {"enabled": False, "default_level": "none", "users": {}},
         "prefs": {},
     }
@@ -419,8 +417,6 @@ def _sanitize_panel(p: dict[str, Any], current: dict[str, Any]) -> dict[str, Any
         out["default_tab"] = p["default_tab"]
     if isinstance(p.get("hidden_tabs"), list):
         out["hidden_tabs"] = [t for t in p["hidden_tabs"] if t in _PANEL_TABS and t not in ("status", "panel")]
-    if "hide_deprecated" in p:
-        out["hide_deprecated"] = bool(p["hide_deprecated"])
     return out
 
 
@@ -479,8 +475,6 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_get_cycle_power_data, ws_trim_cycle, ws_analyze_split, ws_apply_split, ws_apply_merge,
         # Profile envelope / member cycles
         ws_get_profile_envelope, ws_get_profile_cycles,
-        # Feedback comparison
-        ws_get_feedback_detail,
         # Panel config + RBAC
         ws_get_panel_config, ws_set_panel_config, ws_set_user_prefs,
         # Logs
@@ -495,8 +489,9 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_get_ml_comparison,
         # ML Lab review write-back (Stage 4b)
         ws_set_ml_review,
-        # On-device ML training (status + manual trigger + matcher-tuning revert)
+        # On-device ML training (status + manual trigger + matcher-tuning revert + models revert)
         ws_get_ml_training_status, ws_trigger_ml_training, ws_revert_matching_config,
+        ws_revert_ml_models,
         # Cycle controls (pause / resume / force-stop)
         ws_pause_cycle, ws_resume_cycle, ws_terminate_cycle,
     ]
@@ -686,8 +681,6 @@ async def ws_set_options(
     if new_options.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE) != DEVICE_TYPE_PUMP:
         new_options.pop(CONF_PUMP_STUCK_DURATION, None)
 
-    new_options.pop(CONF_APPLY_SUGGESTIONS, None)
-
     update_kwargs: dict[str, Any] = {"options": new_options}
     if CONF_NAME in new_options and new_options[CONF_NAME]:
         update_kwargs["title"] = new_options[CONF_NAME].strip()
@@ -726,7 +719,31 @@ def ws_get_profiles(
     except Exception:  # pylint: disable=broad-exception-caught
         pass
 
-    connection.send_result(msg["id"], {"profiles": profiles, "profile_health": health})
+    trends: dict[str, dict] = {}
+    try:
+        trends = manager.profile_store.compute_profile_trends()
+    except Exception:  # pylint: disable=broad-exception-caught
+        pass
+
+    coverage_gaps: dict[str, Any] = {}
+    try:
+        coverage_gaps = manager.profile_store.suggest_coverage_gaps()
+    except Exception:  # pylint: disable=broad-exception-caught
+        pass
+
+    advisories: list[dict] = []
+    try:
+        advisories = manager.profile_store.compute_profile_advisories()
+    except Exception:  # pylint: disable=broad-exception-caught
+        pass
+
+    connection.send_result(msg["id"], {
+        "profiles": profiles,
+        "profile_health": health,
+        "profile_trends": trends,
+        "coverage_gaps": coverage_gaps,
+        "profile_advisories": advisories,
+    })
 
 
 @websocket_api.websocket_command(
@@ -1845,7 +1862,7 @@ def ws_get_constants(
     canonical fallback and the single source for state colors.
     """
     device_types = [
-        {"id": key, "label": label, "deprecated": key in DEPRECATED_DEVICE_TYPES}
+        {"id": key, "label": label}
         for key, label in DEVICE_TYPES.items()
     ]
     connection.send_result(
@@ -2056,6 +2073,13 @@ def ws_get_cycle_power_data(
                 "status": cycle.get("status"),
                 "energy_kwh": _cycle_kwh(cycle),
             }
+            # Transient artifacts (door-open pauses, out-of-band dips/spikes) for
+            # graph markers. Prefer the value frozen at cycle end; compute on the
+            # fly for older cycles that predate artifact storage.
+            artifacts = cycle.get("artifacts")
+            if artifacts is None and cycle.get("profile_name") and samples:
+                artifacts = store.detect_cycle_artifacts(cycle["profile_name"], samples)
+            meta["artifacts"] = artifacts or []
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error getting cycle power data %s: %s", cycle_id, exc)
 
@@ -2370,74 +2394,6 @@ def ws_get_profile_cycles(
         _LOGGER.debug("Error getting profile cycles for %s: %s", profile_name, exc)
 
     connection.send_result(msg["id"], {"cycles": out})
-
-
-# ─── Feedback comparison ───────────────────────────────────────────────────────
-
-@websocket_api.websocket_command(
-    {
-        vol.Required("type"): "ha_washdata/get_feedback_detail",
-        vol.Required("entry_id"): str,
-        vol.Required("cycle_id"): str,
-    }
-)
-@callback
-def ws_get_feedback_detail(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-) -> None:
-    """Return everything needed to compare a feedback cycle against candidates.
-
-    Includes the actual cycle curve, the candidate profiles' average envelopes
-    (for overlay) and the ranked candidates table (confidence/MAE/correlation/
-    duration), reconstructed from the stored feedback ranking.
-    """
-    entry_id: str = msg["entry_id"]
-    manager = _get_manager(hass, entry_id)
-    if manager is None:
-        _err_not_found(connection, msg["id"], entry_id)
-        return
-
-    cycle_id: str = msg["cycle_id"]
-    out: dict[str, Any] = {
-        "detected_profile": None, "confidence": None,
-        "estimated_duration": None, "actual_duration": None,
-        "candidates": [], "overlays": [], "actual_samples": [], "full_duration_s": 0.0,
-    }
-    try:
-        store = manager.profile_store
-        item = (store.get_pending_feedback() or {}).get(cycle_id) or {}
-        out["detected_profile"] = item.get("detected_profile")
-        out["confidence"] = item.get("confidence")
-        out["estimated_duration"] = item.get("estimated_duration")
-        out["actual_duration"] = item.get("actual_duration")
-
-        ranking = item.get("ranking") or []
-        if ranking:
-            mr = _RankingMatchResult(ranking, item.get("estimated_duration") or 0)
-            out["candidates"] = store.get_match_candidates_summary(mr, 5)
-
-        samples = store.get_cycle_power_data(cycle_id)
-        out["actual_samples"] = _downsample(samples)
-        out["full_duration_s"] = round(float(samples[-1][0]), 1) if samples else 0.0
-
-        names: list[str] = []
-        det = item.get("detected_profile")
-        if det:
-            names.append(det)
-        for c in out["candidates"]:
-            n = c.get("profile_name")
-            if n and n not in names:
-                names.append(n)
-        for n in names[:4]:
-            env = store.get_envelope(n)
-            if env and env.get("avg"):
-                out["overlays"].append({"profile_name": n, "avg": _downsample(env["avg"])})
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Error building feedback detail for %s: %s", cycle_id, exc)
-
-    connection.send_result(msg["id"], out)
 
 
 # ─── Panel config + RBAC commands ──────────────────────────────────────────────
@@ -3230,11 +3186,62 @@ async def ws_get_ml_training_status(
     store = manager.profile_store
     versions = store.get_ml_model_versions() or {}
     last = manager._last_ml_training_at()  # pylint: disable=protected-access
-    models = {
-        cap: {"trained_at": v.get("trained_at")}
-        for cap, v in versions.items()
-        if isinstance(v, dict)
+    # Plain-language names + a one-line "what it does" for each capability, so the
+    # panel never has to show raw internal keys to non-ML users.
+    _cap_labels = {
+        "end": ("Cycle-end detection", "Knowing when a cycle has truly finished"),
+        "quality": ("Cycle quality check", "Spotting mis-detected or corrupted cycles"),
+        "live_match": ("Program matching", "Identifying the running program sooner"),
+        "remaining_time": ("Time-remaining estimate", "Predicting how long is left"),
+        "total_energy": ("Energy estimate", "Predicting total energy and cost"),
     }
+    models: dict[str, Any] = {}
+    for cap, v in versions.items():
+        if not isinstance(v, dict):
+            continue
+        spec = v.get("spec") if isinstance(v.get("spec"), dict) else {}
+        label, blurb = _cap_labels.get(cap, (cap, ""))
+        info: dict[str, Any] = {
+            "trained_at": v.get("trained_at"),
+            "cycle_count": v.get("cycle_count"),
+            "kind": spec.get("kind"),
+            "label": label,
+            "blurb": blurb,
+        }
+        # Raw metric numbers so the panel can render a humanized quality indicator
+        # (a bar + word) with the exact figure on hover: held-out AUC for
+        # classifiers, MAE-vs-naive for regressors.
+        if v.get("new_auc") is not None:
+            info["auc"] = round(float(v["new_auc"]), 4)
+            info["metric"] = f"AUC {float(v['new_auc']):.2f} on held-out data"
+        elif v.get("model_mae") is not None and v.get("naive_mae") is not None:
+            info["model_mae"] = round(float(v["model_mae"]), 5)
+            info["naive_mae"] = round(float(v["naive_mae"]), 5)
+            info["metric"] = f"error {float(v['model_mae']):.3f} vs {float(v['naive_mae']):.3f} baseline"
+        models[cap] = info
+
+    # Fit trend across recent training runs (drift): compare the mean held-out
+    # score of the most-recent third of runs to the oldest third, respecting each
+    # metric's direction. Only meaningful with a few runs of history.
+    history = store.get_ml_training_history()
+    for cap, info in models.items():
+        series = history.get(cap) if isinstance(history, dict) else None
+        if not isinstance(series, list) or len(series) < 4:
+            continue
+        scores = [float(e["score"]) for e in series if isinstance(e, dict) and "score" in e]
+        if len(scores) < 4:
+            continue
+        higher_better = bool(series[-1].get("higher_better", True))
+        third = max(1, len(scores) // 3)
+        old_mean = sum(scores[:third]) / third
+        new_mean = sum(scores[-third:]) / third
+        if abs(old_mean) < 1e-9:
+            continue
+        rel = (new_mean - old_mean) / abs(old_mean)
+        if not higher_better:
+            rel = -rel  # for error metrics, a decrease is an improvement
+        info["trend"] = "improving" if rel > 0.03 else "declining" if rel < -0.03 else "steady"
+
     # Matcher scoring-weight tuning (Stage 4/5): current shipped defaults, the
     # on-device tuned record (if promoted), and which set is actually in use.
     tuned_rec = store.get_matching_config()
@@ -3314,6 +3321,36 @@ async def ws_revert_matching_config(
         _err_not_found(connection, msg["id"], entry_id)
         return
     await manager.profile_store.clear_matching_config()
+    manager.notify_update()
+    connection.send_result(msg["id"], {"success": True})
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/revert_ml_models",
+        vol.Required("entry_id"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_revert_ml_models(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Revert all on-device trained models to the shipped embedded baselines.
+
+    Drops every promoted spec in ``ml_model_versions`` so ``resolve_scorer`` /
+    ``resolve_regressor`` fall back to the baseline (or, for the baseline-less
+    remaining-time regressor, become inert). The next training pass may
+    re-promote models if they beat the baseline again. Mirrors
+    ``revert_matching_config`` for the matcher weights.
+    """
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    await manager.profile_store.clear_ml_model_versions()
     manager.notify_update()
     connection.send_result(msg["id"], {"success": True})
 

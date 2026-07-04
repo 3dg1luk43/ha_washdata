@@ -1004,13 +1004,9 @@
         "dryer": "Sušilnik",
         "washer_dryer": "Pralno-sušilni stroj Combo",
         "dishwasher": "Pomivalni stroj",
-        "coffee_machine": "Aparat za kavo (zastarelo)",
-        "ev": "Električno vozilo (zastarelo)",
         "air_fryer": "Zračni cvrtnik",
-        "heat_pump": "Toplotna črpalka (zastarelo)",
         "bread_maker": "pekač kruha",
         "pump": "Črpalka / zbiralna črpalka",
-        "oven": "Pečica (zastarelo)",
         "other": "Drugo (napredno)"
       }
     }

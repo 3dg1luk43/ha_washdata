@@ -1004,13 +1004,9 @@
         "dryer": "Sušilica",
         "washer_dryer": "Perilica-sušilica Combo",
         "dishwasher": "Perilica posuđa",
-        "coffee_machine": "Aparat za kavu (zastarjelo)",
-        "ev": "Električno vozilo (zastarjelo)",
         "air_fryer": "Zračna friteza",
-        "heat_pump": "Toplinska pumpa (zastarjelo)",
         "bread_maker": "pekač kruha",
         "pump": "Pumpa / Sump Pumpa",
-        "oven": "Pećnica (zastarjelo)",
         "other": "Ostalo (napredno)"
       }
     }

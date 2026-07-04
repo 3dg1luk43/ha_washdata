@@ -1004,13 +1004,9 @@
         "dryer": "Suszarka",
         "washer_dryer": "Zestaw pralko-suszarki",
         "dishwasher": "Pomywaczka",
-        "coffee_machine": "Ekspres do kawy (przestarzały)",
-        "ev": "Pojazd elektryczny (przestarzałe)",
         "air_fryer": "Frytkownica powietrzna",
-        "heat_pump": "Pompa ciepła (przestarzała)",
         "bread_maker": "Wypiekacz chleba",
         "pump": "Pompa/pompa ściekowa",
-        "oven": "Piekarnik (przestarzały)",
         "other": "Inne (zaawansowane)"
       }
     }

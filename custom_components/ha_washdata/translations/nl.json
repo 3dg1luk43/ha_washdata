@@ -1004,13 +1004,9 @@
         "dryer": "Droger",
         "washer_dryer": "Was-droog combinatie",
         "dishwasher": "Afwasmachine",
-        "coffee_machine": "Koffiezetapparaat (verouderd)",
-        "ev": "Elektrisch voertuig (verouderd)",
         "air_fryer": "Lucht friteuse",
-        "heat_pump": "Warmtepomp (verouderd)",
         "bread_maker": "Broodbakmachine",
         "pump": "Pomp / Sumppomp",
-        "oven": "Oven (verouderd)",
         "other": "Anders (geavanceerd)"
       }
     }

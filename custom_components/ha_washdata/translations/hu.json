@@ -1004,13 +1004,9 @@
         "dryer": "Szárítógép",
         "washer_dryer": "Mosó-szárító kombó",
         "dishwasher": "Mosogatógép",
-        "coffee_machine": "Kávéfőző (elavult)",
-        "ev": "Elektromos jármű (elavult)",
         "air_fryer": "Air Fryer",
-        "heat_pump": "Hőszivattyú (elavult)",
         "bread_maker": "Kenyérsütő",
         "pump": "Szivattyú / olajteknő szivattyú",
-        "oven": "Sütő (elavult)",
         "other": "Egyéb (haladó)"
       }
     }

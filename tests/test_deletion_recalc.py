@@ -29,12 +29,6 @@ async def test_deletion_recalculates_stats(mock_store_cls, mock_dt, mock_hass: H
     }
     
     store.async_save = AsyncMock()
-    def mock_decompress(cycle):
-        # Return list of (offset_seconds, power) floats - matches real _decompress_power_data format
-        data = cycle.get("power_data", [])
-        return [(float(item[0]), float(item[1])) for item in data]
-
-    store._decompress_power_data = mock_decompress
 
     # Helper to create a cycle
     def make_cycle(cid, duration, profile="Test Profile"):

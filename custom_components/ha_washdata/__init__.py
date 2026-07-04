@@ -89,6 +89,7 @@ from .const import (
     DEFAULT_COMPLETION_MIN_SECONDS,
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
     DEFAULT_DEVICE_TYPE,
+    DEVICE_TYPE_OTHER,
     DEFAULT_START_DURATION_THRESHOLD,
     CONF_START_DURATION_THRESHOLD,
 )
@@ -125,7 +126,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         return False
 
-    if version == 3 and minor_version >= 5:
+    if version == 3 and minor_version >= 6:
         return True
 
     data: dict[str, Any] = dict(entry.data)
@@ -239,15 +240,26 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     ):
         options.pop(k, None)
 
+    # 3.6: coffee_machine / ev / heat_pump / oven device types were removed.
+    # Remap any entry still on one of them to the generic "Other (Advanced)"
+    # bucket, preserving all tuned options so no user data is lost.
+    _removed_device_types = {"coffee_machine", "ev", "heat_pump", "oven"}
+    if (options.get(CONF_DEVICE_TYPE) or data.get(CONF_DEVICE_TYPE)) in _removed_device_types:
+        _log.info(
+            "Device type %r is no longer supported; migrating to %r (options preserved)",
+            options.get(CONF_DEVICE_TYPE), DEVICE_TYPE_OTHER,
+        )
+        options[CONF_DEVICE_TYPE] = DEVICE_TYPE_OTHER
+
     hass.config_entries.async_update_entry(
         entry,
         data=data,
         options=options,
         version=3,
-        minor_version=5,
+        minor_version=6,
     )
     _log.info(
-        "Migrated WashData entry from version %s.%s to 3.5", version, minor_version
+        "Migrated WashData entry from version %s.%s to 3.6", version, minor_version
     )
     return True
 

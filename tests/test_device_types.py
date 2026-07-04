@@ -1,13 +1,11 @@
 
-import pytest
 from unittest.mock import Mock
 from datetime import datetime, timedelta, timezone
 from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDetectorConfig
 from custom_components.ha_washdata.const import (
-    DEVICE_TYPE_DRYER, DEVICE_TYPE_COFFEE_MACHINE,
+    DEVICE_TYPE_DRYER,
     DEVICE_TYPE_WASHING_MACHINE, DEVICE_TYPE_WASHER_DRYER, DEVICE_TYPE_DISHWASHER,
-    STATE_RUNNING, STATE_OFF, STATE_PAUSED,
-    DEFAULT_OFF_DELAY, DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
+    STATE_RUNNING, DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
     DEVICE_COMPLETION_THRESHOLDS,
     DEFAULT_SAMPLING_INTERVAL, DEFAULT_SAMPLING_INTERVAL_BY_DEVICE,
 )
@@ -69,59 +67,3 @@ def test_dryer_thresholds():
     cycle_data = callbacks["on_cycle_end"].call_args[0][0]
     assert cycle_data["status"] == "interrupted"
 
-def test_coffee_thresholds():
-    # Verify defaults
-    start_thresh = DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE[DEVICE_TYPE_COFFEE_MACHINE] # 0.05
-    completion_min = DEVICE_COMPLETION_THRESHOLDS[DEVICE_TYPE_COFFEE_MACHINE] # 60
-    
-    config = CycleDetectorConfig(
-        device_type=DEVICE_TYPE_COFFEE_MACHINE,
-        min_power=5.0,
-        off_delay=30,
-        start_energy_threshold=start_thresh,
-        completion_min_seconds=completion_min,
-        interrupted_min_seconds=10, 
-    )
-    
-    callbacks = {"on_state_change": Mock(), "on_cycle_end": Mock()}
-    detector = CycleDetector(config, callbacks["on_state_change"], callbacks["on_cycle_end"])
-    
-    # 1. Start with very small energy (0.06 Wh)
-    # 1000W for > 5s (Default start_duration_threshold)
-    detector.process_reading(1000.0, dt(0))
-    for i in range(1, 7):
-        detector.process_reading(1000.0, dt(i))
-        
-    assert detector.state == STATE_RUNNING
-    
-    # 2. Run for 70s -> Completed
-    detector.process_reading(100.0, dt(70))
-    detector.process_reading(0.0, dt(71))
-    flush_buffer(detector, 71)
-    
-    assert callbacks["on_cycle_end"].called
-    cycle_data = callbacks["on_cycle_end"].call_args[0][0]
-    assert cycle_data["status"] == "completed"
-
-def test_coffee_very_short():
-    # 30s run -> Interrupted (if 60s min)
-    start_thresh = 0.05
-    completion_min = 60
-    config = CycleDetectorConfig(
-        device_type=DEVICE_TYPE_COFFEE_MACHINE,
-        min_power=5.0,
-        off_delay=30,
-        start_energy_threshold=start_thresh,
-        completion_min_seconds=completion_min,
-    )
-    callbacks = {"on_state_change": Mock(), "on_cycle_end": Mock()}
-    detector = CycleDetector(config, callbacks["on_state_change"], callbacks["on_cycle_end"])
-    
-    detector.process_reading(1000.0, dt(0))
-    detector.process_reading(1000.0, dt(30))
-    detector.process_reading(0.0, dt(31))
-    flush_buffer(detector, 31)
-    
-    cycle_data = callbacks["on_cycle_end"].call_args[0][0]
-    # If completion_min_seconds is 60, then 30s is interrupted.
-    assert cycle_data["status"] == "interrupted"

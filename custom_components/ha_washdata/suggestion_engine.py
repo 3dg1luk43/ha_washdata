@@ -467,7 +467,6 @@ class SuggestionEngine:
             suggestions[CONF_DURATION_TOLERANCE] = {"value": suggested_tol, "reason": reason_tol}
             suggestions[CONF_PROFILE_DURATION_TOLERANCE] = {"value": suggested_tol, "reason": reason_tol}
 
-            p05_ratio = float(np.percentile(arr, 5))
             p95_ratio = float(np.percentile(arr, 95))
 
             # min_duration_ratio governs how EARLY a running cycle may match a
@@ -1173,27 +1172,10 @@ class MLSuggestionEngine:
     def _profile_expectations(
         self, clean: list[dict[str, Any]]
     ) -> dict[str, dict[str, float]]:
-        """Median duration / energy / peak per profile, for model expectations."""
-        stats: dict[str, dict[str, list[float]]] = {}
-        for c in clean:
-            name = c.get("profile_name")
-            if not isinstance(name, str) or not name:
-                continue
-            s = stats.setdefault(name, {"d": [], "e": [], "p": []})
-            for key, field in (("d", "duration"), ("e", "energy_wh"), ("p", "max_power")):
-                v = c.get(field)
-                if isinstance(v, (int, float)) and not isinstance(v, bool):
-                    s[key].append(float(v))
-        out: dict[str, dict[str, float]] = {}
-        for name, s in stats.items():
-            if not s["d"]:
-                continue
-            out[name] = {
-                "duration": float(np.median(s["d"])),
-                "energy": float(np.median(s["e"])) if s["e"] else 500.0,
-                "peak": float(np.median(s["p"])) if s["p"] else 500.0,
-            }
-        return out
+        """Median duration / energy / peak per profile (shared helper)."""
+        from .ml.feature_extraction import profile_expectations
+
+        return profile_expectations(clean)
 
     def _scored_pauses(
         self,

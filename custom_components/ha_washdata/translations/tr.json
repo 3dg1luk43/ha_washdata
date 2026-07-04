@@ -1004,13 +1004,9 @@
         "dryer": "Kurutma makinesi",
         "washer_dryer": "Yıkama-Kurutma Makinesi Kombinasyonu",
         "dishwasher": "Bulaşık makinesi",
-        "coffee_machine": "Kahve Makinesi (kullanımdan kaldırıldı)",
-        "ev": "Elektrikli Araç (kullanımdan kaldırıldı)",
         "air_fryer": "Hava Fritözü",
-        "heat_pump": "Isı Pompası (kullanımdan kaldırıldı)",
         "bread_maker": "Ekmek Makinesi",
         "pump": "Pompa / Karter Pompası",
-        "oven": "Fırın (kullanımdan kaldırıldı)",
         "other": "Diğer (Gelişmiş)"
       }
     }
