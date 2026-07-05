@@ -22925,10 +22925,10 @@
       "trim_intro": "Քաշեք կարմիր բռնակները կամ մուտքագրեք արժեքներ: Պատուհանից դուրս ամեն ինչ հանվում է:",
       "unsure_detected_prefix": "WashData-ն վստահ չէ, որ հայտնաբերել է",
       "updated": "Թարմացվեց",
-      "feedback_cycles_pending": "{n} ցիկл{s} սպասում է վերանայման",
-      "artifact_spike_detail": "Անցել է հզորության սովորական շեղից ~{n}վ.",
-      "artifact_dip_detail": "Ընկել է հզորության սովորական շեղից ցածր ~{n}վ.",
-      "artifact_pause_detail": "Հզորությունը ~{n}վ-ով ընկավ գրեթե զրոյի, ապա շարունակվեց — հավանաբար դուռը բացվել էր ցիկլի կեսին կամ ցիկլը կասեցվել էր:"
+      "feedback_cycles_pending": "{n} ցիկլ{s} վերանայման կարիք ունի",
+      "artifact_spike_detail": "Սովորական հզորության գոտուց բարձր էր ~{n}վ.",
+      "artifact_dip_detail": "Սովորական հզորության գոտուց ցածր ընկավ ~{n}վ.",
+      "artifact_pause_detail": "Հզորությունը ~{n}վ-ով իջավ գրեթե զրոյի, ապա վերականգնվեց — հավանաբար դուռը բացվել էր ցիկլի կեսին կամ ցիկլը կանգ էր առել."
     },
     "phase_desc": {
       "pre_wash": "Հիմնական լվացումից առաջ նախնական ներծծում կամ նախնական բուժում:",
@@ -23071,39 +23071,39 @@
     "section": {
       "basic": {
         "label": "Հիմնական",
-        "intro": "Հիմնական ինքնությունը և կոնֆիգուրացիաների մեծ մասի համար անհրաժեշտ հիմքը:"
+        "intro": "Հիմնական ինքնությունը և հիմնական կարիքները."
       },
       "detection": {
         "label": "Հայտնաբերում",
-        "intro": "Ինչպես է ցիկլը հայտնաբերվում որպես սկսված, ընթացող և ավարտված:"
+        "intro": "Ինչպես է ցիկլը հայտնաբերվում որպես մեկնարկված, ընթացող և ավարտված."
       },
       "matching": {
-        "label": "Համապատասխանություն",
-        "intro": "Ինչպես են ավարտված ցիկլերը համապատասխանեցվում սովորած պրոֆիլներին:"
+        "label": "Համընկնում",
+        "intro": "Ինչպես են ավարտված ցիկլերը համընկնում ուսուցված պրոֆիլներին և նշվում."
       },
       "timing": {
-        "label": "Ժամաչափ և watchdog",
-        "intro": "Ֆոնային ռիթմ, offline watchdog և պարբերական սպասարկում:"
+        "label": "Ժամանակացույց և հսկողություն",
+        "intro": "Ֆոնային կadénс, անցանց հսկողությունը և տնտեսությունը."
       },
       "anti_wrinkle": {
-        "label": "Ծալքերի կանխարգելում",
-        "intro": "Ծալքերի կանխարգելման ռեժիմն հայտնաբերում է հիմնական փուլից հետո ցածր հզորության կարճ պտտիչ զարկերը:"
+        "label": "Հակակնճռոտ",
+        "intro": "Հակակնճռոտ/հակակոնքոտ ռեժիմը հայտնաբերում է ցածր հզորության բռնկումներ հիմնական փուլից հետո."
       },
       "delay": {
         "label": "Հետաձգված մեկնարկ",
-        "intro": "Հետաձգված մեկնարկի հայտնաբերումն ճանաչում է, երբ սարքը միացված է, բայց ցիկլն դեռ չի սկսել:"
+        "intro": "Հետաձգված մեկնարկի հայտնաբերումը ճանաչում է, երբ սարքն աշխատում է, բայց դեռ չի սկսել ցիկլը."
       },
       "triggers": {
-        "label": "Գործարկիչներ և դռներ",
-        "intro": "Կամընտիր արտաքին ազդանշաններ. ավարտի գործարկիչ, դռան տվիչ, կասեցման անջատիչ և բեռնաթափման հիշեցում:"
+        "label": "Ազդանշաններ և դռներ",
+        "intro": "Ըստ ցանկության արտաքին ազդանշաններ. ավարտի ազդանշան, դռան սենսոր, դադարի անջատիչ և բեռնաթափման հիշեցում."
       },
       "notifications": {
         "label": "Ծանուցումներ",
-        "intro": "Երբ և ինչպես ստանաք ծանուցումներ ցիկլի իրադարձությունների մասին:"
+        "intro": "Երբ և ինչպես ծանուցվում եք ցիկլային իրադարձությունների մասին."
       },
       "ml_training": {
         "label": "ML ուսուցում",
-        "intro": "Սարքի վրա ML-ի վերաուսուցման ժամանակացույց և տվյալների կարգավորումներ:"
+        "intro": "Սարքի վրա ML-ի վերաուսուցման ժամանակացույցը և տվյալների կարգավորումները."
       }
     },
     "setting_group": {
@@ -23120,37 +23120,37 @@
         "label": "Ազդանշանի մշակում"
       },
       "predictive_end": {
-        "label": "Կանխատեսված ավարտ"
+        "label": "Կանխատեսողական ավարտ"
       },
       "dishwasher_end": {
-        "label": "Ամանաթափ ավարտ"
+        "label": "Սպասք լվացող մեքենայի ավարտ"
       },
       "dtw_refinement": {
-        "label": "DTW-ի բարելավում"
+        "label": "DTW կատարելագործում"
       },
       "match_scoring": {
-        "label": "Համապատասխանության գնահատում"
+        "label": "Համընկնման գնահատում"
       },
       "duration_gates": {
-        "label": "Տևողության դարպաս"
+        "label": "Տևողության դռներ"
       },
       "auto_labeling": {
-        "label": "Ինքնաբեր պիտակավորում"
+        "label": "Ավտոմատ պիտակավորում"
       },
       "watchdog": {
-        "label": "Watchdog"
+        "label": "Հսկողություն"
       },
       "housekeeping": {
-        "label": "Սպասարկում"
+        "label": "Տնտեսություն"
       },
       "debug": {
-        "label": "Կարդայ"
+        "label": "Վրիպազերծում"
       },
       "external_end_trigger": {
-        "label": "Արտաքին ավարտի գործարկիչ"
+        "label": "Արտաքին ավարտի ազդանշան"
       },
       "door_pause": {
-        "label": "Դուռ և կասեցում"
+        "label": "Դուռ և դադար"
       },
       "unload_reminder": {
         "label": "Բեռնաթափման հիշեցում"
@@ -23159,7 +23159,7 @@
         "label": "Ծառայություններ"
       },
       "timing": {
-        "label": "Ժամաչափ"
+        "label": "Ժամանակացույց"
       },
       "messages": {
         "label": "Հաղորդագրություններ"
@@ -23168,7 +23168,7 @@
         "label": "Էներգիա"
       },
       "cycle_timers": {
-        "label": "Ցիկլի ժամաչափ"
+        "label": "Ցիկլի ժմչփեր"
       },
       "schedule": {
         "label": "Ժամանակացույց"
@@ -23179,22 +23179,22 @@
     },
     "setting": {
       "name": {
-        "label": "Սարքի անուն"
+        "label": "Սարքի անվանումը"
       },
       "device_type": {
-        "label": "Սարքի տեսակ"
+        "label": "Սարքի տեսակը"
       },
       "power_sensor": {
-        "label": "Հզորության տվիչ"
+        "label": "Հզորության սենսոր"
       },
       "min_power": {
         "label": "Նվազագույն հզորություն"
       },
       "off_delay": {
-        "label": "Անջատման հետաձգում"
+        "label": "Անջատման ուշացում"
       },
       "linked_device": {
-        "label": "Խմբավորել սարքի ներքո"
+        "label": "Խմբավորել սարքի տակ"
       },
       "start_threshold_w": {
         "label": "Մեկնարկի շեմ"
@@ -23203,7 +23203,7 @@
         "label": "Կանգառի շեմ"
       },
       "min_off_gap": {
-        "label": "Նվ. անջատման բաց"
+        "label": "Նվազ. անջատման բաց"
       },
       "start_duration_threshold": {
         "label": "Մեկնարկի տևողություն"
@@ -23212,202 +23212,202 @@
         "label": "Մեկնարկի էներգիա"
       },
       "completion_min_seconds": {
-        "label": "Ն-մ ցիկ. տևողություն"
+        "label": "Ցիկլի նվազ. տևողություն"
       },
       "running_dead_zone": {
-        "label": "Ակտ. մ-ռ. գոտի"
+        "label": "Աշխ. մեռյալ գոտի"
       },
       "end_energy_threshold": {
-        "label": "Ավ. էն. շ-մ"
+        "label": "Ավարտի էներգիա"
       },
       "end_repeat_count": {
-        "label": "Ավ. կրկն. հ-ր"
+        "label": "Ավարտի կրկնությունների հաշիվ"
       },
       "sampling_interval": {
-        "label": "Դ-ի ընդ-ջ"
+        "label": "Նմուշառման ընդմիջում"
       },
       "smoothing_window": {
-        "label": "Հ-ի պ-ն"
+        "label": "Հարթեցման պատուհան"
       },
       "abrupt_drop_watts": {
-        "label": "Կ-ն անկ. (Վ)"
+        "label": "Կտրուկ անկում (Վտ)"
       },
       "abrupt_drop_ratio": {
-        "label": "Կ-ն անկ. հ-ց"
+        "label": "Կտրուկ անկման հարաբերություն"
       },
       "profile_match_threshold": {
-        "label": "Հ-ն. շ-մ"
+        "label": "Համընկնման շեմ"
       },
       "profile_unmatch_threshold": {
-        "label": "Անհ-ն. շ-մ"
+        "label": "Չհամընկնման շեմ"
       },
       "profile_match_interval": {
-        "label": "Հ-ն. ընդ-ջ"
+        "label": "Համընկնման ընդմիջում"
       },
       "profile_match_min_duration_ratio": {
-        "label": "Հ-ն. ն-մ. տ. հ-ց"
+        "label": "Նվազ. տևողության հարաբ."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Հ-ն. ա-ն. տ. հ-ց"
+        "label": "Առ. տևողության հարաբ."
       },
       "profile_duration_tolerance": {
-        "label": "Պ-ի տ. թ-ց"
+        "label": "Պրոֆիլի տևողության հանդ."
       },
       "duration_tolerance": {
-        "label": "Կ-ի թ-ց"
+        "label": "Գնահատման հանդուրժողություն"
       },
       "auto_label_confidence": {
-        "label": "Ինքն. պ-ի վ-ն"
+        "label": "Ավտոպիտ. վստահություն"
       },
       "learning_confidence": {
-        "label": "Ու-ն. վ-ն"
+        "label": "Ուսուցման վստահություն"
       },
       "suppress_feedback_notifications": {
-        "label": "Ջ-ել հ-ի ծ-ն"
+        "label": "Հ. կ. ծանուցումների ճնշում"
       },
       "watchdog_interval": {
-        "label": "Watchdog ընդ-ջ"
+        "label": "Հսկ. ընդմիջում"
       },
       "no_update_active_timeout": {
-        "label": "Ան. ա. ժ-կ"
+        "label": "Թարմ.-ի բացակայ. ժամկ."
       },
       "progress_reset_delay": {
-        "label": "Ա-ի վ. ո-ն"
+        "label": "Ա. վերակ. ուշացում"
       },
       "auto_maintenance": {
-        "label": "Ինքն. ջ-ն (գ.)"
+        "label": "Ավտո պահպանում (գիշ. մաքր.)"
       },
       "expose_debug_entities": {
-        "label": "Ց-ն կ-ի ս-ն"
+        "label": "Վրիպ. օբ. բացահ."
       },
       "save_debug_traces": {
-        "label": "Պ-ն կ. ը-ն"
+        "label": "Վ. հետ. պահ."
       },
       "anti_wrinkle_enabled": {
-        "label": "Ծ. կ-ի հ-ն"
+        "label": "Հ/կ. հայտն. միացնել"
       },
       "anti_wrinkle_max_power": {
-        "label": "Ծ.կ. ա-ն. հ-ն"
+        "label": "Հ/կ. առ. հզ."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Ա-ն. տ-ն"
+        "label": "Հ/կ. առ. տևողություն"
       },
       "anti_wrinkle_exit_power": {
-        "label": "Ե-ի հ-ի շ-մ"
+        "label": "Ել. հզ. շ."
       },
       "delay_start_detect_enabled": {
-        "label": "Հ. մ-ի հ-ն"
+        "label": "Հ. մ. հ. միացնել"
       },
       "delay_confirm_seconds": {
-        "label": "Հ-ն. վ-ն"
+        "label": "Հաստ. վայրկ."
       },
       "delay_timeout_hours": {
-        "label": "Ժ-ն. ժ-ն"
+        "label": "Ժամ. ժ."
       },
       "external_end_trigger_enabled": {
-        "label": "Ա. ա-ի գ. ա-ն"
+        "label": "Ա. ազ. միացնել"
       },
       "external_end_trigger": {
-        "label": "Ա. գ. ս-ն"
+        "label": "Ա. ազ. օբ."
       },
       "external_end_trigger_inverted": {
-        "label": "Շ-ն ա. գ. (ԱՆ.)"
+        "label": "Ա. ազ. շրջ. (ԱՆՋ)"
       },
       "door_sensor_entity": {
-        "label": "Դ-ի տ. ս-ն"
+        "label": "Դռ. սն. օբ."
       },
       "pause_cuts_power": {
-        "label": "Կ-ն կտ. հ-ն"
+        "label": "Դ. կ. հ. (անջ.)"
       },
       "switch_entity": {
-        "label": "Ա-ի ս-ն"
+        "label": "Անջ. օբ."
       },
       "notify_unload_delay_minutes": {
-        "label": "Բ-ի հ. ո-ն"
+        "label": "Բ. հ. ուշ."
       },
       "pump_stuck_duration": {
-        "label": "Ն-ի կ-ն. տ-ն"
+        "label": "Կ. պ. տ."
       },
       "notify_start_services": {
-        "label": "Մ-ի ծ-ռ."
+        "label": "Մ. ծ."
       },
       "notify_finish_services": {
-        "label": "Ա-ի ծ-ռ."
+        "label": "Ա. ծ."
       },
       "notify_live_services": {
-        "label": "Ա. ծ-ռ."
+        "label": "Ու. ծ."
       },
       "notify_people": {
-        "label": "Ան. (Ն-ի ե.)"
+        "label": "Ան."
       },
       "notify_only_when_home": {
-        "label": "Ծ-ն ե. տ."
+        "label": "Տ. ե."
       },
       "notify_fire_events": {
-        "label": "HA ի-ծ."
+        "label": "HA ի."
       },
       "notify_before_end_minutes": {
-        "label": "Ա-ց ն."
+        "label": "Ն. ծ."
       },
       "notify_live_interval_seconds": {
-        "label": "Ա. թ-ն"
+        "label": "Ու. ն."
       },
       "notify_live_overrun_percent": {
-        "label": "Ա. % ն."
+        "label": "Ու. %"
       },
       "notify_live_chronometer": {
-        "label": "Ա. ժ-ն"
+        "label": "Ժ."
       },
       "notify_timeout_seconds": {
-        "label": "Փ-ն ա."
+        "label": "Ա. հ."
       },
       "notify_title": {
-        "label": "Ծ-ի վ-ն"
+        "label": "Ծ. վ."
       },
       "notify_icon": {
-        "label": "Ծ-ի պ-ն"
+        "label": "Ծ. պ."
       },
       "notify_start_message": {
-        "label": "Մ-ի հ-ն"
+        "label": "Մ. հ."
       },
       "notify_finish_message": {
-        "label": "Ա-ի հ-ն"
+        "label": "Ա. հ."
       },
       "notify_pre_complete_message": {
-        "label": "Հ-ի ա. հ-ն"
+        "label": "Ն. հ."
       },
       "notify_reminder_message": {
-        "label": "Հ-ի հ-ն"
+        "label": "Հ."
       },
       "notify_channel": {
-        "label": "Android ա. (մ./ա.)"
+        "label": "Android ալ. (մ./ու.)"
       },
       "notify_finish_channel": {
-        "label": "Android ա. (ա.)"
+        "label": "Android ալ. (ա.)"
       },
       "energy_price_entity": {
-        "label": "Է-ի գ. ս-ն"
+        "label": "Է. գ. օ."
       },
       "energy_price_static": {
-        "label": "Ն. է. գ-ն (kWh)"
+        "label": "Ստ. է. գ. (kWh)"
       },
       "notify_cycle_timers": {
-        "label": "Ց-ի ժ-ն"
+        "label": "Ց. ժ."
       },
       "enable_ml_models": {
-        "label": "ML ե. ցիկ. ժ."
+        "label": "Կ. ժ. ML մ."
       },
       "ml_training_enabled": {
-        "label": "Ս-ն ե."
+        "label": "Ս."
       },
       "ml_training_hour": {
-        "label": "Ս-ն ժ-ն"
+        "label": "Ժ."
       },
       "ml_training_min_cycles": {
-        "label": "Ց-ն ն-ե."
+        "label": "Ն. ց."
       },
       "ml_training_interval_days": {
-        "label": "Ն. ա-ն"
+        "label": "Ն."
       }
     }
   },
