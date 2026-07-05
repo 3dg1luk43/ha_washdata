@@ -1007,7 +1007,8 @@
       "search_placeholder": "Bilatu ezarpenak…",
       "automations_intro": "WashData-k {start} / {end} gertaerak abiarazten ditu eta entitateak agertzen ditu; beraz, jakinarazpenak eta ekintzak Home Assistant-en ohiko automatizazioen bidez sortzea da hobe. Gailu hau erabiltzen duten automatizazioak behean agertzen dira.",
       "notify_services_hint": "Erabili {entity} zerbitzu IDak (komaz bereizita, bat baino gehiago izanez gero). Txantiloi-aldagaiak: {vars}.",
-      "rbac_hint": "Desaktibatuta dagoenean, Home Assistant erabiltzaile guztiek sarbide osoa dute (lehenetsia). Administratzaileek beti dute sarbide osoa eta guztiak kudeatu ditzakete."
+      "rbac_hint": "Desaktibatuta dagoenean, Home Assistant erabiltzaile guztiek sarbide osoa dute (lehenetsia). Administratzaileek beti dute sarbide osoa eta guztiak kudeatu ditzakete.",
+      "feedback_prompt": "Berretsi zuzena zen, zuzendu programa edo ez ikusi egin."
     },
     "modal": {
       "label_cycle": "Etiketa-zikloa",

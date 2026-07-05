@@ -1007,7 +1007,8 @@
       "search_placeholder": "Leita í stillingum…",
       "automations_intro": "WashData kveikir á {start} / {end} tilvikum og sýnir einingar, þannig að tilkynningar og aðgerðir eru best byggðar sem venjulegar Home Assistant sjálfvirkingar. Sjálfvirkingar sem nota þetta tæki birtast hér að neðan.",
       "notify_services_hint": "Notaðu {entity} þjónustu-auðkenni (kommuaðskilin fyrir mörg). Sniðmátsbreytur: {vars}.",
-      "rbac_hint": "Þegar slökkt er, hefur sérhver Home Assistant notandi fulla aðgang (sjálfgefið). Stjórnendur hafa alltaf fulla aðgang og geta stjórnað öllum."
+      "rbac_hint": "Þegar slökkt er, hefur sérhver Home Assistant notandi fulla aðgang (sjálfgefið). Stjórnendur hafa alltaf fulla aðgang og geta stjórnað öllum.",
+      "feedback_prompt": "Staðfestu hvort það var rétt, leiðréttu forritið eða hunsa."
     },
     "modal": {
       "label_cycle": "Merkja hringrás",

@@ -758,7 +758,7 @@
       "profile": "Profiili",
       "status": "Tila",
       "date": "Päivämäärä",
-      "confidence": "Luottamus",
+      "confidence": "Luotettavuus",
       "health": "Kunto",
       "cost": "Kustannukset",
       "program": "Ohjelma",
@@ -1007,7 +1007,8 @@
       "search_placeholder": "Etsi asetuksia…",
       "automations_intro": "WashData laukaisee {start} / {end} -tapahtumat ja paljastaa entiteetit, joten ilmoitukset ja toiminnot kannattaa rakentaa tavallisiksi Home Assistant -automaatioiksi. Tätä laitetta käyttävät automaatiot näkyvät alla.",
       "notify_services_hint": "Käytä {entity} -palvelutunnuksia (erota pilkulla useita). Mallimuuttujat: {vars}.",
-      "rbac_hint": "Kun pois käytöstä, jokaisella Home Assistant -käyttäjällä on täysi pääsy (oletus). Ylläpitäjillä on aina täysi pääsy ja he voivat hallita kaikkia."
+      "rbac_hint": "Kun pois käytöstä, jokaisella Home Assistant -käyttäjällä on täysi pääsy (oletus). Ylläpitäjillä on aina täysi pääsy ja he voivat hallita kaikkia.",
+      "feedback_prompt": "Vahvista onko tunnistus oikea, korjaa ohjelma tai ohita."
     },
     "modal": {
       "label_cycle": "Merkitse sykli",

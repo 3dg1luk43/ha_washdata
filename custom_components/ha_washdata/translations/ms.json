@@ -1008,7 +1008,8 @@
       "search_placeholder": "Cari tetapan…",
       "automations_intro": "WashData mencetuskan peristiwa {start} / {end} dan mendedahkan entiti, jadi pemberitahuan dan tindakan paling baik dibina sebagai automasi Home Assistant biasa. Automasi yang menggunakan peranti ini dipaparkan di bawah.",
       "notify_services_hint": "Gunakan ID perkhidmatan {entity} (dipisahkan koma untuk berbilang). Pembolehubah templat: {vars}.",
-      "rbac_hint": "Apabila dimatikan, setiap pengguna Home Assistant mempunyai akses penuh (lalai). Pentadbir sentiasa mempunyai akses penuh dan boleh mengurus semua orang."
+      "rbac_hint": "Apabila dimatikan, setiap pengguna Home Assistant mempunyai akses penuh (lalai). Pentadbir sentiasa mempunyai akses penuh dan boleh mengurus semua orang.",
+      "feedback_prompt": "Sahkan ia betul, betulkan program, atau abaikan."
     },
     "modal": {
       "label_cycle": "Beri Label Kitaran",

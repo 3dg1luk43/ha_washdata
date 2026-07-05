@@ -1007,7 +1007,8 @@
       "search_placeholder": "Serĉi agordojn…",
       "automations_intro": "WashData aktivigas {start} / {end} eventojn kaj eksponas entitojn, do sciigoj kaj agoj plej bone estas konstruitaj kiel normalaj Home Assistant aŭtomatizilaĵoj. Aŭtomatizilaĵoj kiuj uzas ĉi tiun aparaton aperas sube.",
       "notify_services_hint": "Uzu {entity} servajn IDojn (komoseparataj por multoblaj). Ŝablonaj variabloj: {vars}.",
-      "rbac_hint": "Se malŝaltita, ĉiu Home Assistant uzanto havas plenan aliron (la defaŭlto). Administrantoj ĉiam havas plenan aliron kaj povas administri ĉiujn."
+      "rbac_hint": "Se malŝaltita, ĉiu Home Assistant uzanto havas plenan aliron (la defaŭlto). Administrantoj ĉiam havas plenan aliron kaj povas administri ĉiujn.",
+      "feedback_prompt": "Konfirmu ke ĝi estis ĝusta, korektu la programon aŭ ignoru."
     },
     "modal": {
       "label_cycle": "Etikedi ciklon",

@@ -1475,7 +1475,7 @@
       "auto_fine_tune_on": "samodejno natančno uglaševanje vklopljeno (okoli {hour}:00)",
       "clock_time": "Čas ure",
       "compare_profiles": "Primerjaj s profili",
-      "confidence": "Zaupanje",
+      "confidence": "Zanesljivost",
       "confidence_threshold": "Prag zaupanja",
       "correct_duration": "Pravilno trajanje (min, neobvezno)",
       "correct_profile": "Pravilen profil",
@@ -1725,7 +1725,8 @@
       "search_placeholder": "Iskanje nastavitev…",
       "automations_intro": "WashData sproži dogodke {start} / {end} in izpostavi entitete, zato je obvestila in dejanja najbolje graditi kot navadne avtomatizacije Home Assistant. Avtomatizacije, ki uporabljajo to napravo, so prikazane spodaj.",
       "notify_services_hint": "Uporabite ID-je storitve {entity} (ločeni z vejico za več). Spremenljivke predloge: {vars}.",
-      "rbac_hint": "Ko je izklopljeno, ima vsak uporabnik Home Assistant poln dostop (privzeto). Skrbniki imajo vedno poln dostop in lahko upravljajo vse."
+      "rbac_hint": "Ko je izklopljeno, ima vsak uporabnik Home Assistant poln dostop (privzeto). Skrbniki imajo vedno poln dostop in lahko upravljajo vse.",
+      "feedback_prompt": "Potrdite, ali je bilo pravilno zaznano, popravite program ali prezrite."
     },
     "modal": {
       "auto_label": "Samodejno označi cikle",

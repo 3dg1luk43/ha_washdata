@@ -1007,7 +1007,8 @@
       "search_placeholder": "Hľadať nastavenia…",
       "automations_intro": "WashData spúšťa udalosti {start} / {end} a sprístupňuje entity, takže notifikácie a akcie sa najlepšie vytvárajú ako bežné automatizácie Home Assistant. Automatizácie využívajúce toto zariadenie sa zobrazujú nižšie.",
       "notify_services_hint": "Používajte ID služby {entity} (oddelené čiarkami pre viacero). Premenné šablóny: {vars}.",
-      "rbac_hint": "Ak je vypnuté, každý používateľ Home Assistant má plný prístup (predvolené). Administrátori majú vždy plný prístup a môžu spravovať všetkých."
+      "rbac_hint": "Ak je vypnuté, každý používateľ Home Assistant má plný prístup (predvolené). Administrátori majú vždy plný prístup a môžu spravovať všetkých.",
+      "feedback_prompt": "Potvrďte, či bolo správne rozpoznané, opravte program alebo ignorujte."
     },
     "modal": {
       "label_cycle": "Označiť cyklus",

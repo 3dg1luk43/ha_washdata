@@ -758,7 +758,7 @@
       "profile": "Profiil",
       "status": "Staatus",
       "date": "Kuupäev",
-      "confidence": "Usaldus",
+      "confidence": "Usaldusväärsus",
       "health": "Tervis",
       "cost": "Kulu",
       "program": "Programm",
@@ -1007,7 +1007,8 @@
       "search_placeholder": "Otsi seadeid…",
       "automations_intro": "WashData käivitab {start} / {end} sündmusi ja paljastab olemeid, nii et teavitused ja toimingud on kõige parem luua tavaliste Home Assistanti automaatikate abil. Automaatikad, mis kasutavad seda seadet, kuvatakse allpool.",
       "notify_services_hint": "Kasutage {entity} teenuse ID-sid (mitu eraldatuna komadega). Malli muutujad: {vars}.",
-      "rbac_hint": "Kui see on välja lülitatud, on kõigil Home Assistanti kasutajatel täielik juurdepääs (vaikeväärtus). Administraatoritel on alati täielik juurdepääs ja nad saavad kõiki hallata."
+      "rbac_hint": "Kui see on välja lülitatud, on kõigil Home Assistanti kasutajatel täielik juurdepääs (vaikeväärtus). Administraatoritel on alati täielik juurdepääs ja nad saavad kõiki hallata.",
+      "feedback_prompt": "Kinnitage, kas tuvastati õigesti, parandage programm või jätke tähelepanuta."
     },
     "modal": {
       "label_cycle": "Märgista tsükkel",

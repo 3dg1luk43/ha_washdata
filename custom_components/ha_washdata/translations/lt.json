@@ -758,7 +758,7 @@
       "profile": "Profilis",
       "status": "Būsena",
       "date": "Data",
-      "confidence": "Pasitikėjimas",
+      "confidence": "Patikimumas",
       "health": "Sveikata",
       "cost": "Kaina",
       "program": "Programa",
@@ -1007,7 +1007,8 @@
       "search_placeholder": "Ieškoti nustatymų…",
       "automations_intro": "WashData skleidžia {start} / {end} įvykius ir atskleidžia objektus, todėl pranešimus ir veiksmus geriausia kurti kaip įprastus Home Assistant automatizavimus. Automatizavimai, naudojantys šį įrenginį, rodomi žemiau.",
       "notify_services_hint": "Naudokite {entity} paslaugų ID (keliems – per kablelį). Šablono kintamieji: {vars}.",
-      "rbac_hint": "Kai išjungta, kiekvienas Home Assistant naudotojas turi pilną prieigą (numatytasis). Administratoriai visada turi pilną prieigą ir gali valdyti visus."
+      "rbac_hint": "Kai išjungta, kiekvienas Home Assistant naudotojas turi pilną prieigą (numatytasis). Administratoriai visada turi pilną prieigą ir gali valdyti visus.",
+      "feedback_prompt": "Patvirtinkite, ar buvo teisingai aptikta, pataisykite programą arba nepaisykite."
     },
     "modal": {
       "label_cycle": "Žymėti ciklą",

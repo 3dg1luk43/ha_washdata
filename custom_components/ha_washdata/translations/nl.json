@@ -1007,7 +1007,8 @@
       "search_placeholder": "Instellingen zoeken…",
       "automations_intro": "WashData stuurt {start} / {end}-events en stelt entiteiten beschikbaar, zodat meldingen en acties het best als gewone Home Assistant-automatiseringen worden gebouwd. Automatiseringen die dit apparaat gebruiken worden hieronder weergegeven.",
       "notify_services_hint": "Gebruik {entity} service-ID's (kommagescheiden voor meerdere). Sjabloonvariabelen: {vars}.",
-      "rbac_hint": "Wanneer uitgeschakeld, heeft elke Home Assistant-gebruiker volledige toegang (standaard). Beheerders hebben altijd volledige toegang en kunnen iedereen beheren."
+      "rbac_hint": "Wanneer uitgeschakeld, heeft elke Home Assistant-gebruiker volledige toegang (standaard). Beheerders hebben altijd volledige toegang en kunnen iedereen beheren.",
+      "feedback_prompt": "Bevestig of dit klopt, corrigeer het programma of negeer het."
     },
     "modal": {
       "label_cycle": "Cyclus labelen",

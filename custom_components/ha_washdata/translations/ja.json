@@ -871,7 +871,8 @@
       "search_placeholder": "設定を検索…",
       "automations_intro": "WashDataは{start} / {end}イベントを発火し、エンティティを公開します。通知やアクションは通常のHome Assistantオートメーションとして作成することをお勧めします。このデバイスを使用するオートメーションは以下に表示されます。",
       "notify_services_hint": "{entity}サービスIDを使用してください（複数の場合はカンマ区切り）。テンプレート変数: {vars}。",
-      "rbac_hint": "オフの場合、すべてのHome Assistantユーザーがフルアクセスを持ちます（デフォルト）。管理者は常にフルアクセスを持ち、全員を管理できます。"
+      "rbac_hint": "オフの場合、すべてのHome Assistantユーザーがフルアクセスを持ちます（デフォルト）。管理者は常にフルアクセスを持ち、全員を管理できます。",
+      "feedback_prompt": "正しく検出されたか確認するか、プログラムを修正するか、無視してください。"
     },
     "section": {
       "basic": {

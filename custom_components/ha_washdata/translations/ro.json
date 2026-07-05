@@ -1007,7 +1007,8 @@
       "search_placeholder": "Căutare setări…",
       "automations_intro": "WashData declanșează evenimentele {start} / {end} și expune entități, astfel că notificările și acțiunile se construiesc cel mai bine ca automatizări normale Home Assistant. Automatizările care utilizează acest dispozitiv apar mai jos.",
       "notify_services_hint": "Utilizați ID-urile serviciului {entity} (separate prin virgulă pentru mai multe). Variabile șablon: {vars}.",
-      "rbac_hint": "Când este dezactivat, fiecare utilizator Home Assistant are acces complet (implicit). Administratorii au întotdeauna acces complet și pot gestiona toți utilizatorii."
+      "rbac_hint": "Când este dezactivat, fiecare utilizator Home Assistant are acces complet (implicit). Administratorii au întotdeauna acces complet și pot gestiona toți utilizatorii.",
+      "feedback_prompt": "Confirmați dacă a fost corect, corectați programul sau ignorați."
     },
     "modal": {
       "label_cycle": "Etichetare ciclu",

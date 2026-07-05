@@ -871,7 +871,8 @@
       "search_placeholder": "설정 검색…",
       "automations_intro": "WashData는 {start} / {end} 이벤트를 발생시키고 엔터티를 노출하므로, 알림과 동작은 일반 Home Assistant 자동화로 구성하는 것이 좋습니다. 이 장치를 사용하는 자동화가 아래에 표시됩니다.",
       "notify_services_hint": "{entity} 서비스 ID를 사용하세요(여러 개는 쉼표로 구분). 템플릿 변수: {vars}.",
-      "rbac_hint": "끄면 모든 Home Assistant 사용자가 전체 액세스 권한을 가집니다(기본값). 관리자는 항상 전체 액세스 권한을 가지며 모든 사람을 관리할 수 있습니다."
+      "rbac_hint": "끄면 모든 Home Assistant 사용자가 전체 액세스 권한을 가집니다(기본값). 관리자는 항상 전체 액세스 권한을 가지며 모든 사람을 관리할 수 있습니다.",
+      "feedback_prompt": "올바르게 감지됐는지 확인하거나, 프로그램을 수정하거나, 무시하세요."
     },
     "section": {
       "basic": {

@@ -1007,7 +1007,8 @@
       "search_placeholder": "Szukaj ustawień…",
       "automations_intro": "WashData wyzwala zdarzenia {start} / {end} i udostępnia encje, dlatego powiadomienia i akcje najlepiej budować jako zwykłe automatyzacje Home Assistant. Automatyzacje korzystające z tego urządzenia są widoczne poniżej.",
       "notify_services_hint": "Użyj identyfikatorów usług {entity} (oddzielone przecinkami dla wielu). Zmienne szablonu: {vars}.",
-      "rbac_hint": "Gdy wyłączone, każdy użytkownik Home Assistant ma pełny dostęp (domyślnie). Administratorzy zawsze mają pełny dostęp i mogą zarządzać wszystkimi."
+      "rbac_hint": "Gdy wyłączone, każdy użytkownik Home Assistant ma pełny dostęp (domyślnie). Administratorzy zawsze mają pełny dostęp i mogą zarządzać wszystkimi.",
+      "feedback_prompt": "Potwierdź poprawność wykrycia, popraw program lub zignoruj."
     },
     "modal": {
       "label_cycle": "Oznacz cykl",

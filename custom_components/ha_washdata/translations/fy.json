@@ -758,7 +758,7 @@
       "profile": "Profyl",
       "status": "Status",
       "date": "Datum",
-      "confidence": "Fertrouwen",
+      "confidence": "Betrouberens",
       "health": "Sûnens",
       "cost": "Kosten",
       "program": "Programma",
@@ -1009,7 +1009,8 @@
       "search_placeholder": "Sykje ynstellingen…",
       "automations_intro": "WashData fiert {start} / {end} barrens en eksponearret entiteiten, dus notifikaasjes en aksjes wurde it bêste boud as normale Home Assistant-automatisearringen. Automatisearringen dy't dit apparaat brûke ferskine hjirûnder.",
       "notify_services_hint": "Brûk {entity} tsjinst-ID's (komma-skieden foar meardere). Sjabloanfariabelen: {vars}.",
-      "rbac_hint": "As it út is, hat elke Home Assistant-brûker folsleine tagong (de standert). Behearders hawwe altyd folsleine tagong en kinne elkenien beheare."
+      "rbac_hint": "As it út is, hat elke Home Assistant-brûker folsleine tagong (de standert). Behearders hawwe altyd folsleine tagong en kinne elkenien beheare.",
+      "feedback_prompt": "Befêstigje dat it korrekt wie, korrektearje it programma of negearje it."
     },
     "modal": {
       "label_cycle": "Syklus labele",

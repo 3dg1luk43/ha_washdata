@@ -1007,7 +1007,8 @@
       "search_placeholder": "Meklēt iestatījumus…",
       "automations_intro": "WashData izsūta {start} / {end} notikumus un atklāj entītijas, tāpēc paziņojumus un darbības vislabāk veidot kā parastos Home Assistant automatizācijas skriptus. Automatizācijas, kas izmanto šo ierīci, parādās zemāk.",
       "notify_services_hint": "Izmantojiet {entity} pakalpojumu ID (vairākiem – ar komatu). Veidnes mainīgie: {vars}.",
-      "rbac_hint": "Ja izslēgts, katram Home Assistant lietotājam ir pilna piekļuve (noklusējums). Administratoriem vienmēr ir pilna piekļuve un viņi var pārvaldīt visus."
+      "rbac_hint": "Ja izslēgts, katram Home Assistant lietotājam ir pilna piekļuve (noklusējums). Administratoriem vienmēr ir pilna piekļuve un viņi var pārvaldīt visus.",
+      "feedback_prompt": "Apstipriniet, vai tika pareizi noteikts, labojiet programmu vai ignorējiet."
     },
     "modal": {
       "label_cycle": "Iezīmēt ciklu",

@@ -1007,7 +1007,8 @@
       "search_placeholder": "Einstellungen durchsuchen…",
       "automations_intro": "WashData löst {start} / {end}-Ereignisse aus und stellt Entitäten bereit, daher werden Benachrichtigungen und Aktionen am besten als normale Home Assistant-Automatisierungen erstellt. Automatisierungen, die dieses Gerät verwenden, werden unten angezeigt.",
       "notify_services_hint": "Verwenden Sie {entity}-Dienst-IDs (kommagetrennt für mehrere). Vorlagenvariablen: {vars}.",
-      "rbac_hint": "Wenn deaktiviert, hat jeder Home Assistant-Benutzer vollen Zugriff (Standard). Administratoren haben immer vollen Zugriff und können alle verwalten."
+      "rbac_hint": "Wenn deaktiviert, hat jeder Home Assistant-Benutzer vollen Zugriff (Standard). Administratoren haben immer vollen Zugriff und können alle verwalten.",
+      "feedback_prompt": "Bestätigen Sie, ob das Programm korrekt erkannt wurde, korrigieren Sie es oder ignorieren Sie es."
     },
     "modal": {
       "label_cycle": "Zyklus beschriften",

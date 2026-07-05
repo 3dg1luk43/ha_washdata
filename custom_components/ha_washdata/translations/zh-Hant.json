@@ -871,7 +871,8 @@
       "search_placeholder": "搜尋設定…",
       "automations_intro": "WashData 觸發 {start} / {end} 事件並公開實體，因此通知和操作最好建置為一般的 Home Assistant 自動化。使用此裝置的自動化顯示在下方。",
       "notify_services_hint": "使用 {entity} 服務 ID（多個時用逗號分隔）。範本變數：{vars}。",
-      "rbac_hint": "關閉時，每位 Home Assistant 使用者都擁有完整存取權限（預設）。管理員始終擁有完整存取權限，可以管理所有人。"
+      "rbac_hint": "關閉時，每位 Home Assistant 使用者都擁有完整存取權限（預設）。管理員始終擁有完整存取權限，可以管理所有人。",
+      "feedback_prompt": "確認偵測是否正確，修正程式名稱，或忽略。"
     },
     "section": {
       "basic": {

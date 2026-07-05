@@ -1007,7 +1007,8 @@
       "search_placeholder": "Astellungen sichen…",
       "automations_intro": "WashData schéckt {start} / {end} Eventer a stellt Entitéiten bereet, dofir ginn Notifizéierungen an Aktiounen am beschten als normal Home Assistant Automatiounen gebaut. Automatiounen, déi dëst Apparat benotzen, ginn hei ënnen ugewisen.",
       "notify_services_hint": "{entity} Service-IDs benotzen (fir méi eng, mat Komma getrennt). Template-Variabelen: {vars}.",
-      "rbac_hint": "Wann ausgeschalt, huet all Home Assistant Benotzer vollen Zougang (Standard). Administrateuren hunn ëmmer vollen Zougang a kënnen jiddereen verwalten."
+      "rbac_hint": "Wann ausgeschalt, huet all Home Assistant Benotzer vollen Zougang (Standard). Administrateuren hunn ëmmer vollen Zougang a kënnen jiddereen verwalten.",
+      "feedback_prompt": "Bestätegt ob et richteg war, korrigéiert de Programm oder ignoréiert et."
     },
     "modal": {
       "label_cycle": "Zyklus etikettéieren",

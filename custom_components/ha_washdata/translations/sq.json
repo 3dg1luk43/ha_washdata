@@ -1007,7 +1007,8 @@
       "search_placeholder": "Kërko cilësimet…",
       "automations_intro": "WashData ndez ngjarjet {start} / {end} dhe ekspozon entitete, kështu që njoftimet dhe veprimet ndërtohen më mirë si automatizime normale të Home Assistant. Automatizimite që përdorin këtë pajisje shfaqen më poshtë.",
       "notify_services_hint": "Përdorni ID-të e shërbimit {entity} (të ndara me presje për disa). Variablat e shabllonit: {vars}.",
-      "rbac_hint": "Kur është i fikur, çdo përdorues i Home Assistant ka akses të plotë (e parazgjedhura). Administratorët kanë gjithmonë akses të plotë dhe mund të menaxhojnë të gjithë."
+      "rbac_hint": "Kur është i fikur, çdo përdorues i Home Assistant ka akses të plotë (e parazgjedhura). Administratorët kanë gjithmonë akses të plotë dhe mund të menaxhojnë të gjithë.",
+      "feedback_prompt": "Konfirmoni nëse ishte i saktë, korrigjoni programin ose injoroni."
     },
     "modal": {
       "label_cycle": "Etiketoje ciklin",

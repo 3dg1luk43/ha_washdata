@@ -1007,7 +1007,8 @@
       "search_placeholder": "Cuardaigh socruithe…",
       "automations_intro": "Lasann WashData imeachtaí {start} / {end} agus nochtann sé eintitis, mar sin is fearr fógraí agus gníomhartha a thógáil mar uathoibrithe Home Assistant gnáthúla. Uathoibrithe a úsáideann an gléas seo le feiceáil thíos.",
       "notify_services_hint": "Úsáid aitheantais seirbhíse {entity} (scartha le camóg le haghaidh iolraí). Athróga teimpléid: {vars}.",
-      "rbac_hint": "Nuair atá sé as, tá rochtain iomlán ag gach úsáideoir Home Assistant (an réamhshocrú). Tá rochtain iomlán i gcónaí ag riarthóirí agus is féidir leo gach duine a bhainistiú."
+      "rbac_hint": "Nuair atá sé as, tá rochtain iomlán ag gach úsáideoir Home Assistant (an réamhshocrú). Tá rochtain iomlán i gcónaí ag riarthóirí agus is féidir leo gach duine a bhainistiú.",
+      "feedback_prompt": "Deimhnigh go raibh sé ceart, ceartaigh an clár, nó déan neamhaird de."
     },
     "modal": {
       "label_cycle": "Lipéadaigh Timthriall",

@@ -1725,7 +1725,8 @@
       "search_placeholder": "Sök inställningar…",
       "automations_intro": "WashData utlöser {start} / {end}-händelser och exponerar entiteter, så aviseringar och åtgärder byggs bäst som vanliga Home Assistant-automatiseringar. Automatiseringar som använder den här enheten visas nedan.",
       "notify_services_hint": "Använd {entity} tjänste-ID:n (kommaseparerade för flera). Mallvariabler: {vars}.",
-      "rbac_hint": "När det är avstängt har alla Home Assistant-användare full åtkomst (standard). Administratörer har alltid full åtkomst och kan hantera alla."
+      "rbac_hint": "När det är avstängt har alla Home Assistant-användare full åtkomst (standard). Administratörer har alltid full åtkomst och kan hantera alla.",
+      "feedback_prompt": "Bekräfta att det stämmer, korrigera programmet eller ignorera."
     },
     "modal": {
       "auto_label": "Etikettera cykler automatiskt",

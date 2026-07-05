@@ -1007,7 +1007,8 @@
       "search_placeholder": "Søg i indstillinger…",
       "automations_intro": "WashData udløser {start} / {end}-hændelser og eksponerer entiteter, så notifikationer og handlinger bygges bedst som normale Home Assistant-automatiseringer. Automatiseringer der bruger denne enhed vises nedenfor.",
       "notify_services_hint": "Brug {entity} service-ID'er (kommasepareret for flere). Skabelonvariabler: {vars}.",
-      "rbac_hint": "Når det er slået fra, har alle Home Assistant-brugere fuld adgang (standard). Administratorer har altid fuld adgang og kan administrere alle."
+      "rbac_hint": "Når det er slået fra, har alle Home Assistant-brugere fuld adgang (standard). Administratorer har altid fuld adgang og kan administrere alle.",
+      "feedback_prompt": "Bekræft, at det var korrekt, ret programmet, eller ignorer."
     },
     "modal": {
       "label_cycle": "Etiketér cyklus",

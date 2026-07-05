@@ -871,7 +871,8 @@
       "search_placeholder": "搜索设置…",
       "automations_intro": "WashData 触发 {start} / {end} 事件并公开实体，因此通知和操作最好构建为普通的 Home Assistant 自动化。使用此设备的自动化显示在下方。",
       "notify_services_hint": "使用 {entity} 服务 ID（多个时用逗号分隔）。模板变量：{vars}。",
-      "rbac_hint": "关闭时，每个 Home Assistant 用户都拥有完全访问权限（默认）。管理员始终拥有完全访问权限，可以管理所有人。"
+      "rbac_hint": "关闭时，每个 Home Assistant 用户都拥有完全访问权限（默认）。管理员始终拥有完全访问权限，可以管理所有人。",
+      "feedback_prompt": "确认检测是否正确，纠正程序名称，或忽略。"
     },
     "section": {
       "basic": {

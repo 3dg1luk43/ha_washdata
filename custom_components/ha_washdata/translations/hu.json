@@ -758,7 +758,7 @@
       "profile": "Profil",
       "status": "Állapot",
       "date": "Dátum",
-      "confidence": "Bizalom",
+      "confidence": "Megbízhatóság",
       "health": "Egészség",
       "cost": "Költség",
       "program": "Program",
@@ -1007,7 +1007,8 @@
       "search_placeholder": "Beállítások keresése…",
       "automations_intro": "A WashData {start} / {end} eseményeket indít és entitásokat tesz elérhetővé, így az értesítések és műveletek legjobban normál Home Assistant automatizálásként építhetők fel. Az ezt az eszközt használó automatizálások alább jelennek meg.",
       "notify_services_hint": "Használja a {entity} szolgáltatás-azonosítókat (több esetén vesszővel elválasztva). Sablonváltozók: {vars}.",
-      "rbac_hint": "Ha ki van kapcsolva, minden Home Assistant felhasználónak teljes hozzáférése van (ez az alapértelmezett). A rendszergazdáknak mindig teljes hozzáférésük van, és mindenkit kezelhetnek."
+      "rbac_hint": "Ha ki van kapcsolva, minden Home Assistant felhasználónak teljes hozzáférése van (ez az alapértelmezett). A rendszergazdáknak mindig teljes hozzáférésük van, és mindenkit kezelhetnek.",
+      "feedback_prompt": "Erősítse meg, hogy helyes volt, javítsa a programot, vagy hagyja figyelmen kívül."
     },
     "modal": {
       "label_cycle": "Ciklus felcímkézése",

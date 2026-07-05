@@ -1007,7 +1007,8 @@
       "search_placeholder": "Søk i innstillinger…",
       "automations_intro": "WashData sender {start} / {end}-hendelser og eksponerer entiteter, så varsler og handlinger bygges best som vanlige Home Assistant-automatiseringer. Automatiseringer som bruker denne enheten vises nedenfor.",
       "notify_services_hint": "Bruk {entity} tjeneste-ID-er (kommaseparert for flere). Malvariabler: {vars}.",
-      "rbac_hint": "Når av, har alle Home Assistant-brukere full tilgang (standard). Administratorer har alltid full tilgang og kan administrere alle."
+      "rbac_hint": "Når av, har alle Home Assistant-brukere full tilgang (standard). Administratorer har alltid full tilgang og kan administrere alle.",
+      "feedback_prompt": "Bekreft at det stemmer, korriger programmet, eller ignorer."
     },
     "modal": {
       "label_cycle": "Merk syklus",

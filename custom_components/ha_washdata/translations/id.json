@@ -1008,7 +1008,8 @@
       "search_placeholder": "Cari pengaturan…",
       "automations_intro": "WashData memicu event {start} / {end} dan mengekspos entitas, sehingga notifikasi dan aksi sebaiknya dibuat sebagai otomasi Home Assistant biasa. Otomasi yang menggunakan perangkat ini ditampilkan di bawah.",
       "notify_services_hint": "Gunakan ID layanan {entity} (dipisahkan koma untuk beberapa). Variabel template: {vars}.",
-      "rbac_hint": "Saat dimatikan, setiap pengguna Home Assistant memiliki akses penuh (default). Administrator selalu memiliki akses penuh dan dapat mengelola semua pengguna."
+      "rbac_hint": "Saat dimatikan, setiap pengguna Home Assistant memiliki akses penuh (default). Administrator selalu memiliki akses penuh dan dapat mengelola semua pengguna.",
+      "feedback_prompt": "Konfirmasi sudah benar, koreksi programnya, atau abaikan."
     },
     "modal": {
       "label_cycle": "Beri Label Siklus",

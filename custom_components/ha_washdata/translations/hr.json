@@ -1007,7 +1007,8 @@
       "search_placeholder": "Pretraži postavke…",
       "automations_intro": "WashData pokreće {start} / {end} događaje i izlaže entitete, pa je obavijesti i radnje najbolje graditi kao uobičajene Home Assistant automatizacije. Automatizacije koje koriste ovaj uređaj prikazuju se ispod.",
       "notify_services_hint": "Koristite ID-ove servisa {entity} (zarezom odvojene za više). Varijable predloška: {vars}.",
-      "rbac_hint": "Kada je isključeno, svaki korisnik Home Assistanta ima pun pristup (zadano). Administratori uvijek imaju pun pristup i mogu upravljati svima."
+      "rbac_hint": "Kada je isključeno, svaki korisnik Home Assistanta ima pun pristup (zadano). Administratori uvijek imaju pun pristup i mogu upravljati svima.",
+      "feedback_prompt": "Potvrdite je li točno, ispravite program ili zanemarite."
     },
     "modal": {
       "label_cycle": "Označi ciklus",

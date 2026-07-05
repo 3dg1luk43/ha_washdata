@@ -1008,7 +1008,8 @@
       "search_placeholder": "Buscar axustes…",
       "automations_intro": "WashData dispara eventos {start} / {end} e expón entidades, polo que as notificacións e accións créanse mellor como automatizacións normais de Home Assistant. As automatizacións que usan este dispositivo aparecen a continuación.",
       "notify_services_hint": "Usa os ID de servizo de {entity} (separados por comas para varios). Variables de modelo: {vars}.",
-      "rbac_hint": "Cando está desactivado, todos os usuarios de Home Assistant teñen acceso completo (o valor predeterminado). Os administradores sempre teñen acceso completo e poden xestionar a todos."
+      "rbac_hint": "Cando está desactivado, todos os usuarios de Home Assistant teñen acceso completo (o valor predeterminado). Os administradores sempre teñen acceso completo e poden xestionar a todos.",
+      "feedback_prompt": "Confirma se foi correcto, corrixe o programa ou ignora."
     },
     "modal": {
       "label_cycle": "Ciclo de etiquetas",

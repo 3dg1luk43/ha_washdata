@@ -1007,7 +1007,8 @@
       "search_placeholder": "Chwilio gosodiadau…",
       "automations_intro": "Mae WashData yn tanio digwyddiadau {start} / {end} ac yn datgelu endidau, felly mae'n well adeiladu hysbysiadau a chamau gweithredu fel awtomeiddiadau Home Assistant arferol. Mae'r awtomeiddiadau sy'n defnyddio'r ddyfais hon yn ymddangos isod.",
       "notify_services_hint": "Defnyddiwch IDau gwasanaeth {entity} (wedi'u gwahanu gan gomas am fwy nag un). Newidynnau templed: {vars}.",
-      "rbac_hint": "Pan fo i ffwrdd, mae gan bob defnyddiwr Home Assistant fynediad llawn (y rhagosodiad). Mae gan weinyddwyr fynediad llawn bob amser a gallant reoli pawb."
+      "rbac_hint": "Pan fo i ffwrdd, mae gan bob defnyddiwr Home Assistant fynediad llawn (y rhagosodiad). Mae gan weinyddwyr fynediad llawn bob amser a gallant reoli pawb.",
+      "feedback_prompt": "Cadarnhewch ei fod yn gywir, cywirwch y rhaglen, neu anwybyddwch."
     },
     "modal": {
       "label_cycle": "Labelu Cylch",

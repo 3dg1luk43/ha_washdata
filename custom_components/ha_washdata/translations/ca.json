@@ -1007,7 +1007,8 @@
       "search_placeholder": "Cerca als paràmetres…",
       "automations_intro": "WashData llança esdeveniments {start} / {end} i exposa entitats, de manera que les notificacions i les accions es construeixen millor com a automatitzacions normals de Home Assistant. Les automatitzacions que utilitzen aquest dispositiu apareixen a continuació.",
       "notify_services_hint": "Feu servir els ID del servei {entity} (separats per comes per a múltiples). Variables de plantilla: {vars}.",
-      "rbac_hint": "Quan està desactivat, tots els usuaris de Home Assistant tenen accés complet (per defecte). Els administradors sempre tenen accés complet i poden gestionar tothom."
+      "rbac_hint": "Quan està desactivat, tots els usuaris de Home Assistant tenen accés complet (per defecte). Els administradors sempre tenen accés complet i poden gestionar tothom.",
+      "feedback_prompt": "Confirmeu si era correcte, corregiu el programa o ignoreu."
     },
     "modal": {
       "label_cycle": "Etiquetar cicle",

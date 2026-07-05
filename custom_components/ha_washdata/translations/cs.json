@@ -758,7 +758,7 @@
       "profile": "Profil",
       "status": "Stav",
       "date": "Datum",
-      "confidence": "Důvěra",
+      "confidence": "Spolehlivost",
       "health": "Zdraví",
       "cost": "Náklady",
       "program": "Program",
@@ -1007,7 +1007,8 @@
       "search_placeholder": "Hledat v nastavení…",
       "automations_intro": "WashData spouští události {start} / {end} a zpřístupňuje entity, takže oznámení a akce je nejlepší sestavit jako běžné automatizace Home Assistant. Automatizace využívající toto zařízení se zobrazí níže.",
       "notify_services_hint": "Použijte ID služeb {entity} (více hodnot oddělte čárkou). Proměnné šablony: {vars}.",
-      "rbac_hint": "Pokud je vypnuto, má každý uživatel Home Assistant plný přístup (výchozí stav). Správci mají vždy plný přístup a mohou spravovat všechny uživatele."
+      "rbac_hint": "Pokud je vypnuto, má každý uživatel Home Assistant plný přístup (výchozí stav). Správci mají vždy plný přístup a mohou spravovat všechny uživatele.",
+      "feedback_prompt": "Potvrďte, že byl detekován správně, opravte program nebo ignorujte."
     },
     "modal": {
       "label_cycle": "Označit cyklus",

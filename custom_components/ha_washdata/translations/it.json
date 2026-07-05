@@ -1007,7 +1007,8 @@
       "search_placeholder": "Cerca impostazioni…",
       "automations_intro": "WashData genera eventi {start} / {end} ed espone entità, quindi le notifiche e le azioni si costruiscono meglio come normali automazioni di Home Assistant. Le automazioni che utilizzano questo dispositivo sono visualizzate di seguito.",
       "notify_services_hint": "Usa gli ID servizio {entity} (separati da virgola per più valori). Variabili template: {vars}.",
-      "rbac_hint": "Se disattivato, ogni utente di Home Assistant ha accesso completo (impostazione predefinita). Gli amministratori hanno sempre accesso completo e possono gestire tutti."
+      "rbac_hint": "Se disattivato, ogni utente di Home Assistant ha accesso completo (impostazione predefinita). Gli amministratori hanno sempre accesso completo e possono gestire tutti.",
+      "feedback_prompt": "Conferma se era corretto, correggi il programma o ignora."
     },
     "modal": {
       "label_cycle": "Etichetta ciclo",

@@ -1007,7 +1007,8 @@
       "search_placeholder": "Tìm kiếm cài đặt…",
       "automations_intro": "WashData kích hoạt các sự kiện {start} / {end} và hiển thị các thực thể, vì vậy các thông báo và hành động được xây dựng tốt nhất là các tự động hóa Home Assistant thông thường. Các tự động hóa sử dụng thiết bị này xuất hiện bên dưới.",
       "notify_services_hint": "Sử dụng ID dịch vụ {entity} (phân cách bằng dấu phẩy cho nhiều). Biến mẫu: {vars}.",
-      "rbac_hint": "Khi tắt, mọi người dùng Home Assistant đều có quyền truy cập đầy đủ (mặc định). Quản trị viên luôn có quyền truy cập đầy đủ và có thể quản lý tất cả mọi người."
+      "rbac_hint": "Khi tắt, mọi người dùng Home Assistant đều có quyền truy cập đầy đủ (mặc định). Quản trị viên luôn có quyền truy cập đầy đủ và có thể quản lý tất cả mọi người.",
+      "feedback_prompt": "Xác nhận nếu đúng, sửa tên chương trình, hoặc bỏ qua."
     },
     "modal": {
       "label_cycle": "Gắn nhãn chu kỳ",

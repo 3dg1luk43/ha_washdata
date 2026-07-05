@@ -796,7 +796,7 @@
       "profile": "Profiel",
       "status": "Status",
       "date": "Datum",
-      "confidence": "Vertroue",
+      "confidence": "Betroubaarheid",
       "health": "Gesondheid",
       "cost": "Koste",
       "program": "Program",
@@ -1045,7 +1045,8 @@
       "search_placeholder": "Soek instellings…",
       "automations_intro": "WashData stuur {start} / {end} gebeure en stel entiteite bloot, so kennisgewings en aksies word die beste as normale Home Assistant-outomatiserings gebou. Outomatiserings wat hierdie toestel gebruik, verskyn hieronder.",
       "notify_services_hint": "Gebruik {entity} diensidentifiseerders (komma-geskei vir meerdere). Sjabloonveranderlikes: {vars}.",
-      "rbac_hint": "Wanneer afgeskakel, het elke Home Assistant-gebruiker volle toegang (die verstek). Administrateurs het altyd volle toegang en kan almal bestuur."
+      "rbac_hint": "Wanneer afgeskakel, het elke Home Assistant-gebruiker volle toegang (die verstek). Administrateurs het altyd volle toegang en kan almal bestuur.",
+      "feedback_prompt": "Bevestig of dit korrek was, korrigeer die program, of ignoreer dit."
     },
     "modal": {
       "label_cycle": "Etiketsiklus",

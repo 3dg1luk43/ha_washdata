@@ -758,7 +758,7 @@
       "profile": "Profil",
       "status": "Durum",
       "date": "Tarih",
-      "confidence": "Güven",
+      "confidence": "Güvenilirlik",
       "health": "Sağlık",
       "cost": "Maliyet",
       "program": "Program",
@@ -1008,7 +1008,8 @@
       "automations_intro": "WashData {start} / {end} olaylarını tetikler ve varlıkları açığa çıkarır; bu nedenle bildirimler ve eylemler en iyi normal Home Assistant otomasyonları olarak oluşturulur. Bu cihazı kullanan otomasyonlar aşağıda görünür.",
       "notify_services_hint": "{entity} hizmet kimliklerini kullanın (birden fazla için virgülle ayrılmış). Şablon değişkenleri: {vars}.",
       "rbac_hint": "Kapalıyken, her Home Assistant kullanıcısının tam erişimi vardır (varsayılan). Yöneticiler her zaman tam erişime sahiptir ve herkesi yönetebilir.",
-      "no_split_found": "Bölmek için boş süre bulunamadı"
+      "no_split_found": "Bölmek için boş süre bulunamadı",
+      "feedback_prompt": "Doğruysa onaylayın, programı düzeltin veya yoksayın."
     },
     "modal": {
       "label_cycle": "Etiket Döngüsü",
