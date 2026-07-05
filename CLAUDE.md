@@ -151,6 +151,40 @@ The `ml/` package adds ML *alongside* the proven detection/matching code — it 
 ### UI Localization
 - **No inline strings in Python** for UI text - all labels/descriptions go in `strings.json` and `translations/en.json`
 - Translation key format: `step_name.data.field_name` or `step_name.description`
+- **Every user-visible string in the panel must go through `_t(key, vars, fallback)`** — no raw English strings in HTML templates, `title=` attributes, `placeholder=` attributes, `aria-label=`, settings schema labels/docs/intros, or tooltip text. The English value goes in `translations/en.json` under `panel.*` as the canonical source and as the `_t()` fallback. The only exception is the hardcoded `'WashData'` brand name.
+- **Never use `translate.py --all` (the machine translator) for new keys** — machine translation produces domain-wrong output (sports for "match", lumber for "logs", CV for "Resume"). All new panel translations must be done by Claude subagents with explicit domain context. The `translate.py` script may only be used for HA-layer keys (config flow, entity names) where machine quality is acceptable.
+- **Settings schema strings** are auto-resolved at render time: section labels via `_t('section.{id}.label', {}, fallback)`, section intros via `_t('section.{id}.intro', {}, fallback)`, field labels via `_t('setting.{key}.label', {}, fallback)`, field docs via `_t('setting.{key}.doc', {}, fallback)`, sub-group headers via `_t('setting_group.{slug}.label', {}, fallback)`. Adding a key to `en.json` is all that is needed to make the UI translatable; the code already handles it.
+- **Artifact detail strings** from Python must return `detail_key` + `detail_params` alongside the English `detail` fallback. JS renders them as `_t(a.detail_key, a.detail_params, a.detail)`.
+
+#### Translation maintenance (required after adding/removing keys)
+
+**Source of truth:** `strings.json` ≡ `translations/en.json` (kept identical for all HA keys).
+
+**Panel translations** (the panel's `_t()` function) live in TWO places:
+1. `translations/en.json` → `panel.*` section — source for the machine translator
+2. `custom_components/ha_washdata/www/panel-translations.json` — client-side bundle served to browsers
+
+**After adding or removing translation keys, you MUST:**
+
+```bash
+# 1. Remove deprecated keys from all 60+ language files (syncs them to strings.json structure,
+#    preserving each file's panel.* section).
+#    Also automatically rebuilds panel-translations.json at the end.
+python3 devtools/sync_translations.py
+
+# 2. Translate new keys from en.json into all languages (needs network; adds new keys,
+#    removes deleted ones, updates ha-washdata-card.js TRANSLATIONS object).
+cd scripts/ha_integration_translator
+python3 translate.py ../../custom_components/ha_washdata/translations \
+  --all \
+  --card-file ../../custom_components/ha_washdata/www/ha-washdata-card.js
+
+# 3. Rebuild panel-translations.json after the translate step (step 1 does this automatically,
+#    but translate.py does not, so run this after step 2).
+python3 devtools/build_panel_translations.py
+```
+
+Step 1 and 3 are fast and safe to run without network access. **Step 2 must NOT be run for panel.* keys** — use Claude subagents instead (see UI Localization rules above). The machine translator may be used for HA-layer keys (config flow, entity names) only.
 
 ### Home Assistant Patterns
 - Use `async_update_entry` for config entry modifications

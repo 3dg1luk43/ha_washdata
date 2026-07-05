@@ -680,6 +680,12 @@ function _artifactLabel(type, t) {
   return t ? t(key, {}, fb) : fb;
 }
 
+// Slugify a sub-group label to a translation key fragment.
+// "Door & Pause" → "door_pause", "Auto-Labeling" → "auto_labeling", etc.
+function _slugSub(s) {
+  return s.toLowerCase().replace(/[\s&/\-]+/g, '_').replace(/^_+|_+$/g, '').replace(/_+/g, '_');
+}
+
 // Linear-interpolated y at offset x for a sorted [[x,y],...] series.
 function _valueAt(pts, x) {
   if (!pts || !pts.length) return null;
@@ -1684,7 +1690,7 @@ class HaWashdataPanel extends HTMLElement {
 
     const attn = [];
     if (dev.recording && this._canEdit()) attn.push(`<div class="wd-attn-card"><span class="wd-attn-icon">●</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.recording_in_progress', {}, 'Recording in progress')}</div><div class="wd-attn-sub">${this._t('msg.see_recorder', {}, 'See recorder widget below')}</div></div></div>`);
-    if (dev.feedback_count && this._canEdit()) attn.push(`<div class="wd-attn-card" data-action="goto-feedbacks"><span class="wd-attn-icon">💬</span><div class="wd-attn-body"><div class="wd-attn-title">${dev.feedback_count} cycle${dev.feedback_count > 1 ? 's' : ''} to review</div><div class="wd-attn-sub">${this._t('msg.review_to_cycles', {}, 'Open the Cycles review queue')}</div></div></div>`);
+    if (dev.feedback_count && this._canEdit()) attn.push(`<div class="wd-attn-card" data-action="goto-feedbacks"><span class="wd-attn-icon">💬</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.feedback_cycles_pending', {n: dev.feedback_count, s: dev.feedback_count > 1 ? 's' : ''}, `${dev.feedback_count} cycle${dev.feedback_count > 1 ? 's' : ''} to review`)}</div><div class="wd-attn-sub">${this._t('msg.review_to_cycles', {}, 'Open the Cycles review queue')}</div></div></div>`);
     if (dev.suggestions_count && this._canEdit()) attn.push(`<div class="wd-attn-card" data-action="goto-suggestions"><span class="wd-attn-icon">💡</span><div class="wd-attn-body"><div class="wd-attn-title">${dev.suggestions_count} tuning suggestion${dev.suggestions_count > 1 ? 's' : ''}</div><div class="wd-attn-sub">${this._t('msg.review_in_settings', {}, 'Review in Settings')}</div></div></div>`);
     const attnHtml = attn.length ? `<div class="wd-attn">${attn.join('')}</div>` : '';
 
@@ -2419,14 +2425,14 @@ class HaWashdataPanel extends HTMLElement {
       const varsHint = `<p class="wd-info" style="margin-bottom:16px">${this._t('msg.notify_services_hint', {entity: '<code>notify.&lt;name&gt;</code>', vars: '<code>' + _esc(_NOTIFY_VARS) + '</code>'}, 'Use {entity} service IDs (comma-separated for multiple). Template variables: {vars}.')}</p>`;
       const groups = sec.groups.map(grp => {
         const fields = grp.fields.map(f => this._renderField(f, o)).join('');
-        return `<div class="wd-subhead">${_esc(grp.sub)}</div><div class="wd-form-grid">${fields}</div>`;
+        return `<div class="wd-subhead">${_esc(this._t('setting_group.' + _slugSub(grp.sub) + '.label', {}, grp.sub))}</div><div class="wd-form-grid">${fields}</div>`;
       }).join('');
       return `${this._htmlAutomations()}${varsHint}${groups}`;
     }
 
     if (sec.groups) {
       const groups = sec.groups.map(grp => {
-        const sub = grp.sub ? `<div class="wd-subhead">${_esc(grp.sub)}</div>` : '';
+        const sub = grp.sub ? `<div class="wd-subhead">${_esc(this._t('setting_group.' + _slugSub(grp.sub) + '.label', {}, grp.sub))}</div>` : '';
         const fields = (grp.fields || []).map(f => this._renderField(f, o)).filter(Boolean).join('');
         return fields ? `${sub}<div class="wd-form-grid">${fields}</div>` : '';
       }).join('');
@@ -3132,7 +3138,8 @@ class HaWashdataPanel extends HTMLElement {
     // Anomaly detail when hovering inside a detected artifact span.
     (wd.artifacts || []).forEach(a => {
       if (x >= a.start_s && x <= a.end_s) {
-        lines.push(`<span style="color:var(--warning-color,#ff9800)">⚠ ${_esc(_artifactLabel(a.type, (k, v, f) => this._t(k, v, f)))}</span>: ${_esc(a.detail || '')}`);
+        const detail = a.detail_key ? this._t(a.detail_key, a.detail_params || {}, a.detail || '') : (a.detail || '');
+        lines.push(`<span style="color:var(--warning-color,#ff9800)">⚠ ${_esc(_artifactLabel(a.type, (k, v, f) => this._t(k, v, f)))}</span>: ${_esc(detail)}`);
       }
     });
     if (this._canvasZoom[id]) lines.push('<span style="opacity:.45">scroll to zoom · dblclick to reset</span>');
@@ -3188,7 +3195,7 @@ class HaWashdataPanel extends HTMLElement {
       body = `<h2>${this._t('modal.label_cycle', {}, 'Label Cycle')}</h2>
         <div class="wd-field"><label>${this._t('lbl.select_profile', {}, 'Select Profile')}</label>
           <select id="wd-label-profile"><option value="">${this._t('lbl.remove_label', {}, '- Remove label -')}</option><option value="__create_new__">${this._t('lbl.create_new_profile', {}, '+ Create new profile…')}</option>${this._profileOptions()}</select></div>
-        <div id="wd-new-profile-row" class="wd-field" style="display:none"><label>New Profile Name</label><input type="text" id="wd-new-profile-name" placeholder="e.g. Cotton 40°C"></div>
+        <div id="wd-new-profile-row" class="wd-field" style="display:none"><label>${this._t('lbl.new_profile_name', {}, 'New Profile Name')}</label><input type="text" id="wd-new-profile-name" placeholder="e.g. Cotton 40°C"></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="label-ok">${this._t('btn.apply_label', {}, 'Apply Label')}</button></div>`;
     } else if (m.type === 'create-profile') {
@@ -3419,7 +3426,10 @@ class HaWashdataPanel extends HTMLElement {
     let artifactBox = '';
     const arts = (m.mode === 'view' || m.mode === 'review') ? (cur.artifacts || []) : [];
     if (arts.length) {
-      const items = arts.map(a => `<li><b>${_esc(_artifactLabel(a.type, (k, v, f) => this._t(k, v, f)))}</b> at ${_fmtClock(a.start_s)}–${_fmtClock(a.end_s)} — ${_esc(a.detail || '')}</li>`).join('');
+      const items = arts.map(a => {
+        const detail = a.detail_key ? this._t(a.detail_key, a.detail_params || {}, a.detail || '') : (a.detail || '');
+        return `<li><b>${_esc(_artifactLabel(a.type, (k, v, f) => this._t(k, v, f)))}</b> at ${_fmtClock(a.start_s)}–${_fmtClock(a.end_s)} — ${_esc(detail)}</li>`;
+      }).join('');
       artifactBox = `<div class="wd-card" style="margin:10px 0 0;padding:10px 12px;border-left:3px solid var(--warning-color,#ff9800)">
         <div style="font-weight:600;font-size:.9em">⚠ ${this._t('msg.artifact_header', {n: arts.length}, `${arts.length} anomal${arts.length > 1 ? 'ies' : 'y'} detected during this cycle`)}</div>
         <ul class="wd-info" style="margin:4px 0 0;padding-left:18px;font-size:.82em">${items}</ul>

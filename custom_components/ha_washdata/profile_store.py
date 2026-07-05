@@ -806,6 +806,12 @@ class ProfileStore:
 
         # Cache for resampled sample segments: key=(cycle_id, dt)
         self._cached_sample_segments: dict[tuple[str, float], Segment] = {}
+        # Cache for group cohesion scores to avoid re-running DTW on the event loop
+        # every 5 minutes.  Keyed by sorted-members tuple; invalidated when profile_groups
+        # content changes (tracked by a simple generation counter).
+        self._cohesion_cache: dict[tuple[str, ...], float] = {}
+        self._cohesion_cache_generation: int = 0
+        self._cohesion_cache_generation_checked: int = -1
         # Profile duration tolerance (set by manager; reserved for duration-based heuristics)
         self._duration_tolerance: float = 0.25
         # Retention policy: cap total cycles and number of full-resolution traces per profile
@@ -1113,6 +1119,7 @@ class ProfileStore:
         members = [m for m in dict.fromkeys(members or []) if m in profiles]
         groups = self.get_profile_groups()
         groups[name] = {"members": members, "created_at": dt_util.now().isoformat()}
+        self._cohesion_cache_generation += 1
         await self.async_save()
         self._logger.info("Created profile group %r with %d members", name, len(members))
         return True
@@ -1128,6 +1135,7 @@ class ProfileStore:
             groups[name]["members"] = members
         else:
             groups.pop(name, None)
+        self._cohesion_cache_generation += 1
         await self.async_save()
         return True
 
@@ -1138,6 +1146,7 @@ class ProfileStore:
             raise ValueError("Group not found or new name empty")
         if new_name != name:
             groups[new_name] = groups.pop(name)
+        self._cohesion_cache_generation += 1
         await self.async_save()
         return True
 
@@ -1145,6 +1154,7 @@ class ProfileStore:
         groups = self.get_profile_groups()
         if groups.pop(name, None) is None:
             return False
+        self._cohesion_cache_generation += 1
         await self.async_save()
         self._logger.info("Deleted profile group %r", name)
         return True
@@ -1183,15 +1193,27 @@ class ProfileStore:
         so their averaged aggregate would be too generic and could out-match
         unrelated profiles - the matcher refuses to aggregate below
         GROUP_MIN_COHESION and the UI warns the user.
+
+        Results are cached per member-set and invalidated via
+        ``_cohesion_cache_generation`` (incremented by group mutation methods) so
+        the DTW pairwise comparison does not run on the event loop every 5 minutes.
         """
+        key = tuple(sorted(members))
+        if self._cohesion_cache_generation != self._cohesion_cache_generation_checked:
+            self._cohesion_cache.clear()
+            self._cohesion_cache_generation_checked = self._cohesion_cache_generation
+        if key in self._cohesion_cache:
+            return self._cohesion_cache[key]
         curves = [c for c in (self._profile_curve(m) for m in members) if c is not None]
         if len(curves) < 2:
-            return 1.0
-        worst = 1.0
-        for i in range(len(curves)):
-            for j in range(i + 1, len(curves)):
-                worst = min(worst, self._shape_similarity(curves[i], curves[j]))
-        return worst
+            result = 1.0
+        else:
+            result = 1.0
+            for i in range(len(curves)):
+                for j in range(i + 1, len(curves)):
+                    result = min(result, self._shape_similarity(curves[i], curves[j]))
+        self._cohesion_cache[key] = result
+        return result
 
     def _grouped_snapshots(
         self, snapshots: list[dict[str, Any]]
@@ -1668,18 +1690,21 @@ class ProfileStore:
         top1_score: float,
         top2_score: float | None,
         candidate_count: int,
+        cycle_id: str = "",
     ) -> None:
         """Append a live-match ranking snapshot for the active cycle.
 
-        Snapshots are keyed by ``start_time_iso`` so that ``confirm_match_ranking_snapshots``
-        can back-fill the confirmed label when the cycle ends.  Pre-computed feature
-        scalars are stored (not raw traces) to keep footprint small.  The store is
-        NOT persisted here — the caller must schedule ``async_save``.
+        Snapshots are keyed by ``start_time_iso`` (and optionally ``cycle_id``) so
+        that ``confirm_match_ranking_snapshots`` can back-fill the confirmed label
+        when the cycle ends.  Pre-computed feature scalars are stored (not raw traces)
+        to keep footprint small.  The store is NOT persisted here — the caller must
+        schedule ``async_save``.
         """
         from .const import MATCH_RANKING_HISTORY_MAX  # pylint: disable=import-outside-toplevel
         history: list[dict[str, Any]] = self._data.setdefault("match_ranking_history", [])
         history.append({
             "start_time_iso": start_time_iso,
+            "cycle_id": str(cycle_id) if cycle_id else "",
             "features": dict(features),
             "top1_profile": str(top1_profile),
             "top1_score": round(float(top1_score), 4),
@@ -1695,10 +1720,14 @@ class ProfileStore:
         self,
         start_time_iso: str,
         confirmed_label: str,
+        cycle_id: str = "",
     ) -> int:
         """Back-fill the confirmed label for all snapshots belonging to a cycle.
 
-        Matches by ``start_time_iso`` (set at record time, equals cycle's start_time).
+        When ``cycle_id`` is provided (and the snapshot was recorded with one), matches
+        by ``cycle_id`` to avoid cross-contamination between cycles that share the same
+        second-resolution ``start_time_iso``.  Falls back to ``start_time_iso`` matching
+        for snapshots recorded without a cycle_id (backward compatibility).
         Returns the number of snapshots updated.
         """
         history = self._data.get("match_ranking_history")
@@ -1706,9 +1735,19 @@ class ProfileStore:
             return 0
         updated = 0
         for snap in history:
-            if isinstance(snap, dict) and snap.get("start_time_iso") == start_time_iso:
-                snap["confirmed_label"] = str(confirmed_label)
-                updated += 1
+            if not isinstance(snap, dict):
+                continue
+            snap_cid = snap.get("cycle_id") or ""
+            if cycle_id and snap_cid:
+                # Both sides have an ID — match by ID for precision.
+                if snap_cid == cycle_id:
+                    snap["confirmed_label"] = str(confirmed_label)
+                    updated += 1
+            else:
+                # Legacy path: match by timestamp (no cycle_id on one or both sides).
+                if snap.get("start_time_iso") == start_time_iso:
+                    snap["confirmed_label"] = str(confirmed_label)
+                    updated += 1
         return updated
 
     def get_match_ranking_history(self) -> list[dict[str, Any]]:
@@ -3037,14 +3076,21 @@ class ProfileStore:
             if not env:
                 return None
             time_grid = env.get("time_grid")
-            lower = env.get("lower")
-            upper = env.get("upper")
-            if not time_grid or not lower or not upper:
+            lower_raw = env.get("min")
+            upper_raw = env.get("max")
+            if not time_grid or not lower_raw or not upper_raw:
                 return None
 
             tg = np.asarray(time_grid, dtype=float)
-            lo = np.asarray(lower, dtype=float)
-            hi = np.asarray(upper, dtype=float)
+            # Envelope curves are stored as [[t, y], ...]; extract the y column.
+            lo = np.asarray(
+                [p[1] if isinstance(p, (list, tuple)) else p for p in lower_raw],
+                dtype=float,
+            )
+            hi = np.asarray(
+                [p[1] if isinstance(p, (list, tuple)) else p for p in upper_raw],
+                dtype=float,
+            )
             env_duration = float(tg[-1]) if len(tg) > 1 else 1.0
 
             # Normalise observed trace to [0, env_duration] time range
@@ -3100,10 +3146,17 @@ class ProfileStore:
             if not env:
                 return []
             tg = np.asarray(env.get("time_grid") or [], dtype=float)
-            lo = np.asarray(env.get("lower") or [], dtype=float)
-            hi = np.asarray(env.get("upper") or [], dtype=float)
-            avg_raw = env.get("avg") or []
-            avg = np.asarray(avg_raw, dtype=float)
+            # Envelope curves are stored as [[t, y], ...]; extract the y column.
+            def _extract_y(raw: list) -> np.ndarray:
+                if not raw:
+                    return np.array([], dtype=float)
+                return np.asarray(
+                    [p[1] if isinstance(p, (list, tuple)) else p for p in raw],
+                    dtype=float,
+                )
+            lo = _extract_y(env.get("min") or [])
+            hi = _extract_y(env.get("max") or [])
+            avg = _extract_y(env.get("avg") or [])
             if tg.size < 2 or lo.size != tg.size or hi.size != tg.size:
                 return []
 
@@ -3158,15 +3211,20 @@ class ProfileStore:
                     if s == "pause":
                         detail = (f"Power dropped to near zero for ~{int(dur)}s then resumed — "
                                   "likely the door was opened mid-cycle or the cycle was paused.")
+                        detail_key = "msg.artifact_pause_detail"
                     elif s == "dip":
                         detail = f"Drew below the usual power band for ~{int(dur)}s."
+                        detail_key = "msg.artifact_dip_detail"
                     else:
                         detail = f"Drew above the usual power band for ~{int(dur)}s."
+                        detail_key = "msg.artifact_spike_detail"
                     events.append({
                         "type": s,
                         "start_s": round(start_s, 1),
                         "end_s": round(end_s, 1),
                         "detail": detail,
+                        "detail_key": detail_key,
+                        "detail_params": {"n": int(dur)},
                         "severity": round(min(1.0, dur / sev_scale[s]), 3),
                     })
                 i = j + 1
@@ -3487,7 +3545,10 @@ class ProfileStore:
             # Safeguard #2: the group aggregate matched but if the chosen member
             # does not individually fit reasonably (vs the group score), the real
             # program may be a different single profile -> treat as uncertain.
-            if member_fit is not None and best["score"] > 0 and member_fit < 0.7 * best["score"]:
+            # member_fit is a Stage-2-only score; best["score"] includes DTW-blend +
+            # duration/energy agreement (typically 25-30% higher). Use 0.55× to avoid
+            # the threshold being effectively too strict for DTW-boosted groups.
+            if member_fit is not None and best["score"] > 0 and member_fit < 0.55 * best["score"]:
                 is_ambiguous = True
             # Relabel the winning candidate for the ranking / diagnostics.
             candidates = [{**best, "name": best_name, "profile_duration": best_duration}, *candidates[1:]]
@@ -4194,6 +4255,10 @@ class ProfileStore:
             data_dict["past_cycles"] = []
         data_dict.setdefault("envelopes", {})
 
+        if not data_dict.get("profiles") and not data_dict.get("past_cycles"):
+            raise ValueError(
+                "Import payload contains no profiles or cycles — aborting to prevent data loss"
+            )
         self._data = data_dict
         self._cached_sample_segments = {}
         await self.async_save()
