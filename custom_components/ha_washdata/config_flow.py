@@ -145,9 +145,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
                 errors["base"] = "unknown"
 
             if not errors:
-                new_data = {
-                    **entry.data,
-                    CONF_NAME: user_input[CONF_NAME],
+                new_options = {
+                    **entry.options,
                     CONF_DEVICE_TYPE: user_input[CONF_DEVICE_TYPE],
                     CONF_POWER_SENSOR: user_input[CONF_POWER_SENSOR],
                     CONF_MIN_POWER: user_input[CONF_MIN_POWER],
@@ -155,7 +154,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
                 return self.async_update_reload_and_abort(
                     entry,
                     title=user_input[CONF_NAME],
-                    data=new_data,
+                    options=new_options,
                 )
 
         current_device_type = entry.data.get(
@@ -232,16 +231,21 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             CONF_DEVICE_TYPE, entry.options.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
         )
 
+        errors: dict[str, str] = {}
+
         if user_input is not None:
-            new_name = str(user_input.get(CONF_NAME, "")).strip()
-            new_options = {**entry.data, **entry.options, **user_input}
-            if new_name and new_name != entry.title:
-                self.hass.config_entries.async_update_entry(
-                    entry,
-                    title=new_name,
-                    data={**entry.data, CONF_NAME: new_name},
-                )
-            return self.async_create_entry(title="", data=new_options)
+            if user_input.get(CONF_MIN_POWER, 0) <= 0:
+                errors[CONF_MIN_POWER] = "invalid_power"
+            if not errors:
+                new_name = str(user_input.get(CONF_NAME, "")).strip()
+                new_options = {**entry.data, **entry.options, **user_input}
+                if new_name and new_name != entry.title:
+                    self.hass.config_entries.async_update_entry(
+                        entry,
+                        title=new_name,
+                        data={**entry.data, CONF_NAME: new_name},
+                    )
+                return self.async_create_entry(title="", data=new_options)
 
         schema = vol.Schema(
             {
@@ -278,4 +282,4 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             }
         )
 
-        return self.async_show_form(step_id="init", data_schema=schema)
+        return self.async_show_form(step_id="init", data_schema=schema, errors=errors)

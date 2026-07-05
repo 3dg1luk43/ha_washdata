@@ -1448,8 +1448,23 @@ async def ws_process_recording(
         data_start_ts = parsed[0][0] if parsed else 0.0
         data_end_ts = parsed[-1][0] if parsed else 0.0
 
-        start_ts = dt_util.parse_datetime(rec_start_str).timestamp() if rec_start_str else data_start_ts
-        end_ts = dt_util.parse_datetime(rec_end_str).timestamp() if rec_end_str else data_end_ts
+        if rec_start_str:
+            parsed_dt = dt_util.parse_datetime(rec_start_str)
+            if parsed_dt is None:
+                connection.send_error(msg["id"], "invalid_format", "Invalid recording start_time format")
+                return
+            start_ts = parsed_dt.timestamp()
+        else:
+            start_ts = data_start_ts
+
+        if rec_end_str:
+            parsed_dt = dt_util.parse_datetime(rec_end_str)
+            if parsed_dt is None:
+                connection.send_error(msg["id"], "invalid_format", "Invalid recording end_time format")
+                return
+            end_ts = parsed_dt.timestamp()
+        else:
+            end_ts = data_end_ts
 
         if parsed:
             start_ts = min(start_ts, data_start_ts)
@@ -1781,8 +1796,8 @@ async def ws_wipe_history(
 @websocket_api.websocket_command(
     {vol.Required("type"): "ha_washdata/export_config", vol.Required("entry_id"): str}
 )
-@callback
-def ws_export_config(
+@websocket_api.async_response
+async def ws_export_config(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
@@ -1800,7 +1815,11 @@ def ws_export_config(
             entry_data=dict(entry.data) if entry else {},
             entry_options=dict(entry.options) if entry else {},
         )
-        connection.send_result(msg["id"], {"json_data": json.dumps(payload, indent=2)})
+        # Offload serialization to executor — power traces can be megabytes
+        json_str = await hass.async_add_executor_job(
+            lambda: json.dumps(payload, indent=2)
+        )
+        connection.send_result(msg["id"], {"json_data": json_str})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -2042,8 +2061,8 @@ async def ws_run_suggestion_analysis(
         vol.Required("cycle_id"): str,
     }
 )
-@callback
-def ws_get_cycle_power_data(
+@websocket_api.async_response
+async def ws_get_cycle_power_data(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
@@ -2078,7 +2097,10 @@ def ws_get_cycle_power_data(
             # fly for older cycles that predate artifact storage.
             artifacts = cycle.get("artifacts")
             if artifacts is None and cycle.get("profile_name") and samples:
-                artifacts = store.detect_cycle_artifacts(cycle["profile_name"], samples)
+                # Offload CPU-intensive NumPy work to executor thread
+                artifacts = await hass.async_add_executor_job(
+                    store.detect_cycle_artifacts, cycle["profile_name"], samples
+                )
             meta["artifacts"] = artifacts or []
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error getting cycle power data %s: %s", cycle_id, exc)

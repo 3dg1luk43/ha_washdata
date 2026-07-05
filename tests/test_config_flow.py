@@ -167,11 +167,12 @@ async def test_reconfigure_saves_and_aborts_on_valid_input():
     assert flow.async_update_reload_and_abort.called
     call_kwargs = flow.async_update_reload_and_abort.call_args[1]
     assert call_kwargs["title"] == "Renamed Washer"
-    new_data = call_kwargs["data"]
-    assert new_data[CONF_NAME] == "Renamed Washer"
-    assert new_data[CONF_DEVICE_TYPE] == "dryer"
-    assert new_data[CONF_POWER_SENSOR] == "sensor.dryer_power"
-    assert new_data[CONF_MIN_POWER] == 3.0
+    # After migration 3.6, device_type/power_sensor/min_power live in options, not data.
+    assert "data" not in call_kwargs, "reconfigure must not write to entry.data"
+    new_options = call_kwargs["options"]
+    assert new_options[CONF_DEVICE_TYPE] == "dryer"
+    assert new_options[CONF_POWER_SENSOR] == "sensor.dryer_power"
+    assert new_options[CONF_MIN_POWER] == 3.0
 
 
 @pytest.mark.asyncio

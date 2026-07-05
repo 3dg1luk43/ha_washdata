@@ -3446,7 +3446,7 @@ class WashDataManager:
                 profile_distance=proxy_dist,
                 label_margin=proxy_margin,
                 profile_fit_score=proxy_fit,
-                flag_count=0,
+                flag_count=len(cycle_data.get("artifacts", [])),
             )
             score = round(float(quality_fn(feat)), 3)
             cycle_data["ml_quality_score"] = score
@@ -3573,6 +3573,12 @@ class WashDataManager:
             cycle_data["energy_price"] = price
             cycle_data["cost"] = round(cycle_data.get("energy_wh", 0.0) / 1000.0 * price, 4)
 
+        # Score cycle quality with the ML model before persisting so the score is
+        # stored on the cycle record and available to the learning manager immediately.
+        # Must run BEFORE async_add_cycle so get_past_cycles() inside the scorer does
+        # not yet include the current cycle, keeping reference statistics uncontaminated.
+        self._compute_cycle_quality_score(cycle_data)
+
         # Add cycle to store immediately (still sync but offloadable parts optimized
         # internally if possible)
         # Note: add_cycle is mostly safe (signature calc is O(N) but fast enough for
@@ -3667,10 +3673,6 @@ class WashDataManager:
                     "tag": self._lifecycle_tag,
                 },
             )
-
-        # Score cycle quality with the ML model (opt-in; stored on cycle_data so
-        # the learning manager can use it to gate auto-labeling vs. feedback).
-        self._compute_cycle_quality_score(cycle_data)
 
         # Request user feedback if we had a confident match.
         # AND perform learning analysis on the completed cycle.

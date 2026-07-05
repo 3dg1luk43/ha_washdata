@@ -56,14 +56,11 @@ _MIN_ROWS = 40
 
 
 def _read_points(cycle: dict[str, Any]) -> list[tuple[float, float]]:
-    raw = cycle.get("power_data")
-    if not isinstance(raw, list) or len(raw) < 2:
-        return []
-    start_iso = cycle.get("start_time") if isinstance(cycle.get("start_time"), str) else None
+    """Return power data as offset-seconds/watts pairs, handling str and datetime start_time."""
+    from ..profile_store import decompress_power_data  # noqa: PLC0415
     try:
-        pairs = power_data_to_offsets(raw, start_iso)
-        return [(float(o), float(p)) for o, p in pairs]
-    except (TypeError, ValueError):
+        return decompress_power_data(cycle)
+    except Exception:  # noqa: BLE001
         return []
 
 
@@ -568,7 +565,7 @@ async def async_run_training(hass: Any, manager: Any) -> dict[str, Any]:
     from homeassistant.util import dt as dt_util
 
     trained_at = dt_util.now().isoformat()
-    cycles = store.get_past_cycles()
+    cycles = list(store.get_past_cycles())  # snapshot before executor to avoid data race
     ranking_history = store.get_match_ranking_history()
 
     _LOGGER.info(

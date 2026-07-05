@@ -49,13 +49,22 @@ Point = tuple[float, float]
 
 
 def cumulative_energy_wh(points: Sequence[Point]) -> np.ndarray:
-    """Trapezoidal cumulative energy (Wh) aligned to each reading."""
+    """Trapezoidal cumulative energy (Wh) aligned to each reading, with gap handling.
+
+    Segments spanning sensor-outage gaps (larger than ``energy_gap_threshold_s``)
+    are zeroed out so energy does not inflate across outages, matching the behaviour
+    of ``signal_processing.integrate_wh`` used for stored ``energy_wh`` fields.
+    """
+    from ..signal_processing import energy_gap_threshold_s  # noqa: PLC0415
     offsets = np.asarray([float(offset) for offset, _power in points], dtype=float)
     powers = np.asarray([max(0.0, float(power)) for _offset, power in points], dtype=float)
     if offsets.size < 2:
         return np.zeros(offsets.size, dtype=float)
+    max_gap = energy_gap_threshold_s(offsets)
     deltas = np.diff(offsets)
     segment = (powers[:-1] + powers[1:]) / 2.0 * deltas / 3600.0
+    # Zero out segments that span a sensor outage gap to match integrate_wh behaviour.
+    segment[deltas > max_gap] = 0.0
     return np.concatenate([[0.0], np.cumsum(segment)])
 
 
