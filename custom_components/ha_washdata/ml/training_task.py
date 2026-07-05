@@ -506,7 +506,12 @@ def train_from_cycles(
     promoted: dict[str, Any] = {}
     for capability, (module_name, target) in _CAPABILITIES.items():
         X, y, columns = datasets[capability]
-        record = _train_capability(capability, target, X, y, columns, trained_at)
+        try:
+            record = _train_capability(capability, target, X, y, columns, trained_at)
+        except ValueError as exc:
+            _LOGGER.debug("Skipping %s training: %s", capability, exc)
+            results.append({"capability": capability, "promoted": False, "reason": str(exc)})
+            continue
         results.append(record)
         if record.get("promoted") and "spec" in record:
             promoted[capability] = {

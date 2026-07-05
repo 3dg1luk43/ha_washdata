@@ -16,7 +16,7 @@ class TerminationReason(StrEnum):
     TERMINAL_DROP = "terminal_drop"  # anomalously-early hard cliff-to-0 (opt-in)
 
 
-# Completed dryers stay eligible for anti-wrinkle handling only for these
+# Completed cycles stay eligible for anti-wrinkle handling only for these
 # reasons (a user-stopped cycle is intentionally excluded).
 ANTI_WRINKLE_ELIGIBLE_REASONS = frozenset(
     {TerminationReason.TIMEOUT, TerminationReason.SMART}
@@ -36,6 +36,7 @@ CONF_NOTIFY_EVENTS = "notify_events"  # Deprecated - kept for migration only
 CONF_NOTIFY_START_SERVICES = "notify_start_services"
 CONF_NOTIFY_FINISH_SERVICES = "notify_finish_services"
 CONF_NOTIFY_LIVE_SERVICES = "notify_live_services"
+CONF_NOTIFY_CYCLE_TIMERS = "notify_cycle_timers"
 CONF_NO_UPDATE_ACTIVE_TIMEOUT = "no_update_active_timeout"
 CONF_LOW_POWER_NO_UPDATE_TIMEOUT = "low_power_no_update_timeout"
 CONF_SMOOTHING_WINDOW = "smoothing_window"
@@ -99,6 +100,7 @@ NOTIFY_EVENT_START = "cycle_start"
 NOTIFY_EVENT_FINISH = "cycle_finish"
 NOTIFY_EVENT_LIVE = "cycle_live"
 NOTIFY_EVENT_CLEAN = "cycle_clean"  # Laundry still inside after cycle ends
+NOTIFY_EVENT_TIMER = "cycle_timer"  # User-configured mid-cycle countdown timer
 
 CONF_NOTIFY_TITLE = "notify_title"
 CONF_NOTIFY_ICON = "notify_icon"
@@ -442,6 +444,11 @@ DISHWASHER_END_SPIKE_MIN_PROGRESS = 0.85
 # to capture even the latest pump-outs while still guaranteeing the cycle
 # closes eventually for dishwashers that have no pump-out at all.
 DISHWASHER_END_SPIKE_WAIT_SECONDS = 1800.0
+# Minimum reasonable dishwasher cycle duration (seconds).  Even the shortest
+# quick programmes take at least 30 min; defer _should_defer_finish for any
+# dishwasher whose cycle has not yet crossed this floor, regardless of whether
+# a profile match is available yet.
+DISHWASHER_MIN_CYCLE_DURATION_S = 1800.0
 
 DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 1800,  # 30 min (Drying)

@@ -270,7 +270,7 @@ Start 5-min idle timer
 | Component | Purpose |
 |-----------|---------|
 | `_cycle_completed_time` | Tracks when cycle finished (ISO timestamp) |
-| `_progress_reset_delay` | Configurable idle time (default: 300s/5min) |
+| `_progress_reset_delay` | Configurable idle time (default: 1800s/30min) |
 | `_start_state_expiry_timer()` | Begin countdown after cycle end |
 | `_handle_state_expiry()` | Async callback checking if idle threshold passed |
 | `_stop_state_expiry_timer()` | Cancel reset if new cycle starts |

@@ -8,6 +8,7 @@ import logging
 import hashlib
 import inspect
 import math
+import uuid
 from asyncio import Task
 from datetime import datetime, timedelta
 from typing import Any, cast
@@ -37,6 +38,7 @@ from .const import (
     CONF_NOTIFY_START_SERVICES,
     CONF_NOTIFY_FINISH_SERVICES,
     CONF_NOTIFY_LIVE_SERVICES,
+    CONF_NOTIFY_CYCLE_TIMERS,
     CONF_NOTIFY_PEOPLE,
     CONF_NOTIFY_ONLY_WHEN_HOME,
     CONF_NOTIFY_FIRE_EVENTS,
@@ -97,6 +99,7 @@ from .const import (
     NOTIFY_EVENT_FINISH,
     NOTIFY_EVENT_LIVE,
     NOTIFY_EVENT_CLEAN,
+    NOTIFY_EVENT_TIMER,
     EVENT_CYCLE_STARTED,
     EVENT_CYCLE_ENDED,
     DEFAULT_MIN_POWER,
@@ -249,6 +252,20 @@ def _pn_create(
         return
 
 
+def _pn_dismiss(hass: HomeAssistant, notification_id: str) -> None:
+    """Best-effort persistent notification dismissal."""
+    try:
+        components = getattr(cast(Any, hass), "components", None)
+        pn = getattr(cast(Any, components), "persistent_notification", None)
+        if pn is None:
+            return
+        result = pn.async_dismiss(notification_id)
+        if inspect.iscoroutine(result):
+            hass.async_create_task(result)
+    except Exception:
+        return
+
+
 class WashDataManager:
     """Manages a single washing machine instance."""
 
@@ -279,6 +296,11 @@ class WashDataManager:
         self._notify_live_services: list[str] = []
         self._notify_actions: list[dict[str, Any]] = []
         self._notify_people: list[str] = []
+        self._notify_cycle_timers: list[dict[str, Any]] = []
+        self._fired_cycle_timers: set[int] = set()
+        self._timer_pause_pn_id: str | None = None
+        self._timer_pause_mobile_tag: str | None = None
+        self._remove_timer_action_listener: Any | None = None
         self._notify_only_when_home = DEFAULT_NOTIFY_ONLY_WHEN_HOME
         self._notify_fire_events = DEFAULT_NOTIFY_FIRE_EVENTS
         self._notify_live_interval_seconds = DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS
@@ -325,6 +347,9 @@ class WashDataManager:
         self._live_notification_tag = self._lifecycle_tag
         self._start_event_fired = False
         self._cycle_start_time: datetime | None = None
+        # Per-cycle UUID used to key ranking snapshots; prevents cross-contamination
+        # between cycles that happen to share the same second-resolution start_time.
+        self._ranking_snapshot_cycle_id: str = ""
 
         # State
         self._current_power = 0.0
@@ -883,6 +908,7 @@ class WashDataManager:
                         top1_score=float(confidence),
                         top2_score=_top2_score,
                         candidate_count=max(1, len(self.profile_store.get_profiles())),
+                        cycle_id=self._ranking_snapshot_cycle_id,
                     )
                 except Exception:  # noqa: BLE001 - never break matching
                     pass
@@ -1532,6 +1558,11 @@ class WashDataManager:
         self._notify_start_services = list(config_entry.options.get(CONF_NOTIFY_START_SERVICES, []) or [])
         self._notify_finish_services = list(config_entry.options.get(CONF_NOTIFY_FINISH_SERVICES, []) or [])
         self._notify_live_services = list(config_entry.options.get(CONF_NOTIFY_LIVE_SERVICES, []) or [])
+        raw_timers = config_entry.options.get(CONF_NOTIFY_CYCLE_TIMERS, []) or []
+        self._notify_cycle_timers = [
+            t for t in raw_timers
+            if isinstance(t, dict) and isinstance(t.get("offset_minutes"), (int, float)) and t["offset_minutes"] > 0
+        ]
         # Backward compat: migrate old single notify_service + notify_events to new per-event lists
         if not (self._notify_start_services or self._notify_finish_services or self._notify_live_services):
             _old_svc = config_entry.options.get(CONF_NOTIFY_SERVICE, "")
@@ -1967,6 +1998,13 @@ class WashDataManager:
             self._remove_ml_training_scheduler = None
 
         self.diag_buffer.uninstall()
+
+        # Dismiss the timer-pause notification so it doesn't linger on mobile or
+        # sidebar after HA restarts / integration unloads.
+        try:
+            self._clear_timer_pause_notification()
+        except Exception:  # noqa: BLE001
+            pass
 
         # Dismiss any active live/progress notification so it doesn't linger on
         # mobile devices across HA restarts or integration unloads with a stale
@@ -2430,7 +2468,13 @@ class WashDataManager:
         except Exception as err:  # noqa: BLE001
             self._logger.debug("Cycle-health recompute failed: %s", err)
             return 0
-        if result.get("_health_dirty"):
+        health_updates = result.get("_health_updates", {})
+        if health_updates:
+            for cycle in self.profile_store.get_past_cycles():
+                cid = cycle.get("id")
+                if cid in health_updates:
+                    cycle["ml_health"] = health_updates[cid]
+        if result.get("_health_dirty") or health_updates:
             await self.profile_store.async_save()
         return int(result.get("evaluated_count", 0))
 
@@ -3011,6 +3055,7 @@ class WashDataManager:
                 self._notified_start = False # Reset start notification state
                 self._start_event_fired = False
                 self._cycle_start_time = self.detector.current_cycle_start or dt_util.now()
+                self._ranking_snapshot_cycle_id = str(uuid.uuid4())
                 self._reset_live_notification_state()
 
                 # Reset pause tracking and clean state for new cycle
@@ -3018,6 +3063,8 @@ class WashDataManager:
                 self._user_pause_start = None
                 self._total_user_paused_seconds = 0.0
                 self._is_clean_state = False
+                self._fired_cycle_timers = set()
+                self._clear_timer_pause_notification()
                 self._clean_state_start = None
                 self._notified_clean_laundry = False
 
@@ -3082,6 +3129,7 @@ class WashDataManager:
         # IMMEDIATELY stop all active timers when cycle determined to have ended
         self._stop_watchdog()  # Stop active cycle watchdog
         self._stop_state_expiry_timer()  # Cancel any pending progress reset
+        self._clear_timer_pause_notification()
         prev_cycle_end_time = self._last_cycle_end_time
         self._last_cycle_end_time = dt_util.now()
         self._pump_stuck = False  # Reset for next pump cycle
@@ -3532,7 +3580,11 @@ class WashDataManager:
         _confirmed_profile = cycle_data.get("profile_name")
         if _start_iso and _confirmed_profile:
             try:
-                self.profile_store.confirm_match_ranking_snapshots(_start_iso, _confirmed_profile)
+                self.profile_store.confirm_match_ranking_snapshots(
+                    _start_iso,
+                    _confirmed_profile,
+                    cycle_id=self._ranking_snapshot_cycle_id,
+                )
             except Exception:  # noqa: BLE001
                 pass
 
@@ -3585,8 +3637,10 @@ class WashDataManager:
         # single cycle).
         # We could offload signature calc to analysis logic if really needed, but let's
         # stick to match profile optimization first.
+        cycle_persisted = False
         try:
             await self.profile_store.async_add_cycle(cycle_data)
+            cycle_persisted = True
             profile_name = cycle_data.get("profile_name")
             if profile_name:
                 await self.profile_store.async_rebuild_envelope(profile_name)
@@ -3677,13 +3731,17 @@ class WashDataManager:
         # Request user feedback if we had a confident match.
         # AND perform learning analysis on the completed cycle.
         # IMPORTANT: this must happen before we clear match state.
-        self.learning_manager.process_cycle_end(
-            cycle_data,
-            detected_profile=self._current_program,
-            confidence=self._last_match_confidence or 0.0,
-            predicted_duration=self._matched_profile_duration,
-            match_result=self._last_match_result,
-        )
+        # Only run when the cycle was actually persisted — an unpersisted cycle
+        # has no store entry to reference, so a pending-feedback record would
+        # dangle forever.
+        if cycle_persisted:
+            self.learning_manager.process_cycle_end(
+                cycle_data,
+                detected_profile=self._current_program,
+                confidence=self._last_match_confidence or 0.0,
+                predicted_duration=self._matched_profile_duration,
+                match_result=self._last_match_result,
+            )
 
         # Clear all state and timers - zero everything out
         self._current_program = "off"
@@ -3696,6 +3754,7 @@ class WashDataManager:
         self._cycle_progress = 100.0  # 100% = cycle complete
         self._cycle_completed_time = dt_util.now()
         self._cycle_start_time = None
+        self._ranking_snapshot_cycle_id = ""
         self._reset_live_notification_state()
 
         # Reset pause tracking for the next cycle
@@ -3775,6 +3834,11 @@ class WashDataManager:
             return self._notify_finish_services
         if event_type == NOTIFY_EVENT_LIVE:
             return self._notify_live_services
+        if event_type == NOTIFY_EVENT_TIMER:
+            # Cycle timers go to all configured services (start union finish, deduped).
+            return list(dict.fromkeys(
+                self._notify_start_services + self._notify_finish_services
+            ))
         return []
 
     def _resolve_channel(self, event_type: str | None) -> str | None:
@@ -3903,18 +3967,15 @@ class WashDataManager:
         extra_vars: dict[str, Any] | None = None,
     ) -> bool:
         """Send a notification to each configured notify service, or fall back to persistent notification."""
+        ev = extra_vars or {}
+        # Base payload shared by all notification platforms.
         data: dict[str, Any] = {}
         if icon:
             data["icon"] = icon
 
-        ev = extra_vars or {}
-        # Common payload keys forwarded for every event type so start/live/reminder/
-        # finished share a tag (replace each other) and honour timeout/channel/priority.
-        for key in ("tag", "timeout", "channel", "priority"):
-            if key in ev:
-                data[key] = ev[key]
-
         # Live-progress-only payload keys (countdown, progress bar, throttle markers).
+        # Live updates are already gated to mobile_app targets by the guard below,
+        # so these keys never reach strict-schema platforms.
         if event_type == NOTIFY_EVENT_LIVE:
             for key in (
                 "progress",
@@ -3944,6 +4005,16 @@ class WashDataManager:
                 )
                 continue
 
+            # Mobile-app-specific keys (tag/timeout/channel/priority) are
+            # rejected by some strict-schema platforms such as Signal Messenger.
+            # Only add them for mobile_app targets; all other platforms receive
+            # the base payload only.
+            svc_data = dict(data)
+            if self._is_mobile_notify_service(notify_service):
+                for key in ("tag", "timeout", "channel", "priority", "actions", "sticky"):
+                    if key in ev:
+                        svc_data[key] = ev[key]
+
             state = (
                 self.hass.states.get(notify_service)
                 if notify_service.startswith("notify.")
@@ -3956,8 +4027,8 @@ class WashDataManager:
                 }
                 if title:
                     service_data["title"] = title
-                if data:
-                    service_data["data"] = data
+                if svc_data:
+                    service_data["data"] = svc_data
                 self.hass.async_create_task(
                     self.hass.services.async_call(
                         "notify", "send_message", service_data
@@ -3970,8 +4041,8 @@ class WashDataManager:
                     else ("notify", notify_service)
                 )
                 service_data = {"message": message, "title": title}
-                if data:
-                    service_data["data"] = data
+                if svc_data:
+                    service_data["data"] = svc_data
                 self.hass.async_create_task(
                     self.hass.services.async_call(domain, service, service_data)
                 )
@@ -4270,6 +4341,11 @@ class WashDataManager:
             else ("notify", notify_service)
         )
         return service.startswith("mobile_app")
+
+    @property
+    def _timer_pause_action_id(self) -> str:
+        """Stable mobile action ID for timer-pause Resume button, unique per device."""
+        return f"RESUME_WD_{self.entry_id[:8].upper()}"
 
     def _estimate_live_notification_cap(self) -> int:
         """Compute hard cap for live updates from estimated cycle duration and overrun margin."""
@@ -4640,6 +4716,7 @@ class WashDataManager:
         # Use net elapsed (wall-clock minus user-paused time) for all time estimates
         # so that paused time is excluded from progress / remaining / total duration.
         duration_so_far = float(self.net_elapsed_seconds)
+        self._check_cycle_timers(duration_so_far)
 
         if self._matched_profile_duration and self._matched_profile_duration > 0:
             # Get current power trace for phase analysis
@@ -4761,10 +4838,13 @@ class WashDataManager:
             else:
                 self._smoothed_progress = progress
 
+            # Set _cycle_progress from the smoothed value FIRST so that
+            # time_remaining is derived from the same value shown to the user.
+            self._cycle_progress = max(0.0, min(self._smoothed_progress, 100.0))
+            remaining = max(matched_dur * (1.0 - self._cycle_progress / 100.0), 0.0)
             self._time_remaining = remaining
             self._total_duration = duration_so_far + remaining
             self._last_total_duration_update = now
-            self._cycle_progress = max(0.0, min(self._smoothed_progress, 100.0))
             self._logger.debug(
                 "Linear estimate: remaining=%smin, progress=%.1f%%",
                 int(remaining / 60),
@@ -4786,6 +4866,108 @@ class WashDataManager:
             self._logger.debug(
                 "No profile matched yet, elapsed=%smin", int(duration_so_far / 60)
             )
+
+    def _check_cycle_timers(self, elapsed_seconds: float) -> None:
+        """Fire any user-configured cycle timers whose offset has been reached."""
+        if not self._notify_cycle_timers:
+            return
+        if self.detector.state not in (STATE_RUNNING, STATE_PAUSED):
+            return
+
+        elapsed_minutes = elapsed_seconds / 60.0
+        for idx, timer in enumerate(self._notify_cycle_timers):
+            if idx in self._fired_cycle_timers:
+                continue
+            offset = float(timer.get("offset_minutes", 0))
+            if elapsed_minutes < offset:
+                continue
+
+            self._fired_cycle_timers.add(idx)
+            raw_msg = timer.get("message") or ""
+            fmt_kwargs = {
+                "device": self.config_entry.title,
+                "program": self._current_program or "",
+                "minutes": int(offset),
+            }
+            msg = self._safe_format_template(
+                raw_msg or "{device}: {minutes} min timer",
+                **fmt_kwargs,
+            )
+            auto_pause = bool(timer.get("auto_pause", False))
+            timer_tag = f"{self._lifecycle_tag}_timer_{idx}"
+            extra_vars: dict[str, Any] = {"tag": timer_tag}
+            if auto_pause:
+                extra_vars["actions"] = [
+                    {"action": self._timer_pause_action_id, "title": "Resume Cycle"}
+                ]
+                extra_vars["sticky"] = "true"
+            self._dispatch_notification(
+                msg,
+                event_type=NOTIFY_EVENT_TIMER,
+                extra_vars=extra_vars,
+                allow_deferral=False,
+            )
+            self._logger.info(
+                "Cycle timer #%d fired at %.0fs (%.1f min): %s",
+                idx, elapsed_seconds, offset, msg,
+            )
+            if auto_pause:
+                self.hass.async_create_task(self.async_pause_cycle())
+                self._setup_timer_pause_notification(msg, timer_tag)
+
+    def _setup_timer_pause_notification(self, msg: str, tag: str) -> None:
+        """Create the interactive pause notification: HA sidebar + mobile action listener.
+
+        Called when a cycle timer fires with auto_pause=True. The mobile notification
+        itself was already sent by _dispatch_notification (with actions/sticky in extra_vars);
+        this method creates the HA persistent notification for sidebar visibility and
+        registers the mobile action listener so tapping Resume on the phone calls resume_cycle.
+        """
+        self._clear_timer_pause_notification()
+
+        self._timer_pause_pn_id = tag
+        self._timer_pause_mobile_tag = tag
+
+        _pn_create(
+            self.hass,
+            f"{msg}\n\nThe cycle is paused. Open the WashData panel to resume.",
+            title=f"WashData: {self.config_entry.title}",
+            notification_id=tag,
+        )
+
+        action_id = self._timer_pause_action_id
+
+        @callback
+        def _on_mobile_action(event: Any) -> None:
+            if event.data.get("action") == action_id:
+                self.hass.async_create_task(self.async_resume_cycle())
+
+        self._remove_timer_action_listener = self.hass.bus.async_listen(
+            "mobile_app_notification_action",
+            _on_mobile_action,
+        )
+
+    def _clear_timer_pause_notification(self) -> None:
+        """Dismiss the active timer-pause notification (both HA persistent and mobile)."""
+        if self._remove_timer_action_listener is not None:
+            self._remove_timer_action_listener()
+            self._remove_timer_action_listener = None
+
+        if self._timer_pause_pn_id:
+            _pn_dismiss(self.hass, self._timer_pause_pn_id)
+            self._timer_pause_pn_id = None
+
+        if self._timer_pause_mobile_tag:
+            services = self._get_services_for_event(NOTIFY_EVENT_TIMER)
+            mobile_services = [s for s in services if self._is_mobile_notify_service(s)]
+            if mobile_services:
+                self._send_notification_service(
+                    "clear_notification",
+                    services=mobile_services,
+                    event_type=NOTIFY_EVENT_TIMER,
+                    extra_vars={"tag": self._timer_pause_mobile_tag},
+                )
+            self._timer_pause_mobile_tag = None
 
     def _estimate_phase_progress(
         self,
@@ -5255,21 +5437,23 @@ class WashDataManager:
                 if self.detector.state == "running":
                     self._update_estimates()
 
-    async def async_pause_cycle(self) -> None:
+    async def async_pause_cycle(self) -> bool:
         """Pause the current cycle (user-triggered).
 
         Sets verified_pause so the cycle is not finalized when power drops.
         Optionally cuts power to the switch entity if CONF_PAUSE_CUTS_POWER is enabled.
+
+        Returns True if the cycle was paused, False if it was a no-op (wrong state).
         """
         if self.detector.state not in (STATE_RUNNING, STATE_STARTING, STATE_PAUSED, STATE_ENDING):
             self._logger.debug(
                 "async_pause_cycle: ignored (detector state=%s)", self.detector.state
             )
-            return
+            return False
 
         if self._is_user_paused:
             self._logger.debug("async_pause_cycle: already user-paused, ignoring")
-            return
+            return False
 
         self._logger.info("Cycle paused by user")
         prev_verified = self.detector._verified_pause
@@ -5297,7 +5481,7 @@ class WashDataManager:
                     self._is_user_paused = False
                     self._user_pause_start = None
                     self.detector.set_verified_pause(prev_verified)
-                    return
+                    return False
 
         snapshot = self.detector.get_state_snapshot()
         snapshot["manual_program"] = self._manual_program_active
@@ -5310,16 +5494,19 @@ class WashDataManager:
         snapshot["total_user_paused_seconds"] = self._total_user_paused_seconds
         self.hass.async_create_task(self.profile_store.async_save_active_cycle(snapshot))
         self._notify_update()
+        return True
 
-    async def async_resume_cycle(self) -> None:
+    async def async_resume_cycle(self) -> bool:
         """Resume a user-paused cycle.
 
         Accumulates elapsed paused time and clears the verified pause flag.
         Optionally restores power via the switch entity if CONF_PAUSE_CUTS_POWER is enabled.
+
+        Returns True if the cycle was resumed, False if it was a no-op (not paused).
         """
         if not self._is_user_paused:
             self._logger.debug("async_resume_cycle: not user-paused, ignoring")
-            return
+            return False
 
         now = dt_util.now()
         prev_pause_start = self._user_pause_start
@@ -5332,6 +5519,7 @@ class WashDataManager:
         self._user_pause_start = None
         self._is_user_paused = False
         self.detector.set_verified_pause(False)
+        self._clear_timer_pause_notification()
         self._logger.info(
             "Cycle resumed by user (total paused: %.0fs)", self._total_user_paused_seconds
         )
@@ -5357,7 +5545,7 @@ class WashDataManager:
                     self._user_pause_start = prev_pause_start
                     self._is_user_paused = True
                     self.detector.set_verified_pause(True)
-                    return
+                    return False
 
         snapshot = self.detector.get_state_snapshot()
         snapshot["manual_program"] = self._manual_program_active
@@ -5370,6 +5558,7 @@ class WashDataManager:
         snapshot["total_user_paused_seconds"] = self._total_user_paused_seconds
         self.hass.async_create_task(self.profile_store.async_save_active_cycle(snapshot))
         self._notify_update()
+        return True
 
     async def async_terminate_cycle(self) -> None:
         """Force terminate the current cycle via user request."""

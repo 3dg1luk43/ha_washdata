@@ -348,12 +348,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             manager = hass.data[DOMAIN][entry_id]
 
             # Assign existing profile or remove label
-            if profile_name:
-                await manager.profile_store.assign_profile_to_cycle(
-                    cycle_id, profile_name
-                )
-            else:
-                await manager.profile_store.assign_profile_to_cycle(cycle_id, None)
+            try:
+                if profile_name:
+                    await manager.profile_store.assign_profile_to_cycle(
+                        cycle_id, profile_name
+                    )
+                else:
+                    await manager.profile_store.assign_profile_to_cycle(cycle_id, None)
+            except ValueError as exc:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="cycle_not_found_or_no_power",
+                ) from exc
 
             manager.notify_update()
 
@@ -379,9 +385,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 raise ValueError("Integration not loaded for this device")
 
             manager = hass.data[DOMAIN][entry_id]
-            await manager.profile_store.create_profile_standalone(
-                profile_name, reference_cycle_id
-            )
+            try:
+                await manager.profile_store.create_profile_standalone(
+                    profile_name, reference_cycle_id
+                )
+            except ValueError as exc:
+                raise ServiceValidationError(str(exc)) from exc
             manager.notify_update()
 
         hass.services.async_register(DOMAIN, "create_profile", handle_create_profile)
@@ -478,15 +487,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
             # Determine trim end - default to full cycle duration if not supplied
             raw_end = call.data.get("trim_end_s")
+            # Always check cycle existence first, regardless of which trim path is taken
+            p_data = store.get_cycle_power_data(cycle_id)
+            if not p_data:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="cycle_not_found_or_no_power",
+                )
             if raw_end is not None:
                 trim_end_s = max(0.0, float(raw_end))
             else:
-                p_data = store.get_cycle_power_data(cycle_id)
-                if not p_data:
-                    raise ServiceValidationError(
-                        translation_domain=DOMAIN,
-                        translation_key="cycle_not_found_or_no_power",
-                    )
                 trim_end_s = max(point[0] for point in p_data)
 
             if trim_end_s <= trim_start_s:
@@ -653,8 +663,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
             target = target.resolve()
 
-            # Write export
-            target.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+            # Write export (offloaded to executor to avoid blocking the event loop)
+            def _dump_and_write():
+                text = json.dumps(payload, indent=2)
+                target.write_text(text, encoding="utf-8")
+            await hass.async_add_executor_job(_dump_and_write)
             manager._logger.info("Exported ha_washdata entry %s to %s", entry_id, target)
 
         hass.services.async_register(DOMAIN, "export_config", handle_export_config)
@@ -690,7 +703,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 raise ValueError(f"File not found: {source}")
 
             try:
-                payload = json.loads(source.read_text(encoding="utf-8"))
+                def _read_and_parse():
+                    text = source.read_text(encoding="utf-8")
+                    return json.loads(text)
+                payload = await hass.async_add_executor_job(_read_and_parse)
             except Exception as err:  # noqa: BLE001
                 raise ValueError(f"Failed to read import file: {err}") from err
 
@@ -807,7 +823,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 )
 
             manager = hass.data[DOMAIN][entry_id]
-            await manager.async_pause_cycle()
+            success = await manager.async_pause_cycle()
+            if not success:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="no_active_cycle",
+                )
 
         hass.services.async_register(DOMAIN, "pause_cycle", handle_pause_cycle)
 
@@ -837,7 +858,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 )
 
             manager = hass.data[DOMAIN][entry_id]
-            await manager.async_resume_cycle()
+            success = await manager.async_resume_cycle()
+            if not success:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="no_active_cycle",
+                )
 
         hass.services.async_register(DOMAIN, "resume_cycle", handle_resume_cycle)
 

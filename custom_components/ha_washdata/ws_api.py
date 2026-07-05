@@ -694,8 +694,8 @@ async def ws_set_options(
 @websocket_api.websocket_command(
     {vol.Required("type"): "ha_washdata/get_profiles", vol.Required("entry_id"): str}
 )
-@callback
-def ws_get_profiles(
+@websocket_api.async_response
+async def ws_get_profiles(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
@@ -707,43 +707,47 @@ def ws_get_profiles(
         _err_not_found(connection, msg["id"], entry_id)
         return
 
-    profiles: list[dict[str, Any]] = []
-    try:
-        profiles = manager.profile_store.list_profiles()
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Error listing profiles for %s: %s", entry_id, exc)
+    def _compute_stats() -> dict[str, Any]:
+        profiles: list[dict[str, Any]] = []
+        try:
+            profiles = manager.profile_store.list_profiles()
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Error listing profiles for %s: %s", entry_id, exc)
 
-    health: dict[str, dict] = {}
-    try:
-        health = manager.profile_store.compute_profile_health()
-    except Exception:  # pylint: disable=broad-exception-caught
-        pass
+        health: dict[str, dict] = {}
+        try:
+            health = manager.profile_store.compute_profile_health()
+        except Exception:  # pylint: disable=broad-exception-caught
+            pass
 
-    trends: dict[str, dict] = {}
-    try:
-        trends = manager.profile_store.compute_profile_trends()
-    except Exception:  # pylint: disable=broad-exception-caught
-        pass
+        trends: dict[str, dict] = {}
+        try:
+            trends = manager.profile_store.compute_profile_trends()
+        except Exception:  # pylint: disable=broad-exception-caught
+            pass
 
-    coverage_gaps: dict[str, Any] = {}
-    try:
-        coverage_gaps = manager.profile_store.suggest_coverage_gaps()
-    except Exception:  # pylint: disable=broad-exception-caught
-        pass
+        coverage_gaps: dict[str, Any] = {}
+        try:
+            coverage_gaps = manager.profile_store.suggest_coverage_gaps()
+        except Exception:  # pylint: disable=broad-exception-caught
+            pass
 
-    advisories: list[dict] = []
-    try:
-        advisories = manager.profile_store.compute_profile_advisories()
-    except Exception:  # pylint: disable=broad-exception-caught
-        pass
+        advisories: list[dict] = []
+        try:
+            advisories = manager.profile_store.compute_profile_advisories()
+        except Exception:  # pylint: disable=broad-exception-caught
+            pass
 
-    connection.send_result(msg["id"], {
-        "profiles": profiles,
-        "profile_health": health,
-        "profile_trends": trends,
-        "coverage_gaps": coverage_gaps,
-        "profile_advisories": advisories,
-    })
+        return {
+            "profiles": profiles,
+            "profile_health": health,
+            "profile_trends": trends,
+            "coverage_gaps": coverage_gaps,
+            "profile_advisories": advisories,
+        }
+
+    stats = await hass.async_add_executor_job(_compute_stats)
+    connection.send_result(msg["id"], stats)
 
 
 @websocket_api.websocket_command(
@@ -887,17 +891,21 @@ async def ws_get_profile_groups(
     groups = []
     for name, g in store.get_profile_groups().items():
         members = list(g.get("members") or [])
-        coh = store.group_cohesion(members) if len(members) >= 2 else 1.0
+        if len(members) >= 2:
+            coh = await hass.async_add_executor_job(store.group_cohesion, members)
+        else:
+            coh = 1.0
         groups.append({
             "name": name,
             "members": members,
             "cohesion": round(coh, 3),
             "cohesive": coh >= GROUP_MIN_COHESION,  # False => not aggregated by matcher; UI warns
         })
+    suggestions = await hass.async_add_executor_job(store.suggest_profile_groups)
     connection.send_result(msg["id"], {
         "groups": groups,
         "min_cohesion": GROUP_MIN_COHESION,
-        "suggestions": store.suggest_profile_groups(),
+        "suggestions": suggestions,
     })
 
 
@@ -1338,10 +1346,13 @@ def ws_get_recording_state(
         info["start_time"] = last_run.get("start_time")
         info["end_time"] = last_run.get("end_time")
         try:
-            start = dt_util.parse_datetime(last_run["start_time"])
-            end = dt_util.parse_datetime(last_run["end_time"])
-            if start and end:
-                info["duration_s"] = int((end - start).total_seconds())
+            start_str = last_run.get("start_time")
+            end_str = last_run.get("end_time")
+            if start_str and end_str:
+                start = dt_util.parse_datetime(start_str)
+                end = dt_util.parse_datetime(end_str)
+                if start and end:
+                    info["duration_s"] = int((end - start).total_seconds())
         except Exception:  # pylint: disable=broad-exception-caught
             pass
 
@@ -1613,6 +1624,9 @@ async def ws_resolve_feedback(
                 corrected_duration=corrected_duration_s,
                 dismiss=(action == "ignore"),
             )
+        else:
+            connection.send_error(msg["id"], "not_available", "Learning manager not available")
+            return
         manager.notify_update()
         connection.send_result(msg["id"], {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -1740,6 +1754,17 @@ async def ws_reprocess_history(
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 _LOGGER.debug("health recompute failed for %s: %s", entry_id, exc)
 
+        # Re-validate the manager is still live after a potentially long chain of
+        # awaits (reprocess + ML training can take tens of seconds).  If the entry
+        # was reloaded in the meantime the original manager is detached and its
+        # store saves would overwrite the new manager's data.
+        current_manager = _get_manager(hass, entry_id)
+        if current_manager is not manager:
+            _LOGGER.warning(
+                "Manager replaced during reprocess for %s; skipping notify", entry_id
+            )
+            connection.send_result(msg["id"], summary)
+            return
         manager.notify_update()
         connection.send_result(msg["id"], summary)
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -1846,8 +1871,17 @@ async def ws_import_config(
 
     entry = _get_entry(hass, entry_id)
     try:
-        payload = json.loads(msg["json_data"])
+        payload = await hass.async_add_executor_job(json.loads, msg["json_data"])
         config_updates = await manager.profile_store.async_import_data(payload)
+
+        # Re-validate after awaits — entry may have been reloaded during import.
+        current_manager = _get_manager(hass, entry_id)
+        if current_manager is not manager:
+            _LOGGER.warning(
+                "Manager replaced during import for %s; aborting notify", entry_id
+            )
+            connection.send_result(msg["id"], {"success": True})
+            return
 
         if entry and config_updates:
             entry_data_updates = config_updates.get("entry_data", {})
@@ -2374,8 +2408,8 @@ def ws_get_profile_envelope(
         vol.Optional("limit", default=150): vol.All(int, vol.Range(min=1, max=400)),
     }
 )
-@callback
-def ws_get_profile_cycles(
+@websocket_api.async_response
+async def ws_get_profile_cycles(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
@@ -2393,29 +2427,33 @@ def ws_get_profile_cycles(
 
     profile_name: str = msg["profile_name"]
     limit: int = msg.get("limit", 150)
-    out: list[dict[str, Any]] = []
-    try:
-        store = manager.profile_store
-        matched = [
-            c for c in store.get_past_cycles() if c.get("profile_name") == profile_name
-        ]
-        for c in matched[-limit:]:
-            cid = c.get("id")
-            samples = store.get_cycle_power_data(cid) if cid else []
-            out.append(
-                {
-                    "cycle_id": cid,
-                    "start_time": c.get("start_time"),
-                    "duration": c.get("duration"),
-                    "status": c.get("status"),
-                    "energy_kwh": _cycle_kwh(c),
-                    "samples": _downsample(samples, 160),
-                }
-            )
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Error getting profile cycles for %s: %s", profile_name, exc)
 
-    connection.send_result(msg["id"], {"cycles": out})
+    def _collect() -> list[dict[str, Any]]:
+        out: list[dict[str, Any]] = []
+        try:
+            store = manager.profile_store
+            matched = [
+                c for c in store.get_past_cycles() if c.get("profile_name") == profile_name
+            ]
+            for c in matched[-limit:]:
+                cid = c.get("id")
+                samples = store.get_cycle_power_data(cid) if cid else []
+                out.append(
+                    {
+                        "cycle_id": cid,
+                        "start_time": c.get("start_time"),
+                        "duration": c.get("duration"),
+                        "status": c.get("status"),
+                        "energy_kwh": _cycle_kwh(c),
+                        "samples": _downsample(samples, 160),
+                    }
+                )
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Error getting profile cycles for %s: %s", profile_name, exc)
+        return out
+
+    result = await hass.async_add_executor_job(_collect)
+    connection.send_result(msg["id"], {"cycles": result})
 
 
 # ─── Panel config + RBAC commands ──────────────────────────────────────────────
@@ -2802,6 +2840,7 @@ def _compute_ml_comparison(
 
     model_sig = _health_model_sig(store)
     health_dirty = False
+    health_updates: dict[str, Any] = {}
     cycles: list[Any] = store.get_past_cycles()
 
     # --- Build per-profile statistics from cycle history ---
@@ -2952,16 +2991,19 @@ def _compute_ml_comparison(
             else:
                 end_label = "likely_pause"
 
-            # Persist the freshly-computed health on the cycle for reuse.
-            cycle["ml_health"] = {
-                "score": round(ml_quality, 3) if ml_quality is not None else None,
-                "label": quality_label,
-                "end_score": round(ml_end_conf, 3) if ml_end_conf is not None else None,
-                "end_label": end_label,
-                "events": events,
-                "model_sig": model_sig,
-                "at": dt_util.now().isoformat(),
-            }
+            # Collect freshly-computed health for the event-loop to apply
+            # back to the live store dicts (avoids mutating from executor thread).
+            cycle_id_key = cycle.get("id", "")
+            if cycle_id_key:
+                health_updates[cycle_id_key] = {
+                    "score": round(ml_quality, 3) if ml_quality is not None else None,
+                    "label": quality_label,
+                    "end_score": round(ml_end_conf, 3) if ml_end_conf is not None else None,
+                    "end_label": end_label,
+                    "events": events,
+                    "model_sig": model_sig,
+                    "at": dt_util.now().isoformat(),
+                }
             health_dirty = True
 
         start_raw = cycle.get("start_time", "")
@@ -3019,6 +3061,7 @@ def _compute_ml_comparison(
         "settings_comparison": settings_comparison,
         "model_source": {"quality": quality_source, "end": end_source},
         "_health_dirty": health_dirty,
+        "_health_updates": health_updates,
         "profile_stats": {
             name: {"count": int(m["count"]), "median_duration_s": int(m["duration_s"]), "median_energy_wh": round(m["energy_wh"], 1)}
             for name, m in profile_medians.items()
@@ -3150,8 +3193,15 @@ async def ws_get_ml_comparison(
         result = await hass.async_add_executor_job(
             _compute_ml_comparison, store, current_off_delay
         )
-        # Persist any newly-computed per-cycle health so the next load reuses it.
-        if result.pop("_health_dirty", False):
+        # Apply any freshly-computed per-cycle health updates on the event loop
+        # (the executor must not mutate live store dicts directly), then persist.
+        health_updates = result.pop("_health_updates", {})
+        result.pop("_health_dirty", False)
+        if health_updates:
+            for cycle in store.get_past_cycles():
+                cid = cycle.get("id", "")
+                if cid and cid in health_updates:
+                    cycle["ml_health"] = health_updates[cid]
             await store.async_save()
         result["ml_suggestions_enabled"] = ENABLE_ML_SUGGESTIONS
 

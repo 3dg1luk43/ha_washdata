@@ -31,8 +31,8 @@ def _make_envelope(avg: list[float], spread: float = 100.0) -> dict:
     return {
         "time_grid": time_grid,
         "avg": avg,
-        "lower": lower,
-        "upper": upper,
+        "min": lower,
+        "max": upper,
     }
 
 
@@ -127,7 +127,7 @@ def test_returns_none_for_empty_points():
 
 
 def test_returns_none_when_envelope_missing_time_grid():
-    store = _store_with_envelope({"lower": [400.0], "upper": [600.0]})
+    store = _store_with_envelope({"min": [400.0], "max": [600.0]})
     assert store.compute_envelope_conformance("P", _flat_points()) is None
 
 

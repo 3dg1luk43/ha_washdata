@@ -33,6 +33,7 @@ from .const import (
     DEFAULT_DEFER_FINISH_CONFIDENCE,
     DISHWASHER_END_SPIKE_MIN_PROGRESS,
     DISHWASHER_END_SPIKE_WAIT_SECONDS,
+    DISHWASHER_MIN_CYCLE_DURATION_S,
     TERMINAL_DROP_OFF_DELAY_SECONDS,
 )
 
@@ -661,7 +662,11 @@ class CycleDetector:
 
         anti_wrinkle_active = (
             self._config.anti_wrinkle_enabled
-            and self._config.device_type in (DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER)
+            and self._config.device_type in (
+                DEVICE_TYPE_WASHING_MACHINE,
+                DEVICE_TYPE_DRYER,
+                DEVICE_TYPE_WASHER_DRYER,
+            )
         )
 
         # 3. State Machine
@@ -1096,6 +1101,18 @@ class CycleDetector:
                         # Dynamic confirmation window
                         if self._config.device_type == "dishwasher":
                             smart_debounce = max(300.0, self._config.off_delay * 0.25)
+                        elif self._config.device_type in (
+                            DEVICE_TYPE_WASHING_MACHINE,
+                            DEVICE_TYPE_WASHER_DRYER,
+                        ):
+                            # Washing machines and washer-dryers have soak and
+                            # rinse gaps that can dip for several minutes between
+                            # programme phases.  Require quiet time equal to half
+                            # the soak-bridging min_off_gap before committing
+                            # Smart Termination, so a near-duplicate profile
+                            # doesn't cut a long cycle short during a mid-cycle
+                            # power trough.
+                            smart_debounce = max(180.0, self._config.min_off_gap * 0.5)
                         else:
                             smart_debounce = 120.0
 
@@ -1185,6 +1202,7 @@ class CycleDetector:
                 # anomaly check has ruled out a legitimate early pause.
                 if (
                     self._terminal_drop_provider is not None
+                    and not self._verified_pause
                     and effective_off_delay > TERMINAL_DROP_OFF_DELAY_SECONDS
                     and self._time_below_threshold >= TERMINAL_DROP_OFF_DELAY_SECONDS
                     and self._is_terminal_drop()
@@ -1363,6 +1381,22 @@ class CycleDetector:
         # Check explicit verified pause override from manager
         if getattr(self, "_verified_pause", False):
             self._logger.debug("Deferring cycle finish: Verified pause active")
+            return True
+
+        # Dishwasher minimum-duration floor: even without a matched profile (e.g.
+        # first cycle of a program, or the 5-min matcher hasn't fired yet) a
+        # dishwasher cycle should never end before it has crossed the minimum
+        # reasonable programme duration.  This prevents a dip during the fill or
+        # early wash phase from being read as the end of a complete cycle.
+        if (
+            self._config.device_type == "dishwasher"
+            and duration < DISHWASHER_MIN_CYCLE_DURATION_S
+        ):
+            self._logger.debug(
+                "Deferring dishwasher cycle end: elapsed %.0fs < minimum %.0fs",
+                duration,
+                DISHWASHER_MIN_CYCLE_DURATION_S,
+            )
             return True
 
         if not self._matched_profile or self._expected_duration <= 0:
@@ -1580,7 +1614,11 @@ class CycleDetector:
             status == "completed"
             and termination_reason in ANTI_WRINKLE_ELIGIBLE_REASONS
             and self._config.anti_wrinkle_enabled
-            and self._config.device_type in (DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER)
+            and self._config.device_type in (
+                DEVICE_TYPE_WASHING_MACHINE,
+                DEVICE_TYPE_DRYER,
+                DEVICE_TYPE_WASHER_DRYER,
+            )
         ):
             target = STATE_ANTI_WRINKLE
 

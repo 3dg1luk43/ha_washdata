@@ -47,10 +47,15 @@ def fit_logistic(
         raise ValueError("matrix must be a non-empty 2D array")
     if labels.shape[0] != matrix.shape[0]:
         raise ValueError("labels/matrix row mismatch")
+    if len(np.unique(labels)) < 2:
+        raise ValueError(
+            f"fit_logistic requires both positive and negative examples; "
+            f"got labels: {np.unique(labels)}"
+        )
 
     center = np.mean(matrix, axis=0)
     scale = np.std(matrix, axis=0)
-    scale = np.where(scale <= 1e-9, 1.0, scale)
+    scale = np.where(scale <= 1e-8, 1.0, scale)
     scaled = (matrix - center) / scale
 
     weight = np.ones(labels.size, dtype=float)
@@ -107,6 +112,11 @@ def auc(labels: np.ndarray, scores: np.ndarray) -> float:
     """Rank-based ROC AUC (Mann-Whitney U). 0.5 when one class is absent."""
     labels = np.asarray(labels, dtype=float)
     scores = np.asarray(scores, dtype=float)
+    finite_mask = np.isfinite(scores)
+    scores = scores[finite_mask]
+    labels = labels[finite_mask]
+    if len(scores) == 0:
+        return 0.5
     pos = scores[labels == 1]
     neg = scores[labels == 0]
     if pos.size == 0 or neg.size == 0:
@@ -160,11 +170,13 @@ def select_threshold(
             np.linspace(0.1, 0.95, 86),
         ])
     )
-    candidates = candidates[(candidates >= 0.05) & (candidates <= 0.97)]
+    candidates = candidates[(candidates >= 0.05) & (candidates <= 0.999)]
     if candidates.size == 0:
-        return default
+        pos_scores = scores[labels == 1]
+        return float(np.min(pos_scores)) if len(pos_scores) > 0 else default
     best_key: tuple[float, float] | None = None
     best_threshold = default
+    best_ba = 0.5
     for threshold in candidates:
         m = binary_metrics(labels, scores, float(threshold))
         bal = float(m.get("balanced_accuracy") or 0.0)
@@ -172,6 +184,10 @@ def select_threshold(
         if best_key is None or key > best_key:
             best_key = key
             best_threshold = float(threshold)
+            best_ba = bal
+    if best_ba == 0.5:
+        pos_scores = scores[labels == 1]
+        return float(np.min(pos_scores)) if len(pos_scores) > 0 else default
     return round(best_threshold, 6)
 
 
@@ -226,9 +242,18 @@ def score_matrix_spec(spec: Mapping[str, Any], matrix: np.ndarray) -> np.ndarray
 
 
 def score_spec(spec: Mapping[str, Any], features: Mapping[str, float]) -> float:
-    """Pure-NumPy probability for one feature mapping (matches embedded score())."""
+    """Pure-NumPy probability for one feature mapping (matches embedded score()).
+
+    Missing feature keys are filled with the training center (which standardises
+    to 0.0 = neutral), not raw 0.0, to avoid 8+ SD corruption of inference.
+    """
     columns = spec["feature_columns"]
-    vector = np.array([float(features.get(col) or 0.0) for col in columns], dtype=float)
+    center = np.asarray(spec["center"], dtype=float)
+    row = []
+    for i, col in enumerate(columns):
+        val = features.get(col)
+        row.append(float(center[i]) if val is None else float(val))
+    vector = np.array(row, dtype=float)
     return float(score_matrix_spec(spec, vector.reshape(1, -1))[0])
 
 
@@ -266,10 +291,15 @@ def fit_ridge(
         raise ValueError("matrix must be a non-empty 2D array")
     if labels.shape[0] != matrix.shape[0]:
         raise ValueError("labels/matrix row mismatch")
+    if np.std(labels) < 1e-8:
+        raise ValueError(
+            f"fit_ridge requires non-constant targets; "
+            f"all labels are approximately {labels[0]:.4f}"
+        )
 
     center = np.mean(matrix, axis=0)
     scale = np.std(matrix, axis=0)
-    scale = np.where(scale <= 1e-9, 1.0, scale)
+    scale = np.where(scale <= 1e-8, 1.0, scale)
     scaled = (matrix - center) / scale
 
     y_center = float(np.mean(labels))
@@ -330,9 +360,18 @@ def predict_matrix_spec(spec: Mapping[str, Any], matrix: np.ndarray) -> np.ndarr
 
 
 def predict_value_spec(spec: Mapping[str, Any], features: Mapping[str, float]) -> float:
-    """Un-standardised regression output for one feature mapping."""
+    """Un-standardised regression output for one feature mapping.
+
+    Missing feature keys are filled with the training center (which standardises
+    to 0.0 = neutral), not raw 0.0, to avoid 8+ SD corruption of inference.
+    """
     columns = spec["feature_columns"]
-    vector = np.array([float(features.get(col) or 0.0) for col in columns], dtype=float)
+    center = np.asarray(spec["center"], dtype=float)
+    row = []
+    for i, col in enumerate(columns):
+        val = features.get(col)
+        row.append(float(center[i]) if val is None else float(val))
+    vector = np.array(row, dtype=float)
     return float(predict_matrix_spec(spec, vector.reshape(1, -1))[0])
 
 

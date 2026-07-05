@@ -58,6 +58,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
     """Handle a config flow for WashData."""
 
     VERSION = 3
+    MINOR_VERSION = 6
 
     def __init__(self) -> None:
         """Initialize the config flow."""

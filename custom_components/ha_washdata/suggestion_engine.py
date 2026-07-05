@@ -98,13 +98,21 @@ def _classify_cycle_health(
     # High start: the trace opens at/near peak with no ramp-up (detection began
     # after the appliance was already running, e.g. restored state).
     t0 = readings[0][0]
-    if (first_active_t - t0) <= _CLEAN_HIGH_START_WINDOW_S and first_active_p >= _CLEAN_HIGH_START_RATIO * peak:
+    if (first_active_t - t0) < _CLEAN_HIGH_START_WINDOW_S and first_active_p >= _CLEAN_HIGH_START_RATIO * peak:
         return "high_start"
 
     # Abrupt end: the tail is still drawing significant power, so the cycle was
-    # cut off rather than winding down naturally.
+    # cut off rather than winding down naturally.  Guard with the last sample's
+    # power level: if the trace ends at near-zero, the device shut down cleanly
+    # (resistive devices like pumps and bread makers hold near-peak until the
+    # very last moment then drop to 0, so their correctly-detected cycles must
+    # not be excluded by this check).
     tail = powers[-3:] if len(powers) >= 3 else powers
-    if (sum(tail) / len(tail)) >= _CLEAN_ABRUPT_END_RATIO * peak:
+    last_power = readings[-1][1] if readings else 0.0
+    if (
+        (sum(tail) / len(tail)) >= _CLEAN_ABRUPT_END_RATIO * peak
+        and last_power >= _CLEAN_ABRUPT_END_RATIO * peak
+    ):
         return "abrupt_end"
 
     # Mid-cycle restart / fragmentation: a long internal near-zero run that
@@ -709,7 +717,12 @@ class SuggestionEngine:
                 continue
             active_thr = max(stop_threshold_w, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
             dead_start: float | None = None
+            seen_active = False
             for t, p in readings:
+                if p >= active_thr:
+                    seen_active = True
+                if not seen_active:
+                    continue
                 if p < active_thr:
                     if dead_start is None:
                         dead_start = t
@@ -763,15 +776,19 @@ class SuggestionEngine:
                 continue
             active_thr = max(stop_threshold_w, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
             dead_start: float | None = None
+            seen_active = False
             for t, p in readings:
                 if p < active_thr:
                     if dead_start is None:
                         dead_start = t
-                elif dead_start is not None:
-                    run = t - dead_start  # a pause that resumed (not the tail)
-                    if run > 0:
-                        pause_durations.append(run)
-                    dead_start = None
+                else:
+                    if dead_start is not None:
+                        if seen_active:
+                            run = t - dead_start  # a pause that resumed (not the tail)
+                            if run > 0:
+                                pause_durations.append(run)
+                        dead_start = None
+                    seen_active = True
             # A trailing dead run is the natural cycle end -> intentionally skipped.
 
         if n_traced < 5 or len(pause_durations) < 3:
@@ -1005,7 +1022,7 @@ class SuggestionEngine:
             cycle_wh = 0.0
             in_pause = False
             pause_energy = 0.0
-            stop_w = 2.0
+            stop_w = stop_thr
             for i in range(1, len(readings)):
                 t0, p0 = readings[i - 1]
                 t1, p1 = readings[i]

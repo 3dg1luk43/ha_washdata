@@ -350,12 +350,12 @@ def compute_matches_worker(
     # candidates whose expected duration/energy match the observed cycle.
     shape_w = 1.0 - dur_weight - en_weight
     if (dur_weight > 0 or en_weight > 0) and candidates and current_duration > 0:
-        cur_energy = float(np.mean(curr_arr)) * current_duration  # ∝ Wh (mean power × duration)
+        cur_energy = float(np.mean(curr_arr))  # mean power (W) — no duration multiplication
         for cand in candidates:
             prof_dur = float(cand.get("profile_duration") or 0.0)
             dur_ag = _agreement(current_duration, prof_dur, dur_scale)
             sample = cand.get("sample") or []
-            cand_energy = (float(np.mean(sample)) * prof_dur) if (sample and prof_dur > 0) else 0.0
+            cand_energy = float(np.mean(sample)) if sample else 0.0
             en_ag = _agreement(cur_energy, cand_energy, en_scale)
             cand["shape_score"] = float(cand["score"])
             cand["score"] = float(

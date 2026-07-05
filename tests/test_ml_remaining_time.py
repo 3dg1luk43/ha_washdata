@@ -51,14 +51,12 @@ def test_fit_ridge_recovers_linear_target() -> None:
 
 
 def test_fit_ridge_constant_target() -> None:
+    # Constant-target data must raise so the caller (training_task) can skip
+    # promotion rather than promoting a trivial constant predictor with MAE=0.
     X = np.random.default_rng(1).normal(0.0, 1.0, (50, 2))
     y = np.full(50, 0.5)
-    fit = T.fit_ridge(X, y)
-    spec = {**fit, "output_center": fit["y_center"], "output_scale": fit["y_scale"],
-            "feature_columns": ["a", "b"]}
-    preds = T.predict_matrix_spec(spec, X)
-    # zero-variance target -> predictions collapse to the mean
-    assert np.allclose(preds, 0.5, atol=1e-6)
+    with pytest.raises(ValueError, match="non-constant targets"):
+        T.fit_ridge(X, y)
 
 
 def test_regression_metrics_perfect_and_empty() -> None:

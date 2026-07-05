@@ -21,8 +21,11 @@ from __future__ import annotations
 
 import importlib
 import json
+import logging
 from pathlib import Path
 from typing import Mapping
+
+_LOGGER = logging.getLogger(__name__)
 
 CONF_ENABLE_ML_MODELS = "enable_ml_models"
 
@@ -61,16 +64,22 @@ def resolve_scorer(capability: str, store: object | None):
                 from .trainer import score_spec
 
                 return (lambda feats, _s=spec: float(score_spec(_s, feats)), "on_device")
-        except Exception:  # noqa: BLE001 - never let a bad store break inference
-            pass
+        except Exception as exc:  # noqa: BLE001 - never let a bad store break inference
+            _LOGGER.warning(
+                "Failed to load trained spec for capability %r, falling back to baseline: %s",
+                capability, exc,
+            )
     # 2) Shipped embedded baseline module.
     module_name = _MODEL_MODULES.get(capability)
     if module_name is not None:
         try:
             module = importlib.import_module(f"{__package__}.{module_name}")
             return (lambda feats, _m=module: float(_m.score(feats)), "baseline")
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception as exc:  # noqa: BLE001
+            _LOGGER.warning(
+                "Failed to load embedded baseline for capability %r: %s",
+                capability, exc,
+            )
     return (None, None)
 
 
@@ -95,8 +104,11 @@ def resolve_regressor(capability: str, store: object | None):
             from .trainer import predict_value_spec
 
             return (lambda feats, _s=spec: float(predict_value_spec(_s, feats)), "on_device")
-    except Exception:  # noqa: BLE001 - never let a bad store break inference
-        pass
+    except Exception as exc:  # noqa: BLE001 - never let a bad store break inference
+        _LOGGER.warning(
+            "Failed to load trained regression spec for capability %r, capability will be inert: %s",
+            capability, exc,
+        )
     return (None, None)
 
 

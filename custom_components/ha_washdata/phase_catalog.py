@@ -26,31 +26,37 @@ DEFAULT_PHASES_BY_DEVICE: dict[str, list[PhaseItem]] = {
         {
             "name": "Pre-Wash",
             "description": "Initial soak or pre-treatment before the main wash.",
+            "translation_key": "phase_desc.pre_wash",
             "is_default": True,
         },
         {
             "name": "Wash",
             "description": "Main washing cycle with drum movement and optional heating.",
+            "translation_key": "phase_desc.wash",
             "is_default": True,
         },
         {
             "name": "Rinse",
             "description": "Clean-water rinse stage. This phase may repeat multiple times.",
+            "translation_key": "phase_desc.rinse",
             "is_default": True,
         },
         {
             "name": "Spin",
             "description": "High-speed extraction to remove water from the load.",
+            "translation_key": "phase_desc.spin",
             "is_default": True,
         },
         {
             "name": "Soak",
             "description": "Low-activity soaking period between active wash stages.",
+            "translation_key": "phase_desc.soak",
             "is_default": True,
         },
         {
             "name": "Anti-Crease",
             "description": "Occasional short tumbles after completion to reduce wrinkles.",
+            "translation_key": "phase_desc.anti_crease",
             "is_default": True,
         },
     ],
@@ -58,26 +64,31 @@ DEFAULT_PHASES_BY_DEVICE: dict[str, list[PhaseItem]] = {
         {
             "name": "Heat Up",
             "description": "Initial heater warm-up before full drying begins.",
+            "translation_key": "phase_desc.heat_up",
             "is_default": True,
         },
         {
             "name": "Drying",
             "description": "Main heated tumbling period.",
+            "translation_key": "phase_desc.drying",
             "is_default": True,
         },
         {
             "name": "Cool Down",
             "description": "Tumbling without heat near cycle end.",
+            "translation_key": "phase_desc.cool_down",
             "is_default": True,
         },
         {
             "name": "Anti-Wrinkle",
             "description": "Periodic post-cycle tumbling to reduce wrinkles.",
+            "translation_key": "phase_desc.anti_wrinkle",
             "is_default": True,
         },
         {
             "name": "Sensor Check",
             "description": "Short low-power pause while dryness is measured.",
+            "translation_key": "phase_desc.sensor_check",
             "is_default": True,
         },
     ],
@@ -85,46 +96,55 @@ DEFAULT_PHASES_BY_DEVICE: dict[str, list[PhaseItem]] = {
         {
             "name": "Pre-Wash",
             "description": "Initial soak or pre-treatment before the main wash.",
+            "translation_key": "phase_desc.pre_wash",
             "is_default": True,
         },
         {
             "name": "Wash",
             "description": "Main washing cycle with drum movement and optional heating.",
+            "translation_key": "phase_desc.wash",
             "is_default": True,
         },
         {
             "name": "Rinse",
             "description": "Clean-water rinse stage. This phase may repeat multiple times.",
+            "translation_key": "phase_desc.rinse",
             "is_default": True,
         },
         {
             "name": "Spin",
             "description": "High-speed extraction before drying transition.",
+            "translation_key": "phase_desc.spin_wd",
             "is_default": True,
         },
         {
             "name": "Drain & Switch",
             "description": "Transition period from washing to drying mode.",
+            "translation_key": "phase_desc.drain_and_switch",
             "is_default": True,
         },
         {
             "name": "Heat Up",
             "description": "Initial heater warm-up before full drying begins.",
+            "translation_key": "phase_desc.heat_up",
             "is_default": True,
         },
         {
             "name": "Drying",
             "description": "Main heated tumbling period.",
+            "translation_key": "phase_desc.drying",
             "is_default": True,
         },
         {
             "name": "Cool Down",
             "description": "Tumbling without heat near cycle end.",
+            "translation_key": "phase_desc.cool_down",
             "is_default": True,
         },
         {
             "name": "Anti-Wrinkle",
             "description": "Periodic post-cycle tumbling to reduce wrinkles.",
+            "translation_key": "phase_desc.anti_wrinkle",
             "is_default": True,
         },
     ],
@@ -132,31 +152,37 @@ DEFAULT_PHASES_BY_DEVICE: dict[str, list[PhaseItem]] = {
         {
             "name": "Pre-Rinse",
             "description": "Initial spray-down before detergent wash.",
+            "translation_key": "phase_desc.pre_rinse",
             "is_default": True,
         },
         {
             "name": "Wash",
             "description": "Main detergent wash with heating.",
+            "translation_key": "phase_desc.wash_dw",
             "is_default": True,
         },
         {
             "name": "Rinse",
             "description": "Clean-water rinse stage. This phase may repeat multiple times.",
+            "translation_key": "phase_desc.rinse",
             "is_default": True,
         },
         {
             "name": "Dry",
             "description": "Drying stage using heater and/or residual heat.",
+            "translation_key": "phase_desc.dry",
             "is_default": True,
         },
         {
             "name": "Sanitize",
             "description": "High-temperature cleaning stage for sanitization programs.",
+            "translation_key": "phase_desc.sanitize",
             "is_default": True,
         },
         {
             "name": "Soak",
             "description": "Extended soak period for heavy soil.",
+            "translation_key": "phase_desc.soak_dw",
             "is_default": True,
         },
     ],
@@ -195,15 +221,16 @@ def get_shared_default_phase_catalog() -> list[PhaseItem]:
             if key in seen:
                 continue
             seen.add(key)
-            merged.append(
-                {
-                    "id": _builtin_phase_id(device_type, name),
-                    "device_type": device_type,
-                    "name": name,
-                    "description": str(item.get("description", "")).strip(),
-                    "is_default": True,
-                }
-            )
+            entry: PhaseItem = {
+                "id": _builtin_phase_id(device_type, name),
+                "device_type": device_type,
+                "name": name,
+                "description": str(item.get("description", "")).strip(),
+                "is_default": True,
+            }
+            if "translation_key" in item:
+                entry["translation_key"] = item["translation_key"]
+            merged.append(entry)
     return merged
 
 

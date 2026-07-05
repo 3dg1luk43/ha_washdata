@@ -22,7 +22,8 @@ def _store(envelope):
 
 def _flat_env(n=60, avg=1000.0, spread=300.0, dur=3600.0):
     tg = list(np.linspace(0, dur, n))
-    return {"time_grid": tg, "avg": [avg] * n, "lower": [avg - spread] * n, "upper": [avg + spread] * n}
+    # Storage format uses "min"/"max" keys with flat scalar lists.
+    return {"time_grid": tg, "avg": [avg] * n, "min": [avg - spread] * n, "max": [avg + spread] * n}
 
 
 def _trace(fn, step=20, dur=3600):
@@ -94,5 +95,5 @@ def test_events_bounded_and_chronological():
 
 
 def test_never_raises_on_bad_envelope():
-    store = _store({"time_grid": [0, 1], "lower": [1.0], "upper": [1.0, 2.0]})  # mismatched
+    store = _store({"time_grid": [0, 1], "min": [1.0], "max": [1.0, 2.0]})  # mismatched
     assert store.detect_cycle_artifacts("P", _trace(lambda t: 1000.0)) == []

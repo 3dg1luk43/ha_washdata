@@ -189,7 +189,7 @@ The integration's **Configure** dialog ([Settings → Devices & Services → Was
 > **Notifications are built on automations.** The old built-in custom-action editor has been removed; instead, Settings → Notifications → **Automations** lists the automations that use a device and creates new ones (blank, or prefilled with a cycle trigger). Any custom actions from an older setup keep firing and can be **converted to an automation or removed** from that section. See **[NOTIFICATIONS.md](NOTIFICATIONS.md)**.
 
 ### Entities Provided
-- **`sensor.<name>_state`**: Current status (Idle / Running / Detecting... / Clean).
+- **`sensor.<name>_state`**: Current status. Possible values: `idle`, `starting`, `running`, `paused`, `user_paused`, `ending`, `finished`, `anti_wrinkle`, `interrupted`, `force_stopped`, `rinse`, `clean`, `delay_wait`, `unknown`.
 - **`sensor.<name>_program`**: Best-matched profile name.
 - **`sensor.<name>_time_remaining`**: Smart countdown (locks during high-variance phases).
 - **`sensor.<name>_total_duration`**: Total predicted duration (Elapsed + Remaining). Ideal for `timer-bar-card`.
