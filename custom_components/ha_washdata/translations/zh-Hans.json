@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "循环开始",
-        "cycle_finish": "循环完成",
-        "cycle_live": "实时进展"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "洗衣机",
@@ -88,198 +81,6 @@
         "bread_maker": "面包机",
         "pump": "泵/污水泵",
         "other": "其他（高级）"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "（未标记）",
-        "create_new_profile": "创建新配置文件",
-        "remove_label": "移除标签",
-        "no_reference_cycle": "（无参考周期）",
-        "all_device_types": "所有设备类型",
-        "current_suffix": "（当前的）",
-        "phase_builtin_suffix": "（内置）",
-        "phase_none_available": "没有可用的阶段。",
-        "phase_other_device_types": "其他设备类型：",
-        "settings_deprecation_warning": "⚠️ **已弃用的设备类型：** {device_type} 计划在未来版本中删除。 WashData 的匹配管道不会为此类设备生成可靠的结果。您的集成在弃用期内继续有效；要消除此警告，请将下面的**设备类型**切换为受支持的类型之一（洗衣机、烘干机、洗衣干衣机组合、洗碗机、空气炸锅、面包机或泵），或者如果您的设备与任何受支持的类型不匹配，则切换为**其他（高级）**。 **其他（高级）** 故意提供通用默认值，未针对任何特定设备进行调整，因此您需要自己配置阈值、超时和匹配参数；切换时，所有现有设置都会保留。",
-        "editor_select_info": "选择 1 个循环进行拆分，或选择 2 个以上循环进行合并。",
-        "editor_select_info_split": "选择 1 个要拆分的周期。",
-        "editor_select_info_merge": "选择 2 个或更多要合并的周期。",
-        "editor_select_info_delete": "选择 1 个或更多要删除的周期。",
-        "no_cycles_recorded": "尚未记录任何周期。",
-        "profile_summary_line": "- **{name}**：{count} 个周期，平均 {avg} 分钟",
-        "no_profiles_created": "尚未创建配置文件。",
-        "phase_preview": "阶段预览",
-        "phase_preview_no_curve": "平均配置文件曲线尚不可用。为此配置文件运行/标记更多周期。",
-        "average_power_curve": "平均功率曲线",
-        "unit_min": "分钟",
-        "profile_option_fmt": "{name}（{count} 个周期，平均 ~{duration}m）",
-        "profile_option_short_fmt": "{name}（{count} 个周期，~{duration} 分钟）",
-        "deleted_cycles_from_profile": "已从 {profile} 中删除 {count} 个周期。",
-        "not_enough_data_graph": "数据不足，无法生成图表。",
-        "no_profiles_found": "未找到配置文件。",
-        "cycle_info_fmt": "周期：{start}，{duration}m，当前：{label}",
-        "top_candidates_header": "### 最佳候选人",
-        "tbl_profile": "配置文件",
-        "tbl_confidence": "置信度",
-        "tbl_correlation": "相关性",
-        "tbl_duration_match": "持续时间匹配",
-        "detected_profile": "检测到的配置文件",
-        "estimated_duration": "预计持续时间",
-        "actual_duration": "实际持续时间",
-        "choose_action": "__选择以下操作：__",
-        "tbl_count": "数数",
-        "tbl_avg": "平均",
-        "tbl_min": "最小",
-        "tbl_max": "最大限度",
-        "tbl_energy_avg": "能量（平均）",
-        "tbl_energy_total": "能量（总计）",
-        "tbl_consistency": "组成。",
-        "tbl_last_run": "最后一次运行",
-        "graph_legend_title": "图例",
-        "graph_legend_body": "蓝色带代表观察到的最小和最大功率消耗范围。该线显示平均功率曲线。",
-        "recording_preview": "记录预览",
-        "trim_start": "修剪开始",
-        "trim_end": "修剪末端",
-        "split_preview_title": "分割预览",
-        "split_preview_found_fmt": "找到 {count} 个分段。",
-        "split_preview_confirm_fmt": "单击“确认”将此周期拆分为 {count} 个单独的周期。",
-        "merge_preview_title": "合并预览",
-        "merge_preview_joining_fmt": "加入 {count} 个周期。间隙将用 0W 读数填充。",
-        "editor_delete_preview_title": "删除预览",
-        "editor_delete_preview_intro": "所选周期将被永久删除：",
-        "editor_delete_preview_confirm": "点击确认以永久删除这些周期记录。",
-        "no_power_preview": "*没有可供预览的功率数据。*",
-        "profile_comparison": "配置文件比较",
-        "actual_cycle_label": "本周期（实际）",
-        "storage_usage_header": "存储使用情况",
-        "storage_file_size": "文件大小",
-        "storage_cycles": "周期",
-        "storage_profiles": "配置文件",
-        "storage_debug_traces": "调试跟踪",
-        "overview_suffix": "概述",
-        "phase_preview_for_profile": "配置文件的阶段预览",
-        "current_ranges_header": "当前范围",
-        "assign_phases_help": "使用以下操作来添加、编辑、删除或保存范围。",
-        "profile_summary_header": "配置文件摘要",
-        "recent_cycles_header": "最近的周期",
-        "trim_cycle_preview_title": "循环修剪预览",
-        "trim_cycle_preview_no_data": "此周期没有可用的功率数据。",
-        "trim_cycle_preview_kept_suffix": "保留",
-        "table_program": "程序",
-        "table_when": "时间",
-        "table_length": "时长",
-        "table_match": "匹配",
-        "table_profile": "配置文件",
-        "table_cycles": "周期",
-        "table_avg_length": "平均时长",
-        "table_last_run": "最后一次运行",
-        "table_avg_energy": "平均能耗",
-        "table_detected_program": "检测到的程序",
-        "table_confidence": "置信度",
-        "table_reported": "已报告"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "分割一个周期（查找间隙）",
-        "merge": "合并循环（连接片段）",
-        "delete": "删除周期"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "自动检测空闲间隔",
-        "manual": "手动时间戳"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "维护：重新处理和优化数据",
-        "clear_debug_data": "清除调试数据（释放空间）",
-        "wipe_history": "擦除该设备的所有数据（不可逆）",
-        "export_import": "使用设置导出/导入 JSON（复制/粘贴）"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "导出所有数据",
-        "import": "导入/合并数据"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "自动标记旧周期",
-        "select_cycle_to_label": "标签特定周期",
-        "select_cycle_to_delete": "删除循环",
-        "interactive_editor": "合并/拆分交互式编辑器",
-        "trim_cycle": "修剪周期数据"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "创建新配置文件",
-        "edit_profile": "编辑/重命名配置文件",
-        "delete_profile": "删除配置文件",
-        "profile_stats": "配置文件统计",
-        "cleanup_profile": "清理历史记录 - 图表和删除",
-        "assign_phases": "分配相位范围"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "创建新阶段",
-        "edit_custom_phase": "编辑阶段",
-        "delete_custom_phase": "删除阶段"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "命名和应用阶段",
-        "cancel": "不做任何修改返回"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "添加相位范围",
-        "edit_range": "编辑相位范围",
-        "delete_range": "删除相位范围",
-        "clear_ranges": "清除所有范围",
-        "auto_detect_ranges": "自动检测相位",
-        "save_ranges": "保存并返回"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "刷新状态",
-        "stop_recording": "停止录制（保存并处理）",
-        "start_recording": "开始新记录",
-        "process_recording": "处理最后的记录（修剪和保存）",
-        "discard_recording": "放弃最后的记录"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "创建新配置文件",
-        "existing_profile": "添加到现有配置文件",
-        "discard": "放弃记录"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "确认-检测正确",
-        "correct": "正确 - 选择程序/持续时间",
-        "ignore": "忽略 - 误报/噪声循环",
-        "delete": "删除 - 从历史记录中删除"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "设置起点",
-        "set_end": "设置终点",
-        "reset": "重置为完整持续时间",
-        "apply": "应用修剪",
-        "cancel": "取消"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "当前阶段"
       },
-      "wash_phase": {
-        "name": "阶段"
-      },
       "profile_cycle_count": {
         "name": "配置文件 {profile_name} 计数",
         "unit_of_measurement": "周期"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s必须大于trim_start_s。"
+    },
+    "no_active_cycle": {
+      "message": "没有可暂停或恢复的活动周期。"
     }
   },
   "panel": {
     "hdr": {
-      "panel_settings": "面板设置（所有用户）",
-      "ml_learned": "WashData 学到了什么",
-      "status": "状态",
-      "live_power": "实时功率",
-      "manual_recording": "手动记录",
-      "tools_and_data": "工具与数据",
-      "phase_catalog": "阶段目录",
-      "storage_stats": "存储统计",
-      "maintenance": "维护措施",
-      "export_import": "导出/导入",
+      "toggle_sidebar": "切换家庭助理侧边栏",
       "logs": "日志",
-      "my_preferences": "我的偏好",
       "access_control": "访问控制",
-      "ml_smart_learning": "智能学习",
-      "ml_settings_card": "设置",
-      "ml_matching_tuning": "程序匹配微调",
-      "display": "显示",
-      "status_graph": "状态图",
-      "diagnostics_pref": "诊断",
-      "logs_diagnostics": "诊断",
-      "process_history": "流程历史",
-      "clear_debug": "清除调试痕迹",
-      "wipe_history": "擦除历史记录",
-      "automations": "自动化",
-      "automation_open": "在自动化编辑器中打开",
       "automation_delete": "删除此自动化",
-      "automation_needs_review": "这个周期需要审查",
-      "automation_review_this_cycle": "回顾这个周期",
-      "no_automations": "尚未有自动化引用此设备。"
-    },
-    "lbl": {
-      "manual_duration": "手动持续时间（分钟，可选）",
-      "correct_duration": "正确持续时间（分钟，可选）",
-      "default_tab": "打开面板时的默认选项卡",
-      "default_access_level": "下面未列出的用户的默认级别",
-      "show_expected": "显示预期的曲线叠加（匹配的配置文件，橙色）",
-      "show_raw": "显示原始传感器读数（未平滑，灰色）",
-      "show_debug": "在状态页面上显示实时匹配调试卡（置信度、模糊度、最佳候选人）",
-      "power": "功率",
-      "progress": "进度",
-      "remaining": "剩余",
-      "duration": "时长",
-      "energy": "电能",
-      "profile": "配置文件",
+      "automation_needs_review": "此周期需要审查",
+      "automation_open": "在自动化编辑器中打开",
+      "automation_review_this_cycle": "审查此周期",
+      "automations": "自动化",
+      "clear_debug": "清除调试追踪",
+      "diagnostics_pref": "诊断",
+      "display": "显示",
+      "export_import": "导出 / 导入",
+      "live_power": "实时功率",
+      "logs_diagnostics": "诊断",
+      "maintenance": "维护操作",
+      "manual_recording": "手动录制",
+      "ml_learned": "WashData 已学到的内容",
+      "ml_matching_tuning": "程序匹配微调",
+      "ml_settings_card": "设置",
+      "ml_smart_learning": "智能学习",
+      "my_preferences": "我的偏好",
+      "no_automations": "尚未有自动化引用此设备。",
+      "panel_settings": "面板设置",
+      "phase_catalog": "阶段目录",
+      "process_history": "处理历史",
       "status": "状态",
-      "date": "日期",
-      "confidence": "置信度",
-      "health": "健康",
-      "cost": "成本",
-      "program": "程序",
-      "cycle_health": "周期健康",
-      "activity": "活动",
-      "unlabelled": "未标记",
-      "unlabelled_paren": "（未标记）",
-      "emphasis": "强调",
-      "default": "默认",
-      "in_use": "使用中",
-      "profile_name": "个人资料名称",
-      "ref_cycle": "参考周期（可选）",
-      "phase_name": "阶段名称",
-      "description": "描述",
-      "correct_profile": "正确的配置文件",
-      "load_from_file": "从文件加载",
-      "json_data": "JSON数据",
-      "expected_duration": "预计持续时间（分钟）",
-      "rename_profile": "重命名配置文件",
-      "select_profile": "选择个人资料",
-      "confidence_threshold": "置信阈值",
-      "resulting_profile": "生成的配置文件",
-      "new_profile_name": "新的个人资料名称",
-      "save_mode": "保存模式",
-      "head_trim": "起始裁剪（秒）",
-      "tail_trim": "末端裁剪（秒）",
-      "gap_s": "间隙",
-      "start": "开始",
-      "end": "结尾",
-      "quality": "质量",
-      "golden_reference": "记录参考周期",
-      "compare_profiles": "与配置文件比较",
-      "tags": "标签",
-      "notes": "笔记",
-      "cycle_date_display": "周期日期显示",
-      "refresh_interval": "刷新间隔（秒）",
-      "panel_default_tab": "默认选项卡",
-      "hide_tabs": "隐藏非管理员的选项卡",
-      "enable_access_control": "启用每用户访问控制",
-      "administrators": "管理员",
-      "default_other": "默认（其他设备）",
-      "mode_new_profile": "创建新配置文件",
-      "mode_existing_profile": "添加到现有配置文件",
-      "auto_fine_tune_on": "自动微调开启（{hour}:00 左右）",
-      "auto_fine_tune_off": "自动微调关闭",
-      "last_checked": "最后检查：",
-      "remove_label": "- 去除标签 -",
-      "create_new_profile": "+ 创建新配置文件...",
-      "read_only": "只读",
-      "actions": "操作",
-      "cycles_count": "周期",
-      "debug_traces": "调试跟踪",
-      "file_kb": "文件（KB）",
-      "label": "标签",
-      "seconds_from_start": "从开始算起的秒数",
-      "clock_time": "时钟时间",
-      "ungrouped": "未分组"
-    },
-    "toast": {
-      "settings_saved": "设置已保存；集成重载",
-      "import_successful": "导入成功；集成重载",
-      "suggestions_applied": "已采纳建议；集成重载",
-      "ml_training_no_improvement": "训练完成：保持基线（无改进）",
-      "could_not_load_cycle": "无法加载循环：{error}",
-      "preferences_saved": "已保存偏好设置",
-      "panel_settings_saved": "已保存面板设置",
-      "access_saved": "访问控制已保存",
-      "profile_created": "已创建配置文件“{name}”",
-      "profile_deleted": "个人资料“{name}”已删除",
-      "profile_renamed": "个人资料已重命名",
-      "phases_saved": "已保存阶段",
-      "phase_created": "已创建阶段“{name}”",
-      "phase_deleted": "阶段“{name}”已删除",
-      "phase_updated": "阶段已更新",
-      "recording_started": "录制已开始",
-      "recording_stopped": "录制已停止",
-      "recording_discarded": "录制已丢弃",
-      "recording_saved": "录制已保存至配置文件",
-      "export_downloaded": "导出已下载",
-      "logs_exported": "日志已导出",
-      "envelopes_rebuilt": "包络线已重建",
-      "envelope_rebuilt": "包络线已重建",
-      "suggestions_dismissed": "建议已忽略",
-      "auto_label_complete": "自动标记完成",
-      "cycle_labelled": "周期已标记",
-      "cycle_deleted": "循环已删除",
-      "cycles_deleted": "已删除 {count} 个周期",
-      "cycle_trimmed": "周期已修剪",
-      "cycles_merged": "周期已合并",
-      "review_saved": "审核已保存",
-      "feedback_confirmed": "反馈已确认",
-      "feedback_dismissed": "反馈已忽略",
-      "feedback_all_dismissed": "所有反馈均已忽略",
-      "correction_submitted": "已提交更正",
-      "group_saved": "组已保存",
-      "group_deleted": "群组已删除",
-      "automation_deleted": "自动化已删除",
-      "legacy_removed": "已删除旧操作",
-      "cycle_paused": "循环暂停",
-      "cycle_resumed": "循环恢复",
-      "cycle_force_stopped": "循环强制停止",
-      "ml_training_promoted": "训练完成：升级了 {count} 个模型",
-      "matching_reverted": "匹配权重恢复为默认值",
-      "models_reverted": "设备上模型恢复到基线",
-      "analysis_complete": "分析完成：{count} 个建议",
-      "analysis_complete_none": "分析完成：没有新建议",
-      "debug_cleared": "已清除 {count} 个调试跟踪",
-      "all_wiped": "所有数据已擦除",
-      "no_split_found": "没有发现空闲间隙可以分割",
-      "group_name_required": "群组名称为必填项",
-      "min_2_profiles": "为一个组选择至少 2 个配置文件",
-      "profile_name_required": "个人资料名称为必填项",
-      "phase_name_required": "阶段名称为必填项",
-      "name_required": "姓名必填",
-      "json_required": "需要 JSON 数据",
-      "save_failed": "保存失败：{error}",
-      "delete_failed": "删除失败：{error}",
-      "apply_failed": "应用失败：{error}",
-      "rebuild_failed": "重建失败：{error}",
-      "start_failed": "启动失败：{error}",
-      "stop_failed": "停止失败：{error}",
-      "discard_failed": "丢弃失败：{error}",
-      "trim_failed": "修剪失败：{error}",
-      "split_failed": "拆分失败：{error}",
-      "merge_failed": "合并失败：{error}",
-      "create_failed": "创建失败：{error}",
-      "update_failed": "更新失败：{error}",
-      "rename_failed": "重命名失败：{error}",
-      "revert_failed": "恢复失败：{error}",
-      "training_failed": "训练失败：{error}",
-      "export_failed": "导出失败：{error}",
-      "import_failed": "导入失败：{error}",
-      "auto_label_failed": "自动标记失败：{error}",
-      "analysis_failed": "分析失败：{error}",
-      "auto_detect_failed": "自动检测失败：{error}",
-      "error": "错误：{error}",
-      "pause_failed": "暂停失败：{error}",
-      "label_failed": "标签失败：{error}",
-      "invalid_json": "“{key}”不是有效的 JSON - 修复它或在保存之前清除该字段。",
-      "processed": "已处理{bits}",
-      "split_complete": "分成 {count} 个周期"
-    },
-    "msg": {
-      "no_devices": "尚未配置 WashData 设备。",
-      "live_chart_loading": "读数到达时会出现实时功率图表。",
-      "no_profiles_yet": "还没有配置文件。从已标记的周期中创建一个。",
-      "no_logs": "尚未缓冲日志记录。",
-      "no_envelope": "还没有包络线 — 标注周期后重建。",
-      "no_cycles_profile": "此配置文件没有循环。",
-      "ml_learned_intro": "模型针对该机器进行了微调。未列出的任何内容都使用可靠的内置模型。",
-      "ml_intro": "WashData 附带智能模型，可以检测周期、匹配程序并估计时间和能量 - 它们开箱即用。",
-      "matching_tuning_intro": "在学习时，WashData 还会调整程序匹配对循环形状与其持续时间和能量的权重程度。",
-      "merge_intro": "选定的周期合并为一个（按时间顺序；间隙用 0 W 填充）。选择生成的配置文件。",
-      "see_recorder": "请查看下方的录制器小组件",
-      "review_to_cycles": "打开周期审核队列",
-      "no_device_selected": "未选择设备。",
-      "loading": "加载中…",
-      "loading_settings": "正在加载设置...",
-      "no_cycles_match": "没有循环与当前过滤器匹配。",
-      "no_cycles_yet": "尚未记录任何周期。",
-      "no_phases": "没有定义阶段。",
-      "no_phases_assigned": "未分配阶段。",
-      "no_split_points": "还没有分割点。",
-      "no_envelope_overlay": "没有可用于叠加的包络线。",
-      "no_other_users": "未找到其他 Home Assistant 个用户。",
-      "maintenance_requires_access": "维护和导出/导入需要完全访问权限。",
-      "loading_curve": "加载曲线...",
-      "compare_selected_cycles": "选定的循环（实心）- 显示/隐藏",
-      "compare_overlay_profiles": "叠加配置文件（微弱）",
-      "no_profiles_compare": "没有可供比较的配置文件。",
-      "saving_triggers_reload": "保存会触发集成重新加载。 HA 实体可能会短暂显示为不可用。",
-      "prefs_personal": "这些仅适用于您的 Home Assistant 帐户。",
-      "no_match_yet": "尚未进行匹配尝试 - 这会在运行周期内填充。",
-      "no_fine_tuned": "尚未进行任何微调 - WashData 正在使用其内置模型。",
-      "ml_settings_intro": "两个独立的开关：一个在循环运行时应用模型，另一个让 WashData 随着时间的推移将它们微调到您的机器上。",
-      "phase_catalog_intro": "循环的指定部分（预洗、加热、脱水……）。从其控制面板将它们分配给配置文件。",
-      "phase_ranges_intro": "阶段范围（周期开始后的分钟数）叠加在平均曲线上。编辑值以实时预览。",
-      "cleanup_intro": "每个标记的周期都重叠。勾选异常值并删除以清理配置文件。",
-      "split_intro": "单击图形可添加或删除分割点，或按空闲间隙自动检测。",
-      "trim_intro": "拖动红色手柄，或输入值。窗外的所有东西都被移除。",
-      "import_intro": "加载导出的文件或粘贴下面的 JSON 有效负载。",
-      "auto_label_intro": "将配置文件分配给匹配置信度清除阈值的未标记循环。",
-      "enough_data": "有足够的数据可供学习（{current}/{min} 个周期）。",
-      "collecting_data": "收集数据 — 再进行 {need} 个周期{plural}，然后才能开始微调 ({current}/{min})。",
-      "updated": "更新了{time}",
-      "appliance_monitor": "家电监控",
-      "ml_loading": "加载机器学习…",
-      "review_in_settings": "在设置中查看",
-      "storage_diagnostics": "存储统计、维护、导出/导入",
-      "recent_logs": "最近的 ha_washdata 记录",
-      "preferences_adv": "偏好设置",
-      "preferences_admin": "首选项、面板和访问控制",
-      "pending_feedback": "待检测反馈",
-      "recording_in_progress": "录制进行中",
-      "no_profiles_yet_short": "还没有配置文件。",
-      "unsure_detected_prefix": "WashData 不确定是否已检测到",
-      "no_suggestions": "没有积极的建议。",
-      "no_profiles_overlay": "没有要覆盖的配置文件。",
-      "compare_cycles_title": "比较 {count} 个周期",
-      "profiles_intro": "点击配置文件查看统计信息、阶段和清理。将近似相同的程序（相同形状/时长，不同温度或转速）分组，以便匹配可靠地在它们之间选择。",
-      "search_placeholder": "搜索设置…",
-      "automations_intro": "WashData 触发 {start} / {end} 事件并公开实体，因此通知和操作最好构建为普通的 Home Assistant 自动化。使用此设备的自动化显示在下方。",
-      "notify_services_hint": "使用 {entity} 服务 ID（多个时用逗号分隔）。模板变量：{vars}。",
-      "rbac_hint": "关闭时，每个 Home Assistant 用户都拥有完全访问权限（默认）。管理员始终拥有完全访问权限，可以管理所有人。",
-      "feedback_prompt": "确认检测是否正确，纠正程序名称，或忽略。"
-    },
-    "section": {
-      "basic": {
-        "intro": "核心标识和大多数设置所需的必需品。",
-        "label": "基础"
-      },
-      "detection": {
-        "intro": "如何检测循环的开始、运行和结束。",
-        "label": "检测"
-      },
-      "matching": {
-        "intro": "如何将完成的周期与学习的配置文件进行匹配并进行标记。",
-        "label": "匹配"
-      },
-      "timing": {
-        "intro": "背景节奏、离线看门狗和内务管理。",
-        "label": "计时与看门狗"
-      },
-      "anti_wrinkle": {
-        "intro": "防皱模式可在主要加热阶段后检测烘干机的翻滚脉冲。",
-        "label": "抗皱"
-      },
-      "delay": {
-        "intro": "延迟启动检测可识别设备何时通电但尚未开始其周期。",
-        "label": "延迟启动"
-      },
-      "triggers": {
-        "intro": "可选外部信号：结束触发器、门磁、暂停开关和卸载提醒。",
-        "label": "触发器和门"
-      },
-      "notifications": {
-        "label": "通知",
-        "intro": "配置您收到有关周期事件的通知的时间和方式。"
-      },
-      "ml_training": {
-        "label": "ML 训练",
-        "intro": "选择智能模型，个性化对此设备的检测和计时。"
-      }
-    },
-    "setting": {
-      "auto_maintenance": {
-        "label": "自动维护（夜间清理）"
-      },
-      "external_end_trigger_enabled": {
-        "label": "启用外部结束触发"
-      },
-      "external_end_trigger_inverted": {
-        "label": "反转外部触发（触发关闭）"
-      },
-      "pause_cuts_power": {
-        "label": "暂停也会切断电源（通过开关）"
-      },
-      "notify_people": {
-        "label": "人（仅限在家时）"
-      },
-      "notify_only_when_home": {
-        "label": "仅在回家时通知"
-      },
-      "energy_price_static": {
-        "label": "静态能源价格（每千瓦时）"
-      },
-      "enable_ml_models": {
-        "label": "在一个周期内应用智能模型"
-      },
-      "ml_training_enabled": {
-        "label": "向这台机器学习"
-      },
-      "name": {
-        "label": "设备名称"
-      },
-      "device_type": {
-        "label": "设备类型"
-      },
-      "power_sensor": {
-        "label": "功率传感器"
-      },
-      "min_power": {
-        "label": "最小功率"
-      },
-      "off_delay": {
-        "label": "关闭延迟"
-      },
-      "linked_device": {
-        "label": "设备下的组"
-      },
-      "start_threshold_w": {
-        "label": "启动阈值"
-      },
-      "stop_threshold_w": {
-        "label": "停止阈值"
-      },
-      "min_off_gap": {
-        "label": "最小间隙"
-      },
-      "start_duration_threshold": {
-        "label": "开始持续时间"
-      },
-      "start_energy_threshold": {
-        "label": "启动能量"
-      },
-      "completion_min_seconds": {
-        "label": "最短周期持续时间"
-      },
-      "running_dead_zone": {
-        "label": "运行死区"
-      },
-      "end_energy_threshold": {
-        "label": "最终能量"
-      },
-      "end_repeat_count": {
-        "label": "结束重复计数"
-      },
-      "sampling_interval": {
-        "label": "采样间隔"
-      },
-      "smoothing_window": {
-        "label": "平滑窗口"
-      },
-      "abrupt_drop_watts": {
-        "label": "突然下降"
-      },
-      "abrupt_drop_ratio": {
-        "label": "突变率"
-      },
-      "profile_match_threshold": {
-        "label": "匹配阈值"
-      },
-      "profile_unmatch_threshold": {
-        "label": "不匹配阈值"
-      },
-      "profile_match_interval": {
-        "label": "匹配间隔"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "最短持续时间比率"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "最大持续时间比率"
-      },
-      "profile_duration_tolerance": {
-        "label": "配置文件持续时间公差"
-      },
-      "duration_tolerance": {
-        "label": "估计公差"
-      },
-      "auto_label_confidence": {
-        "label": "自动标记置信度"
-      },
-      "learning_confidence": {
-        "label": "学习置信度"
-      },
-      "suppress_feedback_notifications": {
-        "label": "抑制反馈通知"
-      },
-      "watchdog_interval": {
-        "label": "看门狗间隔"
-      },
-      "no_update_active_timeout": {
-        "label": "无更新超时"
-      },
-      "progress_reset_delay": {
-        "label": "进度重置延迟"
-      },
-      "expose_debug_entities": {
-        "label": "公开调试实体"
-      },
-      "save_debug_traces": {
-        "label": "保存调试跟踪"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "启用抗皱检测"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "最大抗皱功效"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "最长持续时间"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "退出功率阈值"
-      },
-      "delay_start_detect_enabled": {
-        "label": "启用延迟启动检测"
-      },
-      "delay_confirm_seconds": {
-        "label": "确认秒数"
-      },
-      "delay_timeout_hours": {
-        "label": "超时时间"
-      },
-      "external_end_trigger": {
-        "label": "外部触发实体"
-      },
-      "door_sensor_entity": {
-        "label": "门磁实体"
-      },
-      "switch_entity": {
-        "label": "切换实体"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "取件提醒延迟"
-      },
-      "pump_stuck_duration": {
-        "label": "泵卡住持续时间"
-      },
-      "notify_start_services": {
-        "label": "启动服务"
-      },
-      "notify_finish_services": {
-        "label": "完成服务"
-      },
-      "notify_live_services": {
-        "label": "实时进展服务"
-      },
-      "notify_fire_events": {
-        "label": "通知的 Fire HA 事件"
-      },
-      "notify_before_end_minutes": {
-        "label": "结束前警报"
-      },
-      "notify_live_interval_seconds": {
-        "label": "实时更新间隔"
-      },
-      "notify_live_overrun_percent": {
-        "label": "警报前的实时超限百分比"
-      },
-      "notify_live_chronometer": {
-        "label": "使用实时计时器"
-      },
-      "notify_timeout_seconds": {
-        "label": "之后自动关闭"
-      },
-      "notify_title": {
-        "label": "通知标题"
-      },
-      "notify_icon": {
-        "label": "通知图标"
-      },
-      "notify_start_message": {
-        "label": "开始留言"
-      },
-      "notify_finish_message": {
-        "label": "完成留言"
-      },
-      "notify_pre_complete_message": {
-        "label": "预完成消息"
-      },
-      "notify_reminder_message": {
-        "label": "提醒信息"
-      },
-      "notify_channel": {
-        "label": "Android频道（开始/直播）"
-      },
-      "notify_finish_channel": {
-        "label": "Android频道（完成）"
-      },
-      "energy_price_entity": {
-        "label": "能源价格实体"
-      },
-      "ml_training_hour": {
-        "label": "每小时学习"
-      },
-      "ml_training_min_cycles": {
-        "label": "首先需要周期"
-      },
-      "ml_training_interval_days": {
-        "label": "最多检查每个"
-      }
-    },
-    "tab": {
-      "status": "概述",
-      "history": "周期",
-      "profiles": "配置文件",
-      "settings": "设置",
-      "ml": "ML 训练",
-      "advanced": "高级",
-      "diagnostics": "诊断",
-      "pp_overview": "概述",
-      "pp_phases": "阶段",
-      "pp_cleanup": "清理",
-      "pp_manage": "管理",
-      "subtab_profiles": "配置文件",
-      "subtab_phase_catalog": "阶段目录"
-    },
-    "btn": {
-      "save": "保存",
-      "cancel": "取消",
-      "delete": "删除",
-      "close": "关闭",
-      "edit": "编辑",
-      "add": "添加",
-      "rebuild": "重建包络线",
-      "record": "开始记录",
-      "compare": "比较",
-      "confirm": "确认",
-      "discard": "丢弃",
-      "export": "导出",
-      "import": "导入",
-      "merge": "合并",
-      "apply": "应用",
-      "refresh": "刷新",
-      "create": "创建",
-      "select": "选择",
-      "done": "完毕",
-      "reset": "重置",
-      "trim": "修剪",
-      "split": "分割",
-      "review": "审查",
-      "inspect": "检查",
-      "label": "标签",
-      "save_settings": "保存设置",
-      "new_profile": "+ 新配置文件",
-      "new_group": "+ 新组",
-      "apply_label": "贴上标签",
-      "run_auto_label": "运行自动标签",
-      "save_review": "保存审阅",
-      "apply_trim": "应用修剪",
-      "apply_split": "应用分割",
-      "process_recording": "保存记录",
-      "stop": "停止",
-      "process": "处理",
-      "add_device": "+ 添加设备",
-      "train_now": "现在训练",
-      "reset_to_defaults": "重置为默认值",
-      "reset_to_builtin": "重置为内置模型",
-      "save_preferences": "保存首选项",
-      "save_panel_settings": "保存面板设置",
-      "save_access_control": "保存访问控制",
-      "auto_label_cycles": "自动标记周期",
-      "run_analysis": "🔍 运行建议分析",
-      "apply_all": "全部应用",
-      "show_only": "仅显示",
-      "dismiss": "忽略",
-      "dismiss_all": "全部忽略",
-      "process_history": "立即处理",
-      "clear_debug": "清除调试数据",
-      "wipe_all": "擦除所有数据",
-      "export_json": "导出为 JSON",
-      "import_json": "从 JSON 导入",
-      "correct": "更正…",
-      "ignore": "忽略",
-      "add_phase": "+ 添加阶段",
-      "new_phase": "+ 新阶段",
-      "delete_profile": "删除配置文件",
-      "rebuild_envelope": "重建包络线",
-      "create_profile": "+ 创建配置文件",
-      "rec_stop": "停止",
-      "pause_cycle": "暂停",
-      "resume_cycle": "恢复",
-      "force_stop": "强制停止",
-      "save_phases": "保存阶段",
-      "auto_detect_split": "自动检测",
-      "clear_splits": "清除",
-      "submit_correction": "提交更正",
-      "import_overwrite": "导入（覆盖数据）",
-      "use": "使用",
-      "manage": "管理",
-      "remove": "移除",
-      "delete_group": "删除组",
-      "trim_split": "修剪/分割",
-      "convert_to_automation": "转换为自动化",
-      "new_automation": "＋ 新自动化",
-      "from_template": "来自模板 ▾",
-      "on_cycle_started": "循环开始",
-      "on_cycle_finished": "循环结束",
-      "save_group": "保存组"
+      "status_graph": "状态图表",
+      "storage_stats": "存储统计",
+      "tools_and_data": "工具与数据",
+      "wipe_history": "清除历史"
     },
     "badge": {
-      "poor_fit": "适配度差",
-      "fair_fit": "适配度一般",
-      "manual": "（手动选择）",
+      "golden_cycle": "记录参考周期",
+      "reviewed": "已审核",
+      "feedback_requested": "已请求反馈",
+      "needs_review": "需要审查",
+      "overrun": "运行时间超出正常",
+      "artifact_tip": "检测到 {n} 个异常（例如，门在周期中打开）— 打开以在图表上查看",
+      "poor_fit_tip": "匹配历史不一致 — 考虑重建此配置文件",
+      "fair_fit_tip": "匹配一致性适中 — 分配给此配置文件的部分周期置信度较低。标记更多周期或重新录制配置文件以提高准确性。",
       "auto": "（自动检测）",
-      "improving": "↗ 改善",
-      "declining": "↘ 下降",
+      "built_in_tag": "内置",
+      "declining": "↘ 下降中",
+      "fair_fit": "质量尚可",
+      "improving": "↗ 提升中",
+      "manual": "（手动选择）",
+      "poor_fit": "质量差",
       "steady": "→ 稳定",
-      "using_tuned": "使用调整权重",
       "using_defaults": "使用出厂默认值",
-      "built_in_tag": "内置"
+      "using_tuned": "使用已调整的权重"
     },
-    "status": {
-      "completed": "已完成",
-      "interrupted": "已中断",
-      "force_stopped": "强制停止",
-      "active": "运行中",
-      "ambiguous": "不确定",
-      "clear": "清除",
-      "working": "处理中…",
-      "recording": "录制中…",
-      "ready": "准备处理",
-      "idle": "空闲",
-      "auto_detect": "自动检测",
-      "fine_tuning": "现在正在微调…",
-      "all_statuses": "所有状态"
+    "btn": {
+      "add_timer": "+ 添加计时器",
+      "remove_timer": "删除计时器",
+      "add_device_tip": "添加另一个 WashData 设备",
+      "delete_group_tip": "仅删除此组 — 保留成员配置文件",
+      "run_analysis_tip": "立即分析已记录的周期并刷新调整建议",
+      "reset_ml_models_tip": "放弃微调模型并恢复内置模型。WashData 可以稍后重新学习。",
+      "add_device": "+ 添加设备",
+      "add_phase": "+ 添加阶段",
+      "apply_all": "全部应用",
+      "apply_label": "应用标签",
+      "apply_split": "应用拆分",
+      "apply_trim": "应用裁剪",
+      "auto_detect_split": "自动检测",
+      "auto_label_cycles": "自动标记周期",
+      "cancel": "取消",
+      "clear_debug": "清除调试数据",
+      "clear_splits": "清除",
+      "close": "关闭",
+      "compare": "比较",
+      "confirm": "确认",
+      "convert_to_automation": "转换为自动化",
+      "correct": "修正…",
+      "create": "创建",
+      "create_profile": "+ 创建配置文件",
+      "delete": "删除",
+      "delete_group": "删除组",
+      "delete_profile": "删除配置文件",
+      "discard": "丢弃",
+      "dismiss": "关闭",
+      "done": "完成",
+      "edit": "编辑",
+      "export": "导出",
+      "export_json": "导出为 JSON",
+      "force_stop": "强制停止",
+      "from_template": "从模板 ▾",
+      "ignore": "忽略",
+      "import_json": "从 JSON 导入",
+      "import_overwrite": "导入（覆盖数据）",
+      "inspect": "检查",
+      "label": "标记",
+      "manage": "管理",
+      "merge": "合并",
+      "new_automation": "＋ 新建自动化",
+      "new_group": "+ 新建组",
+      "new_phase": "+ 新建阶段",
+      "new_profile": "+ 新建配置文件",
+      "on_cycle_finished": "周期完成时",
+      "on_cycle_started": "周期开始时",
+      "pause_cycle": "暂停",
+      "process": "处理",
+      "process_history": "立即处理",
+      "process_recording": "保存录制",
+      "rebuild": "重建包络",
+      "rebuild_envelope": "重建包络",
+      "rec_stop": "停止",
+      "record": "开始录制",
+      "refresh": "刷新",
+      "remove": "移除",
+      "reset": "重置",
+      "reset_to_builtin": "重置为内置模型",
+      "reset_to_defaults": "重置为默认值",
+      "resume_cycle": "继续运行周期",
+      "review": "审查",
+      "run_analysis": "🔍 运行建议分析",
+      "run_auto_label": "运行自动标记",
+      "save": "保存",
+      "save_access_control": "保存访问控制",
+      "save_group": "保存组",
+      "save_panel_settings": "保存面板设置",
+      "save_phases": "保存阶段",
+      "save_preferences": "保存偏好",
+      "save_review": "保存审查",
+      "save_settings": "保存设置",
+      "select": "选择",
+      "show_only": "只显示",
+      "split": "拆分",
+      "submit_correction": "提交修正",
+      "train_now": "立即训练",
+      "trim": "裁剪",
+      "trim_split": "裁剪 / 拆分",
+      "use": "使用",
+      "wipe_all": "清除所有数据"
     },
-    "ml": {
-      "fit_strong": "优秀",
-      "fit_good": "良好",
-      "fit_fair": "一般",
-      "fit_weak": "偏弱",
-      "fit_slight": "微弱",
-      "fit_word": "匹配度",
-      "fine_tuned_at": "微调{when}",
-      "personalized": "● 针对本机进行个性化设置",
-      "builtin_models": "● 使用内置模型"
+    "lbl": {
+      "timer_min": "分钟",
+      "timer_msg_placeholder": "消息（可选，{device}/{program}/{minutes}）",
+      "timer_auto_pause": "自动暂停",
+      "actions": "操作",
+      "activity": "活动",
+      "administrators": "管理员",
+      "auto_fine_tune_off": "自动微调已关闭",
+      "clock_time": "时钟时间",
+      "compare_profiles": "与配置文件比较",
+      "confidence": "置信度",
+      "confidence_threshold": "置信度阈值",
+      "correct_duration": "修正时长（分钟，可选）",
+      "correct_profile": "修正配置文件",
+      "cost": "费用",
+      "create_new_profile": "+ 创建新配置文件…",
+      "cycle_date_display": "周期日期显示",
+      "cycle_health": "周期健康",
+      "cycles_count": "周期数",
+      "date": "日期",
+      "debug_traces": "调试追踪",
+      "default": "默认",
+      "default_access_level": "未列出用户的默认级别",
+      "default_other": "默认（其他设备）",
+      "default_tab": "打开面板时的默认标签",
+      "description": "描述",
+      "duration": "时长",
+      "emphasis": "强调",
+      "enable_access_control": "启用每用户访问控制",
+      "energy": "能耗",
+      "expected_duration": "预期时长（分钟）",
+      "file_kb": "文件（kB）",
+      "gap_s": "间隔（秒）",
+      "head_trim": "头部裁剪（秒）",
+      "health": "健康",
+      "hide_tabs": "对非管理员隐藏标签",
+      "in_use": "使用中",
+      "json_data": "JSON 数据",
+      "label": "匹配的程序",
+      "last_checked": "上次检查：",
+      "load_from_file": "从文件加载",
+      "manual_duration": "手动时长（分钟，可选）",
+      "mode_existing_profile": "添加到现有配置文件",
+      "mode_new_profile": "创建新配置文件",
+      "new_profile_name": "新配置文件名称",
+      "panel_default_tab": "默认标签",
+      "phase_name": "名称",
+      "power": "功率",
+      "profile": "配置文件",
+      "profile_name": "配置文件名称",
+      "progress": "进度",
+      "read_only": "只读",
+      "ref_cycle": "参考周期（可选）",
+      "refresh_interval": "刷新间隔（秒）",
+      "remaining": "剩余",
+      "remove_label": "- 删除标签 -",
+      "rename_profile": "重命名配置文件",
+      "resulting_profile": "结果配置文件",
+      "save_mode": "保存模式",
+      "seconds_from_start": "从开始计的秒数",
+      "select_profile": "选择配置文件",
+      "show_debug": "在状态页面显示实时匹配调试卡（置信度、歧义、最佳候选）",
+      "show_expected": "显示预期曲线叠加（匹配配置文件，橙色）",
+      "show_raw": "显示原始传感器读数（未平滑，灰色）",
+      "status": "状态",
+      "tail_trim": "尾部裁剪（秒）",
+      "ungrouped": "未分组",
+      "unlabelled": "未标记",
+      "unlabelled_paren": "（未标记）",
+      "expected": "预期",
+      "raw_socket": "原始套接字",
+      "artifact_interruption": "中断",
+      "artifact_low_power": "低功率",
+      "artifact_high_power": "高功率",
+      "artifact_anomaly": "异常"
     },
     "modal": {
-      "label_cycle": "标记周期",
+      "merge_cycles": "合并 {n} 个周期",
+      "auto_label": "自动标记周期",
+      "correct_feedback": "修正反馈",
       "create_profile": "创建配置文件",
-      "new_phase": "新阶段",
+      "cycle": "周期",
       "edit_phase": "编辑阶段",
-      "process_recording": "处理记录",
-      "correct_feedback": "正确的反馈",
       "import_config": "导入配置",
-      "auto_label": "自动标签周期",
-      "cycle": "循环"
+      "label_cycle": "标记周期",
+      "new_phase": "新建阶段",
+      "process_recording": "处理录制"
     },
-    "tag": {
-      "late_start": "开始较晚",
-      "early_end": "提早结束",
-      "merged": "合并循环",
-      "split": "分割循环",
-      "noise": "噪音",
-      "wrong_profile": "个人资料错误",
-      "sensor_gap": "传感器间隙"
+    "msg": {
+      "near_duplicate_cluster": "检测到近似重复的配置文件群。分组可让匹配在相似项目间可靠地选择（例如同一程序在不同温度/转速下）。",
+      "coverage_gap": "近期周期没有匹配的配置文件（最近 30 次的 {pct}%）。",
+      "consider_new_profile": "考虑创建新配置文件。",
+      "group_not_cohesive": "这些配置文件不够相似，无法可靠分组，因此匹配会单独处理它们，直到您移除离群值或拆分组。",
+      "group_modal_help": "将形状相同但温度/转速不同的程序分组（时长可能不同）。匹配将组作为一个候选项评分，然后选择最合适的成员。至少选 2 个；叠加显示相似程度。",
+      "showing_suggestions": "显示 {count} 个有建议的设置。",
+      "show_all_settings": "显示所有设置",
+      "tuning_suggestions_available": "来自观察周期的 {count} 个调整建议可用。它们显示在相关字段旁边。",
+      "legacy_actions_title": "{count} 个旧版自定义操作仍在运行",
+      "old_actions_warning": "使用旧版操作编辑器配置（现已移除）。它们仍会在周期事件上触发，但无法在此处编辑。将它们转换为普通自动化，或移除它们。",
+      "no_settings_match": "没有与“{q}”匹配的设置",
+      "clear_debug_hint": "删除存储的调试数据以释放空间。",
+      "wipe_history_warning": "永久删除所有周期和配置文件。无法撤销。",
+      "export_description": "将所有配置文件和周期导出为 JSON，或从之前的导出中恢复。",
+      "log_buffer_hint": "最新在前 · 缓冲自重启以来最后 500 条 ha_washdata 记录 · 拖动底边调整大小。",
+      "review_profile_tip": "此周期标记的程序。如果自动检测的程序有误，请在此处修正 — 标记可帮助未来周期的匹配学习。",
+      "review_quality_tip": "此周期的质量。好 = 该程序的标准示例；差 = 已检测但有噪声或不典型；不可用 = 误检测（合并、截断或虚假）。影响健康评分及允许训练模型的周期。",
+      "review_recorded_tip": "将此标记为其程序的精选参考周期 — 与手动录制周期的作用相同。参考周期始终保留，为匹配模板提供种子，且不会被清理删除。（这是“黄金”/录制标志；两者是同一件事。）",
+      "review_tags_tip": "描述此周期出现问题的可选标志，以便训练和清理可以考虑这些问题。",
+      "review_notes_tip": "供个人参考的自由文本注释。不用于匹配或训练。",
+      "review_confirm_help": "确认此周期是否被正确检测。您的审查可在您的机器上训练模型 — 确认的周期越多，匹配和健康评分越好。快速的好/差就足够了。",
+      "review_notes_placeholder": "注释（可选）",
+      "compare_profiles_tip": "将其他配置文件包络叠加在上方图表上，看哪个最适合此周期。",
+      "artifact_header": "此周期中检测到 {n} 个异常",
+      "artifact_footer": "在上图中高亮显示。这些是瞬态异常（例如门在周期中打开），不一定是问题。",
+      "profile_poor_health_detail": "分配给此配置文件的周期形状不一致或置信度较低。考虑重建包络或审查已标记的周期。",
+      "trend_duration_longer": "时长趋势增长（{pct}%/周期）— 近期平均 {avg}",
+      "trend_duration_shorter": "时长趋势缩短（{pct}%/周期）— 近期平均 {avg}",
+      "trend_energy_up": "能耗趋势上升（{pct}%/周期）— 近期平均 {avg}",
+      "trend_energy_down": "能耗趋势下降（{pct}%/周期）",
+      "performance_trend": "性能趋势（{n} 个周期）",
+      "maintenance_advisory": "时长/能耗增加可能表明设备需要维护（例如除垢、清洗滤网）。",
+      "manual_duration_hint": "配置文件的平均/预期周期时长，用于剩余时间估算。编辑以设置；保持不变则保留当前值。",
+      "appliance_monitor": "设备监控",
+      "auto_label_intro": "为置信度达到阈值的未标记周期分配配置文件。",
+      "cleanup_intro": "显示所有已标记周期的叠加。勾选离群值并删除以清理配置文件。",
+      "compare_overlay_profiles": "叠加配置文件（浅色）",
+      "compare_selected_cycles": "选中的周期（实线）— 显示/隐藏",
+      "feedback_prompt": "确认正确、修正程序或忽略。",
+      "import_intro": "加载导出文件或在下方粘贴 JSON 内容。",
+      "live_chart_loading": "实时功率图表将随读数到达而显示。",
+      "loading": "加载中…",
+      "loading_curve": "加载曲线…",
+      "loading_settings": "加载设置…",
+      "maintenance_requires_access": "维护和导出/导入需要完全访问权限。",
+      "matching_tuning_intro": "在学习时，WashData 还会调整程序匹配对形状与时长和能耗的权重比例。",
+      "merge_intro": "选中的周期将按时间顺序合并（间隙填充为 0 W）。选择结果配置文件。",
+      "ml_intro": "WashData 配备了开箱即用的智能模型。",
+      "ml_learned_intro": "针对此机器微调的模型。",
+      "ml_loading": "加载 ML 中…",
+      "ml_settings_intro": "两个独立开关：一个在周期运行时应用模型，另一个让 WashData 随时间针对您的机器进行微调。",
+      "no_cycles_match": "没有与当前筛选条件匹配的周期。",
+      "no_cycles_profile": "此配置文件没有周期。",
+      "no_cycles_yet": "尚未记录任何周期。",
+      "no_device_selected": "未选择设备。",
+      "no_devices": "尚未配置 WashData 设备。",
+      "no_envelope": "还没有包络 — 标记周期后重建。",
+      "no_envelope_overlay": "没有可叠加的包络。",
+      "no_fine_tuned": "尚未微调 — WashData 正在使用内置模型。",
+      "no_logs": "尚未缓冲任何日志记录。",
+      "no_match_yet": "尚未尝试匹配 — 此项在运行周期时填充。",
+      "no_other_users": "未找到其他 Home Assistant 用户。",
+      "no_phases": "未定义阶段。",
+      "no_phases_assigned": "未分配阶段。",
+      "no_profiles_compare": "没有可比较的配置文件。",
+      "no_profiles_overlay": "没有可叠加的配置文件。",
+      "no_profiles_yet": "还没有配置文件。从已标记的周期创建一个。",
+      "no_profiles_yet_short": "还没有配置文件。",
+      "no_split_points": "还没有分割点。",
+      "no_suggestions": "没有活跃的建议。",
+      "pending_feedback": "待处理的检测反馈",
+      "phase_catalog_intro": "周期的命名片段（预洗、加热、甩干…）。从其控制面板将它们分配给配置文件。",
+      "phase_ranges_intro": "叠加在平均曲线上的阶段范围（从周期开始的分钟数）。编辑值以实时预览。",
+      "preferences_admin": "偏好、面板和访问控制",
+      "preferences_adv": "偏好",
+      "prefs_personal": "这些仅适用于您的 Home Assistant 账户。",
+      "profiles_intro": "点击配置文件查看统计、阶段和清理。将形状/时长相近（不同温度或转速）的程序分组，以便匹配可靠地区分它们。",
+      "rbac_hint": "关闭时，每个 Home Assistant 用户都有完全访问权限（默认）。管理员始终有完全访问权限并可管理所有人。",
+      "recent_logs": "最近的 ha_washdata 记录",
+      "recording_in_progress": "录制进行中",
+      "review_in_settings": "在设置中审查",
+      "review_to_cycles": "打开周期审查队列",
+      "saving_triggers_reload": "保存会触发集成重载。HA 实体可能短暂显示为不可用。",
+      "search_placeholder": "搜索设置…",
+      "see_recorder": "查看下方的录制小部件",
+      "split_intro": "点击图表添加或删除分割点，或通过空闲间隔自动检测。每个结果片段可获得自己的配置文件。",
+      "storage_diagnostics": "存储统计、维护、导出/导入",
+      "trim_intro": "拖动红色控制柄，或输入值。窗口外的所有内容将被移除。",
+      "unsure_detected_prefix": "WashData 不确定是否检测到",
+      "updated": "已更新"
     },
-    "quality": {
-      "good": "好的",
-      "bad": "坏的",
-      "unusable": "无法使用"
-    },
-    "access": {
-      "none": "无（隐藏）",
-      "read": "读取",
-      "edit": "编辑",
-      "full": "完整",
-      "inherit": "继承"
+    "phase_desc": {
+      "pre_wash": "主洗前的初步浸泡或预处理。",
+      "wash": "主洗涤周期带有滚筒运动和可选加热。",
+      "wash_dw": "主要洗涤剂加热洗涤。",
+      "rinse": "清水冲洗阶段。该阶段可能会重复多次。",
+      "spin": "高速提取以去除负载中的水。",
+      "spin_wd": "干燥过渡前高速萃取。",
+      "soak": "活性洗涤阶段之间的低活性浸泡期。",
+      "soak_dw": "对重度污垢进行延长浸泡。",
+      "anti_crease": "完成后偶尔进行短暂的翻滚以减少皱纹。",
+      "heat_up": "完全干燥开始之前加热器初始预热。",
+      "drying": "主要加热翻滚期。",
+      "cool_down": "接近循环结束时在没有热量的情况下翻滚。",
+      "anti_wrinkle": "周期后定期翻滚以减少皱纹。",
+      "sensor_check": "测量干燥度时短暂的低功率暂停。",
+      "drain_and_switch": "从洗涤模式到干燥模式的过渡期。",
+      "pre_rinse": "洗涤剂清洗前初步喷洒。",
+      "dry": "使用加热器和/或余热的干燥阶段。",
+      "sanitize": "用于消毒程序的高温清洁阶段。"
     },
     "health": {
-      "poor": "⚠ 匹配差",
-      "fair": "匹配一般",
-      "good": "✓ 匹配良好"
-    },
-    "trend": {
-      "up": "趋势上升",
-      "down": "趋势下降"
-    },
-    "pref": {
-      "date_relative": "相对（例如 2 小时前）",
-      "date_absolute": "绝对（例如 7 月 2 日 14:32）"
+      "fair": "配置文件质量尚可",
+      "good": "✓ 配置文件质量良好",
+      "poor": "⚠ 配置文件质量差"
     },
     "log": {
       "all_levels": "所有级别"
+    },
+    "ml": {
+      "builtin_models": "● 使用内置模型",
+      "fit_fair": "尚可",
+      "fit_good": "良好",
+      "fit_slight": "轻微",
+      "fit_strong": "强",
+      "fit_weak": "弱",
+      "fit_word": "拟合",
+      "personalized": "● 已针对此机器个性化"
+    },
+    "pref": {
+      "date_absolute": "绝对时间（例如：7月2日 14:32）",
+      "date_relative": "相对时间（例如：2小时前）"
+    },
+    "quality": {
+      "bad": "差",
+      "good": "好",
+      "unusable": "不可用"
+    },
+    "status": {
+      "active": "活跃",
+      "all_statuses": "所有状态",
+      "ambiguous": "不明确",
+      "auto_detect": "自动检测",
+      "clear": "正常",
+      "completed": "已完成",
+      "fine_tuning": "正在微调…",
+      "force_stopped": "强制停止",
+      "idle": "空闲",
+      "interrupted": "已中断",
+      "ready": "准备处理",
+      "recording": "录制中"
+    },
+    "tab": {
+      "advanced": "高级",
+      "diagnostics": "诊断",
+      "history": "周期",
+      "ml": "ML 训练",
+      "pp_cleanup": "清理",
+      "pp_manage": "管理",
+      "pp_overview": "概览",
+      "pp_phases": "阶段",
+      "profiles": "配置文件",
+      "settings": "设置",
+      "status": "概览",
+      "subtab_phase_catalog": "阶段目录",
+      "subtab_profiles": "配置文件"
+    },
+    "tag": {
+      "early_end": "提前结束",
+      "late_start": "延迟开始",
+      "merged": "合并周期",
+      "noise": "噪声",
+      "sensor_gap": "传感器间隔",
+      "split": "拆分周期",
+      "wrong_profile": "错误配置文件"
+    },
+    "toast": {
+      "access_saved": "已保存访问控制",
+      "all_wiped": "所有数据已清除",
+      "analysis_complete_none": "分析完成：没有新建议",
+      "auto_label_complete": "自动标记完成",
+      "automation_deleted": "自动化已删除",
+      "correction_submitted": "修正已提交",
+      "cycle_deleted": "周期已删除",
+      "cycle_force_stopped": "周期已强制停止",
+      "cycle_labelled": "周期已标记",
+      "cycle_paused": "周期已暂停",
+      "cycle_resumed": "周期已恢复",
+      "cycle_trimmed": "周期已裁剪",
+      "cycles_merged": "周期已合并",
+      "envelope_rebuilt": "包络已重建",
+      "envelopes_rebuilt": "所有包络已重建",
+      "export_downloaded": "导出已下载",
+      "feedback_all_dismissed": "所有反馈已关闭",
+      "feedback_confirmed": "反馈已确认",
+      "feedback_dismissed": "反馈已关闭",
+      "group_deleted": "组已删除",
+      "group_name_required": "需要组名",
+      "group_saved": "组已保存",
+      "import_successful": "导入成功；集成重载中",
+      "json_required": "需要 JSON 数据",
+      "legacy_removed": "旧版操作已移除",
+      "logs_exported": "日志已导出",
+      "matching_reverted": "匹配权重已恢复为默认值",
+      "min_2_profiles": "为组至少选择 2 个配置文件",
+      "ml_training_no_improvement": "训练完成：保留基准（无改进）",
+      "models_reverted": "设备上的模型已恢复为基准",
+      "name_required": "需要名称",
+      "no_split_found": "未找到可分割的空闲间隔",
+      "panel_settings_saved": "面板设置已保存",
+      "phase_name_required": "需要阶段名称",
+      "phase_updated": "阶段已更新",
+      "phases_saved": "阶段已保存",
+      "preferences_saved": "偏好已保存",
+      "profile_name_required": "需要配置文件名称",
+      "profile_renamed": "配置文件已重命名",
+      "recording_discarded": "录制已丢弃",
+      "recording_saved": "录制已保存到配置文件",
+      "recording_started": "录制已开始",
+      "recording_stopped": "录制已停止",
+      "review_saved": "审查已保存",
+      "settings_saved": "设置已保存；集成重载中",
+      "suggestions_applied": "建议已应用；集成重载中",
+      "suggestions_dismissed": "建议已关闭"
+    },
+    "trend": {
+      "down": "下降趋势",
+      "up": "上升趋势"
     }
   }
 }

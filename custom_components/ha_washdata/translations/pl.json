@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Rozpoczęcie cyklu",
-        "cycle_finish": "Zakończenie cyklu",
-        "cycle_live": "Postęp na żywo"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Pralka",
@@ -88,198 +81,6 @@
         "bread_maker": "Wypiekacz chleba",
         "pump": "Pompa/pompa ściekowa",
         "other": "Inne (zaawansowane)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(Bez etykiety)",
-        "create_new_profile": "Utwórz nowy profil",
-        "remove_label": "Usuń etykietę",
-        "no_reference_cycle": "(Brak cyklu referencyjnego)",
-        "all_device_types": "Wszystkie typy urządzeń",
-        "current_suffix": "(aktualny)",
-        "phase_builtin_suffix": "(Wbudowany)",
-        "phase_none_available": "Brak dostępnych faz.",
-        "phase_other_device_types": "Inne typy urządzeń:",
-        "settings_deprecation_warning": "⚠️ **Wycofany typ urządzenia:** Urządzenie {device_type} ma zostać usunięte w przyszłej wersji. Potok dopasowujący WashData nie zapewnia wiarygodnych wyników dla tej klasy urządzeń. Twoja integracja będzie działać przez cały okres wycofania; aby wyciszyć to ostrzeżenie, przełącz **Typ urządzenia** poniżej na jeden z obsługiwanych typów (pralka, suszarka, pralko-suszarka, zmywarka, frytownica, wypiekacz do chleba lub pompa) lub na **Inny (zaawansowany)**, jeśli Twoje urządzenie nie pasuje do żadnego z obsługiwanych typów. **Inne (zaawansowane)** zawiera celowo ogólne ustawienia domyślne, które nie są dostrojone do żadnego konkretnego urządzenia, dlatego konieczne będzie samodzielne skonfigurowanie progów, limitów czasu i dopasowywania parametrów; wszystkie istniejące ustawienia zostaną zachowane po przełączeniu.",
-        "editor_select_info": "Wybierz 1 cykl do podziału lub 2+ cykli do scalenia.",
-        "editor_select_info_split": "Wybierz 1 cykl do podziału.",
-        "editor_select_info_merge": "Wybierz 2+ cykle do scalenia.",
-        "editor_select_info_delete": "Wybierz 1+ cykli do usunięcia.",
-        "no_cycles_recorded": "Nie zapisano jeszcze żadnych cykli.",
-        "profile_summary_line": "- **{name}**: {count} cykli, śr. {avg} min",
-        "no_profiles_created": "Nie utworzono jeszcze żadnych profili.",
-        "phase_preview": "Podgląd fazy",
-        "phase_preview_no_curve": "Krzywa średniego profilu nie jest jeszcze dostępna. Uruchom lub oetykietuj więcej cykli dla tego profilu.",
-        "average_power_curve": "Krzywa średniej mocy",
-        "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} cykli, ~{duration} min śr.)",
-        "profile_option_short_fmt": "{name} ({count} cykli, ~{duration} min)",
-        "deleted_cycles_from_profile": "Usunięto {count} cykli z {profile}.",
-        "not_enough_data_graph": "Za mało danych, aby wygenerować wykres.",
-        "no_profiles_found": "Nie znaleziono profili.",
-        "cycle_info_fmt": "Cykl: {start}, {duration} min, aktualnie: {label}",
-        "top_candidates_header": "### Najlepsi kandydaci",
-        "tbl_profile": "Profil",
-        "tbl_confidence": "Pewność",
-        "tbl_correlation": "Korelacja",
-        "tbl_duration_match": "Dopasowanie czasu trwania",
-        "detected_profile": "Wykryty profil",
-        "estimated_duration": "Szacowany czas trwania",
-        "actual_duration": "Rzeczywisty czas trwania",
-        "choose_action": "__Wybierz akcję poniżej:__",
-        "tbl_count": "Liczba",
-        "tbl_avg": "Śr.",
-        "tbl_min": "Min",
-        "tbl_max": "Maks",
-        "tbl_energy_avg": "Energia (śr.)",
-        "tbl_energy_total": "Energia (łącznie)",
-        "tbl_consistency": "Spójn.",
-        "tbl_last_run": "Ostatni cykl",
-        "graph_legend_title": "Legenda wykresu",
-        "graph_legend_body": "Niebieski pasek przedstawia zaobserwowany minimalny i maksymalny zakres poboru mocy. Linia pokazuje krzywą średniej mocy.",
-        "recording_preview": "Podgląd nagrania",
-        "trim_start": "Przycięcie początku",
-        "trim_end": "Przycięcie końca",
-        "split_preview_title": "Podgląd podziału",
-        "split_preview_found_fmt": "Znaleziono {count} segmentów.",
-        "split_preview_confirm_fmt": "Kliknij Potwierdź, aby podzielić ten cykl na {count} oddzielnych cykli.",
-        "merge_preview_title": "Podgląd scalania",
-        "merge_preview_joining_fmt": "Scalanie {count} cykli. Luki zostaną wypełnione odczytami 0 W.",
-        "editor_delete_preview_title": "Podgląd usuwania",
-        "editor_delete_preview_intro": "Wybrane cykle zostaną trwale usunięte:",
-        "editor_delete_preview_confirm": "Kliknij Potwierdź, aby trwale usunąć te rekordy cykli.",
-        "no_power_preview": "*Brak danych mocy dostępnych do podglądu.*",
-        "profile_comparison": "Porównanie profili",
-        "actual_cycle_label": "Ten cykl (rzeczywisty)",
-        "storage_usage_header": "Wykorzystanie miejsca",
-        "storage_file_size": "Rozmiar pliku",
-        "storage_cycles": "Cykle",
-        "storage_profiles": "Profile",
-        "storage_debug_traces": "Ślady debugowania",
-        "overview_suffix": "Przegląd",
-        "phase_preview_for_profile": "Podgląd fazy dla profilu",
-        "current_ranges_header": "Aktualne zakresy",
-        "assign_phases_help": "Użyj poniższych akcji, aby dodawać, edytować, usuwać lub zapisywać zakresy.",
-        "profile_summary_header": "Podsumowanie profili",
-        "recent_cycles_header": "Ostatnie cykle",
-        "trim_cycle_preview_title": "Podgląd przycięcia cyklu",
-        "trim_cycle_preview_no_data": "Brak danych mocy dla tego cyklu.",
-        "trim_cycle_preview_kept_suffix": "zachowane",
-        "table_program": "Program",
-        "table_when": "Kiedy",
-        "table_length": "Długość",
-        "table_match": "Dopasowanie",
-        "table_profile": "Profil",
-        "table_cycles": "Cykle",
-        "table_avg_length": "Śr. długość",
-        "table_last_run": "Ostatni cykl",
-        "table_avg_energy": "Śr. energia",
-        "table_detected_program": "Wykryty program",
-        "table_confidence": "Pewność",
-        "table_reported": "Zgłoszono"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Podziel cykl (znajdź przerwy)",
-        "merge": "Scal cykle (połącz fragmenty)",
-        "delete": "Usuń cykl(e)"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Automatycznie wykryj przerwy bezczynności",
-        "manual": "Ręczne znaczniki czasu"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Konserwacja: ponowne przetwarzanie i optymalizacja danych",
-        "clear_debug_data": "Wyczyść dane debugowania (zwolnij miejsce)",
-        "wipe_history": "Usuń WSZYSTKIE dane z tego urządzenia (nieodwracalne)",
-        "export_import": "Eksportuj/importuj JSON z ustawieniami (kopiuj/wklej)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "Eksportuj wszystkie dane",
-        "import": "Importuj/scal dane"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Automatyczne etykietowanie starych cykli",
-        "select_cycle_to_label": "Etykietuj konkretny cykl",
-        "select_cycle_to_delete": "Usuń cykl",
-        "interactive_editor": "Interaktywny edytor scalania/podziału",
-        "trim_cycle": "Przytnij dane cyklu"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Utwórz nowy profil",
-        "edit_profile": "Edytuj/zmień nazwę profilu",
-        "delete_profile": "Usuń profil",
-        "profile_stats": "Statystyki profilu",
-        "cleanup_profile": "Czyszczenie historii - wykres i usuwanie",
-        "assign_phases": "Przypisz zakresy faz"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Utwórz nową fazę",
-        "edit_custom_phase": "Edytuj fazę",
-        "delete_custom_phase": "Usuń fazę"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Nadaj nazwy i zastosuj fazy",
-        "cancel": "Wróć bez zmian"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Dodaj zakres fazy",
-        "edit_range": "Edytuj zakres fazy",
-        "delete_range": "Usuń zakres fazy",
-        "clear_ranges": "Wyczyść wszystkie zakresy",
-        "auto_detect_ranges": "Automatycznie wykryj fazy",
-        "save_ranges": "Zapisz i wróć"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Odśwież stan",
-        "stop_recording": "Zatrzymaj nagrywanie (zapisz i przetwórz)",
-        "start_recording": "Rozpocznij nowe nagranie",
-        "process_recording": "Przetwórz ostatnie nagranie (przytnij i zapisz)",
-        "discard_recording": "Odrzuć ostatnie nagranie"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Utwórz nowy profil",
-        "existing_profile": "Dodaj do istniejącego profilu",
-        "discard": "Odrzuć nagranie"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Potwierdź - poprawne wykrycie",
-        "correct": "Popraw - wybierz program/czas trwania",
-        "ignore": "Ignoruj - fałszywy alarm/zakłócony cykl",
-        "delete": "Usuń - usuń z historii"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Ustaw punkt początku",
-        "set_end": "Ustaw punkt końca",
-        "reset": "Zresetuj do pełnego czasu trwania",
-        "apply": "Zastosuj przycięcie",
-        "cancel": "Anuluj"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "Bieżąca faza"
       },
-      "wash_phase": {
-        "name": "Faza"
-      },
       "profile_cycle_count": {
         "name": "Profil {profile_name} - liczba",
         "unit_of_measurement": "cykle"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s musi być większe niż trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "Brak aktywnego cyklu, który można wstrzymać lub wznowić."
     }
   },
   "panel": {
-    "tab": {
-      "status": "Przegląd",
-      "history": "Cykle",
-      "profiles": "Profile",
-      "settings": "Ustawienia",
-      "ml": "Trenowanie ML",
-      "advanced": "Zaawansowany",
-      "diagnostics": "Diagnostyka",
-      "pp_overview": "Przegląd",
-      "pp_phases": "Fazy",
-      "pp_cleanup": "Czyszczenie",
-      "pp_manage": "Zarządzanie",
-      "subtab_profiles": "Profile",
-      "subtab_phase_catalog": "Katalog faz"
-    },
     "btn": {
-      "save": "Zapisz",
-      "cancel": "Anuluj",
-      "delete": "Usuń",
-      "close": "Zamknij",
-      "edit": "Edytuj",
-      "add": "Dodaj",
-      "rebuild": "Odbuduj koperty",
-      "record": "Rozpocznij nagrywanie",
-      "compare": "Porównaj",
-      "confirm": "Potwierdź",
-      "discard": "Odrzuć",
-      "export": "Eksport",
-      "import": "Import",
-      "merge": "Scal",
-      "apply": "Zastosuj",
-      "refresh": "Odśwież",
-      "create": "Utwórz",
-      "select": "Wybierz",
-      "done": "Gotowe",
-      "reset": "Resetuj",
-      "trim": "Przytnij",
-      "split": "Podziel",
-      "review": "Przejrzyj",
-      "inspect": "Sprawdź",
-      "label": "Oznacz",
-      "save_settings": "Zapisz ustawienia",
-      "new_profile": "+ Nowy profil",
-      "new_group": "+ Nowa grupa",
-      "apply_label": "Zastosuj etykietę",
-      "run_auto_label": "Uruchom automatyczne etykietowanie",
-      "save_review": "Zapisz ocenę",
-      "apply_trim": "Zastosuj przycięcie",
-      "apply_split": "Zastosuj podział",
-      "process_recording": "Zapisz nagranie",
-      "stop": "Zatrzymaj",
-      "process": "Przetwórz",
+      "add_timer": "+ Dodaj timer",
+      "remove_timer": "Usuń timer",
+      "add_device_tip": "Dodaj kolejne urządzenie WashData",
+      "delete_group_tip": "Usuń tylko tę grupę — profile członków zostaną zachowane",
+      "run_analysis_tip": "Przeanalizuj już teraz swoje zarejestrowane cykle i odśwież sugestie dotyczące tuningu",
+      "reset_ml_models_tip": "Odrzuć modele dopracowane i wróć do wbudowanych. WashData może później nauczyć się ich ponownie.",
+      "resume_cycle": "Wznawiać",
       "add_device": "+ Dodaj urządzenie",
-      "train_now": "Trenuj teraz",
-      "reset_to_defaults": "Przywróć ustawienia domyślne",
-      "reset_to_builtin": "Zresetuj do modeli wbudowanych",
-      "save_preferences": "Zapisz preferencje",
-      "save_panel_settings": "Zapisz ustawienia panelu",
-      "save_access_control": "Zapisz kontrolę dostępu",
-      "auto_label_cycles": "Automatycznie oznaczaj cykle",
-      "run_analysis": "🔍 Przeprowadź analizę sugestii",
-      "apply_all": "Zastosuj wszystko",
-      "show_only": "Pokaż tylko",
-      "dismiss": "Odrzuć",
-      "dismiss_all": "Odrzuć wszystko",
-      "process_history": "Przetwórz teraz",
-      "clear_debug": "Wyczyść dane debugowania",
-      "wipe_all": "Wyczyść wszystkie dane",
-      "export_json": "Eksportuj do JSON",
-      "import_json": "Importuj z JSON",
-      "correct": "Popraw…",
-      "ignore": "Ignoruj",
       "add_phase": "+ Dodaj fazę",
-      "new_phase": "+ Nowa faza",
-      "delete_profile": "Usuń profil",
-      "rebuild_envelope": "Odbuduj kopertę",
-      "create_profile": "+ Utwórz profil",
-      "rec_stop": "Zatrzymaj",
-      "pause_cycle": "Pauza",
-      "resume_cycle": "Wznów",
-      "force_stop": "Wymuś zatrzymanie",
-      "save_phases": "Zapisz fazy",
+      "apply_all": "Zastosuj wszystko",
+      "apply_label": "Zastosuj etykietę",
+      "apply_split": "Zastosuj podział",
+      "apply_trim": "Zastosuj Przytnij",
       "auto_detect_split": "Automatyczne wykrywanie",
-      "clear_splits": "Wyczyść",
-      "submit_correction": "Prześlij poprawkę",
-      "import_overwrite": "Importuj (nadpisuje dane)",
-      "use": "Użyj",
-      "manage": "Zarządzaj",
-      "remove": "Usuń",
+      "auto_label_cycles": "Cykle automatycznego etykietowania",
+      "cancel": "Anulować",
+      "clear_debug": "Wyczyść dane debugowania",
+      "clear_splits": "Jasne",
+      "close": "Zamknąć",
+      "compare": "Porównywać",
+      "confirm": "Potwierdzać",
+      "convert_to_automation": "Przejdź na automatyzację",
+      "correct": "Prawidłowy…",
+      "create": "Tworzyć",
+      "create_profile": "+ Utwórz profil",
+      "delete": "Usuwać",
       "delete_group": "Usuń grupę",
-      "trim_split": "Przytnij / Podziel",
-      "convert_to_automation": "Konwertuj na automatyzację",
-      "new_automation": "+ Nowa automatyzacja",
+      "delete_profile": "Usuń profil",
+      "discard": "Wyrzucać",
+      "dismiss": "Odrzucać",
+      "done": "Zrobione",
+      "edit": "Redagować",
+      "export": "Eksport",
+      "export_json": "Eksportuj do JSON",
+      "force_stop": "Wymuś zatrzymanie",
       "from_template": "Z szablonu ▾",
-      "on_cycle_started": "Po rozpoczęciu cyklu",
+      "ignore": "Ignorować",
+      "import_json": "Importuj z JSON",
+      "import_overwrite": "Importuj (nadpisuje dane)",
+      "inspect": "Sprawdzać",
+      "label": "Etykieta",
+      "manage": "Zarządzać",
+      "merge": "Łączyć",
+      "new_automation": "+ Nowa automatyzacja",
+      "new_group": "+ Nowa grupa",
+      "new_phase": "+ Nowa faza",
+      "new_profile": "+ Nowy profil",
       "on_cycle_finished": "Po zakończeniu cyklu",
-      "save_group": "Zapisz grupę"
+      "on_cycle_started": "Po rozpoczęciu cyklu",
+      "pause_cycle": "Pauza",
+      "process": "Proces",
+      "process_history": "Przetwarzaj teraz",
+      "process_recording": "Zapisz nagranie",
+      "rebuild": "Odbuduj koperty",
+      "rebuild_envelope": "Odbuduj kopertę",
+      "rec_stop": "Zatrzymywać się",
+      "record": "Rozpocznij nagrywanie",
+      "refresh": "Odświeżać",
+      "remove": "Usunąć",
+      "reset": "Nastawić",
+      "reset_to_builtin": "Zresetuj do modeli wbudowanych",
+      "reset_to_defaults": "Przywróć ustawienia domyślne",
+      "review": "Recenzja",
+      "run_analysis": "🔍 Przeprowadź analizę sugestii",
+      "run_auto_label": "Uruchom automatyczne etykietowanie",
+      "save": "Ratować",
+      "save_access_control": "Zapisz kontrolę dostępu",
+      "save_group": "Zapisz grupę",
+      "save_panel_settings": "Zapisz ustawienia panelu",
+      "save_phases": "Zapisz fazy",
+      "save_preferences": "Zapisz preferencje",
+      "save_review": "Zapisz recenzję",
+      "save_settings": "Zapisz ustawienia",
+      "select": "Wybierać",
+      "show_only": "Pokaż tylko",
+      "split": "Podział",
+      "submit_correction": "Prześlij poprawkę",
+      "train_now": "Pociąg teraz",
+      "trim": "Przycinać",
+      "trim_split": "Przytnij / Podziel",
+      "use": "Używać",
+      "wipe_all": "Wyczyść wszystkie dane"
     },
     "hdr": {
-      "status": "Status",
-      "live_power": "Moc na żywo",
-      "manual_recording": "Nagrywanie ręczne",
-      "tools_and_data": "Narzędzia i dane",
-      "phase_catalog": "Katalog faz",
-      "storage_stats": "Statystyki przechowywania",
-      "maintenance": "Działania konserwacyjne",
-      "export_import": "Eksportuj/Importuj",
       "logs": "Dzienniki",
-      "my_preferences": "Moje preferencje",
-      "panel_settings": "Ustawienia panelu (wszyscy użytkownicy)",
+      "toggle_sidebar": "Przełącz pasek boczny Asystenta Home",
       "access_control": "Kontrola dostępu",
-      "ml_smart_learning": "Inteligentne uczenie się",
-      "ml_settings_card": "Ustawienia",
-      "ml_learned": "Czego nauczył się WashData",
-      "ml_matching_tuning": "Dostrajanie dopasowania programu",
-      "display": "Wyświetlacz",
-      "status_graph": "Wykres stanu",
-      "diagnostics_pref": "Diagnostyka",
-      "logs_diagnostics": "Diagnostyka",
-      "process_history": "Historia przetworzeń",
-      "clear_debug": "Wyczyść ślady debugowania",
-      "wipe_history": "Wyczyść historię",
-      "automations": "Automatyzacje",
-      "automation_open": "Otwórz w edytorze automatyzacji",
       "automation_delete": "Usuń tę automatyzację",
       "automation_needs_review": "Ten cykl wymaga przeglądu",
+      "automation_open": "Otwórz w edytorze automatyzacji",
       "automation_review_this_cycle": "Przejrzyj ten cykl",
-      "no_automations": "Żadna automatyzacja nie odwołuje się jeszcze do tego urządzenia."
+      "automations": "Automatyka",
+      "clear_debug": "Wyczyść ślady debugowania",
+      "diagnostics_pref": "Diagnostyka",
+      "display": "Wyświetlacz",
+      "export_import": "Eksportuj/Importuj",
+      "live_power": "Żywa moc",
+      "logs_diagnostics": "Diagnostyka",
+      "maintenance": "Działania konserwacyjne",
+      "manual_recording": "Nagrywanie ręczne",
+      "ml_learned": "Czego nauczył się WashData",
+      "ml_matching_tuning": "Dostrajanie dopasowania programu",
+      "ml_settings_card": "Ustawienia",
+      "ml_smart_learning": "Inteligentne uczenie się",
+      "my_preferences": "Moje preferencje",
+      "no_automations": "Żadna automatyzacja nie odwołuje się jeszcze do tego urządzenia.",
+      "panel_settings": "Ustawienia panelu",
+      "phase_catalog": "Katalog faz",
+      "process_history": "Historia procesu",
+      "status": "Status",
+      "status_graph": "Wykres stanu",
+      "storage_stats": "Statystyki przechowywania",
+      "tools_and_data": "Narzędzia i dane",
+      "wipe_history": "Wyczyść historię"
     },
     "lbl": {
-      "power": "Moc",
-      "progress": "Postęp",
-      "remaining": "Pozostało",
-      "duration": "Czas trwania",
-      "energy": "Energia",
-      "profile": "Profil",
-      "status": "Status",
-      "date": "Data",
-      "confidence": "Pewność",
-      "health": "Kondycja",
-      "cost": "Koszt",
-      "program": "Program",
-      "cycle_health": "Kondycja cyklu",
-      "activity": "Aktywność",
-      "unlabelled": "Nieoznakowane",
-      "unlabelled_paren": "(bez etykiety)",
-      "emphasis": "Podkreślenie",
-      "default": "Domyślny",
-      "in_use": "W użyciu",
-      "profile_name": "Nazwa profilu",
-      "ref_cycle": "Cykl referencyjny (opcjonalnie)",
-      "manual_duration": "Ręczny czas trwania (min, opcjonalnie)",
-      "phase_name": "Nazwa fazy",
-      "description": "Opis",
-      "correct_profile": "Prawidłowy profil",
-      "correct_duration": "Prawidłowy czas trwania (min, opcjonalnie)",
-      "load_from_file": "Załaduj z pliku",
-      "json_data": "Dane JSON",
-      "expected_duration": "Oczekiwany czas trwania (min)",
-      "rename_profile": "Zmień nazwę profilu",
-      "select_profile": "Wybierz profil",
-      "confidence_threshold": "Próg ufności",
-      "resulting_profile": "Wynikowy profil",
-      "new_profile_name": "Nowa nazwa profilu",
-      "save_mode": "Tryb zapisu",
-      "head_trim": "Przytnij początek (s)",
-      "tail_trim": "Przytnij koniec (s)",
-      "gap_s": "Przerwa (s)",
-      "start": "Start",
-      "end": "Koniec",
-      "quality": "Jakość",
-      "golden_reference": "Zarejestrowany cykl referencyjny",
-      "compare_profiles": "Porównaj z profilami",
-      "tags": "Tagi",
-      "notes": "Notatki",
-      "default_tab": "Domyślna zakładka podczas otwierania panelu",
-      "cycle_date_display": "Wyświetlanie daty cyklu",
-      "refresh_interval": "Interwał odświeżania (s)",
-      "panel_default_tab": "Zakładka domyślna",
-      "hide_tabs": "Ukryj karty dla osób niebędących administratorami",
-      "enable_access_control": "Włącz kontrolę dostępu dla poszczególnych użytkowników",
-      "default_access_level": "Domyślny poziom dla użytkowników niewymienionych poniżej",
+      "timer_min": "min",
+      "timer_msg_placeholder": "Wiadomość (opcjonalnie, {device}/{program}/{minutes})",
+      "timer_auto_pause": "Automatyczna pauza",
+      "label": "Dopasowany program",
+      "actions": "Działania",
+      "activity": "Działalność",
       "administrators": "Administratorzy",
+      "auto_fine_tune_off": "automatyczne dostrajanie wyłączone",
+      "clock_time": "Czas zegarowy",
+      "compare_profiles": "Porównaj z profilami",
+      "confidence": "Zaufanie",
+      "confidence_threshold": "Próg ufności",
+      "correct_duration": "Prawidłowy czas trwania (min, opcjonalnie)",
+      "correct_profile": "Prawidłowy profil",
+      "cost": "Koszt",
+      "create_new_profile": "+ Utwórz nowy profil…",
+      "cycle_date_display": "Wyświetlanie daty cyklu",
+      "cycle_health": "Zdrowie na rowerze",
+      "cycles_count": "Cykle",
+      "date": "Data",
+      "debug_traces": "Debuguj ślady",
+      "default": "Domyślny",
+      "default_access_level": "Domyślny poziom dla użytkowników niewymienionych poniżej",
       "default_other": "Domyślne (inne urządzenia)",
+      "default_tab": "Domyślna zakładka podczas otwierania panelu",
+      "description": "Opis",
+      "duration": "Czas trwania",
+      "emphasis": "Podkreślenie",
+      "enable_access_control": "Włącz kontrolę dostępu dla poszczególnych użytkowników",
+      "energy": "Energia",
+      "expected_duration": "Oczekiwany czas trwania (min)",
+      "file_kb": "Plik (kB)",
+      "gap_s": "Luka (y)",
+      "head_trim": "Głowica (e)",
+      "health": "Zdrowie",
+      "hide_tabs": "Ukryj karty dla osób niebędących administratorami",
+      "in_use": "W użyciu",
+      "json_data": "Dane JSON",
+      "last_checked": "Ostatnio sprawdzane:",
+      "load_from_file": "Załaduj z pliku",
+      "manual_duration": "Ręczny czas trwania (min, opcjonalnie)",
+      "mode_existing_profile": "Dodaj do istniejącego profilu",
+      "mode_new_profile": "Utwórz nowy profil",
+      "new_profile_name": "Nowa nazwa profilu",
+      "panel_default_tab": "Zakładka domyślna",
+      "phase_name": "Nazwa",
+      "power": "Moc",
+      "profile": "Profil",
+      "profile_name": "Nazwa profilu",
+      "progress": "Postęp",
+      "read_only": "Tylko do odczytu",
+      "ref_cycle": "Cykl referencyjny (opcjonalnie)",
+      "refresh_interval": "Interwał odświeżania (s)",
+      "remaining": "Pozostały",
+      "remove_label": "- Usuń etykietę -",
+      "rename_profile": "Zmień nazwę profilu",
+      "resulting_profile": "Wynikowy profil",
+      "save_mode": "Tryb oszczędzania",
+      "seconds_from_start": "Sekundy od początku",
+      "select_profile": "Wybierz opcję Profil",
+      "show_debug": "Pokaż kartę debugowania dopasowania na żywo na stronie Status (pewność, niejednoznaczność, najlepsi kandydaci)",
       "show_expected": "Pokaż oczekiwaną nakładkę krzywej (dopasowany profil, pomarańczowy)",
       "show_raw": "Pokaż surowe odczyty czujnika (niewygładzone, szare)",
-      "show_debug": "Pokaż kartę debugowania dopasowania na żywo na stronie Status (pewność, niejednoznaczność, najlepsi kandydaci)",
-      "mode_new_profile": "Utwórz nowy profil",
-      "mode_existing_profile": "Dodaj do istniejącego profilu",
-      "auto_fine_tune_on": "automatyczne dostrajanie włączone (około {hour}:00)",
-      "auto_fine_tune_off": "automatyczne dostrajanie wyłączone",
-      "last_checked": "Ostatnio sprawdzane:",
-      "remove_label": "- Usuń etykietę -",
-      "create_new_profile": "+ Utwórz nowy profil…",
-      "read_only": "Tylko do odczytu",
-      "actions": "Działania",
-      "cycles_count": "Cykle",
-      "debug_traces": "Ślady debugowania",
-      "file_kb": "Plik (kB)",
-      "label": "Etykieta",
-      "seconds_from_start": "Sekundy od początku",
-      "clock_time": "Czas zegarowy",
-      "ungrouped": "Niezgrupowane"
+      "status": "Status",
+      "tail_trim": "Trymowanie ogona",
+      "ungrouped": "Rozgrupowane",
+      "unlabelled": "Nieoznakowane",
+      "unlabelled_paren": "(bez etykiety)",
+      "expected": "Oczekiwane",
+      "raw_socket": "Surowe gniazdo",
+      "artifact_interruption": "Przerwanie",
+      "artifact_low_power": "Niska moc",
+      "artifact_high_power": "Wysoka moc",
+      "artifact_anomaly": "Anomalia"
     },
     "badge": {
+      "golden_cycle": "Zarejestrowany cykl referencyjny",
+      "reviewed": "Recenzję",
+      "feedback_requested": "Poproszono o opinię",
+      "needs_review": "Wymaga recenzji",
+      "overrun": "Biegałem dłużej niż zwykle",
+      "artifact_tip": "Wykryto {n} anomalii (np. drzwi otwarte w połowie cyklu) — otwórz, aby zobaczyć je na wykresie",
+      "poor_fit_tip": "Niespójna historia meczów — rozważ przebudowę tego profilu",
+      "fair_fit_tip": "Umiarkowana spójność dopasowania — niektóre cykle przypisane do tego profilu mają niższy poziom pewności. Oznacz więcej cykli lub ponownie zapisz profil, aby poprawić dokładność.",
+      "fair_fit": "uczciwe dopasowanie",
       "poor_fit": "słabe dopasowanie",
-      "fair_fit": "przeciętne dopasowanie",
-      "manual": "(wybierane ręcznie)",
       "auto": "(automatycznie wykryty)",
-      "improving": "↗ poprawa",
+      "built_in_tag": "wbudowany",
       "declining": "↘ maleje",
+      "improving": "↗ poprawa",
+      "manual": "(wybierane ręcznie)",
       "steady": "→ stały",
-      "using_tuned": "Używanie dostrojonych wag",
-      "using_defaults": "Używanie domyślnych ustawień",
-      "built_in_tag": "wbudowany"
-    },
-    "status": {
-      "completed": "Zakończony",
-      "interrupted": "Przerwano",
-      "force_stopped": "Zatrzymano siłą",
-      "active": "Aktywny",
-      "ambiguous": "Dwuznaczny",
-      "clear": "Jasne",
-      "working": "Przetwarzanie…",
-      "recording": "Nagrywanie…",
-      "ready": "Gotowe do przetworzenia",
-      "idle": "Bezczynny",
-      "auto_detect": "Automatyczne wykrywanie",
-      "fine_tuning": "teraz dostrajanie…",
-      "all_statuses": "Wszystkie statusy"
-    },
-    "ml": {
-      "fit_strong": "Mocny",
-      "fit_good": "Dobry",
-      "fit_fair": "Zadowalający",
-      "fit_weak": "Słaby",
-      "fit_slight": "Niewielki",
-      "fit_word": "dopasowanie",
-      "fine_tuned_at": "dostrojono {when}",
-      "personalized": "● Spersonalizowane dla tego urządzenia",
-      "builtin_models": "● Korzystanie z wbudowanych modeli"
-    },
-    "toast": {
-      "settings_saved": "Ustawienia zapisane; przeładowanie integracji",
-      "preferences_saved": "Preferencje zostały zapisane",
-      "panel_settings_saved": "Ustawienia panelu zostały zapisane",
-      "access_saved": "Kontrola dostępu zapisana",
-      "profile_created": "Profil „{name}” został utworzony",
-      "profile_deleted": "Profil „{name}” został usunięty",
-      "profile_renamed": "Zmieniono nazwę profilu",
-      "phases_saved": "Fazy zapisane",
-      "phase_created": "Utworzono fazę „{name}\"",
-      "phase_deleted": "Faza „{name}” została usunięta",
-      "phase_updated": "Faza zaktualizowana",
-      "recording_started": "Rozpoczęło się nagrywanie",
-      "recording_stopped": "Nagrywanie zatrzymane",
-      "recording_discarded": "Nagranie odrzucone",
-      "recording_saved": "Nagranie zapisane w profilu",
-      "export_downloaded": "Eksport pobrany",
-      "logs_exported": "Logi wyeksportowane",
-      "import_successful": "Import udany; przeładowanie integracji",
-      "envelopes_rebuilt": "Koperty odbudowane",
-      "envelope_rebuilt": "Koperta odnowiona",
-      "suggestions_applied": "Zastosowano sugestie; przeładowanie integracji",
-      "suggestions_dismissed": "Sugestie odrzucone",
-      "auto_label_complete": "Automatyczne etykietowanie zakończone",
-      "cycle_labelled": "Cykl oznaczony",
-      "cycle_deleted": "Cykl usunięty",
-      "cycles_deleted": "Usunięto {count} cykli",
-      "cycle_trimmed": "Cykl przycięty",
-      "cycles_merged": "Cykle zostały połączone",
-      "review_saved": "Ocena zapisana",
-      "feedback_confirmed": "Opinia potwierdzona",
-      "feedback_dismissed": "Opinia odrzucona",
-      "feedback_all_dismissed": "Wszystkie opinie odrzucone",
-      "correction_submitted": "Poprawka złożona",
-      "group_saved": "Grupa zapisana",
-      "group_deleted": "Grupa usunięta",
-      "automation_deleted": "Automatyzacja usunięta",
-      "legacy_removed": "Usunięto starsze działania",
-      "cycle_paused": "Cykl wstrzymany",
-      "cycle_resumed": "Cykl wznowiony",
-      "cycle_force_stopped": "Cykl wymuszony zatrzymany",
-      "ml_training_promoted": "Szkolenie ukończone: promowano {count} modeli",
-      "ml_training_no_improvement": "Trening ukończony: poziom bazowy utrzymany (brak poprawy)",
-      "matching_reverted": "Dopasowane wagi przywrócono do wartości domyślnych",
-      "models_reverted": "Modele na urządzeniu przywrócono do stanu bazowego",
-      "analysis_complete": "Analiza ukończona: {count} sugestii",
-      "analysis_complete_none": "Analiza ukończona: brak nowych sugestii",
-      "debug_cleared": "Wyczyszczono {count} śladów debugowania",
-      "all_wiped": "Wszystkie dane zostały usunięte",
-      "no_split_found": "Nie znaleziono żadnych wolnych luk, które można by podzielić",
-      "group_name_required": "Nazwa grupy jest wymagana",
-      "min_2_profiles": "Wybierz co najmniej 2 profile dla grupy",
-      "profile_name_required": "Nazwa profilu jest wymagana",
-      "phase_name_required": "Nazwa fazy jest wymagana",
-      "name_required": "Wymagana nazwa",
-      "json_required": "Wymagane są dane JSON",
-      "save_failed": "Zapisanie nie powiodło się: {error}",
-      "delete_failed": "Usunięcie nie powiodło się: {error}",
-      "apply_failed": "Zastosowanie nie powiodło się: {error}",
-      "rebuild_failed": "Odbudowa nie powiodła się: {error}",
-      "start_failed": "Uruchomienie nie powiodło się: {error}",
-      "stop_failed": "Zatrzymanie nie powiodło się: {error}",
-      "discard_failed": "Odrzucenie nie powiodło się: {error}",
-      "trim_failed": "Przycięcie nie powiodło się: {error}",
-      "split_failed": "Podział nie powiódł się: {error}",
-      "merge_failed": "Połączenie nie powiodło się: {error}",
-      "create_failed": "Tworzenie nie powiodło się: {error}",
-      "update_failed": "Aktualizacja nie powiodła się: {error}",
-      "rename_failed": "Zmiana nazwy nie powiodła się: {error}",
-      "revert_failed": "Przywrócenie nie powiodło się: {error}",
-      "training_failed": "Szkolenie nie powiodło się: {error}",
-      "export_failed": "Eksport nie powiódł się: {error}",
-      "import_failed": "Import nie powiódł się: {error}",
-      "auto_label_failed": "Automatyczne oznaczenie nie powiodło się: {error}",
-      "analysis_failed": "Analiza nie powiodła się: {error}",
-      "auto_detect_failed": "Automatyczne wykrywanie nie powiodło się: {error}",
-      "error": "Błąd: {error}",
-      "could_not_load_cycle": "Nie można załadować cyklu: {error}",
-      "pause_failed": "Wstrzymanie nie powiodło się: {error}",
-      "label_failed": "Etykieta nie powiodła się: {error}",
-      "invalid_json": "„{key}” nie jest prawidłowym kodem JSON — popraw to lub wyczyść pole przed zapisaniem.",
-      "processed": "Przetworzone {bits}",
-      "split_complete": "Podzielono na {count} cykli"
-    },
-    "msg": {
-      "no_devices": "Nie skonfigurowano jeszcze żadnych urządzeń WashData.",
-      "no_device_selected": "Nie wybrano żadnego urządzenia.",
-      "loading": "Ładowanie…",
-      "loading_settings": "Ładowanie ustawień…",
-      "live_chart_loading": "Wykres mocy na żywo pojawia się po otrzymaniu odczytów.",
-      "no_cycles_match": "Żaden cykl nie pasuje do bieżącego filtra.",
-      "no_cycles_yet": "Nie zapisano jeszcze żadnych cykli.",
-      "no_profiles_yet": "Nie ma jeszcze profili. Utwórz jeden z oznaczonego cyklu.",
-      "no_logs": "Żadne rekordy dziennika nie zostały jeszcze zbuforowane.",
-      "no_phases": "Nie zdefiniowano faz.",
-      "no_phases_assigned": "Brak przypisanych faz.",
-      "no_split_points": "Nie ma jeszcze punktów podziału.",
-      "no_envelope": "Nie ma jeszcze koperty - odbuduj po cyklach etykietowania.",
-      "no_envelope_overlay": "Brak koperty do nałożenia.",
-      "no_other_users": "Nie znaleziono innych użytkowników (Home Assistant).",
-      "maintenance_requires_access": "Konserwacja i eksport/import wymagają pełnego dostępu.",
-      "loading_curve": "Ładowanie krzywej…",
-      "compare_selected_cycles": "Wybrane cykle (pełne) — pokaż / ukryj",
-      "compare_overlay_profiles": "Profile nakładkowe (słabe)",
-      "no_profiles_compare": "Brak profili do porównania.",
-      "no_cycles_profile": "Brak cykli dla tego profilu.",
-      "saving_triggers_reload": "Zapisanie powoduje przeładowanie integracji. Encje HA mogą przez chwilę być wyświetlane jako niedostępne.",
-      "prefs_personal": "Dotyczą one tylko Twojego konta Home Assistant.",
-      "no_match_yet": "Brak jeszcze próby dopasowania — komunikat pojawia się podczas trwającego cyklu.",
-      "no_fine_tuned": "Nic jeszcze nie zostało dopracowane — WashData korzysta z wbudowanych modeli.",
-      "ml_learned_intro": "Modele dopasowane do tej maszyny. Wszystko, co nie jest wymienione, korzysta z niezawodnego wbudowanego modelu.",
-      "ml_settings_intro": "Dwa niezależne przełączniki: jeden stosuje modele w trakcie trwania cyklu, drugi pozwala WashData dostosować je do Twojej maszyny w miarę upływu czasu.",
-      "ml_intro": "WashData jest dostarczana z inteligentnymi modelami, które wykrywają cykle, dopasowują programy oraz szacują czas i energię – działają od razu po wyjęciu z pudełka.",
-      "matching_tuning_intro": "Podczas uczenia się WashData dostosowuje również, w jakim stopniu dopasowanie programu wpływa na kształt cyklu w porównaniu z jego czasem trwania i energią.",
-      "phase_catalog_intro": "Nazwane segmenty cyklu (pranie wstępne, podgrzewanie, wirowanie…). Przypisz je do profilu z panelu sterowania.",
-      "phase_ranges_intro": "Zakresy faz (minuty od początku cyklu) nałożone na krzywą średnią. Edytuj wartości, aby wyświetlić podgląd na żywo.",
-      "cleanup_intro": "Każdy oznaczony cykl został nałożony. Zaznacz wartości odstające i usuń, aby oczyścić profil.",
-      "split_intro": "Kliknij wykres, aby dodać lub usunąć punkt podziału albo automatycznie wykryć na podstawie pustych przerw.",
-      "trim_intro": "Przeciągnij czerwone uchwyty lub wprowadź wartości. Wszystko za oknem jest usuwane.",
-      "import_intro": "Załaduj wyeksportowany plik lub wklej poniżej ładunek JSON.",
-      "auto_label_intro": "Przypisz profile do nieoznakowanych cykli, których pewność dopasowania przekracza próg.",
-      "merge_intro": "Wybrane cykle są łączone w jeden (kolejność chronologiczna; przerwy wypełnione 0 W). Wybierz wynikowy profil.",
-      "enough_data": "Wystarczająca ilość danych do nauki ({current}/{min} cykli).",
-      "collecting_data": "Zbieranie danych — jeszcze {need} cykl{plural}, zanim będzie można rozpocząć dostrajanie ({current}/{min}).",
-      "updated": "Zaktualizowano {time}",
-      "appliance_monitor": "Monitor urządzenia",
-      "ml_loading": "ładowanie ML…",
-      "see_recorder": "Zobacz widżet rejestratora poniżej",
-      "review_in_settings": "Przejrzyj w Ustawieniach",
-      "storage_diagnostics": "Statystyki przechowywania, konserwacja, eksport/import",
-      "recent_logs": "Najnowsze rekordy ha_washdata",
-      "preferences_adv": "Preferencje",
-      "preferences_admin": "Preferencje, panel i kontrola dostępu",
-      "review_to_cycles": "Otwórz kolejkę przeglądu Cykli",
-      "pending_feedback": "Oczekuje na informację zwrotną dotyczącą wykrycia",
-      "recording_in_progress": "Trwa nagrywanie",
-      "no_profiles_yet_short": "Nie ma jeszcze profili.",
-      "unsure_detected_prefix": "WashData nie jest pewien, czy został wykryty",
-      "no_suggestions": "Brak aktywnych sugestii.",
-      "no_profiles_overlay": "Brak profili do nałożenia.",
-      "compare_cycles_title": "Porównaj {count} cykli",
-      "profiles_intro": "Kliknij profil, aby zobaczyć statystyki, fazy i porządkowanie. Grupuj prawie identyczne programy (ten sam kształt/czas trwania, inna temperatura lub wirowanie), aby dopasowanie niezawodnie rozróżniało między nimi.",
-      "search_placeholder": "Szukaj ustawień…",
-      "automations_intro": "WashData wyzwala zdarzenia {start} / {end} i udostępnia encje, dlatego powiadomienia i akcje najlepiej budować jako zwykłe automatyzacje Home Assistant. Automatyzacje korzystające z tego urządzenia są widoczne poniżej.",
-      "notify_services_hint": "Użyj identyfikatorów usług {entity} (oddzielone przecinkami dla wielu). Zmienne szablonu: {vars}.",
-      "rbac_hint": "Gdy wyłączone, każdy użytkownik Home Assistant ma pełny dostęp (domyślnie). Administratorzy zawsze mają pełny dostęp i mogą zarządzać wszystkimi.",
-      "feedback_prompt": "Potwierdź poprawność wykrycia, popraw program lub zignoruj."
+      "using_defaults": "Używanie dostarczonych ustawień domyślnych",
+      "using_tuned": "Używanie dostrojonych ciężarków"
     },
     "modal": {
-      "label_cycle": "Oznacz cykl",
+      "merge_cycles": "Połącz {n} cykli",
+      "auto_label": "Cykle automatycznego etykietowania",
+      "correct_feedback": "Prawidłowa informacja zwrotna",
       "create_profile": "Utwórz profil",
-      "new_phase": "Nowa faza",
+      "cycle": "Cykl",
       "edit_phase": "Edytuj fazę",
-      "process_recording": "Przetwórz nagranie",
-      "correct_feedback": "Korekta informacji zwrotnej",
       "import_config": "Importuj konfigurację",
-      "auto_label": "Automatyczne oznaczanie cykli",
-      "cycle": "Cykl"
+      "label_cycle": "Cykl etykiet",
+      "new_phase": "Nowa faza",
+      "process_recording": "Nagrywanie procesu"
     },
-    "tag": {
-      "late_start": "Późny start",
-      "early_end": "Wczesny koniec",
-      "merged": "Połączone cykle",
-      "split": "Podzielony cykl",
-      "noise": "Szum",
-      "wrong_profile": "Zły profil",
-      "sensor_gap": "Przerwa czujnika"
+    "msg": {
+      "near_duplicate_cluster": "Wykryto prawie zduplikowany klaster profili. Grupowanie umożliwia niezawodne wybieranie podobnych programów (np. tego samego programu w innej temperaturze/wirowaniu).",
+      "coverage_gap": "ostatnie cykle nie mają pasującego profilu ({pct}% z ostatnich 30).",
+      "consider_new_profile": "Rozważ utworzenie nowego profilu.",
+      "group_not_cohesive": "Te profile nie są na tyle podobne, aby można było je bezpiecznie grupować, więc dopasowywanie traktuje je indywidualnie, dopóki nie usuniesz wartości odstającej lub nie podzielisz grupy.",
+      "group_modal_help": "Grupuj programy o tym samym kształcie, różniące się temperaturą/wirowaniem (czas trwania może się różnić). Dopasowanie ocenia grupę jako jednego kandydata, a następnie wybiera najlepiej dopasowanego członka. Wybierz co najmniej 2; nakładka pokazuje, jak bardzo są podobni.",
+      "showing_suggestions": "Wyświetlam ustawienie {count} z sugestiami.",
+      "show_all_settings": "Pokaż wszystkie ustawienia",
+      "tuning_suggestions_available": "Sugestia dostrojenia {count} dostępna z obserwowanych cykli. Pojawiają się obok odpowiednich pól.",
+      "legacy_actions_title": "{count} starsze działanie niestandardowe nadal działa",
+      "old_actions_warning": "Skonfigurowano przy użyciu starego edytora akcji (teraz usuniętego). Nadal uruchamiają się w przypadku wydarzeń cyklicznych, ale nie można ich już tutaj edytować. Przekształć je w normalną automatyzację lub usuń.",
+      "no_settings_match": "Żadne ustawienia nie pasują do „{q}”",
+      "clear_debug_hint": "Usuń zapisane dane debugowania, aby zwolnić miejsce.",
+      "wipe_history_warning": "Usuń trwale wszystkie cykle i profile. Nie można tego cofnąć.",
+      "export_description": "Eksportuj wszystkie profile i cykle do formatu JSON lub przywróć dane z poprzedniego eksportu.",
+      "log_buffer_hint": "Najpierw najnowsze · buforuje ostatnie 500 rekordów ha_washdata od ponownego uruchomienia · przeciągnij dolną krawędź, aby zmienić rozmiar.",
+      "review_profile_tip": "Program tego cyklu jest oznaczony jako. Jeśli automatycznie wykryty program był błędny, popraw go tutaj - etykietowanie uczy dopasowywania dla przyszłych cykli.",
+      "review_quality_tip": "Jak czysty jest ten cykl. Dobry = podręcznikowy przykład tego programu; Zły = wykryty, ale głośny lub nietypowy; Nieużyteczny = błędnie wykryty (połączony, obcięty lub fałszywy). Określa wynik kondycji i liczbę cykli, które mogą trenować model.",
+      "review_recorded_tip": "Oznacz to jako ręcznie wybrany cykl referencyjny dla swojego programu – pełni tę samą rolę, co cykl nagrany ręcznie. Cykle referencyjne są zawsze zachowywane, zaszczepiają pasujący szablon i nigdy nie są usuwane podczas czyszczenia. (To jest „złota”/nagrana flaga; obie są tym samym.)",
+      "review_tags_tip": "Opcjonalne flagi opisujące, co poszło nie tak w tym cyklu, więc szkolenie i czyszczenie mogą to wyjaśnić.",
+      "review_notes_tip": "Notatki tekstowe do własnego użytku. Nieużywane podczas dopasowywania lub treningu.",
+      "review_confirm_help": "Sprawdź, czy ten cykl został prawidłowo wykryty. Twoje recenzje szkolą model na Twojej maszynie — im więcej cykli potwierdzisz, tym lepsze dopasowanie i punktacja kondycji. Wystarczy szybkie dobre/złe.",
+      "review_notes_placeholder": "Notatki (opcjonalnie)",
+      "compare_profiles_tip": "Nałóż inne koperty profili na powyższy wykres, aby zobaczyć, która z nich najlepiej pasuje do tego cyklu.",
+      "artifact_header": "W tym cyklu wykryto {n} anomalii",
+      "artifact_footer": "Zaznaczono na powyższym wykresie. Są to artefakty przejściowe (np. otwarcie drzwi w połowie cyklu), niekoniecznie problemy.",
+      "profile_poor_health_detail": "Cykle przypisane do tego profilu mają niespójne kształty lub niską pewność. Rozważ przebudowę koperty lub przejrzenie oznakowanych cykli.",
+      "trend_duration_longer": "Trwanie w trendzie dłuższym ({pct}%/cykl) — ostatnia średnia {avg}",
+      "trend_duration_shorter": "Trwanie w trendzie krótszym ({pct}%/cykl) — ostatnia średnia {avg}",
+      "trend_energy_up": "Trend wzrostowy w zakresie energii ({pct}%/cykl) — ostatnia średnia {avg}",
+      "trend_energy_down": "Energia wykazuje tendencję spadkową ({pct}%/cykl)",
+      "performance_trend": "Trend wydajności ({n} cykli)",
+      "maintenance_advisory": "Zwiększenie czasu trwania/energii może wskazywać na konieczność konserwacji urządzenia (np. odkamieniania, czyszczenia filtra).",
+      "manual_duration_hint": "Średnia/oczekiwana długość cyklu profilu, używana do szacunków pozostałego czasu. Edytuj, aby to ustawić; pozostawienie go bez zmian powoduje zachowanie bieżącej wartości.",
+      "appliance_monitor": "Monitor urządzenia",
+      "auto_label_intro": "Przypisz profile do nieoznakowanych cykli, których pewność dopasowania przekracza próg.",
+      "cleanup_intro": "Każdy oznaczony cykl został nałożony. Zaznacz wartości odstające i usuń, aby oczyścić profil.",
+      "compare_overlay_profiles": "Profile nakładkowe (słabe)",
+      "compare_selected_cycles": "Wybrane cykle (pełne) — pokaż / ukryj",
+      "feedback_prompt": "Potwierdź, że wszystko było w porządku, popraw program lub zignoruj.",
+      "import_intro": "Załaduj wyeksportowany plik lub wklej poniżej ładunek JSON.",
+      "live_chart_loading": "Wykres mocy na żywo pojawia się po otrzymaniu odczytów.",
+      "loading": "Załadunek…",
+      "loading_curve": "Ładowanie krzywej…",
+      "loading_settings": "Ładowanie ustawień…",
+      "maintenance_requires_access": "Konserwacja i eksport/import wymagają pełnego dostępu.",
+      "matching_tuning_intro": "Podczas nauki WashData dostosowuje również wpływ dopasowania programu na kształt w porównaniu z czasem trwania i energią.",
+      "merge_intro": "Wybrane cykle są łączone w jeden (kolejność chronologiczna; przerwy wypełnione 0 W). Wybierz wynikowy profil.",
+      "ml_intro": "WashData jest dostarczana z inteligentnymi modelami, które działają od razu po wyjęciu z pudełka.",
+      "ml_learned_intro": "Modele dopasowane do tej maszyny.",
+      "ml_loading": "ładowanie ML…",
+      "ml_settings_intro": "Dwa niezależne przełączniki: jeden stosuje modele w trakcie trwania cyklu, drugi pozwala WashData dostosować je do Twojej maszyny w miarę upływu czasu.",
+      "no_cycles_match": "Żaden cykl nie pasuje do bieżącego filtra.",
+      "no_cycles_profile": "Brak cykli dla tego profilu.",
+      "no_cycles_yet": "Nie zapisano jeszcze żadnych cykli.",
+      "no_device_selected": "Nie wybrano żadnego urządzenia.",
+      "no_devices": "Nie skonfigurowano jeszcze żadnych urządzeń WashData.",
+      "no_envelope": "Nie ma jeszcze koperty - odbuduj po cyklach etykietowania.",
+      "no_envelope_overlay": "Brak koperty do nałożenia.",
+      "no_fine_tuned": "Nic jeszcze nie zostało dopracowane — WashData korzysta z wbudowanych modeli.",
+      "no_logs": "Żadne rekordy dziennika nie zostały jeszcze zbuforowane.",
+      "no_match_yet": "Brak jeszcze próby dopasowania — komunikat pojawia się podczas trwającego cyklu.",
+      "no_other_users": "Nie znaleziono innych użytkowników Home Assistant.",
+      "no_phases": "Nie zdefiniowano faz.",
+      "no_phases_assigned": "Brak przypisanych faz.",
+      "no_profiles_compare": "Brak profili do porównania.",
+      "no_profiles_overlay": "Brak profili do nałożenia.",
+      "no_profiles_yet": "Nie ma jeszcze profili. Utwórz jeden z oznaczonego cyklu.",
+      "no_profiles_yet_short": "Nie ma jeszcze profili.",
+      "no_split_points": "Nie ma jeszcze punktów podziału.",
+      "no_suggestions": "Brak aktywnych sugestii.",
+      "pending_feedback": "Oczekuje na informację zwrotną dotyczącą wykrycia",
+      "phase_catalog_intro": "Nazwane segmenty cyklu (pranie wstępne, podgrzewanie, wirowanie…). Przypisz je do profilu z panelu sterowania.",
+      "phase_ranges_intro": "Zakresy faz (minuty od początku cyklu) nałożone na krzywą średnią. Edytuj wartości, aby wyświetlić podgląd na żywo.",
+      "preferences_admin": "Preferencje, panel i kontrola dostępu",
+      "preferences_adv": "Preferencje",
+      "prefs_personal": "Dotyczą one wyłącznie Twojego konta Home Assistant.",
+      "profiles_intro": "Kliknij profil, aby zobaczyć statystyki, fazy i porządki. Grupuj niemal identyczne programy (ten sam kształt/czas trwania, różna temperatura lub wirowanie), aby dopasowanie umożliwiało niezawodne wybieranie między nimi.",
+      "rbac_hint": "Gdy opcja jest wyłączona, każdy użytkownik Home Assistant ma pełny dostęp (domyślnie). Administratorzy zawsze mają pełny dostęp i mogą zarządzać wszystkimi.",
+      "recent_logs": "Najnowsze rekordy ha_washdata",
+      "recording_in_progress": "Trwa nagrywanie",
+      "review_in_settings": "Przejrzyj w Ustawieniach",
+      "review_to_cycles": "Otwórz kolejkę przeglądu Cykli",
+      "saving_triggers_reload": "Zapisanie powoduje przeładowanie integracji. Jednostki HA mogą przez chwilę być wyświetlane jako niedostępne.",
+      "search_placeholder": "Ustawienia wyszukiwania…",
+      "see_recorder": "Zobacz widżet rejestratora poniżej",
+      "split_intro": "Kliknij wykres, aby dodać lub usunąć punkt podziału albo automatycznie wykryć na podstawie pustych przerw. Każdy powstały segment może otrzymać swój własny profil.",
+      "storage_diagnostics": "Statystyki przechowywania, konserwacja, eksport/import",
+      "trim_intro": "Przeciągnij czerwone uchwyty lub wprowadź wartości. Wszystko za oknem jest usuwane.",
+      "unsure_detected_prefix": "WashData nie jest pewien, czy został wykryty",
+      "updated": "Zaktualizowano"
     },
-    "quality": {
-      "good": "Dobry",
-      "bad": "Zły",
-      "unusable": "Nie nadaje się do użytku"
-    },
-    "access": {
-      "none": "Brak (ukryty)",
-      "read": "Odczyt",
-      "edit": "Edycja",
-      "full": "Pełny",
-      "inherit": "Dziedzicz"
+    "phase_desc": {
+      "pre_wash": "Wstępne namoczenie lub obróbka wstępna przed praniem zasadniczym.",
+      "wash": "Cykl prania głównego z ruchem bębna i opcjonalnym ogrzewaniem.",
+      "wash_dw": "Pranie w detergencie głównym z ogrzewaniem.",
+      "rinse": "Etap płukania czystą wodą. Faza ta może powtarzać się wielokrotnie.",
+      "spin": "Ekstrakcja z dużą prędkością w celu usunięcia wody z wsadu.",
+      "spin_wd": "Ekstrakcja z dużą szybkością przed przejściem do suszenia.",
+      "soak": "Okres namaczania o niskiej aktywności pomiędzy aktywnymi etapami prania.",
+      "soak_dw": "Wydłużony okres moczenia w przypadku ciężkich gleb.",
+      "anti_crease": "Sporadyczne krótkie upadki po zakończeniu w celu zmniejszenia zmarszczek.",
+      "heat_up": "Wstępne rozgrzewanie grzejnika przed rozpoczęciem pełnego suszenia.",
+      "drying": "Główny okres podgrzewania.",
+      "cool_down": "Obracanie bez ogrzewania pod koniec cyklu.",
+      "anti_wrinkle": "Okresowe upadki po cyklu w celu zmniejszenia zmarszczek.",
+      "sensor_check": "Krótka przerwa przy małej mocy podczas pomiaru suchości.",
+      "drain_and_switch": "Okres przejścia z trybu prania do trybu suszenia.",
+      "pre_rinse": "Wstępne spryskanie przed praniem w detergencie.",
+      "dry": "Etap suszenia przy użyciu grzejnika i/lub ciepła resztkowego.",
+      "sanitize": "Etap czyszczenia w wysokiej temperaturze w programach odkażania."
     },
     "health": {
-      "poor": "⚠ Słabe dopasowanie",
-      "fair": "Przeciętne dopasowanie",
-      "good": "✓ Dobre dopasowanie"
+      "good": "✓ Dobra jakość profilu",
+      "fair": "Akceptowalna jakość profilu",
+      "poor": "⚠ Słaba jakość profilu"
+    },
+    "ml": {
+      "fit_fair": "Akceptowalny",
+      "builtin_models": "● Korzystanie z wbudowanych modeli",
+      "fit_good": "Dobry",
+      "fit_slight": "Niewielki",
+      "fit_strong": "Mocny",
+      "fit_weak": "Słaby",
+      "fit_word": "pasować",
+      "personalized": "● Spersonalizowane dla tego urządzenia"
     },
     "trend": {
-      "up": "Trend rosnący",
+      "up": "Trendy",
       "down": "Trend w dół"
-    },
-    "pref": {
-      "date_relative": "Względnie (np. 2 godziny temu)",
-      "date_absolute": "Absolutne (np. 14:32 w dniu 2 lipca)"
     },
     "log": {
       "all_levels": "Wszystkie poziomy"
     },
-    "section": {
-      "basic": {
-        "label": "Podstawowy",
-        "intro": "Podstawowa tożsamość i podstawowe elementy potrzebne w większości konfiguracji."
-      },
-      "detection": {
-        "label": "Wykrywanie",
-        "intro": "W jaki sposób cykl jest wykrywany jako rozpoczynający się, trwający i kończący."
-      },
-      "matching": {
-        "label": "Dopasowanie",
-        "intro": "W jaki sposób ukończone cykle są dopasowywane do wyuczonych profili i etykietowane."
-      },
-      "timing": {
-        "label": "Czas i Watchdog",
-        "intro": "Kadencja w tle, strażnik offline i sprzątanie."
-      },
-      "anti_wrinkle": {
-        "label": "Przeciwzmarszczkowy",
-        "intro": "Tryb przeciwzmarszczkowy wykrywa impulsy suszenia po głównej fazie nagrzewania."
-      },
-      "delay": {
-        "label": "Opóźniony start",
-        "intro": "Wykrywanie opóźnionego startu identyfikuje, kiedy urządzenie jest zasilane, ale nie rozpoczęło jeszcze swojego cyklu."
-      },
-      "triggers": {
-        "label": "Wyzwalacze i drzwi",
-        "intro": "Opcjonalne sygnały zewnętrzne: wyzwalacz końcowy, czujnik drzwi, wyłącznik pauzy i przypomnienie o rozładunku."
-      },
-      "notifications": {
-        "label": "Powiadomienia",
-        "intro": "Skonfiguruj, kiedy i w jaki sposób będziesz powiadamiany o zdarzeniach cyklu."
-      },
-      "ml_training": {
-        "label": "Trenowanie ML",
-        "intro": "Opcjonalne inteligentne modele personalizujące wykrywanie i timing dla tego urządzenia."
-      }
+    "pref": {
+      "date_absolute": "Absolutne (np. 14:32 w dniu 2 lipca)",
+      "date_relative": "Względnie (np. 2 godziny temu)"
     },
-    "setting": {
-      "name": {
-        "label": "Nazwa urządzenia"
-      },
-      "device_type": {
-        "label": "Typ urządzenia"
-      },
-      "power_sensor": {
-        "label": "Czujnik mocy"
-      },
-      "min_power": {
-        "label": "Minimalna moc"
-      },
-      "off_delay": {
-        "label": "Opóźnienie wyłączenia"
-      },
-      "linked_device": {
-        "label": "Grupuj w obszarze Urządzenie"
-      },
-      "start_threshold_w": {
-        "label": "Próg uruchomienia"
-      },
-      "stop_threshold_w": {
-        "label": "Próg zatrzymania"
-      },
-      "min_off_gap": {
-        "label": "Min. przerwa wyłączenia"
-      },
-      "start_duration_threshold": {
-        "label": "Czas trwania uruchomienia"
-      },
-      "start_energy_threshold": {
-        "label": "Energia uruchomienia"
-      },
-      "completion_min_seconds": {
-        "label": "Minimalny czas trwania cyklu"
-      },
-      "running_dead_zone": {
-        "label": "Martwa strefa"
-      },
-      "end_energy_threshold": {
-        "label": "Energia końcowa"
-      },
-      "end_repeat_count": {
-        "label": "Zakończ liczenie powtórzeń"
-      },
-      "sampling_interval": {
-        "label": "Interwał próbkowania"
-      },
-      "smoothing_window": {
-        "label": "Okno wygładzania"
-      },
-      "abrupt_drop_watts": {
-        "label": "Nagły spadek"
-      },
-      "abrupt_drop_ratio": {
-        "label": "Nagły współczynnik spadku"
-      },
-      "profile_match_threshold": {
-        "label": "Dopasuj próg"
-      },
-      "profile_unmatch_threshold": {
-        "label": "Niedopasowany próg"
-      },
-      "profile_match_interval": {
-        "label": "Interwał dopasowania"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "Minimalny współczynnik czasu trwania"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "Maksymalny współczynnik czasu trwania"
-      },
-      "profile_duration_tolerance": {
-        "label": "Tolerancja czasu trwania profilu"
-      },
-      "duration_tolerance": {
-        "label": "Tolerancja szacowania"
-      },
-      "auto_label_confidence": {
-        "label": "Pewność automatycznego etykietowania"
-      },
-      "learning_confidence": {
-        "label": "Pewność uczenia się"
-      },
-      "suppress_feedback_notifications": {
-        "label": "Pomiń powiadomienia o opiniach"
-      },
-      "watchdog_interval": {
-        "label": "Interwał watchdoga"
-      },
-      "no_update_active_timeout": {
-        "label": "Limit czasu braku aktualizacji"
-      },
-      "progress_reset_delay": {
-        "label": "Opóźnienie resetowania postępu"
-      },
-      "auto_maintenance": {
-        "label": "Konserwacja automatyczna (nocne sprzątanie)"
-      },
-      "expose_debug_entities": {
-        "label": "Ujawnij encje debugowania"
-      },
-      "save_debug_traces": {
-        "label": "Zapisz ślady debugowania"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "Włącz wykrywanie zmarszczek"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "Maksymalna moc przeciwzmarszczkowa"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "Maksymalny czas trwania"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "Próg mocy wyjścia"
-      },
-      "delay_start_detect_enabled": {
-        "label": "Włącz wykrywanie opóźnienia startu"
-      },
-      "delay_confirm_seconds": {
-        "label": "Sekundy potwierdzenia"
-      },
-      "delay_timeout_hours": {
-        "label": "Godziny przekroczenia limitu czasu"
-      },
-      "external_end_trigger_enabled": {
-        "label": "Włącz zewnętrzny wyzwalacz końcowy"
-      },
-      "external_end_trigger": {
-        "label": "Zewnętrzna encja wyzwalacza"
-      },
-      "external_end_trigger_inverted": {
-        "label": "Odwróć zewnętrzny wyzwalacz (wyzwalacz wyłączony)"
-      },
-      "door_sensor_entity": {
-        "label": "Encja czujnika drzwi"
-      },
-      "pause_cuts_power": {
-        "label": "Pauza powoduje również odcięcie zasilania (za pomocą przełącznika)"
-      },
-      "switch_entity": {
-        "label": "Encja przełącznika"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "Opóźnienie przypomnienia o rozładunku"
-      },
-      "pump_stuck_duration": {
-        "label": "Czas zablokowania pompy"
-      },
-      "notify_start_services": {
-        "label": "Usługi startu"
-      },
-      "notify_finish_services": {
-        "label": "Usługi zakończenia"
-      },
-      "notify_live_services": {
-        "label": "Usługi postępu na żywo"
-      },
-      "notify_people": {
-        "label": "Ludzie (tylko w domu)"
-      },
-      "notify_only_when_home": {
-        "label": "Powiadamiaj tylko wtedy, gdy jesteś w domu"
-      },
-      "notify_fire_events": {
-        "label": "Wyzwól zdarzenia HA dla powiadomień"
-      },
-      "notify_before_end_minutes": {
-        "label": "Alarm przed zakończeniem"
-      },
-      "notify_live_interval_seconds": {
-        "label": "Interwał aktualizacji na żywo"
-      },
-      "notify_live_overrun_percent": {
-        "label": "Przekroczenie na żywo % przed alertem"
-      },
-      "notify_live_chronometer": {
-        "label": "Użyj chronometru na żywo"
-      },
-      "notify_timeout_seconds": {
-        "label": "Automatyczne odrzucanie po"
-      },
-      "notify_title": {
-        "label": "Tytuł powiadomienia"
-      },
-      "notify_icon": {
-        "label": "Ikona powiadomienia"
-      },
-      "notify_start_message": {
-        "label": "Wiadomość przy starcie"
-      },
-      "notify_finish_message": {
-        "label": "Wiadomość przy zakończeniu"
-      },
-      "notify_pre_complete_message": {
-        "label": "Wiadomość przed zakończeniem"
-      },
-      "notify_reminder_message": {
-        "label": "Wiadomość przypominająca"
-      },
-      "notify_channel": {
-        "label": "Android Kanał (start/na żywo)"
-      },
-      "notify_finish_channel": {
-        "label": "Android Kanał (zakończenie)"
-      },
-      "energy_price_entity": {
-        "label": "Encja ceny energii"
-      },
-      "energy_price_static": {
-        "label": "Cena energii statycznej (za kWh)"
-      },
-      "enable_ml_models": {
-        "label": "Stosuj inteligentne modele podczas cyklu"
-      },
-      "ml_training_enabled": {
-        "label": "Ucz się od tej maszyny"
-      },
-      "ml_training_hour": {
-        "label": "Ucz się o godz"
-      },
-      "ml_training_min_cycles": {
-        "label": "Najpierw potrzebne cykle"
-      },
-      "ml_training_interval_days": {
-        "label": "Sprawdzaj co najwyżej co"
-      }
+    "quality": {
+      "bad": "Zły",
+      "good": "Dobry",
+      "unusable": "Nie nadaje się do użytku"
+    },
+    "status": {
+      "active": "Aktywny",
+      "all_statuses": "Wszystkie statusy",
+      "ambiguous": "Dwuznaczny",
+      "auto_detect": "Automatyczne wykrywanie",
+      "clear": "Jasne",
+      "completed": "Zakończony",
+      "fine_tuning": "teraz dostrajanie…",
+      "force_stopped": "Siła zatrzymana",
+      "idle": "Bezczynny",
+      "interrupted": "Przerwano",
+      "ready": "Gotowe do przetworzenia",
+      "recording": "Nagrywanie"
+    },
+    "tab": {
+      "advanced": "Zaawansowany",
+      "diagnostics": "Diagnostyka",
+      "history": "Cykle",
+      "ml": "Szkolenie M.L",
+      "pp_cleanup": "Posprzątać",
+      "pp_manage": "Zarządzać",
+      "pp_overview": "Przegląd",
+      "pp_phases": "Fazy",
+      "profiles": "Profile",
+      "settings": "Ustawienia",
+      "status": "Przegląd",
+      "subtab_phase_catalog": "Katalog faz",
+      "subtab_profiles": "Profile"
+    },
+    "tag": {
+      "early_end": "Wczesny koniec",
+      "late_start": "Późny start",
+      "merged": "Połączone cykle",
+      "noise": "Hałas",
+      "sensor_gap": "Szczelina czujnika",
+      "split": "Cykl podziału",
+      "wrong_profile": "Zły profil"
+    },
+    "toast": {
+      "access_saved": "Kontrola dostępu zapisana",
+      "all_wiped": "Wszystkie dane zostały usunięte",
+      "analysis_complete_none": "Analiza ukończona: brak nowych sugestii",
+      "auto_label_complete": "Automatyczne etykietowanie zakończone",
+      "automation_deleted": "Automatyzacja usunięta",
+      "correction_submitted": "Poprawka złożona",
+      "cycle_deleted": "Cykl usunięty",
+      "cycle_force_stopped": "Cykl wymuszony zatrzymany",
+      "cycle_labelled": "Cykl oznaczony",
+      "cycle_paused": "Cykl wstrzymany",
+      "cycle_resumed": "Cykl wznowiony",
+      "cycle_trimmed": "Cykl przycięty",
+      "cycles_merged": "Cykle połączyły się",
+      "envelope_rebuilt": "Koperta odnowiona",
+      "envelopes_rebuilt": "Koperty odbudowane",
+      "export_downloaded": "Eksport pobrany",
+      "feedback_all_dismissed": "Wszystkie opinie odrzucone",
+      "feedback_confirmed": "Opinia potwierdzona",
+      "feedback_dismissed": "Opinia odrzucona",
+      "group_deleted": "Grupa usunięta",
+      "group_name_required": "Nazwa grupy jest wymagana",
+      "group_saved": "Grupa zapisana",
+      "import_successful": "Import udany; przeładowanie integracji",
+      "json_required": "Wymagane są dane JSON",
+      "legacy_removed": "Usunięto starsze działania",
+      "logs_exported": "Logi wyeksportowane",
+      "matching_reverted": "Dopasowane wagi przywrócono do wartości domyślnych",
+      "min_2_profiles": "Wybierz co najmniej 2 profile dla grupy",
+      "ml_training_no_improvement": "Trening ukończony: poziom bazowy utrzymany (brak poprawy)",
+      "models_reverted": "Modele na urządzeniu przywrócono do stanu bazowego",
+      "name_required": "Wymagane imię i nazwisko",
+      "no_split_found": "Nie znaleziono żadnych wolnych luk, które można by podzielić",
+      "panel_settings_saved": "Ustawienia panelu zostały zapisane",
+      "phase_name_required": "Nazwa fazy jest wymagana",
+      "phase_updated": "Faza zaktualizowana",
+      "phases_saved": "Fazy ​​zapisane",
+      "preferences_saved": "Preferencje zostały zapisane",
+      "profile_name_required": "Nazwa profilu jest wymagana",
+      "profile_renamed": "Zmieniono nazwę profilu",
+      "recording_discarded": "Nagranie odrzucone",
+      "recording_saved": "Nagranie zapisane w profilu",
+      "recording_started": "Rozpoczęło się nagrywanie",
+      "recording_stopped": "Nagrywanie zatrzymane",
+      "review_saved": "Recenzja zapisana",
+      "settings_saved": "Ustawienia zapisane; przeładowanie integracji",
+      "suggestions_applied": "Zastosowano sugestie; przeładowanie integracji",
+      "suggestions_dismissed": "Sugestie odrzucone"
     }
   }
 }

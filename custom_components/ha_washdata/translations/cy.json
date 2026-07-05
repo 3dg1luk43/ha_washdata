@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Dechrau Cylch",
-        "cycle_finish": "Gorffen Cylch",
-        "cycle_live": "Cynnydd Byw"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Peiriant Golchi",
@@ -88,198 +81,6 @@
         "bread_maker": "Gwneuthurwr Bara",
         "pump": "Pwmp / Swmp Pwmp",
         "other": "Arall (Uwch)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(Heb ei labelu)",
-        "create_new_profile": "Creu Proffil Newydd",
-        "remove_label": "Dileu Label",
-        "no_reference_cycle": "(Dim cylch cyfeirio)",
-        "all_device_types": "Pob Math o Ddyfais",
-        "current_suffix": "(cyfredol)",
-        "phase_builtin_suffix": "(Adeiledig)",
-        "phase_none_available": "Dim cyfnodau ar gael.",
-        "phase_other_device_types": "Mathau eraill o ddyfeisiau:",
-        "settings_deprecation_warning": "⚠️ **Math o ddyfais anghymeradwy:** Mae {device_type} wedi'i drefnu i'w dynnu mewn datganiad yn y dyfodol. Nid yw piblinell baru WashData yn cynhyrchu canlyniadau dibynadwy ar gyfer y dosbarth offer hwn. Mae eich integreiddio yn parhau i weithio drwy'r cyfnod dibrisio; i dawelu’r rhybudd hwn, newidiwch **Math o Ddyfais** isod i un o’r mathau a gefnogir (Peiriant Golchi, Sychwr, Combo Golchwr-Sychwr, Peiriant golchi llestri, ffrïwr aer, gwneuthurwr bara, neu bwmp), neu i **Arall (Uwch)** os nad yw’ch teclyn yn cyfateb i unrhyw un o’r mathau a gefnogir. Mae **Arall (Uwch)** yn cludo rhagosodiadau generig bwriadol nad ydynt wedi'u tiwnio ar gyfer unrhyw declyn penodol, felly bydd angen i chi ffurfweddu trothwyon, goramser a pharamedrau cyfatebol eich hun; cedwir eich holl osodiadau presennol pan fyddwch yn newid.",
-        "editor_select_info": "Dewiswch 1 cylch i rannu, neu 2+ gylchred i uno.",
-        "editor_select_info_split": "Dewiswch 1 cylch i'w hollti.",
-        "editor_select_info_merge": "Dewiswch 2+ gylch i'w cyfuno.",
-        "editor_select_info_delete": "Dewiswch 1+ cylch i'w ddileu.",
-        "no_cycles_recorded": "Dim cylchoedd wedi'u cofnodi eto.",
-        "profile_summary_line": "- **{name}**: {count} cylchredau, {avg}m cyf",
-        "no_profiles_created": "Dim proffiliau wedi'u creu eto.",
-        "phase_preview": "Rhagolwg Cyfnod",
-        "phase_preview_no_curve": "Nid yw cromlin proffil cyfartalog ar gael eto. Rhedeg/labelu mwy o gylchoedd ar gyfer y proffil hwn.",
-        "average_power_curve": "Cromlin Pŵer Cyfartalog",
-        "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} cylch, ~{duration}m cyf)",
-        "profile_option_short_fmt": "{name} ({count} cylch, ~{duration}m)",
-        "deleted_cycles_from_profile": "Wedi dileu {count} cylch o {profile}.",
-        "not_enough_data_graph": "Dim digon o ddata i gynhyrchu graff.",
-        "no_profiles_found": "Heb ganfod proffiliau.",
-        "cycle_info_fmt": "Cylchred: {start}, {duration}m, Cyfredol: {label}",
-        "top_candidates_header": "### Ymgeiswyr Gorau",
-        "tbl_profile": "Proffil",
-        "tbl_confidence": "Hyder",
-        "tbl_correlation": "Cydberthynas",
-        "tbl_duration_match": "Hyd Match",
-        "detected_profile": "Proffil Wedi'i Ganfod",
-        "estimated_duration": "Hyd Amcangyfrif",
-        "actual_duration": "Hyd Gwirioneddol",
-        "choose_action": "__Dewiswch weithred isod:__",
-        "tbl_count": "Cyfri",
-        "tbl_avg": "Cyf",
-        "tbl_min": "Lleiaf",
-        "tbl_max": "Max",
-        "tbl_energy_avg": "Egni (Cyf)",
-        "tbl_energy_total": "Ynni (Cyfanswm)",
-        "tbl_consistency": "Cynwys.",
-        "tbl_last_run": "Rhedeg Olaf",
-        "graph_legend_title": "Chwedl Graff",
-        "graph_legend_body": "Mae'r band glas yn cynrychioli'r amrediad tynnu pŵer lleiaf ac uchaf a welwyd. Mae'r llinell yn dangos y gromlin pŵer cyfartalog.",
-        "recording_preview": "Rhagolwg Cofnodi",
-        "trim_start": "Dechrau Trimio",
-        "trim_end": "Trim End",
-        "split_preview_title": "Rhagolwg Hollti",
-        "split_preview_found_fmt": "Wedi dod o hyd i {count} segment.",
-        "split_preview_confirm_fmt": "Cliciwch Cadarnhau i rannu'r cylch hwn yn {count} gylchred ar wahân.",
-        "merge_preview_title": "Cyfuno Rhagolwg",
-        "merge_preview_joining_fmt": "Yn ymuno â {count} cylch. Bydd bylchau yn cael eu llenwi â darlleniadau 0W.",
-        "editor_delete_preview_title": "Rhagolwg Dileu",
-        "editor_delete_preview_intro": "Bydd y cylchoedd a ddewiswyd yn cael eu dileu'n barhaol:",
-        "editor_delete_preview_confirm": "Cliciwch Cadarnhau i ddileu'r cofnodion cylch hyn yn barhaol.",
-        "no_power_preview": "* Dim data pŵer ar gael ar gyfer rhagolwg.*",
-        "profile_comparison": "Cymhariaeth Proffil",
-        "actual_cycle_label": "Y cylch hwn (gwirioneddol)",
-        "storage_usage_header": "Defnydd Storio",
-        "storage_file_size": "Maint Ffeil",
-        "storage_cycles": "Cylchoedd",
-        "storage_profiles": "Proffiliau",
-        "storage_debug_traces": "Olion Dadfygio",
-        "overview_suffix": "Trosolwg",
-        "phase_preview_for_profile": "Rhagolwg cyfnod ar gyfer proffil",
-        "current_ranges_header": "Ystodau cyfredol",
-        "assign_phases_help": "Defnyddiwch y gweithredoedd isod i ychwanegu, golygu, dileu, neu gadw ystodau.",
-        "profile_summary_header": "Crynodeb Proffil",
-        "recent_cycles_header": "Cylchoedd diweddar",
-        "trim_cycle_preview_title": "Rhagolwg Trimio Cylch",
-        "trim_cycle_preview_no_data": "Nid oes data pŵer ar gael ar gyfer y cylch hwn.",
-        "trim_cycle_preview_kept_suffix": "cadw",
-        "table_program": "Rhaglen",
-        "table_when": "Pryd",
-        "table_length": "Hyd",
-        "table_match": "Cydweddiad",
-        "table_profile": "Proffil",
-        "table_cycles": "Cylchoedd",
-        "table_avg_length": "Hyd Cyf.",
-        "table_last_run": "Rhedeg Olaf",
-        "table_avg_energy": "Ynni Cyf.",
-        "table_detected_program": "Rhaglen a Ganfuwyd",
-        "table_confidence": "Hyder",
-        "table_reported": "Adroddwyd"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Rhannu Cylch (Dod o hyd i fylchau)",
-        "merge": "Cyfuno Cylchoedd (Ymuno darnau)",
-        "delete": "Dileu Cylchoedd"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Canfod bylchau segur yn awtomatig",
-        "manual": "Stamp(iau) amser â llaw"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Cynnal a Chadw: Ailbrosesu ac Optimeiddio Data",
-        "clear_debug_data": "Clirio Data Dadfygio (Rhyddhau lle)",
-        "wipe_history": "Sychwch POB data ar gyfer y ddyfais hon (anghildroadwy)",
-        "export_import": "Allforio/Mewnforio JSON gyda gosodiadau (copïo/gludo)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "Allforio Pob Data",
-        "import": "Mewnforio / Cyfuno Data"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Awto-Labelu Hen Gylchoedd",
-        "select_cycle_to_label": "Label Cylch Penodol",
-        "select_cycle_to_delete": "Dileu Cylch",
-        "interactive_editor": "Cyfuno/Hollti Golygydd Rhyngweithiol",
-        "trim_cycle": "Trimio Data Cylch"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Creu Proffil Newydd",
-        "edit_profile": "Golygu/Ailenwi Proffil",
-        "delete_profile": "Dileu Proffil",
-        "profile_stats": "Ystadegau Proffil",
-        "cleanup_profile": "Glanhau Hanes - Graff a Dileu",
-        "assign_phases": "Neilltuo Ystod Cyfnod"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Creu Cyfnod Newydd",
-        "edit_custom_phase": "Golygu Cyfnod",
-        "delete_custom_phase": "Dileu Cyfnod"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Enw a chamau cymhwyso",
-        "cancel": "Ewch yn ôl heb newidiadau"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Ychwanegu Ystod Cyfnod",
-        "edit_range": "Golygu Ystod Cyfnod",
-        "delete_range": "Dileu Ystod Cyfnod",
-        "clear_ranges": "Clirio Pob Ystod",
-        "auto_detect_ranges": "Auto-canfod Cyfnodau",
-        "save_ranges": "Cadw a Dychwelyd"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Statws Adnewyddu",
-        "stop_recording": "Stopio Recordio (Cadw a Phrosesu)",
-        "start_recording": "Dechrau Recordio Newydd",
-        "process_recording": "Prosesu Recordiad Diwethaf (Trimio ac Arbed)",
-        "discard_recording": "Gwaredu Recordiad Diwethaf"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Creu Proffil Newydd",
-        "existing_profile": "Ychwanegu at y Proffil Presennol",
-        "discard": "Taflwch Recordio"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Cadarnhau - Canfod Cywir",
-        "correct": "Cywir - Dewiswch Raglen/Hyd",
-        "ignore": "Anwybyddu - Cylchred Anghywir/Swnllyd",
-        "delete": "Dileu - Dileu o Hanes"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Gosod Man Cychwyn",
-        "set_end": "Gosod Pwynt Terfyn",
-        "reset": "Ailosod i Hyd Llawn",
-        "apply": "Cymhwyso Trim",
-        "cancel": "Canslo"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "Cyfnod Presennol"
       },
-      "wash_phase": {
-        "name": "Cyfnod"
-      },
       "profile_cycle_count": {
         "name": "Proffil {profile_name} Cyfrif",
         "unit_of_measurement": "cylchoedd"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "rhaid i trim_end_s fod yn fwy na trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "Dim cylch gweithredol i oedi neu ailddechrau."
     }
   },
   "panel": {
-    "tab": {
-      "status": "Trosolwg",
-      "history": "Cylchoedd",
-      "profiles": "Proffiliau",
-      "settings": "Gosodiadau",
-      "ml": "Hyfforddiant ML",
-      "advanced": "Uwch",
-      "diagnostics": "Diagnosteg",
-      "pp_overview": "Trosolwg",
-      "pp_phases": "Cyfnodau",
-      "pp_cleanup": "Glanhau",
-      "pp_manage": "Rheoli",
-      "subtab_profiles": "Proffiliau",
-      "subtab_phase_catalog": "Catalog Cyfnod"
-    },
     "btn": {
-      "save": "Arbed",
+      "add_timer": "+ Ychwanegu amserydd",
+      "remove_timer": "Tynnu'r amserydd",
+      "add_device_tip": "Ychwanegu dyfais WashData arall",
+      "delete_group_tip": "Dileu'r grŵp hwn yn unig - mae'r proffiliau aelod yn cael eu cadw",
+      "run_analysis_tip": "Dadansoddwch eich cylchoedd recordio nawr ac adnewyddwch awgrymiadau tiwnio",
+      "reset_ml_models_tip": "Taflwch y modelau wedi'u tiwnio'n fanwl ac ewch yn ôl i'r rhai adeiledig. Gall WashData eu hailddysgu yn ddiweddarach.",
+      "add_device": "+ Ychwanegu dyfais",
+      "add_phase": "+ Ychwanegu cyfnod",
+      "apply_all": "Gwnewch gais i gyd",
+      "apply_label": "Cymhwyso Label",
+      "apply_split": "Gwneud cais Hollti",
+      "apply_trim": "Gwneud cais Trim",
+      "auto_detect_split": "Auto-canfod",
+      "auto_label_cycles": "Cylchoedd labelu awtomatig",
       "cancel": "Canslo",
-      "delete": "Dileu",
+      "clear_debug": "Clirio Data Dadfygio",
+      "clear_splits": "Clir",
       "close": "Cau",
-      "edit": "Golygu",
-      "add": "Ychwanegu",
-      "rebuild": "Ailadeiladu Amlenni",
-      "record": "Dechrau Recordio",
       "compare": "Cymharer",
       "confirm": "Cadarnhau",
-      "discard": "Taflwch",
-      "export": "Allforio",
-      "import": "Mewnforio",
-      "merge": "Uno",
-      "apply": "Cymhwyso",
-      "refresh": "Adnewyddu",
+      "convert_to_automation": "Trosi i awtomeiddio",
+      "correct": "Cywir…",
       "create": "Creu",
-      "select": "Dewiswch",
+      "create_profile": "+ Creu proffil",
+      "delete": "Dileu",
+      "delete_group": "Dileu Grŵp",
+      "delete_profile": "Dileu Proffil",
+      "discard": "Taflwch",
+      "dismiss": "Diystyru",
       "done": "Wedi'i wneud",
-      "reset": "Ailosod",
-      "trim": "Trimio",
-      "split": "Hollti",
-      "review": "Adolygu",
+      "edit": "Golygu",
+      "export": "Allforio",
+      "export_json": "Allforio i JSON",
+      "force_stop": "Gorfod Stop",
+      "from_template": "O'r templed ▾",
+      "ignore": "Anwybyddu",
+      "import_json": "Mewnforio o JSON",
+      "import_overwrite": "Mewnforio (trosysgrifo data)",
       "inspect": "Archwilio",
       "label": "Label",
-      "save_settings": "Cadw Gosodiadau",
-      "new_profile": "+ Proffil Newydd",
-      "new_group": "+ Grŵp Newydd",
-      "apply_label": "Cymhwyso Label",
-      "run_auto_label": "Rhedeg Auto-Label",
-      "save_review": "Cadw Adolygiad",
-      "apply_trim": "Cymhwyso Trim",
-      "apply_split": "Cymhwyso Hollti",
-      "process_recording": "Cadw Recordio",
-      "stop": "Stopio",
-      "process": "Prosesu",
-      "add_device": "+ Ychwanegu dyfais",
-      "train_now": "Hyfforddwch nawr",
-      "reset_to_defaults": "Ailosod i ragosodiadau",
-      "reset_to_builtin": "Ailosod i fodelau adeiledig",
-      "save_preferences": "Cadw Dewisiadau",
-      "save_panel_settings": "Cadw Gosodiadau Panel",
-      "save_access_control": "Cadw Rheoli Mynediad",
-      "auto_label_cycles": "Cylchoedd labelu awtomatig",
-      "run_analysis": "🔍 Rhedeg dadansoddiad awgrymiadau",
-      "apply_all": "Cymhwyso'r cyfan",
-      "show_only": "Dangos yn unig",
-      "dismiss": "Diystyru",
-      "dismiss_all": "Diystyru Pawb",
-      "process_history": "Prosesu Nawr",
-      "clear_debug": "Clirio Data Dadfygio",
-      "wipe_all": "Sychwch yr holl ddata",
-      "export_json": "Allforio i JSON",
-      "import_json": "Mewnforio o JSON",
-      "correct": "Cywir…",
-      "ignore": "Anwybyddu",
-      "add_phase": "+ Ychwanegu cyfnod",
-      "new_phase": "+ Cyfnod Newydd",
-      "delete_profile": "Dileu Proffil",
-      "rebuild_envelope": "Ailadeiladu Amlen",
-      "create_profile": "+ Creu proffil",
-      "rec_stop": "Stopio",
-      "pause_cycle": "Oedwch",
-      "resume_cycle": "Ail-ddechrau",
-      "force_stop": "Gorfodi Stop",
-      "save_phases": "Cadw cyfnodau",
-      "auto_detect_split": "Auto-canfod",
-      "clear_splits": "Clir",
-      "submit_correction": "Cyflwyno Cywiriad",
-      "import_overwrite": "Mewnforio (trosysgrifo data)",
-      "use": "Defnyddio",
       "manage": "Rheoli",
-      "remove": "Dileu",
-      "delete_group": "Dileu Grŵp",
-      "trim_split": "Trimio / Hollti",
-      "convert_to_automation": "Trosi i awtomeiddio",
+      "merge": "Uno",
       "new_automation": "＋ Awtomeiddio Newydd",
-      "from_template": "O'r templed ▾",
-      "on_cycle_started": "Ar ôl i gylch ddechrau",
-      "on_cycle_finished": "Ar ôl i gylch orffen",
-      "save_group": "Cadw Grŵp"
+      "new_group": "+ Grŵp Newydd",
+      "new_phase": "+ Cyfnod Newydd",
+      "new_profile": "+ Proffil Newydd",
+      "on_cycle_finished": "Ar y beic wedi gorffen",
+      "on_cycle_started": "Ar feic wedi dechrau",
+      "pause_cycle": "Oedwch",
+      "process": "Proses",
+      "process_history": "Prosesu Nawr",
+      "process_recording": "Cadw Recordio",
+      "rebuild": "Ailadeiladu Amlenni",
+      "rebuild_envelope": "Ailadeiladu Amlen",
+      "rec_stop": "Stopio",
+      "record": "Dechrau Recordio",
+      "refresh": "Adnewyddu",
+      "remove": "Dileu",
+      "reset": "Ailosod",
+      "reset_to_builtin": "Ailosod i fodelau adeiledig",
+      "reset_to_defaults": "Ailosod i ragosodiadau",
+      "resume_cycle": "Parhau â'r cylch",
+      "review": "Adolygu",
+      "run_analysis": "🔍 Rhedeg dadansoddiad awgrymiadau",
+      "run_auto_label": "Rhedeg Auto-Label",
+      "save": "Arbed",
+      "save_access_control": "Cadw Rheoli Mynediad",
+      "save_group": "Cadw Grŵp",
+      "save_panel_settings": "Cadw Gosodiadau Panel",
+      "save_phases": "Arbed cyfnodau",
+      "save_preferences": "Cadw Dewisiadau",
+      "save_review": "Cadw Adolygiad",
+      "save_settings": "Cadw Gosodiadau",
+      "select": "Dewiswch",
+      "show_only": "Dangos yn unig",
+      "split": "Hollti",
+      "submit_correction": "Cyflwyno Cywiriad",
+      "train_now": "Hyfforddwch nawr",
+      "trim": "Trimio",
+      "trim_split": "Trimio / Hollti",
+      "use": "Defnydd",
+      "wipe_all": "Sychwch yr holl ddata"
     },
     "hdr": {
-      "status": "Statws",
-      "live_power": "Pŵer byw",
-      "manual_recording": "Recordio â Llaw",
-      "tools_and_data": "Offer a Data",
-      "phase_catalog": "Catalog Cyfnod",
-      "storage_stats": "Ystadegau Storio",
-      "maintenance": "Camau Cynnal a Chadw",
-      "export_import": "Allforio / Mewnforio",
+      "toggle_sidebar": "Toglo bar ochr Cynorthwyydd Cartref",
       "logs": "Logiau",
-      "my_preferences": "Fy Dewisiadau",
-      "panel_settings": "Gosodiadau Panel (pob defnyddiwr)",
       "access_control": "Rheoli Mynediad",
-      "ml_smart_learning": "Dysgu Clyfar",
-      "ml_settings_card": "Gosodiadau",
-      "ml_learned": "Yr hyn y mae WashData wedi'i ddysgu",
-      "ml_matching_tuning": "Tiwnio sy'n cyfateb i raglenni",
-      "display": "Arddangos",
-      "status_graph": "Graff Statws",
-      "diagnostics_pref": "Diagnosteg",
-      "logs_diagnostics": "Diagnosteg",
-      "process_history": "Hanes Proses",
-      "clear_debug": "Olion Dadfygio Clir",
-      "wipe_history": "Sychwch Hanes",
-      "automations": "Awtomeiddio",
-      "automation_open": "Agor yn y golygydd awtomeiddio",
       "automation_delete": "Dileu'r awtomeiddio hwn",
       "automation_needs_review": "Mae angen adolygu'r cylch hwn",
+      "automation_open": "Agor yn y golygydd awtomeiddio",
       "automation_review_this_cycle": "Adolygwch y cylch hwn",
-      "no_automations": "Nid oes unrhyw awtomeiddio yn cyfeirio at y ddyfais hon eto."
+      "automations": "Automations",
+      "clear_debug": "Olion Dadfygio Clir",
+      "diagnostics_pref": "Diagnosteg",
+      "display": "Arddangos",
+      "export_import": "Allforio / Mewnforio",
+      "live_power": "Grym byw",
+      "logs_diagnostics": "Diagnosteg",
+      "maintenance": "Camau Cynnal a Chadw",
+      "manual_recording": "Recordio â Llaw",
+      "ml_learned": "Yr hyn y mae WashData wedi'i ddysgu",
+      "ml_matching_tuning": "Tiwnio sy'n cyfateb i raglenni",
+      "ml_settings_card": "Gosodiadau",
+      "ml_smart_learning": "Dysgu Clyfar",
+      "my_preferences": "Fy Dewisiadau",
+      "no_automations": "Nid oes unrhyw awtomeiddio yn cyfeirio at y ddyfais hon eto.",
+      "panel_settings": "Gosodiadau Panel",
+      "phase_catalog": "Catalog Cyfnod",
+      "process_history": "Hanes Proses",
+      "status": "Statws",
+      "status_graph": "Graff Statws",
+      "storage_stats": "Ystadegau Storio",
+      "tools_and_data": "Offer a Data",
+      "wipe_history": "Sychwch Hanes"
     },
     "lbl": {
-      "power": "Pŵer",
-      "progress": "Cynnydd",
-      "remaining": "Gweddill",
-      "duration": "Hyd",
-      "energy": "Egni",
-      "profile": "Proffil",
-      "status": "Statws",
-      "date": "Dyddiad",
-      "confidence": "Hyder",
-      "health": "Iechyd",
-      "cost": "Cost",
-      "program": "Rhaglen",
-      "cycle_health": "Iechyd cylch",
+      "timer_min": "min",
+      "timer_msg_placeholder": "Neges (dewisol, {device}/{program}/{minutes})",
+      "timer_auto_pause": "Auto-saib",
+      "actions": "Gweithredoedd",
       "activity": "Gweithgaredd",
-      "unlabelled": "Heb ei labelu",
-      "unlabelled_paren": "(heb ei labelu)",
-      "emphasis": "Pwyslais",
-      "default": "Diofyn",
-      "in_use": "Mewn defnydd",
-      "profile_name": "Enw Proffil",
-      "ref_cycle": "Cylch Cyfeirio (dewisol)",
-      "manual_duration": "Hyd â llaw (munudau, dewisol)",
-      "phase_name": "Enw Cyfnod",
-      "description": "Disgrifiad",
-      "correct_profile": "Proffil Cywir",
-      "correct_duration": "Hyd Cywir (munudau, dewisol)",
-      "load_from_file": "Llwytho o ffeil",
-      "json_data": "Data JSON",
-      "expected_duration": "Hyd Disgwyliedig (munud)",
-      "rename_profile": "Ail-enwi Proffil",
-      "select_profile": "Dewiswch Proffil",
-      "confidence_threshold": "Trothwy hyder",
-      "resulting_profile": "Proffil canlyniadol",
-      "new_profile_name": "Enw proffil newydd",
-      "save_mode": "Modd Cadw",
-      "head_trim": "Trim(iau) pen",
-      "tail_trim": "Trim(iau) Cynffon",
-      "gap_s": "Bwlch(iau)",
-      "start": "Cychwyn",
-      "end": "Diwedd",
-      "quality": "Ansawdd",
-      "golden_reference": "Cylch cyfeirio wedi'i recordio",
-      "compare_profiles": "Cymharwch â phroffiliau",
-      "tags": "Tagiau",
-      "notes": "Nodiadau",
-      "default_tab": "Tab rhagosodedig wrth agor y panel",
-      "cycle_date_display": "Arddangosfa dyddiad cylch",
-      "refresh_interval": "Adnewyddu cyfwng(s)",
-      "panel_default_tab": "Tab rhagosodedig",
-      "hide_tabs": "Cuddio tabiau ar gyfer rhai nad ydynt yn weinyddwyr",
-      "enable_access_control": "Galluogi rheolaeth mynediad fesul defnyddiwr",
-      "default_access_level": "Lefel ddiofyn ar gyfer defnyddwyr nad ydynt wedi'u rhestru isod",
       "administrators": "Gweinyddwyr",
+      "auto_fine_tune_off": "auto mân-diwn i ffwrdd",
+      "clock_time": "Amser cloc",
+      "compare_profiles": "Cymharwch â phroffiliau",
+      "confidence": "Hyder",
+      "confidence_threshold": "Trothwy hyder",
+      "correct_duration": "Hyd Cywir (isafswm, dewisol)",
+      "correct_profile": "Proffil Cywir",
+      "cost": "Cost",
+      "create_new_profile": "+ Creu proffil newydd…",
+      "cycle_date_display": "Arddangosfa dyddiad beicio",
+      "cycle_health": "Iechyd beicio",
+      "cycles_count": "Beiciau",
+      "date": "Dyddiad",
+      "debug_traces": "Olion Dadfygio",
+      "default": "Diofyn",
+      "default_access_level": "Lefel ddiofyn ar gyfer defnyddwyr nad ydynt wedi'u rhestru isod",
       "default_other": "Diofyn (dyfeisiau eraill)",
+      "default_tab": "Tab rhagosodedig wrth agor y panel",
+      "description": "Disgrifiad",
+      "duration": "Hyd",
+      "emphasis": "Pwyslais",
+      "enable_access_control": "Galluogi rheolaeth mynediad fesul defnyddiwr",
+      "energy": "Egni",
+      "expected_duration": "Hyd Disgwyliedig (munud)",
+      "file_kb": "Ffeil (kB)",
+      "gap_s": "Bwlch(iau)",
+      "head_trim": "Trim(iau) pen",
+      "health": "Iechyd",
+      "hide_tabs": "Cuddio tabiau ar gyfer rhai nad ydynt yn weinyddwyr",
+      "in_use": "Mewn defnydd",
+      "json_data": "Data JSON",
+      "label": "Rhaglen gyfatebol",
+      "last_checked": "Wedi'i wirio ddiwethaf:",
+      "load_from_file": "Llwytho o ffeil",
+      "manual_duration": "Hyd â llaw (isafswm, dewisol)",
+      "mode_existing_profile": "Ychwanegu at y Proffil Presennol",
+      "mode_new_profile": "Creu Proffil Newydd",
+      "new_profile_name": "Enw proffil newydd",
+      "panel_default_tab": "Tab rhagosodedig",
+      "phase_name": "Enw",
+      "power": "Grym",
+      "profile": "Proffil",
+      "profile_name": "Enw Proffil",
+      "progress": "Cynnydd",
+      "read_only": "Darllen-yn-unig",
+      "ref_cycle": "Cylch Cyfeirio (dewisol)",
+      "refresh_interval": "Adnewyddu cyfwng(s)",
+      "remaining": "Gweddill",
+      "remove_label": "- Tynnu label -",
+      "rename_profile": "Ail-enwi Proffil",
+      "resulting_profile": "Proffil canlyniadol",
+      "save_mode": "Modd Cadw",
+      "seconds_from_start": "Eiliadau o'r dechrau",
+      "select_profile": "Dewiswch Proffil",
+      "show_debug": "Dangos cerdyn dadfygio gêm fyw ar y dudalen Statws (hyder, amwysedd, ymgeiswyr gorau)",
       "show_expected": "Dangos troshaen cromlin ddisgwyliedig (proffil cyfatebol, oren)",
       "show_raw": "Dangos darlleniadau synhwyrydd amrwd (dilyfn, llwyd)",
-      "show_debug": "Dangos cerdyn dadfygio gêm fyw ar y dudalen Statws (hyder, amwysedd, ymgeiswyr gorau)",
-      "mode_new_profile": "Creu Proffil Newydd",
-      "mode_existing_profile": "Ychwanegu at y Proffil Presennol",
-      "auto_fine_tune_on": "mân-diwnio ymlaen yn awtomatig (tua {hour}:00)",
-      "auto_fine_tune_off": "auto mân-diwn i ffwrdd",
-      "last_checked": "Wedi'i wirio ddiwethaf:",
-      "remove_label": "- Tynnu label -",
-      "create_new_profile": "+ Creu proffil newydd…",
-      "read_only": "Darllen-yn-unig",
-      "actions": "Gweithredoedd",
-      "cycles_count": "Cylchoedd",
-      "debug_traces": "Olion Dadfygio",
-      "file_kb": "Ffeil (kB)",
-      "label": "Label",
-      "seconds_from_start": "Eiliadau o'r dechrau",
-      "clock_time": "Amser cloc",
-      "ungrouped": "Heb ei grwpio"
+      "status": "Statws",
+      "tail_trim": "Trim(iau) Cynffon",
+      "ungrouped": "Heb ei grwpio",
+      "unlabelled": "Heb ei labelu",
+      "unlabelled_paren": "(heb ei labelu)",
+      "expected": "Disgwyliedig",
+      "raw_socket": "Soced amrwd",
+      "artifact_interruption": "Tarfu",
+      "artifact_low_power": "Pŵer isel",
+      "artifact_high_power": "Pŵer uchel",
+      "artifact_anomaly": "Anomaledd"
     },
     "badge": {
-      "poor_fit": "ffit gwael",
-      "fair_fit": "gweddol ffit",
-      "manual": "(wedi'i ddewis â llaw)",
+      "golden_cycle": "Cylch cyfeirio wedi'i recordio",
+      "reviewed": "Adolygwyd",
+      "feedback_requested": "Gofynnwyd am adborth",
+      "needs_review": "Angen adolygiad",
+      "overrun": "Wedi rhedeg yn hirach nag arfer",
+      "artifact_tip": "{n} anomaleddau wedi'u canfod (e.e. drws yn agor yng nghanol y cylch) — ar agor i'w gweld ar y graff",
+      "poor_fit_tip": "Hanes paru anghyson — ystyriwch ailadeiladu'r proffil hwn",
+      "fair_fit_tip": "Cysondeb cyfatebol cymedrol - mae gan rai cylchoedd a neilltuwyd i'r proffil hwn sgorau hyder is. Labelwch fwy o gylchoedd neu ail-gofnodwch y proffil i wella cywirdeb.",
       "auto": "(wedi'i ganfod yn awtomatig)",
-      "improving": "↗ gwella",
+      "built_in_tag": "adeiledig yn",
       "declining": "↘ yn dirywio",
+      "fair_fit": "ansawdd derbyniol",
+      "improving": "↗ gwella",
+      "manual": "(wedi'i ddewis â llaw)",
+      "poor_fit": "ansawdd gwael",
       "steady": "→ cyson",
-      "using_tuned": "Defnyddio pwysau wedi'u tiwnio",
       "using_defaults": "Gan ddefnyddio rhagosodiadau wedi'u cludo",
-      "built_in_tag": "adeiledig yn"
-    },
-    "status": {
-      "completed": "Cwblhawyd",
-      "interrupted": "Torri ar draws",
-      "force_stopped": "Stopiodd grym",
-      "active": "Actif",
-      "ambiguous": "Amwys",
-      "clear": "Clir",
-      "working": "Yn gweithio…",
-      "recording": "Wrthi'n recordio…",
-      "ready": "Yn barod i brosesu",
-      "idle": "Segur",
-      "auto_detect": "Auto-canfod",
-      "fine_tuning": "mireinio nawr…",
-      "all_statuses": "Pob statws"
-    },
-    "ml": {
-      "fit_strong": "Cryf",
-      "fit_good": "Da",
-      "fit_fair": "Teg",
-      "fit_weak": "Gwan",
-      "fit_slight": "Ychydig",
-      "fit_word": "ffit",
-      "fine_tuned_at": "mireinio {when}",
-      "personalized": "● Wedi'i bersonoli i'r peiriant hwn",
-      "builtin_models": "● Defnyddio modelau adeiledig"
-    },
-    "toast": {
-      "settings_saved": "Gosodiadau wedi'u cadw; ail-lwytho integreiddio",
-      "preferences_saved": "Dewisiadau wedi'u cadw",
-      "panel_settings_saved": "Gosodiadau panel wedi'u cadw",
-      "access_saved": "Rheoli mynediad wedi'i gadw",
-      "profile_created": "Proffil \"{name}\" wedi'i greu",
-      "profile_deleted": "Proffil \"{name}\" wedi'i ddileu",
-      "profile_renamed": "Proffil wedi'i ailenwi",
-      "phases_saved": "Cyfnodau wedi'u cadw",
-      "phase_created": "Cam \"{name}\" wedi'i greu",
-      "phase_deleted": "Cam \"{name}\" wedi'i ddileu",
-      "phase_updated": "Cyfnod wedi'i ddiweddaru",
-      "recording_started": "Dechreuwyd recordio",
-      "recording_stopped": "Stopiwyd y recordio",
-      "recording_discarded": "Recordiad wedi'i daflu",
-      "recording_saved": "Recordiad wedi'i gadw i'r proffil",
-      "export_downloaded": "Allforio wedi'i lawrlwytho",
-      "logs_exported": "Logiau wedi'u hallforio",
-      "import_successful": "Mewnforio yn llwyddiannus; ail-lwytho integreiddio",
-      "envelopes_rebuilt": "Amlenni wedi'u hailadeiladu",
-      "envelope_rebuilt": "Amlen wedi'i hailadeiladu",
-      "suggestions_applied": "Awgrymiadau wedi eu cymhwyso; ail-lwytho integreiddio",
-      "suggestions_dismissed": "Awgrymiadau wedi'u gwrthod",
-      "auto_label_complete": "Auto-label wedi'i gwblhau",
-      "cycle_labelled": "Cylch wedi'i labelu",
-      "cycle_deleted": "Cylch wedi'i ddileu",
-      "cycles_deleted": "{count} cylch(au) wedi'u dileu",
-      "cycle_trimmed": "Cylch wedi'i docio",
-      "cycles_merged": "Cylchoedd wedi'u huno",
-      "review_saved": "Adolygiad wedi'i gadw",
-      "feedback_confirmed": "Cadarnhawyd yr adborth",
-      "feedback_dismissed": "Gwrthodwyd yr adborth",
-      "feedback_all_dismissed": "Pob adborth wedi'i wrthod",
-      "correction_submitted": "Cyflwynwyd cywiriad",
-      "group_saved": "Grŵp wedi'i gadw",
-      "group_deleted": "Grŵp wedi'i ddileu",
-      "automation_deleted": "Awtomatiaeth wedi'i ddileu",
-      "legacy_removed": "Gweithredoedd etifeddiaeth wedi'u dileu",
-      "cycle_paused": "Cylch wedi'i seibio",
-      "cycle_resumed": "Ailddechreuodd y cylch",
-      "cycle_force_stopped": "Cylch wedi'i stopio trwy rym",
-      "ml_training_promoted": "Hyfforddiant wedi'i gwblhau: model(au) {count} wedi'u hyrwyddo",
-      "ml_training_no_improvement": "Hyfforddiant wedi'i gwblhau: gwaelodlin wedi'i gadw (dim gwelliant)",
-      "matching_reverted": "Pwysau paru wedi'u dychwelyd i'r rhagosodiadau",
-      "models_reverted": "Aeth modelau ar ddyfais yn ôl i'r llinell sylfaen",
-      "analysis_complete": "Dadansoddiad wedi'i gwblhau: {count} awgrym(au)",
-      "analysis_complete_none": "Dadansoddiad wedi'i gwblhau: dim awgrymiadau newydd",
-      "debug_cleared": "Wedi clirio {count} o olion dadfygio",
-      "all_wiped": "Sychwyd yr holl ddata",
-      "no_split_found": "Ni chanfuwyd unrhyw fylchau segur i hollti arnynt",
-      "group_name_required": "Mae angen enw'r grŵp",
-      "min_2_profiles": "Dewiswch o leiaf 2 broffil ar gyfer grŵp",
-      "profile_name_required": "Mae angen enw proffil",
-      "phase_name_required": "Mae angen enw'r cyfnod",
-      "name_required": "Angen enw",
-      "json_required": "Mae angen data JSON",
-      "save_failed": "Wedi methu cadw: {error}",
-      "delete_failed": "Wedi methu dileu: {error}",
-      "apply_failed": "Methodd y cais: {error}",
-      "rebuild_failed": "Methodd ailadeiladu: {error}",
-      "start_failed": "Methodd cychwyn: {error}",
-      "stop_failed": "Wedi methu stopio: {error}",
-      "discard_failed": "Methodd taflu: {error}",
-      "trim_failed": "Methodd y trimio: {error}",
-      "split_failed": "Methodd rhaniad: {error}",
-      "merge_failed": "Cyfuno wedi methu: {error}",
-      "create_failed": "Methwyd creu: {error}",
-      "update_failed": "Diweddariad wedi methu: {error}",
-      "rename_failed": "Methodd ailenwi: {error}",
-      "revert_failed": "Wedi methu dychwelyd: {error}",
-      "training_failed": "Hyfforddiant wedi methu: {error}",
-      "export_failed": "Methodd yr allforio: {error}",
-      "import_failed": "Methodd mewnforio: {error}",
-      "auto_label_failed": "Methodd label awtomatig: {error}",
-      "analysis_failed": "Methodd y dadansoddiad: {error}",
-      "auto_detect_failed": "Methwyd canfod yn awtomatig: {error}",
-      "error": "Gwall: {error}",
-      "could_not_load_cycle": "Methu llwytho cylchred: {error}",
-      "pause_failed": "Methodd seibio: {error}",
-      "label_failed": "Methodd y label: {error}",
-      "invalid_json": "Nid yw \"{key}\" yn JSON ddilys - trwsio neu glirio'r maes cyn cadw.",
-      "processed": "Wedi prosesu {bits}",
-      "split_complete": "Wedi'i rannu'n {count} gylchred"
-    },
-    "msg": {
-      "no_devices": "Dim dyfeisiau WashData wedi'u ffurfweddu eto.",
-      "no_device_selected": "Dim dyfais wedi'i dewis.",
-      "loading": "Wrthi'n llwytho…",
-      "loading_settings": "Wrthi'n llwytho gosodiadau…",
-      "live_chart_loading": "Mae siart pŵer byw yn ymddangos wrth i ddarlleniadau gyrraedd.",
-      "no_cycles_match": "Nid oes unrhyw gylchredau yn cyfateb i'r hidlydd cyfredol.",
-      "no_cycles_yet": "Dim cylchoedd wedi'u cofnodi eto.",
-      "no_profiles_yet": "Dim proffiliau eto. Creu un o gylchred wedi'i labelu.",
-      "no_logs": "Dim cofnodion log wedi'u clustogi eto.",
-      "no_phases": "Dim cyfnodau wedi'u diffinio.",
-      "no_phases_assigned": "Dim cyfnodau wedi'u neilltuo.",
-      "no_split_points": "Dim pwyntiau hollt eto.",
-      "no_envelope": "Dim amlen eto - ailadeiladu ar ôl cylchoedd labelu.",
-      "no_envelope_overlay": "Dim amlen ar gael i'w throshaenu.",
-      "no_other_users": "Ni chanfuwyd Home Assistant defnyddiwr arall.",
-      "maintenance_requires_access": "Mae angen mynediad llawn i gynnal a chadw ac allforio/mewnforio.",
-      "loading_curve": "Wrthi'n llwytho cromlin…",
-      "compare_selected_cycles": "Cylchoedd dethol (solet) — dangos / cuddio",
-      "compare_overlay_profiles": "Proffiliau troshaen (llewygu)",
-      "no_profiles_compare": "Dim proffiliau i'w cymharu.",
-      "no_cycles_profile": "Dim cylchoedd ar gyfer y proffil hwn.",
-      "saving_triggers_reload": "Mae arbed yn sbarduno ail-lwytho integreiddio. Gall endidau HA ddangos yn fyr nad ydynt ar gael.",
-      "prefs_personal": "Mae'r rhain yn berthnasol i'ch cyfrif Home Assistant yn unig.",
-      "no_match_yet": "Dim ymgais paru eto - mae hyn yn llenwi yn ystod cylchred rhedeg.",
-      "no_fine_tuned": "Dim wedi'i fireinio eto - mae WashData yn defnyddio ei fodelau adeiledig.",
-      "ml_learned_intro": "Modelau wedi'u mireinio i'r peiriant hwn. Mae unrhyw beth nad yw wedi'i restru yn defnyddio'r model adeiledig dibynadwy.",
-      "ml_settings_intro": "Dau switsh annibynnol: mae un yn cymhwyso'r modelau tra bod cylch yn rhedeg, mae'r llall yn gadael i WashData eu mireinio i'ch peiriant dros amser.",
-      "ml_intro": "Llongau WashData gyda modelau smart sy'n canfod cylchoedd, rhaglenni paru, ac amcangyfrif amser ac egni - maen nhw'n gweithio allan o'r bocs.",
-      "matching_tuning_intro": "Wrth ddysgu, mae WashData hefyd yn addasu faint o baru rhaglenni sy'n pwyso siâp cylch yn erbyn ei hyd a'i egni.",
-      "phase_catalog_intro": "Segmentau penodol o gylchred (Cyn-olchi, Gwresogi, Troelli…). Neilltuwch nhw i broffil o'i banel rheoli.",
-      "phase_ranges_intro": "Amrediadau cyfnodau (munudau o ddechrau'r cylch) wedi'u troshaenu ar y gromlin gyfartalog. Golygu gwerthoedd i gael rhagolwg byw.",
-      "cleanup_intro": "Pob cylch wedi'i labelu wedi'i droshaenu. Ticiwch yr allgleifion a dilëwch i lanhau'r proffil.",
-      "split_intro": "Cliciwch ar y graff i ychwanegu neu ddileu pwynt hollt, neu awto-ganfod trwy fylchau segur.",
-      "trim_intro": "Llusgwch y dolenni coch, neu rhowch werthoedd. Mae popeth y tu allan i'r ffenestr yn cael ei dynnu.",
-      "import_intro": "Llwythwch ffeil wedi'i hallforio neu gludwch lwyth tâl JSON isod.",
-      "auto_label_intro": "Neilltuo proffiliau i gylchoedd heb eu labelu y mae eu hyder paru yn clirio'r trothwy.",
-      "merge_intro": "Mae'r cylchoedd dethol yn cael eu cyfuno yn un (trefn gronolegol; bylchau wedi'u llenwi â 0 W). Dewiswch y proffil canlyniadol.",
-      "enough_data": "Digon o ddata i ddysgu oddi wrth ({current}/{min} cylch).",
-      "collecting_data": "Casglu data — {need} cylch arall{plural} cyn i'r mireinio ddechrau ({current}/{min}).",
-      "updated": "Wedi diweddaru {time}",
-      "appliance_monitor": "Monitor offer",
-      "ml_loading": "wrth lwytho ML…",
-      "see_recorder": "Gweler teclyn recordydd isod",
-      "review_in_settings": "Adolygu mewn Gosodiadau",
-      "storage_diagnostics": "Ystadegau storio, cynnal a chadw, allforio / mewnforio",
-      "recent_logs": "Cofnodion ha_washdata diweddar",
-      "preferences_adv": "Dewisiadau",
-      "preferences_admin": "Dewisiadau, panel a rheolaeth mynediad",
-      "review_to_cycles": "Agorwch y ciw adolygu Cycles",
-      "pending_feedback": "Wrth aros am adborth canfod",
-      "recording_in_progress": "Cofnodi ar y gweill",
-      "no_profiles_yet_short": "Dim proffiliau eto.",
-      "unsure_detected_prefix": "Nid yw WashData yn siŵr ei fod wedi'i ganfod",
-      "no_suggestions": "Dim awgrymiadau gweithredol.",
-      "no_profiles_overlay": "Dim proffiliau i'w troshaenu.",
-      "compare_cycles_title": "Cymharwch {count} gylchred",
-      "profiles_intro": "Cliciwch ar broffil am ystadegau, cyfnodau a glanhau. Grwpiwch raglenni bron-union (un siâp/hyd, tymheredd neu droi gwahanol) fel bod cyfatebiad yn dewis rhyngddynt yn ddibynadwy.",
-      "search_placeholder": "Chwilio gosodiadau…",
-      "automations_intro": "Mae WashData yn tanio digwyddiadau {start} / {end} ac yn datgelu endidau, felly mae'n well adeiladu hysbysiadau a chamau gweithredu fel awtomeiddiadau Home Assistant arferol. Mae'r awtomeiddiadau sy'n defnyddio'r ddyfais hon yn ymddangos isod.",
-      "notify_services_hint": "Defnyddiwch IDau gwasanaeth {entity} (wedi'u gwahanu gan gomas am fwy nag un). Newidynnau templed: {vars}.",
-      "rbac_hint": "Pan fo i ffwrdd, mae gan bob defnyddiwr Home Assistant fynediad llawn (y rhagosodiad). Mae gan weinyddwyr fynediad llawn bob amser a gallant reoli pawb.",
-      "feedback_prompt": "Cadarnhewch ei fod yn gywir, cywirwch y rhaglen, neu anwybyddwch."
+      "using_tuned": "Defnyddio pwysau wedi'u tiwnio"
     },
     "modal": {
-      "label_cycle": "Labelu Cylch",
-      "create_profile": "Creu Proffil",
-      "new_phase": "Cyfnod Newydd",
-      "edit_phase": "Golygu Cyfnod",
-      "process_recording": "Cofnodi Proses",
-      "correct_feedback": "Adborth Cywir",
-      "import_config": "Mewnforio Ffurfweddu",
+      "merge_cycles": "Cyfuno {n} Cylchoedd",
       "auto_label": "Cylchoedd Auto-Label",
-      "cycle": "Cylch"
+      "correct_feedback": "Adborth Cywir",
+      "create_profile": "Creu Proffil",
+      "cycle": "Beicio",
+      "edit_phase": "Golygu Cyfnod",
+      "import_config": "Mewnforio Ffurfweddu",
+      "label_cycle": "Label Cycle",
+      "new_phase": "Cyfnod Newydd",
+      "process_recording": "Cofnodi Proses"
     },
-    "tag": {
-      "late_start": "Dechrau hwyr",
-      "early_end": "Diwedd cynnar",
-      "merged": "Cylchoedd wedi'u huno",
-      "split": "Cylch hollti",
-      "noise": "Swn",
-      "wrong_profile": "Proffil anghywir",
-      "sensor_gap": "Bwlch synhwyrydd"
+    "msg": {
+      "near_duplicate_cluster": "clwstwr proffil bron yn ddyblyg wedi'i ganfod. Mae grwpio yn gadael i baru ddewis yn ddibynadwy rhwng tebygrwydd (e.e. yr un rhaglen ar dymheredd/sbin gwahanol).",
+      "coverage_gap": "nid oes gan gylchoedd diweddar unrhyw broffil cyfatebol ({pct}% o'r 30 diwethaf).",
+      "consider_new_profile": "Ystyriwch greu proffil newydd.",
+      "group_not_cohesive": "Nid yw'r proffiliau hyn yn ddigon tebyg i grwpio'n ddibynadwy, felly mae paru yn eu trin yn unigol nes i chi dynnu'r allanolyn neu rannu'r grŵp.",
+      "group_modal_help": "Rhaglenni grŵp gyda'r un siâp sy'n amrywio o ran tymheredd/sbin (gall hyd amrywio). Mae paru yn sgorio'r grŵp fel un ymgeisydd, yna'n dewis yr aelod ffit orau. Dewiswch o leiaf 2; mae'r troshaen yn dangos pa mor debyg ydyn nhw.",
+      "showing_suggestions": "Yn dangos gosodiad {count} gydag awgrymiadau.",
+      "show_all_settings": "Dangos pob gosodiad",
+      "tuning_suggestions_available": "{count} awgrym tiwnio ar gael o gylchoedd a arsylwyd. Maent yn ymddangos wrth ymyl y meysydd perthnasol.",
+      "legacy_actions_title": "{count} gweithred arferiad etifeddol yn dal i redeg",
+      "old_actions_warning": "Wedi'i ffurfweddu gyda'r hen olygydd gweithredoedd (wedi'i dynnu bellach). Maent yn dal i danio ar ddigwyddiadau beicio ond ni ellir eu golygu yma mwyach. Troswch nhw yn awtomeiddio arferol, neu eu dileu.",
+      "no_settings_match": "Dim gosodiadau yn cyfateb i \"{q}\"",
+      "clear_debug_hint": "Tynnwch y data dadfygio sydd wedi'i storio i ryddhau lle.",
+      "wipe_history_warning": "Dileu pob cylch a phroffil yn barhaol. Ni ellir ei ddadwneud.",
+      "export_description": "Allforio pob proffil a chylch i JSON, neu adfer o allforyn blaenorol.",
+      "log_buffer_hint": "Y diweddaraf yn gyntaf · yn clustogi'r 500 o gofnodion ha_washdata diwethaf ers ailgychwyn · llusgwch ymyl y gwaelod i newid maint.",
+      "review_profile_tip": "Mae'r rhaglen y cylch hwn wedi'i labelu fel. Os oedd y rhaglen a ganfuwyd yn awtomatig yn anghywir, cywirwch hi yma - mae labelu yn dysgu paru ar gyfer cylchoedd y dyfodol.",
+      "review_quality_tip": "Pa mor lân yw'r cylch hwn. Da = enghraifft gwerslyfr o'r rhaglen hon; Gwael = canfod ond swnllyd neu annodweddiadol; Annefnyddiadwy = cam-ganfod (cyfuno, cwtogi neu ffug). Yn gyrru'r sgôr iechyd a pha gylchoedd sy'n cael hyfforddi'r model.",
+      "review_recorded_tip": "Marciwch hwn fel cylch cyfeirio wedi'i ddewis â llaw ar gyfer ei raglen - yr un rôl â chylch wedi'i recordio â llaw. Mae cylchoedd cyfeirio yn cael eu cadw bob amser, yn hadu'r templed paru, ac nid ydynt byth yn cael eu gollwng trwy lanhau. (Dyma'r faner \"aur\"/recordiedig; mae'r ddau yr un peth.)",
+      "review_tags_tip": "Baneri dewisol yn disgrifio'r hyn a aeth o'i le gyda'r cylch hwn, felly gall hyfforddiant a glanhau gyfrif amdano.",
+      "review_notes_tip": "Nodiadau testun rhydd ar gyfer eich cyfeiriad eich hun. Heb ei ddefnyddio gan baru neu hyfforddi.",
+      "review_confirm_help": "Cadarnhewch a gafodd y cylch hwn ei ganfod yn gywir. Mae eich adolygiadau'n hyfforddi'r model ar eich peiriant - po fwyaf o gylchoedd y byddwch chi'n eu cadarnhau, y gorau fydd y paru a'r sgorio iechyd. Mae Da/Drwg cyflym yn ddigon.",
+      "review_notes_placeholder": "Nodiadau (dewisol)",
+      "compare_profiles_tip": "Troshaenwch amlenni proffil eraill ar y siart uchod i weld pa un sy'n cyd-fynd orau â'r cylch hwn.",
+      "artifact_header": "{n} anomaleddau a ganfuwyd yn ystod y cylch hwn",
+      "artifact_footer": "Wedi'i amlygu ar y graff uchod. Mae’r rhain yn arteffactau dros dro (e.e. agor y drws ar ganol y cylch), nid o reidrwydd yn broblemau.",
+      "profile_poor_health_detail": "Mae gan gylchoedd a neilltuwyd i'r proffil hwn siapiau anghyson neu hyder isel. Ystyriwch ailadeiladu'r amlen neu adolygu cylchoedd wedi'u labelu.",
+      "trend_duration_longer": "Hyd yn dueddol o hirach ({pct}%/cylch) — diweddar cyf {avg}",
+      "trend_duration_shorter": "Hyd tueddiad byrrach ({pct}%/cylch) — diweddar cyf {avg}",
+      "trend_energy_up": "Tueddiad egni i fyny ({pct}%/cycle) — cyf diweddar {avg}",
+      "trend_energy_down": "Tueddiad egni i lawr ({pct}%/cylch)",
+      "performance_trend": "Tuedd perfformiad ({n} cylch)",
+      "maintenance_advisory": "Gall cynyddu hyd/ynni ddangos bod angen cynnal a chadw offer (e.e. diraddio, glanhau ffilter).",
+      "manual_duration_hint": "Cyfartaledd/hyd cylch disgwyliedig y proffil, a ddefnyddir ar gyfer amcangyfrifon sy'n weddill o amser. Golygu i'w osod; mae ei adael heb ei newid yn cadw'r gwerth presennol.",
+      "appliance_monitor": "Monitor offer",
+      "auto_label_intro": "Neilltuo proffiliau i gylchoedd heb eu labelu y mae eu hyder paru yn clirio'r trothwy.",
+      "cleanup_intro": "Pob cylch wedi'i labelu wedi'i droshaenu. Ticiwch yr allgleifion a dilëwch i lanhau'r proffil.",
+      "compare_overlay_profiles": "Proffiliau troshaen (llewygu)",
+      "compare_selected_cycles": "Cylchoedd dethol (solet) — dangos / cuddio",
+      "feedback_prompt": "Cadarnhewch ei fod yn iawn, cywirwch y rhaglen, neu anwybyddwch.",
+      "import_intro": "Llwythwch ffeil wedi'i hallforio neu gludwch lwyth tâl JSON isod.",
+      "live_chart_loading": "Mae siart pŵer byw yn ymddangos wrth i ddarlleniadau gyrraedd.",
+      "loading": "Wrthi'n llwytho…",
+      "loading_curve": "Wrthi'n llwytho cromlin…",
+      "loading_settings": "Wrthi'n llwytho gosodiadau…",
+      "maintenance_requires_access": "Mae angen mynediad llawn i gynnal a chadw ac allforio/mewnforio.",
+      "matching_tuning_intro": "Wrth ddysgu, mae WashData hefyd yn addasu faint mae paru rhaglenni yn pwyso siâp yn erbyn hyd ac egni.",
+      "merge_intro": "Mae'r cylchoedd dethol yn cael eu cyfuno yn un (trefn gronolegol; bylchau wedi'u llenwi â 0 W). Dewiswch y proffil canlyniadol.",
+      "ml_intro": "Llongau WashData gyda modelau smart sy'n gweithio allan o'r bocs.",
+      "ml_learned_intro": "Modelau wedi'u mireinio i'r peiriant hwn.",
+      "ml_loading": "wrth lwytho ML…",
+      "ml_settings_intro": "Dau switsh annibynnol: mae un yn cymhwyso'r modelau tra bod cylch yn rhedeg, mae'r llall yn gadael i WashData eu mireinio i'ch peiriant dros amser.",
+      "no_cycles_match": "Nid oes unrhyw gylchredau yn cyfateb i'r hidlydd cyfredol.",
+      "no_cycles_profile": "Dim cylchoedd ar gyfer y proffil hwn.",
+      "no_cycles_yet": "Dim cylchoedd wedi'u cofnodi eto.",
+      "no_device_selected": "Dim dyfais wedi'i dewis.",
+      "no_devices": "Dim dyfeisiau WashData wedi'u ffurfweddu eto.",
+      "no_envelope": "Dim amlen eto - ailadeiladu ar ôl cylchoedd labelu.",
+      "no_envelope_overlay": "Dim amlen ar gael i'w throshaenu.",
+      "no_fine_tuned": "Dim wedi'i fireinio eto - mae WashData yn defnyddio ei fodelau adeiledig.",
+      "no_logs": "Dim cofnodion log wedi'u clustogi eto.",
+      "no_match_yet": "Dim ymgais paru eto - mae hyn yn llenwi yn ystod cylchred rhedeg.",
+      "no_other_users": "Ni chanfuwyd unrhyw ddefnyddwyr Cynorthwyydd Cartref eraill.",
+      "no_phases": "Dim cyfnodau wedi'u diffinio.",
+      "no_phases_assigned": "Dim cyfnodau wedi'u neilltuo.",
+      "no_profiles_compare": "Dim proffiliau i'w cymharu.",
+      "no_profiles_overlay": "Dim proffiliau i'w troshaenu.",
+      "no_profiles_yet": "Dim proffiliau eto. Creu un o gylchred wedi'i labelu.",
+      "no_profiles_yet_short": "Dim proffiliau eto.",
+      "no_split_points": "Dim pwyntiau hollt eto.",
+      "no_suggestions": "Dim awgrymiadau gweithredol.",
+      "pending_feedback": "Wrth aros am adborth canfod",
+      "phase_catalog_intro": "Segmentau penodol o gylchred (Cyn-olchi, Gwresogi, Troelli…). Neilltuwch nhw i broffil o'i banel rheoli.",
+      "phase_ranges_intro": "Amrediadau cyfnodau (munudau o ddechrau'r cylch) wedi'u troshaenu ar y gromlin gyfartalog. Golygu gwerthoedd i gael rhagolwg byw.",
+      "preferences_admin": "Dewisiadau, panel a rheolaeth mynediad",
+      "preferences_adv": "Dewisiadau",
+      "prefs_personal": "Mae'r rhain yn berthnasol i'ch cyfrif Cynorthwyydd Cartref yn unig.",
+      "profiles_intro": "Cliciwch ar broffil ar gyfer ystadegau, cyfnodau a glanhau. Grwpiau rhaglenni sydd bron yn union yr un fath (yr un siâp/hyd, tymheredd gwahanol neu sbin) felly mae paru’n ddibynadwy yn dewis rhyngddynt.",
+      "rbac_hint": "Pan fydd i ffwrdd, mae gan bob defnyddiwr Cynorthwyydd Cartref fynediad llawn (y rhagosodiad). Mae gan weinyddwyr fynediad llawn bob amser a gallant reoli pawb.",
+      "recent_logs": "Cofnodion ha_washdata diweddar",
+      "recording_in_progress": "Cofnodi ar y gweill",
+      "review_in_settings": "Adolygu mewn Gosodiadau",
+      "review_to_cycles": "Agorwch y ciw adolygu Cycles",
+      "saving_triggers_reload": "Mae arbed yn sbarduno ail-lwytho integreiddio. Gall endidau HA ddangos yn fyr nad ydynt ar gael.",
+      "search_placeholder": "Chwilio gosodiadau…",
+      "see_recorder": "Gweler teclyn recordydd isod",
+      "split_intro": "Cliciwch ar y graff i ychwanegu neu ddileu pwynt hollt, neu awto-ganfod trwy fylchau segur. Gall pob segment canlyniadol gael ei broffil ei hun.",
+      "storage_diagnostics": "Ystadegau storio, cynnal a chadw, allforio / mewnforio",
+      "trim_intro": "Llusgwch y dolenni coch, neu rhowch werthoedd. Mae popeth y tu allan i'r ffenestr yn cael ei dynnu.",
+      "unsure_detected_prefix": "Nid yw WashData yn siŵr ei fod wedi'i ganfod",
+      "updated": "Diweddarwyd"
     },
-    "quality": {
-      "good": "Da",
-      "bad": "Drwg",
-      "unusable": "Annefnyddiadwy"
-    },
-    "access": {
-      "none": "Dim (cudd)",
-      "read": "Darllen",
-      "edit": "Golygu",
-      "full": "Llawn",
-      "inherit": "Etifedd"
+    "phase_desc": {
+      "pre_wash": "Mwydwch neu ragdriniaeth gychwynnol cyn y prif olchi.",
+      "wash": "Prif gylchred golchi gyda symudiad drwm a gwresogi dewisol.",
+      "wash_dw": "Golchwch y prif lanedydd gyda gwres.",
+      "rinse": "Cam rinsio dŵr glân. Gall y cam hwn ailadrodd sawl gwaith.",
+      "spin": "Echdynnu cyflym i dynnu dŵr o'r llwyth.",
+      "spin_wd": "Echdynnu cyflym cyn sychu pontio.",
+      "soak": "Cyfnod socian actifedd isel rhwng cyfnodau golchi actif.",
+      "soak_dw": "Cyfnod socian estynedig ar gyfer pridd trwm.",
+      "anti_crease": "Tymblau byr yn achlysurol ar ôl cwblhau i leihau crychau.",
+      "heat_up": "Cynhesu gwresogydd cychwynnol cyn dechrau sychu'n llawn.",
+      "drying": "Prif gyfnod tumbling wedi'i gynhesu.",
+      "cool_down": "Yn cwympo heb wres ger pen y beic.",
+      "anti_wrinkle": "Twmblo ôl-gylch cyfnodol i leihau crychau.",
+      "sensor_check": "Saib pŵer isel byr tra bod sychder yn cael ei fesur.",
+      "drain_and_switch": "Cyfnod pontio o olchi i ddull sychu.",
+      "pre_rinse": "Chwistrellu i lawr cychwynnol cyn golchi glanedydd.",
+      "dry": "Cam sychu gan ddefnyddio gwresogydd a/neu wres gweddilliol.",
+      "sanitize": "Cam glanhau tymheredd uchel ar gyfer rhaglenni glanweithdra."
     },
     "health": {
-      "poor": "⚠ Ffit cydweddiad gwael",
-      "fair": "Cyfateb teg",
-      "good": "✓ Ffit dda"
-    },
-    "trend": {
-      "up": "Tueddu i fyny",
-      "down": "Yn tueddu i lawr"
-    },
-    "pref": {
-      "date_relative": "Perthynas (e.e. 2 awr yn ôl)",
-      "date_absolute": "Absolute (e.e. 14:32 ar 2 Gorff)"
+      "fair": "Ansawdd proffil derbyniol",
+      "good": "✓ Ansawdd proffil da",
+      "poor": "⚠ Ansawdd proffil gwael"
     },
     "log": {
       "all_levels": "Pob lefel"
     },
-    "section": {
-      "basic": {
-        "label": "Sylfaenol",
-        "intro": "Hunaniaeth graidd a'r hanfodion sydd eu hangen ar y mwyafrif o setiau."
-      },
-      "detection": {
-        "label": "Canfod",
-        "intro": "Sut mae cylch yn cael ei ganfod fel dechrau, rhedeg a gorffen."
-      },
-      "matching": {
-        "label": "Paru",
-        "intro": "Sut mae cylchoedd gorffenedig yn cael eu paru â phroffiliau a ddysgwyd a'u labelu."
-      },
-      "timing": {
-        "label": "Amseru a Chorff Gwarchod",
-        "intro": "Diweddeb cefndir, y corff gwarchod all-lein a chadw tŷ."
-      },
-      "anti_wrinkle": {
-        "label": "Gwrth-Wrinkle",
-        "intro": "Mae modd gwrth-wrinkle yn canfod codlysiau sychwr ar ôl y prif gyfnod gwres."
-      },
-      "delay": {
-        "label": "Oedi Cychwyn",
-        "intro": "Mae canfod oedi-dechrau yn nodi pan fydd dyfais yn cael ei bweru ond nad yw wedi dechrau ei gylchred eto."
-      },
-      "triggers": {
-        "label": "Sbardunau a Drws",
-        "intro": "Arwyddion allanol dewisol: sbardun diwedd, synhwyrydd drws, switsh saib, a'r nodyn atgoffa dadlwytho."
-      },
-      "notifications": {
-        "label": "Hysbysiadau",
-        "intro": "Ffurfweddwch pryd a sut y cewch eich hysbysu am ddigwyddiadau cylch."
-      },
-      "ml_training": {
-        "label": "Hyfforddiant ML",
-        "intro": "Modelau smart optio i mewn sy'n personoli canfod ac amseru i'r ddyfais hon."
-      }
+    "ml": {
+      "builtin_models": "● Defnyddio modelau adeiledig",
+      "fit_fair": "Derbyniol",
+      "fit_good": "Da",
+      "fit_slight": "Ychydig",
+      "fit_strong": "Cryf",
+      "fit_weak": "Gwan",
+      "fit_word": "ffit",
+      "personalized": "● Wedi'i bersonoli i'r peiriant hwn"
     },
-    "setting": {
-      "name": {
-        "label": "Enw Dyfais"
-      },
-      "device_type": {
-        "label": "Math o Ddyfais"
-      },
-      "power_sensor": {
-        "label": "Synhwyrydd Pŵer"
-      },
-      "min_power": {
-        "label": "Isafswm Pwer"
-      },
-      "off_delay": {
-        "label": "Oddi ar Oedi"
-      },
-      "linked_device": {
-        "label": "Grŵp Dan Ddyfais"
-      },
-      "start_threshold_w": {
-        "label": "Trothwy Cychwyn"
-      },
-      "stop_threshold_w": {
-        "label": "Trothwy Stop"
-      },
-      "min_off_gap": {
-        "label": "Bwlch Lleiaf Pan Diffodd"
-      },
-      "start_duration_threshold": {
-        "label": "Dechrau Hyd"
-      },
-      "start_energy_threshold": {
-        "label": "Dechrau Ynni"
-      },
-      "completion_min_seconds": {
-        "label": "Isafswm Hyd y Cylch"
-      },
-      "running_dead_zone": {
-        "label": "Rhedeg Parth Marw"
-      },
-      "end_energy_threshold": {
-        "label": "Egni Diwedd"
-      },
-      "end_repeat_count": {
-        "label": "Diwedd Cyfrif Ailadrodd"
-      },
-      "sampling_interval": {
-        "label": "Cyfwng Samplu"
-      },
-      "smoothing_window": {
-        "label": "Ffenestr Llyfnu"
-      },
-      "abrupt_drop_watts": {
-        "label": "Gollwng sydyn"
-      },
-      "abrupt_drop_ratio": {
-        "label": "Cymhareb Gollwng Sydyn"
-      },
-      "profile_match_threshold": {
-        "label": "Trothwy Cyfatebol"
-      },
-      "profile_unmatch_threshold": {
-        "label": "Trothwy Unmatch"
-      },
-      "profile_match_interval": {
-        "label": "Cyfwng Cyfatebol"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "Cymhareb Hyd Isaf"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "Cymhareb Hyd Uchaf"
-      },
-      "profile_duration_tolerance": {
-        "label": "Proffil Hyd Goddefiant"
-      },
-      "duration_tolerance": {
-        "label": "Amcangyfrif Goddefgarwch"
-      },
-      "auto_label_confidence": {
-        "label": "Hyder Auto-Label"
-      },
-      "learning_confidence": {
-        "label": "Hyder Dysgu"
-      },
-      "suppress_feedback_notifications": {
-        "label": "Atal Hysbysiadau Adborth"
-      },
-      "watchdog_interval": {
-        "label": "Cyfnod Gwarchod"
-      },
-      "no_update_active_timeout": {
-        "label": "Goramser Dim Diweddariad"
-      },
-      "progress_reset_delay": {
-        "label": "Oedi Ailosod Cynnydd"
-      },
-      "auto_maintenance": {
-        "label": "Cynnal a Chadw Awtomatig (glanhau bob nos)"
-      },
-      "expose_debug_entities": {
-        "label": "Endidau Dadfygio Datguddio"
-      },
-      "save_debug_traces": {
-        "label": "Arbed Olion Dadfygio"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "Galluogi Canfod Gwrth-Wrinkle"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "Pŵer Gwrth-Wrinkle Max"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "Hyd Uchaf"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "Trothwy Pŵer Ymadael"
-      },
-      "delay_start_detect_enabled": {
-        "label": "Galluogi Canfod Oedi-Dechrau"
-      },
-      "delay_confirm_seconds": {
-        "label": "Cadarnhau Eiliadau"
-      },
-      "delay_timeout_hours": {
-        "label": "Oriau Goramser"
-      },
-      "external_end_trigger_enabled": {
-        "label": "Galluogi Sbardun Diwedd Allanol"
-      },
-      "external_end_trigger": {
-        "label": "Endid Sbardun Allanol"
-      },
-      "external_end_trigger_inverted": {
-        "label": "Sbardun Allanol Gwrthdro (sbardun wedi'i DIFFODD)"
-      },
-      "door_sensor_entity": {
-        "label": "Endid Synhwyrydd Drws"
-      },
-      "pause_cuts_power": {
-        "label": "Seibio Hefyd Yn Torri Pŵer (trwy switsh)"
-      },
-      "switch_entity": {
-        "label": "Newid Endid"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "Dadlwytho Nag Oedi"
-      },
-      "pump_stuck_duration": {
-        "label": "Pwmp yn Sownd Hyd"
-      },
-      "notify_start_services": {
-        "label": "Dechrau Gwasanaethau"
-      },
-      "notify_finish_services": {
-        "label": "Gwasanaethau Gorffen"
-      },
-      "notify_live_services": {
-        "label": "Gwasanaethau Cynnydd Byw"
-      },
-      "notify_people": {
-        "label": "Pobl (ar gyfer Pan Gartref yn unig)"
-      },
-      "notify_only_when_home": {
-        "label": "Hysbysu Pan Adref yn unig"
-      },
-      "notify_fire_events": {
-        "label": "Anfon Digwyddiadau HA ar gyfer Hysbysiadau"
-      },
-      "notify_before_end_minutes": {
-        "label": "Rhybudd Cyn Diwedd"
-      },
-      "notify_live_interval_seconds": {
-        "label": "Cyfnod Diweddariad Byw"
-      },
-      "notify_live_overrun_percent": {
-        "label": "Gorrediad Byw % Cyn Rhybudd"
-      },
-      "notify_live_chronometer": {
-        "label": "Defnyddiwch Live Chronometer"
-      },
-      "notify_timeout_seconds": {
-        "label": "Auto-Diswyddo Ar ôl"
-      },
-      "notify_title": {
-        "label": "Teitl yr Hysbysiad"
-      },
-      "notify_icon": {
-        "label": "Eicon Hysbysiad"
-      },
-      "notify_start_message": {
-        "label": "Cychwyn Neges"
-      },
-      "notify_finish_message": {
-        "label": "Gorffen Neges"
-      },
-      "notify_pre_complete_message": {
-        "label": "Neges Rhag-gwbl"
-      },
-      "notify_reminder_message": {
-        "label": "Neges Atgoffa"
-      },
-      "notify_channel": {
-        "label": "Sianel Android (dechrau/byw)"
-      },
-      "notify_finish_channel": {
-        "label": "Sianel Android (gorffen)"
-      },
-      "energy_price_entity": {
-        "label": "Endid Pris Ynni"
-      },
-      "energy_price_static": {
-        "label": "Pris Ynni Statig (fesul kWh)"
-      },
-      "enable_ml_models": {
-        "label": "Cymhwyso modelau smart yn ystod cylchred"
-      },
-      "ml_training_enabled": {
-        "label": "Dysgwch o'r peiriant hwn"
-      },
-      "ml_training_hour": {
-        "label": "Dysgwch ar awr"
-      },
-      "ml_training_min_cycles": {
-        "label": "Mae angen cylchoedd yn gyntaf"
-      },
-      "ml_training_interval_days": {
-        "label": "Gwiriwch ar y mwyaf bob"
-      }
+    "pref": {
+      "date_absolute": "Absolute (e.e. 14:32 ar 2 Gorff)",
+      "date_relative": "Perthynas (e.e. 2 awr yn ôl)"
+    },
+    "quality": {
+      "bad": "Drwg",
+      "good": "Da",
+      "unusable": "Annefnyddiadwy"
+    },
+    "status": {
+      "active": "Actif",
+      "all_statuses": "Pob statws",
+      "ambiguous": "Amwys",
+      "auto_detect": "Auto-canfod",
+      "clear": "Clir",
+      "completed": "Cwblhawyd",
+      "fine_tuning": "mireinio nawr…",
+      "force_stopped": "Stopiodd grym",
+      "idle": "Segur",
+      "interrupted": "Torri ar draws",
+      "ready": "Yn barod i brosesu",
+      "recording": "Recordio"
+    },
+    "tab": {
+      "advanced": "Uwch",
+      "diagnostics": "Diagnosteg",
+      "history": "Beiciau",
+      "ml": "Hyfforddiant ML",
+      "pp_cleanup": "Glanhau",
+      "pp_manage": "Rheoli",
+      "pp_overview": "Trosolwg",
+      "pp_phases": "Cyfnodau",
+      "profiles": "Proffiliau",
+      "settings": "Gosodiadau",
+      "status": "Trosolwg",
+      "subtab_phase_catalog": "Catalog Cyfnod",
+      "subtab_profiles": "Proffiliau"
+    },
+    "tag": {
+      "early_end": "Diwedd cynnar",
+      "late_start": "Dechrau hwyr",
+      "merged": "Cylchoedd wedi'u huno",
+      "noise": "Swn",
+      "sensor_gap": "Bwlch synhwyrydd",
+      "split": "Cylch hollti",
+      "wrong_profile": "Proffil anghywir"
+    },
+    "toast": {
+      "access_saved": "Rheoli mynediad wedi'i gadw",
+      "all_wiped": "Sychwyd yr holl ddata",
+      "analysis_complete_none": "Dadansoddiad wedi'i gwblhau: dim awgrymiadau newydd",
+      "auto_label_complete": "Auto-label wedi'i gwblhau",
+      "automation_deleted": "Awtomatiaeth wedi'i ddileu",
+      "correction_submitted": "Cyflwynwyd cywiriad",
+      "cycle_deleted": "Beic wedi'i ddileu",
+      "cycle_force_stopped": "Grym beicio wedi'i stopio",
+      "cycle_labelled": "Beic wedi'i labelu",
+      "cycle_paused": "Beic wedi'i seibio",
+      "cycle_resumed": "Ailddechreuodd y beic",
+      "cycle_trimmed": "Beic tocio",
+      "cycles_merged": "Cycles uno",
+      "envelope_rebuilt": "Amlen wedi'i hailadeiladu",
+      "envelopes_rebuilt": "Amlenni wedi'u hailadeiladu",
+      "export_downloaded": "Allforio wedi'i lawrlwytho",
+      "feedback_all_dismissed": "Pob adborth wedi'i wrthod",
+      "feedback_confirmed": "Cadarnhawyd yr adborth",
+      "feedback_dismissed": "Gwrthodwyd yr adborth",
+      "group_deleted": "Grŵp wedi'i ddileu",
+      "group_name_required": "Mae angen enw'r grŵp",
+      "group_saved": "Grŵp wedi'i gadw",
+      "import_successful": "Mewnforio yn llwyddiannus; ail-lwytho integreiddio",
+      "json_required": "Mae angen data JSON",
+      "legacy_removed": "Gweithredoedd etifeddiaeth wedi'u dileu",
+      "logs_exported": "Logiau wedi'u hallforio",
+      "matching_reverted": "Pwysau paru wedi'u dychwelyd i'r rhagosodiadau",
+      "min_2_profiles": "Dewiswch o leiaf 2 broffil ar gyfer grŵp",
+      "ml_training_no_improvement": "Hyfforddiant wedi'i gwblhau: gwaelodlin wedi'i gadw (dim gwelliant)",
+      "models_reverted": "Aeth modelau ar ddyfais yn ôl i'r llinell sylfaen",
+      "name_required": "Angen enw",
+      "no_split_found": "Ni chanfuwyd unrhyw fylchau segur i hollti arnynt",
+      "panel_settings_saved": "Gosodiadau panel wedi'u cadw",
+      "phase_name_required": "Mae angen enw'r cyfnod",
+      "phase_updated": "Cyfnod wedi'i ddiweddaru",
+      "phases_saved": "Cyfnodau wedi'u cadw",
+      "preferences_saved": "Dewisiadau wedi'u cadw",
+      "profile_name_required": "Mae angen enw proffil",
+      "profile_renamed": "Proffil wedi'i ailenwi",
+      "recording_discarded": "Recordiad wedi'i daflu",
+      "recording_saved": "Recordiad wedi'i gadw i'r proffil",
+      "recording_started": "Dechreuwyd recordio",
+      "recording_stopped": "Stopiwyd y recordio",
+      "review_saved": "Adolygiad wedi'i gadw",
+      "settings_saved": "Gosodiadau wedi'u cadw; ail-lwytho integreiddio",
+      "suggestions_applied": "Awgrymiadau wedi eu cymhwyso; ail-lwytho integreiddio",
+      "suggestions_dismissed": "Awgrymiadau wedi'u gwrthod"
+    },
+    "trend": {
+      "down": "Yn tueddu i lawr",
+      "up": "Tueddu i fyny"
     }
   }
 }

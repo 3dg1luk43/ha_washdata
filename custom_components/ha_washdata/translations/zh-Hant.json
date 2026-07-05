@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "循環開始",
-        "cycle_finish": "循環完成",
-        "cycle_live": "即時進展"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "洗衣機",
@@ -88,198 +81,6 @@
         "bread_maker": "麵包機",
         "pump": "泵浦/污水泵",
         "other": "其他（高級）"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "（未標記）",
-        "create_new_profile": "建立新設定檔",
-        "remove_label": "移除標籤",
-        "no_reference_cycle": "（無參考週期）",
-        "all_device_types": "所有設備類型",
-        "current_suffix": "（當前的）",
-        "phase_builtin_suffix": "(內建)",
-        "phase_none_available": "沒有可用的階段。",
-        "phase_other_device_types": "其他設備類型：",
-        "settings_deprecation_warning": "⚠️ **已棄用的裝置類型：** {device_type} 計劃在未來版本中刪除。 WashData 的匹配管道不會為此類設備產生可靠的結果。您的整合在棄用期內繼續有效；要消除此警告，請將下面的**設備類型**切換為受支援的類型之一（洗衣機、烘乾機、洗衣乾衣機組合、洗碗機、空氣炸鍋、麵包機或泵），或者如果您的設備與任何受支援的類型不匹配，則切換為**其他（高級）**。 **其他（進階）** 故意提供通用預設值，未針對任何特定裝置進行調整，因此您需要自行配置閾值、逾時和匹配參數；切換時，所有現有設定都會保留。",
-        "editor_select_info": "選擇 1 個循環進行拆分，或選擇 2 個以上循環進行合併。",
-        "editor_select_info_split": "選擇 1 個要分割的週期。",
-        "editor_select_info_merge": "選擇 2 個或更多要合併的週期。",
-        "editor_select_info_delete": "選擇 1 個或更多要刪除的週期。",
-        "no_cycles_recorded": "尚未記錄任何週期。",
-        "profile_summary_line": "- **{name}**：{count} 個週期，平均 {avg} 分鐘",
-        "no_profiles_created": "尚未建立設定檔。",
-        "phase_preview": "階段預覽",
-        "phase_preview_no_curve": "平均設定檔曲線尚不可用。為此設定檔運行/標記更多周期。",
-        "average_power_curve": "平均功率曲線",
-        "unit_min": "分鐘",
-        "profile_option_fmt": "{name}（{count} 個週期，平均 ~{duration}m）",
-        "profile_option_short_fmt": "{name}（{count} 個週期，~{duration} 分鐘）",
-        "deleted_cycles_from_profile": "已從 {profile} 中刪除 {count} 個週期。",
-        "not_enough_data_graph": "數據不足，無法產生圖表。",
-        "no_profiles_found": "未找到設定檔。",
-        "cycle_info_fmt": "週期：{start}，{duration}m，目前：{label}",
-        "top_candidates_header": "### 最佳候選人",
-        "tbl_profile": "設定檔",
-        "tbl_confidence": "信心",
-        "tbl_correlation": "相關性",
-        "tbl_duration_match": "持續時間匹配",
-        "detected_profile": "偵測到的設定檔",
-        "estimated_duration": "預計持續時間",
-        "actual_duration": "實際持續時間",
-        "choose_action": "__選擇以下操作：__",
-        "tbl_count": "數數",
-        "tbl_avg": "平均",
-        "tbl_min": "最小",
-        "tbl_max": "最大限度",
-        "tbl_energy_avg": "能量（平均）",
-        "tbl_energy_total": "能量（總計）",
-        "tbl_consistency": "組成。",
-        "tbl_last_run": "最後一次運行",
-        "graph_legend_title": "圖例",
-        "graph_legend_body": "藍色帶代表觀察到的最小和最大功率消耗範圍。此線顯示平均功率曲線。",
-        "recording_preview": "錄音預覽",
-        "trim_start": "修剪開始",
-        "trim_end": "修剪末端",
-        "split_preview_title": "分割預覽",
-        "split_preview_found_fmt": "找到 {count} 個分段。",
-        "split_preview_confirm_fmt": "按一下「確認」將此週期拆分為 {count} 個單獨的周期。",
-        "merge_preview_title": "合併預覽",
-        "merge_preview_joining_fmt": "加入 {count} 個週期。間隙將以 0W 讀數填充。",
-        "editor_delete_preview_title": "刪除預覽",
-        "editor_delete_preview_intro": "所選週期將被永久刪除：",
-        "editor_delete_preview_confirm": "點擊確認以永久刪除這些週期記錄。",
-        "no_power_preview": "*沒有可供預覽的功率數據。 *",
-        "profile_comparison": "設定檔比較",
-        "actual_cycle_label": "本週期（實際）",
-        "storage_usage_header": "儲存使用情況",
-        "storage_file_size": "文件大小",
-        "storage_cycles": "週期",
-        "storage_profiles": "設定檔",
-        "storage_debug_traces": "偵錯追蹤",
-        "overview_suffix": "概述",
-        "phase_preview_for_profile": "設定檔的階段預覽",
-        "current_ranges_header": "目前範圍",
-        "assign_phases_help": "使用以下操作來新增、編輯、刪除或儲存範圍。",
-        "profile_summary_header": "設定檔摘要",
-        "recent_cycles_header": "最近的週期",
-        "trim_cycle_preview_title": "循環修剪預覽",
-        "trim_cycle_preview_no_data": "此週期沒有可用的功率資料。",
-        "trim_cycle_preview_kept_suffix": "保留",
-        "table_program": "程式",
-        "table_when": "時間",
-        "table_length": "時長",
-        "table_match": "匹配",
-        "table_profile": "設定檔",
-        "table_cycles": "週期",
-        "table_avg_length": "平均時長",
-        "table_last_run": "最後一次運行",
-        "table_avg_energy": "平均能耗",
-        "table_detected_program": "檢測到的程式",
-        "table_confidence": "信心",
-        "table_reported": "已回報"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "分割一個週期（查找間隙）",
-        "merge": "合併循環（連結片段）",
-        "delete": "刪除週期"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "自動偵測閒置間隔",
-        "manual": "手動時間戳記"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "維護：重新處理和優化數據",
-        "clear_debug_data": "清除調試資料（釋放空間）",
-        "wipe_history": "擦除該裝置的所有資料（不可逆）",
-        "export_import": "使用設定導出/匯入 JSON（複製/貼上）"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "匯出所有數據",
-        "import": "導入/合併數據"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "自動標記舊週期",
-        "select_cycle_to_label": "標籤特定週期",
-        "select_cycle_to_delete": "刪除循環",
-        "interactive_editor": "合併/拆分互動式編輯器",
-        "trim_cycle": "修剪週期數據"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "建立新設定檔",
-        "edit_profile": "編輯/重新命名設定檔",
-        "delete_profile": "刪除設定檔",
-        "profile_stats": "設定檔統計",
-        "cleanup_profile": "清理歷史記錄 - 圖表和刪除",
-        "assign_phases": "分配相位範圍"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "建立新階段",
-        "edit_custom_phase": "編輯階段",
-        "delete_custom_phase": "刪除階段"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "命名和應用階段",
-        "cancel": "不做任何修改返回"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "增加相位範圍",
-        "edit_range": "編輯相位範圍",
-        "delete_range": "刪除相位範圍",
-        "clear_ranges": "清除所有範圍",
-        "auto_detect_ranges": "自動檢測相位",
-        "save_ranges": "儲存並返回"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "刷新狀態",
-        "stop_recording": "停止錄影（儲存並處理）",
-        "start_recording": "開始新錄音",
-        "process_recording": "處理最後的錄音（修剪和保存）",
-        "discard_recording": "放棄最後的錄音"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "建立新設定檔",
-        "existing_profile": "新增至現有設定檔",
-        "discard": "放棄錄音"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "確認-檢測正確",
-        "correct": "正確 - 選擇程式/持續時間",
-        "ignore": "忽略 - 誤報/噪音循環",
-        "delete": "刪除 - 從歷史記錄中刪除"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "設定起點",
-        "set_end": "設定終點",
-        "reset": "重置為完整持續時間",
-        "apply": "應用修剪",
-        "cancel": "取消"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "當前階段"
       },
-      "wash_phase": {
-        "name": "階段"
-      },
       "profile_cycle_count": {
         "name": "設定檔 {profile_name} 計數",
         "unit_of_measurement": "週期"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s必須大於trim_start_s。"
+    },
+    "no_active_cycle": {
+      "message": "沒有可暫停或恢復的活動週期。"
     }
   },
   "panel": {
     "hdr": {
-      "panel_settings": "面板設定（所有使用者）",
-      "ml_learned": "WashData 學到了什麼",
-      "status": "狀態",
-      "live_power": "即時電力",
-      "manual_recording": "手動記錄",
-      "tools_and_data": "工具與數據",
-      "phase_catalog": "階段目錄",
-      "storage_stats": "儲存統計",
-      "maintenance": "維護措施",
-      "export_import": "匯出/匯入",
-      "logs": "紀錄",
-      "my_preferences": "我的偏好",
+      "toggle_sidebar": "切換家庭助理側邊欄",
+      "logs": "日誌",
       "access_control": "存取控制",
-      "ml_smart_learning": "智慧學習",
-      "ml_settings_card": "設定",
-      "ml_matching_tuning": "程式匹配微調",
-      "display": "顯示",
-      "status_graph": "狀態圖",
-      "diagnostics_pref": "診斷",
-      "logs_diagnostics": "診斷",
-      "process_history": "歷史記錄處理",
-      "clear_debug": "清除除錯記錄",
-      "wipe_history": "清除歷史記錄",
-      "automations": "自動化",
-      "automation_open": "在自動化編輯器中開啟",
       "automation_delete": "刪除此自動化",
-      "automation_needs_review": "這個週期需要審查",
-      "automation_review_this_cycle": "回顧這個週期",
-      "no_automations": "尚未有自動化引用此設備。"
-    },
-    "lbl": {
-      "manual_duration": "手動持續時間（分鐘，可選）",
-      "correct_duration": "正確持續時間（分鐘，可選）",
-      "default_tab": "打開面板時的預設標籤",
-      "default_access_level": "下面未列出的用戶的預設級別",
-      "show_expected": "顯示預期的曲線疊加（匹配的設定檔，橙色）",
-      "show_raw": "顯示原始感測器讀數（未平滑，灰色）",
-      "show_debug": "在狀態頁面上顯示即時比賽調試卡（置信度、模糊度、最佳候選人）",
-      "power": "功率",
-      "progress": "進度",
-      "remaining": "剩餘",
-      "duration": "時長",
-      "energy": "電能",
-      "profile": "設定檔",
+      "automation_needs_review": "此週期需要審查",
+      "automation_open": "在自動化編輯器中開啟",
+      "automation_review_this_cycle": "審查此週期",
+      "automations": "自動化",
+      "clear_debug": "清除偵錯追蹤",
+      "diagnostics_pref": "診斷",
+      "display": "顯示",
+      "export_import": "匯出 / 匯入",
+      "live_power": "即時功率",
+      "logs_diagnostics": "診斷",
+      "maintenance": "維護操作",
+      "manual_recording": "手動錄製",
+      "ml_learned": "WashData 已學到的內容",
+      "ml_matching_tuning": "程式匹配微調",
+      "ml_settings_card": "設定",
+      "ml_smart_learning": "智慧學習",
+      "my_preferences": "我的偏好",
+      "no_automations": "尚未有自動化參照此設備。",
+      "panel_settings": "面板設定",
+      "phase_catalog": "階段目錄",
+      "process_history": "處理歷史",
       "status": "狀態",
-      "date": "日期",
-      "confidence": "信賴度",
-      "health": "健康",
-      "cost": "成本",
-      "program": "程式",
-      "cycle_health": "週期健康",
-      "activity": "活動",
-      "unlabelled": "未標記",
-      "unlabelled_paren": "（未標記）",
-      "emphasis": "強調",
-      "default": "預設",
-      "in_use": "使用中",
-      "profile_name": "個人資料名稱",
-      "ref_cycle": "參考週期（可選）",
-      "phase_name": "階段名稱",
-      "description": "描述",
-      "correct_profile": "正確的設定檔",
-      "load_from_file": "從檔案載入",
-      "json_data": "JSON資料",
-      "expected_duration": "預計持續時間（分鐘）",
-      "rename_profile": "重新命名設定檔",
-      "select_profile": "選擇個人資料",
-      "confidence_threshold": "置信閾值",
-      "resulting_profile": "產生的設定檔",
-      "new_profile_name": "新的個人資料名稱",
-      "save_mode": "儲存模式",
-      "head_trim": "起始裁剪（秒）",
-      "tail_trim": "末端裁剪（秒）",
-      "gap_s": "間隙",
-      "start": "開始",
-      "end": "結尾",
-      "quality": "品質",
-      "golden_reference": "記錄參考週期",
-      "compare_profiles": "與設定檔比較",
-      "tags": "標籤",
-      "notes": "筆記",
-      "cycle_date_display": "週期日期顯示",
-      "refresh_interval": "重新整理間隔（秒）",
-      "panel_default_tab": "預設選項卡",
-      "hide_tabs": "隱藏非管理員的選項卡",
-      "enable_access_control": "啟用每用戶存取控制",
-      "administrators": "管理員",
-      "default_other": "預設（其他設備）",
-      "mode_new_profile": "建立新設定檔",
-      "mode_existing_profile": "新增至現有設定檔",
-      "auto_fine_tune_on": "自動微調開啟（{hour}:00 左右）",
-      "auto_fine_tune_off": "自動微調關閉",
-      "last_checked": "最後檢查：",
-      "remove_label": "- 去除標籤 -",
-      "create_new_profile": "+ 建立新設定檔...",
-      "read_only": "唯讀",
-      "actions": "操作",
-      "cycles_count": "週期",
-      "debug_traces": "偵錯追蹤",
-      "file_kb": "文件（KB）",
-      "label": "標籤",
-      "seconds_from_start": "從開始算起的秒數",
-      "clock_time": "時鐘時間",
-      "ungrouped": "未分組"
-    },
-    "toast": {
-      "settings_saved": "設定已儲存；整合重載",
-      "import_successful": "導入成功；整合重載",
-      "suggestions_applied": "已採納建議；整合重載",
-      "ml_training_no_improvement": "訓練完成：保持基線（無改善）",
-      "could_not_load_cycle": "無法載入循環：{error}",
-      "preferences_saved": "已儲存偏好設定",
-      "panel_settings_saved": "已儲存面板設定",
-      "access_saved": "存取控制已儲存",
-      "profile_created": "已建立設定檔\"{name}\"",
-      "profile_deleted": "個人資料「{name}」已刪除",
-      "profile_renamed": "個人資料已重新命名",
-      "phases_saved": "階段已儲存",
-      "phase_created": "已建立階段\"{name}\"",
-      "phase_deleted": "階段\"{name}\"已刪除",
-      "phase_updated": "階段已更新",
-      "recording_started": "記錄已開始",
-      "recording_stopped": "記錄已停止",
-      "recording_discarded": "記錄已放棄",
-      "recording_saved": "記錄已儲存至設定檔",
-      "export_downloaded": "匯出已下載",
-      "logs_exported": "日誌已匯出",
-      "envelopes_rebuilt": "包絡線已重建",
-      "envelope_rebuilt": "包絡線已重建",
-      "suggestions_dismissed": "建議已忽略",
-      "auto_label_complete": "自動標記完成",
-      "cycle_labelled": "週期已標記",
-      "cycle_deleted": "循環已刪除",
-      "cycles_deleted": "已刪除 {count} 個週期",
-      "cycle_trimmed": "週期已修剪",
-      "cycles_merged": "週期已合併",
-      "review_saved": "審核已儲存",
-      "feedback_confirmed": "回饋已確認",
-      "feedback_dismissed": "回饋已忽略",
-      "feedback_all_dismissed": "所有回饋均已忽略",
-      "correction_submitted": "已提交更正",
-      "group_saved": "群組已儲存",
-      "group_deleted": "群組已刪除",
-      "automation_deleted": "自動化已刪除",
-      "legacy_removed": "已刪除舊操作",
-      "cycle_paused": "循環暫停",
-      "cycle_resumed": "循環恢復",
-      "cycle_force_stopped": "循環強制停止",
-      "ml_training_promoted": "訓練完成：升級了 {count} 個模型",
-      "matching_reverted": "匹配權重恢復為預設值",
-      "models_reverted": "設備上模型恢復到基線",
-      "analysis_complete": "分析完成：{count} 個建議",
-      "analysis_complete_none": "分析完成：沒有新建議",
-      "debug_cleared": "已清除 {count} 個調試跟踪",
-      "all_wiped": "所有資料已清除",
-      "no_split_found": "沒有發現空閒間隙可以分割",
-      "group_name_required": "群組名稱為必填項",
-      "min_2_profiles": "為一個群組選擇至少 2 個設定文件",
-      "profile_name_required": "個人資料名稱為必填項",
-      "phase_name_required": "階段名稱為必填項",
-      "name_required": "姓名必填",
-      "json_required": "需要 JSON 數據",
-      "save_failed": "儲存失敗：{error}",
-      "delete_failed": "刪除失敗：{error}",
-      "apply_failed": "套用失敗：{error}",
-      "rebuild_failed": "重建失敗：{error}",
-      "start_failed": "啟動失敗：{error}",
-      "stop_failed": "停止失敗：{error}",
-      "discard_failed": "丟棄失敗：{error}",
-      "trim_failed": "修剪失敗：{error}",
-      "split_failed": "拆分失敗：{error}",
-      "merge_failed": "合併失敗：{error}",
-      "create_failed": "建立失敗：{error}",
-      "update_failed": "更新失敗：{error}",
-      "rename_failed": "重新命名失敗：{error}",
-      "revert_failed": "恢復失敗：{error}",
-      "training_failed": "訓練失敗：{error}",
-      "export_failed": "匯出失敗：{error}",
-      "import_failed": "導入失敗：{error}",
-      "auto_label_failed": "自動標記失敗：{error}",
-      "analysis_failed": "分析失敗：{error}",
-      "auto_detect_failed": "自動偵測失敗：{error}",
-      "error": "錯誤：{error}",
-      "pause_failed": "暫停失敗：{error}",
-      "label_failed": "標籤失敗：{error}",
-      "invalid_json": "「{key}」不是有效的 JSON - 修復它或在儲存之前清除該欄位。",
-      "processed": "已處理{bits}",
-      "split_complete": "分成 {count} 個週期"
-    },
-    "msg": {
-      "no_devices": "尚未配置 WashData 設備。",
-      "live_chart_loading": "讀數到達時會出現即時功率圖表。",
-      "no_profiles_yet": "還沒有設定檔。從已標記的週期中建立一個。",
-      "no_logs": "尚未緩衝日誌記錄。",
-      "no_envelope": "還沒有包絡線 — 標記週期後重建。",
-      "no_cycles_profile": "此設定檔沒有循環。",
-      "ml_learned_intro": "模型針對該機器進行了微調。未列出的任何內容都使用可靠的內建模型。",
-      "ml_intro": "WashData 附帶智慧模型，可偵測週期、匹配程式並估計時間和能量 - 它們開箱即用。",
-      "matching_tuning_intro": "在學習時，WashData 也會調整程式配對對循環形狀與其持續時間和能量的權重程度。",
-      "merge_intro": "選定的周期合併為一個（依時間順序；間隙以 0 W 填滿）。選擇生成的設定檔。",
-      "see_recorder": "請查看下方的記錄器小工具",
-      "review_to_cycles": "打開週期審核佇列",
-      "no_device_selected": "未選擇設備。",
-      "loading": "載入中…",
-      "loading_settings": "正在載入設定…",
-      "no_cycles_match": "沒有循環與當前過濾器匹配。",
-      "no_cycles_yet": "尚未記錄任何週期。",
-      "no_phases": "沒有定義階段。",
-      "no_phases_assigned": "未分配階段。",
-      "no_split_points": "還沒有分割點。",
-      "no_envelope_overlay": "沒有可用於疊加的包絡線。",
-      "no_other_users": "未找到其他 Home Assistant 個使用者。",
-      "maintenance_requires_access": "維護和匯出/匯入需要完全存取權限。",
-      "loading_curve": "加載曲線...",
-      "compare_selected_cycles": "選定的循環（實心）- 顯示/隱藏",
-      "compare_overlay_profiles": "疊加設定檔（微弱）",
-      "no_profiles_compare": "沒有可供比較的設定檔。",
-      "saving_triggers_reload": "儲存會觸發整合重新載入。 HA 實體可能會短暫顯示為不可用。",
-      "prefs_personal": "這些僅適用於您的 Home Assistant 帳戶。",
-      "no_match_yet": "尚未進行匹配嘗試 - 這會在運行週期內填充。",
-      "no_fine_tuned": "尚未進行任何微調 - WashData 正在使用其內建模型。",
-      "ml_settings_intro": "兩個獨立的開關：一個在循環運行時應用模型，另一個讓 WashData 隨著時間的推移將它們微調到您的機器上。",
-      "phase_catalog_intro": "循環的指定部分（預洗、加熱、脫水…）。從其控制面板將它們指派給設定檔。",
-      "phase_ranges_intro": "階段範圍（週期開始後的分鐘數）疊加在平均曲線上。編輯值以即時預覽。",
-      "cleanup_intro": "每個標記的周期都重疊。勾選異常值並刪除以清理設定檔。",
-      "split_intro": "按一下圖形可新增或刪除分割點，或按空閒間隙自動偵測。",
-      "trim_intro": "拖曳紅色手柄，或輸入數值。窗外的所有東西都被移除。",
-      "import_intro": "載入匯出的檔案或貼上下面的 JSON 有效負載。",
-      "auto_label_intro": "將設定檔指派給匹配置信度清除閾值的未標記循環。",
-      "enough_data": "有足夠的數據可供學習（{current}/{min} 個週期）。",
-      "collecting_data": "收集資料 — 再進行 {need} 個週期{plural}，然後才能開始微調 ({current}/{min})。",
-      "updated": "更新了{time}",
-      "appliance_monitor": "家電監控",
-      "ml_loading": "載入機器學習…",
-      "review_in_settings": "在設定中查看",
-      "storage_diagnostics": "儲存統計、維護、匯出/匯入",
-      "recent_logs": "最近的 ha_washdata 記錄",
-      "preferences_adv": "偏好設定",
-      "preferences_admin": "首選項、面板和存取控制",
-      "pending_feedback": "待檢測回饋",
-      "recording_in_progress": "記錄進行中",
-      "no_profiles_yet_short": "還沒有設定檔。",
-      "unsure_detected_prefix": "WashData 不確定是否已偵測到",
-      "no_suggestions": "沒有積極的建議。",
-      "no_profiles_overlay": "沒有要覆蓋的設定檔。",
-      "compare_cycles_title": "比較 {count} 個週期",
-      "profiles_intro": "點擊設定檔查看統計資訊、階段和清理。將近似相同的程式（相同形狀/時長，不同溫度或轉速）分組，以便比對可靠地在它們之間選擇。",
-      "search_placeholder": "搜尋設定…",
-      "automations_intro": "WashData 觸發 {start} / {end} 事件並公開實體，因此通知和操作最好建置為一般的 Home Assistant 自動化。使用此裝置的自動化顯示在下方。",
-      "notify_services_hint": "使用 {entity} 服務 ID（多個時用逗號分隔）。範本變數：{vars}。",
-      "rbac_hint": "關閉時，每位 Home Assistant 使用者都擁有完整存取權限（預設）。管理員始終擁有完整存取權限，可以管理所有人。",
-      "feedback_prompt": "確認偵測是否正確，修正程式名稱，或忽略。"
-    },
-    "section": {
-      "basic": {
-        "intro": "核心標識和大多數設定所需的必需品。",
-        "label": "基礎"
-      },
-      "detection": {
-        "intro": "如何偵測循環的開始、運作和結束。",
-        "label": "偵測"
-      },
-      "matching": {
-        "intro": "如何將完成的周期與學習的設定檔進行配對並進行標記。",
-        "label": "匹配"
-      },
-      "timing": {
-        "intro": "背景節奏、離線看門狗和內務管理。",
-        "label": "計時與看門狗"
-      },
-      "anti_wrinkle": {
-        "intro": "防皺模式可在主要加熱階段後偵測烘乾機的翻滾脈衝。",
-        "label": "抗皺"
-      },
-      "delay": {
-        "intro": "延遲啟動偵測可識別設備何時通電但尚未開始其週期。",
-        "label": "延遲啟動"
-      },
-      "triggers": {
-        "intro": "可選外部訊號：結束觸發器、閘磁、暫停開關和卸載提醒。",
-        "label": "觸發器和門"
-      },
-      "notifications": {
-        "label": "通知",
-        "intro": "配置您收到有關週期事件的通知的時間和方式。"
-      },
-      "ml_training": {
-        "label": "ML 訓練",
-        "intro": "選擇智慧型模型，個人化對此設備的檢測和計時。"
-      }
-    },
-    "setting": {
-      "auto_maintenance": {
-        "label": "自動維護（夜間清理）"
-      },
-      "external_end_trigger_enabled": {
-        "label": "啟用外部結束觸發"
-      },
-      "external_end_trigger_inverted": {
-        "label": "反轉外部觸發（觸發關閉）"
-      },
-      "pause_cuts_power": {
-        "label": "暫停也會切斷電源（透過開關）"
-      },
-      "notify_people": {
-        "label": "人（僅限在家時）"
-      },
-      "notify_only_when_home": {
-        "label": "僅在回家時通知"
-      },
-      "energy_price_static": {
-        "label": "靜態能源價格（每度電）"
-      },
-      "enable_ml_models": {
-        "label": "在一個週期內應用智慧模型"
-      },
-      "ml_training_enabled": {
-        "label": "向這台機器學習"
-      },
-      "name": {
-        "label": "設備名稱"
-      },
-      "device_type": {
-        "label": "設備類型"
-      },
-      "power_sensor": {
-        "label": "功率感測器"
-      },
-      "min_power": {
-        "label": "最小功率"
-      },
-      "off_delay": {
-        "label": "關閉延遲"
-      },
-      "linked_device": {
-        "label": "設備下的群組"
-      },
-      "start_threshold_w": {
-        "label": "啟動閾值"
-      },
-      "stop_threshold_w": {
-        "label": "停止閾值"
-      },
-      "min_off_gap": {
-        "label": "最小間隙"
-      },
-      "start_duration_threshold": {
-        "label": "開始持續時間"
-      },
-      "start_energy_threshold": {
-        "label": "啟動能量"
-      },
-      "completion_min_seconds": {
-        "label": "最短週期持續時間"
-      },
-      "running_dead_zone": {
-        "label": "運行死區"
-      },
-      "end_energy_threshold": {
-        "label": "最終能量"
-      },
-      "end_repeat_count": {
-        "label": "結束重複計數"
-      },
-      "sampling_interval": {
-        "label": "採樣間隔"
-      },
-      "smoothing_window": {
-        "label": "平滑視窗"
-      },
-      "abrupt_drop_watts": {
-        "label": "突然下降"
-      },
-      "abrupt_drop_ratio": {
-        "label": "突變率"
-      },
-      "profile_match_threshold": {
-        "label": "匹配閾值"
-      },
-      "profile_unmatch_threshold": {
-        "label": "不匹配閾值"
-      },
-      "profile_match_interval": {
-        "label": "匹配間隔"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "最短持續時間比率"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "最大持續時間比率"
-      },
-      "profile_duration_tolerance": {
-        "label": "設定檔持續時間公差"
-      },
-      "duration_tolerance": {
-        "label": "估計公差"
-      },
-      "auto_label_confidence": {
-        "label": "自動標記置信度"
-      },
-      "learning_confidence": {
-        "label": "學習信賴度"
-      },
-      "suppress_feedback_notifications": {
-        "label": "抑制回饋通知"
-      },
-      "watchdog_interval": {
-        "label": "看門狗間隔"
-      },
-      "no_update_active_timeout": {
-        "label": "無更新逾時"
-      },
-      "progress_reset_delay": {
-        "label": "進度重置延遲"
-      },
-      "expose_debug_entities": {
-        "label": "公開除錯實體"
-      },
-      "save_debug_traces": {
-        "label": "儲存除錯記錄"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "啟用抗皺檢測"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "最大抗皺功效"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "最長持續時間"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "退出功率閾值"
-      },
-      "delay_start_detect_enabled": {
-        "label": "啟用延遲啟動偵測"
-      },
-      "delay_confirm_seconds": {
-        "label": "確認秒數"
-      },
-      "delay_timeout_hours": {
-        "label": "超時時間"
-      },
-      "external_end_trigger": {
-        "label": "外部觸發實體"
-      },
-      "door_sensor_entity": {
-        "label": "門磁實體"
-      },
-      "switch_entity": {
-        "label": "切換實體"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "取件提醒延遲"
-      },
-      "pump_stuck_duration": {
-        "label": "泵浦卡住持續時間"
-      },
-      "notify_start_services": {
-        "label": "啟動服務"
-      },
-      "notify_finish_services": {
-        "label": "完成服務"
-      },
-      "notify_live_services": {
-        "label": "即時進展服務"
-      },
-      "notify_fire_events": {
-        "label": "通知的 Fire HA 事件"
-      },
-      "notify_before_end_minutes": {
-        "label": "結束前警報"
-      },
-      "notify_live_interval_seconds": {
-        "label": "即時更新間隔"
-      },
-      "notify_live_overrun_percent": {
-        "label": "警報前的即時超限百分比"
-      },
-      "notify_live_chronometer": {
-        "label": "使用即時計時器"
-      },
-      "notify_timeout_seconds": {
-        "label": "之後自動關閉"
-      },
-      "notify_title": {
-        "label": "通知標題"
-      },
-      "notify_icon": {
-        "label": "通知圖示"
-      },
-      "notify_start_message": {
-        "label": "開始留言"
-      },
-      "notify_finish_message": {
-        "label": "完成留言"
-      },
-      "notify_pre_complete_message": {
-        "label": "預完成訊息"
-      },
-      "notify_reminder_message": {
-        "label": "提醒訊息"
-      },
-      "notify_channel": {
-        "label": "Android頻道（開始/直播）"
-      },
-      "notify_finish_channel": {
-        "label": "Android頻道（完成）"
-      },
-      "energy_price_entity": {
-        "label": "能源價格實體"
-      },
-      "ml_training_hour": {
-        "label": "每小時學習"
-      },
-      "ml_training_min_cycles": {
-        "label": "首先需要週期"
-      },
-      "ml_training_interval_days": {
-        "label": "最多檢查每個"
-      }
-    },
-    "tab": {
-      "status": "概述",
-      "history": "週期",
-      "profiles": "設定檔",
-      "settings": "設定",
-      "ml": "ML 訓練",
-      "advanced": "進階",
-      "diagnostics": "診斷",
-      "pp_overview": "概述",
-      "pp_phases": "階段",
-      "pp_cleanup": "清理",
-      "pp_manage": "管理",
-      "subtab_profiles": "設定檔",
-      "subtab_phase_catalog": "階段目錄"
-    },
-    "btn": {
-      "save": "儲存",
-      "cancel": "取消",
-      "delete": "刪除",
-      "close": "關閉",
-      "edit": "編輯",
-      "add": "添加",
-      "rebuild": "重建包絡線",
-      "record": "開始記錄",
-      "compare": "比較",
-      "confirm": "確認",
-      "discard": "丟棄",
-      "export": "匯出",
-      "import": "匯入",
-      "merge": "合併",
-      "apply": "套用",
-      "refresh": "重新整理",
-      "create": "建立",
-      "select": "選擇",
-      "done": "完畢",
-      "reset": "重置",
-      "trim": "修剪",
-      "split": "分割",
-      "review": "審查",
-      "inspect": "檢查",
-      "label": "標籤",
-      "save_settings": "儲存設定",
-      "new_profile": "+ 新設定檔",
-      "new_group": "+ 新組",
-      "apply_label": "貼上標籤",
-      "run_auto_label": "執行自動標記",
-      "save_review": "儲存審核",
-      "apply_trim": "應用修剪",
-      "apply_split": "應用分割",
-      "process_recording": "保存錄音",
-      "stop": "停止",
-      "process": "處理",
-      "add_device": "+ 新增設備",
-      "train_now": "現在訓練",
-      "reset_to_defaults": "重設為預設值",
-      "reset_to_builtin": "重置為內建模型",
-      "save_preferences": "儲存首選項",
-      "save_panel_settings": "儲存面板設定",
-      "save_access_control": "保存存取控制",
-      "auto_label_cycles": "自動標記週期",
-      "run_analysis": "🔍 執行建議分析",
-      "apply_all": "全部套用",
-      "show_only": "僅顯示",
-      "dismiss": "忽略",
-      "dismiss_all": "全部忽略",
-      "process_history": "立即處理",
-      "clear_debug": "清除調試數據",
-      "wipe_all": "擦除所有數據",
-      "export_json": "導出為 JSON",
-      "import_json": "從 JSON 導入",
-      "correct": "更正…",
-      "ignore": "忽略",
-      "add_phase": "+ 新增階段",
-      "new_phase": "+ 新階段",
-      "delete_profile": "刪除設定檔",
-      "rebuild_envelope": "重建包絡線",
-      "create_profile": "+ 建立設定檔",
-      "rec_stop": "停止",
-      "pause_cycle": "暫停",
-      "resume_cycle": "恢復",
-      "force_stop": "強制停止",
-      "save_phases": "保存階段",
-      "auto_detect_split": "自動偵測",
-      "clear_splits": "清除",
-      "submit_correction": "提交更正",
-      "import_overwrite": "導入（覆蓋資料）",
-      "use": "使用",
-      "manage": "管理",
-      "remove": "移除",
-      "delete_group": "刪除群組",
-      "trim_split": "修剪/分割",
-      "convert_to_automation": "轉換為自動化",
-      "new_automation": "＋ 新自動化",
-      "from_template": "來自模板 ▾",
-      "on_cycle_started": "循環開始",
-      "on_cycle_finished": "循環結束",
-      "save_group": "儲存群組"
+      "status_graph": "狀態圖表",
+      "storage_stats": "儲存統計",
+      "tools_and_data": "工具與資料",
+      "wipe_history": "清除歷史"
     },
     "badge": {
-      "poor_fit": "適配度差",
-      "fair_fit": "適配度一般",
+      "golden_cycle": "記錄參考週期",
+      "reviewed": "已審核",
+      "feedback_requested": "已請求回饋",
+      "needs_review": "需要審查",
+      "overrun": "運行時間超出正常",
+      "artifact_tip": "偵測到 {n} 個異常（例如，門在週期中開啟）— 開啟以在圖表上查看",
+      "poor_fit_tip": "匹配歷史不一致 — 考慮重建此設定檔",
+      "fair_fit_tip": "匹配一致性適中 — 分配給此設定檔的部分週期置信度較低。標記更多週期或重新錄製設定檔以提高準確性。",
+      "auto": "（自動偵測）",
+      "built_in_tag": "內建",
+      "declining": "↘ 下降中",
+      "fair_fit": "品質尚可",
+      "improving": "↗ 提升中",
       "manual": "（手動選擇）",
-      "auto": "（自動檢測）",
-      "improving": "↗ 改善",
-      "declining": "↘ 下降",
+      "poor_fit": "品質差",
       "steady": "→ 穩定",
-      "using_tuned": "使用調整權重",
       "using_defaults": "使用出廠預設值",
-      "built_in_tag": "內建"
+      "using_tuned": "使用已調整的權重"
     },
-    "status": {
-      "completed": "已完成",
-      "interrupted": "已中斷",
-      "force_stopped": "強制停止",
-      "active": "運行中",
-      "ambiguous": "不確定",
-      "clear": "清除",
-      "working": "處理中…",
-      "recording": "記錄中…",
-      "ready": "準備處理",
-      "idle": "空閒",
-      "auto_detect": "自動偵測",
-      "fine_tuning": "現在正在微調…",
-      "all_statuses": "所有狀態"
+    "btn": {
+      "add_timer": "+ 新增計時器",
+      "remove_timer": "刪除計時器",
+      "add_device_tip": "新增另一個 WashData 設備",
+      "delete_group_tip": "僅刪除此群組 — 保留成員設定檔",
+      "run_analysis_tip": "立即分析已記錄的週期並刷新調整建議",
+      "reset_ml_models_tip": "放棄微調模型並恢復內建模型。WashData 可以稍後重新學習。",
+      "add_device": "+ 新增設備",
+      "add_phase": "+ 新增階段",
+      "apply_all": "全部套用",
+      "apply_label": "套用標籤",
+      "apply_split": "套用分割",
+      "apply_trim": "套用裁剪",
+      "auto_detect_split": "自動偵測",
+      "auto_label_cycles": "自動標記週期",
+      "cancel": "取消",
+      "clear_debug": "清除偵錯資料",
+      "clear_splits": "清除",
+      "close": "關閉",
+      "compare": "比較",
+      "confirm": "確認",
+      "convert_to_automation": "轉換為自動化",
+      "correct": "修正…",
+      "create": "建立",
+      "create_profile": "+ 建立設定檔",
+      "delete": "刪除",
+      "delete_group": "刪除群組",
+      "delete_profile": "刪除設定檔",
+      "discard": "捨棄",
+      "dismiss": "關閉",
+      "done": "完成",
+      "edit": "編輯",
+      "export": "匯出",
+      "export_json": "匯出為 JSON",
+      "force_stop": "強制停止",
+      "from_template": "從範本 ▾",
+      "ignore": "忽略",
+      "import_json": "從 JSON 匯入",
+      "import_overwrite": "匯入（覆寫資料）",
+      "inspect": "檢查",
+      "label": "標記",
+      "manage": "管理",
+      "merge": "合併",
+      "new_automation": "＋ 新建自動化",
+      "new_group": "+ 新建群組",
+      "new_phase": "+ 新建階段",
+      "new_profile": "+ 新建設定檔",
+      "on_cycle_finished": "週期完成時",
+      "on_cycle_started": "週期開始時",
+      "pause_cycle": "暫停",
+      "process": "處理",
+      "process_history": "立即處理",
+      "process_recording": "儲存錄製",
+      "rebuild": "重建包絡",
+      "rebuild_envelope": "重建包絡",
+      "rec_stop": "停止",
+      "record": "開始錄製",
+      "refresh": "重新整理",
+      "remove": "移除",
+      "reset": "重置",
+      "reset_to_builtin": "重置為內建模型",
+      "reset_to_defaults": "重置為預設值",
+      "resume_cycle": "繼續運行週期",
+      "review": "審查",
+      "run_analysis": "🔍 執行建議分析",
+      "run_auto_label": "執行自動標記",
+      "save": "儲存",
+      "save_access_control": "儲存存取控制",
+      "save_group": "儲存群組",
+      "save_panel_settings": "儲存面板設定",
+      "save_phases": "儲存階段",
+      "save_preferences": "儲存偏好",
+      "save_review": "儲存審查",
+      "save_settings": "儲存設定",
+      "select": "選擇",
+      "show_only": "只顯示",
+      "split": "分割",
+      "submit_correction": "提交修正",
+      "train_now": "立即訓練",
+      "trim": "裁剪",
+      "trim_split": "裁剪 / 分割",
+      "use": "使用",
+      "wipe_all": "清除所有資料"
     },
-    "ml": {
-      "fit_strong": "優秀",
-      "fit_good": "良好",
-      "fit_fair": "一般",
-      "fit_weak": "偏弱",
-      "fit_slight": "微弱",
-      "fit_word": "適配度",
-      "fine_tuned_at": "微調{when}",
-      "personalized": "● 針對本機進行個人化設置",
-      "builtin_models": "● 使用內建模型"
+    "lbl": {
+      "timer_min": "分鐘",
+      "timer_msg_placeholder": "訊息（可選，{device}/{program}/{minutes}）",
+      "timer_auto_pause": "自動暫停",
+      "actions": "操作",
+      "activity": "活動",
+      "administrators": "管理員",
+      "auto_fine_tune_off": "自動微調已關閉",
+      "clock_time": "時鐘時間",
+      "compare_profiles": "與設定檔比較",
+      "confidence": "置信度",
+      "confidence_threshold": "置信度閾值",
+      "correct_duration": "修正時長（分鐘，可選）",
+      "correct_profile": "修正設定檔",
+      "cost": "費用",
+      "create_new_profile": "+ 建立新設定檔…",
+      "cycle_date_display": "週期日期顯示",
+      "cycle_health": "週期健康",
+      "cycles_count": "週期數",
+      "date": "日期",
+      "debug_traces": "偵錯追蹤",
+      "default": "預設",
+      "default_access_level": "未列出使用者的預設級別",
+      "default_other": "預設（其他設備）",
+      "default_tab": "開啟面板時的預設標籤",
+      "description": "描述",
+      "duration": "時長",
+      "emphasis": "強調",
+      "enable_access_control": "啟用每位使用者存取控制",
+      "energy": "能耗",
+      "expected_duration": "預期時長（分鐘）",
+      "file_kb": "檔案（kB）",
+      "gap_s": "間隔（秒）",
+      "head_trim": "頭部裁剪（秒）",
+      "health": "健康",
+      "hide_tabs": "對非管理員隱藏標籤",
+      "in_use": "使用中",
+      "json_data": "JSON 資料",
+      "label": "符合的程式",
+      "last_checked": "上次檢查：",
+      "load_from_file": "從檔案載入",
+      "manual_duration": "手動時長（分鐘，可選）",
+      "mode_existing_profile": "新增至現有設定檔",
+      "mode_new_profile": "建立新設定檔",
+      "new_profile_name": "新設定檔名稱",
+      "panel_default_tab": "預設標籤",
+      "phase_name": "名稱",
+      "power": "功率",
+      "profile": "設定檔",
+      "profile_name": "設定檔名稱",
+      "progress": "進度",
+      "read_only": "唯讀",
+      "ref_cycle": "參考週期（可選）",
+      "refresh_interval": "重新整理間隔（秒）",
+      "remaining": "剩餘",
+      "remove_label": "- 刪除標籤 -",
+      "rename_profile": "重新命名設定檔",
+      "resulting_profile": "結果設定檔",
+      "save_mode": "儲存模式",
+      "seconds_from_start": "從開始計的秒數",
+      "select_profile": "選擇設定檔",
+      "show_debug": "在狀態頁面顯示即時匹配偵錯卡（置信度、歧義、最佳候選）",
+      "show_expected": "顯示預期曲線疊加（匹配設定檔，橙色）",
+      "show_raw": "顯示原始感測器讀數（未平滑，灰色）",
+      "status": "狀態",
+      "tail_trim": "尾部裁剪（秒）",
+      "ungrouped": "未分組",
+      "unlabelled": "未標記",
+      "unlabelled_paren": "（未標記）",
+      "expected": "預期",
+      "raw_socket": "原始套接字",
+      "artifact_interruption": "中斷",
+      "artifact_low_power": "低功率",
+      "artifact_high_power": "高功率",
+      "artifact_anomaly": "異常"
     },
     "modal": {
-      "label_cycle": "標記週期",
+      "merge_cycles": "合併 {n} 個週期",
+      "auto_label": "自動標記週期",
+      "correct_feedback": "修正回饋",
       "create_profile": "建立設定檔",
-      "new_phase": "新階段",
+      "cycle": "週期",
       "edit_phase": "編輯階段",
-      "process_recording": "處理記錄",
-      "correct_feedback": "正確的回饋",
-      "import_config": "導入配置",
-      "auto_label": "自動標籤週期",
-      "cycle": "循環"
+      "import_config": "匯入設定",
+      "label_cycle": "標記週期",
+      "new_phase": "新建階段",
+      "process_recording": "處理錄製"
     },
-    "tag": {
-      "late_start": "開始較晚",
-      "early_end": "提早結束",
-      "merged": "合併循環",
-      "split": "分割循環",
-      "noise": "噪音",
-      "wrong_profile": "個人資料錯誤",
-      "sensor_gap": "感測器間隙"
+    "msg": {
+      "near_duplicate_cluster": "偵測到近似重複的設定檔群。分組可讓匹配在相似項目間可靠地選擇（例如同一程式在不同溫度/轉速下）。",
+      "coverage_gap": "近期週期沒有匹配的設定檔（最近 30 次的 {pct}%）。",
+      "consider_new_profile": "考慮建立新設定檔。",
+      "group_not_cohesive": "這些設定檔不夠相似，無法可靠分組，因此匹配會單獨處理它們，直到您移除離群值或分割組。",
+      "group_modal_help": "將形狀相同但溫度/轉速不同的程式分組（時長可能不同）。匹配將組作為一個候選項評分，然後選擇最合適的成員。至少選 2 個；疊加顯示相似程度。",
+      "showing_suggestions": "顯示 {count} 個有建議的設定。",
+      "show_all_settings": "顯示所有設定",
+      "tuning_suggestions_available": "來自觀察週期的 {count} 個調整建議可用。它們顯示在相關欄位旁邊。",
+      "legacy_actions_title": "{count} 個舊版自訂操作仍在執行",
+      "old_actions_warning": "使用舊版操作編輯器配置（現已移除）。它們仍會在週期事件上觸發，但無法在此處編輯。將它們轉換為普通自動化，或移除它們。",
+      "no_settings_match": "沒有與「{q}」相符的設定",
+      "clear_debug_hint": "刪除儲存的偵錯資料以釋放空間。",
+      "wipe_history_warning": "永久刪除所有週期和設定檔。無法復原。",
+      "export_description": "將所有設定檔和週期匯出為 JSON，或從先前的匯出中復原。",
+      "log_buffer_hint": "最新在前 · 緩衝自重啟以來最後 500 條 ha_washdata 記錄 · 拖曳底部邊緣調整大小。",
+      "review_profile_tip": "此週期標記的程式。如果自動偵測的程式有誤，請在此處修正 — 標記可幫助未來週期的匹配學習。",
+      "review_quality_tip": "此週期的品質。好 = 該程式的標準範例；差 = 已偵測但有雜訊或不典型；不可用 = 誤偵測（合併、截斷或虛假）。影響健康評分及允許訓練模型的週期。",
+      "review_recorded_tip": "將此標記為其程式的精選參考週期 — 與手動錄製週期的作用相同。參考週期始終保留，為匹配範本提供種子，且不會被清理刪除。（這是「黃金」/錄製標誌；兩者是同一件事。）",
+      "review_tags_tip": "描述此週期出現問題的可選標誌，以便訓練和清理可以考慮這些問題。",
+      "review_notes_tip": "供個人參考的自由文字注釋。不用於匹配或訓練。",
+      "review_confirm_help": "確認此週期是否被正確偵測。您的審查可在您的機器上訓練模型 — 確認的週期越多，匹配和健康評分越好。快速的好/差就足夠了。",
+      "review_notes_placeholder": "注釋（可選）",
+      "compare_profiles_tip": "將其他設定檔包絡疊加在上方圖表上，看哪個最適合此週期。",
+      "artifact_header": "此週期中偵測到 {n} 個異常",
+      "artifact_footer": "在上圖中高亮顯示。這些是瞬態異常（例如門在週期中開啟），不一定是問題。",
+      "profile_poor_health_detail": "分配給此設定檔的週期形狀不一致或置信度較低。考慮重建包絡或審查已標記的週期。",
+      "trend_duration_longer": "時長趨勢增長（{pct}%/週期）— 近期平均 {avg}",
+      "trend_duration_shorter": "時長趨勢縮短（{pct}%/週期）— 近期平均 {avg}",
+      "trend_energy_up": "能耗趨勢上升（{pct}%/週期）— 近期平均 {avg}",
+      "trend_energy_down": "能耗趨勢下降（{pct}%/週期）",
+      "performance_trend": "效能趨勢（{n} 個週期）",
+      "maintenance_advisory": "時長/能耗增加可能表示設備需要維護（例如除垢、清洗濾網）。",
+      "manual_duration_hint": "設定檔的平均/預期週期時長，用於剩餘時間估算。編輯以設定；保持不變則保留目前值。",
+      "appliance_monitor": "設備監控",
+      "auto_label_intro": "為置信度達到閾值的未標記週期分配設定檔。",
+      "cleanup_intro": "顯示所有已標記週期的疊加。勾選離群值並刪除以清理設定檔。",
+      "compare_overlay_profiles": "疊加設定檔（淺色）",
+      "compare_selected_cycles": "選取的週期（實線）— 顯示/隱藏",
+      "feedback_prompt": "確認正確、修正程式或忽略。",
+      "import_intro": "載入匯出檔案或在下方貼上 JSON 內容。",
+      "live_chart_loading": "即時功率圖表將隨讀數到達而顯示。",
+      "loading": "載入中…",
+      "loading_curve": "載入曲線…",
+      "loading_settings": "載入設定…",
+      "maintenance_requires_access": "維護和匯出/匯入需要完全存取權限。",
+      "matching_tuning_intro": "在學習時，WashData 還會調整程式匹配對形狀與時長和能耗的權重比例。",
+      "merge_intro": "選取的週期將按時間順序合併（間隙填充為 0 W）。選擇結果設定檔。",
+      "ml_intro": "WashData 配備了開箱即用的智慧模型。",
+      "ml_learned_intro": "針對此機器微調的模型。",
+      "ml_loading": "載入 ML 中…",
+      "ml_settings_intro": "兩個獨立開關：一個在週期執行時套用模型，另一個讓 WashData 隨時間針對您的機器進行微調。",
+      "no_cycles_match": "沒有與目前篩選條件相符的週期。",
+      "no_cycles_profile": "此設定檔沒有週期。",
+      "no_cycles_yet": "尚未記錄任何週期。",
+      "no_device_selected": "未選擇設備。",
+      "no_devices": "尚未設定 WashData 設備。",
+      "no_envelope": "還沒有包絡 — 標記週期後重建。",
+      "no_envelope_overlay": "沒有可疊加的包絡。",
+      "no_fine_tuned": "尚未微調 — WashData 正在使用內建模型。",
+      "no_logs": "尚未緩衝任何日誌記錄。",
+      "no_match_yet": "尚未嘗試匹配 — 此項在執行週期時填充。",
+      "no_other_users": "未找到其他 Home Assistant 使用者。",
+      "no_phases": "未定義階段。",
+      "no_phases_assigned": "未分配階段。",
+      "no_profiles_compare": "沒有可比較的設定檔。",
+      "no_profiles_overlay": "沒有可疊加的設定檔。",
+      "no_profiles_yet": "還沒有設定檔。從已標記的週期建立一個。",
+      "no_profiles_yet_short": "還沒有設定檔。",
+      "no_split_points": "還沒有分割點。",
+      "no_suggestions": "沒有活躍的建議。",
+      "pending_feedback": "待處理的偵測回饋",
+      "phase_catalog_intro": "週期的命名片段（預洗、加熱、甩乾…）。從其控制面板將它們分配給設定檔。",
+      "phase_ranges_intro": "疊加在平均曲線上的階段範圍（從週期開始的分鐘數）。編輯值以即時預覽。",
+      "preferences_admin": "偏好、面板和存取控制",
+      "preferences_adv": "偏好",
+      "prefs_personal": "這些僅適用於您的 Home Assistant 帳戶。",
+      "profiles_intro": "點擊設定檔查看統計、階段和清理。將形狀/時長相近（不同溫度或轉速）的程式分組，以便匹配可靠地區分它們。",
+      "rbac_hint": "關閉時，每個 Home Assistant 使用者都有完全存取權限（預設）。管理員始終有完全存取權限並可管理所有人。",
+      "recent_logs": "最近的 ha_washdata 記錄",
+      "recording_in_progress": "錄製進行中",
+      "review_in_settings": "在設定中審查",
+      "review_to_cycles": "開啟週期審查佇列",
+      "saving_triggers_reload": "儲存會觸發整合重載。HA 實體可能短暫顯示為不可用。",
+      "search_placeholder": "搜尋設定…",
+      "see_recorder": "查看下方的錄製小工具",
+      "split_intro": "點擊圖表新增或刪除分割點，或透過空閒間隔自動偵測。每個結果片段可獲得自己的設定檔。",
+      "storage_diagnostics": "儲存統計、維護、匯出/匯入",
+      "trim_intro": "拖曳紅色控制柄，或輸入值。視窗外的所有內容將被移除。",
+      "unsure_detected_prefix": "WashData 不確定是否偵測到",
+      "updated": "已更新"
     },
-    "quality": {
-      "good": "好的",
-      "bad": "壞的",
-      "unusable": "無法使用"
-    },
-    "access": {
-      "none": "無（隱藏）",
-      "read": "讀取",
-      "edit": "編輯",
-      "full": "完整",
-      "inherit": "繼承"
+    "phase_desc": {
+      "pre_wash": "主洗前的初步浸泡或預處理。",
+      "wash": "主洗滌週期帶有滾筒運動和可選加熱。",
+      "wash_dw": "主要洗滌劑加熱洗滌。",
+      "rinse": "清水沖洗階段。該階段可能會重複多次。",
+      "spin": "高速提取以去除負載中的水。",
+      "spin_wd": "乾燥過渡前高速萃取。",
+      "soak": "活性洗滌階段之間的低活性浸泡期。",
+      "soak_dw": "對重度污垢進行延長浸泡。",
+      "anti_crease": "完成後偶爾進行短暫的翻滾以減少皺紋。",
+      "heat_up": "完全乾燥開始之前加熱器初始預熱。",
+      "drying": "主要加熱翻滾期。",
+      "cool_down": "接近循環結束時在沒有熱量的情況下翻滾。",
+      "anti_wrinkle": "週期後定期翻滾以減少皺紋。",
+      "sensor_check": "測量乾燥度時短暫的低功率暫停。",
+      "drain_and_switch": "從洗滌模式到乾燥模式的過渡期。",
+      "pre_rinse": "洗滌劑清洗前初步噴灑。",
+      "dry": "使用加熱器和/或餘熱的乾燥階段。",
+      "sanitize": "用於消毒程序的高溫清潔階段。"
     },
     "health": {
-      "poor": "⚠ 匹配差",
-      "fair": "匹配一般",
-      "good": "✓ 匹配良好"
-    },
-    "trend": {
-      "up": "趨勢上升",
-      "down": "趨勢下降"
-    },
-    "pref": {
-      "date_relative": "相對（例如 2 小時前）",
-      "date_absolute": "絕對（例如 7 月 2 日 14:32）"
+      "fair": "設定檔品質尚可",
+      "good": "✓ 設定檔品質良好",
+      "poor": "⚠ 設定檔品質差"
     },
     "log": {
-      "all_levels": "所有等級"
+      "all_levels": "所有層級"
+    },
+    "ml": {
+      "builtin_models": "● 使用內建模型",
+      "fit_fair": "尚可",
+      "fit_good": "良好",
+      "fit_slight": "輕微",
+      "fit_strong": "強",
+      "fit_weak": "弱",
+      "fit_word": "擬合",
+      "personalized": "● 已針對此機器個人化"
+    },
+    "pref": {
+      "date_absolute": "絕對時間（例如：7月2日 14:32）",
+      "date_relative": "相對時間（例如：2小時前）"
+    },
+    "quality": {
+      "bad": "差",
+      "good": "好",
+      "unusable": "不可用"
+    },
+    "status": {
+      "active": "活躍",
+      "all_statuses": "所有狀態",
+      "ambiguous": "不明確",
+      "auto_detect": "自動偵測",
+      "clear": "正常",
+      "completed": "已完成",
+      "fine_tuning": "正在微調…",
+      "force_stopped": "強制停止",
+      "idle": "空閒",
+      "interrupted": "已中斷",
+      "ready": "準備處理",
+      "recording": "錄製中"
+    },
+    "tab": {
+      "advanced": "進階",
+      "diagnostics": "診斷",
+      "history": "週期",
+      "ml": "ML 訓練",
+      "pp_cleanup": "清理",
+      "pp_manage": "管理",
+      "pp_overview": "概覽",
+      "pp_phases": "階段",
+      "profiles": "設定檔",
+      "settings": "設定",
+      "status": "概覽",
+      "subtab_phase_catalog": "階段目錄",
+      "subtab_profiles": "設定檔"
+    },
+    "tag": {
+      "early_end": "提前結束",
+      "late_start": "延遲開始",
+      "merged": "合併週期",
+      "noise": "雜訊",
+      "sensor_gap": "感測器間隔",
+      "split": "分割週期",
+      "wrong_profile": "錯誤設定檔"
+    },
+    "toast": {
+      "access_saved": "已儲存存取控制",
+      "all_wiped": "所有資料已清除",
+      "analysis_complete_none": "分析完成：沒有新建議",
+      "auto_label_complete": "自動標記完成",
+      "automation_deleted": "自動化已刪除",
+      "correction_submitted": "修正已提交",
+      "cycle_deleted": "週期已刪除",
+      "cycle_force_stopped": "週期已強制停止",
+      "cycle_labelled": "週期已標記",
+      "cycle_paused": "週期已暫停",
+      "cycle_resumed": "週期已繼續",
+      "cycle_trimmed": "週期已裁剪",
+      "cycles_merged": "週期已合併",
+      "envelope_rebuilt": "包絡已重建",
+      "envelopes_rebuilt": "所有包絡已重建",
+      "export_downloaded": "匯出已下載",
+      "feedback_all_dismissed": "所有回饋已關閉",
+      "feedback_confirmed": "回饋已確認",
+      "feedback_dismissed": "回饋已關閉",
+      "group_deleted": "群組已刪除",
+      "group_name_required": "需要群組名稱",
+      "group_saved": "群組已儲存",
+      "import_successful": "匯入成功；整合重載中",
+      "json_required": "需要 JSON 資料",
+      "legacy_removed": "舊版操作已移除",
+      "logs_exported": "日誌已匯出",
+      "matching_reverted": "匹配權重已恢復為預設值",
+      "min_2_profiles": "為群組至少選擇 2 個設定檔",
+      "ml_training_no_improvement": "訓練完成：保留基準（無改進）",
+      "models_reverted": "設備上的模型已恢復為基準",
+      "name_required": "需要名稱",
+      "no_split_found": "未找到可分割的空閒間隔",
+      "panel_settings_saved": "面板設定已儲存",
+      "phase_name_required": "需要階段名稱",
+      "phase_updated": "階段已更新",
+      "phases_saved": "階段已儲存",
+      "preferences_saved": "偏好已儲存",
+      "profile_name_required": "需要設定檔名稱",
+      "profile_renamed": "設定檔已重新命名",
+      "recording_discarded": "錄製已捨棄",
+      "recording_saved": "錄製已儲存至設定檔",
+      "recording_started": "錄製已開始",
+      "recording_stopped": "錄製已停止",
+      "review_saved": "審查已儲存",
+      "settings_saved": "設定已儲存；整合重載中",
+      "suggestions_applied": "建議已套用；整合重載中",
+      "suggestions_dismissed": "建議已關閉"
+    },
+    "trend": {
+      "down": "下降趨勢",
+      "up": "上升趨勢"
     }
   }
 }

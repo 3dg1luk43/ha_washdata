@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "ციკლის დაწყება",
-        "cycle_finish": "ციკლის დასრულება",
-        "cycle_live": "პირდაპირი პროგრესი"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "სარეცხი მანქანა",
@@ -88,198 +81,6 @@
         "bread_maker": "პურის მწარმოებელი",
         "pump": "ტუმბო / Sump Pump",
         "other": "სხვა (გაფართოებული)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(ეტიკეტის გარეშე)",
-        "create_new_profile": "ახალი პროფილის შექმნა",
-        "remove_label": "ეტიკეტის ამოღება",
-        "no_reference_cycle": "(საცნობარო ციკლი არ არის)",
-        "all_device_types": "ყველა ტიპის მოწყობილობა",
-        "current_suffix": "(მიმდინარე)",
-        "phase_builtin_suffix": "(ჩაშენებული)",
-        "phase_none_available": "ფაზები არ არის ხელმისაწვდომი.",
-        "phase_other_device_types": "მოწყობილობის სხვა ტიპები:",
-        "settings_deprecation_warning": "⚠️ **მოძველებული მოწყობილობის ტიპი:** {device_type} დაგეგმილია წაშლა მომავალ გამოშვებაში. WashData-ს შესაბამისი მილსადენი არ იძლევა სანდო შედეგებს მოწყობილობის ამ კლასისთვის. თქვენი ინტეგრაცია აგრძელებს მუშაობას გაუქმების პერიოდში; ამ გაფრთხილების გასაჩუმებლად, გადართეთ **მოწყობილობის ტიპი** ქვემოთ ერთ-ერთ მხარდაჭერილ ტიპზე (სარეცხი მანქანა, საშრობი, სარეცხი მანქანა-საშრობი კომბინირებული, ჭურჭლის სარეცხი მანქანა, ჰაერის შემწვარი, პურის მწარმოებელი ან ტუმბო) ან **სხვა (მოწინავე)**, თუ თქვენი მოწყობილობა არ ემთხვევა მხარდაჭერილ ტიპებს. **სხვა (მოწინავე)** აგზავნის განზრახ ზოგად ნაგულისხმევ ნაგულისხმევს, რომელიც არ არის მორგებული რომელიმე კონკრეტული მოწყობილობისთვის, ასე რომ თქვენ მოგიწევთ ზღურბლების, დროის ამოწურვისა და შესატყვისი პარამეტრების კონფიგურაცია; ყველა არსებული პარამეტრი შენარჩუნებულია გადართვისას.",
-        "editor_select_info": "გასაყოფად 1 ციკლი ან გასაერთიანებლად 2+ ციკლი აირჩიეთ.",
-        "editor_select_info_split": "გასაყოფად აირჩიეთ 1 ციკლი.",
-        "editor_select_info_merge": "გასაერთიანებლად აირჩიეთ 2+ ციკლი.",
-        "editor_select_info_delete": "წასაშლელად აირჩიეთ 1+ ციკლი.",
-        "no_cycles_recorded": "ჯერ არ არის ჩაწერილი ციკლები.",
-        "profile_summary_line": "- **{name}**: {count} ციკლი, საშ. {avg}წთ",
-        "no_profiles_created": "ჯერ არ არის შექმნილი პროფილები.",
-        "phase_preview": "ფაზის გადახედვა",
-        "phase_preview_no_curve": "პროფილის საშუალო მრუდი ჯერ ხელმისაწვდომი არ არის. ამ პროფილისთვის გაუშვით/მონიშნეთ მეტი ციკლი.",
-        "average_power_curve": "საშუალო სიმძლავრის მრუდი",
-        "unit_min": "წთ",
-        "profile_option_fmt": "{name} ({count} ციკლი, ~{duration}წთ საშ.)",
-        "profile_option_short_fmt": "{name} ({count} ციკლი, ~{duration}წთ)",
-        "deleted_cycles_from_profile": "{profile}-დან {count} ციკლი წაიშალა.",
-        "not_enough_data_graph": "გრაფიკის შესაქმნელად მონაცემები არ კმარა.",
-        "no_profiles_found": "პროფილები ვერ მოიძებნა.",
-        "cycle_info_fmt": "ციკლი: {start}, {duration}წთ, მიმდინარე: {label}",
-        "top_candidates_header": "### საუკეთესო კანდიდატები",
-        "tbl_profile": "პროფილი",
-        "tbl_confidence": "სანდოობა",
-        "tbl_correlation": "კორელაცია",
-        "tbl_duration_match": "ხანგრძლივობის შედარება",
-        "detected_profile": "გამოვლენილი პროფილი",
-        "estimated_duration": "სავარაუდო ხანგრძლივობა",
-        "actual_duration": "ფაქტობრივი ხანგრძლივობა",
-        "choose_action": "__ქვემოთ აირჩიეთ მოქმედება:__",
-        "tbl_count": "რაოდენობა",
-        "tbl_avg": "საშ.",
-        "tbl_min": "მინ.",
-        "tbl_max": "მაქს.",
-        "tbl_energy_avg": "ენერგია (საშ.)",
-        "tbl_energy_total": "ენერგია (სულ)",
-        "tbl_consistency": "თანმიმდ.",
-        "tbl_last_run": "ბოლო გაშვება",
-        "graph_legend_title": "გრაფიკის ლეგენდა",
-        "graph_legend_body": "ლურჯი ზოლი გამოვლენილი მინიმალური და მაქსიმალური სიმძლავრის დიაპაზონს წარმოადგენს. ხაზი საშუალო სიმძლავრის მრუდს აჩვენებს.",
-        "recording_preview": "ჩაწერის გადახედვა",
-        "trim_start": "ამოჭრის დასაწყისი",
-        "trim_end": "ამოჭრის დასასრული",
-        "split_preview_title": "გაყოფის გადახედვა",
-        "split_preview_found_fmt": "ნაპოვნია {count} სეგმენტი.",
-        "split_preview_confirm_fmt": "დადასტურებაზე დაჭერით ეს ციკლი {count} ცალკეულ ციკლად გაიყოფა.",
-        "merge_preview_title": "შერწყმის გადახედვა",
-        "merge_preview_joining_fmt": "{count} ციკლი ერთიანდება. ინტერვალები 0W მაჩვენებლებით შეივსება.",
-        "editor_delete_preview_title": "წაშლის გადახედვა",
-        "editor_delete_preview_intro": "არჩეული ციკლები სამუდამოდ წაიშლება:",
-        "editor_delete_preview_confirm": "ამ ციკლის ჩანაწერების სამუდამოდ წასაშლელად დააწკაპუნეთ „დადასტურება“.",
-        "no_power_preview": "*გადახედვისთვის სიმძლავრის მონაცემები ხელმისაწვდომი არ არის.*",
-        "profile_comparison": "პროფილის შედარება",
-        "actual_cycle_label": "ეს ციკლი (ფაქტობრივი)",
-        "storage_usage_header": "შენახვის გამოყენება",
-        "storage_file_size": "ფაილის ზომა",
-        "storage_cycles": "ციკლები",
-        "storage_profiles": "პროფილები",
-        "storage_debug_traces": "გამართვის კვალები",
-        "overview_suffix": "მიმოხილვა",
-        "phase_preview_for_profile": "ფაზის გადახედვა პროფილისთვის",
-        "current_ranges_header": "მიმდინარე დიაპაზონები",
-        "assign_phases_help": "დიაპაზონების დასამატებლად, სარედაქტირებლად, წასაშლელად ან შესანახად გამოიყენეთ ქვემოთ მოცემული მოქმედებები.",
-        "profile_summary_header": "პროფილის შეჯამება",
-        "recent_cycles_header": "ბოლო ციკლები",
-        "trim_cycle_preview_title": "ციკლის ამოჭრის გადახედვა",
-        "trim_cycle_preview_no_data": "ამ ციკლისთვის სიმძლავრის მონაცემები ხელმისაწვდომი არ არის.",
-        "trim_cycle_preview_kept_suffix": "ინახება",
-        "table_program": "პროგრამა",
-        "table_when": "როდის",
-        "table_length": "ხანგრძლივობა",
-        "table_match": "დამთხვევა",
-        "table_profile": "პროფილი",
-        "table_cycles": "ციკლები",
-        "table_avg_length": "საშ. ხანგრძლივობა",
-        "table_last_run": "ბოლო გაშვება",
-        "table_avg_energy": "საშ. ენერგია",
-        "table_detected_program": "გამოვლენილი პროგრამა",
-        "table_confidence": "სანდოობა",
-        "table_reported": "მითითებული"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "ციკლის გაყოფა (ინტერვალების პოვნა)",
-        "merge": "ციკლების შერწყმა (ფრაგმენტების შეერთება)",
-        "delete": "ციკლ(ებ)ის წაშლა"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "უქმე ინტერვალების ავტომატური აღმოჩენა",
-        "manual": "ხელით მითითებული დროის ნიშნულ(ებ)ი"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "მოვლა: მონაცემების ხელახალი დამუშავება და ოპტიმიზაცია",
-        "clear_debug_data": "გამართვის მონაცემების გასუფთავება (სივრცის გათავისუფლება)",
-        "wipe_history": "ამ მოწყობილობის ყველა მონაცემის წაშლა (შეუქცევადი)",
-        "export_import": "JSON-ის ექსპორტი/იმპორტი პარამეტრებით (კოპირება/ჩასმა)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "ყველა მონაცემის ექსპორტი",
-        "import": "მონაცემების იმპორტი/შერწყმა"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "ძველი ციკლების ავტო-ეტიკეტირება",
-        "select_cycle_to_label": "კონკრეტული ციკლის ეტიკეტირება",
-        "select_cycle_to_delete": "ციკლის წაშლა",
-        "interactive_editor": "შერწყმა/გაყოფის ინტერაქტიული რედაქტორი",
-        "trim_cycle": "ციკლის მონაცემების ამოჭრა"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "ახალი პროფილის შექმნა",
-        "edit_profile": "პროფილის რედაქტირება/გადარქმევა",
-        "delete_profile": "პროფილის წაშლა",
-        "profile_stats": "პროფილის სტატისტიკა",
-        "cleanup_profile": "ისტორიის გასუფთავება - გრაფიკი და წაშლა",
-        "assign_phases": "ფაზის დიაპაზონების მინიჭება"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "ახალი ფაზის შექმნა",
-        "edit_custom_phase": "ფაზის რედაქტირება",
-        "delete_custom_phase": "ფაზის წაშლა"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "ფაზების დასახელება და გამოყენება",
-        "cancel": "ცვლილებების გარეშე დაბრუნება"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "ფაზის დიაპაზონის დამატება",
-        "edit_range": "ფაზის დიაპაზონის რედაქტირება",
-        "delete_range": "ფაზის დიაპაზონის წაშლა",
-        "clear_ranges": "ყველა დიაპაზონის გასუფთავება",
-        "auto_detect_ranges": "ფაზების ავტო-გამოვლენა",
-        "save_ranges": "შენახვა და დაბრუნება"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "სტატუსის განახლება",
-        "stop_recording": "ჩაწერის შეჩერება (შენახვა და დამუშავება)",
-        "start_recording": "ახალი ჩაწერის დაწყება",
-        "process_recording": "ბოლო ჩანაწერის დამუშავება (ამოჭრა და შენახვა)",
-        "discard_recording": "ბოლო ჩანაწერის გაუქმება"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "ახალი პროფილის შექმნა",
-        "existing_profile": "არსებულ პროფილში დამატება",
-        "discard": "ჩაწერის გაუქმება"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "დადასტურება - გამოვლენა სწორია",
-        "correct": "გასწორება - პროგრამის/ხანგრძლივობის არჩევა",
-        "ignore": "იგნორირება - ყალბი დადებითი/ხმაურიანი ციკლი",
-        "delete": "წაშლა - ისტორიიდან ამოღება"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "საწყისი წერტილის დაყენება",
-        "set_end": "საბოლოო წერტილის დაყენება",
-        "reset": "სრულ ხანგრძლივობაზე გადაყენება",
-        "apply": "ამოჭრის გამოყენება",
-        "cancel": "გაუქმება"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "მიმდინარე ფაზა"
       },
-      "wash_phase": {
-        "name": "ფაზა"
-      },
       "profile_cycle_count": {
         "name": "პროფილი {profile_name} - რაოდენობა",
         "unit_of_measurement": "ციკლები"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s trim_start_s-ზე მეტი უნდა იყოს."
+    },
+    "no_active_cycle": {
+      "message": "არ არის აქტიური ციკლი პაუზის ან განახლებისთვის."
     }
   },
   "panel": {
     "hdr": {
-      "panel_settings": "პანელის პარამეტრები (ყველა მომხმარებელი)",
-      "ml_learned": "რა ისწავლა WashData-მ",
-      "status": "სტატუსი",
-      "live_power": "პირდაპირი სიმძლავრე",
-      "manual_recording": "ხელით ჩაწერა",
-      "tools_and_data": "ინსტრუმენტები და მონაცემები",
-      "phase_catalog": "ფაზის კატალოგი",
-      "storage_stats": "შენახვის სტატისტიკა",
-      "maintenance": "სარემონტო მოქმედებები",
-      "export_import": "ექსპორტი / იმპორტი",
       "logs": "ჟურნალები",
-      "my_preferences": "ჩემი პრეფერენციები",
+      "toggle_sidebar": "სახლის ასისტენტის გვერდითი ზოლის გადართვა",
       "access_control": "წვდომის კონტროლი",
-      "ml_smart_learning": "ჭკვიანი სწავლა",
-      "ml_settings_card": "პარამეტრები",
-      "ml_matching_tuning": "პროგრამის შესატყვისი დახვეწა",
-      "display": "ჩვენება",
-      "status_graph": "სტატუსის გრაფიკი",
-      "diagnostics_pref": "დიაგნოსტიკა",
-      "logs_diagnostics": "დიაგნოსტიკა",
-      "process_history": "ისტორიის დამუშავება",
-      "clear_debug": "გამართვის კვალის გასუფთავება",
-      "wipe_history": "ისტორიის წაშლა",
-      "automations": "ავტომატიზაცია",
-      "automation_open": "გახსენით ავტომატიზაციის რედაქტორში",
       "automation_delete": "წაშალეთ ეს ავტომატიზაცია",
       "automation_needs_review": "ამ ციკლს განხილვა სჭირდება",
+      "automation_open": "გახსენით ავტომატიზაციის რედაქტორში",
       "automation_review_this_cycle": "გადახედეთ ამ ციკლს",
-      "no_automations": "ამ მოწყობილობაზე ავტომატიზაცია ჯერ არ არის მითითებული."
+      "automations": "ავტომატიზაცია",
+      "clear_debug": "გამართვის კვალის გასუფთავება",
+      "diagnostics_pref": "დიაგნოსტიკა",
+      "display": "ჩვენება",
+      "export_import": "ექსპორტი / იმპორტი",
+      "live_power": "ცოცხალი ძალა",
+      "logs_diagnostics": "დიაგნოსტიკა",
+      "maintenance": "სარემონტო მოქმედებები",
+      "manual_recording": "ხელით ჩაწერა",
+      "ml_learned": "რა ისწავლა WashData-მ",
+      "ml_matching_tuning": "პროგრამის შესატყვისი დახვეწა",
+      "ml_settings_card": "პარამეტრები",
+      "ml_smart_learning": "ჭკვიანი სწავლა",
+      "my_preferences": "ჩემი პრეფერენციები",
+      "no_automations": "ამ მოწყობილობაზე ავტომატიზაცია ჯერ არ არის მითითებული.",
+      "panel_settings": "პანელის პარამეტრები",
+      "phase_catalog": "ფაზის კატალოგი",
+      "process_history": "პროცესის ისტორია",
+      "status": "სტატუსი",
+      "status_graph": "სტატუსის გრაფიკი",
+      "storage_stats": "შენახვის სტატისტიკა",
+      "tools_and_data": "ინსტრუმენტები და მონაცემები",
+      "wipe_history": "წაშალე ისტორია"
     },
     "lbl": {
-      "manual_duration": "მექანიკური ხანგრძლივობა (წთ, სურვილისამებრ)",
+      "timer_min": "წთ",
+      "timer_msg_placeholder": "შეტყობინება (არასავალდებულო, {device}/{program}/{minutes})",
+      "timer_auto_pause": "ავტომატური პაუზა",
+      "label": "შესაბამისი პროგრამა",
+      "actions": "მოქმედებები",
+      "activity": "აქტივობა",
+      "administrators": "ადმინისტრატორები",
+      "auto_fine_tune_off": "ავტომატური დახვეწის გამორთვა",
+      "clock_time": "საათის დრო",
+      "compare_profiles": "შედარება პროფილებთან",
+      "confidence": "ნდობა",
+      "confidence_threshold": "ნდობის ბარიერი",
       "correct_duration": "სწორი ხანგრძლივობა (წთ, სურვილისამებრ)",
-      "default_tab": "პანელის გახსნისას ნაგულისხმევი ჩანართი",
+      "correct_profile": "სწორი პროფილი",
+      "cost": "ღირებულება",
+      "create_new_profile": "+ ახალი პროფილის შექმნა…",
+      "cycle_date_display": "ციკლის თარიღის ჩვენება",
+      "cycle_health": "ციკლის ჯანმრთელობა",
+      "cycles_count": "ციკლები",
+      "date": "თარიღი",
+      "debug_traces": "გამართვის კვალი",
+      "default": "ნაგულისხმევი",
       "default_access_level": "ნაგულისხმევი დონე მომხმარებლებისთვის, რომლებიც არ არის ჩამოთვლილი ქვემოთ",
+      "default_other": "ნაგულისხმევი (სხვა მოწყობილობები)",
+      "default_tab": "პანელის გახსნისას ნაგულისხმევი ჩანართი",
+      "description": "აღწერა",
+      "duration": "ხანგრძლივობა",
+      "emphasis": "ხაზგასმა",
+      "enable_access_control": "ჩართეთ თითო მომხმარებლის წვდომის კონტროლი",
+      "energy": "ენერგია",
+      "expected_duration": "მოსალოდნელი ხანგრძლივობა (წთ)",
+      "file_kb": "ფაილი (კბ)",
+      "gap_s": "უფსკრული (ებ)",
+      "head_trim": "თავის მორთვა (ები)",
+      "health": "ჯანმრთელობა",
+      "hide_tabs": "ჩანართების დამალვა არაადმინისტრატორებისთვის",
+      "in_use": "გამოყენებაში",
+      "json_data": "JSON მონაცემები",
+      "last_checked": "ბოლოს შემოწმებული:",
+      "load_from_file": "ჩატვირთვა ფაილიდან",
+      "manual_duration": "მექანიკური ხანგრძლივობა (წთ, სურვილისამებრ)",
+      "mode_existing_profile": "დაამატეთ არსებულ პროფილში",
+      "mode_new_profile": "შექმენით ახალი პროფილი",
+      "new_profile_name": "ახალი პროფილის სახელი",
+      "panel_default_tab": "ნაგულისხმევი ჩანართი",
+      "phase_name": "სახელი",
+      "power": "ძალაუფლება",
+      "profile": "პროფილი",
+      "profile_name": "პროფილის სახელი",
+      "progress": "პროგრესი",
+      "read_only": "მხოლოდ წაკითხვადი",
+      "ref_cycle": "საცნობარო ციკლი (სურვილისამებრ)",
+      "refresh_interval": "განახლების ინტერვალი (ები)",
+      "remaining": "დარჩენილი",
+      "remove_label": "- ეტიკეტის ამოღება -",
+      "rename_profile": "პროფილის გადარქმევა",
+      "resulting_profile": "შედეგად პროფილი",
+      "save_mode": "შენახვის რეჟიმი",
+      "seconds_from_start": "დაწყებიდან წამები",
+      "select_profile": "აირჩიეთ პროფილი",
+      "show_debug": "მატჩის გამართვის ბარათის ჩვენება სტატუსის გვერდზე (დარწმუნებულობა, გაურკვევლობა, საუკეთესო კანდიდატები)",
       "show_expected": "მოსალოდნელი მრუდის გადაფარვის ჩვენება (შესაბამისი პროფილი, ნარინჯისფერი)",
       "show_raw": "ნედლი სენსორის ჩვენება (გაუსწორებელი, ნაცრისფერი)",
-      "show_debug": "მატჩის გამართვის ბარათის ჩვენება სტატუსის გვერდზე (დარწმუნებულობა, გაურკვევლობა, საუკეთესო კანდიდატები)",
-      "power": "სიმძლავრე",
-      "progress": "პროგრესი",
-      "remaining": "დარჩენილი",
-      "duration": "ხანგრძლივობა",
-      "energy": "ენერგია",
-      "profile": "პროფილი",
       "status": "სტატუსი",
-      "date": "თარიღი",
-      "confidence": "სანდოობა",
-      "health": "ჯანმრთელობა",
-      "cost": "ღირებულება",
-      "program": "პროგრამა",
-      "cycle_health": "ციკლის ჯანმრთელობა",
-      "activity": "აქტივობა",
-      "unlabelled": "ეტიკეტის გარეშე",
-      "unlabelled_paren": "(ეტიკეტის გარეშე)",
-      "emphasis": "ხაზგასმა",
-      "default": "ნაგულისხმევი",
-      "in_use": "გამოყენებაში",
-      "profile_name": "პროფილის სახელი",
-      "ref_cycle": "საცნობარო ციკლი (სურვილისამებრ)",
-      "phase_name": "ფაზის დასახელება",
-      "description": "აღწერა",
-      "correct_profile": "სწორი პროფილი",
-      "load_from_file": "ჩატვირთვა ფაილიდან",
-      "json_data": "JSON მონაცემები",
-      "expected_duration": "მოსალოდნელი ხანგრძლივობა (წთ)",
-      "rename_profile": "პროფილის გადარქმევა",
-      "select_profile": "აირჩიეთ პროფილი",
-      "confidence_threshold": "ნდობის ბარიერი",
-      "resulting_profile": "შედეგად პროფილი",
-      "new_profile_name": "ახალი პროფილის სახელი",
-      "save_mode": "შენახვის რეჟიმი",
-      "head_trim": "დასაწყისის ამოჭრა (წმ)",
-      "tail_trim": "დასასრულის ამოჭრა (წმ)",
-      "gap_s": "შუალედი (წმ)",
-      "start": "დაწყება",
-      "end": "დასასრული",
-      "quality": "ხარისხი",
-      "golden_reference": "ჩაწერილი საცნობარო ციკლი",
-      "compare_profiles": "შედარება პროფილებთან",
-      "tags": "ტეგები",
-      "notes": "შენიშვნები",
-      "cycle_date_display": "ციკლის თარიღის ჩვენება",
-      "refresh_interval": "განახლების ინტერვალი (ები)",
-      "panel_default_tab": "ნაგულისხმევი ჩანართი",
-      "hide_tabs": "ჩანართების დამალვა არაადმინისტრატორებისთვის",
-      "enable_access_control": "ჩართეთ თითო მომხმარებლის წვდომის კონტროლი",
-      "administrators": "ადმინისტრატორები",
-      "default_other": "ნაგულისხმევი (სხვა მოწყობილობები)",
-      "mode_new_profile": "შექმენით ახალი პროფილი",
-      "mode_existing_profile": "დაამატეთ არსებულ პროფილში",
-      "auto_fine_tune_on": "ავტომატური დაზუსტება ჩართულია (დაახლოებით {hour}:00)",
-      "auto_fine_tune_off": "ავტომატური დახვეწის გამორთვა",
-      "last_checked": "ბოლოს შემოწმებული:",
-      "remove_label": "- ეტიკეტის ამოღება -",
-      "create_new_profile": "+ ახალი პროფილის შექმნა…",
-      "read_only": "მხოლოდ წაკითხვადი",
-      "actions": "მოქმედებები",
-      "cycles_count": "ციკლები",
-      "debug_traces": "გამართვის კვალი",
-      "file_kb": "ფაილი (კბ)",
-      "label": "ლეიბლი",
-      "seconds_from_start": "დაწყებიდან წამები",
-      "clock_time": "საათის დრო",
-      "ungrouped": "დაუჯგუფებელი"
-    },
-    "toast": {
-      "settings_saved": "პარამეტრები შენახულია; ინტეგრაციის გადატვირთვა",
-      "import_successful": "იმპორტი წარმატებულია; ინტეგრაციის გადატვირთვა",
-      "suggestions_applied": "გამოყენებულია წინადადებები; ინტეგრაციის გადატვირთვა",
-      "ml_training_no_improvement": "ტრენინგი დასრულებულია: საბაზისო შენარჩუნებულია (გაუმჯობესების გარეშე)",
-      "could_not_load_cycle": "ციკლის ჩატვირთვა ვერ მოხერხდა: {error}",
-      "preferences_saved": "პრეფერენციები შენახულია",
-      "panel_settings_saved": "პანელის პარამეტრები შენახულია",
-      "access_saved": "წვდომის კონტროლი შენახულია",
-      "profile_created": "პროფილი \"{name}\" შეიქმნა",
-      "profile_deleted": "პროფილი \"{name}\" წაიშალა",
-      "profile_renamed": "პროფილს სახელი გადაერქვა",
-      "phases_saved": "შენახული ფაზები",
-      "phase_created": "ფაზა „{name}“ შეიქმნა",
-      "phase_deleted": "ფაზა „{name}“ წაიშალა",
-      "phase_updated": "ფაზა განახლებულია",
-      "recording_started": "ჩაწერა დაიწყო",
-      "recording_stopped": "ჩაწერა შეწყდა",
-      "recording_discarded": "ჩანაწერი გაუქმებულია",
-      "recording_saved": "ჩანაწერი შენახულია პროფილში",
-      "export_downloaded": "ექსპორტი ჩამოტვირთულია",
-      "logs_exported": "ჟურნალები ექსპორტირებულია",
-      "envelopes_rebuilt": "კონვერტები გადაკეთებული",
-      "envelope_rebuilt": "კონვერტი გადაკეთებულია",
-      "suggestions_dismissed": "წინადადებები უარყოფილია",
-      "auto_label_complete": "ავტომატური მარკირება დასრულებულია",
-      "cycle_labelled": "ციკლი ეტიკეტირებული",
-      "cycle_deleted": "ციკლი წაიშალა",
-      "cycles_deleted": "{count} ციკლ(ები) წაიშალა",
-      "cycle_trimmed": "ციკლი დამსხვრეული",
-      "cycles_merged": "ციკლები გაერთიანდა",
-      "review_saved": "მიმოხილვა შენახულია",
-      "feedback_confirmed": "გამოხმაურება დადასტურდა",
-      "feedback_dismissed": "გამოხმაურება უარყოფილია",
-      "feedback_all_dismissed": "ყველა გამოხმაურება უარყოფილია",
-      "correction_submitted": "შესწორება წარდგენილია",
-      "group_saved": "ჯგუფი შენახულია",
-      "group_deleted": "ჯგუფი წაიშალა",
-      "automation_deleted": "ავტომატიზაცია წაშლილია",
-      "legacy_removed": "მოძველებული ქმედებები წაიშალა",
-      "cycle_paused": "ციკლი შეჩერდა",
-      "cycle_resumed": "ციკლი განახლდა",
-      "cycle_force_stopped": "ციკლი ძალით შეჩერდა",
-      "ml_training_promoted": "ტრენინგი დასრულებულია: დაწინაურებული {count} მოდელი(ები)",
-      "matching_reverted": "შესატყვისი წონა დაბრუნდა ნაგულისხმევად",
-      "models_reverted": "მოწყობილობაზე არსებული მოდელები დაუბრუნდა საწყისს",
-      "analysis_complete": "ანალიზი დასრულებულია: {count} წინადადებ(ები)",
-      "analysis_complete_none": "ანალიზი დასრულებულია: ახალი შეთავაზებები არ არის",
-      "debug_cleared": "გასუფთავდა {count} გამართვის კვალი",
-      "all_wiped": "ყველა მონაცემი წაშლილია",
-      "no_split_found": "არ მოიძებნა უსაქმური ხარვეზები გასაყოფად",
-      "group_name_required": "ჯგუფის სახელი აუცილებელია",
-      "min_2_profiles": "აირჩიეთ მინიმუმ 2 პროფილი ჯგუფისთვის",
-      "profile_name_required": "საჭიროა პროფილის სახელი",
-      "phase_name_required": "საჭიროა ფაზის სახელი",
-      "name_required": "სახელი აუცილებელია",
-      "json_required": "საჭიროა JSON მონაცემები",
-      "save_failed": "შენახვა ვერ მოხერხდა: {error}",
-      "delete_failed": "წაშლა ვერ მოხერხდა: {error}",
-      "apply_failed": "განაცხადი ვერ მოხერხდა: {error}",
-      "rebuild_failed": "აღდგენა ვერ მოხერხდა: {error}",
-      "start_failed": "დაწყება ვერ მოხერხდა: {error}",
-      "stop_failed": "შეჩერება ვერ მოხერხდა: {error}",
-      "discard_failed": "გაუქმება ვერ მოხერხდა: {error}",
-      "trim_failed": "მოჭრა ვერ მოხერხდა: {error}",
-      "split_failed": "გაყოფა ვერ მოხერხდა: {error}",
-      "merge_failed": "შერწყმა ვერ მოხერხდა: {error}",
-      "create_failed": "შექმნა ვერ მოხერხდა: {error}",
-      "update_failed": "განახლება ვერ მოხერხდა: {error}",
-      "rename_failed": "გადარქმევა ვერ მოხერხდა: {error}",
-      "revert_failed": "დაბრუნება ვერ მოხერხდა: {error}",
-      "training_failed": "ტრენინგი ჩაიშალა: {error}",
-      "export_failed": "ექსპორტი ვერ მოხერხდა: {error}",
-      "import_failed": "იმპორტი ვერ მოხერხდა: {error}",
-      "auto_label_failed": "ავტომატური ეტიკეტირება ვერ მოხერხდა: {error}",
-      "analysis_failed": "ანალიზი ვერ მოხერხდა: {error}",
-      "auto_detect_failed": "ავტომატური აღმოჩენა ვერ მოხერხდა: {error}",
-      "error": "შეცდომა: {error}",
-      "pause_failed": "პაუზა ვერ მოხერხდა: {error}",
-      "label_failed": "ლეიბლი ვერ მოხერხდა: {error}",
-      "invalid_json": "„{key}“ არ არის სწორი JSON — შეასწორეთ ან გაასუფთავეთ ველი შენახვამდე.",
-      "processed": "დამუშავებული {bits}",
-      "split_complete": "დაყოფა {count} ციკლად"
-    },
-    "msg": {
-      "no_devices": "WashData მოწყობილობები ჯერ არ არის კონფიგურირებული.",
-      "live_chart_loading": "მაჩვენებლების ჩასვლისას ჩნდება ცოცხალი დენის დიაგრამა.",
-      "no_profiles_yet": "ჯერ არ არის პროფილები. შექმენით ერთი ეტიკეტირებული ციკლიდან.",
-      "no_logs": "ჯერ არ არის ბუფერული ჟურნალის ჩანაწერები.",
-      "no_envelope": "კონვერტი ჯერ არ არის - ხელახლა აშენება მარკირების ციკლების შემდეგ.",
-      "no_cycles_profile": "ამ პროფილისთვის ციკლები არ არის.",
-      "ml_learned_intro": "მოდელები კარგად არის მორგებული ამ მანქანაზე. ყველაფერი, რაც არ არის ჩამოთვლილი, იყენებს საიმედო ჩაშენებულ მოდელს.",
-      "ml_intro": "WashData მიეწოდება ჭკვიან მოდელებს, რომლებიც ამოიცნობენ ციკლებს, ემთხვევა პროგრამებს და აფასებენ დროსა და ენერგიას - ისინი მუშაობენ უპრობლემოდ.",
-      "matching_tuning_intro": "სწავლისას, WashData ასევე არეგულირებს პროგრამის შესატყვისი ოდენობის წონას ციკლის ფორმას მისი ხანგრძლივობისა და ენერგიის მიმართ.",
-      "merge_intro": "შერჩეული ციკლები გაერთიანებულია ერთში (ქრონოლოგიური თანმიმდევრობა; ხარვეზები ივსება 0 ვტ-ით). შეარჩიეთ მიღებული პროფილი.",
-      "see_recorder": "იხილეთ ჩამწერის ვიჯეტი ქვემოთ",
-      "review_to_cycles": "გახსენით ციკლების განხილვის რიგი",
-      "no_device_selected": "მოწყობილობა არ არის არჩეული.",
-      "loading": "იტვირთება…",
-      "loading_settings": "პარამეტრების ჩატვირთვა…",
-      "no_cycles_match": "არცერთი ციკლი არ ემთხვევა მიმდინარე ფილტრს.",
-      "no_cycles_yet": "ჯერ არ არის ჩაწერილი ციკლები.",
-      "no_phases": "არ არის განსაზღვრული ფაზები.",
-      "no_phases_assigned": "არ არის დანიშნული ფაზები.",
-      "no_split_points": "ჯერ არ არის ქულების გაყოფა.",
-      "no_envelope_overlay": "კონვერტი არ არის ხელმისაწვდომი გადაფარვისთვის.",
-      "no_other_users": "სხვა Home Assistant მომხმარებელი ვერ მოიძებნა.",
-      "maintenance_requires_access": "ტექნიკური მომსახურება და ექსპორტი/იმპორტი საჭიროებს სრულ წვდომას.",
-      "loading_curve": "მრუდი იტვირთება…",
-      "compare_selected_cycles": "არჩეული ციკლები (მყარი) — ჩვენება/დამალვა",
-      "compare_overlay_profiles": "გადაფარვის პროფილები (მკრთალი)",
-      "no_profiles_compare": "შედარების პროფილები არ არის.",
-      "saving_triggers_reload": "შენახვა იწვევს ინტეგრაციის გადატვირთვას. HA ერთეულები შეიძლება მოკლედ გამოჩნდეს როგორც მიუწვდომელი.",
-      "prefs_personal": "ეს ეხება მხოლოდ თქვენს Home Assistant ანგარიშს.",
-      "no_match_yet": "მატჩის მცდელობა ჯერ არ არის - ის ივსება სირბილის ციკლის დროს.",
-      "no_fine_tuned": "ჯერ არაფერია დაზუსტებული — WashData იყენებს თავის ჩაშენებულ მოდელებს.",
-      "ml_settings_intro": "ორი დამოუკიდებელი გადამრთველი: ერთი იყენებს მოდელებს ციკლის გაშვებისას, მეორე კი WashData-ს საშუალებას აძლევს დროთა განმავლობაში დააზუსტოს ისინი თქვენს აპარატში.",
-      "phase_catalog_intro": "ციკლის დასახელებული სეგმენტები (წინასწარი რეცხვა, გათბობა, ტრიალი…). მიანიჭეთ ისინი პროფილს მისი მართვის პანელიდან.",
-      "phase_ranges_intro": "ფაზის დიაპაზონები (წუთები ციკლის დაწყებიდან) გადაფარულია საშუალო მრუდზე. დაარედაქტირეთ მნიშვნელობები პირდაპირი გადახედვისთვის.",
-      "cleanup_intro": "ყველა ეტიკეტირებული ციკლი გადახურულია. მონიშნეთ outliers და წაშალეთ პროფილის გასასუფთავებლად.",
-      "split_intro": "დააწკაპუნეთ გრაფიკზე გაყოფის წერტილის დასამატებლად ან წასაშლელად, ან ავტომატური ამოცნობისთვის უმოქმედო ხარვეზებით.",
-      "trim_intro": "გადაათრიეთ წითელი სახელურები ან შეიყვანეთ მნიშვნელობები. ფანჯრის გარეთ ყველაფერი ამოღებულია.",
-      "import_intro": "ჩატვირთეთ ექსპორტირებული ფაილი ან ჩასვით JSON დატვირთვა ქვემოთ.",
-      "auto_label_intro": "მიანიჭეთ პროფილები არალეიბლირებულ ციკლებს, რომელთა შესაბამისობის ნდობა ხსნის ზღურბლს.",
-      "enough_data": "საკმარისი მონაცემები სწავლისთვის ({current}/{min} ციკლი).",
-      "collecting_data": "მონაცემთა შეგროვება — კიდევ {need} ციკლი{plural} დაზუსტების დაწყებამდე ({current}/{min}).",
-      "updated": "განახლებულია {time}",
-      "appliance_monitor": "მოწყობილობის მონიტორი",
-      "ml_loading": "იტვირთება ML…",
-      "review_in_settings": "მიმოხილვა პარამეტრებში",
-      "storage_diagnostics": "შენახვის სტატისტიკა, ტექნიკური მომსახურება, ექსპორტი/იმპორტი",
-      "recent_logs": "ბოლო ha_washdata ჩანაწერები",
-      "preferences_adv": "პრეფერენციები",
-      "preferences_admin": "პრეფერენციები, პანელი და წვდომის კონტროლი",
-      "pending_feedback": "ელოდება გამოვლენის გამოხმაურებას",
-      "recording_in_progress": "მიმდინარეობს ჩაწერა",
-      "no_profiles_yet_short": "ჯერ არ არის პროფილები.",
-      "unsure_detected_prefix": "WashData დარწმუნებული არ არის, რომ აღმოჩენილია",
-      "no_suggestions": "აქტიური წინადადებები არ არის.",
-      "no_profiles_overlay": "გადაფარვის პროფილები არ არის.",
-      "compare_cycles_title": "შეადარეთ {count} ციკლი",
-      "profiles_intro": "პროფილზე დაჭერით ნახეთ სტატისტიკა, ფაზები და გასუფთავება. დაჯგუფეთ თითქმის იდენტური პროგრამები (ერთი ფორმა/ხანგრძლივობა, სხვადასხვა ტემპერატურა ან ცენტრიფუგა) რათა შესაბამებამ საიმედოდ განასხვაოს ისინი.",
-      "search_placeholder": "პარამეტრების ძებნა…",
-      "automations_intro": "WashData აგზავნის {start} / {end} მოვლენებს და ამოიცნობს ერთეულებს, ამიტომ შეტყობინებები და მოქმედებები საუკეთესოდ შეიქმნება ჩვეულებრივი Home Assistant ავტომაციების სახით. ამ მოწყობილობის გამოყენების ავტომაციები ნაჩვენებია ქვემოთ.",
-      "notify_services_hint": "გამოიყენეთ {entity} სერვის ID-ები (მძიმით გამოყოფილი მრავლისთვის). შაბლონის ცვლადები: {vars}.",
-      "rbac_hint": "გათიშვისას, Home Assistant-ის ყველა მომხმარებელს აქვს სრული წვდომა (ნაგულისხმები). ადმინისტრატორებს ყოველთვის აქვთ სრული წვდომა და შეუძლიათ ყველას მართვა.",
-      "feedback_prompt": "დაადასტურეთ, სწორია თუ არა, შეასწორეთ პროგრამა ან გამოტოვეთ."
-    },
-    "section": {
-      "basic": {
-        "intro": "ძირითადი იდენტურობა და ის აუცილებელი ნივთები, რომლებიც უმეტესობას სჭირდება.",
-        "label": "ძირითადი"
-      },
-      "detection": {
-        "intro": "როგორ ვლინდება ციკლი დაწყებული, გაშვებული და დასრულებული.",
-        "label": "გამოვლენა"
-      },
-      "matching": {
-        "intro": "როგორ ემთხვევა დასრულებული ციკლები ნასწავლ პროფილებს და ეტიკეტირდება.",
-        "label": "შესატყვისი"
-      },
-      "timing": {
-        "intro": "ფონური კადენცია, ოფლაინ მცველი და დიასახლისი.",
-        "label": "დრო და მცველი"
-      },
-      "anti_wrinkle": {
-        "intro": "ნაოჭების საწინააღმდეგო რეჟიმი ამოიცნობს საშრობი პულსებს მთავარი სითბოს ფაზის შემდეგ.",
-        "label": "ნაოჭების საწინააღმდეგო"
-      },
-      "delay": {
-        "intro": "დაგვიანებული დაწყების ამოცნობა განსაზღვრავს, როდესაც მოწყობილობა იკვებება, მაგრამ ჯერ არ დაწყებულა მისი ციკლი.",
-        "label": "დაგვიანებით დაწყება"
-      },
-      "triggers": {
-        "intro": "არასავალდებულო გარე სიგნალები: დასასრულის ტრიგერი, კარის სენსორი, პაუზის შეცვლა და განტვირთვის შეხსენება.",
-        "label": "ტრიგერები და კარი"
-      },
-      "notifications": {
-        "label": "შეტყობინებები",
-        "intro": "დააკონფიგურირეთ როდის და როგორ მიიღებთ შეტყობინებას ციკლის მოვლენების შესახებ."
-      },
-      "ml_training": {
-        "label": "ML ტრენინგი",
-        "intro": "ჩართეთ ჭკვიანი მოდელები, რომლებიც პერსონალიზირებენ ამოცნობას და დროებს ამ მოწყობილობაზე."
-      }
-    },
-    "setting": {
-      "auto_maintenance": {
-        "label": "ავტომატური მოვლა (ღამის გაწმენდა)"
-      },
-      "external_end_trigger_enabled": {
-        "label": "ჩართეთ გარე დასასრულის ტრიგერი"
-      },
-      "external_end_trigger_inverted": {
-        "label": "გარე ტრიგერის ინვერსია (ტრიგერი გამორთულია)"
-      },
-      "pause_cuts_power": {
-        "label": "პაუზა ასევე წყვეტს ენერგიას (გადამრთველის საშუალებით)"
-      },
-      "notify_people": {
-        "label": "ხალხი (მხოლოდ სახლში)"
-      },
-      "notify_only_when_home": {
-        "label": "შეტყობინება მხოლოდ სახლში"
-      },
-      "energy_price_static": {
-        "label": "სტატიკური ენერგიის ფასი (კვტ/სთ)"
-      },
-      "enable_ml_models": {
-        "label": "გამოიყენეთ ჭკვიანი მოდელები ციკლის დროს"
-      },
-      "ml_training_enabled": {
-        "label": "ისწავლეთ ამ მანქანიდან"
-      },
-      "name": {
-        "label": "მოწყობილობის სახელი"
-      },
-      "device_type": {
-        "label": "მოწყობილობის ტიპი"
-      },
-      "power_sensor": {
-        "label": "დენის სენსორი"
-      },
-      "min_power": {
-        "label": "მინიმალური სიმძლავრე"
-      },
-      "off_delay": {
-        "label": "გამორთვის დაყოვნება"
-      },
-      "linked_device": {
-        "label": "ჯგუფი მოწყობილობის ქვეშ"
-      },
-      "start_threshold_w": {
-        "label": "დაწყების ბარიერი"
-      },
-      "stop_threshold_w": {
-        "label": "შეჩერების ბარიერი"
-      },
-      "min_off_gap": {
-        "label": "მინ. გამორთვის ინტერვალი"
-      },
-      "start_duration_threshold": {
-        "label": "დაწყების ხანგრძლივობა"
-      },
-      "start_energy_threshold": {
-        "label": "დაწყების ენერგია"
-      },
-      "completion_min_seconds": {
-        "label": "მინიმალური ციკლის ხანგრძლივობა"
-      },
-      "running_dead_zone": {
-        "label": "გაშვებული მკვდარი ზონა"
-      },
-      "end_energy_threshold": {
-        "label": "ბოლო ენერგია"
-      },
-      "end_repeat_count": {
-        "label": "დასასრული გამეორების რაოდენობა"
-      },
-      "sampling_interval": {
-        "label": "შერჩევის ინტერვალი"
-      },
-      "smoothing_window": {
-        "label": "დამარბილებელი ფანჯარა"
-      },
-      "abrupt_drop_watts": {
-        "label": "მკვეთრი ვარდნა"
-      },
-      "abrupt_drop_ratio": {
-        "label": "მკვეთრი ვარდნის თანაფარდობა"
-      },
-      "profile_match_threshold": {
-        "label": "მატჩის ბარიერი"
-      },
-      "profile_unmatch_threshold": {
-        "label": "შეუსაბამო ბარიერი"
-      },
-      "profile_match_interval": {
-        "label": "მატჩის ინტერვალი"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "მინ ხანგრძლივობის თანაფარდობა"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "მაქსიმალური ხანგრძლივობის თანაფარდობა"
-      },
-      "profile_duration_tolerance": {
-        "label": "პროფილის ხანგრძლივობის ტოლერანტობა"
-      },
-      "duration_tolerance": {
-        "label": "შეფასების ტოლერანტობა"
-      },
-      "auto_label_confidence": {
-        "label": "ავტო-ეტიკეტირების სანდოობა"
-      },
-      "learning_confidence": {
-        "label": "სწავლის ნდობა"
-      },
-      "suppress_feedback_notifications": {
-        "label": "გამოხმაურების შეტყობინებების ჩახშობა"
-      },
-      "watchdog_interval": {
-        "label": "მცველის ინტერვალი"
-      },
-      "no_update_active_timeout": {
-        "label": "განახლების დრო ამოიწურა"
-      },
-      "progress_reset_delay": {
-        "label": "პროგრესის გადატვირთვის დაგვიანება"
-      },
-      "expose_debug_entities": {
-        "label": "გამართვის ერთეულების გამოვლენა"
-      },
-      "save_debug_traces": {
-        "label": "შეინახეთ გამართვის კვალი"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "ჩართეთ ნაოჭების საწინააღმდეგო გამოვლენა"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "მაქსიმალური ნაოჭების საწინააღმდეგო ძალა"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "მაქსიმალური ხანგრძლივობა"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "დენის ზღურბლიდან გასვლა"
-      },
-      "delay_start_detect_enabled": {
-        "label": "ჩართეთ დაგვიანებული დაწყების გამოვლენა"
-      },
-      "delay_confirm_seconds": {
-        "label": "დაადასტურეთ წამები"
-      },
-      "delay_timeout_hours": {
-        "label": "ვადის ამოწურვის საათები"
-      },
-      "external_end_trigger": {
-        "label": "გარე გამშვები ერთეული"
-      },
-      "door_sensor_entity": {
-        "label": "კარის სენსორის ერთეული"
-      },
-      "switch_entity": {
-        "label": "გადამრთველის ობიექტი"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "განტვირთვის შეხსენების დაყოვნება"
-      },
-      "pump_stuck_duration": {
-        "label": "ტუმბოს ჩაყრის ხანგრძლივობა"
-      },
-      "notify_start_services": {
-        "label": "სერვისების დაწყება"
-      },
-      "notify_finish_services": {
-        "label": "დასრულების სერვისები"
-      },
-      "notify_live_services": {
-        "label": "ცოცხალი პროგრესის სერვისები"
-      },
-      "notify_fire_events": {
-        "label": "Fire HA ღონისძიებები შეტყობინებებისთვის"
-      },
-      "notify_before_end_minutes": {
-        "label": "წინასწარი დასრულების გაფრთხილება"
-      },
-      "notify_live_interval_seconds": {
-        "label": "პირდაპირი განახლების ინტერვალი"
-      },
-      "notify_live_overrun_percent": {
-        "label": "Live Overrun % გაფრთხილებამდე"
-      },
-      "notify_live_chronometer": {
-        "label": "გამოიყენეთ ცოცხალი ქრონომეტრი"
-      },
-      "notify_timeout_seconds": {
-        "label": "ავტომატური გაუქმება შემდეგ"
-      },
-      "notify_title": {
-        "label": "შეტყობინების სათაური"
-      },
-      "notify_icon": {
-        "label": "შეტყობინების ხატულა"
-      },
-      "notify_start_message": {
-        "label": "შეტყობინების დაწყება"
-      },
-      "notify_finish_message": {
-        "label": "შეტყობინების დასრულება"
-      },
-      "notify_pre_complete_message": {
-        "label": "წინასწარ დასრულებული შეტყობინება"
-      },
-      "notify_reminder_message": {
-        "label": "შეხსენების შეტყობინება"
-      },
-      "notify_channel": {
-        "label": "Android არხი (დაწყება/პირდაპირი)"
-      },
-      "notify_finish_channel": {
-        "label": "Android არხი (დასრულება)"
-      },
-      "energy_price_entity": {
-        "label": "ენერგიის ფასის სუბიექტი"
-      },
-      "ml_training_hour": {
-        "label": "ისწავლეთ საათზე"
-      },
-      "ml_training_min_cycles": {
-        "label": "ჯერ საჭიროა ციკლები"
-      },
-      "ml_training_interval_days": {
-        "label": "შეამოწმეთ მაქსიმუმ ყოველი"
-      }
-    },
-    "tab": {
-      "status": "მიმოხილვა",
-      "history": "ციკლები",
-      "profiles": "პროფილები",
-      "settings": "პარამეტრები",
-      "ml": "ML ტრენინგი",
-      "advanced": "გაფართოებული",
-      "diagnostics": "დიაგნოსტიკა",
-      "pp_overview": "მიმოხილვა",
-      "pp_phases": "ფაზები",
-      "pp_cleanup": "გასუფთავება",
-      "pp_manage": "მართვა",
-      "subtab_profiles": "პროფილები",
-      "subtab_phase_catalog": "ფაზის კატალოგი"
+      "tail_trim": "კუდის მორთვა",
+      "ungrouped": "დაუჯგუფებელი",
+      "unlabelled": "არალეგირებული",
+      "unlabelled_paren": "(არალეგირებული)",
+      "expected": "მოსალოდნელი",
+      "raw_socket": "დაუმუშავებელი სოკეტი",
+      "artifact_interruption": "შეფერხება",
+      "artifact_low_power": "დაბალი სიმძლავრე",
+      "artifact_high_power": "მაღალი სიმძლავრე",
+      "artifact_anomaly": "ანომალია"
     },
     "btn": {
-      "save": "შენახვა",
+      "add_timer": "+ დაამატეთ ტაიმერი",
+      "remove_timer": "ამოიღეთ ტაიმერი",
+      "add_device_tip": "დაამატეთ სხვა WashData მოწყობილობა",
+      "delete_group_tip": "წაშალეთ მხოლოდ ეს ჯგუფი - წევრების პროფილები ინახება",
+      "run_analysis_tip": "გაანალიზეთ თქვენი ჩაწერილი ციკლები ახლა და განაახლეთ დარეგულირების წინადადებები",
+      "reset_ml_models_tip": "გააუქმეთ კარგად მორგებული მოდელები და დაუბრუნდით ჩაშენებულ მოდელებს. WashData-ს შეუძლია მათი ხელახლა სწავლა მოგვიანებით.",
+      "resume_cycle": "გაგრძელება",
+      "add_device": "+ მოწყობილობის დამატება",
+      "add_phase": "+ ფაზის დამატება",
+      "apply_all": "მიმართეთ ყველა",
+      "apply_label": "გამოიყენეთ ლეიბლი",
+      "apply_split": "გამოიყენეთ Split",
+      "apply_trim": "წაისვით მორთვა",
+      "auto_detect_split": "ავტომატური ამოცნობა",
+      "auto_label_cycles": "ავტომატური ეტიკეტირების ციკლები",
       "cancel": "გაუქმება",
-      "delete": "წაშლა",
+      "clear_debug": "გამართვის მონაცემების გასუფთავება",
+      "clear_splits": "წმინდა",
       "close": "დახურვა",
-      "edit": "რედაქტირება",
-      "add": "დამატება",
-      "rebuild": "კონვერტების აღდგენა",
-      "record": "ჩაწერის დაწყება",
       "compare": "შეადარე",
       "confirm": "დაადასტურეთ",
-      "discard": "გაუქმება",
-      "export": "ექსპორტი",
-      "import": "იმპორტი",
-      "merge": "შერწყმა",
-      "apply": "მიმართეთ",
-      "refresh": "განაახლეთ",
+      "convert_to_automation": "გადაიყვანეთ ავტომატიზაციაში",
+      "correct": "სწორი…",
       "create": "შექმნა",
-      "select": "აირჩიეთ",
+      "create_profile": "+ პროფილის შექმნა",
+      "delete": "წაშლა",
+      "delete_group": "ჯგუფის წაშლა",
+      "delete_profile": "პროფილის წაშლა",
+      "discard": "გაუქმება",
+      "dismiss": "გაუქმება",
       "done": "შესრულებულია",
-      "reset": "გადატვირთვა",
-      "trim": "მორთვა",
-      "split": "გაყოფა",
-      "review": "მიმოხილვა",
+      "edit": "რედაქტირება",
+      "export": "ექსპორტი",
+      "export_json": "ექსპორტი JSON-ში",
+      "force_stop": "იძულებითი გაჩერება",
+      "from_template": "შაბლონიდან ▾",
+      "ignore": "იგნორირება",
+      "import_json": "იმპორტი JSON-დან",
+      "import_overwrite": "იმპორტი (მონაცემების გადაწერა)",
       "inspect": "შეამოწმეთ",
       "label": "ლეიბლი",
-      "save_settings": "პარამეტრების შენახვა",
-      "new_profile": "+ ახალი პროფილი",
-      "new_group": "+ ახალი ჯგუფი",
-      "apply_label": "გამოიყენეთ ლეიბლი",
-      "run_auto_label": "გაუშვით Auto-Label",
-      "save_review": "მიმოხილვის შენახვა",
-      "apply_trim": "წაისვით მორთვა",
-      "apply_split": "გამოიყენეთ Split",
-      "process_recording": "ჩაწერის შენახვა",
-      "stop": "შეჩერება",
-      "process": "პროცესი",
-      "add_device": "+ მოწყობილობის დამატება",
-      "train_now": "ივარჯიშე ახლა",
-      "reset_to_defaults": "გადატვირთეთ ნაგულისხმევად",
-      "reset_to_builtin": "გადატვირთეთ ჩაშენებულ მოდელებზე",
-      "save_preferences": "პრეფერენციების შენახვა",
-      "save_panel_settings": "პანელის პარამეტრების შენახვა",
-      "save_access_control": "წვდომის კონტროლის შენახვა",
-      "auto_label_cycles": "ავტომატური ეტიკეტირების ციკლები",
-      "run_analysis": "🔍 გაუშვით წინადადებების ანალიზი",
-      "apply_all": "მიმართეთ ყველა",
-      "show_only": "მხოლოდ ჩვენება",
-      "dismiss": "გაუქმება",
-      "dismiss_all": "ყველას გაუქმება",
-      "process_history": "პროცესი ახლა",
-      "clear_debug": "გამართვის მონაცემების გასუფთავება",
-      "wipe_all": "წაშალეთ ყველა მონაცემი",
-      "export_json": "ექსპორტი JSON-ში",
-      "import_json": "იმპორტი JSON-დან",
-      "correct": "სწორი…",
-      "ignore": "იგნორირება",
-      "add_phase": "+ ფაზის დამატება",
-      "new_phase": "+ ახალი ეტაპი",
-      "delete_profile": "პროფილის წაშლა",
-      "rebuild_envelope": "კონვერტის აღდგენა",
-      "create_profile": "+ პროფილის შექმნა",
-      "rec_stop": "შეჩერება",
-      "pause_cycle": "პაუზა",
-      "resume_cycle": "გაგრძელება",
-      "force_stop": "იძულებითი გაჩერება",
-      "save_phases": "ფაზების შენახვა",
-      "auto_detect_split": "ავტომატური ამოცნობა",
-      "clear_splits": "წმინდა",
-      "submit_correction": "შესწორების გაგზავნა",
-      "import_overwrite": "იმპორტი (მონაცემების გადაწერა)",
-      "use": "გამოყენება",
       "manage": "მართვა",
-      "remove": "ამოღება",
-      "delete_group": "ჯგუფის წაშლა",
-      "trim_split": "მორთვა / გაყოფა",
-      "convert_to_automation": "გადაიყვანეთ ავტომატიზაციაში",
+      "merge": "შერწყმა",
       "new_automation": "＋ ახალი ავტომატიზაცია",
-      "from_template": "შაბლონიდან ▾",
-      "on_cycle_started": "ციკლი დაიწყო",
+      "new_group": "+ ახალი ჯგუფი",
+      "new_phase": "+ ახალი ეტაპი",
+      "new_profile": "+ ახალი პროფილი",
       "on_cycle_finished": "ციკლი დასრულდა",
-      "save_group": "ჯგუფის შენახვა"
+      "on_cycle_started": "ციკლი დაიწყო",
+      "pause_cycle": "პაუზა",
+      "process": "პროცესი",
+      "process_history": "პროცესი ახლა",
+      "process_recording": "ჩაწერის შენახვა",
+      "rebuild": "კონვერტების აღდგენა",
+      "rebuild_envelope": "კონვერტის აღდგენა",
+      "rec_stop": "გაჩერდი",
+      "record": "ჩაწერის დაწყება",
+      "refresh": "განაახლეთ",
+      "remove": "ამოღება",
+      "reset": "გადატვირთვა",
+      "reset_to_builtin": "გადატვირთეთ ჩაშენებულ მოდელებზე",
+      "reset_to_defaults": "გადატვირთეთ ნაგულისხმევად",
+      "review": "მიმოხილვა",
+      "run_analysis": "🔍 გაუშვით წინადადებების ანალიზი",
+      "run_auto_label": "გაუშვით Auto-Label",
+      "save": "შენახვა",
+      "save_access_control": "წვდომის კონტროლის შენახვა",
+      "save_group": "ჯგუფის შენახვა",
+      "save_panel_settings": "პანელის პარამეტრების შენახვა",
+      "save_phases": "ფაზების შენახვა",
+      "save_preferences": "პრეფერენციების შენახვა",
+      "save_review": "მიმოხილვის შენახვა",
+      "save_settings": "პარამეტრების შენახვა",
+      "select": "აირჩიეთ",
+      "show_only": "მხოლოდ ჩვენება",
+      "split": "გაყოფა",
+      "submit_correction": "შესწორების გაგზავნა",
+      "train_now": "ივარჯიშე ახლა",
+      "trim": "მორთვა",
+      "trim_split": "მორთვა / გაყოფა",
+      "use": "გამოყენება",
+      "wipe_all": "წაშალეთ ყველა მონაცემი"
     },
     "badge": {
-      "poor_fit": "ცუდი მორგება",
+      "golden_cycle": "ჩაწერილი საცნობარო ციკლი",
+      "reviewed": "განხილული",
+      "feedback_requested": "გამოხმაურება მოითხოვა",
+      "needs_review": "განხილვას საჭიროებს",
+      "overrun": "ჩვეულებრივზე დიდხანს გაიქცა",
+      "artifact_tip": "აღმოჩენილია {n} ანომალიები (მაგ. კარი გაიხსნა ციკლის შუა პერიოდში) — გახსენით, რომ ნახოთ ისინი გრაფიკზე",
+      "poor_fit_tip": "არათანმიმდევრული მატჩების ისტორია — განიხილეთ ამ პროფილის ხელახლა აშენება",
+      "fair_fit_tip": "ზომიერი თანმიმდევრულობა — ამ პროფილზე მინიჭებულ ზოგიერთ ციკლს აქვს დაბალი ნდობის ქულები. მონიშნეთ მეტი ციკლი ან ხელახლა ჩაწერეთ პროფილი სიზუსტის გასაუმჯობესებლად.",
       "fair_fit": "სამართლიანი მორგება",
-      "manual": "(ხელით შერჩეული)",
+      "poor_fit": "ცუდი მორგება",
       "auto": "(ავტომატურად გამოვლენილი)",
-      "improving": "↗ გაუმჯობესება",
+      "built_in_tag": "ჩაშენებული",
       "declining": "↘ მცირდება",
+      "improving": "↗ გაუმჯობესება",
+      "manual": "(ხელით შერჩეული)",
       "steady": "→ სტაბილური",
-      "using_tuned": "მორგებული წონის გამოყენებით",
       "using_defaults": "გაგზავნილი ნაგულისხმევის გამოყენება",
-      "built_in_tag": "ჩაშენებული"
-    },
-    "status": {
-      "completed": "დასრულებული",
-      "interrupted": "შეწყვეტილი",
-      "force_stopped": "ძალით შეჩერებული",
-      "active": "აქტიური",
-      "ambiguous": "ორაზროვანი",
-      "clear": "წმინდა",
-      "working": "მუშაობს…",
-      "recording": "მიმდინარეობს ჩაწერა…",
-      "ready": "მზადაა დასამუშავებლად",
-      "idle": "უსაქმური",
-      "auto_detect": "ავტომატური ამოცნობა",
-      "fine_tuning": "დაზუსტება ახლა…",
-      "all_statuses": "ყველა სტატუსი"
-    },
-    "ml": {
-      "fit_strong": "ძლიერი",
-      "fit_good": "კარგი",
-      "fit_fair": "სამართლიანი",
-      "fit_weak": "სუსტი",
-      "fit_slight": "უმნიშვნელო",
-      "fit_word": "მოერგება",
-      "fine_tuned_at": "დაზუსტებული {when}",
-      "personalized": "● პერსონალიზებულია ამ აპარატზე",
-      "builtin_models": "● ჩაშენებული მოდელების გამოყენება"
+      "using_tuned": "მორგებული წონის გამოყენებით"
     },
     "modal": {
-      "label_cycle": "ციკლის ეტიკეტი",
-      "create_profile": "პროფილის შექმნა",
-      "new_phase": "ახალი ეტაპი",
-      "edit_phase": "რედაქტირების ფაზა",
-      "process_recording": "პროცესის ჩაწერა",
+      "merge_cycles": "{n} ციკლების შერწყმა",
+      "auto_label": "ავტომატური ეტიკეტების ციკლები",
       "correct_feedback": "სწორი გამოხმაურება",
+      "create_profile": "პროფილის შექმნა",
+      "cycle": "ციკლი",
+      "edit_phase": "რედაქტირების ფაზა",
       "import_config": "იმპორტის კონფიგურაცია",
-      "auto_label": "ციკლების ავტო-ეტიკეტირება",
-      "cycle": "ციკლი"
+      "label_cycle": "ლეიბლის ციკლი",
+      "new_phase": "ახალი ეტაპი",
+      "process_recording": "პროცესის ჩაწერა"
     },
-    "tag": {
-      "late_start": "გვიან დაწყება",
-      "early_end": "ადრეული დასასრული",
-      "merged": "გაერთიანებული ციკლები",
-      "split": "გაყოფილი ციკლი",
-      "noise": "ხმაური",
-      "wrong_profile": "არასწორი პროფილი",
-      "sensor_gap": "სენსორის უფსკრული"
+    "msg": {
+      "near_duplicate_cluster": "აღმოჩენილია თითქმის დუბლიკატი პროფილის კლასტერი. დაჯგუფება შესატყვისს საშუალებას აძლევს საიმედოდ შეარჩიოს მსგავსებს შორის (მაგ. ერთი და იგივე პროგრამა სხვადასხვა ტემპერატურაზე/სპინი).",
+      "coverage_gap": "ბოლო ციკლებს არ აქვთ შესაბამისი პროფილი (ბოლო 30-ის {pct}%).",
+      "consider_new_profile": "განიხილეთ ახალი პროფილის შექმნა.",
+      "group_not_cohesive": "ეს პროფილები საკმარისად მსგავსი არ არის საიმედოდ დაჯგუფებისთვის, ასე რომ, დამთხვევა მათ ინდივიდუალურად ეპყრობა მანამ, სანამ არ ამოიღებთ გარედან ან არ გაყოფთ ჯგუფს.",
+      "group_modal_help": "დააჯგუფეთ იგივე ფორმის პროგრამები, რომლებიც განსხვავდება ტემპერატურით/სპინით (ხანგრძლივობა შეიძლება განსხვავდებოდეს). Matching ადგენს ჯგუფს, როგორც ერთ კანდიდატს, შემდეგ ირჩევს საუკეთესო წევრს. აირჩიე მინიმუმ 2; გადაფარვა აჩვენებს, თუ რამდენად ჰგვანან ისინი.",
+      "showing_suggestions": "ნაჩვენებია {count} პარამეტრი შემოთავაზებებით.",
+      "show_all_settings": "ყველა პარამეტრის ჩვენება",
+      "tuning_suggestions_available": "{count} დარეგულირების შეთავაზება ხელმისაწვდომია დაკვირვებული ციკლებიდან. ისინი გამოჩნდება შესაბამისი ველების გვერდით.",
+      "legacy_actions_title": "{count} მოძველებული მორგებული მოქმედება ჯერ კიდევ მუშაობს",
+      "old_actions_warning": "კონფიგურირებულია მოქმედებების ძველ რედაქტორთან (ახლა ამოღებულია). ისინი კვლავ ამუშავებენ ციკლის მოვლენებს, მაგრამ აქ რედაქტირება აღარ არის შესაძლებელი. გადააკეთეთ ისინი ნორმალურ ავტომატიზაციაში, ან წაშალეთ ისინი.",
+      "no_settings_match": "არცერთი პარამეტრი არ ემთხვევა „{q}“-ს",
+      "clear_debug_hint": "წაშალეთ შენახული გამართვის მონაცემები სივრცის გასათავისუფლებლად.",
+      "wipe_history_warning": "სამუდამოდ წაშალეთ ყველა ციკლი და პროფილი. გაუქმება შეუძლებელია.",
+      "export_description": "ყველა პროფილის და ციკლის ექსპორტი JSON-ში, ან აღადგინეთ წინა ექსპორტიდან.",
+      "log_buffer_hint": "უახლესი პირველი · ბუფერული აქვს ბოლო 500 ha_washdata ჩანაწერს გადატვირთვის შემდეგ · გადაიტანეთ ქვედა კიდე ზომის შესაცვლელად.",
+      "review_profile_tip": "პროგრამა ამ ციკლის ეტიკეტირებულია, როგორც. თუ ავტომატურად გამოვლენილი პროგრამა არასწორი იყო, შეასწორეთ აქ - მარკირება გვასწავლის მომავალი ციკლების შესაბამისობას.",
+      "review_quality_tip": "რამდენად სუფთაა ეს ციკლი. კარგი = ამ პროგრამის სახელმძღვანელოს მაგალითი; ცუდი = აღმოჩენილი, მაგრამ ხმაურიანი ან ატიპიური; გამოუსადეგარი = არასწორად გამოვლენილი (შერწყმული, შეკვეცილი ან ყალბი). განსაზღვრავს ჯანმრთელობის ქულას და რომელი ციკლებია დაშვებული მოდელის მოსამზადებლად.",
+      "review_recorded_tip": "მონიშნეთ ეს, როგორც ხელით შერჩეული საცნობარო ციკლი მისი პროგრამისთვის - იგივე როლი, როგორც ხელით ჩაწერილი ციკლი. საცნობარო ციკლები ყოველთვის ინახება, შესატყვისი შაბლონის დათესვა და არასოდეს იშლება გასუფთავებით. (ეს არის \"ოქროს\"/ჩაწერილი დროშა; ორივე ერთი და იგივეა.)",
+      "review_tags_tip": "არასავალდებულო დროშები, რომლებიც აღწერს რა არასწორედ წარიმართა ამ ციკლში, ასე რომ, ტრენინგი და გასუფთავება შეიძლება ასახავდეს ამას.",
+      "review_notes_tip": "თავისუფალი ტექსტის შენიშვნები საკუთარი მითითებისთვის. არ გამოიყენება შესატყვისით ან ვარჯიშით.",
+      "review_confirm_help": "დაადასტურეთ, სწორად იქნა თუ არა აღმოჩენილი ეს ციკლი. თქვენი მიმოხილვები ავარჯიშებს მოდელს თქვენს აპარატზე - რაც უფრო მეტ ციკლს დაადასტურებთ, მით უკეთესია შესატყვისი და ჯანმრთელობის ქულა. სწრაფი კარგი/ცუდი საკმარისია.",
+      "review_notes_placeholder": "შენიშვნები (სურვილისამებრ)",
+      "compare_profiles_tip": "გადააფარეთ სხვა პროფილის კონვერტები ზემოთ მოცემულ დიაგრამაზე, რომ ნახოთ რომელი ჯდება ამ ციკლზე.",
+      "artifact_header": "ამ ციკლის განმავლობაში გამოვლენილი {n} ანომალია",
+      "artifact_footer": "მონიშნულია ზემოთ მოცემულ გრაფიკზე. ეს არის გარდამავალი არტეფაქტები (მაგ. კარი გაიღო ციკლის შუა პერიოდში), არ არის აუცილებელი პრობლემები.",
+      "profile_poor_health_detail": "ამ პროფილზე მინიჭებულ ციკლებს აქვთ არათანმიმდევრული ფორმები ან დაბალი ნდობა. განიხილეთ კონვერტის ხელახლა აშენება ან ეტიკეტირებული ციკლების გადახედვა.",
+      "trend_duration_longer": "ხანგრძლივობა უფრო გრძელია ({pct}%/ციკლი) — ბოლო საშუალოდ {avg}",
+      "trend_duration_shorter": "ხანგრძლივობა უფრო მოკლეა ({pct}%/ციკლი) — ბოლო საშუალოდ {avg}",
+      "trend_energy_up": "ენერგიის ზრდა ({pct}%/ციკლი) — ბოლო საშ. {avg}",
+      "trend_energy_down": "ენერგიის კლების ტენდენცია ({pct}%/ციკლი)",
+      "performance_trend": "შესრულების ტენდენცია ({n} ციკლი)",
+      "maintenance_advisory": "ხანგრძლივობის/ენერგიის გაზრდა შეიძლება მიუთითებდეს მოწყობილობის მოვლის საჭიროებაზე (მაგ. გამწმენდი, ფილტრის გაწმენდა).",
+      "manual_duration_hint": "პროფილის საშუალო/მოსალოდნელი ციკლის ხანგრძლივობა, რომელიც გამოიყენება დარჩენილი დროის შეფასებისთვის. რედაქტირება მის დასაყენებლად; მისი უცვლელად დატოვება ინარჩუნებს მიმდინარე მნიშვნელობას.",
+      "appliance_monitor": "მოწყობილობის მონიტორი",
+      "auto_label_intro": "მიანიჭეთ პროფილები არალეიბლირებულ ციკლებს, რომელთა შესაბამისობის ნდობა ხსნის ზღურბლს.",
+      "cleanup_intro": "ყველა ეტიკეტირებული ციკლი გადახურულია. მონიშნეთ outliers და წაშალეთ პროფილის გასასუფთავებლად.",
+      "compare_overlay_profiles": "გადაფარვის პროფილები (მკრთალი)",
+      "compare_selected_cycles": "არჩეული ციკლები (მყარი) — ჩვენება/დამალვა",
+      "feedback_prompt": "დაადასტურეთ, რომ ეს იყო სწორი, შეასწორეთ პროგრამა ან იგნორირება.",
+      "import_intro": "ჩატვირთეთ ექსპორტირებული ფაილი ან ჩასვით JSON დატვირთვა ქვემოთ.",
+      "live_chart_loading": "მაჩვენებლების ჩასვლისას ჩნდება ცოცხალი დენის დიაგრამა.",
+      "loading": "იტვირთება…",
+      "loading_curve": "მრუდი იტვირთება…",
+      "loading_settings": "პარამეტრების ჩატვირთვა…",
+      "maintenance_requires_access": "ტექნიკური მომსახურება და ექსპორტი/იმპორტი საჭიროებს სრულ წვდომას.",
+      "matching_tuning_intro": "სწავლის დროს, WashData ასევე არეგულირებს პროგრამის შესატყვისობის ზომას იწონის ფორმას ხანგრძლივობისა და ენერგიის მიმართ.",
+      "merge_intro": "შერჩეული ციკლები გაერთიანებულია ერთში (ქრონოლოგიური თანმიმდევრობა; ხარვეზები ივსება 0 ვტ-ით). შეარჩიეთ მიღებული პროფილი.",
+      "ml_intro": "WashData-ს მიეწოდება ჭკვიანი მოდელები, რომლებიც მუშაობენ ყუთში.",
+      "ml_learned_intro": "მოდელები კარგად არის მორგებული ამ მანქანაზე.",
+      "ml_loading": "იტვირთება ML…",
+      "ml_settings_intro": "ორი დამოუკიდებელი გადამრთველი: ერთი იყენებს მოდელებს ციკლის გაშვებისას, მეორე კი WashData-ს საშუალებას აძლევს დროთა განმავლობაში დააზუსტოს ისინი თქვენს აპარატში.",
+      "no_cycles_match": "არცერთი ციკლი არ ემთხვევა მიმდინარე ფილტრს.",
+      "no_cycles_profile": "ამ პროფილისთვის ციკლები არ არის.",
+      "no_cycles_yet": "ჯერ არ არის ჩაწერილი ციკლები.",
+      "no_device_selected": "მოწყობილობა არ არის არჩეული.",
+      "no_devices": "WashData მოწყობილობები ჯერ არ არის კონფიგურირებული.",
+      "no_envelope": "კონვერტი ჯერ არ არის - ხელახლა აშენება მარკირების ციკლების შემდეგ.",
+      "no_envelope_overlay": "კონვერტი არ არის ხელმისაწვდომი გადაფარვისთვის.",
+      "no_fine_tuned": "ჯერ არაფერია დაზუსტებული — WashData იყენებს თავის ჩაშენებულ მოდელებს.",
+      "no_logs": "ჯერ არ არის ბუფერული ჟურნალის ჩანაწერები.",
+      "no_match_yet": "მატჩის მცდელობა ჯერ არ არის - ის ივსება სირბილის ციკლის დროს.",
+      "no_other_users": "Home Assistant-ის სხვა მომხმარებლები ვერ მოიძებნა.",
+      "no_phases": "არ არის განსაზღვრული ფაზები.",
+      "no_phases_assigned": "არ არის დანიშნული ფაზები.",
+      "no_profiles_compare": "შედარების პროფილები არ არის.",
+      "no_profiles_overlay": "გადაფარვის პროფილები არ არის.",
+      "no_profiles_yet": "ჯერ არ არის პროფილები. შექმენით ერთი ეტიკეტირებული ციკლიდან.",
+      "no_profiles_yet_short": "ჯერ არ არის პროფილები.",
+      "no_split_points": "ჯერ არ არის ქულების გაყოფა.",
+      "no_suggestions": "აქტიური წინადადებები არ არის.",
+      "pending_feedback": "ელოდება გამოვლენის გამოხმაურებას",
+      "phase_catalog_intro": "ციკლის დასახელებული სეგმენტები (წინასწარი რეცხვა, გათბობა, ტრიალი…). მიანიჭეთ ისინი პროფილს მისი მართვის პანელიდან.",
+      "phase_ranges_intro": "ფაზის დიაპაზონები (წუთები ციკლის დაწყებიდან) გადაფარულია საშუალო მრუდზე. დაარედაქტირეთ მნიშვნელობები პირდაპირი გადახედვისთვის.",
+      "preferences_admin": "პრეფერენციები, პანელი და წვდომის კონტროლი",
+      "preferences_adv": "პრეფერენციები",
+      "prefs_personal": "ეს ეხება მხოლოდ თქვენს Home Assistant ანგარიშს.",
+      "profiles_intro": "დააწკაპუნეთ პროფილზე სტატისტიკის, ფაზებისა და გასუფთავებისთვის. დააჯგუფეთ თითქმის იდენტური პროგრამები (იგივე ფორმა/ხანგრძლივობა, განსხვავებული ტემპერატურა ან ტრიალი), რათა მათ შორის საიმედოდ შესატყვისი იყოს.",
+      "rbac_hint": "როდესაც გამორთულია, სახლის ასისტენტის ყველა მომხმარებელს აქვს სრული წვდომა (ნაგულისხმევი). ადმინისტრატორებს ყოველთვის აქვთ სრული წვდომა და შეუძლიათ ყველას მართვა.",
+      "recent_logs": "ბოლო ha_washdata ჩანაწერები",
+      "recording_in_progress": "მიმდინარეობს ჩაწერა",
+      "review_in_settings": "მიმოხილვა პარამეტრებში",
+      "review_to_cycles": "გახსენით ციკლების განხილვის რიგი",
+      "saving_triggers_reload": "შენახვა იწვევს ინტეგრაციის გადატვირთვას. HA ერთეულები შეიძლება მოკლედ გამოჩნდეს როგორც მიუწვდომელი.",
+      "search_placeholder": "ძებნის პარამეტრები…",
+      "see_recorder": "იხილეთ ჩამწერის ვიჯეტი ქვემოთ",
+      "split_intro": "დააწკაპუნეთ გრაფიკზე გაყოფის წერტილის დასამატებლად ან წასაშლელად, ან ავტომატური ამოცნობისთვის უმოქმედო ხარვეზებით. თითოეულ სეგმენტს შეუძლია მიიღოს საკუთარი პროფილი.",
+      "storage_diagnostics": "შენახვის სტატისტიკა, ტექნიკური მომსახურება, ექსპორტი/იმპორტი",
+      "trim_intro": "გადაათრიეთ წითელი სახელურები ან შეიყვანეთ მნიშვნელობები. ფანჯრის გარეთ ყველაფერი ამოღებულია.",
+      "unsure_detected_prefix": "WashData დარწმუნებული არ არის, რომ აღმოჩენილია",
+      "updated": "განახლებულია"
     },
-    "quality": {
-      "good": "კარგი",
-      "bad": "ცუდი",
-      "unusable": "გამოუყენებელი"
-    },
-    "access": {
-      "none": "არცერთი (დამალული)",
-      "read": "წაიკითხეთ",
-      "edit": "რედაქტირება",
-      "full": "სრული",
-      "inherit": "მემკვიდრეობით"
+    "phase_desc": {
+      "pre_wash": "პირველადი გაჟღენთვა ან წინასწარი დამუშავება ძირითადი რეცხვის წინ.",
+      "wash": "ძირითადი სარეცხი ციკლი დოლის მოძრაობით და სურვილისამებრ გათბობით.",
+      "wash_dw": "ძირითადი სარეცხი საშუალება გათბობით.",
+      "rinse": "სუფთა წყლით გამრეცხვის ეტაპი. ეს ეტაპი შეიძლება რამდენჯერმე განმეორდეს.",
+      "spin": "მაღალი სიჩქარით ამოღება ტვირთიდან წყლის მოსაშორებლად.",
+      "spin_wd": "მაღალსიჩქარიანი მოპოვება გაშრობის გადასვლამდე.",
+      "soak": "დაბალი აქტივობის გაჟღენთის პერიოდი აქტიური რეცხვის ეტაპებს შორის.",
+      "soak_dw": "გახანგრძლივებული გაჟღენთილი პერიოდი მძიმე ნიადაგისთვის.",
+      "anti_crease": "ნაოჭების შესამცირებლად ნაოჭების შესამცირებლად, ხანდახან ხანმოკლე ცვივა დასრულების შემდეგ.",
+      "heat_up": "გამათბობლის საწყისი დათბობა სრული გაშრობის დაწყებამდე.",
+      "drying": "ძირითადი გაცხელებული ჩამოსხმის პერიოდი.",
+      "cool_down": "ციკლის დასასრულის მახლობლად სიცხის გარეშე დაძაბვა.",
+      "anti_wrinkle": "პერიოდული ციკლის შემდგომი შეკუმშვა ნაოჭების შესამცირებლად.",
+      "sensor_check": "მცირე სიმძლავრის ხანმოკლე პაუზა სიმშრალის გაზომვისას.",
+      "drain_and_switch": "გარდამავალი პერიოდი რეცხვიდან გაშრობის რეჟიმში.",
+      "pre_rinse": "პირველადი შესხურება სარეცხი საშუალებით გარეცხვის წინ.",
+      "dry": "გაშრობის ეტაპი გამათბობლის ან/და ნარჩენი სითბოს გამოყენებით.",
+      "sanitize": "მაღალი ტემპერატურის გაწმენდის ეტაპი სანიტარული პროგრამებისთვის."
     },
     "health": {
-      "poor": "⚠ ცუდი შესატყვისი",
-      "fair": "სამართლიანი მატჩი შეესაბამება",
-      "good": "✓ კარგი შესატყვისი"
+      "good": "✓ პროფილის კარგი ხარისხი",
+      "fair": "პროფილის მისაღები ხარისხი",
+      "poor": "⚠ პროფილის ცუდი ხარისხი"
+    },
+    "ml": {
+      "fit_fair": "მისაღები",
+      "builtin_models": "● ჩაშენებული მოდელების გამოყენება",
+      "fit_good": "კარგი",
+      "fit_slight": "უმნიშვნელო",
+      "fit_strong": "ძლიერი",
+      "fit_weak": "სუსტი",
+      "fit_word": "მოერგება",
+      "personalized": "● პერსონალიზებულია ამ აპარატზე"
     },
     "trend": {
-      "up": "ზრდის ტენდენცია",
+      "up": "ტრენდული",
       "down": "ქვევით ტენდენცია"
-    },
-    "pref": {
-      "date_relative": "ნათესავი (მაგ. 2 საათის წინ)",
-      "date_absolute": "აბსოლუტური (მაგ. 2 ივლისს 14:32)"
     },
     "log": {
       "all_levels": "ყველა დონე"
+    },
+    "pref": {
+      "date_absolute": "აბსოლუტური (მაგ. 2 ივლისს 14:32)",
+      "date_relative": "ნათესავი (მაგ. 2 საათის წინ)"
+    },
+    "quality": {
+      "bad": "ცუდი",
+      "good": "კარგი",
+      "unusable": "გამოუყენებელი"
+    },
+    "status": {
+      "active": "აქტიური",
+      "all_statuses": "ყველა სტატუსი",
+      "ambiguous": "ორაზროვანი",
+      "auto_detect": "ავტომატური ამოცნობა",
+      "clear": "წმინდა",
+      "completed": "დასრულებული",
+      "fine_tuning": "დაზუსტება ახლა…",
+      "force_stopped": "ძალა შეჩერდა",
+      "idle": "უსაქმური",
+      "interrupted": "შეაწყვეტინა",
+      "ready": "მზადაა დასამუშავებლად",
+      "recording": "ჩაწერა"
+    },
+    "tab": {
+      "advanced": "გაფართოებული",
+      "diagnostics": "დიაგნოსტიკა",
+      "history": "ციკლები",
+      "ml": "ML ტრენინგი",
+      "pp_cleanup": "გასუფთავება",
+      "pp_manage": "მართვა",
+      "pp_overview": "მიმოხილვა",
+      "pp_phases": "ფაზები",
+      "profiles": "პროფილები",
+      "settings": "პარამეტრები",
+      "status": "მიმოხილვა",
+      "subtab_phase_catalog": "ფაზის კატალოგი",
+      "subtab_profiles": "პროფილები"
+    },
+    "tag": {
+      "early_end": "ადრეული დასასრული",
+      "late_start": "გვიან დაწყება",
+      "merged": "გაერთიანებული ციკლები",
+      "noise": "ხმაური",
+      "sensor_gap": "სენსორის უფსკრული",
+      "split": "გაყოფილი ციკლი",
+      "wrong_profile": "არასწორი პროფილი"
+    },
+    "toast": {
+      "access_saved": "წვდომის კონტროლი შენახულია",
+      "all_wiped": "ყველა მონაცემი წაშლილია",
+      "analysis_complete_none": "ანალიზი დასრულებულია: ახალი შეთავაზებები არ არის",
+      "auto_label_complete": "ავტომატური მარკირება დასრულებულია",
+      "automation_deleted": "ავტომატიზაცია წაშლილია",
+      "correction_submitted": "შესწორება წარდგენილია",
+      "cycle_deleted": "ციკლი წაიშალა",
+      "cycle_force_stopped": "ციკლი ძალით შეჩერდა",
+      "cycle_labelled": "ციკლი ეტიკეტირებული",
+      "cycle_paused": "ციკლი შეჩერდა",
+      "cycle_resumed": "ციკლი განახლდა",
+      "cycle_trimmed": "ციკლი დამსხვრეული",
+      "cycles_merged": "ციკლები გაერთიანდა",
+      "envelope_rebuilt": "კონვერტი გადაკეთებულია",
+      "envelopes_rebuilt": "კონვერტები გადაკეთებული",
+      "export_downloaded": "ექსპორტი ჩამოტვირთულია",
+      "feedback_all_dismissed": "ყველა გამოხმაურება უარყოფილია",
+      "feedback_confirmed": "გამოხმაურება დადასტურდა",
+      "feedback_dismissed": "გამოხმაურება უარყოფილია",
+      "group_deleted": "ჯგუფი წაიშალა",
+      "group_name_required": "ჯგუფის სახელი აუცილებელია",
+      "group_saved": "ჯგუფი შენახულია",
+      "import_successful": "იმპორტი წარმატებულია; ინტეგრაციის გადატვირთვა",
+      "json_required": "საჭიროა JSON მონაცემები",
+      "legacy_removed": "მოძველებული ქმედებები წაიშალა",
+      "logs_exported": "ჟურნალები ექსპორტირებულია",
+      "matching_reverted": "შესატყვისი წონა დაბრუნდა ნაგულისხმევად",
+      "min_2_profiles": "აირჩიეთ მინიმუმ 2 პროფილი ჯგუფისთვის",
+      "ml_training_no_improvement": "ტრენინგი დასრულებულია: საბაზისო შენარჩუნებულია (გაუმჯობესების გარეშე)",
+      "models_reverted": "მოწყობილობაზე არსებული მოდელები დაუბრუნდა საწყისს",
+      "name_required": "სახელი აუცილებელია",
+      "no_split_found": "არ მოიძებნა უსაქმური ხარვეზები გასაყოფად",
+      "panel_settings_saved": "პანელის პარამეტრები შენახულია",
+      "phase_name_required": "საჭიროა ფაზის სახელი",
+      "phase_updated": "ფაზა განახლებულია",
+      "phases_saved": "შენახული ფაზები",
+      "preferences_saved": "პრეფერენციები შენახულია",
+      "profile_name_required": "საჭიროა პროფილის სახელი",
+      "profile_renamed": "პროფილს სახელი გადაერქვა",
+      "recording_discarded": "ჩანაწერი გაუქმებულია",
+      "recording_saved": "ჩანაწერი შენახულია პროფილში",
+      "recording_started": "ჩაწერა დაიწყო",
+      "recording_stopped": "ჩაწერა შეწყდა",
+      "review_saved": "მიმოხილვა შენახულია",
+      "settings_saved": "პარამეტრები შენახულია; ინტეგრაციის გადატვირთვა",
+      "suggestions_applied": "გამოყენებულია წინადადებები; ინტეგრაციის გადატვირთვა",
+      "suggestions_dismissed": "წინადადებები უარყოფილია"
     }
   }
 }

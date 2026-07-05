@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Zyklus Start",
-        "cycle_finish": "Zyklus fäerdeg",
-        "cycle_live": "Live Fortschrëtt"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Wäschmaschinn",
@@ -88,198 +81,6 @@
         "bread_maker": "Brout Maker",
         "pump": "Pompel / Drénagepompel",
         "other": "Aner (fortgeschratt)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(net markéiert)",
-        "create_new_profile": "Neie Profil erstellen",
-        "remove_label": "Label ewechhuelen",
-        "no_reference_cycle": "(Kee Referenz Zyklus)",
-        "all_device_types": "All Apparat Zorte",
-        "current_suffix": "(aktuell)",
-        "phase_builtin_suffix": "(Built-in)",
-        "phase_none_available": "Keng Phasen verfügbar.",
-        "phase_other_device_types": "Aner Zorte vun Apparater:",
-        "settings_deprecation_warning": "⚠️ **Deprecéiert Apparattyp:** {device_type} ass geplangt fir an enger zukünfteg Verëffentlechung ze läschen. WashData's passende Pipeline produzéiert keng zouverlässeg Resultater fir dës Apparatklass. Är Integratioun schafft weider duerch d'Deprecatiounsperiod; fir dës Warnung z'ënnerhalen, wiesselt ** Apparat Typ** hei ënnen op eng vun den ënnerstëtzten Typen (Wäschmaschinn, Dryer, Wäschmaschinn Combo, Spullmaschinn, Air Fryer, Broutmaschinn oder Pompel), oder op **Aner (Fortgeschratt)** wann Ären Apparat net mat enger vun den ënnerstëtzten Typen entsprécht. ** Aner (Fortgeschratt) ** Schëffer bewosst generesch Defaults déi net fir all spezifescht Apparat ofgestëmmt sinn, sou datt Dir selwer Schwellen, Timeouts a passende Parameteren konfiguréiere musst; all Är bestehend Astellunge sinn preservéiert wann Dir wiesselt.",
-        "editor_select_info": "1 Zyklus auswielen fir opzedeelen, oder 2+ Zyklen fir ze fusionéieren.",
-        "editor_select_info_split": "Wielt 1 Zyklus fir opzedeelen.",
-        "editor_select_info_merge": "Wielt 2+ Zyklen fir zesummenzeféieren.",
-        "editor_select_info_delete": "Wielt 1+ Zyklus/Zyklen fir ze läschen.",
-        "no_cycles_recorded": "Nach keng Zyklen opgeholl.",
-        "profile_summary_line": "- **{name}**: {count} Zyklen, {avg}m Duerchschnëtt",
-        "no_profiles_created": "Nach keng Profiler erstallt.",
-        "phase_preview": "Phase Virschau",
-        "phase_preview_no_curve": "Duerchschnëttlech Profilkurve ass nach net verfügbar. Méi Zyklen fir dëse Profil lafen/etikettéieren.",
-        "average_power_curve": "Duerchschnëttlech Power Kurve",
-        "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} Zyklen, ~{duration}m Duerchschnëtt)",
-        "profile_option_short_fmt": "{name} ({count} Zyklen, ~{duration}m)",
-        "deleted_cycles_from_profile": "{count} Zyklen aus {profile} geläscht.",
-        "not_enough_data_graph": "Net genuch Daten fir eng Grafik ze generéieren.",
-        "no_profiles_found": "Keng Profiler fonnt.",
-        "cycle_info_fmt": "Zyklus: {start}, {duration}m, Aktuell: {label}",
-        "top_candidates_header": "### Top Kandidaten",
-        "tbl_profile": "Profil",
-        "tbl_confidence": "Vertrauen",
-        "tbl_correlation": "Korrelatioun",
-        "tbl_duration_match": "Dauer Match",
-        "detected_profile": "Detektéierte Profil",
-        "estimated_duration": "Geschätzte Dauer",
-        "actual_duration": "Tatsächlech Dauer",
-        "choose_action": "__Wielt eng Aktioun hei drënner:__",
-        "tbl_count": "Zuel",
-        "tbl_avg": "Avg",
-        "tbl_min": "Min",
-        "tbl_max": "Max",
-        "tbl_energy_avg": "Energie (Duerchschnëtt)",
-        "tbl_energy_total": "Energie (Gesamt)",
-        "tbl_consistency": "Konsistenz",
-        "tbl_last_run": "Leschte Laf",
-        "graph_legend_title": "Grafik Legende",
-        "graph_legend_body": "D'Blo Band stellt de Minimum a Maximum Power Verbrauch Beräich duer deen observéiert gouf. D'Linn weist d'Duerchschnëttlech Power Kurve.",
-        "recording_preview": "Opnam Virschau",
-        "trim_start": "Trim Start",
-        "trim_end": "Trim Enn",
-        "split_preview_title": "Split Virschau",
-        "split_preview_found_fmt": "{count} Segmenter fonnt.",
-        "split_preview_confirm_fmt": "Klickt Bestätegen fir dëse Zyklus an {count} separat Zyklen opzedeelen.",
-        "merge_preview_title": "Fusioun Virschau",
-        "merge_preview_joining_fmt": "{count} Zyklen zesummefoueren. Lücken ginn mat 0W Liesungen gefëllt.",
-        "editor_delete_preview_title": "Läsch-Virschau",
-        "editor_delete_preview_intro": "Déi gewielte Zykle ginn permanent geläscht:",
-        "editor_delete_preview_confirm": "Klickt op Bestätegen, fir dës Zyklus-Opzeechnunge permanent ze läschen.",
-        "no_power_preview": "*Keng Power Daten verfügbar fir Virschau.*",
-        "profile_comparison": "Profil Verglach",
-        "actual_cycle_label": "Dëse Zyklus (tatsächlech)",
-        "storage_usage_header": "Späicherverbrauch",
-        "storage_file_size": "Dateigréisst",
-        "storage_cycles": "Zyklen",
-        "storage_profiles": "Profiler",
-        "storage_debug_traces": "Debug Spuren",
-        "overview_suffix": "Iwwersiicht",
-        "phase_preview_for_profile": "Phase Virschau fir Profil",
-        "current_ranges_header": "Aktuelle Beräicher",
-        "assign_phases_help": "Benotzt d'Aktiounen hei drënner fir Beräicher ze addéieren, z'änneren, ze läschen oder ze späicheren.",
-        "profile_summary_header": "Profil Resumé",
-        "recent_cycles_header": "Rezent Zyklen",
-        "trim_cycle_preview_title": "Zyklus Trim Virschau",
-        "trim_cycle_preview_no_data": "Keng Power Daten verfügbar fir dëse Zyklus.",
-        "trim_cycle_preview_kept_suffix": "behalen",
-        "table_program": "Programm",
-        "table_when": "Wéini",
-        "table_length": "Längt",
-        "table_match": "Treffer",
-        "table_profile": "Profil",
-        "table_cycles": "Zyklen",
-        "table_avg_length": "Duerchschn. Längt",
-        "table_last_run": "Leschte Laf",
-        "table_avg_energy": "Duerchschn. Energie",
-        "table_detected_program": "Erkannt Programm",
-        "table_confidence": "Vertrauen",
-        "table_reported": "Gemellt"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Zyklus opdeelen (Lücken fannen)",
-        "merge": "Zyklen fusionéieren (Fragmenter verbinden)",
-        "delete": "Zyklus(en) läschen"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Idle-Lücken automatesch erkennen",
-        "manual": "Manuelle Zäitstempel(en)"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Ënnerhalt: Daten nei veraarbecht & optimiséieren",
-        "clear_debug_data": "Debug Daten läschen (Plaz befreien)",
-        "wipe_history": "ALL Daten fir dësen Apparat läschen (irreversibel)",
-        "export_import": "Export / Import JSON mat Astellungen (kopéieren/ansetzen)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "All Daten exportéieren",
-        "import": "Daten importéieren / fusionéieren"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Al Zyklen automatesch etikettéieren",
-        "select_cycle_to_label": "Spezifesche Zyklus etikettéieren",
-        "select_cycle_to_delete": "Zyklus läschen",
-        "interactive_editor": "Fusionéieren / Split Interaktiven Editor",
-        "trim_cycle": "Zyklus Daten trimmen"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Neie Profil erstellen",
-        "edit_profile": "Profil änneren / ëmbenennen",
-        "delete_profile": "Profil läschen",
-        "profile_stats": "Profil Statistiken",
-        "cleanup_profile": "Geschicht botzen - Grafik & Läschen",
-        "assign_phases": "Phase Beräicher zouweisen"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Nei Phase erstellen",
-        "edit_custom_phase": "Phase änneren",
-        "delete_custom_phase": "Phase läschen"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Phasen benennen & uwenden",
-        "cancel": "Zréck ouni Ännerungen"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Phase Beräich addéieren",
-        "edit_range": "Phase Beräich änneren",
-        "delete_range": "Phase Beräich läschen",
-        "clear_ranges": "All Beräicher läschen",
-        "auto_detect_ranges": "Phasen auto-detektéieren",
-        "save_ranges": "Späicheren an zréck"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Status erfrëschen",
-        "stop_recording": "Opnam stoppen (Späicheren & Veraarbecht)",
-        "start_recording": "Nei Opnam starten",
-        "process_recording": "Lescht Opnam veraarbecht (Trim & Späicheren)",
-        "discard_recording": "Lescht Opnam verworf"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Neie Profil erstellen",
-        "existing_profile": "Zu bestehenden Profil addéieren",
-        "discard": "Opnam verworf"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Bestätegen - Richteg Detektioun",
-        "correct": "Korrigéieren - Programm / Dauer auswielen",
-        "ignore": "Ignoréieren - Falsch Positiv / Noise Zyklus",
-        "delete": "Läschen - Aus der Geschicht ewechhuelen"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Startpunkt setzen",
-        "set_end": "Endpunkt setzen",
-        "reset": "Op voll Dauer zrécksetzen",
-        "apply": "Trim uwenden",
-        "cancel": "Ofbriechen"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "Aktuell Phase"
       },
-      "wash_phase": {
-        "name": "Phase"
-      },
       "profile_cycle_count": {
         "name": "Profil {profile_name} Zuel",
         "unit_of_measurement": "Zyklen"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s muss méi grouss sinn wéi trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "Keen aktiven Zyklus fir ze pausen oder weiderzeféieren."
     }
   },
   "panel": {
-    "tab": {
-      "status": "Iwwersiicht",
-      "history": "Zyklen",
-      "profiles": "Profiler",
-      "settings": "Astellungen",
-      "ml": "ML Training",
-      "advanced": "Fortgeschratt",
-      "diagnostics": "Diagnostik",
-      "pp_overview": "Iwwersiicht",
-      "pp_phases": "Phasen",
-      "pp_cleanup": "Botzen",
-      "pp_manage": "Verwalten",
-      "subtab_profiles": "Profiler",
-      "subtab_phase_catalog": "Phase Katalog"
-    },
     "btn": {
-      "save": "Späicheren",
+      "add_timer": "+ Timer derbäi",
+      "remove_timer": "Ewechzehuelen Timer",
+      "add_device_tip": "Füügt en anere WashData-Apparat derbäi",
+      "delete_group_tip": "Nëmmen dës Grupp läschen - d'Memberprofile ginn behalen",
+      "run_analysis_tip": "Analyséiert Är opgeholl Zyklen elo an erfrëscht Tuning Suggestiounen",
+      "reset_ml_models_tip": "Gitt déi fein gestëmmte Modeller ewech a gitt zréck op déi agebaut. WashData kann se spéider nei léieren.",
+      "resume_cycle": "Weiderfueren",
+      "add_device": "+ Füügt Apparat",
+      "add_phase": "+ Phase derbäi",
+      "apply_all": "Gëlle all",
+      "apply_label": "Label bewerben",
+      "apply_split": "Split applizéieren",
+      "apply_trim": "Trim applizéieren",
+      "auto_detect_split": "Automatesch erkennen",
+      "auto_label_cycles": "Auto-Label Zyklen",
       "cancel": "Ofbriechen",
-      "delete": "Läschen",
+      "clear_debug": "Kloer Debug Daten",
+      "clear_splits": "Kloer",
       "close": "Zoumaachen",
-      "edit": "Änneren",
-      "add": "Addéieren",
-      "rebuild": "Enveloppen opbauen",
-      "record": "Opnam starten",
       "compare": "Vergläichen",
       "confirm": "Confirméieren",
-      "discard": "Wegwerfen",
-      "export": "Export",
-      "import": "Import",
-      "merge": "Fusioun",
-      "apply": "Gëlle",
-      "refresh": "Erfrëschen",
+      "convert_to_automation": "Konvertéieren an Automatisatioun",
+      "correct": "Richteg…",
       "create": "Schafen",
-      "select": "Wielt",
+      "create_profile": "+ Profil erstellen",
+      "delete": "Läschen",
+      "delete_group": "Grupp läschen",
+      "delete_profile": "Läschen Profil",
+      "discard": "Wegwerfen",
+      "dismiss": "Entlooss",
       "done": "Gemaach",
-      "reset": "Zerécksetzen",
-      "trim": "Trimmen",
-      "split": "Opdeelen",
-      "review": "Iwwerpréiwung",
+      "edit": "Edit",
+      "export": "Export",
+      "export_json": "Export op JSON",
+      "force_stop": "Force Stop",
+      "from_template": "Vun der Schabloun ▾",
+      "ignore": "Ignoréieren",
+      "import_json": "Import vum JSON",
+      "import_overwrite": "Import (iwwerschreift Daten)",
       "inspect": "Inspektéieren",
       "label": "Label",
-      "save_settings": "Astellungen späicheren",
-      "new_profile": "+ Neie Profil",
-      "new_group": "+ Neie Grupp",
-      "apply_label": "Label uwenden",
-      "run_auto_label": "Auto-Label lafen",
-      "save_review": "Iwwerpréiwung späicheren",
-      "apply_trim": "Trim applizéieren",
-      "apply_split": "Split applizéieren",
-      "process_recording": "Opnam späicheren",
-      "stop": "Stop",
-      "process": "Prozess",
-      "add_device": "+ Apparat addéieren",
-      "train_now": "Elo trainéieren",
-      "reset_to_defaults": "Op Standard zerécksetzen",
-      "reset_to_builtin": "Op agebaute Modeller zerécksetzen",
-      "save_preferences": "Preferenzen späicheren",
-      "save_panel_settings": "Panel Astellunge späicheren",
-      "save_access_control": "Zougangskontroll späicheren",
-      "auto_label_cycles": "Auto-Label Zyklen",
-      "run_analysis": "🔍 Virschlag-Analyse ausféieren",
-      "apply_all": "All uwenden",
-      "show_only": "Nëmmen weisen",
-      "dismiss": "Zoumaachen",
-      "dismiss_all": "All zoumaachen",
-      "process_history": "Elo veraarbechten",
-      "clear_debug": "Debug Daten läschen",
-      "wipe_all": "All Daten läschen",
-      "export_json": "Als JSON exportéieren",
-      "import_json": "Aus JSON importéieren",
-      "correct": "Korrigéieren…",
-      "ignore": "Ignoréieren",
-      "add_phase": "+ Phase derbäi",
-      "new_phase": "+ Nei Phase",
-      "delete_profile": "Profil läschen",
-      "rebuild_envelope": "Enveloppe opzebauen",
-      "create_profile": "+ Profil erstellen",
-      "rec_stop": "Stop",
-      "pause_cycle": "Paus",
-      "resume_cycle": "Weidergoen",
-      "force_stop": "Force Stop",
-      "save_phases": "Phasen späicheren",
-      "auto_detect_split": "Automatesch erkennen",
-      "clear_splits": "Kloer",
-      "submit_correction": "Korrektur ofginn",
-      "import_overwrite": "Import (iwwerschreift Daten)",
-      "use": "Benotzt",
       "manage": "Verwalten",
-      "remove": "Ewechzehuelen",
-      "delete_group": "Grupp läschen",
-      "trim_split": "Trimmen / Split",
-      "convert_to_automation": "Konvertéieren an Automatisatioun",
+      "merge": "Fusioun",
       "new_automation": "＋ Nei Automatioun",
-      "from_template": "Vun der Schabloun ▾",
-      "on_cycle_started": "Wann Zyklus gestart",
-      "on_cycle_finished": "Wann Zyklus fäerdeg",
-      "save_group": "Grupp späicheren"
+      "new_group": "+ Neie Grupp",
+      "new_phase": "+ Nei Phas",
+      "new_profile": "+ Neie Profil",
+      "on_cycle_finished": "Am Cycle fäerdeg",
+      "on_cycle_started": "Am Zyklus ugefaang",
+      "pause_cycle": "Paus",
+      "process": "Prozess",
+      "process_history": "Prozess Elo",
+      "process_recording": "Späicheren Recording",
+      "rebuild": "Enveloppen opbauen",
+      "rebuild_envelope": "Enveloppe opzebauen",
+      "rec_stop": "Stop",
+      "record": "Start Recording",
+      "refresh": "Erfrëschen",
+      "remove": "Ewechzehuelen",
+      "reset": "Zerécksetzen",
+      "reset_to_builtin": "Reset op agebaute Modeller",
+      "reset_to_defaults": "Zerécksetzen op Default",
+      "review": "Iwwerpréiwung",
+      "run_analysis": "🔍 Run Virschlag Analyse",
+      "run_auto_label": "Run Auto-Label",
+      "save": "Späicheren",
+      "save_access_control": "Retten Zougang Kontrolléiere",
+      "save_group": "Grupp späicheren",
+      "save_panel_settings": "Panel Astellunge späicheren",
+      "save_phases": "Späichert Phasen",
+      "save_preferences": "Späicheren Preferenzen",
+      "save_review": "Retten Iwwerpréiwung",
+      "save_settings": "Späicheren Astellungen",
+      "select": "Wielt",
+      "show_only": "Show nëmmen",
+      "split": "Split",
+      "submit_correction": "Korrektur ofginn",
+      "train_now": "Train elo",
+      "trim": "Trimmen",
+      "trim_split": "Trimmen / Split",
+      "use": "Benotzt",
+      "wipe_all": "Wëschen All Daten"
     },
     "hdr": {
-      "status": "Status",
-      "live_power": "Aktuell Power",
-      "manual_recording": "Manuell Opnam",
-      "tools_and_data": "Tools & Daten",
-      "phase_catalog": "Phase Katalog",
-      "storage_stats": "Stockage Statistiken",
-      "maintenance": "Ënnerhalt Aktiounen",
-      "export_import": "Export / Import",
       "logs": "Logbicher",
-      "my_preferences": "Meng Preferenzen",
-      "panel_settings": "Panel Astellunge (all Benotzer)",
+      "toggle_sidebar": "Toggle Home Assistant Sidebar",
       "access_control": "Zougang Kontroll",
-      "ml_smart_learning": "Smart Léieren",
-      "ml_settings_card": "Astellungen",
-      "ml_learned": "Wat WashData geléiert huet",
-      "ml_matching_tuning": "Programm-Matching Feinabstëmmung",
-      "display": "Display",
-      "status_graph": "Status Grafik",
-      "diagnostics_pref": "Diagnostik",
-      "logs_diagnostics": "Diagnostik",
-      "process_history": "Geschicht veraarbechten",
-      "clear_debug": "Debug Spure läschen",
-      "wipe_history": "Geschicht läschen",
-      "automations": "Automatisatiounen",
-      "automation_open": "Am Automatiséierungseditor opmaachen",
-      "automation_delete": "Dës Automatiséierung läschen",
+      "automation_delete": "Läschen dës Automatisatioun",
       "automation_needs_review": "Dëse Zyklus brauch Iwwerpréiwung",
+      "automation_open": "Open am Automatisatiounseditor",
       "automation_review_this_cycle": "Iwwerpréift dësen Zyklus",
-      "no_automations": "Keng Automatisatiounen referenzéieren nach op dësem Apparat."
+      "automations": "Automatisatiounen",
+      "clear_debug": "Kloer Debug Spure",
+      "diagnostics_pref": "Diagnostik",
+      "display": "Display",
+      "export_import": "Export / Import",
+      "live_power": "Live Power",
+      "logs_diagnostics": "Diagnostik",
+      "maintenance": "Ënnerhalt Aktiounen",
+      "manual_recording": "Manuell Opnam",
+      "ml_learned": "Wat WashData geléiert huet",
+      "ml_matching_tuning": "Programm-passende Feintuning",
+      "ml_settings_card": "Astellungen",
+      "ml_smart_learning": "Smart Léieren",
+      "my_preferences": "Meng Preferenzen",
+      "no_automations": "Keng Automatisatiounen referenzéieren nach op dësem Apparat.",
+      "panel_settings": "Panel Astellungen",
+      "phase_catalog": "Phase Katalog",
+      "process_history": "Prozess Geschicht",
+      "status": "Status",
+      "status_graph": "Status Grafik",
+      "storage_stats": "Stockage Statistiken",
+      "tools_and_data": "Tools & Daten",
+      "wipe_history": "Wischen Geschicht"
     },
     "lbl": {
-      "power": "Muecht",
-      "progress": "Fortschrëtt",
-      "remaining": "Rescht",
-      "duration": "Dauer",
-      "energy": "Energie",
-      "profile": "Profil",
-      "status": "Status",
-      "date": "Datum",
-      "confidence": "Vertrauen",
-      "health": "Gesondheet",
-      "cost": "Käschten",
-      "program": "Programm",
-      "cycle_health": "Cycle Gesondheet",
+      "timer_min": "min",
+      "timer_msg_placeholder": "Message (optional, {device}/{program}/{minutes})",
+      "timer_auto_pause": "Automatesch Paus",
+      "label": "Match",
+      "actions": "Aktiounen",
       "activity": "Aktivitéit",
-      "unlabelled": "Net markéiert",
-      "unlabelled_paren": "(net markéiert)",
-      "emphasis": "Schwéierpunkt",
-      "default": "Default",
-      "in_use": "Am Gebrauch",
-      "profile_name": "Profil Numm",
-      "ref_cycle": "Referenzzyklus (optional)",
-      "manual_duration": "Manuell Dauer (min, optional)",
-      "phase_name": "Phase Numm",
-      "description": "Beschreiwung",
-      "correct_profile": "Korrekt Profil",
-      "correct_duration": "Korrekt Dauer (min, fakultativ)",
-      "load_from_file": "Lued aus Fichier",
-      "json_data": "JSON Daten",
-      "expected_duration": "Erwaart Dauer (min)",
-      "rename_profile": "Profil ëmbenennen",
-      "select_profile": "Wielt Profil",
-      "confidence_threshold": "Vertrauensgrenz",
-      "resulting_profile": "Resultat Profil",
-      "new_profile_name": "Neie Profil Numm",
-      "save_mode": "Spueren Modus",
-      "head_trim": "Kapp Trimm (en)",
-      "tail_trim": "Schwanz Trimm (en)",
-      "gap_s": "Gap (en)",
-      "start": "Start",
-      "end": "Enn",
-      "quality": "Qualitéit",
-      "golden_reference": "Opgeholl Referenz Zyklus",
-      "compare_profiles": "Vergläicht mat Profiler",
-      "tags": "Tags",
-      "notes": "Notizen",
-      "default_tab": "Standard Tab beim Ouverture vum Panel",
-      "cycle_date_display": "Zyklus Datum Display",
-      "refresh_interval": "Erfrëschungsintervall (en)",
-      "panel_default_tab": "Standard Tab",
-      "hide_tabs": "Verstoppen Tabs fir Net-Administrateuren",
-      "enable_access_control": "Aktivéiert pro Benotzer Zougangskontroll",
-      "default_access_level": "Standardniveau fir Benotzer net hei ënnen opgezielt",
       "administrators": "Administrateuren",
+      "auto_fine_tune_off": "Auto Fine-tune aus",
+      "clock_time": "Auer Zäit",
+      "compare_profiles": "Vergläicht mat Profiler",
+      "confidence": "Vertrauen",
+      "confidence_threshold": "Vertrauensgrenz",
+      "correct_duration": "Korrekt Dauer (min, fakultativ)",
+      "correct_profile": "Korrekt Profil",
+      "cost": "Käschten",
+      "create_new_profile": "+ Neie Profil erstellen ...",
+      "cycle_date_display": "Zyklus Datum Display",
+      "cycle_health": "Cycle Gesondheet",
+      "cycles_count": "Cyclen",
+      "date": "Datum",
+      "debug_traces": "Debug Spuren",
+      "default": "Default",
+      "default_access_level": "Standardniveau fir Benotzer net hei ënnen opgezielt",
       "default_other": "Standard (aner Apparater)",
+      "default_tab": "Standard Tab beim Ouverture vum Panel",
+      "description": "Beschreiwung",
+      "duration": "Dauer",
+      "emphasis": "Schwéierpunkt",
+      "enable_access_control": "Aktivéiert pro Benotzer Zougangskontroll",
+      "energy": "Energie",
+      "expected_duration": "Erwaart Dauer (min)",
+      "file_kb": "Datei (kB)",
+      "gap_s": "Gap (en)",
+      "head_trim": "Kapp Trimm (en)",
+      "health": "Gesondheet",
+      "hide_tabs": "Verstoppen Tabs fir Net-Administrateuren",
+      "in_use": "Am Gebrauch",
+      "json_data": "JSON Daten",
+      "last_checked": "Lescht gepréift:",
+      "load_from_file": "Lued aus Fichier",
+      "manual_duration": "Manuell Dauer (min, optional)",
+      "mode_existing_profile": "Add to bestehend Profil",
+      "mode_new_profile": "Schafen neie Profil",
+      "new_profile_name": "Neie Profil Numm",
+      "panel_default_tab": "Standard Tab",
+      "phase_name": "Numm",
+      "power": "Muecht",
+      "profile": "Profil",
+      "profile_name": "Profil Numm",
+      "progress": "Fortschrëtt",
+      "read_only": "Lies-nëmmen",
+      "ref_cycle": "Referenzzyklus (optional)",
+      "refresh_interval": "Erfrëschungsintervall (en)",
+      "remaining": "Rescht",
+      "remove_label": "- Label ewechhuelen -",
+      "rename_profile": "Umbenannt Profil",
+      "resulting_profile": "Resultat Profil",
+      "save_mode": "Spueren Modus",
+      "seconds_from_start": "Sekonnen vun Ufank un",
+      "select_profile": "Wielt Profil",
+      "show_debug": "Show Live Match Debug Kaart op der Status Säit (Vertrauen, Ambiguitéit, Spëtzekandidaten)",
       "show_expected": "Weist erwaart Curve Iwwerlagerung (gepasst Profil, orange)",
       "show_raw": "Weist Roh Sensor Liesungen (onglätt, gro)",
-      "show_debug": "Live Match Debug Kaart op der Status Säit weisen (Vertrauen, Ambiguitéit, Spëtzekandidaten)",
-      "mode_new_profile": "Neie Profil schafen",
-      "mode_existing_profile": "Zu bestehende Profil addéieren",
-      "auto_fine_tune_on": "auto-Fintune op (ongeféier {hour}:00)",
-      "auto_fine_tune_off": "Auto Fine-tune aus",
-      "last_checked": "Lescht gepréift:",
-      "remove_label": "- Label ewechhuelen -",
-      "create_new_profile": "+ Neie Profil erstellen ...",
-      "read_only": "Lies-nëmmen",
-      "actions": "Aktiounen",
-      "cycles_count": "Cyclen",
-      "debug_traces": "Debug Spuren",
-      "file_kb": "Datei (kB)",
-      "label": "Label",
-      "seconds_from_start": "Sekonnen vun Ufank un",
-      "clock_time": "Auer Zäit",
-      "ungrouped": "Ongruppéiert"
+      "status": "Status",
+      "tail_trim": "Schwanz Trimm (en)",
+      "ungrouped": "Ongruppéiert",
+      "unlabelled": "Unlabeléiert",
+      "unlabelled_paren": "(net markéiert)",
+      "expected": "Erwaart",
+      "raw_socket": "Ro Stroum",
+      "artifact_interruption": "Ënnerbriechung",
+      "artifact_low_power": "Niddreg Stroum",
+      "artifact_high_power": "Héich Stroum",
+      "artifact_anomaly": "Anomalie"
     },
     "badge": {
-      "poor_fit": "schlecht fit",
+      "golden_cycle": "Opgeholl Referenz Zyklus",
+      "reviewed": "Iwwerpréift",
+      "feedback_requested": "Feedback gefrot",
+      "needs_review": "Braucht Iwwerpréiwung",
+      "overrun": "Laang méi laang wéi soss",
+      "artifact_tip": "{n} Anomalien entdeckt (z.B. Dier Mëtt-Zyklus opgemaach) - oppen fir se op der Grafik ze gesinn",
+      "poor_fit_tip": "Onkonsequent Matchgeschicht - betruecht dëse Profil nei opzebauen",
+      "fair_fit_tip": "Moderéiert Matchkonsistenz - e puer Zyklen, déi un dësem Profil zougewisen sinn, hu méi niddereg Vertrauensscores. Label méi Zyklen oder registréiert de Profil nei fir d'Genauegkeet ze verbesseren.",
       "fair_fit": "fair fit",
-      "manual": "(manuell ausgewielt)",
+      "poor_fit": "schlecht fit",
       "auto": "(automatesch festgestallt)",
-      "improving": "↗ verbessert",
+      "built_in_tag": "gebaut-an",
       "declining": "↘ erofgaang",
+      "improving": "↗ verbessert",
+      "manual": "(manuell ausgewielt)",
       "steady": "→ stänneg",
-      "using_tuned": "Mat ugepasste Gewiichter",
       "using_defaults": "Benotzt verschéckt Defaults",
-      "built_in_tag": "gebaut-an"
-    },
-    "status": {
-      "completed": "Ofgeschloss",
-      "interrupted": "Ënnerbrach",
-      "force_stopped": "Kraaft gestoppt",
-      "active": "Aktiv",
-      "ambiguous": "Ambigue",
-      "clear": "Kloer",
-      "working": "Schafft…",
-      "recording": "Opnam…",
-      "ready": "Bereet fir ze veraarbecht",
-      "idle": "Idle",
-      "auto_detect": "Automatesch erkennen",
-      "fine_tuning": "elo finjustéieren ...",
-      "all_statuses": "All Status"
-    },
-    "ml": {
-      "fit_strong": "Staark",
-      "fit_good": "Gutt",
-      "fit_fair": "Fair",
-      "fit_weak": "Schwaach",
-      "fit_slight": "Liicht",
-      "fit_word": "fit",
-      "fine_tuned_at": "fein gestëmmt {when}",
-      "personalized": "● Personaliséiert op dës Maschinn",
-      "builtin_models": "● Mat agebaute Modeller"
-    },
-    "toast": {
-      "settings_saved": "Astellunge gespäichert; Integratioun reloading",
-      "preferences_saved": "Virléiften gespäichert",
-      "panel_settings_saved": "Panel Astellunge gespäichert",
-      "access_saved": "Zougang Kontroll gespäichert",
-      "profile_created": "Profil \"{name}\" erstallt",
-      "profile_deleted": "Profil \"{name}\" geläscht",
-      "profile_renamed": "Profil ëmbenannt",
-      "phases_saved": "Phasen gespäichert",
-      "phase_created": "Phase \"{name}\" erstallt",
-      "phase_deleted": "Phase \"{name}\" geläscht",
-      "phase_updated": "Phase aktualiséiert",
-      "recording_started": "Opnahmen ugefaangen",
-      "recording_stopped": "Opnahmen gestoppt",
-      "recording_discarded": "Opnam verworf",
-      "recording_saved": "Opnam gespäichert op Profil",
-      "export_downloaded": "Export erofgeluede",
-      "logs_exported": "Logbicher exportéiert",
-      "import_successful": "Import erfollegräich; Integratioun reloading",
-      "envelopes_rebuilt": "Enveloppen opgebaut",
-      "envelope_rebuilt": "Enveloppe nei opgebaut",
-      "suggestions_applied": "Virschléi applizéiert; Integratioun reloading",
-      "suggestions_dismissed": "Virschléi entlooss",
-      "auto_label_complete": "Auto-Label komplett",
-      "cycle_labelled": "Zyklus markéiert",
-      "cycle_deleted": "Zyklus geläscht",
-      "cycles_deleted": "{count} Zyklus(en) geläscht",
-      "cycle_trimmed": "Zyklus ofgeschnidden",
-      "cycles_merged": "Cyclen fusionéiert",
-      "review_saved": "Iwwerpréiwung gespäichert",
-      "feedback_confirmed": "Feedback confirméiert",
-      "feedback_dismissed": "Feedback entlooss",
-      "feedback_all_dismissed": "All Feedback entlooss",
-      "correction_submitted": "Korrektur presentéiert",
-      "group_saved": "Grupp gespäichert",
-      "group_deleted": "Grupp geläscht",
-      "automation_deleted": "Automatisatioun geläscht",
-      "legacy_removed": "Legacy Aktiounen geläscht",
-      "cycle_paused": "Zyklus gestoppt",
-      "cycle_resumed": "Zyklus erëm op",
-      "cycle_force_stopped": "Zyklus Kraaft gestoppt",
-      "ml_training_promoted": "Training fäerdeg: gefördert {count} Modell(en)",
-      "ml_training_no_improvement": "Training fäerdeg: Baseline gehale (keng Verbesserung)",
-      "matching_reverted": "Passende Gewiichter zréck op Defaults",
-      "models_reverted": "On-Device Modeller zréck op d'Basislinn",
-      "analysis_complete": "Analyse fäerdeg: {count} Virschlag(en)",
-      "analysis_complete_none": "Analyse komplett: keng nei Virschléi",
-      "debug_cleared": "Geläscht {count} Debug Spuren",
-      "all_wiped": "All Daten geläscht",
-      "no_split_found": "Keng Idle Lücken fonnt fir opzedeelen",
-      "group_name_required": "Grupp Numm ass néideg",
-      "min_2_profiles": "Wielt op d'mannst 2 Profiler fir eng Grupp",
-      "profile_name_required": "Profilnumm ass erfuerderlech",
-      "phase_name_required": "Phasennumm ass erfuerderlech",
-      "name_required": "Numm néideg",
-      "json_required": "JSON Daten sinn erfuerderlech",
-      "save_failed": "Späichere gescheitert: {error}",
-      "delete_failed": "Läschen gescheitert: {error}",
-      "apply_failed": "Uwendung gescheitert: {error}",
-      "rebuild_failed": "Neiopbau gescheitert: {error}",
-      "start_failed": "Start gescheitert: {error}",
-      "stop_failed": "Stop gescheitert: {error}",
-      "discard_failed": "Wegwerfen gescheitert: {error}",
-      "trim_failed": "Trimmen gescheitert: {error}",
-      "split_failed": "Split gescheitert: {error}",
-      "merge_failed": "Fusioun gescheitert: {error}",
-      "create_failed": "Erstellen gescheitert: {error}",
-      "update_failed": "Update gescheitert: {error}",
-      "rename_failed": "Umbenennung gescheitert: {error}",
-      "revert_failed": "Zerécksetzen ass gescheitert: {error}",
-      "training_failed": "Training gescheitert: {error}",
-      "export_failed": "Export gescheitert: {error}",
-      "import_failed": "Import gescheitert: {error}",
-      "auto_label_failed": "Automatesch Label gescheitert: {error}",
-      "analysis_failed": "Analyse gescheitert: {error}",
-      "auto_detect_failed": "Automatesch Erkennung gescheitert: {error}",
-      "error": "Feeler: {error}",
-      "could_not_load_cycle": "Konnt den Zyklus net lueden: {error}",
-      "pause_failed": "Paus gescheitert: {error}",
-      "label_failed": "Label gescheitert: {error}",
-      "invalid_json": "\"{key}\" ass net gëlteg JSON - fix et oder läscht d'Feld ier Dir späichert.",
-      "processed": "Veraarbechtt {bits}",
-      "split_complete": "Split an {count} Zyklen"
-    },
-    "msg": {
-      "no_devices": "Nee WashData Apparater nach konfiguréiert.",
-      "no_device_selected": "Keen Apparat ausgewielt.",
-      "loading": "Lueden…",
-      "loading_settings": "Lueden Astellunge…",
-      "live_chart_loading": "Live Power Chart erschéngt wéi d'Liesungen ukommen.",
-      "no_cycles_match": "Keng Zyklen passen dem aktuellen Filter.",
-      "no_cycles_yet": "Nach keng Zyklen opgeholl.",
-      "no_profiles_yet": "Nee Profiler nach. Erstellt een aus engem markéierten Zyklus.",
-      "no_logs": "Et gi keng Logbicher nach gebuffert.",
-      "no_phases": "Keng Phasen definéiert.",
-      "no_phases_assigned": "Keng Phasen zougewisen.",
-      "no_split_points": "Nach keng Spaltpunkten.",
-      "no_envelope": "Nach keng Enveloppe - nei opzebauen no Etikettéierungszyklen.",
-      "no_envelope_overlay": "Keng Enveloppe verfügbar fir ze iwwerlageren.",
-      "no_other_users": "Keng aner Home Assistant Benotzer fonnt.",
-      "maintenance_requires_access": "Ënnerhalt an Export / Import verlaangen voll Zougang.",
-      "loading_curve": "Lueden Curve…",
-      "compare_selected_cycles": "Ausgewielten Zyklen (staark) - weisen / verstoppen",
-      "compare_overlay_profiles": "Overlay Profiler (schwaach)",
-      "no_profiles_compare": "Keng Profiler ze vergläichen.",
-      "no_cycles_profile": "Keng Zyklen fir dëse Profil.",
-      "saving_triggers_reload": "Spueren ausléist eng Integratiounsreload. HA Entitéite kënnen kuerz als net verfügbar sinn.",
-      "prefs_personal": "Dës gëllen nëmme fir Äre Home Assistant Kont.",
-      "no_match_yet": "Kee Match Versuch nach - dëst populates während engem Lafen Zyklus.",
-      "no_fine_tuned": "Näischt nach ofgestëmmt - WashData benotzt seng agebaute Modeller.",
-      "ml_learned_intro": "Modeller op dës Maschinn fein gestëmmt. Alles wat net opgezielt ass benotzt den zouverléissege agebaute Modell.",
-      "ml_settings_intro": "Zwee onofhängeg Schalter: een applizéiert d'Modeller wärend engem Zyklus leeft, deen aneren léisst WashData se mat der Zäit op Är Maschinn feinjustéieren.",
-      "ml_intro": "WashData verschéckt mat intelligente Modeller déi Zyklen erkennen, Programmer passen an Zäit & Energie schätzen - si schaffen aus der Këscht.",
-      "matching_tuning_intro": "Wann Dir léiert, passt WashData och un wéi vill Programmpassung d'Form vun engem Zyklus waacht géint seng Dauer an Energie.",
-      "phase_catalog_intro": "Benannt Segmenter vun engem Zyklus (Virwäsch, Heizung, Spin ...). Gitt hinnen op e Profil vu senger Kontrollpanel.",
-      "phase_ranges_intro": "Phasebereich (Minute vum Zyklusstart) iwwerlagert op der Moyennekurve. Ännere Wäerter fir live ze kucken.",
-      "cleanup_intro": "All Label Zyklus iwwerlagert. Tick ​​outliers a läschen fir de Profil ze botzen.",
-      "split_intro": "Klickt op d'Grafik fir e Splitpunkt ze addéieren oder ze läschen, oder automatesch z'entdecken duerch Idle Lücken.",
-      "trim_intro": "Drag déi rout Handle, oder gitt Wäerter. Alles baussent der Fënster gëtt ewechgeholl.",
-      "import_intro": "Lued eng exportéiert Datei oder paste eng JSON Notzlaascht hei drënner.",
-      "auto_label_intro": "Gitt Profiler un onlabeléiert Zyklen, deenen hir Matchvertrauen d'Schwell läscht.",
-      "merge_intro": "Déi gewielte Zyklen ginn an een kombinéiert (chronologesch Uerdnung; Lücken mat 0 W gefëllt). Wielt de resultéierende Profil.",
-      "enough_data": "Genuch Daten fir ze léieren ({current}/{min} Zyklen).",
-      "collecting_data": "Daten sammelen - {need} méi Zyklus{plural} ier d'Feinjustéierung kann ufänken ({current}/{min}).",
-      "updated": "Aktualiséiert {time}",
-      "appliance_monitor": "Apparat Monitor",
-      "ml_loading": "ML laden...",
-      "see_recorder": "Gesinn Recorder Widget- ënnert",
-      "review_in_settings": "Iwwerpréift an Astellungen",
-      "storage_diagnostics": "Stockage Statistiken, Ënnerhalt, Export / Import",
-      "recent_logs": "Rezent ha_washdata records",
-      "preferences_adv": "Preferenzen",
-      "preferences_admin": "Preferenzen, Panel & Zougangskontroll",
-      "review_to_cycles": "Öffnen d'Cycles Iwwerpréiwungsschlaang",
-      "pending_feedback": "Erwaardung Detektioun Feedback",
-      "recording_in_progress": "Enregistrement amgaang",
-      "no_profiles_yet_short": "Nee Profiler nach.",
-      "unsure_detected_prefix": "WashData ass net sécher datt et entdeckt gouf",
-      "no_suggestions": "Keng aktiv Virschléi.",
-      "no_profiles_overlay": "Keng Profiler ze iwwerlageren.",
-      "compare_cycles_title": "Vergläichen {count} Zyklen",
-      "profiles_intro": "Klickt op e Profil fir Statistiken, Phasen an Opreenung. Gruppéiert bal-identisch Programmer (selwecht Form/Dauer, ënnerschiddlech Temperatur oder Schleuder), fir datt d'Erkennung zouverlässeg tëscht hinnen ënnerscheet.",
-      "search_placeholder": "Astellungen sichen…",
-      "automations_intro": "WashData schéckt {start} / {end} Eventer a stellt Entitéiten bereet, dofir ginn Notifizéierungen an Aktiounen am beschten als normal Home Assistant Automatiounen gebaut. Automatiounen, déi dëst Apparat benotzen, ginn hei ënnen ugewisen.",
-      "notify_services_hint": "{entity} Service-IDs benotzen (fir méi eng, mat Komma getrennt). Template-Variabelen: {vars}.",
-      "rbac_hint": "Wann ausgeschalt, huet all Home Assistant Benotzer vollen Zougang (Standard). Administrateuren hunn ëmmer vollen Zougang a kënnen jiddereen verwalten.",
-      "feedback_prompt": "Bestätegt ob et richteg war, korrigéiert de Programm oder ignoréiert et."
+      "using_tuned": "Mat ugepasste Gewiichter"
     },
     "modal": {
-      "label_cycle": "Zyklus etikettéieren",
-      "create_profile": "Profil schafen",
-      "new_phase": "Nei Phase",
-      "edit_phase": "Phase änneren",
-      "process_recording": "Opnam veraarbechten",
+      "merge_cycles": "Merge {n} Zyklen",
+      "auto_label": "Auto-Label Cycles",
       "correct_feedback": "Korrekt Feedback",
-      "import_config": "Konfiguratioun importéieren",
-      "auto_label": "Zyklen auto-etikettéieren",
-      "cycle": "Zyklus"
+      "create_profile": "Schafen Profil",
+      "cycle": "Zyklus",
+      "edit_phase": "Phase änneren",
+      "import_config": "Import Configuratioun",
+      "label_cycle": "Label Cycle",
+      "new_phase": "Nei Phas",
+      "process_recording": "Prozess Recording"
     },
-    "tag": {
-      "late_start": "Spéit Start",
-      "early_end": "Fréi Enn",
-      "merged": "Fusiounszyklen",
-      "split": "Split Zyklus",
-      "noise": "Kaméidi",
-      "wrong_profile": "Falsche Profil",
-      "sensor_gap": "Sensor Spalt"
+    "msg": {
+      "near_duplicate_cluster": "bal duplizéiert Profilcluster entdeckt. D'Gruppéierung léisst d'Mataarbecht zouverlässeg tëscht Look-alikes wielen (zB deeselwechte Programm bei verschiddenen Temperaturen / Spinn).",
+      "coverage_gap": "rezent Zyklen hu kee passende Profil ({pct}% vun de leschten 30).",
+      "consider_new_profile": "Betruecht engem neie Profil schafen.",
+      "group_not_cohesive": "Dës Profiler sinn net ähnlech genuch fir zouverlässeg ze gruppéieren, sou datt de Matching se individuell behandelt bis Dir den Outlier läscht oder d'Grupp opgedeelt.",
+      "group_modal_help": "Grupp Programmer mat der selwechter Form datt Temperatur ënnerscheeden / spin (Dauer kann variéieren). De Matching markéiert de Grupp als ee Kandidat, wielt dann dee passendste Member. Wielt op d'mannst 2; d'Iwwerlagerung weist wéi ähnlech se sinn.",
+      "showing_suggestions": "Weist {count} Astellung mat Virschléi.",
+      "show_all_settings": "Show all Astellungen",
+      "tuning_suggestions_available": "{count} Ofstëmmungsvirschlag verfügbar aus observéierten Zyklen. Si schéngen nieft de relevante Felder.",
+      "legacy_actions_title": "{count} legacy personaliséiert Aktioun leeft nach",
+      "old_actions_warning": "Konfiguréiert mam alen Handlungseditor (elo ewechgeholl). Si brennen nach ëmmer op Zyklusevenementer awer kënnen net méi hei geännert ginn. Konvertéiert se an eng normal Automatisatioun, oder läscht se.",
+      "no_settings_match": "Keng Astellunge passen \"{q}\"",
+      "clear_debug_hint": "Ewechzehuelen gespäichert Debug Daten fir fräi Plaz.",
+      "wipe_history_warning": "Permanent läschen all Zyklen a Profiler. Kann net réckgängeg gemaach ginn.",
+      "export_description": "Export all Profiler an Zyklen op JSON, oder restauréiert vun engem fréiere Export.",
+      "log_buffer_hint": "Neisten éischt · Puffer déi lescht 500 ha_washdata records zënter Restart · zitt den ënneschten Rand fir d'Gréisst ze änneren.",
+      "review_profile_tip": "De Programm dësen Zyklus gëtt als Label bezeechent. Wann den auto-detektéierte Programm falsch war, korrigéiert et hei - Etikettéierung léiert passende fir zukünfteg Zyklen.",
+      "review_quality_tip": "Wéi propper dësen Zyklus ass. Gutt = e Léierbuch Beispill vun dësem Programm; Schlecht = festgestallt, awer laut oder ontypesch; Onbenotzbar = falsch festgestallt (fusionéiert, ofgeschnidden oder falsch). Fuert de Gesondheetsscore a wéi eng Zyklen erlaabt sinn de Modell ze trainéieren.",
+      "review_recorded_tip": "Mark dëst als Hand-ausgewielt Referenz Zyklus fir säi Programm - déi selwecht Roll wéi eng manuell opgeholl Zyklus. Referenzzyklen ginn ëmmer gehal, seet déi passend Schabloun a ginn ni vun der Botz erofgelooss. (Dëst ass de \"gëllene\" / opgeholl Fändel; béid sinn déiselwecht Saach.)",
+      "review_tags_tip": "Optional Fändelen déi beschreiwen wat mat dësem Zyklus falsch gaang ass, sou datt Training a Botzen derfir kënne berechnen.",
+      "review_notes_tip": "Free-Text Notize fir Är eege Referenz. Net duerch Matching oder Training benotzt.",
+      "review_confirm_help": "Bestätegt ob dësen Zyklus richteg festgestallt gouf. Är Rezensiounen trainéieren de Modell op Ärer Maschinn - wat méi Zyklen Dir confirméiert, wat besser Matching a Gesondheetsscore kritt. E séiere Gutt / Schlecht ass genuch.",
+      "review_notes_placeholder": "Notizen (optional)",
+      "compare_profiles_tip": "Iwwerlagert aner Profilenveloppen op der Grafik hei uewen fir ze kucken wéi eng am Beschten an dësem Zyklus passt.",
+      "artifact_header": "{n} Anomalien entdeckt während dësem Zyklus",
+      "artifact_footer": "Highlight op der Grafik uewen. Dës sinn transient artifacts (zB der Dier Mëtt-Zyklus opgemaach), net onbedéngt Problemer.",
+      "profile_poor_health_detail": "Cyclen, déi zu dësem Profil zougewisen sinn, hunn onkonsequent Formen oder wéineg Vertrauen. Betruecht d'Enveloppe nei opzebauen oder markéiert Zyklen ze iwwerpréiwen.",
+      "trend_duration_longer": "Dauer am Trend méi laang ({pct}%/Zyklus) — rezent avg {avg}",
+      "trend_duration_shorter": "Dauer am Trend méi kuerz ({pct}%/Zyklus) — rezent avg {avg}",
+      "trend_energy_up": "Energietrend erop ({pct}%/Zyklus) — rezent Duerchschnëtt {avg}",
+      "trend_energy_down": "Energie Trend erof ({pct}%/Zyklus)",
+      "performance_trend": "Performance Trend ({n} Zyklen)",
+      "maintenance_advisory": "D'Erhéijung vun der Dauer / d'Energie kann uginn datt den Apparat Ënnerhalt néideg ass (zB Entkalking, Filterreinigung).",
+      "manual_duration_hint": "D'Moyenne vum Profil / erwaart Zyklus Längt, benotzt fir Zäit Rescht Schätzung. Edit fir et ze setzen; et onverännert ze loossen hält den aktuelle Wäert.",
+      "appliance_monitor": "Apparat Monitor",
+      "auto_label_intro": "Gitt Profiler un onlabeléiert Zyklen, deenen hir Matchvertrauen d'Schwell läscht.",
+      "cleanup_intro": "All Label Zyklus iwwerlagert. Tick ​​outliers a läschen fir de Profil ze botzen.",
+      "compare_overlay_profiles": "Overlay Profiler (schwaach)",
+      "compare_selected_cycles": "Ausgewielten Zyklen (staark) - weisen / verstoppen",
+      "feedback_prompt": "Bestätegt datt et richteg war, korrigéiert de Programm oder ignoréiert.",
+      "import_intro": "Lued eng exportéiert Datei oder paste eng JSON Notzlaascht hei drënner.",
+      "live_chart_loading": "Live Power Chart erschéngt wéi d'Liesungen ukommen.",
+      "loading": "Lueden…",
+      "loading_curve": "Lueden Curve…",
+      "loading_settings": "Lueden Astellunge…",
+      "maintenance_requires_access": "Ënnerhalt an Export / Import verlaangen voll Zougang.",
+      "matching_tuning_intro": "Wann Dir léiert, passt WashData och un wéi vill Programmpassend Form versus Dauer an Energie weegt.",
+      "merge_intro": "Déi gewielte Zyklen ginn an een kombinéiert (chronologesch Uerdnung; Lücken mat 0 W gefëllt). Wielt de resultéierende Profil.",
+      "ml_intro": "WashData Schëffer mat intelligenten Modeller déi aus der Këscht funktionnéieren.",
+      "ml_learned_intro": "Modeller op dës Maschinn fein gestëmmt.",
+      "ml_loading": "ML laden...",
+      "ml_settings_intro": "Zwee onofhängeg Schalter: een applizéiert d'Modeller wärend engem Zyklus leeft, deen aneren léisst WashData se mat der Zäit op Är Maschinn feinjustéieren.",
+      "no_cycles_match": "Keng Zyklen passen dem aktuellen Filter.",
+      "no_cycles_profile": "Keng Zyklen fir dëse Profil.",
+      "no_cycles_yet": "Nach keng Zyklen opgeholl.",
+      "no_device_selected": "Keen Apparat ausgewielt.",
+      "no_devices": "Nee WashData Apparater nach konfiguréiert.",
+      "no_envelope": "Nach keng Enveloppe - nei opzebauen no Etikettéierungszyklen.",
+      "no_envelope_overlay": "Keng Enveloppe verfügbar fir ze iwwerlageren.",
+      "no_fine_tuned": "Näischt nach ofgestëmmt - WashData benotzt seng agebaute Modeller.",
+      "no_logs": "Et gi keng Logbicher nach gebuffert.",
+      "no_match_yet": "Kee Match Versuch nach - dëst populates während engem Lafen Zyklus.",
+      "no_other_users": "Keng aner Home Assistant Benotzer fonnt.",
+      "no_phases": "Keng Phasen definéiert.",
+      "no_phases_assigned": "Keng Phasen zougewisen.",
+      "no_profiles_compare": "Keng Profiler ze vergläichen.",
+      "no_profiles_overlay": "Keng Profiler ze iwwerlageren.",
+      "no_profiles_yet": "Nee Profiler nach. Erstellt een aus engem markéierten Zyklus.",
+      "no_profiles_yet_short": "Nee Profiler nach.",
+      "no_split_points": "Nach keng Spaltpunkten.",
+      "no_suggestions": "Keng aktiv Virschléi.",
+      "pending_feedback": "Erwaardung Detektioun Feedback",
+      "phase_catalog_intro": "Benannt Segmenter vun engem Zyklus (Virwäsch, Heizung, Spin ...). Gitt hinnen op e Profil vu senger Kontrollpanel.",
+      "phase_ranges_intro": "Phasebereich (Minute vum Zyklusstart) iwwerlagert op der Moyennekurve. Ännere Wäerter fir live ze kucken.",
+      "preferences_admin": "Preferenzen, Panel & Zougangskontroll",
+      "preferences_adv": "Preferenzen",
+      "prefs_personal": "Dës gëllen nëmme fir Ären Home Assistant Kont.",
+      "profiles_intro": "Klickt op e Profil fir Statistiken, Phasen a Botzen. Grupp bal identesch Programmer (selwescht Form / Dauer, aner Temperatur oder spin) sou passende zouverlässeg wielt tëscht hinnen.",
+      "rbac_hint": "Wann aus ass, huet all Home Assistant Benotzer voll Zougang (de Standard). Administrateuren hunn ëmmer voll Zougang a kann jiddereen verwalten.",
+      "recent_logs": "Rezent ha_washdata records",
+      "recording_in_progress": "Enregistrement amgaang",
+      "review_in_settings": "Iwwerpréift an Astellungen",
+      "review_to_cycles": "Öffnen d'Cycles Iwwerpréiwungsschlaang",
+      "saving_triggers_reload": "Spueren ausléist eng Integratiounsreload. HA Entitéite kënnen kuerz als net verfügbar sinn.",
+      "search_placeholder": "Sich Astellunge…",
+      "see_recorder": "Gesinn Recorder Widget- ënnert",
+      "split_intro": "Klickt op d'Grafik fir e Splitpunkt ze addéieren oder ze läschen, oder automatesch z'entdecken duerch Idle Lücken. All resultéierend Segment kann säin eegene Profil kréien.",
+      "storage_diagnostics": "Stockage Statistiken, Ënnerhalt, Export / Import",
+      "trim_intro": "Drag déi rout Handle, oder gitt Wäerter. Alles baussent der Fënster gëtt ewechgeholl.",
+      "unsure_detected_prefix": "WashData ass net sécher datt et entdeckt gouf",
+      "updated": "Aktualiséiert"
     },
-    "quality": {
-      "good": "Gutt",
-      "bad": "Schlecht",
-      "unusable": "Onbenotzbar"
-    },
-    "access": {
-      "none": "Keen (verstoppt)",
-      "read": "Liesen",
-      "edit": "Edit",
-      "full": "Voll",
-      "inherit": "Ierwen"
+    "phase_desc": {
+      "pre_wash": "Initial Soak oder Pre-Behandlung virun der Haaptwäsch.",
+      "wash": "Main Wäschzyklus mat Trommelbewegung an optional Heizung.",
+      "wash_dw": "Main Wäschmëttel wäschen mat Heizung.",
+      "rinse": "Propper Waasser Spülen Etapp. Dës Phase kann e puer Mol widderhuelen.",
+      "spin": "Héichgeschwindeg Extraktioun fir Waasser aus der Laascht ze entfernen.",
+      "spin_wd": "Héichgeschwindeg Extraktioun virum Trocknungstransitioun.",
+      "soak": "Niddereg Aktivitéit Soaking Period tëscht aktive Wäschstadien.",
+      "soak_dw": "Verlängert Soakperiod fir schwéier Buedem.",
+      "anti_crease": "Heiansdo kuerz tumbles nom Ofschloss fir Falten ze reduzéieren.",
+      "heat_up": "Éischt Heizung Erwiermung ier voll Trocknung ufänkt.",
+      "drying": "Main gehëtzt tumbling Period.",
+      "cool_down": "Tumbling ouni Hëtzt no Zyklus Enn.",
+      "anti_wrinkle": "Periodesch Post-Zyklus Tumbling fir Falten ze reduzéieren.",
+      "sensor_check": "Kuerz Low-Power Paus wärend d'Trockheet gemooss gëtt.",
+      "drain_and_switch": "Iwwergangsperiod vum Wäschen op d'Trocknungsmodus.",
+      "pre_rinse": "Éischt Spraydousen virum Wäschmëttel.",
+      "dry": "Trocknungsstadium mat Heizung an / oder Reschthëtzt.",
+      "sanitize": "Héichtemperatur Botzstadium fir Sanéierungsprogrammer."
     },
     "health": {
-      "poor": "⚠ Schlechte Match fit",
-      "fair": "Fair Match fit",
-      "good": "✓ Gutt Passform"
+      "good": "✓ Gutt Profilqualitéit",
+      "fair": "Akzeptabel Profilqualitéit",
+      "poor": "⚠ Schlecht Profilqualitéit"
+    },
+    "ml": {
+      "fit_fair": "Akzeptabel",
+      "builtin_models": "● Mat agebaute Modeller",
+      "fit_good": "Gutt",
+      "fit_slight": "Liicht",
+      "fit_strong": "Staark",
+      "fit_weak": "Schwaach",
+      "fit_word": "fit",
+      "personalized": "● Personaliséiert op dës Maschinn"
     },
     "trend": {
       "up": "Trend erop",
       "down": "Trend erof"
     },
-    "pref": {
-      "date_relative": "Relativ (z.B. virun 2 Stonnen)",
-      "date_absolute": "Absolut (z.B. 14:32 den 2. Juli)"
-    },
     "log": {
       "all_levels": "All Niveauen"
     },
-    "section": {
-      "basic": {
-        "label": "Basis",
-        "intro": "Kär Identitéit an déi wesentlech déi meescht Setups brauchen."
-      },
-      "detection": {
-        "label": "Detektioun",
-        "intro": "Wéi en Zyklus als Start, Lafen a Schluss festgestallt gëtt."
-      },
-      "matching": {
-        "label": "Passend",
-        "intro": "Wéi fäerdeg Zyklen mat geléierte Profiler ugepasst sinn a markéiert ginn."
-      },
-      "timing": {
-        "label": "Timing & Iwwerwaachung",
-        "intro": "Hannergrond Kadens, den offline Iwwerwaachungshond an Haushalt."
-      },
-      "anti_wrinkle": {
-        "label": "Anti-Falten",
-        "intro": "Anti-Falten-Modus erkennt Trockner-Tumble-Impulser no der Haaptheizphase."
-      },
-      "delay": {
-        "label": "Verspéidten Start",
-        "intro": "Delayed-Start Detectioun identifizéiert wann en Apparat ugedriwwe gëtt, awer huet säin Zyklus nach net ugefaang."
-      },
-      "triggers": {
-        "label": "Ausléiser & Dier",
-        "intro": "Optional extern Signaler: en Ennausléiser, en Diersensor, e Pausschalter, an d'Entluede Erënnerung."
-      },
-      "notifications": {
-        "label": "Notifikatiounen",
-        "intro": "Configuréieren wéini a wéi Dir iwwer Zyklusevenementer informéiert sidd."
-      },
-      "ml_training": {
-        "label": "ML Training",
-        "intro": "Opt-in Smart Modeller déi Erkennung an Timing op dësem Apparat personaliséieren."
-      }
+    "pref": {
+      "date_absolute": "Absolut (z.B. 14:32 den 2. Juli)",
+      "date_relative": "Relativ (z.B. virun 2 Stonnen)"
     },
-    "setting": {
-      "name": {
-        "label": "Apparat Numm"
-      },
-      "device_type": {
-        "label": "Apparat Typ"
-      },
-      "power_sensor": {
-        "label": "Power Sensor"
-      },
-      "min_power": {
-        "label": "Minimum Muecht"
-      },
-      "off_delay": {
-        "label": "Off Verspéidung"
-      },
-      "linked_device": {
-        "label": "Grupp Ënner Apparat"
-      },
-      "start_threshold_w": {
-        "label": "Start Schwell"
-      },
-      "stop_threshold_w": {
-        "label": "Stop Schwell"
-      },
-      "min_off_gap": {
-        "label": "Min. Auspaus-Intervall"
-      },
-      "start_duration_threshold": {
-        "label": "Start Dauer"
-      },
-      "start_energy_threshold": {
-        "label": "Start Energie"
-      },
-      "completion_min_seconds": {
-        "label": "Min Zyklus Dauer"
-      },
-      "running_dead_zone": {
-        "label": "Lafen Toddzone"
-      },
-      "end_energy_threshold": {
-        "label": "Enn Energie"
-      },
-      "end_repeat_count": {
-        "label": "Enn widderhuelen Grof"
-      },
-      "sampling_interval": {
-        "label": "Sampling Intervall"
-      },
-      "smoothing_window": {
-        "label": "Glat Fënster"
-      },
-      "abrupt_drop_watts": {
-        "label": "Abrupten Afall"
-      },
-      "abrupt_drop_ratio": {
-        "label": "Abrupten Afall Verhältnis"
-      },
-      "profile_match_threshold": {
-        "label": "Match Schwell"
-      },
-      "profile_unmatch_threshold": {
-        "label": "Unmatch Schwell"
-      },
-      "profile_match_interval": {
-        "label": "Match Intervall"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "Min Dauer Verhältnis"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "Max Dauer Verhältnis"
-      },
-      "profile_duration_tolerance": {
-        "label": "Profil Dauer Toleranz"
-      },
-      "duration_tolerance": {
-        "label": "Dauer Toleranz"
-      },
-      "auto_label_confidence": {
-        "label": "Auto-Label Vertrauen"
-      },
-      "learning_confidence": {
-        "label": "Léieren Vertrauen"
-      },
-      "suppress_feedback_notifications": {
-        "label": "Ënnerdréckt Feedback Notifikatiounen"
-      },
-      "watchdog_interval": {
-        "label": "Watchdog Intervall"
-      },
-      "no_update_active_timeout": {
-        "label": "Keng-Update Timeout"
-      },
-      "progress_reset_delay": {
-        "label": "Fortschrëtt Reset Verzögerung"
-      },
-      "auto_maintenance": {
-        "label": "Auto Ënnerhalt (Nuecht Botzen)"
-      },
-      "expose_debug_entities": {
-        "label": "Entdeckt Debug Entitéiten"
-      },
-      "save_debug_traces": {
-        "label": "Debug Spure späicheren"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "Aktivéiert Anti-Wrinkle Detection"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "Max Anti-Falten Power"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "Max Dauer"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "Ausgangs-Power Schwell"
-      },
-      "delay_start_detect_enabled": {
-        "label": "Aktivéiert Verspéidten-Start Detektioun"
-      },
-      "delay_confirm_seconds": {
-        "label": "Confirméieren Sekonnen"
-      },
-      "delay_timeout_hours": {
-        "label": "Timeout Stonnen"
-      },
-      "external_end_trigger_enabled": {
-        "label": "Extern End Trigger aktivéieren"
-      },
-      "external_end_trigger": {
-        "label": "Extern Ausléiser Entitéit"
-      },
-      "external_end_trigger_inverted": {
-        "label": "Invertéieren externen Ausléiser (Ausléiser op OFF)"
-      },
-      "door_sensor_entity": {
-        "label": "Dier Sensor Entitéit"
-      },
-      "pause_cuts_power": {
-        "label": "Paus schneit och Kraaft (iwwer Schalter)"
-      },
-      "switch_entity": {
-        "label": "Wiessel Entitéit"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "Ausluede Nag Verzögerung"
-      },
-      "pump_stuck_duration": {
-        "label": "Pompel Stuck Dauer"
-      },
-      "notify_start_services": {
-        "label": "Start Servicer"
-      },
-      "notify_finish_services": {
-        "label": "Schluss Servicer"
-      },
-      "notify_live_services": {
-        "label": "Live Fortschrëtter Services"
-      },
-      "notify_people": {
-        "label": "Leit (fir nëmmen wann doheem)"
-      },
-      "notify_only_when_home": {
-        "label": "Notifikatioun Nëmme Wann Doheem"
-      },
-      "notify_fire_events": {
-        "label": "Feier HA Eventer fir Notifikatiounen"
-      },
-      "notify_before_end_minutes": {
-        "label": "Pre-End Alarm"
-      },
-      "notify_live_interval_seconds": {
-        "label": "Live Update Intervall"
-      },
-      "notify_live_overrun_percent": {
-        "label": "Live Iwwerschwemmung % Virun Alarm"
-      },
-      "notify_live_chronometer": {
-        "label": "Benotzt Live Chronometer"
-      },
-      "notify_timeout_seconds": {
-        "label": "Auto-Entlooss No"
-      },
-      "notify_title": {
-        "label": "Notifikatioun Titel"
-      },
-      "notify_icon": {
-        "label": "Notifikatioun Ikon"
-      },
-      "notify_start_message": {
-        "label": "Start Message"
-      },
-      "notify_finish_message": {
-        "label": "Schluss Message"
-      },
-      "notify_pre_complete_message": {
-        "label": "Pre-Complete Message"
-      },
-      "notify_reminder_message": {
-        "label": "Erënnerung Message"
-      },
-      "notify_channel": {
-        "label": "Android Kanal (Start/Live)"
-      },
-      "notify_finish_channel": {
-        "label": "Android Kanal (Finish)"
-      },
-      "energy_price_entity": {
-        "label": "Energie Präis Entitéit"
-      },
-      "energy_price_static": {
-        "label": "Statesch Energiepräis (pro kWh)"
-      },
-      "enable_ml_models": {
-        "label": "Gëlle Smart Modeller während engem Zyklus"
-      },
-      "ml_training_enabled": {
-        "label": "Léiert vun dëser Maschinn"
-      },
-      "ml_training_hour": {
-        "label": "Léieren op Stonn"
-      },
-      "ml_training_min_cycles": {
-        "label": "Zyklen néideg éischt"
-      },
-      "ml_training_interval_days": {
-        "label": "Check héchstens all"
-      }
+    "quality": {
+      "bad": "Schlecht",
+      "good": "Gutt",
+      "unusable": "Onbenotzbar"
+    },
+    "status": {
+      "active": "Aktiv",
+      "all_statuses": "All Status",
+      "ambiguous": "Ambigue",
+      "auto_detect": "Automatesch erkennen",
+      "clear": "Kloer",
+      "completed": "Ofgeschloss",
+      "fine_tuning": "elo finjustéieren ...",
+      "force_stopped": "Kraaft gestoppt",
+      "idle": "Idle",
+      "interrupted": "Ënnerbrach",
+      "ready": "Bereet fir ze veraarbecht",
+      "recording": "Am Opzeechnen"
+    },
+    "tab": {
+      "advanced": "Fortgeschratt",
+      "diagnostics": "Diagnostik",
+      "history": "Cyclen",
+      "ml": "ML Formatioun",
+      "pp_cleanup": "Botzen",
+      "pp_manage": "Verwalten",
+      "pp_overview": "Iwwersiicht",
+      "pp_phases": "Phasen",
+      "profiles": "Profiler",
+      "settings": "Astellungen",
+      "status": "Iwwersiicht",
+      "subtab_phase_catalog": "Phase Katalog",
+      "subtab_profiles": "Profiler"
+    },
+    "tag": {
+      "early_end": "Fréi Enn",
+      "late_start": "Spéit Start",
+      "merged": "Fusiounszyklen",
+      "noise": "Kaméidi",
+      "sensor_gap": "Sensor Spalt",
+      "split": "Split Zyklus",
+      "wrong_profile": "Falsche Profil"
+    },
+    "toast": {
+      "access_saved": "Zougang Kontroll gespäichert",
+      "all_wiped": "All Daten geläscht",
+      "analysis_complete_none": "Analyse komplett: keng nei Virschléi",
+      "auto_label_complete": "Auto-Label komplett",
+      "automation_deleted": "Automatisatioun geläscht",
+      "correction_submitted": "Korrektur presentéiert",
+      "cycle_deleted": "Zyklus geläscht",
+      "cycle_force_stopped": "Zyklus Kraaft gestoppt",
+      "cycle_labelled": "Zyklus markéiert",
+      "cycle_paused": "Zyklus gestoppt",
+      "cycle_resumed": "Zyklus erëm op",
+      "cycle_trimmed": "Zyklus ofgeschnidden",
+      "cycles_merged": "Cyclen fusionéiert",
+      "envelope_rebuilt": "Enveloppe nei opgebaut",
+      "envelopes_rebuilt": "Enveloppen opgebaut",
+      "export_downloaded": "Export erofgeluede",
+      "feedback_all_dismissed": "All Feedback entlooss",
+      "feedback_confirmed": "Feedback confirméiert",
+      "feedback_dismissed": "Feedback entlooss",
+      "group_deleted": "Grupp geläscht",
+      "group_name_required": "Grupp Numm ass néideg",
+      "group_saved": "Grupp gespäichert",
+      "import_successful": "Import erfollegräich; Integratioun reloading",
+      "json_required": "JSON Daten sinn erfuerderlech",
+      "legacy_removed": "Legacy Aktiounen geläscht",
+      "logs_exported": "Logbicher exportéiert",
+      "matching_reverted": "Passende Gewiichter zréck op Defaults",
+      "min_2_profiles": "Wielt op d'mannst 2 Profiler fir eng Grupp",
+      "ml_training_no_improvement": "Training fäerdeg: Baseline gehale (keng Verbesserung)",
+      "models_reverted": "On-Device Modeller zréck op d'Basislinn",
+      "name_required": "Numm néideg",
+      "no_split_found": "Keng Idle Lücken fonnt fir opzedeelen",
+      "panel_settings_saved": "Panel Astellunge gespäichert",
+      "phase_name_required": "Phasennumm ass erfuerderlech",
+      "phase_updated": "Phase aktualiséiert",
+      "phases_saved": "Phasen gespäichert",
+      "preferences_saved": "Virléiften gespäichert",
+      "profile_name_required": "Profilnumm ass erfuerderlech",
+      "profile_renamed": "Profil ëmbenannt",
+      "recording_discarded": "Opnam verworf",
+      "recording_saved": "Opnam gespäichert op Profil",
+      "recording_started": "Opnahmen ugefaangen",
+      "recording_stopped": "Opnahmen gestoppt",
+      "review_saved": "Iwwerpréiwung gespäichert",
+      "settings_saved": "Astellunge gespäichert; Integratioun reloading",
+      "suggestions_applied": "Virschléi applizéiert; Integratioun reloading",
+      "suggestions_dismissed": "Virschléi entlooss"
     }
   }
 }

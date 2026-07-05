@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Почеток на циклусот",
-        "cycle_finish": "Завршување на циклусот",
-        "cycle_live": "Прогрес во живо"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Машина за перење",
@@ -88,198 +81,6 @@
         "bread_maker": "Машина за леб",
         "pump": "Пумпа / Спојна пумпа",
         "other": "Друго (Напредно)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(Неозначено)",
-        "create_new_profile": "Креирај нов профил",
-        "remove_label": "Отстранете ја етикетата",
-        "no_reference_cycle": "(Без референтен циклус)",
-        "all_device_types": "Сите типови уреди",
-        "current_suffix": "(тековно)",
-        "phase_builtin_suffix": "(Вградено)",
-        "phase_none_available": "Нема достапни фази.",
-        "phase_other_device_types": "Други типови уреди:",
-        "settings_deprecation_warning": "⚠️ **Застарен тип на уред:** {device_type} е закажано за отстранување во идното издание. Соодветниот цевковод на WashData не дава сигурни резултати за оваа класа на апарати. Вашата интеграција продолжува да работи во текот на периодот на застарување; за да го исклучите ова предупредување, префрлете го **Тип на уред** подолу на еден од поддржаните типови (Машина за перење, машина за сушење, комбо машина за перење-сушач, машина за миење садови, фризер со воздух, производител на леб или пумпа) или на **Друго (Напредно)** ако вашиот уред не одговара на ниту еден од поддржаните типови. **Другите (напредни)** испраќаат намерно генерички стандардни вредности кои не се прилагодени за кој било специфичен апарат, така што ќе треба сами да ги конфигурирате праговите, временските рокови и соодветните параметри; сите ваши постоечки поставки се зачувани кога ќе се префрлите.",
-        "editor_select_info": "Изберете 1 циклус за разделување или 2+ циклуси за спојување.",
-        "editor_select_info_split": "Изберете 1 циклус за поделба.",
-        "editor_select_info_merge": "Изберете 2+ циклуси за спојување.",
-        "editor_select_info_delete": "Изберете 1+ циклуси за бришење.",
-        "no_cycles_recorded": "Сè уште нема снимени циклуси.",
-        "profile_summary_line": "- **{name}**: {count} циклуси, во просек {avg} м",
-        "no_profiles_created": "Сè уште нема создадени профили.",
-        "phase_preview": "Преглед на фаза",
-        "phase_preview_no_curve": "Просечната крива на профилот сè уште не е достапна. Стартувај/означи повеќе циклуси за овој профил.",
-        "average_power_curve": "Крива на просечна моќност",
-        "unit_min": "мин",
-        "profile_option_fmt": "{name} ({count} циклуси, ~{duration}m просечно)",
-        "profile_option_short_fmt": "{name} ({count} циклуси, ~{duration} м)",
-        "deleted_cycles_from_profile": "Избришани се {count} циклуси од {profile}.",
-        "not_enough_data_graph": "Нема доволно податоци за генерирање графикон.",
-        "no_profiles_found": "Не се пронајдени профили.",
-        "cycle_info_fmt": "Циклус: {start}, {duration}m, Тековен: {label}",
-        "top_candidates_header": "### Топ кандидати",
-        "tbl_profile": "Профил",
-        "tbl_confidence": "Доверба",
-        "tbl_correlation": "Корелација",
-        "tbl_duration_match": "Времетраење натпревар",
-        "detected_profile": "Откриен профил",
-        "estimated_duration": "Проценето времетраење",
-        "actual_duration": "Реално времетраење",
-        "choose_action": "__Изберете дејство подолу:__",
-        "tbl_count": "брои",
-        "tbl_avg": "Просечно",
-        "tbl_min": "мин",
-        "tbl_max": "Макс",
-        "tbl_energy_avg": "Енергија (просечно)",
-        "tbl_energy_total": "Енергија (вкупно)",
-        "tbl_consistency": "Се состои.",
-        "tbl_last_run": "Последно извршување",
-        "graph_legend_title": "Графикон Легенда",
-        "graph_legend_body": "Сината лента го претставува забележаниот опсег на минимална и максимална моќност. Линијата ја покажува просечната крива на моќност.",
-        "recording_preview": "Преглед на снимање",
-        "trim_start": "Намали го стартот",
-        "trim_end": "Намали крајот",
-        "split_preview_title": "Сплит преглед",
-        "split_preview_found_fmt": "Најдени се {count} сегменти.",
-        "split_preview_confirm_fmt": "Кликнете Потврди за да го поделите овој циклус на {count} посебни циклуси.",
-        "merge_preview_title": "Преглед на спојување",
-        "merge_preview_joining_fmt": "Се придружува на {count} циклуси. Празнините ќе се пополнат со отчитувања од 0W.",
-        "editor_delete_preview_title": "Преглед на бришење",
-        "editor_delete_preview_intro": "Избраните циклуси ќе бидат трајно избришани:",
-        "editor_delete_preview_confirm": "Кликнете Потврди за трајно да ги избришете овие записи за циклуси.",
-        "no_power_preview": "*Нема достапни податоци за напојување за преглед.*",
-        "profile_comparison": "Споредба на профили",
-        "actual_cycle_label": "Овој циклус (вистински)",
-        "storage_usage_header": "Употреба на складиште",
-        "storage_file_size": "Големина на датотека",
-        "storage_cycles": "Циклуси",
-        "storage_profiles": "Профили",
-        "storage_debug_traces": "Дебагирање траги",
-        "overview_suffix": "Преглед",
-        "phase_preview_for_profile": "Фазен преглед за профилот",
-        "current_ranges_header": "Тековни опсези",
-        "assign_phases_help": "Користете ги дејствата подолу за додавање, уредување, бришење или зачувување опсези.",
-        "profile_summary_header": "Резиме на профилот",
-        "recent_cycles_header": "Неодамнешни циклуси",
-        "trim_cycle_preview_title": "Преглед на циклус на трим",
-        "trim_cycle_preview_no_data": "Нема достапни податоци за напојувањето за овој циклус.",
-        "trim_cycle_preview_kept_suffix": "се чуваат",
-        "table_program": "Програма",
-        "table_when": "Кога",
-        "table_length": "Траење",
-        "table_match": "Совпаѓање",
-        "table_profile": "Профил",
-        "table_cycles": "Циклуси",
-        "table_avg_length": "Прос. траење",
-        "table_last_run": "Последно извршување",
-        "table_avg_energy": "Прос. енергија",
-        "table_detected_program": "Откриена програма",
-        "table_confidence": "Доверба",
-        "table_reported": "Пријавено"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Поделете циклус (најдете празнини)",
-        "merge": "Циклуси на спојување (спојување на фрагменти)",
-        "delete": "Избриши циклус(и)"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Автоматски откриј неактивни празнини",
-        "manual": "Рачни временски ознаки"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Одржување: Повторна обработка и оптимизирање на податоците",
-        "clear_debug_data": "Исчистете ги податоците за отстранување грешки (ослободете простор)",
-        "wipe_history": "Избришете ги СИТЕ податоци за овој уред (неповратно)",
-        "export_import": "Извезете/Увезете JSON со поставки (копирајте/залепете)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "Извези ги сите податоци",
-        "import": "Увези/Спојувај податоци"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Автоматско обележување на старите циклуси",
-        "select_cycle_to_label": "Означи специфичен циклус",
-        "select_cycle_to_delete": "Избриши циклус",
-        "interactive_editor": "Спој/Сплит интерактивен уредник",
-        "trim_cycle": "Податоци за скратување на циклусот"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Креирај нов профил",
-        "edit_profile": "Уреди/Преименувајте го профилот",
-        "delete_profile": "Избришете го профилот",
-        "profile_stats": "Статистика на профилот",
-        "cleanup_profile": "Исчистете ја историјата - графикон и избришете",
-        "assign_phases": "Доделете опсези на фази"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Креирај нова фаза",
-        "edit_custom_phase": "Уреди фаза",
-        "delete_custom_phase": "Избриши фаза"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Именувајте и применувајте фази",
-        "cancel": "Вратете се назад без промени"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Додадете опсег на фази",
-        "edit_range": "Уреди опсег на фази",
-        "delete_range": "Избришете опсег на фази",
-        "clear_ranges": "Исчистете ги сите опсези",
-        "auto_detect_ranges": "Фази за автоматско откривање",
-        "save_ranges": "Зачувај и Врати"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Освежи статус",
-        "stop_recording": "Стоп за снимање (Зачувај и обработувај)",
-        "start_recording": "Започнете ново снимање",
-        "process_recording": "Обработете го последното снимање (Скратете и зачувајте)",
-        "discard_recording": "Отфрли ја последната снимка"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Креирај нов профил",
-        "existing_profile": "Додај во постоечкиот профил",
-        "discard": "Отфрли го снимањето"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Потврди - Правилно откривање",
-        "correct": "Точно - Изберете Програма/Времетраење",
-        "ignore": "Игнорирај - Лажно позитивен/бучен циклус",
-        "delete": "Избриши - Отстрани од историјата"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Поставете почетна точка",
-        "set_end": "Поставете крајна точка",
-        "reset": "Ресетирање на целосно времетраење",
-        "apply": "Примени скратување",
-        "cancel": "Откажи"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "Тековна фаза"
       },
-      "wash_phase": {
-        "name": "Фаза"
-      },
       "profile_cycle_count": {
         "name": "Број на профил {profile_name}",
         "unit_of_measurement": "циклуси"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s мора да биде поголем од trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "Нема активен циклус за паузирање или продолжување."
     }
   },
   "panel": {
     "hdr": {
-      "panel_settings": "Поставки на панелот (сите корисници)",
-      "ml_learned": "Што научи WashData",
-      "status": "Статус",
-      "live_power": "Моќност во живо",
-      "manual_recording": "Рачно снимање",
-      "tools_and_data": "Алатки и податоци",
-      "phase_catalog": "Фазен каталог",
-      "storage_stats": "Статистика за складирање",
-      "maintenance": "Акции за одржување",
-      "export_import": "Извоз / увоз",
       "logs": "Дневници",
-      "my_preferences": "Мои преференции",
+      "toggle_sidebar": "Вклучете ја страничната лента на Home Assistant",
       "access_control": "Контрола на пристап",
-      "ml_smart_learning": "Паметно учење",
-      "ml_settings_card": "Поставки",
-      "ml_matching_tuning": "Фино приспособување за совпаѓање на програма",
-      "display": "Приказ",
-      "status_graph": "График на статус",
-      "diagnostics_pref": "Дијагностика",
-      "logs_diagnostics": "Дијагностика",
-      "process_history": "Историја на процесот",
-      "clear_debug": "Исчисти ги трагите за дебагирање",
-      "wipe_history": "Избриши ја историјата",
-      "automations": "Автоматизации",
-      "automation_open": "Отвори во уредникот за автоматизација",
-      "automation_delete": "Избриши ја оваа автоматизација",
+      "automation_delete": "Избришете ја оваа автоматизација",
       "automation_needs_review": "Овој циклус бара преглед",
-      "automation_review_this_cycle": "Прегледај го овој циклус",
-      "no_automations": "Сè уште нема автоматизација на овој уред."
+      "automation_open": "Отворете во уредникот за автоматизација",
+      "automation_review_this_cycle": "Прегледајте го овој циклус",
+      "automations": "Автомати",
+      "clear_debug": "Исчистете ги трагите за отстранување грешки",
+      "diagnostics_pref": "Дијагностика",
+      "display": "Приказ",
+      "export_import": "Извоз / увоз",
+      "live_power": "Жива моќ",
+      "logs_diagnostics": "Дијагностика",
+      "maintenance": "Акции за одржување",
+      "manual_recording": "Рачно снимање",
+      "ml_learned": "Што научи WashData",
+      "ml_matching_tuning": "Фино подесување што одговара на програмата",
+      "ml_settings_card": "Поставки",
+      "ml_smart_learning": "Паметно учење",
+      "my_preferences": "Мои преференции",
+      "no_automations": "Сè уште нема автоматизација на овој уред.",
+      "panel_settings": "Поставки на панелот",
+      "phase_catalog": "Фазен каталог",
+      "process_history": "Историја на процесот",
+      "status": "Статус",
+      "status_graph": "График на статус",
+      "storage_stats": "Статистика за складирање",
+      "tools_and_data": "Алатки и податоци",
+      "wipe_history": "Избришете ја историјата"
     },
     "lbl": {
-      "manual_duration": "Рачно времетраење (мин., изборно)",
+      "timer_min": "мин",
+      "timer_msg_placeholder": "Порака (изборно, {device}/{program}/{minutes})",
+      "timer_auto_pause": "Автоматска пауза",
+      "label": "Совпаден програм",
+      "actions": "Акции",
+      "activity": "Активност",
+      "administrators": "Администраторите",
+      "auto_fine_tune_off": "автоматско фино исклучување",
+      "clock_time": "Време на часовникот",
+      "compare_profiles": "Споредете со профили",
+      "confidence": "Доверба",
+      "confidence_threshold": "Праг на доверба",
       "correct_duration": "Точно времетраење (мин., изборно)",
-      "default_tab": "Стандардна картичка при отворање на панелот",
+      "correct_profile": "Точен профил",
+      "cost": "Цена",
+      "create_new_profile": "+ Направете нов профил…",
+      "cycle_date_display": "Приказ на датум на циклус",
+      "cycle_health": "Здравје на циклусот",
+      "cycles_count": "Циклуси",
+      "date": "Датум",
+      "debug_traces": "Дебагирање траги",
+      "default": "Стандардно",
       "default_access_level": "Стандардно ниво за корисници кои не се наведени подолу",
+      "default_other": "Стандардно (други уреди)",
+      "default_tab": "Стандардна картичка при отворање на панелот",
+      "description": "Опис",
+      "duration": "Времетраење",
+      "emphasis": "Нагласување",
+      "enable_access_control": "Овозможи контрола на пристап по корисник",
+      "energy": "Енергија",
+      "expected_duration": "Очекувано времетраење (мин.)",
+      "file_kb": "Датотека (kB)",
+      "gap_s": "Јаз (и)",
+      "head_trim": "Намалување на главата (и)",
+      "health": "Здравје",
+      "hide_tabs": "Скриј јазичиња за не-администратори",
+      "in_use": "Во употреба",
+      "json_data": "JSON податоци",
+      "last_checked": "Последно проверено:",
+      "load_from_file": "Вчитај од датотека",
+      "manual_duration": "Рачно времетраење (мин., изборно)",
+      "mode_existing_profile": "Додај во постоечкиот профил",
+      "mode_new_profile": "Креирај нов профил",
+      "new_profile_name": "Ново име на профил",
+      "panel_default_tab": "Стандардна картичка",
+      "phase_name": "Име",
+      "power": "Моќ",
+      "profile": "Профил",
+      "profile_name": "Име на профилот",
+      "progress": "Напредок",
+      "read_only": "Само за читање",
+      "ref_cycle": "Референтен циклус (опционално)",
+      "refresh_interval": "Интервал (и) на освежување",
+      "remaining": "Преостанати",
+      "remove_label": "- Отстрани ја етикетата -",
+      "rename_profile": "Преименувајте го профилот",
+      "resulting_profile": "Резултат на профилот",
+      "save_mode": "Режим за зачувување",
+      "seconds_from_start": "Секунди од почеток",
+      "select_profile": "Изберете Профил",
+      "show_debug": "Прикажи картичка за отстранување грешки во живо на натпреварот на страницата Статус (доверба, нејасност, најдобри кандидати)",
       "show_expected": "Прикажи очекувано преклопување на кривата (совпаднат профил, портокалова)",
       "show_raw": "Прикажи необработени отчитувања на сензорот (неизмазнет, ​​сив)",
-      "show_debug": "Прикажи картичка за отстранување грешки во живо на натпреварот на страницата Статус (доверба, нејасност, најдобри кандидати)",
-      "power": "Моќ",
-      "progress": "Напредок",
-      "remaining": "Преостанато",
-      "duration": "Времетраење",
-      "energy": "Енергија",
-      "profile": "Профил",
       "status": "Статус",
-      "date": "Датум",
-      "confidence": "Точност",
-      "health": "Здравје",
-      "cost": "Цена",
-      "program": "Програма",
-      "cycle_health": "Здравје на циклусот",
-      "activity": "Активност",
+      "tail_trim": "Намалување на опашката (и)",
+      "ungrouped": "Негрупирани",
       "unlabelled": "Неозначено",
       "unlabelled_paren": "(неозначен)",
-      "emphasis": "Нагласување",
-      "default": "Стандардно",
-      "in_use": "Во употреба",
-      "profile_name": "Име на профилот",
-      "ref_cycle": "Референтен циклус (опционално)",
-      "phase_name": "Име на фаза",
-      "description": "Опис",
-      "correct_profile": "Точен профил",
-      "load_from_file": "Вчитај од датотека",
-      "json_data": "JSON податоци",
-      "expected_duration": "Очекувано времетраење (мин.)",
-      "rename_profile": "Преименувај го профилот",
-      "select_profile": "Избери профил",
-      "confidence_threshold": "Праг на доверба",
-      "resulting_profile": "Резултат на профилот",
-      "new_profile_name": "Ново име на профил",
-      "save_mode": "Режим за зачувување",
-      "head_trim": "Скратување на почетокот (с)",
-      "tail_trim": "Скратување на крајот (с)",
-      "gap_s": "Пауза (с)",
-      "start": "Почеток",
-      "end": "Крај",
-      "quality": "Квалитет",
-      "golden_reference": "Снимен референтен циклус",
-      "compare_profiles": "Спореди со профили",
-      "tags": "Тагови",
-      "notes": "Белешки",
-      "cycle_date_display": "Приказ на датум на циклус",
-      "refresh_interval": "Интервал (и) на освежување",
-      "panel_default_tab": "Стандардна картичка",
-      "hide_tabs": "Скриј јазичиња за не-администратори",
-      "enable_access_control": "Овозможи контрола на пристап по корисник",
-      "administrators": "Администраторите",
-      "default_other": "Стандардно (други уреди)",
-      "mode_new_profile": "Креирај нов профил",
-      "mode_existing_profile": "Додај во постоечкиот профил",
-      "auto_fine_tune_on": "автоматско дотерување вклучено (околу {hour}:00 часот)",
-      "auto_fine_tune_off": "автоматско фино исклучување",
-      "last_checked": "Последно проверено:",
-      "remove_label": "- Отстрани ја етикетата -",
-      "create_new_profile": "+ Направи нов профил…",
-      "read_only": "Само за читање",
-      "actions": "Акции",
-      "cycles_count": "Циклуси",
-      "debug_traces": "Дебагирање траги",
-      "file_kb": "Датотека (kB)",
-      "label": "Етикета",
-      "seconds_from_start": "Секунди од почеток",
-      "clock_time": "Време на часовникот",
-      "ungrouped": "Негрупирани"
-    },
-    "toast": {
-      "settings_saved": "Зачувани се поставките; интеграција повторно вчитување",
-      "import_successful": "Увозот е успешен; интеграција повторно вчитување",
-      "suggestions_applied": "Применети предлози; интеграција повторно вчитување",
-      "ml_training_no_improvement": "Обуката е завршена: основната линија е задржана (без подобрување)",
-      "could_not_load_cycle": "Не може да се вчита циклусот: {error}",
-      "preferences_saved": "Поставките се зачувани",
-      "panel_settings_saved": "Поставките на панелот се зачувани",
-      "access_saved": "Контролата за пристап е зачувана",
-      "profile_created": "Профилот „{name}“ е создаден",
-      "profile_deleted": "Профилот „{name}“ е избришан",
-      "profile_renamed": "Профилот е преименуван",
-      "phases_saved": "Фазите се зачувани",
-      "phase_created": "Создадена е фазата „{name}“.",
-      "phase_deleted": "Фазата „{name}“ е избришана",
-      "phase_updated": "Фазата е ажурирана",
-      "recording_started": "Снимањето започна",
-      "recording_stopped": "Снимањето прекина",
-      "recording_discarded": "Снимањето е отфрлено",
-      "recording_saved": "Снимката е зачувана на профилот",
-      "export_downloaded": "Преземено е извоз",
-      "logs_exported": "Извезени дневници",
-      "envelopes_rebuilt": "Пликовите повторно изградени",
-      "envelope_rebuilt": "Пликот повторно изграден",
-      "suggestions_dismissed": "Предлозите се отфрлени",
-      "auto_label_complete": "Автоматската етикета е завршена",
-      "cycle_labelled": "Циклус означен",
-      "cycle_deleted": "Циклусот е избришан",
-      "cycles_deleted": "{count} циклус(и) се избришани",
-      "cycle_trimmed": "Циклус скратен",
-      "cycles_merged": "Циклусите се споија",
-      "review_saved": "Прегледот е зачуван",
-      "feedback_confirmed": "Повратните информации се потврдени",
-      "feedback_dismissed": "Повратните информации се отфрлени",
-      "feedback_all_dismissed": "Сите повратни информации се отфрлени",
-      "correction_submitted": "Исправката е поднесена",
-      "group_saved": "Групата е зачувана",
-      "group_deleted": "Групата е избришана",
-      "automation_deleted": "Автоматизацијата е избришана",
-      "legacy_removed": "Дејствата за наследство се отстранети",
-      "cycle_paused": "Циклусот е паузиран",
-      "cycle_resumed": "Циклусот продолжи",
-      "cycle_force_stopped": "Циклусот со сила е запрен",
-      "ml_training_promoted": "Обуката е завршена: промовирани {count} модели",
-      "matching_reverted": "Соодветните тежини се вратија на стандардни",
-      "models_reverted": "Моделите на уредот се вратија на основната линија",
-      "analysis_complete": "Анализата е завршена: {count} предлог(и)",
-      "analysis_complete_none": "Анализата е завршена: нема нови предлози",
-      "debug_cleared": "Исчистени {count} траги за отстранување грешки",
-      "all_wiped": "Сите податоци се избришани",
-      "no_split_found": "Не се пронајдени празни празнини за да се подели",
-      "group_name_required": "Името на групата е потребно",
-      "min_2_profiles": "Избери најмалку 2 профили за група",
-      "profile_name_required": "Потребно е името на профилот",
-      "phase_name_required": "Потребно е име на фаза",
-      "name_required": "Потребно е име",
-      "json_required": "Потребни се податоци за JSON",
-      "save_failed": "Зачувувањето не успеа: {error}",
-      "delete_failed": "Бришењето не успеа: {error}",
-      "apply_failed": "Аплицирањето не успеа: {error}",
-      "rebuild_failed": "Обновата не успеа: {error}",
-      "start_failed": "Почетокот не успеа: {error}",
-      "stop_failed": "Стоп не успеа: {error}",
-      "discard_failed": "Отфрлањето не успеа: {error}",
-      "trim_failed": "Скратувањето не успеа: {error}",
-      "split_failed": "Поделбата не успеа: {error}",
-      "merge_failed": "Спојувањето не успеа: {error}",
-      "create_failed": "Креирањето не успеа: {error}",
-      "update_failed": "Ажурирањето не успеа: {error}",
-      "rename_failed": "Преименувањето не успеа: {error}",
-      "revert_failed": "Враќањето не успеа: {error}",
-      "training_failed": "Обуката не успеа: {error}",
-      "export_failed": "Извозот не успеа: {error}",
-      "import_failed": "Увозот не успеа: {error}",
-      "auto_label_failed": "Автоматската ознака не успеа: {error}",
-      "analysis_failed": "Анализата не успеа: {error}",
-      "auto_detect_failed": "Автоматското откривање не успеа: {error}",
-      "error": "Грешка: {error}",
-      "pause_failed": "Паузата не успеа: {error}",
-      "label_failed": "Етикетата не успеа: {error}",
-      "invalid_json": "„{key}” не е валиден JSON — поправи го или исчисти го полето пред да зачуваш.",
-      "processed": "Обработено {bits}",
-      "split_complete": "Поделено на {count} циклуси"
-    },
-    "msg": {
-      "no_devices": "Сè уште нема конфигурирани уреди за WashData.",
-      "live_chart_loading": "Табелата за напојување во живо се појавува кога пристигнуваат читањата.",
-      "no_profiles_yet": "Сè уште нема профили. Создади еден од означен циклус.",
-      "no_logs": "Сè уште нема записи од дневници во бафер.",
-      "no_envelope": "Сè уште нема обвивка — обнови по означувањето на циклусите.",
-      "no_cycles_profile": "Нема циклуси за овој профил.",
-      "ml_learned_intro": "Модели фино подесени на оваа машина. Сè што не е наведено го користи доверливиот вграден модел.",
-      "ml_intro": "WashData се испорачува со паметни модели кои детектираат циклуси, совпаѓаат програми и проценуваат време и енергија - тие работат надвор од кутијата.",
-      "matching_tuning_intro": "Кога учи, WashData приспособува и колку совпаѓањето на програмата тежи обликот на циклусот наспроти неговото времетраење и енергија.",
-      "merge_intro": "Избраните циклуси се комбинираат во еден (хронолошки редослед; празнини исполнети со 0 W). Изберете го добиениот профил.",
-      "see_recorder": "Погледни го виџетот за снимање подолу",
-      "review_to_cycles": "Отвори го редот за преглед на циклуси",
-      "no_device_selected": "Нема избран уред.",
-      "loading": "Се вчитува…",
-      "loading_settings": "Се вчитуваат поставките…",
-      "no_cycles_match": "Ниту еден циклус не одговара на тековниот филтер.",
-      "no_cycles_yet": "Сè уште нема снимени циклуси.",
-      "no_phases": "Не се дефинирани фази.",
-      "no_phases_assigned": "Не се доделени фази.",
-      "no_split_points": "Сè уште нема поделени поени.",
-      "no_envelope_overlay": "Нема достапен плик за преклопување.",
-      "no_other_users": "Не се пронајдени други корисници на Home Assistant.",
-      "maintenance_requires_access": "Одржувањето и извозот/увозот бараат целосен пристап.",
-      "loading_curve": "Се вчитува кривата…",
-      "compare_selected_cycles": "Избрани циклуси (цврсти) - прикажи / скриј",
-      "compare_overlay_profiles": "Преклопени профили (бледо)",
-      "no_profiles_compare": "Нема профили за споредба.",
-      "saving_triggers_reload": "Зачувувањето активира повторно вчитување на интеграцијата. Ентитетите на HA може накратко да се покажат како недостапни.",
-      "prefs_personal": "Овие се однесуваат само на вашата сметка на Home Assistant.",
-      "no_match_yet": "Сè уште нема обид за совпаѓање — ова се пополнува за текот на работниот циклус.",
-      "no_fine_tuned": "Сè уште ништо не е дотерано - WashData ги користи своите вградени модели.",
-      "ml_settings_intro": "Два независни прекинувачи: едниот ги применува моделите додека работи циклусот, другиот дозволува WashData фино да ги прилагоди на вашата машина со текот на времето.",
-      "phase_catalog_intro": "Именувани сегменти од циклусот (предмиење, загревање, центрифугирање...). Додели ги на профил од неговата контролна табла.",
-      "phase_ranges_intro": "Опсегот на фази (минути од почетокот на циклусот) се преклопени на просечната крива. Уреди ги вредностите за директен преглед.",
-      "cleanup_intro": "Секој означен циклус е преклопен. Штиклирај ги одалечените и избриши ги за да го исчистиш профилот.",
-      "split_intro": "Кликни на графиконот за да додадеш или отстраниш точка на поделба, или автоматски открие по паузите во мирување.",
-      "trim_intro": "Повлечи ги црвените рачки или внеси вредности. Сè што е надвор од прозорецот се отстранува.",
-      "import_intro": "Вчитај извезена датотека или залепи JSON содржина подолу.",
-      "auto_label_intro": "Додели профили на неозначени циклуси чијашто доверба за совпаѓање го надминува прагот.",
-      "enough_data": "Доволно податоци за учење ({current}/{min} циклуси).",
-      "collecting_data": "Собирање податоци — уште {need} циклус{plural} пред да започне финото прилагодување ({current}/{min}).",
-      "updated": "Ажурирано {time}",
-      "appliance_monitor": "Монитор на апаратот",
-      "ml_loading": "се вчитува ML…",
-      "review_in_settings": "Преглед во Поставки",
-      "storage_diagnostics": "Статистика за складирање, одржување, извоз/увоз",
-      "recent_logs": "Неодамнешни записи ha_washdata",
-      "preferences_adv": "Преференци",
-      "preferences_admin": "Преференци, панел и контрола на пристап",
-      "pending_feedback": "Во очекување на повратни информации за откривање",
-      "recording_in_progress": "Снимањето е во тек",
-      "no_profiles_yet_short": "Сè уште нема профили.",
-      "unsure_detected_prefix": "WashData не е сигурен дека е откриен",
-      "no_suggestions": "Нема активни предлози.",
-      "no_profiles_overlay": "Нема профили за преклопување.",
-      "compare_cycles_title": "Споредба на {count} циклуси",
-      "profiles_intro": "Кликни на профил за статистики, фази и чистење. Групирај речиси идентични програми (иста форма/траење, различна температура или центрифугирање) за да може совпаѓањето сигурно да разликува меѓу нив.",
-      "search_placeholder": "Пребарај поставки…",
-      "automations_intro": "WashData испраќа {start} / {end} настани и изложува ентитети, па известувањата и акциите најдобро се изградуваат како нормални автоматизации на Home Assistant. Автоматизациите кои го користат овој уред се прикажани подолу.",
-      "notify_services_hint": "Употреби ги ID-ата на услугите на {entity} (за повеќе, одвоени со запирка). Шаблонски променливи: {vars}.",
-      "rbac_hint": "Кога е исклучено, секој корисник на Home Assistant има целосен пристап (стандардно). Администраторите секогаш имаат целосен пристап и можат да управуваат со сите.",
-      "feedback_prompt": "Потврдете дали е точно препознаено, исправете ја програмата или игнорирајте."
-    },
-    "section": {
-      "basic": {
-        "intro": "Основниот идентитет и најважните работи што им се потребни на повеќето поставки.",
-        "label": "Основни"
-      },
-      "detection": {
-        "intro": "Како се открива циклусот како почнат, работи и завршен.",
-        "label": "Откривање"
-      },
-      "matching": {
-        "intro": "Како завршените циклуси се совпаѓаат со научените профили и означени.",
-        "label": "Совпаѓање"
-      },
-      "timing": {
-        "intro": "Каденција во заднина, офлајн чувар и домаќинство.",
-        "label": "Временски поставки и чувар"
-      },
-      "anti_wrinkle": {
-        "intro": "Режимот против брчки ги открива пулсирањата на машината за сушење по главната термичка фаза.",
-        "label": "Против брчки"
-      },
-      "delay": {
-        "intro": "Откривањето на одложен почеток идентификува кога апаратот е напојуван, но сè уште не го започнал својот циклус.",
-        "label": "Одложен почеток"
-      },
-      "triggers": {
-        "intro": "Изборни надворешни сигнали: крајно активирање, сензор за врата, прекинувач за пауза и потсетник за растоварување.",
-        "label": "Активирања и врата"
-      },
-      "notifications": {
-        "label": "Известувања",
-        "intro": "Конфигурирај кога и како ќе бидеш известен за настани од циклусот."
-      },
-      "ml_training": {
-        "label": "МЛ обука",
-        "intro": "Паметни модели кои го персонализираат откривањето и тајмингот за овој уред."
-      }
-    },
-    "setting": {
-      "auto_maintenance": {
-        "label": "Автоматско одржување (ноќно чистење)"
-      },
-      "external_end_trigger_enabled": {
-        "label": "Овозможи надворешно крајно активирање"
-      },
-      "external_end_trigger_inverted": {
-        "label": "Преврти надворешен активирач (активирањето е исклучено)"
-      },
-      "pause_cuts_power": {
-        "label": "Паузата го намалува и напојувањето (преку прекинувачот)"
-      },
-      "notify_people": {
-        "label": "Луѓе (за Само кога дома)"
-      },
-      "notify_only_when_home": {
-        "label": "Известувај само кога дома"
-      },
-      "energy_price_static": {
-        "label": "Цена на статичка енергија (по kWh)"
-      },
-      "enable_ml_models": {
-        "label": "Примени паметни модели за текот на циклус"
-      },
-      "ml_training_enabled": {
-        "label": "Учи од оваа машина"
-      },
-      "name": {
-        "label": "Име на уред"
-      },
-      "device_type": {
-        "label": "Тип на уред"
-      },
-      "power_sensor": {
-        "label": "Сензор за напојување"
-      },
-      "min_power": {
-        "label": "Минимална моќност"
-      },
-      "off_delay": {
-        "label": "Исклучено одложување"
-      },
-      "linked_device": {
-        "label": "Група под уред"
-      },
-      "start_threshold_w": {
-        "label": "Праг за почеток"
-      },
-      "stop_threshold_w": {
-        "label": "Стоп праг"
-      },
-      "min_off_gap": {
-        "label": "Мин исклучен јаз"
-      },
-      "start_duration_threshold": {
-        "label": "Почетно времетраење"
-      },
-      "start_energy_threshold": {
-        "label": "Стартна енергија"
-      },
-      "completion_min_seconds": {
-        "label": "Времетраење на минимум циклус"
-      },
-      "running_dead_zone": {
-        "label": "Работна мртва зона"
-      },
-      "end_energy_threshold": {
-        "label": "Крајна енергија"
-      },
-      "end_repeat_count": {
-        "label": "Крај на повторено броење"
-      },
-      "sampling_interval": {
-        "label": "Интервал на земање примероци"
-      },
-      "smoothing_window": {
-        "label": "Прозорец за измазнување"
-      },
-      "abrupt_drop_watts": {
-        "label": "Нагло паѓање"
-      },
-      "abrupt_drop_ratio": {
-        "label": "Сооднос на нагло паѓање"
-      },
-      "profile_match_threshold": {
-        "label": "Праг на совпаѓање"
-      },
-      "profile_unmatch_threshold": {
-        "label": "Несовпаѓање на прагот"
-      },
-      "profile_match_interval": {
-        "label": "Интервал на совпаѓање"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "Сооднос на минимум времетраење"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "Максимален сооднос на времетраење"
-      },
-      "profile_duration_tolerance": {
-        "label": "Толеранција на времетраење на профилот"
-      },
-      "duration_tolerance": {
-        "label": "Толеранција на проценката"
-      },
-      "auto_label_confidence": {
-        "label": "Доверба за автоматско обележување"
-      },
-      "learning_confidence": {
-        "label": "Доверба за учење"
-      },
-      "suppress_feedback_notifications": {
-        "label": "Потисни ги известувањата за повратни информации"
-      },
-      "watchdog_interval": {
-        "label": "Интервал на чувар"
-      },
-      "no_update_active_timeout": {
-        "label": "Истекување на времето без ажурирање"
-      },
-      "progress_reset_delay": {
-        "label": "Одложување на ресетирање на напредокот"
-      },
-      "expose_debug_entities": {
-        "label": "Изложи ги ентитетите за дебагирање"
-      },
-      "save_debug_traces": {
-        "label": "Зачувај траги за отстранување грешки"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "Овозможи откривање против брчки"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "Макс моќ против брчки"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "Максимално времетраење"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "Излезен праг на моќност"
-      },
-      "delay_start_detect_enabled": {
-        "label": "Овозможи откривање на одложен почеток"
-      },
-      "delay_confirm_seconds": {
-        "label": "Потврди секунди"
-      },
-      "delay_timeout_hours": {
-        "label": "Часови за истекување"
-      },
-      "external_end_trigger": {
-        "label": "Надворешен ентитет за активирање"
-      },
-      "door_sensor_entity": {
-        "label": "Ентитет на сензор за врата"
-      },
-      "switch_entity": {
-        "label": "Префрли ентитет"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "Растоварување Nag Delay"
-      },
-      "pump_stuck_duration": {
-        "label": "Времетраење на заглавување на пумпата"
-      },
-      "notify_start_services": {
-        "label": "Услуги за почеток"
-      },
-      "notify_finish_services": {
-        "label": "Услуги за завршување"
-      },
-      "notify_live_services": {
-        "label": "Услуги за напредок во живо"
-      },
-      "notify_fire_events": {
-        "label": "Испрати HA настани за известувања"
-      },
-      "notify_before_end_minutes": {
-        "label": "Предупредување за завршување"
-      },
-      "notify_live_interval_seconds": {
-        "label": "Интервал за ажурирање во живо"
-      },
-      "notify_live_overrun_percent": {
-        "label": "Надминување во живо % пред предупредување"
-      },
-      "notify_live_chronometer": {
-        "label": "Користи хронометар во живо"
-      },
-      "notify_timeout_seconds": {
-        "label": "Автоматско отфрли после"
-      },
-      "notify_title": {
-        "label": "Наслов на известување"
-      },
-      "notify_icon": {
-        "label": "Икона за известување"
-      },
-      "notify_start_message": {
-        "label": "Порака за почеток"
-      },
-      "notify_finish_message": {
-        "label": "Порака за завршување"
-      },
-      "notify_pre_complete_message": {
-        "label": "Пред-комплетна порака"
-      },
-      "notify_reminder_message": {
-        "label": "Порака за потсетување"
-      },
-      "notify_channel": {
-        "label": "Канал на Android (почеток/во живо)"
-      },
-      "notify_finish_channel": {
-        "label": "Android Канал (заврши)"
-      },
-      "energy_price_entity": {
-        "label": "Ентитет за цени на енергија"
-      },
-      "ml_training_hour": {
-        "label": "Учи во час"
-      },
-      "ml_training_min_cycles": {
-        "label": "Потребни циклуси за почеток"
-      },
-      "ml_training_interval_days": {
-        "label": "Проверувај најмногу на секои"
-      }
-    },
-    "tab": {
-      "status": "Преглед",
-      "history": "Циклуси",
-      "profiles": "Профили",
-      "settings": "Поставки",
-      "ml": "МЛ обука",
-      "advanced": "Напредно",
-      "diagnostics": "Дијагностика",
-      "pp_overview": "Преглед",
-      "pp_phases": "Фази",
-      "pp_cleanup": "Чистење",
-      "pp_manage": "Управувај",
-      "subtab_profiles": "Профили",
-      "subtab_phase_catalog": "Фазен каталог"
+      "expected": "Очекувано",
+      "raw_socket": "Суров приклучок",
+      "artifact_interruption": "Прекин",
+      "artifact_low_power": "Ниска моќ",
+      "artifact_high_power": "Висока моќ",
+      "artifact_anomaly": "Аномалија"
     },
     "btn": {
-      "save": "Зачувај",
-      "cancel": "Откажи",
-      "delete": "Избриши",
-      "close": "Затвори",
-      "edit": "Уреди",
-      "add": "Додади",
-      "rebuild": "Обнови ги обвивките",
-      "record": "Започни снимање",
-      "compare": "Спореди",
-      "confirm": "Потврди",
-      "discard": "Отфрли",
-      "export": "Извези",
-      "import": "Увези",
-      "merge": "Спои",
-      "apply": "Примени",
-      "refresh": "Освежи",
-      "create": "Креирај",
-      "select": "Избери",
-      "done": "Готово",
-      "reset": "Ресетирај",
-      "trim": "Намали",
-      "split": "Подели",
-      "review": "Прегледај",
-      "inspect": "Инспектирај",
-      "label": "Означи",
-      "save_settings": "Зачувај ги поставките",
-      "new_profile": "+ Нов профил",
-      "new_group": "+ Нова група",
-      "apply_label": "Примени етикета",
-      "run_auto_label": "Стартувај автоматско означување",
-      "save_review": "Зачувај преглед",
-      "apply_trim": "Примени скратување",
-      "apply_split": "Примени поделба",
-      "process_recording": "Зачувај снимање",
-      "stop": "Запри",
-      "process": "Обработи",
-      "add_device": "+ Додај уред",
-      "train_now": "Обучи сега",
-      "reset_to_defaults": "Ресетирај на стандардни",
-      "reset_to_builtin": "Ресетирај на вградени модели",
-      "save_preferences": "Зачувај преференции",
-      "save_panel_settings": "Зачувај ги поставките на панелот",
-      "save_access_control": "Зачувај контрола на пристап",
-      "auto_label_cycles": "Автоматски означи циклуси",
-      "run_analysis": "🔍 Изврши анализа на предлози",
-      "apply_all": "Примени ги сите",
-      "show_only": "Прикажи само",
-      "dismiss": "Отфрли",
-      "dismiss_all": "Отфрли ги сите",
-      "process_history": "Обработи сега",
-      "clear_debug": "Исчисти ги трагите за дебагирање",
-      "wipe_all": "Избриши ги сите податоци",
-      "export_json": "Извези во JSON",
-      "import_json": "Увези од JSON",
-      "correct": "Поправи…",
-      "ignore": "Игнорирај",
-      "add_phase": "+ Додај фаза",
-      "new_phase": "+ Нова фаза",
-      "delete_profile": "Избриши го профилот",
-      "rebuild_envelope": "Обнови ја обвивката",
-      "create_profile": "+ Направи профил",
-      "rec_stop": "Запри",
-      "pause_cycle": "Пауза",
+      "add_timer": "+ Додај тајмер",
+      "remove_timer": "Отстранете го тајмерот",
+      "add_device_tip": "Додадете друг уред WashData",
+      "delete_group_tip": "Избришете ја само оваа група - профилите на членовите се чуваат",
+      "run_analysis_tip": "Анализирајте ги вашите снимени циклуси сега и освежете ги предлозите за подесување",
+      "reset_ml_models_tip": "Отфрлете ги фино подесените модели и вратете се на вградените. WashData може повторно да ги научи подоцна.",
       "resume_cycle": "Продолжи",
-      "force_stop": "Присилно запри",
-      "save_phases": "Зачувај фази",
+      "add_device": "+ Додај уред",
+      "add_phase": "+ Додај фаза",
+      "apply_all": "Примени ги сите",
+      "apply_label": "Примени етикета",
+      "apply_split": "Примени Сплит",
+      "apply_trim": "Нанесете го Trim",
       "auto_detect_split": "Автоматско откривање",
-      "clear_splits": "Исчисти",
-      "submit_correction": "Поднеси корекција",
-      "import_overwrite": "Увези (ги препишува податоците)",
-      "use": "Користи",
-      "manage": "Управувај",
-      "remove": "Отстрани",
+      "auto_label_cycles": "Циклуси за автоматско обележување",
+      "cancel": "Откажи",
+      "clear_debug": "Исчистете ги податоците за отстранување грешки",
+      "clear_splits": "Јасно",
+      "close": "Затвори",
+      "compare": "Споредете",
+      "confirm": "Потврди",
+      "convert_to_automation": "Претворете во автоматизација",
+      "correct": "Правилно…",
+      "create": "Креирај",
+      "create_profile": "+ Направете профил",
+      "delete": "Избриши",
       "delete_group": "Избриши група",
-      "trim_split": "Намали / Подели",
-      "convert_to_automation": "Претвори во автоматизација",
-      "new_automation": "＋ Нова автоматизација",
+      "delete_profile": "Избришете го профилот",
+      "discard": "Отфрли",
+      "dismiss": "Отфрли",
+      "done": "Готово",
+      "edit": "Уреди",
+      "export": "Извоз",
+      "export_json": "Извези во JSON",
+      "force_stop": "Присилно стопирање",
       "from_template": "Од шаблонот ▾",
-      "on_cycle_started": "Кога циклусот ќе почне",
-      "on_cycle_finished": "Кога циклусот ќе заврши",
-      "save_group": "Зачувај група"
+      "ignore": "Игнорирај",
+      "import_json": "Увезете од JSON",
+      "import_overwrite": "Увези (ги препишува податоците)",
+      "inspect": "Увид",
+      "label": "Етикета",
+      "manage": "Управувај",
+      "merge": "Спојување",
+      "new_automation": "＋ Нова автоматизација",
+      "new_group": "+ Нова група",
+      "new_phase": "+ Нова фаза",
+      "new_profile": "+ Нов профил",
+      "on_cycle_finished": "На циклус заврши",
+      "on_cycle_started": "На циклус започна",
+      "pause_cycle": "Пауза",
+      "process": "Процес",
+      "process_history": "Процесирајте сега",
+      "process_recording": "Зачувај снимање",
+      "rebuild": "Обновете ги пликовите",
+      "rebuild_envelope": "Обновете го пликот",
+      "rec_stop": "Стоп",
+      "record": "Започнете со снимање",
+      "refresh": "Освежи",
+      "remove": "Отстрани",
+      "reset": "Ресетирај",
+      "reset_to_builtin": "Ресетирајте на вградени модели",
+      "reset_to_defaults": "Ресетирање на стандардните",
+      "review": "Преглед",
+      "run_analysis": "🔍 Изврши анализа на предлози",
+      "run_auto_label": "Стартувај Auto-Label",
+      "save": "Зачувај",
+      "save_access_control": "Зачувај контрола на пристап",
+      "save_group": "Зачувај група",
+      "save_panel_settings": "Зачувај ги поставките на панелот",
+      "save_phases": "Зачувај фази",
+      "save_preferences": "Зачувај параметри",
+      "save_review": "Зачувај преглед",
+      "save_settings": "Зачувај ги поставките",
+      "select": "Изберете",
+      "show_only": "Прикажи само",
+      "split": "Сплит",
+      "submit_correction": "Поднесете корекција",
+      "train_now": "Тренирај сега",
+      "trim": "Намали",
+      "trim_split": "Намали / Сплит",
+      "use": "Користете",
+      "wipe_all": "Избришете ги сите податоци"
     },
     "badge": {
+      "golden_cycle": "Снимен референтен циклус",
+      "reviewed": "Прегледано",
+      "feedback_requested": "Се бара повратна информација",
+      "needs_review": "Треба преглед",
+      "overrun": "Трчаше подолго од вообичаено",
+      "artifact_tip": "Откриени се {n} аномалии (на пр. вратата отворена во средината на циклусот) - отворени за да ги видите на графиконот",
+      "poor_fit_tip": "Неконзистентна историја на совпаѓање - размислете за повторно градење на овој профил",
+      "fair_fit_tip": "Умерена конзистентност на совпаѓање - некои циклуси доделени на овој профил имаат пониски оценки за доверба. Обележете повеќе циклуси или повторно снимајте го профилот за да ја подобрите точноста.",
+      "fair_fit": "фер одговара",
       "poor_fit": "лошо вклопување",
-      "fair_fit": "задоволително вклопување",
-      "manual": "(рачно избрано)",
       "auto": "(автоматски откриено)",
-      "improving": "↗ подобрување",
+      "built_in_tag": "вграден",
       "declining": "↘ опаѓање",
+      "improving": "↗ подобрување",
+      "manual": "(рачно избрано)",
       "steady": "→ стабилно",
-      "using_tuned": "Користење на подесени тегови",
       "using_defaults": "Користење на стандардните испорачани вредности",
-      "built_in_tag": "вграден"
-    },
-    "status": {
-      "completed": "Завршено",
-      "interrupted": "Прекинато",
-      "force_stopped": "Присилно запрено",
-      "active": "Активен",
-      "ambiguous": "Двосмислена",
-      "clear": "Јасно",
-      "working": "Работи…",
-      "recording": "Се снима…",
-      "ready": "Подготвен за обработка",
-      "idle": "Неактивен",
-      "auto_detect": "Автоматско откривање",
-      "fine_tuning": "фино подесување сега…",
-      "all_statuses": "Сите статуси"
-    },
-    "ml": {
-      "fit_strong": "Силен",
-      "fit_good": "Добро",
-      "fit_fair": "Задоволително",
-      "fit_weak": "Слабо",
-      "fit_slight": "Мало",
-      "fit_word": "усогласеност",
-      "fine_tuned_at": "фино подесен {when}",
-      "personalized": "● Персонализирано за оваа машина",
-      "builtin_models": "● Користење на вградени модели"
+      "using_tuned": "Користење на подесени тегови"
     },
     "modal": {
-      "label_cycle": "Означи циклус",
+      "merge_cycles": "Спојување на {n} циклуси",
+      "auto_label": "Циклуси за автоматско обележување",
+      "correct_feedback": "Точни повратни информации",
       "create_profile": "Креирај профил",
+      "cycle": "Циклус",
+      "edit_phase": "Фаза на уредување",
+      "import_config": "Увезена конфигурација",
+      "label_cycle": "Циклус на етикети",
       "new_phase": "Нова фаза",
-      "edit_phase": "Уреди фаза",
-      "process_recording": "Обработка на снимањето",
-      "correct_feedback": "Поправи повратни информации",
-      "import_config": "Увоз на конфигурација",
-      "auto_label": "Автоматско означување на циклуси",
-      "cycle": "Циклус"
+      "process_recording": "Процес на снимање"
     },
-    "tag": {
-      "late_start": "Задоцнет почеток",
-      "early_end": "Ран крај",
-      "merged": "Споени циклуси",
-      "split": "Поделен циклус",
-      "noise": "Бучава",
-      "wrong_profile": "Погрешен профил",
-      "sensor_gap": "Сензорска празнина"
+    "msg": {
+      "near_duplicate_cluster": "Откриена е скоро дупликат профилна група. Групирањето овозможува совпаѓањето со сигурност да се избере помеѓу сличните (на пр. иста програма на различна температура/вртење).",
+      "coverage_gap": "последните циклуси немаат соодветни профили ({pct}% од последните 30).",
+      "consider_new_profile": "Размислете за создавање нов профил.",
+      "group_not_cohesive": "Овие профили не се доволно слични за да се групираат веродостојно, така што совпаѓањето ги третира поединечно додека не го отстраните оддалеченото или не ја поделите групата.",
+      "group_modal_help": "Групирајте програми со иста форма што се разликуваат по температура/вртење (времетраењето може да варира). Со совпаѓање се добиваат бодови на групата како еден кандидат, а потоа се избира членот кој најдобро одговара. Изберете најмалку 2; преклопот покажува колку се слични.",
+      "showing_suggestions": "Се прикажува поставката {count} со предлози.",
+      "show_all_settings": "Прикажи ги сите поставки",
+      "tuning_suggestions_available": "{count} предлог за подесување е достапен од набљудуваните циклуси. Тие се појавуваат покрај соодветните полиња.",
+      "legacy_actions_title": "{count} наследено приспособено дејство сè уште работи",
+      "old_actions_warning": "Конфигуриран со стариот уредувач на дејства (сега отстранет). Сè уште пукаат на настани од циклусот, но веќе не може да се уредуваат овде. Претворете ги во нормална автоматизација или отстранете ги.",
+      "no_settings_match": "Нема поставки кои одговараат на „{q}“",
+      "clear_debug_hint": "Отстранете ги зачуваните податоци за отстранување грешки за да ослободите простор.",
+      "wipe_history_warning": "Трајно избришете ги сите циклуси и профили. Не може да се врати.",
+      "export_description": "Извезете ги сите профили и циклуси во JSON или вратете ги од претходен извоз.",
+      "log_buffer_hint": "Најновото прво · ги зачува последните 500 записи ha_washdata од рестартирањето · повлечете го долниот раб за да ја промените големината.",
+      "review_profile_tip": "Програмата за овој циклус е означена како. Ако програмата за автоматско откривање е погрешна, поправете ја овде - етикетирањето учи совпаѓање за идните циклуси.",
+      "review_quality_tip": "Колку е чист овој циклус. Добро = пример за учебник за оваа програма; Лошо = откриено, но бучно или нетипично; Неупотреблив = погрешно откриен (споен, скратен или лажен). Вози на здравствениот резултат и кои циклуси се дозволени за обука на моделот.",
+      "review_recorded_tip": "Означете го ова како рачно избран референтен циклус за неговата програма - иста улога како рачно снимен циклус. Референтните циклуси секогаш се чуваат, се засноваат соодветниот шаблон и никогаш не се испуштаат со чистење. (Ова е „златното“/снимено знаме; и двете се иста работа.)",
+      "review_tags_tip": "Изборни знаменца што опишуваат што тргнало наопаку со овој циклус, така што обуката и чистењето можат да одговорат за тоа.",
+      "review_notes_tip": "Белешки со слободен текст за ваша сопствена референца. Не се користи со совпаѓање или обука.",
+      "review_confirm_help": "Потврдете дали овој циклус е правилно откриен. Вашите рецензии го обучуваат моделот на вашата машина - колку повеќе циклуси потврдувате, толку подобро се совпаѓаат и бодовите за здравјето. Доволно е брзо/добро/лошо.",
+      "review_notes_placeholder": "Забелешки (изборно)",
+      "compare_profiles_tip": "Преклопете ги другите пликови на профили на табелата погоре за да видите кој најдобро одговара на овој циклус.",
+      "artifact_header": "{n} откриени аномалии за време на овој циклус",
+      "artifact_footer": "Нагласено на графиконот погоре. Ова се минливи артефакти (на пр. вратата отворена во средината на циклусот), а не нужно проблеми.",
+      "profile_poor_health_detail": "Циклусите доделени на овој профил имаат неконзистентни форми или мала доверба. Размислете за обнова на пликот или прегледување на означените циклуси.",
+      "trend_duration_longer": "Времетраењето е во тренд подолго ({pct}%/циклус) - неодамнешниот просек {avg}",
+      "trend_duration_shorter": "Времетраењето е во тренд пократко ({pct}%/циклус) - неодамнешниот просек {avg}",
+      "trend_energy_up": "Енергетскиот тренд нагоре ({pct}%/циклус) - неодамнешен просек {avg}",
+      "trend_energy_down": "Енергетскиот тренд надолу ({pct}%/циклус)",
+      "performance_trend": "Тренд на изведба ({n} циклуси)",
+      "maintenance_advisory": "Зголеменото времетраење/енергија може да укаже на потребното одржување на апаратот (на пр. бигор, чистење на филтерот).",
+      "manual_duration_hint": "Просечната/очекуваната должина на циклусот на профилот, што се користи за проценки на преостанатото време. Уредете за да го поставите; оставајќи го непроменет ја задржува моменталната вредност.",
+      "appliance_monitor": "Монитор на апаратот",
+      "auto_label_intro": "Доделете профили на неозначени циклуси чијашто доверба за совпаѓање го брише прагот.",
+      "cleanup_intro": "Секој означен циклус е преклопен. Штиклирајте ги оддалечените и избришете за да го исчистите профилот.",
+      "compare_overlay_profiles": "Преклопени профили (бледо)",
+      "compare_selected_cycles": "Избрани циклуси (цврсти) - прикажи / скриј",
+      "feedback_prompt": "Потврдете дека е точно, поправете ја програмата или игнорирајте.",
+      "import_intro": "Вчитајте извезена датотека или залепете JSON носивост подолу.",
+      "live_chart_loading": "Табелата за напојување во живо се појавува кога пристигнуваат читањата.",
+      "loading": "Се вчитува…",
+      "loading_curve": "Се вчитува кривата…",
+      "loading_settings": "Се вчитуваат поставките…",
+      "maintenance_requires_access": "Одржувањето и извозот/увозот бараат целосен пристап.",
+      "matching_tuning_intro": "Кога учи, WashData приспособува и колку одговарањето на програмата тежи обликот наспроти времетраењето и енергијата.",
+      "merge_intro": "Избраните циклуси се комбинираат во еден (хронолошки редослед; празнини исполнети со 0 W). Изберете го добиениот профил.",
+      "ml_intro": "WashData се испорачува со паметни модели кои работат надвор од кутијата.",
+      "ml_learned_intro": "Модели фино подесени на оваа машина.",
+      "ml_loading": "се вчитува ML…",
+      "ml_settings_intro": "Два независни прекинувачи: едниот ги применува моделите додека работи циклусот, другиот дозволува WashData фино да ги прилагоди на вашата машина со текот на времето.",
+      "no_cycles_match": "Ниту еден циклус не одговара на тековниот филтер.",
+      "no_cycles_profile": "Нема циклуси за овој профил.",
+      "no_cycles_yet": "Сè уште нема снимени циклуси.",
+      "no_device_selected": "Нема избран уред.",
+      "no_devices": "Сè уште нема конфигурирани уреди за WashData.",
+      "no_envelope": "Сè уште нема плико - обновете по циклусите на етикетирање.",
+      "no_envelope_overlay": "Нема достапен плик за преклопување.",
+      "no_fine_tuned": "Сè уште ништо не е дотерано - WashData ги користи своите вградени модели.",
+      "no_logs": "Сè уште нема записи од дневници во бафер.",
+      "no_match_yet": "Сè уште нема обид за натпревар - ова се пополнува за време на циклус на трчање.",
+      "no_other_users": "Не се пронајдени други корисници на Home Assistant.",
+      "no_phases": "Не се дефинирани фази.",
+      "no_phases_assigned": "Не се доделени фази.",
+      "no_profiles_compare": "Нема профили за споредба.",
+      "no_profiles_overlay": "Нема профили за преклопување.",
+      "no_profiles_yet": "Сè уште нема профили. Направете еден од означен циклус.",
+      "no_profiles_yet_short": "Сè уште нема профили.",
+      "no_split_points": "Сè уште нема поделени поени.",
+      "no_suggestions": "Нема активни предлози.",
+      "pending_feedback": "Во очекување на повратни информации за откривање",
+      "phase_catalog_intro": "Именувани сегменти од циклусот (предмиење, загревање, центрифугирање...). Доделете ги на профил од неговата контролна табла.",
+      "phase_ranges_intro": "Опсегот на фази (минути од почетокот на циклусот) се преклопени на просечната крива. Уредете ги вредностите за да ги прегледате во живо.",
+      "preferences_admin": "Преференци, панел и контрола на пристап",
+      "preferences_adv": "Преференци",
+      "prefs_personal": "Овие се однесуваат само на вашата сметка на „Помошник за дома“.",
+      "profiles_intro": "Кликнете на профил за статистика, фази и чистење. Групирајте скоро идентични програми (иста форма/траење, различна температура или центрифугирање) така што сигурно се совпаѓаат помеѓу нив.",
+      "rbac_hint": "Кога е исклучен, секој корисник на Home Assistant има целосен пристап (стандардно). Администраторите секогаш имаат целосен пристап и можат да управуваат со секого.",
+      "recent_logs": "Неодамнешни записи ha_washdata",
+      "recording_in_progress": "Снимањето е во тек",
+      "review_in_settings": "Преглед во Поставки",
+      "review_to_cycles": "Отворете го редот за преглед на циклуси",
+      "saving_triggers_reload": "Зачувувањето активира повторно вчитување на интеграцијата. Ентитетите на HA може накратко да се покажат како недостапни.",
+      "search_placeholder": "Поставки за пребарување…",
+      "see_recorder": "Погледнете го додатокот за рекордер подолу",
+      "split_intro": "Кликнете на графиконот за да додадете или отстраните точка на разделување или автоматско откривање со празнини во мирување. Секој добиен сегмент може да добие свој профил.",
+      "storage_diagnostics": "Статистика за складирање, одржување, извоз/увоз",
+      "trim_intro": "Повлечете ги црвените рачки или внесете вредности. Сè што е надвор од прозорецот е отстрането.",
+      "unsure_detected_prefix": "WashData не е сигурен дека е откриен",
+      "updated": "Ажурирано"
     },
-    "quality": {
-      "good": "Добро",
-      "bad": "Лошо",
-      "unusable": "Неупотребливи"
-    },
-    "access": {
-      "none": "Никој (скриен)",
-      "read": "Читање",
-      "edit": "Уреди",
-      "full": "Полен",
-      "inherit": "Наследи"
+    "phase_desc": {
+      "pre_wash": "Почетно натопување или предтретман пред главното перење.",
+      "wash": "Главен циклус на перење со движење на барабанот и опционално загревање.",
+      "wash_dw": "Главно миење со детергент со загревање.",
+      "rinse": "Фаза на плакнење со чиста вода. Оваа фаза може да се повтори повеќе пати.",
+      "spin": "Извлекување со голема брзина за отстранување на водата од товарот.",
+      "spin_wd": "Екстракција со голема брзина пред транзиција на сушење.",
+      "soak": "Период на натопување со мала активност помеѓу активните фази на миење.",
+      "soak_dw": "Продолжен период на киснење за тешка почва.",
+      "anti_crease": "Повремени кратки превртувања по завршувањето за да се намалат брчките.",
+      "heat_up": "Почетното загревање на грејачот пред да започне целосното сушење.",
+      "drying": "Главен загреан период на превртување.",
+      "cool_down": "Превртување без топлина блиску до крајот на циклусот.",
+      "anti_wrinkle": "Периодично вртење после циклус за намалување на брчките.",
+      "sensor_check": "Кратка пауза со мала моќност додека се мери сувоста.",
+      "drain_and_switch": "Преоден период од режим на перење во сушење.",
+      "pre_rinse": "Почетно прскање пред миење со детергент.",
+      "dry": "Фаза на сушење со помош на грејач и/или преостаната топлина.",
+      "sanitize": "Фаза за чистење со висока температура за програми за дезинфекција."
     },
     "health": {
-      "poor": "⚠ Лоша усогласеност",
-      "fair": "Задоволителна усогласеност",
-      "good": "✓ Добра усогласеност"
+      "good": "✓ Добар квалитет на профилот",
+      "fair": "Прифатлив квалитет на профилот",
+      "poor": "⚠ Лош квалитет на профилот"
+    },
+    "ml": {
+      "fit_fair": "Прифатливо",
+      "builtin_models": "● Користење на вградени модели",
+      "fit_good": "Добро",
+      "fit_slight": "Мало",
+      "fit_strong": "Силен",
+      "fit_weak": "Слаби",
+      "fit_word": "одговара",
+      "personalized": "● Персонализирано за оваа машина"
     },
     "trend": {
       "up": "Во тренд нагоре",
       "down": "Во тренд надолу"
     },
-    "pref": {
-      "date_relative": "Релативно (на пр. пред 2 часа)",
-      "date_absolute": "Апсолутно (на пр. 14:32 на 2 јули)"
-    },
     "log": {
       "all_levels": "Сите нивоа"
+    },
+    "pref": {
+      "date_absolute": "Апсолутно (на пр. 14:32 на 2 јули)",
+      "date_relative": "Роднина (на пр. пред 2 часа)"
+    },
+    "quality": {
+      "bad": "Лошо",
+      "good": "Добро",
+      "unusable": "Неупотребливи"
+    },
+    "status": {
+      "active": "Активен",
+      "all_statuses": "Сите статуси",
+      "ambiguous": "Двосмислена",
+      "auto_detect": "Автоматско откривање",
+      "clear": "Јасно",
+      "completed": "Завршено",
+      "fine_tuning": "фино подесување сега…",
+      "force_stopped": "Силата запре",
+      "idle": "Неактивен",
+      "interrupted": "Прекинато",
+      "ready": "Подготвен за обработка",
+      "recording": "Снимање"
+    },
+    "tab": {
+      "advanced": "Напредно",
+      "diagnostics": "Дијагностика",
+      "history": "Циклуси",
+      "ml": "МЛ обука",
+      "pp_cleanup": "Чистење",
+      "pp_manage": "Управувај",
+      "pp_overview": "Преглед",
+      "pp_phases": "Фази",
+      "profiles": "Профили",
+      "settings": "Поставки",
+      "status": "Преглед",
+      "subtab_phase_catalog": "Фазен каталог",
+      "subtab_profiles": "Профили"
+    },
+    "tag": {
+      "early_end": "Ран крај",
+      "late_start": "Задоцнет почеток",
+      "merged": "Споени циклуси",
+      "noise": "Бучава",
+      "sensor_gap": "Сензорска празнина",
+      "split": "Сплит циклус",
+      "wrong_profile": "Погрешен профил"
+    },
+    "toast": {
+      "access_saved": "Контролата за пристап е зачувана",
+      "all_wiped": "Сите податоци се избришани",
+      "analysis_complete_none": "Анализата е завршена: нема нови предлози",
+      "auto_label_complete": "Автоматската етикета е завршена",
+      "automation_deleted": "Автоматизацијата е избришана",
+      "correction_submitted": "Исправката е поднесена",
+      "cycle_deleted": "Циклусот е избришан",
+      "cycle_force_stopped": "Циклусот со сила е запрен",
+      "cycle_labelled": "Циклус означен",
+      "cycle_paused": "Циклусот е паузиран",
+      "cycle_resumed": "Циклусот продолжи",
+      "cycle_trimmed": "Циклус скратен",
+      "cycles_merged": "Циклусите се споија",
+      "envelope_rebuilt": "Пликот повторно изграден",
+      "envelopes_rebuilt": "Пликовите повторно изградени",
+      "export_downloaded": "Преземено е извоз",
+      "feedback_all_dismissed": "Сите повратни информации се отфрлени",
+      "feedback_confirmed": "Повратните информации се потврдени",
+      "feedback_dismissed": "Повратните информации се отфрлени",
+      "group_deleted": "Групата е избришана",
+      "group_name_required": "Името на групата е потребно",
+      "group_saved": "Групата е зачувана",
+      "import_successful": "Увозот е успешен; интеграција повторно вчитување",
+      "json_required": "Потребни се податоци за JSON",
+      "legacy_removed": "Дејствата за наследство се отстранети",
+      "logs_exported": "Извезени дневници",
+      "matching_reverted": "Соодветните тежини се вратија на стандардни",
+      "min_2_profiles": "Изберете најмалку 2 профили за група",
+      "ml_training_no_improvement": "Обуката е завршена: основната линија е задржана (без подобрување)",
+      "models_reverted": "Моделите на уредот се вратија на основната линија",
+      "name_required": "Потребно е име",
+      "no_split_found": "Не се пронајдени празни празнини за да се подели",
+      "panel_settings_saved": "Поставките на панелот се зачувани",
+      "phase_name_required": "Потребно е име на фаза",
+      "phase_updated": "Фазата е ажурирана",
+      "phases_saved": "Фазите се зачувани",
+      "preferences_saved": "Поставките се зачувани",
+      "profile_name_required": "Потребно е името на профилот",
+      "profile_renamed": "Профилот е преименуван",
+      "recording_discarded": "Снимањето е отфрлено",
+      "recording_saved": "Снимката е зачувана на профилот",
+      "recording_started": "Снимањето започна",
+      "recording_stopped": "Снимањето прекина",
+      "review_saved": "Прегледот е зачуван",
+      "settings_saved": "Зачувани се поставките; интеграција повторно вчитување",
+      "suggestions_applied": "Применети предлози; интеграција повторно вчитување",
+      "suggestions_dismissed": "Предлозите се отфрлени"
     }
   }
 }

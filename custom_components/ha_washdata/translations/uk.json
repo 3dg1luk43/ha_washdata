@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Початок циклу",
-        "cycle_finish": "Завершення циклу",
-        "cycle_live": "Живий прогрес"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Пральна машина",
@@ -88,198 +81,6 @@
         "bread_maker": "Хлібопічка",
         "pump": "Насос / Відстійний насос",
         "other": "Інше (розширений)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(Без мітки)",
-        "create_new_profile": "Створити новий профіль",
-        "remove_label": "Видалити мітку",
-        "no_reference_cycle": "(Без опорного циклу)",
-        "all_device_types": "Усі типи пристроїв",
-        "current_suffix": "(поточний)",
-        "phase_builtin_suffix": "(вбудований)",
-        "phase_none_available": "Немає доступних фаз.",
-        "phase_other_device_types": "Інші типи пристроїв:",
-        "settings_deprecation_warning": "⚠️ **Застарілий тип пристрою:** {device_type} планується видалити в майбутньому випуску. Конвеєр відповідності WashData не дає надійних результатів для цього класу приладів. Ваша інтеграція продовжує працювати протягом періоду припинення підтримки; щоб вимкнути це попередження, перемкніть **Тип пристрою** нижче на один із підтримуваних типів (пральна машина, сушильна машина, комбінована пральна машина з сушаркою, посудомийна машина, фритюрниця, хлібопічка або насос) або на **Інше (розширений)**, якщо ваш прилад не відповідає жодному з підтримуваних типів. **Інші (розширені)** навмисно надає загальні параметри за замовчуванням, які не налаштовані для жодного конкретного пристрою, тому вам потрібно буде самостійно налаштувати порогові значення, тайм-аути та відповідні параметри; усі наявні налаштування зберігаються під час перемикання.",
-        "editor_select_info": "Виберіть 1 цикл, щоб розділити, або 2+ цикли, щоб об’єднати.",
-        "editor_select_info_split": "Виберіть 1 цикл для поділу.",
-        "editor_select_info_merge": "Виберіть 2+ цикли для об’єднання.",
-        "editor_select_info_delete": "Виберіть 1+ циклів для видалення.",
-        "no_cycles_recorded": "Циклів ще не зареєстровано.",
-        "profile_summary_line": "- **{name}**: {count} циклів, {avg} хв. сер.",
-        "no_profiles_created": "Профілі ще не створені.",
-        "phase_preview": "Попередній перегляд фази",
-        "phase_preview_no_curve": "Середня профільна крива поки що недоступна. Запустити/позначити більше циклів для цього профілю.",
-        "average_power_curve": "Крива середньої потужності",
-        "unit_min": "хв",
-        "profile_option_fmt": "{name} ({count} циклів, ~{duration} м. в середньому)",
-        "profile_option_short_fmt": "{name} ({count} циклів, ~{duration} хв)",
-        "deleted_cycles_from_profile": "Видалено {count} циклів із {profile}.",
-        "not_enough_data_graph": "Недостатньо даних для створення графіка.",
-        "no_profiles_found": "Профілі не знайдено.",
-        "cycle_info_fmt": "Цикл: {start}, {duration} хв, поточна: {label}",
-        "top_candidates_header": "### Кращі кандидати",
-        "tbl_profile": "Профіль",
-        "tbl_confidence": "Впевненість",
-        "tbl_correlation": "Кореляція",
-        "tbl_duration_match": "Збіг тривалості",
-        "detected_profile": "Виявлений профіль",
-        "estimated_duration": "Розрахункова тривалість",
-        "actual_duration": "Фактична тривалість",
-        "choose_action": "__Оберіть дію нижче:__",
-        "tbl_count": "Кількість",
-        "tbl_avg": "Середнє",
-        "tbl_min": "Хв",
-        "tbl_max": "Макс",
-        "tbl_energy_avg": "Енергія (середнє)",
-        "tbl_energy_total": "Енергія (загальна)",
-        "tbl_consistency": "Стабільність",
-        "tbl_last_run": "Останній запуск",
-        "graph_legend_title": "Легенда графіка",
-        "graph_legend_body": "Синя смуга позначає мінімальний і максимальний діапазон споживаної потужності. Лінія показує середню криву потужності.",
-        "recording_preview": "Попередній перегляд запису",
-        "trim_start": "Початок обрізки",
-        "trim_end": "Обрізати кінець",
-        "split_preview_title": "Розділений попередній перегляд",
-        "split_preview_found_fmt": "Знайдено {count} сегментів.",
-        "split_preview_confirm_fmt": "Натисніть Підтвердити, щоб розділити цей цикл на {count} окремих циклів.",
-        "merge_preview_title": "Попередній перегляд злиття",
-        "merge_preview_joining_fmt": "Приєднання до {count} циклів. Прогалини будуть заповнені показаннями 0 Вт.",
-        "editor_delete_preview_title": "Попередній перегляд видалення",
-        "editor_delete_preview_intro": "Вибрані цикли буде остаточно видалено:",
-        "editor_delete_preview_confirm": "Натисніть Підтвердити, щоб остаточно видалити ці записи циклів.",
-        "no_power_preview": "*Немає даних про потужність для попереднього перегляду.*",
-        "profile_comparison": "Порівняння профілю",
-        "actual_cycle_label": "Цей цикл (фактично)",
-        "storage_usage_header": "Використання сховища",
-        "storage_file_size": "Розмір файлу",
-        "storage_cycles": "Цикли",
-        "storage_profiles": "Профілі",
-        "storage_debug_traces": "Сліди налагодження",
-        "overview_suffix": "Огляд",
-        "phase_preview_for_profile": "Попередній перегляд фази для профілю",
-        "current_ranges_header": "Діапазон струму",
-        "assign_phases_help": "Використовуйте наведені нижче дії, щоб додавати, редагувати, видаляти або зберігати діапазони.",
-        "profile_summary_header": "Резюме профілю",
-        "recent_cycles_header": "Останні цикли",
-        "trim_cycle_preview_title": "Попередній перегляд циклічного обрізання",
-        "trim_cycle_preview_no_data": "Немає даних про потужність для цього циклу.",
-        "trim_cycle_preview_kept_suffix": "збережено",
-        "table_program": "Програма",
-        "table_when": "Коли",
-        "table_length": "Тривалість",
-        "table_match": "Збіг",
-        "table_profile": "Профіль",
-        "table_cycles": "Цикли",
-        "table_avg_length": "Сер. тривалість",
-        "table_last_run": "Останній запуск",
-        "table_avg_energy": "Сер. енергія",
-        "table_detected_program": "Виявлена програма",
-        "table_confidence": "Впевненість",
-        "table_reported": "Повідомлено"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Розділити цикл (знайти прогалини)",
-        "merge": "Цикли злиття (об’єднання фрагментів)",
-        "delete": "Видалити цикл(и)"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Автоматично виявляти паузи простою",
-        "manual": "Ручні часові позначки"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Обслуговування: повторна обробка та оптимізація даних",
-        "clear_debug_data": "Очистити дані налагодження (звільнити місце)",
-        "wipe_history": "Очистити ВСІ дані цього пристрою (безповоротно)",
-        "export_import": "Експорт/імпорт JSON з налаштуваннями (копіювати/вставити)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "Експортувати всі дані",
-        "import": "Імпорт/об’єднання даних"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Автоматичне позначення старих циклів",
-        "select_cycle_to_label": "Позначити конкретний цикл",
-        "select_cycle_to_delete": "Видалити цикл",
-        "interactive_editor": "Інтерактивний редактор злиття/розділу",
-        "trim_cycle": "Обрізати дані циклу"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Створити новий профіль",
-        "edit_profile": "Редагувати/перейменувати профіль",
-        "delete_profile": "Видалити профіль",
-        "profile_stats": "Статистика профілю",
-        "cleanup_profile": "Очистити історію - побудувати графік і видалити",
-        "assign_phases": "Призначити діапазони фаз"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Створити нову фазу",
-        "edit_custom_phase": "Редагувати фазу",
-        "delete_custom_phase": "Видалити фазу"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Назвіть і застосуйте фази",
-        "cancel": "Повернутися без змін"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Додати діапазон фаз",
-        "edit_range": "Редагувати діапазон фаз",
-        "delete_range": "Видалити діапазон фаз",
-        "clear_ranges": "Очистити всі діапазони",
-        "auto_detect_ranges": "Автоматичне визначення фаз",
-        "save_ranges": "Зберегти та повернути"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Оновити статус",
-        "stop_recording": "Зупинити запис (зберегти та обробити)",
-        "start_recording": "Почати новий запис",
-        "process_recording": "Обробити останній запис (обрізати та зберегти)",
-        "discard_recording": "Відкинути останній запис"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Створити новий профіль",
-        "existing_profile": "Додати до наявного профілю",
-        "discard": "Скасувати запис"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Підтвердити - правильне виявлення",
-        "correct": "Правильно - Виберіть програму/тривалість",
-        "ignore": "Ігнорувати - хибний позитивний/шумовий цикл",
-        "delete": "Видалити - видалити з історії"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Встановити початкову точку",
-        "set_end": "Встановити кінцеву точку",
-        "reset": "Скинути до повної тривалості",
-        "apply": "Застосувати Trim",
-        "cancel": "Скасувати"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "Поточна фаза"
       },
-      "wash_phase": {
-        "name": "Фаза"
-      },
       "profile_cycle_count": {
         "name": "Кількість профілю {profile_name}",
         "unit_of_measurement": "циклів"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s має бути більше, ніж trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "Немає активного циклу для призупинення або відновлення."
     }
   },
   "panel": {
     "hdr": {
-      "panel_settings": "Налаштування панелі (всі користувачі)",
-      "ml_learned": "Чого дізнався WashData",
-      "status": "Статус",
-      "live_power": "Жива потужність",
-      "manual_recording": "Ручний запис",
-      "tools_and_data": "Інструменти та дані",
-      "phase_catalog": "Каталог фаз",
-      "storage_stats": "Статистика зберігання",
-      "maintenance": "Дії з технічного обслуговування",
-      "export_import": "Експорт / Імпорт",
+      "toggle_sidebar": "Перемкнути бічну панель Домашнього помічника",
       "logs": "Журнали",
-      "my_preferences": "Мої налаштування",
       "access_control": "Контроль доступу",
-      "ml_smart_learning": "Розумне навчання",
-      "ml_settings_card": "Налаштування",
-      "ml_matching_tuning": "Точне налаштування відповідності програми",
-      "display": "Дисплей",
-      "status_graph": "Графік стану",
-      "diagnostics_pref": "Діагностика",
-      "logs_diagnostics": "Діагностика",
-      "process_history": "Історія процесу",
-      "clear_debug": "Очистити сліди налагодження",
-      "wipe_history": "Очистити історію",
-      "automations": "Автоматизації",
-      "automation_open": "Відкрийте в редакторі автоматизації",
       "automation_delete": "Видалити цю автоматизацію",
       "automation_needs_review": "Цей цикл потребує перегляду",
-      "automation_review_this_cycle": "Перегляньте цей цикл",
-      "no_automations": "Цей пристрій поки що не стосується автоматизації."
-    },
-    "lbl": {
-      "manual_duration": "Тривалість вручну (хв., необов’язково)",
-      "correct_duration": "Правильна тривалість (хв., необов’язково)",
-      "default_tab": "Вкладка за замовчуванням під час відкриття панелі",
-      "default_access_level": "Рівень за умовчанням для користувачів, яких немає в списку нижче",
-      "show_expected": "Показати очікуване накладання кривої (відповідний профіль, оранжевий)",
-      "show_raw": "Показати необроблені показання датчика (незгладжені, сірі)",
-      "show_debug": "Показати картку налагодження прямого матчу на сторінці статусу (впевненість, неоднозначність, найкращі кандидати)",
-      "power": "Потужність",
-      "progress": "Прогрес",
-      "remaining": "Залишилося",
-      "duration": "Тривалість",
-      "energy": "Енергія",
-      "profile": "Профіль",
-      "status": "Статус",
-      "date": "Дата",
-      "confidence": "Впевненість",
-      "health": "Здоров'я",
-      "cost": "Вартість",
-      "program": "Програма",
-      "cycle_health": "Здоров'я циклу",
-      "activity": "Діяльність",
-      "unlabelled": "Без позначки",
-      "unlabelled_paren": "(без мітки)",
-      "emphasis": "Наголос",
-      "default": "За замовчуванням",
-      "in_use": "У користуванні",
-      "profile_name": "Ім'я профілю",
-      "ref_cycle": "Базовий цикл (необов'язково)",
-      "phase_name": "Назва фази",
-      "description": "Опис",
-      "correct_profile": "Правильний профіль",
-      "load_from_file": "Завантажити з файлу",
-      "json_data": "Дані JSON",
-      "expected_duration": "Очікувана тривалість (хв.)",
-      "rename_profile": "Перейменувати профіль",
-      "select_profile": "Виберіть Профіль",
-      "confidence_threshold": "Поріг довіри",
-      "resulting_profile": "Результуючий профіль",
-      "new_profile_name": "Нова назва профілю",
-      "save_mode": "Режим збереження",
-      "head_trim": "Голова (и)",
-      "tail_trim": "Обрізка хвоста (и)",
-      "gap_s": "Розрив (и)",
-      "start": "Початок",
-      "end": "Кінець",
-      "quality": "Якість",
-      "golden_reference": "Записаний контрольний цикл",
-      "compare_profiles": "Порівняйте з профілями",
-      "tags": "Теги",
-      "notes": "Примітки",
-      "cycle_date_display": "Відображення дати циклу",
-      "refresh_interval": "Інтервал оновлення (с)",
-      "panel_default_tab": "Вкладка за замовчуванням",
-      "hide_tabs": "Приховати вкладки для користувачів, які не є адміністраторами",
-      "enable_access_control": "Увімкнути контроль доступу кожного користувача",
-      "administrators": "Адміністратори",
-      "default_other": "За умовчанням (інші пристрої)",
-      "mode_new_profile": "Створити новий профіль",
-      "mode_existing_profile": "Додати до наявного профілю",
-      "auto_fine_tune_on": "автоматичне тонке налаштування ввімкнено (близько {hour}:00)",
-      "auto_fine_tune_off": "автоматичне тонке налаштування вимкнено",
-      "last_checked": "Остання перевірка:",
-      "remove_label": "- Зняти етикетку -",
-      "create_new_profile": "+ Створити новий профіль…",
-      "read_only": "Тільки для читання",
-      "actions": "Дії",
-      "cycles_count": "Цикли",
-      "debug_traces": "Сліди налагодження",
-      "file_kb": "Файл (кБ)",
-      "label": "Мітка",
-      "seconds_from_start": "Секунди від початку",
-      "clock_time": "Час годинника",
-      "ungrouped": "Незгруповано"
-    },
-    "toast": {
-      "settings_saved": "Налаштування збережено; перезавантаження інтеграції",
-      "import_successful": "Імпорт успішний; перезавантаження інтеграції",
-      "suggestions_applied": "Пропозиції застосовані; перезавантаження інтеграції",
-      "ml_training_no_improvement": "Навчання завершено: базовий рівень збережено (без покращень)",
-      "could_not_load_cycle": "Не вдалося завантажити цикл: {error}",
-      "preferences_saved": "Налаштування збережено",
-      "panel_settings_saved": "Налаштування панелі збережено",
-      "access_saved": "Контроль доступу збережено",
-      "profile_created": "Профіль \"{name}\" створено",
-      "profile_deleted": "Профіль \"{name}\" видалено",
-      "profile_renamed": "Профіль перейменовано",
-      "phases_saved": "Фази збережено",
-      "phase_created": "Етап \"{name}\" створено",
-      "phase_deleted": "Фазу \"{name}\" видалено",
-      "phase_updated": "Фаза оновлена",
-      "recording_started": "Запис розпочато",
-      "recording_stopped": "Запис зупинено",
-      "recording_discarded": "Запис відхилено",
-      "recording_saved": "Запис збережено в профілі",
-      "export_downloaded": "Експорт завантажено",
-      "logs_exported": "Журнали експортовано",
-      "envelopes_rebuilt": "Конверти перебудовані",
-      "envelope_rebuilt": "Конверт перебудований",
-      "suggestions_dismissed": "Пропозиції відхилено",
-      "auto_label_complete": "Автоматична мітка завершена",
-      "cycle_labelled": "Цикл з позначкою",
-      "cycle_deleted": "Цикл видалено",
-      "cycles_deleted": "Видалено циклів: {count}",
-      "cycle_trimmed": "Цикл обрізаний",
-      "cycles_merged": "Цикли об'єднані",
-      "review_saved": "Оцінку збережено",
-      "feedback_confirmed": "Відгук підтверджено",
-      "feedback_dismissed": "Відгук відхилено",
-      "feedback_all_dismissed": "Усі відгуки відхилено",
-      "correction_submitted": "Виправлення подано",
-      "group_saved": "Групу збережено",
-      "group_deleted": "Групу видалено",
-      "automation_deleted": "Автоматику видалено",
-      "legacy_removed": "Застарілі дії видалено",
-      "cycle_paused": "Цикл призупинено",
-      "cycle_resumed": "Цикл відновлено",
-      "cycle_force_stopped": "Цикл примусово зупинено",
-      "ml_training_promoted": "Навчання завершено: підвищено {count} моделей",
-      "matching_reverted": "Відповідні ваги повернуто до значень за замовчуванням",
-      "models_reverted": "Моделі на пристрої повернуто до базової лінії",
-      "analysis_complete": "Аналіз завершено: пропозицій: {count}",
-      "analysis_complete_none": "Аналіз завершено: нових пропозицій немає",
-      "debug_cleared": "Очищено сліди налагодження: {count}",
-      "all_wiped": "Усі дані стерто",
-      "no_split_found": "Не знайдено зазорів, на які можна було б розколоти",
-      "group_name_required": "Потрібно вказати назву групи",
-      "min_2_profiles": "Виберіть принаймні 2 профілі для групи",
-      "profile_name_required": "Потрібно вказати назву профілю",
-      "phase_name_required": "Потрібно вказати назву фази",
-      "name_required": "Необхідна назва",
-      "json_required": "Потрібні дані JSON",
-      "save_failed": "Не вдалося зберегти: {error}",
-      "delete_failed": "Не вдалося видалити: {error}",
-      "apply_failed": "Не вдалося застосувати: {error}",
-      "rebuild_failed": "Помилка відновлення: {error}",
-      "start_failed": "Помилка запуску: {error}",
-      "stop_failed": "Не вдалося зупинити: {error}",
-      "discard_failed": "Не вдалося скасувати: {error}",
-      "trim_failed": "Не вдалося обрізати: {error}",
-      "split_failed": "Не вдалося розділити: {error}",
-      "merge_failed": "Не вдалося об’єднати: {error}",
-      "create_failed": "Не вдалося створити: {error}",
-      "update_failed": "Помилка оновлення: {error}",
-      "rename_failed": "Не вдалося перейменувати: {error}",
-      "revert_failed": "Помилка повернення: {error}",
-      "training_failed": "Помилка навчання: {error}",
-      "export_failed": "Помилка експорту: {error}",
-      "import_failed": "Помилка імпорту: {error}",
-      "auto_label_failed": "Помилка автоматичного позначення: {error}",
-      "analysis_failed": "Помилка аналізу: {error}",
-      "auto_detect_failed": "Помилка автоматичного визначення: {error}",
-      "error": "Помилка: {error}",
-      "pause_failed": "Не вдалося призупинити: {error}",
-      "label_failed": "Помилка мітки: {error}",
-      "invalid_json": "\"{key}\" недійсний JSON — виправте це або очистіть поле перед збереженням.",
-      "processed": "Оброблено {bits}",
-      "split_complete": "Розділено на {count} циклів"
-    },
-    "msg": {
-      "no_devices": "Ще не налаштовано пристрої WashData.",
-      "live_chart_loading": "Жива діаграма потужності з’являється, коли надходять показання.",
-      "no_profiles_yet": "Ще немає профілів. Створіть один із позначеного циклу.",
-      "no_logs": "Записи журналу ще не буферизовано.",
-      "no_envelope": "Ще немає конверта - перебудуйте після циклів маркування.",
-      "no_cycles_profile": "Для цього профілю немає циклів.",
-      "ml_learned_intro": "Моделі, налаштовані на цю машину. Все, що не вказано, використовує надійну вбудовану модель.",
-      "ml_intro": "WashData поставляється з інтелектуальними моделями, які виявляють цикли, підбирають програми та оцінюють час і енергію — вони працюють із коробки.",
-      "matching_tuning_intro": "Під час навчання WashData також регулює, наскільки програмна відповідність важить форму циклу порівняно з його тривалістю та енергією.",
-      "merge_intro": "Вибрані цикли об’єднуються в один (хронологічний порядок; пропуски заповнюються 0 Вт). Виберіть отриманий профіль.",
-      "see_recorder": "Дивіться віджет запису нижче",
-      "review_to_cycles": "Відкрийте чергу перегляду Cycles",
-      "no_device_selected": "Пристрій не вибрано.",
-      "loading": "Завантаження…",
-      "loading_settings": "Завантаження налаштувань…",
-      "no_cycles_match": "Жоден цикл не відповідає поточному фільтру.",
-      "no_cycles_yet": "Циклів ще не зареєстровано.",
-      "no_phases": "Фази не визначені.",
-      "no_phases_assigned": "Фази не призначені.",
-      "no_split_points": "Точок розділення ще немає.",
-      "no_envelope_overlay": "Немає конверта для накладання.",
-      "no_other_users": "Інших користувачів Home Assistant не знайдено.",
-      "maintenance_requires_access": "Обслуговування та експорт/імпорт потребують повного доступу.",
-      "loading_curve": "Завантаження кривої…",
-      "compare_selected_cycles": "Виділені цикли (суцільні) — показати / приховати",
-      "compare_overlay_profiles": "Профілі накладання (слабкі)",
-      "no_profiles_compare": "Немає профілів для порівняння.",
-      "saving_triggers_reload": "Збереження запускає перезавантаження інтеграції. Об’єкти HA можуть на короткий час відображатися як недоступні.",
-      "prefs_personal": "Це стосується лише вашого облікового запису Home Assistant.",
-      "no_match_yet": "Ще немає спроб збігу - це заповнюється під час робочого циклу.",
-      "no_fine_tuned": "Ще нічого не налаштовано — WashData використовує свої вбудовані моделі.",
-      "ml_settings_intro": "Два незалежних перемикача: один застосовує моделі під час виконання циклу, інший дозволяє WashData точно налаштовувати їх на вашу машину з часом.",
-      "phase_catalog_intro": "Іменовані сегменти циклу (попереднє прання, нагрівання, віджимання…). Призначте їх до профілю з панелі керування.",
-      "phase_ranges_intro": "Діапазони фаз (хвилини від початку циклу), накладені на середню криву. Відредагуйте значення для попереднього перегляду.",
-      "cleanup_intro": "Кожен позначений цикл накладено. Поставте прапорці біля викидів і видаліть, щоб очистити профіль.",
-      "split_intro": "Клацніть на графіку, щоб додати або видалити точку розділення або автоматично визначити за неактивними проміжками.",
-      "trim_intro": "Перетягніть червоні маркери або введіть значення. Все за вікном прибирається.",
-      "import_intro": "Завантажте експортований файл або вставте корисне навантаження JSON нижче.",
-      "auto_label_intro": "Призначте профілі циклам без міток, достовірність відповідності яких перевищує поріг.",
-      "enough_data": "Достатньо даних для навчання ({current}/{min} циклів).",
-      "collecting_data": "Збір даних — ще {need} цикл{plural} перед початком тонкого налаштування ({current}/{min}).",
-      "updated": "Оновлено {time}",
-      "appliance_monitor": "Монітор приладу",
-      "ml_loading": "завантаження ML…",
-      "review_in_settings": "Перегляньте в налаштуваннях",
-      "storage_diagnostics": "Статистика зберігання, обслуговування, експорт/імпорт",
-      "recent_logs": "Останні записи ha_washdata",
-      "preferences_adv": "Уподобання",
-      "preferences_admin": "Налаштування, панель і контроль доступу",
-      "pending_feedback": "Очікує відгук про виявлення",
-      "recording_in_progress": "Триває запис",
-      "no_profiles_yet_short": "Ще немає профілів.",
-      "unsure_detected_prefix": "WashData не впевнений, що це виявлено",
-      "no_suggestions": "Немає активних пропозицій.",
-      "no_profiles_overlay": "Немає профілів для накладання.",
-      "compare_cycles_title": "Порівняти {count} циклів",
-      "profiles_intro": "Натисніть на профіль для статистики, фаз і очищення. Групуйте майже однакові програми (однакова форма/тривалість, різна температура або відтискання), щоб підбір надійно вибирав між ними.",
-      "search_placeholder": "Пошук налаштувань…",
-      "automations_intro": "WashData запускає події {start} / {end} та відкриває об'єкти, тому сповіщення та дії найкраще створювати як звичайні автоматизації Home Assistant. Автоматизації, що використовують цей пристрій, відображаються нижче.",
-      "notify_services_hint": "Використовуйте ідентифікатори сервісу {entity} (через кому для кількох). Змінні шаблону: {vars}.",
-      "rbac_hint": "Якщо вимкнено, кожен користувач Home Assistant має повний доступ (за замовчуванням). Адміністратори завжди мають повний доступ та можуть керувати всіма.",
-      "feedback_prompt": "Підтвердьте правильність визначення, виправте програму або ігноруйте."
-    },
-    "section": {
-      "basic": {
-        "intro": "Основна ідентифікація та основні елементи, необхідні для більшості налаштувань.",
-        "label": "Базовий"
-      },
-      "detection": {
-        "intro": "Як цикл визначається як початок, запуск і завершення.",
-        "label": "Виявлення"
-      },
-      "matching": {
-        "intro": "Як завершені цикли зіставляються з вивченими профілями та позначаються.",
-        "label": "Зіставлення"
-      },
-      "timing": {
-        "intro": "Фонова каденція, офлайн-сторожовий пес і прибирання.",
-        "label": "Час і сторожовий таймер"
-      },
-      "anti_wrinkle": {
-        "intro": "Режим проти зморшок визначає імпульси обертання сушильної машини після основної фази нагрівання.",
-        "label": "Проти зморшок"
-      },
-      "delay": {
-        "intro": "Виявлення відкладеного старту визначає, коли прилад включений, але ще не почав свій цикл.",
-        "label": "Відкладений старт"
-      },
-      "triggers": {
-        "intro": "Додаткові зовнішні сигнали: тригер завершення, датчик дверей, перемикач паузи та нагадування про розвантаження.",
-        "label": "Тригери та двері"
-      },
-      "notifications": {
-        "label": "Сповіщення",
-        "intro": "Налаштуйте час і спосіб сповіщення про події циклу."
-      },
-      "ml_training": {
-        "label": "Навчання ML",
-        "intro": "Розумні моделі, які персоналізують виявлення та час для цього пристрою."
-      }
-    },
-    "setting": {
-      "auto_maintenance": {
-        "label": "Технічне обслуговування авто (нічне прибирання)"
-      },
-      "external_end_trigger_enabled": {
-        "label": "Увімкнути зовнішній кінцевий тригер"
-      },
-      "external_end_trigger_inverted": {
-        "label": "Інвертувати зовнішній тригер (тригер ВИМК.)"
-      },
-      "pause_cuts_power": {
-        "label": "Пауза також вимикає живлення (через перемикач)"
-      },
-      "notify_people": {
-        "label": "Люди (лише коли вдома)"
-      },
-      "notify_only_when_home": {
-        "label": "Сповіщати лише вдома"
-      },
-      "energy_price_static": {
-        "label": "Ціна статичної енергії (за кВт/год)"
-      },
-      "enable_ml_models": {
-        "label": "Застосовуйте розумні моделі протягом циклу"
-      },
-      "ml_training_enabled": {
-        "label": "Вчіться на цій машині"
-      },
-      "name": {
-        "label": "Назва пристрою"
-      },
-      "device_type": {
-        "label": "Тип пристрою"
-      },
-      "power_sensor": {
-        "label": "Датчик потужності"
-      },
-      "min_power": {
-        "label": "Мінімальна потужність"
-      },
-      "off_delay": {
-        "label": "Затримка вимкнення"
-      },
-      "linked_device": {
-        "label": "Групувати під Пристроєм"
-      },
-      "start_threshold_w": {
-        "label": "Стартовий поріг"
-      },
-      "stop_threshold_w": {
-        "label": "Поріг зупинки"
-      },
-      "min_off_gap": {
-        "label": "Мін. пауза вимкнення"
-      },
-      "start_duration_threshold": {
-        "label": "Тривалість початку"
-      },
-      "start_energy_threshold": {
-        "label": "Енергія запуску"
-      },
-      "completion_min_seconds": {
-        "label": "Мінімальна тривалість циклу"
-      },
-      "running_dead_zone": {
-        "label": "Запуск мертвої зони"
-      },
-      "end_energy_threshold": {
-        "label": "Кінцева енергія"
-      },
-      "end_repeat_count": {
-        "label": "Кінець підрахунку повторів"
-      },
-      "sampling_interval": {
-        "label": "Інтервал вибірки"
-      },
-      "smoothing_window": {
-        "label": "Вікно згладжування"
-      },
-      "abrupt_drop_watts": {
-        "label": "Різке падіння"
-      },
-      "abrupt_drop_ratio": {
-        "label": "Коефіцієнт різкого падіння"
-      },
-      "profile_match_threshold": {
-        "label": "Поріг відповідності"
-      },
-      "profile_unmatch_threshold": {
-        "label": "Порогове значення невідповідності"
-      },
-      "profile_match_interval": {
-        "label": "Інтервал відповідності"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "Коефіцієнт мінімальної тривалості"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "Коефіцієнт максимальної тривалості"
-      },
-      "profile_duration_tolerance": {
-        "label": "Допустима тривалість профілю"
-      },
-      "duration_tolerance": {
-        "label": "Оцінити толерантність"
-      },
-      "auto_label_confidence": {
-        "label": "Впевненість автоматичної мітки"
-      },
-      "learning_confidence": {
-        "label": "Навчання впевненості"
-      },
-      "suppress_feedback_notifications": {
-        "label": "Придушити сповіщення про відгуки"
-      },
-      "watchdog_interval": {
-        "label": "Сторожовий інтервал"
-      },
-      "no_update_active_timeout": {
-        "label": "Час очікування без оновлення"
-      },
-      "progress_reset_delay": {
-        "label": "Затримка скидання прогресу"
-      },
-      "expose_debug_entities": {
-        "label": "Відкрити сутності налагодження"
-      },
-      "save_debug_traces": {
-        "label": "Зберегти сліди налагодження"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "Увімкнути виявлення зморшок"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "Максимальна сила проти зморшок"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "Максимальна тривалість"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "Поріг потужності виходу"
-      },
-      "delay_start_detect_enabled": {
-        "label": "Увімкнути виявлення затримки запуску"
-      },
-      "delay_confirm_seconds": {
-        "label": "Секунди підтвердження"
-      },
-      "delay_timeout_hours": {
-        "label": "Час очікування"
-      },
-      "external_end_trigger": {
-        "label": "Зовнішня сутність тригера"
-      },
-      "door_sensor_entity": {
-        "label": "Сутність датчика дверей"
-      },
-      "switch_entity": {
-        "label": "Сутність перемикача"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "Затримка вивантаження"
-      },
-      "pump_stuck_duration": {
-        "label": "Тривалість зупинки насоса"
-      },
-      "notify_start_services": {
-        "label": "Служби при запуску"
-      },
-      "notify_finish_services": {
-        "label": "Служби при завершенні"
-      },
-      "notify_live_services": {
-        "label": "Служби живого прогресу"
-      },
-      "notify_fire_events": {
-        "label": "Запускати події HA для сповіщень"
-      },
-      "notify_before_end_minutes": {
-        "label": "Сповіщення перед закінченням"
-      },
-      "notify_live_interval_seconds": {
-        "label": "Інтервал оновлення в реальному часі"
-      },
-      "notify_live_overrun_percent": {
-        "label": "Перевищення в реальному часі % до сповіщення"
-      },
-      "notify_live_chronometer": {
-        "label": "Використовуйте Live Chronometer"
-      },
-      "notify_timeout_seconds": {
-        "label": "Автоматичне відхилення після"
-      },
-      "notify_title": {
-        "label": "Заголовок сповіщення"
-      },
-      "notify_icon": {
-        "label": "Значок сповіщення"
-      },
-      "notify_start_message": {
-        "label": "Повідомлення при запуску"
-      },
-      "notify_finish_message": {
-        "label": "Повідомлення при завершенні"
-      },
-      "notify_pre_complete_message": {
-        "label": "Попереднє повне повідомлення"
-      },
-      "notify_reminder_message": {
-        "label": "Повідомлення-нагадування"
-      },
-      "notify_channel": {
-        "label": "Канал Android (початок/прямий ефір)"
-      },
-      "notify_finish_channel": {
-        "label": "Android канал (завершити)"
-      },
-      "energy_price_entity": {
-        "label": "Сутність ціни енергії"
-      },
-      "ml_training_hour": {
-        "label": "Вчитися на годину"
-      },
-      "ml_training_min_cycles": {
-        "label": "Спочатку потрібні цикли"
-      },
-      "ml_training_interval_days": {
-        "label": "Перевіряйте не більше кожного"
-      }
-    },
-    "tab": {
-      "status": "Огляд",
-      "history": "Цикли",
-      "profiles": "Профілі",
-      "settings": "Налаштування",
-      "ml": "Навчання ML",
-      "advanced": "Розширений",
-      "diagnostics": "Діагностика",
-      "pp_overview": "Огляд",
-      "pp_phases": "Фази",
-      "pp_cleanup": "Очищення",
-      "pp_manage": "Керувати",
-      "subtab_profiles": "Профілі",
-      "subtab_phase_catalog": "Каталог фаз"
-    },
-    "btn": {
-      "save": "Зберегти",
-      "cancel": "Скасувати",
-      "delete": "Видалити",
-      "close": "Закрити",
-      "edit": "Редагувати",
-      "add": "Додати",
-      "rebuild": "Перебудувати конверти",
-      "record": "Почати запис",
-      "compare": "Порівняти",
-      "confirm": "Підтвердити",
-      "discard": "Відкинути",
-      "export": "Експорт",
-      "import": "Імпорт",
-      "merge": "Об’єднати",
-      "apply": "Застосувати",
-      "refresh": "Оновити",
-      "create": "Створити",
-      "select": "Вибрати",
-      "done": "Готово",
-      "reset": "Скинути",
-      "trim": "Обрізати",
-      "split": "Розділити",
-      "review": "Переглянути",
-      "inspect": "Оглянути",
-      "label": "Позначити",
-      "save_settings": "Зберегти налаштування",
-      "new_profile": "+ Новий профіль",
-      "new_group": "+ Нова група",
-      "apply_label": "Застосувати мітку",
-      "run_auto_label": "Запустити авто-мітку",
-      "save_review": "Зберегти оцінку",
-      "apply_trim": "Застосувати обрізання",
-      "apply_split": "Застосувати розділення",
-      "process_recording": "Зберегти запис",
-      "stop": "Зупинити",
-      "process": "Обробити",
-      "add_device": "+ Додати пристрій",
-      "train_now": "Навчати зараз",
-      "reset_to_defaults": "Відновити налаштування за замовчуванням",
-      "reset_to_builtin": "Скидання до вбудованих моделей",
-      "save_preferences": "Зберегти налаштування",
-      "save_panel_settings": "Зберегти налаштування панелі",
-      "save_access_control": "Зберегти контроль доступу",
-      "auto_label_cycles": "Авто-маркування циклів",
-      "run_analysis": "🔍 Виконайте аналіз пропозицій",
-      "apply_all": "Застосувати все",
-      "show_only": "Тільки показати",
-      "dismiss": "Відхилити",
-      "dismiss_all": "Відхилити всі",
-      "process_history": "Обробити зараз",
-      "clear_debug": "Очистити дані налагодження",
-      "wipe_all": "Видалити всі дані",
-      "export_json": "Експортувати в JSON",
-      "import_json": "Імпорт з JSON",
-      "correct": "Правильно…",
-      "ignore": "Ігнорувати",
-      "add_phase": "+ Додати фазу",
-      "new_phase": "+ Нова фаза",
-      "delete_profile": "Видалити профіль",
-      "rebuild_envelope": "Перебудувати конверт",
-      "create_profile": "+ Створити профіль",
-      "rec_stop": "Зупинити",
-      "pause_cycle": "Пауза",
-      "resume_cycle": "Відновити",
-      "force_stop": "Примусова зупинка",
-      "save_phases": "Зберегти фази",
-      "auto_detect_split": "Автоматичне визначення",
-      "clear_splits": "Очистити",
-      "submit_correction": "Надіслати виправлення",
-      "import_overwrite": "Імпорт (перезапис даних)",
-      "use": "Використати",
-      "manage": "Керувати",
-      "remove": "Видалити",
-      "delete_group": "Видалити групу",
-      "trim_split": "Обрізати / розділити",
-      "convert_to_automation": "Перевести на автоматизацію",
-      "new_automation": "＋ Нова автоматизація",
-      "from_template": "З шаблону ▾",
-      "on_cycle_started": "На початку циклу",
-      "on_cycle_finished": "На завершенні циклу",
-      "save_group": "Зберегти групу"
+      "automation_open": "Відкрити в редакторі автоматизацій",
+      "automation_review_this_cycle": "Переглянути цей цикл",
+      "automations": "Автоматизації",
+      "clear_debug": "Очистити трасування налагодження",
+      "diagnostics_pref": "Діагностика",
+      "display": "Відображення",
+      "export_import": "Експорт / Імпорт",
+      "live_power": "Потужність в реальному часі",
+      "logs_diagnostics": "Діагностика",
+      "maintenance": "Дії з обслуговування",
+      "manual_recording": "Ручний запис",
+      "ml_learned": "Що WashData дізнався",
+      "ml_matching_tuning": "Точне налаштування відповідності програм",
+      "ml_settings_card": "Налаштування",
+      "ml_smart_learning": "Розумне навчання",
+      "my_preferences": "Мої налаштування",
+      "no_automations": "Жодна автоматизація ще не посилається на цей пристрій.",
+      "panel_settings": "Налаштування панелі",
+      "phase_catalog": "Каталог фаз",
+      "process_history": "Обробка історії",
+      "status": "Стан",
+      "status_graph": "Графік стану",
+      "storage_stats": "Статистика сховища",
+      "tools_and_data": "Інструменти та дані",
+      "wipe_history": "Очистити історію"
     },
     "badge": {
-      "poor_fit": "погана підгонка",
-      "fair_fit": "задовільна відповідність",
-      "manual": "(вибрано вручну)",
-      "auto": "(автоматично визначено)",
-      "improving": "↗ покращення",
+      "golden_cycle": "Записаний контрольний цикл",
+      "reviewed": "Переглянуто",
+      "feedback_requested": "Запит на відгук",
+      "needs_review": "Потребує перегляду",
+      "overrun": "Тривав довше, ніж зазвичай",
+      "artifact_tip": "Виявлено {n} аномалій (наприклад, двері відкриті посеред циклу) — відкрийте, щоб побачити їх на графіку",
+      "poor_fit_tip": "Непослідовна історія збігів — розгляньте можливість відновлення цього профілю",
+      "fair_fit_tip": "Помірна постійність збігів — деякі цикли, призначені цьому профілю, мають нижчі оцінки надійності. Позначте більше циклів або перезапишіть профіль, щоб підвищити точність.",
+      "auto": "(виявлено автоматично)",
+      "built_in_tag": "вбудований",
       "declining": "↘ знижується",
-      "steady": "→ стійкий",
-      "using_tuned": "Використання налаштованих ваг",
-      "using_defaults": "Використання надісланих параметрів за замовчуванням",
-      "built_in_tag": "вбудований"
+      "fair_fit": "прийнятна якість",
+      "improving": "↗ покращується",
+      "manual": "(вибрано вручну)",
+      "poor_fit": "погана якість",
+      "steady": "→ стабільно",
+      "using_defaults": "Використовуються стандартні налаштування",
+      "using_tuned": "Використовуються налаштовані ваги"
     },
-    "status": {
-      "completed": "Виконано",
-      "interrupted": "Перерваний",
-      "force_stopped": "Примусово зупинено",
-      "active": "Активний",
-      "ambiguous": "Неоднозначний",
-      "clear": "Однозначно",
-      "working": "Робота…",
-      "recording": "Запис...",
-      "ready": "Готовий до обробки",
-      "idle": "Простій",
-      "auto_detect": "Автоматичне визначення",
-      "fine_tuning": "тонке налаштування зараз…",
-      "all_statuses": "Всі статуси"
+    "btn": {
+      "add_timer": "+ Додати таймер",
+      "remove_timer": "Видалити таймер",
+      "add_device_tip": "Додати інший пристрій WashData",
+      "delete_group_tip": "Видалити лише цю групу — профілі учасників збережуться",
+      "run_analysis_tip": "Проаналізуйте записані цикли зараз і оновіть пропозиції щодо налаштування",
+      "reset_ml_models_tip": "Відмовтеся від налаштованих моделей і поверніться до вбудованих. WashData може повторно навчити їх пізніше.",
+      "add_device": "+ Додати пристрій",
+      "add_phase": "+ Додати фазу",
+      "apply_all": "Застосувати всі",
+      "apply_label": "Застосувати мітку",
+      "apply_split": "Застосувати поділ",
+      "apply_trim": "Застосувати обрізання",
+      "auto_detect_split": "Автовизначення",
+      "auto_label_cycles": "Автоматично позначити цикли",
+      "cancel": "Скасувати",
+      "clear_debug": "Очистити дані налагодження",
+      "clear_splits": "Очистити",
+      "close": "Закрити",
+      "compare": "Порівняти",
+      "confirm": "Підтвердити",
+      "convert_to_automation": "Перетворити на автоматизацію",
+      "correct": "Виправити…",
+      "create": "Створити",
+      "create_profile": "+ Створити профіль",
+      "delete": "Видалити",
+      "delete_group": "Видалити групу",
+      "delete_profile": "Видалити профіль",
+      "discard": "Відхилити",
+      "dismiss": "Закрити",
+      "done": "Готово",
+      "edit": "Редагувати",
+      "export": "Експортувати",
+      "export_json": "Експортувати до JSON",
+      "force_stop": "Примусово зупинити",
+      "from_template": "З шаблону ▾",
+      "ignore": "Ігнорувати",
+      "import_json": "Імпортувати з JSON",
+      "import_overwrite": "Імпортувати (перезаписує дані)",
+      "inspect": "Перевірити",
+      "label": "Позначити",
+      "manage": "Керувати",
+      "merge": "Об'єднати",
+      "new_automation": "＋ Нова автоматизація",
+      "new_group": "+ Нова група",
+      "new_phase": "+ Нова фаза",
+      "new_profile": "+ Новий профіль",
+      "on_cycle_finished": "Коли цикл завершено",
+      "on_cycle_started": "Коли цикл розпочато",
+      "pause_cycle": "Пауза",
+      "process": "Обробити",
+      "process_history": "Обробити зараз",
+      "process_recording": "Зберегти запис",
+      "rebuild": "Відновити конверти",
+      "rebuild_envelope": "Відновити конверт",
+      "rec_stop": "Зупинити",
+      "record": "Почати запис",
+      "refresh": "Оновити",
+      "remove": "Видалити",
+      "reset": "Скинути",
+      "reset_to_builtin": "Скинути до вбудованих моделей",
+      "reset_to_defaults": "Скинути до стандартних",
+      "resume_cycle": "Продовжити цикл",
+      "review": "Переглянути",
+      "run_analysis": "🔍 Запустити аналіз пропозицій",
+      "run_auto_label": "Запустити автопозначення",
+      "save": "Зберегти",
+      "save_access_control": "Зберегти контроль доступу",
+      "save_group": "Зберегти групу",
+      "save_panel_settings": "Зберегти налаштування панелі",
+      "save_phases": "Зберегти фази",
+      "save_preferences": "Зберегти налаштування",
+      "save_review": "Зберегти огляд",
+      "save_settings": "Зберегти налаштування",
+      "select": "Вибрати",
+      "show_only": "Показати лише",
+      "split": "Розділити",
+      "submit_correction": "Надіслати виправлення",
+      "train_now": "Навчити зараз",
+      "trim": "Обрізати",
+      "trim_split": "Обрізати / Розділити",
+      "use": "Використати",
+      "wipe_all": "Видалити всі дані"
     },
-    "ml": {
-      "fit_strong": "Сильний",
-      "fit_good": "Добре",
-      "fit_fair": "Задовільний",
-      "fit_weak": "Слабкий",
-      "fit_slight": "Незначний",
-      "fit_word": "відповідність",
-      "fine_tuned_at": "налаштовано {when}",
-      "personalized": "● Персоналізовано для цієї машини",
-      "builtin_models": "● Використання вбудованих моделей"
+    "lbl": {
+      "timer_min": "хв",
+      "timer_msg_placeholder": "Повідомлення (необов'язково, {device}/{program}/{minutes})",
+      "timer_auto_pause": "Автопауза",
+      "actions": "Дії",
+      "activity": "Активність",
+      "administrators": "Адміністратори",
+      "auto_fine_tune_off": "автоналаштування вимкнено",
+      "clock_time": "Час",
+      "compare_profiles": "Порівняти з профілями",
+      "confidence": "Впевненість",
+      "confidence_threshold": "Поріг впевненості",
+      "correct_duration": "Правильна тривалість (хв, необов'язково)",
+      "correct_profile": "Правильний профіль",
+      "cost": "Вартість",
+      "create_new_profile": "+ Створити новий профіль…",
+      "cycle_date_display": "Відображення дати циклу",
+      "cycle_health": "Стан циклу",
+      "cycles_count": "Цикли",
+      "date": "Дата",
+      "debug_traces": "Трасування налагодження",
+      "default": "Стандартний",
+      "default_access_level": "Стандартний рівень для користувачів, яких немає в списку нижче",
+      "default_other": "Стандартний (інші пристрої)",
+      "default_tab": "Стандартна вкладка при відкритті панелі",
+      "description": "Опис",
+      "duration": "Тривалість",
+      "emphasis": "Акцент",
+      "enable_access_control": "Увімкнути контроль доступу для кожного користувача",
+      "energy": "Енергія",
+      "expected_duration": "Очікувана тривалість (хв)",
+      "file_kb": "Файл (кБ)",
+      "gap_s": "Розрив (с)",
+      "head_trim": "Обрізання початку (с)",
+      "health": "Стан",
+      "hide_tabs": "Приховати вкладки для не-адміністраторів",
+      "in_use": "Використовується",
+      "json_data": "Дані JSON",
+      "label": "Відповідна програма",
+      "last_checked": "Остання перевірка:",
+      "load_from_file": "Завантажити з файлу",
+      "manual_duration": "Ручна тривалість (хв, необов'язково)",
+      "mode_existing_profile": "Додати до наявного профілю",
+      "mode_new_profile": "Створити новий профіль",
+      "new_profile_name": "Нова назва профілю",
+      "panel_default_tab": "Стандартна вкладка",
+      "phase_name": "Назва",
+      "power": "Потужність",
+      "profile": "Профіль",
+      "profile_name": "Назва профілю",
+      "progress": "Прогрес",
+      "read_only": "Лише читання",
+      "ref_cycle": "Контрольний цикл (необов'язково)",
+      "refresh_interval": "Інтервал оновлення (с)",
+      "remaining": "Залишилось",
+      "remove_label": "- Видалити мітку -",
+      "rename_profile": "Перейменувати профіль",
+      "resulting_profile": "Отриманий профіль",
+      "save_mode": "Режим збереження",
+      "seconds_from_start": "Секунди від початку",
+      "select_profile": "Вибрати профіль",
+      "show_debug": "Показати картку налагодження збігів на сторінці стану (впевненість, неоднозначність, найкращі кандидати)",
+      "show_expected": "Показати накладення очікуваної кривої (відповідний профіль, помаранчевий)",
+      "show_raw": "Показати необроблені показання датчика (без згладжування, сірий)",
+      "status": "Стан",
+      "tail_trim": "Обрізання кінця (с)",
+      "ungrouped": "Без групи",
+      "unlabelled": "Без мітки",
+      "unlabelled_paren": "(без мітки)",
+      "expected": "Очікуваний",
+      "raw_socket": "Необроблений сокет",
+      "artifact_interruption": "Переривання",
+      "artifact_low_power": "Низька потужність",
+      "artifact_high_power": "Висока потужність",
+      "artifact_anomaly": "Аномалія"
     },
     "modal": {
-      "label_cycle": "Позначити цикл",
+      "merge_cycles": "Об'єднати {n} циклів",
+      "auto_label": "Автопозначення циклів",
+      "correct_feedback": "Виправити відгук",
       "create_profile": "Створити профіль",
-      "new_phase": "Нова фаза",
+      "cycle": "Цикл",
       "edit_phase": "Редагувати фазу",
-      "process_recording": "Обробити запис",
-      "correct_feedback": "Коригування відгуку",
-      "import_config": "Імпорт конфігурації",
-      "auto_label": "Авто-мітка циклів",
-      "cycle": "Цикл"
+      "import_config": "Імпортувати конфігурацію",
+      "label_cycle": "Позначити цикл",
+      "new_phase": "Нова фаза",
+      "process_recording": "Обробити запис"
     },
-    "tag": {
-      "late_start": "Пізній старт",
-      "early_end": "Ранній кінець",
-      "merged": "Об'єднані цикли",
-      "split": "Розділений цикл",
-      "noise": "Шум",
-      "wrong_profile": "Неправильний профіль",
-      "sensor_gap": "Пропуск датчика"
+    "msg": {
+      "near_duplicate_cluster": "виявлено майже повторюваний кластер профілів. Групування дає змогу надійно вибирати між подібними програмами (наприклад, однакова програма з різною температурою/віджиманням).",
+      "coverage_gap": "останні цикли не мають відповідного профілю ({pct}% з останніх 30).",
+      "consider_new_profile": "Розгляньте можливість створення нового профілю.",
+      "group_not_cohesive": "Ці профілі недостатньо схожі для надійного групування, тому при зіставленні вони обробляються окремо, доки ви не видалите викид або не розділите групу.",
+      "group_modal_help": "Групуйте програми однакової форми, які відрізняються температурою/віджиманням (тривалість може відрізнятися). Підбір оцінює групу як одного кандидата, а потім вибирає найкраще підходящого учасника. Виберіть принаймні 2; накладка показує, наскільки вони схожі.",
+      "showing_suggestions": "Показано {count} налаштувань із пропозиціями.",
+      "show_all_settings": "Показати всі налаштування",
+      "tuning_suggestions_available": "Доступна {count} пропозиція налаштування на основі спостережених циклів. Вони з'являються поряд із відповідними полями.",
+      "legacy_actions_title": "{count} застаріла спеціальна дія ще виконується",
+      "old_actions_warning": "Налаштовано за допомогою старого редактора дій (тепер вилучено). Вони все ще запускаються на події циклу, але їх більше не можна редагувати тут. Перетворіть їх на звичайну автоматизацію або видаліть.",
+      "no_settings_match": "Жодне налаштування не відповідає \"{q}\"",
+      "clear_debug_hint": "Видаліть збережені дані налагодження, щоб звільнити місце.",
+      "wipe_history_warning": "Назавжди видалити всі цикли та профілі. Не можна скасувати.",
+      "export_description": "Експортуйте всі профілі та цикли в JSON або відновіть попередній експорт.",
+      "log_buffer_hint": "Спочатку найновіші · буферизує останні 500 записів ha_washdata з моменту перезапуску · перетягніть нижній край, щоб змінити розмір.",
+      "review_profile_tip": "Програма, якою позначено цей цикл. Якщо автоматично визначена програма була неправильною, виправте це тут — маркування навчає відповідності для майбутніх циклів.",
+      "review_quality_tip": "Наскільки чистий цей цикл. Добре = хрестоматійний приклад цієї програми; Погано = виявлено, але шумно або нетипово; Непридатний = неправильно виявлений (об'єднаний, усічений або фальшивий). Керує оцінкою стану та циклами, дозволеними для навчання моделі.",
+      "review_recorded_tip": "Позначте це як підібраний вручну еталонний цикл для своєї програми — така ж роль, як цикл, записаний вручну. Довідкові цикли завжди зберігаються, заповнюють відповідний шаблон і ніколи не відкидаються під час очищення. (Це «золотий»/записаний прапор; обидва — одне й те саме.)",
+      "review_tags_tip": "Необов'язкові прапорці, що описують, що пішло не так у цьому циклі, щоб навчання та очищення могли це врахувати.",
+      "review_notes_tip": "Довільні текстові нотатки для власної довідки. Не використовується під час підбору чи навчання.",
+      "review_confirm_help": "Перевірте, чи правильно було виявлено цей цикл. Ваші відгуки навчають модель на вашому пристрої — що більше циклів ви підтвердите, то кращим буде відповідність та оцінка стану. Достатньо швидкого Добре/Погано.",
+      "review_notes_placeholder": "Примітки (необов'язково)",
+      "compare_profiles_tip": "Накладіть інші конверти профілів на таблицю вище, щоб побачити, який з них найкраще підходить для цього циклу.",
+      "artifact_header": "Протягом цього циклу виявлено {n} аномалій",
+      "artifact_footer": "Виділено на графіку вище. Це тимчасові артефакти (наприклад, двері відчинені посередині циклу), не обов'язково проблеми.",
+      "profile_poor_health_detail": "Цикли, призначені цьому профілю, мають суперечливі форми або низьку надійність. Розгляньте можливість перебудови конверта або перегляду позначених циклів.",
+      "trend_duration_longer": "Тривалість збільшується ({pct}%/цикл) — останній середній показник {avg}",
+      "trend_duration_shorter": "Тривалість скорочується ({pct}%/цикл) — останній середній показник {avg}",
+      "trend_energy_up": "Енергія зростає ({pct}%/цикл) — останній середній показник {avg}",
+      "trend_energy_down": "Енергія зменшується ({pct}%/цикл)",
+      "performance_trend": "Тенденція продуктивності ({n} циклів)",
+      "maintenance_advisory": "Збільшення тривалості/енергії може свідчити про необхідність обслуговування приладу (наприклад, видалення накипу, очищення фільтра).",
+      "manual_duration_hint": "Середня/очікувана тривалість циклу профілю, що використовується для оцінки часу, що залишився. Відредагуйте, щоб встановити; якщо залишити без змін, збереже поточне значення.",
+      "appliance_monitor": "Монітор приладу",
+      "auto_label_intro": "Призначте профілі непозначеним циклам, чия впевненість збігу перевищує поріг.",
+      "cleanup_intro": "Усі позначені цикли накладено. Позначте аномалії і видаліть їх для очищення профілю.",
+      "compare_overlay_profiles": "Накласти профілі (блідо)",
+      "compare_selected_cycles": "Вибрані цикли (суцільно) — показати / приховати",
+      "feedback_prompt": "Підтвердьте правильність, виправте програму або проігноруйте.",
+      "import_intro": "Завантажте експортований файл або вставте JSON нижче.",
+      "live_chart_loading": "Графік потужності в реальному часі з'являється по мірі надходження показань.",
+      "loading": "Завантаження…",
+      "loading_curve": "Завантаження кривої…",
+      "loading_settings": "Завантаження налаштувань…",
+      "maintenance_requires_access": "Обслуговування та експорт/імпорт потребують повного доступу.",
+      "matching_tuning_intro": "Під час навчання WashData також налаштовує, скільки ваги відповідність програм надає формі, тривалості та енергії.",
+      "merge_intro": "Вибрані цикли об'єднуються в один (хронологічний порядок; розриви заповнені 0 Вт). Оберіть отриманий профіль.",
+      "ml_intro": "WashData постачається з розумними моделями, які працюють одразу.",
+      "ml_learned_intro": "Моделі, налаштовані під цей пристрій.",
+      "ml_loading": "завантаження ML…",
+      "ml_settings_intro": "Два незалежних перемикачі: один застосовує моделі під час циклу, інший дозволяє WashData з часом налаштовуватися під ваш пристрій.",
+      "no_cycles_match": "Жоден цикл не відповідає поточному фільтру.",
+      "no_cycles_profile": "Немає циклів для цього профілю.",
+      "no_cycles_yet": "Жодного циклу ще не записано.",
+      "no_device_selected": "Пристрій не вибрано.",
+      "no_devices": "Жодного пристрою WashData ще не налаштовано.",
+      "no_envelope": "Конверта ще немає — відновіть після позначення циклів.",
+      "no_envelope_overlay": "Немає доступного конверта для накладання.",
+      "no_fine_tuned": "Ще нічого не налаштовано — WashData використовує вбудовані моделі.",
+      "no_logs": "Жодних записів журналу ще не буферизовано.",
+      "no_match_yet": "Ще немає спроби збігу — це заповнюється під час запущеного циклу.",
+      "no_other_users": "Інших користувачів Home Assistant не знайдено.",
+      "no_phases": "Фаз не визначено.",
+      "no_phases_assigned": "Фаз не призначено.",
+      "no_profiles_compare": "Немає профілів для порівняння.",
+      "no_profiles_overlay": "Немає профілів для накладання.",
+      "no_profiles_yet": "Профілів ще немає. Створіть один з позначеного циклу.",
+      "no_profiles_yet_short": "Профілів ще немає.",
+      "no_split_points": "Точок поділу ще немає.",
+      "no_suggestions": "Немає активних пропозицій.",
+      "pending_feedback": "Очікує відгук про виявлення",
+      "phase_catalog_intro": "Іменовані сегменти циклу (Попереднє прання, Нагрів, Віджимання…). Призначте їх профілю з його панелі керування.",
+      "phase_ranges_intro": "Діапазони фаз (хвилини від початку циклу), накладені на середню криву. Редагуйте значення для попереднього перегляду в реальному часі.",
+      "preferences_admin": "Налаштування, панель і контроль доступу",
+      "preferences_adv": "Налаштування",
+      "prefs_personal": "Застосовується лише до вашого облікового запису Home Assistant.",
+      "profiles_intro": "Натисніть на профіль для статистики, фаз та очищення. Групуйте майже ідентичні програми (однакова форма/тривалість, різна температура або віджимання) для надійного вибору.",
+      "rbac_hint": "Коли вимкнено, кожен користувач Home Assistant має повний доступ (за замовчуванням). Адміністратори завжди мають повний доступ і можуть керувати всіма.",
+      "recent_logs": "Останні записи ha_washdata",
+      "recording_in_progress": "Запис триває",
+      "review_in_settings": "Переглянути в налаштуваннях",
+      "review_to_cycles": "Відкрити чергу огляду циклів",
+      "saving_triggers_reload": "Збереження запускає перезавантаження інтеграції. Об'єкти HA можуть короткочасно відображатися як недоступні.",
+      "search_placeholder": "Пошук налаштувань…",
+      "see_recorder": "Дивіться віджет записувача нижче",
+      "split_intro": "Натисніть на графік, щоб додати або видалити точку поділу, або автовизначення за паузами. Кожен отриманий сегмент може отримати власний профіль.",
+      "storage_diagnostics": "Статистика сховища, обслуговування, експорт/імпорт",
+      "trim_intro": "Перетягніть червоні маркери або введіть значення. Все за межами вікна видаляється.",
+      "unsure_detected_prefix": "WashData не впевнений, що виявив",
+      "updated": "Оновлено"
     },
-    "quality": {
-      "good": "Добре",
-      "bad": "Погано",
-      "unusable": "Непридатний для використання"
-    },
-    "access": {
-      "none": "Немає (приховано)",
-      "read": "Читання",
-      "edit": "Редагувати",
-      "full": "Повний",
-      "inherit": "Успадкувати"
+    "phase_desc": {
+      "pre_wash": "Початкове замочування або попередня обробка перед основним пранням.",
+      "wash": "Основний цикл прання з рухом барабана та додатковим підігрівом.",
+      "wash_dw": "Основне мийне прання з підігрівом.",
+      "rinse": "Стадія промивання чистою водою. Ця фаза може повторюватися кілька разів.",
+      "spin": "Високошвидкісна екстракція для видалення води із завантаження.",
+      "spin_wd": "Високошвидкісна екстракція перед переходом до сушіння.",
+      "soak": "Період низькоактивного замочування між етапами активного прання.",
+      "soak_dw": "Подовжений період замочування для важкого бруду.",
+      "anti_crease": "Час від часу короткі оберти після завершення для зменшення зморшок.",
+      "heat_up": "Початковий прогрів нагрівача перед початком повного висихання.",
+      "drying": "Основний період нагрітого барабанного сушіння.",
+      "cool_down": "Обертання без нагріву ближче до кінця циклу.",
+      "anti_wrinkle": "Періодичне обертання після циклу для зменшення зморшок.",
+      "sensor_check": "Коротка пауза низької потужності під час вимірювання сухості.",
+      "drain_and_switch": "Перехідний період з режиму прання на режим сушіння.",
+      "pre_rinse": "Початкове зрошення перед пранням мийним засобом.",
+      "dry": "Стадія сушіння з використанням нагрівача та/або залишкового тепла.",
+      "sanitize": "Етап високотемпературного очищення для програм дезінфекції."
     },
     "health": {
-      "poor": "⚠ Погана відповідність",
-      "fair": "Задовільна відповідність",
-      "good": "✓ Добра відповідність"
-    },
-    "trend": {
-      "up": "Підвищення тенденції",
-      "down": "Знижується"
-    },
-    "pref": {
-      "date_relative": "Відносний (наприклад, 2 години тому)",
-      "date_absolute": "Абсолютний (наприклад, 14:32 2 липня)"
+      "fair": "Прийнятна якість профілю",
+      "good": "✓ Хороша якість профілю",
+      "poor": "⚠ Погана якість профілю"
     },
     "log": {
-      "all_levels": "Всі рівні"
+      "all_levels": "Усі рівні"
+    },
+    "ml": {
+      "builtin_models": "● Використовуються вбудовані моделі",
+      "fit_fair": "Прийнятно",
+      "fit_good": "Добре",
+      "fit_slight": "Незначно",
+      "fit_strong": "Сильно",
+      "fit_weak": "Слабко",
+      "fit_word": "відповідність",
+      "personalized": "● Персоналізовано для цього пристрою"
+    },
+    "pref": {
+      "date_absolute": "Абсолютна (напр. 14:32 2 лип)",
+      "date_relative": "Відносна (напр. 2 години тому)"
+    },
+    "quality": {
+      "bad": "Погано",
+      "good": "Добре",
+      "unusable": "Непридатний"
+    },
+    "status": {
+      "active": "Активний",
+      "all_statuses": "Усі стани",
+      "ambiguous": "Неоднозначний",
+      "auto_detect": "Автовизначення",
+      "clear": "Чисто",
+      "completed": "Завершено",
+      "fine_tuning": "налаштування…",
+      "force_stopped": "Примусово зупинено",
+      "idle": "Бездіяльність",
+      "interrupted": "Перерваний",
+      "ready": "Готовий до обробки",
+      "recording": "Запис"
+    },
+    "tab": {
+      "advanced": "Розширені",
+      "diagnostics": "Діагностика",
+      "history": "Цикли",
+      "ml": "ML навчання",
+      "pp_cleanup": "Очищення",
+      "pp_manage": "Керування",
+      "pp_overview": "Огляд",
+      "pp_phases": "Фази",
+      "profiles": "Профілі",
+      "settings": "Налаштування",
+      "status": "Огляд",
+      "subtab_phase_catalog": "Каталог фаз",
+      "subtab_profiles": "Профілі"
+    },
+    "tag": {
+      "early_end": "Раннє завершення",
+      "late_start": "Пізній старт",
+      "merged": "Об'єднані цикли",
+      "noise": "Шум",
+      "sensor_gap": "Розрив датчика",
+      "split": "Розділений цикл",
+      "wrong_profile": "Неправильний профіль"
+    },
+    "toast": {
+      "access_saved": "Контроль доступу збережено",
+      "all_wiped": "Усі дані видалено",
+      "analysis_complete_none": "Аналіз завершено: нових пропозицій немає",
+      "auto_label_complete": "Автопозначення завершено",
+      "automation_deleted": "Автоматизацію видалено",
+      "correction_submitted": "Виправлення надіслано",
+      "cycle_deleted": "Цикл видалено",
+      "cycle_force_stopped": "Цикл примусово зупинено",
+      "cycle_labelled": "Цикл позначено",
+      "cycle_paused": "Цикл призупинено",
+      "cycle_resumed": "Цикл відновлено",
+      "cycle_trimmed": "Цикл обрізано",
+      "cycles_merged": "Цикли об'єднано",
+      "envelope_rebuilt": "Конверт відновлено",
+      "envelopes_rebuilt": "Конверти відновлено",
+      "export_downloaded": "Експорт завантажено",
+      "feedback_all_dismissed": "Усі відгуки відхилено",
+      "feedback_confirmed": "Відгук підтверджено",
+      "feedback_dismissed": "Відгук відхилено",
+      "group_deleted": "Групу видалено",
+      "group_name_required": "Назва групи обов'язкова",
+      "group_saved": "Групу збережено",
+      "import_successful": "Імпорт успішний; інтеграція перезавантажується",
+      "json_required": "Дані JSON обов'язкові",
+      "legacy_removed": "Застарілі дії видалено",
+      "logs_exported": "Журнали експортовано",
+      "matching_reverted": "Ваги збігів скинуто до стандартних",
+      "min_2_profiles": "Виберіть принаймні 2 профілі для групи",
+      "ml_training_no_improvement": "Навчання завершено: базовий рівень збережено (без покращень)",
+      "models_reverted": "Моделі пристрою скинуто до базового рівня",
+      "name_required": "Назва обов'язкова",
+      "no_split_found": "Не знайдено пауз для поділу",
+      "panel_settings_saved": "Налаштування панелі збережено",
+      "phase_name_required": "Назва фази обов'язкова",
+      "phase_updated": "Фазу оновлено",
+      "phases_saved": "Фази збережено",
+      "preferences_saved": "Налаштування збережено",
+      "profile_name_required": "Назва профілю обов'язкова",
+      "profile_renamed": "Профіль перейменовано",
+      "recording_discarded": "Запис скасовано",
+      "recording_saved": "Запис збережено до профілю",
+      "recording_started": "Запис розпочато",
+      "recording_stopped": "Запис зупинено",
+      "review_saved": "Огляд збережено",
+      "settings_saved": "Налаштування збережено; інтеграція перезавантажується",
+      "suggestions_applied": "Пропозиції застосовано; інтеграція перезавантажується",
+      "suggestions_dismissed": "Пропозиції відхилено"
+    },
+    "trend": {
+      "down": "Низхідна тенденція",
+      "up": "Висхідна тенденція"
     }
   }
 }

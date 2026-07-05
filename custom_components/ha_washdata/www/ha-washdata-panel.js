@@ -74,7 +74,7 @@ const _SETTINGS_SECTIONS = [
         doc: 'A drop larger than this fraction of current power is also treated as abrupt (0.6 = a 60% drop). Complements the watts threshold across appliance sizes.' },
     ] },
   ] },
-  { id: 'matching', label: 'Matching', intro: 'How finished cycles are matched to learned profiles and labelled.', groups: [
+  { id: 'matching', label: 'Matching', intro: 'How finished cycles are matched to learned profiles and labelled.', notDeviceTypes: ['other'], groups: [
     { sub: 'Match Scoring', fields: [
       { key: 'profile_match_threshold', label: 'Match Threshold', type: 'number', step: 0.01, min: 0, max: 1, def: 0.4,
         doc: 'Minimum similarity score (0-1) required at cycle end to accept a program identification. Raise it to reduce wrong identifications; lower it if your machine\'s programs are not being matched. Default 0.4 is a conservative starting point.' },
@@ -122,7 +122,7 @@ const _SETTINGS_SECTIONS = [
         doc: 'Store the full power trace and matching debug data for each cycle. Useful for troubleshooting but increases storage size.' },
     ] },
   ] },
-  { id: 'anti_wrinkle', label: 'Anti-Wrinkle', intro: 'Anti-wrinkle mode detects dryer tumble pulses after the main heat phase and shields them from being read as new cycles.', fields: [
+  { id: 'anti_wrinkle', label: 'Anti-Wrinkle', intro: 'Anti-wrinkle / anti-crease mode detects low-power tumble pulses after the main phase and keeps them attached to the finished cycle instead of reading them as new cycles.', onlyDeviceTypes: ['washing_machine', 'dryer', 'washer_dryer'], fields: [
     { key: 'anti_wrinkle_enabled', label: 'Enable Anti-Wrinkle Detection', type: 'checkbox',
       doc: 'Recognise the short low-power tumble pulses a dryer emits after the main heat phase and keep them attached to the finished cycle instead of reading them as new cycles.' },
     { key: 'anti_wrinkle_max_power', label: 'Max Anti-Wrinkle Power', unit: 'W', type: 'number', step: 10, min: 0, def: 400,
@@ -216,6 +216,10 @@ const _SETTINGS_SECTIONS = [
         doc: 'Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Takes precedence over the static price below. Each cycle freezes the price in effect when it finished.' },
       { key: 'energy_price_static', label: 'Static Energy Price (per kWh)', type: 'number', step: 0.001, min: 0,
         doc: 'Fixed price per kWh used for cost figures when no live price entity is set above.' },
+    ] },
+    { sub: 'Cycle Timers', fields: [
+      { key: 'notify_cycle_timers', label: 'Cycle Timers', type: 'timerlist',
+        doc: 'Notifications at specific minutes into a cycle (e.g. to add softener). Message supports {device}, {program}, {minutes}. Enable Auto-pause to pause at that point and receive an interactive notification with a Resume button; resume via the panel, the pause/resume service, or the notification action.' },
     ] },
   ] },
   { id: 'ml_training', label: 'ML Training', fields: [
@@ -414,6 +418,15 @@ const _CSS = `
 .wd-pill-add { flex: 1; min-width: 90px; border: 0 !important; background: transparent !important; padding: 3px 4px !important;
   font-size: .88em; color: var(--primary-text-color); outline: none; }
 .wd-form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0 20px; }
+/* Cycle timer list */
+.wd-timerlist { display: flex; flex-direction: column; gap: 8px; }
+.wd-timer-row { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px;
+  border: 1px solid var(--divider-color); border-radius: 8px; background: var(--card-background-color); }
+.wd-timer-controls { display: flex; align-items: center; gap: 8px; }
+.wd-timer-row input[type="number"] { width: 70px; }
+.wd-timer-row input[type="text"] { width: 100%; box-sizing: border-box; }
+.wd-timer-row label { display: flex; align-items: center; gap: 4px; font-size: .88em; white-space: nowrap; }
+.wd-timer-add { align-self: flex-start; margin-top: 4px; }
 /* Roomier Settings layout (scoped so modals keep their compact spacing) */
 #wd-settings-form .wd-form-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px 28px; align-items: start; }
 #wd-settings-form .wd-field { margin-bottom: 0; background: var(--secondary-background-color); border-radius: 10px; padding: 12px 14px; }
@@ -661,8 +674,10 @@ function _fmtClock(s) {
 }
 
 // Plain label for a detected cycle artifact type.
-function _artifactLabel(type) {
-  return { pause: 'Interruption', dip: 'Low power', spike: 'High power' }[type] || 'Anomaly';
+function _artifactLabel(type, t) {
+  const entries = { pause: ['lbl.artifact_interruption', 'Interruption'], dip: ['lbl.artifact_low_power', 'Low power'], spike: ['lbl.artifact_high_power', 'High power'] };
+  const [key, fb] = entries[type] || ['lbl.artifact_anomaly', 'Anomaly'];
+  return t ? t(key, {}, fb) : fb;
 }
 
 // Linear-interpolated y at offset x for a sorted [[x,y],...] series.
@@ -717,6 +732,29 @@ function _field(f, value, extra) {
     const pills = vals.map(x => `<span class="wd-pill" data-val="${_esc(x)}">${_esc(x)}<button type="button" class="wd-pill-x" aria-label="Remove">×</button></span>`).join('');
     const opts = (extra.entities || []).filter(e => !vals.includes(e)).map(e => `<option value="${_esc(e)}">`).join('');
     input = `<div class="wd-pillbox" data-opt="${key}" data-ftype="entitylist">${pills}<input type="text" class="wd-pill-add" list="${dlId}" placeholder="${_esc(f.placeholder || 'add…')}"><datalist id="${dlId}">${opts}</datalist></div>`;
+  } else if (f.type === 'timerlist') {
+    const timers = Array.isArray(v) ? v : [];
+    const tMin = extra.t ? extra.t('lbl.timer_min', {}, 'min') : 'min';
+    const tMsgPh = extra.t ? extra.t('lbl.timer_msg_placeholder', {}, 'Message (optional, {device}/{program}/{minutes})') : 'Message (optional, {device}/{program}/{minutes})';
+    const tAutoPause = extra.t ? extra.t('lbl.timer_auto_pause', {}, 'Auto-pause') : 'Auto-pause';
+    const tRemove = extra.t ? extra.t('btn.remove_timer', {}, 'Remove timer') : 'Remove timer';
+    const tAddTimer = extra.t ? extra.t('btn.add_timer', {}, '+ Add timer') : '+ Add timer';
+    const mkRow = (t, idx) => {
+      const mins = (t && t.offset_minutes) ? String(t.offset_minutes) : '';
+      const msg = (t && t.message) ? _esc(t.message) : '';
+      const paused = (t && t.auto_pause) ? ' checked' : '';
+      return `<div class="wd-timer-row" data-idx="${idx}">` +
+        `<div class="wd-timer-controls">` +
+        `<input type="number" min="1" placeholder="${_esc(tMin)}" data-field="offset_minutes" value="${_esc(mins)}" style="width:70px">` +
+        `<label><input type="checkbox" data-field="auto_pause"${paused}> ${_esc(tAutoPause)}</label>` +
+        `<button type="button" class="wd-btn wd-btn-sm wd-btn-secondary wd-timer-remove" aria-label="${_esc(tRemove)}">&times;</button>` +
+        `</div>` +
+        `<input type="text" placeholder="${_esc(tMsgPh)}" data-field="message" value="${msg}">` +
+        `</div>`;
+    };
+    const rows = timers.map((t, i) => mkRow(t, i)).join('');
+    input = `<div class="wd-timerlist" data-opt="${key}" data-ftype="timerlist">${rows}` +
+      `<button type="button" class="wd-btn wd-btn-sm wd-btn-secondary wd-timer-add">${_esc(tAddTimer)}</button></div>`;
   } else if (f.type === 'list') {
     const joined = Array.isArray(v) ? v.join(', ') : _esc(v);
     input = `<input type="text" data-opt="${key}" data-ftype="list" value="${_esc(joined)}" placeholder="notify.mobile_app_phone, ...">`;
@@ -1045,7 +1083,7 @@ class HaWashdataPanel extends HTMLElement {
 
   async _loadPanelTranslations() {
     try {
-      const r = await fetch('/ha_washdata/panel-translations.json');
+      const r = await fetch(`/ha_washdata/panel-translations.json?v=${this._panelVersion || Date.now()}`);
       if (r.ok) this._panelTrans = await r.json();
     } catch (_) { /* non-fatal — fall back to JS-embedded strings */ }
   }
@@ -1266,7 +1304,7 @@ class HaWashdataPanel extends HTMLElement {
       }
     }
     const ts = sr.querySelector('.wd-ts');
-    if (ts && this._lastRefresh) ts.textContent = 'Updated ' + this._lastRefresh.toLocaleTimeString();
+    if (ts && this._lastRefresh) ts.textContent = this._t('msg.updated', {}, 'Updated') + ' ' + this._lastRefresh.toLocaleTimeString();
   }
 
   async _fetchTabData() {
@@ -1550,7 +1588,7 @@ class HaWashdataPanel extends HTMLElement {
       <circle cx="12" cy="14" r="5"/>
       <circle cx="12" cy="14" r="2"/>
     </svg>`;
-    const burger = `<button class="wd-burger" id="wd-burger" aria-label="Toggle sidebar" title="Toggle Home Assistant sidebar">
+    const burger = `<button class="wd-burger" id="wd-burger" aria-label="Toggle sidebar" title="${_esc(this._t('hdr.toggle_sidebar', {}, 'Toggle Home Assistant sidebar'))}">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
     </button>`;
     return `
@@ -1560,7 +1598,7 @@ class HaWashdataPanel extends HTMLElement {
         <div><h1>WashData</h1><div class="wd-sub">${this._t('msg.appliance_monitor', {}, 'Appliance monitor')}</div></div>
         ${working}
         <span class="wd-ts">${this._t('msg.updated', {time: ts}, 'Updated') + ' ' + ts}</span>
-        ${this._isAdmin() ? `<button class="wd-gear-btn" data-action="open-advanced" data-sub="logs" title="Logs" aria-label="Logs"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16"/><path d="M4 10h16"/><path d="M4 15h10"/><path d="M4 20h7"/></svg></button>` : ''}
+        ${this._isAdmin() ? `<button class="wd-gear-btn" data-action="open-advanced" data-sub="logs" title="${_esc(this._t('hdr.logs', {}, 'Logs'))}" aria-label="Logs"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16"/><path d="M4 10h16"/><path d="M4 15h10"/><path d="M4 20h7"/></svg></button>` : ''}
       </div>
     `;
   }
@@ -1595,15 +1633,15 @@ class HaWashdataPanel extends HTMLElement {
   _htmlDeviceBar() {
     // Always offer onboarding another device; show the picker only when >1.
     const addBtn = this._isAdmin()
-      ? `<button class="wd-devcard wd-devadd" data-action="add-device" title="Add another WashData device"><span class="wd-devadd-plus">+</span> ${this._t('btn.add_device', {}, '+ Add device')}</button>`
+      ? `<button class="wd-devcard wd-devadd" data-action="add-device" title="${_esc(this._t('btn.add_device_tip', {}, 'Add another WashData device'))}"><span class="wd-devadd-plus">+</span> ${this._t('btn.add_device', {}, '+ Add device')}</button>`
       : '';
     if (this._devices.length <= 1) return addBtn ? `<div class="wd-devbar">${addBtn}</div>` : '';
     return `<div class="wd-devbar">${this._devices.map((d, i) => {
-      const st = d.detector_state || 'unknown';
-      const running = ['running', 'starting', 'paused', 'ending', 'anti_wrinkle', 'rinse'].includes(st);
+      const st = d.is_user_paused ? 'user_paused' : (d.detector_state || 'unknown');
+      const running = ['running', 'starting', 'paused', 'user_paused', 'ending', 'anti_wrinkle', 'rinse'].includes(st);
       const rec = !!d.recording;
       const dotColor = rec ? 'var(--error-color, #f44336)' : this._stateColor(st);
-      const label = rec ? 'Recording' : this._stateLabel(st);
+      const label = rec ? this._t('status.recording', {}, 'Recording') : this._stateLabel(st);
       const badges = [];
       if (d.suggestions_count) badges.push(`<span class="wd-dbadge sug">💡 ${d.suggestions_count}</span>`);
       if (d.feedback_count) badges.push(`<span class="wd-dbadge fb">💬 ${d.feedback_count}</span>`);
@@ -1618,12 +1656,12 @@ class HaWashdataPanel extends HTMLElement {
   _htmlStatus() {
     const dev = this._devices[this._selIdx];
     if (!dev) return `<div class="wd-empty">${this._t('msg.no_device_selected', {}, 'No device selected.')}</div>`;
-    const state = dev.detector_state || 'unknown';
-    const rec = !!dev.recording;
     const isUserPaused = !!dev.is_user_paused;
+    const state = isUserPaused ? 'user_paused' : (dev.detector_state || 'unknown');
+    const rec = !!dev.recording;
     const color = rec ? 'var(--error-color, #f44336)' : this._stateColor(state);
-    const label = rec ? 'Recording' : this._stateLabel(state);
-    const isRunning = rec || ['running', 'starting', 'paused', 'ending', 'anti_wrinkle', 'rinse'].includes(state);
+    const label = rec ? this._t('status.recording', {}, 'Recording') : this._stateLabel(state);
+    const isRunning = rec || ['running', 'starting', 'paused', 'user_paused', 'ending', 'anti_wrinkle', 'rinse'].includes(state);
     const prog = dev.cycle_progress_pct;
     const rem = dev.time_remaining_s;
 
@@ -1659,9 +1697,9 @@ class HaWashdataPanel extends HTMLElement {
     const showExpected = this._pref('show_expected', true);
     const showRawLeg = this._pref('show_raw', false);
     const legend = `<div class="wd-leg">
-      <span class="wd-leg-i"><span class="wd-leg-sw" style="background:var(--primary-color)"></span> Power</span>
-      ${this._statusEnv ? `<label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_expected" ${showExpected ? 'checked' : ''}><span class="wd-leg-sw" style="background:#ff9800"></span> Expected</label>` : ''}
-      ${(pd.raw || []).length > 1 ? `<label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_raw" ${showRawLeg ? 'checked' : ''}><span class="wd-leg-sw" style="background:#9e9e9e"></span> Raw socket</label>` : ''}
+      <span class="wd-leg-i"><span class="wd-leg-sw" style="background:var(--primary-color)"></span> ${this._t('lbl.power', {}, 'Power')}</span>
+      ${this._statusEnv ? `<label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_expected" ${showExpected ? 'checked' : ''}><span class="wd-leg-sw" style="background:#ff9800"></span> ${this._t('lbl.expected', {}, 'Expected')}</label>` : ''}
+      ${(pd.raw || []).length > 1 ? `<label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_raw" ${showRawLeg ? 'checked' : ''}><span class="wd-leg-sw" style="background:#9e9e9e"></span> ${this._t('lbl.raw_socket', {}, 'Raw socket')}</label>` : ''}
     </div>`;
     const curveHtml = hasCurve
       ? `<div class="wd-canvas-wrap" style="margin-top:14px"><canvas id="wd-status-canvas" style="height:160px"></canvas></div>${legend}`
@@ -1826,21 +1864,21 @@ class HaWashdataPanel extends HTMLElement {
       return this._mlLoading ? '<span style="color:var(--secondary-text-color)">…</span>' : '<span style="color:var(--secondary-text-color)">-</span>';
     };
     const reviewBadge = c => {
-      if (isGolden(c)) return ' <span title="Recorded reference cycle" style="color:var(--warning-color,#ff9800)">⭐</span>';
-      if (isReviewed(c)) return ' <span title="Reviewed" style="color:var(--success-color,#4caf50)">✓</span>';
-      if (fbIds.has(c.id)) return ' <span title="Feedback requested" style="color:var(--info-color,#2196f3)">💬</span>';
-      if (needsReview(c)) return ' <span title="Needs review" style="color:var(--error-color,#f44336)">●</span>';
+      if (isGolden(c)) return ' <span title="' + _esc(this._t('badge.golden_cycle', {}, 'Recorded reference cycle')) + '" style="color:var(--warning-color,#ff9800)">⭐</span>';
+      if (isReviewed(c)) return ' <span title="' + _esc(this._t('badge.reviewed', {}, 'Reviewed')) + '" style="color:var(--success-color,#4caf50)">✓</span>';
+      if (fbIds.has(c.id)) return ' <span title="' + _esc(this._t('badge.feedback_requested', {}, 'Feedback requested')) + '" style="color:var(--info-color,#2196f3)">💬</span>';
+      if (needsReview(c)) return ' <span title="' + _esc(this._t('badge.needs_review', {}, 'Needs review')) + '" style="color:var(--error-color,#f44336)">●</span>';
       return '';
     };
     const overrunBadge = c => {
       if (c.anomaly !== 'overrun') return '';
       const r = c.overrun_ratio ? ` (${Number(c.overrun_ratio).toFixed(1)}x expected)` : '';
-      return ` <span title="Ran longer than usual${r}" style="color:var(--warning-color,#ff9800)">⏱</span>`;
+      return ` <span title="${_esc(this._t('badge.overrun', {}, 'Ran longer than usual'))}${r}" style="color:var(--warning-color,#ff9800)">⏱</span>`;
     };
     const artifactBadge = c => {
       const n = Array.isArray(c.artifacts) ? c.artifacts.length : 0;
       if (!n) return '';
-      return ` <span title="${n} anomal${n > 1 ? 'ies' : 'y'} detected (e.g. door opened mid-cycle) — open to see them on the graph" style="color:var(--warning-color,#ff9800)">⚠</span>`;
+      return ` <span title="${_esc(this._t('badge.artifact_tip', {n}, `${n} anomal${n > 1 ? 'ies' : 'y'} detected (e.g. door opened mid-cycle) — open to see them on the graph`))}" style="color:var(--warning-color,#ff9800)">⚠</span>`;
     };
 
     const cur = (this._hass && this._hass.config && this._hass.config.currency) || '';
@@ -1883,7 +1921,7 @@ class HaWashdataPanel extends HTMLElement {
       <input type="text" class="wd-filter-input" id="wd-cyc-filter-text" placeholder="Filter by profile…" value="${_esc(text)}" autocomplete="off">
       <select id="wd-cyc-filter-status" class="wd-filter-select">
         <option value="" ${!fStatus ? 'selected' : ''}>${this._t('status.all_statuses', {}, 'All statuses')}</option>
-        <option value="needs_review" ${fStatus === 'needs_review' ? 'selected' : ''}>Needs review${needsReviewCount ? ` (${needsReviewCount})` : ''}</option>
+        <option value="needs_review" ${fStatus === 'needs_review' ? 'selected' : ''}>${this._t('badge.needs_review', {}, 'Needs review')}${needsReviewCount ? ` (${needsReviewCount})` : ''}</option>
         <option value="completed" ${fStatus === 'completed' ? 'selected' : ''}>${this._t('status.completed', {}, 'Completed')}</option>
         <option value="interrupted" ${fStatus === 'interrupted' ? 'selected' : ''}>${this._t('status.interrupted', {}, 'Interrupted')}</option>
         <option value="force_stopped" ${fStatus === 'force_stopped' ? 'selected' : ''}>${this._t('status.force_stopped', {}, 'Force stopped')}</option>
@@ -1936,9 +1974,9 @@ class HaWashdataPanel extends HTMLElement {
     const t = (this._profileTrends || {})[p.name];
     let healthBadge = '';
     if (h && h.health_status === 'poor') {
-      healthBadge = `<span class="wd-badge" style="color:var(--error-color,#f44336);background:rgba(244,67,54,.12)" title="Inconsistent match history — consider rebuilding this profile">⚠ ${this._t('badge.poor_fit', {}, 'poor fit')}</span>`;
+      healthBadge = `<span class="wd-badge" style="color:var(--error-color,#f44336);background:rgba(244,67,54,.12)" title="${_esc(this._t('badge.poor_fit_tip', {}, 'Inconsistent match history — consider rebuilding this profile'))}">⚠ ${this._t('badge.poor_fit', {}, 'poor fit')}</span>`;
     } else if (h && h.health_status === 'fair') {
-      healthBadge = `<span class="wd-badge" style="color:var(--warning-color,#ff9800);background:rgba(255,152,0,.12)" title="Moderate match consistency — some cycles assigned to this profile have lower confidence scores. Label more cycles or re-record the profile to improve accuracy.">${this._t('badge.fair_fit', {}, 'fair fit')}</span>`;
+      healthBadge = `<span class="wd-badge" style="color:var(--warning-color,#ff9800);background:rgba(255,152,0,.12)" title="${_esc(this._t('badge.fair_fit_tip', {}, 'Moderate match consistency — some cycles assigned to this profile have lower confidence scores. Label more cycles or re-record the profile to improve accuracy.'))}">${this._t('badge.fair_fit', {}, 'fair fit')}</span>`;
     }
     // Trend badge: show if duration is drifting (up = slower/longer, concerning for lime buildup etc.)
     let trendBadge = '';
@@ -1973,7 +2011,7 @@ class HaWashdataPanel extends HTMLElement {
     // Suggestion banner: near-duplicate clusters the user can confirm as groups.
     const sugBanner = (canEdit && (pg.suggestions || []).length) ? `
       <div class="wd-sug-banner">
-        <span>🔗 <b>${pg.suggestions.length}</b> near-duplicate profile cluster${pg.suggestions.length > 1 ? 's' : ''} detected. Grouping lets matching reliably pick between look-alikes (e.g. same program at different temperature/spin).</span>
+        <span>🔗 <b>${pg.suggestions.length}</b> ${this._t('msg.near_duplicate_cluster', {}, 'near-duplicate profile cluster' + (pg.suggestions.length > 1 ? 's' : '') + ' detected. Grouping lets matching reliably pick between look-alikes (e.g. same program at different temperature/spin).')}</span>
         ${pg.suggestions.map((s, i) => `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-suggest" data-idx="${i}">Group ${s.members.length}: ${_esc(s.members.join(', ').slice(0, 48))}</button>`).join('')}
       </div>` : '';
 
@@ -1983,7 +2021,7 @@ class HaWashdataPanel extends HTMLElement {
       const clusters = (cg.duration_clusters || []).slice(0, 3);
       const clusterHints = clusters.map(cl => `~${cl.duration_bucket_min}–${cl.duration_bucket_min + 15} min (${cl.count}×)`).join(', ');
       return `<div class="wd-sug-banner" style="border-color:var(--info-color,#2196f3);background:rgba(33,150,243,.07)">
-        <span>📂 <b>${cg.unmatched_count}</b> recent cycles have no matching profile (${Math.round(cg.unmatched_rate * 100)}% of last 30).${clusterHints ? ` Durations: ${clusterHints}.` : ''} Consider creating a new profile.</span>
+        <span>📂 <b>${cg.unmatched_count}</b> ${this._t('msg.coverage_gap', {pct: Math.round(cg.unmatched_rate * 100)}, `recent cycles have no matching profile (${Math.round(cg.unmatched_rate * 100)}% of last 30).`)}${clusterHints ? ` ${this._t('lbl.duration', {}, 'Duration')}: ${clusterHints}.` : ''} ${this._t('msg.consider_new_profile', {}, 'Consider creating a new profile.')}</span>
         ${canEdit ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="create-profile">${this._t('btn.create_profile', {}, '+ Create profile')}</button>` : ''}
       </div>`;
     })() : '';
@@ -2004,7 +2042,7 @@ class HaWashdataPanel extends HTMLElement {
       const cohBadge = g.cohesive
         ? `<span class="wd-badge" style="color:var(--success-color,#4caf50);background:rgba(76,175,80,.14)">cohesion ${cohPct}%</span>`
         : `<span class="wd-badge" style="color:var(--warning-color,#ff9800);background:rgba(255,152,0,.14)">⚠ low cohesion ${cohPct}%</span>`;
-      const warn = g.cohesive ? '' : `<p class="wd-info" style="margin:0 0 8px;color:var(--warning-color,#ff9800)">These profiles aren't similar enough to group reliably, so matching treats them individually until you remove the outlier or split the group.</p>`;
+      const warn = g.cohesive ? '' : `<p class="wd-info" style="margin:0 0 8px;color:var(--warning-color,#ff9800)">${this._t('msg.group_not_cohesive', {}, "These profiles aren't similar enough to group reliably, so matching treats them individually until you remove the outlier or split the group.")}</p>`;
       const titleEl = canEdit
         ? `<button class="wd-btn-link" style="font-size:1.05em;font-weight:600;text-align:left;padding:0;border:none;background:none;cursor:pointer;color:inherit" data-action="pg-edit" data-gname="${_esc(g.name)}">🔗 ${_esc(g.name)}</button>`
         : `<span style="font-size:1.05em;font-weight:600">🔗 ${_esc(g.name)}</span>`;
@@ -2084,10 +2122,10 @@ class HaWashdataPanel extends HTMLElement {
       ${canvas}
       <div class="wd-rev-sub">Members ${members.length ? `(${members.length})` : ''}</div>
       <div class="wd-rev-tags">${checks || `<span class="wd-info">${this._t('msg.no_profiles_yet_short', {}, 'No profiles yet.')}</span>`}</div>
-      <p class="wd-info" style="margin-top:10px">Group programs with the same shape that differ in temperature/spin (durations may vary). Matching scores the group as one candidate, then picks the best-fitting member. Pick at least 2; the overlay shows how alike they are.</p>
+      <p class="wd-info" style="margin-top:10px">${this._t('msg.group_modal_help', {}, 'Group programs with the same shape that differ in temperature/spin (durations may vary). Matching scores the group as one candidate, then picks the best-fitting member. Pick at least 2; the overlay shows how alike they are.')}</p>
       <div class="wd-modal-actions">
         <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
-        ${m.orig ? `<button class="wd-btn wd-btn-danger" data-maction="pg-delete" title="Delete this group only - the member profiles are kept">${this._t('btn.delete_group', {}, 'Delete Group')}</button>` : ''}
+        ${m.orig ? `<button class="wd-btn wd-btn-danger" data-maction="pg-delete" title="${_esc(this._t('btn.delete_group_tip', {}, 'Delete this group only - the member profiles are kept'))}">${this._t('btn.delete_group', {}, 'Delete Group')}</button>` : ''}
         <button class="wd-btn wd-btn-primary" data-maction="pg-save" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Saving…' : this._t('btn.save_group', {}, 'Save Group')}</button>
       </div>`;
   }
@@ -2120,7 +2158,14 @@ class HaWashdataPanel extends HTMLElement {
       return fields.some(f => sugKeys.has(f.key));
     };
     // ml_training moved to its own "ML Training" tab; never show it under Settings.
-    const visibleSections = _SETTINGS_SECTIONS.filter(sec => sec.id !== 'ml_training');
+    // Also filter sections by device type (e.g. hide Matching for "other" device type).
+    const currentDeviceType = (this._opts && this._opts.device_type) || '';
+    const visibleSections = _SETTINGS_SECTIONS.filter(sec => {
+      if (sec.id === 'ml_training') return false;
+      if (currentDeviceType && sec.notDeviceTypes && sec.notDeviceTypes.includes(currentDeviceType)) return false;
+      if (currentDeviceType && sec.onlyDeviceTypes && !sec.onlyDeviceTypes.includes(currentDeviceType)) return false;
+      return true;
+    });
     const nav = visibleSections.map(sec => {
       const hasSug = secHasSug(sec);
       return `<button class="wd-sec-btn ${this._settingsSec === sec.id ? 'active' : ''}" data-sec="${sec.id}">${_esc(this._t('section.' + sec.id + '.label', {}, sec.label))}${hasSug ? '<span class="wd-sec-sug-dot"></span>' : ''}</button>`;
@@ -2131,18 +2176,18 @@ class HaWashdataPanel extends HTMLElement {
     const sugOnly = this._settingsSugOnly && !this._settingsSearch;
     const banner = sugCount ? (sugOnly ? `
       <div class="wd-sug-banner">
-        <span>💡 Showing <b>${sugCount}</b> setting${sugCount > 1 ? 's' : ''} with suggestions. Select a section above or <span style="text-decoration:underline;cursor:pointer" data-action="sug-show-all">show all settings</span>.</span>
+        <span>💡 ${this._t('msg.showing_suggestions', {count: sugCount}, `Showing ${sugCount} setting${sugCount > 1 ? 's' : ''} with suggestions.`)} <span style="text-decoration:underline;cursor:pointer" data-action="sug-show-all">${this._t('msg.show_all_settings', {}, 'Show all settings')}</span>.</span>
         <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="sug-apply-all">${this._t('btn.apply_all', {}, 'Apply all')}</button>
       </div>` : `
       <div class="wd-sug-banner">
-        <span>💡 <b>${sugCount}</b> tuning suggestion${sugCount > 1 ? 's' : ''} available from observed cycles. They appear beside the relevant fields.</span>
+        <span>💡 ${this._t('msg.tuning_suggestions_available', {count: sugCount}, `${sugCount} tuning suggestion${sugCount > 1 ? 's' : ''} available from observed cycles. They appear beside the relevant fields.`)}</span>
         <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="goto-suggestions">${this._t('btn.show_only', {}, 'Show only')}</button>
         <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="sug-apply-all">${this._t('btn.apply_all', {}, 'Apply all')}</button>
         <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="sug-dismiss">${this._t('btn.dismiss', {}, 'Dismiss')}</button>
       </div>`) : '';
 
     const analyzeBusy = this._busy.has('sug-analyze');
-    const analyzeBtn = `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="sug-analyze" ${analyzeBusy ? 'disabled' : ''} title="Analyze your recorded cycles now and refresh tuning suggestions">${analyzeBusy ? '<span class="wd-spin"></span> Analyzing…' : this._t('btn.run_analysis', {}, '🔍 Run suggestion analysis')}</button>`;
+    const analyzeBtn = `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="sug-analyze" ${analyzeBusy ? 'disabled' : ''} title="${_esc(this._t('btn.run_analysis_tip', {}, 'Analyze your recorded cycles now and refresh tuning suggestions'))}">${analyzeBusy ? '<span class="wd-spin"></span> Analyzing…' : this._t('btn.run_analysis', {}, '🔍 Run suggestion analysis')}</button>`;
 
     const search = this._settingsSearch || '';
     const q = search.trim().toLowerCase();
@@ -2190,7 +2235,13 @@ class HaWashdataPanel extends HTMLElement {
       extra.datalist = `<datalist id="${dlId}">${ids.map(e => `<option value="${_esc(e)}">`).join('')}</datalist>`;
     } else if (f.type === 'entitylist') {
       const states = this._hass && this._hass.states ? this._hass.states : {};
-      extra.entities = Object.keys(states).filter(e => !f.domain || e.startsWith(f.domain + '.')).sort().slice(0, 500);
+      const stateEntities = Object.keys(states).filter(e => !f.domain || e.startsWith(f.domain + '.')).sort();
+      if (f.domain === 'notify' && this._hass && this._hass.services && this._hass.services.notify) {
+        const svcEntities = Object.keys(this._hass.services.notify).map(s => `notify.${s}`);
+        extra.entities = [...new Set([...stateEntities, ...svcEntities])].sort().slice(0, 500);
+      } else {
+        extra.entities = stateEntities.slice(0, 500);
+      }
     } else if (Array.isArray(f.suggestions) && f.suggestions.length) {
       // Free-text field with a suggestion datalist (e.g. Android channel names).
       const dlId = `wd-dl-${f.key}`;
@@ -2205,6 +2256,7 @@ class HaWashdataPanel extends HTMLElement {
     if (mlc && mlc.ml_value != null) extra.mlSuggestion = { value: mlc.ml_value, reason: mlc.ml_reason };
 
     extra.useBtnLabel = this._t('btn.use', {}, 'Use');
+    extra.t = this._t.bind(this);
     const tf = Object.assign({}, f, { label: this._t('setting.' + f.key + '.label', {}, f.label || ''), doc: f.doc != null ? this._t('setting.' + f.key + '.doc', {}, f.doc) : f.doc });
     return _field(tf, value, extra);
   }
@@ -2228,8 +2280,8 @@ class HaWashdataPanel extends HTMLElement {
     const legacy = Array.isArray(this._opts.notify_actions) ? this._opts.notify_actions : [];
     const legacyBlock = legacy.length ? `
       <div style="border:1px solid var(--warning-color,#ff9800);border-radius:8px;padding:10px 12px;margin-bottom:12px;background:rgba(255,152,0,.08)">
-        <div style="font-weight:600;margin-bottom:4px">${legacy.length} legacy custom action${legacy.length > 1 ? 's' : ''} still running</div>
-        <p class="wd-info" style="margin:0 0 8px">Configured with the old actions editor (now removed). They still fire on cycle events but can no longer be edited here. Convert them into a normal automation, or remove them.</p>
+        <div style="font-weight:600;margin-bottom:4px">${this._t('msg.legacy_actions_title', {count: legacy.length}, `${legacy.length} legacy custom action${legacy.length > 1 ? 's' : ''} still running`)}</div>
+        <p class="wd-info" style="margin:0 0 8px">${this._t('msg.old_actions_warning', {}, 'Configured with the old actions editor (now removed). They still fire on cycle events but can no longer be edited here. Convert them into a normal automation, or remove them.')}</p>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           <button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-convert-legacy">${this._t('btn.convert_to_automation', {}, 'Convert to automation')}</button>
           <button type="button" class="wd-btn wd-btn-danger wd-btn-sm" data-action="auto-remove-legacy">${this._t('btn.remove', {}, 'Remove')}</button>
@@ -2349,10 +2401,15 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   _htmlSettingsSection(o) {
-    // ml_training now lives in its own tab, so it must never resolve here even
-    // if _settingsSec still points at it.
-    const sec = _SETTINGS_SECTIONS.find(s => s.id === this._settingsSec && s.id !== 'ml_training')
-      || _SETTINGS_SECTIONS.find(s => s.id !== 'ml_training')
+    const currentDeviceType = (this._opts && this._opts.device_type) || '';
+    const _secVisible = sec => {
+      if (sec.id === 'ml_training') return false;
+      if (currentDeviceType && sec.notDeviceTypes && sec.notDeviceTypes.includes(currentDeviceType)) return false;
+      if (currentDeviceType && sec.onlyDeviceTypes && !sec.onlyDeviceTypes.includes(currentDeviceType)) return false;
+      return true;
+    };
+    const sec = _SETTINGS_SECTIONS.find(s => s.id === this._settingsSec && _secVisible(s))
+      || _SETTINGS_SECTIONS.find(s => _secVisible(s))
       || _SETTINGS_SECTIONS[0];
     const intro = (sec.intro || this._t('section.' + sec.id + '.intro', {}, ''))
       ? `<p class="wd-sec-intro">${_esc(this._t('section.' + sec.id + '.intro', {}, sec.intro || ''))}</p>` : '';
@@ -2383,7 +2440,13 @@ class HaWashdataPanel extends HTMLElement {
   // Cross-section field search: render every field (from all sections) whose
   // label / key / tooltip matches the query, grouped under its section heading.
   _htmlSettingsSearch(o, q) {
-    const sections = _SETTINGS_SECTIONS.filter(s => s.id !== 'ml_training');
+    const currentDeviceType = (this._opts && this._opts.device_type) || '';
+    const sections = _SETTINGS_SECTIONS.filter(s => {
+      if (s.id === 'ml_training') return false;
+      if (currentDeviceType && s.notDeviceTypes && s.notDeviceTypes.includes(currentDeviceType)) return false;
+      if (currentDeviceType && s.onlyDeviceTypes && !s.onlyDeviceTypes.includes(currentDeviceType)) return false;
+      return true;
+    });
     const match = f => (`${f.label || ''} ${f.key || ''} ${f.doc || ''} ${f.hint || ''}`).toLowerCase().includes(q);
     let out = '';
     let count = 0;
@@ -2396,14 +2459,20 @@ class HaWashdataPanel extends HTMLElement {
       count += hits.length;
       out += `<div class="wd-subhead">${_esc(this._t('section.' + sec.id + '.label', {}, sec.label))}</div><div class="wd-form-grid">${rendered}</div>`;
     }
-    return count ? out : `<p class="wd-info" style="padding:12px">No settings match "${_esc(q)}".</p>`;
+    return count ? out : `<p class="wd-info" style="padding:12px">${this._t('msg.no_settings_match', {q}, `No settings match "${_esc(q)}"`)}</p>`;
   }
 
   // Cross-section view showing only the fields that have active suggestions.
   _htmlSettingsSugOnly(o) {
     const sugKeys = new Set((this._suggestions || []).map(s => s.key));
     if (!sugKeys.size) return `<p class="wd-info" style="padding:12px">${this._t('msg.no_suggestions', {}, 'No active suggestions.')}</p>`;
-    const sections = _SETTINGS_SECTIONS.filter(s => s.id !== 'ml_training');
+    const currentDeviceType = (this._opts && this._opts.device_type) || '';
+    const sections = _SETTINGS_SECTIONS.filter(s => {
+      if (s.id === 'ml_training') return false;
+      if (currentDeviceType && s.notDeviceTypes && s.notDeviceTypes.includes(currentDeviceType)) return false;
+      if (currentDeviceType && s.onlyDeviceTypes && !s.onlyDeviceTypes.includes(currentDeviceType)) return false;
+      return true;
+    });
     let out = '';
     for (const sec of sections) {
       const secFields = sec.fields || (sec.groups || []).flatMap(g => g.fields || []);
@@ -2511,7 +2580,7 @@ class HaWashdataPanel extends HTMLElement {
         </div>`;
       }).join('');
       const resetBtn = this._canEdit()
-        ? `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="ml-revert-models" ${reverting ? 'disabled' : ''} title="Discard the fine-tuned models and go back to the built-in ones. WashData can re-learn them later." style="margin-top:12px">${reverting ? '<span class="wd-spin"></span> Resetting…' : this._t('btn.reset_to_builtin', {}, 'Reset to built-in models')}</button>`
+        ? `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="ml-revert-models" ${reverting ? 'disabled' : ''} title="${_esc(this._t('btn.reset_ml_models_tip', {}, 'Discard the fine-tuned models and go back to the built-in ones. WashData can re-learn them later.'))}" style="margin-top:12px">${reverting ? '<span class="wd-spin"></span> Resetting…' : this._t('btn.reset_to_builtin', {}, 'Reset to built-in models')}</button>`
         : '';
       body = `<div>${rows}</div>${resetBtn}`;
     }
@@ -2618,7 +2687,7 @@ class HaWashdataPanel extends HTMLElement {
     const devType = dev ? (dev.options.device_type || 'washing_machine') : 'washing_machine';
     const rows = this._phases.map(p => {
       const isDefault = p.is_default;
-      const desc = p.description || '';
+      const desc = p.translation_key ? this._t(p.translation_key, {}, p.description || '') : (p.description || '');
       return `<tr>
         <td>${_esc(p.name)} ${isDefault ? `<span class="wd-tag">${this._t('badge.built_in_tag', {}, 'built-in')}</span>` : ''}</td>
         <td>${_esc(desc.length > 60 ? desc.slice(0, 57) + '…' : desc)}</td>
@@ -2664,15 +2733,15 @@ class HaWashdataPanel extends HTMLElement {
         <div style="display:flex;flex-direction:column;gap:12px">
           <div><strong>${this._t('hdr.process_history', {}, 'Process History')}</strong><p class="wd-info" style="margin:4px 0">Re-run matching on all stored cycles, refresh tuning suggestions, retrain the ML models (if enabled), and recompute cycle health. Run this after a batch of reviews.</p>
             <button class="wd-btn wd-btn-secondary" data-action="reprocess-history">${this._t('btn.process_history', {}, 'Process Now')}</button></div>
-          <div><strong>${this._t('hdr.clear_debug', {}, 'Clear Debug Traces')}</strong><p class="wd-info" style="margin:4px 0">Remove stored debug data to free space.</p>
+          <div><strong>${this._t('hdr.clear_debug', {}, 'Clear Debug Traces')}</strong><p class="wd-info" style="margin:4px 0">${this._t('msg.clear_debug_hint', {}, 'Remove stored debug data to free space.')}</p>
             <button class="wd-btn wd-btn-secondary" data-action="clear-debug">${this._t('btn.clear_debug', {}, 'Clear Debug Data')}</button></div>
-          <div><strong>${this._t('hdr.wipe_history', {}, 'Wipe History')}</strong><p class="wd-info" style="margin:4px 0">Permanently delete all cycles and profiles. Cannot be undone.</p>
+          <div><strong>${this._t('hdr.wipe_history', {}, 'Wipe History')}</strong><p class="wd-info" style="margin:4px 0">${this._t('msg.wipe_history_warning', {}, 'Permanently delete all cycles and profiles. Cannot be undone.')}</p>
             <button class="wd-btn wd-btn-danger" data-action="wipe-history">${this._t('btn.wipe_all', {}, 'Wipe All Data')}</button></div>
         </div>
       </div>
       <div class="wd-card">
         <div class="wd-card-title">${this._t('hdr.export_import', {}, 'Export / Import')}</div>
-        <p class="wd-info" style="margin-bottom:12px">Export all profiles and cycles to JSON, or restore from a previous export.</p>
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.export_description', {}, 'Export all profiles and cycles to JSON, or restore from a previous export.')}</p>
         <div class="wd-card-actions">
           <button class="wd-btn wd-btn-secondary" data-action="export-config">${this._t('btn.export_json', {}, 'Export to JSON')}</button>
           <button class="wd-btn wd-btn-secondary" data-action="import-config-open">${this._t('btn.import_json', {}, 'Import from JSON')}</button>
@@ -2794,7 +2863,7 @@ class HaWashdataPanel extends HTMLElement {
         <select id="wd-log-level">${sel}</select>
         <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="logs-refresh">${this._t('btn.refresh', {}, 'Refresh')}</button>
         <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="logs-export">${this._t('btn.export', {}, 'Export')}</button>
-        <span class="wd-field-hint" style="margin:0">Newest first · buffers the last 500 ha_washdata records since restart · drag the bottom edge to resize.</span>
+        <span class="wd-field-hint" style="margin:0">${this._t('msg.log_buffer_hint', {}, 'Newest first · buffers the last 500 ha_washdata records since restart · drag the bottom edge to resize.')}</span>
       </div>
       ${lines ? `<div class="wd-logs">${lines}</div>` : `<p class="wd-info">${this._t('msg.no_logs', {}, 'No log records buffered yet.')}</p>`}
     </div>`;
@@ -2970,15 +3039,15 @@ class HaWashdataPanel extends HTMLElement {
     // Expected (matched) curve, full length, faint orange - drawn behind.
     if (pd.cycle_active && env && (env.avg || []).length && showExpected) {
       const target = env.target_duration || env.avg[env.avg.length - 1][0];
-      series.push({ points: env.avg, stroke: '#ff9800', width: 2, alpha: 0.4, name: 'Expected' });
+      series.push({ points: env.avg, stroke: '#ff9800', width: 2, alpha: 0.4, name: this._t('lbl.expected', {}, 'Expected') });
       xMax = Math.max(xMax, target);
     }
     // Processed live trace (primary, filled).
-    series.push({ points: live, stroke: 'primary', fill: true, width: 2, name: 'Power' });
+    series.push({ points: live, stroke: 'primary', fill: true, width: 2, name: this._t('lbl.power', {}, 'Power') });
     // Raw unthrottled socket readings (thin grey, on top). noScale so its spikes
     // don't inflate the y-axis and squash the real curve.
     if (showRaw && (pd.raw || []).length > 1) {
-      series.push({ points: pd.raw, stroke: '#9e9e9e', width: 1, alpha: 0.65, name: 'Raw socket', noScale: true });
+      series.push({ points: pd.raw, stroke: '#9e9e9e', width: 1, alpha: 0.65, name: this._t('lbl.raw_socket', {}, 'Raw socket'), noScale: true });
     }
     this._drawCurves('wd-status-canvas', { series, xMax });
   }
@@ -3063,7 +3132,7 @@ class HaWashdataPanel extends HTMLElement {
     // Anomaly detail when hovering inside a detected artifact span.
     (wd.artifacts || []).forEach(a => {
       if (x >= a.start_s && x <= a.end_s) {
-        lines.push(`<span style="color:var(--warning-color,#ff9800)">⚠ ${_esc(_artifactLabel(a.type))}</span>: ${_esc(a.detail || '')}`);
+        lines.push(`<span style="color:var(--warning-color,#ff9800)">⚠ ${_esc(_artifactLabel(a.type, (k, v, f) => this._t(k, v, f)))}</span>: ${_esc(a.detail || '')}`);
       }
     });
     if (this._canvasZoom[id]) lines.push('<span style="opacity:.45">scroll to zoom · dblclick to reset</span>');
@@ -3173,8 +3242,8 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="auto-run">${this._t('btn.run_auto_label', {}, 'Run Auto-Label')}</button></div>`;
     } else if (m.type === 'merge-cycles') {
-      body = `<h2>Merge ${m.ids.length} Cycles</h2>
-        <p class="wd-info" style="margin-bottom:12px">The selected cycles are combined into one (chronological order; gaps filled with 0 W). Pick the resulting profile.</p>
+      body = `<h2>${this._t('modal.merge_cycles', {n: m.ids.length}, `Merge ${m.ids.length} Cycles`)}</h2>
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.merge_intro', {}, 'The selected cycles are combined into one (chronological order; gaps filled with 0 W). Pick the resulting profile.')}</p>
         <div class="wd-field"><label>${this._t('lbl.resulting_profile', {}, 'Resulting profile')}</label>
           <select id="wd-merge-prof"><option value="">${this._t('lbl.unlabelled_paren', {}, '(unlabelled)')}</option><option value="__create_new__">+ Create new profile…</option>${this._profileOptions()}</select></div>
         <div id="wd-merge-new" class="wd-field" style="display:none"><label>${this._t('lbl.new_profile_name', {}, 'New profile name')}</label><input type="text" id="wd-merge-newname" placeholder="e.g. Cotton 40°C"></div>
@@ -3243,7 +3312,7 @@ class HaWashdataPanel extends HTMLElement {
       const itype = tm === 'clock' ? 'time' : 'number';
       const iattr = tm === 'clock' ? 'step="1"' : `min="0" max="${Math.ceil(full)}" step="1"`;
       const ulbl = tm === 'clock' ? '' : ' (s)';
-      controls = `<p class="wd-info" style="margin:4px 0 8px">Drag the red handles, or enter values. Everything outside the window is removed.</p>
+      controls = `<p class="wd-info" style="margin:4px 0 8px">${this._t('msg.trim_intro', {}, 'Drag the red handles, or enter values. Everything outside the window is removed.')}</p>
         <div class="wd-mode-bar" style="margin-bottom:8px;align-items:center">
           <span class="wd-info" style="margin:0">Input:</span>
           <button class="wd-btn wd-btn-sm ${tm === 's' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="trim-mode-s">${this._t('lbl.seconds_from_start', {}, 'Seconds from start')}</button>
@@ -3309,16 +3378,15 @@ class HaWashdataPanel extends HTMLElement {
             <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-ignore" data-cid="${_esc(m.cycleId)}">${this._t('btn.ignore', {}, 'Ignore')}</button>
           </div>
         </div>` : '';
-      const tProfile = _tip('The program this cycle is labelled as. If the auto-detected program was wrong, correct it here - labelling teaches matching for future cycles.');
-      const tQuality = _tip('How clean this cycle is. Good = a textbook example of this program; Bad = detected but noisy or atypical; Unusable = mis-detected (merged, truncated or spurious). Drives the health score and which cycles are allowed to train the model.');
-      const tRecorded = _tip('Mark this as a hand-picked reference cycle for its program - the same role as a manually recorded cycle. Reference cycles are always kept, seed the matching template, and are never dropped by cleanup. (This is the "golden"/recorded flag; both are the same thing.)');
-      const tTags = _tip('Optional flags describing what went wrong with this cycle, so training and cleanup can account for it.');
-      const tNotes = _tip('Free-text notes for your own reference. Not used by matching or training.');
+      const tProfile = _tip(this._t('msg.review_profile_tip', {}, 'The program this cycle is labelled as. If the auto-detected program was wrong, correct it here - labelling teaches matching for future cycles.'));
+      const tQuality = _tip(this._t('msg.review_quality_tip', {}, 'How clean this cycle is. Good = a textbook example of this program; Bad = detected but noisy or atypical; Unusable = mis-detected (merged, truncated or spurious). Drives the health score and which cycles are allowed to train the model.'));
+      const tRecorded = _tip(this._t('msg.review_recorded_tip', {}, 'Mark this as a hand-picked reference cycle for its program - the same role as a manually recorded cycle. Reference cycles are always kept, seed the matching template, and are never dropped by cleanup. (This is the "golden"/recorded flag; both are the same thing.)'));
+      const tTags = _tip(this._t('msg.review_tags_tip', {}, 'Optional flags describing what went wrong with this cycle, so training and cleanup can account for it.'));
+      const tNotes = _tip(this._t('msg.review_notes_tip', {}, 'Free-text notes for your own reference. Not used by matching or training.'));
       controls = `
         ${fbBanner}
         <p style="font-size:.82em;color:var(--secondary-text-color);margin:8px 0 12px">
-          Confirm whether this cycle was detected correctly. Your reviews train the model on <em>your</em> machine -
-          the more cycles you confirm, the better matching and health scoring get. A quick Good/Bad is enough.
+          ${this._t('msg.review_confirm_help', {}, 'Confirm whether this cycle was detected correctly. Your reviews train the model on your machine - the more cycles you confirm, the better matching and health scoring get. A quick Good/Bad is enough.')}
         </p>
         <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin:6px 0">
           <label style="display:inline-flex;align-items:center;gap:6px">Profile${tProfile}
@@ -3327,10 +3395,10 @@ class HaWashdataPanel extends HTMLElement {
           <label style="display:inline-flex;align-items:center;gap:6px">Quality${tQuality}
             <select id="wd-cyc-rev-quality" class="wd-filter-select">${qOpt('', '-')}${qOpt('good', this._t('quality.good', {}, 'Good'))}${qOpt('bad', this._t('quality.bad', {}, 'Bad'))}${qOpt('unusable', this._t('quality.unusable', {}, 'Unusable'))}</select>
           </label>
-          <label style="display:inline-flex;align-items:center;gap:6px"><input type="checkbox" id="wd-cyc-rev-golden" ${rv.golden ? 'checked' : ''}> Recorded reference cycle${tRecorded}</label>
+          <label style="display:inline-flex;align-items:center;gap:6px"><input type="checkbox" id="wd-cyc-rev-golden" ${rv.golden ? 'checked' : ''}> ${this._t('badge.golden_cycle', {}, 'Recorded reference cycle')}${tRecorded}</label>
           ${reviewedBadge}
         </div>
-        <div class="wd-rev-sub">Compare with profiles${_tip('Overlay other profile envelopes on the chart above to see which one best fits this cycle.')}</div>
+        <div class="wd-rev-sub">${this._t('lbl.compare_profiles', {}, 'Compare with profiles')}${_tip(this._t('msg.compare_profiles_tip', {}, 'Overlay other profile envelopes on the chart above to see which one best fits this cycle.'))}</div>
         <div class="wd-rev-tags">${(this._profiles || []).map(p => {
           const on = (m.overlays || []).includes(p.name);
           const sw = on ? `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${_PALETTE[Math.max(0, this._profiles.findIndex(x => x.name === p.name)) % _PALETTE.length]};margin:0 2px"></span>` : '';
@@ -3339,7 +3407,7 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-rev-sub">Tags${tTags}</div>
         <div class="wd-rev-tags">${tagChecks}</div>
         <div class="wd-rev-sub">Notes${tNotes}</div>
-        <textarea id="wd-cyc-rev-notes" class="wd-rev-notes" rows="3" placeholder="Notes (optional)">${_esc(rv.notes || '')}</textarea>
+        <textarea id="wd-cyc-rev-notes" class="wd-rev-notes" rows="3" placeholder="${this._t('msg.review_notes_placeholder', {}, 'Notes (optional)')}">${_esc(rv.notes || '')}</textarea>
         <div class="wd-modal-actions" style="margin-top:16px">
           <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
           <button class="wd-btn wd-btn-primary" data-maction="cyc-review-save" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Saving…' : this._t('btn.save_review', {}, 'Save Review')}</button>
@@ -3351,11 +3419,11 @@ class HaWashdataPanel extends HTMLElement {
     let artifactBox = '';
     const arts = (m.mode === 'view' || m.mode === 'review') ? (cur.artifacts || []) : [];
     if (arts.length) {
-      const items = arts.map(a => `<li><b>${_esc(_artifactLabel(a.type))}</b> at ${_fmtClock(a.start_s)}–${_fmtClock(a.end_s)} — ${_esc(a.detail || '')}</li>`).join('');
+      const items = arts.map(a => `<li><b>${_esc(_artifactLabel(a.type, (k, v, f) => this._t(k, v, f)))}</b> at ${_fmtClock(a.start_s)}–${_fmtClock(a.end_s)} — ${_esc(a.detail || '')}</li>`).join('');
       artifactBox = `<div class="wd-card" style="margin:10px 0 0;padding:10px 12px;border-left:3px solid var(--warning-color,#ff9800)">
-        <div style="font-weight:600;font-size:.9em">⚠ ${arts.length} anomal${arts.length > 1 ? 'ies' : 'y'} detected during this cycle</div>
+        <div style="font-weight:600;font-size:.9em">⚠ ${this._t('msg.artifact_header', {n: arts.length}, `${arts.length} anomal${arts.length > 1 ? 'ies' : 'y'} detected during this cycle`)}</div>
         <ul class="wd-info" style="margin:4px 0 0;padding-left:18px;font-size:.82em">${items}</ul>
-        <div class="wd-info" style="margin:6px 0 0;font-size:.75em">Highlighted on the graph above. These are transient artifacts (e.g. the door opened mid-cycle), not necessarily problems.</div>
+        <div class="wd-info" style="margin:6px 0 0;font-size:.75em">${this._t('msg.artifact_footer', {}, 'Highlighted on the graph above. These are transient artifacts (e.g. the door opened mid-cycle), not necessarily problems.')}</div>
       </div>`;
     }
     return `<h2>Cycle · ${_esc(_fmtDate(cur.start_time))}</h2>
@@ -3392,23 +3460,23 @@ class HaWashdataPanel extends HTMLElement {
         return `<div style="margin:8px 0 4px;padding:8px 12px;border-radius:6px;background:${bg};border:1px solid ${col}22;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <span style="font-weight:600;color:${col}">${ph.health_status === 'poor' ? this._t('health.poor', {}, '⚠ Poor match fit') : ph.health_status === 'fair' ? this._t('health.fair', {}, 'Fair match fit') : this._t('health.good', {}, '✓ Good match fit')}</span>
           <span style="font-size:.85em;opacity:.8">score ${pct}%${cvPct}${confPct}</span>
-          ${ph.health_status === 'poor' ? `<span style="font-size:.82em;opacity:.75;flex-basis:100%">Cycles assigned to this profile have inconsistent shapes or low confidence. Consider rebuilding the envelope or reviewing labelled cycles.</span>` : ''}
+          ${ph.health_status === 'poor' ? `<span style="font-size:.82em;opacity:.75;flex-basis:100%">${this._t('msg.profile_poor_health_detail', {}, 'Cycles assigned to this profile have inconsistent shapes or low confidence. Consider rebuilding the envelope or reviewing labelled cycles.')}</span>` : ''}
         </div>`;
       })() : '';
       // Trend row: shown when at least one metric is drifting
       const trendRow = pt && (pt.duration_trend !== 'stable' || (pt.energy_trend && pt.energy_trend !== 'stable')) ? (() => {
         const parts = [];
-        if (pt.duration_trend === 'up') parts.push(`Duration trending longer (${pt.duration_slope_pct > 0 ? '+' : ''}${pt.duration_slope_pct}%/cycle) — recent avg ${Math.round(pt.duration_recent_mean_s / 60)}m`);
-        else if (pt.duration_trend === 'down') parts.push(`Duration trending shorter (${pt.duration_slope_pct}%/cycle) — recent avg ${Math.round(pt.duration_recent_mean_s / 60)}m`);
-        if (pt.energy_trend === 'up') parts.push(`Energy trending up (${pt.energy_slope_pct > 0 ? '+' : ''}${pt.energy_slope_pct}%/cycle) — recent avg ${_fmtEnergy(pt.energy_recent_mean_wh)}`);
-        else if (pt.energy_trend === 'down') parts.push(`Energy trending down (${pt.energy_slope_pct}%/cycle)`);
+        if (pt.duration_trend === 'up') parts.push(this._t('msg.trend_duration_longer', {pct: `${pt.duration_slope_pct > 0 ? '+' : ''}${pt.duration_slope_pct}`, avg: `${Math.round(pt.duration_recent_mean_s / 60)}m`}, `Duration trending longer (${pt.duration_slope_pct > 0 ? '+' : ''}${pt.duration_slope_pct}%/cycle) — recent avg ${Math.round(pt.duration_recent_mean_s / 60)}m`));
+        else if (pt.duration_trend === 'down') parts.push(this._t('msg.trend_duration_shorter', {pct: `${pt.duration_slope_pct}`, avg: `${Math.round(pt.duration_recent_mean_s / 60)}m`}, `Duration trending shorter (${pt.duration_slope_pct}%/cycle) — recent avg ${Math.round(pt.duration_recent_mean_s / 60)}m`));
+        if (pt.energy_trend === 'up') parts.push(this._t('msg.trend_energy_up', {pct: `${pt.energy_slope_pct > 0 ? '+' : ''}${pt.energy_slope_pct}`, avg: _fmtEnergy(pt.energy_recent_mean_wh)}, `Energy trending up (${pt.energy_slope_pct > 0 ? '+' : ''}${pt.energy_slope_pct}%/cycle) — recent avg ${_fmtEnergy(pt.energy_recent_mean_wh)}`));
+        else if (pt.energy_trend === 'down') parts.push(this._t('msg.trend_energy_down', {pct: `${pt.energy_slope_pct}`}, `Energy trending down (${pt.energy_slope_pct}%/cycle)`));
         const isWorrying = pt.duration_trend === 'up' || pt.energy_trend === 'up';
         const col = isWorrying ? 'var(--warning-color,#ff9800)' : 'var(--info-color,#2196f3)';
         const bg = isWorrying ? 'rgba(255,152,0,.10)' : 'rgba(33,150,243,.10)';
         return `<div style="margin:6px 0;padding:8px 12px;border-radius:6px;background:${bg};font-size:.88em">
-          <span style="font-weight:600;color:${col}">Performance trend (${pt.cycle_count} cycles)</span><br>
+          <span style="font-weight:600;color:${col}">${this._t('msg.performance_trend', {n: pt.cycle_count}, `Performance trend (${pt.cycle_count} cycles)`)}</span><br>
           ${parts.map(p => `<span>${p}</span>`).join('<br>')}
-          ${isWorrying ? `<br><span style="opacity:.75">Increasing duration/energy may indicate appliance maintenance needed (e.g. descaling, filter cleaning).</span>` : ''}
+          ${isWorrying ? `<br><span style="opacity:.75">${this._t('msg.maintenance_advisory', {}, 'Increasing duration/energy may indicate appliance maintenance needed (e.g. descaling, filter cleaning).')}</span>` : ''}
         </div>`;
       })() : '';
       body = `<div class="wd-sg-row">
@@ -3442,7 +3510,7 @@ class HaWashdataPanel extends HTMLElement {
           <button class="wd-btn wd-btn-danger wd-btn-sm" data-maction="pp-phase-rm" data-idx="${i}">✕</button></div>`;
       }).join('');
       const busy = this._busy.has('pp-phase-save');
-      body = `<p class="wd-info" style="margin-bottom:10px">Phase ranges (minutes from cycle start) overlaid on the average curve. Edit values to preview live.</p>
+      body = `<p class="wd-info" style="margin-bottom:10px">${this._t('msg.phase_ranges_intro', {}, 'Phase ranges (minutes from cycle start) overlaid on the average curve. Edit values to preview live.')}</p>
         ${m.env && m.env.avg && m.env.avg.length ? `<div class="wd-canvas-wrap"><canvas id="wd-phase-canvas"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_envelope_overlay', {}, 'No envelope available to overlay.')}</p>`}
         <div style="margin:10px 0">${rows || `<p class="wd-info">${this._t('msg.no_phases_assigned', {}, 'No phases assigned.')}</p>`}</div>
         ${canEdit ? `<div class="wd-mode-bar">
@@ -3484,7 +3552,7 @@ class HaWashdataPanel extends HTMLElement {
         ${canEdit ? '<th></th>' : ''}
       </tr></thead>`;
       const busy = this._busy.has('pp-cleanup-del');
-      body = `<p class="wd-info" style="margin-bottom:10px">Every labelled cycle overlaid. Tick outliers and delete to clean up the profile.</p>
+      body = `<p class="wd-info" style="margin-bottom:10px">${this._t('msg.cleanup_intro', {}, 'Every labelled cycle overlaid. Tick outliers and delete to clean up the profile.')}</p>
         ${allCyc.length ? `<div class="wd-canvas-wrap"><canvas id="wd-spag-canvas"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_cycles_profile', {}, 'No cycles for this profile.')}</p>`}
         ${allCyc.length ? `<div class="wd-table-wrap" style="max-height:420px;overflow:auto;margin:10px 0"><table class="wd-table">${thead}<tbody>${rows}</tbody></table></div>` : ''}
         ${canEdit ? `<div class="wd-modal-actions"><button class="wd-btn wd-btn-danger" data-maction="pp-cleanup-del" ${busy || sel.size === 0 ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Deleting…' : `Delete selected (${sel.size})`}</button></div>` : ''}`;
@@ -3493,7 +3561,7 @@ class HaWashdataPanel extends HTMLElement {
       const curDurMin = (m.stats && m.stats.avg_duration) ? Math.round(m.stats.avg_duration / 60) : 0;
       body = `<div class="wd-field"><label>${this._t('lbl.rename_profile', {}, 'Rename Profile')}</label><input type="text" id="wd-pp-rename" value="${_esc(m.name)}"></div>
         <div class="wd-field"><label>${this._t('lbl.expected_duration', {}, 'Expected Duration (min)')}</label><input type="number" id="wd-pp-dur" min="0" max="600" value="${curDurMin}">
-          <div class="wd-field-hint">The profile's average/expected cycle length, used for time-remaining estimates. Edit to set it; leaving it unchanged keeps the current value.</div></div>
+          <div class="wd-field-hint">${this._t('msg.manual_duration_hint', {}, "The profile's average/expected cycle length, used for time-remaining estimates. Edit to set it; leaving it unchanged keeps the current value.")}</div></div>
         <div class="wd-card-actions">
           <button class="wd-btn wd-btn-primary" data-maction="pp-rename">${this._t('btn.save', {}, 'Save')}</button>
           <button class="wd-btn wd-btn-secondary" data-maction="pp-rebuild" ${busyR ? 'disabled' : ''}>${busyR ? '<span class="wd-spin"></span> Rebuilding…' : this._t('btn.rebuild_envelope', {}, 'Rebuild Envelope')}</button>
@@ -3520,7 +3588,7 @@ class HaWashdataPanel extends HTMLElement {
     // (faint orange, behind the live trace). Hidden during Trim/Split editing.
     const pe = m.profileEnv;
     if ((m.mode === 'view' || m.mode === 'review') && pe && (pe.avg || []).length) {
-      series.push({ points: pe.avg, stroke: '#ff9800', width: 2, alpha: 0.45, name: `Expected (${cur.profile_name || 'profile'})` });
+      series.push({ points: pe.avg, stroke: '#ff9800', width: 2, alpha: 0.45, name: `${this._t('lbl.expected', {}, 'Expected')} (${cur.profile_name || 'profile'})` });
       full = Math.max(full, pe.target_duration || pe.avg[pe.avg.length - 1][0] || 0);
     }
     // User-selected comparison overlays (Review mode): draw each ticked profile's
@@ -3536,7 +3604,7 @@ class HaWashdataPanel extends HTMLElement {
         full = Math.max(full, env.target_duration || (last ? last[0] : 0));
       });
     }
-    series.push({ points: samples, stroke: 'primary', fill: true, width: 2, name: 'Power' });
+    series.push({ points: samples, stroke: 'primary', fill: true, width: 2, name: this._t('lbl.power', {}, 'Power') });
     const bands = [], vlines = [];
     let artifacts = [];
     if (m.mode === 'trim') {
@@ -3777,6 +3845,26 @@ class HaWashdataPanel extends HTMLElement {
         });
         addInput.addEventListener('blur', () => addVal(addInput.value));
       }
+    });
+
+    // Cycle timer list: add/remove rows via direct DOM mutation (no re-render).
+    sr.querySelectorAll('.wd-timerlist').forEach(list => {
+      list.querySelectorAll('.wd-timer-remove').forEach(btn =>
+        btn.addEventListener('click', () => btn.closest('.wd-timer-row')?.remove()));
+      const addBtn = list.querySelector('.wd-timer-add');
+      if (addBtn) addBtn.addEventListener('click', () => {
+        const row = document.createElement('div');
+        row.className = 'wd-timer-row';
+        row.innerHTML =
+          `<div class="wd-timer-controls">` +
+          `<input type="number" min="1" placeholder="${this._t('lbl.timer_min', {}, 'min')}" data-field="offset_minutes" style="width:70px">` +
+          `<label><input type="checkbox" data-field="auto_pause"> ${this._t('lbl.timer_auto_pause', {}, 'Auto-pause')}</label>` +
+          `<button type="button" class="wd-btn wd-btn-sm wd-btn-secondary wd-timer-remove" aria-label="${this._t('btn.remove_timer', {}, 'Remove timer')}">&times;</button>` +
+          `</div>` +
+          `<input type="text" placeholder="${this._t('lbl.timer_msg_placeholder', {}, 'Message (optional, {device}/{program}/{minutes})')}" data-field="message">`;
+        row.querySelector('.wd-timer-remove').addEventListener('click', () => row.remove());
+        list.insertBefore(row, addBtn);
+      });
     });
 
     const progSel = sr.getElementById('wd-status-prog');
@@ -4796,6 +4884,14 @@ class HaWashdataPanel extends HTMLElement {
       const ftype = (f && f.type) || el.dataset.ftype || 'text';
       if (el.type === 'checkbox') { updates[key] = el.checked; return; }
       if (ftype === 'entitylist') { updates[key] = Array.from(el.querySelectorAll('.wd-pill')).map(p => p.dataset.val).filter(Boolean); return; }
+      if (ftype === 'timerlist') {
+        updates[key] = Array.from(el.querySelectorAll('.wd-timer-row')).map(row => ({
+          offset_minutes: parseFloat(row.querySelector('[data-field="offset_minutes"]').value) || 0,
+          message: (row.querySelector('[data-field="message"]').value || '').trim(),
+          auto_pause: row.querySelector('[data-field="auto_pause"]').checked,
+        })).filter(t => t.offset_minutes > 0);
+        return;
+      }
       const val = el.value;
       if (ftype === 'number') { const n = parseFloat(val); if (!isNaN(n)) updates[key] = n; return; }
       if (ftype === 'list') { updates[key] = String(val).split(',').map(s => s.trim()).filter(Boolean); return; }

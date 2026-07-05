@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "รอบเริ่มต้น",
-        "cycle_finish": "รอบเสร็จสิ้น",
-        "cycle_live": "ความคืบหน้าสด"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "เครื่องซักผ้า",
@@ -88,198 +81,6 @@
         "bread_maker": "เครื่องทำขนมปัง",
         "pump": "ปั๊ม/ปั๊มบ่อ",
         "other": "อื่นๆ (ขั้นสูง)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(ไม่มีป้ายกำกับ)",
-        "create_new_profile": "สร้างโปรไฟล์ใหม่",
-        "remove_label": "ลบป้ายกำกับ",
-        "no_reference_cycle": "(ไม่มีรอบการอ้างอิง)",
-        "all_device_types": "อุปกรณ์ทุกประเภท",
-        "current_suffix": "(ปัจจุบัน)",
-        "phase_builtin_suffix": "(บิวท์อิน)",
-        "phase_none_available": "ไม่มีเฟสว่าง.",
-        "phase_other_device_types": "อุปกรณ์ประเภทอื่นๆ:",
-        "settings_deprecation_warning": "⚠️ **ประเภทอุปกรณ์ที่เลิกใช้งานแล้ว:** {device_type} มีกำหนดการนำออกในรุ่นต่อๆ ไป ไปป์ไลน์ที่ตรงกันของ WashData ไม่ได้ให้ผลลัพธ์ที่เชื่อถือได้สำหรับคลาสอุปกรณ์นี้ การบูรณาการของคุณยังคงดำเนินต่อไปจนถึงช่วงที่เลิกใช้งาน หากต้องการปิดเสียงคำเตือนนี้ ให้เปลี่ยน **ประเภทอุปกรณ์** ด้านล่างเป็นประเภทที่รองรับ (เครื่องซักผ้า เครื่องอบผ้า เครื่องซักผ้า-เครื่องอบผ้า เครื่องล้างจาน เครื่องทอดอากาศ เครื่องทำขนมปัง หรือปั๊ม) หรือเป็น **อื่นๆ (ขั้นสูง)** หากเครื่องใช้ไฟฟ้าของคุณไม่ตรงกับประเภทใดๆ ที่รองรับ **อื่นๆ (ขั้นสูง)** จัดส่งค่าเริ่มต้นทั่วไปโดยเจตนาซึ่งไม่ได้ปรับแต่งสำหรับอุปกรณ์ใดๆ โดยเฉพาะ ดังนั้นคุณจะต้องกำหนดค่าเกณฑ์ ระยะหมดเวลา และพารามิเตอร์ที่ตรงกันด้วยตนเอง การตั้งค่าที่มีอยู่ทั้งหมดของคุณจะถูกเก็บรักษาไว้เมื่อคุณเปลี่ยน",
-        "editor_select_info": "เลือก 1 รอบที่จะแยก หรือ 2+ รอบเพื่อรวม",
-        "editor_select_info_split": "เลือก 1 รอบเพื่อแยก",
-        "editor_select_info_merge": "เลือก 2+ รอบเพื่อรวม",
-        "editor_select_info_delete": "เลือก 1+ รอบเพื่อลบ",
-        "no_cycles_recorded": "ยังไม่มีการบันทึกรอบ",
-        "profile_summary_line": "- **{name}**: {count} รอบ เฉลี่ย {avg}ม",
-        "no_profiles_created": "ยังไม่มีการสร้างโปรไฟล์",
-        "phase_preview": "ดูตัวอย่างเฟส",
-        "phase_preview_no_curve": "เส้นโค้งโปรไฟล์เฉลี่ยยังไม่พร้อมใช้งาน เรียกใช้/ติดป้ายกำกับรอบเพิ่มเติมสำหรับโปรไฟล์นี้",
-        "average_power_curve": "เส้นโค้งกำลังเฉลี่ย",
-        "unit_min": "นาที",
-        "profile_option_fmt": "{name} ({count} รอบ ~{duration}m เฉลี่ย)",
-        "profile_option_short_fmt": "{name} ({count} รอบ, ~{duration}ม.)",
-        "deleted_cycles_from_profile": "ลบ {count} รอบจาก {profile}",
-        "not_enough_data_graph": "ข้อมูลไม่เพียงพอที่จะสร้างกราฟ",
-        "no_profiles_found": "ไม่พบโปรไฟล์",
-        "cycle_info_fmt": "วงจร: {start}, {duration}ม. กระแส: {label}",
-        "top_candidates_header": "### ผู้สมัครอันดับต้นๆ",
-        "tbl_profile": "โปรไฟล์",
-        "tbl_confidence": "ความมั่นใจ",
-        "tbl_correlation": "ความสัมพันธ์",
-        "tbl_duration_match": "การจับคู่ระยะเวลา",
-        "detected_profile": "โปรไฟล์ที่ตรวจพบ",
-        "estimated_duration": "ระยะเวลาโดยประมาณ",
-        "actual_duration": "ระยะเวลาจริง",
-        "choose_action": "__เลือกการกระทำด้านล่าง:__",
-        "tbl_count": "นับ",
-        "tbl_avg": "เฉลี่ย",
-        "tbl_min": "นาที",
-        "tbl_max": "สูงสุด",
-        "tbl_energy_avg": "พลังงาน (เฉลี่ย)",
-        "tbl_energy_total": "พลังงาน (รวม)",
-        "tbl_consistency": "ความสม่ำเสมอ.",
-        "tbl_last_run": "วิ่งครั้งสุดท้าย",
-        "graph_legend_title": "ตำนานกราฟ",
-        "graph_legend_body": "แถบสีน้ำเงินแสดงถึงช่วงการดึงกำลังขั้นต่ำและสูงสุดที่สังเกตได้ เส้นนี้แสดงกราฟกำลังเฉลี่ย",
-        "recording_preview": "ตัวอย่างการบันทึก",
-        "trim_start": "ตัดแต่งเริ่มต้น",
-        "trim_end": "ตัดแต่งปลาย",
-        "split_preview_title": "ดูตัวอย่างแบบแยกส่วน",
-        "split_preview_found_fmt": "พบ {count} ส่วน",
-        "split_preview_confirm_fmt": "คลิกยืนยันเพื่อแบ่งรอบนี้เป็น {count} รอบแยกกัน",
-        "merge_preview_title": "รวมตัวอย่าง",
-        "merge_preview_joining_fmt": "เข้าร่วม {count} รอบ ช่องว่างจะเต็มไปด้วยการอ่าน 0W",
-        "editor_delete_preview_title": "ตัวอย่างก่อนลบ",
-        "editor_delete_preview_intro": "รอบที่เลือกจะถูกลบอย่างถาวร:",
-        "editor_delete_preview_confirm": "คลิกยืนยันเพื่อลบระเบียนรอบเหล่านี้อย่างถาวร",
-        "no_power_preview": "*ไม่มีข้อมูลพลังงานสำหรับการดูตัวอย่าง*",
-        "profile_comparison": "การเปรียบเทียบโปรไฟล์",
-        "actual_cycle_label": "รอบนี้ (ตามจริง)",
-        "storage_usage_header": "การใช้พื้นที่เก็บข้อมูล",
-        "storage_file_size": "ขนาดไฟล์",
-        "storage_cycles": "รอบ",
-        "storage_profiles": "โปรไฟล์",
-        "storage_debug_traces": "ดีบักการติดตาม",
-        "overview_suffix": "ภาพรวม",
-        "phase_preview_for_profile": "ตัวอย่างเฟสสำหรับโปรไฟล์",
-        "current_ranges_header": "ช่วงปัจจุบัน",
-        "assign_phases_help": "ใช้การดำเนินการด้านล่างเพื่อเพิ่ม แก้ไข ลบ หรือบันทึกช่วง",
-        "profile_summary_header": "สรุปโปรไฟล์",
-        "recent_cycles_header": "รอบล่าสุด",
-        "trim_cycle_preview_title": "ดูตัวอย่างการตัดวงจร",
-        "trim_cycle_preview_no_data": "ไม่มีข้อมูลกำลังสำหรับรอบนี้",
-        "trim_cycle_preview_kept_suffix": "เก็บไว้",
-        "table_program": "โปรแกรม",
-        "table_when": "เมื่อใด",
-        "table_length": "ความยาว",
-        "table_match": "การจับคู่",
-        "table_profile": "โปรไฟล์",
-        "table_cycles": "รอบ",
-        "table_avg_length": "ความยาวเฉลี่ย",
-        "table_last_run": "วิ่งครั้งสุดท้าย",
-        "table_avg_energy": "พลังงานเฉลี่ย",
-        "table_detected_program": "โปรแกรมที่ตรวจพบ",
-        "table_confidence": "ความมั่นใจ",
-        "table_reported": "ที่รายงาน"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "แยกรอบ (ค้นหาช่องว่าง)",
-        "merge": "ผสานรอบ (เข้าร่วมส่วนย่อย)",
-        "delete": "ลบรอบ"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "ตรวจจับช่วงว่างอัตโนมัติ",
-        "manual": "เวลาที่ระบุเอง"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "การบำรุงรักษา: ประมวลผลใหม่และเพิ่มประสิทธิภาพข้อมูล",
-        "clear_debug_data": "ล้างข้อมูลการดีบัก (เพิ่มพื้นที่ว่าง)",
-        "wipe_history": "ล้างข้อมูลทั้งหมดสำหรับอุปกรณ์นี้ (ไม่สามารถย้อนกลับได้)",
-        "export_import": "ส่งออก/นำเข้า JSON ด้วยการตั้งค่า (คัดลอก/วาง)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "ส่งออกข้อมูลทั้งหมด",
-        "import": "นำเข้า/รวมข้อมูล"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "ติดป้ายกำกับรอบเก่าโดยอัตโนมัติ",
-        "select_cycle_to_label": "ติดป้ายกำกับรอบที่เฉพาะเจาะจง",
-        "select_cycle_to_delete": "ลบรอบ",
-        "interactive_editor": "ผสาน / แยกตัวแก้ไขเชิงโต้ตอบ",
-        "trim_cycle": "ตัดแต่งข้อมูลรอบ"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "สร้างโปรไฟล์ใหม่",
-        "edit_profile": "แก้ไข/เปลี่ยนชื่อโปรไฟล์",
-        "delete_profile": "ลบโปรไฟล์",
-        "profile_stats": "สถิติโปรไฟล์",
-        "cleanup_profile": "ล้างประวัติ - กราฟ & ลบ",
-        "assign_phases": "กำหนดช่วงเฟส"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "สร้างเฟสใหม่",
-        "edit_custom_phase": "แก้ไขเฟส",
-        "delete_custom_phase": "ลบเฟส"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "ตั้งชื่อและสมัครเฟส",
-        "cancel": "กลับไปโดยไม่มีการเปลี่ยนแปลง"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "เพิ่มช่วงเฟส",
-        "edit_range": "แก้ไขช่วงเฟส",
-        "delete_range": "ลบช่วงเฟส",
-        "clear_ranges": "ล้างทุกช่วง",
-        "auto_detect_ranges": "ตรวจจับเฟสอัตโนมัติ",
-        "save_ranges": "บันทึกและส่งคืน"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "รีเฟรชสถานะ",
-        "stop_recording": "หยุดการบันทึก (บันทึกและประมวลผล)",
-        "start_recording": "เริ่มการบันทึกใหม่",
-        "process_recording": "ประมวลผลการบันทึกครั้งล่าสุด (ตัดแต่งและบันทึก)",
-        "discard_recording": "ละทิ้งการบันทึกครั้งล่าสุด"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "สร้างโปรไฟล์ใหม่",
-        "existing_profile": "เพิ่มไปยังโปรไฟล์ที่มีอยู่",
-        "discard": "ยกเลิกการบันทึก"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "ยืนยัน - การตรวจจับที่ถูกต้อง",
-        "correct": "ถูกต้อง - เลือกโปรแกรม/ระยะเวลา",
-        "ignore": "เพิกเฉย - วงจรบวกลวง/มีเสียงดัง",
-        "delete": "ลบ - ลบออกจากประวัติ"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "กำหนดจุดเริ่มต้น",
-        "set_end": "กำหนดจุดสิ้นสุด",
-        "reset": "รีเซ็ตเป็นระยะเวลาเต็ม",
-        "apply": "ใช้ตัดแต่ง",
-        "cancel": "ยกเลิก"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "เฟสปัจจุบัน"
       },
-      "wash_phase": {
-        "name": "เฟส"
-      },
       "profile_cycle_count": {
         "name": "โปรไฟล์ {profile_name} จำนวน",
         "unit_of_measurement": "รอบ"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s ต้องมากกว่า trim_start_s"
+    },
+    "no_active_cycle": {
+      "message": "ไม่มีวงจรที่ใช้งานอยู่ให้หยุดชั่วคราวหรือดำเนินการต่อ"
     }
   },
   "panel": {
     "hdr": {
-      "panel_settings": "การตั้งค่าแผงควบคุม (ผู้ใช้ทั้งหมด)",
-      "ml_learned": "สิ่งที่ WashData ได้เรียนรู้",
-      "status": "สถานะ",
-      "live_power": "กำลังไฟฟ้าสด",
-      "manual_recording": "การบันทึกด้วยตนเอง",
-      "tools_and_data": "เครื่องมือและข้อมูล",
-      "phase_catalog": "แคตตาล็อกเฟส",
-      "storage_stats": "สถิติการจัดเก็บ",
-      "maintenance": "การดำเนินการบำรุงรักษา",
-      "export_import": "ส่งออก/นำเข้า",
+      "toggle_sidebar": "สลับแถบด้านข้างของ Home Assistant",
       "logs": "บันทึก",
-      "my_preferences": "การตั้งค่าของฉัน",
       "access_control": "การควบคุมการเข้าถึง",
-      "ml_smart_learning": "การเรียนรู้ที่ชาญฉลาด",
-      "ml_settings_card": "การตั้งค่า",
-      "ml_matching_tuning": "การปรับจูนการจับคู่โปรแกรมอย่างละเอียด",
-      "display": "แสดง",
-      "status_graph": "กราฟสถานะ",
-      "diagnostics_pref": "การวินิจฉัย",
-      "logs_diagnostics": "การวินิจฉัย",
-      "process_history": "ประวัติกระบวนการ",
-      "clear_debug": "ล้างร่องรอยดีบัก",
-      "wipe_history": "ล้างประวัติ",
+      "automation_delete": "ลบระบบอัตโนมัตินี้",
+      "automation_needs_review": "รอบนี้ต้องการการตรวจสอบ",
+      "automation_open": "เปิดในตัวแก้ไขระบบอัตโนมัติ",
+      "automation_review_this_cycle": "ตรวจสอบรอบนี้",
       "automations": "ระบบอัตโนมัติ",
-      "automation_open": "เปิดในตัวแก้ไขการทำงานอัตโนมัติ",
-      "automation_delete": "ลบการทำงานอัตโนมัตินี้",
-      "automation_needs_review": "รอบนี้ต้องทบทวน",
-      "automation_review_this_cycle": "ทบทวนรอบนี้",
-      "no_automations": "ยังไม่มีระบบอัตโนมัติที่อ้างอิงถึงอุปกรณ์นี้"
-    },
-    "lbl": {
-      "manual_duration": "ระยะเวลาแบบแมนนวล (นาที ไม่จำเป็น)",
-      "correct_duration": "ระยะเวลาที่ถูกต้อง (ขั้นต่ำ ไม่บังคับ)",
-      "default_tab": "แท็บเริ่มต้นเมื่อเปิดแผง",
-      "default_access_level": "ระดับเริ่มต้นสำหรับผู้ใช้ที่ไม่อยู่ในรายการด้านล่าง",
-      "show_expected": "แสดงการซ้อนทับเส้นโค้งที่คาดหวัง (โปรไฟล์ที่ตรงกัน สีส้ม)",
-      "show_raw": "แสดงการอ่านค่าเซ็นเซอร์ดิบ (ไม่เรียบ สีเทา)",
-      "show_debug": "แสดงการ์ดแก้ไขข้อบกพร่องการแข่งขันสดบนหน้าสถานะ (ความมั่นใจ ความคลุมเครือ ผู้เป็นตัวเลือกอันดับต้นๆ)",
-      "power": "พลัง",
-      "progress": "ความคืบหน้า",
-      "remaining": "ที่เหลืออยู่",
-      "duration": "ระยะเวลา",
-      "energy": "พลังงาน",
-      "profile": "โปรไฟล์",
+      "clear_debug": "ล้างข้อมูลการติดตามดีบัก",
+      "diagnostics_pref": "การวินิจฉัย",
+      "display": "การแสดงผล",
+      "export_import": "ส่งออก / นำเข้า",
+      "live_power": "กำลังไฟฟ้าสด",
+      "logs_diagnostics": "การวินิจฉัย",
+      "maintenance": "การดำเนินการบำรุงรักษา",
+      "manual_recording": "การบันทึกด้วยตนเอง",
+      "ml_learned": "สิ่งที่ WashData ได้เรียนรู้",
+      "ml_matching_tuning": "การปรับแต่งการจับคู่โปรแกรม",
+      "ml_settings_card": "การตั้งค่า",
+      "ml_smart_learning": "การเรียนรู้อัจฉริยะ",
+      "my_preferences": "ความต้องการของฉัน",
+      "no_automations": "ยังไม่มีระบบอัตโนมัติใดอ้างอิงถึงอุปกรณ์นี้",
+      "panel_settings": "การตั้งค่าแผง",
+      "phase_catalog": "แคตาล็อกเฟส",
+      "process_history": "ประวัติการประมวลผล",
       "status": "สถานะ",
-      "date": "วันที่",
-      "confidence": "ความมั่นใจ",
-      "health": "สุขภาพ",
-      "cost": "ค่าใช้จ่าย",
-      "program": "โปรแกรม",
-      "cycle_health": "สุขภาพของรอบ",
-      "activity": "กิจกรรม",
-      "unlabelled": "ไม่มีป้ายกำกับ",
-      "unlabelled_paren": "(ไม่มีป้ายกำกับ)",
-      "emphasis": "เน้น",
-      "default": "ค่าเริ่มต้น",
-      "in_use": "ในการใช้งาน",
-      "profile_name": "ชื่อโปรไฟล์",
-      "ref_cycle": "รอบอ้างอิง (ไม่บังคับ)",
-      "phase_name": "ชื่อเฟส",
-      "description": "คำอธิบาย",
-      "correct_profile": "โปรไฟล์ที่ถูกต้อง",
-      "load_from_file": "โหลดจากไฟล์",
-      "json_data": "ข้อมูล JSON",
-      "expected_duration": "ระยะเวลาที่คาดหวัง (นาที)",
-      "rename_profile": "เปลี่ยนชื่อโปรไฟล์",
-      "select_profile": "เลือกโปรไฟล์",
-      "confidence_threshold": "เกณฑ์ความเชื่อมั่น",
-      "resulting_profile": "โปรไฟล์ผลลัพธ์",
-      "new_profile_name": "ชื่อโปรไฟล์ใหม่",
-      "save_mode": "โหมดบันทึก",
-      "head_trim": "ตัดแต่งส่วนหัว (s)",
-      "tail_trim": "ตัดแต่งหาง (s)",
-      "gap_s": "ช่องว่าง",
-      "start": "เริ่ม",
-      "end": "จบ",
-      "quality": "คุณภาพ",
-      "golden_reference": "รอบอ้างอิงที่บันทึกไว้",
-      "compare_profiles": "เปรียบเทียบกับโปรไฟล์",
-      "tags": "แท็ก",
-      "notes": "หมายเหตุ",
-      "cycle_date_display": "การแสดงวันที่รอบ",
-      "refresh_interval": "ช่วงเวลารีเฟรช",
-      "panel_default_tab": "แท็บเริ่มต้น",
-      "hide_tabs": "ซ่อนแท็บสำหรับผู้ที่ไม่ใช่ผู้ดูแลระบบ",
-      "enable_access_control": "เปิดใช้งานการควบคุมการเข้าถึงต่อผู้ใช้",
-      "administrators": "ผู้ดูแลระบบ",
-      "default_other": "ค่าเริ่มต้น (อุปกรณ์อื่นๆ)",
-      "mode_new_profile": "สร้างโปรไฟล์ใหม่",
-      "mode_existing_profile": "เพิ่มไปยังโปรไฟล์ที่มีอยู่",
-      "auto_fine_tune_on": "เปิดการปรับอัตโนมัติ (ประมาณ {hour}:00)",
-      "auto_fine_tune_off": "ปิดการปรับละเอียดอัตโนมัติ",
-      "last_checked": "ตรวจสอบครั้งล่าสุด:",
-      "remove_label": "- ลบป้ายกำกับ -",
-      "create_new_profile": "+ สร้างโปรไฟล์ใหม่...",
-      "read_only": "อ่านอย่างเดียว",
-      "actions": "การดำเนินการ",
-      "cycles_count": "รอบ",
-      "debug_traces": "ดีบักการติดตาม",
-      "file_kb": "ไฟล์ (kB)",
-      "label": "ฉลาก",
-      "seconds_from_start": "วินาทีตั้งแต่เริ่มต้น",
-      "clock_time": "เวลานาฬิกา",
-      "ungrouped": "ไม่ได้จัดกลุ่ม"
-    },
-    "toast": {
-      "settings_saved": "บันทึกการตั้งค่าแล้ว การโหลดซ้ำการบูรณาการ",
-      "import_successful": "นำเข้าสำเร็จ การโหลดซ้ำการบูรณาการ",
-      "suggestions_applied": "ใช้ข้อเสนอแนะแล้ว การโหลดซ้ำการบูรณาการ",
-      "ml_training_no_improvement": "การฝึกอบรมเสร็จสมบูรณ์: รักษาพื้นฐานไว้ (ไม่มีการปรับปรุง)",
-      "could_not_load_cycle": "ไม่สามารถโหลดวงจร: {error}",
-      "preferences_saved": "บันทึกการตั้งค่าแล้ว",
-      "panel_settings_saved": "บันทึกการตั้งค่าแผงควบคุมแล้ว",
-      "access_saved": "บันทึกการควบคุมการเข้าถึงแล้ว",
-      "profile_created": "สร้างโปรไฟล์ \"{name}\" แล้ว",
-      "profile_deleted": "ลบโปรไฟล์ \"{name}\" แล้ว",
-      "profile_renamed": "เปลี่ยนชื่อโปรไฟล์แล้ว",
-      "phases_saved": "บันทึกเฟสแล้ว",
-      "phase_created": "เฟส \"{name}\" ถูกสร้างขึ้นแล้ว",
-      "phase_deleted": "ลบเฟส \"{name}\" แล้ว",
-      "phase_updated": "เฟสอัพเดทแล้ว",
-      "recording_started": "เริ่มการบันทึกแล้ว",
-      "recording_stopped": "หยุดการบันทึกแล้ว",
-      "recording_discarded": "ทิ้งการบันทึกแล้ว",
-      "recording_saved": "การบันทึกบันทึกไว้ในโปรไฟล์",
-      "export_downloaded": "ดาวน์โหลดการส่งออกแล้ว",
-      "logs_exported": "บันทึกที่ส่งออกแล้ว",
-      "envelopes_rebuilt": "ซองจดหมายสร้างขึ้นใหม่",
-      "envelope_rebuilt": "ซองจดหมายสร้างขึ้นใหม่",
-      "suggestions_dismissed": "ปิดข้อเสนอแนะแล้ว",
-      "auto_label_complete": "ติดป้ายกำกับอัตโนมัติเสร็จสมบูรณ์",
-      "cycle_labelled": "ติดป้ายกำกับรอบแล้ว",
-      "cycle_deleted": "ลบรอบแล้ว",
-      "cycles_deleted": "ลบแล้ว {count} รอบ",
-      "cycle_trimmed": "ตัดแต่งรอบแล้ว",
-      "cycles_merged": "ผสานรอบแล้ว",
-      "review_saved": "บันทึกรีวิวแล้ว",
-      "feedback_confirmed": "ข้อเสนอแนะได้รับการยืนยัน",
-      "feedback_dismissed": "ปิดความคิดเห็นแล้ว",
-      "feedback_all_dismissed": "ข้อเสนอแนะทั้งหมดถูกปิด",
-      "correction_submitted": "ส่งการแก้ไขแล้ว",
-      "group_saved": "บันทึกกลุ่มแล้ว",
-      "group_deleted": "ลบกลุ่มแล้ว",
-      "automation_deleted": "ลบการทำงานอัตโนมัติแล้ว",
-      "legacy_removed": "การดำเนินการแบบเดิมถูกลบออก",
-      "cycle_paused": "หยุดรอบชั่วคราว",
-      "cycle_resumed": "รอบกลับมาทำงานต่อ",
-      "cycle_force_stopped": "บังคับหยุดรอบแล้ว",
-      "ml_training_promoted": "การฝึกเสร็จสมบูรณ์: เลื่อนระดับแล้ว {count} โมเดล",
-      "matching_reverted": "น้ำหนักที่ตรงกันเปลี่ยนกลับเป็นค่าเริ่มต้น",
-      "models_reverted": "รุ่นในอุปกรณ์เปลี่ยนกลับเป็นค่าพื้นฐาน",
-      "analysis_complete": "การวิเคราะห์เสร็จสมบูรณ์: {count} ข้อเสนอแนะ",
-      "analysis_complete_none": "การวิเคราะห์เสร็จสมบูรณ์: ไม่มีข้อเสนอแนะใหม่",
-      "debug_cleared": "ล้างการติดตามการแก้ไขข้อบกพร่อง {count} รายการ",
-      "all_wiped": "ล้างข้อมูลทั้งหมดแล้ว",
-      "no_split_found": "ไม่พบช่องว่างที่ไม่ได้ใช้งานที่จะแยกออก",
-      "group_name_required": "ต้องระบุชื่อกลุ่ม",
-      "min_2_profiles": "เลือกอย่างน้อย 2 โปรไฟล์สำหรับกลุ่ม",
-      "profile_name_required": "ต้องระบุชื่อโปรไฟล์",
-      "phase_name_required": "ต้องระบุชื่อเฟส",
-      "name_required": "จำเป็นต้องระบุชื่อ",
-      "json_required": "ต้องมีข้อมูล JSON",
-      "save_failed": "บันทึกล้มเหลว: {error}",
-      "delete_failed": "ลบล้มเหลว: {error}",
-      "apply_failed": "การสมัครล้มเหลว: {error}",
-      "rebuild_failed": "การสร้างใหม่ล้มเหลว: {error}",
-      "start_failed": "การเริ่มต้นล้มเหลว: {error}",
-      "stop_failed": "หยุดล้มเหลว: {error}",
-      "discard_failed": "การยกเลิกล้มเหลว: {error}",
-      "trim_failed": "ตัดแต่งล้มเหลว: {error}",
-      "split_failed": "การแยกล้มเหลว: {error}",
-      "merge_failed": "การรวมล้มเหลว: {error}",
-      "create_failed": "การสร้างล้มเหลว: {error}",
-      "update_failed": "การอัปเดตล้มเหลว: {error}",
-      "rename_failed": "การเปลี่ยนชื่อล้มเหลว: {error}",
-      "revert_failed": "เปลี่ยนกลับล้มเหลว: {error}",
-      "training_failed": "การฝึกล้มเหลว: {error}",
-      "export_failed": "การส่งออกล้มเหลว: {error}",
-      "import_failed": "การนำเข้าล้มเหลว: {error}",
-      "auto_label_failed": "การติดป้ายกำกับอัตโนมัติล้มเหลว: {error}",
-      "analysis_failed": "การวิเคราะห์ล้มเหลว: {error}",
-      "auto_detect_failed": "การตรวจจับอัตโนมัติล้มเหลว: {error}",
-      "error": "ข้อผิดพลาด: {error}",
-      "pause_failed": "การหยุดชั่วคราวล้มเหลว: {error}",
-      "label_failed": "ป้ายกำกับล้มเหลว: {error}",
-      "invalid_json": "\"{key}\" ไม่ใช่ JSON ที่ถูกต้อง โปรดแก้ไขหรือล้างข้อมูลในช่องก่อนบันทึก",
-      "processed": "ประมวลผลแล้ว {bits}",
-      "split_complete": "แบ่งออกเป็น {count} รอบ"
-    },
-    "msg": {
-      "no_devices": "ยังไม่มีการกำหนดค่าอุปกรณ์ WashData",
-      "live_chart_loading": "แผนภูมิกำลังสดจะปรากฏขึ้นเมื่อมีการอ่านค่า",
-      "no_profiles_yet": "ยังไม่มีโปรไฟล์ สร้างหนึ่งรายการจากวงจรที่มีป้ายกำกับ",
-      "no_logs": "ยังไม่มีการบันทึกบันทึกบัฟเฟอร์",
-      "no_envelope": "ยังไม่มีซองจดหมาย - สร้างใหม่หลังจากรอบการติดฉลาก",
-      "no_cycles_profile": "ไม่มีรอบสำหรับโปรไฟล์นี้",
-      "ml_learned_intro": "รุ่นที่ได้รับการปรับแต่งมาอย่างดีสำหรับเครื่องนี้ สิ่งใดก็ตามที่ไม่อยู่ในรายการจะใช้โมเดลในตัวที่เชื่อถือได้",
-      "ml_intro": "WashData มาพร้อมกับโมเดลอัจฉริยะที่ตรวจจับรอบ จับคู่โปรแกรม และประมาณการเวลาและพลังงาน ซึ่งทำงานนอกกรอบได้",
-      "matching_tuning_intro": "เมื่อเรียนรู้ WashData ยังปรับปริมาณการจับคู่ของโปรแกรมที่มีน้ำหนักต่อรูปร่างของรอบ เทียบกับระยะเวลาและพลังงาน",
-      "merge_intro": "รอบที่เลือกจะรวมกันเป็นหนึ่งเดียว (ตามลำดับเวลา; ช่องว่างที่เต็มไปด้วย 0 W) เลือกโปรไฟล์ผลลัพธ์",
-      "see_recorder": "ดูวิดเจ็ตเครื่องบันทึกด้านล่าง",
-      "review_to_cycles": "เปิดคิวการตรวจสอบ Cycles",
-      "no_device_selected": "ไม่ได้เลือกอุปกรณ์",
-      "loading": "กำลังโหลด...",
-      "loading_settings": "กำลังโหลดการตั้งค่า...",
-      "no_cycles_match": "ไม่มีรอบที่ตรงกับตัวกรองปัจจุบัน",
-      "no_cycles_yet": "ยังไม่มีการบันทึกรอบ",
-      "no_phases": "ไม่มีการกำหนดเฟส",
-      "no_phases_assigned": "ไม่มีการกำหนดเฟส",
-      "no_split_points": "ยังไม่มีจุดแยก",
-      "no_envelope_overlay": "ไม่มีซองจดหมายสำหรับวางซ้อน",
-      "no_other_users": "ไม่พบผู้ใช้ Home Assistant รายอื่น",
-      "maintenance_requires_access": "การบำรุงรักษาและการส่งออก/นำเข้าจำเป็นต้องมีการเข้าถึงเต็มรูปแบบ",
-      "loading_curve": "กำลังโหลดเส้นโค้ง...",
-      "compare_selected_cycles": "รอบที่เลือก (ทึบ) — แสดง / ซ่อน",
-      "compare_overlay_profiles": "โปรไฟล์โอเวอร์เลย์ (จาง)",
-      "no_profiles_compare": "ไม่มีโปรไฟล์ที่จะเปรียบเทียบ",
-      "saving_triggers_reload": "การบันทึกจะโหลดการผสานรวมใหม่ เอนทิตี HA อาจแสดงว่าไม่พร้อมใช้งานชั่วครู่",
-      "prefs_personal": "สิ่งเหล่านี้ใช้ได้กับบัญชี Home Assistant ของคุณเท่านั้น",
-      "no_match_yet": "ยังไม่มีความพยายามในการจับคู่ - จะเกิดขึ้นระหว่างรอบการทำงาน",
-      "no_fine_tuned": "ยังไม่มีการปรับแต่งใดๆ — WashData ใช้โมเดลในตัว",
-      "ml_settings_intro": "สวิตช์อิสระสองตัว: ตัวหนึ่งใช้โมเดลในขณะที่วงจรทำงาน อีกตัวช่วยให้ WashData ปรับแต่งโมเดลเหล่านี้ให้เข้ากับเครื่องของคุณเมื่อเวลาผ่านไป",
-      "phase_catalog_intro": "ตั้งชื่อส่วนของรอบการซัก (ล้างล่วงหน้า, ทำความร้อน, ปั่นหมาด…) กำหนดให้กับโปรไฟล์จากแผงควบคุม",
-      "phase_ranges_intro": "ช่วงเฟส (นาทีจากการเริ่มรอบ) ซ้อนทับบนเส้นโค้งเฉลี่ย แก้ไขค่าเพื่อดูตัวอย่างสด",
-      "cleanup_intro": "ทุกรอบที่มีป้ายกำกับซ้อนทับ ทำเครื่องหมายค่าผิดปกติและลบเพื่อล้างโปรไฟล์",
-      "split_intro": "คลิกที่กราฟเพื่อเพิ่มหรือลบจุดแยก หรือตรวจหาอัตโนมัติด้วยช่องว่างที่ไม่ได้ใช้งาน",
-      "trim_intro": "ลากขอบจับสีแดง หรือป้อนค่า ทุกสิ่งที่อยู่นอกหน้าต่างจะถูกลบออก",
-      "import_intro": "โหลดไฟล์ที่ส่งออกหรือวางเพย์โหลด JSON ด้านล่าง",
-      "auto_label_intro": "กำหนดโปรไฟล์ให้กับรอบที่ไม่มีป้ายกำกับซึ่งความเชื่อมั่นในการจับคู่ผ่านเกณฑ์",
-      "enough_data": "ข้อมูลเพียงพอที่จะเรียนรู้ ({current}/{min} รอบ)",
-      "collecting_data": "การรวบรวมข้อมูล — เพิ่ม {need} รอบ{plural} ก่อนที่จะเริ่มการปรับแต่งแบบละเอียด ({current}/{min})",
-      "updated": "อัปเดต {time}",
-      "appliance_monitor": "การตรวจสอบเครื่องใช้ไฟฟ้า",
-      "ml_loading": "กำลังโหลด ML...",
-      "review_in_settings": "ตรวจสอบในการตั้งค่า",
-      "storage_diagnostics": "สถิติการจัดเก็บ การบำรุงรักษา การส่งออก/นำเข้า",
-      "recent_logs": "บันทึก ha_washdata ล่าสุด",
-      "preferences_adv": "การตั้งค่า",
-      "preferences_admin": "การตั้งค่า แผงควบคุม และการควบคุมการเข้าถึง",
-      "pending_feedback": "รอผลตอบรับการตรวจจับ",
-      "recording_in_progress": "อยู่ระหว่างการบันทึก",
-      "no_profiles_yet_short": "ยังไม่มีโปรไฟล์",
-      "unsure_detected_prefix": "WashData ไม่แน่ใจว่าตรวจพบแล้ว",
-      "no_suggestions": "ไม่มีข้อเสนอแนะที่ใช้งานอยู่",
-      "no_profiles_overlay": "ไม่มีโปรไฟล์ที่จะซ้อนทับ",
-      "compare_cycles_title": "เปรียบเทียบ {count} รอบ",
-      "profiles_intro": "คลิกที่โปรไฟล์เพื่อดูสถิติ ระยะ และการทำความสะอาด จัดกลุ่มโปรแกรมที่เกือบเหมือนกัน (รูปร่าง/ระยะเวลาเดียวกัน อุณหภูมิหรือการปั่นต่างกัน) เพื่อให้การจับคู่เลือกระหว่างกันได้อย่างน่าเชื่อถือ",
-      "search_placeholder": "ค้นหาการตั้งค่า…",
-      "automations_intro": "WashData ส่งสัญญาณเหตุการณ์ {start} / {end} และเปิดเผย entities ดังนั้นการแจ้งเตือนและการดำเนินการควรสร้างเป็น Home Assistant automations ปกติ automations ที่ใช้อุปกรณ์นี้จะแสดงด้านล่าง",
-      "notify_services_hint": "ใช้รหัสบริการ {entity} (คั่นด้วยเครื่องหมายจุลภาคสำหรับหลายรายการ) ตัวแปรเทมเพลต: {vars}.",
-      "rbac_hint": "เมื่อปิด ผู้ใช้ Home Assistant ทุกคนจะมีสิทธิ์เข้าถึงเต็มรูปแบบ (ค่าเริ่มต้น) ผู้ดูแลระบบมีสิทธิ์เข้าถึงเต็มรูปแบบเสมอและสามารถจัดการทุกคนได้",
-      "feedback_prompt": "ยืนยันว่าถูกต้อง แก้ไขโปรแกรม หรือเพิกเฉย"
-    },
-    "section": {
-      "basic": {
-        "intro": "เอกลักษณ์หลักและสิ่งที่จำเป็นในการตั้งค่าส่วนใหญ่ต้องการ",
-        "label": "ขั้นพื้นฐาน"
-      },
-      "detection": {
-        "intro": "วิธีการตรวจพบรอบการสตาร์ท การรัน และการสิ้นสุด",
-        "label": "การตรวจจับ"
-      },
-      "matching": {
-        "intro": "วิธีจับคู่รอบที่เสร็จสิ้นกับโปรไฟล์ที่เรียนรู้และติดป้ายกำกับ",
-        "label": "การจับคู่"
-      },
-      "timing": {
-        "intro": "จังหวะพื้นหลัง, สุนัขเฝ้าบ้านออฟไลน์และการดูแลทำความสะอาด",
-        "label": "เวลาและสุนัขเฝ้าบ้าน"
-      },
-      "anti_wrinkle": {
-        "intro": "โหมดต่อต้านรอยยับจะตรวจจับแรงสั่นสะเทือนของเครื่องเป่าหลังจากช่วงความร้อนหลัก",
-        "label": "ต่อต้านริ้วรอย"
-      },
-      "delay": {
-        "intro": "การตรวจจับการสตาร์ทล่าช้าจะระบุว่าเครื่องใช้ไฟฟ้าเปิดอยู่เมื่อใดแต่ยังไม่เริ่มวงจร",
-        "label": "ความล่าช้าในการเริ่มต้น"
-      },
-      "triggers": {
-        "intro": "สัญญาณภายนอกเสริม: ทริกเกอร์สิ้นสุด เซ็นเซอร์ประตู สวิตช์หยุดชั่วคราว และระบบเตือนการขนถ่าย",
-        "label": "ทริกเกอร์และประตู"
-      },
-      "notifications": {
-        "label": "การแจ้งเตือน",
-        "intro": "กำหนดเวลาและวิธีที่คุณจะได้รับการแจ้งเตือนเกี่ยวกับเหตุการณ์รอบการทำงาน"
-      },
-      "ml_training": {
-        "label": "การฝึก ML",
-        "intro": "เลือกใช้รุ่นอัจฉริยะที่ปรับแต่งการตรวจจับและการกำหนดเวลาให้กับอุปกรณ์นี้"
-      }
-    },
-    "setting": {
-      "auto_maintenance": {
-        "label": "การบำรุงรักษาอัตโนมัติ (ทำความสะอาดทุกคืน)"
-      },
-      "external_end_trigger_enabled": {
-        "label": "เปิดใช้งานทริกเกอร์การสิ้นสุดภายนอก"
-      },
-      "external_end_trigger_inverted": {
-        "label": "สลับทริกเกอร์ภายนอก (ทริกเกอร์เปิดปิด)"
-      },
-      "pause_cuts_power": {
-        "label": "หยุดชั่วคราวยังตัดพลังงาน (ผ่านสวิตช์)"
-      },
-      "notify_people": {
-        "label": "ผู้คน (สำหรับเมื่ออยู่บ้านเท่านั้น)"
-      },
-      "notify_only_when_home": {
-        "label": "แจ้งเตือนเมื่อถึงบ้านเท่านั้น"
-      },
-      "energy_price_static": {
-        "label": "ราคาพลังงานคงที่ (ต่อ kWh)"
-      },
-      "enable_ml_models": {
-        "label": "ใช้โมเดลอัจฉริยะระหว่างรอบการทำงาน"
-      },
-      "ml_training_enabled": {
-        "label": "เรียนรู้จากเครื่องนี้"
-      },
-      "name": {
-        "label": "ชื่ออุปกรณ์"
-      },
-      "device_type": {
-        "label": "ประเภทอุปกรณ์"
-      },
-      "power_sensor": {
-        "label": "เซ็นเซอร์วัดกำลัง"
-      },
-      "min_power": {
-        "label": "พลังงานขั้นต่ำ"
-      },
-      "off_delay": {
-        "label": "ปิดการหน่วงเวลา"
-      },
-      "linked_device": {
-        "label": "จัดกลุ่มภายใต้อุปกรณ์"
-      },
-      "start_threshold_w": {
-        "label": "เริ่มเกณฑ์"
-      },
-      "stop_threshold_w": {
-        "label": "หยุดเกณฑ์"
-      },
-      "min_off_gap": {
-        "label": "ขั้นต่ำปิดช่องว่าง"
-      },
-      "start_duration_threshold": {
-        "label": "เริ่มระยะเวลา"
-      },
-      "start_energy_threshold": {
-        "label": "เริ่มต้นพลังงาน"
-      },
-      "completion_min_seconds": {
-        "label": "ระยะเวลารอบขั้นต่ำ"
-      },
-      "running_dead_zone": {
-        "label": "รันนิ่งเดดโซน"
-      },
-      "end_energy_threshold": {
-        "label": "สิ้นสุดพลังงาน"
-      },
-      "end_repeat_count": {
-        "label": "สิ้นสุดการนับซ้ำ"
-      },
-      "sampling_interval": {
-        "label": "ช่วงการสุ่มตัวอย่าง"
-      },
-      "smoothing_window": {
-        "label": "หน้าต่างปรับให้เรียบ"
-      },
-      "abrupt_drop_watts": {
-        "label": "ลดลงอย่างกะทันหัน"
-      },
-      "abrupt_drop_ratio": {
-        "label": "อัตราส่วนการดรอปทันที"
-      },
-      "profile_match_threshold": {
-        "label": "เกณฑ์การจับคู่"
-      },
-      "profile_unmatch_threshold": {
-        "label": "เกณฑ์ที่ไม่ตรงกัน"
-      },
-      "profile_match_interval": {
-        "label": "ช่วงเวลาการแข่งขัน"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "อัตราส่วนระยะเวลาขั้นต่ำ"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "อัตราส่วนระยะเวลาสูงสุด"
-      },
-      "profile_duration_tolerance": {
-        "label": "ความอดทนต่อระยะเวลาของโปรไฟล์"
-      },
-      "duration_tolerance": {
-        "label": "ประมาณการความอดทน"
-      },
-      "auto_label_confidence": {
-        "label": "ความมั่นใจในการติดป้ายกำกับอัตโนมัติ"
-      },
-      "learning_confidence": {
-        "label": "ความมั่นใจในการเรียนรู้"
-      },
-      "suppress_feedback_notifications": {
-        "label": "ระงับการแจ้งเตือนคำติชม"
-      },
-      "watchdog_interval": {
-        "label": "ช่วงเวลาเฝ้าระวัง"
-      },
-      "no_update_active_timeout": {
-        "label": "ไม่มีการอัพเดตหมดเวลา"
-      },
-      "progress_reset_delay": {
-        "label": "ความคืบหน้าการรีเซ็ตล่าช้า"
-      },
-      "expose_debug_entities": {
-        "label": "เปิดเผยเอนทิตีการตรวจแก้จุดบกพร่อง"
-      },
-      "save_debug_traces": {
-        "label": "บันทึกการติดตามการแก้ไขข้อบกพร่อง"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "เปิดใช้งานการตรวจจับการต่อต้านริ้วรอย"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "พลังต่อต้านริ้วรอยสูงสุด"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "ระยะเวลาสูงสุด"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "ออกจากเกณฑ์พลังงาน"
-      },
-      "delay_start_detect_enabled": {
-        "label": "เปิดใช้งานการตรวจจับการหน่วงเวลาเริ่มต้น"
-      },
-      "delay_confirm_seconds": {
-        "label": "ยืนยันวินาที"
-      },
-      "delay_timeout_hours": {
-        "label": "ชั่วโมงการหมดเวลา"
-      },
-      "external_end_trigger": {
-        "label": "เอนทิตีทริกเกอร์ภายนอก"
-      },
-      "door_sensor_entity": {
-        "label": "เอนทิตีเซ็นเซอร์ประตู"
-      },
-      "switch_entity": {
-        "label": "เอนทิตีสวิตช์"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "เวลาหน่วงเตือนเก็บผ้า"
-      },
-      "pump_stuck_duration": {
-        "label": "ระยะเวลาติดปั๊ม"
-      },
-      "notify_start_services": {
-        "label": "เริ่มบริการ"
-      },
-      "notify_finish_services": {
-        "label": "บริการเสร็จสิ้น"
-      },
-      "notify_live_services": {
-        "label": "บริการความคืบหน้าสด"
-      },
-      "notify_fire_events": {
-        "label": "ยิงเหตุการณ์ HA สำหรับการแจ้งเตือน"
-      },
-      "notify_before_end_minutes": {
-        "label": "การแจ้งเตือนก่อนสิ้นสุด"
-      },
-      "notify_live_interval_seconds": {
-        "label": "ช่วงเวลาอัปเดตสด"
-      },
-      "notify_live_overrun_percent": {
-        "label": "% โอเวอร์รันสดก่อนการแจ้งเตือน"
-      },
-      "notify_live_chronometer": {
-        "label": "ใช้ Live Chronometer"
-      },
-      "notify_timeout_seconds": {
-        "label": "ปิดอัตโนมัติหลังจาก"
-      },
-      "notify_title": {
-        "label": "ชื่อการแจ้งเตือน"
-      },
-      "notify_icon": {
-        "label": "ไอคอนการแจ้งเตือน"
-      },
-      "notify_start_message": {
-        "label": "เริ่มข้อความ"
-      },
-      "notify_finish_message": {
-        "label": "จบข้อความ"
-      },
-      "notify_pre_complete_message": {
-        "label": "ข้อความที่กรอกไว้ล่วงหน้า"
-      },
-      "notify_reminder_message": {
-        "label": "ข้อความเตือนความจำ"
-      },
-      "notify_channel": {
-        "label": "Android ช่อง (เริ่ม/ถ่ายทอดสด)"
-      },
-      "notify_finish_channel": {
-        "label": "Android ช่อง (เสร็จสิ้น)"
-      },
-      "energy_price_entity": {
-        "label": "เอนทิตีราคาพลังงาน"
-      },
-      "ml_training_hour": {
-        "label": "เรียนรู้ในชั่วโมง"
-      },
-      "ml_training_min_cycles": {
-        "label": "จำนวนรอบที่ต้องการ"
-      },
-      "ml_training_interval_days": {
-        "label": "ตรวจสอบสูงสุดทุก"
-      }
-    },
-    "tab": {
-      "status": "ภาพรวม",
-      "history": "รอบ",
-      "profiles": "โปรไฟล์",
-      "settings": "การตั้งค่า",
-      "ml": "การฝึก ML",
-      "advanced": "ขั้นสูง",
-      "diagnostics": "การวินิจฉัย",
-      "pp_overview": "ภาพรวม",
-      "pp_phases": "เฟส",
-      "pp_cleanup": "การล้างข้อมูล",
-      "pp_manage": "จัดการ",
-      "subtab_profiles": "โปรไฟล์",
-      "subtab_phase_catalog": "แคตตาล็อกเฟส"
-    },
-    "btn": {
-      "save": "บันทึก",
-      "cancel": "ยกเลิก",
-      "delete": "ลบ",
-      "close": "ปิด",
-      "edit": "แก้ไข",
-      "add": "เพิ่ม",
-      "rebuild": "สร้างซองจดหมายขึ้นมาใหม่",
-      "record": "เริ่มการบันทึก",
-      "compare": "เปรียบเทียบ",
-      "confirm": "ยืนยัน",
-      "discard": "ทิ้ง",
-      "export": "ส่งออก",
-      "import": "นำเข้า",
-      "merge": "ผสาน",
-      "apply": "นำไปใช้",
-      "refresh": "รีเฟรช",
-      "create": "สร้าง",
-      "select": "เลือก",
-      "done": "เสร็จแล้ว",
-      "reset": "รีเซ็ต",
-      "trim": "ตัดแต่ง",
-      "split": "แยก",
-      "review": "ทบทวน",
-      "inspect": "ตรวจสอบ",
-      "label": "ฉลาก",
-      "save_settings": "บันทึกการตั้งค่า",
-      "new_profile": "+ โปรไฟล์ใหม่",
-      "new_group": "+ กลุ่มใหม่",
-      "apply_label": "ใช้ฉลาก",
-      "run_auto_label": "เรียกใช้ป้ายกำกับอัตโนมัติ",
-      "save_review": "บันทึกรีวิว",
-      "apply_trim": "ใช้ตัดแต่ง",
-      "apply_split": "ใช้แยก",
-      "process_recording": "บันทึกการบันทึก",
-      "stop": "หยุด",
-      "process": "ประมวลผล",
-      "add_device": "+ เพิ่มอุปกรณ์",
-      "train_now": "ฝึกเลย",
-      "reset_to_defaults": "รีเซ็ตเป็นค่าเริ่มต้น",
-      "reset_to_builtin": "รีเซ็ตเป็นรุ่นบิวท์อิน",
-      "save_preferences": "บันทึกการตั้งค่า",
-      "save_panel_settings": "บันทึกการตั้งค่าแผง",
-      "save_access_control": "บันทึกการควบคุมการเข้าถึง",
-      "auto_label_cycles": "รอบการติดฉลากอัตโนมัติ",
-      "run_analysis": "🔍 เรียกใช้การวิเคราะห์ข้อเสนอแนะ",
-      "apply_all": "ใช้ทั้งหมด",
-      "show_only": "แสดงเท่านั้น",
-      "dismiss": "ปิด",
-      "dismiss_all": "ยกเลิกทั้งหมด",
-      "process_history": "ดำเนินการทันที",
-      "clear_debug": "ล้างข้อมูลการดีบัก",
-      "wipe_all": "ล้างข้อมูลทั้งหมด",
-      "export_json": "ส่งออกเป็น JSON",
-      "import_json": "นำเข้าจาก JSON",
-      "correct": "แก้ไข…",
-      "ignore": "ไม่สนใจ",
-      "add_phase": "+ เพิ่มเฟส",
-      "new_phase": "+ เฟสใหม่",
-      "delete_profile": "ลบโปรไฟล์",
-      "rebuild_envelope": "สร้างซองจดหมายขึ้นมาใหม่",
-      "create_profile": "+ สร้างโปรไฟล์",
-      "rec_stop": "หยุด",
-      "pause_cycle": "หยุดชั่วคราว",
-      "resume_cycle": "ดำเนินต่อ",
-      "force_stop": "บังคับให้หยุด",
-      "save_phases": "บันทึกเฟส",
-      "auto_detect_split": "ตรวจจับอัตโนมัติ",
-      "clear_splits": "ล้าง",
-      "submit_correction": "ส่งการแก้ไข",
-      "import_overwrite": "นำเข้า (เขียนทับข้อมูล)",
-      "use": "ใช้",
-      "manage": "จัดการ",
-      "remove": "ลบ",
-      "delete_group": "ลบกลุ่ม",
-      "trim_split": "ตัดแต่ง / แยก",
-      "convert_to_automation": "แปลงเป็นระบบอัตโนมัติ",
-      "new_automation": "＋ ระบบอัตโนมัติใหม่",
-      "from_template": "จากเทมเพลต ▾",
-      "on_cycle_started": "เมื่อเริ่มรอบแล้ว",
-      "on_cycle_finished": "เมื่อรอบเสร็จสิ้น",
-      "save_group": "บันทึกกลุ่ม"
+      "status_graph": "กราฟสถานะ",
+      "storage_stats": "สถิติพื้นที่จัดเก็บ",
+      "tools_and_data": "เครื่องมือ & ข้อมูล",
+      "wipe_history": "ล้างประวัติ"
     },
     "badge": {
-      "poor_fit": "พอดีไม่ดี",
-      "fair_fit": "พอดี",
-      "manual": "(เลือกด้วยตนเอง)",
+      "golden_cycle": "รอบอ้างอิงที่บันทึกไว้",
+      "reviewed": "ตรวจสอบแล้ว",
+      "feedback_requested": "ขอคำติชม",
+      "needs_review": "ต้องการการตรวจสอบ",
+      "overrun": "ทำงานนานกว่าปกติ",
+      "artifact_tip": "ตรวจพบความผิดปกติ {n} รายการ (เช่น เปิดประตูกลางรอบ) — เปิดเพื่อดูบนกราฟ",
+      "poor_fit_tip": "ประวัติการจับคู่ไม่สอดคล้องกัน — พิจารณาสร้างโปรไฟล์นี้ใหม่",
+      "fair_fit_tip": "ความสอดคล้องของการจับคู่ปานกลาง — บางรอบที่กำหนดให้โปรไฟล์นี้มีคะแนนความเชื่อมั่นต่ำ ติดป้ายกำกับรอบเพิ่มเติมหรือบันทึกโปรไฟล์ใหม่เพื่อปรับปรุงความแม่นยำ",
       "auto": "(ตรวจจับอัตโนมัติ)",
-      "improving": "↗ ปรับปรุง",
+      "built_in_tag": "ในตัว",
       "declining": "↘ ลดลง",
-      "steady": "→ มั่นคง",
-      "using_tuned": "ใช้ค่าน้ำหนักที่ปรับแล้ว",
-      "using_defaults": "ใช้ค่าเริ่มต้นของระบบ",
-      "built_in_tag": "ในตัว"
+      "fair_fit": "คุณภาพโปรไฟล์พอใช้ได้",
+      "improving": "↗ ดีขึ้น",
+      "manual": "(เลือกด้วยตนเอง)",
+      "poor_fit": "คุณภาพโปรไฟล์ต่ำ",
+      "steady": "→ คงที่",
+      "using_defaults": "ใช้ค่าเริ่มต้นที่ติดมา",
+      "using_tuned": "ใช้น้ำหนักที่ปรับแต่งแล้ว"
     },
-    "status": {
-      "completed": "สมบูรณ์",
-      "interrupted": "ขัดจังหวะ",
-      "force_stopped": "บังคับหยุด",
-      "active": "ใช้งานอยู่",
-      "ambiguous": "ไม่ชัดเจน",
-      "clear": "ชัดเจน",
-      "working": "กำลังทำงาน…",
-      "recording": "กำลังบันทึก...",
-      "ready": "พร้อมดำเนินการ",
-      "idle": "ไม่ได้ใช้งาน",
-      "auto_detect": "ตรวจจับอัตโนมัติ",
-      "fine_tuning": "ปรับแต่งตอนนี้…",
-      "all_statuses": "สถานะทั้งหมด"
+    "btn": {
+      "add_timer": "+ เพิ่มตัวจับเวลา",
+      "remove_timer": "ลบตัวจับเวลา",
+      "add_device_tip": "เพิ่มอุปกรณ์ WashData อื่น",
+      "delete_group_tip": "ลบกลุ่มนี้เท่านั้น — โปรไฟล์สมาชิกจะถูกเก็บไว้",
+      "run_analysis_tip": "วิเคราะห์รอบที่บันทึกไว้ตอนนี้และรีเฟรชคำแนะนำการปรับแต่ง",
+      "reset_ml_models_tip": "ละทิ้งโมเดลที่ปรับแต่งแล้วและกลับไปใช้โมเดลที่ติดมา WashData สามารถเรียนรู้ใหม่ได้ในภายหลัง",
+      "add_device": "+ เพิ่มอุปกรณ์",
+      "add_phase": "+ เพิ่มเฟส",
+      "apply_all": "ใช้ทั้งหมด",
+      "apply_label": "ใช้ป้ายกำกับ",
+      "apply_split": "ใช้การแบ่ง",
+      "apply_trim": "ใช้การตัดแต่ง",
+      "auto_detect_split": "ตรวจจับอัตโนมัติ",
+      "auto_label_cycles": "ติดป้ายกำกับรอบอัตโนมัติ",
+      "cancel": "ยกเลิก",
+      "clear_debug": "ล้างข้อมูลดีบัก",
+      "clear_splits": "ล้าง",
+      "close": "ปิด",
+      "compare": "เปรียบเทียบ",
+      "confirm": "ยืนยัน",
+      "convert_to_automation": "แปลงเป็นระบบอัตโนมัติ",
+      "correct": "แก้ไข…",
+      "create": "สร้าง",
+      "create_profile": "+ สร้างโปรไฟล์",
+      "delete": "ลบ",
+      "delete_group": "ลบกลุ่ม",
+      "delete_profile": "ลบโปรไฟล์",
+      "discard": "ยกเลิก",
+      "dismiss": "ปิด",
+      "done": "เสร็จสิ้น",
+      "edit": "แก้ไข",
+      "export": "ส่งออก",
+      "export_json": "ส่งออกเป็น JSON",
+      "force_stop": "บังคับหยุด",
+      "from_template": "จากเทมเพลต ▾",
+      "ignore": "ไม่สนใจ",
+      "import_json": "นำเข้าจาก JSON",
+      "import_overwrite": "นำเข้า (เขียนทับข้อมูล)",
+      "inspect": "ตรวจสอบ",
+      "label": "ติดป้ายกำกับ",
+      "manage": "จัดการ",
+      "merge": "รวม",
+      "new_automation": "＋ ระบบอัตโนมัติใหม่",
+      "new_group": "+ กลุ่มใหม่",
+      "new_phase": "+ เฟสใหม่",
+      "new_profile": "+ โปรไฟล์ใหม่",
+      "on_cycle_finished": "เมื่อรอบเสร็จสิ้น",
+      "on_cycle_started": "เมื่อรอบเริ่มต้น",
+      "pause_cycle": "หยุดชั่วคราว",
+      "process": "ประมวลผล",
+      "process_history": "ประมวลผลตอนนี้",
+      "process_recording": "บันทึกการบันทึก",
+      "rebuild": "สร้างซองใหม่",
+      "rebuild_envelope": "สร้างซองใหม่",
+      "rec_stop": "หยุด",
+      "record": "เริ่มบันทึก",
+      "refresh": "รีเฟรช",
+      "remove": "ลบออก",
+      "reset": "รีเซ็ต",
+      "reset_to_builtin": "รีเซ็ตเป็นโมเดลในตัว",
+      "reset_to_defaults": "รีเซ็ตเป็นค่าเริ่มต้น",
+      "resume_cycle": "ดำเนินรอบต่อ",
+      "review": "ตรวจสอบ",
+      "run_analysis": "🔍 เรียกใช้การวิเคราะห์คำแนะนำ",
+      "run_auto_label": "เรียกใช้การติดป้ายกำกับอัตโนมัติ",
+      "save": "บันทึก",
+      "save_access_control": "บันทึกการควบคุมการเข้าถึง",
+      "save_group": "บันทึกกลุ่ม",
+      "save_panel_settings": "บันทึกการตั้งค่าแผง",
+      "save_phases": "บันทึกเฟส",
+      "save_preferences": "บันทึกความต้องการ",
+      "save_review": "บันทึกการตรวจสอบ",
+      "save_settings": "บันทึกการตั้งค่า",
+      "select": "เลือก",
+      "show_only": "แสดงเฉพาะ",
+      "split": "แบ่ง",
+      "submit_correction": "ส่งการแก้ไข",
+      "train_now": "ฝึกตอนนี้",
+      "trim": "ตัดแต่ง",
+      "trim_split": "ตัดแต่ง / แบ่ง",
+      "use": "ใช้",
+      "wipe_all": "ล้างข้อมูลทั้งหมด"
     },
-    "ml": {
-      "fit_strong": "แข็งแกร่ง",
-      "fit_good": "ดี",
-      "fit_fair": "พอใช้",
-      "fit_weak": "อ่อนแอ",
-      "fit_slight": "เล็กน้อย",
-      "fit_word": "พอดี",
-      "fine_tuned_at": "ปรับแต่ง {when}",
-      "personalized": "● ปรับแต่งเฉพาะสำหรับเครื่องนี้",
-      "builtin_models": "● การใช้โมเดลในตัว"
+    "lbl": {
+      "timer_min": "นาที",
+      "timer_msg_placeholder": "ข้อความ (ไม่บังคับ, {device}/{program}/{minutes})",
+      "timer_auto_pause": "หยุดชั่วคราวอัตโนมัติ",
+      "actions": "การดำเนินการ",
+      "activity": "กิจกรรม",
+      "administrators": "ผู้ดูแลระบบ",
+      "auto_fine_tune_off": "ปิดการปรับแต่งอัตโนมัติ",
+      "clock_time": "เวลานาฬิกา",
+      "compare_profiles": "เปรียบเทียบกับโปรไฟล์",
+      "confidence": "ความเชื่อมั่น",
+      "confidence_threshold": "ค่าขั้นต่ำความเชื่อมั่น",
+      "correct_duration": "ระยะเวลาที่ถูกต้อง (นาที, ไม่บังคับ)",
+      "correct_profile": "โปรไฟล์ที่ถูกต้อง",
+      "cost": "ค่าใช้จ่าย",
+      "create_new_profile": "+ สร้างโปรไฟล์ใหม่…",
+      "cycle_date_display": "การแสดงวันที่รอบ",
+      "cycle_health": "สุขภาพรอบ",
+      "cycles_count": "รอบ",
+      "date": "วันที่",
+      "debug_traces": "การติดตามดีบัก",
+      "default": "ค่าเริ่มต้น",
+      "default_access_level": "ระดับเริ่มต้นสำหรับผู้ใช้ที่ไม่ได้ระบุด้านล่าง",
+      "default_other": "ค่าเริ่มต้น (อุปกรณ์อื่น)",
+      "default_tab": "แท็บเริ่มต้นเมื่อเปิดแผง",
+      "description": "คำอธิบาย",
+      "duration": "ระยะเวลา",
+      "emphasis": "ความเน้น",
+      "enable_access_control": "เปิดใช้การควบคุมการเข้าถึงรายผู้ใช้",
+      "energy": "พลังงาน",
+      "expected_duration": "ระยะเวลาที่คาดหวัง (นาที)",
+      "file_kb": "ไฟล์ (kB)",
+      "gap_s": "ช่วงว่าง (วินาที)",
+      "head_trim": "ตัดหัว (วินาที)",
+      "health": "สุขภาพ",
+      "hide_tabs": "ซ่อนแท็บสำหรับผู้ที่ไม่ใช่ผู้ดูแลระบบ",
+      "in_use": "กำลังใช้งาน",
+      "json_data": "ข้อมูล JSON",
+      "label": "โปรแกรมที่จับคู่",
+      "last_checked": "ตรวจสอบล่าสุด:",
+      "load_from_file": "โหลดจากไฟล์",
+      "manual_duration": "ระยะเวลาด้วยตนเอง (นาที, ไม่บังคับ)",
+      "mode_existing_profile": "เพิ่มในโปรไฟล์ที่มีอยู่",
+      "mode_new_profile": "สร้างโปรไฟล์ใหม่",
+      "new_profile_name": "ชื่อโปรไฟล์ใหม่",
+      "panel_default_tab": "แท็บเริ่มต้น",
+      "phase_name": "ชื่อ",
+      "power": "กำลังไฟฟ้า",
+      "profile": "โปรไฟล์",
+      "profile_name": "ชื่อโปรไฟล์",
+      "progress": "ความคืบหน้า",
+      "read_only": "อ่านอย่างเดียว",
+      "ref_cycle": "รอบอ้างอิง (ไม่บังคับ)",
+      "refresh_interval": "ช่วงเวลารีเฟรช (วินาที)",
+      "remaining": "เหลืออยู่",
+      "remove_label": "- ลบป้ายกำกับ -",
+      "rename_profile": "เปลี่ยนชื่อโปรไฟล์",
+      "resulting_profile": "โปรไฟล์ที่ได้",
+      "save_mode": "โหมดบันทึก",
+      "seconds_from_start": "วินาทีจากเริ่มต้น",
+      "select_profile": "เลือกโปรไฟล์",
+      "show_debug": "แสดงการ์ดดีบักการจับคู่สดในหน้าสถานะ (ความเชื่อมั่น, ความคลุมเครือ, ผู้สมัครอันดับต้น)",
+      "show_expected": "แสดงเส้นกราฟที่คาดหวัง (โปรไฟล์ที่จับคู่, สีส้ม)",
+      "show_raw": "แสดงค่าเซ็นเซอร์ดิบ (ไม่ได้ปรับให้ราบเรียบ, สีเทา)",
+      "status": "สถานะ",
+      "tail_trim": "ตัดท้าย (วินาที)",
+      "ungrouped": "ไม่ได้จัดกลุ่ม",
+      "unlabelled": "ไม่มีป้ายกำกับ",
+      "unlabelled_paren": "(ไม่มีป้ายกำกับ)",
+      "expected": "ที่คาดหวัง",
+      "raw_socket": "ซ็อกเก็ตดิบ",
+      "artifact_interruption": "การขัดจังหวะ",
+      "artifact_low_power": "กำลังไฟฟ้าต่ำ",
+      "artifact_high_power": "กำลังไฟฟ้าสูง",
+      "artifact_anomaly": "ความผิดปกติ"
     },
     "modal": {
-      "label_cycle": "ติดป้ายกำกับรอบ",
+      "merge_cycles": "รวม {n} รอบ",
+      "auto_label": "ติดป้ายกำกับรอบอัตโนมัติ",
+      "correct_feedback": "แก้ไขคำติชม",
       "create_profile": "สร้างโปรไฟล์",
-      "new_phase": "เฟสใหม่",
+      "cycle": "รอบ",
       "edit_phase": "แก้ไขเฟส",
-      "process_recording": "ประมวลผลการบันทึก",
-      "correct_feedback": "ข้อเสนอแนะที่ถูกต้อง",
       "import_config": "นำเข้าการกำหนดค่า",
-      "auto_label": "รอบการติดฉลากอัตโนมัติ",
-      "cycle": "รอบ"
+      "label_cycle": "ติดป้ายกำกับรอบ",
+      "new_phase": "เฟสใหม่",
+      "process_recording": "ประมวลผลการบันทึก"
     },
-    "tag": {
-      "late_start": "เริ่มช้า",
-      "early_end": "จบเร็ว",
-      "merged": "รอบที่รวม",
-      "split": "รอบที่แยก",
-      "noise": "เสียงรบกวน",
-      "wrong_profile": "โปรไฟล์ผิด",
-      "sensor_gap": "ช่องว่างเซ็นเซอร์"
+    "msg": {
+      "near_duplicate_cluster": "ตรวจพบคลัสเตอร์โปรไฟล์ที่เกือบเหมือนกัน การจัดกลุ่มช่วยให้การจับคู่เลือกระหว่างโปรไฟล์ที่คล้ายกันได้อย่างน่าเชื่อถือ (เช่น โปรแกรมเดียวกันที่อุณหภูมิ/รอบต่างกัน)",
+      "coverage_gap": "รอบล่าสุดไม่มีโปรไฟล์ที่ตรงกัน ({pct}% จาก 30 รายการล่าสุด)",
+      "consider_new_profile": "พิจารณาสร้างโปรไฟล์ใหม่",
+      "group_not_cohesive": "โปรไฟล์เหล่านี้ไม่คล้ายกันพอที่จะจัดกลุ่มได้อย่างน่าเชื่อถือ ดังนั้นการจับคู่จะถือว่าแยกกันจนกว่าคุณจะลบค่าผิดปกติหรือแยกกลุ่ม",
+      "group_modal_help": "จัดกลุ่มโปรแกรมที่มีรูปร่างเหมือนกันแต่ต่างกันด้านอุณหภูมิ/รอบ (ระยะเวลาอาจแตกต่างกัน) การจับคู่จะให้คะแนนกลุ่มเป็นหนึ่งผู้สมัคร จากนั้นเลือกสมาชิกที่เหมาะสมที่สุด เลือกอย่างน้อย 2 รายการ; ภาพซ้อนแสดงความคล้ายคลึง",
+      "showing_suggestions": "กำลังแสดงการตั้งค่า {count} รายการพร้อมคำแนะนำ",
+      "show_all_settings": "แสดงการตั้งค่าทั้งหมด",
+      "tuning_suggestions_available": "มีคำแนะนำการปรับแต่ง {count} รายการจากรอบที่สังเกต ปรากฏข้างช่องที่เกี่ยวข้อง",
+      "legacy_actions_title": "การดำเนินการแบบกำหนดเองเดิม {count} รายการยังคงทำงาน",
+      "old_actions_warning": "กำหนดค่าด้วยตัวแก้ไขการดำเนินการเก่า (ถูกลบออกแล้ว) ยังคงทำงานในเหตุการณ์รอบแต่ไม่สามารถแก้ไขที่นี่ได้อีก แปลงเป็นระบบอัตโนมัติปกติหรือลบออก",
+      "no_settings_match": "ไม่มีการตั้งค่าที่ตรงกับ \"{q}\"",
+      "clear_debug_hint": "ลบข้อมูลดีบักที่เก็บไว้เพื่อเพิ่มพื้นที่ว่าง",
+      "wipe_history_warning": "ลบรอบและโปรไฟล์ทั้งหมดอย่างถาวร ไม่สามารถยกเลิกได้",
+      "export_description": "ส่งออกโปรไฟล์และรอบทั้งหมดเป็น JSON หรือกู้คืนจากการส่งออกก่อนหน้า",
+      "log_buffer_hint": "ใหม่สุดก่อน · บัฟเฟอร์บันทึก ha_washdata 500 รายการล่าสุดตั้งแต่รีสตาร์ท · ลากขอบล่างเพื่อปรับขนาด",
+      "review_profile_tip": "โปรแกรมที่รอบนี้ถูกติดป้ายกำกับว่า หากโปรแกรมที่ตรวจจับอัตโนมัติผิดพลาด ให้แก้ไขที่นี่ — การติดป้ายกำกับจะสอนการจับคู่สำหรับรอบในอนาคต",
+      "review_quality_tip": "รอบนี้สะอาดแค่ไหน ดี = ตัวอย่างตำราของโปรแกรมนี้; แย่ = ตรวจพบแต่มีสัญญาณรบกวนหรือผิดปกติ; ใช้ไม่ได้ = ตรวจจับผิดพลาด (รวม, ตัดทอน หรือปลอม) ขับเคลื่อนคะแนนสุขภาพและกำหนดว่ารอบใดได้รับอนุญาตให้ฝึกโมเดล",
+      "review_recorded_tip": "ทำเครื่องหมายนี้เป็นรอบอ้างอิงที่เลือกด้วยมือสำหรับโปรแกรม — บทบาทเดียวกับรอบที่บันทึกด้วยตนเอง รอบอ้างอิงจะถูกเก็บไว้เสมอ สร้างเทมเพลตการจับคู่ และจะไม่ถูกทิ้งโดยการล้างข้อมูล (นี่คือธง \"ทอง\"/ที่บันทึกไว้; ทั้งสองสิ่งเหมือนกัน)",
+      "review_tags_tip": "แฟล็กเพิ่มเติมที่อธิบายสิ่งที่ผิดพลาดกับรอบนี้ เพื่อให้การฝึกและการล้างข้อมูลสามารถนำมาพิจารณาได้",
+      "review_notes_tip": "บันทึกข้อความอิสระสำหรับการอ้างอิงของคุณเอง ไม่ได้ใช้โดยการจับคู่หรือการฝึก",
+      "review_confirm_help": "ยืนยันว่ารอบนี้ถูกตรวจจับอย่างถูกต้องหรือไม่ การตรวจสอบของคุณฝึกโมเดลบนเครื่องของคุณ — ยิ่งคุณยืนยันรอบมากเท่าไร การจับคู่และคะแนนสุขภาพก็จะยิ่งดีขึ้น ดี/ไม่ดีอย่างรวดเร็วก็เพียงพอ",
+      "review_notes_placeholder": "หมายเหตุ (ไม่บังคับ)",
+      "compare_profiles_tip": "วางซ้อนซองโปรไฟล์อื่นบนแผนภูมิด้านบนเพื่อดูว่าอันไหนเหมาะกับรอบนี้ที่สุด",
+      "artifact_header": "ตรวจพบความผิดปกติ {n} รายการในระหว่างรอบนี้",
+      "artifact_footer": "ไฮไลต์บนกราฟด้านบน สิ่งเหล่านี้เป็นสิ่งแปลกปลอมชั่วคราว (เช่น เปิดประตูกลางรอบ) ไม่จำเป็นต้องเป็นปัญหาเสมอไป",
+      "profile_poor_health_detail": "รอบที่กำหนดให้โปรไฟล์นี้มีรูปร่างไม่สอดคล้องกันหรือมีความเชื่อมั่นต่ำ พิจารณาสร้างซองใหม่หรือตรวจสอบรอบที่ติดป้ายกำกับ",
+      "trend_duration_longer": "ระยะเวลามีแนวโน้มนานขึ้น ({pct}%/รอบ) — ค่าเฉลี่ยล่าสุด {avg}",
+      "trend_duration_shorter": "ระยะเวลามีแนวโน้มสั้นลง ({pct}%/รอบ) — ค่าเฉลี่ยล่าสุด {avg}",
+      "trend_energy_up": "พลังงานมีแนวโน้มเพิ่มขึ้น ({pct}%/รอบ) — ค่าเฉลี่ยล่าสุด {avg}",
+      "trend_energy_down": "พลังงานมีแนวโน้มลดลง ({pct}%/รอบ)",
+      "performance_trend": "แนวโน้มประสิทธิภาพ ({n} รอบ)",
+      "maintenance_advisory": "ระยะเวลา/พลังงานที่เพิ่มขึ้นอาจบ่งบอกว่าต้องการการบำรุงรักษาอุปกรณ์ (เช่น การขจัดตะกรัน, การทำความสะอาดตัวกรอง)",
+      "manual_duration_hint": "ความยาวรอบเฉลี่ย/ที่คาดหวังของโปรไฟล์ ใช้สำหรับการประมาณเวลาที่เหลือ แก้ไขเพื่อตั้งค่า การปล่อยให้ไม่เปลี่ยนแปลงจะคงค่าปัจจุบันไว้",
+      "appliance_monitor": "มอนิเตอร์อุปกรณ์",
+      "auto_label_intro": "กำหนดโปรไฟล์ให้กับรอบที่ไม่มีป้ายกำกับซึ่งมีความเชื่อมั่นการจับคู่ผ่านเกณฑ์",
+      "cleanup_intro": "ทุกรอบที่ติดป้ายกำกับถูกวางซ้อน ทำเครื่องหมายค่าผิดปกติและลบเพื่อล้างโปรไฟล์",
+      "compare_overlay_profiles": "วางซ้อนโปรไฟล์ (จาง)",
+      "compare_selected_cycles": "รอบที่เลือก (ทึบ) — แสดง / ซ่อน",
+      "feedback_prompt": "ยืนยันว่าถูกต้อง แก้ไขโปรแกรม หรือไม่สนใจ",
+      "import_intro": "โหลดไฟล์ที่ส่งออกหรือวาง JSON ด้านล่าง",
+      "live_chart_loading": "แผนภูมิกำลังไฟฟ้าสดจะปรากฏเมื่อค่าถูกรับ",
+      "loading": "กำลังโหลด…",
+      "loading_curve": "กำลังโหลดเส้นกราฟ…",
+      "loading_settings": "กำลังโหลดการตั้งค่า…",
+      "maintenance_requires_access": "การบำรุงรักษาและการส่งออก/นำเข้าต้องการการเข้าถึงแบบเต็ม",
+      "matching_tuning_intro": "เมื่อเรียนรู้ WashData ยังปรับว่าการจับคู่โปรแกรมให้น้ำหนักรูปร่างเทียบกับระยะเวลาและพลังงานแค่ไหน",
+      "merge_intro": "รอบที่เลือกถูกรวมเป็นหนึ่ง (ตามลำดับเวลา; ช่องว่างเติมด้วย 0 W) เลือกโปรไฟล์ที่ได้",
+      "ml_intro": "WashData มาพร้อมโมเดลอัจฉริยะที่ทำงานได้ทันที",
+      "ml_learned_intro": "โมเดลที่ปรับแต่งสำหรับเครื่องนี้",
+      "ml_loading": "กำลังโหลด ML…",
+      "ml_settings_intro": "สวิตช์สองตัวที่ทำงานอิสระ: ตัวหนึ่งใช้โมเดลขณะรอบทำงาน อีกตัวให้ WashData ปรับแต่งโมเดลให้เหมาะกับเครื่องของคุณเมื่อเวลาผ่านไป",
+      "no_cycles_match": "ไม่มีรอบที่ตรงกับตัวกรองปัจจุบัน",
+      "no_cycles_profile": "ไม่มีรอบสำหรับโปรไฟล์นี้",
+      "no_cycles_yet": "ยังไม่มีรอบที่บันทึกไว้",
+      "no_device_selected": "ไม่มีอุปกรณ์ที่เลือก",
+      "no_devices": "ยังไม่มีอุปกรณ์ WashData ที่กำหนดค่า",
+      "no_envelope": "ยังไม่มีซอง — สร้างใหม่หลังจากติดป้ายกำกับรอบ",
+      "no_envelope_overlay": "ไม่มีซองที่จะวางซ้อน",
+      "no_fine_tuned": "ยังไม่มีการปรับแต่ง — WashData ใช้โมเดลในตัว",
+      "no_logs": "ยังไม่มีบันทึกที่บัฟเฟอร์",
+      "no_match_yet": "ยังไม่มีการพยายามจับคู่ — จะเติมข้อมูลระหว่างรอบที่กำลังทำงาน",
+      "no_other_users": "ไม่พบผู้ใช้ Home Assistant อื่น",
+      "no_phases": "ไม่มีเฟสที่กำหนด",
+      "no_phases_assigned": "ไม่มีเฟสที่กำหนด",
+      "no_profiles_compare": "ไม่มีโปรไฟล์ที่จะเปรียบเทียบ",
+      "no_profiles_overlay": "ไม่มีโปรไฟล์ที่จะวางซ้อน",
+      "no_profiles_yet": "ยังไม่มีโปรไฟล์ สร้างจากรอบที่ติดป้ายกำกับ",
+      "no_profiles_yet_short": "ยังไม่มีโปรไฟล์",
+      "no_split_points": "ยังไม่มีจุดแบ่ง",
+      "no_suggestions": "ไม่มีคำแนะนำที่ใช้งานอยู่",
+      "pending_feedback": "คำติชมการตรวจจับที่รอดำเนินการ",
+      "phase_catalog_intro": "ส่วนที่มีชื่อของรอบ (ก่อนซัก, ทำความร้อน, ปั่น…) กำหนดให้โปรไฟล์จากแผงควบคุม",
+      "phase_ranges_intro": "ช่วงเฟส (นาทีจากเริ่มรอบ) วางซ้อนบนเส้นกราฟเฉลี่ย แก้ไขค่าเพื่อดูตัวอย่างสด",
+      "preferences_admin": "ความต้องการ, แผง & การควบคุมการเข้าถึง",
+      "preferences_adv": "ความต้องการ",
+      "prefs_personal": "ใช้กับบัญชี Home Assistant ของคุณเท่านั้น",
+      "profiles_intro": "คลิกโปรไฟล์เพื่อดูสถิติ เฟส และการล้างข้อมูล จัดกลุ่มโปรแกรมที่เหมือนกัน (รูปร่าง/ระยะเวลาเดียวกัน, อุณหภูมิหรือรอบต่างกัน) เพื่อให้การจับคู่เลือกระหว่างพวกมันได้อย่างน่าเชื่อถือ",
+      "rbac_hint": "เมื่อปิด ผู้ใช้ Home Assistant ทุกคนจะมีการเข้าถึงแบบเต็ม (ค่าเริ่มต้น) ผู้ดูแลระบบจะมีการเข้าถึงแบบเต็มเสมอและสามารถจัดการทุกคนได้",
+      "recent_logs": "บันทึก ha_washdata ล่าสุด",
+      "recording_in_progress": "กำลังบันทึก",
+      "review_in_settings": "ตรวจสอบในการตั้งค่า",
+      "review_to_cycles": "เปิดคิวการตรวจสอบรอบ",
+      "saving_triggers_reload": "การบันทึกจะกระตุ้นการโหลดการรวมใหม่ เอนทิตี HA อาจแสดงว่าไม่พร้อมใช้งานชั่วคราว",
+      "search_placeholder": "ค้นหาการตั้งค่า…",
+      "see_recorder": "ดูวิดเจ็ตเครื่องบันทึกด้านล่าง",
+      "split_intro": "คลิกกราฟเพื่อเพิ่มหรือลบจุดแบ่ง หรือตรวจจับอัตโนมัติจากช่องว่างที่ว่างเปล่า แต่ละส่วนที่ได้สามารถมีโปรไฟล์ของตัวเองได้",
+      "storage_diagnostics": "สถิติพื้นที่จัดเก็บ, การบำรุงรักษา, ส่งออก/นำเข้า",
+      "trim_intro": "ลากแฮนเดิลสีแดง หรือป้อนค่า ทุกอย่างนอกหน้าต่างจะถูกลบ",
+      "unsure_detected_prefix": "WashData ไม่แน่ใจว่าตรวจจับ",
+      "updated": "อัปเดตแล้ว"
     },
-    "quality": {
-      "good": "ดี",
-      "bad": "แย่",
-      "unusable": "ใช้ไม่ได้"
-    },
-    "access": {
-      "none": "ไม่มี (ซ่อนอยู่)",
-      "read": "อ่าน",
-      "edit": "แก้ไข",
-      "full": "เต็ม",
-      "inherit": "สืบทอด"
+    "phase_desc": {
+      "pre_wash": "แช่เบื้องต้นหรือบำบัดก่อนซักหลัก",
+      "wash": "รอบการซักหลักพร้อมการหมุนของถังและระบบทำความร้อนเสริม",
+      "wash_dw": "ซักด้วยผงซักฟอกหลักพร้อมความร้อน",
+      "rinse": "ขั้นตอนล้างด้วยน้ำสะอาด ระยะนี้อาจเกิดซ้ำหลายครั้ง",
+      "spin": "การสกัดด้วยความเร็วสูงเพื่อเอาน้ำออกจากผ้า",
+      "spin_wd": "การสกัดด้วยความเร็วสูงก่อนการเปลี่ยนผ่านสู่การอบแห้ง",
+      "soak": "ระยะการแช่กิจกรรมต่ำระหว่างขั้นตอนซักที่ใช้งาน",
+      "soak_dw": "ระยะการแช่ยาวนานสำหรับสิ่งสกปรกมาก",
+      "anti_crease": "การหมุนสั้นๆ เป็นครั้งคราวหลังเสร็จเพื่อลดรอยยับ",
+      "heat_up": "การอุ่นเครื่องทำความร้อนเบื้องต้นก่อนการอบแห้งเต็มรูปแบบ",
+      "drying": "ระยะการหมุนด้วยความร้อนหลัก",
+      "cool_down": "การหมุนโดยไม่มีความร้อนใกล้สิ้นสุดรอบ",
+      "anti_wrinkle": "การหมุนหลังรอบเป็นระยะๆ เพื่อลดรอยยับ",
+      "sensor_check": "หยุดกำลังต่ำสั้นๆ ขณะวัดความแห้ง",
+      "drain_and_switch": "ช่วงการเปลี่ยนผ่านจากการซักเป็นโหมดอบแห้ง",
+      "pre_rinse": "ฉีดน้ำเบื้องต้นก่อนซักด้วยผงซักฟอก",
+      "dry": "ขั้นตอนการอบแห้งโดยใช้เครื่องทำความร้อนและ/หรือความร้อนที่เหลือ",
+      "sanitize": "ขั้นตอนการทำความสะอาดอุณหภูมิสูงสำหรับโปรแกรมฆ่าเชื้อ"
     },
     "health": {
-      "poor": "⚠ ความพอดีที่ไม่เหมาะสม",
-      "fair": "เหมาะสมกันพอสมควร",
-      "good": "✓ เข้ากันได้ดี"
-    },
-    "trend": {
-      "up": "กำลังมาแรง",
-      "down": "มีแนวโน้มลดลง"
-    },
-    "pref": {
-      "date_relative": "แบบสัมพัทธ์ (เช่น 2 ชั่วโมงที่แล้ว)",
-      "date_absolute": "แน่นอน (เช่น 14:32 น. วันที่ 2 กรกฎาคม)"
+      "fair": "คุณภาพโปรไฟล์พอใช้ได้",
+      "good": "✓ คุณภาพโปรไฟล์ดี",
+      "poor": "⚠ คุณภาพโปรไฟล์ต่ำ"
     },
     "log": {
       "all_levels": "ทุกระดับ"
+    },
+    "ml": {
+      "builtin_models": "● ใช้โมเดลในตัว",
+      "fit_fair": "พอใช้ได้",
+      "fit_good": "ดี",
+      "fit_slight": "เล็กน้อย",
+      "fit_strong": "แข็งแกร่ง",
+      "fit_weak": "อ่อนแอ",
+      "fit_word": "ความเหมาะสม",
+      "personalized": "● ปรับแต่งสำหรับเครื่องนี้"
+    },
+    "pref": {
+      "date_absolute": "สัมบูรณ์ (เช่น 14:32 วันที่ 2 ก.ค.)",
+      "date_relative": "สัมพัทธ์ (เช่น 2 ชั่วโมงที่แล้ว)"
+    },
+    "quality": {
+      "bad": "แย่",
+      "good": "ดี",
+      "unusable": "ใช้ไม่ได้"
+    },
+    "status": {
+      "active": "ใช้งานอยู่",
+      "all_statuses": "ทุกสถานะ",
+      "ambiguous": "คลุมเครือ",
+      "auto_detect": "ตรวจจับอัตโนมัติ",
+      "clear": "ชัดเจน",
+      "completed": "เสร็จสมบูรณ์",
+      "fine_tuning": "กำลังปรับแต่ง…",
+      "force_stopped": "บังคับหยุดแล้ว",
+      "idle": "ว่างงาน",
+      "interrupted": "ขัดจังหวะ",
+      "ready": "พร้อมประมวลผล",
+      "recording": "กำลังบันทึก"
+    },
+    "tab": {
+      "advanced": "ขั้นสูง",
+      "diagnostics": "การวินิจฉัย",
+      "history": "รอบ",
+      "ml": "การฝึก ML",
+      "pp_cleanup": "ล้างข้อมูล",
+      "pp_manage": "จัดการ",
+      "pp_overview": "ภาพรวม",
+      "pp_phases": "เฟส",
+      "profiles": "โปรไฟล์",
+      "settings": "การตั้งค่า",
+      "status": "ภาพรวม",
+      "subtab_phase_catalog": "แคตาล็อกเฟส",
+      "subtab_profiles": "โปรไฟล์"
+    },
+    "tag": {
+      "early_end": "จบเร็ว",
+      "late_start": "เริ่มช้า",
+      "merged": "รอบที่รวมกัน",
+      "noise": "สัญญาณรบกวน",
+      "sensor_gap": "ช่องว่างเซ็นเซอร์",
+      "split": "รอบที่แบ่ง",
+      "wrong_profile": "โปรไฟล์ผิด"
+    },
+    "toast": {
+      "access_saved": "บันทึกการควบคุมการเข้าถึงแล้ว",
+      "all_wiped": "ล้างข้อมูลทั้งหมดแล้ว",
+      "analysis_complete_none": "การวิเคราะห์เสร็จสิ้น: ไม่มีคำแนะนำใหม่",
+      "auto_label_complete": "การติดป้ายกำกับอัตโนมัติเสร็จสิ้น",
+      "automation_deleted": "ลบระบบอัตโนมัติแล้ว",
+      "correction_submitted": "ส่งการแก้ไขแล้ว",
+      "cycle_deleted": "ลบรอบแล้ว",
+      "cycle_force_stopped": "บังคับหยุดรอบแล้ว",
+      "cycle_labelled": "ติดป้ายกำกับรอบแล้ว",
+      "cycle_paused": "หยุดรอบชั่วคราวแล้ว",
+      "cycle_resumed": "ดำเนินรอบต่อแล้ว",
+      "cycle_trimmed": "ตัดแต่งรอบแล้ว",
+      "cycles_merged": "รวมรอบแล้ว",
+      "envelope_rebuilt": "สร้างซองใหม่แล้ว",
+      "envelopes_rebuilt": "สร้างซองทั้งหมดใหม่แล้ว",
+      "export_downloaded": "ดาวน์โหลดการส่งออกแล้ว",
+      "feedback_all_dismissed": "ปิดคำติชมทั้งหมดแล้ว",
+      "feedback_confirmed": "ยืนยันคำติชมแล้ว",
+      "feedback_dismissed": "ปิดคำติชมแล้ว",
+      "group_deleted": "ลบกลุ่มแล้ว",
+      "group_name_required": "จำเป็นต้องมีชื่อกลุ่ม",
+      "group_saved": "บันทึกกลุ่มแล้ว",
+      "import_successful": "นำเข้าสำเร็จ; กำลังโหลดการรวมใหม่",
+      "json_required": "จำเป็นต้องมีข้อมูล JSON",
+      "legacy_removed": "ลบการดำเนินการเดิมแล้ว",
+      "logs_exported": "ส่งออกบันทึกแล้ว",
+      "matching_reverted": "คืนน้ำหนักการจับคู่เป็นค่าเริ่มต้นแล้ว",
+      "min_2_profiles": "เลือกอย่างน้อย 2 โปรไฟล์สำหรับกลุ่ม",
+      "ml_training_no_improvement": "การฝึกเสร็จสิ้น: คงค่าพื้นฐานไว้ (ไม่มีการปรับปรุง)",
+      "models_reverted": "คืนโมเดลบนอุปกรณ์เป็นค่าพื้นฐานแล้ว",
+      "name_required": "จำเป็นต้องมีชื่อ",
+      "no_split_found": "ไม่พบช่องว่างที่ว่างเปล่าสำหรับการแบ่ง",
+      "panel_settings_saved": "บันทึกการตั้งค่าแผงแล้ว",
+      "phase_name_required": "จำเป็นต้องมีชื่อเฟส",
+      "phase_updated": "อัปเดตเฟสแล้ว",
+      "phases_saved": "บันทึกเฟสแล้ว",
+      "preferences_saved": "บันทึกความต้องการแล้ว",
+      "profile_name_required": "จำเป็นต้องมีชื่อโปรไฟล์",
+      "profile_renamed": "เปลี่ยนชื่อโปรไฟล์แล้ว",
+      "recording_discarded": "ยกเลิกการบันทึกแล้ว",
+      "recording_saved": "บันทึกการบันทึกในโปรไฟล์แล้ว",
+      "recording_started": "เริ่มการบันทึกแล้ว",
+      "recording_stopped": "หยุดการบันทึกแล้ว",
+      "review_saved": "บันทึกการตรวจสอบแล้ว",
+      "settings_saved": "บันทึกการตั้งค่าแล้ว; กำลังโหลดการรวมใหม่",
+      "suggestions_applied": "ใช้คำแนะนำแล้ว; กำลังโหลดการรวมใหม่",
+      "suggestions_dismissed": "ปิดคำแนะนำแล้ว"
+    },
+    "trend": {
+      "down": "แนวโน้มขาลง",
+      "up": "แนวโน้มขาขึ้น"
     }
   }
 }

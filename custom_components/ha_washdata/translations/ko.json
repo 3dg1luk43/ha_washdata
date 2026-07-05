@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "사이클 시작",
-        "cycle_finish": "사이클 완료",
-        "cycle_live": "실시간 진행"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "세탁기",
@@ -88,198 +81,6 @@
         "bread_maker": "빵 제조기",
         "pump": "펌프 / 배수 펌프",
         "other": "기타(고급)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(라벨 없음)",
-        "create_new_profile": "새 프로필 만들기",
-        "remove_label": "라벨 제거",
-        "no_reference_cycle": "(참조 사이클 없음)",
-        "all_device_types": "모든 장치 유형",
-        "current_suffix": "(현재)",
-        "phase_builtin_suffix": "(내장)",
-        "phase_none_available": "사용 가능한 단계가 없습니다.",
-        "phase_other_device_types": "기타 장치 유형:",
-        "settings_deprecation_warning": "⚠️ **더 이상 사용되지 않는 장치 유형:** {device_type}은(는) 향후 릴리스에서 제거될 예정입니다. WashData의 일치 파이프라인은 이 어플라이언스 클래스에 대해 신뢰할 수 있는 결과를 생성하지 않습니다. 통합은 지원 중단 기간 동안 계속 작동합니다. 이 경고를 끄려면 아래의 **장치 유형**을 지원되는 유형(세탁기, 건조기, 세탁기-건조기 콤보, 식기세척기, 에어프라이어, 제빵기 또는 펌프) 중 하나로 전환하거나 가전제품이 지원되는 유형과 일치하지 않는 경우 **기타(고급)**로 전환하세요. **기타(고급)**은 특정 어플라이언스에 맞게 조정되지 않은 의도적으로 일반 기본값을 제공하므로 임계값, 시간 초과 및 일치 매개변수를 직접 구성해야 합니다. 전환하면 모든 기존 설정이 유지됩니다.",
-        "editor_select_info": "분할할 사이클 1개 또는 병합할 사이클 2개 이상을 선택하세요.",
-        "editor_select_info_split": "분할할 사이클을 1개 선택하세요.",
-        "editor_select_info_merge": "병합할 사이클을 2개 이상 선택하세요.",
-        "editor_select_info_delete": "삭제할 사이클을 1개 이상 선택하세요.",
-        "no_cycles_recorded": "아직 기록된 사이클이 없습니다.",
-        "profile_summary_line": "- **{name}**: {count}회 사이클, 평균 {avg}분",
-        "no_profiles_created": "아직 생성된 프로필이 없습니다.",
-        "phase_preview": "단계 미리보기",
-        "phase_preview_no_curve": "평균 프로필 곡선을 아직 사용할 수 없습니다. 이 프로필에 대한 사이클을 더 실행/라벨 지정하세요.",
-        "average_power_curve": "평균 전력 곡선",
-        "unit_min": "분",
-        "profile_option_fmt": "{name} ({count}회 사이클, ~{duration}분 평균)",
-        "profile_option_short_fmt": "{name} ({count}회 사이클, ~{duration}분)",
-        "deleted_cycles_from_profile": "{profile}에서 {count}개의 사이클을 삭제했습니다.",
-        "not_enough_data_graph": "그래프를 생성하기에 데이터가 충분하지 않습니다.",
-        "no_profiles_found": "프로필을 찾을 수 없습니다.",
-        "cycle_info_fmt": "사이클: {start}, {duration}분, 현재: {label}",
-        "top_candidates_header": "### 상위 후보",
-        "tbl_profile": "프로필",
-        "tbl_confidence": "신뢰도",
-        "tbl_correlation": "상관관계",
-        "tbl_duration_match": "기간 일치",
-        "detected_profile": "감지된 프로필",
-        "estimated_duration": "예상 기간",
-        "actual_duration": "실제 기간",
-        "choose_action": "__아래에서 작업을 선택하세요:__",
-        "tbl_count": "횟수",
-        "tbl_avg": "평균",
-        "tbl_min": "최소",
-        "tbl_max": "최대",
-        "tbl_energy_avg": "에너지 (평균)",
-        "tbl_energy_total": "에너지 (합계)",
-        "tbl_consistency": "일관성",
-        "tbl_last_run": "마지막 실행",
-        "graph_legend_title": "그래프 범례",
-        "graph_legend_body": "파란색 밴드는 관찰된 최소 및 최대 전력 소모 범위를 나타냅니다. 선은 평균 전력 곡선을 보여줍니다.",
-        "recording_preview": "기록 미리보기",
-        "trim_start": "트림 시작",
-        "trim_end": "트림 종료",
-        "split_preview_title": "분할 미리보기",
-        "split_preview_found_fmt": "{count}개의 세그먼트를 찾았습니다.",
-        "split_preview_confirm_fmt": "확인을 클릭하여 이 사이클을 {count}개의 개별 사이클로 분할합니다.",
-        "merge_preview_title": "병합 미리보기",
-        "merge_preview_joining_fmt": "{count}개의 사이클을 병합합니다. 간격은 0W 수치로 채워집니다.",
-        "editor_delete_preview_title": "삭제 미리보기",
-        "editor_delete_preview_intro": "선택한 사이클은 영구적으로 삭제됩니다:",
-        "editor_delete_preview_confirm": "이 사이클 기록을 영구적으로 삭제하려면 확인을 클릭하세요.",
-        "no_power_preview": "*미리보기에 사용할 수 있는 전력 데이터가 없습니다.*",
-        "profile_comparison": "프로필 비교",
-        "actual_cycle_label": "이 사이클 (실제)",
-        "storage_usage_header": "저장 공간 사용량",
-        "storage_file_size": "파일 크기",
-        "storage_cycles": "사이클",
-        "storage_profiles": "프로필",
-        "storage_debug_traces": "디버그 추적",
-        "overview_suffix": "개요",
-        "phase_preview_for_profile": "프로필의 단계 미리보기",
-        "current_ranges_header": "현재 범위",
-        "assign_phases_help": "범위를 추가, 편집, 삭제 또는 저장하려면 아래 작업을 사용하세요.",
-        "profile_summary_header": "프로필 요약",
-        "recent_cycles_header": "최근 사이클",
-        "trim_cycle_preview_title": "사이클 트림 미리보기",
-        "trim_cycle_preview_no_data": "이 사이클에 사용할 수 있는 전력 데이터가 없습니다.",
-        "trim_cycle_preview_kept_suffix": "유지됨",
-        "table_program": "프로그램",
-        "table_when": "시점",
-        "table_length": "길이",
-        "table_match": "일치",
-        "table_profile": "프로필",
-        "table_cycles": "사이클",
-        "table_avg_length": "평균 길이",
-        "table_last_run": "마지막 실행",
-        "table_avg_energy": "평균 에너지",
-        "table_detected_program": "감지된 프로그램",
-        "table_confidence": "신뢰도",
-        "table_reported": "보고됨"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "사이클 분할 (간격 찾기)",
-        "merge": "사이클 병합 (조각 결합)",
-        "delete": "사이클 삭제"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "유휴 간격 자동 감지",
-        "manual": "수동 타임스탬프"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "유지보수: 데이터 재처리 및 최적화",
-        "clear_debug_data": "디버그 데이터 지우기 (공간 확보)",
-        "wipe_history": "이 장치의 모든 데이터 삭제 (되돌릴 수 없음)",
-        "export_import": "설정 포함 JSON 내보내기/가져오기 (복사/붙여넣기)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "모든 데이터 내보내기",
-        "import": "데이터 가져오기/병합"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "기존 사이클 자동 라벨 지정",
-        "select_cycle_to_label": "특정 사이클 라벨 지정",
-        "select_cycle_to_delete": "사이클 삭제",
-        "interactive_editor": "병합/분할 대화형 편집기",
-        "trim_cycle": "사이클 데이터 트림"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "새 프로필 만들기",
-        "edit_profile": "프로필 편집/이름 바꾸기",
-        "delete_profile": "프로필 삭제",
-        "profile_stats": "프로필 통계",
-        "cleanup_profile": "기록 정리 - 그래프 및 삭제",
-        "assign_phases": "단계 범위 할당"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "새 단계 만들기",
-        "edit_custom_phase": "단계 편집",
-        "delete_custom_phase": "단계 삭제"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "단계 이름 지정 및 적용",
-        "cancel": "변경사항 없이 돌아가기"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "단계 범위 추가",
-        "edit_range": "단계 범위 편집",
-        "delete_range": "단계 범위 삭제",
-        "clear_ranges": "모든 범위 지우기",
-        "auto_detect_ranges": "단계 자동 감지",
-        "save_ranges": "저장하고 돌아가기"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "상태 새로 고침",
-        "stop_recording": "기록 중지 (저장 및 처리)",
-        "start_recording": "새 기록 시작",
-        "process_recording": "마지막 기록 처리 (트림 및 저장)",
-        "discard_recording": "마지막 기록 취소"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "새 프로필 만들기",
-        "existing_profile": "기존 프로필에 추가",
-        "discard": "기록 취소"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "확인 - 올바른 감지",
-        "correct": "수정 - 프로그램/기간 선택",
-        "ignore": "무시 - 오탐/노이즈 사이클",
-        "delete": "삭제 - 기록에서 제거"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "시작점 설정",
-        "set_end": "종료점 설정",
-        "reset": "전체 기간으로 초기화",
-        "apply": "트림 적용",
-        "cancel": "취소"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "현재 단계"
       },
-      "wash_phase": {
-        "name": "단계"
-      },
       "profile_cycle_count": {
         "name": "프로필 {profile_name} 횟수",
         "unit_of_measurement": "사이클"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s는 trim_start_s보다 커야 합니다."
+    },
+    "no_active_cycle": {
+      "message": "일시 중지하거나 재개할 활성 주기가 없습니다."
     }
   },
   "panel": {
     "hdr": {
-      "panel_settings": "패널 설정(모든 사용자)",
-      "ml_learned": "WashData가 배운 것",
-      "status": "상태",
-      "live_power": "실시간 전력",
-      "manual_recording": "수동 기록",
-      "tools_and_data": "도구 및 데이터",
-      "phase_catalog": "단계 카탈로그",
-      "storage_stats": "스토리지 통계",
-      "maintenance": "유지 관리 작업",
-      "export_import": "내보내기/가져오기",
       "logs": "로그",
-      "my_preferences": "내 환경설정",
-      "access_control": "액세스 제어",
-      "ml_smart_learning": "스마트 러닝",
-      "ml_settings_card": "설정",
-      "ml_matching_tuning": "프로그램 매칭 미세 조정",
-      "display": "표시",
-      "status_graph": "상태 그래프",
-      "diagnostics_pref": "진단",
-      "logs_diagnostics": "진단",
-      "process_history": "처리 기록",
-      "clear_debug": "디버그 추적 지우기",
-      "wipe_history": "기록 지우기",
-      "automations": "자동화",
-      "automation_open": "자동화 편집기에서 열기",
+      "toggle_sidebar": "홈어시스턴트 사이드바 전환",
+      "access_control": "접근 제어",
       "automation_delete": "이 자동화 삭제",
       "automation_needs_review": "이 주기에는 검토가 필요합니다.",
+      "automation_open": "자동화 편집기에서 열기",
       "automation_review_this_cycle": "이 주기를 검토하세요",
-      "no_automations": "아직 이 장치를 참조하는 자동화가 없습니다."
+      "automations": "자동화",
+      "clear_debug": "디버그 추적 지우기",
+      "diagnostics_pref": "진단",
+      "display": "표시하다",
+      "export_import": "내보내기/가져오기",
+      "live_power": "라이브 파워",
+      "logs_diagnostics": "진단",
+      "maintenance": "유지 관리 작업",
+      "manual_recording": "수동녹화",
+      "ml_learned": "WashData가 배운 것",
+      "ml_matching_tuning": "프로그램 매칭 미세 조정",
+      "ml_settings_card": "설정",
+      "ml_smart_learning": "스마트러닝",
+      "my_preferences": "내 환경설정",
+      "no_automations": "아직 이 장치를 참조하는 자동화가 없습니다.",
+      "panel_settings": "패널 설정",
+      "phase_catalog": "단계 카탈로그",
+      "process_history": "공정 이력",
+      "status": "상태",
+      "status_graph": "상태 그래프",
+      "storage_stats": "스토리지 통계",
+      "tools_and_data": "도구 및 데이터",
+      "wipe_history": "기록 지우기"
     },
     "lbl": {
-      "manual_duration": "수동 기간(최소, 선택 사항)",
+      "timer_min": "분",
+      "timer_msg_placeholder": "메시지(선택사항, {device}/{program}/{minutes})",
+      "timer_auto_pause": "자동 일시중지",
+      "label": "매칭된 프로그램",
+      "actions": "행위",
+      "activity": "활동",
+      "administrators": "관리자",
+      "auto_fine_tune_off": "자동 미세 조정 꺼짐",
+      "clock_time": "시계 시간",
+      "compare_profiles": "프로필과 비교",
+      "confidence": "신뢰",
+      "confidence_threshold": "신뢰도 임계값",
       "correct_duration": "올바른 기간(최소, 선택 사항)",
-      "default_tab": "패널을 열 때 기본 탭",
+      "correct_profile": "올바른 프로필",
+      "cost": "비용",
+      "create_new_profile": "+ 새 프로필 만들기…",
+      "cycle_date_display": "주기 날짜 표시",
+      "cycle_health": "사이클 건강",
+      "cycles_count": "사이클",
+      "date": "날짜",
+      "debug_traces": "디버그 추적",
+      "default": "기본",
       "default_access_level": "아래에 나열되지 않은 사용자의 기본 수준",
+      "default_other": "기본값(기타 장치)",
+      "default_tab": "패널을 열 때 기본 탭",
+      "description": "설명",
+      "duration": "지속",
+      "emphasis": "중요성",
+      "enable_access_control": "사용자별 액세스 제어 활성화",
+      "energy": "에너지",
+      "expected_duration": "예상 기간(분)",
+      "file_kb": "파일(KB)",
+      "gap_s": "간격(들)",
+      "head_trim": "헤드 트림(들)",
+      "health": "건강",
+      "hide_tabs": "관리자가 아닌 사용자를 위한 탭 숨기기",
+      "in_use": "사용 중",
+      "json_data": "JSON 데이터",
+      "last_checked": "마지막 확인:",
+      "load_from_file": "파일에서 로드",
+      "manual_duration": "수동 기간(최소, 선택 사항)",
+      "mode_existing_profile": "기존 프로필에 추가",
+      "mode_new_profile": "새 프로필 만들기",
+      "new_profile_name": "새 프로필 이름",
+      "panel_default_tab": "기본 탭",
+      "phase_name": "이름",
+      "power": "힘",
+      "profile": "윤곽",
+      "profile_name": "프로필 이름",
+      "progress": "진전",
+      "read_only": "읽기 전용",
+      "ref_cycle": "참조 주기(선택 사항)",
+      "refresh_interval": "새로 고침 간격(초)",
+      "remaining": "남은",
+      "remove_label": "- 라벨 제거 -",
+      "rename_profile": "프로필 이름 바꾸기",
+      "resulting_profile": "결과 프로필",
+      "save_mode": "저장 모드",
+      "seconds_from_start": "시작부터 몇 초",
+      "select_profile": "프로필 선택",
+      "show_debug": "상태 페이지에 실시간 매치 디버그 카드 표시(신뢰도, 모호함, 상위 후보)",
       "show_expected": "예상 곡선 오버레이 표시(일치하는 프로필, 주황색)",
       "show_raw": "원시 센서 판독값 표시(평탄화되지 않음, 회색)",
-      "show_debug": "상태 페이지에 실시간 매치 디버그 카드 표시(신뢰도, 모호함, 상위 후보)",
-      "power": "전력",
-      "progress": "진전",
-      "remaining": "남은",
-      "duration": "소요 시간",
-      "energy": "에너지",
-      "profile": "프로필",
       "status": "상태",
-      "date": "날짜",
-      "confidence": "신뢰도",
-      "health": "상태",
-      "cost": "비용",
-      "program": "프로그램",
-      "cycle_health": "사이클 상태",
-      "activity": "활동",
+      "tail_trim": "테일 트림(들)",
+      "ungrouped": "그룹 해제됨",
       "unlabelled": "라벨이 지정되지 않음",
       "unlabelled_paren": "(라벨 없음)",
-      "emphasis": "강조",
-      "default": "기본",
-      "in_use": "사용 중",
-      "profile_name": "프로필 이름",
-      "ref_cycle": "참조 주기(선택 사항)",
-      "phase_name": "단계 이름",
-      "description": "설명",
-      "correct_profile": "올바른 프로필",
-      "load_from_file": "파일에서 로드",
-      "json_data": "JSON 데이터",
-      "expected_duration": "예상 기간(분)",
-      "rename_profile": "프로필 이름 바꾸기",
-      "select_profile": "프로필 선택",
-      "confidence_threshold": "신뢰도 임계값",
-      "resulting_profile": "결과 프로필",
-      "new_profile_name": "새 프로필 이름",
-      "save_mode": "저장 모드",
-      "head_trim": "헤드 트림(초)",
-      "tail_trim": "테일 트림(초)",
-      "gap_s": "간격(초)",
-      "start": "시작",
-      "end": "끝",
-      "quality": "품질",
-      "golden_reference": "기록된 참조주기",
-      "compare_profiles": "프로필과 비교",
-      "tags": "태그",
-      "notes": "메모",
-      "cycle_date_display": "주기 날짜 표시",
-      "refresh_interval": "새로 고침 간격(초)",
-      "panel_default_tab": "기본 탭",
-      "hide_tabs": "관리자가 아닌 사용자를 위한 탭 숨기기",
-      "enable_access_control": "사용자별 액세스 제어 활성화",
-      "administrators": "관리자",
-      "default_other": "기본값(기타 장치)",
-      "mode_new_profile": "새 프로필 만들기",
-      "mode_existing_profile": "기존 프로필에 추가",
-      "auto_fine_tune_on": "자동 미세 조정 켜짐(약 {hour}:00)",
-      "auto_fine_tune_off": "자동 미세 조정 꺼짐",
-      "last_checked": "마지막 확인:",
-      "remove_label": "- 라벨 제거 -",
-      "create_new_profile": "+ 새 프로필 만들기…",
-      "read_only": "읽기 전용",
-      "actions": "작업",
-      "cycles_count": "사이클",
-      "debug_traces": "디버그 추적",
-      "file_kb": "파일(KB)",
-      "label": "라벨",
-      "seconds_from_start": "시작부터 몇 초",
-      "clock_time": "시각",
-      "ungrouped": "그룹 해제됨"
-    },
-    "toast": {
-      "settings_saved": "설정이 저장되었습니다. 통합 다시 로드",
-      "import_successful": "가져오기가 성공했습니다. 통합 다시 로드",
-      "suggestions_applied": "제안이 적용되었습니다. 통합 다시 로드",
-      "ml_training_no_improvement": "훈련 완료: 기준선 유지(개선 없음)",
-      "could_not_load_cycle": "주기를 로드할 수 없습니다: {error}",
-      "preferences_saved": "환경설정이 저장되었습니다.",
-      "panel_settings_saved": "패널 설정이 저장되었습니다.",
-      "access_saved": "액세스 제어가 저장되었습니다.",
-      "profile_created": "프로필 \"{name}\"이(가) 생성되었습니다.",
-      "profile_deleted": "프로필 \"{name}\"이 삭제되었습니다.",
-      "profile_renamed": "프로필 이름이 변경됨",
-      "phases_saved": "단계가 저장되었습니다",
-      "phase_created": "\"{name}\" 단계가 생성되었습니다.",
-      "phase_deleted": "\"{name}\" 단계가 삭제되었습니다.",
-      "phase_updated": "단계가 업데이트되었습니다.",
-      "recording_started": "기록이 시작되었습니다",
-      "recording_stopped": "기록이 중지되었습니다.",
-      "recording_discarded": "기록이 삭제되었습니다.",
-      "recording_saved": "프로필에 기록이 저장되었습니다.",
-      "export_downloaded": "내보내기가 다운로드됨",
-      "logs_exported": "내보낸 로그",
-      "envelopes_rebuilt": "엔벨로프 재구축됨",
-      "envelope_rebuilt": "엔벨로프 재구축됨",
-      "suggestions_dismissed": "제안이 무시되었습니다.",
-      "auto_label_complete": "자동 라벨 완료",
-      "cycle_labelled": "라벨이 붙은 사이클",
-      "cycle_deleted": "주기가 삭제되었습니다.",
-      "cycles_deleted": "{count}주기가 삭제되었습니다.",
-      "cycle_trimmed": "주기가 잘림",
-      "cycles_merged": "사이클이 병합되었습니다.",
-      "review_saved": "리뷰가 저장되었습니다.",
-      "feedback_confirmed": "피드백 확인됨",
-      "feedback_dismissed": "피드백이 무시되었습니다.",
-      "feedback_all_dismissed": "모든 피드백이 무시되었습니다.",
-      "correction_submitted": "수정사항이 제출되었습니다.",
-      "group_saved": "그룹이 저장되었습니다",
-      "group_deleted": "그룹이 삭제되었습니다.",
-      "automation_deleted": "자동화가 삭제되었습니다.",
-      "legacy_removed": "기존 작업이 제거되었습니다.",
-      "cycle_paused": "주기가 일시중지됨",
-      "cycle_resumed": "사이클 재개",
-      "cycle_force_stopped": "사이클 강제 정지",
-      "ml_training_promoted": "학습 완료: 승격된 {count} 모델",
-      "matching_reverted": "일치하는 가중치가 기본값으로 되돌아갔습니다.",
-      "models_reverted": "온디바이스 모델이 기준으로 되돌아갔습니다.",
-      "analysis_complete": "분석 완료: 제안 {count}개",
-      "analysis_complete_none": "분석 완료: 새로운 제안 없음",
-      "debug_cleared": "{count} 디버그 추적을 삭제했습니다.",
-      "all_wiped": "모든 데이터가 지워졌습니다.",
-      "no_split_found": "분할할 유휴 간격이 발견되지 않았습니다.",
-      "group_name_required": "그룹 이름은 필수 항목입니다.",
-      "min_2_profiles": "그룹당 프로필을 2개 이상 선택하세요.",
-      "profile_name_required": "프로필 이름은 필수 항목입니다.",
-      "phase_name_required": "단계 이름은 필수 항목입니다.",
-      "name_required": "이름이 필요합니다",
-      "json_required": "JSON 데이터가 필요합니다",
-      "save_failed": "저장 실패: {error}",
-      "delete_failed": "삭제 실패: {error}",
-      "apply_failed": "적용 실패: {error}",
-      "rebuild_failed": "재구축 실패: {error}",
-      "start_failed": "시작 실패: {error}",
-      "stop_failed": "중지 실패: {error}",
-      "discard_failed": "삭제 실패: {error}",
-      "trim_failed": "다듬기 실패: {error}",
-      "split_failed": "분할 실패: {error}",
-      "merge_failed": "병합 실패: {error}",
-      "create_failed": "생성 실패: {error}",
-      "update_failed": "업데이트 실패: {error}",
-      "rename_failed": "이름 바꾸기 실패: {error}",
-      "revert_failed": "되돌리기 실패: {error}",
-      "training_failed": "학습 실패: {error}",
-      "export_failed": "내보내기 실패: {error}",
-      "import_failed": "가져오기 실패: {error}",
-      "auto_label_failed": "자동 라벨 지정 실패: {error}",
-      "analysis_failed": "분석 실패: {error}",
-      "auto_detect_failed": "자동 감지 실패: {error}",
-      "error": "오류: {error}",
-      "pause_failed": "일시중지 실패: {error}",
-      "label_failed": "라벨 실패: {error}",
-      "invalid_json": "\"{key}\"은(는) 유효한 JSON이 아닙니다. 저장하기 전에 수정하거나 필드를 지우세요.",
-      "processed": "{bits} 처리됨",
-      "split_complete": "{count} 주기로 분할"
-    },
-    "msg": {
-      "no_devices": "아직 구성된 WashData 장치가 없습니다.",
-      "live_chart_loading": "판독값이 도착하면 실시간 전력 차트가 나타납니다.",
-      "no_profiles_yet": "아직 프로필이 없습니다. 레이블이 지정된 주기에서 하나를 만듭니다.",
-      "no_logs": "아직 버퍼링된 로그 레코드가 없습니다.",
-      "no_envelope": "아직 엔벨로프가 없습니다. 주기에 레이블을 지정한 후 재구축하세요.",
-      "no_cycles_profile": "이 프로필에는 사이클이 없습니다.",
-      "ml_learned_intro": "이 기계에 맞게 미세 조정된 모델입니다. 나열되지 않은 모든 항목은 신뢰할 수 있는 내장 모델을 사용합니다.",
-      "ml_intro": "WashData는 주기를 감지하고, 프로그램을 일치시키고, 시간과 에너지를 추정하는 스마트 모델과 함께 제공됩니다.",
-      "matching_tuning_intro": "학습할 때 WashData는 또한 프로그램 일치가 주기의 모양과 지속 시간 및 에너지에 얼마나 큰 영향을 미치는지 조정합니다.",
-      "merge_intro": "선택한 사이클이 하나로 결합됩니다(연대순, 간격이 0W로 채워짐). 결과 프로필을 선택합니다.",
-      "see_recorder": "아래의 기록기 위젯을 참조하세요",
-      "review_to_cycles": "사이클 검토 대기열 열기",
-      "no_device_selected": "선택한 장치가 없습니다.",
-      "loading": "로드 중…",
-      "loading_settings": "설정 로드 중…",
-      "no_cycles_match": "현재 필터와 일치하는 사이클이 없습니다.",
-      "no_cycles_yet": "아직 기록된 사이클이 없습니다.",
-      "no_phases": "정의된 단계가 없습니다.",
-      "no_phases_assigned": "할당된 단계가 없습니다.",
-      "no_split_points": "아직 분할 지점이 없습니다.",
-      "no_envelope_overlay": "오버레이할 수 있는 엔벨로프가 없습니다.",
-      "no_other_users": "다른 Home Assistant명의 사용자를 찾을 수 없습니다.",
-      "maintenance_requires_access": "유지 관리 및 내보내기/가져오기에는 전체 액세스 권한이 필요합니다.",
-      "loading_curve": "곡선 로드 중…",
-      "compare_selected_cycles": "선택한 주기(단색) — 표시/숨기기",
-      "compare_overlay_profiles": "오버레이 프로필(희미함)",
-      "no_profiles_compare": "비교할 프로필이 없습니다.",
-      "saving_triggers_reload": "저장하면 통합 다시 로드가 트리거됩니다. HA 엔터티는 일시적으로 사용할 수 없는 것으로 표시될 수 있습니다.",
-      "prefs_personal": "이는 귀하의 Home Assistant 계정에만 적용됩니다.",
-      "no_match_yet": "아직 일치 시도가 없습니다. 이는 실행 주기 중에 채워집니다.",
-      "no_fine_tuned": "아직 세부 조정된 사항은 없습니다. WashData는 내장 모델을 사용하고 있습니다.",
-      "ml_settings_intro": "두 개의 독립적인 스위치: 하나는 사이클이 실행되는 동안 모델을 적용하고 다른 하나는 WashData가 시간이 지남에 따라 기계에 맞게 미세 조정할 수 있도록 합니다.",
-      "phase_catalog_intro": "주기의 명명된 부분(세탁 전, 가열, 탈수…). 제어판에서 프로필에 할당합니다.",
-      "phase_ranges_intro": "평균 곡선에 중첩된 단계 범위(사이클 시작 후 분). 실시간으로 미리 보려면 값을 편집하세요.",
-      "cleanup_intro": "라벨이 붙은 모든 사이클이 중첩됩니다. 이상값을 선택하고 삭제하여 프로필을 정리하세요.",
-      "split_intro": "그래프를 클릭하여 분할 지점을 추가 또는 제거하거나 유휴 간격으로 자동 감지합니다.",
-      "trim_intro": "빨간색 핸들을 드래그하거나 값을 입력합니다. 창 밖의 모든 것이 제거됩니다.",
-      "import_intro": "내보낸 파일을 로드하거나 아래에 JSON 페이로드를 붙여넣으세요.",
-      "auto_label_intro": "일치 신뢰도가 임계값을 클리어하는 레이블이 없는 주기에 프로필을 할당합니다.",
-      "enough_data": "({current}/{min} 주기)에서 학습할 데이터가 충분합니다.",
-      "collecting_data": "데이터 수집 — 미세 조정이 시작되기 전에 {need}추가 주기{plural}({current}/{min})",
-      "updated": "{time} 업데이트됨",
-      "appliance_monitor": "가전제품 모니터",
-      "ml_loading": "ML 로드 중…",
-      "review_in_settings": "설정에서 검토",
-      "storage_diagnostics": "스토리지 통계, 유지 관리, 내보내기/가져오기",
-      "recent_logs": "최근 ha_washdata 기록",
-      "preferences_adv": "환경설정",
-      "preferences_admin": "환경 설정, 패널 및 액세스 제어",
-      "pending_feedback": "보류 중인 감지 피드백",
-      "recording_in_progress": "기록 진행 중",
-      "no_profiles_yet_short": "아직 프로필이 없습니다.",
-      "unsure_detected_prefix": "WashData가 감지되었는지 확실하지 않습니다.",
-      "no_suggestions": "활성 제안이 없습니다.",
-      "no_profiles_overlay": "오버레이할 프로필이 없습니다.",
-      "compare_cycles_title": "{count}주기 비교",
-      "profiles_intro": "프로필을 클릭하면 통계, 단계 및 정리를 볼 수 있습니다. 거의 동일한 프로그램(모양/지속 시간이 같고 온도 또는 회전 속도가 다른)은 그룹으로 묶어 매칭이 정확하게 구분할 수 있도록 하세요.",
-      "search_placeholder": "설정 검색…",
-      "automations_intro": "WashData는 {start} / {end} 이벤트를 발생시키고 엔터티를 노출하므로, 알림과 동작은 일반 Home Assistant 자동화로 구성하는 것이 좋습니다. 이 장치를 사용하는 자동화가 아래에 표시됩니다.",
-      "notify_services_hint": "{entity} 서비스 ID를 사용하세요(여러 개는 쉼표로 구분). 템플릿 변수: {vars}.",
-      "rbac_hint": "끄면 모든 Home Assistant 사용자가 전체 액세스 권한을 가집니다(기본값). 관리자는 항상 전체 액세스 권한을 가지며 모든 사람을 관리할 수 있습니다.",
-      "feedback_prompt": "올바르게 감지됐는지 확인하거나, 프로그램을 수정하거나, 무시하세요."
-    },
-    "section": {
-      "basic": {
-        "intro": "핵심 정체성과 대부분의 설정에 필요한 필수 요소입니다.",
-        "label": "기본"
-      },
-      "detection": {
-        "intro": "사이클의 시작, 실행 및 종료를 감지하는 방법입니다.",
-        "label": "감지"
-      },
-      "matching": {
-        "intro": "완료된 주기를 학습된 프로필과 일치시키고 레이블을 지정하는 방법입니다.",
-        "label": "매칭"
-      },
-      "timing": {
-        "intro": "백그라운드 케이던스, 오프라인 감시 및 관리.",
-        "label": "타이밍 및 워치독"
-      },
-      "anti_wrinkle": {
-        "intro": "주름 방지 모드는 주요 가열 단계 이후 건조기 회전 펄스를 감지합니다.",
-        "label": "주름개선"
-      },
-      "delay": {
-        "intro": "지연된 시작 감지는 기기에 전원이 공급되지만 아직 주기가 시작되지 않은 시기를 식별합니다.",
-        "label": "지연 시작"
-      },
-      "triggers": {
-        "intro": "선택적 외부 신호: 종료 트리거, 도어 센서, 일시 중지 스위치 및 언로드 알림.",
-        "label": "트리거 및 도어"
-      },
-      "notifications": {
-        "label": "알림",
-        "intro": "주기 이벤트에 대한 알림을 받는 시기와 방법을 구성합니다."
-      },
-      "ml_training": {
-        "label": "ML 훈련",
-        "intro": "이 장치에 대한 감지 및 타이밍을 개인화하는 옵트인 스마트 모델입니다."
-      }
-    },
-    "setting": {
-      "auto_maintenance": {
-        "label": "자동 유지 관리(야간 청소)"
-      },
-      "external_end_trigger_enabled": {
-        "label": "외부 종료 트리거 활성화"
-      },
-      "external_end_trigger_inverted": {
-        "label": "외부 트리거 반전(트리거 ON OFF)"
-      },
-      "pause_cuts_power": {
-        "label": "일시 중지하면 전원도 꺼집니다(스위치를 통해)."
-      },
-      "notify_people": {
-        "label": "사람(집에 있을 때만)"
-      },
-      "notify_only_when_home": {
-        "label": "집에 있을 때만 알림"
-      },
-      "energy_price_static": {
-        "label": "고정 에너지 가격 (kWh당)"
-      },
-      "enable_ml_models": {
-        "label": "주기 동안 스마트 모델 적용"
-      },
-      "ml_training_enabled": {
-        "label": "이 기기에서 학습"
-      },
-      "name": {
-        "label": "장치 이름"
-      },
-      "device_type": {
-        "label": "장치 유형"
-      },
-      "power_sensor": {
-        "label": "전력 센서"
-      },
-      "min_power": {
-        "label": "최소 전력"
-      },
-      "off_delay": {
-        "label": "꺼짐 지연"
-      },
-      "linked_device": {
-        "label": "장치 아래 그룹"
-      },
-      "start_threshold_w": {
-        "label": "시작 임계값"
-      },
-      "stop_threshold_w": {
-        "label": "임계값 중지"
-      },
-      "min_off_gap": {
-        "label": "최소 오프 갭"
-      },
-      "start_duration_threshold": {
-        "label": "시작 기간"
-      },
-      "start_energy_threshold": {
-        "label": "에너지 시작"
-      },
-      "completion_min_seconds": {
-        "label": "최소 주기 기간"
-      },
-      "running_dead_zone": {
-        "label": "러닝 데드존"
-      },
-      "end_energy_threshold": {
-        "label": "종료 에너지 임계값"
-      },
-      "end_repeat_count": {
-        "label": "반복 횟수 종료"
-      },
-      "sampling_interval": {
-        "label": "샘플링 간격"
-      },
-      "smoothing_window": {
-        "label": "평활화 창"
-      },
-      "abrupt_drop_watts": {
-        "label": "급격한 하락"
-      },
-      "abrupt_drop_ratio": {
-        "label": "급격한 하락률"
-      },
-      "profile_match_threshold": {
-        "label": "일치 임계값"
-      },
-      "profile_unmatch_threshold": {
-        "label": "불일치 임계값"
-      },
-      "profile_match_interval": {
-        "label": "일치 간격"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "최소 기간 비율"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "최대 기간 비율"
-      },
-      "profile_duration_tolerance": {
-        "label": "프로필 기간 허용 한도"
-      },
-      "duration_tolerance": {
-        "label": "추정 오차 허용값"
-      },
-      "auto_label_confidence": {
-        "label": "자동 라벨 신뢰도"
-      },
-      "learning_confidence": {
-        "label": "학습 신뢰도"
-      },
-      "suppress_feedback_notifications": {
-        "label": "피드백 알림 억제"
-      },
-      "watchdog_interval": {
-        "label": "감시 간격"
-      },
-      "no_update_active_timeout": {
-        "label": "업데이트 없음 시간 초과"
-      },
-      "progress_reset_delay": {
-        "label": "진행 재설정 지연"
-      },
-      "expose_debug_entities": {
-        "label": "디버그 엔터티 노출"
-      },
-      "save_debug_traces": {
-        "label": "디버그 추적 저장"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "주름 방지 감지 활성화"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "최대 주름 방지 효과"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "최대 기간"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "전력 임계값 종료"
-      },
-      "delay_start_detect_enabled": {
-        "label": "지연 시작 감지 활성화"
-      },
-      "delay_confirm_seconds": {
-        "label": "초 확인"
-      },
-      "delay_timeout_hours": {
-        "label": "시간 초과 시간"
-      },
-      "external_end_trigger": {
-        "label": "외부 트리거 엔터티"
-      },
-      "door_sensor_entity": {
-        "label": "도어 센서 엔터티"
-      },
-      "switch_entity": {
-        "label": "스위치 엔터티"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "꺼내기 알림 지연"
-      },
-      "pump_stuck_duration": {
-        "label": "펌프 정체 기간"
-      },
-      "notify_start_services": {
-        "label": "서비스 시작"
-      },
-      "notify_finish_services": {
-        "label": "마무리 서비스"
-      },
-      "notify_live_services": {
-        "label": "실시간 진행 서비스"
-      },
-      "notify_fire_events": {
-        "label": "알림을 위한 Fire HA 이벤트"
-      },
-      "notify_before_end_minutes": {
-        "label": "종료 전 알림"
-      },
-      "notify_live_interval_seconds": {
-        "label": "라이브 업데이트 간격"
-      },
-      "notify_live_overrun_percent": {
-        "label": "경고 전 실시간 오버런 %"
-      },
-      "notify_live_chronometer": {
-        "label": "라이브 크로노미터 사용"
-      },
-      "notify_timeout_seconds": {
-        "label": "다음 이후 자동 종료"
-      },
-      "notify_title": {
-        "label": "알림 제목"
-      },
-      "notify_icon": {
-        "label": "알림 아이콘"
-      },
-      "notify_start_message": {
-        "label": "시작 메시지"
-      },
-      "notify_finish_message": {
-        "label": "완료 메시지"
-      },
-      "notify_pre_complete_message": {
-        "label": "사전 완료 메시지"
-      },
-      "notify_reminder_message": {
-        "label": "알림 메시지"
-      },
-      "notify_channel": {
-        "label": "Android 채널(시작/실시간)"
-      },
-      "notify_finish_channel": {
-        "label": "Android 채널(완료)"
-      },
-      "energy_price_entity": {
-        "label": "에너지 가격 엔터티"
-      },
-      "ml_training_hour": {
-        "label": "학습 실행 시간"
-      },
-      "ml_training_min_cycles": {
-        "label": "최소 필요 사이클 수"
-      },
-      "ml_training_interval_days": {
-        "label": "최대 확인 주기(일)"
-      }
-    },
-    "tab": {
-      "status": "개요",
-      "history": "사이클",
-      "profiles": "프로필",
-      "settings": "설정",
-      "ml": "ML 훈련",
-      "advanced": "고급",
-      "diagnostics": "진단",
-      "pp_overview": "개요",
-      "pp_phases": "단계",
-      "pp_cleanup": "정리",
-      "pp_manage": "관리",
-      "subtab_profiles": "프로필",
-      "subtab_phase_catalog": "단계 카탈로그"
+      "expected": "예상",
+      "raw_socket": "원시 소켓",
+      "artifact_interruption": "중단",
+      "artifact_low_power": "저전력",
+      "artifact_high_power": "고전력",
+      "artifact_anomaly": "이상"
     },
     "btn": {
-      "save": "저장",
-      "cancel": "취소",
-      "delete": "삭제",
-      "close": "닫기",
-      "edit": "편집",
-      "add": "추가",
-      "rebuild": "엔벨로프 재구축",
-      "record": "기록 시작",
-      "compare": "비교",
-      "confirm": "확인",
-      "discard": "버리기",
-      "export": "내보내기",
-      "import": "가져오기",
-      "merge": "병합",
-      "apply": "적용",
-      "refresh": "새로 고침",
-      "create": "만들기",
-      "select": "선택",
-      "done": "완료",
-      "reset": "초기화",
-      "trim": "손질",
-      "split": "분할",
-      "review": "검토",
-      "inspect": "검사",
-      "label": "라벨",
-      "save_settings": "설정 저장",
-      "new_profile": "+ 새 프로필",
-      "new_group": "+ 새 그룹",
-      "apply_label": "라벨 적용",
-      "run_auto_label": "자동 라벨 실행",
-      "save_review": "리뷰 저장",
-      "apply_trim": "트림 적용",
-      "apply_split": "분할 적용",
-      "process_recording": "녹음 저장",
-      "stop": "중지",
-      "process": "처리",
+      "add_timer": "+ 타이머 추가",
+      "remove_timer": "타이머 삭제",
+      "add_device_tip": "다른 WashData 장치 추가",
+      "delete_group_tip": "이 그룹만 삭제 - 회원 프로필은 유지됩니다.",
+      "run_analysis_tip": "지금 기록된 주기를 분석하고 튜닝 제안을 새로 고치세요.",
+      "reset_ml_models_tip": "미세 조정된 모델을 폐기하고 내장된 모델로 돌아갑니다. WashData는 나중에 다시 학습할 수 있습니다.",
+      "resume_cycle": "재개하다",
       "add_device": "+ 장치 추가",
-      "train_now": "지금 훈련",
-      "reset_to_defaults": "기본값으로 재설정",
-      "reset_to_builtin": "내장 모델로 재설정",
-      "save_preferences": "환경설정 저장",
-      "save_panel_settings": "패널 설정 저장",
-      "save_access_control": "액세스 제어 저장",
-      "auto_label_cycles": "자동 라벨 주기",
-      "run_analysis": "🔍 제안 분석 실행",
-      "apply_all": "모두 적용",
-      "show_only": "표시만",
-      "dismiss": "닫기",
-      "dismiss_all": "모두 닫기",
-      "process_history": "지금 처리",
-      "clear_debug": "디버그 데이터 지우기",
-      "wipe_all": "모든 데이터 지우기",
-      "export_json": "JSON으로 내보내기",
-      "import_json": "JSON에서 가져오기",
-      "correct": "수정…",
-      "ignore": "무시",
       "add_phase": "+ 단계 추가",
-      "new_phase": "+ 새로운 단계",
-      "delete_profile": "프로필 삭제",
-      "rebuild_envelope": "엔벨로프 재구축",
-      "create_profile": "+ 프로필 만들기",
-      "rec_stop": "중지",
-      "pause_cycle": "일시 정지",
-      "resume_cycle": "재개",
-      "force_stop": "강제 정지",
-      "save_phases": "단계 저장",
+      "apply_all": "모두 적용",
+      "apply_label": "라벨 적용",
+      "apply_split": "분할 적용",
+      "apply_trim": "트림 적용",
       "auto_detect_split": "자동 감지",
-      "clear_splits": "지우기",
-      "submit_correction": "정정사항 제출",
-      "import_overwrite": "가져오기(데이터 덮어쓰기)",
-      "use": "사용",
-      "manage": "관리",
-      "remove": "제거",
-      "delete_group": "그룹 삭제",
-      "trim_split": "다듬기/분할",
+      "auto_label_cycles": "자동 라벨 주기",
+      "cancel": "취소",
+      "clear_debug": "디버그 데이터 지우기",
+      "clear_splits": "분명한",
+      "close": "닫다",
+      "compare": "비교하다",
+      "confirm": "확인하다",
       "convert_to_automation": "자동화로 전환",
-      "new_automation": "＋ 새로운 자동화",
+      "correct": "옳은…",
+      "create": "만들다",
+      "create_profile": "+ 프로필 만들기",
+      "delete": "삭제",
+      "delete_group": "그룹 삭제",
+      "delete_profile": "프로필 삭제",
+      "discard": "버리다",
+      "dismiss": "해고하다",
+      "done": "완료",
+      "edit": "편집하다",
+      "export": "내보내다",
+      "export_json": "JSON으로 내보내기",
+      "force_stop": "강제 정지",
       "from_template": "템플릿에서 ▾",
-      "on_cycle_started": "주기 시작됨",
+      "ignore": "무시하다",
+      "import_json": "JSON에서 가져오기",
+      "import_overwrite": "가져오기(데이터 덮어쓰기)",
+      "inspect": "검사",
+      "label": "상표",
+      "manage": "관리하다",
+      "merge": "병합",
+      "new_automation": "＋ 새로운 자동화",
+      "new_group": "+ 새 그룹",
+      "new_phase": "+ 새로운 단계",
+      "new_profile": "+ 새 프로필",
       "on_cycle_finished": "사이클 완료됨",
-      "save_group": "그룹 저장"
+      "on_cycle_started": "주기 시작됨",
+      "pause_cycle": "정지시키다",
+      "process": "프로세스",
+      "process_history": "지금 처리하세요",
+      "process_recording": "녹음 저장",
+      "rebuild": "봉투 다시 작성",
+      "rebuild_envelope": "봉투 재구축",
+      "rec_stop": "멈추다",
+      "record": "녹음 시작",
+      "refresh": "새로 고치다",
+      "remove": "제거하다",
+      "reset": "다시 놓기",
+      "reset_to_builtin": "내장 모델로 재설정",
+      "reset_to_defaults": "기본값으로 재설정",
+      "review": "검토",
+      "run_analysis": "🔍 제안 분석 실행",
+      "run_auto_label": "자동 라벨 실행",
+      "save": "구하다",
+      "save_access_control": "액세스 제어 저장",
+      "save_group": "그룹 저장",
+      "save_panel_settings": "패널 설정 저장",
+      "save_phases": "단계 저장",
+      "save_preferences": "환경설정 저장",
+      "save_review": "리뷰 저장",
+      "save_settings": "설정 저장",
+      "select": "선택하다",
+      "show_only": "표시만",
+      "split": "나뉘다",
+      "submit_correction": "정정사항 제출",
+      "train_now": "지금 훈련하세요",
+      "trim": "손질",
+      "trim_split": "다듬기/분할",
+      "use": "사용",
+      "wipe_all": "모든 데이터 지우기"
     },
     "badge": {
+      "golden_cycle": "기록된 참조주기",
+      "reviewed": "검토됨",
+      "feedback_requested": "피드백 요청됨",
+      "needs_review": "검토 필요",
+      "overrun": "평소보다 더 오래 달렸어요",
+      "artifact_tip": "{n} 이상 현상이 감지되었습니다(예: 사이클 중간에 문이 열림) - 열어서 그래프에서 확인",
+      "poor_fit_tip": "일치하지 않는 일치 기록 — 이 프로필을 다시 작성하는 것이 좋습니다.",
+      "fair_fit_tip": "중간 수준의 일치 일관성 - 이 프로필에 할당된 일부 주기의 신뢰도 점수가 낮습니다. 정확성을 높이려면 더 많은 주기에 라벨을 붙이거나 프로필을 다시 기록하십시오.",
+      "fair_fit": "적당한 핏",
       "poor_fit": "적합하지 않음",
-      "fair_fit": "보통 적합도",
-      "manual": "(수동으로 선택)",
       "auto": "(자동 감지)",
-      "improving": "↗ 개선",
+      "built_in_tag": "내장",
       "declining": "↘ 감소",
-      "steady": "→ 안정적",
-      "using_tuned": "조정된 가중치 사용",
-      "using_defaults": "기본값 사용",
-      "built_in_tag": "내장"
-    },
-    "status": {
-      "completed": "완료됨",
-      "interrupted": "중단된",
-      "force_stopped": "강제 정지됨",
-      "active": "활성",
-      "ambiguous": "모호한",
-      "clear": "정상",
-      "working": "처리 중…",
-      "recording": "기록 중…",
-      "ready": "처리 준비 완료",
-      "idle": "대기 중",
-      "auto_detect": "자동 감지",
-      "fine_tuning": "지금 미세 조정 중…",
-      "all_statuses": "모든 상태"
-    },
-    "ml": {
-      "fit_strong": "우수",
-      "fit_good": "양호",
-      "fit_fair": "보통",
-      "fit_weak": "미흡",
-      "fit_slight": "미약",
-      "fit_word": "적합도",
-      "fine_tuned_at": "미세 조정된 {when}",
-      "personalized": "● 이 기계에 맞춤화됨",
-      "builtin_models": "● 내장 모델 사용"
+      "improving": "↗ 개선",
+      "manual": "(수동으로 선택)",
+      "steady": "→ 꾸준한",
+      "using_defaults": "배송된 기본값 사용",
+      "using_tuned": "조정된 가중치 사용"
     },
     "modal": {
-      "label_cycle": "주기 레이블 지정",
-      "create_profile": "프로필 만들기",
-      "new_phase": "새로운 단계",
-      "edit_phase": "단계 편집",
-      "process_recording": "기록 처리",
+      "merge_cycles": "{n} 사이클 병합",
+      "auto_label": "자동 라벨 주기",
       "correct_feedback": "올바른 피드백",
+      "create_profile": "프로필 만들기",
+      "cycle": "주기",
+      "edit_phase": "단계 편집",
       "import_config": "구성 가져오기",
-      "auto_label": "사이클 자동 라벨",
-      "cycle": "주기"
+      "label_cycle": "라벨주기",
+      "new_phase": "새로운 단계",
+      "process_recording": "프로세스 기록"
     },
-    "tag": {
-      "late_start": "늦은 시작",
-      "early_end": "조기 종료",
-      "merged": "병합된 주기",
-      "split": "분할주기",
-      "noise": "소음",
-      "wrong_profile": "잘못된 프로필",
-      "sensor_gap": "센서 갭"
+    "msg": {
+      "near_duplicate_cluster": "거의 중복된 프로필 클러스터가 감지되었습니다. 그룹화를 통해 일치하는 항목을 유사 항목(예: 서로 다른 온도/회전의 동일한 프로그램) 중에서 안정적으로 선택할 수 있습니다.",
+      "coverage_gap": "최근 주기에 일치하는 프로필이 없습니다(지난 30개 중 {pct}%).",
+      "consider_new_profile": "새 프로필을 만드는 것을 고려해 보세요.",
+      "group_not_cohesive": "이러한 프로필은 안정적으로 그룹화할 만큼 유사하지 않으므로 일치는 이상값을 제거하거나 그룹을 분할할 때까지 프로필을 개별적으로 처리합니다.",
+      "group_modal_help": "온도/회전이 다른 동일한 모양의 프로그램을 그룹화합니다(기간은 다를 수 있음). 매칭은 그룹을 하나의 후보로 평가한 다음 가장 적합한 멤버를 선택합니다. 최소 2개를 선택하세요. 오버레이는 얼마나 유사한지 보여줍니다.",
+      "showing_suggestions": "제안사항과 함께 {count} 설정을 표시합니다.",
+      "show_all_settings": "모든 설정 표시",
+      "tuning_suggestions_available": "관찰된 주기에서 사용할 수 있는 {count} 조정 제안입니다. 관련 필드 옆에 표시됩니다.",
+      "legacy_actions_title": "{count} 레거시 맞춤 작업이 아직 실행 중입니다.",
+      "old_actions_warning": "이전 작업 편집기로 구성되었습니다(현재 제거됨). 사이클 이벤트에서는 여전히 실행되지만 여기에서는 더 이상 편집할 수 없습니다. 일반 자동화로 변환하거나 제거하십시오.",
+      "no_settings_match": "\"{q}\"과(와) 일치하는 설정이 없습니다.",
+      "clear_debug_hint": "저장된 디버그 데이터를 제거하여 여유 공간을 확보하세요.",
+      "wipe_history_warning": "모든 사이클과 프로필을 영구적으로 삭제합니다. 취소할 수 없습니다.",
+      "export_description": "모든 프로필과 사이클을 JSON으로 내보내거나 이전 내보내기에서 복원합니다.",
+      "log_buffer_hint": "최신 항목부터 · 다시 시작한 이후 마지막 500개의 ha_washdata 레코드를 버퍼링합니다. · 크기를 조정하려면 아래쪽 가장자리를 드래그합니다.",
+      "review_profile_tip": "이 주기에 라벨이 붙은 프로그램입니다. 자동 감지된 프로그램이 잘못된 경우 여기에서 수정하십시오. 라벨링은 향후 주기에 대한 일치를 가르칩니다.",
+      "review_quality_tip": "이주기가 얼마나 깨끗한 지. 좋음 = 이 프로그램의 교과서 예제; 나쁨 = 감지되었지만 잡음이 많거나 비정형적임; 사용할 수 없음 = 잘못 감지됨(병합, 잘림 또는 허위). 상태 점수와 모델 학습에 허용되는 주기를 결정합니다.",
+      "review_recorded_tip": "이를 프로그램에 대해 직접 선택한 참조 주기로 표시합니다. 이는 수동으로 기록된 주기와 동일한 역할입니다. 참조 순환은 항상 유지되고 일치하는 템플릿을 시드하며 정리로 인해 삭제되지 않습니다. (이것은 \"황금\"/기록된 플래그입니다. 둘 다 동일합니다.)",
+      "review_tags_tip": "이 주기에 무엇이 잘못되었는지 설명하는 선택적 플래그이므로 훈련과 정리가 이를 설명할 수 있습니다.",
+      "review_notes_tip": "자신만의 참조를 위한 자유 텍스트 메모입니다. 일치 또는 훈련에서는 사용되지 않습니다.",
+      "review_confirm_help": "이 주기가 올바르게 감지되었는지 확인하십시오. 귀하의 리뷰는 귀하의 기계에서 모델을 훈련시킵니다. 더 많은 주기를 확인할수록 더 나은 일치 및 상태 점수를 얻을 수 있습니다. 빠른 좋음/나쁨이면 충분합니다.",
+      "review_notes_placeholder": "메모(선택사항)",
+      "compare_profiles_tip": "위 차트에 다른 프로필 봉투를 겹쳐서 어느 것이 이 주기에 가장 적합한지 확인하세요.",
+      "artifact_header": "이 주기 동안 {n}개의 이상 현상이 감지되었습니다.",
+      "artifact_footer": "위 그래프에 강조표시되어 있습니다. 이는 일시적인 아티팩트(예: 사이클 중간에 문이 열림)이며 반드시 문제가 되는 것은 아닙니다.",
+      "profile_poor_health_detail": "이 프로필에 할당된 주기의 모양이 일관되지 않거나 신뢰도가 낮습니다. 봉투를 재구성하거나 라벨이 붙은 주기를 검토하는 것을 고려하십시오.",
+      "trend_duration_longer": "기간이 길어지는 추세({pct}%/주기) — 최근 평균 {avg}",
+      "trend_duration_shorter": "기간이 짧아지는 추세({pct}%/주기) — 최근 평균 {avg}",
+      "trend_energy_up": "에너지 상승 추세({pct}%/주기) — 최근 평균 {avg}",
+      "trend_energy_down": "에너지 감소 추세({pct}%/주기)",
+      "performance_trend": "실적 추세({n}주기)",
+      "maintenance_advisory": "지속 시간/에너지가 늘어나면 기기 유지 관리(예: 석회질 제거, 필터 청소)가 필요함을 나타낼 수 있습니다.",
+      "manual_duration_hint": "남은 시간 추정에 사용되는 프로필의 평균/예상 주기 길이입니다. 설정하려면 편집하세요. 변경하지 않고 그대로 두면 현재 값이 유지됩니다.",
+      "appliance_monitor": "가전제품 모니터",
+      "auto_label_intro": "일치 신뢰도가 임계값을 클리어하는 레이블이 없는 주기에 프로필을 할당합니다.",
+      "cleanup_intro": "라벨이 붙은 모든 사이클이 중첩됩니다. 이상값을 선택하고 삭제하여 프로필을 정리하세요.",
+      "compare_overlay_profiles": "오버레이 프로필(희미함)",
+      "compare_selected_cycles": "선택한 주기(단색) — 표시/숨기기",
+      "feedback_prompt": "그것이 옳았는지 확인하고, 프로그램을 수정하거나, 무시하십시오.",
+      "import_intro": "내보낸 파일을 로드하거나 아래에 JSON 페이로드를 붙여넣으세요.",
+      "live_chart_loading": "판독값이 도착하면 실시간 전력 차트가 나타납니다.",
+      "loading": "로드 중…",
+      "loading_curve": "곡선 로드 중…",
+      "loading_settings": "설정 로드 중…",
+      "maintenance_requires_access": "유지 관리 및 내보내기/가져오기에는 전체 액세스 권한이 필요합니다.",
+      "matching_tuning_intro": "학습할 때 WashData는 프로그램 일치가 모양, 지속 시간 및 에너지에 얼마나 큰 영향을 미치는지 조정합니다.",
+      "merge_intro": "선택한 사이클이 하나로 결합됩니다(연대순, 간격이 0W로 채워짐). 결과 프로필을 선택합니다.",
+      "ml_intro": "WashData는 즉시 사용 가능한 스마트 모델과 함께 제공됩니다.",
+      "ml_learned_intro": "이 기계에 맞게 미세 조정된 모델입니다.",
+      "ml_loading": "ML 로드 중…",
+      "ml_settings_intro": "두 개의 독립적인 스위치: 하나는 사이클이 실행되는 동안 모델을 적용하고 다른 하나는 WashData가 시간이 지남에 따라 기계에 맞게 미세 조정할 수 있도록 합니다.",
+      "no_cycles_match": "현재 필터와 일치하는 사이클이 없습니다.",
+      "no_cycles_profile": "이 프로필에는 사이클이 없습니다.",
+      "no_cycles_yet": "아직 기록된 사이클이 없습니다.",
+      "no_device_selected": "선택한 장치가 없습니다.",
+      "no_devices": "아직 구성된 WashData 장치가 없습니다.",
+      "no_envelope": "아직 봉투가 없습니다. 라벨링 주기 후에 재구축하세요.",
+      "no_envelope_overlay": "오버레이할 수 있는 봉투가 없습니다.",
+      "no_fine_tuned": "아직 세부 조정된 사항은 없습니다. WashData는 내장 모델을 사용하고 있습니다.",
+      "no_logs": "아직 버퍼링된 로그 레코드가 없습니다.",
+      "no_match_yet": "아직 일치 시도가 없습니다. 이는 실행 주기 중에 채워집니다.",
+      "no_other_users": "다른 홈어시스턴트 사용자를 찾을 수 없습니다.",
+      "no_phases": "정의된 단계가 없습니다.",
+      "no_phases_assigned": "할당된 단계가 없습니다.",
+      "no_profiles_compare": "비교할 프로필이 없습니다.",
+      "no_profiles_overlay": "오버레이할 프로필이 없습니다.",
+      "no_profiles_yet": "아직 프로필이 없습니다. 레이블이 지정된 주기에서 하나를 만듭니다.",
+      "no_profiles_yet_short": "아직 프로필이 없습니다.",
+      "no_split_points": "아직 분할 지점이 없습니다.",
+      "no_suggestions": "활성 제안이 없습니다.",
+      "pending_feedback": "보류 중인 감지 피드백",
+      "phase_catalog_intro": "주기의 명명된 부분(세탁 전, 가열, 탈수…). 제어판에서 프로필에 할당합니다.",
+      "phase_ranges_intro": "평균 곡선에 중첩된 단계 범위(사이클 시작 후 분). 실시간으로 미리 보려면 값을 편집하세요.",
+      "preferences_admin": "환경 설정, 패널 및 액세스 제어",
+      "preferences_adv": "환경설정",
+      "prefs_personal": "이는 홈어시스턴트 계정에만 적용됩니다.",
+      "profiles_intro": "통계, 단계 및 정리를 보려면 프로필을 클릭하세요. 거의 동일한 프로그램(동일한 모양/기간, 다른 온도 또는 회전)을 그룹화하여 일치하는 프로그램을 안정적으로 선택합니다.",
+      "rbac_hint": "꺼져 있으면 모든 홈어시스턴트 사용자가 전체 액세스 권한을 갖습니다(기본값). 관리자는 항상 전체 액세스 권한을 가지며 모든 사람을 관리할 수 있습니다.",
+      "recent_logs": "최근 ha_washdata 기록",
+      "recording_in_progress": "녹음 진행 중",
+      "review_in_settings": "설정에서 검토",
+      "review_to_cycles": "사이클 검토 대기열 열기",
+      "saving_triggers_reload": "저장하면 통합 다시 로드가 트리거됩니다. HA 엔터티는 일시적으로 사용할 수 없는 것으로 표시될 수 있습니다.",
+      "search_placeholder": "검색 설정…",
+      "see_recorder": "아래의 녹음기 위젯을 참조하세요",
+      "split_intro": "그래프를 클릭하여 분할 지점을 추가 또는 제거하거나 유휴 간격으로 자동 감지합니다. 각 결과 세그먼트는 자체 프로필을 얻을 수 있습니다.",
+      "storage_diagnostics": "스토리지 통계, 유지 관리, 내보내기/가져오기",
+      "trim_intro": "빨간색 핸들을 드래그하거나 값을 입력합니다. 창 밖의 모든 것이 제거됩니다.",
+      "unsure_detected_prefix": "WashData가 감지되었는지 확실하지 않습니다.",
+      "updated": "업데이트됨"
     },
-    "quality": {
-      "good": "좋은",
-      "bad": "나쁜",
-      "unusable": "쓸 수 없는"
-    },
-    "access": {
-      "none": "없음(숨김)",
-      "read": "읽기",
-      "edit": "편집",
-      "full": "전체",
-      "inherit": "상속"
+    "phase_desc": {
+      "pre_wash": "본 세탁 전 초기 담금 또는 전처리.",
+      "wash": "드럼 이동과 선택적인 가열을 포함한 주요 세탁 사이클.",
+      "wash_dw": "주요세제를 가열하여 세탁합니다.",
+      "rinse": "깨끗한 물로 헹구는 단계. 이 단계는 여러 번 반복될 수 있습니다.",
+      "spin": "부하에서 수분을 제거하기 위한 고속 추출.",
+      "spin_wd": "건조 전환 전 고속 추출.",
+      "soak": "활성 세탁 단계 사이의 낮은 활동 담금 기간.",
+      "soak_dw": "무거운 토양의 경우 담그는 기간이 길어집니다.",
+      "anti_crease": "주름을 줄이기 위해 완성 후 가끔 짧게 텀블링을 해주세요.",
+      "heat_up": "완전 건조가 시작되기 전 초기 히터 예열.",
+      "drying": "주요 가열 텀블링 기간.",
+      "cool_down": "사이클 종료 근처에서 열 없이 회전합니다.",
+      "anti_wrinkle": "주기적인 포스트 사이클 텀블링으로 주름을 줄입니다.",
+      "sensor_check": "건조도를 측정하는 동안 짧은 저전력 일시 중지입니다.",
+      "drain_and_switch": "세탁 모드에서 건조 모드로 전환되는 기간입니다.",
+      "pre_rinse": "세제 세척 전 초기 스프레이다운.",
+      "dry": "히터 및/또는 여열을 이용한 건조 단계입니다.",
+      "sanitize": "살균 프로그램을 위한 고온 세척 단계."
     },
     "health": {
-      "poor": "⚠ 일치도 낮음",
-      "fair": "보통 일치도",
-      "good": "✓ 일치도 양호"
+      "good": "✓ 프로파일 품질: 양호",
+      "fair": "프로파일 품질: 보통",
+      "poor": "⚠ 프로파일 품질: 불량"
+    },
+    "ml": {
+      "fit_fair": "보통",
+      "builtin_models": "● 내장 모델 사용",
+      "fit_good": "좋은",
+      "fit_slight": "근소한",
+      "fit_strong": "강한",
+      "fit_weak": "약한",
+      "fit_word": "맞다",
+      "personalized": "● 이 기계에 맞춤화됨"
     },
     "trend": {
       "up": "추세 상승",
       "down": "하락세"
     },
-    "pref": {
-      "date_relative": "상대 항목(예: 2시간 전)",
-      "date_absolute": "절대값(예: 7월 2일 14:32)"
-    },
     "log": {
       "all_levels": "모든 레벨"
+    },
+    "pref": {
+      "date_absolute": "절대값(예: 7월 2일 14:32)",
+      "date_relative": "상대 항목(예: 2시간 전)"
+    },
+    "quality": {
+      "bad": "나쁜",
+      "good": "좋은",
+      "unusable": "쓸 수 없는"
+    },
+    "status": {
+      "active": "활동적인",
+      "all_statuses": "모든 상태",
+      "ambiguous": "모호한",
+      "auto_detect": "자동 감지",
+      "clear": "분명한",
+      "completed": "완전한",
+      "fine_tuning": "지금 미세 조정 중…",
+      "force_stopped": "강제 정지됨",
+      "idle": "게으른",
+      "interrupted": "중단된",
+      "ready": "처리 준비 완료",
+      "recording": "녹화 중"
+    },
+    "tab": {
+      "advanced": "고급의",
+      "diagnostics": "진단",
+      "history": "사이클",
+      "ml": "ML 훈련",
+      "pp_cleanup": "대청소",
+      "pp_manage": "관리하다",
+      "pp_overview": "개요",
+      "pp_phases": "단계",
+      "profiles": "프로필",
+      "settings": "설정",
+      "status": "개요",
+      "subtab_phase_catalog": "단계 카탈로그",
+      "subtab_profiles": "프로필"
+    },
+    "tag": {
+      "early_end": "조기 종료",
+      "late_start": "늦은 시작",
+      "merged": "병합된 주기",
+      "noise": "소음",
+      "sensor_gap": "센서 갭",
+      "split": "분할주기",
+      "wrong_profile": "잘못된 프로필"
+    },
+    "toast": {
+      "access_saved": "액세스 제어가 저장되었습니다.",
+      "all_wiped": "모든 데이터가 지워졌습니다.",
+      "analysis_complete_none": "분석 완료: 새로운 제안 없음",
+      "auto_label_complete": "자동 라벨 완료",
+      "automation_deleted": "자동화가 삭제되었습니다.",
+      "correction_submitted": "수정사항이 제출되었습니다.",
+      "cycle_deleted": "주기가 삭제되었습니다.",
+      "cycle_force_stopped": "사이클 강제 정지",
+      "cycle_labelled": "라벨이 붙은 사이클",
+      "cycle_paused": "주기가 일시중지됨",
+      "cycle_resumed": "사이클 재개",
+      "cycle_trimmed": "주기가 잘림",
+      "cycles_merged": "사이클이 병합되었습니다.",
+      "envelope_rebuilt": "봉투 재구축",
+      "envelopes_rebuilt": "봉투 재구축",
+      "export_downloaded": "내보내기가 다운로드됨",
+      "feedback_all_dismissed": "모든 피드백이 무시되었습니다.",
+      "feedback_confirmed": "피드백 확인됨",
+      "feedback_dismissed": "피드백이 무시되었습니다.",
+      "group_deleted": "그룹이 삭제되었습니다.",
+      "group_name_required": "그룹 이름은 필수 항목입니다.",
+      "group_saved": "그룹이 저장되었습니다",
+      "import_successful": "가져오기가 성공했습니다. 통합 다시 로드",
+      "json_required": "JSON 데이터가 필요합니다",
+      "legacy_removed": "기존 작업이 제거되었습니다.",
+      "logs_exported": "내보낸 로그",
+      "matching_reverted": "일치하는 가중치가 기본값으로 되돌아갔습니다.",
+      "min_2_profiles": "그룹당 프로필을 2개 이상 선택하세요.",
+      "ml_training_no_improvement": "훈련 완료: 기준선 유지(개선 없음)",
+      "models_reverted": "온디바이스 모델이 기준으로 되돌아갔습니다.",
+      "name_required": "이름이 필요합니다",
+      "no_split_found": "분할할 유휴 간격이 발견되지 않았습니다.",
+      "panel_settings_saved": "패널 설정이 저장되었습니다.",
+      "phase_name_required": "단계 이름은 필수 항목입니다.",
+      "phase_updated": "단계가 업데이트되었습니다.",
+      "phases_saved": "저장된 단계",
+      "preferences_saved": "환경설정이 저장되었습니다.",
+      "profile_name_required": "프로필 이름은 필수 항목입니다.",
+      "profile_renamed": "프로필 이름이 변경됨",
+      "recording_discarded": "녹음이 삭제되었습니다.",
+      "recording_saved": "프로필에 녹음이 저장되었습니다.",
+      "recording_started": "녹음이 시작되었습니다",
+      "recording_stopped": "녹음이 중지되었습니다.",
+      "review_saved": "리뷰가 저장되었습니다.",
+      "settings_saved": "설정이 저장되었습니다. 통합 다시 로드",
+      "suggestions_applied": "제안이 적용되었습니다. 통합 다시 로드",
+      "suggestions_dismissed": "제안이 무시되었습니다."
     }
   }
 }

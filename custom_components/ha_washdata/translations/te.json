@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "చక్రం ప్రారంభం",
-        "cycle_finish": "చక్రం ముగింపు",
-        "cycle_live": "ప్రత్యక్ష పురోగతి"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "వాషింగ్ మెషిన్",
@@ -88,198 +81,6 @@
         "bread_maker": "బ్రెడ్ మేకర్",
         "pump": "పంప్ / సంప్ పంప్",
         "other": "ఇతర (అధునాతన)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(లేబుల్ చేయబడలేదు)",
-        "create_new_profile": "కొత్త ప్రొఫైల్‌ని సృష్టించండి",
-        "remove_label": "లేబుల్‌ని తీసివేయండి",
-        "no_reference_cycle": "(రిఫరెన్స్ చక్రం లేదు)",
-        "all_device_types": "అన్ని పరికర రకాలు",
-        "current_suffix": "(ప్రస్తుతం)",
-        "phase_builtin_suffix": "(అంతర్నిర్మిత)",
-        "phase_none_available": "దశలు అందుబాటులో లేవు.",
-        "phase_other_device_types": "ఇతర పరికరాల రకాలు:",
-        "settings_deprecation_warning": "⚠️ **విస్మరించబడిన పరికర రకం:** {device_type} భవిష్యత్తు విడుదలలో తీసివేయడానికి షెడ్యూల్ చేయబడింది. WashData యొక్క మ్యాచింగ్ పైప్‌లైన్ ఈ ఉపకరణ తరగతికి నమ్మదగిన ఫలితాలను అందించదు. మీ ఇంటిగ్రేషన్ డిప్రికేషన్ వ్యవధిలో పని చేస్తూనే ఉంటుంది; ఈ హెచ్చరికను నిశ్శబ్దం చేయడానికి, మద్దతు ఉన్న రకాల్లో ఒకదానికి (వాషింగ్ మెషిన్, డ్రైయర్, వాషర్-డ్రైర్ కాంబో, డిష్‌వాషర్, ఎయిర్ ఫ్రైయర్, బ్రెడ్ మేకర్, లేదా పంప్) దిగువన **పరికర రకాన్ని** మార్చండి లేదా మీ ఉపకరణం మద్దతు ఉన్న ఏ రకంతోనూ సరిపోలకపోతే **ఇతర (అధునాతన)**కి మార్చండి. **ఇతర (అధునాతన)** ఏదైనా నిర్దిష్ట ఉపకరణం కోసం ట్యూన్ చేయని ఉద్దేశపూర్వకంగా జెనరిక్ డిఫాల్ట్‌లను పంపుతుంది, కాబట్టి మీరు థ్రెషోల్డ్‌లు, టైమ్‌అవుట్‌లు మరియు సరిపోలే పారామితులను మీరే కాన్ఫిగర్ చేయాలి; మీరు మారినప్పుడు మీ ప్రస్తుత సెట్టింగ్‌లు అన్నీ భద్రపరచబడతాయి.",
-        "editor_select_info": "విభజించడానికి 1 చక్రాన్ని లేదా విలీనం చేయడానికి 2+ చక్రాలను ఎంచుకోండి.",
-        "editor_select_info_split": "విభజించడానికి 1 చక్రాన్ని ఎంచుకోండి.",
-        "editor_select_info_merge": "విలీనం చేయడానికి 2+ చక్రాలను ఎంచుకోండి.",
-        "editor_select_info_delete": "తొలగించడానికి 1+ చక్రాన్ని ఎంచుకోండి.",
-        "no_cycles_recorded": "ఇంకా ఏ చక్రాలు రికార్డ్ చేయబడలేదు.",
-        "profile_summary_line": "- **{name}**: {count} చక్రాలు, {avg}మీ సగటు",
-        "no_profiles_created": "ఇంకా ప్రొఫైల్‌లు ఏవీ సృష్టించబడలేదు.",
-        "phase_preview": "దశ ప్రివ్యూ",
-        "phase_preview_no_curve": "సగటు ప్రొఫైల్ వక్రరేఖ ఇంకా అందుబాటులో లేదు. ఈ ప్రొఫైల్ కోసం మరిన్ని చక్రాలను అమలు చేయండి/లేబుల్ చేయండి.",
-        "average_power_curve": "సగటు పవర్ కర్వ్",
-        "unit_min": "నిమి",
-        "profile_option_fmt": "{name} ({count} చక్రాలు, ~{duration}మీ సగటు)",
-        "profile_option_short_fmt": "{name} ({count} చక్రాలు, ~{duration}మీ)",
-        "deleted_cycles_from_profile": "{profile} నుండి {count} చక్రాలు తొలగించబడ్డాయి.",
-        "not_enough_data_graph": "గ్రాఫ్‌ని రూపొందించడానికి తగినంత డేటా లేదు.",
-        "no_profiles_found": "ప్రొఫైల్‌లు ఏవీ కనుగొనబడలేదు.",
-        "cycle_info_fmt": "చక్రం: {start}, {duration}మీ, ప్రస్తుత: {label}",
-        "top_candidates_header": "### అగ్ర అభ్యర్థులు",
-        "tbl_profile": "ప్రొఫైల్",
-        "tbl_confidence": "విశ్వాసం",
-        "tbl_correlation": "సహసంబంధం",
-        "tbl_duration_match": "వ్యవధి మ్యాచ్",
-        "detected_profile": "గుర్తించబడిన ప్రొఫైల్",
-        "estimated_duration": "అంచనా వ్యవధి",
-        "actual_duration": "వాస్తవ వ్యవధి",
-        "choose_action": "__క్రింద ఒక చర్యను ఎంచుకోండి:__",
-        "tbl_count": "లెక్కించు",
-        "tbl_avg": "సగటు",
-        "tbl_min": "కనిష్ట",
-        "tbl_max": "గరిష్టంగా",
-        "tbl_energy_avg": "శక్తి (సగటు)",
-        "tbl_energy_total": "శక్తి (మొత్తం)",
-        "tbl_consistency": "స్థిరత.",
-        "tbl_last_run": "చివరి పరుగు",
-        "graph_legend_title": "గ్రాఫ్ లెజెండ్",
-        "graph_legend_body": "బ్లూ బ్యాండ్ గమనించిన కనిష్ట మరియు గరిష్ట పవర్ డ్రా పరిధిని సూచిస్తుంది. లైన్ సగటు శక్తి వక్రతను చూపుతుంది.",
-        "recording_preview": "రికార్డింగ్ ప్రివ్యూ",
-        "trim_start": "ట్రిమ్ ప్రారంభం",
-        "trim_end": "ట్రిమ్ ఎండ్",
-        "split_preview_title": "స్ప్లిట్ ప్రివ్యూ",
-        "split_preview_found_fmt": "{count} విభాగాలు కనుగొనబడ్డాయి.",
-        "split_preview_confirm_fmt": "ఈ చక్రాన్ని {count} ప్రత్యేక చక్రాలుగా విభజించడానికి నిర్ధారించు క్లిక్ చేయండి.",
-        "merge_preview_title": "ప్రివ్యూను విలీనం చేయండి",
-        "merge_preview_joining_fmt": "{count} చక్రాలలో చేరుతోంది. ఖాళీలు 0W రీడింగ్‌లతో పూరించబడతాయి.",
-        "editor_delete_preview_title": "తొలగింపు ప్రివ్యూ",
-        "editor_delete_preview_intro": "ఎంచుకున్న చక్రాలు శాశ్వతంగా తొలగించబడతాయి:",
-        "editor_delete_preview_confirm": "ఈ చక్ర రికార్డులను శాశ్వతంగా తొలగించడానికి Confirm క్లిక్ చేయండి.",
-        "no_power_preview": "*ప్రివ్యూ కోసం పవర్ డేటా అందుబాటులో లేదు.*",
-        "profile_comparison": "ప్రొఫైల్ పోలిక",
-        "actual_cycle_label": "ఈ చక్రం (అసలు)",
-        "storage_usage_header": "నిల్వ వినియోగం",
-        "storage_file_size": "ఫైల్ పరిమాణం",
-        "storage_cycles": "చక్రాలు",
-        "storage_profiles": "ప్రొఫైల్స్",
-        "storage_debug_traces": "డీబగ్ జాడలు",
-        "overview_suffix": "అవలోకనం",
-        "phase_preview_for_profile": "ప్రొఫైల్ కోసం దశ ప్రివ్యూ",
-        "current_ranges_header": "ప్రస్తుత పరిధులు",
-        "assign_phases_help": "పరిధులను జోడించడానికి, సవరించడానికి, తొలగించడానికి లేదా సేవ్ చేయడానికి దిగువ చర్యలను ఉపయోగించండి.",
-        "profile_summary_header": "ప్రొఫైల్ సారాంశం",
-        "recent_cycles_header": "ఇటీవలి చక్రాలు",
-        "trim_cycle_preview_title": "చక్రం ట్రిమ్ ప్రివ్యూ",
-        "trim_cycle_preview_no_data": "ఈ చక్రం కోసం పవర్ డేటా అందుబాటులో లేదు.",
-        "trim_cycle_preview_kept_suffix": "ఉంచింది",
-        "table_program": "కార్యక్రమం",
-        "table_when": "ఎప్పుడు",
-        "table_length": "వ్యవధి",
-        "table_match": "మ్యాచ్",
-        "table_profile": "ప్రొఫైల్",
-        "table_cycles": "చక్రాలు",
-        "table_avg_length": "సగటు వ్యవధి",
-        "table_last_run": "చివరి పరుగు",
-        "table_avg_energy": "సగటు శక్తి",
-        "table_detected_program": "గుర్తించబడిన ప్రోగ్రామ్",
-        "table_confidence": "విశ్వాసం",
-        "table_reported": "నివేదించబడింది"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "చక్రాన్ని విభజించండి (ఖాళీలను కనుగొనండి)",
-        "merge": "చక్రాలను విలీనం చేయండి (శకలాలు కలపండి)",
-        "delete": "చక్రాన్ని తొలగించు"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "నిష్క్రియ గ్యాప్‌లను స్వయంచాలకంగా గుర్తించండి",
-        "manual": "మాన్యువల్ టైమ్‌స్టాంప్(లు)"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "నిర్వహణ: రీప్రాసెస్ & డేటాను ఆప్టిమైజ్ చేయండి",
-        "clear_debug_data": "డీబగ్ డేటాను క్లియర్ చేయండి (స్థలాన్ని ఖాళీ చేయండి)",
-        "wipe_history": "ఈ పరికరం కోసం మొత్తం డేటాను తుడిచివేయండి (తిరుగులేనిది)",
-        "export_import": "సెట్టింగ్‌లతో JSONని ఎగుమతి/దిగుమతి చేయండి (కాపీ/పేస్ట్)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "మొత్తం డేటాను ఎగుమతి చేయండి",
-        "import": "డేటాను దిగుమతి/విలీనం చేయండి"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "పాత చక్రాలను ఆటో-లేబుల్ చేయండి",
-        "select_cycle_to_label": "లేబుల్ నిర్దిష్ట చక్రం",
-        "select_cycle_to_delete": "చక్రాన్ని తొలగించండి",
-        "interactive_editor": "ఇంటరాక్టివ్ ఎడిటర్‌ను విలీనం చేయండి/స్ప్లిట్ చేయండి",
-        "trim_cycle": "చక్ర డేటాను ట్రిమ్ చేయండి"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "కొత్త ప్రొఫైల్‌ని సృష్టించండి",
-        "edit_profile": "ప్రొఫైల్‌ని సవరించండి/పేరుమార్చు",
-        "delete_profile": "ప్రొఫైల్‌ను తొలగించండి",
-        "profile_stats": "ప్రొఫైల్ గణాంకాలు",
-        "cleanup_profile": "చరిత్రను క్లీన్ అప్ చేయండి - గ్రాఫ్ & డిలీట్",
-        "assign_phases": "దశ పరిధులను కేటాయించండి"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "కొత్త దశను సృష్టించండి",
-        "edit_custom_phase": "దశను సవరించండి",
-        "delete_custom_phase": "దశను తొలగించండి"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "దశలకు పేరు పెట్టండి & దరఖాస్తు చేయండి",
-        "cancel": "మార్పులు లేకుండా వెనక్కి వెళ్లండి"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "దశ పరిధిని జోడించండి",
-        "edit_range": "దశ పరిధిని సవరించండి",
-        "delete_range": "దశ పరిధిని తొలగించండి",
-        "clear_ranges": "అన్ని పరిధులను క్లియర్ చేయండి",
-        "auto_detect_ranges": "దశలను స్వయంచాలకంగా గుర్తించండి",
-        "save_ranges": "సేవ్ మరియు తిరిగి"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "స్థితిని రిఫ్రెష్ చేయండి",
-        "stop_recording": "రికార్డింగ్ ఆపివేయి (సేవ్ & ప్రాసెస్)",
-        "start_recording": "కొత్త రికార్డింగ్‌ని ప్రారంభించండి",
-        "process_recording": "చివరి రికార్డింగ్‌ని ప్రాసెస్ చేయండి (ట్రిమ్ & సేవ్)",
-        "discard_recording": "చివరి రికార్డింగ్‌ని విస్మరించండి"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "కొత్త ప్రొఫైల్‌ని సృష్టించండి",
-        "existing_profile": "ఇప్పటికే ఉన్న ప్రొఫైల్‌కు జోడించండి",
-        "discard": "రికార్డింగ్‌ని విస్మరించండి"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "నిర్ధారించండి - సరైన గుర్తింపు",
-        "correct": "సరైనది - ప్రోగ్రామ్/వ్యవధిని ఎంచుకోండి",
-        "ignore": "విస్మరించండి - ఫాల్స్ పాజిటివ్/నాయిస్ సైకిల్",
-        "delete": "తొలగించు - చరిత్ర నుండి తీసివేయి"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "ప్రారంభ స్థానం సెట్ చేయండి",
-        "set_end": "ముగింపు పాయింట్‌ని సెట్ చేయండి",
-        "reset": "పూర్తి వ్యవధికి రీసెట్ చేయండి",
-        "apply": "ట్రిమ్ వర్తించు",
-        "cancel": "రద్దు చేయి"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "ప్రస్తుత దశ"
       },
-      "wash_phase": {
-        "name": "దశ"
-      },
       "profile_cycle_count": {
         "name": "ప్రొఫైల్ {profile_name} కౌంట్",
         "unit_of_measurement": "చక్రాలు"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s తప్పనిసరిగా trim_start_s కంటే ఎక్కువగా ఉండాలి."
+    },
+    "no_active_cycle": {
+      "message": "పాజ్ చేయడానికి లేదా రెస్యూమ్ చేయడానికి యాక్టివ్ సైకిల్ లేదు."
     }
   },
   "panel": {
     "hdr": {
-      "panel_settings": "ప్యానెల్ సెట్టింగ్‌లు (అందరు వినియోగదారులు)",
-      "ml_learned": "వాష్‌డేటా ఏమి నేర్చుకుంది",
-      "status": "స్థితి",
-      "live_power": "లైవ్ పవర్",
-      "manual_recording": "మాన్యువల్ రికార్డింగ్",
-      "tools_and_data": "సాధనాలు & డేటా",
-      "phase_catalog": "దశ కేటలాగ్",
-      "storage_stats": "నిల్వ గణాంకాలు",
-      "maintenance": "నిర్వహణ చర్యలు",
-      "export_import": "ఎగుమతి / దిగుమతి",
+      "toggle_sidebar": "హోమ్ అసిస్టెంట్ సైడ్‌బార్‌ని టోగుల్ చేయండి",
       "logs": "లాగ్‌లు",
-      "my_preferences": "నా ప్రాధాన్యతలు",
       "access_control": "యాక్సెస్ నియంత్రణ",
-      "ml_smart_learning": "స్మార్ట్ లెర్నింగ్",
-      "ml_settings_card": "సెట్టింగ్‌లు",
-      "ml_matching_tuning": "ప్రోగ్రామ్-మ్యాచింగ్ ఫైన్-ట్యూనింగ్",
-      "display": "ప్రదర్శించు",
-      "status_graph": "స్థితి గ్రాఫ్",
-      "diagnostics_pref": "డయాగ్నోస్టిక్స్",
-      "logs_diagnostics": "డయాగ్నోస్టిక్స్",
-      "process_history": "ప్రక్రియ చరిత్ర",
-      "clear_debug": "డీబగ్ జాడలను క్లియర్ చేయండి",
-      "wipe_history": "చరిత్రను తుడిచివేయండి",
-      "automations": "ఆటోమేషన్లు",
-      "automation_open": "ఆటోమేషన్ ఎడిటర్‌లో తెరవండి",
       "automation_delete": "ఈ ఆటోమేషన్‌ని తొలగించండి",
       "automation_needs_review": "ఈ చక్రానికి సమీక్ష అవసరం",
+      "automation_open": "ఆటోమేషన్ ఎడిటర్‌లో తెరవండి",
       "automation_review_this_cycle": "ఈ చక్రాన్ని సమీక్షించండి",
-      "no_automations": "ఈ పరికరాన్ని ఇంకా ఆటోమేషన్‌లు సూచించలేదు."
-    },
-    "lbl": {
-      "manual_duration": "మాన్యువల్ వ్యవధి (నిమి, ఐచ్ఛికం)",
-      "correct_duration": "సరైన వ్యవధి (నిమి, ఐచ్ఛికం)",
-      "default_tab": "ప్యానెల్‌ను తెరిచేటప్పుడు డిఫాల్ట్ ట్యాబ్",
-      "default_access_level": "దిగువ జాబితా చేయని వినియోగదారుల కోసం డిఫాల్ట్ స్థాయి",
-      "show_expected": "ఊహించిన వక్రత అతివ్యాప్తిని చూపు (సరిపోలిన ప్రొఫైల్, నారింజ)",
-      "show_raw": "ముడి సెన్సార్ రీడింగ్‌లను చూపు (మృదువుగా లేని, బూడిద రంగు)",
-      "show_debug": "స్థితి పేజీలో ప్రత్యక్ష మ్యాచ్ డీబగ్ కార్డ్‌ని చూపండి (విశ్వాసం, అస్పష్టత, అగ్ర అభ్యర్థులు)",
-      "power": "శక్తి",
-      "progress": "పురోగతి",
-      "remaining": "మిగిలింది",
-      "duration": "వ్యవధి",
-      "energy": "శక్తి",
-      "profile": "ప్రొఫైల్",
+      "automations": "ఆటోమేషన్‌లు",
+      "clear_debug": "డీబగ్ ట్రేస్‌లను తొలగించండి",
+      "diagnostics_pref": "డయాగ్నోస్టిక్స్",
+      "display": "డిస్‌ప్లే",
+      "export_import": "ఎగుమతి / దిగుమతి",
+      "live_power": "లైవ్ పవర్",
+      "logs_diagnostics": "డయాగ్నోస్టిక్స్",
+      "maintenance": "నిర్వహణ చర్యలు",
+      "manual_recording": "మాన్యువల్ రికార్డింగ్",
+      "ml_learned": "WashData నేర్చుకున్నది",
+      "ml_matching_tuning": "ప్రోగ్రామ్ మ్యాచింగ్ ఫైన్-ట్యూనింగ్",
+      "ml_settings_card": "సెట్టింగ్‌లు",
+      "ml_smart_learning": "స్మార్ట్ లెర్నింగ్",
+      "my_preferences": "నా ప్రాధాన్యతలు",
+      "no_automations": "ఇంతవరకు ఏ ఆటోమేషన్‌లు ఈ పరికరాన్ని సూచించలేదు.",
+      "panel_settings": "ప్యానెల్ సెట్టింగ్‌లు",
+      "phase_catalog": "దశల కేటలాగ్",
+      "process_history": "ప్రాసెస్ హిస్టరీ",
       "status": "స్థితి",
-      "date": "తేదీ",
-      "confidence": "విశ్వసనీయత",
-      "health": "ఆరోగ్యం",
-      "cost": "ఖర్చు",
-      "program": "కార్యక్రమం",
-      "cycle_health": "సైకిల్ ఆరోగ్యం",
-      "activity": "కార్యాచరణ",
-      "unlabelled": "లేబుల్ చేయబడలేదు",
-      "unlabelled_paren": "(లేబుల్ చేయబడలేదు)",
-      "emphasis": "ఉద్ఘాటన",
-      "default": "డిఫాల్ట్",
-      "in_use": "వాడుకలో ఉంది",
-      "profile_name": "ప్రొఫైల్ పేరు",
-      "ref_cycle": "రిఫరెన్స్ చక్రం (ఐచ్ఛికం)",
-      "phase_name": "దశ పేరు",
-      "description": "వివరణ",
-      "correct_profile": "సరైన ప్రొఫైల్",
-      "load_from_file": "ఫైల్ నుండి లోడ్ చేయండి",
-      "json_data": "JSON డేటా",
-      "expected_duration": "ఆశించిన వ్యవధి (నిమి)",
-      "rename_profile": "ప్రొఫైల్ పేరు మార్చండి",
-      "select_profile": "ప్రొఫైల్‌ని ఎంచుకోండి",
-      "confidence_threshold": "కాన్ఫిడెన్స్ థ్రెషోల్డ్",
-      "resulting_profile": "ఫలిత ప్రొఫైల్",
-      "new_profile_name": "కొత్త ప్రొఫైల్ పేరు",
-      "save_mode": "సేవ్ మోడ్",
-      "head_trim": "హెడ్ ​​ట్రిమ్ (లు)",
-      "tail_trim": "టెయిల్ ట్రిమ్ (లు)",
-      "gap_s": "గ్యాప్ (లు)",
-      "start": "ప్రారంభించండి",
-      "end": "ముగింపు",
-      "quality": "నాణ్యత",
-      "golden_reference": "రికార్డ్ చేయబడిన సూచన చక్రం",
-      "compare_profiles": "ప్రొఫైల్‌లతో సరిపోల్చండి",
-      "tags": "ట్యాగ్‌లు",
-      "notes": "గమనికలు",
-      "cycle_date_display": "సైకిల్ తేదీ ప్రదర్శన",
-      "refresh_interval": "రిఫ్రెష్ విరామం (లు)",
-      "panel_default_tab": "డిఫాల్ట్ ట్యాబ్",
-      "hide_tabs": "నిర్వాహకులు కానివారి కోసం ట్యాబ్‌లను దాచండి",
-      "enable_access_control": "ప్రతి వినియోగదారు యాక్సెస్ నియంత్రణను ప్రారంభించండి",
-      "administrators": "నిర్వాహకులు",
-      "default_other": "డిఫాల్ట్ (ఇతర పరికరాలు)",
-      "mode_new_profile": "కొత్త ప్రొఫైల్‌ని సృష్టించండి",
-      "mode_existing_profile": "ఇప్పటికే ఉన్న ప్రొఫైల్‌కు జోడించండి",
-      "auto_fine_tune_on": "ఆటో ఫైన్-ట్యూన్ ఆన్ (సుమారు {hour}:00)",
-      "auto_fine_tune_off": "ఆటో ఫైన్-ట్యూన్ ఆఫ్",
-      "last_checked": "చివరిగా తనిఖీ చేయబడింది:",
-      "remove_label": "- లేబుల్‌ని తీసివేయండి -",
-      "create_new_profile": "+ కొత్త ప్రొఫైల్‌ని సృష్టించండి...",
-      "read_only": "చదవడానికి మాత్రమే",
-      "actions": "చర్యలు",
-      "cycles_count": "చక్రాలు",
-      "debug_traces": "డీబగ్ జాడలు",
-      "file_kb": "ఫైల్ (kB)",
-      "label": "లేబుల్",
-      "seconds_from_start": "ప్రారంభం నుండి సెకన్లు",
-      "clock_time": "గడియార సమయం",
-      "ungrouped": "సమూహం చేయబడలేదు"
-    },
-    "toast": {
-      "settings_saved": "సెట్టింగులు సేవ్ చేయబడ్డాయి; ఇంటిగ్రేషన్ రీలోడింగ్",
-      "import_successful": "దిగుమతి విజయవంతమైంది; ఇంటిగ్రేషన్ రీలోడింగ్",
-      "suggestions_applied": "సూచనలు వర్తింపజేయబడ్డాయి; ఇంటిగ్రేషన్ రీలోడింగ్",
-      "ml_training_no_improvement": "శిక్షణ పూర్తయింది: బేస్‌లైన్ ఉంచబడింది (అభివృద్ధి లేదు)",
-      "could_not_load_cycle": "చక్రాన్ని లోడ్ చేయడం సాధ్యపడలేదు: {error}",
-      "preferences_saved": "ప్రాధాన్యతలు సేవ్ చేయబడ్డాయి",
-      "panel_settings_saved": "ప్యానెల్ సెట్టింగ్‌లు సేవ్ చేయబడ్డాయి",
-      "access_saved": "యాక్సెస్ నియంత్రణ సేవ్ చేయబడింది",
-      "profile_created": "ప్రొఫైల్ \"{name}\" సృష్టించబడింది",
-      "profile_deleted": "ప్రొఫైల్ \"{name}\" తొలగించబడింది",
-      "profile_renamed": "ప్రొఫైల్ పేరు మార్చబడింది",
-      "phases_saved": "దశలు సేవ్ చేయబడ్డాయి",
-      "phase_created": "దశ \"{name}\" సృష్టించబడింది",
-      "phase_deleted": "దశ \"{name}\" తొలగించబడింది",
-      "phase_updated": "దశ నవీకరించబడింది",
-      "recording_started": "రికార్డింగ్ ప్రారంభమైంది",
-      "recording_stopped": "రికార్డింగ్ ఆగిపోయింది",
-      "recording_discarded": "రికార్డింగ్ విస్మరించబడింది",
-      "recording_saved": "రికార్డింగ్ ప్రొఫైల్‌లో సేవ్ చేయబడింది",
-      "export_downloaded": "ఎగుమతి డౌన్‌లోడ్ చేయబడింది",
-      "logs_exported": "లాగ్‌లు ఎగుమతి చేయబడ్డాయి",
-      "envelopes_rebuilt": "ఎన్వలప్‌లు పునర్నిర్మించబడ్డాయి",
-      "envelope_rebuilt": "ఎన్వలప్ పునర్నిర్మించబడింది",
-      "suggestions_dismissed": "సూచనలు తోసిపుచ్చబడ్డాయి",
-      "auto_label_complete": "స్వీయ లేబుల్ పూర్తయింది",
-      "cycle_labelled": "చక్రం లేబుల్ చేయబడింది",
-      "cycle_deleted": "చక్రం తొలగించబడింది",
-      "cycles_deleted": "{count} చక్రం(లు) తొలగించబడ్డాయి",
-      "cycle_trimmed": "చక్రం కత్తిరించబడింది",
-      "cycles_merged": "చక్రాలు విలీనం చేయబడ్డాయి",
-      "review_saved": "సమీక్ష సేవ్ చేయబడింది",
-      "feedback_confirmed": "అభిప్రాయం ధృవీకరించబడింది",
-      "feedback_dismissed": "అభిప్రాయం తీసివేయబడింది",
-      "feedback_all_dismissed": "అన్ని ఫీడ్‌బ్యాక్‌లు తీసివేయబడ్డాయి",
-      "correction_submitted": "దిద్దుబాటు సమర్పించబడింది",
-      "group_saved": "సమూహం సేవ్ చేయబడింది",
-      "group_deleted": "సమూహం తొలగించబడింది",
-      "automation_deleted": "ఆటోమేషన్ తొలగించబడింది",
-      "legacy_removed": "లెగసీ చర్యలు తీసివేయబడ్డాయి",
-      "cycle_paused": "చక్రం పాజ్ చేయబడింది",
-      "cycle_resumed": "చక్రం పునఃప్రారంభించబడింది",
-      "cycle_force_stopped": "చక్రం బలవంతంగా ఆగిపోయింది",
-      "ml_training_promoted": "శిక్షణ పూర్తయింది: ప్రమోట్ చేయబడిన {count} మోడల్(లు)",
-      "matching_reverted": "సరిపోలే బరువులు డిఫాల్ట్‌లకు మార్చబడ్డాయి",
-      "models_reverted": "పరికరంలోని మోడల్‌లు బేస్‌లైన్‌కి మార్చబడ్డాయి",
-      "analysis_complete": "విశ్లేషణ పూర్తయింది: {count} సూచన(లు)",
-      "analysis_complete_none": "విశ్లేషణ పూర్తయింది: కొత్త సూచనలు లేవు",
-      "debug_cleared": "{count} డీబగ్ ట్రేస్‌లు క్లియర్ చేయబడ్డాయి",
-      "all_wiped": "మొత్తం డేటా తుడిచివేయబడింది",
-      "no_split_found": "విభజించడానికి నిష్క్రియ ఖాళీలు ఏవీ కనుగొనబడలేదు",
-      "group_name_required": "సమూహం పేరు అవసరం",
-      "min_2_profiles": "సమూహం కోసం కనీసం 2 ప్రొఫైల్‌లను ఎంచుకోండి",
-      "profile_name_required": "ప్రొఫైల్ పేరు అవసరం",
-      "phase_name_required": "దశ పేరు అవసరం",
-      "name_required": "పేరు అవసరం",
-      "json_required": "JSON డేటా అవసరం",
-      "save_failed": "సేవ్ చేయడం విఫలమైంది: {error}",
-      "delete_failed": "తొలగించడం విఫలమైంది: {error}",
-      "apply_failed": "దరఖాస్తు విఫలమైంది: {error}",
-      "rebuild_failed": "పునర్నిర్మాణం విఫలమైంది: {error}",
-      "start_failed": "ప్రారంభం విఫలమైంది: {error}",
-      "stop_failed": "స్టాప్ విఫలమైంది: {error}",
-      "discard_failed": "విస్మరించడం విఫలమైంది: {error}",
-      "trim_failed": "ట్రిమ్ విఫలమైంది: {error}",
-      "split_failed": "విభజన విఫలమైంది: {error}",
-      "merge_failed": "విలీనం విఫలమైంది: {error}",
-      "create_failed": "సృష్టించడం విఫలమైంది: {error}",
-      "update_failed": "అప్‌డేట్ విఫలమైంది: {error}",
-      "rename_failed": "పేరు మార్చడం విఫలమైంది: {error}",
-      "revert_failed": "తిరిగి విఫలమైంది: {error}",
-      "training_failed": "శిక్షణ విఫలమైంది: {error}",
-      "export_failed": "ఎగుమతి విఫలమైంది: {error}",
-      "import_failed": "దిగుమతి విఫలమైంది: {error}",
-      "auto_label_failed": "ఆటో-లేబుల్ విఫలమైంది: {error}",
-      "analysis_failed": "విశ్లేషణ విఫలమైంది: {error}",
-      "auto_detect_failed": "స్వీయ-గుర్తింపు విఫలమైంది: {error}",
-      "error": "లోపం: {error}",
-      "pause_failed": "పాజ్ విఫలమైంది: {error}",
-      "label_failed": "లేబుల్ విఫలమైంది: {error}",
-      "invalid_json": "\"{key}\" చెల్లుబాటు కాదు JSON — సేవ్ చేయడానికి ముందు దాన్ని పరిష్కరించండి లేదా ఫీల్డ్‌ను క్లియర్ చేయండి.",
-      "processed": "ప్రాసెస్ చేయబడింది {bits}",
-      "split_complete": "{count} చక్రాలుగా విభజించబడింది"
-    },
-    "msg": {
-      "no_devices": "ఇంకా WashData పరికరాలు ఏవీ కాన్ఫిగర్ చేయబడలేదు.",
-      "live_chart_loading": "రీడింగ్‌లు వచ్చినప్పుడు లైవ్ పవర్ చార్ట్ కనిపిస్తుంది.",
-      "no_profiles_yet": "ఇంకా ప్రొఫైల్‌లు లేవు. లేబుల్ చేయబడిన సైకిల్ నుండి ఒకదాన్ని సృష్టించండి.",
-      "no_logs": "లాగ్ రికార్డులు ఇంకా బఫర్ చేయబడలేదు.",
-      "no_envelope": "ఇంకా ఎన్వలప్ లేదు - సైకిల్‌లను లేబులింగ్ చేసిన తర్వాత పునర్నిర్మించండి.",
-      "no_cycles_profile": "ఈ ప్రొఫైల్ కోసం చక్రాలు లేవు.",
-      "ml_learned_intro": "మోడల్‌లు ఈ యంత్రానికి చక్కగా ట్యూన్ చేయబడ్డాయి. జాబితా చేయని ఏదైనా విశ్వసనీయ అంతర్నిర్మిత మోడల్‌ని ఉపయోగిస్తుంది.",
-      "ml_intro": "WashData చక్రాలను గుర్తించే, ప్రోగ్రామ్‌లను సరిపోల్చడం మరియు సమయం & శక్తిని అంచనా వేసే స్మార్ట్ మోడల్‌లతో రవాణా చేస్తుంది - అవి బాక్స్ నుండి పని చేస్తాయి.",
-      "matching_tuning_intro": "నేర్చుకునేటప్పుడు, WashData ప్రోగ్రామ్ మ్యాచింగ్ దాని వ్యవధి మరియు శక్తికి వ్యతిరేకంగా చక్రం యొక్క ఆకృతిని ఎంత బరువుగా ఉంచుతుందో కూడా సర్దుబాటు చేస్తుంది.",
-      "merge_intro": "ఎంచుకున్న చక్రాలు ఒకటిగా మిళితం చేయబడ్డాయి (కాలక్రమ క్రమం; ఖాళీలు 0 Wతో నిండి ఉంటాయి). ఫలిత ప్రొఫైల్‌ను ఎంచుకోండి.",
-      "see_recorder": "క్రింద రికార్డర్ విడ్జెట్ చూడండి",
-      "review_to_cycles": "చక్రాల రివ్యూ క్యూను తెరవండి",
-      "no_device_selected": "పరికరం ఏదీ ఎంచుకోబడలేదు.",
-      "loading": "లోడ్ అవుతోంది...",
-      "loading_settings": "సెట్టింగ్‌లను లోడ్ చేస్తోంది...",
-      "no_cycles_match": "ప్రస్తుత ఫిల్టర్‌తో ఏ చక్రాలు సరిపోలలేదు.",
-      "no_cycles_yet": "ఇంకా ఏ చక్రాలు రికార్డ్ చేయబడలేదు.",
-      "no_phases": "ఏ దశలు నిర్వచించబడలేదు.",
-      "no_phases_assigned": "దశలు కేటాయించబడలేదు.",
-      "no_split_points": "ఇంకా స్ప్లిట్ పాయింట్‌లు లేవు.",
-      "no_envelope_overlay": "ఓవర్‌లే చేయడానికి ఎన్వలప్ అందుబాటులో లేదు.",
-      "no_other_users": "ఇతర Home Assistant వినియోగదారులు కనుగొనబడలేదు.",
-      "maintenance_requires_access": "నిర్వహణ మరియు ఎగుమతి/దిగుమతి పూర్తి యాక్సెస్ అవసరం.",
-      "loading_curve": "వక్రత లోడ్ అవుతోంది…",
-      "compare_selected_cycles": "ఎంచుకున్న చక్రాలు (ఘనమైనవి) — చూపించు / దాచు",
-      "compare_overlay_profiles": "అతివ్యాప్తి ప్రొఫైల్‌లు (మసకబారినవి)",
-      "no_profiles_compare": "పోల్చడానికి ప్రొఫైల్‌లు లేవు.",
-      "saving_triggers_reload": "సేవ్ చేయడం అనేది ఇంటిగ్రేషన్ రీలోడ్‌ను ట్రిగ్గర్ చేస్తుంది. HA ఎంటిటీలు అందుబాటులో లేనట్లు క్లుప్తంగా చూపవచ్చు.",
-      "prefs_personal": "ఇవి మీ Home Assistant ఖాతాకు మాత్రమే వర్తిస్తాయి.",
-      "no_match_yet": "ఇంకా మ్యాచ్ ప్రయత్నం లేదు - ఇది నడుస్తున్న సైకిల్‌లో జనాదరణ పొందుతుంది.",
-      "no_fine_tuned": "ఇంకా ఏదీ ఫైన్-ట్యూన్ చేయలేదు — WashData దాని అంతర్నిర్మిత నమూనాలను ఉపయోగిస్తోంది.",
-      "ml_settings_intro": "రెండు స్వతంత్ర స్విచ్‌లు: ఒకటి సైకిల్ నడుస్తున్నప్పుడు మోడల్‌లను వర్తింపజేస్తుంది, మరొకటి కాలక్రమేణా వాటిని మీ మెషీన్‌కు చక్కగా ట్యూన్ చేయడానికి WashDataని అనుమతిస్తుంది.",
-      "phase_catalog_intro": "సైకిల్‌కి పేరు పెట్టబడిన విభాగాలు (ప్రీ-వాష్, హీటింగ్, స్పిన్...). దాని నియంత్రణ ప్యానెల్ నుండి ప్రొఫైల్‌కు వాటిని కేటాయించండి.",
-      "phase_ranges_intro": "దశ పరిధులు (సైకిల్ ప్రారంభం నుండి నిమిషాలు) సగటు వక్రరేఖపై కప్పబడి ఉంటాయి. ప్రత్యక్షంగా ప్రివ్యూ చేయడానికి విలువలను సవరించండి.",
-      "cleanup_intro": "లేబుల్ చేయబడిన ప్రతి చక్రం అతివ్యాప్తి చేయబడింది. ప్రొఫైల్‌ను క్లీన్ చేయడానికి అవుట్‌లయర్‌లను టిక్ చేయండి మరియు తొలగించండి.",
-      "split_intro": "స్ప్లిట్ పాయింట్‌ను జోడించడానికి లేదా తీసివేయడానికి గ్రాఫ్‌పై క్లిక్ చేయండి లేదా నిష్క్రియ ఖాళీల ద్వారా స్వయంచాలకంగా గుర్తించండి.",
-      "trim_intro": "ఎరుపు హ్యాండిల్‌లను లాగండి లేదా విలువలను నమోదు చేయండి. విండో వెలుపల ఉన్న ప్రతిదీ తీసివేయబడుతుంది.",
-      "import_intro": "ఎగుమతి చేసిన ఫైల్‌ను లోడ్ చేయండి లేదా JSON పేలోడ్‌ను దిగువన అతికించండి.",
-      "auto_label_intro": "థ్రెషోల్డ్‌ను క్లియర్ చేసే మ్యాచ్ కాన్ఫిడెన్స్ లేబుల్ చేయని సైకిల్‌లకు ప్రొఫైల్‌లను కేటాయించండి.",
-      "enough_data": "({current}/{min} సైకిల్స్) నుండి తెలుసుకోవడానికి తగినంత డేటా.",
-      "collecting_data": "డేటాను సేకరిస్తోంది — ఫైన్-ట్యూనింగ్ ప్రారంభించడానికి ముందు {need} మరో సైకిల్{plural} ({current}/{min}).",
-      "updated": "నవీకరించబడింది {time}",
-      "appliance_monitor": "ఉపకరణ మానిటర్",
-      "ml_loading": "ML లోడ్ అవుతోంది…",
-      "review_in_settings": "సెట్టింగ్‌లలో సమీక్షించండి",
-      "storage_diagnostics": "నిల్వ గణాంకాలు, నిర్వహణ, ఎగుమతి/దిగుమతి",
-      "recent_logs": "ఇటీవలి ha_washdata రికార్డులు",
-      "preferences_adv": "ప్రాధాన్యతలు",
-      "preferences_admin": "ప్రాధాన్యతలు, ప్యానెల్ & యాక్సెస్ నియంత్రణ",
-      "pending_feedback": "పెండింగ్‌లో ఉన్న గుర్తింపు అభిప్రాయం",
-      "recording_in_progress": "రికార్డింగ్ ప్రోగ్రెస్‌లో ఉంది",
-      "no_profiles_yet_short": "ఇంకా ప్రొఫైల్‌లు లేవు.",
-      "unsure_detected_prefix": "WashData అది గుర్తించబడిందని ఖచ్చితంగా తెలియదు",
-      "no_suggestions": "క్రియాశీల సూచనలు లేవు.",
-      "no_profiles_overlay": "ఓవర్‌లే చేయడానికి ప్రొఫైల్‌లు లేవు.",
-      "compare_cycles_title": "{count} చక్రాలను సరిపోల్చండి",
-      "profiles_intro": "గణాంకాలు, దశలు మరియు శుభ్రత కోసం ఒక ప్రొఫైల్‌పై క్లిక్ చేయండి. దాదాపు ఒకేలా ఉండే ప్రోగ్రామ్‌లను (ఒకే ఆకృతి/వ్యవధి, వేర్వేరు ఉష్ణోగ్రత లేదా స్పిన్) సమూహపరచండి, తద్వారా మ్యాచింగ్ వాటి మధ్య నమ్మకంగా ఎంచుకుంటుంది.",
-      "search_placeholder": "సెట్టింగులు వెతకండి…",
-      "automations_intro": "WashData {start} / {end} ఈవెంట్‌లను ట్రిగ్గర్ చేసి entities బహిర్గతం చేస్తుంది, కాబట్టి నోటిఫికేషన్లు మరియు చర్యలు సాధారణ Home Assistant automations గా నిర్మించడం ఉత్తమం. ఈ పరికరాన్ని ఉపయోగించే automations క్రింద కనిపిస్తాయి.",
-      "notify_services_hint": "{entity} సేవా IDలను ఉపయోగించండి (బహువుకు కామాతో వేరు చేసి). టెంప్లేట్ వేరియబుల్స్: {vars}.",
-      "rbac_hint": "ఆఫ్ చేసినప్పుడు, ప్రతి Home Assistant వినియోగదారుకు పూర్తి యాక్సెస్ ఉంటుంది (డిఫాల్ట్). అడ్మినిస్ట్రేటర్లకు ఎల్లప్పుడూ పూర్తి యాక్సెస్ ఉంటుంది మరియు వారు అందరినీ నిర్వహించగలరు.",
-      "feedback_prompt": "ఇది సరైనదని నిర్ధారించండి, ప్రోగ్రామ్‌ను దిద్దుబాటు చేయండి, లేదా విస్మరించండి."
-    },
-    "section": {
-      "basic": {
-        "intro": "కోర్ గుర్తింపు మరియు చాలా సెటప్‌లకు అవసరమైన ముఖ్యమైనవి.",
-        "label": "ప్రాథమిక"
-      },
-      "detection": {
-        "intro": "ఒక చక్రం ప్రారంభం, పరుగు మరియు ముగింపుగా ఎలా గుర్తించబడుతుంది.",
-        "label": "డిటెక్షన్"
-      },
-      "matching": {
-        "intro": "పూర్తయిన చక్రాలు నేర్చుకున్న ప్రొఫైల్‌లకు ఎలా సరిపోతాయి మరియు లేబుల్ చేయబడ్డాయి.",
-        "label": "సరిపోలిక"
-      },
-      "timing": {
-        "intro": "బ్యాక్‌గ్రౌండ్ క్యాడెన్స్, ఆఫ్‌లైన్ వాచ్‌డాగ్ మరియు హౌస్ కీపింగ్.",
-        "label": "టైమింగ్ & వాచ్‌డాగ్"
-      },
-      "anti_wrinkle": {
-        "intro": "యాంటీ రింక్ల్ మోడ్ ప్రధాన ఉష్ణ దశ తర్వాత డ్రైయర్ టంబుల్ పప్పులను గుర్తిస్తుంది.",
-        "label": "వ్యతిరేక ముడతలు"
-      },
-      "delay": {
-        "intro": "ఆలస్యమైన-ప్రారంభ గుర్తింపు అనేది ఉపకరణం శక్తితో ఉన్నప్పుడు గుర్తిస్తుంది కానీ దాని చక్రాన్ని ఇంకా ప్రారంభించలేదు.",
-        "label": "ఆలస్యం ప్రారంభం"
-      },
-      "triggers": {
-        "intro": "ఐచ్ఛిక బాహ్య సంకేతాలు: ముగింపు ట్రిగ్గర్, డోర్ సెన్సార్, పాజ్ స్విచ్ మరియు అన్‌లోడ్ రిమైండర్.",
-        "label": "ట్రిగ్గర్స్ & డోర్"
-      },
-      "notifications": {
-        "label": "నోటిఫికేషన్‌లు",
-        "intro": "సైకిల్ ఈవెంట్‌ల గురించి మీకు ఎప్పుడు మరియు ఎలా తెలియజేయబడుతుందో కాన్ఫిగర్ చేయండి."
-      },
-      "ml_training": {
-        "label": "ML శిక్షణ",
-        "intro": "ఈ పరికరానికి గుర్తింపు మరియు సమయాన్ని వ్యక్తిగతీకరించే స్మార్ట్ మోడల్‌లను ప్రారంభించండి."
-      }
-    },
-    "setting": {
-      "auto_maintenance": {
-        "label": "ఆటో మెయింటెనెన్స్ (రాత్రిపూట శుభ్రపరచడం)"
-      },
-      "external_end_trigger_enabled": {
-        "label": "బాహ్య ముగింపు ట్రిగ్గర్‌ని ప్రారంభించండి"
-      },
-      "external_end_trigger_inverted": {
-        "label": "విలోమ బాహ్య ట్రిగ్గర్ (ట్రిగ్గర్ ఆఫ్‌లో ఉంది)"
-      },
-      "pause_cuts_power": {
-        "label": "పాజ్ కూడా పవర్ కట్ చేస్తుంది (స్విచ్ ద్వారా)"
-      },
-      "notify_people": {
-        "label": "వ్యక్తులు (ఇంట్లో ఉన్నప్పుడు మాత్రమే)"
-      },
-      "notify_only_when_home": {
-        "label": "ఇంట్లో ఉన్నప్పుడు మాత్రమే తెలియజేయండి"
-      },
-      "energy_price_static": {
-        "label": "స్టాటిక్ ఎనర్జీ ధర (kWhకి)"
-      },
-      "enable_ml_models": {
-        "label": "సైకిల్ సమయంలో స్మార్ట్ మోడల్‌లను వర్తింపజేయండి"
-      },
-      "ml_training_enabled": {
-        "label": "ఈ యంత్రం నుండి నేర్చుకోండి"
-      },
-      "name": {
-        "label": "పరికరం పేరు"
-      },
-      "device_type": {
-        "label": "పరికర రకం"
-      },
-      "power_sensor": {
-        "label": "పవర్ సెన్సార్"
-      },
-      "min_power": {
-        "label": "కనీస శక్తి"
-      },
-      "off_delay": {
-        "label": "ఆఫ్ ఆలస్యం"
-      },
-      "linked_device": {
-        "label": "పరికరం కింద సమూహం"
-      },
-      "start_threshold_w": {
-        "label": "ప్రారంభ థ్రెషోల్డ్"
-      },
-      "stop_threshold_w": {
-        "label": "స్టాప్ థ్రెషోల్డ్"
-      },
-      "min_off_gap": {
-        "label": "మినిమ్ ఆఫ్ గ్యాప్"
-      },
-      "start_duration_threshold": {
-        "label": "ప్రారంభ వ్యవధి"
-      },
-      "start_energy_threshold": {
-        "label": "శక్తిని ప్రారంభించండి"
-      },
-      "completion_min_seconds": {
-        "label": "కనిష్ట సైకిల్ వ్యవధి"
-      },
-      "running_dead_zone": {
-        "label": "రన్నింగ్ డెడ్ జోన్"
-      },
-      "end_energy_threshold": {
-        "label": "ఎండ్ ఎనర్జీ"
-      },
-      "end_repeat_count": {
-        "label": "ఎండ్ రిపీట్ కౌంట్"
-      },
-      "sampling_interval": {
-        "label": "నమూనా విరామం"
-      },
-      "smoothing_window": {
-        "label": "మృదువైన విండో"
-      },
-      "abrupt_drop_watts": {
-        "label": "ఆకస్మిక డ్రాప్"
-      },
-      "abrupt_drop_ratio": {
-        "label": "ఆకస్మిక డ్రాప్ నిష్పత్తి"
-      },
-      "profile_match_threshold": {
-        "label": "మ్యాచ్ థ్రెషోల్డ్"
-      },
-      "profile_unmatch_threshold": {
-        "label": "సరిపోలని థ్రెషోల్డ్"
-      },
-      "profile_match_interval": {
-        "label": "మ్యాచ్ విరామం"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "కనిష్ట వ్యవధి నిష్పత్తి"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "గరిష్ట వ్యవధి నిష్పత్తి"
-      },
-      "profile_duration_tolerance": {
-        "label": "ప్రొఫైల్ వ్యవధి సహనం"
-      },
-      "duration_tolerance": {
-        "label": "సహనాన్ని అంచనా వేయండి"
-      },
-      "auto_label_confidence": {
-        "label": "స్వీయ లేబుల్ విశ్వాసం"
-      },
-      "learning_confidence": {
-        "label": "విశ్వాసం నేర్చుకోవడం"
-      },
-      "suppress_feedback_notifications": {
-        "label": "ఫీడ్‌బ్యాక్ నోటిఫికేషన్‌లను అణచివేయండి"
-      },
-      "watchdog_interval": {
-        "label": "వాచ్డాగ్ ఇంటర్వెల్"
-      },
-      "no_update_active_timeout": {
-        "label": "ఏ-నవీకరణ సమయం ముగిసింది"
-      },
-      "progress_reset_delay": {
-        "label": "ప్రోగ్రెస్ రీసెట్ ఆలస్యం"
-      },
-      "expose_debug_entities": {
-        "label": "డీబగ్ ఎంటిటీలను బహిర్గతం చేయండి"
-      },
-      "save_debug_traces": {
-        "label": "డీబగ్ ట్రేస్‌లను సేవ్ చేయండి"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "యాంటీ రింకిల్ డిటెక్షన్‌ని ఎనేబుల్ చేయండి"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "మాక్స్ యాంటీ రింకిల్ పవర్"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "గరిష్ట వ్యవధి"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "పవర్ థ్రెషోల్డ్ నుండి నిష్క్రమించండి"
-      },
-      "delay_start_detect_enabled": {
-        "label": "ఆలస్యం-ప్రారంభ గుర్తింపును ప్రారంభించండి"
-      },
-      "delay_confirm_seconds": {
-        "label": "సెకనులను నిర్ధారించండి"
-      },
-      "delay_timeout_hours": {
-        "label": "గడువు ముగిసిన గంటలు"
-      },
-      "external_end_trigger": {
-        "label": "బాహ్య ట్రిగ్గర్ ఎంటిటీ"
-      },
-      "door_sensor_entity": {
-        "label": "డోర్ సెన్సార్ ఎంటిటీ"
-      },
-      "switch_entity": {
-        "label": "ఎంటిటీని మార్చండి"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "నాగ్ ఆలస్యంని అన్‌లోడ్ చేయండి"
-      },
-      "pump_stuck_duration": {
-        "label": "పంప్ స్టక్ వ్యవధి"
-      },
-      "notify_start_services": {
-        "label": "సేవలను ప్రారంభించండి"
-      },
-      "notify_finish_services": {
-        "label": "సేవలను ముగించు"
-      },
-      "notify_live_services": {
-        "label": "ప్రత్యక్ష ప్రగతి సేవలు"
-      },
-      "notify_fire_events": {
-        "label": "నోటిఫికేషన్‌ల కోసం ఫైర్ HA ఈవెంట్‌లు"
-      },
-      "notify_before_end_minutes": {
-        "label": "ముందస్తు ముగింపు హెచ్చరిక"
-      },
-      "notify_live_interval_seconds": {
-        "label": "ప్రత్యక్ష నవీకరణ విరామం"
-      },
-      "notify_live_overrun_percent": {
-        "label": "హెచ్చరికకు ముందు ప్రత్యక్ష ప్రసారం %"
-      },
-      "notify_live_chronometer": {
-        "label": "లైవ్ క్రోనోమీటర్ ఉపయోగించండి"
-      },
-      "notify_timeout_seconds": {
-        "label": "తర్వాత స్వయంచాలకంగా తీసివేయండి"
-      },
-      "notify_title": {
-        "label": "నోటిఫికేషన్ శీర్షిక"
-      },
-      "notify_icon": {
-        "label": "నోటిఫికేషన్ చిహ్నం"
-      },
-      "notify_start_message": {
-        "label": "సందేశాన్ని ప్రారంభించండి"
-      },
-      "notify_finish_message": {
-        "label": "సందేశాన్ని ముగించు"
-      },
-      "notify_pre_complete_message": {
-        "label": "ముందస్తు పూర్తి సందేశం"
-      },
-      "notify_reminder_message": {
-        "label": "రిమైండర్ సందేశం"
-      },
-      "notify_channel": {
-        "label": "Android ఛానెల్ (ప్రారంభం/ప్రత్యక్షం)"
-      },
-      "notify_finish_channel": {
-        "label": "Android ఛానెల్ (ముగింపు)"
-      },
-      "energy_price_entity": {
-        "label": "శక్తి ధర సంస్థ"
-      },
-      "ml_training_hour": {
-        "label": "గంటలో నేర్చుకోండి"
-      },
-      "ml_training_min_cycles": {
-        "label": "ముందుగా సైకిళ్లు కావాలి"
-      },
-      "ml_training_interval_days": {
-        "label": "ప్రతి ఒక్కటి తనిఖీ చేయండి"
-      }
-    },
-    "tab": {
-      "status": "అవలోకనం",
-      "history": "చక్రాలు",
-      "profiles": "ప్రొఫైల్స్",
-      "settings": "సెట్టింగ్‌లు",
-      "ml": "ML శిక్షణ",
-      "advanced": "అధునాతనమైనది",
-      "diagnostics": "డయాగ్నోస్టిక్స్",
-      "pp_overview": "అవలోకనం",
-      "pp_phases": "దశలు",
-      "pp_cleanup": "శుభ్రపరచడం",
-      "pp_manage": "నిర్వహించండి",
-      "subtab_profiles": "ప్రొఫైల్స్",
-      "subtab_phase_catalog": "దశ కేటలాగ్"
-    },
-    "btn": {
-      "save": "సేవ్ చేయండి",
-      "cancel": "రద్దు చేయి",
-      "delete": "తొలగించు",
-      "close": "మూసివేయి",
-      "edit": "సవరించు",
-      "add": "జోడించు",
-      "rebuild": "ఎన్వలప్‌లను పునర్నిర్మించండి",
-      "record": "రికార్డింగ్ ప్రారంభించండి",
-      "compare": "సరిపోల్చండి",
-      "confirm": "నిర్ధారించండి",
-      "discard": "విస్మరించండి",
-      "export": "ఎగుమతి చేయండి",
-      "import": "దిగుమతి",
-      "merge": "విలీనం చేయండి",
-      "apply": "దరఖాస్తు చేసుకోండి",
-      "refresh": "రిఫ్రెష్ చేయండి",
-      "create": "సృష్టించు",
-      "select": "ఎంచుకోండి",
-      "done": "పూర్తయింది",
-      "reset": "రీసెట్ చేయండి",
-      "trim": "కత్తిరించు",
-      "split": "విభజించండి",
-      "review": "సమీక్షించండి",
-      "inspect": "తనిఖీ చేయండి",
-      "label": "లేబుల్",
-      "save_settings": "సెట్టింగ్‌లను సేవ్ చేయండి",
-      "new_profile": "+ కొత్త ప్రొఫైల్",
-      "new_group": "+ కొత్త సమూహం",
-      "apply_label": "లేబుల్ వర్తించు",
-      "run_auto_label": "ఆటో-లేబుల్‌ని అమలు చేయండి",
-      "save_review": "సమీక్షను సేవ్ చేయండి",
-      "apply_trim": "ట్రిమ్ వర్తించు",
-      "apply_split": "స్ప్లిట్ వర్తించు",
-      "process_recording": "రికార్డింగ్‌ను సేవ్ చేయండి",
-      "stop": "ఆపు",
-      "process": "ప్రక్రియ",
-      "add_device": "+ పరికరాన్ని జోడించండి",
-      "train_now": "ఇప్పుడే శిక్షణ ఇవ్వండి",
-      "reset_to_defaults": "డిఫాల్ట్‌లకు రీసెట్ చేయండి",
-      "reset_to_builtin": "అంతర్నిర్మిత నమూనాలకు రీసెట్ చేయండి",
-      "save_preferences": "ప్రాధాన్యతలను సేవ్ చేయండి",
-      "save_panel_settings": "ప్యానెల్ సెట్టింగ్‌లను సేవ్ చేయండి",
-      "save_access_control": "యాక్సెస్ నియంత్రణను సేవ్ చేయండి",
-      "auto_label_cycles": "స్వీయ లేబుల్ చక్రాలు",
-      "run_analysis": "🔍 సూచన విశ్లేషణను అమలు చేయండి",
-      "apply_all": "అన్నీ వర్తించు",
-      "show_only": "చూపించు మాత్రమే",
-      "dismiss": "తొలగించు",
-      "dismiss_all": "అన్నింటినీ తీసివేయండి",
-      "process_history": "ఇప్పుడు ప్రాసెస్ చేయండి",
-      "clear_debug": "డీబగ్ డేటాను క్లియర్ చేయండి",
-      "wipe_all": "మొత్తం డేటాను తుడిచివేయండి",
-      "export_json": "JSONకి ఎగుమతి చేయండి",
-      "import_json": "JSON నుండి దిగుమతి చేయండి",
-      "correct": "సరైనది...",
-      "ignore": "విస్మరించండి",
-      "add_phase": "+ దశను జోడించండి",
-      "new_phase": "+ కొత్త దశ",
-      "delete_profile": "ప్రొఫైల్‌ను తొలగించండి",
-      "rebuild_envelope": "ఎన్వలప్‌ని పునర్నిర్మించండి",
-      "create_profile": "+ ప్రొఫైల్‌ని సృష్టించండి",
-      "rec_stop": "ఆపు",
-      "pause_cycle": "పాజ్ చేయండి",
-      "resume_cycle": "పునఃప్రారంభించండి",
-      "force_stop": "ఫోర్స్ స్టాప్",
-      "save_phases": "దశలను సేవ్ చేయండి",
-      "auto_detect_split": "స్వయంచాలకంగా గుర్తించండి",
-      "clear_splits": "క్లియర్",
-      "submit_correction": "దిద్దుబాటును సమర్పించండి",
-      "import_overwrite": "దిగుమతి (డేటా ఓవర్‌రైట్ చేస్తుంది)",
-      "use": "ఉపయోగించండి",
-      "manage": "నిర్వహించండి",
-      "remove": "తొలగించు",
-      "delete_group": "సమూహాన్ని తొలగించండి",
-      "trim_split": "ట్రిమ్ / స్ప్లిట్",
-      "convert_to_automation": "ఆటోమేషన్‌కి మార్చండి",
-      "new_automation": "＋ కొత్త ఆటోమేషన్",
-      "from_template": "టెంప్లేట్ ▾ నుండి",
-      "on_cycle_started": "చక్రం ప్రారంభించబడింది",
-      "on_cycle_finished": "ఆన్ సైకిల్ పూర్తయింది",
-      "save_group": "సమూహాన్ని సేవ్ చేయండి"
+      "status_graph": "స్థితి గ్రాఫ్",
+      "storage_stats": "స్టోరేజ్ స్టాట్స్",
+      "tools_and_data": "టూల్స్ & డేటా",
+      "wipe_history": "హిస్టరీని తొలగించండి"
     },
     "badge": {
-      "poor_fit": "పేలవమైన ఫిట్",
-      "fair_fit": "ఫెయిర్ ఫిట్",
-      "manual": "(మాన్యువల్‌గా ఎంపిక చేయబడింది)",
+      "golden_cycle": "రికార్డ్ చేయబడిన సూచన చక్రం",
+      "reviewed": "సమీక్షించబడింది",
+      "feedback_requested": "అభిప్రాయం అభ్యర్థించబడింది",
+      "needs_review": "సమీక్ష అవసరం",
+      "overrun": "సాధారణం కంటే ఎక్కువసేపు నడిచింది",
+      "artifact_tip": "{n} క్రమరాహిత్యాలు గుర్తించబడ్డాయి (ఉదా. సైకిల్ మధ్యలో తలుపు తెరిచింది) — గ్రాఫ్‌లో వాటిని చూడడానికి తెరవండి",
+      "poor_fit_tip": "అస్థిరమైన మ్యాచ్ చరిత్ర — ఈ ప్రొఫైల్‌ను తిరిగి నిర్మించడాన్ని పరిగణించండి",
+      "fair_fit_tip": "మధ్యస్థ మ్యాచ్ అనుగుణ్యత — ఈ ప్రొఫైల్‌కు కేటాయించిన కొన్ని సైకిల్‌లు తక్కువ కాన్ఫిడెన్స్ స్కోర్‌లు కలిగి ఉన్నాయి. ఖచ్చితత్వాన్ని మెరుగుపరచడానికి మరిన్ని సైకిల్‌లను లేబుల్ చేయండి లేదా ప్రొఫైల్‌ను మళ్లీ రికార్డ్ చేయండి.",
       "auto": "(స్వయంచాలకంగా గుర్తించబడింది)",
-      "improving": "↗ మెరుగుపడుతోంది",
+      "built_in_tag": "అంతర్నిర్మిత",
       "declining": "↘ తగ్గుతోంది",
+      "fair_fit": "ఆమోదయోగ్యమైన నాణ్యత",
+      "improving": "↗ మెరుగుపడుతోంది",
+      "manual": "(మాన్యువల్‌గా ఎంచుకోబడింది)",
+      "poor_fit": "తక్కువ నాణ్యత",
       "steady": "→ స్థిరంగా",
-      "using_tuned": "ట్యూన్ చేసిన బరువులను ఉపయోగించడం",
-      "using_defaults": "రవాణా చేయబడిన డిఫాల్ట్‌లను ఉపయోగించడం",
-      "built_in_tag": "అంతర్నిర్మిత"
+      "using_defaults": "నిర్మించిన డిఫాల్ట్‌లు ఉపయోగిస్తోంది",
+      "using_tuned": "ట్యూన్ చేయబడిన వెయిట్‌లు ఉపయోగిస్తోంది"
     },
-    "status": {
-      "completed": "పూర్తయింది",
-      "interrupted": "అంతరాయం కలిగింది",
-      "force_stopped": "ఫోర్స్ ఆగిపోయింది",
-      "active": "చురుకుగా",
-      "ambiguous": "అస్పష్టమైన",
-      "clear": "క్లియర్",
-      "working": "పని చేస్తోంది…",
-      "recording": "రికార్డింగ్…",
-      "ready": "ప్రాసెస్ చేయడానికి సిద్ధంగా ఉంది",
-      "idle": "పనిలేకుండా",
-      "auto_detect": "స్వయంచాలకంగా గుర్తించండి",
-      "fine_tuning": "ఇప్పుడు చక్కగా సర్దుబాటు చేస్తోంది…",
-      "all_statuses": "అన్ని హోదాలు"
+    "btn": {
+      "add_timer": "+ టైమర్ జోడించండి",
+      "remove_timer": "టైమర్ తొలగించండి",
+      "add_device_tip": "మరొక WashData పరికరాన్ని జోడించండి",
+      "delete_group_tip": "ఈ గ్రూప్‌ను మాత్రమే తొలగించండి — సభ్యుల ప్రొఫైల్‌లు ఉంచబడతాయి",
+      "run_analysis_tip": "మీ రికార్డ్ చేసిన సైకిల్‌లను ఇప్పుడు విశ్లేషించండి మరియు ట్యూనింగ్ సూచనలను రిఫ్రెష్ చేయండి",
+      "reset_ml_models_tip": "ఫైన్-ట్యూన్ చేయబడిన మోడల్‌లను విస్మరించి అంతర్నిర్మిత వాటికి తిరిగి వెళ్లండి. WashData వాటిని తర్వాత మళ్లీ నేర్చుకోగలదు.",
+      "add_device": "+ పరికరాన్ని జోడించండి",
+      "add_phase": "+ దశ జోడించండి",
+      "apply_all": "అన్నీ వర్తింపజేయండి",
+      "apply_label": "లేబుల్ వర్తింపజేయండి",
+      "apply_split": "స్ప్లిట్ వర్తింపజేయండి",
+      "apply_trim": "ట్రిమ్ వర్తింపజేయండి",
+      "auto_detect_split": "స్వయంచాలకంగా గుర్తించండి",
+      "auto_label_cycles": "సైకిల్‌లను స్వయంచాలకంగా లేబుల్ చేయండి",
+      "cancel": "రద్దు చేయండి",
+      "clear_debug": "డీబగ్ డేటా తొలగించండి",
+      "clear_splits": "తొలగించండి",
+      "close": "మూసివేయండి",
+      "compare": "పోల్చండి",
+      "confirm": "నిర్ధారించండి",
+      "convert_to_automation": "ఆటోమేషన్‌గా మార్చండి",
+      "correct": "సరిదిద్దండి…",
+      "create": "సృష్టించండి",
+      "create_profile": "+ ప్రొఫైల్ సృష్టించండి",
+      "delete": "తొలగించండి",
+      "delete_group": "గ్రూప్ తొలగించండి",
+      "delete_profile": "ప్రొఫైల్ తొలగించండి",
+      "discard": "విస్మరించండి",
+      "dismiss": "తిరస్కరించండి",
+      "done": "పూర్తయింది",
+      "edit": "సవరించండి",
+      "export": "ఎగుమతి",
+      "export_json": "JSONకి ఎగుమతి",
+      "force_stop": "బలవంతంగా ఆపండి",
+      "from_template": "టెంప్లేట్ నుండి ▾",
+      "ignore": "విస్మరించండి",
+      "import_json": "JSON నుండి దిగుమతి",
+      "import_overwrite": "దిగుమతి (డేటాను ఓవర్‌రైట్ చేస్తుంది)",
+      "inspect": "పరీక్షించండి",
+      "label": "లేబుల్ చేయండి",
+      "manage": "నిర్వహించండి",
+      "merge": "విలీనం చేయండి",
+      "new_automation": "＋ కొత్త ఆటోమేషన్",
+      "new_group": "+ కొత్త గ్రూప్",
+      "new_phase": "+ కొత్త దశ",
+      "new_profile": "+ కొత్త ప్రొఫైల్",
+      "on_cycle_finished": "సైకిల్ పూర్తయినప్పుడు",
+      "on_cycle_started": "సైకిల్ ప్రారంభమైనప్పుడు",
+      "pause_cycle": "పాజ్ చేయండి",
+      "process": "ప్రాసెస్ చేయండి",
+      "process_history": "ఇప్పుడు ప్రాసెస్ చేయండి",
+      "process_recording": "రికార్డింగ్ సేవ్ చేయండి",
+      "rebuild": "ఎన్వలప్‌లను తిరిగి నిర్మించండి",
+      "rebuild_envelope": "ఎన్వలప్ తిరిగి నిర్మించండి",
+      "rec_stop": "ఆపండి",
+      "record": "రికార్డింగ్ ప్రారంభించండి",
+      "refresh": "రిఫ్రెష్ చేయండి",
+      "remove": "తీసివేయండి",
+      "reset": "రీసెట్ చేయండి",
+      "reset_to_builtin": "అంతర్నిర్మిత మోడల్‌లకు రీసెట్ చేయండి",
+      "reset_to_defaults": "డిఫాల్ట్‌లకు రీసెట్ చేయండి",
+      "resume_cycle": "చక్రం పునఃప్రారంభించు",
+      "review": "సమీక్షించండి",
+      "run_analysis": "🔍 సూచన విశ్లేషణ అమలు చేయండి",
+      "run_auto_label": "స్వయంచాలక లేబుల్ అమలు చేయండి",
+      "save": "సేవ్ చేయండి",
+      "save_access_control": "యాక్సెస్ నియంత్రణ సేవ్ చేయండి",
+      "save_group": "గ్రూప్ సేవ్ చేయండి",
+      "save_panel_settings": "ప్యానెల్ సెట్టింగ్‌లు సేవ్ చేయండి",
+      "save_phases": "దశలు సేవ్ చేయండి",
+      "save_preferences": "ప్రాధాన్యతలు సేవ్ చేయండి",
+      "save_review": "సమీక్ష సేవ్ చేయండి",
+      "save_settings": "సెట్టింగ్‌లు సేవ్ చేయండి",
+      "select": "ఎంచుకోండి",
+      "show_only": "మాత్రమే చూపించండి",
+      "split": "విభజించండి",
+      "submit_correction": "సరిదిద్దడాన్ని సమర్పించండి",
+      "train_now": "ఇప్పుడు శిక్షణ ఇవ్వండి",
+      "trim": "ట్రిమ్",
+      "trim_split": "ట్రిమ్ / విభజించండి",
+      "use": "ఉపయోగించండి",
+      "wipe_all": "అన్ని డేటా తొలగించండి"
     },
-    "ml": {
-      "fit_strong": "బలమైన",
-      "fit_good": "బాగుంది",
-      "fit_fair": "సాధారణ",
-      "fit_weak": "బలహీనమైనది",
-      "fit_slight": "కొంచెం",
-      "fit_word": "సరిపోయింది",
-      "fine_tuned_at": "చక్కగా ట్యూన్ చేయబడింది {when}",
-      "personalized": "● ఈ యంత్రానికి వ్యక్తిగతీకరించబడింది",
-      "builtin_models": "● అంతర్నిర్మిత నమూనాలను ఉపయోగించడం"
+    "lbl": {
+      "timer_min": "నిమి",
+      "timer_msg_placeholder": "సందేశం (ఐచ్ఛికం, {device}/{program}/{minutes})",
+      "timer_auto_pause": "ఆటో-పాజ్",
+      "actions": "చర్యలు",
+      "activity": "కార్యాచరణ",
+      "administrators": "నిర్వాహకులు",
+      "auto_fine_tune_off": "ఆటో ఫైన్-ట్యూన్ ఆఫ్",
+      "clock_time": "గడియారం సమయం",
+      "compare_profiles": "ప్రొఫైల్‌లతో పోల్చండి",
+      "confidence": "విశ్వాసం",
+      "confidence_threshold": "విశ్వాస థ్రెషోల్డ్",
+      "correct_duration": "సరైన వ్యవధి (నిమిషాలు, ఐచ్ఛికం)",
+      "correct_profile": "సరైన ప్రొఫైల్",
+      "cost": "వ్యయం",
+      "create_new_profile": "+ కొత్త ప్రొఫైల్ సృష్టించండి…",
+      "cycle_date_display": "సైకిల్ తేదీ డిస్‌ప్లే",
+      "cycle_health": "సైకిల్ ఆరోగ్యం",
+      "cycles_count": "సైకిల్‌లు",
+      "date": "తేదీ",
+      "debug_traces": "డీబగ్ ట్రేస్‌లు",
+      "default": "డిఫాల్ట్",
+      "default_access_level": "క్రింద జాబితా చేయని వినియోగదారులకు డిఫాల్ట్ స్థాయి",
+      "default_other": "డిఫాల్ట్ (ఇతర పరికరాలు)",
+      "default_tab": "ప్యానెల్ తెరిచినప్పుడు డిఫాల్ట్ ట్యాబ్",
+      "description": "వివరణ",
+      "duration": "వ్యవధి",
+      "emphasis": "ప్రాముఖ్యత",
+      "enable_access_control": "వినియోగదారు-వారీగా యాక్సెస్ నియంత్రణను ప్రారంభించండి",
+      "energy": "శక్తి",
+      "expected_duration": "ఆశించిన వ్యవధి (నిమిషాలు)",
+      "file_kb": "ఫైల్ (kB)",
+      "gap_s": "గ్యాప్ (సెకన్లు)",
+      "head_trim": "హెడ్ ట్రిమ్ (సెకన్లు)",
+      "health": "ఆరోగ్యం",
+      "hide_tabs": "నాన్-అడ్మిన్‌ల కోసం ట్యాబ్‌లు దాచండి",
+      "in_use": "ఉపయోగంలో ఉంది",
+      "json_data": "JSON డేటా",
+      "label": "సరిపోలిన ప్రోగ్రామ్",
+      "last_checked": "చివరిగా తనిఖీ చేయబడింది:",
+      "load_from_file": "ఫైల్ నుండి లోడ్ చేయండి",
+      "manual_duration": "మాన్యువల్ వ్యవధి (నిమిషాలు, ఐచ్ఛికం)",
+      "mode_existing_profile": "ఉన్న ప్రొఫైల్‌కు జోడించండి",
+      "mode_new_profile": "కొత్త ప్రొఫైల్ సృష్టించండి",
+      "new_profile_name": "కొత్త ప్రొఫైల్ పేరు",
+      "panel_default_tab": "డిఫాల్ట్ ట్యాబ్",
+      "phase_name": "పేరు",
+      "power": "శక్తి",
+      "profile": "ప్రొఫైల్",
+      "profile_name": "ప్రొఫైల్ పేరు",
+      "progress": "పురోగతి",
+      "read_only": "చదవడానికి మాత్రమే",
+      "ref_cycle": "సూచన సైకిల్ (ఐచ్ఛికం)",
+      "refresh_interval": "రిఫ్రెష్ అంతరం (సెకన్లు)",
+      "remaining": "మిగిలి ఉంది",
+      "remove_label": "- లేబుల్ తీసివేయండి -",
+      "rename_profile": "ప్రొఫైల్ పేరు మార్చండి",
+      "resulting_profile": "ఫలితంగా వచ్చిన ప్రొఫైల్",
+      "save_mode": "సేవ్ మోడ్",
+      "seconds_from_start": "ప్రారంభం నుండి సెకన్లు",
+      "select_profile": "ప్రొఫైల్ ఎంచుకోండి",
+      "show_debug": "స్టేటస్ పేజీలో లైవ్ మ్యాచ్ డీబగ్ కార్డ్ చూపించండి (విశ్వాసం, అస్పష్టత, టాప్ అభ్యర్థులు)",
+      "show_expected": "ఆశించిన వక్రరేఖ ఓవర్‌లే చూపించండి (మ్యాచ్ ప్రొఫైల్, నారింజ)",
+      "show_raw": "రా సెన్సార్ రీడింగ్‌లు చూపించండి (స్మూత్ చేయబడలేదు, బూడిద)",
+      "status": "స్థితి",
+      "tail_trim": "టెయిల్ ట్రిమ్ (సెకన్లు)",
+      "ungrouped": "గ్రూప్ చేయబడలేదు",
+      "unlabelled": "లేబుల్ చేయబడలేదు",
+      "unlabelled_paren": "(లేబుల్ చేయబడలేదు)",
+      "expected": "ఆశించిన",
+      "raw_socket": "రా సాకెట్",
+      "artifact_interruption": "అంతరాయం",
+      "artifact_low_power": "తక్కువ శక్తి",
+      "artifact_high_power": "అధిక శక్తి",
+      "artifact_anomaly": "అసాధారణత"
     },
     "modal": {
-      "label_cycle": "లేబుల్ చక్రం",
+      "merge_cycles": "{n} సైకిల్‌లను విలీనం చేయండి",
+      "auto_label": "సైకిల్‌లను స్వయంచాలకంగా లేబుల్ చేయండి",
+      "correct_feedback": "అభిప్రాయాన్ని సరిదిద్దండి",
       "create_profile": "ప్రొఫైల్ సృష్టించండి",
-      "new_phase": "కొత్త దశ",
+      "cycle": "చక్రం",
       "edit_phase": "దశను సవరించండి",
-      "process_recording": "ప్రాసెస్ రికార్డింగ్",
-      "correct_feedback": "సరైన అభిప్రాయం",
-      "import_config": "దిగుమతి కాన్ఫిగరేషన్",
-      "auto_label": "ఆటో-లేబుల్ సైకిల్స్",
-      "cycle": "చక్రం"
+      "import_config": "కాన్ఫిగరేషన్ దిగుమతి చేయండి",
+      "label_cycle": "సైకిల్‌కు లేబుల్ వేయండి",
+      "new_phase": "కొత్త దశ",
+      "process_recording": "రికార్డింగ్ ప్రాసెస్ చేయండి"
     },
-    "tag": {
-      "late_start": "ఆలస్యంగా ప్రారంభం",
-      "early_end": "ప్రారంభ ముగింపు",
-      "merged": "విలీన చక్రాలు",
-      "split": "స్ప్లిట్ సైకిల్",
-      "noise": "శబ్దం",
-      "wrong_profile": "తప్పు ప్రొఫైల్",
-      "sensor_gap": "సెన్సార్ గ్యాప్"
+    "msg": {
+      "near_duplicate_cluster": "దాదాపు నకిలీ ప్రొఫైల్ క్లస్టర్ కనుగొనబడింది. గ్రూపింగ్ అనేది లుక్-అలైక్‌ల మధ్య విశ్వసనీయంగా ఎంచుకోవడాన్ని అనుమతిస్తుంది (ఉదా. వేర్వేరు ఉష్ణోగ్రత/స్పిన్‌లో ఒకే ప్రోగ్రామ్).",
+      "coverage_gap": "ఇటీవలి సైకిల్‌లకు సరిపోలే ప్రొఫైల్ లేదు (చివరి 30లో {pct}%).",
+      "consider_new_profile": "కొత్త ప్రొఫైల్ సృష్టించడాన్ని పరిగణించండి.",
+      "group_not_cohesive": "ఈ ప్రొఫైల్‌లు విశ్వసనీయంగా గ్రూప్ చేయడానికి తగినంత సారూప్యత లేదు, కాబట్టి మీరు అవుట్‌లైయర్‌ను తీసివేసే వరకు లేదా గ్రూప్‌ను విభజించే వరకు మ్యాచింగ్ వాటిని వ్యక్తిగతంగా పరిగణిస్తుంది.",
+      "group_modal_help": "ఉష్ణోగ్రత/స్పిన్‌లో భిన్నంగా ఉండే ఒకే ఆకారంతో గ్రూప్ ప్రోగ్రామ్‌లు (వ్యవధి మారవచ్చు). మ్యాచింగ్ గ్రూప్‌ను ఒక అభ్యర్థిగా స్కోర్ చేస్తుంది, ఆపై ఉత్తమంగా సరిపడే సభ్యుడిని ఎంచుకుంటుంది. కనీసం 2 ఎంచుకోండి; ఓవర్‌లే వాటి సారూప్యతను చూపిస్తుంది.",
+      "showing_suggestions": "సూచనలతో {count} సెట్టింగ్ చూపిస్తోంది.",
+      "show_all_settings": "అన్ని సెట్టింగ్‌లు చూపించండి",
+      "tuning_suggestions_available": "గమనించిన సైకిల్‌ల నుండి {count} ట్యూనింగ్ సూచన అందుబాటులో ఉంది. అవి సంబంధిత ఫీల్డ్‌ల పక్కన కనిపిస్తాయి.",
+      "legacy_actions_title": "{count} లెగసీ కస్టమ్ యాక్షన్ ఇంకా నడుస్తోంది",
+      "old_actions_warning": "పాత యాక్షన్ ఎడిటర్‌తో కాన్ఫిగర్ చేయబడింది (ఇప్పుడు తొలగించబడింది). అవి ఇంకా సైకిల్ ఈవెంట్‌లలో ట్రిగ్గర్ అవుతాయి కానీ ఇక్కడ సవరించడం సాధ్యం కాదు. వాటిని సాధారణ ఆటోమేషన్‌గా మార్చండి లేదా తొలగించండి.",
+      "no_settings_match": "\"{q}\"కి సరిపోలే సెట్టింగ్‌లు లేవు",
+      "clear_debug_hint": "స్థలాన్ని ఖాళీ చేయడానికి నిల్వ చేయబడిన డీబగ్ డేటాను తొలగించండి.",
+      "wipe_history_warning": "అన్ని సైకిల్‌లు మరియు ప్రొఫైల్‌లను శాశ్వతంగా తొలగించండి. రద్దు చేయడం సాధ్యం కాదు.",
+      "export_description": "అన్ని ప్రొఫైల్‌లు మరియు సైకిల్‌లను JSONకి ఎగుమతి చేయండి లేదా మునుపటి ఎగుమతి నుండి పునరుద్ధరించండి.",
+      "log_buffer_hint": "కొత్తది ముందు · రీస్టార్ట్ అయినప్పటి నుండి చివరి 500 ha_washdata రికార్డ్‌లను బఫర్ చేస్తుంది · పరిమాణం మార్చడానికి దిగువ అంచుని లాగండి.",
+      "review_profile_tip": "ఈ సైకిల్‌కు లేబుల్ చేయబడిన ప్రోగ్రామ్. స్వయంచాలకంగా గుర్తించబడిన ప్రోగ్రామ్ తప్పుగా ఉంటే, ఇక్కడ సరిదిద్దండి — లేబులింగ్ భవిష్యత్తు సైకిల్‌ల కోసం మ్యాచింగ్‌ను నేర్పిస్తుంది.",
+      "review_quality_tip": "ఈ సైకిల్ ఎంత శుభ్రంగా ఉంది. మంచి = ఈ ప్రోగ్రామ్‌కు పాఠ్యపుస్తక ఉదాహరణ; చెడు = గుర్తించబడింది కానీ శబ్దంగా లేదా అసాధారణంగా ఉంది; ఉపయోగించలేనిది = తప్పుగా గుర్తించబడింది (విలీనం, కత్తిరించబడింది లేదా నకిలీ). ఆరోగ్య స్కోర్‌ను మరియు మోడల్‌కు శిక్షణ ఇవ్వడానికి ఏ సైకిల్‌లు అనుమతించబడతాయో నిర్ణయిస్తుంది.",
+      "review_recorded_tip": "దీన్ని దాని ప్రోగ్రామ్ కోసం చేతితో ఎంచుకున్న సూచన సైకిల్‌గా గుర్తించండి — మాన్యువల్‌గా రికార్డ్ చేయబడిన సైకిల్‌కు అదే పాత్ర. సూచన సైకిల్‌లు ఎల్లప్పుడూ ఉంచబడతాయి, మ్యాచింగ్ టెంప్లేట్‌ను సీడ్ చేస్తాయి, మరియు క్లీన్‌అప్ ద్వారా ఎప్పటికీ వదిలివేయబడవు. (ఇది \"గోల్డెన్\"/రికార్డెడ్ ఫ్లాగ్; రెండూ ఒకటే.)",
+      "review_tags_tip": "ఈ సైకిల్‌లో ఏమి తప్పు జరిగిందో వివరించే ఐచ్ఛిక ఫ్లాగ్‌లు, కాబట్టి శిక్షణ మరియు క్లీన్‌అప్ దానికి అనుగుణంగా ఉండవచ్చు.",
+      "review_notes_tip": "మీ స్వంత సూచన కోసం ఉచిత-వచన నోట్స్. మ్యాచింగ్ లేదా శిక్షణలో ఉపయోగించబడదు.",
+      "review_confirm_help": "ఈ సైకిల్ సరిగ్గా గుర్తించబడిందో లేదో నిర్ధారించండి. మీ సమీక్షలు మీ మెషీన్‌లో మోడల్‌కు శిక్షణ ఇస్తాయి — మీరు ఎన్ని సైకిల్‌లు నిర్ధారిస్తే, మ్యాచింగ్ మరియు ఆరోగ్య స్కోరింగ్ అంత మెరుగ్గా ఉంటుంది. శీఘ్ర మంచి/చెడు సరిపోతుంది.",
+      "review_notes_placeholder": "నోట్స్ (ఐచ్ఛికం)",
+      "compare_profiles_tip": "ఈ సైకిల్‌కు ఏది బాగా సరిపోతుందో చూడడానికి పై చార్ట్‌లో ఇతర ప్రొఫైల్ ఎన్వలప్‌లను ఓవర్‌లే చేయండి.",
+      "artifact_header": "ఈ సైకిల్ సమయంలో {n} అసాధారణతలు కనుగొనబడ్డాయి",
+      "artifact_footer": "పై గ్రాఫ్‌లో హైలైట్ చేయబడింది. ఇవి తాత్కాలిక ఆర్టిఫాక్ట్‌లు (ఉదా. సైకిల్ మధ్యలో తలుపు తెరిచింది), అవసరంగా సమస్యలు కాదు.",
+      "profile_poor_health_detail": "ఈ ప్రొఫైల్‌కు కేటాయించిన సైకిల్‌లు అస్థిరమైన ఆకారాలు లేదా తక్కువ విశ్వాసాన్ని కలిగి ఉన్నాయి. ఎన్వలప్‌ను తిరిగి నిర్మించడం లేదా లేబుల్ చేయబడిన సైకిల్‌లను సమీక్షించడాన్ని పరిగణించండి.",
+      "trend_duration_longer": "వ్యవధి ఎక్కువగా ట్రెండ్ అవుతోంది ({pct}%/సైకిల్) — ఇటీవలి సగటు {avg}",
+      "trend_duration_shorter": "వ్యవధి తక్కువగా ట్రెండ్ అవుతోంది ({pct}%/సైకిల్) — ఇటీవలి సగటు {avg}",
+      "trend_energy_up": "శక్తి పెరుగుతోంది ({pct}%/సైకిల్) — ఇటీవలి సగటు {avg}",
+      "trend_energy_down": "శక్తి తగ్గుతోంది ({pct}%/సైకిల్)",
+      "performance_trend": "పనితీరు ట్రెండ్ ({n} సైకిల్‌లు)",
+      "maintenance_advisory": "వ్యవధి/శక్తి పెరగడం ఉపకరణ నిర్వహణ అవసరమని సూచిస్తుంది (ఉదా. డెస్కేలింగ్, ఫిల్టర్ క్లీనింగ్).",
+      "manual_duration_hint": "ప్రొఫైల్ సగటు/అంచనా సైకిల్ పొడవు, మిగిలిన సమయం అంచనాల కోసం ఉపయోగించబడుతుంది. దీన్ని సెట్ చేయడానికి సవరించండి; మార్చకుండా ఉంచడం ప్రస్తుత విలువను ఉంచుతుంది.",
+      "appliance_monitor": "ఉపకరణ మానిటర్",
+      "auto_label_intro": "థ్రెషోల్డ్‌ను మించిన మ్యాచ్ కాన్ఫిడెన్స్ ఉన్న లేబుల్ చేయని సైకిల్‌లకు ప్రొఫైల్‌లను కేటాయించండి.",
+      "cleanup_intro": "ప్రతి లేబుల్ చేయబడిన సైకిల్ ఓవర్‌లే చేయబడింది. అవుట్‌లైయర్‌లను టిక్ చేయండి మరియు ప్రొఫైల్‌ను క్లీన్ చేయడానికి తొలగించండి.",
+      "compare_overlay_profiles": "ప్రొఫైల్‌లను ఓవర్‌లే చేయండి (మసకగా)",
+      "compare_selected_cycles": "ఎంచుకున్న సైకిల్‌లు (ఘనంగా) — చూపించు / దాచు",
+      "feedback_prompt": "సరైనదని నిర్ధారించండి, ప్రోగ్రామ్‌ను సరిదిద్దండి, లేదా విస్మరించండి.",
+      "import_intro": "ఎగుమతి చేయబడిన ఫైల్‌ను లోడ్ చేయండి లేదా క్రింద JSON పేలోడ్‌ను పేస్ట్ చేయండి.",
+      "live_chart_loading": "రీడింగ్‌లు వచ్చినప్పుడు లైవ్ పవర్ చార్ట్ కనిపిస్తుంది.",
+      "loading": "లోడ్ అవుతోంది…",
+      "loading_curve": "వక్రరేఖ లోడ్ అవుతోంది…",
+      "loading_settings": "సెట్టింగ్‌లు లోడ్ అవుతున్నాయి…",
+      "maintenance_requires_access": "నిర్వహణ మరియు ఎగుమతి/దిగుమతికి పూర్తి యాక్సెస్ అవసరం.",
+      "matching_tuning_intro": "నేర్చుకునేటప్పుడు, WashData ప్రోగ్రామ్ మ్యాచింగ్ ఆకారం వర్సెస్ వ్యవధి మరియు శక్తికి ఎంత వెయిట్ ఇస్తుందో కూడా సర్దుబాటు చేస్తుంది.",
+      "merge_intro": "ఎంచుకున్న సైకిల్‌లు ఒకటిగా కలపబడతాయి (కాల క్రమం; గ్యాప్‌లు 0 W తో నింపబడతాయి). ఫలితంగా వచ్చే ప్రొఫైల్‌ను ఎంచుకోండి.",
+      "ml_intro": "WashData అందుబాటులో ఉన్న స్మార్ట్ మోడల్‌లతో వస్తుంది.",
+      "ml_learned_intro": "ఈ మెషీన్‌కు ఫైన్-ట్యూన్ చేయబడిన మోడల్‌లు.",
+      "ml_loading": "ML లోడ్ అవుతోంది…",
+      "ml_settings_intro": "రెండు స్వతంత్ర స్విచ్‌లు: ఒకటి సైకిల్ నడుస్తున్నప్పుడు మోడల్‌లను వర్తింపజేస్తుంది, మరొకటి WashData వాటిని కాలక్రమేణా మీ మెషీన్‌కు ఫైన్-ట్యూన్ చేయడానికి అనుమతిస్తుంది.",
+      "no_cycles_match": "ప్రస్తుత ఫిల్టర్‌కు సరిపోలే సైకిల్‌లు లేవు.",
+      "no_cycles_profile": "ఈ ప్రొఫైల్ కోసం సైకిల్‌లు లేవు.",
+      "no_cycles_yet": "ఇంకా సైకిల్‌లు రికార్డ్ చేయబడలేదు.",
+      "no_device_selected": "పరికరం ఎంచుకోబడలేదు.",
+      "no_devices": "ఇంకా WashData పరికరాలు కాన్ఫిగర్ చేయబడలేదు.",
+      "no_envelope": "ఇంకా ఎన్వలప్ లేదు — సైకిల్‌లను లేబుల్ చేసిన తర్వాత తిరిగి నిర్మించండి.",
+      "no_envelope_overlay": "ఓవర్‌లే చేయడానికి ఎన్వలప్ అందుబాటులో లేదు.",
+      "no_fine_tuned": "ఇంకా ఏమీ ఫైన్-ట్యూన్ చేయబడలేదు — WashData దాని అంతర్నిర్మిత మోడల్‌లను ఉపయోగిస్తోంది.",
+      "no_logs": "ఇంకా లాగ్ రికార్డ్‌లు బఫర్ చేయబడలేదు.",
+      "no_match_yet": "ఇంకా మ్యాచ్ ప్రయత్నం లేదు — నడుస్తున్న సైకిల్ సమయంలో ఇది నింపబడుతుంది.",
+      "no_other_users": "ఇతర హోమ్ అసిస్టెంట్ వినియోగదారులు కనుగొనబడలేదు.",
+      "no_phases": "దశలు నిర్వచించబడలేదు.",
+      "no_phases_assigned": "దశలు కేటాయించబడలేదు.",
+      "no_profiles_compare": "పోల్చడానికి ప్రొఫైల్‌లు లేవు.",
+      "no_profiles_overlay": "ఓవర్‌లే చేయడానికి ప్రొఫైల్‌లు లేవు.",
+      "no_profiles_yet": "ఇంకా ప్రొఫైల్‌లు లేవు. లేబుల్ చేయబడిన సైకిల్ నుండి ఒకదాన్ని సృష్టించండి.",
+      "no_profiles_yet_short": "ఇంకా ప్రొఫైల్‌లు లేవు.",
+      "no_split_points": "ఇంకా స్ప్లిట్ పాయింట్‌లు లేవు.",
+      "no_suggestions": "చురుకైన సూచనలు లేవు.",
+      "pending_feedback": "పెండింగ్ డిటెక్షన్ అభిప్రాయం",
+      "phase_catalog_intro": "సైకిల్‌లోని పేరున్న విభాగాలు (ముందు-వాష్, హీటింగ్, స్పిన్…). దాని కంట్రోల్ ప్యానెల్ నుండి ప్రొఫైల్‌కు కేటాయించండి.",
+      "phase_ranges_intro": "సగటు వక్రరేఖపై ఓవర్‌లే చేయబడిన దశ పరిధులు (సైకిల్ ప్రారంభం నుండి నిమిషాలు). లైవ్‌గా ప్రివ్యూ చేయడానికి విలువలను సవరించండి.",
+      "preferences_admin": "ప్రాధాన్యతలు, ప్యానెల్ & యాక్సెస్ నియంత్రణ",
+      "preferences_adv": "ప్రాధాన్యతలు",
+      "prefs_personal": "ఇవి మీ హోమ్ అసిస్టెంట్ అకౌంట్‌కు మాత్రమే వర్తిస్తాయి.",
+      "profiles_intro": "స్టాట్స్, దశలు మరియు క్లీన్‌అప్ కోసం ప్రొఫైల్‌పై క్లిక్ చేయండి. ఒకే ఆకారం/వ్యవధి (వేర్వేరు ఉష్ణోగ్రత లేదా స్పిన్) గల దగ్గరి ప్రోగ్రామ్‌లను గ్రూప్ చేయండి కాబట్టి మ్యాచింగ్ వాటి మధ్య విశ్వసనీయంగా ఎంచుకుంటుంది.",
+      "rbac_hint": "ఆఫ్ అయినప్పుడు, ప్రతి హోమ్ అసిస్టెంట్ వినియోగదారుకు పూర్తి యాక్సెస్ ఉంది (డిఫాల్ట్). నిర్వాహకులకు ఎల్లప్పుడూ పూర్తి యాక్సెస్ ఉంటుంది మరియు అందరినీ నిర్వహించగలరు.",
+      "recent_logs": "ఇటీవలి ha_washdata రికార్డ్‌లు",
+      "recording_in_progress": "రికార్డింగ్ జరుగుతోంది",
+      "review_in_settings": "సెట్టింగ్‌లలో సమీక్షించండి",
+      "review_to_cycles": "సైకిల్‌ల సమీక్ష క్యూ తెరవండి",
+      "saving_triggers_reload": "సేవ్ చేయడం ఇంటిగ్రేషన్ రీలోడ్‌ను ట్రిగ్గర్ చేస్తుంది. HA ఎంటిటీలు క్లుప్తంగా అందుబాటులో లేవుగా కనిపించవచ్చు.",
+      "search_placeholder": "సెట్టింగ్‌లను వెతకండి…",
+      "see_recorder": "క్రింద రికార్డర్ విడ్జెట్ చూడండి",
+      "split_intro": "స్ప్లిట్ పాయింట్ జోడించడానికి లేదా తొలగించడానికి గ్రాఫ్‌పై క్లిక్ చేయండి, లేదా ఆగి ఉన్న గ్యాప్‌ల ద్వారా స్వయంచాలకంగా గుర్తించండి. ప్రతి ఫలిత విభాగానికి దాని స్వంత ప్రొఫైల్ ఉండవచ్చు.",
+      "storage_diagnostics": "స్టోరేజ్ స్టాట్స్, నిర్వహణ, ఎగుమతి/దిగుమతి",
+      "trim_intro": "ఎరుపు హ్యాండిల్‌లను లాగండి, లేదా విలువలు నమోదు చేయండి. విండో వెలుపల ఉన్నదంతా తొలగించబడుతుంది.",
+      "unsure_detected_prefix": "WashData గుర్తించిందో లేదో ఖచ్చితంగా తెలియదు",
+      "updated": "నవీకరించబడింది"
     },
-    "quality": {
-      "good": "బాగుంది",
-      "bad": "చెడ్డది",
-      "unusable": "ఉపయోగించలేనిది"
-    },
-    "access": {
-      "none": "ఏదీ లేదు (దాచబడింది)",
-      "read": "చదవండి",
-      "edit": "సవరించు",
-      "full": "పూర్తి",
-      "inherit": "వారసత్వము"
+    "phase_desc": {
+      "pre_wash": "ప్రధాన వాష్‌కు ముందు ప్రారంభ నానబెట్టడం లేదా ముందస్తు చికిత్స.",
+      "wash": "డ్రమ్ కదలిక మరియు ఐచ్ఛిక వేడి చేయడంతో ప్రధాన వాషింగ్ సైకిల్.",
+      "wash_dw": "వేడి చేయడంతో ప్రధాన డిటర్జెంట్ వాష్.",
+      "rinse": "శుభ్రమైన నీటి రిన్స్ దశ. ఈ దశ అనేకసార్లు పునరావృతం కావచ్చు.",
+      "spin": "లోడ్ నుండి నీటిని తొలగించడానికి హై-స్పీడ్ వెలికితీత.",
+      "spin_wd": "పొడి చేసే మారు ముందు హై-స్పీడ్ వెలికితీత.",
+      "soak": "యాక్టివ్ వాష్ దశల మధ్య తక్కువ-కార్యాచరణ నానబెట్టిన వ్యవధి.",
+      "soak_dw": "భారీ మట్టి కోసం పొడిగించిన నానబెట్టిన వ్యవధి.",
+      "anti_crease": "ముడతలను తగ్గించడానికి పూర్తయిన తర్వాత అప్పుడప్పుడు చిన్న టంబుల్‌లు.",
+      "heat_up": "పూర్తి పొడి ప్రారంభమయ్యే ముందు ప్రారంభ హీటర్ వేడెక్కడం.",
+      "drying": "ప్రధాన వేడి చేయబడిన టంబులింగ్ వ్యవధి.",
+      "cool_down": "సైకిల్ ముగింపు సమీపంలో వేడి లేకుండా టంబులింగ్.",
+      "anti_wrinkle": "ముడుతలను తగ్గించడానికి ఆవర్తన పోస్ట్-సైకిల్ టంబులింగ్.",
+      "sensor_check": "పొడి కొలవబడుతున్నప్పుడు తక్కువ పవర్ పాజ్.",
+      "drain_and_switch": "వాషింగ్ నుండి పొడి చేసే మోడ్‌కు మారే వ్యవధి.",
+      "pre_rinse": "డిటర్జెంట్ వాష్ ముందు ప్రారంభ స్ప్రే-డౌన్.",
+      "dry": "హీటర్ మరియు/లేదా అవశేష వేడి ఉపయోగించి పొడి చేసే దశ.",
+      "sanitize": "శానిటైజేషన్ ప్రోగ్రామ్‌ల కోసం అధిక ఉష్ణోగ్రత శుభ్రపరిచే దశ."
     },
     "health": {
-      "poor": "⚠ పేలవమైన మ్యాచ్ ఫిట్",
-      "fair": "ఫెయిర్ మ్యాచ్ ఫిట్",
-      "good": "✓ మంచి మ్యాచ్ ఫిట్"
-    },
-    "trend": {
-      "up": "ట్రెండింగ్‌లో ఉంది",
-      "down": "డౌన్ ట్రెండ్ అవుతోంది"
-    },
-    "pref": {
-      "date_relative": "బంధువు (ఉదా. 2 గంటల క్రితం)",
-      "date_absolute": "సంపూర్ణ (ఉదా. 2 జూలైన 14:32)"
+      "fair": "ఆమోదయోగ్యమైన ప్రొఫైల్ నాణ్యత",
+      "good": "✓ మంచి ప్రొఫైల్ నాణ్యత",
+      "poor": "⚠ తక్కువ ప్రొఫైల్ నాణ్యత"
     },
     "log": {
       "all_levels": "అన్ని స్థాయిలు"
+    },
+    "ml": {
+      "builtin_models": "● అంతర్నిర్మిత మోడల్‌లు ఉపయోగిస్తోంది",
+      "fit_fair": "ఆమోదయోగ్యమైనది",
+      "fit_good": "మంచిది",
+      "fit_slight": "తక్కువ",
+      "fit_strong": "బలంగా",
+      "fit_weak": "బలహీనంగా",
+      "fit_word": "సరిపోలిక",
+      "personalized": "● ఈ మెషీన్‌కు వ్యక్తిగతీకరించబడింది"
+    },
+    "pref": {
+      "date_absolute": "సంపూర్ణ (ఉదా. జూ 2న 14:32)",
+      "date_relative": "సాపేక్ష (ఉదా. 2 గంటల క్రితం)"
+    },
+    "quality": {
+      "bad": "చెడు",
+      "good": "మంచిది",
+      "unusable": "ఉపయోగించలేనిది"
+    },
+    "status": {
+      "active": "చురుకుగా",
+      "all_statuses": "అన్ని స్థితులు",
+      "ambiguous": "అస్పష్టం",
+      "auto_detect": "స్వయంచాలకంగా గుర్తించండి",
+      "clear": "స్పష్టంగా",
+      "completed": "పూర్తయింది",
+      "fine_tuning": "ఫైన్-ట్యూనింగ్ జరుగుతోంది…",
+      "force_stopped": "బలవంతంగా ఆపబడింది",
+      "idle": "నిష్క్రియంగా",
+      "interrupted": "అంతరాయం కలిగింది",
+      "ready": "ప్రాసెస్‌కు సిద్ధంగా",
+      "recording": "రికార్డింగ్ జరుగుతోంది"
+    },
+    "tab": {
+      "advanced": "అధునాతన",
+      "diagnostics": "డయాగ్నోస్టిక్స్",
+      "history": "సైకిల్‌లు",
+      "ml": "ML శిక్షణ",
+      "pp_cleanup": "క్లీన్‌అప్",
+      "pp_manage": "నిర్వహించండి",
+      "pp_overview": "అవలోకనం",
+      "pp_phases": "దశలు",
+      "profiles": "ప్రొఫైల్‌లు",
+      "settings": "సెట్టింగ్‌లు",
+      "status": "అవలోకనం",
+      "subtab_phase_catalog": "దశల కేటలాగ్",
+      "subtab_profiles": "ప్రొఫైల్‌లు"
+    },
+    "tag": {
+      "early_end": "తొందర ముగింపు",
+      "late_start": "ఆలస్య ప్రారంభం",
+      "merged": "విలీనం చేయబడిన సైకిల్‌లు",
+      "noise": "నాయిస్",
+      "sensor_gap": "సెన్సార్ గ్యాప్",
+      "split": "విభజించిన సైకిల్",
+      "wrong_profile": "తప్పు ప్రొఫైల్"
+    },
+    "toast": {
+      "access_saved": "యాక్సెస్ నియంత్రణ సేవ్ చేయబడింది",
+      "all_wiped": "అన్ని డేటా తొలగించబడింది",
+      "analysis_complete_none": "విశ్లేషణ పూర్తయింది: కొత్త సూచనలు లేవు",
+      "auto_label_complete": "స్వయంచాలక లేబులింగ్ పూర్తయింది",
+      "automation_deleted": "ఆటోమేషన్ తొలగించబడింది",
+      "correction_submitted": "సరిదిద్దడం సమర్పించబడింది",
+      "cycle_deleted": "సైకిల్ తొలగించబడింది",
+      "cycle_force_stopped": "సైకిల్ బలవంతంగా ఆపబడింది",
+      "cycle_labelled": "సైకిల్ లేబుల్ చేయబడింది",
+      "cycle_paused": "సైకిల్ పాజ్ చేయబడింది",
+      "cycle_resumed": "సైకిల్ పునఃప్రారంభించబడింది",
+      "cycle_trimmed": "సైకిల్ ట్రిమ్ చేయబడింది",
+      "cycles_merged": "సైకిల్‌లు విలీనం చేయబడ్డాయి",
+      "envelope_rebuilt": "ఎన్వలప్ తిరిగి నిర్మించబడింది",
+      "envelopes_rebuilt": "ఎన్వలప్‌లు తిరిగి నిర్మించబడ్డాయి",
+      "export_downloaded": "ఎగుమతి డౌన్‌లోడ్ చేయబడింది",
+      "feedback_all_dismissed": "అన్ని అభిప్రాయాలు తిరస్కరించబడ్డాయి",
+      "feedback_confirmed": "అభిప్రాయం నిర్ధారించబడింది",
+      "feedback_dismissed": "అభిప్రాయం తిరస్కరించబడింది",
+      "group_deleted": "గ్రూప్ తొలగించబడింది",
+      "group_name_required": "గ్రూప్ పేరు అవసరం",
+      "group_saved": "గ్రూప్ సేవ్ చేయబడింది",
+      "import_successful": "దిగుమతి విజయవంతమైంది; ఇంటిగ్రేషన్ రీలోడ్ అవుతోంది",
+      "json_required": "JSON డేటా అవసరం",
+      "legacy_removed": "లెగసీ యాక్షన్‌లు తొలగించబడ్డాయి",
+      "logs_exported": "లాగ్‌లు ఎగుమతి చేయబడ్డాయి",
+      "matching_reverted": "మ్యాచింగ్ వెయిట్‌లు డిఫాల్ట్‌లకు తిరిగి మారించబడ్డాయి",
+      "min_2_profiles": "గ్రూప్ కోసం కనీసం 2 ప్రొఫైల్‌లు ఎంచుకోండి",
+      "ml_training_no_improvement": "శిక్షణ పూర్తయింది: బేస్‌లైన్ ఉంచబడింది (మెరుగుదల లేదు)",
+      "models_reverted": "పరికరంలోని మోడల్‌లు బేస్‌లైన్‌కు తిరిగి మారించబడ్డాయి",
+      "name_required": "పేరు అవసరం",
+      "no_split_found": "విభజించడానికి ఆగి ఉన్న గ్యాప్‌లు కనుగొనబడలేదు",
+      "panel_settings_saved": "ప్యానెల్ సెట్టింగ్‌లు సేవ్ చేయబడ్డాయి",
+      "phase_name_required": "దశ పేరు అవసరం",
+      "phase_updated": "దశ నవీకరించబడింది",
+      "phases_saved": "దశలు సేవ్ చేయబడ్డాయి",
+      "preferences_saved": "ప్రాధాన్యతలు సేవ్ చేయబడ్డాయి",
+      "profile_name_required": "ప్రొఫైల్ పేరు అవసరం",
+      "profile_renamed": "ప్రొఫైల్ పేరు మార్చబడింది",
+      "recording_discarded": "రికార్డింగ్ విస్మరించబడింది",
+      "recording_saved": "రికార్డింగ్ ప్రొఫైల్‌కు సేవ్ చేయబడింది",
+      "recording_started": "రికార్డింగ్ ప్రారంభమైంది",
+      "recording_stopped": "రికార్డింగ్ ఆపబడింది",
+      "review_saved": "సమీక్ష సేవ్ చేయబడింది",
+      "settings_saved": "సెట్టింగ్‌లు సేవ్ చేయబడ్డాయి; ఇంటిగ్రేషన్ రీలోడ్ అవుతోంది",
+      "suggestions_applied": "సూచనలు వర్తింపజేయబడ్డాయి; ఇంటిగ్రేషన్ రీలోడ్ అవుతోంది",
+      "suggestions_dismissed": "సూచనలు తిరస్కరించబడ్డాయి"
+    },
+    "trend": {
+      "down": "పైకి వెళ్తున్న ధోరణి తగ్గుతోంది",
+      "up": "పైకి వెళ్తున్న ధోరణి"
     }
   }
 }

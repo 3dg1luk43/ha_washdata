@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "সাইকেল স্টার্ট",
-        "cycle_finish": "সাইকেল ফিনিশ",
-        "cycle_live": "লাইভ অগ্রগতি"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "ওয়াশিং মেশিন",
@@ -88,198 +81,6 @@
         "bread_maker": "রুটি মেকার",
         "pump": "পাম্প / সাম্প পাম্প",
         "other": "অন্যান্য (উন্নত)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(লেবেলবিহীন)",
-        "create_new_profile": "নতুন প্রোফাইল তৈরি করুন",
-        "remove_label": "লেবেল সরান",
-        "no_reference_cycle": "(কোন রেফারেন্স চক্র নেই)",
-        "all_device_types": "সমস্ত ডিভাইস প্রকার",
-        "current_suffix": "(বর্তমান)",
-        "phase_builtin_suffix": "(অন্তর্নির্মিত)",
-        "phase_none_available": "কোন পর্যায় উপলব্ধ.",
-        "phase_other_device_types": "অন্যান্য ডিভাইস প্রকার:",
-        "settings_deprecation_warning": "⚠️ **অপ্রচলিত ডিভাইসের ধরন:** {device_type} ভবিষ্যতের রিলিজে অপসারণের জন্য নির্ধারিত হয়েছে। WashData এর মিলে যাওয়া পাইপলাইন এই অ্যাপ্লায়েন্স ক্লাসের জন্য নির্ভরযোগ্য ফলাফল দেয় না। আপনার ইন্টিগ্রেশন অবচয় সময়ের মধ্যে কাজ করে; এই সতর্কতাটি নিঃশব্দ করতে, **ডিভাইসের ধরন** নিচের যেকোন একটি সমর্থিত প্রকারে (ওয়াশিং মেশিন, ড্রায়ার, ওয়াশার-ড্রায়ার কম্বো, ডিশওয়াশার, এয়ার ফ্রায়ার, ব্রেড মেকার, বা পাম্প) বা **অন্যান্য (অ্যাডভান্সড)** এ পরিবর্তন করুন যদি আপনার যন্ত্র সমর্থিত কোনো প্রকারের সাথে মেলে না। **অন্যান্য (অ্যাডভান্সড)** ইচ্ছাকৃতভাবে জেনেরিক ডিফল্ট পাঠায় যা কোনো নির্দিষ্ট যন্ত্রের জন্য টিউন করা হয় না, তাই আপনাকে থ্রেশহোল্ড, টাইমআউট এবং ম্যাচিং প্যারামিটারগুলি নিজেই কনফিগার করতে হবে; আপনি যখন স্যুইচ করেন তখন আপনার সমস্ত বিদ্যমান সেটিংস সংরক্ষিত থাকে।",
-        "editor_select_info": "বিভক্ত করতে 1টি চক্র বা একত্রিত করতে 2+ চক্র নির্বাচন করুন৷",
-        "editor_select_info_split": "বিভাজন করতে 1 সাইকেল নির্বাচন করুন।",
-        "editor_select_info_merge": "একত্র করতে 2+ সাইকেল নির্বাচন করুন।",
-        "editor_select_info_delete": "মুছতে 1+ সাইকেল নির্বাচন করুন।",
-        "no_cycles_recorded": "কোন চক্র এখনও রেকর্ড করা হয়নি।",
-        "profile_summary_line": "- **{name}**: {count} চক্র, {avg}মি গড়",
-        "no_profiles_created": "এখনো কোন প্রোফাইল তৈরি করা হয়নি.",
-        "phase_preview": "ফেজ প্রিভিউ",
-        "phase_preview_no_curve": "গড় প্রোফাইল বক্ররেখা এখনও উপলব্ধ নয়. এই প্রোফাইলের জন্য আরো চক্র চালান/লেবেল করুন।",
-        "average_power_curve": "গড় শক্তি বক্ররেখা",
-        "unit_min": "মিনিট",
-        "profile_option_fmt": "{name} ({count} চক্র, ~{duration}মি গড়)",
-        "profile_option_short_fmt": "{name} ({count} চক্র, ~{duration}মি)",
-        "deleted_cycles_from_profile": "{profile} থেকে {count} চক্র মুছে ফেলা হয়েছে৷",
-        "not_enough_data_graph": "গ্রাফ তৈরি করার জন্য পর্যাপ্ত ডেটা নেই।",
-        "no_profiles_found": "কোন প্রোফাইল পাওয়া যায়নি.",
-        "cycle_info_fmt": "চক্র: {start}, {duration}মি, বর্তমান: {label}",
-        "top_candidates_header": "### শীর্ষ প্রার্থী",
-        "tbl_profile": "প্রোফাইল",
-        "tbl_confidence": "আত্মবিশ্বাস",
-        "tbl_correlation": "পারস্পরিক সম্পর্ক",
-        "tbl_duration_match": "সময়কাল ম্যাচ",
-        "detected_profile": "সনাক্ত করা প্রোফাইল",
-        "estimated_duration": "আনুমানিক সময়কাল",
-        "actual_duration": "প্রকৃত সময়কাল",
-        "choose_action": "__নীচে একটি কর্ম চয়ন করুন:__",
-        "tbl_count": "গণনা",
-        "tbl_avg": "গড়",
-        "tbl_min": "মিন",
-        "tbl_max": "সর্বোচ্চ",
-        "tbl_energy_avg": "শক্তি (গড়)",
-        "tbl_energy_total": "শক্তি (মোট)",
-        "tbl_consistency": "গঠিত।",
-        "tbl_last_run": "শেষ রান",
-        "graph_legend_title": "গ্রাফ কিংবদন্তি",
-        "graph_legend_body": "নীল ব্যান্ড ন্যূনতম এবং সর্বাধিক পাওয়ার ড্র পরিসীমা পর্যবেক্ষণ করে। লাইনটি গড় শক্তি বক্ররেখা দেখায়।",
-        "recording_preview": "রেকর্ডিং পূর্বরূপ",
-        "trim_start": "ট্রিম স্টার্ট",
-        "trim_end": "ট্রিম শেষ",
-        "split_preview_title": "বিভক্ত পূর্বরূপ",
-        "split_preview_found_fmt": "{count}টি সেগমেন্ট পাওয়া গেছে।",
-        "split_preview_confirm_fmt": "এই চক্রটিকে {count}টি পৃথক চক্রে বিভক্ত করতে নিশ্চিত করুন ক্লিক করুন৷",
-        "merge_preview_title": "পূর্বরূপ মার্জ করুন",
-        "merge_preview_joining_fmt": "{count} চক্রে যোগদান করা হচ্ছে। শূন্যস্থান 0W রিডিং দিয়ে পূরণ করা হবে।",
-        "editor_delete_preview_title": "মুছে ফেলার পূর্বরূপ",
-        "editor_delete_preview_intro": "নির্বাচিত সাইকেলগুলো স্থায়ীভাবে মুছে ফেলা হবে:",
-        "editor_delete_preview_confirm": "এই সাইকেল রেকর্ডগুলো স্থায়ীভাবে মুছতে Confirm ক্লিক করুন।",
-        "no_power_preview": "*প্রিভিউয়ের জন্য কোনো পাওয়ার ডেটা উপলব্ধ নেই।*",
-        "profile_comparison": "প্রোফাইল তুলনা",
-        "actual_cycle_label": "এই চক্র (প্রকৃত)",
-        "storage_usage_header": "স্টোরেজ ব্যবহার",
-        "storage_file_size": "ফাইলের আকার",
-        "storage_cycles": "সাইকেল",
-        "storage_profiles": "প্রোফাইল",
-        "storage_debug_traces": "ডিবাগ ট্রেস",
-        "overview_suffix": "ওভারভিউ",
-        "phase_preview_for_profile": "প্রোফাইলের জন্য ফেজ প্রিভিউ",
-        "current_ranges_header": "বর্তমান ব্যাপ্তি",
-        "assign_phases_help": "ব্যাপ্তি যোগ করতে, সম্পাদনা করতে, মুছতে বা সংরক্ষণ করতে নিচের ক্রিয়াগুলি ব্যবহার করুন৷",
-        "profile_summary_header": "প্রোফাইল সারাংশ",
-        "recent_cycles_header": "সাম্প্রতিক চক্র",
-        "trim_cycle_preview_title": "সাইকেল ট্রিম প্রিভিউ",
-        "trim_cycle_preview_no_data": "এই চক্রের জন্য কোন পাওয়ার ডেটা উপলব্ধ নেই৷",
-        "trim_cycle_preview_kept_suffix": "রাখা",
-        "table_program": "প্রোগ্রাম",
-        "table_when": "কখন",
-        "table_length": "সময়কাল",
-        "table_match": "মিল",
-        "table_profile": "প্রোফাইল",
-        "table_cycles": "সাইকেল",
-        "table_avg_length": "গড় সময়কাল",
-        "table_last_run": "শেষ রান",
-        "table_avg_energy": "গড় শক্তি",
-        "table_detected_program": "শনাক্তকৃত প্রোগ্রাম",
-        "table_confidence": "আত্মবিশ্বাস",
-        "table_reported": "রিপোর্ট করা হয়েছে"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "একটি চক্র বিভক্ত করুন (শূন্যস্থান খুঁজুন)",
-        "merge": "সাইকেল একত্র করুন (খন্ডে যোগ দিন)",
-        "delete": "চক্র(গুলি) মুছুন"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "নিষ্ক্রিয় ফাঁক স্বয়ংক্রিয়ভাবে শনাক্ত করুন",
-        "manual": "ম্যানুয়াল টাইমস্ট্যাম্প"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "রক্ষণাবেক্ষণ: পুনঃপ্রক্রিয়া এবং ডেটা অপ্টিমাইজ করুন",
-        "clear_debug_data": "ডিবাগ ডেটা সাফ করুন (স্থান খালি করুন)",
-        "wipe_history": "এই ডিভাইসের জন্য সমস্ত ডেটা মুছুন (অপরিবর্তনযোগ্য)",
-        "export_import": "সেটিংস সহ JSON রপ্তানি/আমদানি করুন (কপি/পেস্ট)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "সমস্ত ডেটা রপ্তানি করুন",
-        "import": "ডেটা আমদানি/মার্জ করুন"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "অটো-লেবেল পুরানো চক্র",
-        "select_cycle_to_label": "লেবেল নির্দিষ্ট চক্র",
-        "select_cycle_to_delete": "সাইকেল মুছুন",
-        "interactive_editor": "ইন্টারেক্টিভ এডিটর মার্জ/স্প্লিট করুন",
-        "trim_cycle": "ট্রিম সাইকেল ডেটা"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "নতুন প্রোফাইল তৈরি করুন",
-        "edit_profile": "প্রোফাইল সম্পাদনা/পুনঃনামকরণ করুন",
-        "delete_profile": "প্রোফাইল মুছুন",
-        "profile_stats": "প্রোফাইল পরিসংখ্যান",
-        "cleanup_profile": "ইতিহাস পরিষ্কার করুন - গ্রাফ এবং মুছুন",
-        "assign_phases": "ফেজ রেঞ্জ বরাদ্দ"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "নতুন ফেজ তৈরি করুন",
-        "edit_custom_phase": "ফেজ সম্পাদনা করুন",
-        "delete_custom_phase": "ফেজ মুছুন"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "নাম এবং পর্যায়গুলি প্রয়োগ করুন",
-        "cancel": "পরিবর্তন ছাড়াই ফিরে যান"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "ফেজ রেঞ্জ যোগ করুন",
-        "edit_range": "ফেজ পরিসীমা সম্পাদনা করুন",
-        "delete_range": "ফেজ রেঞ্জ মুছুন",
-        "clear_ranges": "সমস্ত রেঞ্জ সাফ করুন",
-        "auto_detect_ranges": "পর্যায়গুলি স্বয়ংক্রিয়ভাবে সনাক্ত করুন৷",
-        "save_ranges": "সংরক্ষণ করুন এবং ফেরত দিন"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "রিফ্রেশ স্থিতি",
-        "stop_recording": "রেকর্ডিং বন্ধ করুন (সংরক্ষণ এবং প্রক্রিয়া)",
-        "start_recording": "নতুন রেকর্ডিং শুরু করুন",
-        "process_recording": "শেষ রেকর্ডিং প্রক্রিয়া করুন (ছাঁটা ও সংরক্ষণ করুন)",
-        "discard_recording": "শেষ রেকর্ডিং বাতিল করুন"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "নতুন প্রোফাইল তৈরি করুন",
-        "existing_profile": "বিদ্যমান প্রোফাইলে যোগ করুন",
-        "discard": "রেকর্ডিং বাতিল করুন"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "নিশ্চিত করুন - সঠিক সনাক্তকরণ",
-        "correct": "সঠিক - প্রোগ্রাম/সময়কাল বেছে নিন",
-        "ignore": "উপেক্ষা করুন - মিথ্যা ইতিবাচক/কোলাহলপূর্ণ চক্র",
-        "delete": "মুছুন - ইতিহাস থেকে সরান"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "স্টার্ট পয়েন্ট সেট করুন",
-        "set_end": "শেষ বিন্দু সেট করুন",
-        "reset": "সম্পূর্ণ মেয়াদে রিসেট করুন",
-        "apply": "ট্রিম প্রয়োগ করুন",
-        "cancel": "বাতিল করুন"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "বর্তমান পর্যায়"
       },
-      "wash_phase": {
-        "name": "পর্যায়"
-      },
       "profile_cycle_count": {
         "name": "প্রোফাইল {profile_name} গণনা",
         "unit_of_measurement": "চক্র"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s অবশ্যই trim_start_s থেকে বড় হতে হবে।"
+    },
+    "no_active_cycle": {
+      "message": "বিরতি বা পুনরায় শুরু করার জন্য কোন সক্রিয় চক্র নেই।"
     }
   },
   "panel": {
     "hdr": {
-      "panel_settings": "প্যানেল সেটিংস (সকল ব্যবহারকারী)",
-      "ml_learned": "WashData যা শিখেছে",
-      "status": "অবস্থা",
-      "live_power": "লাইভ পাওয়ার",
-      "manual_recording": "ম্যানুয়াল রেকর্ডিং",
-      "tools_and_data": "টুলস এবং ডেটা",
-      "phase_catalog": "পর্যায় ক্যাটালগ",
-      "storage_stats": "স্টোরেজ পরিসংখ্যান",
-      "maintenance": "রক্ষণাবেক্ষণ কার্যাবলী",
-      "export_import": "এক্সপোর্ট / ইম্পোর্ট",
+      "toggle_sidebar": "হোম অ্যাসিস্ট্যান্ট সাইডবার টগল করুন",
       "logs": "লগ",
-      "my_preferences": "আমার পছন্দ",
-      "access_control": "অ্যাক্সেস নিয়ন্ত্রণ",
-      "ml_smart_learning": "স্মার্ট শেখা",
-      "ml_settings_card": "সেটিংস",
-      "ml_matching_tuning": "প্রোগ্রাম ম্যাচিং সূক্ষ্ম সমন্বয়",
-      "display": "প্রদর্শন",
-      "status_graph": "স্ট্যাটাস গ্রাফ",
-      "diagnostics_pref": "ডায়াগনস্টিক",
-      "logs_diagnostics": "ডায়াগনস্টিক",
-      "process_history": "ইতিহাস প্রক্রিয়া করুন",
-      "clear_debug": "ডিবাগ ট্রেস মুছুন",
-      "wipe_history": "ইতিহাস মুছুন",
+      "access_control": "অ্যাক্সেস কন্ট্রোল",
+      "automation_delete": "এই অটোমেশন মুছুন",
+      "automation_needs_review": "এই চক্র পর্যালোচনা প্রয়োজন",
+      "automation_open": "অটোমেশন এডিটরে খুলুন",
+      "automation_review_this_cycle": "এই চক্র পর্যালোচনা",
       "automations": "অটোমেশন",
-      "automation_open": "অটোমেশন সম্পাদকে খুলুন",
-      "automation_delete": "এই অটোমেশনটি মুছুন",
-      "automation_needs_review": "এই চক্রের পর্যালোচনা প্রয়োজন",
-      "automation_review_this_cycle": "এই চক্রটি পর্যালোচনা করুন",
-      "no_automations": "এই ডিভাইসটির সাথে এখনও কোনও অটোমেশন যুক্ত নেই।"
+      "clear_debug": "ডিবাগ ট্রেস সাফ করুন",
+      "diagnostics_pref": "ডায়াগনস্টিকস",
+      "display": "প্রদর্শন",
+      "export_import": "রপ্তানি/আমদানি",
+      "live_power": "লাইভ পাওয়ার",
+      "logs_diagnostics": "ডায়াগনস্টিকস",
+      "maintenance": "রক্ষণাবেক্ষণ কর্ম",
+      "manual_recording": "ম্যানুয়াল রেকর্ডিং",
+      "ml_learned": "ওয়াশডেটা কি শিখেছে",
+      "ml_matching_tuning": "প্রোগ্রাম-ম্যাচিং ফাইন-টিউনিং",
+      "ml_settings_card": "সেটিংস",
+      "ml_smart_learning": "স্মার্ট লার্নিং",
+      "my_preferences": "আমার পছন্দ",
+      "no_automations": "এই ডিভাইসে এখনও কোনো অটোমেশন উল্লেখ নেই।",
+      "panel_settings": "প্যানেল সেটিংস",
+      "phase_catalog": "ফেজ ক্যাটালগ",
+      "process_history": "প্রক্রিয়া ইতিহাস",
+      "status": "স্ট্যাটাস",
+      "status_graph": "স্ট্যাটাস গ্রাফ",
+      "storage_stats": "স্টোরেজ পরিসংখ্যান",
+      "tools_and_data": "টুলস এবং ডেটা",
+      "wipe_history": "ইতিহাস মুছে ফেলুন"
     },
     "lbl": {
-      "manual_duration": "ম্যানুয়াল সময়কাল (মিনিট, ঐচ্ছিক)",
-      "correct_duration": "সঠিক সময়কাল (মিনিট, ঐচ্ছিক)",
-      "default_tab": "প্যানেল খোলার সময় ডিফল্ট ট্যাব",
-      "default_access_level": "ব্যবহারকারীদের জন্য ডিফল্ট স্তর",
-      "show_expected": "প্রত্যাশিত বক্ররেখা ওভারলে দেখান (মিলিত প্রোফাইল, কমলা)",
-      "show_raw": "কাঁচা সেন্সর রিডিং দেখান (মসৃণ নয়, ধূসর)",
-      "show_debug": "স্ট্যাটাস পেজে লাইভ ম্যাচ ডিবাগ কার্ড দেখান (কনফিডেন্স, অস্পষ্টতা, শীর্ষ প্রার্থী)",
-      "power": "শক্তি",
-      "progress": "প্রগতি",
-      "remaining": "অবশিষ্ট",
-      "duration": "সময়কাল",
-      "energy": "শক্তি (kWh)",
-      "profile": "প্রোফাইল",
-      "status": "অবস্থা",
-      "date": "তারিখ",
-      "confidence": "বিশ্বাসযোগ্যতা",
-      "health": "স্বাস্থ্য",
-      "cost": "ব্যয়",
-      "program": "প্রোগ্রাম",
-      "cycle_health": "সাইকেলের স্বাস্থ্য",
+      "timer_min": "মিনিট",
+      "timer_msg_placeholder": "বার্তা (ঐচ্ছিক, {device}/{program}/{minutes})",
+      "timer_auto_pause": "অটো-পজ",
+      "actions": "কর্ম",
       "activity": "কার্যকলাপ",
+      "administrators": "প্রশাসক",
+      "auto_fine_tune_off": "অটো ফাইন-টিউন বন্ধ",
+      "clock_time": "ঘড়ির সময়",
+      "compare_profiles": "প্রোফাইলের সাথে তুলনা করুন",
+      "confidence": "আত্মবিশ্বাস",
+      "confidence_threshold": "আত্মবিশ্বাস থ্রেশহোল্ড",
+      "correct_duration": "সঠিক সময়কাল (মিনিট, ঐচ্ছিক)",
+      "correct_profile": "সঠিক প্রোফাইল",
+      "cost": "খরচ",
+      "create_new_profile": "+ নতুন প্রোফাইল তৈরি করুন...",
+      "cycle_date_display": "চক্র তারিখ প্রদর্শন",
+      "cycle_health": "সাইকেল স্বাস্থ্য",
+      "cycles_count": "চক্র",
+      "date": "তারিখ",
+      "debug_traces": "ডিবাগ ট্রেস",
+      "default": "ডিফল্ট",
+      "default_access_level": "নীচে তালিকাভুক্ত নয় ব্যবহারকারীদের জন্য ডিফল্ট স্তর",
+      "default_other": "ডিফল্ট (অন্যান্য ডিভাইস)",
+      "default_tab": "প্যানেল খোলার সময় ডিফল্ট ট্যাব",
+      "description": "বর্ণনা",
+      "duration": "সময়কাল",
+      "emphasis": "জোর",
+      "enable_access_control": "প্রতি-ব্যবহারকারী অ্যাক্সেস নিয়ন্ত্রণ সক্ষম করুন",
+      "energy": "শক্তি",
+      "expected_duration": "প্রত্যাশিত সময়কাল (মিনিট)",
+      "file_kb": "ফাইল (kB)",
+      "gap_s": "ফাঁক (গুলি)",
+      "head_trim": "হেড ট্রিম (গুলি)",
+      "health": "স্বাস্থ্য",
+      "hide_tabs": "নন-অ্যাডমিনদের জন্য ট্যাব লুকান",
+      "in_use": "ব্যবহারে",
+      "json_data": "JSON ডেটা",
+      "label": "মিলিত প্রোগ্রাম",
+      "last_checked": "সর্বশেষ পরীক্ষা করা হয়েছে:",
+      "load_from_file": "ফাইল থেকে লোড করুন",
+      "manual_duration": "ম্যানুয়াল সময়কাল (মিনিট, ঐচ্ছিক)",
+      "mode_existing_profile": "বিদ্যমান প্রোফাইলে যোগ করুন",
+      "mode_new_profile": "নতুন প্রোফাইল তৈরি করুন",
+      "new_profile_name": "নতুন প্রোফাইল নাম",
+      "panel_default_tab": "ডিফল্ট ট্যাব",
+      "phase_name": "নাম",
+      "power": "শক্তি",
+      "profile": "প্রোফাইল",
+      "profile_name": "প্রোফাইল নাম",
+      "progress": "অগ্রগতি",
+      "read_only": "শুধুমাত্র পঠনযোগ্য",
+      "ref_cycle": "রেফারেন্স সাইকেল (ঐচ্ছিক)",
+      "refresh_interval": "রিফ্রেশ ব্যবধান (গুলি)",
+      "remaining": "অবশিষ্ট",
+      "remove_label": "- লেবেল সরান -",
+      "rename_profile": "প্রোফাইল পুনঃনামকরণ করুন",
+      "resulting_profile": "ফলাফল প্রোফাইল",
+      "save_mode": "সেভ মোড",
+      "seconds_from_start": "শুরু থেকে সেকেন্ড",
+      "select_profile": "প্রোফাইল নির্বাচন করুন",
+      "show_debug": "স্ট্যাটাস পৃষ্ঠায় লাইভ ম্যাচ ডিবাগ কার্ড দেখান (আস্থা, অস্পষ্টতা, শীর্ষ প্রার্থী)",
+      "show_expected": "প্রত্যাশিত কার্ভ ওভারলে দেখান (মিলিত প্রোফাইল, কমলা)",
+      "show_raw": "কাঁচা সেন্সর রিডিং দেখান (আনমসুথ, ধূসর)",
+      "status": "স্ট্যাটাস",
+      "tail_trim": "লেজ ছাঁটা (গুলি)",
+      "ungrouped": "গোষ্ঠীভুক্ত নয়",
       "unlabelled": "লেবেলবিহীন",
       "unlabelled_paren": "(লেবেলবিহীন)",
-      "emphasis": "গুরুত্ব",
-      "default": "ডিফল্ট",
-      "in_use": "ব্যবহারে আছে",
-      "profile_name": "প্রোফাইলের নাম",
-      "ref_cycle": "রেফারেন্স চক্র (ঐচ্ছিক)",
-      "phase_name": "পর্যায় নাম",
-      "description": "বিবরণ",
-      "correct_profile": "সঠিক প্রোফাইল",
-      "load_from_file": "ফাইল থেকে লোড করা হবে",
-      "json_data": "JSON তথ্য",
-      "expected_duration": "প্রত্যাশিত সময়কাল (মিনিট)",
-      "rename_profile": "প্রোফাইলের নাম পরিবর্তন করুন",
-      "select_profile": "প্রোফাইল নির্বাচন করুন",
-      "confidence_threshold": "আত্মবিশ্বাস থ্রেশহোল্ড",
-      "resulting_profile": "ফলস্বরূপ প্রোফাইল",
-      "new_profile_name": "নতুন প্রোফাইলের নাম",
-      "save_mode": "সেভ মোড",
-      "head_trim": "হেড ট্রিম (সে)",
-      "tail_trim": "টেইল ট্রিম (সে)",
-      "gap_s": "গ্যাপ (সে)",
-      "start": "আরম্ভ",
-      "end": "সমাপ্তি",
-      "quality": "গুণমান",
-      "golden_reference": "রেকর্ডকৃত রেফারেন্স চক্র",
-      "compare_profiles": "প্রোফাইলের সাথে তুলনা করুন",
-      "tags": "ট্যাগ",
-      "notes": "নোট",
-      "cycle_date_display": "সাইকেলের তারিখ প্রদর্শন",
-      "refresh_interval": "রিফ্রেশ বিরতি (সেকেন্ড)",
-      "panel_default_tab": "ডিফল্ট ট্যাব",
-      "hide_tabs": "অ-অ্যাডমিনদের জন্য ট্যাব লুকান",
-      "enable_access_control": "প্রতি-ব্যবহারকারী অ্যাক্সেস নিয়ন্ত্রণ সক্রিয় করুন",
-      "administrators": "অ্যাডমিনিস্ট্রেটর",
-      "default_other": "ডিফল্ট (অন্যান্য ডিভাইস)",
-      "mode_new_profile": "নতুন প্রোফাইল নির্মাণ করুন",
-      "mode_existing_profile": "উপস্থিত প্রোফাইল যোগ করুন",
-      "auto_fine_tune_on": "স্বয়ংক্রিয় ফাইন-টিউন চালু (প্রায় {hour}:০০)",
-      "auto_fine_tune_off": "স্বয়ংক্রিয় ফাইন-টিউন বন্ধ",
-      "last_checked": "সর্বশেষ পরীক্ষিত:",
-      "remove_label": "- লেবেল মুছে ফেলুন",
-      "create_new_profile": "+ নতুন প্রোফাইল তৈরি করো...",
-      "read_only": "শুধুমাত্র পাঠযোগ্য",
-      "actions": "কাজ",
-      "cycles_count": "সাইকেল",
-      "debug_traces": "ট্রেস ডিবাগ করুন",
-      "file_kb": "ফাইল (কিলোবাইট)",
-      "label": "লেবেল",
-      "seconds_from_start": "শুরু থেকে সেকেন্ড",
-      "clock_time": "ঘড়ি সময়",
-      "ungrouped": "গ্রুপ করা হয়নি"
-    },
-    "toast": {
-      "settings_saved": "সেটিংস সংরক্ষিত; ইন্টিগ্রেশন পুনরায় লোড হচ্ছে",
-      "import_successful": "সাফল্যের সাথে ইম্পোর্ট সমাপ্ত হয়েছে, পুনরায় লোড করা হচ্ছে",
-      "suggestions_applied": "পরামর্শ প্রয়োগ করা হয়েছে; ইন্টিগ্রেশন পুনরায় লোড হচ্ছে",
-      "ml_training_no_improvement": "প্রশিক্ষণ সম্পূর্ণ: বেসলাইন বজায় (কোনো উন্নতি নেই)",
-      "could_not_load_cycle": "চক্র লোড করা যায়নি: {error}",
-      "preferences_saved": "সংরক্ষিত পছন্দসমূহ",
-      "panel_settings_saved": "প্যানেল সেটিংস সংরক্ষিত",
-      "access_saved": "প্রবেশাধিকার নিয়ন্ত্রণ সংরক্ষিত",
-      "profile_created": "প্রোফাইল \"{name}\" নির্মাণ করা হয়েছে",
-      "profile_deleted": "প্রোফাইল \"{name}\" মুছে ফেলা হয়েছে৷",
-      "profile_renamed": "প্রোফাইলের নাম পরিবর্তন",
-      "phases_saved": "পর্যায় সংরক্ষিত",
-      "phase_created": "পর্যায় \"{name}\" তৈরি হয়েছে",
-      "phase_deleted": "পর্যায় \"{name}\" মুছে ফেলা হয়েছে",
-      "phase_updated": "পর্যায় আপডেট করা হয়েছে",
-      "recording_started": "রেকর্ডিং শুরু হয়েছে",
-      "recording_stopped": "রেকর্ড বন্ধ করা হয়েছে",
-      "recording_discarded": "রেকর্ডিং বাতিল করা হয়েছে",
-      "recording_saved": "রেকর্ডিং প্রোফাইলে সংরক্ষিত",
-      "export_downloaded": "ডাউনলোড করা হয়েছে",
-      "logs_exported": "লগ এক্সপোর্ট করা হয়েছে",
-      "envelopes_rebuilt": "খাম পুনরায় নির্মিত হয়েছে",
-      "envelope_rebuilt": "খাম পুনরায় নির্মিত হয়েছে",
-      "suggestions_dismissed": "পরামর্শগুলি প্রত্যাখ্যান করা হয়েছে",
-      "auto_label_complete": "অটো-লেবেল সম্পূর্ণ",
-      "cycle_labelled": "চক্রে লেবেল লাগানো হয়েছে",
-      "cycle_deleted": "চক্র মুছে ফেলা হয়েছে",
-      "cycles_deleted": "{count}টি চক্র মুছে ফেলা হয়েছে",
-      "cycle_trimmed": "চক্র ছাঁটা হয়েছে",
-      "cycles_merged": "চক্রগুলি একত্রিত হয়েছে",
-      "review_saved": "পর্যালোচনা সংরক্ষিত",
-      "feedback_confirmed": "প্রতিক্রিয়া নিশ্চিত করা হয়েছে",
-      "feedback_dismissed": "প্রতিক্রিয়া প্রত্যাখ্যান করা হয়েছে",
-      "feedback_all_dismissed": "সকল প্রতিক্রিয়া মুছে ফেলা হয়েছে",
-      "correction_submitted": "সংশোধন জমা দেওয়া হয়েছে",
-      "group_saved": "গ্রুপ সংরক্ষিত",
-      "group_deleted": "দল মুছে ফেলা হয়েছে",
-      "automation_deleted": "অটোমেশন মুছে ফেলা হয়েছে",
-      "legacy_removed": "লিগ্যাসি কর্ম মুছে ফেলা হয়েছে",
-      "cycle_paused": "চক্র বিরতি দেওয়া হয়েছে",
-      "cycle_resumed": "চক্র পুনরায় শুরু হয়েছে",
-      "cycle_force_stopped": "চক্র জোরপূর্বক বন্ধ করা হয়েছে",
-      "ml_training_promoted": "প্রশিক্ষণ সম্পূর্ণ: {count}টি মডেল উন্নীত",
-      "matching_reverted": "মিলের ওজন ডিফল্টে ফিরিয়ে দেওয়া হয়েছে",
-      "models_reverted": "ডিভাইস মডেলগুলি বেসলাইনে ফিরে গেছে",
-      "analysis_complete": "সম্পূর্ণ বিশ্লেষণ: {count} পরামর্শ( সমূহ)",
-      "analysis_complete_none": "সম্পূর্ণ বিশ্লেষণ: নতুন পরামর্শ অনুপস্থিত",
-      "debug_cleared": "{count}টি ডিবাগ ট্রেস মুছে ফেলা হয়েছে",
-      "all_wiped": "সমস্ত ডেটা মুছে ফেলা হয়েছে",
-      "no_split_found": "বিচ্ছিন্ন করার যোগ্য কোনো এনট্রি উপস্থিত নেই",
-      "group_name_required": "দলের নাম উল্লেখ করা আবশ্যক",
-      "min_2_profiles": "একটি দলের জন্য অন্তত দুটি প্রোফাইল নির্বাচন করুন",
-      "profile_name_required": "প্রোফাইলের নাম উল্লেখ করা আবশ্যক",
-      "phase_name_required": "দশার নাম উল্লেখ করা আবশ্যক",
-      "name_required": "নাম প্রয়োজন",
-      "json_required": "JSON তথ্য প্রয়োজন",
-      "save_failed": "সংরক্ষণ ব্যর্থ হয়েছে: {error}",
-      "delete_failed": "মুছে ফেলতে ব্যর্থ: {error}",
-      "apply_failed": "প্রয়োগ ব্যর্থ হয়েছে: {error}",
-      "rebuild_failed": "পুনর্নির্মাণ ব্যর্থ হয়েছে: {error}",
-      "start_failed": "আরম্ভ করতে ব্যর্থ: {error}",
-      "stop_failed": "বন্ধ করতে ব্যর্থ: {error}",
-      "discard_failed": "বাতিল করতে ব্যর্থ: {error}",
-      "trim_failed": "ট্রিম ব্যর্থ হয়েছে: {error}",
-      "split_failed": "বিভক্ত করতে ব্যর্থ: {error}",
-      "merge_failed": "একত্রিত করতে ব্যর্থ: {error}",
-      "create_failed": "তৈরি করতে ব্যর্থ: {error}",
-      "update_failed": "আপডেট করতে ব্যর্থ: {error}",
-      "rename_failed": "পুনঃনামকরণ ব্যর্থ হয়েছে: {error}",
-      "revert_failed": "বাতিল করতে ব্যর্থ: {error}",
-      "training_failed": "প্রশিক্ষণ ব্যর্থ হয়েছে: {error}",
-      "export_failed": "এক্সপোর্ট ব্যর্থ হয়েছে: {error}",
-      "import_failed": "আমদানি ব্যর্থ হয়েছে: {error}",
-      "auto_label_failed": "অটো-লেবেল ব্যর্থ হয়েছে: {error}",
-      "analysis_failed": "বিশ্লেষণ করতে ব্যর্থ: {error}",
-      "auto_detect_failed": "অটো-সনাক্ত ব্যর্থ হয়েছে: {error}",
-      "error": "ত্রুটি: {error}",
-      "pause_failed": "বিরতি ব্যর্থ হয়েছে: {error}",
-      "label_failed": "লেবেল ব্যর্থ হয়েছে: {error}",
-      "invalid_json": "\"{key}\" বৈধ JSON নয় — এটি সংশোধন করুন বা সংরক্ষণের আগে ক্ষেত্রটি পরিষ্কার করুন।",
-      "processed": "প্রক্রিয়া করা হয়েছে {bits}",
-      "split_complete": "{count}টি চক্রে বিভক্ত করা হয়েছে"
-    },
-    "msg": {
-      "no_devices": "কোনও WashData ডিভাইস এখনো কনফিগার করা হয়নি।",
-      "live_chart_loading": "লাইভ পাওয়ার চার্ট রিডিং আসার সাথে প্রদর্শিত হবে।",
-      "no_cycles_match": "বর্তমান ফিল্টারের সাথে কোনো চক্র মেলে না।",
-      "no_profiles_yet": "এখনো কোনো প্রোফাইল নেই। একটি লেবেলকৃত চক্র থেকে তৈরি করুন।",
-      "no_logs": "কোন লগ রেকর্ড এখনো বাফার করা হয়নি।",
-      "no_envelope": "এখনও কোনো এনভেলপ নেই — চক্রে লেবেল লাগানোর পরে পুনর্নির্মাণ করুন।",
-      "no_cycles_profile": "এই প্রোফাইলের জন্য কোন সাইকেল নেই।",
-      "saving_triggers_reload": "সংরক্ষণ করলে ইন্টিগ্রেশন পুনরায় লোড হবে। HA এনটিটিগুলি সংক্ষেপে অনুপলব্ধ দেখাতে পারে।",
-      "ml_learned_intro": "এই মেশিনে ফাইন-টিউন করা মডেলগুলি। যা তালিকাভুক্ত নেই তা বিশ্বস্ত বিল্ট-ইন মডেল ব্যবহার করে।",
-      "ml_intro": "WashData স্মার্ট মডেল সহ আসে যা চক্র সনাক্ত করে, প্রোগ্রাম মেলায়, এবং সময় ও শক্তি অনুমান করে — বাক্সের বাইরেই কাজ করে।",
-      "matching_tuning_intro": "শেখার সময়, WashData একইসাথে কীভাবে প্রোগ্রাম মিলানো একটি চক্রের আকার বনাম মেয়াদ এবং শক্তির উপর গুরুত্ব দেয় তা সামঞ্জস্য করে।",
-      "phase_catalog_intro": "চক্রের নামযুক্ত অংশ (প্রি-ওয়াশ, হিটিং, স্পিন...)। এর কন্ট্রোল প্যানেল থেকে একটি প্রোফাইলে বরাদ্দ করুন।",
-      "phase_ranges_intro": "ফেজের সীমা (চক্রের শুরু থেকে মিনিট) গড় বক্ররেখায় উপরিস্থাপিত। লাইভ পূর্বরূপের জন্য মান সম্পাদনা করুন।",
-      "cleanup_intro": "প্রতিটি লেবেলযুক্ত চক্র উপরিস্থাপিত। প্রোফাইল পরিষ্কার করতে আউটলায়ারগুলি চিহ্নিত করে মুছুন।",
-      "trim_intro": "লাল হাতলগুলি টেনে আনুন, অথবা মান লিখুন । জানালার বাইরে সবকিছু সরানো হয়েছে ।",
-      "auto_label_intro": "লেবেলবিহীন চক্রে প্রোফাইল বরাদ্দ করুন যাদের মিলের আস্থা সীমা অতিক্রম করে।",
-      "merge_intro": "নির্বাচিত চক্রগুলি একটিতে একত্রিত হয় (কালানুক্রমিক ক্রমে; ফাঁক 0W রিডিং দিয়ে পূর্ণ)। ফলস্বরূপ প্রোফাইল বেছে নিন।",
-      "see_recorder": "নীচে রেকর্ডার উইজেট দেখুন",
-      "review_to_cycles": "সাইকেলের পর্যালোচনা সারিতে খুলুন",
-      "no_device_selected": "কোনো ডিভাইস নির্বাচিত হয়নি ।",
-      "loading": "লোড করা হচ্ছে...",
-      "loading_settings": "বৈশিষ্ট্যাবলী লোড করা হচ্ছে...",
-      "no_cycles_yet": "এখনো কোনো চক্র রেকর্ড করা হয়নি।",
-      "no_phases": "কোনো পর্যায় নির্ধারিত নেই।",
-      "no_phases_assigned": "কোনো পর্যায় বরাদ্দ নেই।",
-      "no_split_points": "এখনো আলাদা পয়েন্ট নেই।",
-      "no_envelope_overlay": "ওভারলে যাওয়ার জন্য কোন খাম নেই।",
-      "no_other_users": "অন্য কোনো Home Assistant ব্যবহারকারী পাওয়া যায়নি।",
-      "maintenance_requires_access": "রক্ষণাবেক্ষণ এবং এক্সপোর্ট/ইম্পোর্টের জন্য সম্পূর্ণ অ্যাক্সেস প্রয়োজন।",
-      "loading_curve": "বক্ররেখা লোড করা হচ্ছে...",
-      "compare_selected_cycles": "নির্বাচিত চক্র (কঠিন) — দেখান/লুকান",
-      "compare_overlay_profiles": "ওভারলে প্রোফাইল (ম্লান)",
-      "no_profiles_compare": "তুলনার জন্য কোন প্রোফাইল নেই।",
-      "prefs_personal": "আপনার Home Assistant অ্যাকাউন্টের ক্ষেত্রে প্রযোজ্য।",
-      "no_match_yet": "এখনো কোনো ম্যাচ প্রচেষ্টা নেই — এটি একটি চলমান চক্রের সময় পূরণ হয়।",
-      "no_fine_tuned": "এখনো কিছু ফাইন-টিউন করা হয়নি — WashData এর বিল্ট-ইন মডেল ব্যবহার করছে।",
-      "ml_settings_intro": "দুটি স্বাধীন সুইচ: একটি চক্র চলার সময় মডেল প্রয়োগ করে, অন্যটি WashData-কে সময়ের সাথে আপনার মেশিনে তা সূক্ষ্মভাবে সামঞ্জস্য করতে দেয়।",
-      "split_intro": "একটি বিভাজন বিন্দু যোগ বা অপসারণ করতে গ্রাফে ক্লিক করুন, অথবা নিষ্ক্রিয় ফাঁক দিয়ে স্বয়ংক্রিয়ভাবে সনাক্ত করুন।",
-      "import_intro": "একটি এক্সপোর্ট করা ফাইল লোড করুন বা নিচে JSON পেলোড পেস্ট করুন।",
-      "enough_data": "({current}/{min} চক্র) থেকে শেখার জন্য যথেষ্ট ডেটা।",
-      "collecting_data": "ডেটা সংগ্রহ করা হচ্ছে — ফাইন-টিউনিং শুরু হওয়ার আগে {need} আরও চক্র{plural} ({current}/{min})।",
-      "updated": "{time} আপডেট করা হয়েছে",
-      "appliance_monitor": "যন্ত্রপাতি মনিটর",
-      "ml_loading": "এমএল লোড করা হচ্ছে...",
-      "review_in_settings": "সেটিংসে পর্যালোচনা করুন",
-      "storage_diagnostics": "স্টোরেজ পরিসংখ্যান, রক্ষণাবেক্ষণ, এক্সপোর্ট/ইম্পোর্ট",
-      "recent_logs": "সাম্প্রতিক ha_washdata লগ রেকর্ড",
-      "preferences_adv": "পছন্দ",
-      "preferences_admin": "পছন্দ, প্যানেল এবং নিয়ন্ত্রণ",
-      "pending_feedback": "মুলতুবি সনাক্তকরণ প্রতিক্রিয়া",
-      "recording_in_progress": "রেকর্ড করা হচ্ছে",
-      "no_profiles_yet_short": "এখনো কোন প্রোফাইল নেই।",
-      "unsure_detected_prefix": "ওয়াশিং ডাটা নিশ্চিত নয় এটা সনাক্ত করা",
-      "no_suggestions": "কোন সক্রিয় পরামর্শ নেই ।",
-      "no_profiles_overlay": "ওভারলে করার জন্য কোনো প্রোফাইল নেই।",
-      "compare_cycles_title": "{count}টি চক্র তুলনা করুন",
-      "profiles_intro": "পরিসংখ্যান, পর্যায় এবং পরিষ্কারের জন্য একটি প্রোফাইলে ক্লিক করুন। প্রায় একই প্রোগ্রামগুলি (একই আকৃতি/সময়কাল, ভিন্ন তাপমাত্রা বা স্পিন) গ্রুপ করুন যাতে মিল নির্ভরযোগ্যভাবে এদের মধ্যে বেছে নিতে পারে।",
-      "search_placeholder": "সেটিংস অনুসন্ধান করুন…",
-      "automations_intro": "WashData {start} / {end} ইভেন্ট চালু করে এবং এন্টিটি প্রকাশ করে, তাই বিজ্ঞপ্তি এবং ক্রিয়াগুলি সাধারণ Home Assistant অটোমেশন হিসেবে তৈরি করা ভালো। এই ডিভাইস ব্যবহার করে এমন অটোমেশনগুলি নিচে প্রদর্শিত হবে।",
-      "notify_services_hint": "{entity} সার্ভিস আইডি ব্যবহার করুন (একাধিকের জন্য কমা দিয়ে আলাদা করুন)। টেমপ্লেট ভেরিয়েবল: {vars}।",
-      "rbac_hint": "বন্ধ থাকলে, প্রতিটি Home Assistant ব্যবহারকারীর সম্পূর্ণ অ্যাক্সেস থাকে (ডিফল্ট)। প্রশাসকদের সর্বদা সম্পূর্ণ অ্যাক্সেস থাকে এবং তারা সকলকে পরিচালনা করতে পারেন।",
-      "feedback_prompt": "নিশ্চিত করুন এটি সঠিক ছিল, প্রোগ্রামটি সংশোধন করুন, বা উপেক্ষা করুন।"
-    },
-    "section": {
-      "basic": {
-        "intro": "মূল পরিচয় এবং প্রায় সব সেটআপের প্রয়োজনীয় অপরিহার্য উপাদান।",
-        "label": "মৌলিক"
-      },
-      "detection": {
-        "intro": "কীভাবে একটি চক্র শুরু, চলমান এবং শেষ হিসেবে সনাক্ত করা হয়।",
-        "label": "সনাক্তকরণ"
-      },
-      "matching": {
-        "intro": "শেষ হওয়া চক্রগুলি কীভাবে শেখা প্রোফাইলের সাথে মিলিয়ে লেবেল করা হয়।",
-        "label": "মিল"
-      },
-      "timing": {
-        "intro": "পটভূমি তাল, অফলাইন ওয়াচডগ এবং হাউসকিপিং।",
-        "label": "টিমিং ও ওয়াচডগ"
-      },
-      "anti_wrinkle": {
-        "intro": "অ্যান্টি-রিঙ্কেল মোড মূল হিটিং পর্যায়ের পরে ড্রায়ারের টম্বল পালস সনাক্ত করে।",
-        "label": "অ্যান্টি-রিঙ্কেল"
-      },
-      "delay": {
-        "intro": "বিলম্বিত-আরম্ভ সনাক্তকরণ চিহ্নিত করে যখন কোনো যন্ত্র চালু কিন্তু চক্র এখনো শুরু হয়নি।",
-        "label": "আরম্ভের সময় বিলম্ব"
-      },
-      "triggers": {
-        "intro": "ঐচ্ছিক বাহ্যিক সংকেত: একটি শেষ ট্রিগার, দরজা সেন্সর, বিরতি সুইচ এবং আনলোড অনুস্মারক।",
-        "label": "ট্রিগার ও দরজা"
-      },
-      "notifications": {
-        "label": "সূচনাবার্তা",
-        "intro": "চক্রের ঘটনা সম্পর্কে কখন এবং কীভাবে সূচনাবার্তা পাবেন তা কনফিগার করুন।"
-      },
-      "ml_training": {
-        "label": "এমএল প্রশিক্ষণ",
-        "intro": "ঐচ্ছিক স্মার্ট মডেল যা এই ডিভাইসে সনাক্তকরণ এবং সময় ব্যক্তিগতকৃত করে।"
-      }
-    },
-    "setting": {
-      "auto_maintenance": {
-        "label": "অটো-রক্ষণাবেক্ষণ (রাতের পরিষ্কার)"
-      },
-      "external_end_trigger_enabled": {
-        "label": "বাহ্যিক শেষ ট্রিগার সক্রিয় করুন"
-      },
-      "external_end_trigger_inverted": {
-        "label": "বাহ্যিক ট্রিগার উল্টানো (বন্ধে ট্রিগার করুন)"
-      },
-      "pause_cuts_power": {
-        "label": "বিরতিতে বিদ্যুৎ বন্ধ হয় (সুইচের মাধ্যমে)"
-      },
-      "notify_people": {
-        "label": "ব্যক্তি (শুধুমাত্র বাড়িতে থাকলে)"
-      },
-      "notify_only_when_home": {
-        "label": "বাড়িতে থাকলেই সূচনাবার্তা দিন"
-      },
-      "energy_price_static": {
-        "label": "স্থির শক্তির মূল্য (প্রতি kWh)"
-      },
-      "enable_ml_models": {
-        "label": "চক্রের সময়ে স্মার্ট মডেল প্রয়োগ করা হবে"
-      },
-      "ml_training_enabled": {
-        "label": "এই মেশিনের থেকে শিখুন"
-      },
-      "name": {
-        "label": "ডিভাইসের নাম"
-      },
-      "device_type": {
-        "label": "ডিভাইসের ধরন"
-      },
-      "power_sensor": {
-        "label": "পাওয়ার সেনসর"
-      },
-      "min_power": {
-        "label": "সর্বনিম্ন পরিমাণ"
-      },
-      "off_delay": {
-        "label": "বিলম্ব"
-      },
-      "linked_device": {
-        "label": "ডিভাইসের অধীনে গ্রুপ করুন"
-      },
-      "start_threshold_w": {
-        "label": "প্রান্তিক মাপ:"
-      },
-      "stop_threshold_w": {
-        "label": "প্রান্তিক মাপ:"
-      },
-      "min_off_gap": {
-        "label": "সর্বনিম্ন বিরতি ফাঁক"
-      },
-      "start_duration_threshold": {
-        "label": "আরম্ভ মেয়াদ সীমা"
-      },
-      "start_energy_threshold": {
-        "label": "আরম্ভ শক্তি সীমা"
-      },
-      "completion_min_seconds": {
-        "label": "সর্বনিম্ন চক্রের মেয়াদ"
-      },
-      "running_dead_zone": {
-        "label": "চলমান ডেড জোন"
-      },
-      "end_energy_threshold": {
-        "label": "শেষ শক্তি সীমা"
-      },
-      "end_repeat_count": {
-        "label": "পুনরাবৃত্তি সংখ্যার গণনা"
-      },
-      "sampling_interval": {
-        "label": "নমুনা ব্যবধান"
-      },
-      "smoothing_window": {
-        "label": "মসৃণ উইন্ডো"
-      },
-      "abrupt_drop_watts": {
-        "label": "হঠাৎ পতন (ওয়াট)"
-      },
-      "abrupt_drop_ratio": {
-        "label": "হঠাৎ পতনের অনুপাত"
-      },
-      "profile_match_threshold": {
-        "label": "প্রোফাইল মিলের সীমা"
-      },
-      "profile_unmatch_threshold": {
-        "label": "অমিলের সীমা"
-      },
-      "profile_match_interval": {
-        "label": "মিলের বিরতি"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "সর্বনিম্ন দৈর্ঘ্য"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "সর্বোচ্চ দৈর্ঘ্য"
-      },
-      "profile_duration_tolerance": {
-        "label": "প্রোফাইলের মেয়াদ সহনশীলতা"
-      },
-      "duration_tolerance": {
-        "label": "মেয়াদ সহনশীলতা"
-      },
-      "auto_label_confidence": {
-        "label": "অটো-লেবেল আস্থা"
-      },
-      "learning_confidence": {
-        "label": "শেখার আস্থা"
-      },
-      "suppress_feedback_notifications": {
-        "label": "ফিডব্যাক সূচনাবার্তা দমন করুন"
-      },
-      "watchdog_interval": {
-        "label": "ওয়াচডগ বিরতি"
-      },
-      "no_update_active_timeout": {
-        "label": "আপডেট-নেই সময়সীমা"
-      },
-      "progress_reset_delay": {
-        "label": "অগ্রগতি রিসেট বিলম্ব"
-      },
-      "expose_debug_entities": {
-        "label": "ডিবাগ সত্তা উন্মুক্ত করুন"
-      },
-      "save_debug_traces": {
-        "label": "ডিবাগ ট্রেস সংরক্ষণ করুন"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "অ্যান্টি-রিঙ্কেল সনাক্তকরণ সক্রিয় করুন"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "সর্বোচ্চ অ্যান্টি-রিঙ্কেল পাওয়ার"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "সর্বোচ্চ সময়কাল"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "প্রস্থান পাওয়ার থ্রেশহোল্ড"
-      },
-      "delay_start_detect_enabled": {
-        "label": "বিলম্বিত-আরম্ভ সনাক্তকরণ সক্রিয় করুন"
-      },
-      "delay_confirm_seconds": {
-        "label": "নিশ্চিতকরণ সেকেন্ড"
-      },
-      "delay_timeout_hours": {
-        "label": "সময়সীমার ঘন্টা"
-      },
-      "external_end_trigger": {
-        "label": "বাহ্যিক শেষ ট্রিগার সত্তা"
-      },
-      "door_sensor_entity": {
-        "label": "দরজা সেন্সর সত্তা"
-      },
-      "switch_entity": {
-        "label": "সুইচ সত্তা"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "আন-লোডিং বিলম্ব"
-      },
-      "pump_stuck_duration": {
-        "label": "পাম্প আটকানোর মেয়াদ"
-      },
-      "notify_start_services": {
-        "label": "পরিসেবা আরম্ভ করা হবে"
-      },
-      "notify_finish_services": {
-        "label": "সম্পন্ন পরিসেবা"
-      },
-      "notify_live_services": {
-        "label": "প্রগতিসূচক পরিসেবা"
-      },
-      "notify_fire_events": {
-        "label": "সূচনাবার্তার জন্য ফায়ার ইভেন্ট"
-      },
-      "notify_before_end_minutes": {
-        "label": "শেষের আগে সূচনাবার্তা (মিনিট)"
-      },
-      "notify_live_interval_seconds": {
-        "label": "আপডেটের মধ্যে বিরতি"
-      },
-      "notify_live_overrun_percent": {
-        "label": "লাইভ ওভাররান % সতর্কতার আগে"
-      },
-      "notify_live_chronometer": {
-        "label": "লাইভ ক্রোনোমিটার ব্যবহার করুন"
-      },
-      "notify_timeout_seconds": {
-        "label": "স্বয়ংক্রিয়ভাবে বাতিল করা হবে"
-      },
-      "notify_title": {
-        "label": "সূচনাবার্তার শিরোনাম"
-      },
-      "notify_icon": {
-        "label": "বিজ্ঞপ্তির আইকন"
-      },
-      "notify_start_message": {
-        "label": "বার্তা আরম্ভ করুন"
-      },
-      "notify_finish_message": {
-        "label": "সমাপ্তি বার্তা"
-      },
-      "notify_pre_complete_message": {
-        "label": "শেষের আগের বার্তা"
-      },
-      "notify_reminder_message": {
-        "label": "অনুস্মারক বার্তা"
-      },
-      "notify_channel": {
-        "label": "Android চ্যানেল (আরম্ভ/বিরতি)"
-      },
-      "notify_finish_channel": {
-        "label": "Android চ্যানেল (ফিন)"
-      },
-      "energy_price_entity": {
-        "label": "শক্তির মূল্য সত্তা"
-      },
-      "ml_training_hour": {
-        "label": "প্রশিক্ষণের সময় (ঘণ্টা)"
-      },
-      "ml_training_min_cycles": {
-        "label": "সর্বনিম্ন চক্র আগে"
-      },
-      "ml_training_interval_days": {
-        "label": "সর্বোচ্চ প্রতি (দিন)"
-      }
-    },
-    "tab": {
-      "status": "সারসংক্ষেপ",
-      "history": "চক্র",
-      "profiles": "প্রোফাইল",
-      "settings": "বৈশিষ্ট্য",
-      "ml": "এমএল প্রশিক্ষণ",
-      "advanced": "উন্নত",
-      "diagnostics": "ডায়াগনস্টিক",
-      "pp_overview": "সারসংক্ষেপ",
-      "pp_phases": "পর্যায়",
-      "pp_cleanup": "পরিশ্রুত",
-      "pp_manage": "ব্যবস্থাপনা",
-      "subtab_profiles": "প্রোফাইল",
-      "subtab_phase_catalog": "পর্যায় ক্যাটালগ"
+      "expected": "প্রত্যাশিত",
+      "raw_socket": "কাঁচা সকেট",
+      "artifact_interruption": "বাধা",
+      "artifact_low_power": "কম শক্তি",
+      "artifact_high_power": "বেশি শক্তি",
+      "artifact_anomaly": "অস্বাভাবিকতা"
     },
     "btn": {
-      "save": "সংরক্ষণ",
-      "cancel": "বাতিল",
-      "delete": "মুছে ফেলুন",
+      "add_timer": "+ টাইমার যোগ করুন",
+      "remove_timer": "টাইমার সরান",
+      "add_device_tip": "আরেকটি ওয়াশডেটা ডিভাইস যোগ করুন",
+      "delete_group_tip": "শুধুমাত্র এই গ্রুপ মুছুন - সদস্য প্রোফাইল রাখা হয়",
+      "run_analysis_tip": "এখন আপনার রেকর্ড করা চক্র বিশ্লেষণ করুন এবং টিউনিং পরামর্শ রিফ্রেশ করুন",
+      "reset_ml_models_tip": "সূক্ষ্ম সুর করা মডেলগুলি বাতিল করুন এবং অন্তর্নির্মিত মডেলগুলিতে ফিরে যান৷ WashData সেগুলি পরে আবার শিখতে পারে৷",
+      "add_device": "+ ডিভাইস যোগ করুন",
+      "add_phase": "+ ফেজ যোগ করুন",
+      "apply_all": "সব প্রয়োগ করুন",
+      "apply_label": "লেবেল প্রয়োগ করুন",
+      "apply_split": "স্প্লিট প্রয়োগ করুন",
+      "apply_trim": "ট্রিম প্রয়োগ করুন",
+      "auto_detect_split": "স্বয়ংক্রিয়ভাবে সনাক্ত করুন",
+      "auto_label_cycles": "অটো-লেবেল চক্র",
+      "cancel": "বাতিল করুন",
+      "clear_debug": "ডিবাগ ডেটা সাফ করুন",
+      "clear_splits": "পরিষ্কার",
       "close": "বন্ধ",
-      "edit": "সম্পাদনা",
-      "add": "যোগ করুন",
-      "rebuild": "খাম নতুন করে তৈরি করো",
-      "record": "রেকর্ড করতে শুরু করুন",
       "compare": "তুলনা করুন",
       "confirm": "নিশ্চিত করুন",
-      "discard": "বাতিল",
-      "export": "এক্সপোর্ট করুন",
-      "import": "ইম্পোর্ট",
-      "merge": "একত্রিত করুন",
-      "apply": "প্রয়োগ করুন",
-      "refresh": "রিফ্রেশ",
-      "create": "তৈরি করুন",
-      "select": "নির্বাচন করুন",
-      "done": "সম্পন্ন",
-      "reset": "রিসেট",
-      "trim": "ট্রিম",
-      "split": "স্প্লিট",
-      "review": "পর্যালোচনা",
-      "inspect": "পরিদর্শন",
-      "label": "লেবেল",
-      "save_settings": "বৈশিষ্ট্য সংরক্ষণ করুন",
-      "new_profile": "+ নতুন প্রোফাইল",
-      "new_group": "+ নতুন গ্রুপ",
-      "apply_label": "লেবেল প্রয়োগ করুন",
-      "run_auto_label": "অটো-লেবেল চালান",
-      "save_review": "পর্যালোচনা সংরক্ষণ করুন",
-      "apply_trim": "ট্রিম প্রয়োগ করুন",
-      "apply_split": "বিভাজন প্রয়োগ করুন",
-      "process_recording": "রেকর্ডিং সংরক্ষণ করুন",
-      "stop": "বন্ধ করুন",
-      "process": "প্রসেস",
-      "add_device": "+ ডিভাইস যোগ করুন",
-      "train_now": "এখন প্রশিক্ষণ দিন",
-      "reset_to_defaults": "ডিফল্ট মান পুনরায় স্থাপন করুন",
-      "reset_to_builtin": "সিস্টেমের মডেল নির্ধারণ করুন",
-      "save_preferences": "পছন্দ সংরক্ষণ করুন",
-      "save_panel_settings": "প্যানেল সেটিংস সংরক্ষণ করুন",
-      "save_access_control": "প্রবেশাধিকার নিয়ন্ত্রণ",
-      "auto_label_cycles": "অটো-লেবেল চক্র",
-      "run_analysis": "🔍 পরামর্শ বিশ্লেষণ চালান",
-      "apply_all": "সব প্রয়োগ করুন",
-      "show_only": "শুধুমাত্র প্রদর্শন করা হবে",
-      "dismiss": "বাতিল",
-      "dismiss_all": "সকল বাতিল করুন",
-      "process_history": "প্রসেস",
-      "clear_debug": "ডিবাগ তথ্য মুছে ফেলুন",
-      "wipe_all": "সকল ডেটা মুছুন",
-      "export_json": "JSON এ রপ্তানি করো",
-      "import_json": "JSON থেকে ইম্পোর্ট করুন",
-      "correct": "সঠিক...",
-      "ignore": "উপেক্ষা করা হবে",
-      "add_phase": "যোগ করো",
-      "new_phase": "+ নতুন পর্যায়",
-      "delete_profile": "প্রোফাইল মুছে ফেলুন",
-      "rebuild_envelope": "খাম নতুন করে তৈরি করো",
-      "create_profile": "+ প্রোফাইল তৈরি করুন",
-      "rec_stop": "বন্ধ করুন",
-      "pause_cycle": "সাময়িক বিরতি",
-      "resume_cycle": "পুনরারম্ভ",
-      "force_stop": "বলপূর্বক বন্ধ করুন",
-      "save_phases": "পর্যায় সংরক্ষণ করো",
-      "auto_detect_split": "স্বয়ংক্রিয় সনাক্তকরণ",
-      "clear_splits": "মুছে ফেলুন",
-      "submit_correction": "যথার্থতা জমা দিন",
-      "import_overwrite": "ইম্পোর্ট (ডেটা ওভাররাইট করে)",
-      "use": "ব্যবহার",
-      "manage": "ব্যবস্থাপনা",
-      "remove": "অপসারণ",
-      "delete_group": "দল মুছে ফেলুন",
-      "trim_split": "ট্রিম / বিভাজন",
       "convert_to_automation": "অটোমেশনে রূপান্তর করুন",
-      "new_automation": "+ নতুন অটোমেশন",
-      "from_template": "টেমপ্লেট থেকে",
-      "on_cycle_started": "চক্র আরম্ভের সময়",
-      "on_cycle_finished": "চক্র সমাপ্ত হয়েছে",
-      "save_group": "দল সংরক্ষণ করুন"
+      "correct": "সঠিক…",
+      "create": "তৈরি করুন",
+      "create_profile": "+ প্রোফাইল তৈরি করুন",
+      "delete": "মুছে দিন",
+      "delete_group": "গ্রুপ মুছুন",
+      "delete_profile": "প্রোফাইল মুছুন",
+      "discard": "বাতিল করুন",
+      "dismiss": "খারিজ",
+      "done": "সম্পন্ন",
+      "edit": "সম্পাদনা করুন",
+      "export": "রপ্তানি",
+      "export_json": "JSON-এ রপ্তানি করুন",
+      "force_stop": "ফোর্স স্টপ",
+      "from_template": "টেমপ্লেট ▾ থেকে",
+      "ignore": "উপেক্ষা করুন",
+      "import_json": "JSON থেকে আমদানি করুন",
+      "import_overwrite": "আমদানি (ডেটা ওভাররাইট করে)",
+      "inspect": "পরিদর্শন করুন",
+      "label": "লেবেল",
+      "manage": "পরিচালনা করুন",
+      "merge": "একত্রিত করুন",
+      "new_automation": "＋ নতুন অটোমেশন",
+      "new_group": "+ নতুন গ্রুপ",
+      "new_phase": "+ নতুন ফেজ",
+      "new_profile": "+ নতুন প্রোফাইল",
+      "on_cycle_finished": "সাইকেলে শেষ",
+      "on_cycle_started": "শুরু হলো সাইকেল নিয়ে",
+      "pause_cycle": "বিরতি",
+      "process": "প্রক্রিয়া",
+      "process_history": "এখনই প্রক্রিয়া করুন",
+      "process_recording": "রেকর্ডিং সংরক্ষণ করুন",
+      "rebuild": "খাম পুনর্নির্মাণ",
+      "rebuild_envelope": "খাম পুনর্নির্মাণ",
+      "rec_stop": "থামো",
+      "record": "রেকর্ডিং শুরু করুন",
+      "refresh": "রিফ্রেশ",
+      "remove": "সরান",
+      "reset": "রিসেট করুন",
+      "reset_to_builtin": "বিল্ট-ইন মডেলে রিসেট করুন",
+      "reset_to_defaults": "ডিফল্টে রিসেট করুন",
+      "resume_cycle": "পুনরায় শুরু করুন",
+      "review": "পর্যালোচনা",
+      "run_analysis": "🔍 সাজেশন বিশ্লেষণ চালান",
+      "run_auto_label": "অটো-লেবেল চালান",
+      "save": "সংরক্ষণ করুন",
+      "save_access_control": "অ্যাক্সেস কন্ট্রোল সংরক্ষণ করুন",
+      "save_group": "গ্রুপ সংরক্ষণ করুন",
+      "save_panel_settings": "প্যানেল সেটিংস সংরক্ষণ করুন",
+      "save_phases": "পর্যায়গুলি সংরক্ষণ করুন",
+      "save_preferences": "পছন্দগুলি সংরক্ষণ করুন",
+      "save_review": "পর্যালোচনা সংরক্ষণ করুন",
+      "save_settings": "সেটিংস সংরক্ষণ করুন",
+      "select": "নির্বাচন করুন",
+      "show_only": "শুধুমাত্র দেখান",
+      "split": "বিভক্ত",
+      "submit_correction": "সংশোধন জমা দিন",
+      "train_now": "এখন ট্রেন",
+      "trim": "ছাঁটা",
+      "trim_split": "ছাঁটা/বিভক্ত",
+      "use": "ব্যবহার করুন",
+      "wipe_all": "সমস্ত ডেটা মুছুন"
     },
     "badge": {
-      "poor_fit": "দুর্বল ফিট",
-      "fair_fit": "মোটামুটি ফিট",
+      "golden_cycle": "রেকর্ডকৃত রেফারেন্স চক্র",
+      "reviewed": "পর্যালোচনা করা হয়েছে",
+      "feedback_requested": "প্রতিক্রিয়া অনুরোধ করা হয়েছে",
+      "needs_review": "পর্যালোচনা প্রয়োজন",
+      "overrun": "স্বাভাবিকের চেয়ে বেশি ছুটেছে",
+      "artifact_tip": "{n}টি অসঙ্গতি শনাক্ত করা হয়েছে (যেমন দরজা মাঝ-চক্রের খোলা) — গ্রাফে সেগুলি দেখতে খুলুন",
+      "poor_fit_tip": "অসংগত ম্যাচ ইতিহাস — এই প্রোফাইল পুনর্নির্মাণ বিবেচনা করুন",
+      "fair_fit_tip": "মাঝারি ম্যাচের ধারাবাহিকতা — এই প্রোফাইলে নির্ধারিত কিছু চক্রের আত্মবিশ্বাসের স্কোর কম। আরো সাইকেল লেবেল করুন বা সঠিকতা উন্নত করতে প্রোফাইল পুনরায় রেকর্ড করুন।",
+      "auto": "(স্বয়ংক্রিয়ভাবে সনাক্ত)",
+      "built_in_tag": "অন্তর্নির্মিত",
+      "declining": "↘ হ্রাস",
+      "fair_fit": "গ্রহণযোগ্য মান",
+      "improving": "↗ উন্নতি করা",
       "manual": "(ম্যানুয়ালি নির্বাচিত)",
-      "auto": "(স্বয়ংক্রিয়ভাবে সনাক্তকৃত)",
-      "improving": "↗ উন্নতি",
-      "declining": "হ্রাস",
+      "poor_fit": "দুর্বল মান",
       "steady": "→ স্থির",
-      "using_tuned": "টিউন করা ওজন ব্যবহার করা হচ্ছে",
-      "using_defaults": "ডিফল্ট মান ব্যবহার করা হচ্ছে",
-      "built_in_tag": "অন্তর্ভুক্ত"
-    },
-    "status": {
-      "completed": "সম্পন্ন",
-      "interrupted": "বাধাপ্রাপ্ত",
-      "force_stopped": "বলপূর্বক বন্ধ করা হয়েছে",
-      "active": "সক্রিয়",
-      "ambiguous": "বিভ্রান্তিকর",
-      "clear": "পরিষ্কার",
-      "working": "চলমান...",
-      "recording": "রেকর্ড করা হচ্ছে...",
-      "ready": "প্রসেস প্রস্তুত",
-      "idle": "নিষ্ক্রিয়",
-      "auto_detect": "স্বয়ংক্রিয়-সনাক্ত",
-      "fine_tuning": "এখন ফাইন-টিউনিং...",
-      "all_statuses": "সমস্ত অবস্থা"
-    },
-    "ml": {
-      "fit_strong": "শক্তিশালী",
-      "fit_good": "ভাল",
-      "fit_fair": "মোটামুটি",
-      "fit_weak": "দুর্বল",
-      "fit_slight": "স্বল্প",
-      "fit_word": "ফিট",
-      "fine_tuned_at": "{when}-এ ফাইন-টিউন করা",
-      "personalized": "● এই মেশিনে ব্যক্তিগতভাবে নিযুক্ত",
-      "builtin_models": "● নির্মিত মডেল ব্যবহার করুন"
+      "using_defaults": "পাঠানো ডিফল্ট ব্যবহার করে",
+      "using_tuned": "টিউন করা ওজন ব্যবহার করে"
     },
     "modal": {
-      "label_cycle": "লেবেল চক্র",
-      "create_profile": "প্রোফাইল তৈরি করুন",
-      "new_phase": "নতুন পর্যায়",
-      "edit_phase": "পর্যায় সম্পাদনা",
-      "process_recording": "রেকর্ডিং প্রসেস করুন",
+      "merge_cycles": "{n} সাইকেল মার্জ করুন",
+      "auto_label": "অটো-লেবেল সাইকেল",
       "correct_feedback": "সঠিক প্রতিক্রিয়া",
-      "import_config": "কনফিগারেশন ইম্পোর্ট করুন",
-      "auto_label": "অটো-লেবেল চক্র",
-      "cycle": "সাইকেল"
+      "create_profile": "প্রোফাইল তৈরি করুন",
+      "cycle": "চক্র",
+      "edit_phase": "ফেজ সম্পাদনা করুন",
+      "import_config": "আমদানি কনফিগারেশন",
+      "label_cycle": "লেবেল চক্র",
+      "new_phase": "নতুন ফেজ",
+      "process_recording": "প্রক্রিয়া রেকর্ডিং"
     },
-    "tag": {
-      "late_start": "বিলম্বিত শুরু",
-      "early_end": "প্রাথমিক শেষ",
-      "merged": "একত্রিত চক্র",
-      "split": "বিভক্ত চক্র",
-      "noise": "নয়েজ",
-      "wrong_profile": "ভুল প্রোফাইল",
-      "sensor_gap": "সেনসর দূরত্ব"
+    "msg": {
+      "near_duplicate_cluster": "কাছাকাছি-সদৃশ প্রোফাইল ক্লাস্টার সনাক্ত করা হয়েছে৷ গ্রুপিং মিলকে নির্ভরযোগ্যভাবে লুক-অলাইকগুলির মধ্যে বাছাই করতে দেয় (যেমন বিভিন্ন তাপমাত্রা/স্পিনে একই প্রোগ্রাম)।",
+      "coverage_gap": "সাম্প্রতিক চক্রের কোনো মিলিত প্রোফাইল নেই (শেষ 30টির {pct}%)।",
+      "consider_new_profile": "একটি নতুন প্রোফাইল তৈরি বিবেচনা করুন.",
+      "group_not_cohesive": "এই প্রোফাইলগুলি নির্ভরযোগ্যভাবে গোষ্ঠীর জন্য যথেষ্ট অনুরূপ নয়, তাই যতক্ষণ না আপনি বহিরাগত অপসারণ করেন বা গোষ্ঠীকে বিভক্ত না করেন ততক্ষণ পর্যন্ত ম্যাচিং তাদের পৃথকভাবে আচরণ করে।",
+      "group_modal_help": "একই আকৃতির গ্রুপ প্রোগ্রাম যা তাপমাত্রা/স্পিনের মধ্যে ভিন্ন (সময়কাল পরিবর্তিত হতে পারে)। ম্যাচ স্কোর এক প্রার্থী হিসাবে গ্রুপ, তারপর সেরা উপযুক্ত সদস্য বাছাই. কমপক্ষে 2 বাছাই করুন; ওভারলে দেখায় তারা কতটা একই রকম।",
+      "showing_suggestions": "পরামর্শ সহ {count} সেটিং দেখানো হচ্ছে৷",
+      "show_all_settings": "সমস্ত সেটিংস দেখান",
+      "tuning_suggestions_available": "পর্যবেক্ষণ করা চক্র থেকে {count} টিউনিং পরামর্শ উপলব্ধ৷ তারা প্রাসঙ্গিক ক্ষেত্রের পাশে উপস্থিত হয়.",
+      "legacy_actions_title": "{count} লিগ্যাসি কাস্টম অ্যাকশন এখনও চলছে৷",
+      "old_actions_warning": "পুরানো অ্যাকশন এডিটর দিয়ে কনফিগার করা হয়েছে (এখন সরানো হয়েছে)। তারা এখনও সাইকেল ইভেন্টগুলিতে গুলি চালায় কিন্তু এখানে আর সম্পাদনা করা যাবে না। এগুলিকে একটি সাধারণ অটোমেশনে রূপান্তর করুন, বা তাদের সরান৷",
+      "no_settings_match": "\"{q}\" এর সাথে কোনো সেটিংস মেলে না",
+      "clear_debug_hint": "স্থান খালি করতে সঞ্চিত ডিবাগ ডেটা সরান।",
+      "wipe_history_warning": "স্থায়ীভাবে সমস্ত চক্র এবং প্রোফাইল মুছুন. পূর্বাবস্থায় ফেরানো যাবে না।",
+      "export_description": "JSON-এ সমস্ত প্রোফাইল এবং চক্র রপ্তানি করুন বা পূর্ববর্তী রপ্তানি থেকে পুনরুদ্ধার করুন।",
+      "log_buffer_hint": "নতুন প্রথম · পুনঃসূচনা করার পর থেকে শেষ 500 ha_washdata রেকর্ডগুলিকে বাফার করে · আকার পরিবর্তন করতে নীচের প্রান্তটি টেনে আনুন৷",
+      "review_profile_tip": "প্রোগ্রাম এই চক্র হিসাবে লেবেল করা হয়. যদি স্বয়ংক্রিয়ভাবে সনাক্ত করা প্রোগ্রামটি ভুল হয়ে থাকে, তাহলে এটি এখানে সংশোধন করুন - লেবেলিং ভবিষ্যতের চক্রের জন্য মিল শেখায়৷",
+      "review_quality_tip": "কত পরিচ্ছন্ন এই চক্র। ভাল = এই প্রোগ্রামের একটি পাঠ্যপুস্তক উদাহরণ; খারাপ = সনাক্ত করা হয়েছে কিন্তু শোরগোল বা atypical; অব্যবহারযোগ্য = ভুল-শনাক্ত (একত্রিত, ছাঁটাই বা জাল)। স্বাস্থ্য স্কোর ড্রাইভ করে এবং কোন চক্রগুলিকে মডেল প্রশিক্ষণের অনুমতি দেওয়া হয়।",
+      "review_recorded_tip": "এটিকে এটির প্রোগ্রামের জন্য একটি হাতে-বাছাই করা রেফারেন্স চক্র হিসাবে চিহ্নিত করুন - একটি ম্যানুয়ালি রেকর্ড করা চক্রের মতো একই ভূমিকা৷ রেফারেন্স চক্র সবসময় রাখা হয়, ম্যাচিং টেমপ্লেট বীজ, এবং পরিষ্কারের দ্বারা বাদ দেওয়া হয় না। (এটি \"সোনার\"/রেকর্ড করা পতাকা; উভয়ই একই জিনিস।)",
+      "review_tags_tip": "ঐচ্ছিক ফ্ল্যাগগুলি বর্ণনা করে যে এই চক্রের সাথে কী ভুল হয়েছে, তাই প্রশিক্ষণ এবং পরিচ্ছন্নতা এটির জন্য দায়ী হতে পারে।",
+      "review_notes_tip": "আপনার নিজস্ব রেফারেন্সের জন্য বিনামূল্যে পাঠ্য নোট. মিল বা প্রশিক্ষণ দ্বারা ব্যবহার করা হয় না.",
+      "review_confirm_help": "এই চক্রটি সঠিকভাবে সনাক্ত করা হয়েছে কিনা তা নিশ্চিত করুন। আপনার পর্যালোচনাগুলি আপনার মেশিনে মডেলটিকে প্রশিক্ষণ দেয় - আপনি যত বেশি চক্র নিশ্চিত করবেন, তত ভাল মিল এবং স্বাস্থ্য স্কোর পাবেন। একটি দ্রুত ভাল/খারাপ যথেষ্ট।",
+      "review_notes_placeholder": "নোট (ঐচ্ছিক)",
+      "compare_profiles_tip": "উপরের চার্টে অন্যান্য প্রোফাইল খামগুলিকে ওভারলে করুন যা দেখতে এই চক্রটি সবচেয়ে উপযুক্ত।",
+      "artifact_header": "এই চক্রের সময় {n}টি অসঙ্গতি সনাক্ত করা হয়েছে৷",
+      "artifact_footer": "উপরের গ্রাফে হাইলাইট করা হয়েছে। এগুলি হল ক্ষণস্থায়ী নিদর্শন (যেমন দরজা মাঝ-চক্রের খোলা), অগত্যা সমস্যা নয়।",
+      "profile_poor_health_detail": "এই প্রোফাইলে বরাদ্দ করা সাইকেলের অসামঞ্জস্যপূর্ণ আকার বা কম আত্মবিশ্বাস আছে। খাম পুনর্নির্মাণ বা লেবেলযুক্ত চক্র পর্যালোচনা বিবেচনা করুন।",
+      "trend_duration_longer": "সময়কাল প্রবণতা বেশি ({pct}%/চক্র) — সাম্প্রতিক গড় {avg}",
+      "trend_duration_shorter": "সময়কাল প্রবণতা কম ({pct}%/চক্র) — সাম্প্রতিক গড় {avg}",
+      "trend_energy_up": "শক্তি প্রবণতা বৃদ্ধি ({pct}%/সাইকেল) — সাম্প্রতিক গড় {avg}",
+      "trend_energy_down": "শক্তি কমছে ({pct}%/চক্র)",
+      "performance_trend": "কর্মক্ষমতা প্রবণতা ({n} চক্র)",
+      "maintenance_advisory": "ক্রমবর্ধমান সময়কাল/শক্তি যন্ত্রের রক্ষণাবেক্ষণের প্রয়োজনীয়তা নির্দেশ করতে পারে (যেমন ডিস্কলিং, ফিল্টার পরিষ্কার করা)।",
+      "manual_duration_hint": "প্রোফাইলের গড়/প্রত্যাশিত চক্রের দৈর্ঘ্য, সময়-অবশিষ্ট অনুমানের জন্য ব্যবহৃত হয়। এটি সেট করতে সম্পাদনা করুন; এটি অপরিবর্তিত রেখে বর্তমান মান রাখে।",
+      "appliance_monitor": "যন্ত্রপাতি মনিটর",
+      "auto_label_intro": "লেবেলবিহীন চক্রগুলিতে প্রোফাইলগুলি বরাদ্দ করুন যার মিলের আত্মবিশ্বাস থ্রেশহোল্ডকে সাফ করে।",
+      "cleanup_intro": "প্রতিটি লেবেল চক্র ওভারলেড. প্রোফাইল পরিষ্কার করতে আউটলিয়ারগুলিতে টিক দিন এবং মুছুন।",
+      "compare_overlay_profiles": "ওভারলে প্রোফাইল (অজ্ঞান)",
+      "compare_selected_cycles": "নির্বাচিত চক্র (কঠিন) — দেখান/লুকান",
+      "feedback_prompt": "এটি সঠিক ছিল তা নিশ্চিত করুন, প্রোগ্রামটি সংশোধন করুন বা উপেক্ষা করুন।",
+      "import_intro": "একটি রপ্তানি করা ফাইল লোড করুন বা নীচে একটি JSON পেলোড পেস্ট করুন৷",
+      "live_chart_loading": "রিডিং আসার সাথে লাইভ পাওয়ার চার্ট প্রদর্শিত হয়।",
+      "loading": "লোড হচ্ছে...",
+      "loading_curve": "বক্ররেখা লোড হচ্ছে...",
+      "loading_settings": "সেটিংস লোড হচ্ছে...",
+      "maintenance_requires_access": "রক্ষণাবেক্ষণ এবং রপ্তানি/আমদানি সম্পূর্ণ অ্যাক্সেস প্রয়োজন.",
+      "matching_tuning_intro": "শেখার সময়, WashData এছাড়াও সামঞ্জস্য করে যে কতটা প্রোগ্রাম ম্যাচিং আকৃতি বনাম সময়কাল এবং শক্তির ওজন করে।",
+      "merge_intro": "নির্বাচিত চক্র একটিতে একত্রিত হয় (কালানুক্রমিক ক্রম; শূন্যস্থান 0 W দিয়ে ভরা)। ফলস্বরূপ প্রোফাইল বাছুন।",
+      "ml_intro": "বক্সের বাইরে কাজ করে এমন স্মার্ট মডেলগুলির সাথে ওয়াশডেটা জাহাজগুলি।",
+      "ml_learned_intro": "মডেলগুলি এই মেশিনের সাথে সূক্ষ্ম সুরযুক্ত।",
+      "ml_loading": "ML লোড হচ্ছে...",
+      "ml_settings_intro": "দুটি স্বাধীন সুইচ: একটি চক্র চলার সময় একটি মডেলগুলি প্রয়োগ করে, অন্যটি ওয়াশডেটাকে সময়ের সাথে আপনার মেশিনে সূক্ষ্ম-টিউন করতে দেয়৷",
+      "no_cycles_match": "বর্তমান ফিল্টারের সাথে কোনো চক্র মেলে না।",
+      "no_cycles_profile": "এই প্রোফাইলের জন্য কোন চক্র নেই.",
+      "no_cycles_yet": "কোন চক্র এখনও রেকর্ড করা.",
+      "no_device_selected": "কোনো ডিভাইস নির্বাচন করা হয়নি।",
+      "no_devices": "এখনও কোন ওয়াশডেটা ডিভাইস কনফিগার করা হয়নি।",
+      "no_envelope": "এখনও কোন খাম নেই - লেবেল চক্রের পরে পুনর্নির্মাণ করুন।",
+      "no_envelope_overlay": "ওভারলে করার জন্য কোন খাম উপলব্ধ নেই।",
+      "no_fine_tuned": "এখনও কিছুই ঠিক হয়নি — ওয়াশডেটা তার অন্তর্নির্মিত মডেলগুলি ব্যবহার করছে৷",
+      "no_logs": "কোন লগ রেকর্ড এখনও বাফার.",
+      "no_match_yet": "এখনও কোন মিলের প্রচেষ্টা নেই - এটি একটি চলমান চক্রের সময় পূরণ করে৷",
+      "no_other_users": "অন্য কোনো হোম অ্যাসিস্ট্যান্ট ব্যবহারকারী পাওয়া যায়নি।",
+      "no_phases": "কোন পর্যায় সংজ্ঞায়িত.",
+      "no_phases_assigned": "কোন পর্যায় বরাদ্দ নেই.",
+      "no_profiles_compare": "তুলনা করার জন্য কোন প্রোফাইল নেই।",
+      "no_profiles_overlay": "ওভারলে করার জন্য কোন প্রোফাইল নেই।",
+      "no_profiles_yet": "এখনো কোন প্রোফাইল নেই. একটি লেবেলযুক্ত চক্র থেকে একটি তৈরি করুন।",
+      "no_profiles_yet_short": "এখনো কোন প্রোফাইল নেই.",
+      "no_split_points": "এখনও কোন বিভক্ত পয়েন্ট.",
+      "no_suggestions": "কোনো সক্রিয় পরামর্শ নেই।",
+      "pending_feedback": "মুলতুবি সনাক্তকরণ প্রতিক্রিয়া",
+      "phase_catalog_intro": "একটি চক্রের নামকৃত অংশ (প্রি-ওয়াশ, হিটিং, স্পিন…)। তাদের নিয়ন্ত্রণ প্যানেল থেকে একটি প্রোফাইলে বরাদ্দ করুন।",
+      "phase_ranges_intro": "পর্যায় ব্যাপ্তি (চক্র শুরু থেকে মিনিট) গড় বক্ররেখার উপর আচ্ছাদিত। লাইভ প্রাকদর্শন মান সম্পাদনা করুন.",
+      "preferences_admin": "পছন্দ, প্যানেল এবং অ্যাক্সেস নিয়ন্ত্রণ",
+      "preferences_adv": "পছন্দসমূহ",
+      "prefs_personal": "এগুলি শুধুমাত্র আপনার হোম অ্যাসিস্ট্যান্ট অ্যাকাউন্টে প্রযোজ্য।",
+      "profiles_intro": "পরিসংখ্যান, পর্যায় এবং পরিষ্কারের জন্য একটি প্রোফাইলে ক্লিক করুন। কাছাকাছি-সদৃশ প্রোগ্রামগুলিকে (একই আকৃতি/সময়কাল, ভিন্ন তাপমাত্রা বা স্পিন) গোষ্ঠীবদ্ধ করুন যাতে মিল থাকা নির্ভরযোগ্যভাবে তাদের মধ্যে বেছে নেয়।",
+      "rbac_hint": "বন্ধ থাকলে, প্রতিটি হোম অ্যাসিস্ট্যান্ট ব্যবহারকারীর সম্পূর্ণ অ্যাক্সেস থাকে (ডিফল্ট)। প্রশাসকদের সর্বদা সম্পূর্ণ অ্যাক্সেস থাকে এবং প্রত্যেককে পরিচালনা করতে পারে।",
+      "recent_logs": "সাম্প্রতিক হা_ওয়াশডাটা রেকর্ড",
+      "recording_in_progress": "রেকর্ডিং চলছে",
+      "review_in_settings": "সেটিংসে পর্যালোচনা করুন",
+      "review_to_cycles": "সাইকেল পর্যালোচনা সারি খুলুন",
+      "saving_triggers_reload": "সংরক্ষণ একটি ইন্টিগ্রেশন পুনরায় লোড ট্রিগার. HA সত্তা সংক্ষিপ্তভাবে অনুপলব্ধ হিসাবে দেখাতে পারে।",
+      "search_placeholder": "অনুসন্ধান সেটিংস...",
+      "see_recorder": "নিচে রেকর্ডার উইজেট দেখুন",
+      "split_intro": "একটি বিভক্ত বিন্দু যোগ করতে বা অপসারণ করতে গ্রাফটিতে ক্লিক করুন বা নিষ্ক্রিয় ফাঁক দিয়ে স্বয়ংক্রিয়ভাবে সনাক্ত করুন৷ প্রতিটি ফলাফল সেগমেন্ট তার নিজস্ব প্রোফাইল পেতে পারে.",
+      "storage_diagnostics": "স্টোরেজ পরিসংখ্যান, রক্ষণাবেক্ষণ, রপ্তানি/আমদানি",
+      "trim_intro": "লাল হ্যান্ডলগুলি টেনে আনুন বা মান লিখুন। জানালার বাইরের সবকিছু মুছে ফেলা হয়।",
+      "unsure_detected_prefix": "ওয়াশডেটা নিশ্চিত নয় যে এটি সনাক্ত করা হয়েছে৷",
+      "updated": "আপডেট হয়েছে"
     },
-    "quality": {
-      "good": "ভাল",
-      "bad": "খারাপ",
-      "unusable": "ব্যবহারযোগ্য নয়"
-    },
-    "access": {
-      "none": "কোনোটি নেই (লুকানো)",
-      "read": "পড়ো",
-      "edit": "সম্পাদনা",
-      "full": "সম্পূর্ণ",
-      "inherit": "উত্তরাধিকার"
+    "phase_desc": {
+      "pre_wash": "মূল ধোয়ার আগে প্রাথমিক ভিজানো বা প্রাক-চিকিত্সা।",
+      "wash": "ড্রাম আন্দোলন এবং ঐচ্ছিক গরম করার সাথে প্রধান ওয়াশিং চক্র।",
+      "wash_dw": "গরম করার সাথে প্রধান ডিটারজেন্ট ধোয়া.",
+      "rinse": "পরিষ্কার-জল ধোয়া পর্যায়. এই পর্যায়টি একাধিকবার পুনরাবৃত্তি হতে পারে।",
+      "spin": "লোড থেকে জল অপসারণ উচ্চ গতি নিষ্কাশন.",
+      "spin_wd": "স্থানান্তর শুকানোর আগে উচ্চ গতি নিষ্কাশন.",
+      "soak": "সক্রিয় ধোয়ার পর্যায়গুলির মধ্যে কম-অ্যাক্টিভিটি ভিজানোর সময়কাল।",
+      "soak_dw": "ভারী মাটির জন্য বর্ধিত ভিজানোর সময়কাল।",
+      "anti_crease": "বলিরেখা কমাতে সমাপ্তির পর মাঝে ছোট গণ্ডগোল।",
+      "heat_up": "সম্পূর্ণ শুকানো শুরু হওয়ার আগে প্রাথমিক হিটার ওয়ার্ম-আপ।",
+      "drying": "প্রধান উত্তপ্ত টাম্বলিং সময়কাল।",
+      "cool_down": "চক্র শেষ কাছাকাছি তাপ ছাড়া tumbling.",
+      "anti_wrinkle": "বলিরেখা কমাতে পর্যায়ক্রমিক পোস্ট-সাইকেল টাম্বলিং।",
+      "sensor_check": "শুষ্কতা পরিমাপ করার সময় সংক্ষিপ্ত কম-পাওয়ার বিরতি।",
+      "drain_and_switch": "ধোয়া থেকে শুকানোর মোডে রূপান্তর সময়কাল।",
+      "pre_rinse": "ডিটারজেন্ট ধোয়ার আগে প্রাথমিক স্প্রে-ডাউন।",
+      "dry": "হিটার এবং/অথবা অবশিষ্ট তাপ ব্যবহার করে শুকানোর পর্যায়।",
+      "sanitize": "স্যানিটাইজেশন প্রোগ্রামের জন্য উচ্চ-তাপমাত্রা পরিষ্কারের পর্যায়।"
     },
     "health": {
-      "poor": "⚠ দুর্বল ম্যাচ ফিট",
-      "fair": "মোটামুটি ম্যাচ ফিট",
-      "good": "✓ ভালো ম্যাচ ফিট"
-    },
-    "trend": {
-      "up": "↑ ঊর্ধ্বমুখী",
-      "down": "↓ নিম্নমুখী"
-    },
-    "pref": {
-      "date_relative": "আপেক্ষিক (যেমন, ২ ঘণ্টা আগে)",
-      "date_absolute": "পরম (যেমন, ১৪:৩২, ২ জুলাই)"
+      "fair": "গ্রহণযোগ্য মিলের গুণমান",
+      "good": "✓ ভালো মিলের গুণমান",
+      "poor": "⚠ দুর্বল মিলের গুণমান"
     },
     "log": {
-      "all_levels": "সকল স্তর"
+      "all_levels": "সব স্তর"
+    },
+    "ml": {
+      "builtin_models": "● বিল্ট-ইন মডেল ব্যবহার করা",
+      "fit_fair": "মাঝারি",
+      "fit_good": "ভাল",
+      "fit_slight": "সামান্য",
+      "fit_strong": "শক্তিশালী",
+      "fit_weak": "দুর্বল",
+      "fit_word": "ফিট",
+      "personalized": "● এই মেশিনে ব্যক্তিগতকৃত"
+    },
+    "pref": {
+      "date_absolute": "পরম (যেমন 2 জুলাই 14:32)",
+      "date_relative": "আত্মীয় (যেমন 2 ঘন্টা আগে)"
+    },
+    "quality": {
+      "bad": "খারাপ",
+      "good": "ভাল",
+      "unusable": "অব্যবহারযোগ্য"
+    },
+    "status": {
+      "active": "সক্রিয়",
+      "all_statuses": "সব স্ট্যাটাস",
+      "ambiguous": "অস্পষ্ট",
+      "auto_detect": "স্বয়ংক্রিয়ভাবে সনাক্ত করুন",
+      "clear": "পরিষ্কার",
+      "completed": "সম্পন্ন",
+      "fine_tuning": "এখন ফাইন টিউনিং…",
+      "force_stopped": "জোর করে থামল",
+      "idle": "নিষ্ক্রিয়",
+      "interrupted": "বাধাপ্রাপ্ত",
+      "ready": "প্রক্রিয়া করার জন্য প্রস্তুত",
+      "recording": "রেকর্ডিং"
+    },
+    "tab": {
+      "advanced": "উন্নত",
+      "diagnostics": "ডায়াগনস্টিকস",
+      "history": "চক্র",
+      "ml": "এমএল প্রশিক্ষণ",
+      "pp_cleanup": "ক্লিনআপ",
+      "pp_manage": "পরিচালনা করুন",
+      "pp_overview": "ওভারভিউ",
+      "pp_phases": "পর্যায়গুলি",
+      "profiles": "প্রোফাইল",
+      "settings": "সেটিংস",
+      "status": "ওভারভিউ",
+      "subtab_phase_catalog": "ফেজ ক্যাটালগ",
+      "subtab_profiles": "প্রোফাইল"
+    },
+    "tag": {
+      "early_end": "প্রারম্ভিক শেষ",
+      "late_start": "দেরিতে শুরু",
+      "merged": "একত্রিত চক্র",
+      "noise": "গোলমাল",
+      "sensor_gap": "সেন্সর ফাঁক",
+      "split": "বিভক্ত চক্র",
+      "wrong_profile": "ভুল প্রোফাইল"
+    },
+    "toast": {
+      "access_saved": "অ্যাক্সেস নিয়ন্ত্রণ সংরক্ষিত",
+      "all_wiped": "সমস্ত ডেটা মুছে ফেলা হয়েছে",
+      "analysis_complete_none": "বিশ্লেষণ সম্পূর্ণ: কোন নতুন পরামর্শ নেই",
+      "auto_label_complete": "স্বতঃ-লেবেল সম্পূর্ণ",
+      "automation_deleted": "অটোমেশন মুছে ফেলা হয়েছে",
+      "correction_submitted": "সংশোধন জমা দেওয়া হয়েছে",
+      "cycle_deleted": "সাইকেল মুছে ফেলা হয়েছে",
+      "cycle_force_stopped": "সাইকেল জোর করে থামিয়ে দিল",
+      "cycle_labelled": "সাইকেল লেবেলযুক্ত",
+      "cycle_paused": "সাইকেল থামানো হয়েছে",
+      "cycle_resumed": "সাইকেল আবার চালু হল",
+      "cycle_trimmed": "সাইকেল ছাঁটা",
+      "cycles_merged": "চক্র একত্রিত",
+      "envelope_rebuilt": "খাম পুনর্নির্মিত",
+      "envelopes_rebuilt": "খাম পুনর্নির্মিত",
+      "export_downloaded": "রপ্তানি ডাউনলোড করা হয়েছে",
+      "feedback_all_dismissed": "সব প্রতিক্রিয়া খারিজ",
+      "feedback_confirmed": "প্রতিক্রিয়া নিশ্চিত করা হয়েছে",
+      "feedback_dismissed": "প্রতিক্রিয়া খারিজ",
+      "group_deleted": "গ্রুপ মুছে ফেলা হয়েছে",
+      "group_name_required": "গ্রুপ নাম প্রয়োজন",
+      "group_saved": "গ্রুপ সংরক্ষিত",
+      "import_successful": "আমদানি সফল; ইন্টিগ্রেশন রিলোডিং",
+      "json_required": "JSON ডেটা প্রয়োজন",
+      "legacy_removed": "উত্তরাধিকার কর্ম সরানো হয়েছে",
+      "logs_exported": "লগ রপ্তানি করা হয়েছে",
+      "matching_reverted": "ম্যাচিং ওজন ডিফল্টে প্রত্যাবর্তিত হয়েছে",
+      "min_2_profiles": "একটি গ্রুপের জন্য কমপক্ষে 2টি প্রোফাইল নির্বাচন করুন",
+      "ml_training_no_improvement": "প্রশিক্ষণ সম্পূর্ণ: বেসলাইন রাখা (কোন উন্নতি নেই)",
+      "models_reverted": "অন-ডিভাইস মডেলগুলি বেসলাইনে প্রত্যাবর্তিত হয়েছে৷",
+      "name_required": "নাম প্রয়োজন",
+      "no_split_found": "বিভক্ত করার জন্য কোন নিষ্ক্রিয় ফাঁক পাওয়া যায়নি",
+      "panel_settings_saved": "প্যানেল সেটিংস সংরক্ষিত",
+      "phase_name_required": "ফেজ নাম প্রয়োজন",
+      "phase_updated": "পর্যায় আপডেট করা হয়েছে",
+      "phases_saved": "পর্যায় সংরক্ষিত",
+      "preferences_saved": "পছন্দ সংরক্ষিত",
+      "profile_name_required": "প্রোফাইল নাম প্রয়োজন",
+      "profile_renamed": "প্রোফাইলের নাম পরিবর্তন করা হয়েছে",
+      "recording_discarded": "রেকর্ডিং বাতিল করা হয়েছে",
+      "recording_saved": "রেকর্ডিং প্রোফাইলে সংরক্ষিত",
+      "recording_started": "রেকর্ডিং শুরু হল",
+      "recording_stopped": "রেকর্ডিং বন্ধ",
+      "review_saved": "পর্যালোচনা সংরক্ষিত",
+      "settings_saved": "সেটিংস সংরক্ষিত; ইন্টিগ্রেশন রিলোডিং",
+      "suggestions_applied": "প্রস্তাবনা প্রয়োগ করা হয়েছে; ইন্টিগ্রেশন রিলোডিং",
+      "suggestions_dismissed": "প্রস্তাবনা খারিজ করা হয়েছে"
+    },
+    "trend": {
+      "down": "নিচে প্রবণতা",
+      "up": "ঊর্ধ্বমুখী প্রবণতা"
     }
   }
 }

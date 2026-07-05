@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Spuštění cyklu",
-        "cycle_finish": "Dokončení cyklu",
-        "cycle_live": "Živý pokrok"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Pračka",
@@ -88,198 +81,6 @@
         "bread_maker": "Pekárna na chleba",
         "pump": "Pumpa / Kalová pumpa",
         "other": "Jiné (pokročilé)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(Neoznačeno)",
-        "create_new_profile": "Vytvořit nový profil",
-        "remove_label": "Odebrat štítek",
-        "no_reference_cycle": "(Žádný referenční cyklus)",
-        "all_device_types": "Všechny typy zařízení",
-        "current_suffix": "(aktuální)",
-        "phase_builtin_suffix": "(Vestavěný)",
-        "phase_none_available": "Nejsou k dispozici žádné fáze.",
-        "phase_other_device_types": "Další typy zařízení:",
-        "settings_deprecation_warning": "⚠️ **Zastaralý typ zařízení:** Odstranění zařízení {device_type} je naplánováno v budoucí verzi. Porovnávací kanál WashData neposkytuje spolehlivé výsledky pro tuto třídu zařízení. Vaše integrace bude fungovat i během období ukončení podpory; chcete-li toto varování ztišit, přepněte **Typ zařízení** níže na jeden z podporovaných typů (pračka, sušička, kombinovaná pračka se sušičkou, myčka nádobí, fritéza, pekárna chleba nebo pumpa), nebo na **Jiné (pokročilé)**, pokud váš spotřebič neodpovídá žádnému z podporovaných typů. **Jiné (pokročilé)** dodává záměrně generická výchozí nastavení, která nejsou vyladěna pro žádné konkrétní zařízení, takže si budete muset sami nakonfigurovat prahové hodnoty, časové limity a odpovídající parametry; všechna vaše stávající nastavení jsou po přepnutí zachována.",
-        "editor_select_info": "Vyberte 1 cyklus pro rozdělení nebo 2+ cykly pro sloučení.",
-        "editor_select_info_split": "Vyberte 1 cyklus k rozdělení.",
-        "editor_select_info_merge": "Vyberte 2+ cyklů ke sloučení.",
-        "editor_select_info_delete": "Vyberte 1+ cyklů ke smazání.",
-        "no_cycles_recorded": "Dosud nebyly zaznamenány žádné cykly.",
-        "profile_summary_line": "- **{name}**: {count} cyklů, prům. {avg} m",
-        "no_profiles_created": "Zatím nebyly vytvořeny žádné profily.",
-        "phase_preview": "Náhled fáze",
-        "phase_preview_no_curve": "Křivka průměrného profilu zatím není k dispozici. Spustit/označit více cyklů pro tento profil.",
-        "average_power_curve": "Průměrná výkonová křivka",
-        "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} cyklů, průměr ~{duration} m)",
-        "profile_option_short_fmt": "{name} ({count} cyklů, ~{duration} m)",
-        "deleted_cycles_from_profile": "Smazáno {count} cyklů z {profile}.",
-        "not_enough_data_graph": "K vytvoření grafu není dostatek dat.",
-        "no_profiles_found": "Nebyly nalezeny žádné profily.",
-        "cycle_info_fmt": "Cyklus: {start}, {duration}m, aktuální: {label}",
-        "top_candidates_header": "### Nejlepší kandidáti",
-        "tbl_profile": "Profil",
-        "tbl_confidence": "Důvěra",
-        "tbl_correlation": "Korelace",
-        "tbl_duration_match": "Shoda trvání",
-        "detected_profile": "Zjištěný profil",
-        "estimated_duration": "Odhadovaná doba trvání",
-        "actual_duration": "Skutečná doba trvání",
-        "choose_action": "__Vyberte akci níže:__",
-        "tbl_count": "Počet",
-        "tbl_avg": "Prům",
-        "tbl_min": "Min",
-        "tbl_max": "Max",
-        "tbl_energy_avg": "Energie (prům.)",
-        "tbl_energy_total": "Energie (celkem)",
-        "tbl_consistency": "Skládat se.",
-        "tbl_last_run": "Poslední běh",
-        "graph_legend_title": "Legenda grafu",
-        "graph_legend_body": "Modrý pruh představuje minimální a maximální pozorovaný rozsah odběru energie. Čára ukazuje křivku průměrného výkonu.",
-        "recording_preview": "Náhled nahrávání",
-        "trim_start": "Oříznutí začátku",
-        "trim_end": "Oříznout konec",
-        "split_preview_title": "Rozdělit náhled",
-        "split_preview_found_fmt": "Počet nalezených segmentů: {count}.",
-        "split_preview_confirm_fmt": "Kliknutím na Potvrdit rozdělíte tento cyklus do {count} samostatných cyklů.",
-        "merge_preview_title": "Náhled sloučení",
-        "merge_preview_joining_fmt": "Připojování k {count} cyklům. Mezery budou vyplněny hodnotami 0W.",
-        "editor_delete_preview_title": "Náhled smazání",
-        "editor_delete_preview_intro": "Vybrané cykly budou trvale smazány:",
-        "editor_delete_preview_confirm": "Kliknutím na Potvrdit tyto záznamy cyklů trvale smažete.",
-        "no_power_preview": "*Pro náhled nejsou k dispozici žádné údaje o napájení.*",
-        "profile_comparison": "Porovnání profilu",
-        "actual_cycle_label": "Tento cyklus (skutečný)",
-        "storage_usage_header": "Využití úložiště",
-        "storage_file_size": "Velikost souboru",
-        "storage_cycles": "Cykly",
-        "storage_profiles": "Profily",
-        "storage_debug_traces": "Trasování ladění",
-        "overview_suffix": "Přehled",
-        "phase_preview_for_profile": "Náhled fáze pro profil",
-        "current_ranges_header": "Aktuální rozsahy",
-        "assign_phases_help": "Pomocí akcí níže můžete přidat, upravit, odstranit nebo uložit rozsahy.",
-        "profile_summary_header": "Shrnutí profilu",
-        "recent_cycles_header": "Nedávné cykly",
-        "trim_cycle_preview_title": "Náhled cyklu trimování",
-        "trim_cycle_preview_no_data": "Pro tento cyklus nejsou k dispozici žádné údaje o výkonu.",
-        "trim_cycle_preview_kept_suffix": "zachováno",
-        "table_program": "Program",
-        "table_when": "Kdy",
-        "table_length": "Délka",
-        "table_match": "Shoda",
-        "table_profile": "Profil",
-        "table_cycles": "Cykly",
-        "table_avg_length": "Prům. délka",
-        "table_last_run": "Poslední běh",
-        "table_avg_energy": "Prům. energie",
-        "table_detected_program": "Detekovaný program",
-        "table_confidence": "Důvěra",
-        "table_reported": "Nahlášeno"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Rozdělit cyklus (najít mezery)",
-        "merge": "Sloučit cykly (spojit fragmenty)",
-        "delete": "Smazat cykly"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Automaticky zjistit mezery nečinnosti",
-        "manual": "Ruční časová razítka"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Údržba: Přepracování a optimalizace dat",
-        "clear_debug_data": "Vymazat data ladění (uvolnit místo)",
-        "wipe_history": "Vymazat VŠECHNA data tohoto zařízení (nevratné)",
-        "export_import": "Export/import JSON s nastavením (kopírovat/vložit)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "Exportovat všechna data",
-        "import": "Importovat/sloučit data"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Automatické označení starých cyklů",
-        "select_cycle_to_label": "Specifický cyklus štítku",
-        "select_cycle_to_delete": "Smazat cyklus",
-        "interactive_editor": "Interaktivní editor sloučení/rozdělení",
-        "trim_cycle": "Data cyklu trimování"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Vytvořit nový profil",
-        "edit_profile": "Upravit/Přejmenovat profil",
-        "delete_profile": "Smazat profil",
-        "profile_stats": "Statistiky profilu",
-        "cleanup_profile": "Vyčistit historii – graf a smazání",
-        "assign_phases": "Přiřadit fázové rozsahy"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Vytvořit novou fázi",
-        "edit_custom_phase": "Upravit fázi",
-        "delete_custom_phase": "Smazat fázi"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Fáze pojmenování a aplikace",
-        "cancel": "Vraťte se zpět beze změn"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Přidat fázový rozsah",
-        "edit_range": "Upravit rozsah fází",
-        "delete_range": "Smazat fázový rozsah",
-        "clear_ranges": "Vymazat všechny rozsahy",
-        "auto_detect_ranges": "Automatická detekce fází",
-        "save_ranges": "Uložit a vrátit"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Stav obnovení",
-        "stop_recording": "Zastavit nahrávání (Uložit a zpracovat)",
-        "start_recording": "Spusťte nový záznam",
-        "process_recording": "Zpracovat poslední záznam (oříznout a uložit)",
-        "discard_recording": "Zahodit poslední nahrávku"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Vytvořit nový profil",
-        "existing_profile": "Přidat do stávajícího profilu",
-        "discard": "Zahodit záznam"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Potvrdit - Správná detekce",
-        "correct": "Správně - Zvolte Program/Duration",
-        "ignore": "Ignorovat – cyklus falešně pozitivní/hlučný",
-        "delete": "Smazat – Odebrat z historie"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Nastavte počáteční bod",
-        "set_end": "Nastavit koncový bod",
-        "reset": "Resetovat na plnou dobu trvání",
-        "apply": "Použít Trim",
-        "cancel": "Zrušit"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "Aktuální fáze"
       },
-      "wash_phase": {
-        "name": "Fáze"
-      },
       "profile_cycle_count": {
         "name": "Počet cyklů profilu {profile_name}",
         "unit_of_measurement": "cyklů"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s musí být větší než trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "Žádný aktivní cyklus k pozastavení nebo obnovení."
     }
   },
   "panel": {
-    "tab": {
-      "status": "Přehled",
-      "history": "Cykly",
-      "profiles": "Profily",
-      "settings": "Nastavení",
-      "ml": "ML Školení",
-      "advanced": "Pokročilé",
-      "diagnostics": "Diagnostika",
-      "pp_overview": "Přehled",
-      "pp_phases": "Fáze",
-      "pp_cleanup": "Vyčištění",
-      "pp_manage": "Správa",
-      "subtab_profiles": "Profily",
-      "subtab_phase_catalog": "Fázový katalog"
-    },
     "btn": {
-      "save": "Uložit",
-      "cancel": "Zrušit",
-      "delete": "Smazat",
-      "close": "Zavřít",
-      "edit": "Upravit",
-      "add": "Přidat",
-      "rebuild": "Obnovit obálky",
-      "record": "Spustit nahrávání",
-      "compare": "Porovnat",
-      "confirm": "Potvrdit",
-      "discard": "Zahodit",
-      "export": "Exportovat",
-      "import": "Importovat",
-      "merge": "Sloučit",
-      "apply": "Aplikovat",
-      "refresh": "Obnovit",
-      "create": "Vytvořit",
-      "select": "Vybrat",
-      "done": "Hotovo",
-      "reset": "Resetovat",
-      "trim": "Oříznout",
-      "split": "Rozdělit",
-      "review": "Přezkoumat",
-      "inspect": "Zkontrolovat",
-      "label": "Označení",
-      "save_settings": "Uložit nastavení",
-      "new_profile": "+ Nový profil",
-      "new_group": "+ Nová skupina",
-      "apply_label": "Použít štítek",
-      "run_auto_label": "Spustit automatické označení",
-      "save_review": "Uložit recenzi",
-      "apply_trim": "Použít ořez",
-      "apply_split": "Použít rozdělení",
-      "process_recording": "Uložit záznam",
-      "stop": "Zastavit",
-      "process": "Zpracovat",
+      "add_timer": "+ Přidat časovač",
+      "remove_timer": "Odstraňte časovač",
+      "add_device_tip": "Přidejte další zařízení WashData",
+      "delete_group_tip": "Smazat pouze tuto skupinu - profily členů zůstanou zachovány",
+      "run_analysis_tip": "Nyní analyzujte své zaznamenané cykly a obnovte návrhy ladění",
+      "reset_ml_models_tip": "Zahoďte doladěné modely a vraťte se k těm vestavěným. WashData se je může později znovu naučit.",
       "add_device": "+ Přidat zařízení",
-      "train_now": "Trénovat nyní",
-      "reset_to_defaults": "Obnovit výchozí hodnoty",
-      "reset_to_builtin": "Obnovit vestavěné modely",
-      "save_preferences": "Uložit preference",
-      "save_panel_settings": "Uložit nastavení panelu",
-      "save_access_control": "Uložit kontrolu přístupu",
-      "auto_label_cycles": "Automatické cykly označení",
-      "run_analysis": "Analýza návrhů",
-      "apply_all": "Použít vše",
-      "show_only": "Zobrazit pouze",
-      "dismiss": "Zavřít",
-      "dismiss_all": "Zavřít vše",
-      "process_history": "Proces nyní",
-      "clear_debug": "Vymazat data chyb",
-      "wipe_all": "Smazat všechna data",
-      "export_json": "Exportovat do JSON",
-      "import_json": "Import z JSON",
-      "correct": "Opravit…",
-      "ignore": "Ignorovat",
       "add_phase": "+ Přidat fázi",
-      "new_phase": "+ Nová fáze",
-      "delete_profile": "Smazat profil",
-      "rebuild_envelope": "Přestavět obálku",
-      "create_profile": "+ Vytvořit profil",
-      "rec_stop": "Zastavit",
-      "pause_cycle": "Pauza",
-      "resume_cycle": "Pokračovat",
-      "force_stop": "Vynutit zastavení",
-      "save_phases": "Uložit fáze",
+      "apply_all": "Použít vše",
+      "apply_label": "Použít štítek",
+      "apply_split": "Použít Split",
+      "apply_trim": "Použít Trim",
       "auto_detect_split": "Automatická detekce",
-      "clear_splits": "Vyčistit",
-      "submit_correction": "Odeslat opravu",
-      "import_overwrite": "Import (přepisuje data)",
-      "use": "Použít",
-      "manage": "Správa",
-      "remove": "Odstranit",
-      "delete_group": "Smazat skupinu",
-      "trim_split": "Trim / Split",
+      "auto_label_cycles": "Cykly automatického označování",
+      "cancel": "Zrušit",
+      "clear_debug": "Vymazat data ladění",
+      "clear_splits": "Jasný",
+      "close": "Blízko",
+      "compare": "Porovnejte",
+      "confirm": "Potvrdit",
       "convert_to_automation": "Převést na automatizaci",
-      "new_automation": "Nová automatizace",
-      "from_template": "Z šablony ▼",
-      "on_cycle_started": "Začátek cyklu",
-      "on_cycle_finished": "Po skončení cyklu",
-      "save_group": "Uložit skupinu"
+      "correct": "Opravit…",
+      "create": "Vytvořit",
+      "create_profile": "+ Vytvořit profil",
+      "delete": "Smazat",
+      "delete_group": "Smazat skupinu",
+      "delete_profile": "Smazat profil",
+      "discard": "Vyřadit",
+      "dismiss": "Propustit",
+      "done": "Hotovo",
+      "edit": "Upravit",
+      "export": "Vývozní",
+      "export_json": "Export do JSON",
+      "force_stop": "Vynutit zastavení",
+      "from_template": "Ze šablony ▾",
+      "ignore": "Ignorovat",
+      "import_json": "Import z JSON",
+      "import_overwrite": "Importovat (přepíše data)",
+      "inspect": "Kontrolovat",
+      "label": "Označení",
+      "manage": "Spravovat",
+      "merge": "Spojit",
+      "new_automation": "＋ Nová automatizace",
+      "new_group": "+ Nová skupina",
+      "new_phase": "+ Nová fáze",
+      "new_profile": "+ Nový profil",
+      "on_cycle_finished": "Po dokončení cyklu",
+      "on_cycle_started": "Na začátku cyklu",
+      "pause_cycle": "Pauza",
+      "process": "Proces",
+      "process_history": "Zpracovat nyní",
+      "process_recording": "Uložit záznam",
+      "rebuild": "Obnovit obálky",
+      "rebuild_envelope": "Znovu sestavit obálku",
+      "rec_stop": "Zastávka",
+      "record": "Spusťte nahrávání",
+      "refresh": "Obnovit",
+      "remove": "Odstranit",
+      "reset": "Resetovat",
+      "reset_to_builtin": "Resetujte na vestavěné modely",
+      "reset_to_defaults": "Obnovit výchozí nastavení",
+      "resume_cycle": "Pokračovat v cyklu",
+      "review": "Recenze",
+      "run_analysis": "🔍 Spusťte analýzu návrhů",
+      "run_auto_label": "Spusťte Auto-Label",
+      "save": "Uložit",
+      "save_access_control": "Uložit řízení přístupu",
+      "save_group": "Uložit skupinu",
+      "save_panel_settings": "Uložit nastavení panelu",
+      "save_phases": "Uložte fáze",
+      "save_preferences": "Uložit předvolby",
+      "save_review": "Uložit recenzi",
+      "save_settings": "Uložit nastavení",
+      "select": "Vybrat",
+      "show_only": "Zobrazit pouze",
+      "split": "Rozdělit",
+      "submit_correction": "Odeslat opravu",
+      "train_now": "Trénujte hned",
+      "trim": "Oříznout",
+      "trim_split": "Trim / Split",
+      "use": "Použití",
+      "wipe_all": "Vymazat všechna data"
     },
     "hdr": {
-      "status": "Stav",
-      "live_power": "Živá energie",
-      "manual_recording": "Ruční nahrávání",
-      "tools_and_data": "Nástroje a data",
-      "phase_catalog": "Fázový katalog",
-      "storage_stats": "Statistiky úložiště",
-      "maintenance": "Údržba",
-      "export_import": "Export / import",
-      "logs": "Záznamy",
-      "my_preferences": "Moje preference",
-      "panel_settings": "Nastavení panelu (všichni uživatelé)",
+      "toggle_sidebar": "Přepnout postranní panel Home Assistant",
+      "logs": "Protokoly",
       "access_control": "Řízení přístupu",
-      "ml_smart_learning": "Chytré učení",
-      "ml_settings_card": "Nastavení",
-      "ml_learned": "Co se WashData naučilo",
-      "ml_matching_tuning": "Přizpůsobení párování programů",
-      "display": "Zobrazit",
-      "status_graph": "Graf stavu",
-      "diagnostics_pref": "Diagnostika",
-      "logs_diagnostics": "Diagnostika",
-      "process_history": "Historie procesů",
-      "clear_debug": "Odstranit stopy ladění",
-      "wipe_history": "Vymazat historii",
-      "automations": "Automatizace",
-      "automation_open": "Otevřít v editoru automatizace",
       "automation_delete": "Smazat tuto automatizaci",
-      "automation_needs_review": "Tento cyklus potřebuje přezkoumání",
-      "automation_review_this_cycle": "Přezkum tohoto cyklu",
-      "no_automations": "Pro toto zařízení zatím neexistuje žádná automatizace."
+      "automation_needs_review": "Tento cyklus vyžaduje revizi",
+      "automation_open": "Otevřete v editoru automatizace",
+      "automation_review_this_cycle": "Zopakujte si tento cyklus",
+      "automations": "Automatizace",
+      "clear_debug": "Vymazat trasování ladění",
+      "diagnostics_pref": "Diagnostika",
+      "display": "Zobrazit",
+      "export_import": "Export / Import",
+      "live_power": "Živá síla",
+      "logs_diagnostics": "Diagnostika",
+      "maintenance": "Údržbové akce",
+      "manual_recording": "Ruční nahrávání",
+      "ml_learned": "Co se WashData naučila",
+      "ml_matching_tuning": "Jemné doladění programového přizpůsobení",
+      "ml_settings_card": "Nastavení",
+      "ml_smart_learning": "Chytré učení",
+      "my_preferences": "Moje preference",
+      "no_automations": "Na toto zařízení zatím neodkazuje žádná automatizace.",
+      "panel_settings": "Nastavení panelu",
+      "phase_catalog": "Katalog fází",
+      "process_history": "Historie procesu",
+      "status": "Postavení",
+      "status_graph": "Stavový graf",
+      "storage_stats": "Statistiky úložiště",
+      "tools_and_data": "Nástroje a data",
+      "wipe_history": "Vymazat historii"
     },
     "lbl": {
-      "power": "Výkon",
-      "progress": "Pokrok",
-      "remaining": "Zbývající",
-      "duration": "Doba trvání",
-      "energy": "Energie",
-      "profile": "Profil",
-      "status": "Stav",
-      "date": "Datum",
-      "confidence": "Spolehlivost",
-      "health": "Zdraví",
-      "cost": "Náklady",
-      "program": "Program",
-      "cycle_health": "Zdraví cyklu",
-      "activity": "Činnost",
-      "unlabelled": "Neoznačená",
-      "unlabelled_paren": "(bez označení)",
-      "emphasis": "Důraz",
-      "default": "Výchozí",
-      "in_use": "Používané",
-      "profile_name": "Název profilu",
-      "ref_cycle": "Referenční cyklus (nepovinné)",
-      "manual_duration": "Ruční doba trvání (min, volitelné)",
-      "phase_name": "Název fáze",
-      "description": "Popis",
-      "correct_profile": "Správný profil",
-      "correct_duration": "Správná doba trvání (min, nepovinné)",
-      "load_from_file": "Načíst ze souboru",
-      "json_data": "Data JSON",
-      "expected_duration": "Předpokládaná doba trvání (min)",
-      "rename_profile": "Přejmenovat profil",
-      "select_profile": "Vybrat profil",
-      "confidence_threshold": "Prahová hodnota spolehlivosti",
-      "resulting_profile": "Profil výsledku",
-      "new_profile_name": "Nový název profilu",
-      "save_mode": "Režim ukládání",
-      "head_trim": "Hlavní trim (s)",
-      "tail_trim": "Konec záznamu (s)",
-      "gap_s": "Mezera (s)",
-      "start": "Start",
-      "end": "Konec",
-      "quality": "Kvalita",
-      "golden_reference": "Zaznamenaný referenční cyklus",
-      "compare_profiles": "Porovnat s profily",
-      "tags": "Značky",
-      "notes": "Poznámky",
-      "default_tab": "Výchozí záložka při otevření obrazu",
-      "cycle_date_display": "Zobrazení data cyklu",
-      "refresh_interval": "Interval obnovení (s)",
-      "panel_default_tab": "Výchozí karta",
-      "hide_tabs": "Skrýt karty pro non-administrátory",
-      "enable_access_control": "Povolit ovládání přístupu pro uživatele",
-      "default_access_level": "Výchozí úroveň pro uživatele níže neuvedené",
-      "administrators": "Správce",
-      "default_other": "Výchozí (jiná zařízení)",
-      "show_expected": "Zobrazit očekávané překrytí křivky (odpovídající profil, oranžová)",
-      "show_raw": "Zobrazovat syrové údaje senzorů (nehladké, šedé)",
-      "show_debug": "Zobrazit kartu live match debug na stránce Status (důvěra, nejednoznačnost, top kandidáti)",
-      "mode_new_profile": "Vytvořit nový profil",
-      "mode_existing_profile": "Přidat do existujícího profilu",
-      "auto_fine_tune_on": "automatické přizpůsobování zapnuto (kolem {hour}:00)",
-      "auto_fine_tune_off": "automatické přizpůsobování vypnuto",
-      "last_checked": "Poslední kontrola:",
-      "remove_label": "- Odstranit štítek -",
-      "create_new_profile": "+ Vytvořit nový profil...",
-      "read_only": "Pouze pro čtení",
+      "timer_min": "min",
+      "timer_msg_placeholder": "Zpráva (volitelné, {device}/{program}/{minutes})",
+      "timer_auto_pause": "Automatická pauza",
       "actions": "Akce",
+      "activity": "Aktivita",
+      "administrators": "Správci",
+      "auto_fine_tune_off": "automatické jemné doladění",
+      "clock_time": "Čas hodin",
+      "compare_profiles": "Porovnejte s profily",
+      "confidence": "Spolehlivost",
+      "confidence_threshold": "Práh důvěry",
+      "correct_duration": "Správné trvání (min, volitelné)",
+      "correct_profile": "Správný profil",
+      "cost": "Náklady",
+      "create_new_profile": "+ Vytvořit nový profil…",
+      "cycle_date_display": "Zobrazení data cyklu",
+      "cycle_health": "Cyklujte zdraví",
       "cycles_count": "Cykly",
-      "debug_traces": "Stopy ladění",
+      "date": "Datum",
+      "debug_traces": "Trasování ladění",
+      "default": "Výchozí",
+      "default_access_level": "Výchozí úroveň pro uživatele, kteří nejsou uvedeni níže",
+      "default_other": "Výchozí (ostatní zařízení)",
+      "default_tab": "Výchozí karta při otevření panelu",
+      "description": "Popis",
+      "duration": "Trvání",
+      "emphasis": "Důraz",
+      "enable_access_control": "Povolit řízení přístupu pro jednotlivé uživatele",
+      "energy": "Energie",
+      "expected_duration": "Očekávaná doba trvání (min)",
       "file_kb": "Soubor (kB)",
-      "label": "Označení",
+      "gap_s": "mezera (y)",
+      "head_trim": "Obložení hlavy (y)",
+      "health": "Zdraví",
+      "hide_tabs": "Skrýt karty pro neadministrátory",
+      "in_use": "Používá se",
+      "json_data": "Data JSON",
+      "label": "Shoda",
+      "last_checked": "Naposledy zkontrolováno:",
+      "load_from_file": "Načíst ze souboru",
+      "manual_duration": "Manuální trvání (min, volitelné)",
+      "mode_existing_profile": "Přidat do stávajícího profilu",
+      "mode_new_profile": "Vytvořit nový profil",
+      "new_profile_name": "Nový název profilu",
+      "panel_default_tab": "Výchozí karta",
+      "phase_name": "Jméno",
+      "power": "Moc",
+      "profile": "Profil",
+      "profile_name": "Název profilu",
+      "progress": "Pokrok",
+      "read_only": "Pouze pro čtení",
+      "ref_cycle": "Referenční cyklus (volitelné)",
+      "refresh_interval": "Interval obnovení (s)",
+      "remaining": "Zbývající",
+      "remove_label": "- Odebrat štítek -",
+      "rename_profile": "Přejmenovat profil",
+      "resulting_profile": "Výsledný profil",
+      "save_mode": "Uložit režim",
       "seconds_from_start": "Sekundy od začátku",
-      "clock_time": "Hodiny",
-      "ungrouped": "Neseskupené"
+      "select_profile": "Vyberte Profil",
+      "show_debug": "Show live match debug card on the Status page (confidence, ambiguity, top candidates)",
+      "show_expected": "Zobrazit očekávané překrytí křivky (shodný profil, oranžová)",
+      "show_raw": "Zobrazit nezpracované hodnoty senzoru (nevyhlazené, šedé)",
+      "status": "Postavení",
+      "tail_trim": "Trimování ocasu (y)",
+      "ungrouped": "Neseskupeno",
+      "unlabelled": "Neoznačené",
+      "unlabelled_paren": "(neoznačeno)",
+      "expected": "Očekávaný",
+      "raw_socket": "Surový signál",
+      "artifact_interruption": "Přerušení",
+      "artifact_low_power": "Nízký výkon",
+      "artifact_high_power": "Vysoký výkon",
+      "artifact_anomaly": "Anomálie"
     },
     "badge": {
-      "poor_fit": "špatně sedí",
-      "fair_fit": "přijatelná shoda",
-      "manual": "(ručně zvoleno)",
-      "auto": "(automaticky detekováno)",
-      "improving": "↗ zlepšení",
+      "golden_cycle": "Zaznamenaný referenční cyklus",
+      "reviewed": "Zkontrolováno",
+      "feedback_requested": "Vyžádána zpětná vazba",
+      "needs_review": "Vyžaduje revizi",
+      "overrun": "Běžel déle než obvykle",
+      "artifact_tip": "Zjištěno {n} anomálií (např. dveře otevřené uprostřed cyklu) – otevřete, abyste je viděli na grafu",
+      "poor_fit_tip": "Nekonzistentní historie zápasů – zvažte přebudování tohoto profilu",
+      "fair_fit_tip": "Střední konzistence shody – některé cykly přiřazené k tomuto profilu mají nižší skóre spolehlivosti. Označte více cyklů nebo znovu zaznamenejte profil, abyste zvýšili přesnost.",
+      "auto": "(automaticky zjištěno)",
+      "built_in_tag": "vestavěný",
       "declining": "↘ klesající",
+      "fair_fit": "přijatelná shoda",
+      "improving": "↗ zlepšování",
+      "manual": "(vybráno ručně)",
+      "poor_fit": "špatná shoda",
       "steady": "→ stabilní",
-      "using_tuned": "Používá přizpůsobené váhy",
-      "using_defaults": "Používá výchozí hodnoty",
-      "built_in_tag": "vestavěný"
-    },
-    "status": {
-      "completed": "Dokončeno",
-      "interrupted": "Přerušeno",
-      "force_stopped": "Nuceně zastaveno",
-      "active": "Aktivní",
-      "ambiguous": "Nejednoznačné",
-      "clear": "Vyčistit",
-      "working": "Práce...",
-      "recording": "Nahrávám...",
-      "ready": "Připraven ke zpracování",
-      "idle": "Nečinný",
-      "auto_detect": "Automatická detekce",
-      "fine_tuning": "probíhá přizpůsobování…",
-      "all_statuses": "Všechny stavy"
-    },
-    "ml": {
-      "fit_strong": "Silná",
-      "fit_good": "Dobrá",
-      "fit_fair": "Přijatelná",
-      "fit_weak": "Slabá",
-      "fit_slight": "Nepatrná",
-      "fit_word": "shoda",
-      "fine_tuned_at": "přizpůsobeno {when}",
-      "personalized": "● Přizpůsobeno tomuto stroji",
-      "builtin_models": "● Použití vestavěných modelů"
-    },
-    "toast": {
-      "settings_saved": "Uložené nastavení; obnovování integrace",
-      "preferences_saved": "Uložené preference",
-      "panel_settings_saved": "Nastavení panelu uložena",
-      "access_saved": "Přístup uložen",
-      "profile_created": "Vytvořený profil \"{name}\"",
-      "profile_deleted": "Profil \"{name}\" smazán",
-      "profile_renamed": "Přejmenovaný profil",
-      "phases_saved": "Uložené fáze",
-      "phase_created": "Vytvořena fáze \"{name}\"",
-      "phase_deleted": "Fáze \"{name}\" odstraněna",
-      "phase_updated": "Fáze aktualizována",
-      "recording_started": "Začátek záznamu",
-      "recording_stopped": "Nahrávání přerušeno",
-      "recording_discarded": "Záznam vyřazen",
-      "recording_saved": "Nahrávání uloženo do profilu",
-      "export_downloaded": "Export stažen",
-      "logs_exported": "Záznamy exportovány",
-      "import_successful": "Import úspěšný; obnovování integrace",
-      "envelopes_rebuilt": "Obálky přestavěny",
-      "envelope_rebuilt": "Obálka přestavěna",
-      "suggestions_applied": "Použité návrhy; opětovné zatížení integrace",
-      "suggestions_dismissed": "Návrh zamítnut",
-      "auto_label_complete": "Automatické označení dokončeno",
-      "cycle_labelled": "Cyklus označen",
-      "cycle_deleted": "Cyklus smazán",
-      "cycles_deleted": "{count} cyklus (y) smazán",
-      "cycle_trimmed": "Cyklus oříznut",
-      "cycles_merged": "Sloučené cykly",
-      "review_saved": "Přezkum uložen",
-      "feedback_confirmed": "Zpětná vazba potvrzena",
-      "feedback_dismissed": "Zpětná vazba zamítnuta",
-      "feedback_all_dismissed": "Všechny zpětné vazby zamítnuty",
-      "correction_submitted": "Předložená oprava",
-      "group_saved": "Skupina uložena",
-      "group_deleted": "Skupina zrušena",
-      "automation_deleted": "Automatizace zrušena",
-      "legacy_removed": "Starší akce odstraněny",
-      "cycle_paused": "Cyklus pozastaven",
-      "cycle_resumed": "Obnovený cyklus",
-      "cycle_force_stopped": "Cyklus nuceně zastaven",
-      "ml_training_promoted": "Trénink dokončen: povýšen {count} model(ů)",
-      "ml_training_no_improvement": "Trénink dokončen: ponechán výchozí stav (bez zlepšení)",
-      "matching_reverted": "Závaží párování obnovena na výchozí hodnoty",
-      "models_reverted": "Modely v zařízení obnoveny na vestavěnou hodnotu",
-      "analysis_complete": "Analýza dokončena: {count} návrh(ů)",
-      "analysis_complete_none": "Analýza dokončena: žádné nové návrhy",
-      "debug_cleared": "Vymazáno {count} trasování ladění",
-      "all_wiped": "Všechna data vymazána",
-      "no_split_found": "Nebyly nalezeny žádné mezery v volnoběhu",
-      "group_name_required": "Vyžaduje se název skupiny",
-      "min_2_profiles": "Vyberte alespoň 2 profily pro skupinu",
-      "profile_name_required": "Vyžaduje se název profilu",
-      "phase_name_required": "Požaduje se název fáze",
-      "name_required": "Požadované jméno",
-      "json_required": "Požadují se údaje JSON",
-      "save_failed": "Uložení selhalo: {error}",
-      "delete_failed": "Smazat selhání: {error}",
-      "apply_failed": "Aplikace selhala: {error}",
-      "rebuild_failed": "Obnovení selhalo: {error}",
-      "start_failed": "Start selhal: {error}",
-      "stop_failed": "Zastavit selhání: {error}",
-      "discard_failed": "Vyřazení selhalo: {error}",
-      "trim_failed": "Trim selhala: {error}",
-      "split_failed": "Rozdělení selhalo: {error}",
-      "merge_failed": "Sloučení selhalo: {error}",
-      "create_failed": "Vytvoření selhalo: {error}",
-      "update_failed": "Aktualizace selhala: {error}",
-      "rename_failed": "Přejmenovat selhalo: {error}",
-      "revert_failed": "Revert selhal: {error}",
-      "training_failed": "Výcvik selhal: {error}",
-      "export_failed": "Export selhal: {error}",
-      "import_failed": "Import selhal: {error}",
-      "auto_label_failed": "Automatické označení selhalo: {error}",
-      "analysis_failed": "Analýza selhala: {error}",
-      "auto_detect_failed": "Automatické zjištění selhalo: {error}",
-      "error": "Chyba: {error}",
-      "could_not_load_cycle": "Nelze načíst cyklus: {error}",
-      "pause_failed": "Pauza selhala: {error}",
-      "label_failed": "Štítek selhal: {error}",
-      "invalid_json": "\"{key}\" není platný JSON - před uložením jej opravte nebo odstraňte pole.",
-      "processed": "Zpracované {bits}",
-      "split_complete": "Rozdělit do {count} cyklů"
-    },
-    "msg": {
-      "no_devices": "Zatím není nastaveno žádné zařízení WashData.",
-      "no_device_selected": "Není vybráno žádné zařízení.",
-      "loading": "Načítání…",
-      "loading_settings": "Načítání nastavení...",
-      "live_chart_loading": "Živý energetický diagram se objeví, jakmile dorazí údaje.",
-      "no_cycles_match": "Žádný cyklus neodpovídá současnému filtru.",
-      "no_cycles_yet": "Zatím žádné cykly.",
-      "no_profiles_yet": "Zatím žádné profily. Vytvořte jeden z označeného cyklu.",
-      "no_logs": "Zatím žádné záznamy.",
-      "no_phases": "Nejsou definovány žádné fáze.",
-      "no_phases_assigned": "Žádné fáze.",
-      "no_split_points": "Zatím žádné body.",
-      "no_envelope": "Zatím žádná obálka - po cyklech označování se obnoví.",
-      "no_envelope_overlay": "Žádná obálka není k dispozici.",
-      "no_other_users": "Ostatní uživatelé nenalezeni.",
-      "maintenance_requires_access": "Údržba a vývoz / dovoz vyžadují plný přístup.",
-      "loading_curve": "Nakládací křivka...",
-      "compare_selected_cycles": "Vybrané cykly (pevné) - show / hide",
-      "compare_overlay_profiles": "Překrývací profily (slabé)",
-      "no_profiles_compare": "Žádné profily k porovnání.",
-      "no_cycles_profile": "Žádný cyklus pro tento profil.",
-      "saving_triggers_reload": "Uložení spustí obnovení integrace. Entity HA se mohou krátce zobrazit jako nedostupné.",
-      "prefs_personal": "Ty se vztahují pouze na váš účet Home Assistant.",
-      "no_match_yet": "Zatím žádný pokus o shodu — to se plní během probíhajícího cyklu.",
-      "no_fine_tuned": "Zatím žádné přizpůsobení — WashData používá vestavěné modely.",
-      "ml_learned_intro": "Modely přizpůsobené tomuto zařízení. Vše, co není uvedeno, používá spolehlivý vestavěný model.",
-      "ml_settings_intro": "Dva nezávislé přepínače: jeden aplikuje modely v průběhu cyklu, druhý umožňuje WashData přizpůsobovat je tomuto zařízení v průběhu času.",
-      "ml_intro": "WashData je dodáván s chytrými modely, které detekují cykly, párují programy a odhadují čas a energii — fungují hned po instalaci.",
-      "matching_tuning_intro": "Při učení WashData také upravuje, jak moc párování programů zohledňuje tvar cyklu oproti jeho délce a energii.",
-      "phase_catalog_intro": "Pojmenované segmenty cyklu (Předpírka, Topení, Spin...). Přiřaďte je k profilu z jeho ovládacího panelu.",
-      "phase_ranges_intro": "Fázové rozpětí (minuty od začátku cyklu) překrývané na průměrné křivce. Upravit hodnoty na náhled live.",
-      "cleanup_intro": "Každý označený cyklus je překrytý. Tik outliers a smazat vyčistit profil.",
-      "split_intro": "Kliknutím na graf přidáte nebo odstraníte bod rozdělení nebo automaticky detekujete mezery.",
-      "trim_intro": "Přetáhněte červené rukojeti, nebo zadejte hodnoty. Všechno mimo okno je odstraněno.",
-      "import_intro": "Nahrát exportovaný soubor nebo vložit užitečné zatížení JSON níže.",
-      "auto_label_intro": "Přiřadit profily k neoznačeným cyklům, jejichž shoda je spolehlivá.",
-      "merge_intro": "Vybrané cykly se kombinují do jednoho (chronologické pořadí; mezery naplněné 0 W). Vyberte výsledný profil.",
-      "enough_data": "Dostatek dat k poučení z ({current} / {min} cyklů).",
-      "collecting_data": "Shromažďování dat — potřeba {need} dalšího cyklu{plural} před spuštěním přizpůsobování ({current}/{min}).",
-      "updated": "Aktualizováno {time}",
-      "appliance_monitor": "Monitorovací zařízení",
-      "ml_loading": "načítání ML...",
-      "see_recorder": "Viz widget záznamu níže",
-      "review_in_settings": "Přezkum v Nastavení",
-      "storage_diagnostics": "Statistiky skladování, údržba, vývoz / dovoz",
-      "recent_logs": "Nedávné záznamy ha_washdata",
-      "preferences_adv": "Nastavení",
-      "preferences_admin": "Nastavení, ovládání panelu a přístupu",
-      "review_to_cycles": "Otevřít frontu recenzí Cyklů",
-      "pending_feedback": "Až do zpětné vazby od detekce",
-      "recording_in_progress": "Probíhající nahrávání",
-      "no_profiles_yet_short": "Zatím žádné profily.",
-      "unsure_detected_prefix": "WashData si není jistá, zda byl zjištěn.",
-      "no_suggestions": "Žádné aktivní návrhy.",
-      "no_profiles_overlay": "Žádné profily na překrytí.",
-      "compare_cycles_title": "Porovnat {count} cykly",
-      "profiles_intro": "Klikněte na profil pro statistiky, fáze a úklid. Seskupte téměř identické programy (stejný tvar/délka, různá teplota nebo otáčky), aby párování mezi nimi spolehlivě rozlišilo.",
-      "search_placeholder": "Hledat v nastavení…",
-      "automations_intro": "WashData spouští události {start} / {end} a zpřístupňuje entity, takže oznámení a akce je nejlepší sestavit jako běžné automatizace Home Assistant. Automatizace využívající toto zařízení se zobrazí níže.",
-      "notify_services_hint": "Použijte ID služeb {entity} (více hodnot oddělte čárkou). Proměnné šablony: {vars}.",
-      "rbac_hint": "Pokud je vypnuto, má každý uživatel Home Assistant plný přístup (výchozí stav). Správci mají vždy plný přístup a mohou spravovat všechny uživatele.",
-      "feedback_prompt": "Potvrďte, že byl detekován správně, opravte program nebo ignorujte."
+      "using_defaults": "Pomocí dodaných výchozích nastavení",
+      "using_tuned": "Použití vyladěných závaží"
     },
     "modal": {
-      "label_cycle": "Označit cyklus",
-      "create_profile": "Vytvořit profil",
-      "new_phase": "Nová fáze",
-      "edit_phase": "Upravit fázi",
-      "process_recording": "Zpracovat nahrávku",
+      "merge_cycles": "Sloučit {n} cyklů",
+      "auto_label": "Cykly automatického označování",
       "correct_feedback": "Správná zpětná vazba",
-      "import_config": "Nastavení importu",
-      "auto_label": "Automatické popisky",
-      "cycle": "Cyklus"
+      "create_profile": "Vytvořit profil",
+      "cycle": "Cyklus",
+      "edit_phase": "Upravit fázi",
+      "import_config": "Importovat konfiguraci",
+      "label_cycle": "Cyklus štítků",
+      "new_phase": "Nová fáze",
+      "process_recording": "Procesní záznam"
     },
-    "tag": {
-      "late_start": "Pozdní start",
-      "early_end": "Předčasný konec",
-      "merged": "Sloučené cykly",
-      "split": "Rozdělený cyklus",
-      "noise": "Hluk",
-      "wrong_profile": "Špatný profil",
-      "sensor_gap": "Mezera snímače"
+    "msg": {
+      "near_duplicate_cluster": "zjištěn téměř duplicitní shluk profilů. Seskupování umožňuje spárování spolehlivě vybrat mezi podobnými (např. stejný program při různé teplotě/odstřeďování).",
+      "coverage_gap": "nedávné cykly nemají žádný odpovídající profil ({pct} % z posledních 30).",
+      "consider_new_profile": "Zvažte vytvoření nového profilu.",
+      "group_not_cohesive": "Tyto profily nejsou dostatečně podobné, aby se daly spolehlivě seskupit, takže shoda s nimi zachází individuálně, dokud neodstraníte odlehlou hodnotu nebo nerozdělíte skupinu.",
+      "group_modal_help": "Skupinové programy se stejným tvarem, které se liší teplotou/odstřeďováním (doba trvání se může lišit). Shoda hodnotí skupinu jako jednoho kandidáta a poté vybere nejlépe padnoucího člena. Vyberte alespoň 2; překrytí ukazuje, jak jsou si podobné.",
+      "showing_suggestions": "Zobrazuje se nastavení {count} s návrhy.",
+      "show_all_settings": "Zobrazit všechna nastavení",
+      "tuning_suggestions_available": "{count} návrh ladění dostupný z pozorovaných cyklů. Zobrazují se vedle příslušných polí.",
+      "legacy_actions_title": "Stále běží starší vlastní akce {count}",
+      "old_actions_warning": "Nakonfigurováno pomocí starého editoru akcí (nyní odstraněno). Stále se spouštějí při událostech cyklu, ale zde je již nelze upravovat. Převeďte je na normální automatizaci nebo je odstraňte.",
+      "no_settings_match": "Žádné nastavení neodpovídá „{q}“",
+      "clear_debug_hint": "Odstraňte uložená ladicí data, abyste uvolnili místo.",
+      "wipe_history_warning": "Trvale smažte všechny cykly a profily. Nelze vrátit zpět.",
+      "export_description": "Exportujte všechny profily a cykly do JSON nebo obnovte z předchozího exportu.",
+      "log_buffer_hint": "Od nejnovějších · ukládá do vyrovnávací paměti posledních 500 záznamů ha_washdata od restartu · přetažením spodního okraje změníte velikost.",
+      "review_profile_tip": "Program, jako je tento cyklus označen. Pokud byl automaticky zjištěný program nesprávný, opravte jej zde – označení učí párování pro budoucí cykly.",
+      "review_quality_tip": "Jak čistý je tento cyklus. Dobrý = učebnicový příklad tohoto programu; Špatný = detekovaný, ale hlučný nebo atypický; Nepoužitelný = chybně zjištěný (sloučený, zkrácený nebo falešný). Řídí skóre zdraví a které cykly mohou model trénovat.",
+      "review_recorded_tip": "Označte to jako ručně vybraný referenční cyklus pro svůj program – stejná role jako ručně zaznamenaný cyklus. Referenční cykly jsou vždy zachovány, nasazují odpovídající šablonu a při čištění se nikdy nevynechají. (Toto je \"zlatá\" / zaznamenaná vlajka; obě jsou totéž.)",
+      "review_tags_tip": "Volitelné příznaky popisující, co se v tomto cyklu pokazilo, takže za to může školení a čištění.",
+      "review_notes_tip": "Poznámky s volným textem pro vaši vlastní potřebu. Nepoužívá se při párování nebo školení.",
+      "review_confirm_help": "Potvrďte, zda byl tento cyklus správně detekován. Vaše recenze trénují model na vašem stroji – čím více cyklů potvrdíte, tím lepší spárování a hodnocení zdraví získáte. Rychlé dobré/špatné stačí.",
+      "review_notes_placeholder": "Poznámky (volitelné)",
+      "compare_profiles_tip": "Překryjte další obálky profilu na výše uvedené tabulce a zjistěte, která z nich nejlépe vyhovuje tomuto cyklu.",
+      "artifact_header": "Během tohoto cyklu bylo zjištěno {n} anomálií",
+      "artifact_footer": "Zvýrazněno na grafu výše. Jedná se o přechodné artefakty (např. dveře otevřené uprostřed cyklu), ne nutně problémy.",
+      "profile_poor_health_detail": "Cykly přiřazené k tomuto profilu mají nekonzistentní tvary nebo nízkou spolehlivost. Zvažte přestavbu obálky nebo revizi označených cyklů.",
+      "trend_duration_longer": "Trendy delší ({pct} %/cyklus) – poslední průměr {avg}",
+      "trend_duration_shorter": "Trendy kratší ({pct} %/cyklus) – poslední průměr {avg}",
+      "trend_energy_up": "Trend energie stoupá ({pct} %/cyklus) – poslední průměr {avg}",
+      "trend_energy_down": "Energetický trend klesá ({pct} %/cyklus)",
+      "performance_trend": "Trend výkonu ({n} cyklů)",
+      "maintenance_advisory": "Zvyšující se doba trvání/energie může znamenat nutnost údržby spotřebiče (např. odstranění vodního kamene, čištění filtru).",
+      "manual_duration_hint": "Průměrná/očekávaná délka cyklu profilu, použitá pro odhady zbývajícího času. Upravit pro nastavení; ponechání beze změny zachová aktuální hodnotu.",
+      "appliance_monitor": "Monitor spotřebiče",
+      "auto_label_intro": "Přiřaďte profily neoznačeným cyklům, jejichž spolehlivost shody překročí prahovou hodnotu.",
+      "cleanup_intro": "Každý označený cyklus se překrývá. Zaškrtnutím odlehlých hodnot a odstraněním se profil vyčistí.",
+      "compare_overlay_profiles": "Překryvné profily (slabé)",
+      "compare_selected_cycles": "Vybrané cykly (plné) — zobrazit / skrýt",
+      "feedback_prompt": "Potvrďte, že to bylo správné, opravte program nebo jej ignorujte.",
+      "import_intro": "Načtěte exportovaný soubor nebo níže vložte datovou část JSON.",
+      "live_chart_loading": "Při příchodu naměřených hodnot se zobrazí graf živého výkonu.",
+      "loading": "Načítání…",
+      "loading_curve": "Načítání křivky…",
+      "loading_settings": "Načítání nastavení…",
+      "maintenance_requires_access": "Údržba a export/import vyžadují plný přístup.",
+      "matching_tuning_intro": "Při učení WashData také upravuje, jak moc váží přizpůsobení programu tvar oproti délce trvání a energii.",
+      "merge_intro": "Vybrané cykly se spojí do jednoho (chronologické pořadí; mezery vyplněné 0 W). Vyberte výsledný profil.",
+      "ml_intro": "WashData se dodává s chytrými modely, které fungují hned po vybalení.",
+      "ml_learned_intro": "Modely vyladěné na tento stroj.",
+      "ml_loading": "načítání ML…",
+      "ml_settings_intro": "Dva nezávislé přepínače: jeden použije modely během cyklu, druhý umožňuje programu WashData je v průběhu času jemně doladit na váš stroj.",
+      "no_cycles_match": "Žádné cykly neodpovídají aktuálnímu filtru.",
+      "no_cycles_profile": "Žádné cykly pro tento profil.",
+      "no_cycles_yet": "Dosud nebyly zaznamenány žádné cykly.",
+      "no_device_selected": "Není vybráno žádné zařízení.",
+      "no_devices": "Zatím nejsou nakonfigurována žádná zařízení WashData.",
+      "no_envelope": "Zatím bez obálky - po cyklech štítkování znovu sestavit.",
+      "no_envelope_overlay": "Není k dispozici žádná obálka k překrytí.",
+      "no_fine_tuned": "Zatím není nic doladěno — WashData využívá své vestavěné modely.",
+      "no_logs": "Dosud nebyly uloženy žádné záznamy protokolu.",
+      "no_match_yet": "Zatím žádný pokus o shodu – toto se naplní během běžícího cyklu.",
+      "no_other_users": "Nebyli nalezeni žádní další uživatelé Home Assistant.",
+      "no_phases": "Nejsou definovány žádné fáze.",
+      "no_phases_assigned": "Nejsou přiřazeny žádné fáze.",
+      "no_profiles_compare": "Žádné profily k porovnání.",
+      "no_profiles_overlay": "Žádné profily k překrytí.",
+      "no_profiles_yet": "Zatím žádné profily. Vytvořte jeden z označeného cyklu.",
+      "no_profiles_yet_short": "Zatím žádné profily.",
+      "no_split_points": "Zatím žádné dělené body.",
+      "no_suggestions": "Žádné aktivní návrhy.",
+      "pending_feedback": "Čeká na zpětnou vazbu detekce",
+      "phase_catalog_intro": "Pojmenované segmenty cyklu (Předpírka, Ohřev, Odstřeďování…). Přiřaďte je k profilu z jeho ovládacího panelu.",
+      "phase_ranges_intro": "Fázové rozsahy (minuty od začátku cyklu) překrývající průměrnou křivku. Upravte hodnoty pro živý náhled.",
+      "preferences_admin": "Předvolby, panel a řízení přístupu",
+      "preferences_adv": "Předvolby",
+      "prefs_personal": "Platí pouze pro váš účet Home Assistant.",
+      "profiles_intro": "Kliknutím na profil zobrazíte statistiky, fáze a vyčištění. Seskupte téměř identické programy (stejný tvar/doba trvání, různá teplota nebo odstřeďování), takže se mezi nimi dá spolehlivě vybrat.",
+      "rbac_hint": "Když je vypnutá, každý uživatel Home Assistant má plný přístup (výchozí). Správci mají vždy plný přístup a mohou spravovat každého.",
+      "recent_logs": "Nedávné záznamy ha_washdata",
+      "recording_in_progress": "Probíhá nahrávání",
+      "review_in_settings": "Zkontrolujte v Nastavení",
+      "review_to_cycles": "Otevřete frontu kontroly cyklů",
+      "saving_triggers_reload": "Uložení spustí opětovné načtení integrace. Entity HA se mohou krátce zobrazit jako nedostupné.",
+      "search_placeholder": "Nastavení vyhledávání…",
+      "see_recorder": "Viz widget rekordéru níže",
+      "split_intro": "Kliknutím na graf přidáte nebo odstraníte dělicí bod nebo automaticky rozpoznáte mezery v nečinnosti. Každý výsledný segment může získat svůj vlastní profil.",
+      "storage_diagnostics": "Statistiky úložiště, údržba, export/import",
+      "trim_intro": "Přetáhněte červené úchyty nebo zadejte hodnoty. Vše mimo okno je odstraněno.",
+      "unsure_detected_prefix": "WashData si není jistý, zda jej detekoval",
+      "updated": "Aktualizováno"
     },
-    "quality": {
-      "good": "Dobré",
-      "bad": "Špatné",
-      "unusable": "Nepoužitelné"
-    },
-    "access": {
-      "none": "Žádné (skryté)",
-      "read": "Čtení",
-      "edit": "Upravit",
-      "full": "Plné",
-      "inherit": "Zdědit"
+    "phase_desc": {
+      "pre_wash": "Počáteční namáčení nebo předúprava před hlavním praním.",
+      "wash": "Hlavní prací cyklus s pohybem bubnu a volitelným ohřevem.",
+      "wash_dw": "Hlavní mycí prostředek s ohřevem.",
+      "rinse": "Fáze oplachu čistou vodou. Tato fáze se může opakovat několikrát.",
+      "spin": "Vysokorychlostní odsávání pro odstranění vody z nákladu.",
+      "spin_wd": "Vysokorychlostní extrakce před přechodem do sušení.",
+      "soak": "Nízká aktivita namáčení mezi fázemi aktivního praní.",
+      "soak_dw": "Prodloužená doba máčení pro těžké půdy.",
+      "anti_crease": "Občasné krátké tuhnutí po dokončení pro redukci vrásek.",
+      "heat_up": "Počáteční zahřátí ohřívače před úplným sušením.",
+      "drying": "Hlavní vyhřívaná perioda omílání.",
+      "cool_down": "Převalování bez tepla blízko konce cyklu.",
+      "anti_wrinkle": "Pravidelné omílání po cyklu pro redukci vrásek.",
+      "sensor_check": "Krátká pauza s nízkým výkonem při měření suchosti.",
+      "drain_and_switch": "Přechod z režimu praní do režimu sušení.",
+      "pre_rinse": "Počáteční ostřik před mytím detergentem.",
+      "dry": "Fáze sušení pomocí ohřívače a/nebo zbytkového tepla.",
+      "sanitize": "Vysokoteplotní čisticí stupeň pro sanitační programy."
     },
     "health": {
-      "poor": "⚠ Špatná shoda",
       "fair": "Přijatelná shoda",
-      "good": "✓ Dobrá shoda"
-    },
-    "trend": {
-      "up": "Trendy nahoru",
-      "down": "Klesající trend"
-    },
-    "pref": {
-      "date_relative": "Relativní (např. před 2 hodinami)",
-      "date_absolute": "Absolutní (např. 14: 32 dne 2. července)"
+      "good": "✓ Dobrá shoda",
+      "poor": "⚠ Špatná shoda"
     },
     "log": {
       "all_levels": "Všechny úrovně"
     },
-    "section": {
-      "basic": {
-        "label": "Základní",
-        "intro": "Základní identita a základní potřeby, které většina setupů potřebuje."
-      },
-      "detection": {
-        "label": "Zjištění",
-        "intro": "Jak je cyklus detekován jako spuštění, běh a dokončení."
-      },
-      "matching": {
-        "label": "Párování",
-        "intro": "Jak jsou dokončené cykly porovnávány s získanými profily a označeny."
-      },
-      "timing": {
-        "label": "Načasování & Watchdog",
-        "intro": "Pozadí kadence, offline hlídací pes a úklid."
-      },
-      "anti_wrinkle": {
-        "label": "Proti pomačkání",
-        "intro": "Antivráskový režim detekuje bubnové pulzy sušičky po hlavní tepové fázi."
-      },
-      "delay": {
-        "label": "Odložený start",
-        "intro": "Detekce zpoždění-start určuje, kdy je spotřebič napájen, ale ještě nezačal cyklus."
-      },
-      "triggers": {
-        "label": "Spouštěče & dveře",
-        "intro": "Volitelné vnější signály: koncový spínač, čidlo dveří, vypínač pauzy a upozornění na vyložení."
-      },
-      "notifications": {
-        "label": "Oznámení",
-        "intro": "Nastavit kdy a jak jste informováni o událostech cyklu."
-      },
-      "ml_training": {
-        "label": "Trénink ML",
-        "intro": "Aktivujte chytré modely přizpůsobující detekci a načasování tomuto zařízení."
-      }
+    "ml": {
+      "builtin_models": "● Použití vestavěných modelů",
+      "fit_fair": "Přijatelný",
+      "fit_good": "Dobrý",
+      "fit_slight": "Mírný",
+      "fit_strong": "Silný",
+      "fit_weak": "Slabý",
+      "fit_word": "fit",
+      "personalized": "● Přizpůsobeno pro tento stroj"
     },
-    "setting": {
-      "name": {
-        "label": "Název zařízení"
-      },
-      "device_type": {
-        "label": "Typ zařízení"
-      },
-      "power_sensor": {
-        "label": "Napájecí senzor"
-      },
-      "min_power": {
-        "label": "Minimální výkon"
-      },
-      "off_delay": {
-        "label": "Vypnout zpoždění"
-      },
-      "linked_device": {
-        "label": "Skupina pod zařízením"
-      },
-      "start_threshold_w": {
-        "label": "Spustit práh"
-      },
-      "stop_threshold_w": {
-        "label": "Zastavit práh"
-      },
-      "min_off_gap": {
-        "label": "Min. prodleva vypnutí"
-      },
-      "start_duration_threshold": {
-        "label": "Začátek trvání"
-      },
-      "start_energy_threshold": {
-        "label": "Spustit energii"
-      },
-      "completion_min_seconds": {
-        "label": "Minimální délka cyklu"
-      },
-      "running_dead_zone": {
-        "label": "Běžící mrtvá zóna"
-      },
-      "end_energy_threshold": {
-        "label": "Koncová energie"
-      },
-      "end_repeat_count": {
-        "label": "Počet opakování pro ukončení"
-      },
-      "sampling_interval": {
-        "label": "Interval odběru vzorků"
-      },
-      "smoothing_window": {
-        "label": "Vyhlazující okno"
-      },
-      "abrupt_drop_watts": {
-        "label": "Náhlý pokles"
-      },
-      "abrupt_drop_ratio": {
-        "label": "Poměr náhlého poklesu"
-      },
-      "profile_match_threshold": {
-        "label": "Shoda mezních hodnot"
-      },
-      "profile_unmatch_threshold": {
-        "label": "Neshodné prahové hodnoty"
-      },
-      "profile_match_interval": {
-        "label": "Interval shody"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "Poměr doby trvání Min"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "Maximální poměr trvání"
-      },
-      "profile_duration_tolerance": {
-        "label": "Trvání tolerance"
-      },
-      "duration_tolerance": {
-        "label": "Odhad tolerance"
-      },
-      "auto_label_confidence": {
-        "label": "Automatická důvěra na etiketě"
-      },
-      "learning_confidence": {
-        "label": "Učení se sebevědomí"
-      },
-      "suppress_feedback_notifications": {
-        "label": "Oznámení o zpětném převzetí"
-      },
-      "watchdog_interval": {
-        "label": "Interval hlídacího psa"
-      },
-      "no_update_active_timeout": {
-        "label": "No- Aktualizace timeout"
-      },
-      "progress_reset_delay": {
-        "label": "Zpoždění resetování průběhu"
-      },
-      "auto_maintenance": {
-        "label": "Automatická údržba (noční úklid)"
-      },
-      "expose_debug_entities": {
-        "label": "Zobrazit ladicí entity"
-      },
-      "save_debug_traces": {
-        "label": "Uložit stopy debug"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "Povolit detekci anti- vrásek"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "Max výkon proti pomačkání"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "Maximální doba trvání"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "Výstupní práh výkonu"
-      },
-      "delay_start_detect_enabled": {
-        "label": "Povolit Delay-Start Detection"
-      },
-      "delay_confirm_seconds": {
-        "label": "Potvrdit sekundy"
-      },
-      "delay_timeout_hours": {
-        "label": "Timeout hours"
-      },
-      "external_end_trigger_enabled": {
-        "label": "Povolit spouštění externího konce"
-      },
-      "external_end_trigger": {
-        "label": "Entita externího spouštěče"
-      },
-      "external_end_trigger_inverted": {
-        "label": "Invertovat externí Trigger (spouštění vypnuto)"
-      },
-      "door_sensor_entity": {
-        "label": "Entita senzoru dveří"
-      },
-      "pause_cuts_power": {
-        "label": "Pauza také přeruší napájení (přes spínač)"
-      },
-      "switch_entity": {
-        "label": "Entita přepínače"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "Vyložit zpoždění"
-      },
-      "pump_stuck_duration": {
-        "label": "Doba zaseknutého čerpadla"
-      },
-      "notify_start_services": {
-        "label": "Startovní služby"
-      },
-      "notify_finish_services": {
-        "label": "Dokončení služeb"
-      },
-      "notify_live_services": {
-        "label": "Live Progress Services"
-      },
-      "notify_people": {
-        "label": "Lidé (pouze když doma)"
-      },
-      "notify_only_when_home": {
-        "label": "Upozorňovat pouze když doma"
-      },
-      "notify_fire_events": {
-        "label": "Spouštět události HA pro oznámení"
-      },
-      "notify_before_end_minutes": {
-        "label": "Upozornění před ukončením"
-      },
-      "notify_live_interval_seconds": {
-        "label": "Interval živé aktualizace"
-      },
-      "notify_live_overrun_percent": {
-        "label": "Živé překročení % před upozorněním"
-      },
-      "notify_live_chronometer": {
-        "label": "Použít živý chronometr"
-      },
-      "notify_timeout_seconds": {
-        "label": "Automaticky zavřít po"
-      },
-      "notify_title": {
-        "label": "Název oznámení"
-      },
-      "notify_icon": {
-        "label": "Ikona oznámení"
-      },
-      "notify_start_message": {
-        "label": "Spustit zprávu"
-      },
-      "notify_finish_message": {
-        "label": "Dokončit zprávu"
-      },
-      "notify_pre_complete_message": {
-        "label": "Pre- Kompletní zpráva"
-      },
-      "notify_reminder_message": {
-        "label": "Zpráva o připomínkách"
-      },
-      "notify_channel": {
-        "label": "Android Kanál (start / live)"
-      },
-      "notify_finish_channel": {
-        "label": "Android Kanál (konec)"
-      },
-      "energy_price_entity": {
-        "label": "Subjekt s energetickou cenou"
-      },
-      "energy_price_static": {
-        "label": "Statická cena energie (na kWh)"
-      },
-      "enable_ml_models": {
-        "label": "Aplikovat chytré modely během cyklu"
-      },
-      "ml_training_enabled": {
-        "label": "Učte se z tohoto stroje"
-      },
-      "ml_training_hour": {
-        "label": "Učit se v hodině"
-      },
-      "ml_training_min_cycles": {
-        "label": "Cykly potřeba první"
-      },
-      "ml_training_interval_days": {
-        "label": "Zkontrolovat maximálně každý"
-      }
+    "pref": {
+      "date_absolute": "Absolutní (např. 2. července 14:32)",
+      "date_relative": "Relativní (např. před 2 hodinami)"
+    },
+    "quality": {
+      "bad": "Špatný",
+      "good": "Dobrý",
+      "unusable": "Nepoužitelný"
+    },
+    "status": {
+      "active": "Aktivní",
+      "all_statuses": "Všechny stavy",
+      "ambiguous": "Dvojznačný",
+      "auto_detect": "Automatická detekce",
+      "clear": "Jasný",
+      "completed": "Dokončeno",
+      "fine_tuning": "teď dolaďuji…",
+      "force_stopped": "Síla se zastavila",
+      "idle": "Líný",
+      "interrupted": "Přerušeno",
+      "ready": "Připraveno ke zpracování",
+      "recording": "Nahrávání"
+    },
+    "tab": {
+      "advanced": "Pokročilé",
+      "diagnostics": "Diagnostika",
+      "history": "Cykly",
+      "ml": "Školení ML",
+      "pp_cleanup": "Čištění",
+      "pp_manage": "Spravovat",
+      "pp_overview": "Přehled",
+      "pp_phases": "Fáze",
+      "profiles": "Profily",
+      "settings": "Nastavení",
+      "status": "Přehled",
+      "subtab_phase_catalog": "Katalog fází",
+      "subtab_profiles": "Profily"
+    },
+    "tag": {
+      "early_end": "Předčasný konec",
+      "late_start": "Pozdní start",
+      "merged": "Sloučené cykly",
+      "noise": "Hluk",
+      "sensor_gap": "Mezera snímače",
+      "split": "Dělený cyklus",
+      "wrong_profile": "Špatný profil"
+    },
+    "toast": {
+      "access_saved": "Řízení přístupu bylo uloženo",
+      "all_wiped": "Všechna data vymazána",
+      "analysis_complete_none": "Analýza dokončena: žádné nové návrhy",
+      "auto_label_complete": "Automatické označení dokončeno",
+      "automation_deleted": "Automatizace odstraněna",
+      "correction_submitted": "Oprava odeslána",
+      "cycle_deleted": "Cyklus smazán",
+      "cycle_force_stopped": "Cyklus nuceně zastaven",
+      "cycle_labelled": "Cyklus označen",
+      "cycle_paused": "Cyklus pozastaven",
+      "cycle_resumed": "Cyklus byl obnoven",
+      "cycle_trimmed": "Cyklus oříznut",
+      "cycles_merged": "Cykly se spojily",
+      "envelope_rebuilt": "Obálka přestavěna",
+      "envelopes_rebuilt": "Obálky přestavěny",
+      "export_downloaded": "Export stažen",
+      "feedback_all_dismissed": "Všechny zpětné vazby byly zamítnuty",
+      "feedback_confirmed": "Zpětná vazba potvrzena",
+      "feedback_dismissed": "Zpětná vazba zamítnuta",
+      "group_deleted": "Skupina smazána",
+      "group_name_required": "Název skupiny je povinný",
+      "group_saved": "Skupina uložena",
+      "import_successful": "Import byl úspěšný; znovunačtení integrace",
+      "json_required": "Jsou vyžadována data JSON",
+      "legacy_removed": "Starší akce byly odstraněny",
+      "logs_exported": "Protokoly byly exportovány",
+      "matching_reverted": "Odpovídající váhy se vrátily na výchozí hodnoty",
+      "min_2_profiles": "Vyberte alespoň 2 profily pro skupinu",
+      "ml_training_no_improvement": "Školení dokončeno: základní linie zachována (žádné zlepšení)",
+      "models_reverted": "Modely na zařízení se vrátily k výchozímu stavu",
+      "name_required": "Jméno je povinné",
+      "no_split_found": "Nebyly nalezeny žádné volné mezery, které by se daly rozdělit",
+      "panel_settings_saved": "Nastavení panelu uloženo",
+      "phase_name_required": "Název fáze je povinný",
+      "phase_updated": "Fáze aktualizována",
+      "phases_saved": "Fáze uloženy",
+      "preferences_saved": "Předvolby uloženy",
+      "profile_name_required": "Jméno profilu je povinné",
+      "profile_renamed": "Profil přejmenován",
+      "recording_discarded": "Nahrávka vyřazena",
+      "recording_saved": "Záznam byl uložen do profilu",
+      "recording_started": "Nahrávání začalo",
+      "recording_stopped": "Nahrávání zastaveno",
+      "review_saved": "Recenze byla uložena",
+      "settings_saved": "Nastavení uloženo; znovunačtení integrace",
+      "suggestions_applied": "Byly použity návrhy; znovunačtení integrace",
+      "suggestions_dismissed": "Návrhy zamítnuty"
+    },
+    "trend": {
+      "down": "Klesající trend",
+      "up": "Rostoucí trend"
     }
   }
 }

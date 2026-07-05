@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Siklus begin",
-        "cycle_finish": "Siklus voltooi",
-        "cycle_live": "Regstreekse vordering"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Wasmasjien",
@@ -88,198 +81,6 @@
         "bread_maker": "Broodmaker",
         "pump": "Pomp / Sump Pomp",
         "other": "Ander (gevorderd)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(Ongemerk)",
-        "create_new_profile": "Skep nuwe profiel",
-        "remove_label": "Verwyder etiket",
-        "no_reference_cycle": "(Geen verwysingsiklus nie)",
-        "all_device_types": "Alle toesteltipes",
-        "current_suffix": "(huidige)",
-        "phase_builtin_suffix": "(Ingeboude)",
-        "phase_none_available": "Geen fases beskikbaar nie.",
-        "phase_other_device_types": "Ander tipes toestel:",
-        "settings_deprecation_warning": "⚠️ **Verouderde toesteltipe:** {device_type} is geskeduleer vir verwydering in 'n toekomstige vrystelling. WashData se bypassende pyplyn lewer nie betroubare resultate vir hierdie toestelklas nie. Jou integrasie bly deur die afskaffingstydperk werk; om hierdie waarskuwing stil te maak, skakel **Toesteltipe** hieronder na een van die ondersteunde tipes (wasmasjien, droër, wasmasjien-droër-kombinasie, skottelgoedwasser, lugbraaier, broodmaker of pomp), of na **Ander (Gevorderd)** as jou toestel nie by enige van die ondersteunde tipes pas nie. **Ander (Gevorderd)** stuur opsetlik generiese verstekwaardes wat nie vir enige spesifieke toestel ingestel is nie, so jy sal self drempels, uitteltyd en bypassende parameters moet opstel; al jou bestaande instellings word bewaar wanneer jy oorskakel.",
-        "editor_select_info": "Kies 1 siklus om te verdeel, of 2+ siklusse om saam te voeg.",
-        "editor_select_info_split": "Kies 1 siklus om te verdeel.",
-        "editor_select_info_merge": "Kies 2+ siklusse om saam te voeg.",
-        "editor_select_info_delete": "Kies 1+ siklus(se) om te skrap.",
-        "no_cycles_recorded": "Geen siklusse is nog aangeteken nie.",
-        "profile_summary_line": "- **{name}**: {count} siklusse, {avg}m gem",
-        "no_profiles_created": "Geen profiele is nog geskep nie.",
-        "phase_preview": "Fasevoorskou",
-        "phase_preview_no_curve": "Gemiddelde profielkurwe is nog nie beskikbaar nie. Laat loop/benoem meer siklusse vir hierdie profiel.",
-        "average_power_curve": "Gemiddelde kragkurwe",
-        "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} siklusse, ~{duration}m gemiddeld)",
-        "profile_option_short_fmt": "{name} ({count} siklusse, ~{duration}m)",
-        "deleted_cycles_from_profile": "Het {count} siklusse van {profile} uitgevee.",
-        "not_enough_data_graph": "Nie genoeg data om grafiek te genereer nie.",
-        "no_profiles_found": "Geen profiele gevind nie.",
-        "cycle_info_fmt": "Siklus: {start}, {duration}m, stroom: {label}",
-        "top_candidates_header": "### Topkandidate",
-        "tbl_profile": "Profiel",
-        "tbl_confidence": "Vertroue",
-        "tbl_correlation": "Korrelasie",
-        "tbl_duration_match": "Tydswedstryd",
-        "detected_profile": "Bespeur profiel",
-        "estimated_duration": "Geskatte duur",
-        "actual_duration": "Werklike Duur",
-        "choose_action": "__Kies 'n handeling hieronder:__",
-        "tbl_count": "Tel",
-        "tbl_avg": "Gem",
-        "tbl_min": "Min",
-        "tbl_max": "Maks",
-        "tbl_energy_avg": "Energie (Gem.)",
-        "tbl_energy_total": "Energie (totaal)",
-        "tbl_consistency": "Bestaan.",
-        "tbl_last_run": "Laaste hardloop",
-        "graph_legend_title": "Grafieklegende",
-        "graph_legend_body": "Die blou band verteenwoordig die minimum en maksimum krag trekking reeks waargeneem. Die lyn wys die gemiddelde drywingskromme.",
-        "recording_preview": "Opnamevoorskou",
-        "trim_start": "Trim Begin",
-        "trim_end": "Sny Einde",
-        "split_preview_title": "Verdeel voorskou",
-        "split_preview_found_fmt": "Het {count} segmente gevind.",
-        "split_preview_confirm_fmt": "Klik Bevestig om hierdie siklus in {count} afsonderlike siklusse te verdeel.",
-        "merge_preview_title": "Voeg voorskou saam",
-        "merge_preview_joining_fmt": "Sluit tans aan by {count} siklusse. Leemtes sal gevul word met 0W lesings.",
-        "editor_delete_preview_title": "Skrapvoorskou",
-        "editor_delete_preview_intro": "Die gekose siklusse sal permanent geskrap word:",
-        "editor_delete_preview_confirm": "Klik Bevestig om hierdie siklusrekords permanent te skrap.",
-        "no_power_preview": "*Geen kragdata beskikbaar vir voorskou nie.*",
-        "profile_comparison": "Profielvergelyking",
-        "actual_cycle_label": "Hierdie siklus (werklik)",
-        "storage_usage_header": "Berginggebruik",
-        "storage_file_size": "Lêergrootte",
-        "storage_cycles": "Siklusse",
-        "storage_profiles": "Profiele",
-        "storage_debug_traces": "Ontfout spore",
-        "overview_suffix": "Oorsig",
-        "phase_preview_for_profile": "Fasevoorskou vir profiel",
-        "current_ranges_header": "Huidige reekse",
-        "assign_phases_help": "Gebruik handelinge hieronder om reekse by te voeg, te wysig, uit te vee of te stoor.",
-        "profile_summary_header": "Profielopsomming",
-        "recent_cycles_header": "Onlangse siklusse",
-        "trim_cycle_preview_title": "Siklus Trim Voorskou",
-        "trim_cycle_preview_no_data": "Geen kragdata beskikbaar vir hierdie siklus nie.",
-        "trim_cycle_preview_kept_suffix": "gehou",
-        "table_program": "Program",
-        "table_when": "Wanneer",
-        "table_length": "Lengte",
-        "table_match": "Ooreenstemming",
-        "table_profile": "Profiel",
-        "table_cycles": "Siklusse",
-        "table_avg_length": "Gem. lengte",
-        "table_last_run": "Laaste hardloop",
-        "table_avg_energy": "Gem. energie",
-        "table_detected_program": "Bespeurde program",
-        "table_confidence": "Vertroue",
-        "table_reported": "Gerapporteer"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Verdeel 'n siklus (Vind gapings)",
-        "merge": "Voeg siklusse saam (Sluit fragmente aan)",
-        "delete": "Vee siklus(s) uit"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Outo-bespeur ledige gapings",
-        "manual": "Handmatige tydstempel(s)"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Onderhoud: Herverwerk en optimaliseer data",
-        "clear_debug_data": "Vee ontfoutdata uit (maak spasie vry)",
-        "wipe_history": "Vee ALLE data vir hierdie toestel uit (onomkeerbaar)",
-        "export_import": "Voer JSON uit/voer in met instellings (kopieer/plak)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "Voer alle data uit",
-        "import": "Voer data in/voeg saam"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Outo-etiketteer ou siklusse",
-        "select_cycle_to_label": "Benoem Spesifieke Siklus",
-        "select_cycle_to_delete": "Vee siklus uit",
-        "interactive_editor": "Voeg saam / verdeel interaktiewe redigeerder",
-        "trim_cycle": "Knip siklusdata"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Skep nuwe profiel",
-        "edit_profile": "Wysig/hernoem profiel",
-        "delete_profile": "Vee profiel uit",
-        "profile_stats": "Profielstatistieke",
-        "cleanup_profile": "Maak geskiedenis skoon - grafiek en vee uit",
-        "assign_phases": "Ken fasereekse toe"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Skep nuwe fase",
-        "edit_custom_phase": "Wysig fase",
-        "delete_custom_phase": "Vee Fase uit"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Noem en pas fases toe",
-        "cancel": "Gaan terug sonder veranderinge"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Voeg fasereeks by",
-        "edit_range": "Wysig fasereeks",
-        "delete_range": "Vee fasereeks uit",
-        "clear_ranges": "Vee alle reekse uit",
-        "auto_detect_ranges": "Bespeur fases outomaties",
-        "save_ranges": "Stoor en keer terug"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Herlaai status",
-        "stop_recording": "Stop opname (stoor en verwerk)",
-        "start_recording": "Begin nuwe opname",
-        "process_recording": "Verwerk laaste opname (sny en stoor)",
-        "discard_recording": "Gooi laaste opname weg"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Skep nuwe profiel",
-        "existing_profile": "Voeg by bestaande profiel",
-        "discard": "Gooi opname weg"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Bevestig - Korrekte opsporing",
-        "correct": "Korrek - Kies program/duur",
-        "ignore": "Ignoreer - Vals Positief/Lawaaierige Siklus",
-        "delete": "Vee uit - Verwyder uit geskiedenis"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Stel Beginpunt",
-        "set_end": "Stel Eindpunt",
-        "reset": "Stel terug na volle duur",
-        "apply": "Pas Trim toe",
-        "cancel": "Kanselleer"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "Huidige fase"
       },
-      "wash_phase": {
-        "name": "Fase"
-      },
       "profile_cycle_count": {
         "name": "Profiel {profile_name} Tel",
         "unit_of_measurement": "siklusse"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s moet groter as trim_start_s wees."
+    },
+    "no_active_cycle": {
+      "message": "Geen aktiewe siklus om te onderbreek of te hervat nie."
     }
   },
   "panel": {
-    "section": {
-      "notifications": {
-        "intro": "",
-        "label": "Kennisgewings"
-      },
-      "ml_training": {
-        "intro": "",
-        "label": "ML opleiding"
-      },
-      "basic": {
-        "label": "Basies",
-        "intro": "Kernidentiteit en die noodsaaklikhede wat die meeste opstellings benodig."
-      },
-      "detection": {
-        "label": "Opsporing",
-        "intro": "Hoe 'n siklus bespeur word as begin, hardloop en eindig."
-      },
-      "matching": {
-        "label": "Ooreenstemming",
-        "intro": "Hoe voltooide siklusse by aangeleerde profiele pas en geëtiketteer word."
-      },
-      "timing": {
-        "label": "Tydsberekening & Waghond",
-        "intro": "Agtergrond kadens, die vanlyn waghond en huishouding."
-      },
-      "anti_wrinkle": {
-        "label": "Anti-rimpel",
-        "intro": "Anti-rimpel-modus bespeur droër tuimelpulse na die hoofhittefase."
-      },
-      "delay": {
-        "label": "Vertraag Begin",
-        "intro": "Bespeuring van vertraagde begin identifiseer wanneer 'n toestel aangedryf word, maar nog nie sy siklus begin het nie."
-      },
-      "triggers": {
-        "label": "Snellers en deur",
-        "intro": "Opsionele eksterne seine: 'n eindsneller, 'n deursensor, 'n pouseskakelaar en die ontlaai-herinnering."
-      }
-    },
-    "tab": {
-      "status": "Oorsig",
-      "history": "Siklusse",
-      "profiles": "Profiele",
-      "settings": "Instellings",
-      "ml": "ML opleiding",
-      "advanced": "Gevorderd",
-      "diagnostics": "Diagnostiek",
-      "pp_overview": "Oorsig",
-      "pp_phases": "Fases",
-      "pp_cleanup": "Opruiming",
-      "pp_manage": "Bestuur",
-      "subtab_profiles": "Profiele",
-      "subtab_phase_catalog": "Fase Katalogus"
-    },
     "btn": {
-      "save": "Stoor",
+      "add_timer": "+ Voeg timer by",
+      "remove_timer": "Verwyder timer",
+      "add_device_tip": "Voeg nog 'n WashData-toestel by",
+      "delete_group_tip": "Vee slegs hierdie groep uit - die lidprofiele word gehou",
+      "run_analysis_tip": "Ontleed nou jou opgeneemde siklusse en verfris instelvoorstelle",
+      "reset_ml_models_tip": "Gooi die verfynde modelle weg en gaan terug na die ingeboude modelle. WashData kan hulle later weer leer.",
+      "add_device": "+ Voeg toestel by",
+      "add_phase": "+ Voeg fase by",
+      "apply_all": "Pas alles toe",
+      "apply_label": "Pas etiket toe",
+      "apply_split": "Pas Split toe",
+      "apply_trim": "Pas Trim toe",
+      "auto_detect_split": "Outo-bespeur",
+      "auto_label_cycles": "Outo-etiket siklusse",
       "cancel": "Kanselleer",
-      "delete": "Vee uit",
+      "clear_debug": "Vee ontfoutdata uit",
+      "clear_splits": "Duidelik",
       "close": "Maak toe",
-      "edit": "Wysig",
-      "add": "Voeg by",
-      "rebuild": "Herbou koeverte",
-      "record": "Begin opname",
       "compare": "Vergelyk",
       "confirm": "Bevestig",
-      "discard": "Gooi weg",
-      "export": "Uitvoer",
-      "import": "Invoer",
-      "merge": "Voeg saam",
-      "apply": "Toepas",
-      "refresh": "Verfris",
+      "convert_to_automation": "Skakel oor na outomatisering",
+      "correct": "Reg…",
       "create": "Skep",
-      "select": "Kies",
+      "create_profile": "+ Skep profiel",
+      "delete": "Vee uit",
+      "delete_group": "Vee groep uit",
+      "delete_profile": "Vee profiel uit",
+      "discard": "Gooi weg",
+      "dismiss": "Verwerp",
       "done": "Klaar",
-      "reset": "Stel terug",
-      "trim": "Sny",
-      "split": "Verdeel",
-      "review": "Hersien",
+      "edit": "Wysig",
+      "export": "Uitvoer",
+      "export_json": "Voer uit na JSON",
+      "force_stop": "Dwing Stop",
+      "from_template": "Van sjabloon ▾",
+      "ignore": "Ignoreer",
+      "import_json": "Voer in vanaf JSON",
+      "import_overwrite": "Voer in (skryf data oor)",
       "inspect": "Inspekteer",
       "label": "Etiket",
-      "save_settings": "Stoor instellings",
-      "new_profile": "+ Nuwe profiel",
-      "new_group": "+ Nuwe groep",
-      "apply_label": "Pas etiket toe",
-      "run_auto_label": "Begin Auto-Label",
-      "save_review": "Stoor resensie",
-      "apply_trim": "Pas Trim toe",
-      "apply_split": "Pas Split toe",
-      "process_recording": "Stoor opname",
-      "stop": "Stop",
-      "process": "Proses",
-      "add_device": "+ Voeg toestel by",
-      "train_now": "Oefen nou",
-      "reset_to_defaults": "Stel terug na verstek",
-      "reset_to_builtin": "Stel terug na ingeboude modelle",
-      "save_preferences": "Stoor voorkeure",
-      "save_panel_settings": "Stoor Paneelinstellings",
-      "save_access_control": "Stoor toegangsbeheer",
-      "auto_label_cycles": "Outo-etiket siklusse",
-      "run_analysis": "🔍 Begin voorstelontleding",
-      "apply_all": "Pas alles toe",
-      "show_only": "Wys slegs",
-      "dismiss": "Verwerp",
-      "dismiss_all": "Verwerp almal",
-      "process_history": "Verwerk nou",
-      "clear_debug": "Vee ontfoutdata uit",
-      "wipe_all": "Vee alle data uit",
-      "export_json": "Voer uit na JSON",
-      "import_json": "Voer in vanaf JSON",
-      "correct": "Reg…",
-      "ignore": "Ignoreer",
-      "add_phase": "+ Voeg fase by",
-      "new_phase": "+ Nuwe fase",
-      "delete_profile": "Vee profiel uit",
-      "rebuild_envelope": "Herbou koevert",
-      "create_profile": "+ Skep profiel",
-      "rec_stop": "Stop",
-      "pause_cycle": "Pouse",
-      "resume_cycle": "Hervat",
-      "force_stop": "Dwing Stop",
-      "save_phases": "Stoor fases",
-      "auto_detect_split": "Outo-bespeur",
-      "clear_splits": "Duidelik",
-      "submit_correction": "Dien Regstelling in",
-      "import_overwrite": "Voer in (skryf data oor)",
-      "use": "Gebruik",
       "manage": "Bestuur",
-      "remove": "Verwyder",
-      "delete_group": "Vee groep uit",
-      "trim_split": "Sny / verdeel",
-      "convert_to_automation": "Skakel oor na outomatisering",
+      "merge": "Voeg saam",
       "new_automation": "＋ Nuwe outomatisering",
-      "from_template": "Van sjabloon ▾",
-      "on_cycle_started": "Op siklus begin",
+      "new_group": "+ Nuwe groep",
+      "new_phase": "+ Nuwe fase",
+      "new_profile": "+ Nuwe profiel",
       "on_cycle_finished": "Op siklus klaar",
-      "save_group": "Stoor groep"
+      "on_cycle_started": "Op siklus begin",
+      "pause_cycle": "Pouse",
+      "process": "Proses",
+      "process_history": "Verwerk nou",
+      "process_recording": "Stoor opname",
+      "rebuild": "Herbou koeverte",
+      "rebuild_envelope": "Herbou koevert",
+      "rec_stop": "Stop",
+      "record": "Begin opname",
+      "refresh": "Verfris",
+      "remove": "Verwyder",
+      "reset": "Stel terug",
+      "reset_to_builtin": "Stel terug na ingeboude modelle",
+      "reset_to_defaults": "Stel terug na verstek",
+      "resume_cycle": "Hervat siklus",
+      "review": "Hersien",
+      "run_analysis": "🔍 Begin voorstelontleding",
+      "run_auto_label": "Begin Auto-Label",
+      "save": "Stoor",
+      "save_access_control": "Stoor toegangsbeheer",
+      "save_group": "Stoor groep",
+      "save_panel_settings": "Stoor Paneelinstellings",
+      "save_phases": "Stoor fases",
+      "save_preferences": "Stoor voorkeure",
+      "save_review": "Stoor resensie",
+      "save_settings": "Stoor instellings",
+      "select": "Kies",
+      "show_only": "Wys slegs",
+      "split": "Verdeel",
+      "submit_correction": "Dien Regstelling in",
+      "train_now": "Trein nou",
+      "trim": "Sny",
+      "trim_split": "Sny / verdeel",
+      "use": "Gebruik",
+      "wipe_all": "Vee alle data uit"
     },
     "hdr": {
-      "status": "Status",
-      "live_power": "Lewende Krag",
-      "manual_recording": "Handmatige opname",
-      "tools_and_data": "Gereedskap en data",
-      "phase_catalog": "Fase Katalogus",
-      "storage_stats": "Bergingstatistieke",
-      "maintenance": "Onderhoudsaksies",
-      "export_import": "Uitvoer / invoer",
+      "toggle_sidebar": "Wissel Home Assistant-sybalk",
       "logs": "Logs",
-      "my_preferences": "My voorkeure",
-      "panel_settings": "Paneelinstellings (alle gebruikers)",
       "access_control": "Toegangsbeheer",
-      "ml_smart_learning": "Slim leer",
-      "ml_settings_card": "Instellings",
-      "ml_learned": "Wat WashData geleer het",
-      "ml_matching_tuning": "Program-passing verfyn",
-      "display": "Vertoon",
-      "status_graph": "Status Grafiek",
-      "diagnostics_pref": "Diagnostiek",
-      "logs_diagnostics": "Diagnostiek",
-      "process_history": "Proses Geskiedenis",
-      "clear_debug": "Vee ontfoutspore uit",
-      "wipe_history": "Vee geskiedenis uit",
-      "automations": "Outomatiserings",
-      "automation_open": "Maak oop in die outomatiseringsredigeerder",
       "automation_delete": "Vee hierdie outomatisering uit",
       "automation_needs_review": "Hierdie siklus moet hersien word",
+      "automation_open": "Maak oop in die outomatiseringsredigeerder",
       "automation_review_this_cycle": "Hersien hierdie siklus",
-      "no_automations": "Geen outomatisering verwys nog na hierdie toestel nie."
+      "automations": "Outomatiserings",
+      "clear_debug": "Vee ontfoutspore uit",
+      "diagnostics_pref": "Diagnostiek",
+      "display": "Vertoon",
+      "export_import": "Uitvoer / invoer",
+      "live_power": "Lewende Krag",
+      "logs_diagnostics": "Diagnostiek",
+      "maintenance": "Onderhoudsaksies",
+      "manual_recording": "Handmatige opname",
+      "ml_learned": "Wat WashData geleer het",
+      "ml_matching_tuning": "Program-passing verfyn",
+      "ml_settings_card": "Instellings",
+      "ml_smart_learning": "Slim leer",
+      "my_preferences": "My voorkeure",
+      "no_automations": "Geen outomatisering verwys nog na hierdie toestel nie.",
+      "panel_settings": "Paneelinstellings",
+      "phase_catalog": "Fase Katalogus",
+      "process_history": "Proses Geskiedenis",
+      "status": "Status",
+      "status_graph": "Status Grafiek",
+      "storage_stats": "Bergingstatistieke",
+      "tools_and_data": "Gereedskap en data",
+      "wipe_history": "Vee geskiedenis uit"
     },
     "lbl": {
-      "power": "Krag",
-      "progress": "Vordering",
-      "remaining": "Oorblywende",
-      "duration": "Duur",
-      "energy": "Energie",
-      "profile": "Profiel",
-      "status": "Status",
-      "date": "Datum",
-      "confidence": "Betroubaarheid",
-      "health": "Gesondheid",
-      "cost": "Koste",
-      "program": "Program",
-      "cycle_health": "Siklus gesondheid",
+      "timer_min": "min",
+      "timer_msg_placeholder": "Boodskap (opsioneel, {device}/{program}/{minutes})",
+      "timer_auto_pause": "Outo-pouse",
+      "actions": "Aksies",
       "activity": "Aktiwiteit",
-      "unlabelled": "Ongemerk",
-      "unlabelled_paren": "(ongemerk)",
-      "emphasis": "Beklemtoning",
-      "default": "Verstek",
-      "in_use": "In gebruik",
-      "profile_name": "Profiel Naam",
-      "ref_cycle": "Verwysingsiklus (opsioneel)",
-      "manual_duration": "Handmatige duur (min, opsioneel)",
-      "phase_name": "Fase Naam",
-      "description": "Beskrywing",
-      "correct_profile": "Korrekte profiel",
-      "correct_duration": "Korrekte duur (min, opsioneel)",
-      "load_from_file": "Laai vanaf lêer",
-      "json_data": "JSON data",
-      "expected_duration": "Verwagte duur (min)",
-      "rename_profile": "Hernoem profiel",
-      "select_profile": "Kies Profiel",
-      "confidence_threshold": "Vertrouensdrempel",
-      "resulting_profile": "Resulterende profiel",
-      "new_profile_name": "Nuwe profielnaam",
-      "save_mode": "Stoormodus",
-      "head_trim": "Kopsny(e)",
-      "tail_trim": "Stert Trim (s)",
-      "gap_s": "Gaping (s)",
-      "start": "Begin",
-      "end": "Einde",
-      "quality": "Kwaliteit",
-      "golden_reference": "Aangeteken verwysingsiklus",
-      "compare_profiles": "Vergelyk met profiele",
-      "tags": "Merkers",
-      "notes": "Notas",
-      "default_tab": "Verstekoortjie wanneer die paneel oopgemaak word",
-      "cycle_date_display": "Siklus datum vertoon",
-      "refresh_interval": "Herlaai interval (s)",
-      "panel_default_tab": "Verstekoortjie",
-      "hide_tabs": "Versteek oortjies vir nie-administrateurs",
-      "enable_access_control": "Aktiveer toegangsbeheer per gebruiker",
-      "default_access_level": "Verstekvlak vir gebruikers wat nie hieronder gelys word nie",
       "administrators": "Administrateurs",
+      "auto_fine_tune_off": "outomatiese verfyn af",
+      "clock_time": "Horlosie tyd",
+      "compare_profiles": "Vergelyk met profiele",
+      "confidence": "Vertroue",
+      "confidence_threshold": "Vertrouensdrempel",
+      "correct_duration": "Korrekte duur (min, opsioneel)",
+      "correct_profile": "Korrekte profiel",
+      "cost": "Koste",
+      "create_new_profile": "+ Skep nuwe profiel...",
+      "cycle_date_display": "Siklus datum vertoon",
+      "cycle_health": "Siklus gesondheid",
+      "cycles_count": "Siklusse",
+      "date": "Datum",
+      "debug_traces": "Ontfout spore",
+      "default": "Verstek",
+      "default_access_level": "Verstekvlak vir gebruikers wat nie hieronder gelys word nie",
       "default_other": "Verstek (ander toestelle)",
+      "default_tab": "Verstekoortjie wanneer die paneel oopgemaak word",
+      "description": "Beskrywing",
+      "duration": "Duur",
+      "emphasis": "Beklemtoning",
+      "enable_access_control": "Aktiveer toegangsbeheer per gebruiker",
+      "energy": "Energie",
+      "expected_duration": "Verwagte duur (min)",
+      "file_kb": "Lêer (kB)",
+      "gap_s": "Gaping (s)",
+      "head_trim": "Kopsny(e)",
+      "health": "Gesondheid",
+      "hide_tabs": "Versteek oortjies vir nie-administrateurs",
+      "in_use": "In gebruik",
+      "json_data": "JSON data",
+      "label": "Gepasde program",
+      "last_checked": "Laas nagegaan:",
+      "load_from_file": "Laai vanaf lêer",
+      "manual_duration": "Handmatige duur (min, opsioneel)",
+      "mode_existing_profile": "Voeg by bestaande profiel",
+      "mode_new_profile": "Skep nuwe profiel",
+      "new_profile_name": "Nuwe profielnaam",
+      "panel_default_tab": "Verstekoortjie",
+      "phase_name": "Naam",
+      "power": "Krag",
+      "profile": "Profiel",
+      "profile_name": "Profiel Naam",
+      "progress": "Vordering",
+      "read_only": "Leesalleen",
+      "ref_cycle": "Verwysingsiklus (opsioneel)",
+      "refresh_interval": "Herlaai interval (s)",
+      "remaining": "Oorblywende",
+      "remove_label": "- Verwyder etiket -",
+      "rename_profile": "Hernoem profiel",
+      "resulting_profile": "Resulterende profiel",
+      "save_mode": "Stoormodus",
+      "seconds_from_start": "Sekondes van begin af",
+      "select_profile": "Kies Profiel",
+      "show_debug": "Wys regstreekse wedstryd-ontfoutingskaart op die Status-bladsy (vertroue, dubbelsinnigheid, topkandidate)",
       "show_expected": "Wys verwagte kurwe-oorleg (gepasde profiel, oranje)",
       "show_raw": "Wys rou sensorlesings (ongeglad, grys)",
-      "show_debug": "Wys regstreekse wedstryd-ontfoutingskaart op die Status-bladsy (vertroue, dubbelsinnigheid, topkandidate)",
-      "mode_new_profile": "Skep nuwe profiel",
-      "mode_existing_profile": "Voeg by bestaande profiel",
-      "auto_fine_tune_on": "outomatiese verfyn aan (omstreeks {hour}:00)",
-      "auto_fine_tune_off": "outomatiese verfyn af",
-      "last_checked": "Laas nagegaan:",
-      "remove_label": "- Verwyder etiket -",
-      "create_new_profile": "+ Skep nuwe profiel...",
-      "read_only": "Leesalleen",
-      "actions": "Aksies",
-      "cycles_count": "Siklusse",
-      "debug_traces": "Ontfout spore",
-      "file_kb": "Lêer (kB)",
-      "label": "Etiket",
-      "seconds_from_start": "Sekondes van begin af",
-      "clock_time": "Horlosie tyd",
-      "ungrouped": "Ongegroepeer"
+      "status": "Status",
+      "tail_trim": "Stert Trim (s)",
+      "ungrouped": "Ongegroepeer",
+      "unlabelled": "Ongemerk",
+      "unlabelled_paren": "(ongemerk)",
+      "expected": "Verwag",
+      "raw_socket": "Rou kragpunt",
+      "artifact_interruption": "Onderbreking",
+      "artifact_low_power": "Lae krag",
+      "artifact_high_power": "Hoë krag",
+      "artifact_anomaly": "Anomalie"
     },
     "badge": {
-      "poor_fit": "swak pasvorm",
-      "fair_fit": "billike pas",
-      "manual": "(handmatig gekies)",
+      "golden_cycle": "Aangeteken verwysingsiklus",
+      "reviewed": "Hersien",
+      "feedback_requested": "Terugvoer versoek",
+      "needs_review": "Benodig hersiening",
+      "overrun": "Het langer as gewoonlik gehardloop",
+      "artifact_tip": "{n} afwykings bespeur (bv. deur middel van siklus oopgemaak) – maak oop om dit op die grafiek te sien",
+      "poor_fit_tip": "Inkonsekwente pasgeskiedenis – oorweeg dit om hierdie profiel te herbou",
+      "fair_fit_tip": "Matige wedstrydkonsekwentheid – sommige siklusse wat aan hierdie profiel toegewys is, het laer vertrouetellings. Benoem meer siklusse of teken die profiel weer op om akkuraatheid te verbeter.",
       "auto": "(outomaties bespeur)",
-      "improving": "↗ verbeter",
+      "built_in_tag": "ingebou",
       "declining": "↘ afneem",
+      "fair_fit": "aanvaarbare kwaliteit",
+      "improving": "↗ verbeter",
+      "manual": "(handmatig gekies)",
+      "poor_fit": "swak kwaliteit",
       "steady": "→ bestendig",
-      "using_tuned": "Gebruik gestemde gewigte",
       "using_defaults": "Gebruik gestuurde verstekke",
-      "built_in_tag": "ingebou"
-    },
-    "status": {
-      "completed": "Voltooi",
-      "interrupted": "Onderbreek",
-      "force_stopped": "Krag het gestop",
-      "active": "Aktief",
-      "ambiguous": "Dubbelsinnig",
-      "clear": "Duidelik",
-      "working": "Werk tans …",
-      "recording": "Neem tans op …",
-      "ready": "Gereed om te verwerk",
-      "idle": "Ledig",
-      "auto_detect": "Outo-bespeur",
-      "fine_tuning": "verfyn nou...",
-      "all_statuses": "Alle statusse"
-    },
-    "ml": {
-      "fit_strong": "Sterk",
-      "fit_good": "Goed",
-      "fit_fair": "Regverdig",
-      "fit_weak": "Swak",
-      "fit_slight": "Effens",
-      "fit_word": "pas",
-      "fine_tuned_at": "verfyn {when}",
-      "personalized": "● Gepersonaliseer vir hierdie masjien",
-      "builtin_models": "● Gebruik ingeboude modelle"
-    },
-    "toast": {
-      "settings_saved": "Instellings gestoor; integrasie herlaai",
-      "preferences_saved": "Voorkeure gestoor",
-      "panel_settings_saved": "Paneelinstellings gestoor",
-      "access_saved": "Toegangsbeheer gestoor",
-      "profile_created": "Profiel \"{name}\" geskep",
-      "profile_deleted": "Profiel \"{name}\" is uitgevee",
-      "profile_renamed": "Profiel hernoem",
-      "phases_saved": "Fases gestoor",
-      "phase_created": "Fase \"{name}\" geskep",
-      "phase_deleted": "Fase \"{name}\" is uitgevee",
-      "phase_updated": "Fase opgedateer",
-      "recording_started": "Opname het begin",
-      "recording_stopped": "Opname het gestop",
-      "recording_discarded": "Opname weggegooi",
-      "recording_saved": "Opname is in profiel gestoor",
-      "export_downloaded": "Uitvoer afgelaai",
-      "logs_exported": "Logs uitgevoer",
-      "import_successful": "Invoer suksesvol; integrasie herlaai",
-      "envelopes_rebuilt": "Koeverte herbou",
-      "envelope_rebuilt": "Koevert herbou",
-      "suggestions_applied": "Voorstelle toegepas; integrasie herlaai",
-      "suggestions_dismissed": "Voorstelle is verwerp",
-      "auto_label_complete": "Outo-etiket voltooi",
-      "cycle_labelled": "Siklus gemerk",
-      "cycle_deleted": "Siklus uitgevee",
-      "cycles_deleted": "{count} siklus(se) uitgevee",
-      "cycle_trimmed": "Siklus geknip",
-      "cycles_merged": "Siklusse het saamgesmelt",
-      "review_saved": "Resensie is gestoor",
-      "feedback_confirmed": "Terugvoer bevestig",
-      "feedback_dismissed": "Terugvoer is afgewys",
-      "feedback_all_dismissed": "Alle terugvoer is verwerp",
-      "correction_submitted": "Regstelling ingedien",
-      "group_saved": "Groep gestoor",
-      "group_deleted": "Groep uitgevee",
-      "automation_deleted": "Outomatisering is uitgevee",
-      "legacy_removed": "Verouderde handelinge is verwyder",
-      "cycle_paused": "Siklus onderbreek",
-      "cycle_resumed": "Siklus hervat",
-      "cycle_force_stopped": "Siklus krag-gestop",
-      "ml_training_promoted": "Opleiding voltooi: bevorder {count} model(e)",
-      "ml_training_no_improvement": "Opleiding voltooi: basislyn gehou (geen verbetering)",
-      "matching_reverted": "Bypassende gewigte is teruggestel na verstekwaardes",
-      "models_reverted": "Modelle op toestel het teruggekeer na basislyn",
-      "analysis_complete": "Ontleding voltooi: {count} voorstel(s)",
-      "analysis_complete_none": "Ontleding voltooi: geen nuwe voorstelle nie",
-      "debug_cleared": "Het {count} ontfoutspore uitgevee",
-      "all_wiped": "Alle data is uitgevee",
-      "no_split_found": "Geen ledige gapings gevind om op te verdeel nie",
-      "group_name_required": "Groepnaam word vereis",
-      "min_2_profiles": "Kies ten minste 2 profiele vir 'n groep",
-      "profile_name_required": "Profielnaam word vereis",
-      "phase_name_required": "Fasenaam word vereis",
-      "name_required": "Naam vereis",
-      "json_required": "JSON-data word vereis",
-      "save_failed": "Kon nie stoor nie: {error}",
-      "delete_failed": "Kon nie uitvee nie: {error}",
-      "apply_failed": "Toepassing het misluk: {error}",
-      "rebuild_failed": "Herbou het misluk: {error}",
-      "start_failed": "Begin misluk: {error}",
-      "stop_failed": "Stop misluk: {error}",
-      "discard_failed": "Gooi misluk: {error}",
-      "trim_failed": "Snoei misluk: {error}",
-      "split_failed": "Verdeling het misluk: {error}",
-      "merge_failed": "Kon nie saamvoeg nie: {error}",
-      "create_failed": "Skep misluk: {error}",
-      "update_failed": "Opdatering het misluk: {error}",
-      "rename_failed": "Hernoem misluk: {error}",
-      "revert_failed": "Kon nie terugstel nie: {error}",
-      "training_failed": "Opleiding het misluk: {error}",
-      "export_failed": "Uitvoer misluk: {error}",
-      "import_failed": "Invoer het misluk: {error}",
-      "auto_label_failed": "Outo-etiket het misluk: {error}",
-      "analysis_failed": "Ontleding het misluk: {error}",
-      "auto_detect_failed": "Outo-opsporing het misluk: {error}",
-      "error": "Fout: {error}",
-      "could_not_load_cycle": "Kon nie siklus laai nie: {error}",
-      "pause_failed": "Onderbreek misluk: {error}",
-      "label_failed": "Etiket het misluk: {error}",
-      "invalid_json": "\"{key}\" is nie geldige JSON nie - maak dit reg of maak die veld skoon voordat dit gestoor word.",
-      "processed": "Verwerk {bits}",
-      "split_complete": "Verdeel in {count} siklusse"
-    },
-    "msg": {
-      "no_devices": "Geen WashData-toestelle is nog opgestel nie.",
-      "no_device_selected": "Geen toestel gekies nie.",
-      "loading": "Laai tans …",
-      "loading_settings": "Laai tans instellings …",
-      "live_chart_loading": "Regstreekse kragkaart verskyn soos lesings arriveer.",
-      "no_cycles_match": "Geen siklusse pas by die huidige filter nie.",
-      "no_cycles_yet": "Geen siklusse is nog aangeteken nie.",
-      "no_profiles_yet": "Nog geen profiele nie. Skep een uit 'n benoemde siklus.",
-      "no_logs": "Geen log-rekords is nog gebuffer nie.",
-      "no_phases": "Geen fases gedefinieer nie.",
-      "no_phases_assigned": "Geen fases toegewys nie.",
-      "no_split_points": "Nog geen verdeelpunte nie.",
-      "no_envelope": "Nog geen koevert nie - herbou na etikettering siklusse.",
-      "no_envelope_overlay": "Geen koevert beskikbaar om oor te lê nie.",
-      "no_other_users": "Geen ander Home Assistant gebruikers gevind nie.",
-      "maintenance_requires_access": "Instandhouding en uitvoer/invoer vereis volle toegang.",
-      "loading_curve": "Laai tans kromme …",
-      "compare_selected_cycles": "Geselekteerde siklusse (solied) — wys / versteek",
-      "compare_overlay_profiles": "Oorlegprofiele (flou)",
-      "no_profiles_compare": "Geen profiele om te vergelyk nie.",
-      "no_cycles_profile": "Geen siklusse vir hierdie profiel nie.",
-      "saving_triggers_reload": "Stoor veroorsaak 'n integrasie-herlaai. HA-entiteite kan kortliks as onbeskikbaar wys.",
-      "prefs_personal": "Hierdie is slegs van toepassing op jou Home Assistant-rekening.",
-      "no_match_yet": "Nog geen wedstrydpoging nie - dit vul tydens 'n hardloopsiklus.",
-      "no_fine_tuned": "Nog niks verfyn nie - WashData gebruik sy ingeboude modelle.",
-      "ml_learned_intro": "Modelle wat fyn ingestel is op hierdie masjien. Enigiets wat nie gelys word nie, gebruik die betroubare ingeboude model.",
-      "ml_settings_intro": "Twee onafhanklike skakelaars: een pas die modelle toe terwyl 'n siklus loop, die ander laat WashData toe om hulle mettertyd op jou masjien te verfyn.",
-      "ml_intro": "WashData word voorsien met slim modelle wat siklusse opspoor, programme pas, en tyd en energie skat – hulle werk uit die boks.",
-      "matching_tuning_intro": "Wanneer jy leer, pas WashData ook aan hoeveel programpassing die vorm van 'n siklus weeg teenoor sy duur en energie.",
-      "phase_catalog_intro": "Benoemde segmente van 'n siklus (Voorwas, Verhitting, Spin ...). Ken hulle toe aan 'n profiel vanaf sy beheerpaneel.",
-      "phase_ranges_intro": "Fasereekse (minute vanaf siklusbegin) oorgelê op die gemiddelde kurwe. Wysig waardes om regstreeks voor te kyk.",
-      "cleanup_intro": "Elke benoemde siklus oorgetrek. Merk uitskieters en vee uit om die profiel skoon te maak.",
-      "split_intro": "Klik op die grafiek om 'n splitpunt by te voeg of te verwyder, of om outo-bespeur deur ledige gapings.",
-      "trim_intro": "Sleep die rooi handvatsels, of voer waardes in. Alles buite die venster word verwyder.",
-      "import_intro": "Laai 'n uitgevoerde lêer of plak 'n JSON-loonvrag hieronder.",
-      "auto_label_intro": "Ken profiele toe aan ongemerkte siklusse waarvan die wedstrydvertroue die drempel uitvee.",
-      "merge_intro": "Die geselekteerde siklusse word in een gekombineer (chronologiese volgorde; gapings gevul met 0 W). Kies die resulterende profiel.",
-      "enough_data": "Genoeg data om van te leer ({current}/{min} siklusse).",
-      "collecting_data": "Versamel data — {need} meer siklus{plural} voordat fynverstelling kan begin ({current}/{min}).",
-      "updated": "Opgedateer {time}",
-      "appliance_monitor": "Toestelmonitor",
-      "ml_loading": "laai ML …",
-      "see_recorder": "Sien blokfluit-legstuk hieronder",
-      "review_in_settings": "Hersien in Instellings",
-      "storage_diagnostics": "Bergingstatistieke, instandhouding, uitvoer/invoer",
-      "recent_logs": "Onlangse ha_washdata-rekords",
-      "preferences_adv": "Voorkeure",
-      "preferences_admin": "Voorkeure, paneel en toegangsbeheer",
-      "review_to_cycles": "Maak die Cycles review-waglys oop",
-      "pending_feedback": "Hangende opsporingterugvoer",
-      "recording_in_progress": "Opname aan die gang",
-      "no_profiles_yet_short": "Nog geen profiele nie.",
-      "unsure_detected_prefix": "WashData is onseker of dit bespeur is",
-      "no_suggestions": "Geen aktiewe voorstelle nie.",
-      "no_profiles_overlay": "Geen profiele om te oorlê nie.",
-      "compare_cycles_title": "Vergelyk {count} siklusse",
-      "profiles_intro": "Klik op 'n profiel vir statistieke, fases en opruiming. Groepeer byna identiese programme (dieselfde vorm/duur, verskillende temperatuur of spin) sodat die passing betroubaar tussen hulle kies.",
-      "search_placeholder": "Soek instellings…",
-      "automations_intro": "WashData stuur {start} / {end} gebeure en stel entiteite bloot, so kennisgewings en aksies word die beste as normale Home Assistant-outomatiserings gebou. Outomatiserings wat hierdie toestel gebruik, verskyn hieronder.",
-      "notify_services_hint": "Gebruik {entity} diensidentifiseerders (komma-geskei vir meerdere). Sjabloonveranderlikes: {vars}.",
-      "rbac_hint": "Wanneer afgeskakel, het elke Home Assistant-gebruiker volle toegang (die verstek). Administrateurs het altyd volle toegang en kan almal bestuur.",
-      "feedback_prompt": "Bevestig of dit korrek was, korrigeer die program, of ignoreer dit."
+      "using_tuned": "Gebruik gestemde gewigte"
     },
     "modal": {
-      "label_cycle": "Etiketsiklus",
-      "create_profile": "Skep profiel",
-      "new_phase": "Nuwe Fase",
-      "edit_phase": "Wysig fase",
-      "process_recording": "Proses opname",
-      "correct_feedback": "Korrekte terugvoer",
-      "import_config": "Voer konfigurasie in",
+      "merge_cycles": "Voeg {n} siklusse saam",
       "auto_label": "Outo-etiket siklusse",
-      "cycle": "Siklus"
+      "correct_feedback": "Korrekte terugvoer",
+      "create_profile": "Skep profiel",
+      "cycle": "Siklus",
+      "edit_phase": "Wysig fase",
+      "import_config": "Voer konfigurasie in",
+      "label_cycle": "Etiketsiklus",
+      "new_phase": "Nuwe Fase",
+      "process_recording": "Proses opname"
     },
-    "tag": {
-      "late_start": "Laat begin",
-      "early_end": "Vroeë einde",
-      "merged": "Saamgevoegde siklusse",
-      "split": "Verdeel siklus",
-      "noise": "Geraas",
-      "wrong_profile": "Verkeerde profiel",
-      "sensor_gap": "Sensor gaping"
+    "msg": {
+      "near_duplicate_cluster": "byna duplikaat profielgroepering bespeur. Groepering laat bypassende betroubaar kies tussen gelyksoortiges (bv. dieselfde program by verskillende temperatuur/spin).",
+      "coverage_gap": "onlangse siklusse het geen ooreenstemmende profiel nie ({pct}% van laaste 30).",
+      "consider_new_profile": "Oorweeg dit om 'n nuwe profiel te skep.",
+      "group_not_cohesive": "Hierdie profiele stem nie ooreen om betroubaar te groepeer nie, so pasmaak behandel hulle individueel totdat jy die uitskieter verwyder of die groep verdeel.",
+      "group_modal_help": "Groepeer programme met dieselfde vorm wat verskil in temperatuur/spin (tydsduur kan verskil). Pasmaak tel die groep as een kandidaat en kies dan die lid wat die beste pas. Kies ten minste 2; die oorleg wys hoe eenders hulle is.",
+      "showing_suggestions": "Wys tans {count} instelling met voorstelle.",
+      "show_all_settings": "Wys alle instellings",
+      "tuning_suggestions_available": "{count} instelvoorstel beskikbaar vanaf waargenome siklusse. Hulle verskyn langs die relevante velde.",
+      "legacy_actions_title": "{count} verouderde gepasmaakte handeling loop steeds",
+      "old_actions_warning": "Gekonfigureer met die ou aksieredigeerder (nou verwyder). Hulle vuur steeds op siklusgebeurtenisse, maar kan nie meer hier geredigeer word nie. Skakel hulle om in 'n normale outomatisering, of verwyder hulle.",
+      "no_settings_match": "Geen instellings pas by \"{q}\" nie",
+      "clear_debug_hint": "Verwyder gestoorde ontfoutdata om spasie vry te maak.",
+      "wipe_history_warning": "Vee alle siklusse en profiele permanent uit. Kan nie ontdoen word nie.",
+      "export_description": "Voer alle profiele en siklusse uit na JSON, of herstel vanaf 'n vorige uitvoer.",
+      "log_buffer_hint": "Nuutste eerste · buffer die laaste 500 ha_washdata-rekords sedert herbegin · sleep die onderste rand om grootte te verander.",
+      "review_profile_tip": "Die program wat hierdie siklus is gemerk as. As die outomaties bespeurde program verkeerd was, korrigeer dit hier - etikettering leer passing vir toekomstige siklusse.",
+      "review_quality_tip": "Hoe skoon is hierdie siklus nie. Goed = 'n handboekvoorbeeld van hierdie program; Sleg = bespeur maar raserig of atipies; Onbruikbaar = verkeerd opgespoor (saamgevoeg, afgekap of vals). Bestuur die gesondheidtelling en watter siklusse toegelaat word om die model op te lei.",
+      "review_recorded_tip": "Merk dit as 'n met die hand uitgesoekte verwysingsiklus vir sy program - dieselfde rol as 'n handmatig aangetekende siklus. Verwysingsiklusse word altyd gehou, saai die bypassende sjabloon, en word nooit deur opruiming laat val nie. (Dit is die \"goue\"/opgeneemde vlag; albei is dieselfde ding.)",
+      "review_tags_tip": "Opsionele vlae wat beskryf wat verkeerd geloop het met hierdie siklus, sodat opleiding en opruiming dit kan verantwoord.",
+      "review_notes_tip": "Vryteks notas vir jou eie verwysing. Nie gebruik deur passing of opleiding nie.",
+      "review_confirm_help": "Bevestig of hierdie siklus korrek opgespoor is. Jou resensies lei die model op jou masjien op - hoe meer siklusse jy bevestig, hoe beter pas en gesondheidtelling kry. 'n Vinnige Goed/Sleg is genoeg.",
+      "review_notes_placeholder": "Notas (opsioneel)",
+      "compare_profiles_tip": "Trek ander profielkoeverte oor op die grafiek hierbo om te sien watter een die beste by hierdie siklus pas.",
+      "artifact_header": "{n} afwykings bespeur gedurende hierdie siklus",
+      "artifact_footer": "Uitgelig op die grafiek hierbo. Dit is verbygaande artefakte (bv. die deur wat in die middel van die siklus oopgemaak is), nie noodwendig probleme nie.",
+      "profile_poor_health_detail": "Siklusse wat aan hierdie profiel toegewys is, het inkonsekwente vorms of lae vertroue. Oorweeg dit om die koevert te herbou of benoemde siklusse te hersien.",
+      "trend_duration_longer": "Tydsduur neiging langer ({pct}%/siklus) — onlangse gem. {avg}",
+      "trend_duration_shorter": "Tydsduur neiging korter ({pct}%/siklus) — onlangse gem. {avg}",
+      "trend_energy_up": "Energie neig op ({pct}%/siklus) — onlangse gemiddelde {avg}",
+      "trend_energy_down": "Energie neig af ({pct}%/siklus)",
+      "performance_trend": "Prestasieneiging ({n} siklusse)",
+      "maintenance_advisory": "Toenemende tydsduur/energie kan aandui dat toestelonderhoud nodig is (bv. ontkalking, filter skoonmaak).",
+      "manual_duration_hint": "Die profiel se gemiddelde/verwagte sikluslengte, gebruik vir tydoorblywende skattings. Wysig om dit te stel; om dit onveranderd te laat, behou die huidige waarde.",
+      "appliance_monitor": "Toestelmonitor",
+      "auto_label_intro": "Ken profiele toe aan ongemerkte siklusse waarvan die wedstrydvertroue die drempel uitvee.",
+      "cleanup_intro": "Elke benoemde siklus oorgetrek. Merk uitskieters en vee uit om die profiel skoon te maak.",
+      "compare_overlay_profiles": "Oorlegprofiele (flou)",
+      "compare_selected_cycles": "Geselekteerde siklusse (solied) — wys / versteek",
+      "feedback_prompt": "Bevestig dit was reg, korrigeer die program, of ignoreer.",
+      "import_intro": "Laai 'n uitgevoerde lêer of plak 'n JSON-loonvrag hieronder.",
+      "live_chart_loading": "Regstreekse kragkaart verskyn soos lesings arriveer.",
+      "loading": "Laai tans …",
+      "loading_curve": "Laai tans kromme …",
+      "loading_settings": "Laai tans instellings …",
+      "maintenance_requires_access": "Instandhouding en uitvoer/invoer vereis volle toegang.",
+      "matching_tuning_intro": "Wanneer jy leer, pas WashData ook aan hoeveel programpassing vorm teenoor duur en energie weeg.",
+      "merge_intro": "Die geselekteerde siklusse word in een gekombineer (chronologiese volgorde; gapings gevul met 0 W). Kies die resulterende profiel.",
+      "ml_intro": "WashData word gestuur met slim modelle wat uit die boks werk.",
+      "ml_learned_intro": "Modelle wat fyn ingestel is op hierdie masjien.",
+      "ml_loading": "laai ML …",
+      "ml_settings_intro": "Twee onafhanklike skakelaars: een pas die modelle toe terwyl 'n siklus loop, die ander laat WashData toe om hulle mettertyd op jou masjien te verfyn.",
+      "no_cycles_match": "Geen siklusse pas by die huidige filter nie.",
+      "no_cycles_profile": "Geen siklusse vir hierdie profiel nie.",
+      "no_cycles_yet": "Geen siklusse is nog aangeteken nie.",
+      "no_device_selected": "Geen toestel gekies nie.",
+      "no_devices": "Geen WashData-toestelle is nog opgestel nie.",
+      "no_envelope": "Nog geen koevert nie - herbou na etikettering siklusse.",
+      "no_envelope_overlay": "Geen koevert beskikbaar om oor te lê nie.",
+      "no_fine_tuned": "Nog niks verfyn nie - WashData gebruik sy ingeboude modelle.",
+      "no_logs": "Geen log-rekords is nog gebuffer nie.",
+      "no_match_yet": "Nog geen wedstrydpoging nie - dit vul tydens 'n hardloopsiklus.",
+      "no_other_users": "Geen ander Home Assistant-gebruikers gevind nie.",
+      "no_phases": "Geen fases gedefinieer nie.",
+      "no_phases_assigned": "Geen fases toegewys nie.",
+      "no_profiles_compare": "Geen profiele om te vergelyk nie.",
+      "no_profiles_overlay": "Geen profiele om te oorlê nie.",
+      "no_profiles_yet": "Nog geen profiele nie. Skep een uit 'n benoemde siklus.",
+      "no_profiles_yet_short": "Nog geen profiele nie.",
+      "no_split_points": "Nog geen verdeelpunte nie.",
+      "no_suggestions": "Geen aktiewe voorstelle nie.",
+      "pending_feedback": "Hangende opsporingterugvoer",
+      "phase_catalog_intro": "Benoemde segmente van 'n siklus (Voorwas, Verhitting, Spin ...). Ken hulle toe aan 'n profiel vanaf sy beheerpaneel.",
+      "phase_ranges_intro": "Fasereekse (minute vanaf siklusbegin) oorgelê op die gemiddelde kurwe. Wysig waardes om regstreeks voor te kyk.",
+      "preferences_admin": "Voorkeure, paneel en toegangsbeheer",
+      "preferences_adv": "Voorkeure",
+      "prefs_personal": "Dit is slegs van toepassing op jou Home Assistant-rekening.",
+      "profiles_intro": "Klik op 'n profiel vir statistieke, fases en opruiming. Groepeer amper-identiese programme (dieselfde vorm/tydsduur, verskillende temperatuur of spin) sodat betroubare keuses tussen hulle pas.",
+      "rbac_hint": "Wanneer dit af is, het elke Home Assistant-gebruiker volle toegang (die verstek). Administrateurs het altyd volle toegang en kan almal bestuur.",
+      "recent_logs": "Onlangse ha_washdata-rekords",
+      "recording_in_progress": "Opname aan die gang",
+      "review_in_settings": "Hersien in Instellings",
+      "review_to_cycles": "Maak die Cycles review-waglys oop",
+      "saving_triggers_reload": "Stoor veroorsaak 'n integrasie-herlaai. HA-entiteite kan kortliks as onbeskikbaar wys.",
+      "search_placeholder": "Soek instellings …",
+      "see_recorder": "Sien blokfluit-legstuk hieronder",
+      "split_intro": "Klik op die grafiek om 'n splitpunt by te voeg of te verwyder, of om outo-bespeur deur ledige gapings. Elke resulterende segment kan sy eie profiel kry.",
+      "storage_diagnostics": "Bergingstatistieke, instandhouding, uitvoer/invoer",
+      "trim_intro": "Sleep die rooi handvatsels, of voer waardes in. Alles buite die venster word verwyder.",
+      "unsure_detected_prefix": "WashData is onseker of dit bespeur is",
+      "updated": "Opgedateer"
     },
-    "quality": {
-      "good": "Goed",
-      "bad": "Sleg",
-      "unusable": "Onbruikbaar"
-    },
-    "access": {
-      "none": "Geen (versteek)",
-      "read": "Lees",
-      "edit": "Wysig",
-      "full": "Vol",
-      "inherit": "Erf"
+    "phase_desc": {
+      "pre_wash": "Aanvanklike week of voorbehandeling voor die hoofwas.",
+      "wash": "Hoofwassiklus met drombeweging en opsionele verwarming.",
+      "wash_dw": "Hoofwasmiddel was met verwarming.",
+      "rinse": "Skoon-water spoel stadium. Hierdie fase kan verskeie kere herhaal.",
+      "spin": "Hoëspoed onttrekking om water uit die vrag te verwyder.",
+      "spin_wd": "Hoëspoed onttrekking voor droogoorgang.",
+      "soak": "Lae-aktiwiteit deurweek tydperk tussen aktiewe was stadiums.",
+      "soak_dw": "Verlengde weekperiode vir swaar grond.",
+      "anti_crease": "Soms kort tuimels na voltooiing om plooie te verminder.",
+      "heat_up": "Aanvanklike verwarmer opwarm voor volle droog begin.",
+      "drying": "Hoofverhitte tuimelperiode.",
+      "cool_down": "Tuimel sonder hitte naby siklus einde.",
+      "anti_wrinkle": "Periodieke na-siklus tuimel om plooie te verminder.",
+      "sensor_check": "Kort laekragpouse terwyl droogheid gemeet word.",
+      "drain_and_switch": "Oorgangstydperk van was- na droogmodus.",
+      "pre_rinse": "Aanvanklike spuit af voor skoonmaakmiddel was.",
+      "dry": "Droogstadium met behulp van verwarmer en/of oorblywende hitte.",
+      "sanitize": "Hoë-temperatuur skoonmaak stadium vir ontsmettingsprogramme."
     },
     "health": {
-      "poor": "⚠ Swak pasmaat",
-      "fair": "Redelike pasmaat",
-      "good": "✓ Goeie pasmaat"
-    },
-    "trend": {
-      "up": "Neig omhoog",
-      "down": "Neig af"
-    },
-    "pref": {
-      "date_relative": "Relatief (bv. 2 uur gelede)",
-      "date_absolute": "Absoluut (bv. 14:32 op 2 Jul)"
+      "fair": "Aanvaarbare profielkwaliteit",
+      "good": "✓ Goeie profielkwaliteit",
+      "poor": "⚠ Swak profielkwaliteit"
     },
     "log": {
       "all_levels": "Alle vlakke"
     },
-    "setting": {
-      "name": {
-        "label": "Toestelnaam"
-      },
-      "device_type": {
-        "label": "Soort toestel"
-      },
-      "power_sensor": {
-        "label": "Kragsensor"
-      },
-      "min_power": {
-        "label": "Minimum krag"
-      },
-      "off_delay": {
-        "label": "Af Vertraging"
-      },
-      "linked_device": {
-        "label": "Groepeer onder Toestel"
-      },
-      "start_threshold_w": {
-        "label": "Begindrempel"
-      },
-      "stop_threshold_w": {
-        "label": "Stopdrempel"
-      },
-      "min_off_gap": {
-        "label": "Min af gaping"
-      },
-      "start_duration_threshold": {
-        "label": "Begin Duur"
-      },
-      "start_energy_threshold": {
-        "label": "Begin Energie"
-      },
-      "completion_min_seconds": {
-        "label": "Min siklusduur"
-      },
-      "running_dead_zone": {
-        "label": "Aktiewe dooie sone"
-      },
-      "end_energy_threshold": {
-        "label": "Einde Energie"
-      },
-      "end_repeat_count": {
-        "label": "Eindig Herhaal Telling"
-      },
-      "sampling_interval": {
-        "label": "Steekproefinterval"
-      },
-      "smoothing_window": {
-        "label": "Maak venster glad"
-      },
-      "abrupt_drop_watts": {
-        "label": "Skielike daling"
-      },
-      "abrupt_drop_ratio": {
-        "label": "Skielike dalingverhouding"
-      },
-      "profile_match_threshold": {
-        "label": "Pas Drempel"
-      },
-      "profile_unmatch_threshold": {
-        "label": "Onpas drempel"
-      },
-      "profile_match_interval": {
-        "label": "Wedstryd interval"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "Minimum duur verhouding"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "Maksimum duurverhouding"
-      },
-      "profile_duration_tolerance": {
-        "label": "Profiel Duur Toleransie"
-      },
-      "duration_tolerance": {
-        "label": "Skat verdraagsaamheid"
-      },
-      "auto_label_confidence": {
-        "label": "Outo-etiket vertroue"
-      },
-      "learning_confidence": {
-        "label": "Leer selfvertroue"
-      },
-      "suppress_feedback_notifications": {
-        "label": "Onderdruk terugvoerkennisgewings"
-      },
-      "watchdog_interval": {
-        "label": "Waghond Interval"
-      },
-      "no_update_active_timeout": {
-        "label": "Geen-opdatering-tydverloop"
-      },
-      "progress_reset_delay": {
-        "label": "Vordering Herstel Vertraging"
-      },
-      "auto_maintenance": {
-        "label": "Outo-onderhoud (nagtelike skoonmaak)"
-      },
-      "expose_debug_entities": {
-        "label": "Stel ontfoutingsentiteite bloot"
-      },
-      "save_debug_traces": {
-        "label": "Stoor ontfoutspore"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "Aktiveer anti-rimpelbespeuring"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "Maksimum anti-rimpel krag"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "Maksimum duur"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "Verlaat kragdrempel"
-      },
-      "delay_start_detect_enabled": {
-        "label": "Aktiveer Delay-Start Detection"
-      },
-      "delay_confirm_seconds": {
-        "label": "Bevestig sekondes"
-      },
-      "delay_timeout_hours": {
-        "label": "Tydtyd-ure"
-      },
-      "external_end_trigger_enabled": {
-        "label": "Aktiveer eksterne eindsneller"
-      },
-      "external_end_trigger": {
-        "label": "Eksterne sneller-entiteit"
-      },
-      "external_end_trigger_inverted": {
-        "label": "Keer eksterne sneller om (sneller aan AF)"
-      },
-      "door_sensor_entity": {
-        "label": "Deursensor-entiteit"
-      },
-      "pause_cuts_power": {
-        "label": "Pouse sny ook krag af (via skakelaar)"
-      },
-      "switch_entity": {
-        "label": "Skakel Entiteit"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "Ontlaai Nag Delay"
-      },
-      "pump_stuck_duration": {
-        "label": "Pomp vas Duur"
-      },
-      "notify_start_services": {
-        "label": "Begin Dienste"
-      },
-      "notify_finish_services": {
-        "label": "Voltooi Dienste"
-      },
-      "notify_live_services": {
-        "label": "Live Progress Services"
-      },
-      "notify_people": {
-        "label": "Mense (vir slegs wanneer tuis)"
-      },
-      "notify_only_when_home": {
-        "label": "Stel slegs in kennis wanneer u tuis is"
-      },
-      "notify_fire_events": {
-        "label": "Brand HA-geleenthede vir kennisgewings"
-      },
-      "notify_before_end_minutes": {
-        "label": "Voor-einde waarskuwing"
-      },
-      "notify_live_interval_seconds": {
-        "label": "Regstreekse opdateringsinterval"
-      },
-      "notify_live_overrun_percent": {
-        "label": "Regstreekse oorskryding % voor waarskuwing"
-      },
-      "notify_live_chronometer": {
-        "label": "Gebruik Live Chronometer"
-      },
-      "notify_timeout_seconds": {
-        "label": "Ontslaan outomaties na"
-      },
-      "notify_title": {
-        "label": "Kennisgewing titel"
-      },
-      "notify_icon": {
-        "label": "Kennisgewing-ikoon"
-      },
-      "notify_start_message": {
-        "label": "Begin Boodskap"
-      },
-      "notify_finish_message": {
-        "label": "Voltooi Boodskap"
-      },
-      "notify_pre_complete_message": {
-        "label": "Vooraf voltooide boodskap"
-      },
-      "notify_reminder_message": {
-        "label": "Herinnering Boodskap"
-      },
-      "notify_channel": {
-        "label": "Android Kanaal (begin/regstreeks)"
-      },
-      "notify_finish_channel": {
-        "label": "Android Kanaal (voltooi)"
-      },
-      "energy_price_entity": {
-        "label": "Energieprys-entiteit"
-      },
-      "energy_price_static": {
-        "label": "Statiese energieprys (per kWh)"
-      },
-      "enable_ml_models": {
-        "label": "Pas slim modelle toe tydens 'n siklus"
-      },
-      "ml_training_enabled": {
-        "label": "Leer uit hierdie masjien"
-      },
-      "ml_training_hour": {
-        "label": "Leer op uur"
-      },
-      "ml_training_min_cycles": {
-        "label": "Siklusse eers nodig"
-      },
-      "ml_training_interval_days": {
-        "label": "Kontroleer hoogstens elke"
-      }
+    "ml": {
+      "builtin_models": "● Gebruik ingeboude modelle",
+      "fit_fair": "Aanvaarbaar",
+      "fit_good": "Goed",
+      "fit_slight": "Effens",
+      "fit_strong": "Sterk",
+      "fit_weak": "Swak",
+      "fit_word": "pas",
+      "personalized": "● Gepersonaliseer vir hierdie masjien"
+    },
+    "pref": {
+      "date_absolute": "Absoluut (bv. 14:32 op 2 Jul)",
+      "date_relative": "Relatief (bv. 2 uur gelede)"
+    },
+    "quality": {
+      "bad": "Sleg",
+      "good": "Goed",
+      "unusable": "Onbruikbaar"
+    },
+    "status": {
+      "active": "Aktief",
+      "all_statuses": "Alle statusse",
+      "ambiguous": "Dubbelsinnig",
+      "auto_detect": "Outo-bespeur",
+      "clear": "Duidelik",
+      "completed": "Voltooi",
+      "fine_tuning": "verfyn nou...",
+      "force_stopped": "Krag het gestop",
+      "idle": "Ledig",
+      "interrupted": "Onderbreek",
+      "ready": "Gereed om te verwerk",
+      "recording": "Opname"
+    },
+    "tab": {
+      "advanced": "Gevorderd",
+      "diagnostics": "Diagnostiek",
+      "history": "Siklusse",
+      "ml": "ML opleiding",
+      "pp_cleanup": "Opruiming",
+      "pp_manage": "Bestuur",
+      "pp_overview": "Oorsig",
+      "pp_phases": "Fases",
+      "profiles": "Profiele",
+      "settings": "Instellings",
+      "status": "Oorsig",
+      "subtab_phase_catalog": "Fase Katalogus",
+      "subtab_profiles": "Profiele"
+    },
+    "tag": {
+      "early_end": "Vroeë einde",
+      "late_start": "Laat begin",
+      "merged": "Saamgevoegde siklusse",
+      "noise": "Geraas",
+      "sensor_gap": "Sensor gaping",
+      "split": "Verdeel siklus",
+      "wrong_profile": "Verkeerde profiel"
+    },
+    "toast": {
+      "access_saved": "Toegangsbeheer gestoor",
+      "all_wiped": "Alle data is uitgevee",
+      "analysis_complete_none": "Ontleding voltooi: geen nuwe voorstelle nie",
+      "auto_label_complete": "Outo-etiket voltooi",
+      "automation_deleted": "Outomatisering is uitgevee",
+      "correction_submitted": "Regstelling ingedien",
+      "cycle_deleted": "Siklus uitgevee",
+      "cycle_force_stopped": "Siklus krag-gestop",
+      "cycle_labelled": "Siklus gemerk",
+      "cycle_paused": "Siklus onderbreek",
+      "cycle_resumed": "Siklus hervat",
+      "cycle_trimmed": "Siklus geknip",
+      "cycles_merged": "Siklusse het saamgesmelt",
+      "envelope_rebuilt": "Koevert herbou",
+      "envelopes_rebuilt": "Koeverte herbou",
+      "export_downloaded": "Uitvoer afgelaai",
+      "feedback_all_dismissed": "Alle terugvoer is verwerp",
+      "feedback_confirmed": "Terugvoer bevestig",
+      "feedback_dismissed": "Terugvoer is afgewys",
+      "group_deleted": "Groep uitgevee",
+      "group_name_required": "Groepnaam word vereis",
+      "group_saved": "Groep gestoor",
+      "import_successful": "Invoer suksesvol; integrasie herlaai",
+      "json_required": "JSON-data word vereis",
+      "legacy_removed": "Verouderde handelinge is verwyder",
+      "logs_exported": "Logs uitgevoer",
+      "matching_reverted": "Bypassende gewigte is teruggestel na verstekwaardes",
+      "min_2_profiles": "Kies ten minste 2 profiele vir 'n groep",
+      "ml_training_no_improvement": "Opleiding voltooi: basislyn gehou (geen verbetering)",
+      "models_reverted": "Modelle op toestel het teruggekeer na basislyn",
+      "name_required": "Naam vereis",
+      "no_split_found": "Geen ledige gapings gevind om op te verdeel nie",
+      "panel_settings_saved": "Paneelinstellings gestoor",
+      "phase_name_required": "Fasenaam word vereis",
+      "phase_updated": "Fase opgedateer",
+      "phases_saved": "Fases gestoor",
+      "preferences_saved": "Voorkeure gestoor",
+      "profile_name_required": "Profielnaam word vereis",
+      "profile_renamed": "Profiel hernoem",
+      "recording_discarded": "Opname weggegooi",
+      "recording_saved": "Opname is in profiel gestoor",
+      "recording_started": "Opname het begin",
+      "recording_stopped": "Opname het gestop",
+      "review_saved": "Resensie is gestoor",
+      "settings_saved": "Instellings gestoor; integrasie herlaai",
+      "suggestions_applied": "Voorstelle toegepas; integrasie herlaai",
+      "suggestions_dismissed": "Voorstelle is verwerp"
+    },
+    "trend": {
+      "down": "Neig af",
+      "up": "Opwaartse neiging"
     }
   }
 }

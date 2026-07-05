@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Ciklusindítás",
-        "cycle_finish": "Ciklus befejezése",
-        "cycle_live": "Élő Haladás"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Mosógép",
@@ -86,200 +79,8 @@
         "dishwasher": "Mosogatógép",
         "air_fryer": "Air Fryer",
         "bread_maker": "Kenyérsütő",
-        "pump": "Szivattyú / olajteknő szivattyú",
+        "pump": "Szivattyú / búvárszivattyú",
         "other": "Egyéb (haladó)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(Cimkézetlen)",
-        "create_new_profile": "Új profil létrehozása",
-        "remove_label": "Címke eltávolítása",
-        "no_reference_cycle": "(Nincs referencia ciklus)",
-        "all_device_types": "Minden eszköztípus",
-        "current_suffix": "(jelenlegi)",
-        "phase_builtin_suffix": "(Beépített)",
-        "phase_none_available": "Nincs elérhető fázis.",
-        "phase_other_device_types": "Egyéb készüléktípusok:",
-        "settings_deprecation_warning": "⚠️ **Elavult eszköztípus:** A(z) {device_type} eltávolítása egy jövőbeli kiadásban várható. A WashData egyező folyamata nem ad megbízható eredményeket ehhez a készülékosztályhoz. Az integráció az elavulási időszakon keresztül is működik; a figyelmeztetés elnémításához állítsa az alábbi **Eszköztípus** lehetőséget a támogatott típusok egyikére (mosógép, szárítógép, mosó-szárítógép kombináció, mosogatógép, légsütő, kenyérsütő vagy szivattyú), vagy az **Egyéb (speciális)** lehetőségre, ha a készülék nem egyezik a támogatott típusok egyikével sem. Az **Other (Advanced)** szándékosan olyan általános alapértelmezett beállításokat szállít, amelyek nincsenek beállítva egyetlen készülékhez sem, ezért Önnek kell konfigurálnia a küszöbértékeket, az időtúllépéseket és a megfelelő paramétereket; váltáskor az összes meglévő beállítás megmarad.",
-        "editor_select_info": "Válasszon 1 ciklust a felosztáshoz, vagy 2+ ciklust az egyesítéshez.",
-        "editor_select_info_split": "Válasszon 1 ciklust felosztáshoz.",
-        "editor_select_info_merge": "Válasszon 2+ ciklust egyesítéshez.",
-        "editor_select_info_delete": "Válasszon 1+ ciklust törléshez.",
-        "no_cycles_recorded": "Még nem rögzítettek ciklusokat.",
-        "profile_summary_line": "- **{name}**: {count} ciklus, {avg} m átlag",
-        "no_profiles_created": "Még nincsenek profilok.",
-        "phase_preview": "Fázis előnézete",
-        "phase_preview_no_curve": "Átlagos profilgörbe még nem elérhető. További ciklusok futtatása/címkézése ehhez a profilhoz.",
-        "average_power_curve": "Átlagos teljesítmény görbe",
-        "unit_min": "perc",
-        "profile_option_fmt": "{name} ({count} ciklus, ~{duration} perc átlag)",
-        "profile_option_short_fmt": "{name} ({count} ciklus, ~{duration} perc)",
-        "deleted_cycles_from_profile": "{count} ciklus törölve innen: {profile}.",
-        "not_enough_data_graph": "Nincs elég adat a grafikon létrehozásához.",
-        "no_profiles_found": "Nem találhatók profilok.",
-        "cycle_info_fmt": "Ciklus: {start}, {duration} perc, jelenlegi: {label}",
-        "top_candidates_header": "### Legjobb jelöltek",
-        "tbl_profile": "Profil",
-        "tbl_confidence": "Bizalom",
-        "tbl_correlation": "Korreláció",
-        "tbl_duration_match": "Időtartam mérkőzés",
-        "detected_profile": "Észlelt profil",
-        "estimated_duration": "Becsült időtartam",
-        "actual_duration": "Tényleges időtartam",
-        "choose_action": "__Válasszon egy műveletet alább:__",
-        "tbl_count": "Db",
-        "tbl_avg": "Átl",
-        "tbl_min": "Min",
-        "tbl_max": "Max",
-        "tbl_energy_avg": "Energia (átl.)",
-        "tbl_energy_total": "Energia (összesen)",
-        "tbl_consistency": "áll.",
-        "tbl_last_run": "Utolsó futás",
-        "graph_legend_title": "Grafikon jelmagyarázat",
-        "graph_legend_body": "A kék sáv a megfigyelt minimális és maximális teljesítményfelvételi tartományt jelzi. A vonal az átlagos teljesítménygörbét mutatja.",
-        "recording_preview": "Felvétel előnézete",
-        "trim_start": "Vágási kezdőpont",
-        "trim_end": "Vágás vége",
-        "split_preview_title": "Megosztott előnézet",
-        "split_preview_found_fmt": "{count} szegmens található.",
-        "split_preview_confirm_fmt": "Kattintson a Megerősítés gombra, ha ezt a ciklust {count} különálló ciklusra szeretné felosztani.",
-        "merge_preview_title": "Egyesítés előnézete",
-        "merge_preview_joining_fmt": "Csatlakozás {count} ciklushoz. A hiányosságokat 0 W-os leolvasások töltik ki.",
-        "editor_delete_preview_title": "Törlési előnézet",
-        "editor_delete_preview_intro": "A kiválasztott ciklusok véglegesen törlődnek:",
-        "editor_delete_preview_confirm": "Kattintson a Megerősítés gombra ezen ciklusrekordok végleges törléséhez.",
-        "no_power_preview": "*Az előnézethez nem állnak rendelkezésre teljesítményadatok.*",
-        "profile_comparison": "Profilok összehasonlítása",
-        "actual_cycle_label": "Ez a ciklus (tényleges)",
-        "storage_usage_header": "Tárolási használat",
-        "storage_file_size": "Fájl mérete",
-        "storage_cycles": "Ciklusok",
-        "storage_profiles": "Profilok",
-        "storage_debug_traces": "Hibakeresés adatok",
-        "overview_suffix": "Áttekintés",
-        "phase_preview_for_profile": "A profil fázis előnézete",
-        "current_ranges_header": "Aktuális tartományok",
-        "assign_phases_help": "Tartományok hozzáadásához, szerkesztéséhez, törléséhez vagy mentéséhez használja az alábbi műveleteket.",
-        "profile_summary_header": "Profil összefoglaló",
-        "recent_cycles_header": "Legutóbbi ciklusok",
-        "trim_cycle_preview_title": "Vágási ciklus előnézete",
-        "trim_cycle_preview_no_data": "Ehhez a ciklushoz nem állnak rendelkezésre teljesítményadatok.",
-        "trim_cycle_preview_kept_suffix": "tartotta",
-        "table_program": "Program",
-        "table_when": "Mikor",
-        "table_length": "Hossz",
-        "table_match": "Egyezés",
-        "table_profile": "Profil",
-        "table_cycles": "Ciklusok",
-        "table_avg_length": "Átl. hossz",
-        "table_last_run": "Utolsó futás",
-        "table_avg_energy": "Átl. energia",
-        "table_detected_program": "Észlelt program",
-        "table_confidence": "Bizalom",
-        "table_reported": "Jelentve"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Ciklus felosztása (Hézagok keresése)",
-        "merge": "Ciklusok egyesítése (töredékek összekapcsolása)",
-        "delete": "Ciklus(ok) törlése"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Tétlen szünetek automatikus felismerése",
-        "manual": "Kézi időbélyegek"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Karbantartás: Adatok újrafeldolgozása és optimalizálása",
-        "clear_debug_data": "Hibakeresési adatok törlése (tárhely felszabadítása)",
-        "wipe_history": "Az eszköz ÖSSZES adatának törlése (visszafordíthatatlan)",
-        "export_import": "JSON exportálása/importálása beállításokkal (másolás/beillesztés)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "Minden adat exportálása",
-        "import": "Adatok importálása/egyesítése"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Régi ciklusok automatikus címkézése",
-        "select_cycle_to_label": "Címkespecifikus ciklus",
-        "select_cycle_to_delete": "Ciklus törlése",
-        "interactive_editor": "Egyesítés/felosztás interaktív szerkesztő",
-        "trim_cycle": "Vágási ciklus adatai"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Új profil létrehozása",
-        "edit_profile": "Profil szerkesztése/átnevezése",
-        "delete_profile": "Profil törlése",
-        "profile_stats": "Profil statisztika",
-        "cleanup_profile": "Törölje az előzményeket – Graph & Delete",
-        "assign_phases": "Fázistartományok hozzárendelése"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Új fázis létrehozása",
-        "edit_custom_phase": "Fázis szerkesztése",
-        "delete_custom_phase": "Fázis törlése"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Nevezze meg és alkalmazza a fázisokat",
-        "cancel": "Menjen vissza változtatások nélkül"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Fázistartomány hozzáadása",
-        "edit_range": "Fázistartomány szerkesztése",
-        "delete_range": "Fázistartomány törlése",
-        "clear_ranges": "Minden tartomány törlése",
-        "auto_detect_ranges": "Fázisok automatikus felismerése",
-        "save_ranges": "Mentés és visszaküldés"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Állapot frissítése",
-        "stop_recording": "Felvétel leállítása (Mentés és feldolgozás)",
-        "start_recording": "Új felvétel indítása",
-        "process_recording": "Utolsó felvétel feldolgozása (kivágás és mentés)",
-        "discard_recording": "Utolsó felvétel elvetése"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Új profil létrehozása",
-        "existing_profile": "Hozzáadás a meglévő profilhoz",
-        "discard": "Felvétel elvetése"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Megerősítés – Helyes észlelés",
-        "correct": "Helyes – Válassza a Program/Időtartam lehetőséget",
-        "ignore": "Figyelmen kívül hagyás – téves pozitív/zajos ciklus",
-        "delete": "Törlés – Eltávolítás az előzményekből"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Állítsa be a kezdőpontot",
-        "set_end": "Végpont beállítása",
-        "reset": "Állítsa vissza a teljes időtartamra",
-        "apply": "Vágás alkalmazása",
-        "cancel": "Mégsem"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "Jelenlegi fázis"
       },
-      "wash_phase": {
-        "name": "Fázis"
-      },
       "profile_cycle_count": {
         "name": "Profil {profile_name} Szám",
         "unit_of_measurement": "ciklusok"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "A trim_end_s nagyobbnak kell lennie, mint a trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "Nincs aktív ciklus szüneteltetésre vagy folytatásra."
     }
   },
   "panel": {
-    "tab": {
-      "status": "Áttekintés",
-      "history": "Ciklusok",
-      "profiles": "Profilok",
-      "settings": "Beállítások",
-      "ml": "ML képzés",
-      "advanced": "Fejlett",
-      "diagnostics": "Diagnosztika",
-      "pp_overview": "Áttekintés",
-      "pp_phases": "Fázisok",
-      "pp_cleanup": "Tisztítás",
-      "pp_manage": "Kezelés",
-      "subtab_profiles": "Profilok",
-      "subtab_phase_catalog": "Fázis katalógus"
-    },
     "btn": {
-      "save": "Mentés",
-      "cancel": "Mégsem",
-      "delete": "Töröl",
-      "close": "Bezárás",
-      "edit": "Szerkesztés",
-      "add": "Hozzáadás",
-      "rebuild": "Borítékok újjáépítése",
-      "record": "Felvétel indítása",
-      "compare": "Összehasonlítás",
-      "confirm": "Megerősítés",
-      "discard": "Elvetés",
-      "export": "Export",
-      "import": "Importálás",
-      "merge": "Összevonás",
-      "apply": "Alkalmaz",
-      "refresh": "Frissítés",
-      "create": "Létrehozás",
-      "select": "Kiválasztás",
-      "done": "Kész",
-      "reset": "Visszaállítás",
-      "trim": "Vágás",
-      "split": "Felosztás",
-      "review": "Áttekintés",
-      "inspect": "Vizsgálat",
-      "label": "Címke",
-      "save_settings": "Beállítások mentése",
-      "new_profile": "+ Új profil",
-      "new_group": "+ Új csoport",
-      "apply_label": "Címke alkalmazása",
-      "run_auto_label": "Futtassa az Auto-Labelt",
-      "save_review": "Vélemény mentése",
-      "apply_trim": "Vágás alkalmazása",
-      "apply_split": "Felosztás alkalmazása",
-      "process_recording": "Felvétel mentése",
-      "stop": "Stop",
-      "process": "Feldolgozás",
-      "add_device": "+ Eszköz hozzáadása",
-      "train_now": "Tanítás most",
-      "reset_to_defaults": "Visszaállítás alapértelmezettre",
-      "reset_to_builtin": "Visszaállítás beépített modellekre",
-      "save_preferences": "Beállítások mentése",
-      "save_panel_settings": "Panelbeállítások mentése",
-      "save_access_control": "Hozzáférés-vezérlés mentése",
-      "auto_label_cycles": "Automatikus címkézési ciklusok",
-      "run_analysis": "🔍 Javaslatelemzés futtatása",
-      "apply_all": "Mindet alkalmaz",
-      "show_only": "Csak megjelenítés",
-      "dismiss": "Elvetés",
-      "dismiss_all": "Összes elvetése",
-      "process_history": "Feldolgozás most",
-      "clear_debug": "Törölje a hibakeresési adatokat",
-      "wipe_all": "Törölje az összes adatot",
-      "export_json": "Exportálás JSON-ba",
-      "import_json": "Importálás JSON-ból",
-      "correct": "Helyes…",
-      "ignore": "Figyelmen kívül hagyni",
-      "add_phase": "+ Fázis hozzáadása",
-      "new_phase": "+ Új fázis",
-      "delete_profile": "Profil törlése",
-      "rebuild_envelope": "Boríték újraépítése",
-      "create_profile": "+ Profil létrehozása",
-      "rec_stop": "Stop",
-      "pause_cycle": "Szünet",
+      "add_timer": "+ Időzítő hozzáadása",
+      "remove_timer": "Távolítsa el az időzítőt",
+      "add_device_tip": "Adjon hozzá egy másik WashData eszközt",
+      "delete_group_tip": "Csak ezt a csoportot törölje – a tagi profilok megmaradnak",
+      "run_analysis_tip": "Elemezze a rögzített ciklusokat most, és frissítse a hangolási javaslatokat",
+      "reset_ml_models_tip": "Dobja el a finomhangolt modelleket, és térjen vissza a beépített modellekhez. A WashData később újra megtanulhatja őket.",
       "resume_cycle": "Folytatás",
-      "force_stop": "Kényszer leállítás",
-      "save_phases": "Fázisok mentése",
+      "add_device": "+ Eszköz hozzáadása",
+      "add_phase": "+ Fázis hozzáadása",
+      "apply_all": "Alkalmazza az összeset",
+      "apply_label": "Címke alkalmazása",
+      "apply_split": "Split alkalmazása",
+      "apply_trim": "Alkalmazza Trim",
       "auto_detect_split": "Automatikus felismerés",
-      "clear_splits": "Törlés",
-      "submit_correction": "Javítás benyújtása",
-      "import_overwrite": "Importálás (adatok felülírása)",
-      "use": "Használat",
-      "manage": "Kezelése",
-      "remove": "Távolítsa el",
-      "delete_group": "Csoport törlése",
-      "trim_split": "Vágás / Felosztás",
+      "auto_label_cycles": "Automatikus címkézési ciklusok",
+      "cancel": "Mégsem",
+      "clear_debug": "Törölje a hibakeresési adatokat",
+      "clear_splits": "Világos",
+      "close": "Közeli",
+      "compare": "Hasonlítsa össze",
+      "confirm": "Erősítse meg",
       "convert_to_automation": "Átalakítás automatizálásra",
-      "new_automation": "＋ Új automatizálás",
+      "correct": "Helyes…",
+      "create": "Teremt",
+      "create_profile": "+ Profil létrehozása",
+      "delete": "Töröl",
+      "delete_group": "Csoport törlése",
+      "delete_profile": "Profil törlése",
+      "discard": "Eldobni",
+      "dismiss": "Elvetés",
+      "done": "Kész",
+      "edit": "Szerkesztés",
+      "export": "Export",
+      "export_json": "Exportálás JSON-ba",
+      "force_stop": "Kényszer leállítás",
       "from_template": "Sablonból ▾",
-      "on_cycle_started": "Beindult a ciklus",
+      "ignore": "Figyelmen kívül hagyni",
+      "import_json": "Importálás JSON-ból",
+      "import_overwrite": "Importálás (adatok felülírása)",
+      "inspect": "Vizsgálja meg",
+      "label": "Címke",
+      "manage": "Kezelése",
+      "merge": "Összeolvad",
+      "new_automation": "＋ Új automatizálás",
+      "new_group": "+ Új csoport",
+      "new_phase": "+ Új fázis",
+      "new_profile": "+ Új profil",
       "on_cycle_finished": "A ciklus végén",
-      "save_group": "Csoport mentése"
+      "on_cycle_started": "Beindult a ciklus",
+      "pause_cycle": "Szünet",
+      "process": "Folyamat",
+      "process_history": "Folyamat most",
+      "process_recording": "Felvétel mentése",
+      "rebuild": "Borítékok újjáépítése",
+      "rebuild_envelope": "Boríték újraépítése",
+      "rec_stop": "Stop",
+      "record": "Indítsa el a Felvételt",
+      "refresh": "Frissítés",
+      "remove": "Távolítsa el",
+      "reset": "Reset",
+      "reset_to_builtin": "Állítsa vissza a beépített modellekre",
+      "reset_to_defaults": "Állítsa vissza az alapértelmezett értékeket",
+      "review": "Tekintse át",
+      "run_analysis": "🔍 Javaslatelemzés futtatása",
+      "run_auto_label": "Futtassa az Auto-Labelt",
+      "save": "Megtakarítás",
+      "save_access_control": "Hozzáférés-vezérlés mentése",
+      "save_group": "Csoport mentése",
+      "save_panel_settings": "Mentse el a panelbeállításokat",
+      "save_phases": "Fázisok mentése",
+      "save_preferences": "Mentse a Beállításokat",
+      "save_review": "Vélemény mentése",
+      "save_settings": "Beállítások mentése",
+      "select": "Válassza ki",
+      "show_only": "Csak megjelenítés",
+      "split": "Hasított",
+      "submit_correction": "Javítás benyújtása",
+      "train_now": "Vonat most",
+      "trim": "Vágás",
+      "trim_split": "Trim / Split",
+      "use": "Használat",
+      "wipe_all": "Törölje az összes adatot"
     },
     "hdr": {
-      "status": "Állapot",
-      "live_power": "Élő teljesítmény",
-      "manual_recording": "Kézi rögzítés",
-      "tools_and_data": "Eszközök és adatok",
-      "phase_catalog": "Fázis katalógus",
-      "storage_stats": "Tárolási statisztikák",
-      "maintenance": "Karbantartási műveletek",
-      "export_import": "Export / Import",
       "logs": "Naplók",
-      "my_preferences": "Saját preferenciáim",
-      "panel_settings": "Panelbeállítások (minden felhasználó)",
+      "toggle_sidebar": "Kapcsolja be a Home Assistant oldalsávot",
       "access_control": "Hozzáférés-vezérlés",
-      "ml_smart_learning": "Intelligens tanulás",
-      "ml_settings_card": "Beállítások",
-      "ml_learned": "Amit a WashData megtanult",
-      "ml_matching_tuning": "Program-illesztő finomhangolás",
-      "display": "Kijelző",
-      "status_graph": "Állapotgrafikon",
-      "diagnostics_pref": "Diagnosztika",
-      "logs_diagnostics": "Diagnosztika",
-      "process_history": "Folyamattörténet",
-      "clear_debug": "Hibakeresési nyomok törlése",
-      "wipe_history": "Előzmények törlése",
-      "automations": "Automatizálások",
-      "automation_open": "Nyissa meg az automatizálási szerkesztőben",
       "automation_delete": "Törölje ezt az automatizálást",
       "automation_needs_review": "Ezt a ciklust felül kell vizsgálni",
+      "automation_open": "Nyissa meg az automatizálási szerkesztőben",
       "automation_review_this_cycle": "Tekintse át ezt a ciklust",
-      "no_automations": "Egyelőre egyetlen automatika sem utal erre az eszközre."
+      "automations": "Automatizálások",
+      "clear_debug": "Törölje a hibakeresési nyomokat",
+      "diagnostics_pref": "Diagnosztika",
+      "display": "Kijelző",
+      "export_import": "Export / Import",
+      "live_power": "Élő Erő",
+      "logs_diagnostics": "Diagnosztika",
+      "maintenance": "Karbantartási műveletek",
+      "manual_recording": "Kézi rögzítés",
+      "ml_learned": "Amit a WashData megtanult",
+      "ml_matching_tuning": "Program-illesztő finomhangolás",
+      "ml_settings_card": "Beállítások elemre",
+      "ml_smart_learning": "Intelligens tanulás",
+      "my_preferences": "Saját preferenciáim",
+      "no_automations": "Egyelőre egyetlen automatika sem utal erre az eszközre.",
+      "panel_settings": "Panelbeállítások",
+      "phase_catalog": "Fázis katalógus",
+      "process_history": "Folyamattörténet",
+      "status": "Állapot",
+      "status_graph": "Állapotgrafikon",
+      "storage_stats": "Tárolási statisztikák",
+      "tools_and_data": "Eszközök és adatok",
+      "wipe_history": "Törölje az előzményeket"
     },
     "lbl": {
-      "power": "Teljesítmény",
-      "progress": "Haladás",
-      "remaining": "Hátralévő",
-      "duration": "Időtartam",
-      "energy": "Energia",
-      "profile": "Profil",
-      "status": "Állapot",
-      "date": "Dátum",
-      "confidence": "Megbízhatóság",
-      "health": "Egészség",
-      "cost": "Költség",
-      "program": "Program",
-      "cycle_health": "Ciklus egészség",
+      "timer_min": "min",
+      "timer_msg_placeholder": "Üzenet (nem kötelező, {device}/{program}/{minutes})",
+      "timer_auto_pause": "Automatikus szünet",
+      "label": "Program",
+      "actions": "Akciók",
       "activity": "Tevékenység",
-      "unlabelled": "Címkézetlen",
-      "unlabelled_paren": "(címkézetlen)",
-      "emphasis": "Hangsúly",
-      "default": "Alapértelmezett",
-      "in_use": "Használatban",
-      "profile_name": "Profil neve",
-      "ref_cycle": "Referenciaciklus (opcionális)",
-      "manual_duration": "Manuális időtartam (perc, opcionális)",
-      "phase_name": "Fázis neve",
-      "description": "Leírás",
-      "correct_profile": "Helyes profil",
-      "correct_duration": "Helyes időtartam (perc, opcionális)",
-      "load_from_file": "Betöltés fájlból",
-      "json_data": "JSON adatok",
-      "expected_duration": "Várható időtartam (perc)",
-      "rename_profile": "Profil átnevezése",
-      "select_profile": "Válasszon profilt",
-      "confidence_threshold": "Bizalmi küszöb",
-      "resulting_profile": "Az eredményül kapott profil",
-      "new_profile_name": "Új profilnév",
-      "save_mode": "Mentés mód",
-      "head_trim": "Fejvágás (s)",
-      "tail_trim": "Farkavágás (s)",
-      "gap_s": "Rés (s)",
-      "start": "Kezdés",
-      "end": "Vége",
-      "quality": "Minőség",
-      "golden_reference": "Rögzített referenciaciklus",
-      "compare_profiles": "Hasonlítsa össze a profilokkal",
-      "tags": "Címkék",
-      "notes": "Megjegyzések",
-      "default_tab": "Alapértelmezett lap a panel megnyitásakor",
-      "cycle_date_display": "Ciklusdátum kijelzés",
-      "refresh_interval": "Frissítési időköz (s)",
-      "panel_default_tab": "Alapértelmezett lap",
-      "hide_tabs": "Lapok elrejtése nem rendszergazdák számára",
-      "enable_access_control": "Felhasználónkénti hozzáférés-vezérlés engedélyezése",
-      "default_access_level": "Alapértelmezett szint az alábbiakban nem szereplő felhasználók számára",
       "administrators": "Rendszergazdák",
+      "auto_fine_tune_off": "automatikus finomhangolás kikapcsolása",
+      "clock_time": "Óraidő",
+      "compare_profiles": "Hasonlítsa össze a profilokkal",
+      "confidence": "Bizalom",
+      "confidence_threshold": "Bizalmi küszöb",
+      "correct_duration": "Helyes időtartam (perc, opcionális)",
+      "correct_profile": "Helyes profil",
+      "cost": "Költség",
+      "create_new_profile": "+ Új profil létrehozása…",
+      "cycle_date_display": "Ciklusdátum kijelzés",
+      "cycle_health": "Ciklus egészség",
+      "cycles_count": "Ciklusok",
+      "date": "Dátum",
+      "debug_traces": "Debug Traces",
+      "default": "Alapértelmezett",
+      "default_access_level": "Alapértelmezett szint az alábbiakban nem szereplő felhasználók számára",
       "default_other": "Alapértelmezett (más eszközök)",
+      "default_tab": "Alapértelmezett lap a panel megnyitásakor",
+      "description": "Leírás",
+      "duration": "Időtartam",
+      "emphasis": "Hangsúly",
+      "enable_access_control": "Felhasználónkénti hozzáférés-vezérlés engedélyezése",
+      "energy": "Energia",
+      "expected_duration": "Várható időtartam (perc)",
+      "file_kb": "Fájl (kB)",
+      "gap_s": "rés(ek)",
+      "head_trim": "Fejszegély(ek)",
+      "health": "Egészség",
+      "hide_tabs": "Lapok elrejtése nem rendszergazdák számára",
+      "in_use": "Használatban",
+      "json_data": "JSON adatok",
+      "last_checked": "Utoljára ellenőrizve:",
+      "load_from_file": "Betöltés fájlból",
+      "manual_duration": "Manuális időtartam (perc, opcionális)",
+      "mode_existing_profile": "Hozzáadás a meglévő profilhoz",
+      "mode_new_profile": "Új profil létrehozása",
+      "new_profile_name": "Új profilnév",
+      "panel_default_tab": "Alapértelmezett lap",
+      "phase_name": "Név",
+      "power": "Hatalom",
+      "profile": "Profil",
+      "profile_name": "Profil neve",
+      "progress": "Előrehalad",
+      "read_only": "Csak olvasható",
+      "ref_cycle": "Referenciaciklus (opcionális)",
+      "refresh_interval": "Frissítési időköz (s)",
+      "remaining": "Többi",
+      "remove_label": "- Távolítsa el a címkét -",
+      "rename_profile": "Profil átnevezése",
+      "resulting_profile": "Az eredményül kapott profil",
+      "save_mode": "Mentés mód",
+      "seconds_from_start": "Másodpercek az elejétől",
+      "select_profile": "Válassza a Profil lehetőséget",
+      "show_debug": "Élő mérkőzés hibakereső kártya megjelenítése az Állapot oldalon (bizalom, kétértelműség, legjobb jelöltek)",
       "show_expected": "Várható görbefedvény megjelenítése (egyező profil, narancssárga)",
       "show_raw": "Az érzékelő nyers leolvasásainak megjelenítése (simítatlan, szürke)",
-      "show_debug": "Élő mérkőzés hibakereső kártya megjelenítése az Állapot oldalon (bizalom, kétértelműség, legjobb jelöltek)",
-      "mode_new_profile": "Új profil létrehozása",
-      "mode_existing_profile": "Hozzáadás a meglévő profilhoz",
-      "auto_fine_tune_on": "automatikus finomhangolás bekapcsolva (körülbelül {hour}:00)",
-      "auto_fine_tune_off": "automatikus finomhangolás kikapcsolása",
-      "last_checked": "Utoljára ellenőrizve:",
-      "remove_label": "- Távolítsa el a címkét -",
-      "create_new_profile": "+ Új profil létrehozása…",
-      "read_only": "Csak olvasható",
-      "actions": "Műveletek",
-      "cycles_count": "Ciklusok",
-      "debug_traces": "Hibakeresési nyomok",
-      "file_kb": "Fájl (kB)",
-      "label": "Címke",
-      "seconds_from_start": "Másodpercek az elejétől",
-      "clock_time": "Óraidő",
-      "ungrouped": "Csoportosítás nélkül"
+      "status": "Állapot",
+      "tail_trim": "Farokszegély(ek)",
+      "ungrouped": "Csoportosítás nélkül",
+      "unlabelled": "Címkézetlen",
+      "unlabelled_paren": "(címkézetlen)",
+      "expected": "Várt",
+      "raw_socket": "Nyers csatlakozó",
+      "artifact_interruption": "Megszakítás",
+      "artifact_low_power": "Alacsony teljesítmény",
+      "artifact_high_power": "Magas teljesítmény",
+      "artifact_anomaly": "Rendellenesség"
     },
     "badge": {
+      "golden_cycle": "Rögzített referenciaciklus",
+      "reviewed": "Áttekintve",
+      "feedback_requested": "Visszajelzést kértünk",
+      "needs_review": "Felülvizsgálatra szorul",
+      "overrun": "A szokásosnál tovább futott",
+      "artifact_tip": "{n} rendellenesség észlelve (pl. ajtónyitás a ciklus közepén) – nyissa meg, hogy megtekinthesse őket a grafikonon",
+      "poor_fit_tip": "Inkonzisztens meccselőzmények – fontolja meg a profil újjáépítését",
+      "fair_fit_tip": "Mérsékelt egyezési konzisztencia – néhány ehhez a profilhoz rendelt ciklus alacsonyabb megbízhatósági pontszámmal rendelkezik. Címkézz fel több ciklust, vagy rögzítsd újra a profilt a pontosság javítása érdekében.",
+      "fair_fit": "tisztességes illeszkedés",
       "poor_fit": "rossz illeszkedés",
-      "fair_fit": "közepes illeszkedés",
-      "manual": "(manuálisan kiválasztott)",
       "auto": "(automatikusan észlelve)",
-      "improving": "↗ javul",
+      "built_in_tag": "beépített",
       "declining": "↘ csökkenő",
+      "improving": "↗ javul",
+      "manual": "(manuálisan kiválasztott)",
       "steady": "→ állandó",
-      "using_tuned": "Hangolt súlyok használata",
       "using_defaults": "A szállított alapértelmezett értékek használata",
-      "built_in_tag": "beépített"
-    },
-    "status": {
-      "completed": "Befejezve",
-      "interrupted": "Megszakított",
-      "force_stopped": "Kényszer-leállítva",
-      "active": "Aktív",
-      "ambiguous": "Kétértelmű",
-      "clear": "Világos",
-      "working": "Dolgozik…",
-      "recording": "Felvétel…",
-      "ready": "Feldolgozásra kész",
-      "idle": "Tétlen",
-      "auto_detect": "Automatikus felismerés",
-      "fine_tuning": "finomhangolás most…",
-      "all_statuses": "Minden állapot"
-    },
-    "ml": {
-      "fit_strong": "Erős",
-      "fit_good": "Jó",
-      "fit_fair": "Közepes",
-      "fit_weak": "Gyenge",
-      "fit_slight": "Enyhe",
-      "fit_word": "illeszkedés",
-      "fine_tuned_at": "finomhangolt {when}",
-      "personalized": "● Személyre szabott ehhez a géphez",
-      "builtin_models": "● Beépített modellek használata"
-    },
-    "toast": {
-      "settings_saved": "A beállítások elmentve; integráció újratöltése",
-      "preferences_saved": "A beállítások mentve",
-      "panel_settings_saved": "A panel beállításai mentve",
-      "access_saved": "A hozzáférés-szabályozás mentve",
-      "profile_created": "\"{name}\" profil létrehozva",
-      "profile_deleted": "\"{name}\" profil törölve",
-      "profile_renamed": "Profil átnevezve",
-      "phases_saved": "Fázisok mentve",
-      "phase_created": "\"{name}\" fázis létrehozva",
-      "phase_deleted": "\"{name}\" fázis törölve",
-      "phase_updated": "Fázis frissítve",
-      "recording_started": "A felvétel elkezdődött",
-      "recording_stopped": "A felvétel leállt",
-      "recording_discarded": "A felvétel elvetve",
-      "recording_saved": "A felvétel mentve a profilba",
-      "export_downloaded": "Exportálás letöltve",
-      "logs_exported": "A naplók exportálva",
-      "import_successful": "Sikeres importálás; integráció újratöltése",
-      "envelopes_rebuilt": "A borítékok újjáépítve",
-      "envelope_rebuilt": "Boríték újjáépítve",
-      "suggestions_applied": "Javaslatok alkalmazva; integráció újratöltése",
-      "suggestions_dismissed": "Javaslatok elutasítva",
-      "auto_label_complete": "Az automatikus címkézés kész",
-      "cycle_labelled": "Ciklus feliratozott",
-      "cycle_deleted": "Ciklus törölve",
-      "cycles_deleted": "{count} ciklus törölve",
-      "cycle_trimmed": "Ciklus vágva",
-      "cycles_merged": "A ciklusok egyesültek",
-      "review_saved": "Vélemény mentve",
-      "feedback_confirmed": "A visszajelzés megerősítve",
-      "feedback_dismissed": "A visszajelzés elutasítva",
-      "feedback_all_dismissed": "Minden visszajelzés elutasítva",
-      "correction_submitted": "Helyesbítés benyújtva",
-      "group_saved": "Csoport mentve",
-      "group_deleted": "Csoport törölve",
-      "automation_deleted": "Automatizálás törölve",
-      "legacy_removed": "Az örökölt műveletek eltávolítva",
-      "cycle_paused": "A ciklus szünetel",
-      "cycle_resumed": "A ciklus folytatódott",
-      "cycle_force_stopped": "Kényszer-leállított ciklus",
-      "ml_training_promoted": "A képzés befejeződött: előléptetett {count} modell",
-      "ml_training_no_improvement": "Az edzés befejeződött: az alapérték megtartva (nincs javulás)",
-      "matching_reverted": "A megfelelő súlyok visszaálltak az alapértelmezett értékekre",
-      "models_reverted": "Az eszközön lévő modellek visszaálltak az alapszintre",
-      "analysis_complete": "Elemzés kész: {count} javaslat",
-      "analysis_complete_none": "Az elemzés kész: nincs új javaslat",
-      "debug_cleared": "Törölve {count} hibakeresési nyomot",
-      "all_wiped": "Minden adat törölve",
-      "no_split_found": "Nem találtunk üresjárati hézagot, amelyen fel lehetne osztani",
-      "group_name_required": "A csoportnév megadása kötelező",
-      "min_2_profiles": "Válasszon ki legalább 2 profilt egy csoporthoz",
-      "profile_name_required": "A profilnév megadása kötelező",
-      "phase_name_required": "A fázisnév megadása kötelező",
-      "name_required": "Név szükséges",
-      "json_required": "JSON-adatok szükségesek",
-      "save_failed": "A mentés sikertelen: {error}",
-      "delete_failed": "A törlés nem sikerült: {error}",
-      "apply_failed": "Sikertelen alkalmazás: {error}",
-      "rebuild_failed": "Az újraépítés nem sikerült: {error}",
-      "start_failed": "Sikertelen indítás: {error}",
-      "stop_failed": "Sikertelen leállítás: {error}",
-      "discard_failed": "Sikertelen elvetés: {error}",
-      "trim_failed": "Sikertelen vágás: {error}",
-      "split_failed": "A felosztás sikertelen: {error}",
-      "merge_failed": "Az egyesítés sikertelen: {error}",
-      "create_failed": "A létrehozás sikertelen: {error}",
-      "update_failed": "A frissítés sikertelen: {error}",
-      "rename_failed": "Sikertelen átnevezés: {error}",
-      "revert_failed": "A visszaállítás sikertelen: {error}",
-      "training_failed": "Sikertelen képzés: {error}",
-      "export_failed": "Az exportálás sikertelen: {error}",
-      "import_failed": "Sikertelen importálás: {error}",
-      "auto_label_failed": "Az automatikus címkézés sikertelen: {error}",
-      "analysis_failed": "Az elemzés sikertelen: {error}",
-      "auto_detect_failed": "Az automatikus felismerés nem sikerült: {error}",
-      "error": "Hiba: {error}",
-      "could_not_load_cycle": "Nem sikerült betölteni a ciklust: {error}",
-      "pause_failed": "A szüneteltetés sikertelen: {error}",
-      "label_failed": "A címke sikertelen: {error}",
-      "invalid_json": "A(z) „{key}” nem érvényes JSON – javítsa ki, vagy törölje a mezőt a mentés előtt.",
-      "processed": "Feldolgozva: {bits}",
-      "split_complete": "Osztva {count} ciklusra"
-    },
-    "msg": {
-      "no_devices": "Még nincs konfigurálva WashData eszköz.",
-      "no_device_selected": "Nincs kiválasztott eszköz.",
-      "loading": "Betöltés…",
-      "loading_settings": "Beállítások betöltése…",
-      "live_chart_loading": "Az élő teljesítmény diagram megjelenik a leolvasások megérkezésekor.",
-      "no_cycles_match": "Egyetlen ciklus sem felel meg az aktuális szűrőnek.",
-      "no_cycles_yet": "Még nem rögzítettek ciklusokat.",
-      "no_profiles_yet": "Még nincsenek profilok. Hozzon létre egyet egy felcímkézett ciklusból.",
-      "no_logs": "Még nincsenek pufferelt naplórekordok.",
-      "no_phases": "Nincsenek meghatározott fázisok.",
-      "no_phases_assigned": "Nincsenek hozzárendelve fázisok.",
-      "no_split_points": "Még nincsenek megosztott pontok.",
-      "no_envelope": "Még nincs boríték – címkézési ciklusok után építse újra.",
-      "no_envelope_overlay": "Nincs boríték lefedéshez.",
-      "no_other_users": "Nem található más Home Assistant felhasználó.",
-      "maintenance_requires_access": "A karbantartás és az export/import teljes hozzáférést igényel.",
-      "loading_curve": "Görbe betöltése…",
-      "compare_selected_cycles": "Kiválasztott ciklusok (folytonos) — megjelenítés/elrejtés",
-      "compare_overlay_profiles": "Fedőprofilok (halvány)",
-      "no_profiles_compare": "Nincs összehasonlítható profil.",
-      "no_cycles_profile": "Nincs ciklus ehhez a profilhoz.",
-      "saving_triggers_reload": "A mentés az integráció újratöltését indítja el. A HA entitások rövid időre elérhetetlenként jelenhetnek meg.",
-      "prefs_personal": "Ezek csak az Ön Home Assistant-fiókjára vonatkoznak.",
-      "no_match_yet": "Még nincs párosítási kísérlet – ez egy futási ciklus alatt töltődik fel.",
-      "no_fine_tuned": "Még nincs finomhangolás – a WashData a beépített modelljeit használja.",
-      "ml_learned_intro": "Ehhez a géphez finomhangolt modellek. Minden, ami nem szerepel a listán, a megbízható beépített modellt használja.",
-      "ml_settings_intro": "Két független kapcsoló: az egyik a ciklus futása közben alkalmazza a modelleket, a másik lehetővé teszi, hogy a WashData idővel finomhangolja őket a gépére.",
-      "ml_intro": "A WashData olyan intelligens modelleket szállít, amelyek érzékelik a ciklusokat, egyeztetik a programokat, és megbecsülik az időt és energiát – a dobozból kiindulva működnek.",
-      "matching_tuning_intro": "Tanuláskor a WashData azt is beállítja, hogy a programillesztés mennyi súlya legyen a ciklus alakjának az időtartamhoz és az energiához képest.",
-      "phase_catalog_intro": "Egy ciklus elnevezett szegmensei (Előmosás, Fűtés, Centrifugálás…). Rendelje hozzá őket egy profilhoz a vezérlőpultjáról.",
-      "phase_ranges_intro": "A fázistartományok (a ciklus kezdetétől számított percek) átfedik az átlaggörbét. Szerkessze az értékeket az élő előnézethez.",
-      "cleanup_intro": "Minden címkézett ciklus átfedi. Jelölje be a kiugró értékeket, és törölje a profilt a profil megtisztításához.",
-      "split_intro": "Kattintson a diagramra egy osztási pont hozzáadásához vagy eltávolításához, vagy az üresjárati hézagok automatikus észleléséhez.",
-      "trim_intro": "Húzza el a piros fogantyúkat, vagy írjon be értékeket. Az ablakon kívül mindent eltávolítanak.",
-      "import_intro": "Töltsön be egy exportált fájlt, vagy illesszen be egy JSON-adatot alább.",
-      "auto_label_intro": "Rendeljen hozzá profilokat címkézetlen ciklusokhoz, amelyek egyezési megbízhatósága törli a küszöböt.",
-      "merge_intro": "A kiválasztott ciklusokat egyesítjük (időrendi sorrendben; 0 W-tal kitöltött hézagok). Válassza ki a kapott profilt.",
-      "enough_data": "Elegendő adat a tanuláshoz ({current}/{min} ciklus).",
-      "collecting_data": "Adatgyűjtés – {need} további ciklus{plural} a finomhangolás megkezdése előtt ({current}/{min}).",
-      "updated": "Frissítve: {time}",
-      "appliance_monitor": "Készülék monitor",
-      "ml_loading": "ML betöltése…",
-      "see_recorder": "Lásd alább a felvevő widgetet",
-      "review_in_settings": "Tekintse át a Beállításokban",
-      "storage_diagnostics": "Tárolási statisztikák, karbantartás, export/import",
-      "recent_logs": "Legutóbbi ha_washdata rekordok",
-      "preferences_adv": "Beállítások",
-      "preferences_admin": "Beállítások, panel és hozzáférés-vezérlés",
-      "review_to_cycles": "Nyissa meg a Ciklusok áttekintési sort",
-      "pending_feedback": "Függőben lévő észlelési visszajelzés",
-      "recording_in_progress": "Felvétel folyamatban",
-      "no_profiles_yet_short": "Még nincsenek profilok.",
-      "unsure_detected_prefix": "A WashData nem biztos abban, hogy észlelte",
-      "no_suggestions": "Nincsenek aktív javaslatok.",
-      "no_profiles_overlay": "Nincsenek fedendő profilok.",
-      "compare_cycles_title": "Hasonlítson össze {count} ciklust",
-      "profiles_intro": "Kattintson egy profilra a statisztikák, fázisok és karbantartás megtekintéséhez. Csoportosítsa a majdnem azonos programokat (azonos alakú/időtartamú, eltérő hőmérsékletű vagy centrifugájú), hogy az egyeztetés megbízhatóan válasszon köztük.",
-      "search_placeholder": "Beállítások keresése…",
-      "automations_intro": "A WashData {start} / {end} eseményeket indít és entitásokat tesz elérhetővé, így az értesítések és műveletek legjobban normál Home Assistant automatizálásként építhetők fel. Az ezt az eszközt használó automatizálások alább jelennek meg.",
-      "notify_services_hint": "Használja a {entity} szolgáltatás-azonosítókat (több esetén vesszővel elválasztva). Sablonváltozók: {vars}.",
-      "rbac_hint": "Ha ki van kapcsolva, minden Home Assistant felhasználónak teljes hozzáférése van (ez az alapértelmezett). A rendszergazdáknak mindig teljes hozzáférésük van, és mindenkit kezelhetnek.",
-      "feedback_prompt": "Erősítse meg, hogy helyes volt, javítsa a programot, vagy hagyja figyelmen kívül."
+      "using_tuned": "Hangolt súlyok használata"
     },
     "modal": {
-      "label_cycle": "Ciklus felcímkézése",
-      "create_profile": "Profil létrehozása",
-      "new_phase": "Új fázis",
-      "edit_phase": "Fázis szerkesztése",
-      "process_recording": "Felvétel feldolgozása",
-      "correct_feedback": "Helyes visszajelzés",
-      "import_config": "Konfiguráció importálása",
+      "merge_cycles": "Egyesítsen {n} ciklust",
       "auto_label": "Automatikus címkézési ciklusok",
-      "cycle": "Ciklus"
+      "correct_feedback": "Helyes visszajelzés",
+      "create_profile": "Profil létrehozása",
+      "cycle": "Ciklus",
+      "edit_phase": "Fázis szerkesztése",
+      "import_config": "Konfiguráció importálása",
+      "label_cycle": "Címkeciklus",
+      "new_phase": "Új fázis",
+      "process_recording": "Folyamat rögzítése"
     },
-    "tag": {
-      "late_start": "Késői kezdés",
-      "early_end": "Korai vége",
-      "merged": "Összevont ciklusok",
-      "split": "Osztott ciklus",
-      "noise": "Zaj",
-      "wrong_profile": "Rossz profil",
-      "sensor_gap": "Érzékelő rés"
+    "msg": {
+      "near_duplicate_cluster": "majdnem ismétlődő profilfürt észlelve. A csoportosítás lehetővé teszi, hogy a párosítás megbízhatóan válasszon a hasonlók között (pl. ugyanaz a program különböző hőmérsékleten/centrifugáláson).",
+      "coverage_gap": "a legutóbbi ciklusoknak nincs megfelelő profilja (az utolsó 30 {pct}%-a).",
+      "consider_new_profile": "Fontolja meg egy új profil létrehozását.",
+      "group_not_cohesive": "Ezek a profilok nem eléggé hasonlóak ahhoz, hogy megbízhatóan csoportosítsák, ezért az egyeztetés egyenként kezeli őket, amíg el nem távolítja a kiugró értéket, vagy fel nem osztja a csoportot.",
+      "group_modal_help": "Azonos alakú programok, amelyek hőmérséklete/centrifugálása különbözik (az időtartam változhat). Az egyezés pontozza a csoportot, mint egy jelöltet, majd kiválasztja a legmegfelelőbb tagot. Válasszon legalább 2-t; az átfedés megmutatja, mennyire hasonlítanak egymásra.",
+      "showing_suggestions": "{count} beállítás megjelenítése javaslatokkal.",
+      "show_all_settings": "Minden beállítás megjelenítése",
+      "tuning_suggestions_available": "{count} hangolási javaslat érhető el a megfigyelt ciklusokból. A megfelelő mezők mellett jelennek meg.",
+      "legacy_actions_title": "{count} örökölt egyéni művelet továbbra is fut",
+      "old_actions_warning": "A régi műveletszerkesztővel konfigurálva (most eltávolítva). Továbbra is aktiválják a cikluseseményeket, de már nem szerkeszthetők itt. Alakítsa át őket normál automatizálássá, vagy távolítsa el őket.",
+      "no_settings_match": "Egy beállítás sem felel meg a következőnek: \"{q}\"",
+      "clear_debug_hint": "Távolítsa el a tárolt hibakeresési adatokat, hogy helyet szabadítson fel.",
+      "wipe_history_warning": "Véglegesen törölje az összes ciklust és profilt. Nem vonható vissza.",
+      "export_description": "Exportálja az összes profilt és ciklust JSON-ba, vagy állítsa vissza az előző exportálásból.",
+      "log_buffer_hint": "A legújabbak előtt · puffereli az utolsó 500 ha_washdata rekordot az újraindítás óta · húzza az alsó szélét az átméretezéshez.",
+      "review_profile_tip": "A program ezt a ciklust címkével látja el. Ha az automatikusan észlelt program hibás volt, javítsa ki itt – a címkézés megtanítja a jövőbeli ciklusokhoz való illeszkedést.",
+      "review_quality_tip": "Milyen tiszta ez a ciklus. Jó = a program tankönyvi példája; Rossz = észlelt, de zajos vagy atipikus; Használhatatlan = rosszul észlelt (egyesített, csonkolt vagy hamis). Megadja az állapotpontszámot és azt, hogy mely ciklusok engedélyezettek a modell betanításához.",
+      "review_recorded_tip": "Jelölje meg ezt a programhoz tartozó, kézzel kiválasztott referenciaciklusként – ugyanaz a szerep, mint egy kézzel rögzített ciklus. A referenciaciklusokat mindig megőrizzük, a megfelelő sablont vetjük be, és soha nem vetik el őket a tisztítás során. (Ez az \"arany\"/rekord zászló; mindkettő ugyanaz.)",
+      "review_tags_tip": "Opcionális jelzők, amelyek leírják, hogy mi hibázott ebben a ciklusban, így a képzés és a tisztítás megmagyarázhatja.",
+      "review_notes_tip": "Szabad szövegű jegyzetek saját referenciaként. Nem használtak párosításhoz vagy edzéshez.",
+      "review_confirm_help": "Ellenőrizze, hogy ezt a ciklust megfelelően észlelték-e. Az Ön véleménye megtanítja a modellt a gépén – minél több ciklust erősít meg, annál jobb lesz az egyezés és az állapotpontozás. Elég egy gyors Jó/Rossz.",
+      "review_notes_placeholder": "Megjegyzések (opcionális)",
+      "compare_profiles_tip": "Fedjen rá más profilborítékokat a fenti diagramra, hogy megtudja, melyik illik legjobban ehhez a ciklushoz.",
+      "artifact_header": "{n} rendellenesség észlelve ebben a ciklusban",
+      "artifact_footer": "A fenti grafikonon kiemelve. Ezek átmeneti műtermékek (pl. a ciklus közepén kinyílt ajtó), nem feltétlenül problémák.",
+      "profile_poor_health_detail": "Az ehhez a profilhoz rendelt ciklusok alakja inkonzisztens vagy alacsony a megbízhatóságuk. Fontolja meg a boríték újjáépítését vagy a címkézett ciklusok áttekintését.",
+      "trend_duration_longer": "Az időtartam egyre hosszabb ({pct}%/ciklus) – legutóbbi átlag: {avg}",
+      "trend_duration_shorter": "Az időtartam egyre rövidebb ({pct}%/ciklus) – legutóbbi átlag: {avg}",
+      "trend_energy_up": "Emelkedő energiatrend ({pct}%/ciklus) – legutóbbi átlag {avg}",
+      "trend_energy_down": "Az energia csökkenő tendenciája ({pct}%/ciklus)",
+      "performance_trend": "Teljesítménytrend ({n} ciklus)",
+      "maintenance_advisory": "A növekvő időtartam/energiafogyasztás jelezheti a készülék karbantartását (pl. vízkőmentesítés, szűrőtisztítás).",
+      "manual_duration_hint": "A profil átlagos/várható ciklushossza, a hátralévő idő becsléseihez használva. Szerkesztés a beállításhoz; változatlanul hagyva az aktuális értéket megtartja.",
+      "appliance_monitor": "Készülék monitor",
+      "auto_label_intro": "Rendeljen hozzá profilokat címkézetlen ciklusokhoz, amelyek egyezési megbízhatósága törli a küszöböt.",
+      "cleanup_intro": "Minden címkézett ciklus átfedi. Jelölje be a kiugró értékeket, és törölje a profilt a profil megtisztításához.",
+      "compare_overlay_profiles": "Fedőprofilok (halvány)",
+      "compare_selected_cycles": "Kiválasztott ciklusok (folytonos) — megjelenítés/elrejtés",
+      "feedback_prompt": "Erősítse meg, hogy helyes volt, javítsa ki a programot, vagy hagyja figyelmen kívül.",
+      "import_intro": "Töltsön be egy exportált fájlt, vagy illesszen be egy JSON-adatot alább.",
+      "live_chart_loading": "Az élő teljesítmény diagram megjelenik a leolvasások megérkezésekor.",
+      "loading": "Terhelés…",
+      "loading_curve": "Görbe betöltése…",
+      "loading_settings": "Beállítások betöltése…",
+      "maintenance_requires_access": "A karbantartás és az export/import teljes hozzáférést igényel.",
+      "matching_tuning_intro": "Tanuláskor a WashData azt is beállítja, hogy a programillesztés mennyi súlyt jelent a formának az időtartamhoz és az energiához képest.",
+      "merge_intro": "A kiválasztott ciklusokat egyesítjük (időrendi sorrendben; 0 W-tal kitöltött hézagok). Válassza ki a kapott profilt.",
+      "ml_intro": "A WashData intelligens modellekkel szállítjuk, amelyek már a dobozból kivehetők.",
+      "ml_learned_intro": "Ehhez a géphez finomhangolt modellek.",
+      "ml_loading": "ML betöltése…",
+      "ml_settings_intro": "Két független kapcsoló: az egyik a ciklus futása közben alkalmazza a modelleket, a másik lehetővé teszi, hogy a WashData idővel finomhangolja őket a gépére.",
+      "no_cycles_match": "Egyetlen ciklus sem felel meg az aktuális szűrőnek.",
+      "no_cycles_profile": "Nincs ciklus ehhez a profilhoz.",
+      "no_cycles_yet": "Még nem rögzítettek ciklusokat.",
+      "no_device_selected": "Nincs kiválasztott eszköz.",
+      "no_devices": "Még nincs konfigurálva WashData eszköz.",
+      "no_envelope": "Még nincs boríték – címkézési ciklusok után építse újra.",
+      "no_envelope_overlay": "Nincs boríték lefedéshez.",
+      "no_fine_tuned": "Még nincs finomhangolás – a WashData a beépített modelljeit használja.",
+      "no_logs": "Még nincsenek pufferelt naplórekordok.",
+      "no_match_yet": "Még nincs párosítási kísérlet – ez egy futási ciklus alatt töltődik fel.",
+      "no_other_users": "Nem található más Home Assistant felhasználó.",
+      "no_phases": "Nincsenek meghatározott fázisok.",
+      "no_phases_assigned": "Nincsenek hozzárendelve fázisok.",
+      "no_profiles_compare": "Nincs összehasonlítható profil.",
+      "no_profiles_overlay": "Nincsenek fedendő profilok.",
+      "no_profiles_yet": "Még nincsenek profilok. Hozzon létre egyet egy felcímkézett ciklusból.",
+      "no_profiles_yet_short": "Még nincsenek profilok.",
+      "no_split_points": "Még nincsenek megosztott pontok.",
+      "no_suggestions": "Nincsenek aktív javaslatok.",
+      "pending_feedback": "Függőben lévő észlelési visszajelzés",
+      "phase_catalog_intro": "Egy ciklus elnevezett szegmensei (Előmosás, Fűtés, Centrifugálás…). Rendelje hozzá őket egy profilhoz a vezérlőpultjáról.",
+      "phase_ranges_intro": "A fázistartományok (a ciklus kezdetétől számított percek) átfedik az átlaggörbét. Szerkessze az értékeket az élő előnézethez.",
+      "preferences_admin": "Beállítások, panel és hozzáférés-vezérlés",
+      "preferences_adv": "Preferences",
+      "prefs_personal": "Ezek csak a Home Assistant-fiókra vonatkoznak.",
+      "profiles_intro": "Kattintson egy profilra a statisztikák, fázisok és tisztítás megtekintéséhez. Csoportosítsa a közel azonos programokat (azonos forma/időtartam, eltérő hőmérséklet vagy centrifugálás), így az illesztés megbízhatóan kiválasztja őket.",
+      "rbac_hint": "Ha ki van kapcsolva, minden Home Assistant felhasználó teljes hozzáféréssel rendelkezik (alapértelmezett). A rendszergazdák mindig teljes hozzáféréssel rendelkeznek, és mindenkit kezelhetnek.",
+      "recent_logs": "Legutóbbi ha_washdata rekordok",
+      "recording_in_progress": "Felvétel folyamatban",
+      "review_in_settings": "Tekintse át a Beállításokban",
+      "review_to_cycles": "Nyissa meg a Ciklusok áttekintési sort",
+      "saving_triggers_reload": "A mentés az integráció újratöltését indítja el. A HA entitások rövid időre elérhetetlenként jelenhetnek meg.",
+      "search_placeholder": "Keresési beállítások…",
+      "see_recorder": "Lásd alább a felvevő widgetet",
+      "split_intro": "Kattintson a diagramra egy osztási pont hozzáadásához vagy eltávolításához, vagy az üresjárati hézagok automatikus észleléséhez. Minden eredményül kapott szegmens saját profilt kaphat.",
+      "storage_diagnostics": "Tárolási statisztikák, karbantartás, export/import",
+      "trim_intro": "Húzza el a piros fogantyúkat, vagy írjon be értékeket. Az ablakon kívül mindent eltávolítanak.",
+      "unsure_detected_prefix": "A WashData nem biztos abban, hogy észlelte",
+      "updated": "Frissítve"
     },
-    "quality": {
-      "good": "Jó",
-      "bad": "Rossz",
-      "unusable": "Használhatatlan"
-    },
-    "access": {
-      "none": "Nincs (rejtett)",
-      "read": "Olvasás",
-      "edit": "Szerkesztés",
-      "full": "Teljes",
-      "inherit": "Öröklés"
+    "phase_desc": {
+      "pre_wash": "Első áztatás vagy előkezelés a főmosás előtt.",
+      "wash": "Fő mosási ciklus dobmozgással és opcionális fűtéssel.",
+      "wash_dw": "Főmosószeres mosás melegítéssel.",
+      "rinse": "Tiszta vizes öblítési szakasz. Ez a fázis többször is megismétlődhet.",
+      "spin": "Nagy sebességű elszívás a víz eltávolításához a rakományból.",
+      "spin_wd": "Nagy sebességű extrakció a szárítási átmenet előtt.",
+      "soak": "Alacsony aktivitású áztatási időszak az aktív mosási szakaszok között.",
+      "soak_dw": "Meghosszabbított áztatási időszak nehéz talajokhoz.",
+      "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
+      "heat_up": "A fűtőelem kezdeti bemelegítése a teljes szárítás megkezdése előtt.",
+      "drying": "Fő fűtött bukfencezési időszak.",
+      "cool_down": "Zuhanás hő nélkül a ciklus vége felé.",
+      "anti_wrinkle": "Időszakos ciklus utáni zuhanás a ráncok csökkentése érdekében.",
+      "sensor_check": "Rövid kis fogyasztású szünet a szárazság mérése közben.",
+      "drain_and_switch": "Átmeneti időszak a mosásból a szárítási módba.",
+      "pre_rinse": "Első lepermetezés a mosószeres mosás előtt.",
+      "dry": "Szárítási szakasz fűtőberendezéssel és/vagy maradékhővel.",
+      "sanitize": "Magas hőmérsékletű tisztítási szakasz fertőtlenítési programokhoz."
     },
     "health": {
-      "poor": "⚠ Rossz illeszkedés",
-      "fair": "Közepes illeszkedés",
-      "good": "✓ Jó illeszkedés"
+      "good": "✓ Jó profilminőség",
+      "fair": "Elfogadható profilminőség",
+      "poor": "⚠ Gyenge profilminőség"
+    },
+    "ml": {
+      "fit_fair": "Elfogadható",
+      "builtin_models": "● Beépített modellek használata",
+      "fit_good": "Jó",
+      "fit_slight": "Enyhe",
+      "fit_strong": "Erős",
+      "fit_weak": "Gyenge",
+      "fit_word": "illeszkedik",
+      "personalized": "● Személyre szabott ehhez a géphez"
     },
     "trend": {
-      "up": "Növekvő tendencia",
-      "down": "Csökkenő tendencia"
-    },
-    "pref": {
-      "date_relative": "Relatív (pl. 2 órája)",
-      "date_absolute": "Abszolút (pl. július 2-án 14:32)"
+      "up": "Felkapott",
+      "down": "Lefelé trend"
     },
     "log": {
       "all_levels": "Minden szinten"
     },
-    "section": {
-      "basic": {
-        "label": "Alapvető",
-        "intro": "Az alapvető identitás és a legtöbb beállításhoz szükséges alapvető dolgok."
-      },
-      "detection": {
-        "label": "Érzékelés",
-        "intro": "Hogyan észlelhető egy ciklus indításként, futásként és befejezésként."
-      },
-      "matching": {
-        "label": "Illesztés",
-        "intro": "Hogyan illesztik a kész ciklusokat a tanult profilokhoz és címkézik fel."
-      },
-      "timing": {
-        "label": "Időzítés és Watchdog",
-        "intro": "Háttér ütemezés, offline őrzőkutya és háztartás."
-      },
-      "anti_wrinkle": {
-        "label": "Ránctalanító",
-        "intro": "A ránctalanító üzemmód a fő fűtési fázis után érzékeli a szárítógép impulzusait."
-      },
-      "delay": {
-        "label": "Késleltetett indítás",
-        "intro": "A késleltetett indítás észlelése azonosítja, ha a készülék áram alatt van, de még nem kezdte el ciklusát."
-      },
-      "triggers": {
-        "label": "Kioldók és ajtók",
-        "intro": "Opcionális külső jelek: végkioldó, ajtóérzékelő, szünetkapcsoló és kirakodási emlékeztető."
-      },
-      "notifications": {
-        "label": "Értesítések",
-        "intro": "Konfigurálja, hogy mikor és hogyan kapjon értesítést a cikluseseményekről."
-      },
-      "ml_training": {
-        "label": "ML képzés",
-        "intro": "Opcionális intelligens modellek, amelyek személyre szabják az észlelést és az időzítést ehhez az eszközhöz."
-      }
+    "pref": {
+      "date_absolute": "Abszolút (pl. július 2-án 14:32)",
+      "date_relative": "Rokon (pl. 2 órája)"
     },
-    "setting": {
-      "name": {
-        "label": "Eszköz neve"
-      },
-      "device_type": {
-        "label": "Eszköz típusa"
-      },
-      "power_sensor": {
-        "label": "Teljesítmény érzékelő"
-      },
-      "min_power": {
-        "label": "Minimális teljesítmény"
-      },
-      "off_delay": {
-        "label": "Kikapcsolási késleltetés"
-      },
-      "linked_device": {
-        "label": "Csoportosítás az Eszköz alatt"
-      },
-      "start_threshold_w": {
-        "label": "Indítási küszöb"
-      },
-      "stop_threshold_w": {
-        "label": "Leállítási küszöb"
-      },
-      "min_off_gap": {
-        "label": "Min. kikapcsolt szünet"
-      },
-      "start_duration_threshold": {
-        "label": "Kezdés időtartama"
-      },
-      "start_energy_threshold": {
-        "label": "Induló energia"
-      },
-      "completion_min_seconds": {
-        "label": "Minimális ciklusidő"
-      },
-      "running_dead_zone": {
-        "label": "Futás holt zónája"
-      },
-      "end_energy_threshold": {
-        "label": "Végenergia"
-      },
-      "end_repeat_count": {
-        "label": "Ismétlésszám vége"
-      },
-      "sampling_interval": {
-        "label": "Mintavételi intervallum"
-      },
-      "smoothing_window": {
-        "label": "Simító ablak"
-      },
-      "abrupt_drop_watts": {
-        "label": "Hirtelen esés"
-      },
-      "abrupt_drop_ratio": {
-        "label": "Hirtelen csökkenési arány"
-      },
-      "profile_match_threshold": {
-        "label": "Egyezési küszöb"
-      },
-      "profile_unmatch_threshold": {
-        "label": "Páratlan küszöb"
-      },
-      "profile_match_interval": {
-        "label": "Egyezési időköz"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "Minimális időtartam aránya"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "Maximális időtartam arány"
-      },
-      "profile_duration_tolerance": {
-        "label": "Profil időtartamának tűréshatára"
-      },
-      "duration_tolerance": {
-        "label": "Becsült tolerancia"
-      },
-      "auto_label_confidence": {
-        "label": "Automatikus felcímkézési megbízhatóság"
-      },
-      "learning_confidence": {
-        "label": "Tanulási bizalom"
-      },
-      "suppress_feedback_notifications": {
-        "label": "A visszajelzési értesítések letiltása"
-      },
-      "watchdog_interval": {
-        "label": "Figyelő időköz"
-      },
-      "no_update_active_timeout": {
-        "label": "Frissítés nélküli időtúllépés"
-      },
-      "progress_reset_delay": {
-        "label": "Folyamat visszaállítás késleltetése"
-      },
-      "auto_maintenance": {
-        "label": "Automatikus karbantartás (éjszakai takarítás)"
-      },
-      "expose_debug_entities": {
-        "label": "A hibakeresési entitások közzététele"
-      },
-      "save_debug_traces": {
-        "label": "Mentse a hibakeresési nyomokat"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "Engedélyezze a ránctalanító felismerést"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "Max. ránctalanító teljesítmény"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "Max időtartam"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "Kilépés a teljesítményküszöbből"
-      },
-      "delay_start_detect_enabled": {
-        "label": "Engedélyezze a késleltetett indítás észlelését"
-      },
-      "delay_confirm_seconds": {
-        "label": "Erősítse meg a másodperceket"
-      },
-      "delay_timeout_hours": {
-        "label": "Időtúllépési órák"
-      },
-      "external_end_trigger_enabled": {
-        "label": "Külső végkioldó engedélyezése"
-      },
-      "external_end_trigger": {
-        "label": "Külső trigger entitás"
-      },
-      "external_end_trigger_inverted": {
-        "label": "A külső trigger megfordítása (kioldó KI)"
-      },
-      "door_sensor_entity": {
-        "label": "Ajtóérzékelő entitás"
-      },
-      "pause_cuts_power": {
-        "label": "A szüneteltetés az áramellátást is megszakítja (kapcsolón keresztül)"
-      },
-      "switch_entity": {
-        "label": "Entitás váltása"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "Kirakodási emlékeztető késleltetése"
-      },
-      "pump_stuck_duration": {
-        "label": "A szivattyú elakadásának időtartama"
-      },
-      "notify_start_services": {
-        "label": "Indítsa el a Szolgáltatásokat"
-      },
-      "notify_finish_services": {
-        "label": "Szolgáltatások befejezése"
-      },
-      "notify_live_services": {
-        "label": "Élő haladásjelző szolgáltatások"
-      },
-      "notify_people": {
-        "label": "Emberek (csak otthoni használatra)"
-      },
-      "notify_only_when_home": {
-        "label": "Csak akkor értesítsen, ha otthon van"
-      },
-      "notify_fire_events": {
-        "label": "HA-értesítési események küldése"
-      },
-      "notify_before_end_minutes": {
-        "label": "Vége előtti figyelmeztetés"
-      },
-      "notify_live_interval_seconds": {
-        "label": "Élő frissítési időköz"
-      },
-      "notify_live_overrun_percent": {
-        "label": "Élő túllépés % riasztás előtt"
-      },
-      "notify_live_chronometer": {
-        "label": "Használja az Élő kronométert"
-      },
-      "notify_timeout_seconds": {
-        "label": "Automatikus elvetés után"
-      },
-      "notify_title": {
-        "label": "Értesítés címe"
-      },
-      "notify_icon": {
-        "label": "Értesítési ikon"
-      },
-      "notify_start_message": {
-        "label": "Üzenet indítása"
-      },
-      "notify_finish_message": {
-        "label": "Üzenet befejezése"
-      },
-      "notify_pre_complete_message": {
-        "label": "Befejezés előtti üzenet"
-      },
-      "notify_reminder_message": {
-        "label": "Emlékeztető üzenet"
-      },
-      "notify_channel": {
-        "label": "Android csatorna (kezdés/élő)"
-      },
-      "notify_finish_channel": {
-        "label": "Android csatorna (befejezés)"
-      },
-      "energy_price_entity": {
-        "label": "Energiaár Entitás"
-      },
-      "energy_price_static": {
-        "label": "Statikus energia ár (kWh)"
-      },
-      "enable_ml_models": {
-        "label": "Alkalmazzon intelligens modelleket a ciklus során"
-      },
-      "ml_training_enabled": {
-        "label": "Tanulj ebből a gépből"
-      },
-      "ml_training_hour": {
-        "label": "Tanulás órája"
-      },
-      "ml_training_min_cycles": {
-        "label": "Először a ciklusokra van szükség"
-      },
-      "ml_training_interval_days": {
-        "label": "Ellenőrzés legfeljebb minden"
-      }
+    "quality": {
+      "bad": "Rossz",
+      "good": "Jó",
+      "unusable": "Használhatatlan"
+    },
+    "status": {
+      "active": "Aktív",
+      "all_statuses": "Minden állapot",
+      "ambiguous": "Kétértelmű",
+      "auto_detect": "Automatikus felismerés",
+      "clear": "Világos",
+      "completed": "Befejezve",
+      "fine_tuning": "finomhangolás most…",
+      "force_stopped": "Az erő megállt",
+      "idle": "Tétlen",
+      "interrupted": "Megszakított",
+      "ready": "Feldolgozásra kész",
+      "recording": "Felvétel"
+    },
+    "tab": {
+      "advanced": "Fejlett",
+      "diagnostics": "Diagnosztika",
+      "history": "Ciklusok",
+      "ml": "ML képzés",
+      "pp_cleanup": "Tisztítás",
+      "pp_manage": "Kezelése",
+      "pp_overview": "Áttekintés",
+      "pp_phases": "Fázisok",
+      "profiles": "Profilok",
+      "settings": "Beállítások elemre",
+      "status": "Áttekintés",
+      "subtab_phase_catalog": "Fázis katalógus",
+      "subtab_profiles": "Profilok"
+    },
+    "tag": {
+      "early_end": "Korai vége",
+      "late_start": "Késői kezdés",
+      "merged": "Összevont ciklusok",
+      "noise": "Zaj",
+      "sensor_gap": "Érzékelő rés",
+      "split": "Osztott ciklus",
+      "wrong_profile": "Rossz profil"
+    },
+    "toast": {
+      "access_saved": "A hozzáférés-szabályozás mentve",
+      "all_wiped": "Minden adat törölve",
+      "analysis_complete_none": "Az elemzés kész: nincs új javaslat",
+      "auto_label_complete": "Az automatikus címkézés kész",
+      "automation_deleted": "Automatizálás törölve",
+      "correction_submitted": "Helyesbítés benyújtva",
+      "cycle_deleted": "Ciklus törölve",
+      "cycle_force_stopped": "Kényszer-leállított ciklus",
+      "cycle_labelled": "Ciklus feliratozott",
+      "cycle_paused": "A ciklus szünetel",
+      "cycle_resumed": "A ciklus folytatódott",
+      "cycle_trimmed": "Ciklus vágva",
+      "cycles_merged": "A ciklusok egyesültek",
+      "envelope_rebuilt": "Boríték átépített",
+      "envelopes_rebuilt": "A borítékok újjáépítve",
+      "export_downloaded": "Exportálás letöltve",
+      "feedback_all_dismissed": "Minden visszajelzés elutasítva",
+      "feedback_confirmed": "A visszajelzés megerősítve",
+      "feedback_dismissed": "A visszajelzés elutasítva",
+      "group_deleted": "Csoport törölve",
+      "group_name_required": "A csoportnév megadása kötelező",
+      "group_saved": "Csoport mentve",
+      "import_successful": "Sikeres importálás; integráció újratöltése",
+      "json_required": "JSON-adatok szükségesek",
+      "legacy_removed": "Az örökölt műveletek eltávolítva",
+      "logs_exported": "A naplók exportálva",
+      "matching_reverted": "A megfelelő súlyok visszaálltak az alapértelmezett értékekre",
+      "min_2_profiles": "Válasszon ki legalább 2 profilt egy csoporthoz",
+      "ml_training_no_improvement": "Az edzés befejeződött: az alapérték megtartva (nincs javulás)",
+      "models_reverted": "Az eszközön lévő modellek visszaálltak az alapszintre",
+      "name_required": "Név szükséges",
+      "no_split_found": "Nem találtunk üresjárati hézagot, amelyen fel lehetne osztani",
+      "panel_settings_saved": "A panel beállításai mentve",
+      "phase_name_required": "A fázisnév megadása kötelező",
+      "phase_updated": "Fázis frissítve",
+      "phases_saved": "Fázisok mentve",
+      "preferences_saved": "A beállítások mentve",
+      "profile_name_required": "A profilnév megadása kötelező",
+      "profile_renamed": "Profil átnevezve",
+      "recording_discarded": "A felvétel elvetve",
+      "recording_saved": "A felvétel mentve a profilba",
+      "recording_started": "A felvétel elkezdődött",
+      "recording_stopped": "A felvétel leállt",
+      "review_saved": "Vélemény mentve",
+      "settings_saved": "A beállítások elmentve; integráció újratöltése",
+      "suggestions_applied": "Javaslatok alkalmazva; integráció újratöltése",
+      "suggestions_dismissed": "Javaslatok elutasítva"
     }
   }
 }

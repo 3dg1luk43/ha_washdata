@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Ciklo pradžia",
-        "cycle_finish": "Ciklo pabaiga",
-        "cycle_live": "Tiesioginė eiga"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Skalbimo mašina",
@@ -88,198 +81,6 @@
         "bread_maker": "Duonkepė",
         "pump": "Siurblys / Drenažinis siurblys",
         "other": "Kita (išplėstinė)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(be etiketės)",
-        "create_new_profile": "Sukurti naują profilį",
-        "remove_label": "Pašalinti etiketę",
-        "no_reference_cycle": "(Nėra etaloninio ciklo)",
-        "all_device_types": "Visi įrenginių tipai",
-        "current_suffix": "(dabartinis)",
-        "phase_builtin_suffix": "(Įtaisytas)",
-        "phase_none_available": "Fazių nėra.",
-        "phase_other_device_types": "Kiti įrenginių tipai:",
-        "settings_deprecation_warning": "⚠️ **Nebenaudojamo įrenginio tipas:** {device_type} planuojama pašalinti būsimame leidime. „WashData“ atitikimo vamzdynas neduoda patikimų rezultatų šiai prietaisų klasei. Jūsų integracija veikia per nusidėvėjimo laikotarpį; Norėdami nutildyti šį įspėjimą, perjunkite toliau pateiktą **Įrenginio tipą** į vieną iš palaikomų tipų (skalbimo mašina, džiovyklė, skalbimo mašina-džiovyklė kombinuota, indaplovė, oro gruzdintuvė, duonos gaminimo mašina arba siurblys) arba į **Kita (išplėstinė)**, jei jūsų prietaisas neatitinka nė vieno iš palaikomų tipų. **Kita (išplėstinė)** tyčia pristato bendruosius numatytuosius nustatymus, kurie nėra pritaikyti jokiam konkrečiam įrenginiui, todėl turėsite patys sukonfigūruoti slenksčius, skirtąjį laiką ir atitinkamus parametrus; perjungus išsaugomi visi esami nustatymai.",
-        "editor_select_info": "Pasirinkite 1 ciklą padalijimui arba 2+ ciklus sujungimui.",
-        "editor_select_info_split": "Pasirinkite 1 ciklą padalijimui.",
-        "editor_select_info_merge": "Pasirinkite 2+ ciklus sujungimui.",
-        "editor_select_info_delete": "Pasirinkite 1+ ciklus ištrynimui.",
-        "no_cycles_recorded": "Dar nėra užfiksuotų ciklų.",
-        "profile_summary_line": "– **{name}**: {count} ciklų, {avg} m vid.",
-        "no_profiles_created": "Dar nesukurta jokių profilių.",
-        "phase_preview": "Fazės peržiūra",
-        "phase_preview_no_curve": "Vidutinė profilio kreivė dar nepasiekiama. Vykdykite / žymėkite daugiau šio profilio ciklų.",
-        "average_power_curve": "Vidutinės galios kreivė",
-        "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} ciklų, ~{duration} m vid.)",
-        "profile_option_short_fmt": "{name} ({count} ciklų, ~{duration} m)",
-        "deleted_cycles_from_profile": "Ištrinta {count} ciklų iš {profile}.",
-        "not_enough_data_graph": "Nepakanka duomenų diagramai sukurti.",
-        "no_profiles_found": "Nerasta jokių profilių.",
-        "cycle_info_fmt": "Ciklas: {start}, {duration} m, dabartinė: {label}",
-        "top_candidates_header": "### Geriausi kandidatai",
-        "tbl_profile": "Profilis",
-        "tbl_confidence": "Patikimumas",
-        "tbl_correlation": "Koreliacija",
-        "tbl_duration_match": "Trukmės atitikimas",
-        "detected_profile": "Aptiktas profilis",
-        "estimated_duration": "Numatoma trukmė",
-        "actual_duration": "Faktinė trukmė",
-        "choose_action": "__Pasirinkite veiksmą toliau:__",
-        "tbl_count": "Skaičius",
-        "tbl_avg": "Vid.",
-        "tbl_min": "Min.",
-        "tbl_max": "Maks.",
-        "tbl_energy_avg": "Energija (vid.)",
-        "tbl_energy_total": "Energija (iš viso)",
-        "tbl_consistency": "Nuoseklumas",
-        "tbl_last_run": "Paskutinis paleidimas",
-        "graph_legend_title": "Diagramos legenda",
-        "graph_legend_body": "Mėlyna juosta rodo stebėtą minimalų ir maksimalų galios suvartojimo diapazoną. Linija rodo vidutinės galios kreivę.",
-        "recording_preview": "Įrašymo peržiūra",
-        "trim_start": "Apkarpymo pradžia",
-        "trim_end": "Apkarpymo pabaiga",
-        "split_preview_title": "Padalijimo peržiūra",
-        "split_preview_found_fmt": "Rasta {count} segmentų.",
-        "split_preview_confirm_fmt": "Spustelėkite Patvirtinti, kad padalintumėte šį ciklą į {count} atskirus ciklus.",
-        "merge_preview_title": "Sujungimo peržiūra",
-        "merge_preview_joining_fmt": "Sujungiama {count} ciklų. Tarpai bus užpildyti 0 W rodmenimis.",
-        "editor_delete_preview_title": "Trynimo peržiūra",
-        "editor_delete_preview_intro": "Pasirinkti ciklai bus ištrinti visam laikui:",
-        "editor_delete_preview_confirm": "Spustelėkite Patvirtinti, kad visam laikui ištrintumėte šiuos ciklų įrašus.",
-        "no_power_preview": "*Peržiūrai galios duomenų nėra.*",
-        "profile_comparison": "Profilių palyginimas",
-        "actual_cycle_label": "Šis ciklas (faktinis)",
-        "storage_usage_header": "Saugyklos naudojimas",
-        "storage_file_size": "Failo dydis",
-        "storage_cycles": "Ciklai",
-        "storage_profiles": "Profiliai",
-        "storage_debug_traces": "Derinimo pėdsakai",
-        "overview_suffix": "Apžvalga",
-        "phase_preview_for_profile": "Fazės peržiūra profiliui",
-        "current_ranges_header": "Dabartiniai diapazonai",
-        "assign_phases_help": "Norėdami pridėti, redaguoti, ištrinti arba išsaugoti diapazonus, naudokite toliau nurodytus veiksmus.",
-        "profile_summary_header": "Profilio santrauka",
-        "recent_cycles_header": "Naujausi ciklai",
-        "trim_cycle_preview_title": "Ciklo apkarpymo peržiūra",
-        "trim_cycle_preview_no_data": "Nėra šio ciklo galios duomenų.",
-        "trim_cycle_preview_kept_suffix": "išlaikyta",
-        "table_program": "Programa",
-        "table_when": "Kada",
-        "table_length": "Trukmė",
-        "table_match": "Atitikimas",
-        "table_profile": "Profilis",
-        "table_cycles": "Ciklai",
-        "table_avg_length": "Vid. trukmė",
-        "table_last_run": "Paskutinis paleidimas",
-        "table_avg_energy": "Vid. energija",
-        "table_detected_program": "Aptikta programa",
-        "table_confidence": "Patikimumas",
-        "table_reported": "Pranešta"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Padalinti ciklą (rasti tarpus)",
-        "merge": "Sujungti ciklus (sujungti fragmentus)",
-        "delete": "Ištrinti ciklą (-us)"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Automatiškai aptikti neveiklos tarpus",
-        "manual": "Rankinės laiko žymos"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Priežiūra: iš naujo apdoroti ir optimizuoti duomenis",
-        "clear_debug_data": "Išvalyti derinimo duomenis (atlaisvinti vietos)",
-        "wipe_history": "Išvalyti VISUS šio įrenginio duomenis (negrįžtama)",
-        "export_import": "Eksportuoti / importuoti JSON su nustatymais (kopijuoti / įklijuoti)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "Eksportuoti visus duomenis",
-        "import": "Importuoti / sujungti duomenis"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Automatinis senų ciklų žymėjimas",
-        "select_cycle_to_label": "Pažymėti konkretų ciklą",
-        "select_cycle_to_delete": "Ištrinti ciklą",
-        "interactive_editor": "Sujungimo / padalijimo interaktyvus redaktorius",
-        "trim_cycle": "Apkarpyti ciklo duomenis"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Sukurti naują profilį",
-        "edit_profile": "Redaguoti / pervardyti profilį",
-        "delete_profile": "Ištrinti profilį",
-        "profile_stats": "Profilio statistika",
-        "cleanup_profile": "Išvalyti istoriją – diagrama ir ištrynimas",
-        "assign_phases": "Priskirti fazių diapazonus"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Sukurti naują fazę",
-        "edit_custom_phase": "Redaguoti fazę",
-        "delete_custom_phase": "Ištrinti fazę"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Pavadinti ir pritaikyti fazes",
-        "cancel": "Grįžti be pakeitimų"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Pridėti fazių diapazoną",
-        "edit_range": "Redaguoti fazių diapazoną",
-        "delete_range": "Ištrinti fazių diapazoną",
-        "clear_ranges": "Išvalyti visus diapazonus",
-        "auto_detect_ranges": "Automatiškai aptikti fazes",
-        "save_ranges": "Išsaugoti ir grąžinti"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Atnaujinti būseną",
-        "stop_recording": "Sustabdyti įrašymą (išsaugoti ir apdoroti)",
-        "start_recording": "Pradėti naują įrašymą",
-        "process_recording": "Apdoroti paskutinį įrašą (apkarpyti ir išsaugoti)",
-        "discard_recording": "Atmesti paskutinį įrašą"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Sukurti naują profilį",
-        "existing_profile": "Pridėti prie esamo profilio",
-        "discard": "Atmesti įrašą"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Patvirtinti – teisingas aptikimas",
-        "correct": "Taisyti – pasirinkite programą / trukmę",
-        "ignore": "Ignoruoti – klaidingas teigiamas / triukšmingas ciklas",
-        "delete": "Ištrinti – pašalinti iš istorijos"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Nustatyti pradžios tašką",
-        "set_end": "Nustatyti pabaigos tašką",
-        "reset": "Iš naujo nustatyti visą trukmę",
-        "apply": "Taikyti apkarpymą",
-        "cancel": "Atšaukti"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "Dabartinė fazė"
       },
-      "wash_phase": {
-        "name": "Fazė"
-      },
       "profile_cycle_count": {
         "name": "Profilio {profile_name} ciklų skaičius",
         "unit_of_measurement": "ciklai"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s turi būti didesnis nei trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "Nėra aktyvaus ciklo pristabdyti ar tęsti."
     }
   },
   "panel": {
-    "tab": {
-      "status": "Apžvalga",
-      "history": "Ciklai",
-      "profiles": "Profiliai",
-      "settings": "Nustatymai",
-      "ml": "ML treniruotės",
-      "advanced": "Išplėstinė",
-      "diagnostics": "Diagnostika",
-      "pp_overview": "Apžvalga",
-      "pp_phases": "Fazės",
-      "pp_cleanup": "Valymas",
-      "pp_manage": "Tvarkyti",
-      "subtab_profiles": "Profiliai",
-      "subtab_phase_catalog": "Fazių katalogas"
-    },
     "btn": {
-      "save": "Išsaugoti",
+      "add_timer": "+ Pridėti laikmatį",
+      "remove_timer": "Pašalinti laikmatį",
+      "add_device_tip": "Pridėkite kitą WashData įrenginį",
+      "delete_group_tip": "Ištrinti tik šią grupę – narių profiliai išsaugomi",
+      "run_analysis_tip": "Analizuokite įrašytus ciklus dabar ir atnaujinkite derinimo pasiūlymus",
+      "reset_ml_models_tip": "Išmeskite sureguliuotus modelius ir grįžkite prie įmontuotų. „WashData“ vėliau gali juos išmokti iš naujo.",
+      "resume_cycle": "Tęsti",
+      "add_device": "+ Pridėti įrenginį",
+      "add_phase": "+ Pridėti fazę",
+      "apply_all": "Taikyti viską",
+      "apply_label": "Taikyti etiketę",
+      "apply_split": "Taikyti Split",
+      "apply_trim": "Taikyti Trim",
+      "auto_detect_split": "Automatinis aptikimas",
+      "auto_label_cycles": "Automatinio ženklinimo ciklai",
       "cancel": "Atšaukti",
-      "delete": "Ištrinti",
+      "clear_debug": "Išvalyti derinimo duomenis",
+      "clear_splits": "Aišku",
       "close": "Uždaryti",
-      "edit": "Redaguoti",
-      "add": "Pridėti",
-      "rebuild": "Atstatyti vokus",
-      "record": "Pradėti įrašymą",
       "compare": "Palyginti",
       "confirm": "Patvirtinti",
-      "discard": "Išmesti",
-      "export": "Eksportuoti",
-      "import": "Importuoti",
-      "merge": "Sujungti",
-      "apply": "Taikyti",
-      "refresh": "Atnaujinti",
-      "create": "Sukurti",
-      "select": "Pasirinkti",
-      "done": "Atlikta",
-      "reset": "Nustatyti iš naujo",
-      "trim": "Apkarpyti",
-      "split": "Padalinti",
-      "review": "Peržiūrėti",
-      "inspect": "Apžiūrėti",
-      "label": "Žymėti",
-      "save_settings": "Išsaugoti nustatymus",
-      "new_profile": "+ Naujas profilis",
-      "new_group": "+ Nauja grupė",
-      "apply_label": "Taikyti etiketę",
-      "run_auto_label": "Paleisti automatinį žymėjimą",
-      "save_review": "Išsaugoti apžvalgą",
-      "apply_trim": "Taikyti apkarpymą",
-      "apply_split": "Taikyti padalijimą",
-      "process_recording": "Išsaugoti įrašą",
-      "stop": "Sustabdyti",
-      "process": "Apdoroti",
-      "add_device": "+ Pridėti įrenginį",
-      "train_now": "Apmokyti dabar",
-      "reset_to_defaults": "Atstatyti į numatytuosius nustatymus",
-      "reset_to_builtin": "Grąžinti įtaisytuosius modelius",
-      "save_preferences": "Išsaugoti nuostatas",
-      "save_panel_settings": "Išsaugoti skydelio nustatymus",
-      "save_access_control": "Išsaugoti prieigos valdymą",
-      "auto_label_cycles": "Automatiškai žymėti ciklus",
-      "run_analysis": "🔍 Vykdyti pasiūlymų analizę",
-      "apply_all": "Taikyti viską",
-      "show_only": "Rodyti tik",
-      "dismiss": "Atmesti",
-      "dismiss_all": "Atmesti viską",
-      "process_history": "Apdoroti dabar",
-      "clear_debug": "Išvalyti derinimo duomenis",
-      "wipe_all": "Išvalyti visus duomenis",
-      "export_json": "Eksportuoti į JSON",
-      "import_json": "Importuoti iš JSON",
-      "correct": "Taisyti…",
-      "ignore": "Ignoruoti",
-      "add_phase": "+ Pridėti fazę",
-      "new_phase": "+ Naujas etapas",
-      "delete_profile": "Ištrinti profilį",
-      "rebuild_envelope": "Atstatyti voką",
-      "create_profile": "+ Sukurti profilį",
-      "rec_stop": "Sustabdyti",
-      "pause_cycle": "Pristabdyti",
-      "resume_cycle": "Tęsti",
-      "force_stop": "Priverstinis sustabdymas",
-      "save_phases": "Išsaugoti fazes",
-      "auto_detect_split": "Automatinis aptikimas",
-      "clear_splits": "Išvalyti",
-      "submit_correction": "Pateikti pataisymą",
-      "import_overwrite": "Importuoti (perrašo duomenis)",
-      "use": "Naudoti",
-      "manage": "Tvarkyti",
-      "remove": "Pašalinti",
-      "delete_group": "Ištrinti grupę",
-      "trim_split": "Apkarpyti / padalinti",
       "convert_to_automation": "Konvertuoti į automatizavimą",
-      "new_automation": "＋ Naujas automatizavimas",
+      "correct": "Teisingai…",
+      "create": "Sukurti",
+      "create_profile": "+ Sukurti profilį",
+      "delete": "Ištrinti",
+      "delete_group": "Ištrinti grupę",
+      "delete_profile": "Ištrinti profilį",
+      "discard": "Išmesti",
+      "dismiss": "Atsisakyti",
+      "done": "Atlikta",
+      "edit": "Redaguoti",
+      "export": "Eksportuoti",
+      "export_json": "Eksportuoti į JSON",
+      "force_stop": "Priverstinis sustabdymas",
       "from_template": "Iš šablono ▾",
+      "ignore": "Ignoruoti",
+      "import_json": "Importuoti iš JSON",
+      "import_overwrite": "Importuoti (perrašo duomenis)",
+      "inspect": "Apžiūrėti",
+      "label": "Etiketė",
+      "manage": "Tvarkyti",
+      "merge": "Sujungti",
+      "new_automation": "＋ Nauja automatika",
+      "new_group": "+ Nauja grupė",
+      "new_phase": "+ Naujas etapas",
+      "new_profile": "+ Naujas profilis",
+      "on_cycle_finished": "Ciklas baigtas",
       "on_cycle_started": "Prasidėjus ciklui",
-      "on_cycle_finished": "Kai ciklas baigiasi",
-      "save_group": "Išsaugoti grupę"
+      "pause_cycle": "Pauzė",
+      "process": "Procesas",
+      "process_history": "Apdorokite dabar",
+      "process_recording": "Išsaugoti įrašą",
+      "rebuild": "Atstatyti vokus",
+      "rebuild_envelope": "Atstatyti voką",
+      "rec_stop": "Sustok",
+      "record": "Pradėti įrašymą",
+      "refresh": "Atnaujinti",
+      "remove": "Pašalinti",
+      "reset": "Nustatyti iš naujo",
+      "reset_to_builtin": "Iš naujo nustatyti įtaisytuosius modelius",
+      "reset_to_defaults": "Atstatyti į numatytuosius nustatymus",
+      "review": "Apžvalga",
+      "run_analysis": "🔍 Vykdykite pasiūlymų analizę",
+      "run_auto_label": "Paleiskite „Auto-Label“.",
+      "save": "Išsaugoti",
+      "save_access_control": "Išsaugoti prieigos valdymą",
+      "save_group": "Išsaugoti grupę",
+      "save_panel_settings": "Išsaugoti skydelio nustatymus",
+      "save_phases": "Išsaugokite fazes",
+      "save_preferences": "Išsaugoti nuostatas",
+      "save_review": "Išsaugoti apžvalgą",
+      "save_settings": "Išsaugoti nustatymus",
+      "select": "Pasirinkite",
+      "show_only": "Rodyti tik",
+      "split": "Padalinti",
+      "submit_correction": "Pateikite pataisymą",
+      "train_now": "Treniruokis dabar",
+      "trim": "Apkarpyti",
+      "trim_split": "Apkarpyti / padalinti",
+      "use": "Naudokite",
+      "wipe_all": "Išvalykite visus duomenis"
     },
     "hdr": {
-      "status": "Būsena",
-      "live_power": "Gyva galia",
-      "manual_recording": "Rankinis įrašymas",
-      "tools_and_data": "Įrankiai ir duomenys",
-      "phase_catalog": "Fazių katalogas",
-      "storage_stats": "Saugyklos statistika",
-      "maintenance": "Priežiūros veiksmai",
-      "export_import": "Eksportas / Importas",
       "logs": "Žurnalai",
-      "my_preferences": "Mano nuostatos",
-      "panel_settings": "Skydelio nustatymai (visi vartotojai)",
+      "toggle_sidebar": "Perjungti „Home Assistant“ šoninę juostą",
       "access_control": "Prieigos kontrolė",
-      "ml_smart_learning": "Išmanusis mokymasis",
-      "ml_settings_card": "Nustatymai",
+      "automation_delete": "Ištrinkite šią automatiką",
+      "automation_needs_review": "Šį ciklą reikia peržiūrėti",
+      "automation_open": "Atidarykite automatikos rengyklėje",
+      "automation_review_this_cycle": "Peržiūrėkite šį ciklą",
+      "automations": "Automatikos",
+      "clear_debug": "Išvalyti derinimo pėdsakus",
+      "diagnostics_pref": "Diagnostika",
+      "display": "Ekranas",
+      "export_import": "Eksportas / Importas",
+      "live_power": "Gyva galia",
+      "logs_diagnostics": "Diagnostika",
+      "maintenance": "Priežiūros veiksmai",
+      "manual_recording": "Rankinis įrašymas",
       "ml_learned": "Ką WashData išmoko",
       "ml_matching_tuning": "Tikslus programos derinimas",
-      "display": "Ekranas",
-      "status_graph": "Būsenos grafikas",
-      "diagnostics_pref": "Diagnostika",
-      "logs_diagnostics": "Diagnostika",
+      "ml_settings_card": "Nustatymai",
+      "ml_smart_learning": "Išmanusis mokymasis",
+      "my_preferences": "Mano nuostatos",
+      "no_automations": "Dar jokia automatika nenurodo šio įrenginio.",
+      "panel_settings": "Skydelio nustatymai",
+      "phase_catalog": "Fazių katalogas",
       "process_history": "Proceso istorija",
-      "clear_debug": "Išvalyti derinimo pėdsakus",
-      "wipe_history": "Išvalyti istoriją",
-      "automations": "Automatizavimai",
-      "automation_open": "Atidaryti automatizavimo rengyklėje",
-      "automation_delete": "Ištrinti šį automatizavimą",
-      "automation_needs_review": "Šį ciklą reikia peržiūrėti",
-      "automation_review_this_cycle": "Peržiūrėti šį ciklą",
-      "no_automations": "Dar jokia automatika nenurodo šio įrenginio."
+      "status": "Būsena",
+      "status_graph": "Būsenos grafikas",
+      "storage_stats": "Saugyklos statistika",
+      "tools_and_data": "Įrankiai ir duomenys",
+      "wipe_history": "Išvalyti istoriją"
     },
     "lbl": {
-      "power": "Galia",
-      "progress": "Pažanga",
-      "remaining": "Likę",
-      "duration": "Trukmė",
-      "energy": "Energija",
-      "profile": "Profilis",
-      "status": "Būsena",
-      "date": "Data",
-      "confidence": "Patikimumas",
-      "health": "Sveikata",
-      "cost": "Kaina",
-      "program": "Programa",
-      "cycle_health": "Ciklo sveikata",
+      "timer_min": "min",
+      "timer_msg_placeholder": "Pranešimas (pasirenkama, {device}/{program}/{minutes})",
+      "timer_auto_pause": "Automatinis pristabdymas",
+      "label": "Atitikta programa",
+      "actions": "Veiksmai",
       "activity": "Veikla",
-      "unlabelled": "Nepaženklinta",
-      "unlabelled_paren": "(be etiketės)",
-      "emphasis": "Pabrėžimas",
-      "default": "Numatytoji",
-      "in_use": "Naudojamas",
-      "profile_name": "Profilio pavadinimas",
-      "ref_cycle": "Etaloninis ciklas (neprivaloma)",
-      "manual_duration": "Rankinė trukmė (min., neprivaloma)",
-      "phase_name": "Fazės pavadinimas",
-      "description": "Aprašymas",
-      "correct_profile": "Teisingas profilis",
-      "correct_duration": "Tinkama trukmė (min., neprivaloma)",
-      "load_from_file": "Įkelti iš failo",
-      "json_data": "JSON duomenys",
-      "expected_duration": "Numatoma trukmė (min.)",
-      "rename_profile": "Pervardyti profilį",
-      "select_profile": "Pasirinkite profilį",
-      "confidence_threshold": "Pasitikėjimo slenkstis",
-      "resulting_profile": "Gautas profilis",
-      "new_profile_name": "Naujas profilio pavadinimas",
-      "save_mode": "Išsaugojimo režimas",
-      "head_trim": "Pradžios apkarpymas (s)",
-      "tail_trim": "Pabaigos apkarpymas (s)",
-      "gap_s": "Tarpas (s)",
-      "start": "Pradžia",
-      "end": "Pabaiga",
-      "quality": "Kokybė",
-      "golden_reference": "Užregistruotas atskaitos ciklas",
-      "compare_profiles": "Palyginti su profiliais",
-      "tags": "Žymos",
-      "notes": "Pastabos",
-      "default_tab": "Numatytasis skirtukas atidarant skydelį",
-      "cycle_date_display": "Ciklo datos rodymas",
-      "refresh_interval": "Atnaujinimo intervalas (s)",
-      "panel_default_tab": "Numatytasis skirtukas",
-      "hide_tabs": "Slėpti skirtukus ne administratoriams",
-      "enable_access_control": "Įgalinti kiekvieno vartotojo prieigos valdymą",
-      "default_access_level": "Numatytasis naudotojų lygis, nenurodytas toliau",
       "administrators": "Administratoriai",
+      "auto_fine_tune_off": "automatinis tikslus išjungimas",
+      "clock_time": "Laikrodžio laikas",
+      "compare_profiles": "Palyginkite su profiliais",
+      "confidence": "Pasitikėjimas",
+      "confidence_threshold": "Pasitikėjimo slenkstis",
+      "correct_duration": "Tinkama trukmė (min., neprivaloma)",
+      "correct_profile": "Teisingas profilis",
+      "cost": "Kaina",
+      "create_new_profile": "+ Sukurti naują profilį…",
+      "cycle_date_display": "Ciklo datos rodymas",
+      "cycle_health": "Ciklo sveikata",
+      "cycles_count": "Ciklai",
+      "date": "Data",
+      "debug_traces": "Derinimo pėdsakai",
+      "default": "Numatytoji",
+      "default_access_level": "Numatytasis naudotojų lygis, nenurodytas toliau",
       "default_other": "Numatytasis (kiti įrenginiai)",
+      "default_tab": "Numatytasis skirtukas atidarant skydelį",
+      "description": "Aprašymas",
+      "duration": "Trukmė",
+      "emphasis": "Pabrėžimas",
+      "enable_access_control": "Įgalinti kiekvieno vartotojo prieigos valdymą",
+      "energy": "Energija",
+      "expected_duration": "Numatoma trukmė (min.)",
+      "file_kb": "Failas (kB)",
+      "gap_s": "Tarpas (-iai)",
+      "head_trim": "Galvos apdaila (-ai)",
+      "health": "Sveikata",
+      "hide_tabs": "Slėpti skirtukus ne administratoriams",
+      "in_use": "Naudojamas",
+      "json_data": "JSON duomenys",
+      "last_checked": "Paskutinį kartą tikrinta:",
+      "load_from_file": "Įkelti iš failo",
+      "manual_duration": "Rankinio darbo trukmė (min., neprivaloma)",
+      "mode_existing_profile": "Pridėti prie esamo profilio",
+      "mode_new_profile": "Sukurti naują profilį",
+      "new_profile_name": "Naujas profilio pavadinimas",
+      "panel_default_tab": "Numatytasis skirtukas",
+      "phase_name": "Vardas",
+      "power": "Galia",
+      "profile": "Profilis",
+      "profile_name": "Profilio pavadinimas",
+      "progress": "Pažanga",
+      "read_only": "Tik skaityti",
+      "ref_cycle": "Etaloninis ciklas (neprivaloma)",
+      "refresh_interval": "Atnaujinimo intervalas (-ai)",
+      "remaining": "Likę",
+      "remove_label": "- Pašalinti etiketę -",
+      "rename_profile": "Pervardyti profilį",
+      "resulting_profile": "Gautas profilis",
+      "save_mode": "Išsaugoti režimą",
+      "seconds_from_start": "Sekundės nuo pradžios",
+      "select_profile": "Pasirinkite Profilis",
+      "show_debug": "Rodyti tiesioginio rungtynių derinimo kortelę būsenos puslapyje (pasitikėjimas, dviprasmiškumas, geriausi kandidatai)",
       "show_expected": "Rodyti numatomą kreivės perdangą (atitinkantį profilį, oranžinė)",
       "show_raw": "Rodyti neapdorotus jutiklio rodmenis (neišlygintus, pilkus)",
-      "show_debug": "Rodyti tiesioginės atitikties derinimo kortelę būsenos puslapyje (pasitikėjimas, dviprasmiškumas, geriausi kandidatai)",
-      "mode_new_profile": "Sukurti naują profilį",
-      "mode_existing_profile": "Pridėti prie esamo profilio",
-      "auto_fine_tune_on": "automatinis tikslus įjungimas (apie {hour}:00)",
-      "auto_fine_tune_off": "automatinis tikslus išjungimas",
-      "last_checked": "Paskutinį kartą tikrinta:",
-      "remove_label": "- Pašalinti etiketę -",
-      "create_new_profile": "+ Sukurti naują profilį…",
-      "read_only": "Tik skaityti",
-      "actions": "Veiksmai",
-      "cycles_count": "Ciklai",
-      "debug_traces": "Derinimo pėdsakai",
-      "file_kb": "Failas (kB)",
-      "label": "Etiketė",
-      "seconds_from_start": "Sekundės nuo pradžios",
-      "clock_time": "Laikrodžio laikas",
-      "ungrouped": "Nesugrupuota"
+      "status": "Būsena",
+      "tail_trim": "Uodegos apdaila (-ai)",
+      "ungrouped": "Nesugrupuota",
+      "unlabelled": "Nepaženklinta",
+      "unlabelled_paren": "(be etiketės)",
+      "expected": "Numatoma",
+      "raw_socket": "Neapdorotas lizdas",
+      "artifact_interruption": "Pertraukimas",
+      "artifact_low_power": "Maža galia",
+      "artifact_high_power": "Didelė galia",
+      "artifact_anomaly": "Anomalija"
     },
     "badge": {
-      "poor_fit": "prastai tinka",
+      "golden_cycle": "Užregistruotas atskaitos ciklas",
+      "reviewed": "Peržiūrėta",
+      "feedback_requested": "Prašoma atsiliepimo",
+      "needs_review": "Reikia peržiūros",
+      "overrun": "Bėgo ilgiau nei įprastai",
+      "artifact_tip": "Aptikta {n} anomalijų (pvz., durys atidarytos ciklo viduryje) – atidarykite, kad pamatytumėte juos diagramoje",
+      "poor_fit_tip": "Nenuosekli rungtynių istorija – apsvarstykite galimybę atkurti šį profilį",
+      "fair_fit_tip": "Vidutinis atitikties nuoseklumas – kai kurie šiam profiliui priskirti ciklai turi žemesnius patikimumo balus. Pažymėkite daugiau ciklų arba iš naujo įrašykite profilį, kad pagerintumėte tikslumą.",
       "fair_fit": "tinkamas",
-      "manual": "(rankiniu būdu pasirinkta)",
+      "poor_fit": "prastai tinka",
       "auto": "(aptikta automatiškai)",
-      "improving": "↗ tobulėja",
+      "built_in_tag": "įmontuotas",
       "declining": "↘ mažėja",
+      "improving": "↗ tobulėjimas",
+      "manual": "(rankiniu būdu pasirinkta)",
       "steady": "→ pastovus",
-      "using_tuned": "Naudojant suderintus svorius",
       "using_defaults": "Naudojami pristatyti numatytieji nustatymai",
-      "built_in_tag": "įmontuotas"
-    },
-    "status": {
-      "completed": "Baigta",
-      "interrupted": "Pertraukta",
-      "force_stopped": "Priverstinai sustabdyta",
-      "active": "Aktyvus",
-      "ambiguous": "Dviprasmiška",
-      "clear": "Aišku",
-      "working": "Dirba…",
-      "recording": "Įrašoma…",
-      "ready": "Paruošta apdoroti",
-      "idle": "Tuščia eiga",
-      "auto_detect": "Automatinis aptikimas",
-      "fine_tuning": "tikslinama dabar...",
-      "all_statuses": "Visos būsenos"
-    },
-    "ml": {
-      "fit_strong": "Stiprus",
-      "fit_good": "Gerai",
-      "fit_fair": "Vidutinis",
-      "fit_weak": "Silpnas",
-      "fit_slight": "Nežymus",
-      "fit_word": "tinka",
-      "fine_tuned_at": "tiksliai sureguliuota {when}",
-      "personalized": "● Pritaikyta šiai mašinai",
-      "builtin_models": "● Naudojant įmontuotus modelius"
-    },
-    "toast": {
-      "settings_saved": "Nustatymai išsaugoti; integracijos perkrovimas",
-      "preferences_saved": "Parinktys išsaugotos",
-      "panel_settings_saved": "Skydelio nustatymai išsaugoti",
-      "access_saved": "Prieigos valdymas išsaugotas",
-      "profile_created": "Profilis „{name}“ sukurtas",
-      "profile_deleted": "Profilis „{name}“ ištrintas",
-      "profile_renamed": "Profilis pervardytas",
-      "phases_saved": "Fazės išsaugotos",
-      "phase_created": "Fazė „{name}“ sukurta",
-      "phase_deleted": "Fazė „{name}“ ištrinta",
-      "phase_updated": "Atnaujintas etapas",
-      "recording_started": "Pradėtas įrašymas",
-      "recording_stopped": "Įrašymas sustabdytas",
-      "recording_discarded": "Įrašas atmestas",
-      "recording_saved": "Įrašas išsaugotas profilyje",
-      "export_downloaded": "Eksportas atsisiųstas",
-      "logs_exported": "Žurnalai eksportuoti",
-      "import_successful": "Sėkmingas importas; integracijos perkrovimas",
-      "envelopes_rebuilt": "Vokai perstatyti",
-      "envelope_rebuilt": "Vokas perstatytas",
-      "suggestions_applied": "Pasiūlymai pritaikyti; integracijos perkrovimas",
-      "suggestions_dismissed": "Pasiūlymai atmesti",
-      "auto_label_complete": "Automatinis žymėjimas baigtas",
-      "cycle_labelled": "Ciklas pažymėtas",
-      "cycle_deleted": "Ciklas ištrintas",
-      "cycles_deleted": "Ištrintas {count} ciklas (-ai).",
-      "cycle_trimmed": "Apkarpytas ciklas",
-      "cycles_merged": "Ciklai sujungti",
-      "review_saved": "Apžvalga išsaugota",
-      "feedback_confirmed": "Atsiliepimai patvirtinti",
-      "feedback_dismissed": "Atsiliepimai atmesti",
-      "feedback_all_dismissed": "Visi atsiliepimai atmesti",
-      "correction_submitted": "Pateiktas pataisymas",
-      "group_saved": "Grupė išsaugota",
-      "group_deleted": "Grupė ištrinta",
-      "automation_deleted": "Automatika ištrinta",
-      "legacy_removed": "Pašalinti pasenę veiksmai",
-      "cycle_paused": "Ciklas pristabdytas",
-      "cycle_resumed": "Ciklas atnaujintas",
-      "cycle_force_stopped": "Ciklas priverstinai sustabdytas",
-      "ml_training_promoted": "Mokymas baigtas: paaukštintas {count} modelis (-iai)",
-      "ml_training_no_improvement": "Mokymas baigtas: pradinis lygis išlaikytas (nėra pagerėjimo)",
-      "matching_reverted": "Atitinkantys svoriai grąžinti į numatytuosius",
-      "models_reverted": "Įrenginyje esantys modeliai grįžo į pradinį lygį",
-      "analysis_complete": "Analizė baigta: {count} pasiūlymas (-ai)",
-      "analysis_complete_none": "Analizė baigta: jokių naujų pasiūlymų",
-      "debug_cleared": "Išvalyti {count} derinimo pėdsakai",
-      "all_wiped": "Visi duomenys ištrinti",
-      "no_split_found": "Nerasta tuščiosios eigos spragų, dėl kurių būtų galima suskaidyti",
-      "group_name_required": "Būtinas grupės pavadinimas",
-      "min_2_profiles": "Pasirinkite bent 2 grupės profilius",
-      "profile_name_required": "Būtinas profilio pavadinimas",
-      "phase_name_required": "Būtinas fazės pavadinimas",
-      "name_required": "Reikalingas vardas",
-      "json_required": "Reikalingi JSON duomenys",
-      "save_failed": "Nepavyko išsaugoti: {error}",
-      "delete_failed": "Nepavyko ištrinti: {error}",
-      "apply_failed": "Nepavyko taikyti: {error}",
-      "rebuild_failed": "Nepavyko atkurti: {error}",
-      "start_failed": "Pradėti nepavyko: {error}",
-      "stop_failed": "Sustabdyti nepavyko: {error}",
-      "discard_failed": "Nepavyko išmesti: {error}",
-      "trim_failed": "Apkarpyti nepavyko: {error}",
-      "split_failed": "Padalijimas nepavyko: {error}",
-      "merge_failed": "Sujungti nepavyko: {error}",
-      "create_failed": "Nepavyko sukurti: {error}",
-      "update_failed": "Nepavyko atnaujinti: {error}",
-      "rename_failed": "Nepavyko pervardyti: {error}",
-      "revert_failed": "Grąžinti nepavyko: {error}",
-      "training_failed": "Mokymas nepavyko: {error}",
-      "export_failed": "Eksportuoti nepavyko: {error}",
-      "import_failed": "Importuoti nepavyko: {error}",
-      "auto_label_failed": "Automatinis žymėjimas nepavyko: {error}",
-      "analysis_failed": "Analizė nepavyko: {error}",
-      "auto_detect_failed": "Automatinis aptikimas nepavyko: {error}",
-      "error": "Klaida: {error}",
-      "could_not_load_cycle": "Nepavyko įkelti ciklo: {error}",
-      "pause_failed": "Pristabdyti nepavyko: {error}",
-      "label_failed": "Žymėjimas nepavyko: {error}",
-      "invalid_json": "„{key}“ nėra tinkamas JSON – pataisykite arba išvalykite lauką prieš išsaugodami.",
-      "processed": "Apdorota {bits}",
-      "split_complete": "Padalinta į {count} ciklus"
-    },
-    "msg": {
-      "no_devices": "Dar nesukonfigūruota jokių „WashData“ įrenginių.",
-      "no_device_selected": "Nepasirinktas joks įrenginys.",
-      "loading": "Įkeliama…",
-      "loading_settings": "Įkeliami nustatymai…",
-      "live_chart_loading": "Tiesioginė galios diagrama pasirodo gavus rodmenis.",
-      "no_cycles_match": "Nė vienas ciklas neatitinka esamo filtro.",
-      "no_cycles_yet": "Dar nėra užfiksuotų ciklų.",
-      "no_profiles_yet": "Dar nėra profilių. Sukurkite jį iš pažymėto ciklo.",
-      "no_logs": "Buferyje dar nėra žurnalo įrašų.",
-      "no_phases": "Jokių fazių neapibrėžta.",
-      "no_phases_assigned": "Fazių nepriskirta.",
-      "no_split_points": "Dar nėra padalintų taškų.",
-      "no_envelope": "Dar nėra voko – atstatyti po ženklinimo ciklų.",
-      "no_envelope_overlay": "Negalima perdengti voko.",
-      "no_other_users": "Kitų Home Assistant naudotojų nerasta.",
-      "maintenance_requires_access": "Priežiūra ir eksportas / importas reikalauja visiškos prieigos.",
-      "loading_curve": "Įkeliama kreivė…",
-      "compare_selected_cycles": "Pasirinkti ciklai (vientisas) – rodyti / slėpti",
-      "compare_overlay_profiles": "Perdangos profiliai (blankūs)",
-      "no_profiles_compare": "Nėra profilių, kuriuos būtų galima palyginti.",
-      "no_cycles_profile": "Šiam profiliui nėra ciklų.",
-      "saving_triggers_reload": "Išsaugojus suaktyvinamas integracijos įkėlimas iš naujo. HA objektai trumpam gali būti rodomi kaip nepasiekiami.",
-      "prefs_personal": "Tai galioja tik jūsų Home Assistant paskyrai.",
-      "no_match_yet": "Kol kas atitikties bandymų nebuvo – užpildoma vykstant ciklui.",
-      "no_fine_tuned": "Dar nieko nesureguliuota – „WashData“ naudoja įmontuotus modelius.",
-      "ml_learned_intro": "Modeliai, pritaikyti šiai mašinai. Viskas, kas nenurodyta, naudoja patikimą įmontuotą modelį.",
-      "ml_settings_intro": "Du nepriklausomi jungikliai: vienas pritaiko modelius, kol veikia ciklas, kitas leidžia WashData laikui bėgant tiksliai suderinti juos su jūsų aparatu.",
-      "ml_intro": "„WashData“ pristatomi su išmaniaisiais modeliais, kurie aptinka ciklus, suderina programas ir įvertina laiką bei energiją – jie veikia iš karto.",
-      "matching_tuning_intro": "Mokydamiesi „WashData“ taip pat koreguoja, kiek programos atitikimo sveria ciklo formą, palyginti su jo trukme ir energija.",
-      "phase_catalog_intro": "Pavadinti ciklo segmentai (išankstinis plovimas, šildymas, gręžimas…). Priskirkite juos profiliui iš valdymo skydelio.",
-      "phase_ranges_intro": "Fazių diapazonai (minutės nuo ciklo pradžios) perdengti vidurkio kreive. Redaguokite vertes, kad galėtumėte peržiūrėti tiesiogiai.",
-      "cleanup_intro": "Kiekvienas pažymėtas ciklas padengtas. Pažymėkite nuokrypius ir ištrinkite, kad išvalytumėte profilį.",
-      "split_intro": "Spustelėkite diagramą, kad pridėtumėte arba pašalintumėte padalijimo tašką, arba automatiškai aptiktumėte pagal tuščiosios eigos tarpus.",
-      "trim_intro": "Vilkite raudonas rankenas arba įveskite vertes. Viskas, kas yra už lango, pašalinama.",
-      "import_intro": "Toliau įkelkite eksportuotą failą arba įklijuokite JSON naudingąjį failą.",
-      "auto_label_intro": "Priskirkite profilius nepažymėtiems ciklams, kurių atitikties patikimumas pašalina slenkstį.",
-      "merge_intro": "Pasirinkti ciklai sujungiami į vieną (chronologine tvarka; tarpai užpildyti 0 W). Pasirinkite gautą profilį.",
-      "enough_data": "Pakanka duomenų, iš kurių galima mokytis (ciklų: {current}/{min}).",
-      "collecting_data": "Renkami duomenys – dar {need} ciklas{plural}, kol bus galima pradėti tikslinimą ({current}/{min}).",
-      "updated": "Atnaujinta {time}",
-      "appliance_monitor": "Prietaisų monitorius",
-      "ml_loading": "įkeliamas ML…",
-      "see_recorder": "Žiūrėkite įrašymo valdiklį žemiau",
-      "review_in_settings": "Peržiūrėti nustatymuose",
-      "storage_diagnostics": "Saugyklos statistika, priežiūra, eksportas/importas",
-      "recent_logs": "Naujausi ha_washdata įrašai",
-      "preferences_adv": "Parinktys",
-      "preferences_admin": "Parinktys, skydelis ir prieigos valdymas",
-      "review_to_cycles": "Atidarykite ciklų peržiūros eilę",
-      "pending_feedback": "Laukiama aptikimo atsiliepimo",
-      "recording_in_progress": "Įrašymas vyksta",
-      "no_profiles_yet_short": "Dar nėra profilių.",
-      "unsure_detected_prefix": "„WashData“ nėra tikras, kad aptiko",
-      "no_suggestions": "Nėra aktyvių pasiūlymų.",
-      "no_profiles_overlay": "Nėra profilių, kuriuos būtų galima perdengti.",
-      "compare_cycles_title": "Palyginkite {count} ciklus",
-      "profiles_intro": "Spustelėkite profilį, kad matytumėte statistiką, fazes ir tvarkymą. Sugrupuokite beveik identiškas programas (ta pati forma/trukmė, skirtinga temperatūra ar išgręžimas), kad atitikimas patikimai jas atskirtų.",
-      "search_placeholder": "Ieškoti nustatymų…",
-      "automations_intro": "WashData skleidžia {start} / {end} įvykius ir atskleidžia objektus, todėl pranešimus ir veiksmus geriausia kurti kaip įprastus Home Assistant automatizavimus. Automatizavimai, naudojantys šį įrenginį, rodomi žemiau.",
-      "notify_services_hint": "Naudokite {entity} paslaugų ID (keliems – per kablelį). Šablono kintamieji: {vars}.",
-      "rbac_hint": "Kai išjungta, kiekvienas Home Assistant naudotojas turi pilną prieigą (numatytasis). Administratoriai visada turi pilną prieigą ir gali valdyti visus.",
-      "feedback_prompt": "Patvirtinkite, ar buvo teisingai aptikta, pataisykite programą arba nepaisykite."
+      "using_tuned": "Naudojant suderintus svorius"
     },
     "modal": {
-      "label_cycle": "Žymėti ciklą",
+      "merge_cycles": "Sujungti {n} ciklus",
+      "auto_label": "Automatinio etikečių ciklai",
+      "correct_feedback": "Teisingas Atsiliepimas",
       "create_profile": "Sukurti profilį",
-      "new_phase": "Nauja fazė",
+      "cycle": "Ciklas",
       "edit_phase": "Redaguoti fazę",
-      "process_recording": "Įrašo apdorojimas",
-      "correct_feedback": "Taisyti atsiliepimą",
       "import_config": "Importuoti konfigūraciją",
-      "auto_label": "Automatinis ciklų žymėjimas",
-      "cycle": "Ciklas"
+      "label_cycle": "Etikečių ciklas",
+      "new_phase": "Naujas etapas",
+      "process_recording": "Proceso įrašymas"
     },
-    "tag": {
-      "late_start": "Vėlyva pradžia",
-      "early_end": "Ankstyva pabaiga",
-      "merged": "Sujungti ciklai",
-      "split": "Padalintas ciklas",
-      "noise": "Triukšmas",
-      "wrong_profile": "Neteisingas profilis",
-      "sensor_gap": "Jutiklio tarpas"
+    "msg": {
+      "near_duplicate_cluster": "Aptikta beveik pasikartojanti profilių grupė. Grupavimas leidžia suderinti patikimai pasirinkti panašius dalykus (pvz., ta pati programa esant skirtingai temperatūrai / sukimuisi).",
+      "coverage_gap": "paskutiniai ciklai neturi atitinkančio profilio ({pct} % iš paskutinių 30).",
+      "consider_new_profile": "Apsvarstykite galimybę sukurti naują profilį.",
+      "group_not_cohesive": "Šie profiliai nėra pakankamai panašūs, kad būtų galima patikimai sugrupuoti, todėl derinant jie traktuojami atskirai, kol pašalinsite nuokrypį arba padalinsite grupę.",
+      "group_modal_help": "Grupuoti tos pačios formos programas, kurios skiriasi temperatūra / sukimu (trukmė gali skirtis). Atitikimas įvertina grupę kaip vieną kandidatą, tada parenka geriausiai tinkantį narį. Pasirinkite bent 2; perdanga parodo, kokie jie panašūs.",
+      "showing_suggestions": "Rodomas {count} nustatymas su pasiūlymais.",
+      "show_all_settings": "Rodyti visus nustatymus",
+      "tuning_suggestions_available": "Galimas {count} derinimo pasiūlymas iš stebimų ciklų. Jie rodomi šalia atitinkamų laukų.",
+      "legacy_actions_title": "{count} senas priskirtas veiksmas vis dar vykdomas",
+      "old_actions_warning": "Sukonfigūruota naudojant seną veiksmų rengyklę (dabar pašalinta). Jie vis dar suaktyvinami ciklo įvykiuose, bet čia jų redaguoti nebegalima. Konvertuokite juos į įprastą automatiką arba pašalinkite.",
+      "no_settings_match": "Jokie nustatymai neatitinka „{q}“",
+      "clear_debug_hint": "Pašalinkite saugomus derinimo duomenis, kad atlaisvintumėte vietos.",
+      "wipe_history_warning": "Visam laikui ištrinti visus ciklus ir profilius. Negalima anuliuoti.",
+      "export_description": "Eksportuokite visus profilius ir ciklus į JSON arba atkurkite iš ankstesnio eksportavimo.",
+      "log_buffer_hint": "Pirmiau naujausi · Buferyje saugomi paskutiniai 500 ha_washdata įrašų nuo paleidimo iš naujo · Vilkite apatinį kraštą, kad pakeistumėte dydį.",
+      "review_profile_tip": "Šio ciklo programa pažymėta kaip. Jei automatiškai aptikta programa buvo neteisinga, pataisykite ją čia – ženklinimas moko suderinti būsimus ciklus.",
+      "review_quality_tip": "Koks švarus šis ciklas. Geras = šios programos vadovėlis pavyzdys; Blogai = aptikta, bet triukšminga arba netipiška; Netinkamas = klaidingai aptiktas (sujungtas, sutrumpintas arba klaidingas). Nurodo sveikatos balą ir kokius ciklus leidžiama treniruoti modelį.",
+      "review_recorded_tip": "Pažymėkite tai kaip savo programos etaloninį ciklą – tą patį vaidmenį kaip ir rankiniu būdu įrašytą ciklą. Etaloniniai ciklai visada išsaugomi, imamasi atitinkamo šablono ir niekada nenuleidžiami valant. (Tai yra „auksinė“ / įrašyta vėliava; abi yra tas pats.)",
+      "review_tags_tip": "Pasirenkamos vėliavėlės, nurodančios, kas nutiko šiame cikle, todėl mokymai ir valymas gali tai paaiškinti.",
+      "review_notes_tip": "Laisvo teksto pastabos jūsų patiems. Nenaudojamas atitikimui ar mokymui.",
+      "review_confirm_help": "Patvirtinkite, ar šis ciklas buvo aptiktas teisingai. Jūsų atsiliepimai lavina modelį jūsų įrenginyje – kuo daugiau ciklų patvirtinsite, tuo geresnis atitikimas ir būklės įvertinimas. Užtenka greito Gero/Blogo.",
+      "review_notes_placeholder": "Pastabos (neprivaloma)",
+      "compare_profiles_tip": "Aukščiau pateiktoje diagramoje uždėkite kitus profilio vokus, kad sužinotumėte, kuris iš jų geriausiai tinka šiam ciklui.",
+      "artifact_header": "Per šį ciklą aptikta anomalijų: {n}",
+      "artifact_footer": "Paryškinta aukščiau esančiame grafike. Tai yra trumpalaikiai artefaktai (pvz., durys atidarytos ciklo viduryje), nebūtinai problemos.",
+      "profile_poor_health_detail": "Šiam profiliui priskirtų ciklų formos yra nenuoseklios arba jų patikimumas yra mažas. Apsvarstykite galimybę atkurti voką arba peržiūrėti pažymėtus ciklus.",
+      "trend_duration_longer": "Ilgesnė trukmė ({pct} %/ciklas) – pastaruoju metu vid. {avg}",
+      "trend_duration_shorter": "Trukmė mažėja ({pct} %/ciklas) – pastaruoju metu vid. {avg}",
+      "trend_energy_up": "Energijos augimas ({pct} % per ciklą) – pastaruoju metu vid. {avg}",
+      "trend_energy_down": "Energijos mažėjimas ({pct} % per ciklą)",
+      "performance_trend": "Našumo tendencija ({n} ciklai)",
+      "maintenance_advisory": "Ilgėjanti trukmė / energija gali reikšti, kad reikalinga prietaiso priežiūra (pvz., nukalkinimas, filtro valymas).",
+      "manual_duration_hint": "Profilio vidutinė / numatoma ciklo trukmė, naudojama likusiam laikui apskaičiuoti. Redaguoti, kad jį nustatytumėte; paliekant jį nepakeistą, išlaikoma dabartinė vertė.",
+      "appliance_monitor": "Prietaisų monitorius",
+      "auto_label_intro": "Priskirkite profilius nepažymėtiems ciklams, kurių atitikties patikimumas pašalina slenkstį.",
+      "cleanup_intro": "Kiekvienas pažymėtas ciklas padengtas. Pažymėkite nuokrypius ir ištrinkite, kad išvalytumėte profilį.",
+      "compare_overlay_profiles": "Perdangos profiliai (blankūs)",
+      "compare_selected_cycles": "Pasirinkti ciklai (vientisas) – rodyti / slėpti",
+      "feedback_prompt": "Patvirtinkite, kad tai buvo teisinga, pataisykite programą arba ignoruokite.",
+      "import_intro": "Toliau įkelkite eksportuotą failą arba įklijuokite JSON naudingąjį failą.",
+      "live_chart_loading": "Tiesioginė galios diagrama pasirodo gavus rodmenis.",
+      "loading": "Įkeliama…",
+      "loading_curve": "Įkeliama kreivė…",
+      "loading_settings": "Įkeliami nustatymai…",
+      "maintenance_requires_access": "Priežiūra ir eksportas / importas reikalauja visiškos prieigos.",
+      "matching_tuning_intro": "Mokydamiesi „WashData“ taip pat koreguoja, kiek programos atitikimas sveria formą, palyginti su trukme ir energija.",
+      "merge_intro": "Pasirinkti ciklai sujungiami į vieną (chronologine tvarka; tarpai užpildyti 0 W). Pasirinkite gautą profilį.",
+      "ml_intro": "„WashData“ pristatomi su išmaniaisiais modeliais, kurie veikia iš karto.",
+      "ml_learned_intro": "Modeliai, pritaikyti šiai mašinai.",
+      "ml_loading": "įkeliamas ML…",
+      "ml_settings_intro": "Du nepriklausomi jungikliai: vienas pritaiko modelius, kol veikia ciklas, kitas leidžia WashData laikui bėgant tiksliai suderinti juos su jūsų aparatu.",
+      "no_cycles_match": "Nė vienas ciklas neatitinka esamo filtro.",
+      "no_cycles_profile": "Šiam profiliui nėra ciklų.",
+      "no_cycles_yet": "Dar nėra užfiksuotų ciklų.",
+      "no_device_selected": "Nepasirinktas joks įrenginys.",
+      "no_devices": "Dar nesukonfigūruota jokių „WashData“ įrenginių.",
+      "no_envelope": "Dar nėra voko – atstatyti po ženklinimo ciklų.",
+      "no_envelope_overlay": "Negalima perdengti voko.",
+      "no_fine_tuned": "Dar nieko nesureguliuota – „WashData“ naudoja įmontuotus modelius.",
+      "no_logs": "Buferyje dar nėra žurnalo įrašų.",
+      "no_match_yet": "Kol kas nebandoma sutapti – tai užpildoma bėgimo ciklo metu.",
+      "no_other_users": "Kitų namų asistento naudotojų nerasta.",
+      "no_phases": "Jokių fazių neapibrėžta.",
+      "no_phases_assigned": "Fazių nepriskirta.",
+      "no_profiles_compare": "Nėra profilių, kuriuos būtų galima palyginti.",
+      "no_profiles_overlay": "Nėra profilių, kuriuos būtų galima perdengti.",
+      "no_profiles_yet": "Dar nėra profilių. Sukurkite jį iš pažymėto ciklo.",
+      "no_profiles_yet_short": "Dar nėra profilių.",
+      "no_split_points": "Dar nėra padalintų taškų.",
+      "no_suggestions": "Nėra aktyvių pasiūlymų.",
+      "pending_feedback": "Laukiama aptikimo atsiliepimo",
+      "phase_catalog_intro": "Pavadinti ciklo segmentai (išankstinis plovimas, šildymas, gręžimas…). Priskirkite juos profiliui iš valdymo skydelio.",
+      "phase_ranges_intro": "Fazių diapazonai (minutės nuo ciklo pradžios) perdengti vidurkio kreive. Redaguokite vertes, kad galėtumėte peržiūrėti tiesiogiai.",
+      "preferences_admin": "Parinktys, skydelis ir prieigos valdymas",
+      "preferences_adv": "Parinktys",
+      "prefs_personal": "Tai galioja tik jūsų namų asistento paskyrai.",
+      "profiles_intro": "Spustelėkite profilį, kad pamatytumėte statistiką, etapus ir valymą. Grupuokite beveik identiškas programas (ta pati forma / trukmė, skirtinga temperatūra arba sukimas), kad suderinus būtų patikimai parenkamos tarp jų.",
+      "rbac_hint": "Kai išjungta, kiekvienas namų asistento naudotojas turi visišką prieigą (numatytasis). Administratoriai visada turi visišką prieigą ir gali valdyti visus.",
+      "recent_logs": "Naujausi ha_washdata įrašai",
+      "recording_in_progress": "Įrašymas vyksta",
+      "review_in_settings": "Peržiūrėkite nustatymuose",
+      "review_to_cycles": "Atidarykite ciklų peržiūros eilę",
+      "saving_triggers_reload": "Išsaugojus suaktyvinamas integracijos įkėlimas iš naujo. HA objektai trumpam gali būti rodomi kaip nepasiekiami.",
+      "search_placeholder": "Paieškos nustatymai…",
+      "see_recorder": "Žiūrėkite įrašymo valdiklį žemiau",
+      "split_intro": "Spustelėkite diagramą, kad pridėtumėte arba pašalintumėte padalijimo tašką, arba automatiškai aptiktumėte pagal tuščiosios eigos tarpus. Kiekvienas gautas segmentas gali gauti savo profilį.",
+      "storage_diagnostics": "Sandėliavimo statistika, priežiūra, eksportas/importas",
+      "trim_intro": "Vilkite raudonas rankenas arba įveskite vertes. Viskas, kas yra už lango, pašalinama.",
+      "unsure_detected_prefix": "„WashData“ nėra tikras, kad aptiko",
+      "updated": "Atnaujinta"
     },
-    "quality": {
-      "good": "Gerai",
-      "bad": "Blogai",
-      "unusable": "Netinkamas naudoti"
-    },
-    "access": {
-      "none": "Nėra (paslėpta)",
-      "read": "Skaityti",
-      "edit": "Redaguoti",
-      "full": "Pilnas",
-      "inherit": "Paveldėti"
+    "phase_desc": {
+      "pre_wash": "Pirminis mirkymas arba paruošiamasis apdorojimas prieš pagrindinį skalbimą.",
+      "wash": "Pagrindinis skalbimo ciklas su būgno judėjimu ir pasirenkamu šildymu.",
+      "wash_dw": "Pagrindinis ploviklis, skalbimas su šildymu.",
+      "rinse": "Skalavimo švariu vandeniu etapas. Ši fazė gali kartotis kelis kartus.",
+      "spin": "Didelio greičio ištraukimas vandeniui pašalinti iš krovinio.",
+      "spin_wd": "Greitas ištraukimas prieš džiovinimo perėjimą.",
+      "soak": "Mažo aktyvumo mirkymo laikotarpis tarp aktyvaus plovimo etapų.",
+      "soak_dw": "Pailgintas mirkymo laikotarpis sunkiam dirvožemiui.",
+      "anti_crease": "Pasibaigus retkarčiais trumpai pasilenkti, siekiant sumažinti raukšles.",
+      "heat_up": "Pradinis šildytuvo pašildymas prieš pradedant visišką džiovinimą.",
+      "drying": "Pagrindinis kaitinimo laikotarpis.",
+      "cool_down": "Vartymas be karščio artėjant ciklo pabaigai.",
+      "anti_wrinkle": "Periodiškas pociklinis šukavimas, siekiant sumažinti raukšles.",
+      "sensor_check": "Trumpa mažos galios pauzė, kol matuojamas sausumas.",
+      "drain_and_switch": "Perėjimo iš skalbimo į džiovinimo režimą laikotarpis.",
+      "pre_rinse": "Pradinis purškimas prieš skalbimą plovikliu.",
+      "dry": "Džiovinimo etapas naudojant šildytuvą ir (arba) likutinę šilumą.",
+      "sanitize": "Aukštos temperatūros valymo etapas, skirtas dezinfekavimo programoms."
     },
     "health": {
-      "poor": "⚠ Prastai tinka",
-      "fair": "Vidutinis atitikimas",
-      "good": "✓ Puikus atitikimas"
+      "good": "✓ Gera profilio kokybė",
+      "fair": "Priimtina profilio kokybė",
+      "poor": "⚠ Prasta profilio kokybė"
+    },
+    "ml": {
+      "fit_fair": "Priimtina",
+      "builtin_models": "● Naudojant įmontuotus modelius",
+      "fit_good": "Gerai",
+      "fit_slight": "Nežymus",
+      "fit_strong": "Stiprus",
+      "fit_weak": "Silpnas",
+      "fit_word": "tinka",
+      "personalized": "● Pritaikyta šiai mašinai"
     },
     "trend": {
       "up": "Populiarėja",
       "down": "Tendencija žemyn"
     },
-    "pref": {
-      "date_relative": "Santykinis (pvz., prieš 2 valandas)",
-      "date_absolute": "Absoliutus (pvz., liepos 2 d. 14:32)"
-    },
     "log": {
       "all_levels": "Visi lygiai"
     },
-    "section": {
-      "basic": {
-        "label": "Pagrindinis",
-        "intro": "Pagrindinė tapatybė ir pagrindiniai dalykai, kurių reikia daugumai sąrankų."
-      },
-      "detection": {
-        "label": "Aptikimas",
-        "intro": "Kaip ciklas aptinkamas kaip pradžia, eiga ir pabaiga."
-      },
-      "matching": {
-        "label": "Derinimas",
-        "intro": "Kaip užbaigti ciklai suderinami su išmoktais profiliais ir pažymimi."
-      },
-      "timing": {
-        "label": "Laikas ir sargyba",
-        "intro": "Fono ritmas, budėjimas neprisijungus ir namų tvarkymas."
-      },
-      "anti_wrinkle": {
-        "label": "Nuo raukšlių",
-        "intro": "Apsaugos nuo raukšlių režimas aptinka džiovintuvo impulsus po pagrindinės šildymo fazės."
-      },
-      "delay": {
-        "label": "Atidėtas startas",
-        "intro": "Atidėto paleidimo aptikimas nustato, kai prietaisas yra maitinamas, bet dar nepradėjo savo ciklo."
-      },
-      "triggers": {
-        "label": "Paleidikliai ir durys",
-        "intro": "Pasirenkami išoriniai signalai: pabaigos gaidukas, durų jutiklis, pauzės jungiklis ir iškrovimo priminimas."
-      },
-      "notifications": {
-        "label": "Pranešimai",
-        "intro": "Konfigūruokite, kada ir kaip jums bus pranešta apie ciklo įvykius."
-      },
-      "ml_training": {
-        "label": "ML treniruotės",
-        "intro": "Pasirinkite išmaniuosius modelius, kurie suasmenina šio įrenginio aptikimą ir laiką."
-      }
+    "pref": {
+      "date_absolute": "Absoliutus (pvz., liepos 2 d. 14:32)",
+      "date_relative": "Giminaitis (pvz., prieš 2 valandas)"
     },
-    "setting": {
-      "name": {
-        "label": "Įrenginio pavadinimas"
-      },
-      "device_type": {
-        "label": "Įrenginio tipas"
-      },
-      "power_sensor": {
-        "label": "Galios jutiklis"
-      },
-      "min_power": {
-        "label": "Minimali galia"
-      },
-      "off_delay": {
-        "label": "Išjungimo delsimas"
-      },
-      "linked_device": {
-        "label": "Grupuoti pagal įrenginį"
-      },
-      "start_threshold_w": {
-        "label": "Pradžios slenkstis"
-      },
-      "stop_threshold_w": {
-        "label": "Sustabdymo slenkstis"
-      },
-      "min_off_gap": {
-        "label": "Minimalus išjungimo tarpas"
-      },
-      "start_duration_threshold": {
-        "label": "Pradžios trukmė"
-      },
-      "start_energy_threshold": {
-        "label": "Pradžios energija"
-      },
-      "completion_min_seconds": {
-        "label": "Minimali ciklo trukmė"
-      },
-      "running_dead_zone": {
-        "label": "Veikimo negyva zona"
-      },
-      "end_energy_threshold": {
-        "label": "Pabaigos energija"
-      },
-      "end_repeat_count": {
-        "label": "Pabaiga pakartojimų skaičius"
-      },
-      "sampling_interval": {
-        "label": "Mėginių ėmimo intervalas"
-      },
-      "smoothing_window": {
-        "label": "Lyginamasis langas"
-      },
-      "abrupt_drop_watts": {
-        "label": "Staigus kritimas"
-      },
-      "abrupt_drop_ratio": {
-        "label": "Staigus kritimo santykis"
-      },
-      "profile_match_threshold": {
-        "label": "Atitikties slenkstis"
-      },
-      "profile_unmatch_threshold": {
-        "label": "Neatitikties slenkstis"
-      },
-      "profile_match_interval": {
-        "label": "Atitikties intervalas"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "Min. trukmės santykis"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "Maksimalus trukmės santykis"
-      },
-      "profile_duration_tolerance": {
-        "label": "Profilio trukmės tolerancija"
-      },
-      "duration_tolerance": {
-        "label": "Trukmės tolerancija"
-      },
-      "auto_label_confidence": {
-        "label": "Automatinio žymėjimo patikimumas"
-      },
-      "learning_confidence": {
-        "label": "Mokymosi patikimumas"
-      },
-      "suppress_feedback_notifications": {
-        "label": "Slopinti atsiliepimų pranešimus"
-      },
-      "watchdog_interval": {
-        "label": "Watchdog intervalas"
-      },
-      "no_update_active_timeout": {
-        "label": "Neatnaujinimo skirtasis laikas"
-      },
-      "progress_reset_delay": {
-        "label": "Pažangos atkūrimo delsa"
-      },
-      "auto_maintenance": {
-        "label": "Automatinė priežiūra (naktinis valymas)"
-      },
-      "expose_debug_entities": {
-        "label": "Atskleisti derinimo objektus"
-      },
-      "save_debug_traces": {
-        "label": "Išsaugoti derinimo pėdsakus"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "Įjungti aptikimą nuo raukšlių"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "Maksimali galia nuo raukšlių"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "Maksimali trukmė"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "Išeiti iš galios slenksčio"
-      },
-      "delay_start_detect_enabled": {
-        "label": "Įgalinti uždelsto paleidimo aptikimą"
-      },
-      "delay_confirm_seconds": {
-        "label": "Patvirtinimo sekundės"
-      },
-      "delay_timeout_hours": {
-        "label": "Laiko pabaigos valandos"
-      },
-      "external_end_trigger_enabled": {
-        "label": "Įgalinti išorinį pabaigos aktyviklį"
-      },
-      "external_end_trigger": {
-        "label": "Išorinio pabaigos aktyviklio objektas"
-      },
-      "external_end_trigger_inverted": {
-        "label": "Apversti išorinį paleidiklį (paleidiklis IŠJUNGUS)"
-      },
-      "door_sensor_entity": {
-        "label": "Durų jutiklis"
-      },
-      "pause_cuts_power": {
-        "label": "Pauzė taip pat atjungia maitinimą (per jungiklį)"
-      },
-      "switch_entity": {
-        "label": "Jungiklio objektas"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "Iškrovimo priminimo vėlinimas"
-      },
-      "pump_stuck_duration": {
-        "label": "Siurblio užstrigimo trukmė"
-      },
-      "notify_start_services": {
-        "label": "Pradžios paslaugos"
-      },
-      "notify_finish_services": {
-        "label": "Pabaigos paslaugos"
-      },
-      "notify_live_services": {
-        "label": "Tiesioginės pažangos paslaugos"
-      },
-      "notify_people": {
-        "label": "Žmonės (tik būnant namuose)"
-      },
-      "notify_only_when_home": {
-        "label": "Pranešti tik namuose"
-      },
-      "notify_fire_events": {
-        "label": "Siųsti HA įvykius pranešimams"
-      },
-      "notify_before_end_minutes": {
-        "label": "Išankstinis įspėjimas"
-      },
-      "notify_live_interval_seconds": {
-        "label": "Tiesioginio atnaujinimo intervalas"
-      },
-      "notify_live_overrun_percent": {
-        "label": "Tiesioginis viršijimas % prieš įspėjimą"
-      },
-      "notify_live_chronometer": {
-        "label": "Naudoti tiesioginį chronometrą"
-      },
-      "notify_timeout_seconds": {
-        "label": "Automatinis atsisakymas po"
-      },
-      "notify_title": {
-        "label": "Pranešimo pavadinimas"
-      },
-      "notify_icon": {
-        "label": "Pranešimo piktograma"
-      },
-      "notify_start_message": {
-        "label": "Pradėti pranešimą"
-      },
-      "notify_finish_message": {
-        "label": "Baigti pranešimą"
-      },
-      "notify_pre_complete_message": {
-        "label": "Iš anksto užpildytas pranešimas"
-      },
-      "notify_reminder_message": {
-        "label": "Priminimo pranešimas"
-      },
-      "notify_channel": {
-        "label": "Android kanalas (pradžia / tiesiogiai)"
-      },
-      "notify_finish_channel": {
-        "label": "Android kanalas (baigti)"
-      },
-      "energy_price_entity": {
-        "label": "Energijos kainos objektas"
-      },
-      "energy_price_static": {
-        "label": "Statinės energijos kaina (už kWh)"
-      },
-      "enable_ml_models": {
-        "label": "Taikyti išmaniuosius modelius ciklo metu"
-      },
-      "ml_training_enabled": {
-        "label": "Mokytis iš šio įrenginio"
-      },
-      "ml_training_hour": {
-        "label": "Mokymosi valanda"
-      },
-      "ml_training_min_cycles": {
-        "label": "Pirmiausia reikalingi ciklai"
-      },
-      "ml_training_interval_days": {
-        "label": "Tikrinkite daugiausia kiekvieną"
-      }
+    "quality": {
+      "bad": "Blogai",
+      "good": "Gerai",
+      "unusable": "Netinkamas naudoti"
+    },
+    "status": {
+      "active": "Aktyvus",
+      "all_statuses": "Visos būsenos",
+      "ambiguous": "Dviprasmiška",
+      "auto_detect": "Automatinis aptikimas",
+      "clear": "Aišku",
+      "completed": "Užbaigta",
+      "fine_tuning": "patikslinu dabar...",
+      "force_stopped": "Jėga sustojo",
+      "idle": "Tuščia eiga",
+      "interrupted": "Pertraukė",
+      "ready": "Paruošta apdoroti",
+      "recording": "Įrašoma"
+    },
+    "tab": {
+      "advanced": "Išplėstinė",
+      "diagnostics": "Diagnostika",
+      "history": "Ciklai",
+      "ml": "ML treniruotės",
+      "pp_cleanup": "Valymas",
+      "pp_manage": "Tvarkyti",
+      "pp_overview": "Apžvalga",
+      "pp_phases": "Fazės",
+      "profiles": "Profiliai",
+      "settings": "Nustatymai",
+      "status": "Apžvalga",
+      "subtab_phase_catalog": "Fazių katalogas",
+      "subtab_profiles": "Profiliai"
+    },
+    "tag": {
+      "early_end": "Ankstyva pabaiga",
+      "late_start": "Vėlyva pradžia",
+      "merged": "Sujungti ciklai",
+      "noise": "Triukšmas",
+      "sensor_gap": "Jutiklio tarpas",
+      "split": "Padalintas ciklas",
+      "wrong_profile": "Neteisingas profilis"
+    },
+    "toast": {
+      "access_saved": "Prieigos valdymas išsaugotas",
+      "all_wiped": "Visi duomenys ištrinti",
+      "analysis_complete_none": "Analizė baigta: jokių naujų pasiūlymų",
+      "auto_label_complete": "Automatinis žymėjimas baigtas",
+      "automation_deleted": "Automatika ištrinta",
+      "correction_submitted": "Pateiktas pataisymas",
+      "cycle_deleted": "Ciklas ištrintas",
+      "cycle_force_stopped": "Ciklas priverstinai sustabdytas",
+      "cycle_labelled": "Ciklas pažymėtas",
+      "cycle_paused": "Ciklas pristabdytas",
+      "cycle_resumed": "Ciklas atnaujintas",
+      "cycle_trimmed": "Apkarpytas ciklas",
+      "cycles_merged": "Ciklai sujungti",
+      "envelope_rebuilt": "Vokas perstatytas",
+      "envelopes_rebuilt": "Vokai perstatyti",
+      "export_downloaded": "Eksportas atsisiųstas",
+      "feedback_all_dismissed": "Visi atsiliepimai atmesti",
+      "feedback_confirmed": "Atsiliepimai patvirtinti",
+      "feedback_dismissed": "Atsiliepimai atmesti",
+      "group_deleted": "Grupė ištrinta",
+      "group_name_required": "Būtinas grupės pavadinimas",
+      "group_saved": "Grupė išsaugota",
+      "import_successful": "Sėkmingas importas; integracijos perkrovimas",
+      "json_required": "Reikalingi JSON duomenys",
+      "legacy_removed": "Pašalinti pasenę veiksmai",
+      "logs_exported": "Žurnalai eksportuoti",
+      "matching_reverted": "Atitinkantys svoriai grąžinti į numatytuosius",
+      "min_2_profiles": "Pasirinkite bent 2 grupės profilius",
+      "ml_training_no_improvement": "Mokymas baigtas: pradinis lygis išlaikytas (nėra pagerėjimo)",
+      "models_reverted": "Įrenginyje esantys modeliai grįžo į pradinį lygį",
+      "name_required": "Reikalingas vardas",
+      "no_split_found": "Nerasta tuščiosios eigos spragų, dėl kurių būtų galima suskaidyti",
+      "panel_settings_saved": "Skydelio nustatymai išsaugoti",
+      "phase_name_required": "Būtinas fazės pavadinimas",
+      "phase_updated": "Atnaujintas etapas",
+      "phases_saved": "Fazės išsaugotos",
+      "preferences_saved": "Parinktys išsaugotos",
+      "profile_name_required": "Būtinas profilio pavadinimas",
+      "profile_renamed": "Profilis pervardytas",
+      "recording_discarded": "Įrašas atmestas",
+      "recording_saved": "Įrašas išsaugotas profilyje",
+      "recording_started": "Pradėtas įrašymas",
+      "recording_stopped": "Įrašymas sustabdytas",
+      "review_saved": "Apžvalga išsaugota",
+      "settings_saved": "Nustatymai išsaugoti; integracijos perkrovimas",
+      "suggestions_applied": "Pasiūlymai pritaikyti; integracijos perkrovimas",
+      "suggestions_dismissed": "Pasiūlymai atmesti"
     }
   }
 }

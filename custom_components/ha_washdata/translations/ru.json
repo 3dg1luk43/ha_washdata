@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Начало цикла",
-        "cycle_finish": "Окончание цикла",
-        "cycle_live": "Прогресс в реальном времени"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Стиральная машина",
@@ -88,198 +81,6 @@
         "bread_maker": "Хлебопечка",
         "pump": "Насос / Отстойный насос",
         "other": "Другое (продвинутый уровень)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(без маркировки)",
-        "create_new_profile": "Создать новый профиль",
-        "remove_label": "Удалить метку",
-        "no_reference_cycle": "(нет эталонного цикла)",
-        "all_device_types": "Все типы устройств",
-        "current_suffix": "(текущий)",
-        "phase_builtin_suffix": "(Встроенный)",
-        "phase_none_available": "Нет доступных фаз.",
-        "phase_other_device_types": "Другие типы устройств:",
-        "settings_deprecation_warning": "⚠️ **Устаревший тип устройства:** {device_type} планируется удалить в будущем выпуске. Конвейер сопоставления WashData не дает надежных результатов для этого класса устройств. Ваша интеграция продолжает работать в течение периода устаревания; Чтобы отключить это предупреждение, переключите **Тип устройства** ниже на один из поддерживаемых типов (стиральная машина, сушильная машина, комбинированная стирально-сушильная машина, посудомоечная машина, аэрофритюрница, хлебопечка или насос) или на **Другое (расширенное)**, если ваше устройство не соответствует ни одному из поддерживаемых типов. **Другое (расширенное)** намеренно предоставляет общие параметры по умолчанию, которые не настроены для какого-либо конкретного устройства, поэтому вам придется самостоятельно настраивать пороговые значения, тайм-ауты и соответствующие параметры; все существующие настройки сохраняются при переключении.",
-        "editor_select_info": "Выберите 1 цикл для разделения или 2+ цикла для объединения.",
-        "editor_select_info_split": "Выберите 1 цикл для разделения.",
-        "editor_select_info_merge": "Выберите 2+ цикла для объединения.",
-        "editor_select_info_delete": "Выберите 1+ циклов для удаления.",
-        "no_cycles_recorded": "Циклы пока не зарегистрированы.",
-        "profile_summary_line": "- **{name}**: {count} циклов, в среднем {avg} мин",
-        "no_profiles_created": "Профили ещё не созданы.",
-        "phase_preview": "Предварительный просмотр фазы",
-        "phase_preview_no_curve": "Кривая среднего профиля пока недоступна. Запустите/маркируйте дополнительные циклы для этого профиля.",
-        "average_power_curve": "Кривая средней мощности",
-        "unit_min": "мин",
-        "profile_option_fmt": "{name} ({count} циклов, в среднем ~{duration} мин)",
-        "profile_option_short_fmt": "{name} ({count} циклов, ~{duration} мин)",
-        "deleted_cycles_from_profile": "Удалено {count} циклов из {profile}.",
-        "not_enough_data_graph": "Недостаточно данных для построения графика.",
-        "no_profiles_found": "Профили не найдены.",
-        "cycle_info_fmt": "Цикл: {start}, {duration} мин, метка: {label}",
-        "top_candidates_header": "### Лучшие кандидаты",
-        "tbl_profile": "Профиль",
-        "tbl_confidence": "Уверенность",
-        "tbl_correlation": "Корреляция",
-        "tbl_duration_match": "Совпадение по длительности",
-        "detected_profile": "Обнаруженный профиль",
-        "estimated_duration": "Расчётная продолжительность",
-        "actual_duration": "Фактическая продолжительность",
-        "choose_action": "__Выберите действие ниже:__",
-        "tbl_count": "Кол-во",
-        "tbl_avg": "Среднее",
-        "tbl_min": "Мин.",
-        "tbl_max": "Макс.",
-        "tbl_energy_avg": "Энергия (средн.)",
-        "tbl_energy_total": "Энергия (итого)",
-        "tbl_consistency": "Конс.",
-        "tbl_last_run": "Последний запуск",
-        "graph_legend_title": "Легенда графика",
-        "graph_legend_body": "Синяя полоса представляет наблюдаемый минимальный и максимальный диапазон энергопотребления. Линия показывает кривую средней мощности.",
-        "recording_preview": "Предварительный просмотр записи",
-        "trim_start": "Начало обрезки",
-        "trim_end": "Конец обрезки",
-        "split_preview_title": "Предварительный просмотр разделения",
-        "split_preview_found_fmt": "Найдено {count} сегментов.",
-        "split_preview_confirm_fmt": "Нажмите «Подтвердить», чтобы разделить этот цикл на {count} отдельных цикла.",
-        "merge_preview_title": "Предварительный просмотр объединения",
-        "merge_preview_joining_fmt": "Объединение {count} циклов. Пробелы будут заполнены показаниями 0 Вт.",
-        "editor_delete_preview_title": "Предпросмотр удаления",
-        "editor_delete_preview_intro": "Выбранные циклы будут удалены безвозвратно:",
-        "editor_delete_preview_confirm": "Нажмите Подтвердить, чтобы навсегда удалить эти записи циклов.",
-        "no_power_preview": "*Данные о мощности недоступны для предварительного просмотра.*",
-        "profile_comparison": "Сравнение профилей",
-        "actual_cycle_label": "Этот цикл (фактический)",
-        "storage_usage_header": "Использование хранилища",
-        "storage_file_size": "Размер файла",
-        "storage_cycles": "Циклы",
-        "storage_profiles": "Профили",
-        "storage_debug_traces": "Трассировки отладки",
-        "overview_suffix": "Обзор",
-        "phase_preview_for_profile": "Предварительный просмотр фазы для профиля",
-        "current_ranges_header": "Текущие диапазоны",
-        "assign_phases_help": "Используйте действия ниже, чтобы добавлять, редактировать, удалять или сохранять диапазоны.",
-        "profile_summary_header": "Сводка профилей",
-        "recent_cycles_header": "Последние циклы",
-        "trim_cycle_preview_title": "Предварительный просмотр обрезки цикла",
-        "trim_cycle_preview_no_data": "Для этого цикла данные о мощности отсутствуют.",
-        "trim_cycle_preview_kept_suffix": "сохраняется",
-        "table_program": "Программа",
-        "table_when": "Когда",
-        "table_length": "Длительность",
-        "table_match": "Совпадение",
-        "table_profile": "Профиль",
-        "table_cycles": "Циклы",
-        "table_avg_length": "Средн. длительность",
-        "table_last_run": "Последний запуск",
-        "table_avg_energy": "Средн. энергия",
-        "table_detected_program": "Обнаруженная программа",
-        "table_confidence": "Уверенность",
-        "table_reported": "Сообщено"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Разделить цикл (найти промежутки)",
-        "merge": "Объединить циклы (сшить фрагменты)",
-        "delete": "Удалить цикл(ы)"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Автоматически находить паузы бездействия",
-        "manual": "Ручные временные метки"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Обслуживание: повторная обработка и оптимизация данных",
-        "clear_debug_data": "Очистить данные отладки (освободить место)",
-        "wipe_history": "Удалить ВСЕ данные на этом устройстве (необратимо)",
-        "export_import": "Экспорт/импорт JSON с настройками (копировать/вставить)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "Экспортировать все данные",
-        "import": "Импорт/объединение данных"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Автоматическая маркировка старых циклов",
-        "select_cycle_to_label": "Маркировка конкретного цикла",
-        "select_cycle_to_delete": "Удалить цикл",
-        "interactive_editor": "Интерактивный редактор слияния/разделения",
-        "trim_cycle": "Обрезать данные цикла"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Создать новый профиль",
-        "edit_profile": "Редактировать/переименовать профиль",
-        "delete_profile": "Удалить профиль",
-        "profile_stats": "Статистика профиля",
-        "cleanup_profile": "Очистка истории: график и удаление",
-        "assign_phases": "Назначить диапазоны фаз"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Создать новую фазу",
-        "edit_custom_phase": "Редактировать фазу",
-        "delete_custom_phase": "Удалить фазу"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Назвать и применить фазы",
-        "cancel": "Вернуться без изменений"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Добавить диапазон фаз",
-        "edit_range": "Редактировать диапазон фаз",
-        "delete_range": "Удалить диапазон фаз",
-        "clear_ranges": "Очистить все диапазоны",
-        "auto_detect_ranges": "Автоматическое определение фаз",
-        "save_ranges": "Сохранить и вернуться"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Обновить статус",
-        "stop_recording": "Остановить запись (сохранить и обработать)",
-        "start_recording": "Начать новую запись",
-        "process_recording": "Обработать последнюю запись (обрезать и сохранить)",
-        "discard_recording": "Отменить последнюю запись"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Создать новый профиль",
-        "existing_profile": "Добавить в существующий профиль",
-        "discard": "Отменить запись"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Подтвердить - обнаружение правильное",
-        "correct": "Исправить - выбрать программу/продолжительность",
-        "ignore": "Игнорировать - цикл ложного срабатывания/шума",
-        "delete": "Удалить - удалить из истории"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Установить начальную точку",
-        "set_end": "Установить конечную точку",
-        "reset": "Сбросить до полной продолжительности",
-        "apply": "Применить обрезку",
-        "cancel": "Отмена"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "Текущая фаза"
       },
-      "wash_phase": {
-        "name": "Фаза"
-      },
       "profile_cycle_count": {
         "name": "Количество циклов профиля {profile_name}",
         "unit_of_measurement": "циклов"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s должно быть больше, чем trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "Нет активного цикла для приостановки или возобновления."
     }
   },
   "panel": {
     "hdr": {
-      "panel_settings": "Настройки панели (все пользователи)",
-      "ml_learned": "Чему научилась WashData",
-      "status": "Статус",
-      "live_power": "Мощность в реальном времени",
-      "manual_recording": "Ручная запись",
-      "tools_and_data": "Инструменты и данные",
-      "phase_catalog": "Каталог фаз",
-      "storage_stats": "Статистика хранилища",
-      "maintenance": "Действия по техническому обслуживанию",
-      "export_import": "Экспорт/Импорт",
+      "toggle_sidebar": "Переключить боковую панель Домашнего помощника",
       "logs": "Журналы",
-      "my_preferences": "Мои предпочтения",
-      "access_control": "Контроль доступа",
-      "ml_smart_learning": "Умное обучение",
-      "ml_settings_card": "Настройки",
-      "ml_matching_tuning": "Точная настройка в соответствии с программой",
-      "display": "Отображение",
-      "status_graph": "График состояния",
-      "diagnostics_pref": "Диагностика",
-      "logs_diagnostics": "Диагностика",
-      "process_history": "Обработка истории",
-      "clear_debug": "Очистить следы отладки",
-      "wipe_history": "Очистить историю",
-      "automations": "Автоматизации",
-      "automation_open": "Открыть в редакторе автоматизации",
+      "access_control": "Управление доступом",
       "automation_delete": "Удалить эту автоматизацию",
-      "automation_needs_review": "Этот цикл нуждается в пересмотре",
-      "automation_review_this_cycle": "Просмотрите этот цикл",
-      "no_automations": "Никакая автоматизация пока не ссылается на это устройство."
-    },
-    "lbl": {
-      "manual_duration": "Продолжительность вручную (мин, необязательно)",
-      "correct_duration": "Правильная продолжительность (мин, необязательно)",
-      "default_tab": "Вкладка по умолчанию при открытии панели",
-      "default_access_level": "Уровень по умолчанию для пользователей, не перечисленных ниже",
-      "show_expected": "Показать наложение ожидаемой кривой (совпадающий профиль, оранжевый)",
-      "show_raw": "Показывать необработанные показания датчика (несглаженные, серые)",
-      "show_debug": "Показывать карточку отладки живого матча на странице статуса (уверенность, двусмысленность, лучшие кандидаты).",
-      "power": "Мощность",
-      "progress": "Прогресс",
-      "remaining": "Оставшийся",
-      "duration": "Продолжительность",
-      "energy": "Энергия",
-      "profile": "Профиль",
+      "automation_needs_review": "Этот цикл требует проверки",
+      "automation_open": "Открыть в редакторе автоматизаций",
+      "automation_review_this_cycle": "Проверить этот цикл",
+      "automations": "Автоматизации",
+      "clear_debug": "Очистить отладочные данные",
+      "diagnostics_pref": "Диагностика",
+      "display": "Отображение",
+      "export_import": "Экспорт / Импорт",
+      "live_power": "Текущая мощность",
+      "logs_diagnostics": "Диагностика",
+      "maintenance": "Действия по обслуживанию",
+      "manual_recording": "Ручная запись",
+      "ml_learned": "Что WashData узнал",
+      "ml_matching_tuning": "Точная настройка распознавания программ",
+      "ml_settings_card": "Настройки",
+      "ml_smart_learning": "Умное обучение",
+      "my_preferences": "Мои настройки",
+      "no_automations": "Пока нет автоматизаций, ссылающихся на это устройство.",
+      "panel_settings": "Настройки панели",
+      "phase_catalog": "Каталог фаз",
+      "process_history": "История процессов",
       "status": "Статус",
-      "date": "Дата",
-      "confidence": "Уверенность",
-      "health": "Здоровье",
-      "cost": "Расходы",
-      "program": "Программа",
-      "cycle_health": "Здоровье цикла",
-      "activity": "Активность",
-      "unlabelled": "Без маркировки",
-      "unlabelled_paren": "(без маркировки)",
-      "emphasis": "Акцент",
-      "default": "По умолчанию",
-      "in_use": "В использовании",
-      "profile_name": "Имя профиля",
-      "ref_cycle": "Справочный цикл (опционально)",
-      "phase_name": "Название фазы",
-      "description": "Описание",
-      "correct_profile": "Правильный профиль",
-      "load_from_file": "Загрузить из файла",
-      "json_data": "Данные JSON",
-      "expected_duration": "Ожидаемая продолжительность (мин)",
-      "rename_profile": "Переименовать профиль",
-      "select_profile": "Выберите профиль",
-      "confidence_threshold": "Порог уверенности",
-      "resulting_profile": "Результирующий профиль",
-      "new_profile_name": "Новое имя профиля",
-      "save_mode": "Режим сохранения",
-      "head_trim": "Обрезка головы (а)",
-      "tail_trim": "Хвостовая отделка (ы)",
-      "gap_s": "Разрыв (ы)",
-      "start": "Начинать",
-      "end": "Конец",
-      "quality": "Качество",
-      "golden_reference": "Записанный эталонный цикл",
-      "compare_profiles": "Сравнить с профилями",
-      "tags": "Теги",
-      "notes": "Примечания",
-      "cycle_date_display": "Отображение даты цикла",
-      "refresh_interval": "Интервал обновления (сек)",
-      "panel_default_tab": "Вкладка по умолчанию",
-      "hide_tabs": "Скрыть вкладки для пользователей, не являющихся администраторами",
-      "enable_access_control": "Включить контроль доступа для каждого пользователя",
-      "administrators": "Администраторы",
-      "default_other": "По умолчанию (другие устройства)",
-      "mode_new_profile": "Создать новый профиль",
-      "mode_existing_profile": "Добавить в существующий профиль",
-      "auto_fine_tune_on": "автоматическая точная настройка включена (около {hour}:00)",
-      "auto_fine_tune_off": "автоматическая точная настройка выключена",
-      "last_checked": "Последняя проверка:",
-      "remove_label": "- Удалить этикетку -",
-      "create_new_profile": "+ Создать новый профиль…",
-      "read_only": "Только чтение",
-      "actions": "Действия",
-      "cycles_count": "Циклы",
-      "debug_traces": "Следы отладки",
-      "file_kb": "Файл (КБ)",
-      "label": "Этикетка",
-      "seconds_from_start": "Секунды от начала",
-      "clock_time": "Время на часах",
-      "ungrouped": "Разгруппировано"
-    },
-    "toast": {
-      "settings_saved": "Настройки сохранены; интеграционная перезагрузка",
-      "import_successful": "Импорт выполнен успешно; интеграционная перезагрузка",
-      "suggestions_applied": "Предложения применены; интеграционная перезагрузка",
-      "ml_training_no_improvement": "Обучение завершено: базовый уровень сохранен (без улучшений)",
-      "could_not_load_cycle": "Не удалось загрузить цикл: {error}",
-      "preferences_saved": "Настройки сохранены.",
-      "panel_settings_saved": "Настройки панели сохранены.",
-      "access_saved": "Контроль доступа сохранен.",
-      "profile_created": "Профиль \"{name}\" создан.",
-      "profile_deleted": "Профиль \"{name}\" удален.",
-      "profile_renamed": "Профиль переименован",
-      "phases_saved": "Фазы сохранены",
-      "phase_created": "Фаза \"{name}\" создана.",
-      "phase_deleted": "Фаза \"{name}\" удалена.",
-      "phase_updated": "Фаза обновлена",
-      "recording_started": "Запись началась",
-      "recording_stopped": "Запись остановлена",
-      "recording_discarded": "Запись удалена",
-      "recording_saved": "Запись сохранена в профиле",
-      "export_downloaded": "Экспорт скачан",
-      "logs_exported": "Журналы экспортированы",
-      "envelopes_rebuilt": "Конверты восстановлены",
-      "envelope_rebuilt": "Конверт восстановлен",
-      "suggestions_dismissed": "Предложения отклонены",
-      "auto_label_complete": "Автоматическая маркировка завершена",
-      "cycle_labelled": "Цикл с маркировкой",
-      "cycle_deleted": "Цикл удален.",
-      "cycles_deleted": "{count} цикл(ов) удалено",
-      "cycle_trimmed": "Цикл обрезан",
-      "cycles_merged": "Циклы объединены",
-      "review_saved": "Оценка сохранена",
-      "feedback_confirmed": "Отзыв подтвержден",
-      "feedback_dismissed": "Отзыв отклонен.",
-      "feedback_all_dismissed": "Все отзывы отклонены",
-      "correction_submitted": "Исправление отправлено",
-      "group_saved": "Группа сохранена",
-      "group_deleted": "Группа удалена",
-      "automation_deleted": "Автоматизация удалена.",
-      "legacy_removed": "Устаревшие действия удалены.",
-      "cycle_paused": "Цикл приостановлен",
-      "cycle_resumed": "Цикл возобновлен",
-      "cycle_force_stopped": "Цикл принудительно остановлен",
-      "ml_training_promoted": "Обучение завершено: повышено {count} модели",
-      "matching_reverted": "Соответствующие веса возвращены к значениям по умолчанию.",
-      "models_reverted": "Модели на устройстве вернулись к базовому состоянию",
-      "analysis_complete": "Анализ завершен: предложений: {count}",
-      "analysis_complete_none": "Анализ завершен: новых предложений нет.",
-      "debug_cleared": "Удалены следы отладки {count}.",
-      "all_wiped": "Все данные удалены",
-      "no_split_found": "Не обнаружено пустых промежутков, на которые можно было бы разделить",
-      "group_name_required": "Укажите название группы.",
-      "min_2_profiles": "Выберите минимум 2 профиля для группы.",
-      "profile_name_required": "Укажите имя профиля.",
-      "phase_name_required": "Укажите название фазы.",
-      "name_required": "Требуется имя",
-      "json_required": "Требуются данные JSON.",
-      "save_failed": "Не удалось сохранить: {error}",
-      "delete_failed": "Не удалось удалить: {error}",
-      "apply_failed": "Не удалось применить: {error}",
-      "rebuild_failed": "Не удалось перестроить: {error}",
-      "start_failed": "Не удалось запустить: {error}",
-      "stop_failed": "Остановить не удалось: {error}",
-      "discard_failed": "Не удалось удалить: {error}",
-      "trim_failed": "Обрезать не удалось: {error}",
-      "split_failed": "Разделить не удалось: {error}",
-      "merge_failed": "Слияние не удалось: {error}",
-      "create_failed": "Не удалось создать: {error}",
-      "update_failed": "Обновление не выполнено: {error}",
-      "rename_failed": "Не удалось переименовать: {error}",
-      "revert_failed": "Не удалось выполнить возврат: {error}",
-      "training_failed": "Обучение не удалось: {error}",
-      "export_failed": "Не удалось экспортировать: {error}",
-      "import_failed": "Не удалось импортировать: {error}",
-      "auto_label_failed": "Не удалось добавить автоматическую метку: {error}",
-      "analysis_failed": "Анализ не удался: {error}",
-      "auto_detect_failed": "Не удалось выполнить автоматическое обнаружение: {error}",
-      "error": "Ошибка: {error}",
-      "pause_failed": "Не удалось приостановить: {error}",
-      "label_failed": "Не удалось установить ярлык: {error}",
-      "invalid_json": "«{key}» не является допустимым JSON — исправьте это или очистите поле перед сохранением.",
-      "processed": "Обработано {bits}",
-      "split_complete": "Разделено на {count} циклов"
-    },
-    "msg": {
-      "no_devices": "Устройства WashData еще не настроены.",
-      "live_chart_loading": "Диаграмма мощности в реальном времени появляется по мере поступления показаний.",
-      "no_profiles_yet": "Профилей пока нет. Создайте его из помеченного цикла.",
-      "no_logs": "Ни одна запись журнала еще не помещена в буфер.",
-      "no_envelope": "Конверта пока нет. Восстановите его после циклов маркировки.",
-      "no_cycles_profile": "Для этого профиля нет циклов.",
-      "ml_learned_intro": "Модели доработаны под эту машину. Все, что не указано в списке, использует надежную встроенную модель.",
-      "ml_intro": "WashData поставляется с интеллектуальными моделями, которые определяют циклы, сопоставляют программы и оценивают время и энергию — они работают сразу после установки.",
-      "matching_tuning_intro": "При обучении WashData также регулирует, насколько соответствие программы влияет на форму цикла по сравнению с его продолжительностью и энергией.",
-      "merge_intro": "Выбранные циклы объединяются в один (хронологический порядок; пробелы заполняются 0 Вт). Выберите получившийся профиль.",
-      "see_recorder": "См. виджет рекордера ниже",
-      "review_to_cycles": "Откройте очередь проверки Cycles",
-      "no_device_selected": "Устройство не выбрано.",
-      "loading": "Загрузка…",
-      "loading_settings": "Загрузка настроек…",
-      "no_cycles_match": "Ни один цикл не соответствует текущему фильтру.",
-      "no_cycles_yet": "Циклы пока не зарегистрированы.",
-      "no_phases": "Фазы не определены.",
-      "no_phases_assigned": "Фазы не назначены.",
-      "no_split_points": "Разделительных точек пока нет.",
-      "no_envelope_overlay": "Нет конверта, доступного для наложения.",
-      "no_other_users": "Других пользователей Home Assistant не найдено.",
-      "maintenance_requires_access": "Для обслуживания и экспорта/импорта требуется полный доступ.",
-      "loading_curve": "Кривая загрузки…",
-      "compare_selected_cycles": "Выбранные циклы (сплошные) — показать/скрыть",
-      "compare_overlay_profiles": "Наложение профилей (слабое)",
-      "no_profiles_compare": "Нет профилей для сравнения.",
-      "saving_triggers_reload": "Сохранение запускает перезагрузку интеграции. Объекты HA могут на короткое время отображаться как недоступные.",
-      "prefs_personal": "Они применимы только к вашей учетной записи Home Assistant.",
-      "no_match_yet": "Попыток сопоставления пока нет — это значение заполняется во время рабочего цикла.",
-      "no_fine_tuned": "Пока ничего не доработано — WashData использует свои встроенные модели.",
-      "ml_settings_intro": "Два независимых переключателя: один применяет модели во время выполнения цикла, другой позволяет WashData с течением времени точно настраивать их для вашей машины.",
-      "phase_catalog_intro": "Именованные сегменты цикла (Предварительная стирка, Нагрев, Отжим…). Назначьте их профилю с его панели управления.",
-      "phase_ranges_intro": "Диапазоны фаз (минуты от начала цикла), наложенные на среднюю кривую. Отредактируйте значения для предварительного просмотра в реальном времени.",
-      "cleanup_intro": "Каждый помеченный цикл наложен. Отметьте выбросы и удалите их, чтобы очистить профиль.",
-      "split_intro": "Щелкните график, чтобы добавить или удалить точку разделения или выполнить автоматическое обнаружение по пустым промежуткам.",
-      "trim_intro": "Перетащите красные маркеры или введите значения. Все, что за окном, убрано.",
-      "import_intro": "Загрузите экспортированный файл или вставьте полезные данные JSON ниже.",
-      "auto_label_intro": "Назначьте профили немаркированным циклам, достоверность совпадения которых превышает пороговое значение.",
-      "enough_data": "Достаточно данных для обучения (циклов {current}/{min}).",
-      "collecting_data": "Сбор данных — еще {need} цикл{plural}, прежде чем можно будет начать тонкую настройку ({current}/{min}).",
-      "updated": "Обновлен {time}",
-      "appliance_monitor": "Монитор устройства",
-      "ml_loading": "загружается МЛ…",
-      "review_in_settings": "Обзор в настройках",
-      "storage_diagnostics": "Статистика хранения, обслуживание, экспорт/импорт",
-      "recent_logs": "Последние записи ha_washdata",
-      "preferences_adv": "Предпочтения",
-      "preferences_admin": "Настройки, панель и контроль доступа",
-      "pending_feedback": "Ожидается отзыв об обнаружении",
-      "recording_in_progress": "Идет запись",
-      "no_profiles_yet_short": "Профилей пока нет.",
-      "unsure_detected_prefix": "WashData не уверен, что обнаружен",
-      "no_suggestions": "Нет активных предложений.",
-      "no_profiles_overlay": "Нет профилей для наложения.",
-      "compare_cycles_title": "Сравнить {count} циклов",
-      "profiles_intro": "Нажмите на профиль для просмотра статистики, фаз и очистки. Группируйте почти идентичные программы (одинаковая форма/длительность, разная температура или отжим), чтобы подбор надёжно различал их.",
-      "search_placeholder": "Поиск настроек…",
-      "automations_intro": "WashData отправляет события {start} / {end} и предоставляет объекты, поэтому уведомления и действия лучше всего создавать как обычные автоматизации Home Assistant. Автоматизации, использующие это устройство, отображаются ниже.",
-      "notify_services_hint": "Используйте идентификаторы сервиса {entity} (через запятую для нескольких). Переменные шаблона: {vars}.",
-      "rbac_hint": "Если отключено, каждый пользователь Home Assistant имеет полный доступ (по умолчанию). Администраторы всегда имеют полный доступ и могут управлять всеми.",
-      "feedback_prompt": "Подтвердите правильность определения, исправьте программу или проигнорируйте."
-    },
-    "section": {
-      "basic": {
-        "intro": "Основная идентичность и основные характеристики, необходимые большинству установок.",
-        "label": "Базовый"
-      },
-      "detection": {
-        "intro": "Как цикл определяется как начало, выполнение и завершение.",
-        "label": "Обнаружение"
-      },
-      "matching": {
-        "intro": "Как законченные циклы сопоставляются с изученными профилями и маркируются.",
-        "label": "Соответствие"
-      },
-      "timing": {
-        "intro": "Фоновая частота, автономный сторожевой таймер и ведение домашнего хозяйства.",
-        "label": "Тайминг и сторожевой таймер"
-      },
-      "anti_wrinkle": {
-        "intro": "Режим против морщин определяет импульсы вращения сушильной машины после основной фазы нагрева.",
-        "label": "Защита от заминания"
-      },
-      "delay": {
-        "intro": "Обнаружение отложенного запуска определяет, когда устройство включено, но еще не начало цикл работы.",
-        "label": "Отсрочка старта"
-      },
-      "triggers": {
-        "intro": "Дополнительные внешние сигналы: триггер завершения, датчик двери, переключатель паузы и напоминание о разгрузке.",
-        "label": "Триггеры и двери"
-      },
-      "notifications": {
-        "label": "Уведомления",
-        "intro": "Настройте, когда и как вы будете получать уведомления о событиях цикла."
-      },
-      "ml_training": {
-        "label": "Обучение машинному обучению",
-        "intro": "Подключите интеллектуальные модели, которые персонализируют обнаружение и синхронизацию для этого устройства."
-      }
-    },
-    "setting": {
-      "auto_maintenance": {
-        "label": "Автотехническое обслуживание (ночная уборка)"
-      },
-      "external_end_trigger_enabled": {
-        "label": "Включить внешний триггер завершения"
-      },
-      "external_end_trigger_inverted": {
-        "label": "Инвертировать внешний триггер (триггер выключен)"
-      },
-      "pause_cuts_power": {
-        "label": "Пауза также отключает питание (через переключатель)"
-      },
-      "notify_people": {
-        "label": "Люди (только когда дома)"
-      },
-      "notify_only_when_home": {
-        "label": "Уведомлять только когда дома"
-      },
-      "energy_price_static": {
-        "label": "Статическая цена энергии (за кВтч)"
-      },
-      "enable_ml_models": {
-        "label": "Применяйте интеллектуальные модели во время цикла"
-      },
-      "ml_training_enabled": {
-        "label": "Учитесь у этой машины"
-      },
-      "name": {
-        "label": "Имя устройства"
-      },
-      "device_type": {
-        "label": "Тип устройства"
-      },
-      "power_sensor": {
-        "label": "Датчик мощности"
-      },
-      "min_power": {
-        "label": "Минимальная мощность"
-      },
-      "off_delay": {
-        "label": "Задержка выключения"
-      },
-      "linked_device": {
-        "label": "Группа под устройством"
-      },
-      "start_threshold_w": {
-        "label": "Начальный порог"
-      },
-      "stop_threshold_w": {
-        "label": "Порог остановки"
-      },
-      "min_off_gap": {
-        "label": "Мин. интервал выключения"
-      },
-      "start_duration_threshold": {
-        "label": "Продолжительность начала"
-      },
-      "start_energy_threshold": {
-        "label": "Начальная энергия"
-      },
-      "completion_min_seconds": {
-        "label": "Минимальная продолжительность цикла"
-      },
-      "running_dead_zone": {
-        "label": "Мёртвая зона работы"
-      },
-      "end_energy_threshold": {
-        "label": "Конечная энергия"
-      },
-      "end_repeat_count": {
-        "label": "Конец отсчета повторов"
-      },
-      "sampling_interval": {
-        "label": "Интервал выборки"
-      },
-      "smoothing_window": {
-        "label": "Окно сглаживания"
-      },
-      "abrupt_drop_watts": {
-        "label": "Резкое падение"
-      },
-      "abrupt_drop_ratio": {
-        "label": "Коэффициент резкого падения"
-      },
-      "profile_match_threshold": {
-        "label": "Порог совпадения"
-      },
-      "profile_unmatch_threshold": {
-        "label": "Несоответствие порога"
-      },
-      "profile_match_interval": {
-        "label": "Интервал сопоставления"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "Минимальный коэффициент продолжительности"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "Максимальный коэффициент продолжительности"
-      },
-      "profile_duration_tolerance": {
-        "label": "Допуск продолжительности профиля"
-      },
-      "duration_tolerance": {
-        "label": "Допуск оценки"
-      },
-      "auto_label_confidence": {
-        "label": "Уверенность в автоматической маркировке"
-      },
-      "learning_confidence": {
-        "label": "Уверенность обучения"
-      },
-      "suppress_feedback_notifications": {
-        "label": "Подавить уведомления об отзывах"
-      },
-      "watchdog_interval": {
-        "label": "Сторожевой интервал"
-      },
-      "no_update_active_timeout": {
-        "label": "Таймаут без обновления"
-      },
-      "progress_reset_delay": {
-        "label": "Задержка сброса прогресса"
-      },
-      "expose_debug_entities": {
-        "label": "Раскрытие объектов отладки"
-      },
-      "save_debug_traces": {
-        "label": "Сохранить следы отладки"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "Включить обнаружение морщин"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "Максимальная сила против морщин"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "Максимальная продолжительность"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "Порог выходной мощности"
-      },
-      "delay_start_detect_enabled": {
-        "label": "Включить обнаружение задержки запуска"
-      },
-      "delay_confirm_seconds": {
-        "label": "Секунды подтверждения"
-      },
-      "delay_timeout_hours": {
-        "label": "Тайм-аут часов"
-      },
-      "external_end_trigger": {
-        "label": "Объект внешнего триггера"
-      },
-      "door_sensor_entity": {
-        "label": "Датчик двери"
-      },
-      "switch_entity": {
-        "label": "Объект переключателя"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "Задержка напоминания о выгрузке"
-      },
-      "pump_stuck_duration": {
-        "label": "Продолжительность зависания насоса"
-      },
-      "notify_start_services": {
-        "label": "Службы при запуске"
-      },
-      "notify_finish_services": {
-        "label": "Службы при завершении"
-      },
-      "notify_live_services": {
-        "label": "Службы живого прогресса"
-      },
-      "notify_fire_events": {
-        "label": "События Fire HA для уведомлений"
-      },
-      "notify_before_end_minutes": {
-        "label": "Предварительное оповещение"
-      },
-      "notify_live_interval_seconds": {
-        "label": "Интервал оперативного обновления"
-      },
-      "notify_live_overrun_percent": {
-        "label": "% переполнения в реальном времени до оповещения"
-      },
-      "notify_live_chronometer": {
-        "label": "Используйте живой хронометр"
-      },
-      "notify_timeout_seconds": {
-        "label": "Автоматическое закрытие после"
-      },
-      "notify_title": {
-        "label": "Название уведомления"
-      },
-      "notify_icon": {
-        "label": "Значок уведомления"
-      },
-      "notify_start_message": {
-        "label": "Начальное сообщение"
-      },
-      "notify_finish_message": {
-        "label": "Сообщение при завершении"
-      },
-      "notify_pre_complete_message": {
-        "label": "Предварительное сообщение"
-      },
-      "notify_reminder_message": {
-        "label": "Напоминание"
-      },
-      "notify_channel": {
-        "label": "Канал Android (старт/в прямом эфире)"
-      },
-      "notify_finish_channel": {
-        "label": "Канал Android (окончание)"
-      },
-      "energy_price_entity": {
-        "label": "Объект цены на энергию"
-      },
-      "ml_training_hour": {
-        "label": "Час обучения"
-      },
-      "ml_training_min_cycles": {
-        "label": "Циклы нужны в первую очередь"
-      },
-      "ml_training_interval_days": {
-        "label": "Проверяйте максимум каждый"
-      }
-    },
-    "tab": {
-      "status": "Обзор",
-      "history": "Циклы",
-      "profiles": "Профили",
-      "settings": "Настройки",
-      "ml": "Обучение ML",
-      "advanced": "Дополнительно",
-      "diagnostics": "Диагностика",
-      "pp_overview": "Обзор",
-      "pp_phases": "Фазы",
-      "pp_cleanup": "Очистка",
-      "pp_manage": "Управлять",
-      "subtab_profiles": "Профили",
-      "subtab_phase_catalog": "Каталог фаз"
-    },
-    "btn": {
-      "save": "Сохранить",
-      "cancel": "Отмена",
-      "delete": "Удалить",
-      "close": "Закрыть",
-      "edit": "Редактировать",
-      "add": "Добавить",
-      "rebuild": "Восстановить конверты",
-      "record": "Начать запись",
-      "compare": "Сравнить",
-      "confirm": "Подтвердить",
-      "discard": "Отказаться",
-      "export": "Экспорт",
-      "import": "Импорт",
-      "merge": "Объединить",
-      "apply": "Применить",
-      "refresh": "Обновить",
-      "create": "Создать",
-      "select": "Выбрать",
-      "done": "Готово",
-      "reset": "Сбросить",
-      "trim": "Подрезать",
-      "split": "Разделить",
-      "review": "Обзор",
-      "inspect": "Осмотреть",
-      "label": "Пометить",
-      "save_settings": "Сохранить настройки",
-      "new_profile": "+ Новый профиль",
-      "new_group": "+ Новая группа",
-      "apply_label": "Применить метку",
-      "run_auto_label": "Запустить автоматическую маркировку",
-      "save_review": "Сохранить оценку",
-      "apply_trim": "Применить обрезку",
-      "apply_split": "Применить разделение",
-      "process_recording": "Сохранить запись",
-      "stop": "Остановить",
-      "process": "Обработать",
-      "add_device": "+ Добавить устройство",
-      "train_now": "Обучить сейчас",
-      "reset_to_defaults": "Сбросить настройки по умолчанию",
-      "reset_to_builtin": "Сброс на встроенные модели",
-      "save_preferences": "Сохранить предпочтения",
-      "save_panel_settings": "Сохранить настройки панели",
-      "save_access_control": "Сохранить контроль доступа",
-      "auto_label_cycles": "Авто-маркировка циклов",
-      "run_analysis": "🔍 Запустите анализ предложений",
-      "apply_all": "Применить все",
-      "show_only": "Показать только",
-      "dismiss": "Отклонить",
-      "dismiss_all": "Отклонить все",
-      "process_history": "Обработать сейчас",
-      "clear_debug": "Очистить данные отладки",
-      "wipe_all": "Стереть все данные",
-      "export_json": "Экспорт в JSON",
-      "import_json": "Импорт из JSON",
-      "correct": "Исправить…",
-      "ignore": "Игнорировать",
-      "add_phase": "+ Добавить фазу",
-      "new_phase": "+ Новая фаза",
-      "delete_profile": "Удалить профиль",
-      "rebuild_envelope": "Восстановить конверт",
-      "create_profile": "+ Создать профиль",
-      "rec_stop": "Остановить",
-      "pause_cycle": "Пауза",
-      "resume_cycle": "Возобновить",
-      "force_stop": "Принудительная остановка",
-      "save_phases": "Сохранить фазы",
-      "auto_detect_split": "Автообнаружение",
-      "clear_splits": "Очистить",
-      "submit_correction": "Отправить исправление",
-      "import_overwrite": "Импорт (перезаписывает данные)",
-      "use": "Использовать",
-      "manage": "Управлять",
-      "remove": "Удалить",
-      "delete_group": "Удалить группу",
-      "trim_split": "Обрезка/Разделение",
-      "convert_to_automation": "Превратить в автоматизацию",
-      "new_automation": "＋ Новая автоматизация",
-      "from_template": "Из шаблона ▾",
-      "on_cycle_started": "В начале цикла",
-      "on_cycle_finished": "Цикл завершен",
-      "save_group": "Сохранить группу"
+      "status_graph": "График статуса",
+      "storage_stats": "Статистика хранилища",
+      "tools_and_data": "Инструменты и данные",
+      "wipe_history": "Очистить историю"
     },
     "badge": {
-      "poor_fit": "плохое совпадение",
-      "fair_fit": "приемлемое совпадение",
-      "manual": "(выбирается вручную)",
-      "auto": "(автоматически обнаружено)",
-      "improving": "↗ улучшение",
+      "golden_cycle": "Записанный эталонный цикл",
+      "reviewed": "Рассмотрено",
+      "feedback_requested": "Запрошен отзыв",
+      "needs_review": "Требуется проверка",
+      "overrun": "Работал дольше обычного",
+      "artifact_tip": "Обнаружено {n} аномалий (например, дверь открылась в середине цикла) — откройте, чтобы увидеть их на графике",
+      "poor_fit_tip": "Непоследовательная история совпадений — рассмотрите возможность восстановления этого профиля",
+      "fair_fit_tip": "Умеренная согласованность совпадений — некоторые циклы, назначенные этому профилю, имеют более низкие оценки достоверности. Пометьте больше циклов или перезапишите профиль, чтобы повысить точность.",
+      "auto": "(авто-определение)",
+      "built_in_tag": "встроенный",
       "declining": "↘ снижается",
-      "steady": "→ устойчивый",
-      "using_tuned": "Использование настроенных весов",
-      "using_defaults": "Использование поставляемых настроек по умолчанию",
-      "built_in_tag": "встроенный"
+      "fair_fit": "приемлемое качество",
+      "improving": "↗ улучшается",
+      "manual": "(выбрано вручную)",
+      "poor_fit": "низкое качество",
+      "steady": "→ стабильно",
+      "using_defaults": "Использует стандартные настройки",
+      "using_tuned": "Использует настроенные веса"
     },
-    "status": {
-      "completed": "Завершено",
-      "interrupted": "Прервано",
-      "force_stopped": "Принудительно остановлено",
-      "active": "Активно",
-      "ambiguous": "Неоднозначно",
-      "clear": "Однозначно",
-      "working": "Работает…",
-      "recording": "Запись…",
-      "ready": "Готов к обработке",
-      "idle": "В ожидании",
-      "auto_detect": "Автообнаружение",
-      "fine_tuning": "настройка сейчас…",
-      "all_statuses": "Все статусы"
+    "btn": {
+      "add_timer": "+ Добавить таймер",
+      "remove_timer": "Удалить таймер",
+      "add_device_tip": "Добавить ещё одно устройство WashData",
+      "delete_group_tip": "Удалить только эту группу — профили участников останутся",
+      "run_analysis_tip": "Проанализируйте свои записанные циклы прямо сейчас и обновите предложения по настройке",
+      "reset_ml_models_tip": "Откажитесь от доработанных моделей и вернитесь к встроенным. WashData может переучить их позже.",
+      "add_device": "+ Добавить устройство",
+      "add_phase": "+ Добавить фазу",
+      "apply_all": "Применить всё",
+      "apply_label": "Применить метку",
+      "apply_split": "Применить разбивку",
+      "apply_trim": "Применить обрезку",
+      "auto_detect_split": "Авто-определение",
+      "auto_label_cycles": "Автоматически пометить циклы",
+      "cancel": "Отмена",
+      "clear_debug": "Очистить отладочные данные",
+      "clear_splits": "Очистить",
+      "close": "Закрыть",
+      "compare": "Сравнить",
+      "confirm": "Подтвердить",
+      "convert_to_automation": "Преобразовать в автоматизацию",
+      "correct": "Исправить…",
+      "create": "Создать",
+      "create_profile": "+ Создать профиль",
+      "delete": "Удалить",
+      "delete_group": "Удалить группу",
+      "delete_profile": "Удалить профиль",
+      "discard": "Отменить",
+      "dismiss": "Закрыть",
+      "done": "Готово",
+      "edit": "Редактировать",
+      "export": "Экспорт",
+      "export_json": "Экспорт в JSON",
+      "force_stop": "Принудительная остановка",
+      "from_template": "Из шаблона ▾",
+      "ignore": "Игнорировать",
+      "import_json": "Импорт из JSON",
+      "import_overwrite": "Импорт (перезаписать данные)",
+      "inspect": "Проверить",
+      "label": "Пометить",
+      "manage": "Управление",
+      "merge": "Объединить",
+      "new_automation": "＋ Новая автоматизация",
+      "new_group": "+ Новая группа",
+      "new_phase": "+ Новая фаза",
+      "new_profile": "+ Новый профиль",
+      "on_cycle_finished": "По завершении цикла",
+      "on_cycle_started": "При запуске цикла",
+      "pause_cycle": "Пауза",
+      "process": "Обработать",
+      "process_history": "Обработать сейчас",
+      "process_recording": "Сохранить запись",
+      "rebuild": "Перестроить огибающие",
+      "rebuild_envelope": "Перестроить огибающую",
+      "rec_stop": "Стоп",
+      "record": "Начать запись",
+      "refresh": "Обновить",
+      "remove": "Удалить",
+      "reset": "Сбросить",
+      "reset_to_builtin": "Сбросить до встроенных моделей",
+      "reset_to_defaults": "Сбросить до значений по умолчанию",
+      "resume_cycle": "Продолжить цикл",
+      "review": "Проверить",
+      "run_analysis": "🔍 Запустить анализ предложений",
+      "run_auto_label": "Запустить авто-пометку",
+      "save": "Сохранить",
+      "save_access_control": "Сохранить управление доступом",
+      "save_group": "Сохранить группу",
+      "save_panel_settings": "Сохранить настройки панели",
+      "save_phases": "Сохранить фазы",
+      "save_preferences": "Сохранить настройки",
+      "save_review": "Сохранить проверку",
+      "save_settings": "Сохранить настройки",
+      "select": "Выбрать",
+      "show_only": "Показать только",
+      "split": "Разбить",
+      "submit_correction": "Отправить исправление",
+      "train_now": "Обучить сейчас",
+      "trim": "Обрезать",
+      "trim_split": "Обрезать / Разбить",
+      "use": "Использовать",
+      "wipe_all": "Удалить все данные"
     },
-    "ml": {
-      "fit_strong": "Сильный",
-      "fit_good": "Хороший",
-      "fit_fair": "Удовлетворительный",
-      "fit_weak": "Слабый",
-      "fit_slight": "Легкий",
-      "fit_word": "соответствие",
-      "fine_tuned_at": "настроено {when}",
-      "personalized": "● Персонализировано для этой машины",
-      "builtin_models": "● Использование встроенных моделей"
+    "lbl": {
+      "timer_min": "мин",
+      "timer_msg_placeholder": "Сообщение (необязательно, {device}/{program}/{minutes})",
+      "timer_auto_pause": "Авто-пауза",
+      "actions": "Действия",
+      "activity": "Активность",
+      "administrators": "Администраторы",
+      "auto_fine_tune_off": "авто-точная настройка выключена",
+      "clock_time": "Время",
+      "compare_profiles": "Сравнить с профилями",
+      "confidence": "Достоверность",
+      "confidence_threshold": "Порог достоверности",
+      "correct_duration": "Исправить продолжительность (мин, необязательно)",
+      "correct_profile": "Исправить профиль",
+      "cost": "Стоимость",
+      "create_new_profile": "+ Создать новый профиль…",
+      "cycle_date_display": "Отображение даты цикла",
+      "cycle_health": "Качество цикла",
+      "cycles_count": "Циклы",
+      "date": "Дата",
+      "debug_traces": "Отладочные данные",
+      "default": "По умолчанию",
+      "default_access_level": "Уровень доступа по умолчанию для пользователей, не указанных ниже",
+      "default_other": "По умолчанию (другие устройства)",
+      "default_tab": "Вкладка по умолчанию при открытии панели",
+      "description": "Описание",
+      "duration": "Продолжительность",
+      "emphasis": "Акцент",
+      "enable_access_control": "Включить контроль доступа для каждого пользователя",
+      "energy": "Энергия",
+      "expected_duration": "Ожидаемая продолжительность (мин)",
+      "file_kb": "Файл (кБ)",
+      "gap_s": "Пауза (с)",
+      "head_trim": "Обрезка начала (с)",
+      "health": "Качество",
+      "hide_tabs": "Скрыть вкладки для не-администраторов",
+      "in_use": "Используется",
+      "json_data": "Данные JSON",
+      "label": "Сопоставленная программа",
+      "last_checked": "Последняя проверка:",
+      "load_from_file": "Загрузить из файла",
+      "manual_duration": "Ручная продолжительность (мин, необязательно)",
+      "mode_existing_profile": "Добавить к существующему профилю",
+      "mode_new_profile": "Создать новый профиль",
+      "new_profile_name": "Новое имя профиля",
+      "panel_default_tab": "Вкладка по умолчанию",
+      "phase_name": "Имя",
+      "power": "Мощность",
+      "profile": "Профиль",
+      "profile_name": "Имя профиля",
+      "progress": "Прогресс",
+      "read_only": "Только чтение",
+      "ref_cycle": "Эталонный цикл (необязательно)",
+      "refresh_interval": "Интервал обновления (с)",
+      "remaining": "Осталось",
+      "remove_label": "- Удалить метку -",
+      "rename_profile": "Переименовать профиль",
+      "resulting_profile": "Результирующий профиль",
+      "save_mode": "Режим сохранения",
+      "seconds_from_start": "Секунды от начала",
+      "select_profile": "Выбрать профиль",
+      "show_debug": "Показать отладочную карточку на странице статуса (достоверность, неоднозначность, лучшие кандидаты)",
+      "show_expected": "Показать ожидаемую кривую (сопоставленный профиль, оранжевый)",
+      "show_raw": "Показать необработанные показания датчика (несглаженные, серые)",
+      "status": "Статус",
+      "tail_trim": "Обрезка конца (с)",
+      "ungrouped": "Без группы",
+      "unlabelled": "Без метки",
+      "unlabelled_paren": "(без метки)",
+      "expected": "Ожидаемо",
+      "raw_socket": "Необработанный сокет",
+      "artifact_interruption": "Прерывание",
+      "artifact_low_power": "Низкая мощность",
+      "artifact_high_power": "Высокая мощность",
+      "artifact_anomaly": "Аномалия"
     },
     "modal": {
-      "label_cycle": "Отметить цикл",
+      "merge_cycles": "Объединить {n} циклов",
+      "auto_label": "Автоматическая пометка циклов",
+      "correct_feedback": "Исправить отзыв",
       "create_profile": "Создать профиль",
-      "new_phase": "Новая фаза",
+      "cycle": "Цикл",
       "edit_phase": "Редактировать фазу",
-      "process_recording": "Обработка записи",
-      "correct_feedback": "Корректировка обратной связи",
       "import_config": "Импортировать конфигурацию",
-      "auto_label": "Циклы автоматической маркировки",
-      "cycle": "Цикл"
+      "label_cycle": "Пометить цикл",
+      "new_phase": "Новая фаза",
+      "process_recording": "Обработать запись"
     },
-    "tag": {
-      "late_start": "Позднее начало",
-      "early_end": "Ранний конец",
-      "merged": "Объединенные циклы",
-      "split": "Разделённый цикл",
-      "noise": "Шум",
-      "wrong_profile": "Неправильный профиль",
-      "sensor_gap": "Пропуск датчика"
+    "msg": {
+      "near_duplicate_cluster": "Обнаружен почти повторяющийся кластер профилей. Группировка позволяет надежно выбирать одинаковые программы (например, одна и та же программа при разной температуре/отжиме).",
+      "coverage_gap": "последние циклы не имеют соответствующего профиля ({pct}% из последних 30).",
+      "consider_new_profile": "Рассмотрите возможность создания нового профиля.",
+      "group_not_cohesive": "Эти профили недостаточно похожи, чтобы их можно было надежно сгруппировать, поэтому сопоставление обрабатывает их индивидуально, пока вы не удалите выброс или не разделите группу.",
+      "group_modal_help": "Групповые программы одинаковой формы, отличающиеся температурой/отжимом (продолжительность может варьироваться). При сопоставлении группа оценивается как один кандидат, а затем выбирается наиболее подходящий член. Выберите хотя бы 2; наложение показывает, насколько они похожи.",
+      "showing_suggestions": "Показана настройка {count} с предложениями.",
+      "show_all_settings": "Показать все настройки",
+      "tuning_suggestions_available": "{count} предложение по настройке, доступное из наблюдаемых циклов. Они появляются рядом с соответствующими полями.",
+      "legacy_actions_title": "{count} устаревшее специальное действие все еще работает",
+      "old_actions_warning": "Настроен со старым редактором действий (теперь удален). Они по-прежнему срабатывают при событиях цикла, но их больше нельзя редактировать здесь. Преобразуйте их в обычную автоматику или удалите.",
+      "no_settings_match": "Нет настроек, соответствующих \"{q}\"",
+      "clear_debug_hint": "Удалите сохраненные данные отладки, чтобы освободить место.",
+      "wipe_history_warning": "Безвозвратно удалите все циклы и профили. Невозможно отменить.",
+      "export_description": "Экспортируйте все профили и циклы в JSON или восстановите данные из предыдущего экспорта.",
+      "log_buffer_hint": "Сначала самые новые · буферизует последние 500 записей ha_washdata с момента перезапуска · перетащите нижний край, чтобы изменить размер.",
+      "review_profile_tip": "Программа, под которой помечен этот цикл. Если автоматически определенная программа была неправильной, исправьте ее здесь — маркировка учит сопоставлению для будущих циклов.",
+      "review_quality_tip": "Насколько чист этот цикл. Хорошо = хрестоматийный пример этой программы; Плохо = обнаружено, но шумно или нетипично; Непригодный = обнаружен неправильно (объединен, усечен или поддельен). Управляет показателем работоспособности и тем, какие циклы разрешены для обучения модели.",
+      "review_recorded_tip": "Отметьте это как выбранный вручную эталонный цикл для своей программы — та же роль, что и цикл, записанный вручную. Ссылочные циклы всегда сохраняются, заполняют соответствующий шаблон и никогда не удаляются при очистке. (Это «золотой»/записанный флаг; оба — одно и то же.)",
+      "review_tags_tip": "Необязательные флаги, описывающие, что пошло не так в этом цикле, чтобы это можно было учесть при обучении и очистке.",
+      "review_notes_tip": "Свободные текстовые заметки для справки. Не используется при сопоставлении или обучении.",
+      "review_confirm_help": "Убедитесь, что этот цикл был обнаружен правильно. Ваши обзоры тренируют модель на вашей машине. Чем больше циклов вы подтвердите, тем лучше будет соответствие и оценка работоспособности. Достаточно быстрого ответа «Хорошо/Плохо».",
+      "review_notes_placeholder": "Примечания (необязательно)",
+      "compare_profiles_tip": "Наложите конверты других профилей на диаграмму выше, чтобы увидеть, какой из них лучше всего подходит для этого цикла.",
+      "artifact_header": "В этом цикле обнаружено {n} аномалий",
+      "artifact_footer": "Выделено на графике выше. Это временные артефакты (например, дверь открылась в середине цикла), а не обязательно проблемы.",
+      "profile_poor_health_detail": "Циклы, назначенные этому профилю, имеют непоследовательную форму или низкую достоверность. Рассмотрите возможность восстановления конверта или пересмотра помеченных циклов.",
+      "trend_duration_longer": "Тенденция увеличения продолжительности ({pct}%/цикл) — среднее значение за последнее время {avg}",
+      "trend_duration_shorter": "Тенденция к сокращению продолжительности ({pct}%/цикл) — среднее значение за последнее время {avg}",
+      "trend_energy_up": "Тенденция роста энергопотребления ({pct}%/цикл) — последнее среднее значение {avg}",
+      "trend_energy_down": "Тенденция к снижению энергопотребления ({pct}%/цикл)",
+      "performance_trend": "Тенденция производительности ({n} циклов)",
+      "maintenance_advisory": "Увеличение продолжительности/энергии может указывать на необходимость технического обслуживания устройства (например, удаление накипи, очистка фильтра).",
+      "manual_duration_hint": "Средняя/ожидаемая длина цикла профиля, используемая для оценки оставшегося времени. Измените, чтобы установить его; оставляя его без изменений, сохраняется текущее значение.",
+      "appliance_monitor": "Монитор прибора",
+      "auto_label_intro": "Назначить профили не помеченным циклам, чьё совпадение превышает порог.",
+      "cleanup_intro": "Все помеченные циклы наложены. Отметьте выбросы и удалите для очистки профиля.",
+      "compare_overlay_profiles": "Наложить профили (бледные)",
+      "compare_selected_cycles": "Выбранные циклы (чёткие) — показать / скрыть",
+      "feedback_prompt": "Подтвердите правильность, исправьте программу или проигнорируйте.",
+      "import_intro": "Загрузите экспортированный файл или вставьте JSON ниже.",
+      "live_chart_loading": "График мощности появится по мере поступления показаний.",
+      "loading": "Загрузка…",
+      "loading_curve": "Загрузка кривой…",
+      "loading_settings": "Загрузка настроек…",
+      "maintenance_requires_access": "Обслуживание и экспорт/импорт требуют полного доступа.",
+      "matching_tuning_intro": "При обучении WashData также регулирует, насколько сопоставление программ учитывает форму, продолжительность и энергию.",
+      "merge_intro": "Выбранные циклы объединяются в один (хронологический порядок; пропуски заполняются 0 Вт). Выберите результирующий профиль.",
+      "ml_intro": "WashData поставляется с умными моделями, которые работают сразу после установки.",
+      "ml_learned_intro": "Модели, настроенные под эту машину.",
+      "ml_loading": "загрузка ML…",
+      "ml_settings_intro": "Два независимых переключателя: один применяет модели во время работы цикла, другой позволяет WashData постепенно настраивать их под вашу машину.",
+      "no_cycles_match": "Нет циклов, соответствующих текущему фильтру.",
+      "no_cycles_profile": "Нет циклов для этого профиля.",
+      "no_cycles_yet": "Циклы пока не записаны.",
+      "no_device_selected": "Устройство не выбрано.",
+      "no_devices": "Устройства WashData ещё не настроены.",
+      "no_envelope": "Огибающей пока нет — перестройте после пометки циклов.",
+      "no_envelope_overlay": "Нет доступной огибающей для наложения.",
+      "no_fine_tuned": "Ещё ничего не настроено — WashData использует встроенные модели.",
+      "no_logs": "Журналы пока не буферизованы.",
+      "no_match_yet": "Попыток совпадения пока нет — заполняется во время работы цикла.",
+      "no_other_users": "Других пользователей Home Assistant не найдено.",
+      "no_phases": "Фазы не определены.",
+      "no_phases_assigned": "Фазы не назначены.",
+      "no_profiles_compare": "Нет профилей для сравнения.",
+      "no_profiles_overlay": "Нет профилей для наложения.",
+      "no_profiles_yet": "Профилей пока нет. Создайте из помеченного цикла.",
+      "no_profiles_yet_short": "Профилей пока нет.",
+      "no_split_points": "Точек разбивки пока нет.",
+      "no_suggestions": "Нет активных предложений.",
+      "pending_feedback": "Ожидает отзыва об обнаружении",
+      "phase_catalog_intro": "Именованные сегменты цикла (предстирка, нагрев, отжим…). Назначайте их профилю из его панели управления.",
+      "phase_ranges_intro": "Диапазоны фаз (минуты от начала цикла) наложены на среднюю кривую. Изменяйте значения для предварительного просмотра.",
+      "preferences_admin": "Настройки, панель и управление доступом",
+      "preferences_adv": "Настройки",
+      "prefs_personal": "Применяются только к вашей учётной записи Home Assistant.",
+      "profiles_intro": "Нажмите на профиль для статистики, фаз и очистки. Группируйте почти одинаковые программы (одинаковая форма/продолжительность, разная температура или отжим), чтобы сопоставление надёжно выбирало между ними.",
+      "rbac_hint": "Когда выключено, каждый пользователь Home Assistant имеет полный доступ (по умолчанию). Администраторы всегда имеют полный доступ и могут управлять всеми.",
+      "recent_logs": "Последние записи ha_washdata",
+      "recording_in_progress": "Запись в процессе",
+      "review_in_settings": "Просмотр в настройках",
+      "review_to_cycles": "Открыть очередь проверки циклов",
+      "saving_triggers_reload": "Сохранение вызывает перезагрузку интеграции. Объекты HA могут кратко отображаться как недоступные.",
+      "search_placeholder": "Поиск настроек…",
+      "see_recorder": "Смотрите виджет записи ниже",
+      "split_intro": "Нажмите на график, чтобы добавить или удалить точку разбивки, или авто-определите по паузам. Каждый результирующий сегмент может получить свой профиль.",
+      "storage_diagnostics": "Статистика хранилища, обслуживание, экспорт/импорт",
+      "trim_intro": "Перетащите красные маркеры или введите значения. Всё за пределами окна удаляется.",
+      "unsure_detected_prefix": "WashData не уверен, что обнаружил",
+      "updated": "Обновлено"
     },
-    "quality": {
-      "good": "Хороший",
-      "bad": "Плохой",
-      "unusable": "Непригодный для использования"
-    },
-    "access": {
-      "none": "Нет (скрыто)",
-      "read": "Читать",
-      "edit": "Редактировать",
-      "full": "Полный",
-      "inherit": "Наследовать"
+    "phase_desc": {
+      "pre_wash": "Первоначальное замачивание или предварительная обработка перед основной стиркой.",
+      "wash": "Основной цикл стирки с движением барабана и дополнительным подогревом.",
+      "wash_dw": "Основная моющая стирка с подогревом.",
+      "rinse": "Этап ополаскивания чистой водой. Эта фаза может повторяться несколько раз.",
+      "spin": "Высокоскоростная экстракция для удаления воды из загрузки.",
+      "spin_wd": "Высокоскоростная экстракция перед переходом к сушке.",
+      "soak": "Период низкоактивного замачивания между этапами активной стирки.",
+      "soak_dw": "Увеличенный период замачивания для сильно загрязнённой посуды.",
+      "anti_crease": "Периодические короткие вращения барабана после завершения для уменьшения складок.",
+      "heat_up": "Первоначальный прогрев нагревателя перед началом полной сушки.",
+      "drying": "Основной период нагреваемой сушки с вращением барабана.",
+      "cool_down": "Вращение без нагрева ближе к концу цикла.",
+      "anti_wrinkle": "Периодическое встряхивание барабана после цикла для уменьшения морщин.",
+      "sensor_check": "Короткая пауза при низком энергопотреблении во время измерения сухости.",
+      "drain_and_switch": "Переходный период от режима стирки к режиму сушки.",
+      "pre_rinse": "Первоначальное распыление перед стиркой моющим средством.",
+      "dry": "Этап сушки с использованием нагревателя и/или остаточного тепла.",
+      "sanitize": "Этап высокотемпературной очистки для программ санитарной обработки."
     },
     "health": {
-      "poor": "⚠ Плохое совпадение",
-      "fair": "Удовлетворительное совпадение",
-      "good": "✓ Хорошее совпадение"
-    },
-    "trend": {
-      "up": "Тенденция вверх",
-      "down": "Тенденция вниз"
-    },
-    "pref": {
-      "date_relative": "Относительное (например, 2 часа назад)",
-      "date_absolute": "Абсолютное (например, 14:32 2 июля)"
+      "good": "✓ Хорошее качество профиля",
+      "fair": "Приемлемое качество профиля",
+      "poor": "⚠ Низкое качество профиля"
     },
     "log": {
       "all_levels": "Все уровни"
+    },
+    "ml": {
+      "builtin_models": "● Использует встроенные модели",
+      "fit_fair": "Приемлемо",
+      "fit_good": "Хорошо",
+      "fit_slight": "Незначительное",
+      "fit_strong": "Сильное",
+      "fit_weak": "Слабое",
+      "fit_word": "подогнано",
+      "personalized": "● Настроено под эту машину"
+    },
+    "pref": {
+      "date_absolute": "Абсолютная (например, 14:32, 2 июля)",
+      "date_relative": "Относительная (например, 2 часа назад)"
+    },
+    "quality": {
+      "bad": "Плохо",
+      "good": "Хорошо",
+      "unusable": "Непригодный"
+    },
+    "status": {
+      "active": "Активно",
+      "all_statuses": "Все статусы",
+      "ambiguous": "Неоднозначно",
+      "auto_detect": "Авто-определение",
+      "clear": "Очистить",
+      "completed": "Завершено",
+      "fine_tuning": "точная настройка…",
+      "force_stopped": "Принудительно остановлено",
+      "idle": "Ожидание",
+      "interrupted": "Прервано",
+      "ready": "Готов к обработке",
+      "recording": "Запись"
+    },
+    "tab": {
+      "advanced": "Дополнительно",
+      "diagnostics": "Диагностика",
+      "history": "Циклы",
+      "ml": "Обучение ML",
+      "pp_cleanup": "Очистка",
+      "pp_manage": "Управление",
+      "pp_overview": "Обзор",
+      "pp_phases": "Фазы",
+      "profiles": "Профили",
+      "settings": "Настройки",
+      "status": "Обзор",
+      "subtab_phase_catalog": "Каталог фаз",
+      "subtab_profiles": "Профили"
+    },
+    "tag": {
+      "early_end": "Раннее завершение",
+      "late_start": "Позднее начало",
+      "merged": "Объединённые циклы",
+      "noise": "Шум",
+      "sensor_gap": "Пропуск датчика",
+      "split": "Разбитый цикл",
+      "wrong_profile": "Неверный профиль"
+    },
+    "toast": {
+      "access_saved": "Управление доступом сохранено",
+      "all_wiped": "Все данные удалены",
+      "analysis_complete_none": "Анализ завершён: нет новых предложений",
+      "auto_label_complete": "Автоматическая пометка завершена",
+      "automation_deleted": "Автоматизация удалена",
+      "correction_submitted": "Исправление отправлено",
+      "cycle_deleted": "Цикл удалён",
+      "cycle_force_stopped": "Цикл принудительно остановлен",
+      "cycle_labelled": "Цикл помечен",
+      "cycle_paused": "Цикл приостановлен",
+      "cycle_resumed": "Цикл возобновлён",
+      "cycle_trimmed": "Цикл обрезан",
+      "cycles_merged": "Циклы объединены",
+      "envelope_rebuilt": "Огибающая перестроена",
+      "envelopes_rebuilt": "Огибающие перестроены",
+      "export_downloaded": "Экспорт загружен",
+      "feedback_all_dismissed": "Все отзывы отклонены",
+      "feedback_confirmed": "Отзыв подтверждён",
+      "feedback_dismissed": "Отзыв отклонён",
+      "group_deleted": "Группа удалена",
+      "group_name_required": "Требуется имя группы",
+      "group_saved": "Группа сохранена",
+      "import_successful": "Импорт выполнен; интеграция перезагружается",
+      "json_required": "Требуются данные JSON",
+      "legacy_removed": "Устаревшие действия удалены",
+      "logs_exported": "Журналы экспортированы",
+      "matching_reverted": "Веса сопоставления сброшены до значений по умолчанию",
+      "min_2_profiles": "Выберите не менее 2 профилей для группы",
+      "ml_training_no_improvement": "Обучение завершено: базовая модель сохранена (нет улучшений)",
+      "models_reverted": "Модели устройства сброшены до базовых",
+      "name_required": "Требуется имя",
+      "no_split_found": "Пауз для разбивки не найдено",
+      "panel_settings_saved": "Настройки панели сохранены",
+      "phase_name_required": "Требуется имя фазы",
+      "phase_updated": "Фаза обновлена",
+      "phases_saved": "Фазы сохранены",
+      "preferences_saved": "Настройки сохранены",
+      "profile_name_required": "Требуется имя профиля",
+      "profile_renamed": "Профиль переименован",
+      "recording_discarded": "Запись отменена",
+      "recording_saved": "Запись сохранена в профиль",
+      "recording_started": "Запись начата",
+      "recording_stopped": "Запись остановлена",
+      "review_saved": "Проверка сохранена",
+      "settings_saved": "Настройки сохранены; интеграция перезагружается",
+      "suggestions_applied": "Предложения применены; интеграция перезагружается",
+      "suggestions_dismissed": "Предложения отклонены"
+    },
+    "trend": {
+      "down": "Нисходящая тенденция",
+      "up": "Восходящая тенденция"
     }
   }
 }

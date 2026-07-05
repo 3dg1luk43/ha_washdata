@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Fillimi i ciklit",
-        "cycle_finish": "Përfundimi i ciklit",
-        "cycle_live": "Progresi i drejtpërdrejtë"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Makinë larëse",
@@ -88,198 +81,6 @@
         "bread_maker": "Bukëbërës",
         "pump": "Pompë / Pompë kullimi",
         "other": "Të tjera (të avancuara)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(i paetiketuar)",
-        "create_new_profile": "Krijo një profil të ri",
-        "remove_label": "Hiq etiketën",
-        "no_reference_cycle": "(Nuk ka cikël referimi)",
-        "all_device_types": "Të gjitha llojet e pajisjeve",
-        "current_suffix": "(aktual)",
-        "phase_builtin_suffix": "(I integruar)",
-        "phase_none_available": "Nuk ka faza të disponueshme.",
-        "phase_other_device_types": "Llojet e tjera të pajisjeve:",
-        "settings_deprecation_warning": "⚠️ **Lloji i vjetër i pajisjes:** {device_type} është planifikuar të hiqet në një version të ardhshëm. Tubacioni i përputhjes së WashData nuk prodhon rezultate të besueshme për këtë klasë pajisjesh. Integrimi juaj vazhdon të funksionojë gjatë periudhës së zhvlerësimit; për të heshtur këtë paralajmërim, kaloni **Lloji i pajisjes** më poshtë në një nga llojet e mbështetura (Makinë larëse, Tharëse, Kombinim larëse-tharëse, Pjatalarëse, Fryerje me ajër, Bukëbërës ose Pompë) ose në **Të tjera (të avancuara)** nëse pajisja juaj nuk përputhet me asnjë nga llojet e mbështetur. **Të tjera (të avancuara)** dërgon qëllimisht standarde gjenerike që nuk janë të akorduara për ndonjë pajisje specifike, kështu që do t'ju duhet të konfiguroni vetë pragjet, afatet kohore dhe parametrat që përputhen; të gjitha cilësimet tuaja ekzistuese ruhen kur kaloni.",
-        "editor_select_info": "Zgjidhni 1 cikël për ta ndarë ose 2+ cikle për t'i bashkuar.",
-        "editor_select_info_split": "Zgjidhni 1 cikël për ta ndarë.",
-        "editor_select_info_merge": "Zgjidhni 2+ cikle për t'i bashkuar.",
-        "editor_select_info_delete": "Zgjidhni 1+ cikël(e) për t'i fshirë.",
-        "no_cycles_recorded": "Nuk është regjistruar ende asnjë cikël.",
-        "profile_summary_line": "- **{name}**: {count} cikle, mesatarisht {avg} min",
-        "no_profiles_created": "Nuk janë krijuar ende profile.",
-        "phase_preview": "Pamja paraprake e fazës",
-        "phase_preview_no_curve": "Kurba e profilit mesatar nuk është ende e disponueshme. Ekzekuto/etiketo më shumë cikle për këtë profil.",
-        "average_power_curve": "Kurba e fuqisë mesatare",
-        "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} cikle, ~{duration} min mesatarisht)",
-        "profile_option_short_fmt": "{name} ({count} cikle, ~{duration} min)",
-        "deleted_cycles_from_profile": "U fshinë {count} cikle nga {profile}.",
-        "not_enough_data_graph": "Nuk ka të dhëna të mjaftueshme për të krijuar grafikun.",
-        "no_profiles_found": "Nuk u gjet asnjë profil.",
-        "cycle_info_fmt": "Cikli: {start}, {duration} min, etiketë: {label}",
-        "top_candidates_header": "### Kandidatët kryesorë",
-        "tbl_profile": "Profili",
-        "tbl_confidence": "Besueshmëria",
-        "tbl_correlation": "Korrelacioni",
-        "tbl_duration_match": "Përputhja e kohëzgjatjes",
-        "detected_profile": "Profili i zbuluar",
-        "estimated_duration": "Kohëzgjatja e parashikuar",
-        "actual_duration": "Kohëzgjatja aktuale",
-        "choose_action": "__Zgjidhni një veprim më poshtë:__",
-        "tbl_count": "Nr.",
-        "tbl_avg": "Mes.",
-        "tbl_min": "Min",
-        "tbl_max": "Maks",
-        "tbl_energy_avg": "Energjia (mes.)",
-        "tbl_energy_total": "Energjia (total)",
-        "tbl_consistency": "Konz.",
-        "tbl_last_run": "Ekzekutimi i fundit",
-        "graph_legend_title": "Legjenda e grafikut",
-        "graph_legend_body": "Shiriti blu përfaqëson diapazonin minimal dhe maksimal të tërheqjes së fuqisë së vëzhguar. Linja tregon kurbën e fuqisë mesatare.",
-        "recording_preview": "Pamja paraprake e regjistrimit",
-        "trim_start": "Fillimi i prerjes",
-        "trim_end": "Fundi i prerjes",
-        "split_preview_title": "Pamja paraprake e ndarjes",
-        "split_preview_found_fmt": "U gjetën {count} segmente.",
-        "split_preview_confirm_fmt": "Kliko Konfirmo për ta ndarë këtë cikël në {count} cikle të veçanta.",
-        "merge_preview_title": "Pamja paraprake e bashkimit",
-        "merge_preview_joining_fmt": "Po bashkohen {count} cikle. Boshllëqet do të mbushen me lexime 0 W.",
-        "editor_delete_preview_title": "Pamja paraprake e fshirjes",
-        "editor_delete_preview_intro": "Ciklet e zgjedhura do të fshihen përgjithmonë:",
-        "editor_delete_preview_confirm": "Klikoni Konfirmo për t'i fshirë përgjithmonë këto regjistrime cikli.",
-        "no_power_preview": "*Nuk ka të dhëna për fuqinë e disponueshme për shikim paraprak.*",
-        "profile_comparison": "Krahasimi i profilit",
-        "actual_cycle_label": "Ky cikël (aktual)",
-        "storage_usage_header": "Përdorimi i hapësirës ruajtëse",
-        "storage_file_size": "Madhësia e skedarit",
-        "storage_cycles": "Ciklet",
-        "storage_profiles": "Profilet",
-        "storage_debug_traces": "Gjurmët e korrigjimit",
-        "overview_suffix": "Vështrim i përgjithshëm",
-        "phase_preview_for_profile": "Pamja paraprake e fazës për profilin",
-        "current_ranges_header": "Intervalet aktuale",
-        "assign_phases_help": "Përdorni veprimet e mëposhtme për të shtuar, modifikuar, fshirë ose ruajtur intervalet.",
-        "profile_summary_header": "Përmbledhje e profilit",
-        "recent_cycles_header": "Ciklet e fundit",
-        "trim_cycle_preview_title": "Pamja paraprake e prerjes së ciklit",
-        "trim_cycle_preview_no_data": "Nuk ka të dhëna për fuqinë për këtë cikël.",
-        "trim_cycle_preview_kept_suffix": "mbajtur",
-        "table_program": "Programi",
-        "table_when": "Kur",
-        "table_length": "Kohëzgjatja",
-        "table_match": "Përputhja",
-        "table_profile": "Profili",
-        "table_cycles": "Ciklet",
-        "table_avg_length": "Mes. kohëzgjatje",
-        "table_last_run": "Ekzekutimi i fundit",
-        "table_avg_energy": "Mes. energji",
-        "table_detected_program": "Programi i zbuluar",
-        "table_confidence": "Besueshmëria",
-        "table_reported": "Raportuar"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Ndaj ciklin (gjej boshllëqet)",
-        "merge": "Bashko ciklet (bashko fragmentet)",
-        "delete": "Fshi ciklet"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Zbulo automatikisht boshllëqet e pushimit",
-        "manual": "Vulë(a) kohore manuale"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Mirëmbajtja: ripërpuno dhe optimizo të dhënat",
-        "clear_debug_data": "Pastro të dhënat e korrigjimit (liro hapësirë)",
-        "wipe_history": "Fshi TË GJITHA të dhënat për këtë pajisje (të pakthyeshme)",
-        "export_import": "Eksporto/importo JSON me cilësimet (kopjo/ngjit)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "Eksporto të gjitha të dhënat",
-        "import": "Importo/bashko të dhënat"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Etiketimi automatik i cikleve të vjetra",
-        "select_cycle_to_label": "Etiketoni ciklin specifik",
-        "select_cycle_to_delete": "Fshi ciklin",
-        "interactive_editor": "Redaktuesi interaktiv bashkim/ndarje",
-        "trim_cycle": "Priti të dhënat e ciklit"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Krijo një profil të ri",
-        "edit_profile": "Redakto/riemërto profilin",
-        "delete_profile": "Fshi profilin",
-        "profile_stats": "Statistikat e profilit",
-        "cleanup_profile": "Pastro historikun – grafiku dhe fshirja",
-        "assign_phases": "Cakto intervalet e fazave"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Krijo një fazë të re",
-        "edit_custom_phase": "Modifiko fazën",
-        "delete_custom_phase": "Fshi fazën"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Emërto dhe apliko fazat",
-        "cancel": "Kthehu pa ndryshime"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Shto interval fazor",
-        "edit_range": "Redakto intervalin e fazës",
-        "delete_range": "Fshi intervalin e fazës",
-        "clear_ranges": "Pastro të gjitha intervalet",
-        "auto_detect_ranges": "Zbulo automatikisht fazat",
-        "save_ranges": "Ruaj dhe kthehu"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Rifresko statusin",
-        "stop_recording": "Ndalo regjistrimin (ruaj dhe përpuno)",
-        "start_recording": "Fillo regjistrimin e ri",
-        "process_recording": "Përpuno regjistrimin e fundit (pre dhe ruaj)",
-        "discard_recording": "Hiq regjistrimin e fundit"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Krijo një profil të ri",
-        "existing_profile": "Shto në profilin ekzistues",
-        "discard": "Hiq regjistrimin"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Konfirmo – zbulimi i saktë",
-        "correct": "Korrigjo – zgjidhni programin/kohëzgjatjen",
-        "ignore": "Injoro – cikël i rremë pozitiv/me zhurmë",
-        "delete": "Fshi – hiq nga historiku"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Cakto pikën e fillimit",
-        "set_end": "Cakto pikën e fundit",
-        "reset": "Rivendos në kohëzgjatje të plotë",
-        "apply": "Apliko prerjen",
-        "cancel": "Anulo"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "Faza aktuale"
       },
-      "wash_phase": {
-        "name": "Faza"
-      },
       "profile_cycle_count": {
         "name": "Numri i cikleve të profilit {profile_name}",
         "unit_of_measurement": "cikle"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s duhet të jetë më i madh se trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "Nuk ka cikël aktiv për të ndaluar ose rifilluar."
     }
   },
   "panel": {
-    "tab": {
-      "status": "Vështrim i përgjithshëm",
-      "history": "Ciklet",
-      "profiles": "Profilet",
-      "settings": "Cilësimet",
-      "ml": "Trajnim ML",
-      "advanced": "E avancuar",
-      "diagnostics": "Diagnostifikim",
-      "pp_overview": "Vështrim i përgjithshëm",
-      "pp_phases": "Fazat",
-      "pp_cleanup": "Pastrim",
-      "pp_manage": "Menaxho",
-      "subtab_profiles": "Profilet",
-      "subtab_phase_catalog": "Katalogu i Fazave"
-    },
-    "btn": {
-      "save": "Ruaj",
-      "cancel": "Anulo",
-      "delete": "Fshije",
-      "close": "Mbyll",
-      "edit": "Redakto",
-      "add": "Shto",
-      "rebuild": "Rindërto zarfat",
-      "record": "Fillo regjistrimin",
-      "compare": "Krahaso",
-      "confirm": "Konfirmo",
-      "discard": "Hidhe",
-      "export": "Eksporto",
-      "import": "Importo",
-      "merge": "Bashko",
-      "apply": "Apliko",
-      "refresh": "Rifresko",
-      "create": "Krijo",
-      "select": "Zgjidh",
-      "done": "U krye",
-      "reset": "Rivendos",
-      "trim": "Pre",
-      "split": "Ndaj",
-      "review": "Rishiko",
-      "inspect": "Inspekto",
-      "label": "Etiketoje",
-      "save_settings": "Ruaj cilësimet",
-      "new_profile": "+ Profil i ri",
-      "new_group": "+ Grup i ri",
-      "apply_label": "Apliko etiketën",
-      "run_auto_label": "Ekzekuto auto-etiketimin",
-      "save_review": "Ruaj rishikimin",
-      "apply_trim": "Apliko prerjen",
-      "apply_split": "Apliko ndarjen",
-      "process_recording": "Ruaj regjistrimin",
-      "stop": "Ndalo",
-      "process": "Përpuno",
-      "add_device": "+ Shto pajisje",
-      "train_now": "Trajno tani",
-      "reset_to_defaults": "Rivendos në parazgjedhje",
-      "reset_to_builtin": "Rivendos në modelet e integruara",
-      "save_preferences": "Ruaj preferencat",
-      "save_panel_settings": "Ruaj cilësimet e panelit",
-      "save_access_control": "Ruaj kontrollin e aksesit",
-      "auto_label_cycles": "Auto-etiketim ciklesh",
-      "run_analysis": "🔍 Ekzekuto analizë sugjerimesh",
-      "apply_all": "Apliko të gjitha",
-      "show_only": "Shfaq vetëm",
-      "dismiss": "Hiqe",
-      "dismiss_all": "Hiq të gjitha",
-      "process_history": "Përpuno tani",
-      "clear_debug": "Pastro të dhënat e korrigjimit",
-      "wipe_all": "Fshi të gjitha të dhënat",
-      "export_json": "Eksporto në JSON",
-      "import_json": "Importo nga JSON",
-      "correct": "Korrigjo…",
-      "ignore": "Injoro",
-      "add_phase": "+ Shto fazë",
-      "new_phase": "+ Fazë e re",
-      "delete_profile": "Fshi profilin",
-      "rebuild_envelope": "Rindërto zarfin",
-      "create_profile": "+ Krijo profil",
-      "rec_stop": "Ndalo",
-      "pause_cycle": "Pauzo",
-      "resume_cycle": "Rifillo",
-      "force_stop": "Ndalim me forcë",
-      "save_phases": "Ruaj fazat",
-      "auto_detect_split": "Zbulim automatik",
-      "clear_splits": "Pastro",
-      "submit_correction": "Paraqit korrigjimin",
-      "import_overwrite": "Importo (mbishkruan të dhënat)",
-      "use": "Përdor",
-      "manage": "Menaxho",
-      "remove": "Hiq",
-      "delete_group": "Fshi grupin",
-      "trim_split": "Pre / Ndaj",
-      "convert_to_automation": "Konverto në automatizim",
-      "new_automation": "＋ Automatizim i ri",
-      "from_template": "Nga shablloni ▾",
-      "on_cycle_started": "Kur cikli filloi",
-      "on_cycle_finished": "Kur cikli përfundoi",
-      "save_group": "Ruaj grupin"
-    },
     "hdr": {
-      "status": "Statusi",
-      "live_power": "Fuqia e drejtpërdrejtë",
-      "manual_recording": "Regjistrimi manual",
-      "tools_and_data": "Mjetet dhe të dhënat",
-      "phase_catalog": "Katalogu i Fazave",
-      "storage_stats": "Statistikat e ruajtjes",
-      "maintenance": "Veprimet e mirëmbajtjes",
-      "export_import": "Eksporti / Importi",
+      "toggle_sidebar": "Ndrysho shiritin anësor të Asistentit në Shtëpi",
       "logs": "Regjistrat",
-      "my_preferences": "Preferencat e mia",
-      "panel_settings": "Cilësimet e panelit (të gjithë përdoruesit)",
       "access_control": "Kontrolli i aksesit",
-      "ml_smart_learning": "Mësimi i zgjuar",
-      "ml_settings_card": "Cilësimet",
-      "ml_learned": "Çfarë ka mësuar WashData",
-      "ml_matching_tuning": "Rregullimi i saktë i përputhjes së programit",
-      "display": "Paraqitja",
-      "status_graph": "Grafiku i statusit",
-      "diagnostics_pref": "Diagnostifikim",
-      "logs_diagnostics": "Diagnostifikim",
-      "process_history": "Historia e procesit",
-      "clear_debug": "Pastro gjurmët e korrigjimit",
-      "wipe_history": "Fshi historikun",
-      "automations": "Automatizime",
-      "automation_open": "Hap në redaktuesin e automatizimit",
       "automation_delete": "Fshi këtë automatizim",
       "automation_needs_review": "Ky cikël ka nevojë për rishikim",
+      "automation_open": "Hap në redaktuesin e automatizimit",
       "automation_review_this_cycle": "Rishiko këtë cikël",
-      "no_automations": "Asnjë automatizim ende nuk e referon këtë pajisje."
-    },
-    "lbl": {
-      "power": "Fuqia",
-      "progress": "Progresi",
-      "remaining": "E mbetur",
-      "duration": "Kohëzgjatja",
-      "energy": "Energjia",
-      "profile": "Profili",
+      "automations": "Automatizime",
+      "clear_debug": "Pastro gjurmët e korrigjimit",
+      "diagnostics_pref": "Diagnostikim",
+      "display": "Shfaqje",
+      "export_import": "Eksporto / Importo",
+      "live_power": "Fuqia live",
+      "logs_diagnostics": "Diagnostikim",
+      "maintenance": "Veprime mirëmbajtjeje",
+      "manual_recording": "Regjistrim manual",
+      "ml_learned": "Çfarë ka mësuar WashData",
+      "ml_matching_tuning": "Rregullim i hollë i përputhjes së programit",
+      "ml_settings_card": "Cilësimet",
+      "ml_smart_learning": "Të mësuarit inteligjent",
+      "my_preferences": "Preferencat e mia",
+      "no_automations": "Asnjë automatizim nuk i referohet kësaj pajisjeje ende.",
+      "panel_settings": "Cilësimet e panelit",
+      "phase_catalog": "Katalog fazash",
+      "process_history": "Historiku i procesit",
       "status": "Statusi",
-      "date": "Data",
-      "confidence": "Besueshmëria",
-      "health": "Cilësia",
-      "cost": "Kostoja",
-      "program": "Programi",
-      "cycle_health": "Cilësia e ciklit",
-      "activity": "Aktiviteti",
-      "unlabelled": "E paetiketuar",
-      "unlabelled_paren": "(e paetiketuar)",
-      "emphasis": "Theksimi",
-      "default": "E paracaktuar",
-      "in_use": "Në përdorim",
-      "profile_name": "Emri i profilit",
-      "ref_cycle": "Cikli i referencës (opsionale)",
-      "manual_duration": "Kohëzgjatja manuale (min, opsionale)",
-      "phase_name": "Emri i fazës",
-      "description": "Përshkrimi",
-      "correct_profile": "Profili i saktë",
-      "correct_duration": "Kohëzgjatja e saktë (min, opsionale)",
-      "load_from_file": "Ngarko nga skedari",
-      "json_data": "Të dhënat JSON",
-      "expected_duration": "Kohëzgjatja e pritshme (min)",
-      "rename_profile": "Riemërto profilin",
-      "select_profile": "Zgjidh profilin",
-      "confidence_threshold": "Pragu i besueshmërisë",
-      "resulting_profile": "Profili që rezulton",
-      "new_profile_name": "Emri i ri i profilit",
-      "save_mode": "Mënyra e ruajtjes",
-      "head_trim": "Prerja e fillimit (s)",
-      "tail_trim": "Prerja e fundit (s)",
-      "gap_s": "Boshllëku (s)",
-      "start": "Fillim",
-      "end": "Fund",
-      "quality": "Cilësia",
-      "golden_reference": "Cikli referues i regjistruar",
-      "compare_profiles": "Krahaso me profilet",
-      "tags": "Etiketat",
-      "notes": "Shënime",
-      "default_tab": "Skeda e parazgjedhur kur hapet paneli",
-      "cycle_date_display": "Shfaqja e datës së ciklit",
-      "refresh_interval": "Intervali i rifreskimit (s)",
-      "panel_default_tab": "Skeda e parazgjedhur",
-      "hide_tabs": "Fshih skedat për jo-administratorët",
-      "enable_access_control": "Aktivizo kontrollin e aksesit për çdo përdorues",
-      "default_access_level": "Niveli i parazgjedhur për përdoruesit që nuk renditen më poshtë",
-      "administrators": "Administratorët",
-      "default_other": "Parazgjedhja (pajisje të tjera)",
-      "show_expected": "Shfaq mbivendosjen e pritur të kurbës (profili i përputhur, portokalli)",
-      "show_raw": "Shfaq leximet e papërpunuara të sensorit (të paglatura, gri)",
-      "show_debug": "Shfaq kartën e korrigjimit të përputhjes drejtpërdrejt në faqen e statusit (besueshmëria, paqartësia, kandidatët kryesorë)",
-      "mode_new_profile": "Krijo profil të ri",
-      "mode_existing_profile": "Shto në profilin ekzistues",
-      "auto_fine_tune_on": "rregullimi automatik aktiv (rreth {hour}:00)",
-      "auto_fine_tune_off": "rregullimi automatik joaktiv",
-      "last_checked": "Kontrolli i fundit:",
-      "remove_label": "- Hiq etiketën -",
-      "create_new_profile": "+ Krijo profil të ri…",
-      "read_only": "Vetëm për lexim",
-      "actions": "Veprimet",
-      "cycles_count": "Ciklet",
-      "debug_traces": "Gjurmët e korrigjimit",
-      "file_kb": "Skedari (kB)",
-      "label": "Etiketa",
-      "seconds_from_start": "Sekonda nga fillimi",
-      "clock_time": "Ora",
-      "ungrouped": "I pagrupuar"
+      "status_graph": "Grafiku i statusit",
+      "storage_stats": "Statistikat e ruajtjes",
+      "tools_and_data": "Mjete dhe të dhëna",
+      "wipe_history": "Fshi historikun"
     },
     "badge": {
-      "poor_fit": "përputhje e dobët",
-      "fair_fit": "përputhje mesatare",
-      "manual": "(e zgjedhur me dorë)",
-      "auto": "(zbulohet automatikisht)",
-      "improving": "↗ duke u përmirësuar",
+      "golden_cycle": "Cikli referues i regjistruar",
+      "reviewed": "Shqyrtuar",
+      "feedback_requested": "Kërkohet koment",
+      "needs_review": "Ka nevojë për rishikim",
+      "overrun": "Zgjati më shumë se zakonisht",
+      "artifact_tip": "U zbuluan {n} anomali (p.sh. dera e hapur në mes të ciklit) — hapeni për t'i parë ato në grafik",
+      "poor_fit_tip": "Histori jokonsistente e ndeshjeve — merrni parasysh rindërtimin e këtij profili",
+      "fair_fit_tip": "Konsistencë e moderuar e ndeshjes — disa cikle të caktuara për këtë profil kanë rezultate më të ulëta besimi. Etiketoni më shumë cikle ose riregjistroni profilin për të përmirësuar saktësinë.",
+      "auto": "(zbuluar automatikisht)",
+      "built_in_tag": "i integruar",
       "declining": "↘ në rënie",
-      "steady": "→ e qëndrueshme",
-      "using_tuned": "Peshat e rregulluara aktive",
-      "using_defaults": "Peshat e parazgjedhura aktive",
-      "built_in_tag": "i integruar"
+      "fair_fit": "cilësi e pranueshme",
+      "improving": "↗ në rritje",
+      "manual": "(zgjedhur manualisht)",
+      "poor_fit": "cilësi e keqe",
+      "steady": "→ i qëndrueshëm",
+      "using_defaults": "Duke përdorur vlerat e parazgjedhura",
+      "using_tuned": "Duke përdorur peshat e rregulluara"
     },
-    "status": {
-      "completed": "E përfunduar",
-      "interrupted": "E ndërprerë",
-      "force_stopped": "Ndaluar me forcë",
-      "active": "Aktiv",
-      "ambiguous": "I paqartë",
-      "clear": "E qartë",
-      "working": "Punon…",
-      "recording": "Po regjistron…",
-      "ready": "Gati për përpunim",
-      "idle": "Në pritje",
-      "auto_detect": "Zbulim automatik",
-      "fine_tuning": "rregullim i imët tani…",
-      "all_statuses": "Të gjitha statuset"
+    "btn": {
+      "add_timer": "+ Shto kohëmatës",
+      "remove_timer": "Hiq kohëmatësin",
+      "add_device_tip": "Shto një pajisje tjetër WashData",
+      "delete_group_tip": "Fshije vetëm këtë grup - profilet e anëtarëve mbahen",
+      "run_analysis_tip": "Analizoni ciklet tuaja të regjistruara tani dhe rifresko sugjerimet e akordimit",
+      "reset_ml_models_tip": "Hidhni modelet e rregulluara mirë dhe kthehuni te ato të integruara. WashData mund t'i rimësojë ato më vonë.",
+      "add_device": "+ Shto pajisje",
+      "add_phase": "+ Shto fazë",
+      "apply_all": "Apliko të gjitha",
+      "apply_label": "Apliko etiketën",
+      "apply_split": "Apliko ndarjen",
+      "apply_trim": "Apliko prerjen",
+      "auto_detect_split": "Zbulo automatikisht",
+      "auto_label_cycles": "Etiketim automatik i cikleve",
+      "cancel": "Anulo",
+      "clear_debug": "Pastro të dhënat e korrigjimit",
+      "clear_splits": "Pastro",
+      "close": "Mbyll",
+      "compare": "Krahaso",
+      "confirm": "Konfirmo",
+      "convert_to_automation": "Konverto në automatizim",
+      "correct": "Korrigjo…",
+      "create": "Krijo",
+      "create_profile": "+ Krijo profil",
+      "delete": "Fshi",
+      "delete_group": "Fshi grupin",
+      "delete_profile": "Fshi profilin",
+      "discard": "Hidh poshtë",
+      "dismiss": "Injorojë",
+      "done": "Gatë",
+      "edit": "Modifiko",
+      "export": "Eksporto",
+      "export_json": "Eksporto në JSON",
+      "force_stop": "Ndalim i detyruar",
+      "from_template": "Nga shablloni ▾",
+      "ignore": "Injorojë",
+      "import_json": "Importo nga JSON",
+      "import_overwrite": "Importo (mbishkruan të dhënat)",
+      "inspect": "Inspekto",
+      "label": "Etiketë",
+      "manage": "Menaxho",
+      "merge": "Bashko",
+      "new_automation": "＋ Automatizim i ri",
+      "new_group": "+ Grup i ri",
+      "new_phase": "+ Fazë e re",
+      "new_profile": "+ Profil i ri",
+      "on_cycle_finished": "Kur cikli përfundon",
+      "on_cycle_started": "Kur cikli fillon",
+      "pause_cycle": "Ndalo",
+      "process": "Proceso",
+      "process_history": "Proceso tani",
+      "process_recording": "Ruaj regjistrimin",
+      "rebuild": "Rindërto zarfet",
+      "rebuild_envelope": "Rindërto zarfin",
+      "rec_stop": "Ndalo",
+      "record": "Fillo regjistrimin",
+      "refresh": "Rifresko",
+      "remove": "Hiq",
+      "reset": "Rivendos",
+      "reset_to_builtin": "Rivendos te modelet e integruara",
+      "reset_to_defaults": "Rivendos vlerat e parazgjedhura",
+      "resume_cycle": "Vazhdo ciklin",
+      "review": "Rishiko",
+      "run_analysis": "🔍 Ekzekuto analizën e sugjerimeve",
+      "run_auto_label": "Ekzekuto etiketimin automatik",
+      "save": "Ruaj",
+      "save_access_control": "Ruaj kontrollin e aksesit",
+      "save_group": "Ruaj grupin",
+      "save_panel_settings": "Ruaj cilësimet e panelit",
+      "save_phases": "Ruaj fazat",
+      "save_preferences": "Ruaj preferencat",
+      "save_review": "Ruaj rishikimin",
+      "save_settings": "Ruaj cilësimet",
+      "select": "Zgjidh",
+      "show_only": "Shfaq vetëm",
+      "split": "Ndaj",
+      "submit_correction": "Dërgo korrigjimin",
+      "train_now": "Trajno tani",
+      "trim": "Priti",
+      "trim_split": "Priti / Ndaj",
+      "use": "Përdor",
+      "wipe_all": "Fshi të gjitha të dhënat"
     },
-    "ml": {
-      "fit_strong": "E fortë",
-      "fit_good": "E mirë",
-      "fit_fair": "Mesatare",
-      "fit_weak": "E dobët",
-      "fit_slight": "E lehtë",
-      "fit_word": "përshtatje",
-      "fine_tuned_at": "rregulluar imët {when}",
-      "personalized": "● Personalizuar për këtë makinë",
-      "builtin_models": "● Modelet e integruara aktive"
-    },
-    "toast": {
-      "settings_saved": "Cilësimet u ruajtën; integrimi po ringarkohet",
-      "preferences_saved": "Preferencat u ruajtën",
-      "panel_settings_saved": "Cilësimet e panelit u ruajtën",
-      "access_saved": "Kontrolli i aksesit u ruajt",
-      "profile_created": "Profili \"{name}\" u krijua",
-      "profile_deleted": "Profili \"{name}\" u fshi",
-      "profile_renamed": "Profili u riemërua",
-      "phases_saved": "Fazat u ruajtën",
-      "phase_created": "Faza \"{name}\" u krijua",
-      "phase_deleted": "Faza \"{name}\" u fshi",
-      "phase_updated": "Faza u përditësua",
-      "recording_started": "Regjistrimi filloi",
-      "recording_stopped": "Regjistrimi u ndal",
-      "recording_discarded": "Regjistrimi u hodh",
-      "recording_saved": "Regjistrimi u ruajt në profil",
-      "export_downloaded": "Eksporti u shkarkua",
-      "logs_exported": "Regjistrat u eksportuan",
-      "import_successful": "Importi i suksesshëm; integrimi po ringarkohet",
-      "envelopes_rebuilt": "Zarfat u rindërtuan",
-      "envelope_rebuilt": "Zarfi u rindërtua",
-      "suggestions_applied": "Sugjerimet u aplikuan; integrimi po ringarkohet",
-      "suggestions_dismissed": "Sugjerimet u hodhën poshtë",
-      "auto_label_complete": "Etiketimi automatik përfundoi",
-      "cycle_labelled": "Cikli u etiketua",
-      "cycle_deleted": "Cikli u fshi",
-      "cycles_deleted": "{count} cikël(e) u fshinë",
-      "cycle_trimmed": "Cikli u pre",
-      "cycles_merged": "Ciklet u bashkuan",
-      "review_saved": "Rishikimi u ruajt",
-      "feedback_confirmed": "Reagimet u konfirmuan",
-      "feedback_dismissed": "Reagimet u hodhën poshtë",
-      "feedback_all_dismissed": "Të gjitha reagimet u hodhën poshtë",
-      "correction_submitted": "Korrigjimi u paraqit",
-      "group_saved": "Grupi u ruajt",
-      "group_deleted": "Grupi u fshi",
-      "automation_deleted": "Automatizimi u fshi",
-      "legacy_removed": "Veprimet e vjetra u hoqën",
-      "cycle_paused": "Cikli u vendos në pauzë",
-      "cycle_resumed": "Cikli rifilloi",
-      "cycle_force_stopped": "Cikli u ndal me forcë",
-      "ml_training_promoted": "Trajnimi përfundoi: {count} model(e) të promovuara",
-      "ml_training_no_improvement": "Trajnimi përfundoi: modeli bazë u ruajt (pa përmirësim)",
-      "matching_reverted": "Peshat e përputhjes u kthyen në parazgjedhje",
-      "models_reverted": "Modelet e pajisjes u kthyen në bazë",
-      "analysis_complete": "Analiza përfundoi: {count} sugjerime",
-      "analysis_complete_none": "Analiza përfundoi: nuk ka sugjerime të reja",
-      "debug_cleared": "U pastruan {count} gjurmë korrigjimi",
-      "all_wiped": "Të gjitha të dhënat u fshinë",
-      "no_split_found": "Nuk u gjetën boshllëqe pushimi për ndarje",
-      "group_name_required": "Kërkohet emri i grupit",
-      "min_2_profiles": "Zgjidhni të paktën 2 profile për një grup",
-      "profile_name_required": "Kërkohet emri i profilit",
-      "phase_name_required": "Kërkohet emri i fazës",
-      "name_required": "Kërkohet emri",
-      "json_required": "Kërkohen të dhëna JSON",
-      "save_failed": "Ruajtja dështoi: {error}",
-      "delete_failed": "Fshirja dështoi: {error}",
-      "apply_failed": "Aplikimi dështoi: {error}",
-      "rebuild_failed": "Rindërtimi dështoi: {error}",
-      "start_failed": "Fillimi dështoi: {error}",
-      "stop_failed": "Ndalimi dështoi: {error}",
-      "discard_failed": "Heqja dështoi: {error}",
-      "trim_failed": "Prerja dështoi: {error}",
-      "split_failed": "Ndarja dështoi: {error}",
-      "merge_failed": "Bashkimi dështoi: {error}",
-      "create_failed": "Krijimi dështoi: {error}",
-      "update_failed": "Përditësimi dështoi: {error}",
-      "rename_failed": "Riemërtimi dështoi: {error}",
-      "revert_failed": "Rikthimi dështoi: {error}",
-      "training_failed": "Trajnimi dështoi: {error}",
-      "export_failed": "Eksporti dështoi: {error}",
-      "import_failed": "Importi dështoi: {error}",
-      "auto_label_failed": "Etiketimi automatik dështoi: {error}",
-      "analysis_failed": "Analiza dështoi: {error}",
-      "auto_detect_failed": "Zbulimi automatik dështoi: {error}",
-      "error": "Gabim: {error}",
-      "could_not_load_cycle": "Cikli nuk mund të ngarkohej: {error}",
-      "pause_failed": "Pauzimi dështoi: {error}",
-      "label_failed": "Etiketimi dështoi: {error}",
-      "invalid_json": "\"{key}\" nuk është JSON i vlefshëm — rregullojeni ose pastroni fushën përpara se ta ruani.",
-      "processed": "Përpunuar {bits}",
-      "split_complete": "Ndarë në {count} cikle"
-    },
-    "msg": {
-      "no_devices": "Nuk është konfiguruar ende asnjë pajisje WashData.",
-      "no_device_selected": "Asnjë pajisje e zgjedhur.",
-      "loading": "Po ngarkohet…",
-      "loading_settings": "Po ngarkon cilësimet…",
-      "live_chart_loading": "Grafiku i fuqisë drejtpërdrejtë shfaqet kur arrijnë leximet.",
-      "no_cycles_match": "Asnjë cikël nuk përputhet me filtrin aktual.",
-      "no_cycles_yet": "Nuk është regjistruar ende asnjë cikël.",
-      "no_profiles_yet": "Nuk ka ende profile. Krijo një nga një cikël i etiketuar.",
-      "no_profiles_yet_short": "Nuk ka ende profile.",
-      "no_logs": "Asnjë regjistrim nuk është ruajtur ende.",
-      "no_phases": "Nuk ka faza të përcaktuara.",
-      "no_phases_assigned": "Nuk janë caktuar faza.",
-      "no_split_points": "Ende nuk ka pika ndarjeje.",
-      "no_envelope": "Nuk ka ende zarf - rindërto pas etiketimit të cikleve.",
-      "no_envelope_overlay": "Nuk ka zarf të disponueshëm për mbivendosje.",
-      "no_other_users": "Nuk u gjetën përdorues të tjerë të Home Assistant.",
-      "maintenance_requires_access": "Mirëmbajtja dhe eksporti/importi kërkojnë akses të plotë.",
-      "loading_curve": "Po ngarkohet kurba…",
-      "compare_selected_cycles": "Ciklet e zgjedhura (të ngurta) — shfaq / fshih",
-      "compare_overlay_profiles": "Profilet e mbivendosjes (të zbehta)",
-      "no_profiles_compare": "Nuk ka profile për të krahasuar.",
-      "no_cycles_profile": "Nuk ka cikle për këtë profil.",
-      "saving_triggers_reload": "Ruajtja shkakton një ringarkim të integrimit. Entitetet HA mund të shfaqen shkurtimisht si të padisponueshme.",
-      "prefs_personal": "Këto zbatohen vetëm për llogarinë tuaj Home Assistant.",
-      "no_match_yet": "Nuk ka ende përpjekje për përputhje — kjo mbushet gjatë një cikli aktiv.",
-      "no_fine_tuned": "Asgjë ende e rregulluar imët — WashData po përdor modelet e saj të integruara.",
-      "ml_learned_intro": "Modele të rregulluara imët me këtë makinë. Çdo gjë që nuk renditet përdor modelin e integruar të besueshëm.",
-      "ml_settings_intro": "Dy çelësa të pavarur: njëri i aplikon modelet ndërsa një cikël funksionon, tjetri lejon që WashData t'i rregullojë ato në pajisjen tuaj me kalimin e kohës.",
-      "ml_intro": "WashData dërgohet me modele inteligjente që zbulojnë ciklet, përputhin programet dhe vlerësojnë kohën dhe energjinë — ato funksionojnë menjëherë.",
-      "matching_tuning_intro": "Kur mëson, WashData rregullon gjithashtu se sa përputhja e programit peshon formën e një cikli kundrejt kohëzgjatjes dhe energjisë së tij.",
-      "phase_catalog_intro": "Segmente të emërtuara të një cikli (paralarje, ngrohje, centrifugim…). Caktoji ato në një profil nga paneli i tij i kontrollit.",
-      "phase_ranges_intro": "Gama e fazave (minuta nga fillimi i ciklit) të mbivendosura në kurbën mesatare. Modifiko vlerat për të parë paraprakisht drejtpërdrejt.",
-      "cleanup_intro": "Çdo cikël i etiketuar mbivendoset. Shëno pikat e jashtme dhe fshiji për të pastruar profilin.",
-      "split_intro": "Kliko grafikun për të shtuar ose hequr një pikë ndarjeje ose për të zbuluar automatikisht nga boshllëqet e pushimit.",
-      "trim_intro": "Zvarrit dorezat e kuqe ose fut vlerat. Gjithçka jashtë dritares hiqet.",
-      "import_intro": "Ngarko një skedar të eksportuar ose ngjit një ngarkesë JSON më poshtë.",
-      "auto_label_intro": "Cakto profile për cikle të paetiketuara, besueshmëria e përputhjes së të cilave kalon pragun.",
-      "merge_intro": "Ciklet e zgjedhura kombinohen në një (rendi kronologjik; boshllëqet e mbushura me 0 W). Zgjidh profilin që rezulton.",
-      "enough_data": "Të dhëna të mjaftueshme për të mësuar ({current}/{min} cikle).",
-      "collecting_data": "Mbledhja e të dhënave — {need} cikël{plural} shtesë para se të fillojë rregullimi imët ({current}/{min}).",
-      "updated": "Përditësuar {time}",
-      "appliance_monitor": "Monitori i pajisjes",
-      "ml_loading": "po ngarkon ML…",
-      "see_recorder": "Shiko miniaplikacionin e regjistruesit më poshtë",
-      "review_in_settings": "Rishiko te Cilësimet",
-      "storage_diagnostics": "Statistikat e ruajtjes, mirëmbajtja, eksporti/importi",
-      "recent_logs": "Regjistrimet e fundit ha_washdata",
-      "preferences_adv": "Preferencat",
-      "preferences_admin": "Preferencat, paneli dhe kontrolli i aksesit",
-      "review_to_cycles": "Hap radhën e rishikimit të cikleve",
-      "pending_feedback": "Reagimet në pritje për zbulim",
-      "recording_in_progress": "Regjistrimi në vazhdim",
-      "unsure_detected_prefix": "WashData nuk është i sigurt se ka zbuluar",
-      "no_suggestions": "Nuk ka sugjerime aktive.",
-      "no_profiles_overlay": "Nuk ka profile për mbivendosje.",
-      "compare_cycles_title": "Krahaso {count} cikle",
-      "profiles_intro": "Klikoni një profil për statistika, faza dhe pastrim. Gruponi programet pothuajse identike (e njëjta formë/kohëzgjatje, temperaturë ose centrifugë të ndryshme) që përputhja të zgjedhë me besueshmëri mes tyre.",
-      "search_placeholder": "Kërko cilësimet…",
-      "automations_intro": "WashData ndez ngjarjet {start} / {end} dhe ekspozon entitete, kështu që njoftimet dhe veprimet ndërtohen më mirë si automatizime normale të Home Assistant. Automatizimite që përdorin këtë pajisje shfaqen më poshtë.",
-      "notify_services_hint": "Përdorni ID-të e shërbimit {entity} (të ndara me presje për disa). Variablat e shabllonit: {vars}.",
-      "rbac_hint": "Kur është i fikur, çdo përdorues i Home Assistant ka akses të plotë (e parazgjedhura). Administratorët kanë gjithmonë akses të plotë dhe mund të menaxhojnë të gjithë.",
-      "feedback_prompt": "Konfirmoni nëse ishte i saktë, korrigjoni programin ose injoroni."
+    "lbl": {
+      "timer_min": "min",
+      "timer_msg_placeholder": "Mesazh (opsionale, {device}/{program}/{minutes})",
+      "timer_auto_pause": "Auto-pauzë",
+      "actions": "Veprime",
+      "activity": "Aktivitet",
+      "administrators": "Administratorë",
+      "auto_fine_tune_off": "rregullimi automatik i hollë çaktivizuar",
+      "clock_time": "Koha e orës",
+      "compare_profiles": "Krahaso me profilet",
+      "confidence": "Besueshmëria",
+      "confidence_threshold": "Pragu i besueshmërisë",
+      "correct_duration": "Korrigjo kohëzgjatjen (min, opsionale)",
+      "correct_profile": "Profili i korrigjuar",
+      "cost": "Kosto",
+      "create_new_profile": "+ Krijo profil të ri…",
+      "cycle_date_display": "Shfaqja e datës së ciklit",
+      "cycle_health": "Shëndeti i ciklit",
+      "cycles_count": "Cikle",
+      "date": "Data",
+      "debug_traces": "Gjurmë korrigjimi",
+      "default": "Parazgjedhja",
+      "default_access_level": "Niveli i parazgjedhur për përdoruesit e palistuara më poshtë",
+      "default_other": "Parazgjedhja (pajisje të tjera)",
+      "default_tab": "Skeda e parazgjedhur kur hapet paneli",
+      "description": "Përshkrimi",
+      "duration": "Kohëzgjatja",
+      "emphasis": "Theksimi",
+      "enable_access_control": "Aktivizo kontrollin e aksesit për çdo përdorues",
+      "energy": "Energjia",
+      "expected_duration": "Kohëzgjatja e pritshme (min)",
+      "file_kb": "Skedari (kB)",
+      "gap_s": "Ndërrimi (s)",
+      "head_trim": "Prerja e kreut (s)",
+      "health": "Shëndeti",
+      "hide_tabs": "Fshih skedat për jo-administratorët",
+      "in_use": "Në përdorim",
+      "json_data": "Të dhëna JSON",
+      "label": "Program i përputhshëm",
+      "last_checked": "Kontrolluar herën e fundit:",
+      "load_from_file": "Ngarko nga skedari",
+      "manual_duration": "Kohëzgjatja manuale (min, opsionale)",
+      "mode_existing_profile": "Shto te profili ekzistues",
+      "mode_new_profile": "Krijo profil të ri",
+      "new_profile_name": "Emër i ri profili",
+      "panel_default_tab": "Skeda e parazgjedhur",
+      "phase_name": "Emri",
+      "power": "Fuqia",
+      "profile": "Profili",
+      "profile_name": "Emri i profilit",
+      "progress": "Progresi",
+      "read_only": "Vetëm lexim",
+      "ref_cycle": "Cikli referues (opsionale)",
+      "refresh_interval": "Intervali i rifreskimit (s)",
+      "remaining": "I mbetur",
+      "remove_label": "- Hiq etiketën -",
+      "rename_profile": "Riemërto profilin",
+      "resulting_profile": "Profili rezultues",
+      "save_mode": "Modaliteti i ruajtjes",
+      "seconds_from_start": "Sekonda nga fillimi",
+      "select_profile": "Zgjidh profilin",
+      "show_debug": "Shfaq kartën e korrigjimit live në faqen e Statusit (besueshmëria, paqartësia, kandidatët kryesorë)",
+      "show_expected": "Shfaq mbivendosjen e kurbës së pritshme (profili i përputhshëm, portokalli)",
+      "show_raw": "Shfaq leximet e papërpunuara të sensorit (të palëmuara, gri)",
+      "status": "Statusi",
+      "tail_trim": "Prerja e fundit (s)",
+      "ungrouped": "I pagrupuar",
+      "unlabelled": "I paetiketuar",
+      "unlabelled_paren": "(i paetiketuar)",
+      "expected": "I pritshëm",
+      "raw_socket": "Fole e papërpunuar",
+      "artifact_interruption": "Ndërprerje",
+      "artifact_low_power": "Fuqi e ulët",
+      "artifact_high_power": "Fuqi e lartë",
+      "artifact_anomaly": "Anomali"
     },
     "modal": {
-      "label_cycle": "Etiketoje ciklin",
-      "create_profile": "Krijo profilin",
-      "new_phase": "Fazë e re",
-      "edit_phase": "Modifiko fazën",
-      "process_recording": "Përpuno regjistrimin",
-      "correct_feedback": "Korrigjo reagimet",
-      "import_config": "Importo konfigurimin",
+      "merge_cycles": "Bashko {n} cikle",
       "auto_label": "Etiketim automatik i cikleve",
-      "cycle": "Cikli"
+      "correct_feedback": "Korrigjo komentin",
+      "create_profile": "Krijo profilin",
+      "cycle": "Cikli",
+      "edit_phase": "Modifiko fazën",
+      "import_config": "Importo konfigurimin",
+      "label_cycle": "Etiketoje ciklin",
+      "new_phase": "Fazë e re",
+      "process_recording": "Proceso regjistrimin"
     },
-    "tag": {
-      "late_start": "Fillim me vonesë",
-      "early_end": "Fund i hershëm",
-      "merged": "Cikle të bashkuara",
-      "split": "Cikël i ndarë",
-      "noise": "Zhurmë",
-      "wrong_profile": "Profil i gabuar",
-      "sensor_gap": "Boshllëk sensori"
+    "msg": {
+      "near_duplicate_cluster": "u zbulua grupi i profilit pothuajse dublikatë. Grupimi lejon që përputhja të zgjedhë në mënyrë të besueshme midis pamjeve të ngjashme (p.sh. i njëjti program në temperaturë/centrifugim të ndryshëm).",
+      "coverage_gap": "ciklet e fundit nuk kanë asnjë profil që përputhet ({pct}% e 30 të fundit).",
+      "consider_new_profile": "Konsideroni krijimin e një profili të ri.",
+      "group_not_cohesive": "Këto profile nuk janë mjaft të ngjashme për t'u grupuar në mënyrë të besueshme, kështu që përputhja i trajton ato individualisht derisa të hiqni pjesën e jashtme ose të ndani grupin.",
+      "group_modal_help": "Gruponi programe me të njëjtën formë që ndryshojnë në temperaturë/centrifugim (kohëzgjatja mund të ndryshojë). Përputhja shënon grupin si një kandidat dhe më pas zgjedh anëtarin më të përshtatshëm. Zgjidhni të paktën 2; mbivendosja tregon se sa të ngjashëm janë.",
+      "showing_suggestions": "Po shfaq cilësimin e {count} me sugjerime.",
+      "show_all_settings": "Shfaq të gjitha cilësimet",
+      "tuning_suggestions_available": "Ofrohet {count} sugjerim akordimi nga ciklet e vëzhguara. Ato shfaqen pranë fushave përkatëse.",
+      "legacy_actions_title": "Veprimi i personalizuar i trashëguar i {count} është ende duke u ekzekutuar",
+      "old_actions_warning": "Konfiguruar me redaktuesin e vjetër të veprimeve (tani i hequr). Ato ende ndezin në ngjarjet e ciklit, por nuk mund të modifikohen më këtu. Shndërrojini ato në një automatizim normal ose hiqni ato.",
+      "no_settings_match": "Asnjë cilësim nuk përputhet me \"{q}\"",
+      "clear_debug_hint": "Hiqni të dhënat e ruajtura të korrigjimit për të liruar hapësirën.",
+      "wipe_history_warning": "Fshini përgjithmonë të gjitha ciklet dhe profilet. Nuk mund të zhbëhet.",
+      "export_description": "Eksporto të gjitha profilet dhe ciklet në JSON ose rivendos nga një eksportim i mëparshëm.",
+      "log_buffer_hint": "Më i riu i pari · ruan 500 rekordet e fundit ha_washdata që nga rinisja · zvarrit skajin e poshtëm për të ndryshuar madhësinë.",
+      "review_profile_tip": "Programi i këtij cikli është etiketuar si. Nëse programi i zbuluar automatikisht ishte i gabuar, korrigjoni atë këtu - etiketimi mëson përputhjen për ciklet e ardhshme.",
+      "review_quality_tip": "Sa i pastër është ky cikël. Mirë = një shembull teksti i këtij programi; E keqe = e zbuluar por e zhurmshme ose atipike; I papërdorshëm = i zbuluar gabimisht (i bashkuar, i cunguar ose i rremë). Drejton rezultatin e shëndetit dhe cilat cikle lejohen për të trajnuar modelin.",
+      "review_recorded_tip": "Shënojeni këtë si një cikël referimi të zgjedhur vetë për programin e tij - i njëjti rol si një cikël i regjistruar manualisht. Ciklet e referencës mbahen gjithmonë, vendosin shabllonin që përputhet dhe nuk hiqen kurrë nga pastrimi. (Ky është flamuri \"i artë\"/regjistruar; të dy janë e njëjta gjë.)",
+      "review_tags_tip": "Flamujt opsionalë që përshkruajnë atë që shkoi keq me këtë cikël, kështu që trajnimi dhe pastrimi mund të jenë përgjegjës për këtë.",
+      "review_notes_tip": "Shënime me tekst të lirë për referencën tuaj. Nuk përdoret nga përputhja ose trajnimi.",
+      "review_confirm_help": "Konfirmoni nëse ky cikël është zbuluar saktë. Komentet tuaja e trajnojnë modelin në kompjuterin tuaj - sa më shumë cikle të konfirmoni, aq më i mirë do të jetë përputhja dhe rezultatet shëndetësore. Mjafton një mirë/e keqe e shpejtë.",
+      "review_notes_placeholder": "Shënime (opsionale)",
+      "compare_profiles_tip": "Mbivendosni zarfat e tjerë të profileve në grafikun e mësipërm për të parë se cili i përshtatet më mirë këtij cikli.",
+      "artifact_header": "{n} anomali të zbuluara gjatë këtij cikli",
+      "artifact_footer": "E theksuar në grafikun e mësipërm. Këto janë objekte kalimtare (p.sh. dera e hapur në mes të ciklit), jo domosdoshmërisht probleme.",
+      "profile_poor_health_detail": "Ciklet e caktuara për këtë profil kanë forma jokonsistente ose besim të ulët. Merrni parasysh rindërtimin e zarfit ose rishikimin e cikleve të etiketuara.",
+      "trend_duration_longer": "Kohëzgjatja në tendencë më e gjatë ({pct}%/cikël) — mesatare e fundit {avg}",
+      "trend_duration_shorter": "Kohëzgjatja në tendencë më e shkurtër ({pct}%/cikël) - mesatare e fundit {avg}",
+      "trend_energy_up": "Tendenca e energjisë në rritje ({pct}%/cikël) - mesatarisht kohët e fundit {avg}",
+      "trend_energy_down": "Tendenca e energjisë në rënie ({pct}%/cikël)",
+      "performance_trend": "Tendenca e performancës ({n} cikle)",
+      "maintenance_advisory": "Rritja e kohëzgjatjes/energjisë mund të tregojë nevojën e mirëmbajtjes së pajisjes (p.sh. heqja e gurëve, pastrimi i filtrit).",
+      "manual_duration_hint": "Gjatësia mesatare/e pritshme e ciklit të profilit, e përdorur për vlerësimet e kohës së mbetur. Ndrysho për ta vendosur atë; duke e lënë të pandryshuar ruan vlerën aktuale.",
+      "appliance_monitor": "Monitor i pajisjes",
+      "auto_label_intro": "Cakto profile te ciklet e paetiketuara që besueshmëria e tyre e përputhjes tejkalon pragun.",
+      "cleanup_intro": "Çdo cikël i etiketuar mbivendosur. Shëno outlier-ët dhe fshi për të pastruar profilin.",
+      "compare_overlay_profiles": "Mbivendos profilet (të zbetura)",
+      "compare_selected_cycles": "Ciklet e zgjedhura (solide) — shfaq / fshih",
+      "feedback_prompt": "Konfirmo nëse ishte i saktë, korrigjo programin ose injorojë.",
+      "import_intro": "Ngarko një skedar të eksportuar ose ngjit një ngarkesë JSON më poshtë.",
+      "live_chart_loading": "Grafiku i fuqisë live shfaqet ndërsa mbërrijnë leximet.",
+      "loading": "Duke ngarkuar…",
+      "loading_curve": "Duke ngarkuar kurbën…",
+      "loading_settings": "Duke ngarkuar cilësimet…",
+      "maintenance_requires_access": "Mirëmbajtja dhe eksporti/importi kërkojnë akses të plotë.",
+      "matching_tuning_intro": "Gjatë të mësuarit, WashData rregullon gjithashtu sa shumë përputhja e programit peshohet sipas formës kundrejt kohëzgjatjes dhe energjisë.",
+      "merge_intro": "Ciklet e zgjedhura kombinohen në një (rend kronologjik; boshllëqet mbushen me 0 W). Zgjidhni profilin që rezulton.",
+      "ml_intro": "WashData vjen me modele inteligjente që funksionojnë menjëherë.",
+      "ml_learned_intro": "Modele të rregulluara mirë për këtë makinë.",
+      "ml_loading": "duke ngarkuar ML…",
+      "ml_settings_intro": "Dy çelësa të pavarur: njëri aplikon modelet ndërsa një cikël ekzekutohet, tjetri lejon WashData t'i rregullojë ato me kalimin e kohës.",
+      "no_cycles_match": "Asnjë cikël nuk përputhet me filtrin aktual.",
+      "no_cycles_profile": "Asnjë cikël për këtë profil.",
+      "no_cycles_yet": "Asnjë cikël i regjistruar ende.",
+      "no_device_selected": "Asnjë pajisje e zgjedhur.",
+      "no_devices": "Asnjë pajisje WashData e konfiguruar ende.",
+      "no_envelope": "Asnjë zarf ende - rindërtoni pas etiketimit të cikleve.",
+      "no_envelope_overlay": "Asnjë zarf i disponueshëm për mbivendosje.",
+      "no_fine_tuned": "Asgjë e rregulluar mirë ende — WashData po përdor modelet e integruara.",
+      "no_logs": "Asnjë regjistrim i mbajtur në bufer ende.",
+      "no_match_yet": "Asnjë tentativë përputhje ende - kjo plotësohet gjatë një cikli aktiv.",
+      "no_other_users": "Nuk u gjetën përdorues të tjerë të Asistentit në Shtëpi.",
+      "no_phases": "Asnjë fazë e përcaktuar.",
+      "no_phases_assigned": "Asnjë fazë e caktuar.",
+      "no_profiles_compare": "Asnjë profil për krahasim.",
+      "no_profiles_overlay": "Asnjë profil për mbivendosje.",
+      "no_profiles_yet": "Asnjë profil ende. Krijo një nga një cikël i etiketuar.",
+      "no_profiles_yet_short": "Asnjë profil ende.",
+      "no_split_points": "Asnjë pikë ndarjeje ende.",
+      "no_suggestions": "Asnjë sugjerim aktiv.",
+      "pending_feedback": "Koment në pritje të zbulimit",
+      "phase_catalog_intro": "Segmente të emërtuara të një cikli (Para-larje, Ngrohje, Centrifugim…). Caktojini ato profilit nga paneli i kontrollit.",
+      "phase_ranges_intro": "Intervalët e fazës (minuta nga fillimi i ciklit) mbivendosur mbi kurbën mesatare. Redakto vlerat për pamje paraprake live.",
+      "preferences_admin": "Preferencat, paneli dhe kontrolli i aksesit",
+      "preferences_adv": "Preferencat",
+      "prefs_personal": "Këto vlejnë vetëm për llogarinë tuaj të Asistentit në Shtëpi.",
+      "profiles_intro": "Kliko një profil për statistika, faza dhe pastrim. Grupo programe pothuajse identike (të njëjtën formë/kohëzgjatje, temperaturë ose centrifugim të ndryshëm) kështu që përputhja zgjedh me besueshmëri ndërmjet tyre.",
+      "rbac_hint": "Kur çaktivizohet, çdo përdorues i Asistentit në Shtëpi ka akses të plotë (parazgjedhja). Administratorët kanë gjithmonë akses të plotë dhe mund të menaxhojnë të gjithë.",
+      "recent_logs": "Regjistrimet e fundit ha_washdata",
+      "recording_in_progress": "Regjistrimi në progres",
+      "review_in_settings": "Rishiko në Cilësime",
+      "review_to_cycles": "Hap radhën e rishikimit të Cikleve",
+      "saving_triggers_reload": "Ruajtja aktivizon ringarkimin e integrimit. Njësitë HA mund të shfaqen shkurtimisht si të padisponueshme.",
+      "search_placeholder": "Kërko cilësime…",
+      "see_recorder": "Shiko veglën e regjistruesit më poshtë",
+      "split_intro": "Kliko grafikun për të shtuar ose hequr një pikë ndarjeje, ose zbulo automatikisht sipas ndërprerjeve. Çdo segment që rezulton mund të ketë profilin e tij.",
+      "storage_diagnostics": "Statistikat e ruajtjes, mirëmbajtja, eksporti/importi",
+      "trim_intro": "Zvarrit dorëzat e kuqe ose futo vlerat. Gjithçka jashtë dritares hiqet.",
+      "unsure_detected_prefix": "WashData nuk është i sigurt se ka zbuluar",
+      "updated": "Përditësuar"
     },
-    "quality": {
-      "good": "Mirë",
-      "bad": "Keq",
-      "unusable": "I papërdorshëm"
-    },
-    "access": {
-      "none": "Asnjë (i fshehur)",
-      "read": "Lexim",
-      "edit": "Redaktim",
-      "full": "I plotë",
-      "inherit": "Trashëgo"
+    "phase_desc": {
+      "pre_wash": "Thithja fillestare ose trajtimi paraprak përpara larjes kryesore.",
+      "wash": "Cikli kryesor i larjes me lëvizjen e kazanit dhe ngrohje opsionale.",
+      "wash_dw": "Larja kryesore me detergjent me ngrohje.",
+      "rinse": "Faza e shpëlarjes me ujë të pastër. Kjo fazë mund të përsëritet disa herë.",
+      "spin": "Nxjerrja me shpejtësi të lartë për të hequr ujin nga ngarkesa.",
+      "spin_wd": "Nxjerrja me shpejtësi të lartë përpara kalimit të tharjes.",
+      "soak": "Periudha e njomjes me aktivitet të ulët midis fazave aktive të larjes.",
+      "soak_dw": "Periudha e zgjatur e njomjes për tokë të rëndë.",
+      "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
+      "heat_up": "Ngrohja fillestare e ngrohësit përpara se të fillojë tharja e plotë.",
+      "drying": "Periudha kryesore e tumbullimit me ngrohje.",
+      "cool_down": "Rrotullimi pa ngrohje afër fundit të ciklit.",
+      "anti_wrinkle": "Rrotullimi periodik pas ciklit për të reduktuar rrudhat.",
+      "sensor_check": "Pauzë e shkurtër me fuqi të ulët ndërsa matet thatësia.",
+      "drain_and_switch": "Periudha e tranzicionit nga mënyra e larjes në tharje.",
+      "pre_rinse": "Spërkatja fillestare përpara larjes me detergjent.",
+      "dry": "Faza e tharjes duke përdorur ngrohës dhe/ose nxehtësi të mbetur.",
+      "sanitize": "Faza e pastrimit me temperaturë të lartë për programet e higjenizimit."
     },
     "health": {
-      "poor": "⚠ Përputhje e dobët",
-      "fair": "Përputhje mesatare",
-      "good": "✓ Përputhje e mirë"
-    },
-    "trend": {
-      "up": "Trend rritës",
-      "down": "Trend zbritës"
-    },
-    "pref": {
-      "date_relative": "Relative (p.sh. 2 orë më parë)",
-      "date_absolute": "Absolute (p.sh. 14:32 më 2 korrik)"
+      "good": "✓ Cilësi e mirë e profilit",
+      "fair": "Cilësi e pranueshme e profilit",
+      "poor": "⚠ Cilësi e keqe e profilit"
     },
     "log": {
       "all_levels": "Të gjitha nivelet"
     },
-    "section": {
-      "basic": {
-        "label": "Bazë",
-        "intro": "Identiteti kryesor dhe gjërat thelbësore që kanë nevojë shumicën e konfigurimeve."
-      },
-      "detection": {
-        "label": "Zbulimi",
-        "intro": "Si zbulohet një cikël si fillim, ekzekutim dhe mbarim."
-      },
-      "matching": {
-        "label": "Përputhja",
-        "intro": "Si përputhen ciklet e përfunduara me profilet e mësuara dhe etiketohen."
-      },
-      "timing": {
-        "label": "Koha dhe Mbrojtja",
-        "intro": "Kadenca e sfondit, kujdestari jashtë linje dhe mirëmbajtja."
-      },
-      "anti_wrinkle": {
-        "label": "Kundër rrudhave",
-        "intro": "Modaliteti kundër rrudhave zbulon pulset e tharëses pas fazës kryesore të nxehtësisë."
-      },
-      "delay": {
-        "label": "Vonesa e fillimit",
-        "intro": "Zbulimi i fillimit me vonesë identifikon kur një pajisje është e ndezur, por nuk e ka filluar ende ciklin e saj."
-      },
-      "triggers": {
-        "label": "Këmbëza & Dera",
-        "intro": "Sinjalet e jashtme opsionale: një këmbëzë fundi, një sensor dere, një ndërprerës pauzë dhe kujtues shkarkimi."
-      },
-      "notifications": {
-        "label": "Njoftimet",
-        "intro": "Konfiguro kur dhe si njoftohesh për ngjarjet e ciklit."
-      },
-      "ml_training": {
-        "label": "Trajnim ML",
-        "intro": "Modele inteligjente opsionale që personalizojnë zbulimin dhe kohën për këtë pajisje."
-      }
+    "ml": {
+      "builtin_models": "● Duke përdorur modelet e integruara",
+      "fit_fair": "I pranueshëm",
+      "fit_good": "Mirë",
+      "fit_slight": "I lehtë",
+      "fit_strong": "I fortë",
+      "fit_weak": "I dobët",
+      "fit_word": "përshtatje",
+      "personalized": "● I personalizuar për këtë makinë"
     },
-    "setting": {
-      "name": {
-        "label": "Emri i pajisjes"
-      },
-      "device_type": {
-        "label": "Lloji i pajisjes"
-      },
-      "power_sensor": {
-        "label": "Sensori i fuqisë"
-      },
-      "min_power": {
-        "label": "Fuqia minimale"
-      },
-      "off_delay": {
-        "label": "Vonesa e çaktivizimit"
-      },
-      "linked_device": {
-        "label": "Grupo nën pajisje"
-      },
-      "start_threshold_w": {
-        "label": "Pragu i fillimit"
-      },
-      "stop_threshold_w": {
-        "label": "Pragu i ndalimit"
-      },
-      "min_off_gap": {
-        "label": "Boshllëku min. joaktiv"
-      },
-      "start_duration_threshold": {
-        "label": "Kohëzgjatja e fillimit"
-      },
-      "start_energy_threshold": {
-        "label": "Energjia e fillimit"
-      },
-      "completion_min_seconds": {
-        "label": "Kohëzgjatja min. e ciklit"
-      },
-      "running_dead_zone": {
-        "label": "Zona e vdekur e ekzekutimit"
-      },
-      "end_energy_threshold": {
-        "label": "Energjia e fundit"
-      },
-      "end_repeat_count": {
-        "label": "Numri i përsëritjeve të fundit"
-      },
-      "sampling_interval": {
-        "label": "Intervali i kampionimit"
-      },
-      "smoothing_window": {
-        "label": "Dritarja e zbutjes"
-      },
-      "abrupt_drop_watts": {
-        "label": "Rënie e papritur"
-      },
-      "abrupt_drop_ratio": {
-        "label": "Raporti i rënies së papritur"
-      },
-      "profile_match_threshold": {
-        "label": "Pragu i përputhjes"
-      },
-      "profile_unmatch_threshold": {
-        "label": "Pragu i mosperputjes"
-      },
-      "profile_match_interval": {
-        "label": "Intervali i përputhjes"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "Raporti minimal i kohëzgjatjes"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "Raporti maksimal i kohëzgjatjes"
-      },
-      "profile_duration_tolerance": {
-        "label": "Toleranca e kohëzgjatjes së profilit"
-      },
-      "duration_tolerance": {
-        "label": "Toleranca e vlerësimit"
-      },
-      "auto_label_confidence": {
-        "label": "Besueshmëria e auto-etiketimit"
-      },
-      "learning_confidence": {
-        "label": "Besueshmëria e të mësuarit"
-      },
-      "suppress_feedback_notifications": {
-        "label": "Mbyll njoftimet e reagimeve"
-      },
-      "watchdog_interval": {
-        "label": "Intervali i rojes"
-      },
-      "no_update_active_timeout": {
-        "label": "Skadimi pa përditësim"
-      },
-      "progress_reset_delay": {
-        "label": "Vonesa e rivendosjes së progresit"
-      },
-      "auto_maintenance": {
-        "label": "Mirëmbajtja automatike (pastrim gjatë natës)"
-      },
-      "expose_debug_entities": {
-        "label": "Ekspono entitetet e korrigjimit"
-      },
-      "save_debug_traces": {
-        "label": "Ruaj gjurmët e korrigjimit"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "Aktivizo zbulimin kundër rrudhave"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "Fuqia maksimale kundër rrudhave"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "Kohëzgjatja maksimale"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "Pragu i fuqisë së daljes"
-      },
-      "delay_start_detect_enabled": {
-        "label": "Aktivizo zbulimin e fillimit me vonesë"
-      },
-      "delay_confirm_seconds": {
-        "label": "Sekonda e konfirmimit"
-      },
-      "delay_timeout_hours": {
-        "label": "Orët e skadimit"
-      },
-      "external_end_trigger_enabled": {
-        "label": "Aktivizo këmbëzën e jashtme të fundit"
-      },
-      "external_end_trigger": {
-        "label": "Entiteti i këmbëzës së jashtme"
-      },
-      "external_end_trigger_inverted": {
-        "label": "Inverto këmbëzën e jashtme (aktivizim me JO-aktiv)"
-      },
-      "door_sensor_entity": {
-        "label": "Entiteti i sensorit të derës"
-      },
-      "pause_cuts_power": {
-        "label": "Pauza gjithashtu ndërpret fuqinë (nëpërmjet çelësit)"
-      },
-      "switch_entity": {
-        "label": "Entiteti i çelësit"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "Vonesa e kujtuesit të shkarkimit"
-      },
-      "pump_stuck_duration": {
-        "label": "Kohëzgjatja e bllokimit të pompës"
-      },
-      "notify_start_services": {
-        "label": "Shërbimet e fillimit"
-      },
-      "notify_finish_services": {
-        "label": "Shërbimet e përfundimit"
-      },
-      "notify_live_services": {
-        "label": "Shërbimet e progresit drejtpërdrejtë"
-      },
-      "notify_people": {
-        "label": "Njerëzit (vetëm kur janë në shtëpi)"
-      },
-      "notify_only_when_home": {
-        "label": "Njofto vetëm kur jeni në shtëpi"
-      },
-      "notify_fire_events": {
-        "label": "Aktivizo ngjarjet HA për njoftimet"
-      },
-      "notify_before_end_minutes": {
-        "label": "Sinjalizim para përfundimit"
-      },
-      "notify_live_interval_seconds": {
-        "label": "Intervali i përditësimit drejtpërdrejtë"
-      },
-      "notify_live_overrun_percent": {
-        "label": "Tejkalimi drejtpërdrejtë % para sinjalizimit"
-      },
-      "notify_live_chronometer": {
-        "label": "Përdor kronometrin drejtpërdrejtë"
-      },
-      "notify_timeout_seconds": {
-        "label": "Hiq automatikisht pas"
-      },
-      "notify_title": {
-        "label": "Titulli i njoftimit"
-      },
-      "notify_icon": {
-        "label": "Ikona e njoftimit"
-      },
-      "notify_start_message": {
-        "label": "Mesazhi i fillimit"
-      },
-      "notify_finish_message": {
-        "label": "Mesazhi i përfundimit"
-      },
-      "notify_pre_complete_message": {
-        "label": "Mesazhi para përfundimit"
-      },
-      "notify_reminder_message": {
-        "label": "Mesazhi i kujtuesit"
-      },
-      "notify_channel": {
-        "label": "Kanali Android (fillim/drejtpërdrejtë)"
-      },
-      "notify_finish_channel": {
-        "label": "Kanali Android (përfundim)"
-      },
-      "energy_price_entity": {
-        "label": "Entiteti i çmimit të energjisë"
-      },
-      "energy_price_static": {
-        "label": "Çmimi statik i energjisë (për kWh)"
-      },
-      "enable_ml_models": {
-        "label": "Apliko modele inteligjente gjatë një cikli"
-      },
-      "ml_training_enabled": {
-        "label": "Mëso nga kjo makinë"
-      },
-      "ml_training_hour": {
-        "label": "Mëso në orën"
-      },
-      "ml_training_min_cycles": {
-        "label": "Ciklet e nevojshme fillimisht"
-      },
-      "ml_training_interval_days": {
-        "label": "Kontrollo më së shumti çdo"
-      }
+    "pref": {
+      "date_absolute": "Absolute (p.sh. 14:32 më 2 Korrik)",
+      "date_relative": "Relative (p.sh. 2 orë më parë)"
+    },
+    "quality": {
+      "bad": "E keqe",
+      "good": "Mirë",
+      "unusable": "E papërdorshme"
+    },
+    "status": {
+      "active": "Aktiv",
+      "all_statuses": "Të gjitha statuset",
+      "ambiguous": "I paqartë",
+      "auto_detect": "Zbulim automatik",
+      "clear": "I qartë",
+      "completed": "Përfunduar",
+      "fine_tuning": "duke rregulluar mirë…",
+      "force_stopped": "Ndaluar me forcë",
+      "idle": "Joaktiv",
+      "interrupted": "I ndërprerë",
+      "ready": "Gati për procesim",
+      "recording": "Regjistrim"
+    },
+    "tab": {
+      "advanced": "I avancuar",
+      "diagnostics": "Diagnostikim",
+      "history": "Cikle",
+      "ml": "Trajnim ML",
+      "pp_cleanup": "Pastrim",
+      "pp_manage": "Menaxho",
+      "pp_overview": "Pasqyra",
+      "pp_phases": "Fazat",
+      "profiles": "Profile",
+      "settings": "Cilësimet",
+      "status": "Pasqyra",
+      "subtab_phase_catalog": "Katalog fazash",
+      "subtab_profiles": "Profile"
+    },
+    "tag": {
+      "early_end": "Fund i hershëm",
+      "late_start": "Fillim i vonshëm",
+      "merged": "Cikle të bashkuara",
+      "noise": "Zhurmë",
+      "sensor_gap": "Ndërrimi i sensorit",
+      "split": "Cikël i ndarë",
+      "wrong_profile": "Profil i gabuar"
+    },
+    "toast": {
+      "access_saved": "Kontrolli i aksesit u ruajt",
+      "all_wiped": "Të gjitha të dhënat u fshien",
+      "analysis_complete_none": "Analiza e plotë: asnjë sugjerim i ri",
+      "auto_label_complete": "Etiketimi automatik i plotë",
+      "automation_deleted": "Automatizimi u fshi",
+      "correction_submitted": "Korrigjimi u dërgua",
+      "cycle_deleted": "Cikli u fshi",
+      "cycle_force_stopped": "Cikli u ndalua me forcë",
+      "cycle_labelled": "Cikli u etiketua",
+      "cycle_paused": "Cikli u ndal",
+      "cycle_resumed": "Cikli u vazhdua",
+      "cycle_trimmed": "Cikli u prit",
+      "cycles_merged": "Ciklet u bashkuan",
+      "envelope_rebuilt": "Zarfi u rindërtua",
+      "envelopes_rebuilt": "Zarfet u rindërtuan",
+      "export_downloaded": "Eksporti u shkarkua",
+      "feedback_all_dismissed": "Të gjitha komentet u injoruan",
+      "feedback_confirmed": "Komenti u konfirmua",
+      "feedback_dismissed": "Komenti u injorua",
+      "group_deleted": "Grupi u fshi",
+      "group_name_required": "Kërkohet emri i grupit",
+      "group_saved": "Grupi u ruajt",
+      "import_successful": "Importimi u krye; integrimi po ringarkohet",
+      "json_required": "Kërkohen të dhëna JSON",
+      "legacy_removed": "Veprimet e trashëgimit u hoqën",
+      "logs_exported": "Regjistrat u eksportuan",
+      "matching_reverted": "Peshat e përputhjes u kthyen te parazgjedhjet",
+      "min_2_profiles": "Zgjidhni të paktën 2 profile për një grup",
+      "ml_training_no_improvement": "Trajnimi i plotë: baza e mbajtur (pa përmirësim)",
+      "models_reverted": "Modelet e pajisjes u kthyen te baza",
+      "name_required": "Kërkohet emri",
+      "no_split_found": "Nuk u gjetën ndërrimi të papunë për ndarje",
+      "panel_settings_saved": "Cilësimet e panelit u ruajtën",
+      "phase_name_required": "Kërkohet emri i fazës",
+      "phase_updated": "Faza u përditësua",
+      "phases_saved": "Fazat u ruajtën",
+      "preferences_saved": "Preferencat u ruajtën",
+      "profile_name_required": "Kërkohet emri i profilit",
+      "profile_renamed": "Profili u riemërtua",
+      "recording_discarded": "Regjistrimi u hodh poshtë",
+      "recording_saved": "Regjistrimi u ruajt te profili",
+      "recording_started": "Regjistrimi filloi",
+      "recording_stopped": "Regjistrimi u ndalua",
+      "review_saved": "Rishikimi u ruajt",
+      "settings_saved": "Cilësimet u ruajtën; integrimi po ringarkohet",
+      "suggestions_applied": "Sugjerimet u zbatuan; integrimi po ringarkohet",
+      "suggestions_dismissed": "Sugjerimet u injoruan"
+    },
+    "trend": {
+      "down": "Tendencë rënëse",
+      "up": "Tendencë rritëse"
     }
   }
 }

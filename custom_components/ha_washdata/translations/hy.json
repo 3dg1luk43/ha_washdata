@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Ցիկլի սկիզբ",
-        "cycle_finish": "Ցիկլերի ավարտ",
-        "cycle_live": "Live Progress"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Լվացքի մեքենա",
@@ -88,198 +81,6 @@
         "bread_maker": "Հաց պատրաստող",
         "pump": "Pump / Sump Pump",
         "other": "Այլ (Ընդլայնված)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(Չպիտակավորված)",
-        "create_new_profile": "Ստեղծեք նոր պրոֆիլ",
-        "remove_label": "Հեռացնել պիտակը",
-        "no_reference_cycle": "(Ոչ մի հղման ցիկլ)",
-        "all_device_types": "Սարքի բոլոր տեսակները",
-        "current_suffix": "(ընթացիկ)",
-        "phase_builtin_suffix": "(Ներկառուցված)",
-        "phase_none_available": "Հասանելի փուլեր չկան:",
-        "phase_other_device_types": "Սարքի այլ տեսակներ.",
-        "settings_deprecation_warning": "⚠️ **Սարքի հնացած տեսակ.** {device_type}-ը նախատեսվում է հեռացնել ապագա թողարկումում: WashData-ի համապատասխան խողովակաշարը հուսալի արդյունքներ չի տալիս սարքերի այս դասի համար: Ձեր ինտեգրումը շարունակում է աշխատել հնացած ժամանակահատվածի ընթացքում. Այս նախազգուշացումը լռեցնելու համար, ներքևում անցեք **Սարքի տեսակը** աջակցվող տեսակներից մեկի (Լվացքի մեքենա, չորանոց, լվացքի մեքենա-չորացնող սարք, աման լվացող մեքենա, օդափոխիչ, հաց պատրաստող կամ պոմպ) կամ **Այլ (Ընդլայնված)**, եթե ձեր սարքը չի համապատասխանում աջակցվող տեսակներից որևէ մեկին: **Այլ (Ընդլայնված)** առաքում է միտումնավոր ընդհանուր լռելյայններ, որոնք հարմարեցված չեն որևէ հատուկ սարքի համար, այնպես որ դուք պետք է ինքներդ կարգավորեք շեմերը, ժամանակի ընդհատումները և համապատասխանող պարամետրերը. Ձեր բոլոր առկա կարգավորումները պահպանվում են, երբ փոխարկեք:",
-        "editor_select_info": "Ընտրեք 1 ցիկլ՝ բաժանելու համար, կամ 2+ ցիկլ՝ միաձուլվելու համար:",
-        "editor_select_info_split": "Բաժանելու համար ընտրեք 1 ցիկլ։",
-        "editor_select_info_merge": "Միավորելու համար ընտրեք 2+ ցիկլ։",
-        "editor_select_info_delete": "Ջնջելու համար ընտրեք 1+ ցիկլ։",
-        "no_cycles_recorded": "Դեռևս ցիկլեր չեն գրանցվել:",
-        "profile_summary_line": "- **{name}**. {count} ցիկլեր, միջինը {avg}մ",
-        "no_profiles_created": "Դեռևս ստեղծված պրոֆիլներ չկան:",
-        "phase_preview": "Փուլի նախադիտում",
-        "phase_preview_no_curve": "Պրոֆիլի միջին կորը դեռ հասանելի չէ: Գործարկել/պիտակավորել ավելի շատ ցիկլեր այս պրոֆիլի համար:",
-        "average_power_curve": "Միջին հզորության կորը",
-        "unit_min": "ր",
-        "profile_option_fmt": "{name} ({count} ցիկլ, միջինը ~{duration}մ)",
-        "profile_option_short_fmt": "{name} ({count} ցիկլ, ~{duration}մ)",
-        "deleted_cycles_from_profile": "Ջնջվել է {count} ցիկլ {profile}-ից:",
-        "not_enough_data_graph": "Գրաֆիկ ստեղծելու համար բավարար տվյալներ չկան:",
-        "no_profiles_found": "Պրոֆիլներ չեն գտնվել:",
-        "cycle_info_fmt": "Ցիկլ՝ {start}, {duration}մ, ընթացիկ՝ {label}",
-        "top_candidates_header": "### Լավագույն թեկնածուներ",
-        "tbl_profile": "Պրոֆիլ",
-        "tbl_confidence": "Վստահություն",
-        "tbl_correlation": "Հարաբերակցություն",
-        "tbl_duration_match": "Տևողությունը համընկնում",
-        "detected_profile": "Հայտնաբերված պրոֆիլ",
-        "estimated_duration": "Մոտավոր տեւողությունը",
-        "actual_duration": "Փաստացի տևողությունը",
-        "choose_action": "__Ընտրեք ստորև նշված գործողությունը՝__",
-        "tbl_count": "Քանակ",
-        "tbl_avg": "Միջին",
-        "tbl_min": "Min",
-        "tbl_max": "Մաքս",
-        "tbl_energy_avg": "Էներգիա (միջին)",
-        "tbl_energy_total": "Էներգիա (ընդհանուր)",
-        "tbl_consistency": "Կազմել.",
-        "tbl_last_run": "Վերջին վազքը",
-        "graph_legend_title": "Գրաֆիկի լեգենդ",
-        "graph_legend_body": "Կապույտ գոտին ներկայացնում է նվազագույն և առավելագույն էներգիայի ընդունման տիրույթը: Գիծը ցույց է տալիս միջին հզորության կորը:",
-        "recording_preview": "Ձայնագրման նախադիտում",
-        "trim_start": "Կտրման մեկնարկ",
-        "trim_end": "Կտրել վերջը",
-        "split_preview_title": "Բաժանման նախադիտում",
-        "split_preview_found_fmt": "Գտնվել է {count} հատված:",
-        "split_preview_confirm_fmt": "Սեղմեք Հաստատել՝ այս ցիկլը {count} առանձին ցիկլերի բաժանելու համար:",
-        "merge_preview_title": "Միաձուլման նախադիտում",
-        "merge_preview_joining_fmt": "{count} ցիկլերի միացում: Բացերը կլրացվեն 0W ցուցումներով:",
-        "editor_delete_preview_title": "Ջնջման նախադիտում",
-        "editor_delete_preview_intro": "Ընտրված ցիկլերը մշտապես կջնջվեն՝",
-        "editor_delete_preview_confirm": "Սեղմեք «Հաստատել»՝ այս ցիկլի գրառումները մշտապես ջնջելու համար։",
-        "no_power_preview": "*Նախադիտման համար հոսանքի տվյալներ չկան։*",
-        "profile_comparison": "Պրոֆիլների համեմատություն",
-        "actual_cycle_label": "Այս ցիկլը (իրական)",
-        "storage_usage_header": "Պահպանման օգտագործումը",
-        "storage_file_size": "Ֆայլի չափ",
-        "storage_cycles": "Ցիկլեր",
-        "storage_profiles": "Պրոֆիլներ",
-        "storage_debug_traces": "Վրիպազերծման հետքեր",
-        "overview_suffix": "Ընդհանուր ակնարկ",
-        "phase_preview_for_profile": "Փուլային նախադիտում պրոֆիլի համար",
-        "current_ranges_header": "Ընթացիկ միջակայքերը",
-        "assign_phases_help": "Օգտագործեք ստորև նշված գործողությունները՝ միջակայքերը ավելացնելու, խմբագրելու, ջնջելու կամ պահպանելու համար:",
-        "profile_summary_header": "Պրոֆիլի ամփոփում",
-        "recent_cycles_header": "Վերջին ցիկլերը",
-        "trim_cycle_preview_title": "Ցիկլի կտրվածքի նախադիտում",
-        "trim_cycle_preview_no_data": "Էլեկտրաէներգիայի վերաբերյալ տվյալներ չկան այս ցիկլի համար:",
-        "trim_cycle_preview_kept_suffix": "պահված",
-        "table_program": "Ծրագիր",
-        "table_when": "Երբ",
-        "table_length": "Տևողություն",
-        "table_match": "Համընկնում",
-        "table_profile": "Պրոֆիլ",
-        "table_cycles": "Ցիկլեր",
-        "table_avg_length": "Միջ. տևողություն",
-        "table_last_run": "Վերջին վազքը",
-        "table_avg_energy": "Միջ. էներգիա",
-        "table_detected_program": "Հայտնաբերված ծրագիր",
-        "table_confidence": "Վստահություն",
-        "table_reported": "Հաղորդված"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Բաժանել ցիկլը (գտնել բացերը)",
-        "merge": "Միաձուլման ցիկլեր (միացնել հատվածները)",
-        "delete": "Ջնջել ցիկլ(ները)"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Ավտոմատ հայտնաբերել դադարի բացերը",
-        "manual": "Ձեռքով ժամային նշում(ներ)"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Սպասարկում. Վերամշակել և օպտիմիզացնել տվյալները",
-        "clear_debug_data": "Մաքրել վրիպազերծման տվյալները (տեղ ազատել)",
-        "wipe_history": "Ջնջել այս սարքի ԲՈԼՈՐ տվյալները (անշրջելի)",
-        "export_import": "Արտահանել/ներմուծել JSON կարգավորումներով (պատճենել/տեղադրել)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "Արտահանել բոլոր տվյալները",
-        "import": "Տվյալների ներմուծում/միաձուլում"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Հին ցիկլերի ավտոմատ պիտակավորում",
-        "select_cycle_to_label": "Պիտակի հատուկ ցիկլ",
-        "select_cycle_to_delete": "Ջնջել ցիկլը",
-        "interactive_editor": "Միաձուլել / բաժանել ինտերակտիվ խմբագիր",
-        "trim_cycle": "Կտրման ցիկլի տվյալները"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Ստեղծեք նոր պրոֆիլ",
-        "edit_profile": "Խմբագրել/վերանվանել պրոֆիլը",
-        "delete_profile": "Ջնջել պրոֆիլը",
-        "profile_stats": "Պրոֆիլների վիճակագրություն",
-        "cleanup_profile": "Մաքրել պատմությունը - գրաֆիկ և ջնջել",
-        "assign_phases": "Նշանակել փուլերի միջակայքերը"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Ստեղծեք նոր փուլ",
-        "edit_custom_phase": "Խմբագրել փուլ",
-        "delete_custom_phase": "Ջնջել փուլը"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Անվանեք և կիրառեք փուլերը",
-        "cancel": "Վերադարձեք առանց փոփոխությունների"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Ավելացնել փուլային տիրույթ",
-        "edit_range": "Խմբագրել փուլերի տիրույթը",
-        "delete_range": "Ջնջել փուլային տիրույթը",
-        "clear_ranges": "Մաքրել բոլոր տիրույթները",
-        "auto_detect_ranges": "Ավտոմատ հայտնաբերման փուլեր",
-        "save_ranges": "Պահպանել և վերադարձնել"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Թարմացնել կարգավիճակը",
-        "stop_recording": "Դադարեցնել ձայնագրումը (Պահպանել և մշակել)",
-        "start_recording": "Սկսեք նոր ձայնագրությունը",
-        "process_recording": "Ընթացքի վերջին ձայնագրությունը (կտրում և պահպանում)",
-        "discard_recording": "Վերացնել վերջին ձայնագրությունը"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Ստեղծեք նոր պրոֆիլ",
-        "existing_profile": "Ավելացնել գոյություն ունեցող պրոֆիլին",
-        "discard": "Հեռացնել ձայնագրությունը"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Հաստատել - ճիշտ հայտնաբերում",
-        "correct": "Ճիշտ - Ընտրեք Ծրագիր/Տևողություն",
-        "ignore": "Անտեսել - Կեղծ դրական/աղմկոտ ցիկլ",
-        "delete": "Ջնջել - Հեռացնել պատմությունից"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Սահմանեք մեկնարկային կետը",
-        "set_end": "Սահմանեք վերջնակետը",
-        "reset": "Վերականգնել ամբողջական տևողության",
-        "apply": "Կիրառել Trim-ը",
-        "cancel": "Չեղարկել"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "Ընթացիկ փուլ"
       },
-      "wash_phase": {
-        "name": "Փուլ"
-      },
       "profile_cycle_count": {
         "name": "Պրոֆիլ {profile_name} Քանակ",
         "unit_of_measurement": "ցիկլեր"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s-ը պետք է մեծ լինի trim_start_s-ից:"
+    },
+    "no_active_cycle": {
+      "message": "Դադարեցնել կամ վերսկսելու ակտիվ ցիկլ չկա:"
     }
   },
   "panel": {
     "hdr": {
-      "panel_settings": "Վահանակի կարգավորումներ (բոլոր օգտվողները)",
-      "ml_learned": "Ինչ է սովորել WashData-ն",
-      "status": "Կարգավիճակ",
-      "live_power": "Ուղիղ Հզորություն",
-      "manual_recording": "Ձեռքով ձայնագրում",
-      "tools_and_data": "Գործիքներ և տվյալներ",
-      "phase_catalog": "Փուլային կատալոգ",
-      "storage_stats": "Պահպանման վիճակագրություն",
-      "maintenance": "Պահպանման գործողություններ",
-      "export_import": "Արտահանում / Ներմուծում",
       "logs": "Տեղեկամատյաններ",
-      "my_preferences": "Իմ Նախապատվությունները",
+      "toggle_sidebar": "Միացնել «Տնային օգնականի» կողագոտին",
       "access_control": "Մուտքի վերահսկում",
-      "ml_smart_learning": "Խելացի ուսուցում",
-      "ml_settings_card": "Կարգավորումներ",
-      "ml_matching_tuning": "Ծրագրին համապատասխանող ճշգրտում",
-      "display": "Ցուցադրություն",
-      "status_graph": "Կարգավիճակի գրաֆիկ",
-      "diagnostics_pref": "Ախտորոշում",
-      "logs_diagnostics": "Ախտորոշում",
-      "process_history": "Գործընթացի պատմություն",
-      "clear_debug": "Մաքրել վրիպազերծման հետքերը",
-      "wipe_history": "Ջնջել պատմությունը",
-      "automations": "Ավտոմատացումներ",
-      "automation_open": "Բացեք ավտոմատացման խմբագրում",
       "automation_delete": "Ջնջել այս ավտոմատացումը",
       "automation_needs_review": "Այս ցիկլը վերանայման կարիք ունի",
+      "automation_open": "Բացեք ավտոմատացման խմբագրում",
       "automation_review_this_cycle": "Վերանայեք այս ցիկլը",
-      "no_automations": "Ավտոմատացումներ դեռևս չեն հղում այս սարքին:"
+      "automations": "Ավտոմատացումներ",
+      "clear_debug": "Մաքրել վրիպազերծման հետքերը",
+      "diagnostics_pref": "Ախտորոշում",
+      "display": "Ցուցադրել",
+      "export_import": "Արտահանում / Ներմուծում",
+      "live_power": "Live Power",
+      "logs_diagnostics": "Ախտորոշում",
+      "maintenance": "Պահպանման գործողություններ",
+      "manual_recording": "Ձեռքով ձայնագրում",
+      "ml_learned": "Ինչ է սովորել WashData-ն",
+      "ml_matching_tuning": "Ծրագրին համապատասխանող ճշգրտում",
+      "ml_settings_card": "Կարգավորումներ",
+      "ml_smart_learning": "Խելացի ուսուցում",
+      "my_preferences": "Իմ Նախապատվությունները",
+      "no_automations": "Ավտոմատացումներ դեռևս չեն հղում այս սարքին:",
+      "panel_settings": "Վահանակի կարգավորումներ",
+      "phase_catalog": "Փուլային կատալոգ",
+      "process_history": "Գործընթացի պատմություն",
+      "status": "Կարգավիճակ",
+      "status_graph": "Կարգավիճակի գրաֆիկ",
+      "storage_stats": "Պահպանման վիճակագրություն",
+      "tools_and_data": "Գործիքներ և տվյալներ",
+      "wipe_history": "Ջնջել պատմությունը"
     },
     "lbl": {
-      "manual_duration": "Ձեռնարկի տևողությունը (րոպե, ընտրովի)",
+      "timer_min": "ր",
+      "timer_msg_placeholder": "Հաղորդագրություն (ըստ ցանկության, {device}/{program}/{minutes})",
+      "timer_auto_pause": "Ավտոմատ դադար",
+      "label": "Համապատասխանում",
+      "actions": "Գործողություններ",
+      "activity": "Գործունեություն",
+      "administrators": "Ադմինիստրատորներ",
+      "auto_fine_tune_off": "ավտոմատ ճշգրտում անջատում",
+      "clock_time": "Ժամացույցի ժամ",
+      "compare_profiles": "Համեմատեք պրոֆիլների հետ",
+      "confidence": "Վստահություն",
+      "confidence_threshold": "Վստահության շեմ",
       "correct_duration": "Ճիշտ տևողություն (րոպե, ընտրովի)",
-      "default_tab": "Վահանակը բացելիս լռելյայն ներդիր",
+      "correct_profile": "Ճիշտ պրոֆիլ",
+      "cost": "Արժեքը",
+      "create_new_profile": "+ Ստեղծեք նոր պրոֆիլ…",
+      "cycle_date_display": "Ցիկլի ամսաթվի ցուցադրում",
+      "cycle_health": "Ցիկլի առողջություն",
+      "cycles_count": "Ցիկլեր",
+      "date": "Ամսաթիվ",
+      "debug_traces": "Վրիպազերծման հետքեր",
+      "default": "Կանխադրված",
       "default_access_level": "Ստորև նշված օգտատերերի համար կանխադրված մակարդակ",
+      "default_other": "Կանխադրված (այլ սարքեր)",
+      "default_tab": "Վահանակը բացելիս լռելյայն ներդիր",
+      "description": "Նկարագրություն",
+      "duration": "Տևողությունը",
+      "emphasis": "Շեշտադրում",
+      "enable_access_control": "Միացնել յուրաքանչյուր օգտատիրոջ մուտքի կառավարումը",
+      "energy": "Էներգիա",
+      "expected_duration": "Ակնկալվող տևողությունը (րոպե)",
+      "file_kb": "Ֆայլ (կԲ)",
+      "gap_s": "Բաց (ներ)",
+      "head_trim": "Գլխի կտրվածք (ներ)",
+      "health": "Առողջություն",
+      "hide_tabs": "Թաքցնել ներդիրները ոչ ադմինների համար",
+      "in_use": "Օգտագործման մեջ",
+      "json_data": "JSON տվյալներ",
+      "last_checked": "Վերջին ստուգումը.",
+      "load_from_file": "Բեռնել ֆայլից",
+      "manual_duration": "Ձեռնարկի տևողությունը (րոպե, ընտրովի)",
+      "mode_existing_profile": "Ավելացնել գոյություն ունեցող պրոֆիլին",
+      "mode_new_profile": "Ստեղծեք նոր պրոֆիլ",
+      "new_profile_name": "Նոր պրոֆիլի անունը",
+      "panel_default_tab": "Կանխադրված ներդիր",
+      "phase_name": "Անուն",
+      "power": "Իշխանություն",
+      "profile": "Անձնագիր",
+      "profile_name": "Պրոֆիլի անունը",
+      "progress": "Առաջընթաց",
+      "read_only": "Միայն կարդալու համար",
+      "ref_cycle": "Հղման ցիկլ (ըստ ցանկության)",
+      "refresh_interval": "Թարմացման ընդմիջում (ներ)",
+      "remaining": "Մնացած",
+      "remove_label": "- Հեռացնել պիտակը -",
+      "rename_profile": "Վերանվանել պրոֆիլը",
+      "resulting_profile": "Ստացված պրոֆիլը",
+      "save_mode": "Պահպանման ռեժիմ",
+      "seconds_from_start": "Վայրկյաններ սկզբից",
+      "select_profile": "Ընտրեք պրոֆիլը",
+      "show_debug": "Ցույց տալ խաղի ուղիղ հեռարձակման քարտը կարգավիճակի էջում (վստահություն, անորոշություն, լավագույն թեկնածուներ)",
       "show_expected": "Ցույց տալ ակնկալվող կորի ծածկույթը (համընկնող պրոֆիլը, նարնջագույն)",
       "show_raw": "Ցուցադրել չմշակված սենսորային ընթերցումները (չհարթված, մոխրագույն)",
-      "show_debug": "Ցույց տալ խաղի ուղիղ հեռարձակման քարտը կարգավիճակի էջում (վստահություն, անորոշություն, լավագույն թեկնածուներ)",
-      "power": "Հզորություն",
-      "progress": "Առաջընթաց",
-      "remaining": "Մնացած",
-      "duration": "Տևողությունը",
-      "energy": "Էներգիա",
-      "profile": "Պրոֆիլ",
       "status": "Կարգավիճակ",
-      "date": "Ամսաթիվ",
-      "confidence": "Հուսալիություն",
-      "health": "Առողջություն",
-      "cost": "Արժեքը",
-      "program": "Ծրագիր",
-      "cycle_health": "Ցիկլի առողջություն",
-      "activity": "Գործունեություն",
+      "tail_trim": "Պոչերի հարդարում (ներ)",
+      "ungrouped": "Չխմբավորված",
       "unlabelled": "Չպիտակավորված",
       "unlabelled_paren": "(չպիտակավորված)",
-      "emphasis": "Շեշտադրում",
-      "default": "Կանխադրված",
-      "in_use": "Օգտագործման մեջ",
-      "profile_name": "Պրոֆիլի անունը",
-      "ref_cycle": "Հղման ցիկլ (ըստ ցանկության)",
-      "phase_name": "Փուլի անվանումը",
-      "description": "Նկարագրություն",
-      "correct_profile": "Ճիշտ պրոֆիլ",
-      "load_from_file": "Բեռնել ֆայլից",
-      "json_data": "JSON տվյալներ",
-      "expected_duration": "Ակնկալվող տևողությունը (րոպե)",
-      "rename_profile": "Վերանվանել պրոֆիլը",
-      "select_profile": "Ընտրեք պրոֆիլը",
-      "confidence_threshold": "Վստահության շեմ",
-      "resulting_profile": "Ստացված պրոֆիլը",
-      "new_profile_name": "Նոր պրոֆիլի անունը",
-      "save_mode": "Պահպանման ռեժիմ",
-      "head_trim": "Գլխի կտրվածք (ներ)",
-      "tail_trim": "Պոչերի հարդարում (ներ)",
-      "gap_s": "Բաց (ներ)",
-      "start": "Սկսել",
-      "end": "Վերջ",
-      "quality": "Որակ",
-      "golden_reference": "Արձանագրված հղման ցիկլը",
-      "compare_profiles": "Համեմատեք պրոֆիլների հետ",
-      "tags": "Պիտակներ",
-      "notes": "Նշումներ",
-      "cycle_date_display": "Ցիկլի ամսաթվի ցուցադրում",
-      "refresh_interval": "Թարմացման ընդմիջում (ներ)",
-      "panel_default_tab": "Կանխադրված ներդիր",
-      "hide_tabs": "Թաքցնել ներդիրները ոչ ադմինների համար",
-      "enable_access_control": "Միացնել յուրաքանչյուր օգտատիրոջ մուտքի կառավարումը",
-      "administrators": "Ադմինիստրատորներ",
-      "default_other": "Կանխադրված (այլ սարքեր)",
-      "mode_new_profile": "Ստեղծեք նոր պրոֆիլ",
-      "mode_existing_profile": "Ավելացնել գոյություն ունեցող պրոֆիլին",
-      "auto_fine_tune_on": "ավտոմատ ճշգրտումը միացված է (մոտ {hour}:00)",
-      "auto_fine_tune_off": "ավտոմատ ճշգրտում անջատում",
-      "last_checked": "Վերջին ստուգումը.",
-      "remove_label": "- Հեռացնել պիտակը -",
-      "create_new_profile": "+ Ստեղծեք նոր պրոֆիլ…",
-      "read_only": "Միայն կարդալու համար",
-      "actions": "Գործողություններ",
-      "cycles_count": "Ցիկլեր",
-      "debug_traces": "Վրիպազերծման հետքեր",
-      "file_kb": "Ֆայլ (կԲ)",
-      "label": "Պիտակ",
-      "seconds_from_start": "Վայրկյաններ սկզբից",
-      "clock_time": "Ժամացույցի ժամ",
-      "ungrouped": "Չխմբավորված"
-    },
-    "toast": {
-      "settings_saved": "Պարամետրերը պահպանված են; ինտեգրման վերաբեռնում",
-      "import_successful": "Ներմուծումը հաջողվեց; ինտեգրման վերաբեռնում",
-      "suggestions_applied": "Կիրառված առաջարկություններ; ինտեգրման վերաբեռնում",
-      "ml_training_no_improvement": "Դասընթացն ավարտված է. ելակետը պահպանվել է (բարելավումներ չկան)",
-      "could_not_load_cycle": "Չհաջողվեց բեռնել ցիկլը՝ {error}",
-      "preferences_saved": "Նախապատվությունները պահված են",
-      "panel_settings_saved": "Վահանակի կարգավորումները պահպանված են",
-      "access_saved": "Մուտքի կառավարումը պահպանված է",
-      "profile_created": "Ստեղծվել է «{name}» պրոֆիլը",
-      "profile_deleted": "«{name}» պրոֆիլը ջնջվել է",
-      "profile_renamed": "Պրոֆիլը վերանվանվեց",
-      "phases_saved": "Փուլերը պահպանված են",
-      "phase_created": "«{name}» փուլը ստեղծվել է",
-      "phase_deleted": "«{name}» փուլը ջնջվել է",
-      "phase_updated": "Փուլը թարմացվել է",
-      "recording_started": "Ձայնագրումը սկսվեց",
-      "recording_stopped": "Ձայնագրումը դադարեցվեց",
-      "recording_discarded": "Ձայնագրությունը մերժվեց",
-      "recording_saved": "Ձայնագրությունը պահվել է պրոֆիլում",
-      "export_downloaded": "Արտահանումը ներբեռնվեց",
-      "logs_exported": "Տեղեկամատյանները արտահանվել են",
-      "envelopes_rebuilt": "Ծրարները վերակառուցվել են",
-      "envelope_rebuilt": "Ծրարը վերակառուցվել է",
-      "suggestions_dismissed": "Առաջարկությունները մերժվել են",
-      "auto_label_complete": "Ավտոմատ պիտակավորումն ավարտված է",
-      "cycle_labelled": "Ցիկլը պիտակավորված",
-      "cycle_deleted": "Ցիկլը ջնջված է",
-      "cycles_deleted": "{count} ցիկլ(ներ) ջնջվել է",
-      "cycle_trimmed": "Ցիկլը կտրված է",
-      "cycles_merged": "Ցիկլերը միաձուլվեցին",
-      "review_saved": "Կարծիքը պահված է",
-      "feedback_confirmed": "Հետադարձ կապը հաստատվեց",
-      "feedback_dismissed": "Արձագանքը մերժված է",
-      "feedback_all_dismissed": "Բոլոր արձագանքները մերժված են",
-      "correction_submitted": "Ուղղումը ներկայացված է",
-      "group_saved": "Խումբը պահված է",
-      "group_deleted": "Խումբը ջնջված է",
-      "automation_deleted": "Ավտոմատացումը ջնջված է",
-      "legacy_removed": "Հնացած գործողությունները հեռացվել են",
-      "cycle_paused": "Ցիկլը ընդհատվեց",
-      "cycle_resumed": "Ցիկլը վերսկսվեց",
-      "cycle_force_stopped": "Ցիկլը դադարեցվել է ուժով",
-      "ml_training_promoted": "Ուսուցումն ավարտված է՝ առաջխաղացված {count} մոդել(ներ)",
-      "matching_reverted": "Համապատասխան կշիռները վերադարձվեցին կանխադրվածին",
-      "models_reverted": "Սարքի վրա գտնվող մոդելները վերադարձվել են բազային",
-      "analysis_complete": "Վերլուծությունն ավարտված է՝ {count} առաջարկ(ներ)",
-      "analysis_complete_none": "Վերլուծությունն ավարտված է. նոր առաջարկներ չկան",
-      "debug_cleared": "Մաքրվեց {count} վրիպազերծման հետք",
-      "all_wiped": "Բոլոր տվյալները ջնջվել են",
-      "no_split_found": "Ոչ մի պարապ բացեր չեն գտնվել, որոնց վրա կարելի է բաժանել",
-      "group_name_required": "Խմբի անունը պարտադիր է",
-      "min_2_profiles": "Խմբի համար ընտրեք առնվազն 2 պրոֆիլ",
-      "profile_name_required": "Պահանջվում է պրոֆիլի անունը",
-      "phase_name_required": "Փուլի անունը պարտադիր է",
-      "name_required": "Անունը պարտադիր է",
-      "json_required": "JSON տվյալները պահանջվում են",
-      "save_failed": "Պահումը ձախողվեց՝ {error}",
-      "delete_failed": "Չհաջողվեց ջնջել՝ {error}",
-      "apply_failed": "Դիմումը ձախողվեց՝ {error}",
-      "rebuild_failed": "Չհաջողվեց վերականգնել՝ {error}",
-      "start_failed": "Մեկնարկը ձախողվեց՝ {error}",
-      "stop_failed": "Չհաջողվեց դադարեցնել՝ {error}",
-      "discard_failed": "Չեղարկելը ձախողվեց՝ {error}",
-      "trim_failed": "Չհաջողվեց կտրել՝ {error}",
-      "split_failed": "Չհաջողվեց բաժանել՝ {error}",
-      "merge_failed": "Չհաջողվեց միավորել՝ {error}",
-      "create_failed": "Չհաջողվեց ստեղծել՝ {error}",
-      "update_failed": "Չհաջողվեց թարմացնել՝ {error}",
-      "rename_failed": "Չհաջողվեց վերանվանել՝ {error}",
-      "revert_failed": "Չհաջողվեց վերադարձնել՝ {error}",
-      "training_failed": "Դասընթացը ձախողվեց՝ {error}",
-      "export_failed": "Չհաջողվեց արտահանել՝ {error}",
-      "import_failed": "Չհաջողվեց ներմուծել՝ {error}",
-      "auto_label_failed": "Ավտոմատ պիտակավորումը ձախողվեց՝ {error}",
-      "analysis_failed": "Վերլուծությունը ձախողվեց՝ {error}",
-      "auto_detect_failed": "Չհաջողվեց ավտոմատ հայտնաբերել՝ {error}",
-      "error": "Սխալ՝ {error}",
-      "pause_failed": "Դադարեցումը ձախողվեց՝ {error}",
-      "label_failed": "Պիտակը ձախողվեց՝ {error}",
-      "invalid_json": "«{key}»-ը վավեր JSON չէ. նախքան պահպանելը շտկել այն կամ մաքրել դաշտը:",
-      "processed": "Մշակված է {bits}",
-      "split_complete": "Բաժանվել {count} ցիկլերի"
-    },
-    "msg": {
-      "no_devices": "WashData սարքեր դեռ կազմաձևված չեն:",
-      "live_chart_loading": "Ուղիղ հզորության աղյուսակը հայտնվում է ընթերցումների ժամանումին:",
-      "no_profiles_yet": "Դեռևս պրոֆիլներ չկան: Ստեղծեք մեկը պիտակավորված ցիկլից:",
-      "no_logs": "Մատյանների գրառումները դեռ բուֆերացված չեն:",
-      "no_envelope": "Դեռ ոչ մի ծրար. վերակառուցեք պիտակավորման փուլերից հետո:",
-      "no_cycles_profile": "Այս պրոֆիլի համար ցիկլեր չկան:",
-      "ml_learned_intro": "Մոդելներ, որոնք ճշգրտորեն հարմարեցված են այս մեքենային: Ցանկացած բան, որը նշված չէ, օգտագործում է հուսալի ներկառուցված մոդելը:",
-      "ml_intro": "WashData-ն առաքվում է խելացի մոդելներով, որոնք հայտնաբերում են ցիկլերը, համընկնում են ծրագրերը և գնահատում ժամանակը և էներգիան. դրանք աշխատում են առանց տուփի:",
-      "matching_tuning_intro": "Սովորելու ժամանակ WashData-ն նաև ճշգրտում է, թե որքան է ծրագրի համապատասխանությունը կշռում ցիկլի ձևն ընդդեմ դրա տևողության և էներգիայի:",
-      "merge_intro": "Ընտրված ցիկլերը միավորվում են մեկում (ժամանակագրական հերթականությամբ, բացերը լցված են 0 Վտ-ով): Ընտրեք ստացված պրոֆիլը:",
-      "see_recorder": "Տես ձայնագրիչի վիջեթը ստորև",
-      "review_to_cycles": "Բացեք Cycles վերանայման հերթը",
-      "no_device_selected": "Ոչ մի սարք ընտրված չէ:",
-      "loading": "Բեռնվում է…",
-      "loading_settings": "Կարգավորումների բեռնում…",
-      "no_cycles_match": "Ոչ մի ցիկլ չի համապատասխանում ընթացիկ ֆիլտրին:",
-      "no_cycles_yet": "Դեռևս ցիկլեր չեն գրանցվել:",
-      "no_phases": "Ոչ մի փուլ սահմանված չէ:",
-      "no_phases_assigned": "Ոչ մի փուլ չի նշանակվել:",
-      "no_split_points": "Բաժանման կետեր դեռ չկան:",
-      "no_envelope_overlay": "Ծրարը հասանելի չէ ծածկելու համար:",
-      "no_other_users": "Այլ Home Assistant օգտվողներ չեն գտնվել:",
-      "maintenance_requires_access": "Սպասարկումը և արտահանումը/ներմուծումը պահանջում են լիարժեք մուտք:",
-      "loading_curve": "Բեռնվում է կորը…",
-      "compare_selected_cycles": "Ընտրված ցիկլեր (պինդ) - ցուցադրել / թաքցնել",
-      "compare_overlay_profiles": "Ծածկված պրոֆիլներ (թույլ)",
-      "no_profiles_compare": "Համեմատելու պրոֆիլներ չկան:",
-      "saving_triggers_reload": "Պահպանումը առաջացնում է ինտեգրման վերաբեռնում: HA սուբյեկտները կարող են համառոտ ցուցադրվել որպես անհասանելի:",
-      "prefs_personal": "Դրանք վերաբերում են միայն ձեր Home Assistant հաշվին:",
-      "no_match_yet": "Համապատասխանության փորձ դեռ չկա. սա լրացվում է վազքի ընթացքում:",
-      "no_fine_tuned": "Դեռևս ոչինչ ճշգրտված չէ. WashData-ն օգտագործում է իր ներկառուցված մոդելները:",
-      "ml_settings_intro": "Երկու անկախ անջատիչներ. մեկը կիրառում է մոդելները մինչ ցիկլը աշխատում է, մյուսը թույլ է տալիս WashData-ին ժամանակի ընթացքում դրանք ճշգրտել ձեր մեքենայի վրա:",
-      "phase_catalog_intro": "Ցիկլի անվանված հատվածներ (Նախալվացում, Ջեռուցում, Սփին…): Վերագրեք դրանք պրոֆիլին իր կառավարման վահանակից:",
-      "phase_ranges_intro": "Միջին կորի վրա ծածկված փուլերի միջակայքերը (ցիկլի մեկնարկից րոպեներ): Խմբագրել արժեքները՝ ուղիղ եթերում նախադիտելու համար:",
-      "cleanup_intro": "Յուրաքանչյուր պիտակավորված ցիկլը ծածկված է: Նշեք ծայրամասերը և ջնջեք՝ պրոֆիլը մաքրելու համար:",
-      "split_intro": "Սեղմեք գծապատկերը՝ բաժանման կետ ավելացնելու կամ հեռացնելու համար, կամ ավտոմատ կերպով հայտնաբերել անգործության բացերը:",
-      "trim_intro": "Քաշեք կարմիր բռնակները կամ մուտքագրեք արժեքներ: Պատուհանից դուրս ամեն ինչ հանվում է:",
-      "import_intro": "Ներբեռնեք արտահանված ֆայլը կամ տեղադրեք JSON օգտակար բեռը ստորև:",
-      "auto_label_intro": "Հանձնարարեք պրոֆիլներ չպիտակավորված ցիկլերին, որոնց համընկնումի վստահությունը վերացնում է շեմը:",
-      "enough_data": "Բավականաչափ տվյալներ սովորելու համար ({current}/{min} ցիկլ):",
-      "collecting_data": "Տվյալների հավաքում. ևս {need} ցիկլ{plural} մինչև ճշգրտումը սկսելը ({current}/{min}):",
-      "updated": "Թարմացվել է {time}",
-      "appliance_monitor": "Սարքի մոնիտոր",
-      "ml_loading": "բեռնում է ML…",
-      "review_in_settings": "Վերանայեք Կարգավորումներում",
-      "storage_diagnostics": "Պահպանման վիճակագրություն, սպասարկում, արտահանում/ներմուծում",
-      "recent_logs": "ha_washdata վերջին գրառումները",
-      "preferences_adv": "Նախապատվություններ",
-      "preferences_admin": "Նախապատվություններ, վահանակ և մուտքի կառավարում",
-      "pending_feedback": "Սպասվում է հայտնաբերման հետադարձ կապ",
-      "recording_in_progress": "Ձայնագրումն ընթացքի մեջ է",
-      "no_profiles_yet_short": "Դեռևս պրոֆիլներ չկան:",
-      "unsure_detected_prefix": "WashData-ն վստահ չէ, որ հայտնաբերել է",
-      "no_suggestions": "Ակտիվ առաջարկներ չկան:",
-      "no_profiles_overlay": "Պրոֆիլներ չկան ծածկելու համար:",
-      "compare_cycles_title": "Համեմատեք {count} ցիկլերը",
-      "profiles_intro": "Կտտացրեք պրոֆիլին՝ վիճակագրություն, փուլեր և մաքրում դիտելու համար: Խմբավորեք գրեթե նույնական ծրագրերը (նույն ձև/տևողություն, տարբեր ջերմաստիճան կամ կենտրոնախույս) որպեսզի համընկնումը հուսալիորեն ընտրի դրանց միջև:",
-      "search_placeholder": "Որոնել կարգավորումներ…",
-      "automations_intro": "WashData-ն կրակում է {start} / {end} իրադարձություններ և բացահայտում ենթաօբյեկտներ, ուստի ծանուցումներն ու գործողությունները լավագույնս կառուցվում են որպես Home Assistant-ի սովորական ավտոմատացումներ: Այս սարքն օգտագործող ավտոմատացումները ցուցադրվում են ստորև:",
-      "notify_services_hint": "Օգտագործեք {entity} ծառայության ID-ները (ստորակետով բաժանված մի քանիի համար): Կաղապարային փոփոխականներ. {vars}:",
-      "rbac_hint": "Անջատված լինելու դեպքում Home Assistant-ի յուրաքանչյուր օգտատեր ունի լիարժեք հասանելիություն (կանխադրված): Ադմինիստրատորներն միշտ ունեն լիարժեք հասանելիություն և կարող են կառավարել բոլորին:",
-      "feedback_prompt": "Հաստատե՛ք, որ ճիշտ է, ուղղե՛ք ծրագիրը կամ անտեսե՛ք:"
-    },
-    "section": {
-      "basic": {
-        "intro": "Հիմնական ինքնությունը և այն հիմնական տարրերը, որոնք անհրաժեշտ են շատ կարգավորումների համար:",
-        "label": "Հիմնական"
-      },
-      "detection": {
-        "intro": "Ինչպես է ցիկլը հայտնաբերվում որպես մեկնարկային, վազող և ավարտվող:",
-        "label": "Հայտնաբերում"
-      },
-      "matching": {
-        "intro": "Ինչպես են ավարտված ցիկլերը համընկնում սովորած պրոֆիլների հետ և պիտակավորված:",
-        "label": "Համապատասխանեցում"
-      },
-      "timing": {
-        "intro": "Ֆոնային կադենս, անցանց պահակ և տնային տնտեսություն:",
-        "label": "Ժամկետներ և պահակ"
-      },
-      "anti_wrinkle": {
-        "intro": "Հակակնճիռային ռեժիմը հայտնաբերում է չորանոցի թափվող իմպուլսները հիմնական ջերմային փուլից հետո:",
-        "label": "Հակակնճիռների դեմ"
-      },
-      "delay": {
-        "intro": "Հետաձգված մեկնարկի հայտնաբերումը ցույց է տալիս, երբ սարքը միացված է սնուցմամբ, բայց դեռ չի սկսել իր ցիկլը:",
-        "label": "Հետաձգման մեկնարկը"
-      },
-      "triggers": {
-        "intro": "Ընտրովի արտաքին ազդանշաններ՝ վերջի ձգան, դռան սենսոր, դադարի անջատիչ և բեռնաթափման հիշեցում:",
-        "label": "ձգաններ և դուռ"
-      },
-      "notifications": {
-        "label": "Ծանուցումներ",
-        "intro": "Կարգավորեք, թե երբ և ինչպես եք ծանուցվում ցիկլի իրադարձությունների մասին:"
-      },
-      "ml_training": {
-        "label": "ML թրեյնինգ",
-        "intro": "Օգտագործեք խելացի մոդելներ, որոնք անհատականացնում են այս սարքի հայտնաբերումն ու ժամանակացույցը:"
-      }
-    },
-    "setting": {
-      "auto_maintenance": {
-        "label": "Ավտոտեխսպասարկում (գիշերային մաքրում)"
-      },
-      "external_end_trigger_enabled": {
-        "label": "Միացնել արտաքին ավարտի գործարկիչը"
-      },
-      "external_end_trigger_inverted": {
-        "label": "Շրջել արտաքին ձգան (գործարկիչը անջատված է)"
-      },
-      "pause_cuts_power": {
-        "label": "Դադարը նաև անջատում է էներգիան (անջատիչի միջոցով)"
-      },
-      "notify_people": {
-        "label": "Մարդիկ (միայն տանը)"
-      },
-      "notify_only_when_home": {
-        "label": "Ծանուցել միայն տանը"
-      },
-      "energy_price_static": {
-        "label": "Ստատիկ էներգիայի գինը (կՎտժ)"
-      },
-      "enable_ml_models": {
-        "label": "Կիրառեք խելացի մոդելներ ցիկլի ընթացքում"
-      },
-      "ml_training_enabled": {
-        "label": "Սովորեք այս մեքենայից"
-      },
-      "name": {
-        "label": "Սարքի անվանումը"
-      },
-      "device_type": {
-        "label": "Սարքի տեսակը"
-      },
-      "power_sensor": {
-        "label": "Էլեկտրաէներգիայի ցուցիչ"
-      },
-      "min_power": {
-        "label": "Նվազագույն հզորություն"
-      },
-      "off_delay": {
-        "label": "Անջատված ուշացում"
-      },
-      "linked_device": {
-        "label": "Խումբ սարքի տակ"
-      },
-      "start_threshold_w": {
-        "label": "Մեկնարկի շեմը"
-      },
-      "stop_threshold_w": {
-        "label": "Stop շեմը"
-      },
-      "min_off_gap": {
-        "label": "Min Off Gap"
-      },
-      "start_duration_threshold": {
-        "label": "Մեկնարկի տևողությունը"
-      },
-      "start_energy_threshold": {
-        "label": "Սկսեք էներգիան"
-      },
-      "completion_min_seconds": {
-        "label": "Min Cycle Duration"
-      },
-      "running_dead_zone": {
-        "label": "Running Dead Zone"
-      },
-      "end_energy_threshold": {
-        "label": "Վերջ էներգիա"
-      },
-      "end_repeat_count": {
-        "label": "Ավարտել Կրկնությունների հաշվարկը"
-      },
-      "sampling_interval": {
-        "label": "Նմուշառման ընդմիջում"
-      },
-      "smoothing_window": {
-        "label": "Հարթեցնող պատուհան"
-      },
-      "abrupt_drop_watts": {
-        "label": "Կտրուկ անկում"
-      },
-      "abrupt_drop_ratio": {
-        "label": "Կտրուկ անկման հարաբերակցությունը"
-      },
-      "profile_match_threshold": {
-        "label": "Համապատասխանության շեմ"
-      },
-      "profile_unmatch_threshold": {
-        "label": "Չհամընկնել շեմին"
-      },
-      "profile_match_interval": {
-        "label": "Խաղի ընդմիջում"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "Min Duration հարաբերակցությունը"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "Առավելագույն տևողության հարաբերակցությունը"
-      },
-      "profile_duration_tolerance": {
-        "label": "Անձնագրի տևողության հանդուրժողականություն"
-      },
-      "duration_tolerance": {
-        "label": "Գնահատեք հանդուրժողականությունը"
-      },
-      "auto_label_confidence": {
-        "label": "Ավտոմատ պիտակի վստահություն"
-      },
-      "learning_confidence": {
-        "label": "Սովորելու վստահություն"
-      },
-      "suppress_feedback_notifications": {
-        "label": "Չեղարկել հետադարձ կապի ծանուցումները"
-      },
-      "watchdog_interval": {
-        "label": "Watchdog ընդմիջում"
-      },
-      "no_update_active_timeout": {
-        "label": "Առանց թարմացման ժամանակի վերջ"
-      },
-      "progress_reset_delay": {
-        "label": "Առաջընթացի վերակայման հետաձգում"
-      },
-      "expose_debug_entities": {
-        "label": "Բացահայտեք վրիպազերծման սուբյեկտները"
-      },
-      "save_debug_traces": {
-        "label": "Պահպանեք վրիպազերծման հետքերը"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "Միացնել հակակնճիռների հայտնաբերումը"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "Max Anti-Wrinkle Power"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "Առավելագույն տևողությունը"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "Ելք իշխանության շեմից"
-      },
-      "delay_start_detect_enabled": {
-        "label": "Միացնել հետաձգման մեկնարկի հայտնաբերումը"
-      },
-      "delay_confirm_seconds": {
-        "label": "Հաստատեք վայրկյաններ"
-      },
-      "delay_timeout_hours": {
-        "label": "Դադարեցման ժամեր"
-      },
-      "external_end_trigger": {
-        "label": "Արտաքին ձգանային միավոր"
-      },
-      "door_sensor_entity": {
-        "label": "Դռների սենսորային միավոր"
-      },
-      "switch_entity": {
-        "label": "Անջատեք կազմակերպություն"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "Բեռնաթափել Nag Delay-ը"
-      },
-      "pump_stuck_duration": {
-        "label": "Պոմպի խրվածության տևողությունը"
-      },
-      "notify_start_services": {
-        "label": "Սկսեք ծառայությունները"
-      },
-      "notify_finish_services": {
-        "label": "Ավարտական ​​ծառայություններ"
-      },
-      "notify_live_services": {
-        "label": "Ուղիղ առաջընթացի ծառայություններ"
-      },
-      "notify_fire_events": {
-        "label": "Fire HA իրադարձություններ ծանուցումների համար"
-      },
-      "notify_before_end_minutes": {
-        "label": "Նախնական ավարտի ահազանգ"
-      },
-      "notify_live_interval_seconds": {
-        "label": "Ուղիղ թարմացումների ընդմիջում"
-      },
-      "notify_live_overrun_percent": {
-        "label": "Live Overrun % նախքան ահազանգը"
-      },
-      "notify_live_chronometer": {
-        "label": "Օգտագործեք Live Chronometer"
-      },
-      "notify_timeout_seconds": {
-        "label": "Ավտոմատ անջատել հետո"
-      },
-      "notify_title": {
-        "label": "Ծանուցման վերնագիր"
-      },
-      "notify_icon": {
-        "label": "Ծանուցման պատկերակ"
-      },
-      "notify_start_message": {
-        "label": "Սկսել հաղորդագրությունը"
-      },
-      "notify_finish_message": {
-        "label": "Ավարտել հաղորդագրությունը"
-      },
-      "notify_pre_complete_message": {
-        "label": "Նախապես ավարտված հաղորդագրություն"
-      },
-      "notify_reminder_message": {
-        "label": "Հիշեցման հաղորդագրություն"
-      },
-      "notify_channel": {
-        "label": "Android ալիք (սկիզբ/ուղիղ)"
-      },
-      "notify_finish_channel": {
-        "label": "Android ալիք (ավարտել)"
-      },
-      "energy_price_entity": {
-        "label": "Էներգիայի գնի սուբյեկտ"
-      },
-      "ml_training_hour": {
-        "label": "Սովորեք ժամին"
-      },
-      "ml_training_min_cycles": {
-        "label": "Նախ անհրաժեշտ է ցիկլեր"
-      },
-      "ml_training_interval_days": {
-        "label": "Ստուգեք առավելագույնը յուրաքանչյուր"
-      }
-    },
-    "tab": {
-      "status": "Ընդհանուր ակնարկ",
-      "history": "Ցիկլեր",
-      "profiles": "Պրոֆիլներ",
-      "settings": "Կարգավորումներ",
-      "ml": "ML թրեյնինգ",
-      "advanced": "Ընդլայնված",
-      "diagnostics": "Ախտորոշում",
-      "pp_overview": "Ընդհանուր ակնարկ",
-      "pp_phases": "Փուլեր",
-      "pp_cleanup": "Մաքրում",
-      "pp_manage": "Կառավարել",
-      "subtab_profiles": "Պրոֆիլներ",
-      "subtab_phase_catalog": "Փուլային կատալոգ"
+      "expected": "Ակնկալված",
+      "raw_socket": "Հում վարդակ",
+      "artifact_interruption": "Ընդհատում",
+      "artifact_low_power": "Ցածր հզորություն",
+      "artifact_high_power": "Բարձր հզորություն",
+      "artifact_anomaly": "Անոմալիա"
     },
     "btn": {
-      "save": "Պահպանել",
+      "add_timer": "+ Ավելացնել ժմչփ",
+      "remove_timer": "Հեռացնել ժմչփը",
+      "add_device_tip": "Ավելացնել մեկ այլ WashData սարք",
+      "delete_group_tip": "Ջնջել միայն այս խումբը. անդամների պրոֆիլները պահպանվում են",
+      "run_analysis_tip": "Վերլուծեք ձեր ձայնագրված ցիկլերը հիմա և թարմացրեք թյունինգի առաջարկները",
+      "reset_ml_models_tip": "Հեռացրեք ճշգրտված մոդելները և վերադարձեք ներկառուցվածներին: WashData-ն կարող է դրանք ավելի ուշ նորից սովորել:",
+      "resume_cycle": "Վերսկսել",
+      "add_device": "+ Ավելացնել սարք",
+      "add_phase": "+ Ավելացնել փուլ",
+      "apply_all": "Կիրառել բոլորը",
+      "apply_label": "Կիրառել պիտակը",
+      "apply_split": "Կիրառել Split",
+      "apply_trim": "Կիրառել Trim-ը",
+      "auto_detect_split": "Ավտոմատ հայտնաբերում",
+      "auto_label_cycles": "Ավտոմատ պիտակավորման ցիկլեր",
       "cancel": "Չեղարկել",
-      "delete": "Ջնջել",
+      "clear_debug": "Մաքրել վրիպազերծման տվյալները",
+      "clear_splits": "Պարզ",
       "close": "Փակել",
-      "edit": "Խմբագրել",
-      "add": "Ավելացնել",
-      "rebuild": "Վերակառուցել ծրարները",
-      "record": "Սկսեք ձայնագրումը",
       "compare": "Համեմատեք",
       "confirm": "Հաստատել",
-      "discard": "Վերացնել",
-      "export": "Արտահանում",
-      "import": "Ներմուծում",
-      "merge": "Միաձուլել",
-      "apply": "Կիռառել",
-      "refresh": "Թարմացնել",
+      "convert_to_automation": "Փոխակերպել ավտոմատացման",
+      "correct": "Ճիշտ…",
       "create": "Ստեղծել",
-      "select": "Ընտրել",
+      "create_profile": "+ Ստեղծեք պրոֆիլ",
+      "delete": "Ջնջել",
+      "delete_group": "Ջնջել խումբը",
+      "delete_profile": "Ջնջել պրոֆիլը",
+      "discard": "Վերացնել",
+      "dismiss": "Հեռացնել",
       "done": "Կատարված է",
-      "reset": "Վերականգնել",
-      "trim": "Կտրել",
-      "split": "Բաժանել",
-      "review": "Վերանայում",
+      "edit": "Խմբագրել",
+      "export": "Արտահանում",
+      "export_json": "Արտահանել JSON",
+      "force_stop": "Force Stop",
+      "from_template": "Կաղապարից ▾",
+      "ignore": "Անտեսել",
+      "import_json": "Ներմուծում JSON-ից",
+      "import_overwrite": "Ներմուծում (վերագրանցում է տվյալները)",
       "inspect": "Ստուգել",
       "label": "Պիտակ",
-      "save_settings": "Պահպանել կարգավորումները",
-      "new_profile": "+ Նոր պրոֆիլ",
-      "new_group": "+ Նոր խումբ",
-      "apply_label": "Կիրառել պիտակը",
-      "run_auto_label": "Գործարկեք Auto-Label-ը",
-      "save_review": "Պահպանել ակնարկը",
-      "apply_trim": "Կիրառել Trim-ը",
-      "apply_split": "Կիրառել Split",
-      "process_recording": "Պահպանել ձայնագրությունը",
-      "stop": "Դադարեցրեք",
-      "process": "Գործընթացը",
-      "add_device": "+ Ավելացնել սարք",
-      "train_now": "Ուսուցություն հիմա",
-      "reset_to_defaults": "Վերականգնել լռելյայն",
-      "reset_to_builtin": "Վերականգնել ներկառուցված մոդելներին",
-      "save_preferences": "Պահպանել նախապատվությունները",
-      "save_panel_settings": "Պահպանել վահանակի կարգավորումները",
-      "save_access_control": "Պահպանել մուտքի վերահսկումը",
-      "auto_label_cycles": "Ավտոմատ պիտակավորման ցիկլեր",
-      "run_analysis": "🔍 Գործարկել առաջարկների վերլուծություն",
-      "apply_all": "Կիրառել բոլորը",
-      "show_only": "Ցույց տալ միայն",
-      "dismiss": "Հեռացնել",
-      "dismiss_all": "Հեռացնել բոլորին",
-      "process_history": "Գործընթացը հիմա",
-      "clear_debug": "Մաքրել վրիպազերծման տվյալները",
-      "wipe_all": "Ջնջել բոլոր տվյալները",
-      "export_json": "Արտահանել JSON",
-      "import_json": "Ներմուծում JSON-ից",
-      "correct": "Ճիշտ…",
-      "ignore": "Անտեսել",
-      "add_phase": "+ Ավելացնել փուլ",
-      "new_phase": "+ Նոր փուլ",
-      "delete_profile": "Ջնջել պրոֆիլը",
-      "rebuild_envelope": "Վերակառուցել ծրարը",
-      "create_profile": "+ Ստեղծեք պրոֆիլ",
-      "rec_stop": "Դադարեցրեք",
-      "pause_cycle": "Դադար",
-      "resume_cycle": "Վերսկսել",
-      "force_stop": "Ուժով Դադարեցրեք",
-      "save_phases": "Պահպանել փուլերը",
-      "auto_detect_split": "Ավտոմատ հայտնաբերում",
-      "clear_splits": "Պարզ",
-      "submit_correction": "Ներկայացրեք ուղղումը",
-      "import_overwrite": "Ներմուծում (վերագրանցում է տվյալները)",
-      "use": "Օգտագործեք",
       "manage": "Կառավարել",
-      "remove": "Հեռացնել",
-      "delete_group": "Ջնջել խումբը",
-      "trim_split": "Կտրել / Սպլիտ",
-      "convert_to_automation": "Փոխակերպել ավտոմատացման",
+      "merge": "Միաձուլել",
       "new_automation": "＋ Նոր ավտոմատացում",
-      "from_template": "Կաղապարից ▾",
-      "on_cycle_started": "Ցիկլը սկսվել է",
+      "new_group": "+ Նոր խումբ",
+      "new_phase": "+ Նոր փուլ",
+      "new_profile": "+ Նոր պրոֆիլ",
       "on_cycle_finished": "Ցիկլը ավարտված է",
-      "save_group": "Պահպանել խումբը"
+      "on_cycle_started": "Ցիկլը սկսվել է",
+      "pause_cycle": "Դադար",
+      "process": "Գործընթացը",
+      "process_history": "Գործընթացը հիմա",
+      "process_recording": "Պահպանել ձայնագրությունը",
+      "rebuild": "Վերակառուցել ծրարները",
+      "rebuild_envelope": "Վերակառուցել ծրարը",
+      "rec_stop": "Դադարեցրեք",
+      "record": "Սկսեք ձայնագրումը",
+      "refresh": "Թարմացնել",
+      "remove": "Հեռացնել",
+      "reset": "Վերականգնել",
+      "reset_to_builtin": "Վերականգնել ներկառուցված մոդելներին",
+      "reset_to_defaults": "Վերականգնել լռելյայն",
+      "review": "Վերանայում",
+      "run_analysis": "🔍 Գործարկել առաջարկների վերլուծություն",
+      "run_auto_label": "Գործարկեք Auto-Label-ը",
+      "save": "Պահպանել",
+      "save_access_control": "Պահպանել մուտքի վերահսկումը",
+      "save_group": "Պահպանել խումբը",
+      "save_panel_settings": "Պահպանել վահանակի կարգավորումները",
+      "save_phases": "Պահպանել փուլերը",
+      "save_preferences": "Պահպանել նախապատվությունները",
+      "save_review": "Պահպանել ակնարկը",
+      "save_settings": "Պահպանել կարգավորումները",
+      "select": "Ընտրել",
+      "show_only": "Ցույց տալ միայն",
+      "split": "Պառակտում",
+      "submit_correction": "Ներկայացրեք ուղղումը",
+      "train_now": "Գնացե՛ք հիմա",
+      "trim": "Կտրել",
+      "trim_split": "Կտրել / Սպլիտ",
+      "use": "Օգտագործեք",
+      "wipe_all": "Ջնջել բոլոր տվյալները"
     },
     "badge": {
-      "poor_fit": "վատ պիտանիություն",
+      "golden_cycle": "Արձանագրված հղման ցիկլը",
+      "reviewed": "Վերանայված",
+      "feedback_requested": "Հետադարձ կապ է պահանջվել",
+      "needs_review": "Վերանայման կարիք ունի",
+      "overrun": "Սովորականից երկար վազեց",
+      "artifact_tip": "Հայտնաբերվել են {n} անոմալիաներ (օրինակ՝ դուռը բացվել է ցիկլի կեսին) — բաց՝ դրանք գրաֆիկում տեսնելու համար",
+      "poor_fit_tip": "Անհամապատասխան համընկնումների պատմություն. մտածեք վերակառուցելու այս պրոֆիլը",
+      "fair_fit_tip": "Համապատասխանության չափավոր հետևողականություն. այս պրոֆիլին հատկացված որոշ ցիկլեր ավելի ցածր վստահության միավորներ ունեն: Նշեք ավելի շատ ցիկլեր կամ վերագրանցեք պրոֆիլը՝ ճշգրտությունը բարելավելու համար:",
       "fair_fit": "արդար համապատասխանություն",
-      "manual": "(ձեռքով ընտրված)",
+      "poor_fit": "վատ պիտանիություն",
       "auto": "(ինքնաբերաբար հայտնաբերված)",
-      "improving": "↗ բարելավում",
+      "built_in_tag": "ներկառուցված",
       "declining": "↘ նվազում",
+      "improving": "↗ բարելավում",
+      "manual": "(ձեռքով ընտրված)",
       "steady": "→ կայուն",
-      "using_tuned": "Կարգավորված կշիռների օգտագործումը",
       "using_defaults": "Օգտագործելով առաքված լռելյայն",
-      "built_in_tag": "ներկառուցված"
-    },
-    "status": {
-      "completed": "Ավարտված",
-      "interrupted": "Ընդհատված",
-      "force_stopped": "Ուժով Դադարեցված",
-      "active": "Ակտիվ",
-      "ambiguous": "Ոչ միանշանակ",
-      "clear": "Պարզ",
-      "working": "Աշխատանքային…",
-      "recording": "Ձայնագրվում է…",
-      "ready": "Պատրաստ է մշակման",
-      "idle": "Պարապ",
-      "auto_detect": "Ավտոմատ հայտնաբերում",
-      "fine_tuning": "ճշգրտում հիմա…",
-      "all_statuses": "Բոլոր կարգավիճակները"
-    },
-    "ml": {
-      "fit_strong": "Ուժեղ",
-      "fit_good": "Լավ",
-      "fit_fair": "Արդար",
-      "fit_weak": "Թույլ",
-      "fit_slight": "Թեթև",
-      "fit_word": "տեղավորել",
-      "fine_tuned_at": "ճշգրտված {when}",
-      "personalized": "● Անհատականացված այս մեքենայի համար",
-      "builtin_models": "● Ներկառուցված մոդելների օգտագործումը"
+      "using_tuned": "Կարգավորված կշիռների օգտագործումը"
     },
     "modal": {
-      "label_cycle": "ցիկլ Պիտակավորել",
-      "create_profile": "Ստեղծել պրոֆիլ",
-      "new_phase": "Նոր փուլ",
-      "edit_phase": "Խմբագրել փուլ",
-      "process_recording": "Գործընթացի ձայնագրում",
-      "correct_feedback": "Ճիշտ արձագանք",
-      "import_config": "Ներմուծման կոնֆիգուրացիա",
+      "merge_cycles": "Միավորել {n} ցիկլերը",
       "auto_label": "Ավտոմատ պիտակի ցիկլեր",
-      "cycle": "Ցիկլ"
+      "correct_feedback": "Ճիշտ արձագանք",
+      "create_profile": "Ստեղծել պրոֆիլ",
+      "cycle": "Ցիկլ",
+      "edit_phase": "Խմբագրել փուլ",
+      "import_config": "Ներմուծման կոնֆիգուրացիա",
+      "label_cycle": "Պիտակի ցիկլ",
+      "new_phase": "Նոր փուլ",
+      "process_recording": "Գործընթացի ձայնագրում"
     },
-    "tag": {
-      "late_start": "Ուշ մեկնարկ",
-      "early_end": "Վաղ ավարտ",
-      "merged": "Միաձուլված ցիկլեր",
-      "split": "Բաժանված ցիկլ",
-      "noise": "Աղմուկ",
-      "wrong_profile": "Սխալ պրոֆիլ",
-      "sensor_gap": "Սենսորային բացը"
+    "msg": {
+      "near_duplicate_cluster": "Հայտնաբերվել է գրեթե կրկնօրինակ պրոֆիլների կլաստեր: Խմբավորումը թույլ է տալիս արժանահավատորեն համընկնել արտաքին տեսքի միջև (օրինակ՝ նույն ծրագիրը տարբեր ջերմաստիճանի/պտույտի դեպքում):",
+      "coverage_gap": "վերջին ցիկլերը չունեն համապատասխան պրոֆիլ (վերջին 30-ի {pct}%):",
+      "consider_new_profile": "Մտածեք նոր պրոֆիլ ստեղծելու մասին:",
+      "group_not_cohesive": "Այս պրոֆիլները բավականաչափ նման չեն հուսալիորեն խմբավորելու համար, ուստի համընկնումով դրանք վերաբերվում են առանձին, մինչև չհեռացնեք ծայրամասը կամ բաժանեք խումբը:",
+      "group_modal_help": "Խմբավորել նույն ձևով ծրագրեր, որոնք տարբերվում են ջերմաստիճանով/պտտումով (տեւողությունները կարող են տարբեր լինել): Համապատասխանեցման արդյունքում խումբը գնահատվում է որպես մեկ թեկնածու, այնուհետև ընտրվում է ամենալավ անդամին: Ընտրեք առնվազն 2; ծածկույթը ցույց է տալիս, թե որքանով են նրանք նման:",
+      "showing_suggestions": "Ցուցադրվում է {count} կարգավորումն առաջարկներով:",
+      "show_all_settings": "Ցույց տալ բոլոր կարգավորումները",
+      "tuning_suggestions_available": "{count} թյունինգի առաջարկը հասանելի է դիտարկված ցիկլերից: Դրանք հայտնվում են համապատասխան դաշտերի կողքին:",
+      "legacy_actions_title": "{count} ժառանգական հատուկ գործողությունը դեռ աշխատում է",
+      "old_actions_warning": "Կազմաձևված է գործողությունների հին խմբագրիչով (այժմ հանված է): Դրանք դեռևս կրակում են ցիկլային իրադարձությունների վրա, բայց այլևս չեն կարող խմբագրվել այստեղ: Փոխակերպեք դրանք սովորական ավտոմատացման կամ հեռացրեք դրանք:",
+      "no_settings_match": "«{q}»-ին համապատասխան կարգավորումներ չկան",
+      "clear_debug_hint": "Հեռացրեք պահված վրիպազերծման տվյալները՝ տարածք ազատելու համար:",
+      "wipe_history_warning": "Ընդմիշտ ջնջեք բոլոր ցիկլերը և պրոֆիլները: Հնարավոր չէ հետարկել:",
+      "export_description": "Արտահանել բոլոր պրոֆիլներն ու ցիկլերը JSON կամ վերականգնել նախորդ արտահանումից:",
+      "log_buffer_hint": "Նորագույն առաջինը · բուֆերացնում է վերջին 500 ha_washdata գրառումները վերագործարկումից հետո · քաշեք ստորին եզրը՝ չափափոխելու համար:",
+      "review_profile_tip": "Ծրագիրը այս ցիկլը պիտակավորված է որպես. Եթե ​​ավտոմատ հայտնաբերված ծրագիրը սխալ էր, ուղղեք այն այստեղ. պիտակավորումը սովորեցնում է համապատասխանեցնել ապագա ցիկլերին:",
+      "review_quality_tip": "Որքան մաքուր է այս ցիկլը: Լավ = այս ծրագրի դասագրքի օրինակ; Վատ = հայտնաբերված, բայց աղմկոտ կամ անտիպ; Անօգտագործելի = սխալ հայտնաբերված (միաձուլված, կտրված կամ կեղծ): Առաջարկում է առողջության գնահատականը և այն ցիկլերը, որոնք թույլատրվում են վարժեցնել մոդելին:",
+      "review_recorded_tip": "Նշեք սա որպես իր ծրագրի համար ձեռքով ընտրված հղման ցիկլ՝ նույն դերը, ինչ ձեռքով գրանցված ցիկլը: Հղման ցիկլերը միշտ պահվում են, տեղադրվում են համապատասխան ձևանմուշները և երբեք չեն հեռացվում մաքրման միջոցով: (Սա «ոսկե»/ձայնագրված դրոշն է, երկուսն էլ նույն բանն են):",
+      "review_tags_tip": "Կամընտիր դրոշներ, որոնք նկարագրում են, թե ինչն է սխալ եղել այս ցիկլում, այնպես որ ուսուցումն ու մաքրումը կարող են պատճառ հանդիսանալ:",
+      "review_notes_tip": "Ազատ տեքստային նշումներ ձեր սեփական հղումների համար: Չի օգտագործվում համընկնման կամ մարզման միջոցով:",
+      "review_confirm_help": "Հաստատեք, արդյոք այս ցիկլը ճիշտ է հայտնաբերվել: Ձեր ակնարկները վարժեցնում են մոդելը ձեր մեքենայի վրա. որքան շատ ցիկլեր հաստատեք, այնքան ավելի լավ համընկնում և առողջական միավորներ կստանան: Արագ լավ/վատը բավական է:",
+      "review_notes_placeholder": "Նշումներ (ըստ ցանկության)",
+      "compare_profiles_tip": "Վերևի գծապատկերում ծածկեք պրոֆիլի այլ ծրարները՝ տեսնելու, թե որն է լավագույնս համապատասխանում այս ցիկլին:",
+      "artifact_header": "Այս ցիկլի ընթացքում հայտնաբերված {n} անոմալիաներ",
+      "artifact_footer": "Ընդգծված է վերևի գծապատկերում: Սրանք անցողիկ արտեֆակտներ են (օրինակ՝ ցիկլի կեսին բացված դուռը), պարտադիր չէ, որ խնդիրներ լինեն:",
+      "profile_poor_health_detail": "Այս պրոֆիլին նշանակված ցիկլերն ունեն անհամապատասխան ձևեր կամ ցածր վստահություն: Մտածեք վերակառուցել ծրարը կամ վերանայել պիտակավորված ցիկլերը:",
+      "trend_duration_longer": "Տևողությունը՝ ավելի երկար ({pct}%/ցիկլ) — վերջին միջինը {avg}",
+      "trend_duration_shorter": "Տևողությունը ավելի կարճ է ({pct}%/ցիկլ) — վերջին միջինը {avg}",
+      "trend_energy_up": "Էներգիայի աճի միտում ({pct}%/ցիկլ) — վերջին միջինը {avg}",
+      "trend_energy_down": "Էներգիայի միտումը նվազում է ({pct}%/ցիկլ)",
+      "performance_trend": "Արդյունավետության միտում ({n} ցիկլ)",
+      "maintenance_advisory": "Տևողությունը/էներգիայի ավելացումը կարող է ցույց տալ սարքի պահպանման անհրաժեշտությունը (օրինակ՝ աղազրկում, ֆիլտրի մաքրում):",
+      "manual_duration_hint": "Պրոֆիլի միջին/ակնկալվող ցիկլի երկարությունը, որն օգտագործվում է մնացած ժամանակի գնահատումների համար: Խմբագրել՝ այն սահմանելու համար; թողնելով այն անփոփոխ, պահպանում է ընթացիկ արժեքը:",
+      "appliance_monitor": "Սարքի մոնիտոր",
+      "auto_label_intro": "Հանձնարարեք պրոֆիլներ չպիտակավորված ցիկլերին, որոնց համընկնումի վստահությունը վերացնում է շեմը:",
+      "cleanup_intro": "Յուրաքանչյուր պիտակավորված ցիկլը ծածկված է: Նշեք ծայրամասերը և ջնջեք՝ պրոֆիլը մաքրելու համար:",
+      "compare_overlay_profiles": "Ծածկված պրոֆիլներ (թույլ)",
+      "compare_selected_cycles": "Ընտրված ցիկլեր (պինդ) - ցուցադրել / թաքցնել",
+      "feedback_prompt": "Հաստատեք, որ դա ճիշտ էր, ուղղեք ծրագիրը կամ անտեսեք:",
+      "import_intro": "Ներբեռնեք արտահանված ֆայլը կամ տեղադրեք JSON օգտակար բեռը ստորև:",
+      "live_chart_loading": "Ուղիղ հզորության աղյուսակը հայտնվում է ընթերցումների ժամանումին:",
+      "loading": "Բեռնվում է…",
+      "loading_curve": "Բեռնվում է կորը…",
+      "loading_settings": "Կարգավորումների բեռնում…",
+      "maintenance_requires_access": "Սպասարկումը և արտահանումը/ներմուծումը պահանջում են լիարժեք մուտք:",
+      "matching_tuning_intro": "Սովորելու ժամանակ WashData-ն նաև կարգավորում է ծրագրի համապատասխանության չափի կշիռը՝ ընդդեմ տևողության և էներգիայի:",
+      "merge_intro": "Ընտրված ցիկլերը միավորվում են մեկում (ժամանակագրական հերթականությամբ, բացերը լցված են 0 Վտ-ով): Ընտրեք ստացված պրոֆիլը:",
+      "ml_intro": "WashData-ն առաքվում է խելացի մոդելներով, որոնք աշխատում են առանց տուփի:",
+      "ml_learned_intro": "Մոդելներ, որոնք ճշգրտորեն հարմարեցված են այս մեքենային:",
+      "ml_loading": "բեռնում է ML…",
+      "ml_settings_intro": "Երկու անկախ անջատիչներ. մեկը կիրառում է մոդելները մինչ ցիկլը աշխատում է, մյուսը թույլ է տալիս WashData-ին ժամանակի ընթացքում դրանք ճշգրտել ձեր մեքենայի վրա:",
+      "no_cycles_match": "Ոչ մի ցիկլ չի համապատասխանում ընթացիկ ֆիլտրին:",
+      "no_cycles_profile": "Այս պրոֆիլի համար ցիկլեր չկան:",
+      "no_cycles_yet": "Դեռևս ցիկլեր չեն գրանցվել:",
+      "no_device_selected": "Ոչ մի սարք ընտրված չէ:",
+      "no_devices": "WashData սարքեր դեռ կազմաձևված չեն:",
+      "no_envelope": "Դեռ ոչ մի ծրար. վերակառուցեք պիտակավորման փուլերից հետո:",
+      "no_envelope_overlay": "Ծրարը հասանելի չէ ծածկելու համար:",
+      "no_fine_tuned": "Դեռևս ոչինչ ճշգրտված չէ. WashData-ն օգտագործում է իր ներկառուցված մոդելները:",
+      "no_logs": "Մատյանների գրառումները դեռ բուֆերացված չեն:",
+      "no_match_yet": "Համապատասխանության փորձ դեռ չկա. սա լրացվում է վազքի ընթացքում:",
+      "no_other_users": "Տնային օգնականի այլ օգտվողներ չեն գտնվել:",
+      "no_phases": "Ոչ մի փուլ սահմանված չէ:",
+      "no_phases_assigned": "Ոչ մի փուլ չի նշանակվել:",
+      "no_profiles_compare": "Համեմատելու պրոֆիլներ չկան:",
+      "no_profiles_overlay": "Պրոֆիլներ չկան ծածկելու համար:",
+      "no_profiles_yet": "Դեռևս պրոֆիլներ չկան: Ստեղծեք մեկը պիտակավորված ցիկլից:",
+      "no_profiles_yet_short": "Դեռևս պրոֆիլներ չկան:",
+      "no_split_points": "Բաժանման կետեր դեռ չկան:",
+      "no_suggestions": "Ակտիվ առաջարկներ չկան:",
+      "pending_feedback": "Սպասվում է հայտնաբերման հետադարձ կապ",
+      "phase_catalog_intro": "Ցիկլի անվանված հատվածներ (Նախալվացում, Ջեռուցում, Սփին…): Վերագրեք դրանք պրոֆիլին իր կառավարման վահանակից:",
+      "phase_ranges_intro": "Միջին կորի վրա ծածկված փուլերի միջակայքերը (ցիկլի մեկնարկից րոպեներ): Խմբագրել արժեքները՝ ուղիղ եթերում նախադիտելու համար:",
+      "preferences_admin": "Նախապատվություններ, վահանակ և մուտքի կառավարում",
+      "preferences_adv": "Նախապատվություններ",
+      "prefs_personal": "Դրանք վերաբերում են միայն ձեր Home Assistant հաշվին:",
+      "profiles_intro": "Կտտացրեք պրոֆիլը վիճակագրության, փուլերի և մաքրման համար: Խմբավորեք գրեթե նույնական ծրագրերը (նույն ձևի/տեւողության, տարբեր ջերմաստիճանի կամ պտույտի) այնպես, որ դրանք հուսալիորեն համապատասխանեն:",
+      "rbac_hint": "Երբ անջատված է, «Տնային օգնականի» յուրաքանչյուր օգտատեր լիարժեք հասանելիություն ունի (կանխադրված): Ադմինիստրատորները միշտ ունեն լիարժեք մուտք և կարող են կառավարել բոլորին:",
+      "recent_logs": "ha_washdata վերջին գրառումները",
+      "recording_in_progress": "Ձայնագրումն ընթացքի մեջ է",
+      "review_in_settings": "Վերանայեք Կարգավորումներում",
+      "review_to_cycles": "Բացեք Cycles վերանայման հերթը",
+      "saving_triggers_reload": "Պահպանումը առաջացնում է ինտեգրման վերաբեռնում: HA սուբյեկտները կարող են համառոտ ցուցադրվել որպես անհասանելի:",
+      "search_placeholder": "Որոնման կարգավորումներ…",
+      "see_recorder": "Տես ձայնագրիչի վիջեթը ստորև",
+      "split_intro": "Սեղմեք գծապատկերը՝ բաժանման կետ ավելացնելու կամ հեռացնելու համար, կամ ավտոմատ կերպով հայտնաբերել անգործության բացերը: Արդյունքում յուրաքանչյուր հատված կարող է ստանալ իր սեփական պրոֆիլը:",
+      "storage_diagnostics": "Պահպանման վիճակագրություն, սպասարկում, արտահանում/ներմուծում",
+      "trim_intro": "Քաշեք կարմիր բռնակները կամ մուտքագրեք արժեքներ: Պատուհանից դուրս ամեն ինչ հանվում է:",
+      "unsure_detected_prefix": "WashData-ն վստահ չէ, որ հայտնաբերել է",
+      "updated": "Թարմացվեց"
     },
-    "quality": {
-      "good": "Լավ",
-      "bad": "Վատ",
-      "unusable": "Անօգտագործելի"
-    },
-    "access": {
-      "none": "Ոչ մեկը (թաքնված)",
-      "read": "Կարդացեք",
-      "edit": "Խմբագրել",
-      "full": "Լրիվ",
-      "inherit": "Ժառանգել"
+    "phase_desc": {
+      "pre_wash": "Հիմնական լվացումից առաջ նախնական ներծծում կամ նախնական բուժում:",
+      "wash": "Լվացքի հիմնական ցիկլը թմբուկի շարժումով և ընտրովի ջեռուցմամբ:",
+      "wash_dw": "Հիմնական լվացող միջոցի լվացում ջեռուցմամբ։",
+      "rinse": "Մաքուր ջրով ողողման փուլ: Այս փուլը կարող է կրկնվել մի քանի անգամ:",
+      "spin": "Բարձր արագությամբ արդյունահանում ջուրը բեռից հեռացնելու համար:",
+      "spin_wd": "Բարձր արագությամբ արդյունահանում մինչև չորացման անցումը:",
+      "soak": "Ցածր ակտիվության ներծծման ժամանակահատվածը ակտիվ լվացման փուլերի միջև:",
+      "soak_dw": "Երկարացված ներծծման ժամանակահատվածը ծանր հողի համար:",
+      "anti_crease": "Ավարտելուց հետո երբեմն կարճ պտտվում է կնճիռները նվազեցնելու համար:",
+      "heat_up": "Ջեռուցիչի սկզբնական տաքացումը մինչև լրիվ չորացումը սկսելը:",
+      "drying": "Հիմնական ջեռուցվող շրջադարձային շրջանը:",
+      "cool_down": "Շրջվել առանց ջերմության մոտ ցիկլի ավարտին:",
+      "anti_wrinkle": "Պարբերական հետցիկլային պտտվել՝ կնճիռները նվազեցնելու համար:",
+      "sensor_check": "Ցածր էներգիայի կարճատև դադար, մինչդեռ չորությունը չափվում է:",
+      "drain_and_switch": "Լվացքից չորացման ռեժիմի անցումային շրջան.",
+      "pre_rinse": "Նախնական ցողում լվացքի միջոցներով լվանալուց առաջ:",
+      "dry": "Չորացման փուլ՝ օգտագործելով ջեռուցիչ և/կամ մնացորդային ջերմություն:",
+      "sanitize": "Սանիտարական ծրագրերի բարձր ջերմաստիճանի մաքրման փուլ:"
     },
     "health": {
-      "poor": "⚠ Վատ համընկնում",
-      "fair": "Արդար համընկնումը",
-      "good": "✓ Լավ համընկնում"
+      "good": "✓ Պրոֆիլի լավ որակ",
+      "fair": "Ընդունելի պրոֆիլի որակ",
+      "poor": "⚠ Պրոֆիլի վատ որակ"
+    },
+    "ml": {
+      "fit_fair": "Ընդունելի",
+      "builtin_models": "● Ներկառուցված մոդելների օգտագործումը",
+      "fit_good": "Լավ",
+      "fit_slight": "Թեթև",
+      "fit_strong": "Ուժեղ",
+      "fit_weak": "Թույլ",
+      "fit_word": "տեղավորել",
+      "personalized": "● Անհատականացված այս մեքենայի համար"
     },
     "trend": {
       "up": "Թրենդային",
       "down": "Նվազման միտում"
     },
-    "pref": {
-      "date_relative": "Հարազատ (օրինակ՝ 2 ժամ առաջ)",
-      "date_absolute": "Բացարձակ (օրինակ՝ հուլիսի 2-ի 14:32)"
-    },
     "log": {
       "all_levels": "Բոլոր մակարդակները"
+    },
+    "pref": {
+      "date_absolute": "Բացարձակ (օրինակ՝ հուլիսի 2-ի 14:32)",
+      "date_relative": "Հարազատ (օրինակ՝ 2 ժամ առաջ)"
+    },
+    "quality": {
+      "bad": "Վատ",
+      "good": "Լավ",
+      "unusable": "Անօգտագործելի"
+    },
+    "status": {
+      "active": "Ակտիվ",
+      "all_statuses": "Բոլոր կարգավիճակները",
+      "ambiguous": "Ոչ միանշանակ",
+      "auto_detect": "Ավտոմատ հայտնաբերում",
+      "clear": "Պարզ",
+      "completed": "Ավարտված",
+      "fine_tuning": "ճշգրտում հիմա…",
+      "force_stopped": "Ուժը դադարեց",
+      "idle": "Պարապ",
+      "interrupted": "Ընդհատված",
+      "ready": "Պատրաստ է մշակման",
+      "recording": "Ձայնագրում"
+    },
+    "tab": {
+      "advanced": "Ընդլայնված",
+      "diagnostics": "Ախտորոշում",
+      "history": "Ցիկլեր",
+      "ml": "ML թրեյնինգ",
+      "pp_cleanup": "Մաքրում",
+      "pp_manage": "Կառավարել",
+      "pp_overview": "Ընդհանուր ակնարկ",
+      "pp_phases": "Փուլեր",
+      "profiles": "Պրոֆիլներ",
+      "settings": "Կարգավորումներ",
+      "status": "Ընդհանուր ակնարկ",
+      "subtab_phase_catalog": "Փուլային կատալոգ",
+      "subtab_profiles": "Պրոֆիլներ"
+    },
+    "tag": {
+      "early_end": "Վաղ ավարտ",
+      "late_start": "Ուշ մեկնարկ",
+      "merged": "Միաձուլված ցիկլեր",
+      "noise": "Աղմուկ",
+      "sensor_gap": "Սենսորային բացը",
+      "split": "Պառակտման ցիկլ",
+      "wrong_profile": "Սխալ պրոֆիլ"
+    },
+    "toast": {
+      "access_saved": "Մուտքի կառավարումը պահպանված է",
+      "all_wiped": "Բոլոր տվյալները ջնջվել են",
+      "analysis_complete_none": "Վերլուծությունն ավարտված է. նոր առաջարկներ չկան",
+      "auto_label_complete": "Ավտոմատ պիտակավորումն ավարտված է",
+      "automation_deleted": "Ավտոմատացումը ջնջված է",
+      "correction_submitted": "Ուղղումը ներկայացված է",
+      "cycle_deleted": "Ցիկլը ջնջված է",
+      "cycle_force_stopped": "Ցիկլը դադարեցվել է ուժով",
+      "cycle_labelled": "Ցիկլը պիտակավորված",
+      "cycle_paused": "Ցիկլը ընդհատվեց",
+      "cycle_resumed": "Ցիկլը վերսկսվեց",
+      "cycle_trimmed": "Ցիկլը կտրված է",
+      "cycles_merged": "Ցիկլերը միաձուլվեցին",
+      "envelope_rebuilt": "Ծրարը վերակառուցվել է",
+      "envelopes_rebuilt": "Ծրարները վերակառուցվել են",
+      "export_downloaded": "Արտահանումը ներբեռնվեց",
+      "feedback_all_dismissed": "Բոլոր արձագանքները մերժված են",
+      "feedback_confirmed": "Հետադարձ կապը հաստատվեց",
+      "feedback_dismissed": "Արձագանքը մերժված է",
+      "group_deleted": "Խումբը ջնջված է",
+      "group_name_required": "Խմբի անունը պարտադիր է",
+      "group_saved": "Խումբը պահված է",
+      "import_successful": "Ներմուծումը հաջողվեց; ինտեգրման վերաբեռնում",
+      "json_required": "JSON տվյալները պահանջվում են",
+      "legacy_removed": "Հնացած գործողությունները հեռացվել են",
+      "logs_exported": "Տեղեկամատյանները արտահանվել են",
+      "matching_reverted": "Համապատասխան կշիռները վերադարձվեցին կանխադրվածին",
+      "min_2_profiles": "Խմբի համար ընտրեք առնվազն 2 պրոֆիլ",
+      "ml_training_no_improvement": "Դասընթացն ավարտված է. ելակետը պահպանվել է (բարելավումներ չկան)",
+      "models_reverted": "Սարքի վրա գտնվող մոդելները վերադարձվել են բազային",
+      "name_required": "Անունը պարտադիր է",
+      "no_split_found": "Ոչ մի պարապ բացեր չեն գտնվել, որոնց վրա կարելի է բաժանել",
+      "panel_settings_saved": "Վահանակի կարգավորումները պահպանված են",
+      "phase_name_required": "Փուլի անունը պարտադիր է",
+      "phase_updated": "Փուլը թարմացվել է",
+      "phases_saved": "Փուլերը պահպանված են",
+      "preferences_saved": "Նախապատվությունները պահված են",
+      "profile_name_required": "Պահանջվում է պրոֆիլի անունը",
+      "profile_renamed": "Պրոֆիլը վերանվանվեց",
+      "recording_discarded": "Ձայնագրությունը մերժվեց",
+      "recording_saved": "Ձայնագրությունը պահվել է պրոֆիլում",
+      "recording_started": "Ձայնագրումը սկսվեց",
+      "recording_stopped": "Ձայնագրումը դադարեցվեց",
+      "review_saved": "Կարծիքը պահված է",
+      "settings_saved": "Պարամետրերը պահպանված են; ինտեգրման վերաբեռնում",
+      "suggestions_applied": "Կիրառված առաջարկություններ; ինտեգրման վերաբեռնում",
+      "suggestions_dismissed": "Առաջարկությունները մերժվել են"
     }
   }
 }

@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Upphaf hringrásar",
-        "cycle_finish": "Ljúka hringrás",
-        "cycle_live": "Framfarir í beinni"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Þvottavél",
@@ -88,198 +81,6 @@
         "bread_maker": "Brauðgerðarmaður",
         "pump": "Dæla / Sump Pump",
         "other": "Annað (háþróað)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(Ómerkt)",
-        "create_new_profile": "Búðu til nýjan prófíl",
-        "remove_label": "Fjarlægðu merkimiðann",
-        "no_reference_cycle": "(Engin viðmiðunarlota)",
-        "all_device_types": "Allar gerðir tækja",
-        "current_suffix": "(núverandi)",
-        "phase_builtin_suffix": "(Innbyggt)",
-        "phase_none_available": "Engir áfangar í boði.",
-        "phase_other_device_types": "Aðrar gerðir tækja:",
-        "settings_deprecation_warning": "⚠️ **Undanleg tækisgerð:** Áætlað er að {device_type} verði fjarlægður í framtíðarútgáfu. Samsvarandi leiðsla WashData gefur ekki áreiðanlegar niðurstöður fyrir þennan tækjaflokk. Samþætting þín heldur áfram að virka í gegnum afskriftartímabilið; til að þagga niður í þessari viðvörun skaltu skipta **Tegun tækis** hér að neðan yfir í eina af studdu gerðunum (þvottavél, þurrkara, þvottavél-þurrkara, uppþvottavél, loftsteikingarvél, brauðvél eða dælu), eða í **Annað (íþróað)** ef heimilistækið þitt passar ekki við neinar af þeim studdu gerðum. **Annað (Advanced)** sendir viljandi almennar sjálfgefnar stillingar sem eru ekki stilltar fyrir neitt sérstakt tæki, svo þú þarft að stilla þröskulda, tímamörk og samsvarandi færibreytur sjálfur; allar núverandi stillingar þínar varðveitast þegar þú skiptir.",
-        "editor_select_info": "Veldu 1 lotu til að skipta eða 2+ lotur til að sameinast.",
-        "editor_select_info_split": "Veldu 1 hringrás til að skipta.",
-        "editor_select_info_merge": "Veldu 2+ hringrásir til að sameina.",
-        "editor_select_info_delete": "Veldu 1+ hringrás(ir) til að eyða.",
-        "no_cycles_recorded": "Engar lotur skráðar ennþá.",
-        "profile_summary_line": "- **{name}**: {count} lotur, {avg}m meðaltal",
-        "no_profiles_created": "Engir prófílar búnir til ennþá.",
-        "phase_preview": "Forskoðun á áfanga",
-        "phase_preview_no_curve": "Meðalprófílferill er ekki tiltækur ennþá. Keyra/merkja fleiri lotur fyrir þetta snið.",
-        "average_power_curve": "Meðalaflsferill",
-        "unit_min": "mín",
-        "profile_option_fmt": "{name} ({count} lotur, ~{duration}m meðaltal)",
-        "profile_option_short_fmt": "{name} ({count} lotur, ~{duration}m)",
-        "deleted_cycles_from_profile": "Eyddi {count} lotum frá {profile}.",
-        "not_enough_data_graph": "Ekki næg gögn til að búa til línurit.",
-        "no_profiles_found": "Engir prófílar fundust.",
-        "cycle_info_fmt": "Hringrás: {start}, {duration}m, núverandi: {label}",
-        "top_candidates_header": "### Helstu frambjóðendur",
-        "tbl_profile": "Prófíll",
-        "tbl_confidence": "Sjálfstraust",
-        "tbl_correlation": "Fylgni",
-        "tbl_duration_match": "Lengd Match",
-        "detected_profile": "Fann prófíl",
-        "estimated_duration": "Áætluð tímalengd",
-        "actual_duration": "Raunveruleg lengd",
-        "choose_action": "__Veldu aðgerð hér að neðan:__",
-        "tbl_count": "Telja",
-        "tbl_avg": "Meðaltal",
-        "tbl_min": "Min",
-        "tbl_max": "Hámark",
-        "tbl_energy_avg": "Orka (meðal)",
-        "tbl_energy_total": "Orka (samtals)",
-        "tbl_consistency": "Samræmi",
-        "tbl_last_run": "Síðasta hlaup",
-        "graph_legend_title": "Grafík Legend",
-        "graph_legend_body": "Bláa bandið táknar lágmarks- og hámarksaflspennusvið sem sést. Línan sýnir meðalaflsferilinn.",
-        "recording_preview": "Forskoðun upptöku",
-        "trim_start": "Klippa upphaf",
-        "trim_end": "Klipptu enda",
-        "split_preview_title": "Skipt forskoðun",
-        "split_preview_found_fmt": "Fann {count} hluti.",
-        "split_preview_confirm_fmt": "Smelltu á Staðfesta til að skipta þessari lotu í {count} aðskildar lotur.",
-        "merge_preview_title": "Sameina forskoðun",
-        "merge_preview_joining_fmt": "Tengist {count} lotum. Eyður verða fylltar með 0W lestri.",
-        "editor_delete_preview_title": "Forskoðun eyðingar",
-        "editor_delete_preview_intro": "Valdar hringrásir verða eyddar varanlega:",
-        "editor_delete_preview_confirm": "Smelltu á Staðfesta til að eyða þessum hringrásarskrám varanlega.",
-        "no_power_preview": "*Engin orkugögn tiltæk til forskoðunar.*",
-        "profile_comparison": "Samanburður á prófíl",
-        "actual_cycle_label": "Þessi hringrás (raunveruleg)",
-        "storage_usage_header": "Geymslunotkun",
-        "storage_file_size": "Skráarstærð",
-        "storage_cycles": "Hringrásir",
-        "storage_profiles": "Snið",
-        "storage_debug_traces": "Villuleita spor",
-        "overview_suffix": "Yfirlit",
-        "phase_preview_for_profile": "Fasa forskoðun fyrir prófíl",
-        "current_ranges_header": "Núverandi svið",
-        "assign_phases_help": "Notaðu aðgerðir hér að neðan til að bæta við, breyta, eyða eða vista svið.",
-        "profile_summary_header": "Samantekt prófíls",
-        "recent_cycles_header": "Nýlegar lotur",
-        "trim_cycle_preview_title": "Forskoðun klippingar hringrásar",
-        "trim_cycle_preview_no_data": "Engin orkugögn tiltæk fyrir þessa lotu.",
-        "trim_cycle_preview_kept_suffix": "haldið",
-        "table_program": "Forrit",
-        "table_when": "Hvenær",
-        "table_length": "Lengd",
-        "table_match": "Samsvörun",
-        "table_profile": "Prófíll",
-        "table_cycles": "Hringrásir",
-        "table_avg_length": "Meðallengd",
-        "table_last_run": "Síðasta hlaup",
-        "table_avg_energy": "Meðalorka",
-        "table_detected_program": "Greint forrit",
-        "table_confidence": "Sjálfstraust",
-        "table_reported": "Tilkynnt"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Skiptu hringrás (finndu eyður)",
-        "merge": "Sameina hringrás (sameina brot)",
-        "delete": "Eyða hringrás(um)"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Finna biðbil sjálfkrafa",
-        "manual": "Handvirk(ur) tímastimpill(ar)"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Viðhald: Endurvinnsla og fínstilla gögn",
-        "clear_debug_data": "Hreinsa villuleitargögn (lausa um pláss)",
-        "wipe_history": "Þurrkaðu ÖLL gögn fyrir þetta tæki (óafturkræft)",
-        "export_import": "Flytja út / flytja inn JSON með stillingum (afrita/líma)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "Flytja út öll gögn",
-        "import": "Flytja inn / sameina gögn"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Sjálfvirk merking á gömlum hringrásum",
-        "select_cycle_to_label": "Merki ákveðin hringrás",
-        "select_cycle_to_delete": "Eyða hringrás",
-        "interactive_editor": "Sameina/skipta gagnvirkum ritstjóra",
-        "trim_cycle": "Gögn klippingar hringrásar"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Búðu til nýjan prófíl",
-        "edit_profile": "Breyta/endurnefna prófíl",
-        "delete_profile": "Eyða prófíl",
-        "profile_stats": "Tölfræði prófíls",
-        "cleanup_profile": "Hreinsaðu sögu - Grafið og eytt",
-        "assign_phases": "Úthluta áfangasviðum"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Búa til nýjan áfanga",
-        "edit_custom_phase": "Breyta áfanga",
-        "delete_custom_phase": "Eyða áfanga"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Nefndu og notaðu áfanga",
-        "cancel": "Farðu til baka án breytinga"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Bæta við áfangasviði",
-        "edit_range": "Breyta áfangasviði",
-        "delete_range": "Eyða áfangasviði",
-        "clear_ranges": "Hreinsaðu öll svið",
-        "auto_detect_ranges": "Greina áfanga sjálfkrafa",
-        "save_ranges": "Vista og skila"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Endurnýja stöðu",
-        "stop_recording": "Stöðva upptöku (vista og vinna)",
-        "start_recording": "Byrjaðu nýja upptöku",
-        "process_recording": "Vinnsla síðustu upptöku (klippa og vista)",
-        "discard_recording": "Fleygðu síðustu upptöku"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Búðu til nýjan prófíl",
-        "existing_profile": "Bæta við núverandi prófíl",
-        "discard": "Fargaðu upptöku"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Staðfesta - Rétt uppgötvun",
-        "correct": "Rétt - Veldu Dagskrá/Tímalengd",
-        "ignore": "Hunsa - False Positive/Noisy Cycle",
-        "delete": "Eyða - Fjarlægja úr sögu"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Stilltu upphafspunkt",
-        "set_end": "Stilltu endapunkt",
-        "reset": "Endurstilla á fulla lengd",
-        "apply": "Beita klippingu",
-        "cancel": "Hætta við"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "Núverandi áfangi"
       },
-      "wash_phase": {
-        "name": "Áfangi"
-      },
       "profile_cycle_count": {
         "name": "Prófíl {profile_name} Talning",
         "unit_of_measurement": "hringrásir"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s verða að vera stærri en trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "Engin virk lota til að gera hlé á eða halda áfram."
     }
   },
   "panel": {
-    "tab": {
-      "status": "Yfirlit",
-      "history": "Hringrásir",
-      "profiles": "Prófílar",
-      "settings": "Stillingar",
-      "ml": "ML þjálfun",
-      "advanced": "Ítarlegri",
-      "diagnostics": "Greining",
-      "pp_overview": "Yfirlit",
-      "pp_phases": "Áfangar",
-      "pp_cleanup": "Hreinsun",
-      "pp_manage": "Stjórna",
-      "subtab_profiles": "Prófílar",
-      "subtab_phase_catalog": "Áfangaskrá"
-    },
     "btn": {
-      "save": "Vista",
+      "add_timer": "+ Bæta við tímamæli",
+      "remove_timer": "Fjarlægðu tímamæli",
+      "add_device_tip": "Bættu við öðru WashData tæki",
+      "delete_group_tip": "Eyddu aðeins þessum hópi - meðlimasniðin eru geymd",
+      "run_analysis_tip": "Greindu upptökur þínar núna og endurnýjaðu stillingartillögur",
+      "reset_ml_models_tip": "Fleygðu fínstilltu gerðum og farðu aftur í innbyggðu. WashData getur lært þau aftur síðar.",
+      "resume_cycle": "Halda áfram",
+      "add_device": "+ Bæta við tæki",
+      "add_phase": "+ Bæta við áfanga",
+      "apply_all": "Notaðu allt",
+      "apply_label": "Notaðu merki",
+      "apply_split": "Notaðu Split",
+      "apply_trim": "Notaðu Trim",
+      "auto_detect_split": "Sjálfvirk skynjun",
+      "auto_label_cycles": "Sjálfvirk merkingarlotur",
       "cancel": "Hætta við",
-      "delete": "Eyða",
+      "clear_debug": "Hreinsaðu villuleitargögn",
+      "clear_splits": "Hreinsa",
       "close": "Loka",
-      "edit": "Breyta",
-      "add": "Bæta við",
-      "rebuild": "Endurbyggja umslög",
-      "record": "Byrjaðu upptöku",
       "compare": "Bera saman",
       "confirm": "Staðfesta",
-      "discard": "Fargaðu",
-      "export": "Flytja út",
-      "import": "Flytja inn",
-      "merge": "Sameina",
-      "apply": "Nota",
-      "refresh": "Endurnýja",
+      "convert_to_automation": "Umbreyta í sjálfvirkni",
+      "correct": "Rétt…",
       "create": "Búa til",
-      "select": "Veldu",
+      "create_profile": "+ Búðu til prófíl",
+      "delete": "Eyða",
+      "delete_group": "Eyða hópi",
+      "delete_profile": "Eyða prófíl",
+      "discard": "Fargaðu",
+      "dismiss": "Segja frá",
       "done": "Búið",
-      "reset": "Endurstilla",
-      "trim": "Snyrta",
-      "split": "Skipta",
-      "review": "Upprifjun",
+      "edit": "Breyta",
+      "export": "Útflutningur",
+      "export_json": "Flytja út í JSON",
+      "force_stop": "Þvingaðu stöðvun",
+      "from_template": "Frá sniðmáti ▾",
+      "ignore": "Hunsa",
+      "import_json": "Flytja inn frá JSON",
+      "import_overwrite": "Flytja inn (skrifar yfir gögn)",
       "inspect": "Skoðaðu",
       "label": "Merki",
-      "save_settings": "Vista stillingar",
-      "new_profile": "+ Nýtt snið",
-      "new_group": "+ Nýr hópur",
-      "apply_label": "Notaðu merki",
-      "run_auto_label": "Keyra Auto-Label",
-      "save_review": "Vista umsögn",
-      "apply_trim": "Notaðu Trim",
-      "apply_split": "Notaðu Split",
-      "process_recording": "Vista upptöku",
-      "stop": "Hættu",
-      "process": "Ferli",
-      "add_device": "+ Bæta við tæki",
-      "train_now": "Þjálfa núna",
-      "reset_to_defaults": "Endurstilla í sjálfgefna stillingar",
-      "reset_to_builtin": "Endurstilla á innbyggðar gerðir",
-      "save_preferences": "Vista kjörstillingar",
-      "save_panel_settings": "Vistaðu pallborðsstillingar",
-      "save_access_control": "Vista aðgangsstýringu",
-      "auto_label_cycles": "Sjálfvirk merkingarlotur",
-      "run_analysis": "🔍 Keyra tillögugreiningu",
-      "apply_all": "Notaðu allt",
-      "show_only": "Sýna aðeins",
-      "dismiss": "Hafna",
-      "dismiss_all": "Hafna öllu",
-      "process_history": "Vinna núna",
-      "clear_debug": "Hreinsaðu villuleitargögn",
-      "wipe_all": "Þurrkaðu öll gögn",
-      "export_json": "Flytja út í JSON",
-      "import_json": "Flytja inn frá JSON",
-      "correct": "Leiðrétta…",
-      "ignore": "Hunsa",
-      "add_phase": "+ Bæta við áfanga",
-      "new_phase": "+ Nýr áfangi",
-      "delete_profile": "Eyða prófíl",
-      "rebuild_envelope": "Endurbyggja umslag",
-      "create_profile": "+ Búðu til prófíl",
-      "rec_stop": "Hættu",
-      "pause_cycle": "Gera hlé",
-      "resume_cycle": "Halda áfram",
-      "force_stop": "Þvingaðu stöðvun",
-      "save_phases": "Vista áfanga",
-      "auto_detect_split": "Sjálfvirk skynjun",
-      "clear_splits": "Hreinsa",
-      "submit_correction": "Sendu leiðréttingu",
-      "import_overwrite": "Flytja inn (skrifar yfir gögn)",
-      "use": "Nota",
       "manage": "Stjórna",
-      "remove": "Fjarlægja",
-      "delete_group": "Eyða hópi",
-      "trim_split": "Klippta / Kljúfa",
-      "convert_to_automation": "Umbreyta í sjálfvirkni",
+      "merge": "Sameina",
       "new_automation": "＋ Ný sjálfvirkni",
-      "from_template": "Frá sniðmáti ▾",
-      "on_cycle_started": "Á hringrás byrjaði",
+      "new_group": "+ Nýr hópur",
+      "new_phase": "+ Nýr áfangi",
+      "new_profile": "+ Nýtt snið",
       "on_cycle_finished": "Á hringrás lokið",
-      "save_group": "Vista hóp"
+      "on_cycle_started": "Á hringrás byrjaði",
+      "pause_cycle": "Gera hlé",
+      "process": "Ferli",
+      "process_history": "Vinnið núna",
+      "process_recording": "Vista upptöku",
+      "rebuild": "Endurbyggja umslög",
+      "rebuild_envelope": "Endurbyggja umslag",
+      "rec_stop": "Hættu",
+      "record": "Byrjaðu upptöku",
+      "refresh": "Endurnýja",
+      "remove": "Fjarlægja",
+      "reset": "Endurstilla",
+      "reset_to_builtin": "Endurstilla á innbyggðar gerðir",
+      "reset_to_defaults": "Endurstilla í sjálfgefna stillingar",
+      "review": "Upprifjun",
+      "run_analysis": "🔍 Keyra tillögugreiningu",
+      "run_auto_label": "Keyra Auto-Label",
+      "save": "Vista",
+      "save_access_control": "Vista aðgangsstýringu",
+      "save_group": "Vista hóp",
+      "save_panel_settings": "Vistaðu pallborðsstillingar",
+      "save_phases": "Vista áfanga",
+      "save_preferences": "Vista kjörstillingar",
+      "save_review": "Vista umsögn",
+      "save_settings": "Vista stillingar",
+      "select": "Veldu",
+      "show_only": "Sýna aðeins",
+      "split": "Skipta",
+      "submit_correction": "Sendu leiðréttingu",
+      "train_now": "Þjálfa núna",
+      "trim": "Snyrta",
+      "trim_split": "Klippta / Kljúfa",
+      "use": "Notaðu",
+      "wipe_all": "Þurrkaðu öll gögn"
     },
     "hdr": {
-      "status": "Staða",
-      "live_power": "Lifandi afl",
-      "manual_recording": "Handvirk upptaka",
-      "tools_and_data": "Verkfæri og gögn",
-      "phase_catalog": "Áfangaskrá",
-      "storage_stats": "Geymslutölfræði",
-      "maintenance": "Viðhaldsaðgerðir",
-      "export_import": "Útflutningur / Innflutningur",
-      "logs": "Logs",
-      "my_preferences": "Mínar óskir",
-      "panel_settings": "Pallborðsstillingar (allir notendur)",
+      "logs": "Annálar",
+      "toggle_sidebar": "Skiptu um hliðarstiku Home Assistant",
       "access_control": "Aðgangsstýring",
-      "ml_smart_learning": "Snjallt nám",
-      "ml_settings_card": "Stillingar",
-      "ml_learned": "Það sem WashData hefur lært",
-      "ml_matching_tuning": "Fínstilling í samræmi við forrit",
-      "display": "Skjár",
-      "status_graph": "Staða graf",
-      "diagnostics_pref": "Greining",
-      "logs_diagnostics": "Greining",
-      "process_history": "Ferlissaga",
-      "clear_debug": "Hreinsaðu villuleitarspor",
-      "wipe_history": "Þurrkaðu sögu",
-      "automations": "Sjálfvirkni",
-      "automation_open": "Opnaðu í sjálfvirkni ritlinum",
       "automation_delete": "Eyða þessari sjálfvirkni",
       "automation_needs_review": "Þessi hringrás þarfnast endurskoðunar",
+      "automation_open": "Opnaðu í sjálfvirkni ritlinum",
       "automation_review_this_cycle": "Skoðaðu þessa lotu",
-      "no_automations": "Engar sjálfvirkni vísar til þessa tækis ennþá."
+      "automations": "Sjálfvirkni",
+      "clear_debug": "Hreinsaðu villuleitarspor",
+      "diagnostics_pref": "Greining",
+      "display": "Skjár",
+      "export_import": "Útflutningur / Innflutningur",
+      "live_power": "Lifandi kraftur",
+      "logs_diagnostics": "Greining",
+      "maintenance": "Viðhaldsaðgerðir",
+      "manual_recording": "Handvirk upptaka",
+      "ml_learned": "Það sem WashData hefur lært",
+      "ml_matching_tuning": "Fínstilling í samræmi við forrit",
+      "ml_settings_card": "Stillingar",
+      "ml_smart_learning": "Snjallt nám",
+      "my_preferences": "Mínar óskir",
+      "no_automations": "Engar sjálfvirkni vísar til þessa tækis ennþá.",
+      "panel_settings": "Pallborðsstillingar",
+      "phase_catalog": "Áfangaskrá",
+      "process_history": "Ferlissaga",
+      "status": "Staða",
+      "status_graph": "Staða graf",
+      "storage_stats": "Geymslutölfræði",
+      "tools_and_data": "Verkfæri og gögn",
+      "wipe_history": "Þurrkaðu sögu"
     },
     "lbl": {
-      "power": "Afl",
-      "progress": "Framfarir",
-      "remaining": "Eftir",
-      "duration": "Lengd",
-      "energy": "Orka",
-      "profile": "Prófíll",
-      "status": "Staða",
-      "date": "Dagsetning",
-      "confidence": "Öryggi",
-      "health": "Heilsa",
-      "cost": "Kostnaður",
-      "program": "Forrit",
-      "cycle_health": "Heilsa í hringrás",
+      "timer_min": "mín",
+      "timer_msg_placeholder": "Skilaboð (valfrjálst, {device}/{program}/{minutes})",
+      "timer_auto_pause": "Sjálfvirk hlé",
+      "label": "Samsvörun",
+      "actions": "Aðgerðir",
       "activity": "Virkni",
-      "unlabelled": "Ómerkt",
-      "unlabelled_paren": "(ómerkt)",
-      "emphasis": "Áherslur",
-      "default": "Sjálfgefið",
-      "in_use": "Í notkun",
-      "profile_name": "Nafn prófíls",
-      "ref_cycle": "Viðmiðunarlota (valfrjálst)",
-      "manual_duration": "Handvirk lengd (mín., valfrjálst)",
-      "phase_name": "Fasa nafn",
-      "description": "Lýsing",
-      "correct_profile": "Rétt prófíl",
-      "correct_duration": "Rétt lengd (mín., valfrjálst)",
-      "load_from_file": "Hlaða úr skrá",
-      "json_data": "JSON gögn",
-      "expected_duration": "Áætluð lengd (mín.)",
-      "rename_profile": "Endurnefna prófíl",
-      "select_profile": "Veldu prófíl",
-      "confidence_threshold": "Þröskuldur sjálfstrausts",
-      "resulting_profile": "Úrkomandi prófíll",
-      "new_profile_name": "Nýtt prófílnafn",
-      "save_mode": "Vista ham",
-      "head_trim": "Höfuðsnyrting (s)",
-      "tail_trim": "Halaklipping (s)",
-      "gap_s": "Bil (s)",
-      "start": "Byrjun",
-      "end": "Enda",
-      "quality": "Gæði",
-      "golden_reference": "Skráð viðmiðunarlota",
-      "compare_profiles": "Bera saman við snið",
-      "tags": "Merki",
-      "notes": "Skýringar",
-      "default_tab": "Sjálfgefinn flipi þegar spjaldið er opnað",
-      "cycle_date_display": "Sýning á dagsetningu hringrásar",
-      "refresh_interval": "Uppfærslubil (s)",
-      "panel_default_tab": "Sjálfgefinn flipi",
-      "hide_tabs": "Fela flipa fyrir ekki stjórnendur",
-      "enable_access_control": "Virkja aðgangsstýringu fyrir hvern notanda",
-      "default_access_level": "Sjálfgefið stig fyrir notendur sem ekki eru taldir upp hér að neðan",
       "administrators": "Stjórnendur",
+      "auto_fine_tune_off": "slökkt á sjálfvirkri fínstillingu",
+      "clock_time": "Klukkutími",
+      "compare_profiles": "Bera saman við snið",
+      "confidence": "Sjálfstraust",
+      "confidence_threshold": "Þröskuldur sjálfstrausts",
+      "correct_duration": "Rétt lengd (mín., valfrjálst)",
+      "correct_profile": "Rétt prófíl",
+      "cost": "Kostnaður",
+      "create_new_profile": "+ Búðu til nýjan prófíl...",
+      "cycle_date_display": "Sýning á dagsetningu hringrásar",
+      "cycle_health": "Heilsa í hringrás",
+      "cycles_count": "Hringrásir",
+      "date": "Dagsetning",
+      "debug_traces": "Villuleita spor",
+      "default": "Sjálfgefið",
+      "default_access_level": "Sjálfgefið stig fyrir notendur sem ekki eru taldir upp hér að neðan",
       "default_other": "Sjálfgefið (önnur tæki)",
+      "default_tab": "Sjálfgefinn flipi þegar spjaldið er opnað",
+      "description": "Lýsing",
+      "duration": "Lengd",
+      "emphasis": "Áherslur",
+      "enable_access_control": "Virkja aðgangsstýringu fyrir hvern notanda",
+      "energy": "Orka",
+      "expected_duration": "Áætluð lengd (mín.)",
+      "file_kb": "Skrá (kB)",
+      "gap_s": "Bil (s)",
+      "head_trim": "Höfuðsnyrting (s)",
+      "health": "Heilsa",
+      "hide_tabs": "Fela flipa fyrir ekki stjórnendur",
+      "in_use": "Í notkun",
+      "json_data": "JSON gögn",
+      "last_checked": "Síðast athugað:",
+      "load_from_file": "Hlaða úr skrá",
+      "manual_duration": "Handvirk lengd (mín., valfrjálst)",
+      "mode_existing_profile": "Bæta við núverandi prófíl",
+      "mode_new_profile": "Búðu til nýjan prófíl",
+      "new_profile_name": "Nýtt prófílnafn",
+      "panel_default_tab": "Sjálfgefinn flipi",
+      "phase_name": "Nafn",
+      "power": "Kraftur",
+      "profile": "Prófíll",
+      "profile_name": "Nafn prófíls",
+      "progress": "Framfarir",
+      "read_only": "Eingöngu lesin",
+      "ref_cycle": "Viðmiðunarlota (valfrjálst)",
+      "refresh_interval": "Uppfærslubil (s)",
+      "remaining": "Eftir",
+      "remove_label": "- Fjarlægðu merkimiðann -",
+      "rename_profile": "Endurnefna prófíl",
+      "resulting_profile": "Úrkomandi prófíll",
+      "save_mode": "Vista ham",
+      "seconds_from_start": "Sekúndur frá upphafi",
+      "select_profile": "Veldu prófíl",
+      "show_debug": "Sýna villuleitarspjald í beinni á stöðusíðunni (sjálfstraust, tvíræðni, efstu frambjóðendur)",
       "show_expected": "Sýna væntanleg ferilyfirlag (samsvörun snið, appelsínugult)",
       "show_raw": "Sýna hráar skynjaralestur (ósléttaðar, gráar)",
-      "show_debug": "Sýna villuleitarspjald í beinni á stöðusíðunni (sjálfstraust, tvíræðni, efstu frambjóðendur)",
-      "mode_new_profile": "Búðu til nýjan prófíl",
-      "mode_existing_profile": "Bæta við núverandi prófíl",
-      "auto_fine_tune_on": "kveikt á sjálfvirkri fínstillingu (um {hour}:00)",
-      "auto_fine_tune_off": "slökkt á sjálfvirkri fínstillingu",
-      "last_checked": "Síðast athugað:",
-      "remove_label": "- Fjarlægðu merkimiðann -",
-      "create_new_profile": "+ Búðu til nýjan prófíl...",
-      "read_only": "Eingöngu lesin",
-      "actions": "Aðgerðir",
-      "cycles_count": "Hringrásir",
-      "debug_traces": "Villuleita spor",
-      "file_kb": "Skrá (kB)",
-      "label": "Merki",
-      "seconds_from_start": "Sekúndur frá upphafi",
-      "clock_time": "Klukkutími",
-      "ungrouped": "Óhópað"
+      "status": "Staða",
+      "tail_trim": "Halaklipping (s)",
+      "ungrouped": "Óhópað",
+      "unlabelled": "Ómerkt",
+      "unlabelled_paren": "(ómerkt)",
+      "expected": "Vænt",
+      "raw_socket": "Hrár tengi",
+      "artifact_interruption": "Hlé",
+      "artifact_low_power": "Lítið afl",
+      "artifact_high_power": "Mikið afl",
+      "artifact_anomaly": "Frávik"
     },
     "badge": {
-      "poor_fit": "léleg passa",
+      "golden_cycle": "Skráð viðmiðunarlota",
+      "reviewed": "Farið yfir",
+      "feedback_requested": "Óskað er eftir umsögn",
+      "needs_review": "Þarfnast endurskoðunar",
+      "overrun": "Hljóp lengur en venjulega",
+      "artifact_tip": "{n} frávik fundust (t.d. hurð opnuð í miðjum lotu) — opnaðu til að sjá þau á línuritinu",
+      "poor_fit_tip": "Ósamkvæmur samsvörunarferill – íhugaðu að endurbyggja þennan prófíl",
+      "fair_fit_tip": "Í meðallagi samræmi við samsvörun - sumar lotur sem eru úthlutaðar þessum prófíl hafa lægri sjálfstraustsstig. Merktu fleiri lotur eða skráðu sniðið aftur til að bæta nákvæmni.",
       "fair_fit": "þokkalega passa",
-      "manual": "(handvirkt valið)",
+      "poor_fit": "léleg passa",
       "auto": "(sjálfvirkt greint)",
-      "improving": "↗ batnar",
+      "built_in_tag": "innbyggður",
       "declining": "↘ minnkandi",
+      "improving": "↗ batnar",
+      "manual": "(handvirkt valið)",
       "steady": "→ stöðugt",
-      "using_tuned": "Notar stilltar lóðir",
-      "using_defaults": "Notar sjálfgefnar stillingar",
-      "built_in_tag": "innbyggður"
-    },
-    "status": {
-      "completed": "Lokið",
-      "interrupted": "Truflað",
-      "force_stopped": "Þvingað stöðvað",
-      "active": "Virkur",
-      "ambiguous": "Óljós",
-      "clear": "Skýrt",
-      "working": "Vinnur…",
-      "recording": "Tekur upp...",
-      "ready": "Tilbúið til vinnslu",
-      "idle": "Aðgerðarlaus",
-      "auto_detect": "Sjálfvirk skynjun",
-      "fine_tuning": "fínstilla núna…",
-      "all_statuses": "Allar stöður"
-    },
-    "ml": {
-      "fit_strong": "Sterkur",
-      "fit_good": "Gott",
-      "fit_fair": "Þokkalegt",
-      "fit_weak": "Veik",
-      "fit_slight": "Lítilsháttar",
-      "fit_word": "passa",
-      "fine_tuned_at": "fínstillt {when}",
-      "personalized": "● Sérsniðin að þessari vél",
-      "builtin_models": "● Að nota innbyggðar gerðir"
-    },
-    "toast": {
-      "settings_saved": "Stillingar vistaðar; endurhleðsla samþættingar",
-      "preferences_saved": "Kjörstillingar vistaðar",
-      "panel_settings_saved": "Pallborðsstillingar vistaðar",
-      "access_saved": "Aðgangsstýring vistuð",
-      "profile_created": "Prófíllinn \"{name}\" búinn til",
-      "profile_deleted": "Prófílnum \"{name}\" eytt",
-      "profile_renamed": "Prófíll endurnefnt",
-      "phases_saved": "Áfangar vistaðir",
-      "phase_created": "Áfanginn „{name}“ búinn til",
-      "phase_deleted": "Áfangi „{name}“ eytt",
-      "phase_updated": "Áfangi uppfærður",
-      "recording_started": "Upptaka hafin",
-      "recording_stopped": "Upptaka hætt",
-      "recording_discarded": "Upptöku hent",
-      "recording_saved": "Upptaka vistuð á prófíl",
-      "export_downloaded": "Útflutningur hlaðið niður",
-      "logs_exported": "Logar fluttir út",
-      "import_successful": "Innflutningur tókst; endurhleðsla samþættingar",
-      "envelopes_rebuilt": "Umslög endurbyggð",
-      "envelope_rebuilt": "Umslag endurbyggt",
-      "suggestions_applied": "Tillögur beitt; endurhleðsla samþættingar",
-      "suggestions_dismissed": "Tillögum vísað frá",
-      "auto_label_complete": "Sjálfvirkt merki lokið",
-      "cycle_labelled": "Hringrás merkt",
-      "cycle_deleted": "Hringrás eytt",
-      "cycles_deleted": "{count} lotum eytt",
-      "cycle_trimmed": "Hringrás klippt",
-      "cycles_merged": "Hringrásir sameinaðar",
-      "review_saved": "Umsögn vistuð",
-      "feedback_confirmed": "Viðbrögð staðfest",
-      "feedback_dismissed": "Viðbrögðum hafnað",
-      "feedback_all_dismissed": "Öllum athugasemdum vísað frá",
-      "correction_submitted": "Leiðrétting lögð fram",
-      "group_saved": "Hópur vistaður",
-      "group_deleted": "Hópi eytt",
-      "automation_deleted": "Sjálfvirkni eytt",
-      "legacy_removed": "Eldri aðgerðir fjarlægðar",
-      "cycle_paused": "Hlé gert á hringrásinni",
-      "cycle_resumed": "Hringrás hafin aftur",
-      "cycle_force_stopped": "Hringrás afl-stöðvuð",
-      "ml_training_promoted": "Þjálfun lokið: kynntar {count} líkan(ir)",
-      "ml_training_no_improvement": "Þjálfun lokið: grunnlínu haldið (engar umbætur)",
-      "matching_reverted": "Samsvarandi þyngd færð aftur í sjálfgefna stillingar",
-      "models_reverted": "Módel í tæki færð aftur til grunnlínu",
-      "analysis_complete": "Greiningu lokið: {count} tillögur",
-      "analysis_complete_none": "Greiningu lokið: engar nýjar tillögur",
-      "debug_cleared": "Hreinsaði {count} villuleitarspor",
-      "all_wiped": "Öll gögn þurrkuð út",
-      "no_split_found": "Engar aðgerðalausar eyður fundust til að skipta á",
-      "group_name_required": "Nafn hóps er áskilið",
-      "min_2_profiles": "Veldu að minnsta kosti 2 prófíla fyrir hóp",
-      "profile_name_required": "Nafn prófíls er áskilið",
-      "phase_name_required": "Fasaheiti er áskilið",
-      "name_required": "Nafn krafist",
-      "json_required": "JSON gögn eru nauðsynleg",
-      "save_failed": "Vistun mistókst: {error}",
-      "delete_failed": "Eyða mistókst: {error}",
-      "apply_failed": "Notkun mistókst: {error}",
-      "rebuild_failed": "Endurbygging mistókst: {error}",
-      "start_failed": "Byrjun mistókst: {error}",
-      "stop_failed": "Stöðvun mistókst: {error}",
-      "discard_failed": "Fleygja mistókst: {error}",
-      "trim_failed": "Klipping mistókst: {error}",
-      "split_failed": "Skipting mistókst: {error}",
-      "merge_failed": "Sameining mistókst: {error}",
-      "create_failed": "Ekki tókst að búa til: {error}",
-      "update_failed": "Uppfærsla mistókst: {error}",
-      "rename_failed": "Endurnefna mistókst: {error}",
-      "revert_failed": "Til baka mistókst: {error}",
-      "training_failed": "Þjálfun mistókst: {error}",
-      "export_failed": "Útflutningur mistókst: {error}",
-      "import_failed": "Innflutningur mistókst: {error}",
-      "auto_label_failed": "Sjálfvirk merki mistókst: {error}",
-      "analysis_failed": "Greining mistókst: {error}",
-      "auto_detect_failed": "Sjálfvirk greining mistókst: {error}",
-      "error": "Villa: {error}",
-      "could_not_load_cycle": "Gat ekki hlaðið hringrás: {error}",
-      "pause_failed": "Hlé mistókst: {error}",
-      "label_failed": "Merki mistókst: {error}",
-      "invalid_json": "„{key}“ er ekki gilt JSON — lagfærðu það eða hreinsaðu reitinn áður en þú vistar.",
-      "processed": "Unnið {bits}",
-      "split_complete": "Skipt í {count} lotur"
-    },
-    "msg": {
-      "no_devices": "Engin WashData tæki stillt enn.",
-      "no_device_selected": "Ekkert tæki valið.",
-      "loading": "Hleður…",
-      "loading_settings": "Hleður stillingum...",
-      "live_chart_loading": "Lifandi aflkort birtist þegar álestur berast.",
-      "no_cycles_match": "Engar lotur passa við núverandi síu.",
-      "no_cycles_yet": "Engar lotur skráðar ennþá.",
-      "no_profiles_yet": "Engir prófílar ennþá. Búðu til einn úr merktri hringrás.",
-      "no_logs": "Engar annálarfærslur eru í biðminni ennþá.",
-      "no_phases": "Engir áfangar skilgreindir.",
-      "no_phases_assigned": "Engum áföngum úthlutað.",
-      "no_split_points": "Engin skipting stig ennþá.",
-      "no_envelope": "Ekkert umslag ennþá - endurbyggt eftir merkingarlotur.",
-      "no_envelope_overlay": "Ekkert umslag tiltækt til að leggja yfir.",
-      "no_other_users": "Engir aðrir Home Assistant notendur fundust.",
-      "maintenance_requires_access": "Viðhald og útflutningur/innflutningur krefjast fulls aðgangs.",
-      "loading_curve": "Hleður feril...",
-      "compare_selected_cycles": "Valdar lotur (fastar) — sýna / fela",
-      "compare_overlay_profiles": "Yfirlagssnið (dauft)",
-      "no_profiles_compare": "Engir prófílar til að bera saman.",
-      "no_cycles_profile": "Engar lotur fyrir þetta snið.",
-      "saving_triggers_reload": "Vistun kallar á endurhleðslu samþættingar. HA einingar gætu sýnt stuttlega sem ófáanlegur.",
-      "prefs_personal": "Þetta á aðeins við um Home Assistant reikninginn þinn.",
-      "no_match_yet": "Engin samsvörunstilraun ennþá - þetta fyllist á meðan á hlaupi stendur.",
-      "no_fine_tuned": "Ekkert fínstillt ennþá - WashData notar innbyggðu módelin sín.",
-      "ml_learned_intro": "Módel fínstillt að þessari vél. Allt sem ekki er skráð notar áreiðanlega innbyggða líkanið.",
-      "ml_settings_intro": "Tveir óháðir rofar: annar notar gerðir á meðan hringrás er í gangi, hinn gerir WashData kleift að fínstilla þær að vélinni þinni með tímanum.",
-      "ml_intro": "WashData kemur með snjöllum gerðum sem greina lotur, passa við forrit og áætla tíma og orku - þau vinna út úr kassanum.",
-      "matching_tuning_intro": "Þegar þú lærir, stillir WashData einnig hversu mikið forritasamsvörun vegur lögun hringrásar á móti lengd hennar og orku.",
-      "phase_catalog_intro": "Nafngreindir hlutar hringrásar (Forþvottur, Upphitun, Snúning…). Úthlutaðu þeim á prófíl frá stjórnborði þess.",
-      "phase_ranges_intro": "Áfangasvið (mínútur frá upphafi lotu) lögð yfir meðalferilinn. Breyttu gildum til að forskoða í beinni.",
-      "cleanup_intro": "Sérhver merkt hringrás lögð yfir. Merktu við frávik og eyddu til að hreinsa upp prófílinn.",
-      "split_intro": "Smelltu á línuritið til að bæta við eða fjarlægja skiptingarpunkt, eða greina sjálfvirkt með aðgerðalausum eyðum.",
-      "trim_intro": "Dragðu rauðu handföngin eða sláðu inn gildi. Allt fyrir utan gluggann er fjarlægt.",
-      "import_intro": "Hlaðið út útfluttri skrá eða límdu JSON-hleðslu fyrir neðan.",
-      "auto_label_intro": "Úthlutaðu sniðum á ómerktar lotur þar sem samsvörun þeirra hreinsar þröskuldinn.",
-      "merge_intro": "Valdar lotur eru sameinaðar í eina (tímaröð; eyður fyllt með 0 W). Veldu prófílinn sem myndast.",
-      "enough_data": "Næg gögn til að læra af ({current}/{min} lotur).",
-      "collecting_data": "Gagnasöfnun — {need} meiri lota{plural} áður en fínstilling getur hafist ({current}/{min}).",
-      "updated": "Uppfært {time}",
-      "appliance_monitor": "Vöktunartæki",
-      "ml_loading": "hleður ML…",
-      "see_recorder": "Sjá upptökugræju hér að neðan",
-      "review_in_settings": "Skoðaðu í stillingum",
-      "storage_diagnostics": "Geymslutölfræði, viðhald, útflutningur/innflutningur",
-      "recent_logs": "Nýlegar ha_washdata færslur",
-      "preferences_adv": "Óskir",
-      "preferences_admin": "Óskir, pallborð og aðgangsstýring",
-      "review_to_cycles": "Opnaðu Cycles review biðröðina",
-      "pending_feedback": "Bíður viðbrögð við uppgötvunum",
-      "recording_in_progress": "Upptaka í gangi",
-      "no_profiles_yet_short": "Engir prófílar ennþá.",
-      "unsure_detected_prefix": "WashData er ekki viss um að það hafi fundist",
-      "no_suggestions": "Engar virkar tillögur.",
-      "no_profiles_overlay": "Engir snið til að leggja yfir.",
-      "compare_cycles_title": "Berðu saman {count} lotur",
-      "profiles_intro": "Smelltu á prófíl til að sjá tölfræði, stig og hreinsun. Flokkaðu nánast eins forrit (sama lögun/lengd, mismunandi hiti eða þvottahraði) til að samsvörun velji milli þeirra á áreiðanlegan hátt.",
-      "search_placeholder": "Leita í stillingum…",
-      "automations_intro": "WashData kveikir á {start} / {end} tilvikum og sýnir einingar, þannig að tilkynningar og aðgerðir eru best byggðar sem venjulegar Home Assistant sjálfvirkingar. Sjálfvirkingar sem nota þetta tæki birtast hér að neðan.",
-      "notify_services_hint": "Notaðu {entity} þjónustu-auðkenni (kommuaðskilin fyrir mörg). Sniðmátsbreytur: {vars}.",
-      "rbac_hint": "Þegar slökkt er, hefur sérhver Home Assistant notandi fulla aðgang (sjálfgefið). Stjórnendur hafa alltaf fulla aðgang og geta stjórnað öllum.",
-      "feedback_prompt": "Staðfestu hvort það var rétt, leiðréttu forritið eða hunsa."
+      "using_defaults": "Notar sjálfgefnar sendingar",
+      "using_tuned": "Notaðu stilltar lóðir"
     },
     "modal": {
-      "label_cycle": "Merkja hringrás",
-      "create_profile": "Búðu til prófíl",
-      "new_phase": "Nýr áfangi",
-      "edit_phase": "Breyta áfanga",
-      "process_recording": "Vinna úr upptöku",
-      "correct_feedback": "Rétt endurgjöf",
-      "import_config": "Flytja inn stillingar",
+      "merge_cycles": "Sameina {n} lotur",
       "auto_label": "Sjálfvirk merkingarlotur",
-      "cycle": "Hringrás"
+      "correct_feedback": "Rétt endurgjöf",
+      "create_profile": "Búðu til prófíl",
+      "cycle": "Hringrás",
+      "edit_phase": "Breyta áfanga",
+      "import_config": "Flytja inn stillingar",
+      "label_cycle": "Label Cycle",
+      "new_phase": "Nýr áfangi",
+      "process_recording": "Ferli Upptaka"
     },
-    "tag": {
-      "late_start": "Seint byrjað",
-      "early_end": "Snemma lokið",
-      "merged": "Sameinaðar hringrásir",
-      "split": "Skipt hringrás",
-      "noise": "Hávaði",
-      "wrong_profile": "Rangt snið",
-      "sensor_gap": "Skynjarabil"
+    "msg": {
+      "near_duplicate_cluster": "næstum tvítekinn prófílklasi fannst. Flokkun gerir samsvörun kleift að velja áreiðanlega á milli útlita (t.d. sama forritið við mismunandi hitastig/snúning).",
+      "coverage_gap": "Nýlegar lotur hafa ekkert samsvarandi prófíl ({pct}% af síðustu 30).",
+      "consider_new_profile": "Íhugaðu að búa til nýjan prófíl.",
+      "group_not_cohesive": "Þessir snið eru ekki nógu lík til að hópa á áreiðanlegan hátt, þannig að samsvörun meðhöndlar þá hver fyrir sig þar til þú fjarlægir frávikið eða skiptir hópnum.",
+      "group_modal_help": "Flokkaðu forrit með sömu lögun sem eru mismunandi hvað varðar hitastig/snúning (lengd getur verið mismunandi). Samsvörun skorar hópinn sem einn frambjóðanda og velur síðan þann sem hentar best. Veldu að minnsta kosti 2; yfirlagið sýnir hversu lík þau eru.",
+      "showing_suggestions": "Sýnir {count} stillingu með tillögum.",
+      "show_all_settings": "Sýna allar stillingar",
+      "tuning_suggestions_available": "{count} uppástunga að stilla í boði frá athuguðum lotum. Þau birtast við hlið viðkomandi reita.",
+      "legacy_actions_title": "{count} eldri sérsniðin aðgerð enn í gangi",
+      "old_actions_warning": "Stillt með gamla aðgerðaritlinum (nú fjarlægður). Þeir skjóta enn á hringrásarviðburði en ekki er lengur hægt að breyta þeim hér. Umbreyttu þeim í venjulega sjálfvirkni eða fjarlægðu þau.",
+      "no_settings_match": "Engar stillingar passa við \"{q}\"",
+      "clear_debug_hint": "Fjarlægðu vistuð villuleitargögn til að losa um pláss.",
+      "wipe_history_warning": "Eyða öllum lotum og sniðum varanlega. Ekki hægt að afturkalla.",
+      "export_description": "Flyttu út öll snið og lotur í JSON, eða endurheimtu frá fyrri útflutningi.",
+      "log_buffer_hint": "Nýjasta fyrst · biðminni síðustu 500 ha_washdata færslur frá endurræsingu · dragðu neðri brúnina til að breyta stærð.",
+      "review_profile_tip": "Forritið sem þessi lota er merkt sem. Ef sjálfvirkt greind forrit var rangt skaltu leiðrétta það hér - merking kennir samsvörun fyrir framtíðarlotur.",
+      "review_quality_tip": "Hversu hreinn þessi hringrás er. Gott = kennslubókardæmi um þetta forrit; Slæmt = greinist en hávær eða óhefðbundin; Ónothæft = rangt greint (sameinað, stytt eða falsað). Keyrir heilsustigið og hvaða lotur eru leyfðar til að þjálfa líkanið.",
+      "review_recorded_tip": "Merktu þetta sem handvalna viðmiðunarlotu fyrir forritið sitt - sama hlutverk og handvirkt skráð lota. Viðmiðunarlotum er alltaf haldið, sáð samsvarandi sniðmát og er aldrei sleppt við hreinsun. (Þetta er „gyllti“/skráður fáninn; báðir eru það sama.)",
+      "review_tags_tip": "Valfrjálsir fánar sem lýsa því sem fór úrskeiðis við þessa lotu, svo þjálfun og hreinsun getur gert grein fyrir því.",
+      "review_notes_tip": "Skýringar með frjálsum texta til eigin viðmiðunar. Ekki notað við samsvörun eða þjálfun.",
+      "review_confirm_help": "Staðfestu hvort þessi hringrás hafi fundist rétt. Umsagnir þínar þjálfa líkanið á vélinni þinni - því fleiri lotur sem þú staðfestir, því betri samsvörun og heilsustig fást. Fljótlegt gott/slæmt er nóg.",
+      "review_notes_placeholder": "Skýringar (valfrjálst)",
+      "compare_profiles_tip": "Leggðu önnur prófílumslög yfir á töfluna hér að ofan til að sjá hver þeirra passar best við þessa lotu.",
+      "artifact_header": "{n} frávik fundust í þessari lotu",
+      "artifact_footer": "Auðkenndur á grafinu hér að ofan. Þetta eru skammvinnir gripir (t.d. hurðin opnuð í miðjum lotu), ekki endilega vandamál.",
+      "profile_poor_health_detail": "Hringrásir sem eru úthlutaðar á þetta snið hafa ósamræmi lögun eða lítið sjálfstraust. Íhugaðu að endurbyggja umslagið eða endurskoða merktar lotur.",
+      "trend_duration_longer": "Tímalengd í vændum lengri ({pct}%/lotu) — nýleg meðaltal {avg}",
+      "trend_duration_shorter": "Tímalengd styttist ({pct}%/lotu) — nýleg meðaltal {avg}",
+      "trend_energy_up": "Orka hækkar ({pct}%/lotu) — nýleg meðaltal {avg}",
+      "trend_energy_down": "Orka á niðurleið ({pct}%/lotu)",
+      "performance_trend": "Árangursþróun ({n} lotur)",
+      "maintenance_advisory": "Vaxandi tímalengd/orka getur bent til þess að viðhalda þörfum tækisins (t.d. kalkhreinsun, síuþrif).",
+      "manual_duration_hint": "Meðaltal/vænt hringrásarlengd sniðsins, notuð fyrir tíma sem eftir er. Breyta til að stilla það; ef það er óbreytt heldur núverandi gildi.",
+      "appliance_monitor": "Vöktunartæki",
+      "auto_label_intro": "Úthlutaðu sniðum á ómerktar lotur þar sem samsvörun þeirra hreinsar þröskuldinn.",
+      "cleanup_intro": "Sérhver merkt hringrás lögð yfir. Merktu við frávik og eyddu til að hreinsa upp prófílinn.",
+      "compare_overlay_profiles": "Yfirlagssnið (dauft)",
+      "compare_selected_cycles": "Valdar lotur (fastar) — sýna / fela",
+      "feedback_prompt": "Staðfestu að það væri rétt, leiðréttu forritið eða hunsa.",
+      "import_intro": "Hlaðið út útfluttri skrá eða límdu JSON-hleðslu fyrir neðan.",
+      "live_chart_loading": "Lifandi aflkort birtist þegar álestur berast.",
+      "loading": "Hleður…",
+      "loading_curve": "Hleður feril...",
+      "loading_settings": "Hleður stillingum...",
+      "maintenance_requires_access": "Viðhald og útflutningur/innflutningur krefjast fulls aðgangs.",
+      "matching_tuning_intro": "Þegar þú lærir, stillir WashData einnig hversu mikið forritasamsvörun vegur lögun á móti lengd og orku.",
+      "merge_intro": "Valdar lotur eru sameinaðar í eina (tímaröð; eyður fyllt með 0 W). Veldu prófílinn sem myndast.",
+      "ml_intro": "WashData er sent með snjöllum gerðum sem vinna úr kassanum.",
+      "ml_learned_intro": "Módel fínstillt að þessari vél.",
+      "ml_loading": "hleður ML…",
+      "ml_settings_intro": "Tveir óháðir rofar: annar notar gerðir á meðan hringrás er í gangi, hinn gerir WashData kleift að fínstilla þær að vélinni þinni með tímanum.",
+      "no_cycles_match": "Engar lotur passa við núverandi síu.",
+      "no_cycles_profile": "Engar lotur fyrir þetta snið.",
+      "no_cycles_yet": "Engar lotur skráðar ennþá.",
+      "no_device_selected": "Ekkert tæki valið.",
+      "no_devices": "Engin WashData tæki stillt enn.",
+      "no_envelope": "Ekkert umslag ennþá - endurbyggt eftir merkingarlotur.",
+      "no_envelope_overlay": "Ekkert umslag tiltækt til að leggja yfir.",
+      "no_fine_tuned": "Ekkert fínstillt ennþá - WashData notar innbyggðu módelin sín.",
+      "no_logs": "Engar annálarfærslur eru í biðminni ennþá.",
+      "no_match_yet": "Engin samsvörunstilraun ennþá - þetta fyllist á meðan á hlaupi stendur.",
+      "no_other_users": "Engir aðrir notendur Home Assistant fundust.",
+      "no_phases": "Engir áfangar skilgreindir.",
+      "no_phases_assigned": "Engum áföngum úthlutað.",
+      "no_profiles_compare": "Engir prófílar til að bera saman.",
+      "no_profiles_overlay": "Engir snið til að leggja yfir.",
+      "no_profiles_yet": "Engir prófílar ennþá. Búðu til einn úr merktri hringrás.",
+      "no_profiles_yet_short": "Engir prófílar ennþá.",
+      "no_split_points": "Engin skipting stig ennþá.",
+      "no_suggestions": "Engar virkar tillögur.",
+      "pending_feedback": "Bíður viðbrögð við uppgötvunum",
+      "phase_catalog_intro": "Nafngreindir hlutar hringrásar (Forþvottur, Upphitun, Snúning…). Úthlutaðu þeim á prófíl frá stjórnborði þess.",
+      "phase_ranges_intro": "Áfangasvið (mínútur frá upphafi lotu) lögð yfir meðalferilinn. Breyttu gildum til að forskoða í beinni.",
+      "preferences_admin": "Óskir, pallborð og aðgangsstýring",
+      "preferences_adv": "Óskir",
+      "prefs_personal": "Þetta á aðeins við um Home Assistant reikninginn þinn.",
+      "profiles_intro": "Smelltu á prófíl fyrir tölfræði, áfanga og hreinsun. Flokkaðu næstum eins forrit (sama lögun/lengd, mismunandi hitastig eða snúningur) þannig að þú velur á áreiðanlegan hátt á milli þeirra.",
+      "rbac_hint": "Þegar slökkt er á því hefur hver Home Assistant notandi fullan aðgang (sjálfgefið). Stjórnendur hafa alltaf fullan aðgang og geta stjórnað öllum.",
+      "recent_logs": "Nýlegar ha_washdata færslur",
+      "recording_in_progress": "Upptaka í gangi",
+      "review_in_settings": "Skoðaðu í stillingum",
+      "review_to_cycles": "Opnaðu Cycles review biðröðina",
+      "saving_triggers_reload": "Vistun kallar á endurhleðslu samþættingar. HA einingar gætu sýnt stuttlega sem ófáanlegur.",
+      "search_placeholder": "Leitarstillingar...",
+      "see_recorder": "Sjá upptökugræju hér að neðan",
+      "split_intro": "Smelltu á línuritið til að bæta við eða fjarlægja skiptingarpunkt, eða greina sjálfvirkt með aðgerðalausum eyðum. Hver hluti sem myndast getur fengið sinn eigin prófíl.",
+      "storage_diagnostics": "Geymslutölfræði, viðhald, útflutningur/innflutningur",
+      "trim_intro": "Dragðu rauðu handföngin eða sláðu inn gildi. Allt fyrir utan gluggann er fjarlægt.",
+      "unsure_detected_prefix": "WashData er ekki viss um að það hafi fundist",
+      "updated": "Uppfært"
     },
-    "quality": {
-      "good": "Gott",
-      "bad": "Slæmt",
-      "unusable": "Ónothæft"
-    },
-    "access": {
-      "none": "Enginn (falinn)",
-      "read": "Lestrarstig",
-      "edit": "Breyta",
-      "full": "Fullt",
-      "inherit": "Erfa"
+    "phase_desc": {
+      "pre_wash": "Upphafsbleyting eða formeðferð fyrir aðalþvott.",
+      "wash": "Aðalþvottakerfi með trommuhreyfingu og valfrjálsum upphitun.",
+      "wash_dw": "Aðalþvottaefnisþvottur með hita.",
+      "rinse": "Hreinvatnsskolunarstig. Þessi áfangi getur endurtekið sig mörgum sinnum.",
+      "spin": "Háhraðaútdráttur til að fjarlægja vatn úr hleðslunni.",
+      "spin_wd": "Háhraðaútdráttur fyrir þurrkunarskipti.",
+      "soak": "Lítil virkni í bleyti á milli virkra þvottastiga.",
+      "soak_dw": "Lengri bleytutími fyrir þungan jarðveg.",
+      "anti_crease": "Stundum hrynur stutt eftir að því er lokið til að draga úr hrukkum.",
+      "heat_up": "Upphitun hitari í upphafi áður en full þurrkun hefst.",
+      "drying": "Aðal upphitað veltitímabil.",
+      "cool_down": "Veltur án hita nálægt lok hringrásar.",
+      "anti_wrinkle": "Reglubundin velting eftir hringrás til að draga úr hrukkum.",
+      "sensor_check": "Stutt hlé á lágu afli á meðan þurrkur er mældur.",
+      "drain_and_switch": "Aðlögunartímabil frá þvotti yfir í þurrkun.",
+      "pre_rinse": "Sprautaðu fyrst fyrir þvottaefnisþvott.",
+      "dry": "Þurrkunarstig með hitara og/eða afgangshita.",
+      "sanitize": "Háhitaþrifastig fyrir hreinsunaráætlanir."
     },
     "health": {
-      "poor": "⚠ Léleg samsvörun",
-      "fair": "Þokkaleg samsvörun",
-      "good": "✓ Passar vel"
+      "good": "✓ Passar vel",
+      "fair": "Viðunanlegt prófíl",
+      "poor": "⚠ Léleg samsvörun"
+    },
+    "ml": {
+      "fit_fair": "Viðunanlegt",
+      "builtin_models": "● Að nota innbyggðar gerðir",
+      "fit_good": "Gott",
+      "fit_slight": "Lítilsháttar",
+      "fit_strong": "Sterkur",
+      "fit_weak": "Veik",
+      "fit_word": "passa",
+      "personalized": "● Sérsniðin að þessari vél"
     },
     "trend": {
       "up": "Stefna upp",
       "down": "Stefnir niður"
     },
-    "pref": {
-      "date_relative": "Hlutfærar (t.d. fyrir 2 klukkustundum)",
-      "date_absolute": "Algjört (t.d. 14:32 þann 2. júlí)"
-    },
     "log": {
       "all_levels": "Öll stig"
     },
-    "section": {
-      "basic": {
-        "label": "Grunnur",
-        "intro": "Kjarnakennd og nauðsynleg atriði sem flestar uppsetningar þurfa."
-      },
-      "detection": {
-        "label": "Uppgötvun",
-        "intro": "Hvernig hringrás greinist sem ræsing, hlaupandi og endalok."
-      },
-      "matching": {
-        "label": "Samsvörun",
-        "intro": "Hvernig fullunnum lotum er passað við lærð snið og merkt."
-      },
-      "timing": {
-        "label": "Tímasetning og varðhundur",
-        "intro": "Bakgrunnshlaup, varðhundurinn án nettengingar og heimilishald."
-      },
-      "anti_wrinkle": {
-        "label": "Anti-hrukku",
-        "intro": "Anti-hrukkuhamur greinir þurrkarapúlsa eftir aðalhitafasann."
-      },
-      "delay": {
-        "label": "Seinkað byrjun",
-        "intro": "Seinkuð ræsing greinir hvenær tæki er knúið en hefur ekki enn hafið hringrás sína."
-      },
-      "triggers": {
-        "label": "Kveikjur og hurð",
-        "intro": "Valfrjáls ytri merki: lokakveikja, hurðarskynjari, hlérofi og áminning um affermingu."
-      },
-      "notifications": {
-        "label": "Tilkynningar",
-        "intro": "Stilltu hvenær og hvernig þú færð tilkynningu um atburði í lotu."
-      },
-      "ml_training": {
-        "label": "ML þjálfun",
-        "intro": "Skráðu snjallgerðir sem sérsníða uppgötvun og tímasetningu fyrir þetta tæki."
-      }
+    "pref": {
+      "date_absolute": "Algjört (t.d. 14:32 þann 2. júlí)",
+      "date_relative": "Aðstandandi (t.d. fyrir 2 klukkustundum)"
     },
-    "setting": {
-      "name": {
-        "label": "Nafn tækis"
-      },
-      "device_type": {
-        "label": "Tegund tækis"
-      },
-      "power_sensor": {
-        "label": "Aflskynjari"
-      },
-      "min_power": {
-        "label": "Lágmarksafl"
-      },
-      "off_delay": {
-        "label": "Slökkt á seinkun"
-      },
-      "linked_device": {
-        "label": "Hópur undir tæki"
-      },
-      "start_threshold_w": {
-        "label": "Byrjunarþröskuldur"
-      },
-      "stop_threshold_w": {
-        "label": "Stöðva þröskuldur"
-      },
-      "min_off_gap": {
-        "label": "Lágmark slökktubil"
-      },
-      "start_duration_threshold": {
-        "label": "Upphafslengd"
-      },
-      "start_energy_threshold": {
-        "label": "Byrja orku"
-      },
-      "completion_min_seconds": {
-        "label": "Lágm. lotulengd"
-      },
-      "running_dead_zone": {
-        "label": "Dautt svæði í gangi"
-      },
-      "end_energy_threshold": {
-        "label": "Lokaorka"
-      },
-      "end_repeat_count": {
-        "label": "Endurtaka talningu"
-      },
-      "sampling_interval": {
-        "label": "Sýnatökubil"
-      },
-      "smoothing_window": {
-        "label": "Sléttandi gluggi"
-      },
-      "abrupt_drop_watts": {
-        "label": "Skyndilegt fall"
-      },
-      "abrupt_drop_ratio": {
-        "label": "Skyndilegt fallhlutfall"
-      },
-      "profile_match_threshold": {
-        "label": "Samsvörunarþröskuldur"
-      },
-      "profile_unmatch_threshold": {
-        "label": "Þröskuldur missamsvörunar"
-      },
-      "profile_match_interval": {
-        "label": "Samsvörunarbil"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "Lágm. lengdarhlutfall"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "Hámarks lengdarhlutfall"
-      },
-      "profile_duration_tolerance": {
-        "label": "Tímaþol prófíls"
-      },
-      "duration_tolerance": {
-        "label": "Áætla umburðarlyndi"
-      },
-      "auto_label_confidence": {
-        "label": "Sjálfvirk merkisöryggi"
-      },
-      "learning_confidence": {
-        "label": "Að læra sjálfstraust"
-      },
-      "suppress_feedback_notifications": {
-        "label": "Bældu viðbrögðstilkynningar"
-      },
-      "watchdog_interval": {
-        "label": "Varðhundabil"
-      },
-      "no_update_active_timeout": {
-        "label": "Tímamörk án uppfærslu"
-      },
-      "progress_reset_delay": {
-        "label": "Seinkun á endurstillingu framvindu"
-      },
-      "auto_maintenance": {
-        "label": "Sjálfvirk viðhald (næturhreinsun)"
-      },
-      "expose_debug_entities": {
-        "label": "Afhjúpa villuleitareiningar"
-      },
-      "save_debug_traces": {
-        "label": "Vista villuleitarspor"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "Virkja uppgötvun gegn hrukkum"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "Max kraftur gegn hrukkum"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "Hámarkslengd"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "Hætta máttur þröskuldur"
-      },
-      "delay_start_detect_enabled": {
-        "label": "Virkja seinkun-start uppgötvun"
-      },
-      "delay_confirm_seconds": {
-        "label": "Staðfestu sekúndur"
-      },
-      "delay_timeout_hours": {
-        "label": "Tímamörk"
-      },
-      "external_end_trigger_enabled": {
-        "label": "Virkja ytri lokakveikju"
-      },
-      "external_end_trigger": {
-        "label": "Ytri kveikjueining"
-      },
-      "external_end_trigger_inverted": {
-        "label": "Snúa ytri kveikju við (kveikja á OFF)"
-      },
-      "door_sensor_entity": {
-        "label": "Hurðarskynjari"
-      },
-      "pause_cuts_power": {
-        "label": "Hlé dregur einnig úr rafmagni (með rofa)"
-      },
-      "switch_entity": {
-        "label": "Skiptu um einingu"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "Seinkun affermisáminningar"
-      },
-      "pump_stuck_duration": {
-        "label": "Tímalengd þess sem dæla er föst"
-      },
-      "notify_start_services": {
-        "label": "Byrjaðu þjónustu"
-      },
-      "notify_finish_services": {
-        "label": "Klára Þjónusta"
-      },
-      "notify_live_services": {
-        "label": "Þjónusta lifandi framfara"
-      },
-      "notify_people": {
-        "label": "Fólk (aðeins þegar þú ert heima)"
-      },
-      "notify_only_when_home": {
-        "label": "Tilkynna aðeins þegar þú ert heima"
-      },
-      "notify_fire_events": {
-        "label": "Fire HA viðburðir fyrir tilkynningar"
-      },
-      "notify_before_end_minutes": {
-        "label": "Viðvörun fyrir lok"
-      },
-      "notify_live_interval_seconds": {
-        "label": "Lifandi uppfærslubil"
-      },
-      "notify_live_overrun_percent": {
-        "label": "Live yfirkeyrsla % Fyrir viðvörun"
-      },
-      "notify_live_chronometer": {
-        "label": "Notaðu Live Chronometer"
-      },
-      "notify_timeout_seconds": {
-        "label": "Sjálfkrafa hafna eftir"
-      },
-      "notify_title": {
-        "label": "Titill tilkynningar"
-      },
-      "notify_icon": {
-        "label": "Tilkynningatákn"
-      },
-      "notify_start_message": {
-        "label": "Byrja skilaboð"
-      },
-      "notify_finish_message": {
-        "label": "Ljúktu skilaboðum"
-      },
-      "notify_pre_complete_message": {
-        "label": "Pre-Complete skilaboð"
-      },
-      "notify_reminder_message": {
-        "label": "Áminningarskilaboð"
-      },
-      "notify_channel": {
-        "label": "Android Rás (byrjun/í beinni)"
-      },
-      "notify_finish_channel": {
-        "label": "Android Rás (klára)"
-      },
-      "energy_price_entity": {
-        "label": "Orkuverðsaðili"
-      },
-      "energy_price_static": {
-        "label": "Stöðuorkuverð (á kWst)"
-      },
-      "enable_ml_models": {
-        "label": "Notaðu snjöll líkön meðan á lotu stendur"
-      },
-      "ml_training_enabled": {
-        "label": "Lærðu af þessari vél"
-      },
-      "ml_training_hour": {
-        "label": "Lærðu á klukkustund"
-      },
-      "ml_training_min_cycles": {
-        "label": "Fyrst þarf hringrás"
-      },
-      "ml_training_interval_days": {
-        "label": "Athugaðu í mesta lagi hvert"
-      }
+    "quality": {
+      "bad": "Slæmt",
+      "good": "Gott",
+      "unusable": "Ónothæft"
+    },
+    "status": {
+      "active": "Virkur",
+      "all_statuses": "Allar stöður",
+      "ambiguous": "Óljós",
+      "auto_detect": "Sjálfvirk skynjun",
+      "clear": "Hreinsa",
+      "completed": "Lokið",
+      "fine_tuning": "fínstilla núna…",
+      "force_stopped": "Kraftur stöðvaður",
+      "idle": "Aðgerðarlaus",
+      "interrupted": "Truflað",
+      "ready": "Tilbúið til vinnslu",
+      "recording": "Tekur upp"
+    },
+    "tab": {
+      "advanced": "Ítarlegri",
+      "diagnostics": "Greining",
+      "history": "Hringrásir",
+      "ml": "ML þjálfun",
+      "pp_cleanup": "Hreinsun",
+      "pp_manage": "Stjórna",
+      "pp_overview": "Yfirlit",
+      "pp_phases": "Áfangar",
+      "profiles": "Snið",
+      "settings": "Stillingar",
+      "status": "Yfirlit",
+      "subtab_phase_catalog": "Áfangaskrá",
+      "subtab_profiles": "Snið"
+    },
+    "tag": {
+      "early_end": "Snemma enda",
+      "late_start": "Seint byrjun",
+      "merged": "Sameinaðir hringrásir",
+      "noise": "Hávaði",
+      "sensor_gap": "Skynjarabil",
+      "split": "Skipt hringrás",
+      "wrong_profile": "Rangt snið"
+    },
+    "toast": {
+      "access_saved": "Aðgangsstýring vistuð",
+      "all_wiped": "Öll gögn þurrkuð út",
+      "analysis_complete_none": "Greiningu lokið: engar nýjar tillögur",
+      "auto_label_complete": "Sjálfvirkt merki lokið",
+      "automation_deleted": "Sjálfvirkni eytt",
+      "correction_submitted": "Leiðrétting lögð fram",
+      "cycle_deleted": "Hringrás eytt",
+      "cycle_force_stopped": "Hringrás afl-stöðvuð",
+      "cycle_labelled": "Hringrás merkt",
+      "cycle_paused": "Hlé gert á hringrásinni",
+      "cycle_resumed": "Hringrás hafin aftur",
+      "cycle_trimmed": "Hringrás klippt",
+      "cycles_merged": "Hringrásir sameinaðar",
+      "envelope_rebuilt": "Umslag endurbyggt",
+      "envelopes_rebuilt": "Umslög endurbyggð",
+      "export_downloaded": "Útflutningur hlaðið niður",
+      "feedback_all_dismissed": "Öllum athugasemdum vísað frá",
+      "feedback_confirmed": "Viðbrögð staðfest",
+      "feedback_dismissed": "Viðbrögðum hafnað",
+      "group_deleted": "Hópi eytt",
+      "group_name_required": "Nafn hóps er áskilið",
+      "group_saved": "Hópur vistaður",
+      "import_successful": "Innflutningur tókst; endurhleðsla samþættingar",
+      "json_required": "JSON gögn eru nauðsynleg",
+      "legacy_removed": "Eldri aðgerðir fjarlægðar",
+      "logs_exported": "Logar fluttir út",
+      "matching_reverted": "Samsvarandi þyngd færð aftur í sjálfgefna stillingar",
+      "min_2_profiles": "Veldu að minnsta kosti 2 prófíla fyrir hóp",
+      "ml_training_no_improvement": "Þjálfun lokið: grunnlínu haldið (engar umbætur)",
+      "models_reverted": "Módel í tæki færð aftur til grunnlínu",
+      "name_required": "Nafn krafist",
+      "no_split_found": "Engar aðgerðalausar eyður fundust til að skipta á",
+      "panel_settings_saved": "Pallborðsstillingar vistaðar",
+      "phase_name_required": "Fasaheiti er áskilið",
+      "phase_updated": "Áfangi uppfærður",
+      "phases_saved": "Áfangar vistaðir",
+      "preferences_saved": "Kjörstillingar vistaðar",
+      "profile_name_required": "Nafn prófíls er áskilið",
+      "profile_renamed": "Prófíll endurnefnt",
+      "recording_discarded": "Upptöku hent",
+      "recording_saved": "Upptaka vistuð á prófíl",
+      "recording_started": "Upptaka hafin",
+      "recording_stopped": "Upptaka hætt",
+      "review_saved": "Umsögn vistuð",
+      "settings_saved": "Stillingar vistaðar; endurhleðsla samþættingar",
+      "suggestions_applied": "Tillögur beitt; endurhleðsla samþættingar",
+      "suggestions_dismissed": "Tillögum vísað frá"
     }
   }
 }

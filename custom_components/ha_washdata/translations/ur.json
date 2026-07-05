@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "سائیکل اسٹارٹ",
-        "cycle_finish": "سائیکل ختم",
-        "cycle_live": "لائیو پروگریس"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "واشنگ مشین",
@@ -88,198 +81,6 @@
         "bread_maker": "روٹی بنانے والا",
         "pump": "پمپ / سمپ پمپ",
         "other": "دیگر (جدید)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(غیر لیبل لگا ہوا)",
-        "create_new_profile": "نیا پروفائل بنائیں",
-        "remove_label": "لیبل کو ہٹا دیں۔",
-        "no_reference_cycle": "(کوئی حوالہ سائیکل نہیں)",
-        "all_device_types": "ڈیوائس کی تمام اقسام",
-        "current_suffix": "(موجودہ)",
-        "phase_builtin_suffix": "(بلٹ ان)",
-        "phase_none_available": "کوئی فیز دستیاب نہیں۔",
-        "phase_other_device_types": "ڈیوائس کی دیگر اقسام:",
-        "settings_deprecation_warning": "⚠️ **فرسودہ ڈیوائس کی قسم:** {device_type} کو مستقبل کی ریلیز میں ہٹانے کے لیے شیڈول کیا گیا ہے۔ واش ڈیٹا کی مماثل پائپ لائن اس آلات کی کلاس کے لیے قابل اعتماد نتائج پیدا نہیں کرتی ہے۔ آپ کا انضمام فرسودگی کی مدت کے دوران کام کرتا رہتا ہے۔ اس انتباہ کو خاموش کرنے کے لیے، **ڈیوائس کی قسم** کو ذیل میں معاون اقسام میں سے کسی ایک (واشنگ مشین، ڈرائر، واشر ڈرائر کومبو، ڈش واشر، ایئر فرائر، بریڈ میکر، یا پمپ)، یا **دیگر (ایڈوانسڈ)** پر سوئچ کریں اگر آپ کا آلہ کسی بھی معاون قسم سے مماثل نہیں ہے۔ **دیگر (ایڈوانسڈ)** جان بوجھ کر جنرک ڈیفالٹس بھیجتے ہیں جو کسی مخصوص آلات کے لیے نہیں بنائے جاتے ہیں، اس لیے آپ کو حد، ٹائم آؤٹ، اور مماثل پیرامیٹرز خود ترتیب دینے کی ضرورت ہوگی۔ جب آپ سوئچ کرتے ہیں تو آپ کی تمام موجودہ ترتیبات محفوظ رہتی ہیں۔",
-        "editor_select_info": "تقسیم کرنے کے لیے 1 سائیکل، یا ضم کرنے کے لیے 2+ سائیکل منتخب کریں۔",
-        "editor_select_info_split": "تقسیم کرنے کے لیے 1 سائیکل منتخب کریں۔",
-        "editor_select_info_merge": "ضم کرنے کے لیے 2+ سائیکل منتخب کریں۔",
-        "editor_select_info_delete": "حذف کرنے کے لیے 1+ سائیکل منتخب کریں۔",
-        "no_cycles_recorded": "ابھی تک کوئی سائیکل ریکارڈ نہیں ہوا۔",
-        "profile_summary_line": "- **{name}**: {count} سائیکل، {avg}m اوسط",
-        "no_profiles_created": "ابھی تک کوئی پروفائل نہیں بنایا گیا ہے۔",
-        "phase_preview": "فیز کا پیش نظارہ",
-        "phase_preview_no_curve": "پروفائل کا اوسط وکر ابھی دستیاب نہیں ہے۔ اس پروفائل کے لیے مزید سائیکل چلائیں/لیبل لگائیں۔",
-        "average_power_curve": "اوسط پاور وکر",
-        "unit_min": "منٹ",
-        "profile_option_fmt": "{name} ({count} سائیکل، ~{duration}m اوسط)",
-        "profile_option_short_fmt": "{name} ({count} سائیکل، ~{duration}m)",
-        "deleted_cycles_from_profile": "{profile} سے {count} سائیکلوں کو حذف کر دیا گیا۔",
-        "not_enough_data_graph": "گراف بنانے کے لیے کافی ڈیٹا نہیں ہے۔",
-        "no_profiles_found": "کوئی پروفائلز نہیں ملے۔",
-        "cycle_info_fmt": "سائیکل: {start}، {duration}m، موجودہ: {label}",
-        "top_candidates_header": "### سرفہرست امیدوار",
-        "tbl_profile": "پروفائل",
-        "tbl_confidence": "اعتماد",
-        "tbl_correlation": "ارتباط",
-        "tbl_duration_match": "دورانیہ میچ",
-        "detected_profile": "پروفائل کا پتہ چلا",
-        "estimated_duration": "متوقع دورانیہ",
-        "actual_duration": "اصل دورانیہ",
-        "choose_action": "__ذیل میں ایک عمل کا انتخاب کریں:__",
-        "tbl_count": "شمار",
-        "tbl_avg": "اوسط",
-        "tbl_min": "کم از کم",
-        "tbl_max": "زیادہ سے زیادہ",
-        "tbl_energy_avg": "توانائی (اوسط)",
-        "tbl_energy_total": "توانائی (کل)",
-        "tbl_consistency": "پر مشتمل",
-        "tbl_last_run": "آخری رن",
-        "graph_legend_title": "گراف لیجنڈ",
-        "graph_legend_body": "نیلا بینڈ مشاہدہ کی گئی کم سے کم اور زیادہ سے زیادہ پاور ڈرا رینج کی نمائندگی کرتا ہے۔ لائن اوسط پاور وکر کو ظاہر کرتی ہے۔",
-        "recording_preview": "ریکارڈنگ کا پیش نظارہ",
-        "trim_start": "ٹرم اسٹارٹ",
-        "trim_end": "ٹرم اینڈ",
-        "split_preview_title": "تقسیم کا پیش نظارہ",
-        "split_preview_found_fmt": "{count} سیگمنٹس ملے۔",
-        "split_preview_confirm_fmt": "اس سائیکل کو {count} الگ الگ سائیکلوں میں تقسیم کرنے کے لیے تصدیق پر کلک کریں۔",
-        "merge_preview_title": "پیش نظارہ کو ضم کریں۔",
-        "merge_preview_joining_fmt": "{count} سائیکلوں میں شامل ہونا۔ خلا کو 0W ریڈنگ سے پُر کیا جائے گا۔",
-        "editor_delete_preview_title": "حذف کا پیش نظارہ",
-        "editor_delete_preview_intro": "منتخب کردہ سائیکل مستقل طور پر حذف کر دیے جائیں گے:",
-        "editor_delete_preview_confirm": "ان سائیکل ریکارڈز کو مستقل طور پر حذف کرنے کے لیے Confirm پر کلک کریں۔",
-        "no_power_preview": "*پیش نظارہ کے لیے کوئی پاور ڈیٹا دستیاب نہیں ہے۔*",
-        "profile_comparison": "پروفائل کا موازنہ",
-        "actual_cycle_label": "یہ سائیکل (حقیقی)",
-        "storage_usage_header": "اسٹوریج کا استعمال",
-        "storage_file_size": "فائل کا سائز",
-        "storage_cycles": "سائیکل",
-        "storage_profiles": "پروفائلز",
-        "storage_debug_traces": "ڈیبگ ٹریسز",
-        "overview_suffix": "جائزہ",
-        "phase_preview_for_profile": "پروفائل کے لیے فیز کا پیش نظارہ",
-        "current_ranges_header": "موجودہ حدود",
-        "assign_phases_help": "رینجز کو شامل کرنے، ترمیم کرنے، حذف کرنے یا محفوظ کرنے کے لیے نیچے دی گئی کارروائیوں کا استعمال کریں۔",
-        "profile_summary_header": "پروفائل کا خلاصہ",
-        "recent_cycles_header": "حالیہ چکر",
-        "trim_cycle_preview_title": "سائیکل ٹرم کا پیش نظارہ",
-        "trim_cycle_preview_no_data": "اس سائیکل کے لیے کوئی پاور ڈیٹا دستیاب نہیں ہے۔",
-        "trim_cycle_preview_kept_suffix": "رکھا",
-        "table_program": "پروگرام",
-        "table_when": "کب",
-        "table_length": "دورانیہ",
-        "table_match": "مماثلت",
-        "table_profile": "پروفائل",
-        "table_cycles": "سائیکل",
-        "table_avg_length": "اوسط دورانیہ",
-        "table_last_run": "آخری رن",
-        "table_avg_energy": "اوسط توانائی",
-        "table_detected_program": "پتہ لگا ہوا پروگرام",
-        "table_confidence": "اعتماد",
-        "table_reported": "رپورٹ کیا گیا"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "ایک سائیکل کو تقسیم کریں (خالی تلاش کریں)",
-        "merge": "سائیکلوں کو ضم کریں (ٹکڑوں میں شامل ہوں)",
-        "delete": "سائیکل کو حذف کریں"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "خودکار طور پر بیکار خلا تلاش کریں",
-        "manual": "دستی ٹائم اسٹیمپ"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "دیکھ بھال: دوبارہ عمل اور ڈیٹا کو بہتر بنائیں",
-        "clear_debug_data": "ڈیبگ ڈیٹا صاف کریں (جگہ خالی کریں)",
-        "wipe_history": "اس آلہ کا تمام ڈیٹا صاف کریں (ناقابل واپسی)",
-        "export_import": "ترتیبات کے ساتھ JSON برآمد/درآمد کریں (کاپی/پیسٹ)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "تمام ڈیٹا ایکسپورٹ کریں۔",
-        "import": "ڈیٹا کو درآمد/ضم کریں۔"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "پرانے سائیکلوں کو آٹو لیبل کریں۔",
-        "select_cycle_to_label": "لیبل مخصوص سائیکل",
-        "select_cycle_to_delete": "سائیکل کو حذف کریں۔",
-        "interactive_editor": "انٹرایکٹو ایڈیٹر کو ضم/تقسیم کریں۔",
-        "trim_cycle": "ٹرم سائیکل ڈیٹا"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "نیا پروفائل بنائیں",
-        "edit_profile": "پروفائل میں ترمیم/نام تبدیل کریں۔",
-        "delete_profile": "پروفائل حذف کریں",
-        "profile_stats": "پروفائل کے اعدادوشمار",
-        "cleanup_profile": "کلین اپ ہسٹری - گراف اور ڈیلیٹ کریں۔",
-        "assign_phases": "فیز رینجز تفویض کریں۔"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "نیا مرحلہ بنائیں",
-        "edit_custom_phase": "فیز میں ترمیم کریں۔",
-        "delete_custom_phase": "مرحلہ حذف کریں۔"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "نام کریں اور مراحل کا اطلاق کریں۔",
-        "cancel": "بغیر کسی تبدیلی کے واپس جائیں۔"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "فیز رینج شامل کریں۔",
-        "edit_range": "فیز رینج میں ترمیم کریں۔",
-        "delete_range": "فیز رینج کو حذف کریں۔",
-        "clear_ranges": "تمام حدود کو صاف کریں۔",
-        "auto_detect_ranges": "مراحل کا خود بخود پتہ لگائیں۔",
-        "save_ranges": "محفوظ کریں اور واپس کریں۔"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "ریفریش اسٹیٹس",
-        "stop_recording": "ریکارڈنگ بند کریں (محفوظ کریں اور عمل کریں)",
-        "start_recording": "نئی ریکارڈنگ شروع کریں۔",
-        "process_recording": "آخری ریکارڈنگ پر عمل کریں (تراشیں اور محفوظ کریں)",
-        "discard_recording": "آخری ریکارڈنگ کو مسترد کریں۔"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "نیا پروفائل بنائیں",
-        "existing_profile": "موجودہ پروفائل میں شامل کریں۔",
-        "discard": "ریکارڈنگ کو مسترد کریں۔"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "تصدیق کریں - درست پتہ لگانا",
-        "correct": "درست - پروگرام/دورانیہ کا انتخاب کریں۔",
-        "ignore": "نظر انداز کریں - غلط مثبت/شور کا چکر",
-        "delete": "حذف کریں - تاریخ سے ہٹا دیں۔"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "سٹارٹ پوائنٹ سیٹ کریں۔",
-        "set_end": "اختتامی نقطہ مقرر کریں۔",
-        "reset": "مکمل دورانیہ پر ری سیٹ کریں۔",
-        "apply": "ٹرم لگائیں۔",
-        "cancel": "منسوخ کریں۔"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "موجودہ مرحلہ"
       },
-      "wash_phase": {
-        "name": "مرحلہ"
-      },
       "profile_cycle_count": {
         "name": "پروفائل {profile_name} شمار",
         "unit_of_measurement": "سائیکل"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s trim_start_s سے بڑا ہونا چاہیے۔"
+    },
+    "no_active_cycle": {
+      "message": "روکنے یا دوبارہ شروع کرنے کے لیے کوئی فعال سائیکل نہیں ہے۔"
     }
   },
   "panel": {
     "hdr": {
-      "panel_settings": "پینل کی ترتیبات (تمام صارفین)",
-      "ml_learned": "واش ڈیٹا نے کیا سیکھا ہے۔",
-      "status": "حیثیت",
-      "live_power": "لائیو پاور",
-      "manual_recording": "دستی ریکارڈنگ",
-      "tools_and_data": "ٹولز اور ڈیٹا",
-      "phase_catalog": "فیز کیٹلاگ",
-      "storage_stats": "اسٹوریج کے اعدادوشمار",
-      "maintenance": "بحالی کے اقدامات",
-      "export_import": "برآمد / درآمد",
-      "logs": "نوشتہ جات",
-      "my_preferences": "میری ترجیحات",
-      "access_control": "رسائی کنٹرول",
-      "ml_smart_learning": "اسمارٹ لرننگ",
-      "ml_settings_card": "ترتیبات",
-      "ml_matching_tuning": "پروگرام سے مماثل فائن ٹیوننگ",
-      "display": "ڈسپلے",
-      "status_graph": "اسٹیٹس گراف",
-      "diagnostics_pref": "تشخیص",
-      "logs_diagnostics": "تشخیص",
-      "process_history": "عمل کی تاریخ",
-      "clear_debug": "ڈیبگ کے نشانات صاف کریں۔",
-      "wipe_history": "تاریخ کو صاف کریں۔",
+      "toggle_sidebar": "ہوم اسسٹنٹ سائڈبار کو ٹوگل کریں",
+      "logs": "نظام کے ریکارڈ",
+      "access_control": "رسائی کا کنٹرول",
+      "automation_delete": "یہ آٹومیشن حذف کریں",
+      "automation_needs_review": "اس سائیکل کو جائزے کی ضرورت ہے",
+      "automation_open": "آٹومیشن ایڈیٹر میں کھولیں",
+      "automation_review_this_cycle": "اس سائیکل کا جائزہ لیں",
       "automations": "آٹومیشنز",
-      "automation_open": "آٹومیشن ایڈیٹر میں کھولیں۔",
-      "automation_delete": "اس آٹومیشن کو حذف کریں۔",
-      "automation_needs_review": "اس سائیکل پر نظرثانی کی ضرورت ہے۔",
-      "automation_review_this_cycle": "اس سائیکل کا جائزہ لیں۔",
-      "no_automations": "ابھی تک اس ڈیوائس کا کوئی آٹومیشن نہیں ہے۔"
-    },
-    "lbl": {
-      "manual_duration": "دستی دورانیہ (منٹ، اختیاری)",
-      "correct_duration": "درست دورانیہ (منٹ، اختیاری)",
-      "default_tab": "پینل کھولتے وقت ڈیفالٹ ٹیب",
-      "default_access_level": "ذیل میں درج نہیں صارفین کے لیے طے شدہ سطح",
-      "show_expected": "متوقع وکر اوورلے دکھائیں (مماثل پروفائل، نارنجی)",
-      "show_raw": "خام سینسر ریڈنگز دکھائیں (غیر ہموار، سرمئی)",
-      "show_debug": "اسٹیٹس پیج پر لائیو میچ ڈیبگ کارڈ دکھائیں (اعتماد، ابہام، سرفہرست امیدوار)",
-      "power": "طاقت",
-      "progress": "پیش رفت",
-      "remaining": "باقی",
-      "duration": "دورانیہ",
-      "energy": "توانائی",
-      "profile": "پروفائل",
+      "clear_debug": "ڈیبگ ٹریسز صاف کریں",
+      "diagnostics_pref": "تشخیصات",
+      "display": "ڈسپلے",
+      "export_import": "برآمد / درآمد",
+      "live_power": "لائیو پاور",
+      "logs_diagnostics": "تشخیصات",
+      "maintenance": "دیکھ بھال کی کارروائیاں",
+      "manual_recording": "دستی ریکارڈنگ",
+      "ml_learned": "WashData نے کیا سیکھا",
+      "ml_matching_tuning": "پروگرام میچنگ کی ٹھیک ترتیب",
+      "ml_settings_card": "ترتیبات",
+      "ml_smart_learning": "ذہین سیکھنا",
+      "my_preferences": "میری ترجیحات",
+      "no_automations": "ابھی تک کوئی آٹومیشن اس ڈیوائس کا حوالہ نہیں دیتی۔",
+      "panel_settings": "پینل کی ترتیبات",
+      "phase_catalog": "مرحلہ کیٹلاگ",
+      "process_history": "تاریخ پر کارروائی",
       "status": "حیثیت",
-      "date": "تاریخ",
-      "confidence": "اعتماد",
-      "health": "صحت",
-      "cost": "لاگت",
-      "program": "پروگرام",
-      "cycle_health": "سائیکل کی صحت",
-      "activity": "سرگرمی",
-      "unlabelled": "بغیر لیبل والا",
-      "unlabelled_paren": "(بغیر لیبل لگا ہوا)",
-      "emphasis": "زور",
-      "default": "طے شدہ",
-      "in_use": "استعمال میں",
-      "profile_name": "پروفائل کا نام",
-      "ref_cycle": "حوالہ سائیکل (اختیاری)",
-      "phase_name": "فیز کا نام",
-      "description": "تفصیل",
-      "correct_profile": "درست پروفائل",
-      "load_from_file": "فائل سے لوڈ کریں۔",
-      "json_data": "JSON ڈیٹا",
-      "expected_duration": "متوقع دورانیہ (منٹ)",
-      "rename_profile": "پروفائل کا نام تبدیل کریں۔",
-      "select_profile": "پروفائل منتخب کریں۔",
-      "confidence_threshold": "اعتماد کی حد",
-      "resulting_profile": "نتیجہ خیز پروفائل",
-      "new_profile_name": "نیا پروفائل نام",
-      "save_mode": "محفوظ موڈ",
-      "head_trim": "ہیڈ ٹرم",
-      "tail_trim": "ٹیل ٹرم (s)",
-      "gap_s": "فرق (s)",
-      "start": "شروع",
-      "end": "ختم",
-      "quality": "معیار",
-      "golden_reference": "ریکارڈ شدہ حوالہ سائیکل",
-      "compare_profiles": "پروفائلز کے ساتھ موازنہ کریں۔",
-      "tags": "ٹیگز",
-      "notes": "نوٹس",
-      "cycle_date_display": "سائیکل تاریخ ڈسپلے",
-      "refresh_interval": "ریفریش وقفہ (s)",
-      "panel_default_tab": "ڈیفالٹ ٹیب",
-      "hide_tabs": "غیر منتظمین کے لیے ٹیبز چھپائیں۔",
-      "enable_access_control": "فی صارف رسائی کنٹرول کو فعال کریں۔",
-      "administrators": "منتظمین",
-      "default_other": "ڈیفالٹ (دیگر آلات)",
-      "mode_new_profile": "نیا پروفائل بنائیں",
-      "mode_existing_profile": "موجودہ پروفائل میں شامل کریں۔",
-      "auto_fine_tune_on": "آٹو فائن ٹیون آن (تقریباً {hour}:00)",
-      "auto_fine_tune_off": "آٹو فائن ٹیون آف",
-      "last_checked": "آخری بار چیک کیا گیا:",
-      "remove_label": "- لیبل ہٹا دیں -",
-      "create_new_profile": "+ نیا پروفائل بنائیں…",
-      "read_only": "صرف پڑھنے کے لیے",
-      "actions": "اعمال",
-      "cycles_count": "سائیکل",
-      "debug_traces": "ڈیبگ ٹریسز",
-      "file_kb": "فائل (kB)",
-      "label": "لیبل",
-      "seconds_from_start": "شروع سے سیکنڈز",
-      "clock_time": "گھڑی کا وقت",
-      "ungrouped": "غیر گروپ شدہ"
-    },
-    "toast": {
-      "settings_saved": "ترتیبات محفوظ انضمام کو دوبارہ لوڈ کرنا",
-      "import_successful": "درآمد کامیاب؛ انضمام کو دوبارہ لوڈ کرنا",
-      "suggestions_applied": "تجاویز کا اطلاق؛ انضمام کو دوبارہ لوڈ کرنا",
-      "ml_training_no_improvement": "تربیت مکمل: بیس لائن رکھی گئی (کوئی بہتری نہیں)",
-      "could_not_load_cycle": "سائیکل لوڈ نہیں ہو سکا: {error}",
-      "preferences_saved": "ترجیحات محفوظ ہو گئیں۔",
-      "panel_settings_saved": "پینل کی ترتیبات محفوظ ہو گئیں۔",
-      "access_saved": "رسائی کنٹرول محفوظ ہو گیا۔",
-      "profile_created": "پروفائل \"{name}\" بنایا گیا۔",
-      "profile_deleted": "پروفائل \"{name}\" حذف کر دیا گیا۔",
-      "profile_renamed": "پروفائل کا نام تبدیل کر دیا گیا۔",
-      "phases_saved": "مراحل محفوظ ہو گئے۔",
-      "phase_created": "مرحلہ \"{name}\" بنایا گیا۔",
-      "phase_deleted": "مرحلہ \"{name}\" حذف کر دیا گیا۔",
-      "phase_updated": "فیز اپ ڈیٹ ہو گیا۔",
-      "recording_started": "ریکارڈنگ شروع ہو گئی۔",
-      "recording_stopped": "ریکارڈنگ رک گئی۔",
-      "recording_discarded": "ریکارڈنگ مسترد کر دی گئی۔",
-      "recording_saved": "ریکارڈنگ پروفائل میں محفوظ ہو گئی۔",
-      "export_downloaded": "ایکسپورٹ ڈاؤن لوڈ ہو گیا۔",
-      "logs_exported": "نوشتہ جات برآمد ہوئے۔",
-      "envelopes_rebuilt": "لفافے دوبارہ بنائے گئے۔",
-      "envelope_rebuilt": "لفافہ دوبارہ بنایا گیا۔",
-      "suggestions_dismissed": "تجاویز مسترد کر دی گئیں۔",
-      "auto_label_complete": "آٹو لیبل مکمل",
-      "cycle_labelled": "سائیکل کا لیبل لگا ہوا ہے۔",
-      "cycle_deleted": "سائیکل کو حذف کر دیا گیا۔",
-      "cycles_deleted": "{count} سائیکل (سائیکلز) کو حذف کر دیا گیا۔",
-      "cycle_trimmed": "سائیکل کو تراشا۔",
-      "cycles_merged": "سائیکلیں ضم ہو گئیں۔",
-      "review_saved": "جائزہ محفوظ ہو گیا۔",
-      "feedback_confirmed": "تاثرات کی تصدیق ہوگئی",
-      "feedback_dismissed": "تاثرات کو مسترد کر دیا گیا۔",
-      "feedback_all_dismissed": "تمام تاثرات کو مسترد کر دیا گیا۔",
-      "correction_submitted": "تصحیح جمع کرائی گئی۔",
-      "group_saved": "گروپ محفوظ ہو گیا۔",
-      "group_deleted": "گروپ حذف کر دیا گیا۔",
-      "automation_deleted": "آٹومیشن کو حذف کر دیا گیا۔",
-      "legacy_removed": "پرانی کارروائیاں ہٹا دی گئیں۔",
-      "cycle_paused": "سائیکل رک گئی۔",
-      "cycle_resumed": "سائیکل دوبارہ شروع ہو گئی۔",
-      "cycle_force_stopped": "سائیکل زبردستی روکی گئی۔",
-      "ml_training_promoted": "ٹریننگ مکمل: پروموٹ شدہ {count} ماڈل",
-      "matching_reverted": "مماثل وزن ڈیفالٹس پر واپس آ گیا۔",
-      "models_reverted": "آن ڈیوائس ماڈلز کو بیس لائن پر واپس کر دیا گیا۔",
-      "analysis_complete": "تجزیہ مکمل: {count} تجاویز",
-      "analysis_complete_none": "تجزیہ مکمل: کوئی نئی تجاویز نہیں۔",
-      "debug_cleared": "{count} ڈیبگ ٹریسز کو صاف کر دیا گیا۔",
-      "all_wiped": "تمام ڈیٹا مٹا دیا گیا۔",
-      "no_split_found": "تقسیم کرنے کے لیے کوئی خالی جگہ نہیں ملی",
-      "group_name_required": "گروپ کا نام درکار ہے۔",
-      "min_2_profiles": "ایک گروپ کے لیے کم از کم 2 پروفائلز منتخب کریں۔",
-      "profile_name_required": "پروفائل کا نام درکار ہے۔",
-      "phase_name_required": "فیز کا نام درکار ہے۔",
-      "name_required": "نام درکار ہے۔",
-      "json_required": "JSON ڈیٹا درکار ہے۔",
-      "save_failed": "محفوظ کرنا ناکام ہو گیا: {error}",
-      "delete_failed": "حذف کرنا ناکام ہو گیا: {error}",
-      "apply_failed": "درخواست ناکام ہوئی: {error}",
-      "rebuild_failed": "دوبارہ تعمیر ناکام: {error}",
-      "start_failed": "شروع کرنا ناکام ہو گیا: {error}",
-      "stop_failed": "سٹاپ ناکام ہو گیا: {error}",
-      "discard_failed": "رد کرنا ناکام ہو گیا: {error}",
-      "trim_failed": "تراشنا ناکام ہو گیا: {error}",
-      "split_failed": "تقسیم ناکام ہو گئی: {error}",
-      "merge_failed": "انضمام ناکام ہو گیا: {error}",
-      "create_failed": "بنانا ناکام ہو گیا: {error}",
-      "update_failed": "اپ ڈیٹ ناکام ہو گیا: {error}",
-      "rename_failed": "نام بدلنا ناکام ہو گیا: {error}",
-      "revert_failed": "واپس کرنا ناکام ہو گیا: {error}",
-      "training_failed": "تربیت ناکام ہوئی: {error}",
-      "export_failed": "ایکسپورٹ ناکام ہو گیا: {error}",
-      "import_failed": "درآمد ناکام: {error}",
-      "auto_label_failed": "خودکار لیبل ناکام ہو گیا: {error}",
-      "analysis_failed": "تجزیہ ناکام ہو گیا: {error}",
-      "auto_detect_failed": "خودکار پتہ لگانا ناکام ہو گیا: {error}",
-      "error": "خرابی: {error}",
-      "pause_failed": "روکنا ناکام ہو گیا: {error}",
-      "label_failed": "لیبل ناکام ہو گیا: {error}",
-      "invalid_json": "\"{key}\" درست JSON نہیں ہے — اسے ٹھیک کریں یا محفوظ کرنے سے پہلے فیلڈ کو صاف کریں۔",
-      "processed": "کارروائی کی گئی {bits}",
-      "split_complete": "{count} چکروں میں تقسیم کریں۔"
-    },
-    "msg": {
-      "no_devices": "ابھی تک کوئی واش ڈیٹا ڈیوائسز کنفیگر نہیں ہیں۔",
-      "live_chart_loading": "ریڈنگ آتے ہی لائیو پاور چارٹ ظاہر ہوتا ہے۔",
-      "no_profiles_yet": "ابھی تک کوئی پروفائلز نہیں ہیں۔ ایک لیبل شدہ سائیکل سے بنائیں۔",
-      "no_logs": "ابھی تک کوئی لاگ ریکارڈ بفر نہیں ہوا ہے۔",
-      "no_envelope": "ابھی تک کوئی لفافہ نہیں ہے - لیبلنگ سائیکلوں کے بعد دوبارہ تعمیر کریں۔",
-      "no_cycles_profile": "اس پروفائل کے لیے کوئی سائیکل نہیں ہے۔",
-      "ml_learned_intro": "ماڈلز اس مشین کے لیے ٹھیک ہیں۔ جو بھی چیز درج نہیں ہے وہ قابل اعتماد بلٹ ان ماڈل استعمال کرتی ہے۔",
-      "ml_intro": "WashData میں پہلے سے سمارٹ ماڈلز شامل ہیں جو سائیکلوں کا پتہ لگاتے ہیں، پروگراموں کو میچ کرتے ہیں، اور وقت اور توانائی کا تخمینہ لگاتے ہیں — یہ شروع سے کام کرتے ہیں۔",
-      "matching_tuning_intro": "سیکھتے وقت، WashData یہ بھی ایڈجسٹ کرتا ہے کہ پروگرام کی مماثلت کا وزن ایک سائیکل کی شکل بمقابلہ اس کی مدت اور توانائی میں کتنا ہے۔",
-      "merge_intro": "منتخب چکروں کو ایک میں ملایا جاتا ہے (تاریخی ترتیب؛ خلا 0 W سے بھرا ہوا)۔ نتیجے میں پروفائل کا انتخاب کریں۔",
-      "see_recorder": "نیچے ریکارڈر ویجیٹ دیکھیں",
-      "review_to_cycles": "سائیکلوں کا جائزہ لینے والی قطار کھولیں۔",
-      "no_device_selected": "کوئی آلہ منتخب نہیں کیا گیا۔",
-      "loading": "لوڈ ہو رہا ہے…",
-      "loading_settings": "ترتیبات لوڈ ہو رہی ہیں…",
-      "no_cycles_match": "کوئی سائیکل موجودہ فلٹر سے مماثل نہیں ہے۔",
-      "no_cycles_yet": "ابھی تک کوئی سائیکل ریکارڈ نہیں ہوا۔",
-      "no_phases": "کوئی مراحل متعین نہیں ہیں۔",
-      "no_phases_assigned": "کوئی مراحل تفویض نہیں کیے گئے ہیں۔",
-      "no_split_points": "ابھی تک کوئی تقسیم پوائنٹس نہیں ہیں۔",
-      "no_envelope_overlay": "اوورلے کے لیے کوئی لفافہ دستیاب نہیں ہے۔",
-      "no_other_users": "کوئی اور Home Assistant صارفین نہیں ملے۔",
-      "maintenance_requires_access": "دیکھ بھال اور برآمد/درآمد کے لیے مکمل رسائی درکار ہے۔",
-      "loading_curve": "وکر لوڈ ہو رہا ہے…",
-      "compare_selected_cycles": "منتخب سائیکل (ٹھوس) — دکھائیں/چھپائیں۔",
-      "compare_overlay_profiles": "اوورلے پروفائلز (بیہوش)",
-      "no_profiles_compare": "موازنہ کرنے کے لیے کوئی پروفائلز نہیں ہیں۔",
-      "saving_triggers_reload": "محفوظ کرنے سے انضمام دوبارہ لوڈ ہو جاتا ہے۔ HA ادارے مختصر طور پر غیر دستیاب کے طور پر دکھا سکتے ہیں۔",
-      "prefs_personal": "یہ صرف آپ کے Home Assistant اکاؤنٹ پر لاگو ہوتے ہیں۔",
-      "no_match_yet": "ابھی تک کوئی مماثلت کی کوشش نہیں ہے - یہ چلتے ہوئے سائیکل کے دوران آباد ہوتا ہے۔",
-      "no_fine_tuned": "ابھی تک کچھ بھی ٹھیک نہیں ہوا — واش ڈیٹا اپنے بلٹ ان ماڈلز استعمال کر رہا ہے۔",
-      "ml_settings_intro": "دو آزاد سوئچز: ایک سائیکل کے چلنے کے دوران ماڈلز کو لاگو کرتا ہے، دوسرا واش ڈیٹا کو وقت کے ساتھ آپ کی مشین میں ان کو ٹھیک کرنے دیتا ہے۔",
-      "phase_catalog_intro": "سائیکل کے نامزد حصے (پری واش، ہیٹنگ، اسپن…)۔ انہیں اس کے کنٹرول پینل سے پروفائل میں تفویض کریں۔",
-      "phase_ranges_intro": "فیز رینجز (سائیکل شروع ہونے سے منٹ) اوسط وکر پر چڑھی ہوئی ہیں۔ لائیو پیش نظارہ کرنے کے لیے اقدار میں ترمیم کریں۔",
-      "cleanup_intro": "ہر لیبل لگا ہوا چکر لگا ہوا ہے۔ پروفائل کو صاف کرنے کے لیے آؤٹ لیرز پر نشان لگائیں اور حذف کریں۔",
-      "split_intro": "اسپلٹ پوائنٹ کو شامل کرنے یا ہٹانے کے لیے گراف پر کلک کریں، یا خالی جگہوں سے خود بخود پتہ لگائیں۔",
-      "trim_intro": "سرخ ہینڈلز کو گھسیٹیں، یا اقدار درج کریں۔ کھڑکی سے باہر کی ہر چیز کو ہٹا دیا گیا ہے۔",
-      "import_intro": "ایک برآمد شدہ فائل لوڈ کریں یا نیچے JSON پے لوڈ چسپاں کریں۔",
-      "auto_label_intro": "پروفائلز کو بغیر لیبل والے سائیکلوں کو تفویض کریں جن کے میچ کا اعتماد حد کو صاف کرتا ہے۔",
-      "enough_data": "({current}/{min} سائیکل) سے سیکھنے کے لیے کافی ڈیٹا۔",
-      "collecting_data": "ڈیٹا اکٹھا کرنا — ٹھیک ٹیوننگ شروع ہونے سے پہلے {need} مزید سائیکل{plural} ({current}/{min})۔",
-      "updated": "اپ ڈیٹ کیا گیا {time}",
-      "appliance_monitor": "آلات مانیٹر",
-      "ml_loading": "ایم ایل لوڈ ہو رہا ہے…",
-      "review_in_settings": "ترتیبات میں جائزہ لیں۔",
-      "storage_diagnostics": "سٹوریج کے اعدادوشمار، دیکھ بھال، برآمد/درآمد",
-      "recent_logs": "حالیہ ha_washdata ریکارڈز",
-      "preferences_adv": "ترجیحات",
-      "preferences_admin": "ترجیحات، پینل اور رسائی کنٹرول",
-      "pending_feedback": "زیر التواء پتہ لگانے کے تاثرات",
-      "recording_in_progress": "ریکارڈنگ جاری ہے۔",
-      "no_profiles_yet_short": "ابھی تک کوئی پروفائلز نہیں ہیں۔",
-      "unsure_detected_prefix": "واش ڈیٹا کو یقین نہیں ہے کہ اس کا پتہ چلا ہے۔",
-      "no_suggestions": "کوئی فعال تجاویز نہیں ہیں۔",
-      "no_profiles_overlay": "اوورلے کرنے کے لیے کوئی پروفائلز نہیں ہیں۔",
-      "compare_cycles_title": "{count} سائیکلوں کا موازنہ کریں۔",
-      "profiles_intro": "اعداد و شمار، مراحل اور صفائی کے لیے کسی پروفائل پر کلک کریں۔ تقریباً یکساں پروگرامز (ایک جیسی شکل/مدت، مختلف درجہ حرارت یا اسپن) کو گروپ کریں تاکہ میچنگ ان کے درمیان قابل اعتماد طریقے سے انتخاب کر سکے۔",
-      "search_placeholder": "ترتیبات تلاش کریں…",
-      "automations_intro": "WashData {start} / {end} ایونٹس فائر کرتا ہے اور entities ظاہر کرتا ہے، اس لیے اطلاعات اور اعمال عام Home Assistant آٹومیشنز کے طور پر بنانا بہتر ہے۔ اس ڈیوائس کو استعمال کرنے والی آٹومیشنز نیچے دکھائی دیتی ہیں۔",
-      "notify_services_hint": "{entity} سروس IDs استعمال کریں (ایک سے زیادہ کے لیے کوما سے الگ کریں)۔ ٹیمپلیٹ متغیرات: {vars}.",
-      "rbac_hint": "بند ہونے پر، ہر Home Assistant صارف کو مکمل رسائی حاصل ہوتی ہے (پہلے سے طے شدہ)۔ منتظمین کو ہمیشہ مکمل رسائی حاصل ہوتی ہے اور وہ سب کا انتظام کر سکتے ہیں۔",
-      "feedback_prompt": "تصدیق کریں کہ یہ درست تھا، پروگرام کو درست کریں، یا نظرانداز کریں۔"
-    },
-    "section": {
-      "basic": {
-        "intro": "بنیادی شناخت اور سب سے زیادہ سیٹ اپ کی ضرورت کے لوازمات۔",
-        "label": "بنیادی"
-      },
-      "detection": {
-        "intro": "کس طرح ایک سائیکل کو شروع، چلانے اور ختم کرنے کے طور پر پتہ چلا ہے.",
-        "label": "پتہ لگانا"
-      },
-      "matching": {
-        "intro": "تیار شدہ سائیکلوں کو سیکھے ہوئے پروفائلز سے کیسے ملایا جاتا ہے اور لیبل لگایا جاتا ہے۔",
-        "label": "ملاپ کرنا"
-      },
-      "timing": {
-        "intro": "بیک گراؤنڈ کیڈینس، آف لائن واچ ڈاگ اور ہاؤس کیپنگ۔",
-        "label": "ٹائمنگ اور واچ ڈاگ"
-      },
-      "anti_wrinkle": {
-        "intro": "اینٹی رنکل موڈ گرمی کے مرکزی مرحلے کے بعد ڈرائر ٹمبل دالوں کا پتہ لگاتا ہے۔",
-        "label": "اینٹی شیکن"
-      },
-      "delay": {
-        "intro": "تاخیر سے شروع ہونے کا پتہ لگانا اس وقت کی نشاندہی کرتا ہے جب کوئی آلہ چلایا جاتا ہے لیکن اس نے ابھی تک اپنا سائیکل شروع نہیں کیا ہے۔",
-        "label": "شروع کرنے میں تاخیر"
-      },
-      "triggers": {
-        "intro": "اختیاری بیرونی سگنلز: ایک اختتامی محرک، ایک دروازے کا سینسر، ایک توقف کا سوئچ، اور ان لوڈ کی یاد دہانی۔",
-        "label": "محرکات اور دروازہ"
-      },
-      "notifications": {
-        "label": "اطلاعات",
-        "intro": "ترتیب دیں کہ سائیکل کے واقعات کے بارے میں آپ کو کب اور کیسے مطلع کیا جاتا ہے۔"
-      },
-      "ml_training": {
-        "label": "ایم ایل ٹریننگ",
-        "intro": "آپٹ ان سمارٹ ماڈلز جو اس ڈیوائس پر پتہ لگانے اور وقت کو ذاتی نوعیت کا بناتے ہیں۔"
-      }
-    },
-    "setting": {
-      "auto_maintenance": {
-        "label": "آٹو مینٹیننس (رات کی صفائی)"
-      },
-      "external_end_trigger_enabled": {
-        "label": "ایکسٹرنل اینڈ ٹرگر کو فعال کریں۔"
-      },
-      "external_end_trigger_inverted": {
-        "label": "بیرونی محرک کو الٹ دیں (ٹرگر آن آف)"
-      },
-      "pause_cuts_power": {
-        "label": "موقوف بھی بجلی کاٹتا ہے (سوئچ کے ذریعے)"
-      },
-      "notify_people": {
-        "label": "لوگ (صرف گھر آنے پر)"
-      },
-      "notify_only_when_home": {
-        "label": "صرف گھر جانے پر مطلع کریں۔"
-      },
-      "energy_price_static": {
-        "label": "جامد توانائی کی قیمت (فی کلو واٹ)"
-      },
-      "enable_ml_models": {
-        "label": "ایک سائیکل کے دوران سمارٹ ماڈلز کا اطلاق کریں۔"
-      },
-      "ml_training_enabled": {
-        "label": "اس مشین سے سیکھیں۔"
-      },
-      "name": {
-        "label": "ڈیوائس کا نام"
-      },
-      "device_type": {
-        "label": "ڈیوائس کی قسم"
-      },
-      "power_sensor": {
-        "label": "پاور سینسر"
-      },
-      "min_power": {
-        "label": "کم از کم پاور"
-      },
-      "off_delay": {
-        "label": "آف تاخیر"
-      },
-      "linked_device": {
-        "label": "ڈیوائس کے تحت گروپ"
-      },
-      "start_threshold_w": {
-        "label": "تھریشولڈ شروع کریں۔"
-      },
-      "stop_threshold_w": {
-        "label": "اسٹاپ تھریشولڈ"
-      },
-      "min_off_gap": {
-        "label": "منٹ آف گیپ"
-      },
-      "start_duration_threshold": {
-        "label": "شروع کی مدت"
-      },
-      "start_energy_threshold": {
-        "label": "توانائی شروع کریں۔"
-      },
-      "completion_min_seconds": {
-        "label": "کم از کم سائیکل کا دورانیہ"
-      },
-      "running_dead_zone": {
-        "label": "ڈیڈ زون چل رہا ہے۔"
-      },
-      "end_energy_threshold": {
-        "label": "ختم توانائی"
-      },
-      "end_repeat_count": {
-        "label": "دوبارہ گنتی ختم کریں۔"
-      },
-      "sampling_interval": {
-        "label": "نمونے لینے کا وقفہ"
-      },
-      "smoothing_window": {
-        "label": "ہموار ونڈو"
-      },
-      "abrupt_drop_watts": {
-        "label": "اچانک ڈراپ"
-      },
-      "abrupt_drop_ratio": {
-        "label": "اچانک گراوٹ کا تناسب"
-      },
-      "profile_match_threshold": {
-        "label": "میچ کی حد"
-      },
-      "profile_unmatch_threshold": {
-        "label": "بے مثال حد"
-      },
-      "profile_match_interval": {
-        "label": "میچ کا وقفہ"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "کم از کم دورانیہ کا تناسب"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "زیادہ سے زیادہ دورانیہ کا تناسب"
-      },
-      "profile_duration_tolerance": {
-        "label": "پروفائل دورانیہ رواداری"
-      },
-      "duration_tolerance": {
-        "label": "رواداری کا اندازہ لگائیں۔"
-      },
-      "auto_label_confidence": {
-        "label": "خودکار لیبل اعتماد"
-      },
-      "learning_confidence": {
-        "label": "اعتماد سیکھنا"
-      },
-      "suppress_feedback_notifications": {
-        "label": "تاثرات کی اطلاعات کو دبا دیں۔"
-      },
-      "watchdog_interval": {
-        "label": "واچ ڈاگ وقفہ"
-      },
-      "no_update_active_timeout": {
-        "label": "کوئی اپ ڈیٹ ٹائم آؤٹ"
-      },
-      "progress_reset_delay": {
-        "label": "پیش رفت کو دوبارہ ترتیب دینے میں تاخیر"
-      },
-      "expose_debug_entities": {
-        "label": "ڈیبگ اداروں کو بے نقاب کریں۔"
-      },
-      "save_debug_traces": {
-        "label": "ڈیبگ ٹریس کو محفوظ کریں۔"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "اینٹی شیکن کا پتہ لگانے کو فعال کریں۔"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "زیادہ سے زیادہ اینٹی شیکن طاقت"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "زیادہ سے زیادہ دورانیہ"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "پاور تھریشولڈ سے باہر نکلیں۔"
-      },
-      "delay_start_detect_enabled": {
-        "label": "تاخیر سے شروع کی کھوج کو فعال کریں۔"
-      },
-      "delay_confirm_seconds": {
-        "label": "سیکنڈز کی تصدیق کریں۔"
-      },
-      "delay_timeout_hours": {
-        "label": "ٹائم آؤٹ گھنٹے"
-      },
-      "external_end_trigger": {
-        "label": "بیرونی محرک ہستی"
-      },
-      "door_sensor_entity": {
-        "label": "دروازے سینسر ہستی"
-      },
-      "switch_entity": {
-        "label": "ہستی سوئچ کریں۔"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "ناگ ڈیلے کو ان لوڈ کریں۔"
-      },
-      "pump_stuck_duration": {
-        "label": "پمپ پھنسا دورانیہ"
-      },
-      "notify_start_services": {
-        "label": "سروسز شروع کریں۔"
-      },
-      "notify_finish_services": {
-        "label": "خدمات ختم کریں۔"
-      },
-      "notify_live_services": {
-        "label": "لائیو پروگریس سروسز"
-      },
-      "notify_fire_events": {
-        "label": "اطلاعات کے لیے HA ایونٹس کو فائر کریں۔"
-      },
-      "notify_before_end_minutes": {
-        "label": "پری اینڈ الرٹ"
-      },
-      "notify_live_interval_seconds": {
-        "label": "لائیو اپ ڈیٹ کا وقفہ"
-      },
-      "notify_live_overrun_percent": {
-        "label": "لائیو اووررن % الرٹ سے پہلے"
-      },
-      "notify_live_chronometer": {
-        "label": "لائیو کرونومیٹر استعمال کریں۔"
-      },
-      "notify_timeout_seconds": {
-        "label": "بعد از خود برخاست کریں۔"
-      },
-      "notify_title": {
-        "label": "اطلاع کا عنوان"
-      },
-      "notify_icon": {
-        "label": "اطلاع کا آئیکن"
-      },
-      "notify_start_message": {
-        "label": "پیغام شروع کریں۔"
-      },
-      "notify_finish_message": {
-        "label": "پیغام ختم کریں۔"
-      },
-      "notify_pre_complete_message": {
-        "label": "پری مکمل پیغام"
-      },
-      "notify_reminder_message": {
-        "label": "یاد دہانی کا پیغام"
-      },
-      "notify_channel": {
-        "label": "Android چینل (شروع/لائیو)"
-      },
-      "notify_finish_channel": {
-        "label": "Android چینل (ختم)"
-      },
-      "energy_price_entity": {
-        "label": "توانائی کی قیمت کا ادارہ"
-      },
-      "ml_training_hour": {
-        "label": "گھنٹے میں سیکھیں۔"
-      },
-      "ml_training_min_cycles": {
-        "label": "پہلے سائیکل کی ضرورت ہے۔"
-      },
-      "ml_training_interval_days": {
-        "label": "زیادہ سے زیادہ ہر چیک کریں۔"
-      }
-    },
-    "tab": {
-      "status": "جائزہ",
-      "history": "چکر",
-      "profiles": "پروفائلز",
-      "settings": "ترتیبات",
-      "ml": "ایم ایل ٹریننگ",
-      "advanced": "اعلی درجے کی",
-      "diagnostics": "تشخیص",
-      "pp_overview": "جائزہ",
-      "pp_phases": "مراحل",
-      "pp_cleanup": "صفائی",
-      "pp_manage": "انتظام کریں۔",
-      "subtab_profiles": "پروفائلز",
-      "subtab_phase_catalog": "فیز کیٹلاگ"
-    },
-    "btn": {
-      "save": "محفوظ کریں",
-      "cancel": "منسوخ کریں",
-      "delete": "حذف کریں",
-      "close": "بند",
-      "edit": "ترمیم کریں",
-      "add": "شامل کریں",
-      "rebuild": "لفافے دوبارہ بنائیں",
-      "record": "ریکارڈنگ شروع کریں",
-      "compare": "موازنہ کریں",
-      "confirm": "تصدیق کریں",
-      "discard": "رد کریں",
-      "export": "برآمد کریں",
-      "import": "درآمد کریں",
-      "merge": "ضم کرنا",
-      "apply": "لگائیں",
-      "refresh": "ریفریش کریں",
-      "create": "بنائیں",
-      "select": "منتخب کریں",
-      "done": "ہو گیا",
-      "reset": "دوبارہ ترتیب دیں",
-      "trim": "تراشنا",
-      "split": "تقسیم",
-      "review": "جائزہ لیں",
-      "inspect": "معائنہ کریں",
-      "label": "لیبل",
-      "save_settings": "ترتیبات محفوظ کریں",
-      "new_profile": "+ نیا پروفائل",
-      "new_group": "+ نیا گروپ",
-      "apply_label": "لیبل لگائیں",
-      "run_auto_label": "آٹو لیبل چلائیں",
-      "save_review": "جائزہ محفوظ کریں",
-      "apply_trim": "ٹرم لگائیں",
-      "apply_split": "اسپلٹ کا اطلاق کریں",
-      "process_recording": "ریکارڈنگ محفوظ کریں",
-      "stop": "روکیں",
-      "process": "عمل",
-      "add_device": "+ ڈیوائس شامل کریں",
-      "train_now": "ابھی تربیت کریں",
-      "reset_to_defaults": "ڈیفالٹس پر ری سیٹ کریں",
-      "reset_to_builtin": "بلٹ ان ماڈلز پر ری سیٹ کریں",
-      "save_preferences": "ترجیحات محفوظ کریں",
-      "save_panel_settings": "پینل ترتیبات محفوظ کریں",
-      "save_access_control": "ایکسیس کنٹرول محفوظ کریں",
-      "auto_label_cycles": "آٹو لیبل سائیکل",
-      "run_analysis": "🔍 تجویز کا تجزیہ چلائیں۔",
-      "apply_all": "سب لگائیں",
-      "show_only": "صرف دکھائیں",
-      "dismiss": "برطرف کرنا",
-      "dismiss_all": "سب برخاست کریں",
-      "process_history": "ابھی عمل کریں",
-      "clear_debug": "ڈیبگ ڈیٹا صاف کریں",
-      "wipe_all": "تمام ڈیٹا صاف کریں",
-      "export_json": "JSON برآمد کریں",
-      "import_json": "JSON سے درآمد کریں",
-      "correct": "درست…",
-      "ignore": "نظر انداز کریں",
-      "add_phase": "+ مرحلہ شامل کریں",
-      "new_phase": "+ نیا مرحلہ",
-      "delete_profile": "پروفائل حذف کریں",
-      "rebuild_envelope": "لفافہ دوبارہ بنائیں",
-      "create_profile": "+ پروفائل بنائیں",
-      "rec_stop": "روکیں",
-      "pause_cycle": "توقف",
-      "resume_cycle": "دوبارہ شروع کریں",
-      "force_stop": "زبردستی روکیں",
-      "save_phases": "مراحل محفوظ کریں",
-      "auto_detect_split": "خودکار پتہ لگانا",
-      "clear_splits": "صاف",
-      "submit_correction": "تصحیح جمع کروائیں",
-      "import_overwrite": "درآمد کریں (ڈیٹا کو اوور رائٹ کرتا ہے)",
-      "use": "استعمال کریں",
-      "manage": "انتظام کریں",
-      "remove": "ہٹا دیں",
-      "delete_group": "گروپ حذف کریں",
-      "trim_split": "تراشنا / تقسیم کرنا",
-      "convert_to_automation": "آٹومیشن میں تبدیل کریں",
-      "new_automation": "＋ نئی آٹومیشن",
-      "from_template": "ٹیمپلیٹ سے ▾",
-      "on_cycle_started": "سائیکل شروع ہونے پر",
-      "on_cycle_finished": "سائیکل ختم ہونے پر",
-      "save_group": "گروپ محفوظ کریں"
+      "status_graph": "حیثیت گراف",
+      "storage_stats": "ذخیرہ کے اعداد و شمار",
+      "tools_and_data": "ٹولز اور ڈیٹا",
+      "wipe_history": "تاریخ صاف کریں"
     },
     "badge": {
-      "poor_fit": "کمزور فٹ",
-      "fair_fit": "اوسط فٹ",
-      "manual": "(دستی طور پر منتخب کیا گیا)",
-      "auto": "(خودکار پتہ چلا)",
-      "improving": "↗ بہتری",
-      "declining": "↘ کمی",
+      "golden_cycle": "ریکارڈ شدہ حوالہ سائیکل",
+      "reviewed": "جائزہ لیا گیا",
+      "feedback_requested": "رائے طلب کی گئی",
+      "needs_review": "جائزے کی ضرورت ہے",
+      "overrun": "معمول سے زیادہ دیر تک چلا",
+      "artifact_tip": "{n} بے ضابطگیاں پائی گئیں (مثلاً سائیکل کے دوران دروازہ کھلا) — انہیں گراف پر دیکھنے کے لیے کھولیں",
+      "poor_fit_tip": "متضاد مماثلت کی تاریخ — اس پروفائل کو دوبارہ بنانے پر غور کریں",
+      "fair_fit_tip": "اعتدال پسند میچ کی مستقل مزاجی — اس پروفائل کو تفویض کردہ کچھ سائیکلوں کے اعتماد کے اسکور کم ہیں۔ درستگی بہتر کرنے کے لیے مزید سائیکل لیبل کریں یا پروفائل دوبارہ ریکارڈ کریں۔",
+      "auto": "(خودکار طور پر پتہ چلا)",
+      "built_in_tag": "بلٹ ان",
+      "declining": "↘ کم ہو رہا ہے",
+      "fair_fit": "قابل قبول معیار",
+      "improving": "↗ بہتر ہو رہا ہے",
+      "manual": "(دستی طور پر منتخب)",
+      "poor_fit": "کمزور معیار",
       "steady": "→ مستحکم",
-      "using_tuned": "ٹیونڈ وزن کا استعمال",
-      "using_defaults": "بھیجے گئے ڈیفالٹس کا استعمال کرنا",
-      "built_in_tag": "بلٹ-ان"
+      "using_defaults": "ڈیفالٹ ترتیبات استعمال ہو رہی ہیں",
+      "using_tuned": "ٹیون شدہ وزن استعمال ہو رہے ہیں"
     },
-    "status": {
-      "completed": "مکمل",
-      "interrupted": "خلل ڈالا۔",
-      "force_stopped": "زبردستی روکا گیا۔",
-      "active": "فعال",
-      "ambiguous": "مبہم",
-      "clear": "صاف",
-      "working": "کام کر رہا ہے…",
-      "recording": "ریکارڈنگ…",
-      "ready": "کارروائی کے لیے تیار ہے۔",
-      "idle": "بیکار",
-      "auto_detect": "خودکار پتہ لگانا",
-      "fine_tuning": "ابھی فائن ٹیوننگ ہو رہی ہے…",
-      "all_statuses": "تمام سٹیٹس"
+    "btn": {
+      "add_timer": "+ ٹائمر شامل کریں",
+      "remove_timer": "ٹائمر ہٹائیں",
+      "add_device_tip": "ایک اور واش ڈیٹا ڈیوائس شامل کریں",
+      "delete_group_tip": "صرف یہ گروپ حذف کریں - ممبر پروفائلز محفوظ رہیں گے",
+      "run_analysis_tip": "ابھی اپنے ریکارڈ شدہ سائیکلوں کا تجزیہ کریں اور ٹیوننگ تجاویز تازہ کریں",
+      "reset_ml_models_tip": "ٹھیک بنائے ہوئے ماڈلز کو ضائع کریں اور بلٹ ان ماڈلز پر واپس جائیں۔ WashData بعد میں انہیں دوبارہ سیکھ سکتا ہے۔",
+      "add_device": "+ ڈیوائس شامل کریں",
+      "add_phase": "+ مرحلہ شامل کریں",
+      "apply_all": "سب لاگو کریں",
+      "apply_label": "لیبل لگائیں",
+      "apply_split": "تقسیم لاگو کریں",
+      "apply_trim": "ٹرم لاگو کریں",
+      "auto_detect_split": "خودکار پتہ لگائیں",
+      "auto_label_cycles": "سائیکلوں کو خودکار لیبل کریں",
+      "cancel": "منسوخ کریں",
+      "clear_debug": "ڈیبگ ڈیٹا صاف کریں",
+      "clear_splits": "صاف کریں",
+      "close": "بند کریں",
+      "compare": "موازنہ کریں",
+      "confirm": "تصدیق کریں",
+      "convert_to_automation": "آٹومیشن میں تبدیل کریں",
+      "correct": "درست کریں…",
+      "create": "بنائیں",
+      "create_profile": "+ پروفائل بنائیں",
+      "delete": "حذف کریں",
+      "delete_group": "گروپ حذف کریں",
+      "delete_profile": "پروفائل حذف کریں",
+      "discard": "رد کریں",
+      "dismiss": "برخاست کریں",
+      "done": "ہو گیا",
+      "edit": "ترمیم کریں",
+      "export": "برآمد کریں",
+      "export_json": "JSON میں برآمد کریں",
+      "force_stop": "زبردستی روکیں",
+      "from_template": "ٹیمپلیٹ سے ▾",
+      "ignore": "نظرانداز کریں",
+      "import_json": "JSON سے درآمد کریں",
+      "import_overwrite": "درآمد کریں (ڈیٹا اوور رائٹ کرتا ہے)",
+      "inspect": "جانچیں",
+      "label": "لیبل",
+      "manage": "منظم کریں",
+      "merge": "ضم کریں",
+      "new_automation": "＋ نئی آٹومیشن",
+      "new_group": "+ نیا گروپ",
+      "new_phase": "+ نیا مرحلہ",
+      "new_profile": "+ نیا پروفائل",
+      "on_cycle_finished": "سائیکل ختم ہونے پر",
+      "on_cycle_started": "سائیکل شروع ہونے پر",
+      "pause_cycle": "روکیں",
+      "process": "پروسیس کریں",
+      "process_history": "ابھی پروسیس کریں",
+      "process_recording": "ریکارڈنگ محفوظ کریں",
+      "rebuild": "لفافے دوبارہ بنائیں",
+      "rebuild_envelope": "لفافہ دوبارہ بنائیں",
+      "rec_stop": "رکیں",
+      "record": "ریکارڈنگ شروع کریں",
+      "refresh": "تازہ کریں",
+      "remove": "ہٹائیں",
+      "reset": "دوبارہ ترتیب دیں",
+      "reset_to_builtin": "بلٹ ان ماڈلز پر دوبارہ ترتیب دیں",
+      "reset_to_defaults": "ڈیفالٹس پر دوبارہ ترتیب دیں",
+      "resume_cycle": "سائیکل دوبارہ شروع کریں",
+      "review": "جائزہ لیں",
+      "run_analysis": "🔍 تجویز تجزیہ چلائیں",
+      "run_auto_label": "خودکار لیبلنگ چلائیں",
+      "save": "محفوظ کریں",
+      "save_access_control": "رسائی کنٹرول محفوظ کریں",
+      "save_group": "گروپ محفوظ کریں",
+      "save_panel_settings": "پینل ترتیبات محفوظ کریں",
+      "save_phases": "مراحل محفوظ کریں",
+      "save_preferences": "ترجیحات محفوظ کریں",
+      "save_review": "جائزہ محفوظ کریں",
+      "save_settings": "ترتیبات محفوظ کریں",
+      "select": "منتخب کریں",
+      "show_only": "صرف دکھائیں",
+      "split": "تقسیم کریں",
+      "submit_correction": "درستگی جمع کریں",
+      "train_now": "ابھی تربیت دیں",
+      "trim": "ٹرم کریں",
+      "trim_split": "ٹرم / تقسیم",
+      "use": "استعمال کریں",
+      "wipe_all": "تمام ڈیٹا مٹائیں"
     },
-    "ml": {
-      "fit_strong": "مضبوط",
-      "fit_good": "اچھا",
-      "fit_fair": "اوسط",
-      "fit_weak": "کمزور",
-      "fit_slight": "معمولی",
-      "fit_word": "فٹ",
-      "fine_tuned_at": "ٹھیک ٹیونڈ {when}",
-      "personalized": "● اس مشین کے لیے ذاتی نوعیت کا",
-      "builtin_models": "● بلٹ ان ماڈلز کا استعمال"
+    "lbl": {
+      "timer_min": "منٹ",
+      "timer_msg_placeholder": "پیغام (اختیاری، {device}/{program}/{minutes})",
+      "timer_auto_pause": "خودکار توقف",
+      "actions": "اقدامات",
+      "activity": "سرگرمی",
+      "administrators": "منتظمین",
+      "auto_fine_tune_off": "خودکار ٹھیک ترتیب بند",
+      "clock_time": "گھڑی کا وقت",
+      "compare_profiles": "پروفائلز سے موازنہ کریں",
+      "confidence": "اعتماد",
+      "confidence_threshold": "اعتماد کی حد",
+      "correct_duration": "درست مدت (منٹ، اختیاری)",
+      "correct_profile": "درست پروفائل",
+      "cost": "لاگت",
+      "create_new_profile": "+ نیا پروفائل بنائیں…",
+      "cycle_date_display": "سائیکل کی تاریخ کا ڈسپلے",
+      "cycle_health": "سائیکل کی صحت",
+      "cycles_count": "سائیکلز",
+      "date": "تاریخ",
+      "debug_traces": "ڈیبگ ٹریسز",
+      "default": "ڈیفالٹ",
+      "default_access_level": "نیچے درج نہ صارفین کے لیے ڈیفالٹ سطح",
+      "default_other": "ڈیفالٹ (دیگر ڈیوائسز)",
+      "default_tab": "پینل کھولنے پر ڈیفالٹ ٹیب",
+      "description": "تفصیل",
+      "duration": "مدت",
+      "emphasis": "زور",
+      "enable_access_control": "فی صارف رسائی کنٹرول فعال کریں",
+      "energy": "توانائی",
+      "expected_duration": "متوقع مدت (منٹ)",
+      "file_kb": "فائل (kB)",
+      "gap_s": "خلا (s)",
+      "head_trim": "شروع کی ٹرم (s)",
+      "health": "صحت",
+      "hide_tabs": "غیر منتظم صارفین کے لیے ٹیبز چھپائیں",
+      "in_use": "استعمال میں",
+      "json_data": "JSON ڈیٹا",
+      "label": "مماثل پروگرام",
+      "last_checked": "آخری بار چیک کیا:",
+      "load_from_file": "فائل سے لوڈ کریں",
+      "manual_duration": "دستی مدت (منٹ، اختیاری)",
+      "mode_existing_profile": "موجودہ پروفائل میں شامل کریں",
+      "mode_new_profile": "نیا پروفائل بنائیں",
+      "new_profile_name": "نئے پروفائل کا نام",
+      "panel_default_tab": "ڈیفالٹ ٹیب",
+      "phase_name": "نام",
+      "power": "پاور",
+      "profile": "پروفائل",
+      "profile_name": "پروفائل کا نام",
+      "progress": "پیش رفت",
+      "read_only": "صرف پڑھنے کے لیے",
+      "ref_cycle": "حوالہ سائیکل (اختیاری)",
+      "refresh_interval": "تازہ کاری کا وقفہ (s)",
+      "remaining": "باقی",
+      "remove_label": "- لیبل ہٹائیں -",
+      "rename_profile": "پروفائل کا نام بدلیں",
+      "resulting_profile": "نتیجے میں پروفائل",
+      "save_mode": "محفوظ کرنے کا طریقہ",
+      "seconds_from_start": "شروع سے سیکنڈ",
+      "select_profile": "پروفائل منتخب کریں",
+      "show_debug": "حیثیت صفحہ پر لائیو میچ ڈیبگ کارڈ دکھائیں (اعتماد، ابہام، اہم امیدوار)",
+      "show_expected": "متوقع منحنی اوورلے دکھائیں (مماثل پروفائل، نارنجی)",
+      "show_raw": "خام سینسر ریڈنگز دکھائیں (بغیر ہموار کیے، سرمئی)",
+      "status": "حیثیت",
+      "tail_trim": "آخری ٹرم (s)",
+      "ungrouped": "غیر گروپ شدہ",
+      "unlabelled": "بغیر لیبل",
+      "unlabelled_paren": "(بغیر لیبل)",
+      "expected": "متوقع",
+      "raw_socket": "خام ساکٹ",
+      "artifact_interruption": "رکاوٹ",
+      "artifact_low_power": "کم پاور",
+      "artifact_high_power": "زیادہ پاور",
+      "artifact_anomaly": "بے ضابطگی"
     },
     "modal": {
-      "label_cycle": "لیبل سائیکل",
+      "merge_cycles": "{n} سائیکلز ضم کریں",
+      "auto_label": "سائیکلوں کو خودکار لیبل کریں",
+      "correct_feedback": "رائے درست کریں",
       "create_profile": "پروفائل بنائیں",
+      "cycle": "سائیکل",
+      "edit_phase": "مرحلہ ترمیم کریں",
+      "import_config": "ترتیب درآمد کریں",
+      "label_cycle": "سائیکل لیبل کریں",
       "new_phase": "نیا مرحلہ",
-      "edit_phase": "فیز میں ترمیم کریں۔",
-      "process_recording": "عمل کی ریکارڈنگ",
-      "correct_feedback": "درست رائے",
-      "import_config": "درآمد کنفیگریشن",
-      "auto_label": "آٹو لیبل سائیکل",
-      "cycle": "سائیکل"
+      "process_recording": "ریکارڈنگ پروسیس کریں"
     },
-    "tag": {
-      "late_start": "دیر سے آغاز",
-      "early_end": "ابتدائی اختتام",
-      "merged": "ضم شدہ سائیکل",
-      "split": "سپلٹ سائیکل",
-      "noise": "شور",
-      "wrong_profile": "غلط پروفائل",
-      "sensor_gap": "سینسر گیپ"
+    "msg": {
+      "near_duplicate_cluster": "قریب ڈپلیکیٹ پروفائل کلسٹر پایا گیا۔ گروپ بندی مماثلت کو نظر آنے والے پروفائلز کے درمیان قابل اعتماد انتخاب کرنے دیتی ہے (مثلاً مختلف درجہ حرارت/اسپن پر ایک ہی پروگرام)۔",
+      "coverage_gap": "حالیہ سائیکلوں میں کوئی مماثل پروفائل نہیں ہے (پچھلے 30 کا {pct}%)۔",
+      "consider_new_profile": "ایک نیا پروفائل بنانے پر غور کریں۔",
+      "group_not_cohesive": "یہ پروفائلز قابل اعتماد طریقے سے گروپ کرنے کے لیے کافی مماثل نہیں ہیں، اس لیے مماثلت ان کے ساتھ انفرادی طور پر برتاؤ کرتی ہے جب تک کہ آپ آؤٹ لائر کو نہ ہٹائیں یا گروپ کو الگ نہ کریں۔",
+      "group_modal_help": "ایک جیسی شکل کے پروگرام گروپ کریں جو درجہ حرارت/اسپن میں مختلف ہوں (مدت مختلف ہو سکتی ہے)۔ مماثلت گروپ کو ایک امیدوار کے طور پر اسکور کرتی ہے، پھر بہترین فٹنگ ممبر منتخب کرتی ہے۔ کم از کم 2 منتخب کریں۔ اوورلے دکھاتا ہے کہ وہ کتنے ملتے جلتے ہیں۔",
+      "showing_suggestions": "تجاویز کے ساتھ {count} ترتیبات دکھائی جا رہی ہیں۔",
+      "show_all_settings": "تمام ترتیبات دکھائیں",
+      "tuning_suggestions_available": "مشاہدہ شدہ سائیکلوں سے {count} ٹیوننگ تجویز دستیاب ہے۔ وہ متعلقہ فیلڈز کے ساتھ ظاہر ہوتی ہیں۔",
+      "legacy_actions_title": "{count} پرانی حسب ضرورت کارروائی ابھی بھی چل رہی ہے",
+      "old_actions_warning": "پرانے ایکشن ایڈیٹر کے ساتھ ترتیب دیا گیا (اب ہٹا دیا گیا)۔ وہ ابھی بھی سائیکل ایونٹس پر فائر کرتی ہیں لیکن یہاں مزید ترمیم نہیں کی جا سکتی۔ انہیں عام آٹومیشن میں تبدیل کریں، یا ہٹائیں۔",
+      "no_settings_match": "کوئی ترتیبات \"{q}\" سے مماثل نہیں",
+      "clear_debug_hint": "جگہ خالی کرنے کے لیے ذخیرہ شدہ ڈیبگ ڈیٹا ہٹائیں۔",
+      "wipe_history_warning": "تمام سائیکلز اور پروفائلز مستقل طور پر حذف کریں۔ واپس نہیں کیا جا سکتا۔",
+      "export_description": "تمام پروفائلز اور سائیکلز JSON میں برآمد کریں، یا سابقہ برآمد سے بحال کریں۔",
+      "log_buffer_hint": "تازہ ترین پہلے · دوبارہ شروع ہونے کے بعد سے آخری 500 ha_washdata ریکارڈ بفر کرتا ہے · سائز تبدیل کرنے کے لیے نیچے کا کنارہ کھینچیں۔",
+      "review_profile_tip": "وہ پروگرام جس کے طور پر یہ سائیکل لیبل کیا گیا ہے۔ اگر خودکار طور پر پتہ چلا پروگرام غلط تھا، تو یہاں درست کریں — لیبلنگ مستقبل کے سائیکلوں کے لیے مماثلت سکھاتی ہے۔",
+      "review_quality_tip": "یہ سائیکل کتنا صاف ہے۔ اچھا = اس پروگرام کی کتابی مثال؛ خراب = پتہ چلا لیکن شور والا یا غیر معمولی؛ ناقابل استعمال = غلط پتہ چلا (ضم شدہ، چھوٹا یا جعلی)۔ صحت کا اسکور اور ماڈل کی تربیت کے لیے کن سائیکلوں کی اجازت ہے یہ طے کرتا ہے۔",
+      "review_recorded_tip": "اسے اس کے پروگرام کے لیے ہاتھ سے منتخب کردہ حوالہ سائیکل کے طور پر نشان زد کریں — وہی کردار جو دستی طور پر ریکارڈ شدہ سائیکل کا ہے۔ حوالہ سائیکلز ہمیشہ محفوظ رہتے ہیں، مماثل ٹیمپلیٹ کا بیج بنتے ہیں، اور صفائی کے ذریعے کبھی نہیں چھوڑے جاتے۔ (یہ \"سنہری\"/ریکارڈ شدہ پرچم ہے؛ دونوں ایک ہی چیز ہیں۔)",
+      "review_tags_tip": "اختیاری پرچم جو بتاتے ہیں کہ اس سائیکل میں کیا غلط ہوا، تاکہ تربیت اور صفائی اسے مدنظر رکھ سکیں۔",
+      "review_notes_tip": "اپنے حوالے کے لیے آزاد متن نوٹ۔ مماثلت یا تربیت کے ذریعے استعمال نہیں ہوتے۔",
+      "review_confirm_help": "اس بات کی تصدیق کریں کہ آیا اس سائیکل کو صحیح طریقے سے پتہ چلا ہے۔ آپ کے جائزے آپ کی مشین پر ماڈل کو تربیت دیتے ہیں — آپ جتنے زیادہ سائیکلوں کی تصدیق کریں گے، مماثلت اور صحت کا اسکور اتنا بہتر ہوگا۔ ایک فوری اچھا/خراب کافی ہے۔",
+      "review_notes_placeholder": "نوٹس (اختیاری)",
+      "compare_profiles_tip": "اوپر والے چارٹ پر دوسرے پروفائل لفافوں کو اوورلے کریں تاکہ دیکھ سکیں کہ کون سا اس سائیکل میں بہترین فٹ بیٹھتا ہے۔",
+      "artifact_header": "اس سائیکل کے دوران {n} بے ضابطگیاں پائی گئیں",
+      "artifact_footer": "اوپر گراف پر روشنی ڈالی گئی ہے۔ یہ عارضی نمونے ہیں (مثلاً سائیکل کے دوران دروازہ کھلا)، ضروری نہیں کہ مسائل ہوں۔",
+      "profile_poor_health_detail": "اس پروفائل کو تفویض کردہ سائیکلوں کی شکلیں متضاد ہیں یا کم اعتماد ہیں۔ لفافے کو دوبارہ بنانے یا لیبل والے سائیکلوں کا جائزہ لینے پر غور کریں۔",
+      "trend_duration_longer": "مدت کا رجحان طولانی ({pct}%/سائیکل) — حالیہ اوسط {avg}",
+      "trend_duration_shorter": "مدت کا رجحان مختصر ({pct}%/سائیکل) — حالیہ اوسط {avg}",
+      "trend_energy_up": "توانائی کا رجحان بڑھ رہا ہے ({pct}%/سائیکل) — حالیہ اوسط {avg}",
+      "trend_energy_down": "توانائی کا رجحان کم ہو رہا ہے ({pct}%/سائیکل)",
+      "performance_trend": "کارکردگی کا رجحان ({n} سائیکل)",
+      "maintenance_advisory": "مدت/توانائی میں اضافہ آلات کی دیکھ بھال کی ضرورت کی نشاندہی کر سکتا ہے (مثلاً ڈیسکیلنگ، فلٹر صفائی)۔",
+      "manual_duration_hint": "پروفائل کی اوسط/متوقع سائیکل کی لمبائی، باقی وقت کے تخمینے کے لیے استعمال ہوتی ہے۔ ترتیب دینے کے لیے ترمیم کریں؛ بغیر تبدیلی چھوڑنے سے موجودہ قدر برقرار رہتی ہے۔",
+      "appliance_monitor": "آلات کا مانیٹر",
+      "auto_label_intro": "بغیر لیبل سائیکلوں کو پروفائل تفویض کریں جن کا میچ اعتماد حد سے گزرے۔",
+      "cleanup_intro": "تمام لیبل شدہ سائیکلز اوورلے کیے گئے ہیں۔ آؤٹ لائرز نشان زد کریں اور پروفائل صاف کرنے کے لیے حذف کریں۔",
+      "compare_overlay_profiles": "پروفائلز اوورلے کریں (ہلکا)",
+      "compare_selected_cycles": "منتخب سائیکلز (ٹھوس) — دکھائیں / چھپائیں",
+      "feedback_prompt": "تصدیق کریں کہ یہ درست تھا، پروگرام درست کریں، یا نظرانداز کریں۔",
+      "import_intro": "برآمد شدہ فائل لوڈ کریں یا نیچے JSON پیسٹ کریں۔",
+      "live_chart_loading": "لائیو پاور چارٹ ریڈنگز آنے پر ظاہر ہوتا ہے۔",
+      "loading": "لوڈ ہو رہا ہے…",
+      "loading_curve": "منحنی لوڈ ہو رہی ہے…",
+      "loading_settings": "ترتیبات لوڈ ہو رہی ہیں…",
+      "maintenance_requires_access": "دیکھ بھال اور برآمد/درآمد کے لیے مکمل رسائی درکار ہے۔",
+      "matching_tuning_intro": "سیکھتے وقت WashData یہ بھی ایڈجسٹ کرتا ہے کہ پروگرام مماثلت شکل، مدت اور توانائی کو کتنا وزن دیتی ہے۔",
+      "merge_intro": "منتخب سائیکلز ایک میں ضم کیے جاتے ہیں (تاریخی ترتیب؛ خلا 0 W سے پر ہوتے ہیں)۔ نتیجے کا پروفائل منتخب کریں۔",
+      "ml_intro": "WashData ذہین ماڈلز کے ساتھ آتا ہے جو فوری کام کرتے ہیں۔",
+      "ml_learned_intro": "اس مشین کے لیے ٹھیک بنائے گئے ماڈلز۔",
+      "ml_loading": "ML لوڈ ہو رہا ہے…",
+      "ml_settings_intro": "دو آزاد سوئچ: ایک سائیکل چلنے کے دوران ماڈلز لاگو کرتا ہے، دوسرا WashData کو وقت کے ساتھ آپ کی مشین کے مطابق ٹھیک بنانے دیتا ہے۔",
+      "no_cycles_match": "موجودہ فلٹر سے کوئی سائیکل مطابقت نہیں رکھتا۔",
+      "no_cycles_profile": "اس پروفائل کے لیے کوئی سائیکل نہیں۔",
+      "no_cycles_yet": "ابھی تک کوئی سائیکل ریکارڈ نہیں ہوا۔",
+      "no_device_selected": "کوئی ڈیوائس منتخب نہیں۔",
+      "no_devices": "ابھی تک کوئی WashData ڈیوائس ترتیب نہیں دی گئی۔",
+      "no_envelope": "ابھی تک لفافہ نہیں — سائیکلوں کو لیبل کرنے کے بعد دوبارہ بنائیں۔",
+      "no_envelope_overlay": "اوورلے کرنے کے لیے کوئی لفافہ دستیاب نہیں۔",
+      "no_fine_tuned": "ابھی تک کچھ ٹھیک نہیں بنایا گیا — WashData بلٹ ان ماڈلز استعمال کر رہا ہے۔",
+      "no_logs": "ابھی تک کوئی لاگ ریکارڈ بفر نہیں ہوا۔",
+      "no_match_yet": "ابھی تک کوئی میچ کوشش نہیں — یہ چلتے سائیکل کے دوران پُر ہوتا ہے۔",
+      "no_other_users": "کوئی دوسرا Home Assistant صارف نہیں ملا۔",
+      "no_phases": "کوئی مرحلہ بیان نہیں ہوا۔",
+      "no_phases_assigned": "کوئی مرحلہ تفویض نہیں۔",
+      "no_profiles_compare": "موازنے کے لیے کوئی پروفائل نہیں۔",
+      "no_profiles_overlay": "اوورلے کے لیے کوئی پروفائل نہیں۔",
+      "no_profiles_yet": "ابھی تک کوئی پروفائل نہیں۔ لیبل شدہ سائیکل سے ایک بنائیں۔",
+      "no_profiles_yet_short": "ابھی تک کوئی پروفائل نہیں۔",
+      "no_split_points": "ابھی تک کوئی تقسیمی نقطہ نہیں۔",
+      "no_suggestions": "کوئی فعال تجویز نہیں۔",
+      "pending_feedback": "تعین کی زیر التواء رائے",
+      "phase_catalog_intro": "ایک سائیکل کے نامی حصے (پری واش، ہیٹنگ، اسپن…)۔ انہیں اس کے کنٹرول پینل سے پروفائل کو تفویض کریں۔",
+      "phase_ranges_intro": "اوسط منحنی پر اوورلے مرحلے کی حدود (سائیکل شروع سے منٹ)۔ لائیو پیش نظارے کے لیے قدریں ترمیم کریں۔",
+      "preferences_admin": "ترجیحات، پینل اور رسائی کنٹرول",
+      "preferences_adv": "ترجیحات",
+      "prefs_personal": "یہ صرف آپ کے Home Assistant اکاؤنٹ پر لاگو ہوتا ہے۔",
+      "profiles_intro": "اعداد و شمار، مراحل اور صفائی کے لیے پروفائل پر کلک کریں۔ قابل اعتماد انتخاب کے لیے تقریباً ایک جیسے پروگرام گروپ کریں (ایک جیسی شکل/مدت، مختلف درجہ حرارت یا اسپن)۔",
+      "rbac_hint": "بند ہونے پر، ہر Home Assistant صارف کو مکمل رسائی حاصل ہوتی ہے (ڈیفالٹ)۔ منتظمین کو ہمیشہ مکمل رسائی ہوتی ہے اور وہ سب کا انتظام کر سکتے ہیں۔",
+      "recent_logs": "حالیہ ha_washdata ریکارڈ",
+      "recording_in_progress": "ریکارڈنگ جاری ہے",
+      "review_in_settings": "ترتیبات میں جائزہ لیں",
+      "review_to_cycles": "سائیکل جائزہ قطار کھولیں",
+      "saving_triggers_reload": "محفوظ کرنے سے انضمام دوبارہ لوڈ ہوتا ہے۔ HA کے اداروں کو مختصر طور پر ناقابل دسترس دکھایا جا سکتا ہے۔",
+      "search_placeholder": "ترتیبات تلاش کریں…",
+      "see_recorder": "نیچے ریکارڈر ویجٹ دیکھیں",
+      "split_intro": "تقسیمی نقطہ شامل یا ہٹانے کے لیے گراف پر کلک کریں، یا خالی خلا سے خودکار پتہ لگائیں۔ ہر نتیجہ سیگمنٹ اپنا پروفائل حاصل کر سکتا ہے۔",
+      "storage_diagnostics": "ذخیرہ کے اعداد و شمار، دیکھ بھال، برآمد/درآمد",
+      "trim_intro": "سرخ ہینڈل کھینچیں، یا قدریں درج کریں۔ ونڈو سے باہر سب کچھ ہٹا دیا جاتا ہے۔",
+      "unsure_detected_prefix": "WashData کو یقین نہیں کہ اس نے پتہ لگایا",
+      "updated": "اپ ڈیٹ ہوا"
     },
-    "quality": {
-      "good": "اچھا",
-      "bad": "برا",
-      "unusable": "ناقابل استعمال"
-    },
-    "access": {
-      "none": "کوئی نہیں (چھپا ہوا)",
-      "read": "پڑھیں",
-      "edit": "ترمیم کریں۔",
-      "full": "مکمل",
-      "inherit": "وراثت"
+    "phase_desc": {
+      "pre_wash": "مین واش سے پہلے ابتدائی بھگونا یا پری ٹریٹمنٹ۔",
+      "wash": "ڈرم کی حرکت اور اختیاری ہیٹنگ کے ساتھ مین واشنگ سائیکل۔",
+      "wash_dw": "ہیٹنگ کے ساتھ مین ڈیٹرجنٹ واش۔",
+      "rinse": "صاف پانی سے دھونے کا مرحلہ۔ یہ مرحلہ کئی بار دہرایا جا سکتا ہے۔",
+      "spin": "بوجھ سے پانی نکالنے کے لیے تیز رفتار نکالنا۔",
+      "spin_wd": "خشک کرنے والی منتقلی سے پہلے تیز رفتار نکالنا۔",
+      "soak": "فعال دھونے کے مراحل کے درمیان کم سرگرمی میں بھگونے کی مدت۔",
+      "soak_dw": "بھاری آلودگی کے لیے بھگونے کی توسیع شدہ مدت۔",
+      "anti_crease": "شکنیں کم کرنے کے لیے مکمل ہونے کے بعد کبھی کبھار مختصر گھماؤ۔",
+      "heat_up": "مکمل خشک ہونے سے پہلے ہیٹر کا ابتدائی گرم ہونا۔",
+      "drying": "گرم ٹمبلنگ کا اہم دور۔",
+      "cool_down": "سائیکل کے اختتام کے قریب گرمی کے بغیر ٹمبلنگ۔",
+      "anti_wrinkle": "شکنیں کم کرنے کے لیے وقتاً فوقتاً پوسٹ سائیکل ٹمبلنگ۔",
+      "sensor_check": "خشکی کی پیمائش کے دوران مختصر کم پاور وقفہ۔",
+      "drain_and_switch": "دھونے سے خشک کرنے کے موڈ میں منتقلی کی مدت۔",
+      "pre_rinse": "ڈیٹرجنٹ واش سے پہلے ابتدائی اسپرے۔",
+      "dry": "ہیٹر اور/یا بقایا گرمی کا استعمال کرتے ہوئے خشک کرنے کا مرحلہ۔",
+      "sanitize": "صفائی پروگراموں کے لیے اعلی درجہ حرارت کی صفائی کا مرحلہ۔"
     },
     "health": {
-      "poor": "⚠ ناقص میچ فٹ",
-      "fair": "اوسط میچ فٹ",
-      "good": "✓ اچھا میچ فٹ"
-    },
-    "trend": {
-      "up": "رجحان بڑھ رہا ہے۔",
-      "down": "نیچے کا رجحان"
-    },
-    "pref": {
-      "date_relative": "رشتہ دار (جیسے 2 گھنٹے پہلے)",
-      "date_absolute": "مطلق (مثلاً 2 جولائی کو 14:32)"
+      "fair": "پروفائل کا قابل قبول معیار",
+      "good": "✓ پروفائل کا اچھا معیار",
+      "poor": "⚠ پروفائل کا کمزور معیار"
     },
     "log": {
-      "all_levels": "تمام سطحوں"
+      "all_levels": "تمام سطحیں"
+    },
+    "ml": {
+      "builtin_models": "● بلٹ ان ماڈلز استعمال ہو رہے ہیں",
+      "fit_fair": "قابل قبول",
+      "fit_good": "اچھا",
+      "fit_slight": "معمولی",
+      "fit_strong": "مضبوط",
+      "fit_weak": "کمزور",
+      "fit_word": "فٹ",
+      "personalized": "● اس مشین کے لیے ذاتی بنایا گیا"
+    },
+    "pref": {
+      "date_absolute": "مطلق (مثلاً 2 جولائی 14:32)",
+      "date_relative": "نسبی (مثلاً 2 گھنٹے پہلے)"
+    },
+    "quality": {
+      "bad": "خراب",
+      "good": "اچھا",
+      "unusable": "ناقابل استعمال"
+    },
+    "status": {
+      "active": "فعال",
+      "all_statuses": "تمام حیثیتیں",
+      "ambiguous": "مبہم",
+      "auto_detect": "خودکار پتہ لگائیں",
+      "clear": "صاف",
+      "completed": "مکمل",
+      "fine_tuning": "ٹھیک ترتیب دے رہا ہے…",
+      "force_stopped": "زبردستی روکا گیا",
+      "idle": "بیکار",
+      "interrupted": "منقطع",
+      "ready": "پروسیس کے لیے تیار",
+      "recording": "ریکارڈنگ"
+    },
+    "tab": {
+      "advanced": "جدید",
+      "diagnostics": "تشخیصات",
+      "history": "سائیکلز",
+      "ml": "ML تربیت",
+      "pp_cleanup": "صفائی",
+      "pp_manage": "منظم کریں",
+      "pp_overview": "جائزہ",
+      "pp_phases": "مراحل",
+      "profiles": "پروفائلز",
+      "settings": "ترتیبات",
+      "status": "جائزہ",
+      "subtab_phase_catalog": "مرحلہ کیٹلاگ",
+      "subtab_profiles": "پروفائلز"
+    },
+    "tag": {
+      "early_end": "جلد اختتام",
+      "late_start": "دیر سے آغاز",
+      "merged": "ضم شدہ سائیکلز",
+      "noise": "شور",
+      "sensor_gap": "سینسر خلا",
+      "split": "تقسیم شدہ سائیکل",
+      "wrong_profile": "غلط پروفائل"
+    },
+    "toast": {
+      "access_saved": "رسائی کنٹرول محفوظ",
+      "all_wiped": "تمام ڈیٹا مٹا دیا گیا",
+      "analysis_complete_none": "تجزیہ مکمل: کوئی نئی تجویز نہیں",
+      "auto_label_complete": "خودکار لیبلنگ مکمل",
+      "automation_deleted": "آٹومیشن حذف",
+      "correction_submitted": "درستگی جمع",
+      "cycle_deleted": "سائیکل حذف",
+      "cycle_force_stopped": "سائیکل زبردستی روکا گیا",
+      "cycle_labelled": "سائیکل لیبل ہوا",
+      "cycle_paused": "سائیکل موقوف",
+      "cycle_resumed": "سائیکل دوبارہ شروع",
+      "cycle_trimmed": "سائیکل ٹرم ہوا",
+      "cycles_merged": "سائیکلز ضم ہوئے",
+      "envelope_rebuilt": "لفافہ دوبارہ بنا",
+      "envelopes_rebuilt": "لفافے دوبارہ بنے",
+      "export_downloaded": "برآمد ڈاؤن لوڈ ہوئی",
+      "feedback_all_dismissed": "تمام رائے برخاست",
+      "feedback_confirmed": "رائے تصدیق شدہ",
+      "feedback_dismissed": "رائے برخاست",
+      "group_deleted": "گروپ حذف",
+      "group_name_required": "گروپ کا نام ضروری ہے",
+      "group_saved": "گروپ محفوظ",
+      "import_successful": "درآمد کامیاب؛ انضمام دوبارہ لوڈ ہو رہا ہے",
+      "json_required": "JSON ڈیٹا ضروری ہے",
+      "legacy_removed": "پرانی کارروائیاں ہٹا دی گئیں",
+      "logs_exported": "لاگز برآمد ہوئے",
+      "matching_reverted": "میچنگ وزن ڈیفالٹس پر واپس",
+      "min_2_profiles": "گروپ کے لیے کم از کم 2 پروفائل منتخب کریں",
+      "ml_training_no_improvement": "تربیت مکمل: بنیادی سطح برقرار (کوئی بہتری نہیں)",
+      "models_reverted": "ڈیوائس کے ماڈلز بنیادی سطح پر واپس",
+      "name_required": "نام ضروری ہے",
+      "no_split_found": "تقسیم کے لیے کوئی خالی خلا نہیں ملا",
+      "panel_settings_saved": "پینل ترتیبات محفوظ",
+      "phase_name_required": "مرحلے کا نام ضروری ہے",
+      "phase_updated": "مرحلہ اپ ڈیٹ",
+      "phases_saved": "مراحل محفوظ",
+      "preferences_saved": "ترجیحات محفوظ",
+      "profile_name_required": "پروفائل کا نام ضروری ہے",
+      "profile_renamed": "پروفائل کا نام بدلا",
+      "recording_discarded": "ریکارڈنگ رد کی گئی",
+      "recording_saved": "ریکارڈنگ پروفائل میں محفوظ",
+      "recording_started": "ریکارڈنگ شروع",
+      "recording_stopped": "ریکارڈنگ بند",
+      "review_saved": "جائزہ محفوظ",
+      "settings_saved": "ترتیبات محفوظ؛ انضمام دوبارہ لوڈ ہو رہا ہے",
+      "suggestions_applied": "تجاویز لاگو؛ انضمام دوبارہ لوڈ ہو رہا ہے",
+      "suggestions_dismissed": "تجاویز برخاست"
+    },
+    "trend": {
+      "down": "نیچے کا رجحان",
+      "up": "اوپر کا رجحان"
     }
   }
 }

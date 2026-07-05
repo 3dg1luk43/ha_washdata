@@ -71,13 +71,6 @@
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Cyclus gestart",
-        "cycle_finish": "Cyclus voltooid",
-        "cycle_live": "Live voortgang"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Wasmachine",
@@ -88,198 +81,6 @@
         "bread_maker": "Broodbakmachine",
         "pump": "Pomp / Sumppomp",
         "other": "Anders (geavanceerd)"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(Ongelabeld)",
-        "create_new_profile": "Nieuw profiel maken",
-        "remove_label": "Label verwijderen",
-        "no_reference_cycle": "(Geen referentiecyclus)",
-        "all_device_types": "Alle apparaattypen",
-        "current_suffix": "(huidig)",
-        "phase_builtin_suffix": "(ingebouwd)",
-        "phase_none_available": "Geen fasen beschikbaar.",
-        "phase_other_device_types": "Andere apparaattypen:",
-        "settings_deprecation_warning": "⚠️ **Verouderd apparaattype:** {device_type} zal in een toekomstige release worden verwijderd. De matchingpijplijn van WashData levert geen betrouwbare resultaten op voor deze apparaatklasse. Uw integratie blijft gedurende de beëindigingsperiode werken; Om deze waarschuwing uit te zetten, schakelt u **Apparaattype** hieronder over naar een van de ondersteunde typen (wasmachine, droger, was-droogcombinatie, vaatwasser, luchtfriteuse, broodbakmachine of pomp), of naar **Overig (geavanceerd)** als uw apparaat niet overeenkomt met een van de ondersteunde typen. **Overig (geavanceerd)** levert opzettelijk generieke standaardwaarden die niet zijn afgestemd op een specifiek apparaat, dus u zult zelf drempels, time-outs en overeenkomende parameters moeten configureren; al uw bestaande instellingen blijven behouden wanneer u overstapt.",
-        "editor_select_info": "Selecteer 1 cyclus om te splitsen, of 2+ cycli om samen te voegen.",
-        "editor_select_info_split": "Selecteer 1 cyclus om te splitsen.",
-        "editor_select_info_merge": "Selecteer 2 of meer cycli om samen te voegen.",
-        "editor_select_info_delete": "Selecteer 1 of meer cycli om te verwijderen.",
-        "no_cycles_recorded": "Er zijn nog geen cycli geregistreerd.",
-        "profile_summary_line": "- **{name}**: {count} cycli, {avg}m gem",
-        "no_profiles_created": "Er zijn nog geen profielen aangemaakt.",
-        "phase_preview": "Faseoverzicht",
-        "phase_preview_no_curve": "De gemiddelde profielcurve is nog niet beschikbaar. Voer meer cycli uit of label ze voor dit profiel.",
-        "average_power_curve": "Gemiddelde vermogenscurve",
-        "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} cycli, ~{duration} min gem)",
-        "profile_option_short_fmt": "{name} ({count} cycli, ~{duration} min)",
-        "deleted_cycles_from_profile": "{count} cycli verwijderd van {profile}.",
-        "not_enough_data_graph": "Onvoldoende gegevens om grafiek te genereren.",
-        "no_profiles_found": "Geen profielen gevonden.",
-        "cycle_info_fmt": "Cyclus: {start}, {duration} min, Huidig: {label}",
-        "top_candidates_header": "### Topkandidaten",
-        "tbl_profile": "Profiel",
-        "tbl_confidence": "Betrouwbaarheid",
-        "tbl_correlation": "Correlatie",
-        "tbl_duration_match": "Duurovereenkomst",
-        "detected_profile": "Gedetecteerd profiel",
-        "estimated_duration": "Geschatte duur",
-        "actual_duration": "Werkelijke duur",
-        "choose_action": "__Kies hieronder een actie:__",
-        "tbl_count": "Aantal",
-        "tbl_avg": "Gem",
-        "tbl_min": "Min",
-        "tbl_max": "Max",
-        "tbl_energy_avg": "Energie (gem)",
-        "tbl_energy_total": "Energie (totaal)",
-        "tbl_consistency": "Consist.",
-        "tbl_last_run": "Laatste cyclus",
-        "graph_legend_title": "Grafieklegenda",
-        "graph_legend_body": "De blauwe band vertegenwoordigt het waargenomen minimale en maximale vermogensbereik. De lijn toont de gemiddelde vermogenscurve.",
-        "recording_preview": "Opnameoverzicht",
-        "trim_start": "Trim begin",
-        "trim_end": "Trim einde",
-        "split_preview_title": "Splitsingsoverzicht",
-        "split_preview_found_fmt": "{count} segmenten gevonden.",
-        "split_preview_confirm_fmt": "Klik op Bevestigen om deze cyclus op te splitsen in {count} afzonderlijke cycli.",
-        "merge_preview_title": "Samenvoegingsoverzicht",
-        "merge_preview_joining_fmt": "{count} cycli samenvoegen. Gaten worden gevuld met 0W-metingen.",
-        "editor_delete_preview_title": "Voorbeeld verwijderen",
-        "editor_delete_preview_intro": "De geselecteerde cycli worden permanent verwijderd:",
-        "editor_delete_preview_confirm": "Klik op Bevestigen om deze cyclusrecords permanent te verwijderen.",
-        "no_power_preview": "*Geen vermogensgegevens beschikbaar voor overzicht.*",
-        "profile_comparison": "Profielvergelijking",
-        "actual_cycle_label": "Deze cyclus (werkelijk)",
-        "storage_usage_header": "Opslaggebruik",
-        "storage_file_size": "Bestandsgrootte",
-        "storage_cycles": "Cycli",
-        "storage_profiles": "Profielen",
-        "storage_debug_traces": "Debugsporen",
-        "overview_suffix": "Overzicht",
-        "phase_preview_for_profile": "Faseoverzicht voor profiel",
-        "current_ranges_header": "Huidige bereiken",
-        "assign_phases_help": "Gebruik de onderstaande acties om bereiken toe te voegen, te bewerken, te verwijderen of op te slaan.",
-        "profile_summary_header": "Profieloverzicht",
-        "recent_cycles_header": "Recente cycli",
-        "trim_cycle_preview_title": "Cyclustrimoverzicht",
-        "trim_cycle_preview_no_data": "Geen vermogensgegevens beschikbaar voor deze cyclus.",
-        "trim_cycle_preview_kept_suffix": "bewaard",
-        "table_program": "Programma",
-        "table_when": "Wanneer",
-        "table_length": "Duur",
-        "table_match": "Overeenkomst",
-        "table_profile": "Profiel",
-        "table_cycles": "Cycli",
-        "table_avg_length": "Gem. duur",
-        "table_last_run": "Laatste cyclus",
-        "table_avg_energy": "Gem. energie",
-        "table_detected_program": "Gedetecteerd programma",
-        "table_confidence": "Betrouwbaarheid",
-        "table_reported": "Gemeld"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Cyclus splitsen (gaten zoeken)",
-        "merge": "Cycli samenvoegen (fragmenten combineren)",
-        "delete": "Cyclus(sen) verwijderen"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Inactieve gaten automatisch detecteren",
-        "manual": "Handmatige tijdstempels"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Onderhoud: gegevens opnieuw verwerken en optimaliseren",
-        "clear_debug_data": "Debuggegevens wissen (ruimte vrijmaken)",
-        "wipe_history": "ALLE gegevens voor dit apparaat wissen (onomkeerbaar)",
-        "export_import": "JSON exporteren/importeren met instellingen (kopiëren/plakken)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "Alle gegevens exporteren",
-        "import": "Gegevens importeren/samenvoegen"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Oude cycli automatisch labelen",
-        "select_cycle_to_label": "Specifieke cyclus labelen",
-        "select_cycle_to_delete": "Cyclus verwijderen",
-        "interactive_editor": "Interactieve editor samenvoegen/splitsen",
-        "trim_cycle": "Cyclusgegevens trimmen"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Nieuw profiel maken",
-        "edit_profile": "Profiel bewerken/hernoemen",
-        "delete_profile": "Profiel verwijderen",
-        "profile_stats": "Profielstatistieken",
-        "cleanup_profile": "Geschiedenis opschonen - Grafiek & verwijderen",
-        "assign_phases": "Fasebereiken toewijzen"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Nieuwe fase maken",
-        "edit_custom_phase": "Fase bewerken",
-        "delete_custom_phase": "Fase verwijderen"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Fasen een naam geven en toepassen",
-        "cancel": "Terug zonder wijzigingen"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Fasebereik toevoegen",
-        "edit_range": "Fasebereik bewerken",
-        "delete_range": "Fasebereik verwijderen",
-        "clear_ranges": "Alle bereiken wissen",
-        "auto_detect_ranges": "Fasen automatisch detecteren",
-        "save_ranges": "Opslaan en terug"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Status vernieuwen",
-        "stop_recording": "Opname stoppen (opslaan en verwerken)",
-        "start_recording": "Nieuwe opname starten",
-        "process_recording": "Laatste opname verwerken (trimmen en opslaan)",
-        "discard_recording": "Laatste opname verwijderen"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Nieuw profiel maken",
-        "existing_profile": "Aan bestaand profiel toevoegen",
-        "discard": "Opname verwijderen"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Bevestigen - Detectie correct",
-        "correct": "Corrigeren - Programma/duur kiezen",
-        "ignore": "Negeren - Vals positief/ruizige cyclus",
-        "delete": "Verwijderen - Uit geschiedenis verwijderen"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Beginpunt instellen",
-        "set_end": "Eindpunt instellen",
-        "reset": "Terugzetten naar volledige duur",
-        "apply": "Trim toepassen",
-        "cancel": "Annuleren"
       }
     }
   },
@@ -553,9 +354,6 @@
       "current_phase": {
         "name": "Huidige fase"
       },
-      "wash_phase": {
-        "name": "Fase"
-      },
       "profile_cycle_count": {
         "name": "Profiel {profile_name} aantal",
         "unit_of_measurement": "cycli"
@@ -617,714 +415,465 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s moet groter zijn dan trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "Geen actieve cyclus om te pauzeren of te hervatten."
     }
   },
   "panel": {
-    "tab": {
-      "status": "Overzicht",
-      "history": "Cycli",
-      "profiles": "Profielen",
-      "settings": "Instellingen",
-      "ml": "ML-training",
-      "advanced": "Geavanceerd",
-      "diagnostics": "Diagnostiek",
-      "pp_overview": "Overzicht",
-      "pp_phases": "Fasen",
-      "pp_cleanup": "Opruimen",
-      "pp_manage": "Beheren",
-      "subtab_profiles": "Profielen",
-      "subtab_phase_catalog": "Fasecatalogus"
-    },
     "btn": {
-      "save": "Opslaan",
+      "add_timer": "+ Timer toevoegen",
+      "remove_timer": "Timer verwijderen",
+      "add_device_tip": "Voeg nog een WashData-apparaat toe",
+      "delete_group_tip": "Verwijder alleen deze groep - de ledenprofielen blijven behouden",
+      "run_analysis_tip": "Analyseer nu uw geregistreerde cycli en vernieuw de afstemmingssuggesties",
+      "reset_ml_models_tip": "Gooi de verfijnde modellen weg en ga terug naar de ingebouwde modellen. WashData kan ze later opnieuw leren.",
+      "resume_cycle": "Hervatten",
+      "add_device": "+ Apparaat toevoegen",
+      "add_phase": "+ Fase toevoegen",
+      "apply_all": "Alles toepassen",
+      "apply_label": "Etiket toepassen",
+      "apply_split": "Splitsing toepassen",
+      "apply_trim": "Pas trimmen toe",
+      "auto_detect_split": "Automatische detectie",
+      "auto_label_cycles": "Cycli voor automatisch labelen",
       "cancel": "Annuleren",
-      "delete": "Verwijderen",
-      "close": "Sluiten",
-      "edit": "Bewerken",
-      "add": "Toevoegen",
-      "rebuild": "Enveloppen opnieuw opbouwen",
-      "record": "Opname starten",
+      "clear_debug": "Wis foutopsporingsgegevens",
+      "clear_splits": "Duidelijk",
+      "close": "Dichtbij",
       "compare": "Vergelijken",
       "confirm": "Bevestigen",
+      "convert_to_automation": "Converteren naar automatisering",
+      "correct": "Juist…",
+      "create": "Creëren",
+      "create_profile": "+ Profiel aanmaken",
+      "delete": "Verwijderen",
+      "delete_group": "Groep verwijderen",
+      "delete_profile": "Profiel verwijderen",
       "discard": "Weggooien",
-      "export": "Exporteren",
-      "import": "Importeren",
-      "merge": "Samenvoegen",
-      "apply": "Toepassen",
-      "refresh": "Vernieuwen",
-      "create": "Aanmaken",
-      "select": "Selecteren",
+      "dismiss": "Afwijzen",
       "done": "Klaar",
-      "reset": "Opnieuw instellen",
-      "trim": "Trimmen",
-      "split": "Splitsen",
-      "review": "Beoordelen",
+      "edit": "Bewerking",
+      "export": "Exporteren",
+      "export_json": "Exporteren naar JSON",
+      "force_stop": "Forceer stop",
+      "from_template": "Van sjabloon ▾",
+      "ignore": "Negeren",
+      "import_json": "Importeren vanuit JSON",
+      "import_overwrite": "Importeren (overschrijft gegevens)",
       "inspect": "Inspecteren",
       "label": "Label",
-      "save_settings": "Instellingen opslaan",
-      "new_profile": "+ Nieuw profiel",
-      "new_group": "+ Nieuwe groep",
-      "apply_label": "Label toepassen",
-      "run_auto_label": "Automatisch labelen uitvoeren",
-      "save_review": "Beoordeling opslaan",
-      "apply_trim": "Trimmen toepassen",
-      "apply_split": "Splitsing toepassen",
-      "process_recording": "Opname opslaan",
-      "stop": "Stop",
-      "process": "Verwerken",
-      "add_device": "+ Apparaat toevoegen",
-      "train_now": "Train nu",
-      "reset_to_defaults": "Terugzetten naar standaardwaarden",
-      "reset_to_builtin": "Terugzetten naar ingebouwde modellen",
-      "save_preferences": "Voorkeuren opslaan",
-      "save_panel_settings": "Paneelinstellingen opslaan",
-      "save_access_control": "Toegangscontrole opslaan",
-      "auto_label_cycles": "Cycli automatisch labelen",
-      "run_analysis": "🔍 Voer suggestieanalyse uit",
-      "apply_all": "Alles toepassen",
-      "show_only": "Alleen weergeven",
-      "dismiss": "Afwijzen",
-      "dismiss_all": "Alles afwijzen",
-      "process_history": "Nu verwerken",
-      "clear_debug": "Wis foutopsporingsgegevens",
-      "wipe_all": "Wis alle gegevens",
-      "export_json": "Exporteren naar JSON",
-      "import_json": "Importeren vanuit JSON",
-      "correct": "Corrigeren…",
-      "ignore": "Negeren",
-      "add_phase": "+ Fase toevoegen",
-      "new_phase": "+ Nieuwe Fase",
-      "delete_profile": "Profiel verwijderen",
-      "rebuild_envelope": "Envelop opnieuw opbouwen",
-      "create_profile": "+ Profiel aanmaken",
-      "rec_stop": "Stop",
-      "pause_cycle": "Pauze",
-      "resume_cycle": "Hervatten",
-      "force_stop": "Forceer stop",
-      "save_phases": "Fasen opslaan",
-      "auto_detect_split": "Automatische detectie",
-      "clear_splits": "Wissen",
-      "submit_correction": "Correctie indienen",
-      "import_overwrite": "Importeren (overschrijft gegevens)",
-      "use": "Gebruik",
       "manage": "Beheren",
-      "remove": "Verwijderen",
-      "delete_group": "Groep verwijderen",
-      "trim_split": "Trimmen/splitsen",
-      "convert_to_automation": "Converteren naar automatisering",
+      "merge": "Samenvoegen",
       "new_automation": "＋ Nieuwe automatisering",
-      "from_template": "Uit sjabloon ▾",
-      "on_cycle_started": "Bij cyclusstart",
-      "on_cycle_finished": "Bij cycluseinde",
-      "save_group": "Groep opslaan"
+      "new_group": "+ Nieuwe groep",
+      "new_phase": "+ Nieuwe Fase",
+      "new_profile": "+ Nieuw profiel",
+      "on_cycle_finished": "Op cyclus klaar",
+      "on_cycle_started": "Op cyclus gestart",
+      "pause_cycle": "Pauze",
+      "process": "Proces",
+      "process_history": "Verwerk nu",
+      "process_recording": "Opname opslaan",
+      "rebuild": "Enveloppen opnieuw opbouwen",
+      "rebuild_envelope": "Envelop opnieuw opbouwen",
+      "rec_stop": "Stop",
+      "record": "Begin met opnemen",
+      "refresh": "Vernieuwen",
+      "remove": "Verwijderen",
+      "reset": "Opnieuw instellen",
+      "reset_to_builtin": "Reset naar ingebouwde modellen",
+      "reset_to_defaults": "Terugzetten naar standaardwaarden",
+      "review": "Beoordeling",
+      "run_analysis": "🔍 Voer suggestieanalyse uit",
+      "run_auto_label": "Voer Auto-Label uit",
+      "save": "Redden",
+      "save_access_control": "Toegangscontrole opslaan",
+      "save_group": "Groep opslaan",
+      "save_panel_settings": "Paneelinstellingen opslaan",
+      "save_phases": "Fasen opslaan",
+      "save_preferences": "Bewaar voorkeuren",
+      "save_review": "Beoordeling opslaan",
+      "save_settings": "Instellingen opslaan",
+      "select": "Selecteer",
+      "show_only": "Alleen weergeven",
+      "split": "Splitsen",
+      "submit_correction": "Correctie indienen",
+      "train_now": "Train nu",
+      "trim": "Trimmen",
+      "trim_split": "Trimmen/splitsen",
+      "use": "Gebruik",
+      "wipe_all": "Wis alle gegevens"
     },
     "hdr": {
-      "status": "Status",
-      "live_power": "Live vermogen",
-      "manual_recording": "Handmatige opname",
-      "tools_and_data": "Hulpmiddelen en gegevens",
-      "phase_catalog": "Fasecatalogus",
-      "storage_stats": "Opslagstatistieken",
-      "maintenance": "Onderhoudsacties",
-      "export_import": "Exporteren / importeren",
       "logs": "Logboeken",
-      "my_preferences": "Mijn voorkeuren",
-      "panel_settings": "Paneelinstellingen (alle gebruikers)",
+      "toggle_sidebar": "Schakel de Home Assistant-zijbalk in of uit",
       "access_control": "Toegangscontrole",
-      "ml_smart_learning": "Slim leren",
-      "ml_settings_card": "Instellingen",
+      "automation_delete": "Verwijder deze automatisering",
+      "automation_needs_review": "Deze cyclus moet worden herzien",
+      "automation_open": "Openen in de automatiseringseditor",
+      "automation_review_this_cycle": "Bekijk deze cyclus",
+      "automations": "Automatiseringen",
+      "clear_debug": "Wis foutopsporingssporen",
+      "diagnostics_pref": "Diagnostiek",
+      "display": "Weergave",
+      "export_import": "Exporteren / importeren",
+      "live_power": "Levende kracht",
+      "logs_diagnostics": "Diagnostiek",
+      "maintenance": "Onderhoudsacties",
+      "manual_recording": "Handmatige opname",
       "ml_learned": "Wat WashData heeft geleerd",
       "ml_matching_tuning": "Verfijning van programma-matching",
-      "display": "Weergave",
+      "ml_settings_card": "Instellingen",
+      "ml_smart_learning": "Slim leren",
+      "my_preferences": "Mijn voorkeuren",
+      "no_automations": "Er zijn nog geen automatiseringen die naar dit apparaat verwijzen.",
+      "panel_settings": "Paneelinstellingen",
+      "phase_catalog": "Fasecatalogus",
+      "process_history": "Procesgeschiedenis",
+      "status": "Status",
       "status_graph": "Statusgrafiek",
-      "diagnostics_pref": "Diagnostiek",
-      "logs_diagnostics": "Diagnostiek",
-      "process_history": "Geschiedenis verwerken",
-      "clear_debug": "Wis foutopsporingssporen",
-      "wipe_history": "Geschiedenis wissen",
-      "automations": "Automatiseringen",
-      "automation_open": "Openen in de automatiseringseditor",
-      "automation_delete": "Deze automatisering verwijderen",
-      "automation_needs_review": "Deze cyclus moet worden beoordeeld",
-      "automation_review_this_cycle": "Deze cyclus beoordelen",
-      "no_automations": "Er zijn nog geen automatiseringen die naar dit apparaat verwijzen."
+      "storage_stats": "Opslagstatistieken",
+      "tools_and_data": "Hulpmiddelen en gegevens",
+      "wipe_history": "Geschiedenis wissen"
     },
     "lbl": {
-      "power": "Vermogen",
-      "progress": "Voortgang",
-      "remaining": "Resterend",
-      "duration": "Duur",
-      "energy": "Energie",
-      "profile": "Profiel",
-      "status": "Status",
-      "date": "Datum",
-      "confidence": "Betrouwbaarheid",
-      "health": "Gezondheid",
-      "cost": "Kosten",
-      "program": "Programma",
-      "cycle_health": "Gezondheid van de cyclus",
-      "activity": "Activiteit",
-      "unlabelled": "Ongelabeld",
-      "unlabelled_paren": "(ongelabeld)",
-      "emphasis": "Nadruk",
-      "default": "Standaard",
-      "in_use": "In gebruik",
-      "profile_name": "Profielnaam",
-      "ref_cycle": "Referentiecyclus (optioneel)",
-      "manual_duration": "Handmatige duur (min, optioneel)",
-      "phase_name": "Fasenaam",
-      "description": "Beschrijving",
-      "correct_profile": "Juist profiel",
-      "correct_duration": "Juiste duur (min, optioneel)",
-      "load_from_file": "Laden uit bestand",
-      "json_data": "JSON-gegevens",
-      "expected_duration": "Verwachte duur (min)",
-      "rename_profile": "Naam van profiel wijzigen",
-      "select_profile": "Profiel selecteren",
-      "confidence_threshold": "Betrouwbaarheidsdrempel",
-      "resulting_profile": "Resulterend profiel",
-      "new_profile_name": "Nieuwe profielnaam",
-      "save_mode": "Opslagmodus",
-      "head_trim": "Koptrim (s)",
-      "tail_trim": "Staarttrim (s)",
-      "gap_s": "Tussenruimte (s)",
-      "start": "Begin",
-      "end": "Einde",
-      "quality": "Kwaliteit",
-      "golden_reference": "Geregistreerde referentiecyclus",
-      "compare_profiles": "Vergelijk met profielen",
-      "tags": "Labels",
-      "notes": "Opmerkingen",
-      "default_tab": "Standaardtabblad bij het openen van het paneel",
-      "cycle_date_display": "Weergave cyclusdatum",
-      "refresh_interval": "Vernieuwingsinterval (s)",
-      "panel_default_tab": "Standaard tabblad",
-      "hide_tabs": "Verberg tabbladen voor niet-beheerders",
-      "enable_access_control": "Schakel toegangscontrole per gebruiker in",
-      "default_access_level": "Standaardniveau voor gebruikers die hieronder niet worden vermeld",
-      "administrators": "Beheerders",
-      "default_other": "Standaard (andere apparaten)",
-      "show_expected": "Verwachte curve-overlay weergeven (overeenkomend profiel, oranje)",
-      "show_raw": "Toon onbewerkte sensormetingen (niet-afgevlakt, grijs)",
-      "show_debug": "Toon live overeenkomst-debugkaart op de statuspagina (betrouwbaarheid, dubbelzinnigheid, topkandidaten)",
-      "mode_new_profile": "Nieuw profiel maken",
-      "mode_existing_profile": "Toevoegen aan bestaand profiel",
-      "auto_fine_tune_on": "automatische fijnafstemming ingeschakeld (rond {hour}:00)",
-      "auto_fine_tune_off": "automatische fijnafstemming uit",
-      "last_checked": "Laatst gecontroleerd:",
-      "remove_label": "- Label verwijderen -",
-      "create_new_profile": "+ Nieuw profiel aanmaken…",
-      "read_only": "Alleen-lezen",
+      "timer_min": "min",
+      "timer_msg_placeholder": "Bericht (optioneel, {device}/{program}/{minutes})",
+      "timer_auto_pause": "Automatische pauze",
+      "label": "Overeenkomst",
       "actions": "Acties",
+      "activity": "Activiteit",
+      "administrators": "Beheerders",
+      "auto_fine_tune_off": "automatische fijnafstemming uit",
+      "clock_time": "Klok tijd",
+      "compare_profiles": "Vergelijk met profielen",
+      "confidence": "Vertrouwen",
+      "confidence_threshold": "Vertrouwensdrempel",
+      "correct_duration": "Correcte duur (min, optioneel)",
+      "correct_profile": "Correct profiel",
+      "cost": "Kosten",
+      "create_new_profile": "+ Nieuw profiel aanmaken…",
+      "cycle_date_display": "Weergave cyclusdatum",
+      "cycle_health": "Gezondheid van de cyclus",
       "cycles_count": "Cycli",
-      "debug_traces": "Debugsporen",
+      "date": "Datum",
+      "debug_traces": "Sporen debuggen",
+      "default": "Standaard",
+      "default_access_level": "Standaardniveau voor gebruikers die hieronder niet worden vermeld",
+      "default_other": "Standaard (andere apparaten)",
+      "default_tab": "Standaardtabblad bij het openen van het paneel",
+      "description": "Beschrijving",
+      "duration": "Duur",
+      "emphasis": "Nadruk",
+      "enable_access_control": "Schakel toegangscontrole per gebruiker in",
+      "energy": "Energie",
+      "expected_duration": "Verwachte duur (min)",
       "file_kb": "Bestand (kB)",
-      "label": "Label",
+      "gap_s": "Tussenruimte(n)",
+      "head_trim": "Hoofdversiering(en)",
+      "health": "Gezondheid",
+      "hide_tabs": "Verberg tabbladen voor niet-beheerders",
+      "in_use": "In gebruik",
+      "json_data": "JSON-gegevens",
+      "last_checked": "Laatst gecontroleerd:",
+      "load_from_file": "Laden uit bestand",
+      "manual_duration": "Handmatige duur (min, optioneel)",
+      "mode_existing_profile": "Toevoegen aan bestaand profiel",
+      "mode_new_profile": "Nieuw profiel maken",
+      "new_profile_name": "Nieuwe profielnaam",
+      "panel_default_tab": "Standaard tabblad",
+      "phase_name": "Naam",
+      "power": "Stroom",
+      "profile": "Profiel",
+      "profile_name": "Profielnaam",
+      "progress": "Voortgang",
+      "read_only": "Alleen-lezen",
+      "ref_cycle": "Referentiecyclus (optioneel)",
+      "refresh_interval": "Vernieuwingsinterval(s)",
+      "remaining": "Overig",
+      "remove_label": "- Etiket verwijderen -",
+      "rename_profile": "Naam van profiel wijzigen",
+      "resulting_profile": "Resulterend profiel",
+      "save_mode": "Bewaarmodus",
       "seconds_from_start": "Seconden vanaf het begin",
-      "clock_time": "Kloktijd",
-      "ungrouped": "Niet-gegroepeerd"
+      "select_profile": "Selecteer Profiel",
+      "show_debug": "Toon live wedstrijdfoutopsporingskaart op de statuspagina (vertrouwen, dubbelzinnigheid, topkandidaten)",
+      "show_expected": "Verwachte curve-overlay weergeven (overeenkomend profiel, oranje)",
+      "show_raw": "Toon onbewerkte sensormetingen (ongeëffend, grijs)",
+      "status": "Status",
+      "tail_trim": "Staartversiering(en)",
+      "ungrouped": "Niet-gegroepeerd",
+      "unlabelled": "Zonder etiket",
+      "unlabelled_paren": "(ongelabeld)",
+      "expected": "Verwacht",
+      "raw_socket": "Ruwe stroom",
+      "artifact_interruption": "Onderbreking",
+      "artifact_low_power": "Laag vermogen",
+      "artifact_high_power": "Hoog vermogen",
+      "artifact_anomaly": "Anomalie"
     },
     "badge": {
-      "poor_fit": "slechte overeenkomst",
-      "fair_fit": "redelijke overeenkomst",
-      "manual": "(handmatig geselecteerd)",
+      "golden_cycle": "Geregistreerde referentiecyclus",
+      "reviewed": "Beoordeeld",
+      "feedback_requested": "Feedback gevraagd",
+      "needs_review": "Moet worden beoordeeld",
+      "overrun": "Langer gelopen dan normaal",
+      "artifact_tip": "{n} afwijkingen gedetecteerd (bijvoorbeeld de deur werd halverwege de cyclus geopend) — open om ze in de grafiek te zien",
+      "poor_fit_tip": "Inconsistente wedstrijdgeschiedenis: overweeg om dit profiel opnieuw op te bouwen",
+      "fair_fit_tip": "Matige wedstrijdconsistentie: sommige cycli die aan dit profiel zijn toegewezen, hebben lagere betrouwbaarheidsscores. Label meer cycli of registreer het profiel opnieuw om de nauwkeurigheid te verbeteren.",
+      "fair_fit": "redelijke pasvorm",
+      "poor_fit": "slechte pasvorm",
       "auto": "(automatisch gedetecteerd)",
-      "improving": "↗ verbeterend",
+      "built_in_tag": "ingebouwd",
       "declining": "↘ afnemend",
+      "improving": "↗ verbeteren",
+      "manual": "(handmatig geselecteerd)",
       "steady": "→ stabiel",
-      "using_tuned": "Gebruik van afgestemde gewichten",
       "using_defaults": "Standaardwaarden voor verzending gebruiken",
-      "built_in_tag": "ingebouwd"
-    },
-    "status": {
-      "completed": "Voltooid",
-      "interrupted": "Onderbroken",
-      "force_stopped": "Geforceerd gestopt",
-      "active": "Actief",
-      "ambiguous": "Dubbelzinnig",
-      "clear": "Duidelijk",
-      "working": "Bezig…",
-      "recording": "Opnemen…",
-      "ready": "Klaar om te verwerken",
-      "idle": "Inactief",
-      "auto_detect": "Automatische detectie",
-      "fine_tuning": "nu aan het finetunen...",
-      "all_statuses": "Alle statussen"
-    },
-    "ml": {
-      "fit_strong": "Sterk",
-      "fit_good": "Goed",
-      "fit_fair": "Redelijk",
-      "fit_weak": "Zwak",
-      "fit_slight": "Licht",
-      "fit_word": "fit",
-      "fine_tuned_at": "verfijnd {when}",
-      "personalized": "● Gepersonaliseerd voor deze machine",
-      "builtin_models": "● Ingebouwde modellen gebruiken"
-    },
-    "toast": {
-      "settings_saved": "Instellingen opgeslagen; integratie herladen",
-      "preferences_saved": "Voorkeuren opgeslagen",
-      "panel_settings_saved": "Paneelinstellingen opgeslagen",
-      "access_saved": "Toegangscontrole opgeslagen",
-      "profile_created": "Profiel \"{name}\" gemaakt",
-      "profile_deleted": "Profiel \"{name}\" verwijderd",
-      "profile_renamed": "Profiel hernoemd",
-      "phases_saved": "Fasen opgeslagen",
-      "phase_created": "Fase \"{name}\" gemaakt",
-      "phase_deleted": "Fase \"{name}\" verwijderd",
-      "phase_updated": "Fase bijgewerkt",
-      "recording_started": "De opname is gestart",
-      "recording_stopped": "De opname is gestopt",
-      "recording_discarded": "Opname verwijderd",
-      "recording_saved": "Opname opgeslagen in profiel",
-      "export_downloaded": "Exporteren gedownload",
-      "logs_exported": "Logboeken geëxporteerd",
-      "import_successful": "Importeren succesvol; integratie herladen",
-      "envelopes_rebuilt": "Enveloppen opnieuw opgebouwd",
-      "envelope_rebuilt": "Envelop opnieuw opgebouwd",
-      "suggestions_applied": "Suggesties toegepast; integratie herladen",
-      "suggestions_dismissed": "Suggesties afgewezen",
-      "auto_label_complete": "Automatisch labelen voltooid",
-      "cycle_labelled": "Cyclus gelabeld",
-      "cycle_deleted": "Cyclus verwijderd",
-      "cycles_deleted": "{count} cyclus(en) verwijderd",
-      "cycle_trimmed": "Cyclus ingekort",
-      "cycles_merged": "Cycli samengevoegd",
-      "review_saved": "Beoordeling opgeslagen",
-      "feedback_confirmed": "Feedback bevestigd",
-      "feedback_dismissed": "Feedback afgewezen",
-      "feedback_all_dismissed": "Alle feedback is afgewezen",
-      "correction_submitted": "Correctie ingediend",
-      "group_saved": "Groep opgeslagen",
-      "group_deleted": "Groep verwijderd",
-      "automation_deleted": "Automatisering verwijderd",
-      "legacy_removed": "Verouderde acties verwijderd",
-      "cycle_paused": "Cyclus onderbroken",
-      "cycle_resumed": "Cyclus hervat",
-      "cycle_force_stopped": "Cyclus geforceerd gestopt",
-      "ml_training_promoted": "Training voltooid: {count} model(len) gepromoveerd",
-      "ml_training_no_improvement": "Training voltooid: basislijn behouden (geen verbetering)",
-      "matching_reverted": "Matchgewichten teruggezet naar standaardwaarden",
-      "models_reverted": "Modellen op het apparaat zijn teruggekeerd naar de basislijn",
-      "analysis_complete": "Analyse voltooid: {count} suggestie(s)",
-      "analysis_complete_none": "Analyse voltooid: geen nieuwe suggesties",
-      "debug_cleared": "{count} foutopsporingssporen gewist",
-      "all_wiped": "Alle gegevens gewist",
-      "no_split_found": "Geen inactieve pauzes gevonden om op te splitsen",
-      "group_name_required": "Groepsnaam is vereist",
-      "min_2_profiles": "Selecteer minimaal 2 profielen voor een groep",
-      "profile_name_required": "Profielnaam is vereist",
-      "phase_name_required": "Fasenaam is vereist",
-      "name_required": "Naam vereist",
-      "json_required": "JSON-gegevens zijn vereist",
-      "save_failed": "Opslaan mislukt: {error}",
-      "delete_failed": "Verwijderen mislukt: {error}",
-      "apply_failed": "Toepassen mislukt: {error}",
-      "rebuild_failed": "Opnieuw opbouwen mislukt: {error}",
-      "start_failed": "Start mislukt: {error}",
-      "stop_failed": "Stoppen mislukt: {error}",
-      "discard_failed": "Weggooien mislukt: {error}",
-      "trim_failed": "Trimmen mislukt: {error}",
-      "split_failed": "Splitsen mislukt: {error}",
-      "merge_failed": "Samenvoegen mislukt: {error}",
-      "create_failed": "Maken mislukt: {error}",
-      "update_failed": "Update mislukt: {error}",
-      "rename_failed": "Hernoemen mislukt: {error}",
-      "revert_failed": "Terugzetten mislukt: {error}",
-      "training_failed": "Training mislukt: {error}",
-      "export_failed": "Exporteren mislukt: {error}",
-      "import_failed": "Importeren mislukt: {error}",
-      "auto_label_failed": "Automatisch labelen mislukt: {error}",
-      "analysis_failed": "Analyse mislukt: {error}",
-      "auto_detect_failed": "Automatische detectie mislukt: {error}",
-      "error": "Fout: {error}",
-      "could_not_load_cycle": "Kan cyclus niet laden: {error}",
-      "pause_failed": "Onderbreken mislukt: {error}",
-      "label_failed": "Label mislukt: {error}",
-      "invalid_json": "'{key}' is geen geldige JSON. Corrigeer het probleem of wis het veld voordat u het opslaat.",
-      "processed": "Verwerkt {bits}",
-      "split_complete": "Opgesplitst in {count} cycli"
-    },
-    "msg": {
-      "no_devices": "Er zijn nog geen WashData-apparaten geconfigureerd.",
-      "no_device_selected": "Geen apparaat geselecteerd.",
-      "loading": "Laden…",
-      "loading_settings": "Instellingen laden…",
-      "live_chart_loading": "Een live vermogensgrafiek verschijnt zodra de metingen binnenkomen.",
-      "no_cycles_match": "Er zijn geen cycli die overeenkomen met het huidige filter.",
-      "no_cycles_yet": "Er zijn nog geen cycli geregistreerd.",
-      "no_profiles_yet": "Nog geen profielen. Maak er een van een gelabelde cyclus.",
-      "no_logs": "Er zijn nog geen logrecords gebufferd.",
-      "no_phases": "Geen fasen gedefinieerd.",
-      "no_phases_assigned": "Geen fasen toegewezen.",
-      "no_split_points": "Er zijn nog geen splitpunten.",
-      "no_envelope": "Nog geen envelop - herbouw na het labelen van cycli.",
-      "no_envelope_overlay": "Er is geen envelop beschikbaar om over te leggen.",
-      "no_other_users": "Geen andere Home Assistant-gebruikers gevonden.",
-      "maintenance_requires_access": "Onderhoud en export/import vereisen volledige toegang.",
-      "loading_curve": "Laadcurve…",
-      "compare_selected_cycles": "Geselecteerde cycli (doorgetrokken) — tonen/verbergen",
-      "compare_overlay_profiles": "Overlay-profielen (vaag)",
-      "no_profiles_compare": "Geen profielen om te vergelijken.",
-      "no_cycles_profile": "Geen cycli voor dit profiel.",
-      "saving_triggers_reload": "Opslaan activeert een herladen van de integratie. HA-entiteiten kunnen kort worden weergegeven als niet beschikbaar.",
-      "prefs_personal": "Deze zijn alleen van toepassing op uw Home Assistant-account.",
-      "no_match_yet": "Nog geen overeenkomstpoging — dit wordt ingevuld tijdens een lopende cyclus.",
-      "no_fine_tuned": "Er is nog niets verfijnd: WashData gebruikt de ingebouwde modellen.",
-      "ml_learned_intro": "Modellen die op deze machine zijn afgestemd. Alles wat niet wordt vermeld, maakt gebruik van het betrouwbare ingebouwde model.",
-      "ml_settings_intro": "Twee onafhankelijke schakelaars: de ene past de modellen toe terwijl een cyclus loopt, de andere laat WashData ze in de loop van de tijd nauwkeurig afstemmen op uw machine.",
-      "ml_intro": "WashData wordt geleverd met slimme modellen die cycli detecteren, programma's afstemmen en tijd en energie inschatten - ze werken out-of-the-box.",
-      "matching_tuning_intro": "Tijdens het leren past WashData ook aan hoeveel programmamatching de vorm van een cyclus weegt ten opzichte van de duur en energie ervan.",
-      "phase_catalog_intro": "Benoemde segmenten van een cyclus (Voorwas, Verwarming, Centrifugeren…). Wijs ze toe aan een profiel vanuit het configuratiescherm.",
-      "phase_ranges_intro": "Fasebereiken (minuten vanaf het begin van de cyclus) over de gemiddelde curve heen. Bewerk waarden om live een voorbeeld te bekijken.",
-      "cleanup_intro": "Alle gelabelde cycli over elkaar heen. Vink uitschieters aan en verwijder ze om het profiel op te schonen.",
-      "split_intro": "Klik op de grafiek om een splitspunt toe te voegen of te verwijderen, of detecteer ze automatisch op basis van inactieve pauzes.",
-      "trim_intro": "Versleep de rode grepen of voer waarden in. Alles buiten het venster wordt verwijderd.",
-      "import_intro": "Laad een geëxporteerd bestand of plak hieronder een JSON-payload.",
-      "auto_label_intro": "Wijs profielen toe aan niet-gelabelde cycli waarvan het matchvertrouwen de drempel overschrijdt.",
-      "merge_intro": "De geselecteerde cycli worden gecombineerd tot één (chronologische volgorde; gaten gevuld met 0 W). Kies het resulterende profiel.",
-      "enough_data": "Genoeg gegevens om van te leren ({current}/{min} cycli).",
-      "collecting_data": "Gegevens verzamelen: {need} extra cyclus{plural} voordat de fijnafstelling kan beginnen ({current}/{min}).",
-      "updated": "Bijgewerkt {time}",
-      "appliance_monitor": "Apparaatmonitor",
-      "ml_loading": "ML laden...",
-      "see_recorder": "Zie recorderwidget hieronder",
-      "review_in_settings": "Beoordelen in Instellingen",
-      "storage_diagnostics": "Opslagstatistieken, onderhoud, export/import",
-      "recent_logs": "Recente ha_washdata-records",
-      "preferences_adv": "Voorkeuren",
-      "preferences_admin": "Voorkeuren, paneel- en toegangscontrole",
-      "review_to_cycles": "Open de wachtrij voor het beoordelen van cycli",
-      "pending_feedback": "In afwachting van detectiefeedback",
-      "recording_in_progress": "Opname bezig",
-      "no_profiles_yet_short": "Nog geen profielen.",
-      "unsure_detected_prefix": "WashData weet niet zeker of het dit heeft gedetecteerd:",
-      "no_suggestions": "Geen actieve suggesties.",
-      "no_profiles_overlay": "Geen profielen om over te leggen.",
-      "compare_cycles_title": "Vergelijk {count} cycli",
-      "profiles_intro": "Klik op een profiel voor statistieken, fases en opruiming. Groepeer bijna identieke programma's (zelfde vorm/duur, andere temperatuur of centrifugering) zodat de koppeling betrouwbaar onderscheid maakt.",
-      "search_placeholder": "Instellingen zoeken…",
-      "automations_intro": "WashData stuurt {start} / {end}-events en stelt entiteiten beschikbaar, zodat meldingen en acties het best als gewone Home Assistant-automatiseringen worden gebouwd. Automatiseringen die dit apparaat gebruiken worden hieronder weergegeven.",
-      "notify_services_hint": "Gebruik {entity} service-ID's (kommagescheiden voor meerdere). Sjabloonvariabelen: {vars}.",
-      "rbac_hint": "Wanneer uitgeschakeld, heeft elke Home Assistant-gebruiker volledige toegang (standaard). Beheerders hebben altijd volledige toegang en kunnen iedereen beheren.",
-      "feedback_prompt": "Bevestig of dit klopt, corrigeer het programma of negeer het."
+      "using_tuned": "Gebruik van afgestemde gewichten"
     },
     "modal": {
-      "label_cycle": "Cyclus labelen",
+      "merge_cycles": "Voeg {n} cycli samen",
+      "auto_label": "Automatische labelcycli",
+      "correct_feedback": "Correcte feedback",
       "create_profile": "Profiel aanmaken",
-      "new_phase": "Nieuwe Fase",
+      "cycle": "Cyclus",
       "edit_phase": "Fase bewerken",
-      "process_recording": "Opname verwerken",
-      "correct_feedback": "Feedback corrigeren",
       "import_config": "Configuratie importeren",
-      "auto_label": "Cycli automatisch labelen",
-      "cycle": "Cyclus"
+      "label_cycle": "Labelcyclus",
+      "new_phase": "Nieuwe Fase",
+      "process_recording": "Procesregistratie"
     },
-    "tag": {
-      "late_start": "Late start",
-      "early_end": "Vroeg einde",
-      "merged": "Samengevoegde cycli",
-      "split": "Gesplitste cyclus",
-      "noise": "Ruis",
-      "wrong_profile": "Verkeerd profiel",
-      "sensor_gap": "Sensoronderbreking"
+    "msg": {
+      "near_duplicate_cluster": "bijna dubbel profielcluster gedetecteerd. Door te groeperen kan er op betrouwbare wijze worden gekozen tussen look-alikes (bijvoorbeeld hetzelfde programma op verschillende temperatuur/centrifugeren).",
+      "coverage_gap": "recente cycli hebben geen overeenkomend profiel ({pct}% van de laatste 30).",
+      "consider_new_profile": "Overweeg een nieuw profiel aan te maken.",
+      "group_not_cohesive": "Deze profielen lijken niet voldoende op elkaar om betrouwbaar te kunnen worden gegroepeerd, dus bij het matchen worden ze individueel behandeld totdat u de uitbijter verwijdert of de groep opsplitst.",
+      "group_modal_help": "Groepeer programma's met dezelfde vorm die verschillen in temperatuur/centrifugeren (duur kan variëren). Matching scoort de groep als één kandidaat en kiest vervolgens het best passende lid. Kies er minimaal 2; de overlay laat zien hoezeer ze op elkaar lijken.",
+      "showing_suggestions": "Instelling {count} met suggesties weergegeven.",
+      "show_all_settings": "Toon alle instellingen",
+      "tuning_suggestions_available": "{count} afstemmingssuggestie beschikbaar op basis van waargenomen cycli. Ze verschijnen naast de relevante velden.",
+      "legacy_actions_title": "{count} verouderde aangepaste actie wordt nog steeds uitgevoerd",
+      "old_actions_warning": "Geconfigureerd met de oude actie-editor (nu verwijderd). Ze vuren nog steeds op cyclusevenementen, maar kunnen hier niet langer worden bewerkt. Converteer ze naar een normale automatisering of verwijder ze.",
+      "no_settings_match": "Er zijn geen instellingen die overeenkomen met '{q}'",
+      "clear_debug_hint": "Verwijder opgeslagen foutopsporingsgegevens om ruimte vrij te maken.",
+      "wipe_history_warning": "Verwijder definitief alle cycli en profielen. Kan niet ongedaan worden gemaakt.",
+      "export_description": "Exporteer alle profielen en cycli naar JSON, of herstel vanuit een eerdere export.",
+      "log_buffer_hint": "Nieuwste eerst · buffert de laatste 500 ha_washdata-records sinds het opnieuw opstarten · sleep de onderrand om het formaat te wijzigen.",
+      "review_profile_tip": "Het programma waarmee deze cyclus wordt aangeduid als. Als het automatisch gedetecteerde programma fout was, corrigeer dit dan hier. Labeling leert matching voor toekomstige cycli.",
+      "review_quality_tip": "Hoe schoon is deze cyclus. Goed = een schoolvoorbeeld van dit programma; Slecht = gedetecteerd maar luidruchtig of atypisch; Onbruikbaar = verkeerd gedetecteerd (samengevoegd, afgekapt of onecht). Stuurt de gezondheidsscore aan en welke cycli het model mogen trainen.",
+      "review_recorded_tip": "Markeer dit als een zorgvuldig uitgekozen referentiecyclus voor het programma - dezelfde rol als een handmatig geregistreerde cyclus. Referentiecycli worden altijd bewaard, voorzien van de overeenkomende sjabloon en worden nooit verwijderd door opschoning. (Dit is de \"gouden\"/opgenomen vlag; beide zijn hetzelfde.)",
+      "review_tags_tip": "Optionele vlaggen die beschrijven wat er mis is gegaan in deze cyclus, zodat training en opruiming hiervan een verklaring kunnen zijn.",
+      "review_notes_tip": "Vrije tekstnotities voor uw eigen referentie. Wordt niet gebruikt bij matching of training.",
+      "review_confirm_help": "Controleer of deze cyclus correct is gedetecteerd. Uw beoordelingen trainen het model op uw machine: hoe meer cycli u bevestigt, hoe beter de matching en de gezondheidsscore worden. Een snelle goed/slecht is genoeg.",
+      "review_notes_placeholder": "Opmerkingen (optioneel)",
+      "compare_profiles_tip": "Leg andere profielenveloppen op het schema hierboven om te zien welke het beste bij deze cyclus past.",
+      "artifact_header": "{n} afwijkingen gedetecteerd tijdens deze cyclus",
+      "artifact_footer": "Gemarkeerd in de bovenstaande grafiek. Dit zijn tijdelijke artefacten (bijvoorbeeld de deur die halverwege de cyclus wordt geopend), en niet noodzakelijkerwijs problemen.",
+      "profile_poor_health_detail": "Cycli die aan dit profiel zijn toegewezen, hebben inconsistente vormen of een lage betrouwbaarheid. Overweeg om de envelop opnieuw te maken of de gelabelde cycli te bekijken.",
+      "trend_duration_longer": "Duur trending langer ({pct}%/cyclus) — recent gemiddelde {avg}",
+      "trend_duration_shorter": "Duur trending korter ({pct}%/cyclus) — recent gemiddelde {avg}",
+      "trend_energy_up": "Energie stijgt ({pct}%/cyclus) — recent gemiddelde {avg}",
+      "trend_energy_down": "Energietrend omlaag ({pct}%/cyclus)",
+      "performance_trend": "Prestatietrend ({n} cycli)",
+      "maintenance_advisory": "Het verhogen van de duur/energie kan erop wijzen dat er onderhoud aan het apparaat nodig is (bijvoorbeeld ontkalken, filterreiniging).",
+      "manual_duration_hint": "De gemiddelde/verwachte cycluslengte van het profiel, gebruikt voor schattingen van de resterende tijd. Bewerk om het in te stellen; Door het ongewijzigd te laten, blijft de huidige waarde behouden.",
+      "appliance_monitor": "Apparaatmonitor",
+      "auto_label_intro": "Wijs profielen toe aan niet-gelabelde cycli waarvan het matchvertrouwen de drempel overschrijdt.",
+      "cleanup_intro": "Elke gelabelde cyclus wordt overlay. Vink uitschieters aan en verwijder deze om het profiel op te schonen.",
+      "compare_overlay_profiles": "Overlay-profielen (vaag)",
+      "compare_selected_cycles": "Geselecteerde cycli (vast) — tonen/verbergen",
+      "feedback_prompt": "Bevestig dat het goed was, corrigeer het programma of negeer het.",
+      "import_intro": "Laad een geëxporteerd bestand of plak hieronder een JSON-payload.",
+      "live_chart_loading": "Een live vermogensgrafiek verschijnt zodra de metingen binnenkomen.",
+      "loading": "Laden…",
+      "loading_curve": "Laadcurve…",
+      "loading_settings": "Instellingen laden…",
+      "maintenance_requires_access": "Onderhoud en export/import vereisen volledige toegang.",
+      "matching_tuning_intro": "Tijdens het leren past WashData ook aan hoeveel programmamatching de vorm versus duur en energie weegt.",
+      "merge_intro": "De geselecteerde cycli worden gecombineerd tot één (chronologische volgorde; gaten gevuld met 0 W). Kies het resulterende profiel.",
+      "ml_intro": "WashData wordt geleverd met slimme modellen die out-of-the-box werken.",
+      "ml_learned_intro": "Modellen die op deze machine zijn afgestemd.",
+      "ml_loading": "ML laden...",
+      "ml_settings_intro": "Twee onafhankelijke schakelaars: de ene past de modellen toe terwijl een cyclus loopt, de andere laat WashData ze in de loop van de tijd nauwkeurig afstemmen op uw machine.",
+      "no_cycles_match": "Er zijn geen cycli die overeenkomen met het huidige filter.",
+      "no_cycles_profile": "Geen cycli voor dit profiel.",
+      "no_cycles_yet": "Er zijn nog geen cycli geregistreerd.",
+      "no_device_selected": "Geen apparaat geselecteerd.",
+      "no_devices": "Er zijn nog geen WashData-apparaten geconfigureerd.",
+      "no_envelope": "Nog geen envelop - herbouw na etiketteringscycli.",
+      "no_envelope_overlay": "Er is geen envelop beschikbaar om te bedekken.",
+      "no_fine_tuned": "Er is nog niets verfijnd: WashData gebruikt de ingebouwde modellen.",
+      "no_logs": "Er zijn nog geen logrecords gebufferd.",
+      "no_match_yet": "Nog geen wedstrijdpoging: dit wordt ingevuld tijdens een hardloopcyclus.",
+      "no_other_users": "Geen andere Home Assistant-gebruikers gevonden.",
+      "no_phases": "Geen fasen gedefinieerd.",
+      "no_phases_assigned": "Geen fasen toegewezen.",
+      "no_profiles_compare": "Geen profielen om te vergelijken.",
+      "no_profiles_overlay": "Geen profielen om over te leggen.",
+      "no_profiles_yet": "Nog geen profielen. Maak er een van een gelabelde cyclus.",
+      "no_profiles_yet_short": "Nog geen profielen.",
+      "no_split_points": "Er zijn nog geen splitpunten.",
+      "no_suggestions": "Geen actieve suggesties.",
+      "pending_feedback": "In afwachting van detectiefeedback",
+      "phase_catalog_intro": "Benoemde segmenten van een cyclus (Voorwas, Verwarming, Centrifugeren…). Wijs ze toe aan een profiel vanuit het configuratiescherm.",
+      "phase_ranges_intro": "Fasebereiken (minuten vanaf het begin van de cyclus) over de gemiddelde curve heen. Bewerk waarden om live een voorbeeld te bekijken.",
+      "preferences_admin": "Voorkeuren, paneel- en toegangscontrole",
+      "preferences_adv": "Voorkeuren",
+      "prefs_personal": "Deze zijn alleen van toepassing op uw Home Assistant-account.",
+      "profiles_intro": "Klik op een profiel voor statistieken, fasen en opruimacties. Groepeer vrijwel identieke programma's (dezelfde vorm/duur, andere temperatuur of draairichting), zodat er betrouwbaar een keuze tussen de programma's kan worden gemaakt.",
+      "rbac_hint": "Indien uitgeschakeld heeft elke Home Assistant-gebruiker volledige toegang (standaard). Beheerders hebben altijd volledige toegang en kunnen iedereen beheren.",
+      "recent_logs": "Recente ha_washdata-records",
+      "recording_in_progress": "Opname bezig",
+      "review_in_settings": "Controleer in Instellingen",
+      "review_to_cycles": "Open de wachtrij voor het beoordelen van cycli",
+      "saving_triggers_reload": "Opslaan activeert een herladen van de integratie. HA-entiteiten kunnen kort worden weergegeven als niet beschikbaar.",
+      "search_placeholder": "Zoekinstellingen…",
+      "see_recorder": "Zie recorderwidget hieronder",
+      "split_intro": "Klik op de grafiek om een ​​splitspunt toe te voegen of te verwijderen, of om automatisch gaten in de grafiek te detecteren. Elk resulterend segment kan zijn eigen profiel krijgen.",
+      "storage_diagnostics": "Opslagstatistieken, onderhoud, export/import",
+      "trim_intro": "Versleep de rode grepen of voer waarden in. Alles buiten het raam wordt verwijderd.",
+      "unsure_detected_prefix": "WashData weet niet zeker of het is gedetecteerd",
+      "updated": "Bijgewerkt"
     },
-    "quality": {
-      "good": "Goed",
-      "bad": "Slecht",
-      "unusable": "Onbruikbaar"
-    },
-    "access": {
-      "none": "Geen (verborgen)",
-      "read": "Lezen",
-      "edit": "Bewerken",
-      "full": "Volledig",
-      "inherit": "Erven"
+    "phase_desc": {
+      "pre_wash": "Eerste inweken of voorbehandeling vóór de hoofdwas.",
+      "wash": "Hoofdwasprogramma met trommelbeweging en optionele verwarming.",
+      "wash_dw": "Hoofdwasmiddel met verwarming.",
+      "rinse": "Spoelfase met schoon water. Deze fase kan zich meerdere keren herhalen.",
+      "spin": "Snelle extractie om water uit de lading te verwijderen.",
+      "spin_wd": "Snelle extractie vóór de droogovergang.",
+      "soak": "Inweekperiode met lage activiteit tussen actieve wasfasen.",
+      "soak_dw": "Verlengde weekperiode voor zware grond.",
+      "anti_crease": "Af en toe kort tuimelen na voltooiing om rimpels te verminderen.",
+      "heat_up": "Eerste opwarming van de verwarming voordat het volledig drogen begint.",
+      "drying": "Belangrijkste verwarmde tuimelen periode.",
+      "cool_down": "Tuimelen zonder warmte tegen het einde van de cyclus.",
+      "anti_wrinkle": "Periodiek tuimelen na de cyclus om rimpels te verminderen.",
+      "sensor_check": "Korte pauze met laag vermogen terwijl de droogte wordt gemeten.",
+      "drain_and_switch": "Overgangsperiode van wassen naar drogen.",
+      "pre_rinse": "Eerste spray-down vóór het wassen met wasmiddel.",
+      "dry": "Droogfase met behulp van verwarming en/of restwarmte.",
+      "sanitize": "Reinigingsfase op hoge temperatuur voor ontsmettingsprogramma's."
     },
     "health": {
-      "poor": "⚠ Slechte overeenkomst",
-      "fair": "Redelijke overeenkomst",
-      "good": "✓ Goede overeenkomst"
+      "good": "✓ Goede profielkwaliteit",
+      "fair": "Acceptabele profielkwaliteit",
+      "poor": "⚠ Slechte profielkwaliteit"
+    },
+    "ml": {
+      "fit_fair": "Acceptabel",
+      "builtin_models": "● Ingebouwde modellen gebruiken",
+      "fit_good": "Goed",
+      "fit_slight": "Licht",
+      "fit_strong": "Sterk",
+      "fit_weak": "Zwak",
+      "fit_word": "fit",
+      "personalized": "● Gepersonaliseerd voor deze machine"
     },
     "trend": {
       "up": "Trend omhoog",
       "down": "Trend naar beneden"
     },
-    "pref": {
-      "date_relative": "Relatief (bijvoorbeeld 2 uur geleden)",
-      "date_absolute": "Absoluut (bijv. 14:32 op 2 juli)"
-    },
     "log": {
       "all_levels": "Alle niveaus"
     },
-    "section": {
-      "basic": {
-        "label": "Basis",
-        "intro": "Kernidentiteit en de essentie die de meeste opstellingen nodig hebben."
-      },
-      "detection": {
-        "label": "Detectie",
-        "intro": "Hoe het starten, lopen en eindigen van een cyclus wordt gedetecteerd."
-      },
-      "matching": {
-        "label": "Overeenkomst",
-        "intro": "Hoe voltooide cycli worden gekoppeld aan aangeleerde profielen en gelabeld."
-      },
-      "timing": {
-        "label": "Timing en watchdog",
-        "intro": "Achtergrondritme, de offline watchdog en opschoning."
-      },
-      "anti_wrinkle": {
-        "label": "Anti-rimpel",
-        "intro": "De antikreukmodus detecteert droogtrommelpulsen na de hoofdverwarmingsfase."
-      },
-      "delay": {
-        "label": "Uitgestelde start",
-        "intro": "Detectie van vertraagde start identificeert wanneer een apparaat onder stroom staat, maar nog niet aan zijn cyclus is begonnen."
-      },
-      "triggers": {
-        "label": "Triggers en deur",
-        "intro": "Optionele externe signalen: een eindtrigger, een deursensor, een pauzeschakelaar en de uitlaadherinnering."
-      },
-      "notifications": {
-        "label": "Meldingen",
-        "intro": "Configureer wanneer en hoe u op de hoogte wordt gesteld van cyclusgebeurtenissen."
-      },
-      "ml_training": {
-        "label": "ML-training",
-        "intro": "Optionele slimme modellen die detectie en timing personaliseren voor dit apparaat."
-      }
+    "pref": {
+      "date_absolute": "Absoluut (bijv. 14:32 op 2 juli)",
+      "date_relative": "Relatief (bijvoorbeeld 2 uur geleden)"
     },
-    "setting": {
-      "name": {
-        "label": "Apparaatnaam"
-      },
-      "device_type": {
-        "label": "Apparaattype"
-      },
-      "power_sensor": {
-        "label": "Vermogenssensor"
-      },
-      "min_power": {
-        "label": "Minimaal vermogen"
-      },
-      "off_delay": {
-        "label": "Uitschakelvertraging"
-      },
-      "linked_device": {
-        "label": "Groep onder apparaat"
-      },
-      "start_threshold_w": {
-        "label": "Startdrempel"
-      },
-      "stop_threshold_w": {
-        "label": "Stopdrempel"
-      },
-      "min_off_gap": {
-        "label": "Min. uit-pauze"
-      },
-      "start_duration_threshold": {
-        "label": "Startduur"
-      },
-      "start_energy_threshold": {
-        "label": "Startenergie"
-      },
-      "completion_min_seconds": {
-        "label": "Min. cyclusduur"
-      },
-      "running_dead_zone": {
-        "label": "Dode zone tijdens werking"
-      },
-      "end_energy_threshold": {
-        "label": "Eindenergie"
-      },
-      "end_repeat_count": {
-        "label": "Einde herhalingstelling"
-      },
-      "sampling_interval": {
-        "label": "Bemonsteringsinterval"
-      },
-      "smoothing_window": {
-        "label": "Afvlakkingsvenster"
-      },
-      "abrupt_drop_watts": {
-        "label": "Abrupte daling"
-      },
-      "abrupt_drop_ratio": {
-        "label": "Abrupte dalingsverhouding"
-      },
-      "profile_match_threshold": {
-        "label": "Matchdrempel"
-      },
-      "profile_unmatch_threshold": {
-        "label": "Niet-overeenkomstdrempel"
-      },
-      "profile_match_interval": {
-        "label": "Overeenkomstinterval"
-      },
-      "profile_match_min_duration_ratio": {
-        "label": "Min. duurverhouding"
-      },
-      "profile_match_max_duration_ratio": {
-        "label": "Maximale duurverhouding"
-      },
-      "profile_duration_tolerance": {
-        "label": "Profielduurtolerantie"
-      },
-      "duration_tolerance": {
-        "label": "Schattingstolerantie"
-      },
-      "auto_label_confidence": {
-        "label": "Betrouwbaarheid automatisch labelen"
-      },
-      "learning_confidence": {
-        "label": "Betrouwbaarheid leren"
-      },
-      "suppress_feedback_notifications": {
-        "label": "Feedbackmeldingen onderdrukken"
-      },
-      "watchdog_interval": {
-        "label": "Watchdog-interval"
-      },
-      "no_update_active_timeout": {
-        "label": "Time-out bij geen update"
-      },
-      "progress_reset_delay": {
-        "label": "Vertraging voortgangsreset"
-      },
-      "auto_maintenance": {
-        "label": "Automatisch onderhoud (nachtelijke schoonmaak)"
-      },
-      "expose_debug_entities": {
-        "label": "Debug-entiteiten beschikbaar maken"
-      },
-      "save_debug_traces": {
-        "label": "Foutopsporingssporen opslaan"
-      },
-      "anti_wrinkle_enabled": {
-        "label": "Schakel antirimpeldetectie in"
-      },
-      "anti_wrinkle_max_power": {
-        "label": "Maximaal antirimpelvermogen"
-      },
-      "anti_wrinkle_max_duration": {
-        "label": "Maximale duur"
-      },
-      "anti_wrinkle_exit_power": {
-        "label": "Vermogensdrempel voor verlaten"
-      },
-      "delay_start_detect_enabled": {
-        "label": "Schakel uitgestelde startdetectie in"
-      },
-      "delay_confirm_seconds": {
-        "label": "Bevestig seconden"
-      },
-      "delay_timeout_hours": {
-        "label": "Time-out uren"
-      },
-      "external_end_trigger_enabled": {
-        "label": "Externe eindtrigger inschakelen"
-      },
-      "external_end_trigger": {
-        "label": "Externe triggerentiteit"
-      },
-      "external_end_trigger_inverted": {
-        "label": "Externe trigger omkeren (trigger aan UIT)"
-      },
-      "door_sensor_entity": {
-        "label": "Deursensor-entiteit"
-      },
-      "pause_cuts_power": {
-        "label": "Pauze onderbreekt ook de stroom (via schakelaar)"
-      },
-      "switch_entity": {
-        "label": "Schakelaarentiteit"
-      },
-      "notify_unload_delay_minutes": {
-        "label": "Vertraging uitlaadherinnering"
-      },
-      "pump_stuck_duration": {
-        "label": "Duur vastgelopen pomp"
-      },
-      "notify_start_services": {
-        "label": "Startdiensten"
-      },
-      "notify_finish_services": {
-        "label": "Voltooiingsdiensten"
-      },
-      "notify_live_services": {
-        "label": "Live voortgangsdiensten"
-      },
-      "notify_people": {
-        "label": "Personen (voor 'Alleen wanneer thuis')"
-      },
-      "notify_only_when_home": {
-        "label": "Alleen melden als u thuis bent"
-      },
-      "notify_fire_events": {
-        "label": "Activeer HA-gebeurtenissen voor meldingen"
-      },
-      "notify_before_end_minutes": {
-        "label": "Waarschuwing vóór einde"
-      },
-      "notify_live_interval_seconds": {
-        "label": "Live-update-interval"
-      },
-      "notify_live_overrun_percent": {
-        "label": "Live-overschrijding % vóór waarschuwing"
-      },
-      "notify_live_chronometer": {
-        "label": "Gebruik Live-chronometer"
-      },
-      "notify_timeout_seconds": {
-        "label": "Automatisch sluiten na"
-      },
-      "notify_title": {
-        "label": "Titel van melding"
-      },
-      "notify_icon": {
-        "label": "Meldingspictogram"
-      },
-      "notify_start_message": {
-        "label": "Startbericht"
-      },
-      "notify_finish_message": {
-        "label": "Voltooiingsbericht"
-      },
-      "notify_pre_complete_message": {
-        "label": "Bericht vóór voltooiing"
-      },
-      "notify_reminder_message": {
-        "label": "Herinneringsbericht"
-      },
-      "notify_channel": {
-        "label": "Android-kanaal (start/live)"
-      },
-      "notify_finish_channel": {
-        "label": "Android-kanaal (voltooid)"
-      },
-      "energy_price_entity": {
-        "label": "Energieprijs-entiteit"
-      },
-      "energy_price_static": {
-        "label": "Statische energieprijs (per kWh)"
-      },
-      "enable_ml_models": {
-        "label": "Pas slimme modellen toe tijdens een cyclus"
-      },
-      "ml_training_enabled": {
-        "label": "Leer van deze machine"
-      },
-      "ml_training_hour": {
-        "label": "Leer om uur"
-      },
-      "ml_training_min_cycles": {
-        "label": "Cycli zijn eerst nodig"
-      },
-      "ml_training_interval_days": {
-        "label": "Controleer maximaal elke"
-      }
+    "quality": {
+      "bad": "Slecht",
+      "good": "Goed",
+      "unusable": "Onbruikbaar"
+    },
+    "status": {
+      "active": "Actief",
+      "all_statuses": "Alle statussen",
+      "ambiguous": "Ambigu",
+      "auto_detect": "Automatische detectie",
+      "clear": "Duidelijk",
+      "completed": "Voltooid",
+      "fine_tuning": "nu aan het finetunen...",
+      "force_stopped": "Kracht gestopt",
+      "idle": "Inactief",
+      "interrupted": "Onderbroken",
+      "ready": "Klaar om te verwerken",
+      "recording": "Opnemen"
+    },
+    "tab": {
+      "advanced": "Geavanceerd",
+      "diagnostics": "Diagnostiek",
+      "history": "Cycli",
+      "ml": "ML-training",
+      "pp_cleanup": "Opruimen",
+      "pp_manage": "Beheren",
+      "pp_overview": "Overzicht",
+      "pp_phases": "Fasen",
+      "profiles": "Profielen",
+      "settings": "Instellingen",
+      "status": "Overzicht",
+      "subtab_phase_catalog": "Fasecatalogus",
+      "subtab_profiles": "Profielen"
+    },
+    "tag": {
+      "early_end": "Vroeg einde",
+      "late_start": "Laat beginnen",
+      "merged": "Samengevoegde cycli",
+      "noise": "Lawaai",
+      "sensor_gap": "Sensorafstand",
+      "split": "Gesplitste cyclus",
+      "wrong_profile": "Verkeerd profiel"
+    },
+    "toast": {
+      "access_saved": "Toegangscontrole opgeslagen",
+      "all_wiped": "Alle gegevens gewist",
+      "analysis_complete_none": "Analyse voltooid: geen nieuwe suggesties",
+      "auto_label_complete": "Automatisch labelen voltooid",
+      "automation_deleted": "Automatisering verwijderd",
+      "correction_submitted": "Correctie ingediend",
+      "cycle_deleted": "Cyclus verwijderd",
+      "cycle_force_stopped": "Cyclus geforceerd gestopt",
+      "cycle_labelled": "Cyclus gelabeld",
+      "cycle_paused": "Cyclus onderbroken",
+      "cycle_resumed": "Cyclus hervat",
+      "cycle_trimmed": "Cyclus ingekort",
+      "cycles_merged": "Cycli samengevoegd",
+      "envelope_rebuilt": "Envelop opnieuw opgebouwd",
+      "envelopes_rebuilt": "Enveloppen opnieuw opgebouwd",
+      "export_downloaded": "Exporteren gedownload",
+      "feedback_all_dismissed": "Alle feedback is afgewezen",
+      "feedback_confirmed": "Feedback bevestigd",
+      "feedback_dismissed": "Feedback afgewezen",
+      "group_deleted": "Groep verwijderd",
+      "group_name_required": "Groepsnaam is vereist",
+      "group_saved": "Groep opgeslagen",
+      "import_successful": "Importeren succesvol; integratie herladen",
+      "json_required": "JSON-gegevens zijn vereist",
+      "legacy_removed": "Verouderde acties verwijderd",
+      "logs_exported": "Logboeken geëxporteerd",
+      "matching_reverted": "Overeenkomende gewichten zijn teruggezet naar de standaardwaarden",
+      "min_2_profiles": "Selecteer minimaal 2 profielen voor een groep",
+      "ml_training_no_improvement": "Training voltooid: basislijn behouden (geen verbetering)",
+      "models_reverted": "Modellen op het apparaat zijn teruggekeerd naar de basislijn",
+      "name_required": "Naam vereist",
+      "no_split_found": "Er zijn geen lege gaten gevonden om op te splitsen",
+      "panel_settings_saved": "Paneelinstellingen opgeslagen",
+      "phase_name_required": "Fasenaam is vereist",
+      "phase_updated": "Fase bijgewerkt",
+      "phases_saved": "Fasen opgeslagen",
+      "preferences_saved": "Voorkeuren opgeslagen",
+      "profile_name_required": "Profielnaam is vereist",
+      "profile_renamed": "Profiel hernoemd",
+      "recording_discarded": "Opname verwijderd",
+      "recording_saved": "Opname opgeslagen in profiel",
+      "recording_started": "De opname is gestart",
+      "recording_stopped": "De opname is gestopt",
+      "review_saved": "Beoordeling opgeslagen",
+      "settings_saved": "Instellingen opgeslagen; integratie herladen",
+      "suggestions_applied": "Suggesties toegepast; integratie herladen",
+      "suggestions_dismissed": "Suggesties afgewezen"
     }
   }
 }
