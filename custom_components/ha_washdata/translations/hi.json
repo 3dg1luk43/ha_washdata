@@ -536,7 +536,7 @@
       "delete_group_tip": "केवल इस समूह को हटाएं - सदस्य प्रोफ़ाइल रखी जाती हैं",
       "run_analysis_tip": "अभी अपने रिकॉर्ड किए गए चक्रों का विश्लेषण करें और ट्यूनिंग सुझावों को ताज़ा करें",
       "reset_ml_models_tip": "बेहतर ट्यून किए गए मॉडलों को त्यागें और अंतर्निर्मित मॉडलों पर वापस जाएं। वॉशडेटा उन्हें बाद में पुनः सीख सकता है।",
-      "resume_cycle": "फिर शुरू करना",
+      "resume_cycle": "चक्र जारी रखें",
       "add_device": "+ डिवाइस जोड़ें",
       "add_phase": "+ चरण जोड़ें",
       "apply_all": "सभी लागू करें",
@@ -548,7 +548,7 @@
       "cancel": "रद्द करना",
       "clear_debug": "डिबग डेटा साफ़ करें",
       "clear_splits": "स्पष्ट",
-      "close": "बंद करना",
+      "close": "बंद करें",
       "compare": "तुलना करना",
       "confirm": "पुष्टि करना",
       "convert_to_automation": "स्वचालन में कनवर्ट करें",
@@ -570,7 +570,7 @@
       "import_json": "JSON से आयात करें",
       "import_overwrite": "आयात (डेटा अधिलेखित करता है)",
       "inspect": "निरीक्षण करें",
-      "label": "लेबल",
+      "label": "लेबल करें",
       "manage": "प्रबंधित करना",
       "merge": "मर्ज",
       "new_automation": "＋ नया स्वचालन",
@@ -622,7 +622,7 @@
       "artifact_tip": "{n} विसंगतियों का पता चला (उदाहरण के लिए चक्र के बीच में दरवाजा खोला गया) - उन्हें ग्राफ़ पर देखने के लिए खोलें",
       "poor_fit_tip": "असंगत मिलान इतिहास - इस प्रोफ़ाइल को फिर से बनाने पर विचार करें",
       "fair_fit_tip": "मध्यम मिलान स्थिरता - इस प्रोफ़ाइल को सौंपे गए कुछ चक्रों में कम आत्मविश्वास स्कोर होता है। सटीकता में सुधार के लिए अधिक चक्रों को लेबल करें या प्रोफ़ाइल को फिर से रिकॉर्ड करें।",
-      "fair_fit": "उचित फिट",
+      "fair_fit": "स्वीकार्य गुणवत्ता",
       "poor_fit": "ख़राब फिट",
       "auto": "(स्वचालित रूप से पता लगाया गया)",
       "built_in_tag": "निर्मित में",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "भंडारण आँकड़े, रखरखाव, निर्यात/आयात",
       "trim_intro": "लाल हैंडल खींचें, या मान दर्ज करें। खिड़की के बाहर सब कुछ हटा दिया गया है।",
       "unsure_detected_prefix": "वॉशडेटा अनिश्चित है कि इसका पता चला है",
-      "updated": "अपडेट किया गया"
+      "updated": "अपडेट किया गया",
+      "feedback_cycles_pending": "{n} चक्र{s} समीक्षा के लिए",
+      "artifact_spike_detail": "~{n}सेकंड के लिए सामान्य पावर बैंड से ऊपर गया।",
+      "artifact_dip_detail": "~{n}सेकंड के लिए सामान्य पावर बैंड से नीचे गया।",
+      "artifact_pause_detail": "पावर ~{n}सेकंड के लिए लगभग शून्य हो गई और फिर से शुरू हुई — संभवतः चक्र के बीच में दरवाज़ा खोला गया या चक्र रोका गया था।"
     },
     "phase_desc": {
       "pre_wash": "मुख्य धुलाई से पहले प्रारंभिक भिगोएँ या पूर्व-उपचार करें।",
@@ -769,7 +773,7 @@
       "fit_slight": "थोड़ा",
       "fit_strong": "मज़बूत",
       "fit_weak": "कमज़ोर",
-      "fit_word": "उपयुक्त",
+      "fit_word": "उपयुक्तता",
       "personalized": "● इस मशीन को वैयक्तिकृत किया गया"
     },
     "trend": {
@@ -874,6 +878,348 @@
       "settings_saved": "सेटिंग्स को सहेजा गया; एकीकरण पुनः लोड हो रहा है",
       "suggestions_applied": "सुझाव लागू; एकीकरण पुनः लोड हो रहा है",
       "suggestions_dismissed": "सुझाव खारिज"
+    },
+    "section": {
+      "basic": {
+        "label": "बुनियादी",
+        "intro": "मूल पहचान और आवश्यक तत्व जो अधिकांश सेटअप को चाहिए।"
+      },
+      "detection": {
+        "label": "पहचान",
+        "intro": "चक्र कैसे शुरू, चलते और समाप्त होने पर पहचाना जाता है।"
+      },
+      "matching": {
+        "label": "मिलान",
+        "intro": "समाप्त चक्रों को सीखे गए प्रोफाइल से कैसे मिलाया और लेबल किया जाता है।"
+      },
+      "timing": {
+        "label": "समय और वॉचडॉग",
+        "intro": "पृष्ठभूमि की लय, ऑफलाइन वॉचडॉग और रखरखाव।"
+      },
+      "anti_wrinkle": {
+        "label": "एंटी-सिलवट",
+        "intro": "एंटी-सिलवट मोड मुख्य चरण के बाद कम-शक्ति टम्बल पल्स का पता लगाता है और उन्हें समाप्त चक्र से जोड़े रखता है।"
+      },
+      "delay": {
+        "label": "विलंबित प्रारंभ",
+        "intro": "विलंबित प्रारंभ पहचान यह पहचानती है कि उपकरण चालू है लेकिन अभी तक अपना चक्र शुरू नहीं किया है।"
+      },
+      "triggers": {
+        "label": "ट्रिगर और दरवाजे",
+        "intro": "वैकल्पिक बाहरी संकेत: एक समाप्ति ट्रिगर, दरवाज़ा सेंसर, पॉज़ स्विच, और अनलोड अनुस्मारक।"
+      },
+      "notifications": {
+        "label": "सूचनाएं",
+        "intro": "चक्र घटनाओं के बारे में कब और कैसे सूचित किया जाता है।"
+      },
+      "ml_training": {
+        "label": "ML प्रशिक्षण",
+        "intro": "डिवाइस पर मशीन लर्निंग पुनः प्रशिक्षण शेड्यूल और डेटा सेटिंग्स।"
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "सीमाएं और अंतराल"
+      },
+      "cycle_start": {
+        "label": "चक्र प्रारंभ"
+      },
+      "cycle_end": {
+        "label": "चक्र समाप्ति"
+      },
+      "signal_processing": {
+        "label": "सिग्नल प्रोसेसिंग"
+      },
+      "predictive_end": {
+        "label": "पूर्वानुमानित समाप्ति"
+      },
+      "dishwasher_end": {
+        "label": "डिशवॉशर समाप्ति"
+      },
+      "dtw_refinement": {
+        "label": "DTW परिशोधन"
+      },
+      "match_scoring": {
+        "label": "मिलान स्कोरिंग"
+      },
+      "duration_gates": {
+        "label": "अवधि गेट"
+      },
+      "auto_labeling": {
+        "label": "स्वतः लेबलिंग"
+      },
+      "watchdog": {
+        "label": "वॉचडॉग"
+      },
+      "housekeeping": {
+        "label": "रखरखाव"
+      },
+      "debug": {
+        "label": "डीबग"
+      },
+      "external_end_trigger": {
+        "label": "बाहरी समाप्ति ट्रिगर"
+      },
+      "door_pause": {
+        "label": "दरवाज़ा और पॉज़"
+      },
+      "unload_reminder": {
+        "label": "अनलोड अनुस्मारक"
+      },
+      "services": {
+        "label": "सेवाएं"
+      },
+      "timing": {
+        "label": "समय"
+      },
+      "messages": {
+        "label": "संदेश"
+      },
+      "energy": {
+        "label": "ऊर्जा"
+      },
+      "cycle_timers": {
+        "label": "चक्र टाइमर"
+      },
+      "schedule": {
+        "label": "शेड्यूल"
+      },
+      "data_management": {
+        "label": "डेटा प्रबंधन"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "डिवाइस नाम"
+      },
+      "device_type": {
+        "label": "डिवाइस प्रकार"
+      },
+      "power_sensor": {
+        "label": "पावर सेंसर"
+      },
+      "min_power": {
+        "label": "न्यूनतम शक्ति"
+      },
+      "off_delay": {
+        "label": "बंद विलंब"
+      },
+      "linked_device": {
+        "label": "डिवाइस के अंतर्गत समूह"
+      },
+      "start_threshold_w": {
+        "label": "प्रारंभ सीमा"
+      },
+      "stop_threshold_w": {
+        "label": "रोक सीमा"
+      },
+      "min_off_gap": {
+        "label": "न्यूनतम बंद अंतराल"
+      },
+      "start_duration_threshold": {
+        "label": "प्रारंभ अवधि"
+      },
+      "start_energy_threshold": {
+        "label": "प्रारंभ ऊर्जा"
+      },
+      "completion_min_seconds": {
+        "label": "न्यूनतम चक्र अवधि"
+      },
+      "running_dead_zone": {
+        "label": "चलने का डेड ज़ोन"
+      },
+      "end_energy_threshold": {
+        "label": "समाप्ति ऊर्जा"
+      },
+      "end_repeat_count": {
+        "label": "समाप्ति दोहराव गणना"
+      },
+      "sampling_interval": {
+        "label": "नमूनाकरण अंतराल"
+      },
+      "smoothing_window": {
+        "label": "स्मूदिंग विंडो"
+      },
+      "abrupt_drop_watts": {
+        "label": "अचानक गिरावट"
+      },
+      "abrupt_drop_ratio": {
+        "label": "अचानक गिरावट अनुपात"
+      },
+      "profile_match_threshold": {
+        "label": "मिलान सीमा"
+      },
+      "profile_unmatch_threshold": {
+        "label": "गैर-मिलान सीमा"
+      },
+      "profile_match_interval": {
+        "label": "मिलान अंतराल"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "न्यूनतम अवधि अनुपात"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "अधिकतम अवधि अनुपात"
+      },
+      "profile_duration_tolerance": {
+        "label": "प्रोफाइल अवधि सहिष्णुता"
+      },
+      "duration_tolerance": {
+        "label": "अनुमान सहिष्णुता"
+      },
+      "auto_label_confidence": {
+        "label": "स्वतः लेबल विश्वास"
+      },
+      "learning_confidence": {
+        "label": "सीखने का विश्वास"
+      },
+      "suppress_feedback_notifications": {
+        "label": "फीडबैक सूचनाएं दबाएं"
+      },
+      "watchdog_interval": {
+        "label": "वॉचडॉग अंतराल"
+      },
+      "no_update_active_timeout": {
+        "label": "अपडेट-रहित टाइमआउट"
+      },
+      "progress_reset_delay": {
+        "label": "प्रगति रीसेट विलंब"
+      },
+      "auto_maintenance": {
+        "label": "स्वतः रखरखाव (रात्रि सफाई)"
+      },
+      "expose_debug_entities": {
+        "label": "डीबग एंटिटी उजागर करें"
+      },
+      "save_debug_traces": {
+        "label": "डीबग ट्रेस सहेजें"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "एंटी-सिलवट पहचान सक्षम करें"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "अधिकतम एंटी-सिलवट शक्ति"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "अधिकतम अवधि"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "बाहर निकलने की शक्ति सीमा"
+      },
+      "delay_start_detect_enabled": {
+        "label": "विलंबित प्रारंभ पहचान सक्षम करें"
+      },
+      "delay_confirm_seconds": {
+        "label": "पुष्टि सेकंड"
+      },
+      "delay_timeout_hours": {
+        "label": "टाइमआउट घंटे"
+      },
+      "external_end_trigger_enabled": {
+        "label": "बाहरी समाप्ति ट्रिगर सक्षम करें"
+      },
+      "external_end_trigger": {
+        "label": "बाहरी ट्रिगर एंटिटी"
+      },
+      "external_end_trigger_inverted": {
+        "label": "बाहरी ट्रिगर उल्टा करें (बंद पर ट्रिगर)"
+      },
+      "door_sensor_entity": {
+        "label": "दरवाज़ा सेंसर एंटिटी"
+      },
+      "pause_cuts_power": {
+        "label": "पॉज़ भी बिजली काटता है (स्विच द्वारा)"
+      },
+      "switch_entity": {
+        "label": "स्विच एंटिटी"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "अनलोड अनुस्मारक विलंब"
+      },
+      "pump_stuck_duration": {
+        "label": "पंप फंसने की अवधि"
+      },
+      "notify_start_services": {
+        "label": "प्रारंभ सेवाएं"
+      },
+      "notify_finish_services": {
+        "label": "समाप्ति सेवाएं"
+      },
+      "notify_live_services": {
+        "label": "लाइव प्रगति सेवाएं"
+      },
+      "notify_people": {
+        "label": "लोग (केवल घर पर होने पर)"
+      },
+      "notify_only_when_home": {
+        "label": "केवल घर पर सूचित करें"
+      },
+      "notify_fire_events": {
+        "label": "सूचनाओं के लिए HA इवेंट फायर करें"
+      },
+      "notify_before_end_minutes": {
+        "label": "समाप्ति से पहले अलर्ट"
+      },
+      "notify_live_interval_seconds": {
+        "label": "लाइव अपडेट अंतराल"
+      },
+      "notify_live_overrun_percent": {
+        "label": "अलर्ट से पहले लाइव ओवररन %"
+      },
+      "notify_live_chronometer": {
+        "label": "लाइव क्रोनोमीटर उपयोग करें"
+      },
+      "notify_timeout_seconds": {
+        "label": "स्वतः खारिज करें बाद में"
+      },
+      "notify_title": {
+        "label": "सूचना शीर्षक"
+      },
+      "notify_icon": {
+        "label": "सूचना आइकन"
+      },
+      "notify_start_message": {
+        "label": "प्रारंभ संदेश"
+      },
+      "notify_finish_message": {
+        "label": "समाप्ति संदेश"
+      },
+      "notify_pre_complete_message": {
+        "label": "लगभग पूर्ण संदेश"
+      },
+      "notify_reminder_message": {
+        "label": "अनुस्मारक संदेश"
+      },
+      "notify_channel": {
+        "label": "Android चैनल (प्रारंभ/लाइव)"
+      },
+      "notify_finish_channel": {
+        "label": "Android चैनल (समाप्ति)"
+      },
+      "energy_price_entity": {
+        "label": "ऊर्जा मूल्य एंटिटी"
+      },
+      "energy_price_static": {
+        "label": "स्थिर ऊर्जा मूल्य (प्रति kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "चक्र टाइमर"
+      },
+      "enable_ml_models": {
+        "label": "चक्र के दौरान स्मार्ट मॉडल लागू करें"
+      },
+      "ml_training_enabled": {
+        "label": "इस मशीन से सीखें"
+      },
+      "ml_training_hour": {
+        "label": "घंटे पर सीखें"
+      },
+      "ml_training_min_cycles": {
+        "label": "पहले आवश्यक चक्र"
+      },
+      "ml_training_interval_days": {
+        "label": "अधिकतम हर बार जांचें"
+      }
     }
   }
 }

@@ -735,7 +735,11 @@
       "storage_diagnostics": "Պահպանման վիճակագրություն, սպասարկում, արտահանում/ներմուծում",
       "trim_intro": "Քաշեք կարմիր բռնակները կամ մուտքագրեք արժեքներ: Պատուհանից դուրս ամեն ինչ հանվում է:",
       "unsure_detected_prefix": "WashData-ն վստահ չէ, որ հայտնաբերել է",
-      "updated": "Թարմացվեց"
+      "updated": "Թարմացվեց",
+      "feedback_cycles_pending": "{n} ցիկл{s} սպասում է վերանայման",
+      "artifact_spike_detail": "Անցել է հզորության սովորական շեղից ~{n}վ.",
+      "artifact_dip_detail": "Ընկել է հզորության սովորական շեղից ցածր ~{n}վ.",
+      "artifact_pause_detail": "Հզորությունը ~{n}վ-ով ընկավ գրեթե զրոյի, ապա շարունակվեց — հավանաբար դուռը բացվել էր ցիկլի կեսին կամ ցիկլը կասեցվել էր:"
     },
     "phase_desc": {
       "pre_wash": "Հիմնական լվացումից առաջ նախնական ներծծում կամ նախնական բուժում:",
@@ -874,6 +878,348 @@
       "settings_saved": "Պարամետրերը պահպանված են; ինտեգրման վերաբեռնում",
       "suggestions_applied": "Կիրառված առաջարկություններ; ինտեգրման վերաբեռնում",
       "suggestions_dismissed": "Առաջարկությունները մերժվել են"
+    },
+    "section": {
+      "basic": {
+        "label": "Հիմնական",
+        "intro": "Հիմնական ինքնությունը և կոնֆիգուրացիաների մեծ մասի համար անհրաժեշտ հիմքը:"
+      },
+      "detection": {
+        "label": "Հայտնաբերում",
+        "intro": "Ինչպես է ցիկլը հայտնաբերվում որպես սկսված, ընթացող և ավարտված:"
+      },
+      "matching": {
+        "label": "Համապատասխանություն",
+        "intro": "Ինչպես են ավարտված ցիկլերը համապատասխանեցվում սովորած պրոֆիլներին:"
+      },
+      "timing": {
+        "label": "Ժամաչափ և watchdog",
+        "intro": "Ֆոնային ռիթմ, offline watchdog և պարբերական սպասարկում:"
+      },
+      "anti_wrinkle": {
+        "label": "Ծալքերի կանխարգելում",
+        "intro": "Ծալքերի կանխարգելման ռեժիմն հայտնաբերում է հիմնական փուլից հետո ցածր հզորության կարճ պտտիչ զարկերը:"
+      },
+      "delay": {
+        "label": "Հետաձգված մեկնարկ",
+        "intro": "Հետաձգված մեկնարկի հայտնաբերումն ճանաչում է, երբ սարքը միացված է, բայց ցիկլն դեռ չի սկսել:"
+      },
+      "triggers": {
+        "label": "Գործարկիչներ և դռներ",
+        "intro": "Կամընտիր արտաքին ազդանշաններ. ավարտի գործարկիչ, դռան տվիչ, կասեցման անջատիչ և բեռնաթափման հիշեցում:"
+      },
+      "notifications": {
+        "label": "Ծանուցումներ",
+        "intro": "Երբ և ինչպես ստանաք ծանուցումներ ցիկլի իրադարձությունների մասին:"
+      },
+      "ml_training": {
+        "label": "ML ուսուցում",
+        "intro": "Սարքի վրա ML-ի վերաուսուցման ժամանակացույց և տվյալների կարգավորումներ:"
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Շեմեր և բաց"
+      },
+      "cycle_start": {
+        "label": "Ցիկլի մեկնարկ"
+      },
+      "cycle_end": {
+        "label": "Ցիկլի ավարտ"
+      },
+      "signal_processing": {
+        "label": "Ազդանշանի մշակում"
+      },
+      "predictive_end": {
+        "label": "Կանխատեսված ավարտ"
+      },
+      "dishwasher_end": {
+        "label": "Ամանաթափ ավարտ"
+      },
+      "dtw_refinement": {
+        "label": "DTW-ի բարելավում"
+      },
+      "match_scoring": {
+        "label": "Համապատասխանության գնահատում"
+      },
+      "duration_gates": {
+        "label": "Տևողության դարպաս"
+      },
+      "auto_labeling": {
+        "label": "Ինքնաբեր պիտակավորում"
+      },
+      "watchdog": {
+        "label": "Watchdog"
+      },
+      "housekeeping": {
+        "label": "Սպասարկում"
+      },
+      "debug": {
+        "label": "Կարդայ"
+      },
+      "external_end_trigger": {
+        "label": "Արտաքին ավարտի գործարկիչ"
+      },
+      "door_pause": {
+        "label": "Դուռ և կասեցում"
+      },
+      "unload_reminder": {
+        "label": "Բեռնաթափման հիշեցում"
+      },
+      "services": {
+        "label": "Ծառայություններ"
+      },
+      "timing": {
+        "label": "Ժամաչափ"
+      },
+      "messages": {
+        "label": "Հաղորդագրություններ"
+      },
+      "energy": {
+        "label": "Էներգիա"
+      },
+      "cycle_timers": {
+        "label": "Ցիկլի ժամաչափ"
+      },
+      "schedule": {
+        "label": "Ժամանակացույց"
+      },
+      "data_management": {
+        "label": "Տվյալների կառավարում"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Սարքի անուն"
+      },
+      "device_type": {
+        "label": "Սարքի տեսակ"
+      },
+      "power_sensor": {
+        "label": "Հզորության տվիչ"
+      },
+      "min_power": {
+        "label": "Նվազագույն հզորություն"
+      },
+      "off_delay": {
+        "label": "Անջատման հետաձգում"
+      },
+      "linked_device": {
+        "label": "Խմբավորել սարքի ներքո"
+      },
+      "start_threshold_w": {
+        "label": "Մեկնարկի շեմ"
+      },
+      "stop_threshold_w": {
+        "label": "Կանգառի շեմ"
+      },
+      "min_off_gap": {
+        "label": "Նվ. անջատման բաց"
+      },
+      "start_duration_threshold": {
+        "label": "Մեկնարկի տևողություն"
+      },
+      "start_energy_threshold": {
+        "label": "Մեկնարկի էներգիա"
+      },
+      "completion_min_seconds": {
+        "label": "Ն-մ ցիկ. տևողություն"
+      },
+      "running_dead_zone": {
+        "label": "Ակտ. մ-ռ. գոտի"
+      },
+      "end_energy_threshold": {
+        "label": "Ավ. էն. շ-մ"
+      },
+      "end_repeat_count": {
+        "label": "Ավ. կրկն. հ-ր"
+      },
+      "sampling_interval": {
+        "label": "Դ-ի ընդ-ջ"
+      },
+      "smoothing_window": {
+        "label": "Հ-ի պ-ն"
+      },
+      "abrupt_drop_watts": {
+        "label": "Կ-ն անկ. (Վ)"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Կ-ն անկ. հ-ց"
+      },
+      "profile_match_threshold": {
+        "label": "Հ-ն. շ-մ"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Անհ-ն. շ-մ"
+      },
+      "profile_match_interval": {
+        "label": "Հ-ն. ընդ-ջ"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Հ-ն. ն-մ. տ. հ-ց"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Հ-ն. ա-ն. տ. հ-ց"
+      },
+      "profile_duration_tolerance": {
+        "label": "Պ-ի տ. թ-ց"
+      },
+      "duration_tolerance": {
+        "label": "Կ-ի թ-ց"
+      },
+      "auto_label_confidence": {
+        "label": "Ինքն. պ-ի վ-ն"
+      },
+      "learning_confidence": {
+        "label": "Ու-ն. վ-ն"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Ջ-ել հ-ի ծ-ն"
+      },
+      "watchdog_interval": {
+        "label": "Watchdog ընդ-ջ"
+      },
+      "no_update_active_timeout": {
+        "label": "Ան. ա. ժ-կ"
+      },
+      "progress_reset_delay": {
+        "label": "Ա-ի վ. ո-ն"
+      },
+      "auto_maintenance": {
+        "label": "Ինքն. ջ-ն (գ.)"
+      },
+      "expose_debug_entities": {
+        "label": "Ց-ն կ-ի ս-ն"
+      },
+      "save_debug_traces": {
+        "label": "Պ-ն կ. ը-ն"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Ծ. կ-ի հ-ն"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Ծ.կ. ա-ն. հ-ն"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Ա-ն. տ-ն"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Ե-ի հ-ի շ-մ"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Հ. մ-ի հ-ն"
+      },
+      "delay_confirm_seconds": {
+        "label": "Հ-ն. վ-ն"
+      },
+      "delay_timeout_hours": {
+        "label": "Ժ-ն. ժ-ն"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Ա. ա-ի գ. ա-ն"
+      },
+      "external_end_trigger": {
+        "label": "Ա. գ. ս-ն"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Շ-ն ա. գ. (ԱՆ.)"
+      },
+      "door_sensor_entity": {
+        "label": "Դ-ի տ. ս-ն"
+      },
+      "pause_cuts_power": {
+        "label": "Կ-ն կտ. հ-ն"
+      },
+      "switch_entity": {
+        "label": "Ա-ի ս-ն"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Բ-ի հ. ո-ն"
+      },
+      "pump_stuck_duration": {
+        "label": "Ն-ի կ-ն. տ-ն"
+      },
+      "notify_start_services": {
+        "label": "Մ-ի ծ-ռ."
+      },
+      "notify_finish_services": {
+        "label": "Ա-ի ծ-ռ."
+      },
+      "notify_live_services": {
+        "label": "Ա. ծ-ռ."
+      },
+      "notify_people": {
+        "label": "Ան. (Ն-ի ե.)"
+      },
+      "notify_only_when_home": {
+        "label": "Ծ-ն ե. տ."
+      },
+      "notify_fire_events": {
+        "label": "HA ի-ծ."
+      },
+      "notify_before_end_minutes": {
+        "label": "Ա-ց ն."
+      },
+      "notify_live_interval_seconds": {
+        "label": "Ա. թ-ն"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Ա. % ն."
+      },
+      "notify_live_chronometer": {
+        "label": "Ա. ժ-ն"
+      },
+      "notify_timeout_seconds": {
+        "label": "Փ-ն ա."
+      },
+      "notify_title": {
+        "label": "Ծ-ի վ-ն"
+      },
+      "notify_icon": {
+        "label": "Ծ-ի պ-ն"
+      },
+      "notify_start_message": {
+        "label": "Մ-ի հ-ն"
+      },
+      "notify_finish_message": {
+        "label": "Ա-ի հ-ն"
+      },
+      "notify_pre_complete_message": {
+        "label": "Հ-ի ա. հ-ն"
+      },
+      "notify_reminder_message": {
+        "label": "Հ-ի հ-ն"
+      },
+      "notify_channel": {
+        "label": "Android ա. (մ./ա.)"
+      },
+      "notify_finish_channel": {
+        "label": "Android ա. (ա.)"
+      },
+      "energy_price_entity": {
+        "label": "Է-ի գ. ս-ն"
+      },
+      "energy_price_static": {
+        "label": "Ն. է. գ-ն (kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Ց-ի ժ-ն"
+      },
+      "enable_ml_models": {
+        "label": "ML ե. ցիկ. ժ."
+      },
+      "ml_training_enabled": {
+        "label": "Ս-ն ե."
+      },
+      "ml_training_hour": {
+        "label": "Ս-ն ժ-ն"
+      },
+      "ml_training_min_cycles": {
+        "label": "Ց-ն ն-ե."
+      },
+      "ml_training_interval_days": {
+        "label": "Ն. ա-ն"
+      }
     }
   }
 }

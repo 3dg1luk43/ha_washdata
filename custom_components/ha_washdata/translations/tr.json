@@ -513,7 +513,7 @@
       "import_json": "JSON'dan içe aktar",
       "import_overwrite": "İçe aktar (veriyi üzerine yazar)",
       "inspect": "İncele",
-      "label": "Etiket",
+      "label": "Etiketle",
       "manage": "Yönet",
       "merge": "Birleştir",
       "new_automation": "＋ Yeni Otomasyon",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Depolama istatistikleri, bakım, dışa/içe aktarma",
       "trim_intro": "Kırmızı tutamaçları sürükleyin veya değer girin. Pencerenin dışındaki her şey kaldırılır.",
       "unsure_detected_prefix": "WashData algıladığından emin değil",
-      "updated": "Güncellendi"
+      "updated": "Güncellendi",
+      "feedback_cycles_pending": "İncelenecek {n} döngü",
+      "artifact_spike_detail": "Normal güç bandının üzerinde yaklaşık ~{n} saniye sürdü.",
+      "artifact_dip_detail": "Normal güç bandının altında yaklaşık ~{n} saniye sürdü.",
+      "artifact_pause_detail": "Güç yaklaşık ~{n} saniye boyunca sıfıra yakın düştü, sonra devam etti — döngünün ortasında kapı açılmış veya döngü duraklatılmış olabilir."
     },
     "phase_desc": {
       "pre_wash": "Ana yıkamadan önce ilk ıslatma veya ön işlemden geçirin.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Düşen eğilim",
       "up": "Yükselen eğilim"
+    },
+    "section": {
+      "basic": {
+        "label": "Temel",
+        "intro": "Temel kimlik ve çoğu kurulum için gerekli olan temel öğeler."
+      },
+      "detection": {
+        "label": "Algılama",
+        "intro": "Bir döngünün nasıl başladığı, çalıştığı ve bittiği algılanır."
+      },
+      "matching": {
+        "label": "Eşleştirme",
+        "intro": "Tamamlanan döngülerin öğrenilen profillerle nasıl eşleştirilip etiketlendiği."
+      },
+      "timing": {
+        "label": "Zamanlama & Bekçi",
+        "intro": "Arka plan ritmi, çevrimdışı bekçi ve bakım işlemleri."
+      },
+      "anti_wrinkle": {
+        "label": "Kırışıklık Önleme",
+        "intro": "Kırışıklık önleme modu, ana aşamadan sonra düşük güçlü tumble darbelerini algılar ve bunları tamamlanan döngüye bağlı tutar."
+      },
+      "delay": {
+        "label": "Gecikmeli Başlatma",
+        "intro": "Gecikmeli başlatma algılaması, cihazın açık olduğu ancak henüz döngüsüne başlamadığı durumu tespit eder."
+      },
+      "triggers": {
+        "label": "Tetikleyiciler & Kapılar",
+        "intro": "İsteğe bağlı harici sinyaller: bitiş tetikleyicisi, kapı sensörü, duraklatma anahtarı ve boşaltma hatırlatıcısı."
+      },
+      "notifications": {
+        "label": "Bildirimler",
+        "intro": "Döngü olayları hakkında ne zaman ve nasıl bildirim alacağınız."
+      },
+      "ml_training": {
+        "label": "ML Eğitimi",
+        "intro": "Cihaz üzerinde makine öğrenmesi yeniden eğitim takvimi ve veri ayarları."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Eşikler & Aralık"
+      },
+      "cycle_start": {
+        "label": "Döngü Başlangıcı"
+      },
+      "cycle_end": {
+        "label": "Döngü Sonu"
+      },
+      "signal_processing": {
+        "label": "Sinyal İşleme"
+      },
+      "predictive_end": {
+        "label": "Tahmine Dayalı Bitiş"
+      },
+      "dishwasher_end": {
+        "label": "Bulaşık Makinesi Sonu"
+      },
+      "dtw_refinement": {
+        "label": "DTW İyileştirme"
+      },
+      "match_scoring": {
+        "label": "Eşleşme Puanlaması"
+      },
+      "duration_gates": {
+        "label": "Süre Kapıları"
+      },
+      "auto_labeling": {
+        "label": "Otomatik Etiketleme"
+      },
+      "watchdog": {
+        "label": "Bekçi"
+      },
+      "housekeeping": {
+        "label": "Bakım"
+      },
+      "debug": {
+        "label": "Hata Ayıklama"
+      },
+      "external_end_trigger": {
+        "label": "Harici Bitiş Tetikleyicisi"
+      },
+      "door_pause": {
+        "label": "Kapı & Duraklatma"
+      },
+      "unload_reminder": {
+        "label": "Boşaltma Hatırlatıcısı"
+      },
+      "services": {
+        "label": "Servisler"
+      },
+      "timing": {
+        "label": "Zamanlama"
+      },
+      "messages": {
+        "label": "Mesajlar"
+      },
+      "energy": {
+        "label": "Enerji"
+      },
+      "cycle_timers": {
+        "label": "Döngü Zamanlayıcıları"
+      },
+      "schedule": {
+        "label": "Takvim"
+      },
+      "data_management": {
+        "label": "Veri Yönetimi"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Cihaz Adı"
+      },
+      "device_type": {
+        "label": "Cihaz Türü"
+      },
+      "power_sensor": {
+        "label": "Güç Sensörü"
+      },
+      "min_power": {
+        "label": "Minimum Güç"
+      },
+      "off_delay": {
+        "label": "Kapatma Gecikmesi"
+      },
+      "linked_device": {
+        "label": "Cihaz Altında Grupla"
+      },
+      "start_threshold_w": {
+        "label": "Başlangıç Eşiği"
+      },
+      "stop_threshold_w": {
+        "label": "Durdurma Eşiği"
+      },
+      "min_off_gap": {
+        "label": "Min. Kapalı Aralık"
+      },
+      "start_duration_threshold": {
+        "label": "Başlangıç Süresi"
+      },
+      "start_energy_threshold": {
+        "label": "Başlangıç Enerjisi"
+      },
+      "completion_min_seconds": {
+        "label": "Min. Döngü Süresi"
+      },
+      "running_dead_zone": {
+        "label": "Çalışma Ölü Bölgesi"
+      },
+      "end_energy_threshold": {
+        "label": "Bitiş Enerjisi"
+      },
+      "end_repeat_count": {
+        "label": "Bitiş Tekrar Sayısı"
+      },
+      "sampling_interval": {
+        "label": "Örnekleme Aralığı"
+      },
+      "smoothing_window": {
+        "label": "Yumuşatma Penceresi"
+      },
+      "abrupt_drop_watts": {
+        "label": "Ani Düşüş"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Ani Düşüş Oranı"
+      },
+      "profile_match_threshold": {
+        "label": "Eşleşme Eşiği"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Eşleşmeme Eşiği"
+      },
+      "profile_match_interval": {
+        "label": "Eşleşme Aralığı"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Min. Süre Oranı"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Maks. Süre Oranı"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profil Süre Toleransı"
+      },
+      "duration_tolerance": {
+        "label": "Tahmin Toleransı"
+      },
+      "auto_label_confidence": {
+        "label": "Otomatik Etiket Güveni"
+      },
+      "learning_confidence": {
+        "label": "Öğrenme Güveni"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Geri Bildirim Bildirimlerini Gizle"
+      },
+      "watchdog_interval": {
+        "label": "Bekçi Aralığı"
+      },
+      "no_update_active_timeout": {
+        "label": "Güncelleme Yok Zaman Aşımı"
+      },
+      "progress_reset_delay": {
+        "label": "İlerleme Sıfırlama Gecikmesi"
+      },
+      "auto_maintenance": {
+        "label": "Otomatik Bakım (gece temizliği)"
+      },
+      "expose_debug_entities": {
+        "label": "Hata Ayıklama Varlıklarını Göster"
+      },
+      "save_debug_traces": {
+        "label": "Hata Ayıklama İzlerini Kaydet"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Kırışıklık Önleme Algılamayı Etkinleştir"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Maks. Kırışıklık Önleme Gücü"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Maks. Süre"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Çıkış Gücü Eşiği"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Gecikmeli Başlatma Algılamayı Etkinleştir"
+      },
+      "delay_confirm_seconds": {
+        "label": "Onay Saniyeleri"
+      },
+      "delay_timeout_hours": {
+        "label": "Zaman Aşımı Saatleri"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Harici Bitiş Tetikleyicisini Etkinleştir"
+      },
+      "external_end_trigger": {
+        "label": "Harici Tetikleyici Varlığı"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Harici Tetikleyiciyi Tersine Çevir (KAPALI'da tetikle)"
+      },
+      "door_sensor_entity": {
+        "label": "Kapı Sensörü Varlığı"
+      },
+      "pause_cuts_power": {
+        "label": "Duraklatma Gücü de Keser (anahtar üzerinden)"
+      },
+      "switch_entity": {
+        "label": "Anahtar Varlığı"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Boşaltma Hatırlatıcısı Gecikmesi"
+      },
+      "pump_stuck_duration": {
+        "label": "Pompa Takılma Süresi"
+      },
+      "notify_start_services": {
+        "label": "Başlangıç Servisleri"
+      },
+      "notify_finish_services": {
+        "label": "Bitiş Servisleri"
+      },
+      "notify_live_services": {
+        "label": "Canlı İlerleme Servisleri"
+      },
+      "notify_people": {
+        "label": "Kişiler (Evde İken için)"
+      },
+      "notify_only_when_home": {
+        "label": "Yalnızca Evdeyken Bildir"
+      },
+      "notify_fire_events": {
+        "label": "Bildirimler için HA Olayları Tetikle"
+      },
+      "notify_before_end_minutes": {
+        "label": "Bitiş Öncesi Uyarı"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Canlı Güncelleme Aralığı"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Uyarı Öncesi Canlı Aşım %"
+      },
+      "notify_live_chronometer": {
+        "label": "Canlı Kronometre Kullan"
+      },
+      "notify_timeout_seconds": {
+        "label": "Sonra Otomatik Kapat"
+      },
+      "notify_title": {
+        "label": "Bildirim Başlığı"
+      },
+      "notify_icon": {
+        "label": "Bildirim Simgesi"
+      },
+      "notify_start_message": {
+        "label": "Başlangıç Mesajı"
+      },
+      "notify_finish_message": {
+        "label": "Bitiş Mesajı"
+      },
+      "notify_pre_complete_message": {
+        "label": "Bitiş Öncesi Mesaj"
+      },
+      "notify_reminder_message": {
+        "label": "Hatırlatıcı Mesaj"
+      },
+      "notify_channel": {
+        "label": "Android Kanalı (başlangıç/canlı)"
+      },
+      "notify_finish_channel": {
+        "label": "Android Kanalı (bitiş)"
+      },
+      "energy_price_entity": {
+        "label": "Enerji Fiyatı Varlığı"
+      },
+      "energy_price_static": {
+        "label": "Sabit Enerji Fiyatı (kWh başına)"
+      },
+      "notify_cycle_timers": {
+        "label": "Döngü Zamanlayıcıları"
+      },
+      "enable_ml_models": {
+        "label": "Döngü sırasında akıllı modelleri uygula"
+      },
+      "ml_training_enabled": {
+        "label": "Bu makineden öğren"
+      },
+      "ml_training_hour": {
+        "label": "Saatte öğren"
+      },
+      "ml_training_min_cycles": {
+        "label": "Önce gereken döngüler"
+      },
+      "ml_training_interval_days": {
+        "label": "En fazla her seferinde kontrol et"
+      }
     }
   }
 }

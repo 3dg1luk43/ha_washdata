@@ -581,7 +581,7 @@
       "manual_duration": "Manuell Dauer (min, optional)",
       "mode_existing_profile": "Add to bestehend Profil",
       "mode_new_profile": "Schafen neie Profil",
-      "new_profile_name": "Neie Profil Numm",
+      "new_profile_name": "Neien Profilnumm",
       "panel_default_tab": "Standard Tab",
       "phase_name": "Numm",
       "power": "Muecht",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Stockage Statistiken, Ënnerhalt, Export / Import",
       "trim_intro": "Drag déi rout Handle, oder gitt Wäerter. Alles baussent der Fënster gëtt ewechgeholl.",
       "unsure_detected_prefix": "WashData ass net sécher datt et entdeckt gouf",
-      "updated": "Aktualiséiert"
+      "updated": "Aktualiséiert",
+      "feedback_cycles_pending": "{n} Zyklus{s} ze iwwerpruefe",
+      "artifact_spike_detail": "Iwwert dem normale Stroumband fir ~{n}s.",
+      "artifact_dip_detail": "Ënnert dem normale Stroumband fir ~{n}s.",
+      "artifact_pause_detail": "De Stroum ass fir ~{n}s op bal null gefall a dunn erëm ugaangen - méiglecherweis gouf d'Dier am Laf vum Zyklus opgemaach oder de Zyklus gouf pauséiert."
     },
     "phase_desc": {
       "pre_wash": "Initial Soak oder Pre-Behandlung virun der Haaptwäsch.",
@@ -874,6 +878,348 @@
       "settings_saved": "Astellunge gespäichert; Integratioun reloading",
       "suggestions_applied": "Virschléi applizéiert; Integratioun reloading",
       "suggestions_dismissed": "Virschléi entlooss"
+    },
+    "section": {
+      "basic": {
+        "label": "Basis",
+        "intro": "Kern-Identitéit an d'Essenzielles fir déi meescht Opstellungen."
+      },
+      "detection": {
+        "label": "Erkennung",
+        "intro": "Wéi e Zyklus als gestart, laafend a fäerdeg erkannt gëtt."
+      },
+      "matching": {
+        "label": "Matching",
+        "intro": "Wéi fäerdeg Zyklen mat geléierte Profiler verglach a markéiert ginn."
+      },
+      "timing": {
+        "label": "Timing a Iwwerwaachung",
+        "intro": "Hannergrond-Takt, Offline-Iwwerwaachung a Housekeeping."
+      },
+      "anti_wrinkle": {
+        "label": "Anti-Faltung",
+        "intro": "Den Anti-Faltungs-Modus erkennt nidderenergie Tummel-Pulsen no der Haaptfase an hält se beim fäerdege Zyklus."
+      },
+      "delay": {
+        "label": "Verzoegerte Start",
+        "intro": "D'Verzoegerungs-Erkennungsfunktioun identifizéiert wann en Apparat ageschalt ass, mee de Zyklus nach net ugefaangen huet."
+      },
+      "triggers": {
+        "label": "Trigger a Dieren",
+        "intro": "Optional extern Signaler: en End-Trigger, e Dier-Sensor, en Pauséier-Schalter an d'Ausloede-Erënnerung."
+      },
+      "notifications": {
+        "label": "Notifikatiounen",
+        "intro": "Wann a wéi Dir iwwert Zyklus-Evenementer informéiert gitt."
+      },
+      "ml_training": {
+        "label": "ML Training",
+        "intro": "On-Apparat ML Neutraining-Plang an Datenandstellungen."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Schwellenwäerter a Lück"
+      },
+      "cycle_start": {
+        "label": "Zyklus Start"
+      },
+      "cycle_end": {
+        "label": "Zyklus Enn"
+      },
+      "signal_processing": {
+        "label": "Signalveraarbechtung"
+      },
+      "predictive_end": {
+        "label": "Virausgesote Enn"
+      },
+      "dishwasher_end": {
+        "label": "Geschirrspueler Enn"
+      },
+      "dtw_refinement": {
+        "label": "DTW Verfeinnerung"
+      },
+      "match_scoring": {
+        "label": "Match-Bewäertung"
+      },
+      "duration_gates": {
+        "label": "Dauer-Gates"
+      },
+      "auto_labeling": {
+        "label": "Auto-Markéierung"
+      },
+      "watchdog": {
+        "label": "Iwwerwaachung"
+      },
+      "housekeeping": {
+        "label": "Housekeeping"
+      },
+      "debug": {
+        "label": "Debug"
+      },
+      "external_end_trigger": {
+        "label": "Externe End-Trigger"
+      },
+      "door_pause": {
+        "label": "Dier a Pause"
+      },
+      "unload_reminder": {
+        "label": "Ausloede-Erënnerung"
+      },
+      "services": {
+        "label": "Servicer"
+      },
+      "timing": {
+        "label": "Timing"
+      },
+      "messages": {
+        "label": "Messagen"
+      },
+      "energy": {
+        "label": "Energie"
+      },
+      "cycle_timers": {
+        "label": "Zyklus-Timer"
+      },
+      "schedule": {
+        "label": "Zäitplang"
+      },
+      "data_management": {
+        "label": "Dateverwaltung"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Apparat-Numm"
+      },
+      "device_type": {
+        "label": "Apparat-Typ"
+      },
+      "power_sensor": {
+        "label": "Stroum-Sensor"
+      },
+      "min_power": {
+        "label": "Minimalstroum"
+      },
+      "off_delay": {
+        "label": "Ausschaltverzögerung"
+      },
+      "linked_device": {
+        "label": "Ënnert Apparat gruppéieren"
+      },
+      "start_threshold_w": {
+        "label": "Startschwelle"
+      },
+      "stop_threshold_w": {
+        "label": "Stoppschwelle"
+      },
+      "min_off_gap": {
+        "label": "Min. Auspause-Gap"
+      },
+      "start_duration_threshold": {
+        "label": "Startdauer"
+      },
+      "start_energy_threshold": {
+        "label": "Startenergie"
+      },
+      "completion_min_seconds": {
+        "label": "Min. Zyklusdauer"
+      },
+      "running_dead_zone": {
+        "label": "Laaf-Totzone"
+      },
+      "end_energy_threshold": {
+        "label": "Endenergie"
+      },
+      "end_repeat_count": {
+        "label": "End-Widderhuelung"
+      },
+      "sampling_interval": {
+        "label": "Mesintervall"
+      },
+      "smoothing_window": {
+        "label": "Glättungsfenster"
+      },
+      "abrupt_drop_watts": {
+        "label": "Schroffe Ooffall"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Schroffe Ooffall-Verhältnis"
+      },
+      "profile_match_threshold": {
+        "label": "Match-Schwelle"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Unmatch-Schwelle"
+      },
+      "profile_match_interval": {
+        "label": "Match-Intervall"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Min. Dauerverhältnis"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Max. Dauerverhältnis"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profil-Dauertoleranz"
+      },
+      "duration_tolerance": {
+        "label": "Schätzungstoleranz"
+      },
+      "auto_label_confidence": {
+        "label": "Auto-Markéierungsvertrauen"
+      },
+      "learning_confidence": {
+        "label": "Léiervertrauen"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Feedback-Notifikatiounen ënnerdrecken"
+      },
+      "watchdog_interval": {
+        "label": "Iwwerwaachungsintervall"
+      },
+      "no_update_active_timeout": {
+        "label": "Kee-Update Timeout"
+      },
+      "progress_reset_delay": {
+        "label": "Fortschrittszurücksetz-Verspéidung"
+      },
+      "auto_maintenance": {
+        "label": "Auto-Maintenance (nächteliche Opraumen)"
+      },
+      "expose_debug_entities": {
+        "label": "Debug-Entitéiten aussestellen"
+      },
+      "save_debug_traces": {
+        "label": "Debug-Spueren späicheren"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Anti-Faltungs-Erkennung aktivéieren"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Max. Anti-Faltungs-Stroum"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Max. Dauer"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Ausgangsstroum-Schwelle"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Verzoegerte-Start-Erkennung aktivéieren"
+      },
+      "delay_confirm_seconds": {
+        "label": "Confirmatiouns-Sekonnen"
+      },
+      "delay_timeout_hours": {
+        "label": "Timeout-Stonnen"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Externen End-Trigger aktivéieren"
+      },
+      "external_end_trigger": {
+        "label": "Externe Trigger-Entitéit"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Externer Trigger invertéieren (bei OFF)"
+      },
+      "door_sensor_entity": {
+        "label": "Dier-Sensor-Entitéit"
+      },
+      "pause_cuts_power": {
+        "label": "Pause schneit och Stroum (via Schalter)"
+      },
+      "switch_entity": {
+        "label": "Schalter-Entitéit"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Ausloede-Erënnerungs-Verspéidung"
+      },
+      "pump_stuck_duration": {
+        "label": "Pompe-Stau-Dauer"
+      },
+      "notify_start_services": {
+        "label": "Start-Servicer"
+      },
+      "notify_finish_services": {
+        "label": "Finish-Servicer"
+      },
+      "notify_live_services": {
+        "label": "Live-Fortschritt-Servicer"
+      },
+      "notify_people": {
+        "label": "Persoune (fir nëmmen doheem)"
+      },
+      "notify_only_when_home": {
+        "label": "Nëmme benoriichten wann doheem"
+      },
+      "notify_fire_events": {
+        "label": "HA-Evenementer ofschéissen"
+      },
+      "notify_before_end_minutes": {
+        "label": "Pre-End-Alert"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Live-Update-Intervall"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Live-Iwwerschreidungs-% Alarm"
+      },
+      "notify_live_chronometer": {
+        "label": "Live-Chronometer benotzen"
+      },
+      "notify_timeout_seconds": {
+        "label": "Auto-Zoumaachen no"
+      },
+      "notify_title": {
+        "label": "Notifikatiounstitel"
+      },
+      "notify_icon": {
+        "label": "Notifikatiounsikoun"
+      },
+      "notify_start_message": {
+        "label": "Startnoriicht"
+      },
+      "notify_finish_message": {
+        "label": "Endnoriicht"
+      },
+      "notify_pre_complete_message": {
+        "label": "Pre-Complete Noriicht"
+      },
+      "notify_reminder_message": {
+        "label": "Erënnerungs-Noriicht"
+      },
+      "notify_channel": {
+        "label": "Android-Kanal (Start/Live)"
+      },
+      "notify_finish_channel": {
+        "label": "Android-Kanal (Finish)"
+      },
+      "energy_price_entity": {
+        "label": "Energie-Präis-Entitéit"
+      },
+      "energy_price_static": {
+        "label": "Statesche Energiepräis (pro kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Zyklus-Timer"
+      },
+      "enable_ml_models": {
+        "label": "Smart Modeller während engem Zyklus"
+      },
+      "ml_training_enabled": {
+        "label": "Vun dësem Apparat léieren"
+      },
+      "ml_training_hour": {
+        "label": "Léierstond"
+      },
+      "ml_training_min_cycles": {
+        "label": "Zyklen fir den Ufank"
+      },
+      "ml_training_interval_days": {
+        "label": "Max. Intervall"
+      }
     }
   }
 }

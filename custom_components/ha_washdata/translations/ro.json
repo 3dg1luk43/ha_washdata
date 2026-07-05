@@ -491,7 +491,7 @@
       "cancel": "Anulați",
       "clear_debug": "Curățați datele de depanare",
       "clear_splits": "Curățați",
-      "close": "Închideți",
+      "close": "Închide",
       "compare": "Comparați",
       "confirm": "Confirmați",
       "convert_to_automation": "Convertiți în automatizare",
@@ -513,7 +513,7 @@
       "import_json": "Importați din JSON",
       "import_overwrite": "Importați (suprascrie datele)",
       "inspect": "Inspectați",
-      "label": "Etichetați",
+      "label": "Etichetează",
       "manage": "Gestionați",
       "merge": "Îmbinați",
       "new_automation": "＋ Automatizare nouă",
@@ -536,7 +536,7 @@
       "reset_to_builtin": "Resetați la modelele integrate",
       "reset_to_defaults": "Resetați la valorile implicite",
       "resume_cycle": "Reluare ciclu",
-      "review": "Revizuiți",
+      "review": "Evaluează",
       "run_analysis": "🔍 Rulați analiza sugestiilor",
       "run_auto_label": "Rulați etichetarea automată",
       "save": "Salvați",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Statistici stocare, întreținere, export/import",
       "trim_intro": "Trageți mânerele roșii sau introduceți valori. Tot ceea ce este în afara ferestrei este eliminat.",
       "unsure_detected_prefix": "WashData nu este sigur că a detectat",
-      "updated": "Actualizat"
+      "updated": "Actualizat",
+      "feedback_cycles_pending": "{n} ciclu{s} de revizuit",
+      "artifact_spike_detail": "A depășit banda de putere obișnuită timp de ~{n}s.",
+      "artifact_dip_detail": "A scăzut sub banda de putere obișnuită timp de ~{n}s.",
+      "artifact_pause_detail": "Puterea a scăzut aproape la zero timp de ~{n}s, apoi a revenit — probabil ușa a fost deschisă în mijlocul ciclului sau ciclul a fost întrerupt."
     },
     "phase_desc": {
       "pre_wash": "Înmuiere inițială sau pre-tratament înainte de spălarea principală.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Tendință descendentă",
       "up": "Tendință ascendentă"
+    },
+    "section": {
+      "basic": {
+        "label": "De bază",
+        "intro": "Identitate centrală și elementele esențiale pentru majoritatea configurațiilor."
+      },
+      "detection": {
+        "label": "Detectare",
+        "intro": "Cum este detectat un ciclu ca pornind, rulând și terminând."
+      },
+      "matching": {
+        "label": "Potrivire",
+        "intro": "Cum ciclurile terminate sunt potrivite cu profiluri învățate și etichetate."
+      },
+      "timing": {
+        "label": "Temporizare și Watchdog",
+        "intro": "Cadența de fundal, watchdog-ul offline și întreținerea."
+      },
+      "anti_wrinkle": {
+        "label": "Anti-Șifonare",
+        "intro": "Modul anti-șifonare detectează pulsuri de tumblare la putere redusă după faza principală și le menține atașate ciclului terminat."
+      },
+      "delay": {
+        "label": "Start Întârziat",
+        "intro": "Detectarea startului întârziat identifică momentul în care un aparat este pornit dar nu și-a început ciclul."
+      },
+      "triggers": {
+        "label": "Declanșatoare și Uși",
+        "intro": "Semnale externe opționale: un declanșator de sfârșit, un senzor de ușă, un comutator de pauză și reamintirea de descărcare."
+      },
+      "notifications": {
+        "label": "Notificări",
+        "intro": "Când și cum sunteți notificat despre evenimentele de ciclu."
+      },
+      "ml_training": {
+        "label": "Antrenare ML",
+        "intro": "Calendarul de reantrenare a învățării automate pe dispozitiv și setările de date."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Praguri și Pauză"
+      },
+      "cycle_start": {
+        "label": "Pornire Ciclu"
+      },
+      "cycle_end": {
+        "label": "Sfârșit Ciclu"
+      },
+      "signal_processing": {
+        "label": "Procesare Semnal"
+      },
+      "predictive_end": {
+        "label": "Sfârșit Predictiv"
+      },
+      "dishwasher_end": {
+        "label": "Sfârșit Mașină de Spălat Vase"
+      },
+      "dtw_refinement": {
+        "label": "Rafinare DTW"
+      },
+      "match_scoring": {
+        "label": "Scor Potrivire"
+      },
+      "duration_gates": {
+        "label": "Porți Durată"
+      },
+      "auto_labeling": {
+        "label": "Etichetare Automată"
+      },
+      "watchdog": {
+        "label": "Watchdog"
+      },
+      "housekeeping": {
+        "label": "Întreținere"
+      },
+      "debug": {
+        "label": "Depanare"
+      },
+      "external_end_trigger": {
+        "label": "Declanșator Extern de Sfârșit"
+      },
+      "door_pause": {
+        "label": "Ușă și Pauză"
+      },
+      "unload_reminder": {
+        "label": "Reamintire Descărcare"
+      },
+      "services": {
+        "label": "Servicii"
+      },
+      "timing": {
+        "label": "Temporizare"
+      },
+      "messages": {
+        "label": "Mesaje"
+      },
+      "energy": {
+        "label": "Energie"
+      },
+      "cycle_timers": {
+        "label": "Temporizatoare Ciclu"
+      },
+      "schedule": {
+        "label": "Program"
+      },
+      "data_management": {
+        "label": "Gestionare Date"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Numele Dispozitivului"
+      },
+      "device_type": {
+        "label": "Tipul Dispozitivului"
+      },
+      "power_sensor": {
+        "label": "Senzor de Putere"
+      },
+      "min_power": {
+        "label": "Putere Minimă"
+      },
+      "off_delay": {
+        "label": "Întârziere la Oprire"
+      },
+      "linked_device": {
+        "label": "Grupați sub Dispozitiv"
+      },
+      "start_threshold_w": {
+        "label": "Prag de Pornire"
+      },
+      "stop_threshold_w": {
+        "label": "Prag de Oprire"
+      },
+      "min_off_gap": {
+        "label": "Pauză Minimă de Oprire"
+      },
+      "start_duration_threshold": {
+        "label": "Durata de Pornire"
+      },
+      "start_energy_threshold": {
+        "label": "Energia de Pornire"
+      },
+      "completion_min_seconds": {
+        "label": "Durata Minimă a Ciclului"
+      },
+      "running_dead_zone": {
+        "label": "Zonă Moartă în Funcționare"
+      },
+      "end_energy_threshold": {
+        "label": "Energia de Sfârșit"
+      },
+      "end_repeat_count": {
+        "label": "Număr de Repetări la Sfârșit"
+      },
+      "sampling_interval": {
+        "label": "Interval de Eșantionare"
+      },
+      "smoothing_window": {
+        "label": "Fereastră de Netezire"
+      },
+      "abrupt_drop_watts": {
+        "label": "Scădere Bruscă"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Raport Scădere Bruscă"
+      },
+      "profile_match_threshold": {
+        "label": "Prag de Potrivire"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Prag de Nepotrivire"
+      },
+      "profile_match_interval": {
+        "label": "Interval de Potrivire"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Raport Durată Minimă"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Raport Durată Maximă"
+      },
+      "profile_duration_tolerance": {
+        "label": "Toleranță Durată Profil"
+      },
+      "duration_tolerance": {
+        "label": "Toleranță Estimare"
+      },
+      "auto_label_confidence": {
+        "label": "Încredere Etichetare Automată"
+      },
+      "learning_confidence": {
+        "label": "Încredere Învățare"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Suprimați Notificările de Feedback"
+      },
+      "watchdog_interval": {
+        "label": "Interval Watchdog"
+      },
+      "no_update_active_timeout": {
+        "label": "Timeout Fără Actualizare"
+      },
+      "progress_reset_delay": {
+        "label": "Întârziere Resetare Progres"
+      },
+      "auto_maintenance": {
+        "label": "Întreținere Automată (curățare nocturnă)"
+      },
+      "expose_debug_entities": {
+        "label": "Expuneți Entitățile de Depanare"
+      },
+      "save_debug_traces": {
+        "label": "Salvați Urmele de Depanare"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Activați Detectarea Anti-Șifonare"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Putere Maximă Anti-Șifonare"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Durată Maximă"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Prag Putere de Ieșire"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Activați Detectarea Startului Întârziat"
+      },
+      "delay_confirm_seconds": {
+        "label": "Secunde de Confirmare"
+      },
+      "delay_timeout_hours": {
+        "label": "Ore de Timeout"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Activați Declanșatorul Extern de Sfârșit"
+      },
+      "external_end_trigger": {
+        "label": "Entitate Declanșator Extern"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Inversați Declanșatorul Extern (declanșare la OPRIT)"
+      },
+      "door_sensor_entity": {
+        "label": "Entitate Senzor Ușă"
+      },
+      "pause_cuts_power": {
+        "label": "Pauza Întrerupe Alimentarea (prin switch)"
+      },
+      "switch_entity": {
+        "label": "Entitate Switch"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Întârziere Reamintire Descărcare"
+      },
+      "pump_stuck_duration": {
+        "label": "Durata Pompei Blocate"
+      },
+      "notify_start_services": {
+        "label": "Servicii de Pornire"
+      },
+      "notify_finish_services": {
+        "label": "Servicii de Finalizare"
+      },
+      "notify_live_services": {
+        "label": "Servicii Progres în Timp Real"
+      },
+      "notify_people": {
+        "label": "Persoane (pentru Doar Când Acasă)"
+      },
+      "notify_only_when_home": {
+        "label": "Notificați Doar Când Acasă"
+      },
+      "notify_fire_events": {
+        "label": "Declanșați Evenimente HA pentru Notificări"
+      },
+      "notify_before_end_minutes": {
+        "label": "Alertă Înainte de Sfârșit"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Interval Actualizare în Timp Real"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% Depășire Înainte de Alertă"
+      },
+      "notify_live_chronometer": {
+        "label": "Utilizați Cronometru în Timp Real"
+      },
+      "notify_timeout_seconds": {
+        "label": "Ignorare Automată După"
+      },
+      "notify_title": {
+        "label": "Titlu Notificare"
+      },
+      "notify_icon": {
+        "label": "Pictogramă Notificare"
+      },
+      "notify_start_message": {
+        "label": "Mesaj de Pornire"
+      },
+      "notify_finish_message": {
+        "label": "Mesaj de Finalizare"
+      },
+      "notify_pre_complete_message": {
+        "label": "Mesaj Pre-Finalizare"
+      },
+      "notify_reminder_message": {
+        "label": "Mesaj Reamintire"
+      },
+      "notify_channel": {
+        "label": "Canal Android (pornire/timp real)"
+      },
+      "notify_finish_channel": {
+        "label": "Canal Android (finalizare)"
+      },
+      "energy_price_entity": {
+        "label": "Entitate Preț Energie"
+      },
+      "energy_price_static": {
+        "label": "Preț Static Energie (pe kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Temporizatoare Ciclu"
+      },
+      "enable_ml_models": {
+        "label": "Aplicați modele inteligente în timpul unui ciclu"
+      },
+      "ml_training_enabled": {
+        "label": "Învățați de la această mașină"
+      },
+      "ml_training_hour": {
+        "label": "Învățați la ora"
+      },
+      "ml_training_min_cycles": {
+        "label": "Cicluri necesare mai întâi"
+      },
+      "ml_training_interval_days": {
+        "label": "Verificați cel mult la fiecare"
+      }
     }
   }
 }

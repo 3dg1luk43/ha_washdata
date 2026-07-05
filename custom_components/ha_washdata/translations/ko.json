@@ -536,7 +536,7 @@
       "delete_group_tip": "이 그룹만 삭제 - 회원 프로필은 유지됩니다.",
       "run_analysis_tip": "지금 기록된 주기를 분석하고 튜닝 제안을 새로 고치세요.",
       "reset_ml_models_tip": "미세 조정된 모델을 폐기하고 내장된 모델로 돌아갑니다. WashData는 나중에 다시 학습할 수 있습니다.",
-      "resume_cycle": "재개하다",
+      "resume_cycle": "사이클 재개",
       "add_device": "+ 장치 추가",
       "add_phase": "+ 단계 추가",
       "apply_all": "모두 적용",
@@ -548,7 +548,7 @@
       "cancel": "취소",
       "clear_debug": "디버그 데이터 지우기",
       "clear_splits": "분명한",
-      "close": "닫다",
+      "close": "닫기",
       "compare": "비교하다",
       "confirm": "확인하다",
       "convert_to_automation": "자동화로 전환",
@@ -570,7 +570,7 @@
       "import_json": "JSON에서 가져오기",
       "import_overwrite": "가져오기(데이터 덮어쓰기)",
       "inspect": "검사",
-      "label": "상표",
+      "label": "라벨 지정",
       "manage": "관리하다",
       "merge": "병합",
       "new_automation": "＋ 새로운 자동화",
@@ -622,7 +622,7 @@
       "artifact_tip": "{n} 이상 현상이 감지되었습니다(예: 사이클 중간에 문이 열림) - 열어서 그래프에서 확인",
       "poor_fit_tip": "일치하지 않는 일치 기록 — 이 프로필을 다시 작성하는 것이 좋습니다.",
       "fair_fit_tip": "중간 수준의 일치 일관성 - 이 프로필에 할당된 일부 주기의 신뢰도 점수가 낮습니다. 정확성을 높이려면 더 많은 주기에 라벨을 붙이거나 프로필을 다시 기록하십시오.",
-      "fair_fit": "적당한 핏",
+      "fair_fit": "적절함",
       "poor_fit": "적합하지 않음",
       "auto": "(자동 감지)",
       "built_in_tag": "내장",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "스토리지 통계, 유지 관리, 내보내기/가져오기",
       "trim_intro": "빨간색 핸들을 드래그하거나 값을 입력합니다. 창 밖의 모든 것이 제거됩니다.",
       "unsure_detected_prefix": "WashData가 감지되었는지 확실하지 않습니다.",
-      "updated": "업데이트됨"
+      "updated": "업데이트됨",
+      "feedback_cycles_pending": "검토가 필요한 사이클 {n}개{s}",
+      "artifact_spike_detail": "일반 전력 범위 위로 약 {n}초 동안 나타났습니다.",
+      "artifact_dip_detail": "일반 전력 범위 아래로 약 {n}초 동안 내려갔습니다.",
+      "artifact_pause_detail": "전력이 약 {n}초 동안 거의 0으로 떨어진 후 재개되었습니다. 사이클 도중 문이 열리거나 일시 정지된 것으로 보입니다."
     },
     "phase_desc": {
       "pre_wash": "본 세탁 전 초기 담금 또는 전처리.",
@@ -746,11 +750,11 @@
       "spin_wd": "건조 전환 전 고속 추출.",
       "soak": "활성 세탁 단계 사이의 낮은 활동 담금 기간.",
       "soak_dw": "무거운 토양의 경우 담그는 기간이 길어집니다.",
-      "anti_crease": "주름을 줄이기 위해 완성 후 가끔 짧게 텀블링을 해주세요.",
+      "anti_crease": "메인 사이클 후 드럼이 간헐적으로 회전하여 의류 구김을 방지합니다.",
       "heat_up": "완전 건조가 시작되기 전 초기 히터 예열.",
       "drying": "주요 가열 텀블링 기간.",
       "cool_down": "사이클 종료 근처에서 열 없이 회전합니다.",
-      "anti_wrinkle": "주기적인 포스트 사이클 텀블링으로 주름을 줄입니다.",
+      "anti_wrinkle": "메인 사이클 후 드럼이 간헐적으로 회전하여 의류 구김을 방지합니다.",
       "sensor_check": "건조도를 측정하는 동안 짧은 저전력 일시 중지입니다.",
       "drain_and_switch": "세탁 모드에서 건조 모드로 전환되는 기간입니다.",
       "pre_rinse": "세제 세척 전 초기 스프레이다운.",
@@ -874,6 +878,348 @@
       "settings_saved": "설정이 저장되었습니다. 통합 다시 로드",
       "suggestions_applied": "제안이 적용되었습니다. 통합 다시 로드",
       "suggestions_dismissed": "제안이 무시되었습니다."
+    },
+    "section": {
+      "basic": {
+        "label": "기본",
+        "intro": "핵심 식별 정보와 대부분의 설정에 필요한 기본 사항."
+      },
+      "detection": {
+        "label": "감지",
+        "intro": "사이클의 시작, 실행 및 종료 감지 방법."
+      },
+      "matching": {
+        "label": "매칭",
+        "intro": "완료된 사이클을 학습된 프로필에 매칭하고 라벨을 지정하는 방법."
+      },
+      "timing": {
+        "label": "타이밍과 감시",
+        "intro": "백그라운드 실행 주기, 오프라인 감시, 및 하우스키핑."
+      },
+      "anti_wrinkle": {
+        "label": "구김 방지",
+        "intro": "구김 방지 모드는 메인 단계 이후 낮은 전력 텀블 펄스를 감지하고 완료된 사이클에 포함합니다."
+      },
+      "delay": {
+        "label": "지연 시작",
+        "intro": "지연 시작 감지는 기기가 켜져 있지만 사이클이 아직 시작되지 않은 상태를 식별합니다."
+      },
+      "triggers": {
+        "label": "트리거와 문",
+        "intro": "선택적 외부 신호: 종료 트리거, 문 센서, 일시 정지 스위치, 꺼내기 알림."
+      },
+      "notifications": {
+        "label": "알림",
+        "intro": "사이클 이벤트에 대한 알림 시기와 방법."
+      },
+      "ml_training": {
+        "label": "ML 훈련",
+        "intro": "기기에서 직접 하는 머신러닝 재훈련 일정 및 데이터 설정."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "임계값과 간격"
+      },
+      "cycle_start": {
+        "label": "사이클 시작"
+      },
+      "cycle_end": {
+        "label": "사이클 종료"
+      },
+      "signal_processing": {
+        "label": "신호 처리"
+      },
+      "predictive_end": {
+        "label": "예측 종료"
+      },
+      "dishwasher_end": {
+        "label": "식기세척기 종료"
+      },
+      "dtw_refinement": {
+        "label": "DTW 정밀화"
+      },
+      "match_scoring": {
+        "label": "매칭 점수"
+      },
+      "duration_gates": {
+        "label": "기간 게이트"
+      },
+      "auto_labeling": {
+        "label": "자동 라벨링"
+      },
+      "watchdog": {
+        "label": "워치독"
+      },
+      "housekeeping": {
+        "label": "하우스키핑"
+      },
+      "debug": {
+        "label": "디버그"
+      },
+      "external_end_trigger": {
+        "label": "외부 종료 트리거"
+      },
+      "door_pause": {
+        "label": "문과 일시 정지"
+      },
+      "unload_reminder": {
+        "label": "꺼내기 알림"
+      },
+      "services": {
+        "label": "서비스"
+      },
+      "timing": {
+        "label": "타이밍"
+      },
+      "messages": {
+        "label": "메시지"
+      },
+      "energy": {
+        "label": "에너지"
+      },
+      "cycle_timers": {
+        "label": "사이클 타이머"
+      },
+      "schedule": {
+        "label": "일정"
+      },
+      "data_management": {
+        "label": "데이터 관리"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "기기 이름"
+      },
+      "device_type": {
+        "label": "기기 유형"
+      },
+      "power_sensor": {
+        "label": "전력 센서"
+      },
+      "min_power": {
+        "label": "최소 전력"
+      },
+      "off_delay": {
+        "label": "오프 지연"
+      },
+      "linked_device": {
+        "label": "기기 아래 그룹화"
+      },
+      "start_threshold_w": {
+        "label": "시작 임계값"
+      },
+      "stop_threshold_w": {
+        "label": "중지 임계값"
+      },
+      "min_off_gap": {
+        "label": "최소 오프 간격"
+      },
+      "start_duration_threshold": {
+        "label": "시작 지속 시간"
+      },
+      "start_energy_threshold": {
+        "label": "시작 에너지"
+      },
+      "completion_min_seconds": {
+        "label": "사이클 최소 시간"
+      },
+      "running_dead_zone": {
+        "label": "실행 데드존"
+      },
+      "end_energy_threshold": {
+        "label": "종료 에너지"
+      },
+      "end_repeat_count": {
+        "label": "종료 반복 횟수"
+      },
+      "sampling_interval": {
+        "label": "샘플링 간격"
+      },
+      "smoothing_window": {
+        "label": "스무딩 윈도우"
+      },
+      "abrupt_drop_watts": {
+        "label": "급격한 강하"
+      },
+      "abrupt_drop_ratio": {
+        "label": "급격한 강하 비율"
+      },
+      "profile_match_threshold": {
+        "label": "매칭 임계값"
+      },
+      "profile_unmatch_threshold": {
+        "label": "언매칭 임계값"
+      },
+      "profile_match_interval": {
+        "label": "매칭 간격"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "최소 기간 비율"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "최대 기간 비율"
+      },
+      "profile_duration_tolerance": {
+        "label": "프로필 기간 허용 오차"
+      },
+      "duration_tolerance": {
+        "label": "추정 허용 오차"
+      },
+      "auto_label_confidence": {
+        "label": "자동 라벨 신뢰도"
+      },
+      "learning_confidence": {
+        "label": "학습 신뢰도"
+      },
+      "suppress_feedback_notifications": {
+        "label": "피드백 알림 억제"
+      },
+      "watchdog_interval": {
+        "label": "워치독 간격"
+      },
+      "no_update_active_timeout": {
+        "label": "업데이트 없음 타임아웃"
+      },
+      "progress_reset_delay": {
+        "label": "진행 초기화 지연"
+      },
+      "auto_maintenance": {
+        "label": "자동 유지 관리 (야간 정리)"
+      },
+      "expose_debug_entities": {
+        "label": "디버그 엔티티 노출"
+      },
+      "save_debug_traces": {
+        "label": "디버그 추적 저장"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "구김 방지 감지 활성화"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "구김 방지 최대 전력"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "최대 지속 시간"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "종료 전력 임계값"
+      },
+      "delay_start_detect_enabled": {
+        "label": "지연 시작 감지 활성화"
+      },
+      "delay_confirm_seconds": {
+        "label": "확인 초"
+      },
+      "delay_timeout_hours": {
+        "label": "타임아웃 시간"
+      },
+      "external_end_trigger_enabled": {
+        "label": "외부 종료 트리거 활성화"
+      },
+      "external_end_trigger": {
+        "label": "외부 트리거 엔티티"
+      },
+      "external_end_trigger_inverted": {
+        "label": "외부 트리거 반전 (OFF에서 트리거)"
+      },
+      "door_sensor_entity": {
+        "label": "문 센서 엔티티"
+      },
+      "pause_cuts_power": {
+        "label": "일시 정지로 전력도 차단 (스위치 경유)"
+      },
+      "switch_entity": {
+        "label": "스위치 엔티티"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "꺼내기 알림 지연"
+      },
+      "pump_stuck_duration": {
+        "label": "펌프 정지 지속 시간"
+      },
+      "notify_start_services": {
+        "label": "시작 서비스"
+      },
+      "notify_finish_services": {
+        "label": "종료 서비스"
+      },
+      "notify_live_services": {
+        "label": "라이브 진행 서비스"
+      },
+      "notify_people": {
+        "label": "사람 (집에 있을 때)"
+      },
+      "notify_only_when_home": {
+        "label": "집에 있을 때만 알림"
+      },
+      "notify_fire_events": {
+        "label": "알림용 HA 이벤트 실행"
+      },
+      "notify_before_end_minutes": {
+        "label": "종료 전 알림"
+      },
+      "notify_live_interval_seconds": {
+        "label": "라이브 업데이트 간격"
+      },
+      "notify_live_overrun_percent": {
+        "label": "라이브 초과 % 알림"
+      },
+      "notify_live_chronometer": {
+        "label": "라이브 크로노미터 사용"
+      },
+      "notify_timeout_seconds": {
+        "label": "자동 닫기"
+      },
+      "notify_title": {
+        "label": "알림 제목"
+      },
+      "notify_icon": {
+        "label": "알림 아이콘"
+      },
+      "notify_start_message": {
+        "label": "시작 메시지"
+      },
+      "notify_finish_message": {
+        "label": "종료 메시지"
+      },
+      "notify_pre_complete_message": {
+        "label": "완료 전 메시지"
+      },
+      "notify_reminder_message": {
+        "label": "알림 메시지"
+      },
+      "notify_channel": {
+        "label": "Android 채널 (시작/라이브)"
+      },
+      "notify_finish_channel": {
+        "label": "Android 채널 (종료)"
+      },
+      "energy_price_entity": {
+        "label": "에너지 가격 엔티티"
+      },
+      "energy_price_static": {
+        "label": "고정 에너지 가격 (kWh당)"
+      },
+      "notify_cycle_timers": {
+        "label": "사이클 타이머"
+      },
+      "enable_ml_models": {
+        "label": "사이클 중 스마트 모델 적용"
+      },
+      "ml_training_enabled": {
+        "label": "이 기기에서 학습"
+      },
+      "ml_training_hour": {
+        "label": "학습 시간"
+      },
+      "ml_training_min_cycles": {
+        "label": "필요한 사이클 수"
+      },
+      "ml_training_interval_days": {
+        "label": "최대 확인 간격"
+      }
     }
   }
 }

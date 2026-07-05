@@ -735,7 +735,11 @@
       "storage_diagnostics": "சேமிப்பக புள்ளிவிவரங்கள், பராமரிப்பு, ஏற்றுமதி/இறக்குமதி",
       "trim_intro": "சிவப்பு கைடியை இழுக்கவும் அல்லது மதிப்புகளை உள்ளிடவும். சாளரத்திற்கு வெளியே உள்ள அனைத்தும் அகற்றப்படும்.",
       "unsure_detected_prefix": "WashData கண்டறிந்தது என்று உறுதியாக தெரியவில்லை",
-      "updated": "புதுப்பிக்கப்பட்டது"
+      "updated": "புதுப்பிக்கப்பட்டது",
+      "feedback_cycles_pending": "மதிப்பாய்வு செய்ய {n} சுழற்சி{s}",
+      "artifact_spike_detail": "வழக்கமான சக்தி வரம்புக்கு மேல் ~{n} வினாடிகளுக்கு சென்றது.",
+      "artifact_dip_detail": "வழக்கமான சக்தி வரம்புக்கு கீழ் ~{n} வினாடிகளுக்கு சென்றது.",
+      "artifact_pause_detail": "சக்தி ~{n} வினாடிகளுக்கு கிட்டத்தட்ட பூஜ்ஜியத்திற்கு விழுந்து பின் மீண்டும் தொடர்ந்தது — கதவு சுழற்சியின் நடுவில் திறக்கப்பட்டிருக்கலாம் அல்லது சுழற்சி இடைநிறுத்தப்பட்டிருக்கலாம்."
     },
     "phase_desc": {
       "pre_wash": "பிரதான கழுவுவதற்கு முன் ஆரம்ப ஊறவைத்தல் அல்லது முன் சிகிச்சை.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "கீழ்நோக்கிய போக்கு",
       "up": "மேல்நோக்கிய போக்கு"
+    },
+    "section": {
+      "basic": {
+        "label": "அடிப்படை",
+        "intro": "அடிப்படை அடையாளம் மற்றும் பெரும்பாலான அமைப்புகளுக்குத் தேவையான முக்கிய விவரங்கள்."
+      },
+      "detection": {
+        "label": "கண்டறிதல்",
+        "intro": "சுழற்சி எவ்வாறு தொடங்கி, இயங்கி, முடிகிறது என்று கண்டறியப்படுகிறது."
+      },
+      "matching": {
+        "label": "பொருத்தம்",
+        "intro": "முடிந்த சுழற்சிகள் எவ்வாறு கற்ற சுயவிவரங்களுடன் பொருத்தப்பட்டு லேபிளிடப்படுகின்றன."
+      },
+      "timing": {
+        "label": "நேரம் & கண்காணிப்பு",
+        "intro": "பின்னணி இயக்கம், ஆஃப்லைன் கண்காணிப்பு மற்றும் பராமரிப்பு."
+      },
+      "anti_wrinkle": {
+        "label": "சுளிவு எதிர்ப்பு",
+        "intro": "சுளிவு எதிர்ப்பு முறை முக்கிய கட்டத்திற்குப் பிறகு குறைந்த-சக்தி சுழல் துடிப்புகளை கண்டறிந்து, முடிந்த சுழற்சியுடன் இணைத்திருக்கும்."
+      },
+      "delay": {
+        "label": "தாமதமான தொடக்கம்",
+        "intro": "தாமதமான-தொடக்க கண்டறிதல் சாதனம் இயக்கப்பட்டிருந்தாலும் சுழற்சி இன்னும் தொடங்காத நிலையை அடையாளம் காட்டுகிறது."
+      },
+      "triggers": {
+        "label": "தூண்டுதல்கள் & கதவுகள்",
+        "intro": "விருப்ப வெளிப்புற சமிக்ஞைகள்: முடிவு தூண்டுதல், கதவு சென்சார், இடைநிறுத்த சுவிட்ச், மற்றும் இறக்கும் நினைவூட்டல்."
+      },
+      "notifications": {
+        "label": "அறிவிப்புகள்",
+        "intro": "சுழற்சி நிகழ்வுகளைப் பற்றி எப்போது, எப்படி அறிவிக்கப்படுகிறீர்கள்."
+      },
+      "ml_training": {
+        "label": "ML பயிற்சி",
+        "intro": "சாதனத்திலேயே இயந்திர கற்றல் மீண்டும் பயிற்சி அட்டவணை மற்றும் தரவு அமைப்புகள்."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "வரம்புகள் & இடைவெளி"
+      },
+      "cycle_start": {
+        "label": "சுழற்சி தொடக்கம்"
+      },
+      "cycle_end": {
+        "label": "சுழற்சி முடிவு"
+      },
+      "signal_processing": {
+        "label": "சமிக்ஞை செயலாக்கம்"
+      },
+      "predictive_end": {
+        "label": "முன்கணிப்பு முடிவு"
+      },
+      "dishwasher_end": {
+        "label": "பாத்திரக் கழுவி முடிவு"
+      },
+      "dtw_refinement": {
+        "label": "DTW சுத்திகரிப்பு"
+      },
+      "match_scoring": {
+        "label": "பொருத்த மதிப்பீடு"
+      },
+      "duration_gates": {
+        "label": "கால அளவு வாயில்கள்"
+      },
+      "auto_labeling": {
+        "label": "தானியங்கி லேபிளிடல்"
+      },
+      "watchdog": {
+        "label": "கண்காணிப்பு"
+      },
+      "housekeeping": {
+        "label": "பராமரிப்பு"
+      },
+      "debug": {
+        "label": "பிழை பிரிப்பு"
+      },
+      "external_end_trigger": {
+        "label": "வெளிப்புற முடிவு தூண்டுதல்"
+      },
+      "door_pause": {
+        "label": "கதவு & இடைநிறுத்தம்"
+      },
+      "unload_reminder": {
+        "label": "இறக்கும் நினைவூட்டல்"
+      },
+      "services": {
+        "label": "சேவைகள்"
+      },
+      "timing": {
+        "label": "நேரம்"
+      },
+      "messages": {
+        "label": "செய்திகள்"
+      },
+      "energy": {
+        "label": "ஆற்றல்"
+      },
+      "cycle_timers": {
+        "label": "சுழற்சி நேரக்கடிகாரங்கள்"
+      },
+      "schedule": {
+        "label": "அட்டவணை"
+      },
+      "data_management": {
+        "label": "தரவு மேலாண்மை"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "சாதன பெயர்"
+      },
+      "device_type": {
+        "label": "சாதன வகை"
+      },
+      "power_sensor": {
+        "label": "சக்தி சென்சார்"
+      },
+      "min_power": {
+        "label": "குறைந்தபட்ச சக்தி"
+      },
+      "off_delay": {
+        "label": "ஆஃப் தாமதம்"
+      },
+      "linked_device": {
+        "label": "சாதனத்தின் கீழ் குழுவமை"
+      },
+      "start_threshold_w": {
+        "label": "தொடக்க வரம்பு"
+      },
+      "stop_threshold_w": {
+        "label": "நிறுத்த வரம்பு"
+      },
+      "min_off_gap": {
+        "label": "குறைந்தபட்ச ஆஃப் இடைவெளி"
+      },
+      "start_duration_threshold": {
+        "label": "தொடக்க கால அளவு"
+      },
+      "start_energy_threshold": {
+        "label": "தொடக்க ஆற்றல்"
+      },
+      "completion_min_seconds": {
+        "label": "குறைந்தபட்ச சுழற்சி கால அளவு"
+      },
+      "running_dead_zone": {
+        "label": "இயக்கும் செயலற்ற மண்டலம்"
+      },
+      "end_energy_threshold": {
+        "label": "முடிவு ஆற்றல்"
+      },
+      "end_repeat_count": {
+        "label": "முடிவு திரும்ப எண்ணிக்கை"
+      },
+      "sampling_interval": {
+        "label": "மாதிரி இடைவெளி"
+      },
+      "smoothing_window": {
+        "label": "மென்மையாக்கல் சாளரம்"
+      },
+      "abrupt_drop_watts": {
+        "label": "திடீர் வீழ்ச்சி"
+      },
+      "abrupt_drop_ratio": {
+        "label": "திடீர் வீழ்ச்சி விகிதம்"
+      },
+      "profile_match_threshold": {
+        "label": "பொருத்த வரம்பு"
+      },
+      "profile_unmatch_threshold": {
+        "label": "பொருத்தமில்லா வரம்பு"
+      },
+      "profile_match_interval": {
+        "label": "பொருத்த இடைவெளி"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "குறைந்தபட்ச கால விகிதம்"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "அதிகபட்ச கால விகிதம்"
+      },
+      "profile_duration_tolerance": {
+        "label": "சுயவிவர கால சகிப்புத்தன்மை"
+      },
+      "duration_tolerance": {
+        "label": "மதிப்பீட்டு சகிப்புத்தன்மை"
+      },
+      "auto_label_confidence": {
+        "label": "தானியங்கி-லேபிள் நம்பிக்கை"
+      },
+      "learning_confidence": {
+        "label": "கற்றல் நம்பிக்கை"
+      },
+      "suppress_feedback_notifications": {
+        "label": "கருத்து அறிவிப்புகளை அடக்கு"
+      },
+      "watchdog_interval": {
+        "label": "கண்காணிப்பு இடைவெளி"
+      },
+      "no_update_active_timeout": {
+        "label": "புதுப்பிப்பின்மை காலாவதி"
+      },
+      "progress_reset_delay": {
+        "label": "முன்னேற்றம் மீட்டமைப்பு தாமதம்"
+      },
+      "auto_maintenance": {
+        "label": "தானியங்கி பராமரிப்பு (இரவு சுத்தம்)"
+      },
+      "expose_debug_entities": {
+        "label": "பிழை பிரிப்பு நிறுவனங்களை வெளிப்படுத்து"
+      },
+      "save_debug_traces": {
+        "label": "பிழை பிரிப்பு தடங்களை சேமி"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "சுளிவு எதிர்ப்பு கண்டறிதலை இயக்கு"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "அதிகபட்ச சுளிவு எதிர்ப்பு சக்தி"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "அதிகபட்ச கால அளவு"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "வெளியேறும் சக்தி வரம்பு"
+      },
+      "delay_start_detect_enabled": {
+        "label": "தாமதமான-தொடக்க கண்டறிதலை இயக்கு"
+      },
+      "delay_confirm_seconds": {
+        "label": "உறுதிப்படுத்தல் வினாடிகள்"
+      },
+      "delay_timeout_hours": {
+        "label": "காலாவதி மணி நேரங்கள்"
+      },
+      "external_end_trigger_enabled": {
+        "label": "வெளிப்புற முடிவு தூண்டுதலை இயக்கு"
+      },
+      "external_end_trigger": {
+        "label": "வெளிப்புற தூண்டுதல் நிறுவனம்"
+      },
+      "external_end_trigger_inverted": {
+        "label": "வெளிப்புற தூண்டுதலை தலைகீழாக்கு (ஆஃப்-இல் தூண்டு)"
+      },
+      "door_sensor_entity": {
+        "label": "கதவு சென்சார் நிறுவனம்"
+      },
+      "pause_cuts_power": {
+        "label": "இடைநிறுத்தம் சக்தியையும் துண்டிக்கும் (சுவிட்சு வழியாக)"
+      },
+      "switch_entity": {
+        "label": "சுவிட்ச் நிறுவனம்"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "இறக்கும் நினைவூட்டல் தாமதம்"
+      },
+      "pump_stuck_duration": {
+        "label": "பம்ப் சிக்கிய கால அளவு"
+      },
+      "notify_start_services": {
+        "label": "தொடக்க சேவைகள்"
+      },
+      "notify_finish_services": {
+        "label": "முடிவு சேவைகள்"
+      },
+      "notify_live_services": {
+        "label": "நேரடி முன்னேற்ற சேவைகள்"
+      },
+      "notify_people": {
+        "label": "மக்கள் (வீட்டில் இருக்கும்போது மட்டும்)"
+      },
+      "notify_only_when_home": {
+        "label": "வீட்டில் இருக்கும்போது மட்டும் அறிவிக்கவும்"
+      },
+      "notify_fire_events": {
+        "label": "அறிவிப்புகளுக்கு HA நிகழ்வுகளை தூண்டவும்"
+      },
+      "notify_before_end_minutes": {
+        "label": "முன்-முடிவு எச்சரிக்கை"
+      },
+      "notify_live_interval_seconds": {
+        "label": "நேரடி புதுப்பிப்பு இடைவெளி"
+      },
+      "notify_live_overrun_percent": {
+        "label": "நேரடி மீறல் % எச்சரிக்கைக்கு முன்"
+      },
+      "notify_live_chronometer": {
+        "label": "நேரடி குரோனோமீட்டரை பயன்படுத்தவும்"
+      },
+      "notify_timeout_seconds": {
+        "label": "இயல்பாக நிராகரிக்கவும் பிறகு"
+      },
+      "notify_title": {
+        "label": "அறிவிப்பு தலைப்பு"
+      },
+      "notify_icon": {
+        "label": "அறிவிப்பு ஐகான்"
+      },
+      "notify_start_message": {
+        "label": "தொடக்க செய்தி"
+      },
+      "notify_finish_message": {
+        "label": "முடிவு செய்தி"
+      },
+      "notify_pre_complete_message": {
+        "label": "முன்-முடிவு செய்தி"
+      },
+      "notify_reminder_message": {
+        "label": "நினைவூட்டல் செய்தி"
+      },
+      "notify_channel": {
+        "label": "ஆண்ட்ராய்டு சேனல் (தொடக்கம்/நேரடி)"
+      },
+      "notify_finish_channel": {
+        "label": "ஆண்ட்ராய்டு சேனல் (முடிவு)"
+      },
+      "energy_price_entity": {
+        "label": "ஆற்றல் விலை நிறுவனம்"
+      },
+      "energy_price_static": {
+        "label": "நிலையான ஆற்றல் விலை (kWh ஒன்றுக்கு)"
+      },
+      "notify_cycle_timers": {
+        "label": "சுழற்சி நேரக்கடிகாரங்கள்"
+      },
+      "enable_ml_models": {
+        "label": "சுழற்சியின்போது ஸ்மார்ட் மாடல்களை பயன்படுத்தவும்"
+      },
+      "ml_training_enabled": {
+        "label": "இந்த இயந்திரத்திலிருந்து கற்றுக்கொள்ளவும்"
+      },
+      "ml_training_hour": {
+        "label": "மணி நேரத்தில் கற்றுக்கொள்ளவும்"
+      },
+      "ml_training_min_cycles": {
+        "label": "முதலில் தேவையான சுழற்சிகள்"
+      },
+      "ml_training_interval_days": {
+        "label": "அதிகபட்சம் ஒவ்வொரு முறையும் சரிபார்க்கவும்"
+      }
     }
   }
 }

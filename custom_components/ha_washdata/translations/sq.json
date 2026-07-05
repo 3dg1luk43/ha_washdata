@@ -513,7 +513,7 @@
       "import_json": "Importo nga JSON",
       "import_overwrite": "Importo (mbishkruan të dhënat)",
       "inspect": "Inspekto",
-      "label": "Etiketë",
+      "label": "Etiketoje",
       "manage": "Menaxho",
       "merge": "Bashko",
       "new_automation": "＋ Automatizim i ri",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Statistikat e ruajtjes, mirëmbajtja, eksporti/importi",
       "trim_intro": "Zvarrit dorëzat e kuqe ose futo vlerat. Gjithçka jashtë dritares hiqet.",
       "unsure_detected_prefix": "WashData nuk është i sigurt se ka zbuluar",
-      "updated": "Përditësuar"
+      "updated": "Përditësuar",
+      "feedback_cycles_pending": "{n} cikle për rishikim",
+      "artifact_spike_detail": "Shkoi mbi brezin e zakonshëm të fuqisë për ~{n} s.",
+      "artifact_dip_detail": "Ra nën brezin e zakonshëm të fuqisë për ~{n} s.",
+      "artifact_pause_detail": "Fuqia ra pothuajse në zero për ~{n} s dhe u rikuperua — ndoshta dera u hap në mes të ciklit ose cikli u ndërpre."
     },
     "phase_desc": {
       "pre_wash": "Thithja fillestare ose trajtimi paraprak përpara larjes kryesore.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Tendencë rënëse",
       "up": "Tendencë rritëse"
+    },
+    "section": {
+      "basic": {
+        "label": "Bazike",
+        "intro": "Identiteti kryesor dhe bazat që shumica e konfigurimeve i nevojiten."
+      },
+      "detection": {
+        "label": "Zbulim",
+        "intro": "Si zbulohet fillimi, ekzekutimi dhe përfundimi i ciklit."
+      },
+      "matching": {
+        "label": "Përputhje",
+        "intro": "Si përputhen ciklet e përfunduara me profilet e mësuara dhe etiketohen."
+      },
+      "timing": {
+        "label": "Kohëzgjatja dhe rojtar",
+        "intro": "Kadenca e sfondit, rojtari offline dhe mirëmbajtja."
+      },
+      "anti_wrinkle": {
+        "label": "Kundër rrudhave",
+        "intro": "Mënyra kundër rrudhave të rrobave zbulon pulsimet e tumblimit me fuqi të ulët pas fazës kryesore dhe i mban ato të lidhura me ciklin e përfunduar."
+      },
+      "delay": {
+        "label": "Nisje e vonuar",
+        "intro": "Zbulimi i nisjes së vonuar identifikon kur pajisja është ndezur por nuk ka filluar ende ciklin."
+      },
+      "triggers": {
+        "label": "Aktivizues dhe dera",
+        "intro": "Sinjalet e jashtme opsionale: aktivizues përfundimi, senzori i derës, çelësi i pauzës dhe kujtues për shkarkim."
+      },
+      "notifications": {
+        "label": "Njoftime",
+        "intro": "Kur dhe si njoftoheni për ngjarjet e ciklit."
+      },
+      "ml_training": {
+        "label": "Trajnim ML",
+        "intro": "Orari i ritrajnimit të mësimit automatik në pajisje dhe cilësimet e të dhënave."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Pragjet dhe hendeku"
+      },
+      "cycle_start": {
+        "label": "Fillimi i ciklit"
+      },
+      "cycle_end": {
+        "label": "Fundi i ciklit"
+      },
+      "signal_processing": {
+        "label": "Përpunimi i sinjalit"
+      },
+      "predictive_end": {
+        "label": "Fund parashikues"
+      },
+      "dishwasher_end": {
+        "label": "Fundi i ciklit të pjatalarëses"
+      },
+      "dtw_refinement": {
+        "label": "Rafinim DTW"
+      },
+      "match_scoring": {
+        "label": "Vlerësimi i përputhjes"
+      },
+      "duration_gates": {
+        "label": "Portat e kohëzgjatjes"
+      },
+      "auto_labeling": {
+        "label": "Etiketim automatik"
+      },
+      "watchdog": {
+        "label": "Rojtar"
+      },
+      "housekeeping": {
+        "label": "Mirëmbajtje"
+      },
+      "debug": {
+        "label": "Korrigjim"
+      },
+      "external_end_trigger": {
+        "label": "Aktivizues i jashtëm i fundit"
+      },
+      "door_pause": {
+        "label": "Dera dhe pauzë"
+      },
+      "unload_reminder": {
+        "label": "Kujtues shkarkimi"
+      },
+      "services": {
+        "label": "Shërbime"
+      },
+      "timing": {
+        "label": "Kohëzgjatja"
+      },
+      "messages": {
+        "label": "Mesazhe"
+      },
+      "energy": {
+        "label": "Energji"
+      },
+      "cycle_timers": {
+        "label": "Kohëmatës cikli"
+      },
+      "schedule": {
+        "label": "Orar"
+      },
+      "data_management": {
+        "label": "Menaxhimi i të dhënave"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Emri i pajisjes"
+      },
+      "device_type": {
+        "label": "Lloji i pajisjes"
+      },
+      "power_sensor": {
+        "label": "Sensori i fuqisë"
+      },
+      "min_power": {
+        "label": "Fuqia minimale"
+      },
+      "off_delay": {
+        "label": "Vonesë fikjeje"
+      },
+      "linked_device": {
+        "label": "Grupo nën pajisje"
+      },
+      "start_threshold_w": {
+        "label": "Pragu i nisjes"
+      },
+      "stop_threshold_w": {
+        "label": "Pragu i ndalimit"
+      },
+      "min_off_gap": {
+        "label": "Hendeku min. i fikjes"
+      },
+      "start_duration_threshold": {
+        "label": "Kohëzgjatja e nisjes"
+      },
+      "start_energy_threshold": {
+        "label": "Energjia e nisjes"
+      },
+      "completion_min_seconds": {
+        "label": "Kohëzgjatja min. e ciklit"
+      },
+      "running_dead_zone": {
+        "label": "Zona e vdekur e ekzekutimit"
+      },
+      "end_energy_threshold": {
+        "label": "Energjia e fundit"
+      },
+      "end_repeat_count": {
+        "label": "Numri i përsëritjeve të fundit"
+      },
+      "sampling_interval": {
+        "label": "Intervali i kampionimit"
+      },
+      "smoothing_window": {
+        "label": "Dritarja e zbutjes"
+      },
+      "abrupt_drop_watts": {
+        "label": "Rënie e papritur"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Raporti i rënies së papritur"
+      },
+      "profile_match_threshold": {
+        "label": "Pragu i përputhjes"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Pragu i mosperputhjeve"
+      },
+      "profile_match_interval": {
+        "label": "Intervali i përputhjes"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Raporti min. i kohëzgjatjes"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Raporti maks. i kohëzgjatjes"
+      },
+      "profile_duration_tolerance": {
+        "label": "Toleranca e kohëzgjatjes së profilit"
+      },
+      "duration_tolerance": {
+        "label": "Toleranca e vlerësimit"
+      },
+      "auto_label_confidence": {
+        "label": "Besueshmëria e etiketimit automatik"
+      },
+      "learning_confidence": {
+        "label": "Besueshmëria e të mësuarit"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Mbylli njoftimet e komenteve"
+      },
+      "watchdog_interval": {
+        "label": "Intervali i rojëtarit"
+      },
+      "no_update_active_timeout": {
+        "label": "Koha e skadimit pa përditësim"
+      },
+      "progress_reset_delay": {
+        "label": "Vonesë rivendosjeje të progresit"
+      },
+      "auto_maintenance": {
+        "label": "Mirëmbajtje automatike (pastrimi nate)"
+      },
+      "expose_debug_entities": {
+        "label": "Ekspono entitetet e korrigjimit"
+      },
+      "save_debug_traces": {
+        "label": "Ruaj gjurmët e korrigjimit"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Aktivizo zbulimin kundër rrudhave"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Fuqia maks. kundër rrudhave"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Kohëzgjatja maks."
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Pragu i fuqisë së daljes"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Aktivizo zbulimin e nisjes së vonuar"
+      },
+      "delay_confirm_seconds": {
+        "label": "Sekonda konfirmimi"
+      },
+      "delay_timeout_hours": {
+        "label": "Orë kohe skadimi"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Aktivizo aktivizuesin e jashtëm të fundit"
+      },
+      "external_end_trigger": {
+        "label": "Entiteta e aktivizuesit të jashtëm"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Invertoj aktivizuesin e jashtëm (aktivizoj kur FIKUR)"
+      },
+      "door_sensor_entity": {
+        "label": "Entiteta e sensorit të derës"
+      },
+      "pause_cuts_power": {
+        "label": "Pauzë gjithashtu pret fuqinë (nëpërmjet çelësit)"
+      },
+      "switch_entity": {
+        "label": "Entiteta e çelësit"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Vonesë njoftimi për shkarkim"
+      },
+      "pump_stuck_duration": {
+        "label": "Kohëzgjatja e pompës së bllokuar"
+      },
+      "notify_start_services": {
+        "label": "Shërbime nisje"
+      },
+      "notify_finish_services": {
+        "label": "Shërbime përfundimi"
+      },
+      "notify_live_services": {
+        "label": "Shërbime progres live"
+      },
+      "notify_people": {
+        "label": "Njerëzit (për Vetëm kur në shtëpi)"
+      },
+      "notify_only_when_home": {
+        "label": "Njofto vetëm kur në shtëpi"
+      },
+      "notify_fire_events": {
+        "label": "Aktivizo ngjarje HA për njoftime"
+      },
+      "notify_before_end_minutes": {
+        "label": "Alarm para fundit"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Intervali i përditësimeve live"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% tejkalimi para alarmit"
+      },
+      "notify_live_chronometer": {
+        "label": "Përdor kronometër live"
+      },
+      "notify_timeout_seconds": {
+        "label": "Mbylle automatikisht pas"
+      },
+      "notify_title": {
+        "label": "Titulli i njoftimit"
+      },
+      "notify_icon": {
+        "label": "Ikona e njoftimit"
+      },
+      "notify_start_message": {
+        "label": "Mesazh nisje"
+      },
+      "notify_finish_message": {
+        "label": "Mesazh përfundimi"
+      },
+      "notify_pre_complete_message": {
+        "label": "Mesazh para-përfundimi"
+      },
+      "notify_reminder_message": {
+        "label": "Mesazh kujtues"
+      },
+      "notify_channel": {
+        "label": "Kanal Android (nisje/live)"
+      },
+      "notify_finish_channel": {
+        "label": "Kanal Android (përfundim)"
+      },
+      "energy_price_entity": {
+        "label": "Entiteta e çmimit të energjisë"
+      },
+      "energy_price_static": {
+        "label": "Çmimi statik i energjisë (për kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Kohëmatës cikli"
+      },
+      "enable_ml_models": {
+        "label": "Apliko modele inteligjente gjatë ciklit"
+      },
+      "ml_training_enabled": {
+        "label": "Mëso nga kjo makinë"
+      },
+      "ml_training_hour": {
+        "label": "Mëso në orën"
+      },
+      "ml_training_min_cycles": {
+        "label": "Ciklet e nevojshme fillimisht"
+      },
+      "ml_training_interval_days": {
+        "label": "Kontrolloje më shumë çdo"
+      }
     }
   }
 }

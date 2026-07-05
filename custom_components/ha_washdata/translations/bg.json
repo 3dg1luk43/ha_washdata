@@ -491,13 +491,13 @@
       "hide_tabs": "Скриване на раздели за неадминистратори",
       "in_use": "В употреба",
       "json_data": "JSON данни",
-      "label": "Съвпадащ профил",
+      "label": "Съвпадаща програма",
       "last_checked": "Последна проверка:",
       "load_from_file": "Зареждане от файл",
       "manual_duration": "Ръчна продължителност (мин., по избор)",
       "mode_existing_profile": "Добавяне към съществуващ профил",
       "mode_new_profile": "Създаване на нов профил",
-      "new_profile_name": "Ново име на профил",
+      "new_profile_name": "Ново име на профила",
       "panel_default_tab": "Раздел по подразбиране",
       "phase_name": "Име",
       "power": "Мощност",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Статистика за съхранение, поддръжка, експорт/импорт",
       "trim_intro": "Плъзнете червените манипулатори или въведете стойности. Всичко извън прозореца се премахва.",
       "unsure_detected_prefix": "WashData не е сигурен, че е открит",
-      "updated": "Актуализирано"
+      "updated": "Актуализирано",
+      "feedback_cycles_pending": "{n} цикъл{s} за преглед",
+      "artifact_spike_detail": "Надвиши обичайния диапазон на мощността за ~{n} сек.",
+      "artifact_dip_detail": "Падна под обичайния диапазон на мощността за ~{n} сек.",
+      "artifact_pause_detail": "Мощността падна до почти нула за ~{n} сек. и след това се възобнови — вероятно вратата е отворена по средата на цикъла или цикълът е бил поставен на пауза."
     },
     "phase_desc": {
       "pre_wash": "Първоначално накисване или предварителна обработка преди основното пране.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Тенденция надолу",
       "up": "Нарастваща тенденция"
+    },
+    "section": {
+      "basic": {
+        "label": "Основни",
+        "intro": "Основна идентичност и основните неща, от които се нуждаят повечето конфигурации."
+      },
+      "detection": {
+        "label": "Откриване",
+        "intro": "Как се открива цикъл като стартиращ, работещ и завършващ."
+      },
+      "matching": {
+        "label": "Съвпадение",
+        "intro": "Как завършените цикли се съпоставят с научени профили и се маркират."
+      },
+      "timing": {
+        "label": "Синхронизиране и наблюдател",
+        "intro": "Фонов ритъм, офлайн наблюдателят и поддръжката."
+      },
+      "anti_wrinkle": {
+        "label": "Против бръчки",
+        "intro": "Режимът против бръчки/против набръчкване открива импулси на ниска мощност след основната фаза и ги прикрепя към завършения цикъл."
+      },
+      "delay": {
+        "label": "Отложен старт",
+        "intro": "Детекцията на отложен старт идентифицира кога уредът е захранван, но все още не е започнал своя цикъл."
+      },
+      "triggers": {
+        "label": "Задействания и врати",
+        "intro": "Незадължителни външни сигнали: задействане на края, сензор за врата, превключвател за пауза и напомнянето за разтоварване."
+      },
+      "notifications": {
+        "label": "Известия",
+        "intro": "Кога и как ви се известява за събитията от цикъла."
+      },
+      "ml_training": {
+        "label": "ML обучение",
+        "intro": "График за преобучение на машинно обучение на устройство и настройки на данни."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Прагове и пропуск"
+      },
+      "cycle_start": {
+        "label": "Начало на цикъла"
+      },
+      "cycle_end": {
+        "label": "Край на цикъла"
+      },
+      "signal_processing": {
+        "label": "Обработка на сигнала"
+      },
+      "predictive_end": {
+        "label": "Предсказуем край"
+      },
+      "dishwasher_end": {
+        "label": "Край на съдомиялна"
+      },
+      "dtw_refinement": {
+        "label": "DTW прецизиране"
+      },
+      "match_scoring": {
+        "label": "Оценяване на съвпадение"
+      },
+      "duration_gates": {
+        "label": "Врати на продължителност"
+      },
+      "auto_labeling": {
+        "label": "Автоматично маркиране"
+      },
+      "watchdog": {
+        "label": "Наблюдател"
+      },
+      "housekeeping": {
+        "label": "Поддръжка"
+      },
+      "debug": {
+        "label": "Отстраняване на грешки"
+      },
+      "external_end_trigger": {
+        "label": "Външен краен тригер"
+      },
+      "door_pause": {
+        "label": "Врата и пауза"
+      },
+      "unload_reminder": {
+        "label": "Напомняне за разтоварване"
+      },
+      "services": {
+        "label": "Услуги"
+      },
+      "timing": {
+        "label": "Синхронизиране"
+      },
+      "messages": {
+        "label": "Съобщения"
+      },
+      "energy": {
+        "label": "Енергия"
+      },
+      "cycle_timers": {
+        "label": "Циклови таймери"
+      },
+      "schedule": {
+        "label": "График"
+      },
+      "data_management": {
+        "label": "Управление на данни"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Име на устройство"
+      },
+      "device_type": {
+        "label": "Тип устройство"
+      },
+      "power_sensor": {
+        "label": "Сензор за мощност"
+      },
+      "min_power": {
+        "label": "Минимална мощност"
+      },
+      "off_delay": {
+        "label": "Закъснение при изключване"
+      },
+      "linked_device": {
+        "label": "Групиране под устройство"
+      },
+      "start_threshold_w": {
+        "label": "Праг на стартиране"
+      },
+      "stop_threshold_w": {
+        "label": "Праг на спиране"
+      },
+      "min_off_gap": {
+        "label": "Минимална пауза при изключване"
+      },
+      "start_duration_threshold": {
+        "label": "Продължителност на стартиране"
+      },
+      "start_energy_threshold": {
+        "label": "Начална енергия"
+      },
+      "completion_min_seconds": {
+        "label": "Мин. продължителност на цикъл"
+      },
+      "running_dead_zone": {
+        "label": "Мъртва зона при работа"
+      },
+      "end_energy_threshold": {
+        "label": "Крайна енергия"
+      },
+      "end_repeat_count": {
+        "label": "Брой повторения при край"
+      },
+      "sampling_interval": {
+        "label": "Интервал на вземане на проби"
+      },
+      "smoothing_window": {
+        "label": "Прозорец за изглаждане"
+      },
+      "abrupt_drop_watts": {
+        "label": "Рязко падане"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Съотношение на рязко падане"
+      },
+      "profile_match_threshold": {
+        "label": "Праг на съвпадение"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Праг на несъвпадение"
+      },
+      "profile_match_interval": {
+        "label": "Интервал на съвпадение"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Мин. съотношение на продължителност"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Макс. съотношение на продължителност"
+      },
+      "profile_duration_tolerance": {
+        "label": "Толеранс на продължителност на профил"
+      },
+      "duration_tolerance": {
+        "label": "Толеранс на оценка"
+      },
+      "auto_label_confidence": {
+        "label": "Автоматично маркиране доверие"
+      },
+      "learning_confidence": {
+        "label": "Доверие в обучението"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Потискане на известия за обратна връзка"
+      },
+      "watchdog_interval": {
+        "label": "Интервал на наблюдател"
+      },
+      "no_update_active_timeout": {
+        "label": "Таймаут без актуализация"
+      },
+      "progress_reset_delay": {
+        "label": "Закъснение при нулиране на напредъка"
+      },
+      "auto_maintenance": {
+        "label": "Автоматична поддръжка (нощно почистване)"
+      },
+      "expose_debug_entities": {
+        "label": "Изложи обекти за отстраняване на грешки"
+      },
+      "save_debug_traces": {
+        "label": "Запазване на следи за отстраняване на грешки"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Активиране на антибръчково засичане"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Макс. антибръчкова мощност"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Максимална продължителност"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Праг на изходна мощност"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Активиране на засичане на отложен старт"
+      },
+      "delay_confirm_seconds": {
+        "label": "Секунди за потвърждение"
+      },
+      "delay_timeout_hours": {
+        "label": "Часове на таймаут"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Активиране на външен краен тригер"
+      },
+      "external_end_trigger": {
+        "label": "Обект на външен тригер"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Инвертиране на zewn. тригер (задействане при ИЗКЛ.)"
+      },
+      "door_sensor_entity": {
+        "label": "Обект на сензор за врата"
+      },
+      "pause_cuts_power": {
+        "label": "Паузата изрязва и мощността (чрез превключвател)"
+      },
+      "switch_entity": {
+        "label": "Обект на превключвател"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Закъснение на напомнянето за разтоварване"
+      },
+      "pump_stuck_duration": {
+        "label": "Продължителност при заседнала помпа"
+      },
+      "notify_start_services": {
+        "label": "Услуги при старт"
+      },
+      "notify_finish_services": {
+        "label": "Услуги при завършване"
+      },
+      "notify_live_services": {
+        "label": "Услуги за напредък на живо"
+      },
+      "notify_people": {
+        "label": "Хора (само когато са вкъщи)"
+      },
+      "notify_only_when_home": {
+        "label": "Известяване само когато е вкъщи"
+      },
+      "notify_fire_events": {
+        "label": "Задействане на HA събитие за известия"
+      },
+      "notify_before_end_minutes": {
+        "label": "Предупреждение преди края"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Интервал на актуализация на живо"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Живо преминаване % преди предупреждение"
+      },
+      "notify_live_chronometer": {
+        "label": "Използване на хронометър на живо"
+      },
+      "notify_timeout_seconds": {
+        "label": "Автоматично отхвърляне след"
+      },
+      "notify_title": {
+        "label": "Заглавие на известие"
+      },
+      "notify_icon": {
+        "label": "Икона на известие"
+      },
+      "notify_start_message": {
+        "label": "Съобщение при старт"
+      },
+      "notify_finish_message": {
+        "label": "Съобщение при завършване"
+      },
+      "notify_pre_complete_message": {
+        "label": "Съобщение преди завършване"
+      },
+      "notify_reminder_message": {
+        "label": "Съобщение за напомняне"
+      },
+      "notify_channel": {
+        "label": "Android канал (старт/на живо)"
+      },
+      "notify_finish_channel": {
+        "label": "Android канал (завършване)"
+      },
+      "energy_price_entity": {
+        "label": "Обект на цена на енергия"
+      },
+      "energy_price_static": {
+        "label": "Статична цена на енергия (на kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Циклови таймери"
+      },
+      "enable_ml_models": {
+        "label": "Прилагане на умни модели по време на цикъл"
+      },
+      "ml_training_enabled": {
+        "label": "Учене от тази машина"
+      },
+      "ml_training_hour": {
+        "label": "Учене в час"
+      },
+      "ml_training_min_cycles": {
+        "label": "Необходими цикли първо"
+      },
+      "ml_training_interval_days": {
+        "label": "Проверявай не по-рядко от"
+      }
     }
   }
 }

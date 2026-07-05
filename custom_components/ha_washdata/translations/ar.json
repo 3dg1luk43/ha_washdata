@@ -735,7 +735,11 @@
       "storage_diagnostics": "إحصائيات التخزين والصيانة والتصدير/الاستيراد",
       "trim_intro": "اسحب المقابض الحمراء، أو أدخل القيم. تتم إزالة كل شيء خارج النافذة.",
       "unsure_detected_prefix": "WashData غير متأكد من اكتشافه",
-      "updated": "تم التحديث"
+      "updated": "تم التحديث",
+      "feedback_cycles_pending": "{n} دورة للمراجعة",
+      "artifact_spike_detail": "ارتفع فوق نطاق الطاقة المعتاد لمدة ~{n}ث.",
+      "artifact_dip_detail": "انخفض تحت نطاق الطاقة المعتاد لمدة ~{n}ث.",
+      "artifact_pause_detail": "انخفضت الطاقة إلى ما يقارب الصفر لمدة ~{n}ث ثم استؤنفت — من المحتمل أن الباب فُتح في منتصف الدورة أو تم إيقاف الدورة مؤقتاً."
     },
     "phase_desc": {
       "pre_wash": "النقع الأولي أو المعالجة المسبقة قبل الغسيل الرئيسي.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "تتجه نحو الانخفاض",
       "up": "اتجاه تصاعدي"
+    },
+    "section": {
+      "basic": {
+        "label": "أساسي",
+        "intro": "الهوية الأساسية والضروريات التي تحتاجها معظم الإعدادات."
+      },
+      "detection": {
+        "label": "الكشف",
+        "intro": "كيف يتم كشف الدورة كبداية وتشغيل وانتهاء."
+      },
+      "matching": {
+        "label": "المطابقة",
+        "intro": "كيف تتم مطابقة الدورات المكتملة مع الملفات الشخصية المتعلمة وتسميتها."
+      },
+      "timing": {
+        "label": "التوقيت والحارس",
+        "intro": "إيقاع الخلفية وحارس غير الاتصال والصيانة المنزلية."
+      },
+      "anti_wrinkle": {
+        "label": "مضاد للتجاعيد",
+        "intro": "يكشف وضع مضاد التجاعيد/مضاد الطيات عن نبضات الدوران منخفضة الطاقة بعد المرحلة الرئيسية ويبقيها ملحقة بالدورة المكتملة."
+      },
+      "delay": {
+        "label": "البدء المؤجل",
+        "intro": "يحدد كشف البدء المؤجل متى يكون الجهاز في وضع التشغيل ولكنه لم يبدأ دورته بعد."
+      },
+      "triggers": {
+        "label": "المشغلات والأبواب",
+        "intro": "إشارات خارجية اختيارية: مشغل نهاية، وحساس باب، ومفتاح إيقاف مؤقت، وتذكير التفريغ."
+      },
+      "notifications": {
+        "label": "الإشعارات",
+        "intro": "متى وكيف يتم إشعارك بأحداث الدورة."
+      },
+      "ml_training": {
+        "label": "تدريب ML",
+        "intro": "جدول إعادة التدريب على التعلم الآلي على الجهاز وإعدادات البيانات."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "العتبات والفجوة"
+      },
+      "cycle_start": {
+        "label": "بداية الدورة"
+      },
+      "cycle_end": {
+        "label": "نهاية الدورة"
+      },
+      "signal_processing": {
+        "label": "معالجة الإشارة"
+      },
+      "predictive_end": {
+        "label": "النهاية التنبؤية"
+      },
+      "dishwasher_end": {
+        "label": "نهاية غسالة الأواني"
+      },
+      "dtw_refinement": {
+        "label": "تحسين DTW"
+      },
+      "match_scoring": {
+        "label": "تسجيل المطابقة"
+      },
+      "duration_gates": {
+        "label": "بوابات المدة"
+      },
+      "auto_labeling": {
+        "label": "التسمية التلقائية"
+      },
+      "watchdog": {
+        "label": "الحارس"
+      },
+      "housekeeping": {
+        "label": "الصيانة المنزلية"
+      },
+      "debug": {
+        "label": "التصحيح"
+      },
+      "external_end_trigger": {
+        "label": "مشغل النهاية الخارجي"
+      },
+      "door_pause": {
+        "label": "الباب والإيقاف المؤقت"
+      },
+      "unload_reminder": {
+        "label": "تذكير التفريغ"
+      },
+      "services": {
+        "label": "الخدمات"
+      },
+      "timing": {
+        "label": "التوقيت"
+      },
+      "messages": {
+        "label": "الرسائل"
+      },
+      "energy": {
+        "label": "الطاقة"
+      },
+      "cycle_timers": {
+        "label": "مؤقتات الدورة"
+      },
+      "schedule": {
+        "label": "الجدول الزمني"
+      },
+      "data_management": {
+        "label": "إدارة البيانات"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "اسم الجهاز"
+      },
+      "device_type": {
+        "label": "نوع الجهاز"
+      },
+      "power_sensor": {
+        "label": "مستشعر الطاقة"
+      },
+      "min_power": {
+        "label": "الحد الأدنى للطاقة"
+      },
+      "off_delay": {
+        "label": "تأخير الإيقاف"
+      },
+      "linked_device": {
+        "label": "تجميع تحت جهاز"
+      },
+      "start_threshold_w": {
+        "label": "عتبة البدء"
+      },
+      "stop_threshold_w": {
+        "label": "عتبة الإيقاف"
+      },
+      "min_off_gap": {
+        "label": "الحد الأدنى لفجوة الإيقاف"
+      },
+      "start_duration_threshold": {
+        "label": "مدة البدء"
+      },
+      "start_energy_threshold": {
+        "label": "طاقة البدء"
+      },
+      "completion_min_seconds": {
+        "label": "الحد الأدنى لمدة الدورة"
+      },
+      "running_dead_zone": {
+        "label": "منطقة الميتة للتشغيل"
+      },
+      "end_energy_threshold": {
+        "label": "طاقة النهاية"
+      },
+      "end_repeat_count": {
+        "label": "عدد تكرار النهاية"
+      },
+      "sampling_interval": {
+        "label": "فترة أخذ العينات"
+      },
+      "smoothing_window": {
+        "label": "نافذة التمهيد"
+      },
+      "abrupt_drop_watts": {
+        "label": "انخفاض مفاجئ"
+      },
+      "abrupt_drop_ratio": {
+        "label": "نسبة الانخفاض المفاجئ"
+      },
+      "profile_match_threshold": {
+        "label": "عتبة المطابقة"
+      },
+      "profile_unmatch_threshold": {
+        "label": "عتبة عدم المطابقة"
+      },
+      "profile_match_interval": {
+        "label": "فترة المطابقة"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "الحد الأدنى لنسبة المدة"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "الحد الأقصى لنسبة المدة"
+      },
+      "profile_duration_tolerance": {
+        "label": "تسامح مدة الملف الشخصي"
+      },
+      "duration_tolerance": {
+        "label": "تسامح التقدير"
+      },
+      "auto_label_confidence": {
+        "label": "ثقة التسمية التلقائية"
+      },
+      "learning_confidence": {
+        "label": "ثقة التعلم"
+      },
+      "suppress_feedback_notifications": {
+        "label": "إخفاء إشعارات التعليقات"
+      },
+      "watchdog_interval": {
+        "label": "فترة الحارس"
+      },
+      "no_update_active_timeout": {
+        "label": "مهلة عدم التحديث"
+      },
+      "progress_reset_delay": {
+        "label": "تأخير إعادة تعيين التقدم"
+      },
+      "auto_maintenance": {
+        "label": "الصيانة التلقائية (تنظيف ليلي)"
+      },
+      "expose_debug_entities": {
+        "label": "كشف كيانات التصحيح"
+      },
+      "save_debug_traces": {
+        "label": "حفظ آثار التصحيح"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "تمكين الكشف عن مضاد التجاعيد"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "الحد الأقصى لطاقة مضاد التجاعيد"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "الحد الأقصى للمدة"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "عتبة طاقة الخروج"
+      },
+      "delay_start_detect_enabled": {
+        "label": "تمكين كشف البدء المؤجل"
+      },
+      "delay_confirm_seconds": {
+        "label": "ثواني التأكيد"
+      },
+      "delay_timeout_hours": {
+        "label": "ساعات المهلة"
+      },
+      "external_end_trigger_enabled": {
+        "label": "تمكين مشغل النهاية الخارجي"
+      },
+      "external_end_trigger": {
+        "label": "كيان المشغل الخارجي"
+      },
+      "external_end_trigger_inverted": {
+        "label": "عكس المشغل الخارجي (التشغيل عند الإيقاف)"
+      },
+      "door_sensor_entity": {
+        "label": "كيان حساس الباب"
+      },
+      "pause_cuts_power": {
+        "label": "الإيقاف المؤقت يقطع الطاقة أيضاً (عبر مفتاح)"
+      },
+      "switch_entity": {
+        "label": "كيان المفتاح"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "تأخير تذكير التفريغ"
+      },
+      "pump_stuck_duration": {
+        "label": "مدة توقف المضخة"
+      },
+      "notify_start_services": {
+        "label": "خدمات البدء"
+      },
+      "notify_finish_services": {
+        "label": "خدمات الانتهاء"
+      },
+      "notify_live_services": {
+        "label": "خدمات التقدم المباشر"
+      },
+      "notify_people": {
+        "label": "الأشخاص (للإشعار عند التواجد في المنزل فقط)"
+      },
+      "notify_only_when_home": {
+        "label": "إشعار عند التواجد في المنزل فقط"
+      },
+      "notify_fire_events": {
+        "label": "إطلاق أحداث HA للإشعارات"
+      },
+      "notify_before_end_minutes": {
+        "label": "تنبيه ما قبل النهاية"
+      },
+      "notify_live_interval_seconds": {
+        "label": "فترة التحديث المباشر"
+      },
+      "notify_live_overrun_percent": {
+        "label": "نسبة تجاوز المباشر قبل التنبيه"
+      },
+      "notify_live_chronometer": {
+        "label": "استخدام ساعة توقيت مباشرة"
+      },
+      "notify_timeout_seconds": {
+        "label": "الإيقاف التلقائي بعد"
+      },
+      "notify_title": {
+        "label": "عنوان الإشعار"
+      },
+      "notify_icon": {
+        "label": "أيقونة الإشعار"
+      },
+      "notify_start_message": {
+        "label": "رسالة البدء"
+      },
+      "notify_finish_message": {
+        "label": "رسالة الانتهاء"
+      },
+      "notify_pre_complete_message": {
+        "label": "رسالة ما قبل الاكتمال"
+      },
+      "notify_reminder_message": {
+        "label": "رسالة التذكير"
+      },
+      "notify_channel": {
+        "label": "قناة Android (البدء/المباشر)"
+      },
+      "notify_finish_channel": {
+        "label": "قناة Android (الانتهاء)"
+      },
+      "energy_price_entity": {
+        "label": "كيان سعر الطاقة"
+      },
+      "energy_price_static": {
+        "label": "سعر الطاقة الثابت (لكل kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "مؤقتات الدورة"
+      },
+      "enable_ml_models": {
+        "label": "تطبيق النماذج الذكية أثناء الدورة"
+      },
+      "ml_training_enabled": {
+        "label": "التعلم من هذا الجهاز"
+      },
+      "ml_training_hour": {
+        "label": "التعلم في الساعة"
+      },
+      "ml_training_min_cycles": {
+        "label": "الدورات المطلوبة أولاً"
+      },
+      "ml_training_interval_days": {
+        "label": "التحقق بحد أقصى كل"
+      }
     }
   }
 }

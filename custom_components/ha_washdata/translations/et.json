@@ -461,7 +461,7 @@
       "import_json": "Import JSON-ist",
       "import_overwrite": "Import (kirjutab andmed üle)",
       "inspect": "Kontrollige",
-      "label": "Silt",
+      "label": "Sildista",
       "manage": "Halda",
       "merge": "Ühendage",
       "new_automation": "＋ Uus automaatika",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Salvestusstatistika, hooldus, eksport/import",
       "trim_intro": "Lohistage punaseid käepidemeid või sisestage väärtused. Kõik väljaspool akent eemaldatakse.",
       "unsure_detected_prefix": "WashData pole kindel, et see tuvastas",
-      "updated": "Uuendatud"
+      "updated": "Uuendatud",
+      "feedback_cycles_pending": "{n} tsükkel{s} ülevaatamiseks",
+      "artifact_spike_detail": "Ületas tavapärase võimsusriba umbes {n}s jooksul.",
+      "artifact_dip_detail": "Langes alla tavapärase võimsusriba umbes {n}s jooksul.",
+      "artifact_pause_detail": "Võimsus langes peaaegu nulli umbes {n}s jooksul ja taastus seejärel — tõenäoliselt avati uks tsükli keskel või tsükkel peatati."
     },
     "phase_desc": {
       "pre_wash": "Esmane leotamine või eeltöötlus enne põhipesu.",
@@ -777,7 +781,7 @@
     },
     "pref": {
       "date_absolute": "Absoluutne (nt 2. juulil 14:32)",
-      "date_relative": "Sugulane (nt 2 tundi tagasi)"
+      "date_relative": "Suhteline (nt 2 tundi tagasi)"
     },
     "quality": {
       "bad": "Halb",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Trend langeb",
       "up": "Tõusev trend"
+    },
+    "section": {
+      "basic": {
+        "label": "Põhiline",
+        "intro": "Põhiidentiteet ja olulisemad asjad, mida enamik seadistusi vajab."
+      },
+      "detection": {
+        "label": "Tuvastamine",
+        "intro": "Kuidas tsüklit tuvastatakse käivitumisena, töötamisena ja lõppemisena."
+      },
+      "matching": {
+        "label": "Sobitamine",
+        "intro": "Kuidas lõppenud tsüklid sobitatakse õpitud profiilidega ja märgistatakse."
+      },
+      "timing": {
+        "label": "Ajastus ja Valvekoer",
+        "intro": "Taustakadens, võrguühenduseta valvekoer ja hooldus."
+      },
+      "anti_wrinkle": {
+        "label": "Kortsudevastane",
+        "intro": "Kortsudevastane/kroomievastane režiim tuvastab madalvõimsusega trummelpulsid pärast põhifaasi ja hoiab need lõppenud tsükliga seotud."
+      },
+      "delay": {
+        "label": "Viivitatud Käivitus",
+        "intro": "Viivitatud käivituse tuvastamine tuvastab, millal seade on sisse lülitatud, kuid pole veel tsüklit alustanud."
+      },
+      "triggers": {
+        "label": "Päästikud ja Uksed",
+        "intro": "Valikulised välised signaalid: lõpu päästik, ukse andur, pausi lüliti ja mahalaadimisel meeldetuletaja."
+      },
+      "notifications": {
+        "label": "Teavitused",
+        "intro": "Millal ja kuidas teid tsüklisündmustest teavitatakse."
+      },
+      "ml_training": {
+        "label": "ML Koolitus",
+        "intro": "Seadmes toimuva masinõppe ümberõppe ajakava ja andmete seaded."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Läviväärtused ja Vahe"
+      },
+      "cycle_start": {
+        "label": "Tsükli Algus"
+      },
+      "cycle_end": {
+        "label": "Tsükli Lõpp"
+      },
+      "signal_processing": {
+        "label": "Signaali Töötlus"
+      },
+      "predictive_end": {
+        "label": "Ennustav Lõpp"
+      },
+      "dishwasher_end": {
+        "label": "Nõudepesumasina Lõpp"
+      },
+      "dtw_refinement": {
+        "label": "DTW Täpsustamine"
+      },
+      "match_scoring": {
+        "label": "Vaste Skoor"
+      },
+      "duration_gates": {
+        "label": "Kestuse Väravad"
+      },
+      "auto_labeling": {
+        "label": "Automaatne Sildistamine"
+      },
+      "watchdog": {
+        "label": "Valvekoer"
+      },
+      "housekeeping": {
+        "label": "Hooldus"
+      },
+      "debug": {
+        "label": "Silumine"
+      },
+      "external_end_trigger": {
+        "label": "Väline Lõpu Päästik"
+      },
+      "door_pause": {
+        "label": "Uks ja Paus"
+      },
+      "unload_reminder": {
+        "label": "Mahalaadimise Meeldetuletus"
+      },
+      "services": {
+        "label": "Teenused"
+      },
+      "timing": {
+        "label": "Ajastus"
+      },
+      "messages": {
+        "label": "Sõnumid"
+      },
+      "energy": {
+        "label": "Energia"
+      },
+      "cycle_timers": {
+        "label": "Tsükli Taimerid"
+      },
+      "schedule": {
+        "label": "Ajakava"
+      },
+      "data_management": {
+        "label": "Andmehaldus"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Seadme Nimi"
+      },
+      "device_type": {
+        "label": "Seadme Tüüp"
+      },
+      "power_sensor": {
+        "label": "Võimsusandur"
+      },
+      "min_power": {
+        "label": "Minimaalne Võimsus"
+      },
+      "off_delay": {
+        "label": "Väljalülitumise Viivitus"
+      },
+      "linked_device": {
+        "label": "Grupeeri Seadme Alla"
+      },
+      "start_threshold_w": {
+        "label": "Käivitumise Lävi"
+      },
+      "stop_threshold_w": {
+        "label": "Peatumise Lävi"
+      },
+      "min_off_gap": {
+        "label": "Min Väljalülitumise Vahe"
+      },
+      "start_duration_threshold": {
+        "label": "Käivitumise Kestus"
+      },
+      "start_energy_threshold": {
+        "label": "Käivitumise Energia"
+      },
+      "completion_min_seconds": {
+        "label": "Min Tsükli Kestus"
+      },
+      "running_dead_zone": {
+        "label": "Töötava Surnud Tsoon"
+      },
+      "end_energy_threshold": {
+        "label": "Lõpu Energia"
+      },
+      "end_repeat_count": {
+        "label": "Lõpu Kordusloendur"
+      },
+      "sampling_interval": {
+        "label": "Proovivõtu Intervall"
+      },
+      "smoothing_window": {
+        "label": "Silumisaken"
+      },
+      "abrupt_drop_watts": {
+        "label": "Järsk Langus"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Järsu Languse Suhe"
+      },
+      "profile_match_threshold": {
+        "label": "Vaste Lävi"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Mitte-Vaste Lävi"
+      },
+      "profile_match_interval": {
+        "label": "Vaste Intervall"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Min Kestuse Suhe"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Max Kestuse Suhe"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profiili Kestuse Tolerants"
+      },
+      "duration_tolerance": {
+        "label": "Hinnangu Tolerants"
+      },
+      "auto_label_confidence": {
+        "label": "Automaatse Sildi Usaldus"
+      },
+      "learning_confidence": {
+        "label": "Õppimise Usaldus"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Tõkesta Tagasiside Teavitused"
+      },
+      "watchdog_interval": {
+        "label": "Valvekoera Intervall"
+      },
+      "no_update_active_timeout": {
+        "label": "Ilma Uuenduseta Aegumine"
+      },
+      "progress_reset_delay": {
+        "label": "Edenemise Lähtestamise Viivitus"
+      },
+      "auto_maintenance": {
+        "label": "Automaatne Hooldus (öine puhastus)"
+      },
+      "expose_debug_entities": {
+        "label": "Näita Silumise Olemeid"
+      },
+      "save_debug_traces": {
+        "label": "Salvesta Silumise Jäljed"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Luba Kortsudevastane Tuvastamine"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Maks Kortsudevastane Võimsus"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Maksimaalne Kestus"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Väljumise Võimsuse Lävi"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Luba Viivitatud Käivituse Tuvastamine"
+      },
+      "delay_confirm_seconds": {
+        "label": "Kinnitussekundid"
+      },
+      "delay_timeout_hours": {
+        "label": "Aegumistunnid"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Luba Väline Lõpu Päästik"
+      },
+      "external_end_trigger": {
+        "label": "Väline Päästiku Olem"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Pööra Väline Päästik (käivita VÄLJAS)"
+      },
+      "door_sensor_entity": {
+        "label": "Ukse Anduri Olem"
+      },
+      "pause_cuts_power": {
+        "label": "Paus Lõikab Ka Võimsuse (lüliti kaudu)"
+      },
+      "switch_entity": {
+        "label": "Lüliti Olem"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Mahalaadimise Meeldetuletuse Viivitus"
+      },
+      "pump_stuck_duration": {
+        "label": "Pumba Kinnijäämise Kestus"
+      },
+      "notify_start_services": {
+        "label": "Käivitamise Teenused"
+      },
+      "notify_finish_services": {
+        "label": "Lõpetamise Teenused"
+      },
+      "notify_live_services": {
+        "label": "Reaalajas Edenemise Teenused"
+      },
+      "notify_people": {
+        "label": "Inimesed (Ainult Kodus Olles)"
+      },
+      "notify_only_when_home": {
+        "label": "Teavita Ainult Kodus Olles"
+      },
+      "notify_fire_events": {
+        "label": "Käivita HA Sündmused Teavituste Jaoks"
+      },
+      "notify_before_end_minutes": {
+        "label": "Eel-Lõpu Hoiatus"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Reaalajas Uuenduse Intervall"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Reaalajas Ülekulu % Enne Hoiatust"
+      },
+      "notify_live_chronometer": {
+        "label": "Kasuta Elavat Kronomeetrit"
+      },
+      "notify_timeout_seconds": {
+        "label": "Automaatne Sulgemine Pärast"
+      },
+      "notify_title": {
+        "label": "Teavituse Pealkiri"
+      },
+      "notify_icon": {
+        "label": "Teavituse Ikoon"
+      },
+      "notify_start_message": {
+        "label": "Käivitamise Sõnum"
+      },
+      "notify_finish_message": {
+        "label": "Lõpetamise Sõnum"
+      },
+      "notify_pre_complete_message": {
+        "label": "Eel-Lõpetamise Sõnum"
+      },
+      "notify_reminder_message": {
+        "label": "Meeldetuletuse Sõnum"
+      },
+      "notify_channel": {
+        "label": "Android Kanal (käivitus/reaalajas)"
+      },
+      "notify_finish_channel": {
+        "label": "Android Kanal (lõpetamine)"
+      },
+      "energy_price_entity": {
+        "label": "Energia Hinna Olem"
+      },
+      "energy_price_static": {
+        "label": "Staatiline Energia Hind (kWh kohta)"
+      },
+      "notify_cycle_timers": {
+        "label": "Tsükli Taimerid"
+      },
+      "enable_ml_models": {
+        "label": "Rakenda nutikaid mudeleid tsükli ajal"
+      },
+      "ml_training_enabled": {
+        "label": "Õpi sellest masinast"
+      },
+      "ml_training_hour": {
+        "label": "Õpi tunnil"
+      },
+      "ml_training_min_cycles": {
+        "label": "Esmalt vajalikud tsüklid"
+      },
+      "ml_training_interval_days": {
+        "label": "Kontrolli maksimaalselt iga"
+      }
     }
   }
 }

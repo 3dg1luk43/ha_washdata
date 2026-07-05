@@ -428,7 +428,7 @@
       "delete_group_tip": "Usuń tylko tę grupę — profile członków zostaną zachowane",
       "run_analysis_tip": "Przeanalizuj już teraz swoje zarejestrowane cykle i odśwież sugestie dotyczące tuningu",
       "reset_ml_models_tip": "Odrzuć modele dopracowane i wróć do wbudowanych. WashData może później nauczyć się ich ponownie.",
-      "resume_cycle": "Wznawiać",
+      "resume_cycle": "Wznów cykl",
       "add_device": "+ Dodaj urządzenie",
       "add_phase": "+ Dodaj fazę",
       "apply_all": "Zastosuj wszystko",
@@ -440,7 +440,7 @@
       "cancel": "Anulować",
       "clear_debug": "Wyczyść dane debugowania",
       "clear_splits": "Jasne",
-      "close": "Zamknąć",
+      "close": "Zamknij",
       "compare": "Porównywać",
       "confirm": "Potwierdzać",
       "convert_to_automation": "Przejdź na automatyzację",
@@ -454,7 +454,7 @@
       "dismiss": "Odrzucać",
       "done": "Zrobione",
       "edit": "Redagować",
-      "export": "Eksport",
+      "export": "Eksportuj",
       "export_json": "Eksportuj do JSON",
       "force_stop": "Wymuś zatrzymanie",
       "from_template": "Z szablonu ▾",
@@ -462,7 +462,7 @@
       "import_json": "Importuj z JSON",
       "import_overwrite": "Importuj (nadpisuje dane)",
       "inspect": "Sprawdzać",
-      "label": "Etykieta",
+      "label": "Oznacz",
       "manage": "Zarządzać",
       "merge": "Łączyć",
       "new_automation": "+ Nowa automatyzacja",
@@ -484,7 +484,7 @@
       "reset": "Nastawić",
       "reset_to_builtin": "Zresetuj do modeli wbudowanych",
       "reset_to_defaults": "Przywróć ustawienia domyślne",
-      "review": "Recenzja",
+      "review": "Sprawdź",
       "run_analysis": "🔍 Przeprowadź analizę sugestii",
       "run_auto_label": "Uruchom automatyczne etykietowanie",
       "save": "Ratować",
@@ -622,7 +622,7 @@
       "artifact_tip": "Wykryto {n} anomalii (np. drzwi otwarte w połowie cyklu) — otwórz, aby zobaczyć je na wykresie",
       "poor_fit_tip": "Niespójna historia meczów — rozważ przebudowę tego profilu",
       "fair_fit_tip": "Umiarkowana spójność dopasowania — niektóre cykle przypisane do tego profilu mają niższy poziom pewności. Oznacz więcej cykli lub ponownie zapisz profil, aby poprawić dokładność.",
-      "fair_fit": "uczciwe dopasowanie",
+      "fair_fit": "akceptowalne dopasowanie",
       "poor_fit": "słabe dopasowanie",
       "auto": "(automatycznie wykryty)",
       "built_in_tag": "wbudowany",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Statystyki przechowywania, konserwacja, eksport/import",
       "trim_intro": "Przeciągnij czerwone uchwyty lub wprowadź wartości. Wszystko za oknem jest usuwane.",
       "unsure_detected_prefix": "WashData nie jest pewien, czy został wykryty",
-      "updated": "Zaktualizowano"
+      "updated": "Zaktualizowano",
+      "feedback_cycles_pending": "{n} cykl{s} do sprawdzenia",
+      "artifact_spike_detail": "Moc przekroczyła normalny zakres przez ~{n}s.",
+      "artifact_dip_detail": "Moc spadła poniżej normalnego zakresu przez ~{n}s.",
+      "artifact_pause_detail": "Moc spadła prawie do zera przez ~{n}s, a następnie wzrosła — prawdopodobnie drzwi zostały otwarte w trakcie cyklu lub cykl był wstrzymany."
     },
     "phase_desc": {
       "pre_wash": "Wstępne namoczenie lub obróbka wstępna przed praniem zasadniczym.",
@@ -746,11 +750,11 @@
       "spin_wd": "Ekstrakcja z dużą szybkością przed przejściem do suszenia.",
       "soak": "Okres namaczania o niskiej aktywności pomiędzy aktywnymi etapami prania.",
       "soak_dw": "Wydłużony okres moczenia w przypadku ciężkich gleb.",
-      "anti_crease": "Sporadyczne krótkie upadki po zakończeniu w celu zmniejszenia zmarszczek.",
+      "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
       "heat_up": "Wstępne rozgrzewanie grzejnika przed rozpoczęciem pełnego suszenia.",
       "drying": "Główny okres podgrzewania.",
       "cool_down": "Obracanie bez ogrzewania pod koniec cyklu.",
-      "anti_wrinkle": "Okresowe upadki po cyklu w celu zmniejszenia zmarszczek.",
+      "anti_wrinkle": "Okresowe obroty bębna po zakończeniu cyklu w celu zapobiegania gnieceniu tkanin.",
       "sensor_check": "Krótka przerwa przy małej mocy podczas pomiaru suchości.",
       "drain_and_switch": "Okres przejścia z trybu prania do trybu suszenia.",
       "pre_rinse": "Wstępne spryskanie przed praniem w detergencie.",
@@ -769,7 +773,7 @@
       "fit_slight": "Niewielki",
       "fit_strong": "Mocny",
       "fit_weak": "Słaby",
-      "fit_word": "pasować",
+      "fit_word": "dopasowanie",
       "personalized": "● Spersonalizowane dla tego urządzenia"
     },
     "trend": {
@@ -874,6 +878,348 @@
       "settings_saved": "Ustawienia zapisane; przeładowanie integracji",
       "suggestions_applied": "Zastosowano sugestie; przeładowanie integracji",
       "suggestions_dismissed": "Sugestie odrzucone"
+    },
+    "section": {
+      "basic": {
+        "label": "Podstawowe",
+        "intro": "Kluczowa tożsamość i essentials dla większości konfiguracji."
+      },
+      "detection": {
+        "label": "Wykrywanie",
+        "intro": "Jak cykl jest wykrywany jako uruchamiany, działający i kończący się."
+      },
+      "matching": {
+        "label": "Dopasowanie",
+        "intro": "Jak zakończone cykle są dopasowywane do nauczonych profili i etykietowane."
+      },
+      "timing": {
+        "label": "Czas i Watchdog",
+        "intro": "Harmonogram tła, watchdog offline i konserwacja."
+      },
+      "anti_wrinkle": {
+        "label": "Antygniotowy",
+        "intro": "Tryb antygniotowy wykrywa impulsy bębnowania przy niskiej mocy po fazie głównej i utrzymuje je przyłączone do zakończonego cyklu."
+      },
+      "delay": {
+        "label": "Opóźniony Start",
+        "intro": "Wykrywanie opóźnionego startu identyfikuje, gdy urządzenie jest zasilane, ale jeszcze nie rozpoczęło cyklu."
+      },
+      "triggers": {
+        "label": "Wyzwalacze i Drzwi",
+        "intro": "Opcjonalne zewnętrzne sygnały: wyzwalacz zakończenia, czujnik drzwi, przełącznik pauzy i przypomnienie o rozładunku."
+      },
+      "notifications": {
+        "label": "Powiadomienia",
+        "intro": "Kiedy i jak otrzymujesz powiadomienia o zdarzeniach cyklu."
+      },
+      "ml_training": {
+        "label": "Trenowanie ML",
+        "intro": "Harmonogram i ustawienia danych do ponownego trenowania uczenia maszynowego na urządzeniu."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Progi i Przerwy"
+      },
+      "cycle_start": {
+        "label": "Start Cyklu"
+      },
+      "cycle_end": {
+        "label": "Koniec Cyklu"
+      },
+      "signal_processing": {
+        "label": "Przetwarzanie Sygnału"
+      },
+      "predictive_end": {
+        "label": "Przewidywane Zakończenie"
+      },
+      "dishwasher_end": {
+        "label": "Zakończenie Zmywarki"
+      },
+      "dtw_refinement": {
+        "label": "Uściślenie DTW"
+      },
+      "match_scoring": {
+        "label": "Punktacja Dopasowania"
+      },
+      "duration_gates": {
+        "label": "Bramki Czasowe"
+      },
+      "auto_labeling": {
+        "label": "Automatyczne Etykietowanie"
+      },
+      "watchdog": {
+        "label": "Watchdog"
+      },
+      "housekeeping": {
+        "label": "Utrzymanie"
+      },
+      "debug": {
+        "label": "Debugowanie"
+      },
+      "external_end_trigger": {
+        "label": "Zewnętrzny Wyzwalacz Zakończenia"
+      },
+      "door_pause": {
+        "label": "Drzwi i Pauza"
+      },
+      "unload_reminder": {
+        "label": "Przypomnienie o Rozładunku"
+      },
+      "services": {
+        "label": "Usługi"
+      },
+      "timing": {
+        "label": "Czas"
+      },
+      "messages": {
+        "label": "Wiadomości"
+      },
+      "energy": {
+        "label": "Energia"
+      },
+      "cycle_timers": {
+        "label": "Timery Cyklu"
+      },
+      "schedule": {
+        "label": "Harmonogram"
+      },
+      "data_management": {
+        "label": "Zarządzanie Danymi"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Nazwa Urządzenia"
+      },
+      "device_type": {
+        "label": "Typ Urządzenia"
+      },
+      "power_sensor": {
+        "label": "Czujnik Mocy"
+      },
+      "min_power": {
+        "label": "Minimalna Moc"
+      },
+      "off_delay": {
+        "label": "Opóźnienie Wyłączenia"
+      },
+      "linked_device": {
+        "label": "Grupuj pod Urządzeniem"
+      },
+      "start_threshold_w": {
+        "label": "Próg Startu"
+      },
+      "stop_threshold_w": {
+        "label": "Próg Zatrzymania"
+      },
+      "min_off_gap": {
+        "label": "Minimalna Przerwa Wyłączenia"
+      },
+      "start_duration_threshold": {
+        "label": "Czas Trwania Startu"
+      },
+      "start_energy_threshold": {
+        "label": "Energia Startu"
+      },
+      "completion_min_seconds": {
+        "label": "Minimalny Czas Trwania Cyklu"
+      },
+      "running_dead_zone": {
+        "label": "Strefa Martwa"
+      },
+      "end_energy_threshold": {
+        "label": "Energia Zakończenia"
+      },
+      "end_repeat_count": {
+        "label": "Liczba Powtórzeń Zakończenia"
+      },
+      "sampling_interval": {
+        "label": "Interwał Próbkowania"
+      },
+      "smoothing_window": {
+        "label": "Okno Wygładzania"
+      },
+      "abrupt_drop_watts": {
+        "label": "Nagły Spadek"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Współczynnik Nagłego Spadku"
+      },
+      "profile_match_threshold": {
+        "label": "Próg Dopasowania"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Próg Niedopasowania"
+      },
+      "profile_match_interval": {
+        "label": "Interwał Dopasowania"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Minimalna Proporcja Czasu Trwania"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Maksymalna Proporcja Czasu Trwania"
+      },
+      "profile_duration_tolerance": {
+        "label": "Tolerancja Czasu Profilu"
+      },
+      "duration_tolerance": {
+        "label": "Tolerancja Szacowania"
+      },
+      "auto_label_confidence": {
+        "label": "Pewność Automatycznego Etykietowania"
+      },
+      "learning_confidence": {
+        "label": "Pewność Uczenia"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Wycisz Powiadomienia o Opinii"
+      },
+      "watchdog_interval": {
+        "label": "Interwał Watchdog"
+      },
+      "no_update_active_timeout": {
+        "label": "Limit Czasu Braku Aktualizacji"
+      },
+      "progress_reset_delay": {
+        "label": "Opóźnienie Resetowania Postępu"
+      },
+      "auto_maintenance": {
+        "label": "Automatyczna Konserwacja (nocne czyszczenie)"
+      },
+      "expose_debug_entities": {
+        "label": "Ujawnij Encje Debugowania"
+      },
+      "save_debug_traces": {
+        "label": "Zapisuj Ślady Debugowania"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Włącz Wykrywanie Antygniotowe"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Maks. Moc Antygniotowa"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Maks. Czas Trwania"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Próg Wyjścia Mocy"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Włącz Wykrywanie Opóźnionego Startu"
+      },
+      "delay_confirm_seconds": {
+        "label": "Sekundy Potwierdzenia"
+      },
+      "delay_timeout_hours": {
+        "label": "Czas Oczekiwania (godziny)"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Włącz Zewnętrzny Wyzwalacz Zakończenia"
+      },
+      "external_end_trigger": {
+        "label": "Encja Zewnętrznego Wyzwalacza"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Odwróć Zewnętrzny Wyzwalacz (wyzwalaj przy WYŁ)"
+      },
+      "door_sensor_entity": {
+        "label": "Encja Czujnika Drzwi"
+      },
+      "pause_cuts_power": {
+        "label": "Pauza Odcina Zasilanie (przez przełącznik)"
+      },
+      "switch_entity": {
+        "label": "Encja Przełącznika"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Opóźnienie Przypomnienia o Rozładunku"
+      },
+      "pump_stuck_duration": {
+        "label": "Czas Zacięcia Pompy"
+      },
+      "notify_start_services": {
+        "label": "Usługi Startu"
+      },
+      "notify_finish_services": {
+        "label": "Usługi Zakończenia"
+      },
+      "notify_live_services": {
+        "label": "Usługi Aktualizacji na Żywo"
+      },
+      "notify_people": {
+        "label": "Osoby (dla Tylko Gdy Jestem w Domu)"
+      },
+      "notify_only_when_home": {
+        "label": "Powiadamiaj Tylko Gdy Jestem w Domu"
+      },
+      "notify_fire_events": {
+        "label": "Wysyłaj Zdarzenia HA dla Powiadomień"
+      },
+      "notify_before_end_minutes": {
+        "label": "Alert Przed Zakończeniem"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Interwał Aktualizacji na Żywo"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% Przekroczenia przed Alertem"
+      },
+      "notify_live_chronometer": {
+        "label": "Używaj Chronometru na Żywo"
+      },
+      "notify_timeout_seconds": {
+        "label": "Automatyczne Zamknięcie Po"
+      },
+      "notify_title": {
+        "label": "Tytuł Powiadomienia"
+      },
+      "notify_icon": {
+        "label": "Ikona Powiadomienia"
+      },
+      "notify_start_message": {
+        "label": "Wiadomość Startu"
+      },
+      "notify_finish_message": {
+        "label": "Wiadomość Zakończenia"
+      },
+      "notify_pre_complete_message": {
+        "label": "Wiadomość Przed Zakończeniem"
+      },
+      "notify_reminder_message": {
+        "label": "Wiadomość Przypomnienia"
+      },
+      "notify_channel": {
+        "label": "Kanał Android (start/na żywo)"
+      },
+      "notify_finish_channel": {
+        "label": "Kanał Android (zakończenie)"
+      },
+      "energy_price_entity": {
+        "label": "Encja Ceny Energii"
+      },
+      "energy_price_static": {
+        "label": "Statyczna Cena Energii (za kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Timery Cyklu"
+      },
+      "enable_ml_models": {
+        "label": "Stosuj inteligentne modele podczas cyklu"
+      },
+      "ml_training_enabled": {
+        "label": "Ucz się od tej maszyny"
+      },
+      "ml_training_hour": {
+        "label": "Ucz się o godzinie"
+      },
+      "ml_training_min_cycles": {
+        "label": "Wymagane minimum cykli"
+      },
+      "ml_training_interval_days": {
+        "label": "Sprawdzaj co najwyżej co"
+      }
     }
   }
 }

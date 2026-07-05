@@ -536,7 +536,7 @@
       "reset_to_builtin": "Ponastavi na vgrajene modele",
       "reset_to_defaults": "Ponastavi na privzete vrednosti",
       "resume_cycle": "Nadaljuj cikel",
-      "review": "Preglej",
+      "review": "Oceni",
       "run_analysis": "🔍 Zaženi analizo predlogov",
       "run_auto_label": "Zaženi samodejno označevanje",
       "save": "Shrani",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Statistike shrambe, vzdrževanje, izvoz/uvoz",
       "trim_intro": "Povlecite rdeče ročke ali vnesite vrednosti. Vse zunaj okna se odstrani.",
       "unsure_detected_prefix": "WashData ni prepričan, da je zaznal",
-      "updated": "Posodobljeno"
+      "updated": "Posodobljeno",
+      "feedback_cycles_pending": "{n} ciklov za pregled",
+      "artifact_spike_detail": "Presegl normalni pas moči za ~{n} s.",
+      "artifact_dip_detail": "Padel pod normalni pas moči za ~{n} s.",
+      "artifact_pause_detail": "Moč je padla skoraj na nič za ~{n} s in se nato obnovila — verjetno so bila odprta vrata sredi cikla ali je bil cikel zaustavljen."
     },
     "phase_desc": {
       "pre_wash": "Začetno namakanje ali predobdelava pred glavnim pranjem.",
@@ -746,11 +750,11 @@
       "spin_wd": "Visokohitrostna ekstrakcija pred prehodom sušenja.",
       "soak": "Nizkoaktivno obdobje namakanja med aktivnimi fazami pranja.",
       "soak_dw": "Podaljšano obdobje namakanja za močno umazano posodo.",
-      "anti_crease": "Občasni kratki pomiki po zaključku za zmanjšanje gub.",
+      "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",
       "heat_up": "Začetno ogrevanje grelnika pred začetkom popolnega sušenja.",
       "drying": "Glavno ogrevano obdobje sušenja z vrtenjem.",
       "cool_down": "Vrtenje brez toplote blizu konca cikla.",
-      "anti_wrinkle": "Periodično vrtanje po ciklu za zmanjšanje gub.",
+      "anti_wrinkle": "Periodično vrtenje po ciklu za preprečevanje gub na oblačilih.",
       "sensor_check": "Kratek premor z nizko močjo med merjenjem suhosti.",
       "drain_and_switch": "Prehodno obdobje iz načina pranja v način sušenja.",
       "pre_rinse": "Začetno pršenje pred pranjem z detergentom.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Padajoči trend",
       "up": "Naraščajoča tendenca"
+    },
+    "section": {
+      "basic": {
+        "label": "Osnovno",
+        "intro": "Osnovna identiteta in bistvo, ki ga večina nastavitev potrebuje."
+      },
+      "detection": {
+        "label": "Zaznavanje",
+        "intro": "Kako se zazna začetek, tek in konec cikla."
+      },
+      "matching": {
+        "label": "Ujemanje",
+        "intro": "Kako se končani cikli ujemajo z naučenimi profili in označijo."
+      },
+      "timing": {
+        "label": "Časovanje in nadzornik",
+        "intro": "Ozadna kadenca, nadzornik brez povezave in vzdrževanje."
+      },
+      "anti_wrinkle": {
+        "label": "Zaščita pred gubami",
+        "intro": "Način zaščite pred gubami na oblačilih zazna kratke pulze pri nizki moči po glavni fazi in jih obdrži pripisane končanemu ciklu."
+      },
+      "delay": {
+        "label": "Zakasnjen zagon",
+        "intro": "Zaznavanje zakasnjenega zagona prepozna, ko je naprava vklopljena, a cikla še ni začela."
+      },
+      "triggers": {
+        "label": "Sprožilci in vrata",
+        "intro": "Izbirni zunanji signali: sprožilec za konec, senzor vrat, stikalo za premor in opomnik za raztovarjanje."
+      },
+      "notifications": {
+        "label": "Obvestila",
+        "intro": "Kdaj in kako boste obveščeni o dogodkih cikla."
+      },
+      "ml_training": {
+        "label": "Usposabljanje ML",
+        "intro": "Urnik ponovnega usposabljanja strojnega učenja na napravi in nastavitve podatkov."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Pragovi in presledek"
+      },
+      "cycle_start": {
+        "label": "Začetek cikla"
+      },
+      "cycle_end": {
+        "label": "Konec cikla"
+      },
+      "signal_processing": {
+        "label": "Obdelava signala"
+      },
+      "predictive_end": {
+        "label": "Prediktivni konec"
+      },
+      "dishwasher_end": {
+        "label": "Konec cikla pomivalnega stroja"
+      },
+      "dtw_refinement": {
+        "label": "DTW izpopolnjevanje"
+      },
+      "match_scoring": {
+        "label": "Ocenjevanje ujemanja"
+      },
+      "duration_gates": {
+        "label": "Vrata trajanja"
+      },
+      "auto_labeling": {
+        "label": "Samodejno označevanje"
+      },
+      "watchdog": {
+        "label": "Nadzornik"
+      },
+      "housekeeping": {
+        "label": "Vzdrževanje"
+      },
+      "debug": {
+        "label": "Odpravljanje napak"
+      },
+      "external_end_trigger": {
+        "label": "Zunanji sprožilec za konec"
+      },
+      "door_pause": {
+        "label": "Vrata in premor"
+      },
+      "unload_reminder": {
+        "label": "Opomnik za raztovarjanje"
+      },
+      "services": {
+        "label": "Storitve"
+      },
+      "timing": {
+        "label": "Časovanje"
+      },
+      "messages": {
+        "label": "Sporočila"
+      },
+      "energy": {
+        "label": "Energija"
+      },
+      "cycle_timers": {
+        "label": "Časovniki cikla"
+      },
+      "schedule": {
+        "label": "Urnik"
+      },
+      "data_management": {
+        "label": "Upravljanje podatkov"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Ime naprave"
+      },
+      "device_type": {
+        "label": "Vrsta naprave"
+      },
+      "power_sensor": {
+        "label": "Senzor moči"
+      },
+      "min_power": {
+        "label": "Minimalna moč"
+      },
+      "off_delay": {
+        "label": "Zamuda izklopa"
+      },
+      "linked_device": {
+        "label": "Združi pod napravo"
+      },
+      "start_threshold_w": {
+        "label": "Prag zagona"
+      },
+      "stop_threshold_w": {
+        "label": "Prag zaustavitve"
+      },
+      "min_off_gap": {
+        "label": "Min. presledek izklopa"
+      },
+      "start_duration_threshold": {
+        "label": "Trajanje zagona"
+      },
+      "start_energy_threshold": {
+        "label": "Energija zagona"
+      },
+      "completion_min_seconds": {
+        "label": "Min. trajanje cikla"
+      },
+      "running_dead_zone": {
+        "label": "Mrtva cona delovanja"
+      },
+      "end_energy_threshold": {
+        "label": "Energija konca"
+      },
+      "end_repeat_count": {
+        "label": "Število ponovitev konca"
+      },
+      "sampling_interval": {
+        "label": "Interval vzorčenja"
+      },
+      "smoothing_window": {
+        "label": "Okno glajenja"
+      },
+      "abrupt_drop_watts": {
+        "label": "Nenaden padec"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Razmerje nenadnega padca"
+      },
+      "profile_match_threshold": {
+        "label": "Prag ujemanja"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Prag neujemanja"
+      },
+      "profile_match_interval": {
+        "label": "Interval ujemanja"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Min. razmerje trajanja"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Maks. razmerje trajanja"
+      },
+      "profile_duration_tolerance": {
+        "label": "Toleranca trajanja profila"
+      },
+      "duration_tolerance": {
+        "label": "Toleranca ocene"
+      },
+      "auto_label_confidence": {
+        "label": "Zaupanje samodejnega označevanja"
+      },
+      "learning_confidence": {
+        "label": "Zaupanje učenja"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Potlači obvestila o povratnih informacijah"
+      },
+      "watchdog_interval": {
+        "label": "Interval nadzornika"
+      },
+      "no_update_active_timeout": {
+        "label": "Časovna omejitev brez posodobitve"
+      },
+      "progress_reset_delay": {
+        "label": "Zamuda ponastavitve napredka"
+      },
+      "auto_maintenance": {
+        "label": "Samodejno vzdrževanje (nočno čiščenje)"
+      },
+      "expose_debug_entities": {
+        "label": "Izpostavi entitete za odpravljanje napak"
+      },
+      "save_debug_traces": {
+        "label": "Shrani sledove za odpravljanje napak"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Omogoči zaznavanje zaščite pred gubami"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Maks. moč zaščite pred gubami"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Maks. trajanje"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Prag izhodne moči"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Omogoči zaznavanje zakasnjenega zagona"
+      },
+      "delay_confirm_seconds": {
+        "label": "Sekunde potrditve"
+      },
+      "delay_timeout_hours": {
+        "label": "Ure časovne omejitve"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Omogoči zunanji sprožilec za konec"
+      },
+      "external_end_trigger": {
+        "label": "Zunanja sprožilna entiteta"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Obrni zunanji sprožilec (sproži ob IZKLOP)"
+      },
+      "door_sensor_entity": {
+        "label": "Entiteta senzorja vrat"
+      },
+      "pause_cuts_power": {
+        "label": "Premor tudi prekine napajanje (prek stikala)"
+      },
+      "switch_entity": {
+        "label": "Entiteta stikala"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Zamuda opomnika za raztovarjanje"
+      },
+      "pump_stuck_duration": {
+        "label": "Trajanje zataknjenosti črpalke"
+      },
+      "notify_start_services": {
+        "label": "Storitve ob zagonu"
+      },
+      "notify_finish_services": {
+        "label": "Storitve ob dokončanju"
+      },
+      "notify_live_services": {
+        "label": "Storitve sprotnega napredka"
+      },
+      "notify_people": {
+        "label": "Osebe (za Samo ko doma)"
+      },
+      "notify_only_when_home": {
+        "label": "Obvesti samo ko doma"
+      },
+      "notify_fire_events": {
+        "label": "Sproži HA dogodke za obvestila"
+      },
+      "notify_before_end_minutes": {
+        "label": "Opozorilo pred koncem"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Interval sprotnih posodobitev"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% prekoračitve pred opozorilom"
+      },
+      "notify_live_chronometer": {
+        "label": "Uporabi sprotni kronometer"
+      },
+      "notify_timeout_seconds": {
+        "label": "Samodejno zavrži po"
+      },
+      "notify_title": {
+        "label": "Naslov obvestila"
+      },
+      "notify_icon": {
+        "label": "Ikona obvestila"
+      },
+      "notify_start_message": {
+        "label": "Sporočilo ob zagonu"
+      },
+      "notify_finish_message": {
+        "label": "Sporočilo ob dokončanju"
+      },
+      "notify_pre_complete_message": {
+        "label": "Sporočilo pred dokončanjem"
+      },
+      "notify_reminder_message": {
+        "label": "Sporočilo opomnika"
+      },
+      "notify_channel": {
+        "label": "Android kanal (zagon/v živo)"
+      },
+      "notify_finish_channel": {
+        "label": "Android kanal (dokončanje)"
+      },
+      "energy_price_entity": {
+        "label": "Entiteta cene energije"
+      },
+      "energy_price_static": {
+        "label": "Statična cena energije (za kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Časovniki cikla"
+      },
+      "enable_ml_models": {
+        "label": "Uporabi pametne modele med ciklom"
+      },
+      "ml_training_enabled": {
+        "label": "Uči se iz te naprave"
+      },
+      "ml_training_hour": {
+        "label": "Uči se ob uri"
+      },
+      "ml_training_min_cycles": {
+        "label": "Najprej potrebno število ciklov"
+      },
+      "ml_training_interval_days": {
+        "label": "Preverjaj največ vsakih"
+      }
     }
   }
 }

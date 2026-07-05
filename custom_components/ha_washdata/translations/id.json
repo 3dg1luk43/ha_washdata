@@ -440,7 +440,7 @@
       "cancel": "Membatalkan",
       "clear_debug": "Hapus Data Debug",
       "clear_splits": "Jernih",
-      "close": "Menutup",
+      "close": "Tutup",
       "compare": "Membandingkan",
       "confirm": "Mengonfirmasi",
       "convert_to_automation": "Konversi ke otomatisasi",
@@ -462,7 +462,7 @@
       "import_json": "Impor dari JSON",
       "import_overwrite": "Impor (menimpa data)",
       "inspect": "Memeriksa",
-      "label": "Label",
+      "label": "Beri label",
       "manage": "Mengelola",
       "merge": "Menggabungkan",
       "new_automation": "＋ Otomatisasi Baru",
@@ -622,7 +622,7 @@
       "artifact_tip": "{n} anomali terdeteksi (misalnya pintu terbuka di tengah siklus) — terbuka untuk melihatnya di grafik",
       "poor_fit_tip": "Riwayat pertandingan tidak konsisten — pertimbangkan untuk membangun kembali profil ini",
       "fair_fit_tip": "Konsistensi kecocokan sedang — beberapa siklus yang ditetapkan ke profil ini memiliki skor keyakinan lebih rendah. Beri label lebih banyak siklus atau rekam ulang profil untuk meningkatkan akurasi.",
-      "fair_fit": "cukup cocok",
+      "fair_fit": "kualitas dapat diterima",
       "poor_fit": "tidak cocok",
       "auto": "(terdeteksi otomatis)",
       "built_in_tag": "bawaan",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Statistik penyimpanan, pemeliharaan, ekspor/impor",
       "trim_intro": "Seret pengendali merah, atau masukkan nilai. Segala sesuatu di luar jendela dihapus.",
       "unsure_detected_prefix": "WashData tidak yakin itu terdeteksi",
-      "updated": "Diperbarui"
+      "updated": "Diperbarui",
+      "feedback_cycles_pending": "{n} siklus{s} perlu ditinjau",
+      "artifact_spike_detail": "Melebihi band daya biasa selama ~{n}d.",
+      "artifact_dip_detail": "Turun di bawah band daya biasa selama ~{n}d.",
+      "artifact_pause_detail": "Daya turun hampir nol selama ~{n}d lalu kembali — kemungkinan pintu dibuka di tengah siklus atau siklus dijeda."
     },
     "phase_desc": {
       "pre_wash": "Perendaman awal atau pra-perawatan sebelum pencucian utama.",
@@ -769,7 +773,7 @@
       "fit_slight": "Sedikit",
       "fit_strong": "Kuat",
       "fit_weak": "Lemah",
-      "fit_word": "bugar",
+      "fit_word": "akurasi",
       "personalized": "● Dipersonalisasi untuk mesin ini"
     },
     "trend": {
@@ -874,6 +878,348 @@
       "settings_saved": "Pengaturan disimpan; memuat ulang integrasi",
       "suggestions_applied": "Saran diterapkan; memuat ulang integrasi",
       "suggestions_dismissed": "Saran ditolak"
+    },
+    "section": {
+      "basic": {
+        "label": "Dasar",
+        "intro": "Identitas inti dan hal-hal penting yang dibutuhkan sebagian besar pengaturan."
+      },
+      "detection": {
+        "label": "Deteksi",
+        "intro": "Cara siklus dideteksi sebagai dimulai, berjalan, dan selesai."
+      },
+      "matching": {
+        "label": "Pencocokan",
+        "intro": "Cara siklus yang selesai dicocokkan dengan profil yang dipelajari dan diberi label."
+      },
+      "timing": {
+        "label": "Waktu & Pengawas",
+        "intro": "Kadence latar belakang, pengawas offline, dan pemeliharaan."
+      },
+      "anti_wrinkle": {
+        "label": "Anti-Kerut",
+        "intro": "Mode anti-kerut/anti-kusut mendeteksi pulsa putaran daya rendah setelah fase utama dan menjaganya tetap terlampir pada siklus yang selesai."
+      },
+      "delay": {
+        "label": "Penundaan Mulai",
+        "intro": "Deteksi penundaan mulai mengidentifikasi ketika peralatan dinyalakan tetapi belum memulai siklusnya."
+      },
+      "triggers": {
+        "label": "Pemicu & Pintu",
+        "intro": "Sinyal eksternal opsional: pemicu akhir, sensor pintu, sakelar jeda, dan pengingat bongkar."
+      },
+      "notifications": {
+        "label": "Notifikasi",
+        "intro": "Kapan dan bagaimana Anda diberitahu tentang peristiwa siklus."
+      },
+      "ml_training": {
+        "label": "Pelatihan ML",
+        "intro": "Jadwal pelatihan ulang machine learning pada perangkat dan pengaturan data."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Ambang Batas & Jarak"
+      },
+      "cycle_start": {
+        "label": "Mulai Siklus"
+      },
+      "cycle_end": {
+        "label": "Akhir Siklus"
+      },
+      "signal_processing": {
+        "label": "Pemrosesan Sinyal"
+      },
+      "predictive_end": {
+        "label": "Akhir Prediktif"
+      },
+      "dishwasher_end": {
+        "label": "Akhir Mesin Cuci Piring"
+      },
+      "dtw_refinement": {
+        "label": "Pemurnian DTW"
+      },
+      "match_scoring": {
+        "label": "Penilaian Kecocokan"
+      },
+      "duration_gates": {
+        "label": "Gerbang Durasi"
+      },
+      "auto_labeling": {
+        "label": "Pelabelan Otomatis"
+      },
+      "watchdog": {
+        "label": "Pengawas"
+      },
+      "housekeeping": {
+        "label": "Pemeliharaan"
+      },
+      "debug": {
+        "label": "Debug"
+      },
+      "external_end_trigger": {
+        "label": "Pemicu Akhir Eksternal"
+      },
+      "door_pause": {
+        "label": "Pintu & Jeda"
+      },
+      "unload_reminder": {
+        "label": "Pengingat Bongkar"
+      },
+      "services": {
+        "label": "Layanan"
+      },
+      "timing": {
+        "label": "Waktu"
+      },
+      "messages": {
+        "label": "Pesan"
+      },
+      "energy": {
+        "label": "Energi"
+      },
+      "cycle_timers": {
+        "label": "Pengatur Waktu Siklus"
+      },
+      "schedule": {
+        "label": "Jadwal"
+      },
+      "data_management": {
+        "label": "Manajemen Data"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Nama Perangkat"
+      },
+      "device_type": {
+        "label": "Jenis Perangkat"
+      },
+      "power_sensor": {
+        "label": "Sensor Daya"
+      },
+      "min_power": {
+        "label": "Daya Minimum"
+      },
+      "off_delay": {
+        "label": "Penundaan Mati"
+      },
+      "linked_device": {
+        "label": "Kelompokkan di Bawah Perangkat"
+      },
+      "start_threshold_w": {
+        "label": "Ambang Mulai"
+      },
+      "stop_threshold_w": {
+        "label": "Ambang Berhenti"
+      },
+      "min_off_gap": {
+        "label": "Jarak Mati Minimum"
+      },
+      "start_duration_threshold": {
+        "label": "Durasi Mulai"
+      },
+      "start_energy_threshold": {
+        "label": "Energi Mulai"
+      },
+      "completion_min_seconds": {
+        "label": "Durasi Siklus Minimum"
+      },
+      "running_dead_zone": {
+        "label": "Zona Mati Berjalan"
+      },
+      "end_energy_threshold": {
+        "label": "Energi Akhir"
+      },
+      "end_repeat_count": {
+        "label": "Jumlah Pengulangan Akhir"
+      },
+      "sampling_interval": {
+        "label": "Interval Pengambilan Sampel"
+      },
+      "smoothing_window": {
+        "label": "Jendela Pemulusan"
+      },
+      "abrupt_drop_watts": {
+        "label": "Penurunan Mendadak"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Rasio Penurunan Mendadak"
+      },
+      "profile_match_threshold": {
+        "label": "Ambang Kecocokan"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Ambang Ketidakcocokan"
+      },
+      "profile_match_interval": {
+        "label": "Interval Pencocokan"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Rasio Durasi Minimum"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Rasio Durasi Maksimum"
+      },
+      "profile_duration_tolerance": {
+        "label": "Toleransi Durasi Profil"
+      },
+      "duration_tolerance": {
+        "label": "Toleransi Estimasi"
+      },
+      "auto_label_confidence": {
+        "label": "Kepercayaan Label Otomatis"
+      },
+      "learning_confidence": {
+        "label": "Kepercayaan Pembelajaran"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Sembunyikan Notifikasi Umpan Balik"
+      },
+      "watchdog_interval": {
+        "label": "Interval Pengawas"
+      },
+      "no_update_active_timeout": {
+        "label": "Batas Waktu Tanpa Pembaruan"
+      },
+      "progress_reset_delay": {
+        "label": "Penundaan Reset Kemajuan"
+      },
+      "auto_maintenance": {
+        "label": "Pemeliharaan Otomatis (pembersihan malam)"
+      },
+      "expose_debug_entities": {
+        "label": "Tampilkan Entitas Debug"
+      },
+      "save_debug_traces": {
+        "label": "Simpan Jejak Debug"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Aktifkan Deteksi Anti-Kerut"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Daya Anti-Kerut Maksimum"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Durasi Maksimum"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Ambang Daya Keluar"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Aktifkan Deteksi Penundaan Mulai"
+      },
+      "delay_confirm_seconds": {
+        "label": "Detik Konfirmasi"
+      },
+      "delay_timeout_hours": {
+        "label": "Jam Batas Waktu"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Aktifkan Pemicu Akhir Eksternal"
+      },
+      "external_end_trigger": {
+        "label": "Entitas Pemicu Eksternal"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Balik Pemicu Eksternal (picu saat MATI)"
+      },
+      "door_sensor_entity": {
+        "label": "Entitas Sensor Pintu"
+      },
+      "pause_cuts_power": {
+        "label": "Jeda Juga Memutus Daya (via sakelar)"
+      },
+      "switch_entity": {
+        "label": "Entitas Sakelar"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Penundaan Pengingat Bongkar"
+      },
+      "pump_stuck_duration": {
+        "label": "Durasi Pompa Macet"
+      },
+      "notify_start_services": {
+        "label": "Layanan Mulai"
+      },
+      "notify_finish_services": {
+        "label": "Layanan Selesai"
+      },
+      "notify_live_services": {
+        "label": "Layanan Kemajuan Langsung"
+      },
+      "notify_people": {
+        "label": "Orang (untuk Hanya Saat di Rumah)"
+      },
+      "notify_only_when_home": {
+        "label": "Notifikasi Hanya Saat di Rumah"
+      },
+      "notify_fire_events": {
+        "label": "Aktifkan Peristiwa HA untuk Notifikasi"
+      },
+      "notify_before_end_minutes": {
+        "label": "Peringatan Pra-Akhir"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Interval Pembaruan Langsung"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% Kelewatan Langsung Sebelum Peringatan"
+      },
+      "notify_live_chronometer": {
+        "label": "Gunakan Kronometer Langsung"
+      },
+      "notify_timeout_seconds": {
+        "label": "Tutup Otomatis Setelah"
+      },
+      "notify_title": {
+        "label": "Judul Notifikasi"
+      },
+      "notify_icon": {
+        "label": "Ikon Notifikasi"
+      },
+      "notify_start_message": {
+        "label": "Pesan Mulai"
+      },
+      "notify_finish_message": {
+        "label": "Pesan Selesai"
+      },
+      "notify_pre_complete_message": {
+        "label": "Pesan Pra-Selesai"
+      },
+      "notify_reminder_message": {
+        "label": "Pesan Pengingat"
+      },
+      "notify_channel": {
+        "label": "Saluran Android (mulai/langsung)"
+      },
+      "notify_finish_channel": {
+        "label": "Saluran Android (selesai)"
+      },
+      "energy_price_entity": {
+        "label": "Entitas Harga Energi"
+      },
+      "energy_price_static": {
+        "label": "Harga Energi Statis (per kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Pengatur Waktu Siklus"
+      },
+      "enable_ml_models": {
+        "label": "Terapkan model cerdas selama siklus"
+      },
+      "ml_training_enabled": {
+        "label": "Belajar dari mesin ini"
+      },
+      "ml_training_hour": {
+        "label": "Belajar pada jam"
+      },
+      "ml_training_min_cycles": {
+        "label": "Siklus yang dibutuhkan terlebih dahulu"
+      },
+      "ml_training_interval_days": {
+        "label": "Periksa paling banyak setiap"
+      }
     }
   }
 }

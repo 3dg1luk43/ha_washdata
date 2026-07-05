@@ -439,7 +439,7 @@
       "cancel": "Ophæve",
       "clear_debug": "Ryd fejlretningsdata",
       "clear_splits": "Klar",
-      "close": "Tæt",
+      "close": "Luk",
       "compare": "Sammenligne",
       "confirm": "Bekræfte",
       "convert_to_automation": "Konverter til automatisering",
@@ -461,7 +461,7 @@
       "import_json": "Importer fra JSON",
       "import_overwrite": "Importer (overskriver data)",
       "inspect": "Inspicere",
-      "label": "Mærke",
+      "label": "Mærk",
       "manage": "Styre",
       "merge": "Flet sammen",
       "new_automation": "＋ Ny automatisering",
@@ -484,7 +484,7 @@
       "reset_to_builtin": "Nulstil til indbyggede modeller",
       "reset_to_defaults": "Nulstil til standardindstillinger",
       "resume_cycle": "Fortsæt",
-      "review": "Gennemgå",
+      "review": "Vurder",
       "run_analysis": "🔍 Kør forslagsanalyse",
       "run_auto_label": "Kør Auto-label",
       "save": "Spare",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Lagerstatistik, vedligeholdelse, eksport/import",
       "trim_intro": "Træk i de røde håndtag, eller indtast værdier. Alt uden for vinduet fjernes.",
       "unsure_detected_prefix": "WashData er usikker på, om det er registreret",
-      "updated": "Opdateret"
+      "updated": "Opdateret",
+      "feedback_cycles_pending": "{n} cyklus{s} til gennemgang",
+      "artifact_spike_detail": "Steg over det normale effektbånd i ~{n}s.",
+      "artifact_dip_detail": "Faldt under det normale effektbånd i ~{n}s.",
+      "artifact_pause_detail": "Effekten faldt til næsten nul i ~{n}s og genoptog derefter — sandsynligvis blev døren åbnet midt i cyklussen, eller cyklussen blev sat på pause."
     },
     "phase_desc": {
       "pre_wash": "Indledende iblødsætning eller forbehandling før hovedvasken.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Trend nedad",
       "up": "Opadgående tendens"
+    },
+    "section": {
+      "basic": {
+        "label": "Grundlæggende",
+        "intro": "Kernens identitet og de essentielle ting, som de fleste opsætninger har brug for."
+      },
+      "detection": {
+        "label": "Registrering",
+        "intro": "Hvordan en cyklus registreres som start, kørsel og afslutning."
+      },
+      "matching": {
+        "label": "Matching",
+        "intro": "Hvordan afsluttede cyklusser matches til lærte profiler og mærkes."
+      },
+      "timing": {
+        "label": "Timing og Watchdog",
+        "intro": "Baggrundskadens, offline-watchdog og vedligeholdelse."
+      },
+      "anti_wrinkle": {
+        "label": "Anti-rynke",
+        "intro": "Anti-rynke-tilstand registrerer tumble-pulser med lav effekt efter den vigtigste fase og holder dem tilknyttet den afsluttede cyklus."
+      },
+      "delay": {
+        "label": "Forsinket start",
+        "intro": "Registrering af forsinket start identificerer, hvornår et apparat er tændt, men endnu ikke har påbegyndt sin cyklus."
+      },
+      "triggers": {
+        "label": "Udløsere og døre",
+        "intro": "Valgfrie eksterne signaler: en slutudløser, en dørsensor, en pausekontakt og aflæsningspåmindelsen."
+      },
+      "notifications": {
+        "label": "Notifikationer",
+        "intro": "Hvornår og hvordan du får besked om cyklushændelser."
+      },
+      "ml_training": {
+        "label": "ML-træning",
+        "intro": "Tidsplan for genlæring af maskinlæring på enheden og dataindstillinger."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Tærskler og mellemrum"
+      },
+      "cycle_start": {
+        "label": "Cyklusstart"
+      },
+      "cycle_end": {
+        "label": "Cyklusslut"
+      },
+      "signal_processing": {
+        "label": "Signalbehandling"
+      },
+      "predictive_end": {
+        "label": "Forudsigelig afslutning"
+      },
+      "dishwasher_end": {
+        "label": "Opvaskemaskine slut"
+      },
+      "dtw_refinement": {
+        "label": "DTW-raffinering"
+      },
+      "match_scoring": {
+        "label": "Matchvurdering"
+      },
+      "duration_gates": {
+        "label": "Varighedsporte"
+      },
+      "auto_labeling": {
+        "label": "Automatisk mærkning"
+      },
+      "watchdog": {
+        "label": "Watchdog"
+      },
+      "housekeeping": {
+        "label": "Vedligeholdelse"
+      },
+      "debug": {
+        "label": "Fejlretning"
+      },
+      "external_end_trigger": {
+        "label": "Ekstern slutudløser"
+      },
+      "door_pause": {
+        "label": "Dør og pause"
+      },
+      "unload_reminder": {
+        "label": "Aflæsningspåmindelse"
+      },
+      "services": {
+        "label": "Tjenester"
+      },
+      "timing": {
+        "label": "Timing"
+      },
+      "messages": {
+        "label": "Beskeder"
+      },
+      "energy": {
+        "label": "Energi"
+      },
+      "cycle_timers": {
+        "label": "Cyklustimere"
+      },
+      "schedule": {
+        "label": "Tidsplan"
+      },
+      "data_management": {
+        "label": "Datastyring"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Enhedsnavn"
+      },
+      "device_type": {
+        "label": "Enhedstype"
+      },
+      "power_sensor": {
+        "label": "Effektsensor"
+      },
+      "min_power": {
+        "label": "Minimumseffekt"
+      },
+      "off_delay": {
+        "label": "Slukkeforsinkelse"
+      },
+      "linked_device": {
+        "label": "Gruppe under enhed"
+      },
+      "start_threshold_w": {
+        "label": "Starttærskel"
+      },
+      "stop_threshold_w": {
+        "label": "Stoptærskel"
+      },
+      "min_off_gap": {
+        "label": "Minimum slukket mellemrum"
+      },
+      "start_duration_threshold": {
+        "label": "Startvarighed"
+      },
+      "start_energy_threshold": {
+        "label": "Startenergi"
+      },
+      "completion_min_seconds": {
+        "label": "Minimum cyklusvarighed"
+      },
+      "running_dead_zone": {
+        "label": "Kørende dødzone"
+      },
+      "end_energy_threshold": {
+        "label": "Slutenergi"
+      },
+      "end_repeat_count": {
+        "label": "Slutgentagelsesantal"
+      },
+      "sampling_interval": {
+        "label": "Samplingsinterval"
+      },
+      "smoothing_window": {
+        "label": "Glatningsvindue"
+      },
+      "abrupt_drop_watts": {
+        "label": "Pludseligt fald"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Ratio for pludseligt fald"
+      },
+      "profile_match_threshold": {
+        "label": "Matchtærskel"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Fejlmatchtærskel"
+      },
+      "profile_match_interval": {
+        "label": "Matchinterval"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Minimum varighed ratio"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Maksimum varighed ratio"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profilvarighedstolerance"
+      },
+      "duration_tolerance": {
+        "label": "Estimeringstolerance"
+      },
+      "auto_label_confidence": {
+        "label": "Auto-mærkning konfidens"
+      },
+      "learning_confidence": {
+        "label": "Læringskonfidens"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Undertryk feedbacknotifikationer"
+      },
+      "watchdog_interval": {
+        "label": "Watchdog-interval"
+      },
+      "no_update_active_timeout": {
+        "label": "Timeout uden opdatering"
+      },
+      "progress_reset_delay": {
+        "label": "Forsinkelse ved nulstilling af fremskridt"
+      },
+      "auto_maintenance": {
+        "label": "Automatisk vedligeholdelse (natlig oprydning)"
+      },
+      "expose_debug_entities": {
+        "label": "Vis fejlretningsenheder"
+      },
+      "save_debug_traces": {
+        "label": "Gem fejlretningsspor"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Aktivér anti-rynke registrering"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Maks. anti-rynkeeffekt"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Maks. varighed"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Udgangstærskel for effekt"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Aktivér registrering af forsinket start"
+      },
+      "delay_confirm_seconds": {
+        "label": "Bekræftelsessekunder"
+      },
+      "delay_timeout_hours": {
+        "label": "Timeout-timer"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Aktivér ekstern slutudløser"
+      },
+      "external_end_trigger": {
+        "label": "Ekstern udløserenhed"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Inverter ekstern udløser (udløs ved SLUK)"
+      },
+      "door_sensor_entity": {
+        "label": "Dørsensorenhed"
+      },
+      "pause_cuts_power": {
+        "label": "Pause afbryder også strøm (via kontakt)"
+      },
+      "switch_entity": {
+        "label": "Kontaktenhed"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Forsinkelse for aflæsningspåmindelse"
+      },
+      "pump_stuck_duration": {
+        "label": "Varighed for fastklemt pumpe"
+      },
+      "notify_start_services": {
+        "label": "Starttjenester"
+      },
+      "notify_finish_services": {
+        "label": "Sluttjenester"
+      },
+      "notify_live_services": {
+        "label": "Live fremdriftstjenester"
+      },
+      "notify_people": {
+        "label": "Personer (for kun når hjemme)"
+      },
+      "notify_only_when_home": {
+        "label": "Underret kun når hjemme"
+      },
+      "notify_fire_events": {
+        "label": "Send HA-hændelser til notifikationer"
+      },
+      "notify_before_end_minutes": {
+        "label": "Forhåndsadvarsel om afslutning"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Live opdateringsinterval"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Live overskridelsesprocent før advarsel"
+      },
+      "notify_live_chronometer": {
+        "label": "Brug live kronometer"
+      },
+      "notify_timeout_seconds": {
+        "label": "Auto-afvis efter"
+      },
+      "notify_title": {
+        "label": "Notifikationstitel"
+      },
+      "notify_icon": {
+        "label": "Notifikationsikon"
+      },
+      "notify_start_message": {
+        "label": "Startbesked"
+      },
+      "notify_finish_message": {
+        "label": "Slutbesked"
+      },
+      "notify_pre_complete_message": {
+        "label": "Besked om næsten færdig"
+      },
+      "notify_reminder_message": {
+        "label": "Påmindelsesbesked"
+      },
+      "notify_channel": {
+        "label": "Android-kanal (start/live)"
+      },
+      "notify_finish_channel": {
+        "label": "Android-kanal (slut)"
+      },
+      "energy_price_entity": {
+        "label": "Energiprisenhed"
+      },
+      "energy_price_static": {
+        "label": "Statisk energipris (per kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Cyklustimere"
+      },
+      "enable_ml_models": {
+        "label": "Anvend smarte modeller under en cyklus"
+      },
+      "ml_training_enabled": {
+        "label": "Lær fra denne maskine"
+      },
+      "ml_training_hour": {
+        "label": "Lær på tidspunktet"
+      },
+      "ml_training_min_cycles": {
+        "label": "Cykler nødvendige først"
+      },
+      "ml_training_interval_days": {
+        "label": "Tjek højst én gang hver"
+      }
     }
   }
 }

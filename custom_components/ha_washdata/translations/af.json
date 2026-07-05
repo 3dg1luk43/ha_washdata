@@ -735,7 +735,11 @@
       "storage_diagnostics": "Bergingstatistieke, instandhouding, uitvoer/invoer",
       "trim_intro": "Sleep die rooi handvatsels, of voer waardes in. Alles buite die venster word verwyder.",
       "unsure_detected_prefix": "WashData is onseker of dit bespeur is",
-      "updated": "Opgedateer"
+      "updated": "Opgedateer",
+      "feedback_cycles_pending": "{n} siklus{s} om te hersien",
+      "artifact_spike_detail": "Het bo die gewone kragband geteken vir ~{n}s.",
+      "artifact_dip_detail": "Het onder die gewone kragband geval vir ~{n}s.",
+      "artifact_pause_detail": "Krag het tot naby nul gedaal vir ~{n}s en daarna hervat — moontlik is die deur middel-siklus oopgemaak of die siklus is onderbreek."
     },
     "phase_desc": {
       "pre_wash": "Aanvanklike week of voorbehandeling voor die hoofwas.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Neig af",
       "up": "Opwaartse neiging"
+    },
+    "section": {
+      "basic": {
+        "label": "Basiese",
+        "intro": "Kernidentiteit en die noodsaaklikhede wat die meeste opstellings benodig."
+      },
+      "detection": {
+        "label": "Opsporing",
+        "intro": "Hoe 'n siklus as begin, lopend en geëindig bespeur word."
+      },
+      "matching": {
+        "label": "Passing",
+        "intro": "Hoe voltooide siklusse met aangeleerde profiele gepas en gemerk word."
+      },
+      "timing": {
+        "label": "Tydsberekening en waghond",
+        "intro": "Agtergrondkadans, die aanlyn waghond en huishouding."
+      },
+      "anti_wrinkle": {
+        "label": "Anti-kreuk",
+        "intro": "Anti-kreuk-/anti-plooimodus bespeur laedrywing-tuimelpulse na die hooffase en hou dit aan die voltooide siklus."
+      },
+      "delay": {
+        "label": "Uitgestelde begin",
+        "intro": "Uitgestelde-begin-opsporing identifiseer wanneer 'n toestel van krag voorsien word maar nog nie sy siklus begin het nie."
+      },
+      "triggers": {
+        "label": "Snellers en deure",
+        "intro": "Opsionele eksterne seine: 'n eindsneller, 'n deurwagter, 'n pouseskakelaar en die aflaai-herinnering."
+      },
+      "notifications": {
+        "label": "Kennisgewings",
+        "intro": "Wanneer en hoe u in kennis gestel word oor siklus-gebeure."
+      },
+      "ml_training": {
+        "label": "ML-opleiding",
+        "intro": "Toestelmasjiene-leer heropleiding skedule en data-instellings."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Drempels en gaping"
+      },
+      "cycle_start": {
+        "label": "Siklus begin"
+      },
+      "cycle_end": {
+        "label": "Siklus einde"
+      },
+      "signal_processing": {
+        "label": "Seinverwerking"
+      },
+      "predictive_end": {
+        "label": "Voorspellende einde"
+      },
+      "dishwasher_end": {
+        "label": "Skottelgoedwasser einde"
+      },
+      "dtw_refinement": {
+        "label": "DTW-verfyning"
+      },
+      "match_scoring": {
+        "label": "Passingsgradering"
+      },
+      "duration_gates": {
+        "label": "Duur-hekke"
+      },
+      "auto_labeling": {
+        "label": "Outomatiese etikettering"
+      },
+      "watchdog": {
+        "label": "Waghond"
+      },
+      "housekeeping": {
+        "label": "Huishouding"
+      },
+      "debug": {
+        "label": "Ontfouting"
+      },
+      "external_end_trigger": {
+        "label": "Eksterne eindsneller"
+      },
+      "door_pause": {
+        "label": "Deur en pouse"
+      },
+      "unload_reminder": {
+        "label": "Aflaai-herinnering"
+      },
+      "services": {
+        "label": "Dienste"
+      },
+      "timing": {
+        "label": "Tydsberekening"
+      },
+      "messages": {
+        "label": "Boodskappe"
+      },
+      "energy": {
+        "label": "Energie"
+      },
+      "cycle_timers": {
+        "label": "Siklus-tydsaamhoeders"
+      },
+      "schedule": {
+        "label": "Skedule"
+      },
+      "data_management": {
+        "label": "Databestuur"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Toestelnaam"
+      },
+      "device_type": {
+        "label": "Soort toestel"
+      },
+      "power_sensor": {
+        "label": "Kragsensor"
+      },
+      "min_power": {
+        "label": "Minimum krag"
+      },
+      "off_delay": {
+        "label": "Af-vertraging"
+      },
+      "linked_device": {
+        "label": "Groepeer onder toestel"
+      },
+      "start_threshold_w": {
+        "label": "Begindrempel"
+      },
+      "stop_threshold_w": {
+        "label": "Stopdrempel"
+      },
+      "min_off_gap": {
+        "label": "Min af-gaping"
+      },
+      "start_duration_threshold": {
+        "label": "Beginduur"
+      },
+      "start_energy_threshold": {
+        "label": "Beginenergie"
+      },
+      "completion_min_seconds": {
+        "label": "Min siklusduur"
+      },
+      "running_dead_zone": {
+        "label": "Hardloopse dooie sone"
+      },
+      "end_energy_threshold": {
+        "label": "Eindenergie"
+      },
+      "end_repeat_count": {
+        "label": "Eindherhaaltelling"
+      },
+      "sampling_interval": {
+        "label": "Steekproefinterval"
+      },
+      "smoothing_window": {
+        "label": "Gladstrykvenster"
+      },
+      "abrupt_drop_watts": {
+        "label": "Skielike daling"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Skielike dalingsverhouding"
+      },
+      "profile_match_threshold": {
+        "label": "Passingsdrempel"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Nie-passingsdrempel"
+      },
+      "profile_match_interval": {
+        "label": "Passingsinterval"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Min duurverhouding"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Maks duurverhouding"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profiel-duurtoleransie"
+      },
+      "duration_tolerance": {
+        "label": "Skattingstoleransie"
+      },
+      "auto_label_confidence": {
+        "label": "Outomatiese etikettering-vertroue"
+      },
+      "learning_confidence": {
+        "label": "Leer-vertroue"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Onderdruk terugvoerkennisgewings"
+      },
+      "watchdog_interval": {
+        "label": "Waghond-interval"
+      },
+      "no_update_active_timeout": {
+        "label": "Geen-opdatering-tydsduur"
+      },
+      "progress_reset_delay": {
+        "label": "Vordering-herstelstel-vertraging"
+      },
+      "auto_maintenance": {
+        "label": "Outo-onderhoud (nagtelike opruiming)"
+      },
+      "expose_debug_entities": {
+        "label": "Stel ontfout-entiteite bloot"
+      },
+      "save_debug_traces": {
+        "label": "Stoor ontfoutspore"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Aktiveer anti-kreukopsporing"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Maks anti-kreuk krag"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Maksimum duur"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Uitgangsdrempel krag"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Aktiveer vertraagde-begin-opsporing"
+      },
+      "delay_confirm_seconds": {
+        "label": "Bevestig sekondes"
+      },
+      "delay_timeout_hours": {
+        "label": "Tydsduur ure"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Aktiveer eksterne eindsneller"
+      },
+      "external_end_trigger": {
+        "label": "Eksterne sneller entiteit"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Omkeer eksterne sneller (sneller op AF)"
+      },
+      "door_sensor_entity": {
+        "label": "Deursensor entiteit"
+      },
+      "pause_cuts_power": {
+        "label": "Pouse sny ook krag (via skakelaar)"
+      },
+      "switch_entity": {
+        "label": "Skakelaar entiteit"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Aflaai-nag-vertraging"
+      },
+      "pump_stuck_duration": {
+        "label": "Pomp vasgesit duur"
+      },
+      "notify_start_services": {
+        "label": "Begin dienste"
+      },
+      "notify_finish_services": {
+        "label": "Klaar dienste"
+      },
+      "notify_live_services": {
+        "label": "Regstreekse vordering dienste"
+      },
+      "notify_people": {
+        "label": "Mense (vir slegs tuis)"
+      },
+      "notify_only_when_home": {
+        "label": "Kennisgewings slegs tuis"
+      },
+      "notify_fire_events": {
+        "label": "Brand HA-gebeurtenisse vir kennisgewings"
+      },
+      "notify_before_end_minutes": {
+        "label": "Voor-einde-waarskuwing"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Regstreekse opdate-interval"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Regstreekse oorloop % voor waarskuwing"
+      },
+      "notify_live_chronometer": {
+        "label": "Gebruik regstreekse tydmeter"
+      },
+      "notify_timeout_seconds": {
+        "label": "Outo-verwerp na"
+      },
+      "notify_title": {
+        "label": "Kennisgewingstitel"
+      },
+      "notify_icon": {
+        "label": "Kennisgewingsikoon"
+      },
+      "notify_start_message": {
+        "label": "Begin boodskap"
+      },
+      "notify_finish_message": {
+        "label": "Klaar boodskap"
+      },
+      "notify_pre_complete_message": {
+        "label": "Voor-voltooide boodskap"
+      },
+      "notify_reminder_message": {
+        "label": "Herinnering boodskap"
+      },
+      "notify_channel": {
+        "label": "Android-kanaal (begin/regstreeks)"
+      },
+      "notify_finish_channel": {
+        "label": "Android-kanaal (klaar)"
+      },
+      "energy_price_entity": {
+        "label": "Energieprysentiteit"
+      },
+      "energy_price_static": {
+        "label": "Statiese energieprys (per kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Siklus-tydsaamhoeders"
+      },
+      "enable_ml_models": {
+        "label": "Pas slim modelle toe tydens 'n siklus"
+      },
+      "ml_training_enabled": {
+        "label": "Leer van hierdie masjien"
+      },
+      "ml_training_hour": {
+        "label": "Leer op uur"
+      },
+      "ml_training_min_cycles": {
+        "label": "Siklusse eers nodig"
+      },
+      "ml_training_interval_days": {
+        "label": "Kontroleer hoogstens elke"
+      }
     }
   }
 }

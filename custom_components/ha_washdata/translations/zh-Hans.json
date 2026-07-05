@@ -735,7 +735,11 @@
       "storage_diagnostics": "存储统计、维护、导出/导入",
       "trim_intro": "拖动红色控制柄，或输入值。窗口外的所有内容将被移除。",
       "unsure_detected_prefix": "WashData 不确定是否检测到",
-      "updated": "已更新"
+      "updated": "已更新",
+      "feedback_cycles_pending": "{n} 个周期待审查",
+      "artifact_spike_detail": "超出通常功率范围约 {n} 秒。",
+      "artifact_dip_detail": "跌破通常功率范围约 {n} 秒。",
+      "artifact_pause_detail": "功率降至接近零约 {n} 秒后恢复 — 可能是周期中途开门或周期被暂停。"
     },
     "phase_desc": {
       "pre_wash": "主洗前的初步浸泡或预处理。",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "下降趋势",
       "up": "上升趋势"
+    },
+    "section": {
+      "basic": {
+        "label": "基本",
+        "intro": "核心标识和大多数设置所需的基本要素。"
+      },
+      "detection": {
+        "label": "检测",
+        "intro": "周期的启动、运行和结束是如何被检测的。"
+      },
+      "matching": {
+        "label": "匹配",
+        "intro": "已完成的周期如何与学习到的运行档案匹配并贴标签。"
+      },
+      "timing": {
+        "label": "计时与看门狗",
+        "intro": "后台节奏、离线看门狗和日常维护。"
+      },
+      "anti_wrinkle": {
+        "label": "防皱",
+        "intro": "防皱模式检测主阶段后的低功率翻滚脉冲，并将其附加到完成的周期。"
+      },
+      "delay": {
+        "label": "延迟启动",
+        "intro": "延迟启动检测识别设备已通电但尚未开始运行的情况。"
+      },
+      "triggers": {
+        "label": "触发器与门",
+        "intro": "可选的外部信号：结束触发器、门传感器、暂停开关和卸载提醒。"
+      },
+      "notifications": {
+        "label": "通知",
+        "intro": "关于周期事件，您何时以及如何收到通知。"
+      },
+      "ml_training": {
+        "label": "ML 训练",
+        "intro": "设备端机器学习重训练计划和数据设置。"
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "阈值与间隔"
+      },
+      "cycle_start": {
+        "label": "周期开始"
+      },
+      "cycle_end": {
+        "label": "周期结束"
+      },
+      "signal_processing": {
+        "label": "信号处理"
+      },
+      "predictive_end": {
+        "label": "预测结束"
+      },
+      "dishwasher_end": {
+        "label": "洗碗机结束"
+      },
+      "dtw_refinement": {
+        "label": "DTW 细化"
+      },
+      "match_scoring": {
+        "label": "匹配评分"
+      },
+      "duration_gates": {
+        "label": "时长门控"
+      },
+      "auto_labeling": {
+        "label": "自动标记"
+      },
+      "watchdog": {
+        "label": "看门狗"
+      },
+      "housekeeping": {
+        "label": "日常维护"
+      },
+      "debug": {
+        "label": "调试"
+      },
+      "external_end_trigger": {
+        "label": "外部结束触发器"
+      },
+      "door_pause": {
+        "label": "门与暂停"
+      },
+      "unload_reminder": {
+        "label": "卸载提醒"
+      },
+      "services": {
+        "label": "服务"
+      },
+      "timing": {
+        "label": "计时"
+      },
+      "messages": {
+        "label": "消息"
+      },
+      "energy": {
+        "label": "能耗"
+      },
+      "cycle_timers": {
+        "label": "周期计时器"
+      },
+      "schedule": {
+        "label": "计划"
+      },
+      "data_management": {
+        "label": "数据管理"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "设备名称"
+      },
+      "device_type": {
+        "label": "设备类型"
+      },
+      "power_sensor": {
+        "label": "功率传感器"
+      },
+      "min_power": {
+        "label": "最小功率"
+      },
+      "off_delay": {
+        "label": "关闭延迟"
+      },
+      "linked_device": {
+        "label": "归入设备"
+      },
+      "start_threshold_w": {
+        "label": "启动阈值"
+      },
+      "stop_threshold_w": {
+        "label": "停止阈值"
+      },
+      "min_off_gap": {
+        "label": "最小关闭间隔"
+      },
+      "start_duration_threshold": {
+        "label": "启动时长"
+      },
+      "start_energy_threshold": {
+        "label": "启动能耗"
+      },
+      "completion_min_seconds": {
+        "label": "最短周期时长"
+      },
+      "running_dead_zone": {
+        "label": "运行死区"
+      },
+      "end_energy_threshold": {
+        "label": "结束能耗"
+      },
+      "end_repeat_count": {
+        "label": "结束重复次数"
+      },
+      "sampling_interval": {
+        "label": "采样间隔"
+      },
+      "smoothing_window": {
+        "label": "平滑窗口"
+      },
+      "abrupt_drop_watts": {
+        "label": "突降功率"
+      },
+      "abrupt_drop_ratio": {
+        "label": "突降比例"
+      },
+      "profile_match_threshold": {
+        "label": "匹配阈值"
+      },
+      "profile_unmatch_threshold": {
+        "label": "不匹配阈值"
+      },
+      "profile_match_interval": {
+        "label": "匹配间隔"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "最小时长比例"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "最大时长比例"
+      },
+      "profile_duration_tolerance": {
+        "label": "运行档案时长容差"
+      },
+      "duration_tolerance": {
+        "label": "估算容差"
+      },
+      "auto_label_confidence": {
+        "label": "自动标记置信度"
+      },
+      "learning_confidence": {
+        "label": "学习置信度"
+      },
+      "suppress_feedback_notifications": {
+        "label": "抑制反馈通知"
+      },
+      "watchdog_interval": {
+        "label": "看门狗间隔"
+      },
+      "no_update_active_timeout": {
+        "label": "无更新超时"
+      },
+      "progress_reset_delay": {
+        "label": "进度重置延迟"
+      },
+      "auto_maintenance": {
+        "label": "自动维护（每夜清理）"
+      },
+      "expose_debug_entities": {
+        "label": "暴露调试实体"
+      },
+      "save_debug_traces": {
+        "label": "保存调试追踪"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "启用防皱检测"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "最大防皱功率"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "最长时长"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "退出功率阈值"
+      },
+      "delay_start_detect_enabled": {
+        "label": "启用延迟启动检测"
+      },
+      "delay_confirm_seconds": {
+        "label": "确认秒数"
+      },
+      "delay_timeout_hours": {
+        "label": "超时小时数"
+      },
+      "external_end_trigger_enabled": {
+        "label": "启用外部结束触发器"
+      },
+      "external_end_trigger": {
+        "label": "外部触发器实体"
+      },
+      "external_end_trigger_inverted": {
+        "label": "反转外部触发器（关闭时触发）"
+      },
+      "door_sensor_entity": {
+        "label": "门传感器实体"
+      },
+      "pause_cuts_power": {
+        "label": "暂停同时断电（通过开关）"
+      },
+      "switch_entity": {
+        "label": "开关实体"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "卸载提醒延迟"
+      },
+      "pump_stuck_duration": {
+        "label": "泵卡住时长"
+      },
+      "notify_start_services": {
+        "label": "启动服务"
+      },
+      "notify_finish_services": {
+        "label": "结束服务"
+      },
+      "notify_live_services": {
+        "label": "实时进度服务"
+      },
+      "notify_people": {
+        "label": "人员（仅在家时通知用）"
+      },
+      "notify_only_when_home": {
+        "label": "仅在家时通知"
+      },
+      "notify_fire_events": {
+        "label": "为通知触发 HA 事件"
+      },
+      "notify_before_end_minutes": {
+        "label": "结束前提醒"
+      },
+      "notify_live_interval_seconds": {
+        "label": "实时更新间隔"
+      },
+      "notify_live_overrun_percent": {
+        "label": "实时超时 % 提醒前"
+      },
+      "notify_live_chronometer": {
+        "label": "使用实时计时器"
+      },
+      "notify_timeout_seconds": {
+        "label": "自动关闭延迟"
+      },
+      "notify_title": {
+        "label": "通知标题"
+      },
+      "notify_icon": {
+        "label": "通知图标"
+      },
+      "notify_start_message": {
+        "label": "启动消息"
+      },
+      "notify_finish_message": {
+        "label": "结束消息"
+      },
+      "notify_pre_complete_message": {
+        "label": "完成前消息"
+      },
+      "notify_reminder_message": {
+        "label": "提醒消息"
+      },
+      "notify_channel": {
+        "label": "Android 频道（启动/实时）"
+      },
+      "notify_finish_channel": {
+        "label": "Android 频道（结束）"
+      },
+      "energy_price_entity": {
+        "label": "电价实体"
+      },
+      "energy_price_static": {
+        "label": "固定电价（每 kWh）"
+      },
+      "notify_cycle_timers": {
+        "label": "周期计时器"
+      },
+      "enable_ml_models": {
+        "label": "在周期中应用智能模型"
+      },
+      "ml_training_enabled": {
+        "label": "从此机器学习"
+      },
+      "ml_training_hour": {
+        "label": "学习时间（小时）"
+      },
+      "ml_training_min_cycles": {
+        "label": "需要的最少周期数"
+      },
+      "ml_training_interval_days": {
+        "label": "最多每隔几天检查一次"
+      }
     }
   }
 }

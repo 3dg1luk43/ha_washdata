@@ -513,7 +513,7 @@
       "import_json": "JSON سے درآمد کریں",
       "import_overwrite": "درآمد کریں (ڈیٹا اوور رائٹ کرتا ہے)",
       "inspect": "جانچیں",
-      "label": "لیبل",
+      "label": "لیبل لگائیں",
       "manage": "منظم کریں",
       "merge": "ضم کریں",
       "new_automation": "＋ نئی آٹومیشن",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "ذخیرہ کے اعداد و شمار، دیکھ بھال، برآمد/درآمد",
       "trim_intro": "سرخ ہینڈل کھینچیں، یا قدریں درج کریں۔ ونڈو سے باہر سب کچھ ہٹا دیا جاتا ہے۔",
       "unsure_detected_prefix": "WashData کو یقین نہیں کہ اس نے پتہ لگایا",
-      "updated": "اپ ڈیٹ ہوا"
+      "updated": "اپ ڈیٹ ہوا",
+      "feedback_cycles_pending": "{n} سائیکل جائزے کے لیے",
+      "artifact_spike_detail": "معمول کے پاور بینڈ سے اوپر تقریباً {n} سیکنڈ تک رہا۔",
+      "artifact_dip_detail": "معمول کے پاور بینڈ سے نیچے تقریباً {n} سیکنڈ تک گرا۔",
+      "artifact_pause_detail": "پاور تقریباً {n} سیکنڈ کے لیے صفر کے قریب گر کر دوبارہ شروع ہوئی — ممکنہ طور پر سائیکل کے دوران دروازہ کھلا یا سائیکل موقوف ہوئی۔"
     },
     "phase_desc": {
       "pre_wash": "مین واش سے پہلے ابتدائی بھگونا یا پری ٹریٹمنٹ۔",
@@ -772,7 +776,7 @@
       "fit_slight": "معمولی",
       "fit_strong": "مضبوط",
       "fit_weak": "کمزور",
-      "fit_word": "فٹ",
+      "fit_word": "مطابقت",
       "personalized": "● اس مشین کے لیے ذاتی بنایا گیا"
     },
     "pref": {
@@ -874,6 +878,348 @@
     "trend": {
       "down": "نیچے کا رجحان",
       "up": "اوپر کا رجحان"
+    },
+    "section": {
+      "basic": {
+        "label": "بنیادی",
+        "intro": "بنیادی شناخت اور ضروری چیزیں جن کی اکثر سیٹ اپ کو ضرورت ہوتی ہے۔"
+      },
+      "detection": {
+        "label": "پتہ لگانا",
+        "intro": "سائیکل کا آغاز، چلنا اور اختتام کس طرح پکڑا جاتا ہے۔"
+      },
+      "matching": {
+        "label": "مماثلت",
+        "intro": "مکمل سائیکلز کو سیکھے ہوئے پروفائلز سے کس طرح ملایا اور لیبل کیا جاتا ہے۔"
+      },
+      "timing": {
+        "label": "ٹائمنگ اور واچ ڈاگ",
+        "intro": "پس منظر کی رفتار، آف لائن واچ ڈاگ اور صفائی کا کام۔"
+      },
+      "anti_wrinkle": {
+        "label": "اینٹی شکن",
+        "intro": "اینٹی شکن موڈ مرکزی مرحلے کے بعد کم پاور ٹمبل پلس کا پتہ لگاتا ہے اور انہیں مکمل سائیکل سے منسلک رکھتا ہے۔"
+      },
+      "delay": {
+        "label": "تاخیری آغاز",
+        "intro": "تاخیری آغاز کا پتہ لگانا شناخت کرتا ہے جب آلہ آن ہو لیکن اس کا سائیکل ابھی شروع نہ ہوا ہو۔"
+      },
+      "triggers": {
+        "label": "ٹرگرز اور دروازے",
+        "intro": "اختیاری بیرونی سگنل: اختتامی ٹرگر، دروازے کا سینسر، پاز سوئچ، اور سامان اتارنے کی یاددہانی۔"
+      },
+      "notifications": {
+        "label": "اطلاعات",
+        "intro": "سائیکل کے واقعات کے بارے میں کب اور کس طرح آپ کو اطلاع دی جاتی ہے۔"
+      },
+      "ml_training": {
+        "label": "ML تربیت",
+        "intro": "ڈیوائس پر مشین لرننگ کو دوبارہ تربیت دینے کا شیڈول اور ڈیٹا کی ترتیبات۔"
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "تھریشولڈ اور خلا"
+      },
+      "cycle_start": {
+        "label": "سائیکل آغاز"
+      },
+      "cycle_end": {
+        "label": "سائیکل اختتام"
+      },
+      "signal_processing": {
+        "label": "سگنل پروسیسنگ"
+      },
+      "predictive_end": {
+        "label": "پیش گوئی کا اختتام"
+      },
+      "dishwasher_end": {
+        "label": "ڈش واشر اختتام"
+      },
+      "dtw_refinement": {
+        "label": "DTW بہتری"
+      },
+      "match_scoring": {
+        "label": "میچ اسکورنگ"
+      },
+      "duration_gates": {
+        "label": "دورانیے کے گیٹ"
+      },
+      "auto_labeling": {
+        "label": "خودکار لیبلنگ"
+      },
+      "watchdog": {
+        "label": "واچ ڈاگ"
+      },
+      "housekeeping": {
+        "label": "گھریلو انتظام"
+      },
+      "debug": {
+        "label": "ڈیبگ"
+      },
+      "external_end_trigger": {
+        "label": "بیرونی اختتامی ٹرگر"
+      },
+      "door_pause": {
+        "label": "دروازہ اور توقف"
+      },
+      "unload_reminder": {
+        "label": "سامان اتارنے کی یاددہانی"
+      },
+      "services": {
+        "label": "سروسز"
+      },
+      "timing": {
+        "label": "ٹائمنگ"
+      },
+      "messages": {
+        "label": "پیغامات"
+      },
+      "energy": {
+        "label": "توانائی"
+      },
+      "cycle_timers": {
+        "label": "سائیکل ٹائمرز"
+      },
+      "schedule": {
+        "label": "شیڈول"
+      },
+      "data_management": {
+        "label": "ڈیٹا مینجمنٹ"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "ڈیوائس کا نام"
+      },
+      "device_type": {
+        "label": "ڈیوائس کی قسم"
+      },
+      "power_sensor": {
+        "label": "پاور سینسر"
+      },
+      "min_power": {
+        "label": "کم از کم پاور"
+      },
+      "off_delay": {
+        "label": "بند ہونے میں تاخیر"
+      },
+      "linked_device": {
+        "label": "ڈیوائس کے نیچے گروپ کریں"
+      },
+      "start_threshold_w": {
+        "label": "آغاز کی حد"
+      },
+      "stop_threshold_w": {
+        "label": "رکنے کی حد"
+      },
+      "min_off_gap": {
+        "label": "کم از کم بند خلا"
+      },
+      "start_duration_threshold": {
+        "label": "آغاز کا دورانیہ"
+      },
+      "start_energy_threshold": {
+        "label": "آغاز کی توانائی"
+      },
+      "completion_min_seconds": {
+        "label": "کم از کم سائیکل دورانیہ"
+      },
+      "running_dead_zone": {
+        "label": "چلنے کا ڈیڈ زون"
+      },
+      "end_energy_threshold": {
+        "label": "اختتامی توانائی"
+      },
+      "end_repeat_count": {
+        "label": "اختتام کی تکرار گنتی"
+      },
+      "sampling_interval": {
+        "label": "نمونہ لینے کا وقفہ"
+      },
+      "smoothing_window": {
+        "label": "ہمواری ونڈو"
+      },
+      "abrupt_drop_watts": {
+        "label": "اچانک گراوٹ"
+      },
+      "abrupt_drop_ratio": {
+        "label": "اچانک گراوٹ کا تناسب"
+      },
+      "profile_match_threshold": {
+        "label": "میچ کی حد"
+      },
+      "profile_unmatch_threshold": {
+        "label": "بے میل کی حد"
+      },
+      "profile_match_interval": {
+        "label": "میچ کا وقفہ"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "کم از کم دورانیے کا تناسب"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "زیادہ سے زیادہ دورانیے کا تناسب"
+      },
+      "profile_duration_tolerance": {
+        "label": "پروفائل دورانیے کی رواداری"
+      },
+      "duration_tolerance": {
+        "label": "تخمینے کی رواداری"
+      },
+      "auto_label_confidence": {
+        "label": "خودکار لیبل کا اعتماد"
+      },
+      "learning_confidence": {
+        "label": "سیکھنے کا اعتماد"
+      },
+      "suppress_feedback_notifications": {
+        "label": "فیڈ بیک اطلاعات دبائیں"
+      },
+      "watchdog_interval": {
+        "label": "واچ ڈاگ وقفہ"
+      },
+      "no_update_active_timeout": {
+        "label": "بغیر اپ ڈیٹ ٹائم آؤٹ"
+      },
+      "progress_reset_delay": {
+        "label": "پیش رفت ری سیٹ تاخیر"
+      },
+      "auto_maintenance": {
+        "label": "خودکار دیکھ بھال (رات کی صفائی)"
+      },
+      "expose_debug_entities": {
+        "label": "ڈیبگ اداروں کو ظاہر کریں"
+      },
+      "save_debug_traces": {
+        "label": "ڈیبگ ٹریسز محفوظ کریں"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "اینٹی شکن پتہ لگانا فعال کریں"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "زیادہ سے زیادہ اینٹی شکن پاور"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "زیادہ سے زیادہ دورانیہ"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "باہر نکلنے کی پاور کی حد"
+      },
+      "delay_start_detect_enabled": {
+        "label": "تاخیری آغاز پتہ لگانا فعال کریں"
+      },
+      "delay_confirm_seconds": {
+        "label": "تصدیقی سیکنڈ"
+      },
+      "delay_timeout_hours": {
+        "label": "ٹائم آؤٹ گھنٹے"
+      },
+      "external_end_trigger_enabled": {
+        "label": "بیرونی اختتامی ٹرگر فعال کریں"
+      },
+      "external_end_trigger": {
+        "label": "بیرونی ٹرگر ادارہ"
+      },
+      "external_end_trigger_inverted": {
+        "label": "بیرونی ٹرگر الٹائیں (آف پر ٹرگر)"
+      },
+      "door_sensor_entity": {
+        "label": "دروازے کا سینسر ادارہ"
+      },
+      "pause_cuts_power": {
+        "label": "توقف سے پاور بھی کٹتی ہے (سوئچ کے ذریعے)"
+      },
+      "switch_entity": {
+        "label": "سوئچ ادارہ"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "سامان اتارنے کی یاددہانی کی تاخیر"
+      },
+      "pump_stuck_duration": {
+        "label": "پمپ پھنسے کا دورانیہ"
+      },
+      "notify_start_services": {
+        "label": "آغاز سروسز"
+      },
+      "notify_finish_services": {
+        "label": "اختتام سروسز"
+      },
+      "notify_live_services": {
+        "label": "لائیو پیش رفت سروسز"
+      },
+      "notify_people": {
+        "label": "افراد (صرف گھر پر اطلاع کے لیے)"
+      },
+      "notify_only_when_home": {
+        "label": "صرف گھر پر اطلاع دیں"
+      },
+      "notify_fire_events": {
+        "label": "اطلاعات کے لیے HA ایونٹ چلائیں"
+      },
+      "notify_before_end_minutes": {
+        "label": "اختتام سے پہلے الرٹ"
+      },
+      "notify_live_interval_seconds": {
+        "label": "لائیو اپ ڈیٹ وقفہ"
+      },
+      "notify_live_overrun_percent": {
+        "label": "لائیو اوور رن % الرٹ سے پہلے"
+      },
+      "notify_live_chronometer": {
+        "label": "لائیو کرونومیٹر استعمال کریں"
+      },
+      "notify_timeout_seconds": {
+        "label": "خودکار برخاستگی کے بعد"
+      },
+      "notify_title": {
+        "label": "اطلاع کا عنوان"
+      },
+      "notify_icon": {
+        "label": "اطلاع کا آئیکن"
+      },
+      "notify_start_message": {
+        "label": "آغاز کا پیغام"
+      },
+      "notify_finish_message": {
+        "label": "اختتام کا پیغام"
+      },
+      "notify_pre_complete_message": {
+        "label": "اختتام سے پہلے کا پیغام"
+      },
+      "notify_reminder_message": {
+        "label": "یاددہانی کا پیغام"
+      },
+      "notify_channel": {
+        "label": "اینڈرائیڈ چینل (آغاز/لائیو)"
+      },
+      "notify_finish_channel": {
+        "label": "اینڈرائیڈ چینل (اختتام)"
+      },
+      "energy_price_entity": {
+        "label": "توانائی کی قیمت کا ادارہ"
+      },
+      "energy_price_static": {
+        "label": "ثابت توانائی قیمت (فی kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "سائیکل ٹائمرز"
+      },
+      "enable_ml_models": {
+        "label": "سائیکل کے دوران ذہین ماڈلز لاگو کریں"
+      },
+      "ml_training_enabled": {
+        "label": "اس مشین سے سیکھیں"
+      },
+      "ml_training_hour": {
+        "label": "گھنٹے پر سیکھیں"
+      },
+      "ml_training_min_cycles": {
+        "label": "پہلے ضرورت کے سائیکل"
+      },
+      "ml_training_interval_days": {
+        "label": "زیادہ سے زیادہ ہر چند دنوں میں جانچیں"
+      }
     }
   }
 }

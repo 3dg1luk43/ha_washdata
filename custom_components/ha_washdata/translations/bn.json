@@ -735,7 +735,11 @@
       "storage_diagnostics": "স্টোরেজ পরিসংখ্যান, রক্ষণাবেক্ষণ, রপ্তানি/আমদানি",
       "trim_intro": "লাল হ্যান্ডলগুলি টেনে আনুন বা মান লিখুন। জানালার বাইরের সবকিছু মুছে ফেলা হয়।",
       "unsure_detected_prefix": "ওয়াশডেটা নিশ্চিত নয় যে এটি সনাক্ত করা হয়েছে৷",
-      "updated": "আপডেট হয়েছে"
+      "updated": "আপডেট হয়েছে",
+      "feedback_cycles_pending": "{n}টি চক্র{s} পর্যালোচনা করতে হবে",
+      "artifact_spike_detail": "প্রায় {n}সে. ধরে স্বাভাবিক পাওয়ার ব্যান্ডের উপরে উঠেছিল।",
+      "artifact_dip_detail": "প্রায় {n}সে. ধরে স্বাভাবিক পাওয়ার ব্যান্ডের নীচে নেমে গিয়েছিল।",
+      "artifact_pause_detail": "পাওয়ার ~{n}সে. ধরে প্রায় শূন্যে নেমে আসার পর আবার চালু হয়েছে — সম্ভবত দরজা মাঝ-চক্রে খোলা হয়েছিল বা চক্র বিরতি দেওয়া হয়েছিল।"
     },
     "phase_desc": {
       "pre_wash": "মূল ধোয়ার আগে প্রাথমিক ভিজানো বা প্রাক-চিকিত্সা।",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "নিচে প্রবণতা",
       "up": "ঊর্ধ্বমুখী প্রবণতা"
+    },
+    "section": {
+      "basic": {
+        "label": "মৌলিক",
+        "intro": "মূল পরিচয় এবং বেশিরভাগ সেটআপের জন্য প্রয়োজনীয় বিষয়গুলি।"
+      },
+      "detection": {
+        "label": "সনাক্তকরণ",
+        "intro": "কীভাবে একটি চক্র শুরু, চলমান এবং শেষ হিসেবে সনাক্ত করা হয়।"
+      },
+      "matching": {
+        "label": "মিলকরণ",
+        "intro": "কীভাবে সম্পূর্ণ চক্রগুলি শেখা প্রোফাইলের সাথে মেলানো হয় এবং লেবেল করা হয়।"
+      },
+      "timing": {
+        "label": "সময়জ্ঞান ও ওয়াচডগ",
+        "intro": "ব্যাকগ্রাউন্ড ক্যাডেন্স, অফলাইন ওয়াচডগ এবং রক্ষণাবেক্ষণ।"
+      },
+      "anti_wrinkle": {
+        "label": "অ্যান্টি-রিঙ্কেল",
+        "intro": "অ্যান্টি-রিঙ্কেল/অ্যান্টি-ক্রিজ মোড মূল পর্যায়ের পরে কম-শক্তির টাম্বল পালস সনাক্ত করে এবং তাদের সম্পূর্ণ চক্রের সাথে সংযুক্ত রাখে।"
+      },
+      "delay": {
+        "label": "বিলম্বিত শুরু",
+        "intro": "বিলম্বিত শুরু সনাক্তকরণ সনাক্ত করে যখন একটি যন্ত্র চালু আছে কিন্তু এখনও তার চক্র শুরু করেনি।"
+      },
+      "triggers": {
+        "label": "ট্রিগার ও দরজা",
+        "intro": "ঐচ্ছিক বাহ্যিক সংকেত: শেষ ট্রিগার, দরজা সেন্সর, পজ সুইচ এবং আনলোড রিমাইন্ডার।"
+      },
+      "notifications": {
+        "label": "বিজ্ঞপ্তি",
+        "intro": "চক্র ঘটনা সম্পর্কে কখন এবং কীভাবে আপনি বিজ্ঞপ্তি পাবেন।"
+      },
+      "ml_training": {
+        "label": "ML প্রশিক্ষণ",
+        "intro": "ডিভাইসে মেশিন লার্নিং পুনঃপ্রশিক্ষণ সময়সূচি এবং ডেটা সেটিংস।"
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "থ্রেশহোল্ড ও গ্যাপ"
+      },
+      "cycle_start": {
+        "label": "চক্র শুরু"
+      },
+      "cycle_end": {
+        "label": "চক্র শেষ"
+      },
+      "signal_processing": {
+        "label": "সিগন্যাল প্রক্রিয়াকরণ"
+      },
+      "predictive_end": {
+        "label": "পূর্বাভাসমূলক শেষ"
+      },
+      "dishwasher_end": {
+        "label": "ডিশওয়াশার শেষ"
+      },
+      "dtw_refinement": {
+        "label": "DTW পরিমার্জন"
+      },
+      "match_scoring": {
+        "label": "মিল স্কোরিং"
+      },
+      "duration_gates": {
+        "label": "সময়কাল গেট"
+      },
+      "auto_labeling": {
+        "label": "স্বয়ংক্রিয় লেবেলিং"
+      },
+      "watchdog": {
+        "label": "ওয়াচডগ"
+      },
+      "housekeeping": {
+        "label": "গৃহস্থালি"
+      },
+      "debug": {
+        "label": "ডিবাগ"
+      },
+      "external_end_trigger": {
+        "label": "বাহ্যিক শেষ ট্রিগার"
+      },
+      "door_pause": {
+        "label": "দরজা ও পজ"
+      },
+      "unload_reminder": {
+        "label": "আনলোড রিমাইন্ডার"
+      },
+      "services": {
+        "label": "সেবা"
+      },
+      "timing": {
+        "label": "সময়"
+      },
+      "messages": {
+        "label": "বার্তা"
+      },
+      "energy": {
+        "label": "শক্তি"
+      },
+      "cycle_timers": {
+        "label": "চক্র টাইমার"
+      },
+      "schedule": {
+        "label": "সময়সূচি"
+      },
+      "data_management": {
+        "label": "ডেটা ব্যবস্থাপনা"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "ডিভাইসের নাম"
+      },
+      "device_type": {
+        "label": "ডিভাইসের ধরন"
+      },
+      "power_sensor": {
+        "label": "পাওয়ার সেন্সর"
+      },
+      "min_power": {
+        "label": "ন্যূনতম পাওয়ার"
+      },
+      "off_delay": {
+        "label": "অফ বিলম্ব"
+      },
+      "linked_device": {
+        "label": "ডিভাইসের অধীনে গ্রুপ"
+      },
+      "start_threshold_w": {
+        "label": "শুরু থ্রেশহোল্ড"
+      },
+      "stop_threshold_w": {
+        "label": "স্টপ থ্রেশহোল্ড"
+      },
+      "min_off_gap": {
+        "label": "ন্যূনতম অফ গ্যাপ"
+      },
+      "start_duration_threshold": {
+        "label": "শুরু সময়কাল"
+      },
+      "start_energy_threshold": {
+        "label": "শুরু শক্তি"
+      },
+      "completion_min_seconds": {
+        "label": "ন্যূনতম চক্র সময়কাল"
+      },
+      "running_dead_zone": {
+        "label": "রানিং ডেড জোন"
+      },
+      "end_energy_threshold": {
+        "label": "শেষ শক্তি"
+      },
+      "end_repeat_count": {
+        "label": "শেষ পুনরাবৃত্তি গণনা"
+      },
+      "sampling_interval": {
+        "label": "স্যাম্পলিং ইন্টারভাল"
+      },
+      "smoothing_window": {
+        "label": "স্মুথিং উইন্ডো"
+      },
+      "abrupt_drop_watts": {
+        "label": "আকস্মিক পতন"
+      },
+      "abrupt_drop_ratio": {
+        "label": "আকস্মিক পতন অনুপাত"
+      },
+      "profile_match_threshold": {
+        "label": "মিল থ্রেশহোল্ড"
+      },
+      "profile_unmatch_threshold": {
+        "label": "অমিল থ্রেশহোল্ড"
+      },
+      "profile_match_interval": {
+        "label": "মিল ব্যবধান"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "ন্যূনতম সময়কাল অনুপাত"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "সর্বোচ্চ সময়কাল অনুপাত"
+      },
+      "profile_duration_tolerance": {
+        "label": "প্রোফাইল সময়কাল সহনশীলতা"
+      },
+      "duration_tolerance": {
+        "label": "অনুমান সহনশীলতা"
+      },
+      "auto_label_confidence": {
+        "label": "স্বয়ংক্রিয় লেবেলিং আস্থা"
+      },
+      "learning_confidence": {
+        "label": "লার্নিং আস্থা"
+      },
+      "suppress_feedback_notifications": {
+        "label": "ফিডব্যাক বিজ্ঞপ্তি দমন করুন"
+      },
+      "watchdog_interval": {
+        "label": "ওয়াচডগ ব্যবধান"
+      },
+      "no_update_active_timeout": {
+        "label": "আপডেট নেই টাইমআউট"
+      },
+      "progress_reset_delay": {
+        "label": "অগ্রগতি রিসেট বিলম্ব"
+      },
+      "auto_maintenance": {
+        "label": "স্বয়ংক্রিয় রক্ষণাবেক্ষণ (রাতের পরিষ্কার)"
+      },
+      "expose_debug_entities": {
+        "label": "ডিবাগ এন্টিটি প্রকাশ করুন"
+      },
+      "save_debug_traces": {
+        "label": "ডিবাগ ট্রেস সংরক্ষণ করুন"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "অ্যান্টি-রিঙ্কেল সনাক্তকরণ সক্ষম করুন"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "সর্বোচ্চ অ্যান্টি-রিঙ্কেল পাওয়ার"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "সর্বোচ্চ সময়কাল"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "এক্সিট পাওয়ার থ্রেশহোল্ড"
+      },
+      "delay_start_detect_enabled": {
+        "label": "বিলম্বিত শুরু সনাক্তকরণ সক্ষম করুন"
+      },
+      "delay_confirm_seconds": {
+        "label": "নিশ্চিতকরণ সেকেন্ড"
+      },
+      "delay_timeout_hours": {
+        "label": "টাইমআউট ঘণ্টা"
+      },
+      "external_end_trigger_enabled": {
+        "label": "বাহ্যিক শেষ ট্রিগার সক্ষম করুন"
+      },
+      "external_end_trigger": {
+        "label": "বাহ্যিক ট্রিগার এন্টিটি"
+      },
+      "external_end_trigger_inverted": {
+        "label": "বাহ্যিক ট্রিগার উল্টান (অফ-এ ট্রিগার করুন)"
+      },
+      "door_sensor_entity": {
+        "label": "দরজা সেন্সর এন্টিটি"
+      },
+      "pause_cuts_power": {
+        "label": "পজ পাওয়ারও কাটে (সুইচের মাধ্যমে)"
+      },
+      "switch_entity": {
+        "label": "সুইচ এন্টিটি"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "আনলোড নাগ বিলম্ব"
+      },
+      "pump_stuck_duration": {
+        "label": "পাম্প আটকে থাকার সময়কাল"
+      },
+      "notify_start_services": {
+        "label": "শুরু সেবা"
+      },
+      "notify_finish_services": {
+        "label": "শেষ সেবা"
+      },
+      "notify_live_services": {
+        "label": "লাইভ অগ্রগতি সেবা"
+      },
+      "notify_people": {
+        "label": "মানুষ (শুধুমাত্র বাড়িতে থাকলে)"
+      },
+      "notify_only_when_home": {
+        "label": "শুধুমাত্র বাড়িতে থাকলে বিজ্ঞপ্তি দিন"
+      },
+      "notify_fire_events": {
+        "label": "বিজ্ঞপ্তির জন্য HA ইভেন্ট ফায়ার করুন"
+      },
+      "notify_before_end_minutes": {
+        "label": "শেষের আগে সতর্কতা"
+      },
+      "notify_live_interval_seconds": {
+        "label": "লাইভ আপডেট ব্যবধান"
+      },
+      "notify_live_overrun_percent": {
+        "label": "সতর্কতার আগে লাইভ ওভাররান %"
+      },
+      "notify_live_chronometer": {
+        "label": "লাইভ ক্রোনোমিটার ব্যবহার করুন"
+      },
+      "notify_timeout_seconds": {
+        "label": "পরে স্বয়ংক্রিয়ভাবে বন্ধ করুন"
+      },
+      "notify_title": {
+        "label": "বিজ্ঞপ্তির শিরোনাম"
+      },
+      "notify_icon": {
+        "label": "বিজ্ঞপ্তির আইকন"
+      },
+      "notify_start_message": {
+        "label": "শুরুর বার্তা"
+      },
+      "notify_finish_message": {
+        "label": "শেষের বার্তা"
+      },
+      "notify_pre_complete_message": {
+        "label": "প্রি-কমপ্লিট বার্তা"
+      },
+      "notify_reminder_message": {
+        "label": "রিমাইন্ডার বার্তা"
+      },
+      "notify_channel": {
+        "label": "Android চ্যানেল (শুরু/লাইভ)"
+      },
+      "notify_finish_channel": {
+        "label": "Android চ্যানেল (শেষ)"
+      },
+      "energy_price_entity": {
+        "label": "শক্তি মূল্য এন্টিটি"
+      },
+      "energy_price_static": {
+        "label": "স্থির শক্তির মূল্য (প্রতি kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "চক্র টাইমার"
+      },
+      "enable_ml_models": {
+        "label": "একটি চক্রের সময় স্মার্ট মডেল প্রয়োগ করুন"
+      },
+      "ml_training_enabled": {
+        "label": "এই মেশিন থেকে শিখুন"
+      },
+      "ml_training_hour": {
+        "label": "ঘণ্টায় শিখুন"
+      },
+      "ml_training_min_cycles": {
+        "label": "প্রথমে চক্র প্রয়োজন"
+      },
+      "ml_training_interval_days": {
+        "label": "সর্বোচ্চ প্রতিটিতে চেক করুন"
+      }
     }
   }
 }

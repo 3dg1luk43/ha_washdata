@@ -455,13 +455,13 @@
       "edit": "Editatu",
       "export": "Esportatu",
       "export_json": "Esportatu JSONra",
-      "force_stop": "Force Stop",
+      "force_stop": "Beharrez gelditu",
       "from_template": "Txantiloitik ▾",
       "ignore": "Ez ikusi",
       "import_json": "Inportatu JSONtik",
       "import_overwrite": "Inportatu (datuak gainidazten ditu)",
       "inspect": "Ikuskatu",
-      "label": "Etiketa",
+      "label": "Etiketatu",
       "manage": "Kudeatu",
       "merge": "Batu",
       "new_automation": "＋ Automatizazio berria",
@@ -518,7 +518,7 @@
       "diagnostics_pref": "Diagnostikoak",
       "display": "Bistaratzea",
       "export_import": "Esportatu / Inportatu",
-      "live_power": "Botere bizia",
+      "live_power": "Potentzia bizia",
       "logs_diagnostics": "Diagnostikoak",
       "maintenance": "Mantentze-ekintzak",
       "manual_recording": "Eskuzko Grabaketa",
@@ -584,7 +584,7 @@
       "new_profile_name": "Profilaren izen berria",
       "panel_default_tab": "Fitxa lehenetsia",
       "phase_name": "Izena",
-      "power": "Boterea",
+      "power": "Potentzia",
       "profile": "Profila",
       "profile_name": "Profilaren izena",
       "progress": "Aurrerapena",
@@ -603,7 +603,7 @@
       "show_raw": "Erakutsi sentsoreen irakurketa gordinak (leundu gabea, grisa)",
       "status": "Egoera",
       "tail_trim": "Buztana moztu (k)",
-      "ungrouped": "Taldekatua",
+      "ungrouped": "Taldekatu gabea",
       "unlabelled": "Etiketarik gabe",
       "unlabelled_paren": "(etiketatu gabe)",
       "expected": "Espero",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Biltegiratze-estatistikak, mantentze-lanak, esportazioa/inportazioa",
       "trim_intro": "Arrastatu helduleku gorriak edo idatzi balioak. Leihotik kanpo dagoen guztia kendu egiten da.",
       "unsure_detected_prefix": "WashData ez dago ziur detektatu denik",
-      "updated": "Eguneratuta"
+      "updated": "Eguneratuta",
+      "feedback_cycles_pending": "{n} ziklo{s} berrikusteko",
+      "artifact_spike_detail": "Ohiko potentzia-bandatik gora egon zen ~{n}s inguruz.",
+      "artifact_dip_detail": "Ohiko potentzia-bandatik behera egon zen ~{n}s inguruz.",
+      "artifact_pause_detail": "Potentzia ia zerora jaitsi zen ~{n}s inguruz eta gero berrekin zen — seguruenik atea ziklo erdian ireki zen edo zikloa pausatu zen."
     },
     "phase_desc": {
       "pre_wash": "Hasierako beratzea edo aurretratamendua garbiketa nagusia baino lehen.",
@@ -792,7 +796,7 @@
       "clear": "Garbi",
       "completed": "Osatua",
       "fine_tuning": "doitzen orain...",
-      "force_stopped": "Indarra gelditu da",
+      "force_stopped": "Beharrez gelditua",
       "idle": "Geldirik",
       "interrupted": "Etenduta",
       "ready": "Prozesatzeko prest",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Joera behera",
       "up": "Goranzko joera"
+    },
+    "section": {
+      "basic": {
+        "label": "Oinarrizkoa",
+        "intro": "Funtsezko identitatea eta konfigurazio gehienek behar dituzten oinarriak."
+      },
+      "detection": {
+        "label": "Detekzioa",
+        "intro": "Nola detektatzen den ziklo bat hasieratzean, funtzionatzen eta amaitzen."
+      },
+      "matching": {
+        "label": "Bat-Etortzea",
+        "intro": "Nola parekatzen diren ziklo amaituak ikasitako profilekin eta etiketatuak."
+      },
+      "timing": {
+        "label": "Denbora eta Guardatxakurra",
+        "intro": "Atzeko planoko kadentzia, guardatxakur deskonektatua eta etxeko lanak."
+      },
+      "anti_wrinkle": {
+        "label": "Zimur-Aurkakoa",
+        "intro": "Zimur-aurkako/tolesdura-aurkako modua fase nagusiak ondoren potentziadun tamborel-pultsoak detektatzen ditu eta ziklo amaitutarentzat atxikita mantentzen ditu."
+      },
+      "delay": {
+        "label": "Hasiera Atzeratua",
+        "intro": "Hasiera atzeratuaren detekzioak identifikatzen du noiz dagoen aparatua piztuta baina bere zikloa oraindik hasi ez duenean."
+      },
+      "triggers": {
+        "label": "Ekigailuak eta Ateak",
+        "intro": "Aukerako kanpo-seinaleak: bukaera-ekigailua, ateko sentsorea, pausa-etengailua eta deskarga-gogoratzailea."
+      },
+      "notifications": {
+        "label": "Jakinarazpenak",
+        "intro": "Noiz eta nola jakinarazten zaizun ziklo-gertaerei buruz."
+      },
+      "ml_training": {
+        "label": "ML Entrenamendua",
+        "intro": "Gailuan berrentrenamendu ordutegia eta datuen ezarpenak makinak ikasteko."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Atalaseak eta Tartea"
+      },
+      "cycle_start": {
+        "label": "Zikloaren Hasiera"
+      },
+      "cycle_end": {
+        "label": "Zikloaren Amaiera"
+      },
+      "signal_processing": {
+        "label": "Seinalearen Prozesatzea"
+      },
+      "predictive_end": {
+        "label": "Amaiera Iragarlea"
+      },
+      "dishwasher_end": {
+        "label": "Ontzi-Garbigailuaren Amaiera"
+      },
+      "dtw_refinement": {
+        "label": "DTW Fintzea"
+      },
+      "match_scoring": {
+        "label": "Bat-Etortze Puntuazioa"
+      },
+      "duration_gates": {
+        "label": "Iraupenentzako Ateak"
+      },
+      "auto_labeling": {
+        "label": "Auto-Etiketatze"
+      },
+      "watchdog": {
+        "label": "Guardatxakurra"
+      },
+      "housekeeping": {
+        "label": "Etxeko Lanak"
+      },
+      "debug": {
+        "label": "Arazketa"
+      },
+      "external_end_trigger": {
+        "label": "Kanpo Bukaera-Ekigailua"
+      },
+      "door_pause": {
+        "label": "Atea eta Pausa"
+      },
+      "unload_reminder": {
+        "label": "Deskarga Gogoraraztea"
+      },
+      "services": {
+        "label": "Zerbitzuak"
+      },
+      "timing": {
+        "label": "Denbora-Tartea"
+      },
+      "messages": {
+        "label": "Mezuak"
+      },
+      "energy": {
+        "label": "Energia"
+      },
+      "cycle_timers": {
+        "label": "Ziklo Tenporizadoreak"
+      },
+      "schedule": {
+        "label": "Egutegia"
+      },
+      "data_management": {
+        "label": "Datuen Kudeaketa"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Gailuaren Izena"
+      },
+      "device_type": {
+        "label": "Gailu Mota"
+      },
+      "power_sensor": {
+        "label": "Potentzia-Sentsorea"
+      },
+      "min_power": {
+        "label": "Gutxieneko Potentzia"
+      },
+      "off_delay": {
+        "label": "Itzaltzeko Atzerapena"
+      },
+      "linked_device": {
+        "label": "Taldekatu Gailuaren Azpian"
+      },
+      "start_threshold_w": {
+        "label": "Hasierako Atalasea"
+      },
+      "stop_threshold_w": {
+        "label": "Gelditzeko Atalasea"
+      },
+      "min_off_gap": {
+        "label": "Min Itzaltze-Tartea"
+      },
+      "start_duration_threshold": {
+        "label": "Hasierako Iraupena"
+      },
+      "start_energy_threshold": {
+        "label": "Hasierako Energia"
+      },
+      "completion_min_seconds": {
+        "label": "Min Ziklo Iraupena"
+      },
+      "running_dead_zone": {
+        "label": "Funtzionatzeko Zona Hila"
+      },
+      "end_energy_threshold": {
+        "label": "Amaierako Energia"
+      },
+      "end_repeat_count": {
+        "label": "Amaierako Errepikaketa Zenbaketa"
+      },
+      "sampling_interval": {
+        "label": "Laginketa Tartea"
+      },
+      "smoothing_window": {
+        "label": "Leuntzeko Leihoa"
+      },
+      "abrupt_drop_watts": {
+        "label": "Bat-Bateko Jaitsiera"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Bat-Bateko Jaitsiera Ratioa"
+      },
+      "profile_match_threshold": {
+        "label": "Bat-Etortze Atalasea"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Ez-Bat-Etortze Atalasea"
+      },
+      "profile_match_interval": {
+        "label": "Bat-Etortze Tartea"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Min Iraupena Ratioa"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Max Iraupena Ratioa"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profil Iraupena Tolerantzia"
+      },
+      "duration_tolerance": {
+        "label": "Estimazioaren Tolerantzia"
+      },
+      "auto_label_confidence": {
+        "label": "Auto-Etiketa Konfiantza"
+      },
+      "learning_confidence": {
+        "label": "Ikaskuntzako Konfiantza"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Ezkutatu Iritzi Jakinarazpenak"
+      },
+      "watchdog_interval": {
+        "label": "Guardatxakurraren Tartea"
+      },
+      "no_update_active_timeout": {
+        "label": "Eguneraketarik Gabeko Denbora-Muga"
+      },
+      "progress_reset_delay": {
+        "label": "Aurrerapenaren Berrezartzeko Atzerapena"
+      },
+      "auto_maintenance": {
+        "label": "Auto Mantentze-Lanak (gau-garbiketa)"
+      },
+      "expose_debug_entities": {
+        "label": "Erakutsi Arazketa Entitateak"
+      },
+      "save_debug_traces": {
+        "label": "Gorde Arazketa Arrastoak"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Gaitu Zimur-Aurkako Detekzioa"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Maks Zimur-Aurkako Potentzia"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Gehieneko Iraupena"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Irteerako Potentzia Atalasea"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Gaitu Hasiera Atzeratuaren Detekzioa"
+      },
+      "delay_confirm_seconds": {
+        "label": "Segundoak Berresteko"
+      },
+      "delay_timeout_hours": {
+        "label": "Denbora-Muga Orduak"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Gaitu Kanpo Bukaera-Ekigailua"
+      },
+      "external_end_trigger": {
+        "label": "Kanpo Ekigailu Entitatea"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Alderantzikatu Kanpo Ekigailua (ITZALTZEAN ekigin)"
+      },
+      "door_sensor_entity": {
+        "label": "Ateko Sentsore Entitatea"
+      },
+      "pause_cuts_power": {
+        "label": "Pausak Ere Potentzia Mozten du (etengailuen bidez)"
+      },
+      "switch_entity": {
+        "label": "Etengailu Entitatea"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Deskarga Gogorazlearen Atzerapena"
+      },
+      "pump_stuck_duration": {
+        "label": "Ponparen Blokeatze Iraupena"
+      },
+      "notify_start_services": {
+        "label": "Hasierako Zerbitzuak"
+      },
+      "notify_finish_services": {
+        "label": "Amaierako Zerbitzuak"
+      },
+      "notify_live_services": {
+        "label": "Aurrerapen Zuzeneko Zerbitzuak"
+      },
+      "notify_people": {
+        "label": "Pertsonak (Etxean Soilik Baderako)"
+      },
+      "notify_only_when_home": {
+        "label": "Jakinarazi Soilik Etxean Dagoenean"
+      },
+      "notify_fire_events": {
+        "label": "Piztu HA Gertaerak Jakinarazpenetarako"
+      },
+      "notify_before_end_minutes": {
+        "label": "Amaierako Aurre-Oharra"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Zuzeneko Eguneratze Tartea"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Zuzeneko Gainpasatze % Oharra Baino Lehen"
+      },
+      "notify_live_chronometer": {
+        "label": "Erabili Zuzeneko Kronometroa"
+      },
+      "notify_timeout_seconds": {
+        "label": "Auto-Baztertu Ostean"
+      },
+      "notify_title": {
+        "label": "Jakinarazpen Titulua"
+      },
+      "notify_icon": {
+        "label": "Jakinarazpen Ikonoa"
+      },
+      "notify_start_message": {
+        "label": "Hasierako Mezua"
+      },
+      "notify_finish_message": {
+        "label": "Amaierako Mezua"
+      },
+      "notify_pre_complete_message": {
+        "label": "Aurre-Osatze Mezua"
+      },
+      "notify_reminder_message": {
+        "label": "Gogorarazpen Mezua"
+      },
+      "notify_channel": {
+        "label": "Android Kanala (hasiera/zuzeneko)"
+      },
+      "notify_finish_channel": {
+        "label": "Android Kanala (amaiera)"
+      },
+      "energy_price_entity": {
+        "label": "Energia Prezio Entitatea"
+      },
+      "energy_price_static": {
+        "label": "Energia Prezio Estatikoa (kWh bakoitzeko)"
+      },
+      "notify_cycle_timers": {
+        "label": "Ziklo Tenporizadoreak"
+      },
+      "enable_ml_models": {
+        "label": "Aplikatu eredu adimendunak ziklo batean zehar"
+      },
+      "ml_training_enabled": {
+        "label": "Ikasi makina honetatik"
+      },
+      "ml_training_hour": {
+        "label": "Ikasi orduan"
+      },
+      "ml_training_min_cycles": {
+        "label": "Zikloak lehenik behar"
+      },
+      "ml_training_interval_days": {
+        "label": "Egiaztatu gehienez aldi bakoitzean"
+      }
     }
   }
 }

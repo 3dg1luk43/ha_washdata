@@ -735,7 +735,11 @@
       "storage_diagnostics": "สถิติพื้นที่จัดเก็บ, การบำรุงรักษา, ส่งออก/นำเข้า",
       "trim_intro": "ลากแฮนเดิลสีแดง หรือป้อนค่า ทุกอย่างนอกหน้าต่างจะถูกลบ",
       "unsure_detected_prefix": "WashData ไม่แน่ใจว่าตรวจจับ",
-      "updated": "อัปเดตแล้ว"
+      "updated": "อัปเดตแล้ว",
+      "feedback_cycles_pending": "{n} รอบที่ต้องตรวจสอบ",
+      "artifact_spike_detail": "วาดเหนือแถบพลังงานปกติประมาณ ~{n} วินาที",
+      "artifact_dip_detail": "ลดลงต่ำกว่าแถบพลังงานปกติประมาณ ~{n} วินาที",
+      "artifact_pause_detail": "พลังงานลดลงเกือบเป็นศูนย์ประมาณ ~{n} วินาทีแล้วกลับมาทำงาน — น่าจะเปิดประตูกลางรอบหรือรอบถูกหยุดชั่วคราว"
     },
     "phase_desc": {
       "pre_wash": "แช่เบื้องต้นหรือบำบัดก่อนซักหลัก",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "แนวโน้มขาลง",
       "up": "แนวโน้มขาขึ้น"
+    },
+    "section": {
+      "basic": {
+        "label": "พื้นฐาน",
+        "intro": "ข้อมูลพื้นฐานและสิ่งจำเป็นสำหรับการตั้งค่าส่วนใหญ่"
+      },
+      "detection": {
+        "label": "การตรวจจับ",
+        "intro": "วิธีที่รอบการทำงานถูกตรวจจับว่าเริ่มต้น ทำงาน และสิ้นสุด"
+      },
+      "matching": {
+        "label": "การจับคู่",
+        "intro": "วิธีที่รอบที่เสร็จสิ้นถูกจับคู่กับโปรไฟล์ที่เรียนรู้และติดป้ายกำกับ"
+      },
+      "timing": {
+        "label": "เวลา & การเฝ้าระวัง",
+        "intro": "รอบการทำงานพื้นหลัง การเฝ้าระวังออฟไลน์ และการบำรุงรักษา"
+      },
+      "anti_wrinkle": {
+        "label": "ป้องกันรอยยับ",
+        "intro": "โหมดป้องกันรอยยับตรวจจับพัลส์หมุนกำลังต่ำหลังจากขั้นตอนหลักและเก็บไว้กับรอบที่เสร็จสิ้น"
+      },
+      "delay": {
+        "label": "การเริ่มล่าช้า",
+        "intro": "การตรวจจับการเริ่มล่าช้าระบุเมื่ออุปกรณ์เปิดแต่ยังไม่เริ่มรอบ"
+      },
+      "triggers": {
+        "label": "ทริกเกอร์ & ประตู",
+        "intro": "สัญญาณภายนอกเพิ่มเติม: ทริกเกอร์สิ้นสุด เซนเซอร์ประตู สวิตช์หยุดชั่วคราว และการแจ้งเตือนขนออก"
+      },
+      "notifications": {
+        "label": "การแจ้งเตือน",
+        "intro": "เมื่อและวิธีที่คุณได้รับการแจ้งเตือนเกี่ยวกับเหตุการณ์รอบ"
+      },
+      "ml_training": {
+        "label": "การฝึก ML",
+        "intro": "ตารางการฝึกอบรมใหม่การเรียนรู้ของเครื่องในอุปกรณ์และการตั้งค่าข้อมูล"
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "ค่าขีดจำกัด & ช่องว่าง"
+      },
+      "cycle_start": {
+        "label": "การเริ่มรอบ"
+      },
+      "cycle_end": {
+        "label": "การสิ้นสุดรอบ"
+      },
+      "signal_processing": {
+        "label": "การประมวลผลสัญญาณ"
+      },
+      "predictive_end": {
+        "label": "การสิ้นสุดแบบคาดการณ์"
+      },
+      "dishwasher_end": {
+        "label": "การสิ้นสุดเครื่องล้างจาน"
+      },
+      "dtw_refinement": {
+        "label": "การปรับปรุง DTW"
+      },
+      "match_scoring": {
+        "label": "คะแนนการจับคู่"
+      },
+      "duration_gates": {
+        "label": "ประตูระยะเวลา"
+      },
+      "auto_labeling": {
+        "label": "การติดป้ายอัตโนมัติ"
+      },
+      "watchdog": {
+        "label": "การเฝ้าระวัง"
+      },
+      "housekeeping": {
+        "label": "การบำรุงรักษา"
+      },
+      "debug": {
+        "label": "ดีบัก"
+      },
+      "external_end_trigger": {
+        "label": "ทริกเกอร์สิ้นสุดภายนอก"
+      },
+      "door_pause": {
+        "label": "ประตู & หยุดชั่วคราว"
+      },
+      "unload_reminder": {
+        "label": "การแจ้งเตือนขนออก"
+      },
+      "services": {
+        "label": "บริการ"
+      },
+      "timing": {
+        "label": "เวลา"
+      },
+      "messages": {
+        "label": "ข้อความ"
+      },
+      "energy": {
+        "label": "พลังงาน"
+      },
+      "cycle_timers": {
+        "label": "ตัวจับเวลารอบ"
+      },
+      "schedule": {
+        "label": "ตาราง"
+      },
+      "data_management": {
+        "label": "การจัดการข้อมูล"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "ชื่ออุปกรณ์"
+      },
+      "device_type": {
+        "label": "ประเภทอุปกรณ์"
+      },
+      "power_sensor": {
+        "label": "เซนเซอร์พลังงาน"
+      },
+      "min_power": {
+        "label": "พลังงานขั้นต่ำ"
+      },
+      "off_delay": {
+        "label": "ดีเลย์ปิด"
+      },
+      "linked_device": {
+        "label": "จัดกลุ่มใต้อุปกรณ์"
+      },
+      "start_threshold_w": {
+        "label": "ค่าขีดจำกัดเริ่มต้น"
+      },
+      "stop_threshold_w": {
+        "label": "ค่าขีดจำกัดหยุด"
+      },
+      "min_off_gap": {
+        "label": "ช่องว่างปิดขั้นต่ำ"
+      },
+      "start_duration_threshold": {
+        "label": "ระยะเวลาเริ่มต้น"
+      },
+      "start_energy_threshold": {
+        "label": "พลังงานเริ่มต้น"
+      },
+      "completion_min_seconds": {
+        "label": "ระยะเวลารอบขั้นต่ำ"
+      },
+      "running_dead_zone": {
+        "label": "โซนตายขณะทำงาน"
+      },
+      "end_energy_threshold": {
+        "label": "พลังงานสิ้นสุด"
+      },
+      "end_repeat_count": {
+        "label": "จำนวนซ้ำสิ้นสุด"
+      },
+      "sampling_interval": {
+        "label": "ช่วงเวลาสุ่มตัวอย่าง"
+      },
+      "smoothing_window": {
+        "label": "หน้าต่างการปรับให้เรียบ"
+      },
+      "abrupt_drop_watts": {
+        "label": "การลดลงกะทันหัน"
+      },
+      "abrupt_drop_ratio": {
+        "label": "อัตราส่วนการลดลงกะทันหัน"
+      },
+      "profile_match_threshold": {
+        "label": "ค่าขีดจำกัดการจับคู่"
+      },
+      "profile_unmatch_threshold": {
+        "label": "ค่าขีดจำกัดการไม่จับคู่"
+      },
+      "profile_match_interval": {
+        "label": "ช่วงเวลาการจับคู่"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "อัตราส่วนระยะเวลาขั้นต่ำ"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "อัตราส่วนระยะเวลาสูงสุด"
+      },
+      "profile_duration_tolerance": {
+        "label": "ความคลาดเคลื่อนระยะเวลาโปรไฟล์"
+      },
+      "duration_tolerance": {
+        "label": "ความคลาดเคลื่อนการประมาณ"
+      },
+      "auto_label_confidence": {
+        "label": "ความเชื่อมั่นการติดป้ายอัตโนมัติ"
+      },
+      "learning_confidence": {
+        "label": "ความเชื่อมั่นการเรียนรู้"
+      },
+      "suppress_feedback_notifications": {
+        "label": "ระงับการแจ้งเตือนข้อเสนอแนะ"
+      },
+      "watchdog_interval": {
+        "label": "ช่วงเวลาการเฝ้าระวัง"
+      },
+      "no_update_active_timeout": {
+        "label": "หมดเวลาไม่มีการอัปเดต"
+      },
+      "progress_reset_delay": {
+        "label": "ดีเลย์รีเซ็ตความคืบหน้า"
+      },
+      "auto_maintenance": {
+        "label": "การบำรุงรักษาอัตโนมัติ (ทำความสะอาดรายคืน)"
+      },
+      "expose_debug_entities": {
+        "label": "เปิดเผยเอนทิตีดีบัก"
+      },
+      "save_debug_traces": {
+        "label": "บันทึกการติดตามดีบัก"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "เปิดใช้งานการตรวจจับป้องกันรอยยับ"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "พลังงานป้องกันรอยยับสูงสุด"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "ระยะเวลาสูงสุด"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "ค่าขีดจำกัดพลังงานออก"
+      },
+      "delay_start_detect_enabled": {
+        "label": "เปิดใช้งานการตรวจจับการเริ่มล่าช้า"
+      },
+      "delay_confirm_seconds": {
+        "label": "วินาทียืนยัน"
+      },
+      "delay_timeout_hours": {
+        "label": "ชั่วโมงหมดเวลา"
+      },
+      "external_end_trigger_enabled": {
+        "label": "เปิดใช้งานทริกเกอร์สิ้นสุดภายนอก"
+      },
+      "external_end_trigger": {
+        "label": "เอนทิตีทริกเกอร์ภายนอก"
+      },
+      "external_end_trigger_inverted": {
+        "label": "กลับทริกเกอร์ภายนอก (ทริกเกอร์เมื่อปิด)"
+      },
+      "door_sensor_entity": {
+        "label": "เอนทิตีเซนเซอร์ประตู"
+      },
+      "pause_cuts_power": {
+        "label": "การหยุดชั่วคราวตัดพลังงานด้วย (ผ่านสวิตช์)"
+      },
+      "switch_entity": {
+        "label": "เอนทิตีสวิตช์"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "ดีเลย์แจ้งเตือนขนออก"
+      },
+      "pump_stuck_duration": {
+        "label": "ระยะเวลาปั๊มติด"
+      },
+      "notify_start_services": {
+        "label": "บริการเริ่มต้น"
+      },
+      "notify_finish_services": {
+        "label": "บริการสิ้นสุด"
+      },
+      "notify_live_services": {
+        "label": "บริการความคืบหน้าสด"
+      },
+      "notify_people": {
+        "label": "บุคคล (สำหรับเมื่ออยู่บ้านเท่านั้น)"
+      },
+      "notify_only_when_home": {
+        "label": "แจ้งเตือนเมื่ออยู่บ้านเท่านั้น"
+      },
+      "notify_fire_events": {
+        "label": "ยิงเหตุการณ์ HA สำหรับการแจ้งเตือน"
+      },
+      "notify_before_end_minutes": {
+        "label": "การแจ้งเตือนก่อนสิ้นสุด"
+      },
+      "notify_live_interval_seconds": {
+        "label": "ช่วงเวลาการอัปเดตสด"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% เกินเวลาสดก่อนแจ้งเตือน"
+      },
+      "notify_live_chronometer": {
+        "label": "ใช้นาฬิกาจับเวลาสด"
+      },
+      "notify_timeout_seconds": {
+        "label": "ปิดอัตโนมัติหลังจาก"
+      },
+      "notify_title": {
+        "label": "หัวข้อการแจ้งเตือน"
+      },
+      "notify_icon": {
+        "label": "ไอคอนการแจ้งเตือน"
+      },
+      "notify_start_message": {
+        "label": "ข้อความเริ่มต้น"
+      },
+      "notify_finish_message": {
+        "label": "ข้อความสิ้นสุด"
+      },
+      "notify_pre_complete_message": {
+        "label": "ข้อความก่อนสิ้นสุด"
+      },
+      "notify_reminder_message": {
+        "label": "ข้อความแจ้งเตือน"
+      },
+      "notify_channel": {
+        "label": "ช่อง Android (เริ่มต้น/สด)"
+      },
+      "notify_finish_channel": {
+        "label": "ช่อง Android (สิ้นสุด)"
+      },
+      "energy_price_entity": {
+        "label": "เอนทิตีราคาพลังงาน"
+      },
+      "energy_price_static": {
+        "label": "ราคาพลังงานคงที่ (ต่อ kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "ตัวจับเวลารอบ"
+      },
+      "enable_ml_models": {
+        "label": "ใช้โมเดลอัจฉริยะระหว่างรอบ"
+      },
+      "ml_training_enabled": {
+        "label": "เรียนรู้จากเครื่องนี้"
+      },
+      "ml_training_hour": {
+        "label": "เรียนรู้ที่ชั่วโมง"
+      },
+      "ml_training_min_cycles": {
+        "label": "รอบที่ต้องการก่อน"
+      },
+      "ml_training_interval_days": {
+        "label": "ตรวจสอบอย่างน้อยทุก"
+      }
     }
   }
 }

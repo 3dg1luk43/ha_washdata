@@ -735,7 +735,11 @@
       "storage_diagnostics": "സംഭരണ ​​സ്ഥിതിവിവരക്കണക്കുകൾ, പരിപാലനം, കയറ്റുമതി/ഇറക്കുമതി",
       "trim_intro": "ചുവന്ന ഹാൻഡിലുകൾ വലിച്ചിടുക, അല്ലെങ്കിൽ മൂല്യങ്ങൾ നൽകുക. വിൻഡോയ്ക്ക് പുറത്തുള്ള എല്ലാം നീക്കം ചെയ്തു.",
       "unsure_detected_prefix": "WashData അത് കണ്ടെത്തിയെന്ന് ഉറപ്പില്ല",
-      "updated": "അപ്ഡേറ്റ് ചെയ്തു"
+      "updated": "അപ്ഡേറ്റ് ചെയ്തു",
+      "artifact_spike_detail": "സ്ഥിര ഊർജ്ജ ബാൻഡിന് മുകളിൽ ~{n}s.",
+      "artifact_dip_detail": "സ്ഥിര ഊർജ്ജ ബാൻഡിന് താഴെ ~{n}s.",
+      "artifact_pause_detail": "ഊർജ്ജം ~{n}s-ൽ ഏതാണ്ട് പൂജ്യത്തിലേക്ക് താഴ്ന്ന് തുടർന്ന് പുനരാരംഭിച്ചു — ഒരുപക്ഷേ സൈക്കിളിൻ്റെ മധ്യത്തിൽ വാതിൽ തുറന്നതോ സൈക്കിൾ താൽക്കാലികമായി നിർത്തിയതോ ആകാം.",
+      "feedback_cycles_pending": "{n} സൈക്കിൾ{s} അവലോകനം ചെയ്യാൻ"
     },
     "phase_desc": {
       "pre_wash": "പ്രധാന കഴുകുന്നതിന് മുമ്പ് പ്രാഥമിക കുതിർക്കുക അല്ലെങ്കിൽ പ്രീ-ട്രീറ്റ്മെൻ്റ്.",
@@ -874,6 +878,641 @@
     "trend": {
       "down": "ട്രെൻഡ് ഡൗൺ",
       "up": "ട്രെൻഡ് അപ്പ്"
+    },
+    "section": {
+      "overview": {
+        "label": "അവലോകനം",
+        "intro": "നിങ്ങളുടെ ഉപകരണത്തിന്റെ നില, സമീപകാല പ്രവർത്തനം എന്നിവയുടെ അവലോകനം."
+      },
+      "cycles": {
+        "label": "ചക്രങ്ങൾ",
+        "intro": "കണ്ടെത്തിയ വാഷ് ചക്രങ്ങളുടെ ചരിത്രം."
+      },
+      "profiles": {
+        "label": "പ്രൊഫൈലുകൾ",
+        "intro": "വ്യത്യസ്ത പ്രോഗ്രാമുകൾക്കായുള്ള പഠിക്കപ്പെട്ട പവർ പ്രൊഫൈലുകൾ."
+      },
+      "settings": {
+        "label": "ക്രമീകരണങ്ങൾ",
+        "intro": "കണ്ടെത്തൽ, മാച്ചിംഗ് ക്രമീകരണങ്ങൾ കോൺഫിഗർ ചെയ്യുക."
+      },
+      "ml_training": {
+        "label": "ML പരിശീലനം",
+        "intro": "ഉപകരണത്തിലെ ML പുനഃ-പരിശീലന ഷെഡ്യൂൾ, ഡാറ്റ ക്രമീകരണങ്ങൾ."
+      },
+      "diagnostics": {
+        "label": "ഡയഗ്നോസ്റ്റിക്സ്",
+        "intro": "ഡയഗ്നോസ്റ്റിക് വിവരങ്ങൾ, സെൻസർ റീഡിംഗുകൾ."
+      },
+      "logs": {
+        "label": "ലോഗുകൾ",
+        "intro": "പ്രശ്നപരിഹാരത്തിനായുള്ള ലോഗ് എൻട്രികൾ."
+      },
+      "help": {
+        "label": "സഹായം",
+        "intro": "സഹായവും ഡോക്യുമെന്റേഷനും."
+      },
+      "about": {
+        "label": "കുറിച്ച്",
+        "intro": "ഈ ഇന്റഗ്രേഷനെ കുറിച്ച്."
+      },
+      "basic": {
+        "label": "അടിസ്ഥാനം",
+        "intro": "കോർ ഐഡൻ്റിറ്റിയും മിക്ക സെറ്റപ്പുകൾക്കും ആവശ്യമായ അടിസ്ഥാനകാര്യങ്ങളും."
+      },
+      "detection": {
+        "label": "കണ്ടെത്തൽ",
+        "intro": "ഒരു സൈക്കിൾ ആരംഭിക്കുന്നതും പ്രവർത്തിക്കുന്നതും അവസാനിക്കുന്നതും എങ്ങനെ കണ്ടെത്തുന്നു."
+      },
+      "matching": {
+        "label": "പൊരുത്തപ്പെടുത്തൽ",
+        "intro": "പൂർത്തിയായ സൈക്കിളുകൾ പഠിച്ച പ്രൊഫൈലുകളുമായി എങ്ങനെ പൊരുത്തപ്പെടുകയും ലേബൽ ചെയ്യുകയും ചെയ്യുന്നു."
+      },
+      "timing": {
+        "label": "ടൈമിംഗ് & വാച്ച്ഡോഗ്",
+        "intro": "പശ്ചാത്തല കേഡൻസ്, ഓഫ്‌ലൈൻ വാച്ച്ഡോഗ്, ഹൗസ്‌കീപ്പിംഗ്."
+      },
+      "anti_wrinkle": {
+        "label": "ആൻ്റി-റിങ്കിൾ",
+        "intro": "ആൻ്റി-റിങ്കിൾ/ആൻ്റി-ക്രീസ് മോഡ് മുഖ്യ ഘട്ടത്തിന് ശേഷം കുറഞ്ഞ-ശക്തിയിലുള്ള ടംബൾ പൾസുകൾ കണ്ടെത്തി പൂർത്തിയായ സൈക്കിളിൽ ഘടിപ്പിക്കുന്നു."
+      },
+      "delay": {
+        "label": "വൈകിയ സ്റ്റാർട്ട്",
+        "intro": "ഡിലേ-സ്റ്റാർട്ട് ഡിറ്റക്ഷൻ ഒരു ഉപകരണം ഓൺ ആകുമ്പോഴും സൈക്കിൾ ആരംഭിക്കാത്തപ്പോഴും തിരിച്ചറിയുന്നു."
+      },
+      "triggers": {
+        "label": "ട്രിഗറുകൾ & വാതിലുകൾ",
+        "intro": "ഓപ്ഷണൽ ബാഹ്യ സിഗ്നലുകൾ: ഒരു അവസാന ട്രിഗർ, ഒരു ഡോർ സെൻസർ, ഒരു പോസ് സ്വിച്ച്, അൺലോഡ് ഓർമ്മപ്പെടുത്തൽ."
+      },
+      "notifications": {
+        "label": "അറിയിപ്പുകൾ",
+        "intro": "സൈക്കിൾ ഇവൻ്റുകളെക്കുറിച്ച് നിങ്ങളെ എപ്പോൾ, എങ്ങനെ അറിയിക്കുന്നു."
+      }
+    },
+    "setting_group": {
+      "detection": {
+        "label": "കണ്ടെത്തൽ"
+      },
+      "thresholds": {
+        "label": "പരിധികൾ"
+      },
+      "timing": {
+        "label": "ടൈമിംഗ്"
+      },
+      "energy": {
+        "label": "ഊർജ്ജം"
+      },
+      "matching": {
+        "label": "പ്രൊഫൈൽ മാച്ചിംഗ്"
+      },
+      "dtw": {
+        "label": "DTW പരിഷ്കരണം"
+      },
+      "learning": {
+        "label": "പഠനം"
+      },
+      "feedback": {
+        "label": "ഫീഡ്ബാക്ക്"
+      },
+      "display": {
+        "label": "ഡിസ്പ്ലേ"
+      },
+      "advanced": {
+        "label": "വിപുലീകൃതം"
+      },
+      "notifications": {
+        "label": "അറിയിപ്പുകൾ"
+      },
+      "ml": {
+        "label": "മെഷീൻ ലേണിംഗ്"
+      },
+      "ml_training": {
+        "label": "ML പരിശീലനം"
+      },
+      "ml_models": {
+        "label": "ML മോഡലുകൾ"
+      },
+      "cycle_detection": {
+        "label": "ചക്ര കണ്ടെത്തൽ"
+      },
+      "profile_matching": {
+        "label": "പ്രൊഫൈൽ മാച്ചിംഗ്"
+      },
+      "power": {
+        "label": "ശക്തി"
+      },
+      "duration": {
+        "label": "ദൈർഘ്യം"
+      },
+      "cost": {
+        "label": "ചിലവ്"
+      },
+      "debug": {
+        "label": "ഡീബഗ്"
+      },
+      "device": {
+        "label": "ഉപകരണം"
+      },
+      "phases": {
+        "label": "ഘട്ടങ്ങൾ"
+      },
+      "groups": {
+        "label": "പ്രൊഫൈൽ ഗ്രൂപ്പുകൾ"
+      },
+      "thresholds_gap": {
+        "label": "ത്രെഷോൾഡുകളും ഗ്യാപ്പും"
+      },
+      "cycle_start": {
+        "label": "സൈക്കിൾ ആരംഭം"
+      },
+      "cycle_end": {
+        "label": "സൈക്കിൾ അവസാനം"
+      },
+      "signal_processing": {
+        "label": "സിഗ്നൽ പ്രോസസ്സിംഗ്"
+      },
+      "predictive_end": {
+        "label": "പ്രവചനാത്മക അവസാനം"
+      },
+      "dishwasher_end": {
+        "label": "ഡിഷ്‌വാഷർ അവസാനം"
+      },
+      "dtw_refinement": {
+        "label": "DTW പരിഷ്കരണം"
+      },
+      "match_scoring": {
+        "label": "മാച്ച് സ്കോറിംഗ്"
+      },
+      "duration_gates": {
+        "label": "ദൈർഘ്യ ഗേറ്റ്സ്"
+      },
+      "auto_labeling": {
+        "label": "ഓട്ടോ-ലേബൽ"
+      },
+      "watchdog": {
+        "label": "വാച്ച്ഡോഗ്"
+      },
+      "housekeeping": {
+        "label": "ഹൗസ്‌കീപ്പിംഗ്"
+      },
+      "external_end_trigger": {
+        "label": "ബാഹ്യ അവസാന ട്രിഗർ"
+      },
+      "door_pause": {
+        "label": "ഡോർ & പോസ്"
+      },
+      "unload_reminder": {
+        "label": "അൺലോഡ് ഓർമ്മപ്പെടുത്തൽ"
+      },
+      "services": {
+        "label": "സേവനങ്ങൾ"
+      },
+      "messages": {
+        "label": "സന്ദേശങ്ങൾ"
+      },
+      "cycle_timers": {
+        "label": "സൈക്കിൾ ടൈമറുകൾ"
+      },
+      "schedule": {
+        "label": "ഷെഡ്യൂൾ"
+      },
+      "data_management": {
+        "label": "ഡാറ്റ മാനേജ്‌മെൻ്റ്"
+      }
+    },
+    "setting": {
+      "min_power": {
+        "label": "ഏറ്റവും കുറഞ്ഞ പവർ"
+      },
+      "start_power": {
+        "label": "ആരംഭ ശക്തി"
+      },
+      "stop_power": {
+        "label": "നിർത്തൽ ശക്തി"
+      },
+      "min_duration": {
+        "label": "കുറഞ്ഞ ദൈർഘ്യം"
+      },
+      "max_duration": {
+        "label": "പരമാവധി ദൈർഘ്യം"
+      },
+      "start_delay": {
+        "label": "ആരംഭ കാലതാമസം"
+      },
+      "stop_delay": {
+        "label": "നിർത്തൽ കാലതാമസം"
+      },
+      "min_off_gap": {
+        "label": "മിൻ ഓഫ് ഗ്യാപ്"
+      },
+      "energy_gate": {
+        "label": "ഊർജ്ജ ഗേറ്റ്"
+      },
+      "match_min_score": {
+        "label": "കുറഞ്ഞ മാച്ച് സ്കോർ"
+      },
+      "match_ambiguity_margin": {
+        "label": "അവ്യക്തത മാർജിൻ"
+      },
+      "match_min_duration_ratio": {
+        "label": "കുറഞ്ഞ ദൈർഘ്യ അനുപാതം"
+      },
+      "match_max_duration_ratio": {
+        "label": "പരമ ദൈർഘ്യ അനുപാതം"
+      },
+      "dtw_mode": {
+        "label": "DTW മോഡ്"
+      },
+      "dtw_bandwidth": {
+        "label": "DTW ബാൻഡ്‌വിഡ്ത്"
+      },
+      "dtw_blend": {
+        "label": "DTW ബ്ലെൻഡ്"
+      },
+      "dtw_refine_top_n": {
+        "label": "DTW ടോപ്പ് N പരിഷ്കരണം"
+      },
+      "dtw_ensemble_w": {
+        "label": "DTW എൻസെംബിൾ വെയ്റ്റ്"
+      },
+      "corr_weight": {
+        "label": "കോറിലേഷൻ വെയ്റ്റ്"
+      },
+      "duration_weight": {
+        "label": "ദൈർഘ്യ വെയ്റ്റ്"
+      },
+      "energy_weight": {
+        "label": "ഊർജ്ജ വെയ്റ്റ്"
+      },
+      "duration_scale": {
+        "label": "ദൈർഘ്യ സ്കെയിൽ"
+      },
+      "energy_scale": {
+        "label": "ഊർജ്ജ സ്കെയിൽ"
+      },
+      "learning_rate": {
+        "label": "പഠന നിരക്ക്"
+      },
+      "confidence_threshold": {
+        "label": "ആത്മവിശ്വാസ പരിധി"
+      },
+      "auto_label_threshold": {
+        "label": "സ്വയം-ലേബൽ പരിധി"
+      },
+      "feedback_threshold": {
+        "label": "ഫീഡ്ബാക്ക് പരിധി"
+      },
+      "min_cycles_to_match": {
+        "label": "മാച്ചിംഗിനായുള്ള കുറഞ്ഞ ചക്രങ്ങൾ"
+      },
+      "profile_min_cycles": {
+        "label": "പ്രൊഫൈൽ കുറഞ്ഞ ചക്രങ്ങൾ"
+      },
+      "cost_per_kwh": {
+        "label": "kWh-ന് ചിലവ്"
+      },
+      "currency": {
+        "label": "കറൻസി"
+      },
+      "expose_debug_entities": {
+        "label": "ഡീബഗ് എൻ്റിറ്റികൾ കാണിക്കുക"
+      },
+      "enable_ml_models": {
+        "label": "സൈക്കിൾ ചെയ്യുമ്പോൾ സ്‌മാർട്ട് മോഡലുകൾ പ്രയോഗിക്കുക"
+      },
+      "ml_training_enabled": {
+        "label": "ഈ മെഷീനിൽ നിന്ന് പഠിക്കുക"
+      },
+      "ml_training_schedule": {
+        "label": "ML പരിശീലന ഷെഡ്യൂൾ"
+      },
+      "ml_training_min_cycles": {
+        "label": "ആദ്യം ആവശ്യമായ സൈക്കിളുകൾ"
+      },
+      "ml_training_min_new_cycles": {
+        "label": "പരിശീലനത്തിനുള്ള കുറഞ്ഞ പുതിയ ചക്രങ്ങൾ"
+      },
+      "ml_match_commit_threshold": {
+        "label": "ML മാച്ച് കമ്മിറ്റ് പരിധി"
+      },
+      "ml_end_guard_threshold": {
+        "label": "ML അവസാന ഗാർഡ് പരിധി"
+      },
+      "ml_quality_threshold": {
+        "label": "ML ഗുണനിലവാര പരിധി"
+      },
+      "ml_progress_blend_weight": {
+        "label": "ML പ്രോഗ്രസ് ബ്ലെൻഡ് വെയ്റ്റ്"
+      },
+      "device_type": {
+        "label": "ഉപകരണ തരം"
+      },
+      "power_sensor": {
+        "label": "പവർ സെൻസർ"
+      },
+      "name": {
+        "label": "ഉപകരണ നാമം"
+      },
+      "anti_crease_power": {
+        "label": "ചുളിവ്-വിരുദ്ധ ശക്തി"
+      },
+      "anti_crease_min_duration": {
+        "label": "ചുളിവ്-വിരുദ്ധ കുറഞ്ഞ ദൈർഘ്യം"
+      },
+      "anti_crease_max_cycles": {
+        "label": "ചുളിവ്-വിരുദ്ധ പരമ ചക്രങ്ങൾ"
+      },
+      "dishwasher_end_spike_min_progress": {
+        "label": "അവസാന സ്പൈക്ക് കുറഞ്ഞ പ്രോഗ്രസ്"
+      },
+      "dishwasher_end_spike_wait_seconds": {
+        "label": "അവസാന സ്പൈക്ക് കാത്തിരിപ്പ് സമയം"
+      },
+      "pump_out_power": {
+        "label": "പമ്പ്-ഔട്ട് ശക്തി"
+      },
+      "dryer_cool_power": {
+        "label": "ഡ്രയർ കൂൾ-ഡൗൺ ശക്തി"
+      },
+      "dryer_cool_max_duration": {
+        "label": "ഡ്രയർ കൂൾ-ഡൗൺ പരമ ദൈർഘ്യം"
+      },
+      "end_defer_confidence": {
+        "label": "അവസാന മുൻകൂർ ആത്മവിശ്വാസം"
+      },
+      "end_guard_max_defer": {
+        "label": "അവസാന ഗാർഡ് പരമ കാലതാമസം"
+      },
+      "terminal_drop_min_peak_ratio": {
+        "label": "ടെർമിനൽ ഡ്രോപ്പ് കുറഞ്ഞ പീക്ക് അനുപാതം"
+      },
+      "terminal_drop_earliness_ratio": {
+        "label": "ടെർമിനൽ ഡ്രോപ്പ് ആദ്യകാല അനുപാതം"
+      },
+      "terminal_drop_peak_familiar_tol": {
+        "label": "ടെർമിനൽ ഡ്രോപ്പ് പീക്ക് ടോളറൻസ്"
+      },
+      "terminal_drop_off_delay": {
+        "label": "ടെർമിനൽ ഡ്രോപ്പ് ഓഫ് കാലതാമസം"
+      },
+      "terminal_drop_min_clean_cycles": {
+        "label": "ടെർമിനൽ ഡ്രോപ്പ് കുറഞ്ഞ ക്ലീൻ ചക്രങ്ങൾ"
+      },
+      "match_ranking_history_max": {
+        "label": "മാച്ച് റാങ്കിംഗ് ചരിത്ര പരമാവധി"
+      },
+      "max_cycles_stored": {
+        "label": "പരമ ചക്രങ്ങൾ സ്റ്റോർ ചെയ്തു"
+      },
+      "max_power_trace_points": {
+        "label": "പരമ ശക്തി ട്രേസ് പോയിന്റുകൾ"
+      },
+      "envelope_conformance_threshold": {
+        "label": "എൻവലോപ്പ് അനുസൃതത പരിധി"
+      },
+      "suggest_coverage_min_unmatched": {
+        "label": "കവറേജ് ഗ്യാപ്പ് കുറഞ്ഞ അൺമാച്ച്ഡ്"
+      },
+      "suggest_coverage_min_rate": {
+        "label": "കവറേജ് ഗ്യാപ്പ് കുറഞ്ഞ നിരക്ക്"
+      },
+      "suggest_coverage_window": {
+        "label": "കവറേജ് ഗ്യാപ്പ് വിൻഡോ"
+      },
+      "suggest_coverage_low_conf": {
+        "label": "കവറേജ് ഗ്യാപ്പ് കുറഞ്ഞ ആത്മവിശ്വാസം"
+      },
+      "group_min_cohesion": {
+        "label": "ഗ്രൂപ്പ് കുറഞ്ഞ ഒത്തൊരുമ"
+      },
+      "phase_match_tolerance": {
+        "label": "ഘട്ടം മാച്ച് ടോളറൻസ്"
+      },
+      "recording_max_duration": {
+        "label": "റെക്കോർഡിംഗ് പരമ ദൈർഘ്യം"
+      },
+      "recording_min_duration": {
+        "label": "റെക്കോർഡിംഗ് കുറഞ്ഞ ദൈർഘ്യം"
+      },
+      "resampling_points": {
+        "label": "റീസാമ്പ്ലിംഗ് പോയിന്റുകൾ"
+      },
+      "smoothing_window": {
+        "label": "സ്‌മൂത്തിംഗ് വിൻഡോ"
+      },
+      "trend_min_cycles": {
+        "label": "ട്രെൻഡ് കുറഞ്ഞ ചക്രങ്ങൾ"
+      },
+      "trend_recent_window": {
+        "label": "ട്രെൻഡ് സമീപകാല വിൻഡോ"
+      },
+      "trend_slope_threshold": {
+        "label": "ട്രെൻഡ് ചരിവ് പരിധി"
+      },
+      "advisory_min_cycles": {
+        "label": "ഉപദേശ കുറഞ്ഞ ചക്രങ്ങൾ"
+      },
+      "off_delay": {
+        "label": "ഓഫ് ഡിലേ"
+      },
+      "linked_device": {
+        "label": "ഉപകരണത്തിൻ്റെ കീഴിൽ ഗ്രൂപ്പ് ചെയ്യുക"
+      },
+      "start_threshold_w": {
+        "label": "സ്റ്റാർട്ട് ത്രെഷോൾഡ്"
+      },
+      "stop_threshold_w": {
+        "label": "സ്റ്റോപ്പ് ത്രെഷോൾഡ്"
+      },
+      "start_duration_threshold": {
+        "label": "സ്റ്റാർട്ട് ദൈർഘ്യം"
+      },
+      "start_energy_threshold": {
+        "label": "സ്റ്റാർട്ട് ഊർജ്ജം"
+      },
+      "completion_min_seconds": {
+        "label": "മിൻ സൈക്കിൾ ദൈർഘ്യം"
+      },
+      "running_dead_zone": {
+        "label": "റണ്ണിംഗ് ഡെഡ് സോൺ"
+      },
+      "end_energy_threshold": {
+        "label": "അവസാന ഊർജ്ജം"
+      },
+      "end_repeat_count": {
+        "label": "അവസാന ആവർത്തന എണ്ണം"
+      },
+      "sampling_interval": {
+        "label": "സാംപ്ലിംഗ് ഇൻ്റർവൽ"
+      },
+      "abrupt_drop_watts": {
+        "label": "പൊടുന്നനെ ഇടിവ്"
+      },
+      "abrupt_drop_ratio": {
+        "label": "പൊടുന്നനെ ഇടിവ് അനുപാതം"
+      },
+      "profile_match_threshold": {
+        "label": "മാച്ച് ത്രെഷോൾഡ്"
+      },
+      "profile_unmatch_threshold": {
+        "label": "അൺമാച്ച് ത്രെഷോൾഡ്"
+      },
+      "profile_match_interval": {
+        "label": "മാച്ച് ഇൻ്റർവൽ"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "മിൻ ദൈർഘ്യ അനുപാതം"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "മാക്സ് ദൈർഘ്യ അനുപാതം"
+      },
+      "profile_duration_tolerance": {
+        "label": "പ്രൊഫൈൽ ദൈർഘ്യ ടോളറൻസ്"
+      },
+      "duration_tolerance": {
+        "label": "എസ്റ്റിമേറ്റ് ടോളറൻസ്"
+      },
+      "auto_label_confidence": {
+        "label": "ഓട്ടോ-ലേബൽ ആത്മവിശ്വാസം"
+      },
+      "learning_confidence": {
+        "label": "ലേണിംഗ് ആത്മവിശ്വാസം"
+      },
+      "suppress_feedback_notifications": {
+        "label": "ഫീഡ്‌ബാക്ക് അറിയിപ്പുകൾ അടക്കം ചെയ്യുക"
+      },
+      "watchdog_interval": {
+        "label": "വാച്ച്ഡോഗ് ഇൻ്റർവൽ"
+      },
+      "no_update_active_timeout": {
+        "label": "അപ്ഡേറ്റ് ഇല്ലാതെ ടൈം-ഔട്ട്"
+      },
+      "progress_reset_delay": {
+        "label": "പ്രോഗ്രസ് റീസെറ്റ് ഡിലേ"
+      },
+      "auto_maintenance": {
+        "label": "ഓട്ടോ മെയ്ൻ്റനൻസ് (നൈറ്റ്‌ലി ക്ലീനപ്പ്)"
+      },
+      "save_debug_traces": {
+        "label": "ഡീബഗ് ട്രെയ്‌സ് സംരക്ഷിക്കുക"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "ആൻ്റി-റിങ്കിൾ ഡിറ്റക്ഷൻ പ്രവർത്തനക്ഷമമാക്കുക"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "മാക്‌സ് ആൻ്റി-റിങ്കിൾ പവർ"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "മാക്‌സ് ദൈർഘ്യം"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "ആൻ്റി-റിങ്കിൾ എക്‌സിറ്റ് ത്രെഷോൾഡ്"
+      },
+      "delay_start_detect_enabled": {
+        "label": "ഡിലേ-സ്റ്റാർട്ട് ഡിറ്റക്ഷൻ പ്രവർത്തനക്ഷമമാക്കുക"
+      },
+      "delay_confirm_seconds": {
+        "label": "കൺഫേം സെക്കൻഡ്"
+      },
+      "delay_timeout_hours": {
+        "label": "ടൈം-ഔട്ട് മണിക്കൂർ"
+      },
+      "external_end_trigger_enabled": {
+        "label": "ബാഹ്യ അവസാന ട്രിഗർ പ്രവർത്തനക്ഷമമാക്കുക"
+      },
+      "external_end_trigger": {
+        "label": "ബാഹ്യ ട്രിഗർ എൻ്റിറ്റി"
+      },
+      "external_end_trigger_inverted": {
+        "label": "ബാഹ്യ ട്രിഗർ ഇൻ്വേർട്ട് ചെയ്യുക (ഓഫ്-ൽ ട്രിഗർ)"
+      },
+      "door_sensor_entity": {
+        "label": "ഡോർ സെൻസർ എൻ്റിറ്റി"
+      },
+      "pause_cuts_power": {
+        "label": "പോസ് പവർ ഓഫ് ആക്കുന്നു (സ്വിച്ച് വഴി)"
+      },
+      "switch_entity": {
+        "label": "സ്വിച്ച് എൻ്റിറ്റി"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "അൺലോഡ് ഓർമ്മ ഡിലേ"
+      },
+      "pump_stuck_duration": {
+        "label": "പമ്പ് തടങ്കൽ ദൈർഘ്യം"
+      },
+      "notify_start_services": {
+        "label": "സ്റ്റാർട്ട് സേവനങ്ങൾ"
+      },
+      "notify_finish_services": {
+        "label": "ഫിനിഷ് സേവനങ്ങൾ"
+      },
+      "notify_live_services": {
+        "label": "ലൈവ് പ്രോഗ്രസ് സേവനങ്ങൾ"
+      },
+      "notify_people": {
+        "label": "ആളുകൾ (ഹോം-ഓൺലി)"
+      },
+      "notify_only_when_home": {
+        "label": "വീട്ടിലായിരിക്കുമ്പോൾ മാത്രം അറിയിക്കുക"
+      },
+      "notify_fire_events": {
+        "label": "അറിയിപ്പുകൾക്കായി HA ഇവൻ്റുകൾ ഫയർ ചെയ്യുക"
+      },
+      "notify_before_end_minutes": {
+        "label": "അവസാനത്തിന് മുൻ‌പേ അലേർട്ട്"
+      },
+      "notify_live_interval_seconds": {
+        "label": "ലൈവ് അപ്‌ഡേറ്റ് ഇൻ്റർവൽ"
+      },
+      "notify_live_overrun_percent": {
+        "label": "ലൈവ് ഓവർറൺ % അലേർട്ടിന് മുൻ‌പ്"
+      },
+      "notify_live_chronometer": {
+        "label": "ലൈവ് ക്രോണോമീറ്റർ ഉപയോഗിക്കുക"
+      },
+      "notify_timeout_seconds": {
+        "label": "ഇത്ര സമയം ശേഷം ഓട്ടോ-ഡിസ്‌മിസ്"
+      },
+      "notify_title": {
+        "label": "അറിയിപ്പ് തലക്കെട്ട്"
+      },
+      "notify_icon": {
+        "label": "അറിയിപ്പ് ഐക്കൺ"
+      },
+      "notify_start_message": {
+        "label": "സ്റ്റാർട്ട് സന്ദേശം"
+      },
+      "notify_finish_message": {
+        "label": "ഫിനിഷ് സന്ദേശം"
+      },
+      "notify_pre_complete_message": {
+        "label": "പ്രീ-കംപ്ലീറ്റ് സന്ദേശം"
+      },
+      "notify_reminder_message": {
+        "label": "ഓർമ്മ സന്ദേശം"
+      },
+      "notify_channel": {
+        "label": "Android ചാനൽ (സ്റ്റാർട്ട്/ലൈവ്)"
+      },
+      "notify_finish_channel": {
+        "label": "Android ചാനൽ (ഫിനിഷ്)"
+      },
+      "energy_price_entity": {
+        "label": "ഊർജ്ജ വില എൻ്റിറ്റി"
+      },
+      "energy_price_static": {
+        "label": "സ്റ്റാറ്റിക് ഊർജ്ജ വില (kWh-ൽ)"
+      },
+      "notify_cycle_timers": {
+        "label": "സൈക്കിൾ ടൈമറുകൾ"
+      },
+      "ml_training_hour": {
+        "label": "ഈ മണിക്കൂറിൽ പഠിക്കുക"
+      },
+      "ml_training_interval_days": {
+        "label": "ഏറ്റവും കൂടിയത് ഇത്ര ദിവസം ഇടവിട്ട് പരിശോധിക്കുക"
+      }
     }
   }
 }

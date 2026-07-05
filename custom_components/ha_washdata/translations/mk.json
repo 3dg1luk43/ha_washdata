@@ -735,7 +735,11 @@
       "storage_diagnostics": "Статистика за складирање, одржување, извоз/увоз",
       "trim_intro": "Повлечете ги црвените рачки или внесете вредности. Сè што е надвор од прозорецот е отстрането.",
       "unsure_detected_prefix": "WashData не е сигурен дека е откриен",
-      "updated": "Ажурирано"
+      "updated": "Ажурирано",
+      "artifact_spike_detail": "Надмина го вообичаениот опсег на моќност за ~{n}с.",
+      "artifact_dip_detail": "Падна под вообичаениот опсег на моќност за ~{n}с.",
+      "artifact_pause_detail": "Моќноста падна до скоро нула за ~{n}с потоа продолжи — веројатно вратата беше отворена во средината на циклусот или циклусот беше паузиран.",
+      "feedback_cycles_pending": "{n} циклус{s} за преглед"
     },
     "phase_desc": {
       "pre_wash": "Почетно натопување или предтретман пред главното перење.",
@@ -874,6 +878,641 @@
       "settings_saved": "Зачувани се поставките; интеграција повторно вчитување",
       "suggestions_applied": "Применети предлози; интеграција повторно вчитување",
       "suggestions_dismissed": "Предлозите се отфрлени"
+    },
+    "section": {
+      "overview": {
+        "label": "Преглед",
+        "intro": "Преглед на статусот на вашиот уред и неодамнешната активност."
+      },
+      "cycles": {
+        "label": "Циклуси",
+        "intro": "Историја на откриените циклуси на перење."
+      },
+      "profiles": {
+        "label": "Профили",
+        "intro": "Научени профили на моќност за различни програми."
+      },
+      "settings": {
+        "label": "Поставки",
+        "intro": "Конфигурирајте поставки за откривање и совпаѓање."
+      },
+      "ml_training": {
+        "label": "МЛ обука",
+        "intro": "Распоред и поставки за податоци за повторна обука на машинско учење на уредот."
+      },
+      "diagnostics": {
+        "label": "Дијагностика",
+        "intro": "Дијагностички информации и очитувања на сензори."
+      },
+      "logs": {
+        "label": "Дневници",
+        "intro": "Записи во дневникот за решавање проблеми."
+      },
+      "help": {
+        "label": "Помош",
+        "intro": "Помош и документација."
+      },
+      "about": {
+        "label": "За",
+        "intro": "За оваа интеграција."
+      },
+      "basic": {
+        "label": "Основно",
+        "intro": "Основен идентитет и суштинските работи кои ги бараат повеќето поставки."
+      },
+      "detection": {
+        "label": "Откривање",
+        "intro": "Kako се открива циклусот при започнување, работење и завршување."
+      },
+      "matching": {
+        "label": "Совпаѓање",
+        "intro": "Kako завршените циклуси се совпаѓаат со научените профили и се означуваат."
+      },
+      "timing": {
+        "label": "Тајмирање и чувар",
+        "intro": "Позадинска каденца, офлајн чувар и одржување."
+      },
+      "anti_wrinkle": {
+        "label": "Против брчки",
+        "intro": "Режимот против брчки/набирање открива импулси со ниска моќност по главната фаза и ги прикачува на завршениот циклус."
+      },
+      "delay": {
+        "label": "Одложен старт",
+        "intro": "Откривањето на одложениот старт идентификува кога апаратот е вклучен но сè уште не започнал циклус."
+      },
+      "triggers": {
+        "label": "Тригери и врати",
+        "intro": "Опционални надворешни сигнали: тригер за крај, сензор за врата, прекинувач за пауза и потсетник за истовар."
+      },
+      "notifications": {
+        "label": "Известувања",
+        "intro": "Кога и kako се известувате за настаните на циклусот."
+      }
+    },
+    "setting_group": {
+      "detection": {
+        "label": "Откривање"
+      },
+      "thresholds": {
+        "label": "Прагови"
+      },
+      "timing": {
+        "label": "Тајмирање"
+      },
+      "energy": {
+        "label": "Енергија"
+      },
+      "matching": {
+        "label": "Совпаѓање на профил"
+      },
+      "dtw": {
+        "label": "DTW прецизирање"
+      },
+      "learning": {
+        "label": "Учење"
+      },
+      "feedback": {
+        "label": "Повратна информација"
+      },
+      "display": {
+        "label": "Приказ"
+      },
+      "advanced": {
+        "label": "Напредно"
+      },
+      "notifications": {
+        "label": "Известувања"
+      },
+      "ml": {
+        "label": "Машинско учење"
+      },
+      "ml_training": {
+        "label": "МЛ обука"
+      },
+      "ml_models": {
+        "label": "МЛ модели"
+      },
+      "cycle_detection": {
+        "label": "Откривање циклус"
+      },
+      "profile_matching": {
+        "label": "Совпаѓање профил"
+      },
+      "power": {
+        "label": "Моќност"
+      },
+      "duration": {
+        "label": "Траење"
+      },
+      "cost": {
+        "label": "Трошок"
+      },
+      "debug": {
+        "label": "Дебагирање"
+      },
+      "device": {
+        "label": "Уред"
+      },
+      "phases": {
+        "label": "Фази"
+      },
+      "groups": {
+        "label": "Групи на профили"
+      },
+      "thresholds_gap": {
+        "label": "Прагови и јаз"
+      },
+      "cycle_start": {
+        "label": "Почеток на циклус"
+      },
+      "cycle_end": {
+        "label": "Крај на циклус"
+      },
+      "signal_processing": {
+        "label": "Обработка на сигналот"
+      },
+      "predictive_end": {
+        "label": "Предвидливо завршување"
+      },
+      "dishwasher_end": {
+        "label": "Крај на миење садови"
+      },
+      "dtw_refinement": {
+        "label": "DTW прецизирање"
+      },
+      "match_scoring": {
+        "label": "Бодување за совпаѓање"
+      },
+      "duration_gates": {
+        "label": "Порти за времетраење"
+      },
+      "auto_labeling": {
+        "label": "Автоматско означување"
+      },
+      "watchdog": {
+        "label": "Чувар"
+      },
+      "housekeeping": {
+        "label": "Одржување"
+      },
+      "external_end_trigger": {
+        "label": "Надворешен тригер за крај"
+      },
+      "door_pause": {
+        "label": "Врата и пауза"
+      },
+      "unload_reminder": {
+        "label": "Потсетник за истовар"
+      },
+      "services": {
+        "label": "Услуги"
+      },
+      "messages": {
+        "label": "Пораки"
+      },
+      "cycle_timers": {
+        "label": "Тајмери за циклус"
+      },
+      "schedule": {
+        "label": "Распоред"
+      },
+      "data_management": {
+        "label": "Управување со податоци"
+      }
+    },
+    "setting": {
+      "min_power": {
+        "label": "Минимална моќност"
+      },
+      "start_power": {
+        "label": "Моќност за почеток"
+      },
+      "stop_power": {
+        "label": "Моќност за запирање"
+      },
+      "min_duration": {
+        "label": "Минимално траење"
+      },
+      "max_duration": {
+        "label": "Максимално траење"
+      },
+      "start_delay": {
+        "label": "Доцнење при почеток"
+      },
+      "stop_delay": {
+        "label": "Доцнење при запирање"
+      },
+      "min_off_gap": {
+        "label": "Мин. јаз при исклучување"
+      },
+      "energy_gate": {
+        "label": "Енергетска порта"
+      },
+      "match_min_score": {
+        "label": "Минимален резултат за совпаѓање"
+      },
+      "match_ambiguity_margin": {
+        "label": "Граница на двосмисленост"
+      },
+      "match_min_duration_ratio": {
+        "label": "Мин. однос на траење"
+      },
+      "match_max_duration_ratio": {
+        "label": "Макс. однос на траење"
+      },
+      "dtw_mode": {
+        "label": "DTW режим"
+      },
+      "dtw_bandwidth": {
+        "label": "DTW опсег"
+      },
+      "dtw_blend": {
+        "label": "DTW мешање"
+      },
+      "dtw_refine_top_n": {
+        "label": "DTW прецизирање Топ N"
+      },
+      "dtw_ensemble_w": {
+        "label": "DTW тежина на ансамбл"
+      },
+      "corr_weight": {
+        "label": "Тежина на корелација"
+      },
+      "duration_weight": {
+        "label": "Тежина на траење"
+      },
+      "energy_weight": {
+        "label": "Тежина на енергија"
+      },
+      "duration_scale": {
+        "label": "Скала на траење"
+      },
+      "energy_scale": {
+        "label": "Скала на енергија"
+      },
+      "learning_rate": {
+        "label": "Стапка на учење"
+      },
+      "confidence_threshold": {
+        "label": "Праг на доверба"
+      },
+      "auto_label_threshold": {
+        "label": "Праг за автоматско означување"
+      },
+      "feedback_threshold": {
+        "label": "Праг за повратна информација"
+      },
+      "min_cycles_to_match": {
+        "label": "Мин. циклуси за совпаѓање"
+      },
+      "profile_min_cycles": {
+        "label": "Мин. циклуси на профил"
+      },
+      "cost_per_kwh": {
+        "label": "Цена по kWh"
+      },
+      "currency": {
+        "label": "Валута"
+      },
+      "expose_debug_entities": {
+        "label": "Изложи ентитети за дебагирање"
+      },
+      "enable_ml_models": {
+        "label": "Примени паметни модели за време на циклус"
+      },
+      "ml_training_enabled": {
+        "label": "Учи од оваа машина"
+      },
+      "ml_training_schedule": {
+        "label": "Распоред за МЛ обука"
+      },
+      "ml_training_min_cycles": {
+        "label": "Прво потребни циклуси"
+      },
+      "ml_training_min_new_cycles": {
+        "label": "Мин. нови циклуси за обука"
+      },
+      "ml_match_commit_threshold": {
+        "label": "Праг за потврда на МЛ совпаѓање"
+      },
+      "ml_end_guard_threshold": {
+        "label": "Праг за МЛ заштита на крај"
+      },
+      "ml_quality_threshold": {
+        "label": "Праг за МЛ квалитет"
+      },
+      "ml_progress_blend_weight": {
+        "label": "Тежина на мешање на МЛ напредок"
+      },
+      "device_type": {
+        "label": "Тип на уред"
+      },
+      "power_sensor": {
+        "label": "Сензор за моќност"
+      },
+      "name": {
+        "label": "Назив на уред"
+      },
+      "anti_crease_power": {
+        "label": "Моќност за спречување набирање"
+      },
+      "anti_crease_min_duration": {
+        "label": "Мин. траење за спречување набирање"
+      },
+      "anti_crease_max_cycles": {
+        "label": "Макс. циклуси за спречување набирање"
+      },
+      "dishwasher_end_spike_min_progress": {
+        "label": "Мин. напредок на финалниот скок"
+      },
+      "dishwasher_end_spike_wait_seconds": {
+        "label": "Чекање за финален скок"
+      },
+      "pump_out_power": {
+        "label": "Моќност на пумпата"
+      },
+      "dryer_cool_power": {
+        "label": "Моќност на ладење на сушилницата"
+      },
+      "dryer_cool_max_duration": {
+        "label": "Макс. траење на ладење на сушилницата"
+      },
+      "end_defer_confidence": {
+        "label": "Доверба за одложување на крај"
+      },
+      "end_guard_max_defer": {
+        "label": "Макс. одложување на заштитата на крај"
+      },
+      "terminal_drop_min_peak_ratio": {
+        "label": "Мин. однос на врвот при терминален пад"
+      },
+      "terminal_drop_earliness_ratio": {
+        "label": "Однос на раност при терминален пад"
+      },
+      "terminal_drop_peak_familiar_tol": {
+        "label": "Толеранција на познат врв при терминален пад"
+      },
+      "terminal_drop_off_delay": {
+        "label": "Доцнење при исклучување на терминален пад"
+      },
+      "terminal_drop_min_clean_cycles": {
+        "label": "Мин. чисти циклуси при терминален пад"
+      },
+      "match_ranking_history_max": {
+        "label": "Макс. историја на рангирање совпаѓања"
+      },
+      "max_cycles_stored": {
+        "label": "Макс. зачувани циклуси"
+      },
+      "max_power_trace_points": {
+        "label": "Макс. точки на траг на моќност"
+      },
+      "envelope_conformance_threshold": {
+        "label": "Праг на усогласеност со обвивката"
+      },
+      "suggest_coverage_min_unmatched": {
+        "label": "Мин. несовпаднати за празнина во покриеност"
+      },
+      "suggest_coverage_min_rate": {
+        "label": "Мин. стапка за празнина во покриеност"
+      },
+      "suggest_coverage_window": {
+        "label": "Прозорец за празнина во покриеност"
+      },
+      "suggest_coverage_low_conf": {
+        "label": "Ниска доверба за празнина во покриеност"
+      },
+      "group_min_cohesion": {
+        "label": "Мин. кохезија на група"
+      },
+      "phase_match_tolerance": {
+        "label": "Толеранција за совпаѓање на фаза"
+      },
+      "recording_max_duration": {
+        "label": "Макс. траење на снимање"
+      },
+      "recording_min_duration": {
+        "label": "Мин. траење на снимање"
+      },
+      "resampling_points": {
+        "label": "Точки на повторно земање примероци"
+      },
+      "smoothing_window": {
+        "label": "Прозорец за изглавнување"
+      },
+      "trend_min_cycles": {
+        "label": "Мин. циклуси на тренд"
+      },
+      "trend_recent_window": {
+        "label": "Последен прозорец на тренд"
+      },
+      "trend_slope_threshold": {
+        "label": "Праг на наклон на тренд"
+      },
+      "advisory_min_cycles": {
+        "label": "Мин. циклуси за советување"
+      },
+      "off_delay": {
+        "label": "Одложување на исклучување"
+      },
+      "linked_device": {
+        "label": "Групирај под уред"
+      },
+      "start_threshold_w": {
+        "label": "Праг за почеток"
+      },
+      "stop_threshold_w": {
+        "label": "Праг за стоп"
+      },
+      "start_duration_threshold": {
+        "label": "Времетраење на старт"
+      },
+      "start_energy_threshold": {
+        "label": "Старт енергија"
+      },
+      "completion_min_seconds": {
+        "label": "Мин. траење на циклус"
+      },
+      "running_dead_zone": {
+        "label": "Мртва зона при работење"
+      },
+      "end_energy_threshold": {
+        "label": "Крајна енергија"
+      },
+      "end_repeat_count": {
+        "label": "Броење на повторување при крај"
+      },
+      "sampling_interval": {
+        "label": "Интервал на земање примероци"
+      },
+      "abrupt_drop_watts": {
+        "label": "Нагол пад"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Сооднос на нагол пад"
+      },
+      "profile_match_threshold": {
+        "label": "Праг за совпаѓање"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Праг за несовпаѓање"
+      },
+      "profile_match_interval": {
+        "label": "Интервал за совпаѓање"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Мин. сооднос на траење"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Макс. сооднос на траење"
+      },
+      "profile_duration_tolerance": {
+        "label": "Толеранција на траење на профилот"
+      },
+      "duration_tolerance": {
+        "label": "Толеранција на проценката"
+      },
+      "auto_label_confidence": {
+        "label": "Доверба за автоматско означување"
+      },
+      "learning_confidence": {
+        "label": "Доверба при учење"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Потисни известувања за повратни информации"
+      },
+      "watchdog_interval": {
+        "label": "Интервал на чувар"
+      },
+      "no_update_active_timeout": {
+        "label": "Пауза без ажурирање"
+      },
+      "progress_reset_delay": {
+        "label": "Одложување на ресет на напредок"
+      },
+      "auto_maintenance": {
+        "label": "Автоматско одржување (ноќно чистење)"
+      },
+      "save_debug_traces": {
+        "label": "Зачувај траги за дебагирање"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Овозможи откривање против брчки"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Макс. моќност против брчки"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Макс. траење"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Праг на моќност за излез"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Овозможи откривање на одложен старт"
+      },
+      "delay_confirm_seconds": {
+        "label": "Секунди за потврда"
+      },
+      "delay_timeout_hours": {
+        "label": "Часови за истекување"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Овозможи надворешен тригер за крај"
+      },
+      "external_end_trigger": {
+        "label": "Ентитет на надворешен тригер"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Инвертирај надворешен тригер (тригер при ИСКЛУЧУВАЊЕ)"
+      },
+      "door_sensor_entity": {
+        "label": "Ентитет на сензор за врата"
+      },
+      "pause_cuts_power": {
+        "label": "Паузата исто така ја исклучува моќноста (преку прекинувач)"
+      },
+      "switch_entity": {
+        "label": "Ентитет на прекинувач"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Задоцнување на потсетникот за истовар"
+      },
+      "pump_stuck_duration": {
+        "label": "Времетраење за заглавена пумпа"
+      },
+      "notify_start_services": {
+        "label": "Услуги за почеток"
+      },
+      "notify_finish_services": {
+        "label": "Услуги за крај"
+      },
+      "notify_live_services": {
+        "label": "Услуги за напредок во живо"
+      },
+      "notify_people": {
+        "label": "Луѓе (за Само дома)"
+      },
+      "notify_only_when_home": {
+        "label": "Известувај само кога сте дома"
+      },
+      "notify_fire_events": {
+        "label": "Активирај HA настани за известувања"
+      },
+      "notify_before_end_minutes": {
+        "label": "Предупредување пред крај"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Интервал за ажурирање во живо"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% на прекорачување во живо пред предупредување"
+      },
+      "notify_live_chronometer": {
+        "label": "Користи хронометар во живо"
+      },
+      "notify_timeout_seconds": {
+        "label": "Автоматско отфрлање по"
+      },
+      "notify_title": {
+        "label": "Наслов на известување"
+      },
+      "notify_icon": {
+        "label": "Икона на известување"
+      },
+      "notify_start_message": {
+        "label": "Порака за почеток"
+      },
+      "notify_finish_message": {
+        "label": "Порака за крај"
+      },
+      "notify_pre_complete_message": {
+        "label": "Порака за скоро крај"
+      },
+      "notify_reminder_message": {
+        "label": "Порака за потсетник"
+      },
+      "notify_channel": {
+        "label": "Android канал (старт/живо)"
+      },
+      "notify_finish_channel": {
+        "label": "Android канал (крај)"
+      },
+      "energy_price_entity": {
+        "label": "Ентитет на цена на енергија"
+      },
+      "energy_price_static": {
+        "label": "Статична цена на енергија (по kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Тајмери за циклус"
+      },
+      "ml_training_hour": {
+        "label": "Учи во час"
+      },
+      "ml_training_interval_days": {
+        "label": "Проверувај најмногу на секои"
+      }
     }
   }
 }

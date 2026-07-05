@@ -462,7 +462,7 @@
       "import_json": "Importar desde JSON",
       "import_overwrite": "Importar (sobrescribe datos)",
       "inspect": "Inspeccionar",
-      "label": "Etiqueta",
+      "label": "Etiquetar",
       "manage": "Xestionar",
       "merge": "Combinar",
       "new_automation": "＋ Nova automatización",
@@ -484,7 +484,7 @@
       "reset": "Restablecer",
       "reset_to_builtin": "Restablecer aos modelos incorporados",
       "reset_to_defaults": "Restablecer os valores predeterminados",
-      "review": "Revisión",
+      "review": "Revisar",
       "run_analysis": "🔍 Realiza análise de suxestións",
       "run_auto_label": "Executar etiqueta automática",
       "save": "Gardar",
@@ -622,7 +622,7 @@
       "artifact_tip": "{n} anomalías detectadas (por exemplo, a porta aberta a metade do ciclo): ábrese para velos no gráfico",
       "poor_fit_tip": "Historial de coincidencias incoherente: considera reconstruír este perfil",
       "fair_fit_tip": "Coherencia moderada da coincidencia: algúns ciclos asignados a este perfil teñen puntuacións de confianza máis baixas. Etiqueta máis ciclos ou volve gravar o perfil para mellorar a precisión.",
-      "fair_fit": "axuste xusto",
+      "fair_fit": "calidade aceptable",
       "poor_fit": "mal axuste",
       "auto": "(detectado automaticamente)",
       "built_in_tag": "incorporado",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Estatísticas de almacenamento, mantemento, exportación/importación",
       "trim_intro": "Arrastre os tiradores vermellos ou introduza valores. Elimínase todo o que está fóra da fiestra.",
       "unsure_detected_prefix": "WashData non está seguro de que se detectou",
-      "updated": "Actualizado"
+      "updated": "Actualizado",
+      "feedback_cycles_pending": "{n} ciclo{s} para revisar",
+      "artifact_spike_detail": "Superou a banda de potencia habitual durante ~{n}s.",
+      "artifact_dip_detail": "Baixou da banda de potencia habitual durante ~{n}s.",
+      "artifact_pause_detail": "A potencia caeu case a cero durante ~{n}s e despois continuou — probablemente a porta foi aberta a metade do ciclo ou o ciclo foi pausado."
     },
     "phase_desc": {
       "pre_wash": "Inmersión inicial ou pretratamento antes do lavado principal.",
@@ -874,6 +878,348 @@
       "settings_saved": "Configuración gardada; recarga de integración",
       "suggestions_applied": "Suxestións aplicadas; recarga de integración",
       "suggestions_dismissed": "Suxestións descartadas"
+    },
+    "section": {
+      "basic": {
+        "label": "Básico",
+        "intro": "Identidade principal e os elementos esenciais que a maioría das configuracións precisan."
+      },
+      "detection": {
+        "label": "Detección",
+        "intro": "Como se detecta un ciclo ao comezar, executarse e terminar."
+      },
+      "matching": {
+        "label": "Coincidencia",
+        "intro": "Como os ciclos terminados se comparan cos perfís aprendidos e se etiquetan."
+      },
+      "timing": {
+        "label": "Temporización e vixilancia",
+        "intro": "Cadencia de fondo, a vixilancia sen conexión e o mantemento."
+      },
+      "anti_wrinkle": {
+        "label": "Anti-engurras",
+        "intro": "O modo anti-engurras detecta pulsos de tombado de baixa potencia despois da fase principal e mantenos unidos ao ciclo terminado."
+      },
+      "delay": {
+        "label": "Inicio retardado",
+        "intro": "A detección de inicio retardado identifica cando un aparello está alimentado pero aínda non iniciou o seu ciclo."
+      },
+      "triggers": {
+        "label": "Disparadores e portas",
+        "intro": "Sinais externos opcionais: un disparador de fin, un sensor de porta, un interruptor de pausa e o recordatorio de descarga."
+      },
+      "notifications": {
+        "label": "Notificacións",
+        "intro": "Cando e como se lle notifica sobre os eventos do ciclo."
+      },
+      "ml_training": {
+        "label": "Adestramento ML",
+        "intro": "Programación de readestramento de aprendizaxe automática no dispositivo e configuración de datos."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Limiares e intervalo"
+      },
+      "cycle_start": {
+        "label": "Inicio do ciclo"
+      },
+      "cycle_end": {
+        "label": "Fin do ciclo"
+      },
+      "signal_processing": {
+        "label": "Procesamento de sinais"
+      },
+      "predictive_end": {
+        "label": "Fin preditivo"
+      },
+      "dishwasher_end": {
+        "label": "Fin do lavalouzas"
+      },
+      "dtw_refinement": {
+        "label": "Refinamento DTW"
+      },
+      "match_scoring": {
+        "label": "Puntuación de coincidencia"
+      },
+      "duration_gates": {
+        "label": "Portas de duración"
+      },
+      "auto_labeling": {
+        "label": "Etiquetaxe automática"
+      },
+      "watchdog": {
+        "label": "Vixilante"
+      },
+      "housekeeping": {
+        "label": "Mantemento"
+      },
+      "debug": {
+        "label": "Depuración"
+      },
+      "external_end_trigger": {
+        "label": "Disparador de fin externo"
+      },
+      "door_pause": {
+        "label": "Porta e pausa"
+      },
+      "unload_reminder": {
+        "label": "Recordatorio de descarga"
+      },
+      "services": {
+        "label": "Servizos"
+      },
+      "timing": {
+        "label": "Temporización"
+      },
+      "messages": {
+        "label": "Mensaxes"
+      },
+      "energy": {
+        "label": "Enerxía"
+      },
+      "cycle_timers": {
+        "label": "Temporizadores de ciclo"
+      },
+      "schedule": {
+        "label": "Programación"
+      },
+      "data_management": {
+        "label": "Xestión de datos"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Nome do dispositivo"
+      },
+      "device_type": {
+        "label": "Tipo de dispositivo"
+      },
+      "power_sensor": {
+        "label": "Sensor de potencia"
+      },
+      "min_power": {
+        "label": "Potencia mínima"
+      },
+      "off_delay": {
+        "label": "Atraso de apagado"
+      },
+      "linked_device": {
+        "label": "Agrupar baixo dispositivo"
+      },
+      "start_threshold_w": {
+        "label": "Limiar de inicio"
+      },
+      "stop_threshold_w": {
+        "label": "Limiar de parada"
+      },
+      "min_off_gap": {
+        "label": "Intervalo mínimo de apagado"
+      },
+      "start_duration_threshold": {
+        "label": "Duración de inicio"
+      },
+      "start_energy_threshold": {
+        "label": "Enerxía de inicio"
+      },
+      "completion_min_seconds": {
+        "label": "Duración mínima do ciclo"
+      },
+      "running_dead_zone": {
+        "label": "Zona morta de execución"
+      },
+      "end_energy_threshold": {
+        "label": "Enerxía de fin"
+      },
+      "end_repeat_count": {
+        "label": "Conta de repetición de fin"
+      },
+      "sampling_interval": {
+        "label": "Intervalo de mostraxe"
+      },
+      "smoothing_window": {
+        "label": "Ventá de suavizado"
+      },
+      "abrupt_drop_watts": {
+        "label": "Caída abrupta"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Proporción de caída abrupta"
+      },
+      "profile_match_threshold": {
+        "label": "Limiar de coincidencia"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Limiar de non coincidencia"
+      },
+      "profile_match_interval": {
+        "label": "Intervalo de coincidencia"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Proporción de duración mínima"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Proporción de duración máxima"
+      },
+      "profile_duration_tolerance": {
+        "label": "Tolerancia de duración do perfil"
+      },
+      "duration_tolerance": {
+        "label": "Tolerancia de estimación"
+      },
+      "auto_label_confidence": {
+        "label": "Confianza de etiquetaxe automática"
+      },
+      "learning_confidence": {
+        "label": "Confianza de aprendizaxe"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Suprimir notificacións de comentarios"
+      },
+      "watchdog_interval": {
+        "label": "Intervalo do vixilante"
+      },
+      "no_update_active_timeout": {
+        "label": "Tempo de espera sen actualización"
+      },
+      "progress_reset_delay": {
+        "label": "Atraso de reinicio do progreso"
+      },
+      "auto_maintenance": {
+        "label": "Mantemento automático (limpeza nocturna)"
+      },
+      "expose_debug_entities": {
+        "label": "Expor entidades de depuración"
+      },
+      "save_debug_traces": {
+        "label": "Gardar trazos de depuración"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Activar detección anti-engurras"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Potencia máxima anti-engurras"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Duración máxima"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Limiar de potencia de saída"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Activar detección de inicio retardado"
+      },
+      "delay_confirm_seconds": {
+        "label": "Segundos de confirmación"
+      },
+      "delay_timeout_hours": {
+        "label": "Horas de tempo de espera"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Activar disparador de fin externo"
+      },
+      "external_end_trigger": {
+        "label": "Entidade de disparador externo"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Inverter disparador externo (disparar en APAGADO)"
+      },
+      "door_sensor_entity": {
+        "label": "Entidade do sensor de porta"
+      },
+      "pause_cuts_power": {
+        "label": "A pausa tamén corta a alimentación (mediante interruptor)"
+      },
+      "switch_entity": {
+        "label": "Entidade de interruptor"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Atraso do recordatorio de descarga"
+      },
+      "pump_stuck_duration": {
+        "label": "Duración de bomba atascada"
+      },
+      "notify_start_services": {
+        "label": "Servizos de inicio"
+      },
+      "notify_finish_services": {
+        "label": "Servizos de fin"
+      },
+      "notify_live_services": {
+        "label": "Servizos de progreso en directo"
+      },
+      "notify_people": {
+        "label": "Persoas (para só cando estea en casa)"
+      },
+      "notify_only_when_home": {
+        "label": "Notificar só cando estea en casa"
+      },
+      "notify_fire_events": {
+        "label": "Lanzar eventos HA para notificacións"
+      },
+      "notify_before_end_minutes": {
+        "label": "Alerta previa ao fin"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Intervalo de actualización en directo"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% de sobrepasamento en directo antes de alerta"
+      },
+      "notify_live_chronometer": {
+        "label": "Usar cronómetro en directo"
+      },
+      "notify_timeout_seconds": {
+        "label": "Descartar automaticamente despois"
+      },
+      "notify_title": {
+        "label": "Título da notificación"
+      },
+      "notify_icon": {
+        "label": "Icona da notificación"
+      },
+      "notify_start_message": {
+        "label": "Mensaxe de inicio"
+      },
+      "notify_finish_message": {
+        "label": "Mensaxe de fin"
+      },
+      "notify_pre_complete_message": {
+        "label": "Mensaxe de case completado"
+      },
+      "notify_reminder_message": {
+        "label": "Mensaxe de recordatorio"
+      },
+      "notify_channel": {
+        "label": "Canal de Android (inicio/en directo)"
+      },
+      "notify_finish_channel": {
+        "label": "Canal de Android (fin)"
+      },
+      "energy_price_entity": {
+        "label": "Entidade de prezo de enerxía"
+      },
+      "energy_price_static": {
+        "label": "Prezo estático de enerxía (por kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Temporizadores de ciclo"
+      },
+      "enable_ml_models": {
+        "label": "Aplicar modelos intelixentes durante un ciclo"
+      },
+      "ml_training_enabled": {
+        "label": "Aprender deste aparello"
+      },
+      "ml_training_hour": {
+        "label": "Aprender á hora"
+      },
+      "ml_training_min_cycles": {
+        "label": "Ciclos necesarios primeiro"
+      },
+      "ml_training_interval_days": {
+        "label": "Comprobar como máximo cada"
+      }
     }
   }
 }

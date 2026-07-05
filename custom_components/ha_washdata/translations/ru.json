@@ -505,7 +505,7 @@
       "dismiss": "Закрыть",
       "done": "Готово",
       "edit": "Редактировать",
-      "export": "Экспорт",
+      "export": "Экспортировать",
       "export_json": "Экспорт в JSON",
       "force_stop": "Принудительная остановка",
       "from_template": "Из шаблона ▾",
@@ -535,8 +535,8 @@
       "reset": "Сбросить",
       "reset_to_builtin": "Сбросить до встроенных моделей",
       "reset_to_defaults": "Сбросить до значений по умолчанию",
-      "resume_cycle": "Продолжить цикл",
-      "review": "Проверить",
+      "resume_cycle": "Возобновить цикл",
+      "review": "Оценить",
       "run_analysis": "🔍 Запустить анализ предложений",
       "run_auto_label": "Запустить авто-пометку",
       "save": "Сохранить",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Статистика хранилища, обслуживание, экспорт/импорт",
       "trim_intro": "Перетащите красные маркеры или введите значения. Всё за пределами окна удаляется.",
       "unsure_detected_prefix": "WashData не уверен, что обнаружил",
-      "updated": "Обновлено"
+      "updated": "Обновлено",
+      "feedback_cycles_pending": "{n} цикл{s} для проверки",
+      "artifact_spike_detail": "Мощность вышла за пределы обычного диапазона на ~{n}с.",
+      "artifact_dip_detail": "Мощность упала ниже обычного диапазона на ~{n}с.",
+      "artifact_pause_detail": "Мощность упала почти до нуля на ~{n}с, затем возобновилась — вероятно, дверца была открыта в середине цикла или цикл был приостановлен."
     },
     "phase_desc": {
       "pre_wash": "Первоначальное замачивание или предварительная обработка перед основной стиркой.",
@@ -750,7 +754,7 @@
       "heat_up": "Первоначальный прогрев нагревателя перед началом полной сушки.",
       "drying": "Основной период нагреваемой сушки с вращением барабана.",
       "cool_down": "Вращение без нагрева ближе к концу цикла.",
-      "anti_wrinkle": "Периодическое встряхивание барабана после цикла для уменьшения морщин.",
+      "anti_wrinkle": "Периодические короткие вращения барабана после завершения цикла для предотвращения сминания белья.",
       "sensor_check": "Короткая пауза при низком энергопотреблении во время измерения сухости.",
       "drain_and_switch": "Переходный период от режима стирки к режиму сушки.",
       "pre_rinse": "Первоначальное распыление перед стиркой моющим средством.",
@@ -772,7 +776,7 @@
       "fit_slight": "Незначительное",
       "fit_strong": "Сильное",
       "fit_weak": "Слабое",
-      "fit_word": "подогнано",
+      "fit_word": "соответствие",
       "personalized": "● Настроено под эту машину"
     },
     "pref": {
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Нисходящая тенденция",
       "up": "Восходящая тенденция"
+    },
+    "section": {
+      "basic": {
+        "label": "Основное",
+        "intro": "Ключевые идентификаторы и базовые настройки для большинства конфигураций."
+      },
+      "detection": {
+        "label": "Обнаружение",
+        "intro": "Как цикл определяется как запускающийся, работающий и завершающийся."
+      },
+      "matching": {
+        "label": "Сопоставление",
+        "intro": "Как завершённые циклы сопоставляются с изученными профилями и маркируются."
+      },
+      "timing": {
+        "label": "Таймер и Watchdog",
+        "intro": "Фоновый таймер, офлайн-watchdog и обслуживание."
+      },
+      "anti_wrinkle": {
+        "label": "Защита от морщин",
+        "intro": "Режим защиты от морщин определяет короткие импульсы вращения барабана на малой мощности после основной фазы и сохраняет их привязанными к завершённому циклу."
+      },
+      "delay": {
+        "label": "Отложенный старт",
+        "intro": "Обнаружение отложенного старта определяет, когда прибор включён, но ещё не начал цикл."
+      },
+      "triggers": {
+        "label": "Триггеры и дверцы",
+        "intro": "Опциональные внешние сигналы: триггер завершения, датчик дверцы, переключатель паузы и напоминание о выгрузке."
+      },
+      "notifications": {
+        "label": "Уведомления",
+        "intro": "Когда и как вы получаете уведомления о событиях цикла."
+      },
+      "ml_training": {
+        "label": "Обучение ML",
+        "intro": "Расписание переобучения машинного обучения на устройстве и настройки данных."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Пороги и Пауза"
+      },
+      "cycle_start": {
+        "label": "Запуск Цикла"
+      },
+      "cycle_end": {
+        "label": "Завершение Цикла"
+      },
+      "signal_processing": {
+        "label": "Обработка Сигнала"
+      },
+      "predictive_end": {
+        "label": "Прогнозируемое Завершение"
+      },
+      "dishwasher_end": {
+        "label": "Завершение Посудомойки"
+      },
+      "dtw_refinement": {
+        "label": "Уточнение DTW"
+      },
+      "match_scoring": {
+        "label": "Оценка Совпадения"
+      },
+      "duration_gates": {
+        "label": "Ворота Длительности"
+      },
+      "auto_labeling": {
+        "label": "Авто-Маркировка"
+      },
+      "watchdog": {
+        "label": "Watchdog"
+      },
+      "housekeeping": {
+        "label": "Обслуживание"
+      },
+      "debug": {
+        "label": "Отладка"
+      },
+      "external_end_trigger": {
+        "label": "Внешний Триггер Завершения"
+      },
+      "door_pause": {
+        "label": "Дверца и Пауза"
+      },
+      "unload_reminder": {
+        "label": "Напоминание о Выгрузке"
+      },
+      "services": {
+        "label": "Службы"
+      },
+      "timing": {
+        "label": "Таймер"
+      },
+      "messages": {
+        "label": "Сообщения"
+      },
+      "energy": {
+        "label": "Энергия"
+      },
+      "cycle_timers": {
+        "label": "Таймеры Цикла"
+      },
+      "schedule": {
+        "label": "Расписание"
+      },
+      "data_management": {
+        "label": "Управление Данными"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Имя Устройства"
+      },
+      "device_type": {
+        "label": "Тип Устройства"
+      },
+      "power_sensor": {
+        "label": "Датчик Мощности"
+      },
+      "min_power": {
+        "label": "Минимальная Мощность"
+      },
+      "off_delay": {
+        "label": "Задержка Выключения"
+      },
+      "linked_device": {
+        "label": "Группировать под Устройством"
+      },
+      "start_threshold_w": {
+        "label": "Порог Запуска"
+      },
+      "stop_threshold_w": {
+        "label": "Порог Остановки"
+      },
+      "min_off_gap": {
+        "label": "Минимальная Пауза Выключения"
+      },
+      "start_duration_threshold": {
+        "label": "Длительность Запуска"
+      },
+      "start_energy_threshold": {
+        "label": "Энергия Запуска"
+      },
+      "completion_min_seconds": {
+        "label": "Минимальная Длительность Цикла"
+      },
+      "running_dead_zone": {
+        "label": "Мёртвая Зона Работы"
+      },
+      "end_energy_threshold": {
+        "label": "Энергия Завершения"
+      },
+      "end_repeat_count": {
+        "label": "Количество Повторений Завершения"
+      },
+      "sampling_interval": {
+        "label": "Интервал Выборки"
+      },
+      "smoothing_window": {
+        "label": "Окно Сглаживания"
+      },
+      "abrupt_drop_watts": {
+        "label": "Резкое Падение"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Коэффициент Резкого Падения"
+      },
+      "profile_match_threshold": {
+        "label": "Порог Совпадения"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Порог Несовпадения"
+      },
+      "profile_match_interval": {
+        "label": "Интервал Совпадения"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Минимальное Соотношение Длительности"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Максимальное Соотношение Длительности"
+      },
+      "profile_duration_tolerance": {
+        "label": "Допуск Длительности Профиля"
+      },
+      "duration_tolerance": {
+        "label": "Допуск Оценки"
+      },
+      "auto_label_confidence": {
+        "label": "Уверенность Авто-Маркировки"
+      },
+      "learning_confidence": {
+        "label": "Уверенность Обучения"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Отключить Уведомления Обратной Связи"
+      },
+      "watchdog_interval": {
+        "label": "Интервал Watchdog"
+      },
+      "no_update_active_timeout": {
+        "label": "Таймаут Без Обновления"
+      },
+      "progress_reset_delay": {
+        "label": "Задержка Сброса Прогресса"
+      },
+      "auto_maintenance": {
+        "label": "Автоматическое Обслуживание (ночная уборка)"
+      },
+      "expose_debug_entities": {
+        "label": "Открыть Отладочные Объекты"
+      },
+      "save_debug_traces": {
+        "label": "Сохранять Отладочные Данные"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Включить Защиту от Морщин"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Макс. Мощность Защиты от Морщин"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Макс. Длительность"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Порог Мощности Выхода"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Включить Обнаружение Отложенного Старта"
+      },
+      "delay_confirm_seconds": {
+        "label": "Секунды Подтверждения"
+      },
+      "delay_timeout_hours": {
+        "label": "Часы Таймаута"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Включить Внешний Триггер Завершения"
+      },
+      "external_end_trigger": {
+        "label": "Объект Внешнего Триггера"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Инвертировать Внешний Триггер (срабатывать на ВЫКЛ)"
+      },
+      "door_sensor_entity": {
+        "label": "Объект Датчика Дверцы"
+      },
+      "pause_cuts_power": {
+        "label": "Пауза Отключает Питание (через переключатель)"
+      },
+      "switch_entity": {
+        "label": "Объект Переключателя"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Задержка Напоминания о Выгрузке"
+      },
+      "pump_stuck_duration": {
+        "label": "Длительность Застревания Насоса"
+      },
+      "notify_start_services": {
+        "label": "Службы Запуска"
+      },
+      "notify_finish_services": {
+        "label": "Службы Завершения"
+      },
+      "notify_live_services": {
+        "label": "Службы Обновления в Реальном Времени"
+      },
+      "notify_people": {
+        "label": "Люди (для Только Когда Дома)"
+      },
+      "notify_only_when_home": {
+        "label": "Уведомлять Только Когда Дома"
+      },
+      "notify_fire_events": {
+        "label": "Отправлять События HA для Уведомлений"
+      },
+      "notify_before_end_minutes": {
+        "label": "Оповещение Перед Завершением"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Интервал Обновления в Реальном Времени"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% Превышения До Оповещения"
+      },
+      "notify_live_chronometer": {
+        "label": "Использовать Хронометр в Реальном Времени"
+      },
+      "notify_timeout_seconds": {
+        "label": "Авто-Закрытие Через"
+      },
+      "notify_title": {
+        "label": "Заголовок Уведомления"
+      },
+      "notify_icon": {
+        "label": "Иконка Уведомления"
+      },
+      "notify_start_message": {
+        "label": "Сообщение о Запуске"
+      },
+      "notify_finish_message": {
+        "label": "Сообщение о Завершении"
+      },
+      "notify_pre_complete_message": {
+        "label": "Сообщение Перед Завершением"
+      },
+      "notify_reminder_message": {
+        "label": "Напоминание"
+      },
+      "notify_channel": {
+        "label": "Канал Android (запуск/реальное время)"
+      },
+      "notify_finish_channel": {
+        "label": "Канал Android (завершение)"
+      },
+      "energy_price_entity": {
+        "label": "Объект Цены на Электроэнергию"
+      },
+      "energy_price_static": {
+        "label": "Фиксированная Цена Электроэнергии (за кВт·ч)"
+      },
+      "notify_cycle_timers": {
+        "label": "Таймеры Цикла"
+      },
+      "enable_ml_models": {
+        "label": "Применять умные модели во время цикла"
+      },
+      "ml_training_enabled": {
+        "label": "Обучаться на этой машине"
+      },
+      "ml_training_hour": {
+        "label": "Обучаться в час"
+      },
+      "ml_training_min_cycles": {
+        "label": "Сначала нужно циклов"
+      },
+      "ml_training_interval_days": {
+        "label": "Проверять не чаще раза в"
+      }
     }
   }
 }

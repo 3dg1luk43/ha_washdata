@@ -484,7 +484,7 @@
       "reset": "Zurücksetzen",
       "reset_to_builtin": "Zurücksetzen auf integrierte Modelle",
       "reset_to_defaults": "Auf Standardeinstellungen zurücksetzen",
-      "review": "Rezension",
+      "review": "Auswerten",
       "run_analysis": "🔍 Führen Sie eine Vorschlagsanalyse durch",
       "run_auto_label": "Führen Sie Auto-Label aus",
       "save": "Speichern",
@@ -555,7 +555,7 @@
       "cost": "Kosten",
       "create_new_profile": "+ Neues Profil erstellen…",
       "cycle_date_display": "Anzeige des Zyklusdatums",
-      "cycle_health": "Fahrradgesundheit",
+      "cycle_health": "Zyklusgesundheit",
       "cycles_count": "Zyklen",
       "date": "Datum",
       "debug_traces": "Debug-Traces",
@@ -622,7 +622,7 @@
       "artifact_tip": "{n} Anomalien erkannt (z. B. Tür mitten im Zyklus geöffnet) – öffnen Sie sie, um sie in der Grafik anzuzeigen",
       "poor_fit_tip": "Inkonsistenter Spielverlauf – erwägen Sie die Neuerstellung dieses Profils",
       "fair_fit_tip": "Mäßige Übereinstimmungskonsistenz – einige diesem Profil zugewiesene Zyklen weisen niedrigere Konfidenzwerte auf. Beschriften Sie weitere Zyklen oder zeichnen Sie das Profil neu auf, um die Genauigkeit zu verbessern.",
-      "fair_fit": "passgenau",
+      "fair_fit": "akzeptable Qualität",
       "poor_fit": "schlechte Passform",
       "auto": "(automatisch erkannt)",
       "built_in_tag": "eingebaut",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Speicherstatistiken, Wartung, Export/Import",
       "trim_intro": "Ziehen Sie die roten Ziehpunkte oder geben Sie Werte ein. Alles außerhalb des Fensters wird entfernt.",
       "unsure_detected_prefix": "WashData ist sich nicht sicher, ob es erkannt wurde",
-      "updated": "Aktualisiert"
+      "updated": "Aktualisiert",
+      "feedback_cycles_pending": "{n} Zyklus{s} zur Überprüfung",
+      "artifact_spike_detail": "Lag ~{n}s über dem üblichen Leistungsband.",
+      "artifact_dip_detail": "Lag ~{n}s unter dem üblichen Leistungsband.",
+      "artifact_pause_detail": "Die Leistung fiel ~{n}s auf nahezu null und nahm dann wieder zu — wahrscheinlich wurde die Tür mitten im Zyklus geöffnet oder der Zyklus wurde unterbrochen."
     },
     "phase_desc": {
       "pre_wash": "Erstes Einweichen oder Vorbehandeln vor dem Hauptwaschgang.",
@@ -773,9 +777,9 @@
       "subtab_profiles": "Profile"
     },
     "health": {
-      "good": "✓ Gute Passform",
+      "good": "✓ Gute Profilqualität",
       "fair": "Passable Profilqualität",
-      "poor": "⚠ Schlechte Passform"
+      "poor": "⚠ Schlechte Profilqualität"
     },
     "ml": {
       "fit_fair": "Akzeptabel",
@@ -784,7 +788,7 @@
       "fit_slight": "Leicht",
       "fit_strong": "Stark",
       "fit_weak": "Schwach",
-      "fit_word": "fit",
+      "fit_word": "Güte",
       "personalized": "● Personalisiert für diese Maschine"
     },
     "trend": {
@@ -874,6 +878,348 @@
       "settings_saved": "Einstellungen gespeichert; Neuladen der Integration",
       "suggestions_applied": "Angewendete Vorschläge; Neuladen der Integration",
       "suggestions_dismissed": "Vorschläge abgelehnt"
+    },
+    "section": {
+      "basic": {
+        "label": "Grundeinstellungen",
+        "intro": "Kernidentität und die Grundlagen, die meisten Einrichtungen benötigen."
+      },
+      "detection": {
+        "label": "Erkennung",
+        "intro": "Wie ein Zyklus beim Starten, Laufen und Beenden erkannt wird."
+      },
+      "matching": {
+        "label": "Abgleich",
+        "intro": "Wie abgeschlossene Zyklen mit erlernten Profilen abgeglichen und gekennzeichnet werden."
+      },
+      "timing": {
+        "label": "Timing & Watchdog",
+        "intro": "Hintergrundkadenz, der Offline-Watchdog und Housekeeping."
+      },
+      "anti_wrinkle": {
+        "label": "Knitterschutz",
+        "intro": "Der Knitterschutzmodus erkennt Niedrigleistungs-Tumblerpulse nach der Hauptphase und hält sie am fertigen Zyklus fest."
+      },
+      "delay": {
+        "label": "Verzögerter Start",
+        "intro": "Die Verzögerungsstarterkennung identifiziert, wenn ein Gerät eingeschaltet ist, aber seinen Zyklus noch nicht begonnen hat."
+      },
+      "triggers": {
+        "label": "Auslöser & Türen",
+        "intro": "Optionale externe Signale: ein Endauslöser, ein Türsensor, ein Pausenschalter und die Entladeerinnerung."
+      },
+      "notifications": {
+        "label": "Benachrichtigungen",
+        "intro": "Wann und wie Sie über Zyklusereignisse benachrichtigt werden."
+      },
+      "ml_training": {
+        "label": "ML-Training",
+        "intro": "Zeitplan für das maschinelle Lernen auf dem Gerät und Dateneinstellungen."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Schwellenwerte & Lücke"
+      },
+      "cycle_start": {
+        "label": "Zyklusstart"
+      },
+      "cycle_end": {
+        "label": "Zyklusende"
+      },
+      "signal_processing": {
+        "label": "Signalverarbeitung"
+      },
+      "predictive_end": {
+        "label": "Prädiktives Ende"
+      },
+      "dishwasher_end": {
+        "label": "Spülmaschinenende"
+      },
+      "dtw_refinement": {
+        "label": "DTW-Verfeinerung"
+      },
+      "match_scoring": {
+        "label": "Übereinstimmungsbewertung"
+      },
+      "duration_gates": {
+        "label": "Dauerfilter"
+      },
+      "auto_labeling": {
+        "label": "Automatische Kennzeichnung"
+      },
+      "watchdog": {
+        "label": "Watchdog"
+      },
+      "housekeeping": {
+        "label": "Housekeeping"
+      },
+      "debug": {
+        "label": "Debug"
+      },
+      "external_end_trigger": {
+        "label": "Externer Endauslöser"
+      },
+      "door_pause": {
+        "label": "Tür & Pause"
+      },
+      "unload_reminder": {
+        "label": "Entladeerinnerung"
+      },
+      "services": {
+        "label": "Dienste"
+      },
+      "timing": {
+        "label": "Timing"
+      },
+      "messages": {
+        "label": "Nachrichten"
+      },
+      "energy": {
+        "label": "Energie"
+      },
+      "cycle_timers": {
+        "label": "Zyklustimer"
+      },
+      "schedule": {
+        "label": "Zeitplan"
+      },
+      "data_management": {
+        "label": "Datenverwaltung"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Gerätename"
+      },
+      "device_type": {
+        "label": "Gerätetyp"
+      },
+      "power_sensor": {
+        "label": "Leistungssensor"
+      },
+      "min_power": {
+        "label": "Mindestleistung"
+      },
+      "off_delay": {
+        "label": "Ausschaltverzögerung"
+      },
+      "linked_device": {
+        "label": "Unter Gerät gruppieren"
+      },
+      "start_threshold_w": {
+        "label": "Startschwellenwert"
+      },
+      "stop_threshold_w": {
+        "label": "Stoppschwellenwert"
+      },
+      "min_off_gap": {
+        "label": "Mindestabschaltlücke"
+      },
+      "start_duration_threshold": {
+        "label": "Startdauer"
+      },
+      "start_energy_threshold": {
+        "label": "Startenergie"
+      },
+      "completion_min_seconds": {
+        "label": "Mindestzyklusdauer"
+      },
+      "running_dead_zone": {
+        "label": "Lauf-Totzone"
+      },
+      "end_energy_threshold": {
+        "label": "Endenergie"
+      },
+      "end_repeat_count": {
+        "label": "Endwiederholungsanzahl"
+      },
+      "sampling_interval": {
+        "label": "Abtastintervall"
+      },
+      "smoothing_window": {
+        "label": "Glättungsfenster"
+      },
+      "abrupt_drop_watts": {
+        "label": "Abrupter Abfall"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Abruptes Abfallverhältnis"
+      },
+      "profile_match_threshold": {
+        "label": "Übereinstimmungsschwelle"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Nicht-Übereinstimmungsschwelle"
+      },
+      "profile_match_interval": {
+        "label": "Übereinstimmungsintervall"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Mindestdauerverhältnis"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Höchstdauerverhältnis"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profildauertoleranz"
+      },
+      "duration_tolerance": {
+        "label": "Schätztoleranz"
+      },
+      "auto_label_confidence": {
+        "label": "Konfidenz für automatische Kennzeichnung"
+      },
+      "learning_confidence": {
+        "label": "Lernkonfidenz"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Feedback-Benachrichtigungen unterdrücken"
+      },
+      "watchdog_interval": {
+        "label": "Watchdog-Intervall"
+      },
+      "no_update_active_timeout": {
+        "label": "Timeout ohne Aktualisierung"
+      },
+      "progress_reset_delay": {
+        "label": "Fortschritts-Reset-Verzögerung"
+      },
+      "auto_maintenance": {
+        "label": "Automatische Wartung (nächtliche Bereinigung)"
+      },
+      "expose_debug_entities": {
+        "label": "Debug-Entitäten verfügbar machen"
+      },
+      "save_debug_traces": {
+        "label": "Debug-Traces speichern"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Knitterschutzerkennung aktivieren"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Max. Knitterschutzleistung"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Maximale Dauer"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Ausgangsleistungsschwelle"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Verzögerungsstarterkennung aktivieren"
+      },
+      "delay_confirm_seconds": {
+        "label": "Bestätigungssekunden"
+      },
+      "delay_timeout_hours": {
+        "label": "Timeout-Stunden"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Externen Endauslöser aktivieren"
+      },
+      "external_end_trigger": {
+        "label": "Externe Auslöserentität"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Externen Auslöser invertieren (bei AUS auslösen)"
+      },
+      "door_sensor_entity": {
+        "label": "Türsensorentität"
+      },
+      "pause_cuts_power": {
+        "label": "Pause trennt auch Strom (über Schalter)"
+      },
+      "switch_entity": {
+        "label": "Schaltentität"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Entladeverzögerung"
+      },
+      "pump_stuck_duration": {
+        "label": "Pumpen-Feststeckdauer"
+      },
+      "notify_start_services": {
+        "label": "Startdienste"
+      },
+      "notify_finish_services": {
+        "label": "Endedienste"
+      },
+      "notify_live_services": {
+        "label": "Live-Fortschrittsdienste"
+      },
+      "notify_people": {
+        "label": "Personen (für Nur wenn zu Hause)"
+      },
+      "notify_only_when_home": {
+        "label": "Nur benachrichtigen wenn zu Hause"
+      },
+      "notify_fire_events": {
+        "label": "HA-Ereignisse für Benachrichtigungen auslösen"
+      },
+      "notify_before_end_minutes": {
+        "label": "Vorab-Ende-Alarm"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Live-Aktualisierungsintervall"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Live-Überschreitung % vor Alarm"
+      },
+      "notify_live_chronometer": {
+        "label": "Live-Chronometer verwenden"
+      },
+      "notify_timeout_seconds": {
+        "label": "Automatisch ausblenden nach"
+      },
+      "notify_title": {
+        "label": "Benachrichtigungstitel"
+      },
+      "notify_icon": {
+        "label": "Benachrichtigungssymbol"
+      },
+      "notify_start_message": {
+        "label": "Startnachricht"
+      },
+      "notify_finish_message": {
+        "label": "Endenachricht"
+      },
+      "notify_pre_complete_message": {
+        "label": "Fast-fertig-Nachricht"
+      },
+      "notify_reminder_message": {
+        "label": "Erinnerungsnachricht"
+      },
+      "notify_channel": {
+        "label": "Android-Kanal (Start/Live)"
+      },
+      "notify_finish_channel": {
+        "label": "Android-Kanal (Ende)"
+      },
+      "energy_price_entity": {
+        "label": "Energiepreisentität"
+      },
+      "energy_price_static": {
+        "label": "Statischer Energiepreis (pro kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Zyklustimer"
+      },
+      "enable_ml_models": {
+        "label": "Smarte Modelle während eines Zyklus anwenden"
+      },
+      "ml_training_enabled": {
+        "label": "Von dieser Maschine lernen"
+      },
+      "ml_training_hour": {
+        "label": "Lernen zur Stunde"
+      },
+      "ml_training_min_cycles": {
+        "label": "Zuerst benötigte Zyklen"
+      },
+      "ml_training_interval_days": {
+        "label": "Höchstens alle prüfen"
+      }
     }
   }
 }

@@ -562,7 +562,7 @@
       "dismiss": "לְפַטֵר",
       "done": "נַעֲשָׂה",
       "edit": "לַעֲרוֹך",
-      "export": "יְצוּא",
+      "export": "ייצא",
       "export_json": "ייצא ל-JSON",
       "force_stop": "כוח עצירה",
       "from_template": "מתוך תבנית ▾",
@@ -570,7 +570,7 @@
       "import_json": "ייבוא ​​מ-JSON",
       "import_overwrite": "ייבוא ​​(מחליף נתונים)",
       "inspect": "לִבדוֹק",
-      "label": "מַדבֵּקָה",
+      "label": "תייג",
       "manage": "לְנַהֵל",
       "merge": "לְמַזֵג",
       "new_automation": "＋ אוטומציה חדשה",
@@ -592,7 +592,7 @@
       "reset": "אִתחוּל",
       "reset_to_builtin": "איפוס לדגמים מובנים",
       "reset_to_defaults": "אפס לברירות המחדל",
-      "review": "סְקִירָה",
+      "review": "הערכה",
       "run_analysis": "🔍 הפעל ניתוח הצעות",
       "run_auto_label": "הפעל Auto-Label",
       "save": "לְהַצִיל",
@@ -622,7 +622,7 @@
       "artifact_tip": "{n} חריגות שזוהו (למשל דלת נפתחה באמצע המחזור) - פתח כדי לראות אותן בתרשים",
       "poor_fit_tip": "היסטוריית התאמות לא עקבית - שקול לבנות מחדש את הפרופיל הזה",
       "fair_fit_tip": "עקביות מתונה בהתאמה - לחלק מהמחזורים שהוקצו לפרופיל זה יש ציוני ביטחון נמוכים יותר. סמן עוד מחזורים או הקלט מחדש את הפרופיל כדי לשפר את הדיוק.",
-      "fair_fit": "התאמה הוגנת",
+      "fair_fit": "איכות מקובלת",
       "poor_fit": "התאמה לקויה",
       "auto": "(זוהה אוטומטית)",
       "built_in_tag": "מובנה",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "סטטיסטיקות אחסון, תחזוקה, ייצוא/ייבוא",
       "trim_intro": "גרור את נקודות האחיזה האדומות, או הזן ערכים. כל מה שמחוץ לחלון מוסר.",
       "unsure_detected_prefix": "WashData לא בטוח שזוהה",
-      "updated": "עודכן"
+      "updated": "עודכן",
+      "feedback_cycles_pending": "{n} מחזור{s} לסקירה",
+      "artifact_spike_detail": "חרג מעל רצועת ההספק הרגילה במשך ~{n}ש.",
+      "artifact_dip_detail": "ירד מתחת לרצועת ההספק הרגילה במשך ~{n}ש.",
+      "artifact_pause_detail": "ההספק ירד לכמעט אפס במשך ~{n}ש ולאחר מכן חודש — ככל הנראה הדלת נפתחה באמצע המחזור או שהמחזור הושהה."
     },
     "phase_desc": {
       "pre_wash": "השרייה ראשונית או טיפול מקדים לפני הכביסה הראשית.",
@@ -769,7 +773,7 @@
       "fit_slight": "קָלוּשׁ",
       "fit_strong": "חָזָק",
       "fit_weak": "חַלָשׁ",
-      "fit_word": "לְהַתְאִים",
+      "fit_word": "התאמה",
       "personalized": "● מותאם אישית למכונה זו"
     },
     "trend": {
@@ -874,6 +878,348 @@
       "settings_saved": "ההגדרות נשמרו; טעינה מחדש של אינטגרציה",
       "suggestions_applied": "הצעות יושמו; טעינה מחדש של אינטגרציה",
       "suggestions_dismissed": "הצעות נדחו"
+    },
+    "section": {
+      "basic": {
+        "label": "בסיסי",
+        "intro": "זהות מרכזית והיסודות שרוב ההגדרות זקוקות להם."
+      },
+      "detection": {
+        "label": "זיהוי",
+        "intro": "כיצד מחזור מזוהה בעת הפעלה, הרצה וסיום."
+      },
+      "matching": {
+        "label": "התאמה",
+        "intro": "כיצד מחזורים שהסתיימו מותאמים לפרופילים שנלמדו ומסומנים."
+      },
+      "timing": {
+        "label": "תזמון ושמירה",
+        "intro": "קצב רקע, שמירה במצב לא מקוון וניקוי שגרתי."
+      },
+      "anti_wrinkle": {
+        "label": "נגד קמטים",
+        "intro": "מצב נגד קמטים מזהה פולסי תיפוף בהספק נמוך לאחר השלב הראשי ושומר אותם מחוברים למחזור שהסתיים."
+      },
+      "delay": {
+        "label": "התחלה מושהית",
+        "intro": "זיהוי התחלה מושהית מזהה מתי מכשיר מופעל אך עדיין לא התחיל את המחזור שלו."
+      },
+      "triggers": {
+        "label": "טריגרים ודלתות",
+        "intro": "אותות חיצוניים אופציונליים: טריגר סיום, חיישן דלת, מתג השהיה, ותזכורת פריקה."
+      },
+      "notifications": {
+        "label": "התראות",
+        "intro": "מתי וכיצד אתה מקבל התראות על אירועי מחזור."
+      },
+      "ml_training": {
+        "label": "אימון ML",
+        "intro": "לוח זמנים לאימון מחדש של למידת מכונה במכשיר והגדרות נתונים."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "סף ופרק זמן"
+      },
+      "cycle_start": {
+        "label": "התחלת מחזור"
+      },
+      "cycle_end": {
+        "label": "סיום מחזור"
+      },
+      "signal_processing": {
+        "label": "עיבוד אות"
+      },
+      "predictive_end": {
+        "label": "סיום חזוי"
+      },
+      "dishwasher_end": {
+        "label": "סיום מדיח כלים"
+      },
+      "dtw_refinement": {
+        "label": "שיפור DTW"
+      },
+      "match_scoring": {
+        "label": "ניקוד התאמה"
+      },
+      "duration_gates": {
+        "label": "מסנני משך"
+      },
+      "auto_labeling": {
+        "label": "תיוג אוטומטי"
+      },
+      "watchdog": {
+        "label": "שמירה"
+      },
+      "housekeeping": {
+        "label": "ניקוי שגרתי"
+      },
+      "debug": {
+        "label": "ניפוי באגים"
+      },
+      "external_end_trigger": {
+        "label": "טריגר סיום חיצוני"
+      },
+      "door_pause": {
+        "label": "דלת והשהיה"
+      },
+      "unload_reminder": {
+        "label": "תזכורת פריקה"
+      },
+      "services": {
+        "label": "שירותים"
+      },
+      "timing": {
+        "label": "תזמון"
+      },
+      "messages": {
+        "label": "הודעות"
+      },
+      "energy": {
+        "label": "אנרגיה"
+      },
+      "cycle_timers": {
+        "label": "טיימרי מחזור"
+      },
+      "schedule": {
+        "label": "לוח זמנים"
+      },
+      "data_management": {
+        "label": "ניהול נתונים"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "שם מכשיר"
+      },
+      "device_type": {
+        "label": "סוג מכשיר"
+      },
+      "power_sensor": {
+        "label": "חיישן הספק"
+      },
+      "min_power": {
+        "label": "הספק מינימלי"
+      },
+      "off_delay": {
+        "label": "עיכוב כיבוי"
+      },
+      "linked_device": {
+        "label": "קבץ תחת מכשיר"
+      },
+      "start_threshold_w": {
+        "label": "סף התחלה"
+      },
+      "stop_threshold_w": {
+        "label": "סף עצירה"
+      },
+      "min_off_gap": {
+        "label": "פרק זמן כיבוי מינימלי"
+      },
+      "start_duration_threshold": {
+        "label": "משך התחלה"
+      },
+      "start_energy_threshold": {
+        "label": "אנרגיית התחלה"
+      },
+      "completion_min_seconds": {
+        "label": "משך מחזור מינימלי"
+      },
+      "running_dead_zone": {
+        "label": "אזור מת בהרצה"
+      },
+      "end_energy_threshold": {
+        "label": "אנרגיית סיום"
+      },
+      "end_repeat_count": {
+        "label": "מספר חזרות לסיום"
+      },
+      "sampling_interval": {
+        "label": "מרווח דגימה"
+      },
+      "smoothing_window": {
+        "label": "חלון החלקה"
+      },
+      "abrupt_drop_watts": {
+        "label": "ירידה פתאומית"
+      },
+      "abrupt_drop_ratio": {
+        "label": "יחס ירידה פתאומית"
+      },
+      "profile_match_threshold": {
+        "label": "סף התאמה"
+      },
+      "profile_unmatch_threshold": {
+        "label": "סף אי-התאמה"
+      },
+      "profile_match_interval": {
+        "label": "מרווח התאמה"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "יחס משך מינימלי"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "יחס משך מקסימלי"
+      },
+      "profile_duration_tolerance": {
+        "label": "סבילות משך פרופיל"
+      },
+      "duration_tolerance": {
+        "label": "סבילות אומדן"
+      },
+      "auto_label_confidence": {
+        "label": "ביטחון תיוג אוטומטי"
+      },
+      "learning_confidence": {
+        "label": "ביטחון למידה"
+      },
+      "suppress_feedback_notifications": {
+        "label": "הסתר התראות משוב"
+      },
+      "watchdog_interval": {
+        "label": "מרווח שמירה"
+      },
+      "no_update_active_timeout": {
+        "label": "פסק זמן ללא עדכון"
+      },
+      "progress_reset_delay": {
+        "label": "עיכוב איפוס התקדמות"
+      },
+      "auto_maintenance": {
+        "label": "תחזוקה אוטומטית (ניקוי לילי)"
+      },
+      "expose_debug_entities": {
+        "label": "חשוף ישויות ניפוי באגים"
+      },
+      "save_debug_traces": {
+        "label": "שמור עקבות ניפוי באגים"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "הפעל זיהוי נגד קמטים"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "הספק מקסימלי נגד קמטים"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "משך מקסימלי"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "סף הספק יציאה"
+      },
+      "delay_start_detect_enabled": {
+        "label": "הפעל זיהוי התחלה מושהית"
+      },
+      "delay_confirm_seconds": {
+        "label": "שניות אישור"
+      },
+      "delay_timeout_hours": {
+        "label": "שעות פסק זמן"
+      },
+      "external_end_trigger_enabled": {
+        "label": "הפעל טריגר סיום חיצוני"
+      },
+      "external_end_trigger": {
+        "label": "ישות טריגר חיצוני"
+      },
+      "external_end_trigger_inverted": {
+        "label": "הפוך טריגר חיצוני (טריגר ב-כבוי)"
+      },
+      "door_sensor_entity": {
+        "label": "ישות חיישן דלת"
+      },
+      "pause_cuts_power": {
+        "label": "השהיה גם מנתקת חשמל (דרך מתג)"
+      },
+      "switch_entity": {
+        "label": "ישות מתג"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "עיכוב תזכורת פריקה"
+      },
+      "pump_stuck_duration": {
+        "label": "משך תקיעת משאבה"
+      },
+      "notify_start_services": {
+        "label": "שירותי התחלה"
+      },
+      "notify_finish_services": {
+        "label": "שירותי סיום"
+      },
+      "notify_live_services": {
+        "label": "שירותי התקדמות חיה"
+      },
+      "notify_people": {
+        "label": "אנשים (לרק כשבבית)"
+      },
+      "notify_only_when_home": {
+        "label": "התרע רק כשבבית"
+      },
+      "notify_fire_events": {
+        "label": "הפעל אירועי HA להתראות"
+      },
+      "notify_before_end_minutes": {
+        "label": "התראה לפני סיום"
+      },
+      "notify_live_interval_seconds": {
+        "label": "מרווח עדכון חי"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% חריגה חיה לפני התראה"
+      },
+      "notify_live_chronometer": {
+        "label": "השתמש בכרונומטר חי"
+      },
+      "notify_timeout_seconds": {
+        "label": "סגור אוטומטית אחרי"
+      },
+      "notify_title": {
+        "label": "כותרת התראה"
+      },
+      "notify_icon": {
+        "label": "סמל התראה"
+      },
+      "notify_start_message": {
+        "label": "הודעת התחלה"
+      },
+      "notify_finish_message": {
+        "label": "הודעת סיום"
+      },
+      "notify_pre_complete_message": {
+        "label": "הודעת כמעט הושלם"
+      },
+      "notify_reminder_message": {
+        "label": "הודעת תזכורת"
+      },
+      "notify_channel": {
+        "label": "ערוץ אנדרואיד (התחלה/חי)"
+      },
+      "notify_finish_channel": {
+        "label": "ערוץ אנדרואיד (סיום)"
+      },
+      "energy_price_entity": {
+        "label": "ישות מחיר אנרגיה"
+      },
+      "energy_price_static": {
+        "label": "מחיר אנרגיה סטטי (לקוט\"ש)"
+      },
+      "notify_cycle_timers": {
+        "label": "טיימרי מחזור"
+      },
+      "enable_ml_models": {
+        "label": "החל מודלים חכמים במהלך מחזור"
+      },
+      "ml_training_enabled": {
+        "label": "למד ממכונה זו"
+      },
+      "ml_training_hour": {
+        "label": "למד בשעה"
+      },
+      "ml_training_min_cycles": {
+        "label": "מחזורים נדרשים תחילה"
+      },
+      "ml_training_interval_days": {
+        "label": "בדוק לכל היותר כל"
+      }
     }
   }
 }

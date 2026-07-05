@@ -536,7 +536,7 @@
       "reset_to_builtin": "Repor modelos incorporados",
       "reset_to_defaults": "Repor predefinições",
       "resume_cycle": "Retomar ciclo",
-      "review": "Rever",
+      "review": "Avaliar",
       "run_analysis": "🔍 Executar análise de sugestões",
       "run_auto_label": "Executar rotulagem automática",
       "save": "Guardar",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Estatísticas de armazenamento, manutenção, exportação/importação",
       "trim_intro": "Arraste os puxadores vermelhos ou introduza valores. Tudo o que estiver fora da janela é removido.",
       "unsure_detected_prefix": "O WashData não tem a certeza de que detectou",
-      "updated": "Actualizado"
+      "updated": "Actualizado",
+      "feedback_cycles_pending": "{n} ciclo{s} para rever",
+      "artifact_spike_detail": "Ultrapassou a banda de potência habitual durante ~{n}s.",
+      "artifact_dip_detail": "Caiu abaixo da banda de potência habitual durante ~{n}s.",
+      "artifact_pause_detail": "A potência caiu quase a zero durante ~{n}s e depois retomou — provavelmente a porta foi aberta a meio do ciclo ou o ciclo foi pausado."
     },
     "phase_desc": {
       "pre_wash": "Imersão inicial ou pré-tratamento antes da lavagem principal.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Tendência descendente",
       "up": "Tendência ascendente"
+    },
+    "section": {
+      "basic": {
+        "label": "Básico",
+        "intro": "Identidade central e os essenciais para a maioria das configurações."
+      },
+      "detection": {
+        "label": "Detecção",
+        "intro": "Como um ciclo é detectado como a iniciar, a decorrer e a terminar."
+      },
+      "matching": {
+        "label": "Correspondência",
+        "intro": "Como os ciclos terminados são correspondidos a perfis aprendidos e rotulados."
+      },
+      "timing": {
+        "label": "Temporização e Watchdog",
+        "intro": "Cadência de fundo, o watchdog offline e a manutenção."
+      },
+      "anti_wrinkle": {
+        "label": "Anti-Vincos",
+        "intro": "O modo anti-vincos detecta pulsos de rotação a baixa potência após a fase principal e mantém-nos ligados ao ciclo terminado."
+      },
+      "delay": {
+        "label": "Início Retardado",
+        "intro": "A detecção de início retardado identifica quando um electrodoméstico está ligado mas ainda não iniciou o ciclo."
+      },
+      "triggers": {
+        "label": "Gatilhos e Portas",
+        "intro": "Sinais externos opcionais: um gatilho de fim, um sensor de porta, um interruptor de pausa e o lembrete de descarga."
+      },
+      "notifications": {
+        "label": "Notificações",
+        "intro": "Quando e como é notificado sobre eventos de ciclo."
+      },
+      "ml_training": {
+        "label": "Treino ML",
+        "intro": "Calendário de retreino de aprendizagem automática no dispositivo e definições de dados."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Limiares e Intervalo"
+      },
+      "cycle_start": {
+        "label": "Início do Ciclo"
+      },
+      "cycle_end": {
+        "label": "Fim do Ciclo"
+      },
+      "signal_processing": {
+        "label": "Processamento de Sinal"
+      },
+      "predictive_end": {
+        "label": "Fim Preditivo"
+      },
+      "dishwasher_end": {
+        "label": "Fim da Máquina de Lavar Louça"
+      },
+      "dtw_refinement": {
+        "label": "Refinamento DTW"
+      },
+      "match_scoring": {
+        "label": "Pontuação de Correspondência"
+      },
+      "duration_gates": {
+        "label": "Portas de Duração"
+      },
+      "auto_labeling": {
+        "label": "Rotulagem Automática"
+      },
+      "watchdog": {
+        "label": "Watchdog"
+      },
+      "housekeeping": {
+        "label": "Manutenção"
+      },
+      "debug": {
+        "label": "Depuração"
+      },
+      "external_end_trigger": {
+        "label": "Gatilho de Fim Externo"
+      },
+      "door_pause": {
+        "label": "Porta e Pausa"
+      },
+      "unload_reminder": {
+        "label": "Lembrete de Descarga"
+      },
+      "services": {
+        "label": "Serviços"
+      },
+      "timing": {
+        "label": "Temporização"
+      },
+      "messages": {
+        "label": "Mensagens"
+      },
+      "energy": {
+        "label": "Energia"
+      },
+      "cycle_timers": {
+        "label": "Temporizadores de Ciclo"
+      },
+      "schedule": {
+        "label": "Calendário"
+      },
+      "data_management": {
+        "label": "Gestão de Dados"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Nome do Dispositivo"
+      },
+      "device_type": {
+        "label": "Tipo de Dispositivo"
+      },
+      "power_sensor": {
+        "label": "Sensor de Potência"
+      },
+      "min_power": {
+        "label": "Potência Mínima"
+      },
+      "off_delay": {
+        "label": "Atraso de Desligamento"
+      },
+      "linked_device": {
+        "label": "Agrupar sob Dispositivo"
+      },
+      "start_threshold_w": {
+        "label": "Limiar de Início"
+      },
+      "stop_threshold_w": {
+        "label": "Limiar de Paragem"
+      },
+      "min_off_gap": {
+        "label": "Intervalo Mínimo de Desligamento"
+      },
+      "start_duration_threshold": {
+        "label": "Duração de Início"
+      },
+      "start_energy_threshold": {
+        "label": "Energia de Início"
+      },
+      "completion_min_seconds": {
+        "label": "Duração Mínima do Ciclo"
+      },
+      "running_dead_zone": {
+        "label": "Zona Morta em Execução"
+      },
+      "end_energy_threshold": {
+        "label": "Energia de Fim"
+      },
+      "end_repeat_count": {
+        "label": "Contagem de Repetições de Fim"
+      },
+      "sampling_interval": {
+        "label": "Intervalo de Amostragem"
+      },
+      "smoothing_window": {
+        "label": "Janela de Suavização"
+      },
+      "abrupt_drop_watts": {
+        "label": "Queda Abrupta"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Rácio de Queda Abrupta"
+      },
+      "profile_match_threshold": {
+        "label": "Limiar de Correspondência"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Limiar de Não Correspondência"
+      },
+      "profile_match_interval": {
+        "label": "Intervalo de Correspondência"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Rácio de Duração Mínima"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Rácio de Duração Máxima"
+      },
+      "profile_duration_tolerance": {
+        "label": "Tolerância de Duração do Perfil"
+      },
+      "duration_tolerance": {
+        "label": "Tolerância de Estimativa"
+      },
+      "auto_label_confidence": {
+        "label": "Confiança de Rotulagem Automática"
+      },
+      "learning_confidence": {
+        "label": "Confiança de Aprendizagem"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Suprimir Notificações de Feedback"
+      },
+      "watchdog_interval": {
+        "label": "Intervalo do Watchdog"
+      },
+      "no_update_active_timeout": {
+        "label": "Timeout Sem Actualização"
+      },
+      "progress_reset_delay": {
+        "label": "Atraso de Reposição de Progresso"
+      },
+      "auto_maintenance": {
+        "label": "Manutenção Automática (limpeza nocturna)"
+      },
+      "expose_debug_entities": {
+        "label": "Expor Entidades de Depuração"
+      },
+      "save_debug_traces": {
+        "label": "Guardar Traços de Depuração"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Activar Detecção Anti-Vincos"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Potência Máxima Anti-Vincos"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Duração Máxima"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Limiar de Saída de Potência"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Activar Detecção de Início Retardado"
+      },
+      "delay_confirm_seconds": {
+        "label": "Segundos de Confirmação"
+      },
+      "delay_timeout_hours": {
+        "label": "Horas de Timeout"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Activar Gatilho de Fim Externo"
+      },
+      "external_end_trigger": {
+        "label": "Entidade do Gatilho Externo"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Inverter Gatilho Externo (activar em DESLIGADO)"
+      },
+      "door_sensor_entity": {
+        "label": "Entidade do Sensor de Porta"
+      },
+      "pause_cuts_power": {
+        "label": "Pausa Também Corta Energia (via switch)"
+      },
+      "switch_entity": {
+        "label": "Entidade do Switch"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Atraso de Lembrete de Descarga"
+      },
+      "pump_stuck_duration": {
+        "label": "Duração de Bomba Presa"
+      },
+      "notify_start_services": {
+        "label": "Serviços de Início"
+      },
+      "notify_finish_services": {
+        "label": "Serviços de Fim"
+      },
+      "notify_live_services": {
+        "label": "Serviços de Progresso em Tempo Real"
+      },
+      "notify_people": {
+        "label": "Pessoas (para Apenas Quando em Casa)"
+      },
+      "notify_only_when_home": {
+        "label": "Notificar Apenas Quando em Casa"
+      },
+      "notify_fire_events": {
+        "label": "Disparar Eventos HA para Notificações"
+      },
+      "notify_before_end_minutes": {
+        "label": "Alerta Pré-Fim"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Intervalo de Actualização em Tempo Real"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% de Sobrecarga Antes do Alerta"
+      },
+      "notify_live_chronometer": {
+        "label": "Usar Cronómetro em Tempo Real"
+      },
+      "notify_timeout_seconds": {
+        "label": "Dispensar Automaticamente Após"
+      },
+      "notify_title": {
+        "label": "Título da Notificação"
+      },
+      "notify_icon": {
+        "label": "Ícone da Notificação"
+      },
+      "notify_start_message": {
+        "label": "Mensagem de Início"
+      },
+      "notify_finish_message": {
+        "label": "Mensagem de Fim"
+      },
+      "notify_pre_complete_message": {
+        "label": "Mensagem Pré-Conclusão"
+      },
+      "notify_reminder_message": {
+        "label": "Mensagem de Lembrete"
+      },
+      "notify_channel": {
+        "label": "Canal Android (início/tempo real)"
+      },
+      "notify_finish_channel": {
+        "label": "Canal Android (fim)"
+      },
+      "energy_price_entity": {
+        "label": "Entidade de Preço de Energia"
+      },
+      "energy_price_static": {
+        "label": "Preço Estático de Energia (por kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Temporizadores de Ciclo"
+      },
+      "enable_ml_models": {
+        "label": "Aplicar modelos inteligentes durante um ciclo"
+      },
+      "ml_training_enabled": {
+        "label": "Aprender com esta máquina"
+      },
+      "ml_training_hour": {
+        "label": "Aprender às horas"
+      },
+      "ml_training_min_cycles": {
+        "label": "Ciclos necessários primeiro"
+      },
+      "ml_training_interval_days": {
+        "label": "Verificar no máximo de"
+      }
     }
   }
 }

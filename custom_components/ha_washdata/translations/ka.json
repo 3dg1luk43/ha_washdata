@@ -735,7 +735,11 @@
       "storage_diagnostics": "შენახვის სტატისტიკა, ტექნიკური მომსახურება, ექსპორტი/იმპორტი",
       "trim_intro": "გადაათრიეთ წითელი სახელურები ან შეიყვანეთ მნიშვნელობები. ფანჯრის გარეთ ყველაფერი ამოღებულია.",
       "unsure_detected_prefix": "WashData დარწმუნებული არ არის, რომ აღმოჩენილია",
-      "updated": "განახლებულია"
+      "updated": "განახლებულია",
+      "feedback_cycles_pending": "{n} ციკლი{s} განსახილველად",
+      "artifact_spike_detail": "ელ.ენერგიის ჩვეულებრივ ზოლს ზევით ~{n}წ-ის განმავლობაში.",
+      "artifact_dip_detail": "ელ.ენერგიის ჩვეულებრივ ზოლს ქვევით ~{n}წ-ის განმავლობაში.",
+      "artifact_pause_detail": "ელ. ძაბვა ~{n}წ-ის განმავლობაში თითქმის ნულამდე დაეცა, შემდეგ განახლდა — სავარაუდოდ, კარი ციკლის შუა პერიოდში გაიხსნა ან ციკლი შეჩერდა."
     },
     "phase_desc": {
       "pre_wash": "პირველადი გაჟღენთვა ან წინასწარი დამუშავება ძირითადი რეცხვის წინ.",
@@ -874,6 +878,348 @@
       "settings_saved": "პარამეტრები შენახულია; ინტეგრაციის გადატვირთვა",
       "suggestions_applied": "გამოყენებულია წინადადებები; ინტეგრაციის გადატვირთვა",
       "suggestions_dismissed": "წინადადებები უარყოფილია"
+    },
+    "section": {
+      "basic": {
+        "label": "ძირითადი",
+        "intro": "ძირითადი პარამეტრები და საწყისი კონფიგურაცია."
+      },
+      "detection": {
+        "label": "გამოვლენა",
+        "intro": "ციკლის დაწყების, მუშაობის და დასრულების გამოვლენის მეთოდი."
+      },
+      "matching": {
+        "label": "შეგუება",
+        "intro": "დასრულებული ციკლების პროფილებთან შეგუების და ეტიკეტირების მეთოდი."
+      },
+      "timing": {
+        "label": "დრო და მეთვალყურე",
+        "intro": "ფონური განახლებები, ოფლაინ მეთვალყურე და ტექნიკური მომსახურება."
+      },
+      "anti_wrinkle": {
+        "label": "ნაოჭების საწინააღმდეგო",
+        "intro": "ნაოჭების საწინააღმდეგო რეჟიმი ძირითადი ფაზის შემდეგ დაბალი სიმძლავრის დარტყმებს ამოიცნობს."
+      },
+      "delay": {
+        "label": "დაგვიანებული გაშვება",
+        "intro": "დაგვიანებული გაშვების გამოვლენა: მოწყობილობა ჩართულია, მაგრამ ციკლი ჯერ არ დაწყებულა."
+      },
+      "triggers": {
+        "label": "ტრიგერები და კარები",
+        "intro": "სურვილისამებრ გარე სიგნალები: დასასრულის ტრიგერი, კარის სენსორი, პაუზის გადამრთველი."
+      },
+      "notifications": {
+        "label": "შეტყობინებები",
+        "intro": "ციკლის მოვლენებზე შეტყობინებების დრო და გზა."
+      },
+      "ml_training": {
+        "label": "ML სწავლება",
+        "intro": "მოწყობილობაზე ML-ის განახლების განრიგი და მონაცემთა პარამეტრები."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "ზღვრები და ხარვეზები"
+      },
+      "cycle_start": {
+        "label": "ციკლის დაწყება"
+      },
+      "cycle_end": {
+        "label": "ციკლის დასრულება"
+      },
+      "signal_processing": {
+        "label": "სიგნალის დამუშავება"
+      },
+      "predictive_end": {
+        "label": "პროგნოზული დასრულება"
+      },
+      "dishwasher_end": {
+        "label": "ჭურჭლის მრეცხავის დასრულება"
+      },
+      "dtw_refinement": {
+        "label": "DTW სიზუსტის გაუმჯობესება"
+      },
+      "match_scoring": {
+        "label": "შეგუების ქულა"
+      },
+      "duration_gates": {
+        "label": "ხანგრძლივობის კარები"
+      },
+      "auto_labeling": {
+        "label": "ავტომატური ეტიკეტირება"
+      },
+      "watchdog": {
+        "label": "მეთვალყურე"
+      },
+      "housekeeping": {
+        "label": "ტექნიკური მომსახურება"
+      },
+      "debug": {
+        "label": "გამართვა"
+      },
+      "external_end_trigger": {
+        "label": "გარე დასასრულის ტრიგერი"
+      },
+      "door_pause": {
+        "label": "კარი და პაუზა"
+      },
+      "unload_reminder": {
+        "label": "გადმოტვირთვის შეხსენება"
+      },
+      "services": {
+        "label": "სერვისები"
+      },
+      "timing": {
+        "label": "დრო"
+      },
+      "messages": {
+        "label": "შეტყობინებები"
+      },
+      "energy": {
+        "label": "ენერგია"
+      },
+      "cycle_timers": {
+        "label": "ციკლის ტაიმერები"
+      },
+      "schedule": {
+        "label": "განრიგი"
+      },
+      "data_management": {
+        "label": "მონაცემების მართვა"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "მოწყობილობის სახელი"
+      },
+      "device_type": {
+        "label": "მოწყობილობის ტიპი"
+      },
+      "power_sensor": {
+        "label": "ენერგიის სენსორი"
+      },
+      "min_power": {
+        "label": "მინიმალური სიმძლავრე"
+      },
+      "off_delay": {
+        "label": "გამორთვის დაყოვნება"
+      },
+      "linked_device": {
+        "label": "მოწყობილობის ქვეშ დაჯგუფება"
+      },
+      "start_threshold_w": {
+        "label": "დაწყების ზღვარი"
+      },
+      "stop_threshold_w": {
+        "label": "გაჩერების ზღვარი"
+      },
+      "min_off_gap": {
+        "label": "მინ. გამორთვის ხარვეზი"
+      },
+      "start_duration_threshold": {
+        "label": "დაწყების ხანგრძლივობა"
+      },
+      "start_energy_threshold": {
+        "label": "დაწყების ენერგია"
+      },
+      "completion_min_seconds": {
+        "label": "ციკლის მინ. ხანგრძლივობა"
+      },
+      "running_dead_zone": {
+        "label": "სიჩქარის მკვდარი ზონა"
+      },
+      "end_energy_threshold": {
+        "label": "დასასრულის ენერგია"
+      },
+      "end_repeat_count": {
+        "label": "დასასრულის გამეორება"
+      },
+      "sampling_interval": {
+        "label": "შერჩევის ინტერვალი"
+      },
+      "smoothing_window": {
+        "label": "გამარტივების ფანჯარა"
+      },
+      "abrupt_drop_watts": {
+        "label": "მკვეთრი ვარდნა"
+      },
+      "abrupt_drop_ratio": {
+        "label": "მკვეთრი ვარდნის კოეფ."
+      },
+      "profile_match_threshold": {
+        "label": "შეგუების ზღვარი"
+      },
+      "profile_unmatch_threshold": {
+        "label": "შეუსაბამობის ზღვარი"
+      },
+      "profile_match_interval": {
+        "label": "შეგუების ინტერვალი"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "მინ. ხანგრძლივობის კოეფ."
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "მაქს. ხანგრძლივობის კოეფ."
+      },
+      "profile_duration_tolerance": {
+        "label": "პროფილის ხანგრძლივობის ტოლ."
+      },
+      "duration_tolerance": {
+        "label": "შეფასების ტოლერანტობა"
+      },
+      "auto_label_confidence": {
+        "label": "ავტო-ეტიკეტის სანდოობა"
+      },
+      "learning_confidence": {
+        "label": "სწავლების სანდოობა"
+      },
+      "suppress_feedback_notifications": {
+        "label": "უკუკავშირის შეტყობინებების ჩახშობა"
+      },
+      "watchdog_interval": {
+        "label": "მეთვალყურის ინტერვალი"
+      },
+      "no_update_active_timeout": {
+        "label": "განახლებების გარეშე ლოდინი"
+      },
+      "progress_reset_delay": {
+        "label": "პროგრესის გადაყენების დაყოვნება"
+      },
+      "auto_maintenance": {
+        "label": "ავტო-მომსახურება (ღამის გასუფთავება)"
+      },
+      "expose_debug_entities": {
+        "label": "გამართვის ობიექტების ჩვენება"
+      },
+      "save_debug_traces": {
+        "label": "გამართვის კვალების შენახვა"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "ნაოჭ-საწინააღმდეგო გამოვლენის ჩართვა"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "ნაოჭ-საწინააღმდეგო მაქს. სიმძლავრე"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "მაქსიმალური ხანგრძლივობა"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "გასვლის სიმძლავრის ზღვარი"
+      },
+      "delay_start_detect_enabled": {
+        "label": "დაგვიანებული გაშვების გამოვლენა"
+      },
+      "delay_confirm_seconds": {
+        "label": "დადასტურების წამები"
+      },
+      "delay_timeout_hours": {
+        "label": "ტაიმაუტის საათები"
+      },
+      "external_end_trigger_enabled": {
+        "label": "გარე ტრიგერის ჩართვა"
+      },
+      "external_end_trigger": {
+        "label": "გარე ტრიგერის ობიექტი"
+      },
+      "external_end_trigger_inverted": {
+        "label": "გარე ტრიგერის ინვერსია (OFF-ზე)"
+      },
+      "door_sensor_entity": {
+        "label": "კარის სენსორის ობიექტი"
+      },
+      "pause_cuts_power": {
+        "label": "პაუზა ჭრის ელ. ენერგიასაც (გადამრთველით)"
+      },
+      "switch_entity": {
+        "label": "გადამრთველის ობიექტი"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "გადმოტვირთვის შეხსენება"
+      },
+      "pump_stuck_duration": {
+        "label": "ტუმბოს გაჩერების ხანგრძლივობა"
+      },
+      "notify_start_services": {
+        "label": "დაწყების სერვისები"
+      },
+      "notify_finish_services": {
+        "label": "დასრულების სერვისები"
+      },
+      "notify_live_services": {
+        "label": "ლაივ პროგრესის სერვისები"
+      },
+      "notify_people": {
+        "label": "ადამიანები (სახლში ყოფნის პირობა)"
+      },
+      "notify_only_when_home": {
+        "label": "შეტყობინება მხოლოდ სახლში ყოფნისას"
+      },
+      "notify_fire_events": {
+        "label": "HA მოვლენების გაშვება"
+      },
+      "notify_before_end_minutes": {
+        "label": "გაფრთხილება დასასრულამდე"
+      },
+      "notify_live_interval_seconds": {
+        "label": "ლაივ განახლების ინტერვალი"
+      },
+      "notify_live_overrun_percent": {
+        "label": "ლაივ გადამეტების % გაფრთხილება"
+      },
+      "notify_live_chronometer": {
+        "label": "ლაივ ქრონომეტრის გამოყენება"
+      },
+      "notify_timeout_seconds": {
+        "label": "ავტო-დახურვა"
+      },
+      "notify_title": {
+        "label": "სათაური"
+      },
+      "notify_icon": {
+        "label": "ხატი"
+      },
+      "notify_start_message": {
+        "label": "დაწყების შეტყობინება"
+      },
+      "notify_finish_message": {
+        "label": "დასრულების შეტყობინება"
+      },
+      "notify_pre_complete_message": {
+        "label": "დასრულებამდე შეტყობინება"
+      },
+      "notify_reminder_message": {
+        "label": "შეხსენების შეტყობინება"
+      },
+      "notify_channel": {
+        "label": "Android არხი (დაწყება/ლაივ)"
+      },
+      "notify_finish_channel": {
+        "label": "Android არხი (დასრულება)"
+      },
+      "energy_price_entity": {
+        "label": "ენ. ფასის ობიექტი"
+      },
+      "energy_price_static": {
+        "label": "სტატ. ენ. ფასი (kWh-ზე)"
+      },
+      "notify_cycle_timers": {
+        "label": "ციკლის ტაიმერები"
+      },
+      "enable_ml_models": {
+        "label": "ჭკვიანი მოდელების გამოყენება"
+      },
+      "ml_training_enabled": {
+        "label": "ამ მოწყობილობიდან სწავლება"
+      },
+      "ml_training_hour": {
+        "label": "სწავლების საათი"
+      },
+      "ml_training_min_cycles": {
+        "label": "საჭირო ციკლები"
+      },
+      "ml_training_interval_days": {
+        "label": "მაქს. შემოწმების ინტერვალი"
+      }
     }
   }
 }

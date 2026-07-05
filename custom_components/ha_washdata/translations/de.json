@@ -453,7 +453,7 @@
       "dismiss": "Zurückweisen",
       "done": "Erledigt",
       "edit": "Bearbeiten",
-      "export": "Export",
+      "export": "Exportieren",
       "export_json": "Export nach JSON",
       "force_stop": "Stopp erzwingen",
       "from_template": "Aus Vorlage ▾",
@@ -461,7 +461,7 @@
       "import_json": "Import aus JSON",
       "import_overwrite": "Importieren (Daten überschreiben)",
       "inspect": "Überprüfen",
-      "label": "Etikett",
+      "label": "Beschriften",
       "manage": "Verwalten",
       "merge": "Verschmelzen",
       "new_automation": "＋ Neue Automatisierung",
@@ -484,7 +484,7 @@
       "reset_to_builtin": "Zurücksetzen auf integrierte Modelle",
       "reset_to_defaults": "Auf Standardeinstellungen zurücksetzen",
       "resume_cycle": "Fortsetzen",
-      "review": "Rezension",
+      "review": "Auswerten",
       "run_analysis": "🔍 Führen Sie eine Vorschlagsanalyse durch",
       "run_auto_label": "Führen Sie Auto-Label aus",
       "save": "Speichern",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Speicherstatistiken, Wartung, Export/Import",
       "trim_intro": "Ziehen Sie die roten Ziehpunkte oder geben Sie Werte ein. Alles außerhalb des Fensters wird entfernt.",
       "unsure_detected_prefix": "WashData ist sich nicht sicher, ob es erkannt wurde",
-      "updated": "Aktualisiert"
+      "updated": "Aktualisiert",
+      "feedback_cycles_pending": "{n} Zyklus{s} zur Überprüfung",
+      "artifact_spike_detail": "Überstieg das übliche Leistungsband für ~{n}s.",
+      "artifact_dip_detail": "Sank unter das übliche Leistungsband für ~{n}s.",
+      "artifact_pause_detail": "Die Leistung fiel für ~{n}s nahezu auf null und wurde dann wieder aufgenommen — wahrscheinlich wurde die Tür während des Zyklus geöffnet oder der Zyklus wurde angehalten."
     },
     "phase_desc": {
       "pre_wash": "Erstes Einweichen oder Vorbehandeln vor dem Hauptwaschgang.",
@@ -746,11 +750,11 @@
       "spin_wd": "Hochgeschwindigkeitsextraktion vor dem Trocknungsübergang.",
       "soak": "Einweichzeit mit geringer Aktivität zwischen den aktiven Waschphasen.",
       "soak_dw": "Verlängerte Einweichzeit für schwere Böden.",
-      "anti_crease": "Gelegentliches kurzes Wäschewaschen nach der Fertigstellung, um Falten zu reduzieren.",
+      "anti_crease": "Gelegentliche kurze Trommelumwälzungen nach Abschluss, um Knitterung zu vermeiden.",
       "heat_up": "Erstes Aufwärmen der Heizung, bevor die vollständige Trocknung beginnt.",
       "drying": "Hauptheizperiode.",
       "cool_down": "Taumeln ohne Hitze gegen Ende des Zyklus.",
-      "anti_wrinkle": "Regelmäßiges Wäschewaschen nach dem Zyklus, um Falten zu reduzieren.",
+      "anti_wrinkle": "Regelmäßige Trommelumwälzungen nach dem Zyklus, um Knitterung zu vermeiden.",
       "sensor_check": "Kurze Pause bei geringer Leistung, während der Trockenheitsgrad gemessen wird.",
       "drain_and_switch": "Übergangszeit vom Wasch- zum Trocknungsmodus.",
       "pre_rinse": "Erstes Aufsprühen vor dem Waschen mit Reinigungsmittel.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Abwärtstrend",
       "up": "Aufwärtstrend"
+    },
+    "section": {
+      "basic": {
+        "label": "Grundlegend",
+        "intro": "Kernidentität und die wesentlichen Funktionen, die meisten Setups benötigen."
+      },
+      "detection": {
+        "label": "Erkennung",
+        "intro": "Wie ein Zyklus als Start, Lauf und Abschluss erkannt wird."
+      },
+      "matching": {
+        "label": "Abgleich",
+        "intro": "Wie abgeschlossene Zyklen mit erlernten Profilen abgeglichen und beschriftet werden."
+      },
+      "timing": {
+        "label": "Zeitsteuerung & Watchdog",
+        "intro": "Hintergrundrhythmus, der Offline-Watchdog und die Wartung."
+      },
+      "anti_wrinkle": {
+        "label": "Knitterschutz",
+        "intro": "Knitterschutz-Modus erkennt Tumble-Impulse mit geringer Leistung nach der Hauptphase und hält sie dem abgeschlossenen Zyklus zugeordnet."
+      },
+      "delay": {
+        "label": "Verzögerter Start",
+        "intro": "Die Verzögerungsstarterkennung erkennt, wenn ein Gerät eingeschaltet ist, aber seinen Zyklus noch nicht begonnen hat."
+      },
+      "triggers": {
+        "label": "Auslöser & Türen",
+        "intro": "Optionale externe Signale: ein Endauslöser, ein Türsensor, ein Pause-Schalter und die Entladeerinnerung."
+      },
+      "notifications": {
+        "label": "Benachrichtigungen",
+        "intro": "Wann und wie Sie über Zyklusereignisse benachrichtigt werden."
+      },
+      "ml_training": {
+        "label": "ML-Training",
+        "intro": "Zeitplan für das Geräte-ML-Retraining und Dateneinstellungen."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Schwellenwerte & Lücke"
+      },
+      "cycle_start": {
+        "label": "Zyklusstart"
+      },
+      "cycle_end": {
+        "label": "Zyklusende"
+      },
+      "signal_processing": {
+        "label": "Signalverarbeitung"
+      },
+      "predictive_end": {
+        "label": "Prädiktives Ende"
+      },
+      "dishwasher_end": {
+        "label": "Spülmaschinenende"
+      },
+      "dtw_refinement": {
+        "label": "DTW-Verfeinerung"
+      },
+      "match_scoring": {
+        "label": "Abgleichbewertung"
+      },
+      "duration_gates": {
+        "label": "Dauertore"
+      },
+      "auto_labeling": {
+        "label": "Automatische Beschriftung"
+      },
+      "watchdog": {
+        "label": "Watchdog"
+      },
+      "housekeeping": {
+        "label": "Wartung"
+      },
+      "debug": {
+        "label": "Debug"
+      },
+      "external_end_trigger": {
+        "label": "Externer Endauslöser"
+      },
+      "door_pause": {
+        "label": "Tür & Pause"
+      },
+      "unload_reminder": {
+        "label": "Entladeerinnerung"
+      },
+      "services": {
+        "label": "Dienste"
+      },
+      "timing": {
+        "label": "Zeitsteuerung"
+      },
+      "messages": {
+        "label": "Nachrichten"
+      },
+      "energy": {
+        "label": "Energie"
+      },
+      "cycle_timers": {
+        "label": "Zyklustimer"
+      },
+      "schedule": {
+        "label": "Zeitplan"
+      },
+      "data_management": {
+        "label": "Datenverwaltung"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Gerätename"
+      },
+      "device_type": {
+        "label": "Gerätetyp"
+      },
+      "power_sensor": {
+        "label": "Leistungssensor"
+      },
+      "min_power": {
+        "label": "Mindestleistung"
+      },
+      "off_delay": {
+        "label": "Abschaltverzögerung"
+      },
+      "linked_device": {
+        "label": "Unter Gerät gruppieren"
+      },
+      "start_threshold_w": {
+        "label": "Startschwellenwert"
+      },
+      "stop_threshold_w": {
+        "label": "Stoppschwellenwert"
+      },
+      "min_off_gap": {
+        "label": "Mindest-Aus-Lücke"
+      },
+      "start_duration_threshold": {
+        "label": "Startdauer"
+      },
+      "start_energy_threshold": {
+        "label": "Startenergie"
+      },
+      "completion_min_seconds": {
+        "label": "Mindestzyklusdauer"
+      },
+      "running_dead_zone": {
+        "label": "Laufende Totzone"
+      },
+      "end_energy_threshold": {
+        "label": "Endenergie"
+      },
+      "end_repeat_count": {
+        "label": "End-Wiederholungsanzahl"
+      },
+      "sampling_interval": {
+        "label": "Abtastintervall"
+      },
+      "smoothing_window": {
+        "label": "Glättungsfenster"
+      },
+      "abrupt_drop_watts": {
+        "label": "Abrupter Abfall"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Abruptes Abfallverhältnis"
+      },
+      "profile_match_threshold": {
+        "label": "Abgleichschwellenwert"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Nichtübereinstimmungsschwellenwert"
+      },
+      "profile_match_interval": {
+        "label": "Abgleichintervall"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Mindestdauerverhältnis"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Maximaldauerverhältnis"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profildauertoleranz"
+      },
+      "duration_tolerance": {
+        "label": "Schätzungstoleranz"
+      },
+      "auto_label_confidence": {
+        "label": "Automatische Beschriftungskonfidenz"
+      },
+      "learning_confidence": {
+        "label": "Lernkonfidenz"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Feedback-Benachrichtigungen unterdrücken"
+      },
+      "watchdog_interval": {
+        "label": "Watchdog-Intervall"
+      },
+      "no_update_active_timeout": {
+        "label": "Timeout ohne Aktualisierung"
+      },
+      "progress_reset_delay": {
+        "label": "Fortschritts-Reset-Verzögerung"
+      },
+      "auto_maintenance": {
+        "label": "Automatische Wartung (nächtliche Bereinigung)"
+      },
+      "expose_debug_entities": {
+        "label": "Debug-Entitäten anzeigen"
+      },
+      "save_debug_traces": {
+        "label": "Debug-Traces speichern"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Knitterschutzerkennung aktivieren"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Max. Knitterschutzleistung"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Maximale Dauer"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Ausgangsleistungsschwellenwert"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Verzögerungsstarterkennung aktivieren"
+      },
+      "delay_confirm_seconds": {
+        "label": "Bestätigungssekunden"
+      },
+      "delay_timeout_hours": {
+        "label": "Timeout-Stunden"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Externen Endauslöser aktivieren"
+      },
+      "external_end_trigger": {
+        "label": "Externe Auslöser-Entität"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Externen Auslöser umkehren (bei AUS auslösen)"
+      },
+      "door_sensor_entity": {
+        "label": "Türsensor-Entität"
+      },
+      "pause_cuts_power": {
+        "label": "Pause unterbricht auch Strom (über Schalter)"
+      },
+      "switch_entity": {
+        "label": "Schalter-Entität"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Verzögerung der Entladeerinnerung"
+      },
+      "pump_stuck_duration": {
+        "label": "Dauer der feststeckenden Pumpe"
+      },
+      "notify_start_services": {
+        "label": "Startdienste"
+      },
+      "notify_finish_services": {
+        "label": "Enddienste"
+      },
+      "notify_live_services": {
+        "label": "Live-Fortschrittsdienste"
+      },
+      "notify_people": {
+        "label": "Personen (für Nur wenn zu Hause)"
+      },
+      "notify_only_when_home": {
+        "label": "Nur benachrichtigen wenn zu Hause"
+      },
+      "notify_fire_events": {
+        "label": "HA-Ereignisse für Benachrichtigungen auslösen"
+      },
+      "notify_before_end_minutes": {
+        "label": "Vorend-Alarm"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Live-Aktualisierungsintervall"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Live-Überlauf-% vor Alarm"
+      },
+      "notify_live_chronometer": {
+        "label": "Live-Chronometer verwenden"
+      },
+      "notify_timeout_seconds": {
+        "label": "Automatisch schließen nach"
+      },
+      "notify_title": {
+        "label": "Benachrichtigungstitel"
+      },
+      "notify_icon": {
+        "label": "Benachrichtigungssymbol"
+      },
+      "notify_start_message": {
+        "label": "Startnachricht"
+      },
+      "notify_finish_message": {
+        "label": "Endnachricht"
+      },
+      "notify_pre_complete_message": {
+        "label": "Vorend-Nachricht"
+      },
+      "notify_reminder_message": {
+        "label": "Erinnerungsnachricht"
+      },
+      "notify_channel": {
+        "label": "Android-Kanal (Start/Live)"
+      },
+      "notify_finish_channel": {
+        "label": "Android-Kanal (Ende)"
+      },
+      "energy_price_entity": {
+        "label": "Energiepreis-Entität"
+      },
+      "energy_price_static": {
+        "label": "Statischer Energiepreis (pro kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Zyklustimer"
+      },
+      "enable_ml_models": {
+        "label": "Intelligente Modelle während eines Zyklus anwenden"
+      },
+      "ml_training_enabled": {
+        "label": "Von dieser Maschine lernen"
+      },
+      "ml_training_hour": {
+        "label": "Lernen zur Stunde"
+      },
+      "ml_training_min_cycles": {
+        "label": "Zuerst benötigte Zyklen"
+      },
+      "ml_training_interval_days": {
+        "label": "Höchstens alle prüfen"
+      }
     }
   }
 }

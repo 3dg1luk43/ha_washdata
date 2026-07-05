@@ -513,7 +513,7 @@
       "import_json": "Importera från JSON",
       "import_overwrite": "Importera (skriver över data)",
       "inspect": "Inspektera",
-      "label": "Etikett",
+      "label": "Märk",
       "manage": "Hantera",
       "merge": "Slå samman",
       "new_automation": "＋ Ny automatisering",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Lagringsstatistik, underhåll, export/import",
       "trim_intro": "Dra de röda handtagen eller ange värden. Allt utanför fönstret tas bort.",
       "unsure_detected_prefix": "WashData är osäker på att den identifierade",
-      "updated": "Uppdaterad"
+      "updated": "Uppdaterad",
+      "feedback_cycles_pending": "{n} cykel{s} att granska",
+      "artifact_spike_detail": "Drog över det normala effektbandet i ~{n} s.",
+      "artifact_dip_detail": "Föll under det normala effektbandet i ~{n} s.",
+      "artifact_pause_detail": "Effekten föll till nära noll i ~{n} s och återupptogs sedan — troligtvis öppnades dörren mitt i cykeln eller cykeln pausades."
     },
     "phase_desc": {
       "pre_wash": "Inledande blötläggning eller förbehandling före huvudtvätt.",
@@ -746,11 +750,11 @@
       "spin_wd": "Höghastighetsextraktion före torkningsövergång.",
       "soak": "Lågaktivitets blötläggningsperiod mellan aktiva tvättsteg.",
       "soak_dw": "Förlängd blötläggningstid för starkt nedsmutsad disk.",
-      "anti_crease": "Enstaka korta tumlar efter färdigställandet för att minska rynkor.",
+      "anti_crease": "Enstaka korta tumlar efter färdigställandet för att förhindra skrynklor i tvätten.",
       "heat_up": "Första uppvärmningen av värmaren innan full torkning börjar.",
       "drying": "Huvudsaklig uppvärmd tumlingsperiod.",
       "cool_down": "Tumling utan värme nära cykelns slut.",
-      "anti_wrinkle": "Periodisk tumlande efter cykeln för att minska rynkor.",
+      "anti_wrinkle": "Periodisk tumlande efter cykeln för att förhindra skrynklor i tvätten.",
       "sensor_check": "Kort lågeffektpaus medan torrhet mäts.",
       "drain_and_switch": "Övergångsperiod från tvätt- till torkläge.",
       "pre_rinse": "Initial sprayning innan tvättmedelstvätt.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Nedåtgående trend",
       "up": "Uppåtgående trend"
+    },
+    "section": {
+      "basic": {
+        "label": "Grundläggande",
+        "intro": "Kärn-identitet och grunderna som de flesta konfigurationer behöver."
+      },
+      "detection": {
+        "label": "Detektering",
+        "intro": "Hur start, körning och slutföring av en cykel identifieras."
+      },
+      "matching": {
+        "label": "Matchning",
+        "intro": "Hur avslutade cykler matchas mot inlärda profiler och märks."
+      },
+      "timing": {
+        "label": "Timing och vakthund",
+        "intro": "Bakgrundskadensen, offline-vakthunden och hushållning."
+      },
+      "anti_wrinkle": {
+        "label": "Skrynkelskydd",
+        "intro": "Skrynkelskyddsläget identifierar korta lågeffektstumlingspulser efter huvudfasen och håller dem kopplade till den avslutade cykeln för att förhindra skrynklor i tvätten."
+      },
+      "delay": {
+        "label": "Försenad start",
+        "intro": "Detektering av försenad start identifierar när apparaten är påslagen men ännu inte har startat sin cykel."
+      },
+      "triggers": {
+        "label": "Utlösare och dörrar",
+        "intro": "Valfria externa signaler: en slututlösare, en dörrsensor, en pausknapp och en lossningspåminnelse."
+      },
+      "notifications": {
+        "label": "Meddelanden",
+        "intro": "När och hur du meddelas om cykelhändelser."
+      },
+      "ml_training": {
+        "label": "ML-träning",
+        "intro": "Schema för omskolning av maskininlärning på enheten och datainställningar."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Trösklar och lucka"
+      },
+      "cycle_start": {
+        "label": "Cykelstart"
+      },
+      "cycle_end": {
+        "label": "Cykelslut"
+      },
+      "signal_processing": {
+        "label": "Signalbehandling"
+      },
+      "predictive_end": {
+        "label": "Prediktivt slut"
+      },
+      "dishwasher_end": {
+        "label": "Diskmaskinsslut"
+      },
+      "dtw_refinement": {
+        "label": "DTW-förfining"
+      },
+      "match_scoring": {
+        "label": "Matchningspoäng"
+      },
+      "duration_gates": {
+        "label": "Varaktighetsportar"
+      },
+      "auto_labeling": {
+        "label": "Automatisk märkning"
+      },
+      "watchdog": {
+        "label": "Vakthund"
+      },
+      "housekeeping": {
+        "label": "Hushållning"
+      },
+      "debug": {
+        "label": "Felsökning"
+      },
+      "external_end_trigger": {
+        "label": "Extern slututlösare"
+      },
+      "door_pause": {
+        "label": "Dörr och paus"
+      },
+      "unload_reminder": {
+        "label": "Lossningspåminnelse"
+      },
+      "services": {
+        "label": "Tjänster"
+      },
+      "timing": {
+        "label": "Timing"
+      },
+      "messages": {
+        "label": "Meddelanden"
+      },
+      "energy": {
+        "label": "Energi"
+      },
+      "cycle_timers": {
+        "label": "Cykeltidurar"
+      },
+      "schedule": {
+        "label": "Schema"
+      },
+      "data_management": {
+        "label": "Datahantering"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Enhetsnamn"
+      },
+      "device_type": {
+        "label": "Enhetstyp"
+      },
+      "power_sensor": {
+        "label": "Effektsensor"
+      },
+      "min_power": {
+        "label": "Minimieffekt"
+      },
+      "off_delay": {
+        "label": "Avfördröjning"
+      },
+      "linked_device": {
+        "label": "Gruppera under enhet"
+      },
+      "start_threshold_w": {
+        "label": "Starttröskel"
+      },
+      "stop_threshold_w": {
+        "label": "Stopptröskel"
+      },
+      "min_off_gap": {
+        "label": "Min. avlucka"
+      },
+      "start_duration_threshold": {
+        "label": "Startvaraktighet"
+      },
+      "start_energy_threshold": {
+        "label": "Startenergi"
+      },
+      "completion_min_seconds": {
+        "label": "Min. cykelvaraktighet"
+      },
+      "running_dead_zone": {
+        "label": "Löpande dödzon"
+      },
+      "end_energy_threshold": {
+        "label": "Slutenergi"
+      },
+      "end_repeat_count": {
+        "label": "Antal slutrepetitioner"
+      },
+      "sampling_interval": {
+        "label": "Samplingsintervall"
+      },
+      "smoothing_window": {
+        "label": "Utjämningsfönster"
+      },
+      "abrupt_drop_watts": {
+        "label": "Abrupt fall"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Abrupt fallförhållande"
+      },
+      "profile_match_threshold": {
+        "label": "Matchningströskel"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Omatchningströskel"
+      },
+      "profile_match_interval": {
+        "label": "Matchningsintervall"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Min. varaktighetsförhållande"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Maks. varaktighetsförhållande"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profilvaraktighetstolerans"
+      },
+      "duration_tolerance": {
+        "label": "Uppskattingstolerans"
+      },
+      "auto_label_confidence": {
+        "label": "Automärkningskonfidens"
+      },
+      "learning_confidence": {
+        "label": "Inlärningskonfidens"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Undertryck feedbackmeddelanden"
+      },
+      "watchdog_interval": {
+        "label": "Vakthundsintervall"
+      },
+      "no_update_active_timeout": {
+        "label": "Tidsgräns utan uppdatering"
+      },
+      "progress_reset_delay": {
+        "label": "Förloppåterställningsfördröjning"
+      },
+      "auto_maintenance": {
+        "label": "Automatiskt underhåll (nattlig städning)"
+      },
+      "expose_debug_entities": {
+        "label": "Exponera felsökningsentiteter"
+      },
+      "save_debug_traces": {
+        "label": "Spara felsökningsspår"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Aktivera skrynkelskyddsdetektering"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Maks. skrynkelskyddseffekt"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Maks. varaktighet"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Avslutningseffekttröskel"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Aktivera detektering av försenad start"
+      },
+      "delay_confirm_seconds": {
+        "label": "Bekräftelsesekunder"
+      },
+      "delay_timeout_hours": {
+        "label": "Tidsgränstimmar"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Aktivera extern slututlösare"
+      },
+      "external_end_trigger": {
+        "label": "Extern utlösarentitet"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Invertera extern utlösare (utlös vid AV)"
+      },
+      "door_sensor_entity": {
+        "label": "Dörrsensorentitet"
+      },
+      "pause_cuts_power": {
+        "label": "Paus bryter även ström (via switch)"
+      },
+      "switch_entity": {
+        "label": "Switchentitet"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Lossningspåminnelsefördröjning"
+      },
+      "pump_stuck_duration": {
+        "label": "Pumpens fastnadsvaraktighet"
+      },
+      "notify_start_services": {
+        "label": "Starttjänster"
+      },
+      "notify_finish_services": {
+        "label": "Sluttjänster"
+      },
+      "notify_live_services": {
+        "label": "Direktframstegstjänster"
+      },
+      "notify_people": {
+        "label": "Personer (för Bara när hemma)"
+      },
+      "notify_only_when_home": {
+        "label": "Meddela bara när hemma"
+      },
+      "notify_fire_events": {
+        "label": "Avfyra HA-händelser för meddelanden"
+      },
+      "notify_before_end_minutes": {
+        "label": "Förvarning före slut"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Direktuppdateringsintervall"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% överköring innan varning"
+      },
+      "notify_live_chronometer": {
+        "label": "Använd direktkronometer"
+      },
+      "notify_timeout_seconds": {
+        "label": "Avfärda automatiskt efter"
+      },
+      "notify_title": {
+        "label": "Meddelanderubrik"
+      },
+      "notify_icon": {
+        "label": "Meddelandeikon"
+      },
+      "notify_start_message": {
+        "label": "Startmeddelande"
+      },
+      "notify_finish_message": {
+        "label": "Slutmeddelande"
+      },
+      "notify_pre_complete_message": {
+        "label": "Nästan klart-meddelande"
+      },
+      "notify_reminder_message": {
+        "label": "Påminnelsemeddelande"
+      },
+      "notify_channel": {
+        "label": "Android-kanal (start/direkt)"
+      },
+      "notify_finish_channel": {
+        "label": "Android-kanal (slut)"
+      },
+      "energy_price_entity": {
+        "label": "Energiprisentitet"
+      },
+      "energy_price_static": {
+        "label": "Statiskt energipris (per kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Cykeltidurar"
+      },
+      "enable_ml_models": {
+        "label": "Tillämpa smarta modeller under en cykel"
+      },
+      "ml_training_enabled": {
+        "label": "Lär dig av denna maskin"
+      },
+      "ml_training_hour": {
+        "label": "Lär dig vid timmen"
+      },
+      "ml_training_min_cycles": {
+        "label": "Cykler som behövs först"
+      },
+      "ml_training_interval_days": {
+        "label": "Kontrollera som mest varje"
+      }
     }
   }
 }

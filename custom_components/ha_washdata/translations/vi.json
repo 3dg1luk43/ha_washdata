@@ -735,7 +735,11 @@
       "storage_diagnostics": "Thống kê lưu trữ, bảo trì, xuất/nhập",
       "trim_intro": "Kéo các nút đỏ, hoặc nhập giá trị. Mọi thứ ngoài cửa sổ sẽ bị xóa.",
       "unsure_detected_prefix": "WashData không chắc đã phát hiện",
-      "updated": "Đã cập nhật"
+      "updated": "Đã cập nhật",
+      "feedback_cycles_pending": "{n} chu kỳ cần xem xét",
+      "artifact_spike_detail": "Vượt trên dải công suất thông thường trong ~{n}s.",
+      "artifact_dip_detail": "Giảm xuống dưới dải công suất thông thường trong ~{n}s.",
+      "artifact_pause_detail": "Công suất giảm xuống gần bằng không trong ~{n}s rồi tiếp tục — có thể cửa đã mở giữa chừng hoặc chu kỳ bị tạm dừng."
     },
     "phase_desc": {
       "pre_wash": "Ngâm lần đầu hoặc xử lý sơ bộ trước khi giặt chính.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Xu hướng giảm",
       "up": "Xu hướng tăng"
+    },
+    "section": {
+      "basic": {
+        "label": "Cơ bản",
+        "intro": "Danh tính cốt lõi và những điều cần thiết mà hầu hết các cài đặt cần."
+      },
+      "detection": {
+        "label": "Phát hiện",
+        "intro": "Chu kỳ được phát hiện bắt đầu, chạy và kết thúc như thế nào."
+      },
+      "matching": {
+        "label": "Khớp",
+        "intro": "Các chu kỳ hoàn thành được khớp với hồ sơ đã học và dán nhãn như thế nào."
+      },
+      "timing": {
+        "label": "Thời gian & Giám sát",
+        "intro": "Nhịp nền, giám sát ngoại tuyến và dọn dẹp."
+      },
+      "anti_wrinkle": {
+        "label": "Chống nhăn",
+        "intro": "Chế độ chống nhăn phát hiện các xung tumble công suất thấp sau pha chính và giữ chúng gắn với chu kỳ đã hoàn thành."
+      },
+      "delay": {
+        "label": "Khởi động trễ",
+        "intro": "Phát hiện khởi động trễ xác định khi thiết bị được bật nhưng chưa bắt đầu chu kỳ."
+      },
+      "triggers": {
+        "label": "Kích hoạt & Cửa",
+        "intro": "Tín hiệu bên ngoài tùy chọn: kích hoạt kết thúc, cảm biến cửa, công tắc tạm dừng và nhắc nhở dỡ tải."
+      },
+      "notifications": {
+        "label": "Thông báo",
+        "intro": "Khi nào và cách bạn được thông báo về các sự kiện chu kỳ."
+      },
+      "ml_training": {
+        "label": "Huấn luyện ML",
+        "intro": "Lịch đào tạo lại máy học trên thiết bị và cài đặt dữ liệu."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Ngưỡng & Khoảng cách"
+      },
+      "cycle_start": {
+        "label": "Bắt đầu chu kỳ"
+      },
+      "cycle_end": {
+        "label": "Kết thúc chu kỳ"
+      },
+      "signal_processing": {
+        "label": "Xử lý tín hiệu"
+      },
+      "predictive_end": {
+        "label": "Kết thúc dự đoán"
+      },
+      "dishwasher_end": {
+        "label": "Kết thúc máy rửa chén"
+      },
+      "dtw_refinement": {
+        "label": "Tinh chỉnh DTW"
+      },
+      "match_scoring": {
+        "label": "Chấm điểm khớp"
+      },
+      "duration_gates": {
+        "label": "Cổng thời lượng"
+      },
+      "auto_labeling": {
+        "label": "Tự động dán nhãn"
+      },
+      "watchdog": {
+        "label": "Giám sát"
+      },
+      "housekeeping": {
+        "label": "Dọn dẹp"
+      },
+      "debug": {
+        "label": "Gỡ lỗi"
+      },
+      "external_end_trigger": {
+        "label": "Kích hoạt kết thúc bên ngoài"
+      },
+      "door_pause": {
+        "label": "Cửa & Tạm dừng"
+      },
+      "unload_reminder": {
+        "label": "Nhắc nhở dỡ tải"
+      },
+      "services": {
+        "label": "Dịch vụ"
+      },
+      "timing": {
+        "label": "Thời gian"
+      },
+      "messages": {
+        "label": "Tin nhắn"
+      },
+      "energy": {
+        "label": "Năng lượng"
+      },
+      "cycle_timers": {
+        "label": "Bộ hẹn giờ chu kỳ"
+      },
+      "schedule": {
+        "label": "Lịch"
+      },
+      "data_management": {
+        "label": "Quản lý dữ liệu"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Tên thiết bị"
+      },
+      "device_type": {
+        "label": "Loại thiết bị"
+      },
+      "power_sensor": {
+        "label": "Cảm biến nguồn"
+      },
+      "min_power": {
+        "label": "Công suất tối thiểu"
+      },
+      "off_delay": {
+        "label": "Độ trễ tắt"
+      },
+      "linked_device": {
+        "label": "Nhóm dưới thiết bị"
+      },
+      "start_threshold_w": {
+        "label": "Ngưỡng bắt đầu"
+      },
+      "stop_threshold_w": {
+        "label": "Ngưỡng dừng"
+      },
+      "min_off_gap": {
+        "label": "Khoảng cách tắt tối thiểu"
+      },
+      "start_duration_threshold": {
+        "label": "Thời lượng bắt đầu"
+      },
+      "start_energy_threshold": {
+        "label": "Năng lượng khởi động"
+      },
+      "completion_min_seconds": {
+        "label": "Thời lượng chu kỳ tối thiểu"
+      },
+      "running_dead_zone": {
+        "label": "Vùng chết khi chạy"
+      },
+      "end_energy_threshold": {
+        "label": "Năng lượng kết thúc"
+      },
+      "end_repeat_count": {
+        "label": "Số lần lặp lại kết thúc"
+      },
+      "sampling_interval": {
+        "label": "Khoảng thời gian lấy mẫu"
+      },
+      "smoothing_window": {
+        "label": "Cửa sổ làm mượt"
+      },
+      "abrupt_drop_watts": {
+        "label": "Giảm đột ngột"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Tỷ lệ giảm đột ngột"
+      },
+      "profile_match_threshold": {
+        "label": "Ngưỡng khớp"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Ngưỡng không khớp"
+      },
+      "profile_match_interval": {
+        "label": "Khoảng thời gian khớp"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Tỷ lệ thời lượng tối thiểu"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Tỷ lệ thời lượng tối đa"
+      },
+      "profile_duration_tolerance": {
+        "label": "Độ chấp nhận thời lượng hồ sơ"
+      },
+      "duration_tolerance": {
+        "label": "Độ chấp nhận ước tính"
+      },
+      "auto_label_confidence": {
+        "label": "Độ tin cậy tự động dán nhãn"
+      },
+      "learning_confidence": {
+        "label": "Độ tin cậy học tập"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Tắt thông báo phản hồi"
+      },
+      "watchdog_interval": {
+        "label": "Khoảng thời gian giám sát"
+      },
+      "no_update_active_timeout": {
+        "label": "Thời gian chờ không cập nhật"
+      },
+      "progress_reset_delay": {
+        "label": "Độ trễ đặt lại tiến độ"
+      },
+      "auto_maintenance": {
+        "label": "Tự động bảo trì (dọn dẹp đêm)"
+      },
+      "expose_debug_entities": {
+        "label": "Hiển thị thực thể gỡ lỗi"
+      },
+      "save_debug_traces": {
+        "label": "Lưu dấu vết gỡ lỗi"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Bật phát hiện chống nhăn"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Công suất chống nhăn tối đa"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Thời lượng tối đa"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Ngưỡng công suất thoát"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Bật phát hiện khởi động trễ"
+      },
+      "delay_confirm_seconds": {
+        "label": "Giây xác nhận"
+      },
+      "delay_timeout_hours": {
+        "label": "Giờ hết thời gian"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Bật kích hoạt kết thúc bên ngoài"
+      },
+      "external_end_trigger": {
+        "label": "Thực thể kích hoạt bên ngoài"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Đảo kích hoạt bên ngoài (kích hoạt khi TẮT)"
+      },
+      "door_sensor_entity": {
+        "label": "Thực thể cảm biến cửa"
+      },
+      "pause_cuts_power": {
+        "label": "Tạm dừng cũng cắt nguồn (qua công tắc)"
+      },
+      "switch_entity": {
+        "label": "Thực thể công tắc"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Độ trễ nhắc nhở dỡ tải"
+      },
+      "pump_stuck_duration": {
+        "label": "Thời gian máy bơm bị kẹt"
+      },
+      "notify_start_services": {
+        "label": "Dịch vụ bắt đầu"
+      },
+      "notify_finish_services": {
+        "label": "Dịch vụ kết thúc"
+      },
+      "notify_live_services": {
+        "label": "Dịch vụ tiến trình trực tiếp"
+      },
+      "notify_people": {
+        "label": "Người (cho Chỉ khi ở nhà)"
+      },
+      "notify_only_when_home": {
+        "label": "Chỉ thông báo khi ở nhà"
+      },
+      "notify_fire_events": {
+        "label": "Kích hoạt sự kiện HA cho thông báo"
+      },
+      "notify_before_end_minutes": {
+        "label": "Cảnh báo trước khi kết thúc"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Khoảng cập nhật trực tiếp"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% vượt quá trực tiếp trước khi cảnh báo"
+      },
+      "notify_live_chronometer": {
+        "label": "Sử dụng đồng hồ bấm giờ trực tiếp"
+      },
+      "notify_timeout_seconds": {
+        "label": "Tự động bỏ qua sau"
+      },
+      "notify_title": {
+        "label": "Tiêu đề thông báo"
+      },
+      "notify_icon": {
+        "label": "Biểu tượng thông báo"
+      },
+      "notify_start_message": {
+        "label": "Tin nhắn bắt đầu"
+      },
+      "notify_finish_message": {
+        "label": "Tin nhắn kết thúc"
+      },
+      "notify_pre_complete_message": {
+        "label": "Tin nhắn trước khi hoàn thành"
+      },
+      "notify_reminder_message": {
+        "label": "Tin nhắn nhắc nhở"
+      },
+      "notify_channel": {
+        "label": "Kênh Android (bắt đầu/trực tiếp)"
+      },
+      "notify_finish_channel": {
+        "label": "Kênh Android (kết thúc)"
+      },
+      "energy_price_entity": {
+        "label": "Thực thể giá năng lượng"
+      },
+      "energy_price_static": {
+        "label": "Giá năng lượng cố định (mỗi kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Bộ hẹn giờ chu kỳ"
+      },
+      "enable_ml_models": {
+        "label": "Áp dụng mô hình thông minh trong chu kỳ"
+      },
+      "ml_training_enabled": {
+        "label": "Học từ máy này"
+      },
+      "ml_training_hour": {
+        "label": "Học vào giờ"
+      },
+      "ml_training_min_cycles": {
+        "label": "Cần bao nhiêu chu kỳ trước"
+      },
+      "ml_training_interval_days": {
+        "label": "Kiểm tra tối đa mỗi"
+      }
     }
   }
 }

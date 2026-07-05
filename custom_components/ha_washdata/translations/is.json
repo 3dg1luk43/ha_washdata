@@ -622,7 +622,7 @@
       "artifact_tip": "{n} frávik fundust (t.d. hurð opnuð í miðjum lotu) — opnaðu til að sjá þau á línuritinu",
       "poor_fit_tip": "Ósamkvæmur samsvörunarferill – íhugaðu að endurbyggja þennan prófíl",
       "fair_fit_tip": "Í meðallagi samræmi við samsvörun - sumar lotur sem eru úthlutaðar þessum prófíl hafa lægri sjálfstraustsstig. Merktu fleiri lotur eða skráðu sniðið aftur til að bæta nákvæmni.",
-      "fair_fit": "þokkalega passa",
+      "fair_fit": "viðunanlegt",
       "poor_fit": "léleg passa",
       "auto": "(sjálfvirkt greint)",
       "built_in_tag": "innbyggður",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Geymslutölfræði, viðhald, útflutningur/innflutningur",
       "trim_intro": "Dragðu rauðu handföngin eða sláðu inn gildi. Allt fyrir utan gluggann er fjarlægt.",
       "unsure_detected_prefix": "WashData er ekki viss um að það hafi fundist",
-      "updated": "Uppfært"
+      "updated": "Uppfært",
+      "feedback_cycles_pending": "{n} lota{s} til yfirferðar",
+      "artifact_spike_detail": "Fór yfir venjulegt aflband í ~{n}s.",
+      "artifact_dip_detail": "Féll undir venjulegt aflband í ~{n}s.",
+      "artifact_pause_detail": "Afl féll nærri núlli í ~{n}s og hækkaði svo aftur — líklega var hurðin opnuð um miðja lotu eða lota sett í bið."
     },
     "phase_desc": {
       "pre_wash": "Upphafsbleyting eða formeðferð fyrir aðalþvott.",
@@ -874,6 +878,348 @@
       "settings_saved": "Stillingar vistaðar; endurhleðsla samþættingar",
       "suggestions_applied": "Tillögur beitt; endurhleðsla samþættingar",
       "suggestions_dismissed": "Tillögum vísað frá"
+    },
+    "section": {
+      "basic": {
+        "label": "Grunnstillingar",
+        "intro": "Kjarnaauðkenni og það sem flest uppsetningar þarfnast."
+      },
+      "detection": {
+        "label": "Greining",
+        "intro": "Hvernig lota greinist sem byrjuð, í gangi og lokið."
+      },
+      "matching": {
+        "label": "Samsvörun",
+        "intro": "Hvernig loknum lotum er fundið samsvörun við lærð snið og þær merktar."
+      },
+      "timing": {
+        "label": "Tímasetning og gæsla",
+        "intro": "Bakgrunnstíðni, ótengd gæsla og viðhald."
+      },
+      "anti_wrinkle": {
+        "label": "Hrukkuleysi",
+        "intro": "Hrukkuleysi-/krumpluleys-stilling greinir lágtaktsveltiboð eftir aðalfasann og heldur þeim tengdum við lokinni lotu."
+      },
+      "delay": {
+        "label": "Seinkuð ræsing",
+        "intro": "Greining á seinkaðri ræsingu þekkir þegar tæki er tengt en hefur ekki byrjað lotu."
+      },
+      "triggers": {
+        "label": "Kveikjar og dyr",
+        "intro": "Valfrjálsir ytri merkar: lokakveikin, dyraskynjari, hlébilaskipti og losunarminnir."
+      },
+      "notifications": {
+        "label": "Tilkynningar",
+        "intro": "Hvenær og hvernig þú færð tilkynningu um lotuviðburði."
+      },
+      "ml_training": {
+        "label": "ML þjálfun",
+        "intro": "Áætlun endurþjálfunar vélanáms í tæki og gagnastillingar."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Þröskuldar og bil"
+      },
+      "cycle_start": {
+        "label": "Upphaf lotu"
+      },
+      "cycle_end": {
+        "label": "Lok lotu"
+      },
+      "signal_processing": {
+        "label": "Merkjavinnsla"
+      },
+      "predictive_end": {
+        "label": "Forspár lok"
+      },
+      "dishwasher_end": {
+        "label": "Lok uppþvottavélar"
+      },
+      "dtw_refinement": {
+        "label": "DTW fínstilling"
+      },
+      "match_scoring": {
+        "label": "Samsvarsskor"
+      },
+      "duration_gates": {
+        "label": "Lengdargáttir"
+      },
+      "auto_labeling": {
+        "label": "Sjálfvirk merking"
+      },
+      "watchdog": {
+        "label": "Gæsla"
+      },
+      "housekeeping": {
+        "label": "Viðhald"
+      },
+      "debug": {
+        "label": "Villuleit"
+      },
+      "external_end_trigger": {
+        "label": "Ytri lokakveikin"
+      },
+      "door_pause": {
+        "label": "Dyr og hlé"
+      },
+      "unload_reminder": {
+        "label": "Losunarminni"
+      },
+      "services": {
+        "label": "Þjónustur"
+      },
+      "timing": {
+        "label": "Tímasetning"
+      },
+      "messages": {
+        "label": "Skilaboð"
+      },
+      "energy": {
+        "label": "Orka"
+      },
+      "cycle_timers": {
+        "label": "Lotuklukka"
+      },
+      "schedule": {
+        "label": "Áætlun"
+      },
+      "data_management": {
+        "label": "Gagnastjórnun"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Nafn tækis"
+      },
+      "device_type": {
+        "label": "Tegund tækis"
+      },
+      "power_sensor": {
+        "label": "Aflskynjari"
+      },
+      "min_power": {
+        "label": "Lágmarksafl"
+      },
+      "off_delay": {
+        "label": "Slökkviðráð"
+      },
+      "linked_device": {
+        "label": "Flokka undir tæki"
+      },
+      "start_threshold_w": {
+        "label": "Ræsingarþröskuldur"
+      },
+      "stop_threshold_w": {
+        "label": "Stöðvunarþröskuldur"
+      },
+      "min_off_gap": {
+        "label": "Lágm. slökkubil"
+      },
+      "start_duration_threshold": {
+        "label": "Ræsingarlengd"
+      },
+      "start_energy_threshold": {
+        "label": "Ræsingaorka"
+      },
+      "completion_min_seconds": {
+        "label": "Lágm. lotulengd"
+      },
+      "running_dead_zone": {
+        "label": "Dauðbelt í gangi"
+      },
+      "end_energy_threshold": {
+        "label": "Lokaorka"
+      },
+      "end_repeat_count": {
+        "label": "Fjöldi lokakorna"
+      },
+      "sampling_interval": {
+        "label": "Sýnitakabil"
+      },
+      "smoothing_window": {
+        "label": "Jöfnunargluggi"
+      },
+      "abrupt_drop_watts": {
+        "label": "Snögg niðurfelling"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Hlutfall snöggrar niðurfellingar"
+      },
+      "profile_match_threshold": {
+        "label": "Samsvarþröskuldur"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Ósamsvarþröskuldur"
+      },
+      "profile_match_interval": {
+        "label": "Samsvarabil"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Lágm. lengdarhlutfall"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Hám. lengdarhlutfall"
+      },
+      "profile_duration_tolerance": {
+        "label": "Þolinmæði lotulendar sniðs"
+      },
+      "duration_tolerance": {
+        "label": "Matþolinmæði"
+      },
+      "auto_label_confidence": {
+        "label": "Sjálfvirk merkingaöryggi"
+      },
+      "learning_confidence": {
+        "label": "Námsöryggi"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Bæla endurgjöfartilkynningar"
+      },
+      "watchdog_interval": {
+        "label": "Gæsluabil"
+      },
+      "no_update_active_timeout": {
+        "label": "Engin-uppfærsla-tímamark"
+      },
+      "progress_reset_delay": {
+        "label": "Framfaraendurstillingðráð"
+      },
+      "auto_maintenance": {
+        "label": "Sjálfvirkt viðhald (næturþrif)"
+      },
+      "expose_debug_entities": {
+        "label": "Birta villuleitareiningar"
+      },
+      "save_debug_traces": {
+        "label": "Vista villuleitarspor"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Virkja hrukkuleysi-greiningu"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Hám. hrukkuleys-afl"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Hámarkslengd"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Útgönguaflþröskuldur"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Virkja seinkuð-ræsing-greiningu"
+      },
+      "delay_confirm_seconds": {
+        "label": "Staðfestingarsekúndur"
+      },
+      "delay_timeout_hours": {
+        "label": "Tímamarksklst."
+      },
+      "external_end_trigger_enabled": {
+        "label": "Virkja ytri lokakveikin"
+      },
+      "external_end_trigger": {
+        "label": "Ytri kveikjaeining"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Snúa ytri kveikin (kvikna á SLÖKKT)"
+      },
+      "door_sensor_entity": {
+        "label": "Dyraskynjareining"
+      },
+      "pause_cuts_power": {
+        "label": "Hlé slær einnig af straum (með rofa)"
+      },
+      "switch_entity": {
+        "label": "Rofaeining"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Losunarminni-seinkun"
+      },
+      "pump_stuck_duration": {
+        "label": "Fastri dælu-lengd"
+      },
+      "notify_start_services": {
+        "label": "Ræsingarþjónustur"
+      },
+      "notify_finish_services": {
+        "label": "Lokaþjónustur"
+      },
+      "notify_live_services": {
+        "label": "Beinar framfaraþjónustur"
+      },
+      "notify_people": {
+        "label": "Fólk (fyrir Aðeins Heima)"
+      },
+      "notify_only_when_home": {
+        "label": "Tilkynna aðeins þegar heima"
+      },
+      "notify_fire_events": {
+        "label": "Kveikja HA viðburði fyrir tilkynningar"
+      },
+      "notify_before_end_minutes": {
+        "label": "Forlokaviðvörun"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Bein uppfærsluabil"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Bein yfirkeyrð % áður en viðvörun"
+      },
+      "notify_live_chronometer": {
+        "label": "Nota beina tímamæling"
+      },
+      "notify_timeout_seconds": {
+        "label": "Sjálfvirk lokun eftir"
+      },
+      "notify_title": {
+        "label": "Tilkynninga­fyrirsögn"
+      },
+      "notify_icon": {
+        "label": "Tilkynningatákn"
+      },
+      "notify_start_message": {
+        "label": "Ræsingarskilaboð"
+      },
+      "notify_finish_message": {
+        "label": "Lokaskilaboð"
+      },
+      "notify_pre_complete_message": {
+        "label": "For-lokar­skilaboð"
+      },
+      "notify_reminder_message": {
+        "label": "Minningarboð"
+      },
+      "notify_channel": {
+        "label": "Android rás (ræsing/bein)"
+      },
+      "notify_finish_channel": {
+        "label": "Android rás (lok)"
+      },
+      "energy_price_entity": {
+        "label": "Orkuverðeining"
+      },
+      "energy_price_static": {
+        "label": "Fast orkuverð (á kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Lotuklukka"
+      },
+      "enable_ml_models": {
+        "label": "Nota greind líkön meðan á lotu stendur"
+      },
+      "ml_training_enabled": {
+        "label": "Læra frá þessar vél"
+      },
+      "ml_training_hour": {
+        "label": "Læra á klst."
+      },
+      "ml_training_min_cycles": {
+        "label": "Lotur þarf fyrst"
+      },
+      "ml_training_interval_days": {
+        "label": "Athuga í mesta lagi á hverju"
+      }
     }
   }
 }

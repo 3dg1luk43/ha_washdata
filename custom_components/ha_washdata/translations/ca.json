@@ -484,7 +484,7 @@
       "reset_to_builtin": "Restableix als models integrats",
       "reset_to_defaults": "Restableix els valors predeterminats",
       "resume_cycle": "Reprendre",
-      "review": "Revisió",
+      "review": "Revisar",
       "run_analysis": "🔍 Fes una anàlisi de suggeriments",
       "run_auto_label": "Executeu etiqueta automàtica",
       "save": "Desa",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Estadístiques d'emmagatzematge, manteniment, exportació/importació",
       "trim_intro": "Arrossegueu les nanses vermelles o introduïu valors. S'elimina tot el que hi ha fora de la finestra.",
       "unsure_detected_prefix": "WashData no està segur que s'hagi detectat",
-      "updated": "Actualitzat"
+      "updated": "Actualitzat",
+      "feedback_cycles_pending": "{n} cicle{s} per revisar",
+      "artifact_spike_detail": "Va superar la banda de potència habitual durant ~{n}s.",
+      "artifact_dip_detail": "Va caure per sota de la banda de potència habitual durant ~{n}s.",
+      "artifact_pause_detail": "La potència va baixar a gairebé zero durant ~{n}s i després va reprendre — probablement la porta es va obrir a mig cicle o el cicle es va pausar."
     },
     "phase_desc": {
       "pre_wash": "Remull inicial o pretractament abans del rentat principal.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Tendència a la baixa",
       "up": "Tendència a l'alça"
+    },
+    "section": {
+      "basic": {
+        "label": "Bàsic",
+        "intro": "Identitat principal i les opcions essencials que la majoria de configuracions necessiten."
+      },
+      "detection": {
+        "label": "Detecció",
+        "intro": "Com es detecta un cicle com a iniciació, execució i finalització."
+      },
+      "matching": {
+        "label": "Coincidència",
+        "intro": "Com els cicles acabats s'associen als perfils apresos i s'etiqueten."
+      },
+      "timing": {
+        "label": "Temporització i vigilant",
+        "intro": "Cadència en segon pla, el vigilant fora de línia i el manteniment."
+      },
+      "anti_wrinkle": {
+        "label": "Antiarrugues",
+        "intro": "El mode antiarrugues/anticrespa detecta polsos de tumble de baixa potència després de la fase principal i els manté associats al cicle finalitzat."
+      },
+      "delay": {
+        "label": "Inici retardat",
+        "intro": "La detecció d'inici retardat identifica quan un aparell s'ha engegat però encara no ha iniciat el seu cicle."
+      },
+      "triggers": {
+        "label": "Disparadors i portes",
+        "intro": "Senyals externs opcionals: un disparador de final, un sensor de porta, un interruptor de pausa i el recordatori de descàrrega."
+      },
+      "notifications": {
+        "label": "Notificacions",
+        "intro": "Quan i com se us notifica sobre els esdeveniments del cicle."
+      },
+      "ml_training": {
+        "label": "Entrenament ML",
+        "intro": "Programació de reentrament d'aprenentatge automàtic al dispositiu i configuració de dades."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Llindars i buit"
+      },
+      "cycle_start": {
+        "label": "Inici del cicle"
+      },
+      "cycle_end": {
+        "label": "Final del cicle"
+      },
+      "signal_processing": {
+        "label": "Processament del senyal"
+      },
+      "predictive_end": {
+        "label": "Final predictiu"
+      },
+      "dishwasher_end": {
+        "label": "Final del rentaplats"
+      },
+      "dtw_refinement": {
+        "label": "Refinament DTW"
+      },
+      "match_scoring": {
+        "label": "Puntuació de coincidència"
+      },
+      "duration_gates": {
+        "label": "Portes de durada"
+      },
+      "auto_labeling": {
+        "label": "Etiquetatge automàtic"
+      },
+      "watchdog": {
+        "label": "Vigilant"
+      },
+      "housekeeping": {
+        "label": "Manteniment"
+      },
+      "debug": {
+        "label": "Depuració"
+      },
+      "external_end_trigger": {
+        "label": "Disparador de final extern"
+      },
+      "door_pause": {
+        "label": "Porta i pausa"
+      },
+      "unload_reminder": {
+        "label": "Recordatori de descàrrega"
+      },
+      "services": {
+        "label": "Serveis"
+      },
+      "timing": {
+        "label": "Temporització"
+      },
+      "messages": {
+        "label": "Missatges"
+      },
+      "energy": {
+        "label": "Energia"
+      },
+      "cycle_timers": {
+        "label": "Temporitzadors de cicle"
+      },
+      "schedule": {
+        "label": "Programació"
+      },
+      "data_management": {
+        "label": "Gestió de dades"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Nom del dispositiu"
+      },
+      "device_type": {
+        "label": "Tipus de dispositiu"
+      },
+      "power_sensor": {
+        "label": "Sensor de potència"
+      },
+      "min_power": {
+        "label": "Potència mínima"
+      },
+      "off_delay": {
+        "label": "Retard d'apagada"
+      },
+      "linked_device": {
+        "label": "Agrupa sota el dispositiu"
+      },
+      "start_threshold_w": {
+        "label": "Llindar d'inici"
+      },
+      "stop_threshold_w": {
+        "label": "Llindar d'aturada"
+      },
+      "min_off_gap": {
+        "label": "Buit mínim apagat"
+      },
+      "start_duration_threshold": {
+        "label": "Durada d'inici"
+      },
+      "start_energy_threshold": {
+        "label": "Energia d'inici"
+      },
+      "completion_min_seconds": {
+        "label": "Durada mínima del cicle"
+      },
+      "running_dead_zone": {
+        "label": "Zona morta en execució"
+      },
+      "end_energy_threshold": {
+        "label": "Energia final"
+      },
+      "end_repeat_count": {
+        "label": "Recompte de repeticions finals"
+      },
+      "sampling_interval": {
+        "label": "Interval de mostreig"
+      },
+      "smoothing_window": {
+        "label": "Finestra de suavitzat"
+      },
+      "abrupt_drop_watts": {
+        "label": "Caiguda brusca"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Ràtio de caiguda brusca"
+      },
+      "profile_match_threshold": {
+        "label": "Llindar de coincidència"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Llindar de desajust"
+      },
+      "profile_match_interval": {
+        "label": "Interval de coincidència"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Ràtio de durada mínima"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Ràtio de durada màxima"
+      },
+      "profile_duration_tolerance": {
+        "label": "Tolerància de durada del perfil"
+      },
+      "duration_tolerance": {
+        "label": "Tolerància d'estimació"
+      },
+      "auto_label_confidence": {
+        "label": "Confiança d'etiquetatge automàtic"
+      },
+      "learning_confidence": {
+        "label": "Confiança d'aprenentatge"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Suprimir les notificacions de comentaris"
+      },
+      "watchdog_interval": {
+        "label": "Interval del vigilant"
+      },
+      "no_update_active_timeout": {
+        "label": "Temps d'espera sense actualització"
+      },
+      "progress_reset_delay": {
+        "label": "Retard de reinici del progrés"
+      },
+      "auto_maintenance": {
+        "label": "Manteniment automàtic (neteja nocturna)"
+      },
+      "expose_debug_entities": {
+        "label": "Exposa les entitats de depuració"
+      },
+      "save_debug_traces": {
+        "label": "Desa les traces de depuració"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Activa la detecció antiarrugues"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Potència màxima antiarrugues"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Durada màxima"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Llindar de potència de sortida"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Activa la detecció d'inici retardat"
+      },
+      "delay_confirm_seconds": {
+        "label": "Segons de confirmació"
+      },
+      "delay_timeout_hours": {
+        "label": "Hores de temps d'espera"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Activa el disparador de final extern"
+      },
+      "external_end_trigger": {
+        "label": "Entitat de disparador extern"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Inverteix el disparador extern (disparar a DESACTIVAT)"
+      },
+      "door_sensor_entity": {
+        "label": "Entitat del sensor de porta"
+      },
+      "pause_cuts_power": {
+        "label": "La pausa també talla l'alimentació (via interruptor)"
+      },
+      "switch_entity": {
+        "label": "Entitat de l'interruptor"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Retard del recordatori de descàrrega"
+      },
+      "pump_stuck_duration": {
+        "label": "Durada de la bomba encallada"
+      },
+      "notify_start_services": {
+        "label": "Serveis d'inici"
+      },
+      "notify_finish_services": {
+        "label": "Serveis de finalització"
+      },
+      "notify_live_services": {
+        "label": "Serveis de progrés en directe"
+      },
+      "notify_people": {
+        "label": "Persones (per a Notificar només quan estic a casa)"
+      },
+      "notify_only_when_home": {
+        "label": "Notificar només quan estic a casa"
+      },
+      "notify_fire_events": {
+        "label": "Llançar esdeveniments HA per a notificacions"
+      },
+      "notify_before_end_minutes": {
+        "label": "Alerta prèvia al final"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Interval d'actualització en directe"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% de sobreexecució en directe abans de l'alerta"
+      },
+      "notify_live_chronometer": {
+        "label": "Utilitza el cronòmetre en directe"
+      },
+      "notify_timeout_seconds": {
+        "label": "Dismiss automàtic després de"
+      },
+      "notify_title": {
+        "label": "Títol de la notificació"
+      },
+      "notify_icon": {
+        "label": "Icona de la notificació"
+      },
+      "notify_start_message": {
+        "label": "Missatge d'inici"
+      },
+      "notify_finish_message": {
+        "label": "Missatge de finalització"
+      },
+      "notify_pre_complete_message": {
+        "label": "Missatge de pre-finalització"
+      },
+      "notify_reminder_message": {
+        "label": "Missatge de recordatori"
+      },
+      "notify_channel": {
+        "label": "Canal Android (inici/en directe)"
+      },
+      "notify_finish_channel": {
+        "label": "Canal Android (finalització)"
+      },
+      "energy_price_entity": {
+        "label": "Entitat del preu de l'energia"
+      },
+      "energy_price_static": {
+        "label": "Preu estàtic de l'energia (per kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Temporitzadors del cicle"
+      },
+      "enable_ml_models": {
+        "label": "Aplica models intel·ligents durant un cicle"
+      },
+      "ml_training_enabled": {
+        "label": "Aprèn d'aquesta màquina"
+      },
+      "ml_training_hour": {
+        "label": "Aprèn a l'hora"
+      },
+      "ml_training_min_cycles": {
+        "label": "Cicles necessaris primer"
+      },
+      "ml_training_interval_days": {
+        "label": "Comprova com a màxim cada"
+      }
     }
   }
 }

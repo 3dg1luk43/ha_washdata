@@ -26,13 +26,13 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
-        "description": "Update the device name, appliance type, or power sensor.",
+        "title": "Konfiguroi WashData uudelleen",
+        "description": "Päivitä laitteen nimi, laitteen tyyppi tai tehoanturi.",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Laitteen nimi",
+          "device_type": "Laitteen tyyppi",
+          "power_sensor": "Tehon anturi",
+          "min_power": "Minimitehokynnys (W)"
         }
       }
     },
@@ -40,23 +40,23 @@
       "cannot_connect": "Yhteyden muodostaminen epäonnistui",
       "invalid_auth": "Virheellinen todennus",
       "unknown": "Odottamaton virhe",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Tehokynnyksen on oltava suurempi kuin 0"
     },
     "abort": {
       "already_configured": "Laite on jo määritetty",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Uudelleenmäärittely onnistui"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "WashData-asetukset",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
           "name": "Laitteen nimi",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Laitteen tyyppi",
+          "power_sensor": "Tehon anturi",
+          "min_power": "Minimitehokynnys (W)"
         }
       }
     },
@@ -278,12 +278,12 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
-      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "name": "Käynnistä ML-koulutus",
+      "description": "Kouluta laitteen ML-mallit manuaalisesti uudelleen tämän laitteen omien merkittyjen syklien perusteella (kokeellinen).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Laite",
+          "description": "WashData-laite, jonka malleja koulutetaan uudelleen."
         }
       }
     }
@@ -349,7 +349,7 @@
         }
       },
       "ambiguity": {
-        "name": "Match Ambiguity"
+        "name": "Vastaavuuden epäselvyys"
       },
       "current_phase": {
         "name": "Nykyinen vaihe"
@@ -439,7 +439,7 @@
       "cancel": "Peruuttaa",
       "clear_debug": "Tyhjennä virheenkorjaustiedot",
       "clear_splits": "Selkeä",
-      "close": "Lähellä",
+      "close": "Sulje",
       "compare": "Vertaa",
       "confirm": "Vahvistaa",
       "convert_to_automation": "Muunna automaatioon",
@@ -453,7 +453,7 @@
       "dismiss": "Hylkää",
       "done": "Tehty",
       "edit": "Muokata",
-      "export": "Viedä",
+      "export": "Vie",
       "export_json": "Vie JSONiin",
       "force_stop": "Pakota pysäytys",
       "from_template": "Mallista ▾",
@@ -461,7 +461,7 @@
       "import_json": "Tuo JSONista",
       "import_overwrite": "Tuo (korvaa tiedot)",
       "inspect": "Tarkastaa",
-      "label": "Label",
+      "label": "Merkitse",
       "manage": "Hallitse",
       "merge": "Yhdistää",
       "new_automation": "＋ Uusi automaatio",
@@ -484,7 +484,7 @@
       "reset_to_builtin": "Palauta sisäänrakennetut mallit",
       "reset_to_defaults": "Palauta oletusasetukset",
       "resume_cycle": "Jatka sykliä",
-      "review": "Arvostelu",
+      "review": "Arvioi",
       "run_analysis": "🔍 Suorita ehdotusanalyysi",
       "run_auto_label": "Suorita Auto-Label",
       "save": "Tallentaa",
@@ -554,8 +554,8 @@
       "cost": "Maksaa",
       "create_new_profile": "+ Luo uusi profiili…",
       "cycle_date_display": "Jakson päivämäärän näyttö",
-      "cycle_health": "Pyöräilyn terveys",
-      "cycles_count": "Pyörät",
+      "cycle_health": "Syklin kunto",
+      "cycles_count": "Syklit",
       "date": "Päivämäärä",
       "debug_traces": "Debug Traces",
       "default": "Oletus",
@@ -615,7 +615,7 @@
     },
     "badge": {
       "golden_cycle": "Tallennettu vertailujakso",
-      "reviewed": "Arvosteltu",
+      "reviewed": "Tarkistettu",
       "feedback_requested": "Palautetta pyydetty",
       "needs_review": "Vaatii tarkistuksen",
       "overrun": "Juoksi tavallista pidempään",
@@ -641,7 +641,7 @@
       "cycle": "Kierrä",
       "edit_phase": "Muokkaa vaihetta",
       "import_config": "Tuo kokoonpano",
-      "label_cycle": "Label Cycle",
+      "label_cycle": "Merkitse sykli",
       "new_phase": "Uusi vaihe",
       "process_recording": "Prosessin tallennus"
     },
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Varastointitilastot, ylläpito, vienti/tuonti",
       "trim_intro": "Vedä punaisia ​​kahvoja tai syötä arvot. Kaikki ikkunan ulkopuolella poistetaan.",
       "unsure_detected_prefix": "WashData ei ole varma, onko se havaittu",
-      "updated": "Päivitetty"
+      "updated": "Päivitetty",
+      "feedback_cycles_pending": "{n} sykliä tarkistettavana",
+      "artifact_spike_detail": "Ylitti tavallisen tehon ylärajan noin {n} sekunnin ajan.",
+      "artifact_dip_detail": "Alitti tavallisen tehon alarajan noin {n} sekunnin ajan.",
+      "artifact_pause_detail": "Teho laski lähes nollaan noin {n} sekunniksi ja jatkui sitten — todennäköisesti ovi avattiin syklin aikana tai sykli pysäytettiin."
     },
     "phase_desc": {
       "pre_wash": "Ensimmäinen liotus tai esikäsittely ennen pääpesua.",
@@ -746,11 +750,11 @@
       "spin_wd": "Nopea uutto ennen kuivaussiirtymää.",
       "soak": "Vähäaktiivinen liotusjakso aktiivisten pesuvaiheiden välillä.",
       "soak_dw": "Pidennetty liotusaika raskaalle maaperälle.",
-      "anti_crease": "Ajoittain lyhyitä ryppyjä lopettamisen jälkeen vähentämään ryppyjä.",
+      "anti_crease": "Satunnaisia lyhyitä rumpujaksia valmistumisen jälkeen vaatteiden rypistyistä ehkäisemiseksi.",
       "heat_up": "Lämmittimen ensimmäinen lämmitys ennen täyden kuivumisen alkamista.",
       "drying": "Lämmitetty pääjakso.",
       "cool_down": "Pyöriminen ilman lämpöä syklin lopussa.",
-      "anti_wrinkle": "Säännöllinen kierron jälkeinen rumpu ryppyjen vähentämiseksi.",
+      "anti_wrinkle": "Jaksoittainen rummun pyörittäminen syklin jälkeen vaatteiden rypistyistä ehkäisemiseksi.",
       "sensor_check": "Lyhyt vähätehoinen tauko, kun kuivuutta mitataan.",
       "drain_and_switch": "Siirtymäaika pesusta kuivaustilaan.",
       "pre_rinse": "Ensimmäinen suihkutus ennen pesuainepesua.",
@@ -772,7 +776,7 @@
       "fit_slight": "Lievä",
       "fit_strong": "Vahva",
       "fit_weak": "Heikko",
-      "fit_word": "sovi",
+      "fit_word": "sopivuus",
       "personalized": "● Mukautettu tälle koneelle"
     },
     "pref": {
@@ -801,7 +805,7 @@
     "tab": {
       "advanced": "Edistynyt",
       "diagnostics": "Diagnostiikka",
-      "history": "Pyörät",
+      "history": "Syklit",
       "ml": "ML koulutus",
       "pp_cleanup": "Puhdistus",
       "pp_manage": "Hallitse",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Trendikäs alaspäin",
       "up": "Nouseva suunta"
+    },
+    "section": {
+      "basic": {
+        "label": "Perusasetukset",
+        "intro": "Ydinidentiteetti ja olennaiset tiedot, joita useimmat asetukset tarvitsevat."
+      },
+      "detection": {
+        "label": "Tunnistus",
+        "intro": "Miten sykli tunnistetaan alkaneeksi, käynnissä olevaksi ja päättyneeksi."
+      },
+      "matching": {
+        "label": "Täsmäytys",
+        "intro": "Miten valmiit syklit täsmäytetään opittuihin profiileihin ja merkitään."
+      },
+      "timing": {
+        "label": "Ajoitus ja tarkkailija",
+        "intro": "Taustatoiminnot, offline-tarkkailija ja huolto."
+      },
+      "anti_wrinkle": {
+        "label": "Ryppyjenesto",
+        "intro": "Ryppyjenestotila tunnistaa lyhyet pienet pyörimisjaksot päävaiheen jälkeen ja pitää ne kiinnitettynä valmiiseen sykliin."
+      },
+      "delay": {
+        "label": "Viivästetty käynnistys",
+        "intro": "Viivästetyn käynnistyksen tunnistus havaitsee, kun laite on päällä mutta sykliä ei ole vielä aloitettu."
+      },
+      "triggers": {
+        "label": "Käynnistysimpulssit ja ovet",
+        "intro": "Valinnaiset ulkoiset signaalit: päätyssignaali, ovianturi, taukokytkin ja purkamismuistutus."
+      },
+      "notifications": {
+        "label": "Ilmoitukset",
+        "intro": "Milloin ja miten saat ilmoituksia syklitapahtumista."
+      },
+      "ml_training": {
+        "label": "ML-koulutus",
+        "intro": "Laitteen koneoppimisen uudelleenkoulutusaikataulu ja tietoasetukset."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Kynnykset ja väli"
+      },
+      "cycle_start": {
+        "label": "Syklin alku"
+      },
+      "cycle_end": {
+        "label": "Syklin loppu"
+      },
+      "signal_processing": {
+        "label": "Signaalinkäsittely"
+      },
+      "predictive_end": {
+        "label": "Ennakoiva lopetus"
+      },
+      "dishwasher_end": {
+        "label": "Astianpesukoneen lopetus"
+      },
+      "dtw_refinement": {
+        "label": "DTW-tarkennus"
+      },
+      "match_scoring": {
+        "label": "Täsmäytyspisteet"
+      },
+      "duration_gates": {
+        "label": "Keston portit"
+      },
+      "auto_labeling": {
+        "label": "Automaattiset merkinnät"
+      },
+      "watchdog": {
+        "label": "Tarkkailija"
+      },
+      "housekeeping": {
+        "label": "Huolto"
+      },
+      "debug": {
+        "label": "Virhehaku"
+      },
+      "external_end_trigger": {
+        "label": "Ulkoinen päätyssignaali"
+      },
+      "door_pause": {
+        "label": "Ovi ja tauko"
+      },
+      "unload_reminder": {
+        "label": "Purkamismuistutus"
+      },
+      "services": {
+        "label": "Palvelut"
+      },
+      "timing": {
+        "label": "Ajoitus"
+      },
+      "messages": {
+        "label": "Viestit"
+      },
+      "energy": {
+        "label": "Energia"
+      },
+      "cycle_timers": {
+        "label": "Sykliajastimet"
+      },
+      "schedule": {
+        "label": "Aikataulu"
+      },
+      "data_management": {
+        "label": "Tiedonhallinta"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Laitteen nimi"
+      },
+      "device_type": {
+        "label": "Laitteen tyyppi"
+      },
+      "power_sensor": {
+        "label": "Tehoanturi"
+      },
+      "min_power": {
+        "label": "Minimiteho"
+      },
+      "off_delay": {
+        "label": "Sammutusviive"
+      },
+      "linked_device": {
+        "label": "Ryhmittele laitteen alle"
+      },
+      "start_threshold_w": {
+        "label": "Käynnistyskynnys"
+      },
+      "stop_threshold_w": {
+        "label": "Pysäytyskynnys"
+      },
+      "min_off_gap": {
+        "label": "Pienin sammutusväli"
+      },
+      "start_duration_threshold": {
+        "label": "Käynnistyksen kesto"
+      },
+      "start_energy_threshold": {
+        "label": "Käynnistyksen energia"
+      },
+      "completion_min_seconds": {
+        "label": "Syklin vähimmäiskesto"
+      },
+      "running_dead_zone": {
+        "label": "Käynnissäolon kuolualue"
+      },
+      "end_energy_threshold": {
+        "label": "Lopetuksen energiakynnys"
+      },
+      "end_repeat_count": {
+        "label": "Lopetuksen toistomäärä"
+      },
+      "sampling_interval": {
+        "label": "Näytteenottoväli"
+      },
+      "smoothing_window": {
+        "label": "Tasoitusikkuna"
+      },
+      "abrupt_drop_watts": {
+        "label": "Äkillinen pudotus"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Äkillisen pudotuksen suhde"
+      },
+      "profile_match_threshold": {
+        "label": "Täsmäytyskynnys"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Eritäsmäytyskynnys"
+      },
+      "profile_match_interval": {
+        "label": "Täsmäytysväli"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Vähimmäiskestosuhde"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Enimmäiskestosuhde"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profiilin kestotoleranssi"
+      },
+      "duration_tolerance": {
+        "label": "Arviotoleranssi"
+      },
+      "auto_label_confidence": {
+        "label": "Automaattimerkinnän varmuus"
+      },
+      "learning_confidence": {
+        "label": "Oppimisen varmuus"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Estä palauteilmoitukset"
+      },
+      "watchdog_interval": {
+        "label": "Tarkkailijaväli"
+      },
+      "no_update_active_timeout": {
+        "label": "Päivityksettömyyden aikakatkaisuaika"
+      },
+      "progress_reset_delay": {
+        "label": "Edistymisen nollausviive"
+      },
+      "auto_maintenance": {
+        "label": "Automaattinen huolto (yösiivous)"
+      },
+      "expose_debug_entities": {
+        "label": "Näytä virheenkorjausentiteetit"
+      },
+      "save_debug_traces": {
+        "label": "Tallenna virheenkorjausjäljet"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Ota ryppyjenesto käyttöön"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Ryppyjeneston enimmäisteho"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Enimmäiskesto"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Poistumistehokynnys"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Ota viivästetyn käynnistyksen tunnistus käyttöön"
+      },
+      "delay_confirm_seconds": {
+        "label": "Vahvistusaika sekunteina"
+      },
+      "delay_timeout_hours": {
+        "label": "Aikakatkaisutunnit"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Ota ulkoinen päätyssignaali käyttöön"
+      },
+      "external_end_trigger": {
+        "label": "Ulkoisen signaalin entiteetti"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Käännä ulkoinen signaali (laukaise POIS)"
+      },
+      "door_sensor_entity": {
+        "label": "Ovianturin entiteetti"
+      },
+      "pause_cuts_power": {
+        "label": "Tauko katkaisee myös virran (kytkimen kautta)"
+      },
+      "switch_entity": {
+        "label": "Kytkimen entiteetti"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Purkamismuistutuksen viive"
+      },
+      "pump_stuck_duration": {
+        "label": "Pumpun jumiutumiskesto"
+      },
+      "notify_start_services": {
+        "label": "Käynnistyspalvelut"
+      },
+      "notify_finish_services": {
+        "label": "Lopetuspalvelut"
+      },
+      "notify_live_services": {
+        "label": "Suoran edistymisen palvelut"
+      },
+      "notify_people": {
+        "label": "Henkilöt (Ilmoita vain kotona ollessa)"
+      },
+      "notify_only_when_home": {
+        "label": "Ilmoita vain kotona ollessa"
+      },
+      "notify_fire_events": {
+        "label": "Käynnistä HA-tapahtumat ilmoituksille"
+      },
+      "notify_before_end_minutes": {
+        "label": "Lopetusennakkoilmoitus"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Suoran päivityksen väli"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Suoran yliajan % ennen hälytystä"
+      },
+      "notify_live_chronometer": {
+        "label": "Käytä suoraa kronometriä"
+      },
+      "notify_timeout_seconds": {
+        "label": "Piilota automaattisesti sen jälkeen"
+      },
+      "notify_title": {
+        "label": "Ilmoituksen otsikko"
+      },
+      "notify_icon": {
+        "label": "Ilmoituksen kuvake"
+      },
+      "notify_start_message": {
+        "label": "Käynnistysviesti"
+      },
+      "notify_finish_message": {
+        "label": "Lopetusviesti"
+      },
+      "notify_pre_complete_message": {
+        "label": "Ennen valmistumista -viesti"
+      },
+      "notify_reminder_message": {
+        "label": "Muistutusviesti"
+      },
+      "notify_channel": {
+        "label": "Android-kanava (käynnistys/suora)"
+      },
+      "notify_finish_channel": {
+        "label": "Android-kanava (lopetus)"
+      },
+      "energy_price_entity": {
+        "label": "Energiahinnan entiteetti"
+      },
+      "energy_price_static": {
+        "label": "Kiinteä energiahinta (per kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Sykliajastimet"
+      },
+      "enable_ml_models": {
+        "label": "Käytä älykkäitä malleja syklin aikana"
+      },
+      "ml_training_enabled": {
+        "label": "Opi tästä koneesta"
+      },
+      "ml_training_hour": {
+        "label": "Opi tunnilla"
+      },
+      "ml_training_min_cycles": {
+        "label": "Tarvittavat syklit ensin"
+      },
+      "ml_training_interval_days": {
+        "label": "Tarkista enintään joka"
+      }
     }
   }
 }

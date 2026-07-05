@@ -547,7 +547,7 @@
       "cancel": "Ματαίωση",
       "clear_debug": "Εκκαθάριση δεδομένων εντοπισμού σφαλμάτων",
       "clear_splits": "Σαφής",
-      "close": "Κοντά",
+      "close": "Κλείσιμο",
       "compare": "Συγκρίνω",
       "confirm": "Επιβεβαιώνω",
       "convert_to_automation": "Μετατροπή σε αυτοματισμό",
@@ -569,7 +569,7 @@
       "import_json": "Εισαγωγή από JSON",
       "import_overwrite": "Εισαγωγή (αντικαθιστά δεδομένα)",
       "inspect": "Ελέγχω",
-      "label": "Επιγραφή",
+      "label": "Επισήμανση",
       "manage": "Διαχειρίζομαι",
       "merge": "Συγχώνευση",
       "new_automation": "＋ Νέος Αυτοματισμός",
@@ -591,8 +591,8 @@
       "reset": "Επαναφορά",
       "reset_to_builtin": "Επαναφορά σε ενσωματωμένα μοντέλα",
       "reset_to_defaults": "Επαναφορά στις προεπιλογές",
-      "resume_cycle": "Συνέχεια",
-      "review": "Κριτική",
+      "resume_cycle": "Συνέχιση κύκλου",
+      "review": "Αξιολόγηση",
       "run_analysis": "🔍 Εκτέλεση ανάλυσης προτάσεων",
       "run_auto_label": "Εκτελέστε Auto-Label",
       "save": "Εκτός",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Στατιστικά αποθήκευσης, συντήρηση, εξαγωγές/εισαγωγές",
       "trim_intro": "Σύρετε τις κόκκινες λαβές ή εισαγάγετε τιμές. Όλα έξω από το παράθυρο αφαιρούνται.",
       "unsure_detected_prefix": "Το WashData δεν είναι βέβαιο ότι εντόπισε",
-      "updated": "Ενημερώθηκε"
+      "updated": "Ενημερώθηκε",
+      "feedback_cycles_pending": "{n} κύκλος/κύκλοι για αξιολόγηση",
+      "artifact_spike_detail": "Υπερέβη το συνηθισμένο εύρος ισχύος για ~{n}s.",
+      "artifact_dip_detail": "Έπεσε κάτω από το συνηθισμένο εύρος ισχύος για ~{n}s.",
+      "artifact_pause_detail": "Η ισχύς έπεσε σχεδόν στο μηδέν για ~{n}s και μετά ανέκαμψε — πιθανώς η πόρτα άνοιξε στα μέσα του κύκλου ή ο κύκλος τέθηκε σε παύση."
     },
     "phase_desc": {
       "pre_wash": "Αρχικό εμποτισμό ή προεπεξεργασία πριν από την κύρια πλύση.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Πτωτικές τάσεις",
       "up": "Ανοδική τάση"
+    },
+    "section": {
+      "basic": {
+        "label": "Βασικά",
+        "intro": "Βασική ταυτότητα και τα απαραίτητα στοιχεία που χρειάζονται οι περισσότερες διαμορφώσεις."
+      },
+      "detection": {
+        "label": "Ανίχνευση",
+        "intro": "Πώς εντοπίζεται ένας κύκλος ως έναρξη, λειτουργία και ολοκλήρωση."
+      },
+      "matching": {
+        "label": "Αντιστοίχιση",
+        "intro": "Πώς οι ολοκληρωμένοι κύκλοι αντιστοιχίζονται σε μαθημένα προφίλ και επισημαίνονται."
+      },
+      "timing": {
+        "label": "Χρονισμός & Watchdog",
+        "intro": "Ρυθμός παρασκηνίου, το watchdog εκτός σύνδεσης και η συντήρηση."
+      },
+      "anti_wrinkle": {
+        "label": "Αντί-τσάκισμα",
+        "intro": "Η λειτουργία κατά τσακίσματος εντοπίζει παλμούς χαμηλής ισχύος τύμβου μετά την κύρια φάση και τους διατηρεί συνδεδεμένους με τον ολοκληρωμένο κύκλο."
+      },
+      "delay": {
+        "label": "Καθυστερημένη Εκκίνηση",
+        "intro": "Η ανίχνευση καθυστερημένης εκκίνησης αναγνωρίζει πότε μια συσκευή είναι ενεργοποιημένη αλλά δεν έχει ακόμα ξεκινήσει τον κύκλο της."
+      },
+      "triggers": {
+        "label": "Ενεργοποιητές & Πόρτες",
+        "intro": "Προαιρετικά εξωτερικά σήματα: ενεργοποιητής τέλους, αισθητήρας πόρτας, διακόπτης παύσης και υπενθύμιση αποφόρτωσης."
+      },
+      "notifications": {
+        "label": "Ειδοποιήσεις",
+        "intro": "Πότε και πώς λαμβάνετε ειδοποιήσεις για συμβάντα κύκλου."
+      },
+      "ml_training": {
+        "label": "Εκπαίδευση ML",
+        "intro": "Πρόγραμμα επανεκπαίδευσης μηχανικής μάθησης στη συσκευή και ρυθμίσεις δεδομένων."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Κατώφλια & Κενό"
+      },
+      "cycle_start": {
+        "label": "Έναρξη Κύκλου"
+      },
+      "cycle_end": {
+        "label": "Λήξη Κύκλου"
+      },
+      "signal_processing": {
+        "label": "Επεξεργασία Σήματος"
+      },
+      "predictive_end": {
+        "label": "Προβλεπτική Λήξη"
+      },
+      "dishwasher_end": {
+        "label": "Λήξη Πλυντηρίου Πιάτων"
+      },
+      "dtw_refinement": {
+        "label": "Βελτίωση DTW"
+      },
+      "match_scoring": {
+        "label": "Βαθμολόγηση Αντιστοίχισης"
+      },
+      "duration_gates": {
+        "label": "Πύλες Διάρκειας"
+      },
+      "auto_labeling": {
+        "label": "Αυτόματη Επισήμανση"
+      },
+      "watchdog": {
+        "label": "Watchdog"
+      },
+      "housekeeping": {
+        "label": "Συντήρηση"
+      },
+      "debug": {
+        "label": "Αποσφαλμάτωση"
+      },
+      "external_end_trigger": {
+        "label": "Εξωτερικός Ενεργοποιητής Λήξης"
+      },
+      "door_pause": {
+        "label": "Πόρτα & Παύση"
+      },
+      "unload_reminder": {
+        "label": "Υπενθύμιση Αποφόρτωσης"
+      },
+      "services": {
+        "label": "Υπηρεσίες"
+      },
+      "timing": {
+        "label": "Χρονισμός"
+      },
+      "messages": {
+        "label": "Μηνύματα"
+      },
+      "energy": {
+        "label": "Ενέργεια"
+      },
+      "cycle_timers": {
+        "label": "Χρονόμετρα Κύκλου"
+      },
+      "schedule": {
+        "label": "Πρόγραμμα"
+      },
+      "data_management": {
+        "label": "Διαχείριση Δεδομένων"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Όνομα Συσκευής"
+      },
+      "device_type": {
+        "label": "Τύπος Συσκευής"
+      },
+      "power_sensor": {
+        "label": "Αισθητήρας Ισχύος"
+      },
+      "min_power": {
+        "label": "Ελάχιστη Ισχύς"
+      },
+      "off_delay": {
+        "label": "Καθυστέρηση Απενεργοποίησης"
+      },
+      "linked_device": {
+        "label": "Ομαδοποίηση κάτω από Συσκευή"
+      },
+      "start_threshold_w": {
+        "label": "Κατώφλι Εκκίνησης"
+      },
+      "stop_threshold_w": {
+        "label": "Κατώφλι Τερματισμού"
+      },
+      "min_off_gap": {
+        "label": "Ελάχιστο Κενό Απενεργοποίησης"
+      },
+      "start_duration_threshold": {
+        "label": "Διάρκεια Εκκίνησης"
+      },
+      "start_energy_threshold": {
+        "label": "Ενέργεια Εκκίνησης"
+      },
+      "completion_min_seconds": {
+        "label": "Ελάχιστη Διάρκεια Κύκλου"
+      },
+      "running_dead_zone": {
+        "label": "Νεκρή Ζώνη Λειτουργίας"
+      },
+      "end_energy_threshold": {
+        "label": "Ενέργεια Λήξης"
+      },
+      "end_repeat_count": {
+        "label": "Πλήθος Επαναλήψεων Λήξης"
+      },
+      "sampling_interval": {
+        "label": "Διάστημα Δειγματοληψίας"
+      },
+      "smoothing_window": {
+        "label": "Παράθυρο Εξομάλυνσης"
+      },
+      "abrupt_drop_watts": {
+        "label": "Απότομη Πτώση"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Αναλογία Απότομης Πτώσης"
+      },
+      "profile_match_threshold": {
+        "label": "Κατώφλι Αντιστοίχισης"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Κατώφλι Μη-Αντιστοίχισης"
+      },
+      "profile_match_interval": {
+        "label": "Διάστημα Αντιστοίχισης"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Ελάχιστη Αναλογία Διάρκειας"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Μέγιστη Αναλογία Διάρκειας"
+      },
+      "profile_duration_tolerance": {
+        "label": "Ανοχή Διάρκειας Προφίλ"
+      },
+      "duration_tolerance": {
+        "label": "Ανοχή Εκτίμησης"
+      },
+      "auto_label_confidence": {
+        "label": "Εμπιστοσύνη Αυτόματης Επισήμανσης"
+      },
+      "learning_confidence": {
+        "label": "Εμπιστοσύνη Μάθησης"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Απόκρυψη Ειδοποιήσεων Σχολίων"
+      },
+      "watchdog_interval": {
+        "label": "Διάστημα Watchdog"
+      },
+      "no_update_active_timeout": {
+        "label": "Λήξη Χρόνου Χωρίς Ενημέρωση"
+      },
+      "progress_reset_delay": {
+        "label": "Καθυστέρηση Επαναφοράς Προόδου"
+      },
+      "auto_maintenance": {
+        "label": "Αυτόματη Συντήρηση (νυχτερινός καθαρισμός)"
+      },
+      "expose_debug_entities": {
+        "label": "Εμφάνιση Οντοτήτων Αποσφαλμάτωσης"
+      },
+      "save_debug_traces": {
+        "label": "Αποθήκευση Ιχνών Αποσφαλμάτωσης"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Ενεργοποίηση Ανίχνευσης Κατά Τσακίσματος"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Μέγιστη Ισχύς Κατά Τσακίσματος"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Μέγιστη Διάρκεια"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Κατώφλι Ισχύος Εξόδου"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Ενεργοποίηση Ανίχνευσης Καθυστερημένης Εκκίνησης"
+      },
+      "delay_confirm_seconds": {
+        "label": "Δευτερόλεπτα Επιβεβαίωσης"
+      },
+      "delay_timeout_hours": {
+        "label": "Ώρες Λήξης Χρόνου"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Ενεργοποίηση Εξωτερικού Ενεργοποιητή Λήξης"
+      },
+      "external_end_trigger": {
+        "label": "Οντότητα Εξωτερικού Ενεργοποιητή"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Αντιστροφή Εξωτερικού Ενεργοποιητή (ενεργοποίηση στο ΑΠΕΝΕΡΓΟ)"
+      },
+      "door_sensor_entity": {
+        "label": "Οντότητα Αισθητήρα Πόρτας"
+      },
+      "pause_cuts_power": {
+        "label": "Η Παύση Διακόπτει Επίσης Ρεύμα (μέσω διακόπτη)"
+      },
+      "switch_entity": {
+        "label": "Οντότητα Διακόπτη"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Καθυστέρηση Υπενθύμισης Αποφόρτωσης"
+      },
+      "pump_stuck_duration": {
+        "label": "Διάρκεια Κολλημένης Αντλίας"
+      },
+      "notify_start_services": {
+        "label": "Υπηρεσίες Εκκίνησης"
+      },
+      "notify_finish_services": {
+        "label": "Υπηρεσίες Λήξης"
+      },
+      "notify_live_services": {
+        "label": "Υπηρεσίες Ζωντανής Προόδου"
+      },
+      "notify_people": {
+        "label": "Άτομα (για Μόνο Όταν Είμαι Σπίτι)"
+      },
+      "notify_only_when_home": {
+        "label": "Ειδοποίηση Μόνο Όταν Είμαι Σπίτι"
+      },
+      "notify_fire_events": {
+        "label": "Ενεργοποίηση Συμβάντων HA για Ειδοποιήσεις"
+      },
+      "notify_before_end_minutes": {
+        "label": "Προειδοποίηση Πριν το Τέλος"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Διάστημα Ζωντανής Ενημέρωσης"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% Υπέρβαση Ζωντανά Πριν την Ειδοποίηση"
+      },
+      "notify_live_chronometer": {
+        "label": "Χρήση Ζωντανού Χρονόμετρου"
+      },
+      "notify_timeout_seconds": {
+        "label": "Αυτόματη Απόρριψη Μετά από"
+      },
+      "notify_title": {
+        "label": "Τίτλος Ειδοποίησης"
+      },
+      "notify_icon": {
+        "label": "Εικονίδιο Ειδοποίησης"
+      },
+      "notify_start_message": {
+        "label": "Μήνυμα Εκκίνησης"
+      },
+      "notify_finish_message": {
+        "label": "Μήνυμα Λήξης"
+      },
+      "notify_pre_complete_message": {
+        "label": "Μήνυμα Προ-Ολοκλήρωσης"
+      },
+      "notify_reminder_message": {
+        "label": "Μήνυμα Υπενθύμισης"
+      },
+      "notify_channel": {
+        "label": "Κανάλι Android (εκκίνηση/ζωντανά)"
+      },
+      "notify_finish_channel": {
+        "label": "Κανάλι Android (λήξη)"
+      },
+      "energy_price_entity": {
+        "label": "Οντότητα Τιμής Ενέργειας"
+      },
+      "energy_price_static": {
+        "label": "Στατική Τιμή Ενέργειας (ανά kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Χρονόμετρα Κύκλου"
+      },
+      "enable_ml_models": {
+        "label": "Εφαρμογή έξυπνων μοντέλων κατά τη διάρκεια κύκλου"
+      },
+      "ml_training_enabled": {
+        "label": "Μάθηση από αυτή τη συσκευή"
+      },
+      "ml_training_hour": {
+        "label": "Μάθηση την ώρα"
+      },
+      "ml_training_min_cycles": {
+        "label": "Κύκλοι που χρειάζονται πρώτα"
+      },
+      "ml_training_interval_days": {
+        "label": "Έλεγχος το πολύ κάθε"
+      }
     }
   }
 }

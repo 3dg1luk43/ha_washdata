@@ -457,7 +457,7 @@
       "timer_min": "分",
       "timer_msg_placeholder": "メッセージ (オプション、{device}/{program}/{minutes})",
       "timer_auto_pause": "自動一時停止",
-      "label": "マッチ",
+      "label": "一致したプログラム",
       "actions": "アクション",
       "activity": "活動",
       "administrators": "管理者",
@@ -548,7 +548,7 @@
       "cancel": "キャンセル",
       "clear_debug": "デバッグデータのクリア",
       "clear_splits": "クリア",
-      "close": "近い",
+      "close": "閉じる",
       "compare": "比較する",
       "confirm": "確認する",
       "convert_to_automation": "自動化への変換",
@@ -570,7 +570,7 @@
       "import_json": "JSONからインポート",
       "import_overwrite": "インポート（データを上書き）",
       "inspect": "検査する",
-      "label": "ラベル",
+      "label": "ラベル付け",
       "manage": "管理",
       "merge": "マージ",
       "new_automation": "＋ 新しい自動化",
@@ -592,7 +592,7 @@
       "reset": "リセット",
       "reset_to_builtin": "内蔵モデルにリセット",
       "reset_to_defaults": "デフォルトにリセットする",
-      "review": "レビュー",
+      "review": "評価する",
       "run_analysis": "🔍 提案分析を実行する",
       "run_auto_label": "自動ラベルの実行",
       "save": "保存",
@@ -622,7 +622,7 @@
       "artifact_tip": "{n} 個の異常が検出されました (例: サイクルの途中でドアが開いた) — 開いてグラフ上で確認します",
       "poor_fit_tip": "一致しない試合履歴 - このプロファイルの再構築を検討してください",
       "fair_fit_tip": "中程度の一致一貫性 - このプロファイルに割り当てられた一部のサイクルの信頼スコアが低くなります。精度を向上させるには、さらに多くのサイクルにラベルを付けるか、プロファイルを再記録します。",
-      "fair_fit": "適度なフィット感",
+      "fair_fit": "普通",
       "poor_fit": "フィット感が悪い",
       "auto": "(自動検出)",
       "built_in_tag": "内蔵",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "ストレージ統計、メンテナンス、エクスポート/インポート",
       "trim_intro": "赤いハンドルをドラッグするか、値を入力します。窓の外側のものはすべて削除されます。",
       "unsure_detected_prefix": "WashData が検出したかどうかは不明",
-      "updated": "更新"
+      "updated": "更新",
+      "feedback_cycles_pending": "レビューが必要なサイクル: {n}件{s}",
+      "artifact_spike_detail": "通常の電力帯の上側に約{n}秒間現れました。",
+      "artifact_dip_detail": "通常の電力帯の下側に約{n}秒間落ちました。",
+      "artifact_pause_detail": "電力が約{n}秒間ほぼゼロに落ちた後、再開されました。サイクルの途中でドアが開かれたか、一時停止された可能性があります。"
     },
     "phase_desc": {
       "pre_wash": "本洗浄前の最初の浸漬または前処理。",
@@ -746,11 +750,11 @@
       "spin_wd": "乾燥移行前の高速抽出。",
       "soak": "アクティブな洗浄ステージ間の低アクティビティの浸漬期間。",
       "soak_dw": "重い土壌の場合は浸漬期間を延長します。",
-      "anti_crease": "しわを軽減するために、完成後に時々短いタンブルを行います。",
+      "anti_crease": "メインサイクル後にドラムが断続的に回転し、衣類のシワを防止します。",
       "heat_up": "完全な乾燥が始まる前に最初のヒーターのウォームアップを行います。",
       "drying": "メインの加熱タンブリング期間。",
       "cool_down": "サイクル終了近くで熱を伴わないタンブリング。",
-      "anti_wrinkle": "シワを軽減するためにサイクル後に定期的にタンブリングを行います。",
+      "anti_wrinkle": "メインサイクル後にドラムが断続的に回転し、衣類のシワを防止します。",
       "sensor_check": "乾燥度を測定する間、低電力で短い一時停止を行います。",
       "drain_and_switch": "洗濯モードから乾燥モードへの移行期間。",
       "pre_rinse": "洗剤で洗う前の最初のスプレーダウン。",
@@ -874,6 +878,348 @@
       "settings_saved": "設定が保存されました。統合のリロード",
       "suggestions_applied": "提案が適用されました。統合のリロード",
       "suggestions_dismissed": "提案は却下されました"
+    },
+    "section": {
+      "basic": {
+        "label": "基本",
+        "intro": "コアとなる識別情報と、ほとんどの設定に必要な基本事項。"
+      },
+      "detection": {
+        "label": "検出",
+        "intro": "サイクルの開始・実行・終了の検出方法。"
+      },
+      "matching": {
+        "label": "マッチング",
+        "intro": "終了したサイクルを学習済みプロファイルに照合してラベル付けする方法。"
+      },
+      "timing": {
+        "label": "タイミングと監視",
+        "intro": "バックグラウンドの実行間隔、オフライン監視、およびハウスキーピング。"
+      },
+      "anti_wrinkle": {
+        "label": "しわ防止",
+        "intro": "しわ防止モードは、メインフェーズ後の低電力タンブルパルスを検出し、終了したサイクルに付加します。"
+      },
+      "delay": {
+        "label": "遅延スタート",
+        "intro": "遅延スタート検出は、家電製品に電源が入っているがサイクルがまだ開始されていない状態を識別します。"
+      },
+      "triggers": {
+        "label": "トリガーとドア",
+        "intro": "オプションの外部信号：終了トリガー、ドアセンサー、一時停止スイッチ、取り出しリマインダー。"
+      },
+      "notifications": {
+        "label": "通知",
+        "intro": "サイクルイベントの通知タイミングと方法。"
+      },
+      "ml_training": {
+        "label": "MLトレーニング",
+        "intro": "デバイス上の機械学習の再トレーニングスケジュールとデータ設定。"
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "しきい値とギャップ"
+      },
+      "cycle_start": {
+        "label": "サイクル開始"
+      },
+      "cycle_end": {
+        "label": "サイクル終了"
+      },
+      "signal_processing": {
+        "label": "信号処理"
+      },
+      "predictive_end": {
+        "label": "予測終了"
+      },
+      "dishwasher_end": {
+        "label": "食器洗い機の終了"
+      },
+      "dtw_refinement": {
+        "label": "DTW精度向上"
+      },
+      "match_scoring": {
+        "label": "マッチングスコアリング"
+      },
+      "duration_gates": {
+        "label": "時間ゲート"
+      },
+      "auto_labeling": {
+        "label": "自動ラベル付け"
+      },
+      "watchdog": {
+        "label": "ウォッチドッグ"
+      },
+      "housekeeping": {
+        "label": "ハウスキーピング"
+      },
+      "debug": {
+        "label": "デバッグ"
+      },
+      "external_end_trigger": {
+        "label": "外部終了トリガー"
+      },
+      "door_pause": {
+        "label": "ドアと一時停止"
+      },
+      "unload_reminder": {
+        "label": "取り出しリマインダー"
+      },
+      "services": {
+        "label": "サービス"
+      },
+      "timing": {
+        "label": "タイミング"
+      },
+      "messages": {
+        "label": "メッセージ"
+      },
+      "energy": {
+        "label": "エネルギー"
+      },
+      "cycle_timers": {
+        "label": "サイクルタイマー"
+      },
+      "schedule": {
+        "label": "スケジュール"
+      },
+      "data_management": {
+        "label": "データ管理"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "デバイス名"
+      },
+      "device_type": {
+        "label": "デバイスタイプ"
+      },
+      "power_sensor": {
+        "label": "電力センサー"
+      },
+      "min_power": {
+        "label": "最小電力"
+      },
+      "off_delay": {
+        "label": "オフ遅延"
+      },
+      "linked_device": {
+        "label": "デバイス下にグループ化"
+      },
+      "start_threshold_w": {
+        "label": "開始しきい値"
+      },
+      "stop_threshold_w": {
+        "label": "停止しきい値"
+      },
+      "min_off_gap": {
+        "label": "最小オフギャップ"
+      },
+      "start_duration_threshold": {
+        "label": "開始継続時間"
+      },
+      "start_energy_threshold": {
+        "label": "開始エネルギー"
+      },
+      "completion_min_seconds": {
+        "label": "サイクル最小時間"
+      },
+      "running_dead_zone": {
+        "label": "実行デッドゾーン"
+      },
+      "end_energy_threshold": {
+        "label": "終了エネルギー"
+      },
+      "end_repeat_count": {
+        "label": "終了繰り返し回数"
+      },
+      "sampling_interval": {
+        "label": "サンプリング間隔"
+      },
+      "smoothing_window": {
+        "label": "スムージングウィンドウ"
+      },
+      "abrupt_drop_watts": {
+        "label": "急激な降下"
+      },
+      "abrupt_drop_ratio": {
+        "label": "急激な降下比率"
+      },
+      "profile_match_threshold": {
+        "label": "マッチしきい値"
+      },
+      "profile_unmatch_threshold": {
+        "label": "アンマッチしきい値"
+      },
+      "profile_match_interval": {
+        "label": "マッチ間隔"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "最小時間比率"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "最大時間比率"
+      },
+      "profile_duration_tolerance": {
+        "label": "プロファイル時間許容誤差"
+      },
+      "duration_tolerance": {
+        "label": "推定許容誤差"
+      },
+      "auto_label_confidence": {
+        "label": "自動ラベル信頼度"
+      },
+      "learning_confidence": {
+        "label": "学習信頼度"
+      },
+      "suppress_feedback_notifications": {
+        "label": "フィードバック通知を抑制"
+      },
+      "watchdog_interval": {
+        "label": "ウォッチドッグ間隔"
+      },
+      "no_update_active_timeout": {
+        "label": "更新なしタイムアウト"
+      },
+      "progress_reset_delay": {
+        "label": "進捗リセット遅延"
+      },
+      "auto_maintenance": {
+        "label": "自動メンテナンス（夜間クリーンアップ）"
+      },
+      "expose_debug_entities": {
+        "label": "デバッグエンティティを公開"
+      },
+      "save_debug_traces": {
+        "label": "デバッグトレースを保存"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "しわ防止検出を有効化"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "しわ防止最大電力"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "最大継続時間"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "終了電力しきい値"
+      },
+      "delay_start_detect_enabled": {
+        "label": "遅延スタート検出を有効化"
+      },
+      "delay_confirm_seconds": {
+        "label": "確認秒数"
+      },
+      "delay_timeout_hours": {
+        "label": "タイムアウト時間"
+      },
+      "external_end_trigger_enabled": {
+        "label": "外部終了トリガーを有効化"
+      },
+      "external_end_trigger": {
+        "label": "外部トリガーエンティティ"
+      },
+      "external_end_trigger_inverted": {
+        "label": "外部トリガーを反転（OFFでトリガー）"
+      },
+      "door_sensor_entity": {
+        "label": "ドアセンサーエンティティ"
+      },
+      "pause_cuts_power": {
+        "label": "一時停止で電力もカット（スイッチ経由）"
+      },
+      "switch_entity": {
+        "label": "スイッチエンティティ"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "取り出し通知遅延"
+      },
+      "pump_stuck_duration": {
+        "label": "ポンプ停止継続時間"
+      },
+      "notify_start_services": {
+        "label": "開始サービス"
+      },
+      "notify_finish_services": {
+        "label": "終了サービス"
+      },
+      "notify_live_services": {
+        "label": "ライブ進捗サービス"
+      },
+      "notify_people": {
+        "label": "対象ユーザー（在宅時のみ）"
+      },
+      "notify_only_when_home": {
+        "label": "在宅時のみ通知"
+      },
+      "notify_fire_events": {
+        "label": "通知用HAイベントを発火"
+      },
+      "notify_before_end_minutes": {
+        "label": "終了前アラート"
+      },
+      "notify_live_interval_seconds": {
+        "label": "ライブ更新間隔"
+      },
+      "notify_live_overrun_percent": {
+        "label": "ライブ超過%アラート"
+      },
+      "notify_live_chronometer": {
+        "label": "ライブクロノメーターを使用"
+      },
+      "notify_timeout_seconds": {
+        "label": "自動消去まで"
+      },
+      "notify_title": {
+        "label": "通知タイトル"
+      },
+      "notify_icon": {
+        "label": "通知アイコン"
+      },
+      "notify_start_message": {
+        "label": "開始メッセージ"
+      },
+      "notify_finish_message": {
+        "label": "終了メッセージ"
+      },
+      "notify_pre_complete_message": {
+        "label": "完了前メッセージ"
+      },
+      "notify_reminder_message": {
+        "label": "リマインダーメッセージ"
+      },
+      "notify_channel": {
+        "label": "Androidチャンネル（開始/ライブ）"
+      },
+      "notify_finish_channel": {
+        "label": "Androidチャンネル（終了）"
+      },
+      "energy_price_entity": {
+        "label": "エネルギー価格エンティティ"
+      },
+      "energy_price_static": {
+        "label": "静的エネルギー価格（kWhあたり）"
+      },
+      "notify_cycle_timers": {
+        "label": "サイクルタイマー"
+      },
+      "enable_ml_models": {
+        "label": "サイクル中にスマートモデルを適用"
+      },
+      "ml_training_enabled": {
+        "label": "この機器から学習"
+      },
+      "ml_training_hour": {
+        "label": "学習時刻"
+      },
+      "ml_training_min_cycles": {
+        "label": "必要なサイクル数"
+      },
+      "ml_training_interval_days": {
+        "label": "最大確認間隔"
+      }
     }
   }
 }

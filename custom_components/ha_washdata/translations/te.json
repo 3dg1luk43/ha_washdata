@@ -735,7 +735,11 @@
       "storage_diagnostics": "స్టోరేజ్ స్టాట్స్, నిర్వహణ, ఎగుమతి/దిగుమతి",
       "trim_intro": "ఎరుపు హ్యాండిల్‌లను లాగండి, లేదా విలువలు నమోదు చేయండి. విండో వెలుపల ఉన్నదంతా తొలగించబడుతుంది.",
       "unsure_detected_prefix": "WashData గుర్తించిందో లేదో ఖచ్చితంగా తెలియదు",
-      "updated": "నవీకరించబడింది"
+      "updated": "నవీకరించబడింది",
+      "feedback_cycles_pending": "సమీక్షించడానికి {n} సైకిల్{s}",
+      "artifact_spike_detail": "సాధారణ పవర్ బ్యాండ్ పైన ~{n}స వరకు వెళ్ళింది.",
+      "artifact_dip_detail": "సాధారణ పవర్ బ్యాండ్ కింద ~{n}స వరకు పడిపోయింది.",
+      "artifact_pause_detail": "పవర్ ~{n}స వరకు దాదాపు సున్నాకి పడిపోయి తర్వాత పునఃప్రారంభించింది — సైకిల్ మధ్యలో తలుపు తెరవబడి ఉండవచ్చు లేదా సైకిల్ పాజ్ చేయబడి ఉండవచ్చు."
     },
     "phase_desc": {
       "pre_wash": "ప్రధాన వాష్‌కు ముందు ప్రారంభ నానబెట్టడం లేదా ముందస్తు చికిత్స.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "పైకి వెళ్తున్న ధోరణి తగ్గుతోంది",
       "up": "పైకి వెళ్తున్న ధోరణి"
+    },
+    "section": {
+      "basic": {
+        "label": "ప్రాథమిక",
+        "intro": "ప్రాథమిక గుర్తింపు మరియు చాలా సెటప్‌లకు అవసరమైన అంశాలు."
+      },
+      "detection": {
+        "label": "గుర్తింపు",
+        "intro": "సైకిల్ ఎలా ప్రారంభమై, నడుస్తూ, ముగుస్తుందో గుర్తించడం."
+      },
+      "matching": {
+        "label": "సరిపోలిక",
+        "intro": "ముగిసిన సైకిల్‌లు నేర్చుకున్న ప్రొఫైల్‌లతో ఎలా సరిపోల్చబడతాయి మరియు లేబుల్ చేయబడతాయి."
+      },
+      "timing": {
+        "label": "సమయం & వాచ్‌డాగ్",
+        "intro": "నేపథ్య క్రమం, ఆఫ్‌లైన్ వాచ్‌డాగ్ మరియు నిర్వహణ."
+      },
+      "anti_wrinkle": {
+        "label": "వివర్ణ-నిరోధక",
+        "intro": "వివర్ణ-నిరోధక మోడ్ ప్రధాన దశ తర్వాత తక్కువ-శక్తి టంబుల్ పల్స్‌లను గుర్తించి, ముగిసిన సైకిల్‌కు జత చేస్తుంది."
+      },
+      "delay": {
+        "label": "జాప్యం ప్రారంభం",
+        "intro": "జాప్యం-ప్రారంభ గుర్తింపు పరికరం చాలు కానీ సైకిల్ ఇంకా ప్రారంభం కానప్పుడు గుర్తిస్తుంది."
+      },
+      "triggers": {
+        "label": "ట్రిగర్‌లు & తలుపులు",
+        "intro": "ఐచ్ఛిక బాహ్య సంకేతాలు: ముగింపు ట్రిగర్, తలుపు సెన్సార్, పాజ్ స్విచ్ మరియు అన్‌లోడ్ రిమైండర్."
+      },
+      "notifications": {
+        "label": "నోటిఫికేషన్‌లు",
+        "intro": "సైకిల్ సంఘటనల గురించి ఎప్పుడు మరియు ఎలా నోటిఫై చేయబడతారు."
+      },
+      "ml_training": {
+        "label": "ML శిక్షణ",
+        "intro": "పరికరంపై మెషీన్ లెర్నింగ్ రీట్రెయినింగ్ షెడ్యూల్ మరియు డేటా సెట్టింగ్‌లు."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "థ్రెషోల్డ్‌లు & గ్యాప్"
+      },
+      "cycle_start": {
+        "label": "సైకిల్ ప్రారంభం"
+      },
+      "cycle_end": {
+        "label": "సైకిల్ ముగింపు"
+      },
+      "signal_processing": {
+        "label": "సిగ్నల్ ప్రాసెసింగ్"
+      },
+      "predictive_end": {
+        "label": "అంచనా ముగింపు"
+      },
+      "dishwasher_end": {
+        "label": "డిష్‌వాషర్ ముగింపు"
+      },
+      "dtw_refinement": {
+        "label": "DTW శుద్ధీకరణ"
+      },
+      "match_scoring": {
+        "label": "సరిపోలిక స్కోరింగ్"
+      },
+      "duration_gates": {
+        "label": "వ్యవధి గేట్‌లు"
+      },
+      "auto_labeling": {
+        "label": "స్వయంచాలక లేబులింగ్"
+      },
+      "watchdog": {
+        "label": "వాచ్‌డాగ్"
+      },
+      "housekeeping": {
+        "label": "నిర్వహణ"
+      },
+      "debug": {
+        "label": "డీబగ్"
+      },
+      "external_end_trigger": {
+        "label": "బాహ్య ముగింపు ట్రిగర్"
+      },
+      "door_pause": {
+        "label": "తలుపు & పాజ్"
+      },
+      "unload_reminder": {
+        "label": "అన్‌లోడ్ రిమైండర్"
+      },
+      "services": {
+        "label": "సేవలు"
+      },
+      "timing": {
+        "label": "సమయం"
+      },
+      "messages": {
+        "label": "సందేశాలు"
+      },
+      "energy": {
+        "label": "శక్తి"
+      },
+      "cycle_timers": {
+        "label": "సైకిల్ టైమర్‌లు"
+      },
+      "schedule": {
+        "label": "షెడ్యూల్"
+      },
+      "data_management": {
+        "label": "డేటా నిర్వహణ"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "పరికర పేరు"
+      },
+      "device_type": {
+        "label": "పరికర రకం"
+      },
+      "power_sensor": {
+        "label": "పవర్ సెన్సార్"
+      },
+      "min_power": {
+        "label": "కనీస శక్తి"
+      },
+      "off_delay": {
+        "label": "ఆఫ్ జాప్యం"
+      },
+      "linked_device": {
+        "label": "పరికరం కింద గ్రూప్ చేయండి"
+      },
+      "start_threshold_w": {
+        "label": "ప్రారంభ థ్రెషోల్డ్"
+      },
+      "stop_threshold_w": {
+        "label": "స్టాప్ థ్రెషోల్డ్"
+      },
+      "min_off_gap": {
+        "label": "కనీస ఆఫ్ గ్యాప్"
+      },
+      "start_duration_threshold": {
+        "label": "ప్రారంభ వ్యవధి"
+      },
+      "start_energy_threshold": {
+        "label": "ప్రారంభ శక్తి"
+      },
+      "completion_min_seconds": {
+        "label": "కనీస సైకిల్ వ్యవధి"
+      },
+      "running_dead_zone": {
+        "label": "రన్నింగ్ డెడ్ జోన్"
+      },
+      "end_energy_threshold": {
+        "label": "ముగింపు శక్తి"
+      },
+      "end_repeat_count": {
+        "label": "ముగింపు రిపీట్ కౌంట్"
+      },
+      "sampling_interval": {
+        "label": "శాంపులింగ్ వ్యవధి"
+      },
+      "smoothing_window": {
+        "label": "స్మూతింగ్ విండో"
+      },
+      "abrupt_drop_watts": {
+        "label": "అకస్మాత్తు పడిపోవడం"
+      },
+      "abrupt_drop_ratio": {
+        "label": "అకస్మాత్తు పడిపోవడం నిష్పత్తి"
+      },
+      "profile_match_threshold": {
+        "label": "సరిపోలిక థ్రెషోల్డ్"
+      },
+      "profile_unmatch_threshold": {
+        "label": "సరిపోలికేతర థ్రెషోల్డ్"
+      },
+      "profile_match_interval": {
+        "label": "సరిపోలిక విరామం"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "కనీస వ్యవధి నిష్పత్తి"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "గరిష్ట వ్యవధి నిష్పత్తి"
+      },
+      "profile_duration_tolerance": {
+        "label": "ప్రొఫైల్ వ్యవధి సహనం"
+      },
+      "duration_tolerance": {
+        "label": "అంచనా సహనం"
+      },
+      "auto_label_confidence": {
+        "label": "స్వయంచాలక-లేబుల్ నమ్మకం"
+      },
+      "learning_confidence": {
+        "label": "నేర్చుకోవడం నమ్మకం"
+      },
+      "suppress_feedback_notifications": {
+        "label": "ఫీడ్‌బ్యాక్ నోటిఫికేషన్‌లను అణచివేయండి"
+      },
+      "watchdog_interval": {
+        "label": "వాచ్‌డాగ్ విరామం"
+      },
+      "no_update_active_timeout": {
+        "label": "నో-అప్‌డేట్ టైమ్‌అవుట్"
+      },
+      "progress_reset_delay": {
+        "label": "పురోగతి రీసెట్ జాప్యం"
+      },
+      "auto_maintenance": {
+        "label": "స్వయంచాలక నిర్వహణ (రాత్రిపూట శుభ్రం)"
+      },
+      "expose_debug_entities": {
+        "label": "డీబగ్ ఎంటిటీలను బహిర్గతం చేయండి"
+      },
+      "save_debug_traces": {
+        "label": "డీబగ్ ట్రేస్‌లను సేవ్ చేయండి"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "వివర్ణ-నిరోధక గుర్తింపును ప్రారంభించండి"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "గరిష్ట వివర్ణ-నిరోధక శక్తి"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "గరిష్ట వ్యవధి"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "నిష్క్రమణ శక్తి థ్రెషోల్డ్"
+      },
+      "delay_start_detect_enabled": {
+        "label": "జాప్యం-ప్రారంభ గుర్తింపును ప్రారంభించండి"
+      },
+      "delay_confirm_seconds": {
+        "label": "నిర్ధారణ సెకండ్లు"
+      },
+      "delay_timeout_hours": {
+        "label": "టైమ్‌అవుట్ గంటలు"
+      },
+      "external_end_trigger_enabled": {
+        "label": "బాహ్య ముగింపు ట్రిగర్‌ను ప్రారంభించండి"
+      },
+      "external_end_trigger": {
+        "label": "బాహ్య ట్రిగర్ ఎంటిటీ"
+      },
+      "external_end_trigger_inverted": {
+        "label": "బాహ్య ట్రిగర్‌ను తిరగేయండి (ఆఫ్‌లో ట్రిగర్ చేయండి)"
+      },
+      "door_sensor_entity": {
+        "label": "తలుపు సెన్సార్ ఎంటిటీ"
+      },
+      "pause_cuts_power": {
+        "label": "పాజ్ శక్తిని కూడా కట్ చేస్తుంది (స్విచ్ ద్వారా)"
+      },
+      "switch_entity": {
+        "label": "స్విచ్ ఎంటిటీ"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "అన్‌లోడ్ రిమైండర్ జాప్యం"
+      },
+      "pump_stuck_duration": {
+        "label": "పంప్ స్టక్ వ్యవధి"
+      },
+      "notify_start_services": {
+        "label": "ప్రారంభ సేవలు"
+      },
+      "notify_finish_services": {
+        "label": "ముగింపు సేవలు"
+      },
+      "notify_live_services": {
+        "label": "లైవ్ ప్రగతి సేవలు"
+      },
+      "notify_people": {
+        "label": "వ్యక్తులు (ఇంట్లో ఉన్నప్పుడు మాత్రమే)"
+      },
+      "notify_only_when_home": {
+        "label": "ఇంట్లో ఉన్నప్పుడు మాత్రమే నోటిఫై చేయండి"
+      },
+      "notify_fire_events": {
+        "label": "నోటిఫికేషన్‌లకు HA ఈవెంట్‌లను ఫైర్ చేయండి"
+      },
+      "notify_before_end_minutes": {
+        "label": "ముగింపు-పూర్వ హెచ్చరిక"
+      },
+      "notify_live_interval_seconds": {
+        "label": "లైవ్ అప్‌డేట్ విరామం"
+      },
+      "notify_live_overrun_percent": {
+        "label": "హెచ్చరికకు ముందు లైవ్ ఓవర్‌రన్ %"
+      },
+      "notify_live_chronometer": {
+        "label": "లైవ్ క్రోనోమీటర్ ఉపయోగించండి"
+      },
+      "notify_timeout_seconds": {
+        "label": "తర్వాత స్వయంచాలకంగా నిరాకరించండి"
+      },
+      "notify_title": {
+        "label": "నోటిఫికేషన్ శీర్షిక"
+      },
+      "notify_icon": {
+        "label": "నోటిఫికేషన్ చిహ్నం"
+      },
+      "notify_start_message": {
+        "label": "ప్రారంభ సందేశం"
+      },
+      "notify_finish_message": {
+        "label": "ముగింపు సందేశం"
+      },
+      "notify_pre_complete_message": {
+        "label": "ముగింపు-పూర్వ సందేశం"
+      },
+      "notify_reminder_message": {
+        "label": "రిమైండర్ సందేశం"
+      },
+      "notify_channel": {
+        "label": "Android ఛానెల్ (ప్రారంభం/లైవ్)"
+      },
+      "notify_finish_channel": {
+        "label": "Android ఛానెల్ (ముగింపు)"
+      },
+      "energy_price_entity": {
+        "label": "శక్తి ధర ఎంటిటీ"
+      },
+      "energy_price_static": {
+        "label": "స్థిర శక్తి ధర (kWh కి)"
+      },
+      "notify_cycle_timers": {
+        "label": "సైకిల్ టైమర్‌లు"
+      },
+      "enable_ml_models": {
+        "label": "సైకిల్ సమయంలో స్మార్ట్ మోడల్‌లు వర్తించండి"
+      },
+      "ml_training_enabled": {
+        "label": "ఈ మెషీన్ నుండి నేర్చుకోండి"
+      },
+      "ml_training_hour": {
+        "label": "గంటలో నేర్చుకోండి"
+      },
+      "ml_training_min_cycles": {
+        "label": "ముందు అవసరమైన సైకిల్‌లు"
+      },
+      "ml_training_interval_days": {
+        "label": "గరిష్టంగా ప్రతిసారీ తనిఖీ చేయండి"
+      }
     }
   }
 }

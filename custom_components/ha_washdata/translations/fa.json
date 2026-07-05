@@ -26,13 +26,13 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "پیکربندی مجدد WashData",
         "description": "نام دستگاه، نوع دستگاه یا سنسور برق را به روز کنید.",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "نام دستگاه",
+          "device_type": "نوع دستگاه",
+          "power_sensor": "سنسور توان",
+          "min_power": "حداقل آستانه توان (W)"
         }
       }
     },
@@ -40,23 +40,23 @@
       "cannot_connect": "اتصال ناموفق بود",
       "invalid_auth": "احراز هویت نامعتبر است",
       "unknown": "خطای غیرمنتظره",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "آستانه توان باید بزرگتر از 0 باشد"
     },
     "abort": {
       "already_configured": "دستگاه قبلاً پیکربندی شده است",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "پیکربندی مجدد با موفقیت انجام شد"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "تنظیمات WashData",
         "description": "تمام تنظیمات - تشخیص، تطبیق، زمان، اعلان ها، پروفایل ها و چرخه ها - در پانل WashData در دسترس هستند. از این فرم فقط برای تغییر سنسور برق، نوع دستگاه یا آستانه آماده سازی استفاده کنید.",
         "data": {
           "name": "نام دستگاه",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "نوع دستگاه",
+          "power_sensor": "سنسور توان",
+          "min_power": "حداقل آستانه توان (W)"
         }
       }
     },
@@ -278,12 +278,12 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
+      "name": "آموزش ML را فعال کنید",
       "description": "به صورت دستی مدل های ML را از چرخه های برچسب دار این دستگاه (experimental) باز کنید.",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "دستگاه",
+          "description": "دستگاه WashData برای بازآموزی مدل‌ها."
         }
       }
     }
@@ -349,7 +349,7 @@
         }
       },
       "ambiguity": {
-        "name": "Match Ambiguity"
+        "name": "ابهام تطابق"
       },
       "current_phase": {
         "name": "فاز فعلی"
@@ -422,7 +422,7 @@
   },
   "panel": {
     "hdr": {
-      "logs": "سیاههها",
+      "logs": "گزارش‌ها",
       "toggle_sidebar": "نوار کناری Home Assistant را تغییر دهید",
       "access_control": "کنترل دسترسی",
       "automation_delete": "این اتوماسیون را حذف کنید",
@@ -561,7 +561,7 @@
       "dismiss": "رد کردن",
       "done": "انجام شد",
       "edit": "ویرایش کنید",
-      "export": "صادرات",
+      "export": "صادر کنید",
       "export_json": "صادرات به JSON",
       "force_stop": "توقف اجباری",
       "from_template": "از قالب ▾",
@@ -592,7 +592,7 @@
       "reset_to_builtin": "بازنشانی به مدل‌های داخلی",
       "reset_to_defaults": "به حالت پیش فرض بازنشانی کنید",
       "resume_cycle": "ادامه چرخه",
-      "review": "بررسی کنید",
+      "review": "ارزیابی کنید",
       "run_analysis": "🔍 تجزیه و تحلیل پیشنهادات را اجرا کنید",
       "run_auto_label": "Auto-Label را اجرا کنید",
       "save": "ذخیره کنید",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "آمار ذخیره سازی، نگهداری، صادرات/واردات",
       "trim_intro": "دستگیره های قرمز را بکشید یا مقادیر را وارد کنید. همه چیز خارج از پنجره حذف می شود.",
       "unsure_detected_prefix": "WashData مطمئن نیست که شناسایی شده باشد",
-      "updated": "به‌روزرسانی‌شده"
+      "updated": "به‌روزرسانی‌شده",
+      "feedback_cycles_pending": "{n} چرخه برای بررسی",
+      "artifact_spike_detail": "توان به مدت ~{n} ثانیه از باند معمول بالاتر رفت.",
+      "artifact_dip_detail": "توان به مدت ~{n} ثانیه از باند معمول پایین‌تر افتاد.",
+      "artifact_pause_detail": "توان به مدت ~{n} ثانیه تقریباً به صفر رسید و سپس از سر گرفته شد — احتمالاً در وسط چرخه باز شده یا چرخه متوقف شده بود."
     },
     "phase_desc": {
       "pre_wash": "خیساندن اولیه یا قبل از شستشوی اصلی.",
@@ -746,11 +750,11 @@
       "spin_wd": "استخراج با سرعت بالا قبل از انتقال خشک کردن.",
       "soak": "دوره خیساندن کم فعالیت بین مراحل شستشوی فعال.",
       "soak_dw": "دوره خیساندن طولانی مدت برای خاک سنگین.",
-      "anti_crease": "برای کاهش چین و چروک های گاه به گاه بعد از اتمام کار، غلت های کوتاه انجام دهید.",
+      "anti_crease": "غلت‌های کوتاه و گاه‌به‌گاه درام پس از اتمام چرخه، برای جلوگیری از چروک خوردن پارچه.",
       "heat_up": "گرم کردن اولیه بخاری قبل از شروع خشک شدن کامل.",
       "drying": "دوره غلتش گرم اصلی.",
       "cool_down": "غلت زدن بدون گرما نزدیک به پایان چرخه.",
-      "anti_wrinkle": "غلت زدن دوره ای بعد از چرخه برای کاهش چین و چروک.",
+      "anti_wrinkle": "غلتیدن دوره‌ای درام پس از اتمام چرخه، برای جلوگیری از چروک خوردن پارچه.",
       "sensor_check": "مکث کوتاه کم مصرف در حالی که خشکی اندازه گیری می شود.",
       "drain_and_switch": "دوره انتقال از حالت شستشو به حالت خشک کردن.",
       "pre_rinse": "اسپری اولیه قبل از شستشو با مواد شوینده",
@@ -772,7 +776,7 @@
       "fit_slight": "خفیف",
       "fit_strong": "قوی",
       "fit_weak": "ضعیف",
-      "fit_word": "مناسب",
+      "fit_word": "تناسب",
       "personalized": "● برای این دستگاه شخصی سازی شده است"
     },
     "pref": {
@@ -874,6 +878,348 @@
     "trend": {
       "down": "روند رو به پایین",
       "up": "روند صعودی"
+    },
+    "section": {
+      "basic": {
+        "label": "اصلی",
+        "intro": "هویت اصلی و ملزوماتی که اکثر تنظیمات به آنها نیاز دارند."
+      },
+      "detection": {
+        "label": "تشخیص",
+        "intro": "نحوه تشخیص شروع، اجرا و پایان یک چرخه."
+      },
+      "matching": {
+        "label": "تطابق",
+        "intro": "نحوه تطابق چرخه‌های تمام‌شده با پروفایل‌های یادگرفته‌شده و برچسب‌گذاری آنها."
+      },
+      "timing": {
+        "label": "زمان‌بندی و محافظ",
+        "intro": "ریتم پس‌زمینه، محافظ آفلاین و نگهداری."
+      },
+      "anti_wrinkle": {
+        "label": "ضد چروک",
+        "intro": "حالت ضد چروک پالس‌های کوتاه کم‌مصرف را پس از فاز اصلی شناسایی می‌کند و آنها را به چرخه تمام‌شده متصل نگه می‌دارد."
+      },
+      "delay": {
+        "label": "شروع تاخیری",
+        "intro": "تشخیص شروع تاخیری هنگامی که دستگاه روشن است اما چرخه‌ای شروع نشده است."
+      },
+      "triggers": {
+        "label": "محرک‌ها و درها",
+        "intro": "سیگنال‌های خارجی اختیاری: محرک پایان، سنسور در، کلید مکث و یادآور تخلیه."
+      },
+      "notifications": {
+        "label": "اعلان‌ها",
+        "intro": "زمان و نحوه اطلاع‌رسانی درباره رویدادهای چرخه."
+      },
+      "ml_training": {
+        "label": "آموزش ML",
+        "intro": "برنامه بازآموزی یادگیری ماشین روی دستگاه و تنظیمات داده."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "آستانه‌ها و شکاف"
+      },
+      "cycle_start": {
+        "label": "شروع چرخه"
+      },
+      "cycle_end": {
+        "label": "پایان چرخه"
+      },
+      "signal_processing": {
+        "label": "پردازش سیگنال"
+      },
+      "predictive_end": {
+        "label": "پایان پیش‌بینی‌شده"
+      },
+      "dishwasher_end": {
+        "label": "پایان ماشین ظرفشویی"
+      },
+      "dtw_refinement": {
+        "label": "پالایش DTW"
+      },
+      "match_scoring": {
+        "label": "امتیازدهی تطابق"
+      },
+      "duration_gates": {
+        "label": "دروازه‌های مدت زمان"
+      },
+      "auto_labeling": {
+        "label": "برچسب‌گذاری خودکار"
+      },
+      "watchdog": {
+        "label": "محافظ"
+      },
+      "housekeeping": {
+        "label": "نگهداری"
+      },
+      "debug": {
+        "label": "اشکال‌زدایی"
+      },
+      "external_end_trigger": {
+        "label": "محرک پایان خارجی"
+      },
+      "door_pause": {
+        "label": "در و مکث"
+      },
+      "unload_reminder": {
+        "label": "یادآور تخلیه"
+      },
+      "services": {
+        "label": "سرویس‌ها"
+      },
+      "timing": {
+        "label": "زمان‌بندی"
+      },
+      "messages": {
+        "label": "پیام‌ها"
+      },
+      "energy": {
+        "label": "انرژی"
+      },
+      "cycle_timers": {
+        "label": "تایمرهای چرخه"
+      },
+      "schedule": {
+        "label": "برنامه زمانی"
+      },
+      "data_management": {
+        "label": "مدیریت داده"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "نام دستگاه"
+      },
+      "device_type": {
+        "label": "نوع دستگاه"
+      },
+      "power_sensor": {
+        "label": "سنسور توان"
+      },
+      "min_power": {
+        "label": "حداقل توان"
+      },
+      "off_delay": {
+        "label": "تاخیر خاموشی"
+      },
+      "linked_device": {
+        "label": "گروه‌بندی زیر دستگاه"
+      },
+      "start_threshold_w": {
+        "label": "آستانه شروع"
+      },
+      "stop_threshold_w": {
+        "label": "آستانه توقف"
+      },
+      "min_off_gap": {
+        "label": "حداقل فاصله خاموشی"
+      },
+      "start_duration_threshold": {
+        "label": "مدت زمان شروع"
+      },
+      "start_energy_threshold": {
+        "label": "انرژی شروع"
+      },
+      "completion_min_seconds": {
+        "label": "حداقل مدت چرخه"
+      },
+      "running_dead_zone": {
+        "label": "ناحیه مرده هنگام اجرا"
+      },
+      "end_energy_threshold": {
+        "label": "آستانه انرژی پایان"
+      },
+      "end_repeat_count": {
+        "label": "تعداد تکرار پایان"
+      },
+      "sampling_interval": {
+        "label": "فاصله نمونه‌برداری"
+      },
+      "smoothing_window": {
+        "label": "پنجره هموارسازی"
+      },
+      "abrupt_drop_watts": {
+        "label": "افت ناگهانی (وات)"
+      },
+      "abrupt_drop_ratio": {
+        "label": "نسبت افت ناگهانی"
+      },
+      "profile_match_threshold": {
+        "label": "آستانه تطابق"
+      },
+      "profile_unmatch_threshold": {
+        "label": "آستانه عدم تطابق"
+      },
+      "profile_match_interval": {
+        "label": "فاصله تطابق"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "نسبت حداقل مدت"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "نسبت حداکثر مدت"
+      },
+      "profile_duration_tolerance": {
+        "label": "تلرانس مدت پروفایل"
+      },
+      "duration_tolerance": {
+        "label": "تلرانس تخمین"
+      },
+      "auto_label_confidence": {
+        "label": "اطمینان برچسب‌گذاری خودکار"
+      },
+      "learning_confidence": {
+        "label": "اطمینان یادگیری"
+      },
+      "suppress_feedback_notifications": {
+        "label": "غیرفعال‌سازی اعلان‌های بازخورد"
+      },
+      "watchdog_interval": {
+        "label": "فاصله محافظ"
+      },
+      "no_update_active_timeout": {
+        "label": "تایم‌اوت بدون به‌روزرسانی"
+      },
+      "progress_reset_delay": {
+        "label": "تاخیر بازنشانی پیشرفت"
+      },
+      "auto_maintenance": {
+        "label": "نگهداری خودکار (پاکسازی شبانه)"
+      },
+      "expose_debug_entities": {
+        "label": "نمایش موجودیت‌های اشکال‌زدایی"
+      },
+      "save_debug_traces": {
+        "label": "ذخیره ردیابی اشکال‌زدایی"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "فعال‌سازی تشخیص ضد چروک"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "حداکثر توان ضد چروک"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "حداکثر مدت"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "آستانه توان خروج"
+      },
+      "delay_start_detect_enabled": {
+        "label": "فعال‌سازی تشخیص شروع تاخیری"
+      },
+      "delay_confirm_seconds": {
+        "label": "ثانیه‌های تایید"
+      },
+      "delay_timeout_hours": {
+        "label": "ساعت‌های تایم‌اوت"
+      },
+      "external_end_trigger_enabled": {
+        "label": "فعال‌سازی محرک پایان خارجی"
+      },
+      "external_end_trigger": {
+        "label": "موجودیت محرک خارجی"
+      },
+      "external_end_trigger_inverted": {
+        "label": "معکوس‌سازی محرک خارجی (محرک با خاموشی)"
+      },
+      "door_sensor_entity": {
+        "label": "موجودیت سنسور در"
+      },
+      "pause_cuts_power": {
+        "label": "مکث برق را نیز قطع می‌کند (از طریق کلید)"
+      },
+      "switch_entity": {
+        "label": "موجودیت کلید"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "تاخیر یادآور تخلیه"
+      },
+      "pump_stuck_duration": {
+        "label": "مدت گیر کردن پمپ"
+      },
+      "notify_start_services": {
+        "label": "سرویس‌های شروع"
+      },
+      "notify_finish_services": {
+        "label": "سرویس‌های پایان"
+      },
+      "notify_live_services": {
+        "label": "سرویس‌های پیشرفت زنده"
+      },
+      "notify_people": {
+        "label": "افراد (برای فقط هنگام حضور در خانه)"
+      },
+      "notify_only_when_home": {
+        "label": "فقط هنگام حضور در خانه اعلان کن"
+      },
+      "notify_fire_events": {
+        "label": "رویدادهای HA را برای اعلان‌ها فعال کن"
+      },
+      "notify_before_end_minutes": {
+        "label": "هشدار قبل از پایان"
+      },
+      "notify_live_interval_seconds": {
+        "label": "فاصله به‌روزرسانی زنده"
+      },
+      "notify_live_overrun_percent": {
+        "label": "درصد تجاوز زنده قبل از هشدار"
+      },
+      "notify_live_chronometer": {
+        "label": "استفاده از کرونومتر زنده"
+      },
+      "notify_timeout_seconds": {
+        "label": "خودکار پنهان کردن پس از"
+      },
+      "notify_title": {
+        "label": "عنوان اعلان"
+      },
+      "notify_icon": {
+        "label": "نماد اعلان"
+      },
+      "notify_start_message": {
+        "label": "پیام شروع"
+      },
+      "notify_finish_message": {
+        "label": "پیام پایان"
+      },
+      "notify_pre_complete_message": {
+        "label": "پیام قبل از اتمام"
+      },
+      "notify_reminder_message": {
+        "label": "پیام یادآوری"
+      },
+      "notify_channel": {
+        "label": "کانال اندروید (شروع/زنده)"
+      },
+      "notify_finish_channel": {
+        "label": "کانال اندروید (پایان)"
+      },
+      "energy_price_entity": {
+        "label": "موجودیت قیمت انرژی"
+      },
+      "energy_price_static": {
+        "label": "قیمت ثابت انرژی (به ازای هر کیلووات‌ساعت)"
+      },
+      "notify_cycle_timers": {
+        "label": "تایمرهای چرخه"
+      },
+      "enable_ml_models": {
+        "label": "اعمال مدل‌های هوشمند در طول چرخه"
+      },
+      "ml_training_enabled": {
+        "label": "یادگیری از این دستگاه"
+      },
+      "ml_training_hour": {
+        "label": "یادگیری در ساعت"
+      },
+      "ml_training_min_cycles": {
+        "label": "چرخه‌های مورد نیاز ابتدا"
+      },
+      "ml_training_interval_days": {
+        "label": "بررسی حداکثر هر"
+      }
     }
   }
 }

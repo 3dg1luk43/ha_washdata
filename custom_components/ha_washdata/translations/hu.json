@@ -428,7 +428,7 @@
       "delete_group_tip": "Csak ezt a csoportot törölje – a tagi profilok megmaradnak",
       "run_analysis_tip": "Elemezze a rögzített ciklusokat most, és frissítse a hangolási javaslatokat",
       "reset_ml_models_tip": "Dobja el a finomhangolt modelleket, és térjen vissza a beépített modellekhez. A WashData később újra megtanulhatja őket.",
-      "resume_cycle": "Folytatás",
+      "resume_cycle": "Ciklus folytatása",
       "add_device": "+ Eszköz hozzáadása",
       "add_phase": "+ Fázis hozzáadása",
       "apply_all": "Alkalmazza az összeset",
@@ -440,7 +440,7 @@
       "cancel": "Mégsem",
       "clear_debug": "Törölje a hibakeresési adatokat",
       "clear_splits": "Világos",
-      "close": "Közeli",
+      "close": "Bezárás",
       "compare": "Hasonlítsa össze",
       "confirm": "Erősítse meg",
       "convert_to_automation": "Átalakítás automatizálásra",
@@ -454,7 +454,7 @@
       "dismiss": "Elvetés",
       "done": "Kész",
       "edit": "Szerkesztés",
-      "export": "Export",
+      "export": "Exportálás",
       "export_json": "Exportálás JSON-ba",
       "force_stop": "Kényszer leállítás",
       "from_template": "Sablonból ▾",
@@ -462,7 +462,7 @@
       "import_json": "Importálás JSON-ból",
       "import_overwrite": "Importálás (adatok felülírása)",
       "inspect": "Vizsgálja meg",
-      "label": "Címke",
+      "label": "Jelöl",
       "manage": "Kezelése",
       "merge": "Összeolvad",
       "new_automation": "＋ Új automatizálás",
@@ -484,7 +484,7 @@
       "reset": "Reset",
       "reset_to_builtin": "Állítsa vissza a beépített modellekre",
       "reset_to_defaults": "Állítsa vissza az alapértelmezett értékeket",
-      "review": "Tekintse át",
+      "review": "Értékel",
       "run_analysis": "🔍 Javaslatelemzés futtatása",
       "run_auto_label": "Futtassa az Auto-Labelt",
       "save": "Megtakarítás",
@@ -622,7 +622,7 @@
       "artifact_tip": "{n} rendellenesség észlelve (pl. ajtónyitás a ciklus közepén) – nyissa meg, hogy megtekinthesse őket a grafikonon",
       "poor_fit_tip": "Inkonzisztens meccselőzmények – fontolja meg a profil újjáépítését",
       "fair_fit_tip": "Mérsékelt egyezési konzisztencia – néhány ehhez a profilhoz rendelt ciklus alacsonyabb megbízhatósági pontszámmal rendelkezik. Címkézz fel több ciklust, vagy rögzítsd újra a profilt a pontosság javítása érdekében.",
-      "fair_fit": "tisztességes illeszkedés",
+      "fair_fit": "elfogadható minőség",
       "poor_fit": "rossz illeszkedés",
       "auto": "(automatikusan észlelve)",
       "built_in_tag": "beépített",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Tárolási statisztikák, karbantartás, export/import",
       "trim_intro": "Húzza el a piros fogantyúkat, vagy írjon be értékeket. Az ablakon kívül mindent eltávolítanak.",
       "unsure_detected_prefix": "A WashData nem biztos abban, hogy észlelte",
-      "updated": "Frissítve"
+      "updated": "Frissítve",
+      "feedback_cycles_pending": "{n} ciklus{s} áttekintésre vár",
+      "artifact_spike_detail": "~{n}s-re a szokásos energiasáv felett volt.",
+      "artifact_dip_detail": "~{n}s-re a szokásos energiasáv alá esett.",
+      "artifact_pause_detail": "A teljesítmény ~{n}s-re közel nullára esett, majd visszatért — valószínűleg kinyílt az ajtó a ciklus közben, vagy a ciklus szünetelt."
     },
     "phase_desc": {
       "pre_wash": "Első áztatás vagy előkezelés a főmosás előtt.",
@@ -769,7 +773,7 @@
       "fit_slight": "Enyhe",
       "fit_strong": "Erős",
       "fit_weak": "Gyenge",
-      "fit_word": "illeszkedik",
+      "fit_word": "illeszkedési minőség",
       "personalized": "● Személyre szabott ehhez a géphez"
     },
     "trend": {
@@ -874,6 +878,348 @@
       "settings_saved": "A beállítások elmentve; integráció újratöltése",
       "suggestions_applied": "Javaslatok alkalmazva; integráció újratöltése",
       "suggestions_dismissed": "Javaslatok elutasítva"
+    },
+    "section": {
+      "basic": {
+        "label": "Alapok",
+        "intro": "Az alap azonosítás és a legtöbb beállítás számára szükséges alapok."
+      },
+      "detection": {
+        "label": "Érzékelés",
+        "intro": "Hogyan érzékeli a rendszer a ciklust indítottnak, futónak és befejezettnek."
+      },
+      "matching": {
+        "label": "Párosítás",
+        "intro": "Hogyan párosítják a befejezett ciklusokat a tanult profilokkal és jelölik meg őket."
+      },
+      "timing": {
+        "label": "Időzítés és felügyelet",
+        "intro": "Háttérkadencia, az offline felügyelet és a karbantartás."
+      },
+      "anti_wrinkle": {
+        "label": "Ránctalanítás",
+        "intro": "A ránctalanító/gyűrőtlenítő mód alacsony teljesítményű dobpulzusokat érzékel a főfázis után, és a befejezett ciklushoz csatolja őket."
+      },
+      "delay": {
+        "label": "Késleltetett indítás",
+        "intro": "A késleltetett indítás érzékelése azonosítja, amikor egy eszköz be van kapcsolva, de még nem kezdte el a ciklust."
+      },
+      "triggers": {
+        "label": "Triggerek és ajtók",
+        "intro": "Opcionális külső jelek: záró trigger, ajtóérzékelő, szünetkapcsoló és a kirakodási emlékeztető."
+      },
+      "notifications": {
+        "label": "Értesítések",
+        "intro": "Mikor és hogyan kap értesítést a cikluseseményekről."
+      },
+      "ml_training": {
+        "label": "ML tanítás",
+        "intro": "Az eszközön végzett gépi tanulás újratanítási ütemezése és adatbeállításai."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Küszöbök és rés"
+      },
+      "cycle_start": {
+        "label": "Ciklus indítása"
+      },
+      "cycle_end": {
+        "label": "Ciklus vége"
+      },
+      "signal_processing": {
+        "label": "Jelkondicionálás"
+      },
+      "predictive_end": {
+        "label": "Prediktív befejezés"
+      },
+      "dishwasher_end": {
+        "label": "Mosogatógép befejezése"
+      },
+      "dtw_refinement": {
+        "label": "DTW finomítás"
+      },
+      "match_scoring": {
+        "label": "Egyezési pontozás"
+      },
+      "duration_gates": {
+        "label": "Időtartam kapuk"
+      },
+      "auto_labeling": {
+        "label": "Automatikus jelölés"
+      },
+      "watchdog": {
+        "label": "Felügyelő"
+      },
+      "housekeeping": {
+        "label": "Karbantartás"
+      },
+      "debug": {
+        "label": "Hibakeresés"
+      },
+      "external_end_trigger": {
+        "label": "Külső záró trigger"
+      },
+      "door_pause": {
+        "label": "Ajtó és szünet"
+      },
+      "unload_reminder": {
+        "label": "Kirakodási emlékeztető"
+      },
+      "services": {
+        "label": "Szolgáltatások"
+      },
+      "timing": {
+        "label": "Időzítés"
+      },
+      "messages": {
+        "label": "Üzenetek"
+      },
+      "energy": {
+        "label": "Energia"
+      },
+      "cycle_timers": {
+        "label": "Ciklus időzítők"
+      },
+      "schedule": {
+        "label": "Ütemezés"
+      },
+      "data_management": {
+        "label": "Adatkezelés"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Eszköz neve"
+      },
+      "device_type": {
+        "label": "Eszköz típusa"
+      },
+      "power_sensor": {
+        "label": "Teljesítmény érzékelő"
+      },
+      "min_power": {
+        "label": "Minimális teljesítmény"
+      },
+      "off_delay": {
+        "label": "Kikapcsolási késleltetés"
+      },
+      "linked_device": {
+        "label": "Csoportosítás eszköz alá"
+      },
+      "start_threshold_w": {
+        "label": "Indítási küszöb"
+      },
+      "stop_threshold_w": {
+        "label": "Leállítási küszöb"
+      },
+      "min_off_gap": {
+        "label": "Min. kikapcsolási rés"
+      },
+      "start_duration_threshold": {
+        "label": "Indítási időtartam"
+      },
+      "start_energy_threshold": {
+        "label": "Indítási energia"
+      },
+      "completion_min_seconds": {
+        "label": "Min. ciklusidőtartam"
+      },
+      "running_dead_zone": {
+        "label": "Futó holttér"
+      },
+      "end_energy_threshold": {
+        "label": "Záró energia"
+      },
+      "end_repeat_count": {
+        "label": "Záró ismétlések száma"
+      },
+      "sampling_interval": {
+        "label": "Mintavételezési intervallum"
+      },
+      "smoothing_window": {
+        "label": "Simítási ablak"
+      },
+      "abrupt_drop_watts": {
+        "label": "Hirtelen esés"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Hirtelen esés aránya"
+      },
+      "profile_match_threshold": {
+        "label": "Egyezési küszöb"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Nem egyező küszöb"
+      },
+      "profile_match_interval": {
+        "label": "Egyezési intervallum"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Min. időtartam arány"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Max. időtartam arány"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profil időtartam tolerancia"
+      },
+      "duration_tolerance": {
+        "label": "Becslési tolerancia"
+      },
+      "auto_label_confidence": {
+        "label": "Automatikus jelölési megbízhatóság"
+      },
+      "learning_confidence": {
+        "label": "Tanulási megbízhatóság"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Visszajelzési értesítések elnyomása"
+      },
+      "watchdog_interval": {
+        "label": "Felügyelő intervallum"
+      },
+      "no_update_active_timeout": {
+        "label": "Frissítés nélküli időtúllépés"
+      },
+      "progress_reset_delay": {
+        "label": "Folyamat visszaállítási késleltetés"
+      },
+      "auto_maintenance": {
+        "label": "Automatikus karbantartás (éjszakai tisztítás)"
+      },
+      "expose_debug_entities": {
+        "label": "Hibakeresési entitások közzététele"
+      },
+      "save_debug_traces": {
+        "label": "Hibakeresési nyomok mentése"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Ránctalanítás érzékelés engedélyezése"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Max. ránctalanítási teljesítmény"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Max. időtartam"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Kilépési teljesítmény küszöb"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Késleltetett indítás érzékelés engedélyezése"
+      },
+      "delay_confirm_seconds": {
+        "label": "Megerősítési másodpercek"
+      },
+      "delay_timeout_hours": {
+        "label": "Időtúllépési órák"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Külső záró trigger engedélyezése"
+      },
+      "external_end_trigger": {
+        "label": "Külső trigger entitás"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Külső trigger invertálása (trigger KI-re)"
+      },
+      "door_sensor_entity": {
+        "label": "Ajtóérzékelő entitás"
+      },
+      "pause_cuts_power": {
+        "label": "Szünet megszakítja az áramot (kapcsolón keresztül)"
+      },
+      "switch_entity": {
+        "label": "Kapcsoló entitás"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Kirakodási emlékeztető késleltetése"
+      },
+      "pump_stuck_duration": {
+        "label": "Elakadt szivattyú időtartama"
+      },
+      "notify_start_services": {
+        "label": "Indítási szolgáltatások"
+      },
+      "notify_finish_services": {
+        "label": "Befejezési szolgáltatások"
+      },
+      "notify_live_services": {
+        "label": "Élő folyamat szolgáltatások"
+      },
+      "notify_people": {
+        "label": "Személyek (Csak otthon értesítéshez)"
+      },
+      "notify_only_when_home": {
+        "label": "Csak otthon értesítés"
+      },
+      "notify_fire_events": {
+        "label": "HA események aktiválása értesítésekhez"
+      },
+      "notify_before_end_minutes": {
+        "label": "Befejezés előtti riasztás"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Élő frissítési intervallum"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Élő túlfutás % riasztás előtt"
+      },
+      "notify_live_chronometer": {
+        "label": "Élő kronométer használata"
+      },
+      "notify_timeout_seconds": {
+        "label": "Automatikus elvetés után"
+      },
+      "notify_title": {
+        "label": "Értesítés címe"
+      },
+      "notify_icon": {
+        "label": "Értesítés ikonja"
+      },
+      "notify_start_message": {
+        "label": "Indítási üzenet"
+      },
+      "notify_finish_message": {
+        "label": "Befejezési üzenet"
+      },
+      "notify_pre_complete_message": {
+        "label": "Befejezés előtti üzenet"
+      },
+      "notify_reminder_message": {
+        "label": "Emlékeztető üzenet"
+      },
+      "notify_channel": {
+        "label": "Android csatorna (indítás/élő)"
+      },
+      "notify_finish_channel": {
+        "label": "Android csatorna (befejezés)"
+      },
+      "energy_price_entity": {
+        "label": "Energiaár entitás"
+      },
+      "energy_price_static": {
+        "label": "Statikus energiaár (kWh-nként)"
+      },
+      "notify_cycle_timers": {
+        "label": "Ciklus időzítők"
+      },
+      "enable_ml_models": {
+        "label": "Intelligens modellek alkalmazása ciklus közben"
+      },
+      "ml_training_enabled": {
+        "label": "Tanulás erről a gépről"
+      },
+      "ml_training_hour": {
+        "label": "Tanulás ennyi órakor"
+      },
+      "ml_training_min_cycles": {
+        "label": "Előbb ennyi ciklus szükséges"
+      },
+      "ml_training_interval_days": {
+        "label": "Legfeljebb ennyi naponta ellenőrizve"
+      }
     }
   }
 }

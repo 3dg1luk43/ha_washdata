@@ -735,7 +735,11 @@
       "storage_diagnostics": "Ystadegau storio, cynnal a chadw, allforio / mewnforio",
       "trim_intro": "Llusgwch y dolenni coch, neu rhowch werthoedd. Mae popeth y tu allan i'r ffenestr yn cael ei dynnu.",
       "unsure_detected_prefix": "Nid yw WashData yn siŵr ei fod wedi'i ganfod",
-      "updated": "Diweddarwyd"
+      "updated": "Diweddarwyd",
+      "feedback_cycles_pending": "{n} cylch{s} i'w adolygu",
+      "artifact_spike_detail": "Tynnodd uwchlaw band pŵer arferol am ~{n}s.",
+      "artifact_dip_detail": "Syrthiodd islaw band pŵer arferol am ~{n}s.",
+      "artifact_pause_detail": "Syrthiodd pŵer i bron sero am ~{n}s yna ailddechrau — mae'n debygol i'r drws agor yng nghanol y cylch neu pausiwyd y cylch."
     },
     "phase_desc": {
       "pre_wash": "Mwydwch neu ragdriniaeth gychwynnol cyn y prif olchi.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Yn tueddu i lawr",
       "up": "Tueddu i fyny"
+    },
+    "section": {
+      "basic": {
+        "label": "Sylfaenol",
+        "intro": "Hunaniaeth craidd a'r hanfodion y mae'r rhan fwyaf o osodiadau eu hangen."
+      },
+      "detection": {
+        "label": "Canfod",
+        "intro": "Sut mae cylchred yn cael ei chanfod fel un sy'n dechrau, rhedeg a gorffen."
+      },
+      "matching": {
+        "label": "Cyfateb",
+        "intro": "Sut mae cylchoedd gorffenedig yn cael eu cyfateb i broffiliau dysgu ac yn cael eu labelu."
+      },
+      "timing": {
+        "label": "Amseru a Gwarcheidwad",
+        "intro": "Cadence cefndir, y gwarcheidwad all-lein a chadwraeth tŷ."
+      },
+      "anti_wrinkle": {
+        "label": "Gwrth-Grychau",
+        "intro": "Mae modd gwrth-grych yn canfod pylsiau tymbl pŵer isel ar ôl y prif gyfnod ac yn eu cadw wedi'u hatodi wrth y cylch gorffenedig."
+      },
+      "delay": {
+        "label": "Dechrau Oedi",
+        "intro": "Mae canfod dechrau gohiriedig yn nodi pryd mae teclyn wedi'i bweru ond nid yw eto wedi dechrau ei gylchred."
+      },
+      "triggers": {
+        "label": "Sbardunau a Drysau",
+        "intro": "Signalau allanol dewisol: sbardun diwedd, synhwyrydd drws, switsh seibio, ac atgoffa dadlwytho."
+      },
+      "notifications": {
+        "label": "Hysbysiadau",
+        "intro": "Pryd a sut y cewch eich hysbysu am ddigwyddiadau cylchred."
+      },
+      "ml_training": {
+        "label": "Hyfforddiant ML",
+        "intro": "Amserlen ailfyfforddi dysgu peiriant ar-ddyfais a gosodiadau data."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Trothwyon a Bwlch"
+      },
+      "cycle_start": {
+        "label": "Dechrau Cylch"
+      },
+      "cycle_end": {
+        "label": "Diwedd Cylch"
+      },
+      "signal_processing": {
+        "label": "Prosesu Signal"
+      },
+      "predictive_end": {
+        "label": "Diwedd Rhagdybiol"
+      },
+      "dishwasher_end": {
+        "label": "Diwedd Peiriant Golchi Llestri"
+      },
+      "dtw_refinement": {
+        "label": "Mireinio DTW"
+      },
+      "match_scoring": {
+        "label": "Sgorio Cyfatebol"
+      },
+      "duration_gates": {
+        "label": "Gatiau Hyd"
+      },
+      "auto_labeling": {
+        "label": "Auto-Labelu"
+      },
+      "watchdog": {
+        "label": "Gwarcheidwad"
+      },
+      "housekeeping": {
+        "label": "Cadwraeth Tŷ"
+      },
+      "debug": {
+        "label": "Dadfygio"
+      },
+      "external_end_trigger": {
+        "label": "Sbardun Diwedd Allanol"
+      },
+      "door_pause": {
+        "label": "Drws a Seibio"
+      },
+      "unload_reminder": {
+        "label": "Atgoffa Dadlwytho"
+      },
+      "services": {
+        "label": "Gwasanaethau"
+      },
+      "timing": {
+        "label": "Amseru"
+      },
+      "messages": {
+        "label": "Negeseuon"
+      },
+      "energy": {
+        "label": "Egni"
+      },
+      "cycle_timers": {
+        "label": "Amseryddion Cylchred"
+      },
+      "schedule": {
+        "label": "Amserlen"
+      },
+      "data_management": {
+        "label": "Rheoli Data"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Enw Dyfais"
+      },
+      "device_type": {
+        "label": "Math o Ddyfais"
+      },
+      "power_sensor": {
+        "label": "Synhwyrydd Pŵer"
+      },
+      "min_power": {
+        "label": "Pŵer Lleiaf"
+      },
+      "off_delay": {
+        "label": "Oedi Diffodd"
+      },
+      "linked_device": {
+        "label": "Grwpio o Dan Ddyfais"
+      },
+      "start_threshold_w": {
+        "label": "Trothwy Cychwyn"
+      },
+      "stop_threshold_w": {
+        "label": "Trothwy Stopio"
+      },
+      "min_off_gap": {
+        "label": "Bwlch Diffodd Isaf"
+      },
+      "start_duration_threshold": {
+        "label": "Hyd Cychwyn"
+      },
+      "start_energy_threshold": {
+        "label": "Egni Cychwyn"
+      },
+      "completion_min_seconds": {
+        "label": "Hyd Cylch Lleiaf"
+      },
+      "running_dead_zone": {
+        "label": "Parth Marw Rhedeg"
+      },
+      "end_energy_threshold": {
+        "label": "Egni Diwedd"
+      },
+      "end_repeat_count": {
+        "label": "Cyfrif Ailadrodd Diwedd"
+      },
+      "sampling_interval": {
+        "label": "Cyfwng Samplu"
+      },
+      "smoothing_window": {
+        "label": "Ffenestr Llyfnhau"
+      },
+      "abrupt_drop_watts": {
+        "label": "Gostyngiad Sydyn"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Cymhareb Gostyngiad Sydyn"
+      },
+      "profile_match_threshold": {
+        "label": "Trothwy Cyfatebu"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Trothwy Anfaes"
+      },
+      "profile_match_interval": {
+        "label": "Cyfwng Cyfatebu"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Cymhareb Hyd Lleiaf"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Cymhareb Hyd Mwyaf"
+      },
+      "profile_duration_tolerance": {
+        "label": "Goddefiant Hyd Proffil"
+      },
+      "duration_tolerance": {
+        "label": "Goddefiant Amcangyfrif"
+      },
+      "auto_label_confidence": {
+        "label": "Hyder Auto-Labelu"
+      },
+      "learning_confidence": {
+        "label": "Hyder Dysgu"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Atal Hysbysiadau Adborth"
+      },
+      "watchdog_interval": {
+        "label": "Cyfwng Gwarcheidwad"
+      },
+      "no_update_active_timeout": {
+        "label": "Amser Heb Ddiweddaru"
+      },
+      "progress_reset_delay": {
+        "label": "Oedi Ailosod Cynnydd"
+      },
+      "auto_maintenance": {
+        "label": "Cynnal a Chadw Awtomatig (glanhau nos)"
+      },
+      "expose_debug_entities": {
+        "label": "Datgelu Endidau Dadfygio"
+      },
+      "save_debug_traces": {
+        "label": "Cadw Olion Dadfygio"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Galluogi Canfod Gwrth-Grych"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Pŵer Gwrth-Grych Mwyaf"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Hyd Mwyaf"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Trothwy Pŵer Ymadael"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Galluogi Canfod Dechrau Oedi"
+      },
+      "delay_confirm_seconds": {
+        "label": "Eiliadau Cadarnhau"
+      },
+      "delay_timeout_hours": {
+        "label": "Oriau Amser Allan"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Galluogi Sbardun Diwedd Allanol"
+      },
+      "external_end_trigger": {
+        "label": "Endid Sbardun Allanol"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Gwrthdroi Sbardun Allanol (sbarduno ar DDIFFODD)"
+      },
+      "door_sensor_entity": {
+        "label": "Endid Synhwyrydd Drws"
+      },
+      "pause_cuts_power": {
+        "label": "Mae Seibio Hefyd yn Torri Pŵer (trwy switsh)"
+      },
+      "switch_entity": {
+        "label": "Endid Switsh"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Oedi Atgoffa Dadlwytho"
+      },
+      "pump_stuck_duration": {
+        "label": "Hyd Pwmp yn Sownd"
+      },
+      "notify_start_services": {
+        "label": "Gwasanaethau Cychwyn"
+      },
+      "notify_finish_services": {
+        "label": "Gwasanaethau Gorffen"
+      },
+      "notify_live_services": {
+        "label": "Gwasanaethau Cynnydd Byw"
+      },
+      "notify_people": {
+        "label": "Pobl (ar gyfer Dim Ond Pan Yn Cartref)"
+      },
+      "notify_only_when_home": {
+        "label": "Hysbysu Dim Ond Pan Yn Cartref"
+      },
+      "notify_fire_events": {
+        "label": "Tanio Digwyddiadau HA ar gyfer Hysbysiadau"
+      },
+      "notify_before_end_minutes": {
+        "label": "Rhybudd Cyn Diwedd"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Cyfwng Diweddariad Byw"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% Gorrediad Byw Cyn Rhybudd"
+      },
+      "notify_live_chronometer": {
+        "label": "Defnyddio Cronomedre Byw"
+      },
+      "notify_timeout_seconds": {
+        "label": "Diswyddo'n Awtomatig Ar Ôl"
+      },
+      "notify_title": {
+        "label": "Teitl Hysbysiad"
+      },
+      "notify_icon": {
+        "label": "Eicon Hysbysiad"
+      },
+      "notify_start_message": {
+        "label": "Neges Dechrau"
+      },
+      "notify_finish_message": {
+        "label": "Neges Gorffen"
+      },
+      "notify_pre_complete_message": {
+        "label": "Neges Cyn Gorffen"
+      },
+      "notify_reminder_message": {
+        "label": "Neges Atgoffa"
+      },
+      "notify_channel": {
+        "label": "Sianel Android (cychwyn/byw)"
+      },
+      "notify_finish_channel": {
+        "label": "Sianel Android (gorffen)"
+      },
+      "energy_price_entity": {
+        "label": "Endid Pris Ynni"
+      },
+      "energy_price_static": {
+        "label": "Pris Ynni Sefydlog (y kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Amseryddion Cylchred"
+      },
+      "enable_ml_models": {
+        "label": "Cymhwyso modelau clyfar yn ystod cylch"
+      },
+      "ml_training_enabled": {
+        "label": "Dysgu o'r peiriant hwn"
+      },
+      "ml_training_hour": {
+        "label": "Dysgu am yr awr"
+      },
+      "ml_training_min_cycles": {
+        "label": "Cylchoedd sydd eu hangen yn gyntaf"
+      },
+      "ml_training_interval_days": {
+        "label": "Gwirio uchafswm bob"
+      }
     }
   }
 }

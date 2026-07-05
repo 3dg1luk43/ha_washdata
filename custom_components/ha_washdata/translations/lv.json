@@ -462,7 +462,7 @@
       "import_json": "Importēt no JSON",
       "import_overwrite": "Importēt (pārraksta datus)",
       "inspect": "Pārbaudīt",
-      "label": "Etiķete",
+      "label": "Iezīmēt",
       "manage": "Pārvaldīt",
       "merge": "Apvienot",
       "new_automation": "＋ Jauna automatizācija",
@@ -484,7 +484,7 @@
       "reset": "Atiestatīt",
       "reset_to_builtin": "Atiestatīt uz iebūvētajiem modeļiem",
       "reset_to_defaults": "Atiestatīt uz noklusējuma iestatījumiem",
-      "review": "Pārskats",
+      "review": "Novērtēt",
       "run_analysis": "🔍 Palaidiet ieteikumu analīzi",
       "run_auto_label": "Palaidiet automātisko etiķeti",
       "save": "Saglabāt",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Uzglabāšanas statistika, apkope, eksports/imports",
       "trim_intro": "Velciet sarkanos rokturus vai ievadiet vērtības. Viss, kas atrodas ārpus loga, tiek noņemts.",
       "unsure_detected_prefix": "WashData nav pārliecināts, ka tas ir atklāts",
-      "updated": "Atjaunināts"
+      "updated": "Atjaunināts",
+      "artifact_spike_detail": "Pārsniedza parasto jaudas joslu ~{n}s.",
+      "artifact_dip_detail": "Krita zem parastā jaudas joslas ~{n}s.",
+      "artifact_pause_detail": "Jauda krita gandrīz līdz nullei ~{n}s, pēc tam atjaunojās — visticamāk, durvis tika atvērtas cikla vidū vai cikls tika pauzēts.",
+      "feedback_cycles_pending": "{n} cikl{s} pārskatīšanai"
     },
     "phase_desc": {
       "pre_wash": "Sākotnējā mērcēšana vai pirmapstrāde pirms galvenās mazgāšanas.",
@@ -874,6 +878,641 @@
       "settings_saved": "Iestatījumi saglabāti; integrācijas pārlādēšana",
       "suggestions_applied": "Ieteikumi piemēroti; integrācijas pārlādēšana",
       "suggestions_dismissed": "Ieteikumi noraidīti"
+    },
+    "section": {
+      "overview": {
+        "label": "Pārskats",
+        "intro": "Jūsu ierīces statusa un jaunākās darbības pārskats."
+      },
+      "cycles": {
+        "label": "Cikli",
+        "intro": "Konstatēto mazgāšanas ciklu vēsture."
+      },
+      "profiles": {
+        "label": "Profili",
+        "intro": "Iemācītie jaudas profili dažādām programmām."
+      },
+      "settings": {
+        "label": "Iestatījumi",
+        "intro": "Konfigurēt noteikšanas un atbilstības iestatījumus."
+      },
+      "ml_training": {
+        "label": "ML apmācība",
+        "intro": "Mašīnmācīšanās pārapmācības grafiks un datu iestatījumi ierīcē."
+      },
+      "diagnostics": {
+        "label": "Diagnostika",
+        "intro": "Diagnostikas informācija un sensoru rādījumi."
+      },
+      "logs": {
+        "label": "Žurnāli",
+        "intro": "Žurnāla ieraksti problēmu novēršanai."
+      },
+      "help": {
+        "label": "Palīdzība",
+        "intro": "Palīdzība un dokumentācija."
+      },
+      "about": {
+        "label": "Par",
+        "intro": "Par šo integrāciju."
+      },
+      "basic": {
+        "label": "Pamata",
+        "intro": "Pamatidentitāte un svarīgākie iestatījumi lielākajai daļai iestatījumu."
+      },
+      "detection": {
+        "label": "Noteikšana",
+        "intro": "Kā tiek noteikts, ka cikls sākas, darbojas un beidzas."
+      },
+      "matching": {
+        "label": "Saskaņošana",
+        "intro": "Kā pabeigtie cikli tiek saskaņoti ar apgūtajiem profiliem un iezīmēti."
+      },
+      "timing": {
+        "label": "Laika grafiks un sargsuns",
+        "intro": "Fona kadence, bezsaistes sargsuns un uzturēšana."
+      },
+      "anti_wrinkle": {
+        "label": "Pretgrumbu",
+        "intro": "Pretgrumbu/pretlocīšanas režīms atpazīst zemas jaudas kratīšanas impulsus pēc galvenās fāzes un pievieno tos pabeigtajam ciklam."
+      },
+      "delay": {
+        "label": "Aizkavēts starts",
+        "intro": "Aizkavēta starta noteikšana identificē, kad ierīce ir ieslēgta, bet vēl nav sākusi ciklu."
+      },
+      "triggers": {
+        "label": "Aktivatori un durvis",
+        "intro": "Neobligātie ārējie signāli: beigu aktivators, durvju sensors, pauzes slēdzis un izkraušanas atgādinājums."
+      },
+      "notifications": {
+        "label": "Paziņojumi",
+        "intro": "Kad un kā jūs tiekat informēts par ciklu notikumiem."
+      }
+    },
+    "setting_group": {
+      "detection": {
+        "label": "Noteikšana"
+      },
+      "thresholds": {
+        "label": "Sliekšņi"
+      },
+      "timing": {
+        "label": "Laika grafiks"
+      },
+      "energy": {
+        "label": "Enerģija"
+      },
+      "matching": {
+        "label": "Profila saskaņošana"
+      },
+      "dtw": {
+        "label": "DTW precizēšana"
+      },
+      "learning": {
+        "label": "Mācīšanās"
+      },
+      "feedback": {
+        "label": "Atgriezeniskā saite"
+      },
+      "display": {
+        "label": "Displejs"
+      },
+      "advanced": {
+        "label": "Papildu"
+      },
+      "notifications": {
+        "label": "Paziņojumi"
+      },
+      "ml": {
+        "label": "Mašīnmācīšanās"
+      },
+      "ml_training": {
+        "label": "ML apmācība"
+      },
+      "ml_models": {
+        "label": "ML modeļi"
+      },
+      "cycle_detection": {
+        "label": "Cikla noteikšana"
+      },
+      "profile_matching": {
+        "label": "Profila saskaņošana"
+      },
+      "power": {
+        "label": "Jauda"
+      },
+      "duration": {
+        "label": "Ilgums"
+      },
+      "cost": {
+        "label": "Izmaksas"
+      },
+      "debug": {
+        "label": "Atkļūdošana"
+      },
+      "device": {
+        "label": "Ierīce"
+      },
+      "phases": {
+        "label": "Fāzes"
+      },
+      "groups": {
+        "label": "Profilu grupas"
+      },
+      "thresholds_gap": {
+        "label": "Sliekšņi un atstarpe"
+      },
+      "cycle_start": {
+        "label": "Cikla sākums"
+      },
+      "cycle_end": {
+        "label": "Cikla beigas"
+      },
+      "signal_processing": {
+        "label": "Signālu apstrāde"
+      },
+      "predictive_end": {
+        "label": "Prognozēšanas beigas"
+      },
+      "dishwasher_end": {
+        "label": "Trauku mazgājamās mašīnas beigas"
+      },
+      "dtw_refinement": {
+        "label": "DTW precizēšana"
+      },
+      "match_scoring": {
+        "label": "Atbilstības vērtēšana"
+      },
+      "duration_gates": {
+        "label": "Ilguma vārti"
+      },
+      "auto_labeling": {
+        "label": "Automātiskā marķēšana"
+      },
+      "watchdog": {
+        "label": "Sargsuns"
+      },
+      "housekeeping": {
+        "label": "Apkope"
+      },
+      "external_end_trigger": {
+        "label": "Ārējais beigu aktivators"
+      },
+      "door_pause": {
+        "label": "Durvis un pauze"
+      },
+      "unload_reminder": {
+        "label": "Izkraušanas atgādinājums"
+      },
+      "services": {
+        "label": "Pakalpojumi"
+      },
+      "messages": {
+        "label": "Ziņojumi"
+      },
+      "cycle_timers": {
+        "label": "Cikla taimeri"
+      },
+      "schedule": {
+        "label": "Grafiks"
+      },
+      "data_management": {
+        "label": "Datu pārvaldība"
+      }
+    },
+    "setting": {
+      "min_power": {
+        "label": "Minimālā jauda"
+      },
+      "start_power": {
+        "label": "Starta jauda"
+      },
+      "stop_power": {
+        "label": "Apstāšanās jauda"
+      },
+      "min_duration": {
+        "label": "Minimālais ilgums"
+      },
+      "max_duration": {
+        "label": "Maksimālais ilgums"
+      },
+      "start_delay": {
+        "label": "Starta aizkave"
+      },
+      "stop_delay": {
+        "label": "Apstāšanās aizkave"
+      },
+      "min_off_gap": {
+        "label": "Min. izslēgšanas atstarpe"
+      },
+      "energy_gate": {
+        "label": "Enerģijas vārti"
+      },
+      "match_min_score": {
+        "label": "Minimālais atbilstības rādītājs"
+      },
+      "match_ambiguity_margin": {
+        "label": "Neskaidrības robeža"
+      },
+      "match_min_duration_ratio": {
+        "label": "Min ilguma attiecība"
+      },
+      "match_max_duration_ratio": {
+        "label": "Max ilguma attiecība"
+      },
+      "dtw_mode": {
+        "label": "DTW režīms"
+      },
+      "dtw_bandwidth": {
+        "label": "DTW joslas platums"
+      },
+      "dtw_blend": {
+        "label": "DTW sajaukums"
+      },
+      "dtw_refine_top_n": {
+        "label": "DTW precizē Top N"
+      },
+      "dtw_ensemble_w": {
+        "label": "DTW ansambļa svars"
+      },
+      "corr_weight": {
+        "label": "Korelācijas svars"
+      },
+      "duration_weight": {
+        "label": "Ilguma svars"
+      },
+      "energy_weight": {
+        "label": "Enerģijas svars"
+      },
+      "duration_scale": {
+        "label": "Ilguma skala"
+      },
+      "energy_scale": {
+        "label": "Enerģijas skala"
+      },
+      "learning_rate": {
+        "label": "Mācīšanās ātrums"
+      },
+      "confidence_threshold": {
+        "label": "Pārliecības slieksnis"
+      },
+      "auto_label_threshold": {
+        "label": "Automātiskās etiķetes slieksnis"
+      },
+      "feedback_threshold": {
+        "label": "Atgriezeniskās saites slieksnis"
+      },
+      "min_cycles_to_match": {
+        "label": "Min cikli saskaņošanai"
+      },
+      "profile_min_cycles": {
+        "label": "Profila min cikli"
+      },
+      "cost_per_kwh": {
+        "label": "Izmaksas par kWh"
+      },
+      "currency": {
+        "label": "Valūta"
+      },
+      "expose_debug_entities": {
+        "label": "Atklāt atkļūdošanas entītijas"
+      },
+      "enable_ml_models": {
+        "label": "Lietot viedos modeļus cikla laikā"
+      },
+      "ml_training_enabled": {
+        "label": "Mācīties no šīs mašīnas"
+      },
+      "ml_training_schedule": {
+        "label": "ML apmācības grafiks"
+      },
+      "ml_training_min_cycles": {
+        "label": "Nepieciešami cikli vispirms"
+      },
+      "ml_training_min_new_cycles": {
+        "label": "Min jaunie cikli apmācībai"
+      },
+      "ml_match_commit_threshold": {
+        "label": "ML atbilstības apstiprināšanas slieksnis"
+      },
+      "ml_end_guard_threshold": {
+        "label": "ML beigu aizsardzības slieksnis"
+      },
+      "ml_quality_threshold": {
+        "label": "ML kvalitātes slieksnis"
+      },
+      "ml_progress_blend_weight": {
+        "label": "ML progresa sajaukuma svars"
+      },
+      "device_type": {
+        "label": "Ierīces veids"
+      },
+      "power_sensor": {
+        "label": "Jaudas sensors"
+      },
+      "name": {
+        "label": "Ierīces nosaukums"
+      },
+      "anti_crease_power": {
+        "label": "Pretburzīšanās jauda"
+      },
+      "anti_crease_min_duration": {
+        "label": "Pretburzīšanās min ilgums"
+      },
+      "anti_crease_max_cycles": {
+        "label": "Pretburzīšanās max cikli"
+      },
+      "dishwasher_end_spike_min_progress": {
+        "label": "Beigu izlēciena min progress"
+      },
+      "dishwasher_end_spike_wait_seconds": {
+        "label": "Beigu izlēciena gaidīšanas laiks"
+      },
+      "pump_out_power": {
+        "label": "Sūkņa jauda"
+      },
+      "dryer_cool_power": {
+        "label": "Žāvētāja dzesēšanas jauda"
+      },
+      "dryer_cool_max_duration": {
+        "label": "Žāvētāja dzesēšanas max ilgums"
+      },
+      "end_defer_confidence": {
+        "label": "Beigu atlikšanas pārliecība"
+      },
+      "end_guard_max_defer": {
+        "label": "Beigu aizsardzības max atlikšana"
+      },
+      "terminal_drop_min_peak_ratio": {
+        "label": "Termināla krituma min maksimuma attiecība"
+      },
+      "terminal_drop_earliness_ratio": {
+        "label": "Termināla krituma agruma attiecība"
+      },
+      "terminal_drop_peak_familiar_tol": {
+        "label": "Termināla krituma maksimuma tolerance"
+      },
+      "terminal_drop_off_delay": {
+        "label": "Termināla krituma izslēgšanas aizkave"
+      },
+      "terminal_drop_min_clean_cycles": {
+        "label": "Termināla krituma min tīrie cikli"
+      },
+      "match_ranking_history_max": {
+        "label": "Atbilstības ranžēšanas vēstures max"
+      },
+      "max_cycles_stored": {
+        "label": "Max saglabātie cikli"
+      },
+      "max_power_trace_points": {
+        "label": "Max jaudas izsekošanas punkti"
+      },
+      "envelope_conformance_threshold": {
+        "label": "Aploksnes atbilstības slieksnis"
+      },
+      "suggest_coverage_min_unmatched": {
+        "label": "Pārklājuma robu min nesakritušie"
+      },
+      "suggest_coverage_min_rate": {
+        "label": "Pārklājuma robu min ātrums"
+      },
+      "suggest_coverage_window": {
+        "label": "Pārklājuma robu logs"
+      },
+      "suggest_coverage_low_conf": {
+        "label": "Pārklājuma robu zemā pārliecība"
+      },
+      "group_min_cohesion": {
+        "label": "Grupas min kohēzija"
+      },
+      "phase_match_tolerance": {
+        "label": "Fāzes atbilstības tolerance"
+      },
+      "recording_max_duration": {
+        "label": "Ierakstīšanas max ilgums"
+      },
+      "recording_min_duration": {
+        "label": "Ierakstīšanas min ilgums"
+      },
+      "resampling_points": {
+        "label": "Atkārtotas izlases punkti"
+      },
+      "smoothing_window": {
+        "label": "Izlīdzināšanas logs"
+      },
+      "trend_min_cycles": {
+        "label": "Tendences min cikli"
+      },
+      "trend_recent_window": {
+        "label": "Tendences jaunākais logs"
+      },
+      "trend_slope_threshold": {
+        "label": "Tendences slīpuma slieksnis"
+      },
+      "advisory_min_cycles": {
+        "label": "Ieteikumu min cikli"
+      },
+      "off_delay": {
+        "label": "Izslēgšanas aizkave"
+      },
+      "linked_device": {
+        "label": "Grupēt zem ierīces"
+      },
+      "start_threshold_w": {
+        "label": "Starta slieksnis"
+      },
+      "stop_threshold_w": {
+        "label": "Apstāšanās slieksnis"
+      },
+      "start_duration_threshold": {
+        "label": "Starta ilgums"
+      },
+      "start_energy_threshold": {
+        "label": "Starta enerģija"
+      },
+      "completion_min_seconds": {
+        "label": "Min. cikla ilgums"
+      },
+      "running_dead_zone": {
+        "label": "Darbības mirušā zona"
+      },
+      "end_energy_threshold": {
+        "label": "Beigu enerģija"
+      },
+      "end_repeat_count": {
+        "label": "Beigu atkārtojumu skaits"
+      },
+      "sampling_interval": {
+        "label": "Paraugu ņemšanas intervāls"
+      },
+      "abrupt_drop_watts": {
+        "label": "Pēkšņs kritums"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Pēkšņa krituma attiecība"
+      },
+      "profile_match_threshold": {
+        "label": "Atbilstības slieksnis"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Neatbilstības slieksnis"
+      },
+      "profile_match_interval": {
+        "label": "Atbilstības intervāls"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Min. ilguma attiecība"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Maks. ilguma attiecība"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profila ilguma tolerance"
+      },
+      "duration_tolerance": {
+        "label": "Novērtējuma tolerance"
+      },
+      "auto_label_confidence": {
+        "label": "Automātiskās marķēšanas pārliecība"
+      },
+      "learning_confidence": {
+        "label": "Mācīšanās pārliecība"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Apturēt atsauksmju paziņojumus"
+      },
+      "watchdog_interval": {
+        "label": "Sargsuna intervāls"
+      },
+      "no_update_active_timeout": {
+        "label": "Laiks bez atjauninājuma"
+      },
+      "progress_reset_delay": {
+        "label": "Progresa atiestatīšanas aizkave"
+      },
+      "auto_maintenance": {
+        "label": "Automātiskā apkope (nakts tīrīšana)"
+      },
+      "save_debug_traces": {
+        "label": "Saglabāt atkļūdošanas pēdas"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Iespējot pretgrumbu noteikšanu"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Maks. pretgrumbu jauda"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Maks. ilgums"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Izejas jaudas slieksnis"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Iespējot aizkavēta starta noteikšanu"
+      },
+      "delay_confirm_seconds": {
+        "label": "Apstiprināšanas sekundes"
+      },
+      "delay_timeout_hours": {
+        "label": "Noilguma stundas"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Iespējot ārējo beigu aktivatoru"
+      },
+      "external_end_trigger": {
+        "label": "Ārējā aktivatora entītija"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Invertēt ārējo aktivatoru (aktivēt pie IZSLĒGTS)"
+      },
+      "door_sensor_entity": {
+        "label": "Durvju sensora entītija"
+      },
+      "pause_cuts_power": {
+        "label": "Pauze arī izslēdz jaudu (ar slēdzi)"
+      },
+      "switch_entity": {
+        "label": "Slēdža entītija"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Izkraušanas atgādinājuma aizkave"
+      },
+      "pump_stuck_duration": {
+        "label": "Iestrēgušā sūkņa ilgums"
+      },
+      "notify_start_services": {
+        "label": "Starta pakalpojumi"
+      },
+      "notify_finish_services": {
+        "label": "Beigu pakalpojumi"
+      },
+      "notify_live_services": {
+        "label": "Tiešraides progresa pakalpojumi"
+      },
+      "notify_people": {
+        "label": "Personas (priekš Tikai mājās)"
+      },
+      "notify_only_when_home": {
+        "label": "Paziņot tikai mājās atrodoties"
+      },
+      "notify_fire_events": {
+        "label": "Aktivēt HA notikumus paziņojumiem"
+      },
+      "notify_before_end_minutes": {
+        "label": "Brīdinājums pirms beigām"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Tiešraides atjauninājumu intervāls"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Tiešraides pārsnieguma % pirms brīdinājuma"
+      },
+      "notify_live_chronometer": {
+        "label": "Izmantot tiešraides hronometru"
+      },
+      "notify_timeout_seconds": {
+        "label": "Automātiskā noņemšana pēc"
+      },
+      "notify_title": {
+        "label": "Paziņojuma virsraksts"
+      },
+      "notify_icon": {
+        "label": "Paziņojuma ikona"
+      },
+      "notify_start_message": {
+        "label": "Starta ziņojums"
+      },
+      "notify_finish_message": {
+        "label": "Beigu ziņojums"
+      },
+      "notify_pre_complete_message": {
+        "label": "Gandrīz pabeigšanas ziņojums"
+      },
+      "notify_reminder_message": {
+        "label": "Atgādinājuma ziņojums"
+      },
+      "notify_channel": {
+        "label": "Android kanāls (starts/tiešraide)"
+      },
+      "notify_finish_channel": {
+        "label": "Android kanāls (beigas)"
+      },
+      "energy_price_entity": {
+        "label": "Enerģijas cenas entītija"
+      },
+      "energy_price_static": {
+        "label": "Fiksētā enerģijas cena (par kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Cikla taimeri"
+      },
+      "ml_training_hour": {
+        "label": "Mācīties stundā"
+      },
+      "ml_training_interval_days": {
+        "label": "Pārbaudīt ne biežāk kā ik"
+      }
     }
   }
 }

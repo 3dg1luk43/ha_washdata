@@ -735,7 +735,11 @@
       "storage_diagnostics": "Статистика сховища, обслуговування, експорт/імпорт",
       "trim_intro": "Перетягніть червоні маркери або введіть значення. Все за межами вікна видаляється.",
       "unsure_detected_prefix": "WashData не впевнений, що виявив",
-      "updated": "Оновлено"
+      "updated": "Оновлено",
+      "feedback_cycles_pending": "{n} цикл{s} для перегляду",
+      "artifact_spike_detail": "Вийшов за верхню межу звичайної смуги потужності приблизно на ~{n} с.",
+      "artifact_dip_detail": "Опустився нижче звичайної смуги потужності приблизно на ~{n} с.",
+      "artifact_pause_detail": "Потужність впала майже до нуля приблизно на ~{n} с, а потім відновилася — імовірно, двері відчинили під час циклу або цикл призупинили."
     },
     "phase_desc": {
       "pre_wash": "Початкове замочування або попередня обробка перед основним пранням.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Низхідна тенденція",
       "up": "Висхідна тенденція"
+    },
+    "section": {
+      "basic": {
+        "label": "Основні",
+        "intro": "Базова ідентифікація та найнеобхідніші елементи для більшості налаштувань."
+      },
+      "detection": {
+        "label": "Виявлення",
+        "intro": "Як цикл виявляється як такий, що починається, виконується та завершується."
+      },
+      "matching": {
+        "label": "Зіставлення",
+        "intro": "Як завершені цикли зіставляються з вивченими профілями та позначаються мітками."
+      },
+      "timing": {
+        "label": "Час & Сторожовий пес",
+        "intro": "Фоновий ритм, офлайн-сторожовий пес та технічне обслуговування."
+      },
+      "anti_wrinkle": {
+        "label": "Захист від зминання",
+        "intro": "Режим захисту від зминання виявляє короткі імпульси обертання барабана з малою потужністю після основного циклу та зберігає їх як частину завершеного циклу."
+      },
+      "delay": {
+        "label": "Відкладений старт",
+        "intro": "Виявлення відкладеного старту визначає, коли прилад увімкнено, але цикл ще не розпочато."
+      },
+      "triggers": {
+        "label": "Тригери & Двері",
+        "intro": "Додаткові зовнішні сигнали: тригер завершення, датчик дверей, перемикач паузи та нагадування про вивантаження."
+      },
+      "notifications": {
+        "label": "Сповіщення",
+        "intro": "Коли і як ви отримуєте сповіщення про події циклу."
+      },
+      "ml_training": {
+        "label": "ML-навчання",
+        "intro": "Розклад перенавчання машинного навчання на пристрої та налаштування даних."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Пороги & Пауза"
+      },
+      "cycle_start": {
+        "label": "Початок циклу"
+      },
+      "cycle_end": {
+        "label": "Завершення циклу"
+      },
+      "signal_processing": {
+        "label": "Обробка сигналу"
+      },
+      "predictive_end": {
+        "label": "Передбачуване завершення"
+      },
+      "dishwasher_end": {
+        "label": "Завершення посудомийки"
+      },
+      "dtw_refinement": {
+        "label": "Уточнення DTW"
+      },
+      "match_scoring": {
+        "label": "Оцінка зіставлення"
+      },
+      "duration_gates": {
+        "label": "Ворота тривалості"
+      },
+      "auto_labeling": {
+        "label": "Автоматичне маркування"
+      },
+      "watchdog": {
+        "label": "Сторожовий пес"
+      },
+      "housekeeping": {
+        "label": "Обслуговування"
+      },
+      "debug": {
+        "label": "Налагодження"
+      },
+      "external_end_trigger": {
+        "label": "Зовнішній тригер завершення"
+      },
+      "door_pause": {
+        "label": "Двері & Пауза"
+      },
+      "unload_reminder": {
+        "label": "Нагадування про вивантаження"
+      },
+      "services": {
+        "label": "Служби"
+      },
+      "timing": {
+        "label": "Час"
+      },
+      "messages": {
+        "label": "Повідомлення"
+      },
+      "energy": {
+        "label": "Енергія"
+      },
+      "cycle_timers": {
+        "label": "Таймери циклу"
+      },
+      "schedule": {
+        "label": "Розклад"
+      },
+      "data_management": {
+        "label": "Керування даними"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Назва пристрою"
+      },
+      "device_type": {
+        "label": "Тип пристрою"
+      },
+      "power_sensor": {
+        "label": "Датчик потужності"
+      },
+      "min_power": {
+        "label": "Мінімальна потужність"
+      },
+      "off_delay": {
+        "label": "Затримка вимкнення"
+      },
+      "linked_device": {
+        "label": "Згрупувати під пристроєм"
+      },
+      "start_threshold_w": {
+        "label": "Поріг початку"
+      },
+      "stop_threshold_w": {
+        "label": "Поріг зупинки"
+      },
+      "min_off_gap": {
+        "label": "Мін. пауза вимкнення"
+      },
+      "start_duration_threshold": {
+        "label": "Тривалість початку"
+      },
+      "start_energy_threshold": {
+        "label": "Енергія початку"
+      },
+      "completion_min_seconds": {
+        "label": "Мін. тривалість циклу"
+      },
+      "running_dead_zone": {
+        "label": "Мертва зона під час роботи"
+      },
+      "end_energy_threshold": {
+        "label": "Енергія завершення"
+      },
+      "end_repeat_count": {
+        "label": "Кількість повторів завершення"
+      },
+      "sampling_interval": {
+        "label": "Інтервал вибірки"
+      },
+      "smoothing_window": {
+        "label": "Вікно згладжування"
+      },
+      "abrupt_drop_watts": {
+        "label": "Різке падіння"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Коефіцієнт різкого падіння"
+      },
+      "profile_match_threshold": {
+        "label": "Поріг зіставлення"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Поріг незіставлення"
+      },
+      "profile_match_interval": {
+        "label": "Інтервал зіставлення"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Мін. коефіцієнт тривалості"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Макс. коефіцієнт тривалості"
+      },
+      "profile_duration_tolerance": {
+        "label": "Допуск тривалості профілю"
+      },
+      "duration_tolerance": {
+        "label": "Допуск оцінки"
+      },
+      "auto_label_confidence": {
+        "label": "Впевненість автоматичного маркування"
+      },
+      "learning_confidence": {
+        "label": "Впевненість навчання"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Приховати сповіщення зворотного зв'язку"
+      },
+      "watchdog_interval": {
+        "label": "Інтервал сторожового пса"
+      },
+      "no_update_active_timeout": {
+        "label": "Тайм-аут без оновлення"
+      },
+      "progress_reset_delay": {
+        "label": "Затримка скидання прогресу"
+      },
+      "auto_maintenance": {
+        "label": "Автоматичне обслуговування (нічне очищення)"
+      },
+      "expose_debug_entities": {
+        "label": "Показати відлагоджувальні сутності"
+      },
+      "save_debug_traces": {
+        "label": "Зберегти відлагоджувальні трасування"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Увімкнути виявлення захисту від зминання"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Макс. потужність захисту від зминання"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Максимальна тривалість"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Поріг потужності виходу"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Увімкнути виявлення відкладеного старту"
+      },
+      "delay_confirm_seconds": {
+        "label": "Секунди підтвердження"
+      },
+      "delay_timeout_hours": {
+        "label": "Години тайм-ауту"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Увімкнути зовнішній тригер завершення"
+      },
+      "external_end_trigger": {
+        "label": "Сутність зовнішнього тригера"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Інвертувати зовнішній тригер (спрацювання при ВИМКНЕННІ)"
+      },
+      "door_sensor_entity": {
+        "label": "Сутність датчика дверей"
+      },
+      "pause_cuts_power": {
+        "label": "Пауза також вимикає живлення (через перемикач)"
+      },
+      "switch_entity": {
+        "label": "Сутність перемикача"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Затримка нагадування про вивантаження"
+      },
+      "pump_stuck_duration": {
+        "label": "Тривалість застрявання насоса"
+      },
+      "notify_start_services": {
+        "label": "Служби початку"
+      },
+      "notify_finish_services": {
+        "label": "Служби завершення"
+      },
+      "notify_live_services": {
+        "label": "Служби прямого прогресу"
+      },
+      "notify_people": {
+        "label": "Люди (для «лише вдома»)"
+      },
+      "notify_only_when_home": {
+        "label": "Сповіщати лише вдома"
+      },
+      "notify_fire_events": {
+        "label": "Запускати події HA для сповіщень"
+      },
+      "notify_before_end_minutes": {
+        "label": "Попередження перед завершенням"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Інтервал прямих оновлень"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% перевищення часу перед сповіщенням"
+      },
+      "notify_live_chronometer": {
+        "label": "Використовувати живий хронометр"
+      },
+      "notify_timeout_seconds": {
+        "label": "Автоматично закрити через"
+      },
+      "notify_title": {
+        "label": "Заголовок сповіщення"
+      },
+      "notify_icon": {
+        "label": "Іконка сповіщення"
+      },
+      "notify_start_message": {
+        "label": "Повідомлення про початок"
+      },
+      "notify_finish_message": {
+        "label": "Повідомлення про завершення"
+      },
+      "notify_pre_complete_message": {
+        "label": "Повідомлення перед завершенням"
+      },
+      "notify_reminder_message": {
+        "label": "Повідомлення-нагадування"
+      },
+      "notify_channel": {
+        "label": "Канал Android (початок/пряма трансляція)"
+      },
+      "notify_finish_channel": {
+        "label": "Канал Android (завершення)"
+      },
+      "energy_price_entity": {
+        "label": "Сутність ціни на енергію"
+      },
+      "energy_price_static": {
+        "label": "Фіксована ціна на енергію (за kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Таймери циклу"
+      },
+      "enable_ml_models": {
+        "label": "Застосовувати розумні моделі під час циклу"
+      },
+      "ml_training_enabled": {
+        "label": "Навчатися від цієї машини"
+      },
+      "ml_training_hour": {
+        "label": "Навчатися о годині"
+      },
+      "ml_training_min_cycles": {
+        "label": "Спочатку потрібні цикли"
+      },
+      "ml_training_interval_days": {
+        "label": "Перевіряти не частіше ніж кожні"
+      }
     }
   }
 }

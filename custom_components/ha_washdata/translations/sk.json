@@ -735,7 +735,11 @@
       "storage_diagnostics": "Štatistiky úložiska, údržba, export/import",
       "trim_intro": "Potiahnite červené rukoväti alebo zadajte hodnoty. Všetko mimo okna sa odstráni.",
       "unsure_detected_prefix": "WashData si nie je istý, či zistil",
-      "updated": "Aktualizované"
+      "updated": "Aktualizované",
+      "feedback_cycles_pending": "{n} cyklov na kontrolu",
+      "artifact_spike_detail": "Bol nad bežným pásmom výkonu počas ~{n} s.",
+      "artifact_dip_detail": "Poklesol pod bežné pásmo výkonu počas ~{n} s.",
+      "artifact_pause_detail": "Výkon poklesol takmer na nulu počas ~{n} s a potom sa obnovil — pravdepodobne boli otvorené dvere uprostred cyklu alebo bol cyklus pozastavený."
     },
     "phase_desc": {
       "pre_wash": "Počiatočné namáčanie alebo predbežná úprava pred hlavným praním.",
@@ -746,11 +750,11 @@
       "spin_wd": "Vysokorýchlostná extrakcia pred prechodom sušenia.",
       "soak": "Obdobie namáčania s nízkou aktivitou medzi aktívnymi fázami prania.",
       "soak_dw": "Predĺžená doba namočenia pre ťažkú pôdu.",
-      "anti_crease": "Príležitostné krátke vírenia po dokončení na zníženie vrások.",
+      "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",
       "heat_up": "Počiatočné zahriatie ohrievača pred úplným sušením.",
       "drying": "Hlavné vyhrievané obdobie sušenia s vírením.",
       "cool_down": "Vírenie bez tepla blízko konca cyklu.",
-      "anti_wrinkle": "Pravidelné vírenie po cykle na redukciu vrások.",
+      "anti_wrinkle": "Pravidelné vírenie po cykle na predchádzanie krčeniu oblečenia.",
       "sensor_check": "Krátka prestávka s nízkou spotrebou energie počas merania sucha.",
       "drain_and_switch": "Obdobie prechodu z režimu prania do režimu sušenia.",
       "pre_rinse": "Počiatočné striekanie pred umývaním čistiaceho prostriedku.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Klesajúci trend",
       "up": "Rastúca tendencia"
+    },
+    "section": {
+      "basic": {
+        "label": "Základné",
+        "intro": "Základná identita a základy, ktoré väčšina nastavení potrebuje."
+      },
+      "detection": {
+        "label": "Detekcia",
+        "intro": "Ako sa deteguje spustenie, beh a ukončenie cyklu."
+      },
+      "matching": {
+        "label": "Porovnávanie",
+        "intro": "Ako sa dokončené cykly porovnávajú s naučenými profilmi a označujú."
+      },
+      "timing": {
+        "label": "Časovanie a watchdog",
+        "intro": "Kadencia na pozadí, sledovač offline a údržba."
+      },
+      "anti_wrinkle": {
+        "label": "Ochrana pred krčením",
+        "intro": "Režim ochrany pred krčením tkaniny deteguje pulzy tumblingu pri nízkej spotrebe po hlavnej fáze a udržuje ich priradené k dokončenému cyklu."
+      },
+      "delay": {
+        "label": "Odložený štart",
+        "intro": "Detekcia odloženého štartu identifikuje, keď je spotrebič zapnutý, ale ešte nezačal cyklus."
+      },
+      "triggers": {
+        "label": "Spúšte a dvere",
+        "intro": "Voliteľné externé signály: spúšť ukončenia, senzor dverí, prepínač pauzy a pripomienka vyloženia."
+      },
+      "notifications": {
+        "label": "Upozornenia",
+        "intro": "Kedy a ako dostávate upozornenia na udalosti cyklu."
+      },
+      "ml_training": {
+        "label": "Tréning ML",
+        "intro": "Harmonogram pretrénovávania strojového učenia na zariadení a nastavenia dát."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Prahy a medzera"
+      },
+      "cycle_start": {
+        "label": "Začiatok cyklu"
+      },
+      "cycle_end": {
+        "label": "Koniec cyklu"
+      },
+      "signal_processing": {
+        "label": "Spracovanie signálu"
+      },
+      "predictive_end": {
+        "label": "Prediktívne ukončenie"
+      },
+      "dishwasher_end": {
+        "label": "Koniec cyklu umývačky"
+      },
+      "dtw_refinement": {
+        "label": "DTW doladenie"
+      },
+      "match_scoring": {
+        "label": "Hodnotenie zhody"
+      },
+      "duration_gates": {
+        "label": "Brány trvania"
+      },
+      "auto_labeling": {
+        "label": "Automatické označovanie"
+      },
+      "watchdog": {
+        "label": "Watchdog"
+      },
+      "housekeeping": {
+        "label": "Údržba"
+      },
+      "debug": {
+        "label": "Ladenie"
+      },
+      "external_end_trigger": {
+        "label": "Externý spúšť ukončenia"
+      },
+      "door_pause": {
+        "label": "Dvere a pauza"
+      },
+      "unload_reminder": {
+        "label": "Pripomienka vyloženia"
+      },
+      "services": {
+        "label": "Služby"
+      },
+      "timing": {
+        "label": "Časovanie"
+      },
+      "messages": {
+        "label": "Správy"
+      },
+      "energy": {
+        "label": "Energia"
+      },
+      "cycle_timers": {
+        "label": "Časovače cyklu"
+      },
+      "schedule": {
+        "label": "Plán"
+      },
+      "data_management": {
+        "label": "Správa dát"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Názov zariadenia"
+      },
+      "device_type": {
+        "label": "Typ zariadenia"
+      },
+      "power_sensor": {
+        "label": "Senzor výkonu"
+      },
+      "min_power": {
+        "label": "Minimálny výkon"
+      },
+      "off_delay": {
+        "label": "Oneskorenie vypnutia"
+      },
+      "linked_device": {
+        "label": "Zoskupiť pod zariadenie"
+      },
+      "start_threshold_w": {
+        "label": "Prah spustenia"
+      },
+      "stop_threshold_w": {
+        "label": "Prah zastavenia"
+      },
+      "min_off_gap": {
+        "label": "Min. medzera vypnutia"
+      },
+      "start_duration_threshold": {
+        "label": "Trvanie spustenia"
+      },
+      "start_energy_threshold": {
+        "label": "Energia spustenia"
+      },
+      "completion_min_seconds": {
+        "label": "Min. trvanie cyklu"
+      },
+      "running_dead_zone": {
+        "label": "Mŕtva zóna behu"
+      },
+      "end_energy_threshold": {
+        "label": "Energia ukončenia"
+      },
+      "end_repeat_count": {
+        "label": "Počet opakovaní ukončenia"
+      },
+      "sampling_interval": {
+        "label": "Interval vzorkovania"
+      },
+      "smoothing_window": {
+        "label": "Okno vyhladzovania"
+      },
+      "abrupt_drop_watts": {
+        "label": "Náhly pokles"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Pomer náhleho poklesu"
+      },
+      "profile_match_threshold": {
+        "label": "Prah zhody"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Prah nezhody"
+      },
+      "profile_match_interval": {
+        "label": "Interval zhody"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Min. pomer trvania"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Max. pomer trvania"
+      },
+      "profile_duration_tolerance": {
+        "label": "Tolerancia trvania profilu"
+      },
+      "duration_tolerance": {
+        "label": "Tolerancia odhadu"
+      },
+      "auto_label_confidence": {
+        "label": "Spoľahlivosť autooznačovania"
+      },
+      "learning_confidence": {
+        "label": "Spoľahlivosť učenia"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Potlačiť upozornenia na spätnú väzbu"
+      },
+      "watchdog_interval": {
+        "label": "Interval watchdog"
+      },
+      "no_update_active_timeout": {
+        "label": "Časový limit bez aktualizácie"
+      },
+      "progress_reset_delay": {
+        "label": "Oneskorenie obnovenia priebehu"
+      },
+      "auto_maintenance": {
+        "label": "Automatická údržba (nočné čistenie)"
+      },
+      "expose_debug_entities": {
+        "label": "Zobraziť ladiace entity"
+      },
+      "save_debug_traces": {
+        "label": "Uložiť ladiace záznamy"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Povoliť detekciu ochrany pred krčením"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Max. výkon ochrany pred krčením"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Max. trvanie"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Prah výkonu ukončenia"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Povoliť detekciu odloženého štartu"
+      },
+      "delay_confirm_seconds": {
+        "label": "Sekundy potvrdenia"
+      },
+      "delay_timeout_hours": {
+        "label": "Hodiny časového limitu"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Povoliť externý spúšť ukončenia"
+      },
+      "external_end_trigger": {
+        "label": "Entita externého spúšte"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Invertovať externý spúšť (spustiť pri VYPNUTÍ)"
+      },
+      "door_sensor_entity": {
+        "label": "Entita senzora dverí"
+      },
+      "pause_cuts_power": {
+        "label": "Pauza tiež preruší napájanie (cez prepínač)"
+      },
+      "switch_entity": {
+        "label": "Entita prepínača"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Oneskorenie pripomienky vyloženia"
+      },
+      "pump_stuck_duration": {
+        "label": "Trvanie zaseknutia čerpadla"
+      },
+      "notify_start_services": {
+        "label": "Služby pri štarte"
+      },
+      "notify_finish_services": {
+        "label": "Služby pri dokončení"
+      },
+      "notify_live_services": {
+        "label": "Služby živého priebehu"
+      },
+      "notify_people": {
+        "label": "Osoby (pre Iba keď doma)"
+      },
+      "notify_only_when_home": {
+        "label": "Upozorniť iba keď doma"
+      },
+      "notify_fire_events": {
+        "label": "Spúšťať HA udalosti pre upozornenia"
+      },
+      "notify_before_end_minutes": {
+        "label": "Upozornenie pred koncom"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Interval živých aktualizácií"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% prekročenia pred upozornením"
+      },
+      "notify_live_chronometer": {
+        "label": "Použiť živý chronometer"
+      },
+      "notify_timeout_seconds": {
+        "label": "Automaticky zatvoriť po"
+      },
+      "notify_title": {
+        "label": "Nadpis upozornenia"
+      },
+      "notify_icon": {
+        "label": "Ikona upozornenia"
+      },
+      "notify_start_message": {
+        "label": "Správa pri štarte"
+      },
+      "notify_finish_message": {
+        "label": "Správa pri dokončení"
+      },
+      "notify_pre_complete_message": {
+        "label": "Správa pred dokončením"
+      },
+      "notify_reminder_message": {
+        "label": "Správa pripomienky"
+      },
+      "notify_channel": {
+        "label": "Android kanál (štart/živý)"
+      },
+      "notify_finish_channel": {
+        "label": "Android kanál (dokončenie)"
+      },
+      "energy_price_entity": {
+        "label": "Entita ceny energie"
+      },
+      "energy_price_static": {
+        "label": "Statická cena energie (za kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Časovače cyklu"
+      },
+      "enable_ml_models": {
+        "label": "Použiť inteligentné modely počas cyklu"
+      },
+      "ml_training_enabled": {
+        "label": "Učiť sa z tohto stroja"
+      },
+      "ml_training_hour": {
+        "label": "Učiť sa v hodine"
+      },
+      "ml_training_min_cycles": {
+        "label": "Najprv potrebné cykly"
+      },
+      "ml_training_interval_days": {
+        "label": "Kontrolovať maximálne každých"
+      }
     }
   }
 }

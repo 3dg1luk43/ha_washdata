@@ -26,13 +26,13 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
-        "description": "Update the device name, appliance type, or power sensor.",
+        "title": "WashData opnij konfigurearje",
+        "description": "Aktualisearje de apparaatnamme, type apparaat, of fermogensensor.",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Apparaat Namme",
+          "device_type": "Apparaat Type",
+          "power_sensor": "Fermogen Sensor",
+          "min_power": "Minimum Fermogen Drompel (W)"
         }
       }
     },
@@ -40,23 +40,23 @@
       "cannot_connect": "Ferbine mislearre",
       "invalid_auth": "Unjildige autentikaasje",
       "unknown": "Unferwachte flater",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Fermogen drompel moat grutter wêze as 0"
     },
     "abort": {
       "already_configured": "Apparaat is al konfigurearre",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Werynstelling wie suksesfol"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "WashData Ynstellings",
         "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
           "name": "Apparaat Namme",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Apparaat Type",
+          "power_sensor": "Fermogen Sensor",
+          "min_power": "Minimum Fermogen Drompel (W)"
         }
       }
     },
@@ -278,12 +278,12 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
-      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "name": "ML Training starte",
+      "description": "Mei de hân de ML-modellen op it apparaat opnij traine fan dit apparaat syn eigen markearre syklusen (eksperiminteel).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Apparaat",
+          "description": "It WashData-apparaat om modellen foar te hertraine."
         }
       }
     }
@@ -349,7 +349,7 @@
         }
       },
       "ambiguity": {
-        "name": "Match Ambiguity"
+        "name": "Oerienkomst ûndúdlikheid"
       },
       "current_phase": {
         "name": "Aktuele faze"
@@ -372,7 +372,7 @@
       "program_select": {
         "name": "Syklusprogramma",
         "state": {
-          "auto_detect": "Auto-detect"
+          "auto_detect": "Automatysk ûntdekke"
         }
       }
     },
@@ -449,19 +449,19 @@
       "delete": "Wiskje",
       "delete_group": "Groep wiskje",
       "delete_profile": "Wiskje profyl",
-      "discard": "Discard",
+      "discard": "Weigoaie",
       "dismiss": "ôfwize",
       "done": "Dien",
       "edit": "Bewurkje",
       "export": "Eksportearje",
       "export_json": "Eksportearje nei JSON",
-      "force_stop": "Force Stop",
+      "force_stop": "Twongen stopje",
       "from_template": "Fan sjabloan ▾",
       "ignore": "Negearje",
       "import_json": "Ymportearje fan JSON",
       "import_overwrite": "Ymportearje (oerskriuwt gegevens)",
       "inspect": "Ynspektearje",
-      "label": "Etiket",
+      "label": "Etikettearje",
       "manage": "Beheare",
       "merge": "Fusearje",
       "new_automation": "＋ Nije automatisearring",
@@ -484,7 +484,7 @@
       "reset_to_builtin": "Weromsette nei ynboude modellen",
       "reset_to_defaults": "Weromsette nei standert",
       "resume_cycle": "Ferfetsje",
-      "review": "Resinsje",
+      "review": "Beoardielje",
       "run_analysis": "🔍 Run suggestje analyze",
       "run_auto_label": "Auto-label útfiere",
       "save": "Rêde",
@@ -493,7 +493,7 @@
       "save_panel_settings": "Bewarje Paneelynstellingen",
       "save_phases": "Fazen bewarje",
       "save_preferences": "Foarkarren bewarje",
-      "save_review": "Bewarje Review",
+      "save_review": "Beoardieling bewarje",
       "save_settings": "Bewarje ynstellings",
       "select": "Selektearje",
       "show_only": "Allinnich sjen litte",
@@ -604,7 +604,7 @@
       "status": "Status",
       "tail_trim": "Tail Trim (s)",
       "ungrouped": "Net groepearre",
-      "unlabelled": "Unlabeled",
+      "unlabelled": "Net-etikettearre",
       "unlabelled_paren": "(net markearre)",
       "expected": "Ferwachte",
       "raw_socket": "Rauwe kontakt",
@@ -615,9 +615,9 @@
     },
     "badge": {
       "golden_cycle": "Opnommen referinsje syklus",
-      "reviewed": "Reviewed",
+      "reviewed": "Beoardielde",
       "feedback_requested": "Feedback frege",
-      "needs_review": "Need review",
+      "needs_review": "Beoardieling nedich",
       "overrun": "Rûn langer as gewoanlik",
       "artifact_tip": "{n} ûntdutsen anomalies (bgl",
       "poor_fit_tip": "Inkonsistente wedstriidskiednis - tink om dit profyl opnij op te bouwen",
@@ -625,23 +625,23 @@
       "auto": "(auto ûntdutsen)",
       "built_in_tag": "ynboude",
       "declining": "↘ ôfnimmend",
-      "fair_fit": "earlike fit",
+      "fair_fit": "ridlike kwaliteit",
       "improving": "↗ ferbetterje",
       "manual": "(hânmjittich selektearre)",
-      "poor_fit": "earme fit",
+      "poor_fit": "minne kwaliteit",
       "steady": "→ fêst",
       "using_defaults": "Mei help fan ferstjoerde standerts",
       "using_tuned": "Mei help fan ôfstimd gewichten"
     },
     "modal": {
       "merge_cycles": "{n} syklusen gearfoegje",
-      "auto_label": "Auto-label Cycles",
+      "auto_label": "Syklusen auto-etikettearje",
       "correct_feedback": "Korrekte feedback",
       "create_profile": "Meitsje profyl",
       "cycle": "Syklus",
       "edit_phase": "Fase bewurkje",
       "import_config": "Ymportearje konfiguraasje",
-      "label_cycle": "Label Cycle",
+      "label_cycle": "Syklus etikettearje",
       "new_phase": "Nije Fase",
       "process_recording": "Proses Recording"
     },
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Storage stats, ûnderhâld, eksport / ymportearje",
       "trim_intro": "Sleep de reade hânfetten, of fier wearden yn. Alles bûten it rút wurdt fuorthelle.",
       "unsure_detected_prefix": "WashData is net wis dat it ûntdutsen is",
-      "updated": "Bywurke"
+      "updated": "Bywurke",
+      "feedback_cycles_pending": "{n} syklus(en) te beoardieljen",
+      "artifact_spike_detail": "Gie boppe de gewoane fermogensband foar ~{n}s.",
+      "artifact_dip_detail": "Sakke ûnder de gewoane fermogensband foar ~{n}s.",
+      "artifact_pause_detail": "Fermogen sakke nei hast nul foar ~{n}s en gie dan troch — wierskynlik waard de doar iepene midden yn de syklus of de syklus wie op pauze set."
     },
     "phase_desc": {
       "pre_wash": "Inisjele soak of foarbehanneling foar de haadwaskje.",
@@ -772,7 +776,7 @@
       "fit_slight": "Lyts",
       "fit_strong": "Sterk",
       "fit_weak": "Weak",
-      "fit_word": "passe",
+      "fit_word": "kwaliteit",
       "personalized": "● Personalized oan dizze masine"
     },
     "pref": {
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Trending del",
       "up": "Trending up"
+    },
+    "section": {
+      "basic": {
+        "label": "Basis",
+        "intro": "Kearnidentiteit en de essinsjelen dy't de measte konfiguraasjes nedich hawwe."
+      },
+      "detection": {
+        "label": "Deteksje",
+        "intro": "Hoe in syklus wurdt ûntdutsen as begjinnend, rinnend en einigjend."
+      },
+      "matching": {
+        "label": "Oerienkomst",
+        "intro": "Hoe einige syklusen oerienkommen wurde mei learde profilen en markearre."
+      },
+      "timing": {
+        "label": "Timing en Watchdog",
+        "intro": "Eftergrûn kadans, de offline watchdog en húshâlding."
+      },
+      "anti_wrinkle": {
+        "label": "Anti-rimpel",
+        "intro": "Anti-rimpelmodus ûntdekt koarte lege-fermogens-tumble-pulsen nei de haadstap en hâldt se oan de klear syklus."
+      },
+      "delay": {
+        "label": "Fertrage Start",
+        "intro": "Fertrage-startdeteksje identifisearret wannear in apparaat oan stiet mar syn syklus noch net begûn is."
+      },
+      "triggers": {
+        "label": "Triggers en Doarren",
+        "intro": "Opsjonele eksterne sinjalen: ein-trigger, doarsensor, pauze-skeakelaar, en ûntlaadherinnering."
+      },
+      "notifications": {
+        "label": "Notifikaasjes",
+        "intro": "Wannear en hoe jo wurde ynformearre oer sykluseveneminten."
+      },
+      "ml_training": {
+        "label": "ML-training",
+        "intro": "Op-apparaat masine-learen opnij train-skema en gegevensynstellings."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Drompels en Gat"
+      },
+      "cycle_start": {
+        "label": "Syklus Start"
+      },
+      "cycle_end": {
+        "label": "Syklus Ein"
+      },
+      "signal_processing": {
+        "label": "Signaalbehandeling"
+      },
+      "predictive_end": {
+        "label": "Foarsizze Ein"
+      },
+      "dishwasher_end": {
+        "label": "Ôfwaskmachine Ein"
+      },
+      "dtw_refinement": {
+        "label": "DTW Ferfining"
+      },
+      "match_scoring": {
+        "label": "Wedstriid Skoare"
+      },
+      "duration_gates": {
+        "label": "Doer Poarten"
+      },
+      "auto_labeling": {
+        "label": "Auto-etikettearjen"
+      },
+      "watchdog": {
+        "label": "Watchdog"
+      },
+      "housekeeping": {
+        "label": "Húshâlding"
+      },
+      "debug": {
+        "label": "Debuggen"
+      },
+      "external_end_trigger": {
+        "label": "Eksterne Ein-Trigger"
+      },
+      "door_pause": {
+        "label": "Doar en Pauze"
+      },
+      "unload_reminder": {
+        "label": "Ûntlaad Herinnering"
+      },
+      "services": {
+        "label": "Tsjinsten"
+      },
+      "timing": {
+        "label": "Timing"
+      },
+      "messages": {
+        "label": "Berjochen"
+      },
+      "energy": {
+        "label": "Enerzjy"
+      },
+      "cycle_timers": {
+        "label": "Syklus Timers"
+      },
+      "schedule": {
+        "label": "Skema"
+      },
+      "data_management": {
+        "label": "Gegevensbehear"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Apparaat Namme"
+      },
+      "device_type": {
+        "label": "Apparaat Type"
+      },
+      "power_sensor": {
+        "label": "Fermogen Sensor"
+      },
+      "min_power": {
+        "label": "Minimum Fermogen"
+      },
+      "off_delay": {
+        "label": "Út Fertraging"
+      },
+      "linked_device": {
+        "label": "Groepearje Under Apparaat"
+      },
+      "start_threshold_w": {
+        "label": "Start Drompel"
+      },
+      "stop_threshold_w": {
+        "label": "Stop Drompel"
+      },
+      "min_off_gap": {
+        "label": "Min Út Gat"
+      },
+      "start_duration_threshold": {
+        "label": "Start Doer"
+      },
+      "start_energy_threshold": {
+        "label": "Start Enerzjy"
+      },
+      "completion_min_seconds": {
+        "label": "Min Syklus Doer"
+      },
+      "running_dead_zone": {
+        "label": "Rinnende Deade Sône"
+      },
+      "end_energy_threshold": {
+        "label": "Ein Enerzjy Drompel"
+      },
+      "end_repeat_count": {
+        "label": "Ein Werhelling Teller"
+      },
+      "sampling_interval": {
+        "label": "Sampling Ynterval"
+      },
+      "smoothing_window": {
+        "label": "Smoothing Rút"
+      },
+      "abrupt_drop_watts": {
+        "label": "Abrupte Fal"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Abrupte Fal Ferhâlding"
+      },
+      "profile_match_threshold": {
+        "label": "Wedstriid Drompel"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Unwedstriid Drompel"
+      },
+      "profile_match_interval": {
+        "label": "Wedstriid Ynterval"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Min Doer Ferhâlding"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Max Doer Ferhâlding"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profyl Doer Tolerânsje"
+      },
+      "duration_tolerance": {
+        "label": "Skatting Tolerânsje"
+      },
+      "auto_label_confidence": {
+        "label": "Auto-etiket Betrouwen"
+      },
+      "learning_confidence": {
+        "label": "Learen Betrouwen"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Feedback Notifikaasjes Undertdrukke"
+      },
+      "watchdog_interval": {
+        "label": "Watchdog Ynterval"
+      },
+      "no_update_active_timeout": {
+        "label": "Gjin-Update Timeout"
+      },
+      "progress_reset_delay": {
+        "label": "Foarútgong Reset Fertraging"
+      },
+      "auto_maintenance": {
+        "label": "Auto Ûnderhâld (nachtlik skjinmeitsjen)"
+      },
+      "expose_debug_entities": {
+        "label": "Debug Entiteiten Bleatstelle"
+      },
+      "save_debug_traces": {
+        "label": "Debug Spoaren Bewarje"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Anti-Rimpel Deteksje Ynskeakelje"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Max Anti-Rimpel Fermogen"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Max Doer"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Exit Fermogen Drompel"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Fertrage-Start Deteksje Ynskeakelje"
+      },
+      "delay_confirm_seconds": {
+        "label": "Befêstigje Sekonden"
+      },
+      "delay_timeout_hours": {
+        "label": "Timeout Oeren"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Eksterne Ein-Trigger Ynskeakelje"
+      },
+      "external_end_trigger": {
+        "label": "Externe Trigger Entiteit"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Externe Trigger Omkearre (trigger op ÚT)"
+      },
+      "door_sensor_entity": {
+        "label": "Doarsensor Entiteit"
+      },
+      "pause_cuts_power": {
+        "label": "Pauze Snijt Ek Fermogen (fia skeakelaar)"
+      },
+      "switch_entity": {
+        "label": "Skeakelaar Entiteit"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Ûntlaad Herinnering Fertraging"
+      },
+      "pump_stuck_duration": {
+        "label": "Pomp Fêstsitte Doer"
+      },
+      "notify_start_services": {
+        "label": "Start Tsjinsten"
+      },
+      "notify_finish_services": {
+        "label": "Einige Tsjinsten"
+      },
+      "notify_live_services": {
+        "label": "Live Foarútgong Tsjinsten"
+      },
+      "notify_people": {
+        "label": "Minsken (foar Allinnich By Thús)"
+      },
+      "notify_only_when_home": {
+        "label": "Allinnich By Thús Melde"
+      },
+      "notify_fire_events": {
+        "label": "HA Eveneminten Oanstekke foar Notifikaasjes"
+      },
+      "notify_before_end_minutes": {
+        "label": "Pre-Ein Alarm"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Live Update Ynterval"
+      },
+      "notify_live_overrun_percent": {
+        "label": "Live Overrun % Foardat Alarm"
+      },
+      "notify_live_chronometer": {
+        "label": "Brûk Live Chronometer"
+      },
+      "notify_timeout_seconds": {
+        "label": "Auto-Ôfwize Nei"
+      },
+      "notify_title": {
+        "label": "Notifikaasje Titel"
+      },
+      "notify_icon": {
+        "label": "Notifikaasje Ikoan"
+      },
+      "notify_start_message": {
+        "label": "Start Berjocht"
+      },
+      "notify_finish_message": {
+        "label": "Einige Berjocht"
+      },
+      "notify_pre_complete_message": {
+        "label": "Pre-Foltôging Berjocht"
+      },
+      "notify_reminder_message": {
+        "label": "Herinnering Berjocht"
+      },
+      "notify_channel": {
+        "label": "Android Kanaal (start/live)"
+      },
+      "notify_finish_channel": {
+        "label": "Android Kanaal (einige)"
+      },
+      "energy_price_entity": {
+        "label": "Enerzjy Priis Entiteit"
+      },
+      "energy_price_static": {
+        "label": "Stasjonêre Enerzjy Priis (per kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Syklus Timers"
+      },
+      "enable_ml_models": {
+        "label": "Tapasse Tûke Modellen Tidens in Syklus"
+      },
+      "ml_training_enabled": {
+        "label": "Leare fan Dizze Masine"
+      },
+      "ml_training_hour": {
+        "label": "Leare op Oere"
+      },
+      "ml_training_min_cycles": {
+        "label": "Syklusen Earst Nedich"
+      },
+      "ml_training_interval_days": {
+        "label": "Kontrolearje Op Syn Meast Elke"
+      }
     }
   }
 }

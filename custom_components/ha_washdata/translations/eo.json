@@ -461,7 +461,7 @@
       "import_json": "Importi el JSON",
       "import_overwrite": "Importi (anstataŭigas datumojn)",
       "inspect": "Inspekti",
-      "label": "Etikedo",
+      "label": "Etikedi",
       "manage": "Administri",
       "merge": "Kunfandi",
       "new_automation": "＋ Nova Aŭtomatigo",
@@ -484,7 +484,7 @@
       "reset_to_builtin": "Restarigi al enkonstruitaj modeloj",
       "reset_to_defaults": "Restarigi al defaŭltoj",
       "resume_cycle": "Daŭrigi ciklon",
-      "review": "Recenzo",
+      "review": "Revizii",
       "run_analysis": "🔍 Faru sugestanalizon",
       "run_auto_label": "Rulu Aŭtomatan Etikedon",
       "save": "Konservu",
@@ -735,7 +735,11 @@
       "storage_diagnostics": "Stokado-statistikoj, prizorgado, eksporto/importo",
       "trim_intro": "Trenu la ruĝajn tenilojn aŭ enigu valorojn. Ĉio ekster la fenestro estas forigita.",
       "unsure_detected_prefix": "WashData ne certas, ke ĝi detektis",
-      "updated": "Ĝisdatigita"
+      "updated": "Ĝisdatigita",
+      "feedback_cycles_pending": "{n} ciklo{s} por revizii",
+      "artifact_spike_detail": "Supriĝis super la kutiman potencbendion dum ĉirkaŭ {n}s.",
+      "artifact_dip_detail": "Malleviĝis sub la kutiman potencbendion dum ĉirkaŭ {n}s.",
+      "artifact_pause_detail": "Potenco falis preskaŭ al nulo dum ĉirkaŭ {n}s kaj tiam reprenis — verŝajne la pordo estis malfermita meze de la ciklo aŭ la ciklo estis paŭzita."
     },
     "phase_desc": {
       "pre_wash": "Komenca trempado aŭ antaŭtraktado antaŭ la ĉefa lavo.",
@@ -874,6 +878,348 @@
     "trend": {
       "down": "Tendenco malsupren",
       "up": "Suprenira tendenco"
+    },
+    "section": {
+      "basic": {
+        "label": "Baza",
+        "intro": "Kernidenteco kaj la esenco kiun bezonas plimultaj agordoj."
+      },
+      "detection": {
+        "label": "Detektado",
+        "intro": "Kiel ciklo estas detektata kiel komenciĝanta, funkcianta kaj finanta."
+      },
+      "matching": {
+        "label": "Kongruado",
+        "intro": "Kiel finitaj cikloj estas kongruigitaj kun lernitaj profiloj kaj etikeditaj."
+      },
+      "timing": {
+        "label": "Tempigado kaj gardostaro",
+        "intro": "Fona kadencio, la eksterreta gardostaro kaj bontenado."
+      },
+      "anti_wrinkle": {
+        "label": "Kontraŭkrempiĝo",
+        "intro": "La kontraŭkrempiĝa/kontraŭfaldo reĝimo detektas malaltpotencan rulimpulson post la ĉefa fazo kaj tenas ilin ligitaj al la finita ciklo."
+      },
+      "delay": {
+        "label": "Prokrastita komenco",
+        "intro": "La detektado de prokrastita komenco identigas kiam la aparato estas ŝaltita sed ankoraŭ ne komencis sian ciklon."
+      },
+      "triggers": {
+        "label": "Ekigoj kaj pordoj",
+        "intro": "Laŭvolaj eksteraj signaloj: fina ekigilo, pordsensilo, paŭzŝaltilo, kaj elŝarĝa rememorigo."
+      },
+      "notifications": {
+        "label": "Sciigoj",
+        "intro": "Kiam kaj kiel vi estas sciigita pri ciklaj eventoj."
+      },
+      "ml_training": {
+        "label": "ML-Trejnado",
+        "intro": "Ensurlokaĵa maŝinlerna retrejnadado kaj datumaj agordoj."
+      }
+    },
+    "setting_group": {
+      "thresholds_gap": {
+        "label": "Sojloj kaj interspaco"
+      },
+      "cycle_start": {
+        "label": "Cikla komenco"
+      },
+      "cycle_end": {
+        "label": "Cikla fino"
+      },
+      "signal_processing": {
+        "label": "Signalprilaborado"
+      },
+      "predictive_end": {
+        "label": "Antaŭdira fino"
+      },
+      "dishwasher_end": {
+        "label": "Telelavila fino"
+      },
+      "dtw_refinement": {
+        "label": "DTW-plibonigo"
+      },
+      "match_scoring": {
+        "label": "Kongruopunktaro"
+      },
+      "duration_gates": {
+        "label": "Daŭrogardoj"
+      },
+      "auto_labeling": {
+        "label": "Aŭtomata etikedado"
+      },
+      "watchdog": {
+        "label": "Gardostaro"
+      },
+      "housekeeping": {
+        "label": "Bontenado"
+      },
+      "debug": {
+        "label": "Erarserĉado"
+      },
+      "external_end_trigger": {
+        "label": "Ekstera fina ekigilo"
+      },
+      "door_pause": {
+        "label": "Pordo kaj paŭzo"
+      },
+      "unload_reminder": {
+        "label": "Elŝarĝa rememorigo"
+      },
+      "services": {
+        "label": "Servoj"
+      },
+      "timing": {
+        "label": "Tempigado"
+      },
+      "messages": {
+        "label": "Mesaĝoj"
+      },
+      "energy": {
+        "label": "Energio"
+      },
+      "cycle_timers": {
+        "label": "Ciklaj tempokalkuliloj"
+      },
+      "schedule": {
+        "label": "Horaro"
+      },
+      "data_management": {
+        "label": "Datuma administrado"
+      }
+    },
+    "setting": {
+      "name": {
+        "label": "Aparatonomo"
+      },
+      "device_type": {
+        "label": "Aparatotipo"
+      },
+      "power_sensor": {
+        "label": "Potencosensilo"
+      },
+      "min_power": {
+        "label": "Minimuma potenco"
+      },
+      "off_delay": {
+        "label": "Elŝaltmalfruo"
+      },
+      "linked_device": {
+        "label": "Grupigi sub aparato"
+      },
+      "start_threshold_w": {
+        "label": "Starta sojlo"
+      },
+      "stop_threshold_w": {
+        "label": "Halta sojlo"
+      },
+      "min_off_gap": {
+        "label": "Minimuma elŝaltinterspaco"
+      },
+      "start_duration_threshold": {
+        "label": "Starta daŭro"
+      },
+      "start_energy_threshold": {
+        "label": "Starta energio"
+      },
+      "completion_min_seconds": {
+        "label": "Minimuma cikla daŭro"
+      },
+      "running_dead_zone": {
+        "label": "Funkcianta malaktiva zono"
+      },
+      "end_energy_threshold": {
+        "label": "Fina energio"
+      },
+      "end_repeat_count": {
+        "label": "Fina ripetokalkulo"
+      },
+      "sampling_interval": {
+        "label": "Proventempospaco"
+      },
+      "smoothing_window": {
+        "label": "Glatigfenestro"
+      },
+      "abrupt_drop_watts": {
+        "label": "Subita falo"
+      },
+      "abrupt_drop_ratio": {
+        "label": "Subita falproporcio"
+      },
+      "profile_match_threshold": {
+        "label": "Kongruosojlo"
+      },
+      "profile_unmatch_threshold": {
+        "label": "Malkongrusojlo"
+      },
+      "profile_match_interval": {
+        "label": "Kongruointervalo"
+      },
+      "profile_match_min_duration_ratio": {
+        "label": "Minimuma daŭroproporcia"
+      },
+      "profile_match_max_duration_ratio": {
+        "label": "Maksimuma daŭroproporcia"
+      },
+      "profile_duration_tolerance": {
+        "label": "Profila daŭrotolero"
+      },
+      "duration_tolerance": {
+        "label": "Taksada tolero"
+      },
+      "auto_label_confidence": {
+        "label": "Aŭtomata etikedadkonfido"
+      },
+      "learning_confidence": {
+        "label": "Lernadkonfido"
+      },
+      "suppress_feedback_notifications": {
+        "label": "Subpremi reagsciigojn"
+      },
+      "watchdog_interval": {
+        "label": "Gardostara tempospaco"
+      },
+      "no_update_active_timeout": {
+        "label": "Senĝisdatiga limdaŭro"
+      },
+      "progress_reset_delay": {
+        "label": "Progresoreset-malfruo"
+      },
+      "auto_maintenance": {
+        "label": "Aŭtomata bontenado (noktopurigado)"
+      },
+      "expose_debug_entities": {
+        "label": "Elmontri erarserĉajn entojn"
+      },
+      "save_debug_traces": {
+        "label": "Konservi erarserĉajn spurojn"
+      },
+      "anti_wrinkle_enabled": {
+        "label": "Ŝalti kontraŭkrempiĝan detektadon"
+      },
+      "anti_wrinkle_max_power": {
+        "label": "Maksimuma kontraŭkrempiĝa potenco"
+      },
+      "anti_wrinkle_max_duration": {
+        "label": "Maksimuma daŭro"
+      },
+      "anti_wrinkle_exit_power": {
+        "label": "Elirsojla potenco"
+      },
+      "delay_start_detect_enabled": {
+        "label": "Ŝalti prokrastitan komencodetektadon"
+      },
+      "delay_confirm_seconds": {
+        "label": "Konfirmaj sekundoj"
+      },
+      "delay_timeout_hours": {
+        "label": "Limdaŭraj horoj"
+      },
+      "external_end_trigger_enabled": {
+        "label": "Ŝalti eksteran finan ekigilon"
+      },
+      "external_end_trigger": {
+        "label": "Ekstera ekigilento"
+      },
+      "external_end_trigger_inverted": {
+        "label": "Inversigi eksteran ekigilon (ekigi ĉe MALŜALTITA)"
+      },
+      "door_sensor_entity": {
+        "label": "Pordsensora ento"
+      },
+      "pause_cuts_power": {
+        "label": "Paŭzo ankaŭ tranĉas potencon (per ŝaltilo)"
+      },
+      "switch_entity": {
+        "label": "Ŝaltilento"
+      },
+      "notify_unload_delay_minutes": {
+        "label": "Elŝarĝa rememorigo-malfruo"
+      },
+      "pump_stuck_duration": {
+        "label": "Blokita pumpildaŭro"
+      },
+      "notify_start_services": {
+        "label": "Startaj servoj"
+      },
+      "notify_finish_services": {
+        "label": "Finaj servoj"
+      },
+      "notify_live_services": {
+        "label": "Vivaj progresservoj"
+      },
+      "notify_people": {
+        "label": "Personoj (por nur kiam hejme)"
+      },
+      "notify_only_when_home": {
+        "label": "Sciigi nur kiam hejme"
+      },
+      "notify_fire_events": {
+        "label": "Ekigi HA-eventojn por sciigoj"
+      },
+      "notify_before_end_minutes": {
+        "label": "Antaŭfina averto"
+      },
+      "notify_live_interval_seconds": {
+        "label": "Viva ĝisdatiga tempospaco"
+      },
+      "notify_live_overrun_percent": {
+        "label": "% da viva superiro antaŭ averto"
+      },
+      "notify_live_chronometer": {
+        "label": "Uzi vivan kronometron"
+      },
+      "notify_timeout_seconds": {
+        "label": "Aŭtomate forigi post"
+      },
+      "notify_title": {
+        "label": "Sciigotitolo"
+      },
+      "notify_icon": {
+        "label": "Sciigikono"
+      },
+      "notify_start_message": {
+        "label": "Startmesaĝo"
+      },
+      "notify_finish_message": {
+        "label": "Finmesaĝo"
+      },
+      "notify_pre_complete_message": {
+        "label": "Antaŭfina mesaĝo"
+      },
+      "notify_reminder_message": {
+        "label": "Rememorigo mesaĝo"
+      },
+      "notify_channel": {
+        "label": "Android-kanalo (start/vivo)"
+      },
+      "notify_finish_channel": {
+        "label": "Android-kanalo (fino)"
+      },
+      "energy_price_entity": {
+        "label": "Energipreza ento"
+      },
+      "energy_price_static": {
+        "label": "Statika energiprezo (po kWh)"
+      },
+      "notify_cycle_timers": {
+        "label": "Ciklaj tempokalkuliloj"
+      },
+      "enable_ml_models": {
+        "label": "Apliki inteligentan modelojn dum ciklo"
+      },
+      "ml_training_enabled": {
+        "label": "Lerni de ĉi tiu maŝino"
+      },
+      "ml_training_hour": {
+        "label": "Lerni je la horo"
+      },
+      "ml_training_min_cycles": {
+        "label": "Unue bezonataj cikloj"
+      },
+      "ml_training_interval_days": {
+        "label": "Kontroli plej ofte ĉiuj"
+      }
     }
   }
 }
