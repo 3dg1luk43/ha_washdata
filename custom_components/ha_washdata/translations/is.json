@@ -80,7 +80,8 @@
         "air_fryer": "Air Fryer",
         "bread_maker": "Brauðgerðarmaður",
         "pump": "Dæla / Sump Pump",
-        "other": "Annað (háþróað)"
+        "generic": "Annað (háþróað)",
+        "other": "Þröskuldstæki"
       }
     }
   },
@@ -620,6 +621,7 @@
       "needs_review": "Þarfnast endurskoðunar",
       "overrun": "Hljóp lengur en venjulega",
       "artifact_tip": "{n} frávik fundust (t.d. hurð opnuð í miðjum lotu) — opnaðu til að sjá þau á línuritinu",
+      "restart_gap_tip": "{n} HA endurræsingarbil: aflsporið hefur gat",
       "poor_fit_tip": "Ósamkvæmur samsvörunarferill – íhugaðu að endurbyggja þennan prófíl",
       "fair_fit_tip": "Í meðallagi samræmi við samsvörun - sumar lotur sem eru úthlutaðar þessum prófíl hafa lægri sjálfstraustsstig. Merktu fleiri lotur eða skráðu sniðið aftur til að bæta nákvæmni.",
       "fair_fit": "viðunanlegt",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Leggðu önnur prófílumslög yfir á töfluna hér að ofan til að sjá hver þeirra passar best við þessa lotu.",
       "artifact_header": "{n} frávik fundust í þessari lotu",
       "artifact_footer": "Auðkenndur á grafinu hér að ofan. Þetta eru skammvinnir gripir (t.d. hurðin opnuð í miðjum lotu), ekki endilega vandamál.",
+      "restart_gap_header": "{n} HA endurræsingarbil á þessum hringrás",
+      "restart_gap_item": "{dur} bil",
+      "restart_gap_footer": "Auðkennt á línuritinu. Aflgögn vantar fyrir þessi bil; samsvörun notaði aðeins raunverulegar mælingar.",
       "profile_poor_health_detail": "Hringrásir sem eru úthlutaðar á þetta snið hafa ósamræmi lögun eða lítið sjálfstraust. Íhugaðu að endurbyggja umslagið eða endurskoða merktar lotur.",
       "trend_duration_longer": "Tímalengd í vændum lengri ({pct}%/lotu) — nýleg meðaltal {avg}",
       "trend_duration_shorter": "Tímalengd styttist ({pct}%/lotu) — nýleg meðaltal {avg}",
@@ -990,235 +995,312 @@
     },
     "setting": {
       "name": {
-        "label": "Nafn tækis"
+        "label": "Nafn tækis",
+        "doc": "Sýningarnafn sýnt í HA samþættingarlistanum og tækjaskránni."
       },
       "device_type": {
-        "label": "Tegund tækis"
+        "label": "Tegund tækis",
+        "doc": "Tækjaflokkur. Stillir skynsamlegar sjálfgefnar greiningar (þröskuldar, slökkt á seinkun, lokameðferð) stillt fyrir þá tegund tækis; breyta því aðeins ef tækið var upphaflega sett upp sem ranga gerð."
       },
       "power_sensor": {
-        "label": "Aflskynjari"
+        "label": "Aflskynjari",
+        "doc": "Skynjaraeiningin tilkynnir um lifandi afl í vöttum fyrir þetta tæki (t.d. sensor.washer_power). Öll hringrásargreining byggist á þessu merki."
       },
       "min_power": {
-        "label": "Lágmarksafl"
+        "label": "Lágmarksafl",
+        "doc": "Algjört lágmarksafl talið virkt. Lestrar fyrir neðan þetta eru meðhöndlaðir sem 0 W (biðstaða), sem síar út draugaálag á snjalltengjum og biðstöðu LED."
       },
       "off_delay": {
-        "label": "Slökkviðráð"
+        "label": "Slökkviðráð",
+        "doc": "Tími til að bíða eftir að kraftur minnkar áður en hringrásinni er lokið. Ef straumur fer aftur innan þessa glugga heldur hringrásin óaðfinnanlega áfram - þetta brúar hlé á milli þvottastiga. Uppþvottavélar eru með langa þurrkunarfasa (slökkt á slökkt í 20-60 mín) þannig að slökkvunartöfin verður að fara yfir það til að halda öllum þvotti+þurrkum sem einni lotu."
       },
       "linked_device": {
-        "label": "Flokka undir tæki"
+        "label": "Flokka undir tæki",
+        "doc": "Hægt er að hreiða þetta WashData tæki undir annað tæki (t.d. snjalltappið) í HA tækjaskránni, sýnt sem „Tengt í gegnum ...“."
       },
       "start_threshold_w": {
-        "label": "Ræsingarþröskuldur"
+        "label": "Ræsingarþröskuldur",
+        "doc": "Afl verður að hækka yfir þetta stig til að staðfesta að hringrás hafi hafist. Ef það er stillt of lágt veldur rangræsingum frá biðstöðu; of há og hægt ræsandi forrit (köld fylling) missir. Tillöguvélin setur þetta rétt fyrir ofan lægsta virka afl vélarinnar."
       },
       "stop_threshold_w": {
-        "label": "Stöðvunarþröskuldur"
+        "label": "Stöðvunarþröskuldur",
+        "doc": "Afl verður að falla niður fyrir þetta stig áður en niðurtalning frá töf hefst. Stilltu það undir Start Threshold - bilið á milli þeirra er hysteresis bandið sem kemur í veg fyrir flökt. Ef stillt er of hátt, ræsa lágt afl fasar (skolunartímar, hrukkuvörn) ranglega af stað lokaröðinni."
       },
       "min_off_gap": {
-        "label": "Lágm. slökkubil"
+        "label": "Lágm. slökkubil",
+        "doc": "Ef vélin slekkur á sér í skemmri tíma en þennan tíma er kveikt/slökkt/kveikt röð meðhöndluð sem eina samfellda lotu. Kemur í veg fyrir að þvottakerfi (vélin slekkur á sér í nokkrar mínútur í miðjum þvotti) skiptist í tvær aðskildar lotur. Stilltu það styttra en bilið á milli bak-til-baks álags ef þú vilt að þær teljist sem aðskildar lotur. Sjálfgefnar stillingar tækis vernda dæmigerða hlé í hringrás fyrir hvert tæki."
       },
       "start_duration_threshold": {
-        "label": "Ræsingarlengd"
+        "label": "Ræsingarlengd",
+        "doc": "Krafturinn verður að vera fyrir ofan upphafsþröskuldinn svona lengi til að staðfesta raunverulega byrjun, sem kemur í veg fyrir að kveikja/slökkva á sekúndubroti geti hafið lotu."
       },
       "start_energy_threshold": {
-        "label": "Ræsingaorka"
+        "label": "Ræsingaorka",
+        "doc": "Orka (afl x tími) sem heimilistækið verður að eyða áður en það er í gangi. Stuttur aflmikill toppur hefur mjög litla orku og er hunsuð, sem kemur í veg fyrir rangræsingar."
       },
       "completion_min_seconds": {
-        "label": "Lágm. lotulengd"
+        "label": "Lágm. lotulengd",
+        "doc": "Hringrásum sem eru styttri en þetta er fleygt sem draugalotum (prófun, opnun á hurðinni til að bæta við sokk)."
       },
       "running_dead_zone": {
-        "label": "Dauðbelt í gangi"
+        "label": "Dauðbelt í gangi",
+        "doc": "Eftir að hringrás er hafin, er hunsað að draga úr krafti innan þessa glugga. Þvottavélar fyllast af köldu vatni (lækkar nálægt 0 W fyrir upphitun) - án þessarar verndar lítur áfyllingarfasinn út eins og lok hringrásar. Þetta sleppir EKKI gögnum: fullur kraftur er skráður frá T=0. Tillöguvélin mælir raunverulegt gangmynstur vélarinnar þinnar og stærðir þetta sjálfkrafa."
       },
       "end_energy_threshold": {
-        "label": "Lokaorka"
+        "label": "Lokaorka",
+        "doc": "Meðan á niðurtalningunni stendur er uppsöfnuð orka (vött x tími) borin saman við þennan þröskuld. Ef farið er yfir það endurstillist niðurtalningin - þannig að krumluvörn og uppþvottavélarþurrkunarhalar eru festir við hringrásina í stað þess að stytta þær. Hækka það ef lotum lýkur of snemma meðan á kólnun stendur; lækka það ef uppgötvun er treg."
       },
       "end_repeat_count": {
-        "label": "Fjöldi lokakorna"
+        "label": "Fjöldi lokakorna",
+        "doc": "Fjöldi samfelldra aflestra undir stöðvunarþröskuldi sem þarf áður en lotunni lýkur. 1 er fínt fyrir flestar innstungur. Hækkaðu í 2-3 ef snjalltappið þitt tilkynnir stundum um rangt núll sýni í miðjum lotu og loturnar þínar eru að ljúka of snemma."
       },
       "sampling_interval": {
-        "label": "Sýnitakabil"
+        "label": "Sýnitakabil",
+        "doc": "Væntanlegur tími á milli skynjaralestra - notaður til að stærð sléttunargluggans og hefja frákast á réttan hátt. Sérhver skynjarauppfærsla er tekin óháð þessu gildi; það kvarðar aðeins niðurstreymisútreikningana. Tillöguvélin mælir raunverulegt hraðafall skynjarans frá fyrri lotum og stillir þetta sjálfkrafa."
       },
       "smoothing_window": {
-        "label": "Jöfnunargluggi"
+        "label": "Jöfnunargluggi",
+        "doc": "Hversu mikið hráorkumerkið er sléttað. Low (2) er móttækilegur en hávær; hár (5) sléttir toppa en bætir við töf."
       },
       "abrupt_drop_watts": {
-        "label": "Snögg niðurfelling"
+        "label": "Snögg niðurfelling",
+        "doc": "Aflfall sem er stærra en þetta merkir lotuna sem truflað (handvirkt hætta við) frekar en náttúrulega frágang."
       },
       "abrupt_drop_ratio": {
-        "label": "Hlutfall snöggrar niðurfellingar"
+        "label": "Hlutfall snöggrar niðurfellingar",
+        "doc": "Fall sem er stærra en þetta brot af núverandi afli er einnig meðhöndlað sem snöggt (0,6 = 60% lækkun). Bætir wöttaþröskuldinum yfir stærðum tækja."
       },
       "profile_match_threshold": {
-        "label": "Samsvarþröskuldur"
+        "label": "Samsvarþröskuldur",
+        "doc": "Lágmarks líkindisstig (0-1) sem krafist er í lok lotu til að samþykkja forritaauðkenni. Hækka það til að draga úr röngum auðkenningum; lækka það ef forrit vélarinnar þinnar eru ekki samræmd. Sjálfgefið 0.4 er íhaldssamt upphafspunktur."
       },
       "profile_unmatch_threshold": {
-        "label": "Ósamsvarþröskuldur"
+        "label": "Ósamsvarþröskuldur",
+        "doc": "Ef bein leik á miðjum leik fer niður fyrir þetta stig er bráðabirgðaauðkenningin hreinsuð. Haltu því aðeins undir samsvörunarþröskuldinum svo stutt dýfa í líkingu snúi ekki skjánum aftur í ósamþykkt."
       },
       "profile_match_interval": {
-        "label": "Samsvarabil"
+        "label": "Samsvarabil",
+        "doc": "Hversu oft á að reyna prófílsamsvörun meðan á hlaupi stendur. Sjálfgefin 300 s (5 mínútur) jafnvægi skynjunarhraða og CPU."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Lágm. lengdarhlutfall"
+        "label": "Lágm. lengdarhlutfall",
+        "doc": "Lágmarks hringrásarlengd miðað við sniðið. 0,9 þýðir að hringrás verður að vera að minnsta kosti 90% af lengd prófílsins til að passa."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Hám. lengdarhlutfall"
+        "label": "Hám. lengdarhlutfall",
+        "doc": "Hámarks hringrásarlengd miðað við sniðið. 1.3 þýðir að hringrás verður að vera undir 130% af lengd prófílsins til að passa."
       },
       "profile_duration_tolerance": {
-        "label": "Þolinmæði lotulendar sniðs"
+        "label": "Þolinmæði lotulendar sniðs",
+        "doc": "+/- bandið í kringum meðallengd prófíls sem notuð er við samsvörun. 0,25 þýðir að 60 mín prófíl passar við 45-75 mín lotur."
       },
       "duration_tolerance": {
-        "label": "Matþolinmæði"
+        "label": "Matþolinmæði",
+        "doc": "Umburðarlyndi fyrir mati sem eftir er af tíma (námsendurgjöf, ekki samsvörun). Ef raunveruleg tímalengd er innan +/-X% af áætluninni telst það góð samsvörun."
       },
       "auto_label_confidence": {
-        "label": "Sjálfvirk merkingaöryggi"
+        "label": "Sjálfvirk merkingaöryggi",
+        "doc": "Ef leikskor í lok lotu er við eða yfir þessu er forritið merkt sjálfkrafa án staðfestingar. Hækka það til að krefjast meiri vissu fyrir sjálfvirka merkingu; lækka það til að gera sjálfvirkan meira. Virkar í tengslum við Learning Confidence fyrir neðan það."
       },
       "learning_confidence": {
-        "label": "Námsöryggi"
+        "label": "Námsöryggi",
+        "doc": "Ef stigaskorið er á milli þessa og sjálfvirkrar merkingar sjálfstrausts, biður endurgjöfstilkynning þig um að staðfesta auðkennda forritið. Fyrir neðan þetta stig er leikurinn of óviss til að komast upp á yfirborðið. Verður að vera undir sjálfvirku merki sjálfstrausts."
       },
       "suppress_feedback_notifications": {
-        "label": "Bæla endurgjöfartilkynningar"
+        "label": "Bæla endurgjöfartilkynningar",
+        "doc": "Ekki gefa upp viðvarandi tilkynningu þegar lokið lotu þarfnast endurskoðunar; endurgjöfin birtist enn í Cycles review biðröðinni."
       },
       "watchdog_interval": {
-        "label": "Gæsluabil"
+        "label": "Gæsluabil",
+        "doc": "Hversu oft bakgrunnsvaktin athugar hvort skynjarar hafi verið stöðvaðir og liðinn tími. Sjálfgefið 30 s."
       },
       "no_update_active_timeout": {
-        "label": "Engin-uppfærsla-tímamark"
+        "label": "Engin-uppfærsla-tímamark",
+        "doc": "Ef engar afluppfærslur berast í svona langan tíma á meðan hún er í gangi, gerðu ráð fyrir að innstungan hafi dottið úr sambandi og þvingað til að stöðva til að forðast uppvakningahring. Sjálfgefin 600 s gerir ráð fyrir skýja- eða möskvatöf."
       },
       "progress_reset_delay": {
-        "label": "Framfaraendurstillingðráð"
+        "label": "Framfaraendurstillingðráð",
+        "doc": "Eftir að hafa lokið, haltu framvindu við 100% í þetta lengi svo Lokið sé sýnilegt á mælaborðum áður en þú endurstillir í aðgerðalaus."
       },
       "auto_maintenance": {
-        "label": "Sjálfvirkt viðhald (næturþrif)"
+        "label": "Sjálfvirkt viðhald (næturþrif)",
+        "doc": "Keyrðu næturþrif: endurbyggðu prófílumslög, endurreiknaðu heilsu hringrásarinnar, klipptu kembiforrit og geymdu nýjustu loturnar."
       },
       "expose_debug_entities": {
-        "label": "Birta villuleitareiningar"
+        "label": "Birta villuleitareiningar",
+        "doc": "Birtu auka greiningar HA einingar (samsvörun, tvíræðni, innri hluti ríkisins). Slökkt heldur einingarlistanum hreinum fyrir venjulega notkun."
       },
       "save_debug_traces": {
-        "label": "Vista villuleitarspor"
+        "label": "Vista villuleitarspor",
+        "doc": "Geymdu fulla aflrekningu og samsvarandi villuleitargögn fyrir hverja lotu. Gagnlegt fyrir bilanaleit en eykur geymslustærð."
       },
       "anti_wrinkle_enabled": {
-        "label": "Virkja hrukkuleysi-greiningu"
+        "label": "Virkja hrukkuleysi-greiningu",
+        "doc": "Viðurkenndu stuttu lág-afls þurrkarapúlsana sem þurrkari gefur frá sér eftir aðalhitafasann og haltu þeim tengdum við lokið lotu í stað þess að lesa þá sem nýjar lotur."
       },
       "anti_wrinkle_max_power": {
-        "label": "Hám. hrukkuleys-afl"
+        "label": "Hám. hrukkuleys-afl",
+        "doc": "Púls yfir þessum krafti er meðhöndluð sem alvöru ný hringrás, ekki hrukkuvörn. Stillt rétt fyrir ofan fallpúlsaflið."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Hámarkslengd"
+        "label": "Hámarkslengd",
+        "doc": "Púlsar sem eru lengri en þetta eru meðhöndlaðir sem alvöru hringrás frekar en hrukkuvörn."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Útgönguaflþröskuldur"
+        "label": "Útgönguaflþröskuldur",
+        "doc": "Krafturinn verður að falla undir þetta á milli púlsa til að hrukkuvarnarstilling haldist virkur."
       },
       "delay_start_detect_enabled": {
-        "label": "Virkja seinkuð-ræsing-greiningu"
+        "label": "Virkja seinkuð-ræsing-greiningu",
+        "doc": "Finndu þegar kveikt er á heimilistækinu og bíður (seinkað ræsingu / biðstöðu) en hefur ekki hafið lotuna, þannig að biðhleðsla telst ekki vera í gangi."
       },
       "delay_confirm_seconds": {
-        "label": "Staðfestingarsekúndur"
+        "label": "Staðfestingarsekúndur",
+        "doc": "Rafmagn verður að vera í biðstöðu í þetta lengi áður en heimilistækið er meðhöndlað sem bið eftir að ræsa sig frekar en í gangi."
       },
       "delay_timeout_hours": {
-        "label": "Tímamarksklst."
+        "label": "Tímamarksklst.",
+        "doc": "Hættu að bíða í seinkaðri ræsingu eftir þessa marga klukkutíma og farðu aftur í aðgerðalausa stöðu, þannig að vél sem er eftir afl en aldrei ræst bíður ekki að eilífu."
       },
       "external_end_trigger_enabled": {
-        "label": "Virkja ytri lokakveikin"
+        "label": "Virkja ytri lokakveikin",
+        "doc": "Láttu utanaðkomandi tvíundarskynjara gefa merki um lok lotu, auk innbyggðrar raforkugreiningar."
       },
       "external_end_trigger": {
-        "label": "Ytri kveikjaeining"
+        "label": "Ytri kveikjaeining",
+        "doc": "Tvöfaldur skynjari þar sem ástandsbreytingin markar lok lotunnar (t.d. „lokið“ tengiliður tækis eða fylgisamþætting)."
       },
       "external_end_trigger_inverted": {
-        "label": "Snúa ytri kveikin (kvikna á SLÖKKT)"
+        "label": "Snúa ytri kveikin (kvikna á SLÖKKT)",
+        "doc": "Líttu á að kveikjuskynjarinn slekkur á (frekar en KVEIKT) sem lok lotumerkis."
       },
       "door_sensor_entity": {
-        "label": "Dyraskynjareining"
+        "label": "Dyraskynjareining",
+        "doc": "Valfrjáls hurð tvöfaldur skynjari. Notað til að greina hvenær heimilistækið hefur verið opnað/affermt eftir lotu."
       },
       "pause_cuts_power": {
-        "label": "Hlé slær einnig af straum (með rofa)"
+        "label": "Hlé slær einnig af straum (með rofa)",
+        "doc": "Þegar gert er hlé á lotu skaltu einnig slökkva á Switch Entity fyrir neðan. Aðeins fyrir tæki þar sem hægt er að skera úr klóinu á öruggan hátt í miðjum lotu."
       },
       "switch_entity": {
-        "label": "Rofaeining"
+        "label": "Rofaeining",
+        "doc": "Valfrjáls rofi slökkt á hléi og aftur kveikt á þegar haldið er áfram, notaður ásamt „Hlé slekkur líka á rafmagni“."
       },
       "notify_unload_delay_minutes": {
-        "label": "Losunarminni-seinkun"
+        "label": "Losunarminni-seinkun",
+        "doc": "Mínútum eftir að lotu lýkur áður en þú sendir áminninguna um „afferma vélina“ sem enn bíður. Stilltu 0 til að slökkva á áminningunni."
       },
       "pump_stuck_duration": {
-        "label": "Fastri dælu-lengd"
+        "label": "Fastri dælu-lengd",
+        "doc": "Sekúndur sem dæla gæti keyrt samfellt áður en hún er merkt sem hugsanlega föst (kveikir dælutilvikinu sem festist)."
       },
       "notify_start_services": {
-        "label": "Ræsingarþjónustur"
+        "label": "Ræsingarþjónustur",
+        "doc": "tilkynna.* þjónustu sem hringt er í þegar hringrás hefst. Bættu við einu við hvert markmið (sími, mælaborð osfrv.); skildu eftir tómt fyrir engin byrjunartilkynning."
       },
       "notify_finish_services": {
-        "label": "Lokaþjónustur"
+        "label": "Lokaþjónustur",
+        "doc": "tilkynna.* þjónustu kallað þegar lotu lýkur. Bættu við einu við hvert markmið; skildu eftir tómt fyrir tilkynningu um að ekki sé lokið."
       },
       "notify_live_services": {
-        "label": "Beinar framfaraþjónustur"
+        "label": "Beinar framfaraþjónustur",
+        "doc": "tilkynna.* þjónustu kallað á lifandi framvinduuppfærslur á meðan hringrás keyrir. Skildu eftir autt til að slökkva á tilkynningum um framvindu í beinni."
       },
       "notify_people": {
-        "label": "Fólk (fyrir Aðeins Heima)"
+        "label": "Fólk (fyrir Aðeins Heima)",
+        "doc": "person.* einingar notaðar af „Tilkynna aðeins þegar heima“ til að ákveða hvort einhver sé heima."
       },
       "notify_only_when_home": {
-        "label": "Tilkynna aðeins þegar heima"
+        "label": "Tilkynna aðeins þegar heima",
+        "doc": "Sendu aðeins tilkynningar þegar að minnsta kosti einn af tengdum einstaklingum (fyrir ofan) er heima."
       },
       "notify_fire_events": {
-        "label": "Kveikja HA viðburði fyrir tilkynningar"
+        "label": "Kveikja HA viðburði fyrir tilkynningar",
+        "doc": "Kveiktu einnig á ha_washdata_* atburðum við upphaf/lok lotu svo þú getir smíðað þína eigin sjálfvirkni."
       },
       "notify_before_end_minutes": {
-        "label": "Forlokaviðvörun"
+        "label": "Forlokaviðvörun",
+        "doc": "Sendu næstum lokið viðvörun þegar áætlaður tími sem eftir er fer niður fyrir þetta. 0 gerir það óvirkt."
       },
       "notify_live_interval_seconds": {
-        "label": "Bein uppfærsluabil"
+        "label": "Bein uppfærsluabil",
+        "doc": "Hversu oft tilkynningar um framvindu í beinni eru endurnýjaðar á meðan hringrás er í gangi."
       },
       "notify_live_overrun_percent": {
-        "label": "Bein yfirkeyrð % áður en viðvörun"
+        "label": "Bein yfirkeyrð % áður en viðvörun",
+        "doc": "Ef lota fer yfir áætlun sína um meira en þetta hlutfall, sendu umframviðvörun."
       },
       "notify_live_chronometer": {
-        "label": "Nota beina tímamæling"
+        "label": "Nota beina tímamæling",
+        "doc": "Sýndu niðurtalningartíma sem uppfærist í beinni í tilkynningunni (á kerfum sem styðja hana) í stað kyrrstöðu mats."
       },
       "notify_timeout_seconds": {
-        "label": "Sjálfvirk lokun eftir"
+        "label": "Sjálfvirk lokun eftir",
+        "doc": "Hunsaðu tilkynninguna sjálfkrafa eftir þessar margar sekúndur (á kerfum sem styðja hana). 0 geymir það þar til henni er vísað frá handvirkt."
       },
       "notify_title": {
-        "label": "Tilkynninga­fyrirsögn"
+        "label": "Tilkynninga­fyrirsögn",
+        "doc": "Titill tilkynningar. Sniðbreytur: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Tilkynningatákn"
+        "label": "Tilkynningatákn",
+        "doc": "Valfrjálst mdi tákn fyrir tilkynninguna (t.d. mdi: þvottavél). Skildu eftir autt fyrir sjálfgefna pallinn."
       },
       "notify_start_message": {
-        "label": "Ræsingarskilaboð"
+        "label": "Ræsingarskilaboð",
+        "doc": "Líkami sendur þegar hringrás byrjar. Sniðbreytur: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Lokaskilaboð"
+        "label": "Lokaskilaboð",
+        "doc": "Líkami sendur þegar lotu lýkur. Sniðbreytur: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "For-lokar­skilaboð"
+        "label": "For-lokar­skilaboð",
+        "doc": "Meginmál fyrir-loka / næstum lokið viðvörun. Sniðbreytur: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Minningarboð"
+        "label": "Minningarboð",
+        "doc": "Meginmál áminningar um affermingu sem enn bíður. Blank notar innbyggða sjálfgefna. Sniðbreytur: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Android rás (ræsing/bein)"
+        "label": "Android rás (ræsing/bein)",
+        "doc": "Nafn Android tilkynningarásar fyrir upphaf/bein skilaboð (stýrir hljóði á hverja rás og forgang í farsímaforritinu). Blank notar sjálfgefið fylgiforrit."
       },
       "notify_finish_channel": {
-        "label": "Android rás (lok)"
+        "label": "Android rás (lok)",
+        "doc": "Nafn Android tilkynningarásar fyrir lokaskilaboðin. Blank endurnotar upphafs-/beinarásina."
       },
       "energy_price_entity": {
-        "label": "Orkuverðeining"
+        "label": "Orkuverðeining",
+        "doc": "Skynjari með núverandi raforkuverði á kWst (t.d. kraftmikla gjaldskrá). Tekur fram yfir fasta verðið hér að neðan. Hver lota frystir verðið sem er í gildi þegar henni lýkur."
       },
       "energy_price_static": {
-        "label": "Fast orkuverð (á kWh)"
+        "label": "Fast orkuverð (á kWh)",
+        "doc": "Fast verð á kWst notað fyrir kostnaðartölur þegar engin lifandi verðeining er stillt hér að ofan."
       },
       "notify_cycle_timers": {
-        "label": "Lotuklukka"
+        "label": "Lotuklukka",
+        "doc": "Tilkynningar á tilteknum mínútum í lotu (t.d. til að bæta við mýkingarefni). Skilaboð styður {device}, {program}, {minutes}. Virkjaðu sjálfvirka hlé til að gera hlé á þeim tímapunkti og fá gagnvirka tilkynningu með hnappi Halda áfram; halda áfram í gegnum spjaldið, hlé/halda áfram þjónustu eða tilkynningaaðgerðina."
       },
       "enable_ml_models": {
-        "label": "Nota greind líkön meðan á lotu stendur"
+        "label": "Nota greind líkön meðan á lotu stendur",
+        "doc": "Á meðan hringrás er í gangi, láttu líkönin betrumbæta niðurstöðurnar í beinni: stöðugri tíma sem eftir er og orku-/kostnaðaráætlun, og vörn gegn ótímabærum stöðvun við endaskynjun (það getur alltaf seinkað frágangi, aldrei endað snemma og er takmarkað). Notar fínstilltu gerðir þínar þegar þær eru tiltækar, annars þær innbyggðu. Slökkt = aðeins klassískt afl-undirstaða rökfræði (enn áreiðanleg)."
       },
       "ml_training_enabled": {
-        "label": "Læra frá þessar vél"
+        "label": "Læra frá þessar vél",
+        "doc": "Skoðaðu endurskoðaða lotur þínar reglulega yfir nótt og fínstilltu módelin að þessari tilteknu vél. Breytingu er aðeins haldið þegar hún skorar raunverulega betur á úthaldslotum, þannig að þetta getur aðeins hjálpað eða verið óbreytt - aldrei dregið til baka."
       },
       "ml_training_hour": {
-        "label": "Læra á klst."
+        "label": "Læra á klst.",
+        "doc": "Staðbundinn klukkutími dags (0-23) til að gera fínstillingu á einni nóttu. Veldu rólegan tíma eins og 2 (02:00)."
       },
       "ml_training_min_cycles": {
-        "label": "Lotur þarf fyrst"
+        "label": "Lotur þarf fyrst",
+        "doc": "Bíddu þar til að minnsta kosti svona margar lotur hafa verið skráðar áður en þú fínstillir, svo það er af nógu að læra."
       },
       "ml_training_interval_days": {
-        "label": "Athuga í mesta lagi á hverju"
+        "label": "Athuga í mesta lagi á hverju",
+        "doc": "Athugaðu aftur fyrir umbætur í mesta lagi einu sinni á þessa marga daga."
       }
     }
   }

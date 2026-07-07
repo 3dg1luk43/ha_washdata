@@ -80,7 +80,8 @@
         "air_fryer": "Vzduchová fritéza",
         "bread_maker": "Pekárna na chleba",
         "pump": "Pumpa / Kalová pumpa",
-        "other": "Jiné (pokročilé)"
+        "generic": "Jiné (pokročilé)",
+        "other": "Prahové zařízení"
       }
     }
   },
@@ -620,6 +621,7 @@
       "needs_review": "Vyžaduje revizi",
       "overrun": "Běžel déle než obvykle",
       "artifact_tip": "Zjištěno {n} anomálií (např. dveře otevřené uprostřed cyklu) – otevřete, abyste je viděli na grafu",
+      "restart_gap_tip": "{n} mezera při restartu HA: průběh výkonu má díru",
       "poor_fit_tip": "Nekonzistentní historie zápasů – zvažte přebudování tohoto profilu",
       "fair_fit_tip": "Střední konzistence shody – některé cykly přiřazené k tomuto profilu mají nižší skóre spolehlivosti. Označte více cyklů nebo znovu zaznamenejte profil, abyste zvýšili přesnost.",
       "auto": "(automaticky zjištěno)",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Překryjte další obálky profilu na výše uvedené tabulce a zjistěte, která z nich nejlépe vyhovuje tomuto cyklu.",
       "artifact_header": "Během tohoto cyklu bylo zjištěno {n} anomálií",
       "artifact_footer": "Zvýrazněno na grafu výše. Jedná se o přechodné artefakty (např. dveře otevřené uprostřed cyklu), ne nutně problémy.",
+      "restart_gap_header": "{n} mezera při restartu HA během tohoto cyklu",
+      "restart_gap_item": "{dur} mezera",
+      "restart_gap_footer": "Zvýrazněno v grafu. Data o výkonu pro tyto intervaly chybí; párování použilo pouze skutečná měření.",
       "profile_poor_health_detail": "Cykly přiřazené k tomuto profilu mají nekonzistentní tvary nebo nízkou spolehlivost. Zvažte přestavbu obálky nebo revizi označených cyklů.",
       "trend_duration_longer": "Trendy delší ({pct} %/cyklus) – poslední průměr {avg}",
       "trend_duration_shorter": "Trendy kratší ({pct} %/cyklus) – poslední průměr {avg}",

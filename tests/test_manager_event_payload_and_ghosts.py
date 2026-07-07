@@ -8,9 +8,7 @@ import pytest
 from homeassistant.core import HomeAssistant, callback
 
 from custom_components.ha_washdata.const import (
-    CONF_NOTIFY_EVENTS,
     EVENT_CYCLE_ENDED,
-    NOTIFY_EVENT_FINISH,
 )
 from custom_components.ha_washdata.manager import WashDataManager
 
@@ -22,7 +20,6 @@ def mock_entry() -> Any:
     entry.title = "Test Washer"
     entry.options = {
         "power_sensor": "sensor.test_power",
-        CONF_NOTIFY_EVENTS: [NOTIFY_EVENT_FINISH],
     }
     entry.data = {}
     return entry

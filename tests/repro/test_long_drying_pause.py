@@ -9,9 +9,9 @@ sys.path.append(os.path.abspath("/root/ha_washdata/custom_components"))
 
 from ha_washdata.manager import WashDataManager
 from ha_washdata.const import (
-    CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS, CONF_POWER_SENSOR, 
+    CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS, CONF_POWER_SENSOR,
     CONF_OFF_DELAY, STATE_RUNNING, STATE_OFF, CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-    CONF_DEVICE_TYPE, CONF_NOTIFY_EVENTS
+    CONF_DEVICE_TYPE,
 )
 from homeassistant.util import dt as dt_util
 
@@ -41,7 +41,6 @@ def mock_entry():
         CONF_NO_UPDATE_ACTIVE_TIMEOUT: 1800, # 30 minutes
         CONF_DEVICE_TYPE: "dishwasher",
         "power_sensor": "sensor.test_power",
-        CONF_NOTIFY_EVENTS: [],
         "start_duration_threshold": 0,
         "start_energy_threshold": 0,
     }

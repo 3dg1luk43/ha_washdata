@@ -80,7 +80,8 @@
         "air_fryer": "Oro gruzdintuvė",
         "bread_maker": "Duonkepė",
         "pump": "Siurblys / Drenažinis siurblys",
-        "other": "Kita (išplėstinė)"
+        "generic": "Kita (išplėstinė)",
+        "other": "Slenksčio įtaisas"
       }
     }
   },
@@ -620,6 +621,7 @@
       "needs_review": "Reikia peržiūros",
       "overrun": "Bėgo ilgiau nei įprastai",
       "artifact_tip": "Aptikta {n} anomalijų (pvz., durys atidarytos ciklo viduryje) – atidarykite, kad pamatytumėte juos diagramoje",
+      "restart_gap_tip": "{n} HA paleidimo iš naujo spraga: galios kreivė turi skylę",
       "poor_fit_tip": "Nenuosekli rungtynių istorija – apsvarstykite galimybę atkurti šį profilį",
       "fair_fit_tip": "Vidutinis atitikties nuoseklumas – kai kurie šiam profiliui priskirti ciklai turi žemesnius patikimumo balus. Pažymėkite daugiau ciklų arba iš naujo įrašykite profilį, kad pagerintumėte tikslumą.",
       "fair_fit": "Priimtina",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Aukščiau pateiktoje diagramoje uždėkite kitus profilio vokus, kad sužinotumėte, kuris iš jų geriausiai tinka šiam ciklui.",
       "artifact_header": "Per šį ciklą aptikta anomalijų: {n}",
       "artifact_footer": "Paryškinta aukščiau esančiame grafike. Tai yra trumpalaikiai artefaktai (pvz., durys atidarytos ciklo viduryje), nebūtinai problemos.",
+      "restart_gap_header": "{n} HA paleidimo iš naujo spraga šio ciklo metu",
+      "restart_gap_item": "{dur} spraga",
+      "restart_gap_footer": "Paryškinta grafike. Galios duomenų trūksta šiems intervalams; suderinimas naudojo tik tikrus rodmenis.",
       "profile_poor_health_detail": "Šiam profiliui priskirtų ciklų formos yra nenuoseklios arba jų patikimumas yra mažas. Apsvarstykite galimybę atkurti voką arba peržiūrėti pažymėtus ciklus.",
       "trend_duration_longer": "Ilgesnė trukmė ({pct} %/ciklas) – pastaruoju metu vid. {avg}",
       "trend_duration_shorter": "Trukmė mažėja ({pct} %/ciklas) – pastaruoju metu vid. {avg}",
@@ -990,235 +995,312 @@
     },
     "setting": {
       "name": {
-        "label": "Įrenginio pavadinimas"
+        "label": "Įrenginio pavadinimas",
+        "doc": "Rodomas pavadinimas, rodomas HA integracijų sąraše ir įrenginių registre."
       },
       "device_type": {
-        "label": "Įrenginio tipas"
+        "label": "Įrenginio tipas",
+        "doc": "Buitinės technikos klasė. Nustato protingus numatytuosius aptikimo nustatymus (slenksčius, išjungimo delsą, pabaigos tvarkymą), pritaikytas tam prietaiso tipui; pakeiskite jį tik tuo atveju, jei įrenginys iš pradžių buvo nustatytas kaip netinkamo tipo."
       },
       "power_sensor": {
-        "label": "Galios jutiklis"
+        "label": "Galios jutiklis",
+        "doc": "Jutiklio subjektas, pranešantis šio prietaiso tiesioginę galią vatais (pvz., sensor.washer_power). Visas ciklo aptikimas pagrįstas šiuo signalu."
       },
       "min_power": {
-        "label": "Minimali galia"
+        "label": "Minimali galia",
+        "doc": "Absoliuti minimali galia laikoma aktyvia. Žemiau esantys rodmenys traktuojami kaip 0 W (parengties režimas), filtruojant fantominę išmaniųjų kištukų ir budėjimo šviesos diodų apkrovą."
       },
       "off_delay": {
-        "label": "Išjungimo delsimas"
+        "label": "Išjungimo delsimas",
+        "doc": "Laikas palaukti, kai nukrenta galia, prieš paskelbiant, kad ciklas baigtas. Jei maitinimas atnaujinamas šiame lange, ciklas tęsiasi sklandžiai – tai sujungia pauzes tarp plovimo etapų. Indaplovės turi ilgas džiovinimo fazes (maitinimas išjungiamas 20–60 min.), todėl išjungimo delsa turi būti didesnė už tą, kad visas plovimas+džiovinimas išliktų kaip vienas ciklas."
       },
       "linked_device": {
-        "label": "Grupuoti po įrenginiu"
+        "label": "Grupuoti po įrenginiu",
+        "doc": "Pasirinktinai įdėkite šį „WashData“ įrenginį į kitą įrenginį (pvz., išmanųjį kištuką) HA įrenginių registre, rodomą kaip „Prisijungta per...“."
       },
       "start_threshold_w": {
-        "label": "Paleidimo slenkstis"
+        "label": "Paleidimo slenkstis",
+        "doc": "Galia turi pakilti virš šio lygio, kad būtų patvirtintas ciklas. Nustačius per žemą, atsiranda klaidingas paleidimas iš budėjimo režimo maitinimo; per aukštai ir lėtai paleidžiamos programos (šaltas užpildymas) praleidžiamos. Pasiūlymo variklis nustato tai šiek tiek aukščiau už pastebėtą mažiausią mašinos aktyviąją galią."
       },
       "stop_threshold_w": {
-        "label": "Sustabdymo slenkstis"
+        "label": "Sustabdymo slenkstis",
+        "doc": "Prieš prasidedant išjungimo delsos skaičiavimui, galia turi nukristi žemiau šio lygio. Nustatykite jį žemiau pradžios slenksčio – tarpas tarp jų yra histerezės juosta, kuri neleidžia mirgėti. Jei nustatyta per didelė, mažos galios fazės (skalavimo sulaikymo, glamžymo) klaidingai suaktyvina pabaigos seką."
       },
       "min_off_gap": {
-        "label": "Min. išjungimo tarpas"
+        "label": "Min. išjungimo tarpas",
+        "doc": "Jei aparatas išsijungia trumpiau nei šį laiką, įjungimo/išjungimo/įjungimo seka laikoma vienu nepertraukiamu ciklu. Neleidžia mirkymo programoms (mašina kelioms minutėms išsijungia skalbimo viduryje) padalyti į du atskirus ciklus. Jei norite, kad apkrovos būtų skaičiuojamos kaip atskiri ciklai, nustatykite jį trumpesnį nei atstumas tarp apkrovų iš vienos pusės į kitą. Įrenginio tipo numatytieji nustatymai apsaugo tipinę kiekvieno prietaiso ciklo pauzę."
       },
       "start_duration_threshold": {
-        "label": "Paleidimo trukmė"
+        "label": "Paleidimo trukmė",
+        "doc": "Galia turi taip ilgai išlikti virš paleidimo slenksčio, kad būtų patvirtintas tikras startas, kad sekundės įjungimo/išjungimo jungikliai nepradėtų ciklo."
       },
       "start_energy_threshold": {
-        "label": "Paleidimo energija"
+        "label": "Paleidimo energija",
+        "doc": "Energijos (galia x laikas) prietaisas turi sunaudoti prieš VEIKIANT. Trumpas didelės galios smaigalys turi labai mažai energijos ir yra ignoruojamas, užkertant kelią klaidingam paleidimui."
       },
       "completion_min_seconds": {
-        "label": "Min. ciklo trukmė"
+        "label": "Min. ciklo trukmė",
+        "doc": "Trumpesni nei šis ciklai atmetami kaip vaiduokliniai ciklai (bandomieji važiavimai, atidarant dureles, norint įdėti kojines)."
       },
       "running_dead_zone": {
-        "label": "Veikimo mirusi zona"
+        "label": "Veikimo mirusi zona",
+        "doc": "Prasidėjus ciklui, maitinimo kritimai šiame lange nepaisomi. Skalbimo mašinos prisipildo šalto vandens (prieš kaitinant nukrenta beveik 0 W) – be šios apsaugos ta užpildymo fazė atrodo kaip ciklo pabaiga. Tai NEpraleidžia duomenų: visos galios sekimas įrašomas nuo T=0. Pasiūlymo variklis matuoja tikrąjį jūsų mašinos paleidimo modelį ir automatiškai nustato jo dydį."
       },
       "end_energy_threshold": {
-        "label": "Pabaigos energija"
+        "label": "Pabaigos energija",
+        "doc": "Išjungimo delsos atgalinio skaičiavimo metu sukaupta energija (vatai x laikas) lyginama su šia riba. Jei viršijamas, atgalinis skaičiavimas nustatomas iš naujo – prie ciklo lieka pritvirtintos nesiglamžančios būgninės ir indaplovės džiovinimo uodegėlės, o ne trumpinamos. Pakelkite, jei ciklai baigiasi per anksti vėsinimo metu; sumažinkite jį, jei aptikimas yra vangus."
       },
       "end_repeat_count": {
-        "label": "Pabaigos pakartojimų sk."
+        "label": "Pabaigos pakartojimų sk.",
+        "doc": "Iš eilės mažesnių nei sustojimo slenksčio rodmenų skaičius, reikalingas iki ciklo pabaigos. 1 tinka daugeliui kištukų. Padidinkite iki 2–3, jei jūsų išmanusis kištukas ciklo viduryje kartais praneša apie klaidingą nulį, o ciklai baigiasi anksčiau laiko."
       },
       "sampling_interval": {
-        "label": "Mėginių ėmimo intervalas"
+        "label": "Mėginių ėmimo intervalas",
+        "doc": "Numatomas laikas tarp jutiklio rodmenų – naudojamas išlyginimo lango dydžiui nustatyti ir tinkamai pradėti atšokti. Kiekvienas jutiklio atnaujinimas fiksuojamas neatsižvelgiant į šią reikšmę; tai tik kalibruoja tolesnius skaičiavimus. Pasiūlymų variklis matuoja tikrąją jutiklio kadenciją iš praėjusių ciklų ir nustato ją automatiškai."
       },
       "smoothing_window": {
-        "label": "Išlyginimo langas"
+        "label": "Išlyginimo langas",
+        "doc": "Kiek išlyginamas neapdorotos galios signalas. Žemas (2) yra jautrus, bet triukšmingas; aukštas (5) išlygina smailes, bet padidina atsilikimą."
       },
       "abrupt_drop_watts": {
-        "label": "Staigus kritimas"
+        "label": "Staigus kritimas",
+        "doc": "Jei galios sumažėjimas didesnis nei šis, ciklas pažymimas kaip Pertrauktas (rankinis atšaukimas), o ne kaip natūrali apdaila."
       },
       "abrupt_drop_ratio": {
-        "label": "Staigaus kritimo santykis"
+        "label": "Staigaus kritimo santykis",
+        "doc": "Didesnis nei ši srovės galios sumažėjimas taip pat laikomas staigiu (0,6 = 60 % kritimas). Papildo vatų slenkstį įvairiems prietaisų dydžiams."
       },
       "profile_match_threshold": {
-        "label": "Atitikimo slenkstis"
+        "label": "Atitikimo slenkstis",
+        "doc": "Kad būtų priimtas programos identifikavimas, ciklo pabaigoje būtinas minimalus panašumo balas (0–1). Pakelkite jį, kad sumažintumėte klaidingų identifikacijų skaičių; sumažinkite jį, jei jūsų mašinos programos nesuderinamos. Numatytasis 0,4 yra konservatyvus atskaitos taškas."
       },
       "profile_unmatch_threshold": {
-        "label": "Neatitikimo slenkstis"
+        "label": "Neatitikimo slenkstis",
+        "doc": "Jei tiesioginės ciklo vidurio rungtynės nukrenta žemiau šio balo, preliminarus identifikavimas išvalomas. Laikykite jį šiek tiek žemiau atitikties slenksčio, kad trumpas panašumas nesukeltų ekrano į neprilygstamą."
       },
       "profile_match_interval": {
-        "label": "Atitikimo intervalas"
+        "label": "Atitikimo intervalas",
+        "doc": "Kaip dažnai bandyti suderinti profilį bėgimo ciklo metu. Numatytoji 300 s (5 minutės) subalansuoja aptikimo greitį ir procesorių."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Min. trukmės santykis"
+        "label": "Min. trukmės santykis",
+        "doc": "Minimalus ciklo ilgis, palyginti su profiliu. 0,9 reiškia, kad ciklas turi sudaryti bent 90 % profilio trukmės, kad atitiktų."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Maks. trukmės santykis"
+        "label": "Maks. trukmės santykis",
+        "doc": "Maksimalus ciklo ilgis, palyginti su profiliu. 1.3 reiškia, kad ciklas turi būti mažesnis nei 130 % profilio trukmės, kad atitiktų."
       },
       "profile_duration_tolerance": {
-        "label": "Profilio trukmės tolerancija"
+        "label": "Profilio trukmės tolerancija",
+        "doc": "+/- juosta aplink vidutinę profilio trukmę, naudojamą derinant. 0,25 reiškia, kad 60 minučių profilis atitinka 45–75 minučių ciklus."
       },
       "duration_tolerance": {
-        "label": "Įvertinimo tolerancija"
+        "label": "Įvertinimo tolerancija",
+        "doc": "Likusio laiko įvertinimų tolerancija (mokomasis grįžtamasis ryšys, nesutapimas). Jei tikroji trukmė neviršija +/-X % apskaičiuoto, tai laikoma gera atitiktimi."
       },
       "auto_label_confidence": {
-        "label": "Automatinio žymėjimo pasitikėjimas"
+        "label": "Automatinio žymėjimo pasitikėjimas",
+        "doc": "Jei atitikties rezultatas ciklo pabaigoje yra lygus arba didesnis, programa automatiškai pažymima be jokio patvirtinimo raginimo. Padidinkite jį, kad būtų reikalaujama didesnio tikrumo prieš automatinį ženklinimą; sumažinkite jį, kad daugiau automatizuotų. Veikia kartu su žemiau esančia mokymosi pasitikėjimo funkcija."
       },
       "learning_confidence": {
-        "label": "Mokymosi pasitikėjimas"
+        "label": "Mokymosi pasitikėjimas",
+        "doc": "Jei atitikties rezultatas patenka tarp šio ir automatinio etiketės pasitikėjimo, atsiliepimo pranešime prašoma patikrinti identifikuotą programą. Žemiau šio rezultato rungtynės yra per daug neaiškios, kad būtų galima pamatyti. Turi būti žemiau automatinio etiketės patikimumo."
       },
       "suppress_feedback_notifications": {
-        "label": "Slėpti grįžtamojo ryšio pranešimus"
+        "label": "Slėpti grįžtamojo ryšio pranešimus",
+        "doc": "Nekelkite nuolatinio pranešimo, kai reikia peržiūrėti baigtą ciklą; atsiliepimai vis tiek rodomi ciklų peržiūros eilėje."
       },
       "watchdog_interval": {
-        "label": "Stebėjimo intervalas"
+        "label": "Stebėjimo intervalas",
+        "doc": "Kaip dažnai foninis sergėtojas tikrina, ar neužstrigo jutikliai ir ar nėra laiko. Numatytasis 30 s."
       },
       "no_update_active_timeout": {
-        "label": "Be atnaujinimų skirtasis laikas"
+        "label": "Be atnaujinimų skirtasis laikas",
+        "doc": "Jei veikiant tiek ilgai negaunama jokių maitinimo atnaujinimų, manykite, kad kištukas nukrito neprisijungus, ir priverstinai sustabdykite, kad išvengtumėte zombių ciklo. Numatytoji 600 s leidžia debesies arba tinklelio delsą."
       },
       "progress_reset_delay": {
-        "label": "Pažangos atstatymo delsimas"
+        "label": "Pažangos atstatymo delsimas",
+        "doc": "Baigę palaikykite 100 % pažangą tiek laiko, kad prieš iš naujo nustatant į neveiklumą prietaisų skydeliuose būtų rodoma baigta."
       },
       "auto_maintenance": {
-        "label": "Automatinė priežiūra (naktinis valymas)"
+        "label": "Automatinė priežiūra (naktinis valymas)",
+        "doc": "Naktį tvarkykite: perkurkite profilio vokus, perskaičiuokite ciklo būseną, apkarpykite derinimo pėdsakus ir išsaugokite naujausius ciklus."
       },
       "expose_debug_entities": {
-        "label": "Rodyti derinimo objektus"
+        "label": "Rodyti derinimo objektus",
+        "doc": "Paskelbkite papildomus diagnostinius HA objektus (atitikties patikimumą, dviprasmiškumą, būsenos vidines savybes). Išjungta objektų sąrašas išlieka švarus normaliam naudojimui."
       },
       "save_debug_traces": {
-        "label": "Įrašyti derinimo pėdsakus"
+        "label": "Įrašyti derinimo pėdsakus",
+        "doc": "Išsaugokite visą galios pėdsaką ir atitinkamus kiekvieno ciklo derinimo duomenis. Naudinga trikčių šalinimui, bet padidina saugyklos dydį."
       },
       "anti_wrinkle_enabled": {
-        "label": "Įjungti apsaugą nuo raukšlių"
+        "label": "Įjungti apsaugą nuo raukšlių",
+        "doc": "Atpažinkite trumpus mažos galios būgninius impulsus, kuriuos džiovyklė skleidžia po pagrindinės šildymo fazės, ir laikykite juos prijungtus prie baigto ciklo, o ne skaitykite juos kaip naujus ciklus."
       },
       "anti_wrinkle_max_power": {
-        "label": "Maks. apsaugos nuo raukšlių galia"
+        "label": "Maks. apsaugos nuo raukšlių galia",
+        "doc": "A pulse above this power is treated as a real new cycle, not an anti-wrinkle tumble. Nustatykite tiesiai virš būgninio impulso galios."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Maksimali trukmė"
+        "label": "Maksimali trukmė",
+        "doc": "Ilgesni impulsai laikomi tikru ciklu, o ne raukšlių mažinimu."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Išėjimo galios slenkstis"
+        "label": "Išėjimo galios slenkstis",
+        "doc": "Kad raukšlių mažinimo režimas išliktų aktyvus, tarp impulsų galia turi būti mažesnė."
       },
       "delay_start_detect_enabled": {
-        "label": "Įjungti atidėto paleidimo aptikimą"
+        "label": "Įjungti atidėto paleidimo aptikimą",
+        "doc": "Nustatykite, kada prietaisas yra įjungtas ir laukia (uždelstas paleidimas / budėjimo režimas), bet nepradėjo ciklo, todėl budėjimo režimo ištraukimas nėra painiojamas su veikimo ciklu."
       },
       "delay_confirm_seconds": {
-        "label": "Patvirtinimo sekundės"
+        "label": "Patvirtinimo sekundės",
+        "doc": "Maitinimas turi likti budėjimo režimo juostoje tiek laiko, kol prietaisas bus traktuojamas kaip laukiantis įsijungimo, o ne kaip veikiantis."
       },
       "delay_timeout_hours": {
-        "label": "Skirtojo laiko valandos"
+        "label": "Skirtojo laiko valandos",
+        "doc": "Po daugelio valandų nustokite laukti atidėto paleidimo režimu ir grįžkite į tuščiąja eiga, todėl mašina, kuri buvo palikta varoma, bet niekada neįjungta, nelaukia amžinai."
       },
       "external_end_trigger_enabled": {
-        "label": "Įjungti išorinį pabaigos trigerį"
+        "label": "Įjungti išorinį pabaigos trigerį",
+        "doc": "Tegul išorinis dvejetainis jutiklis signalizuoja apie ciklo pabaigą, neskaitant integruoto galia pagrįsto aptikimo."
       },
       "external_end_trigger": {
-        "label": "Išorinio trigerio objektas"
+        "label": "Išorinio trigerio objektas",
+        "doc": "Dvejetainis jutiklis, kurio būsenos pasikeitimas žymi ciklo pabaigą (pvz., prietaiso „užbaigtas“ kontaktas arba papildomas integravimas)."
       },
       "external_end_trigger_inverted": {
-        "label": "Invertuoti išorinį trigerį (OFF)"
+        "label": "Invertuoti išorinį trigerį (OFF)",
+        "doc": "Trigerio jutiklio išsijungimą (o ne ĮJUNGTA) laikykite ciklo pabaigos signalu."
       },
       "door_sensor_entity": {
-        "label": "Durų jutiklio objektas"
+        "label": "Durų jutiklio objektas",
+        "doc": "Pasirenkamas dvejetainis durų jutiklis. Naudojamas nustatyti, kada prietaisas buvo atidarytas/iškrautas po ciklo."
       },
       "pause_cuts_power": {
-        "label": "Pauzė taip pat išjungia galią (per jungiklį)"
+        "label": "Pauzė taip pat išjungia galią (per jungiklį)",
+        "doc": "Kai ciklas pristabdytas, taip pat išjunkite toliau pateiktą jungiklio objektą. Tik prietaisams, kurių kištuką galima saugiai atpjauti ciklo viduryje."
       },
       "switch_entity": {
-        "label": "Jungiklio objektas"
+        "label": "Jungiklio objektas",
+        "doc": "Pasirenkamas jungiklis išjungiamas pristabdant ir vėl įjungiamas, kai tęsiamas, naudojamas kartu su „Pauzė taip pat atjungia maitinimą“."
       },
       "notify_unload_delay_minutes": {
-        "label": "Iškrovimo priminimo delsimas"
+        "label": "Iškrovimo priminimo delsimas",
+        "doc": "Minutės po ciklo pabaigos prieš siunčiant vis dar laukiantį priminimą „iškrauti mašiną“. Norėdami išjungti priminimą, nustatykite 0."
       },
       "pump_stuck_duration": {
-        "label": "Siurblio įstrigimo trukmė"
+        "label": "Siurblio įstrigimo trukmė",
+        "doc": "Po kelių sekundžių siurblys gali veikti nepertraukiamai, kol jis bus pažymėtas kaip galimai užstrigęs (įjungiamas įstrigusio siurblio įvykis)."
       },
       "notify_start_services": {
-        "label": "Paleidimo paslaugos"
+        "label": "Paleidimo paslaugos",
+        "doc": "pranešti.* paslaugos iškviečiamos, kai prasideda ciklas. Pridėkite vieną prie kiekvieno tikslo (telefono, prietaisų skydelio ir kt.); palikite tuščią, kad nepradtumėte pranešimo."
       },
       "notify_finish_services": {
-        "label": "Baigimo paslaugos"
+        "label": "Baigimo paslaugos",
+        "doc": "notify.* paslaugos iškviečiamos, kai ciklas baigiasi. Pridėkite po vieną kiekvienam tikslui; palikite tuščią, kad nepraneštumėte apie pabaigą."
       },
       "notify_live_services": {
-        "label": "Tiesioginės pažangos paslaugos"
+        "label": "Tiesioginės pažangos paslaugos",
+        "doc": "notify.* paslaugos reikalavo tiesioginių eigos atnaujinimų, kol vyksta ciklas. Palikite tuščią, kad išjungtumėte tiesioginės eigos pranešimus."
       },
       "notify_people": {
-        "label": "Žmonės (kai namuose)"
+        "label": "Žmonės (kai namuose)",
+        "doc": "asmuo.* subjektai, kuriuos naudoja „Pranešti tik tada, kai namuose“, kad nuspręstų, ar kas nors yra namuose."
       },
       "notify_only_when_home": {
-        "label": "Pranešti tik kai namuose"
+        "label": "Pranešti tik kai namuose",
+        "doc": "Siųskite pranešimus tik tada, kai bent vienas iš susietų žmonių (aukščiau) yra namuose."
       },
       "notify_fire_events": {
-        "label": "Paleisti HA įvykius pranešimams"
+        "label": "Paleisti HA įvykius pranešimams",
+        "doc": "Taip pat suaktyvinkite ha_washdata_* įvykius ciklo pradžioje / pabaigoje, kad galėtumėte kurti savo automatizavimą."
       },
       "notify_before_end_minutes": {
-        "label": "Įspėjimas prieš pabaigą"
+        "label": "Įspėjimas prieš pabaigą",
+        "doc": "Išsiųskite įspėjimą beveik baigta, kai apskaičiuotas likęs laikas nukris žemiau. 0 jį išjungia."
       },
       "notify_live_interval_seconds": {
-        "label": "Tiesioginio atnaujinimo intervalas"
+        "label": "Tiesioginio atnaujinimo intervalas",
+        "doc": "Kaip dažnai vykstant ciklui atnaujinami tiesioginės eigos pranešimai."
       },
       "notify_live_overrun_percent": {
-        "label": "Tiesioginio viršijimo % įspėjimas"
+        "label": "Tiesioginio viršijimo % įspėjimas",
+        "doc": "Jei ciklas viršija savo įvertinimą daugiau nei šiuo procentu, išsiųskite įspėjimą apie viršijimą."
       },
       "notify_live_chronometer": {
-        "label": "Naudoti tiesioginį chronometrą"
+        "label": "Naudoti tiesioginį chronometrą",
+        "doc": "Pranešime rodykite tiesioginį atvirkštinės atskaitos laikmatį (jį palaikančiose platformose), o ne statinį įvertinimą."
       },
       "notify_timeout_seconds": {
-        "label": "Automatinis uždarymas po"
+        "label": "Automatinis uždarymas po",
+        "doc": "Po tiek sekundžių automatiškai atsisakykite pranešimo (jį palaikončiose platformose). 0 išsaugo jį tol, kol atmetamas rankiniu būdu."
       },
       "notify_title": {
-        "label": "Pranešimo pavadinimas"
+        "label": "Pranešimo pavadinimas",
+        "doc": "Pranešimo pavadinimas. Šablono kintamieji: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Pranešimo piktograma"
+        "label": "Pranešimo piktograma",
+        "doc": "Pasirenkama pranešimo mdi piktograma (pvz., mdi:skalbimo mašina). Numatytajai platformai palikite tuščią."
       },
       "notify_start_message": {
-        "label": "Paleidimo žinutė"
+        "label": "Paleidimo žinutė",
+        "doc": "Kūnas siunčiamas, kai prasideda ciklas. Šablono kintamieji: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Baigimo žinutė"
+        "label": "Baigimo žinutė",
+        "doc": "Kūnas siunčiamas, kai ciklas baigiasi. Šablono kintamieji: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "Žinutė prieš baigimą"
+        "label": "Žinutė prieš baigimą",
+        "doc": "Išankstinio / beveik baigto įspėjimo turinys. Šablono kintamieji: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Priminimo žinutė"
+        "label": "Priminimo žinutė",
+        "doc": "Vis dar laukiančio iškrovimo priminimo turinys. Blank naudoja integruotą numatytąjį. Šablono kintamieji: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Android kanalas (paleidimas/tiesioginis)"
+        "label": "Android kanalas (paleidimas/tiesioginis)",
+        "doc": "„Android“ pranešimų kanalo pavadinimas, skirtas pradžios / tiesioginiams pranešimams (valdo kiekvieno kanalo garsą ir prioritetą programoje mobiliesiems). Blank naudoja numatytąją papildomą programą."
       },
       "notify_finish_channel": {
-        "label": "Android kanalas (baigimas)"
+        "label": "Android kanalas (baigimas)",
+        "doc": "„Android“ pranešimų kanalo pavadinimas, skirtas užbaigimo pranešimui. Blank pakartotinai naudoja pradžios / tiesioginį kanalą."
       },
       "energy_price_entity": {
-        "label": "Energijos kainos objektas"
+        "label": "Energijos kainos objektas",
+        "doc": "Jutiklis su esama elektros kaina už kWh (pvz., dinaminis tarifas). Pirmenybė teikiama žemiau nurodytai statinei kainai. Kiekvienas ciklas užšaldo kainą, galiojančią jam pasibaigus."
       },
       "energy_price_static": {
-        "label": "Statinė energijos kaina (už kWh)"
+        "label": "Statinė energijos kaina (už kWh)",
+        "doc": "Fiksuota kaina už kWh, naudojama sąnaudų skaičiams, kai aukščiau nenustatytas joks tiesioginės kainos subjektas."
       },
       "notify_cycle_timers": {
-        "label": "Ciklo laikmačiai"
+        "label": "Ciklo laikmačiai",
+        "doc": "Pranešimai tam tikromis ciklo minutėmis (pvz., norint pridėti minkštiklio). Pranešimas palaiko {device}, {program}, {minutes}. Įjunkite automatinį pristabdymą, kad pristabdytumėte tuo metu ir gautumėte interaktyvų pranešimą su mygtuku Tęsti; tęsti per skydelį, pristabdymo / atnaujinimo paslaugą arba pranešimo veiksmą."
       },
       "enable_ml_models": {
-        "label": "Taikyti išmaniuosius modelius ciklo metu"
+        "label": "Taikyti išmaniuosius modelius ciklo metu",
+        "doc": "Kol vyksta ciklas, leiskite modeliams patikslinti tiesioginius rezultatus: stabilesnį likusį laiką ir energijos / sąnaudų sąmatą bei apsaugą nuo priešlaikinio sustojimo aptikus pabaigą (ji gali tik atidėti finišą, niekada nesibaigti anksčiau ir yra ribota). Naudoja jūsų sureguliuotus modelius, kai jie yra, o kitu atveju įtaisytuosius. Išjungta = tik klasikinė galia pagrįsta logika (vis dar patikima)."
       },
       "ml_training_enabled": {
-        "label": "Mokytis iš šio įrenginio"
+        "label": "Mokytis iš šio įrenginio",
+        "doc": "Periodiškai per naktį ištirkite peržiūrėtus ciklus ir tiksliai suderinkite modelius su šia konkrečia mašina. Pokyčiai išlaikomi tik tada, kai jie iš tikrųjų pasiekia geresnių rezultatų per užlaikytus ciklus, todėl tai gali tik padėti arba išlikti nepakitusi – niekada neregresuoti."
       },
       "ml_training_hour": {
-        "label": "Mokymosi valanda"
+        "label": "Mokymosi valanda",
+        "doc": "Vietinė paros valanda (0–23), kad atliktumėte nakties koregavimą. Pasirinkite ramią valandą, pvz., 2 (02:00)."
       },
       "ml_training_min_cycles": {
-        "label": "Reikalingi ciklai"
+        "label": "Reikalingi ciklai",
+        "doc": "Palaukite, kol bus įrašyta bent tiek ciklų, kad galėtumėte tiksliai derinti, kad būtų iš ko pasimokyti."
       },
       "ml_training_interval_days": {
-        "label": "Maks. tikrinimo intervalas"
+        "label": "Maks. tikrinimo intervalas",
+        "doc": "Dar kartą patikrinkite, ar nėra patobulinimų, bent kartą per tiek dienų."
       }
     }
   }

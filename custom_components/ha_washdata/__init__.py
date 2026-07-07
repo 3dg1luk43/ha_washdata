@@ -241,8 +241,8 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         options.pop(k, None)
 
     # 3.6: coffee_machine / ev / heat_pump / oven device types were removed.
-    # Remap any entry still on one of them to the generic "Other (Advanced)"
-    # bucket, preserving all tuned options so no user data is lost.
+    # Remap any entry still on one of them to DEVICE_TYPE_OTHER (Threshold Device),
+    # preserving all tuned options so no user data is lost.
     _removed_device_types = {"coffee_machine", "ev", "heat_pump", "oven"}
     if (options.get(CONF_DEVICE_TYPE) or data.get(CONF_DEVICE_TYPE)) in _removed_device_types:
         _log.info(

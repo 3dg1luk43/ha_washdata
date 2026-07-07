@@ -311,6 +311,17 @@ class WashDataManager:
         self._remove_notify_people_listener = None
         self._live_notification_sent_count = 0
 
+        # HA restart gap tracking: gaps in the power trace caused by integration
+        # restarts during an active cycle.  Each entry is a dict:
+        #   start_ts: ISO timestamp of gap start (= last snapshot save time)
+        #   end_ts:   ISO timestamp of gap end (= restoration time)
+        #   gap_seconds: duration in seconds
+        #   profile: matched profile name at restoration time, or None
+        #   match_confidence: match confidence at restoration time, or None
+        # Cleared and stored into cycle_data["restart_gaps"] at cycle end.
+        # Matching always uses real readings only; this list is for display/anomaly.
+        self._restart_gaps: list[dict[str, Any]] = []
+
         # Pause tracking (user-triggered)
         self._user_pause_start: datetime | None = None
         self._total_user_paused_seconds: float = 0.0
@@ -1116,7 +1127,8 @@ class WashDataManager:
             self.detector.set_verified_pause(verified_pause)
             self.detector.update_match(
                 (profile_name, confidence, matched_duration, phase_name,
-                 result.is_confident_mismatch, result.is_ambiguous)
+                 result.is_confident_mismatch, result.is_ambiguous,
+                 result.is_prefix_ambiguous)
             )
 
             # --- LOGGING (Unified) ---
@@ -1434,6 +1446,32 @@ class WashDataManager:
                     self._total_user_paused_seconds = float(
                         active_snapshot_to_restore.get("total_user_paused_seconds", 0.0)
                     )
+
+                    # Record the restart gap so the Cycles tab can shade it and
+                    # anomaly detection can surface it.  Only meaningful when
+                    # last_save is known and the dark period exceeds 30 s.
+                    # Matching always uses real readings only (Option B from the
+                    # gap-fill analysis); synthetic fill is intentionally NOT added
+                    # to _power_readings to prevent circular-bias inflation.
+                    if last_save:
+                        gap_end = dt_util.now()
+                        gap_secs = (gap_end - last_save).total_seconds()
+                        if gap_secs > 30:
+                            self._restart_gaps.append({
+                                "start_ts": last_save.isoformat(),
+                                "end_ts": gap_end.isoformat(),
+                                "gap_seconds": round(gap_secs, 1),
+                                "profile": self.detector.matched_profile,
+                                "match_confidence": getattr(
+                                    self.detector, "match_confidence", None
+                                ),
+                            })
+                            self._logger.info(
+                                "HA restart gap recorded: %.0fs (%.1f min) in active cycle; "
+                                "power trace has a hole — no synthetic fill (matching integrity)",
+                                gap_secs,
+                                gap_secs / 60,
+                            )
 
                     self._start_watchdog()
                 else:
@@ -3617,6 +3655,13 @@ class WashDataManager:
             if self._overrun_ratio > 0:
                 cycle_data["overrun_ratio"] = round(float(self._overrun_ratio), 3)
 
+        # Store any HA restart gaps that occurred during this cycle.
+        # The panel shades these regions in the power trace and shows a badge.
+        # Matching always uses real readings only (no synthetic fill in power_data).
+        if self._restart_gaps:
+            cycle_data["restart_gaps"] = list(self._restart_gaps)
+            self._restart_gaps.clear()
+
         # Freeze the energy cost onto the cycle using the price in effect NOW, so
         # later price changes never rewrite historical costs. Stored as a number
         # (currency per the configured price's unit); absent when no price is set.
@@ -5323,6 +5368,11 @@ class WashDataManager:
     def overrun_ratio(self) -> float:
         """Elapsed / expected duration for the running cycle (0.0 when unknown)."""
         return self._overrun_ratio
+
+    @property
+    def restart_gaps(self) -> list[dict]:
+        """HA restart gaps recorded during the current active cycle (may be empty)."""
+        return self._restart_gaps
 
     @property
     def current_power(self):

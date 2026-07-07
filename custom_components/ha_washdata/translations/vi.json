@@ -80,7 +80,8 @@
         "air_fryer": "Nồi chiên không khí",
         "bread_maker": "Máy làm bánh mì",
         "pump": "Máy bơm / Máy bơm bể phốt",
-        "other": "Khác (Nâng cao)"
+        "generic": "Khác (Nâng cao)",
+        "other": "Thiết bị ngưỡng"
       }
     }
   },
@@ -471,7 +472,8 @@
       "poor_fit": "chất lượng thấp",
       "steady": "→ ổn định",
       "using_defaults": "Đang dùng cài đặt mặc định",
-      "using_tuned": "Đang dùng trọng số đã tinh chỉnh"
+      "using_tuned": "Đang dùng trọng số đã tinh chỉnh",
+      "restart_gap_tip": "{n} Khoảng cách khởi động lại HA — dấu vết nguồn có lỗ"
     },
     "btn": {
       "add_timer": "+ Thêm bộ hẹn giờ",
@@ -739,7 +741,10 @@
       "feedback_cycles_pending": "{n} chu kỳ cần xem xét",
       "artifact_spike_detail": "Vượt trên dải công suất thông thường trong ~{n}s.",
       "artifact_dip_detail": "Giảm xuống dưới dải công suất thông thường trong ~{n}s.",
-      "artifact_pause_detail": "Công suất giảm xuống gần bằng không trong ~{n}s rồi tiếp tục — có thể cửa đã mở giữa chừng hoặc chu kỳ bị tạm dừng."
+      "artifact_pause_detail": "Công suất giảm xuống gần bằng không trong ~{n}s rồi tiếp tục — có thể cửa đã mở giữa chừng hoặc chu kỳ bị tạm dừng.",
+      "restart_gap_header": "{n} Khoảng cách khởi động lại HA trong chu kỳ này",
+      "restart_gap_item": "khoảng cách {dur}",
+      "restart_gap_footer": "Nổi bật trên biểu đồ. Dữ liệu nguồn bị thiếu trong các khoảng thời gian này - chỉ khớp với số đọc thực được sử dụng."
     },
     "phase_desc": {
       "pre_wash": "Ngâm lần đầu hoặc xử lý sơ bộ trước khi giặt chính.",
@@ -990,235 +995,312 @@
     },
     "setting": {
       "name": {
-        "label": "Tên thiết bị"
+        "label": "Tên thiết bị",
+        "doc": "Tên hiển thị hiển thị trong danh sách tích hợp HA và sổ đăng ký thiết bị."
       },
       "device_type": {
-        "label": "Loại thiết bị"
+        "label": "Loại thiết bị",
+        "doc": "Lớp thiết bị. Đặt các giá trị mặc định phát hiện hợp lý (ngưỡng, độ trễ tắt, xử lý kết thúc) được điều chỉnh cho loại thiết bị đó; chỉ thay đổi nó nếu thiết bị ban đầu được thiết lập sai loại."
       },
       "power_sensor": {
-        "label": "Cảm biến nguồn"
+        "label": "Cảm biến nguồn",
+        "doc": "Thực thể cảm biến báo cáo nguồn điện trực tiếp tính bằng watt cho thiết bị này (ví dụ: cảm biến.washer_power). Tất cả việc phát hiện chu kỳ đều dựa trên tín hiệu này."
       },
       "min_power": {
-        "label": "Công suất tối thiểu"
+        "label": "Công suất tối thiểu",
+        "doc": "Công suất tối thiểu tuyệt đối được coi là hoạt động. Các số đọc dưới mức này được coi là 0 W (ở chế độ chờ), lọc ra tải ảo của phích cắm thông minh và đèn LED ở chế độ chờ."
       },
       "off_delay": {
-        "label": "Độ trễ tắt"
+        "label": "Độ trễ tắt",
+        "doc": "Thời gian chờ sau khi mất điện trước khi tuyên bố chu trình kết thúc. Nếu có điện trở lại trong cửa sổ này, chu trình sẽ tiếp tục liền mạch - cầu nối này sẽ tạm dừng giữa các giai đoạn giặt. Máy rửa chén có giai đoạn sấy khô dài (tắt nguồn trong 20-60 phút) nên độ trễ tắt phải vượt quá mức đó để giữ cho toàn bộ quá trình rửa+khô như một chu trình."
       },
       "linked_device": {
-        "label": "Nhóm dưới thiết bị"
+        "label": "Nhóm dưới thiết bị",
+        "doc": "Tùy chọn lồng thiết bị WashData này vào một thiết bị khác (ví dụ: phích cắm thông minh) trong sổ đăng ký thiết bị HA, được hiển thị là \"Đã kết nối qua ...\"."
       },
       "start_threshold_w": {
-        "label": "Ngưỡng bắt đầu"
+        "label": "Ngưỡng bắt đầu",
+        "doc": "Công suất phải tăng lên trên mức này để xác nhận một chu kỳ đã bắt đầu. Đặt nó quá thấp sẽ khiến khởi động sai từ nguồn điện dự phòng; các chương trình khởi động quá cao và chậm (lấp đầy nguội) sẽ bị bỏ qua. Công cụ đề xuất đặt giá trị này ngay trên mức công suất hoạt động thấp nhất được quan sát thấy của máy."
       },
       "stop_threshold_w": {
-        "label": "Ngưỡng dừng"
+        "label": "Ngưỡng dừng",
+        "doc": "Công suất phải giảm xuống dưới mức này trước khi quá trình đếm ngược tắt trễ bắt đầu. Đặt nó bên dưới Ngưỡng bắt đầu - khoảng cách giữa chúng là dải trễ giúp ngăn hiện tượng nhấp nháy. Nếu đặt quá cao, các pha công suất thấp (giữ nước xả, chống nhăn) sẽ kích hoạt sai trình tự kết thúc."
       },
       "min_off_gap": {
-        "label": "Khoảng cách tắt tối thiểu"
+        "label": "Khoảng cách tắt tối thiểu",
+        "doc": "Nếu máy tắt nguồn ít hơn thời gian này, trình tự bật/tắt/bật sẽ được coi là một chu kỳ liên tục. Ngăn không cho các chương trình ngâm (máy tắt trong vài phút giữa lúc giặt) bị chia thành hai chu trình riêng biệt. Đặt nó ngắn hơn khoảng cách giữa các lần giặt liên tiếp nếu bạn muốn những lần giặt đó được tính là các chu kỳ riêng biệt. Giá trị mặc định của loại thiết bị bảo vệ việc tạm dừng trong chu kỳ điển hình cho từng thiết bị."
       },
       "start_duration_threshold": {
-        "label": "Thời lượng bắt đầu"
+        "label": "Thời lượng bắt đầu",
+        "doc": "Nguồn điện phải duy trì trên ngưỡng bắt đầu trong thời gian dài để xác nhận thời điểm bắt đầu thực sự, ngăn việc bật/tắt trong vài giây bắt đầu một chu kỳ."
       },
       "start_energy_threshold": {
-        "label": "Năng lượng khởi động"
+        "label": "Năng lượng khởi động",
+        "doc": "Năng lượng (công suất x thời gian) thiết bị phải tiêu thụ trước khi CHẠY. Một xung đột biến công suất cao trong thời gian ngắn có năng lượng rất thấp và bị bỏ qua, ngăn cản việc khởi động sai."
       },
       "completion_min_seconds": {
-        "label": "Thời lượng chu kỳ tối thiểu"
+        "label": "Thời lượng chu kỳ tối thiểu",
+        "doc": "Các chu kỳ ngắn hơn thời gian này sẽ bị loại bỏ dưới dạng chu kỳ ma (chạy thử, mở cửa để thêm một chiếc tất)."
       },
       "running_dead_zone": {
-        "label": "Vùng chết khi chạy"
+        "label": "Vùng chết khi chạy",
+        "doc": "Sau khi một chu kỳ bắt đầu, sự sụt giảm điện năng trong cửa sổ này sẽ bị bỏ qua. Máy giặt đổ đầy nước lạnh (giảm gần 0 W trước khi làm nóng) - nếu không có lớp bảo vệ này thì giai đoạn đổ đầy trông giống như kết thúc chu kỳ. Điều này KHÔNG bỏ qua dữ liệu: toàn bộ dấu vết công suất được ghi lại từ T=0. Công cụ gợi ý đo kiểu khởi động thực tế của máy và tự động kích thước mô hình này."
       },
       "end_energy_threshold": {
-        "label": "Năng lượng kết thúc"
+        "label": "Năng lượng kết thúc",
+        "doc": "Trong quá trình đếm ngược độ trễ tắt, năng lượng tích lũy (watt x thời gian) được so sánh với ngưỡng này. Nếu vượt quá, bộ đếm ngược sẽ được đặt lại - giữ các bộ phận chống nhàu và đuôi sấy của máy rửa chén được gắn vào chu trình thay vì cắt ngắn chúng. Tăng nó lên nếu chu kỳ kết thúc quá sớm trong quá trình hạ nhiệt; giảm nó xuống nếu phát hiện chậm."
       },
       "end_repeat_count": {
-        "label": "Số lần lặp lại kết thúc"
+        "label": "Số lần lặp lại kết thúc",
+        "doc": "Số lần đọc dưới ngưỡng dừng liên tiếp cần thiết trước khi chu kỳ kết thúc. 1 phù hợp với hầu hết các phích cắm. Tăng lên 2-3 nếu phích cắm thông minh của bạn thỉnh thoảng báo cáo mẫu có giá trị 0 sai giữa chu kỳ và chu kỳ của bạn kết thúc sớm."
       },
       "sampling_interval": {
-        "label": "Khoảng thời gian lấy mẫu"
+        "label": "Khoảng thời gian lấy mẫu",
+        "doc": "Thời gian dự kiến ​​giữa các lần đọc cảm biến - được sử dụng để điều chỉnh kích thước cửa sổ làm mịn và bắt đầu gỡ lỗi một cách chính xác. Mọi cập nhật cảm biến đều được ghi lại bất kể giá trị này; nó chỉ hiệu chỉnh các tính toán tiếp theo. Công cụ gợi ý đo nhịp độ thực tế của cảm biến từ các chu kỳ trước đó và tự động thiết lập điều này."
       },
       "smoothing_window": {
-        "label": "Cửa sổ làm mượt"
+        "label": "Cửa sổ làm mượt",
+        "doc": "Tín hiệu nguồn thô được làm mịn đến mức nào. Thấp (2) phản hồi nhanh nhưng ồn ào; cao (5) làm mượt các xung đột biến nhưng tăng thêm độ trễ."
       },
       "abrupt_drop_watts": {
-        "label": "Giảm đột ngột"
+        "label": "Giảm đột ngột",
+        "doc": "Mức giảm điện năng lớn hơn mức này sẽ đánh dấu chu kỳ là Bị gián đoạn (hủy thủ công) thay vì kết thúc tự nhiên."
       },
       "abrupt_drop_ratio": {
-        "label": "Tỷ lệ giảm đột ngột"
+        "label": "Tỷ lệ giảm đột ngột",
+        "doc": "Sự sụt giảm lớn hơn phần công suất hiện tại này cũng được coi là đột ngột (0,6 = mức giảm 60%). Bổ sung ngưỡng watt trên các kích cỡ thiết bị."
       },
       "profile_match_threshold": {
-        "label": "Ngưỡng khớp"
+        "label": "Ngưỡng khớp",
+        "doc": "Cần có điểm tương đồng tối thiểu (0-1) ở cuối chu kỳ để chấp nhận dạng chương trình. Nâng cao nó để giảm việc nhận dạng sai; giảm nó xuống nếu các chương trình trên máy của bạn không khớp. Mặc định 0,4 là điểm khởi đầu thận trọng."
       },
       "profile_unmatch_threshold": {
-        "label": "Ngưỡng không khớp"
+        "label": "Ngưỡng không khớp",
+        "doc": "Nếu trận đấu trực tiếp giữa chu kỳ giảm xuống dưới mức điểm này, việc nhận dạng dự kiến ​​sẽ bị xóa. Giữ nó ở dưới Ngưỡng phù hợp một chút để sự tương đồng giảm xuống trong thời gian ngắn không khiến màn hình trở lại trạng thái chưa từng có."
       },
       "profile_match_interval": {
-        "label": "Khoảng thời gian khớp"
+        "label": "Khoảng thời gian khớp",
+        "doc": "Tần suất thử khớp hồ sơ trong một chu kỳ chạy. Mặc định 300 giây (5 phút) cân bằng tốc độ phát hiện và CPU."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Tỷ lệ thời lượng tối thiểu"
+        "label": "Tỷ lệ thời lượng tối thiểu",
+        "doc": "Độ dài chu kỳ tối thiểu so với hồ sơ. 0,9 có nghĩa là một chu kỳ phải có ít nhất 90% thời lượng hồ sơ để khớp."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Tỷ lệ thời lượng tối đa"
+        "label": "Tỷ lệ thời lượng tối đa",
+        "doc": "Độ dài chu kỳ tối đa so với hồ sơ. 1.3 có nghĩa là một chu kỳ phải dưới 130% thời lượng hồ sơ để khớp."
       },
       "profile_duration_tolerance": {
-        "label": "Độ chấp nhận thời lượng hồ sơ"
+        "label": "Độ chấp nhận thời lượng hồ sơ",
+        "doc": "Dải +/- xung quanh thời lượng trung bình của cấu hình được sử dụng trong quá trình khớp. 0,25 có nghĩa là cấu hình 60 phút phù hợp với chu kỳ 45-75 phút."
       },
       "duration_tolerance": {
-        "label": "Độ chấp nhận ước tính"
+        "label": "Độ chấp nhận ước tính",
+        "doc": "Dung sai cho các ước tính thời gian còn lại (phản hồi học tập, không khớp). Nếu thời lượng thực tế nằm trong khoảng +/-X% so với ước tính thì thời lượng đó được coi là phù hợp."
       },
       "auto_label_confidence": {
-        "label": "Độ tin cậy tự động dán nhãn"
+        "label": "Độ tin cậy tự động dán nhãn",
+        "doc": "Nếu điểm trận đấu ở cuối chu kỳ bằng hoặc cao hơn mức này thì chương trình sẽ tự động được gắn nhãn mà không cần bất kỳ lời nhắc xác nhận nào. Nâng nó lên để yêu cầu độ chắc chắn cao hơn trước khi tự động dán nhãn; hạ thấp nó để tự động hóa nhiều hơn. Hoạt động cùng với Sự tự tin trong học tập bên dưới nó."
       },
       "learning_confidence": {
-        "label": "Độ tin cậy học tập"
+        "label": "Độ tin cậy học tập",
+        "doc": "Nếu điểm số phù hợp nằm giữa mức này và Độ tin cậy gắn nhãn tự động, thông báo phản hồi sẽ yêu cầu bạn xác minh chương trình đã xác định. Dưới tỷ số này, trận đấu quá không chắc chắn để diễn ra. Phải được giữ ở mức độ tin cậy của nhãn tự động."
       },
       "suppress_feedback_notifications": {
-        "label": "Tắt thông báo phản hồi"
+        "label": "Tắt thông báo phản hồi",
+        "doc": "Không đưa ra thông báo liên tục khi chu trình đã hoàn thành cần được xem xét; phản hồi vẫn xuất hiện trong hàng đợi xem xét Chu kỳ."
       },
       "watchdog_interval": {
-        "label": "Khoảng thời gian giám sát"
+        "label": "Khoảng thời gian giám sát",
+        "doc": "Tần suất cơ quan giám sát nền kiểm tra các cảm biến bị dừng và thời gian chờ đã trôi qua. Mặc định 30 giây."
       },
       "no_update_active_timeout": {
-        "label": "Thời gian chờ không cập nhật"
+        "label": "Thời gian chờ không cập nhật",
+        "doc": "Nếu không có bản cập nhật nguồn nào xuất hiện trong thời gian dài khi đang chạy, giả sử phích cắm bị ngắt ngoại tuyến và buộc dừng để tránh chu kỳ zombie. Mặc định 600 giây cho phép độ trễ của đám mây hoặc lưới."
       },
       "progress_reset_delay": {
-        "label": "Độ trễ đặt lại tiến độ"
+        "label": "Độ trễ đặt lại tiến độ",
+        "doc": "Sau khi hoàn tất, hãy giữ tiến độ ở mức 100% trong thời gian dài để Hoàn thành hiển thị trên trang tổng quan trước khi đặt lại về trạng thái Không hoạt động."
       },
       "auto_maintenance": {
-        "label": "Tự động bảo trì (dọn dẹp đêm)"
+        "label": "Tự động bảo trì (dọn dẹp đêm)",
+        "doc": "Chạy công việc dọn phòng hàng đêm: xây dựng lại phong bì hồ sơ, tính toán lại tình trạng chu trình, cắt bớt dấu vết gỡ lỗi và giữ lại các chu kỳ gần đây nhất."
       },
       "expose_debug_entities": {
-        "label": "Hiển thị thực thể gỡ lỗi"
+        "label": "Hiển thị thực thể gỡ lỗi",
+        "doc": "Xuất bản các thực thể HA chẩn đoán bổ sung (độ tin cậy phù hợp, sự mơ hồ, nội bộ trạng thái). Tắt giữ cho danh sách thực thể sạch sẽ để sử dụng bình thường."
       },
       "save_debug_traces": {
-        "label": "Lưu dấu vết gỡ lỗi"
+        "label": "Lưu dấu vết gỡ lỗi",
+        "doc": "Lưu trữ toàn bộ dấu vết nguồn và dữ liệu gỡ lỗi phù hợp cho mỗi chu kỳ. Hữu ích cho việc khắc phục sự cố nhưng làm tăng kích thước lưu trữ."
       },
       "anti_wrinkle_enabled": {
-        "label": "Bật phát hiện chống nhăn"
+        "label": "Bật phát hiện chống nhăn",
+        "doc": "Nhận biết các xung giảm công suất thấp ngắn mà máy sấy phát ra sau giai đoạn nhiệt chính và giữ chúng gắn liền với chu trình đã hoàn thành thay vì đọc chúng thành chu kỳ mới."
       },
       "anti_wrinkle_max_power": {
-        "label": "Công suất chống nhăn tối đa"
+        "label": "Công suất chống nhăn tối đa",
+        "doc": "Xung trên công suất này được coi là một chu kỳ mới thực sự, không phải là một đợt giảm nếp nhăn. Đặt ngay phía trên công suất xung giảm."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Thời lượng tối đa"
+        "label": "Thời lượng tối đa",
+        "doc": "Các xung dài hơn mức này được coi là một chu kỳ thực sự chứ không phải là một đợt giảm nếp nhăn."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Ngưỡng công suất thoát"
+        "label": "Ngưỡng công suất thoát",
+        "doc": "Công suất phải giảm xuống dưới mức này giữa các xung để chế độ chống nhăn duy trì hoạt động."
       },
       "delay_start_detect_enabled": {
-        "label": "Bật phát hiện khởi động trễ"
+        "label": "Bật phát hiện khởi động trễ",
+        "doc": "Phát hiện khi thiết bị được bật nguồn và chờ (khởi động / chờ chậm) nhưng chưa bắt đầu chu kỳ của nó, do đó việc rút ở chế độ chờ không bị nhầm lẫn với chu kỳ đang chạy."
       },
       "delay_confirm_seconds": {
-        "label": "Giây xác nhận"
+        "label": "Giây xác nhận",
+        "doc": "Nguồn điện phải duy trì ở dải chờ trong thời gian dài trước khi thiết bị được coi là chờ khởi động thay vì chạy."
       },
       "delay_timeout_hours": {
-        "label": "Giờ hết thời gian"
+        "label": "Giờ hết thời gian",
+        "doc": "Dừng chờ ở chế độ khởi động chậm sau nhiều giờ và trở về trạng thái không hoạt động, do đó, máy vẫn được cấp nguồn nhưng không bao giờ khởi động sẽ không phải chờ mãi."
       },
       "external_end_trigger_enabled": {
-        "label": "Bật kích hoạt kết thúc bên ngoài"
+        "label": "Bật kích hoạt kết thúc bên ngoài",
+        "doc": "Để cảm biến nhị phân bên ngoài báo hiệu sự kết thúc của một chu kỳ, ngoài tính năng phát hiện dựa trên nguồn điện được tích hợp sẵn."
       },
       "external_end_trigger": {
-        "label": "Thực thể kích hoạt bên ngoài"
+        "label": "Thực thể kích hoạt bên ngoài",
+        "doc": "Cảm biến nhị phân có sự thay đổi trạng thái đánh dấu sự kết thúc của chu kỳ (ví dụ: một tiếp điểm \"đã hoàn thành\" của thiết bị hoặc tích hợp đồng hành)."
       },
       "external_end_trigger_inverted": {
-        "label": "Đảo kích hoạt bên ngoài (kích hoạt khi TẮT)"
+        "label": "Đảo kích hoạt bên ngoài (kích hoạt khi TẮT)",
+        "doc": "Coi cảm biến kích hoạt TẮT (chứ không phải BẬT) làm tín hiệu cuối chu kỳ."
       },
       "door_sensor_entity": {
-        "label": "Thực thể cảm biến cửa"
+        "label": "Thực thể cảm biến cửa",
+        "doc": "Cảm biến nhị phân cửa tùy chọn. Được sử dụng để phát hiện khi nào thiết bị đã được mở/dỡ đồ sau một chu kỳ."
       },
       "pause_cuts_power": {
-        "label": "Tạm dừng cũng cắt nguồn (qua công tắc)"
+        "label": "Tạm dừng cũng cắt nguồn (qua công tắc)",
+        "doc": "Khi một chu kỳ bị tạm dừng, hãy tắt Switch Entity bên dưới. Chỉ dành cho những thiết bị có phích cắm có thể được cắt một cách an toàn giữa chu kỳ."
       },
       "switch_entity": {
-        "label": "Thực thể công tắc"
+        "label": "Thực thể công tắc",
+        "doc": "Công tắc tùy chọn tắt khi tạm dừng và bật lại khi tiếp tục, được sử dụng cùng với \"Tạm dừng cũng cắt điện\"."
       },
       "notify_unload_delay_minutes": {
-        "label": "Độ trễ nhắc nhở dỡ tải"
+        "label": "Độ trễ nhắc nhở dỡ tải",
+        "doc": "Vài phút sau khi chu kỳ kết thúc trước khi gửi lời nhắc \"dỡ máy\" vẫn đang chờ. Đặt 0 để tắt lời nhắc."
       },
       "pump_stuck_duration": {
-        "label": "Thời gian máy bơm bị kẹt"
+        "label": "Thời gian máy bơm bị kẹt",
+        "doc": "Vài giây, máy bơm có thể chạy liên tục trước khi bị gắn cờ là có thể bị kẹt (kích hoạt sự kiện máy bơm bị kẹt)."
       },
       "notify_start_services": {
-        "label": "Dịch vụ bắt đầu"
+        "label": "Dịch vụ bắt đầu",
+        "doc": "thông báo.* dịch vụ được gọi khi một chu kỳ bắt đầu. Thêm một cái cho mỗi mục tiêu (điện thoại, bảng điều khiển, v.v.); để trống nếu không có thông báo bắt đầu."
       },
       "notify_finish_services": {
-        "label": "Dịch vụ kết thúc"
+        "label": "Dịch vụ kết thúc",
+        "doc": "thông báo.* dịch vụ được gọi khi một chu kỳ kết thúc. Thêm một cho mỗi mục tiêu; để trống nếu không có thông báo kết thúc."
       },
       "notify_live_services": {
-        "label": "Dịch vụ tiến trình trực tiếp"
+        "label": "Dịch vụ tiến trình trực tiếp",
+        "doc": "các dịch vụ notification.* được yêu cầu cập nhật tiến trình trực tiếp trong khi một chu trình đang chạy. Để trống để tắt thông báo tiến độ trực tiếp."
       },
       "notify_people": {
-        "label": "Người (cho Chỉ khi ở nhà)"
+        "label": "Người (cho Chỉ khi ở nhà)",
+        "doc": "người.* các thực thể được \"Chỉ thông báo khi ở nhà\" sử dụng để quyết định xem có ai ở nhà hay không."
       },
       "notify_only_when_home": {
-        "label": "Chỉ thông báo khi ở nhà"
+        "label": "Chỉ thông báo khi ở nhà",
+        "doc": "Chỉ gửi thông báo khi ít nhất một trong những người được liên kết (ở trên) ở nhà."
       },
       "notify_fire_events": {
-        "label": "Kích hoạt sự kiện HA cho thông báo"
+        "label": "Kích hoạt sự kiện HA cho thông báo",
+        "doc": "Đồng thời kích hoạt các sự kiện ha_washdata_* khi bắt đầu/kết thúc chu kỳ để bạn có thể xây dựng quy trình tự động hóa của riêng mình."
       },
       "notify_before_end_minutes": {
-        "label": "Cảnh báo trước khi kết thúc"
+        "label": "Cảnh báo trước khi kết thúc",
+        "doc": "Gửi thông báo Gần xong khi thời gian ước tính còn lại giảm xuống dưới mức này. 0 vô hiệu hóa nó."
       },
       "notify_live_interval_seconds": {
-        "label": "Khoảng cập nhật trực tiếp"
+        "label": "Khoảng cập nhật trực tiếp",
+        "doc": "Tần suất làm mới các thông báo về tiến trình trực tiếp trong khi chu trình đang chạy."
       },
       "notify_live_overrun_percent": {
-        "label": "% vượt quá trực tiếp trước khi cảnh báo"
+        "label": "% vượt quá trực tiếp trước khi cảnh báo",
+        "doc": "Nếu một chu kỳ vượt quá ước tính của nó nhiều hơn tỷ lệ phần trăm này, hãy gửi cảnh báo vượt mức."
       },
       "notify_live_chronometer": {
-        "label": "Sử dụng đồng hồ bấm giờ trực tiếp"
+        "label": "Sử dụng đồng hồ bấm giờ trực tiếp",
+        "doc": "Hiển thị đồng hồ đếm ngược cập nhật trực tiếp trong thông báo (trên các nền tảng hỗ trợ thông báo) thay vì ước tính tĩnh."
       },
       "notify_timeout_seconds": {
-        "label": "Tự động bỏ qua sau"
+        "label": "Tự động bỏ qua sau",
+        "doc": "Tự động loại bỏ thông báo sau nhiều giây này (trên các nền tảng hỗ trợ thông báo đó). 0 giữ nó cho đến khi bị loại bỏ theo cách thủ công."
       },
       "notify_title": {
-        "label": "Tiêu đề thông báo"
+        "label": "Tiêu đề thông báo",
+        "doc": "Tiêu đề thông báo. Biến mẫu: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Biểu tượng thông báo"
+        "label": "Biểu tượng thông báo",
+        "doc": "Biểu tượng mdi tùy chọn cho thông báo (ví dụ: mdi:máy giặt). Để trống cho mặc định nền tảng."
       },
       "notify_start_message": {
-        "label": "Tin nhắn bắt đầu"
+        "label": "Tin nhắn bắt đầu",
+        "doc": "Nội dung được gửi khi một chu kỳ bắt đầu. Biến mẫu: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Tin nhắn kết thúc"
+        "label": "Tin nhắn kết thúc",
+        "doc": "Nội dung được gửi khi một chu kỳ kết thúc. Biến mẫu: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "Tin nhắn trước khi hoàn thành"
+        "label": "Tin nhắn trước khi hoàn thành",
+        "doc": "Nội dung của cảnh báo trước khi kết thúc/sắp hoàn thành. Biến mẫu: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Tin nhắn nhắc nhở"
+        "label": "Tin nhắn nhắc nhở",
+        "doc": "Nội dung của lời nhắc dỡ hàng vẫn đang chờ. Trống sử dụng mặc định tích hợp. Biến mẫu: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Kênh Android (bắt đầu/trực tiếp)"
+        "label": "Kênh Android (bắt đầu/trực tiếp)",
+        "doc": "Tên kênh thông báo của Android cho tin nhắn bắt đầu/trực tiếp (kiểm soát âm thanh và mức độ ưu tiên của mỗi kênh trên ứng dụng dành cho thiết bị di động). Blank sử dụng mặc định ứng dụng đồng hành."
       },
       "notify_finish_channel": {
-        "label": "Kênh Android (kết thúc)"
+        "label": "Kênh Android (kết thúc)",
+        "doc": "Tên kênh thông báo Android cho tin nhắn kết thúc. Trống sử dụng lại kênh bắt đầu/trực tiếp."
       },
       "energy_price_entity": {
-        "label": "Thực thể giá năng lượng"
+        "label": "Thực thể giá năng lượng",
+        "doc": "Cảm biến với giá điện hiện tại trên mỗi kWh (ví dụ: biểu giá động). Được ưu tiên hơn giá tĩnh bên dưới. Mỗi chu kỳ sẽ đóng băng giá có hiệu lực khi nó kết thúc."
       },
       "energy_price_static": {
-        "label": "Giá năng lượng cố định (mỗi kWh)"
+        "label": "Giá năng lượng cố định (mỗi kWh)",
+        "doc": "Giá cố định trên mỗi kWh được sử dụng cho số liệu chi phí khi không có thực thể giá hiện tại nào được đặt ở trên."
       },
       "notify_cycle_timers": {
-        "label": "Bộ hẹn giờ chu kỳ"
+        "label": "Bộ hẹn giờ chu kỳ",
+        "doc": "Thông báo vào những phút cụ thể thành một chu kỳ (ví dụ: thêm chất làm mềm). Tin nhắn hỗ trợ {device}, {program}, {minutes}. Bật Tự động tạm dừng để tạm dừng tại thời điểm đó và nhận thông báo tương tác bằng nút Tiếp tục; tiếp tục thông qua bảng điều khiển, dịch vụ tạm dừng/tiếp tục hoặc hành động thông báo."
       },
       "enable_ml_models": {
-        "label": "Áp dụng mô hình thông minh trong chu kỳ"
+        "label": "Áp dụng mô hình thông minh trong chu kỳ",
+        "doc": "Trong khi một chu kỳ đang chạy, hãy để các mô hình tinh chỉnh các kết quả trực tiếp: ước tính thời gian còn lại và năng lượng/chi phí ổn định hơn, đồng thời bảo vệ chống dừng sớm khi phát hiện kết thúc (nó chỉ có thể trì hoãn một lần về đích, không bao giờ kết thúc sớm và bị giới hạn). Sử dụng các mô hình tinh chỉnh của bạn khi có sẵn, nếu không thì các mô hình tích hợp sẵn. Tắt = chỉ logic dựa trên nguồn điện cổ điển (vẫn đáng tin cậy)."
       },
       "ml_training_enabled": {
-        "label": "Học từ máy này"
+        "label": "Học từ máy này",
+        "doc": "Định kỳ nghiên cứu các chu trình đã xem xét của bạn qua đêm và tinh chỉnh các mô hình cho máy cụ thể này. Một thay đổi chỉ được giữ lại khi nó thực sự đạt điểm cao hơn trong các chu kỳ được tổ chức, vì vậy điều này chỉ có thể giúp ích hoặc giữ nguyên - không bao giờ thoái lui."
       },
       "ml_training_hour": {
-        "label": "Học vào giờ"
+        "label": "Học vào giờ",
+        "doc": "Giờ địa phương trong ngày (0-23) để thực hiện tinh chỉnh qua đêm. Chọn một giờ yên tĩnh như 2 (02:00)."
       },
       "ml_training_min_cycles": {
-        "label": "Cần bao nhiêu chu kỳ trước"
+        "label": "Cần bao nhiêu chu kỳ trước",
+        "doc": "Hãy đợi cho đến khi ít nhất số chu kỳ này được ghi lại trước khi tinh chỉnh để có đủ điều kiện để học hỏi."
       },
       "ml_training_interval_days": {
-        "label": "Kiểm tra tối đa mỗi"
+        "label": "Kiểm tra tối đa mỗi",
+        "doc": "Kiểm tra lại các cải tiến nhiều nhất một lần trong nhiều ngày."
       }
     }
   }

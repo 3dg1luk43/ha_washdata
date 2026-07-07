@@ -2136,6 +2136,8 @@ async def ws_get_cycle_power_data(
                     store.detect_cycle_artifacts, cycle["profile_name"], samples
                 )
             meta["artifacts"] = artifacts or []
+            # HA restart gaps recorded during this cycle (for panel shading).
+            meta["restart_gaps"] = cycle.get("restart_gaps") or []
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error getting cycle power data %s: %s", cycle_id, exc)
 
@@ -2664,7 +2666,7 @@ async def ws_get_power_history(
         return
 
     with_raw = bool(msg.get("with_raw"))
-    out: dict[str, Any] = {"cycle_active": False, "cycle_elapsed_s": 0.0, "live": [], "raw": []}
+    out: dict[str, Any] = {"cycle_active": False, "cycle_elapsed_s": 0.0, "live": [], "raw": [], "restart_gaps": []}
     try:
         detector = getattr(manager, "detector", None)
         diag = getattr(manager, "diag_buffer", None)
@@ -2676,6 +2678,8 @@ async def ws_get_power_history(
             out["cycle_active"] = True
             out["live"] = _downsample(live)
             out["cycle_elapsed_s"] = live[-1][0] if live else 0.0
+            out["cycle_start_iso"] = start_dt.isoformat()
+            out["restart_gaps"] = list(getattr(manager, "_restart_gaps", []))
             if with_raw:
                 ent = getattr(manager, "power_sensor_entity_id", None)
                 if ent:

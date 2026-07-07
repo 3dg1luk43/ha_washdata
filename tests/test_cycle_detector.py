@@ -13,6 +13,7 @@ from custom_components.ha_washdata.const import (
     STATE_INTERRUPTED,
     STATE_FORCE_STOPPED,
     DEVICE_TYPE_DISHWASHER,
+    DEVICE_TYPE_WASHING_MACHINE,
 )
 
 # Helper to create datetime sequence
@@ -534,3 +535,119 @@ def test_dishwasher_no_spike_uses_full_off_delay(mock_callbacks):
     assert not mock_callbacks["on_cycle_end"].called, (
         "Cycle must not end after only 1800 s of silence when no end spike occurred"
     )
+
+
+# ── Smart Termination prefix-landscape guard (#288) ──────────────────────────
+#
+# When is_prefix_ambiguous=True (a longer look-alike profile exists in the
+# candidate pool) Smart Termination must be blocked so the power-based fallback
+# timeout decides.  When False, Smart Termination fires as normal.
+#
+# Config: min_off_gap=480 gives smart_debounce=240 s and fallback=480 s, so
+# the 450 s test window sits between the two: Smart Termination would fire
+# without the guard; the fallback does not fire either, leaving the cycle
+# definitively in STATE_ENDING when the guard is active.
+
+def _make_washer_detector(mock_callbacks, min_off_gap=480):
+    config = CycleDetectorConfig(
+        min_power=5.0,
+        off_delay=60,
+        interrupted_min_seconds=150,
+        completion_min_seconds=600,
+        start_duration_threshold=0.0,
+        min_off_gap=min_off_gap,
+        device_type=DEVICE_TYPE_WASHING_MACHINE,
+    )
+    return CycleDetector(
+        config=config,
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+    )
+
+
+def _run_to_end_of_quick(detector, expected_s=2760):
+    """Drive the detector at 100 W for expected_s seconds using 30 s ticks."""
+    detector.process_reading(100.0, dt(0))
+    detector.process_reading(100.0, dt(10))
+    assert detector.state == STATE_RUNNING
+    for t in range(40, expected_s + 1, 30):
+        detector.process_reading(100.0, dt(t))
+
+
+def test_smart_termination_blocked_by_prefix_ambiguous(mock_callbacks):
+    """Reproduces the #288 split-cycle bug class.
+
+    A mid-cycle soak dip lasting 450 s coincides with the short profile's
+    expected end.  Without the prefix-landscape guard Smart Termination would
+    fire at smart_debounce (240 s); with is_prefix_ambiguous=True it must not.
+    """
+    detector = _make_washer_detector(mock_callbacks)
+    _run_to_end_of_quick(detector)
+
+    # Match: Quick 40°C (2760 s) wins, but Normal 40°C (5280 s ≈ 1.91×) is in
+    # the pool with a good shape score → is_prefix_ambiguous=True.
+    detector.update_match(("Quick 40C", 0.7, 2760.0, None, False, False, True))
+    assert detector._match_prefix_ambiguous is True
+
+    # Soak dip: 450 s of low power (> smart_debounce 240 s, < fallback 480 s).
+    for t in range(2790, 2790 + 450, 30):
+        detector.process_reading(0.0, dt(t))
+
+    # Smart Termination must be blocked; cycle must still be open.
+    assert detector.state in (STATE_ENDING, STATE_PAUSED)
+    mock_callbacks["on_cycle_end"].assert_not_called()
+
+
+def test_smart_termination_fires_without_prefix_ambiguous(mock_callbacks):
+    """Baseline: without a long look-alike Smart Termination fires normally."""
+    detector = _make_washer_detector(mock_callbacks)
+    _run_to_end_of_quick(detector)
+
+    # Same match but is_prefix_ambiguous=False.
+    detector.update_match(("Quick 40C", 0.7, 2760.0, None, False, False, False))
+    assert detector._match_prefix_ambiguous is False
+
+    # Same 450 s soak dip > smart_debounce (240 s).
+    for t in range(2790, 2790 + 450, 30):
+        detector.process_reading(0.0, dt(t))
+
+    # Smart Termination fires.
+    assert detector.state == STATE_FINISHED
+    mock_callbacks["on_cycle_end"].assert_called_once()
+    assert mock_callbacks["on_cycle_end"].call_args[0][0]["status"] == "completed"
+
+
+def test_prefix_ambiguous_flag_stored_and_cleared(mock_callbacks):
+    """_match_prefix_ambiguous is stored from the 7th tuple element and cleared
+    on a confident mismatch, matching the behaviour of _match_ambiguous."""
+    detector = _make_washer_detector(mock_callbacks)
+    detector.process_reading(100.0, dt(0))
+    detector.process_reading(100.0, dt(10))
+
+    # Set via 7-element tuple.
+    detector.update_match(("Quick 40C", 0.7, 2760.0, None, False, False, True))
+    assert detector._match_prefix_ambiguous is True
+
+    # Cleared on confident mismatch (5th element=True).
+    detector.update_match(("Quick 40C", 0.7, 2760.0, None, True, False, False))
+    assert detector._match_prefix_ambiguous is False
+
+    # Backward-compatible: 6-element tuple leaves it False.
+    detector.update_match(("Quick 40C", 0.7, 2760.0, None, False, False))
+    assert detector._match_prefix_ambiguous is False
+
+
+def test_prefix_ambiguous_survives_snapshot_roundtrip(mock_callbacks):
+    """_match_prefix_ambiguous is persisted in the state snapshot and restored."""
+    detector = _make_washer_detector(mock_callbacks)
+    detector.process_reading(100.0, dt(0))
+    detector.process_reading(100.0, dt(10))
+    detector.update_match(("Quick 40C", 0.7, 2760.0, None, False, False, True))
+
+    snap = detector.get_state_snapshot()
+    assert snap["match_prefix_ambiguous"] is True
+
+    # New detector restores the flag.
+    detector2 = _make_washer_detector(mock_callbacks)
+    detector2.restore_state_snapshot(snap)
+    assert detector2._match_prefix_ambiguous is True

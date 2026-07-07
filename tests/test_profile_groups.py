@@ -159,3 +159,143 @@ def test_suggest_skips_already_grouped(store):
     store._data["profile_groups"] = {"Eco": {"members": ["E1", "E2"]}}
     # Both already in a group -> nothing new to suggest.
     assert store.suggest_profile_groups() == []
+
+
+# ── prefix-landscape guard: is_prefix_ambiguous on MatchResult ───────────────
+#
+# async_match_profile sets MatchResult.is_prefix_ambiguous=True when any
+# non-winning candidate has a duration >= 1.5x the winner's AND a shape_score
+# >= 0.40 (SMART_TERM_LANDSCAPE_RATIO / SMART_TERM_LANDSCAPE_MIN_SHAPE).
+# The flag is consumed by cycle_detector to block Smart Termination.
+
+
+def _cand(name, dur, shape, final=None):
+    """Synthetic candidate dict as produced by compute_matches_worker after Stage 4."""
+    return {
+        "name": name,
+        "profile_duration": float(dur),
+        "shape_score": float(shape),
+        "score": float(final if final is not None else shape * 0.8),
+        "profile_duration": float(dur),
+    }
+
+
+# --- pure logic helpers (inline mirror of the production formula) ---
+
+from custom_components.ha_washdata.const import (
+    SMART_TERM_LANDSCAPE_RATIO,
+    SMART_TERM_LANDSCAPE_MIN_SHAPE,
+)
+
+
+def _is_prefix_ambiguous(candidates, best_dur):
+    return best_dur > 0 and any(
+        float(c.get("profile_duration") or 0) > best_dur * SMART_TERM_LANDSCAPE_RATIO
+        and float(c.get("shape_score", c.get("score", 0))) >= SMART_TERM_LANDSCAPE_MIN_SHAPE
+        for c in candidates[1:]
+    )
+
+
+def test_prefix_ambiguous_true_when_longer_look_alike_exists():
+    """#288 scenario: Normal (88 min, ratio 1.91) with shape_score 0.70 flags True."""
+    candidates = [
+        _cand("Quick", 2760, 0.70, 0.61),
+        _cand("Normal", 5280, 0.70, 0.44),  # 5280/2760 = 1.91 >= 1.5, shape 0.70 >= 0.40
+    ]
+    assert _is_prefix_ambiguous(candidates, 2760.0) is True
+
+
+def test_prefix_ambiguous_false_when_runner_up_shape_too_low():
+    """A longer profile with poor shape (genuinely different program) is not a prefix risk."""
+    candidates = [
+        _cand("Quick", 2760, 0.70, 0.61),
+        _cand("Wool", 5400, 0.15, 0.12),   # different shape -> shape_score below threshold
+    ]
+    assert _is_prefix_ambiguous(candidates, 2760.0) is False
+
+
+def test_prefix_ambiguous_false_when_runner_up_not_much_longer():
+    """A profile only 30% longer (ratio 1.30 < LANDSCAPE_RATIO 1.50) does not trigger."""
+    candidates = [
+        _cand("Quick", 2760, 0.70, 0.61),
+        _cand("Eco", 3590, 0.68, 0.55),    # 3590/2760 = 1.30 < 1.5
+    ]
+    assert _is_prefix_ambiguous(candidates, 2760.0) is False
+
+
+def test_prefix_ambiguous_false_when_only_one_candidate():
+    """Single-candidate result (no runner-up) must not flag prefix ambiguity."""
+    candidates = [_cand("Quick", 2760, 0.70, 0.61)]
+    assert _is_prefix_ambiguous(candidates, 2760.0) is False
+
+
+def test_prefix_ambiguous_true_exact_ratio_boundary():
+    """A runner-up at exactly 1.5x the winner's duration qualifies (inclusive boundary)."""
+    candidates = [
+        _cand("Short", 2000, 0.70, 0.60),
+        _cand("Long", 3001, 0.50, 0.40),   # 3001/2000 = 1.5005 > 1.5 ✓, shape 0.50 >= 0.40 ✓
+    ]
+    assert _is_prefix_ambiguous(candidates, 2000.0) is True
+
+
+async def test_async_match_profile_sets_is_prefix_ambiguous():
+    """End-to-end: async_match_profile returns is_prefix_ambiguous=True when the
+    executor-returned candidates include a qualifying longer runner-up."""
+    from unittest.mock import AsyncMock
+    from custom_components.ha_washdata.profile_store import ProfileStore
+
+    mock_candidates = [
+        _cand("Quick", 2760, 0.70, 0.61),
+        _cand("Normal", 5280, 0.70, 0.44),
+    ]
+
+    with patch("custom_components.ha_washdata.profile_store.WashDataStore"):
+        ps = ProfileStore(MagicMock(), "entry")
+        ps.async_save = AsyncMock()
+        ps._data.update({
+            "profiles": {
+                "Quick": {"avg_duration": 2760.0},
+                "Normal": {"avg_duration": 5280.0},
+            },
+            "past_cycles": [],
+            "envelopes": {},
+            "profile_groups": {},
+        })
+        ps.hass.async_add_executor_job = AsyncMock(return_value=mock_candidates)
+
+        # 300 float-offset samples (2s apart) → enough points for resampling.
+        power_data = [(float(i * 2), 80.0) for i in range(300)]
+        result = await ps.async_match_profile(power_data, 2760.0)
+
+    assert result.is_prefix_ambiguous is True
+
+
+async def test_async_match_profile_no_prefix_ambiguous_when_only_short_runner_up():
+    """async_match_profile returns is_prefix_ambiguous=False when the runner-up
+    is not long enough, even with a good shape score."""
+    from unittest.mock import AsyncMock
+    from custom_components.ha_washdata.profile_store import ProfileStore
+
+    mock_candidates = [
+        _cand("Quick", 2760, 0.70, 0.61),
+        _cand("Eco", 3500, 0.68, 0.55),   # ratio 1.27 < 1.5 → not a prefix risk
+    ]
+
+    with patch("custom_components.ha_washdata.profile_store.WashDataStore"):
+        ps = ProfileStore(MagicMock(), "entry")
+        ps.async_save = AsyncMock()
+        ps._data.update({
+            "profiles": {
+                "Quick": {"avg_duration": 2760.0},
+                "Eco":   {"avg_duration": 3500.0},
+            },
+            "past_cycles": [],
+            "envelopes": {},
+            "profile_groups": {},
+        })
+        ps.hass.async_add_executor_job = AsyncMock(return_value=mock_candidates)
+
+        power_data = [(float(i * 2), 80.0) for i in range(300)]
+        result = await ps.async_match_profile(power_data, 2760.0)
+
+    assert result.is_prefix_ambiguous is False

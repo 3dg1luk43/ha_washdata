@@ -80,7 +80,8 @@
         "air_fryer": "Gaisa cepeškrāsns",
         "bread_maker": "Maizes gatavotājs",
         "pump": "Sūknis / Drenāžas sūknis",
-        "other": "Cits (uzlabots)"
+        "generic": "Cits (papildu)",
+        "other": "Sliekšņa ierīce"
       }
     }
   },
@@ -620,6 +621,7 @@
       "needs_review": "Nepieciešama pārskatīšana",
       "overrun": "Skrēja ilgāk nekā parasti",
       "artifact_tip": "Konstatētas {n} anomālijas (piemēram, durvis atvērtas cikla vidū) — atveriet, lai tās skatītu diagrammā",
+      "restart_gap_tip": "{n} HA restartēšanas atstarpe: jaudas trasē ir caurums",
       "poor_fit_tip": "Nekonsekventa spēļu vēsture — apsveriet iespēju atjaunot šo profilu",
       "fair_fit_tip": "Mērena atbilstības konsekvence — dažiem šim profilam piešķirtajiem cikliem ir zemāki ticamības rādītāji. Iezīmējiet vairāk ciklu vai atkārtoti ierakstiet profilu, lai uzlabotu precizitāti.",
       "fair_fit": "godīga atbilstība",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Iepriekš redzamajā diagrammā pārklājiet citas profila aploksnes, lai redzētu, kura no tām vislabāk atbilst šim ciklam.",
       "artifact_header": "Šajā ciklā konstatētas {n} anomālijas",
       "artifact_footer": "Izcelts augstāk esošajā grafikā. Tie ir pārejoši artefakti (piemēram, durvis atvērtas cikla vidū), ne vienmēr problēmas.",
+      "restart_gap_header": "{n} HA restartēšanas atstarpe šī cikla laikā",
+      "restart_gap_item": "{dur} atstarpe",
+      "restart_gap_footer": "Izcelts diagrammā. Jaudas dati trūkst šiem intervāliem; atbilstības noteikšana izmantoja tikai faktiskos rādījumus.",
       "profile_poor_health_detail": "Šim profilam piešķirtajiem cikliem ir nekonsekventas formas vai zema ticamība. Apsveriet iespēju atjaunot aploksni vai pārskatīt marķētos ciklus.",
       "trend_duration_longer": "Ilgums kļūst arvien garāks ({pct}%/ciklā) — nesenā vidējā {avg}",
       "trend_duration_shorter": "Ilguma tendence ir īsāka ({pct}%/cikls) — nesenā vidējā {avg}",
@@ -880,41 +885,9 @@
       "suggestions_dismissed": "Ieteikumi noraidīti"
     },
     "section": {
-      "overview": {
-        "label": "Pārskats",
-        "intro": "Jūsu ierīces statusa un jaunākās darbības pārskats."
-      },
-      "cycles": {
-        "label": "Cikli",
-        "intro": "Konstatēto mazgāšanas ciklu vēsture."
-      },
-      "profiles": {
-        "label": "Profili",
-        "intro": "Iemācītie jaudas profili dažādām programmām."
-      },
-      "settings": {
-        "label": "Iestatījumi",
-        "intro": "Konfigurēt noteikšanas un atbilstības iestatījumus."
-      },
       "ml_training": {
         "label": "ML apmācība",
         "intro": "Mašīnmācīšanās pārapmācības grafiks un datu iestatījumi ierīcē."
-      },
-      "diagnostics": {
-        "label": "Diagnostika",
-        "intro": "Diagnostikas informācija un sensoru rādījumi."
-      },
-      "logs": {
-        "label": "Žurnāli",
-        "intro": "Žurnāla ieraksti problēmu novēršanai."
-      },
-      "help": {
-        "label": "Palīdzība",
-        "intro": "Palīdzība un dokumentācija."
-      },
-      "about": {
-        "label": "Par",
-        "intro": "Par šo integrāciju."
       },
       "basic": {
         "label": "Pamata",
@@ -950,74 +923,14 @@
       }
     },
     "setting_group": {
-      "detection": {
-        "label": "Noteikšana"
-      },
-      "thresholds": {
-        "label": "Sliekšņi"
-      },
       "timing": {
         "label": "Laika grafiks"
       },
       "energy": {
         "label": "Enerģija"
       },
-      "matching": {
-        "label": "Profila saskaņošana"
-      },
-      "dtw": {
-        "label": "DTW precizēšana"
-      },
-      "learning": {
-        "label": "Mācīšanās"
-      },
-      "feedback": {
-        "label": "Atgriezeniskā saite"
-      },
-      "display": {
-        "label": "Displejs"
-      },
-      "advanced": {
-        "label": "Papildu"
-      },
-      "notifications": {
-        "label": "Paziņojumi"
-      },
-      "ml": {
-        "label": "Mašīnmācīšanās"
-      },
-      "ml_training": {
-        "label": "ML apmācība"
-      },
-      "ml_models": {
-        "label": "ML modeļi"
-      },
-      "cycle_detection": {
-        "label": "Cikla noteikšana"
-      },
-      "profile_matching": {
-        "label": "Profila saskaņošana"
-      },
-      "power": {
-        "label": "Jauda"
-      },
-      "duration": {
-        "label": "Ilgums"
-      },
-      "cost": {
-        "label": "Izmaksas"
-      },
       "debug": {
         "label": "Atkļūdošana"
-      },
-      "device": {
-        "label": "Ierīce"
-      },
-      "phases": {
-        "label": "Fāzes"
-      },
-      "groups": {
-        "label": "Profilu grupas"
       },
       "thresholds_gap": {
         "label": "Sliekšņi un atstarpe"
@@ -1082,436 +995,312 @@
     },
     "setting": {
       "min_power": {
-        "label": "Minimālā jauda"
-      },
-      "start_power": {
-        "label": "Starta jauda"
-      },
-      "stop_power": {
-        "label": "Apstāšanās jauda"
-      },
-      "min_duration": {
-        "label": "Minimālais ilgums"
-      },
-      "max_duration": {
-        "label": "Maksimālais ilgums"
-      },
-      "start_delay": {
-        "label": "Starta aizkave"
-      },
-      "stop_delay": {
-        "label": "Apstāšanās aizkave"
+        "label": "Minimālā jauda",
+        "doc": "Absolūtā minimālā jauda tiek uzskatīta par aktīvu. Rādījumi, kas ir zemāki par šo, tiek uzskatīti par 0 W (gaidīšanas režīmā), filtrējot viedo spraudņu un gaidstāves gaismas diožu fantoma slodzi."
       },
       "min_off_gap": {
-        "label": "Min. izslēgšanas atstarpe"
-      },
-      "energy_gate": {
-        "label": "Enerģijas vārti"
-      },
-      "match_min_score": {
-        "label": "Minimālais atbilstības rādītājs"
-      },
-      "match_ambiguity_margin": {
-        "label": "Neskaidrības robeža"
-      },
-      "match_min_duration_ratio": {
-        "label": "Min ilguma attiecība"
-      },
-      "match_max_duration_ratio": {
-        "label": "Max ilguma attiecība"
-      },
-      "dtw_mode": {
-        "label": "DTW režīms"
-      },
-      "dtw_bandwidth": {
-        "label": "DTW joslas platums"
-      },
-      "dtw_blend": {
-        "label": "DTW sajaukums"
-      },
-      "dtw_refine_top_n": {
-        "label": "DTW precizē Top N"
-      },
-      "dtw_ensemble_w": {
-        "label": "DTW ansambļa svars"
-      },
-      "corr_weight": {
-        "label": "Korelācijas svars"
-      },
-      "duration_weight": {
-        "label": "Ilguma svars"
-      },
-      "energy_weight": {
-        "label": "Enerģijas svars"
-      },
-      "duration_scale": {
-        "label": "Ilguma skala"
-      },
-      "energy_scale": {
-        "label": "Enerģijas skala"
-      },
-      "learning_rate": {
-        "label": "Mācīšanās ātrums"
-      },
-      "confidence_threshold": {
-        "label": "Pārliecības slieksnis"
-      },
-      "auto_label_threshold": {
-        "label": "Automātiskās etiķetes slieksnis"
-      },
-      "feedback_threshold": {
-        "label": "Atgriezeniskās saites slieksnis"
-      },
-      "min_cycles_to_match": {
-        "label": "Min cikli saskaņošanai"
-      },
-      "profile_min_cycles": {
-        "label": "Profila min cikli"
-      },
-      "cost_per_kwh": {
-        "label": "Izmaksas par kWh"
-      },
-      "currency": {
-        "label": "Valūta"
+        "label": "Min. izslēgšanas atstarpe",
+        "doc": "Ja iekārta izslēdzas mazāk par šo laiku, ieslēgšanas/izslēgšanas/ieslēgšanas secība tiek uzskatīta par vienu nepārtrauktu ciklu. Novērš mērcēšanas programmu (mašīna izslēdzas uz vairākām minūtēm mazgāšanas laikā) sadalīšanu divos atsevišķos ciklos. Ja vēlaties, lai tās tiktu uzskaitītas kā atsevišķi cikli, iestatiet to īsāku par atstarpi starp slodzēm, kas tiek veiktas vienā virzienā. Ierīces tipa noklusējuma iestatījumi aizsargā katras ierīces tipisko pauzi cikla laikā."
       },
       "expose_debug_entities": {
-        "label": "Atklāt atkļūdošanas entītijas"
+        "label": "Atklāt atkļūdošanas entītijas",
+        "doc": "Publicējiet papildu diagnostikas HA entītijas (atbilstības ticamība, neskaidrība, stāvokļa iekšējās vērtības). Izslēgts saglabā entītiju sarakstu tīru normālai lietošanai."
       },
       "enable_ml_models": {
-        "label": "Lietot viedos modeļus cikla laikā"
+        "label": "Lietot viedos modeļus cikla laikā",
+        "doc": "Cikls darbojas, ļaujiet modeļiem uzlabot reāllaika rezultātus: stabilāku atlikušā laika un enerģijas/izmaksu aprēķinu, kā arī pretagrīnas apstāšanās aizsargu, kad tiek konstatēts cikls (tas var tikai aizkavēt finišu, nekad nevar beigties ātrāk un ir ierobežots). Izmanto jūsu precizētos modeļus, kad tie ir pieejami, pretējā gadījumā iebūvētos. Izslēgts = tikai klasiskā uz jaudu balstītā loģika (joprojām uzticama)."
       },
       "ml_training_enabled": {
-        "label": "Mācīties no šīs mašīnas"
-      },
-      "ml_training_schedule": {
-        "label": "ML apmācības grafiks"
+        "label": "Mācīties no šīs mašīnas",
+        "doc": "Periodiski izpētiet savus pārskatītos ciklus nakti un precizējiet modeļus šai konkrētajai iekārtai. Izmaiņas tiek saglabātas tikai tad, ja tās patiešām iegūst labākus rezultātus ilgstošajos ciklos, tāpēc tas var tikai palīdzēt vai palikt nemainīgs — nekad neatkāpties."
       },
       "ml_training_min_cycles": {
-        "label": "Nepieciešami cikli vispirms"
-      },
-      "ml_training_min_new_cycles": {
-        "label": "Min jaunie cikli apmācībai"
-      },
-      "ml_match_commit_threshold": {
-        "label": "ML atbilstības apstiprināšanas slieksnis"
-      },
-      "ml_end_guard_threshold": {
-        "label": "ML beigu aizsardzības slieksnis"
-      },
-      "ml_quality_threshold": {
-        "label": "ML kvalitātes slieksnis"
-      },
-      "ml_progress_blend_weight": {
-        "label": "ML progresa sajaukuma svars"
+        "label": "Nepieciešami cikli vispirms",
+        "doc": "Pirms precizēšanas pagaidiet, līdz ir ierakstīts vismaz tik daudz ciklu, lai būtu pietiekami daudz, no kā mācīties."
       },
       "device_type": {
-        "label": "Ierīces veids"
+        "label": "Ierīces veids",
+        "doc": "Ierīču klase. Iestata saprātīgus noteikšanas noklusējuma iestatījumus (sliekšņus, izslēgšanas aizkavi, beigu apstrādi), kas pielāgoti šim ierīces veidam; mainiet to tikai tad, ja ierīce sākotnēji tika iestatīta kā nepareiza tipa."
       },
       "power_sensor": {
-        "label": "Jaudas sensors"
+        "label": "Jaudas sensors",
+        "doc": "Sensora entītija, kas ziņo par šīs ierīces jaudu vatos (piem., sensor.washer_power). Visa cikla noteikšana ir balstīta uz šo signālu."
       },
       "name": {
-        "label": "Ierīces nosaukums"
-      },
-      "anti_crease_power": {
-        "label": "Pretburzīšanās jauda"
-      },
-      "anti_crease_min_duration": {
-        "label": "Pretburzīšanās min ilgums"
-      },
-      "anti_crease_max_cycles": {
-        "label": "Pretburzīšanās max cikli"
-      },
-      "dishwasher_end_spike_min_progress": {
-        "label": "Beigu izlēciena min progress"
-      },
-      "dishwasher_end_spike_wait_seconds": {
-        "label": "Beigu izlēciena gaidīšanas laiks"
-      },
-      "pump_out_power": {
-        "label": "Sūkņa jauda"
-      },
-      "dryer_cool_power": {
-        "label": "Žāvētāja dzesēšanas jauda"
-      },
-      "dryer_cool_max_duration": {
-        "label": "Žāvētāja dzesēšanas max ilgums"
-      },
-      "end_defer_confidence": {
-        "label": "Beigu atlikšanas pārliecība"
-      },
-      "end_guard_max_defer": {
-        "label": "Beigu aizsardzības max atlikšana"
-      },
-      "terminal_drop_min_peak_ratio": {
-        "label": "Termināla krituma min maksimuma attiecība"
-      },
-      "terminal_drop_earliness_ratio": {
-        "label": "Termināla krituma agruma attiecība"
-      },
-      "terminal_drop_peak_familiar_tol": {
-        "label": "Termināla krituma maksimuma tolerance"
-      },
-      "terminal_drop_off_delay": {
-        "label": "Termināla krituma izslēgšanas aizkave"
-      },
-      "terminal_drop_min_clean_cycles": {
-        "label": "Termināla krituma min tīrie cikli"
-      },
-      "match_ranking_history_max": {
-        "label": "Atbilstības ranžēšanas vēstures max"
-      },
-      "max_cycles_stored": {
-        "label": "Max saglabātie cikli"
-      },
-      "max_power_trace_points": {
-        "label": "Max jaudas izsekošanas punkti"
-      },
-      "envelope_conformance_threshold": {
-        "label": "Aploksnes atbilstības slieksnis"
-      },
-      "suggest_coverage_min_unmatched": {
-        "label": "Pārklājuma robu min nesakritušie"
-      },
-      "suggest_coverage_min_rate": {
-        "label": "Pārklājuma robu min ātrums"
-      },
-      "suggest_coverage_window": {
-        "label": "Pārklājuma robu logs"
-      },
-      "suggest_coverage_low_conf": {
-        "label": "Pārklājuma robu zemā pārliecība"
-      },
-      "group_min_cohesion": {
-        "label": "Grupas min kohēzija"
-      },
-      "phase_match_tolerance": {
-        "label": "Fāzes atbilstības tolerance"
-      },
-      "recording_max_duration": {
-        "label": "Ierakstīšanas max ilgums"
-      },
-      "recording_min_duration": {
-        "label": "Ierakstīšanas min ilgums"
-      },
-      "resampling_points": {
-        "label": "Atkārtotas izlases punkti"
+        "label": "Ierīces nosaukums",
+        "doc": "Parādāmais nosaukums, kas parādīts HA integrāciju sarakstā un ierīču reģistrā."
       },
       "smoothing_window": {
-        "label": "Izlīdzināšanas logs"
-      },
-      "trend_min_cycles": {
-        "label": "Tendences min cikli"
-      },
-      "trend_recent_window": {
-        "label": "Tendences jaunākais logs"
-      },
-      "trend_slope_threshold": {
-        "label": "Tendences slīpuma slieksnis"
-      },
-      "advisory_min_cycles": {
-        "label": "Ieteikumu min cikli"
+        "label": "Izlīdzināšanas logs",
+        "doc": "Cik daudz neapstrādāts jaudas signāls ir izlīdzināts. Zems (2) ir atsaucīgs, bet trokšņains; augsts (5) izlīdzina tapas, bet palielina nobīdi."
       },
       "off_delay": {
-        "label": "Izslēgšanas aizkave"
+        "label": "Izslēgšanas aizkave",
+        "doc": "Laiks gaidīt, kad jauda samazinās, pirms tiek paziņots, ka cikls ir pabeigts. Ja šajā logā tiek atsākta barošana, cikls turpinās nemanāmi – tas pārslēdz pauzes starp mazgāšanas posmiem. Trauku mazgājamām mašīnām ir garas žāvēšanas fāzes (izslēdziet strāvu uz 20–60 minūtēm), tāpēc izslēgšanas aizkavei ir jābūt lielākai par to, lai visa mazgāšana un žāvēšana būtu viens cikls."
       },
       "linked_device": {
-        "label": "Grupēt zem ierīces"
+        "label": "Grupēt zem ierīces",
+        "doc": "Pēc izvēles ievietojiet šo WashData ierīci zem citas ierīces (piemēram, viedspraudņa) HA ierīču reģistrā, kas tiek parādīta kā “Savienots, izmantojot...”."
       },
       "start_threshold_w": {
-        "label": "Starta slieksnis"
+        "label": "Starta slieksnis",
+        "doc": "Jaudai jāpalielinās virs šī līmeņa, lai apstiprinātu, ka cikls ir sācies. Pārāk zema tā iestatīšana izraisa viltus palaišanu no gaidstāves strāvas; pārāk augstas un lēnas palaišanas programmas (aukstā uzpilde) tiek izlaistas. Ieteikuma dzinējs to nosaka tieši virs mašīnas novērotās zemākās aktīvās jaudas."
       },
       "stop_threshold_w": {
-        "label": "Apstāšanās slieksnis"
+        "label": "Apstāšanās slieksnis",
+        "doc": "Pirms izslēgšanas aizkaves atpakaļskaitīšanas sākuma jaudai ir jāsamazinās zem šī līmeņa. Iestatiet to zem sākuma sliekšņa — atstarpe starp tām ir histerēzes josla, kas novērš mirgošanu. Ja iestatīts pārāk augsts, mazjaudas fāzes (skalošanas aizturēšana, pretburzīšanās) kļūdaini aktivizē beigu secību."
       },
       "start_duration_threshold": {
-        "label": "Starta ilgums"
+        "label": "Starta ilgums",
+        "doc": "Jaudai ir jāpaliek virs sākuma sliekšņa tik ilgi, lai apstiprinātu īstu palaišanu, neļaujot sekundes ieslēgšanas/izslēgšanas slēdžiem sākt ciklu."
       },
       "start_energy_threshold": {
-        "label": "Starta enerģija"
+        "label": "Starta enerģija",
+        "doc": "Enerģija (jauda x laiks) ierīcei ir jāpatērē pirms DARBAS. Īsam lieljaudas smailei ir ļoti zema enerģija, un tā tiek ignorēta, novēršot viltus iedarbināšanu."
       },
       "completion_min_seconds": {
-        "label": "Min. cikla ilgums"
+        "label": "Min. cikla ilgums",
+        "doc": "Cikli, kas ir īsāki par šo, tiek izmesti kā spoku cikli (pārbaudes darbi, atverot durvis, lai pievienotu zeķi)."
       },
       "running_dead_zone": {
-        "label": "Darbības mirušā zona"
+        "label": "Darbības mirušā zona",
+        "doc": "Pēc cikla sākuma strāvas kritumi šajā logā tiek ignorēti. Veļas mazgājamās mašīnas piepilda ar aukstu ūdeni (pirms karsēšanas samazinās gandrīz 0 W) – bez šīs aizsardzības uzpildes fāze izskatās kā cikla beigas. Dati netiek izlaisti: pilna jaudas izsekošana tiek reģistrēta no T=0. Ieteikumu programma mēra jūsu mašīnas faktisko palaišanas modeli un automātiski nosaka to izmērus."
       },
       "end_energy_threshold": {
-        "label": "Beigu enerģija"
+        "label": "Beigu enerģija",
+        "doc": "Izslēgšanas aizkaves atpakaļskaitīšanas laikā uzkrātā enerģija (vati x laiks) tiek salīdzināta ar šo slieksni. Ja tas tiek pārsniegts, atpakaļskaitīšanas laiks tiek atiestatīts — ciklam tiek pievienotas pretburzīšanās un trauku mazgājamās mašīnas žāvēšanas astes, nevis saīsinātas. Paceliet to, ja atdzišanas laikā cikli beidzas pārāk agri; samaziniet to, ja noteikšana ir gausa."
       },
       "end_repeat_count": {
-        "label": "Beigu atkārtojumu skaits"
+        "label": "Beigu atkārtojumu skaits",
+        "doc": "Pirms cikla beigām nepieciešamo secīgo rādījumu skaits zem apstāšanās sliekšņa. 1 ir piemērots lielākajai daļai spraudņu. Palieliniet vērtību līdz 2–3, ja viedā spraudnis cikla vidū laiku pa laikam ziņo par nepatiesu nulli un cikli beidzas priekšlaicīgi."
       },
       "sampling_interval": {
-        "label": "Paraugu ņemšanas intervāls"
+        "label": "Paraugu ņemšanas intervāls",
+        "doc": "Paredzamais laiks starp sensora rādījumiem — tiek izmantots, lai izlīdzinātu logu un sāktu pareizu atlēcienu. Katrs sensora atjauninājums tiek fiksēts neatkarīgi no šīs vērtības; tas tikai kalibrē pakārtotos aprēķinus. Ieteikumu programma mēra jūsu sensora faktisko ritmu no iepriekšējiem cikliem un iestata to automātiski."
       },
       "abrupt_drop_watts": {
-        "label": "Pēkšņs kritums"
+        "label": "Pēkšņs kritums",
+        "doc": "Jaudas kritums, kas ir lielāks par šo, norāda ciklu kā Pārtraukts (manuāla atcelšana), nevis dabisku apdari."
       },
       "abrupt_drop_ratio": {
-        "label": "Pēkšņa krituma attiecība"
+        "label": "Pēkšņa krituma attiecība",
+        "doc": "Kritums, kas ir lielāks par šo strāvas jaudas daļu, arī tiek uzskatīts par pēkšņu (0,6 = 60% kritums). Papildina vatu slieksni dažādiem ierīču izmēriem."
       },
       "profile_match_threshold": {
-        "label": "Atbilstības slieksnis"
+        "label": "Atbilstības slieksnis",
+        "doc": "Minimālais līdzības rādītājs (0-1), kas nepieciešams cikla beigās, lai pieņemtu programmas identifikāciju. Paaugstiniet to, lai samazinātu nepareizu identifikāciju; samaziniet to, ja jūsu mašīnas programmas netiek saskaņotas. Noklusējuma vērtība 0,4 ir konservatīvs sākumpunkts."
       },
       "profile_unmatch_threshold": {
-        "label": "Neatbilstības slieksnis"
+        "label": "Neatbilstības slieksnis",
+        "doc": "Ja tiešraides cikla vidus spēles rezultāts ir zemāks par šo rezultātu, provizoriskā identifikācija tiek dzēsta. Turiet to nedaudz zem atbilstības sliekšņa, lai īss līdzības kritums nemainītu displeju atpakaļ uz nepārspējamu."
       },
       "profile_match_interval": {
-        "label": "Atbilstības intervāls"
+        "label": "Atbilstības intervāls",
+        "doc": "Cik bieži ir jāmēģina izveidot profila saskaņošanu skriešanas cikla laikā. Noklusējuma 300 s (5 minūtes) līdzsvaro noteikšanas ātrumu un centrālo procesoru."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Min. ilguma attiecība"
+        "label": "Min. ilguma attiecība",
+        "doc": "Minimālais cikla garums attiecībā pret profilu. 0,9 nozīmē, ka ciklam ir jābūt vismaz 90% no profila ilguma, lai tas atbilstu."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Maks. ilguma attiecība"
+        "label": "Maks. ilguma attiecība",
+        "doc": "Maksimālais cikla garums attiecībā pret profilu. 1.3 nozīmē, ka ciklam ir jābūt mazākam par 130% no profila ilguma, lai tas atbilstu."
       },
       "profile_duration_tolerance": {
-        "label": "Profila ilguma tolerance"
+        "label": "Profila ilguma tolerance",
+        "doc": "+/- josla ap profila vidējo ilgumu, ko izmanto atbilstības noteikšanas laikā. 0,25 nozīmē, ka 60 minūšu profils atbilst 45–75 minūšu cikliem."
       },
       "duration_tolerance": {
-        "label": "Novērtējuma tolerance"
+        "label": "Novērtējuma tolerance",
+        "doc": "Pielaide atlikušā laika aplēsēm (apgūstot atsauksmes, nevis saskaņošanu). Ja faktiskais ilgums ir +/-X% robežās no aplēstā, tas tiek uzskatīts par labu atbilstību."
       },
       "auto_label_confidence": {
-        "label": "Automātiskās marķēšanas pārliecība"
+        "label": "Automātiskās marķēšanas pārliecība",
+        "doc": "Ja atbilstības rezultāts cikla beigās ir vienāds vai lielāks par šo, programma tiek automātiski marķēta bez apstiprinājuma uzvednes. Paaugstiniet to, lai pirms automātiskās marķēšanas būtu nepieciešama lielāka noteiktība; samaziniet to, lai vairāk automatizētu. Darbojas kopā ar Learning Confidence zem tā."
       },
       "learning_confidence": {
-        "label": "Mācīšanās pārliecība"
+        "label": "Mācīšanās pārliecība",
+        "doc": "Ja atbilstības rezultāts ir starp šo un Auto-Label Confidence, atsauksmes paziņojumā tiek lūgts pārbaudīt identificēto programmu. Zem šī rezultāta spēle ir pārāk nenoteikta, lai to varētu atklāt. Jāsaglabā zem Auto-Label Confidence."
       },
       "suppress_feedback_notifications": {
-        "label": "Apturēt atsauksmju paziņojumus"
+        "label": "Apturēt atsauksmju paziņojumus",
+        "doc": "Nesniedziet pastāvīgu paziņojumu, kad pabeigts cikls ir jāpārskata; atsauksmes joprojām tiek rādītas ciklu pārskatīšanas rindā."
       },
       "watchdog_interval": {
-        "label": "Sargsuna intervāls"
+        "label": "Sargsuna intervāls",
+        "doc": "Cik bieži fona sargsuns pārbauda, ​​vai sensori nav apstājušies un vai nav pagājis noildzes laiks. Noklusējums 30 s."
       },
       "no_update_active_timeout": {
-        "label": "Laiks bez atjauninājuma"
+        "label": "Laiks bez atjauninājuma",
+        "doc": "Ja darbības laikā tik ilgi netiek saņemti strāvas atjauninājumi, pieņemsim, ka kontaktdakša ir nokritusi bezsaistē un piespiedu kārtā apturiet, lai izvairītos no zombiju cikla. Noklusējuma 600 s pieļauj mākoņa vai tīkla aizkavi."
       },
       "progress_reset_delay": {
-        "label": "Progresa atiestatīšanas aizkave"
+        "label": "Progresa atiestatīšanas aizkave",
+        "doc": "Pēc pabeigšanas saglabājiet progresu 100% līmenī tik ilgi, lai informācijas paneļos būtu redzams paziņojums Pabeigts pirms atiestatīšanas uz dīkstāvi."
       },
       "auto_maintenance": {
-        "label": "Automātiskā apkope (nakts tīrīšana)"
+        "label": "Automātiskā apkope (nakts tīrīšana)",
+        "doc": "Veiciet nakts uzkopšanu: atjaunojiet profila aploksnes, pārrēķiniet cikla stāvokli, izgrieziet atkļūdošanas pēdas un saglabājiet jaunākos ciklus."
       },
       "save_debug_traces": {
-        "label": "Saglabāt atkļūdošanas pēdas"
+        "label": "Saglabāt atkļūdošanas pēdas",
+        "doc": "Saglabājiet pilnas jaudas izsekošanu un atbilstošos atkļūdošanas datus katram ciklam. Noderīgs problēmu novēršanai, bet palielina krātuves apjomu."
       },
       "anti_wrinkle_enabled": {
-        "label": "Iespējot pretgrumbu noteikšanu"
+        "label": "Iespējot pretgrumbu noteikšanu",
+        "doc": "Atpazīstiet īsos mazjaudas veļas impulsus, ko žāvētājs izstaro pēc galvenās karsēšanas fāzes, un turiet tos pievienotus gatavajam ciklam, nevis nolasiet tos kā jaunus ciklus."
       },
       "anti_wrinkle_max_power": {
-        "label": "Maks. pretgrumbu jauda"
+        "label": "Maks. pretgrumbu jauda",
+        "doc": "Pulss, kas pārsniedz šo jaudu, tiek uzskatīts par īstu jaunu ciklu, nevis pretgrumbu griešanos. Iestatiet tieši virs impulsa jaudas."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Maks. ilgums"
+        "label": "Maks. ilgums",
+        "doc": "Pākšaugi, kas ir garāki par šo, tiek uzskatīti par īstu ciklu, nevis kā pretgrumbu izkrišanu."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Izejas jaudas slieksnis"
+        "label": "Izejas jaudas slieksnis",
+        "doc": "Lai pretgrumbu režīms paliktu aktīvs, starp impulsiem jaudai ir jāsamazinās zem šī."
       },
       "delay_start_detect_enabled": {
-        "label": "Iespējot aizkavēta starta noteikšanu"
+        "label": "Iespējot aizkavēta starta noteikšanu",
+        "doc": "Noteikt, kad ierīce ir ieslēgta un gaida (aizkavēta palaišana / gaidīšanas režīms), bet nav sākusi savu ciklu, tāpēc gaidstāves vilkšana netiek sajaukta ar darbības ciklu."
       },
       "delay_confirm_seconds": {
-        "label": "Apstiprināšanas sekundes"
+        "label": "Apstiprināšanas sekundes",
+        "doc": "Strāvai jāpaliek gaidstāves joslā tik ilgi, pirms ierīce tiek uzskatīta par gaidīšanas brīdi, nevis darbošanos."
       },
       "delay_timeout_hours": {
-        "label": "Noilguma stundas"
+        "label": "Noilguma stundas",
+        "doc": "Pārtrauciet gaidīt aizkavētās palaišanas režīmā pēc tik daudzām stundām un atgriezieties dīkstāvē, lai mašīna, kas atstāta darbināta, bet nekad nav iedarbināta, negaida mūžīgi."
       },
       "external_end_trigger_enabled": {
-        "label": "Iespējot ārējo beigu aktivatoru"
+        "label": "Iespējot ārējo beigu aktivatoru",
+        "doc": "Ļaujiet ārējam binārajam sensoram signalizēt par cikla beigām, papildus iebūvētajai jaudas noteikšanai."
       },
       "external_end_trigger": {
-        "label": "Ārējā aktivatora entītija"
+        "label": "Ārējā aktivatora entītija",
+        "doc": "Binārais sensors, kura stāvokļa maiņa iezīmē cikla beigas (piemēram, ierīces \"pabeigts\" kontakts vai pavadošā integrācija)."
       },
       "external_end_trigger_inverted": {
-        "label": "Invertēt ārējo aktivatoru (aktivēt pie IZSLĒGTS)"
+        "label": "Invertēt ārējo aktivatoru (aktivēt pie IZSLĒGTS)",
+        "doc": "Uztveriet sprūda sensora izslēgšanu (nevis IESLĒGTS) kā cikla beigu signālu."
       },
       "door_sensor_entity": {
-        "label": "Durvju sensora entītija"
+        "label": "Durvju sensora entītija",
+        "doc": "Pēc izvēles durvju binārais sensors. Izmanto, lai noteiktu, kad ierīce ir atvērta/izkrauta pēc cikla."
       },
       "pause_cuts_power": {
-        "label": "Pauze arī izslēdz jaudu (ar slēdzi)"
+        "label": "Pauze arī izslēdz jaudu (ar slēdzi)",
+        "doc": "Kad cikls ir apturēts, izslēdziet arī tālāk esošo Switch Entity. Tikai ierīcēm, kuru kontaktdakšu var droši nogriezt cikla vidū."
       },
       "switch_entity": {
-        "label": "Slēdža entītija"
+        "label": "Slēdža entītija",
+        "doc": "Papildu slēdzis tiek izslēgts pauzes laikā un atkal ieslēgts, kad tiek atsākts, un tiek izmantots kopā ar funkciju “Pauze arī pārtrauc strāvu”."
       },
       "notify_unload_delay_minutes": {
-        "label": "Izkraušanas atgādinājuma aizkave"
+        "label": "Izkraušanas atgādinājuma aizkave",
+        "doc": "Dažas minūtes pēc cikla beigām, pirms tiek nosūtīts joprojām gaidošais atgādinājums \"izlādēt iekārtu\". Iestatiet 0, lai atspējotu atgādinājumu."
       },
       "pump_stuck_duration": {
-        "label": "Iestrēgušā sūkņa ilgums"
+        "label": "Iestrēgušā sūkņa ilgums",
+        "doc": "Sekundes sūknis var darboties nepārtraukti, pirms tas tiek atzīmēts kā iespējams iestrēdzis (aktivizē sūkņa iestrēgšanas notikumu)."
       },
       "notify_start_services": {
-        "label": "Starta pakalpojumi"
+        "label": "Starta pakalpojumi",
+        "doc": "paziņot.* pakalpojumi tiek izsaukti, kad sākas cikls. Pievienojiet vienu katram mērķim (tālrunim, informācijas panelim utt.); atstājiet tukšu, lai netiktu paziņots par sākumu."
       },
       "notify_finish_services": {
-        "label": "Beigu pakalpojumi"
+        "label": "Beigu pakalpojumi",
+        "doc": "paziņot.* pakalpojumi tiek izsaukti, kad cikls beidzas. Pievienojiet vienu katram mērķim; atstājiet tukšu, lai nepabeigtu paziņojumu."
       },
       "notify_live_services": {
-        "label": "Tiešraides progresa pakalpojumi"
+        "label": "Tiešraides progresa pakalpojumi",
+        "doc": "notify.* pakalpojumi pieprasīja tiešsaistes progresa atjauninājumus cikla laikā. Atstājiet tukšu, lai atspējotu tiešraides norises paziņojumus."
       },
       "notify_people": {
-        "label": "Personas (priekš Tikai mājās)"
+        "label": "Personas (priekš Tikai mājās)",
+        "doc": "persona.* vienības, ko izmanto “Paziņot tikai tad, kad mājās”, lai izlemtu, vai kāds ir mājās."
       },
       "notify_only_when_home": {
-        "label": "Paziņot tikai mājās atrodoties"
+        "label": "Paziņot tikai mājās atrodoties",
+        "doc": "Sūtiet paziņojumus tikai tad, ja vismaz viena no saistītajām personām (iepriekš) ir mājās."
       },
       "notify_fire_events": {
-        "label": "Aktivēt HA notikumus paziņojumiem"
+        "label": "Aktivēt HA notikumus paziņojumiem",
+        "doc": "Aktivizējiet arī ha_washdata_* notikumus cikla sākumā/pabeigumā, lai jūs varētu izveidot savu automatizāciju."
       },
       "notify_before_end_minutes": {
-        "label": "Brīdinājums pirms beigām"
+        "label": "Brīdinājums pirms beigām",
+        "doc": "Nosūtiet brīdinājumu Gandrīz pabeigts, ja aptuvenais atlikušais laiks ir mazāks par šo. 0 to atspējo."
       },
       "notify_live_interval_seconds": {
-        "label": "Tiešraides atjauninājumu intervāls"
+        "label": "Tiešraides atjauninājumu intervāls",
+        "doc": "Cik bieži tiek atsvaidzināti tiešraides progresa paziņojumi cikla laikā."
       },
       "notify_live_overrun_percent": {
-        "label": "Tiešraides pārsnieguma % pirms brīdinājuma"
+        "label": "Tiešraides pārsnieguma % pirms brīdinājuma",
+        "doc": "Ja cikls pārsniedz aprēķināto procentuālo daļu, nosūtiet pārsniegšanas brīdinājumu."
       },
       "notify_live_chronometer": {
-        "label": "Izmantot tiešraides hronometru"
+        "label": "Izmantot tiešraides hronometru",
+        "doc": "Statiska aprēķina vietā rādiet paziņojumā reāllaika atpakaļskaitīšanas taimeri (platformās, kas to atbalsta)."
       },
       "notify_timeout_seconds": {
-        "label": "Automātiskā noņemšana pēc"
+        "label": "Automātiskā noņemšana pēc",
+        "doc": "Automātiski noraidīt paziņojumu pēc šīm sekundēm (platformās, kas to atbalsta). 0 saglabā to, līdz tiek manuāli noraidīts."
       },
       "notify_title": {
-        "label": "Paziņojuma virsraksts"
+        "label": "Paziņojuma virsraksts",
+        "doc": "Paziņojuma nosaukums. Veidnes mainīgie: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Paziņojuma ikona"
+        "label": "Paziņojuma ikona",
+        "doc": "Izvēles mdi ikona paziņojumam (piem., mdi:washing-machine). Platformas noklusējuma iestatījumam atstājiet tukšu."
       },
       "notify_start_message": {
-        "label": "Starta ziņojums"
+        "label": "Starta ziņojums",
+        "doc": "Ķermenis tiek nosūtīts, kad sākas cikls. Veidnes mainīgie: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Beigu ziņojums"
+        "label": "Beigu ziņojums",
+        "doc": "Ķermenis tiek nosūtīts, kad cikls beidzas. Veidnes mainīgie: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "Gandrīz pabeigšanas ziņojums"
+        "label": "Gandrīz pabeigšanas ziņojums",
+        "doc": "Pirms-beigšanas/gandrīz pabeigta brīdinājuma pamatteksts. Veidnes mainīgie: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Atgādinājuma ziņojums"
+        "label": "Atgādinājuma ziņojums",
+        "doc": "Joprojām gaidošā izkraušanas atgādinājuma pamatteksts. Blank izmanto iebūvēto noklusējuma iestatījumu. Veidnes mainīgie: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Android kanāls (starts/tiešraide)"
+        "label": "Android kanāls (starts/tiešraide)",
+        "doc": "Android paziņojumu kanāla nosaukums sākuma/tiešraides ziņojumiem (kontrolē katra kanāla skaņu un prioritāti mobilajā lietotnē). Blank izmanto pavadošās lietotnes noklusējuma iestatījumus."
       },
       "notify_finish_channel": {
-        "label": "Android kanāls (beigas)"
+        "label": "Android kanāls (beigas)",
+        "doc": "Android paziņojumu kanāla nosaukums beigu ziņojumam. Tukšs atkārtoti izmanto sākuma/tiešraides kanālu."
       },
       "energy_price_entity": {
-        "label": "Enerģijas cenas entītija"
+        "label": "Enerģijas cenas entītija",
+        "doc": "Sensors ar pašreizējo elektroenerģijas cenu par kWh (piemēram, dinamisks tarifs). Ir prioritāte pār zemāk norādīto statisko cenu. Katrs cikls iesaldē cenu spēkā, kad tas ir beidzies."
       },
       "energy_price_static": {
-        "label": "Fiksētā enerģijas cena (par kWh)"
+        "label": "Fiksētā enerģijas cena (par kWh)",
+        "doc": "Fiksētā cena par kWh, ko izmanto izmaksu skaitļiem, ja iepriekš nav iestatīta reāllaika cenas vienība."
       },
       "notify_cycle_timers": {
-        "label": "Cikla taimeri"
+        "label": "Cikla taimeri",
+        "doc": "Paziņojumi noteiktās cikla minūtēs (piemēram, lai pievienotu mīkstinātāju). Ziņojums atbalsta {device}, {program}, {minutes}. Iespējojiet automātisko pauzi, lai apturētu šajā brīdī un saņemtu interaktīvu paziņojumu ar pogu Atsākt; atsākt, izmantojot paneli, pauzes/atsākšanas pakalpojumu vai paziņojuma darbību."
       },
       "ml_training_hour": {
-        "label": "Mācīties stundā"
+        "label": "Mācīties stundā",
+        "doc": "Vietējā diennakts stunda (0–23), lai veiktu nakts precizēšanu. Izvēlieties klusu stundu, piemēram, 2 (02:00)."
       },
       "ml_training_interval_days": {
-        "label": "Pārbaudīt ne biežāk kā ik"
+        "label": "Pārbaudīt ne biežāk kā ik",
+        "doc": "Atkārtoti pārbaudiet uzlabojumus ne vairāk kā reizi šajās dienās."
       }
     }
   }

@@ -27,7 +27,7 @@ def mock_entry():
         "min_off_gap": 30, # Small value for fast test
         "end_energy_threshold": 0.05,
         "device_type": "washing_machine",
-        "notify_events": []
+        "notify_fire_events": False
     }
     entry.data = {}
     return entry
@@ -129,7 +129,6 @@ async def test_notify_fire_events_disabled_suppresses_both_events(hass: HomeAssi
         "min_off_gap": 30,
         "end_energy_threshold": 0.05,
         "device_type": "washing_machine",
-        "notify_events": [],
         CONF_NOTIFY_FIRE_EVENTS: False,  # Key option: disable events
     }
     entry.data = {}
@@ -220,7 +219,6 @@ async def test_notify_fire_events_enabled_fires_both_events(hass: HomeAssistant)
         "min_off_gap": 30,
         "end_energy_threshold": 0.05,
         "device_type": "washing_machine",
-        "notify_events": [],
         CONF_NOTIFY_FIRE_EVENTS: True,  # Key option: enable events
     }
     entry.data = {}

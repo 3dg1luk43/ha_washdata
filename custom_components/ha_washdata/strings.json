@@ -80,7 +80,8 @@
         "air_fryer": "Air Fryer",
         "bread_maker": "Bread Maker",
         "pump": "Pump / Sump Pump",
-        "other": "Other (Advanced)"
+        "generic": "Other (Advanced)",
+        "other": "Threshold Device"
       }
     }
   },

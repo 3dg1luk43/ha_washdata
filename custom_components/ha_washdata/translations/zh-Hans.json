@@ -80,7 +80,8 @@
         "air_fryer": "空气炸锅",
         "bread_maker": "面包机",
         "pump": "泵/污水泵",
-        "other": "其他（高级）"
+        "generic": "其他（高级）",
+        "other": "阈值装置"
       }
     }
   },
@@ -471,7 +472,8 @@
       "poor_fit": "质量差",
       "steady": "→ 稳定",
       "using_defaults": "使用出厂默认值",
-      "using_tuned": "使用已调整的权重"
+      "using_tuned": "使用已调整的权重",
+      "restart_gap_tip": "{n} HA 重启间隙 - 电源跟踪有漏洞"
     },
     "btn": {
       "add_timer": "+ 添加计时器",
@@ -739,7 +741,10 @@
       "feedback_cycles_pending": "{n} 个周期待审查",
       "artifact_spike_detail": "超出通常功率范围约 {n} 秒。",
       "artifact_dip_detail": "跌破通常功率范围约 {n} 秒。",
-      "artifact_pause_detail": "功率降至接近零约 {n} 秒后恢复 — 可能是周期中途开门或周期被暂停。"
+      "artifact_pause_detail": "功率降至接近零约 {n} 秒后恢复 — 可能是周期中途开门或周期被暂停。",
+      "restart_gap_header": "{n} 此周期内的 HA 重新启动间隔",
+      "restart_gap_item": "{dur}间隙",
+      "restart_gap_footer": "在图表上突出显示。这些间隔的功率数据缺失——仅使用真实读数进行匹配。"
     },
     "phase_desc": {
       "pre_wash": "主洗前的初步浸泡或预处理。",
@@ -990,235 +995,312 @@
     },
     "setting": {
       "name": {
-        "label": "设备名称"
+        "label": "设备名称",
+        "doc": "HA 集成列表和设备注册表中显示的显示名称。"
       },
       "device_type": {
-        "label": "设备类型"
+        "label": "设备类型",
+        "doc": "家电类。设置针对该设备类型调整的合理检测默认值（阈值、关闭延迟、结束处理）；仅当设备最初设置为错误类型时才更改它。"
       },
       "power_sensor": {
-        "label": "功率传感器"
+        "label": "功率传感器",
+        "doc": "报告该设备的实时功率（以瓦为单位）的传感器实体（例如sensor.washer_power）。所有周期检测均基于该信号。"
       },
       "min_power": {
-        "label": "最小功率"
+        "label": "最小功率",
+        "doc": "视为活动的绝对最小功率。低于此值的读数被视为 0 W（待机），滤除智能插头和待机 LED 的幻象负载。"
       },
       "off_delay": {
-        "label": "关闭延迟"
+        "label": "关闭延迟",
+        "doc": "断电后宣告周期结束之前等待的时间。如果在此窗口内恢复供电，则循环将无缝继续 - 这会在清洗阶段之间建立暂停的桥梁。洗碗机具有较长的干燥阶段（关闭电源 20-60 分钟），因此关闭延迟必须超过该时间才能保持整个洗涤+干燥为一个循环。"
       },
       "linked_device": {
-        "label": "归入设备"
+        "label": "归入设备",
+        "doc": "可以选择将此 WashData 设备嵌套在 HA 设备注册表中的另一个设备（例如智能插头）下，显示为“通过...连接”。"
       },
       "start_threshold_w": {
-        "label": "启动阈值"
+        "label": "启动阈值",
+        "doc": "功率必须高于此水平才能确认周期已开始。设置太低会导致待机功率误启动；过高且启动缓慢的程序（冷填充）会被错过。建议引擎将其设置为略高于机器观察到的最低有功功率。"
       },
       "stop_threshold_w": {
-        "label": "停止阈值"
+        "label": "停止阈值",
+        "doc": "在关闭延迟倒计时开始之前，功率必须降至此水平以下。将其设置为低于启动阈值 - 它们之间的间隙是防止闪烁的滞后带。如果设置得太高，低功率阶段（漂洗保持、防皱）会错误地触发结束序列。"
       },
       "min_off_gap": {
-        "label": "最小关闭间隔"
+        "label": "最小关闭间隔",
+        "doc": "如果机器关闭时间少于该时间，则开/关/开序列被视为一个连续周期。防止浸泡程序（机器在洗涤过程中关闭几分钟）被分成两个单独的周期。如果您希望将这些负载算作单独的循环，请将其设置为短于连续负载之间的间隙。设备类型默认值可保护每个设备的典型周期内暂停。"
       },
       "start_duration_threshold": {
-        "label": "启动时长"
+        "label": "启动时长",
+        "doc": "电源必须保持在启动阈值以上这么长的时间才能确认真正的启动，从而防止瞬间开/关切换启动一个周期。"
       },
       "start_energy_threshold": {
-        "label": "启动能耗"
+        "label": "启动能耗",
+        "doc": "设备在运行前必须消耗的能量（功率 x 时间）。短暂的高功率尖峰能量非常低，会被忽略，从而防止误启动。"
       },
       "completion_min_seconds": {
-        "label": "最短周期时长"
+        "label": "最短周期时长",
+        "doc": "比这个短的周期将被丢弃为幽灵周期（测试运行，打开门添加袜子）。"
       },
       "running_dead_zone": {
-        "label": "运行死区"
+        "label": "运行死区",
+        "doc": "一个周期开始后，该窗口内的功率骤降将被忽略。洗衣机注满冷水（加热前下降到接近 0 W） - 如果没有这种保护，注水阶段看起来就像循环结束。这不会跳过数据：从 T=0 开始记录全功率轨迹。建议引擎会测量机器的实际启动模式并自动调整其大小。"
       },
       "end_energy_threshold": {
-        "label": "结束能耗"
+        "label": "结束能耗",
+        "doc": "在关闭延迟倒计时期间，累积能量（瓦特 x 时间）与该阈值进行比较。如果超过，倒计时会重置 - 将防皱翻滚和洗碗机干燥尾部连接到循环上，而不是缩短它们。如果冷却过程中循环结束得太早，则提高它；如果检测缓慢，则降低它。"
       },
       "end_repeat_count": {
-        "label": "结束重复次数"
+        "label": "结束重复次数",
+        "doc": "周期结束前所需的连续低于停止阈值的读数数。 1 适用于大多数插头。如果您的智能插头偶尔在周期中报告假零样本并且您的周期提前结束，则提高到 2-3。"
       },
       "sampling_interval": {
-        "label": "采样间隔"
+        "label": "采样间隔",
+        "doc": "传感器读数之间的预期时间 - 用于调整平滑窗口的大小并正确启动去抖。无论该值如何，都会捕获每个传感器更新；它仅校准下游计算。建议引擎会测量传感器过去周期的实际踏频并自动设置。"
       },
       "smoothing_window": {
-        "label": "平滑窗口"
+        "label": "平滑窗口",
+        "doc": "原始功率信号被平滑了多少。低 (2) 响应灵敏，但噪音较大；高 (5) 可平滑尖峰，但会增加滞后。"
       },
       "abrupt_drop_watts": {
-        "label": "突降功率"
+        "label": "突降功率",
+        "doc": "功率下降大于此值会将循环标记为已中断（手动取消）而不是自然结束。"
       },
       "abrupt_drop_ratio": {
-        "label": "突降比例"
+        "label": "突降比例",
+        "doc": "大于电流功率这一部分的下降也被视为突然下降（0.6 = 60% 下降）。补充不同设备尺寸的瓦特阈值。"
       },
       "profile_match_threshold": {
-        "label": "匹配阈值"
+        "label": "匹配阈值",
+        "doc": "周期结束时接受程序识别所需的最低相似度分数 (0-1)。提高它可以减少错误识别；如果您的机器的程序不匹配，请降低它。默认值 0.4 是一个保守的起点。"
       },
       "profile_unmatch_threshold": {
-        "label": "不匹配阈值"
+        "label": "不匹配阈值",
+        "doc": "如果实时中期比赛的分数低于此分数，则临时标识将被清除。将其保持在匹配阈值以下一点，这样相似度的短暂下降不会将显示翻转回不匹配的状态。"
       },
       "profile_match_interval": {
-        "label": "匹配间隔"
+        "label": "匹配间隔",
+        "doc": "在运行周期中尝试配置文件匹配的频率。默认 300 秒（5 分钟）平衡检测速度和 CPU。"
       },
       "profile_match_min_duration_ratio": {
-        "label": "最小时长比例"
+        "label": "最小时长比例",
+        "doc": "相对于轮廓的最小周期长度。 0.9 表示一个周期必须至少为配置文件持续时间的 90% 才能匹配。"
       },
       "profile_match_max_duration_ratio": {
-        "label": "最大时长比例"
+        "label": "最大时长比例",
+        "doc": "相对于轮廓的最大循环长度。 1.3 表示周期必须低于配置文件持续时间的 130% 才能匹配。"
       },
       "profile_duration_tolerance": {
-        "label": "运行档案时长容差"
+        "label": "运行档案时长容差",
+        "doc": "匹配过程中使用的配置文件平均持续时间周围的 +/- 范围。 0.25 表示 60 分钟的配置文件与 45-75 分钟的循环匹配。"
       },
       "duration_tolerance": {
-        "label": "估算容差"
+        "label": "估算容差",
+        "doc": "对剩余时间估计的容忍度（学习反馈，而不是匹配）。如果实际持续时间在估计值的 +/-X% 范围内，则视为良好匹配。"
       },
       "auto_label_confidence": {
-        "label": "自动标记置信度"
+        "label": "自动标记置信度",
+        "doc": "如果周期结束时的比赛分数等于或高于此分数，则节目将自动标记，无需任何确认提示。在自动标记之前将其提高到需要更高的确定性；降低它以实现更多自动化。与下面的学习信心结合使用。"
       },
       "learning_confidence": {
-        "label": "学习置信度"
+        "label": "学习置信度",
+        "doc": "如果匹配分数介于此分数和自动标签置信度之间，则会出现反馈通知，要求您验证已识别的程序。低于这个分数，比赛就太不确定了，无法浮出水面。必须保持在自动标签置信度以下。"
       },
       "suppress_feedback_notifications": {
-        "label": "抑制反馈通知"
+        "label": "抑制反馈通知",
+        "doc": "当完成的周期需要审查时，不要发出持续通知；反馈仍然出现在周期审核队列中。"
       },
       "watchdog_interval": {
-        "label": "看门狗间隔"
+        "label": "看门狗间隔",
+        "doc": "后台看门狗检查停滞的传感器和超时的频率。默认 30 秒。"
       },
       "no_update_active_timeout": {
-        "label": "无更新超时"
+        "label": "无更新超时",
+        "doc": "如果运行时这么长时间没有电源更新到达，则假设插头脱机并强制停止以避免僵尸循环。默认 600 秒允许云或网格延迟。"
       },
       "progress_reset_delay": {
-        "label": "进度重置延迟"
+        "label": "进度重置延迟",
+        "doc": "完成后，将进度保持在 100% 一段时间，以便在重置为“空闲”之前在仪表板上可以看到“已完成”。"
       },
       "auto_maintenance": {
-        "label": "自动维护（每夜清理）"
+        "label": "自动维护（每夜清理）",
+        "doc": "每晚运行内务管理：重建配置文件包络、重新计算周期运行状况、修剪调试跟踪并保留最新的周期。"
       },
       "expose_debug_entities": {
-        "label": "暴露调试实体"
+        "label": "暴露调试实体",
+        "doc": "发布额外的诊断 HA 实体（匹配置信度、模糊性、状态内部）。关闭可保持实体列表干净以供正常使用。"
       },
       "save_debug_traces": {
-        "label": "保存调试追踪"
+        "label": "保存调试追踪",
+        "doc": "存储每个周期的完整功率跟踪和匹配调试数据。对于故障排除很有用，但会增加存储大小。"
       },
       "anti_wrinkle_enabled": {
-        "label": "启用防皱检测"
+        "label": "启用防皱检测",
+        "doc": "识别烘干机在主要加热阶段后发出的短的低功率翻滚脉冲，并将它们附加到完成的循环，而不是将它们视为新循环。"
       },
       "anti_wrinkle_max_power": {
-        "label": "最大防皱功率"
+        "label": "最大防皱功率",
+        "doc": "高于此功率的脉冲被视为真正的新周期，而不是抗皱翻滚。设置在翻滚脉冲功率的正上方。"
       },
       "anti_wrinkle_max_duration": {
-        "label": "最长时长"
+        "label": "最长时长",
+        "doc": "比这更长的脉冲被视为真正的周期，而不是抗皱滚动。"
       },
       "anti_wrinkle_exit_power": {
-        "label": "退出功率阈值"
+        "label": "退出功率阈值",
+        "doc": "脉冲之间的功率必须低于此值，抗皱模式才能保持活动状态。"
       },
       "delay_start_detect_enabled": {
-        "label": "启用延迟启动检测"
+        "label": "启用延迟启动检测",
+        "doc": "检测设备何时开机并等待（延迟启动/待机）但尚未开始其周期，因此待机绘制不会被误认为是运行周期。"
       },
       "delay_confirm_seconds": {
-        "label": "确认秒数"
+        "label": "确认秒数",
+        "doc": "在设备被视为等待启动而不是运行之前，电源必须保持在待机状态这么长时间。"
       },
       "delay_timeout_hours": {
-        "label": "超时小时数"
+        "label": "超时小时数",
+        "doc": "经过这么多小时后，停止在延迟启动模式下等待并返回空闲状态，因此保持通电但从未启动的机器不会永远等待。"
       },
       "external_end_trigger_enabled": {
-        "label": "启用外部结束触发器"
+        "label": "启用外部结束触发器",
+        "doc": "除了内置的基于电源的检测之外，还可以让外部二进制传感器发出周期结束信号。"
       },
       "external_end_trigger": {
-        "label": "外部触发器实体"
+        "label": "外部触发器实体",
+        "doc": "状态变化标志着周期结束的二进制传感器（例如，设备“完成”接触或配套集成）。"
       },
       "external_end_trigger_inverted": {
-        "label": "反转外部触发器（关闭时触发）"
+        "label": "反转外部触发器（关闭时触发）",
+        "doc": "将触发传感器关闭（而不是打开）视为周期结束信号。"
       },
       "door_sensor_entity": {
-        "label": "门传感器实体"
+        "label": "门传感器实体",
+        "doc": "可选门二进制传感器。用于检测设备在一个周期后何时打开/卸载。"
       },
       "pause_cuts_power": {
-        "label": "暂停同时断电（通过开关）"
+        "label": "暂停同时断电（通过开关）",
+        "doc": "当循环暂停时，还要关闭下面的开关实体。仅适用于插头可以在周期中安全切断的电器。"
       },
       "switch_entity": {
-        "label": "开关实体"
+        "label": "开关实体",
+        "doc": "可选开关在暂停时关闭，在恢复时重新打开，与“暂停也会切断电源”一起使用。"
       },
       "notify_unload_delay_minutes": {
-        "label": "卸载提醒延迟"
+        "label": "卸载提醒延迟",
+        "doc": "一个周期结束后几分钟，发送仍在等待的“卸载机器”提醒。设置 0 禁用提醒。"
       },
       "pump_stuck_duration": {
-        "label": "泵卡住时长"
+        "label": "泵卡住时长",
+        "doc": "泵在被标记为可能卡住之前可以连续运行的秒数（触发泵卡住事件）。"
       },
       "notify_start_services": {
-        "label": "启动服务"
+        "label": "启动服务",
+        "doc": "循环开始时调用的notify.*服务。每个目标（电话、仪表板等）添加一个；留空表示没有开始通知。"
       },
       "notify_finish_services": {
-        "label": "结束服务"
+        "label": "结束服务",
+        "doc": "当一个周期结束时调用notify.*服务。每个目标添加一个；留空表示没有完成通知。"
       },
       "notify_live_services": {
-        "label": "实时进度服务"
+        "label": "实时进度服务",
+        "doc": "在循环运行时，notify.* 服务需要实时更新进度。留空以禁用实时进度通知。"
       },
       "notify_people": {
-        "label": "人员（仅在家时通知用）"
+        "label": "人员（仅在家时通知用）",
+        "doc": "person.* “Notify Only When Home”使用的实体来决定是否有人在家。"
       },
       "notify_only_when_home": {
-        "label": "仅在家时通知"
+        "label": "仅在家时通知",
+        "doc": "仅当至少一名关联人员（上图）在家时才发送通知。"
       },
       "notify_fire_events": {
-        "label": "为通知触发 HA 事件"
+        "label": "为通知触发 HA 事件",
+        "doc": "还在循环开始/结束时触发 ha_​​washdata_* 事件，以便您可以构建自己的自动化。"
       },
       "notify_before_end_minutes": {
-        "label": "结束前提醒"
+        "label": "结束前提醒",
+        "doc": "当预计剩余时间低于此值时，发送“即将完成”警报。 0 禁用它。"
       },
       "notify_live_interval_seconds": {
-        "label": "实时更新间隔"
+        "label": "实时更新间隔",
+        "doc": "周期运行时刷新实时进度通知的频率。"
       },
       "notify_live_overrun_percent": {
-        "label": "实时超时 % 提醒前"
+        "label": "实时超时 % 提醒前",
+        "doc": "如果周期超出其估计值超过此百分比，则发送超限警报。"
       },
       "notify_live_chronometer": {
-        "label": "使用实时计时器"
+        "label": "使用实时计时器",
+        "doc": "在通知中显示实时更新的倒计时器（在支持它的平台上），而不是静态估计。"
       },
       "notify_timeout_seconds": {
-        "label": "自动关闭延迟"
+        "label": "自动关闭延迟",
+        "doc": "在这么多秒后自动关闭通知（在支持它的平台上）。 0 保留它直到手动关闭。"
       },
       "notify_title": {
-        "label": "通知标题"
+        "label": "通知标题",
+        "doc": "通知标题。模板变量：{device}、{program}、{duration}、{energy}、{cost}、{date}、{time}、{minutes}。"
       },
       "notify_icon": {
-        "label": "通知图标"
+        "label": "通知图标",
+        "doc": "通知的可选 mdi 图标（例如 mdi：洗衣机）。将平台默认值留空。"
       },
       "notify_start_message": {
-        "label": "启动消息"
+        "label": "启动消息",
+        "doc": "循环开始时发送主体。模板变量：{device}、{program}、{duration}、{energy}、{cost}、{date}、{time}、{minutes}。"
       },
       "notify_finish_message": {
-        "label": "结束消息"
+        "label": "结束消息",
+        "doc": "循环结束时发送主体。模板变量：{device}、{program}、{duration}、{energy}、{cost}、{date}、{time}、{minutes}。"
       },
       "notify_pre_complete_message": {
-        "label": "完成前消息"
+        "label": "完成前消息",
+        "doc": "正文预结束/即将完成警报。模板变量：{device}、{program}、{duration}、{energy}、{cost}、{date}、{time}、{minutes}。"
       },
       "notify_reminder_message": {
-        "label": "提醒消息"
+        "label": "提醒消息",
+        "doc": "机身还在等待卸载提醒。空白使用内置默认值。模板变量：{device}、{program}、{duration}、{energy}、{cost}、{date}、{time}、{minutes}。"
       },
       "notify_channel": {
-        "label": "Android 频道（启动/实时）"
+        "label": "Android 频道（启动/实时）",
+        "doc": "开始/实时消息的 Android 通知通道名称（控制移动应用程序上的每个通道声音和优先级）。 Blank 使用配套应用程序默认值。"
       },
       "notify_finish_channel": {
-        "label": "Android 频道（结束）"
+        "label": "Android 频道（结束）",
+        "doc": "完成消息的 Android 通知通道名称。空白重用开始/直播频道。"
       },
       "energy_price_entity": {
-        "label": "电价实体"
+        "label": "电价实体",
+        "doc": "具有当前每千瓦时电价的传感器（例如动态电价）。优先于下面的静态价格。每个周期结束后都会冻结实际价格。"
       },
       "energy_price_static": {
-        "label": "固定电价（每 kWh）"
+        "label": "固定电价（每 kWh）",
+        "doc": "当上面未设置实时价格实体时，每千瓦时的固定价格用于成本数据。"
       },
       "notify_cycle_timers": {
-        "label": "周期计时器"
+        "label": "周期计时器",
+        "doc": "在一个周期的特定分钟发出通知（例如添加柔软剂）。消息支持{device}、{program}、{minutes}。启用“自动暂停”以在该点暂停并通过“恢复”按钮接收交互式通知；通过面板、暂停/恢复服务或通知操作恢复。"
       },
       "enable_ml_models": {
-        "label": "在周期中应用智能模型"
+        "label": "在周期中应用智能模型",
+        "doc": "当一个循环运行时，让模型完善实时结果：更稳定的剩余时间和能量/成本估计，以及结束检测的防过早停止防护（它只能延迟完成，永远不会提前结束，并且是有限的）。如果可用，则使用您的微调模型，否则使用内置模型。关闭 = 仅经典的基于电源的逻辑（仍然可靠）。"
       },
       "ml_training_enabled": {
-        "label": "从此机器学习"
+        "label": "从此机器学习",
+        "doc": "定期隔夜研究您审查的循环，并针对该特定机器微调模型。只有当改变在持续的周期中真正取得更好的成绩时，才会保留改变，因此这只能有所帮助或保持不变——永远不会倒退。"
       },
       "ml_training_hour": {
-        "label": "学习时间（小时）"
+        "label": "学习时间（小时）",
+        "doc": "一天中的当地时间 (0-23) 进行夜间微调。选择一个安静的时间，例如 2 (02:00)。"
       },
       "ml_training_min_cycles": {
-        "label": "需要的最少周期数"
+        "label": "需要的最少周期数",
+        "doc": "等到至少记录了这么多周期后再进行微调，这样就有足够的东西可以学习了。"
       },
       "ml_training_interval_days": {
-        "label": "最多每隔几天检查一次"
+        "label": "最多每隔几天检查一次",
+        "doc": "每这么多天最多重新检查一次改进。"
       }
     }
   }

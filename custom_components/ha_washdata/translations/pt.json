@@ -80,7 +80,8 @@
         "air_fryer": "Fritadeira de ar",
         "bread_maker": "Máquina de fazer pão",
         "pump": "Bomba / Bomba de depósito",
-        "other": "Outro (avançado)"
+        "generic": "Outro (avançado)",
+        "other": "Dispositivo de limite"
       }
     }
   },
@@ -460,6 +461,7 @@
       "needs_review": "Precisa de revisão",
       "overrun": "Demorou mais do que o habitual",
       "artifact_tip": "{n} anomalias detectadas (por exemplo, porta aberta a meio do ciclo) — abra para as ver no gráfico",
+      "restart_gap_tip": "{n} lacuna de reinício do HA: o traçado de potência tem uma lacuna",
       "poor_fit_tip": "Histórico de correspondência inconsistente — considere reconstruir este perfil",
       "fair_fit_tip": "Consistência de correspondência moderada — alguns ciclos atribuídos a este perfil têm pontuações de confiança mais baixas. Rotule mais ciclos ou re-grave o perfil para melhorar a precisão.",
       "auto": "(detectado automaticamente)",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Sobreponha outros envelopes de perfil no gráfico acima para ver qual deles melhor se adequa a este ciclo.",
       "artifact_header": "{n} anomalias detectadas durante este ciclo",
       "artifact_footer": "Realçadas no gráfico acima. São artefactos transitórios (por exemplo, a porta foi aberta a meio do ciclo), não necessariamente problemas.",
+      "restart_gap_header": "{n} lacuna de reinício do HA durante este ciclo",
+      "restart_gap_item": "{dur} lacuna",
+      "restart_gap_footer": "Destacado no gráfico. Dados de potência estão em falta para estes intervalos; a correspondência usou apenas leituras reais.",
       "profile_poor_health_detail": "Os ciclos atribuídos a este perfil têm formas inconsistentes ou baixa confiança. Considere reconstruir o envelope ou rever os ciclos rotulados.",
       "trend_duration_longer": "Duração com tendência crescente ({pct}%/ciclo) — média recente {avg}",
       "trend_duration_shorter": "Duração com tendência decrescente ({pct}%/ciclo) — média recente {avg}",
@@ -990,235 +995,312 @@
     },
     "setting": {
       "name": {
-        "label": "Nome do Dispositivo"
+        "label": "Nome do Dispositivo",
+        "doc": "Nome de exibição mostrado na lista de integrações de alta disponibilidade e no registro do dispositivo."
       },
       "device_type": {
-        "label": "Tipo de Dispositivo"
+        "label": "Tipo de Dispositivo",
+        "doc": "Classe de eletrodomésticos. Define padrões de detecção sensatos (limites, atraso de desativação, tratamento final) ajustados para esse tipo de dispositivo; altere-o apenas se o dispositivo tiver sido originalmente configurado como o tipo errado."
       },
       "power_sensor": {
-        "label": "Sensor de Potência"
+        "label": "Sensor de Potência",
+        "doc": "A entidade do sensor que relata a potência ativa em watts para este aparelho (por exemplo, sensor.washer_power). Toda a detecção de ciclo é baseada neste sinal."
       },
       "min_power": {
-        "label": "Potência Mínima"
+        "label": "Potência Mínima",
+        "doc": "Potência mínima absoluta considerada ativa. As leituras abaixo disso são tratadas como 0 W (standby), filtrando a carga fantasma de plugues inteligentes e LEDs de standby."
       },
       "off_delay": {
-        "label": "Atraso de Desligamento"
+        "label": "Atraso de Desligamento",
+        "doc": "Tempo de espera após a queda de energia antes de declarar o término do ciclo. Se a energia for retomada dentro desta janela, o ciclo continua perfeitamente - isso faz a ponte entre as etapas de lavagem. As máquinas de lavar louça têm longas fases de secagem (desligadas por 20-60 minutos), portanto o atraso no desligamento deve exceder esse valor para manter toda a lavagem + secagem em um único ciclo."
       },
       "linked_device": {
-        "label": "Agrupar sob Dispositivo"
+        "label": "Agrupar sob Dispositivo",
+        "doc": "Opcionalmente, aninhe este dispositivo WashData em outro dispositivo (por exemplo, o plugue inteligente) no registro do dispositivo HA, mostrado como \"Conectado via ...\"."
       },
       "start_threshold_w": {
-        "label": "Limiar de Início"
+        "label": "Limiar de Início",
+        "doc": "A potência deve subir acima deste nível para confirmar que um ciclo foi iniciado. Definir um valor muito baixo causa falsas partidas na energia de espera; programas muito altos e de início lento (enchimento a frio) são perdidos. O mecanismo de sugestão define isso logo acima da potência ativa mais baixa observada pela máquina."
       },
       "stop_threshold_w": {
-        "label": "Limiar de Paragem"
+        "label": "Limiar de Paragem",
+        "doc": "A energia deve cair abaixo deste nível antes que a contagem regressiva do atraso de desligamento comece. Defina-o abaixo do limite inicial - a lacuna entre eles é a banda de histerese que evita oscilações. Se definido para um valor demasiado elevado, as fases de baixa potência (paragens de enxaguamento, anti-rugas) acionam falsamente a sequência final."
       },
       "min_off_gap": {
-        "label": "Intervalo Mínimo de Desligamento"
+        "label": "Intervalo Mínimo de Desligamento",
+        "doc": "Se a máquina desligar por menos que esse tempo, a sequência liga/desliga/liga é tratada como um ciclo contínuo. Evita que os programas de imersão (a máquina desliga durante vários minutos a meio da lavagem) sejam divididos em dois ciclos separados. Defina-o mais curto do que o intervalo entre as cargas consecutivas se quiser que elas sejam contadas como ciclos separados. Os padrões de tipo de dispositivo protegem a pausa intra-ciclo típica para cada dispositivo."
       },
       "start_duration_threshold": {
-        "label": "Duração de Início"
+        "label": "Duração de Início",
+        "doc": "A energia deve permanecer acima do limite de partida por tanto tempo para confirmar uma partida real, evitando que interruptores liga/desliga em frações de segundo iniciem um ciclo."
       },
       "start_energy_threshold": {
-        "label": "Energia de Início"
+        "label": "Energia de Início",
+        "doc": "Energia (potência x tempo) que o aparelho deve consumir antes de FUNCIONAR. Um breve pico de alta potência tem energia muito baixa e é ignorado, evitando falsas partidas."
       },
       "completion_min_seconds": {
-        "label": "Duração Mínima do Ciclo"
+        "label": "Duração Mínima do Ciclo",
+        "doc": "Ciclos mais curtos que isso são descartados como ciclos fantasmas (testes, abertura da porta para adicionar uma meia)."
       },
       "running_dead_zone": {
-        "label": "Zona Morta em Execução"
+        "label": "Zona Morta em Execução",
+        "doc": "Após o início de um ciclo, as quedas de energia nesta janela são ignoradas. As máquinas de lavar enchem com água fria (caindo perto de 0 W antes do aquecimento) - sem esta proteção, a fase de enchimento parece um fim de ciclo. Isto NÃO ignora dados: o traço de potência total é registrado a partir de T=0. O mecanismo de sugestão mede o padrão de inicialização real da sua máquina e o dimensiona automaticamente."
       },
       "end_energy_threshold": {
-        "label": "Energia de Fim"
+        "label": "Energia de Fim",
+        "doc": "Durante a contagem regressiva do atraso de desligamento, a energia acumulada (watts x tempo) é comparada a esse limite. Se excedido, a contagem regressiva é reiniciada - mantendo os rolos anti-rugas e os restos de secagem da máquina de lavar louça presos ao ciclo, em vez de cortá-los. Aumente se os ciclos terminarem muito cedo durante o resfriamento; abaixe-o se a detecção for lenta."
       },
       "end_repeat_count": {
-        "label": "Contagem de Repetições de Fim"
+        "label": "Contagem de Repetições de Fim",
+        "doc": "Número de leituras consecutivas abaixo do limite de parada necessárias antes do término do ciclo. 1 é adequado para a maioria dos plugues. Aumente para 2-3 se o seu plugue inteligente ocasionalmente relatar uma amostra de falso zero no meio do ciclo e seus ciclos estiverem terminando prematuramente."
       },
       "sampling_interval": {
-        "label": "Intervalo de Amostragem"
+        "label": "Intervalo de Amostragem",
+        "doc": "Tempo esperado entre as leituras do sensor - usado para dimensionar a janela de suavização e iniciar o debounce corretamente. Cada atualização do sensor é capturada independentemente deste valor; ele apenas calibra os cálculos posteriores. O mecanismo de sugestão mede a cadência real do seu sensor em ciclos anteriores e define isso automaticamente."
       },
       "smoothing_window": {
-        "label": "Janela de Suavização"
+        "label": "Janela de Suavização",
+        "doc": "Quanto o sinal de potência bruta é suavizado. Baixo (2) é responsivo, mas barulhento; alto (5) suaviza os picos, mas adiciona atraso."
       },
       "abrupt_drop_watts": {
-        "label": "Queda Abrupta"
+        "label": "Queda Abrupta",
+        "doc": "Uma queda de energia maior que isso sinaliza o ciclo como Interrompido (cancelamento manual) em vez de um término natural."
       },
       "abrupt_drop_ratio": {
-        "label": "Rácio de Queda Abrupta"
+        "label": "Rácio de Queda Abrupta",
+        "doc": "Uma queda maior que esta fração da potência atual também é tratada como abrupta (0,6 = queda de 60%). Complementa o limite de watts em todos os tamanhos de aparelhos."
       },
       "profile_match_threshold": {
-        "label": "Limiar de Correspondência"
+        "label": "Limiar de Correspondência",
+        "doc": "Pontuação mínima de similaridade (0-1) exigida no final do ciclo para aceitar a identificação do programa. Aumente-o para reduzir identificações erradas; abaixe-o se os programas da sua máquina não estiverem correspondendo. O padrão 0,4 é um ponto de partida conservador."
       },
       "profile_unmatch_threshold": {
-        "label": "Limiar de Não Correspondência"
+        "label": "Limiar de Não Correspondência",
+        "doc": "Se uma partida ao vivo no meio do ciclo cair abaixo dessa pontuação, a identificação provisória será apagada. Mantenha-o um pouco abaixo do Limite de Correspondência para que uma breve queda na similaridade não reverta a exibição para incomparável."
       },
       "profile_match_interval": {
-        "label": "Intervalo de Correspondência"
+        "label": "Intervalo de Correspondência",
+        "doc": "Com que frequência tentar a correspondência de perfil durante um ciclo de execução. O padrão de 300 s (5 minutos) equilibra a velocidade de detecção e a CPU."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Rácio de Duração Mínima"
+        "label": "Rácio de Duração Mínima",
+        "doc": "Duração mínima do ciclo em relação ao perfil. 0,9 significa que um ciclo deve ter pelo menos 90% da duração do perfil para corresponder."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Rácio de Duração Máxima"
+        "label": "Rácio de Duração Máxima",
+        "doc": "Duração máxima do ciclo em relação ao perfil. 1.3 significa que um ciclo deve ter menos de 130% da duração do perfil para corresponder."
       },
       "profile_duration_tolerance": {
-        "label": "Tolerância de Duração do Perfil"
+        "label": "Tolerância de Duração do Perfil",
+        "doc": "A banda +/- em torno da duração média de um perfil usada durante a correspondência. 0,25 significa que um perfil de 60 minutos corresponde a ciclos de 45 a 75 minutos."
       },
       "duration_tolerance": {
-        "label": "Tolerância de Estimativa"
+        "label": "Tolerância de Estimativa",
+        "doc": "Tolerância para estimativas de tempo restante (feedback de aprendizagem, não correspondência). Se a duração real estiver dentro de +/-X% da estimativa, isso será considerado uma boa correspondência."
       },
       "auto_label_confidence": {
-        "label": "Confiança de Rotulagem Automática"
+        "label": "Confiança de Rotulagem Automática",
+        "doc": "Se a pontuação da partida no final do ciclo for igual ou superior a isso, o programa será rotulado automaticamente sem qualquer solicitação de confirmação. Aumente-o para exigir maior certeza antes da rotulagem automática; abaixe-o para automatizar mais. Funciona em conjunto com Learning Confidence abaixo dele."
       },
       "learning_confidence": {
-        "label": "Confiança de Aprendizagem"
+        "label": "Confiança de Aprendizagem",
+        "doc": "Se a pontuação de correspondência estiver entre este valor e a Confiança do rótulo automático, uma notificação de feedback solicitará que você verifique o programa identificado. Abaixo desta pontuação, a partida é muito incerta para surgir. Deve ser mantido abaixo da Confiança da Etiqueta Automática."
       },
       "suppress_feedback_notifications": {
-        "label": "Suprimir Notificações de Feedback"
+        "label": "Suprimir Notificações de Feedback",
+        "doc": "Não gere uma notificação persistente quando um ciclo concluído precisar de revisão; o feedback ainda aparece na fila de revisão dos Ciclos."
       },
       "watchdog_interval": {
-        "label": "Intervalo do Watchdog"
+        "label": "Intervalo do Watchdog",
+        "doc": "Com que frequência o watchdog em segundo plano verifica sensores paralisados ​​e tempos limite decorridos. Padrão 30 seg."
       },
       "no_update_active_timeout": {
-        "label": "Timeout Sem Actualização"
+        "label": "Timeout Sem Actualização",
+        "doc": "Se nenhuma atualização de energia chegar por tanto tempo durante a execução, presuma que o plugue caiu off-line e force a parada para evitar um ciclo zumbi. O padrão de 600 s permite atraso na nuvem ou na malha."
       },
       "progress_reset_delay": {
-        "label": "Atraso de Reposição de Progresso"
+        "label": "Atraso de Reposição de Progresso",
+        "doc": "Depois de terminar, mantenha o progresso em 100% por esse tempo para que Concluído fique visível nos painéis antes de redefinir para Inativo."
       },
       "auto_maintenance": {
-        "label": "Manutenção Automática (limpeza nocturna)"
+        "label": "Manutenção Automática (limpeza nocturna)",
+        "doc": "Execute a limpeza noturna: recrie envelopes de perfil, recalcule a integridade do ciclo, remova rastros de depuração e retenha os ciclos mais recentes."
       },
       "expose_debug_entities": {
-        "label": "Expor Entidades de Depuração"
+        "label": "Expor Entidades de Depuração",
+        "doc": "Publique entidades de HA de diagnóstico extras (confiança de correspondência, ambiguidade, estados internos). Off mantém a lista de entidades limpa para uso normal."
       },
       "save_debug_traces": {
-        "label": "Guardar Traços de Depuração"
+        "label": "Guardar Traços de Depuração",
+        "doc": "Armazene o rastreamento de energia completo e os dados de depuração correspondentes para cada ciclo. Útil para solução de problemas, mas aumenta o tamanho do armazenamento."
       },
       "anti_wrinkle_enabled": {
-        "label": "Activar Detecção Anti-Vincos"
+        "label": "Activar Detecção Anti-Vincos",
+        "doc": "Reconheça os pulsos curtos de baixa potência que uma secadora emite após a fase de aquecimento principal e mantenha-os anexados ao ciclo finalizado, em vez de lê-los como novos ciclos."
       },
       "anti_wrinkle_max_power": {
-        "label": "Potência Máxima Anti-Vincos"
+        "label": "Potência Máxima Anti-Vincos",
+        "doc": "Uma pulsação acima dessa potência é tratada como um verdadeiro novo ciclo, e não como um tombo antirrugas. Defina logo acima da potência do pulso de queda."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Duração Máxima"
+        "label": "Duração Máxima",
+        "doc": "Pulsos mais longos do que isso são tratados como um ciclo real, e não como uma queda anti-rugas."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Limiar de Saída de Potência"
+        "label": "Limiar de Saída de Potência",
+        "doc": "A potência deve cair abaixo disso entre os pulsos para que o modo antirrugas permaneça ativo."
       },
       "delay_start_detect_enabled": {
-        "label": "Activar Detecção de Início Retardado"
+        "label": "Activar Detecção de Início Retardado",
+        "doc": "Detecta quando o aparelho está ligado e aguardando (início retardado/standby), mas ainda não iniciou seu ciclo, para que o standby não seja confundido com um ciclo em execução."
       },
       "delay_confirm_seconds": {
-        "label": "Segundos de Confirmação"
+        "label": "Segundos de Confirmação",
+        "doc": "A energia deve permanecer na faixa de espera por esse tempo antes que o aparelho seja tratado como aguardando para iniciar, em vez de funcionar."
       },
       "delay_timeout_hours": {
-        "label": "Horas de Timeout"
+        "label": "Horas de Timeout",
+        "doc": "Pare de esperar no modo de partida retardada após tantas horas e retorne ao modo inativo, para que uma máquina deixada ligada, mas nunca iniciada, não espere para sempre."
       },
       "external_end_trigger_enabled": {
-        "label": "Activar Gatilho de Fim Externo"
+        "label": "Activar Gatilho de Fim Externo",
+        "doc": "Deixe um sensor binário externo sinalizar o fim de um ciclo, além da detecção integrada baseada em energia."
       },
       "external_end_trigger": {
-        "label": "Entidade do Gatilho Externo"
+        "label": "Entidade do Gatilho Externo",
+        "doc": "Sensor binário cuja mudança de estado marca o fim do ciclo (por exemplo, um contato \"terminado\" do aparelho ou uma integração complementar)."
       },
       "external_end_trigger_inverted": {
-        "label": "Inverter Gatilho Externo (activar em DESLIGADO)"
+        "label": "Inverter Gatilho Externo (activar em DESLIGADO)",
+        "doc": "Trate o sensor de disparo desligado (em vez de ligado) como o sinal de fim de ciclo."
       },
       "door_sensor_entity": {
-        "label": "Entidade do Sensor de Porta"
+        "label": "Entidade do Sensor de Porta",
+        "doc": "Sensor binário de porta opcional. Usado para detectar quando o aparelho foi aberto/descarregado após um ciclo."
       },
       "pause_cuts_power": {
-        "label": "Pausa Também Corta Energia (via switch)"
+        "label": "Pausa Também Corta Energia (via switch)",
+        "doc": "Quando um ciclo for pausado, desligue também a Entidade Switch abaixo. Apenas para aparelhos cuja ficha possa ser cortada com segurança a meio do ciclo."
       },
       "switch_entity": {
-        "label": "Entidade do Switch"
+        "label": "Entidade do Switch",
+        "doc": "Interruptor opcional desligado na pausa e ligado novamente ao reiniciar, usado junto com \"Pausa também corta energia\"."
       },
       "notify_unload_delay_minutes": {
-        "label": "Atraso de Lembrete de Descarga"
+        "label": "Atraso de Lembrete de Descarga",
+        "doc": "Minutos após o término de um ciclo, antes de enviar o lembrete de \"descarregar a máquina\" ainda em espera. Defina 0 para desativar o lembrete."
       },
       "pump_stuck_duration": {
-        "label": "Duração de Bomba Presa"
+        "label": "Duração de Bomba Presa",
+        "doc": "Segundos, uma bomba pode funcionar continuamente antes de ser sinalizada como possivelmente travada (dispara o evento de bomba travada)."
       },
       "notify_start_services": {
-        "label": "Serviços de Início"
+        "label": "Serviços de Início",
+        "doc": "notify.* serviços chamados quando um ciclo é iniciado. Adicione um por destino (telefone, painel, etc.); deixe em branco para nenhuma notificação de início."
       },
       "notify_finish_services": {
-        "label": "Serviços de Fim"
+        "label": "Serviços de Fim",
+        "doc": "notify.* serviços chamados quando um ciclo termina. Adicione um por alvo; deixe em branco para nenhuma notificação de conclusão."
       },
       "notify_live_services": {
-        "label": "Serviços de Progresso em Tempo Real"
+        "label": "Serviços de Progresso em Tempo Real",
+        "doc": "notify.* serviços chamados para atualizações de progresso ao vivo enquanto um ciclo é executado. Deixe em branco para desativar as notificações de progresso ao vivo."
       },
       "notify_people": {
-        "label": "Pessoas (para Apenas Quando em Casa)"
+        "label": "Pessoas (para Apenas Quando em Casa)",
+        "doc": "person.* entidades usadas por \"Notify Only When Home\" para decidir se alguém está em casa."
       },
       "notify_only_when_home": {
-        "label": "Notificar Apenas Quando em Casa"
+        "label": "Notificar Apenas Quando em Casa",
+        "doc": "Envie notificações apenas quando pelo menos uma das pessoas vinculadas (acima) estiver em casa."
       },
       "notify_fire_events": {
-        "label": "Disparar Eventos HA para Notificações"
+        "label": "Disparar Eventos HA para Notificações",
+        "doc": "Também dispare eventos ha_washdata_* no início/término do ciclo para que você possa construir suas próprias automações."
       },
       "notify_before_end_minutes": {
-        "label": "Alerta Pré-Fim"
+        "label": "Alerta Pré-Fim",
+        "doc": "Envie um alerta Quase concluído quando o tempo restante estimado cair abaixo disso. 0 o desativa."
       },
       "notify_live_interval_seconds": {
-        "label": "Intervalo de Actualização em Tempo Real"
+        "label": "Intervalo de Actualização em Tempo Real",
+        "doc": "Com que frequência as notificações de progresso ao vivo são atualizadas enquanto um ciclo é executado."
       },
       "notify_live_overrun_percent": {
-        "label": "% de Sobrecarga Antes do Alerta"
+        "label": "% de Sobrecarga Antes do Alerta",
+        "doc": "Se um ciclo ultrapassar sua estimativa em mais do que essa porcentagem, envie um alerta de ultrapassagem."
       },
       "notify_live_chronometer": {
-        "label": "Usar Cronómetro em Tempo Real"
+        "label": "Usar Cronómetro em Tempo Real",
+        "doc": "Mostre um cronômetro de contagem regressiva com atualização ao vivo na notificação (em plataformas que o suportam) em vez de uma estimativa estática."
       },
       "notify_timeout_seconds": {
-        "label": "Dispensar Automaticamente Após"
+        "label": "Dispensar Automaticamente Após",
+        "doc": "Ignore automaticamente a notificação após esses segundos (em plataformas que a suportam). 0 o mantém até ser descartado manualmente."
       },
       "notify_title": {
-        "label": "Título da Notificação"
+        "label": "Título da Notificação",
+        "doc": "Título da notificação. Variáveis ​​de modelo: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Ícone da Notificação"
+        "label": "Ícone da Notificação",
+        "doc": "Ícone mdi opcional para a notificação (por exemplo, mdi:máquina de lavar). Deixe em branco para o padrão da plataforma."
       },
       "notify_start_message": {
-        "label": "Mensagem de Início"
+        "label": "Mensagem de Início",
+        "doc": "Corpo enviado quando um ciclo é iniciado. Variáveis ​​de modelo: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Mensagem de Fim"
+        "label": "Mensagem de Fim",
+        "doc": "Corpo enviado quando um ciclo termina. Variáveis ​​de modelo: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "Mensagem Pré-Conclusão"
+        "label": "Mensagem Pré-Conclusão",
+        "doc": "Corpo do alerta pré-final/quase concluído. Variáveis ​​de modelo: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Mensagem de Lembrete"
+        "label": "Mensagem de Lembrete",
+        "doc": "Corpo do lembrete de descarga ainda em espera. Em branco usa o padrão integrado. Variáveis ​​de modelo: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Canal Android (início/tempo real)"
+        "label": "Canal Android (início/tempo real)",
+        "doc": "Nome do canal de notificação do Android para mensagens iniciais/ao vivo (controla o som e a prioridade por canal no aplicativo móvel). Em branco usa o aplicativo complementar padrão."
       },
       "notify_finish_channel": {
-        "label": "Canal Android (fim)"
+        "label": "Canal Android (fim)",
+        "doc": "Nome do canal de notificação do Android para a mensagem final. Em branco reutiliza o canal inicial/ao vivo."
       },
       "energy_price_entity": {
-        "label": "Entidade de Preço de Energia"
+        "label": "Entidade de Preço de Energia",
+        "doc": "Sensor com o preço atual da eletricidade por kWh (por exemplo, uma tarifa dinâmica). Tem precedência sobre o preço estático abaixo. Cada ciclo congela o preço em vigor quando termina."
       },
       "energy_price_static": {
-        "label": "Preço Estático de Energia (por kWh)"
+        "label": "Preço Estático de Energia (por kWh)",
+        "doc": "Preço fixo por kWh usado para valores de custos quando nenhuma entidade de preço real é definida acima."
       },
       "notify_cycle_timers": {
-        "label": "Temporizadores de Ciclo"
+        "label": "Temporizadores de Ciclo",
+        "doc": "Notificações em minutos específicos de um ciclo (por exemplo, para adicionar amaciante). A mensagem suporta {device}, {program}, {minutes}. Ative a pausa automática para pausar nesse ponto e receber uma notificação interativa com um botão Continuar; retomar por meio do painel, do serviço de pausa/retomada ou da ação de notificação."
       },
       "enable_ml_models": {
-        "label": "Aplicar modelos inteligentes durante um ciclo"
+        "label": "Aplicar modelos inteligentes durante um ciclo",
+        "doc": "Enquanto um ciclo é executado, deixe os modelos refinarem os resultados em tempo real: uma estimativa de tempo restante e de energia/custo mais estável, e uma proteção anti-parada prematura na detecção de final (ela só pode atrasar um término, nunca terminar um mais cedo e é limitada). Usa seus modelos ajustados quando disponíveis, caso contrário, os integrados. Desligado = apenas a lógica clássica baseada em energia (ainda confiável)."
       },
       "ml_training_enabled": {
-        "label": "Aprender com esta máquina"
+        "label": "Aprender com esta máquina",
+        "doc": "Estude periodicamente seus ciclos revisados ​​durante a noite e ajuste os modelos para esta máquina específica. Uma mudança só é mantida quando realmente obtém resultados melhores em ciclos prolongados, portanto, isso só pode ajudar ou permanecer igual - nunca regredir."
       },
       "ml_training_hour": {
-        "label": "Aprender às horas"
+        "label": "Aprender às horas",
+        "doc": "Hora local do dia (0-23) para fazer o ajuste fino noturno. Escolha um horário tranquilo, como 2 (02:00)."
       },
       "ml_training_min_cycles": {
-        "label": "Ciclos necessários primeiro"
+        "label": "Ciclos necessários primeiro",
+        "doc": "Espere até que pelo menos esse número de ciclos tenha sido registrado antes do ajuste fino, para que haja o suficiente para aprender."
       },
       "ml_training_interval_days": {
-        "label": "Verificar no máximo de"
+        "label": "Verificar no máximo de",
+        "doc": "Verifique novamente se há melhorias no máximo uma vez a cada um desses dias."
       }
     }
   }

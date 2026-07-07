@@ -9,9 +9,7 @@ from homeassistant.core import HomeAssistant
 
 from custom_components.ha_washdata.const import (
     CONF_NOTIFY_CHANNEL,
-    CONF_NOTIFY_EVENTS,
     CONF_NOTIFY_FINISH_CHANNEL,
-    NOTIFY_EVENT_FINISH,
 )
 from custom_components.ha_washdata.manager import WashDataManager
 
@@ -23,7 +21,6 @@ def mock_entry() -> Any:
     entry.title = "Test Washer"
     entry.options = {
         "power_sensor": "sensor.test_power",
-        CONF_NOTIFY_EVENTS: [NOTIFY_EVENT_FINISH],
     }
     entry.data = {}
     return entry

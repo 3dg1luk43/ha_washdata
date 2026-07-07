@@ -80,7 +80,8 @@
         "air_fryer": "Luftfritteuse",
         "bread_maker": "Brotbackautomat",
         "pump": "Pumpe / Sumpfpumpe",
-        "other": "Andere (Erweitert)"
+        "generic": "Andere (Fortgeschrittene)",
+        "other": "Schwellengerät"
       }
     }
   },
@@ -620,6 +621,7 @@
       "needs_review": "Muss überprüft werden",
       "overrun": "Bin länger gelaufen als gewöhnlich",
       "artifact_tip": "{n} Anomalien erkannt (z. B. Tür mitten im Zyklus geöffnet) – öffnen Sie sie, um sie in der Grafik anzuzeigen",
+      "restart_gap_tip": "{n} HA-Neistart-Lücke: dr Leistigsverlauf hett e Lücke",
       "poor_fit_tip": "Inkonsistenter Spielverlauf – erwägen Sie die Neuerstellung dieses Profils",
       "fair_fit_tip": "Mäßige Übereinstimmungskonsistenz – einige diesem Profil zugewiesene Zyklen weisen niedrigere Konfidenzwerte auf. Beschriften Sie weitere Zyklen oder zeichnen Sie das Profil neu auf, um die Genauigkeit zu verbessern.",
       "fair_fit": "akzeptable Qualität",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Überlagern Sie andere Profilumschläge in der Tabelle oben, um zu sehen, welcher am besten zu diesem Zyklus passt.",
       "artifact_header": "{n} Anomalien wurden während dieses Zyklus erkannt",
       "artifact_footer": "In der Grafik oben hervorgehoben. Hierbei handelt es sich um vorübergehende Artefakte (z. B. das Öffnen der Tür mitten im Zyklus), nicht unbedingt um Probleme.",
+      "restart_gap_header": "{n} HA-Neistart-Lücke während dem Zyklus",
+      "restart_gap_item": "{dur} Lücke",
+      "restart_gap_footer": "Im Diagramm hervorgehobe. Leistigsdate fehle für die Intervall; d Erkennig hett nur echti Messwert verwändet.",
       "profile_poor_health_detail": "Die diesem Profil zugewiesenen Zyklen weisen inkonsistente Formen oder eine geringe Konfidenz auf. Erwägen Sie, den Umschlag neu zu erstellen oder beschriftete Zyklen zu überprüfen.",
       "trend_duration_longer": "Dauer tendenziell länger ({pct} %/Zyklus) – aktueller Durchschnitt {avg}",
       "trend_duration_shorter": "Dauer tendenziell kürzer ({pct} %/Zyklus) – aktueller Durchschnitt {avg}",
@@ -990,235 +995,312 @@
     },
     "setting": {
       "name": {
-        "label": "Gerätename"
+        "label": "Gerätename",
+        "doc": "Anzeigename, der in der HA-Integrationsliste und der Geräteregistrierung angezeigt wird."
       },
       "device_type": {
-        "label": "Gerätetyp"
+        "label": "Gerätetyp",
+        "doc": "Geräteklasse. Legt sinnvolle Erkennungsstandardwerte (Schwellenwerte, Ausschaltverzögerung, Endbehandlung) fest, die auf diesen Appliance-Typ abgestimmt sind. Ändern Sie es nur, wenn das Gerät ursprünglich als falscher Typ eingerichtet wurde."
       },
       "power_sensor": {
-        "label": "Leistungssensor"
+        "label": "Leistungssensor",
+        "doc": "Die Sensoreinheit, die Live-Leistung in Watt für dieses Gerät meldet (z. B. sensor.washer_power). Die gesamte Zykluserkennung basiert auf diesem Signal."
       },
       "min_power": {
-        "label": "Mindestleistung"
+        "label": "Mindestleistung",
+        "doc": "Absolute Mindestleistung gilt als aktiv. Werte darunter werden als 0 W (Standby) behandelt, wobei die Phantomlast von Smart Plugs und Standby-LEDs herausgefiltert wird."
       },
       "off_delay": {
-        "label": "Ausschaltverzögerung"
+        "label": "Ausschaltverzögerung",
+        "doc": "Zeit, die nach einem Stromausfall gewartet werden muss, bevor der Zyklus als beendet erklärt wird. Wenn die Stromversorgung innerhalb dieses Fensters wiederhergestellt wird, läuft der Zyklus nahtlos weiter – dies überbrückt Pausen zwischen den Waschphasen. Geschirrspüler haben lange Trocknungsphasen (Ausschalten für 20–60 Minuten), daher muss die Ausschaltverzögerung länger sein, damit der gesamte Spül- und Trockenvorgang als ein Zyklus erfolgt."
       },
       "linked_device": {
-        "label": "Unter Gerät gruppieren"
+        "label": "Unter Gerät gruppieren",
+        "doc": "Verschachteln Sie dieses WashData-Gerät optional unter einem anderen Gerät (z. B. dem Smart Plug) in der HA-Geräteregistrierung, angezeigt als „Verbunden über …“."
       },
       "start_threshold_w": {
-        "label": "Startschwellenwert"
+        "label": "Startschwellenwert",
+        "doc": "Die Leistung muss über diesen Wert ansteigen, um zu bestätigen, dass ein Zyklus gestartet wurde. Eine zu niedrige Einstellung führt zu Fehlstarts aus dem Standby-Modus. zu hoch und langsam startende Programme (Kaltfüllung) werden verpasst. Die Vorschlags-Engine legt diesen Wert knapp über der beobachteten niedrigsten Wirkleistung der Maschine fest."
       },
       "stop_threshold_w": {
-        "label": "Stoppschwellenwert"
+        "label": "Stoppschwellenwert",
+        "doc": "Die Leistung muss unter diesen Wert fallen, bevor der Countdown für die Ausschaltverzögerung beginnt. Stellen Sie ihn unterhalb des Startschwellenwerts ein – die Lücke dazwischen ist das Hystereseband, das ein Flackern verhindert. Bei einer zu hohen Einstellung lösen Phasen mit geringer Leistung (Spülstopps, Knitterschutz) fälschlicherweise die Endsequenz aus."
       },
       "min_off_gap": {
-        "label": "Mindestabschaltlücke"
+        "label": "Mindestabschaltlücke",
+        "doc": "Wenn die Maschine kürzer als diese Zeit ausgeschaltet ist, wird die Ein-/Aus-/Ein-Sequenz als ein kontinuierlicher Zyklus behandelt. Verhindert, dass Einweichprogramme (Maschine schaltet sich während des Waschens für einige Minuten aus) in zwei separate Zyklen aufgeteilt werden. Wenn Sie möchten, dass diese als separate Zyklen gezählt werden, stellen Sie den Wert kürzer ein als die Lücke zwischen Ihren aufeinanderfolgenden Ladungen. Gerätetyp-Standardeinstellungen schützen die typische Intra-Zyklus-Pause für jedes Gerät."
       },
       "start_duration_threshold": {
-        "label": "Startdauer"
+        "label": "Startdauer",
+        "doc": "Die Leistung muss so lange über dem Startschwellenwert bleiben, um einen echten Start zu bestätigen, wodurch verhindert wird, dass sekundenschnelle Ein-/Ausschaltvorgänge einen Zyklus starten."
       },
       "start_energy_threshold": {
-        "label": "Startenergie"
+        "label": "Startenergie",
+        "doc": "Energie (Leistung x Zeit), die das Gerät verbrauchen muss, bevor es in Betrieb geht. Eine kurze Hochleistungsspitze hat eine sehr geringe Energie und wird ignoriert, wodurch Fehlstarts vermieden werden."
       },
       "completion_min_seconds": {
-        "label": "Mindestzyklusdauer"
+        "label": "Mindestzyklusdauer",
+        "doc": "Zyklen, die kürzer sind, werden als Geisterzyklen (Testläufe, Öffnen der Tür zum Hinzufügen einer Socke) verworfen."
       },
       "running_dead_zone": {
-        "label": "Lauf-Totzone"
+        "label": "Lauf-Totzone",
+        "doc": "Nach Beginn eines Zyklus werden Leistungseinbrüche innerhalb dieses Fensters ignoriert. Waschmaschinen füllen sich mit kaltem Wasser (der Wert sinkt vor dem Aufheizen auf nahezu 0 W) – ohne diesen Schutz sieht die Füllphase wie ein Zyklusende aus. Dabei werden KEINE Daten übersprungen: Die vollständige Leistungskurve wird ab T=0 aufgezeichnet. Die Vorschlags-Engine misst das tatsächliche Startmuster Ihrer Maschine und passt dieses automatisch an."
       },
       "end_energy_threshold": {
-        "label": "Endenergie"
+        "label": "Endenergie",
+        "doc": "Während des Countdowns zur Ausschaltverzögerung wird die kumulierte Energie (Watt x Zeit) mit diesem Schwellenwert verglichen. Bei Überschreitung wird der Countdown zurückgesetzt – so bleiben Knitterschutz-Wäschetrockner und Spülmaschinentrocknungsschwänze im Zyklus, anstatt sie abzubrechen. Erhöhen Sie den Wert, wenn die Zyklen während des Abkühlens zu früh enden. Verringern Sie den Wert, wenn die Erkennung langsam ist."
       },
       "end_repeat_count": {
-        "label": "Endwiederholungsanzahl"
+        "label": "Endwiederholungsanzahl",
+        "doc": "Anzahl der aufeinanderfolgenden Messwerte unterhalb des Stoppschwellenwerts, die erforderlich sind, bevor der Zyklus endet. 1 reicht für die meisten Stecker aus. Erhöhen Sie den Wert auf 2–3, wenn Ihr Smart Plug mitten im Zyklus gelegentlich eine falsche Nullprobe meldet und Ihre Zyklen vorzeitig enden."
       },
       "sampling_interval": {
-        "label": "Abtastintervall"
+        "label": "Abtastintervall",
+        "doc": "Erwartete Zeit zwischen Sensorablesungen – wird verwendet, um das Glättungsfenster zu dimensionieren und die Entprellung korrekt zu starten. Unabhängig von diesem Wert wird jede Sensoraktualisierung erfasst; es kalibriert nur die nachgelagerten Berechnungen. Die Vorschlags-Engine misst die tatsächliche Trittfrequenz Ihres Sensors aus vergangenen Zyklen und stellt diese automatisch ein."
       },
       "smoothing_window": {
-        "label": "Glättungsfenster"
+        "label": "Glättungsfenster",
+        "doc": "Wie stark wird das Rohleistungssignal geglättet? Niedrig (2) reagiert, ist aber laut; Hoch (5) glättet Spitzen, fügt aber Verzögerung hinzu."
       },
       "abrupt_drop_watts": {
-        "label": "Abrupter Abfall"
+        "label": "Abrupter Abfall",
+        "doc": "Bei einem größeren Leistungsabfall wird der Zyklus als unterbrochen (manueller Abbruch) und nicht als natürliches Ende gekennzeichnet."
       },
       "abrupt_drop_ratio": {
-        "label": "Abruptes Abfallverhältnis"
+        "label": "Abruptes Abfallverhältnis",
+        "doc": "Ein Abfall, der größer als dieser Bruchteil der aktuellen Leistung ist, wird ebenfalls als abrupt behandelt (0,6 = ein Abfall von 60 %). Ergänzt den Watt-Grenzwert für alle Gerätegrößen."
       },
       "profile_match_threshold": {
-        "label": "Übereinstimmungsschwelle"
+        "label": "Übereinstimmungsschwelle",
+        "doc": "Am Ende des Zyklus ist ein minimaler Ähnlichkeitswert (0-1) erforderlich, um eine Programmidentifikation zu akzeptieren. Erhöhen Sie den Wert, um falsche Identifikationen zu reduzieren. Verringern Sie den Wert, wenn die Programme Ihrer Maschine nicht übereinstimmen. Der Standardwert 0,4 ist ein konservativer Ausgangspunkt."
       },
       "profile_unmatch_threshold": {
-        "label": "Nicht-Übereinstimmungsschwelle"
+        "label": "Nicht-Übereinstimmungsschwelle",
+        "doc": "Wenn ein Live-Match in der Mitte des Zyklus unter diesen Wert fällt, wird die vorläufige Identifizierung gelöscht. Halten Sie den Wert etwas unter dem Übereinstimmungsschwellenwert, damit ein kurzer Rückgang der Ähnlichkeit nicht dazu führt, dass die Anzeige wieder auf „Unübertroffen“ zurückfällt."
       },
       "profile_match_interval": {
-        "label": "Übereinstimmungsintervall"
+        "label": "Übereinstimmungsintervall",
+        "doc": "Wie oft soll während eines laufenden Zyklus versucht werden, einen Profilabgleich durchzuführen? Der Standardwert von 300 s (5 Minuten) gleicht Erkennungsgeschwindigkeit und CPU aus."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Mindestdauerverhältnis"
+        "label": "Mindestdauerverhältnis",
+        "doc": "Mindestzykluslänge relativ zum Profil. 0,9 bedeutet, dass ein Zyklus mindestens 90 % der Profildauer betragen muss, um eine Übereinstimmung zu erzielen."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Höchstdauerverhältnis"
+        "label": "Höchstdauerverhältnis",
+        "doc": "Maximale Zykluslänge relativ zum Profil. 1,3 bedeutet, dass ein Zyklus weniger als 130 % der Profildauer betragen muss, um eine Übereinstimmung zu erzielen."
       },
       "profile_duration_tolerance": {
-        "label": "Profildauertoleranz"
+        "label": "Profildauertoleranz",
+        "doc": "Das +/--Band um die durchschnittliche Dauer eines Profils, das beim Abgleich verwendet wird. 0,25 bedeutet, dass ein 60-Minuten-Profil 45-75-Minuten-Zyklen entspricht."
       },
       "duration_tolerance": {
-        "label": "Schätztoleranz"
+        "label": "Schätztoleranz",
+        "doc": "Toleranz für Schätzungen der verbleibenden Zeit (Lernfeedback, kein Matching). Wenn die tatsächliche Dauer innerhalb von +/-X % der Schätzung liegt, gilt dies als gute Übereinstimmung."
       },
       "auto_label_confidence": {
-        "label": "Konfidenz für automatische Kennzeichnung"
+        "label": "Konfidenz für automatische Kennzeichnung",
+        "doc": "Liegt der Match-Score am Zyklusende bei oder darüber, wird das Programm automatisch ohne Sicherheitsabfrage gekennzeichnet. Erhöhen Sie den Wert, um vor der automatischen Kennzeichnung eine höhere Sicherheit zu erfordern. Reduzieren Sie es, um mehr zu automatisieren. Funktioniert in Verbindung mit der darunter liegenden Lernsicherheit."
       },
       "learning_confidence": {
-        "label": "Lernkonfidenz"
+        "label": "Lernkonfidenz",
+        "doc": "Wenn der Übereinstimmungswert zwischen diesem und dem Auto-Label-Konfidenzwert liegt, werden Sie in einer Feedback-Benachrichtigung aufgefordert, das identifizierte Programm zu überprüfen. Unterhalb dieser Punktzahl ist das Spiel zu unsicher, um an die Oberfläche zu kommen. Muss unterhalb der Auto-Label-Konfidenz gehalten werden."
       },
       "suppress_feedback_notifications": {
-        "label": "Feedback-Benachrichtigungen unterdrücken"
+        "label": "Feedback-Benachrichtigungen unterdrücken",
+        "doc": "Lösen Sie keine dauerhafte Benachrichtigung aus, wenn ein abgeschlossener Zyklus überprüft werden muss. Das Feedback erscheint weiterhin in der Cycles-Überprüfungswarteschlange."
       },
       "watchdog_interval": {
-        "label": "Watchdog-Intervall"
+        "label": "Watchdog-Intervall",
+        "doc": "Wie oft prüft der Hintergrund-Watchdog auf blockierte Sensoren und abgelaufene Zeitüberschreitungen? Standard 30 s."
       },
       "no_update_active_timeout": {
-        "label": "Timeout ohne Aktualisierung"
+        "label": "Timeout ohne Aktualisierung",
+        "doc": "Wenn während der Ausführung so lange keine Stromaktualisierungen eintreffen, gehen Sie davon aus, dass der Stecker offline gegangen ist, und erzwingen Sie den Stopp, um einen Zombie-Zyklus zu vermeiden. Der Standardwert von 600 s ermöglicht Cloud- oder Mesh-Verzögerungen."
       },
       "progress_reset_delay": {
-        "label": "Fortschritts-Reset-Verzögerung"
+        "label": "Fortschritts-Reset-Verzögerung",
+        "doc": "Halten Sie den Fortschritt nach Abschluss so lange auf 100 %, damit „Abgeschlossen“ auf den Dashboards angezeigt wird, bevor Sie auf „Leerlauf“ zurücksetzen."
       },
       "auto_maintenance": {
-        "label": "Automatische Wartung (nächtliche Bereinigung)"
+        "label": "Automatische Wartung (nächtliche Bereinigung)",
+        "doc": "Führen Sie die nächtliche Verwaltung durch: Erstellen Sie Profilumschläge neu, berechnen Sie den Zykluszustand neu, bereinigen Sie Debug-Traces und behalten Sie die neuesten Zyklen bei."
       },
       "expose_debug_entities": {
-        "label": "Debug-Entitäten verfügbar machen"
+        "label": "Debug-Entitäten verfügbar machen",
+        "doc": "Veröffentlichen Sie zusätzliche diagnostische HA-Entitäten (Übereinstimmungskonfidenz, Mehrdeutigkeit, Zustandsinterna). Aus sorgt dafür, dass die Entitätsliste für den normalen Gebrauch sauber bleibt."
       },
       "save_debug_traces": {
-        "label": "Debug-Traces speichern"
+        "label": "Debug-Traces speichern",
+        "doc": "Speichern Sie für jeden Zyklus die vollständige Leistungsverfolgung und die entsprechenden Debug-Daten. Nützlich zur Fehlerbehebung, erhöht jedoch die Speichergröße."
       },
       "anti_wrinkle_enabled": {
-        "label": "Knitterschutzerkennung aktivieren"
+        "label": "Knitterschutzerkennung aktivieren",
+        "doc": "Erkennen Sie die kurzen, stromsparenden Wäscheimpulse, die ein Trockner nach der Hauptheizphase abgibt, und behalten Sie im Zusammenhang mit dem abgeschlossenen Zyklus bei, anstatt sie als neue Zyklen zu lesen."
       },
       "anti_wrinkle_max_power": {
-        "label": "Max. Knitterschutzleistung"
+        "label": "Max. Knitterschutzleistung",
+        "doc": "Ein Puls über dieser Leistung wird als echter neuer Zyklus behandelt, nicht als Anti-Falten-Sturz. Knapp oberhalb der Taumelimpulsleistung einstellen."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Maximale Dauer"
+        "label": "Maximale Dauer",
+        "doc": "Längere Impulse werden als echter Zyklus und nicht als Anti-Falten-Wäsche behandelt."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Ausgangsleistungsschwelle"
+        "label": "Ausgangsleistungsschwelle",
+        "doc": "Die Leistung muss zwischen den Impulsen unter diesen Wert fallen, damit der Anti-Falten-Modus aktiv bleibt."
       },
       "delay_start_detect_enabled": {
-        "label": "Verzögerungsstarterkennung aktivieren"
+        "label": "Verzögerungsstarterkennung aktivieren",
+        "doc": "Erkennen Sie, wenn das Gerät eingeschaltet ist und wartet (verzögerter Start/Standby), aber seinen Zyklus noch nicht begonnen hat, sodass die Standby-Entnahme nicht mit einem laufenden Zyklus verwechselt wird."
       },
       "delay_confirm_seconds": {
-        "label": "Bestätigungssekunden"
+        "label": "Bestätigungssekunden",
+        "doc": "Der Strom muss so lange im Standby-Bereich bleiben, bevor das Gerät als „auf den Start wartend“ und nicht als „in Betrieb“ behandelt wird."
       },
       "delay_timeout_hours": {
-        "label": "Timeout-Stunden"
+        "label": "Timeout-Stunden",
+        "doc": "Hören Sie nach so vielen Stunden auf, im verzögerten Startmodus zu warten, und kehren Sie in den Leerlauf zurück, sodass eine Maschine, die zwar eingeschaltet bleibt, aber nie gestartet wird, nicht ewig wartet."
       },
       "external_end_trigger_enabled": {
-        "label": "Externen Endauslöser aktivieren"
+        "label": "Externen Endauslöser aktivieren",
+        "doc": "Zusätzlich zur integrierten strombasierten Erkennung kann ein externer Binärsensor das Ende eines Zyklus signalisieren."
       },
       "external_end_trigger": {
-        "label": "Externe Auslöserentität"
+        "label": "Externe Auslöserentität",
+        "doc": "Binärer Sensor, dessen Zustandsänderung das Zyklusende markiert (z. B. ein „Fertig“-Kontakt eines Geräts oder eine Companion-Integration)."
       },
       "external_end_trigger_inverted": {
-        "label": "Externen Auslöser invertieren (bei AUS auslösen)"
+        "label": "Externen Auslöser invertieren (bei AUS auslösen)",
+        "doc": "Behandeln Sie das Ausschalten des Auslösesensors (und nicht das Einschalten) als Signal für das Ende des Zyklus."
       },
       "door_sensor_entity": {
-        "label": "Türsensorentität"
+        "label": "Türsensorentität",
+        "doc": "Optionaler binärer Türsensor. Wird verwendet, um zu erkennen, wann das Gerät nach einem Zyklus geöffnet/entladen wurde."
       },
       "pause_cuts_power": {
-        "label": "Pause trennt auch Strom (über Schalter)"
+        "label": "Pause trennt auch Strom (über Schalter)",
+        "doc": "Wenn ein Zyklus angehalten wird, schalten Sie auch die Switch-Entität unten aus. Nur für Geräte, deren Stecker während des Zyklus sicher durchtrennt werden kann."
       },
       "switch_entity": {
-        "label": "Schaltentität"
+        "label": "Schaltentität",
+        "doc": "Optionaler Schalter, der bei Pause aus- und beim Fortsetzen wieder einschaltet und zusammen mit „Pause unterbricht auch die Stromversorgung“ verwendet wird."
       },
       "notify_unload_delay_minutes": {
-        "label": "Entladeverzögerung"
+        "label": "Entladeverzögerung",
+        "doc": "Minuten nach dem Ende eines Zyklus, bevor die noch wartende Erinnerung „Maschine entladen“ gesendet wird. Stellen Sie 0 ein, um die Erinnerung zu deaktivieren."
       },
       "pump_stuck_duration": {
-        "label": "Pumpen-Feststeckdauer"
+        "label": "Pumpen-Feststeckdauer",
+        "doc": "Sekunden lang kann eine Pumpe ununterbrochen laufen, bevor sie als möglicherweise steckengeblieben gekennzeichnet wird (löst das Ereignis „Pumpe steckengeblieben“ aus)."
       },
       "notify_start_services": {
-        "label": "Startdienste"
+        "label": "Startdienste",
+        "doc": "notify.*-Dienste, die aufgerufen werden, wenn ein Zyklus beginnt. Fügen Sie eine pro Ziel hinzu (Telefon, Dashboard usw.); Für keine Startbenachrichtigung leer lassen."
       },
       "notify_finish_services": {
-        "label": "Endedienste"
+        "label": "Endedienste",
+        "doc": "notify.*-Dienste, die aufgerufen werden, wenn ein Zyklus beendet ist. Fügen Sie eins pro Ziel hinzu; Leer lassen, um keine Abschlussbenachrichtigung zu erhalten."
       },
       "notify_live_services": {
-        "label": "Live-Fortschrittsdienste"
+        "label": "Live-Fortschrittsdienste",
+        "doc": "notify.*-Dienste forderten Live-Fortschrittsaktualisierungen während der Ausführung eines Zyklus. Lassen Sie das Feld leer, um Live-Fortschrittsbenachrichtigungen zu deaktivieren."
       },
       "notify_people": {
-        "label": "Personen (für Nur wenn zu Hause)"
+        "label": "Personen (für Nur wenn zu Hause)",
+        "doc": "person.*-Entitäten, die von „Notify Only When Home“ verwendet werden, um zu entscheiden, ob jemand zu Hause ist."
       },
       "notify_only_when_home": {
-        "label": "Nur benachrichtigen wenn zu Hause"
+        "label": "Nur benachrichtigen wenn zu Hause",
+        "doc": "Senden Sie Benachrichtigungen nur, wenn mindestens eine der verknüpften Personen (oben) zu Hause ist."
       },
       "notify_fire_events": {
-        "label": "HA-Ereignisse für Benachrichtigungen auslösen"
+        "label": "HA-Ereignisse für Benachrichtigungen auslösen",
+        "doc": "Lösen Sie außerdem ha_washdata_*-Ereignisse bei Zyklusstart/-ende aus, damit Sie Ihre eigenen Automatisierungen erstellen können."
       },
       "notify_before_end_minutes": {
-        "label": "Vorab-Ende-Alarm"
+        "label": "Vorab-Ende-Alarm",
+        "doc": "Senden Sie eine „Fast fertig“-Benachrichtigung, wenn die geschätzte verbleibende Zeit unter diesen Wert fällt. 0 deaktiviert es."
       },
       "notify_live_interval_seconds": {
-        "label": "Live-Aktualisierungsintervall"
+        "label": "Live-Aktualisierungsintervall",
+        "doc": "Wie oft Live-Fortschrittsbenachrichtigungen während der Ausführung eines Zyklus aktualisiert werden."
       },
       "notify_live_overrun_percent": {
-        "label": "Live-Überschreitung % vor Alarm"
+        "label": "Live-Überschreitung % vor Alarm",
+        "doc": "Wenn ein Zyklus seine Schätzung um mehr als diesen Prozentsatz überschreitet, wird eine Überschreitungswarnung gesendet."
       },
       "notify_live_chronometer": {
-        "label": "Live-Chronometer verwenden"
+        "label": "Live-Chronometer verwenden",
+        "doc": "Zeigen Sie in der Benachrichtigung einen Countdown-Timer für die Live-Aktualisierung an (auf Plattformen, die dies unterstützen) anstelle einer statischen Schätzung."
       },
       "notify_timeout_seconds": {
-        "label": "Automatisch ausblenden nach"
+        "label": "Automatisch ausblenden nach",
+        "doc": "Die Benachrichtigung wird nach dieser Anzahl von Sekunden automatisch verworfen (auf Plattformen, die dies unterstützen). 0 behält es bei, bis es manuell verworfen wird."
       },
       "notify_title": {
-        "label": "Benachrichtigungstitel"
+        "label": "Benachrichtigungstitel",
+        "doc": "Titel der Benachrichtigung. Vorlagenvariablen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Benachrichtigungssymbol"
+        "label": "Benachrichtigungssymbol",
+        "doc": "Optionales MDI-Symbol für die Benachrichtigung (z. B. mdi:washing-machine). Für den Plattformstandard lassen Sie das Feld leer."
       },
       "notify_start_message": {
-        "label": "Startnachricht"
+        "label": "Startnachricht",
+        "doc": "Der Text wird gesendet, wenn ein Zyklus beginnt. Vorlagenvariablen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Endenachricht"
+        "label": "Endenachricht",
+        "doc": "Der Text wird gesendet, wenn ein Zyklus beendet ist. Vorlagenvariablen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "Fast-fertig-Nachricht"
+        "label": "Fast-fertig-Nachricht",
+        "doc": "Text der Vorab-/Fast-Fertig-Warnung. Vorlagenvariablen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Erinnerungsnachricht"
+        "label": "Erinnerungsnachricht",
+        "doc": "Text der noch wartenden Entladeerinnerung. Blank verwendet die integrierte Standardeinstellung. Vorlagenvariablen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Android-Kanal (Start/Live)"
+        "label": "Android-Kanal (Start/Live)",
+        "doc": "Name des Android-Benachrichtigungskanals für Start-/Live-Nachrichten (steuert den Ton pro Kanal und die Priorität in der mobilen App). Blank verwendet die Standardeinstellung der Begleit-App."
       },
       "notify_finish_channel": {
-        "label": "Android-Kanal (Ende)"
+        "label": "Android-Kanal (Ende)",
+        "doc": "Name des Android-Benachrichtigungskanals für die Zielnachricht. Blank verwendet den Start-/Live-Kanal wieder."
       },
       "energy_price_entity": {
-        "label": "Energiepreisentität"
+        "label": "Energiepreisentität",
+        "doc": "Sensor mit dem aktuellen Strompreis pro kWh (z. B. ein dynamischer Tarif). Hat Vorrang vor dem untenstehenden statischen Preis. Jeder Zyklus friert den gültigen Preis ein, wenn er beendet ist."
       },
       "energy_price_static": {
-        "label": "Statischer Energiepreis (pro kWh)"
+        "label": "Statischer Energiepreis (pro kWh)",
+        "doc": "Fester Preis pro kWh, der für Kostenzahlen verwendet wird, wenn oben keine Live-Preiseinheit festgelegt ist."
       },
       "notify_cycle_timers": {
-        "label": "Zyklustimer"
+        "label": "Zyklustimer",
+        "doc": "Benachrichtigungen zu bestimmten Minuten in einem Zyklus (z. B. um Weichspüler hinzuzufügen). Die Nachricht unterstützt {device}, {program}, {minutes}. Aktivieren Sie die automatische Pause, um an diesem Punkt zu pausieren und eine interaktive Benachrichtigung mit der Schaltfläche „Fortsetzen“ zu erhalten. Fortsetzen über das Bedienfeld, den Dienst „Pause/Fortsetzen“ oder die Benachrichtigungsaktion."
       },
       "enable_ml_models": {
-        "label": "Smarte Modelle während eines Zyklus anwenden"
+        "label": "Smarte Modelle während eines Zyklus anwenden",
+        "doc": "Während ein Zyklus läuft, können die Modelle die Live-Ergebnisse verfeinern: eine gleichmäßigere Schätzung der verbleibenden Zeit und der Energie/Kosten sowie einen Schutz vor vorzeitigem Stopp bei der Enderkennung (er kann ein Ende immer nur verzögern, niemals vorzeitig beenden und ist begrenzt). Verwendet Ihre fein abgestimmten Modelle, sofern verfügbar, ansonsten die integrierten. Aus = nur die klassische leistungsbasierte Logik (immer noch zuverlässig)."
       },
       "ml_training_enabled": {
-        "label": "Von dieser Maschine lernen"
+        "label": "Von dieser Maschine lernen",
+        "doc": "Studieren Sie Ihre überprüften Zyklen regelmäßig über Nacht und stimmen Sie die Modelle genau auf diese spezielle Maschine ab. Eine Änderung wird nur dann beibehalten, wenn sie in durchgehaltenen Zyklen tatsächlich besser abschneidet. Dies kann also nur helfen oder gleich bleiben – niemals rückläufig sein."
       },
       "ml_training_hour": {
-        "label": "Lernen zur Stunde"
+        "label": "Lernen zur Stunde",
+        "doc": "Lokale Tageszeit (0-23), um die Feinabstimmung über Nacht vorzunehmen. Wählen Sie eine ruhige Stunde, z. B. 2 Uhr (02:00 Uhr)."
       },
       "ml_training_min_cycles": {
-        "label": "Zuerst benötigte Zyklen"
+        "label": "Zuerst benötigte Zyklen",
+        "doc": "Warten Sie mit der Feinabstimmung, bis mindestens so viele Zyklen aufgezeichnet wurden, damit Sie genug lernen können."
       },
       "ml_training_interval_days": {
-        "label": "Höchstens alle prüfen"
+        "label": "Höchstens alle prüfen",
+        "doc": "Überprüfen Sie alle diese Tage höchstens einmal erneut, ob sich Verbesserungen ergeben."
       }
     }
   }

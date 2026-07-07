@@ -80,7 +80,8 @@
         "air_fryer": "Air Fryer",
         "bread_maker": "Kenyérsütő",
         "pump": "Szivattyú / búvárszivattyú",
-        "other": "Egyéb (haladó)"
+        "generic": "Egyéb (haladó)",
+        "other": "Küszöb eszköz"
       }
     }
   },
@@ -620,6 +621,7 @@
       "needs_review": "Felülvizsgálatra szorul",
       "overrun": "A szokásosnál tovább futott",
       "artifact_tip": "{n} rendellenesség észlelve (pl. ajtónyitás a ciklus közepén) – nyissa meg, hogy megtekinthesse őket a grafikonon",
+      "restart_gap_tip": "{n} HA-újraindítás-rés: a teljesítménygörbén van egy lyuk",
       "poor_fit_tip": "Inkonzisztens meccselőzmények – fontolja meg a profil újjáépítését",
       "fair_fit_tip": "Mérsékelt egyezési konzisztencia – néhány ehhez a profilhoz rendelt ciklus alacsonyabb megbízhatósági pontszámmal rendelkezik. Címkézz fel több ciklust, vagy rögzítsd újra a profilt a pontosság javítása érdekében.",
       "fair_fit": "elfogadható minőség",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Fedjen rá más profilborítékokat a fenti diagramra, hogy megtudja, melyik illik legjobban ehhez a ciklushoz.",
       "artifact_header": "{n} rendellenesség észlelve ebben a ciklusban",
       "artifact_footer": "A fenti grafikonon kiemelve. Ezek átmeneti műtermékek (pl. a ciklus közepén kinyílt ajtó), nem feltétlenül problémák.",
+      "restart_gap_header": "{n} HA-újraindítás-rés ezen ciklus alatt",
+      "restart_gap_item": "{dur} rés",
+      "restart_gap_footer": "Kiemelve a grafikonon. A teljesítményadatok hiányoznak ezekre az intervallumokra; az egyeztetés csak valós méréseket használt.",
       "profile_poor_health_detail": "Az ehhez a profilhoz rendelt ciklusok alakja inkonzisztens vagy alacsony a megbízhatóságuk. Fontolja meg a boríték újjáépítését vagy a címkézett ciklusok áttekintését.",
       "trend_duration_longer": "Az időtartam egyre hosszabb ({pct}%/ciklus) – legutóbbi átlag: {avg}",
       "trend_duration_shorter": "Az időtartam egyre rövidebb ({pct}%/ciklus) – legutóbbi átlag: {avg}",
@@ -990,235 +995,312 @@
     },
     "setting": {
       "name": {
-        "label": "Eszköz neve"
+        "label": "Eszköz neve",
+        "doc": "A HA integrációs listában és az eszköznyilvántartásban látható megjelenített név."
       },
       "device_type": {
-        "label": "Eszköz típusa"
+        "label": "Eszköz típusa",
+        "doc": "Készülék osztály. Beállítja az ésszerű észlelési alapértékeket (küszöbértékek, kikapcsolási késleltetés, végkezelés) az adott készüléktípushoz hangolva; csak akkor módosítsa, ha az eszközt eredetileg rossz típusként állította be."
       },
       "power_sensor": {
-        "label": "Teljesítmény érzékelő"
+        "label": "Teljesítmény érzékelő",
+        "doc": "Az érzékelő entitás, amely a készülék élő teljesítményét jelenti wattban (pl. sensor.washer_power). Minden ciklusérzékelés ezen a jelen alapul."
       },
       "min_power": {
-        "label": "Minimális teljesítmény"
+        "label": "Minimális teljesítmény",
+        "doc": "Aktívnak tekintett abszolút minimális teljesítmény. Az ez alatti értékeket a rendszer 0 W-nak (készenléti) tekinti, kiszűrve az intelligens csatlakozók és a készenléti LED-ek fantomterhelését."
       },
       "off_delay": {
-        "label": "Kikapcsolási késleltetés"
+        "label": "Kikapcsolási késleltetés",
+        "doc": "Várakozási idő a teljesítmény csökkenése után, mielőtt befejezettnek nyilvánítaná a ciklust. Ha az áramellátás ezen az ablakon belül folytatódik, a ciklus zökkenőmentesen folytatódik – ez áthidalja a szüneteket a mosási fázisok között. A mosogatógépek hosszú szárítási fázisokkal rendelkeznek (20-60 percre kikapcsolva), így a kikapcsolási késleltetésnek meg kell haladnia ezt, hogy az egész mosás+szárítás egy ciklusban maradjon."
       },
       "linked_device": {
-        "label": "Csoportosítás eszköz alá"
+        "label": "Csoportosítás eszköz alá",
+        "doc": "Opcionálisan beágyazza ezt a WashData-eszközt egy másik eszköz (például az intelligens csatlakozó) alá a HA-eszköz-nyilvántartásban, amely a „Csatlakozva…” jelzéssel jelenik meg."
       },
       "start_threshold_w": {
-        "label": "Indítási küszöb"
+        "label": "Indítási küszöb",
+        "doc": "A teljesítménynek e szint fölé kell emelkednie a ciklus elindításának megerősítéséhez. Túl alacsonyra állítása téves indítást okoz készenléti tápellátásról; túl magas és lassan induló programok (hideg töltés) elmaradnak. A javaslatmotor ezt éppen a gép megfigyelt legalacsonyabb aktív teljesítménye fölé állítja."
       },
       "stop_threshold_w": {
-        "label": "Leállítási küszöb"
+        "label": "Leállítási küszöb",
+        "doc": "A teljesítménynek e szint alá kell csökkennie, mielőtt a kikapcsolási késleltetés visszaszámlálása megkezdődik. Állítsa az indítási küszöb alá – a köztük lévő hézag a hiszterézis sáv, amely megakadályozza a villogást. Ha túl magasra van állítva, az alacsony teljesítményű fázisok (öblítőstop, gyűrődésgátló) hamisan elindítják a végsorozatot."
       },
       "min_off_gap": {
-        "label": "Min. kikapcsolási rés"
+        "label": "Min. kikapcsolási rés",
+        "doc": "Ha a gép ennél az időnél rövidebb ideig kapcsol ki, a be-/ki/bekapcsolás sorozatot egy folyamatos ciklusnak tekinti. Megakadályozza, hogy az áztatási programok (a mosás közben néhány percre kikapcsol) ne oszlanak fel két külön ciklusra. Állítsa rövidebbre, mint az egymás melletti terhelések közötti hézag, ha azt szeretné, hogy azokat külön ciklusnak számítsa. Az eszköztípus alapértelmezett beállításai védik az egyes készülékek tipikus cikluson belüli szünetét."
       },
       "start_duration_threshold": {
-        "label": "Indítási időtartam"
+        "label": "Indítási időtartam",
+        "doc": "A teljesítménynek ennyi ideig az indítási küszöb felett kell maradnia, hogy megerősítse a valódi indítást, és megakadályozza, hogy a másodperc törtrészes be/ki kapcsolói elindítsák a ciklust."
       },
       "start_energy_threshold": {
-        "label": "Indítási energia"
+        "label": "Indítási energia",
+        "doc": "A készüléknek energiát (teljesítmény x idő) kell fogyasztania MŰKÖDÉS ELŐTT. Egy rövid, nagy teljesítményű tüskének nagyon alacsony az energiája, és figyelmen kívül hagyják, megakadályozva a téves indításokat."
       },
       "completion_min_seconds": {
-        "label": "Min. ciklusidőtartam"
+        "label": "Min. ciklusidőtartam",
+        "doc": "Az ennél rövidebb ciklusokat a rendszer szellemciklusként elveti (próbafutások, az ajtó kinyitása zokni hozzáadásához)."
       },
       "running_dead_zone": {
-        "label": "Futó holttér"
+        "label": "Futó holttér",
+        "doc": "A ciklus elindítása után az ablakon belüli teljesítménycsökkenéseket figyelmen kívül hagyja. A mosógépek hideg vízzel töltik fel (a melegítés előtt közel 0 W csökken) – e védelem nélkül a töltési fázis úgy néz ki, mint a ciklus végén. Ez NEM hagyja ki az adatokat: a teljes teljesítmény nyomvonal T=0-tól kerül rögzítésre. A javaslatmotor méri a gép tényleges indítási mintáját, és automatikusan méretezi azt."
       },
       "end_energy_threshold": {
-        "label": "Záró energia"
+        "label": "Záró energia",
+        "doc": "A kikapcsolási késleltetés visszaszámlálása során a felhalmozott energia (watt x idő) ehhez a küszöbértékhez kerül összehasonlításra. Ha túllépi, a visszaszámlálás újraindul – a gyűrődésgátló szárak és a mosogatógépes szárítószárak a ciklushoz rögzítve maradnak, ahelyett, hogy rövidre vágnák őket. Emelje fel, ha a ciklusok túl korán érnek véget a lehűlés során; csökkentse, ha az észlelés lassú."
       },
       "end_repeat_count": {
-        "label": "Záró ismétlések száma"
+        "label": "Záró ismétlések száma",
+        "doc": "Az egymást követő leállási küszöbérték alatti leolvasások száma a ciklus vége előtt. Az 1 megfelelő a legtöbb csatlakozóhoz. Emelje 2-3-ra, ha az intelligens csatlakozó időnként hamis nullát jelez a ciklus közepén, és a ciklusok idő előtt véget érnek."
       },
       "sampling_interval": {
-        "label": "Mintavételezési intervallum"
+        "label": "Mintavételezési intervallum",
+        "doc": "Várható idő az érzékelő leolvasásai között – a simítóablak méretére és a visszapattanás helyes elindítására szolgál. Ettől az értéktől függetlenül minden érzékelőfrissítés rögzítésre kerül; csak a downstream számításokat kalibrálja. A javaslatmotor méri az érzékelő tényleges ütemét az elmúlt ciklusokból, és automatikusan beállítja ezt."
       },
       "smoothing_window": {
-        "label": "Simítási ablak"
+        "label": "Simítási ablak",
+        "doc": "Mennyire van simítva a nyers teljesítményjel. Alacsony (2) érzékeny, de zajos; magas (5) kisimítja a tüskéket, de növeli a késést."
       },
       "abrupt_drop_watts": {
-        "label": "Hirtelen esés"
+        "label": "Hirtelen esés",
+        "doc": "Az ennél nagyobb teljesítménycsökkenés a ciklust Megszakítottként (kézi törlés) jelzi, nem pedig természetes befejezésként."
       },
       "abrupt_drop_ratio": {
-        "label": "Hirtelen esés aránya"
+        "label": "Hirtelen esés aránya",
+        "doc": "Az áramerősség ezen hányadánál nagyobb esést is hirtelennek kell tekinteni (0,6 = 60%-os csökkenés). Kiegészíti a watt-küszöböt a készülékek méretében."
       },
       "profile_match_threshold": {
-        "label": "Egyezési küszöb"
+        "label": "Egyezési küszöb",
+        "doc": "Minimális hasonlósági pontszám (0-1) szükséges a ciklus végén a programazonosító elfogadásához. Emelje fel a hibás azonosítások csökkentése érdekében; csökkentse, ha a gép programjai nem illeszkednek. Az alapértelmezett 0,4 konzervatív kiindulópont."
       },
       "profile_unmatch_threshold": {
-        "label": "Nem egyező küszöb"
+        "label": "Nem egyező küszöb",
+        "doc": "Ha egy élő ciklus közbeni meccs ez alá csökken, a próbaazonosító törlődik. Tartsa egy kicsit az egyezési küszöb alatt, hogy a hasonlóság rövid csökkenése ne fordítsa vissza páratlanná a kijelzőt."
       },
       "profile_match_interval": {
-        "label": "Egyezési intervallum"
+        "label": "Egyezési intervallum",
+        "doc": "Milyen gyakran próbálja meg a profilegyeztetést egy futási ciklus során. Az alapértelmezett 300 s (5 perc) egyensúlyban tartja az észlelési sebességet és a CPU-t."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Min. időtartam arány"
+        "label": "Min. időtartam arány",
+        "doc": "Minimális ciklushossz a profilhoz képest. A 0,9 azt jelenti, hogy egy ciklusnak a profil időtartamának legalább 90%-ának kell lennie, hogy illeszkedjen."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Max. időtartam arány"
+        "label": "Max. időtartam arány",
+        "doc": "Maximális ciklushossz a profilhoz képest. Az 1.3 azt jelenti, hogy a ciklusnak a profil időtartamának 130%-a alatt kell lennie, hogy megfeleljen."
       },
       "profile_duration_tolerance": {
-        "label": "Profil időtartam tolerancia"
+        "label": "Profil időtartam tolerancia",
+        "doc": "Az egyeztetés során használt profil átlagos időtartama körüli +/- sáv. A 0,25 azt jelenti, hogy a 60 perces profil 45-75 perces ciklusoknak felel meg."
       },
       "duration_tolerance": {
-        "label": "Becslési tolerancia"
+        "label": "Becslési tolerancia",
+        "doc": "Tolerancia a hátralévő időre vonatkozó becslésekhez (visszajelzés tanulás, nem egyeztetés). Ha a tényleges időtartam a becsült +/-X%-on belül van, az jó egyezésnek számít."
       },
       "auto_label_confidence": {
-        "label": "Automatikus jelölési megbízhatóság"
+        "label": "Automatikus jelölési megbízhatóság",
+        "doc": "Ha a ciklus végén az egyezési pontszám e felett van, akkor a program automatikusan, minden megerősítés nélkül felcímkézik. Emelje fel, hogy nagyobb biztonságot igényeljen az automatikus címkézés előtt; csökkentse az automatizálás érdekében. Az alatta lévő Learning Confidence funkcióval együtt működik."
       },
       "learning_confidence": {
-        "label": "Tanulási megbízhatóság"
+        "label": "Tanulási megbízhatóság",
+        "doc": "Ha a találati pontszám e és az automatikus címke megbízhatósága közé esik, egy visszajelzési értesítés kéri, hogy ellenőrizze az azonosított programot. Ez alatt a pontszám alatt a mérkőzés túl bizonytalan ahhoz, hogy felszínre kerüljön. Az automatikus címke megbízhatósága alatt kell tartani."
       },
       "suppress_feedback_notifications": {
-        "label": "Visszajelzési értesítések elnyomása"
+        "label": "Visszajelzési értesítések elnyomása",
+        "doc": "Ne küldjön folyamatos értesítést, ha egy befejezett ciklus felülvizsgálatra szorul; a visszajelzés továbbra is megjelenik a Ciklusok áttekintési sorban."
       },
       "watchdog_interval": {
-        "label": "Felügyelő intervallum"
+        "label": "Felügyelő intervallum",
+        "doc": "Milyen gyakran ellenőrzi a háttérfigyelő az elakadt érzékelőket és az eltelt időtúllépéseket. Alapértelmezett 30 s."
       },
       "no_update_active_timeout": {
-        "label": "Frissítés nélküli időtúllépés"
+        "label": "Frissítés nélküli időtúllépés",
+        "doc": "Ha futás közben ilyen sokáig nem érkezik tápellátás-frissítés, tegyük fel, hogy a csatlakozó leesett offline állapotban, és kényszerítse a leállítást, hogy elkerülje a zombi ciklust. Az alapértelmezett 600 s felhő- vagy hálókésést tesz lehetővé."
       },
       "progress_reset_delay": {
-        "label": "Folyamat visszaállítási késleltetés"
+        "label": "Folyamat visszaállítási késleltetés",
+        "doc": "A befejezés után tartsa 100%-on az előrehaladást ennyi ideig, hogy a Befejezett felirat látható legyen az irányítópulton, mielőtt visszaállítaná az üresjárati állapotot."
       },
       "auto_maintenance": {
-        "label": "Automatikus karbantartás (éjszakai tisztítás)"
+        "label": "Automatikus karbantartás (éjszakai tisztítás)",
+        "doc": "Futtasson éjszakai takarítást: újjáépítse a profilborítékokat, újraszámolja a ciklus állapotát, törölje a hibakeresési nyomokat és őrizze meg a legutóbbi ciklusokat."
       },
       "expose_debug_entities": {
-        "label": "Hibakeresési entitások közzététele"
+        "label": "Hibakeresési entitások közzététele",
+        "doc": "Extra diagnosztikai HA entitások közzététele (egyezési megbízhatóság, kétértelműség, belső állapot). Az Off (Kikapcsolva) funkció tisztán tartja az entitáslistát normál használathoz."
       },
       "save_debug_traces": {
-        "label": "Hibakeresési nyomok mentése"
+        "label": "Hibakeresési nyomok mentése",
+        "doc": "Tárolja a teljes teljesítmény nyomkövetést és a megfelelő hibakeresési adatokat minden ciklushoz. Hasznos hibaelhárításhoz, de növeli a tárhely méretét."
       },
       "anti_wrinkle_enabled": {
-        "label": "Ránctalanítás érzékelés engedélyezése"
+        "label": "Ránctalanítás érzékelés engedélyezése",
+        "doc": "Ismerje fel a szárítógép által a fő fűtési fázis után kibocsátott rövid, kis teljesítményű szárítópulzusokat, és tartsa őket a kész ciklushoz kapcsolva, ahelyett, hogy új ciklusként olvasná őket."
       },
       "anti_wrinkle_max_power": {
-        "label": "Max. ránctalanítási teljesítmény"
+        "label": "Max. ránctalanítási teljesítmény",
+        "doc": "Az ezen az erőn felüli impulzus valódi új ciklusként kezelendő, nem ránctalanító zuhanásként. Állítsa közvetlenül az impulzusteljesítmény fölé."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Max. időtartam"
+        "label": "Max. időtartam",
+        "doc": "Az ennél hosszabb impulzusokat valódi ciklusnak tekintik, nem pedig ránctalanítónak."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Kilépési teljesítmény küszöb"
+        "label": "Kilépési teljesítmény küszöb",
+        "doc": "A teljesítménynek ez alá kell csökkennie az impulzusok között, hogy a ránctalanító üzemmód aktív maradjon."
       },
       "delay_start_detect_enabled": {
-        "label": "Késleltetett indítás érzékelés engedélyezése"
+        "label": "Késleltetett indítás érzékelés engedélyezése",
+        "doc": "Érzékeli, ha a készülék be van kapcsolva, és vár (késleltetett indítás / készenlét), de még nem kezdte meg a ciklusát, így a készenléti húzást nem tévesztik össze egy futó ciklussal."
       },
       "delay_confirm_seconds": {
-        "label": "Megerősítési másodpercek"
+        "label": "Megerősítési másodpercek",
+        "doc": "A tápfeszültségnek ennyi ideig a készenléti sávban kell maradnia, mielőtt a készüléket indításra várónak tekintik, nem pedig működésre."
       },
       "delay_timeout_hours": {
-        "label": "Időtúllépési órák"
+        "label": "Időtúllépési órák",
+        "doc": "Hagyja abba a várakozást a késleltetett indítási módban ennyi óra elteltével, és térjen vissza üresjáratba, így a gép, amelyet áram alatt hagytak, de nem indult el, nem vár örökké."
       },
       "external_end_trigger_enabled": {
-        "label": "Külső záró trigger engedélyezése"
+        "label": "Külső záró trigger engedélyezése",
+        "doc": "Hagyja, hogy egy külső bináris érzékelő jelezze a ciklus végét, a beépített energiaalapú érzékelés mellett."
       },
       "external_end_trigger": {
-        "label": "Külső trigger entitás"
+        "label": "Külső trigger entitás",
+        "doc": "Bináris érzékelő, amelynek állapotváltozása jelzi a ciklus végét (pl. egy készülék „kész” érintkezője vagy egy társintegráció)."
       },
       "external_end_trigger_inverted": {
-        "label": "Külső trigger invertálása (trigger KI-re)"
+        "label": "Külső trigger invertálása (trigger KI-re)",
+        "doc": "A kioldó érzékelő kikapcsolását (nem BE) tekintse a ciklus végének jeleként."
       },
       "door_sensor_entity": {
-        "label": "Ajtóérzékelő entitás"
+        "label": "Ajtóérzékelő entitás",
+        "doc": "Opcionális ajtó bináris érzékelő. Annak érzékelésére szolgál, ha a készüléket egy ciklus után kinyitották/kirakták."
       },
       "pause_cuts_power": {
-        "label": "Szünet megszakítja az áramot (kapcsolón keresztül)"
+        "label": "Szünet megszakítja az áramot (kapcsolón keresztül)",
+        "doc": "Ha egy ciklus szünetel, kapcsolja ki az alábbi Kapcsoló entitást is. Csak olyan készülékekhez, amelyek dugója biztonságosan levágható a ciklus közepén."
       },
       "switch_entity": {
-        "label": "Kapcsoló entitás"
+        "label": "Kapcsoló entitás",
+        "doc": "Az opcionális kapcsoló szüneteltetéskor kikapcsolható, majd újraindításkor visszakapcsolható, a „Szünet is leállítja az áramot” funkcióval együtt használható."
       },
       "notify_unload_delay_minutes": {
-        "label": "Kirakodási emlékeztető késleltetése"
+        "label": "Kirakodási emlékeztető késleltetése",
+        "doc": "Percekkel a ciklus lejárta után, mielőtt elküldené a még mindig várakozó \"üresd ki a gépet\" emlékeztetőt. Állítsa be a 0-t az emlékeztető letiltásához."
       },
       "pump_stuck_duration": {
-        "label": "Elakadt szivattyú időtartama"
+        "label": "Elakadt szivattyú időtartama",
+        "doc": "Másodpercekkel a szivattyú folyamatosan működhet, mielőtt esetleg elakadtként jelölik meg (kiváltja a beragadt szivattyú eseményt)."
       },
       "notify_start_services": {
-        "label": "Indítási szolgáltatások"
+        "label": "Indítási szolgáltatások",
+        "doc": "notify.* szolgáltatások hívják meg a ciklus indulásakor. Adjon hozzá egyet célonként (telefon, műszerfal stb.); hagyja üresen, hogy ne induljon értesítés."
       },
       "notify_finish_services": {
-        "label": "Befejezési szolgáltatások"
+        "label": "Befejezési szolgáltatások",
+        "doc": "notify.* szolgáltatások hívják meg a ciklus végén. Adjon hozzá egyet célonként; hagyja üresen, hogy ne legyen befejezésért értesítés."
       },
       "notify_live_services": {
-        "label": "Élő folyamat szolgáltatások"
+        "label": "Élő folyamat szolgáltatások",
+        "doc": "notify.* szolgáltatások élő folyamatfrissítést kértek a ciklus lefutása közben. Hagyja üresen az élő folyamatról szóló értesítések letiltásához."
       },
       "notify_people": {
-        "label": "Személyek (Csak otthon értesítéshez)"
+        "label": "Személyek (Csak otthon értesítéshez)",
+        "doc": "személy.* entitások, amelyeket a „Csak otthonról értesítés” használ annak eldöntésére, hogy valaki otthon van-e."
       },
       "notify_only_when_home": {
-        "label": "Csak otthon értesítés"
+        "label": "Csak otthon értesítés",
+        "doc": "Csak akkor küldjön értesítést, ha a linkelt személyek közül legalább egy (fent) otthon van."
       },
       "notify_fire_events": {
-        "label": "HA események aktiválása értesítésekhez"
+        "label": "HA események aktiválása értesítésekhez",
+        "doc": "A ha_washdata_* eseményeket is aktiválja a ciklus indításakor/befejezésekor, így megépítheti saját automatikáját."
       },
       "notify_before_end_minutes": {
-        "label": "Befejezés előtti riasztás"
+        "label": "Befejezés előtti riasztás",
+        "doc": "Ha a becsült hátralévő idő e alá esik, küldjön egy majdnem kész figyelmeztetést. 0 letiltja."
       },
       "notify_live_interval_seconds": {
-        "label": "Élő frissítési intervallum"
+        "label": "Élő frissítési intervallum",
+        "doc": "Milyen gyakran frissülnek az élő állapotról szóló értesítések a ciklus lefutása közben."
       },
       "notify_live_overrun_percent": {
-        "label": "Élő túlfutás % riasztás előtt"
+        "label": "Élő túlfutás % riasztás előtt",
+        "doc": "Ha egy ciklus ennél a százaléknál nagyobb mértékben haladja meg a becsült értéket, küldjön túlfutási riasztást."
       },
       "notify_live_chronometer": {
-        "label": "Élő kronométer használata"
+        "label": "Élő kronométer használata",
+        "doc": "Statikus becslés helyett élőben frissített visszaszámláló megjelenítése az értesítésben (az ezt támogató platformokon)."
       },
       "notify_timeout_seconds": {
-        "label": "Automatikus elvetés után"
+        "label": "Automatikus elvetés után",
+        "doc": "Az értesítés automatikus elvetése ennyi másodperc után (az azt támogató platformokon). A 0 megőrzi, amíg manuálisan el nem távolítja."
       },
       "notify_title": {
-        "label": "Értesítés címe"
+        "label": "Értesítés címe",
+        "doc": "Értesítés címe. Sablonváltozók: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Értesítés ikonja"
+        "label": "Értesítés ikonja",
+        "doc": "Opcionális mdi ikon az értesítéshez (pl. mdi:mosógép). Hagyja üresen a platform alapértelmezett beállításához."
       },
       "notify_start_message": {
-        "label": "Indítási üzenet"
+        "label": "Indítási üzenet",
+        "doc": "A testet a ciklus indulásakor küldik el. Sablonváltozók: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Befejezési üzenet"
+        "label": "Befejezési üzenet",
+        "doc": "A testet a ciklus végén küldik el. Sablonváltozók: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "Befejezés előtti üzenet"
+        "label": "Befejezés előtti üzenet",
+        "doc": "A vég előtti / majdnem kész riasztás törzse. Sablonváltozók: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Emlékeztető üzenet"
+        "label": "Emlékeztető üzenet",
+        "doc": "A még várakozó kirakodási emlékeztető törzse. Az üres a beépített alapértelmezést használja. Sablonváltozók: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Android csatorna (indítás/élő)"
+        "label": "Android csatorna (indítás/élő)",
+        "doc": "Android értesítési csatorna neve kezdő/élő üzenetekhez (csatornánként szabályozza a hangot és a prioritást a mobilalkalmazásban). Az üres a kísérőalkalmazás alapértelmezését használja."
       },
       "notify_finish_channel": {
-        "label": "Android csatorna (befejezés)"
+        "label": "Android csatorna (befejezés)",
+        "doc": "Android értesítési csatorna neve a befejező üzenethez. Üres újra felhasználja a kezdő/élő csatornát."
       },
       "energy_price_entity": {
-        "label": "Energiaár entitás"
+        "label": "Energiaár entitás",
+        "doc": "Érzékelő az aktuális elektromos áram kWh-nkénti árával (pl. dinamikus tarifa). Elsőbbséget élvez az alábbi statikus árral szemben. Minden ciklus lefagyasztja az árat, amikor befejeződött."
       },
       "energy_price_static": {
-        "label": "Statikus energiaár (kWh-nként)"
+        "label": "Statikus energiaár (kWh-nként)",
+        "doc": "Rögzített kWh-nkénti ár a költségadatokhoz használatos, ha nincs fent beállítva élő ár entitás."
       },
       "notify_cycle_timers": {
-        "label": "Ciklus időzítők"
+        "label": "Ciklus időzítők",
+        "doc": "Értesítések a ciklus adott perceiben (például lágyító hozzáadása esetén). Az üzenet támogatja a következőt: {device}, {program}, {minutes}. Engedélyezze az Automatikus szünetet, hogy szüneteljen az adott ponton, és interaktív értesítést kapjon a Folytatás gombbal; folytatás a panelen, a szüneteltetési/folytatási szolgáltatáson vagy az értesítési műveleten keresztül."
       },
       "enable_ml_models": {
-        "label": "Intelligens modellek alkalmazása ciklus közben"
+        "label": "Intelligens modellek alkalmazása ciklus közben",
+        "doc": "Amíg a ciklus fut, hagyja, hogy a modellek finomítsák az élő eredményeket: egyenletesebb hátralévő idő és energia/költségbecslés, valamint idő előtti leállás elleni védelem a végérzékelésnél (csak késleltetheti a befejezést, soha nem fejezheti be korábban, és korlátos). Az Ön finomhangolt modelljeit használja, ha rendelkezésre állnak, ellenkező esetben a beépített modelleket. Ki = csak a klasszikus teljesítményalapú logika (még mindig megbízható)."
       },
       "ml_training_enabled": {
-        "label": "Tanulás erről a gépről"
+        "label": "Tanulás erről a gépről",
+        "doc": "Rendszeresen tanulmányozza az áttekintett ciklusokat egyik napról a másikra, és finomítsa a modelleket ehhez a géphez. A változás csak akkor marad meg, ha valóban jobb eredményt ér el a kitartott ciklusokon, tehát ez csak segíthet, vagy változatlan marad – soha ne regresszió."
       },
       "ml_training_hour": {
-        "label": "Tanulás ennyi órakor"
+        "label": "Tanulás ennyi órakor",
+        "doc": "Helyi napszak (0-23) az éjszakai finomhangolás elvégzéséhez. Válasszon egy csendes órát, például 2 (02:00)."
       },
       "ml_training_min_cycles": {
-        "label": "Előbb ennyi ciklus szükséges"
+        "label": "Előbb ennyi ciklus szükséges",
+        "doc": "A finomhangolás előtt várja meg, amíg legalább ennyi ciklus rögzítésre kerül, hogy legyen miből tanulni."
       },
       "ml_training_interval_days": {
-        "label": "Legfeljebb ennyi naponta ellenőrizve"
+        "label": "Legfeljebb ennyi naponta ellenőrizve",
+        "doc": "Ennyi napon belül legfeljebb egyszer ellenőrizze a fejlesztéseket."
       }
     }
   }

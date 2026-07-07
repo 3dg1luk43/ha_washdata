@@ -80,7 +80,8 @@
         "air_fryer": "Aera Fritilo",
         "bread_maker": "Panfaristo",
         "pump": "Pumpilo / Sumpa pumpilo",
-        "other": "Aliaj (Altnivelaj)"
+        "generic": "Aliaj (Altnivelaj)",
+        "other": "Sojla Aparato"
       }
     }
   },
@@ -620,6 +621,7 @@
       "needs_review": "Bezonas revizion",
       "overrun": "Kuris pli longe ol kutime",
       "artifact_tip": "{n} anomalioj detektitaj (ekz. pordo malfermita meze de la ciklo) - malfermiĝas por vidi ilin sur la grafikaĵo",
+      "restart_gap_tip": "{n} HA restarta breĉo: spurkurbo de potenco havas truon",
       "poor_fit_tip": "Nekonsekvenca matĉohistorio — pripensu rekonstrui ĉi tiun profilon",
       "fair_fit_tip": "Modera kongruo de kongruo — iuj cikloj asignitaj al ĉi tiu profilo havas pli malaltajn fidopoentarojn. Etikedu pli da cikloj aŭ reregistru la profilon por plibonigi precizecon.",
       "auto": "(aŭtomate detektita)",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Supermetu aliajn profilkovertojn sur la supra diagramo por vidi kiu plej taŭgas por ĉi tiu ciklo.",
       "artifact_header": "{n} anomalioj detektitaj dum ĉi tiu ciklo",
       "artifact_footer": "Elstarigita sur la supra grafikaĵo. Tiuj estas pasemaj artefaktoj (ekz. la pordo malfermiĝis mezciklo), ne nepre problemoj.",
+      "restart_gap_header": "{n} HA restarta breĉo dum ĉi tiu ciklo",
+      "restart_gap_item": "{dur} breĉo",
+      "restart_gap_footer": "Emfazita sur la grafeo. Potencdatenoj mankas por ĉi tiuj intervaloj; kongruo uzis nur verajn legojn.",
       "profile_poor_health_detail": "Cikloj asignitaj al ĉi tiu profilo havas malkonsekvencan formojn aŭ malaltan fidon. Konsideru rekonstrui la koverton aŭ revizii etikeditajn ciklojn.",
       "trend_duration_longer": "Daŭro tendenca pli longa ({pct}%/ciklo) — lastatempa mezumo {avg}",
       "trend_duration_shorter": "Daŭro tendencas pli mallonga ({pct}%/ciklo) - lastatempa mezumo {avg}",
@@ -990,235 +995,312 @@
     },
     "setting": {
       "name": {
-        "label": "Aparatonomo"
+        "label": "Aparatonomo",
+        "doc": "Montra nomo montrita en la listo de integriĝoj de HA kaj aparato-registro."
       },
       "device_type": {
-        "label": "Aparatotipo"
+        "label": "Aparatotipo",
+        "doc": "Klaso de aparato. Agordas prudentajn detektajn defaŭltojn (sojloj, malprokrasto, fintraktado) agordis por tiu aparato-tipo; ŝanĝu ĝin nur se la aparato estis origine agordita kiel malĝusta tipo."
       },
       "power_sensor": {
-        "label": "Potencosensilo"
+        "label": "Potencosensilo",
+        "doc": "La sensila ento raportanta vivan potencon en vatoj por ĉi tiu aparato (ekz. sensor.washer_power). Ĉiu ciklo-detekto baziĝas sur ĉi tiu signalo."
       },
       "min_power": {
-        "label": "Minimuma potenco"
+        "label": "Minimuma potenco",
+        "doc": "Absoluta minimuma potenco konsiderata aktiva. Legadoj sub ĉi tio estas traktataj kiel 0 W (ŝtopilo), filtrante la fantoman ŝarĝon de inteligentaj ŝtopiloj kaj standby-LED-oj."
       },
       "off_delay": {
-        "label": "Elŝaltmalfruo"
+        "label": "Elŝaltmalfruo",
+        "doc": "Tempo por atendi post kiam potenco falas antaŭ deklari la ciklon finita. Se la potenco rekomenciĝas ene de ĉi tiu fenestro, la ciklo daŭras senjunte - ĉi tio pontas paŭzojn inter lavaj etapoj. Vazlaviloj havas longajn sekigajn fazojn (malŝalti dum 20-60 minutoj) do la malŝalto devas superi tion por konservi la tutan lavadon+seka kiel unu ciklo."
       },
       "linked_device": {
-        "label": "Grupigi sub aparato"
+        "label": "Grupigi sub aparato",
+        "doc": "Laŭvole nestu ĉi tiun WashData-aparaton sub alia aparato (ekz. la inteligenta ŝtopilo) en la HA-aparato-registro, montrita kiel \"Konektita per ...\"."
       },
       "start_threshold_w": {
-        "label": "Starta sojlo"
+        "label": "Starta sojlo",
+        "doc": "Potenco devas leviĝi super ĉi tiu nivelo por konfirmi ke ciklo komenciĝis. Agordi ĝin tro malalte kaŭzas falsajn startojn de standby-potenco; tro altaj kaj malrapide ekfunkciantaj programoj (malvarma plenigo) estas maltrafitaj. La sugesta motoro metas tion tuj super la observita plej malsupra aktiva potenco de la maŝino."
       },
       "stop_threshold_w": {
-        "label": "Halta sojlo"
+        "label": "Halta sojlo",
+        "doc": "Potenco devas fali sub ĉi tiu nivelo antaŭ ol komenciĝos la ekster-malfrua retronombrado. Agordu ĝin sub la Komenca Sojlo - la interspaco inter ili estas la histerez-bendo, kiu malhelpas flagradon. Se agordita tro alte, malalt-potencaj fazoj (rinse-tenoj, kontraŭ-pliko) false ekigas la finsekvencon."
       },
       "min_off_gap": {
-        "label": "Minimuma elŝaltinterspaco"
+        "label": "Minimuma elŝaltinterspaco",
+        "doc": "Se la maŝino malŝaltas por malpli ol ĉi tiu tempo, la on/off/on sekvenco estas traktita kiel unu kontinua ciklo. Malhelpas trempajn programojn (maŝino malŝaltas dum kelkaj minutoj mez-lavado) dividiĝi en du apartajn ciklojn. Agordu ĝin pli mallonga ol la interspaco inter viaj dors-al-dorsaj ŝarĝoj se vi volas, ke tiuj kalkulu kiel apartajn ciklojn. Aparato-specaj defaŭltoj protektas la tipan intraciklan paŭzon por ĉiu aparato."
       },
       "start_duration_threshold": {
-        "label": "Starta daŭro"
+        "label": "Starta daŭro",
+        "doc": "Potenco devas resti super la komenca sojlo tiel longe por konfirmi veran komencon, malhelpante fraŭtajn sekundajn on/malŝaltilojn komenci ciklon."
       },
       "start_energy_threshold": {
-        "label": "Starta energio"
+        "label": "Starta energio",
+        "doc": "Energio (potenco x tempo) la aparato devas konsumi antaŭ RUN. Mallonga alt-motora pikilo havas tre malaltan energion kaj estas ignorita, malhelpante falsajn startojn."
       },
       "completion_min_seconds": {
-        "label": "Minimuma cikla daŭro"
+        "label": "Minimuma cikla daŭro",
+        "doc": "Cikloj pli mallongaj ol tio estas forĵetitaj kiel fantomaj cikloj (testkuroj, malfermante la pordon por aldoni ŝtrumpeton)."
       },
       "running_dead_zone": {
-        "label": "Funkcianta malaktiva zono"
+        "label": "Funkcianta malaktiva zono",
+        "doc": "Post kiam ciklo komenciĝas, potenco-malpli ene de ĉi tiu fenestro estas ignoritaj. Lavmaŝinoj pleniĝas per malvarma akvo (falas proksime de 0 W antaŭ hejtado) - sen ĉi tiu protekto tiu plenigfazo aspektas kiel ciklofino. Ĉi tio NE preterlasas datumojn: la plena potenco-spuro estas registrita de T=0. La sugesta motoro mezuras la realan lanĉan ŝablonon de via maŝino kaj grandigas ĉi tion aŭtomate."
       },
       "end_energy_threshold": {
-        "label": "Fina energio"
+        "label": "Fina energio",
+        "doc": "Dum la ekster-malfrua retronombrado, akumulita energio (vatoj x tempo) estas komparita kun ĉi tiu sojlo. Se superite, la retronombrado rekomenciĝas - konservante kontraŭ-suldiĝojn kaj vazlavilon sekigantajn vostojn fiksitajn al la ciklo anstataŭ tranĉi ilin mallongaj. Levu ĝin se cikloj finiĝas tro frue dum malvarmiĝo; malaltigu ĝin se detekto estas malvigla."
       },
       "end_repeat_count": {
-        "label": "Fina ripetokalkulo"
+        "label": "Fina ripetokalkulo",
+        "doc": "Nombro da sinsekvaj sub-halt-sojlaj legaĵoj necesaj antaŭ ol la ciklo finiĝas. 1 estas bona por la plej multaj ŝtopiloj. Pliigu al 2-3 se via inteligenta ŝtopilo foje raportas falsan nulan specimenon mezciklo kaj viaj cikloj finiĝas antaŭtempe."
       },
       "sampling_interval": {
-        "label": "Proventempospaco"
+        "label": "Proventempospaco",
+        "doc": "Atendata tempo inter sensillegadoj - uzata por dimensionar la glatiga fenestro kaj komenci malrebati ĝuste. Ĉiu sensila ĝisdatigo estas kaptita sendepende de ĉi tiu valoro; ĝi nur kalibras la kontraŭfluajn kalkulojn. La sugesta motoro mezuras la realan kadencon de via sensilo de pasintaj cikloj kaj agordas ĉi tion aŭtomate."
       },
       "smoothing_window": {
-        "label": "Glatigfenestro"
+        "label": "Glatigfenestro",
+        "doc": "Kiom la kruda potenca signalo estas glatigita. Malalta (2) estas respondema sed brua; alta (5) glatigas pikilojn sed aldonas malfruon."
       },
       "abrupt_drop_watts": {
-        "label": "Subita falo"
+        "label": "Subita falo",
+        "doc": "Potenco pli granda ol tio markas la ciklon kiel Interrompita (mana nuligo) prefere ol natura finpoluro."
       },
       "abrupt_drop_ratio": {
-        "label": "Subita falproporcio"
+        "label": "Subita falproporcio",
+        "doc": "Guto pli granda ol ĉi tiu frakcio de nuna potenco ankaŭ estas traktata kiel subita (0.6 = 60% falo). Komplementas la vat-sojlon trans aparatoj."
       },
       "profile_match_threshold": {
-        "label": "Kongruosojlo"
+        "label": "Kongruosojlo",
+        "doc": "Minimuma simileca poentaro (0-1) bezonata ĉe ciklofino por akcepti programidentigon. Levu ĝin por redukti malĝustajn identigojn; malaltigu ĝin se la programoj de via maŝino ne estas kongruaj. Defaŭlte 0.4 estas konservativa deirpunkto."
       },
       "profile_unmatch_threshold": {
-        "label": "Malkongrusojlo"
+        "label": "Malkongrusojlo",
+        "doc": "Se viva mez-cikla matĉo falas sub ĉi tiu poentaro, la prova identigo estas malbarita. Tenu ĝin iomete sub la Match-Sojlo, por ke mallonga trempiĝo en simileco ne renversu la ekranon reen al nekomparebla."
       },
       "profile_match_interval": {
-        "label": "Kongruointervalo"
+        "label": "Kongruointervalo",
+        "doc": "Kiom ofte provi profilkongruon dum kura ciklo. Defaŭlte 300 s (5 minutoj) ekvilibrigas detektan rapidon kaj CPU."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Minimuma daŭroproporcia"
+        "label": "Minimuma daŭroproporcia",
+        "doc": "Minimuma ciklolongo relative al la profilo. 0.9 signifas, ke ciklo devas esti almenaŭ 90% de la profildaŭro por kongrui."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Maksimuma daŭroproporcia"
+        "label": "Maksimuma daŭroproporcia",
+        "doc": "Maksimuma ciklolongo relative al la profilo. 1.3 signifas, ke ciklo devas esti malpli ol 130% de la profildaŭro por kongrui."
       },
       "profile_duration_tolerance": {
-        "label": "Profila daŭrotolero"
+        "label": "Profila daŭrotolero",
+        "doc": "La +/- bendo ĉirkaŭ profila averaĝa tempodaŭro uzata dum kongruo. 0.25 signifas 60-minutan profilon kongruas kun 45-75-minutaj cikloj."
       },
       "duration_tolerance": {
-        "label": "Taksada tolero"
+        "label": "Taksada tolero",
+        "doc": "Toleremo por tempo restantaj taksoj (lernado de retrosciigo, ne kongruo). Se la fakta daŭro estas ene de +/-X% de la takso, ĝi kalkulas kiel bona kongruo."
       },
       "auto_label_confidence": {
-        "label": "Aŭtomata etikedadkonfido"
+        "label": "Aŭtomata etikedadkonfido",
+        "doc": "Se la matĉopoentaro ĉe ciklofino estas ĉe aŭ super ĉi tio, la programo estas etikedita aŭtomate sen iu ajn konfirma prompto. Levu ĝin por postuli pli altan certecon antaŭ aŭtomata etikedado; malaltigu ĝin por aŭtomatigi pli. Funkcias kune kun Learning Confidence sub ĝi."
       },
       "learning_confidence": {
-        "label": "Lernadkonfido"
+        "label": "Lernadkonfido",
+        "doc": "Se la matĉopoentaro falas inter ĉi tio kaj Aŭtomata Etikedo-Konfido, sciigo de sugestoj petas vin kontroli la identigitan programon. Sub ĉi tiu poentaro la matĉo estas tro necerta por ekaperi. Devas esti konservita sub Aŭtomata Etikedo Konfido."
       },
       "suppress_feedback_notifications": {
-        "label": "Subpremi reagsciigojn"
+        "label": "Subpremi reagsciigojn",
+        "doc": "Ne levu konstantan sciigon kiam finita ciklo bezonas revizion; la sugestoj ankoraŭ aperas en la reviziovico de Cycles."
       },
       "watchdog_interval": {
-        "label": "Gardostara tempospaco"
+        "label": "Gardostara tempospaco",
+        "doc": "Kiom ofte la fona gardohundo kontrolas por haltigitaj sensiloj kaj pasintaj tempo-tempoj. Defaŭlte 30 s."
       },
       "no_update_active_timeout": {
-        "label": "Senĝisdatiga limdaŭro"
+        "label": "Senĝisdatiga limdaŭro",
+        "doc": "Se neniuj potencaj ĝisdatigoj alvenos dum ĉi tiu longa tempo dum funkciado, supozu, ke la ŝtopilo estas faligita eksterrete kaj devigu haltigi por eviti zombian ciklon. Defaŭlte 600 s permesas nubon aŭ maŝmalfruon."
       },
       "progress_reset_delay": {
-        "label": "Progresoreset-malfruo"
+        "label": "Progresoreset-malfruo",
+        "doc": "Post fino, tenu progreson je 100% dum ĉi tiu tempo, por ke Kompletigita estu videbla sur paneloj antaŭ restarigi al Neaktiva."
       },
       "auto_maintenance": {
-        "label": "Aŭtomata bontenado (noktopurigado)"
+        "label": "Aŭtomata bontenado (noktopurigado)",
+        "doc": "Kuru noktan mastrumon: rekonstruu profilkovertojn, rekalkulu ciklan sanon, pritondu sencimigajn spurojn kaj konservu la plej lastatempajn ciklojn."
       },
       "expose_debug_entities": {
-        "label": "Elmontri erarserĉajn entojn"
+        "label": "Elmontri erarserĉajn entojn",
+        "doc": "Publikigi ekstrajn diagnozajn HA-entaĵojn (matĉa fido, ambigueco, ŝtatinternoj). Off tenas la entliston pura por normala uzo."
       },
       "save_debug_traces": {
-        "label": "Konservi erarserĉajn spurojn"
+        "label": "Konservi erarserĉajn spurojn",
+        "doc": "Konservu la plenan potencan spuron kaj kongruajn sencimigajn datumojn por ĉiu ciklo. Utila por solvi problemojn sed pliigas stokan grandecon."
       },
       "anti_wrinkle_enabled": {
-        "label": "Ŝalti kontraŭkrempiĝan detektadon"
+        "label": "Ŝalti kontraŭkrempiĝan detektadon",
+        "doc": "Rekonu la mallongajn malalt-fortajn ciklopulsojn, kiujn elsendas sekigilo post la ĉefa varmega fazo kaj tenu ilin ligitaj al la finita ciklo anstataŭ legi ilin kiel novajn ciklojn."
       },
       "anti_wrinkle_max_power": {
-        "label": "Maksimuma kontraŭkrempiĝa potenco"
+        "label": "Maksimuma kontraŭkrempiĝa potenco",
+        "doc": "Pulso super ĉi tiu potenco estas traktata kiel vera nova ciklo, ne kontraŭ-sulketo. Agordu tuj super la falo-pulsa potenco."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Maksimuma daŭro"
+        "label": "Maksimuma daŭro",
+        "doc": "Pulsoj pli longaj ol ĉi tio estas traktataj kiel reala ciklo prefere ol kontraŭ-sulketo."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Elirsojla potenco"
+        "label": "Elirsojla potenco",
+        "doc": "Potenco devas fali sub ĉi tio inter pulsoj por ke kontraŭ-sulka reĝimo restu aktiva."
       },
       "delay_start_detect_enabled": {
-        "label": "Ŝalti prokrastitan komencodetektadon"
+        "label": "Ŝalti prokrastitan komencodetektadon",
+        "doc": "Detektu kiam la aparato estas ŝaltita kaj atendanta (malfrua ekfunkciigo / ŝancatendo) sed ne komencis sian ciklon, do standby-tiro ne estas konfuzita kun kuranta ciklo."
       },
       "delay_confirm_seconds": {
-        "label": "Konfirmaj sekundoj"
+        "label": "Konfirmaj sekundoj",
+        "doc": "Potenco devas resti en la standby por ĉi tio longe antaŭ ol la aparato estas traktata kiel atendanta por komenci anstataŭ funkcii."
       },
       "delay_timeout_hours": {
-        "label": "Limdaŭraj horoj"
+        "label": "Limdaŭraj horoj",
+        "doc": "Ĉesu atendi en prokrasta startreĝimo post ĉi tiuj multaj horoj kaj revenu al neaktiva, do maŝino lasita ŝaltita sed neniam komencita ne atendas eterne."
       },
       "external_end_trigger_enabled": {
-        "label": "Ŝalti eksteran finan ekigilon"
+        "label": "Ŝalti eksteran finan ekigilon",
+        "doc": "Lasu eksteran binaran sensilon signali la finon de ciklo, krom la enkonstruita potenco-bazita detekto."
       },
       "external_end_trigger": {
-        "label": "Ekstera ekigilento"
+        "label": "Ekstera ekigilento",
+        "doc": "Binara sensilo kies statoŝanĝo markas la ciklofinon (ekz. aparato \"finita\" kontakto aŭ kunulintegriĝo)."
       },
       "external_end_trigger_inverted": {
-        "label": "Inversigi eksteran ekigilon (ekigi ĉe MALŜALTITA)"
+        "label": "Inversigi eksteran ekigilon (ekigi ĉe MALŜALTITA)",
+        "doc": "Traktu la ellasilsensilon malŝaltantan (prefere ol ON) kiel la signalon de fino de ciklo."
       },
       "door_sensor_entity": {
-        "label": "Pordsensora ento"
+        "label": "Pordsensora ento",
+        "doc": "Laŭvola pordo binara sensilo. Uzita por detekti kiam la aparato estis malfermita/malŝarĝita post ciklo."
       },
       "pause_cuts_power": {
-        "label": "Paŭzo ankaŭ tranĉas potencon (per ŝaltilo)"
+        "label": "Paŭzo ankaŭ tranĉas potencon (per ŝaltilo)",
+        "doc": "Kiam ciklo estas paŭzita, ankaŭ malŝaltu la Ŝaltilo-Entaĵon sube. Nur por aparatoj, kies ŝtopilo povas sekure tranĉi mezciklon."
       },
       "switch_entity": {
-        "label": "Ŝaltilento"
+        "label": "Ŝaltilento",
+        "doc": "Laŭvola ŝaltilo malŝaltita ĉe paŭzo kaj reŝaltita dum rekomenco, uzata kune kun \"Paŭzo ankaŭ tranĉas potencon\"."
       },
       "notify_unload_delay_minutes": {
-        "label": "Elŝarĝa rememorigo-malfruo"
+        "label": "Elŝarĝa rememorigo-malfruo",
+        "doc": "Minutojn post kiam ciklo finiĝas antaŭ sendi la ankoraŭ atendantan memorigilon \"malŝarĝi la maŝinon\". Agordu 0 por malŝalti la memorigilon."
       },
       "pump_stuck_duration": {
-        "label": "Blokita pumpildaŭro"
+        "label": "Blokita pumpildaŭro",
+        "doc": "Sekundojn pumpilo povas funkcii ade antaŭ ol ĝi estas markita kiel eventuale blokita (pafas la ŝtopitan-pumpilan okazaĵon)."
       },
       "notify_start_services": {
-        "label": "Startaj servoj"
+        "label": "Startaj servoj",
+        "doc": "sciigi.* servoj vokis kiam ciklo komenciĝas. Aldonu unu por celo (telefono, panelo, ktp.); lasu malplena por neniu starta sciigo."
       },
       "notify_finish_services": {
-        "label": "Finaj servoj"
+        "label": "Finaj servoj",
+        "doc": "sciigi.* servoj vokis kiam ciklo finiĝas. Aldonu unu por celo; lasu malplena por neniu finsciigo."
       },
       "notify_live_services": {
-        "label": "Vivaj progresservoj"
+        "label": "Vivaj progresservoj",
+        "doc": "sciigi.* servoj postulis vivajn progresajn ĝisdatigojn dum ciklo funkcias. Lasu malplena por malŝalti sciigojn pri reala progreso."
       },
       "notify_people": {
-        "label": "Personoj (por nur kiam hejme)"
+        "label": "Personoj (por nur kiam hejme)",
+        "doc": "persono.* estaĵoj uzataj de \"Sciigi Nur Kiam Hejme\" por decidi ĉu iu estas hejme."
       },
       "notify_only_when_home": {
-        "label": "Sciigi nur kiam hejme"
+        "label": "Sciigi nur kiam hejme",
+        "doc": "Sendu sciigojn nur kiam almenaŭ unu el la ligitaj homoj (supre) estas hejme."
       },
       "notify_fire_events": {
-        "label": "Ekigi HA-eventojn por sciigoj"
+        "label": "Ekigi HA-eventojn por sciigoj",
+        "doc": "Ankaŭ lanĉu ha_washdata_* eventojn ĉe ciklo-komenco/fino, por ke vi povu konstrui viajn proprajn aŭtomatigojn."
       },
       "notify_before_end_minutes": {
-        "label": "Antaŭfina averto"
+        "label": "Antaŭfina averto",
+        "doc": "Sendu alarmon de Preskaŭ Farita kiam la estimata tempo restanta falas sub ĉi tio. 0 malŝaltas ĝin."
       },
       "notify_live_interval_seconds": {
-        "label": "Viva ĝisdatiga tempospaco"
+        "label": "Viva ĝisdatiga tempospaco",
+        "doc": "Kiom ofte estas refreŝigitaj sciigoj pri reala progreso dum ciklo funkcias."
       },
       "notify_live_overrun_percent": {
-        "label": "% da viva superiro antaŭ averto"
+        "label": "% da viva superiro antaŭ averto",
+        "doc": "Se ciklo preterpasas sian takson je pli ol ĉi tiu procento, sendu transpaŝan alarmon."
       },
       "notify_live_chronometer": {
-        "label": "Uzi vivan kronometron"
+        "label": "Uzi vivan kronometron",
+        "doc": "Montru real-ĝisdatigitan retronombradon en la sciigo (sur platformoj kiuj subtenas ĝin) anstataŭ statika takso."
       },
       "notify_timeout_seconds": {
-        "label": "Aŭtomate forigi post"
+        "label": "Aŭtomate forigi post",
+        "doc": "Aŭtomate forĵetu la sciigon post ĉi tiuj multaj sekundoj (sur platformoj kiuj subtenas ĝin). 0 konservas ĝin ĝis forĵetite permane."
       },
       "notify_title": {
-        "label": "Sciigotitolo"
+        "label": "Sciigotitolo",
+        "doc": "Sciiga titolo. Ŝablonaj variabloj: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Sciigikono"
+        "label": "Sciigikono",
+        "doc": "Laŭvola mdi-ikono por la sciigo (ekz. mdi:wash-machine). Lasu malplena por la platformo defaŭlta."
       },
       "notify_start_message": {
-        "label": "Startmesaĝo"
+        "label": "Startmesaĝo",
+        "doc": "Korpo sendita kiam ciklo komenciĝas. Ŝablonaj variabloj: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Finmesaĝo"
+        "label": "Finmesaĝo",
+        "doc": "Korpo sendita kiam ciklo finiĝas. Ŝablonaj variabloj: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "Antaŭfina mesaĝo"
+        "label": "Antaŭfina mesaĝo",
+        "doc": "Korpo de la antaŭfino / preskaŭ farita atentigo. Ŝablonaj variabloj: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Rememorigo mesaĝo"
+        "label": "Rememorigo mesaĝo",
+        "doc": "Korpo de la ankoraŭ atendanta malŝarĝa memorigilo. Blanka uzas la enkonstruitan defaŭlton. Ŝablonaj variabloj: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Android-kanalo (start/vivo)"
+        "label": "Android-kanalo (start/vivo)",
+        "doc": "Nomo de kanala sciigo de Android por komencaj/vivaj mesaĝoj (regas per-kanalan sonon kaj prioritaton en la poŝtelefona aplikaĵo). Blank uzas la akompanan apon defaŭltan."
       },
       "notify_finish_channel": {
-        "label": "Android-kanalo (fino)"
+        "label": "Android-kanalo (fino)",
+        "doc": "Nomo de kanala sciigo de Android por la finmesaĝo. Blanka reuzas la komencan/vivan kanalon."
       },
       "energy_price_entity": {
-        "label": "Energipreza ento"
+        "label": "Energipreza ento",
+        "doc": "Sensilo kun la nuna elektroprezo per kWh (ekz. dinamika tarifo). Havas prioritaton super la senmova prezo sube. Ĉiu ciklo frostigas la prezon en efiko kiam ĝi finiĝis."
       },
       "energy_price_static": {
-        "label": "Statika energiprezo (po kWh)"
+        "label": "Statika energiprezo (po kWh)",
+        "doc": "Fiksa prezo per kWh uzata por kostaj ciferoj kiam neniu realpreza ento estas fiksita supre."
       },
       "notify_cycle_timers": {
-        "label": "Ciklaj tempokalkuliloj"
+        "label": "Ciklaj tempokalkuliloj",
+        "doc": "Sciigoj je specifaj minutoj en ciklo (ekz. por aldoni moligilon). Mesaĝo subtenas {device}, {program}, {minutes}. Ebligu Aŭtoman paŭzon por paŭzi ĉe tiu punkto kaj ricevi interagan sciigon per butono Rekomenci; rekomencu per la panelo, la paŭzo/rekomenca servo aŭ la sciiga ago."
       },
       "enable_ml_models": {
-        "label": "Apliki inteligentan modelojn dum ciklo"
+        "label": "Apliki inteligentan modelojn dum ciklo",
+        "doc": "Dum ciklo kuras, lasu la modelojn rafini la vivajn rezultojn: pli stabila tempo-restanta kaj energio/kostotakso, kaj kontraŭ-malfrua-halta gardisto ĉe fina detekto (ĝi povas nur iam prokrasti finpoluro, neniam fini unu frue, kaj estas limigita). Uzas viajn fajnagordintajn modelojn kiam disponeblas, alie la enkonstruitajn. Off = la klasika potenc-bazita logiko nur (ankoraŭ fidinda)."
       },
       "ml_training_enabled": {
-        "label": "Lerni de ĉi tiu maŝino"
+        "label": "Lerni de ĉi tiu maŝino",
+        "doc": "Periode studu viajn reviziitajn ciklojn dum la nokto kaj agordu la modelojn al ĉi tiu specifa maŝino. Ŝanĝo estas konservita nur kiam ĝi vere gajnas pli bone en tenitaj cikloj, do ĉi tio povas nur helpi aŭ resti la sama - neniam regresas."
       },
       "ml_training_hour": {
-        "label": "Lerni je la horo"
+        "label": "Lerni je la horo",
+        "doc": "Loka horo de la tago (0-23) por fari la noktan fajnagordon. Elektu trankvilan horon kiel 2 (02:00)."
       },
       "ml_training_min_cycles": {
-        "label": "Unue bezonataj cikloj"
+        "label": "Unue bezonataj cikloj",
+        "doc": "Atendu ĝis almenaŭ tiom da cikloj estas registritaj antaŭ fajnagordado, do estas sufiĉe por lerni."
       },
       "ml_training_interval_days": {
-        "label": "Kontroli plej ofte ĉiuj"
+        "label": "Kontroli plej ofte ĉiuj",
+        "doc": "Rekontrolu por plibonigoj maksimume unufoje dum tiom da tagoj."
       }
     }
   }

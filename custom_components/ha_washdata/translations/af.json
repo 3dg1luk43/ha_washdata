@@ -80,7 +80,8 @@
         "air_fryer": "Air Fryer",
         "bread_maker": "Broodmaker",
         "pump": "Pomp / Sump Pomp",
-        "other": "Ander (gevorderd)"
+        "generic": "Ander (gevorderd)",
+        "other": "Drempeltoestel"
       }
     }
   },
@@ -620,6 +621,7 @@
       "needs_review": "Benodig hersiening",
       "overrun": "Het langer as gewoonlik gehardloop",
       "artifact_tip": "{n} afwykings bespeur (bv. deur middel van siklus oopgemaak) – maak oop om dit op die grafiek te sien",
+      "restart_gap_tip": "{n} HA-herbegin-gaping: kragspoor het 'n gat",
       "poor_fit_tip": "Inkonsekwente pasgeskiedenis – oorweeg dit om hierdie profiel te herbou",
       "fair_fit_tip": "Matige wedstrydkonsekwentheid – sommige siklusse wat aan hierdie profiel toegewys is, het laer vertrouetellings. Benoem meer siklusse of teken die profiel weer op om akkuraatheid te verbeter.",
       "auto": "(outomaties bespeur)",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Trek ander profielkoeverte oor op die grafiek hierbo om te sien watter een die beste by hierdie siklus pas.",
       "artifact_header": "{n} afwykings bespeur gedurende hierdie siklus",
       "artifact_footer": "Uitgelig op die grafiek hierbo. Dit is verbygaande artefakte (bv. die deur wat in die middel van die siklus oopgemaak is), nie noodwendig probleme nie.",
+      "restart_gap_header": "{n} HA-herbegin-gaping tydens hierdie siklus",
+      "restart_gap_item": "{dur} gaping",
+      "restart_gap_footer": "Uitgelig op die grafiek. Kragdata ontbreek vir hierdie intervalle; ooreenstemming het slegs werklike lesings gebruik.",
       "profile_poor_health_detail": "Siklusse wat aan hierdie profiel toegewys is, het inkonsekwente vorms of lae vertroue. Oorweeg dit om die koevert te herbou of benoemde siklusse te hersien.",
       "trend_duration_longer": "Tydsduur neiging langer ({pct}%/siklus) — onlangse gem. {avg}",
       "trend_duration_shorter": "Tydsduur neiging korter ({pct}%/siklus) — onlangse gem. {avg}",
@@ -990,235 +995,312 @@
     },
     "setting": {
       "name": {
-        "label": "Toestelnaam"
+        "label": "Toestelnaam",
+        "doc": "Vertoonnaam wat in die HA-integrasielys en toestelregister gewys word."
       },
       "device_type": {
-        "label": "Soort toestel"
+        "label": "Soort toestel",
+        "doc": "Toestel klas. Stel sinvolle opsporing verstek (drempels, af-vertraging, eindhantering) ingestel vir daardie toestel tipe; verander dit slegs as die toestel oorspronklik as die verkeerde tipe opgestel is."
       },
       "power_sensor": {
-        "label": "Kragsensor"
+        "label": "Kragsensor",
+        "doc": "Die sensor-entiteit rapporteer lewendige krag in watt vir hierdie toestel (bv. sensor.washer_power). Alle siklusbespeuring is gebaseer op hierdie sein."
       },
       "min_power": {
-        "label": "Minimum krag"
+        "label": "Minimum krag",
+        "doc": "Absolute minimum krag word as aktief beskou. Lesings hieronder word as 0 W (bystand) hanteer, wat die spooklading van slimproppe en bystand-LED's uitfiltreer."
       },
       "off_delay": {
-        "label": "Af-vertraging"
+        "label": "Af-vertraging",
+        "doc": "Tyd om te wag nadat krag gedaal het voordat die siklus voltooi verklaar word. As krag binne hierdie venster hervat word, gaan die siklus naatloos voort - dit oorbrug pouses tussen wasstadia. Skottelgoedwassers het lang droogfases (krag af vir 20-60 min) so die af-vertraging moet dit oorskry om die hele was+droog as een siklus te hou."
       },
       "linked_device": {
-        "label": "Groepeer onder toestel"
+        "label": "Groepeer onder toestel",
+        "doc": "Maak hierdie WashData-toestel opsioneel nes onder 'n ander toestel (bv. die slimprop) in die HA-toestelregister, getoon as \"Gekoppel via ...\"."
       },
       "start_threshold_w": {
-        "label": "Begindrempel"
+        "label": "Begindrempel",
+        "doc": "Krag moet bo hierdie vlak styg om te bevestig dat 'n siklus begin het. As dit te laag gestel word, veroorsaak dit vals begin van bystandkrag; te hoog en stadig-begin programme (koue vul) word gemis. Die voorstel-enjin stel dit net bo die masjien se waargenome laagste aktiewe drywing."
       },
       "stop_threshold_w": {
-        "label": "Stopdrempel"
+        "label": "Stopdrempel",
+        "doc": "Krag moet onder hierdie vlak val voordat die af-vertraging-aftelling begin. Stel dit onder die begindrempel - die gaping tussen hulle is die histereseband wat flikkering voorkom. As dit te hoog gestel is, veroorsaak lae-krag fases (spoelhoue, anti-kreukel) die eindvolgorde valslik."
       },
       "min_off_gap": {
-        "label": "Min af-gaping"
+        "label": "Min af-gaping",
+        "doc": "As die masjien vir minder as hierdie tyd afskakel, word die aan/af/aan-volgorde as een aaneenlopende siklus behandel. Verhoed dat weekprogramme (masjien skakel af vir 'n paar minute mid-was) om in twee afsonderlike siklusse verdeel te word. Stel dit korter as die gaping tussen jou rug-aan-rug vragte as jy wil hê dat dit as afsonderlike siklusse getel word. Toesteltipe verstekke beskerm die tipiese binnesikluspouse vir elke toestel."
       },
       "start_duration_threshold": {
-        "label": "Beginduur"
+        "label": "Beginduur",
+        "doc": "Krag moet so lank bo die begindrempel bly om 'n werklike begin te bevestig, wat verhoed dat split-sekonde aan/af-skakelaars 'n siklus begin."
       },
       "start_energy_threshold": {
-        "label": "Beginenergie"
+        "label": "Beginenergie",
+        "doc": "Energie (krag x tyd) wat die toestel moet verbruik voordat dit LAAT. 'n Kort hoë-krag piek het baie lae energie en word geïgnoreer, wat vals begin voorkom."
       },
       "completion_min_seconds": {
-        "label": "Min siklusduur"
+        "label": "Min siklusduur",
+        "doc": "Siklusse korter as dit word as spooksiklusse weggegooi (toetslopies, maak die deur oop om 'n sokkie by te voeg)."
       },
       "running_dead_zone": {
-        "label": "Hardloopse dooie sone"
+        "label": "Hardloopse dooie sone",
+        "doc": "Nadat 'n siklus begin het, word kragdalings binne hierdie venster geïgnoreer. Wasmasjiene vul met koue water (val naby 0 W voor verhitting) - sonder hierdie beskerming lyk daardie vulfase soos 'n siklus einde. Dit slaan NIE data oor nie: die volle kragspoor word vanaf T=0 aangeteken. Die voorstel-enjin meet jou masjien se werklike opstartpatroon en verander dit outomaties."
       },
       "end_energy_threshold": {
-        "label": "Eindenergie"
+        "label": "Eindenergie",
+        "doc": "Tydens die af-vertraging-aftelling word opgehoopte energie (watt x tyd) met hierdie drempel vergelyk. As dit oorskry word, word die aftelling teruggestel - hou anti-kreuktuimels en skottelgoedwasserdroogsterte aan die siklus vas in plaas daarvan om hulle kort te sny. Verhoog dit as siklusse te vroeg eindig tydens afkoeling; verlaag dit as opsporing traag is."
       },
       "end_repeat_count": {
-        "label": "Eindherhaaltelling"
+        "label": "Eindherhaaltelling",
+        "doc": "Aantal opeenvolgende lesings onder-stop-drempel wat vereis word voordat die siklus eindig. 1 is goed vir die meeste proppe. Verhoog tot 2-3 as jou slimprop soms 'n vals-nul-steekproef in die middel van die siklus rapporteer en jou siklusse eindig voortydig."
       },
       "sampling_interval": {
-        "label": "Steekproefinterval"
+        "label": "Steekproefinterval",
+        "doc": "Verwagte tyd tussen sensorlesings - word gebruik om die gladmaakvenster te vergroot en korrek te begin ontbons. Elke sensoropdatering word vasgelê ongeag hierdie waarde; dit kalibreer slegs die stroomafberekeninge. Die voorstel-enjin meet jou sensor se werklike kadens van vorige siklusse en stel dit outomaties in."
       },
       "smoothing_window": {
-        "label": "Gladstrykvenster"
+        "label": "Gladstrykvenster",
+        "doc": "Hoeveel die rou kragsein glad gemaak word. Laag (2) reageer maar raserig; hoog (5) maak spykers glad, maar voeg vertraging by."
       },
       "abrupt_drop_watts": {
-        "label": "Skielike daling"
+        "label": "Skielike daling",
+        "doc": "'n Kragdaling groter as hierdie vlag die siklus as Onderbreek (handmatig kanselleer) eerder as 'n natuurlike afwerking."
       },
       "abrupt_drop_ratio": {
-        "label": "Skielike dalingsverhouding"
+        "label": "Skielike dalingsverhouding",
+        "doc": "'n Daling groter as hierdie fraksie van huidige drywing word ook as skielik behandel (0.6 = 'n 60% daling). Komplementeer die watt-drempel oor toestelgroottes."
       },
       "profile_match_threshold": {
-        "label": "Passingsdrempel"
+        "label": "Passingsdrempel",
+        "doc": "Minimum ooreenkomstelling (0-1) vereis aan die einde van die siklus om 'n program-identifikasie te aanvaar. Verhoog dit om verkeerde identifikasies te verminder; verlaag dit as jou masjien se programme nie ooreenstem nie. Verstek 0.4 is 'n konserwatiewe beginpunt."
       },
       "profile_unmatch_threshold": {
-        "label": "Nie-passingsdrempel"
+        "label": "Nie-passingsdrempel",
+        "doc": "As 'n regstreekse middelsikluswedstryd onder hierdie telling daal, word die voorlopige identifikasie skoongemaak. Hou dit 'n bietjie onder die wedstryddrempel sodat 'n kort duik in ooreenkoms nie die skerm terugdraai na ongeëwenaard nie."
       },
       "profile_match_interval": {
-        "label": "Passingsinterval"
+        "label": "Passingsinterval",
+        "doc": "Hoe gereeld om profielpassing te probeer tydens 'n hardloopsiklus. Verstek 300 s (5 minute) balanseer opsporingspoed en SVE."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Min duurverhouding"
+        "label": "Min duurverhouding",
+        "doc": "Minimum sikluslengte relatief tot die profiel. 0.9 beteken 'n siklus moet ten minste 90% van die profielduur wees om te pas."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Maks duurverhouding"
+        "label": "Maks duurverhouding",
+        "doc": "Maksimum sikluslengte relatief tot die profiel. 1.3 beteken dat 'n siklus minder as 130% van die profielduur moet wees om te pas."
       },
       "profile_duration_tolerance": {
-        "label": "Profiel-duurtoleransie"
+        "label": "Profiel-duurtoleransie",
+        "doc": "Die +/- band rondom 'n profiel gemiddelde duur wat tydens passing gebruik word. 0.25 beteken 'n 60 min profiel pas by 45-75 min siklusse."
       },
       "duration_tolerance": {
-        "label": "Skattingstoleransie"
+        "label": "Skattingstoleransie",
+        "doc": "Toleransie vir tydoorblywende skattings (leerterugvoer, nie ooreenstem nie). As die werklike tydsduur binne +/-X% van die skatting is, tel dit as 'n goeie passing."
       },
       "auto_label_confidence": {
-        "label": "Outomatiese etikettering-vertroue"
+        "label": "Outomatiese etikettering-vertroue",
+        "doc": "As die wedstrydtelling aan die einde van die siklus op of hoër is, word die program outomaties gemerk sonder enige bevestigingsboodskap. Verhoog dit om hoër sekerheid te vereis voor outo-etikettering; verlaag dit om meer te outomatiseer. Werk saam met Learning Confidence daaronder."
       },
       "learning_confidence": {
-        "label": "Leer-vertroue"
+        "label": "Leer-vertroue",
+        "doc": "As die wedstrydtelling tussen hierdie en Auto-Label Confidence val, vra 'n terugvoerkennisgewing jou om die geïdentifiseerde program te verifieer. Onder hierdie telling is die wedstryd te onseker om na vore te kom. Moet onder Auto-etiket vertroue gehou word."
       },
       "suppress_feedback_notifications": {
-        "label": "Onderdruk terugvoerkennisgewings"
+        "label": "Onderdruk terugvoerkennisgewings",
+        "doc": "Moenie 'n aanhoudende kennisgewing instuur wanneer 'n voltooide siklus hersiening benodig nie; die terugvoer verskyn steeds in die Cycles review tou."
       },
       "watchdog_interval": {
-        "label": "Waghond-interval"
+        "label": "Waghond-interval",
+        "doc": "Hoe gereeld die agtergrondwaghond kyk vir geblokkeerde sensors en verstreke uitteltyd. Verstek 30 s."
       },
       "no_update_active_timeout": {
-        "label": "Geen-opdatering-tydsduur"
+        "label": "Geen-opdatering-tydsduur",
+        "doc": "As geen kragopdaterings vir so lank aankom terwyl dit aan die gang is nie, neem aan dat die prop vanlyn gedaal het en forseer stop om 'n zombiesiklus te vermy. Standaard 600 s maak voorsiening vir wolk- of maasvertraging."
       },
       "progress_reset_delay": {
-        "label": "Vordering-herstelstel-vertraging"
+        "label": "Vordering-herstelstel-vertraging",
+        "doc": "Nadat u klaar is, hou vordering so lank op 100% sodat Voltooid op kontroleskerms sigbaar is voordat u na Idle terugstel."
       },
       "auto_maintenance": {
-        "label": "Outo-onderhoud (nagtelike opruiming)"
+        "label": "Outo-onderhoud (nagtelike opruiming)",
+        "doc": "Voer nagtelike huishouding uit: herbou profielkoeverte, herbereken siklusgesondheid, snoei ontfoutspore en behou die mees onlangse siklusse."
       },
       "expose_debug_entities": {
-        "label": "Stel ontfout-entiteite bloot"
+        "label": "Stel ontfout-entiteite bloot",
+        "doc": "Publiseer ekstra diagnostiese HA-entiteite (pas vertroue, dubbelsinnigheid, staatsinterne). Af hou die entiteitlys skoon vir normale gebruik."
       },
       "save_debug_traces": {
-        "label": "Stoor ontfoutspore"
+        "label": "Stoor ontfoutspore",
+        "doc": "Stoor die volle kragspoor en bypassende ontfoutdata vir elke siklus. Nuttig vir die oplos van probleme, maar verhoog die stoorgrootte."
       },
       "anti_wrinkle_enabled": {
-        "label": "Aktiveer anti-kreukopsporing"
+        "label": "Aktiveer anti-kreukopsporing",
+        "doc": "Herken die kort lae-krag tuimelpulse wat 'n droër na die hoofhittefase uitstraal en hou dit vas aan die voltooide siklus in plaas daarvan om dit as nuwe siklusse te lees."
       },
       "anti_wrinkle_max_power": {
-        "label": "Maks anti-kreuk krag"
+        "label": "Maks anti-kreuk krag",
+        "doc": "'n Polsslag bo hierdie krag word beskou as 'n werklike nuwe siklus, nie 'n anti-rimpel tuimel nie. Stel net bokant die tuimel-pulskrag."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Maksimum duur"
+        "label": "Maksimum duur",
+        "doc": "Pulse langer as dit word as 'n ware siklus behandel eerder as 'n anti-rimpel tuimel."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Uitgangsdrempel krag"
+        "label": "Uitgangsdrempel krag",
+        "doc": "Krag moet onder hierdie tussen pulse val vir anti-rimpelmodus om aktief te bly."
       },
       "delay_start_detect_enabled": {
-        "label": "Aktiveer vertraagde-begin-opsporing"
+        "label": "Aktiveer vertraagde-begin-opsporing",
+        "doc": "Bespeur wanneer die toestel aangeskakel is en wag (vertraagde aansit / bystand) maar nie sy siklus begin het nie, so bystand-trekking word nie verwar met 'n hardloopsiklus nie."
       },
       "delay_confirm_seconds": {
-        "label": "Bevestig sekondes"
+        "label": "Bevestig sekondes",
+        "doc": "Krag moet so lank in die bystandsband bly voordat die toestel beskou word as om te wag om te begin eerder as om te loop."
       },
       "delay_timeout_hours": {
-        "label": "Tydsduur ure"
+        "label": "Tydsduur ure",
+        "doc": "Hou op wag in vertraagde-aanskakelmodus na hierdie baie ure en keer terug na luier, so 'n masjien wat aangedryf gelaat word, maar nooit begin nie, wag nie vir ewig nie."
       },
       "external_end_trigger_enabled": {
-        "label": "Aktiveer eksterne eindsneller"
+        "label": "Aktiveer eksterne eindsneller",
+        "doc": "Laat 'n eksterne binêre sensor die einde van 'n siklus aandui, benewens die ingeboude kraggebaseerde opsporing."
       },
       "external_end_trigger": {
-        "label": "Eksterne sneller entiteit"
+        "label": "Eksterne sneller entiteit",
+        "doc": "Binêre sensor wie se toestandsverandering die einde van die siklus aandui (bv. 'n toestel \"klaar\" kontak of 'n metgesel-integrasie)."
       },
       "external_end_trigger_inverted": {
-        "label": "Omkeer eksterne sneller (sneller op AF)"
+        "label": "Omkeer eksterne sneller (sneller op AF)",
+        "doc": "Behandel die snellersensor wat AFskakel (eerder as AAN) as die einde-van-siklussein."
       },
       "door_sensor_entity": {
-        "label": "Deursensor entiteit"
+        "label": "Deursensor entiteit",
+        "doc": "Opsionele deur binêre sensor. Word gebruik om vas te stel wanneer die toestel na 'n siklus oop-/afgelaai is."
       },
       "pause_cuts_power": {
-        "label": "Pouse sny ook krag (via skakelaar)"
+        "label": "Pouse sny ook krag (via skakelaar)",
+        "doc": "Wanneer 'n siklus onderbreek word, skakel ook die Skakelaar-entiteit hieronder af. Slegs vir toestelle waarvan die prop veilig in die middel van die siklus afgesny kan word."
       },
       "switch_entity": {
-        "label": "Skakelaar entiteit"
+        "label": "Skakelaar entiteit",
+        "doc": "Opsionele skakelaar afgeskakel op pouse en weer aan wanneer hervat word, gebruik saam met \"Pouse onderbreek ook krag\"."
       },
       "notify_unload_delay_minutes": {
-        "label": "Aflaai-nag-vertraging"
+        "label": "Aflaai-nag-vertraging",
+        "doc": "Minute nadat 'n siklus geëindig het voordat die \"ontlaai die masjien\"-herinnering wat nog wag, gestuur word. Stel 0 om die herinnering te deaktiveer."
       },
       "pump_stuck_duration": {
-        "label": "Pomp vasgesit duur"
+        "label": "Pomp vasgesit duur",
+        "doc": "Sekondes kan 'n pomp aaneenlopend loop voordat dit gemerk word as moontlik vas (brand die vassit-pomp-gebeurtenis af)."
       },
       "notify_start_services": {
-        "label": "Begin dienste"
+        "label": "Begin dienste",
+        "doc": "stel in kennis.* dienste geroep wanneer 'n siklus begin. Voeg een per teiken by (foon, dashboard, ens.); laat leeg vir geen begin kennisgewing."
       },
       "notify_finish_services": {
-        "label": "Klaar dienste"
+        "label": "Klaar dienste",
+        "doc": "stel in kennis.* dienste geroep wanneer 'n siklus eindig. Voeg een per teiken by; laat leeg vir geen klaar kennisgewing."
       },
       "notify_live_services": {
-        "label": "Regstreekse vordering dienste"
+        "label": "Regstreekse vordering dienste",
+        "doc": "stel in kennis.* dienste gevra vir regstreekse vordering-opdaterings terwyl 'n siklus loop. Laat leeg om kennisgewings oor regstreekse vordering te deaktiveer."
       },
       "notify_people": {
-        "label": "Mense (vir slegs tuis)"
+        "label": "Mense (vir slegs tuis)",
+        "doc": "persoon.* entiteite wat gebruik word deur \"Stel slegs in kennis wanneer tuis\" om te besluit of iemand tuis is."
       },
       "notify_only_when_home": {
-        "label": "Kennisgewings slegs tuis"
+        "label": "Kennisgewings slegs tuis",
+        "doc": "Stuur slegs kennisgewings wanneer ten minste een van die gekoppelde mense (hierbo) tuis is."
       },
       "notify_fire_events": {
-        "label": "Brand HA-gebeurtenisse vir kennisgewings"
+        "label": "Brand HA-gebeurtenisse vir kennisgewings",
+        "doc": "Vuur ook ha_washdata_*-gebeurtenisse op die siklus begin/eind sodat jy jou eie outomatisering kan bou."
       },
       "notify_before_end_minutes": {
-        "label": "Voor-einde-waarskuwing"
+        "label": "Voor-einde-waarskuwing",
+        "doc": "Stuur 'n Amper Klaar-waarskuwing wanneer die geskatte tyd wat oorbly onder dit daal. 0 deaktiveer dit."
       },
       "notify_live_interval_seconds": {
-        "label": "Regstreekse opdate-interval"
+        "label": "Regstreekse opdate-interval",
+        "doc": "Hoe gereeld regstreekse vordering kennisgewings verfris word terwyl 'n siklus loop."
       },
       "notify_live_overrun_percent": {
-        "label": "Regstreekse oorloop % voor waarskuwing"
+        "label": "Regstreekse oorloop % voor waarskuwing",
+        "doc": "As 'n siklus met meer as hierdie persentasie verby sy skatting loop, stuur 'n oorskrydingwaarskuwing."
       },
       "notify_live_chronometer": {
-        "label": "Gebruik regstreekse tydmeter"
+        "label": "Gebruik regstreekse tydmeter",
+        "doc": "Wys 'n regstreekse opdatering afteltydteller in die kennisgewing (op platforms wat dit ondersteun) in plaas van 'n statiese skatting."
       },
       "notify_timeout_seconds": {
-        "label": "Outo-verwerp na"
+        "label": "Outo-verwerp na",
+        "doc": "Verwerp die kennisgewing outomaties na soveel sekondes (op platforms wat dit ondersteun). 0 hou dit totdat dit met die hand afgemaak word."
       },
       "notify_title": {
-        "label": "Kennisgewingstitel"
+        "label": "Kennisgewingstitel",
+        "doc": "Kennisgewing titel. Sjabloonveranderlikes: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Kennisgewingsikoon"
+        "label": "Kennisgewingsikoon",
+        "doc": "Opsionele mdi-ikoon vir die kennisgewing (bv. mdi:wasmasjien). Laat leeg vir die platform verstek."
       },
       "notify_start_message": {
-        "label": "Begin boodskap"
+        "label": "Begin boodskap",
+        "doc": "Liggaam gestuur wanneer 'n siklus begin. Sjabloonveranderlikes: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Klaar boodskap"
+        "label": "Klaar boodskap",
+        "doc": "Liggaam gestuur wanneer 'n siklus klaar is. Sjabloonveranderlikes: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "Voor-voltooide boodskap"
+        "label": "Voor-voltooide boodskap",
+        "doc": "Liggaam van die voor-einde / amper-klaar waarskuwing. Sjabloonveranderlikes: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Herinnering boodskap"
+        "label": "Herinnering boodskap",
+        "doc": "Liggaam van die ontlaai-herinnering wat nog wag. Blank gebruik die ingeboude verstek. Sjabloonveranderlikes: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Android-kanaal (begin/regstreeks)"
+        "label": "Android-kanaal (begin/regstreeks)",
+        "doc": "Android-kennisgewingkanaalnaam vir begin/regstreekse boodskappe (beheer per kanaal klank en prioriteit op die mobiele toepassing). Blank gebruik die metgesel-toepassing verstek."
       },
       "notify_finish_channel": {
-        "label": "Android-kanaal (klaar)"
+        "label": "Android-kanaal (klaar)",
+        "doc": "Android-kennisgewingkanaalnaam vir die voltooiingsboodskap. Blank hergebruik die begin/regstreekse kanaal."
       },
       "energy_price_entity": {
-        "label": "Energieprysentiteit"
+        "label": "Energieprysentiteit",
+        "doc": "Sensor met die huidige elektrisiteitsprys per kWh (bv. 'n dinamiese tarief). Het voorkeur bo die statiese prys hieronder. Elke siklus vries die prys wat in werking is wanneer dit klaar is."
       },
       "energy_price_static": {
-        "label": "Statiese energieprys (per kWh)"
+        "label": "Statiese energieprys (per kWh)",
+        "doc": "Vaste prys per kWh wat vir kostesyfers gebruik word wanneer geen lewendige prysentiteit hierbo gestel is nie."
       },
       "notify_cycle_timers": {
-        "label": "Siklus-tydsaamhoeders"
+        "label": "Siklus-tydsaamhoeders",
+        "doc": "Kennisgewings op spesifieke minute in 'n siklus (bv. om versagmiddel by te voeg). Boodskap ondersteun {device}, {program}, {minutes}. Aktiveer Outo-pouse om op daardie stadium te onderbreek en 'n interaktiewe kennisgewing met 'n Hervat-knoppie te ontvang; hervat via die paneel, die pouse/hervat-diens of die kennisgewingsaksie."
       },
       "enable_ml_models": {
-        "label": "Pas slim modelle toe tydens 'n siklus"
+        "label": "Pas slim modelle toe tydens 'n siklus",
+        "doc": "Terwyl 'n siklus loop, laat die modelle die lewendige resultate verfyn: 'n bestendiger tyd-oorblywende en energie-/kosteskatting, en 'n anti-voortydige-stop-wag by eindebespeuring (dit kan net ooit 'n afwerking vertraag, nooit een vroeg beëindig nie, en is begrens). Gebruik jou verfynde modelle wanneer beskikbaar, andersins die ingeboude. Af = slegs die klassieke kraggebaseerde logika (steeds betroubaar)."
       },
       "ml_training_enabled": {
-        "label": "Leer van hierdie masjien"
+        "label": "Leer van hierdie masjien",
+        "doc": "Bestudeer jou hersiene siklusse gereeld oornag en verfyn die modelle vir hierdie spesifieke masjien. 'n Verandering word slegs behou wanneer dit werklik beter tellings behaal op uitgehoue ​​siklusse, so dit kan net help of dieselfde bly - nooit agteruitgaan nie."
       },
       "ml_training_hour": {
-        "label": "Leer op uur"
+        "label": "Leer op uur",
+        "doc": "Plaaslike uur van die dag (0-23) om die oornag-fyninstelling te doen. Kies 'n stil uur soos 2 (02:00)."
       },
       "ml_training_min_cycles": {
-        "label": "Siklusse eers nodig"
+        "label": "Siklusse eers nodig",
+        "doc": "Wag totdat ten minste soveel siklusse aangeteken is voordat jy fyn instel, so daar is genoeg om van te leer."
       },
       "ml_training_interval_days": {
-        "label": "Kontroleer hoogstens elke"
+        "label": "Kontroleer hoogstens elke",
+        "doc": "Kontroleer hoogstens een keer per soveel dae weer vir verbeterings."
       }
     }
   }

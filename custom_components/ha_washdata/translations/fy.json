@@ -80,7 +80,8 @@
         "air_fryer": "Air Fryer",
         "bread_maker": "Bread Maker",
         "pump": "Pomp / Sump Pomp",
-        "other": "Oare (Avansearre)"
+        "generic": "Oare (Avansearre)",
+        "other": "Drompelapparaat"
       }
     }
   },
@@ -620,6 +621,7 @@
       "needs_review": "Beoardieling nedich",
       "overrun": "Rûn langer as gewoanlik",
       "artifact_tip": "{n} ûntdutsen anomalies (bgl",
+      "restart_gap_tip": "{n} HA-werstart-gat: fermogenstrack hat in gat",
       "poor_fit_tip": "Inkonsistente wedstriidskiednis - tink om dit profyl opnij op te bouwen",
       "fair_fit_tip": "Matige wedstriidkonsistinsje - guon syklussen dy't oan dit profyl binne tawiisd hawwe legere fertrouwenskoares. Label mear syklusen of registrearje it profyl opnij om de krektens te ferbetterjen.",
       "auto": "(auto ûntdutsen)",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Overlay oare profyl envelopes op de kaart hjirboppe om te sjen hokker men it bêste past by dizze syklus.",
       "artifact_header": "{n} anomalies ûntdutsen yn dizze syklus",
       "artifact_footer": "Markearre op 'e grafyk hjirboppe. Dit binne oergeande artefakten (bygelyks de doar iepene mid-syklus), net needsaaklikerwize problemen.",
+      "restart_gap_header": "{n} HA-werstart-gat tidens dizze syklus",
+      "restart_gap_item": "{dur} gat",
+      "restart_gap_footer": "Markeare op de grafyk. Fermogensgegeven ûntbrekke foar dizze yntervallen; oerienkomst brûkte allinnich echte lêzings.",
       "profile_poor_health_detail": "Cycles tawiisd oan dit profyl hawwe inkonsistente foarmen of leech fertrouwen. Beskôgje it opnij opbouwen fan 'e envelop of it besjen fan markearre syklusen.",
       "trend_duration_longer": "Duration trending langer ({pct}%/syklus) - resinte gem. {avg}",
       "trend_duration_shorter": "Duration trending koarter ({pct}%/syklus) - resinte gem. {avg}",
@@ -990,235 +995,312 @@
     },
     "setting": {
       "name": {
-        "label": "Apparaat Namme"
+        "label": "Apparaat Namme",
+        "doc": "Displaynamme werjûn yn 'e HA-yntegraasjelist en apparaatregister."
       },
       "device_type": {
-        "label": "Apparaat Type"
+        "label": "Apparaat Type",
+        "doc": "Appliance klasse. Stelt ferstannige opspoaren standerts (drompels, off-fertraging, ein ôfhanneling) ôfstimd foar dat apparaat type; feroarje it allinnich as it apparaat wie oarspronklik ynsteld as it ferkearde type."
       },
       "power_sensor": {
-        "label": "Fermogen Sensor"
+        "label": "Fermogen Sensor",
+        "doc": "De sensor-entiteit rapportearret live krêft yn watt foar dit apparaat (bgl. sensor.washer_power). Alle syklusdeteksje is basearre op dit sinjaal."
       },
       "min_power": {
-        "label": "Minimum Fermogen"
+        "label": "Minimum Fermogen",
+        "doc": "Absolute minimum macht beskôge aktyf. Lêzingen hjirûnder wurde behannele as 0 W (standby), it filterjen fan de fantoomlading fan smart plugs en standby LED's."
       },
       "off_delay": {
-        "label": "Út Fertraging"
+        "label": "Út Fertraging",
+        "doc": "Tiid om te wachtsjen nei't macht falt foardat jo de syklus klear ferklearje. As de macht binnen dit finster weromgiet, giet de syklus naadloos troch - dit oerbrêget pauzes tusken waskstadia. Ofwaskmasines hawwe lange drogende fazen (macht út foar 20-60 min), dus de út-fertraging moat grutter wêze as dat om de heule wask + droech as ien syklus te hâlden."
       },
       "linked_device": {
-        "label": "Groepearje Under Apparaat"
+        "label": "Groepearje Under Apparaat",
+        "doc": "Opsjoneel nêst dit WashData-apparaat ûnder in oar apparaat (bgl. de smart plug) yn it HA-apparaatregister, werjûn as \"Ferbûn fia ...\"."
       },
       "start_threshold_w": {
-        "label": "Start Drompel"
+        "label": "Start Drompel",
+        "doc": "Macht moat boppe dit nivo opkomme om te befêstigjen dat in syklus is begon. It ynstellen fan it te leech feroarsaket falske starts út standby macht; te heech en stadich begjinnende programma's (kâlde fill) wurde mist. De suggestjemotor stelt dit krekt boppe de waarnommen leechste aktive krêft fan 'e masine."
       },
       "stop_threshold_w": {
-        "label": "Stop Drompel"
+        "label": "Stop Drompel",
+        "doc": "Macht moat ûnder dit nivo falle foardat it ôftellen fan off-fertraging begjint. Set it ûnder de startdrompel - it gat tusken har is de hysteresisband dy't flikkerjen foarkomt. As ynsteld te heech, lege-power fazen (spoelen hâldt, anty-kreuk) falsk trigger de ein folchoarder."
       },
       "min_off_gap": {
-        "label": "Min Út Gat"
+        "label": "Min Út Gat",
+        "doc": "As de masine foar minder dan dizze tiid útskeakelt, wurdt de oan/út/oan-sekwinsje behannele as ien trochgeande syklus. Foarkomt dat seakprogramma's (masine skeakelt ferskate minuten mids waskjen út) wurde splitst yn twa aparte syklusen. Stel it koarter yn dan it gat tusken jo efterste ladingen as jo wolle dat dy as aparte syklusen rekkene wurde. Standert standerts fan apparaattype beskermje de typyske pauze yn 'e syklus foar elk apparaat."
       },
       "start_duration_threshold": {
-        "label": "Start Doer"
+        "label": "Start Doer",
+        "doc": "Macht moat sa lang boppe de startdrompel bliuwe om in echte start te befêstigjen, foar te kommen dat split-sekonde oan/út-skeakels in syklus begjinne."
       },
       "start_energy_threshold": {
-        "label": "Start Enerzjy"
+        "label": "Start Enerzjy",
+        "doc": "Enerzjy (macht x tiid) it apparaat moat konsumearje foardat RUNNING. In koarte spike mei hege krêft hat heul lege enerzjy en wurdt negearre, foarkomt falske starts."
       },
       "completion_min_seconds": {
-        "label": "Min Syklus Doer"
+        "label": "Min Syklus Doer",
+        "doc": "Cycles dy't koarter binne as dit, wurde wegere as spoeksyklusen (testrinnen, de doar iepenje om in sok ta te foegjen)."
       },
       "running_dead_zone": {
-        "label": "Rinnende Deade Sône"
+        "label": "Rinnende Deade Sône",
+        "doc": "Nei in syklus begjint, macht dips binnen dit finster wurde negearre. Wasmachines folje mei kâld wetter (falle tichtby 0 W foar ferwaarming) - sûnder dizze beskerming liket de fillfase as in syklusein. Dit slacht NET gegevens oer: de folsleine krêftspoar wurdt opnomd fan T = 0. De suggestjemotor mjit it eigentlike opstartpatroan fan jo masine en makket dit automatysk."
       },
       "end_energy_threshold": {
-        "label": "Ein Enerzjy Drompel"
+        "label": "Ein Enerzjy Drompel",
+        "doc": "Tidens it ôftellen fan fertraging wurdt opboude enerzjy (watt x tiid) fergelike mei dizze drompel. As oerskreden wurdt, wurdt de countdown weromset - hâld anty-kreuktuimels en ôfwaskmasjine-droogende sturten ferbûn oan 'e syklus ynstee fan se koart te snijen. Ferheegje it as syklussen te betiid einigje by it ôfkoelen; ferleegje it as deteksje traach is."
       },
       "end_repeat_count": {
-        "label": "Ein Werhelling Teller"
+        "label": "Ein Werhelling Teller",
+        "doc": "Oantal opienfolgjende lêzingen ûnder de stop-drompel nedich foardat de syklus einiget. 1 is goed foar de measte plugs. Ferheegje nei 2-3 as jo tûke plug sa no en dan in falske-nul-steekproef midden yn 'e syklus rapporteart en jo syklussen te betiid einigje."
       },
       "sampling_interval": {
-        "label": "Sampling Ynterval"
+        "label": "Sampling Ynterval",
+        "doc": "Ferwachte tiid tusken sensorlêzingen - brûkt om grutte fan it glêdfinster te meitsjen en debounce korrekt te begjinnen. Eltse sensor update wurdt fêstlein nettsjinsteande dizze wearde; it kalibrearret allinnich de streamôfwerts berekkeningen. De suggestjemotor mjit de werklike kadens fan jo sensor fan ferline syklusen en stelt dit automatysk yn."
       },
       "smoothing_window": {
-        "label": "Smoothing Rút"
+        "label": "Smoothing Rút",
+        "doc": "Hoefolle de rauwe macht sinjaal wurdt glêd. Leech (2) reagearret mar lûdroftich; heech (5) glêdt spikes mar foeget lag."
       },
       "abrupt_drop_watts": {
-        "label": "Abrupte Fal"
+        "label": "Abrupte Fal",
+        "doc": "In macht drop grutter dan dit flagge de syklus as ûnderbrutsen (hânlieding ôfbrekke) ynstee fan in natuerlike finish."
       },
       "abrupt_drop_ratio": {
-        "label": "Abrupte Fal Ferhâlding"
+        "label": "Abrupte Fal Ferhâlding",
+        "doc": "In drip grutter dan dizze fraksje fan hjoeddeiske macht wurdt ek behannele as abrupt (0,6 = in 60% drop). Komplementearret de wattdrompel oer apparaatgrutte."
       },
       "profile_match_threshold": {
-        "label": "Wedstriid Drompel"
+        "label": "Wedstriid Drompel",
+        "doc": "Minimale oerienkomstskoare (0-1) fereaske oan 'e ein fan' e syklus om in programma-identifikaasje te akseptearjen. Ferheegje it om ferkearde identifikaasjes te ferminderjen; ferleegje it as de programma's fan jo masine net oerienkomme. Standert 0.4 is in konservatyf útgongspunt."
       },
       "profile_unmatch_threshold": {
-        "label": "Unwedstriid Drompel"
+        "label": "Unwedstriid Drompel",
+        "doc": "As in live midsykluswedstriid ûnder dizze skoare falt, wurdt de foarlopige identifikaasje wiske. Hâld it in bytsje ûnder de Match Threshold, sadat in koarte dip yn oerienkomst it display net weromkeart nei ongeëvenaard."
       },
       "profile_match_interval": {
-        "label": "Wedstriid Ynterval"
+        "label": "Wedstriid Ynterval",
+        "doc": "Hoe faak besykje profyl oerienkomst tidens in rinnende syklus. Standert 300 s (5 minuten) balances detection snelheid en CPU."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Min Doer Ferhâlding"
+        "label": "Min Doer Ferhâlding",
+        "doc": "Minimum syklus lingte relatyf oan it profyl. 0.9 betsjut dat in syklus op syn minst 90% fan 'e profyldoer moat wêze om te passen."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Max Doer Ferhâlding"
+        "label": "Max Doer Ferhâlding",
+        "doc": "Maksimum syklus lingte relatyf oan it profyl. 1.3 betsjut dat in syklus moat wêze ûnder 130% fan de profyl doer te passen."
       },
       "profile_duration_tolerance": {
-        "label": "Profyl Doer Tolerânsje"
+        "label": "Profyl Doer Tolerânsje",
+        "doc": "De +/- band om in gemiddelde doer fan it profyl brûkt by it oerienkommen. 0,25 betsjut in 60 min profyl oerienkomt mei 45-75 min cycles."
       },
       "duration_tolerance": {
-        "label": "Skatting Tolerânsje"
+        "label": "Skatting Tolerânsje",
+        "doc": "Tolerânsje foar oerbleaune skatten (learfeedback, net oerienkommende). As de werklike doer binnen +/-X% fan 'e skatting is, telt it as in goede wedstriid."
       },
       "auto_label_confidence": {
-        "label": "Auto-etiket Betrouwen"
+        "label": "Auto-etiket Betrouwen",
+        "doc": "As de wedstriidskoare oan 'e ein fan' e syklus op of boppe dit is, wurdt it programma automatysk markearre sûnder befêstigingsprompt. Ferheegje it om hegere wissichheid te freegjen foardat auto-labeling; ferleegje it om mear te automatisearjen. Wurket yn gearhing mei Learning Confidence derûnder."
       },
       "learning_confidence": {
-        "label": "Learen Betrouwen"
+        "label": "Learen Betrouwen",
+        "doc": "As de wedstriid skoare falt tusken dit en Auto-Label Confidence, in feedback notifikaasje freget jo te ferifiearjen de identifisearre programma. Under dizze skoare is de wedstriid te ûnwis om boppe te kommen. Moat ûnder Auto-Label Confidence wurde hâlden."
       },
       "suppress_feedback_notifications": {
-        "label": "Feedback Notifikaasjes Undertdrukke"
+        "label": "Feedback Notifikaasjes Undertdrukke",
+        "doc": "Meitsje gjin oanhâldende notifikaasje op as in foltôge syklus beoardieling nedich is; de feedback noch ferskynt yn de Cycles review wachtrige."
       },
       "watchdog_interval": {
-        "label": "Watchdog Ynterval"
+        "label": "Watchdog Ynterval",
+        "doc": "Hoe faak kontrolearret de eftergrûnwachthûn op stilsteande sensoren en ferrûne timeouts. Standert 30 s."
       },
       "no_update_active_timeout": {
-        "label": "Gjin-Update Timeout"
+        "label": "Gjin-Update Timeout",
+        "doc": "As der foar dizze lange tiid gjin machtupdates oankomme, nim dan oan dat de plug offline is sakke en stopje om in zombiesyklus te foarkommen. Standert 600 s soarget foar wolk of mesh lag."
       },
       "progress_reset_delay": {
-        "label": "Foarútgong Reset Fertraging"
+        "label": "Foarútgong Reset Fertraging",
+        "doc": "Nei it foltôgjen, hâld de foarútgong sa lang op 100%, sadat Completed sichtber is op dashboards foardat jo weromsette nei Idle."
       },
       "auto_maintenance": {
-        "label": "Auto Ûnderhâld (nachtlik skjinmeitsjen)"
+        "label": "Auto Ûnderhâld (nachtlik skjinmeitsjen)",
+        "doc": "Rin nachtlike húshâlding út: profilenvelopjes opnij opbouwe, syklussûnens opnij berekkenje, spoaren fan debug snoeie en de meast resinte syklusen behâlde."
       },
       "expose_debug_entities": {
-        "label": "Debug Entiteiten Bleatstelle"
+        "label": "Debug Entiteiten Bleatstelle",
+        "doc": "Publisearje ekstra diagnostyske HA-entiteiten (wedstriidfertrouwen, dûbelsinnigens, ynterne steaten). Off hâldt de entiteitslist skjin foar normaal gebrûk."
       },
       "save_debug_traces": {
-        "label": "Debug Spoaren Bewarje"
+        "label": "Debug Spoaren Bewarje",
+        "doc": "Bewarje de folsleine krêftspoar en oerienkommende debuggegevens foar elke syklus. Nuttich foar it oplossen fan problemen, mar fergruttet de opslachgrutte."
       },
       "anti_wrinkle_enabled": {
-        "label": "Anti-Rimpel Deteksje Ynskeakelje"
+        "label": "Anti-Rimpel Deteksje Ynskeakelje",
+        "doc": "Erkenne de koarte lege-power tumble pulses in droeger útstjit nei de wichtichste waarmte faze en hâld se hechte oan de klear syklus ynstee fan in lêzen se as nije syklussen."
       },
       "anti_wrinkle_max_power": {
-        "label": "Max Anti-Rimpel Fermogen"
+        "label": "Max Anti-Rimpel Fermogen",
+        "doc": "In pols boppe dizze krêft wurdt behannele as in echte nije syklus, net in anty-rimpel tumble. Set krekt boppe de tumble-pulse macht."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Max Doer"
+        "label": "Max Doer",
+        "doc": "Pulsen langer dan dit wurde behannele as in echte syklus yn stee fan in anty-rimpel tumble."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Exit Fermogen Drompel"
+        "label": "Exit Fermogen Drompel",
+        "doc": "Power moat falle ûnder dit tusken pulses foar anty-rimpel modus te bliuwen aktyf."
       },
       "delay_start_detect_enabled": {
-        "label": "Fertrage-Start Deteksje Ynskeakelje"
+        "label": "Fertrage-Start Deteksje Ynskeakelje",
+        "doc": "Detektearje wannear't it apparaat oanstutsen is en wachtet (fertrage start / standby) mar syn syklus net is begon, dus standby-tekening wurdt net fersin mei in rinnende syklus."
       },
       "delay_confirm_seconds": {
-        "label": "Befêstigje Sekonden"
+        "label": "Befêstigje Sekonden",
+        "doc": "Macht moat sa lang yn 'e standby-band bliuwe foardat it apparaat wurdt behannele as wachtsjen om te begjinnen ynstee fan rinnen."
       },
       "delay_timeout_hours": {
-        "label": "Timeout Oeren"
+        "label": "Timeout Oeren",
+        "doc": "Stopje mei wachtsjen yn 'e modus foar fertrage start nei dizze protte oeren en gean werom nei idle, dus in masine dy't oandreaun is, mar nea begon, wachtet net foar altyd."
       },
       "external_end_trigger_enabled": {
-        "label": "Eksterne Ein-Trigger Ynskeakelje"
+        "label": "Eksterne Ein-Trigger Ynskeakelje",
+        "doc": "Lit in eksterne binêre sensor sinjalearje it ein fan in syklus, neist de ynboude macht-basearre detectie."
       },
       "external_end_trigger": {
-        "label": "Externe Trigger Entiteit"
+        "label": "Externe Trigger Entiteit",
+        "doc": "Binêre sensor waans steat feroaring markearret de syklus ein (bygelyks in apparaat \"klear\" kontakt of in begelieder yntegraasje)."
       },
       "external_end_trigger_inverted": {
-        "label": "Externe Trigger Omkearre (trigger op ÚT)"
+        "label": "Externe Trigger Omkearre (trigger op ÚT)",
+        "doc": "Behannelje de triggersensor dy't OFF (ynstee fan ON) draait as it ein-fan-syklussinjaal."
       },
       "door_sensor_entity": {
-        "label": "Doarsensor Entiteit"
+        "label": "Doarsensor Entiteit",
+        "doc": "Opsjonele doar binêre sensor. Wurdt brûkt om te detektearjen wannear't it apparaat nei in syklus iepene/ôfladen is."
       },
       "pause_cuts_power": {
-        "label": "Pauze Snijt Ek Fermogen (fia skeakelaar)"
+        "label": "Pauze Snijt Ek Fermogen (fia skeakelaar)",
+        "doc": "As in syklus wurdt pauze, skeakelet ek de Switch Entity hjirûnder. Allinnich foar apparaten wêrfan de stekker feilich mids syklus kin wurde ôfsnien."
       },
       "switch_entity": {
-        "label": "Skeakelaar Entiteit"
+        "label": "Skeakelaar Entiteit",
+        "doc": "Opsjonele skeakel skeakele út op pauze en wer oan by it hervatten, brûkt tegearre mei \"Pauze snijt ek macht\"."
       },
       "notify_unload_delay_minutes": {
-        "label": "Ûntlaad Herinnering Fertraging"
+        "label": "Ûntlaad Herinnering Fertraging",
+        "doc": "Minuten nei in syklus einiget foardat it ferstjoeren fan de noch wachtsjende herinnering \"de masine losmeitsje\". Stel 0 yn om de herinnering út te skeakeljen."
       },
       "pump_stuck_duration": {
-        "label": "Pomp Fêstsitte Doer"
+        "label": "Pomp Fêstsitte Doer",
+        "doc": "Sekonden kin in pomp kontinu rinne foardat it wurdt markearre as mooglik fêst te sitten (brânt it stuck-pomp-evenemint)."
       },
       "notify_start_services": {
-        "label": "Start Tsjinsten"
+        "label": "Start Tsjinsten",
+        "doc": "notify.* tsjinsten neamd as in syklus begjint. Foegje ien ta per doel ta (tillefoan, dashboard, ensfh.); lit leech foar gjin start notifikaasje."
       },
       "notify_finish_services": {
-        "label": "Einige Tsjinsten"
+        "label": "Einige Tsjinsten",
+        "doc": "notify.* tsjinsten neamd as in syklus einiget. Foegje ien per doel ta; lit leech foar gjin finish notifikaasje."
       },
       "notify_live_services": {
-        "label": "Live Foarútgong Tsjinsten"
+        "label": "Live Foarútgong Tsjinsten",
+        "doc": "notify.* tsjinsten neamd foar live foarútgong updates wylst in syklus rint. Lit leech om notifikaasjes foar live foarútgong út te skeakeljen."
       },
       "notify_people": {
-        "label": "Minsken (foar Allinnich By Thús)"
+        "label": "Minsken (foar Allinnich By Thús)",
+        "doc": "persoan.* entiteiten brûkt troch \"Notify Only When Home\" om te besluten oft immen thús is."
       },
       "notify_only_when_home": {
-        "label": "Allinnich By Thús Melde"
+        "label": "Allinnich By Thús Melde",
+        "doc": "Ferstjoere notifikaasjes allinich as op syn minst ien fan 'e keppele minsken (boppe) thús is."
       },
       "notify_fire_events": {
-        "label": "HA Eveneminten Oanstekke foar Notifikaasjes"
+        "label": "HA Eveneminten Oanstekke foar Notifikaasjes",
+        "doc": "Fier ek ha_washdata_*-eveneminten op by syklusstart/finish, sadat jo eigen automatisearrings kinne bouwe."
       },
       "notify_before_end_minutes": {
-        "label": "Pre-Ein Alarm"
+        "label": "Pre-Ein Alarm",
+        "doc": "Stjoer in hast klear warskôging as de rûsde oerbleaune tiid ûnder dit sakket. 0 skeakelet it út."
       },
       "notify_live_interval_seconds": {
-        "label": "Live Update Ynterval"
+        "label": "Live Update Ynterval",
+        "doc": "Hoe faak wurde notifikaasjes foar live foarútgong ferfarske wylst in syklus rint."
       },
       "notify_live_overrun_percent": {
-        "label": "Live Overrun % Foardat Alarm"
+        "label": "Live Overrun % Foardat Alarm",
+        "doc": "As in syklus rint foarby syn skatting mei mear as dit persintaazje, stjoer in oerrin warskôging."
       },
       "notify_live_chronometer": {
-        "label": "Brûk Live Chronometer"
+        "label": "Brûk Live Chronometer",
+        "doc": "Lit in live-fernijende countdown-timer sjen yn 'e notifikaasje (op platfoarms dy't it stypje) ynstee fan in statyske skatting."
       },
       "notify_timeout_seconds": {
-        "label": "Auto-Ôfwize Nei"
+        "label": "Auto-Ôfwize Nei",
+        "doc": "Ferwiderje de notifikaasje automatysk nei dizze protte sekonden (op platfoarms dy't it stypje). 0 hâldt it oant it mei de hân wegere wurdt."
       },
       "notify_title": {
-        "label": "Notifikaasje Titel"
+        "label": "Notifikaasje Titel",
+        "doc": "Notifikaasje titel. Sjabloanfariabelen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Notifikaasje Ikoan"
+        "label": "Notifikaasje Ikoan",
+        "doc": "Opsjoneel mdi-ikoan foar de notifikaasje (bgl. mdi: waskmasine). Lit leech foar it platfoarm standert."
       },
       "notify_start_message": {
-        "label": "Start Berjocht"
+        "label": "Start Berjocht",
+        "doc": "Lichaam ferstjoerd as in syklus begjint. Sjabloanfariabelen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Einige Berjocht"
+        "label": "Einige Berjocht",
+        "doc": "Lichaam ferstjoerd as in syklus einiget. Sjabloanfariabelen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "Pre-Foltôging Berjocht"
+        "label": "Pre-Foltôging Berjocht",
+        "doc": "Lichaam fan 'e warskôging foarôf / hast klear. Sjabloanfariabelen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Herinnering Berjocht"
+        "label": "Herinnering Berjocht",
+        "doc": "Lichaam fan 'e noch wachte unload herinnering. Blank brûkt de ynboude standert. Sjabloanfariabelen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Android Kanaal (start/live)"
+        "label": "Android Kanaal (start/live)",
+        "doc": "Android-notifikaasjekanaalnamme foar start- / live-berjochten (bestjoert lûd per kanaal en prioriteit op 'e mobile app). Blank brûkt de standert begeliedende app."
       },
       "notify_finish_channel": {
-        "label": "Android Kanaal (einige)"
+        "label": "Android Kanaal (einige)",
+        "doc": "Android-notifikaasjekanaalnamme foar it finishberjocht. Blank brûkt it start-/livekanaal opnij."
       },
       "energy_price_entity": {
-        "label": "Enerzjy Priis Entiteit"
+        "label": "Enerzjy Priis Entiteit",
+        "doc": "Sensor mei de hjoeddeistige elektrisiteitspriis per kWh (bygelyks in dynamysk taryf). Nimt foarrang boppe de statyske priis hjirûnder. Elke syklus befriest de priis yn wurking as it klear is."
       },
       "energy_price_static": {
-        "label": "Stasjonêre Enerzjy Priis (per kWh)"
+        "label": "Stasjonêre Enerzjy Priis (per kWh)",
+        "doc": "Fêste priis per kWh brûkt foar kosten sifers as gjin live priis entiteit is ynsteld hjirboppe."
       },
       "notify_cycle_timers": {
-        "label": "Syklus Timers"
+        "label": "Syklus Timers",
+        "doc": "Notifikaasjes op spesifike minuten yn in syklus (bygelyks om ontharder ta te foegjen). Berjocht stipet {device}, {program}, {minutes}. Auto-pauze ynskeakelje om op dat punt te pausen en in ynteraktive notifikaasje te ûntfangen mei in Resume-knop; ferfetsje fia it paniel, de pauze/ferfetsje tsjinst, of de notifikaasjeaksje."
       },
       "enable_ml_models": {
-        "label": "Tapasse Tûke Modellen Tidens in Syklus"
+        "label": "Tapasse Tûke Modellen Tidens in Syklus",
+        "doc": "Wylst in syklus rint, lit de modellen ferfine de live resultaten: in steadier oerbleaune tiid en enerzjy / kosten skatting, en in anty-foartiid-stop wacht op ein detection (it kin allinnich ea fertrage in finish, nea einigje ien betiid, en wurdt begrinzge). Brûkt jo fine-tuned modellen as beskikber, oars de ynboude. Off = allinich de klassike power-basearre logika (noch betrouber)."
       },
       "ml_training_enabled": {
-        "label": "Leare fan Dizze Masine"
+        "label": "Leare fan Dizze Masine",
+        "doc": "Studearje jo besjoene syklusen periodyk oernachtsje en fine de modellen oan dizze spesifike masine. In feroaring wurdt allinich bewarre as it wirklik better skoart op úthâlden syklusen, dus dit kin allinich helpe of itselde bliuwe - nea regressearje."
       },
       "ml_training_hour": {
-        "label": "Leare op Oere"
+        "label": "Leare op Oere",
+        "doc": "Lokale oere fan 'e dei (0-23) om de oernachtich fine-tuning te dwaan. Kies in rêstich oere lykas 2 (02:00)."
       },
       "ml_training_min_cycles": {
-        "label": "Syklusen Earst Nedich"
+        "label": "Syklusen Earst Nedich",
+        "doc": "Wachtsje oant op syn minst safolle syklussen binne opnommen foardat it fyntjen is, dus d'r is genôch om fan te learen."
       },
       "ml_training_interval_days": {
-        "label": "Kontrolearje Op Syn Meast Elke"
+        "label": "Kontrolearje Op Syn Meast Elke",
+        "doc": "Kontrolearje op syn heechst ien kear per dizze protte dagen opnij op ferbetteringen."
       }
     }
   }

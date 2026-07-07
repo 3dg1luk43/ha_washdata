@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-WashData is a Home Assistant custom integration that monitors appliances (washing machines, dryers, washer-dryer combos, dishwashers, air fryers, bread makers, pumps/sump pumps) via smart power plugs. It detects cycles, learns power-consumption profiles for different programs, and estimates time remaining. An **Other (Advanced)** device type is available for appliances that do not fit one of the supported classes; it ships intentionally generic defaults that the user must tune themselves. (Coffee machines, electric vehicles, heat pumps, and ovens were previously offered as deprecated types and were removed in 0.5.0; existing entries on those types are migrated to **Other (Advanced)** with their tuned options preserved.)
+WashData is a Home Assistant custom integration that monitors appliances (washing machines, dryers, washer-dryer combos, dishwashers, air fryers, bread makers, pumps/sump pumps) via smart power plugs. It detects cycles, learns power-consumption profiles for different programs, and estimates time remaining. An **Other (Advanced)** device type (`generic`) is available for predictable appliances that don't fit one of the named categories; it supports full profile matching/learning with neutral defaults. A **Threshold Device** type (`other`) is also available for truly uncategorised appliances where only threshold-based detection is needed (no profile matching); it ships intentionally generic defaults that the user must tune themselves. (Coffee machines, electric vehicles, heat pumps, and ovens were previously offered as deprecated types and were removed in 0.5.0; existing entries on those types are migrated to **Threshold Device** with their tuned options preserved.)
 
 ## Development Setup
 
@@ -196,6 +196,27 @@ Step 1 and 3 are fast and safe to run without network access. **Step 2 must NOT 
 - Migration must be deterministic and idempotent
 - Never drop user data - preserve cycles, labels, corrections
 - Add migration tests with old-schema fixtures
+
+**Two separate migration layers — test them separately:**
+
+1. **Config entry migration** (`async_migrate_entry` in `__init__.py`, config schema v1→3.6): tested in `tests/test_migration_harness.py`. Covers key moves (data→options), notify_service→per-event lists, device type remapping, drain-spike key removal, idempotency.
+
+2. **Storage migration** (`WashDataStore._async_migrate_func` in `profile_store.py`, storage v1→8): tested in `tests/test_migration_v032.py`. Call `_async_migrate_func(old_version, 1, data)` **directly** — do not go through `ProfileStore.async_load()` (which requires file I/O). Pattern for adding a new storage version (e.g. v9):
+   ```python
+   async def test_v8_my_new_step():
+       store = WashDataStore(_make_hass(), STORAGE_VERSION, f"{STORAGE_KEY}.test")
+       data = {"past_cycles": [...], "profiles": {...}}
+       result = await store._async_migrate_func(8, 1, data)
+       assert result[...]  # verify the new invariant
+   ```
+   Storage versions and what each step does:
+   - v1→v2: compute `signature` for ISO-format cycles (≥11 points)
+   - v2→v3: convert ISO power_data → offset format; add `status`; add profile `device_type`
+   - v3→v4: add `phases: []` to profiles; initialize `custom_phases`
+   - v4→v5: normalize `custom_phases` from list/dict → canonical list (deduplicated)
+   - v5→v6: flag recorded cycles (`meta.source="recorder"`) as `ml_review.golden=True`
+   - v6→v7: re-run golden backfill (broader check, idempotent)
+   - v7→v8: re-run golden backfill for old recordings without meta marker (structural: completed + no `max_power` + no `termination_reason`)
 
 ## Matching Pipeline Details
 

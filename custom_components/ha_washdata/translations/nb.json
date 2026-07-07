@@ -80,7 +80,8 @@
         "air_fryer": "Air Fryer",
         "bread_maker": "Brødbaker",
         "pump": "Pumpe / Sump Pump",
-        "other": "Annet (avansert)"
+        "generic": "Annet (avansert)",
+        "other": "Terskelenhet"
       }
     }
   },
@@ -620,6 +621,7 @@
       "needs_review": "Trenger gjennomgang",
       "overrun": "Løp lenger enn vanlig",
       "artifact_tip": "{n} avvik oppdaget (f.eks. dør åpnet midt i syklusen) – åpne for å se dem på grafen",
+      "restart_gap_tip": "{n} HA-omstartsgap: strømsporet har et hull",
       "poor_fit_tip": "Inkonsekvent kamphistorikk – vurder å gjenoppbygge denne profilen",
       "fair_fit_tip": "Moderat matchkonsistens – noen sykluser tilordnet denne profilen har lavere konfidensscore. Merk flere sykluser eller registrer profilen på nytt for å forbedre nøyaktigheten.",
       "fair_fit": "god passform",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Legg over andre profilkonvolutter på diagrammet ovenfor for å se hvilken som passer best til denne syklusen.",
       "artifact_header": "{n} uregelmessigheter oppdaget i løpet av denne syklusen",
       "artifact_footer": "Fremhevet på grafen over. Dette er forbigående artefakter (f.eks. døren åpnet midt i syklusen), ikke nødvendigvis problemer.",
+      "restart_gap_header": "{n} HA-omstartsgap under denne syklusen",
+      "restart_gap_item": "{dur} gap",
+      "restart_gap_footer": "Fremhevet på grafen. Strømdata mangler for disse intervallene; matching brukte bare faktiske avlesninger.",
       "profile_poor_health_detail": "Sykluser som er tilordnet denne profilen har inkonsekvente former eller lav selvtillit. Vurder å gjenoppbygge konvolutten eller gjennomgå merkede sykluser.",
       "trend_duration_longer": "Varighet trender lengre ({pct} %/syklus) – nylig snitt {avg}",
       "trend_duration_shorter": "Varighet trender kortere ({pct} %/syklus) – nylig snitt {avg}",
@@ -880,41 +885,9 @@
       "suggestions_dismissed": "Forslag avvist"
     },
     "section": {
-      "overview": {
-        "label": "Oversikt",
-        "intro": "Oversikt over statusen til apparatet ditt og nylig aktivitet."
-      },
-      "cycles": {
-        "label": "Sykluser",
-        "intro": "Historikk over oppdagede vaskesykluser."
-      },
-      "profiles": {
-        "label": "Profiler",
-        "intro": "Lærte strømprofiler for ulike programmer."
-      },
-      "settings": {
-        "label": "Innstillinger",
-        "intro": "Konfigurer oppdagelses- og samsvarsinnstillinger."
-      },
       "ml_training": {
         "label": "ML-opplæring",
         "intro": "Planlegging og datainnstillinger for ML-retrening på enheten."
-      },
-      "diagnostics": {
-        "label": "Diagnostikk",
-        "intro": "Diagnostisk informasjon og sensoravlesninger."
-      },
-      "logs": {
-        "label": "Logger",
-        "intro": "Loggoppføringer for feilsøking."
-      },
-      "help": {
-        "label": "Hjelp",
-        "intro": "Hjelp og dokumentasjon."
-      },
-      "about": {
-        "label": "Om",
-        "intro": "Om denne integrasjonen."
       },
       "basic": {
         "label": "Grunnleggende",
@@ -950,74 +923,14 @@
       }
     },
     "setting_group": {
-      "detection": {
-        "label": "Oppdagelse"
-      },
-      "thresholds": {
-        "label": "Terskler"
-      },
       "timing": {
         "label": "Timing"
       },
       "energy": {
         "label": "Energi"
       },
-      "matching": {
-        "label": "Profilsamsvar"
-      },
-      "dtw": {
-        "label": "DTW-raffinering"
-      },
-      "learning": {
-        "label": "Læring"
-      },
-      "feedback": {
-        "label": "Tilbakemelding"
-      },
-      "display": {
-        "label": "Visning"
-      },
-      "advanced": {
-        "label": "Avansert"
-      },
-      "notifications": {
-        "label": "Varsler"
-      },
-      "ml": {
-        "label": "Maskinlæring"
-      },
-      "ml_training": {
-        "label": "ML-opplæring"
-      },
-      "ml_models": {
-        "label": "ML-modeller"
-      },
-      "cycle_detection": {
-        "label": "Syklusoppdagelse"
-      },
-      "profile_matching": {
-        "label": "Profilsamsvar"
-      },
-      "power": {
-        "label": "Effekt"
-      },
-      "duration": {
-        "label": "Varighet"
-      },
-      "cost": {
-        "label": "Kostnad"
-      },
       "debug": {
         "label": "Feilsøking"
-      },
-      "device": {
-        "label": "Enhet"
-      },
-      "phases": {
-        "label": "Faser"
-      },
-      "groups": {
-        "label": "Profilgrupper"
       },
       "thresholds_gap": {
         "label": "Terskler og interval"
@@ -1082,436 +995,312 @@
     },
     "setting": {
       "min_power": {
-        "label": "Minimum effekt"
-      },
-      "start_power": {
-        "label": "Starteffekt"
-      },
-      "stop_power": {
-        "label": "Stoppeffekt"
-      },
-      "min_duration": {
-        "label": "Minimumsvarighet"
-      },
-      "max_duration": {
-        "label": "Maksimumsvarighet"
-      },
-      "start_delay": {
-        "label": "Startforsinkelse"
-      },
-      "stop_delay": {
-        "label": "Stoppforsinkelse"
+        "label": "Minimum effekt",
+        "doc": "Absolutt minimumseffekt anses som aktiv. Avlesninger under dette behandles som 0 W (standby), og filtrerer bort fantombelastningen til smartplugger og standby-lysdioder."
       },
       "min_off_gap": {
-        "label": "Min. av-intervall"
-      },
-      "energy_gate": {
-        "label": "Energiport"
-      },
-      "match_min_score": {
-        "label": "Minimum samsvarsscore"
-      },
-      "match_ambiguity_margin": {
-        "label": "Tvetydighetsmargin"
-      },
-      "match_min_duration_ratio": {
-        "label": "Min varighetsforhold"
-      },
-      "match_max_duration_ratio": {
-        "label": "Maks varighetsforhold"
-      },
-      "dtw_mode": {
-        "label": "DTW-modus"
-      },
-      "dtw_bandwidth": {
-        "label": "DTW-båndbredde"
-      },
-      "dtw_blend": {
-        "label": "DTW-blanding"
-      },
-      "dtw_refine_top_n": {
-        "label": "DTW raffiner topp N"
-      },
-      "dtw_ensemble_w": {
-        "label": "DTW-ensemblevekt"
-      },
-      "corr_weight": {
-        "label": "Korrelasjons vekt"
-      },
-      "duration_weight": {
-        "label": "Varighetsvekt"
-      },
-      "energy_weight": {
-        "label": "Energivekt"
-      },
-      "duration_scale": {
-        "label": "Varighetsskala"
-      },
-      "energy_scale": {
-        "label": "Energiskala"
-      },
-      "learning_rate": {
-        "label": "Læringsrate"
-      },
-      "confidence_threshold": {
-        "label": "Konfidenterskel"
-      },
-      "auto_label_threshold": {
-        "label": "Terskel for automatisk merking"
-      },
-      "feedback_threshold": {
-        "label": "Tilbakemeldingsterskel"
-      },
-      "min_cycles_to_match": {
-        "label": "Min sykluser for samsvar"
-      },
-      "profile_min_cycles": {
-        "label": "Profil min sykluser"
-      },
-      "cost_per_kwh": {
-        "label": "Kostnad per kWh"
-      },
-      "currency": {
-        "label": "Valuta"
+        "label": "Min. av-intervall",
+        "doc": "Hvis maskinen slår seg av i kortere tid enn denne tiden, behandles på/av/på-sekvensen som én kontinuerlig syklus. Forhindrer bløtleggingsprogrammer (maskinen slår seg av i flere minutter midt i vask) fra å deles i to separate sykluser. Sett den kortere enn gapet mellom rygg-til-rygg-lastene hvis du vil at de skal telles som separate sykluser. Standardinnstillinger for enhetstype beskytter den typiske pausen i syklusen for hvert apparat."
       },
       "expose_debug_entities": {
-        "label": "Vis feilsøkingsenheter"
+        "label": "Vis feilsøkingsenheter",
+        "doc": "Publiser ekstra diagnostiske HA-enheter (match konfidens, tvetydighet, tilstandsinternal). Av holder enhetslisten ren for normal bruk."
       },
       "enable_ml_models": {
-        "label": "Bruk smarte modeller under syklus"
+        "label": "Bruk smarte modeller under syklus",
+        "doc": "Mens en syklus kjører, la modellene avgrense live-resultatene: et jevnere tid som gjenstår og energi/kostnadsestimat, og en anti-prematur-stopp-vakt ved sluttdeteksjon (den kan bare forsinke en finish, aldri avslutte en tidlig, og er begrenset). Bruker dine finjusterte modeller når de er tilgjengelige, ellers de innebygde. Av = kun den klassiske strømbaserte logikken (fortsatt pålitelig)."
       },
       "ml_training_enabled": {
-        "label": "Lær fra denne maskinen"
-      },
-      "ml_training_schedule": {
-        "label": "ML-opplæringsplan"
+        "label": "Lær fra denne maskinen",
+        "doc": "Studer regelmessig de gjennomgåtte syklusene dine over natten og finjuster modellene til denne spesifikke maskinen. En endring beholdes bare når den virkelig scorer bedre på utholdte sykluser, så dette kan bare hjelpe eller forbli det samme - aldri gå tilbake."
       },
       "ml_training_min_cycles": {
-        "label": "Sykluser som trengs først"
-      },
-      "ml_training_min_new_cycles": {
-        "label": "Min nye sykluser for opplæring"
-      },
-      "ml_match_commit_threshold": {
-        "label": "ML samsvarsbekreftelseterskel"
-      },
-      "ml_end_guard_threshold": {
-        "label": "ML sluttvaktsterskel"
-      },
-      "ml_quality_threshold": {
-        "label": "ML kvalitetsterskel"
-      },
-      "ml_progress_blend_weight": {
-        "label": "ML fremdriftsblanding vekt"
+        "label": "Sykluser som trengs først",
+        "doc": "Vent til minst så mange sykluser er registrert før du finjusterer, så det er nok å lære av."
       },
       "device_type": {
-        "label": "Enhetstype"
+        "label": "Enhetstype",
+        "doc": "Apparatklasse. Angir fornuftige deteksjonsstandarder (terskler, av-forsinkelse, slutthåndtering) innstilt for den apparattypen; endre den bare hvis enheten opprinnelig ble satt opp som feil type."
       },
       "power_sensor": {
-        "label": "Strømsensor"
+        "label": "Strømsensor",
+        "doc": "Sensorenheten rapporterer levende effekt i watt for dette apparatet (f.eks. sensor.washer_power). All syklusdeteksjon er basert på dette signalet."
       },
       "name": {
-        "label": "Enhetsnavn"
-      },
-      "anti_crease_power": {
-        "label": "Krøllforebyggende effekt"
-      },
-      "anti_crease_min_duration": {
-        "label": "Krøllforebyggende minimumsvarighet"
-      },
-      "anti_crease_max_cycles": {
-        "label": "Krøllforebyggende maksimale sykluser"
-      },
-      "dishwasher_end_spike_min_progress": {
-        "label": "Sluttspike minimumsfremdrift"
-      },
-      "dishwasher_end_spike_wait_seconds": {
-        "label": "Sluttspike ventetid"
-      },
-      "pump_out_power": {
-        "label": "Pumpeeffekt"
-      },
-      "dryer_cool_power": {
-        "label": "Tørker nedkjølingseffekt"
-      },
-      "dryer_cool_max_duration": {
-        "label": "Tørker nedkjøling maks varighet"
-      },
-      "end_defer_confidence": {
-        "label": "Sluttutsettelseskonfidensterskel"
-      },
-      "end_guard_max_defer": {
-        "label": "Sluttvakt maks utsettelse"
-      },
-      "terminal_drop_min_peak_ratio": {
-        "label": "Terminalfall min toppforhold"
-      },
-      "terminal_drop_earliness_ratio": {
-        "label": "Terminalfall tidlighetsforhold"
-      },
-      "terminal_drop_peak_familiar_tol": {
-        "label": "Terminalfall topp kjent toleranse"
-      },
-      "terminal_drop_off_delay": {
-        "label": "Terminalfall av-forsinkelse"
-      },
-      "terminal_drop_min_clean_cycles": {
-        "label": "Terminalfall min rene sykluser"
-      },
-      "match_ranking_history_max": {
-        "label": "Samsvar rangering historikk maks"
-      },
-      "max_cycles_stored": {
-        "label": "Maks lagrede sykluser"
-      },
-      "max_power_trace_points": {
-        "label": "Maks effektsporing punkter"
-      },
-      "envelope_conformance_threshold": {
-        "label": "Envelope konformitetsterskel"
-      },
-      "suggest_coverage_min_unmatched": {
-        "label": "Dekning gap min uoverstemt"
-      },
-      "suggest_coverage_min_rate": {
-        "label": "Dekning gap min rate"
-      },
-      "suggest_coverage_window": {
-        "label": "Dekning gap vindu"
-      },
-      "suggest_coverage_low_conf": {
-        "label": "Dekning gap lav konfidensterskel"
-      },
-      "group_min_cohesion": {
-        "label": "Gruppe min kohesjon"
-      },
-      "phase_match_tolerance": {
-        "label": "Fasetolerans for samsvar"
-      },
-      "recording_max_duration": {
-        "label": "Opptak maks varighet"
-      },
-      "recording_min_duration": {
-        "label": "Opptak min varighet"
-      },
-      "resampling_points": {
-        "label": "Resamplingspoeng"
+        "label": "Enhetsnavn",
+        "doc": "Visningsnavn vist i HA-integreringslisten og enhetsregisteret."
       },
       "smoothing_window": {
-        "label": "Utjevningsvindu"
-      },
-      "trend_min_cycles": {
-        "label": "Trend min sykluser"
-      },
-      "trend_recent_window": {
-        "label": "Trend nylig vindu"
-      },
-      "trend_slope_threshold": {
-        "label": "Trend helningsterskel"
-      },
-      "advisory_min_cycles": {
-        "label": "Rådgivende min sykluser"
+        "label": "Utjevningsvindu",
+        "doc": "Hvor mye råeffektsignalet jevnes ut. Lav (2) er responsiv, men støyende; høy (5) jevner ut pigger, men legger til etterslep."
       },
       "off_delay": {
-        "label": "Av-forsinkelse"
+        "label": "Av-forsinkelse",
+        "doc": "På tide å vente etter at strømmen faller før du erklærer at syklusen er fullført. Hvis strømmen gjenopptas innenfor dette vinduet, fortsetter syklusen sømløst - dette slår bro mellom pauser mellom vasketrinn. Oppvaskmaskiner har lange tørkefaser (strøm av i 20-60 min) så avslåingsforsinkelsen må overstige det for å holde hele vask+tørr som én syklus."
       },
       "linked_device": {
-        "label": "Grupper under enhet"
+        "label": "Grupper under enhet",
+        "doc": "Eventuelt kan denne WashData-enheten legges under en annen enhet (f.eks. smartpluggen) i HA-enhetsregisteret, vist som \"Tilkoblet via ...\"."
       },
       "start_threshold_w": {
-        "label": "Startterskel"
+        "label": "Startterskel",
+        "doc": "Strømmen må stige over dette nivået for å bekrefte at en syklus har startet. Hvis du setter den for lavt, forårsaker feilstarter fra standby-strøm; for høye og saktestartende programmer (kaldfylling) savnes. Forslagsmotoren setter dette like over maskinens observerte laveste aktive effekt."
       },
       "stop_threshold_w": {
-        "label": "Stoppterskel"
+        "label": "Stoppterskel",
+        "doc": "Strømmen må falle under dette nivået før nedtellingen starter. Sett den under startterskelen - gapet mellom dem er hysteresebåndet som forhindrer flimmer. Hvis satt for høyt, utløser laveffektfaser (skyllestopp, anti-krøll) sluttsekvensen feilaktig."
       },
       "start_duration_threshold": {
-        "label": "Startvarighet"
+        "label": "Startvarighet",
+        "doc": "Strømmen må holde seg over startterskelen så lenge for å bekrefte en reell start, og forhindre at av/på-brytere på et brøkdel sekund starter en syklus."
       },
       "start_energy_threshold": {
-        "label": "Startenergi"
+        "label": "Startenergi",
+        "doc": "Energi (strøm x tid) apparatet må forbruke før KJØRING. En kort topp med høy effekt har svært lav energi og ignoreres, og forhindrer falske starter."
       },
       "completion_min_seconds": {
-        "label": "Min. syklusvarighet"
+        "label": "Min. syklusvarighet",
+        "doc": "Sykluser som er kortere enn dette, forkastes som spøkelsessykluser (prøvekjøringer, åpne døren for å legge til en sokk)."
       },
       "running_dead_zone": {
-        "label": "Kjøredødsone"
+        "label": "Kjøredødsone",
+        "doc": "Etter at en syklus starter, ignoreres strømfall i dette vinduet. Vaskemaskiner fylles med kaldt vann (faller nær 0 W før oppvarming) - uten denne beskyttelsen ser fyllingsfasen ut som en syklusslutt. Dette hopper IKKE over data: trasen med full effekt registreres fra T=0. Forslagsmotoren måler maskinens faktiske oppstartsmønster og dimensjonerer dette automatisk."
       },
       "end_energy_threshold": {
-        "label": "Sluttenergi"
+        "label": "Sluttenergi",
+        "doc": "Under nedtellingen med avbruddsforsinkelse sammenlignes akkumulert energi (watt x tid) med denne terskelen. Hvis den overskrides, nullstilles nedtellingen - og holder anti-krøll-trommel og oppvaskmaskinens tørkehaler festet til syklusen i stedet for å klippe dem korte. Hev den hvis syklusene avsluttes for tidlig under nedkjøling; senke den hvis deteksjonen er treg."
       },
       "end_repeat_count": {
-        "label": "Slutt gjentaksantall"
+        "label": "Slutt gjentaksantall",
+        "doc": "Antall påfølgende avlesninger under stoppterskel som kreves før syklusen avsluttes. 1 er greit for de fleste plugger. Øk til 2-3 hvis smartpluggen av og til rapporterer en prøve med falsk null midt i syklusen og syklusene dine avsluttes for tidlig."
       },
       "sampling_interval": {
-        "label": "Sampling-intervall"
+        "label": "Sampling-intervall",
+        "doc": "Forventet tid mellom sensoravlesninger - brukes til å dimensjonere utjevningsvinduet og starte avsprettingen riktig. Hver sensoroppdatering registreres uavhengig av denne verdien; den kalibrerer bare nedstrømsberegningene. Forslagsmotoren måler sensorens faktiske tråkkfrekvens fra tidligere sykluser og setter denne automatisk."
       },
       "abrupt_drop_watts": {
-        "label": "Bratt fall"
+        "label": "Bratt fall",
+        "doc": "Et kraftfall større enn dette flagger syklusen som avbrutt (manuell kansellering) i stedet for en naturlig finish."
       },
       "abrupt_drop_ratio": {
-        "label": "Bratt fall-forhold"
+        "label": "Bratt fall-forhold",
+        "doc": "Et fall som er større enn denne brøkdelen av gjeldende effekt, blir også behandlet som brå (0,6 = et fall på 60 %). Utfyller watt-terskelen på tvers av apparatstørrelser."
       },
       "profile_match_threshold": {
-        "label": "Samsvarsterskel"
+        "label": "Samsvarsterskel",
+        "doc": "Minimum likhetspoeng (0-1) kreves ved syklusslutt for å godta en programidentifikasjon. Hev den for å redusere feil identifikasjon; senk den hvis maskinens programmer ikke blir matchet. Standard 0,4 er et konservativt utgangspunkt."
       },
       "profile_unmatch_threshold": {
-        "label": "Ikke-samsvarsterskel"
+        "label": "Ikke-samsvarsterskel",
+        "doc": "Hvis en direkte kamp midt i syklusen faller under denne poengsummen, slettes den tentative identifikasjonen. Hold den litt under Match-terskelen, slik at et kort fall i likhet ikke snur skjermen tilbake til uovertruffen."
       },
       "profile_match_interval": {
-        "label": "Samsvarsintervall"
+        "label": "Samsvarsintervall",
+        "doc": "Hvor ofte du skal forsøke profiltilpasning under en løpesyklus. Standard 300 s (5 minutter) balanserer deteksjonshastighet og CPU."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Min. varighetsforhold"
+        "label": "Min. varighetsforhold",
+        "doc": "Minimum sykluslengde i forhold til profilen. 0,9 betyr at en syklus må være minst 90 % av profilvarigheten for å matche."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Maks. varighetsforhold"
+        "label": "Maks. varighetsforhold",
+        "doc": "Maksimal sykluslengde i forhold til profilen. 1.3 betyr at en syklus må være under 130 % av profilvarigheten for å matche."
       },
       "profile_duration_tolerance": {
-        "label": "Profil varighetstoleranse"
+        "label": "Profil varighetstoleranse",
+        "doc": "+/--båndet rundt en profilgjennomsnittlig varighet brukt under matching. 0,25 betyr at en 60 min profil matcher 45-75 min sykluser."
       },
       "duration_tolerance": {
-        "label": "Estimattoleranse"
+        "label": "Estimattoleranse",
+        "doc": "Toleranse for anslag som gjenstår av tid (læringsfeedback, ikke matching). Hvis den faktiske varigheten er innenfor +/-X % av estimatet, teller det som et godt samsvar."
       },
       "auto_label_confidence": {
-        "label": "Auto-merking konfidensgrad"
+        "label": "Auto-merking konfidensgrad",
+        "doc": "Hvis kampresultatet ved syklusslutt er på eller over dette, merkes programmet automatisk uten noen bekreftelsesmelding. Hev den for å kreve høyere sikkerhet før automerking; senk den for å automatisere mer. Fungerer sammen med Learning Confidence under den."
       },
       "learning_confidence": {
-        "label": "Lærings-konfidensgrad"
+        "label": "Lærings-konfidensgrad",
+        "doc": "Hvis kampresultatet faller mellom dette og Auto-Label Confidence, ber en tilbakemeldingsmelding deg om å bekrefte det identifiserte programmet. Under denne poengsummen er kampen for usikker til å dukke opp. Må holdes under Auto-Label Confidence."
       },
       "suppress_feedback_notifications": {
-        "label": "Undertrykk tilbakemeldingsvarsler"
+        "label": "Undertrykk tilbakemeldingsvarsler",
+        "doc": "Ikke oppgi et vedvarende varsel når en ferdig syklus trenger gjennomgang; tilbakemeldingen vises fortsatt i Cycles review-køen."
       },
       "watchdog_interval": {
-        "label": "Vokter-intervall"
+        "label": "Vokter-intervall",
+        "doc": "Hvor ofte bakgrunnsvakthunden sjekker for stansede sensorer og medgåtte tidsavbrudd. Standard 30 s."
       },
       "no_update_active_timeout": {
-        "label": "Tid uten oppdatering"
+        "label": "Tid uten oppdatering",
+        "doc": "Hvis det ikke kommer noen strømoppdateringer på så lenge mens du kjører, anta at støpselet har falt frakoblet og tvinget til å stoppe for å unngå en zombiesyklus. Standard 600 s tillater sky eller mesh lag."
       },
       "progress_reset_delay": {
-        "label": "Fremdriftsreset-forsinkelse"
+        "label": "Fremdriftsreset-forsinkelse",
+        "doc": "Etter å ha fullført, hold fremdriften på 100 % så lenge, slik at Fullført er synlig på dashbord før du tilbakestiller til inaktiv."
       },
       "auto_maintenance": {
-        "label": "Automatisk vedlikehold (nattlig opprydding)"
+        "label": "Automatisk vedlikehold (nattlig opprydding)",
+        "doc": "Kjør nattlig rengjøring: gjenoppbygg profilkonvolutter, beregn syklushelsen på nytt, beskjær feilsøkingsspor og behold de siste syklusene."
       },
       "save_debug_traces": {
-        "label": "Lagre feilsøkingsspor"
+        "label": "Lagre feilsøkingsspor",
+        "doc": "Lagre full effektsporing og samsvarende feilsøkingsdata for hver syklus. Nyttig for feilsøking, men øker lagringsstørrelsen."
       },
       "anti_wrinkle_enabled": {
-        "label": "Aktiver anti-rynke-deteksjon"
+        "label": "Aktiver anti-rynke-deteksjon",
+        "doc": "Gjenkjenn de korte laveffekttrommelpulsene en tørketrommel sender ut etter hovedvarmefasen, og hold dem festet til den ferdige syklusen i stedet for å lese dem som nye sykluser."
       },
       "anti_wrinkle_max_power": {
-        "label": "Maks. anti-rynke effekt"
+        "label": "Maks. anti-rynke effekt",
+        "doc": "En puls over denne kraften blir behandlet som en virkelig ny syklus, ikke en anti-rynke tumbling. Sett like over tumle-pulseffekten."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Maks. varighet"
+        "label": "Maks. varighet",
+        "doc": "Pulser lengre enn dette behandles som en ekte syklus i stedet for en anti-rynke tumbling."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Utgangseffektterskel"
+        "label": "Utgangseffektterskel",
+        "doc": "Strømmen må falle under dette mellom pulsene for at anti-rynkemodus skal forbli aktiv."
       },
       "delay_start_detect_enabled": {
-        "label": "Aktiver deteksjon av forsinket start"
+        "label": "Aktiver deteksjon av forsinket start",
+        "doc": "Oppdag når apparatet er slått på og venter (forsinket start / standby), men ikke har begynt syklusen, så standby-trekning blir ikke forvekslet med en kjørende syklus."
       },
       "delay_confirm_seconds": {
-        "label": "Bekreftelsessekunder"
+        "label": "Bekreftelsessekunder",
+        "doc": "Strømmen må forbli i standby-båndet så lenge før apparatet blir behandlet som venter på å starte i stedet for å kjøre."
       },
       "delay_timeout_hours": {
-        "label": "Tidsavbruddsimer"
+        "label": "Tidsavbruddsimer",
+        "doc": "Slutt å vente i forsinket startmodus etter disse mange timene og gå tilbake til tomgang, så en maskin som er slått på, men aldri startet, ikke venter for alltid."
       },
       "external_end_trigger_enabled": {
-        "label": "Aktiver ekstern slutt-utløser"
+        "label": "Aktiver ekstern slutt-utløser",
+        "doc": "La en ekstern binær sensor signalisere slutten av en syklus, i tillegg til den innebygde strømbaserte deteksjonen."
       },
       "external_end_trigger": {
-        "label": "Ekstern utløserenhet"
+        "label": "Ekstern utløserenhet",
+        "doc": "Binær sensor hvis tilstandsendring markerer syklusslutt (f.eks. en \"ferdig\" kontakt med apparatet eller en følgeintegrasjon)."
       },
       "external_end_trigger_inverted": {
-        "label": "Inverter ekstern utløser (utløs ved AV)"
+        "label": "Inverter ekstern utløser (utløs ved AV)",
+        "doc": "Betrakt triggersensoren som slår seg AV (i stedet for PÅ) som sluttsignalet."
       },
       "door_sensor_entity": {
-        "label": "Dørensorenhet"
+        "label": "Dørensorenhet",
+        "doc": "Valgfri dør binær sensor. Brukes til å oppdage når apparatet har blitt åpnet/avlastet etter en syklus."
       },
       "pause_cuts_power": {
-        "label": "Pause kutter også strøm (via bryter)"
+        "label": "Pause kutter også strøm (via bryter)",
+        "doc": "Når en syklus er satt på pause, slå også av Switch Entity nedenfor. Kun for apparater hvis støpsel trygt kan kuttes midt i syklusen."
       },
       "switch_entity": {
-        "label": "Bryterenhet"
+        "label": "Bryterenhet",
+        "doc": "Valgfri bryter slått av på pause og på igjen når du fortsetter, brukt sammen med \"Pause kutter også strømmen\"."
       },
       "notify_unload_delay_minutes": {
-        "label": "Utlastingspåminnelsesforsinkelse"
+        "label": "Utlastingspåminnelsesforsinkelse",
+        "doc": "Minutter etter at en syklus avsluttes før du sender den fortsatt ventende påminnelsen om \"last av maskinen\". Sett 0 for å deaktivere påminnelsen."
       },
       "pump_stuck_duration": {
-        "label": "Pumpe fastsittingsvarighet"
+        "label": "Pumpe fastsittingsvarighet",
+        "doc": "Sekunder kan en pumpe kjøre kontinuerlig før den blir flagget som mulig fastlåst (utløser hendelsen med fast pumpe)."
       },
       "notify_start_services": {
-        "label": "Starttjenester"
+        "label": "Starttjenester",
+        "doc": "varsle.* tjenester som kalles når en syklus starter. Legg til en per mål (telefon, dashbord osv.); la stå tomt for ingen startvarsel."
       },
       "notify_finish_services": {
-        "label": "Sluttjenester"
+        "label": "Sluttjenester",
+        "doc": "varsle.* tjenester som kalles når en syklus er ferdig. Legg til en per mål; la stå tomt for ingen ferdigmelding."
       },
       "notify_live_services": {
-        "label": "Direktefremdriftstjenester"
+        "label": "Direktefremdriftstjenester",
+        "doc": "notify.* tjenester kalt for live fremdriftsoppdateringer mens en syklus kjører. La stå tomt for å deaktivere varsler om fremdrift i sanntid."
       },
       "notify_people": {
-        "label": "Personer (for Kun hjemme)"
+        "label": "Personer (for Kun hjemme)",
+        "doc": "person.*-enheter brukt av «Varsle bare når hjemme» for å avgjøre om noen er hjemme."
       },
       "notify_only_when_home": {
-        "label": "Varsle kun når hjemme"
+        "label": "Varsle kun når hjemme",
+        "doc": "Send kun varsler når minst én av de tilknyttede personene (over) er hjemme."
       },
       "notify_fire_events": {
-        "label": "Aktiver HA-hendelser for varsler"
+        "label": "Aktiver HA-hendelser for varsler",
+        "doc": "Avfyr også ha_washdata_*-hendelser på syklusstart/slutt slik at du kan bygge dine egne automatiseringer."
       },
       "notify_before_end_minutes": {
-        "label": "Forhåndsvarsling"
+        "label": "Forhåndsvarsling",
+        "doc": "Send et Nesten ferdig-varsel når beregnet gjenværende tid faller under dette. 0 deaktiverer den."
       },
       "notify_live_interval_seconds": {
-        "label": "Direkteoppdateringsintervall"
+        "label": "Direkteoppdateringsintervall",
+        "doc": "Hvor ofte varsler om fremdrift oppdateres mens en syklus kjører."
       },
       "notify_live_overrun_percent": {
-        "label": "Direkteoverskridelse % før varsel"
+        "label": "Direkteoverskridelse % før varsel",
+        "doc": "Hvis en syklus går forbi estimatet med mer enn denne prosentandelen, send et overløpsvarsel."
       },
       "notify_live_chronometer": {
-        "label": "Bruk direktekronometer"
+        "label": "Bruk direktekronometer",
+        "doc": "Vis en live-oppdatering nedtellingstidtaker i varselet (på plattformer som støtter det) i stedet for et statisk estimat."
       },
       "notify_timeout_seconds": {
-        "label": "Automatisk avvisning etter"
+        "label": "Automatisk avvisning etter",
+        "doc": "Avvis automatisk varselet etter så mange sekunder (på plattformer som støtter det). 0 beholder den til den avvises manuelt."
       },
       "notify_title": {
-        "label": "Varselstittel"
+        "label": "Varselstittel",
+        "doc": "Meldingstittel. Malvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Varselikon"
+        "label": "Varselikon",
+        "doc": "Valgfritt mdi-ikon for varselet (f.eks. mdi:vaskemaskin). La stå tomt for standard plattform."
       },
       "notify_start_message": {
-        "label": "Startmelding"
+        "label": "Startmelding",
+        "doc": "Kroppen sendes når en syklus starter. Malvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Sluttmelding"
+        "label": "Sluttmelding",
+        "doc": "Kroppen sendes når en syklus er ferdig. Malvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "Nesten ferdig-melding"
+        "label": "Nesten ferdig-melding",
+        "doc": "Brødteksten til forhånds-/nesten-ferdig-varselet. Malvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Påminnelsesmelding"
+        "label": "Påminnelsesmelding",
+        "doc": "Hoveddelen av påminnelsen om lossing som fortsatt venter. Blank bruker den innebygde standarden. Malvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Android-kanal (start/live)"
+        "label": "Android-kanal (start/live)",
+        "doc": "Android-varslingskanalnavn for start-/livemeldinger (styrer lyd per kanal og prioritet på mobilappen). Blank bruker standardappen for følgeappen."
       },
       "notify_finish_channel": {
-        "label": "Android-kanal (slutt)"
+        "label": "Android-kanal (slutt)",
+        "doc": "Android-varslingskanalnavn for sluttmeldingen. Blank gjenbruker start/live-kanalen."
       },
       "energy_price_entity": {
-        "label": "Energiprisenhet"
+        "label": "Energiprisenhet",
+        "doc": "Sensor med gjeldende strømpris per kWh (f.eks. en dynamisk tariff). Går foran den statiske prisen nedenfor. Hver syklus fryser den gjeldende prisen når den er ferdig."
       },
       "energy_price_static": {
-        "label": "Statisk energipris (per kWh)"
+        "label": "Statisk energipris (per kWh)",
+        "doc": "Fast pris per kWh brukt for kostnadstall når ingen levende prisenhet er satt ovenfor."
       },
       "notify_cycle_timers": {
-        "label": "Syklustidtakere"
+        "label": "Syklustidtakere",
+        "doc": "Varsler på bestemte minutter i en syklus (f.eks. for å legge til mykner). Meldingen støtter {device}, {program}, {minutes}. Aktiver Auto-pause for å pause på det tidspunktet og motta et interaktivt varsel med en Fortsett-knapp; gjenoppta via panelet, pause/gjenoppta-tjenesten eller varslingshandlingen."
       },
       "ml_training_hour": {
-        "label": "Lær ved time"
+        "label": "Lær ved time",
+        "doc": "Lokal tid på døgnet (0-23) for å gjøre finjusteringen over natten. Velg en rolig time som 2 (02:00)."
       },
       "ml_training_interval_days": {
-        "label": "Sjekk høyst hvert"
+        "label": "Sjekk høyst hvert",
+        "doc": "Sjekk på nytt for forbedringer maksimalt én gang per så mange dager."
       }
     }
   }

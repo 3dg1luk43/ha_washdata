@@ -319,6 +319,15 @@ MATCH_DDTW_DIST_SCALE = 30.0       # half-saturation for derivative-DTW distance
 MATCH_DTW_ENSEMBLE_W = 0.7         # weight on L1 vs DDTW in "ensemble" mode
 # Ambiguity: top1-top2 score gap below this flags the match as ambiguous.
 MATCH_AMBIGUITY_MARGIN = 0.05
+# Smart Termination landscape guard: when a non-winning candidate is at least this
+# much longer than the matched profile AND has a decent shape score (before Stage-4
+# duration penalty), the current trace may be a *prefix* of that longer program
+# rather than a completed short one. Smart Termination is blocked; the power-based
+# fallback timeout decides instead. Ratio chosen so that programmes within ~50% of
+# each other (e.g. Quick 46 min vs Eco 60 min, ratio 1.30) do not trigger the guard
+# but genuine prefix pairs like Quick 46 vs Normal 88 min (ratio 1.91) always do.
+SMART_TERM_LANDSCAPE_RATIO = 1.5       # candidate must be >= 1.5× the matched duration
+SMART_TERM_LANDSCAPE_MIN_SHAPE = 0.40  # minimum shape score (pre-Stage-4) to qualify
 # Duration + energy agreement blended into the final score. Shape correlation
 # alone cannot separate profiles that differ mainly in duration/energy (a real
 # weakness on multi-program washing machines), so the final score is
@@ -387,13 +396,14 @@ DEVICE_TYPE_DISHWASHER = "dishwasher"
 DEVICE_TYPE_AIR_FRYER = "air_fryer"
 DEVICE_TYPE_BREAD_MAKER = "bread_maker"
 DEVICE_TYPE_PUMP = "pump"
-# Generic / unsupported bucket. Ships intentionally generic defaults that are
-# not tuned for any specific appliance, so the user must configure thresholds,
-# timeouts, and matching parameters themselves. No curated phase catalog and no
-# device-type-specific branches in the runtime, so behavior is whatever the
-# user dials in. Config entries whose stored device_type is no longer supported
-# are migrated to this bucket on load (see __init__.py), preserving their tuned
-# options.
+# Full-featured generic type for predictable appliances that don't fit any of the
+# named categories. Participates in profile matching/learning like any other
+# device type. Ships with neutral/safe defaults; the user tunes from there.
+DEVICE_TYPE_GENERIC = "generic"
+# Threshold-only bucket. No profile matching. Ships intentionally generic
+# defaults; the user must configure thresholds and timeouts themselves.
+# Config entries whose stored device_type is no longer supported are migrated
+# to this bucket on load (see __init__.py), preserving their tuned options.
 DEVICE_TYPE_OTHER = "other"
 
 DEVICE_TYPES = {
@@ -404,7 +414,8 @@ DEVICE_TYPES = {
     DEVICE_TYPE_AIR_FRYER: "Air Fryer",
     DEVICE_TYPE_BREAD_MAKER: "Bread Maker",
     DEVICE_TYPE_PUMP: "Pump / Sump Pump",
-    DEVICE_TYPE_OTHER: "Other (Advanced)",
+    DEVICE_TYPE_GENERIC: "Other (Advanced)",
+    DEVICE_TYPE_OTHER: "Threshold Device",
 }
 
 # Device Type Defaults
@@ -466,6 +477,7 @@ DEVICE_SMOOTHING_THRESHOLDS = {
     DEVICE_TYPE_AIR_FRYER: 2.0,  # Constant load with sudden drop
     DEVICE_TYPE_BREAD_MAKER: 5.0,  # Large power swings between kneading, proving, baking
     DEVICE_TYPE_PUMP: 2.0,  # Binary on/off spikes; minimal smoothing needed
+    DEVICE_TYPE_GENERIC: 3.0,  # Neutral middle ground for unknown appliance types
 }
 
 # Device specific completion thresholds (min run time to be considered a valid "completed" cycle)

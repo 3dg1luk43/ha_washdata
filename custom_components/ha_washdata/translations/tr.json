@@ -80,7 +80,8 @@
         "air_fryer": "Hava Fritözü",
         "bread_maker": "Ekmek Makinesi",
         "pump": "Pompa / Karter Pompası",
-        "other": "Diğer (Gelişmiş)"
+        "generic": "Diğer (Gelişmiş)",
+        "other": "Eşik Cihazı"
       }
     }
   },
@@ -460,6 +461,7 @@
       "needs_review": "İncelenmesi gerekiyor",
       "overrun": "Normalden daha uzun sürdü",
       "artifact_tip": "{n} anormallik algılandı (ör. döngünün ortasında kapının açılması) — bunları grafikte görmek için açın",
+      "restart_gap_tip": "{n} HA yeniden başlatma boşluğu: güç izinde bir delik var",
       "poor_fit_tip": "Tutarsız eşleşme geçmişi — bu profili yeniden oluşturmayı düşünün",
       "fair_fit_tip": "Orta düzeyde eşleşme tutarlılığı — bu profile atanan bazı döngülerin güven puanları daha düşüktür. Doğruluğu artırmak için daha fazla döngü etiketleyin veya profili yeniden kaydedin.",
       "auto": "(otomatik algılandı)",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Hangisinin bu döngüye en uygun olduğunu görmek için diğer profil zarflarını yukarıdaki tabloya yerleştirin.",
       "artifact_header": "Bu döngü sırasında {n} anormallik algılandı",
       "artifact_footer": "Yukarıdaki grafikte vurgulanmıştır. Bunlar geçici eserlerdir (örn. döngünün ortasında kapının açılması), mutlaka sorun teşkil etmez.",
+      "restart_gap_header": "{n} HA yeniden başlatma boşluğu bu döngü sırasında",
+      "restart_gap_item": "{dur} boşluk",
+      "restart_gap_footer": "Grafikte vurgulandı. Bu aralıklar için güç verisi eksik; eşleştirme yalnızca gerçek okumaları kullandı.",
       "profile_poor_health_detail": "Bu profile atanan döngüler tutarsız şekillere sahip veya güvenirliği düşük. Zarfı yeniden oluşturmayı veya etiketli döngüleri gözden geçirmeyi düşünün.",
       "trend_duration_longer": "Süre trendi daha uzun (%{pct}/döngü) — son ortalama {avg}",
       "trend_duration_shorter": "Süre eğilimi daha kısa (%{pct}/döngü) — son ortalama {avg}",
@@ -990,235 +995,312 @@
     },
     "setting": {
       "name": {
-        "label": "Cihaz Adı"
+        "label": "Cihaz Adı",
+        "doc": "HA entegrasyonları listesinde ve cihaz kayıt defterinde gösterilen görünen ad."
       },
       "device_type": {
-        "label": "Cihaz Türü"
+        "label": "Cihaz Türü",
+        "doc": "Cihaz sınıfı. Söz konusu cihaz türü için ayarlanmış mantıklı algılama varsayılanlarını (eşikler, düşmede gecikme, son işleme) ayarlar; bunu yalnızca aygıt başlangıçta yanlış türde ayarlanmışsa değiştirin."
       },
       "power_sensor": {
-        "label": "Güç Sensörü"
+        "label": "Güç Sensörü",
+        "doc": "Bu cihaz için canlı gücü watt cinsinden bildiren sensör varlığı (ör. sensör.washer_power). Tüm döngü tespiti bu sinyale dayanır."
       },
       "min_power": {
-        "label": "Minimum Güç"
+        "label": "Minimum Güç",
+        "doc": "Mutlak minimum gücün aktif olduğu kabul edilir. Bunun altındaki okumalar 0 W (bekleme) olarak kabul edilir ve akıllı prizlerin ve bekleme LED'lerinin hayalet yükü filtrelenir."
       },
       "off_delay": {
-        "label": "Kapatma Gecikmesi"
+        "label": "Kapatma Gecikmesi",
+        "doc": "Güç kesildikten sonra döngünün bittiğini bildirmeden önce beklenecek süre. Bu pencerede güç yeniden gelirse döngü sorunsuz bir şekilde devam eder; bu, yıkama aşamaları arasındaki duraklamaları köprüler. Bulaşık makinelerinin kurutma aşamaları uzundur (20-60 dakika boyunca güç kapalıdır), bu nedenle, tüm yıkama+kuruluğun tek bir döngüde tutulması için kapatma gecikmesinin bunu aşması gerekir."
       },
       "linked_device": {
-        "label": "Cihaz Altında Grupla"
+        "label": "Cihaz Altında Grupla",
+        "doc": "İsteğe bağlı olarak bu WashData cihazını, HA cihaz kaydında \"Bağlandı ...\" olarak gösterilen başka bir cihazın (örn. akıllı priz) altına yerleştirin."
       },
       "start_threshold_w": {
-        "label": "Başlangıç Eşiği"
+        "label": "Başlangıç Eşiği",
+        "doc": "Bir döngünün başladığını doğrulamak için gücün bu seviyenin üzerine çıkması gerekir. Çok düşük bir değere ayarlanması, bekleme gücünden hatalı başlatmalara neden olur; çok yüksek ve yavaş başlayan programlar (soğuk dolum) kaçırılır. Öneri motoru bunu makinenin gözlemlenen en düşük aktif gücünün hemen üzerine ayarlar."
       },
       "stop_threshold_w": {
-        "label": "Durdurma Eşiği"
+        "label": "Durdurma Eşiği",
+        "doc": "Düşmede gecikme geri sayımı başlamadan önce güç bu seviyenin altına düşmelidir. Bunu Başlangıç ​​Eşiğinin altına ayarlayın; aralarındaki boşluk, titremeyi önleyen histerezis bandıdır. Çok yükseğe ayarlanırsa, düşük güçlü fazlar (durulamada bekletme, kırışık önleme) hatalı şekilde bitiş sırasını tetikler."
       },
       "min_off_gap": {
-        "label": "Min. Kapalı Aralık"
+        "label": "Min. Kapalı Aralık",
+        "doc": "Makine bu süreden daha kısa bir süre kapanırsa açma/kapama/açma sırası tek bir sürekli döngü olarak değerlendirilir. Islatma programlarının (makine yıkamanın ortasında birkaç dakika süreyle kapanır) iki ayrı programa bölünmesini önler. Bunların ayrı döngüler olarak sayılmasını istiyorsanız, arka arkaya yükleriniz arasındaki boşluktan daha kısa ayarlayın. Cihaz tipi varsayılanları, her cihaz için tipik döngü içi duraklamayı korur."
       },
       "start_duration_threshold": {
-        "label": "Başlangıç Süresi"
+        "label": "Başlangıç Süresi",
+        "doc": "Gerçek bir başlatmayı onaylamak için gücün, başlatma eşiğinin bu kadar uzun süre üzerinde kalması gerekir; böylece anlık açma/kapama geçişlerinin bir döngü başlatması önlenir."
       },
       "start_energy_threshold": {
-        "label": "Başlangıç Enerjisi"
+        "label": "Başlangıç Enerjisi",
+        "doc": "Cihazın ÇALIŞMADAN önce tüketmesi gereken enerji (güç x süre). Kısa bir yüksek güçlü ani yükselişin enerjisi çok düşüktür ve dikkate alınmaz, böylece hatalı başlatmalar önlenir."
       },
       "completion_min_seconds": {
-        "label": "Min. Döngü Süresi"
+        "label": "Min. Döngü Süresi",
+        "doc": "Bundan daha kısa döngüler hayalet döngüler olarak atılır (test çalıştırmaları, çorap eklemek için kapıyı açma)."
       },
       "running_dead_zone": {
-        "label": "Çalışma Ölü Bölgesi"
+        "label": "Çalışma Ölü Bölgesi",
+        "doc": "Bir döngü başladıktan sonra bu penceredeki güç düşüşleri dikkate alınmaz. Çamaşır makineleri soğuk suyla doluyor (ısıtmadan önce neredeyse 0 W'a düşüyor) - bu koruma olmadan dolum aşaması bir döngü sonu gibi görünür. Bu, verileri atlamaz: tam güç takibi T=0'dan itibaren kaydedilir. Öneri motoru, makinenizin gerçek başlatma düzenini ölçer ve bunu otomatik olarak boyutlandırır."
       },
       "end_energy_threshold": {
-        "label": "Bitiş Enerjisi"
+        "label": "Bitiş Enerjisi",
+        "doc": "Düşmede gecikme geri sayımı sırasında biriken enerji (watt x zaman) bu eşikle karşılaştırılır. Aşılması durumunda geri sayım sıfırlanır; kırışık önleyici tamburlar ve bulaşık makinesi kurutma kuyrukları kısa kesilmek yerine döngüye bağlı kalır. Soğutma sırasında döngüler çok erken biterse yükseltin; algılama yavaşsa düşürün."
       },
       "end_repeat_count": {
-        "label": "Bitiş Tekrar Sayısı"
+        "label": "Bitiş Tekrar Sayısı",
+        "doc": "Döngü sona ermeden önce gereken ardışık durma eşiği altı okumalarının sayısı. Çoğu fiş için 1 uygundur. Akıllı priziniz ara sıra döngünün ortasında yanlış sıfır örneği bildiriyorsa ve döngüleriniz zamanından önce sona eriyorsa 2-3'e yükseltin."
       },
       "sampling_interval": {
-        "label": "Örnekleme Aralığı"
+        "label": "Örnekleme Aralığı",
+        "doc": "Sensör okumaları arasında beklenen süre - yumuşatma penceresini boyutlandırmak ve geri dönmeyi doğru şekilde başlatmak için kullanılır. Her sensör güncellemesi bu değere bakılmaksızın yakalanır; yalnızca aşağı yöndeki hesaplamaları kalibre eder. Öneri motoru, sensörünüzün geçmiş döngülerdeki gerçek temposunu ölçer ve bunu otomatik olarak ayarlar."
       },
       "smoothing_window": {
-        "label": "Yumuşatma Penceresi"
+        "label": "Yumuşatma Penceresi",
+        "doc": "Ham güç sinyalinin ne kadar yumuşatıldığı. Düşük (2) duyarlıdır ancak gürültülüdür; yüksek (5) ani artışları yumuşatır ancak gecikme ekler."
       },
       "abrupt_drop_watts": {
-        "label": "Ani Düşüş"
+        "label": "Ani Düşüş",
+        "doc": "Bundan daha büyük bir güç düşüşü, döngüyü doğal bir son yerine Kesintili (manuel iptal) olarak işaretler."
       },
       "abrupt_drop_ratio": {
-        "label": "Ani Düşüş Oranı"
+        "label": "Ani Düşüş Oranı",
+        "doc": "Akım gücünün bu kısmından daha büyük bir düşüş de ani olarak değerlendirilir (0,6 = %60'lık bir düşüş). Cihaz boyutlarındaki watt eşiğini tamamlar."
       },
       "profile_match_threshold": {
-        "label": "Eşleşme Eşiği"
+        "label": "Eşleşme Eşiği",
+        "doc": "Bir program tanımlamasını kabul etmek için döngü sonunda gereken minimum benzerlik puanı (0-1). Yanlış tanımlamaları azaltmak için kaldırın; makinenizin programları eşleşmiyorsa düşürün. Varsayılan 0,4 ihtiyatlı bir başlangıç ​​noktasıdır."
       },
       "profile_unmatch_threshold": {
-        "label": "Eşleşmeme Eşiği"
+        "label": "Eşleşmeme Eşiği",
+        "doc": "Canlı bir döngü ortası maçı bu puanın altına düşerse, geçici tanımlama silinir. Eşleşme Eşiğinin biraz altında tutun, böylece benzerlikteki kısa bir düşüş, ekranı tekrar benzersiz hale getirmez."
       },
       "profile_match_interval": {
-        "label": "Eşleşme Aralığı"
+        "label": "Eşleşme Aralığı",
+        "doc": "Çalışan bir döngü sırasında profil eşleştirmenin ne sıklıkla deneneceği. Varsayılan 300 sn (5 dakika), algılama hızını ve CPU'yu dengeler."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Min. Süre Oranı"
+        "label": "Min. Süre Oranı",
+        "doc": "Profile göre minimum döngü uzunluğu. 0,9, bir döngünün eşleşmesi için profil süresinin en az %90'ı olması gerektiği anlamına gelir."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Maks. Süre Oranı"
+        "label": "Maks. Süre Oranı",
+        "doc": "Profile göre maksimum döngü uzunluğu. 1.3, bir döngünün eşleşmesi için profil süresinin %130'unun altında olması gerektiği anlamına gelir."
       },
       "profile_duration_tolerance": {
-        "label": "Profil Süre Toleransı"
+        "label": "Profil Süre Toleransı",
+        "doc": "Eşleştirme sırasında kullanılan profil ortalama süresi etrafındaki +/- bandı. 0,25, 60 dakikalık bir profilin 45-75 dakikalık döngülerle eşleştiği anlamına gelir."
       },
       "duration_tolerance": {
-        "label": "Tahmin Toleransı"
+        "label": "Tahmin Toleransı",
+        "doc": "Kalan zaman tahminlerine yönelik tolerans (öğrenme geri bildirimi, eşleşme değil). Gerçek süre tahminin +/-%X'i dahilindeyse, iyi bir eşleşme olarak sayılır."
       },
       "auto_label_confidence": {
-        "label": "Otomatik Etiket Güveni"
+        "label": "Otomatik Etiket Güveni",
+        "doc": "Döngü sonundaki maç skoru bu seviyede veya üzerindeyse program herhangi bir onay istemi olmadan otomatik olarak etiketlenir. Otomatik etiketlemeden önce daha yüksek kesinlik gerektirecek şekilde yükseltin; daha fazlasını otomatikleştirmek için düşürün. Altındaki Learning Confidence ile birlikte çalışır."
       },
       "learning_confidence": {
-        "label": "Öğrenme Güveni"
+        "label": "Öğrenme Güveni",
+        "doc": "Eşleşme puanı bu ile Otomatik Etiket Güveni arasında kalırsa, bir geri bildirim bildirimi tanımlanan programı doğrulamanızı ister. Bu skorun altında maç yüzeye çıkamayacak kadar belirsiz. Otomatik Etiket Güveninin altında tutulmalıdır."
       },
       "suppress_feedback_notifications": {
-        "label": "Geri Bildirim Bildirimlerini Gizle"
+        "label": "Geri Bildirim Bildirimlerini Gizle",
+        "doc": "Biten bir döngünün gözden geçirilmesi gerektiğinde kalıcı bir bildirimde bulunmayın; geri bildirim hâlâ Döngü inceleme kuyruğunda görünüyor."
       },
       "watchdog_interval": {
-        "label": "Bekçi Aralığı"
+        "label": "Bekçi Aralığı",
+        "doc": "Arka plan gözlemcisinin durmuş sensörleri ve geçen zaman aşımlarını ne sıklıkla kontrol ettiği. Varsayılan 30 sn."
       },
       "no_update_active_timeout": {
-        "label": "Güncelleme Yok Zaman Aşımı"
+        "label": "Güncelleme Yok Zaman Aşımı",
+        "doc": "Çalışırken bu kadar uzun süre güç güncellemesi gelmezse, fişin çevrimdışı olduğunu varsayalım ve bir zombi döngüsünden kaçınmak için zorla durdurun. Varsayılan 600 sn, bulut veya ağ gecikmesine izin verir."
       },
       "progress_reset_delay": {
-        "label": "İlerleme Sıfırlama Gecikmesi"
+        "label": "İlerleme Sıfırlama Gecikmesi",
+        "doc": "Bitirdikten sonra, bu süre boyunca ilerlemeyi %100'de tutun; böylece Tamamlandı, Boşta durumuna sıfırlamadan önce kontrol panellerinde görünür."
       },
       "auto_maintenance": {
-        "label": "Otomatik Bakım (gece temizliği)"
+        "label": "Otomatik Bakım (gece temizliği)",
+        "doc": "Gecelik temizlik yapın: profil zarflarını yeniden oluşturun, döngü sağlığını yeniden hesaplayın, hata ayıklama izlerini budayın ve en son döngüleri koruyun."
       },
       "expose_debug_entities": {
-        "label": "Hata Ayıklama Varlıklarını Göster"
+        "label": "Hata Ayıklama Varlıklarını Göster",
+        "doc": "Ekstra teşhis HA varlıkları yayınlayın (eşleşme güveni, belirsizlik, dahili durum bilgileri). Kapalı, varlık listesini normal kullanım için temiz tutar."
       },
       "save_debug_traces": {
-        "label": "Hata Ayıklama İzlerini Kaydet"
+        "label": "Hata Ayıklama İzlerini Kaydet",
+        "doc": "Her döngü için tam güç takibini ve eşleşen hata ayıklama verilerini saklayın. Sorun giderme için kullanışlıdır ancak depolama boyutunu artırır."
       },
       "anti_wrinkle_enabled": {
-        "label": "Kırışıklık Önleme Algılamayı Etkinleştir"
+        "label": "Kırışıklık Önleme Algılamayı Etkinleştir",
+        "doc": "Kurutucunun ana ısıtma aşamasından sonra yaydığı kısa, düşük güçlü tambur darbelerini tanıyın ve bunları yeni döngüler olarak okumak yerine bitmiş döngüye bağlı tutun."
       },
       "anti_wrinkle_max_power": {
-        "label": "Maks. Kırışıklık Önleme Gücü"
+        "label": "Maks. Kırışıklık Önleme Gücü",
+        "doc": "Bu gücün üzerindeki bir nabız, kırışıklık karşıtı bir düşüş değil, gerçek bir yeni döngü olarak değerlendirilir. Takla darbe gücünün hemen üstüne ayarlayın."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Maks. Süre"
+        "label": "Maks. Süre",
+        "doc": "Bundan daha uzun darbeler, kırışıklık önleyici bir takla yerine gerçek bir döngü olarak değerlendirilir."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Çıkış Gücü Eşiği"
+        "label": "Çıkış Gücü Eşiği",
+        "doc": "Kırışıklık önleme modunun aktif kalması için darbeler arasında gücün bu değerin altına düşmesi gerekir."
       },
       "delay_start_detect_enabled": {
-        "label": "Gecikmeli Başlatma Algılamayı Etkinleştir"
+        "label": "Gecikmeli Başlatma Algılamayı Etkinleştir",
+        "doc": "Cihazın ne zaman açık olduğunu ve beklediğini (gecikmeli başlatma / bekleme) ancak kendi döngüsüne başlamadığını tespit edin, böylece bekleme çekmesi bir çalışma döngüsüyle karıştırılmaz."
       },
       "delay_confirm_seconds": {
-        "label": "Onay Saniyeleri"
+        "label": "Onay Saniyeleri",
+        "doc": "Cihazın çalışmak yerine başlamayı bekliyor olarak değerlendirilmesi için gücün bu süre boyunca bekleme bandında kalması gerekir."
       },
       "delay_timeout_hours": {
-        "label": "Zaman Aşımı Saatleri"
+        "label": "Zaman Aşımı Saatleri",
+        "doc": "Bu kadar saatten sonra gecikmeli başlatma modunda beklemeyi bırakın ve boşta çalışmaya dönün; böylece, açık bırakılan ancak hiç başlatılmayan bir makine sonsuza kadar beklemez."
       },
       "external_end_trigger_enabled": {
-        "label": "Harici Bitiş Tetikleyicisini Etkinleştir"
+        "label": "Harici Bitiş Tetikleyicisini Etkinleştir",
+        "doc": "Yerleşik güç tabanlı algılamaya ek olarak harici bir ikili sensörün döngünün sonunu bildirmesine izin verin."
       },
       "external_end_trigger": {
-        "label": "Harici Tetikleyici Varlığı"
+        "label": "Harici Tetikleyici Varlığı",
+        "doc": "Durum değişikliği döngünün sonunu işaret eden ikili sensör (örneğin, cihazın \"tamamlanmış\" kontağı veya tamamlayıcı entegrasyon)."
       },
       "external_end_trigger_inverted": {
-        "label": "Harici Tetikleyiciyi Tersine Çevir (KAPALI'da tetikle)"
+        "label": "Harici Tetikleyiciyi Tersine Çevir (KAPALI'da tetikle)",
+        "doc": "Tetik sensörünün KAPALI duruma geçmesini (AÇIK yerine) döngü sonu sinyali olarak değerlendirin."
       },
       "door_sensor_entity": {
-        "label": "Kapı Sensörü Varlığı"
+        "label": "Kapı Sensörü Varlığı",
+        "doc": "Opsiyonel kapı ikili sensörü. Bir döngüden sonra cihazın ne zaman açıldığını/boşaltıldığını tespit etmek için kullanılır."
       },
       "pause_cuts_power": {
-        "label": "Duraklatma Gücü de Keser (anahtar üzerinden)"
+        "label": "Duraklatma Gücü de Keser (anahtar üzerinden)",
+        "doc": "Bir döngü duraklatıldığında aşağıdaki Anahtar Varlığını da kapatın. Yalnızca kullanım süresinin ortasında fişi güvenli bir şekilde kesilebilen cihazlar için."
       },
       "switch_entity": {
-        "label": "Anahtar Varlığı"
+        "label": "Anahtar Varlığı",
+        "doc": "İsteğe bağlı anahtar, duraklatma durumunda kapatılır ve devam ederken tekrar açılır; \"Duraklatma aynı zamanda gücü de keser\" ile birlikte kullanılır."
       },
       "notify_unload_delay_minutes": {
-        "label": "Boşaltma Hatırlatıcısı Gecikmesi"
+        "label": "Boşaltma Hatırlatıcısı Gecikmesi",
+        "doc": "Hala bekleyen \"makineyi boşaltın\" hatırlatıcısı gönderilmeden önce bir döngü bittikten dakikalar sonra. Hatırlatıcıyı devre dışı bırakmak için 0'a ayarlayın."
       },
       "pump_stuck_duration": {
-        "label": "Pompa Takılma Süresi"
+        "label": "Pompa Takılma Süresi",
+        "doc": "Bir pompa, muhtemelen sıkışmış olarak işaretlenmeden önce sürekli olarak çalışabilir (sıkışmış pompa olayını tetikler)."
       },
       "notify_start_services": {
-        "label": "Başlangıç Servisleri"
+        "label": "Başlangıç Servisleri",
+        "doc": "notify.* Bir döngü başladığında çağrılan hizmetler. Hedef başına bir tane ekleyin (telefon, kontrol paneli vb.); Başlatma bildirimi için boş bırakın."
       },
       "notify_finish_services": {
-        "label": "Bitiş Servisleri"
+        "label": "Bitiş Servisleri",
+        "doc": "notify.* Bir döngü bittiğinde çağrılan hizmetler. Hedef başına bir tane ekleyin; bitiş bildirimi yoksa boş bırakın."
       },
       "notify_live_services": {
-        "label": "Canlı İlerleme Servisleri"
+        "label": "Canlı İlerleme Servisleri",
+        "doc": "notify.* hizmetleri, bir döngü çalışırken canlı ilerleme güncellemeleri için çağrıda bulundu. Canlı ilerleme bildirimlerini devre dışı bırakmak için boş bırakın."
       },
       "notify_people": {
-        "label": "Kişiler (Evde İken için)"
+        "label": "Kişiler (Evde İken için)",
+        "doc": "kişi.* \"Yalnızca Evdeyken Bildir\" tarafından evde kimsenin olup olmadığına karar vermek için kullanılan varlıklar."
       },
       "notify_only_when_home": {
-        "label": "Yalnızca Evdeyken Bildir"
+        "label": "Yalnızca Evdeyken Bildir",
+        "doc": "Yalnızca bağlantılı kişilerden (yukarıdaki) en az biri evde olduğunda bildirim gönderin."
       },
       "notify_fire_events": {
-        "label": "Bildirimler için HA Olayları Tetikle"
+        "label": "Bildirimler için HA Olayları Tetikle",
+        "doc": "Ayrıca döngü başlangıcında/bitişinde ha_washdata_* olaylarını tetikleyin, böylece kendi otomasyonlarınızı oluşturabilirsiniz."
       },
       "notify_before_end_minutes": {
-        "label": "Bitiş Öncesi Uyarı"
+        "label": "Bitiş Öncesi Uyarı",
+        "doc": "Tahmini kalan süre bunun altına düştüğünde Neredeyse Bitti uyarısı gönderin. 0 bunu devre dışı bırakır."
       },
       "notify_live_interval_seconds": {
-        "label": "Canlı Güncelleme Aralığı"
+        "label": "Canlı Güncelleme Aralığı",
+        "doc": "Bir döngü çalışırken canlı ilerleme bildirimlerinin ne sıklıkla yenilendiği."
       },
       "notify_live_overrun_percent": {
-        "label": "Uyarı Öncesi Canlı Aşım %"
+        "label": "Uyarı Öncesi Canlı Aşım %",
+        "doc": "Bir döngü, tahminini bu yüzdeden daha fazla aşarsa, bir taşma uyarısı gönderin."
       },
       "notify_live_chronometer": {
-        "label": "Canlı Kronometre Kullan"
+        "label": "Canlı Kronometre Kullan",
+        "doc": "Bildirimde statik bir tahmin yerine (bunu destekleyen platformlarda) canlı güncellenen bir geri sayım sayacı gösterin."
       },
       "notify_timeout_seconds": {
-        "label": "Sonra Otomatik Kapat"
+        "label": "Sonra Otomatik Kapat",
+        "doc": "Bu kadar saniye sonra bildirimi otomatik olarak kapat (bunu destekleyen platformlarda). 0 manuel olarak kapatılana kadar bunu korur."
       },
       "notify_title": {
-        "label": "Bildirim Başlığı"
+        "label": "Bildirim Başlığı",
+        "doc": "Bildirim başlığı. Şablon değişkenleri: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Bildirim Simgesi"
+        "label": "Bildirim Simgesi",
+        "doc": "Bildirim için isteğe bağlı mdi simgesi (ör. mdi:çamaşır makinesi). Platform varsayılanı için boş bırakın."
       },
       "notify_start_message": {
-        "label": "Başlangıç Mesajı"
+        "label": "Başlangıç Mesajı",
+        "doc": "Bir döngü başladığında gövde gönderilir. Şablon değişkenleri: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Bitiş Mesajı"
+        "label": "Bitiş Mesajı",
+        "doc": "Bir döngü bittiğinde gövde gönderilir. Şablon değişkenleri: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "Bitiş Öncesi Mesaj"
+        "label": "Bitiş Öncesi Mesaj",
+        "doc": "Ön uç / neredeyse tamamlandı uyarısının gövdesi. Şablon değişkenleri: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Hatırlatıcı Mesaj"
+        "label": "Hatırlatıcı Mesaj",
+        "doc": "Hala bekleyen boşaltma hatırlatıcısının metni. Boş, yerleşik varsayılanı kullanır. Şablon değişkenleri: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Android Kanalı (başlangıç/canlı)"
+        "label": "Android Kanalı (başlangıç/canlı)",
+        "doc": "Başlat/canlı mesajlar için Android bildirim kanalı adı (kanal başına sesi ve mobil uygulamada önceliği kontrol eder). Blank, tamamlayıcı uygulama varsayılanını kullanır."
       },
       "notify_finish_channel": {
-        "label": "Android Kanalı (bitiş)"
+        "label": "Android Kanalı (bitiş)",
+        "doc": "Bitiş mesajı için Android bildirim kanalı adı. Boş, başlangıç/canlı kanalını yeniden kullanır."
       },
       "energy_price_entity": {
-        "label": "Enerji Fiyatı Varlığı"
+        "label": "Enerji Fiyatı Varlığı",
+        "doc": "kWh başına güncel elektrik fiyatını gösteren sensör (örn. dinamik tarife). Aşağıdaki statik fiyata göre önceliklidir. Her döngü bittiğinde geçerli olan fiyat dondurulur."
       },
       "energy_price_static": {
-        "label": "Sabit Enerji Fiyatı (kWh başına)"
+        "label": "Sabit Enerji Fiyatı (kWh başına)",
+        "doc": "Yukarıda hiçbir canlı fiyat varlığı belirlenmediğinde maliyet rakamları için kullanılan kWh başına sabit fiyat."
       },
       "notify_cycle_timers": {
-        "label": "Döngü Zamanlayıcıları"
+        "label": "Döngü Zamanlayıcıları",
+        "doc": "Bir döngünün belirli dakikalarında bildirimler (örneğin yumuşatıcı eklemek için). Mesaj {device}, {program}, {minutes}'yi destekliyor. Bu noktada duraklatmak ve Devam Et düğmesiyle etkileşimli bir bildirim almak için Otomatik duraklatmayı etkinleştirin; panel, duraklatma/devam ettirme hizmeti veya bildirim eylemi aracılığıyla devam ettirebilirsiniz."
       },
       "enable_ml_models": {
-        "label": "Döngü sırasında akıllı modelleri uygula"
+        "label": "Döngü sırasında akıllı modelleri uygula",
+        "doc": "Bir döngü çalışırken, modellerin canlı sonuçları iyileştirmesine izin verin: daha istikrarlı bir kalan süre ve enerji/maliyet tahmini ve son tespitte erken durdurma önleme koruması (bir bitişi yalnızca geciktirebilir, hiçbir zaman erken bitiremez ve sınırlıdır). Mümkün olduğunda ince ayarlı modellerinizi, aksi takdirde yerleşik olanları kullanır. Kapalı = yalnızca klasik güç tabanlı mantık (hala güvenilir)."
       },
       "ml_training_enabled": {
-        "label": "Bu makineden öğren"
+        "label": "Bu makineden öğren",
+        "doc": "İncelenen döngülerinizi gece boyunca periyodik olarak inceleyin ve modellerde bu özel makineye göre ince ayar yapın. Bir değişiklik yalnızca uzayan döngülerde gerçekten daha iyi puan aldığında korunur, bu nedenle bu yalnızca yardımcı olabilir veya aynı kalabilir; asla gerilemez."
       },
       "ml_training_hour": {
-        "label": "Saatte öğren"
+        "label": "Saatte öğren",
+        "doc": "Gece ince ayarını yapmak için günün yerel saati (0-23). 2 (02:00) gibi sessiz bir saat seçin."
       },
       "ml_training_min_cycles": {
-        "label": "Önce gereken döngüler"
+        "label": "Önce gereken döngüler",
+        "doc": "İnce ayar yapmadan önce en azından bu sayıda döngü kaydedilene kadar bekleyin, böylece öğrenilecek yeterli şey olur."
       },
       "ml_training_interval_days": {
-        "label": "En fazla her seferinde kontrol et"
+        "label": "En fazla her seferinde kontrol et",
+        "doc": "Gelişmeleri en fazla bu kadar günde bir kez yeniden kontrol edin."
       }
     }
   }

@@ -80,7 +80,8 @@
         "air_fryer": "Fregidora d'aire",
         "bread_maker": "Panificadora",
         "pump": "Bomba / Bomba de sumidor",
-        "other": "Altres (avançat)"
+        "generic": "Altres (avançat)",
+        "other": "Dispositiu llindar"
       }
     }
   },
@@ -620,6 +621,7 @@
       "needs_review": "Necessita revisió",
       "overrun": "Va córrer més de l'habitual",
       "artifact_tip": "S'han detectat {n} anomalies (p. ex., porta oberta a mig cicle): obre per veure-les al gràfic",
+      "restart_gap_tip": "{n} buit de reinici de HA: el traçat de potència té un forat",
       "poor_fit_tip": "Historial de coincidències incoherents: penseu a reconstruir aquest perfil",
       "fair_fit_tip": "Coherència de concordança moderada: alguns cicles assignats a aquest perfil tenen puntuacions de confiança més baixes. Etiqueta més cicles o torna a gravar el perfil per millorar la precisió.",
       "auto": "(detecció automàtica)",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Superposeu altres sobres de perfil al gràfic anterior per veure quin s'adapta millor a aquest cicle.",
       "artifact_header": "S'han detectat {n} anomalies durant aquest cicle",
       "artifact_footer": "Ressaltat al gràfic anterior. Es tracta d'artefactes transitoris (per exemple, la porta oberta a mig cicle), no necessàriament problemes.",
+      "restart_gap_header": "{n} buit de reinici de HA durant aquest cicle",
+      "restart_gap_item": "{dur} buit",
+      "restart_gap_footer": "Ressaltat al gràfic. Les dades de potència falten per a aquests intervals; la coincidència va usar només les lectures reals.",
       "profile_poor_health_detail": "Els cicles assignats a aquest perfil tenen formes inconsistents o poca confiança. Considereu la possibilitat de reconstruir el sobre o revisar els cicles etiquetats.",
       "trend_duration_longer": "Tendència de durada més llarga ({pct}%/cicle) - mitjana recent {avg}",
       "trend_duration_shorter": "Tendència de durada més curta ({pct}%/cicle) - mitjana recent {avg}",
@@ -990,235 +995,312 @@
     },
     "setting": {
       "name": {
-        "label": "Nom del dispositiu"
+        "label": "Nom del dispositiu",
+        "doc": "El nom de visualització es mostra a la llista d'integracions d'HA i al registre del dispositiu."
       },
       "device_type": {
-        "label": "Tipus de dispositiu"
+        "label": "Tipus de dispositiu",
+        "doc": "Classe d'electrodomèstics. Estableix els valors predeterminats de detecció sensibles (llindars, retard a l'apagada, tractament final) ajustats per a aquest tipus d'aparell; canvieu-lo només si el dispositiu es va configurar originalment com a tipus incorrecte."
       },
       "power_sensor": {
-        "label": "Sensor de potència"
+        "label": "Sensor de potència",
+        "doc": "L'entitat sensora que informa de la potència activa en watts d'aquest aparell (p. ex., sensor.washer_power). Tota la detecció de cicles es basa en aquest senyal."
       },
       "min_power": {
-        "label": "Potència mínima"
+        "label": "Potència mínima",
+        "doc": "Potència mínima absoluta considerada activa. Les lectures inferiors es tracten com a 0 W (mode d'espera), filtrant la càrrega fantasma dels endolls intel·ligents i els LED d'espera."
       },
       "off_delay": {
-        "label": "Retard d'apagada"
+        "label": "Retard d'apagada",
+        "doc": "Temps d'espera després d'haver caigut l'energia abans de declarar el cicle finalitzat. Si l'energia es reprèn dins d'aquesta finestra, el cicle continua sense problemes; això fa un pont entre les etapes de rentat. Els rentavaixelles tenen fases d'assecat llargues (apagat durant 20-60 min), de manera que el retard d'apagat ha de superar-lo per mantenir tot el rentat+assecat com un cicle."
       },
       "linked_device": {
-        "label": "Agrupa sota el dispositiu"
+        "label": "Agrupa sota el dispositiu",
+        "doc": "Opcionalment, niu aquest dispositiu WashData a un altre dispositiu (per exemple, l'endoll intel·ligent) al registre de dispositius HA, que es mostra com a \"Connectat mitjançant...\"."
       },
       "start_threshold_w": {
-        "label": "Llindar d'inici"
+        "label": "Llindar d'inici",
+        "doc": "La potència ha de pujar per sobre d'aquest nivell per confirmar que s'ha iniciat un cicle. Si es configura massa baix, es produeixen falses arrencades des de l'alimentació en espera; Es perden programes massa alts i d'inici lent (ompliment en fred). El motor de suggeriments estableix això just per sobre de la potència activa més baixa observada de la màquina."
       },
       "stop_threshold_w": {
-        "label": "Llindar d'aturada"
+        "label": "Llindar d'aturada",
+        "doc": "L'energia ha de caure per sota d'aquest nivell abans que comenci el compte enrere del retard d'apagada. Establiu-lo per sota del llindar inicial: la bretxa entre ells és la banda d'histèresi que evita el parpelleig. Si s'estableixen massa alts, les fases de baixa potència (esbandits, antiarrugues) desencadenen falsament la seqüència final."
       },
       "min_off_gap": {
-        "label": "Buit mínim apagat"
+        "label": "Buit mínim apagat",
+        "doc": "Si la màquina s'apaga durant menys d'aquest temps, la seqüència d'encesa/apagada/encesa es tracta com un cicle continu. Evita que els programes de remull (la màquina s'apaga durant diversos minuts a mig rentat) es divideixin en dos cicles separats. Establiu-lo més curt que la distància entre les vostres càrregues consecutives si voleu que es comptin com a cicles separats. Els valors predeterminats del tipus de dispositiu protegeixen la pausa intracicle típica de cada aparell."
       },
       "start_duration_threshold": {
-        "label": "Durada d'inici"
+        "label": "Durada d'inici",
+        "doc": "L'energia ha de mantenir-se per sobre del llindar d'inici durant tot aquest temps per confirmar un inici real, evitant que les commutacions d'encesa/desactivació d'una fracció de segon comencin un cicle."
       },
       "start_energy_threshold": {
-        "label": "Energia d'inici"
+        "label": "Energia d'inici",
+        "doc": "Energia (potència x temps) que ha de consumir l'electrodomèstic abans de FUNCIONAR. Un pic breu d'alta potència té una energia molt baixa i s'ignora, evitant falses arrencades."
       },
       "completion_min_seconds": {
-        "label": "Durada mínima del cicle"
+        "label": "Durada mínima del cicle",
+        "doc": "Els cicles més curts que aquest es descarten com a cicles fantasma (proves, obrir la porta per afegir un mitjó)."
       },
       "running_dead_zone": {
-        "label": "Zona morta en execució"
+        "label": "Zona morta en execució",
+        "doc": "Després d'iniciar un cicle, les caigudes de potència dins d'aquesta finestra s'ignoren. Les rentadores s'omplen d'aigua freda (caiguda prop de 0 W abans d'escalfar) - sense aquesta protecció, aquesta fase d'ompliment sembla un final de cicle. Això NO salta dades: la traça de potència total es registra des de T=0. El motor de suggeriments mesura el patró d'inici real de la vostra màquina i ho dimensiona automàticament."
       },
       "end_energy_threshold": {
-        "label": "Energia final"
+        "label": "Energia final",
+        "doc": "Durant el compte enrere del retard d'apagada, l'energia acumulada (watts x temps) es compara amb aquest llindar. Si se supera, el compte enrere es restableix, mantenint les caigudes antiarrugues i les cues d'assecat del rentavaixelles connectades al cicle en lloc de tallar-les curtes. Aixequeu-lo si els cicles acaben massa aviat durant el refredament; baixeu-lo si la detecció és lenta."
       },
       "end_repeat_count": {
-        "label": "Recompte de repeticions finals"
+        "label": "Recompte de repeticions finals",
+        "doc": "Nombre de lectures consecutives per sota del llindar de parada necessàries abans que finalitzi el cicle. 1 està bé per a la majoria d'endolls. Augmenteu a 2-3 si el vostre connector intel·ligent informa ocasionalment d'una mostra de fals zero a mig cicle i els vostres cicles acaben abans d'hora."
       },
       "sampling_interval": {
-        "label": "Interval de mostreig"
+        "label": "Interval de mostreig",
+        "doc": "Temps esperat entre les lectures del sensor: s'utilitza per dimensionar la finestra de suavització i començar el rebot correctament. Cada actualització del sensor es captura independentment d'aquest valor; només calibra els càlculs aigües avall. El motor de suggeriments mesura la cadència real del sensor dels cicles anteriors i la configura automàticament."
       },
       "smoothing_window": {
-        "label": "Finestra de suavitzat"
+        "label": "Finestra de suavitzat",
+        "doc": "Quant s'atenua el senyal de potència bruta. Baix (2) és sensible però sorollós; alt (5) suavitza les puntes però afegeix retard."
       },
       "abrupt_drop_watts": {
-        "label": "Caiguda brusca"
+        "label": "Caiguda brusca",
+        "doc": "Una caiguda de potència més gran que aquesta marca el cicle com a interromput (cancel·lació manual) en lloc d'un acabat natural."
       },
       "abrupt_drop_ratio": {
-        "label": "Ràtio de caiguda brusca"
+        "label": "Ràtio de caiguda brusca",
+        "doc": "Una caiguda més gran que aquesta fracció de la potència actual també es tracta com a brusca (0,6 = una caiguda del 60%). Complementa el llindar de watts en les mides de l'aparell."
       },
       "profile_match_threshold": {
-        "label": "Llindar de coincidència"
+        "label": "Llindar de coincidència",
+        "doc": "La puntuació mínima de semblança (0-1) necessària al final del cicle per acceptar la identificació d'un programa. Aixecar-lo per reduir les identificacions incorrectes; baixeu-lo si els programes de la vostra màquina no coincideixen. El 0,4 per defecte és un punt de partida conservador."
       },
       "profile_unmatch_threshold": {
-        "label": "Llindar de desajust"
+        "label": "Llindar de desajust",
+        "doc": "Si un partit en directe de mig cicle baixa per sota d'aquesta puntuació, la identificació provisional s'esborra. Manteniu-lo una mica per sota del llindar de coincidència perquè una breu caiguda en la similitud no torni la pantalla a incomparable."
       },
       "profile_match_interval": {
-        "label": "Interval de coincidència"
+        "label": "Interval de coincidència",
+        "doc": "Amb quina freqüència s'ha d'intentar la concordança de perfils durant un cicle d'execució. El valor per defecte de 300 s (5 minuts) equilibra la velocitat de detecció i la CPU."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Ràtio de durada mínima"
+        "label": "Ràtio de durada mínima",
+        "doc": "Durada mínima del cicle en relació al perfil. 0,9 significa que un cicle ha de ser almenys el 90% de la durada del perfil perquè coincideixi."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Ràtio de durada màxima"
+        "label": "Ràtio de durada màxima",
+        "doc": "Durada màxima del cicle en relació al perfil. 1.3 significa que un cicle ha de ser inferior al 130% de la durada del perfil perquè coincideixi."
       },
       "profile_duration_tolerance": {
-        "label": "Tolerància de durada del perfil"
+        "label": "Tolerància de durada del perfil",
+        "doc": "La banda +/- al voltant de la durada mitjana d'un perfil utilitzada durant la concordança. 0,25 significa que un perfil de 60 minuts coincideix amb cicles de 45-75 minuts."
       },
       "duration_tolerance": {
-        "label": "Tolerància d'estimació"
+        "label": "Tolerància d'estimació",
+        "doc": "Tolerància a les estimacions de temps restant (feedback d'aprenentatge, no coincidència). Si la durada real es troba dins de +/-X% de l'estimació, compta com una bona coincidència."
       },
       "auto_label_confidence": {
-        "label": "Confiança d'etiquetatge automàtic"
+        "label": "Confiança d'etiquetatge automàtic",
+        "doc": "Si la puntuació del partit al final del cicle és igual o superior a aquesta, el programa s'etiqueta automàticament sense cap sol·licitud de confirmació. Augmenteu-lo per exigir una major certesa abans de l'etiquetatge automàtic; baixa-lo per automatitzar més. Funciona conjuntament amb Learning Confidence a sota."
       },
       "learning_confidence": {
-        "label": "Confiança d'aprenentatge"
+        "label": "Confiança d'aprenentatge",
+        "doc": "Si la puntuació de la coincidència se situa entre aquesta i la de Confiança de l'etiqueta automàtica, una notificació de comentaris us demanarà que verifiqueu el programa identificat. Per sota d'aquesta puntuació el partit és massa incert per aflorar. S'ha de mantenir per sota de la confiança de l'etiqueta automàtica."
       },
       "suppress_feedback_notifications": {
-        "label": "Suprimir les notificacions de comentaris"
+        "label": "Suprimir les notificacions de comentaris",
+        "doc": "No enviïs una notificació persistent quan calgui revisar un cicle acabat; els comentaris encara apareixen a la cua de revisió de cicles."
       },
       "watchdog_interval": {
-        "label": "Interval del vigilant"
+        "label": "Interval del vigilant",
+        "doc": "Amb quina freqüència el control de fons comprova si hi ha sensors aturats i temps d'espera transcorreguts. Per defecte 30 s."
       },
       "no_update_active_timeout": {
-        "label": "Temps d'espera sense actualització"
+        "label": "Temps d'espera sense actualització",
+        "doc": "Si no arriben actualitzacions d'energia durant tant de temps mentre s'executa, suposa que l'endoll s'ha deixat fora de línia i força l'aturada per evitar un cicle zombi. Els 600 s per defecte permeten el retard del núvol o de la malla."
       },
       "progress_reset_delay": {
-        "label": "Retard de reinici del progrés"
+        "label": "Retard de reinici del progrés",
+        "doc": "Després d'haver acabat, manteniu el progrés al 100% durant tot aquest temps, de manera que Completat es vegi als taulers abans de restablir a Inactiu."
       },
       "auto_maintenance": {
-        "label": "Manteniment automàtic (neteja nocturna)"
+        "label": "Manteniment automàtic (neteja nocturna)",
+        "doc": "Executeu la neteja nocturna: reconstruïu els sobres del perfil, torneu a calcular l'estat del cicle, elimineu les traces de depuració i conserveu els cicles més recents."
       },
       "expose_debug_entities": {
-        "label": "Exposa les entitats de depuració"
+        "label": "Exposa les entitats de depuració",
+        "doc": "Publiqueu entitats d'HA de diagnòstic addicionals (confiança de coincidència, ambigüitat, estat intern). Desactivat manté la llista d'entitats neta per a un ús normal."
       },
       "save_debug_traces": {
-        "label": "Desa les traces de depuració"
+        "label": "Desa les traces de depuració",
+        "doc": "Emmagatzemeu el rastre de potència total i les dades de depuració coincidents per a cada cicle. Útil per resoldre problemes, però augmenta la mida d'emmagatzematge."
       },
       "anti_wrinkle_enabled": {
-        "label": "Activa la detecció antiarrugues"
+        "label": "Activa la detecció antiarrugues",
+        "doc": "Reconeix els polsos curts de baixa potència que emet una assecadora després de la fase de calor principal i mantén-los connectats al cicle acabat en lloc de llegir-los com a cicles nous."
       },
       "anti_wrinkle_max_power": {
-        "label": "Potència màxima antiarrugues"
+        "label": "Potència màxima antiarrugues",
+        "doc": "Un pols per sobre d'aquesta potència es tracta com un nou cicle real, no com una caiguda anti-arrugues. Situat just per sobre de la potència del pols de caiguda."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Durada màxima"
+        "label": "Durada màxima",
+        "doc": "Els polsos més llargs que això es tracten com un cicle real en lloc d'una caiguda anti-arrugues."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Llindar de potència de sortida"
+        "label": "Llindar de potència de sortida",
+        "doc": "La potència ha de baixar entre polsos perquè el mode antiarrugues es mantingui actiu."
       },
       "delay_start_detect_enabled": {
-        "label": "Activa la detecció d'inici retardat"
+        "label": "Activa la detecció d'inici retardat",
+        "doc": "Detecteu quan l'aparell està encès i esperant (inici retardat / espera) però no ha començat el seu cicle, de manera que el sorteig d'espera no es confongui amb un cicle en marxa."
       },
       "delay_confirm_seconds": {
-        "label": "Segons de confirmació"
+        "label": "Segons de confirmació",
+        "doc": "L'alimentació s'ha de mantenir a la banda d'espera durant molt de temps abans que l'aparell es tracti com a esperant per arrencar en lloc de funcionar."
       },
       "delay_timeout_hours": {
-        "label": "Hores de temps d'espera"
+        "label": "Hores de temps d'espera",
+        "doc": "Deixeu d'esperar en el mode d'inici retardat després d'aquestes moltes hores i torneu al mode inactiu, de manera que una màquina que no s'hagi engegat però no s'ha iniciat no espera per sempre."
       },
       "external_end_trigger_enabled": {
-        "label": "Activa el disparador de final extern"
+        "label": "Activa el disparador de final extern",
+        "doc": "Deixeu que un sensor binari extern senyali el final d'un cicle, a més de la detecció integrada basada en l'energia."
       },
       "external_end_trigger": {
-        "label": "Entitat de disparador extern"
+        "label": "Entitat de disparador extern",
+        "doc": "Sensor binari el canvi d'estat del qual marca el final del cicle (per exemple, un contacte \"acabat\" d'un aparell o una integració d'acompanyant)."
       },
       "external_end_trigger_inverted": {
-        "label": "Inverteix el disparador extern (disparar a DESACTIVAT)"
+        "label": "Inverteix el disparador extern (disparar a DESACTIVAT)",
+        "doc": "Tracteu el sensor de disparador que s'apaga (en lloc d'encendre) com el senyal de final de cicle."
       },
       "door_sensor_entity": {
-        "label": "Entitat del sensor de porta"
+        "label": "Entitat del sensor de porta",
+        "doc": "Sensor binari de la porta opcional. S'utilitza per detectar quan l'aparell s'ha obert/descarregat després d'un cicle."
       },
       "pause_cuts_power": {
-        "label": "La pausa també talla l'alimentació (via interruptor)"
+        "label": "La pausa també talla l'alimentació (via interruptor)",
+        "doc": "Quan un cicle està en pausa, també apagueu l'Entitat de commutació a continuació. Només per a aparells l'endoll dels quals es pot tallar amb seguretat a mig cicle."
       },
       "switch_entity": {
-        "label": "Entitat de l'interruptor"
+        "label": "Entitat de l'interruptor",
+        "doc": "Interruptor opcional desactivat en pausa i tornat a activar-se quan es reprèn, utilitzat juntament amb \"La pausa també talla l'energia\"."
       },
       "notify_unload_delay_minutes": {
-        "label": "Retard del recordatori de descàrrega"
+        "label": "Retard del recordatori de descàrrega",
+        "doc": "Minuts després que finalitzi un cicle abans d'enviar el recordatori de \"descarregueu la màquina\" que encara està esperant. Establiu 0 per desactivar el recordatori."
       },
       "pump_stuck_duration": {
-        "label": "Durada de la bomba encallada"
+        "label": "Durada de la bomba encallada",
+        "doc": "Uns segons pot ser que una bomba funcioni contínuament abans de marcar-la com a possiblement bloquejada (activa l'esdeveniment de bomba encallada)."
       },
       "notify_start_services": {
-        "label": "Serveis d'inici"
+        "label": "Serveis d'inici",
+        "doc": "notificar.* els serveis trucats quan comença un cicle. Afegiu-ne un per objectiu (telèfon, tauler, etc.); Deixeu-lo en blanc per no notificar-ne l'inici."
       },
       "notify_finish_services": {
-        "label": "Serveis de finalització"
+        "label": "Serveis de finalització",
+        "doc": "notificar.* els serveis trucats quan acaba un cicle. Afegiu-ne un per objectiu; Deixeu-lo buit per no notificar-ne el final."
       },
       "notify_live_services": {
-        "label": "Serveis de progrés en directe"
+        "label": "Serveis de progrés en directe",
+        "doc": "notificar.* els serveis demanen actualitzacions de progrés en directe mentre s'executa un cicle. Deixa en blanc per desactivar les notificacions de progrés en directe."
       },
       "notify_people": {
-        "label": "Persones (per a Notificar només quan estic a casa)"
+        "label": "Persones (per a Notificar només quan estic a casa)",
+        "doc": "persona.* entitats utilitzades per \"Notificar només quan estigui a casa\" per decidir si hi ha algú a casa."
       },
       "notify_only_when_home": {
-        "label": "Notificar només quan estic a casa"
+        "label": "Notificar només quan estic a casa",
+        "doc": "Envieu notificacions només quan almenys una de les persones enllaçades (a dalt) sigui a casa."
       },
       "notify_fire_events": {
-        "label": "Llançar esdeveniments HA per a notificacions"
+        "label": "Llançar esdeveniments HA per a notificacions",
+        "doc": "També feu esdeveniments ha_washdata_* a l'inici/final del cicle perquè pugueu crear les vostres pròpies automatitzacions."
       },
       "notify_before_end_minutes": {
-        "label": "Alerta prèvia al final"
+        "label": "Alerta prèvia al final",
+        "doc": "Envieu una alerta de quasi fet quan el temps estimat restant baixi. 0 el desactiva."
       },
       "notify_live_interval_seconds": {
-        "label": "Interval d'actualització en directe"
+        "label": "Interval d'actualització en directe",
+        "doc": "Amb quina freqüència s'actualitzen les notificacions de progrés en directe mentre s'executa un cicle."
       },
       "notify_live_overrun_percent": {
-        "label": "% de sobreexecució en directe abans de l'alerta"
+        "label": "% de sobreexecució en directe abans de l'alerta",
+        "doc": "Si un cicle supera la seva estimació en més d'aquest percentatge, envieu una alerta d'excés."
       },
       "notify_live_chronometer": {
-        "label": "Utilitza el cronòmetre en directe"
+        "label": "Utilitza el cronòmetre en directe",
+        "doc": "Mostra un temporitzador de compte enrere d'actualització en directe a la notificació (a les plataformes que l'admeten) en lloc d'una estimació estàtica."
       },
       "notify_timeout_seconds": {
-        "label": "Dismiss automàtic després de"
+        "label": "Dismiss automàtic després de",
+        "doc": "Descarta automàticament la notificació després d'aquests segons (en plataformes que la admeten). 0 el conserva fins que s'acomiada manualment."
       },
       "notify_title": {
-        "label": "Títol de la notificació"
+        "label": "Títol de la notificació",
+        "doc": "Títol de la notificació. Variables de plantilla: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Icona de la notificació"
+        "label": "Icona de la notificació",
+        "doc": "Icona mdi opcional per a la notificació (p. ex. mdi:washing-machine). Deixeu en blanc el valor predeterminat de la plataforma."
       },
       "notify_start_message": {
-        "label": "Missatge d'inici"
+        "label": "Missatge d'inici",
+        "doc": "Cos enviat quan comença un cicle. Variables de plantilla: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Missatge de finalització"
+        "label": "Missatge de finalització",
+        "doc": "Cos enviat quan acaba un cicle. Variables de plantilla: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "Missatge de pre-finalització"
+        "label": "Missatge de pre-finalització",
+        "doc": "Cos de l'alerta de pre-final / gairebé fet. Variables de plantilla: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Missatge de recordatori"
+        "label": "Missatge de recordatori",
+        "doc": "Cos del recordatori de descàrrega que encara està esperant. En blanc utilitza el valor predeterminat integrat. Variables de plantilla: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Canal Android (inici/en directe)"
+        "label": "Canal Android (inici/en directe)",
+        "doc": "Nom del canal de notificació d'Android per als missatges d'inici/en directe (controla el so i la prioritat per canal a l'aplicació mòbil). Blank utilitza l'aplicació complementària predeterminada."
       },
       "notify_finish_channel": {
-        "label": "Canal Android (finalització)"
+        "label": "Canal Android (finalització)",
+        "doc": "Nom del canal de notificació d'Android per al missatge final. Blank reutilitza el canal inicial/en directe."
       },
       "energy_price_entity": {
-        "label": "Entitat del preu de l'energia"
+        "label": "Entitat del preu de l'energia",
+        "doc": "Sensor amb el preu actual de l'electricitat per kWh (per exemple, una tarifa dinàmica). Té prioritat sobre el preu estàtic a continuació. Cada cicle congela el preu vigent quan s'ha acabat."
       },
       "energy_price_static": {
-        "label": "Preu estàtic de l'energia (per kWh)"
+        "label": "Preu estàtic de l'energia (per kWh)",
+        "doc": "Preu fix per kWh utilitzat per a les xifres de costos quan no s'estableix cap entitat de preu en directe."
       },
       "notify_cycle_timers": {
-        "label": "Temporitzadors del cicle"
+        "label": "Temporitzadors del cicle",
+        "doc": "Notificacions a minuts específics d'un cicle (p. ex., per afegir suavitzant). El missatge és compatible amb {device}, {program}, {minutes}. Activeu la pausa automàtica per fer una pausa en aquest punt i rebre una notificació interactiva amb un botó de reprendre; reprèn mitjançant el tauler, el servei de pausa/reprèn o l'acció de notificació."
       },
       "enable_ml_models": {
-        "label": "Aplica models intel·ligents durant un cicle"
+        "label": "Aplica models intel·ligents durant un cicle",
+        "doc": "Mentre s'executa un cicle, deixeu que els models refineixin els resultats en directe: una estimació més estable del temps restant i de l'energia/cost, i una protecció anti-parada prematura en la detecció final (només pot retardar un acabat, no acabar mai abans i està limitat). Utilitza els vostres models afinats quan estiguin disponibles, en cas contrari els integrats. Apagat = només la lògica clàssica basada en l'energia (encara fiable)."
       },
       "ml_training_enabled": {
-        "label": "Aprèn d'aquesta màquina"
+        "label": "Aprèn d'aquesta màquina",
+        "doc": "Estudieu periòdicament els vostres cicles revisats durant la nit i ajusteu els models a aquesta màquina específica. Un canvi només es manté quan realment aconsegueix una millor puntuació en els cicles retinguts, de manera que això només pot ajudar o mantenir-se igual, mai no retrocedeix."
       },
       "ml_training_hour": {
-        "label": "Aprèn a l'hora"
+        "label": "Aprèn a l'hora",
+        "doc": "Hora local del dia (0-23) per fer l'ajustament nocturn. Trieu una hora tranquil·la com ara 2 (02:00)."
       },
       "ml_training_min_cycles": {
-        "label": "Cicles necessaris primer"
+        "label": "Cicles necessaris primer",
+        "doc": "Espereu fins que s'hagin enregistrat almenys tants cicles abans d'ajustar-los, de manera que n'hi ha prou per aprendre."
       },
       "ml_training_interval_days": {
-        "label": "Comprova com a màxim cada"
+        "label": "Comprova com a màxim cada",
+        "doc": "Torneu a comprovar si hi ha millores com a màxim una vegada per tants dies."
       }
     }
   }

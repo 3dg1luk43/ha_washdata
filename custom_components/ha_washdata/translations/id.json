@@ -80,7 +80,8 @@
         "air_fryer": "Penggorengan Udara",
         "bread_maker": "Pembuat Roti",
         "pump": "Pompa / Pompa Pembuang",
-        "other": "Lainnya (Lanjutan)"
+        "generic": "Lainnya (Lanjutan)",
+        "other": "Perangkat Ambang Batas"
       }
     }
   },
@@ -620,6 +621,7 @@
       "needs_review": "Perlu peninjauan",
       "overrun": "Berlari lebih lama dari biasanya",
       "artifact_tip": "{n} anomali terdeteksi (misalnya pintu terbuka di tengah siklus) — terbuka untuk melihatnya di grafik",
+      "restart_gap_tip": "{n} celah mulai ulang HA: jejak daya memiliki lubang",
       "poor_fit_tip": "Riwayat pertandingan tidak konsisten — pertimbangkan untuk membangun kembali profil ini",
       "fair_fit_tip": "Konsistensi kecocokan sedang — beberapa siklus yang ditetapkan ke profil ini memiliki skor keyakinan lebih rendah. Beri label lebih banyak siklus atau rekam ulang profil untuk meningkatkan akurasi.",
       "fair_fit": "kualitas dapat diterima",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Hamparkan amplop profil lainnya pada bagan di atas untuk melihat mana yang paling sesuai dengan siklus ini.",
       "artifact_header": "{n} anomali terdeteksi selama siklus ini",
       "artifact_footer": "Disorot pada grafik di atas. Ini adalah artefak sementara (misalnya pintu terbuka di tengah siklus), belum tentu merupakan masalah.",
+      "restart_gap_header": "{n} celah mulai ulang HA selama siklus ini",
+      "restart_gap_item": "{dur} celah",
+      "restart_gap_footer": "Disorot pada grafik. Data daya hilang untuk interval ini; pencocokan hanya menggunakan pembacaan nyata.",
       "profile_poor_health_detail": "Siklus yang ditetapkan ke profil ini memiliki bentuk yang tidak konsisten atau tingkat kepercayaan yang rendah. Pertimbangkan untuk membangun kembali cakupannya atau meninjau siklus berlabel.",
       "trend_duration_longer": "Durasi tren lebih lama ({pct}%/siklus) — rata-rata terkini {avg}",
       "trend_duration_shorter": "Durasi tren lebih pendek ({pct}%/siklus) — rata-rata terkini {avg}",
@@ -990,235 +995,312 @@
     },
     "setting": {
       "name": {
-        "label": "Nama Perangkat"
+        "label": "Nama Perangkat",
+        "doc": "Nama tampilan ditampilkan dalam daftar integrasi HA dan registri perangkat."
       },
       "device_type": {
-        "label": "Jenis Perangkat"
+        "label": "Jenis Perangkat",
+        "doc": "Kelas peralatan. Menetapkan default deteksi yang masuk akal (ambang batas, penundaan, penanganan akhir) yang disesuaikan untuk jenis alat tersebut; ubah hanya jika perangkat awalnya diatur dengan tipe yang salah."
       },
       "power_sensor": {
-        "label": "Sensor Daya"
+        "label": "Sensor Daya",
+        "doc": "Entitas sensor melaporkan daya aktif dalam watt untuk alat ini (mis. sensor.washer_power). Semua deteksi siklus didasarkan pada sinyal ini."
       },
       "min_power": {
-        "label": "Daya Minimum"
+        "label": "Daya Minimum",
+        "doc": "Daya minimum absolut dianggap aktif. Pembacaan di bawah ini dianggap sebagai 0 W (siaga), menyaring beban bayangan colokan pintar dan LED siaga."
       },
       "off_delay": {
-        "label": "Penundaan Mati"
+        "label": "Penundaan Mati",
+        "doc": "Saatnya menunggu setelah listrik mati sebelum menyatakan siklus selesai. Jika listrik kembali menyala dalam jangka waktu ini, siklus akan berlanjut dengan mulus - ini menjembatani jeda antar tahap pencucian. Mesin pencuci piring memiliki fase pengeringan yang panjang (matikan selama 20-60 menit) sehingga penundaan harus melebihi fase tersebut untuk menjaga keseluruhan pencucian+pengeringan dalam satu siklus."
       },
       "linked_device": {
-        "label": "Kelompokkan di Bawah Perangkat"
+        "label": "Kelompokkan di Bawah Perangkat",
+        "doc": "Secara opsional, letakkan perangkat WashData ini di bawah perangkat lain (misalnya smart plug) di registri perangkat HA, yang ditampilkan sebagai \"Tersambung melalui ...\"."
       },
       "start_threshold_w": {
-        "label": "Ambang Mulai"
+        "label": "Ambang Mulai",
+        "doc": "Daya harus naik di atas level ini untuk memastikan siklus telah dimulai. Menyetelnya terlalu rendah menyebabkan kesalahan start dari daya siaga; program yang terlalu tinggi dan dimulai dengan lambat (pengisian dingin) terlewatkan. Mesin saran menetapkan ini tepat di atas daya aktif terendah yang diamati mesin."
       },
       "stop_threshold_w": {
-        "label": "Ambang Berhenti"
+        "label": "Ambang Berhenti",
+        "doc": "Daya harus turun di bawah level ini sebelum hitungan mundur off-delay dimulai. Atur di bawah Start Threshold - celah di antara keduanya adalah pita histeresis yang mencegah kedipan. Jika diatur terlalu tinggi, fase berdaya rendah (penahan bilas, anti kusut) akan memicu urutan akhir secara salah."
       },
       "min_off_gap": {
-        "label": "Jarak Mati Minimum"
+        "label": "Jarak Mati Minimum",
+        "doc": "Jika mesin mati kurang dari waktu ini, urutan hidup/mati/hidup dianggap sebagai satu siklus berkelanjutan. Mencegah program perendaman (mesin mati selama beberapa menit di tengah pencucian) agar tidak terpecah menjadi dua siklus terpisah. Tetapkan lebih pendek dari jarak antara beban berturut-turut jika Anda ingin beban tersebut dihitung sebagai siklus terpisah. Default jenis perangkat melindungi jeda intra-siklus yang umum untuk setiap peralatan."
       },
       "start_duration_threshold": {
-        "label": "Durasi Mulai"
+        "label": "Durasi Mulai",
+        "doc": "Daya harus tetap berada di atas ambang batas start selama ini untuk memastikan start sebenarnya, sehingga mencegah tombol hidup/mati sepersekian detik untuk memulai siklus."
       },
       "start_energy_threshold": {
-        "label": "Energi Mulai"
+        "label": "Energi Mulai",
+        "doc": "Energi (daya x waktu) yang harus dikonsumsi alat sebelum BERJALAN. Lonjakan singkat berkekuatan tinggi memiliki energi yang sangat rendah dan diabaikan, sehingga mencegah permulaan yang salah."
       },
       "completion_min_seconds": {
-        "label": "Durasi Siklus Minimum"
+        "label": "Durasi Siklus Minimum",
+        "doc": "Siklus yang lebih pendek dari ini akan dibuang sebagai siklus hantu (uji coba, membuka pintu untuk menambahkan kaus kaki)."
       },
       "running_dead_zone": {
-        "label": "Zona Mati Berjalan"
+        "label": "Zona Mati Berjalan",
+        "doc": "Setelah siklus dimulai, penurunan daya dalam jendela ini diabaikan. Mesin cuci diisi dengan air dingin (turun mendekati 0 W sebelum dipanaskan) - tanpa perlindungan ini fase pengisian tampak seperti akhir siklus. Ini TIDAK melewatkan data: jejak kekuatan penuh dicatat dari T=0. Mesin saran mengukur pola pengaktifan aktual mesin Anda dan mengukurnya secara otomatis."
       },
       "end_energy_threshold": {
-        "label": "Energi Akhir"
+        "label": "Energi Akhir",
+        "doc": "Selama hitungan mundur off-delay, akumulasi energi (watt x waktu) dibandingkan dengan ambang batas ini. Jika terlampaui, hitungan mundur akan diatur ulang - menjaga agar mesin anti kusut dan bagian pengering mesin pencuci piring tetap menempel pada siklus alih-alih memotongnya menjadi pendek. Naikkan jika siklus berakhir terlalu dini selama pendinginan; turunkan jika deteksi lambat."
       },
       "end_repeat_count": {
-        "label": "Jumlah Pengulangan Akhir"
+        "label": "Jumlah Pengulangan Akhir",
+        "doc": "Jumlah pembacaan di bawah ambang batas berturut-turut yang diperlukan sebelum siklus berakhir. 1 baik-baik saja untuk sebagian besar colokan. Naikkan ke 2-3 jika smart plug Anda sesekali melaporkan sampel false-zero di tengah siklus dan siklus Anda berakhir sebelum waktunya."
       },
       "sampling_interval": {
-        "label": "Interval Pengambilan Sampel"
+        "label": "Interval Pengambilan Sampel",
+        "doc": "Waktu yang diharapkan antara pembacaan sensor - digunakan untuk mengukur jendela penghalusan dan memulai debounce dengan benar. Setiap pembaruan sensor ditangkap berapa pun nilainya; itu hanya mengkalibrasi perhitungan hilir. Mesin saran mengukur irama aktual sensor Anda dari siklus sebelumnya dan menyetelnya secara otomatis."
       },
       "smoothing_window": {
-        "label": "Jendela Pemulusan"
+        "label": "Jendela Pemulusan",
+        "doc": "Berapa banyak sinyal daya mentah yang dihaluskan. Rendah (2) responsif tetapi berisik; tinggi (5) menghaluskan lonjakan tetapi menambah kelambatan."
       },
       "abrupt_drop_watts": {
-        "label": "Penurunan Mendadak"
+        "label": "Penurunan Mendadak",
+        "doc": "Penurunan daya yang lebih besar dari ini menandai siklus sebagai Terganggu (pembatalan manual) dan bukan penyelesaian alami."
       },
       "abrupt_drop_ratio": {
-        "label": "Rasio Penurunan Mendadak"
+        "label": "Rasio Penurunan Mendadak",
+        "doc": "Penurunan yang lebih besar dari fraksi daya arus ini juga dianggap terjadi secara tiba-tiba (0,6 = penurunan 60%). Melengkapi ambang batas watt di seluruh ukuran peralatan."
       },
       "profile_match_threshold": {
-        "label": "Ambang Kecocokan"
+        "label": "Ambang Kecocokan",
+        "doc": "Skor kesamaan minimum (0-1) diperlukan pada akhir siklus untuk menerima identifikasi program. Naikkan untuk mengurangi identifikasi yang salah; turunkan jika program mesin Anda tidak cocok. Default 0,4 adalah titik awal yang konservatif."
       },
       "profile_unmatch_threshold": {
-        "label": "Ambang Ketidakcocokan"
+        "label": "Ambang Ketidakcocokan",
+        "doc": "Jika pertandingan langsung di pertengahan siklus turun di bawah skor ini, identifikasi sementara akan dihapus. Jaga agar sedikit di bawah Ambang Batas Kecocokan sehingga penurunan kemiripan yang singkat tidak membuat tampilan kembali menjadi tak tertandingi."
       },
       "profile_match_interval": {
-        "label": "Interval Pencocokan"
+        "label": "Interval Pencocokan",
+        "doc": "Seberapa sering mencoba pencocokan profil selama siklus berjalan. Default 300 detik (5 menit) menyeimbangkan kecepatan deteksi dan CPU."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Rasio Durasi Minimum"
+        "label": "Rasio Durasi Minimum",
+        "doc": "Panjang siklus minimum relatif terhadap profil. 0,9 berarti sebuah siklus harus memiliki setidaknya 90% dari durasi profil agar cocok."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Rasio Durasi Maksimum"
+        "label": "Rasio Durasi Maksimum",
+        "doc": "Panjang siklus maksimum relatif terhadap profil. 1.3 berarti siklus harus berada di bawah 130% durasi profil agar cocok."
       },
       "profile_duration_tolerance": {
-        "label": "Toleransi Durasi Profil"
+        "label": "Toleransi Durasi Profil",
+        "doc": "Pita +/- di sekitar durasi rata-rata profil yang digunakan selama pencocokan. 0,25 berarti profil 60 menit cocok dengan siklus 45-75 menit."
       },
       "duration_tolerance": {
-        "label": "Toleransi Estimasi"
+        "label": "Toleransi Estimasi",
+        "doc": "Toleransi terhadap perkiraan sisa waktu (mempelajari umpan balik, bukan mencocokkan). Jika durasi sebenarnya berada dalam +/-X% dari perkiraan, maka durasi tersebut dihitung sebagai kecocokan yang baik."
       },
       "auto_label_confidence": {
-        "label": "Kepercayaan Label Otomatis"
+        "label": "Kepercayaan Label Otomatis",
+        "doc": "Jika skor pertandingan di akhir siklus sama atau lebih tinggi dari ini, program akan diberi label secara otomatis tanpa konfirmasi apa pun. Naikkan ke tingkat kepastian yang lebih tinggi sebelum memberi label otomatis; turunkan untuk mengotomatisasi lebih banyak. Bekerja bersama dengan Learning Confidence di bawahnya."
       },
       "learning_confidence": {
-        "label": "Kepercayaan Pembelajaran"
+        "label": "Kepercayaan Pembelajaran",
+        "doc": "Jika skor pertandingan berada di antara skor ini dan Keyakinan Label Otomatis, pemberitahuan umpan balik akan meminta Anda memverifikasi program yang teridentifikasi. Di bawah skor ini pertandingan terlalu tidak menentu untuk muncul ke permukaan. Harus dijaga di bawah Keyakinan Label Otomatis."
       },
       "suppress_feedback_notifications": {
-        "label": "Sembunyikan Notifikasi Umpan Balik"
+        "label": "Sembunyikan Notifikasi Umpan Balik",
+        "doc": "Jangan terus-menerus menyampaikan pemberitahuan ketika siklus yang telah selesai perlu ditinjau; umpan baliknya masih muncul di antrean tinjauan Siklus."
       },
       "watchdog_interval": {
-        "label": "Interval Pengawas"
+        "label": "Interval Pengawas",
+        "doc": "Seberapa sering pengawas latar belakang memeriksa sensor yang terhenti dan batas waktu yang telah berlalu. Standarnya 30 detik."
       },
       "no_update_active_timeout": {
-        "label": "Batas Waktu Tanpa Pembaruan"
+        "label": "Batas Waktu Tanpa Pembaruan",
+        "doc": "Jika tidak ada pembaruan daya yang datang selama ini saat berjalan, asumsikan steker terputus dan hentikan paksa untuk menghindari siklus zombi. Default 600 detik memungkinkan terjadinya cloud atau mesh lag."
       },
       "progress_reset_delay": {
-        "label": "Penundaan Reset Kemajuan"
+        "label": "Penundaan Reset Kemajuan",
+        "doc": "Setelah selesai, tahan kemajuan pada 100% selama ini sehingga Selesai terlihat di dasbor sebelum mengatur ulang ke Idle."
       },
       "auto_maintenance": {
-        "label": "Pemeliharaan Otomatis (pembersihan malam)"
+        "label": "Pemeliharaan Otomatis (pembersihan malam)",
+        "doc": "Jalankan tata graha setiap malam: membangun kembali envelope profil, menghitung ulang kesehatan siklus, memangkas jejak debug, dan mempertahankan siklus terbaru."
       },
       "expose_debug_entities": {
-        "label": "Tampilkan Entitas Debug"
+        "label": "Tampilkan Entitas Debug",
+        "doc": "Publikasikan entitas HA diagnostik tambahan (keyakinan kecocokan, ambiguitas, internal status). Mati menjaga daftar entitas tetap bersih untuk penggunaan normal."
       },
       "save_debug_traces": {
-        "label": "Simpan Jejak Debug"
+        "label": "Simpan Jejak Debug",
+        "doc": "Simpan jejak daya penuh dan data debug yang cocok untuk setiap siklus. Berguna untuk memecahkan masalah tetapi meningkatkan ukuran penyimpanan."
       },
       "anti_wrinkle_enabled": {
-        "label": "Aktifkan Deteksi Anti-Kerut"
+        "label": "Aktifkan Deteksi Anti-Kerut",
+        "doc": "Kenali getaran pendek berdaya rendah yang dikeluarkan pengering setelah fase panas utama dan pertahankan agar tetap melekat pada siklus yang telah selesai alih-alih membacanya sebagai siklus baru."
       },
       "anti_wrinkle_max_power": {
-        "label": "Daya Anti-Kerut Maksimum"
+        "label": "Daya Anti-Kerut Maksimum",
+        "doc": "Denyut nadi di atas kekuatan ini dianggap sebagai siklus baru yang nyata, bukan penurunan anti-kerut. Atur tepat di atas kekuatan tumble-pulse."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Durasi Maksimum"
+        "label": "Durasi Maksimum",
+        "doc": "Denyut nadi yang lebih lama dari ini dianggap sebagai siklus nyata, bukan sebagai siklus anti-kerut."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Ambang Daya Keluar"
+        "label": "Ambang Daya Keluar",
+        "doc": "Daya harus berada di bawah ini di antara pulsa agar mode anti-kerut tetap aktif."
       },
       "delay_start_detect_enabled": {
-        "label": "Aktifkan Deteksi Penundaan Mulai"
+        "label": "Aktifkan Deteksi Penundaan Mulai",
+        "doc": "Mendeteksi saat alat dihidupkan dan menunggu (start/standby tertunda) namun belum memulai siklusnya, sehingga standby draw tidak disalahartikan sebagai siklus berjalan."
       },
       "delay_confirm_seconds": {
-        "label": "Detik Konfirmasi"
+        "label": "Detik Konfirmasi",
+        "doc": "Daya harus tetap berada dalam pita siaga selama jangka waktu tersebut sebelum alat dianggap menunggu untuk dihidupkan, bukan dijalankan."
       },
       "delay_timeout_hours": {
-        "label": "Jam Batas Waktu"
+        "label": "Jam Batas Waktu",
+        "doc": "Berhenti menunggu dalam mode start tertunda setelah berjam-jam dan kembali ke idle, sehingga mesin tetap bertenaga tetapi tidak pernah dihidupkan tidak akan menunggu selamanya."
       },
       "external_end_trigger_enabled": {
-        "label": "Aktifkan Pemicu Akhir Eksternal"
+        "label": "Aktifkan Pemicu Akhir Eksternal",
+        "doc": "Biarkan sensor biner eksternal memberi sinyal akhir siklus, selain deteksi berbasis daya bawaan."
       },
       "external_end_trigger": {
-        "label": "Entitas Pemicu Eksternal"
+        "label": "Entitas Pemicu Eksternal",
+        "doc": "Sensor biner yang perubahan statusnya menandai akhir siklus (misalnya kontak peralatan yang \"selesai\" atau integrasi pendamping)."
       },
       "external_end_trigger_inverted": {
-        "label": "Balik Pemicu Eksternal (picu saat MATI)"
+        "label": "Balik Pemicu Eksternal (picu saat MATI)",
+        "doc": "Perlakukan sensor pemicu dalam keadaan OFF (bukan ON) sebagai sinyal akhir siklus."
       },
       "door_sensor_entity": {
-        "label": "Entitas Sensor Pintu"
+        "label": "Entitas Sensor Pintu",
+        "doc": "Sensor biner pintu opsional. Digunakan untuk mendeteksi kapan alat telah dibuka/dibongkar setelah satu siklus."
       },
       "pause_cuts_power": {
-        "label": "Jeda Juga Memutus Daya (via sakelar)"
+        "label": "Jeda Juga Memutus Daya (via sakelar)",
+        "doc": "Saat siklus dijeda, matikan juga Switch Entity di bawah. Hanya untuk peralatan yang stekernya dapat diputus dengan aman di tengah siklus."
       },
       "switch_entity": {
-        "label": "Entitas Sakelar"
+        "label": "Entitas Sakelar",
+        "doc": "Sakelar opsional dimatikan saat jeda dan dihidupkan kembali saat melanjutkan, digunakan bersama dengan \"Jeda juga memutus daya\"."
       },
       "notify_unload_delay_minutes": {
-        "label": "Penundaan Pengingat Bongkar"
+        "label": "Penundaan Pengingat Bongkar",
+        "doc": "Beberapa menit setelah siklus berakhir sebelum mengirimkan pengingat \"bongkar mesin\" yang masih menunggu. Setel 0 untuk menonaktifkan pengingat."
       },
       "pump_stuck_duration": {
-        "label": "Durasi Pompa Macet"
+        "label": "Durasi Pompa Macet",
+        "doc": "Beberapa detik pompa dapat berjalan terus menerus sebelum ditandai sebagai kemungkinan macet (menyalakan kejadian pompa macet)."
       },
       "notify_start_services": {
-        "label": "Layanan Mulai"
+        "label": "Layanan Mulai",
+        "doc": "notify.* layanan dipanggil ketika siklus dimulai. Tambahkan satu per target (ponsel, dasbor, dll.); biarkan kosong tanpa pemberitahuan awal."
       },
       "notify_finish_services": {
-        "label": "Layanan Selesai"
+        "label": "Layanan Selesai",
+        "doc": "notify.* layanan dipanggil ketika siklus selesai. Tambahkan satu per target; biarkan kosong tanpa pemberitahuan selesai."
       },
       "notify_live_services": {
-        "label": "Layanan Kemajuan Langsung"
+        "label": "Layanan Kemajuan Langsung",
+        "doc": "notify.* layanan meminta pembaruan kemajuan langsung saat siklus berjalan. Biarkan kosong untuk menonaktifkan notifikasi kemajuan langsung."
       },
       "notify_people": {
-        "label": "Orang (untuk Hanya Saat di Rumah)"
+        "label": "Orang (untuk Hanya Saat di Rumah)",
+        "doc": "orang.* entitas yang digunakan oleh \"Beri Tahu Hanya Saat Di Rumah\" untuk memutuskan apakah ada orang di rumah."
       },
       "notify_only_when_home": {
-        "label": "Notifikasi Hanya Saat di Rumah"
+        "label": "Notifikasi Hanya Saat di Rumah",
+        "doc": "Hanya kirim pemberitahuan ketika setidaknya salah satu orang yang tertaut (di atas) ada di rumah."
       },
       "notify_fire_events": {
-        "label": "Aktifkan Peristiwa HA untuk Notifikasi"
+        "label": "Aktifkan Peristiwa HA untuk Notifikasi",
+        "doc": "Aktifkan juga peristiwa ha_washdata_* pada siklus mulai/selesai sehingga Anda dapat membuat otomatisasi Anda sendiri."
       },
       "notify_before_end_minutes": {
-        "label": "Peringatan Pra-Akhir"
+        "label": "Peringatan Pra-Akhir",
+        "doc": "Kirim peringatan Hampir Selesai ketika perkiraan waktu yang tersisa kurang dari ini. 0 menonaktifkannya."
       },
       "notify_live_interval_seconds": {
-        "label": "Interval Pembaruan Langsung"
+        "label": "Interval Pembaruan Langsung",
+        "doc": "Seberapa sering notifikasi kemajuan langsung disegarkan saat siklus berjalan."
       },
       "notify_live_overrun_percent": {
-        "label": "% Kelewatan Langsung Sebelum Peringatan"
+        "label": "% Kelewatan Langsung Sebelum Peringatan",
+        "doc": "Jika suatu siklus melebihi perkiraannya lebih dari persentase ini, kirimkan peringatan kelebihan beban."
       },
       "notify_live_chronometer": {
-        "label": "Gunakan Kronometer Langsung"
+        "label": "Gunakan Kronometer Langsung",
+        "doc": "Tampilkan penghitung waktu mundur yang diperbarui secara langsung di notifikasi (pada platform yang mendukungnya) dan bukan perkiraan statis."
       },
       "notify_timeout_seconds": {
-        "label": "Tutup Otomatis Setelah"
+        "label": "Tutup Otomatis Setelah",
+        "doc": "Tutup notifikasi secara otomatis setelah beberapa detik (pada platform yang mendukungnya). 0 menyimpannya sampai ditutup secara manual."
       },
       "notify_title": {
-        "label": "Judul Notifikasi"
+        "label": "Judul Notifikasi",
+        "doc": "Judul pemberitahuan. Variabel templat: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Ikon Notifikasi"
+        "label": "Ikon Notifikasi",
+        "doc": "Ikon mdi opsional untuk notifikasi (misalnya mdi:mesin cuci). Biarkan kosong untuk default platform."
       },
       "notify_start_message": {
-        "label": "Pesan Mulai"
+        "label": "Pesan Mulai",
+        "doc": "Isi dikirim saat siklus dimulai. Variabel templat: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Pesan Selesai"
+        "label": "Pesan Selesai",
+        "doc": "Isi dikirim ketika siklus selesai. Variabel templat: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "Pesan Pra-Selesai"
+        "label": "Pesan Pra-Selesai",
+        "doc": "Isi peringatan pra-akhir/hampir selesai. Variabel templat: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Pesan Pengingat"
+        "label": "Pesan Pengingat",
+        "doc": "Badan pengingat bongkar yang masih menunggu. Blank menggunakan default bawaan. Variabel templat: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Saluran Android (mulai/langsung)"
+        "label": "Saluran Android (mulai/langsung)",
+        "doc": "Nama saluran notifikasi Android untuk pesan mulai/langsung (mengontrol suara per saluran dan prioritas pada aplikasi seluler). Blank menggunakan aplikasi pendamping default."
       },
       "notify_finish_channel": {
-        "label": "Saluran Android (selesai)"
+        "label": "Saluran Android (selesai)",
+        "doc": "Nama saluran notifikasi Android untuk pesan selesai. Blank menggunakan kembali saluran awal/langsung."
       },
       "energy_price_entity": {
-        "label": "Entitas Harga Energi"
+        "label": "Entitas Harga Energi",
+        "doc": "Sensor dengan harga listrik per kWh saat ini (misalnya tarif dinamis). Lebih diutamakan daripada harga statis di bawah. Setiap siklus membekukan harga yang berlaku saat siklus tersebut selesai."
       },
       "energy_price_static": {
-        "label": "Harga Energi Statis (per kWh)"
+        "label": "Harga Energi Statis (per kWh)",
+        "doc": "Harga tetap per kWh digunakan untuk angka biaya ketika tidak ada entitas harga aktif yang ditetapkan di atas."
       },
       "notify_cycle_timers": {
-        "label": "Pengatur Waktu Siklus"
+        "label": "Pengatur Waktu Siklus",
+        "doc": "Pemberitahuan pada menit tertentu ke dalam satu siklus (misalnya untuk menambahkan pelembut). Pesan mendukung {device}, {program}, {minutes}. Aktifkan Jeda Otomatis untuk berhenti sejenak pada saat itu dan menerima pemberitahuan interaktif dengan tombol Lanjutkan; melanjutkan melalui panel, layanan jeda/lanjutkan, atau tindakan notifikasi."
       },
       "enable_ml_models": {
-        "label": "Terapkan model cerdas selama siklus"
+        "label": "Terapkan model cerdas selama siklus",
+        "doc": "Saat siklus berjalan, biarkan model menyempurnakan hasil langsung: perkiraan sisa waktu dan energi/biaya yang lebih stabil, serta pelindung penghentian dini pada deteksi akhir (yang hanya dapat menunda penyelesaian, tidak pernah mengakhiri lebih awal, dan dibatasi). Gunakan model yang telah Anda sesuaikan jika tersedia, jika tidak, gunakan model bawaan. Off = logika berbasis daya klasik saja (masih dapat diandalkan)."
       },
       "ml_training_enabled": {
-        "label": "Belajar dari mesin ini"
+        "label": "Belajar dari mesin ini",
+        "doc": "Pelajari siklus yang Anda ulas secara berkala dalam semalam dan sesuaikan model untuk mesin khusus ini. Sebuah perubahan hanya akan bertahan jika skornya benar-benar lebih baik pada siklus yang ditunda, jadi ini hanya akan membantu atau tetap sama - tidak akan pernah mengalami kemunduran."
       },
       "ml_training_hour": {
-        "label": "Belajar pada jam"
+        "label": "Belajar pada jam",
+        "doc": "Jam lokal siang hari (0-23) untuk melakukan penyempurnaan semalaman. Pilih jam tenang seperti jam 2 (02:00)."
       },
       "ml_training_min_cycles": {
-        "label": "Siklus yang dibutuhkan terlebih dahulu"
+        "label": "Siklus yang dibutuhkan terlebih dahulu",
+        "doc": "Tunggu hingga setidaknya siklus sebanyak ini telah direkam sebelum dilakukan penyesuaian, sehingga cukup banyak pembelajaran yang dapat diambil."
       },
       "ml_training_interval_days": {
-        "label": "Periksa paling banyak setiap"
+        "label": "Periksa paling banyak setiap",
+        "doc": "Periksa ulang perbaikan paling banyak satu kali dalam beberapa hari ini."
       }
     }
   }

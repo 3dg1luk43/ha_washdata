@@ -80,7 +80,8 @@
         "air_fryer": "Aire frijigailua",
         "bread_maker": "Ogi Egilea",
         "pump": "Ponpa",
-        "other": "Beste batzuk (aurreratua)"
+        "generic": "Beste batzuk (aurreratua)",
+        "other": "Threshold Gailua"
       }
     }
   },
@@ -620,6 +621,7 @@
       "needs_review": "Berrikuspena behar du",
       "overrun": "Ohi baino luzeago ibili zen",
       "artifact_tip": "{n} anomaliak detektatu dira (adibidez, atea ziklo erdian irekita) - ireki grafikoan ikusteko",
+      "restart_gap_tip": "{n} HA berrabiarazte-hutsunea: potentzia-arrastoak zulo bat du",
       "poor_fit_tip": "Partiduen historia ez-koherentea: kontuan hartu profil hau berreraikitzea",
       "fair_fit_tip": "Partiduen koherentzia moderatua: profil honi esleitutako ziklo batzuek konfiantza-puntuazio baxuagoak dituzte. Etiketatu ziklo gehiago edo berriro grabatu profila zehaztasuna hobetzeko.",
       "auto": "(automatikoki detektatua)",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Gainjarri beste profil gutun-azalak goiko taulan, ziklo honetara hobekien egokitzen den ikusteko.",
       "artifact_header": "Ziklo honetan zehar {n} anomalia hauteman dira",
       "artifact_footer": "Goiko grafikoan nabarmenduta. Hauek artefaktu iragankorrak dira (adibidez, atea ziklo erdian ireki da), ez dute zertan arazoak.",
+      "restart_gap_header": "{n} HA berrabiarazte-hutsunea ziklo honetan zehar",
+      "restart_gap_item": "{dur} hutsune",
+      "restart_gap_footer": "Grafikoan nabarmenduta. Potentzia-datuak falta dira tarte hauetarako; parekatzeak benetako irakurketak bakarrik erabili zituen.",
       "profile_poor_health_detail": "Profil honi esleitutako zikloek forma ez-koherenteak edo konfiantza baxua dute. Demagun gutun-azala berreraikitzea edo etiketatutako zikloak berrikustea.",
       "trend_duration_longer": "Iraupena luzeagoa da (% {pct}/zikloa) — azken batez beste {avg}",
       "trend_duration_shorter": "Iraupena laburragoa da (% {pct}/zikloa) — azken batez beste {avg}",
@@ -990,235 +995,312 @@
     },
     "setting": {
       "name": {
-        "label": "Gailuaren Izena"
+        "label": "Gailuaren Izena",
+        "doc": "Bistaratzeko izena HA integrazioen zerrendan eta gailuen erregistroan agertzen da."
       },
       "device_type": {
-        "label": "Gailu Mota"
+        "label": "Gailu Mota",
+        "doc": "Etxetresna-klasea. Zentzuzko detekzio lehenetsiak ezartzen ditu (atalaseak, off-atzerapena, amaiera-kudeaketa) tresna mota horretarako sintonizatuta; aldatu gailua jatorriz okerreko mota gisa konfiguratu bazen bakarrik."
       },
       "power_sensor": {
-        "label": "Potentzia-Sentsorea"
+        "label": "Potentzia-Sentsorea",
+        "doc": "Sentsore-entitateak tresna honen watt-etan bizi-potentziaren berri ematen duen (adibidez, sensor.washer_power). Zikloaren detekzio guztiak seinale honetan oinarritzen dira."
       },
       "min_power": {
-        "label": "Gutxieneko Potentzia"
+        "label": "Gutxieneko Potentzia",
+        "doc": "Aktibotzat jotzen den potentzia minimo absolutua. Honen azpian dauden irakurketak 0 W (estantean) gisa tratatzen dira, entxufe adimendunen eta egonean dauden LEDen karga fantasma iragazten dute."
       },
       "off_delay": {
-        "label": "Itzaltzeko Atzerapena"
+        "label": "Itzaltzeko Atzerapena",
+        "doc": "Energia jaitsi ondoren itxaron behar den denbora zikloa amaituta deklaratu aurretik. Leiho honen barruan elektrizitatea berriro hasten bada, zikloak etengabe jarraitzen du; honek garbiketa-faseen arteko etenaldiak egiten ditu. Ontzi-garbigailuek lehortze-fase luzeak dituzte (itzali 20-60 minutuz), beraz, itzaltzeko atzerapenak hori gainditu behar du garbiketa eta lehor osoa ziklo bakarrean mantentzeko."
       },
       "linked_device": {
-        "label": "Taldekatu Gailuaren Azpian"
+        "label": "Taldekatu Gailuaren Azpian",
+        "doc": "Aukeran, habiatu WashData gailu hau beste gailu baten azpian (adibidez, entxufe adimenduna) HA gailuen erregistroan, \"Konektatuta... bidez\"."
       },
       "start_threshold_w": {
-        "label": "Hasierako Atalasea"
+        "label": "Hasierako Atalasea",
+        "doc": "Potentzia maila horretatik gora igo behar da ziklo bat hasi dela baieztatzeko. Oso baxua ezartzeak abiarazte faltsuak eragiten ditu egonean dagoen energiatik; programak altuegiak eta abiarazte motela (hotzeko betetzea) galdu egiten dira. Iradokizun-motorrak makinaren potentzia aktibo baxuenaren gainetik ezartzen du."
       },
       "stop_threshold_w": {
-        "label": "Gelditzeko Atalasea"
+        "label": "Gelditzeko Atalasea",
+        "doc": "Potentzia maila horretatik behera jaitsi behar da off-atzerapenaren atzerako kontaketa hasi baino lehen. Ezarri hasierako atalasearen azpian; haien arteko tartea keinua eragozten duen histeresi banda da. Handiegi ezarriz gero, potentzia baxuko faseek (garbiketa atxikiak, zimurren aurkakoa) amaierako sekuentzia faltsuki abiarazten dute."
       },
       "min_off_gap": {
-        "label": "Min Itzaltze-Tartea"
+        "label": "Min Itzaltze-Tartea",
+        "doc": "Makina denbora hori baino gutxiagoz itzaltzen bada, pizteko/itzaltzeko/pizteko sekuentzia ziklo jarraitu bat bezala hartzen da. Bertzen programak (makina hainbat minutuz itzaltzen da garbiketa erdian) bi ziklo ezberdinetan zatitzea eragozten du. Ezarri ezazu zure bizkarreko kargaren arteko tartea baino laburragoa, ziklo bereizi gisa zenbatu nahi badituzu. Gailu-motaren lehenetsiek tresna bakoitzaren ziklo barruko etenaldi tipikoa babesten dute."
       },
       "start_duration_threshold": {
-        "label": "Hasierako Iraupena"
+        "label": "Hasierako Iraupena",
+        "doc": "Potentzia hasierako atalasearen gainetik egon behar da denbora luzez benetako abiarazte bat baieztatzeko, eta segundo zati batean pizteko/desaktibatzeko txandakatzeek ziklo bat hastea saihestuz."
       },
       "start_energy_threshold": {
-        "label": "Hasierako Energia"
+        "label": "Hasierako Energia",
+        "doc": "Aparatuak MARTXAN baino lehen kontsumitu behar duen energia (potentzia x denbora). Potentzia handiko erpin labur batek energia oso baxua du eta ez da aintzat hartzen, abiarazte faltsuak saihestuz."
       },
       "completion_min_seconds": {
-        "label": "Min Ziklo Iraupena"
+        "label": "Min Ziklo Iraupena",
+        "doc": "Hau baino laburragoak diren zikloak mamu-ziklo gisa baztertzen dira (probak, atea irekiz galtzerdi bat gehitzeko)."
       },
       "running_dead_zone": {
-        "label": "Funtzionatzeko Zona Hila"
+        "label": "Funtzionatzeko Zona Hila",
+        "doc": "Ziklo bat hasi ondoren, leiho honetako potentzia-jauziak ez dira aintzat hartzen. Garbigailuak ur hotzaz betetzen dira (berotu aurretik 0 W-tik gertu erortzen dira) - babes hori gabe betetze faseak ziklo amaiera baten itxura du. Honek EZ ditu datuak saltatzen: potentzia osoaren arrastoa T=0tik erregistratzen da. Iradokizun-motorrak zure makinaren benetako abiarazte-eredua neurtzen du eta hori automatikoki dimentatzen du."
       },
       "end_energy_threshold": {
-        "label": "Amaierako Energia"
+        "label": "Amaierako Energia",
+        "doc": "Off-atzerapenaren atzerako kontaketan, metatutako energia (watt x denbora) atalase honekin konparatzen da. Gainditzen bada, atzerako kontaketa berrezartzen da - zimurren aurkako biraka eta ontzi-garbigailua lehortzeko isatsak zikloari atxikita mantenduz, labur moztu beharrean. Altxa ezazu zikloak goizegi amaitzen badira hoztean; jaitsi ezazu detekzioa geldoa bada."
       },
       "end_repeat_count": {
-        "label": "Amaierako Errepikaketa Zenbaketa"
+        "label": "Amaierako Errepikaketa Zenbaketa",
+        "doc": "Gelditzearen atalasearen azpitik jarraian behar diren irakurketa kopurua zikloa amaitu aurretik. 1 ondo dago entxufe gehienentzat. Igo 2-3ra zure entxufe adimendunak noizean behin zero faltsuko lagin baten berri ematen badu ziklo erdian eta zure zikloak goiz amaitzen ari badira."
       },
       "sampling_interval": {
-        "label": "Laginketa Tartea"
+        "label": "Laginketa Tartea",
+        "doc": "Sentsoreen irakurketen artean espero den denbora - leuntzeko leihoa neurritzeko eta errebote zuzen hasteko erabiltzen da. Sentsoreen eguneratze bakoitza balio hori kontuan hartu gabe hartzen da; beherako kalkuluak bakarrik kalibratzen ditu. Iradokizun-motorrak zure sentsorearen benetako kadentzia neurtzen du iraganeko zikloetatik eta hori automatikoki ezartzen du."
       },
       "smoothing_window": {
-        "label": "Leuntzeko Leihoa"
+        "label": "Leuntzeko Leihoa",
+        "doc": "Potentzia-seinale gordina zenbat leundu den. Baxua (2) sentikorra da baina zaratatsua; altua (5) iltzeak leuntzen ditu baina atzerapena gehitzen du."
       },
       "abrupt_drop_watts": {
-        "label": "Bat-Bateko Jaitsiera"
+        "label": "Bat-Bateko Jaitsiera",
+        "doc": "Hau baino potentzia-jaitsiera handiagoak zikloa Etenduta (eskuz bertan behera uztea) adierazten du, akabera naturala izan beharrean."
       },
       "abrupt_drop_ratio": {
-        "label": "Bat-Bateko Jaitsiera Ratioa"
+        "label": "Bat-Bateko Jaitsiera Ratioa",
+        "doc": "Korronte-potentziaren zati hori baino handiagoa den tanta bat ere bapateko moduan hartzen da (0,6 = %60ko jaitsiera). Watt-atalasea osatzen du etxetresna elektrikoen tamaina guztietan."
       },
       "profile_match_threshold": {
-        "label": "Bat-Etortze Atalasea"
+        "label": "Bat-Etortze Atalasea",
+        "doc": "Ziklo amaieran beharrezkoa den antzekotasun puntuazio minimoa (0-1) programaren identifikazioa onartzeko. Altxa ezazu identifikazio okerrak murrizteko; jaitsi zure makinaren programak ez badira bat egiten. 0,4 lehenetsia abiapuntu kontserbadorea da."
       },
       "profile_unmatch_threshold": {
-        "label": "Ez-Bat-Etortze Atalasea"
+        "label": "Ez-Bat-Etortze Atalasea",
+        "doc": "Zuzeneko ziklo erdiko partida bat puntuazio horretatik behera jaisten bada, behin-behineko identifikazioa garbitu egingo da. Mantendu bat-etortzearen atalasearen apur bat azpitik, antzekotasunean murgiltze labur batek pantaila paregabera irauli ez dezan."
       },
       "profile_match_interval": {
-        "label": "Bat-Etortze Tartea"
+        "label": "Bat-Etortze Tartea",
+        "doc": "Lasterketa-ziklo batean profila lotzen saiatuko den maiztasuna. Lehenetsitako 300 s (5 minutu) detekzio abiadura eta CPU orekatzen ditu."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Min Iraupena Ratioa"
+        "label": "Min Iraupena Ratioa",
+        "doc": "Zikloaren gutxieneko luzera profilarekiko. 0,9k esan nahi du ziklo batek profilaren iraupenaren % 90 izan behar duela gutxienez bat etortzeko."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Max Iraupena Ratioa"
+        "label": "Max Iraupena Ratioa",
+        "doc": "Zikloaren gehienezko luzera profilarekiko. 1.3-k esan nahi du ziklo batek profilaren iraupenaren % 130 baino gutxiago izan behar duela bat egiteko."
       },
       "profile_duration_tolerance": {
-        "label": "Profil Iraupena Tolerantzia"
+        "label": "Profil Iraupena Tolerantzia",
+        "doc": "Parekatzean erabilitako profilaren batez besteko iraupenaren inguruko +/- banda. 0,25ek 60 minutuko profila 45-75 minutuko zikloekin bat datorrela esan nahi du."
       },
       "duration_tolerance": {
-        "label": "Estimazioaren Tolerantzia"
+        "label": "Estimazioaren Tolerantzia",
+        "doc": "Geratzen den denboraren kalkuluekiko tolerantzia (ikaskuntzaren iritzia, ez bat etortzea). Benetako iraupena estimazioaren %/-X barnean badago, bat-etortze ona izango da."
       },
       "auto_label_confidence": {
-        "label": "Auto-Etiketa Konfiantza"
+        "label": "Auto-Etiketa Konfiantza",
+        "doc": "Zikloaren amaieran partidaren puntuazioa horren parekoa edo handiagoa bada, programa automatikoki etiketatuko da inongo berrespen-abisurik gabe. Altxa ezazu ziurtasun handiagoa eskatzeko auto-etiketatu aurretik; jaitsi gehiago automatizatzeko. Behean dagoen Learning Confidence-ekin batera funtzionatzen du."
       },
       "learning_confidence": {
-        "label": "Ikaskuntzako Konfiantza"
+        "label": "Ikaskuntzako Konfiantza",
+        "doc": "Partiduen puntuazioa honen eta Auto-Label Confidence artean kokatzen bada, iritzi-jakinarazpen batek identifikatutako programa egiaztatzeko eskatuko dizu. Puntuazio honen azpitik partida ziurregia da azaleratzeko. Etiketa automatikoaren konfiantzaren azpian mantendu behar da."
       },
       "suppress_feedback_notifications": {
-        "label": "Ezkutatu Iritzi Jakinarazpenak"
+        "label": "Ezkutatu Iritzi Jakinarazpenak",
+        "doc": "Ez egin jakinarazpen iraunkorrik amaitutako ziklo batek berrikusi behar duenean; feedbacka Zikloak berrikusteko ilaran agertzen da oraindik."
       },
       "watchdog_interval": {
-        "label": "Guardatxakurraren Tartea"
+        "label": "Guardatxakurraren Tartea",
+        "doc": "Zenbateko maiztasuna egiaztatzen du atzeko planoko zaintzaileak geldirik dauden sentsoreak eta igarotako denbora-mugarik. Lehenetsia 30 s."
       },
       "no_update_active_timeout": {
-        "label": "Eguneraketarik Gabeko Denbora-Muga"
+        "label": "Eguneraketarik Gabeko Denbora-Muga",
+        "doc": "Exekutatzen ari den bitartean energia-eguneratzerik iristen ez bada, suposatu entxufea lineaz kanpo erori dela eta behartu geldiarazi zonbi ziklo bat saihesteko. 600 s lehenetsiak hodei edo sare-lag-a onartzen du."
       },
       "progress_reset_delay": {
-        "label": "Aurrerapenaren Berrezartzeko Atzerapena"
+        "label": "Aurrerapenaren Berrezartzeko Atzerapena",
+        "doc": "Amaitu ondoren, eduki aurrerapena % 100ean denbora honetan, Osatutako paneletan ikusgai egon dadin Inaktibo moduan berrezarri aurretik."
       },
       "auto_maintenance": {
-        "label": "Auto Mantentze-Lanak (gau-garbiketa)"
+        "label": "Auto Mantentze-Lanak (gau-garbiketa)",
+        "doc": "Egin gaueko garbiketa: berreraiki profilaren gutun-azalak, birkalkulatu zikloaren osasuna, moztu arazketa-arrastoak eta mantendu azken zikloak."
       },
       "expose_debug_entities": {
-        "label": "Erakutsi Arazketa Entitateak"
+        "label": "Erakutsi Arazketa Entitateak",
+        "doc": "Argitaratu diagnostiko gehigarriak HA entitateak (etorkinen konfiantza, anbiguotasuna, egoera barnekoak). Desaktibatuta entitateen zerrenda garbi mantentzen du ohiko erabilerarako."
       },
       "save_debug_traces": {
-        "label": "Gorde Arazketa Arrastoak"
+        "label": "Gorde Arazketa Arrastoak",
+        "doc": "Gorde ziklo bakoitzeko potentzia osoa eta bat datozen arazketa-datuak. Arazoak konpontzeko erabilgarria baina biltegiratze-tamaina handitzen du."
       },
       "anti_wrinkle_enabled": {
-        "label": "Gaitu Zimur-Aurkako Detekzioa"
+        "label": "Gaitu Zimur-Aurkako Detekzioa",
+        "doc": "Ezagutu lehorgailu batek bero-fase nagusiaren ondoren igortzen dituen potentzia baxuko pultsu laburrak eta mantendu ziklo berri gisa irakurri beharrean amaitutako zikloari lotuta."
       },
       "anti_wrinkle_max_power": {
-        "label": "Maks Zimur-Aurkako Potentzia"
+        "label": "Maks Zimur-Aurkako Potentzia",
+        "doc": "Potentzia horretatik gorako pultsu bat benetako ziklo berri gisa tratatzen da, ez zimurren aurkako bira bat. Ezarri biraka-pultsuaren potentziaren gainetik."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Gehieneko Iraupena"
+        "label": "Gehieneko Iraupena",
+        "doc": "Hau baino luzeagoak diren pultsuak ziklo erreal gisa tratatzen dira, zimurren aurkako bira bat baino."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Irteerako Potentzia Atalasea"
+        "label": "Irteerako Potentzia Atalasea",
+        "doc": "Potentzia honen azpitik jaitsi behar da pultsu artean zimurren aurkako modua aktibo egon dadin."
       },
       "delay_start_detect_enabled": {
-        "label": "Gaitu Hasiera Atzeratuaren Detekzioa"
+        "label": "Gaitu Hasiera Atzeratuaren Detekzioa",
+        "doc": "Detektatu aparatua noiz piztuta dagoen eta zain dagoen (abiarazte atzeratua / egonean) baina bere zikloa hasi ez den, beraz, erreserbako zozketa ez da martxan dagoen ziklo batekin nahastu."
       },
       "delay_confirm_seconds": {
-        "label": "Segundoak Berresteko"
+        "label": "Segundoak Berresteko",
+        "doc": "Energia erreserbako bandan egon behar da denbora luzez, aparatua martxan jarri beharrean abiarazteko zain gisa hartu aurretik."
       },
       "delay_timeout_hours": {
-        "label": "Denbora-Muga Orduak"
+        "label": "Denbora-Muga Orduak",
+        "doc": "Utzi abiarazte atzeratuko moduan itxaroteari ordu asko igaro ondoren eta itzuli inaktibora, beraz, piztuta geratu den makina bat martxan jarri gabe ez da betirako itxarongo."
       },
       "external_end_trigger_enabled": {
-        "label": "Gaitu Kanpo Bukaera-Ekigailua"
+        "label": "Gaitu Kanpo Bukaera-Ekigailua",
+        "doc": "Utzi kanpoko sentsore bitar batek ziklo baten amaiera seinalatzen, energian oinarritutako detekzio integratuaz gain."
       },
       "external_end_trigger": {
-        "label": "Kanpo Ekigailu Entitatea"
+        "label": "Kanpo Ekigailu Entitatea",
+        "doc": "Egoera-aldaketak zikloaren amaiera markatzen duen sentsore bitarra (adibidez, etxetresna elektrikoaren kontaktu bat \"amaitu\" edo integrazio laguntzaile bat)."
       },
       "external_end_trigger_inverted": {
-        "label": "Alderantzikatu Kanpo Ekigailua (ITZALTZEAN ekigin)"
+        "label": "Alderantzikatu Kanpo Ekigailua (ITZALTZEAN ekigin)",
+        "doc": "Tratatu abiarazle-sentsorea itzaltzea (piztuta baino) zikloaren amaierako seinale gisa."
       },
       "door_sensor_entity": {
-        "label": "Ateko Sentsore Entitatea"
+        "label": "Ateko Sentsore Entitatea",
+        "doc": "Aukerako atearen sentsore bitarra. Ziklo baten ondoren aparatua noiz ireki/deskargatu den detektatzeko erabiltzen da."
       },
       "pause_cuts_power": {
-        "label": "Pausak Ere Potentzia Mozten du (etengailuen bidez)"
+        "label": "Pausak Ere Potentzia Mozten du (etengailuen bidez)",
+        "doc": "Ziklo bat pausatzen denean, itzali beheko Aldatu Entitatea ere. Zikloaren erdialdean entxufea segurtasunez moztu daitekeen aparatuetarako bakarrik."
       },
       "switch_entity": {
-        "label": "Etengailu Entitatea"
+        "label": "Etengailu Entitatea",
+        "doc": "Aukerako etengailua desaktibatu egiten da etenaldian eta berriro aktibatzen da berriro hasten denean, \"Pausatzeak ere energia mozten du\" aukerarekin batera."
       },
       "notify_unload_delay_minutes": {
-        "label": "Deskarga Gogorazlearen Atzerapena"
+        "label": "Deskarga Gogorazlearen Atzerapena",
+        "doc": "Ziklo bat amaitu eta minutu batzuetara oraindik zain dagoen \"makina deskargatu\" abisua bidali baino lehen. Ezarri 0 abisua desgaitzeko."
       },
       "pump_stuck_duration": {
-        "label": "Ponparen Blokeatze Iraupena"
+        "label": "Ponparen Blokeatze Iraupena",
+        "doc": "Ponpa bat etengabe exekutatu daitekeen segundotan litekeena da itsatsita bezala markatu baino lehen (blopa-ponpa gertaera jaurtitzen du)."
       },
       "notify_start_services": {
-        "label": "Hasierako Zerbitzuak"
+        "label": "Hasierako Zerbitzuak",
+        "doc": "jakinarazi.* ziklo bat hasten denean deitzen diren zerbitzuak. Gehitu bat helburu bakoitzeko (telefonoa, aginte-panela, etab.); utzi hutsik hasierako jakinarazpenik ez izateko."
       },
       "notify_finish_services": {
-        "label": "Amaierako Zerbitzuak"
+        "label": "Amaierako Zerbitzuak",
+        "doc": "jakinarazi.* ziklo bat amaitzen denean deituriko zerbitzuak. Gehitu bat helburu bakoitzeko; utzi hutsik amaiera jakinarazpenik ez izateko."
       },
       "notify_live_services": {
-        "label": "Aurrerapen Zuzeneko Zerbitzuak"
+        "label": "Aurrerapen Zuzeneko Zerbitzuak",
+        "doc": "jakinarazi.* zerbitzuek zuzeneko aurrerapenaren eguneratzeak eskatzen dituzte ziklo bat martxan dagoen bitartean. Utzi hutsik zuzeneko aurrerapenaren jakinarazpenak desgaitzeko."
       },
       "notify_people": {
-        "label": "Pertsonak (Etxean Soilik Baderako)"
+        "label": "Pertsonak (Etxean Soilik Baderako)",
+        "doc": "pertsona.* inor etxean dagoen ala ez erabakitzeko \"Notify Only When Home\"-k erabiltzen dituen entitateak."
       },
       "notify_only_when_home": {
-        "label": "Jakinarazi Soilik Etxean Dagoenean"
+        "label": "Jakinarazi Soilik Etxean Dagoenean",
+        "doc": "Bidali jakinarazpenak soilik estekatutako pertsonetako bat (goian) etxean dagoenean."
       },
       "notify_fire_events": {
-        "label": "Piztu HA Gertaerak Jakinarazpenetarako"
+        "label": "Piztu HA Gertaerak Jakinarazpenetarako",
+        "doc": "Era berean, su ha_washdata_* gertaerak zikloaren hasiera/amaieran, zure automatizazioak eraiki ditzakezu."
       },
       "notify_before_end_minutes": {
-        "label": "Amaierako Aurre-Oharra"
+        "label": "Amaierako Aurre-Oharra",
+        "doc": "Bidali Ia Egindako alerta bat geratzen den denbora honetatik behera jaisten denean. 0-k desgaitu egiten du."
       },
       "notify_live_interval_seconds": {
-        "label": "Zuzeneko Eguneratze Tartea"
+        "label": "Zuzeneko Eguneratze Tartea",
+        "doc": "Ziklo bat martxan dagoen bitartean zuzeneko aurrerapenaren jakinarazpenak zenbateko maiztasunarekin freskatzen diren."
       },
       "notify_live_overrun_percent": {
-        "label": "Zuzeneko Gainpasatze % Oharra Baino Lehen"
+        "label": "Zuzeneko Gainpasatze % Oharra Baino Lehen",
+        "doc": "Ziklo bat portzentaje hori baino gehiago aurreikusten bada, bidali gainditze alerta bat."
       },
       "notify_live_chronometer": {
-        "label": "Erabili Zuzeneko Kronometroa"
+        "label": "Erabili Zuzeneko Kronometroa",
+        "doc": "Erakutsi zuzeneko eguneratze-kontaketaren tenporizadorea jakinarazpenean (hau onartzen duten plataformetan) estimazio estatiko baten ordez."
       },
       "notify_timeout_seconds": {
-        "label": "Auto-Baztertu Ostean"
+        "label": "Auto-Baztertu Ostean",
+        "doc": "Baztertu automatikoki jakinarazpena segundo horren ondoren (hau onartzen duten plataformetan). 0-k mantentzen du eskuz baztertu arte."
       },
       "notify_title": {
-        "label": "Jakinarazpen Titulua"
+        "label": "Jakinarazpen Titulua",
+        "doc": "Jakinarazpenaren izenburua. Txantiloiaren aldagaiak: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Jakinarazpen Ikonoa"
+        "label": "Jakinarazpen Ikonoa",
+        "doc": "Jakinarazpenerako mdi aukerako ikonoa (adibidez, mdi:washing-machine). Utzi hutsik plataforma lehenetsirako."
       },
       "notify_start_message": {
-        "label": "Hasierako Mezua"
+        "label": "Hasierako Mezua",
+        "doc": "Gorputza ziklo bat hasten denean bidali da. Txantiloiaren aldagaiak: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Amaierako Mezua"
+        "label": "Amaierako Mezua",
+        "doc": "Gorputza ziklo bat amaitzen denean bidaliko da. Txantiloiaren aldagaiak: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "Aurre-Osatze Mezua"
+        "label": "Aurre-Osatze Mezua",
+        "doc": "Aurre-amaiera / ia-ia egindako alertaren gorputza. Txantiloiaren aldagaiak: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Gogorarazpen Mezua"
+        "label": "Gogorarazpen Mezua",
+        "doc": "Oraindik zain dagoen deskarga abisuaren gorputza. Blank-ek integratutako lehenetsia erabiltzen du. Txantiloiaren aldagaiak: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Android Kanala (hasiera/zuzeneko)"
+        "label": "Android Kanala (hasiera/zuzeneko)",
+        "doc": "Android jakinarazpen-kanalaren izena hasierako/zuzeneko mezuetarako (kanal bakoitzeko soinua eta lehentasuna kontrolatzen ditu mugikorreko aplikazioan). Blank aplikazio osagarria lehenetsia erabiltzen du."
       },
       "notify_finish_channel": {
-        "label": "Android Kanala (amaiera)"
+        "label": "Android Kanala (amaiera)",
+        "doc": "Amaierako mezuaren Android jakinarazpen-kanalaren izena. Blank hasierako/zuzeneko kanala berrerabiltzen du."
       },
       "energy_price_entity": {
-        "label": "Energia Prezio Entitatea"
+        "label": "Energia Prezio Entitatea",
+        "doc": "kWh-ko elektrizitatearen egungo prezioa duen sentsorea (adibidez, tarifa dinamikoa). Beheko prezio estatikoari lehentasuna ematen dio. Ziklo bakoitzak amaitutakoan indarrean dagoen prezioa izozten du."
       },
       "energy_price_static": {
-        "label": "Energia Prezio Estatikoa (kWh bakoitzeko)"
+        "label": "Energia Prezio Estatikoa (kWh bakoitzeko)",
+        "doc": "Kostu-zifretarako erabilitako kWh bakoitzeko prezio finkoa goian prezio zuzeneko entitaterik ezartzen ez denean."
       },
       "notify_cycle_timers": {
-        "label": "Ziklo Tenporizadoreak"
+        "label": "Ziklo Tenporizadoreak",
+        "doc": "Jakinarazpenak ziklo bateko minutu zehatzetan (adibidez, leungarria gehitzeko). Mezuak {device}, {program}, {minutes} onartzen ditu. Gaitu Eten automatikoa puntu horretan pausatzeko eta Berrekin botoi batekin jakinarazpen interaktibo bat jasotzeko; berrekizu panelaren, eten/berregiteko zerbitzuaren edo jakinarazpen-ekintzaren bidez."
       },
       "enable_ml_models": {
-        "label": "Aplikatu eredu adimendunak ziklo batean zehar"
+        "label": "Aplikatu eredu adimendunak ziklo batean zehar",
+        "doc": "Ziklo bat exekutatzen den bitartean, utzi ereduek zuzeneko emaitzak hobetzen: gelditzen den denbora eta energia/kostuen estimazio egonkorragoa eta amaiera detektatzeko geldialdi goiztiarren aurkako babesa (amaiera bat atzeratu dezake, inoiz ez amaitu goiz, eta mugatuta dago). Zure sintonizatutako modeloak erabilgarri daudenean erabiltzen ditu, bestela integratuta daudenak. Desaktibatuta = boterean oinarritutako logika klasikoa soilik (oraindik fidagarria)."
       },
       "ml_training_enabled": {
-        "label": "Ikasi makina honetatik"
+        "label": "Ikasi makina honetatik",
+        "doc": "Aldian-aldian aztertu berrikusitako zikloak gauetik eta finkatu modeloak makina zehatz honetara. Aldaketa bat mantentzen da benetako puntuazio hobea lortzen duenean eutsitako zikloetan, beraz, honek lagundu edo berdin mantendu dezake - inoiz ez atzera egin."
       },
       "ml_training_hour": {
-        "label": "Ikasi orduan"
+        "label": "Ikasi orduan",
+        "doc": "Eguneko ordu lokala (0-23) gaueko doikuntza zehatza egiteko. Aukeratu ordu lasai bat, esaterako 2 (02:00)."
       },
       "ml_training_min_cycles": {
-        "label": "Zikloak lehenik behar"
+        "label": "Zikloak lehenik behar",
+        "doc": "Itxaron, gutxienez, ziklo asko grabatu arte sintonizatu aurretik, nahikoa ikasteko."
       },
       "ml_training_interval_days": {
-        "label": "Egiaztatu gehienez aldi bakoitzean"
+        "label": "Egiaztatu gehienez aldi bakoitzean",
+        "doc": "Begiratu berriro hobekuntzak dauden egun askotan."
       }
     }
   }

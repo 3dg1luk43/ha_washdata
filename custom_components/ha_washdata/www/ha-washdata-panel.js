@@ -617,6 +617,33 @@ const _CSS = `
   .wd-btn { padding: 9px 15px; }  /* larger touch targets */
   .wd-tip-pop { width: 210px; }
 }
+/* Log drawer */
+.wd-shell { display: flex; flex-direction: column; min-height: 100%; }
+.wd-content-row { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+.wd-main { flex: 1; overflow-y: auto; min-width: 0; }
+.wd-log-drawer {
+  width: 0; overflow: hidden;
+  transition: width .28s cubic-bezier(.4,0,.2,1);
+  border-left: 1px solid var(--divider-color);
+  display: flex; flex-direction: column;
+  background: var(--primary-background-color);
+}
+.wd-log-drawer.open { width: 380px; }
+.wd-log-drawer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-bottom: 1px solid var(--divider-color);
+  font-weight: 600; font-size: .9em; flex-shrink: 0; white-space: nowrap;
+}
+.wd-log-drawer-body { flex: 1; overflow-y: auto; padding: 10px 14px; min-width: 320px; }
+.wd-log-close-btn {
+  background: none; border: none; cursor: pointer; color: inherit; opacity: .65;
+  padding: 3px 6px; border-radius: 4px; font-size: 1.1em; line-height: 1;
+}
+.wd-log-close-btn:hover { opacity: 1; background: var(--secondary-background-color); }
+.wd-gear-btn.log-active { background: rgba(255,255,255,.22); }
+@media (max-width: 680px) {
+  .wd-log-drawer.open { width: 100vw; position: fixed; top: 0; right: 0; bottom: 0; z-index: 30; border-left: none; }
+}
 `;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -1000,6 +1027,8 @@ class HaWashdataPanel extends HTMLElement {
     this._initialized = false;
     this._pollTimer = null;
     this._toastTimer = null;
+    this._hassUpdateThrottle = null;
+    this._evtUnsubs = [];
     // Data
     this._constants = { stateColors: {}, deviceTypes: [], mlLabEnabled: false, mlSuggestionsEnabled: false, mlTrainingAvailable: false };
     this._constantsLoaded = false;
@@ -1046,6 +1075,7 @@ class HaWashdataPanel extends HTMLElement {
     this._panelSubtab = 'prefs';
     this._logs = [];
     this._logLevel = '';
+    this._logOpen = false;
     this._tabInitialized = false;
     this._modal = null;
     this._prevModal = null;  // profile-panel modal to restore after cycle-detail closes
@@ -1058,14 +1088,28 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   set hass(hass) {
+    const prev = this._hass;
     this._hass = hass;
-    if (!this._initialized && hass) { this._initialized = true; this._boot(); }
+    if (!this._initialized && hass) { this._initialized = true; this._boot(); return; }
+    // HA calls set hass() on every state change — use it to refresh the Status
+    // tab live without waiting for the fallback poll.
+    if (prev !== hass && this._initialized && !this._loading && !this._hassUpdateThrottle) {
+      this._hassUpdateThrottle = setTimeout(() => {
+        this._hassUpdateThrottle = null;
+        this._fetchAll();
+      }, 2000);
+    }
   }
   set panel(p) { this._panel = p; }
   set narrow(n) { this._narrow = n; }
 
   connectedCallback() { if (this._initialized) this._startPoll(); }
-  disconnectedCallback() { this._stopPoll(); }
+  disconnectedCallback() {
+    this._stopPoll();
+    if (this._hassUpdateThrottle) { clearTimeout(this._hassUpdateThrottle); this._hassUpdateThrottle = null; }
+    this._evtUnsubs.forEach(u => { try { u(); } catch (_) {} });
+    this._evtUnsubs = [];
+  }
 
   // ── Init ─────────────────────────────────────────────────────────────────
 
@@ -1085,6 +1129,31 @@ class HaWashdataPanel extends HTMLElement {
       this._fetchAll();
       this._startPoll();
     });
+    // Subscribe to WashData cycle events for immediate push-refresh.
+    // These fire when a cycle starts/ends so the UI updates instantly
+    // instead of waiting for the 30s fallback poll.
+    const conn = this._hass && this._hass.connection;
+    if (conn && conn.subscribeMessage) {
+      const handleCycleEvent = (ev) => {
+        // HA event structure: { event_type: '...', data: { entry_id: ... }, ... }
+        const edata = ev.data || {};
+        if (!edata.entry_id) return;
+        this._fetchAll();
+        if (ev.event_type === 'ha_washdata_cycle_ended') {
+          const dev = this._devices[this._selIdx];
+          if (dev && dev.entry_id === edata.entry_id) {
+            this._fetchCycles(edata.entry_id).then(() => {
+              if (this._tab === 'history') this._render();
+            });
+          }
+        }
+      };
+      for (const evType of ['ha_washdata_cycle_started', 'ha_washdata_cycle_ended']) {
+        conn.subscribeMessage(handleCycleEvent, { type: 'subscribe_events', event_type: evType })
+          .then(unsub => { this._evtUnsubs.push(unsub); })
+          .catch(() => {});
+      }
+    }
   }
 
   async _loadPanelTranslations() {
@@ -1153,6 +1222,11 @@ class HaWashdataPanel extends HTMLElement {
         await this._fetchCycles(dev.entry_id);
         await this._fetchSuggestions(dev.entry_id);
         await this._fetchProfiles(dev.entry_id);
+      }
+      // Log drawer: fetch asynchronously so it never delays the main poll;
+      // _refreshLogDrawer patches just the drawer body when the fetch resolves.
+      if (this._logOpen && this._isAdmin()) {
+        this._fetchLogs().then(() => this._refreshLogDrawer()).catch(() => {});
       }
     } catch (err) {
       console.warn('[WashData panel] fetch error:', err);
@@ -1309,8 +1383,22 @@ class HaWashdataPanel extends HTMLElement {
         fresh.querySelectorAll('[data-idx]').forEach(b => b.addEventListener('click', () => this._selectDevice(parseInt(b.dataset.idx, 10))));
       }
     }
-    const ts = sr.querySelector('.wd-ts');
-    if (ts && this._lastRefresh) ts.textContent = this._t('msg.updated', {}, 'Updated') + ' ' + this._lastRefresh.toLocaleTimeString();
+    // _lastRefresh kept for internal use; header no longer shows the timestamp.
+  }
+
+  // Patch only the log drawer body in-place — called on every 5s poll when the
+  // drawer is open, so logs stay live without a full page re-render.
+  _refreshLogDrawer() {
+    if (!this._logOpen) return;
+    const sr = this.shadowRoot;
+    const body = sr && sr.querySelector('.wd-log-drawer-body');
+    if (!body) return;
+    const lines = (this._logs || []).slice().reverse().map(r => {
+      const t = new Date(r.ts * 1000).toLocaleTimeString();
+      return `<div class="wd-logline"><span class="wd-logts">${t}</span><span class="wd-loglvl wd-lvl-${_esc(r.level)}">${_esc(r.level)}</span>${_esc(r.msg)}</div>`;
+    }).join('');
+    body.innerHTML = `<p class="wd-info" style="margin:0 0 8px;font-size:.78em">${this._t('msg.log_buffer_hint', {}, 'Newest first · buffers the last 500 ha_washdata records since restart · drag the bottom edge to resize.')}</p>
+      ${lines ? `<div class="wd-logs" style="max-height:none;resize:none">${lines}</div>` : `<p class="wd-info">${this._t('msg.no_logs', {}, 'No log records buffered yet.')}</p>`}`;
   }
 
   async _fetchTabData() {
@@ -1495,8 +1583,6 @@ class HaWashdataPanel extends HTMLElement {
     const cfg = this._panelCfg;
     if (!cfg) return;
     const panel = cfg.panel || {};
-    const pi = parseInt(panel.poll_interval_s, 10);
-    if (pi && pi * 1000 !== this._pollMs) { this._pollMs = pi * 1000; if (this._pollTimer) this._startPoll(); }
     if (!this._tabInitialized) {
       const dt = (cfg.prefs && cfg.prefs.default_tab) || panel.default_tab;
       if (dt && ['status', 'history', 'profiles', 'settings'].includes(dt)) this._tab = dt;
@@ -1572,11 +1658,18 @@ class HaWashdataPanel extends HTMLElement {
   _buildHtml() {
     const toast = this._toast ? `<div class="wd-toast ${this._toast.cls}">${_esc(this._toast.msg)}</div>` : '';
     return `
-      ${this._htmlHeader()}
-      <div class="wd-body">
-        ${this._loading
-          ? '<div class="wd-empty"><div class="wd-icon">⏳</div>Loading…</div>'
-          : this._htmlBody()}
+      <div class="wd-shell">
+        ${this._htmlHeader()}
+        <div class="wd-content-row">
+          <div class="wd-main">
+            <div class="wd-body">
+              ${this._loading
+                ? '<div class="wd-empty"><div class="wd-icon">⏳</div>Loading…</div>'
+                : this._htmlBody()}
+            </div>
+          </div>
+          ${this._logOpen && this._isAdmin() ? this._htmlLogDrawer() : `<div class="wd-log-drawer"></div>`}
+        </div>
       </div>
       ${this._modal ? this._htmlModal() : ''}
       ${toast}
@@ -1584,7 +1677,6 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   _htmlHeader() {
-    const ts = this._lastRefresh ? this._lastRefresh.toLocaleTimeString() : '…';
     const working = this._busy.size > 0
       ? `<span class="wd-badge" style="margin:0 0 0 12px;color:var(--app-header-text-color,#fff);background:rgba(255,255,255,.15)">${this._t('status.working', {}, 'Working…')}</span>`
       : '';
@@ -1603,8 +1695,8 @@ class HaWashdataPanel extends HTMLElement {
         ${logo}
         <div><h1>WashData</h1><div class="wd-sub">${this._t('msg.appliance_monitor', {}, 'Appliance monitor')}</div></div>
         ${working}
-        <span class="wd-ts">${this._t('msg.updated', {time: ts}, 'Updated') + ' ' + ts}</span>
-        ${this._isAdmin() ? `<button class="wd-gear-btn" data-action="open-advanced" data-sub="logs" title="${_esc(this._t('hdr.logs', {}, 'Logs'))}" aria-label="Logs"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16"/><path d="M4 10h16"/><path d="M4 15h10"/><path d="M4 20h7"/></svg></button>` : ''}
+        <span style="flex:1"></span>
+        ${this._isAdmin() ? `<button class="wd-gear-btn${this._logOpen ? ' log-active' : ''}" data-action="toggle-log-drawer" title="${_esc(this._t('hdr.logs', {}, 'Logs'))}" aria-label="Logs" aria-pressed="${this._logOpen}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16"/><path d="M4 10h16"/><path d="M4 15h10"/><path d="M4 20h7"/></svg></button>` : ''}
       </div>
     `;
   }
@@ -1612,7 +1704,10 @@ class HaWashdataPanel extends HTMLElement {
   _htmlBody() {
     if (!this._devices.length)
       return `<div class="wd-empty"><div class="wd-icon">🧺</div>${this._t('msg.no_devices', {}, 'No WashData devices configured yet.')}</div>`;
-    const sugDot = this._suggestions.length ? ' 💡' : '';
+    const mlSugCount = Object.entries(this._mlSettings || {}).filter(([key, mlc]) =>
+      mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, this._opts[key])
+    ).length;
+    const sugDot = (this._suggestions.length || mlSugCount) ? ' 💡' : '';
     const labels = { status: this._t('tab.status',{},'Overview'), history: this._t('tab.history',{},'Cycles'), profiles: this._t('tab.profiles',{},'Profiles'), settings: this._t('tab.settings',{},'Settings') + sugDot, ml: this._t('tab.ml',{},'ML Training'), advanced: this._t('tab.advanced',{},'Advanced') };
     const visible = this._visibleTabIds();
     if (!visible.includes(this._tab)) this._tab = 'status';
@@ -1691,7 +1786,16 @@ class HaWashdataPanel extends HTMLElement {
     const attn = [];
     if (dev.recording && this._canEdit()) attn.push(`<div class="wd-attn-card"><span class="wd-attn-icon">●</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.recording_in_progress', {}, 'Recording in progress')}</div><div class="wd-attn-sub">${this._t('msg.see_recorder', {}, 'See recorder widget below')}</div></div></div>`);
     if (dev.feedback_count && this._canEdit()) attn.push(`<div class="wd-attn-card" data-action="goto-feedbacks"><span class="wd-attn-icon">💬</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.feedback_cycles_pending', {n: dev.feedback_count, s: dev.feedback_count > 1 ? 's' : ''}, `${dev.feedback_count} cycle${dev.feedback_count > 1 ? 's' : ''} to review`)}</div><div class="wd-attn-sub">${this._t('msg.review_to_cycles', {}, 'Open the Cycles review queue')}</div></div></div>`);
-    if (dev.suggestions_count && this._canEdit()) attn.push(`<div class="wd-attn-card" data-action="goto-suggestions"><span class="wd-attn-icon">💡</span><div class="wd-attn-body"><div class="wd-attn-title">${dev.suggestions_count} tuning suggestion${dev.suggestions_count > 1 ? 's' : ''}</div><div class="wd-attn-sub">${this._t('msg.review_in_settings', {}, 'Review in Settings')}</div></div></div>`);
+    const _mlSugCount = Object.entries(this._mlSettings || {}).filter(([key, mlc]) =>
+      mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, this._opts[key])
+    ).length;
+    if ((dev.suggestions_count || _mlSugCount) && this._canEdit()) {
+      const total = (dev.suggestions_count || 0) + _mlSugCount;
+      const parts = [];
+      if (dev.suggestions_count) parts.push(`${dev.suggestions_count} classic`);
+      if (_mlSugCount) parts.push(`${_mlSugCount} ML`);
+      attn.push(`<div class="wd-attn-card" data-action="goto-suggestions"><span class="wd-attn-icon">💡</span><div class="wd-attn-body"><div class="wd-attn-title">${total} tuning suggestion${total > 1 ? 's' : ''}</div><div class="wd-attn-sub">${parts.join(' · ')} · ${this._t('msg.review_in_settings', {}, 'Review in Settings')}</div></div></div>`);
+    }
     const attnHtml = attn.length ? `<div class="wd-attn">${attn.join('')}</div>` : '';
 
     const progressHtml = (isRunning && prog != null) ? `
@@ -1732,7 +1836,6 @@ class HaWashdataPanel extends HTMLElement {
     // the relevant subtab so the merged 4-tab layout stays discoverable.
     const advCards = [];
     if (this._canEdit()) advCards.push(`<div class="wd-attn-card" data-action="open-advanced" data-sub="diagnostics"><span class="wd-attn-icon">🩺</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('hdr.logs_diagnostics', {}, 'Diagnostics')}</div><div class="wd-attn-sub">${this._t('msg.storage_diagnostics', {}, 'Storage stats, maintenance, export/import')}</div></div></div>`);
-    if (this._isAdmin()) advCards.push(`<div class="wd-attn-card" data-action="open-advanced" data-sub="logs"><span class="wd-attn-icon">📜</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('hdr.logs', {}, 'Logs')}</div><div class="wd-attn-sub">${this._t('msg.recent_logs', {}, 'Recent ha_washdata records')}</div></div></div>`);
     advCards.push(`<div class="wd-attn-card" data-action="open-advanced" data-sub="prefs"><span class="wd-attn-icon">⚙️</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('tab.advanced', {}, 'Advanced')}</div><div class="wd-attn-sub">${this._isAdmin() ? this._t('msg.preferences_admin', {}, 'Preferences, panel & access control') : this._t('msg.preferences_adv', {}, 'Preferences')}</div></div></div>`);
     const advHtml = `<div class="wd-card"><div class="wd-card-title">${this._t('hdr.tools_and_data', {}, 'Tools & Data')}</div><div class="wd-attn" style="margin-bottom:0;margin-top:12px">${advCards.join('')}</div></div>`;
 
@@ -1886,6 +1989,11 @@ class HaWashdataPanel extends HTMLElement {
       if (!n) return '';
       return ` <span title="${_esc(this._t('badge.artifact_tip', {n}, `${n} anomal${n > 1 ? 'ies' : 'y'} detected (e.g. door opened mid-cycle) — open to see them on the graph`))}" style="color:var(--warning-color,#ff9800)">⚠</span>`;
     };
+    const restartGapBadge = c => {
+      const n = Array.isArray(c.restart_gaps) ? c.restart_gaps.length : 0;
+      if (!n) return '';
+      return ` <span title="${_esc(this._t('badge.restart_gap_tip', {n}, `${n} HA restart gap${n > 1 ? 's' : ''} during this cycle — power trace has a hole`))}" style="color:var(--info-color,#2196f3)">↻</span>`;
+    };
 
     const cur = (this._hass && this._hass.config && this._hass.config.currency) || '';
     const costCell = c => c.cost != null ? `${c.cost.toFixed(2)}${cur ? ' ' + cur : ''}` : '-';
@@ -1900,7 +2008,7 @@ class HaWashdataPanel extends HTMLElement {
       const stLabel = { completed: this._t('status.completed',{},'Completed'), interrupted: this._t('status.interrupted',{},'Interrupted'), force_stopped: this._t('status.force_stopped',{},'Force stopped'), active: this._t('status.active',{},'Active') }[st] || st;
       return `<tr data-cid="${_esc(c.id)}" data-selmode="${selMode ? 1 : 0}" style="cursor:pointer">
         <td style="width:26px;padding:6px 4px 6px 8px">${check}</td>
-        <td>${prog ? _esc(prog) : `<span style="color:var(--secondary-text-color)">${this._t('lbl.unlabelled', {}, 'Unlabelled')}</span>`}${reviewBadge(c)}${overrunBadge(c)}${artifactBadge(c)}</td>
+        <td>${prog ? _esc(prog) : `<span style="color:var(--secondary-text-color)">${this._t('lbl.unlabelled', {}, 'Unlabelled')}</span>`}${reviewBadge(c)}${overrunBadge(c)}${artifactBadge(c)}${restartGapBadge(c)}</td>
         <td><span style="color:${statusDotColor(st)};font-size:.9em">${_esc(stLabel)}</span></td>
         <td class="wd-tc-date">${_fmtDate(c.start_time)}</td>
         <td class="wd-tc-num">${_fmtDuration(c.duration)}</td>
@@ -2046,8 +2154,8 @@ class HaWashdataPanel extends HTMLElement {
       const memCards = (g.members || []).map(m => byName[m] ? this._profileCardHtml(byName[m]) : '').join('');
       const cohPct = Math.round((g.cohesion != null ? g.cohesion : 1) * 100);
       const cohBadge = g.cohesive
-        ? `<span class="wd-badge" style="color:var(--success-color,#4caf50);background:rgba(76,175,80,.14)">cohesion ${cohPct}%</span>`
-        : `<span class="wd-badge" style="color:var(--warning-color,#ff9800);background:rgba(255,152,0,.14)">⚠ low cohesion ${cohPct}%</span>`;
+        ? `<span class="wd-badge" style="color:var(--success-color,#4caf50);background:rgba(76,175,80,.14);margin-bottom:0">cohesion ${cohPct}%</span>`
+        : `<span class="wd-badge" style="color:var(--warning-color,#ff9800);background:rgba(255,152,0,.14);margin-bottom:0">⚠ low cohesion ${cohPct}%</span>`;
       const warn = g.cohesive ? '' : `<p class="wd-info" style="margin:0 0 8px;color:var(--warning-color,#ff9800)">${this._t('msg.group_not_cohesive', {}, "These profiles aren't similar enough to group reliably, so matching treats them individually until you remove the outlier or split the group.")}</p>`;
       const titleEl = canEdit
         ? `<button class="wd-btn-link" style="font-size:1.05em;font-weight:600;text-align:left;padding:0;border:none;background:none;cursor:pointer;color:inherit" data-action="pg-edit" data-gname="${_esc(g.name)}">🔗 ${_esc(g.name)}</button>`
@@ -2056,7 +2164,7 @@ class HaWashdataPanel extends HTMLElement {
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
           ${titleEl}
           ${cohBadge}<span style="flex:1"></span>
-          ${canEdit ? `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="pg-edit" data-gname="${_esc(g.name)}">${this._t('btn.manage', {}, 'Manage')}</button>` : ''}
+          ${canEdit ? `<button class="wd-btn wd-btn-primary wd-btn-sm" data-action="pg-edit" data-gname="${_esc(g.name)}">${this._t('btn.manage', {}, 'Manage')}</button>` : ''}
         </div>
         ${warn}
         <div class="wd-profiles-grid">${memCards}</div>
@@ -2697,10 +2805,10 @@ class HaWashdataPanel extends HTMLElement {
       return `<tr>
         <td>${_esc(p.name)} ${isDefault ? `<span class="wd-tag">${this._t('badge.built_in_tag', {}, 'built-in')}</span>` : ''}</td>
         <td>${_esc(desc.length > 60 ? desc.slice(0, 57) + '…' : desc)}</td>
-        <td>${!isDefault ? `
-            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="edit-phase" data-pid="${_esc(p.id)}" data-pname="${_esc(p.name)}" data-pdesc="${_esc(p.description || '')}">${this._t('btn.edit', {}, 'Edit')}</button>
-            <button class="wd-btn wd-btn-danger wd-btn-sm" data-action="del-phase" data-pid="${_esc(p.id)}" data-pname="${_esc(p.name)}" style="margin-left:4px">${this._t('btn.delete', {}, 'Delete')}</button>`
-          : `<span style="color:var(--secondary-text-color);font-size:.78em">${this._t('lbl.read_only', {}, 'Read-only')}</span>`}</td>
+        <td>
+            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="edit-phase" data-pid="${_esc(p.id)}" data-pname="${_esc(p.name)}" data-pdesc="${_esc(p.description || '')}" data-pisdefault="${isDefault}">${this._t('btn.edit', {}, 'Edit')}</button>
+            ${!isDefault ? `<button class="wd-btn wd-btn-danger wd-btn-sm" data-action="del-phase" data-pid="${_esc(p.id)}" data-pname="${_esc(p.name)}" style="margin-left:4px">${this._t('btn.delete', {}, 'Delete')}</button>` : ''}
+        </td>
       </tr>`;
     }).join('');
     return `
@@ -2819,7 +2927,6 @@ class HaWashdataPanel extends HTMLElement {
     return `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.panel_settings', {}, 'Panel Settings (all users)')}</div>
       <div class="wd-form-grid">
-        <div class="wd-field"><label>${this._t('lbl.refresh_interval', {}, 'Refresh interval (s)')}</label><input type="number" id="wd-ps-poll" min="2" max="60" value="${p.poll_interval_s || 5}"></div>
         <div class="wd-field"><label>${this._t('lbl.panel_default_tab', {}, 'Default tab')}</label><select id="wd-ps-deftab">${dtOpts}</select></div>
       </div>
       <div class="wd-field"><label>${this._t('lbl.hide_tabs', {}, 'Hide tabs for non-admins')}</label><div style="display:flex;flex-wrap:wrap;gap:4px">${hideChecks}</div></div>
@@ -2852,6 +2959,31 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-rbac">${this._t('btn.save_access_control', {}, 'Save Access Control')}</button></div>
     </div>
     ${userCards || `<div class="wd-card"><p class="wd-info">${this._t('msg.no_other_users', {}, 'No other Home Assistant users found.')}</p></div>`}`;
+  }
+
+  // ── Log drawer (slide-in side panel) ────────────────────────────────────────
+
+  _htmlLogDrawer() {
+    const levels = ['', 'DEBUG', 'INFO', 'WARNING', 'ERROR'];
+    const sel = levels.map(l => `<option value="${l}" ${this._logLevel === l ? 'selected' : ''}>${l || this._t('log.all_levels', {}, 'All levels')}</option>`).join('');
+    const lines = (this._logs || []).slice().reverse().map(r => {
+      const t = new Date(r.ts * 1000).toLocaleTimeString();
+      return `<div class="wd-logline"><span class="wd-logts">${t}</span><span class="wd-loglvl wd-lvl-${_esc(r.level)}">${_esc(r.level)}</span>${_esc(r.msg)}</div>`;
+    }).join('');
+    return `<div class="wd-log-drawer open">
+      <div class="wd-log-drawer-head">
+        <span>${this._t('hdr.logs', {}, 'Logs')}</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <select id="wd-log-level-drawer" style="font-size:.8em;padding:2px 4px">${sel}</select>
+          <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="logs-export" style="padding:3px 8px">${this._t('btn.export', {}, 'Export')}</button>
+          <button class="wd-log-close-btn" data-action="toggle-log-drawer" title="${_esc(this._t('btn.close', {}, 'Close'))}">✕</button>
+        </div>
+      </div>
+      <div class="wd-log-drawer-body">
+        <p class="wd-info" style="margin:0 0 8px;font-size:.78em">${this._t('msg.log_buffer_hint', {}, 'Newest first · buffers the last 500 ha_washdata records since restart · drag the bottom edge to resize.')}</p>
+        ${lines ? `<div class="wd-logs" style="max-height:none;resize:none">${lines}</div>` : `<p class="wd-info">${this._t('msg.no_logs', {}, 'No log records buffered yet.')}</p>`}
+      </div>
+    </div>`;
   }
 
   // ── Logs page ───────────────────────────────────────────────────────────────
@@ -3055,7 +3187,21 @@ class HaWashdataPanel extends HTMLElement {
     if (showRaw && (pd.raw || []).length > 1) {
       series.push({ points: pd.raw, stroke: '#9e9e9e', width: 1, alpha: 0.65, name: this._t('lbl.raw_socket', {}, 'Raw socket'), noScale: true });
     }
-    this._drawCurves('wd-status-canvas', { series, xMax });
+    // Shade any HA restart gaps that occurred during this live cycle.
+    const bands = [];
+    (pd.restart_gaps || []).forEach(g => {
+      if (!live.length) return;
+      // Gaps are stored with ISO timestamps; convert to seconds-from-cycle-start.
+      // live[0][0] is always 0 (cycle start); we need the absolute start.
+      // Use the cycle_start_iso from powerData if available, else skip shading.
+      const cycleStartIso = pd.cycle_start_iso;
+      if (!cycleStartIso) return;
+      const base = new Date(cycleStartIso).getTime();
+      const x0 = Math.max(0, (new Date(g.start_ts).getTime() - base) / 1000);
+      const x1 = Math.max(x0 + 1, (new Date(g.end_ts).getTime() - base) / 1000);
+      bands.push({ x0, x1, fill: 'rgba(96,125,139,.20)' });
+    });
+    this._drawCurves('wd-status-canvas', { series, xMax, bands });
   }
 
   // ── Graph hover (crosshair + cursor-following readout) ──────────────────────
@@ -3145,6 +3291,7 @@ class HaWashdataPanel extends HTMLElement {
     if (this._canvasZoom[id]) lines.push('<span style="opacity:.45">scroll to zoom · dblclick to reset</span>');
     ctx.restore();
     this._showGraphTip(e.clientX, e.clientY, lines);
+    this._syncSpagRowHighlight(this._hoverNearest ? this._hoverNearest.cid : null);
   }
 
   _showGraphTip(cx, cy, lines) {
@@ -3160,7 +3307,17 @@ class HaWashdataPanel extends HTMLElement {
     tip.style.top = Math.max(6, top) + 'px';
   }
 
-  _hideGraphTip() { if (this._gtip) this._gtip.style.display = 'none'; }
+  _hideGraphTip() { if (this._gtip) this._gtip.style.display = 'none'; this._syncSpagRowHighlight(null); }
+
+  _syncSpagRowHighlight(cid) {
+    if (cid === this._spagHoverCid) return;
+    this._spagHoverCid = cid;
+    const sr = this.shadowRoot;
+    if (!sr) return;
+    sr.querySelectorAll('tr[data-cid]').forEach(row => {
+      row.style.backgroundColor = (cid && row.dataset.cid === cid) ? 'var(--secondary-background-color,rgba(0,0,0,.06))' : '';
+    });
+  }
 
   // ── Toast ────────────────────────────────────────────────────────────────
 
@@ -3214,7 +3371,9 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="create-phase-ok">${this._t('btn.create', {}, 'Create')}</button></div>`;
     } else if (m.type === 'edit-phase') {
-      body = `<h2>${this._t('modal.edit_phase', {}, 'Edit Phase')}</h2>
+      const builtinNote = m.isDefault ? `<p class="wd-info" style="margin:0 0 12px">${this._t('msg.edit_builtin_phase', {}, 'This is a built-in phase. Saving creates a custom override — the original is preserved and can be restored by deleting the override.')}</p>` : '';
+      body = `<h2>${this._t('modal.edit_phase', {}, 'Edit Phase')} ${m.isDefault ? `<span class="wd-tag">${this._t('badge.built_in_tag', {}, 'built-in')}</span>` : ''}</h2>
+        ${builtinNote}
         <div class="wd-field"><label>${this._t('lbl.phase_name', {}, 'Phase Name')}</label><input type="text" id="wd-eph-name" value="${_esc(m.phaseName)}"></div>
         <div class="wd-field"><label>${this._t('lbl.description', {}, 'Description')}</label><textarea id="wd-eph-desc" rows="3">${_esc(m.phaseDesc)}</textarea></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
@@ -3436,10 +3595,28 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-info" style="margin:6px 0 0;font-size:.75em">${this._t('msg.artifact_footer', {}, 'Highlighted on the graph above. These are transient artifacts (e.g. the door opened mid-cycle), not necessarily problems.')}</div>
       </div>`;
     }
+    // HA restart gap summary (Inspect/Review only). Shaded on the graph above.
+    let restartGapBox = '';
+    const gaps = (m.mode === 'view' || m.mode === 'review') ? (cur.restart_gaps || []) : [];
+    if (gaps.length) {
+      const items = gaps.map(g => {
+        const mins = Math.round((g.gap_seconds || 0) / 60);
+        const dur = mins >= 1 ? `${mins}m` : `${Math.round(g.gap_seconds || 0)}s`;
+        const conf = g.match_confidence != null ? ` · ${Math.round(g.match_confidence * 100)}% match confidence` : '';
+        const prof = g.profile ? ` (${g.profile})` : '';
+        return `<li>${this._t('msg.restart_gap_item', {dur}, `${dur} gap`)}: HA restarted${prof}${conf}</li>`;
+      }).join('');
+      restartGapBox = `<div class="wd-card" style="margin:10px 0 0;padding:10px 12px;border-left:3px solid var(--info-color,#2196f3)">
+        <div style="font-weight:600;font-size:.9em">↻ ${this._t('msg.restart_gap_header', {n: gaps.length}, `${gaps.length} HA restart gap${gaps.length > 1 ? 's' : ''} during this cycle`)}</div>
+        <ul class="wd-info" style="margin:4px 0 0;padding-left:18px;font-size:.82em">${items}</ul>
+        <div class="wd-info" style="margin:6px 0 0;font-size:.75em">${this._t('msg.restart_gap_footer', {}, 'Highlighted on the graph. Power data is missing for these intervals — matching used only real readings.')}</div>
+      </div>`;
+    }
     return `<h2>Cycle · ${_esc(_fmtDate(cur.start_time))}</h2>
       ${meta}${modeBar}
       <div class="wd-canvas-wrap"><canvas id="wd-cyc-canvas"></canvas></div>
       ${artifactBox}
+      ${restartGapBox}
       ${controls}`;
   }
 
@@ -3543,7 +3720,7 @@ class HaWashdataPanel extends HTMLElement {
         const editBtn = canEdit ? `<td style="padding:4px 6px 4px 2px;white-space:nowrap">
           <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cleanup-edit-cycle" data-cid="${_esc(c.cycle_id)}">${this._t('btn.trim_split', {}, 'Trim / Split')}</button>
         </td>` : '';
-        return `<tr>
+        return `<tr data-cid="${_esc(c.cycle_id)}">
           <td style="width:26px;padding:6px 4px"><input type="checkbox" data-cleanidx="${origIdx}" ${sel.has(c.cycle_id) ? 'checked' : ''}></td>
           <td style="width:10px;padding:6px 2px"><span class="wd-swatch" style="background:${_PALETTE[origIdx % _PALETTE.length]}"></span></td>
           <td class="wd-tc-date">${_fmtDate(c.start_time)}</td>
@@ -3630,6 +3807,16 @@ class HaWashdataPanel extends HTMLElement {
       artifacts = cur.artifacts || [];
       const fillOf = { pause: 'rgba(255,152,0,.22)', dip: 'rgba(33,150,243,.18)', spike: 'rgba(244,67,54,.18)' };
       artifacts.forEach(a => bands.push({ x0: a.start_s, x1: Math.max(a.end_s, a.start_s + 1), fill: fillOf[a.type] || 'rgba(158,158,158,.18)' }));
+      // Shade HA restart gaps (power trace holes). Uses a blue-gray hatched-look
+      // band so the user can see where data is missing rather than zero.
+      const startIso = cur.start_time;
+      (cur.restart_gaps || []).forEach(g => {
+        if (!startIso) return;
+        const cycleStart = new Date(startIso).getTime();
+        const x0 = Math.max(0, (new Date(g.start_ts).getTime() - cycleStart) / 1000);
+        const x1 = Math.max(x0 + 1, (new Date(g.end_ts).getTime() - cycleStart) / 1000);
+        bands.push({ x0, x1, fill: 'rgba(96,125,139,.20)', label: '↻' });
+      });
     }
     this._drawCurves('wd-cyc-canvas', { series, xMax: full, bands, vlines, artifacts });
   }
@@ -3969,6 +4156,8 @@ class HaWashdataPanel extends HTMLElement {
 
     const logLevel = sr.getElementById('wd-log-level');
     if (logLevel) logLevel.addEventListener('change', () => { this._logLevel = logLevel.value; this._fetchLogs().then(() => this._render()); });
+    const logLevelDrawer = sr.getElementById('wd-log-level-drawer');
+    if (logLevelDrawer) logLevelDrawer.addEventListener('change', () => { this._logLevel = logLevelDrawer.value; this._fetchLogs().then(() => this._render()); });
     const impFile = sr.getElementById('wd-import-file');
     if (impFile) impFile.addEventListener('change', () => {
       const f = impFile.files && impFile.files[0];
@@ -4426,7 +4615,7 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'create-phase') {
       this._modal = { type: 'create-phase', deviceType: btn.dataset.dtype }; this._render();
     } else if (a === 'edit-phase') {
-      this._modal = { type: 'edit-phase', phaseId: btn.dataset.pid, phaseName: btn.dataset.pname, phaseDesc: btn.dataset.pdesc }; this._render();
+      this._modal = { type: 'edit-phase', phaseId: btn.dataset.pid, phaseName: btn.dataset.pname, phaseDesc: btn.dataset.pdesc, isDefault: btn.dataset.pisdefault === 'true' }; this._render();
     } else if (a === 'del-phase') {
       const pname = btn.dataset.pname, pid = btn.dataset.pid;
       this._modal = { type: 'confirm', title: 'Delete Phase', message: `Delete phase "${pname}"?`, okLabel: 'Delete',
@@ -4510,6 +4699,10 @@ class HaWashdataPanel extends HTMLElement {
       this._render();
     } else if (a === 'goto-suggestions') {
       this._settingsSugOnly = true; this._tab = 'settings'; this._fetchTabData();
+    } else if (a === 'toggle-log-drawer') {
+      this._logOpen = !this._logOpen;
+      this._render();
+      if (this._logOpen) this._fetchLogs().then(() => { if (this._logOpen) this._render(); });
     } else if (a === 'open-advanced') {
       // Overview action cards navigate to the Advanced tab at a given subtab.
       const sub = btn.dataset.sub;
@@ -4556,7 +4749,6 @@ class HaWashdataPanel extends HTMLElement {
 
     } else if (a === 'save-panel') {
       const panel = {
-        poll_interval_s: parseInt(sr.getElementById('wd-ps-poll')?.value || '5', 10),
         default_tab: sr.getElementById('wd-ps-deftab')?.value || 'status',
         hidden_tabs: Array.from(sr.querySelectorAll('[data-hidetab]')).filter(c => c.checked).map(c => c.dataset.hidetab),
       };

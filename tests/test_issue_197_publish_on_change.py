@@ -32,8 +32,6 @@ from custom_components.ha_washdata.cycle_detector import (
 )
 from custom_components.ha_washdata.const import (
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-    CONF_NOTIFY_EVENTS,
-    NOTIFY_EVENT_FINISH,
 )
 from custom_components.ha_washdata.manager import WashDataManager
 
@@ -50,7 +48,6 @@ def mock_entry() -> Any:
     entry.title = "Test Washer 197"
     entry.options = {
         "power_sensor": "sensor.test_power",
-        CONF_NOTIFY_EVENTS: [NOTIFY_EVENT_FINISH],
         # User explicitly set a short no-update timeout (as reported in issue #197)
         CONF_NO_UPDATE_ACTIVE_TIMEOUT: 140,
     }

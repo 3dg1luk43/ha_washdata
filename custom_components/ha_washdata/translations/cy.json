@@ -80,7 +80,8 @@
         "air_fryer": "Fryer aer",
         "bread_maker": "Gwneuthurwr Bara",
         "pump": "Pwmp / Swmp Pwmp",
-        "other": "Arall (Uwch)"
+        "generic": "Arall (Uwch)",
+        "other": "Dyfais Trothwy"
       }
     }
   },
@@ -620,6 +621,7 @@
       "needs_review": "Angen adolygiad",
       "overrun": "Wedi rhedeg yn hirach nag arfer",
       "artifact_tip": "{n} anomaleddau wedi'u canfod (e.e. drws yn agor yng nghanol y cylch) — ar agor i'w gweld ar y graff",
+      "restart_gap_tip": "{n} bwlch ailgychwyn HA: mae olrhain pŵer â thwll",
       "poor_fit_tip": "Hanes paru anghyson — ystyriwch ailadeiladu'r proffil hwn",
       "fair_fit_tip": "Cysondeb cyfatebol cymedrol - mae gan rai cylchoedd a neilltuwyd i'r proffil hwn sgorau hyder is. Labelwch fwy o gylchoedd neu ail-gofnodwch y proffil i wella cywirdeb.",
       "auto": "(wedi'i ganfod yn awtomatig)",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Troshaenwch amlenni proffil eraill ar y siart uchod i weld pa un sy'n cyd-fynd orau â'r cylch hwn.",
       "artifact_header": "{n} anomaleddau a ganfuwyd yn ystod y cylch hwn",
       "artifact_footer": "Wedi'i amlygu ar y graff uchod. Mae’r rhain yn arteffactau dros dro (e.e. agor y drws ar ganol y cylch), nid o reidrwydd yn broblemau.",
+      "restart_gap_header": "{n} bwlch ailgychwyn HA yn ystod y gylchred hon",
+      "restart_gap_item": "{dur} bwlch",
+      "restart_gap_footer": "Amlygwyd ar y graff. Mae data pŵer ar goll ar gyfer y cyfyngau hyn; defnyddiodd cyfatebiad ddarlleniadau go iawn yn unig.",
       "profile_poor_health_detail": "Mae gan gylchoedd a neilltuwyd i'r proffil hwn siapiau anghyson neu hyder isel. Ystyriwch ailadeiladu'r amlen neu adolygu cylchoedd wedi'u labelu.",
       "trend_duration_longer": "Hyd yn dueddol o hirach ({pct}%/cylch) — diweddar cyf {avg}",
       "trend_duration_shorter": "Hyd tueddiad byrrach ({pct}%/cylch) — diweddar cyf {avg}",
@@ -990,235 +995,312 @@
     },
     "setting": {
       "name": {
-        "label": "Enw Dyfais"
+        "label": "Enw Dyfais",
+        "doc": "Enw arddangos a ddangosir yn y rhestr integreiddiadau HA a chofrestrfa dyfeisiau."
       },
       "device_type": {
-        "label": "Math o Ddyfais"
+        "label": "Math o Ddyfais",
+        "doc": "Dosbarth offer. Yn gosod rhagosodiadau synhwyro synhwyrol (trothwyon, diffyg oedi, trin yn y pen draw) wedi'u tiwnio ar gyfer y math hwnnw o gyfarpar; ei newid dim ond os sefydlwyd y ddyfais yn wreiddiol fel y math anghywir."
       },
       "power_sensor": {
-        "label": "Synhwyrydd Pŵer"
+        "label": "Synhwyrydd Pŵer",
+        "doc": "Yr endid synhwyrydd sy'n adrodd am bŵer byw mewn watiau ar gyfer y teclyn hwn (e.e. sensor.washer_power). Mae'r holl ganfod beiciau yn seiliedig ar y signal hwn."
       },
       "min_power": {
-        "label": "Pŵer Lleiaf"
+        "label": "Pŵer Lleiaf",
+        "doc": "Ystyrir bod isafswm pŵer absoliwt yn weithredol. Mae darlleniadau o dan hyn yn cael eu trin fel 0 W (wrth gefn), gan hidlo allan y llwyth rhithiol o blygiau clyfar a LEDs wrth gefn."
       },
       "off_delay": {
-        "label": "Oedi Diffodd"
+        "label": "Oedi Diffodd",
+        "doc": "Amser i aros ar ôl i'r pŵer ddisgyn cyn datgan bod y cylch wedi gorffen. Os bydd pŵer yn ailddechrau o fewn y ffenestr hon, mae'r cylchred yn parhau'n ddi-dor - mae hyn yn pontio rhwng cyfnodau golchi. Mae gan beiriannau golchi llestri gyfnodau sychu hir (pŵer i ffwrdd am 20-60 munud) felly mae'n rhaid i'r oedi i ffwrdd fod yn fwy na hynny i gadw'r holl olchi + sych fel un cylch."
       },
       "linked_device": {
-        "label": "Grwpio o Dan Ddyfais"
+        "label": "Grwpio o Dan Ddyfais",
+        "doc": "Yn ddewisol, nythu'r ddyfais WashData hon o dan ddyfais arall (e.e. y plwg clyfar) yn y gofrestr dyfais HA, a ddangosir fel \"Connected through ...\"."
       },
       "start_threshold_w": {
-        "label": "Trothwy Cychwyn"
+        "label": "Trothwy Cychwyn",
+        "doc": "Rhaid i bŵer godi uwchlaw'r lefel hon i gadarnhau bod cylch wedi dechrau. Mae ei osod yn rhy isel yn achosi cychwyniadau ffug o bŵer wrth gefn; rhy uchel a rhaglenni sy'n cychwyn yn araf (llenwi oer) yn cael eu methu. Mae'r injan awgrym yn gosod hyn ychydig uwchlaw pŵer gweithredol isaf y peiriant a welwyd."
       },
       "stop_threshold_w": {
-        "label": "Trothwy Stopio"
+        "label": "Trothwy Stopio",
+        "doc": "Rhaid i'r pŵer ddisgyn yn is na'r lefel hon cyn i'r cyfrif i lawr oddi ar oedi ddechrau. Gosodwch ef o dan y Trothwy Cychwyn - y bwlch rhyngddynt yw'r band hysteresis sy'n atal cryndod. Os caiff ei osod yn rhy uchel, mae cyfnodau pŵer isel (rinsiwch dal, gwrth-grych) yn sbarduno'r dilyniant terfynol ar gam."
       },
       "min_off_gap": {
-        "label": "Bwlch Diffodd Isaf"
+        "label": "Bwlch Diffodd Isaf",
+        "doc": "Os yw'r peiriant yn diffodd am lai na'r amser hwn, mae'r dilyniant ymlaen / i ffwrdd / ymlaen yn cael ei drin fel un cylch parhaus. Yn atal rhaglenni socian (pwerau peiriant i ffwrdd am sawl munud canol golchi) rhag cael eu rhannu'n ddau gylchred ar wahân. Gosodwch hi'n fyrrach na'r bwlch rhwng eich llwythi cefn wrth gefn os ydych chi am i'r rheini gael eu cyfrif fel cylchoedd ar wahân. Mae rhagosodiadau math o ddyfais yn diogelu'r saib nodweddiadol o fewn y cylch ar gyfer pob dyfais."
       },
       "start_duration_threshold": {
-        "label": "Hyd Cychwyn"
+        "label": "Hyd Cychwyn",
+        "doc": "Rhaid i'r pŵer aros uwchlaw'r trothwy cychwyn mor hir â hyn i gadarnhau cychwyn gwirioneddol, gan atal toglau hollt-eiliad ymlaen/diffodd rhag cychwyn cylchred."
       },
       "start_energy_threshold": {
-        "label": "Egni Cychwyn"
+        "label": "Egni Cychwyn",
+        "doc": "Egni (pŵer x amser) mae'n rhaid i'r teclyn ei ddefnyddio cyn RHEDEG. Mae gan bigyn pŵer uchel byr egni isel iawn ac mae'n cael ei anwybyddu, gan atal cychwyniadau ffug."
       },
       "completion_min_seconds": {
-        "label": "Hyd Cylch Lleiaf"
+        "label": "Hyd Cylch Lleiaf",
+        "doc": "Mae beiciau sy'n fyrrach na hyn yn cael eu taflu fel cylchoedd ysbrydion (rhediadau prawf, gan agor y drws i ychwanegu hosan)."
       },
       "running_dead_zone": {
-        "label": "Parth Marw Rhedeg"
+        "label": "Parth Marw Rhedeg",
+        "doc": "Ar ôl i gylchred ddechrau, anwybyddir dipiau pŵer o fewn y ffenestr hon. Mae peiriannau golchi yn llenwi â dŵr oer (gollwng ger 0 W cyn gwresogi) - heb yr amddiffyniad hwn mae'r cyfnod llenwi hwnnw'n edrych fel diwedd cylch. NID yw hyn yn hepgor data: mae'r olrhain pŵer llawn yn cael ei gofnodi o T=0. Mae'r injan awgrymiadau yn mesur patrwm cychwyn gwirioneddol a maint eich peiriant yn awtomatig."
       },
       "end_energy_threshold": {
-        "label": "Egni Diwedd"
+        "label": "Egni Diwedd",
+        "doc": "Yn ystod y cyfrif i lawr oddi ar oedi, mae egni cronedig (wat x amser) yn cael ei gymharu â'r trothwy hwn. Os eir y tu hwnt iddo, mae'r cyfrif i lawr yn ailosod - gan gadw dillad gwrth-grych a chynffonau sychu peiriannau golchi llestri ynghlwm wrth y cylch yn lle eu torri'n fyr. Codwch ef os daw'r cylchoedd i ben yn rhy gynnar yn ystod y cyfnod oeri; ei ostwng os yw'r canfod yn araf."
       },
       "end_repeat_count": {
-        "label": "Cyfrif Ailadrodd Diwedd"
+        "label": "Cyfrif Ailadrodd Diwedd",
+        "doc": "Nifer y darlleniadau dilynol islaw'r trothwy sydd eu hangen cyn i'r cylch ddod i ben. Mae 1 yn iawn ar gyfer y rhan fwyaf o blygiau. Codwch i 2-3 os yw'ch plwg craff weithiau'n adrodd am sampl sero ffug ar ganol y cylch a bod eich cylchoedd yn dod i ben yn gynamserol."
       },
       "sampling_interval": {
-        "label": "Cyfwng Samplu"
+        "label": "Cyfwng Samplu",
+        "doc": "Amser disgwyliedig rhwng darlleniadau synhwyrydd - fe'i defnyddir i faint y ffenestr llyfnu a dechrau dadlennu'n gywir. Mae pob diweddariad synhwyrydd yn cael ei ddal waeth beth fo'r gwerth hwn; dim ond y cyfrifiadau i lawr yr afon y mae'n eu graddnodi. Mae'r injan awgrymiadau yn mesur diweddeb gwirioneddol eich synhwyrydd o gylchoedd y gorffennol ac yn gosod hyn yn awtomatig."
       },
       "smoothing_window": {
-        "label": "Ffenestr Llyfnhau"
+        "label": "Ffenestr Llyfnhau",
+        "doc": "Faint mae'r signal pŵer crai wedi'i lyfnhau. Isel (2) yn ymatebol ond yn swnllyd; uchel (5) yn llyfnu pigau ond yn ychwanegu oedi."
       },
       "abrupt_drop_watts": {
-        "label": "Gostyngiad Sydyn"
+        "label": "Gostyngiad Sydyn",
+        "doc": "Mae gostyngiad pŵer sy'n fwy na hyn yn tynnu sylw at y cylch fel Interrupted (canslo â llaw) yn hytrach na gorffeniad naturiol."
       },
       "abrupt_drop_ratio": {
-        "label": "Cymhareb Gostyngiad Sydyn"
+        "label": "Cymhareb Gostyngiad Sydyn",
+        "doc": "Mae cwymp sy'n fwy na'r ffracsiwn hwn o bŵer cerrynt hefyd yn cael ei drin yn sydyn (0.6 = gostyngiad o 60%). Yn ategu'r trothwy watiau ar draws meintiau offer."
       },
       "profile_match_threshold": {
-        "label": "Trothwy Cyfatebu"
+        "label": "Trothwy Cyfatebu",
+        "doc": "Mae angen isafswm sgôr tebygrwydd (0-1) ar ddiwedd y cylch i dderbyn rhaglen adnabod. Ei godi i leihau adnabyddiaeth anghywir; ei ostwng os nad yw rhaglenni eich peiriant yn cael eu paru. Mae rhagosodiad 0.4 yn fan cychwyn ceidwadol."
       },
       "profile_unmatch_threshold": {
-        "label": "Trothwy Anfaes"
+        "label": "Trothwy Anfaes",
+        "doc": "Os yw gêm fyw yng nghanol y cylch yn disgyn yn is na'r sgôr hwn, caiff y dull adnabod petrus ei glirio. Cadwch ef ychydig yn is na'r Trothwy Cyfatebol fel nad yw gostyngiad byr mewn tebygrwydd yn troi'r arddangosfa yn ôl i un heb ei hail."
       },
       "profile_match_interval": {
-        "label": "Cyfwng Cyfatebu"
+        "label": "Cyfwng Cyfatebu",
+        "doc": "Pa mor aml i geisio paru proffil yn ystod cylchred rhedeg. Mae rhagosodiad 300 s (5 munud) yn cydbwyso cyflymder canfod a CPU."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Cymhareb Hyd Lleiaf"
+        "label": "Cymhareb Hyd Lleiaf",
+        "doc": "Isafswm hyd cylch o'i gymharu â'r proffil. Mae 0.9 yn golygu bod yn rhaid i gylchred fod o leiaf 90% o hyd y proffil i gyd-fynd."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Cymhareb Hyd Mwyaf"
+        "label": "Cymhareb Hyd Mwyaf",
+        "doc": "Uchafswm hyd y cylch o'i gymharu â'r proffil. Mae 1.3 yn golygu bod yn rhaid i gylchred fod yn llai na 130% o hyd y proffil i gyd-fynd."
       },
       "profile_duration_tolerance": {
-        "label": "Goddefiant Hyd Proffil"
+        "label": "Goddefiant Hyd Proffil",
+        "doc": "Y band +/- o amgylch proffil hyd cyfartalog a ddefnyddir yn ystod paru. Mae 0.25 yn golygu bod proffil 60 munud yn cyd-fynd â chylchoedd 45-75 munud."
       },
       "duration_tolerance": {
-        "label": "Goddefiant Amcangyfrif"
+        "label": "Goddefiant Amcangyfrif",
+        "doc": "Goddefgarwch ar gyfer amcangyfrifon sy'n weddill o amser (adborth dysgu, nid cyfateb). Os yw'r hyd gwirioneddol o fewn +/-X% i'r amcangyfrif mae'n cyfrif fel cyfatebiad da."
       },
       "auto_label_confidence": {
-        "label": "Hyder Auto-Labelu"
+        "label": "Hyder Auto-Labelu",
+        "doc": "Os yw'r sgôr gêm ar ddiwedd y beic yr un fath neu'n uwch na hyn, caiff y rhaglen ei labelu'n awtomatig heb unrhyw anogwr cadarnhau. Ei godi i ofyn am fwy o sicrwydd cyn labelu awtomatig; ei ostwng i awtomeiddio mwy. Yn gweithio ar y cyd â Learning Confidence oddi tano."
       },
       "learning_confidence": {
-        "label": "Hyder Dysgu"
+        "label": "Hyder Dysgu",
+        "doc": "Os yw sgôr y gêm yn disgyn rhwng hyn a Auto-Label Confidence, mae hysbysiad adborth yn gofyn ichi wirio'r rhaglen a nodwyd. O dan y sgôr hwn mae'r ornest yn rhy ansicr i'w hwynebu. Rhaid ei gadw o dan Hyder Auto-Label."
       },
       "suppress_feedback_notifications": {
-        "label": "Atal Hysbysiadau Adborth"
+        "label": "Atal Hysbysiadau Adborth",
+        "doc": "Peidiwch â rhoi hysbysiad parhaus pan fydd angen adolygu cylch gorffenedig; mae'r adborth yn dal i ymddangos yn y ciw adolygu Cycles."
       },
       "watchdog_interval": {
-        "label": "Cyfwng Gwarcheidwad"
+        "label": "Cyfwng Gwarcheidwad",
+        "doc": "Pa mor aml y mae'r corff gwarchod cefndir yn gwirio am synwyryddion sydd wedi'u hatal a seibiannau sydd wedi mynd heibio. Rhagosodiad 30 s."
       },
       "no_update_active_timeout": {
-        "label": "Amser Heb Ddiweddaru"
+        "label": "Amser Heb Ddiweddaru",
+        "doc": "Os na fydd unrhyw ddiweddariadau pŵer yn cyrraedd am gyfnod hir, tybiwch fod y plwg wedi'i ollwng all-lein a stopiwch rym i osgoi cylch zombie. Mae rhagosodiad 600 s yn caniatáu oedi cwmwl neu rwyll."
       },
       "progress_reset_delay": {
-        "label": "Oedi Ailosod Cynnydd"
+        "label": "Oedi Ailosod Cynnydd",
+        "doc": "Ar ôl gorffen, daliwch y cynnydd ar 100% cyhyd â hyn felly mae Cwblhawyd yn weladwy ar ddangosfyrddau cyn ailosod i Idle."
       },
       "auto_maintenance": {
-        "label": "Cynnal a Chadw Awtomatig (glanhau nos)"
+        "label": "Cynnal a Chadw Awtomatig (glanhau nos)",
+        "doc": "Cynnal sesiynau cadw tŷ bob nos: ailadeiladu amlenni proffil, ailgyfrifo iechyd beiciau, tocio olion dadfygio a chadw'r cylchoedd diweddaraf."
       },
       "expose_debug_entities": {
-        "label": "Datgelu Endidau Dadfygio"
+        "label": "Datgelu Endidau Dadfygio",
+        "doc": "Cyhoeddi endidau HA diagnostig ychwanegol (hyder paru, amwysedd, mewnolwyr y wladwriaeth). Wedi'i ddiffodd yn cadw'r rhestr endid yn lân ar gyfer defnydd arferol."
       },
       "save_debug_traces": {
-        "label": "Cadw Olion Dadfygio"
+        "label": "Cadw Olion Dadfygio",
+        "doc": "Storio'r olrhain pŵer llawn a data dadfygio cyfatebol ar gyfer pob cylchred. Yn ddefnyddiol ar gyfer datrys problemau ond yn cynyddu maint storio."
       },
       "anti_wrinkle_enabled": {
-        "label": "Galluogi Canfod Gwrth-Grych"
+        "label": "Galluogi Canfod Gwrth-Grych",
+        "doc": "Byddwch yn ymwybodol o'r corbys trymbl pŵer isel byr y mae sychwr yn eu hallyrru ar ôl y prif gyfnod gwres a'u cadw ynghlwm wrth y cylch gorffenedig yn lle eu darllen fel cylchoedd newydd."
       },
       "anti_wrinkle_max_power": {
-        "label": "Pŵer Gwrth-Grych Mwyaf"
+        "label": "Pŵer Gwrth-Grych Mwyaf",
+        "doc": "Mae pwls uwchlaw'r pŵer hwn yn cael ei drin fel cylch newydd go iawn, nid dillad gwrth-wrinkle. Wedi'i osod ychydig uwchben pŵer y curiad disymwth."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Hyd Mwyaf"
+        "label": "Hyd Mwyaf",
+        "doc": "Mae corbys sy'n hirach na hyn yn cael eu trin fel cylch go iawn yn hytrach na dillad gwrth-wrinkle."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Trothwy Pŵer Ymadael"
+        "label": "Trothwy Pŵer Ymadael",
+        "doc": "Rhaid i'r pŵer ddisgyn yn is na hyn rhwng corbys er mwyn i'r modd gwrth-wrinkle aros yn actif."
       },
       "delay_start_detect_enabled": {
-        "label": "Galluogi Canfod Dechrau Oedi"
+        "label": "Galluogi Canfod Dechrau Oedi",
+        "doc": "Canfod pryd mae'r teclyn wedi'i bweru ymlaen ac yn aros (gohirio cychwyn / wrth gefn) ond heb ddechrau ei gylchred, felly nid yw tynnu wrth gefn yn cael ei gamgymryd am gylchred rhedeg."
       },
       "delay_confirm_seconds": {
-        "label": "Eiliadau Cadarnhau"
+        "label": "Eiliadau Cadarnhau",
+        "doc": "Rhaid i'r pŵer aros yn y band wrth gefn am hyn ymhell cyn i'r teclyn gael ei drin fel rhywbeth aros i ddechrau yn hytrach na rhedeg."
       },
       "delay_timeout_hours": {
-        "label": "Oriau Amser Allan"
+        "label": "Oriau Amser Allan",
+        "doc": "Rhoi'r gorau i aros yn y modd oedi-cychwyn ar ôl yr oriau lawer hyn a dychwelyd i segur, felly nid yw peiriant a adawyd wedi'i bweru ond heb ei ddechrau yn aros am byth."
       },
       "external_end_trigger_enabled": {
-        "label": "Galluogi Sbardun Diwedd Allanol"
+        "label": "Galluogi Sbardun Diwedd Allanol",
+        "doc": "Gadewch i synhwyrydd deuaidd allanol nodi diwedd cylch, yn ychwanegol at y canfod sy'n seiliedig ar bŵer adeiledig."
       },
       "external_end_trigger": {
-        "label": "Endid Sbardun Allanol"
+        "label": "Endid Sbardun Allanol",
+        "doc": "Synhwyrydd deuaidd y mae ei newid cyflwr yn nodi diwedd y cylch (e.e. cyswllt “gorffenedig” teclyn neu integreiddio cydymaith)."
       },
       "external_end_trigger_inverted": {
-        "label": "Gwrthdroi Sbardun Allanol (sbarduno ar DDIFFODD)"
+        "label": "Gwrthdroi Sbardun Allanol (sbarduno ar DDIFFODD)",
+        "doc": "Triniwch y synhwyrydd sbardun sy'n troi OFF (yn hytrach nag ON) fel y signal diwedd cylch."
       },
       "door_sensor_entity": {
-        "label": "Endid Synhwyrydd Drws"
+        "label": "Endid Synhwyrydd Drws",
+        "doc": "Synhwyrydd deuaidd drws dewisol. Fe'i defnyddir i ganfod pan fydd y teclyn wedi'i agor / dadlwytho ar ôl cylchred."
       },
       "pause_cuts_power": {
-        "label": "Mae Seibio Hefyd yn Torri Pŵer (trwy switsh)"
+        "label": "Mae Seibio Hefyd yn Torri Pŵer (trwy switsh)",
+        "doc": "Pan fydd cylch yn cael ei seibio, diffoddwch yr Endid Switch isod hefyd. Dim ond ar gyfer offer y gellir torri eu plwg yn ddiogel yng nghanol y cylch."
       },
       "switch_entity": {
-        "label": "Endid Switsh"
+        "label": "Endid Switsh",
+        "doc": "Switsh dewisol wedi'i doglo i ffwrdd ar saib ac yn ôl ymlaen wrth ailddechrau, ei ddefnyddio ynghyd â \"Saib hefyd yn torri pŵer\"."
       },
       "notify_unload_delay_minutes": {
-        "label": "Oedi Atgoffa Dadlwytho"
+        "label": "Oedi Atgoffa Dadlwytho",
+        "doc": "Munudau ar ôl i gylch ddod i ben cyn anfon y nodyn atgoffa llonydd \"dadlwytho'r peiriant\". Gosodwch 0 i analluogi'r nodyn atgoffa."
       },
       "pump_stuck_duration": {
-        "label": "Hyd Pwmp yn Sownd"
+        "label": "Hyd Pwmp yn Sownd",
+        "doc": "Eiliadau gall pwmp redeg yn barhaus cyn iddo gael ei nodi fel un sy'n sownd o bosibl (yn tanio'r digwyddiad pwmp sownd)."
       },
       "notify_start_services": {
-        "label": "Gwasanaethau Cychwyn"
+        "label": "Gwasanaethau Cychwyn",
+        "doc": "hysbysu.* gwasanaethau wedi'u galw pan fydd cylch yn dechrau. Ychwanegu un fesul targed (ffôn, dangosfwrdd, ac ati); gadael yn wag am ddim hysbysiad cychwyn."
       },
       "notify_finish_services": {
-        "label": "Gwasanaethau Gorffen"
+        "label": "Gwasanaethau Gorffen",
+        "doc": "hysbysu.* gwasanaethau wedi'u galw pan fydd cylch yn gorffen. Ychwanegu un fesul targed; gadael yn wag am ddim hysbysiad gorffen."
       },
       "notify_live_services": {
-        "label": "Gwasanaethau Cynnydd Byw"
+        "label": "Gwasanaethau Cynnydd Byw",
+        "doc": "galwodd gwasanaethau hysbysu.* am ddiweddariadau cynnydd byw tra bod cylch yn rhedeg. Gadewch yn wag i analluogi hysbysiadau cynnydd byw."
       },
       "notify_people": {
-        "label": "Pobl (ar gyfer Dim Ond Pan Yn Cartref)"
+        "label": "Pobl (ar gyfer Dim Ond Pan Yn Cartref)",
+        "doc": "person.* endidau a ddefnyddir gan \"Notify Only When Home\" i benderfynu a yw unrhyw un gartref."
       },
       "notify_only_when_home": {
-        "label": "Hysbysu Dim Ond Pan Yn Cartref"
+        "label": "Hysbysu Dim Ond Pan Yn Cartref",
+        "doc": "Anfonwch hysbysiadau dim ond pan fydd o leiaf un o'r bobl gysylltiedig (uchod) gartref."
       },
       "notify_fire_events": {
-        "label": "Tanio Digwyddiadau HA ar gyfer Hysbysiadau"
+        "label": "Tanio Digwyddiadau HA ar gyfer Hysbysiadau",
+        "doc": "Hefyd tanio digwyddiadau ha_washdata_* ar ddechrau/gorffen beicio fel y gallwch adeiladu eich awtomeiddio eich hun."
       },
       "notify_before_end_minutes": {
-        "label": "Rhybudd Cyn Diwedd"
+        "label": "Rhybudd Cyn Diwedd",
+        "doc": "Anfonwch rybudd Bron Wedi'i Wneud pan fydd yr amser amcangyfrifedig sy'n weddill yn disgyn yn is na hyn. 0 yn ei analluogi."
       },
       "notify_live_interval_seconds": {
-        "label": "Cyfwng Diweddariad Byw"
+        "label": "Cyfwng Diweddariad Byw",
+        "doc": "Pa mor aml y caiff hysbysiadau cynnydd byw eu hadnewyddu tra bydd cylch yn rhedeg."
       },
       "notify_live_overrun_percent": {
-        "label": "% Gorrediad Byw Cyn Rhybudd"
+        "label": "% Gorrediad Byw Cyn Rhybudd",
+        "doc": "Os yw cylchred yn mynd heibio i'w amcangyfrif o fwy na'r ganran hon, anfonwch rybudd gorredeg."
       },
       "notify_live_chronometer": {
-        "label": "Defnyddio Cronomedre Byw"
+        "label": "Defnyddio Cronomedre Byw",
+        "doc": "Dangoswch amserydd cyfrif i lawr sy'n diweddaru'n fyw yn yr hysbysiad (ar lwyfannau sy'n ei gefnogi) yn lle amcangyfrif statig."
       },
       "notify_timeout_seconds": {
-        "label": "Diswyddo'n Awtomatig Ar Ôl"
+        "label": "Diswyddo'n Awtomatig Ar Ôl",
+        "doc": "Diystyru'r hysbysiad yn awtomatig ar ôl hyn lawer o eiliadau (ar lwyfannau sy'n ei gefnogi). 0 yn ei gadw nes ei ddiswyddo â llaw."
       },
       "notify_title": {
-        "label": "Teitl Hysbysiad"
+        "label": "Teitl Hysbysiad",
+        "doc": "Teitl yr hysbysiad. Newidynnau templed: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Eicon Hysbysiad"
+        "label": "Eicon Hysbysiad",
+        "doc": "Eicon mdi dewisol ar gyfer yr hysbysiad (e.e. mdi: peiriant golchi). Gadewch yn wag ar gyfer rhagosodiad y platfform."
       },
       "notify_start_message": {
-        "label": "Neges Dechrau"
+        "label": "Neges Dechrau",
+        "doc": "Corff yn cael ei anfon pan fydd cylch yn dechrau. Newidynnau templed: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Neges Gorffen"
+        "label": "Neges Gorffen",
+        "doc": "Corff yn cael ei anfon pan fydd cylch yn gorffen. Newidynnau templed: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "Neges Cyn Gorffen"
+        "label": "Neges Cyn Gorffen",
+        "doc": "Corff y rhybudd cyn diwedd / bron wedi'i wneud. Newidynnau templed: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Neges Atgoffa"
+        "label": "Neges Atgoffa",
+        "doc": "Corff y nodyn atgoffa dadlwytho llonydd sy'n aros. Mae Blank yn defnyddio'r rhagosodiad adeiledig. Newidynnau templed: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Sianel Android (cychwyn/byw)"
+        "label": "Sianel Android (cychwyn/byw)",
+        "doc": "Enw sianel hysbysu Android ar gyfer negeseuon cychwyn / byw (yn rheoli sain fesul sianel a blaenoriaeth ar yr ap symudol). Mae Blank yn defnyddio'r app cydymaith diofyn."
       },
       "notify_finish_channel": {
-        "label": "Sianel Android (gorffen)"
+        "label": "Sianel Android (gorffen)",
+        "doc": "Enw sianel hysbysu Android ar gyfer y neges orffen. Mae gwag yn ailddefnyddio'r sianel gychwyn/byw."
       },
       "energy_price_entity": {
-        "label": "Endid Pris Ynni"
+        "label": "Endid Pris Ynni",
+        "doc": "Synhwyrydd gyda'r pris trydan cyfredol fesul kWh (e.e. tariff deinamig). Yn cael blaenoriaeth dros y pris sefydlog isod. Mae pob cylch yn rhewi'r pris i bob pwrpas pan ddaeth i ben."
       },
       "energy_price_static": {
-        "label": "Pris Ynni Sefydlog (y kWh)"
+        "label": "Pris Ynni Sefydlog (y kWh)",
+        "doc": "Pris sefydlog fesul kWh a ddefnyddir ar gyfer ffigurau cost pan nad oes endid pris byw wedi'i osod uchod."
       },
       "notify_cycle_timers": {
-        "label": "Amseryddion Cylchred"
+        "label": "Amseryddion Cylchred",
+        "doc": "Hysbysiadau ar funudau penodol i mewn i gylchred (e.e. i ychwanegu meddalydd). Mae'r neges yn cefnogi {device}, {program}, {minutes}. Galluogi Awto-saib i oedi ar y pwynt hwnnw a derbyn hysbysiad rhyngweithiol gyda botwm Ail-ddechrau; ailddechrau trwy'r panel, y gwasanaeth saib / ailddechrau, neu'r camau hysbysu."
       },
       "enable_ml_models": {
-        "label": "Cymhwyso modelau clyfar yn ystod cylch"
+        "label": "Cymhwyso modelau clyfar yn ystod cylch",
+        "doc": "Tra bod cylch yn rhedeg, gadewch i'r modelau fireinio'r canlyniadau byw: amcangyfrif mwy cyson o weddill yr amser ac ynni/cost, a gwarchodwr gwrth-stopio cynamserol ar ganfod diwedd (dim ond gohirio gorffeniad y gall, byth ddod i ben yn gynnar, ac mae wedi'i ffinio). Yn defnyddio'ch modelau wedi'u mireinio pan fyddant ar gael, fel arall y rhai adeiledig. I ffwrdd = y rhesymeg pŵer-seiliedig clasurol yn unig (dal yn ddibynadwy)."
       },
       "ml_training_enabled": {
-        "label": "Dysgu o'r peiriant hwn"
+        "label": "Dysgu o'r peiriant hwn",
+        "doc": "Astudiwch eich cylchoedd adolygu o bryd i'w gilydd dros nos a mireinio'r modelau i'r peiriant penodol hwn. Dim ond pan fydd yn sgorio'n well mewn cylchoedd sy'n cael eu dal allan y bydd newid yn cael ei gadw, felly gall hyn ond helpu neu aros yr un peth - peidiwch byth â mynd yn ôl."
       },
       "ml_training_hour": {
-        "label": "Dysgu am yr awr"
+        "label": "Dysgu am yr awr",
+        "doc": "Awr leol o'r dydd (0-23) i wneud y mireinio dros nos. Dewiswch awr dawel fel 2 (02:00)."
       },
       "ml_training_min_cycles": {
-        "label": "Cylchoedd sydd eu hangen yn gyntaf"
+        "label": "Cylchoedd sydd eu hangen yn gyntaf",
+        "doc": "Arhoswch nes bod o leiaf cymaint â hyn o gylchoedd wedi'u cofnodi cyn eu mireinio, felly mae digon i ddysgu ohono."
       },
       "ml_training_interval_days": {
-        "label": "Gwirio uchafswm bob"
+        "label": "Gwirio uchafswm bob",
+        "doc": "Ailwirio am welliannau ar y mwyaf unwaith y dyddiau hyn."
       }
     }
   }

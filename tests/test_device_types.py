@@ -5,9 +5,11 @@ from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDet
 from custom_components.ha_washdata.const import (
     DEVICE_TYPE_DRYER,
     DEVICE_TYPE_WASHING_MACHINE, DEVICE_TYPE_WASHER_DRYER, DEVICE_TYPE_DISHWASHER,
+    DEVICE_TYPE_GENERIC, DEVICE_TYPE_OTHER,
     STATE_RUNNING, DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
-    DEVICE_COMPLETION_THRESHOLDS,
+    DEVICE_COMPLETION_THRESHOLDS, DEVICE_TYPES,
     DEFAULT_SAMPLING_INTERVAL, DEFAULT_SAMPLING_INTERVAL_BY_DEVICE,
+    DEVICE_SMOOTHING_THRESHOLDS,
 )
 
 def dt(seconds):
@@ -66,4 +68,40 @@ def test_dryer_thresholds():
     assert callbacks["on_cycle_end"].called
     cycle_data = callbacks["on_cycle_end"].call_args[0][0]
     assert cycle_data["status"] == "interrupted"
+
+
+def test_generic_device_type_in_device_types():
+    """The generic type is a first-class device type with a display name."""
+    assert DEVICE_TYPE_GENERIC in DEVICE_TYPES
+    assert DEVICE_TYPE_OTHER in DEVICE_TYPES
+    assert DEVICE_TYPES[DEVICE_TYPE_GENERIC] == "Other (Advanced)"
+    assert DEVICE_TYPES[DEVICE_TYPE_OTHER] == "Threshold Device"
+
+
+def test_generic_device_type_smoothing_threshold():
+    """The generic type has a defined smoothing threshold (not falling back to None)."""
+    assert DEVICE_TYPE_GENERIC in DEVICE_SMOOTHING_THRESHOLDS
+    # Neutral middle-ground value
+    assert DEVICE_SMOOTHING_THRESHOLDS[DEVICE_TYPE_GENERIC] == 3.0
+
+
+def test_generic_device_type_runs_cycles():
+    """The generic device type detects cycles like any other type (no hidden exclusions)."""
+    config = CycleDetectorConfig(
+        device_type=DEVICE_TYPE_GENERIC,
+        min_power=5.0,
+        off_delay=60,
+    )
+    callbacks = {"on_state_change": Mock(), "on_cycle_end": Mock()}
+    detector = CycleDetector(config, callbacks["on_state_change"], callbacks["on_cycle_end"])
+
+    # Drive a simple cycle
+    for t in range(0, 800, 10):
+        detector.process_reading(200.0, dt(t))
+    detector.process_reading(0.0, dt(800))
+    flush_buffer(detector, 800)
+
+    assert callbacks["on_cycle_end"].called
+    cycle_data = callbacks["on_cycle_end"].call_args[0][0]
+    assert cycle_data["status"] == "completed"
 

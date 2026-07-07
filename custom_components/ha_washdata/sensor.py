@@ -282,6 +282,11 @@ class WasherStateSensor(WasherBaseSensor):
         if anomaly and anomaly != "none":
             attrs["cycle_anomaly"] = anomaly
             attrs["overrun_ratio"] = round(self._manager.overrun_ratio, 2)
+        # Surface HA restart gaps recorded during the current cycle so automations
+        # can see that the power trace has holes (pure metadata, never a notification).
+        gaps = self._manager.restart_gaps
+        if gaps:
+            attrs["ha_restart_gaps"] = len(gaps)
         return attrs
 
 

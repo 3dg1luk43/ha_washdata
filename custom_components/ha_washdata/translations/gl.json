@@ -80,7 +80,8 @@
         "air_fryer": "Freidora de aire",
         "bread_maker": "Máquina de Pan",
         "pump": "Bomba / Bomba de sumidoiro",
-        "other": "Outros (Avanzado)"
+        "generic": "Outros (Avanzado)",
+        "other": "Dispositivo de limiar"
       }
     }
   },
@@ -620,6 +621,7 @@
       "needs_review": "Necesita revisión",
       "overrun": "Corría máis tempo do habitual",
       "artifact_tip": "{n} anomalías detectadas (por exemplo, a porta aberta a metade do ciclo): ábrese para velos no gráfico",
+      "restart_gap_tip": "{n} fenda de reinicio de HA: o trazado de potencia ten un burato",
       "poor_fit_tip": "Historial de coincidencias incoherente: considera reconstruír este perfil",
       "fair_fit_tip": "Coherencia moderada da coincidencia: algúns ciclos asignados a este perfil teñen puntuacións de confianza máis baixas. Etiqueta máis ciclos ou volve gravar o perfil para mellorar a precisión.",
       "fair_fit": "calidade aceptable",
@@ -671,6 +673,9 @@
       "compare_profiles_tip": "Superpoña outros sobres de perfil no gráfico anterior para ver cal se adapta mellor a este ciclo.",
       "artifact_header": "{n} anomalías detectadas durante este ciclo",
       "artifact_footer": "Resaltado no gráfico anterior. Estes son artefactos transitorios (por exemplo, a porta aberta a metade do ciclo), non necesariamente problemas.",
+      "restart_gap_header": "{n} fenda de reinicio de HA durante este ciclo",
+      "restart_gap_item": "{dur} fenda",
+      "restart_gap_footer": "Resaltado no gráfico. Faltan datos de potencia para estes intervalos; a correspondencia usou só lecturas reais.",
       "profile_poor_health_detail": "Os ciclos asignados a este perfil teñen formas inconsistentes ou escasa confianza. Considera reconstruír o sobre ou revisar os ciclos etiquetados.",
       "trend_duration_longer": "Tendencia de duración máis longa ({pct}%/ciclo) - media recente {avg}",
       "trend_duration_shorter": "Tendencia de duración máis curta ({pct}%/ciclo) - media recente {avg}",
@@ -990,235 +995,312 @@
     },
     "setting": {
       "name": {
-        "label": "Nome do dispositivo"
+        "label": "Nome do dispositivo",
+        "doc": "O nome para mostrar aparece na lista de integracións HA e no rexistro do dispositivo."
       },
       "device_type": {
-        "label": "Tipo de dispositivo"
+        "label": "Tipo de dispositivo",
+        "doc": "Clase de electrodomésticos. Establece valores predeterminados de detección sensatas (limias, atraso de apagado, tratamento final) axustados para ese tipo de aparello; cambialo só se o dispositivo foi configurado orixinalmente como do tipo incorrecto."
       },
       "power_sensor": {
-        "label": "Sensor de potencia"
+        "label": "Sensor de potencia",
+        "doc": "A entidade sensora que informa da potencia activa en vatios deste dispositivo (por exemplo, sensor.washer_power). Todo o ciclo de detección baséase neste sinal."
       },
       "min_power": {
-        "label": "Potencia mínima"
+        "label": "Potencia mínima",
+        "doc": "Potencia mínima absoluta considerada activa. As lecturas por debaixo deste trátanse como 0 W (en espera), filtrando a carga fantasma dos enchufes intelixentes e os LED de espera."
       },
       "off_delay": {
-        "label": "Atraso de apagado"
+        "label": "Atraso de apagado",
+        "doc": "Tempo de agardar despois de que a luz cae antes de declarar o ciclo rematado. Se a enerxía se reanuda nesta ventá, o ciclo continúa sen problemas; isto fai pontes entre as fases de lavado. Os lavalouzas teñen longas fases de secado (apagados durante 20-60 min) polo que o atraso de apagado debe exceder para manter todo o lavado+seco como un ciclo."
       },
       "linked_device": {
-        "label": "Agrupar baixo dispositivo"
+        "label": "Agrupar baixo dispositivo",
+        "doc": "Opcionalmente, aniña este dispositivo WashData noutro dispositivo (por exemplo, o enchufe intelixente) no rexistro do dispositivo HA, que se mostra como \"Conectado mediante...\"."
       },
       "start_threshold_w": {
-        "label": "Limiar de inicio"
+        "label": "Limiar de inicio",
+        "doc": "A potencia debe superar este nivel para confirmar que se iniciou un ciclo. Axustalo demasiado baixo provoca falsos arranques desde a alimentación en espera; pérdense programas demasiado altos e de inicio lento (enchemento en frío). O motor de suxestións establece isto xusto por riba da potencia activa máis baixa observada da máquina."
       },
       "stop_threshold_w": {
-        "label": "Limiar de parada"
+        "label": "Limiar de parada",
+        "doc": "A enerxía debe caer por debaixo deste nivel antes de que comece a conta atrás do atraso de apagado. Establéceo por debaixo do Limiar de inicio: a diferenza entre eles é a banda de histérese que impide o parpadeo. Se configuran demasiado altos, as fases de baixa potencia (aclarado, antiarrugas) activan falsamente a secuencia final."
       },
       "min_off_gap": {
-        "label": "Intervalo mínimo de apagado"
+        "label": "Intervalo mínimo de apagado",
+        "doc": "Se a máquina se apaga durante menos deste tempo, a secuencia on/off/on trátase como un ciclo continuo. Evita que os programas de remollo (a máquina apágase durante varios minutos a medio lavado) se dividan en dous ciclos separados. Estableceo máis curto que a diferenza entre as túas cargas consecutivas se queres que se conteñan como ciclos separados. Os valores predeterminados do tipo de dispositivo protexen a pausa típica dentro do ciclo de cada dispositivo."
       },
       "start_duration_threshold": {
-        "label": "Duración de inicio"
+        "label": "Duración de inicio",
+        "doc": "A enerxía debe permanecer por encima do limiar de inicio durante este tempo para confirmar un inicio real, evitando que os conmutadores de activación/desactivación en fracción de segundo inicien un ciclo."
       },
       "start_energy_threshold": {
-        "label": "Enerxía de inicio"
+        "label": "Enerxía de inicio",
+        "doc": "Enerxía (potencia x tempo) que debe consumir o aparello antes de FUNCIONAR. Un pico breve de alta potencia ten unha enerxía moi baixa e é ignorado, evitando falsos arranques."
       },
       "completion_min_seconds": {
-        "label": "Duración mínima do ciclo"
+        "label": "Duración mínima do ciclo",
+        "doc": "Os ciclos máis curtos que este descartanse como ciclos pantasma (proba, abrindo a porta para engadir un calcetín)."
       },
       "running_dead_zone": {
-        "label": "Zona morta de execución"
+        "label": "Zona morta de execución",
+        "doc": "Despois de que se inicie un ciclo, ignóranse as caídas de enerxía nesta xanela. As lavadoras enchen de auga fría (caendo preto de 0 W antes de quentar) - sen esta protección, esa fase de enchedo parece un final de ciclo. Isto NON omite datos: o trazo de potencia total rexístrase desde T=0. O motor de suxestións mide o patrón de inicio real da túa máquina e mide este automaticamente."
       },
       "end_energy_threshold": {
-        "label": "Enerxía de fin"
+        "label": "Enerxía de fin",
+        "doc": "Durante a conta atrás do retardo de apagado, a enerxía acumulada (watts x tempo) compárase con este limiar. Se supera, a conta atrás restablece - mantendo as caídas antiengurras e as colas de secado do lavalouzas unidas ao ciclo en lugar de cortalas. Levántao se os ciclos rematan demasiado cedo durante o arrefriamento; báixao se a detección é lenta."
       },
       "end_repeat_count": {
-        "label": "Conta de repetición de fin"
+        "label": "Conta de repetición de fin",
+        "doc": "Número de lecturas consecutivas por debaixo do limiar de parada necesarias antes de que remate o ciclo. 1 está ben para a maioría dos enchufes. Aumenta a 2-3 se o teu enchufe intelixente informa ocasionalmente dunha mostra de falso cero a medio ciclo e os teus ciclos están rematando antes de tempo."
       },
       "sampling_interval": {
-        "label": "Intervalo de mostraxe"
+        "label": "Intervalo de mostraxe",
+        "doc": "Tempo esperado entre lecturas do sensor: utilízase para dimensionar a xanela de suavizado e comezar a desbotar correctamente. Cada actualización do sensor captúrase independentemente deste valor; só calibra os cálculos posteriores. O motor de suxestións mide a cadencia real do sensor dos ciclos pasados ​​e establécese automaticamente."
       },
       "smoothing_window": {
-        "label": "Ventá de suavizado"
+        "label": "Ventá de suavizado",
+        "doc": "Canto se suaviza o sinal de enerxía bruta. Baixo (2) é sensible pero ruidoso; alto (5) suaviza os picos pero engade retraso."
       },
       "abrupt_drop_watts": {
-        "label": "Caída abrupta"
+        "label": "Caída abrupta",
+        "doc": "Unha caída de enerxía maior que esta marca o ciclo como Interrumpido (cancelación manual) en lugar dun acabado natural."
       },
       "abrupt_drop_ratio": {
-        "label": "Proporción de caída abrupta"
+        "label": "Proporción de caída abrupta",
+        "doc": "Unha caída maior que esta fracción da potencia actual tamén se trata como brusca (0,6 = unha caída do 60 %). Complementa o limiar de vatios en todos os tamaños dos aparellos."
       },
       "profile_match_threshold": {
-        "label": "Limiar de coincidencia"
+        "label": "Limiar de coincidencia",
+        "doc": "A puntuación mínima de semellanza (0-1) esixida ao final do ciclo para aceptar a identificación do programa. Levántao para reducir as identificacións incorrectas; báixao se os programas da túa máquina non están sendo coincidentes. O valor predeterminado 0,4 é un punto de partida conservador."
       },
       "profile_unmatch_threshold": {
-        "label": "Limiar de non coincidencia"
+        "label": "Limiar de non coincidencia",
+        "doc": "Se un partido de medio ciclo en directo cae por debaixo desta puntuación, borrarase a identificación tentativa. Mantéñase un pouco por debaixo do Limiar de coincidencia para que unha pequena caída na semellanza non volva a pantalla a inigualable."
       },
       "profile_match_interval": {
-        "label": "Intervalo de coincidencia"
+        "label": "Intervalo de coincidencia",
+        "doc": "Con que frecuencia se intenta a coincidencia de perfil durante un ciclo de execución. O valor predeterminado de 300 s (5 minutos) equilibra a velocidade de detección e a CPU."
       },
       "profile_match_min_duration_ratio": {
-        "label": "Proporción de duración mínima"
+        "label": "Proporción de duración mínima",
+        "doc": "Duración mínima do ciclo en relación ao perfil. 0,9 significa que un ciclo debe ser polo menos o 90 % da duración do perfil para que coincida."
       },
       "profile_match_max_duration_ratio": {
-        "label": "Proporción de duración máxima"
+        "label": "Proporción de duración máxima",
+        "doc": "Duración máxima do ciclo en relación ao perfil. 1.3 significa que un ciclo debe ser inferior ao 130 % da duración do perfil para que coincida."
       },
       "profile_duration_tolerance": {
-        "label": "Tolerancia de duración do perfil"
+        "label": "Tolerancia de duración do perfil",
+        "doc": "A banda +/- arredor da duración media dun perfil utilizada durante a coincidencia. 0,25 significa que un perfil de 60 min coincide con ciclos de 45-75 min."
       },
       "duration_tolerance": {
-        "label": "Tolerancia de estimación"
+        "label": "Tolerancia de estimación",
+        "doc": "Tolerancia para as estimacións do tempo restante (retroalimentación de aprendizaxe, non coincidencia). Se a duración real está dentro de +/-X% da estimación, conta como unha boa coincidencia."
       },
       "auto_label_confidence": {
-        "label": "Confianza de etiquetaxe automática"
+        "label": "Confianza de etiquetaxe automática",
+        "doc": "Se a puntuación do partido ao final do ciclo é igual ou superior a esta, o programa etiquetarase automaticamente sen ningunha solicitude de confirmación. Aumentalo para esixir unha maior certeza antes da etiquetaxe automática; redúceo para automatizar máis. Funciona en conxunto con Learning Confidence debaixo dela."
       },
       "learning_confidence": {
-        "label": "Confianza de aprendizaxe"
+        "label": "Confianza de aprendizaxe",
+        "doc": "Se a puntuación da coincidencia cae entre esta e a Auto-Label Confidence, unha notificación de comentarios solicita que verifique o programa identificado. Por debaixo deste marcador o partido é demasiado incerto para aflorar. Debe manterse por debaixo da confianza da etiqueta automática."
       },
       "suppress_feedback_notifications": {
-        "label": "Suprimir notificacións de comentarios"
+        "label": "Suprimir notificacións de comentarios",
+        "doc": "Non envíe unha notificación persistente cando un ciclo rematado necesite revisión; os comentarios aínda aparecen na cola de revisión de Ciclos."
       },
       "watchdog_interval": {
-        "label": "Intervalo do vixilante"
+        "label": "Intervalo do vixilante",
+        "doc": "Con que frecuencia o vixilante en segundo plano busca sensores atascados e tempo de espera transcorrido. Por defecto 30 s."
       },
       "no_update_active_timeout": {
-        "label": "Tempo de espera sen actualización"
+        "label": "Tempo de espera sen actualización",
+        "doc": "Se non chegan actualizacións de enerxía durante tanto tempo mentres se está a executar, supoña que o enchufe quedou fóra de liña e a parada forzada para evitar un ciclo zombie. O valor predeterminado de 600 s permite o retraso da nube ou da malla."
       },
       "progress_reset_delay": {
-        "label": "Atraso de reinicio do progreso"
+        "label": "Atraso de reinicio do progreso",
+        "doc": "Despois de rematar, mantén o progreso ao 100 % durante este tempo para que o Completado estea visible nos paneis de control antes de restablecer a Inactividade."
       },
       "auto_maintenance": {
-        "label": "Mantemento automático (limpeza nocturna)"
+        "label": "Mantemento automático (limpeza nocturna)",
+        "doc": "Realiza a limpeza nocturna: reconstruír sobres de perfil, volver a calcular a saúde do ciclo, eliminar os rastros de depuración e conservar os ciclos máis recentes."
       },
       "expose_debug_entities": {
-        "label": "Expor entidades de depuración"
+        "label": "Expor entidades de depuración",
+        "doc": "Publicar entidades de HA de diagnóstico adicionais (confianza de coincidencia, ambigüidade, estados internos). Desactivado mantén limpa a lista de entidades para o seu uso normal."
       },
       "save_debug_traces": {
-        "label": "Gardar trazos de depuración"
+        "label": "Gardar trazos de depuración",
+        "doc": "Almacena o rastro de potencia completa e os datos de depuración coincidentes para cada ciclo. Útil para solucionar problemas, pero aumenta o tamaño de almacenamento."
       },
       "anti_wrinkle_enabled": {
-        "label": "Activar detección anti-engurras"
+        "label": "Activar detección anti-engurras",
+        "doc": "Recoñece os pulsos curtos de baixa potencia que emite unha secadora despois da fase de calor principal e manténos conectados ao ciclo rematado en lugar de lelos como ciclos novos."
       },
       "anti_wrinkle_max_power": {
-        "label": "Potencia máxima anti-engurras"
+        "label": "Potencia máxima anti-engurras",
+        "doc": "Un pulso superior a este poder trátase como un verdadeiro ciclo novo, non como unha caída antiengurras. Establécese xusto por riba da potencia do pulso de caída."
       },
       "anti_wrinkle_max_duration": {
-        "label": "Duración máxima"
+        "label": "Duración máxima",
+        "doc": "Os pulsos máis longos que isto trátanse como un ciclo real en lugar de unha caída anti-engurras."
       },
       "anti_wrinkle_exit_power": {
-        "label": "Limiar de potencia de saída"
+        "label": "Limiar de potencia de saída",
+        "doc": "A potencia debe caer por debaixo deste entre pulsos para que o modo antiengurras permaneza activo."
       },
       "delay_start_detect_enabled": {
-        "label": "Activar detección de inicio retardado"
+        "label": "Activar detección de inicio retardado",
+        "doc": "Detecta cando o aparello está acendido e agardando (inicio/espera atrasado) pero non comezou o seu ciclo, polo que o sorteo de espera non se confunde cun ciclo en marcha."
       },
       "delay_confirm_seconds": {
-        "label": "Segundos de confirmación"
+        "label": "Segundos de confirmación",
+        "doc": "A enerxía debe permanecer na banda de espera durante moito tempo antes de que o aparello sexa considerado como esperando para iniciarse en lugar de funcionar."
       },
       "delay_timeout_hours": {
-        "label": "Horas de tempo de espera"
+        "label": "Horas de tempo de espera",
+        "doc": "Deixa de agardar no modo de inicio diferido despois destas horas e volve ao inactivo, polo que unha máquina que non se encendeu pero nunca se iniciou non agarde para sempre."
       },
       "external_end_trigger_enabled": {
-        "label": "Activar disparador de fin externo"
+        "label": "Activar disparador de fin externo",
+        "doc": "Permite que un sensor binario externo sinalice o final dun ciclo, ademais da detección baseada en enerxía integrada."
       },
       "external_end_trigger": {
-        "label": "Entidade de disparador externo"
+        "label": "Entidade de disparador externo",
+        "doc": "Sensor binario cuxo cambio de estado marca o final do ciclo (por exemplo, un contacto \"acabado\" dun aparello ou unha integración complementaria)."
       },
       "external_end_trigger_inverted": {
-        "label": "Inverter disparador externo (disparar en APAGADO)"
+        "label": "Inverter disparador externo (disparar en APAGADO)",
+        "doc": "Trate que o sensor de disparo se apaga (en lugar de ON) como o sinal de fin de ciclo."
       },
       "door_sensor_entity": {
-        "label": "Entidade do sensor de porta"
+        "label": "Entidade do sensor de porta",
+        "doc": "Sensor binario de porta opcional. Úsase para detectar cando o aparello foi aberto/descargado despois dun ciclo."
       },
       "pause_cuts_power": {
-        "label": "A pausa tamén corta a alimentación (mediante interruptor)"
+        "label": "A pausa tamén corta a alimentación (mediante interruptor)",
+        "doc": "Cando un ciclo está en pausa, tamén desactiva a Entidade Switch que aparece a continuación. Só para electrodomésticos cuxo enchufe se pode cortar con seguridade a medio ciclo."
       },
       "switch_entity": {
-        "label": "Entidade de interruptor"
+        "label": "Entidade de interruptor",
+        "doc": "Interruptor opcional desactivado na pausa e activado de novo ao retomar, usado xunto con \"A pausa tamén corta a enerxía\"."
       },
       "notify_unload_delay_minutes": {
-        "label": "Atraso do recordatorio de descarga"
+        "label": "Atraso do recordatorio de descarga",
+        "doc": "Minutos despois de que remate un ciclo antes de enviar o recordatorio de \"descargar a máquina\" aínda en espera. Establece 0 para desactivar o recordatorio."
       },
       "pump_stuck_duration": {
-        "label": "Duración de bomba atascada"
+        "label": "Duración de bomba atascada",
+        "doc": "Segundos, unha bomba pode funcionar continuamente antes de que sexa marcada como posiblemente atascada (dispara o evento de bomba atascada)."
       },
       "notify_start_services": {
-        "label": "Servizos de inicio"
+        "label": "Servizos de inicio",
+        "doc": "notificar.* servizos chamados cando comeza un ciclo. Engade un por destino (teléfono, panel de control, etc.); deixar baleiro sen notificación de inicio."
       },
       "notify_finish_services": {
-        "label": "Servizos de fin"
+        "label": "Servizos de fin",
+        "doc": "notificar.* servizos chamados cando remata un ciclo. Engade un por obxectivo; deixar baleiro sen notificación de finalización."
       },
       "notify_live_services": {
-        "label": "Servizos de progreso en directo"
+        "label": "Servizos de progreso en directo",
+        "doc": "notificar.* os servizos solicitados para actualizar o progreso en directo mentres se executa un ciclo. Deixa o campo baleiro para desactivar as notificacións de progreso en directo."
       },
       "notify_people": {
-        "label": "Persoas (para só cando estea en casa)"
+        "label": "Persoas (para só cando estea en casa)",
+        "doc": "persoa.* entidades utilizadas por \"Notificar só cando está na casa\" para decidir se hai alguén na casa."
       },
       "notify_only_when_home": {
-        "label": "Notificar só cando estea en casa"
+        "label": "Notificar só cando estea en casa",
+        "doc": "Envía notificacións só cando polo menos unha das persoas vinculadas (arriba) estea na casa."
       },
       "notify_fire_events": {
-        "label": "Lanzar eventos HA para notificacións"
+        "label": "Lanzar eventos HA para notificacións",
+        "doc": "Tamén activa os eventos ha_washdata_* ao inicio/final do ciclo para que poidas crear as túas propias automatizacións."
       },
       "notify_before_end_minutes": {
-        "label": "Alerta previa ao fin"
+        "label": "Alerta previa ao fin",
+        "doc": "Envía unha alerta de Case feito cando o tempo restante estimado descenda por debaixo deste. 0 desactívao."
       },
       "notify_live_interval_seconds": {
-        "label": "Intervalo de actualización en directo"
+        "label": "Intervalo de actualización en directo",
+        "doc": "Con que frecuencia se actualizan as notificacións de progreso en directo mentres se executa un ciclo."
       },
       "notify_live_overrun_percent": {
-        "label": "% de sobrepasamento en directo antes de alerta"
+        "label": "% de sobrepasamento en directo antes de alerta",
+        "doc": "Se un ciclo supera a súa estimación en máis que esta porcentaxe, envíe unha alerta de desbordamento."
       },
       "notify_live_chronometer": {
-        "label": "Usar cronómetro en directo"
+        "label": "Usar cronómetro en directo",
+        "doc": "Mostra un temporizador de conta atrás de actualización en directo na notificación (en plataformas que o admitan) en lugar dunha estimación estática."
       },
       "notify_timeout_seconds": {
-        "label": "Descartar automaticamente despois"
+        "label": "Descartar automaticamente despois",
+        "doc": "Rexeita automaticamente a notificación despois destes segundos (en plataformas que a admitan). 0 mantena ata que se descarte manualmente."
       },
       "notify_title": {
-        "label": "Título da notificación"
+        "label": "Título da notificación",
+        "doc": "Título da notificación. Variables de modelo: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_icon": {
-        "label": "Icona da notificación"
+        "label": "Icona da notificación",
+        "doc": "Icona mdi opcional para a notificación (por exemplo, mdi:washing-machine). Deixa en branco para o predeterminado da plataforma."
       },
       "notify_start_message": {
-        "label": "Mensaxe de inicio"
+        "label": "Mensaxe de inicio",
+        "doc": "Corpo enviado cando comeza un ciclo. Variables de modelo: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_finish_message": {
-        "label": "Mensaxe de fin"
+        "label": "Mensaxe de fin",
+        "doc": "Corpo enviado cando remata un ciclo. Variables de modelo: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_pre_complete_message": {
-        "label": "Mensaxe de case completado"
+        "label": "Mensaxe de case completado",
+        "doc": "Corpo da alerta previa / case feito. Variables de modelo: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_reminder_message": {
-        "label": "Mensaxe de recordatorio"
+        "label": "Mensaxe de recordatorio",
+        "doc": "Corpo do recordatorio de descarga que aínda está en espera. Blank usa o predeterminado integrado. Variables de modelo: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
       },
       "notify_channel": {
-        "label": "Canal de Android (inicio/en directo)"
+        "label": "Canal de Android (inicio/en directo)",
+        "doc": "Nome da canle de notificación de Android para mensaxes de inicio/en directo (controla o son e a prioridade por canle na aplicación móbil). Blank usa a aplicación complementaria predeterminada."
       },
       "notify_finish_channel": {
-        "label": "Canal de Android (fin)"
+        "label": "Canal de Android (fin)",
+        "doc": "Nome da canle de notificación de Android para a mensaxe de finalización. Blank reutiliza a canle de inicio/en directo."
       },
       "energy_price_entity": {
-        "label": "Entidade de prezo de enerxía"
+        "label": "Entidade de prezo de enerxía",
+        "doc": "Sensor co prezo actual da electricidade por kWh (por exemplo, unha tarifa dinámica). Ten prioridade sobre o prezo estático que aparece a continuación. Cada ciclo conxela o prezo en vigor cando rematou."
       },
       "energy_price_static": {
-        "label": "Prezo estático de enerxía (por kWh)"
+        "label": "Prezo estático de enerxía (por kWh)",
+        "doc": "Prezo fixo por kWh usado para as cifras de custo cando non se establece ningunha entidade de prezos en directo arriba."
       },
       "notify_cycle_timers": {
-        "label": "Temporizadores de ciclo"
+        "label": "Temporizadores de ciclo",
+        "doc": "Notificacións en minutos específicos dun ciclo (por exemplo, para engadir suavizante). A mensaxe admite {device}, {program}, {minutes}. Activa a pausa automática para facer unha pausa nese momento e recibir unha notificación interactiva cun botón Reanudar; retomar a través do panel, o servizo de pausa/retomar ou a acción de notificación."
       },
       "enable_ml_models": {
-        "label": "Aplicar modelos intelixentes durante un ciclo"
+        "label": "Aplicar modelos intelixentes durante un ciclo",
+        "doc": "Mentres se executa un ciclo, deixe que os modelos perfeccionen os resultados en directo: unha estimación do tempo restante e da enerxía/custo máis constante, e unha protección contra paradas prematuras na detección de final (só pode atrasar un final, nunca remata antes e está limitado). Usa os teus modelos afinados cando estes dispoñibles, se non, os incorporados. Desactivado = só a lóxica clásica baseada en enerxía (aínda fiable)."
       },
       "ml_training_enabled": {
-        "label": "Aprender deste aparello"
+        "label": "Aprender deste aparello",
+        "doc": "Estude periodicamente os ciclos revisados ​​durante a noite e axuste os modelos a esta máquina específica. Un cambio só se mantén cando realmente obtén unha mellor puntuación nos ciclos de duración, polo que isto só pode axudar ou permanecer igual, nunca retroceder."
       },
       "ml_training_hour": {
-        "label": "Aprender á hora"
+        "label": "Aprender á hora",
+        "doc": "Hora local do día (0-23) para facer a posta a punto durante a noite. Escolle unha hora tranquila como 2 (02:00)."
       },
       "ml_training_min_cycles": {
-        "label": "Ciclos necesarios primeiro"
+        "label": "Ciclos necesarios primeiro",
+        "doc": "Agarda ata que polo menos se rexistren tantos ciclos antes de axustar con precisión, polo que hai suficiente para aprender."
       },
       "ml_training_interval_days": {
-        "label": "Comprobar como máximo cada"
+        "label": "Comprobar como máximo cada",
+        "doc": "Volve comprobar se hai melloras como máximo unha vez cada tantos días."
       }
     }
   }

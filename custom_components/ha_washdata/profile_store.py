@@ -21,6 +21,8 @@ from homeassistant.util import dt as dt_util
 from .const import (
     GROUP_MIN_COHESION,
     MATCH_AMBIGUITY_MARGIN,
+    SMART_TERM_LANDSCAPE_RATIO,
+    SMART_TERM_LANDSCAPE_MIN_SHAPE,
     STORAGE_KEY,
     STORAGE_VERSION,
     DEFAULT_MAX_PAST_CYCLES,
@@ -276,6 +278,7 @@ class MatchResult:
     debug_details: dict[str, Any] = dataclasses.field(default_factory=_empty_debug_details)
     is_confident_mismatch: bool = False
     mismatch_reason: str | None = None
+    is_prefix_ambiguous: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary with JSON-serializable types, excluding heavy arrays."""
@@ -3177,7 +3180,22 @@ class ProfileStore:
             peak = max(float(np.max(hi)), 1.0)
             active_thr = max(5.0, 0.05 * peak)   # profile expects real power here
             pause_thr = max(2.0, 0.03 * peak)    # observed effectively off
-            margin = max(10.0, 0.08 * peak)      # band slack to ignore edge noise
+            margin = max(10.0, 0.12 * peak)      # band slack to ignore edge noise
+
+            # Pre-check: if the cycle's linear-resampled alignment is too poor
+            # (e.g. duration or phase structure doesn't match the profile), the
+            # envelope comparison produces unreliable artifacts.  Compute tight
+            # conformance (no margin) over the active region; bail out when more
+            # than 45 % of expected-active samples are outside the raw band.
+            active_mask = avg_i > active_thr
+            n_active = int(np.sum(active_mask))
+            if n_active > 10:
+                outside_tight = int(np.sum(
+                    (p_obs[active_mask] < lo_i[active_mask]) |
+                    (p_obs[active_mask] > hi_i[active_mask])
+                ))
+                if outside_tight / n_active > 0.45:
+                    return []
 
             states: list[str] = []
             for i in range(len(p_obs)):
@@ -3550,6 +3568,11 @@ class ProfileStore:
             # the threshold being effectively too strict for DTW-boosted groups.
             if member_fit is not None and best["score"] > 0 and member_fit < 0.55 * best["score"]:
                 is_ambiguous = True
+            # Overrun guard: if the cycle has already outlasted the chosen member's
+            # expected duration we may be running the longer group member — downgrade
+            # to ambiguous so Smart Termination falls back to the power timeout.
+            if best_duration and current_duration > best_duration * 1.05:
+                is_ambiguous = True
             # Relabel the winning candidate for the ranking / diagnostics.
             candidates = [{**best, "name": best_name, "profile_duration": best_duration}, *candidates[1:]]
 
@@ -3559,6 +3582,19 @@ class ProfileStore:
             # show user-assigned phase names even when confidence is moderate.
             matched_phase = self.check_phase_match(best_name, current_duration)
 
+        # Detect "prefix ambiguity": a non-winning candidate whose duration is
+        # significantly longer than the matched profile AND whose shape matched
+        # well before Stage-4 penalised its duration. When this is true the
+        # current trace may be a prefix of that longer program, not a complete
+        # short cycle. Signal cycle_detector to block Smart Termination; the
+        # power-based fallback timeout will decide instead.
+        best_dur = best_duration or 0.0
+        is_prefix_ambiguous = best_dur > 0 and any(
+            float(c.get("profile_duration") or 0) > best_dur * SMART_TERM_LANDSCAPE_RATIO
+            and float(c.get("shape_score", c.get("score", 0))) >= SMART_TERM_LANDSCAPE_MIN_SHAPE
+            for c in candidates[1:]
+        )
+
         return MatchResult(
             best_name,
             best["score"],
@@ -3567,7 +3603,7 @@ class ProfileStore:
             candidates[:5], # Ranking
             is_ambiguous,
             margin,
-            # Extra fields...
+            is_prefix_ambiguous=is_prefix_ambiguous,
         )
 
     def match_profile(

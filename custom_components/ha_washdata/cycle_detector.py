@@ -256,6 +256,7 @@ class CycleDetector:
         self._last_match_confidence: float = 0.0
         self._end_spike_seen: bool = False
         self._match_ambiguous: bool = False  # last live match was ambiguous (gates predictive end)
+        self._match_prefix_ambiguous: bool = False  # longer candidate with good shape exists (prefix guard)
 
         # Anti-wrinkle tracking (dryers only)
         self._anti_wrinkle_candidate_start: datetime | None = None
@@ -480,6 +481,7 @@ class CycleDetector:
             # Store confidence + ambiguity for Smart Termination checks
             self._last_match_confidence = confidence or 0.0
             self._match_ambiguous = ambiguous
+            self._match_prefix_ambiguous = bool(result_seq[6]) if len(result_seq) >= 7 else False
         else:
             # Assume MatchResult object or similar (future proofing)
             # But for now wrapper returns tuple
@@ -489,6 +491,7 @@ class CycleDetector:
             # Confident non-match - revert to detecting if previously matched
             self._matched_profile = None
             self._match_ambiguous = False
+            self._match_prefix_ambiguous = False
 
         elif match_name:
             # If sanitization rejected the expected_duration, treat the match
@@ -1088,15 +1091,24 @@ class CycleDetector:
                         getattr(self, "_last_match_confidence", 0.0) >= 0.4
                     )
 
-                    # Gate the predictive end on match certainty: when the live
-                    # match is ambiguous (top-1 vs top-2 within the ambiguity
-                    # margin) the chosen profile's expected duration is
-                    # unreliable, so we must NOT smart-terminate on it - fall
-                    # through to the power-based fallback timeout instead.
+                    # Gate the predictive end on match certainty.
+                    # _match_ambiguous: top-1 vs top-2 score gap is too small to
+                    # trust the matched profile's expected duration — fall through
+                    # to the power-based fallback timeout instead.
+                    # _match_prefix_ambiguous: a longer candidate with a similar
+                    # shape score exists in the pool. The current trace may be a
+                    # prefix of that longer program (e.g. Quick 46 min matched
+                    # while the machine is actually running Normal 88 min and
+                    # happens to be in a mid-cycle soak dip at the 46-min mark).
+                    # Blocking Smart Termination here means a true Quick cycle
+                    # waits for the fallback timeout instead of getting an early
+                    # close — an acceptable trade-off against the alternative of
+                    # splitting a Normal wash into two separate cycle records.
                     if (
                         current_duration >= (self._expected_duration * smart_ratio)
                         and is_confident_match
                         and not self._match_ambiguous
+                        and not self._match_prefix_ambiguous
                     ):
                         # Dynamic confirmation window
                         if self._config.device_type == "dishwasher":
@@ -1685,6 +1697,7 @@ class CycleDetector:
             ),
             "end_spike_seen": self._end_spike_seen,
             "match_ambiguous": self._match_ambiguous,
+            "match_prefix_ambiguous": self._match_prefix_ambiguous,
         }
 
     def get_elapsed_seconds(self) -> float:
@@ -1735,6 +1748,7 @@ class CycleDetector:
             self._expected_duration = sanitized_expected
             self._end_spike_seen = snapshot.get("end_spike_seen", False)
             self._match_ambiguous = snapshot.get("match_ambiguous", False)
+            self._match_prefix_ambiguous = snapshot.get("match_prefix_ambiguous", False)
 
             # Restore state enter time and recompute time_in_state from it
             enter_time = snapshot.get("state_enter_time")
