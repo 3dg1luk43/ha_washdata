@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Remove deprecated HA keys from all non-English translation files.
 
-Syncs every translation file's non-panel sections to the structure defined in
-strings.json (the canonical HA translation source). Keys present in a language
-file but absent from strings.json are removed. Keys present in strings.json
-but absent from a language file are left missing (the translator adds them).
+Syncs every translation file to the structure defined in strings.json (the
+canonical HA translation source). Keys present in a language file but absent
+from strings.json are removed. Keys present in strings.json but absent from a
+language file are left missing (the translator adds them).
 
-The panel.* section in each file is preserved unchanged — it is maintained
-separately via the translator and build_panel_translations.py.
+Panel translations live in translations/panel/{lang}.json and are not touched
+by this script. build_panel_translations.py is called at the end to rebuild
+panel-translations.json.
 
 Usage:
     python3 devtools/sync_translations.py
@@ -66,22 +67,15 @@ def main() -> None:
             print(f"  WARNING: skipping {lang_file.name}: {exc}", file=sys.stderr)
             continue
 
-        panel = data.pop("panel", None)
-
         synced, removed = _sync(canonical, data)
         if removed:
             total_removed += removed
             modified += 1
-            if panel is not None:
-                synced["panel"] = panel
             lang_file.write_text(
                 json.dumps(synced, indent=2, ensure_ascii=False) + "\n",
                 encoding="utf-8",
             )
             print(f"  {lang_file.name}: removed {removed} deprecated key(s)")
-        else:
-            if panel is not None:
-                data["panel"] = panel
 
     print(f"\nDone: {modified} files updated, {total_removed} deprecated keys removed.")
     print("\nRebuilding panel-translations.json...")

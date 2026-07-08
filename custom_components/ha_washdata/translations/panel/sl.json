@@ -1,0 +1,916 @@
+{
+  "hdr": {
+    "toggle_sidebar": "Preklop stranske vrstice domačega pomočnika",
+    "logs": "Dnevniki",
+    "access_control": "Nadzor dostopa",
+    "automation_delete": "Izbriši to avtomatizacijo",
+    "automation_needs_review": "Ta cikel zahteva pregled",
+    "automation_open": "Odpri v urejevalniku avtomatizacij",
+    "automation_review_this_cycle": "Preglej ta cikel",
+    "automations": "Avtomatizacije",
+    "clear_debug": "Počisti podatke za odpravljanje napak",
+    "diagnostics_pref": "Diagnostika",
+    "display": "Prikaz",
+    "export_import": "Izvoz / Uvoz",
+    "live_power": "Trenutna moč",
+    "logs_diagnostics": "Diagnostika",
+    "maintenance": "Vzdrževalna dejanja",
+    "manual_recording": "Ročno snemanje",
+    "ml_learned": "Kar se je WashData naučil",
+    "ml_matching_tuning": "Natančno prilagajanje prepoznavanja programov",
+    "ml_settings_card": "Nastavitve",
+    "ml_smart_learning": "Pametno učenje",
+    "my_preferences": "Moje nastavitve",
+    "no_automations": "Nobena avtomatizacija še ne sklicuje na to napravo.",
+    "panel_settings": "Nastavitve plošče",
+    "phase_catalog": "Katalog faz",
+    "process_history": "Zgodovina procesov",
+    "status": "Stanje",
+    "status_graph": "Graf stanja",
+    "storage_stats": "Statistike shrambe",
+    "tools_and_data": "Orodja in podatki",
+    "wipe_history": "Izbriši zgodovino"
+  },
+  "badge": {
+    "golden_cycle": "Posneti referenčni cikel",
+    "reviewed": "Pregledano",
+    "feedback_requested": "Zahtevane povratne informacije",
+    "needs_review": "Potrebuje pregled",
+    "overrun": "Trajalo dlje kot običajno",
+    "artifact_tip": "{n} zaznanih nepravilnosti (npr. odprta vrata sredi cikla) — odprite, da jih vidite na grafu",
+    "restart_gap_tip": "{n} vrzel ponovnega zagona HA: sled moči ima luknjo",
+    "poor_fit_tip": "Nedosledna zgodovina ujemanj — razmislite o ponovni izdelavi tega profila",
+    "fair_fit_tip": "Zmerna doslednost ujemanja — nekateri cikli, dodeljeni temu profilu, imajo nižje ocene zaupanja. Označite več ciklov ali znova posnemite profil, da izboljšate natančnost.",
+    "auto": "(samodejno zaznano)",
+    "built_in_tag": "vgrajeno",
+    "declining": "↘ upada",
+    "fair_fit": "sprejemljiva kakovost",
+    "improving": "↗ se izboljšuje",
+    "manual": "(ročno izbrano)",
+    "poor_fit": "slaba kakovost",
+    "steady": "→ stabilno",
+    "using_defaults": "Uporablja privzete nastavitve",
+    "using_tuned": "Uporablja nastavljene uteži"
+  },
+  "btn": {
+    "add_timer": "+ Dodaj časovnik",
+    "remove_timer": "Odstrani časovnik",
+    "add_device_tip": "Dodajte drugo napravo WashData",
+    "delete_group_tip": "Izbriši samo to skupino — profili članov se ohranijo",
+    "run_analysis_tip": "Zdaj analizirajte svoje posnete cikle in osvežite predloge za nastavitev",
+    "reset_ml_models_tip": "Zavrzite natančno nastavljene modele in se vrnite k vgrajenim. WashData se jih lahko pozneje znova nauči.",
+    "add_device": "+ Dodaj napravo",
+    "add_phase": "+ Dodaj fazo",
+    "apply_all": "Uporabi vse",
+    "apply_label": "Uporabi oznako",
+    "apply_split": "Uporabi razdelitev",
+    "apply_trim": "Uporabi obrezovanje",
+    "auto_detect_split": "Samodejno zaznaj",
+    "auto_label_cycles": "Samodejno označi cikle",
+    "cancel": "Prekliči",
+    "clear_debug": "Počisti podatke za odpravljanje napak",
+    "clear_splits": "Počisti",
+    "close": "Zapri",
+    "compare": "Primerjaj",
+    "confirm": "Potrdi",
+    "convert_to_automation": "Pretvori v avtomatizacijo",
+    "correct": "Popravi…",
+    "create": "Ustvari",
+    "create_profile": "+ Ustvari profil",
+    "delete": "Izbriši",
+    "delete_group": "Izbriši skupino",
+    "delete_profile": "Izbriši profil",
+    "discard": "Zavrzi",
+    "dismiss": "Zapri",
+    "done": "Končano",
+    "edit": "Uredi",
+    "export": "Izvozi",
+    "export_json": "Izvozi v JSON",
+    "force_stop": "Prisilna ustavitev",
+    "from_template": "Iz predloge ▾",
+    "ignore": "Prezri",
+    "import_json": "Uvozi iz JSON",
+    "import_overwrite": "Uvozi (prepiše podatke)",
+    "inspect": "Preglej",
+    "label": "Označi",
+    "manage": "Upravljaj",
+    "merge": "Združi",
+    "new_automation": "＋ Nova avtomatizacija",
+    "new_group": "+ Nova skupina",
+    "new_phase": "+ Nova faza",
+    "new_profile": "+ Nov profil",
+    "on_cycle_finished": "Ob koncu cikla",
+    "on_cycle_started": "Ob začetku cikla",
+    "pause_cycle": "Premor",
+    "process": "Obdelaj",
+    "process_history": "Obdelaj zdaj",
+    "process_recording": "Shrani posnetek",
+    "rebuild": "Obnovi ovojnice",
+    "rebuild_envelope": "Obnovi ovojnico",
+    "rec_stop": "Ustavi",
+    "record": "Začni snemanje",
+    "refresh": "Osveži",
+    "remove": "Odstrani",
+    "reset": "Ponastavi",
+    "reset_to_builtin": "Ponastavi na vgrajene modele",
+    "reset_to_defaults": "Ponastavi na privzete vrednosti",
+    "resume_cycle": "Nadaljuj cikel",
+    "review": "Oceni",
+    "run_analysis": "🔍 Zaženi analizo predlogov",
+    "run_auto_label": "Zaženi samodejno označevanje",
+    "save": "Shrani",
+    "save_access_control": "Shrani nadzor dostopa",
+    "save_group": "Shrani skupino",
+    "save_panel_settings": "Shrani nastavitve plošče",
+    "save_phases": "Shrani faze",
+    "save_preferences": "Shrani nastavitve",
+    "save_review": "Shrani pregled",
+    "save_settings": "Shrani nastavitve",
+    "select": "Izberi",
+    "show_only": "Prikaži samo",
+    "split": "Razdeli",
+    "submit_correction": "Pošlji popravek",
+    "train_now": "Usposabljaj zdaj",
+    "trim": "Obreži",
+    "trim_split": "Obreži / Razdeli",
+    "use": "Uporabi",
+    "wipe_all": "Izbriši vse podatke"
+  },
+  "lbl": {
+    "timer_min": "min",
+    "timer_msg_placeholder": "Sporočilo (izbirno, {device}/{program}/{minutes})",
+    "timer_auto_pause": "Samodejna pavza",
+    "actions": "Dejanja",
+    "activity": "Aktivnost",
+    "administrators": "Skrbniki",
+    "auto_fine_tune_off": "samodejno natančno prilagajanje izključeno",
+    "clock_time": "Čas",
+    "compare_profiles": "Primerjaj s profili",
+    "confidence": "Zaupanje",
+    "confidence_threshold": "Prag zaupanja",
+    "correct_duration": "Popravi trajanje (min, izbirno)",
+    "correct_profile": "Popravi profil",
+    "cost": "Stroški",
+    "create_new_profile": "+ Ustvari nov profil…",
+    "cycle_date_display": "Prikaz datuma cikla",
+    "cycle_health": "Kakovost cikla",
+    "cycles_count": "Cikli",
+    "date": "Datum",
+    "debug_traces": "Sledenje za odpravljanje napak",
+    "default": "Privzeto",
+    "default_access_level": "Privzeta raven za uporabnike, ki niso navedeni spodaj",
+    "default_other": "Privzeto (druge naprave)",
+    "default_tab": "Privzeti zavihek pri odpiranju plošče",
+    "description": "Opis",
+    "duration": "Trajanje",
+    "emphasis": "Poudarek",
+    "enable_access_control": "Omogoči nadzor dostopa za vsakega uporabnika",
+    "energy": "Energija",
+    "expected_duration": "Pričakovano trajanje (min)",
+    "file_kb": "Datoteka (kB)",
+    "gap_s": "Presledek (s)",
+    "head_trim": "Obrezovanje začetka (s)",
+    "health": "Kakovost",
+    "hide_tabs": "Skrij zavihke za ne-skrbnike",
+    "in_use": "V uporabi",
+    "json_data": "Podatki JSON",
+    "label": "Ujemajoči program",
+    "last_checked": "Zadnja preveritev:",
+    "load_from_file": "Naloži iz datoteke",
+    "manual_duration": "Ročno trajanje (min, izbirno)",
+    "mode_existing_profile": "Dodaj k obstoječemu profilu",
+    "mode_new_profile": "Ustvari nov profil",
+    "new_profile_name": "Novo ime profila",
+    "panel_default_tab": "Privzeti zavihek",
+    "phase_name": "Ime",
+    "power": "Moč",
+    "profile": "Profil",
+    "profile_name": "Ime profila",
+    "progress": "Napredek",
+    "read_only": "Samo za branje",
+    "ref_cycle": "Referenčni cikel (izbirno)",
+    "refresh_interval": "Interval osveževanja (s)",
+    "remaining": "Preostalo",
+    "remove_label": "- Odstrani oznako -",
+    "rename_profile": "Preimenuj profil",
+    "resulting_profile": "Rezultirajoči profil",
+    "save_mode": "Način shranjevanja",
+    "seconds_from_start": "Sekunde od začetka",
+    "select_profile": "Izberi profil",
+    "show_debug": "Prikaži kartico za odpravljanje napak na strani stanja (zaupanje, dvoumnost, najboljši kandidati)",
+    "show_expected": "Prikaži pričakovano krivuljo (ujemajoči profil, oranžna)",
+    "show_raw": "Prikaži surove odčitke senzorja (neizglajeni, siva)",
+    "status": "Stanje",
+    "tail_trim": "Obrezovanje konca (s)",
+    "ungrouped": "Brez skupine",
+    "unlabelled": "Brez oznake",
+    "unlabelled_paren": "(brez oznake)",
+    "expected": "Pričakovano",
+    "raw_socket": "Surova vtičnica",
+    "artifact_interruption": "Prekinitev",
+    "artifact_low_power": "Nizka moč",
+    "artifact_high_power": "Visoka moč",
+    "artifact_anomaly": "Nepravilnost",
+    "auto_fine_tune_on": "samodejno fino nastavljanje vklopljeno (okrog {hour}:00)",
+    "cohesion_good": "kohezija {pct}%",
+    "cohesion_low": "⚠ nizka kohezija {pct}%",
+    "group_name": "Ime skupine",
+    "members": "Člani",
+    "models_fine_tuned": "({count} modelov prilagojenih)",
+    "panel_language": "Jezik plošče"
+  },
+  "modal": {
+    "merge_cycles": "Spoji {n} ciklov",
+    "auto_label": "Samodejno označevanje ciklov",
+    "correct_feedback": "Popravi povratne informacije",
+    "create_profile": "Ustvari profil",
+    "cycle": "Cikel",
+    "edit_phase": "Uredi fazo",
+    "import_config": "Uvozi konfiguracijo",
+    "label_cycle": "Označi cikel",
+    "new_phase": "Nova faza",
+    "process_recording": "Obdelaj posnetek",
+    "edit_group": "Uredi skupino profilov",
+    "new_group": "Nova skupina profilov",
+    "process_history_title": "Obdelaj zgodovino",
+    "process_history_msg": "Znova zaženite ujemanje, osvežite predloge, naučite ML (če je omogočen) in znova izračunajte zdravje ciklov za vse shranjene cikle. To lahko traja nekaj časa.",
+    "process_history_ok": "Obdelaj"
+  },
+  "msg": {
+    "near_duplicate_cluster": "zaznana skoraj podvojena gruča profilov. Združevanje omogoča ujemanje, ki zanesljivo izbira med podobnimi programi (npr. isti program pri različni temperaturi/ožemanju).",
+    "coverage_gap": "nedavni cikli nimajo ustreznega profila ({pct} % od zadnjih 30).",
+    "consider_new_profile": "Razmislite o ustvarjanju novega profila.",
+    "group_not_cohesive": "Ti profili si niso dovolj podobni, da bi jih lahko zanesljivo združevali, zato jih ujemanje obravnava posamično, dokler ne odstranite odstopanja ali razdelite skupine.",
+    "group_modal_help": "Skupinske programe enake oblike, ki se razlikujejo po temperaturi/ožemanju (trajanje se lahko razlikuje). Ujemanje oceni skupino kot enega kandidata, nato pa izbere najbolj primernega člana. Izberite vsaj 2; prekrivanje kaže, kako si sta podobna.",
+    "showing_suggestions": "Prikaz nastavitve {count} s predlogi.",
+    "show_all_settings": "Pokaži vse nastavitve",
+    "tuning_suggestions_available": "{count} predlog za nastavitev je na voljo iz opazovanih ciklov. Pojavijo se poleg ustreznih polj.",
+    "legacy_actions_title": "{count} podedovano dejanje po meri se še vedno izvaja",
+    "old_actions_warning": "Konfigurirano s starim urejevalnikom dejanj (zdaj odstranjen). Še vedno se sprožijo ob dogodkih cikla, vendar jih tukaj ni več mogoče urejati. Pretvorite jih v običajno avtomatizacijo ali jih odstranite.",
+    "no_settings_match": "Nobena nastavitev se ne ujema z \"{q}\"",
+    "clear_debug_hint": "Odstranite shranjene podatke za odpravljanje napak, da sprostite prostor.",
+    "wipe_history_warning": "Trajno izbrišite vse cikle in profile. Ni mogoče razveljaviti.",
+    "export_description": "Izvozite vse profile in cikle v JSON ali obnovite iz prejšnjega izvoza.",
+    "log_buffer_hint": "Najprej najnovejše · shrani zadnjih 500 zapisov ha_washdata od ponovnega zagona · povlecite spodnji rob, da spremenite velikost.",
+    "review_profile_tip": "Program, kot je ta cikel označen. Če je bil samodejno zaznan program napačen, ga popravite tukaj — označevanje uči ujemanja za prihodnje cikle.",
+    "review_quality_tip": "Kako čist je ta cikel. Dobro = učbeniški primer tega programa; Slabo = zaznano, vendar hrupno ali netipično; Neuporabno = napačno zaznano (združeno, okrnjeno ali lažno). Poganja rezultat zdravja in kateri cikli so dovoljeni za usposabljanje modela.",
+    "review_recorded_tip": "Označite to kot ročno izbran referenčni cikel za svoj program — enaka vloga kot ročno posnet cikel. Referenčni cikli so vedno shranjeni, zasejejo ujemajočo se predlogo in se nikoli ne izbrišejo s čiščenjem. (To je zlata/posneta zastava; obe sta enaki.)",
+    "review_tags_tip": "Neobvezne zastavice, ki opisujejo, kaj je šlo narobe s tem ciklom, tako da lahko to pojasnita usposabljanje in čiščenje.",
+    "review_notes_tip": "Opombe s prostim besedilom za lastno referenco. Ne uporablja se pri ujemanju ali usposabljanju.",
+    "review_confirm_help": "Preverite, ali je bil ta cikel pravilno zaznan. Vaši pregledi usposabljajo model na vašem stroju — več ciklov kot potrdite, boljše je ujemanje in točkovanje zdravja. Dovolj je hitro Dobro/Slabo.",
+    "review_notes_placeholder": "Opombe (neobvezno)",
+    "compare_profiles_tip": "Prekrijte druge ovojnice profila na zgornji tabeli, da vidite, katera najbolj ustreza temu ciklu.",
+    "artifact_header": "{n} nepravilnosti, odkritih v tem ciklu",
+    "artifact_footer": "Označeno na zgornjem grafu. To so prehodni artefakti (npr. vrata so se odprla sredi cikla), ne pa nujno težave.",
+    "restart_gap_header": "{n} vrzel ponovnega zagona HA med tem ciklom",
+    "restart_gap_item": "{dur} vrzel",
+    "restart_gap_footer": "Označeno na grafu. Podatki o moči manjkajo za te intervale; ujemanje je uporabilo samo dejanske meritve.",
+    "profile_poor_health_detail": "Cikli, dodeljeni temu profilu, imajo nedosledne oblike ali nizko stopnjo zaupanja. Razmislite o ponovni izdelavi ovojnice ali pregledu označenih ciklov.",
+    "trend_duration_longer": "Trajanje se povečuje ({pct}%/cikel) — zadnje povprečje {avg}",
+    "trend_duration_shorter": "Trajanje se skrajšuje ({pct}%/cikel) — zadnje povprečje {avg}",
+    "trend_energy_up": "Energija narašča ({pct}%/cikel) — zadnje povprečje {avg}",
+    "trend_energy_down": "Energija pada ({pct}%/cikel)",
+    "performance_trend": "Trend uspešnosti ({n} ciklov)",
+    "maintenance_advisory": "Podaljšanje trajanja/energije lahko pomeni, da je potrebno vzdrževanje naprave (npr. odstranjevanje vodnega kamna, čiščenje filtra).",
+    "manual_duration_hint": "Povprečna/pričakovana dolžina cikla profila, uporabljena za ocene preostalega časa. Uredite, da ga nastavite; če ga ne spremenite, ohranite trenutno vrednost.",
+    "appliance_monitor": "Monitor naprave",
+    "auto_label_intro": "Dodelite profile neoznačenim ciklom, katerih ujemanje presega prag.",
+    "cleanup_intro": "Vsi označeni cikli naloženi. Označi odmike in briši za čiščenje profila.",
+    "compare_overlay_profiles": "Prekriti profili (bledi)",
+    "compare_selected_cycles": "Izbrani cikli (polni) — prikaži / skrij",
+    "feedback_prompt": "Potrdite pravilnost, popravite program ali prezrite.",
+    "import_intro": "Naložite izvoženo datoteko ali prilepite JSON spodaj.",
+    "live_chart_loading": "Graf moči se prikaže ob prihodu odčitkov.",
+    "loading": "Nalaganje…",
+    "loading_curve": "Nalaganje krivulje…",
+    "loading_settings": "Nalaganje nastavitev…",
+    "maintenance_requires_access": "Vzdrževanje in izvoz/uvoz zahtevata polni dostop.",
+    "matching_tuning_intro": "Med učenjem WashData tudi prilagaja, koliko pri ujemanju programov tehta oblika v primerjavi s trajanjem in energijo.",
+    "merge_intro": "Izbrani cikli so združeni v enega (kronološki vrstni red; vrzeli zapolnjene z 0 W). Izberite rezultirajoči profil.",
+    "ml_intro": "WashData je priložen s pametnimi modeli, ki delujejo takoj.",
+    "ml_learned_intro": "Modeli natančno prilagojeni tej napravi.",
+    "ml_loading": "nalaganje ML…",
+    "ml_settings_intro": "Dve neodvisni stikali: ena uporablja modele med delovanjem cikla, druga omogoča WashData, da jih sčasoma prilagodi vaši napravi.",
+    "no_cycles_match": "Noben cikel se ne ujema z aktualnim filtrom.",
+    "no_cycles_profile": "Za ta profil ni ciklov.",
+    "no_cycles_yet": "Še ni posnetih ciklov.",
+    "no_device_selected": "Ni izbrane naprave.",
+    "no_devices": "Nobena naprava WashData še ni konfigurirana.",
+    "no_envelope": "Ovojnice še ni — obnovite po označevanju ciklov.",
+    "no_envelope_overlay": "Ni ovojnice za prekrivanje.",
+    "no_fine_tuned": "Še ni natančno prilagojenega — WashData uporablja vgrajene modele.",
+    "no_logs": "Še ni pufiranih zapisov dnevnika.",
+    "no_match_yet": "Še ni poskusa ujemanja — zapolni se med delujočim ciklom.",
+    "no_other_users": "Ni najdenih drugih uporabnikov Home Assistant.",
+    "no_phases": "Ni definiranih faz.",
+    "no_phases_assigned": "Ni dodeljenih faz.",
+    "no_profiles_compare": "Ni profilov za primerjavo.",
+    "no_profiles_overlay": "Ni profilov za prekrivanje.",
+    "no_profiles_yet": "Še ni profilov. Ustvarite iz označenega cikla.",
+    "no_profiles_yet_short": "Še ni profilov.",
+    "no_split_points": "Še ni točk razdelitve.",
+    "no_suggestions": "Ni aktivnih predlogov.",
+    "pending_feedback": "Čakajoče povratne informacije o zaznavi",
+    "phase_catalog_intro": "Poimenovani segmenti cikla (predhodno pranje, ogrevanje, ožemanje…). Dodelite jih profilu iz nadzorne plošče.",
+    "phase_ranges_intro": "Razponi faz (minute od začetka cikla) naloženi na povprečno krivuljo. Urejajte vrednosti za živahni predogled.",
+    "preferences_admin": "Nastavitve, plošča in nadzor dostopa",
+    "preferences_adv": "Nastavitve",
+    "prefs_personal": "Veljajo samo za vaš račun Home Assistant.",
+    "profiles_intro": "Kliknite na profil za statistike, faze in čiščenje. Združite skoraj enake programe (enaka oblika/trajanje, različna temperatura ali ožemanje), da ujemanje zanesljivo izbira med njimi.",
+    "rbac_hint": "Ko je izključeno, ima vsak uporabnik Home Assistant polni dostop (privzeto). Skrbniki imajo vedno polni dostop in lahko upravljajo vse.",
+    "recent_logs": "Nedavni zapisi ha_washdata",
+    "recording_in_progress": "Snemanje poteka",
+    "review_in_settings": "Pregled v nastavitvah",
+    "review_to_cycles": "Odpri čakalno vrsto pregleda ciklov",
+    "saving_triggers_reload": "Shranjevanje sproži ponovni zagon integracije. Entitete HA se lahko za kratek čas prikažejo kot nedostopne.",
+    "search_placeholder": "Iskanje nastavitev…",
+    "see_recorder": "Glejte pripomoček za snemanje spodaj",
+    "split_intro": "Kliknite na graf, da dodate ali odstranite točko razdelitve, ali samodejno zaznajte po nedejavnih vrzelih. Vsak rezultirajoči segment lahko dobi lasten profil.",
+    "storage_diagnostics": "Statistike shrambe, vzdrževanje, izvoz/uvoz",
+    "trim_intro": "Povlecite rdeče ročke ali vnesite vrednosti. Vse zunaj okna se odstrani.",
+    "unsure_detected_prefix": "WashData ni prepričan, da je zaznal",
+    "updated": "Posodobljeno",
+    "feedback_cycles_pending": "{n} ciklov za pregled",
+    "artifact_spike_detail": "Presegl normalni pas moči za ~{n} s.",
+    "artifact_dip_detail": "Padel pod normalni pas moči za ~{n} s.",
+    "artifact_pause_detail": "Moč je padla skoraj na nič za ~{n} s in se nato obnovila — verjetno so bila odprta vrata sredi cikla ali je bil cikel zaustavljen.",
+    "automations_intro": "WashData sproži dogodke {start} / {end} in razkrije entitete, zato je obvestila in dejanja najbolje graditi kot navadne avtomatizacije Home Assistant. Spodaj so prikazane avtomatizacije, ki uporabljajo to napravo.",
+    "collecting_data": "Zbiranje podatkov — še {need} ciklov pred začetkom finega nastavljanja ({current}/{min}).",
+    "enough_data": "Dovolj podatkov za učenje ({current}/{min} ciklov).",
+    "filter_by_profile": "Filtriraj po profilu…",
+    "group_preview_hint": "Izberite vsaj 2 člana za predogled in primerjavo njihovih krivulj porabe moči.",
+    "notify_services_hint": "Uporabite ID-je storitev {entity} (ločene z vejicami za več storitev). Spremenljivke predloge: {vars}.",
+    "process_history_hint": "Znova zaženite ujemanje za vse shranjene cikle, osvežite predloge nastavljanja, znova naučite modele ML (če so omogočeni) in znova izračunajte zdravje ciklov. Zaženite po seriji pregledov."
+  },
+  "phase_desc": {
+    "pre_wash": "Začetno namakanje ali predobdelava pred glavnim pranjem.",
+    "wash": "Glavni cikel pranja z gibanjem bobna in opcijskim ogrevanjem.",
+    "wash_dw": "Glavno pranje z detergentom z ogrevanjem.",
+    "rinse": "Stopnja izpiranja s čisto vodo. Ta faza se lahko ponovi večkrat.",
+    "spin": "Hitra ekstrakcija za odstranjevanje vode iz tovora.",
+    "spin_wd": "Visokohitrostna ekstrakcija pred prehodom sušenja.",
+    "soak": "Nizkoaktivno obdobje namakanja med aktivnimi fazami pranja.",
+    "soak_dw": "Podaljšano obdobje namakanja za močno umazano posodo.",
+    "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",
+    "heat_up": "Začetno ogrevanje grelnika pred začetkom popolnega sušenja.",
+    "drying": "Glavno ogrevano obdobje sušenja z vrtenjem.",
+    "cool_down": "Vrtenje brez toplote blizu konca cikla.",
+    "anti_wrinkle": "Periodično vrtenje po ciklu za preprečevanje gub na oblačilih.",
+    "sensor_check": "Kratek premor z nizko močjo med merjenjem suhosti.",
+    "drain_and_switch": "Prehodno obdobje iz načina pranja v način sušenja.",
+    "pre_rinse": "Začetno pršenje pred pranjem z detergentom.",
+    "dry": "Stopnja sušenja z uporabo grelnika in/ali preostale toplote.",
+    "sanitize": "Visokotemperaturna stopnja čiščenja za programe razkuževanja."
+  },
+  "health": {
+    "good": "✓ Dobra kakovost profila",
+    "fair": "Sprejemljiva kakovost profila",
+    "poor": "⚠ Slaba kakovost profila"
+  },
+  "log": {
+    "all_levels": "Vse ravni"
+  },
+  "ml": {
+    "builtin_models": "● Uporablja vgrajene modele",
+    "fit_fair": "Sprejemljivo",
+    "fit_good": "Dobro",
+    "fit_slight": "Rahlo",
+    "fit_strong": "Močno",
+    "fit_weak": "Šibko",
+    "fit_word": "prileganje",
+    "personalized": "● Prilagojeno tej napravi"
+  },
+  "pref": {
+    "date_absolute": "Absolutno (npr. 14:32, 2. jul)",
+    "date_relative": "Relativno (npr. pred 2 urami)",
+    "lang_auto": "Sistemska privzeta vrednost ({lang})",
+    "lang_en": "Angleščina",
+    "use_panel_default": "(privzeto za ploščo)"
+  },
+  "quality": {
+    "bad": "Slabo",
+    "good": "Dobro",
+    "unusable": "Neuporabno"
+  },
+  "status": {
+    "active": "Aktivno",
+    "all_statuses": "Vsa stanja",
+    "ambiguous": "Dvoumno",
+    "auto_detect": "Samodejno zaznaj",
+    "clear": "Počisti",
+    "completed": "Zaključeno",
+    "fine_tuning": "natančno prilagajanje…",
+    "force_stopped": "Prisilno ustavljeno",
+    "idle": "Nedejavno",
+    "interrupted": "Prekinjeno",
+    "ready": "Pripravljeno za obdelavo",
+    "recording": "Snemanje",
+    "training": "Učenje…"
+  },
+  "tab": {
+    "advanced": "Napredno",
+    "diagnostics": "Diagnostika",
+    "history": "Cikli",
+    "ml": "Usposabljanje ML",
+    "pp_cleanup": "Čiščenje",
+    "pp_manage": "Upravljaj",
+    "pp_overview": "Pregled",
+    "pp_phases": "Faze",
+    "profiles": "Profili",
+    "settings": "Nastavitve",
+    "status": "Pregled",
+    "subtab_phase_catalog": "Katalog faz",
+    "subtab_profiles": "Profili"
+  },
+  "tag": {
+    "early_end": "Zgodnji konec",
+    "late_start": "Pozen začetek",
+    "merged": "Združeni cikli",
+    "noise": "Šum",
+    "sensor_gap": "Vrzel senzorja",
+    "split": "Razdeljen cikel",
+    "wrong_profile": "Napačen profil"
+  },
+  "toast": {
+    "access_saved": "Nadzor dostopa shranjen",
+    "all_wiped": "Vsi podatki izbrisani",
+    "analysis_complete_none": "Analiza zaključena: ni novih predlogov",
+    "auto_label_complete": "Samodejno označevanje zaključeno",
+    "automation_deleted": "Avtomatizacija izbrisana",
+    "correction_submitted": "Popravek poslan",
+    "cycle_deleted": "Cikel izbrisan",
+    "cycle_force_stopped": "Cikel prisilno ustavljen",
+    "cycle_labelled": "Cikel označen",
+    "cycle_paused": "Cikel v premoru",
+    "cycle_resumed": "Cikel nadaljujem",
+    "cycle_trimmed": "Cikel obrezan",
+    "cycles_merged": "Cikli združeni",
+    "envelope_rebuilt": "Ovojnica obnovljena",
+    "envelopes_rebuilt": "Ovojnice obnovljene",
+    "export_downloaded": "Izvoz prenesen",
+    "feedback_all_dismissed": "Vse povratne informacije zavrnjene",
+    "feedback_confirmed": "Povratne informacije potrjene",
+    "feedback_dismissed": "Povratne informacije zavrnjene",
+    "group_deleted": "Skupina izbrisana",
+    "group_name_required": "Ime skupine je obvezno",
+    "group_saved": "Skupina shranjena",
+    "import_successful": "Uvoz uspešen; integracija se znova nalaga",
+    "json_required": "Podatki JSON so obvezni",
+    "legacy_removed": "Zastarela dejanja odstranjena",
+    "logs_exported": "Dnevniki izvoženi",
+    "matching_reverted": "Uteži ujemanja vrnjene na privzete vrednosti",
+    "min_2_profiles": "Izberite vsaj 2 profila za skupino",
+    "ml_training_no_improvement": "Usposabljanje zaključeno: ohranjen osnovni model (brez izboljšav)",
+    "models_reverted": "Modeli naprave vrnjeni na osnovno",
+    "name_required": "Ime je obvezno",
+    "no_split_found": "Ni najdenih nedejavnih vrzeli za razdelitev",
+    "panel_settings_saved": "Nastavitve plošče shranjene",
+    "phase_name_required": "Ime faze je obvezno",
+    "phase_updated": "Faza posodobljena",
+    "phases_saved": "Faze shranjene",
+    "preferences_saved": "Nastavitve shranjene",
+    "profile_name_required": "Ime profila je obvezno",
+    "profile_renamed": "Profil preimenovan",
+    "recording_discarded": "Posnetek zavržen",
+    "recording_saved": "Posnetek shranjen v profil",
+    "recording_started": "Snemanje začeto",
+    "recording_stopped": "Snemanje ustavljeno",
+    "review_saved": "Pregled shranjen",
+    "settings_saved": "Nastavitve shranjene; integracija se znova nalaga",
+    "suggestions_applied": "Predlogi uporabljeni; integracija se znova nalaga",
+    "suggestions_dismissed": "Predlogi zavrnjeni"
+  },
+  "trend": {
+    "down": "Padajoči trend",
+    "up": "Naraščajoča tendenca"
+  },
+  "section": {
+    "basic": {
+      "label": "Osnovno",
+      "intro": "Osnovna identiteta in bistvo, ki ga večina nastavitev potrebuje."
+    },
+    "detection": {
+      "label": "Zaznavanje",
+      "intro": "Kako se zazna začetek, tek in konec cikla."
+    },
+    "matching": {
+      "label": "Ujemanje",
+      "intro": "Kako se končani cikli ujemajo z naučenimi profili in označijo."
+    },
+    "timing": {
+      "label": "Časovanje in nadzornik",
+      "intro": "Ozadna kadenca, nadzornik brez povezave in vzdrževanje."
+    },
+    "anti_wrinkle": {
+      "label": "Zaščita pred gubami",
+      "intro": "Način zaščite pred gubami na oblačilih zazna kratke pulze pri nizki moči po glavni fazi in jih obdrži pripisane končanemu ciklu."
+    },
+    "delay": {
+      "label": "Zakasnjen zagon",
+      "intro": "Zaznavanje zakasnjenega zagona prepozna, ko je naprava vklopljena, a cikla še ni začela."
+    },
+    "triggers": {
+      "label": "Sprožilci in vrata",
+      "intro": "Izbirni zunanji signali: sprožilec za konec, senzor vrat, stikalo za premor in opomnik za raztovarjanje."
+    },
+    "notifications": {
+      "label": "Obvestila",
+      "intro": "Kdaj in kako boste obveščeni o dogodkih cikla."
+    },
+    "ml_training": {
+      "label": "Usposabljanje ML",
+      "intro": "Urnik ponovnega usposabljanja strojnega učenja na napravi in nastavitve podatkov."
+    }
+  },
+  "setting_group": {
+    "thresholds_gap": {
+      "label": "Pragovi in presledek"
+    },
+    "cycle_start": {
+      "label": "Začetek cikla"
+    },
+    "cycle_end": {
+      "label": "Konec cikla"
+    },
+    "signal_processing": {
+      "label": "Obdelava signala"
+    },
+    "predictive_end": {
+      "label": "Prediktivni konec"
+    },
+    "dishwasher_end": {
+      "label": "Konec cikla pomivalnega stroja"
+    },
+    "dtw_refinement": {
+      "label": "DTW izpopolnjevanje"
+    },
+    "match_scoring": {
+      "label": "Ocenjevanje ujemanja"
+    },
+    "duration_gates": {
+      "label": "Vrata trajanja"
+    },
+    "auto_labeling": {
+      "label": "Samodejno označevanje"
+    },
+    "watchdog": {
+      "label": "Nadzornik"
+    },
+    "housekeeping": {
+      "label": "Vzdrževanje"
+    },
+    "debug": {
+      "label": "Odpravljanje napak"
+    },
+    "external_end_trigger": {
+      "label": "Zunanji sprožilec za konec"
+    },
+    "door_pause": {
+      "label": "Vrata in premor"
+    },
+    "unload_reminder": {
+      "label": "Opomnik za raztovarjanje"
+    },
+    "services": {
+      "label": "Storitve"
+    },
+    "timing": {
+      "label": "Časovanje"
+    },
+    "messages": {
+      "label": "Sporočila"
+    },
+    "energy": {
+      "label": "Energija"
+    },
+    "cycle_timers": {
+      "label": "Časovniki cikla"
+    },
+    "schedule": {
+      "label": "Urnik"
+    },
+    "data_management": {
+      "label": "Upravljanje podatkov"
+    }
+  },
+  "setting": {
+    "name": {
+      "label": "Ime naprave",
+      "doc": "Prikazno ime, prikazano na seznamu integracij HA in registru naprav."
+    },
+    "device_type": {
+      "label": "Vrsta naprave",
+      "doc": "Razred aparata. Nastavi razumne privzete vrednosti zaznavanja (pragovi, zakasnitev izklopa, končna obdelava), prilagojene za to vrsto naprave; spremenite le, če je bila naprava prvotno nastavljena kot napačna vrsta."
+    },
+    "power_sensor": {
+      "label": "Senzor moči",
+      "doc": "Entiteta senzorja, ki poroča o trenutni moči v vatih za to napravo (npr. sensor.washer_power). Zaznavanje vseh ciklov temelji na tem signalu."
+    },
+    "min_power": {
+      "label": "Minimalna moč",
+      "doc": "Absolutna najmanjša moč, ki velja za aktivno. Odčitki pod tem se obravnavajo kot 0 W (stanje pripravljenosti), pri čemer se filtrira fantomska obremenitev pametnih vtičev in LED diod v stanju pripravljenosti."
+    },
+    "off_delay": {
+      "label": "Zamuda izklopa",
+      "doc": "Čas za čakanje po padcu moči, preden razglasite, da je cikel končan. Če se napajanje ponovno vzpostavi v tem oknu, se cikel nemoteno nadaljuje - to premosti premore med stopnjami pranja. Pomivalni stroji imajo dolge faze sušenja (izklop za 20–60 min), zato mora biti zakasnitev izklopa daljša od te, da ostane celotno pranje+sušenje kot en cikel."
+    },
+    "linked_device": {
+      "label": "Združi pod napravo",
+      "doc": "Po želji ugnezdite to napravo WashData pod drugo napravo (npr. pametni vtič) v registru naprav HA, prikazano kot »Povezano prek ...«."
+    },
+    "start_threshold_w": {
+      "label": "Prag zagona",
+      "doc": "Za potrditev začetka cikla se mora moč dvigniti nad to raven. Nastavitev na prenizko povzroči napačne zagone iz stanja pripravljenosti; izpuščeni so previsoki in počasni zagonski programi (hladno polnjenje). Mehanizem predlogov to nastavi tik nad opazovano najnižjo delovno moč stroja."
+    },
+    "stop_threshold_w": {
+      "label": "Prag zaustavitve",
+      "doc": "Moč mora pasti pod to raven, preden se začne odštevanje zakasnitve izklopa. Nastavite ga pod začetnim pragom - vrzel med njima je pas histereze, ki preprečuje utripanje. Če je nastavljeno previsoko, faze z nizko močjo (zadrževanje izpiranja, proti mečkanju) lažno sprožijo končno zaporedje."
+    },
+    "min_off_gap": {
+      "label": "Min. presledek izklopa",
+      "doc": "Če se stroj izklopi za manj kot ta čas, se zaporedje vklop/izklop/vklop obravnava kot en neprekinjen cikel. Preprečuje, da bi se programi namakanja (stroj izklopi za nekaj minut med pranjem) razdelili na dva ločena cikla. Nastavite ga krajše od vrzeli med zaporednimi obremenitvami, če želite, da se te štejejo kot ločeni cikli. Privzete nastavitve vrste naprave ščitijo tipično prekinitev med ciklom za vsako napravo."
+    },
+    "start_duration_threshold": {
+      "label": "Trajanje zagona",
+      "doc": "Moč mora ostati nad začetnim pragom tako dolgo, da se potrdi dejanski začetek, s čimer se prepreči, da bi stikala za vklop/izklop za delčke sekunde začela cikel."
+    },
+    "start_energy_threshold": {
+      "label": "Energija zagona",
+      "doc": "Energija (moč x čas), ki jo mora naprava porabiti pred DELOVANJEM. Kratek skok visoke moči ima zelo nizko energijo in se ne upošteva, kar preprečuje napačne zagone."
+    },
+    "completion_min_seconds": {
+      "label": "Min. trajanje cikla",
+      "doc": "Cikli, krajši od tega, se zavržejo kot cikli duhov (testne vožnje, odpiranje vrat za dodajanje nogavice)."
+    },
+    "running_dead_zone": {
+      "label": "Mrtva cona delovanja",
+      "doc": "Ko se cikel začne, se padci moči v tem oknu ne upoštevajo. Pralni stroj se polni s hladno vodo (pred segrevanjem pade blizu 0 W) – brez te zaščite je faza polnjenja videti kot konec cikla. To NE preskoči podatkov: sled polne moči se zabeleži od T=0. Mehanizem predlogov meri dejanski vzorec zagona vašega računalnika in ga samodejno prilagodi."
+    },
+    "end_energy_threshold": {
+      "label": "Energija konca",
+      "doc": "Med odštevanjem zakasnitve izklopa se akumulirana energija (vati x čas) primerja s tem pragom. Če je preseženo, se odštevanje ponastavi – sušilni stroji proti mečkanju in konci sušenja v pomivalnem stroju ostanejo pritrjeni na cikel, namesto da bi jih skrajšali. Zvišajte ga, če se cikli končajo prezgodaj med ohlajanjem; znižajte, če je zaznavanje počasno."
+    },
+    "end_repeat_count": {
+      "label": "Število ponovitev konca",
+      "doc": "Število zaporednih odčitkov pod mejno vrednostjo, potrebnih pred koncem cikla. 1 je primeren za večino vtičev. Povečajte na 2-3, če vaš pametni vtič občasno poroča o vzorcu napačne ničle sredi cikla in se vaši cikli končajo predčasno."
+    },
+    "sampling_interval": {
+      "label": "Interval vzorčenja",
+      "doc": "Pričakovan čas med odčitki senzorja – uporablja se za velikost okna za glajenje in pravilen začetek odboja. Vsaka posodobitev senzorja je zajeta ne glede na to vrednost; kalibrira le spodnje izračune. Mehanizem predlogov meri dejansko kadenco vašega senzorja iz preteklih ciklov in jo samodejno nastavi."
+    },
+    "smoothing_window": {
+      "label": "Okno glajenja",
+      "doc": "Koliko je zglajen signal neobdelane moči. Nizka (2) je odzivna, a hrupna; visoko (5) zgladi konice, vendar doda zamik."
+    },
+    "abrupt_drop_watts": {
+      "label": "Nenaden padec",
+      "doc": "Večji padec moči od tega označi cikel kot prekinjen (ročni preklic) in ne kot naravni zaključek."
+    },
+    "abrupt_drop_ratio": {
+      "label": "Razmerje nenadnega padca",
+      "doc": "Padec, večji od tega deleža trenutne moči, se prav tako obravnava kot nenaden (0,6 = 60-odstotni padec). Dopolnjuje mejno vrednost v vatih za vse velikosti aparatov."
+    },
+    "profile_match_threshold": {
+      "label": "Prag ujemanja",
+      "doc": "Najmanjši rezultat podobnosti (0-1), ki je potreben na koncu cikla za sprejem identifikacije programa. Zvišajte ga, da zmanjšate napačne identifikacije; znižajte ga, če se programi vaše naprave ne ujemajo. Privzeta vrednost 0,4 je konzervativno izhodišče."
+    },
+    "profile_unmatch_threshold": {
+      "label": "Prag neujemanja",
+      "doc": "Če tekma v živo sredi cikla pade pod ta rezultat, se začasna identifikacija počisti. Naj bo malo pod pragom ujemanja, tako da kratek padec podobnosti ne obrne zaslona nazaj na neizravnanega."
+    },
+    "profile_match_interval": {
+      "label": "Interval ujemanja",
+      "doc": "Kako pogosto poskušati ujemati profile med ciklom teka. Privzetih 300 s (5 minut) uravnava hitrost zaznavanja in CPE."
+    },
+    "profile_match_min_duration_ratio": {
+      "label": "Min. razmerje trajanja",
+      "doc": "Najmanjša dolžina cikla glede na profil. 0,9 pomeni, da mora biti cikel vsaj 90 % trajanja profila, da se ujema."
+    },
+    "profile_match_max_duration_ratio": {
+      "label": "Maks. razmerje trajanja",
+      "doc": "Največja dolžina cikla glede na profil. 1.3 pomeni, da mora biti cikel krajši od 130 % trajanja profila, da se ujema."
+    },
+    "profile_duration_tolerance": {
+      "label": "Toleranca trajanja profila",
+      "doc": "Pas +/- okoli povprečnega trajanja profila, uporabljenega med ujemanjem. 0,25 pomeni, da se 60-minutni profil ujema s 45-75-minutnimi cikli."
+    },
+    "duration_tolerance": {
+      "label": "Toleranca ocene",
+      "doc": "Toleranca za ocene preostalega časa (učna povratna informacija, ne ujemanje). Če je dejansko trajanje znotraj +/-X % ocene, se šteje za dobro ujemanje."
+    },
+    "auto_label_confidence": {
+      "label": "Zaupanje samodejnega označevanja",
+      "doc": "Če je rezultat ujemanja na koncu cikla enak ali višji od tega, je program samodejno označen brez potrditvenega poziva. Povečajte ga tako, da zahteva večjo gotovost pred samodejnim označevanjem; znižajte ga za večjo avtomatizacijo. Deluje v povezavi z Learning Confidence pod njim."
+    },
+    "learning_confidence": {
+      "label": "Zaupanje učenja",
+      "doc": "Če je rezultat ujemanja med tem in zaupanjem samodejnega označevanja, vas obvestilo s povratnimi informacijami prosi, da preverite prepoznani program. Pod tem rezultatom je tekma preveč negotova, da bi prišla na površje. Mora biti pod zaupanjem samodejnega označevanja."
+    },
+    "suppress_feedback_notifications": {
+      "label": "Potlači obvestila o povratnih informacijah",
+      "doc": "Ne oddajte trajnega obvestila, ko je treba pregledati končani cikel; povratne informacije so še vedno prikazane v čakalni vrsti za pregled ciklov."
+    },
+    "watchdog_interval": {
+      "label": "Interval nadzornika",
+      "doc": "Kako pogosto nadzorni sistem v ozadju preveri zastoje senzorjev in pretečene časovne omejitve. Privzeto 30 s."
+    },
+    "no_update_active_timeout": {
+      "label": "Časovna omejitev brez posodobitve",
+      "doc": "Če med delovanjem tako dolgo ne prispe nobena posodobitev napajanja, domnevajte, da je vtič padel brez povezave in ga prisilno ustavite, da se izognete ciklu zombija. Privzetih 600 s omogoča zamik oblaka ali mreže."
+    },
+    "progress_reset_delay": {
+      "label": "Zamuda ponastavitve napredka",
+      "doc": "Ko končate, tako dolgo zadržite napredek pri 100 %, tako da je na nadzornih ploščah vidno Končano, preden se ponastavite na stanje mirovanja."
+    },
+    "auto_maintenance": {
+      "label": "Samodejno vzdrževanje (nočno čiščenje)",
+      "doc": "Zaženite nočno čiščenje: obnovite ovojnice profila, znova izračunajte stanje cikla, odstranite sledi odpravljanja napak in obdržite najnovejše cikle."
+    },
+    "expose_debug_entities": {
+      "label": "Izpostavi entitete za odpravljanje napak",
+      "doc": "Objavite dodatne diagnostične entitete HA (zaupanje ujemanja, dvoumnost, notranje stanje). Izključeno ohranja seznam entitet čist za običajno uporabo."
+    },
+    "save_debug_traces": {
+      "label": "Shrani sledove za odpravljanje napak",
+      "doc": "Shranite celotno sled moči in ustrezne podatke o odpravljanju napak za vsak cikel. Uporabno za odpravljanje težav, vendar poveča velikost pomnilnika."
+    },
+    "anti_wrinkle_enabled": {
+      "label": "Omogoči zaznavanje zaščite pred gubami",
+      "doc": "Prepoznajte kratke vrtilne impulze nizke moči, ki jih oddaja sušilni stroj po glavni fazi segrevanja, in jih ohranite povezane s končanim ciklom, namesto da jih berete kot nove cikle."
+    },
+    "anti_wrinkle_max_power": {
+      "label": "Maks. moč zaščite pred gubami",
+      "doc": "Impulz nad to močjo se obravnava kot pravi nov cikel, ne pa kot udarec proti gubam. Nastavite tik nad pulzno močjo."
+    },
+    "anti_wrinkle_max_duration": {
+      "label": "Maks. trajanje",
+      "doc": "Utripi, ki so daljši od tega, se obravnavajo kot pravi cikel in ne kot sredstvo proti gubam."
+    },
+    "anti_wrinkle_exit_power": {
+      "label": "Prag izhodne moči",
+      "doc": "Moč mora med impulzi pasti pod to vrednost, da način proti gubam ostane aktiven."
+    },
+    "delay_start_detect_enabled": {
+      "label": "Omogoči zaznavanje zakasnjenega zagona",
+      "doc": "Zazna, kdaj je naprava vklopljena in čaka (zakasnjen zagon/stanje pripravljenosti), vendar še ni začela svojega cikla, tako da se črpanje v stanju pripravljenosti ne zamenja za cikel v teku."
+    },
+    "delay_confirm_seconds": {
+      "label": "Sekunde potrditve",
+      "doc": "Napajanje mora ostati v pasu pripravljenosti toliko časa, preden se naprava obravnava kot naprava, ki čaka na zagon, namesto da deluje."
+    },
+    "delay_timeout_hours": {
+      "label": "Ure časovne omejitve",
+      "doc": "Prenehajte čakati v načinu zakasnjenega zagona po toliko urah in se vrnite v stanje mirovanja, tako da stroj, ki ostane pod napajanjem, a se nikoli ne zažene, ne bo čakal večno."
+    },
+    "external_end_trigger_enabled": {
+      "label": "Omogoči zunanji sprožilec za konec",
+      "doc": "Naj zunanji binarni senzor signalizira konec cikla poleg vgrajenega zaznavanja na podlagi moči."
+    },
+    "external_end_trigger": {
+      "label": "Zunanja sprožilna entiteta",
+      "doc": "Binarni senzor, katerega sprememba stanja označuje konec cikla (npr. \"zaključen\" stik naprave ali integracija spremljevalca)."
+    },
+    "external_end_trigger_inverted": {
+      "label": "Obrni zunanji sprožilec (sproži ob IZKLOP)",
+      "doc": "Izklop sprožilnega senzorja (namesto VKLOP) obravnavajte kot signal za konec cikla."
+    },
+    "door_sensor_entity": {
+      "label": "Entiteta senzorja vrat",
+      "doc": "Izbirni binarni senzor vrat. Uporablja se za zaznavanje, kdaj je bila naprava odprta/raztovorjena po ciklu."
+    },
+    "pause_cuts_power": {
+      "label": "Premor tudi prekine napajanje (prek stikala)",
+      "doc": "Ko je cikel zaustavljen, izklopite tudi spodnjo entiteto Switch. Samo za naprave, katerih vtič je mogoče varno prerezati sredi cikla."
+    },
+    "switch_entity": {
+      "label": "Entiteta stikala",
+      "doc": "Izbirno stikalo, ki se izklopi ob premoru in se ponovno vklopi ob nadaljevanju, uporablja se skupaj s \"Premor tudi prekine napajanje\"."
+    },
+    "notify_unload_delay_minutes": {
+      "label": "Zamuda opomnika za raztovarjanje",
+      "doc": "Minute po koncu cikla pred pošiljanjem še vedno čakajočega opomnika \"raztovarjanje stroja\". Nastavite 0, da onemogočite opomnik."
+    },
+    "pump_stuck_duration": {
+      "label": "Trajanje zataknjenosti črpalke",
+      "doc": "Nekaj ​​sekund lahko črpalka deluje neprekinjeno, preden je označena kot morebitna zastoj (sproži dogodek zastoja črpalke)."
+    },
+    "notify_start_services": {
+      "label": "Storitve ob zagonu",
+      "doc": "notify.* storitve, ki se kličejo, ko se cikel začne. Dodajte enega na cilj (telefon, nadzorna plošča itd.); pustite prazno, če ni obvestila o začetku."
+    },
+    "notify_finish_services": {
+      "label": "Storitve ob dokončanju",
+      "doc": "notify.* storitve, ki se kličejo, ko se cikel konča. Dodajte enega na cilj; pustite prazno, če ni obvestila o koncu."
+    },
+    "notify_live_services": {
+      "label": "Storitve sprotnega napredka",
+      "doc": "storitve notify.* so poklicale posodobitve napredka v živo med izvajanjem cikla. Pustite prazno, da onemogočite obvestila o napredku v živo."
+    },
+    "notify_people": {
+      "label": "Osebe (za Samo ko doma)",
+      "doc": "person.* entitete, ki jih funkcija »Obvesti samo, ko je doma« uporablja za odločanje, ali je kdo doma."
+    },
+    "notify_only_when_home": {
+      "label": "Obvesti samo ko doma",
+      "doc": "Pošlji obvestila le, če je vsaj ena od povezanih oseb (zgoraj) doma."
+    },
+    "notify_fire_events": {
+      "label": "Sproži HA dogodke za obvestila",
+      "doc": "Sprožite tudi dogodke ha_washdata_* na začetku/koncu cikla, da lahko ustvarite lastno avtomatizacijo."
+    },
+    "notify_before_end_minutes": {
+      "label": "Opozorilo pred koncem",
+      "doc": "Pošlji opozorilo Skoraj dokončano, ko ocenjeni preostali čas pade pod to. 0 ga onemogoči."
+    },
+    "notify_live_interval_seconds": {
+      "label": "Interval sprotnih posodobitev",
+      "doc": "Kako pogosto se obvestila o napredku v živo osvežujejo med izvajanjem cikla."
+    },
+    "notify_live_overrun_percent": {
+      "label": "% prekoračitve pred opozorilom",
+      "doc": "Če cikel preseže svojo oceno za več kot ta odstotek, pošljite opozorilo o prekoračitvi."
+    },
+    "notify_live_chronometer": {
+      "label": "Uporabi sprotni kronometer",
+      "doc": "V obvestilu (na platformah, ki to podpirajo) namesto statične ocene prikažite odštevalnik, ki se posodablja v živo."
+    },
+    "notify_timeout_seconds": {
+      "label": "Samodejno zavrži po",
+      "doc": "Samodejno opusti obvestilo po toliko sekundah (na platformah, ki to podpirajo). 0 ga hrani, dokler ga ročno ne zavržete."
+    },
+    "notify_title": {
+      "label": "Naslov obvestila",
+      "doc": "Naslov obvestila. Spremenljivke predloge: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
+    },
+    "notify_icon": {
+      "label": "Ikona obvestila",
+      "doc": "Izbirna ikona mdi za obvestilo (npr. mdi:washing-machine). Pustite prazno za privzeto platformo."
+    },
+    "notify_start_message": {
+      "label": "Sporočilo ob zagonu",
+      "doc": "Telo se pošlje, ko se cikel začne. Spremenljivke predloge: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
+    },
+    "notify_finish_message": {
+      "label": "Sporočilo ob dokončanju",
+      "doc": "Telo je poslano, ko se cikel konča. Spremenljivke predloge: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
+    },
+    "notify_pre_complete_message": {
+      "label": "Sporočilo pred dokončanjem",
+      "doc": "Telo opozorila pred koncem/skoraj končano. Spremenljivke predloge: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
+    },
+    "notify_reminder_message": {
+      "label": "Sporočilo opomnika",
+      "doc": "Telo opomnika za razkladanje, ki še čaka. Prazno uporablja vgrajeno privzeto. Spremenljivke predloge: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
+    },
+    "notify_channel": {
+      "label": "Android kanal (zagon/v živo)",
+      "doc": "Ime kanala za obveščanje v sistemu Android za sporočila za začetek/v živo (nadzoruje zvok in prednost posameznega kanala v mobilni aplikaciji). Prazno uporablja privzeto spremljevalno aplikacijo."
+    },
+    "notify_finish_channel": {
+      "label": "Android kanal (dokončanje)",
+      "doc": "Ime kanala za obvestila Android za sporočilo o koncu. Prazno ponovno uporabi začetni kanal/kanal v živo."
+    },
+    "energy_price_entity": {
+      "label": "Entiteta cene energije",
+      "doc": "Senzor s trenutno ceno električne energije na kWh (npr. dinamična tarifa). Ima prednost pred spodnjo statično ceno. Vsak cikel zamrzne veljavno ceno, ko se konča."
+    },
+    "energy_price_static": {
+      "label": "Statična cena energije (za kWh)",
+      "doc": "Fiksna cena na kWh, ki se uporablja za podatke o stroških, kadar zgoraj ni nastavljen noben subjekt v živo."
+    },
+    "notify_cycle_timers": {
+      "label": "Časovniki cikla",
+      "doc": "Obvestila ob določenih minutah v ciklu (npr. za dodajanje mehčalca). Sporočilo podpira {device}, {program}, {minutes}. Omogočite Samodejni premor, da se na tej točki ustavite in prejmete interaktivno obvestilo z gumbom Nadaljuj; nadaljujte prek plošče, storitve za premor/nadaljevanje ali dejanja obvestila."
+    },
+    "enable_ml_models": {
+      "label": "Uporabi pametne modele med ciklom",
+      "doc": "Medtem ko cikel teče, pustite modelom, da izboljšajo rezultate v živo: stabilnejša ocena preostalega časa in energije/stroškov ter varovalo proti prezgodnji zaustavitvi ob zaznavi konca (lahko le odloži zaključek, nikoli ga ne konča predčasno in je omejen). Uporablja vaše natančno nastavljene modele, ko so na voljo, drugače pa vgrajene. Izklopljeno = samo klasična logika, ki temelji na moči (še vedno zanesljiva)."
+    },
+    "ml_training_enabled": {
+      "label": "Uči se iz te naprave",
+      "doc": "Čez noč občasno preučite svoje pregledane cikle in natančno prilagodite modele temu specifičnemu stroju. Sprememba se ohrani le, če resnično doseže boljše rezultate v zadržanih ciklih, tako da lahko to samo pomaga ali ostane enako – nikoli ne nazaduje."
+    },
+    "ml_training_hour": {
+      "label": "Uči se ob uri",
+      "doc": "Lokalna ura dneva (0-23) za natančno nastavitev čez noč. Izberite mirno uro, na primer 2 (02:00)."
+    },
+    "ml_training_min_cycles": {
+      "label": "Najprej potrebno število ciklov",
+      "doc": "Pred natančno nastavitvijo počakajte, da se zabeleži vsaj toliko ciklov, da se je dovolj naučiti."
+    },
+    "ml_training_interval_days": {
+      "label": "Preverjaj največ vsakih",
+      "doc": "Ponovno preverite izboljšave največ enkrat na toliko dni."
+    }
+  },
+  "placeholder": {
+    "add": "dodaj…",
+    "group_name": "npr. Bombaž 2:47",
+    "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+    "notify": "dodaj storitev obvestil…",
+    "notify_services_list": "notify.mobile_app_phone, ...",
+    "person": "dodaj osebo…",
+    "phase_name": "npr. Predpranje",
+    "profile_name": "npr. Bombaž 40°C"
+  }
+}

@@ -1,0 +1,916 @@
+{
+  "btn": {
+    "add_timer": "+ Cuir lasc ama leis",
+    "remove_timer": "Bain an t-amadóir",
+    "add_device_tip": "Cuir gléas WashData eile leis",
+    "delete_group_tip": "Scrios an grúpa seo amháin - coinnítear próifílí na mball",
+    "run_analysis_tip": "Déan anailís ar do thimthriallta taifeadta anois agus athnuaigh moltaí tiúnála",
+    "reset_ml_models_tip": "Caith amach na samhlacha mionchoigeartaithe agus téigh ar ais go dtí na cinn ionsuite. Is féidir le WashData iad a fhoghlaim arís níos déanaí.",
+    "resume_cycle": "Lean ar an timthriall",
+    "add_device": "+ Cuir gléas leis",
+    "add_phase": "+ Cuir céim leis",
+    "apply_all": "Iarratas a dhéanamh ar fad",
+    "apply_label": "Cuir Lipéad i bhfeidhm",
+    "apply_split": "Iarratas a Scoilt",
+    "apply_trim": "Cuir Bearradh i bhfeidhm",
+    "auto_detect_split": "Auto-bhrath",
+    "auto_label_cycles": "Timthriallta lipéadaithe uathoibríoch",
+    "cancel": "Cealaigh",
+    "clear_debug": "Glan Sonraí Dífhabhtaithe",
+    "clear_splits": "Glan",
+    "close": "Dún",
+    "compare": "Déan comparáid idir",
+    "confirm": "Deimhnigh",
+    "convert_to_automation": "Tiontaigh go uathoibriú",
+    "correct": "Ceart…",
+    "create": "Cruthaigh",
+    "create_profile": "+ Cruthaigh próifíl",
+    "delete": "Scrios",
+    "delete_group": "Scrios Grúpa",
+    "delete_profile": "Scrios Próifíl",
+    "discard": "Caith amach",
+    "dismiss": "Díbhe",
+    "done": "Déanta",
+    "edit": "Cuir in eagar",
+    "export": "Easpórtáil",
+    "export_json": "Easpórtáil chuig JSON",
+    "force_stop": "Stop Fórsa",
+    "from_template": "Ón teimpléad ▾",
+    "ignore": "Déan neamhaird de",
+    "import_json": "Iompórtáil ó JSON",
+    "import_overwrite": "Iompórtáil (forscríobhtar sonraí)",
+    "inspect": "Iniúchadh",
+    "label": "Lipéadaigh",
+    "manage": "Bainistigh",
+    "merge": "Cumaisc",
+    "new_automation": "＋ Uathoibriú Nua",
+    "new_group": "+ Grúpa Nua",
+    "new_phase": "+ Céim Nua",
+    "new_profile": "+ Próifíl Nua",
+    "on_cycle_finished": "Ar an timthriall críochnaithe",
+    "on_cycle_started": "Ar timthriall thosaigh",
+    "pause_cycle": "Sos",
+    "process": "Próiseas",
+    "process_history": "Próiseáil Anois",
+    "process_recording": "Sábháil Taifeadadh",
+    "rebuild": "Athchruthaigh Clúdaigh",
+    "rebuild_envelope": "Atóg Clúdach",
+    "rec_stop": "Stop",
+    "record": "Tosaigh Taifeadadh",
+    "refresh": "Athnuaigh",
+    "remove": "Bain",
+    "reset": "Athshocraigh",
+    "reset_to_builtin": "Athshocraigh go samhlacha ionsuite",
+    "reset_to_defaults": "Athshocraigh go réamhshocruithe",
+    "review": "Measúnú",
+    "run_analysis": "🔍 Rith anailís moltaí",
+    "run_auto_label": "Rith Uath-Lipéad",
+    "save": "Sábháil",
+    "save_access_control": "Sábháil Rialú Rochtana",
+    "save_group": "Sábháil Grúpa",
+    "save_panel_settings": "Sábháil Socruithe Painéil",
+    "save_phases": "Sábháil céimeanna",
+    "save_preferences": "Sábháil Sainroghanna",
+    "save_review": "Sábháil Athbhreithniú",
+    "save_settings": "Sábháil Socruithe",
+    "select": "Roghnaigh",
+    "show_only": "Taispeáin amháin",
+    "split": "Scoilt",
+    "submit_correction": "Cuir Ceartúchán isteach",
+    "train_now": "Oiligh anois",
+    "trim": "Bearr",
+    "trim_split": "Bearr / Scoilt",
+    "use": "Úsáid",
+    "wipe_all": "Scrios na Sonraí go léir"
+  },
+  "hdr": {
+    "logs": "Logaí",
+    "toggle_sidebar": "Scoránaigh barra taoibh Home Assistant",
+    "access_control": "Rialú Rochtana",
+    "automation_delete": "Scrios an uathoibriú seo",
+    "automation_needs_review": "Ní mór athbhreithniú a dhéanamh ar an timthriall seo",
+    "automation_open": "Oscail san eagarthóir uathoibrithe",
+    "automation_review_this_cycle": "Déan athbhreithniú ar an timthriall seo",
+    "automations": "Uathoibrithe",
+    "clear_debug": "Glan Rianta Dífhabhtaithe",
+    "diagnostics_pref": "Diagnóisic",
+    "display": "Taispeáin",
+    "export_import": "Easpórtáil / Iompórtáil",
+    "live_power": "Cumhacht Beo",
+    "logs_diagnostics": "Diagnóisic",
+    "maintenance": "Gníomhartha Cothabhála",
+    "manual_recording": "Taifeadadh Láimhe",
+    "ml_learned": "A bhfuil foghlamtha ag WashData",
+    "ml_matching_tuning": "Mionchoigeartú clár",
+    "ml_settings_card": "Socruithe",
+    "ml_smart_learning": "Foghlaim Chliste",
+    "my_preferences": "Mo Roghanna",
+    "no_automations": "Níl aon uathoibriú ag tagairt don ghléas seo fós.",
+    "panel_settings": "Socruithe Painéil",
+    "phase_catalog": "Catalóg Chéim",
+    "process_history": "Stair Próisis",
+    "status": "Stádas",
+    "status_graph": "Graf Stádais",
+    "storage_stats": "Staitisticí Stórála",
+    "tools_and_data": "Uirlisí & Sonraí",
+    "wipe_history": "Scrios an Stair"
+  },
+  "lbl": {
+    "timer_min": "nóim",
+    "timer_msg_placeholder": "Teachtaireacht (roghnach, {device}/{program}/{minutes})",
+    "timer_auto_pause": "Uath-sos",
+    "label": "Clár meaitseáilte",
+    "actions": "Gníomhartha",
+    "activity": "Gníomhaíocht",
+    "administrators": "Riarthóirí",
+    "auto_fine_tune_off": "auto-tune off",
+    "clock_time": "Am clog",
+    "compare_profiles": "Déan comparáid idir le próifílí",
+    "confidence": "Muinín",
+    "confidence_threshold": "Tairseach muiníne",
+    "correct_duration": "Fad ceart (níos lú, roghnach)",
+    "correct_profile": "Próifíl cheart",
+    "cost": "Costas",
+    "create_new_profile": "+ Cruthaigh próifíl nua…",
+    "cycle_date_display": "Taispeáint dáta timthrialla",
+    "cycle_health": "Sláinte timthrialla",
+    "cycles_count": "Timthriallta",
+    "date": "Dáta",
+    "debug_traces": "Rianta Dífhabhtaithe",
+    "default": "Réamhshocrú",
+    "default_access_level": "Leibhéal réamhshocraithe d'úsáideoirí nach bhfuil liostaithe thíos",
+    "default_other": "Réamhshocrú (gléasanna eile)",
+    "default_tab": "Cluaisín réamhshocraithe nuair a osclaítear an painéal",
+    "description": "Cur síos",
+    "duration": "Fad",
+    "emphasis": "Béim",
+    "enable_access_control": "Cumasaigh rialú rochtana in aghaidh an úsáideora",
+    "energy": "Fuinneamh",
+    "expected_duration": "Fad a bhfuiltear ag súil leis (nóiméad)",
+    "file_kb": "Comhad (kB)",
+    "gap_s": "bearna(í)",
+    "head_trim": "Bearradh Tosaigh (s)",
+    "health": "Sláinte",
+    "hide_tabs": "Folaigh cluaisíní do dhaoine nach riarthóirí iad",
+    "in_use": "In úsáid",
+    "json_data": "Sonraí JSON",
+    "last_checked": "Seiceáladh:",
+    "load_from_file": "Luchtaigh ó chomhad",
+    "manual_duration": "Fad Láimhe (níos lú, roghnach)",
+    "mode_existing_profile": "Cuir leis an bPróifíl Reatha",
+    "mode_new_profile": "Cruthaigh Próifíl Nua",
+    "new_profile_name": "Ainm próifíle nua",
+    "panel_default_tab": "Cluaisín réamhshocraithe",
+    "phase_name": "Ainm",
+    "power": "Cumhacht",
+    "profile": "Próifíl",
+    "profile_name": "Ainm Próifíl",
+    "progress": "Dul chun cinn",
+    "read_only": "Inléite amháin",
+    "ref_cycle": "Timthriall Tagartha (roghnach)",
+    "refresh_interval": "Eatramh (í) athnuachan",
+    "remaining": "fágtha",
+    "remove_label": "- Bain an lipéad -",
+    "rename_profile": "Athainmnigh Próifíl",
+    "resulting_profile": "Próifíl mar thoradh air",
+    "save_mode": "Mód Sábháil",
+    "seconds_from_start": "Soicind ón tús",
+    "select_profile": "Roghnaigh Próifíl",
+    "show_debug": "Taispeáin cárta dífhabhtaithe cluiche beo ar an leathanach Stádas (muinín, débhríocht, príomhiarrthóirí)",
+    "show_expected": "Taispeáin forleagan cuar ionchais (próifíl chomhoiriúnaithe, oráiste)",
+    "show_raw": "Taispeáin léamha braite amh (gan maolú, liath)",
+    "status": "Stádas",
+    "tail_trim": "Bearradh Deiridh (s)",
+    "ungrouped": "Neamhghrúpáilte",
+    "unlabelled": "Gan lipéad",
+    "unlabelled_paren": "(gan lipéad)",
+    "expected": "Ionchais",
+    "raw_socket": "Soicéad amh",
+    "artifact_interruption": "Idirbhriseadh",
+    "artifact_low_power": "Cumhacht íseal",
+    "artifact_high_power": "Cumhacht ard",
+    "artifact_anomaly": "Neamhghnáthacht",
+    "auto_fine_tune_on": "mion-tiúnadh uathoibríoch air (thart ar {hour}:00)",
+    "cohesion_good": "comhtháthú {pct}%",
+    "cohesion_low": "⚠ comhtháthú íseal {pct}%",
+    "group_name": "Ainm an ghrúpa",
+    "members": "Baill",
+    "models_fine_tuned": "({count} múnla mion-tiúnta)",
+    "panel_language": "Teanga an phainéil"
+  },
+  "badge": {
+    "golden_cycle": "Timthriall tagartha taifeadta",
+    "reviewed": "Athbhreithnithe",
+    "feedback_requested": "Aiseolas iarrtha",
+    "needs_review": "Athbhreithniú de dhíth",
+    "overrun": "Rith sé níos faide ná mar is gnách",
+    "artifact_tip": "{n} aimhrialtachtaí braite (m.sh. osclaíodh an doras i lár an timthrialla) — oscailte chun iad a fheiceáil ar an ngraf",
+    "restart_gap_tip": "{n} bearna atosaithe HA: tá poll sa rian cumhachta",
+    "poor_fit_tip": "Stair mheaitseála neamh-chomhsheasmhach — smaoinigh ar an bpróifíl seo a atógáil",
+    "fair_fit_tip": "Comhsheasmhacht measartha meaitseála — tá scóir muiníne níos ísle ag roinnt timthriallta a shanntar don phróifíl seo. Lipéadaigh níos mó timthriallta nó ath-thaifeadadh an phróifíl chun cruinneas a fheabhsú.",
+    "fair_fit": "Inghlactha",
+    "poor_fit": "droch-cháilíocht",
+    "auto": "(uathbhraite)",
+    "built_in_tag": "ionsuite",
+    "declining": "↘ ag meath",
+    "improving": "↗ ag feabhsú",
+    "manual": "(roghnaithe de láimh)",
+    "steady": "→ seasta",
+    "using_defaults": "Ag baint úsáide as mainneachtainí seolta",
+    "using_tuned": "Ag baint úsáide as meáchain tiúnta"
+  },
+  "modal": {
+    "merge_cycles": "Cumaisc {n} Timthriall",
+    "auto_label": "Uath-Lipéadaigh Timthriallta",
+    "correct_feedback": "Aiseolas Ceart",
+    "create_profile": "Cruthaigh Próifíl",
+    "cycle": "Timthriall",
+    "edit_phase": "Cuir Céim in Eagar",
+    "import_config": "Cumraíocht Iompórtála",
+    "label_cycle": "Lipéadaigh Timthriall",
+    "new_phase": "Céim Nua",
+    "process_recording": "Taifeadadh Próisis",
+    "edit_group": "Cuir grúpa próifíle in eagar",
+    "new_group": "Grúpa próifíle nua",
+    "process_history_title": "Stair a Phróiseáil",
+    "process_history_msg": "Ath-rith meaitseáil, athnuaigh moltaí, athtraenáil ML (más cumasaithe) agus athríomh sláinte timthrialla ar fud gach timthriall stóráilte. D'fhéadfadh sé seo tamall a thógáil.",
+    "process_history_ok": "Próiseáil"
+  },
+  "msg": {
+    "near_duplicate_cluster": "braisle próifíl gar-dhúblach braite. Ligeann grúpáil do mheaitseáil roghnú go hiontaofa idir cuma chomhchosúil (m.sh. an clár céanna ag teocht/casadh difriúil).",
+    "coverage_gap": "níl aon phróifíl chomhoiriúnach ag timthriallta le déanaí ({pct}% den 30 deireanach).",
+    "consider_new_profile": "Smaoinigh ar phróifíl nua a chruthú.",
+    "group_not_cohesive": "Níl na próifílí seo cosúil go leor le grúpáil go hiontaofa, mar sin déileálann meaitseáil leo ina n-aonar go dtí go mbainfidh tú an t-asluiteach amach nó go scoiltfidh tú an grúpa.",
+    "group_modal_help": "Grúpchláir a bhfuil an cruth céanna orthu agus a bhíonn éagsúil ó thaobh teochta/casadh de (d’fhéadfadh go n-athróidh tréimhsí ama). Trí scóir a mheaitseáil leis an ngrúpa mar iarrthóir amháin, roghnaíonn sé ansin an ball is fearr a fheistiú. Pioc ar a laghad 2; léiríonn an forleagan cé chomh cosúil agus atá siad.",
+    "showing_suggestions": "Socrú {count} á thaispeáint le moltaí.",
+    "show_all_settings": "Taispeáin gach socrú",
+    "tuning_suggestions_available": "{count} moladh tiúnta ar fáil ó thimthriallta breathnaithe. Tá siad le feiceáil in aice leis na réimsí ábhartha.",
+    "legacy_actions_title": "{count} gníomh saincheaptha oidhreachta fós ar siúl",
+    "old_actions_warning": "Cumraithe leis an eagarthóir seanghníomhartha (bainte anois). Cuireann siad tine ar imeachtaí rothaíochta go fóill ach ní féidir iad a chur in eagar anseo a thuilleadh. Tiontaigh iad ina ngnáth-uathoibriú, nó bain amach iad.",
+    "no_settings_match": "Níl aon socruithe ag teacht le \"{q}\"",
+    "clear_debug_hint": "Bain sonraí dífhabhtaithe stóráilte chun spás a shaoradh.",
+    "wipe_history_warning": "Scrios go buan gach timthriall agus próifíl. Ní féidir é a chealú.",
+    "export_description": "Easpórtáil gach próifíl agus timthriall chuig JSON, nó cuir ar ais ó easpórtáil roimhe seo.",
+    "log_buffer_hint": "Is nua ar dtús · maolaíonn sé an 500 taifead ha_washdata deiridh ó atosaíodh é · tarraing an t-imeall íochtair chun méid a athrú.",
+    "review_profile_tip": "An clár tá an timthriall seo lipéadaithe mar. Má bhí an clár uathbhraite mícheart, ceartaigh anseo é - múineann lipéadú meaitseáil do thimthriallta amach anseo.",
+    "review_quality_tip": "Cé chomh glan is atá an timthriall seo. Maith = sampla téacsleabhar den chlár seo; Drochbhraite = braite ach torannach nó aitíopúil; Do-úsáidte = míbhraite (cumasctha, teasctha nó spíonta). Tiomáineann sé an scór sláinte agus cé na timthriallta a cheadaítear chun an tsamhail a oiliúint.",
+    "review_recorded_tip": "Marcáil é seo mar thimthriall tagartha lámh-roghnaithe dá chlár - an ról céanna le timthriall taifeadta de láimh. Coinnítear timthriallta tagartha i gcónaí, síolaítear an teimpléad meaitseála, agus ní scaoiltear iad le glantachán. (Is é seo an bhratach \"órga\"/thaifeadta; tá an dá rud mar an gcéanna.)",
+    "review_tags_tip": "Bratacha roghnacha a chuireann síos ar cad a chuaigh mícheart leis an timthriall seo, mar sin is féidir le hoiliúint agus le glantachán cuntas a thabhairt air.",
+    "review_notes_tip": "Nótaí le haghaidh do tagartha féin saor in aisce,. Ní úsáidtear meaitseáil nó oiliúint.",
+    "review_confirm_help": "Deimhnigh an bhfuarthas an timthriall seo i gceart. Déanann na hathbhreithnithe an múnla a oiliúint ar do mheaisín - dá mhéad timthriallta a dheimhníonn tú, is amhlaidh is fearr a gheobhaidh meaitseáil agus scóráil sláinte. Is leor Maith/Oll tapaidh.",
+    "review_notes_placeholder": "Nótaí (roghnach)",
+    "compare_profiles_tip": "Forleagan clúdaigh phróifíle eile ar an gcairt thuas chun a fheiceáil cé acu ceann is fearr a oireann don timthriall seo.",
+    "artifact_header": "{n} aimhrialtachtaí a braitheadh ​​le linn an timthrialla seo",
+    "artifact_footer": "Aibhsithe ar an ngraf thuas. Is déantáin dhíomuan iad seo (m.sh. osclaíodh an doras i lár an timthrialla), ní gá gur fadhbanna iad.",
+    "restart_gap_header": "{n} bearna atosaithe HA le linn an chiorcail seo",
+    "restart_gap_item": "{dur} bearna",
+    "restart_gap_footer": "Aibhsithe ar an ngraf. Tá sonraí cumhachta ar iarraidh do na heatraimh seo; d'úsáid meaitseáil léamha fíora amháin.",
+    "profile_poor_health_detail": "Bíonn cruthanna neamh-chomhsheasmhacha nó muinín íseal ag timthriallta a shanntar don phróifíl seo. Smaoinigh ar an gclúdach a atógáil nó athbhreithniú a dhéanamh ar thimthriallta lipéadaithe.",
+    "trend_duration_longer": "Fad treochta níos faide ({pct}%/timthriall) — meánlíon le déanaí {avg}",
+    "trend_duration_shorter": "Fad treochta níos giorra ({pct}%/timthriall) — meánlíon le déanaí {avg}",
+    "trend_energy_up": "Fuinneamh ag dul in airde ({pct}%/timthriall) — meánlíon le déanaí {avg}",
+    "trend_energy_down": "Fuinneamh ag treochtáil síos ({pct}%/timthriall)",
+    "performance_trend": "Treocht feidhmíochta ({n} thimthriall)",
+    "maintenance_advisory": "D’fhéadfadh go léireodh méadú ar fhad ré/fuinneamh cothabháil fearas (m.sh. díscálaithe, glanadh scagairí).",
+    "manual_duration_hint": "Meánfhad/fad timthriall ionchasach na próifíle, a úsáidtear le haghaidh meastacháin a bheidh fágtha. Cuir in eagar é a shocrú; fágtar é gan athrú coinníonn sé an luach reatha.",
+    "appliance_monitor": "Monatóir fearas",
+    "auto_label_intro": "Sann próifílí do thimthriallta neamhlipéadaithe a nglanann a muinín meaitseála an tairseach.",
+    "cleanup_intro": "Forleagtha gach timthriall lipéadaithe. Cuir tic as na hasluiteacha agus scrios iad chun an phróifíl a ghlanadh.",
+    "compare_overlay_profiles": "Próifílí forleagan (lag)",
+    "compare_selected_cycles": "Timthriallta roghnaithe (soladach) — taispeáin / folaigh",
+    "feedback_prompt": "Deimhnigh go raibh sé ceart, ceartaigh an clár, nó déan neamhaird de.",
+    "import_intro": "Luchtaigh comhad easpórtáilte nó greamaigh pálasta JSON thíos.",
+    "live_chart_loading": "Léirítear cairt chumhachta bheo de réir mar a thagann léamha.",
+    "loading": "Á lódáil…",
+    "loading_curve": "Cuar á lódáil…",
+    "loading_settings": "Socruithe á lódáil…",
+    "maintenance_requires_access": "Teastaíonn rochtain iomlán ó chothabháil agus easpórtáil/allmhairiú.",
+    "matching_tuning_intro": "Nuair a bhíonn tú ag foghlaim, déanann WashData a choigeartú freisin cé mhéad meáchan atá ag meaitseáil clár i gcomparáid le fad ama agus fuinnimh.",
+    "merge_intro": "Cuirtear na timthriallta roghnaithe le chéile i gceann amháin (ord croineolaíoch; bearnaí a líonadh le 0 W). Roghnaigh an phróifíl mar thoradh air.",
+    "ml_intro": "Longa WashData le samhlacha cliste a oibríonn as an mbosca.",
+    "ml_learned_intro": "Múnlaí mionchoigeartaithe don mheaisín seo.",
+    "ml_loading": "ML á lódáil…",
+    "ml_settings_intro": "Dhá lasc neamhspleácha: cuireann ceann amháin na samhlacha i bhfeidhm agus timthriall ar siúl, ligeann an ceann eile do WashData iad a mhionchoigeartú ar do mheaisín le himeacht ama.",
+    "no_cycles_match": "Ní mheaitseálann aon timthriall leis an scagaire reatha.",
+    "no_cycles_profile": "Níl aon timthriallta don phróifíl seo.",
+    "no_cycles_yet": "Níl aon timthriallta taifeadta fós.",
+    "no_device_selected": "Níor roghnaíodh aon ghléas.",
+    "no_devices": "Níl aon ghléas WashData cumraithe fós.",
+    "no_envelope": "Níl aon chlúdach fós - atógáil tar éis timthriallta lipéadaithe.",
+    "no_envelope_overlay": "Níl clúdach litreach ar fáil le forleagan.",
+    "no_fine_tuned": "Ní dhéanfaidh aon ní mionchoigeartaithe go fóill - tá WashData ag baint úsáide as a samhlacha ionsuite.",
+    "no_logs": "Níl aon taifid loga maolaithe fós.",
+    "no_match_yet": "Níl aon iarracht meaitseála ar bith fós - tagann sé seo i bhfeidhm le linn timthriall reatha.",
+    "no_other_users": "Níor aimsíodh aon úsáideoir Cúntóir Baile eile.",
+    "no_phases": "Níl aon chéim sainithe.",
+    "no_phases_assigned": "Níl aon chéim sannta.",
+    "no_profiles_compare": "Gan próifílí le comparáid a dhéanamh.",
+    "no_profiles_overlay": "Gan próifílí le forleagan.",
+    "no_profiles_yet": "Níl próifílí ann fós. Cruthaigh ceann as timthriall lipéadaithe.",
+    "no_profiles_yet_short": "Níl próifílí ann fós.",
+    "no_split_points": "Uimh pointí scoilte fós.",
+    "no_suggestions": "Gan aon mholtaí gníomhacha.",
+    "pending_feedback": "Ar feitheamh aiseolas braite",
+    "phase_catalog_intro": "Míreanna ainmnithe de thimthriall (Réamh-nigh, Téamh, Casadh…). Sann iad do phróifíl óna phainéal rialaithe.",
+    "phase_ranges_intro": "Raonta céime (nóiméad ó thús an timthrialla) forleagtha ar an gcuar meánach. Cuir luachanna in eagar chun réamhamharc beo a dhéanamh.",
+    "preferences_admin": "Sainroghanna, painéal & rialú rochtana",
+    "preferences_adv": "Roghanna",
+    "prefs_personal": "Baineann siad seo le do chuntas Cúntóir Baile amháin.",
+    "profiles_intro": "Cliceáil ar phróifíl le haghaidh staitisticí, céimeanna agus glantacháin. Grúpáil cláir atá beagnach comhionann (an cruth céanna/an fad céanna, teocht dhifriúil nó casadh) agus mar sin roghnaíonn meaitseáil iontaofa eatarthu.",
+    "rbac_hint": "Nuair atá sé múchta, beidh rochtain iomlán ag gach úsáideoir Cúntóir Baile (an réamhshocrú). Bíonn rochtain iomlán ag riarthóirí i gcónaí agus is féidir leo gach duine a bhainistiú.",
+    "recent_logs": "Taifid ha_washdata le déanaí",
+    "recording_in_progress": "Taifeadadh ar siúl",
+    "review_in_settings": "Léirmheas sna Socruithe",
+    "review_to_cycles": "Oscail scuaine athbhreithnithe Cycles",
+    "saving_triggers_reload": "Spreagann coigilteas athlódáil comhtháthú. Féadfaidh eintitis HA a thaispeáint go hachomair nach bhfuil siad ar fáil.",
+    "search_placeholder": "Socruithe cuardaigh…",
+    "see_recorder": "Féach ar ghiuirléid an taifeadta thíos",
+    "split_intro": "Cliceáil ar an ngraf chun scoiltphointe a chur leis nó a bhaint, nó braith go huathoibríoch le bearnaí díomhaoin. Is féidir le gach deighleog dá bharr a phróifíl féin a fháil.",
+    "storage_diagnostics": "Staitisticí stórála, cothabháil, onnmhairiú / allmhairiú",
+    "trim_intro": "Tarraing na hanlaí dearga, nó cuir isteach luachanna. Baintear gach rud taobh amuigh den fhuinneog.",
+    "unsure_detected_prefix": "Níl WashData cinnte gur braitheadh ​​é",
+    "updated": "Nuashonraithe",
+    "feedback_cycles_pending": "{n} timthriall le hathbhreithniú",
+    "artifact_spike_detail": "Chuaigh os cionn an bhanda cumhachta ngnáthaigh ar feadh ~{n} s.",
+    "artifact_dip_detail": "Thit faoin mbanda cumhachta ngnáthaigh ar feadh ~{n} s.",
+    "artifact_pause_detail": "Thit an chumhacht go dtí beagnach nialas ar feadh ~{n} s ansin d'atosaigh — is dócha gur osclaíodh an doras i lár an timthrialla nó cuireadh an timthriall ar sos.",
+    "automations_intro": "Lasann WashData {start} / {end} imeachtaí agus nochtann sé eintitis, mar sin is fearr fógraí agus gníomhartha a thógáil mar uathoibríochtaí gnátha Home Assistant. Feictear thíos uathoibríochtaí a úsáideann an gléas seo.",
+    "collecting_data": "Ag bailiú sonraí — tá {need} timthriall eile de dhíth sula féidir mion-tiúnadh a thosú ({current}/{min}).",
+    "enough_data": "Sonraí go leor le foghlaim uaidh ({current}/{min} timthriall).",
+    "filter_by_profile": "Scag de réir próifíle…",
+    "group_preview_hint": "Tic 2+ baill chun a gcuar cumhachta a réamhamharc agus a chur i gcomparáid.",
+    "notify_services_hint": "Úsáid {entity} ID seirbhíse (camóg-scartha do iomadú). Athróga teimpléid: {vars}.",
+    "process_history_hint": "Ath-rith meaitseáil ar gach timthriall stóráilte, athnuaigh moltaí tiúnála, athtraenáil múnlaí ML (más cumasaithe) agus athríomh sláinte an timthrialla. Rith tar éis baisceanna athbhreithnithe."
+  },
+  "phase_desc": {
+    "pre_wash": "Soak tosaigh nó réamhchóireáil roimh an príomh-nigh.",
+    "wash": "Príomh-thimthriall níocháin le gluaiseacht druma agus téamh roghnach.",
+    "wash_dw": "Nigh an príomh-ghlantach le téamh.",
+    "rinse": "Céim sruthlaithe uisce glan. Féadfaidh an chéim seo arís agus arís eile.",
+    "spin": "Eastóscadh ardluais chun uisce a bhaint as an ualach.",
+    "spin_wd": "Eastóscadh ardluais roimh an trasdul a thriomú.",
+    "soak": "Tréimhse maosaithe ísealghníomhaíochta idir céimeanna gníomhacha níocháin.",
+    "soak_dw": "Tréimhse sínte le haghaidh ithir throm.",
+    "anti_crease": "Rotáil ghearr druma ó am go chéile tar éis críochnú chun roic éadaigh a chosc.",
+    "heat_up": "Téamh tosaigh an téitheoir sula dtosaítear ar an triomú iomlán.",
+    "drying": "Príomhthréimhse tumbling téite.",
+    "cool_down": "Tumbling gan teas gar do dheireadh na sraithe.",
+    "anti_wrinkle": "Rolladh druma tréimhsiúil tar éis an timthrialla chun roic éadaigh a chosc.",
+    "sensor_check": "Sos gearr ísealchumhachta agus an triomacht á thomhas.",
+    "drain_and_switch": "Idirthréimhse ó níocháin go modh a thriomú.",
+    "pre_rinse": "Spraeáil síos tosaigh roimh nigh glantach.",
+    "dry": "Céim triomúcháin ag baint úsáide as téitheoir agus/nó teas iarmharach.",
+    "sanitize": "Céim glantacháin ardteochta do chláir sláintíochta."
+  },
+  "health": {
+    "good": "✓ Caighdeán maith próifíle",
+    "fair": "Caighdeán inghlactha próifíle",
+    "poor": "⚠ Caighdeán bocht próifíle"
+  },
+  "ml": {
+    "fit_fair": "Inghlactha",
+    "builtin_models": "● Ag baint úsáide as samhlacha ionsuite",
+    "fit_good": "Maith",
+    "fit_slight": "Beagán",
+    "fit_strong": "Láidir",
+    "fit_weak": "Lag",
+    "fit_word": "oiriúnacht",
+    "personalized": "● Pearsantaithe don mheaisín seo"
+  },
+  "trend": {
+    "up": "Ag treocht suas",
+    "down": "Ag treocht síos"
+  },
+  "log": {
+    "all_levels": "Gach leibhéal"
+  },
+  "pref": {
+    "date_absolute": "Absalóideach (m.sh. 14:32 ar 2 Iúil)",
+    "date_relative": "Gaol (m.sh. 2 uair ó shin)",
+    "lang_auto": "Réamhshocrú an chórais ({lang})",
+    "lang_en": "Béarla",
+    "use_panel_default": "(réamhshocrú painéil)"
+  },
+  "quality": {
+    "bad": "olc",
+    "good": "Maith",
+    "unusable": "Do-úsáidte"
+  },
+  "status": {
+    "active": "Gníomhach",
+    "all_statuses": "Gach stádas",
+    "ambiguous": "débhríoch",
+    "auto_detect": "Auto-bhrath",
+    "clear": "Glan",
+    "completed": "Críochnaithe",
+    "fine_tuning": "mionchoigeartú anois…",
+    "force_stopped": "Stopadh fórsa",
+    "idle": "Díomhaoin",
+    "interrupted": "Idirbhriste",
+    "ready": "Réidh le próiseáil",
+    "recording": "Ag taifeadadh",
+    "training": "Ag traenáil…"
+  },
+  "tab": {
+    "advanced": "Casta",
+    "diagnostics": "Diagnóisic",
+    "history": "Timthriallta",
+    "ml": "Oiliúint ML",
+    "pp_cleanup": "Glanta",
+    "pp_manage": "Bainistigh",
+    "pp_overview": "Forbhreathnú",
+    "pp_phases": "Céimeanna",
+    "profiles": "Próifílí",
+    "settings": "Socruithe",
+    "status": "Forbhreathnú",
+    "subtab_phase_catalog": "Catalóg Chéim",
+    "subtab_profiles": "Próifílí"
+  },
+  "tag": {
+    "early_end": "Deireadh luath",
+    "late_start": "Tús déanach",
+    "merged": "Timthriallta cumaisc",
+    "noise": "Torann",
+    "sensor_gap": "Bearna braiteoir",
+    "split": "Timthriall scoilte",
+    "wrong_profile": "Próifíl mícheart"
+  },
+  "toast": {
+    "access_saved": "Rialú rochtana sábháilte",
+    "all_wiped": "Scriosadh na sonraí go léir",
+    "analysis_complete_none": "Anailís críochnaithe: gan aon mholtaí nua",
+    "auto_label_complete": "Uathlipéad críochnaithe",
+    "automation_deleted": "Scriosadh uathoibriú",
+    "correction_submitted": "Ceartúchán curtha isteach",
+    "cycle_deleted": "Scriosadh an timthriall",
+    "cycle_force_stopped": "Timthriall fórsa-stoptha",
+    "cycle_labelled": "Timthriall lipéadaithe",
+    "cycle_paused": "Timthriall ar sos",
+    "cycle_resumed": "Timthriall atosaithe",
+    "cycle_trimmed": "Timthriall bearrtha",
+    "cycles_merged": "Comhcheangail na timthriallta",
+    "envelope_rebuilt": "Clúdach atógtha",
+    "envelopes_rebuilt": "Clúdaigh atógtha",
+    "export_downloaded": "Easpórtáil íosluchtaithe",
+    "feedback_all_dismissed": "Díbheadh ​​gach aiseolas",
+    "feedback_confirmed": "Deimhníodh an t-aiseolas",
+    "feedback_dismissed": "Díbheadh ​​an t-aiseolas",
+    "group_deleted": "Scriosadh an grúpa",
+    "group_name_required": "Tá ainm an ghrúpa ag teastáil",
+    "group_saved": "Sábháladh an grúpa",
+    "import_successful": "Iompórtáil rathúil; athlódáil comhtháthú",
+    "json_required": "Tá sonraí JSON ag teastáil",
+    "legacy_removed": "Baineadh gníomhartha oidhreachta",
+    "logs_exported": "Logchomhaid easpórtáilte",
+    "matching_reverted": "Meaitseáil meáchain ar ais go mainneachtainí",
+    "min_2_profiles": "Roghnaigh 2 phróifíl ar a laghad do ghrúpa",
+    "ml_training_no_improvement": "Oiliúint curtha i gcrích: bunlíne coinnithe (gan feabhsú)",
+    "models_reverted": "Samhlacha ar an ngléas ar ais chuig an mbunlíne",
+    "name_required": "Ainm ag teastáil",
+    "no_split_found": "Níor aimsíodh aon bhearnaí díomhaoin le scoilt orthu",
+    "panel_settings_saved": "Socruithe painéil sábháilte",
+    "phase_name_required": "Tá ainm na céime ag teastáil",
+    "phase_updated": "Céim nuashonraithe",
+    "phases_saved": "Céimeanna sábháilte",
+    "preferences_saved": "Sainroghanna a shábháil",
+    "profile_name_required": "Tá ainm próifíle ag teastáil",
+    "profile_renamed": "Athainmníodh an phróifíl",
+    "recording_discarded": "Taifeadadh caite",
+    "recording_saved": "Taifeadadh sábháilte ar phróifíl",
+    "recording_started": "Thosaigh an taifeadadh",
+    "recording_stopped": "Stopadh an taifeadadh",
+    "review_saved": "Léirmheas sábháilte",
+    "settings_saved": "Socruithe sábháilte; athlódáil comhtháthú",
+    "suggestions_applied": "Moltaí curtha i bhfeidhm; athlódáil comhtháthú",
+    "suggestions_dismissed": "Moltaí a dhíbhe"
+  },
+  "section": {
+    "basic": {
+      "label": "Bunúsach",
+      "intro": "Féiniúlacht lárnach agus na riachtanais is gá do mhórchuid socruithe."
+    },
+    "detection": {
+      "label": "Braiteacht",
+      "intro": "Conas a bhraitear timthriall mar thosaigh, ag rith agus ag críochnú."
+    },
+    "matching": {
+      "label": "Meaitseáil",
+      "intro": "Conas a meaitseáiltear timthriallta críochnaithe le próifílí foghlamtha agus lipéadaithe."
+    },
+    "timing": {
+      "label": "Uainiú agus Faire",
+      "intro": "Cadence cúlra, an faire as líne agus cothabháil."
+    },
+    "anti_wrinkle": {
+      "label": "Frith-Roc",
+      "intro": "Aithníonn mód frith-roc pulsanna druma íseal-chumhachta gearr tar éis an phríomhchéim agus coimeádann siad ceangailte leis an timthriall críochnaithe."
+    },
+    "delay": {
+      "label": "Tús Moillithe",
+      "intro": "Aimsíonn braiteacht tosaigh moillithe nuair atá fearas cumhachtaithe ach nár thosaigh a thimthriall fós."
+    },
+    "triggers": {
+      "label": "Spreagthóirí agus Doirse",
+      "intro": "Comharthaí seachtracha roghnach: spreagthóir deiridh, braiteoir dorais, lasc sosa, agus meabhrúchán díluchtaithe."
+    },
+    "notifications": {
+      "label": "Fógraí",
+      "intro": "Cathain agus conas a chuirtear ar an eolas tú faoi imeachtaí timthrialla."
+    },
+    "ml_training": {
+      "label": "Oiliúint ML",
+      "intro": "Sceideal ath-oiliúna foghlama meaisín ar an ngléas agus socruithe sonraí."
+    }
+  },
+  "setting_group": {
+    "thresholds_gap": {
+      "label": "Tairseacha agus Bearna"
+    },
+    "cycle_start": {
+      "label": "Tús Timthrialla"
+    },
+    "cycle_end": {
+      "label": "Deireadh Timthrialla"
+    },
+    "signal_processing": {
+      "label": "Próiseáil Comhartha"
+    },
+    "predictive_end": {
+      "label": "Deireadh Réamh-mheasta"
+    },
+    "dishwasher_end": {
+      "label": "Deireadh Miasniteora"
+    },
+    "dtw_refinement": {
+      "label": "Mionathrú DTW"
+    },
+    "match_scoring": {
+      "label": "Scóráil Meaitseála"
+    },
+    "duration_gates": {
+      "label": "Geataí Faid"
+    },
+    "auto_labeling": {
+      "label": "Uath-Lipéadú"
+    },
+    "watchdog": {
+      "label": "Faire"
+    },
+    "housekeeping": {
+      "label": "Tís"
+    },
+    "debug": {
+      "label": "Dífhabhtú"
+    },
+    "external_end_trigger": {
+      "label": "Spreagthóir Deiridh Seachtrach"
+    },
+    "door_pause": {
+      "label": "Doras agus Sos"
+    },
+    "unload_reminder": {
+      "label": "Meabhrúchán Díluchtaithe"
+    },
+    "services": {
+      "label": "Seirbhísí"
+    },
+    "timing": {
+      "label": "Uainiú"
+    },
+    "messages": {
+      "label": "Teachtaireachtaí"
+    },
+    "energy": {
+      "label": "Fuinneamh"
+    },
+    "cycle_timers": {
+      "label": "Amadóirí Timthrialla"
+    },
+    "schedule": {
+      "label": "Sceideal"
+    },
+    "data_management": {
+      "label": "Bainistiú Sonraí"
+    }
+  },
+  "setting": {
+    "name": {
+      "label": "Ainm Gléis",
+      "doc": "Ainm taispeána a thaispeántar ar an liosta comhtháthaithe HA agus ar chlár na ngléasanna."
+    },
+    "device_type": {
+      "label": "Cineál Gléis",
+      "doc": "Rang fearas. Socraíonn sé mainneachtainí braite inbhraite (tairseacha, seach-mhoill, láimhseáil deiridh) arna tiúnadh don chineál fearais sin; é a athrú ach amháin má bhí an gléas socraithe ar dtús mar an cineál mícheart."
+    },
+    "power_sensor": {
+      "label": "Braiteoir Cumhachta",
+      "doc": "An t-aonán braiteora a thuairiscíonn cumhacht beo i vata don fhearas seo (m.sh. sensor.washer_power). Tá gach braite timthriall bunaithe ar an gcomhartha seo."
+    },
+    "min_power": {
+      "label": "Cumhacht Íosta",
+      "doc": "Íoschumhacht iomlán a mheastar a bheith gníomhach. Déileáiltear le léamha thíos mar 0 W (fuireachas), ag scagadh amach an t-ualach phantom de phlocóidí cliste agus de stiúir fuireachais."
+    },
+    "off_delay": {
+      "label": "Moill As",
+      "doc": "Tá sé in am fanacht tar éis don chumhacht titim sula ndearbhaítear go bhfuil an timthriall críochnaithe. Má atosaíonn an chumhacht laistigh den fhuinneog seo leanann an timthriall ar aghaidh gan uaim - sosanna an droichid seo idir na céimeanna níocháin. Tá céimeanna fada triomúcháin ag miasniteoirí (cumhacht as ar feadh 20-60 nóiméad) agus mar sin ní mór an mhoill a bheith níos mó ná sin chun an t-iomlán nigh+tirim a choinneáil mar thimthriall amháin."
+    },
+    "linked_device": {
+      "label": "Grúpáil faoi Ghléas",
+      "doc": "Neadaíonn an gléas WashData seo go roghnach faoi ghléas eile (m.sh. an breiseán cliste) sa chlár gléas HA, a thaispeántar mar \"Ceangailte trí ...\"."
+    },
+    "start_threshold_w": {
+      "label": "Tairseach Tosaithe",
+      "doc": "Ní mór an chumhacht a ardú os cionn an leibhéil seo chun a dhearbhú go bhfuil timthriall tosaithe. Má shocraítear é ró-íseal is cúis le tosú bréagach ó chumhacht fuireachais; ró-ard agus cláir a thosaíonn go mall (líonadh fuar) caillte. Socraíonn an t-inneall molta é seo díreach os cionn na cumhachta gníomhach is ísle atá ag an meaisín."
+    },
+    "stop_threshold_w": {
+      "label": "Tairseach Stopadh",
+      "doc": "Ní mór don chumhacht titim faoin leibhéal seo sula dtosaíonn an comhaireamh síos seach-mhoill. Socraigh é faoi bhun an Tairseach Tosaigh - is é an bhearna eatarthu an banna hysteresis a chuireann cosc ​​​​ar flicker. Má tá siad socraithe ró-ard, cuireann céimeanna ísealchumhachta (sruthlaithe greim, frith-chosc) tús bréagach leis an seicheamh deiridh."
+    },
+    "min_off_gap": {
+      "label": "Bearna Íosta As",
+      "doc": "Má mhúchadh an meaisín ar feadh níos lú ná an t-am seo, caitear leis an seicheamh ar/as/ar mar thimthriall leanúnach amháin. Cosc ar chláir sáithithe (cumhachtaí meaisín as ar feadh roinnt nóiméad lár-nigh) ó bheith roinnte ina dhá thimthriall ar leith. Socraigh é níos giorra ná an bhearna idir do chuid ualaí cúl le cúl más mian leat iad siúd a áireamh mar thimthriallta ar leith. Cosnaíonn mainneachtainí de chineál gléas an ghnáthsos laistigh den timthriall do gach fearas."
+    },
+    "start_duration_threshold": {
+      "label": "Fad Tosaithe",
+      "doc": "Ní mór don chumhacht fanacht os cionn na tairsí tosaithe chomh fada seo chun tús ceart a dhearbhú, rud a chuirfidh cosc ​​ar scoránáin scoilte ar/as ó thimthriall a thosú."
+    },
+    "start_energy_threshold": {
+      "label": "Fuinneamh Tosaithe",
+      "doc": "Fuinneamh (cumhacht x am) a chaithfidh an fearas a ithe sula Rithfidh sé. Tá fuinneamh an-íseal ag spike ard-chumhachta gairid agus déantar neamhaird de, rud a chuireann cosc ​​​​ar thosaithe bréagacha."
+    },
+    "completion_min_seconds": {
+      "label": "Íos-Fhad Timthrialla",
+      "doc": "Déantar timthriallta níos giorra ná seo a chaitheamh i leataobh mar thimthriallta taibhsí (ritheann tástála, ag oscailt an dorais chun sock a chur leis)."
+    },
+    "running_dead_zone": {
+      "label": "Marbhchrios Rith",
+      "doc": "Tar éis tús a chur le timthriall, déantar neamhaird de thumanna cumhachta laistigh den fhuinneog seo. Líonann meaisíní níocháin le huisce fuar (ag titim in aice le 0 W roimh théamh) - gan an chosaint seo is cosúil le deireadh timthrialla an chéim líonta. NÍ théann sé seo thar sonraí: déantar an rian cumhachta iomlán a thaifeadadh ó T=0. Tomhaiseann an t-inneall molta patrún tosaithe iarbhír do mheaisín agus méadaíonn sé seo go huathoibríoch."
+    },
+    "end_energy_threshold": {
+      "label": "Tairseach Fuinnimh Deiridh",
+      "doc": "Le linn an chomhairimh asmhoill, cuirtear fuinneamh carntha (watta x am) i gcomparáid leis an tairseach seo. Má sháraítear é, athshocraíonn an comhaireamh síos - tumbles frith-crease a choinneáil agus eireabaill triomú miasniteoir a ghabhann leis an timthriall in ionad iad a ghearradh gearr. Ardaigh é má thagann deireadh le timthriallta ró-luath le linn an fhuaraithe; ísligh é má bhíonn an bhrath mall."
+    },
+    "end_repeat_count": {
+      "label": "Comhaireamh Atráth Deiridh",
+      "doc": "Líon na léamha comhleanúnacha faoi bhun na tairsí a theastaíonn sula dtiocfaidh deireadh leis an timthriall. Tá 1 ceart go leor don chuid is mó de na plocóidí. Ardaigh go 2-3 má thuairiscíonn do breiseán cliste ó am go chéile sampla bréagach-nialas i lár an timthrialla agus go bhfuil do thimthriallta ag críochnú roimh am."
+    },
+    "sampling_interval": {
+      "label": "Eatramh Sampláil",
+      "doc": "An t-am a bhfuiltear ag súil leis idir léamha braiteora - úsáidtear é chun an fhuinneog smúdála a mhéadú agus chun tús a chur le díospóireacht i gceart. Gabhtar gach nuashonrú braiteoir beag beann ar an luach seo; ní dhéanann sé ach na ríomhanna iartheachtacha a chalabrú. Tomhaiseann an t-inneall molta deireadh iarbhír do bhraiteora ó thimthriallta roimhe seo agus socraítear é seo go huathoibríoch."
+    },
+    "smoothing_window": {
+      "label": "Fuinneog Maoinithe",
+      "doc": "Cé mhéad atá an comhartha cumhachta amh smoothed. Tá Íseal (2) sofhreagrach ach noisy; ard (5) smooths spikes ach cuireann Readonly."
+    },
+    "abrupt_drop_watts": {
+      "label": "Titim Ghéar",
+      "doc": "Léiríonn titim cumhachta níos mó ná seo an timthriall mar Idirbhriseadh (Cealú láimhe) seachas bailchríoch nádúrtha."
+    },
+    "abrupt_drop_ratio": {
+      "label": "Cóimheas Titim Ghéar",
+      "doc": "Déileáiltear le titim níos mó ná an codán seo den chumhacht reatha freisin mar thitim tobann (0.6 = titim 60%). Comhlánaíonn sé an tairseach vata trasna méideanna fearas."
+    },
+    "profile_match_threshold": {
+      "label": "Tairseach Meaitseála",
+      "doc": "Íosscór cosúlachta (0-1) ag deireadh an timthrialla chun glacadh le sainaithint cláir. Ardaigh é chun sainaithint mícheart a laghdú; ísligh é mura bhfuil cláir do mheaisín á gcomhoiriúnú. Is pointe tosaigh coimeádach é réamhshocraithe 0.4."
+    },
+    "profile_unmatch_threshold": {
+      "label": "Tairseach Neamh-Mheaitseála",
+      "doc": "Má thiteann cluiche beo lár-timthriall faoi bhun an scór seo, glantar an t-aitheantas sealadach. Coinnigh beagán faoi bhun Thairseach na Meaitseála é ionas nach siompóidh laghdú gairid ar an gcuma chéanna an taispeáint ar ais go dtí nach bhfuil a mhacasamhail ann."
+    },
+    "profile_match_interval": {
+      "label": "Eatramh Meaitseála",
+      "doc": "Cé chomh minic is féidir iarracht a dhéanamh meaitseáil próifíle le linn timthriall reatha. Déanann réamhshocrú 300 s (5 nóiméad) an luas braite agus an LAP a chothromú."
+    },
+    "profile_match_min_duration_ratio": {
+      "label": "Cóimheas Íos-Fhad",
+      "doc": "Íosfhad timthrialla i gcoibhneas leis an bpróifíl. Ciallaíonn 0.9 nach mór do thimthriall a bheith 90% ar a laghad d’fhad na próifíle chun a bheith meaitseála."
+    },
+    "profile_match_max_duration_ratio": {
+      "label": "Cóimheas Uasfhad",
+      "doc": "Fad timthriall uasta i gcoibhneas leis an bpróifíl. Ciallaíonn 1.3 nach mór do thimthriall a bheith níos lú ná 130% d'fhad na próifíle chun a mheaitseáil."
+    },
+    "profile_duration_tolerance": {
+      "label": "Caoinfhulaingt Faid Próifíle",
+      "doc": "An banda +/- thart ar mheánfhad próifíle a úsáidtear le linn meaitseála. Ciallaíonn 0.25 go dtagann próifíl 60 nóiméad le timthriallta 45-75 nóiméad."
+    },
+    "duration_tolerance": {
+      "label": "Caoinfhulaingt Measacháin",
+      "doc": "Caoinfhulaingt do mheastacháin ama fágtha (aiseolas foghlama, ní meaitseáil). Má tá an t-achar iarbhír laistigh de +/-X% den mheastachán, áirítear é mar mheaitseáil mhaith."
+    },
+    "auto_label_confidence": {
+      "label": "Muinín Uath-Lipéadaithe",
+      "doc": "Má tá an scór meaitseála ag deireadh an timthrialla ag deireadh an timthrialla nó os a chionn sin, lipéadaítear an clár go huathoibríoch gan aon leid deimhnithe. Ardaigh é le cinnteacht níos airde a éileamh roimh uathlipéadú; é a ísliú chun níos mó a uathoibriú. Oibríonn sé i gcomhar le Muinín Foghlama thíos faoi."
+    },
+    "learning_confidence": {
+      "label": "Muinín Foghlama",
+      "doc": "Má thiteann an scór meaitseála idir seo agus Auto-Libel Muinín, iarrann fógra aiseolais ort an clár aitheanta a fhíorú. Faoin scór seo tá an cluiche ró-éiginnte le teacht chun solais. Ní mór é a choinneáil faoi Mhuinín Uath-Lipéad."
+    },
+    "suppress_feedback_notifications": {
+      "label": "Cuir Fógraí Aiseolais Faoi Chois",
+      "doc": "Ná tabhair fógra leanúnach nuair is gá athbhreithniú a dhéanamh ar thimthriall críochnaithe; tá an t-aiseolas fós le feiceáil sa scuaine athbhreithnithe Cycles."
+    },
+    "watchdog_interval": {
+      "label": "Eatramh Faire",
+      "doc": "Cé chomh minic agus a sheiceálann an faire cúlra do bhraiteoirí stoptha agus tréimhsí ama caite. Réamhshocrú 30 s."
+    },
+    "no_update_active_timeout": {
+      "label": "Am Críochnaithe gan Nuashonrú",
+      "doc": "Mura dtagann aon nuashonruithe cumhachta amach chomh fada agus a bheidh sé ar siúl, glac leis gur thit an breiseán as líne agus stop fórsa chun timthriall zombie a sheachaint. Ceadaíonn réamhshocraithe 600 s mogaill scamall nó mogall."
+    },
+    "progress_reset_delay": {
+      "label": "Moill Athshocraithe Dul Chun Cinn",
+      "doc": "Tar éis críochnú, coinnigh an dul chun cinn ag 100% chomh fada seo ionas go mbeidh Críochnaithe le feiceáil ar na deaiseanna sula n-athshocraíonn tú go Díomhaoin."
+    },
+    "auto_maintenance": {
+      "label": "Cothabháil Uathoibríoch (glantachán oíche)",
+      "doc": "Déan coimeád tís gach oíche: clúdaigh phróifíle a atógáil, sláinte an timthrialla a ríomh, rianta dífhabhtaithe a ghearradh agus na timthriallta is déanaí a choinneáil."
+    },
+    "expose_debug_entities": {
+      "label": "Nocht Eintitis Dífhabhtaithe",
+      "doc": "Aonáin HA diagnóiseacha breise a fhoilsiú (muinín a mheaitseáil, débhríocht, inmheánaigh stáit). Coinníonn sé liosta na n-eintiteas glan le haghaidh gnáthúsáide."
+    },
+    "save_debug_traces": {
+      "label": "Sábháil Rianta Dífhabhtaithe",
+      "doc": "Stóráil an rian cumhachta iomlán agus sonraí dífhabhtaithe meaitseála do gach timthriall. Úsáideach le haghaidh fabhtcheartaithe ach méadaíonn sé méid stórála."
+    },
+    "anti_wrinkle_enabled": {
+      "label": "Cumasaigh Braiteacht Frith-Roc",
+      "doc": "Aithnigh na bíoga gearra ísealchumhachta tumble a astaíonn triomadóir tar éis an phríomhchéim teasa agus coinnigh iad ceangailte leis an timthriall críochnaithe in ionad iad a léamh mar thimthriallta nua."
+    },
+    "anti_wrinkle_max_power": {
+      "label": "Uaschumhacht Frith-Roc",
+      "doc": "Déileáiltear le cuisle os cionn na cumhachta seo mar thimthriall fíor nua, ní mar thimthriall frith-roic. Socraigh díreach os cionn an chumhacht tumble-pulse."
+    },
+    "anti_wrinkle_max_duration": {
+      "label": "Uasfhad",
+      "doc": "Déileáiltear le bíoga níos faide ná seo mar thimthriall fíor seachas mar thimthriall frith-roic."
+    },
+    "anti_wrinkle_exit_power": {
+      "label": "Tairseach Cumhachta Imeachta",
+      "doc": "Ní mór don chumhacht titim faoi seo idir bíoga le go bhfanfaidh mód frithroctha gníomhach."
+    },
+    "delay_start_detect_enabled": {
+      "label": "Cumasaigh Braiteacht Tosaigh Mhoillithe",
+      "doc": "Braith cathain a bhíonn an fearas á chumhachtú agus ag fanacht (moill ar thús / ar fuireachas) ach nach bhfuil tús curtha lena thimthriall, mar sin ní dhearmadtar tarraingt fuireachais mar thimthriall reatha."
+    },
+    "delay_confirm_seconds": {
+      "label": "Soicindí Deimhnithe",
+      "doc": "Ní mór don chumhacht fanacht sa bhanda fuireachais ar feadh i bhfad sula ndéileáiltear leis an bhfearas mar fhearas feithimh le tosú seachas a bheith ag rith."
+    },
+    "delay_timeout_hours": {
+      "label": "Uaireanta Am Críochnaithe",
+      "doc": "Stop ag fanacht i mód moill-tús tar éis an oiread seo uaireanta agus ar ais go dtí díomhaoin, mar sin d'fhág meaisín faoi thiomáint ach nach bhfuil tosaithe ag fanacht go deo."
+    },
+    "external_end_trigger_enabled": {
+      "label": "Cumasaigh Spreagthóir Deiridh Seachtrach",
+      "doc": "Lig braiteoir dénártha seachtrach comhartha deireadh timthriall, chomh maith leis an bhrath atá bunaithe ar chumhacht ionsuite."
+    },
+    "external_end_trigger": {
+      "label": "Eintiteas Spreagthóra Sheachtraigh",
+      "doc": "Braiteoir dénártha a bhfuil a staid marcanna ag athrú deireadh an timthrialla (m.sh. teagmháil le fearas “críochnaithe” nó comhtháthú compánach)."
+    },
+    "external_end_trigger_inverted": {
+      "label": "Inbhéartaigh Spreagthóir Seachtrach (spreag ar AS)",
+      "doc": "Déan an braiteoir truicear a chasadh AS (seachas ON) a chóireáil mar chomhartha deireadh an timthrialla."
+    },
+    "door_sensor_entity": {
+      "label": "Eintiteas Braiteoir Dorais",
+      "doc": "Braiteoir dénártha doras roghnach. Úsáidtear é chun a bhrath nuair a osclaítear/díluchtaítear an fearas tar éis timthrialla."
+    },
+    "pause_cuts_power": {
+      "label": "Gearrann Sos Cumhacht Freisin (trí lasc)",
+      "doc": "Nuair a chuirtear timthriall ar sos, múch an tAonán Lasc thíos freisin. Ní féidir ach le fearais ar féidir a gcuid breiseán a ghearradh go sábháilte i lár an timthrialla."
+    },
+    "switch_entity": {
+      "label": "Eintiteas Laisc",
+      "doc": "Lasc roghnach scoránaigh ar sos agus ar ais ar nuair a atosú, a úsáidtear in éineacht le \"Sos laghduithe freisin an chumhacht\"."
+    },
+    "notify_unload_delay_minutes": {
+      "label": "Moill Meabhrúcháin Díluchtaithe",
+      "doc": "Nóiméad tar éis do thimthriall críochnú sula seolfar an meabhrúchán “díluchtaigh an meaisín” atá fós ar feitheamh. Socraigh 0 chun an meabhrúchán a dhíchumasú."
+    },
+    "pump_stuck_duration": {
+      "label": "Fad Stoite Caidéil",
+      "doc": "Soicind d’fhéadfadh caidéal rith go leanúnach sula n-aithnítear é mar rud a d’fhéadfadh a bheith greamaithe (cuirtear an t-imeacht an chaidéil greamaithe)."
+    },
+    "notify_start_services": {
+      "label": "Seirbhísí Tosaithe",
+      "doc": "cuir in iúl.* seirbhísí a ghlaoitear nuair a thosaíonn timthriall. Cuir ceann amháin in aghaidh an sprioc (teileafón, painéal, etc.); fág folamh gan fógra tosaithe."
+    },
+    "notify_finish_services": {
+      "label": "Seirbhísí Críochnaithe",
+      "doc": "cuir in iúl.* seirbhísí a ghlaoitear nuair a chríochnaíonn timthriall. Cuir ceann amháin in aghaidh na sprice; fág folamh gan fógra críochnaithe."
+    },
+    "notify_live_services": {
+      "label": "Seirbhísí Dul Chun Cinn Beo",
+      "doc": "fógra a thabhairt.* d'iarr seirbhísí nuashonruithe beo ar dhul chun cinn fad a bhíonn timthriall ar siúl. Fág folamh chun fógraí faoi dhul chun cinn beo a dhíchumasú."
+    },
+    "notify_people": {
+      "label": "Daoine (do Fógairt Nuair sa Bhaile Amháin)",
+      "doc": "person.* aonáin a úsáideann \"Notify Only When Home\" chun cinneadh a dhéanamh an bhfuil aon duine sa bhaile."
+    },
+    "notify_only_when_home": {
+      "label": "Fógair Nuair sa Bhaile Amháin",
+      "doc": "Ná seol fógraí ach amháin nuair atá duine amháin ar a laghad de na daoine nasctha (thuas) sa bhaile."
+    },
+    "notify_fire_events": {
+      "label": "Lasaigh Imeachtaí HA do Fhógraí",
+      "doc": "Chomh maith leis sin tine ha_washdata_* imeachtaí ar an timthriall tosú / chríochnú ionas gur féidir leat a thógáil do uathoibriúcháin féin."
+    },
+    "notify_before_end_minutes": {
+      "label": "Foláireamh Réamh-Deiridh",
+      "doc": "Seol foláireamh Beagnach Déanta nuair a thiteann an t-am measta atá fágtha faoi bhun seo. 0 díchumasaítear é."
+    },
+    "notify_live_interval_seconds": {
+      "label": "Eatramh Nuashonraithe Beo",
+      "doc": "Cé chomh minic is a dhéantar fógraí dul chun cinn beo a athnuachan fad a bhíonn timthriall ar siúl."
+    },
+    "notify_live_overrun_percent": {
+      "label": "% Rith Thar Maoil Beo Roimh Fholáireamh",
+      "doc": "Má théann timthriall thar a mheastachán níos mó ná an céatadán seo, seol foláireamh sáraithe."
+    },
+    "notify_live_chronometer": {
+      "label": "Úsáid Cróineolaí Beo",
+      "doc": "Taispeáin lasc ama comhaireamh síos beo-nuashonraithe san fhógra (ar ardáin a thacaíonn leis) in ionad meastachán statach."
+    },
+    "notify_timeout_seconds": {
+      "label": "Díbhe Uathoibríoch Tar Éis",
+      "doc": "Déan an fógra a dhíbhe go huathoibríoch tar éis an iliomad soicind (ar ardáin a thacaíonn leis). 0 coinníonn sé go dtí go ndéantar é a dhíbhe de láimh."
+    },
+    "notify_title": {
+      "label": "Teideal Fógra",
+      "doc": "Teideal an fhógra. Athróga teimpléid: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
+    },
+    "notify_icon": {
+      "label": "Deilbhín Fógra",
+      "doc": "Deilbhín mdi roghnach don fhógra (m.sh. mdi: meaisín níocháin). Fág bán le haghaidh réamhshocraithe an ardáin."
+    },
+    "notify_start_message": {
+      "label": "Teachtaireacht Tosaithe",
+      "doc": "Corp seolta nuair a thosaíonn timthriall. Athróga teimpléid: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
+    },
+    "notify_finish_message": {
+      "label": "Teachtaireacht Críochnaithe",
+      "doc": "Seoltar an corp nuair a chríochnaíonn timthriall. Athróga teimpléid: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
+    },
+    "notify_pre_complete_message": {
+      "label": "Teachtaireacht Réamh-Chríochnaithe",
+      "doc": "Corp an rabhaidh réamh-deireadh / beagnach déanta. Athróga teimpléid: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
+    },
+    "notify_reminder_message": {
+      "label": "Teachtaireacht Meabhrúcháin",
+      "doc": "Corp an meabhrúcháin díluchtaithe atá fós ar feitheamh. Úsáideann Blank an réamhshocrú ionsuite. Athróga teimpléid: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
+    },
+    "notify_channel": {
+      "label": "Cainéal Android (tús/beo)",
+      "doc": "Ainm cainéal fógra Android le haghaidh teachtaireachtaí tosaithe/beo (rialaíonn fuaim in aghaidh an chainéil agus tosaíocht ar an aip shoghluaiste). Úsáideann Blank réamhshocrú an aip chompánaigh."
+    },
+    "notify_finish_channel": {
+      "label": "Cainéal Android (críoch)",
+      "doc": "Ainm cainéal fógra Android don teachtaireacht chríochnaithe. Athúsáideann bán an cainéal tosaigh/beo."
+    },
+    "energy_price_entity": {
+      "label": "Eintiteas Praghais Fuinnimh",
+      "doc": "Braiteoir leis an bpraghas reatha leictreachais in aghaidh an kWh (m.sh. taraif dhinimiciúil). Bíonn tosaíocht aige ar an bpraghas statach thíos. Déanann gach timthriall an praghas a reoiteáil i bhfeidhm nuair a chríochnaigh sé."
+    },
+    "energy_price_static": {
+      "label": "Praghas Stataiceach Fuinnimh (in aghaidh kWh)",
+      "doc": "Praghas seasta in aghaidh an kWh a úsáidtear le haghaidh figiúirí costais nuair nach bhfuil aon eintiteas praghais beo socraithe thuas."
+    },
+    "notify_cycle_timers": {
+      "label": "Amadóirí Timthrialla",
+      "doc": "Fógraí ag nóiméad ar leith isteach i dtimthriall (m.sh. chun bogadóir a chur leis). Tacaíonn an teachtaireacht le {device}, {program}, {minutes}. Cumasaigh Uathsos chun sos ag an bpointe sin agus fógra idirghníomhach a fháil le cnaipe Atosaigh; atosú tríd an bpainéal, an tseirbhís sos / atosú, nó an gníomh fógartha."
+    },
+    "enable_ml_models": {
+      "label": "Cuir Samhlacha Cliste i bhFeidhm le linn Timthrialla",
+      "doc": "Le linn do thimthriall a bheith ar siúl, lig do na samhlacha na torthaí beo a bheachtú: meastachán níos seasta ar fhanacht ama agus fuinnimh/costais, agus garda frith-stad roimh am ar bhrath deiridh (ní féidir leis ach moill a chur ar chríochnú, gan deireadh a chur le ceann amháin go luath, agus tá sé teorantach). Úsáideann sé do mhúnlaí mionchoigeartaithe nuair atá siad ar fáil, murab é sin na cinn ionsuite. Off = an loighic chumhacht-bhunaithe clasaiceach amháin (iontaofa fós)."
+    },
+    "ml_training_enabled": {
+      "label": "Foghlaim ón Meaisín Seo",
+      "doc": "Déan staidéar tréimhsiúil ar do thimthriallta athbhreithnithe thar oíche agus mionchoigeartaigh na samhlacha don mheaisín sonrach seo. Ní choinnítear athrú ach amháin nuair a fhaigheann sé scór níos fearr i ndáiríre ar thimthriallta coinnithe amach, agus mar sin ní féidir leis seo ach cuidiú nó fanacht mar a chéile - ní rachaidh sé ar ais riamh."
+    },
+    "ml_training_hour": {
+      "label": "Foghlaim ag Uair",
+      "doc": "Uair áitiúil an lae (0-23) a dhéanamh ar an mionchoigeartú thar oíche. Roghnaigh uair an chloig ciúin mar 2 (02:00)."
+    },
+    "ml_training_min_cycles": {
+      "label": "Timthriallta a Theastaíonn ar Dtús",
+      "doc": "Fan go dtí go mbeidh an t-iliomad timthriallta seo taifeadta ar a laghad roimh mhionchoigeartú, ionas go mbeidh go leor le foghlaim uaidh."
+    },
+    "ml_training_interval_days": {
+      "label": "Seiceáil Uair ar a mhéid gach",
+      "doc": "Déan seiceáil arís le haghaidh feabhsuithe uair amháin ar a mhéad in aghaidh na laethanta seo."
+    }
+  },
+  "placeholder": {
+    "add": "cuir leis…",
+    "group_name": "m.sh. Cadás 2:47",
+    "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+    "notify": "cuir seirbhís fógra leis…",
+    "notify_services_list": "notify.mobile_app_phone, ...",
+    "person": "cuir duine leis…",
+    "phase_name": "m.sh. Réamhní",
+    "profile_name": "m.sh. Cadás 40°C"
+  }
+}

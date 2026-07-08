@@ -1,0 +1,916 @@
+{
+  "btn": {
+    "add_timer": "+ Aldonu tempigilon",
+    "remove_timer": "Forigi tempigilon",
+    "add_device_tip": "Aldonu alian WashData-aparaton",
+    "delete_group_tip": "Forigu nur ĉi tiun grupon - la membroprofiloj estas konservitaj",
+    "run_analysis_tip": "Analizu viajn registritajn ciklojn nun kaj refreŝigu agordajn sugestojn",
+    "reset_ml_models_tip": "Forĵetu la bone agorditajn modelojn kaj reiru al la enkonstruitaj. WashData povas relerni ilin poste.",
+    "add_device": "+ Aldonu aparaton",
+    "add_phase": "+ Aldonu fazon",
+    "apply_all": "Apliki ĉion",
+    "apply_label": "Apliki Etikedon",
+    "apply_split": "Apliki Split",
+    "apply_trim": "Apliki Trim",
+    "auto_detect_split": "Aŭtomate detekti",
+    "auto_label_cycles": "Aŭto-etikedaj cikloj",
+    "cancel": "Nuligi",
+    "clear_debug": "Forigi Sencimigajn Datumojn",
+    "clear_splits": "Klara",
+    "close": "Fermu",
+    "compare": "Komparu",
+    "confirm": "Konfirmu",
+    "convert_to_automation": "Konverti al aŭtomatigo",
+    "correct": "Ĝuste…",
+    "create": "Krei",
+    "create_profile": "+ Krei profilon",
+    "delete": "Forigi",
+    "delete_group": "Forigi Grupon",
+    "delete_profile": "Forigi Profilon",
+    "discard": "Forĵeti",
+    "dismiss": "Forĵeti",
+    "done": "Farita",
+    "edit": "Redakti",
+    "export": "Eksporto",
+    "export_json": "Eksportu al JSON",
+    "force_stop": "Forto Halto",
+    "from_template": "El ŝablono ▾",
+    "ignore": "Ignoru",
+    "import_json": "Importi el JSON",
+    "import_overwrite": "Importi (anstataŭigas datumojn)",
+    "inspect": "Inspekti",
+    "label": "Etikedi",
+    "manage": "Administri",
+    "merge": "Kunfandi",
+    "new_automation": "＋ Nova Aŭtomatigo",
+    "new_group": "+ Nova Grupo",
+    "new_phase": "+ Nova Fazo",
+    "new_profile": "+ Nova Profilo",
+    "on_cycle_finished": "Sur ciklo finita",
+    "on_cycle_started": "Sur ciklo komenciĝis",
+    "pause_cycle": "Paŭzo",
+    "process": "Procezo",
+    "process_history": "Procesu Nun",
+    "process_recording": "Konservu Registradon",
+    "rebuild": "Rekonstruu Kovertojn",
+    "rebuild_envelope": "Rekonstruu Koverton",
+    "rec_stop": "Haltu",
+    "record": "Komencu Registradon",
+    "refresh": "Refreŝigi",
+    "remove": "Forigi",
+    "reset": "Restarigi",
+    "reset_to_builtin": "Restarigi al enkonstruitaj modeloj",
+    "reset_to_defaults": "Restarigi al defaŭltoj",
+    "resume_cycle": "Daŭrigi ciklon",
+    "review": "Revizii",
+    "run_analysis": "🔍 Faru sugestanalizon",
+    "run_auto_label": "Rulu Aŭtomatan Etikedon",
+    "save": "Konservu",
+    "save_access_control": "Konservu Alirkontrolon",
+    "save_group": "Konservu Grupon",
+    "save_panel_settings": "Konservu Panelaj Agordoj",
+    "save_phases": "Konservu fazojn",
+    "save_preferences": "Konservu Preferojn",
+    "save_review": "Konservu Recenzon",
+    "save_settings": "Konservu Agordojn",
+    "select": "Elektu",
+    "show_only": "Montru nur",
+    "split": "Split",
+    "submit_correction": "Sendu korekton",
+    "train_now": "Trejnu nun",
+    "trim": "Trim",
+    "trim_split": "Tondi / Dividi",
+    "use": "Uzu",
+    "wipe_all": "Forviŝu Ĉiuj Datumoj"
+  },
+  "hdr": {
+    "logs": "Protokoloj",
+    "toggle_sidebar": "Ŝaltigu la flankmenuon de Hejma Asistanto",
+    "access_control": "Kontrolo de Aliro",
+    "automation_delete": "Forigu ĉi tiun aŭtomatigon",
+    "automation_needs_review": "Ĉi tiu ciklo bezonas revizion",
+    "automation_open": "Malfermu en la aŭtomatiga redaktilo",
+    "automation_review_this_cycle": "Revizu ĉi tiun ciklon",
+    "automations": "Aŭtomatigoj",
+    "clear_debug": "Klara Sencimigaj Spuroj",
+    "diagnostics_pref": "Diagnozo",
+    "display": "Montru",
+    "export_import": "Eksporti / Importi",
+    "live_power": "Viva Potenco",
+    "logs_diagnostics": "Diagnozo",
+    "maintenance": "Prizorgaj Agoj",
+    "manual_recording": "Manlibro Registrado",
+    "ml_learned": "Kion WashData lernis",
+    "ml_matching_tuning": "Program-kongrua fajnagordado",
+    "ml_settings_card": "Agordoj",
+    "ml_smart_learning": "Inteligenta Lernado",
+    "my_preferences": "Miaj Preferoj",
+    "no_automations": "Neniuj aŭtomatigoj ankoraŭ referencas ĉi tiun aparaton.",
+    "panel_settings": "Panelaj Agordoj",
+    "phase_catalog": "Faza Katalogo",
+    "process_history": "Proceza Historio",
+    "status": "Statuso",
+    "status_graph": "Statusa Grafiko",
+    "storage_stats": "Stokado Statoj",
+    "tools_and_data": "Iloj kaj Datumoj",
+    "wipe_history": "Viŝi Historion"
+  },
+  "lbl": {
+    "timer_min": "min",
+    "timer_msg_placeholder": "Mesaĝo (laŭvola, {device}/{program}/{minutes})",
+    "timer_auto_pause": "Aŭtomata paŭzo",
+    "actions": "Agoj",
+    "activity": "Aktiveco",
+    "administrators": "Administrantoj",
+    "auto_fine_tune_off": "aŭtomata fajnagordo for",
+    "clock_time": "Horloĝo",
+    "compare_profiles": "Komparu kun profiloj",
+    "confidence": "Konfido",
+    "confidence_threshold": "Konfida sojlo",
+    "correct_duration": "Ĝusta Daŭro (min, laŭvola)",
+    "correct_profile": "Ĝusta Profilo",
+    "cost": "Kosto",
+    "create_new_profile": "+ Kreu novan profilon...",
+    "cycle_date_display": "Cikla dato-montrado",
+    "cycle_health": "Cikla sano",
+    "cycles_count": "Cikloj",
+    "date": "Dato",
+    "debug_traces": "Sencimigi Spurojn",
+    "default": "Defaŭlte",
+    "default_access_level": "Defaŭlta nivelo por uzantoj ne listigitaj sube",
+    "default_other": "Defaŭlte (aliaj aparatoj)",
+    "default_tab": "Defaŭlta langeto dum malfermado de la panelo",
+    "description": "Priskribo",
+    "duration": "Daŭro",
+    "emphasis": "Emfazo",
+    "enable_access_control": "Ebligu alirkontrolon por po-uzanto",
+    "energy": "Energio",
+    "expected_duration": "Atendata Daŭro (min)",
+    "file_kb": "Dosiero (kB)",
+    "gap_s": "Interspaco (j)",
+    "head_trim": "Kapotondado (j)",
+    "health": "Sano",
+    "hide_tabs": "Kaŝi langetojn por ne-administrantoj",
+    "in_use": "En uzo",
+    "json_data": "JSON-datumoj",
+    "label": "Kongruita programo",
+    "last_checked": "Laste kontrolita:",
+    "load_from_file": "Ŝargi el dosiero",
+    "manual_duration": "Mana Daŭro (min, laŭvola)",
+    "mode_existing_profile": "Aldoni al Ekzistanta Profilo",
+    "mode_new_profile": "Krei Novan Profilon",
+    "new_profile_name": "Nova profilonomo",
+    "panel_default_tab": "Defaŭlta langeto",
+    "phase_name": "Nomo",
+    "power": "Potenco",
+    "profile": "Profilo",
+    "profile_name": "Profila Nomo",
+    "progress": "Progreso",
+    "read_only": "Nurlegebla",
+    "ref_cycle": "Referenca Ciklo (laŭvola)",
+    "refresh_interval": "Refreŝiga intervalo (j)",
+    "remaining": "Restanta",
+    "remove_label": "- Forigi etikedon -",
+    "rename_profile": "Alinomi Profilon",
+    "resulting_profile": "Rezulta profilo",
+    "save_mode": "Ŝparreĝimo",
+    "seconds_from_start": "Sekundoj de komenco",
+    "select_profile": "Elektu Profilon",
+    "show_debug": "Montru rektan matĉo-sencimigan karton sur la Statusa paĝo (fido, ambigueco, ĉefaj kandidatoj)",
+    "show_expected": "Montri atendatan kurbkovraĵon (kongrua profilo, oranĝa)",
+    "show_raw": "Montri krudajn sensilajn legaĵojn (neglatigitaj, grizaj)",
+    "status": "Statuso",
+    "tail_trim": "Vostotondado (j)",
+    "ungrouped": "Negrupigita",
+    "unlabelled": "Senetikedita",
+    "unlabelled_paren": "(senetikedita)",
+    "expected": "Atendita",
+    "raw_socket": "Kruda prizo",
+    "artifact_interruption": "Interrompo",
+    "artifact_low_power": "Malalta potenco",
+    "artifact_high_power": "Alta potenco",
+    "artifact_anomaly": "Anomalio",
+    "auto_fine_tune_on": "aŭtomata agordo aktiva (ĉirkaŭ {hour}:00)",
+    "cohesion_good": "kohezio {pct}%",
+    "cohesion_low": "⚠ malalta kohezio {pct}%",
+    "group_name": "Nomo de grupo",
+    "members": "Membroj",
+    "models_fine_tuned": "({count} modeloj malgrand-agordita)",
+    "panel_language": "Panela lingvo"
+  },
+  "badge": {
+    "golden_cycle": "Registrita referenca ciklo",
+    "reviewed": "Reviziita",
+    "feedback_requested": "Reago petita",
+    "needs_review": "Bezonas revizion",
+    "overrun": "Kuris pli longe ol kutime",
+    "artifact_tip": "{n} anomalioj detektitaj (ekz. pordo malfermita meze de la ciklo) - malfermiĝas por vidi ilin sur la grafikaĵo",
+    "restart_gap_tip": "{n} HA restarta breĉo: spurkurbo de potenco havas truon",
+    "poor_fit_tip": "Nekonsekvenca matĉohistorio — pripensu rekonstrui ĉi tiun profilon",
+    "fair_fit_tip": "Modera kongruo de kongruo — iuj cikloj asignitaj al ĉi tiu profilo havas pli malaltajn fidopoentarojn. Etikedu pli da cikloj aŭ reregistru la profilon por plibonigi precizecon.",
+    "auto": "(aŭtomate detektita)",
+    "built_in_tag": "enkonstruita",
+    "declining": "↘ malkreskante",
+    "fair_fit": "akceptebla kvalito",
+    "improving": "↗ pliboniganta",
+    "manual": "(mane elektita)",
+    "poor_fit": "malbona kvalito",
+    "steady": "→ stabila",
+    "using_defaults": "Uzante senditajn defaŭltojn",
+    "using_tuned": "Uzante agorditajn pezojn"
+  },
+  "modal": {
+    "merge_cycles": "Kunfandi {n} Ciklojn",
+    "auto_label": "Aŭto-Etikedaj Cikloj",
+    "correct_feedback": "Ĝusta Reago",
+    "create_profile": "Krei Profilon",
+    "cycle": "Ciklo",
+    "edit_phase": "Redakti Fazon",
+    "import_config": "Importi Agordon",
+    "label_cycle": "Etikedo-Ciklo",
+    "new_phase": "Nova Fazo",
+    "process_recording": "Proceza Registrado",
+    "edit_group": "Redakti profilan grupon",
+    "new_group": "Nova profila grupo",
+    "process_history_title": "Procesi Historion",
+    "process_history_msg": "Re-ruli egaligas, refreŝigi sugestojn, reklerigi ML (se ebligita) kaj reekzameni ciklan sanon trans ĉiuj konservitaj cikloj. Ĉi tio povas daŭri iom da tempo.",
+    "process_history_ok": "Procesi"
+  },
+  "msg": {
+    "near_duplicate_cluster": "detektita preskaŭ duobla profila aro. Grupiĝo permesas kongrui fidinde elekti inter similaĵoj (ekz. sama programo ĉe malsama temperaturo/spin).",
+    "coverage_gap": "lastatempaj cikloj ne havas kongruan profilon ({pct}% de lastaj 30).",
+    "consider_new_profile": "Konsideru krei novan profilon.",
+    "group_not_cohesive": "Ĉi tiuj profiloj ne estas sufiĉe similaj por grupiĝi fidinde, do kongruo traktas ilin individue ĝis vi forigas la eksterordinaron aŭ disigas la grupon.",
+    "group_modal_help": "Grupaj programoj kun la sama formo, kiuj malsamas en temperaturo/spin (daŭroj povas varii). Kongruo poentas la grupon kiel unu kandidato, tiam elektas la plej taŭgan membron. Elektu almenaŭ 2; la supermetaĵo montras kiom similaj ili estas.",
+    "showing_suggestions": "Montrante {count}-agordon kun sugestoj.",
+    "show_all_settings": "Montru ĉiujn agordojn",
+    "tuning_suggestions_available": "{count} agorda sugesto havebla de observitaj cikloj. Ili aperas apud la koncernaj kampoj.",
+    "legacy_actions_title": "{count} hereda propra ago daŭre funkcias",
+    "old_actions_warning": "Agordita kun la malnova agoj-redaktilo (nun forigita). Ili ankoraŭ pafas sur ciklokazaĵoj sed ne plu povas esti redaktitaj ĉi tie. Konvertu ilin en normalan aŭtomatigon, aŭ forigu ilin.",
+    "no_settings_match": "Neniuj agordoj kongruas kun \"{q}\"",
+    "clear_debug_hint": "Forigu konservitajn sencimigajn datumojn por liberigi spacon.",
+    "wipe_history_warning": "Konstante forigu ĉiujn ciklojn kaj profilojn. Ne povas esti malfarita.",
+    "export_description": "Eksportu ĉiujn profilojn kaj ciklojn al JSON, aŭ restarigu de antaŭa eksporto.",
+    "log_buffer_hint": "Plej novaj unue · bufras la lastajn 500 ha_washdata-rekordojn ekde rekomenco · trenu la malsupran randon por regrandigi.",
+    "review_profile_tip": "La programo ĉi tiu ciklo estas etikedita kiel. Se la aŭtomate detektita programo estis malĝusta, korektu ĝin ĉi tie - etikedado instruas kongruon por estontaj cikloj.",
+    "review_quality_tip": "Kiel pura ĉi tiu ciklo estas. Bona = lernolibro ekzemplo de ĉi tiu programo; Malbona = detektita sed brua aŭ maltipa; Neuzebla = mis-detektita (kunfandita, detranĉita aŭ falsa). Veturas la sanpoentaron kaj kiuj cikloj rajtas trejni la modelon.",
+    "review_recorded_tip": "Marku ĉi tion kiel mane elektita referenca ciklo por ĝia programo - la sama rolo kiel mane registrita ciklo. Referencocikloj ĉiam estas konservitaj, semas la kongruan ŝablonon, kaj neniam estas forigitaj per purigado. (Ĉi tio estas la \"ora\"/registrita flago; ambaŭ estas la sama afero.)",
+    "review_tags_tip": "Laŭvolaj flagoj priskribante kio misfunkciis kun ĉi tiu ciklo, do trejnado kaj purigado povas respondeci pri ĝi.",
+    "review_notes_tip": "Libertekstaj notoj por via propra referenco. Ne uzata per kongruo aŭ trejnado.",
+    "review_confirm_help": "Konfirmu ĉu ĉi tiu ciklo estis detektita ĝuste. Viaj recenzoj trejnas la modelon sur via maŝino - ju pli da cikloj vi konfirmas, des pli bona kongruo kaj sanpoentado ricevas. Rapida Bona/Malbono sufiĉas.",
+    "review_notes_placeholder": "Notoj (laŭvola)",
+    "compare_profiles_tip": "Supermetu aliajn profilkovertojn sur la supra diagramo por vidi kiu plej taŭgas por ĉi tiu ciklo.",
+    "artifact_header": "{n} anomalioj detektitaj dum ĉi tiu ciklo",
+    "artifact_footer": "Elstarigita sur la supra grafikaĵo. Tiuj estas pasemaj artefaktoj (ekz. la pordo malfermiĝis mezciklo), ne nepre problemoj.",
+    "restart_gap_header": "{n} HA restarta breĉo dum ĉi tiu ciklo",
+    "restart_gap_item": "{dur} breĉo",
+    "restart_gap_footer": "Emfazita sur la grafeo. Potencdatenoj mankas por ĉi tiuj intervaloj; kongruo uzis nur verajn legojn.",
+    "profile_poor_health_detail": "Cikloj asignitaj al ĉi tiu profilo havas malkonsekvencan formojn aŭ malaltan fidon. Konsideru rekonstrui la koverton aŭ revizii etikeditajn ciklojn.",
+    "trend_duration_longer": "Daŭro tendenca pli longa ({pct}%/ciklo) — lastatempa mezumo {avg}",
+    "trend_duration_shorter": "Daŭro tendencas pli mallonga ({pct}%/ciklo) - lastatempa mezumo {avg}",
+    "trend_energy_up": "Energio tendenco supren ({pct}%/ciklo) — lastatempa mezumo {avg}",
+    "trend_energy_down": "Energio tendenco malsupren ({pct}%/ciklo)",
+    "performance_trend": "Tendenco de rendimento ({n} cikloj)",
+    "maintenance_advisory": "Pliiĝanta daŭro/energio povas indiki bezonatan prizorgadon de aparato (ekz. senkalkigado, filtrila purigado).",
+    "manual_duration_hint": "La averaĝa/atendita ciklolongo de la profilo, uzita por tempo-restinta taksoj. Redaktu por agordi ĝin; lasi ĝin senŝanĝa konservas la nunan valoron.",
+    "appliance_monitor": "Aparato monitoro",
+    "auto_label_intro": "Asignu profilojn al neetikeditaj cikloj, kies kongrua konfido malplenigas la sojlon.",
+    "cleanup_intro": "Ĉiu etikedita ciklo supermetita. Marku eksteraĵojn kaj forigu por purigi la profilon.",
+    "compare_overlay_profiles": "Supermetu profilojn (malfortaj)",
+    "compare_selected_cycles": "Elektitaj cikloj (solidaj) — montri / kaŝi",
+    "feedback_prompt": "Konfirmu, ke ĝi pravas, korektu la programon aŭ ignoru.",
+    "import_intro": "Ŝarĝu eksportitan dosieron aŭ algluu JSON-utilan ŝarĝon sube.",
+    "live_chart_loading": "Viva potenco-diagramo aperas kiam legadoj alvenas.",
+    "loading": "Ŝargante…",
+    "loading_curve": "Ŝarĝante kurbon...",
+    "loading_settings": "Ŝargante agordojn...",
+    "maintenance_requires_access": "Prizorgado kaj eksporto/importo postulas plenan aliron.",
+    "matching_tuning_intro": "Dum lernado, WashData ankaŭ ĝustigas kiom da programa kongruo pezas formon kontraŭ daŭro kaj energio.",
+    "merge_intro": "La elektitaj cikloj estas kombinitaj en unu (kronologia ordo; interspacoj plenigitaj kun 0 W). Elektu la rezultan profilon.",
+    "ml_intro": "WashData ekspediĝas kun inteligentaj modeloj, kiuj funkcias el la skatolo.",
+    "ml_learned_intro": "Modeloj fajnagordis al ĉi tiu maŝino.",
+    "ml_loading": "ŝarĝante ML...",
+    "ml_settings_intro": "Du sendependaj ŝaltiloj: unu aplikas la modelojn dum ciklo funkcias, la alia lasas WashData fajnagordi ilin al via maŝino laŭlonge de la tempo.",
+    "no_cycles_match": "Neniuj cikloj kongruas kun la nuna filtrilo.",
+    "no_cycles_profile": "Neniuj cikloj por ĉi tiu profilo.",
+    "no_cycles_yet": "Neniuj cikloj ankoraŭ registritaj.",
+    "no_device_selected": "Neniu aparato elektita.",
+    "no_devices": "Ankoraŭ neniuj WashData-aparatoj agordis.",
+    "no_envelope": "Ankoraŭ neniu koverto - rekonstruu post etikedcikloj.",
+    "no_envelope_overlay": "Neniu koverto disponebla por supermeti.",
+    "no_fine_tuned": "Nenio ankoraŭ agordita — WashData uzas siajn enkonstruitajn modelojn.",
+    "no_logs": "Neniuj protokolaj registroj ankoraŭ bufritaj.",
+    "no_match_yet": "Ankoraŭ neniu matĉoprovo - ĉi tio pleniĝas dum kura ciklo.",
+    "no_other_users": "Neniuj aliaj uzantoj de Hejmhelpanto trovitaj.",
+    "no_phases": "Neniuj fazoj difinitaj.",
+    "no_phases_assigned": "Neniuj fazoj asignitaj.",
+    "no_profiles_compare": "Neniuj profiloj por kompari.",
+    "no_profiles_overlay": "Neniuj profiloj por supermeti.",
+    "no_profiles_yet": "Ankoraŭ neniuj profiloj. Kreu unu el etikedita ciklo.",
+    "no_profiles_yet_short": "Ankoraŭ neniuj profiloj.",
+    "no_split_points": "Ankoraŭ neniuj dividitaj punktoj.",
+    "no_suggestions": "Neniuj aktivaj sugestoj.",
+    "pending_feedback": "Atendanta detektreagon",
+    "phase_catalog_intro": "Nomitaj segmentoj de ciklo (Antaŭlavado, Hejtado, Ŝpinilo...). Asignu ilin al profilo de ĝia kontrolpanelo.",
+    "phase_ranges_intro": "Fazintervaloj (minutoj de ciklokomenco) supermetitaj sur la averaĝa kurbo. Redaktu valorojn por antaŭrigardi en rekta.",
+    "preferences_admin": "Preferoj, panelo kaj alirkontrolo",
+    "preferences_adv": "Preferoj",
+    "prefs_personal": "Ĉi tiuj validas nur por via konto de Hejma Asistanto.",
+    "profiles_intro": "Alklaku profilon por statistikoj, fazoj kaj purigado. Grupigu preskaŭ identajn programojn (sama formo/daŭro, malsama temperaturo aŭ spino) tiel kongrui fidinde elektojn inter ili.",
+    "rbac_hint": "Kiam estas malŝaltita, ĉiu uzanto de Hejma Asistanto havas plenan aliron (la defaŭlta). Administrantoj ĉiam havas plenan aliron kaj povas administri ĉiujn.",
+    "recent_logs": "Lastatempaj ha_washdata-rekordoj",
+    "recording_in_progress": "Registrado en progreso",
+    "review_in_settings": "Revizio en Agordoj",
+    "review_to_cycles": "Malfermu la vicon de revizio de Cycles",
+    "saving_triggers_reload": "Konservado ekigas integrigan reŝargon. HA-unuoj povas mallonge montriĝi kiel nedisponeblaj.",
+    "search_placeholder": "Serĉaj agordoj...",
+    "see_recorder": "Vidu registrila fenestraĵo sube",
+    "split_intro": "Alklaku la grafeon por aldoni aŭ forigi dispunkton, aŭ aŭtomate detekti per neaktivaj breĉoj. Ĉiu rezulta segmento povas akiri sian propran profilon.",
+    "storage_diagnostics": "Stokado-statistikoj, prizorgado, eksporto/importo",
+    "trim_intro": "Trenu la ruĝajn tenilojn aŭ enigu valorojn. Ĉio ekster la fenestro estas forigita.",
+    "unsure_detected_prefix": "WashData ne certas, ke ĝi detektis",
+    "updated": "Ĝisdatigita",
+    "feedback_cycles_pending": "{n} ciklo{s} por revizii",
+    "artifact_spike_detail": "Supriĝis super la kutiman potencbendion dum ĉirkaŭ {n}s.",
+    "artifact_dip_detail": "Malleviĝis sub la kutiman potencbendion dum ĉirkaŭ {n}s.",
+    "artifact_pause_detail": "Potenco falis preskaŭ al nulo dum ĉirkaŭ {n}s kaj tiam reprenis — verŝajne la pordo estis malfermita meze de la ciklo aŭ la ciklo estis paŭzita.",
+    "automations_intro": "WashData ekigas {start} / {end} eventojn kaj malkovras entecojn, do sciigoj kaj agoj plej bone konstruiĝas kiel normalaj Home Assistant aŭtomatigoj. Aŭtomatigoj kiuj uzas ĉi tiun aparaton aperas sube.",
+    "collecting_data": "Kolektante datumojn — ankoraŭ {need} cikloj antaŭ ol la agordo povas komenci ({current}/{min}).",
+    "enough_data": "Sufiĉe da datumoj por lerni ({current}/{min} cikloj).",
+    "filter_by_profile": "Filtri laŭ profilo…",
+    "group_preview_hint": "Elektu 2+ membrojn por antaŭvidi kaj kompari iliajn potencajn kurbojn.",
+    "notify_services_hint": "Uzu {entity} servoidentigaĵojn (komo-disigitajn por multoblaj). Ŝablonaj variabloj: {vars}.",
+    "process_history_hint": "Re-ruli egaligas sur ĉiuj konservitaj cikloj, refreŝigi agordajn sugestojn, reklerigi ML-modelojn (se ebligita) kaj reekzameni ciklan sanon. Rulu post aro de recenzoj."
+  },
+  "phase_desc": {
+    "pre_wash": "Komenca trempado aŭ antaŭtraktado antaŭ la ĉefa lavo.",
+    "wash": "Ĉefa lavciklo kun tambura movo kaj laŭvola hejtado.",
+    "wash_dw": "Ĉefa lesiva lavo kun hejtado.",
+    "rinse": "Etapo de purakva lavado. Ĉi tiu fazo povas ripeti plurfoje.",
+    "spin": "Altrapida eltiro por forigi akvon de la ŝarĝo.",
+    "spin_wd": "Altrapida eltiro antaŭ sekiga transiro.",
+    "soak": "Malalt-aktiveca trempa periodo inter aktivaj lavaj stadioj.",
+    "soak_dw": "Plilongigita trempa periodo por peza grundo.",
+    "anti_crease": "Fojaj mallongaj faloj post kompletigo por redukti sulkojn.",
+    "heat_up": "Komenca hejtilo varmigo antaŭ plena sekiĝo komenciĝas.",
+    "drying": "Ĉefa hejtita faloperiodo.",
+    "cool_down": "Tumultado sen varmego proksime de ciklofino.",
+    "anti_wrinkle": "Perioda postcikla falo por redukti sulkojn.",
+    "sensor_check": "Mallonga malforta paŭzo dum sekeco estas mezurita.",
+    "drain_and_switch": "Transira periodo de lavado al sekiga reĝimo.",
+    "pre_rinse": "Komenca ŝprucaĵo malsupren antaŭ detergenta lavado.",
+    "dry": "Sekiga stadio per hejtilo kaj/aŭ resta varmo.",
+    "sanitize": "Alttemperatura purigadstapo por sanigprogramoj."
+  },
+  "health": {
+    "fair": "Akceptebla profilkvalito",
+    "good": "✓ Bona profilkvalito",
+    "poor": "⚠ Malbona profilkvalito"
+  },
+  "log": {
+    "all_levels": "Ĉiuj niveloj"
+  },
+  "ml": {
+    "builtin_models": "● Uzante enkonstruitajn modelojn",
+    "fit_fair": "Akceptebla",
+    "fit_good": "Bone",
+    "fit_slight": "Malgranda",
+    "fit_strong": "Forta",
+    "fit_weak": "Malforta",
+    "fit_word": "taŭga",
+    "personalized": "● Personigita al ĉi tiu maŝino"
+  },
+  "pref": {
+    "date_absolute": "Absoluta (ekz. 14:32 la 2an de julio)",
+    "date_relative": "Parenco (ekz. antaŭ 2 horoj)",
+    "lang_auto": "Defaŭlto de sistemo ({lang})",
+    "lang_en": "Angla",
+    "use_panel_default": "(panela defaŭlto)"
+  },
+  "quality": {
+    "bad": "Malbona",
+    "good": "Bone",
+    "unusable": "Neuzebla"
+  },
+  "status": {
+    "active": "Aktiva",
+    "all_statuses": "Ĉiuj statusoj",
+    "ambiguous": "Ambigua",
+    "auto_detect": "Aŭtomate detekti",
+    "clear": "Klara",
+    "completed": "Kompletigita",
+    "fine_tuning": "fajnagordu nun...",
+    "force_stopped": "Forto ĉesis",
+    "idle": "Senlabore",
+    "interrupted": "Interrompita",
+    "ready": "Preta por prilabori",
+    "recording": "Registrado",
+    "training": "Klerante…"
+  },
+  "tab": {
+    "advanced": "Altnivela",
+    "diagnostics": "Diagnozo",
+    "history": "Cikloj",
+    "ml": "ML-Trejnado",
+    "pp_cleanup": "Purigado",
+    "pp_manage": "Administri",
+    "pp_overview": "Superrigardo",
+    "pp_phases": "Fazoj",
+    "profiles": "Profiloj",
+    "settings": "Agordoj",
+    "status": "Superrigardo",
+    "subtab_phase_catalog": "Faza Katalogo",
+    "subtab_profiles": "Profiloj"
+  },
+  "tag": {
+    "early_end": "Frua fino",
+    "late_start": "Malfrua komenco",
+    "merged": "Kunfanditaj cikloj",
+    "noise": "Bruo",
+    "sensor_gap": "Sensila breĉo",
+    "split": "Dividita ciklo",
+    "wrong_profile": "Malĝusta profilo"
+  },
+  "toast": {
+    "access_saved": "Alirkontrolo konservita",
+    "all_wiped": "Ĉiuj datumoj viŝis",
+    "analysis_complete_none": "Analizo finita: neniuj novaj sugestoj",
+    "auto_label_complete": "Aŭtomata etikedo kompleta",
+    "automation_deleted": "Aŭtomatigo forigita",
+    "correction_submitted": "Korekto prezentita",
+    "cycle_deleted": "Ciklo forigita",
+    "cycle_force_stopped": "Ciklo forto-haltita",
+    "cycle_labelled": "Ciklo etikedita",
+    "cycle_paused": "Ciklo paŭzis",
+    "cycle_resumed": "Ciklo rekomencis",
+    "cycle_trimmed": "Ciklo tondita",
+    "cycles_merged": "Cikloj kunfandiĝis",
+    "envelope_rebuilt": "Koverto rekonstruita",
+    "envelopes_rebuilt": "Kovertoj rekonstruitaj",
+    "export_downloaded": "Eksporto elŝutita",
+    "feedback_all_dismissed": "Ĉiuj reagoj malakceptitaj",
+    "feedback_confirmed": "Reago konfirmita",
+    "feedback_dismissed": "Reago malakceptita",
+    "group_deleted": "Grupo forigita",
+    "group_name_required": "Grupnomo estas postulata",
+    "group_saved": "Grupo konservita",
+    "import_successful": "Importo sukcesa; reŝargado de integriĝo",
+    "json_required": "JSON-datumoj estas bezonataj",
+    "legacy_removed": "Heredaj agoj forigitaj",
+    "logs_exported": "Registroj eksportitaj",
+    "matching_reverted": "Kongruaj pezoj revenis al defaŭltoj",
+    "min_2_profiles": "Elektu almenaŭ 2 profilojn por grupo",
+    "ml_training_no_improvement": "Trejnado kompleta: bazlinio konservita (neniu plibonigo)",
+    "models_reverted": "Sur-aparataj modeloj revenis al bazlinio",
+    "name_required": "Nomo bezonata",
+    "no_split_found": "Neniuj neaktivaj breĉoj trovitaj por disiĝi",
+    "panel_settings_saved": "Panelaj agordoj konservitaj",
+    "phase_name_required": "Faza nomo estas postulata",
+    "phase_updated": "Fazo ĝisdatigita",
+    "phases_saved": "Fazoj konservitaj",
+    "preferences_saved": "Preferoj konservitaj",
+    "profile_name_required": "Profila nomo estas postulata",
+    "profile_renamed": "Profilo renomita",
+    "recording_discarded": "Registrado forĵetita",
+    "recording_saved": "Registrado konservita al profilo",
+    "recording_started": "Registrado komenciĝis",
+    "recording_stopped": "Registrado ĉesis",
+    "review_saved": "Recenzo konservita",
+    "settings_saved": "Agordoj konservitaj; reŝargado de integriĝo",
+    "suggestions_applied": "Sugestoj aplikitaj; reŝargado de integriĝo",
+    "suggestions_dismissed": "Sugestoj forĵetitaj"
+  },
+  "trend": {
+    "down": "Tendenco malsupren",
+    "up": "Suprenira tendenco"
+  },
+  "section": {
+    "basic": {
+      "label": "Baza",
+      "intro": "Kernidenteco kaj la esenco kiun bezonas plimultaj agordoj."
+    },
+    "detection": {
+      "label": "Detektado",
+      "intro": "Kiel ciklo estas detektata kiel komenciĝanta, funkcianta kaj finanta."
+    },
+    "matching": {
+      "label": "Kongruado",
+      "intro": "Kiel finitaj cikloj estas kongruigitaj kun lernitaj profiloj kaj etikeditaj."
+    },
+    "timing": {
+      "label": "Tempigado kaj gardostaro",
+      "intro": "Fona kadencio, la eksterreta gardostaro kaj bontenado."
+    },
+    "anti_wrinkle": {
+      "label": "Kontraŭkrempiĝo",
+      "intro": "La kontraŭkrempiĝa/kontraŭfaldo reĝimo detektas malaltpotencan rulimpulson post la ĉefa fazo kaj tenas ilin ligitaj al la finita ciklo."
+    },
+    "delay": {
+      "label": "Prokrastita komenco",
+      "intro": "La detektado de prokrastita komenco identigas kiam la aparato estas ŝaltita sed ankoraŭ ne komencis sian ciklon."
+    },
+    "triggers": {
+      "label": "Ekigoj kaj pordoj",
+      "intro": "Laŭvolaj eksteraj signaloj: fina ekigilo, pordsensilo, paŭzŝaltilo, kaj elŝarĝa rememorigo."
+    },
+    "notifications": {
+      "label": "Sciigoj",
+      "intro": "Kiam kaj kiel vi estas sciigita pri ciklaj eventoj."
+    },
+    "ml_training": {
+      "label": "ML-Trejnado",
+      "intro": "Ensurlokaĵa maŝinlerna retrejnadado kaj datumaj agordoj."
+    }
+  },
+  "setting_group": {
+    "thresholds_gap": {
+      "label": "Sojloj kaj interspaco"
+    },
+    "cycle_start": {
+      "label": "Cikla komenco"
+    },
+    "cycle_end": {
+      "label": "Cikla fino"
+    },
+    "signal_processing": {
+      "label": "Signalprilaborado"
+    },
+    "predictive_end": {
+      "label": "Antaŭdira fino"
+    },
+    "dishwasher_end": {
+      "label": "Telelavila fino"
+    },
+    "dtw_refinement": {
+      "label": "DTW-plibonigo"
+    },
+    "match_scoring": {
+      "label": "Kongruopunktaro"
+    },
+    "duration_gates": {
+      "label": "Daŭrogardoj"
+    },
+    "auto_labeling": {
+      "label": "Aŭtomata etikedado"
+    },
+    "watchdog": {
+      "label": "Gardostaro"
+    },
+    "housekeeping": {
+      "label": "Bontenado"
+    },
+    "debug": {
+      "label": "Erarserĉado"
+    },
+    "external_end_trigger": {
+      "label": "Ekstera fina ekigilo"
+    },
+    "door_pause": {
+      "label": "Pordo kaj paŭzo"
+    },
+    "unload_reminder": {
+      "label": "Elŝarĝa rememorigo"
+    },
+    "services": {
+      "label": "Servoj"
+    },
+    "timing": {
+      "label": "Tempigado"
+    },
+    "messages": {
+      "label": "Mesaĝoj"
+    },
+    "energy": {
+      "label": "Energio"
+    },
+    "cycle_timers": {
+      "label": "Ciklaj tempokalkuliloj"
+    },
+    "schedule": {
+      "label": "Horaro"
+    },
+    "data_management": {
+      "label": "Datuma administrado"
+    }
+  },
+  "setting": {
+    "name": {
+      "label": "Aparatonomo",
+      "doc": "Montra nomo montrita en la listo de integriĝoj de HA kaj aparato-registro."
+    },
+    "device_type": {
+      "label": "Aparatotipo",
+      "doc": "Klaso de aparato. Agordas prudentajn detektajn defaŭltojn (sojloj, malprokrasto, fintraktado) agordis por tiu aparato-tipo; ŝanĝu ĝin nur se la aparato estis origine agordita kiel malĝusta tipo."
+    },
+    "power_sensor": {
+      "label": "Potencosensilo",
+      "doc": "La sensila ento raportanta vivan potencon en vatoj por ĉi tiu aparato (ekz. sensor.washer_power). Ĉiu ciklo-detekto baziĝas sur ĉi tiu signalo."
+    },
+    "min_power": {
+      "label": "Minimuma potenco",
+      "doc": "Absoluta minimuma potenco konsiderata aktiva. Legadoj sub ĉi tio estas traktataj kiel 0 W (ŝtopilo), filtrante la fantoman ŝarĝon de inteligentaj ŝtopiloj kaj standby-LED-oj."
+    },
+    "off_delay": {
+      "label": "Elŝaltmalfruo",
+      "doc": "Tempo por atendi post kiam potenco falas antaŭ deklari la ciklon finita. Se la potenco rekomenciĝas ene de ĉi tiu fenestro, la ciklo daŭras senjunte - ĉi tio pontas paŭzojn inter lavaj etapoj. Vazlaviloj havas longajn sekigajn fazojn (malŝalti dum 20-60 minutoj) do la malŝalto devas superi tion por konservi la tutan lavadon+seka kiel unu ciklo."
+    },
+    "linked_device": {
+      "label": "Grupigi sub aparato",
+      "doc": "Laŭvole nestu ĉi tiun WashData-aparaton sub alia aparato (ekz. la inteligenta ŝtopilo) en la HA-aparato-registro, montrita kiel \"Konektita per ...\"."
+    },
+    "start_threshold_w": {
+      "label": "Starta sojlo",
+      "doc": "Potenco devas leviĝi super ĉi tiu nivelo por konfirmi ke ciklo komenciĝis. Agordi ĝin tro malalte kaŭzas falsajn startojn de standby-potenco; tro altaj kaj malrapide ekfunkciantaj programoj (malvarma plenigo) estas maltrafitaj. La sugesta motoro metas tion tuj super la observita plej malsupra aktiva potenco de la maŝino."
+    },
+    "stop_threshold_w": {
+      "label": "Halta sojlo",
+      "doc": "Potenco devas fali sub ĉi tiu nivelo antaŭ ol komenciĝos la ekster-malfrua retronombrado. Agordu ĝin sub la Komenca Sojlo - la interspaco inter ili estas la histerez-bendo, kiu malhelpas flagradon. Se agordita tro alte, malalt-potencaj fazoj (rinse-tenoj, kontraŭ-pliko) false ekigas la finsekvencon."
+    },
+    "min_off_gap": {
+      "label": "Minimuma elŝaltinterspaco",
+      "doc": "Se la maŝino malŝaltas por malpli ol ĉi tiu tempo, la on/off/on sekvenco estas traktita kiel unu kontinua ciklo. Malhelpas trempajn programojn (maŝino malŝaltas dum kelkaj minutoj mez-lavado) dividiĝi en du apartajn ciklojn. Agordu ĝin pli mallonga ol la interspaco inter viaj dors-al-dorsaj ŝarĝoj se vi volas, ke tiuj kalkulu kiel apartajn ciklojn. Aparato-specaj defaŭltoj protektas la tipan intraciklan paŭzon por ĉiu aparato."
+    },
+    "start_duration_threshold": {
+      "label": "Starta daŭro",
+      "doc": "Potenco devas resti super la komenca sojlo tiel longe por konfirmi veran komencon, malhelpante fraŭtajn sekundajn on/malŝaltilojn komenci ciklon."
+    },
+    "start_energy_threshold": {
+      "label": "Starta energio",
+      "doc": "Energio (potenco x tempo) la aparato devas konsumi antaŭ RUN. Mallonga alt-motora pikilo havas tre malaltan energion kaj estas ignorita, malhelpante falsajn startojn."
+    },
+    "completion_min_seconds": {
+      "label": "Minimuma cikla daŭro",
+      "doc": "Cikloj pli mallongaj ol tio estas forĵetitaj kiel fantomaj cikloj (testkuroj, malfermante la pordon por aldoni ŝtrumpeton)."
+    },
+    "running_dead_zone": {
+      "label": "Funkcianta malaktiva zono",
+      "doc": "Post kiam ciklo komenciĝas, potenco-malpli ene de ĉi tiu fenestro estas ignoritaj. Lavmaŝinoj pleniĝas per malvarma akvo (falas proksime de 0 W antaŭ hejtado) - sen ĉi tiu protekto tiu plenigfazo aspektas kiel ciklofino. Ĉi tio NE preterlasas datumojn: la plena potenco-spuro estas registrita de T=0. La sugesta motoro mezuras la realan lanĉan ŝablonon de via maŝino kaj grandigas ĉi tion aŭtomate."
+    },
+    "end_energy_threshold": {
+      "label": "Fina energio",
+      "doc": "Dum la ekster-malfrua retronombrado, akumulita energio (vatoj x tempo) estas komparita kun ĉi tiu sojlo. Se superite, la retronombrado rekomenciĝas - konservante kontraŭ-suldiĝojn kaj vazlavilon sekigantajn vostojn fiksitajn al la ciklo anstataŭ tranĉi ilin mallongaj. Levu ĝin se cikloj finiĝas tro frue dum malvarmiĝo; malaltigu ĝin se detekto estas malvigla."
+    },
+    "end_repeat_count": {
+      "label": "Fina ripetokalkulo",
+      "doc": "Nombro da sinsekvaj sub-halt-sojlaj legaĵoj necesaj antaŭ ol la ciklo finiĝas. 1 estas bona por la plej multaj ŝtopiloj. Pliigu al 2-3 se via inteligenta ŝtopilo foje raportas falsan nulan specimenon mezciklo kaj viaj cikloj finiĝas antaŭtempe."
+    },
+    "sampling_interval": {
+      "label": "Proventempospaco",
+      "doc": "Atendata tempo inter sensillegadoj - uzata por dimensionar la glatiga fenestro kaj komenci malrebati ĝuste. Ĉiu sensila ĝisdatigo estas kaptita sendepende de ĉi tiu valoro; ĝi nur kalibras la kontraŭfluajn kalkulojn. La sugesta motoro mezuras la realan kadencon de via sensilo de pasintaj cikloj kaj agordas ĉi tion aŭtomate."
+    },
+    "smoothing_window": {
+      "label": "Glatigfenestro",
+      "doc": "Kiom la kruda potenca signalo estas glatigita. Malalta (2) estas respondema sed brua; alta (5) glatigas pikilojn sed aldonas malfruon."
+    },
+    "abrupt_drop_watts": {
+      "label": "Subita falo",
+      "doc": "Potenco pli granda ol tio markas la ciklon kiel Interrompita (mana nuligo) prefere ol natura finpoluro."
+    },
+    "abrupt_drop_ratio": {
+      "label": "Subita falproporcio",
+      "doc": "Guto pli granda ol ĉi tiu frakcio de nuna potenco ankaŭ estas traktata kiel subita (0.6 = 60% falo). Komplementas la vat-sojlon trans aparatoj."
+    },
+    "profile_match_threshold": {
+      "label": "Kongruosojlo",
+      "doc": "Minimuma simileca poentaro (0-1) bezonata ĉe ciklofino por akcepti programidentigon. Levu ĝin por redukti malĝustajn identigojn; malaltigu ĝin se la programoj de via maŝino ne estas kongruaj. Defaŭlte 0.4 estas konservativa deirpunkto."
+    },
+    "profile_unmatch_threshold": {
+      "label": "Malkongrusojlo",
+      "doc": "Se viva mez-cikla matĉo falas sub ĉi tiu poentaro, la prova identigo estas malbarita. Tenu ĝin iomete sub la Match-Sojlo, por ke mallonga trempiĝo en simileco ne renversu la ekranon reen al nekomparebla."
+    },
+    "profile_match_interval": {
+      "label": "Kongruointervalo",
+      "doc": "Kiom ofte provi profilkongruon dum kura ciklo. Defaŭlte 300 s (5 minutoj) ekvilibrigas detektan rapidon kaj CPU."
+    },
+    "profile_match_min_duration_ratio": {
+      "label": "Minimuma daŭroproporcia",
+      "doc": "Minimuma ciklolongo relative al la profilo. 0.9 signifas, ke ciklo devas esti almenaŭ 90% de la profildaŭro por kongrui."
+    },
+    "profile_match_max_duration_ratio": {
+      "label": "Maksimuma daŭroproporcia",
+      "doc": "Maksimuma ciklolongo relative al la profilo. 1.3 signifas, ke ciklo devas esti malpli ol 130% de la profildaŭro por kongrui."
+    },
+    "profile_duration_tolerance": {
+      "label": "Profila daŭrotolero",
+      "doc": "La +/- bendo ĉirkaŭ profila averaĝa tempodaŭro uzata dum kongruo. 0.25 signifas 60-minutan profilon kongruas kun 45-75-minutaj cikloj."
+    },
+    "duration_tolerance": {
+      "label": "Taksada tolero",
+      "doc": "Toleremo por tempo restantaj taksoj (lernado de retrosciigo, ne kongruo). Se la fakta daŭro estas ene de +/-X% de la takso, ĝi kalkulas kiel bona kongruo."
+    },
+    "auto_label_confidence": {
+      "label": "Aŭtomata etikedadkonfido",
+      "doc": "Se la matĉopoentaro ĉe ciklofino estas ĉe aŭ super ĉi tio, la programo estas etikedita aŭtomate sen iu ajn konfirma prompto. Levu ĝin por postuli pli altan certecon antaŭ aŭtomata etikedado; malaltigu ĝin por aŭtomatigi pli. Funkcias kune kun Learning Confidence sub ĝi."
+    },
+    "learning_confidence": {
+      "label": "Lernadkonfido",
+      "doc": "Se la matĉopoentaro falas inter ĉi tio kaj Aŭtomata Etikedo-Konfido, sciigo de sugestoj petas vin kontroli la identigitan programon. Sub ĉi tiu poentaro la matĉo estas tro necerta por ekaperi. Devas esti konservita sub Aŭtomata Etikedo Konfido."
+    },
+    "suppress_feedback_notifications": {
+      "label": "Subpremi reagsciigojn",
+      "doc": "Ne levu konstantan sciigon kiam finita ciklo bezonas revizion; la sugestoj ankoraŭ aperas en la reviziovico de Cycles."
+    },
+    "watchdog_interval": {
+      "label": "Gardostara tempospaco",
+      "doc": "Kiom ofte la fona gardohundo kontrolas por haltigitaj sensiloj kaj pasintaj tempo-tempoj. Defaŭlte 30 s."
+    },
+    "no_update_active_timeout": {
+      "label": "Senĝisdatiga limdaŭro",
+      "doc": "Se neniuj potencaj ĝisdatigoj alvenos dum ĉi tiu longa tempo dum funkciado, supozu, ke la ŝtopilo estas faligita eksterrete kaj devigu haltigi por eviti zombian ciklon. Defaŭlte 600 s permesas nubon aŭ maŝmalfruon."
+    },
+    "progress_reset_delay": {
+      "label": "Progresoreset-malfruo",
+      "doc": "Post fino, tenu progreson je 100% dum ĉi tiu tempo, por ke Kompletigita estu videbla sur paneloj antaŭ restarigi al Neaktiva."
+    },
+    "auto_maintenance": {
+      "label": "Aŭtomata bontenado (noktopurigado)",
+      "doc": "Kuru noktan mastrumon: rekonstruu profilkovertojn, rekalkulu ciklan sanon, pritondu sencimigajn spurojn kaj konservu la plej lastatempajn ciklojn."
+    },
+    "expose_debug_entities": {
+      "label": "Elmontri erarserĉajn entojn",
+      "doc": "Publikigi ekstrajn diagnozajn HA-entaĵojn (matĉa fido, ambigueco, ŝtatinternoj). Off tenas la entliston pura por normala uzo."
+    },
+    "save_debug_traces": {
+      "label": "Konservi erarserĉajn spurojn",
+      "doc": "Konservu la plenan potencan spuron kaj kongruajn sencimigajn datumojn por ĉiu ciklo. Utila por solvi problemojn sed pliigas stokan grandecon."
+    },
+    "anti_wrinkle_enabled": {
+      "label": "Ŝalti kontraŭkrempiĝan detektadon",
+      "doc": "Rekonu la mallongajn malalt-fortajn ciklopulsojn, kiujn elsendas sekigilo post la ĉefa varmega fazo kaj tenu ilin ligitaj al la finita ciklo anstataŭ legi ilin kiel novajn ciklojn."
+    },
+    "anti_wrinkle_max_power": {
+      "label": "Maksimuma kontraŭkrempiĝa potenco",
+      "doc": "Pulso super ĉi tiu potenco estas traktata kiel vera nova ciklo, ne kontraŭ-sulketo. Agordu tuj super la falo-pulsa potenco."
+    },
+    "anti_wrinkle_max_duration": {
+      "label": "Maksimuma daŭro",
+      "doc": "Pulsoj pli longaj ol ĉi tio estas traktataj kiel reala ciklo prefere ol kontraŭ-sulketo."
+    },
+    "anti_wrinkle_exit_power": {
+      "label": "Elirsojla potenco",
+      "doc": "Potenco devas fali sub ĉi tio inter pulsoj por ke kontraŭ-sulka reĝimo restu aktiva."
+    },
+    "delay_start_detect_enabled": {
+      "label": "Ŝalti prokrastitan komencodetektadon",
+      "doc": "Detektu kiam la aparato estas ŝaltita kaj atendanta (malfrua ekfunkciigo / ŝancatendo) sed ne komencis sian ciklon, do standby-tiro ne estas konfuzita kun kuranta ciklo."
+    },
+    "delay_confirm_seconds": {
+      "label": "Konfirmaj sekundoj",
+      "doc": "Potenco devas resti en la standby por ĉi tio longe antaŭ ol la aparato estas traktata kiel atendanta por komenci anstataŭ funkcii."
+    },
+    "delay_timeout_hours": {
+      "label": "Limdaŭraj horoj",
+      "doc": "Ĉesu atendi en prokrasta startreĝimo post ĉi tiuj multaj horoj kaj revenu al neaktiva, do maŝino lasita ŝaltita sed neniam komencita ne atendas eterne."
+    },
+    "external_end_trigger_enabled": {
+      "label": "Ŝalti eksteran finan ekigilon",
+      "doc": "Lasu eksteran binaran sensilon signali la finon de ciklo, krom la enkonstruita potenco-bazita detekto."
+    },
+    "external_end_trigger": {
+      "label": "Ekstera ekigilento",
+      "doc": "Binara sensilo kies statoŝanĝo markas la ciklofinon (ekz. aparato \"finita\" kontakto aŭ kunulintegriĝo)."
+    },
+    "external_end_trigger_inverted": {
+      "label": "Inversigi eksteran ekigilon (ekigi ĉe MALŜALTITA)",
+      "doc": "Traktu la ellasilsensilon malŝaltantan (prefere ol ON) kiel la signalon de fino de ciklo."
+    },
+    "door_sensor_entity": {
+      "label": "Pordsensora ento",
+      "doc": "Laŭvola pordo binara sensilo. Uzita por detekti kiam la aparato estis malfermita/malŝarĝita post ciklo."
+    },
+    "pause_cuts_power": {
+      "label": "Paŭzo ankaŭ tranĉas potencon (per ŝaltilo)",
+      "doc": "Kiam ciklo estas paŭzita, ankaŭ malŝaltu la Ŝaltilo-Entaĵon sube. Nur por aparatoj, kies ŝtopilo povas sekure tranĉi mezciklon."
+    },
+    "switch_entity": {
+      "label": "Ŝaltilento",
+      "doc": "Laŭvola ŝaltilo malŝaltita ĉe paŭzo kaj reŝaltita dum rekomenco, uzata kune kun \"Paŭzo ankaŭ tranĉas potencon\"."
+    },
+    "notify_unload_delay_minutes": {
+      "label": "Elŝarĝa rememorigo-malfruo",
+      "doc": "Minutojn post kiam ciklo finiĝas antaŭ sendi la ankoraŭ atendantan memorigilon \"malŝarĝi la maŝinon\". Agordu 0 por malŝalti la memorigilon."
+    },
+    "pump_stuck_duration": {
+      "label": "Blokita pumpildaŭro",
+      "doc": "Sekundojn pumpilo povas funkcii ade antaŭ ol ĝi estas markita kiel eventuale blokita (pafas la ŝtopitan-pumpilan okazaĵon)."
+    },
+    "notify_start_services": {
+      "label": "Startaj servoj",
+      "doc": "sciigi.* servoj vokis kiam ciklo komenciĝas. Aldonu unu por celo (telefono, panelo, ktp.); lasu malplena por neniu starta sciigo."
+    },
+    "notify_finish_services": {
+      "label": "Finaj servoj",
+      "doc": "sciigi.* servoj vokis kiam ciklo finiĝas. Aldonu unu por celo; lasu malplena por neniu finsciigo."
+    },
+    "notify_live_services": {
+      "label": "Vivaj progresservoj",
+      "doc": "sciigi.* servoj postulis vivajn progresajn ĝisdatigojn dum ciklo funkcias. Lasu malplena por malŝalti sciigojn pri reala progreso."
+    },
+    "notify_people": {
+      "label": "Personoj (por nur kiam hejme)",
+      "doc": "persono.* estaĵoj uzataj de \"Sciigi Nur Kiam Hejme\" por decidi ĉu iu estas hejme."
+    },
+    "notify_only_when_home": {
+      "label": "Sciigi nur kiam hejme",
+      "doc": "Sendu sciigojn nur kiam almenaŭ unu el la ligitaj homoj (supre) estas hejme."
+    },
+    "notify_fire_events": {
+      "label": "Ekigi HA-eventojn por sciigoj",
+      "doc": "Ankaŭ lanĉu ha_washdata_* eventojn ĉe ciklo-komenco/fino, por ke vi povu konstrui viajn proprajn aŭtomatigojn."
+    },
+    "notify_before_end_minutes": {
+      "label": "Antaŭfina averto",
+      "doc": "Sendu alarmon de Preskaŭ Farita kiam la estimata tempo restanta falas sub ĉi tio. 0 malŝaltas ĝin."
+    },
+    "notify_live_interval_seconds": {
+      "label": "Viva ĝisdatiga tempospaco",
+      "doc": "Kiom ofte estas refreŝigitaj sciigoj pri reala progreso dum ciklo funkcias."
+    },
+    "notify_live_overrun_percent": {
+      "label": "% da viva superiro antaŭ averto",
+      "doc": "Se ciklo preterpasas sian takson je pli ol ĉi tiu procento, sendu transpaŝan alarmon."
+    },
+    "notify_live_chronometer": {
+      "label": "Uzi vivan kronometron",
+      "doc": "Montru real-ĝisdatigitan retronombradon en la sciigo (sur platformoj kiuj subtenas ĝin) anstataŭ statika takso."
+    },
+    "notify_timeout_seconds": {
+      "label": "Aŭtomate forigi post",
+      "doc": "Aŭtomate forĵetu la sciigon post ĉi tiuj multaj sekundoj (sur platformoj kiuj subtenas ĝin). 0 konservas ĝin ĝis forĵetite permane."
+    },
+    "notify_title": {
+      "label": "Sciigotitolo",
+      "doc": "Sciiga titolo. Ŝablonaj variabloj: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
+    },
+    "notify_icon": {
+      "label": "Sciigikono",
+      "doc": "Laŭvola mdi-ikono por la sciigo (ekz. mdi:wash-machine). Lasu malplena por la platformo defaŭlta."
+    },
+    "notify_start_message": {
+      "label": "Startmesaĝo",
+      "doc": "Korpo sendita kiam ciklo komenciĝas. Ŝablonaj variabloj: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
+    },
+    "notify_finish_message": {
+      "label": "Finmesaĝo",
+      "doc": "Korpo sendita kiam ciklo finiĝas. Ŝablonaj variabloj: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
+    },
+    "notify_pre_complete_message": {
+      "label": "Antaŭfina mesaĝo",
+      "doc": "Korpo de la antaŭfino / preskaŭ farita atentigo. Ŝablonaj variabloj: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
+    },
+    "notify_reminder_message": {
+      "label": "Rememorigo mesaĝo",
+      "doc": "Korpo de la ankoraŭ atendanta malŝarĝa memorigilo. Blanka uzas la enkonstruitan defaŭlton. Ŝablonaj variabloj: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
+    },
+    "notify_channel": {
+      "label": "Android-kanalo (start/vivo)",
+      "doc": "Nomo de kanala sciigo de Android por komencaj/vivaj mesaĝoj (regas per-kanalan sonon kaj prioritaton en la poŝtelefona aplikaĵo). Blank uzas la akompanan apon defaŭltan."
+    },
+    "notify_finish_channel": {
+      "label": "Android-kanalo (fino)",
+      "doc": "Nomo de kanala sciigo de Android por la finmesaĝo. Blanka reuzas la komencan/vivan kanalon."
+    },
+    "energy_price_entity": {
+      "label": "Energipreza ento",
+      "doc": "Sensilo kun la nuna elektroprezo per kWh (ekz. dinamika tarifo). Havas prioritaton super la senmova prezo sube. Ĉiu ciklo frostigas la prezon en efiko kiam ĝi finiĝis."
+    },
+    "energy_price_static": {
+      "label": "Statika energiprezo (po kWh)",
+      "doc": "Fiksa prezo per kWh uzata por kostaj ciferoj kiam neniu realpreza ento estas fiksita supre."
+    },
+    "notify_cycle_timers": {
+      "label": "Ciklaj tempokalkuliloj",
+      "doc": "Sciigoj je specifaj minutoj en ciklo (ekz. por aldoni moligilon). Mesaĝo subtenas {device}, {program}, {minutes}. Ebligu Aŭtoman paŭzon por paŭzi ĉe tiu punkto kaj ricevi interagan sciigon per butono Rekomenci; rekomencu per la panelo, la paŭzo/rekomenca servo aŭ la sciiga ago."
+    },
+    "enable_ml_models": {
+      "label": "Apliki inteligentan modelojn dum ciklo",
+      "doc": "Dum ciklo kuras, lasu la modelojn rafini la vivajn rezultojn: pli stabila tempo-restanta kaj energio/kostotakso, kaj kontraŭ-malfrua-halta gardisto ĉe fina detekto (ĝi povas nur iam prokrasti finpoluro, neniam fini unu frue, kaj estas limigita). Uzas viajn fajnagordintajn modelojn kiam disponeblas, alie la enkonstruitajn. Off = la klasika potenc-bazita logiko nur (ankoraŭ fidinda)."
+    },
+    "ml_training_enabled": {
+      "label": "Lerni de ĉi tiu maŝino",
+      "doc": "Periode studu viajn reviziitajn ciklojn dum la nokto kaj agordu la modelojn al ĉi tiu specifa maŝino. Ŝanĝo estas konservita nur kiam ĝi vere gajnas pli bone en tenitaj cikloj, do ĉi tio povas nur helpi aŭ resti la sama - neniam regresas."
+    },
+    "ml_training_hour": {
+      "label": "Lerni je la horo",
+      "doc": "Loka horo de la tago (0-23) por fari la noktan fajnagordon. Elektu trankvilan horon kiel 2 (02:00)."
+    },
+    "ml_training_min_cycles": {
+      "label": "Unue bezonataj cikloj",
+      "doc": "Atendu ĝis almenaŭ tiom da cikloj estas registritaj antaŭ fajnagordado, do estas sufiĉe por lerni."
+    },
+    "ml_training_interval_days": {
+      "label": "Kontroli plej ofte ĉiuj",
+      "doc": "Rekontrolu por plibonigoj maksimume unufoje dum tiom da tagoj."
+    }
+  },
+  "placeholder": {
+    "add": "aldoni…",
+    "group_name": "ekz. Kotono 2:47",
+    "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+    "notify": "aldoni sciigservon…",
+    "notify_services_list": "notify.mobile_app_phone, ...",
+    "person": "aldoni personon…",
+    "phase_name": "ekz. Antaŭlavo",
+    "profile_name": "ekz. Kotono 40°C"
+  }
+}
