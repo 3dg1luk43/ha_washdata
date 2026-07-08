@@ -420,12 +420,13 @@ const _CSS = `
 .wd-form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0 20px; }
 /* Cycle timer list */
 .wd-timerlist { display: flex; flex-direction: column; gap: 8px; }
-.wd-timer-row { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px;
+.wd-timer-row { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px;
   border: 1px solid var(--divider-color); border-radius: 8px; background: var(--card-background-color); }
-.wd-timer-controls { display: flex; align-items: center; gap: 8px; }
-.wd-timer-row input[type="number"] { width: 70px; }
-.wd-timer-row input[type="text"] { width: 100%; box-sizing: border-box; }
-.wd-timer-row label { display: flex; align-items: center; gap: 4px; font-size: .88em; white-space: nowrap; }
+.wd-timer-top { display: flex; align-items: center; gap: 8px; }
+.wd-timer-top input[type="number"] { width: 70px; flex: 0 0 auto; }
+.wd-timer-top textarea { flex: 1 1 auto; min-width: 0; box-sizing: border-box; resize: vertical; min-height: 32px; height: 34px; }
+.wd-timer-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.wd-timer-footer .wd-switch-lbl { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .wd-timer-add { align-self: flex-start; margin-top: 4px; }
 /* Roomier Settings layout (scoped so modals keep their compact spacing) */
 #wd-settings-form .wd-form-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px 28px; align-items: start; }
@@ -587,6 +588,15 @@ const _CSS = `
 .wd-sg-sub { font-size: .78em; color: var(--secondary-text-color); margin-top: 5px; line-height: 1.5; }
 .wd-logline { padding: 2px 0; border-bottom: 1px solid var(--divider-color); white-space: pre-wrap; word-break: break-word; }
 .wd-logline:last-child { border-bottom: none; }
+/* Entity combobox */
+.wd-combo { position: relative; width: 100%; }
+.wd-combo-drop { position: absolute; top: 100%; left: 0; right: 0; z-index: 60;
+  background: var(--card-background-color,#fff); border: 1px solid var(--divider-color);
+  border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.18);
+  max-height: 220px; overflow-y: auto; margin-top: 3px; }
+.wd-combo-item { padding: 7px 12px; cursor: pointer; font-size: .86em; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; }
+.wd-combo-item:hover, .wd-combo-item.kbd { background: var(--secondary-background-color); }
 .wd-loglvl { font-weight: 700; margin-right: 6px; }
 .wd-logts { color: var(--secondary-text-color); margin-right: 6px; }
 .wd-lvl-ERROR, .wd-lvl-CRITICAL { color: var(--error-color, #f44336); }
@@ -622,19 +632,24 @@ const _CSS = `
 .wd-content-row { display: flex; flex: 1; overflow: hidden; min-height: 0; }
 .wd-main { flex: 1; overflow-y: auto; min-width: 0; }
 .wd-log-drawer {
-  width: 0; overflow: hidden;
+  position: relative; width: 0; overflow: hidden;
   transition: width .28s cubic-bezier(.4,0,.2,1);
   border-left: 1px solid var(--divider-color);
   display: flex; flex-direction: column;
   background: var(--primary-background-color);
 }
 .wd-log-drawer.open { width: 380px; }
+.wd-log-resize {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 6px; cursor: ew-resize; z-index: 2;
+  transition: background .15s;
+}
+.wd-log-resize:hover, .wd-log-resize.dragging { background: var(--primary-color, #03a9f4); opacity: .35; }
 .wd-log-drawer-head {
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 14px; border-bottom: 1px solid var(--divider-color);
   font-weight: 600; font-size: .9em; flex-shrink: 0; white-space: nowrap;
 }
-.wd-log-drawer-body { flex: 1; overflow-y: auto; padding: 10px 14px; min-width: 320px; }
+.wd-log-drawer-body { flex: 1; overflow-y: auto; padding: 10px 14px; min-width: 0; }
 .wd-log-close-btn {
   background: none; border: none; cursor: pointer; color: inherit; opacity: .65;
   padding: 3px 6px; border-radius: 4px; font-size: 1.1em; line-height: 1;
@@ -642,7 +657,8 @@ const _CSS = `
 .wd-log-close-btn:hover { opacity: 1; background: var(--secondary-background-color); }
 .wd-gear-btn.log-active { background: rgba(255,255,255,.22); }
 @media (max-width: 680px) {
-  .wd-log-drawer.open { width: 100vw; position: fixed; top: 0; right: 0; bottom: 0; z-index: 30; border-left: none; }
+  .wd-log-drawer.open { width: 100vw !important; position: fixed; top: 0; right: 0; bottom: 0; z-index: 30; border-left: none; }
+  .wd-log-resize { display: none; }
 }
 `;
 
@@ -758,36 +774,46 @@ function _field(f, value, extra) {
     const jt = (v === '' || v == null) ? '' : (typeof v === 'string' ? v : JSON.stringify(v, null, 2));
     input = `<textarea data-opt="${key}" data-ftype="json" rows="3" placeholder='[{"action":"ID","title":"Label"}]'>${_esc(jt)}</textarea>`;
   } else if (f.type === 'entitylist') {
-    // Chip/pill multi-picker: existing values as removable pills + a datalist
+    // Chip/pill multi-picker: existing values as removable pills + a combobox
     // add-input. Managed by DOM (no re-render) and collected on save.
     const vals = Array.isArray(value) ? value : (value ? [value] : []);
-    const dlId = `wd-dl-${key}`;
     const pills = vals.map(x => `<span class="wd-pill" data-val="${_esc(x)}">${_esc(x)}<button type="button" class="wd-pill-x" aria-label="Remove">×</button></span>`).join('');
-    const opts = (extra.entities || []).filter(e => !vals.includes(e)).map(e => `<option value="${_esc(e)}">`).join('');
-    input = `<div class="wd-pillbox" data-opt="${key}" data-ftype="entitylist">${pills}<input type="text" class="wd-pill-add" list="${dlId}" placeholder="${_esc(f.placeholder || 'add…')}"><datalist id="${dlId}">${opts}</datalist></div>`;
+    input = `<div class="wd-pillbox" data-opt="${key}" data-ftype="entitylist">${pills}` +
+      `<div class="wd-combo wd-combo-pill">` +
+      `<input type="text" class="wd-pill-add" autocomplete="off" spellcheck="false" placeholder="${_esc(f.placeholder || 'add…')}">` +
+      `<div class="wd-combo-drop" hidden></div>` +
+      `</div></div>`;
   } else if (f.type === 'timerlist') {
     const timers = Array.isArray(v) ? v : [];
     const tMin = extra.t ? extra.t('lbl.timer_min', {}, 'min') : 'min';
     const tMsgPh = extra.t ? extra.t('lbl.timer_msg_placeholder', {}, 'Message (optional, {device}/{program}/{minutes})') : 'Message (optional, {device}/{program}/{minutes})';
     const tAutoPause = extra.t ? extra.t('lbl.timer_auto_pause', {}, 'Auto-pause') : 'Auto-pause';
-    const tRemove = extra.t ? extra.t('btn.remove_timer', {}, 'Remove timer') : 'Remove timer';
+    const tDel = extra.t ? extra.t('btn.remove_timer', {}, 'Delete') : 'Delete';
     const tAddTimer = extra.t ? extra.t('btn.add_timer', {}, '+ Add timer') : '+ Add timer';
     const mkRow = (t, idx) => {
       const mins = (t && t.offset_minutes) ? String(t.offset_minutes) : '';
       const msg = (t && t.message) ? _esc(t.message) : '';
       const paused = (t && t.auto_pause) ? ' checked' : '';
-      return `<div class="wd-timer-row" data-idx="${idx}">` +
-        `<div class="wd-timer-controls">` +
-        `<input type="number" min="1" placeholder="${_esc(tMin)}" data-field="offset_minutes" value="${_esc(mins)}" style="width:70px">` +
-        `<label><input type="checkbox" data-field="auto_pause"${paused}> ${_esc(tAutoPause)}</label>` +
-        `<button type="button" class="wd-btn wd-btn-sm wd-btn-secondary wd-timer-remove" aria-label="${_esc(tRemove)}">&times;</button>` +
+      return `<div class="wd-timer-row" data-tidx="${idx}">` +
+        `<div class="wd-timer-top">` +
+        `<input type="number" min="1" placeholder="${_esc(tMin)}" data-field="offset_minutes" value="${_esc(mins)}">` +
+        `<textarea placeholder="${_esc(tMsgPh)}" data-field="message">${msg}</textarea>` +
         `</div>` +
-        `<input type="text" placeholder="${_esc(tMsgPh)}" data-field="message" value="${msg}">` +
+        `<div class="wd-timer-footer">` +
+        `<label class="wd-switch-lbl"><span class="wd-switch"><input type="checkbox" data-field="auto_pause"${paused}><span class="wd-switch-slider"></span></span><span class="wd-switch-text">${_esc(tAutoPause)}</span></label>` +
+        `<button type="button" class="wd-btn wd-btn-sm wd-btn-danger wd-timer-remove">${_esc(tDel)}</button>` +
+        `</div>` +
         `</div>`;
     };
     const rows = timers.map((t, i) => mkRow(t, i)).join('');
     input = `<div class="wd-timerlist" data-opt="${key}" data-ftype="timerlist">${rows}` +
       `<button type="button" class="wd-btn wd-btn-sm wd-btn-secondary wd-timer-add">${_esc(tAddTimer)}</button></div>`;
+  } else if (f.type === 'entity') {
+    const ph = f.placeholder ? ` placeholder="${_esc(f.placeholder)}"` : '';
+    input = `<div class="wd-combo">` +
+      `<input type="text" class="wd-combo-inp" data-opt="${key}" data-ftype="entity" value="${_esc(v)}" autocomplete="off" spellcheck="false"${ph}>` +
+      `<div class="wd-combo-drop" hidden></div>` +
+      `</div>`;
   } else if (f.type === 'list') {
     const joined = Array.isArray(v) ? v.join(', ') : _esc(v);
     input = `<input type="text" data-opt="${key}" data-ftype="list" value="${_esc(joined)}" placeholder="notify.mobile_app_phone, ...">`;
@@ -1075,7 +1101,13 @@ class HaWashdataPanel extends HTMLElement {
     this._panelSubtab = 'prefs';
     this._logs = [];
     this._logLevel = '';
-    this._logOpen = false;
+    try {
+      this._logOpen = localStorage.getItem('wd-log-open') === '1';
+      this._logDrawerWidth = Math.max(280, parseInt(localStorage.getItem('wd-log-width') || '380', 10) || 380);
+    } catch (_) {
+      this._logOpen = false;
+      this._logDrawerWidth = 380;
+    }
     this._tabInitialized = false;
     this._modal = null;
     this._prevModal = null;  // profile-panel modal to restore after cycle-detail closes
@@ -1380,7 +1412,7 @@ class HaWashdataPanel extends HTMLElement {
       const fresh = tmp.firstElementChild;
       if (fresh) {
         bar.replaceWith(fresh);
-        fresh.querySelectorAll('[data-idx]').forEach(b => b.addEventListener('click', () => this._selectDevice(parseInt(b.dataset.idx, 10))));
+        fresh.querySelectorAll('.wd-devcard[data-idx]').forEach(b => b.addEventListener('click', () => this._selectDevice(parseInt(b.dataset.idx, 10))));
       }
     }
     // _lastRefresh kept for internal use; header no longer shows the timestamp.
@@ -1397,7 +1429,7 @@ class HaWashdataPanel extends HTMLElement {
       const t = new Date(r.ts * 1000).toLocaleTimeString();
       return `<div class="wd-logline"><span class="wd-logts">${t}</span><span class="wd-loglvl wd-lvl-${_esc(r.level)}">${_esc(r.level)}</span>${_esc(r.msg)}</div>`;
     }).join('');
-    body.innerHTML = `<p class="wd-info" style="margin:0 0 8px;font-size:.78em">${this._t('msg.log_buffer_hint', {}, 'Newest first · buffers the last 500 ha_washdata records since restart · drag the bottom edge to resize.')}</p>
+    body.innerHTML = `<p class="wd-info" style="margin:0 0 8px;font-size:.78em">${this._t('msg.log_buffer_hint', {}, 'Newest first · buffers the last 500 ha_washdata records since restart · drag the left edge to resize.')}</p>
       ${lines ? `<div class="wd-logs" style="max-height:none;resize:none">${lines}</div>` : `<p class="wd-info">${this._t('msg.no_logs', {}, 'No log records buffered yet.')}</p>`}`;
   }
 
@@ -2342,11 +2374,11 @@ class HaWashdataPanel extends HTMLElement {
     else if (f.type === 'device') extra.opts = this._deviceOpts();
     else if (f.type === 'select') extra.opts = f.opts || [];
     else if (f.type === 'entity') {
-      const dlId = `wd-dl-${f.key}`;
       const states = this._hass && this._hass.states ? this._hass.states : {};
-      const ids = Object.keys(states).filter(e => !f.domain || e.startsWith(f.domain + '.')).sort().slice(0, 500);
-      extra.datalistId = dlId;
-      extra.datalist = `<datalist id="${dlId}">${ids.map(e => `<option value="${_esc(e)}">`).join('')}</datalist>`;
+      const domains = f.domain === 'binary_sensor' ? ['binary_sensor', 'sensor'] : (f.domain ? [f.domain] : null);
+      const ids = Object.keys(states).filter(e => !domains || domains.some(d => e.startsWith(d + '.'))).sort().slice(0, 500);
+      if (!this._entityListCache) this._entityListCache = {};
+      this._entityListCache[f.key] = ids;
     } else if (f.type === 'entitylist') {
       const states = this._hass && this._hass.states ? this._hass.states : {};
       const stateEntities = Object.keys(states).filter(e => !f.domain || e.startsWith(f.domain + '.')).sort();
@@ -2356,6 +2388,8 @@ class HaWashdataPanel extends HTMLElement {
       } else {
         extra.entities = stateEntities.slice(0, 500);
       }
+      if (!this._entityListCache) this._entityListCache = {};
+      this._entityListCache[f.key] = extra.entities;
     } else if (Array.isArray(f.suggestions) && f.suggestions.length) {
       // Free-text field with a suggestion datalist (e.g. Android channel names).
       const dlId = `wd-dl-${f.key}`;
@@ -2970,7 +3004,8 @@ class HaWashdataPanel extends HTMLElement {
       const t = new Date(r.ts * 1000).toLocaleTimeString();
       return `<div class="wd-logline"><span class="wd-logts">${t}</span><span class="wd-loglvl wd-lvl-${_esc(r.level)}">${_esc(r.level)}</span>${_esc(r.msg)}</div>`;
     }).join('');
-    return `<div class="wd-log-drawer open">
+    return `<div class="wd-log-drawer open" style="width:${this._logDrawerWidth}px">
+      <div class="wd-log-resize" title="Drag to resize"></div>
       <div class="wd-log-drawer-head">
         <span>${this._t('hdr.logs', {}, 'Logs')}</span>
         <div style="display:flex;align-items:center;gap:6px">
@@ -2980,7 +3015,7 @@ class HaWashdataPanel extends HTMLElement {
         </div>
       </div>
       <div class="wd-log-drawer-body">
-        <p class="wd-info" style="margin:0 0 8px;font-size:.78em">${this._t('msg.log_buffer_hint', {}, 'Newest first · buffers the last 500 ha_washdata records since restart · drag the bottom edge to resize.')}</p>
+        <p class="wd-info" style="margin:0 0 8px;font-size:.78em">${this._t('msg.log_buffer_hint', {}, 'Newest first · buffers the last 500 ha_washdata records since restart · drag the left edge to resize.')}</p>
         ${lines ? `<div class="wd-logs" style="max-height:none;resize:none">${lines}</div>` : `<p class="wd-info">${this._t('msg.no_logs', {}, 'No log records buffered yet.')}</p>`}
       </div>
     </div>`;
@@ -3001,7 +3036,7 @@ class HaWashdataPanel extends HTMLElement {
         <select id="wd-log-level">${sel}</select>
         <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="logs-refresh">${this._t('btn.refresh', {}, 'Refresh')}</button>
         <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="logs-export">${this._t('btn.export', {}, 'Export')}</button>
-        <span class="wd-field-hint" style="margin:0">${this._t('msg.log_buffer_hint', {}, 'Newest first · buffers the last 500 ha_washdata records since restart · drag the bottom edge to resize.')}</span>
+        <span class="wd-field-hint" style="margin:0">${this._t('msg.log_buffer_hint', {}, 'Newest first · buffers the last 500 ha_washdata records since restart · drag the left edge to resize.')}</span>
       </div>
       ${lines ? `<div class="wd-logs">${lines}</div>` : `<p class="wd-info">${this._t('msg.no_logs', {}, 'No log records buffered yet.')}</p>`}
     </div>`;
@@ -3720,7 +3755,7 @@ class HaWashdataPanel extends HTMLElement {
         const editBtn = canEdit ? `<td style="padding:4px 6px 4px 2px;white-space:nowrap">
           <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cleanup-edit-cycle" data-cid="${_esc(c.cycle_id)}">${this._t('btn.trim_split', {}, 'Trim / Split')}</button>
         </td>` : '';
-        return `<tr data-cid="${_esc(c.cycle_id)}">
+        return `<tr data-cid="${_esc(c.cycle_id)}" style="cursor:pointer">
           <td style="width:26px;padding:6px 4px"><input type="checkbox" data-cleanidx="${origIdx}" ${sel.has(c.cycle_id) ? 'checked' : ''}></td>
           <td style="width:10px;padding:6px 2px"><span class="wd-swatch" style="background:${_PALETTE[origIdx % _PALETTE.length]}"></span></td>
           <td class="wd-tc-date">${_fmtDate(c.start_time)}</td>
@@ -3924,16 +3959,20 @@ class HaWashdataPanel extends HTMLElement {
     if (!m || !m.cleanup || !(m.cleanup.cycles || []).length) return;
     const cyc = m.cleanup.cycles;
     const sel = m.cleanup.selected || new Set();
+    const tableHover = this._spagTableHoverCid || null;
     let xMax = 1;
     cyc.forEach(c => { const s = c.samples || []; if (s.length && s[s.length - 1][0] > xMax) xMax = s[s.length - 1][0]; });
-    const series = cyc.map((c, i) => ({
-      points: c.samples || [],
-      stroke: _PALETTE[i % _PALETTE.length],
-      width: sel.has(c.cycle_id) ? 2.6 : 1,
-      alpha: sel.size ? (sel.has(c.cycle_id) ? 1 : 0.22) : 0.7,
-      name: _fmtDate(c.start_time),
-      cid: c.cycle_id,
-    }));
+    const series = cyc.map((c, i) => {
+      const isSel = sel.has(c.cycle_id), isHov = tableHover === c.cycle_id;
+      return {
+        points: c.samples || [],
+        stroke: _PALETTE[i % _PALETTE.length],
+        width: (isSel || isHov) ? 2.6 : 1,
+        alpha: sel.size ? (isSel ? 1 : 0.22) : tableHover ? (isHov ? 1 : 0.22) : 0.7,
+        name: _fmtDate(c.start_time),
+        cid: c.cycle_id,
+      };
+    });
     this._drawCurves('wd-spag-canvas', { series, xMax });
   }
 
@@ -3949,7 +3988,7 @@ class HaWashdataPanel extends HTMLElement {
       this.dispatchEvent(new CustomEvent('hass-toggle-menu', { bubbles: true, composed: true }));
     });
 
-    sr.querySelectorAll('[data-idx]').forEach(btn => btn.addEventListener('click', () => this._selectDevice(parseInt(btn.dataset.idx, 10))));
+    sr.querySelectorAll('.wd-devcard[data-idx]').forEach(btn => btn.addEventListener('click', () => this._selectDevice(parseInt(btn.dataset.idx, 10))));
 
     sr.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => { this._tab = btn.dataset.tab; this._fetchTabData(); }));
     sr.querySelectorAll('[data-sec]').forEach(btn => btn.addEventListener('click', () => { this._settingsSec = btn.dataset.sec; this._settingsSearch = ''; this._settingsSugOnly = false; this._render(); }));
@@ -4030,7 +4069,7 @@ class HaWashdataPanel extends HTMLElement {
         const v = String(raw || '').trim();
         if (!v) return;
         const have = Array.from(box.querySelectorAll('.wd-pill')).some(p => p.dataset.val === v);
-        if (!have) box.insertBefore(mkPill(v), addInput);
+        if (!have) box.insertBefore(mkPill(v), addInput.closest('.wd-combo') || addInput);
         if (addInput) addInput.value = '';
       };
       box.querySelectorAll('.wd-pill-x').forEach(x =>
@@ -4044,22 +4083,126 @@ class HaWashdataPanel extends HTMLElement {
       }
     });
 
-    // Cycle timer list: add/remove rows via direct DOM mutation (no re-render).
+    // Custom entity combobox
+    sr.querySelectorAll('.wd-combo').forEach(combo => {
+      const inp = combo.querySelector('.wd-combo-inp, .wd-pill-add');
+      const drop = combo.querySelector('.wd-combo-drop');
+      if (!inp || !drop) return;
+      const isPill = combo.classList.contains('wd-combo-pill');
+      const optKey = inp.dataset.opt || combo.closest('[data-opt]')?.dataset.opt;
+      const entities = (this._entityListCache || {})[optKey] || [];
+
+      const showDrop = (q) => {
+        const lq = (q || '').toLowerCase();
+        const hits = lq ? entities.filter(e => e.toLowerCase().includes(lq)).slice(0, 40)
+                        : entities.slice(0, 20);
+        if (!hits.length) { drop.hidden = true; return; }
+        drop.innerHTML = hits.map(e => `<div class="wd-combo-item" data-val="${_esc(e)}">${_esc(e)}</div>`).join('');
+        drop._kbd = -1;
+        drop.hidden = false;
+      };
+
+      const pick = (val) => {
+        if (!val) return;
+        if (isPill) {
+          const box = combo.closest('.wd-pillbox');
+          if (box && !Array.from(box.querySelectorAll('.wd-pill')).some(p => p.dataset.val === val)) {
+            const pill = document.createElement('span');
+            pill.className = 'wd-pill'; pill.dataset.val = val;
+            pill.appendChild(document.createTextNode(val));
+            const x = document.createElement('button');
+            x.type = 'button'; x.className = 'wd-pill-x'; x.setAttribute('aria-label', 'Remove');
+            x.textContent = '×';
+            x.addEventListener('click', () => pill.remove());
+            pill.appendChild(x);
+            box.insertBefore(pill, combo);
+          }
+          inp.value = '';
+        } else {
+          inp.value = val;
+        }
+        drop.hidden = true;
+      };
+
+      inp.addEventListener('focus', () => showDrop(inp.value));
+      inp.addEventListener('input', () => showDrop(inp.value));
+      inp.addEventListener('blur', () => setTimeout(() => { drop.hidden = true; }, 150));
+      inp.addEventListener('keydown', e => {
+        if (drop.hidden && e.key !== 'ArrowDown') return;
+        const items = drop.querySelectorAll('.wd-combo-item');
+        let a = drop._kbd || -1;
+        if (e.key === 'ArrowDown') { e.preventDefault(); if (drop.hidden) { showDrop(inp.value); return; } a = Math.min(a + 1, items.length - 1); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); a = Math.max(a - 1, 0); }
+        else if (e.key === 'Enter' && !drop.hidden) { e.preventDefault(); if (a >= 0) pick(items[a].dataset.val); else if (isPill && inp.value.trim()) pick(inp.value.trim()); return; }
+        else if (e.key === 'Escape') { drop.hidden = true; return; }
+        else return;
+        drop._kbd = a;
+        items.forEach((it, i) => it.classList.toggle('kbd', i === a));
+        items[a]?.scrollIntoView({ block: 'nearest' });
+      });
+      drop.addEventListener('mousedown', e => {
+        const item = e.target.closest('.wd-combo-item');
+        if (item) { e.preventDefault(); pick(item.dataset.val); }
+      });
+    });
+
+    // Cycle timer list: all mutations write-through to this._opts so the 5s poll
+    // re-render never wipes unsaved changes (switch toggles, deletes, typed values).
     sr.querySelectorAll('.wd-timerlist').forEach(list => {
-      list.querySelectorAll('.wd-timer-remove').forEach(btn =>
-        btn.addEventListener('click', () => btn.closest('.wd-timer-row')?.remove()));
+      const key = list.dataset.opt;
+
+      const readRow = (row) => ({
+        offset_minutes: parseFloat(row.querySelector('[data-field="offset_minutes"]').value) || 0,
+        message: (row.querySelector('[data-field="message"]').value || '').trim(),
+        auto_pause: row.querySelector('[data-field="auto_pause"]').checked,
+      });
+
+      const writeRow = (row) => {
+        const idx = parseInt(row.dataset.tidx, 10);
+        if (isNaN(idx) || !this._opts) return;
+        if (!Array.isArray(this._opts[key])) this._opts[key] = [];
+        this._opts[key][idx] = readRow(row);
+      };
+
+      const removeRow = (row) => {
+        const idx = parseInt(row.dataset.tidx, 10);
+        if (!isNaN(idx) && this._opts && Array.isArray(this._opts[key]))
+          this._opts[key] = this._opts[key].filter((_, i) => i !== idx);
+        row.remove();
+        // Re-index remaining rows so subsequent interactions use correct indices.
+        list.querySelectorAll('.wd-timer-row').forEach((r, i) => { r.dataset.tidx = i; });
+      };
+
+      const wireRow = (row) => {
+        const del = row.querySelector('.wd-timer-remove');
+        if (del) del.addEventListener('click', () => removeRow(row));
+        // Switch toggle and text edits both write-through to opts immediately.
+        row.querySelector('[data-field="auto_pause"]')?.addEventListener('change', () => writeRow(row));
+        row.querySelectorAll('[data-field="offset_minutes"],[data-field="message"]')
+          .forEach(inp => inp.addEventListener('input', () => writeRow(row)));
+      };
+
+      list.querySelectorAll('.wd-timer-row').forEach(row => wireRow(row));
+
       const addBtn = list.querySelector('.wd-timer-add');
       if (addBtn) addBtn.addEventListener('click', () => {
+        const newIdx = list.querySelectorAll('.wd-timer-row').length;
+        if (!this._opts) this._opts = {};
+        if (!Array.isArray(this._opts[key])) this._opts[key] = [];
+        this._opts[key].push({ offset_minutes: 0, message: '', auto_pause: false });
         const row = document.createElement('div');
         row.className = 'wd-timer-row';
+        row.dataset.tidx = newIdx;
         row.innerHTML =
-          `<div class="wd-timer-controls">` +
-          `<input type="number" min="1" placeholder="${this._t('lbl.timer_min', {}, 'min')}" data-field="offset_minutes" style="width:70px">` +
-          `<label><input type="checkbox" data-field="auto_pause"> ${this._t('lbl.timer_auto_pause', {}, 'Auto-pause')}</label>` +
-          `<button type="button" class="wd-btn wd-btn-sm wd-btn-secondary wd-timer-remove" aria-label="${this._t('btn.remove_timer', {}, 'Remove timer')}">&times;</button>` +
+          `<div class="wd-timer-top">` +
+          `<input type="number" min="1" placeholder="${this._t('lbl.timer_min', {}, 'min')}" data-field="offset_minutes">` +
+          `<textarea placeholder="${this._t('lbl.timer_msg_placeholder', {}, 'Message (optional, {device}/{program}/{minutes})')}" data-field="message"></textarea>` +
           `</div>` +
-          `<input type="text" placeholder="${this._t('lbl.timer_msg_placeholder', {}, 'Message (optional, {device}/{program}/{minutes})')}" data-field="message">`;
-        row.querySelector('.wd-timer-remove').addEventListener('click', () => row.remove());
+          `<div class="wd-timer-footer">` +
+          `<label class="wd-switch-lbl"><span class="wd-switch"><input type="checkbox" data-field="auto_pause"><span class="wd-switch-slider"></span></span><span class="wd-switch-text">${this._t('lbl.timer_auto_pause', {}, 'Auto-pause')}</span></label>` +
+          `<button type="button" class="wd-btn wd-btn-sm wd-btn-danger wd-timer-remove">${this._t('btn.remove_timer', {}, 'Delete')}</button>` +
+          `</div>`;
+        wireRow(row);
         list.insertBefore(row, addBtn);
       });
     });
@@ -4158,6 +4301,29 @@ class HaWashdataPanel extends HTMLElement {
     if (logLevel) logLevel.addEventListener('change', () => { this._logLevel = logLevel.value; this._fetchLogs().then(() => this._render()); });
     const logLevelDrawer = sr.getElementById('wd-log-level-drawer');
     if (logLevelDrawer) logLevelDrawer.addEventListener('change', () => { this._logLevel = logLevelDrawer.value; this._fetchLogs().then(() => this._render()); });
+
+    // Log drawer resize handle — pointer capture keeps tracking even outside the element.
+    const logResize = sr.querySelector('.wd-log-resize');
+    if (logResize) {
+      logResize.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        logResize.setPointerCapture(e.pointerId);
+        logResize.classList.add('dragging');
+        const drawer = sr.querySelector('.wd-log-drawer');
+        const startX = e.clientX, startW = drawer.offsetWidth;
+        const onMove = (me) => {
+          const w = Math.max(280, Math.min(900, startW + (startX - me.clientX)));
+          drawer.style.width = w + 'px';
+          this._logDrawerWidth = w;
+        };
+        logResize.addEventListener('pointermove', onMove);
+        logResize.addEventListener('pointerup', () => {
+          logResize.removeEventListener('pointermove', onMove);
+          logResize.classList.remove('dragging');
+          try { localStorage.setItem('wd-log-width', String(this._logDrawerWidth)); } catch (_) {}
+        }, { once: true });
+      });
+    }
     const impFile = sr.getElementById('wd-import-file');
     if (impFile) impFile.addEventListener('change', () => {
       const f = impFile.files && impFile.files[0];
@@ -4393,8 +4559,20 @@ class HaWashdataPanel extends HTMLElement {
     sr.querySelectorAll('[data-cleanidx]').forEach(el => el.addEventListener('change', () => {
       const c = m.cleanup.cycles[+el.dataset.cleanidx]; if (!c) return;
       if (el.checked) m.cleanup.selected.add(c.cycle_id); else m.cleanup.selected.delete(c.cycle_id);
-      this._render();
+      // Targeted update — avoid full re-render that resets scroll position.
+      const sel = m.cleanup.selected;
+      const delBtn = sr.querySelector('[data-maction="pp-cleanup-del"]');
+      if (delBtn && !this._busy.has('pp-cleanup-del')) {
+        delBtn.disabled = sel.size === 0;
+        delBtn.textContent = `Delete selected (${sel.size})`;
+      }
+      this._drawSpaghetti();
     }));
+    // Hover a row to highlight the matching curve in the graph.
+    sr.querySelectorAll('tr[data-cid]').forEach(row => {
+      row.addEventListener('mouseenter', () => { this._spagTableHoverCid = row.dataset.cid; this._drawSpaghetti(); });
+      row.addEventListener('mouseleave', () => { this._spagTableHoverCid = null; this._drawSpaghetti(); });
+    });
     // Click the highlighted curve on the graph to toggle that cycle's selection.
     const spag = sr.getElementById('wd-spag-canvas');
     if (spag) spag.addEventListener('pointerdown', e => {
@@ -4701,6 +4879,7 @@ class HaWashdataPanel extends HTMLElement {
       this._settingsSugOnly = true; this._tab = 'settings'; this._fetchTabData();
     } else if (a === 'toggle-log-drawer') {
       this._logOpen = !this._logOpen;
+      try { localStorage.setItem('wd-log-open', this._logOpen ? '1' : '0'); } catch (_) {}
       this._render();
       if (this._logOpen) this._fetchLogs().then(() => { if (this._logOpen) this._render(); });
     } else if (a === 'open-advanced') {

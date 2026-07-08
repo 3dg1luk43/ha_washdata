@@ -1,0 +1,241 @@
+name: '🌐 Panel Translations Bundle Check'
+
+# Verifies that panel-translations.json is compiled and current with respect to
+# the translation source files. If stale, posts a comment on the PR (or creates
+# a tracking issue for main-branch pushes) and assigns the maintainer.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'custom_components/ha_washdata/translations/**'
+      - 'custom_components/ha_washdata/www/panel-translations.json'
+  push:
+    branches: [main]
+    paths:
+      - 'custom_components/ha_washdata/translations/**'
+      - 'custom_components/ha_washdata/www/panel-translations.json'
+  workflow_dispatch:
+
+# Default: read-only; the job opts in to the write scopes it actually needs.
+permissions:
+  contents: read
+
+# Serialize per PR / commit so rapid pushes don't produce duplicate comments.
+concurrency:
+  group: panel-translations-check-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: panel-translations.json is compiled
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+      # --- Checkout ----------------------------------------------------------
+      # For pull_request_target the default ref is the BASE branch, so only
+      # trusted scripts are checked out here. PR translation data is fetched
+      # separately below (no PR Python code is ever executed).
+      - name: Checkout base (trusted code)
+        uses: actions/checkout@v4
+
+      # Fetch only the JSON data files from the PR head (no scripts executed).
+      - name: Fetch PR translation data (PR only)
+        if: github.event_name == 'pull_request_target'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: _pr_head
+          sparse-checkout: |
+            custom_components/ha_washdata/translations
+            custom_components/ha_washdata/www
+          sparse-checkout-cone-mode: true
+
+      # Overlay the PR's JSON files onto the base checkout so the base script
+      # runs against the PR's translation data.
+      - name: Overlay PR translation files
+        if: github.event_name == 'pull_request_target'
+        run: |
+          cp -r _pr_head/custom_components/ha_washdata/translations/. \
+                custom_components/ha_washdata/translations/
+          if [ -f _pr_head/custom_components/ha_washdata/www/panel-translations.json ]; then
+            cp _pr_head/custom_components/ha_washdata/www/panel-translations.json \
+               custom_components/ha_washdata/www/panel-translations.json
+          else
+            rm -f custom_components/ha_washdata/www/panel-translations.json
+          fi
+
+      # --- Build + diff ------------------------------------------------------
+      - name: Snapshot panel-translations.json before rebuild
+        id: snapshot
+        run: |
+          FILE="custom_components/ha_washdata/www/panel-translations.json"
+          if [ -f "$FILE" ]; then
+            cp "$FILE" /tmp/panel-translations-before.json
+            echo "existed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "existed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Rebuild panel-translations.json
+        run: python3 devtools/build_panel_translations.py
+
+      - name: Detect drift
+        id: drift
+        run: |
+          FILE="custom_components/ha_washdata/www/panel-translations.json"
+          if [ "${{ steps.snapshot.outputs.existed }}" = "false" ]; then
+            echo "stale=true"  >> "$GITHUB_OUTPUT"
+            echo "reason=missing" >> "$GITHUB_OUTPUT"
+          elif ! diff -q "$FILE" /tmp/panel-translations-before.json > /dev/null 2>&1; then
+            echo "stale=true"  >> "$GITHUB_OUTPUT"
+            echo "reason=outdated" >> "$GITHUB_OUTPUT"
+          else
+            echo "stale=false" >> "$GITHUB_OUTPUT"
+            echo "reason=ok"   >> "$GITHUB_OUTPUT"
+          fi
+
+      # --- PR: post or clear comment -----------------------------------------
+      - name: Handle PR result
+        if: github.event_name == 'pull_request_target'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner    = context.repo.owner;
+            const repo     = context.repo.repo;
+            const prNumber = context.payload.pull_request.number;
+            const branch   = context.payload.pull_request.head.ref;
+            const stale    = '${{ steps.drift.outputs.stale }}' === 'true';
+            const reason   = '${{ steps.drift.outputs.reason }}';
+
+            const BOT_MARKER = '<!-- panel-translations-bundle-bot -->';
+            const LABEL      = 'needs panel bundle rebuild';
+
+            const removeLabelSafe = async (name) => {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number: prNumber, name });
+              } catch (_) {}
+            };
+            const addLabelSafe = async (name) => {
+              try {
+                await github.rest.issues.addLabels({ owner, repo, issue_number: prNumber, labels: [name] });
+              } catch (e) {
+                console.warn(`Could not add label "${name}": ${e.message}`);
+              }
+            };
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number: prNumber, per_page: 100 }
+            );
+            const existing = comments.find(c => c.body?.includes(BOT_MARKER));
+
+            if (!stale) {
+              await removeLabelSafe(LABEL);
+              if (existing) {
+                await github.rest.issues.deleteComment({ owner, repo, comment_id: existing.id });
+                console.log('panel-translations.json is current — removed prior warning.');
+              } else {
+                console.log('panel-translations.json is current — nothing to do.');
+              }
+              return;
+            }
+
+            const verb = reason === 'missing' ? 'is missing' : 'is out of date';
+            const body = [
+              BOT_MARKER,
+              `⚠️ **\`panel-translations.json\` ${verb}** on branch \`${branch}\`.`,
+              '',
+              'The client-side translation bundle must be rebuilt after any change to',
+              'the translation source files. Please run from the repo root and commit',
+              'the updated file:',
+              '',
+              '```bash',
+              'python3 devtools/build_panel_translations.py',
+              '# then: git add custom_components/ha_washdata/www/panel-translations.json',
+              '```',
+            ].join('\n');
+
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
+            }
+
+            await addLabelSafe(LABEL);
+
+            try {
+              await github.rest.issues.addAssignees({ owner, repo, issue_number: prNumber, assignees: [owner] });
+            } catch (e) {
+              console.warn(`Could not assign @${owner}: ${e.message}`);
+            }
+
+            core.setFailed(`panel-translations.json ${verb} on branch "${branch}" — rebuild required.`);
+
+      # --- push to main: create / update tracking issue ----------------------
+      - name: Handle push to main (stale)
+        if: github.event_name == 'push' && steps.drift.outputs.stale == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner  = context.repo.owner;
+            const repo   = context.repo.repo;
+            const branch = context.ref.replace('refs/heads/', '');
+            const sha    = context.sha.slice(0, 7);
+            const reason = '${{ steps.drift.outputs.reason }}';
+
+            const ISSUE_MARKER = '<!-- panel-translations-bundle-main-bot -->';
+            const LABEL        = 'needs panel bundle rebuild';
+            const verb         = reason === 'missing' ? 'is missing' : 'is out of date';
+
+            // Find an open tracking issue from a previous push.
+            const allIssues = await github.paginate(
+              github.rest.issues.listForRepo,
+              { owner, repo, state: 'open', labels: LABEL, per_page: 50 }
+            );
+            const existing = allIssues.find(i => !i.pull_request && i.body?.includes(ISSUE_MARKER));
+
+            const body = [
+              ISSUE_MARKER,
+              `\`panel-translations.json\` ${verb} on branch **\`${branch}\`** (commit \`${sha}\`).`,
+              '',
+              'Run from the repo root and commit the rebuilt file:',
+              '',
+              '```bash',
+              'python3 devtools/build_panel_translations.py',
+              '# then: git add custom_components/ha_washdata/www/panel-translations.json',
+              '```',
+            ].join('\n');
+
+            if (existing) {
+              await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: existing.number,
+                body: `Still ${verb} after push to \`${branch}\` at \`${context.sha}\`.`,
+              });
+              console.log(`Updated tracking issue #${existing.number}.`);
+            } else {
+              const { data: issue } = await github.rest.issues.create({
+                owner, repo,
+                title: `🌐 panel-translations.json ${verb} on ${branch}`,
+                body,
+                labels: [LABEL],
+                assignees: [owner],
+              });
+              console.log(`Created tracking issue #${issue.number}.`);
+            }
+
+            core.setFailed(`panel-translations.json ${verb} on "${branch}" — see tracking issue.`);
+
+      # --- workflow_dispatch: just fail if stale, no comment/issue ----------
+      - name: Report result (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch' && steps.drift.outputs.stale == 'true'
+        run: |
+          echo "::error::panel-translations.json is ${{ steps.drift.outputs.reason }}."
+          echo "Run: python3 devtools/build_panel_translations.py"
+          exit 1

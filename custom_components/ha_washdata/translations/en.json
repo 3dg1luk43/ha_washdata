@@ -477,7 +477,7 @@
     },
     "btn": {
       "add_timer": "+ Add timer",
-      "remove_timer": "Remove timer",
+      "remove_timer": "Delete",
       "add_device_tip": "Add another WashData device",
       "delete_group_tip": "Delete this group only - the member profiles are kept",
       "run_analysis_tip": "Analyze your recorded cycles now and refresh tuning suggestions",
