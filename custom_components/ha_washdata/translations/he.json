@@ -528,7 +528,14 @@
       "artifact_interruption": "הפסקה",
       "artifact_low_power": "הספק נמוך",
       "artifact_high_power": "הספק גבוה",
-      "artifact_anomaly": "אנומליה"
+      "artifact_anomaly": "אנומליה",
+      "auto_fine_tune_on": "כוונון אוטומטי עדין פעיל (סביב {hour}:00)",
+      "cohesion_good": "לכידות {pct}%",
+      "cohesion_low": "⚠ לכידות נמוכה {pct}%",
+      "group_name": "שם קבוצה",
+      "members": "חברים",
+      "models_fine_tuned": "({count} מודלים מכוונים)",
+      "panel_language": "שפת הפאנל"
     },
     "btn": {
       "add_timer": "+ הוסף טיימר",
@@ -645,7 +652,12 @@
       "import_config": "ייבוא ​​תצורה",
       "label_cycle": "מחזור התוויות",
       "new_phase": "שלב חדש",
-      "process_recording": "תהליך הקלטת"
+      "process_recording": "תהליך הקלטת",
+      "edit_group": "ערוך קבוצת פרופילים",
+      "new_group": "קבוצת פרופילים חדשה",
+      "process_history_title": "עיבוד היסטוריה",
+      "process_history_msg": "הפעל מחדש התאמה, רענן הצעות, אמן מחדש ML (אם מופעל) וחשב מחדש את בריאות המחזורים לכל המחזורים השמורים. זה עשוי לקחת זמן.",
+      "process_history_ok": "עיבוד"
     },
     "msg": {
       "near_duplicate_cluster": "זוהה אשכול פרופיל כמעט משוכפל. קיבוץ מאפשר להתאמה לבחור בצורה מהימנה בין דמויות דומות (למשל אותה תוכנית בטמפרטורה/ספין שונה).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} מחזור{s} לסקירה",
       "artifact_spike_detail": "חרג מעל רצועת ההספק הרגילה במשך ~{n}ש.",
       "artifact_dip_detail": "ירד מתחת לרצועת ההספק הרגילה במשך ~{n}ש.",
-      "artifact_pause_detail": "ההספק ירד לכמעט אפס במשך ~{n}ש ולאחר מכן חודש — ככל הנראה הדלת נפתחה באמצע המחזור או שהמחזור הושהה."
+      "artifact_pause_detail": "ההספק ירד לכמעט אפס במשך ~{n}ש ולאחר מכן חודש — ככל הנראה הדלת נפתחה באמצע המחזור או שהמחזור הושהה.",
+      "automations_intro": "WashData מפעיל אירועי {start} / {end} ומחשף ישויות, לכן מומלץ לבנות התראות ופעולות כאוטומציות Home Assistant רגילות. אוטומציות המשתמשות בהתקן זה מופיעות למטה.",
+      "collecting_data": "אוסף נתונים — נדרשות עוד {need} מחזורים לפני תחילת הכוונון העדין ({current}/{min}).",
+      "enough_data": "מספיק נתונים ללמידה ({current}/{min} מחזורים).",
+      "filter_by_profile": "סינון לפי פרופיל…",
+      "group_preview_hint": "סמן 2+ חברים לתצוגה מקדימה ולהשוואת עקומות ההספק שלהם.",
+      "notify_services_hint": "השתמש במזהי שירות {entity} (מופרדים בפסיק עבור מספר שירותים). משתני תבנית: {vars}.",
+      "process_history_hint": "הפעל מחדש התאמה על כל המחזורים השמורים, רענן הצעות כוונון, אמן מחדש מודלי ML (אם מופעל), וחשב מחדש את בריאות המחזורים. הפעל זאת לאחר מחזור ביקורות."
     },
     "phase_desc": {
       "pre_wash": "השרייה ראשונית או טיפול מקדים לפני הכביסה הראשית.",
@@ -790,7 +809,10 @@
     },
     "pref": {
       "date_absolute": "מוחלט (לדוגמה, 14:32 ב-2 ביולי)",
-      "date_relative": "יחסי (לדוגמה, לפני שעתיים)"
+      "date_relative": "יחסי (לדוגמה, לפני שעתיים)",
+      "lang_auto": "ברירת מחדל של המערכת ({lang})",
+      "lang_en": "אנגלית",
+      "use_panel_default": "(ברירת מחדל של הפאנל)"
     },
     "quality": {
       "bad": "רַע",
@@ -809,7 +831,8 @@
       "idle": "לְהִתְבַּטֵל",
       "interrupted": "מוּפרָע",
       "ready": "מוכן לעיבוד",
-      "recording": "מקליט"
+      "recording": "מקליט",
+      "training": "מאמן…"
     },
     "tab": {
       "advanced": "מִתקַדֵם",
@@ -1302,6 +1325,16 @@
         "label": "בדוק לכל היותר כל",
         "doc": "בדוק שוב אם יש שיפורים לכל היותר פעם אחת בכל כמה ימים."
       }
+    },
+    "placeholder": {
+      "add": "הוסף…",
+      "group_name": "לדוג' כותנה 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "הוסף שירות התראה…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "הוסף אדם…",
+      "phase_name": "לדוג' שטיפה מוקדמת",
+      "profile_name": "לדוג' כותנה 40°C"
     }
   }
 }

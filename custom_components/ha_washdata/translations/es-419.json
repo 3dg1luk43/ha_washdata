@@ -612,7 +612,14 @@
       "artifact_interruption": "Interrupción",
       "artifact_low_power": "Potencia baja",
       "artifact_high_power": "Potencia alta",
-      "artifact_anomaly": "Anomalía"
+      "artifact_anomaly": "Anomalía",
+      "auto_fine_tune_on": "ajuste fino automático activado (alrededor de las {hour}:00)",
+      "cohesion_good": "cohesión {pct}%",
+      "cohesion_low": "⚠ cohesión baja {pct}%",
+      "group_name": "Nombre del grupo",
+      "members": "Miembros",
+      "models_fine_tuned": "({count} modelos ajustados)",
+      "panel_language": "Idioma del panel"
     },
     "badge": {
       "golden_cycle": "Ciclo de referencia registrado",
@@ -645,7 +652,12 @@
       "import_config": "Importar configuración",
       "label_cycle": "Ciclo de etiquetas",
       "new_phase": "Nueva fase",
-      "process_recording": "Grabación de procesos"
+      "process_recording": "Grabación de procesos",
+      "edit_group": "Editar grupo de perfiles",
+      "new_group": "Nuevo grupo de perfiles",
+      "process_history_title": "Procesar historial",
+      "process_history_msg": "Volver a ejecutar la coincidencia, actualizar sugerencias, reentrenar ML (si está habilitado) y recalcular el estado de los ciclos en todos los ciclos almacenados. Esto puede tardar un momento.",
+      "process_history_ok": "Procesar"
     },
     "msg": {
       "near_duplicate_cluster": "Se detectó un grupo de perfiles casi duplicados. La agrupación permite elegir de manera confiable entre elementos similares (por ejemplo, el mismo programa a diferente temperatura/centrifugado).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} ciclo{s} por revisar",
       "artifact_spike_detail": "Superó la banda de potencia habitual durante ~{n}s.",
       "artifact_dip_detail": "Cayó por debajo de la banda de potencia habitual durante ~{n}s.",
-      "artifact_pause_detail": "La potencia cayó a casi cero durante ~{n}s y luego se reanudó — probablemente la puerta se abrió a mitad del ciclo o el ciclo fue pausado."
+      "artifact_pause_detail": "La potencia cayó a casi cero durante ~{n}s y luego se reanudó — probablemente la puerta se abrió a mitad del ciclo o el ciclo fue pausado.",
+      "automations_intro": "WashData dispara eventos {start} / {end} y expone entidades, así que las notificaciones y acciones se crean mejor como automatizaciones normales de Home Assistant. Las automatizaciones que usan este dispositivo aparecen a continuación.",
+      "collecting_data": "Recopilando datos — {need} ciclos más antes de que pueda comenzar el ajuste fino ({current}/{min}).",
+      "enough_data": "Suficientes datos para aprender ({current}/{min} ciclos).",
+      "filter_by_profile": "Filtrar por perfil…",
+      "group_preview_hint": "Selecciona 2 o más miembros para previsualizar y comparar sus curvas de potencia.",
+      "notify_services_hint": "Use los IDs de servicio de {entity} (separados por coma para múltiples). Variables de plantilla: {vars}.",
+      "process_history_hint": "Volver a ejecutar la coincidencia en todos los ciclos almacenados, actualizar las sugerencias de ajuste, reentrenar los modelos ML (si están habilitados) y recalcular el estado de los ciclos. Ejecute esto después de un lote de revisiones."
     },
     "phase_desc": {
       "pre_wash": "Remojo inicial o pretratamiento antes del lavado principal.",
@@ -786,7 +805,10 @@
     },
     "pref": {
       "date_absolute": "Absoluto (por ejemplo, 14:32 del 2 de julio)",
-      "date_relative": "Relativo (por ejemplo, hace 2 horas)"
+      "date_relative": "Relativo (por ejemplo, hace 2 horas)",
+      "lang_auto": "Predeterminado del sistema ({lang})",
+      "lang_en": "Inglés",
+      "use_panel_default": "(predeterminado del panel)"
     },
     "quality": {
       "bad": "Malo",
@@ -805,7 +827,8 @@
       "idle": "Inactivo",
       "interrupted": "interrumpido",
       "ready": "Listo para procesar",
-      "recording": "Grabando"
+      "recording": "Grabando",
+      "training": "Entrenando…"
     },
     "tab": {
       "advanced": "Avanzado",
@@ -1302,6 +1325,16 @@
         "label": "Comprobar como máximo cada",
         "doc": "Vuelva a verificar las mejoras como máximo una vez cada tantos días."
       }
+    },
+    "placeholder": {
+      "add": "agregar…",
+      "group_name": "ej. Algodón 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "agregar un servicio de notificación…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "agregar una persona…",
+      "phase_name": "ej. Prelavado",
+      "profile_name": "ej. Algodón 40°C"
     }
   }
 }

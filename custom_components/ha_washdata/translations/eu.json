@@ -612,7 +612,14 @@
       "artifact_interruption": "Etendura",
       "artifact_low_power": "Potentzia baxua",
       "artifact_high_power": "Potentzia altua",
-      "artifact_anomaly": "Anomalia"
+      "artifact_anomaly": "Anomalia",
+      "auto_fine_tune_on": "doikuntza automatikoa aktibo ({hour}:00 inguruan)",
+      "cohesion_good": "koherentzia {pct}%",
+      "cohesion_low": "⚠ koherentzia baxua {pct}%",
+      "group_name": "Taldearen izena",
+      "members": "Kideak",
+      "models_fine_tuned": "({count} eredu doituta)",
+      "panel_language": "Panelaren hizkuntza"
     },
     "badge": {
       "golden_cycle": "Erreferentzia-ziklo grabatua",
@@ -645,7 +652,12 @@
       "import_config": "Inportatu konfigurazioa",
       "label_cycle": "Etiketa Zikloa",
       "new_phase": "Fase Berria",
-      "process_recording": "Prozesuaren Grabaketa"
+      "process_recording": "Prozesuaren Grabaketa",
+      "edit_group": "Editatu profil taldea",
+      "new_group": "Profil talde berria",
+      "process_history_title": "Historia Prozesatu",
+      "process_history_msg": "Berrabiarazi bat-etortzearen bilaketa, eguneratu iradokizunak, birrentrenatu ML (gaituta badago) eta birkalkulatu zikloen osasuna gordetako ziklo guztietan. Hau denbora pixka bat har dezake.",
+      "process_history_ok": "Prozesatu"
     },
     "msg": {
       "near_duplicate_cluster": "ia bikoiztutako profil multzoa detektatu da. Taldekatzeak itxura fidagarrian bat egiteak aukera ematen du (adibidez, programa bera tenperatura/biratu desberdinetan).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} ziklo{s} berrikusteko",
       "artifact_spike_detail": "Ohiko potentzia-bandatik gora egon zen ~{n}s inguruz.",
       "artifact_dip_detail": "Ohiko potentzia-bandatik behera egon zen ~{n}s inguruz.",
-      "artifact_pause_detail": "Potentzia ia zerora jaitsi zen ~{n}s inguruz eta gero berrekin zen — seguruenik atea ziklo erdian ireki zen edo zikloa pausatu zen."
+      "artifact_pause_detail": "Potentzia ia zerora jaitsi zen ~{n}s inguruz eta gero berrekin zen — seguruenik atea ziklo erdian ireki zen edo zikloa pausatu zen.",
+      "automations_intro": "WashData-k {start} / {end} gertaerak abiarazten ditu eta entitateak agerian uzten ditu, beraz jakinarazpenak eta ekintzak Home Assistant-en automatizazio arrunt gisa eraikitzea da onena. Gailu hau erabiltzen duten automatizazioak behean agertzen dira.",
+      "collecting_data": "Datuak biltzen — {need} ziklo gehiago behar dira doikuntza hasi aurretik ({current}/{min}).",
+      "enough_data": "Ikasteko datu nahikoa ({current}/{min} ziklo).",
+      "filter_by_profile": "Filtratu profilez…",
+      "group_preview_hint": "Markatu 2+ kide beren potentzia-kurbak aurreikusteko eta alderatzeko.",
+      "notify_services_hint": "Erabili {entity} zerbitzu-IDak (koma bidez bereizita bat baino gehiagotarako). Txantiloi-aldagaiak: {vars}.",
+      "process_history_hint": "Berrabiarazi bat-etortzearen bilaketa gordetako ziklo guztietan, eguneratu doikuntza-iradokizunak, birrentrenatu ML ereduak (gaituta badaude) eta birkalkulatu zikloen osasuna. Exekutatu hau berrikuspenen multzo baten ondoren."
     },
     "phase_desc": {
       "pre_wash": "Hasierako beratzea edo aurretratamendua garbiketa nagusia baino lehen.",
@@ -786,7 +805,10 @@
     },
     "pref": {
       "date_absolute": "Absolutua (adibidez, uztailaren 2ko 14:32)",
-      "date_relative": "Erlatiboa (adibidez, duela 2 ordu)"
+      "date_relative": "Erlatiboa (adibidez, duela 2 ordu)",
+      "lang_auto": "Sistemaren lehenetsia ({lang})",
+      "lang_en": "Ingelesa",
+      "use_panel_default": "(panelaren lehenetsia)"
     },
     "quality": {
       "bad": "Txarra",
@@ -805,7 +827,8 @@
       "idle": "Geldirik",
       "interrupted": "Etenduta",
       "ready": "Prozesatzeko prest",
-      "recording": "Grabaketa"
+      "recording": "Grabaketa",
+      "training": "Entrenatzen…"
     },
     "tab": {
       "advanced": "Aurreratua",
@@ -1302,6 +1325,16 @@
         "label": "Egiaztatu gehienez aldi bakoitzean",
         "doc": "Begiratu berriro hobekuntzak dauden egun askotan."
       }
+    },
+    "placeholder": {
+      "add": "gehitu…",
+      "group_name": "adib. Kotoia 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "gehitu jakinarazpen-zerbitzu bat…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "gehitu pertsona bat…",
+      "phase_name": "adib. Aurre-garbiketa",
+      "profile_name": "adib. Kotoia 40°C"
     }
   }
 }

@@ -612,7 +612,14 @@
       "artifact_interruption": "Keskeytys",
       "artifact_low_power": "Alhainen teho",
       "artifact_high_power": "Korkea teho",
-      "artifact_anomaly": "Anomalia"
+      "artifact_anomaly": "Anomalia",
+      "auto_fine_tune_on": "automaattinen hienosäätö päällä (noin {hour}:00)",
+      "cohesion_good": "koheesio {pct} %",
+      "cohesion_low": "⚠ matala koheesio {pct} %",
+      "group_name": "Ryhmän nimi",
+      "members": "Jäsenet",
+      "models_fine_tuned": "({count} mallia hienosäädetty)",
+      "panel_language": "Paneelin kieli"
     },
     "badge": {
       "golden_cycle": "Tallennettu vertailujakso",
@@ -645,7 +652,12 @@
       "import_config": "Tuo kokoonpano",
       "label_cycle": "Merkitse sykli",
       "new_phase": "Uusi vaihe",
-      "process_recording": "Prosessin tallennus"
+      "process_recording": "Prosessin tallennus",
+      "edit_group": "Muokkaa profiiliryhmää",
+      "new_group": "Uusi profiiliryhmä",
+      "process_history_title": "Käsittele historia",
+      "process_history_msg": "Suorita täsmäytys uudelleen, päivitä ehdotukset, kouluta ML uudelleen (jos käytössä) ja laske syklipistemäärät uudelleen kaikkien tallennettujen syklien osalta. Tämä voi kestää hetken.",
+      "process_history_ok": "Käsittele"
     },
     "msg": {
       "near_duplicate_cluster": "lähes kaksoiskappale profiiliklusteri havaittu. Ryhmittely mahdollistaa täsmäämisen luotettavasti valitsemaan samankaltaisten ohjelmien välillä (esim. sama ohjelma eri lämpötilassa/linkouksessa).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} sykliä tarkistettavana",
       "artifact_spike_detail": "Ylitti tavallisen tehon ylärajan noin {n} sekunnin ajan.",
       "artifact_dip_detail": "Alitti tavallisen tehon alarajan noin {n} sekunnin ajan.",
-      "artifact_pause_detail": "Teho laski lähes nollaan noin {n} sekunniksi ja jatkui sitten — todennäköisesti ovi avattiin syklin aikana tai sykli pysäytettiin."
+      "artifact_pause_detail": "Teho laski lähes nollaan noin {n} sekunniksi ja jatkui sitten — todennäköisesti ovi avattiin syklin aikana tai sykli pysäytettiin.",
+      "automations_intro": "WashData laukaisee {start} / {end}-tapahtumat ja tarjoaa entiteetit, joten ilmoitukset ja toiminnot kannattaa rakentaa tavallisina Home Assistant -automaatioina. Tätä laitetta käyttävät automaatiot näkyvät alla.",
+      "collecting_data": "Kerätään tietoja — vielä {need} sykliä tarvitaan ennen hienosäädön käynnistymistä ({current}/{min}).",
+      "enough_data": "Tarpeeksi tietoja oppimiseen ({current}/{min} sykliä).",
+      "filter_by_profile": "Suodata profiilin mukaan…",
+      "group_preview_hint": "Valitse vähintään 2 jäsentä esikatsellaksesi ja vertaillaksesi tehokäyriä.",
+      "notify_services_hint": "Käytä {entity}-palvelun tunnuksia (pilkulla eroteltuna usealle). Mallimuuttujat: {vars}.",
+      "process_history_hint": "Suorita täsmäytys uudelleen kaikille tallennetuille sykleille, päivitä virityssuositukset, kouluta ML-mallit uudelleen (jos käytössä) ja laske syklipistemäärät uudelleen. Suorita tämä arviointierän jälkeen."
     },
     "phase_desc": {
       "pre_wash": "Ensimmäinen liotus tai esikäsittely ennen pääpesua.",
@@ -786,7 +805,10 @@
     },
     "pref": {
       "date_absolute": "Absoluuttinen (esim. 14:32 2. heinäkuuta)",
-      "date_relative": "Suhteellinen (esim. 2 tuntia sitten)"
+      "date_relative": "Suhteellinen (esim. 2 tuntia sitten)",
+      "lang_auto": "Järjestelmän oletus ({lang})",
+      "lang_en": "Englanti",
+      "use_panel_default": "(paneelin oletus)"
     },
     "quality": {
       "bad": "Huono",
@@ -805,7 +827,8 @@
       "idle": "Tyhjäkäynti",
       "interrupted": "Keskeytetty",
       "ready": "Valmis käsiteltäväksi",
-      "recording": "Tallennetaan"
+      "recording": "Tallennetaan",
+      "training": "Koulutetaan…"
     },
     "tab": {
       "advanced": "Edistynyt",
@@ -1302,6 +1325,16 @@
         "label": "Tarkista enintään joka",
         "doc": "Tarkista parannukset uudelleen enintään kerran näin monen päivän välein."
       }
+    },
+    "placeholder": {
+      "add": "lisää…",
+      "group_name": "esim. Puuvilla 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "lisää ilmoituspalvelu…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "lisää henkilö…",
+      "phase_name": "esim. Esipesu",
+      "profile_name": "esim. Puuvilla 40°C"
     }
   }
 }

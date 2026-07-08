@@ -612,7 +612,14 @@
       "artifact_interruption": "Onderbreking",
       "artifact_low_power": "Lae krag",
       "artifact_high_power": "Hoë krag",
-      "artifact_anomaly": "Anomalie"
+      "artifact_anomaly": "Anomalie",
+      "auto_fine_tune_on": "outomatiese verfyn aan (rondom {hour}:00)",
+      "cohesion_good": "kohesie {pct}%",
+      "cohesion_low": "⚠ lae kohesie {pct}%",
+      "group_name": "Groepnaam",
+      "members": "Lede",
+      "models_fine_tuned": "({count} modelle verfyn)",
+      "panel_language": "Paneeltaal"
     },
     "badge": {
       "golden_cycle": "Aangeteken verwysingsiklus",
@@ -645,7 +652,12 @@
       "import_config": "Voer konfigurasie in",
       "label_cycle": "Etiketsiklus",
       "new_phase": "Nuwe Fase",
-      "process_recording": "Proses opname"
+      "process_recording": "Proses opname",
+      "edit_group": "Profielgroep wysig",
+      "new_group": "Nuwe profielgroep",
+      "process_history_title": "Verwerk geskiedenis",
+      "process_history_msg": "Pasmaak herhaal, wenke verfris, ML herleer (indien geaktiveer) en siklusgesondheid herbereken oor alle gestoorde siklusse. Dit kan 'n rukkie neem.",
+      "process_history_ok": "Verwerk"
     },
     "msg": {
       "near_duplicate_cluster": "byna duplikaat profielgroepering bespeur. Groepering laat bypassende betroubaar kies tussen gelyksoortiges (bv. dieselfde program by verskillende temperatuur/spin).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} siklus{s} om te hersien",
       "artifact_spike_detail": "Het bo die gewone kragband geteken vir ~{n}s.",
       "artifact_dip_detail": "Het onder die gewone kragband geval vir ~{n}s.",
-      "artifact_pause_detail": "Krag het tot naby nul gedaal vir ~{n}s en daarna hervat — moontlik is die deur middel-siklus oopgemaak of die siklus is onderbreek."
+      "artifact_pause_detail": "Krag het tot naby nul gedaal vir ~{n}s en daarna hervat — moontlik is die deur middel-siklus oopgemaak of die siklus is onderbreek.",
+      "automations_intro": "WashData stuur {start} / {end} gebeure uit en stel entiteite bloot, sodat kennisgewings en aksies die beste as gewone Home Assistant outomatiseringe gebou word. Outomatiseringe wat hierdie toestel gebruik, verskyn hieronder.",
+      "collecting_data": "Versamel data — nog {need} siklusse voordat verfyning kan begin ({current}/{min}).",
+      "enough_data": "Genoeg data om van te leer ({current}/{min} siklusse).",
+      "filter_by_profile": "Filtreer op profiel…",
+      "group_preview_hint": "Merk 2+ lede om hulle vermogenskurwes voor te sien en te vergelyk.",
+      "notify_services_hint": "Gebruik {entity} diens-ID's (kommagewys vir veelvuldige). Sjabloonveranderlikes: {vars}.",
+      "process_history_hint": "Pasmaak herhaal op alle gestoorde siklusse, afstemwenke verfris, ML-modelle herleer (indien geaktiveer) en siklusgesondheid herbereken. Voer dit uit na 'n bondel hersienings."
     },
     "phase_desc": {
       "pre_wash": "Aanvanklike week of voorbehandeling voor die hoofwas.",
@@ -786,7 +805,10 @@
     },
     "pref": {
       "date_absolute": "Absoluut (bv. 14:32 op 2 Jul)",
-      "date_relative": "Relatief (bv. 2 uur gelede)"
+      "date_relative": "Relatief (bv. 2 uur gelede)",
+      "lang_auto": "Stelselverstek ({lang})",
+      "lang_en": "Engels",
+      "use_panel_default": "(paneelverstek)"
     },
     "quality": {
       "bad": "Sleg",
@@ -805,7 +827,8 @@
       "idle": "Ledig",
       "interrupted": "Onderbreek",
       "ready": "Gereed om te verwerk",
-      "recording": "Opname"
+      "recording": "Opname",
+      "training": "Opleiding…"
     },
     "tab": {
       "advanced": "Gevorderd",
@@ -1302,6 +1325,16 @@
         "label": "Kontroleer hoogstens elke",
         "doc": "Kontroleer hoogstens een keer per soveel dae weer vir verbeterings."
       }
+    },
+    "placeholder": {
+      "add": "voeg by…",
+      "group_name": "bv. Katoen 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "voeg 'n kennisgewing-diens by…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "voeg 'n persoon by…",
+      "phase_name": "bv. Voorwas",
+      "profile_name": "bv. Katoen 40°C"
     }
   }
 }

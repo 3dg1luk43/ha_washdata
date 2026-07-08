@@ -612,7 +612,14 @@
       "artifact_interruption": "Pārtraukums",
       "artifact_low_power": "Zema jauda",
       "artifact_high_power": "Augsta jauda",
-      "artifact_anomaly": "Anomālija"
+      "artifact_anomaly": "Anomālija",
+      "auto_fine_tune_on": "automātiskā precizēšana ieslēgta (ap {hour}:00)",
+      "cohesion_good": "kohēzija {pct}%",
+      "cohesion_low": "⚠ zema kohēzija {pct}%",
+      "group_name": "Grupas nosaukums",
+      "members": "Dalībnieki",
+      "models_fine_tuned": "({count} modeļi precizēti)",
+      "panel_language": "Paneļa valoda"
     },
     "badge": {
       "golden_cycle": "Reģistrēts atskaites cikls",
@@ -645,7 +652,12 @@
       "import_config": "Importēt konfigurāciju",
       "label_cycle": "Etiķetes cikls",
       "new_phase": "Jauns posms",
-      "process_recording": "Procesa ierakstīšana"
+      "process_recording": "Procesa ierakstīšana",
+      "edit_group": "Rediģēt profilu grupu",
+      "new_group": "Jauna profilu grupa",
+      "process_history_title": "Apstrādāt vēsturi",
+      "process_history_msg": "Atkārtoti palaist atbilstību, atjaunināt ieteikumus, pārtrenēt ML (ja iespējots) un pārrēķināt ciklu veselību visos saglabātajos ciklos. Tas var aizņemt kādu laiku.",
+      "process_history_ok": "Apstrādāt"
     },
     "msg": {
       "near_duplicate_cluster": "Konstatēts gandrīz dublikāts profilu kopa. Grupēšana ļauj saskaņošanai droši izvēlēties starp līdzīgiem (piemēram, viena un tā pati programma atšķirīgā temperatūrā/griešanā).",
@@ -744,7 +756,14 @@
       "artifact_spike_detail": "Pārsniedza parasto jaudas joslu ~{n}s.",
       "artifact_dip_detail": "Krita zem parastā jaudas joslas ~{n}s.",
       "artifact_pause_detail": "Jauda krita gandrīz līdz nullei ~{n}s, pēc tam atjaunojās — visticamāk, durvis tika atvērtas cikla vidū vai cikls tika pauzēts.",
-      "feedback_cycles_pending": "{n} cikl{s} pārskatīšanai"
+      "feedback_cycles_pending": "{n} cikl{s} pārskatīšanai",
+      "automations_intro": "WashData aktivizē {start} / {end} notikumus un atklāj entītijas, tāpēc paziņojumus un darbības vislabāk veidot kā parastas Home Assistant automatizācijas. Zemāk redzamas automatizācijas, kas izmanto šo ierīci.",
+      "collecting_data": "Datu vākšana — nepieciešami vēl {need} cikli, lai varētu sākt precizēšanu ({current}/{min}).",
+      "enough_data": "Pietiek datu mācīšanai ({current}/{min} cikli).",
+      "filter_by_profile": "Filtrēt pēc profila…",
+      "group_preview_hint": "Atzīmējiet 2+ dalībniekus, lai priekšskatītu un salīdzinātu to jaudas līknes.",
+      "notify_services_hint": "Izmantojiet {entity} pakalpojumu ID (vairākiem — atdaliet ar komatiem). Veidnes mainīgie: {vars}.",
+      "process_history_hint": "Atkārtoti palaist atbilstību visiem saglabātajiem cikliem, atjaunināt precizēšanas ieteikumus, pārtrenēt ML modeļus (ja iespējots) un pārrēķināt ciklu veselību. Palaidiet to pēc pārskatu partijas."
     },
     "phase_desc": {
       "pre_wash": "Sākotnējā mērcēšana vai pirmapstrāde pirms galvenās mazgāšanas.",
@@ -790,7 +809,10 @@
     },
     "pref": {
       "date_absolute": "Absolūtais (piemēram, 14:32 2. jūlijā)",
-      "date_relative": "Radinieks (piemēram, pirms 2 stundām)"
+      "date_relative": "Radinieks (piemēram, pirms 2 stundām)",
+      "lang_auto": "Sistēmas noklusējums ({lang})",
+      "lang_en": "Angļu",
+      "use_panel_default": "(paneļa noklusējums)"
     },
     "quality": {
       "bad": "Slikti",
@@ -809,7 +831,8 @@
       "idle": "Dīkstāvē",
       "interrupted": "Pārtrauca",
       "ready": "Gatavs apstrādei",
-      "recording": "Ierakstīšana"
+      "recording": "Ierakstīšana",
+      "training": "Trenēšana…"
     },
     "tab": {
       "advanced": "Papildu",
@@ -1302,6 +1325,16 @@
         "label": "Pārbaudīt ne biežāk kā ik",
         "doc": "Atkārtoti pārbaudiet uzlabojumus ne vairāk kā reizi šajās dienās."
       }
+    },
+    "placeholder": {
+      "add": "pievienot…",
+      "group_name": "piem. Kokvilna 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "pievienot paziņojumu pakalpojumu…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "pievienot personu…",
+      "phase_name": "piem. Priekšmazgāšana",
+      "profile_name": "piem. Kokvilna 40°C"
     }
   }
 }

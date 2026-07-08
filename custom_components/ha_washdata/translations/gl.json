@@ -612,7 +612,14 @@
       "artifact_interruption": "Interrupción",
       "artifact_low_power": "Potencia baixa",
       "artifact_high_power": "Potencia alta",
-      "artifact_anomaly": "Anomalía"
+      "artifact_anomaly": "Anomalía",
+      "auto_fine_tune_on": "axuste fino automático activado (ao redor das {hour}:00)",
+      "cohesion_good": "cohesión {pct}%",
+      "cohesion_low": "⚠ cohesión baixa {pct}%",
+      "group_name": "Nome do grupo",
+      "members": "Membros",
+      "models_fine_tuned": "({count} modelos axustados)",
+      "panel_language": "Idioma do panel"
     },
     "badge": {
       "golden_cycle": "Ciclo de referencia rexistrado",
@@ -645,7 +652,12 @@
       "import_config": "Importar configuración",
       "label_cycle": "Ciclo de etiquetas",
       "new_phase": "Nova Fase",
-      "process_recording": "Gravación do proceso"
+      "process_recording": "Gravación do proceso",
+      "edit_group": "Editar grupo de perfís",
+      "new_group": "Novo grupo de perfís",
+      "process_history_title": "Procesar historial",
+      "process_history_msg": "Volver a executar a coincidencia, actualizar suxestións, reentrenar ML (se está activado) e recalcular o estado dos ciclos en todos os ciclos almacenados. Isto pode levar un tempo.",
+      "process_history_ok": "Procesar"
     },
     "msg": {
       "near_duplicate_cluster": "detectouse un clúster de perfil case duplicado. A agrupación permite que a correspondencia elixa de forma fiable entre aparellos (por exemplo, o mesmo programa a diferentes temperaturas/xiros).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} ciclo{s} para revisar",
       "artifact_spike_detail": "Superou a banda de potencia habitual durante ~{n}s.",
       "artifact_dip_detail": "Baixou da banda de potencia habitual durante ~{n}s.",
-      "artifact_pause_detail": "A potencia caeu case a cero durante ~{n}s e despois continuou — probablemente a porta foi aberta a metade do ciclo ou o ciclo foi pausado."
+      "artifact_pause_detail": "A potencia caeu case a cero durante ~{n}s e despois continuou — probablemente a porta foi aberta a metade do ciclo ou o ciclo foi pausado.",
+      "automations_intro": "WashData lanza eventos {start} / {end} e expón entidades, polo que as notificacións e accións mellor créanse como automatizacións normais do Home Assistant. As automatizacións que usan este dispositivo aparecen a continuación.",
+      "collecting_data": "Recollendo datos — {need} ciclos máis antes de que poida comezar o axuste fino ({current}/{min}).",
+      "enough_data": "Datos abondos para aprender ({current}/{min} ciclos).",
+      "filter_by_profile": "Filtrar por perfil…",
+      "group_preview_hint": "Marca 2 ou máis membros para previsualizar e comparar as súas curvas de potencia.",
+      "notify_services_hint": "Use os IDs de servizo de {entity} (separados por comas para varios). Variables de modelo: {vars}.",
+      "process_history_hint": "Volver a executar a coincidencia en todos os ciclos almacenados, actualizar as suxestións de axuste, reentrenar os modelos ML (se están activados) e recalcular o estado dos ciclos. Execúteo despois dun lote de revisións."
     },
     "phase_desc": {
       "pre_wash": "Inmersión inicial ou pretratamento antes do lavado principal.",
@@ -790,7 +809,10 @@
     },
     "pref": {
       "date_absolute": "Absoluto (por exemplo, 14:32 do 2 de xullo)",
-      "date_relative": "Relativo (por exemplo, hai 2 horas)"
+      "date_relative": "Relativo (por exemplo, hai 2 horas)",
+      "lang_auto": "Predeterminado do sistema ({lang})",
+      "lang_en": "Inglés",
+      "use_panel_default": "(predeterminado do panel)"
     },
     "quality": {
       "bad": "Malo",
@@ -809,7 +831,8 @@
       "idle": "Inactivo",
       "interrupted": "Interrompido",
       "ready": "Listo para procesar",
-      "recording": "Gravando"
+      "recording": "Gravando",
+      "training": "Adestramento…"
     },
     "tab": {
       "advanced": "Avanzado",
@@ -1302,6 +1325,16 @@
         "label": "Comprobar como máximo cada",
         "doc": "Volve comprobar se hai melloras como máximo unha vez cada tantos días."
       }
+    },
+    "placeholder": {
+      "add": "engadir…",
+      "group_name": "p. ex. Algodón 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "engadir un servizo de notificación…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "engadir unha persoa…",
+      "phase_name": "p. ex. Prelavado",
+      "profile_name": "p. ex. Algodón 40°C"
     }
   }
 }

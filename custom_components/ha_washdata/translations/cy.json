@@ -612,7 +612,14 @@
       "artifact_interruption": "Tarfu",
       "artifact_low_power": "Pŵer isel",
       "artifact_high_power": "Pŵer uchel",
-      "artifact_anomaly": "Anomaledd"
+      "artifact_anomaly": "Anomaledd",
+      "auto_fine_tune_on": "mân-diwno awtomatig ymlaen (tua {hour}:00)",
+      "cohesion_good": "cydlyniad {pct}%",
+      "cohesion_low": "⚠ cydlyniad isel {pct}%",
+      "group_name": "Enw'r grŵp",
+      "members": "Aelodau",
+      "models_fine_tuned": "({count} model wedi'u mân-diwno)",
+      "panel_language": "Iaith y panel"
     },
     "badge": {
       "golden_cycle": "Cylch cyfeirio wedi'i recordio",
@@ -645,7 +652,12 @@
       "import_config": "Mewnforio Ffurfweddu",
       "label_cycle": "Label Cycle",
       "new_phase": "Cyfnod Newydd",
-      "process_recording": "Cofnodi Proses"
+      "process_recording": "Cofnodi Proses",
+      "edit_group": "Golygu grŵp proffil",
+      "new_group": "Grŵp proffil newydd",
+      "process_history_title": "Prosesu Hanes",
+      "process_history_msg": "Ailredeg cyfatebu, adnewyddu awgrymiadau, ail-hyfforddi ML (os wedi'u galluogi) ac ailgyfrifo iechyd y cylch ar draws pob cylch sydd wedi'i storio. Gall hyn gymryd ychydig o amser.",
+      "process_history_ok": "Prosesu"
     },
     "msg": {
       "near_duplicate_cluster": "clwstwr proffil bron yn ddyblyg wedi'i ganfod. Mae grwpio yn gadael i baru ddewis yn ddibynadwy rhwng tebygrwydd (e.e. yr un rhaglen ar dymheredd/sbin gwahanol).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} cylch{s} i'w adolygu",
       "artifact_spike_detail": "Tynnodd uwchlaw band pŵer arferol am ~{n}s.",
       "artifact_dip_detail": "Syrthiodd islaw band pŵer arferol am ~{n}s.",
-      "artifact_pause_detail": "Syrthiodd pŵer i bron sero am ~{n}s yna ailddechrau — mae'n debygol i'r drws agor yng nghanol y cylch neu pausiwyd y cylch."
+      "artifact_pause_detail": "Syrthiodd pŵer i bron sero am ~{n}s yna ailddechrau — mae'n debygol i'r drws agor yng nghanol y cylch neu pausiwyd y cylch.",
+      "automations_intro": "Mae WashData yn tanio digwyddiadau {start} / {end} ac yn datguddio endidau, felly mae'n well adeiladu hysbysiadau a chamau fel awtomeiddio arferol Home Assistant. Mae awtomeiddio sy'n defnyddio'r ddyfais hon yn ymddangos isod.",
+      "collecting_data": "Casglu data — mae angen {need} cylch arall cyn y gellir dechrau mân-diwno ({current}/{min}).",
+      "enough_data": "Digon o ddata i ddysgu ohono ({current}/{min} cylch).",
+      "filter_by_profile": "Hidlo yn ôl proffil…",
+      "group_preview_hint": "Ticiwch 2+ o aelodau i ragolwg a chymharu eu cromliniau pŵer.",
+      "notify_services_hint": "Defnyddiwch {entity} ID gwasanaeth (atalnod am fwy nag un). Newidynnau templed: {vars}.",
+      "process_history_hint": "Ailredeg cyfatebu ar bob cylch sydd wedi'i storio, adnewyddu awgrymiadau tiwnio, ail-hyfforddi modelau ML (os wedi'u galluogi) ac ailgyfrifo iechyd y cylch. Rhedwch hwn ar ôl adolygiad swp."
     },
     "phase_desc": {
       "pre_wash": "Mwydwch neu ragdriniaeth gychwynnol cyn y prif olchi.",
@@ -786,7 +805,10 @@
     },
     "pref": {
       "date_absolute": "Absolute (e.e. 14:32 ar 2 Gorff)",
-      "date_relative": "Perthynas (e.e. 2 awr yn ôl)"
+      "date_relative": "Perthynas (e.e. 2 awr yn ôl)",
+      "lang_auto": "Rhagosodiad y system ({lang})",
+      "lang_en": "Saesneg",
+      "use_panel_default": "(rhagosodiad panel)"
     },
     "quality": {
       "bad": "Drwg",
@@ -805,7 +827,8 @@
       "idle": "Segur",
       "interrupted": "Torri ar draws",
       "ready": "Yn barod i brosesu",
-      "recording": "Recordio"
+      "recording": "Recordio",
+      "training": "Hyfforddi…"
     },
     "tab": {
       "advanced": "Uwch",
@@ -1302,6 +1325,16 @@
         "label": "Gwirio uchafswm bob",
         "doc": "Ailwirio am welliannau ar y mwyaf unwaith y dyddiau hyn."
       }
+    },
+    "placeholder": {
+      "add": "ychwanegu…",
+      "group_name": "e.e. Cotwm 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "ychwanegu gwasanaeth hysbysu…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "ychwanegu person…",
+      "phase_name": "e.e. Rhag-olchi",
+      "profile_name": "e.e. Cotwm 40°C"
     }
   }
 }

@@ -633,7 +633,14 @@
       "artifact_interruption": "Gián đoạn",
       "artifact_low_power": "Công suất thấp",
       "artifact_high_power": "Công suất cao",
-      "artifact_anomaly": "Bất thường"
+      "artifact_anomaly": "Bất thường",
+      "auto_fine_tune_on": "tự động tinh chỉnh bật (khoảng {hour}:00)",
+      "cohesion_good": "độ gắn kết {pct}%",
+      "cohesion_low": "⚠ độ gắn kết thấp {pct}%",
+      "group_name": "Tên nhóm",
+      "members": "Thành viên",
+      "models_fine_tuned": "({count} mô hình đã được tinh chỉnh)",
+      "panel_language": "Ngôn ngữ bảng điều khiển"
     },
     "modal": {
       "merge_cycles": "Hợp nhất {n} chu kỳ",
@@ -645,7 +652,12 @@
       "import_config": "Nhập cấu hình",
       "label_cycle": "Dán nhãn chu kỳ",
       "new_phase": "Giai đoạn mới",
-      "process_recording": "Xử lý bản ghi"
+      "process_recording": "Xử lý bản ghi",
+      "edit_group": "Chỉnh sửa nhóm hồ sơ",
+      "new_group": "Nhóm hồ sơ mới",
+      "process_history_title": "Xử lý Lịch sử",
+      "process_history_msg": "Chạy lại khớp, làm mới gợi ý, huấn luyện lại ML (nếu được bật) và tính toán lại sức khỏe chu kỳ trên tất cả các chu kỳ đã lưu. Điều này có thể mất một lúc.",
+      "process_history_ok": "Xử lý"
     },
     "msg": {
       "near_duplicate_cluster": "cụm hồ sơ gần như trùng lặp được phát hiện. Việc nhóm cho phép khớp chọn đáng tin cậy giữa các mục giống nhau (ví dụ: cùng một chương trình ở nhiệt độ/vắt khác nhau).",
@@ -744,7 +756,14 @@
       "artifact_pause_detail": "Công suất giảm xuống gần bằng không trong ~{n}s rồi tiếp tục — có thể cửa đã mở giữa chừng hoặc chu kỳ bị tạm dừng.",
       "restart_gap_header": "{n} Khoảng cách khởi động lại HA trong chu kỳ này",
       "restart_gap_item": "khoảng cách {dur}",
-      "restart_gap_footer": "Nổi bật trên biểu đồ. Dữ liệu nguồn bị thiếu trong các khoảng thời gian này - chỉ khớp với số đọc thực được sử dụng."
+      "restart_gap_footer": "Nổi bật trên biểu đồ. Dữ liệu nguồn bị thiếu trong các khoảng thời gian này - chỉ khớp với số đọc thực được sử dụng.",
+      "automations_intro": "WashData kích hoạt các sự kiện {start} / {end} và hiển thị các thực thể, vì vậy thông báo và hành động tốt nhất nên được tạo dưới dạng tự động hóa Home Assistant thông thường. Các tự động hóa sử dụng thiết bị này được hiển thị bên dưới.",
+      "collecting_data": "Đang thu thập dữ liệu — cần thêm {need} chu kỳ nữa trước khi có thể bắt đầu tinh chỉnh ({current}/{min}).",
+      "enough_data": "Đã đủ dữ liệu để học ({current}/{min} chu kỳ).",
+      "filter_by_profile": "Lọc theo hồ sơ…",
+      "group_preview_hint": "Chọn 2+ thành viên để xem trước và so sánh đường cong công suất của họ.",
+      "notify_services_hint": "Sử dụng ID dịch vụ {entity} (phân cách bằng dấu phẩy cho nhiều dịch vụ). Biến mẫu: {vars}.",
+      "process_history_hint": "Chạy lại khớp trên tất cả các chu kỳ đã lưu, làm mới gợi ý điều chỉnh, huấn luyện lại các mô hình ML (nếu được bật), và tính toán lại sức khỏe chu kỳ. Chạy sau một loạt đánh giá."
     },
     "phase_desc": {
       "pre_wash": "Ngâm lần đầu hoặc xử lý sơ bộ trước khi giặt chính.",
@@ -786,7 +805,10 @@
     },
     "pref": {
       "date_absolute": "Tuyệt đối (ví dụ: 14:32 ngày 2 tháng 7)",
-      "date_relative": "Tương đối (ví dụ: 2 giờ trước)"
+      "date_relative": "Tương đối (ví dụ: 2 giờ trước)",
+      "lang_auto": "Mặc định hệ thống ({lang})",
+      "lang_en": "Tiếng Anh",
+      "use_panel_default": "(mặc định bảng điều khiển)"
     },
     "quality": {
       "bad": "Kém",
@@ -805,7 +827,8 @@
       "idle": "Nhàn rỗi",
       "interrupted": "Bị gián đoạn",
       "ready": "Sẵn sàng xử lý",
-      "recording": "Đang ghi"
+      "recording": "Đang ghi",
+      "training": "Đang huấn luyện…"
     },
     "tab": {
       "advanced": "Nâng cao",
@@ -1302,6 +1325,16 @@
         "label": "Kiểm tra tối đa mỗi",
         "doc": "Kiểm tra lại các cải tiến nhiều nhất một lần trong nhiều ngày."
       }
+    },
+    "placeholder": {
+      "add": "thêm vào…",
+      "group_name": "vd. Vải bông 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "thêm dịch vụ thông báo…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "thêm một người…",
+      "phase_name": "vd. Giặt sơ bộ",
+      "profile_name": "vd. Vải bông 40°C"
     }
   }
 }

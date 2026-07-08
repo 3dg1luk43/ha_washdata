@@ -633,7 +633,14 @@
       "artifact_interruption": "Prerušenie",
       "artifact_low_power": "Nízky výkon",
       "artifact_high_power": "Vysoký výkon",
-      "artifact_anomaly": "Anomália"
+      "artifact_anomaly": "Anomália",
+      "auto_fine_tune_on": "automatické doladenie zapnuté (okolo {hour}:00)",
+      "cohesion_good": "súdržnosť {pct}%",
+      "cohesion_low": "⚠ nízka súdržnosť {pct}%",
+      "group_name": "Názov skupiny",
+      "members": "Členovia",
+      "models_fine_tuned": "({count} modelov doladených)",
+      "panel_language": "Jazyk panelu"
     },
     "modal": {
       "merge_cycles": "Zlúčiť {n} cyklov",
@@ -645,7 +652,12 @@
       "import_config": "Importovať konfiguráciu",
       "label_cycle": "Označiť cyklus",
       "new_phase": "Nová fáza",
-      "process_recording": "Spracovať nahrávku"
+      "process_recording": "Spracovať nahrávku",
+      "edit_group": "Upraviť skupinu profilov",
+      "new_group": "Nová skupina profilov",
+      "process_history_title": "Spracovanie histórie",
+      "process_history_msg": "Znova spustite párovanie, obnovte návrhy, preškolte ML (ak je povolené) a prepočítajte zdravie cyklov pre všetky uložené cykly. Môže to chvíľu trvať.",
+      "process_history_ok": "Spracovať"
     },
     "msg": {
       "near_duplicate_cluster": "zistený takmer duplicitný klaster profilov. Zoskupenie umožňuje zhodu spoľahlivo vybrať medzi podobnými (napr. rovnaký program pri inej teplote/odstreďovaní).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} cyklov na kontrolu",
       "artifact_spike_detail": "Bol nad bežným pásmom výkonu počas ~{n} s.",
       "artifact_dip_detail": "Poklesol pod bežné pásmo výkonu počas ~{n} s.",
-      "artifact_pause_detail": "Výkon poklesol takmer na nulu počas ~{n} s a potom sa obnovil — pravdepodobne boli otvorené dvere uprostred cyklu alebo bol cyklus pozastavený."
+      "artifact_pause_detail": "Výkon poklesol takmer na nulu počas ~{n} s a potom sa obnovil — pravdepodobne boli otvorené dvere uprostred cyklu alebo bol cyklus pozastavený.",
+      "automations_intro": "WashData spúšťa udalosti {start} / {end} a sprístupňuje entity, takže notifikácie a akcie sa najlepšie vytvárajú ako bežné automatizácie Home Assistant. Automatizácie používajúce toto zariadenie sú zobrazené nižšie.",
+      "collecting_data": "Zbieranie dát — ešte {need} cyklov do spustenia doladenia ({current}/{min}).",
+      "enough_data": "Dostatok dát na učenie ({current}/{min} cyklov).",
+      "filter_by_profile": "Filtrovať podľa profilu…",
+      "group_preview_hint": "Zaškrtnite aspoň 2 členov na náhľad a porovnanie ich výkonových kriviek.",
+      "notify_services_hint": "Použite ID služieb {entity} (oddelené čiarkami pre viacero). Premenné šablóny: {vars}.",
+      "process_history_hint": "Znova spustite párovanie pre všetky uložené cykly, obnovte návrhy ladenia, preškolte modely ML (ak sú povolené) a prepočítajte zdravie cyklov. Spustite po sérii recenzií."
     },
     "phase_desc": {
       "pre_wash": "Počiatočné namáčanie alebo predbežná úprava pred hlavným praním.",
@@ -786,7 +805,10 @@
     },
     "pref": {
       "date_absolute": "Absolútny (napr. 14:32 dňa 2. júla)",
-      "date_relative": "Relatívny (napr. pred 2 hodinami)"
+      "date_relative": "Relatívny (napr. pred 2 hodinami)",
+      "lang_auto": "Predvolený systémový ({lang})",
+      "lang_en": "Angličtina",
+      "use_panel_default": "(predvolené panelu)"
     },
     "quality": {
       "bad": "Zlý",
@@ -805,7 +827,8 @@
       "idle": "Nečinný",
       "interrupted": "Prerušený",
       "ready": "Pripravený na spracovanie",
-      "recording": "Nahrávanie"
+      "recording": "Nahrávanie",
+      "training": "Trénovanie…"
     },
     "tab": {
       "advanced": "Rozšírené",
@@ -1302,6 +1325,16 @@
         "label": "Kontrolovať maximálne každých",
         "doc": "Znova skontrolujte vylepšenia maximálne raz za toľko dní."
       }
+    },
+    "placeholder": {
+      "add": "pridať…",
+      "group_name": "napr. Bavlna 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "pridať notifikačnú službu…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "pridať osobu…",
+      "phase_name": "napr. Predpierka",
+      "profile_name": "napr. Bavlna 40°C"
     }
   }
 }

@@ -612,7 +612,14 @@
       "artifact_interruption": "Avbrudd",
       "artifact_low_power": "Lav effekt",
       "artifact_high_power": "Høy effekt",
-      "artifact_anomaly": "Anomali"
+      "artifact_anomaly": "Anomali",
+      "auto_fine_tune_on": "automatisk finjustering aktiv (omtrent {hour}:00)",
+      "cohesion_good": "kohesjon {pct} %",
+      "cohesion_low": "⚠ lav kohesjon {pct} %",
+      "group_name": "Gruppenavn",
+      "members": "Medlemmer",
+      "models_fine_tuned": "({count} modeller finjustert)",
+      "panel_language": "Panelspråk"
     },
     "badge": {
       "golden_cycle": "Registrert referansesyklus",
@@ -645,7 +652,12 @@
       "import_config": "Importer konfigurasjon",
       "label_cycle": "Etikettsyklus",
       "new_phase": "Ny fase",
-      "process_recording": "Prosessopptak"
+      "process_recording": "Prosessopptak",
+      "edit_group": "Rediger profilgruppe",
+      "new_group": "Ny profilgruppe",
+      "process_history_title": "Behandle historikk",
+      "process_history_msg": "Kjør matching på nytt, oppdater forslag, tren ML på nytt (hvis aktivert) og beregn syklusenes tilstand på nytt for alle lagrede sykluser. Dette kan ta litt tid.",
+      "process_history_ok": "Behandle"
     },
     "msg": {
       "near_duplicate_cluster": "nesten duplikatprofilklynge oppdaget. Gruppering lar matching pålitelig velge mellom like-like (f.eks. samme program ved forskjellig temperatur/spinn).",
@@ -744,7 +756,14 @@
       "artifact_spike_detail": "Gikk over det vanlige effektbåndet i ~{n}s.",
       "artifact_dip_detail": "Falt under det vanlige effektbåndet i ~{n}s.",
       "artifact_pause_detail": "Effekten falt til nær null i ~{n}s og gjenopptok deretter — sannsynligvis ble døren åpnet midt i syklusen eller syklusen ble satt på pause.",
-      "feedback_cycles_pending": "{n} syklus{s} til gjennomgang"
+      "feedback_cycles_pending": "{n} syklus{s} til gjennomgang",
+      "automations_intro": "WashData utløser {start} / {end}-hendelser og gjør entiteter tilgjengelige, slik at varsler og handlinger best bygges som vanlige Home Assistant-automatiseringer. Automatiseringer som bruker denne enheten, vises nedenfor.",
+      "collecting_data": "Samler inn data — {need} sykluser til før finjustering kan starte ({current}/{min}).",
+      "enough_data": "Nok data til å lære av ({current}/{min} sykluser).",
+      "filter_by_profile": "Filtrer etter profil…",
+      "group_preview_hint": "Kryss av 2 eller flere medlemmer for å forhåndsvise og sammenligne effektkurvene.",
+      "notify_services_hint": "Bruk {entity}-tjeneste-ID-er (kommaseparert for flere). Malvariabler: {vars}.",
+      "process_history_hint": "Kjør matching på nytt for alle lagrede sykluser, oppdater justeringsforslag, tren ML-modellene på nytt (hvis aktivert) og beregn syklusenes tilstand på nytt. Kjør dette etter en batch med gjennomganger."
     },
     "phase_desc": {
       "pre_wash": "Innledende bløtlegging eller forbehandling før hovedvask.",
@@ -790,7 +809,10 @@
     },
     "pref": {
       "date_absolute": "Absolutt (f.eks. kl. 14.32 2. juli)",
-      "date_relative": "Relativ (f.eks. for 2 timer siden)"
+      "date_relative": "Relativ (f.eks. for 2 timer siden)",
+      "lang_auto": "Systemstandard ({lang})",
+      "lang_en": "Engelsk",
+      "use_panel_default": "(panelstandard)"
     },
     "quality": {
       "bad": "Dårlig",
@@ -809,7 +831,8 @@
       "idle": "Uvirksom",
       "interrupted": "Avbrutt",
       "ready": "Klar til å behandle",
-      "recording": "Tar opp"
+      "recording": "Tar opp",
+      "training": "Trener…"
     },
     "tab": {
       "advanced": "Avansert",
@@ -1302,6 +1325,16 @@
         "label": "Sjekk høyst hvert",
         "doc": "Sjekk på nytt for forbedringer maksimalt én gang per så mange dager."
       }
+    },
+    "placeholder": {
+      "add": "legg til…",
+      "group_name": "f.eks. Bomull 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "legg til en varslingstjeneste…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "legg til en person…",
+      "phase_name": "f.eks. Forsk",
+      "profile_name": "f.eks. Bomull 40°C"
     }
   }
 }

@@ -612,7 +612,14 @@
       "artifact_interruption": "Gangguan",
       "artifact_low_power": "Daya rendah",
       "artifact_high_power": "Daya tinggi",
-      "artifact_anomaly": "Anomali"
+      "artifact_anomaly": "Anomali",
+      "auto_fine_tune_on": "penyetelan otomatis aktif (sekitar pukul {hour}:00)",
+      "cohesion_good": "kohesi {pct}%",
+      "cohesion_low": "⚠ kohesi rendah {pct}%",
+      "group_name": "Nama grup",
+      "members": "Anggota",
+      "models_fine_tuned": "({count} model disetel)",
+      "panel_language": "Bahasa panel"
     },
     "badge": {
       "golden_cycle": "Siklus referensi yang direkam",
@@ -645,7 +652,12 @@
       "import_config": "Konfigurasi Impor",
       "label_cycle": "Siklus Label",
       "new_phase": "Fase Baru",
-      "process_recording": "Perekaman Proses"
+      "process_recording": "Perekaman Proses",
+      "edit_group": "Edit grup profil",
+      "new_group": "Grup profil baru",
+      "process_history_title": "Proses Riwayat",
+      "process_history_msg": "Jalankan ulang pencocokan, perbarui saran, latih ulang ML (jika diaktifkan), dan hitung ulang kesehatan siklus di semua siklus tersimpan. Ini mungkin memerlukan beberapa waktu.",
+      "process_history_ok": "Proses"
     },
     "msg": {
       "near_duplicate_cluster": "cluster profil yang hampir duplikat terdeteksi. Pengelompokan memungkinkan pencocokan memilih secara andal di antara kemiripan (misalnya program yang sama pada suhu/putaran berbeda).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} siklus{s} perlu ditinjau",
       "artifact_spike_detail": "Melebihi band daya biasa selama ~{n}d.",
       "artifact_dip_detail": "Turun di bawah band daya biasa selama ~{n}d.",
-      "artifact_pause_detail": "Daya turun hampir nol selama ~{n}d lalu kembali — kemungkinan pintu dibuka di tengah siklus atau siklus dijeda."
+      "artifact_pause_detail": "Daya turun hampir nol selama ~{n}d lalu kembali — kemungkinan pintu dibuka di tengah siklus atau siklus dijeda.",
+      "automations_intro": "WashData memicu event {start} / {end} dan menampilkan entitas, sehingga notifikasi dan tindakan lebih baik dibuat sebagai otomasi Home Assistant biasa. Otomasi yang menggunakan perangkat ini ditampilkan di bawah.",
+      "collecting_data": "Mengumpulkan data — perlu {need} siklus lagi sebelum penyetelan dapat dimulai ({current}/{min}).",
+      "enough_data": "Data yang cukup untuk dipelajari ({current}/{min} siklus).",
+      "filter_by_profile": "Filter berdasarkan profil…",
+      "group_preview_hint": "Centang 2+ anggota untuk melihat pratinjau dan membandingkan kurva daya mereka.",
+      "notify_services_hint": "Gunakan ID layanan {entity} (dipisahkan koma untuk lebih dari satu). Variabel template: {vars}.",
+      "process_history_hint": "Jalankan ulang pencocokan pada semua siklus tersimpan, perbarui saran penyetelan, latih ulang model ML (jika diaktifkan), dan hitung ulang kesehatan siklus. Jalankan setelah sekelompok ulasan."
     },
     "phase_desc": {
       "pre_wash": "Perendaman awal atau pra-perawatan sebelum pencucian utama.",
@@ -790,7 +809,10 @@
     },
     "pref": {
       "date_absolute": "Mutlak (misalnya 14:32 pada 2 Juli)",
-      "date_relative": "Relatif (misalnya 2 jam yang lalu)"
+      "date_relative": "Relatif (misalnya 2 jam yang lalu)",
+      "lang_auto": "Default sistem ({lang})",
+      "lang_en": "Inggris",
+      "use_panel_default": "(default panel)"
     },
     "quality": {
       "bad": "Buruk",
@@ -809,7 +831,8 @@
       "idle": "Menganggur",
       "interrupted": "Terganggu",
       "ready": "Siap untuk diproses",
-      "recording": "Merekam"
+      "recording": "Merekam",
+      "training": "Melatih…"
     },
     "tab": {
       "advanced": "Canggih",
@@ -1302,6 +1325,16 @@
         "label": "Periksa paling banyak setiap",
         "doc": "Periksa ulang perbaikan paling banyak satu kali dalam beberapa hari ini."
       }
+    },
+    "placeholder": {
+      "add": "tambahkan…",
+      "group_name": "mis. Katun 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "tambahkan layanan notifikasi…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "tambahkan seseorang…",
+      "phase_name": "mis. Pra-cuci",
+      "profile_name": "mis. Katun 40°C"
     }
   }
 }

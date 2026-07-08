@@ -612,7 +612,14 @@
       "artifact_interruption": "Pertraukimas",
       "artifact_low_power": "Maža galia",
       "artifact_high_power": "Didelė galia",
-      "artifact_anomaly": "Anomalija"
+      "artifact_anomaly": "Anomalija",
+      "auto_fine_tune_on": "automatinis tikslus derinimas įjungtas (apie {hour}:00)",
+      "cohesion_good": "sanglauda {pct}%",
+      "cohesion_low": "⚠ maža sanglauda {pct}%",
+      "group_name": "Grupės pavadinimas",
+      "members": "Nariai",
+      "models_fine_tuned": "({count} modeliai tiksliai sureguliuoti)",
+      "panel_language": "Skydelio kalba"
     },
     "badge": {
       "golden_cycle": "Užregistruotas atskaitos ciklas",
@@ -645,7 +652,12 @@
       "import_config": "Importuoti konfigūraciją",
       "label_cycle": "Etikečių ciklas",
       "new_phase": "Naujas etapas",
-      "process_recording": "Proceso įrašymas"
+      "process_recording": "Proceso įrašymas",
+      "edit_group": "Redaguoti profilių grupę",
+      "new_group": "Nauja profilių grupė",
+      "process_history_title": "Apdoroti istoriją",
+      "process_history_msg": "Pakartotinai paleisti atitikimą, atnaujinti pasiūlymus, iš naujo apmokyti ML (jei įjungta) ir perskaičiuoti ciklų sveikatą visuose saugomuose cikluose. Tai gali užtrukti.",
+      "process_history_ok": "Apdoroti"
     },
     "msg": {
       "near_duplicate_cluster": "Aptikta beveik pasikartojanti profilių grupė. Grupavimas leidžia suderinti patikimai pasirinkti panašius dalykus (pvz., ta pati programa esant skirtingai temperatūrai / sukimuisi).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} cikl{s} peržiūrai",
       "artifact_spike_detail": "Viršijo įprastą galios juostą maždaug {n}s.",
       "artifact_dip_detail": "Nukrito žemiau įprastos galios juostos maždaug {n}s.",
-      "artifact_pause_detail": "Galia krito beveik iki nulio maždaug {n}s, tada atsinaujino - greičiausiai buvo atidarytos durys ciklo metu arba ciklas buvo pristabdytas."
+      "artifact_pause_detail": "Galia krito beveik iki nulio maždaug {n}s, tada atsinaujino - greičiausiai buvo atidarytos durys ciklo metu arba ciklas buvo pristabdytas.",
+      "automations_intro": "WashData paleidžia {start} / {end} įvykius ir atskleidžia esybes, todėl pranešimai ir veiksmai geriausiai kuriami kaip įprasti Home Assistant automatizavimai. Žemiau rodomi automatizavimai, naudojantys šį prietaisą.",
+      "collecting_data": "Renkami duomenys — reikia dar {need} ciklų, kad galėtų prasidėti tikslus derinimas ({current}/{min}).",
+      "enough_data": "Pakankamai duomenų mokymui ({current}/{min} ciklų).",
+      "filter_by_profile": "Filtruoti pagal profilį…",
+      "group_preview_hint": "Pažymėkite 2+ narius, kad peržiūrėtumėte ir palygintumėte jų galios kreives.",
+      "notify_services_hint": "Naudokite {entity} paslaugų ID (keliems — atskirkite kableliais). Šablono kintamieji: {vars}.",
+      "process_history_hint": "Pakartotinai paleisti atitikimą visiems saugomiems ciklams, atnaujinti derinimo pasiūlymus, iš naujo apmokyti ML modelius (jei įjungta) ir perskaičiuoti ciklų sveikatą. Paleiskite tai po peržiūrų partijos."
     },
     "phase_desc": {
       "pre_wash": "Pirminis mirkymas arba paruošiamasis apdorojimas prieš pagrindinį skalbimą.",
@@ -790,7 +809,10 @@
     },
     "pref": {
       "date_absolute": "Absoliutus (pvz., liepos 2 d. 14:32)",
-      "date_relative": "Giminaitis (pvz., prieš 2 valandas)"
+      "date_relative": "Giminaitis (pvz., prieš 2 valandas)",
+      "lang_auto": "Sistemos numatytasis ({lang})",
+      "lang_en": "Anglų",
+      "use_panel_default": "(skydelio numatytasis)"
     },
     "quality": {
       "bad": "Blogai",
@@ -809,7 +831,8 @@
       "idle": "Tuščia eiga",
       "interrupted": "Pertraukė",
       "ready": "Paruošta apdoroti",
-      "recording": "Įrašoma"
+      "recording": "Įrašoma",
+      "training": "Mokymas…"
     },
     "tab": {
       "advanced": "Išplėstinė",
@@ -1302,6 +1325,16 @@
         "label": "Maks. tikrinimo intervalas",
         "doc": "Dar kartą patikrinkite, ar nėra patobulinimų, bent kartą per tiek dienų."
       }
+    },
+    "placeholder": {
+      "add": "pridėti…",
+      "group_name": "pvz. Medvilnė 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "pridėti pranešimų paslaugą…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "pridėti asmenį…",
+      "phase_name": "pvz. Išankstinis skalbimas",
+      "profile_name": "pvz. Medvilnė 40°C"
     }
   }
 }

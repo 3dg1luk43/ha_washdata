@@ -528,7 +528,14 @@
       "artifact_interruption": "중단",
       "artifact_low_power": "저전력",
       "artifact_high_power": "고전력",
-      "artifact_anomaly": "이상"
+      "artifact_anomaly": "이상",
+      "auto_fine_tune_on": "자동 미세 조정 켜짐（약 {hour}:00）",
+      "cohesion_good": "응집도 {pct}%",
+      "cohesion_low": "⚠ 낮은 응집도 {pct}%",
+      "group_name": "그룹 이름",
+      "members": "구성원",
+      "models_fine_tuned": "({count}개 모델 미세 조정됨)",
+      "panel_language": "패널 언어"
     },
     "btn": {
       "add_timer": "+ 타이머 추가",
@@ -645,7 +652,12 @@
       "import_config": "구성 가져오기",
       "label_cycle": "라벨주기",
       "new_phase": "새로운 단계",
-      "process_recording": "프로세스 기록"
+      "process_recording": "프로세스 기록",
+      "edit_group": "프로필 그룹 편집",
+      "new_group": "새 프로필 그룹",
+      "process_history_title": "기록 처리",
+      "process_history_msg": "매칭을 재실행하고, 제안을 새로 고치고, ML을 재훈련하고（활성화된 경우）, 저장된 모든 사이클의 사이클 상태를 재계산합니다. 시간이 걸릴 수 있습니다.",
+      "process_history_ok": "처리"
     },
     "msg": {
       "near_duplicate_cluster": "거의 중복된 프로필 클러스터가 감지되었습니다. 그룹화를 통해 일치하는 항목을 유사 항목(예: 서로 다른 온도/회전의 동일한 프로그램) 중에서 안정적으로 선택할 수 있습니다.",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "검토가 필요한 사이클 {n}개{s}",
       "artifact_spike_detail": "일반 전력 범위 위로 약 {n}초 동안 나타났습니다.",
       "artifact_dip_detail": "일반 전력 범위 아래로 약 {n}초 동안 내려갔습니다.",
-      "artifact_pause_detail": "전력이 약 {n}초 동안 거의 0으로 떨어진 후 재개되었습니다. 사이클 도중 문이 열리거나 일시 정지된 것으로 보입니다."
+      "artifact_pause_detail": "전력이 약 {n}초 동안 거의 0으로 떨어진 후 재개되었습니다. 사이클 도중 문이 열리거나 일시 정지된 것으로 보입니다.",
+      "automations_intro": "WashData는 {start} / {end} 이벤트를 발생시키고 엔티티를 노출하므로, 알림과 동작은 일반 Home Assistant 자동화로 구축하는 것이 가장 좋습니다. 이 기기를 사용하는 자동화가 아래에 표시됩니다.",
+      "collecting_data": "데이터 수집 중 — 미세 조정을 시작하려면 {need}번의 사이클이 더 필요합니다（{current}/{min}）。",
+      "enough_data": "학습할 충분한 데이터가 있습니다（{current}/{min}사이클）。",
+      "filter_by_profile": "프로필로 필터링…",
+      "group_preview_hint": "2명 이상의 멤버를 선택하여 전력 곡선을 미리 보고 비교하세요.",
+      "notify_services_hint": "{entity} 서비스 ID를 사용하세요（여러 개는 쉼표로 구분）。템플릿 변수：{vars}。",
+      "process_history_hint": "저장된 모든 사이클에 대해 매칭을 재실행하고, 튜닝 제안을 새로 고치고, ML 모델을 재훈련하고（활성화된 경우）, 사이클 상태를 재계산합니다. 일괄 검토 후 실행하세요."
     },
     "phase_desc": {
       "pre_wash": "본 세탁 전 초기 담금 또는 전처리.",
@@ -790,7 +809,10 @@
     },
     "pref": {
       "date_absolute": "절대값(예: 7월 2일 14:32)",
-      "date_relative": "상대 항목(예: 2시간 전)"
+      "date_relative": "상대 항목(예: 2시간 전)",
+      "lang_auto": "시스템 기본값（{lang}）",
+      "lang_en": "영어",
+      "use_panel_default": "(패널 기본값)"
     },
     "quality": {
       "bad": "나쁜",
@@ -809,7 +831,8 @@
       "idle": "게으른",
       "interrupted": "중단된",
       "ready": "처리 준비 완료",
-      "recording": "녹화 중"
+      "recording": "녹화 중",
+      "training": "훈련 중…"
     },
     "tab": {
       "advanced": "고급의",
@@ -1302,6 +1325,16 @@
         "label": "최대 확인 간격",
         "doc": "며칠에 한 번만 개선 사항을 다시 확인하세요."
       }
+    },
+    "placeholder": {
+      "add": "추가…",
+      "group_name": "예：면 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "알림 서비스 추가…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "사람 추가…",
+      "phase_name": "예：예비 세탁",
+      "profile_name": "예：면 40°C"
     }
   }
 }

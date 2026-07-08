@@ -33,7 +33,9 @@ The first release since 0.4.5.2, and a large one — everything below is new rel
 
 - **Role-Based Access Control**: Administrators can grant each Home Assistant user a per-device access level (none, read, edit, or full) with a per-user default, from the Panel tab. Access is enforced on every WebSocket command on the server, not only hidden in the UI: read users get a mostly view-only panel with hidden devices removed (but may pick the running program, a live-only action), edit users can operate normally, and destructive or export actions require full access. Administrators always have full access. Access control is **off by default**, so existing single-user setups are unaffected.
 
-- **Preferences and panel settings**: Each user can set their own default tab and Status chart toggles. Administrators can set a global refresh interval, default tab, and hide tabs for non-admins. These are stored independently of device config and preserved across restarts.
+- **Preferences and panel settings**: Each user can set their own default tab, Status chart toggles, and panel language. Administrators can set a global default tab and hide tabs for non-admins. These are stored independently of device config and preserved across restarts.
+
+- **Panel language override**: The **My Preferences** section (User Settings tab) now includes a **Panel language** dropdown. WashData ships panel translations for 60 languages — but panel strings are machine-translated and machine translation routinely gets appliance-monitoring terminology wrong ("matching" becomes a sports match, "logs" become lumber, and so on). If your native language translation is unclear or misleading, switch this to **English** and the panel immediately renders in English for your account only — no Home Assistant restart needed, no effect on other users' language. The override applies only to the WashData panel; Home Assistant itself continues using your system language.
 
 - **Logs page** (administrators): A live, level-filterable view of recent WashData log records from an in-memory ring buffer, with export and a resizable view.
 

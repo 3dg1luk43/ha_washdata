@@ -612,7 +612,14 @@
       "artifact_interruption": "Katkestus",
       "artifact_low_power": "Madal võimsus",
       "artifact_high_power": "Kõrge võimsus",
-      "artifact_anomaly": "Anomaalia"
+      "artifact_anomaly": "Anomaalia",
+      "auto_fine_tune_on": "automaatne peenhäälestus sees (umbes kell {hour}:00)",
+      "cohesion_good": "ühtesus {pct}%",
+      "cohesion_low": "⚠ madal ühtesus {pct}%",
+      "group_name": "Rühma nimi",
+      "members": "Liikmed",
+      "models_fine_tuned": "({count} mudelit peenhäälestatud)",
+      "panel_language": "Paneeli keel"
     },
     "badge": {
       "golden_cycle": "Salvestatud võrdlustsükkel",
@@ -645,7 +652,12 @@
       "import_config": "Impordi konfiguratsioon",
       "label_cycle": "Sildi tsükkel",
       "new_phase": "Uus faas",
-      "process_recording": "Protsessi salvestamine"
+      "process_recording": "Protsessi salvestamine",
+      "edit_group": "Redigeeri profiilirühma",
+      "new_group": "Uus profiilirühm",
+      "process_history_title": "Töötle ajalugu",
+      "process_history_msg": "Käivitage sobitamine uuesti, värskendage soovitusi, treenige ML uuesti (kui lubatud) ja arvutage tsükli tervis ümber kõigi salvestatud tsüklite jaoks. See võib võtta aega.",
+      "process_history_ok": "Töötle"
     },
     "msg": {
       "near_duplicate_cluster": "Tuvastati peaaegu duplikaatprofiili klaster. Rühmitamine võimaldab sobitamisel usaldusväärselt valida sarnasuste vahel (nt sama programm erineval temperatuuril/tsentrifuugimisel).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} tsükkel{s} ülevaatamiseks",
       "artifact_spike_detail": "Ületas tavapärase võimsusriba umbes {n}s jooksul.",
       "artifact_dip_detail": "Langes alla tavapärase võimsusriba umbes {n}s jooksul.",
-      "artifact_pause_detail": "Võimsus langes peaaegu nulli umbes {n}s jooksul ja taastus seejärel — tõenäoliselt avati uks tsükli keskel või tsükkel peatati."
+      "artifact_pause_detail": "Võimsus langes peaaegu nulli umbes {n}s jooksul ja taastus seejärel — tõenäoliselt avati uks tsükli keskel või tsükkel peatati.",
+      "automations_intro": "WashData käivitab {start} / {end} sündmusi ja avaldab olemeid, seega on teated ja toimingud kõige paremini ehitada tavaliste Home Assistanti automaatikana. Seda seadet kasutavad automaatikad kuvatakse allpool.",
+      "collecting_data": "Andmete kogumine — {need} tsüklit veel enne peenhäälestuse alustamist ({current}/{min}).",
+      "enough_data": "Piisavalt andmeid õppimiseks ({current}/{min} tsüklit).",
+      "filter_by_profile": "Filtreeri profiili järgi…",
+      "group_preview_hint": "Märkige 2+ liiget nende võimenduskõverate eelvaatamiseks ja võrdlemiseks.",
+      "notify_services_hint": "Kasutage {entity} teenuse ID-sid (mitme korral komadega eraldatult). Malli muutujad: {vars}.",
+      "process_history_hint": "Käivitage sobitamine uuesti kõigi salvestatud tsüklite jaoks, värskendage häälestamise soovitusi, treenige ML-mudeleid uuesti (kui lubatud) ja arvutage tsükli tervis ümber. Käivitage see pärast ülevaatuste partiid."
     },
     "phase_desc": {
       "pre_wash": "Esmane leotamine või eeltöötlus enne põhipesu.",
@@ -786,7 +805,10 @@
     },
     "pref": {
       "date_absolute": "Absoluutne (nt 2. juulil 14:32)",
-      "date_relative": "Suhteline (nt 2 tundi tagasi)"
+      "date_relative": "Suhteline (nt 2 tundi tagasi)",
+      "lang_auto": "Süsteemi vaikimisi ({lang})",
+      "lang_en": "Inglise",
+      "use_panel_default": "(paneeli vaikimisi)"
     },
     "quality": {
       "bad": "Halb",
@@ -805,7 +827,8 @@
       "idle": "Tühikäik",
       "interrupted": "Katkestatud",
       "ready": "Töötlemiseks valmis",
-      "recording": "Salvestamine"
+      "recording": "Salvestamine",
+      "training": "Treenimine…"
     },
     "tab": {
       "advanced": "Täpsemalt",
@@ -1302,6 +1325,16 @@
         "label": "Kontrolli maksimaalselt iga",
         "doc": "Kontrollige täiustusi uuesti kõige rohkem üks kord selle mitme päeva jooksul."
       }
+    },
+    "placeholder": {
+      "add": "lisa…",
+      "group_name": "nt. Puuvill 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "lisa teavitusteenust…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "lisa isik…",
+      "phase_name": "nt. Eelpesemine",
+      "profile_name": "nt. Puuvill 40°C"
     }
   }
 }

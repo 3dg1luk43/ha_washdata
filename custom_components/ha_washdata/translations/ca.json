@@ -612,7 +612,14 @@
       "artifact_interruption": "Interrupció",
       "artifact_low_power": "Potència baixa",
       "artifact_high_power": "Potència alta",
-      "artifact_anomaly": "Anomalia"
+      "artifact_anomaly": "Anomalia",
+      "auto_fine_tune_on": "ajust fi automàtic activat (al voltant de les {hour}:00)",
+      "cohesion_good": "cohesió {pct}%",
+      "cohesion_low": "⚠ cohesió baixa {pct}%",
+      "group_name": "Nom del grup",
+      "members": "Membres",
+      "models_fine_tuned": "({count} models ajustats)",
+      "panel_language": "Idioma del tauler"
     },
     "badge": {
       "golden_cycle": "Cicle de referència enregistrat",
@@ -645,7 +652,12 @@
       "import_config": "Importa la configuració",
       "label_cycle": "Cicle d'etiquetes",
       "new_phase": "Nova Fase",
-      "process_recording": "Enregistrament del procés"
+      "process_recording": "Enregistrament del procés",
+      "edit_group": "Edita el grup de perfils",
+      "new_group": "Nou grup de perfils",
+      "process_history_title": "Processa l'historial",
+      "process_history_msg": "Tornar a executar la coincidència, actualitzar les suggerències, reentrenar ML (si està habilitat) i recalcular l'estat dels cicles en tots els cicles emmagatzemats. Això pot trigar una estona.",
+      "process_history_ok": "Processa"
     },
     "msg": {
       "near_duplicate_cluster": "S'ha detectat un clúster de perfil gairebé duplicat. L'agrupació permet la concordança de triar de manera fiable entre semblants (p. ex., el mateix programa a diferents temperatures/gir).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} cicle{s} per revisar",
       "artifact_spike_detail": "Va superar la banda de potència habitual durant ~{n}s.",
       "artifact_dip_detail": "Va caure per sota de la banda de potència habitual durant ~{n}s.",
-      "artifact_pause_detail": "La potència va baixar a gairebé zero durant ~{n}s i després va reprendre — probablement la porta es va obrir a mig cicle o el cicle es va pausar."
+      "artifact_pause_detail": "La potència va baixar a gairebé zero durant ~{n}s i després va reprendre — probablement la porta es va obrir a mig cicle o el cicle es va pausar.",
+      "automations_intro": "El WashData genera els esdeveniments {start} / {end} i exposa entitats, de manera que les notificacions i les accions es creen millor com a automatitzacions normals del Home Assistant. Les automatitzacions que utilitzen aquest dispositiu apareixen a continuació.",
+      "collecting_data": "Recollint dades — {need} cicles més abans que pugui començar l'ajust fi ({current}/{min}).",
+      "enough_data": "Prou dades per aprendre ({current}/{min} cicles).",
+      "filter_by_profile": "Filtra per perfil…",
+      "group_preview_hint": "Selecciona 2 o més membres per previsualitzar i comparar les seves corbes de potència.",
+      "notify_services_hint": "Utilitza els IDs de servei de {entity} (separats per comes per a múltiples). Variables de plantilla: {vars}.",
+      "process_history_hint": "Tornar a executar la coincidència en tots els cicles emmagatzemats, actualitzar les suggerències d'ajust, reentrenar els models ML (si estan habilitats) i recalcular l'estat dels cicles. Executa-ho després d'un lot de revisions."
     },
     "phase_desc": {
       "pre_wash": "Remull inicial o pretractament abans del rentat principal.",
@@ -786,7 +805,10 @@
     },
     "pref": {
       "date_absolute": "Absolut (p. ex., 14:32 del 2 de juliol)",
-      "date_relative": "Relatiu (p. ex., fa 2 hores)"
+      "date_relative": "Relatiu (p. ex., fa 2 hores)",
+      "lang_auto": "Predeterminat del sistema ({lang})",
+      "lang_en": "Anglès",
+      "use_panel_default": "(predeterminat del tauler)"
     },
     "quality": {
       "bad": "Dolent",
@@ -805,7 +827,8 @@
       "idle": "Inactiu",
       "interrupted": "Interromput",
       "ready": "A punt per processar",
-      "recording": "Gravació"
+      "recording": "Gravació",
+      "training": "Entrenant…"
     },
     "tab": {
       "advanced": "Avançat",
@@ -1302,6 +1325,16 @@
         "label": "Comprova com a màxim cada",
         "doc": "Torneu a comprovar si hi ha millores com a màxim una vegada per tants dies."
       }
+    },
+    "placeholder": {
+      "add": "afegeix…",
+      "group_name": "p. ex. Cotó 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "afegeix un servei de notificació…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "afegeix una persona…",
+      "phase_name": "p. ex. Prerentat",
+      "profile_name": "p. ex. Cotó 40°C"
     }
   }
 }

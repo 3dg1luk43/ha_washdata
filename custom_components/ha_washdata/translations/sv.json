@@ -633,7 +633,14 @@
       "artifact_interruption": "Avbrott",
       "artifact_low_power": "Låg effekt",
       "artifact_high_power": "Hög effekt",
-      "artifact_anomaly": "Anomali"
+      "artifact_anomaly": "Anomali",
+      "auto_fine_tune_on": "automatisk finjustering aktiv (ungefär {hour}:00)",
+      "cohesion_good": "samhörighet {pct} %",
+      "cohesion_low": "⚠ låg samhörighet {pct} %",
+      "group_name": "Gruppnamn",
+      "members": "Medlemmar",
+      "models_fine_tuned": "({count} modeller finjusterade)",
+      "panel_language": "Panelspråk"
     },
     "modal": {
       "merge_cycles": "Slå samman {n} cykler",
@@ -645,7 +652,12 @@
       "import_config": "Importera konfiguration",
       "label_cycle": "Märk cykel",
       "new_phase": "Ny fas",
-      "process_recording": "Bearbeta inspelning"
+      "process_recording": "Bearbeta inspelning",
+      "edit_group": "Redigera profilgrupp",
+      "new_group": "Ny profilgrupp",
+      "process_history_title": "Bearbeta historik",
+      "process_history_msg": "Kör matchning igen, uppdatera förslag, träna om ML (om aktiverat) och beräkna om cyklernas hälsa för alla lagrade cykler. Detta kan ta ett tag.",
+      "process_history_ok": "Bearbeta"
     },
     "msg": {
       "near_duplicate_cluster": "nästan duplicerat profilkluster upptäcktes. Gruppering gör att matchning på ett tillförlitligt sätt kan välja mellan look-alikes (t.ex. samma program vid olika temperaturer/centrifugering).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} cykel{s} att granska",
       "artifact_spike_detail": "Drog över det normala effektbandet i ~{n} s.",
       "artifact_dip_detail": "Föll under det normala effektbandet i ~{n} s.",
-      "artifact_pause_detail": "Effekten föll till nära noll i ~{n} s och återupptogs sedan — troligtvis öppnades dörren mitt i cykeln eller cykeln pausades."
+      "artifact_pause_detail": "Effekten föll till nära noll i ~{n} s och återupptogs sedan — troligtvis öppnades dörren mitt i cykeln eller cykeln pausades.",
+      "automations_intro": "WashData utlöser {start} / {end}-händelser och tillhandahåller entiteter — aviseringar och åtgärder byggs bäst som vanliga Home Assistant-automatiseringar. Automatiseringar som använder den här enheten visas nedan.",
+      "collecting_data": "Samlar in data — {need} cykler kvar innan finjustering kan starta ({current}/{min}).",
+      "enough_data": "Tillräckligt med data för att lära sig av ({current}/{min} cykler).",
+      "filter_by_profile": "Filtrera efter profil…",
+      "group_preview_hint": "Markera 2 eller fler medlemmar för att förhandsgranska och jämföra deras effektkurvor.",
+      "notify_services_hint": "Använd {entity}-tjänst-ID:n (kommaavgränsade för flera). Mallvariabler: {vars}.",
+      "process_history_hint": "Kör matchning igen på alla lagrade cykler, uppdatera justeringsförslag, träna om ML-modellerna (om aktiverat) och beräkna om cyklernas hälsa. Kör detta efter en omgång granskningar."
     },
     "phase_desc": {
       "pre_wash": "Inledande blötläggning eller förbehandling före huvudtvätt.",
@@ -786,7 +805,10 @@
     },
     "pref": {
       "date_absolute": "Absolut (t.ex. 14:32 den 2 jul)",
-      "date_relative": "Relativ (t.ex. för 2 timmar sedan)"
+      "date_relative": "Relativ (t.ex. för 2 timmar sedan)",
+      "lang_auto": "Systemstandard ({lang})",
+      "lang_en": "Engelska",
+      "use_panel_default": "(panelstandard)"
     },
     "quality": {
       "bad": "Dålig",
@@ -805,7 +827,8 @@
       "idle": "Inaktiv",
       "interrupted": "Avbruten",
       "ready": "Redo att bearbeta",
-      "recording": "Spelar in"
+      "recording": "Spelar in",
+      "training": "Tränar…"
     },
     "tab": {
       "advanced": "Avancerat",
@@ -1302,6 +1325,16 @@
         "label": "Kontrollera som mest varje",
         "doc": "Kontrollera igen efter förbättringar högst en gång per så många dagar."
       }
+    },
+    "placeholder": {
+      "add": "lägg till…",
+      "group_name": "t.ex. Bomull 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "lägg till en aviseringstjänst…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "lägg till en person…",
+      "phase_name": "t.ex. Förtvättning",
+      "profile_name": "t.ex. Bomull 40°C"
     }
   }
 }

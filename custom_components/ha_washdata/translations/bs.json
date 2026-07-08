@@ -612,7 +612,14 @@
       "artifact_interruption": "Prekid",
       "artifact_low_power": "Niska snaga",
       "artifact_high_power": "Visoka snaga",
-      "artifact_anomaly": "Anomalija"
+      "artifact_anomaly": "Anomalija",
+      "auto_fine_tune_on": "automatsko fino podešavanje uključeno (oko {hour}:00)",
+      "cohesion_good": "kohezija {pct}%",
+      "cohesion_low": "⚠ niska kohezija {pct}%",
+      "group_name": "Naziv grupe",
+      "members": "Članovi",
+      "models_fine_tuned": "({count} modela fino podešenih)",
+      "panel_language": "Jezik ploče"
     },
     "badge": {
       "golden_cycle": "Snimljeni referentni ciklus",
@@ -645,7 +652,12 @@
       "import_config": "Uvoz konfiguracije",
       "label_cycle": "Označi ciklus",
       "new_phase": "Nova faza",
-      "process_recording": "Snimanje procesa"
+      "process_recording": "Snimanje procesa",
+      "edit_group": "Uredi grupu profila",
+      "new_group": "Nova grupa profila",
+      "process_history_title": "Obradi povijest",
+      "process_history_msg": "Ponovo pokrenite uparivanje, osvježite prijedloge, trenirajte ML (ako je omogućeno) i preračunajte zdravlje ciklusa za sve pohranjene cikluse. Ovo može potrajati.",
+      "process_history_ok": "Obradi"
     },
     "msg": {
       "near_duplicate_cluster": "otkriven skoro duplirani klaster profila. Grupisanje omogućava pouzdano uparivanje biranja između sličnih (npr. isti program na različitoj temperaturi/centrifikaciji).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} ciklus{s} za pregled",
       "artifact_spike_detail": "Prešao iznad uobičajenog pojasa snage za ~{n}s.",
       "artifact_dip_detail": "Pao ispod uobičajenog pojasa snage za ~{n}s.",
-      "artifact_pause_detail": "Snaga je pala na gotovo nulu za ~{n}s, a zatim se nastavila — vjerovatno su vrata otvorena sredinom ciklusa ili je ciklus pauziran."
+      "artifact_pause_detail": "Snaga je pala na gotovo nulu za ~{n}s, a zatim se nastavila — vjerovatno su vrata otvorena sredinom ciklusa ili je ciklus pauziran.",
+      "automations_intro": "WashData pokreće događaje {start} / {end} i izlaže entitete, pa je obavijesti i radnje najbolje graditi kao normalne automatizacije Home Assistanta. Automatizacije koje koriste ovaj uređaj prikazane su ispod.",
+      "collecting_data": "Prikupljanje podataka — još {need} ciklusa do početka finog podešavanja ({current}/{min}).",
+      "enough_data": "Dovoljno podataka za učenje ({current}/{min} ciklusa).",
+      "filter_by_profile": "Filtriraj po profilu…",
+      "group_preview_hint": "Označite 2 ili više članova za pregled i usporedbu krivulja snage.",
+      "notify_services_hint": "Koristite ID-ove servisa {entity} (odvojene zarezima za više). Varijable predloška: {vars}.",
+      "process_history_hint": "Ponovo pokrenite uparivanje na svim pohranjenim ciklusima, osvježite prijedloge podešavanja, ponovo trenirajte ML modele (ako su omogućeni) i preračunajte zdravlje ciklusa. Pokrenite nakon niza recenzija."
     },
     "phase_desc": {
       "pre_wash": "Prvo namakanje ili predtretman prije glavnog pranja.",
@@ -786,7 +805,10 @@
     },
     "pref": {
       "date_absolute": "Apsolutno (npr. 14:32 2. jula)",
-      "date_relative": "Relativno (npr. prije 2 sata)"
+      "date_relative": "Relativno (npr. prije 2 sata)",
+      "lang_auto": "Sistemski podrazumijevani ({lang})",
+      "lang_en": "Engleski",
+      "use_panel_default": "(podrazumijevano ploče)"
     },
     "quality": {
       "bad": "Loše",
@@ -805,7 +827,8 @@
       "idle": "Neaktivan",
       "interrupted": "Prekinut",
       "ready": "Spreman za obradu",
-      "recording": "Snimanje"
+      "recording": "Snimanje",
+      "training": "Treniranje…"
     },
     "tab": {
       "advanced": "Napredno",
@@ -1302,6 +1325,16 @@
         "label": "Provjeravati najvjše svakih",
         "doc": "Ponovo provjerite ima li poboljšanja najviše jednom u ovoliko dana."
       }
+    },
+    "placeholder": {
+      "add": "dodaj…",
+      "group_name": "npr. Pamuk 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "dodaj servis obavještavanja…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "dodaj osobu…",
+      "phase_name": "npr. Pranje",
+      "profile_name": "npr. Pamuk 40°C"
     }
   }
 }

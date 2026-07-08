@@ -612,7 +612,14 @@
       "artifact_interruption": "Onderbreking",
       "artifact_low_power": "Laag vermogen",
       "artifact_high_power": "Hoog vermogen",
-      "artifact_anomaly": "Anomalie"
+      "artifact_anomaly": "Anomalie",
+      "auto_fine_tune_on": "automatisch verfijnen actief (rond {hour}:00)",
+      "cohesion_good": "cohesie {pct}%",
+      "cohesion_low": "⚠ lage cohesie {pct}%",
+      "group_name": "Groepsnaam",
+      "members": "Leden",
+      "models_fine_tuned": "({count} modellen verfijnd)",
+      "panel_language": "Paneeltaal"
     },
     "badge": {
       "golden_cycle": "Geregistreerde referentiecyclus",
@@ -645,7 +652,12 @@
       "import_config": "Configuratie importeren",
       "label_cycle": "Labelcyclus",
       "new_phase": "Nieuwe Fase",
-      "process_recording": "Procesregistratie"
+      "process_recording": "Procesregistratie",
+      "edit_group": "Profielgroep bewerken",
+      "new_group": "Nieuwe profielgroep",
+      "process_history_title": "Geschiedenis verwerken",
+      "process_history_msg": "Voer opnieuw matching uit, vernieuw suggesties, train ML opnieuw (indien ingeschakeld) en herbereken de cyclusgezondheid over alle opgeslagen cycli. Dit kan even duren.",
+      "process_history_ok": "Verwerken"
     },
     "msg": {
       "near_duplicate_cluster": "bijna dubbel profielcluster gedetecteerd. Door te groeperen kan er op betrouwbare wijze worden gekozen tussen look-alikes (bijvoorbeeld hetzelfde programma op verschillende temperatuur/centrifugeren).",
@@ -744,7 +756,14 @@
       "artifact_spike_detail": "Trad boven de gebruikelijke vermogensband voor ~{n}s.",
       "artifact_dip_detail": "Daalde onder de gebruikelijke vermogensband voor ~{n}s.",
       "artifact_pause_detail": "Vermogen daalde tot bijna nul voor ~{n}s en hervatte vervolgens — waarschijnlijk werd de deur halverwege de cyclus geopend of de cyclus gepauzeerd.",
-      "feedback_cycles_pending": "{n} cyclus{s} te beoordelen"
+      "feedback_cycles_pending": "{n} cyclus{s} te beoordelen",
+      "automations_intro": "WashData activeert {start} / {end}-gebeurtenissen en stelt entiteiten beschikbaar, waardoor meldingen en acties het best als gewone Home Assistant-automatiseringen worden gebouwd. Automatiseringen die dit apparaat gebruiken, worden hieronder weergegeven.",
+      "collecting_data": "Gegevens worden verzameld — nog {need} cycli voordat verfijning kan beginnen ({current}/{min}).",
+      "enough_data": "Voldoende gegevens om van te leren ({current}/{min} cycli).",
+      "filter_by_profile": "Filteren op profiel…",
+      "group_preview_hint": "Selecteer 2 of meer leden om hun vermogenscurven te bekijken en te vergelijken.",
+      "notify_services_hint": "Gebruik {entity}-service-ID's (kommagescheiden voor meerdere). Sjabloonvariabelen: {vars}.",
+      "process_history_hint": "Voer opnieuw matching uit op alle opgeslagen cycli, vernieuw afstemsugesties, train de ML-modellen opnieuw (indien ingeschakeld) en herbereken de cyclusgezondheid. Uitvoeren na een batch van beoordelingen."
     },
     "phase_desc": {
       "pre_wash": "Eerste inweken of voorbehandeling vóór de hoofdwas.",
@@ -790,7 +809,10 @@
     },
     "pref": {
       "date_absolute": "Absoluut (bijv. 14:32 op 2 juli)",
-      "date_relative": "Relatief (bijvoorbeeld 2 uur geleden)"
+      "date_relative": "Relatief (bijvoorbeeld 2 uur geleden)",
+      "lang_auto": "Systeemstandaard ({lang})",
+      "lang_en": "Engels",
+      "use_panel_default": "(standaard paneel)"
     },
     "quality": {
       "bad": "Slecht",
@@ -809,7 +831,8 @@
       "idle": "Inactief",
       "interrupted": "Onderbroken",
       "ready": "Klaar om te verwerken",
-      "recording": "Opnemen"
+      "recording": "Opnemen",
+      "training": "Trainen…"
     },
     "tab": {
       "advanced": "Geavanceerd",
@@ -1302,6 +1325,16 @@
         "label": "Controleer maximaal elke",
         "doc": "Controleer maximaal één keer per zoveel dagen opnieuw of er verbeteringen zijn."
       }
+    },
+    "placeholder": {
+      "add": "toevoegen…",
+      "group_name": "bijv. Katoen 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "voeg een meldingsservice toe…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "voeg een persoon toe…",
+      "phase_name": "bijv. Voorwas",
+      "profile_name": "bijv. Katoen 40°C"
     }
   }
 }

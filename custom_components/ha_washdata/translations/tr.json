@@ -633,7 +633,14 @@
       "artifact_interruption": "Kesinti",
       "artifact_low_power": "Düşük güç",
       "artifact_high_power": "Yüksek güç",
-      "artifact_anomaly": "Anomali"
+      "artifact_anomaly": "Anomali",
+      "auto_fine_tune_on": "otomatik ince ayar açık ({hour}:00 civarı)",
+      "cohesion_good": "uyum {pct}%",
+      "cohesion_low": "⚠ düşük uyum {pct}%",
+      "group_name": "Grup adı",
+      "members": "Üyeler",
+      "models_fine_tuned": "({count} model ince ayarlı)",
+      "panel_language": "Panel dili"
     },
     "modal": {
       "merge_cycles": "{n} Döngüyü Birleştir",
@@ -645,7 +652,12 @@
       "import_config": "Yapılandırmayı İçe Aktar",
       "label_cycle": "Döngüyü Etiketle",
       "new_phase": "Yeni Aşama",
-      "process_recording": "Kaydı İşle"
+      "process_recording": "Kaydı İşle",
+      "edit_group": "Profil grubunu düzenle",
+      "new_group": "Yeni profil grubu",
+      "process_history_title": "Geçmişi İşle",
+      "process_history_msg": "Tüm saklanan döngülerde eşleştirmeyi yeniden çalıştırın, önerileri yenileyin, ML'yi yeniden eğitin (etkinleştirilmişse) ve döngü sağlığını yeniden hesaplayın. Bu biraz zaman alabilir.",
+      "process_history_ok": "İşle"
     },
     "msg": {
       "near_duplicate_cluster": "neredeyse yinelenen profil kümesi algılandı. Gruplandırma, eşleştirmenin benzerler arasında güvenilir bir şekilde seçim yapmasına olanak tanır (örneğin, farklı sıcaklıkta/döndürmede aynı program).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "İncelenecek {n} döngü",
       "artifact_spike_detail": "Normal güç bandının üzerinde yaklaşık ~{n} saniye sürdü.",
       "artifact_dip_detail": "Normal güç bandının altında yaklaşık ~{n} saniye sürdü.",
-      "artifact_pause_detail": "Güç yaklaşık ~{n} saniye boyunca sıfıra yakın düştü, sonra devam etti — döngünün ortasında kapı açılmış veya döngü duraklatılmış olabilir."
+      "artifact_pause_detail": "Güç yaklaşık ~{n} saniye boyunca sıfıra yakın düştü, sonra devam etti — döngünün ortasında kapı açılmış veya döngü duraklatılmış olabilir.",
+      "automations_intro": "WashData, {start} / {end} olaylarını tetikler ve varlıkları gösterir; bu nedenle bildirimler ve eylemler en iyi şekilde normal Home Assistant otomasyonları olarak oluşturulur. Bu cihazı kullanan otomasyonlar aşağıda görünür.",
+      "collecting_data": "Veri toplanıyor — ince ayar başlamadan önce {need} döngü daha gerekiyor ({current}/{min}).",
+      "enough_data": "Öğrenmek için yeterli veri ({current}/{min} döngü).",
+      "filter_by_profile": "Profile göre filtrele…",
+      "group_preview_hint": "Güç eğrilerini önizlemek ve karşılaştırmak için 2 veya daha fazla üyeyi işaretleyin.",
+      "notify_services_hint": "{entity} hizmet kimliklerini kullanın (birden fazlası için virgülle ayrın). Şablon değişkenleri: {vars}.",
+      "process_history_hint": "Tüm saklanan döngülerde eşleştirmeyi yeniden çalıştırın, ayar önerilerini yenileyin, ML modellerini yeniden eğitin (etkinleştirilmişse) ve döngü sağlığını yeniden hesaplayın. Bir toplu incelemenin ardından çalıştırın."
     },
     "phase_desc": {
       "pre_wash": "Ana yıkamadan önce ilk ıslatma veya ön işlemden geçirin.",
@@ -786,7 +805,10 @@
     },
     "pref": {
       "date_absolute": "Mutlak (ör. 2 Tem 14:32)",
-      "date_relative": "Göreli (ör. 2 saat önce)"
+      "date_relative": "Göreli (ör. 2 saat önce)",
+      "lang_auto": "Sistem varsayılanı ({lang})",
+      "lang_en": "İngilizce",
+      "use_panel_default": "(panel varsayılanı)"
     },
     "quality": {
       "bad": "Kötü",
@@ -805,7 +827,8 @@
       "idle": "Boşta",
       "interrupted": "Kesintiye uğradı",
       "ready": "İşlemeye hazır",
-      "recording": "Kaydediliyor"
+      "recording": "Kaydediliyor",
+      "training": "Eğitiliyor…"
     },
     "tab": {
       "advanced": "Gelişmiş",
@@ -1302,6 +1325,16 @@
         "label": "En fazla her seferinde kontrol et",
         "doc": "Gelişmeleri en fazla bu kadar günde bir kez yeniden kontrol edin."
       }
+    },
+    "placeholder": {
+      "add": "ekle…",
+      "group_name": "örn. Pamuk 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "bir bildirim hizmeti ekle…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "bir kişi ekle…",
+      "phase_name": "örn. Ön yıkama",
+      "profile_name": "örn. Pamuk 40°C"
     }
   }
 }

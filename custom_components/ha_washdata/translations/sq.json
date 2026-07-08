@@ -633,7 +633,14 @@
       "artifact_interruption": "Ndërprerje",
       "artifact_low_power": "Fuqi e ulët",
       "artifact_high_power": "Fuqi e lartë",
-      "artifact_anomaly": "Anomali"
+      "artifact_anomaly": "Anomali",
+      "auto_fine_tune_on": "sintonizimi i imët automatik aktiv (rreth {hour}:00)",
+      "cohesion_good": "kohezion {pct}%",
+      "cohesion_low": "⚠ kohezion i ulët {pct}%",
+      "group_name": "Emri i grupit",
+      "members": "Anëtarë",
+      "models_fine_tuned": "({count} modele të sintonizuara)",
+      "panel_language": "Gjuha e panelit"
     },
     "modal": {
       "merge_cycles": "Bashko {n} cikle",
@@ -645,7 +652,12 @@
       "import_config": "Importo konfigurimin",
       "label_cycle": "Etiketoje ciklin",
       "new_phase": "Fazë e re",
-      "process_recording": "Proceso regjistrimin"
+      "process_recording": "Proceso regjistrimin",
+      "edit_group": "Modifiko grupin e profilit",
+      "new_group": "Grup i ri profilesh",
+      "process_history_title": "Proceso historinë",
+      "process_history_msg": "Riekzekutoni përputhjen, rifreskoni sugjerimet, stërvitni ML (nëse aktivizuara) dhe rillogaritni shëndetin e cikleve në të gjitha ciklet e ruajtura. Kjo mund të marrë pak kohë.",
+      "process_history_ok": "Proceso"
     },
     "msg": {
       "near_duplicate_cluster": "u zbulua grupi i profilit pothuajse dublikatë. Grupimi lejon që përputhja të zgjedhë në mënyrë të besueshme midis pamjeve të ngjashme (p.sh. i njëjti program në temperaturë/centrifugim të ndryshëm).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} cikle për rishikim",
       "artifact_spike_detail": "Shkoi mbi brezin e zakonshëm të fuqisë për ~{n} s.",
       "artifact_dip_detail": "Ra nën brezin e zakonshëm të fuqisë për ~{n} s.",
-      "artifact_pause_detail": "Fuqia ra pothuajse në zero për ~{n} s dhe u rikuperua — ndoshta dera u hap në mes të ciklit ose cikli u ndërpre."
+      "artifact_pause_detail": "Fuqia ra pothuajse në zero për ~{n} s dhe u rikuperua — ndoshta dera u hap në mes të ciklit ose cikli u ndërpre.",
+      "automations_intro": "WashData ndez ngjarje {start} / {end} dhe ekspozon entitete, kështu njoftimet dhe veprimet ndërtohen më mirë si automatizime normale të Home Assistant. Automatizimi që përdorin këtë pajisje shfaqen më poshtë.",
+      "collecting_data": "Duke mbledhur të dhëna — nevojiten edhe {need} cikle para se të fillojë sintonizimi i imët ({current}/{min}).",
+      "enough_data": "Të dhëna të mjaftueshme për të mësuar ({current}/{min} cikle).",
+      "filter_by_profile": "Filtro sipas profilit…",
+      "group_preview_hint": "Shënoni 2+ anëtarë për të parë dhe krahasuar kurbat e tyre të fuqisë.",
+      "notify_services_hint": "Përdorni ID-të e shërbimit {entity} (të ndara me presje për shumë). Variablat e shabllonit: {vars}.",
+      "process_history_hint": "Riekzekutoni përputhjen në të gjitha ciklet e ruajtura, rifreskoni sugjerimet e sintonizimit, stërvitni modelet ML (nëse janë aktivizuara) dhe rillogaritni shëndetin e cikleve. Ekzekutoni këtë pas një grupi rishikimesh."
     },
     "phase_desc": {
       "pre_wash": "Thithja fillestare ose trajtimi paraprak përpara larjes kryesore.",
@@ -786,7 +805,10 @@
     },
     "pref": {
       "date_absolute": "Absolute (p.sh. 14:32 më 2 Korrik)",
-      "date_relative": "Relative (p.sh. 2 orë më parë)"
+      "date_relative": "Relative (p.sh. 2 orë më parë)",
+      "lang_auto": "Parazgjedhja e sistemit ({lang})",
+      "lang_en": "Anglisht",
+      "use_panel_default": "(parazgjedhja e panelit)"
     },
     "quality": {
       "bad": "E keqe",
@@ -805,7 +827,8 @@
       "idle": "Joaktiv",
       "interrupted": "I ndërprerë",
       "ready": "Gati për procesim",
-      "recording": "Regjistrim"
+      "recording": "Regjistrim",
+      "training": "Duke stërvitut…"
     },
     "tab": {
       "advanced": "I avancuar",
@@ -1302,6 +1325,16 @@
         "label": "Kontrolloje më shumë çdo",
         "doc": "Ri-kontrolloni për përmirësime maksimumi një herë në kaq ditë."
       }
+    },
+    "placeholder": {
+      "add": "shto…",
+      "group_name": "p.sh. Pambuk 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "shto një shërbim njoftimi…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "shto një person…",
+      "phase_name": "p.sh. Paralandje",
+      "profile_name": "p.sh. Pambuk 40°C"
     }
   }
 }

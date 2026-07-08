@@ -528,7 +528,14 @@
       "artifact_interruption": "中断",
       "artifact_low_power": "低出力",
       "artifact_high_power": "高出力",
-      "artifact_anomaly": "異常"
+      "artifact_anomaly": "異常",
+      "auto_fine_tune_on": "自動微調整オン（{hour}:00 頃）",
+      "cohesion_good": "凝集度 {pct}%",
+      "cohesion_low": "⚠ 低凝集度 {pct}%",
+      "group_name": "グループ名",
+      "members": "メンバー",
+      "models_fine_tuned": "（{count}モデル微調整済み）",
+      "panel_language": "パネル言語"
     },
     "btn": {
       "add_timer": "+ タイマーを追加",
@@ -645,7 +652,12 @@
       "import_config": "設定のインポート",
       "label_cycle": "ラベルサイクル",
       "new_phase": "新しいフェーズ",
-      "process_recording": "プロセスの記録"
+      "process_recording": "プロセスの記録",
+      "edit_group": "プロファイルグループを編集",
+      "new_group": "新しいプロファイルグループ",
+      "process_history_title": "履歴の処理",
+      "process_history_msg": "マッチングを再実行し、提案を更新し、ML を再訓練（有効な場合）し、保存されているすべてのサイクルのサイクル状態を再計算します。これには時間がかかる場合があります。",
+      "process_history_ok": "処理"
     },
     "msg": {
       "near_duplicate_cluster": "ほぼ重複したプロファイル クラスターが検出されました。グループ化により、類似したもの (例: 異なる温度/スピンの同じプログラム) の間でマッチングを確実に選択できるようになります。",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "レビューが必要なサイクル: {n}件{s}",
       "artifact_spike_detail": "通常の電力帯の上側に約{n}秒間現れました。",
       "artifact_dip_detail": "通常の電力帯の下側に約{n}秒間落ちました。",
-      "artifact_pause_detail": "電力が約{n}秒間ほぼゼロに落ちた後、再開されました。サイクルの途中でドアが開かれたか、一時停止された可能性があります。"
+      "artifact_pause_detail": "電力が約{n}秒間ほぼゼロに落ちた後、再開されました。サイクルの途中でドアが開かれたか、一時停止された可能性があります。",
+      "automations_intro": "WashData は {start} / {end} イベントを発火しエンティティを公開するため、通知やアクションは通常の Home Assistant オートメーションとして構築するのが最適です。このデバイスを使用するオートメーションは以下に表示されます。",
+      "collecting_data": "データを収集中 — 微調整を開始するにはあと {need} サイクル必要です（{current}/{min}）。",
+      "enough_data": "学習に十分なデータがあります（{current}/{min} サイクル）。",
+      "filter_by_profile": "プロファイルでフィルター…",
+      "group_preview_hint": "2つ以上のメンバーを選択してパワーカーブをプレビュー・比較できます。",
+      "notify_services_hint": "{entity} サービス ID を使用してください（複数はカンマ区切り）。テンプレート変数：{vars}。",
+      "process_history_hint": "保存されているすべてのサイクルに対してマッチングを再実行し、チューニング提案を更新し、MLモデルを再訓練し（有効な場合）、サイクルの健全性を再計算します。一括レビュー後に実行してください。"
     },
     "phase_desc": {
       "pre_wash": "本洗浄前の最初の浸漬または前処理。",
@@ -790,7 +809,10 @@
     },
     "pref": {
       "date_absolute": "絶対 (例: 7 月 2 日 14:32)",
-      "date_relative": "相対的 (例: 2 時間前)"
+      "date_relative": "相対的 (例: 2 時間前)",
+      "lang_auto": "システムデフォルト（{lang}）",
+      "lang_en": "英語",
+      "use_panel_default": "（パネルデフォルト）"
     },
     "quality": {
       "bad": "悪い",
@@ -809,7 +831,8 @@
       "idle": "アイドル状態",
       "interrupted": "中断されました",
       "ready": "処理の準備ができました",
-      "recording": "録音中"
+      "recording": "録音中",
+      "training": "トレーニング中…"
     },
     "tab": {
       "advanced": "高度な",
@@ -1302,6 +1325,16 @@
         "label": "最大確認間隔",
         "doc": "改善点を再確認するのは、この日数に 1 回だけです。"
       }
+    },
+    "placeholder": {
+      "add": "追加…",
+      "group_name": "例：綿 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "通知サービスを追加…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "人を追加…",
+      "phase_name": "例：予洗い",
+      "profile_name": "例：綿 40°C"
     }
   }
 }

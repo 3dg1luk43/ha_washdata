@@ -612,7 +612,14 @@
       "artifact_interruption": "Interruzione",
       "artifact_low_power": "Bassa potenza",
       "artifact_high_power": "Alta potenza",
-      "artifact_anomaly": "Anomalia"
+      "artifact_anomaly": "Anomalia",
+      "auto_fine_tune_on": "ottimizzazione automatica attiva (intorno alle {hour}:00)",
+      "cohesion_good": "coesione {pct}%",
+      "cohesion_low": "⚠ coesione bassa {pct}%",
+      "group_name": "Nome del gruppo",
+      "members": "Membri",
+      "models_fine_tuned": "({count} modelli ottimizzati)",
+      "panel_language": "Lingua del pannello"
     },
     "badge": {
       "golden_cycle": "Ciclo di riferimento registrato",
@@ -645,7 +652,12 @@
       "import_config": "Importa configurazione",
       "label_cycle": "Ciclo delle etichette",
       "new_phase": "Nuova Fase",
-      "process_recording": "Registrazione del processo"
+      "process_recording": "Registrazione del processo",
+      "edit_group": "Modifica gruppo di profili",
+      "new_group": "Nuovo gruppo di profili",
+      "process_history_title": "Elabora storico",
+      "process_history_msg": "Riesegui il confronto, aggiorna i suggerimenti, riaddestra i modelli ML (se abilitati) e ricalcola lo stato di tutti i cicli memorizzati. Potrebbe richiedere del tempo.",
+      "process_history_ok": "Elabora"
     },
     "msg": {
       "near_duplicate_cluster": "rilevato cluster di profili quasi duplicati. Il raggruppamento consente all'abbinamento di scegliere in modo affidabile tra sosia (ad esempio lo stesso programma a temperatura/centrifuga diversa).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} ciclo{s} da revisionare",
       "artifact_spike_detail": "Ha superato la banda di potenza normale per ~{n}s.",
       "artifact_dip_detail": "È sceso sotto la banda di potenza normale per ~{n}s.",
-      "artifact_pause_detail": "La potenza è scesa quasi a zero per ~{n}s poi è ripresa — probabilmente la porta è stata aperta a metà ciclo o il ciclo è stato messo in pausa."
+      "artifact_pause_detail": "La potenza è scesa quasi a zero per ~{n}s poi è ripresa — probabilmente la porta è stata aperta a metà ciclo o il ciclo è stato messo in pausa.",
+      "automations_intro": "WashData genera gli eventi {start} / {end} ed espone entità, quindi le notifiche e le azioni si costruiscono al meglio come normali automatizzazioni di Home Assistant. Le automatizzazioni che utilizzano questo dispositivo appaiono di seguito.",
+      "collecting_data": "Raccolta dati - ancora {need} cicli prima che l'ottimizzazione possa iniziare ({current}/{min}).",
+      "enough_data": "Dati sufficienti per apprendere ({current}/{min} cicli).",
+      "filter_by_profile": "Filtra per profilo…",
+      "group_preview_hint": "Seleziona 2 o più membri per visualizzare in anteprima e confrontare le loro curve di potenza.",
+      "notify_services_hint": "Usa gli ID servizio {entity} (separati da virgole per più servizi). Variabili del modello: {vars}.",
+      "process_history_hint": "Riesegui il confronto su tutti i cicli memorizzati, aggiorna i suggerimenti di ottimizzazione, riaddestra i modelli ML (se abilitati) e ricalcola lo stato dei cicli. Da eseguire dopo una serie di revisioni."
     },
     "phase_desc": {
       "pre_wash": "Ammollo iniziale o pretrattamento prima del lavaggio principale.",
@@ -790,7 +809,10 @@
     },
     "pref": {
       "date_absolute": "Assoluto (es. 14:32 del 2 luglio)",
-      "date_relative": "Relativo (ad esempio 2 ore fa)"
+      "date_relative": "Relativo (ad esempio 2 ore fa)",
+      "lang_auto": "Lingua di sistema ({lang})",
+      "lang_en": "Inglese",
+      "use_panel_default": "(predefinito del pannello)"
     },
     "quality": {
       "bad": "Cattivo",
@@ -809,7 +831,8 @@
       "idle": "Inattivo",
       "interrupted": "Interrotto",
       "ready": "Pronto per l'elaborazione",
-      "recording": "Registrazione"
+      "recording": "Registrazione",
+      "training": "Addestramento…"
     },
     "tab": {
       "advanced": "Avanzato",
@@ -1302,6 +1325,16 @@
         "label": "Controlla al massimo ogni",
         "doc": "Ricontrolla i miglioramenti al massimo una volta ogni questi giorni."
       }
+    },
+    "placeholder": {
+      "add": "aggiungi…",
+      "group_name": "es. Cotone 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "aggiungi un servizio di notifica…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "aggiungi una persona…",
+      "phase_name": "es. Prelavaggio",
+      "profile_name": "es. Cotone 40°C"
     }
   }
 }

@@ -612,7 +612,14 @@
       "artifact_interruption": "Idirbhriseadh",
       "artifact_low_power": "Cumhacht íseal",
       "artifact_high_power": "Cumhacht ard",
-      "artifact_anomaly": "Neamhghnáthacht"
+      "artifact_anomaly": "Neamhghnáthacht",
+      "auto_fine_tune_on": "mion-tiúnadh uathoibríoch air (thart ar {hour}:00)",
+      "cohesion_good": "comhtháthú {pct}%",
+      "cohesion_low": "⚠ comhtháthú íseal {pct}%",
+      "group_name": "Ainm an ghrúpa",
+      "members": "Baill",
+      "models_fine_tuned": "({count} múnla mion-tiúnta)",
+      "panel_language": "Teanga an phainéil"
     },
     "badge": {
       "golden_cycle": "Timthriall tagartha taifeadta",
@@ -645,7 +652,12 @@
       "import_config": "Cumraíocht Iompórtála",
       "label_cycle": "Lipéadaigh Timthriall",
       "new_phase": "Céim Nua",
-      "process_recording": "Taifeadadh Próisis"
+      "process_recording": "Taifeadadh Próisis",
+      "edit_group": "Cuir grúpa próifíle in eagar",
+      "new_group": "Grúpa próifíle nua",
+      "process_history_title": "Stair a Phróiseáil",
+      "process_history_msg": "Ath-rith meaitseáil, athnuaigh moltaí, athtraenáil ML (más cumasaithe) agus athríomh sláinte timthrialla ar fud gach timthriall stóráilte. D'fhéadfadh sé seo tamall a thógáil.",
+      "process_history_ok": "Próiseáil"
     },
     "msg": {
       "near_duplicate_cluster": "braisle próifíl gar-dhúblach braite. Ligeann grúpáil do mheaitseáil roghnú go hiontaofa idir cuma chomhchosúil (m.sh. an clár céanna ag teocht/casadh difriúil).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} timthriall le hathbhreithniú",
       "artifact_spike_detail": "Chuaigh os cionn an bhanda cumhachta ngnáthaigh ar feadh ~{n} s.",
       "artifact_dip_detail": "Thit faoin mbanda cumhachta ngnáthaigh ar feadh ~{n} s.",
-      "artifact_pause_detail": "Thit an chumhacht go dtí beagnach nialas ar feadh ~{n} s ansin d'atosaigh — is dócha gur osclaíodh an doras i lár an timthrialla nó cuireadh an timthriall ar sos."
+      "artifact_pause_detail": "Thit an chumhacht go dtí beagnach nialas ar feadh ~{n} s ansin d'atosaigh — is dócha gur osclaíodh an doras i lár an timthrialla nó cuireadh an timthriall ar sos.",
+      "automations_intro": "Lasann WashData {start} / {end} imeachtaí agus nochtann sé eintitis, mar sin is fearr fógraí agus gníomhartha a thógáil mar uathoibríochtaí gnátha Home Assistant. Feictear thíos uathoibríochtaí a úsáideann an gléas seo.",
+      "collecting_data": "Ag bailiú sonraí — tá {need} timthriall eile de dhíth sula féidir mion-tiúnadh a thosú ({current}/{min}).",
+      "enough_data": "Sonraí go leor le foghlaim uaidh ({current}/{min} timthriall).",
+      "filter_by_profile": "Scag de réir próifíle…",
+      "group_preview_hint": "Tic 2+ baill chun a gcuar cumhachta a réamhamharc agus a chur i gcomparáid.",
+      "notify_services_hint": "Úsáid {entity} ID seirbhíse (camóg-scartha do iomadú). Athróga teimpléid: {vars}.",
+      "process_history_hint": "Ath-rith meaitseáil ar gach timthriall stóráilte, athnuaigh moltaí tiúnála, athtraenáil múnlaí ML (más cumasaithe) agus athríomh sláinte an timthrialla. Rith tar éis baisceanna athbhreithnithe."
     },
     "phase_desc": {
       "pre_wash": "Soak tosaigh nó réamhchóireáil roimh an príomh-nigh.",
@@ -790,7 +809,10 @@
     },
     "pref": {
       "date_absolute": "Absalóideach (m.sh. 14:32 ar 2 Iúil)",
-      "date_relative": "Gaol (m.sh. 2 uair ó shin)"
+      "date_relative": "Gaol (m.sh. 2 uair ó shin)",
+      "lang_auto": "Réamhshocrú an chórais ({lang})",
+      "lang_en": "Béarla",
+      "use_panel_default": "(réamhshocrú painéil)"
     },
     "quality": {
       "bad": "olc",
@@ -809,7 +831,8 @@
       "idle": "Díomhaoin",
       "interrupted": "Idirbhriste",
       "ready": "Réidh le próiseáil",
-      "recording": "Ag taifeadadh"
+      "recording": "Ag taifeadadh",
+      "training": "Ag traenáil…"
     },
     "tab": {
       "advanced": "Casta",
@@ -1302,6 +1325,16 @@
         "label": "Seiceáil Uair ar a mhéid gach",
         "doc": "Déan seiceáil arís le haghaidh feabhsuithe uair amháin ar a mhéad in aghaidh na laethanta seo."
       }
+    },
+    "placeholder": {
+      "add": "cuir leis…",
+      "group_name": "m.sh. Cadás 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "cuir seirbhís fógra leis…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "cuir duine leis…",
+      "phase_name": "m.sh. Réamhní",
+      "profile_name": "m.sh. Cadás 40°C"
     }
   }
 }

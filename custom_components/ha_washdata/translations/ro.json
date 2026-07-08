@@ -633,7 +633,14 @@
       "artifact_interruption": "Întrerupere",
       "artifact_low_power": "Putere scăzută",
       "artifact_high_power": "Putere ridicată",
-      "artifact_anomaly": "Anomalie"
+      "artifact_anomaly": "Anomalie",
+      "auto_fine_tune_on": "reglaj fin automat activat (în jurul orei {hour}:00)",
+      "cohesion_good": "coeziune {pct}%",
+      "cohesion_low": "⚠ coeziune scăzută {pct}%",
+      "group_name": "Numele grupului",
+      "members": "Membri",
+      "models_fine_tuned": "({count} modele reglate fin)",
+      "panel_language": "Limba panoului"
     },
     "modal": {
       "merge_cycles": "Îmbinați {n} cicluri",
@@ -645,7 +652,12 @@
       "import_config": "Importați configurația",
       "label_cycle": "Etichetați ciclul",
       "new_phase": "Fază nouă",
-      "process_recording": "Procesați înregistrarea"
+      "process_recording": "Procesați înregistrarea",
+      "edit_group": "Editează grupul de profiluri",
+      "new_group": "Grup de profiluri nou",
+      "process_history_title": "Procesare Istoric",
+      "process_history_msg": "Reexecutați potrivirea, actualizați sugestiile, reantrenați ML (dacă este activat) și recalculați starea ciclurilor pentru toate ciclurile stocate. Acest lucru poate dura ceva timp.",
+      "process_history_ok": "Procesare"
     },
     "msg": {
       "near_duplicate_cluster": "cluster de profiluri aproape duplicate detectat. Gruparea permite potrivirii să aleagă în mod fiabil între profiluri similare (de exemplu, același program la temperaturi/viteze de centrifugare diferite).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} ciclu{s} de revizuit",
       "artifact_spike_detail": "A depășit banda de putere obișnuită timp de ~{n}s.",
       "artifact_dip_detail": "A scăzut sub banda de putere obișnuită timp de ~{n}s.",
-      "artifact_pause_detail": "Puterea a scăzut aproape la zero timp de ~{n}s, apoi a revenit — probabil ușa a fost deschisă în mijlocul ciclului sau ciclul a fost întrerupt."
+      "artifact_pause_detail": "Puterea a scăzut aproape la zero timp de ~{n}s, apoi a revenit — probabil ușa a fost deschisă în mijlocul ciclului sau ciclul a fost întrerupt.",
+      "automations_intro": "WashData declanșează evenimente {start} / {end} și expune entități, astfel că notificările și acțiunile sunt cel mai bine construite ca automatizări normale Home Assistant. Automatizările care utilizează acest dispozitiv apar mai jos.",
+      "collecting_data": "Se colectează date — mai sunt necesare {need} cicluri înainte ca reglajul fin să poată începe ({current}/{min}).",
+      "enough_data": "Date suficiente pentru a învăța ({current}/{min} cicluri).",
+      "filter_by_profile": "Filtrează după profil…",
+      "group_preview_hint": "Bifați 2 sau mai mulți membri pentru a previzualiza și compara curbele lor de putere.",
+      "notify_services_hint": "Utilizați ID-urile de serviciu {entity} (separate prin virgulă pentru mai multe). Variabile șablon: {vars}.",
+      "process_history_hint": "Reexecutați potrivirea pe toate ciclurile stocate, actualizați sugestiile de reglaj, reantrenați modelele ML (dacă sunt activate) și recalculați starea ciclurilor. Rulați după un lot de recenzii."
     },
     "phase_desc": {
       "pre_wash": "Înmuiere inițială sau pre-tratament înainte de spălarea principală.",
@@ -786,7 +805,10 @@
     },
     "pref": {
       "date_absolute": "Absolut (ex.: 14:32 pe 2 iul.)",
-      "date_relative": "Relativ (ex.: acum 2 ore)"
+      "date_relative": "Relativ (ex.: acum 2 ore)",
+      "lang_auto": "Implicit sistem ({lang})",
+      "lang_en": "Engleză",
+      "use_panel_default": "(implicit panou)"
     },
     "quality": {
       "bad": "Rău",
@@ -805,7 +827,8 @@
       "idle": "Inactiv",
       "interrupted": "Întrerupt",
       "ready": "Gata de procesare",
-      "recording": "Înregistrare"
+      "recording": "Înregistrare",
+      "training": "Se antrenează…"
     },
     "tab": {
       "advanced": "Avansat",
@@ -1302,6 +1325,16 @@
         "label": "Verificați cel mult la fiecare",
         "doc": "Verificați din nou pentru îmbunătățiri cel mult o dată la atâtea zile."
       }
+    },
+    "placeholder": {
+      "add": "adaugă…",
+      "group_name": "ex. Bumbac 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "adaugă un serviciu de notificare…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "adaugă o persoană…",
+      "phase_name": "ex. Preclătire",
+      "profile_name": "ex. Bumbac 40°C"
     }
   }
 }

@@ -612,7 +612,14 @@
       "artifact_interruption": "Unterbrechung",
       "artifact_low_power": "Niedrige Leistung",
       "artifact_high_power": "Hohe Leistung",
-      "artifact_anomaly": "Anomalie"
+      "artifact_anomaly": "Anomalie",
+      "auto_fine_tune_on": "automatische Feinabstimmung an (gegen {hour}:00)",
+      "cohesion_good": "Kohäsion {pct}%",
+      "cohesion_low": "⚠ niedrige Kohäsion {pct}%",
+      "group_name": "Gruppenname",
+      "members": "Mitglieder",
+      "models_fine_tuned": "({count} Modelle verfeinert)",
+      "panel_language": "Panelsprache"
     },
     "badge": {
       "golden_cycle": "Aufgezeichneter Referenzzyklus",
@@ -645,7 +652,12 @@
       "import_config": "Konfiguration importieren",
       "label_cycle": "Etikettenzyklus",
       "new_phase": "Neue Phase",
-      "process_recording": "Prozessaufzeichnung"
+      "process_recording": "Prozessaufzeichnung",
+      "edit_group": "Profilgruppe bearbeiten",
+      "new_group": "Neue Profilgruppe",
+      "process_history_title": "Verlauf verarbeiten",
+      "process_history_msg": "Abgleich neu ausführen, Vorschläge aktualisieren, ML erneut trainieren (falls aktiviert) und Zyklusgesundheit für alle gespeicherten Zyklen neu berechnen. Dies kann eine Weile dauern.",
+      "process_history_ok": "Verarbeiten"
     },
     "msg": {
       "near_duplicate_cluster": "Beinahe doppelter Profilcluster erkannt. Durch die Gruppierung kann beim Matching zuverlässig zwischen Doppelgängern ausgewählt werden (z. B. dasselbe Programm bei unterschiedlicher Temperatur/Schleuder).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} Zyklus{s} zur Überprüfung",
       "artifact_spike_detail": "Lag ~{n}s über dem üblichen Leistungsband.",
       "artifact_dip_detail": "Lag ~{n}s unter dem üblichen Leistungsband.",
-      "artifact_pause_detail": "Die Leistung fiel ~{n}s auf nahezu null und nahm dann wieder zu — wahrscheinlich wurde die Tür mitten im Zyklus geöffnet oder der Zyklus wurde unterbrochen."
+      "artifact_pause_detail": "Die Leistung fiel ~{n}s auf nahezu null und nahm dann wieder zu — wahrscheinlich wurde die Tür mitten im Zyklus geöffnet oder der Zyklus wurde unterbrochen.",
+      "automations_intro": "WashData löst {start} / {end} Ereignisse aus und stellt Entitäten bereit, sodass Benachrichtigungen und Aktionen am besten als normale Home Assistant Automationen erstellt werden. Automationen, die dieses Gerät verwenden, werden unten angezeigt.",
+      "collecting_data": "Daten sammeln — noch {need} Zyklen, bevor die Feinabstimmung starten kann ({current}/{min}).",
+      "enough_data": "Genug Daten zum Lernen ({current}/{min} Zyklen).",
+      "filter_by_profile": "Nach Profil filtern…",
+      "group_preview_hint": "2 oder mehr Mitglieder auswählen, um ihre Leistungskurven in der Vorschau anzuzeigen und zu vergleichen.",
+      "notify_services_hint": "Verwenden Sie {entity} Service-IDs (kommagetrennt für mehrere). Template-Variablen: {vars}.",
+      "process_history_hint": "Abgleich für alle gespeicherten Zyklen neu ausführen, Abstimmungsvorschläge aktualisieren, ML-Modelle erneut trainieren (falls aktiviert) und Zyklusgesundheit neu berechnen. Nach einer Gruppe von Überprüfungen ausführen."
     },
     "phase_desc": {
       "pre_wash": "Erstes Einweichen oder Vorbehandeln vor dem Hauptwaschgang.",
@@ -805,7 +824,10 @@
     },
     "pref": {
       "date_absolute": "Absolut (z. B. 14:32 Uhr am 2. Juli)",
-      "date_relative": "Relativ (z. B. vor 2 Stunden)"
+      "date_relative": "Relativ (z. B. vor 2 Stunden)",
+      "lang_auto": "Systemstandard ({lang})",
+      "lang_en": "Englisch",
+      "use_panel_default": "(Panel-Standard)"
     },
     "quality": {
       "bad": "Schlecht",
@@ -824,7 +846,8 @@
       "idle": "Leerlauf",
       "interrupted": "Unterbrochen",
       "ready": "Bereit zur Verarbeitung",
-      "recording": "Aufnehmen"
+      "recording": "Aufnehmen",
+      "training": "Training…"
     },
     "tag": {
       "early_end": "Frühes Ende",
@@ -1302,6 +1325,16 @@
         "label": "Höchstens alle prüfen",
         "doc": "Überprüfen Sie alle diese Tage höchstens einmal erneut, ob sich Verbesserungen ergeben."
       }
+    },
+    "placeholder": {
+      "add": "hinzufügen…",
+      "group_name": "z. B. Baumwoll 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "einen Benachrichtigungsdienst hinzufügen…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "eine Person hinzufügen…",
+      "phase_name": "z. B. Vorwäsch",
+      "profile_name": "z. B. Baumwoll 40°C"
     }
   }
 }

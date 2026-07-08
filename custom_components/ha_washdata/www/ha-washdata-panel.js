@@ -772,7 +772,7 @@ function _field(f, value, extra) {
   } else if (f.type === 'json') {
     // Structured value (list/object) edited as JSON text; round-trips on save.
     const jt = (v === '' || v == null) ? '' : (typeof v === 'string' ? v : JSON.stringify(v, null, 2));
-    input = `<textarea data-opt="${key}" data-ftype="json" rows="3" placeholder='[{"action":"ID","title":"Label"}]'>${_esc(jt)}</textarea>`;
+    input = `<textarea data-opt="${key}" data-ftype="json" rows="3" placeholder='${_esc(extra.t('placeholder.json_buttons', {}, '[{"action":"ID","title":"Label"}]'))}'>${_esc(jt)}</textarea>`;
   } else if (f.type === 'entitylist') {
     // Chip/pill multi-picker: existing values as removable pills + a combobox
     // add-input. Managed by DOM (no re-render) and collected on save.
@@ -780,7 +780,7 @@ function _field(f, value, extra) {
     const pills = vals.map(x => `<span class="wd-pill" data-val="${_esc(x)}">${_esc(x)}<button type="button" class="wd-pill-x" aria-label="Remove">×</button></span>`).join('');
     input = `<div class="wd-pillbox" data-opt="${key}" data-ftype="entitylist">${pills}` +
       `<div class="wd-combo wd-combo-pill">` +
-      `<input type="text" class="wd-pill-add" autocomplete="off" spellcheck="false" placeholder="${_esc(f.placeholder || 'add…')}">` +
+      `<input type="text" class="wd-pill-add" autocomplete="off" spellcheck="false" placeholder="${_esc(extra.t('placeholder.' + (f.domain || 'add'), {}, f.placeholder || 'add…'))}">` +
       `<div class="wd-combo-drop" hidden></div>` +
       `</div></div>`;
   } else if (f.type === 'timerlist') {
@@ -816,7 +816,7 @@ function _field(f, value, extra) {
       `</div>`;
   } else if (f.type === 'list') {
     const joined = Array.isArray(v) ? v.join(', ') : _esc(v);
-    input = `<input type="text" data-opt="${key}" data-ftype="list" value="${_esc(joined)}" placeholder="notify.mobile_app_phone, ...">`;
+    input = `<input type="text" data-opt="${key}" data-ftype="list" value="${_esc(joined)}" placeholder="${_esc(extra.t('placeholder.notify_services_list', {}, 'notify.mobile_app_phone, ...'))}">` ;
   } else {
     const t = f.type === 'number' ? 'number' : 'text';
     const dl = extra.datalistId ? ` list="${extra.datalistId}"` : '';
@@ -1562,7 +1562,8 @@ class HaWashdataPanel extends HTMLElement {
 
   _t(key, vars = {}, fallback = '') {
     let s;
-    const lang = this._hass && this._hass.locale && this._hass.locale.language;
+    const langOverride = this._panelCfg && this._panelCfg.prefs && this._panelCfg.prefs.lang_override;
+    const lang = langOverride || (this._hass && this._hass.locale && this._hass.locale.language);
     if (this._panelTrans) {
       // Explicit user-language lookup: user pref → en → JS fallback
       s = (lang && this._tLookup(key, lang)) || this._tLookup(key, 'en') || fallback;
@@ -2064,7 +2065,7 @@ class HaWashdataPanel extends HTMLElement {
     </tr></thead>`;
 
     const filterBar = `<div class="wd-filter-bar">
-      <input type="text" class="wd-filter-input" id="wd-cyc-filter-text" placeholder="Filter by profile…" value="${_esc(text)}" autocomplete="off">
+      <input type="text" class="wd-filter-input" id="wd-cyc-filter-text" placeholder="${_esc(this._t('msg.filter_by_profile', {}, 'Filter by profile…'))}" value="${_esc(text)}" autocomplete="off">
       <select id="wd-cyc-filter-status" class="wd-filter-select">
         <option value="" ${!fStatus ? 'selected' : ''}>${this._t('status.all_statuses', {}, 'All statuses')}</option>
         <option value="needs_review" ${fStatus === 'needs_review' ? 'selected' : ''}>${this._t('badge.needs_review', {}, 'Needs review')}${needsReviewCount ? ` (${needsReviewCount})` : ''}</option>
@@ -2186,8 +2187,8 @@ class HaWashdataPanel extends HTMLElement {
       const memCards = (g.members || []).map(m => byName[m] ? this._profileCardHtml(byName[m]) : '').join('');
       const cohPct = Math.round((g.cohesion != null ? g.cohesion : 1) * 100);
       const cohBadge = g.cohesive
-        ? `<span class="wd-badge" style="color:var(--success-color,#4caf50);background:rgba(76,175,80,.14);margin-bottom:0">cohesion ${cohPct}%</span>`
-        : `<span class="wd-badge" style="color:var(--warning-color,#ff9800);background:rgba(255,152,0,.14);margin-bottom:0">⚠ low cohesion ${cohPct}%</span>`;
+        ? `<span class="wd-badge" style="color:var(--success-color,#4caf50);background:rgba(76,175,80,.14);margin-bottom:0">${this._t('lbl.cohesion_good', {pct: cohPct}, 'cohesion ' + cohPct + '%')}</span>`
+        : `<span class="wd-badge" style="color:var(--warning-color,#ff9800);background:rgba(255,152,0,.14);margin-bottom:0">${this._t('lbl.cohesion_low', {pct: cohPct}, '⚠ low cohesion ' + cohPct + '%')}</span>`;
       const warn = g.cohesive ? '' : `<p class="wd-info" style="margin:0 0 8px;color:var(--warning-color,#ff9800)">${this._t('msg.group_not_cohesive', {}, "These profiles aren't similar enough to group reliably, so matching treats them individually until you remove the outlier or split the group.")}</p>`;
       const titleEl = canEdit
         ? `<button class="wd-btn-link" style="font-size:1.05em;font-weight:600;text-align:left;padding:0;border:none;background:none;cursor:pointer;color:inherit" data-action="pg-edit" data-gname="${_esc(g.name)}">🔗 ${_esc(g.name)}</button>`
@@ -2256,17 +2257,17 @@ class HaWashdataPanel extends HTMLElement {
     const legend = drawable.length ? `<div class="wd-leg">${drawable.map(n => `<span class="wd-leg-i"><span class="wd-leg-sw" style="background:${colOf(n)}"></span> ${_esc(n)}</span>`).join('')}</div>` : '';
     const canvas = drawable.length
       ? `<div class="wd-canvas-wrap" style="margin-top:8px"><canvas id="wd-pg-canvas" style="height:150px"></canvas></div>${legend}`
-      : `<p class="wd-info">Tick 2+ members to preview and compare their power curves.</p>`;
+      : `<p class="wd-info">${this._t('msg.group_preview_hint', {}, 'Tick 2+ members to preview and compare their power curves.')}</p>`;
 
     // Cohesion of the stored group (recomputed on save), if editing one.
     const stored = ((this._profileGroups || {}).groups || []).find(g => g.name === m.orig);
     const cohInfo = (stored && stored.cohesion != null)
-      ? `<span class="wd-badge" style="color:${stored.cohesive ? 'var(--success-color,#4caf50)' : 'var(--warning-color,#ff9800)'};background:${stored.cohesive ? 'rgba(76,175,80,.14)' : 'rgba(255,152,0,.14)'}">${stored.cohesive ? '' : '⚠ '}cohesion ${Math.round(stored.cohesion * 100)}%</span>` : '';
+      ? `<span class="wd-badge" style="color:${stored.cohesive ? 'var(--success-color,#4caf50)' : 'var(--warning-color,#ff9800)'};background:${stored.cohesive ? 'rgba(76,175,80,.14)' : 'rgba(255,152,0,.14)'}">${stored.cohesive ? this._t('lbl.cohesion_good', {pct: Math.round(stored.cohesion * 100)}, 'cohesion ' + Math.round(stored.cohesion * 100) + '%') : this._t('lbl.cohesion_low', {pct: Math.round(stored.cohesion * 100)}, '⚠ low cohesion ' + Math.round(stored.cohesion * 100) + '%')}</span>` : '';
 
-    return `<h2>${m.orig ? 'Edit profile group' : 'New profile group'}</h2>
-      <div class="wd-field" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><label style="margin:0">Group name</label><input type="text" id="wd-pg-name" value="${_esc(m.name || '')}" placeholder="e.g. Cotton 2:47" style="flex:1;min-width:180px">${cohInfo}</div>
+    return `<h2>${m.orig ? this._t('modal.edit_group', {}, 'Edit profile group') : this._t('modal.new_group', {}, 'New profile group')}</h2>
+      <div class="wd-field" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><label style="margin:0">${this._t('lbl.group_name', {}, 'Group name')}</label><input type="text" id="wd-pg-name" value="${_esc(m.name || '')}" placeholder="${_esc(this._t('placeholder.group_name', {}, 'e.g. Cotton 2:47'))}" style="flex:1;min-width:180px">${cohInfo}</div>
       ${canvas}
-      <div class="wd-rev-sub">Members ${members.length ? `(${members.length})` : ''}</div>
+      <div class="wd-rev-sub">${this._t('lbl.members', {}, 'Members')}${members.length ? ` (${members.length})` : ''}</div>
       <div class="wd-rev-tags">${checks || `<span class="wd-info">${this._t('msg.no_profiles_yet_short', {}, 'No profiles yet.')}</span>`}</div>
       <p class="wd-info" style="margin-top:10px">${this._t('msg.group_modal_help', {}, 'Group programs with the same shape that differ in temperature/spin (durations may vary). Matching scores the group as one candidate, then picks the best-fitting member. Pick at least 2; the overlay shows how alike they are.')}</p>
       <div class="wd-modal-actions">
@@ -2672,14 +2673,14 @@ class HaWashdataPanel extends HTMLElement {
   _htmlMlStatusSection(st, eid) {
     const running = (eid && this._busy.has('ml-train-now:' + eid)) || (st && st.running);
     const trainBtn = this._canEdit()
-      ? `<button class="wd-btn wd-btn-primary wd-btn-sm" data-action="ml-train-now" ${running ? 'disabled' : ''}>${running ? '<span class="wd-spin"></span> Training…' : this._t('btn.train_now', {}, 'Train now')}</button>`
+      ? `<button class="wd-btn wd-btn-primary wd-btn-sm" data-action="ml-train-now" ${running ? 'disabled' : ''}>${running ? `<span class="wd-spin"></span> ${this._t('status.training', {}, 'Training…')}` : this._t('btn.train_now', {}, 'Train now')}</button>`
       : '';
     if (!st) {
       return `<div class="wd-card"><div class="wd-card-title" style="margin:0 0 4px">${this._t('hdr.status', {}, 'Status')}</div><p class="wd-info" style="margin:0">${this._t('msg.loading', {}, 'Loading…')}</p></div>`;
     }
     const nModels = Object.keys(st.on_device_models || {}).length;
     const source = nModels
-      ? `<span style="color:var(--success-color,#4caf50);font-weight:600">${this._t('ml.personalized', {}, '● Personalized to this machine')}</span> <span style="color:var(--secondary-text-color)">(${nModels} model${nModels > 1 ? 's' : ''} fine-tuned)</span>`
+      ? `<span style="color:var(--success-color,#4caf50);font-weight:600">${this._t('ml.personalized', {}, '● Personalized to this machine')}</span> <span style="color:var(--secondary-text-color)">${this._t('lbl.models_fine_tuned', {count: nModels, plural: nModels > 1 ? 's' : ''}, '(' + nModels + ' model' + (nModels > 1 ? 's' : '') + ' fine-tuned)')}</span>`
       : `<span style="color:var(--secondary-text-color)">${this._t('ml.builtin_models', {}, '● Using built-in models')}</span>`;
     const cyc = st.cycle_count || 0, min = st.min_cycles || 0;
     const enough = cyc >= min;
@@ -2879,7 +2880,7 @@ class HaWashdataPanel extends HTMLElement {
       ${this._canFull() ? `<div class="wd-card">
         <div class="wd-card-title">${this._t('hdr.maintenance', {}, 'Maintenance Actions')}</div>
         <div style="display:flex;flex-direction:column;gap:12px">
-          <div><strong>${this._t('hdr.process_history', {}, 'Process History')}</strong><p class="wd-info" style="margin:4px 0">Re-run matching on all stored cycles, refresh tuning suggestions, retrain the ML models (if enabled), and recompute cycle health. Run this after a batch of reviews.</p>
+          <div><strong>${this._t('hdr.process_history', {}, 'Process History')}</strong><p class="wd-info" style="margin:4px 0">${this._t('msg.process_history_hint', {}, 'Re-run matching on all stored cycles, refresh tuning suggestions, retrain the ML models (if enabled), and recompute cycle health. Run this after a batch of reviews.')}</p>
             <button class="wd-btn wd-btn-secondary" data-action="reprocess-history">${this._t('btn.process_history', {}, 'Process Now')}</button></div>
           <div><strong>${this._t('hdr.clear_debug', {}, 'Clear Debug Traces')}</strong><p class="wd-info" style="margin:4px 0">${this._t('msg.clear_debug_hint', {}, 'Remove stored debug data to free space.')}</p>
             <button class="wd-btn wd-btn-secondary" data-action="clear-debug">${this._t('btn.clear_debug', {}, 'Clear Debug Data')}</button></div>
@@ -2930,10 +2931,22 @@ class HaWashdataPanel extends HTMLElement {
 
   _htmlPanelPrefs() {
     const cur = (this._panelCfg && this._panelCfg.prefs) || {};
-    const tabsAll = [['', '(use panel default)'], ['status', 'Overview'], ['history', 'Cycles'], ['profiles', 'Profiles'], ['settings', 'Settings']];
-    const opts = tabsAll.map(([v, l]) => `<option value="${v}" ${(cur.default_tab || '') === v ? 'selected' : ''}>${l}</option>`).join('');
+    const sysLang = (this._hass && this._hass.locale && this._hass.locale.language) || 'en';
+    const tabsAll = [
+      ['', this._t('pref.use_panel_default', {}, '(panel default)')],
+      ['status', this._t('tab.status', {}, 'Overview')],
+      ['history', this._t('tab.history', {}, 'Cycles')],
+      ['profiles', this._t('tab.profiles', {}, 'Profiles')],
+      ['settings', this._t('tab.settings', {}, 'Settings')],
+    ];
+    const opts = tabsAll.map(([v, l]) => `<option value="${v}" ${(cur.default_tab || '') === v ? 'selected' : ''}>${_esc(l)}</option>`).join('');
     const dateOpts = [['relative', this._t('pref.date_relative', {}, 'Relative (e.g. 2 hours ago)')], ['absolute', this._t('pref.date_absolute', {}, 'Absolute (e.g. 14:32 on 2 Jul)')]];
-    const dateOptHtml = dateOpts.map(([v, l]) => `<option value="${v}" ${(cur.date_format || 'relative') === v ? 'selected' : ''}>${l}</option>`).join('');
+    const dateOptHtml = dateOpts.map(([v, l]) => `<option value="${v}" ${(cur.date_format || 'relative') === v ? 'selected' : ''}>${_esc(l)}</option>`).join('');
+    const langOverride = cur.lang_override || '';
+    const langOpts = [
+      ['', this._t('pref.lang_auto', {lang: sysLang.toUpperCase()}, 'System default (' + sysLang.toUpperCase() + ')')],
+      ['en', this._t('pref.lang_en', {}, 'English')],
+    ].map(([v, l]) => `<option value="${v}" ${langOverride === v ? 'selected' : ''}>${_esc(l)}</option>`).join('');
     return `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.my_preferences', {}, 'My Preferences')}</div>
       <p class="wd-info" style="margin-bottom:12px">${this._t('msg.prefs_personal', {}, 'These apply to your Home Assistant account only.')}</p>
@@ -2941,6 +2954,7 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-form-grid">
         <div class="wd-field"><label>${this._t('lbl.default_tab', {}, 'Default tab when opening the panel')}</label><select id="wd-pref-tab">${opts}</select></div>
         <div class="wd-field"><label>${this._t('lbl.cycle_date_display', {}, 'Cycle date display')}</label><select id="wd-pref-datefmt">${dateOptHtml}</select></div>
+        <div class="wd-field"><label>${this._t('lbl.panel_language', {}, 'Panel language')}</label><select id="wd-pref-lang">${langOpts}</select></div>
       </div>
       <div class="wd-subhead">${this._t('hdr.status_graph', {}, 'Status Graph')}</div>
       <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-expected" ${(cur.show_expected !== false) ? 'checked' : ''}> ${this._t('lbl.show_expected', {}, 'Show expected curve overlay (matched profile, orange)')}</label></div>
@@ -2953,11 +2967,16 @@ class HaWashdataPanel extends HTMLElement {
 
   _htmlPanelSettings() {
     const p = (this._panelCfg && this._panelCfg.panel) || {};
-    const tabOpts = [['status', 'Overview'], ['history', 'Cycles'], ['profiles', 'Profiles'], ['settings', 'Settings']];
-    const dtOpts = tabOpts.map(([v, l]) => `<option value="${v}" ${(p.default_tab || 'status') === v ? 'selected' : ''}>${l}</option>`).join('');
+    const tabOpts = [
+      ['status', this._t('tab.status', {}, 'Overview')],
+      ['history', this._t('tab.history', {}, 'Cycles')],
+      ['profiles', this._t('tab.profiles', {}, 'Profiles')],
+      ['settings', this._t('tab.settings', {}, 'Settings')],
+    ];
+    const dtOpts = tabOpts.map(([v, l]) => `<option value="${v}" ${(p.default_tab || 'status') === v ? 'selected' : ''}>${_esc(l)}</option>`).join('');
     const hidden = p.hidden_tabs || [];
-    const hideChecks = [['history', 'Cycles'], ['profiles', 'Profiles'], ['settings', 'Settings']]
-      .map(([v, l]) => `<label class="wd-check-row" style="margin-right:14px;display:inline-flex"><input type="checkbox" data-hidetab="${v}" ${hidden.includes(v) ? 'checked' : ''}> ${l}</label>`).join('');
+    const hideChecks = tabOpts.filter(([v]) => v !== 'status')
+      .map(([v, l]) => `<label class="wd-check-row" style="margin-right:14px;display:inline-flex"><input type="checkbox" data-hidetab="${v}" ${hidden.includes(v) ? 'checked' : ''}> ${_esc(l)}</label>`).join('');
     return `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.panel_settings', {}, 'Panel Settings (all users)')}</div>
       <div class="wd-form-grid">
@@ -3387,21 +3406,21 @@ class HaWashdataPanel extends HTMLElement {
       body = `<h2>${this._t('modal.label_cycle', {}, 'Label Cycle')}</h2>
         <div class="wd-field"><label>${this._t('lbl.select_profile', {}, 'Select Profile')}</label>
           <select id="wd-label-profile"><option value="">${this._t('lbl.remove_label', {}, '- Remove label -')}</option><option value="__create_new__">${this._t('lbl.create_new_profile', {}, '+ Create new profile…')}</option>${this._profileOptions()}</select></div>
-        <div id="wd-new-profile-row" class="wd-field" style="display:none"><label>${this._t('lbl.new_profile_name', {}, 'New Profile Name')}</label><input type="text" id="wd-new-profile-name" placeholder="e.g. Cotton 40°C"></div>
+        <div id="wd-new-profile-row" class="wd-field" style="display:none"><label>${this._t('lbl.new_profile_name', {}, 'New Profile Name')}</label><input type="text" id="wd-new-profile-name" placeholder="${_esc(this._t('placeholder.profile_name', {}, 'e.g. Cotton 40°C'))}"></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="label-ok">${this._t('btn.apply_label', {}, 'Apply Label')}</button></div>`;
     } else if (m.type === 'create-profile') {
       const cycleOpts = (this._cycles || []).slice(0, 40).map(c =>
         `<option value="${_esc(c.id)}">${_fmtDate(c.start_time)} - ${Math.round((c.duration || 0) / 60)}m - ${_esc(c.profile_name || 'Unlabelled')}</option>`).join('');
       body = `<h2>${this._t('modal.create_profile', {}, 'Create Profile')}</h2>
-        <div class="wd-field"><label>${this._t('lbl.profile_name', {}, 'Profile Name')}</label><input type="text" id="wd-cp-name" placeholder="e.g. Cotton 40°C"></div>
+        <div class="wd-field"><label>${this._t('lbl.profile_name', {}, 'Profile Name')}</label><input type="text" id="wd-cp-name" placeholder="${_esc(this._t('placeholder.profile_name', {}, 'e.g. Cotton 40°C'))}"></div>
         <div class="wd-field"><label>${this._t('lbl.ref_cycle', {}, 'Reference Cycle (optional)')}</label><select id="wd-cp-cycle"><option value="">None</option>${cycleOpts}</select></div>
         <div class="wd-field"><label>${this._t('lbl.manual_duration', {}, 'Manual Duration (min, optional)')}</label><input type="number" id="wd-cp-dur" min="0" max="600" value="0"></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="create-profile-ok">${this._t('btn.create', {}, 'Create')}</button></div>`;
     } else if (m.type === 'create-phase') {
       body = `<h2>${this._t('modal.new_phase', {}, 'New Phase')}</h2>
-        <div class="wd-field"><label>${this._t('lbl.phase_name', {}, 'Phase Name')}</label><input type="text" id="wd-ph-name" placeholder="e.g. Pre-wash"></div>
+        <div class="wd-field"><label>${this._t('lbl.phase_name', {}, 'Phase Name')}</label><input type="text" id="wd-ph-name" placeholder="${_esc(this._t('placeholder.phase_name', {}, 'e.g. Pre-wash'))}"></div>
         <div class="wd-field"><label>${this._t('lbl.description', {}, 'Description')}</label><textarea id="wd-ph-desc" rows="3"></textarea></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="create-phase-ok">${this._t('btn.create', {}, 'Create')}</button></div>`;
@@ -3416,7 +3435,7 @@ class HaWashdataPanel extends HTMLElement {
     } else if (m.type === 'process-recording') {
       body = `<h2>${this._t('modal.process_recording', {}, 'Process Recording')}</h2>
         <div class="wd-field"><label>${this._t('lbl.save_mode', {}, 'Save Mode')}</label><select id="wd-pr-mode"><option value="new_profile">${this._t('lbl.mode_new_profile', {}, 'Create New Profile')}</option><option value="existing_profile">${this._t('lbl.mode_existing_profile', {}, 'Add to Existing Profile')}</option></select></div>
-        <div class="wd-field"><label>${this._t('lbl.profile_name', {}, 'Profile Name')}</label><input type="text" id="wd-pr-profile" placeholder="e.g. Cotton 40°C">
+        <div class="wd-field"><label>${this._t('lbl.profile_name', {}, 'Profile Name')}</label><input type="text" id="wd-pr-profile" placeholder="${_esc(this._t('placeholder.profile_name', {}, 'e.g. Cotton 40°C'))}">
           <div id="wd-pr-existing" style="display:none;margin-top:4px"><select id="wd-pr-profile-sel">${this._profileOptions()}</select></div></div>
         <div class="wd-field"><label>${this._t('lbl.head_trim', {}, 'Head Trim (s)')}</label><input type="number" id="wd-pr-head" min="0" value="0" step="1"><div class="wd-field-hint">Remove this many seconds from the start</div></div>
         <div class="wd-field"><label>${this._t('lbl.tail_trim', {}, 'Tail Trim (s)')}</label><input type="number" id="wd-pr-tail" min="0" value="0" step="1"><div class="wd-field-hint">Remove this many seconds from the end</div></div>
@@ -3447,7 +3466,7 @@ class HaWashdataPanel extends HTMLElement {
         <p class="wd-info" style="margin-bottom:12px">${this._t('msg.merge_intro', {}, 'The selected cycles are combined into one (chronological order; gaps filled with 0 W). Pick the resulting profile.')}</p>
         <div class="wd-field"><label>${this._t('lbl.resulting_profile', {}, 'Resulting profile')}</label>
           <select id="wd-merge-prof"><option value="">${this._t('lbl.unlabelled_paren', {}, '(unlabelled)')}</option><option value="__create_new__">+ Create new profile…</option>${this._profileOptions()}</select></div>
-        <div id="wd-merge-new" class="wd-field" style="display:none"><label>${this._t('lbl.new_profile_name', {}, 'New profile name')}</label><input type="text" id="wd-merge-newname" placeholder="e.g. Cotton 40°C"></div>
+        <div id="wd-merge-new" class="wd-field" style="display:none"><label>${this._t('lbl.new_profile_name', {}, 'New profile name')}</label><input type="text" id="wd-merge-newname" placeholder="${_esc(this._t('placeholder.profile_name', {}, 'e.g. Cotton 40°C'))}"></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="merge-ok">${this._t('btn.merge', {}, 'Merge')}</button></div>`;
     }
@@ -4803,7 +4822,7 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'diag-refresh') {
       this._fetchToolsData(eid).then(() => this._render());
     } else if (a === 'reprocess-history') {
-      this._modal = { type: 'confirm', title: 'Process History', message: 'Re-run matching, refresh suggestions, retrain ML (if enabled) and recompute cycle health across all stored cycles. This may take a while.', okLabel: 'Process',
+      this._modal = { type: 'confirm', title: this._t('modal.process_history_title', {}, 'Process History'), message: this._t('modal.process_history_msg', {}, 'Re-run matching, refresh suggestions, retrain ML (if enabled) and recompute cycle health across all stored cycles. This may take a while.'), okLabel: this._t('modal.process_history_ok', {}, 'Process'),
         onOk: () => this._busyRun('reprocess', async () => {
           try {
             const r = await this._ws({ type: `${_DOMAIN}/reprocess_history`, entry_id: eid });
@@ -4917,7 +4936,8 @@ class HaWashdataPanel extends HTMLElement {
       const showExpected = sr.getElementById('wd-pref-expected') ? !!sr.getElementById('wd-pref-expected').checked : true;
       const showRaw = !!sr.getElementById('wd-pref-raw')?.checked;
       const dateFmt = sr.getElementById('wd-pref-datefmt')?.value || 'relative';
-      const prefs = { default_tab: dt, show_debug: dbg, show_expected: showExpected, show_raw: showRaw, date_format: dateFmt };
+      const langOverrideSave = sr.getElementById('wd-pref-lang')?.value || '';
+      const prefs = { default_tab: dt, show_debug: dbg, show_expected: showExpected, show_raw: showRaw, date_format: dateFmt, lang_override: langOverrideSave };
       this._busyRun('save-prefs', async () => {
         try {
           await this._ws({ type: `${_DOMAIN}/set_user_prefs`, prefs });

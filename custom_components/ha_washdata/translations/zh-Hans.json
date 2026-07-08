@@ -633,7 +633,14 @@
       "artifact_interruption": "中断",
       "artifact_low_power": "低功率",
       "artifact_high_power": "高功率",
-      "artifact_anomaly": "异常"
+      "artifact_anomaly": "异常",
+      "auto_fine_tune_on": "自动微调已开启（大约 {hour}:00）",
+      "cohesion_good": "凝聚力 {pct}%",
+      "cohesion_low": "⚠ 低凝聚力 {pct}%",
+      "group_name": "组名称",
+      "members": "成员",
+      "models_fine_tuned": "（{count}个模型已微调）",
+      "panel_language": "面板语言"
     },
     "modal": {
       "merge_cycles": "合并 {n} 个周期",
@@ -645,7 +652,12 @@
       "import_config": "导入配置",
       "label_cycle": "标记周期",
       "new_phase": "新建阶段",
-      "process_recording": "处理录制"
+      "process_recording": "处理录制",
+      "edit_group": "编辑配置文件组",
+      "new_group": "新建配置文件组",
+      "process_history_title": "处理历史记录",
+      "process_history_msg": "重新运行匹配、刷新建议、重新训练 ML（如果启用）并重新计算所有存储循环的循环健康状态。这可能需要一些时间。",
+      "process_history_ok": "处理"
     },
     "msg": {
       "near_duplicate_cluster": "检测到近似重复的配置文件群。分组可让匹配在相似项目间可靠地选择（例如同一程序在不同温度/转速下）。",
@@ -744,7 +756,14 @@
       "artifact_pause_detail": "功率降至接近零约 {n} 秒后恢复 — 可能是周期中途开门或周期被暂停。",
       "restart_gap_header": "{n} 此周期内的 HA 重新启动间隔",
       "restart_gap_item": "{dur}间隙",
-      "restart_gap_footer": "在图表上突出显示。这些间隔的功率数据缺失——仅使用真实读数进行匹配。"
+      "restart_gap_footer": "在图表上突出显示。这些间隔的功率数据缺失——仅使用真实读数进行匹配。",
+      "automations_intro": "WashData 触发 {start} / {end} 事件并公开实体，因此通知和操作最好构建为常规 Home Assistant 自动化。使用此设备的自动化显示在下方。",
+      "collecting_data": "正在收集数据——还需要 {need} 个循环才能开始微调（{current}/{min}）。",
+      "enough_data": "有足够数据可供学习（{current}/{min} 个循环）。",
+      "filter_by_profile": "按配置文件筛选…",
+      "group_preview_hint": "勾选 2+ 个成员以预览并比较其功率曲线。",
+      "notify_services_hint": "使用 {entity} 服务 ID（多个请用英文逗号分隔）。模板变量：{vars}。",
+      "process_history_hint": "对所有存储的循环重新运行匹配、刷新调优建议、重新训练 ML 模型（如果启用）并重新计算循环健康状态。在批量审查后运行此项。"
     },
     "phase_desc": {
       "pre_wash": "主洗前的初步浸泡或预处理。",
@@ -786,7 +805,10 @@
     },
     "pref": {
       "date_absolute": "绝对时间（例如：7月2日 14:32）",
-      "date_relative": "相对时间（例如：2小时前）"
+      "date_relative": "相对时间（例如：2小时前）",
+      "lang_auto": "系统默认（{lang}）",
+      "lang_en": "英语",
+      "use_panel_default": "（面板默认）"
     },
     "quality": {
       "bad": "差",
@@ -805,7 +827,8 @@
       "idle": "空闲",
       "interrupted": "已中断",
       "ready": "准备处理",
-      "recording": "录制中"
+      "recording": "录制中",
+      "training": "训练中…"
     },
     "tab": {
       "advanced": "高级",
@@ -1302,6 +1325,16 @@
         "label": "最多每隔几天检查一次",
         "doc": "每这么多天最多重新检查一次改进。"
       }
+    },
+    "placeholder": {
+      "add": "添加…",
+      "group_name": "例如 棉布 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "添加通知服务…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "添加人员…",
+      "phase_name": "例如 预洗",
+      "profile_name": "例如 棉布 40°C"
     }
   }
 }

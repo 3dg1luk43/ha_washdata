@@ -612,7 +612,14 @@
       "artifact_interruption": "Megszakítás",
       "artifact_low_power": "Alacsony teljesítmény",
       "artifact_high_power": "Magas teljesítmény",
-      "artifact_anomaly": "Rendellenesség"
+      "artifact_anomaly": "Rendellenesség",
+      "auto_fine_tune_on": "automatikus finomhangolás aktív (kb. {hour}:00 körül)",
+      "cohesion_good": "kohézió {pct}%",
+      "cohesion_low": "⚠ alacsony kohézió {pct}%",
+      "group_name": "Csoport neve",
+      "members": "Tagok",
+      "models_fine_tuned": "({count} modell finomhangolva)",
+      "panel_language": "Panel nyelve"
     },
     "badge": {
       "golden_cycle": "Rögzített referenciaciklus",
@@ -645,7 +652,12 @@
       "import_config": "Konfiguráció importálása",
       "label_cycle": "Címkeciklus",
       "new_phase": "Új fázis",
-      "process_recording": "Folyamat rögzítése"
+      "process_recording": "Folyamat rögzítése",
+      "edit_group": "Profilcsoport szerkesztése",
+      "new_group": "Új profilcsoport",
+      "process_history_title": "Előzmények feldolgozása",
+      "process_history_msg": "Futtassa újra az egyeztetést, frissítse a javaslatokat, tanítsa újra az ML-t (ha engedélyezve van) és számolja újra a ciklusok egészségét az összes tárolt cikluson. Ez eltarthat egy ideig.",
+      "process_history_ok": "Feldolgozás"
     },
     "msg": {
       "near_duplicate_cluster": "majdnem ismétlődő profilfürt észlelve. A csoportosítás lehetővé teszi, hogy a párosítás megbízhatóan válasszon a hasonlók között (pl. ugyanaz a program különböző hőmérsékleten/centrifugáláson).",
@@ -744,7 +756,14 @@
       "feedback_cycles_pending": "{n} ciklus{s} áttekintésre vár",
       "artifact_spike_detail": "~{n}s-re a szokásos energiasáv felett volt.",
       "artifact_dip_detail": "~{n}s-re a szokásos energiasáv alá esett.",
-      "artifact_pause_detail": "A teljesítmény ~{n}s-re közel nullára esett, majd visszatért — valószínűleg kinyílt az ajtó a ciklus közben, vagy a ciklus szünetelt."
+      "artifact_pause_detail": "A teljesítmény ~{n}s-re közel nullára esett, majd visszatért — valószínűleg kinyílt az ajtó a ciklus közben, vagy a ciklus szünetelt.",
+      "automations_intro": "A WashData {start} / {end} eseményeket küld és entitásokat tesz elérhetővé, ezért az értesítések és műveletek legjobban normál Home Assistant automatizálásként építhetők fel. Az ezt az eszközt használó automatizálások alább jelennek meg.",
+      "collecting_data": "Adatgyűjtés folyamatban — még {need} ciklus szükséges a finomhangolás megkezdéséhez ({current}/{min}).",
+      "enough_data": "Elegendő adat a tanuláshoz ({current}/{min} ciklus).",
+      "filter_by_profile": "Szűrés profil szerint…",
+      "group_preview_hint": "Jelöljön ki 2+ tagot, hogy előnézze és összehasonlítsa teljesítménygörbéiket.",
+      "notify_services_hint": "Használja a(z) {entity} szolgáltatásazonosítókat (több esetén vesszővel elválasztva). Sablonváltozók: {vars}.",
+      "process_history_hint": "Futtassa újra az egyeztetést az összes tárolt cikluson, frissítse a hangolási javaslatokat, tanítsa újra az ML modelleket (ha engedélyezve van) és számolja újra a ciklusok egészségét. Futtassa ezt egy áttekintési köteg után."
     },
     "phase_desc": {
       "pre_wash": "Első áztatás vagy előkezelés a főmosás előtt.",
@@ -790,7 +809,10 @@
     },
     "pref": {
       "date_absolute": "Abszolút (pl. július 2-án 14:32)",
-      "date_relative": "Rokon (pl. 2 órája)"
+      "date_relative": "Rokon (pl. 2 órája)",
+      "lang_auto": "Rendszer alapértelmezett ({lang})",
+      "lang_en": "Angol",
+      "use_panel_default": "(panel alapértelmezett)"
     },
     "quality": {
       "bad": "Rossz",
@@ -809,7 +831,8 @@
       "idle": "Tétlen",
       "interrupted": "Megszakított",
       "ready": "Feldolgozásra kész",
-      "recording": "Felvétel"
+      "recording": "Felvétel",
+      "training": "Tanítás…"
     },
     "tab": {
       "advanced": "Fejlett",
@@ -1302,6 +1325,16 @@
         "label": "Legfeljebb ennyi naponta ellenőrizve",
         "doc": "Ennyi napon belül legfeljebb egyszer ellenőrizze a fejlesztéseket."
       }
+    },
+    "placeholder": {
+      "add": "hozzáadás…",
+      "group_name": "pl. Pamut 2:47",
+      "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+      "notify": "értesítési szolgáltatás hozzáadása…",
+      "notify_services_list": "notify.mobile_app_phone, ...",
+      "person": "személy hozzáadása…",
+      "phase_name": "pl. Előmosás",
+      "profile_name": "pl. Pamut 40°C"
     }
   }
 }
