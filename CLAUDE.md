@@ -169,7 +169,7 @@ The `ml/` package adds ML *alongside* the proven detection/matching code — it 
 **After adding or removing translation keys, you MUST:**
 
 ```bash
-# 1. Remove deprecated keys from all 60+ HA-layer language files (syncs them to strings.json
+# 1. Remove deprecated keys from all 35 HA-layer language files (syncs them to strings.json
 #    structure). Also automatically rebuilds panel-translations.json at the end.
 #    Does NOT touch translations/panel/ — panel files are managed separately.
 python3 devtools/sync_translations.py

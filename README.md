@@ -4,6 +4,7 @@
 ![HACS](https://img.shields.io/github/actions/workflow/status/3dg1luk43/ha_washdata/validate.yml?label=HACS)
 [![](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://ko-fi.com/3dg1luk43)
 [![Contribute Data](https://img.shields.io/badge/Contribute-Training%20Data-7B2FBE?style=flat&logo=googleforms&logoColor=white)](https://forms.gle/m6iGfP8QTasXWg5z7)
+[![Translations](https://gitlocalize.com/repo/10819/whole_project/badge.svg)](https://gitlocalize.com/repo/10819?utm_source=badge)
 
 # WashData Integration
 
@@ -414,7 +415,7 @@ If you'd like to help, you can submit a diagnostics export directly from Home As
 All contributions are used solely to improve the WashData integration.
 
 ### Supported Languages
-🇬🇧 English • 🇨🇿 Čeština • 🇩🇰 Dansk • 🇩🇪 Deutsch • 🇬🇷 Ελληνικά • 🇪🇸 Español • 🇪🇪 Eesti • 🇫🇮 Suomi • 🇫🇷 Français • 🇭🇷 Hrvatski • 🇭🇺 Magyar • 🇮🇹 Italiano • 🇯🇵 日本語 • 🇱🇹 Lietuvių • 🇱🇻 Latviešu • 🇳🇴 Norsk • 🇳🇱 Nederlands • 🇧🇪 Nederlands (BE) • 🇵🇱 Polski • 🇵🇹 Português • 🇷🇴 Română • 🇸🇰 Slovenčina • 🇸🇮 Slovenščina • 🇷🇸 Srpski • 🇸🇪 Svenska • 🇺🇦 Українська • 🇨🇳 简体中文
+🇦🇱 Shqip • 🇧🇦 Bosanski • 🇧🇬 Български • 🇭🇷 Hrvatski • 🇨🇿 Čeština • 🇩🇰 Dansk • 🇳🇱 Nederlands • 🇬🇧 English • 🇪🇪 Eesti • 🇫🇮 Suomi • 🇫🇷 Français • 🇩🇪 Deutsch • 🇬🇷 Ελληνικά • 🇭🇺 Magyar • 🇮🇸 Íslenska • 🇮🇹 Italiano • 🇯🇵 日本語 • 🇰🇷 한국어 • 🇱🇻 Latviešu • 🇱🇹 Lietuvių • 🇲🇰 Македонски • 🇳🇴 Norsk • 🇵🇱 Polski • 🇵🇹 Português • 🇧🇷 Português (BR) • 🇷🇴 Română • 🇷🇺 Русский • 🇷🇸 Srpski • 🇸🇰 Slovenčina • 🇸🇮 Slovenščina • 🇪🇸 Español • 🇸🇪 Svenska • 🇹🇷 Türkçe • 🇺🇦 Українська • 🇨🇳 简体中文
 
 ## License
 Non-commercial use only. See [LICENSE](LICENSE) file.
