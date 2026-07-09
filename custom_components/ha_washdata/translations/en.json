@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "The **Suggested Settings** sensor now reports **{count}** actionable recommendations.\n\nTo review and apply them: **Settings > Devices & Services > WashData > Configure > Advanced Settings > Apply Suggested Values**.\n\nSuggestions are optional and shown for review before you save.",
       "auto_tune_suggestion": "{device_type} {device_title} detected ghost cycles. Suggested min_power change: {current_min}W -> {new_min}W (not applied automatically).",
       "auto_tune_title": "WashData Auto-Tune",
-      "auto_tune_fallback": "{device_type} {device_title} detected ghost cycles. Suggested min_power change: {current_min}W -> {new_min}W (not applied automatically)."
+      "auto_tune_fallback": "{device_type} {device_title} detected ghost cycles. Suggested min_power change: {current_min}W -> {new_min}W (not applied automatically).",
+      "timer_default_message": "{device}: {minutes} min timer",
+      "timer_pause_action_title": "Resume Cycle",
+      "timer_pause_body_suffix": "The cycle is paused. Open the WashData panel to resume."
     }
   },
   "selector": {

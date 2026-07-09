@@ -165,13 +165,13 @@ The "Unloading Phase".
 - After a cycle finishes (Status: Completed), the progress stays at **100%**.
 - This timer holds that state (default **30 min / 1800 s**) to let you see "Completed" on dashboards before resetting to "Idle" (0%).
 
+![Progress Reset](doc/images/suggest/param_progress_reset.png)
+
 ### `anti_wrinkle_exit_power`
 Exit power for anti-wrinkle / anti-crease mode.
 - Power must fall **below** this threshold between tumble pulses for anti-wrinkle mode to stay active.
 - **Default: 0.8 W** — slightly above zero, so a momentary standby glitch does not break the anti-wrinkle sequence.
 - Raise it if your appliance has a slightly elevated standby draw during anti-crease cycles.
-
-![Progress Reset](doc/images/suggest/param_progress_reset.png)
 
 ### `auto_tune_noise_events_threshold`
 Self-Learning Trigger.

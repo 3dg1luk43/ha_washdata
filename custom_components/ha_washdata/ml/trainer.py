@@ -125,7 +125,7 @@ def auc(labels: np.ndarray, scores: np.ndarray) -> float:
     ranks = np.empty(scores.size, dtype=float)
     ranks[order] = np.arange(1, scores.size + 1, dtype=float)
     # Average ranks over ties so AUC is exact for discrete scores.
-    _assign_tie_ranks(scores, ranks)
+    _assign_tie_ranks(scores, ranks, order)
     rank_sum_pos = float(np.sum(ranks[labels == 1]))
     n_pos = float(pos.size)
     n_neg = float(neg.size)
@@ -133,8 +133,7 @@ def auc(labels: np.ndarray, scores: np.ndarray) -> float:
     return float(u / (n_pos * n_neg))
 
 
-def _assign_tie_ranks(scores: np.ndarray, ranks: np.ndarray) -> None:
-    order = np.argsort(scores, kind="mergesort")
+def _assign_tie_ranks(scores: np.ndarray, ranks: np.ndarray, order: np.ndarray) -> None:
     sorted_scores = scores[order]
     i = 0
     n = scores.size

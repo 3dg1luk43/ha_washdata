@@ -241,7 +241,7 @@ def _progress_dataset(
             if feat is None:
                 continue
             actual_elapsed = prefix[-1][0] - t0
-            label = actual_elapsed / total if total > 0 else frac
+            label = actual_elapsed / total
             rows.append(feat)
             labels.append(float(min(max(label, 0.0), 1.0)))
     return _matrix(rows, columns), np.array(labels, dtype=float), columns

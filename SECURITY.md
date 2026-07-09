@@ -48,7 +48,7 @@ Backport policy:
 Include affected versions in reports using release tags or semver ranges.
 Example:
 
-`Affected versions: v0.4.0 - v0.4.5.2 (fixed in v0.5.0)`
+`Affected versions: v0.4.0 - v0.4.9 (fixed in v0.5.0)`
 
 ### Response Timeline
 

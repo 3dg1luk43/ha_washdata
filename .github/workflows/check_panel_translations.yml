@@ -10,11 +10,13 @@ on:
     paths:
       - 'custom_components/ha_washdata/translations/**'
       - 'custom_components/ha_washdata/www/panel-translations.json'
+      - 'devtools/build_panel_translations.py'
   push:
     branches: [main]
     paths:
       - 'custom_components/ha_washdata/translations/**'
       - 'custom_components/ha_washdata/www/panel-translations.json'
+      - 'devtools/build_panel_translations.py'
   workflow_dispatch:
 
 # Default: read-only; the job opts in to the write scopes it actually needs.
@@ -59,8 +61,9 @@ jobs:
       - name: Overlay PR translation files
         if: github.event_name == 'pull_request_target'
         run: |
-          cp -r _pr_head/custom_components/ha_washdata/translations/. \
-                custom_components/ha_washdata/translations/
+          rm -rf custom_components/ha_washdata/translations
+          cp -r _pr_head/custom_components/ha_washdata/translations \
+                custom_components/ha_washdata/translations
           if [ -f _pr_head/custom_components/ha_washdata/www/panel-translations.json ]; then
             cp _pr_head/custom_components/ha_washdata/www/panel-translations.json \
                custom_components/ha_washdata/www/panel-translations.json

@@ -7,7 +7,7 @@ Constraint: All computations must be dt-aware.
 from dataclasses import dataclass
 import numpy as np
 
-from .signal_processing import integrate_wh
+from .signal_processing import energy_gap_threshold_s, integrate_wh
 
 
 
@@ -48,7 +48,7 @@ def compute_signature(
     duration = timestamps[-1] - timestamps[0]
 
     # Energy (trapezoidal Wh) via the shared integrator - single source of truth.
-    total_energy = integrate_wh(timestamps, power)
+    total_energy = integrate_wh(timestamps, power, max_gap_s=energy_gap_threshold_s(timestamps))
 
     dt = np.diff(timestamps)  # sample intervals (s), reused by the high-phase ratio
     max_p = np.max(power)

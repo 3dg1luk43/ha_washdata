@@ -301,6 +301,7 @@ class WashDataManager:
         self._timer_pause_pn_id: str | None = None
         self._timer_pause_mobile_tag: str | None = None
         self._remove_timer_action_listener: Any | None = None
+        self._timer_ui_strings: dict[str, str] = {}
         self._notify_only_when_home = DEFAULT_NOTIFY_ONLY_WHEN_HOME
         self._notify_fire_events = DEFAULT_NOTIFY_FIRE_EVENTS
         self._notify_live_interval_seconds = DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS
@@ -1488,6 +1489,20 @@ class WashDataManager:
     async def async_setup(self) -> None:
         """Set up the manager."""
         await self.profile_store.async_load()
+        try:
+            _trans = await translation.async_get_translations(
+                self.hass, self.hass.config.language, "options", {DOMAIN}
+            )
+            self._timer_ui_strings = {
+                k: _trans.get(f"component.{DOMAIN}.options.error.{k}", v)
+                for k, v in {
+                    "timer_default_message": "{device}: {minutes} min timer",
+                    "timer_pause_action_title": "Resume Cycle",
+                    "timer_pause_body_suffix": "The cycle is paused. Open the WashData panel to resume.",
+                }.items()
+            }
+        except Exception:  # noqa: BLE001
+            pass
         # Apply configurable duration tolerance to profile store
         try:
             self.profile_store.set_duration_tolerance(self._profile_duration_tolerance)
@@ -4935,7 +4950,7 @@ class WashDataManager:
                 "minutes": int(offset),
             }
             msg = self._safe_format_template(
-                raw_msg or "{device}: {minutes} min timer",
+                raw_msg or self._timer_ui_strings.get("timer_default_message", "{device}: {minutes} min timer"),
                 **fmt_kwargs,
             )
             auto_pause = bool(timer.get("auto_pause", False))
@@ -4943,7 +4958,7 @@ class WashDataManager:
             extra_vars: dict[str, Any] = {"tag": timer_tag}
             if auto_pause:
                 extra_vars["actions"] = [
-                    {"action": self._timer_pause_action_id, "title": "Resume Cycle"}
+                    {"action": self._timer_pause_action_id, "title": self._timer_ui_strings.get("timer_pause_action_title", "Resume Cycle")}
                 ]
                 extra_vars["sticky"] = "true"
             self._dispatch_notification(
@@ -4973,9 +4988,12 @@ class WashDataManager:
         self._timer_pause_pn_id = tag
         self._timer_pause_mobile_tag = tag
 
+        _body_suffix = self._timer_ui_strings.get(
+            "timer_pause_body_suffix", "The cycle is paused. Open the WashData panel to resume."
+        )
         _pn_create(
             self.hass,
-            f"{msg}\n\nThe cycle is paused. Open the WashData panel to resume.",
+            f"{msg}\n\n{_body_suffix}",
             title=f"WashData: {self.config_entry.title}",
             notification_id=tag,
         )

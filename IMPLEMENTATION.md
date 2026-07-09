@@ -258,11 +258,11 @@ python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG
 RUNNING → COMPLETE
     ↓
 Progress = 100% (cycle finished)
-Start 5-min idle timer
+Start 30-min idle timer (progress_reset_delay)
     ↓
 [Scenarios]
-├─ New cycle starts within 5min → Cancel reset, progress → 0%
-└─ 5min passes with no activity → Progress → 0% (unload complete)
+├─ New cycle starts within 30min → Cancel reset, progress → 0%
+└─ 30min passes with no activity → Progress → 0% (unload complete)
 ```
 
 **Implementation Details:**
