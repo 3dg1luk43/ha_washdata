@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "De sensor **Foarstelde ynstellings** rapportearret no **{count}** aksjebere oanbefellings.\n\nOm se te besjen en ta te passen: **Ynstellings> Apparaten en tsjinsten> WashData> Konfigurearje> Avansearre ynstellings> Oanbefelle wearden tapasse**.\n\nSuggestjes binne opsjoneel en werjûn foar beoardieling foardat jo bewarje.",
       "auto_tune_suggestion": "{device_type} {device_title} spoeksyklusen ûntdutsen. Foarstelde min_power feroaring: {current_min}W -> {new_min}W (net automatysk tapast).",
       "auto_tune_title": "WashData Auto-Tune",
-      "auto_tune_fallback": "{device_type} {device_title} spoeksyklusen ûntdutsen. Foarstelde min_power feroaring: {current_min}W -> {new_min}W (net automatysk tapast)."
+      "auto_tune_fallback": "{device_type} {device_title} spoeksyklusen ûntdutsen. Foarstelde min_power feroaring: {current_min}W -> {new_min}W (net automatysk tapast).",
+      "timer_default_message": "{device}: {minutes} min timer",
+      "timer_pause_action_title": "Syklus ferfetsje",
+      "timer_pause_body_suffix": "De syklus is pauzearre. Iepenje it WashData-paniel om troch te gean."
     }
   },
   "selector": {

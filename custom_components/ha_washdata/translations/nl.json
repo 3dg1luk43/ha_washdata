@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "De sensor **Voorgestelde instellingen** rapporteert nu **{count}** bruikbare aanbevelingen.\n\nOm ze te bekijken en toe te passen: **Instellingen > Apparaten en services > WashData > Configureren > Geavanceerde instellingen > Voorgestelde waarden toepassen**.\n\nSuggesties zijn optioneel en worden ter beoordeling getoond voordat u ze opslaat.",
       "auto_tune_suggestion": "{device_type} {device_title} heeft spookcycli gedetecteerd. Voorgestelde min_power wijziging: {current_min}W -> {new_min}W (niet automatisch toegepast).",
       "auto_tune_title": "WashData automatisch afstemmen",
-      "auto_tune_fallback": "{device_type} {device_title} heeft spookcycli gedetecteerd. Voorgestelde min_power wijziging: {current_min}W -> {new_min}W (niet automatisch toegepast)."
+      "auto_tune_fallback": "{device_type} {device_title} heeft spookcycli gedetecteerd. Voorgestelde min_power wijziging: {current_min}W -> {new_min}W (niet automatisch toegepast).",
+      "timer_default_message": "{device}: timer van {minutes} min.",
+      "timer_pause_action_title": "Hervat cyclus",
+      "timer_pause_body_suffix": "De cyclus is gepauzeerd. Open het WashData-paneel om te hervatten."
     }
   },
   "selector": {

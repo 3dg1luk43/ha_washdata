@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Die **Voorgestelde instellings**-sensor rapporteer nou **{count}** uitvoerbare aanbevelings.\n\nOm dit te hersien en toe te pas: **Instellings > Toestelle en Dienste > Wasdata > Konfigureer > Gevorderde instellings > Pas voorgestelde waardes toe**.\n\nVoorstelle is opsioneel en gewys vir hersiening voordat jy stoor.",
       "auto_tune_suggestion": "{device_type} {device_title} het spooksiklusse bespeur. Voorgestelde min_kragverandering: {current_min}W -> {new_min}W (nie outomaties toegepas nie).",
       "auto_tune_title": "WashData Outo-Tune",
-      "auto_tune_fallback": "{device_type} {device_title} het spooksiklusse bespeur. Voorgestelde min_kragverandering: {current_min}W -> {new_min}W (nie outomaties toegepas nie)."
+      "auto_tune_fallback": "{device_type} {device_title} het spooksiklusse bespeur. Voorgestelde min_kragverandering: {current_min}W -> {new_min}W (nie outomaties toegepas nie).",
+      "timer_default_message": "{device}: {minutes} min-timer",
+      "timer_pause_action_title": "Hervat siklus",
+      "timer_pause_body_suffix": "Die siklus is onderbreek. Maak die WashData-paneel oop om te hervat."
     }
   },
   "selector": {

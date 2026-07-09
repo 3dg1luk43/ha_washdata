@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "**建議設定**感測器現在報告 **{count}** 可操作的建議。\n\n若要查看並套用它們：**設定 > 裝置和服務 > WashData > 配置 > 進階設定 > 套用建議值**。\n\n建議是可選的，並會在您儲存之前顯示以供審核。",
       "auto_tune_suggestion": "{device_type} {device_title} 偵測到幽靈週期。建議的 min_power 變更：{current_min}W -> {new_min}W（不會自動套用）。",
       "auto_tune_title": "WashData 自動調整",
-      "auto_tune_fallback": "{device_type} {device_title} 偵測到幽靈週期。建議的 min_power 變更：{current_min}W -> {new_min}W（不會自動套用）。"
+      "auto_tune_fallback": "{device_type} {device_title} 偵測到幽靈週期。建議的 min_power 變更：{current_min}W -> {new_min}W（不會自動套用）。",
+      "timer_default_message": "{device}：{minutes} 分鐘計時器",
+      "timer_pause_action_title": "恢復週期",
+      "timer_pause_body_suffix": "週期已暫停。開啟 WashData 面板以恢復。"
     }
   },
   "selector": {

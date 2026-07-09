@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Sensor **Setelan yang Disarankan** kini melaporkan **{count}** rekomendasi yang dapat ditindaklanjuti.\n\nUntuk meninjau dan menerapkannya: **Pengaturan > Perangkat & Layanan > WashData > Konfigurasi > Pengaturan Lanjutan > Terapkan Nilai yang Disarankan**.\n\nSaran bersifat opsional dan ditampilkan untuk ditinjau sebelum Anda menyimpannya.",
       "auto_tune_suggestion": "{device_type} {device_title} mendeteksi siklus hantu. Perubahan min_power yang disarankan: {current_min}W -> {new_min}W (tidak diterapkan secara otomatis).",
       "auto_tune_title": "Penyetelan Otomatis WashData",
-      "auto_tune_fallback": "{device_type} {device_title} mendeteksi siklus hantu. Perubahan min_power yang disarankan: {current_min}W -> {new_min}W (tidak diterapkan secara otomatis)."
+      "auto_tune_fallback": "{device_type} {device_title} mendeteksi siklus hantu. Perubahan min_power yang disarankan: {current_min}W -> {new_min}W (tidak diterapkan secara otomatis).",
+      "timer_default_message": "{device}: pengatur waktu {minutes} menit",
+      "timer_pause_action_title": "Lanjutkan Siklus",
+      "timer_pause_body_suffix": "Siklus sedang dijeda. Buka panel WashData untuk melanjutkan."
     }
   },
   "selector": {

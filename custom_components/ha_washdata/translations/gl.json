@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "O sensor de **Configuración suxerida** agora informa de **{count}** recomendacións útiles.\n\nPara revisalos e aplicalos: **Configuración > Dispositivos e servizos > WashData > Configurar > Configuración avanzada > Aplicar valores suxeridos**.\n\nAs suxestións son opcionais e móstranse para revisar antes de gardar.",
       "auto_tune_suggestion": "{device_type} {device_title} detectaron ciclos pantasmas. Cambio de min_power suxerido: {current_min}W -> {new_min}W (non se aplica automaticamente).",
       "auto_tune_title": "Sintonización automática de WashData",
-      "auto_tune_fallback": "{device_type} {device_title} detectaron ciclos pantasmas. Cambio de min_power suxerido: {current_min}W -> {new_min}W (non se aplica automaticamente)."
+      "auto_tune_fallback": "{device_type} {device_title} detectaron ciclos pantasmas. Cambio de min_power suxerido: {current_min}W -> {new_min}W (non se aplica automaticamente).",
+      "timer_default_message": "{device}: temporizador de {minutes} min",
+      "timer_pause_action_title": "Reanudar ciclo",
+      "timer_pause_body_suffix": "O ciclo está en pausa. Abre o panel de WashData para retomalo."
     }
   },
   "selector": {

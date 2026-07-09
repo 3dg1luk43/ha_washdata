@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "**تجویز کردہ ترتیبات** سینسر اب **{count}** قابل عمل تجاویز کی اطلاع دیتا ہے۔\n\nان کا جائزہ لینے اور لاگو کرنے کے لیے: ** سیٹنگز > ڈیوائسز اور سروسز > واش ڈیٹا > کنفیگر > ایڈوانسڈ سیٹنگز > اپلائی تجویز کردہ ویلیوز**۔\n\nتجاویز اختیاری ہیں اور محفوظ کرنے سے پہلے نظرثانی کے لیے دکھائی جاتی ہیں۔",
       "auto_tune_suggestion": "{device_type} {device_title} بھوت چکروں کا پتہ چلا۔ تجویز کردہ min_power تبدیلی: {current_min}W -> {new_min}W (خودکار طور پر لاگو نہیں ہوا)۔",
       "auto_tune_title": "واش ڈیٹا آٹو ٹیون",
-      "auto_tune_fallback": "{device_type} {device_title} بھوت چکروں کا پتہ چلا۔ تجویز کردہ min_power تبدیلی: {current_min}W -> {new_min}W (خودکار طور پر لاگو نہیں ہوا)۔"
+      "auto_tune_fallback": "{device_type} {device_title} بھوت چکروں کا پتہ چلا۔ تجویز کردہ min_power تبدیلی: {current_min}W -> {new_min}W (خودکار طور پر لاگو نہیں ہوا)۔",
+      "timer_default_message": "{device}: {minutes} منٹ ٹائمر",
+      "timer_pause_action_title": "سائیکل دوبارہ شروع کریں",
+      "timer_pause_body_suffix": "سائیکل موقوف ہے۔ دوبارہ شروع کرنے کے لیے WashData پینل کھولیں۔"
     }
   },
   "selector": {

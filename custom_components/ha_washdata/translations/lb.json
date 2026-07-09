@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "De Sensor **Proposéiert Astellungen** bericht elo **{count}** handlungsfäeg Empfehlungen.\n\nFir se z'iwwerpréiwen an unzewendeden: **Astellungen > Apparater & Servicer > WashData > Konfiguréieren > Advanced Astellungen > Proposéiert Wäerter uwenden**.\n\nVirschléi si fakultativ a ginn fir Iwwerpréiwung gewisen ier Dir späichert.",
       "auto_tune_suggestion": "{device_type} {device_title} entdeckt Geeschterzyklen. Proposéiert min_power Ännerung: {current_min}W -> {new_min}W (net automatesch ugewannt).",
       "auto_tune_title": "WashData Auto-Tune",
-      "auto_tune_fallback": "{device_type} {device_title} entdeckt Geeschterzyklen. Proposéiert min_power Ännerung: {current_min}W -> {new_min}W (net automatesch ugewannt)."
+      "auto_tune_fallback": "{device_type} {device_title} entdeckt Geeschterzyklen. Proposéiert min_power Ännerung: {current_min}W -> {new_min}W (net automatesch ugewannt).",
+      "timer_default_message": "{device}: {minutes} Min. Timer",
+      "timer_pause_action_title": "Zyklus weiderfueren",
+      "timer_pause_body_suffix": "De Zyklus ass pauséiert. Öffnet de WashData Panel fir weiderzeféieren."
     }
   },
   "selector": {

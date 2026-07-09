@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Czujnik **Sugerowane ustawienia** zgłasza teraz **{count}** możliwych do zastosowania zaleceń.\n\nAby je przejrzeć i zastosować: **Ustawienia > Urządzenia i usługi > WashData > Konfiguruj > Ustawienia zaawansowane > Zastosuj sugerowane wartości**.\n\nSugestie są opcjonalne i wyświetlane do przeglądu przed zapisaniem.",
       "auto_tune_suggestion": "{device_type} {device_title} wykrył cykle duchów. Sugerowana zmiana min_power: {current_min}W -> {new_min}W (nie stosowana automatycznie).",
       "auto_tune_title": "Automatyczne dostrajanie WashData",
-      "auto_tune_fallback": "{device_type} {device_title} wykrył cykle duchów. Sugerowana zmiana min_power: {current_min}W -> {new_min}W (nie stosowana automatycznie)."
+      "auto_tune_fallback": "{device_type} {device_title} wykrył cykle duchów. Sugerowana zmiana min_power: {current_min}W -> {new_min}W (nie stosowana automatycznie).",
+      "timer_default_message": "{device}: timer {minutes} min",
+      "timer_pause_action_title": "Wznów cykl",
+      "timer_pause_body_suffix": "Cykl jest wstrzymany. Otwórz panel WashData, aby wznowić."
     }
   },
   "selector": {

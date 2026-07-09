@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "**Önerilen Ayarlar** sensörü artık **{count}** uygulanabilir öneriler raporluyor.\n\nBunları incelemek ve uygulamak için: **Ayarlar > Cihazlar ve Hizmetler > WashData > Yapılandır > Gelişmiş Ayarlar > Önerilen Değerleri Uygula**.\n\nÖneriler isteğe bağlıdır ve kaydetmeden önce incelenmek üzere gösterilir.",
       "auto_tune_suggestion": "{device_type} {device_title} hayalet döngüleri algıladı. Önerilen min_güç değişikliği: {current_min}W -> {new_min}W (otomatik olarak uygulanmaz).",
       "auto_tune_title": "WashData Otomatik Ayarlama",
-      "auto_tune_fallback": "{device_type} {device_title} hayalet döngüleri algıladı. Önerilen min_güç değişikliği: {current_min}W -> {new_min}W (otomatik olarak uygulanmaz)."
+      "auto_tune_fallback": "{device_type} {device_title} hayalet döngüleri algıladı. Önerilen min_güç değişikliği: {current_min}W -> {new_min}W (otomatik olarak uygulanmaz).",
+      "timer_default_message": "{device}: {minutes} dk zamanlayıcı",
+      "timer_pause_action_title": "Döngüyü Devam Ettir",
+      "timer_pause_body_suffix": "Döngü duraklatıldı. Devam ettirmek için WashData panelini açın."
     }
   },
   "selector": {

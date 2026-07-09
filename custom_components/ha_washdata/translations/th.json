@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "ขณะนี้เซ็นเซอร์ **การตั้งค่าที่แนะนำ** รายงานคำแนะนำที่สามารถดำเนินการได้ **{count}**\n\nหากต้องการตรวจสอบและนำไปใช้: **การตั้งค่า > อุปกรณ์และบริการ > WashData > กำหนดค่า > การตั้งค่าขั้นสูง > ใช้ค่าที่แนะนำ**\n\nคำแนะนำเป็นทางเลือกและแสดงให้ตรวจสอบก่อนบันทึก",
       "auto_tune_suggestion": "{device_type} {device_title} ตรวจพบวงจรโกสต์ การเปลี่ยนแปลง min_power ที่แนะนำ: {current_min}W -> {new_min}W (ไม่ได้ใช้โดยอัตโนมัติ)",
       "auto_tune_title": "WashData ปรับอัตโนมัติ",
-      "auto_tune_fallback": "{device_type} {device_title} ตรวจพบวงจรโกสต์ การเปลี่ยนแปลง min_power ที่แนะนำ: {current_min}W -> {new_min}W (ไม่ได้ใช้โดยอัตโนมัติ)"
+      "auto_tune_fallback": "{device_type} {device_title} ตรวจพบวงจรโกสต์ การเปลี่ยนแปลง min_power ที่แนะนำ: {current_min}W -> {new_min}W (ไม่ได้ใช้โดยอัตโนมัติ)",
+      "timer_default_message": "{device}: ตั้งเวลา {minutes} นาที",
+      "timer_pause_action_title": "ดำเนินรอบต่อ",
+      "timer_pause_body_suffix": "รอบการทำงานถูกหยุดชั่วคราว เปิดแผง WashData เพื่อดำเนินการต่อ"
     }
   },
   "selector": {

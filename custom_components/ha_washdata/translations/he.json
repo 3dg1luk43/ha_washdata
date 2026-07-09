@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "חיישן **הגדרות מוצעות** מדווח כעת על המלצות **{count}** שניתן לפעול.\n\nכדי לסקור ולהחיל אותם: **הגדרות > מכשירים ושירותים > WashData > הגדר > הגדרות מתקדמות > החל ערכים מוצעים**.\n\nהצעות הן אופציונליות ומוצגות לבדיקה לפני השמירה.",
       "auto_tune_suggestion": "{device_type} {device_title} זוהו מחזורי רפאים. שינוי הספק המינימלי: {current_min}W -> {new_min}W (לא מוחל אוטומטית).",
       "auto_tune_title": "כוונון אוטומטי של WashData",
-      "auto_tune_fallback": "{device_type} {device_title} זוהו מחזורי רפאים. שינוי הספק המינימלי: {current_min}W -> {new_min}W (לא מוחל אוטומטית)."
+      "auto_tune_fallback": "{device_type} {device_title} זוהו מחזורי רפאים. שינוי הספק המינימלי: {current_min}W -> {new_min}W (לא מוחל אוטומטית).",
+      "timer_default_message": "{device}: טיימר {minutes} דק'",
+      "timer_pause_action_title": "המשך מחזור",
+      "timer_pause_body_suffix": "המחזור מושהה. פתח את לוח WashData כדי לחדש."
     }
   },
   "selector": {

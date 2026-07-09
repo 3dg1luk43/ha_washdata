@@ -195,6 +195,7 @@ jobs:
             const ISSUE_MARKER = '<!-- panel-translations-bundle-main-bot -->';
             const LABEL        = 'needs panel bundle rebuild';
             const verb         = reason === 'missing' ? 'is missing' : 'is out of date';
+            const verbShort    = reason === 'missing' ? 'missing' : 'out of date';
 
             // Find an open tracking issue from a previous push.
             const allIssues = await github.paginate(
@@ -219,7 +220,7 @@ jobs:
               await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
               await github.rest.issues.createComment({
                 owner, repo, issue_number: existing.number,
-                body: `Still ${verb} after push to \`${branch}\` at \`${context.sha}\`.`,
+                body: `Still ${verbShort} after push to \`${branch}\` at \`${context.sha}\`.`,
               });
               console.log(`Updated tracking issue #${existing.number}.`);
             } else {
@@ -228,12 +229,50 @@ jobs:
                 title: `🌐 panel-translations.json ${verb} on ${branch}`,
                 body,
                 labels: [LABEL],
-                assignees: [owner],
               });
+              try {
+                await github.rest.issues.addAssignees({ owner, repo, issue_number: issue.number, assignees: [owner] });
+              } catch (e) {
+                console.warn(`Could not assign @${owner}: ${e.message}`);
+              }
               console.log(`Created tracking issue #${issue.number}.`);
             }
 
             core.setFailed(`panel-translations.json ${verb} on "${branch}" — see tracking issue.`);
+
+      # --- push to main: close tracking issue when drift is resolved ----------
+      - name: Handle push to main (current)
+        if: github.event_name == 'push' && steps.drift.outputs.stale == 'false'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo  = context.repo.repo;
+            const branch = context.ref.replace('refs/heads/', '');
+
+            const ISSUE_MARKER = '<!-- panel-translations-bundle-main-bot -->';
+            const LABEL        = 'needs panel bundle rebuild';
+
+            const allIssues = await github.paginate(
+              github.rest.issues.listForRepo,
+              { owner, repo, state: 'open', labels: LABEL, per_page: 50 }
+            );
+            const existing = allIssues.find(i => !i.pull_request && i.body?.includes(ISSUE_MARKER));
+            if (!existing) {
+              console.log('panel-translations.json is current — no open tracking issue.');
+              return;
+            }
+
+            await github.rest.issues.createComment({
+              owner, repo, issue_number: existing.number,
+              body: `\`panel-translations.json\` is now current on \`${branch}\` — closing.`,
+            });
+            await github.rest.issues.update({
+              owner, repo, issue_number: existing.number,
+              state: 'closed', state_reason: 'completed',
+            });
+            console.log(`Closed tracking issue #${existing.number}.`);
 
       # --- workflow_dispatch: just fail if stale, no comment/issue ----------
       - name: Report result (workflow_dispatch)

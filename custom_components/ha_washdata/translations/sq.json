@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Sensori **Cilësimet e sugjeruara** raporton tani **{count}** rekomandime të zbatueshme.\n\nPër t'i rishikuar dhe zbatuar ato: **Cilësimet > Pajisjet dhe shërbimet > WashData > Konfiguro > Cilësimet e avancuara > Apliko vlerat e sugjeruara**.\n\nSugjerimet janë opsionale dhe shfaqen për shqyrtim përpara se të ruani.",
       "auto_tune_suggestion": "{device_type} {device_title} zbuloi cikle fantazmë. Ndryshimi i sugjeruar min_fuqi: {current_min}W -> {new_min}W (nuk zbatohet automatikisht).",
       "auto_tune_title": "Rregullimi automatik WashData",
-      "auto_tune_fallback": "{device_type} {device_title} zbuloi cikle fantazmë. Ndryshimi i sugjeruar min_fuqi: {current_min}W -> {new_min}W (nuk zbatohet automatikisht)."
+      "auto_tune_fallback": "{device_type} {device_title} zbuloi cikle fantazmë. Ndryshimi i sugjeruar min_fuqi: {current_min}W -> {new_min}W (nuk zbatohet automatikisht).",
+      "timer_default_message": "{device}: kohëmatës {minutes} min",
+      "timer_pause_action_title": "Rifillo ciklin",
+      "timer_pause_body_suffix": "Cikli është në pauzë. Hapni panelin WashData për të vazhduar."
     }
   },
   "selector": {

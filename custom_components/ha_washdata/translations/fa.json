@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "حسگر **تنظیمات پیشنهادی** اکنون **{count}** توصیه های قابل اجرا را گزارش می دهد.\n\nبرای بررسی و اعمال آنها: **تنظیمات > دستگاه‌ها و خدمات > WashData > پیکربندی > تنظیمات پیشرفته > اعمال مقادیر پیشنهادی**.\n\nپیشنهادات اختیاری هستند و قبل از ذخیره برای بررسی نشان داده می شوند.",
       "auto_tune_suggestion": "{device_type} {device_title} چرخه های ارواح را شناسایی کرد. حداقل تغییر توان پیشنهادی: {current_min}W -> {new_min}W (به طور خودکار اعمال نمی شود).",
       "auto_tune_title": "تنظیم خودکار WashData",
-      "auto_tune_fallback": "{device_type} {device_title} چرخه های ارواح را شناسایی کرد. حداقل تغییر توان پیشنهادی: {current_min}W -> {new_min}W (به طور خودکار اعمال نمی شود)."
+      "auto_tune_fallback": "{device_type} {device_title} چرخه های ارواح را شناسایی کرد. حداقل تغییر توان پیشنهادی: {current_min}W -> {new_min}W (به طور خودکار اعمال نمی شود).",
+      "timer_default_message": "{device}: تایمر {minutes} دقیقه",
+      "timer_pause_action_title": "از سرگیری چرخه",
+      "timer_pause_body_suffix": "چرخه متوقف شده است. برای از سرگیری، پنل WashData را باز کنید."
     }
   },
   "selector": {

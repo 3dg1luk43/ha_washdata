@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Senzor **Predložene postavke** sada javlja **{count}** preporuke koje se mogu poduzeti.\n\nDa biste ih pregledali i primijenili: **Postavke > Uređaji i usluge > WashData > Konfiguracija > Napredne postavke > Primijeni predložene vrijednosti**.\n\nPrijedlozi nisu obavezni i prikazuju se na pregled prije spremanja.",
       "auto_tune_suggestion": "{device_type} {device_title} otkrivenih dvostrukih ciklusa. Predložena promjena min_power: {current_min}W -> {new_min}W (ne primjenjuje se automatski).",
       "auto_tune_title": "Automatsko podešavanje WashData",
-      "auto_tune_fallback": "{device_type} {device_title} otkrivenih dvostrukih ciklusa. Predložena promjena min_power: {current_min}W -> {new_min}W (ne primjenjuje se automatski)."
+      "auto_tune_fallback": "{device_type} {device_title} otkrivenih dvostrukih ciklusa. Predložena promjena min_power: {current_min}W -> {new_min}W (ne primjenjuje se automatski).",
+      "timer_default_message": "{device}: {minutes} min tajmer",
+      "timer_pause_action_title": "Nastavi ciklus",
+      "timer_pause_body_suffix": "Ciklus je pauziran. Otvorite WashData panel za nastavak."
     }
   },
   "selector": {

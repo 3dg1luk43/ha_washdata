@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Sensorn **Tillgängliga föreslagna inställningar** rapporterar nu **{count}** åtgärdbara rekommendationer.\n\nSå här granskar och tillämpar du dem: **Inställningar > Enheter och tjänster > WashData > Konfigurera > Avancerade inställningar > Tillämpa föreslagna värden**.\n\nFörslag är valfria och visas för granskning innan du sparar.",
       "auto_tune_suggestion": "{device_type} {device_title} upptäckte spökcykler. Föreslagen min_effektändring: {current_min}W -> {new_min}W (tillämpas inte automatiskt).",
       "auto_tune_title": "WashData Auto-Tune",
-      "auto_tune_fallback": "{device_type} {device_title} upptäckte spökcykler. Föreslagen min_effektändring: {current_min}W -> {new_min}W (tillämpas inte automatiskt)."
+      "auto_tune_fallback": "{device_type} {device_title} upptäckte spökcykler. Föreslagen min_effektändring: {current_min}W -> {new_min}W (tillämpas inte automatiskt).",
+      "timer_default_message": "{device}: timer {minutes} min",
+      "timer_pause_action_title": "Återuppta cykeln",
+      "timer_pause_body_suffix": "Cykeln är pausad. Öppna WashData-panelen för att fortsätta."
     }
   },
   "selector": {

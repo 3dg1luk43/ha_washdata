@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "**建议设置**传感器现在报告 **{count}** 可操作的建议。\n\n要查看并应用它们：**设置 > 设备和服务 > WashData > 配置 > 高级设置 > 应用建议值**。\n\n建议是可选的，并会在您保存之前显示以供审核。",
       "auto_tune_suggestion": "{device_type} {device_title} 检测到幽灵周期。建议的 min_power 更改：{current_min}W -> {new_min}W（不会自动应用）。",
       "auto_tune_title": "WashData 自动调整",
-      "auto_tune_fallback": "{device_type} {device_title} 检测到幽灵周期。建议的 min_power 更改：{current_min}W -> {new_min}W（不会自动应用）。"
+      "auto_tune_fallback": "{device_type} {device_title} 检测到幽灵周期。建议的 min_power 更改：{current_min}W -> {new_min}W（不会自动应用）。",
+      "timer_default_message": "{device}：{minutes} 分钟定时器",
+      "timer_pause_action_title": "恢复周期",
+      "timer_pause_body_suffix": "周期已暂停。打开 WashData 面板以恢复。"
     }
   },
   "selector": {

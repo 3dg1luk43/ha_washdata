@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Senzorul **Setări sugerate** raportează acum **{count}** recomandări acționabile.\n\nPentru a le revizui și aplica: **Setări > Dispozitive și servicii > WashData > Configurare > Setări avansate > Aplicați valorile sugerate**.\n\nSugestiile sunt opționale și sunt afișate pentru examinare înainte de a salva.",
       "auto_tune_suggestion": "{device_type} {device_title} cicluri fantomă detectate. Modificare sugerată de min_power: {current_min}W -> {new_min}W (nu se aplică automat).",
       "auto_tune_title": "Auto-Tune WashData",
-      "auto_tune_fallback": "{device_type} {device_title} cicluri fantomă detectate. Modificare sugerată de min_power: {current_min}W -> {new_min}W (nu se aplică automat)."
+      "auto_tune_fallback": "{device_type} {device_title} cicluri fantomă detectate. Modificare sugerată de min_power: {current_min}W -> {new_min}W (nu se aplică automat).",
+      "timer_default_message": "{device}: cronometru de {minutes} min",
+      "timer_pause_action_title": "Reluați ciclul",
+      "timer_pause_body_suffix": "Ciclul este în pauză. Deschideți panoul WashData pentru a relua."
     }
   },
   "selector": {

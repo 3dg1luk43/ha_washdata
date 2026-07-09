@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "El sensor de **Configuració suggerida** ara informa de **{count}** recomanacions accionables.\n\nPer revisar-los i aplicar-los: **Configuració > Dispositius i serveis > WashData > Configura > Configuració avançada > Aplica els valors suggerits**.\n\nEls suggeriments són opcionals i es mostren per revisar-los abans de desar-los.",
       "auto_tune_suggestion": "{device_type} {device_title} han detectat cicles fantasmes. Canvi de min_power suggerit: {current_min}W -> {new_min}W (no s'aplica automàticament).",
       "auto_tune_title": "Sintonització automàtica de WashData",
-      "auto_tune_fallback": "{device_type} {device_title} han detectat cicles fantasmes. Canvi de min_power suggerit: {current_min}W -> {new_min}W (no s'aplica automàticament)."
+      "auto_tune_fallback": "{device_type} {device_title} han detectat cicles fantasmes. Canvi de min_power suggerit: {current_min}W -> {new_min}W (no s'aplica automàticament).",
+      "timer_default_message": "{device}: temporitzador de {minutes} min",
+      "timer_pause_action_title": "Reprendre el cicle",
+      "timer_pause_body_suffix": "El cicle està en pausa. Obriu el tauler de WashData per reprendre'l."
     }
   },
   "selector": {

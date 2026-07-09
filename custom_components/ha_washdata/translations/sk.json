@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Senzor **Navrhované nastavenia** teraz hlási **{count}** odporúčaní pripravených na použitie.\n\nAk ich chcete skontrolovať a použiť: **Nastavenia > Zariadenia a služby > WashData > Konfigurovať > Rozšírené nastavenia > Použiť navrhované hodnoty**.\n\nNávrhy sú voliteľné a pred uložením sa zobrazia na kontrolu.",
       "auto_tune_suggestion": "{device_type} {device_title} zistilo cykly duchov. Navrhovaná zmena minimálneho výkonu: {current_min}W -> {new_min}W (neaplikuje sa automaticky).",
       "auto_tune_title": "Automatické ladenie WashData",
-      "auto_tune_fallback": "{device_type} {device_title} zistilo cykly duchov. Navrhovaná zmena minimálneho výkonu: {current_min}W -> {new_min}W (neaplikuje sa automaticky)."
+      "auto_tune_fallback": "{device_type} {device_title} zistilo cykly duchov. Navrhovaná zmena minimálneho výkonu: {current_min}W -> {new_min}W (neaplikuje sa automaticky).",
+      "timer_default_message": "{device}: časovač {minutes} min",
+      "timer_pause_action_title": "Obnoviť cyklus",
+      "timer_pause_body_suffix": "Cyklus je pozastavený. Otvorte panel WashData na obnovenie."
     }
   },
   "selector": {

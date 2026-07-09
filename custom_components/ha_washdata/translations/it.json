@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Il sensore **Impostazioni suggerite** segnala ora **{count}** raccomandazioni utilizzabili.\n\nPer rivederle e applicarle: **Impostazioni > Dispositivi e servizi > WashData > Configura > Impostazioni avanzate > Applica valori suggeriti**.\n\nI suggerimenti sono facoltativi e vengono mostrati per la revisione prima del salvataggio.",
       "auto_tune_suggestion": "{device_type} {device_title} ha rilevato cicli fantasma. Modifica min_power suggerita: {current_min}W -> {new_min}W (non applicata automaticamente).",
       "auto_tune_title": "Sintonizzazione automatica WashData",
-      "auto_tune_fallback": "{device_type} {device_title} ha rilevato cicli fantasma. Modifica min_power suggerita: {current_min}W -> {new_min}W (non applicata automaticamente)."
+      "auto_tune_fallback": "{device_type} {device_title} ha rilevato cicli fantasma. Modifica min_power suggerita: {current_min}W -> {new_min}W (non applicata automaticamente).",
+      "timer_default_message": "{device}: timer di {minutes} min",
+      "timer_pause_action_title": "Riprendi ciclo",
+      "timer_pause_body_suffix": "Il ciclo è in pausa. Apri il pannello WashData per riprendere."
     }
   },
   "selector": {

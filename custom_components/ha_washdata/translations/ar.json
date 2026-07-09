@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "يقدم مستشعر **الإعدادات المقترحة** الآن **{count}** توصيات قابلة للتنفيذ.\n\nلمراجعتها وتطبيقها: **الإعدادات > الأجهزة والخدمات > WashData > التكوين > الإعدادات المتقدمة > تطبيق القيم المقترحة**.\n\nالاقتراحات اختيارية ويتم عرضها للمراجعة قبل حفظها.",
       "auto_tune_suggestion": "تم اكتشاف {device_type} {device_title} دورات شبحية. التغيير الأدنى المقترح للطاقة: {current_min}W -> {new_min}W (لا يتم تطبيقه تلقائيًا).",
       "auto_tune_title": "ضبط تلقائي لـ WashData",
-      "auto_tune_fallback": "تم اكتشاف {device_type} {device_title} دورات شبحية. التغيير الأدنى المقترح للطاقة: {current_min}W -> {new_min}W (لا يتم تطبيقه تلقائيًا)."
+      "auto_tune_fallback": "تم اكتشاف {device_type} {device_title} دورات شبحية. التغيير الأدنى المقترح للطاقة: {current_min}W -> {new_min}W (لا يتم تطبيقه تلقائيًا).",
+      "timer_default_message": "{device}: مؤقت {minutes} دقيقة",
+      "timer_pause_action_title": "استئناف الدورة",
+      "timer_pause_body_suffix": "الدورة متوقفة مؤقتاً. افتح لوحة WashData لاستئنافها."
     }
   },
   "selector": {

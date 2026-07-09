@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Сензорът **Предложени настройки** вече отчита **{count}** приложими препоръки.\n\nЗа да ги прегледате и приложите: **Настройки > Устройства и услуги > WashData > Конфигуриране > Разширени настройки > Прилагане на предложените стойности**.\n\nПредложенията не са задължителни и се показват за преглед, преди да запазите.",
       "auto_tune_suggestion": "{device_type} {device_title} открити призрачни цикли. Предложена промяна на min_power: {current_min}W -> {new_min}W (не се прилага автоматично).",
       "auto_tune_title": "Автоматична настройка на WashData",
-      "auto_tune_fallback": "{device_type} {device_title} открити призрачни цикли. Предложена промяна на min_power: {current_min}W -> {new_min}W (не се прилага автоматично)."
+      "auto_tune_fallback": "{device_type} {device_title} открити призрачни цикли. Предложена промяна на min_power: {current_min}W -> {new_min}W (не се прилага автоматично).",
+      "timer_default_message": "{device}: таймер за {minutes} мин",
+      "timer_pause_action_title": "Възобновяване на цикъла",
+      "timer_pause_body_suffix": "Цикълът е на пауза. Отворете панела на WashData, за да го възобновите."
     }
   },
   "selector": {

@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "**প্রস্তাবিত সেটিংস** সেন্সর এখন **{count}** অ্যাকশনেবল সুপারিশের রিপোর্ট করে।\n\nসেগুলি পর্যালোচনা এবং প্রয়োগ করতে: **সেটিংস > ডিভাইস ও পরিষেবা > ওয়াশডেটা > কনফিগার > উন্নত সেটিংস > প্রস্তাবিত মান প্রয়োগ করুন**।\n\nপরামর্শগুলি ঐচ্ছিক এবং আপনি সংরক্ষণ করার আগে পর্যালোচনার জন্য দেখানো হয়৷",
       "auto_tune_suggestion": "{device_type} {device_title} ভূত চক্র সনাক্ত করা হয়েছে৷ প্রস্তাবিত min_power পরিবর্তন: {current_min}W -> {new_min}W (স্বয়ংক্রিয়ভাবে প্রয়োগ করা হয় না)।",
       "auto_tune_title": "ওয়াশডেটা অটো-টিউন",
-      "auto_tune_fallback": "{device_type} {device_title} ভূত চক্র সনাক্ত করা হয়েছে৷ প্রস্তাবিত min_power পরিবর্তন: {current_min}W -> {new_min}W (স্বয়ংক্রিয়ভাবে প্রয়োগ করা হয় না)।"
+      "auto_tune_fallback": "{device_type} {device_title} ভূত চক্র সনাক্ত করা হয়েছে৷ প্রস্তাবিত min_power পরিবর্তন: {current_min}W -> {new_min}W (স্বয়ংক্রিয়ভাবে প্রয়োগ করা হয় না)।",
+      "timer_default_message": "{device}: {minutes} মিনিটের টাইমার",
+      "timer_pause_action_title": "চক্র পুনরায় শুরু করুন",
+      "timer_pause_body_suffix": "চক্রটি বিরতি দেওয়া হয়েছে। পুনরায় শুরু করতে WashData প্যানেল খুলুন।"
     }
   },
   "selector": {

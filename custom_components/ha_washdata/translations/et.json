@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Andur **Soovitatud seaded** annab nüüd **{count}** rakendatavaid soovitusi.\n\nNende ülevaatamiseks ja rakendamiseks tehke järgmist. **Seaded > Seadmed ja teenused > WashData > Seadistamine > Täpsemad seaded > Rakenda soovitatud väärtused**.\n\nSoovitused on valikulised ja neid kuvatakse enne salvestamist ülevaatamiseks.",
       "auto_tune_suggestion": "{device_type} {device_title} tuvastas kummitustsüklit. Soovitatav min_võimsuse muutus: {current_min}W -> {new_min}W (ei rakendata automaatselt).",
       "auto_tune_title": "WashData automaatne häälestus",
-      "auto_tune_fallback": "{device_type} {device_title} tuvastas kummitustsüklit. Soovitatav min_võimsuse muutus: {current_min}W -> {new_min}W (ei rakendata automaatselt)."
+      "auto_tune_fallback": "{device_type} {device_title} tuvastas kummitustsüklit. Soovitatav min_võimsuse muutus: {current_min}W -> {new_min}W (ei rakendata automaatselt).",
+      "timer_default_message": "{device}: {minutes} min taimer",
+      "timer_pause_action_title": "Tsükli jätkamine",
+      "timer_pause_body_suffix": "Tsükkel on peatatud. Jätkamiseks avage WashData paneel."
     }
   },
   "selector": {

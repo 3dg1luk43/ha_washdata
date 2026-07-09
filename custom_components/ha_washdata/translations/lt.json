@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "**Siūlomų nustatymų** jutiklis dabar praneša apie **{count}** įgyvendinamas rekomendacijas.\n\nNorėdami juos peržiūrėti ir pritaikyti: **Nustatymai > Įrenginiai ir paslaugos > „WashData” > Konfigūruoti > Išplėstiniai nustatymai > Taikyti siūlomas reikšmes**.\n\nPasiūlymai yra neprivalomi ir rodomi peržiūrėti prieš išsaugant.",
       "auto_tune_suggestion": "{device_type} {device_title} aptikta vaiduoklio ciklų. Siūlomas min_galios pokytis: {current_min}W -> {new_min}W (netaikomas automatiškai).",
       "auto_tune_title": "„WashData“ automatinis derinimas",
-      "auto_tune_fallback": "{device_type} {device_title} aptikta vaiduoklio ciklų. Siūlomas min_galios pokytis: {current_min}W -> {new_min}W (netaikomas automatiškai)."
+      "auto_tune_fallback": "{device_type} {device_title} aptikta vaiduoklio ciklų. Siūlomas min_galios pokytis: {current_min}W -> {new_min}W (netaikomas automatiškai).",
+      "timer_default_message": "{device}: {minutes} min. laikmatis",
+      "timer_pause_action_title": "Tęsti ciklą",
+      "timer_pause_body_suffix": "Ciklas pristabdytas. Atidarykite WashData skydelį, kad tęstumėte."
     }
   },
   "selector": {

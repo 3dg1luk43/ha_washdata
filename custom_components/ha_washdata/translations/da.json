@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Sensoren **Foreslåede indstillinger** rapporterer nu **{count}** handlingsrettede anbefalinger.\n\nSådan gennemgår og anvender du dem: **Indstillinger > Enheder og tjenester > WashData > Konfigurer > Avancerede indstillinger > Anvend foreslåede værdier**.\n\nForslag er valgfrie og vises til gennemgang, før du gemmer.",
       "auto_tune_suggestion": "{device_type} {device_title} registrerede spøgelsescyklusser. Foreslået min_effektændring: {current_min}W -> {new_min}W (ikke anvendt automatisk).",
       "auto_tune_title": "WashData Auto-Tune",
-      "auto_tune_fallback": "{device_type} {device_title} registrerede spøgelsescyklusser. Foreslået min_effektændring: {current_min}W -> {new_min}W (ikke anvendt automatisk)."
+      "auto_tune_fallback": "{device_type} {device_title} registrerede spøgelsescyklusser. Foreslået min_effektændring: {current_min}W -> {new_min}W (ikke anvendt automatisk).",
+      "timer_default_message": "{device}: {minutes} min timer",
+      "timer_pause_action_title": "Genoptag cyklus",
+      "timer_pause_body_suffix": "Cyklussen er sat på pause. Åbn WashData-panelet for at genoptage."
     }
   },
   "selector": {

@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Mae'r synhwyrydd **Gosodiadau a Awgrymir** bellach yn adrodd ar argymhellion y gellir eu gweithredu **{count}**.\n\nI'w hadolygu a'u cymhwyso: **Gosodiadau > Dyfeisiau a Gwasanaethau > Golchi Data > Ffurfweddu > Gosodiadau Uwch > Cymhwyso Gwerthoedd a Awgrymir**.\n\nMae awgrymiadau yn ddewisol ac yn cael eu dangos i'w hadolygu cyn i chi gadw.",
       "auto_tune_suggestion": "{device_type} {device_title} cylchoedd ysbrydion wedi'u canfod. Newid min_power a awgrymir: {current_min}W -> {new_min}W (heb ei gymhwyso'n awtomatig).",
       "auto_tune_title": "Awto-Alaw WashData",
-      "auto_tune_fallback": "{device_type} {device_title} cylchoedd ysbrydion wedi'u canfod. Newid min_power a awgrymir: {current_min}W -> {new_min}W (heb ei gymhwyso'n awtomatig)."
+      "auto_tune_fallback": "{device_type} {device_title} cylchoedd ysbrydion wedi'u canfod. Newid min_power a awgrymir: {current_min}W -> {new_min}W (heb ei gymhwyso'n awtomatig).",
+      "timer_default_message": "{device}: amserydd {minutes} mun",
+      "timer_pause_action_title": "Ail-ddechrau'r Cylch",
+      "timer_pause_body_suffix": "Mae'r cylch wedi'i seibio. Agorwch banel WashData i ail-ddechrau."
     }
   },
   "selector": {

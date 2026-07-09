@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Cảm biến **Cài đặt được đề xuất** hiện báo cáo **{count}** đề xuất có thể thực hiện được.\n\nĐể xem xét và áp dụng chúng: **Cài đặt > Thiết bị & Dịch vụ > WashData > Định cấu hình > Cài đặt nâng cao > Áp dụng các giá trị được đề xuất**.\n\nĐề xuất là tùy chọn và được hiển thị để xem xét trước khi bạn lưu.",
       "auto_tune_suggestion": "{device_type} {device_title} đã phát hiện chu kỳ ma. Thay đổi công suất tối thiểu được đề xuất: {current_min}W -> {new_min}W (không được áp dụng tự động).",
       "auto_tune_title": "Tự động điều chỉnh WashData",
-      "auto_tune_fallback": "{device_type} {device_title} đã phát hiện chu kỳ ma. Thay đổi công suất tối thiểu được đề xuất: {current_min}W -> {new_min}W (không được áp dụng tự động)."
+      "auto_tune_fallback": "{device_type} {device_title} đã phát hiện chu kỳ ma. Thay đổi công suất tối thiểu được đề xuất: {current_min}W -> {new_min}W (không được áp dụng tự động).",
+      "timer_default_message": "{device}: hẹn giờ {minutes} phút",
+      "timer_pause_action_title": "Tiếp tục chu kỳ",
+      "timer_pause_body_suffix": "Chu kỳ đã bị tạm dừng. Mở bảng điều khiển WashData để tiếp tục."
     }
   },
   "selector": {

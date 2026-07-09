@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "**Ehdotetut asetukset** -anturi raportoi nyt **{count}** toimivia suosituksia.\n\nTarkista ja ota ne käyttöön seuraavasti: **Asetukset > Laitteet ja palvelut > WashData > Määritä > Lisäasetukset > Käytä ehdotettuja arvoja**.\n\nEhdotukset ovat valinnaisia, ja ne näytetään tarkistettavaksi ennen tallentamista.",
       "auto_tune_suggestion": "{device_type} {device_title} havaitsi haamujaksoja. Ehdotettu minimitehon muutos: {current_min}W -> {new_min}W (ei käytössä automaattisesti).",
       "auto_tune_title": "WashData automaattinen viritys",
-      "auto_tune_fallback": "{device_type} {device_title} havaitsi haamujaksoja. Ehdotettu minimitehon muutos: {current_min}W -> {new_min}W (ei käytössä automaattisesti)."
+      "auto_tune_fallback": "{device_type} {device_title} havaitsi haamujaksoja. Ehdotettu minimitehon muutos: {current_min}W -> {new_min}W (ei käytössä automaattisesti).",
+      "timer_default_message": "{device}: {minutes} min ajastin",
+      "timer_pause_action_title": "Jatka sykliä",
+      "timer_pause_body_suffix": "Sykli on keskeytetty. Avaa WashData-paneeli jatkaaksesi."
     }
   },
   "selector": {

@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Датчик **Предложенные настройки** теперь сообщает о **{count}** действенных рекомендациях.\n\nЧтобы просмотреть и применить их: **Настройки > Устройства и службы > WashData > Настройка > Расширенные настройки > Применить предложенные значения**.\n\nПредложения необязательны и отображаются для просмотра перед сохранением.",
       "auto_tune_suggestion": "{device_type} {device_title} обнаружил ложные циклы. Рекомендуемое изменение min_power: {current_min}Вт -> {new_min}Вт (не применяется автоматически).",
       "auto_tune_title": "Автоматическая настройка WashData",
-      "auto_tune_fallback": "{device_type} {device_title} обнаружил ложные циклы. Рекомендуемое изменение min_power: {current_min}Вт -> {new_min}Вт (не применяется автоматически)."
+      "auto_tune_fallback": "{device_type} {device_title} обнаружил ложные циклы. Рекомендуемое изменение min_power: {current_min}Вт -> {new_min}Вт (не применяется автоматически).",
+      "timer_default_message": "{device}: таймер {minutes} мин",
+      "timer_pause_action_title": "Возобновить цикл",
+      "timer_pause_body_suffix": "Цикл на паузе. Откройте панель WashData для возобновления."
     }
   },
   "selector": {

@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "**Iradokitako ezarpenak** sentsoreak **{count}** gomendio akziogarriak ematen ditu orain.\n\nHoriek berrikusteko eta aplikatzeko: **Ezarpenak > Gailuak eta zerbitzuak > WashData > Konfiguratu > Ezarpen aurreratuak > Aplikatu iradokitako balioak**.\n\nIradokizunak aukerakoak dira eta gorde aurretik berrikusteko erakusten dira.",
       "auto_tune_suggestion": "{device_type} {device_title} mamu-zikloak detektatu ditu. Iradokitako potentzia minimoaren aldaketa: {current_min}W -> {new_min}W (ez da automatikoki aplikatu).",
       "auto_tune_title": "WashData Auto-Tune",
-      "auto_tune_fallback": "{device_type} {device_title} mamu-zikloak detektatu ditu. Iradokitako potentzia minimoaren aldaketa: {current_min}W -> {new_min}W (ez da automatikoki aplikatu)."
+      "auto_tune_fallback": "{device_type} {device_title} mamu-zikloak detektatu ditu. Iradokitako potentzia minimoaren aldaketa: {current_min}W -> {new_min}W (ez da automatikoki aplikatu).",
+      "timer_default_message": "{device}: {minutes} min-ko tenporizadorea",
+      "timer_pause_action_title": "Berrekin zikloa",
+      "timer_pause_body_suffix": "Zikloa pausatuta dago. Ireki WashData panela berriro hasteko."
     }
   },
   "selector": {

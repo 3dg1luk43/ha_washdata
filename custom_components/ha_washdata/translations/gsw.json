@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Der Sensor **Vorgeschlagene Einstellungen** meldet jetzt **{count}** umsetzbare Empfehlungen.\n\nUm sie zu überprüfen und anzuwenden: **Einstellungen > Geräte & Dienste > WashData > Konfigurieren > Erweiterte Einstellungen > Vorgeschlagene Werte anwenden**.\n\nVorschläge sind optional und werden vor dem Speichern zur Überprüfung angezeigt.",
       "auto_tune_suggestion": "{device_type} {device_title} hat Geisterzyklen erkannt. Vorgeschlagene Änderung der Mindestleistung: {current_min}W -> {new_min}W (wird nicht automatisch angewendet).",
       "auto_tune_title": "WashData Auto-Tune",
-      "auto_tune_fallback": "{device_type} {device_title} hat Geisterzyklen erkannt. Vorgeschlagene Änderung der Mindestleistung: {current_min}W -> {new_min}W (wird nicht automatisch angewendet)."
+      "auto_tune_fallback": "{device_type} {device_title} hat Geisterzyklen erkannt. Vorgeschlagene Änderung der Mindestleistung: {current_min}W -> {new_min}W (wird nicht automatisch angewendet).",
+      "timer_default_message": "{device}: {minutes} Min. Timer",
+      "timer_pause_action_title": "Zyklus fortsetzen",
+      "timer_pause_body_suffix": "Der Zyklus ist angehalten. Öffnen Sie das WashData-Panel, um fortzufahren."
     }
   },
   "selector": {

@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Tuairiscíonn an braiteoir **Socruithe Molta** anois **{count}** molta inghníomhaithe.\n\nChun iad a athbhreithniú agus a chur i bhfeidhm: **Socruithe > Gléasanna & Seirbhísí > WashData > Cumraigh > Ardsocruithe > Cuir Luachanna Molta i bhFeidhm**.\n\nTá na moltaí roghnach agus taispeántar iad le haghaidh athbhreithniú sula sábhálann tú.",
       "auto_tune_suggestion": "{device_type} {device_title} timthriallta taibhsí braite. Athrú molta min_power: {current_min}W -> {new_min}W (gan chur i bhfeidhm go huathoibríoch).",
       "auto_tune_title": "WashData Auto-Tune",
-      "auto_tune_fallback": "{device_type} {device_title} timthriallta taibhsí braite. Athrú molta min_power: {current_min}W -> {new_min}W (gan chur i bhfeidhm go huathoibríoch)."
+      "auto_tune_fallback": "{device_type} {device_title} timthriallta taibhsí braite. Athrú molta min_power: {current_min}W -> {new_min}W (gan chur i bhfeidhm go huathoibríoch).",
+      "timer_default_message": "{device}: {minutes} nóim uaineadóir",
+      "timer_pause_action_title": "Atosaigh Timthriall",
+      "timer_pause_body_suffix": "Tá an timthriall ar sos. Oscail painéal WashData chun atosú."
     }
   },
   "selector": {

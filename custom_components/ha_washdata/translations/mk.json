@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Сензорот **Предложени поставки** сега известува **{count}** активни препораки.\n\nЗа да ги прегледате и примените: **Поставки > Уреди и услуги > WashData > Конфигурирај > Напредни поставки > Примени ги предложените вредности**.\n\nПредлозите се опционални и се прикажани за преглед пред да зачувате.",
       "auto_tune_suggestion": "{device_type} {device_title} открија циклуси на духови. Предложена промена на мин_моќноста: {current_min}W -> {new_min}W (не се применува автоматски).",
       "auto_tune_title": "Автоматско подесување на WashData",
-      "auto_tune_fallback": "{device_type} {device_title} открија циклуси на духови. Предложена промена на мин_моќноста: {current_min}W -> {new_min}W (не се применува автоматски)."
+      "auto_tune_fallback": "{device_type} {device_title} открија циклуси на духови. Предложена промена на мин_моќноста: {current_min}W -> {new_min}W (не се применува автоматски).",
+      "timer_default_message": "{device}: тајмер од {minutes} мин.",
+      "timer_pause_action_title": "Продолжи со циклусот",
+      "timer_pause_body_suffix": "Циклусот е паузиран. Отворете го WashData панелот за да продолжите."
     }
   },
   "selector": {

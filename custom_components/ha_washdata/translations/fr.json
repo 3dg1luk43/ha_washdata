@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Le capteur **Paramètres suggérés** signale désormais **{count}** recommandations exploitables.\n\nPour les consulter et les appliquer : **Paramètres > Appareils et services > WashData > Configurer > Paramètres avancés > Appliquer les valeurs suggérées**.\n\nLes suggestions sont facultatives et affichées pour examen avant d’enregistrer.",
       "auto_tune_suggestion": "{device_type} {device_title} cycles fantômes détectés. Modification de min_power suggérée : {current_min}W -> {new_min}W (non appliqué automatiquement).",
       "auto_tune_title": "Réglage automatique des données WashData",
-      "auto_tune_fallback": "{device_type} {device_title} cycles fantômes détectés. Modification de min_power suggérée : {current_min}W -> {new_min}W (non appliqué automatiquement)."
+      "auto_tune_fallback": "{device_type} {device_title} cycles fantômes détectés. Modification de min_power suggérée : {current_min}W -> {new_min}W (non appliqué automatiquement).",
+      "timer_default_message": "{device} : minuterie de {minutes} min",
+      "timer_pause_action_title": "Reprendre le cycle",
+      "timer_pause_body_suffix": "Le cycle est en pause. Ouvrez le panneau WashData pour reprendre."
     }
   },
   "selector": {

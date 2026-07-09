@@ -67,7 +67,10 @@
       "suggestions_ready_notification_message": "Датчик **Пропонованих налаштувань** тепер повідомляє **{count}** дієві рекомендації.\n\nЩоб переглянути та застосувати їх: **Налаштування > Пристрої та служби > WashData > Налаштувати > Розширені параметри > Застосувати запропоновані значення**.\n\nПропозиції є необов’язковими та відображаються для перегляду перед збереженням.",
       "auto_tune_suggestion": "{device_type} {device_title} виявлено цикли привидів. Пропонована зміна min_power: {current_min}W -> {new_min}W (не застосовується автоматично).",
       "auto_tune_title": "Автоналаштування WashData",
-      "auto_tune_fallback": "{device_type} {device_title} виявлено цикли привидів. Пропонована зміна min_power: {current_min}W -> {new_min}W (не застосовується автоматично)."
+      "auto_tune_fallback": "{device_type} {device_title} виявлено цикли привидів. Пропонована зміна min_power: {current_min}W -> {new_min}W (не застосовується автоматично).",
+      "timer_default_message": "{device}: таймер {minutes} хв",
+      "timer_pause_action_title": "Відновити цикл",
+      "timer_pause_body_suffix": "Цикл призупинено. Відкрийте панель WashData для відновлення."
     }
   },
   "selector": {
