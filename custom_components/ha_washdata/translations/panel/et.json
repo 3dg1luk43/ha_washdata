@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Tsükli Lõpp"
     },
+    "power_off": {
+      "label": "Toite Väljalülitamine"
+    },
     "signal_processing": {
       "label": "Signaali Töötlus"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Lõpu Kordusloendur",
       "doc": "Enne tsükli lõppu on vajalik järjestikuste alla stopp-läve näitude arv. 1 sobib enamiku pistikute jaoks. Tõstke väärtuseni 2–3, kui teie nutipistik teatab aeg-ajalt valenull-näidist tsükli keskel ja teie tsüklid lõpevad enneaegselt."
+    },
+    "power_off_threshold_w": {
+      "label": "Toite Väljalülitamise Lävi",
+      "doc": "Valikuline võimsuspõhine Väljas-oleku tuvastamine. Kui väärtus on üle 0 ja tsükkel on lõppenud ning võimsus püsib sellest tasemest allpool Toite Väljalülitamise Viivituse jooksul, loetakse masin väljalülitatuks ja olek naaseb olekusse Väljas. Keelamiseks jätke väärtuseks 0 (vaikimisi). Määrake see tegelikust väljalülitatud tasemest kõrgemale, kuid Peatumise Läve ja oma masina lõpetatud-kuid-sees ooterežiimi tarbimisest allapoole; kui see ei ole Peatumise Lävest allpool, seda eiratakse. Sisselülitatuna asendab see olekusse Väljas naasmisel Edenemise Lähtestamise Viivituse, nii et lõpetatud masin jääb olekusse Valmis/Puhas, kuni see tegelikult välja lülitatakse."
+    },
+    "power_off_delay": {
+      "label": "Toite Väljalülitamise Viivitus",
+      "doc": "Kui kaua peab võimsus pärast tsükli lõppu püsima allpool Toite Väljalülitamise Läve, enne kui olek naaseb olekusse Väljas. Kasutatakse ainult siis, kui Toite Väljalülitamise Lävi on üle 0. Kontrollitakse taustatakti järgi, seega tegelik viivitus ümardatakse üles järgmise oleku aegumise sammuni."
     },
     "sampling_interval": {
       "label": "Proovivõtu Intervall",

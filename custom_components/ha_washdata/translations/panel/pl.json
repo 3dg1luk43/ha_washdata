@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Koniec Cyklu"
     },
+    "power_off": {
+      "label": "Wyłączenie zasilania"
+    },
     "signal_processing": {
       "label": "Przetwarzanie Sygnału"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Liczba Powtórzeń Zakończenia",
       "doc": "Liczba kolejnych odczytów poniżej progu wymaganych przed zakończeniem cyklu. 1 jest odpowiedni dla większości wtyczek. Zwiększ do 2-3, jeśli inteligentna wtyczka czasami zgłasza w połowie cyklu próbkę fałszywie zerową, a cykle kończą się przedwcześnie."
+    },
+    "power_off_threshold_w": {
+      "label": "Próg Wyłączenia Zasilania",
+      "doc": "Opcjonalne wykrywanie stanu „Wyłączony” na podstawie mocy. Gdy wartość jest większa niż 0, po zakończeniu cyklu, jeśli moc pozostaje poniżej tego poziomu przez czas „Opóźnienie Wyłączenia Zasilania”, urządzenie jest traktowane jako wyłączone, a stan wraca do „Wyłączony”. Pozostaw 0, aby wyłączyć (wartość domyślna). Ustaw powyżej rzeczywistego poziomu wyłączonego urządzenia, a poniżej „Próg Zatrzymania” oraz poniżej poboru w trybie czuwania po zakończeniu; jeśli wartość nie jest niższa niż „Próg Zatrzymania”, jest ignorowana. Po włączeniu zastępuje „Opóźnienie Resetowania Postępu” przy powrocie do „Wyłączony”, więc zakończone urządzenie pozostaje w stanie „Zakończony”/„Czysty”, dopóki nie zostanie faktycznie wyłączone."
+    },
+    "power_off_delay": {
+      "label": "Opóźnienie Wyłączenia Zasilania",
+      "doc": "Jak długo moc musi pozostawać poniżej „Próg Wyłączenia Zasilania” po zakończeniu cyklu, zanim stan wróci do „Wyłączony”. Używane tylko wtedy, gdy „Próg Wyłączenia Zasilania” jest większy niż 0. Sprawdzane w rytmie działania w tle, więc efektywne opóźnienie jest zaokrąglane w górę do następnego taktu wygaśnięcia stanu."
     },
     "sampling_interval": {
       "label": "Interwał Próbkowania",

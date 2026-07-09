@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Döngü Sonu"
     },
+    "power_off": {
+      "label": "Güç Kapatma"
+    },
     "signal_processing": {
       "label": "Sinyal İşleme"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Bitiş Tekrar Sayısı",
       "doc": "Döngü sona ermeden önce gereken ardışık durma eşiği altı okumalarının sayısı. Çoğu fiş için 1 uygundur. Akıllı priziniz ara sıra döngünün ortasında yanlış sıfır örneği bildiriyorsa ve döngüleriniz zamanından önce sona eriyorsa 2-3'e yükseltin."
+    },
+    "power_off_threshold_w": {
+      "label": "Güç Kapatma Eşiği",
+      "doc": "Güce dayalı isteğe bağlı Kapalı algılama. 0'ın üzerinde olduğunda, bir döngü bittikten sonra güç, Güç Kapatma Gecikmesi süresince bu seviyenin altında kalırsa makine kapatılmış sayılır ve durum Kapalı'ya döner. Devre dışı bırakmak için 0'da bırakın (varsayılan). Bu değeri, gerçek kapalı taban değerinin üzerinde ve Durdurma Eşiği ile makinenizin bittiği hâlde açık kalan bekleme tüketiminin altında ayarlayın; Durdurma Eşiği'nin altında değilse yok sayılır. Etkinleştirildiğinde, Kapalı'ya dönmek için İlerleme Sıfırlama Gecikmesi'nin yerini alır; böylece biten bir makine, gerçekten kapatılana kadar Bitti/Temiz durumunda kalır."
+    },
+    "power_off_delay": {
+      "label": "Güç Kapatma Gecikmesi",
+      "doc": "Bir döngü bittikten sonra durumun Kapalı'ya dönmesinden önce gücün Güç Kapatma Eşiği'nin altında ne kadar süre kalması gerektiğidir. Yalnızca Güç Kapatma Eşiği 0'ın üzerindeyken kullanılır. Arka plan döngüsünde denetlendiğinden, geçerli gecikme bir sonraki durum sona erme adımına yukarı yuvarlanır."
     },
     "sampling_interval": {
       "label": "Örnekleme Aralığı",

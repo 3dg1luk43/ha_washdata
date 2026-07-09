@@ -125,10 +125,14 @@ How raw power sensor data is processed into cycle states.
      FINISHED --> ANTI_WRINKLE: Dryer tumble pulses (opt-in)
      ANTI_WRINKLE --> OFF: True-off after idle
      FINISHED --> CLEAN: Door sensor configured, laundry not yet removed
-     CLEAN --> OFF: Door opened (unloaded)
-     FINISHED --> OFF: After progress-reset delay
+     CLEAN --> OFF: Door opened (unloaded); or power-off (opt-in, #284)
+     FINISHED --> OFF: Progress-reset delay (default); or power < power_off_threshold for power_off_delay (opt-in, #284)
+     INTERRUPTED --> OFF: Progress-reset delay; or power-off (#284)
+     FORCE_STOPPED --> OFF: Progress-reset delay; or power-off (#284)
      FINISHED --> [*]
  ```
+
+ > **Terminal → Off is a single owner.** All terminal states (FINISHED / INTERRUPTED / FORCE_STOPPED, plus the CLEAN overlay) return to OFF through one place, `manager._reset_terminal_to_off`, driven by `_handle_state_expiry`. By default that fires after the **Progress Reset Delay**. When the opt-in **Power Off Threshold** (`power_off_threshold_w`, issue #284) is set below `stop_threshold_w`, power-based Off takes over the transition: the terminal state persists until power stays below the threshold for `power_off_delay`, and the progress-reset timer then only clears the progress bar (it no longer forces OFF). `ANTI_WRINKLE → OFF` keeps its own idle/timeout logic in the detector and is unaffected.
  
  ### 4. Matching Pipeline (5-Stage)
  The logic used to identify which profile matches the current cycle.
@@ -247,8 +251,9 @@ python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG
 **Solution:**
 - Progress reaches 100% immediately when cycle completes (clear signal)
 - Progress stays at 100% for the **Progress Reset Delay** (default **30 min**, `progress_reset_delay`) as the unload window
-- After that idle window, progress automatically resets to 0%
+- After that idle window, progress automatically resets to 0% **and** the state returns to Off
 - If a new cycle starts within the window, the reset is cancelled
+- **Power-based Off (opt-in, #284):** when `power_off_threshold_w > 0` (and below `stop_threshold_w`), the state returns to Off as soon as power stays below the threshold for `power_off_delay` seconds instead of on the timer. In that mode the Progress Reset Delay still clears the progress bar but no longer forces Off, so a finished-but-still-on machine stays in Finished/Clean until it is actually switched off. Evaluated only in terminal states, so a mid-cycle soak is never read as Off; disabled (`0`) leaves behaviour byte-identical.
 
 **Files Modified:**
 - `custom_components/ha_washdata/manager.py` - Complete implementation

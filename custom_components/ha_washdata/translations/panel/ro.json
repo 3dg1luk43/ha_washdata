@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Sfârșit Ciclu"
     },
+    "power_off": {
+      "label": "Oprire Alimentare"
+    },
     "signal_processing": {
       "label": "Procesare Semnal"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Număr de Repetări la Sfârșit",
       "doc": "Numărul de citiri consecutive sub pragul de oprire necesare înainte de încheierea ciclului. 1 este în regulă pentru majoritatea prizei. Ridicați la 2-3 dacă mufa dvs. inteligentă raportează ocazional un eșantion fals zero la jumătatea ciclului și ciclurile dumneavoastră se termină prematur."
+    },
+    "power_off_threshold_w": {
+      "label": "Prag Oprire Alimentare",
+      "doc": "Detectare opțională a stării Oprit pe baza puterii. Când este peste 0, odată ce un ciclu s-a terminat și puterea rămâne sub acest nivel pe durata specificată de Întârziere Oprire Alimentare, mașina este considerată oprită, iar starea revine la Oprit. Lăsați la 0 pentru a dezactiva (valoarea implicită). Setați-l peste consumul real când mașina este oprită și sub Prag de Oprire, precum și sub consumul în standby al mașinii (terminată, dar încă pornită); dacă nu este sub Prag de Oprire, este ignorat. Când este activată, înlocuiește Întârziere Resetare Progres pentru revenirea la Oprit, astfel încât o mașină terminată rămâne în Terminat/Curat până când este oprită efectiv."
+    },
+    "power_off_delay": {
+      "label": "Întârziere Oprire Alimentare",
+      "doc": "Cât timp trebuie să rămână puterea sub Prag Oprire Alimentare după terminarea unui ciclu înainte ca starea să revină la Oprit. Folosit doar când Prag Oprire Alimentare este peste 0. Este verificat conform cadenței din fundal, astfel încât întârzierea efectivă este rotunjită în sus până la următorul tick de expirare a stării."
     },
     "sampling_interval": {
       "label": "Interval de Eșantionare",

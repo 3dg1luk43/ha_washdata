@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Fundi i ciklit"
     },
+    "power_off": {
+      "label": "Fikja e energjisë"
+    },
     "signal_processing": {
       "label": "Përpunimi i sinjalit"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Numri i përsëritjeve të fundit",
       "doc": "Numri i leximeve të njëpasnjëshme nën pragun e ndalimit të kërkuar para përfundimit të ciklit. 1 është e mirë për shumicën e prizave. Rriteni në 2-3 nëse spina juaj inteligjente raporton herë pas here një mostër të rreme me zero në mes të ciklit dhe ciklet tuaja mbarojnë para kohe."
+    },
+    "power_off_threshold_w": {
+      "label": "Pragu i fikjes së energjisë",
+      "doc": "Zbulim opsional i gjendjes Fikur bazuar në fuqinë. Kur është mbi 0, pasi një cikël të ketë përfunduar dhe fuqia të qëndrojë nën këtë nivel për Vonesën e fikjes së energjisë, makina trajtohet si e fikur dhe gjendja kthehet në „Fikur“. Lëreni në 0 për ta çaktivizuar (parazgjedhja). Vendoseni mbi nivelin real të fikjes dhe nën Pragun e ndalimit dhe nën konsumin në gatishmëri të makinës suaj (e përfunduar, por ende e ndezur); nëse nuk është nën Pragun e ndalimit, ai injorohet. Kur aktivizohet, ai zëvendëson Vonesën e rivendosjes së progresit për kthimin në „Fikur“, kështu që një makinë e përfunduar qëndron në „Përfunduar/I pastër“ derisa të fiket vërtet."
+    },
+    "power_off_delay": {
+      "label": "Vonesa e fikjes së energjisë",
+      "doc": "Sa kohë duhet të qëndrojë fuqia nën Pragun e fikjes së energjisë pasi një cikël të përfundojë përpara se gjendja të kthehet në „Fikur“. Përdoret vetëm kur Pragu i fikjes së energjisë është mbi 0. Kontrollohet në ritmin e sfondit, kështu që vonesa efektive rrumbullakoset lart deri te rrahja tjetër e skadimit të gjendjes."
     },
     "sampling_interval": {
       "label": "Intervali i kampionimit",

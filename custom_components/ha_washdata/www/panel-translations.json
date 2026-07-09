@@ -533,6 +533,9 @@
       "cycle_end": {
         "label": "Cycle End"
       },
+      "power_off": {
+        "label": "Power Off"
+      },
       "signal_processing": {
         "label": "Signal Processing"
       },
@@ -654,6 +657,14 @@
       "end_repeat_count": {
         "label": "End Repeat Count",
         "doc": "Number of consecutive below-stop-threshold readings required before the cycle ends. 1 is fine for most plugs. Raise to 2-3 if your smart plug occasionally reports a false-zero sample mid-cycle and your cycles are ending prematurely."
+      },
+      "power_off_threshold_w": {
+        "label": "Power Off Threshold",
+        "doc": "Optional power-based Off detection. When above 0, once a cycle has finished and power stays below this level for the Power Off Delay, the machine is treated as switched off and the state returns to Off. Leave at 0 to disable (the default). Set it above the true switched-off floor and below the Stop Threshold and your machine's finished-but-on standby draw; if it is not below the Stop Threshold it is ignored. When enabled it replaces the Progress Reset Delay for returning to Off, so a finished machine stays in Finished/Clean until it is actually powered off."
+      },
+      "power_off_delay": {
+        "label": "Power Off Delay",
+        "doc": "How long power must stay below the Power Off Threshold after a cycle finishes before the state returns to Off. Only used when the Power Off Threshold is above 0. Checked on the background cadence, so the effective delay rounds up to the next state-expiry tick."
       },
       "sampling_interval": {
         "label": "Sampling Interval",
@@ -1449,6 +1460,9 @@
       "cycle_end": {
         "label": "Край на цикъла"
       },
+      "power_off": {
+        "label": "Изключване на захранването"
+      },
       "signal_processing": {
         "label": "Обработка на сигнала"
       },
@@ -1570,6 +1584,14 @@
       "end_repeat_count": {
         "label": "Брой повторения при край",
         "doc": "Брой последователни отчитания под прага на спиране, необходими преди края на цикъла. 1 е добре за повечето щепсели. Увеличете до 2-3, ако интелигентният ви щепсел от време на време отчита проба с фалшива нула по средата на цикъла и вашите цикли приключват преждевременно."
+      },
+      "power_off_threshold_w": {
+        "label": "Праг за изключване на захранването",
+        "doc": "Опционално откриване на изключено състояние въз основа на мощността. Когато е над 0, след като цикълът приключи и мощността остане под това ниво в продължение на Закъснение при изключване на захранването, машината се третира като изключена и състоянието се връща на „Изкл“. Оставете на 0, за да го деактивирате (по подразбиране). Задайте го над реалното ниво на изключено захранване и под Праг на спиране и под потреблението в режим на готовност на машината ви (завършила, но все още включена); ако не е под Праг на спиране, се игнорира. Когато е активирано, то замества Закъснение при нулиране на напредъка за връщане на „Изкл“, така че завършила машина остава на „Готово/Чисто“, докато действително не бъде изключена."
+      },
+      "power_off_delay": {
+        "label": "Закъснение при изключване на захранването",
+        "doc": "Колко дълго мощността трябва да остане под Праг за изключване на захранването, след като цикълът приключи, преди състоянието да се върне на „Изкл“. Използва се само когато Праг за изключване на захранването е над 0. Проверява се на фонов ритъм, така че ефективното закъснение се закръгля нагоре до следващия тик за изтичане на състоянието."
       },
       "sampling_interval": {
         "label": "Интервал на вземане на проби",
@@ -2365,6 +2387,9 @@
       "cycle_end": {
         "label": "Kraj ciklusa"
       },
+      "power_off": {
+        "label": "Isključivanje napajanja"
+      },
       "signal_processing": {
         "label": "Obrada signala"
       },
@@ -2486,6 +2511,14 @@
       "end_repeat_count": {
         "label": "Broj ponavljanja kraja",
         "doc": "Broj uzastopnih očitavanja ispod praga zaustavljanja potrebnih prije završetka ciklusa. 1 je u redu za većinu utikača. Povećajte na 2-3 ako vaš pametni utikač povremeno prijavi uzorak lažne nule usred ciklusa i vaši ciklusi se završavaju prerano."
+      },
+      "power_off_threshold_w": {
+        "label": "Prag isključivanja napajanja",
+        "doc": "Opciono otkrivanje isključenog stanja na osnovu snage. Kada je iznad 0, nakon što se ciklus završi i snaga ostane ispod ovog nivoa tokom Kašnjenja isključivanja napajanja, mašina se tretira kao isključena i stanje se vraća na „Isključeno“. Ostavite na 0 da onemogućite (zadano). Postavite ga iznad stvarnog nivoa isključenog napajanja, a ispod Praga zaustavljanja i ispod potrošnje vaše mašine u stanju pripravnosti (završeno, ali još uključeno); ako nije ispod Praga zaustavljanja, zanemaruje se. Kada je omogućeno, zamjenjuje Kašnjenje poništavanja napretka za povratak na „Isključeno“, tako da završena mašina ostaje na „Završeno/Čisto“ dok se stvarno ne isključi."
+      },
+      "power_off_delay": {
+        "label": "Kašnjenje isključivanja napajanja",
+        "doc": "Koliko dugo snaga mora ostati ispod Praga isključivanja napajanja nakon što se ciklus završi prije nego što se stanje vrati na „Isključeno“. Koristi se samo kada je Prag isključivanja napajanja iznad 0. Provjerava se na pozadinskom ritmu, tako da se efektivno kašnjenje zaokružuje naviše na sljedeći otkucaj isteka stanja."
       },
       "sampling_interval": {
         "label": "Interval uzorkovanja",
@@ -3281,6 +3314,9 @@
       "cycle_end": {
         "label": "Konec cyklu"
       },
+      "power_off": {
+        "label": "Vypnutí napájení"
+      },
       "signal_processing": {
         "label": "Zpracování signálu"
       },
@@ -3402,6 +3438,14 @@
       "end_repeat_count": {
         "label": "Počet opakování konce",
         "doc": "Počet po sobě jdoucích čtení pod prahem zastavení, potřebných před ukončením cyklu. 1 je v pořádku pro většinu zástrček. Zvyšte na 2–3, pokud vaše chytrá zástrčka občas hlásí falešně nulový vzorek během cyklu a vaše cykly předčasně končí."
+      },
+      "power_off_threshold_w": {
+        "label": "Práh vypnutí napájení",
+        "doc": "Volitelná detekce stavu „Vypnuto“ podle příkonu. Když je hodnota větší než 0, po dokončení cyklu, pokud příkon zůstane pod touto úrovní po dobu „Zpoždění vypnutí napájení“, je spotřebič považován za vypnutý a stav se vrátí na „Vypnuto“. Ponechte 0 pro vypnutí (výchozí). Nastavte ji nad skutečnou úroveň vypnutého spotřebiče a pod „Práh zastavení“ i pod pohotovostní odběr dokončeného, ale stále zapnutého spotřebiče; pokud není nižší než „Práh zastavení“, je ignorována. Když je zapnuta, nahrazuje „Zpoždění resetu průběhu“ pro návrat na „Vypnuto“, takže dokončený spotřebič zůstane ve stavu „Dokončeno“/„Čistý“, dokud není skutečně vypnut."
+      },
+      "power_off_delay": {
+        "label": "Zpoždění vypnutí napájení",
+        "doc": "Jak dlouho musí příkon zůstat pod hodnotou „Práh vypnutí napájení“ po dokončení cyklu, než se stav vrátí na „Vypnuto“. Používá se pouze tehdy, když je „Práh vypnutí napájení“ větší než 0. Kontroluje se v pravidelném intervalu na pozadí, takže se skutečné zpoždění zaokrouhluje nahoru na nejbližší tik vypršení stavu."
       },
       "sampling_interval": {
         "label": "Interval vzorkování",
@@ -4197,6 +4241,9 @@
       "cycle_end": {
         "label": "Cyklusslut"
       },
+      "power_off": {
+        "label": "Slukning"
+      },
       "signal_processing": {
         "label": "Signalbehandling"
       },
@@ -4318,6 +4365,14 @@
       "end_repeat_count": {
         "label": "Slutgentagelsesantal",
         "doc": "Antallet af på hinanden følgende aflæsninger under stop-tærskel, der kræves, før cyklussen slutter. 1 er fint til de fleste stik. Hæv til 2-3, hvis dit smartstik lejlighedsvis rapporterer en falsk nul-prøve midt i cyklussen, og dine cyklusser slutter for tidligt."
+      },
+      "power_off_threshold_w": {
+        "label": "Slukketærskel",
+        "doc": "Valgfri effektbaseret registrering af slukning. Når værdien er over 0, betragtes maskinen som slukket, og tilstanden vender tilbage til Slukket, når en cyklus er afsluttet, og effekten forbliver under dette niveau i hele Slukkeforsinkelsen. Lad den stå på 0 for at deaktivere (standard). Sæt den over det reelle slukkede nulniveau og under Stoptærskel samt under maskinens standbyforbrug i tilstanden færdig-men-tændt; hvis den ikke er under Stoptærskel, ignoreres den. Når den er aktiveret, erstatter den Forsinkelse ved nulstilling af fremskridt for at vende tilbage til Slukket, så en færdig maskine forbliver i Færdig/Ren, indtil den faktisk slukkes."
+      },
+      "power_off_delay": {
+        "label": "Slukkeforsinkelse",
+        "doc": "Hvor længe effekten skal forblive under Slukketærskel, efter at en cyklus er afsluttet, før tilstanden vender tilbage til Slukket. Bruges kun, når Slukketærskel er over 0. Kontrolleres i baggrundstakten, så den effektive forsinkelse rundes op til næste tilstandsudløbstakt."
       },
       "sampling_interval": {
         "label": "Samplingsinterval",
@@ -5113,6 +5168,9 @@
       "cycle_end": {
         "label": "Zyklusende"
       },
+      "power_off": {
+        "label": "Abschaltung"
+      },
       "signal_processing": {
         "label": "Signalverarbeitung"
       },
@@ -5234,6 +5292,14 @@
       "end_repeat_count": {
         "label": "End-Wiederholungsanzahl",
         "doc": "Anzahl der aufeinanderfolgenden Messwerte unterhalb des Stoppschwellenwerts, die erforderlich sind, bevor der Zyklus endet. 1 reicht für die meisten Stecker aus. Erhöhen Sie den Wert auf 2–3, wenn Ihr Smart Plug mitten im Zyklus gelegentlich eine falsche Nullprobe meldet und Ihre Zyklen vorzeitig enden."
+      },
+      "power_off_threshold_w": {
+        "label": "Abschaltschwellenwert",
+        "doc": "Optionale leistungsbasierte Erkennung des Ausschaltens. Bei einem Wert über 0 gilt die Maschine als ausgeschaltet und der Status wechselt zurück zu Aus, sobald ein Zyklus beendet ist und die Leistung für die Dauer der Abschaltverzögerung unter diesem Wert bleibt. Bei 0 belassen, um die Funktion zu deaktivieren (Standard). Setzen Sie den Wert über den echten Abschalt-Nullpegel und unter den Stoppschwellenwert sowie unter die Standby-Leistung Ihrer Maschine im Zustand fertig-aber-eingeschaltet; liegt er nicht unter dem Stoppschwellenwert, wird er ignoriert. Wenn aktiviert, ersetzt dieser Wert die Fortschritts-Reset-Verzögerung für die Rückkehr zu Aus, sodass eine fertige Maschine in Fertig/Sauber bleibt, bis sie tatsächlich ausgeschaltet wird."
+      },
+      "power_off_delay": {
+        "label": "Abschaltverzögerung",
+        "doc": "Wie lange die Leistung nach dem Ende eines Zyklus unter dem Abschaltschwellenwert bleiben muss, bevor der Status zurück zu Aus wechselt. Wird nur verwendet, wenn der Abschaltschwellenwert über 0 liegt. Die Prüfung erfolgt im Hintergrundtakt, daher wird die tatsächliche Verzögerung auf den nächsten Statusablauf-Takt aufgerundet."
       },
       "sampling_interval": {
         "label": "Abtastintervall",
@@ -6029,6 +6095,9 @@
       "cycle_end": {
         "label": "Λήξη Κύκλου"
       },
+      "power_off": {
+        "label": "Απενεργοποίηση"
+      },
       "signal_processing": {
         "label": "Επεξεργασία Σήματος"
       },
@@ -6150,6 +6219,14 @@
       "end_repeat_count": {
         "label": "Πλήθος Επαναλήψεων Λήξης",
         "doc": "Αριθμός διαδοχικών μετρήσεων κάτω από το όριο τερματισμού που απαιτούνται πριν από το τέλος του κύκλου. Το 1 είναι καλό για τα περισσότερα βύσματα. Αυξήστε στο 2-3 εάν το έξυπνο βύσμα σας αναφέρει περιστασιακά ένα δείγμα ψευδούς μηδενισμού στο μέσο του κύκλου και οι κύκλοι σας τελειώνουν πρόωρα."
+      },
+      "power_off_threshold_w": {
+        "label": "Κατώφλι Απενεργοποίησης",
+        "doc": "Προαιρετική ανίχνευση κατάστασης Ανενεργό με βάση την ισχύ. Όταν είναι πάνω από 0, μόλις ολοκληρωθεί ένας κύκλος και η ισχύς παραμείνει κάτω από αυτό το επίπεδο για το διάστημα της Καθυστέρησης Απενεργοποίησης, η συσκευή θεωρείται ότι έχει σβήσει και η κατάσταση επιστρέφει σε Ανενεργό. Αφήστε το στο 0 για απενεργοποίηση (προεπιλογή). Ορίστε το πάνω από το πραγματικό κατώτατο όριο σβησμένης συσκευής και κάτω από το Κατώφλι Τερματισμού και την κατανάλωση αναμονής της συσκευής σας όταν είναι ολοκληρωμένη αλλά ακόμη αναμμένη· αν δεν είναι κάτω από το Κατώφλι Τερματισμού, αγνοείται. Όταν είναι ενεργό, αντικαθιστά την Καθυστέρηση Επαναφοράς Προόδου για την επιστροφή σε Ανενεργό, ώστε μια ολοκληρωμένη συσκευή να παραμένει σε Ολοκληρώθηκε/Καθαρός μέχρι να σβήσει πραγματικά."
+      },
+      "power_off_delay": {
+        "label": "Καθυστέρηση Απενεργοποίησης",
+        "doc": "Για πόσο χρόνο πρέπει να παραμείνει η ισχύς κάτω από το Κατώφλι Απενεργοποίησης μετά την ολοκλήρωση ενός κύκλου, προτού η κατάσταση επιστρέψει σε Ανενεργό. Χρησιμοποιείται μόνο όταν το Κατώφλι Απενεργοποίησης είναι πάνω από 0. Ελέγχεται στον ρυθμό του παρασκηνίου, οπότε η πραγματική καθυστέρηση στρογγυλοποιείται προς τα πάνω στον επόμενο κύκλο λήξης κατάστασης."
       },
       "sampling_interval": {
         "label": "Διάστημα Δειγματοληψίας",
@@ -6945,6 +7022,9 @@
       "cycle_end": {
         "label": "Fin del ciclo"
       },
+      "power_off": {
+        "label": "Apagado"
+      },
       "signal_processing": {
         "label": "Procesamiento de señal"
       },
@@ -7066,6 +7146,14 @@
       "end_repeat_count": {
         "label": "Recuento de repetición de fin",
         "doc": "Número de lecturas consecutivas por debajo del umbral requerido antes de que finalice el ciclo. 1 está bien para la mayoría de los enchufes. Aumente a 2-3 si su enchufe inteligente ocasionalmente informa una muestra de cero falso a mitad del ciclo y sus ciclos terminan prematuramente."
+      },
+      "power_off_threshold_w": {
+        "label": "Umbral de apagado",
+        "doc": "Detección opcional del estado Apagado basada en la potencia. Cuando es mayor que 0, una vez que un ciclo ha finalizado y la potencia se mantiene por debajo de este nivel durante el Retardo de apagado, se considera que la máquina está apagada y el estado vuelve a Apagado. Déjelo en 0 para desactivarlo (valor predeterminado). Ajústelo por encima del nivel real de consumo con la máquina apagada y por debajo del Umbral de parada y del consumo en espera de su máquina (finalizada pero encendida); si no es inferior al Umbral de parada, se ignora. Cuando está activado, sustituye al Retardo de reinicio de progreso para volver a Apagado, de modo que una máquina finalizada permanece en Finalizado/Limpio hasta que se apaga realmente."
+      },
+      "power_off_delay": {
+        "label": "Retardo de apagado",
+        "doc": "Cuánto tiempo debe mantenerse la potencia por debajo del Umbral de apagado tras finalizar un ciclo antes de que el estado vuelva a Apagado. Solo se usa cuando el Umbral de apagado es mayor que 0. Se comprueba según la cadencia en segundo plano, por lo que el retardo efectivo se redondea al alza hasta el siguiente tick de expiración de estado."
       },
       "sampling_interval": {
         "label": "Intervalo de muestreo",
@@ -7861,6 +7949,9 @@
       "cycle_end": {
         "label": "Tsükli Lõpp"
       },
+      "power_off": {
+        "label": "Toite Väljalülitamine"
+      },
       "signal_processing": {
         "label": "Signaali Töötlus"
       },
@@ -7982,6 +8073,14 @@
       "end_repeat_count": {
         "label": "Lõpu Kordusloendur",
         "doc": "Enne tsükli lõppu on vajalik järjestikuste alla stopp-läve näitude arv. 1 sobib enamiku pistikute jaoks. Tõstke väärtuseni 2–3, kui teie nutipistik teatab aeg-ajalt valenull-näidist tsükli keskel ja teie tsüklid lõpevad enneaegselt."
+      },
+      "power_off_threshold_w": {
+        "label": "Toite Väljalülitamise Lävi",
+        "doc": "Valikuline võimsuspõhine Väljas-oleku tuvastamine. Kui väärtus on üle 0 ja tsükkel on lõppenud ning võimsus püsib sellest tasemest allpool Toite Väljalülitamise Viivituse jooksul, loetakse masin väljalülitatuks ja olek naaseb olekusse Väljas. Keelamiseks jätke väärtuseks 0 (vaikimisi). Määrake see tegelikust väljalülitatud tasemest kõrgemale, kuid Peatumise Läve ja oma masina lõpetatud-kuid-sees ooterežiimi tarbimisest allapoole; kui see ei ole Peatumise Lävest allpool, seda eiratakse. Sisselülitatuna asendab see olekusse Väljas naasmisel Edenemise Lähtestamise Viivituse, nii et lõpetatud masin jääb olekusse Valmis/Puhas, kuni see tegelikult välja lülitatakse."
+      },
+      "power_off_delay": {
+        "label": "Toite Väljalülitamise Viivitus",
+        "doc": "Kui kaua peab võimsus pärast tsükli lõppu püsima allpool Toite Väljalülitamise Läve, enne kui olek naaseb olekusse Väljas. Kasutatakse ainult siis, kui Toite Väljalülitamise Lävi on üle 0. Kontrollitakse taustatakti järgi, seega tegelik viivitus ümardatakse üles järgmise oleku aegumise sammuni."
       },
       "sampling_interval": {
         "label": "Proovivõtu Intervall",
@@ -8777,6 +8876,9 @@
       "cycle_end": {
         "label": "Syklin loppu"
       },
+      "power_off": {
+        "label": "Virran sammutus"
+      },
       "signal_processing": {
         "label": "Signaalinkäsittely"
       },
@@ -8898,6 +9000,14 @@
       "end_repeat_count": {
         "label": "Lopetuksen toistomäärä",
         "doc": "Peräkkäisten pysäytyskynnyksen alapuolella olevien lukemien määrä, joka vaaditaan ennen syklin päättymistä. 1 sopii useimpiin pistokkeisiin. Nosta arvoon 2–3, jos älypistoke ilmoittaa toisinaan väärän nollan näytteen kesken jakson ja syklisi päättyvät ennenaikaisesti."
+      },
+      "power_off_threshold_w": {
+        "label": "Virran sammutuksen kynnys",
+        "doc": "Valinnainen tehoon perustuva Pois päältä -tilan tunnistus. Kun arvo on yli 0 ja jakso on päättynyt sekä teho pysyy tämän tason alapuolella Virran sammutuksen viiveen ajan, koneen katsotaan olevan sammutettu ja tila palaa Pois päältä -tilaan. Poista käytöstä jättämällä arvoon 0 (oletus). Aseta se todellisen sammutetun tason yläpuolelle mutta Pysäytyskynnyksen ja koneesi valmis-mutta-päällä-valmiustilan kulutuksen alapuolelle; jos se ei ole Pysäytyskynnyksen alapuolella, se ohitetaan. Käytössä ollessaan se korvaa Edistymisen nollausviiveen paluussa Pois päältä -tilaan, joten valmistunut kone pysyy Valmis/Puhdas-tilassa, kunnes se todella sammutetaan."
+      },
+      "power_off_delay": {
+        "label": "Virran sammutuksen viive",
+        "doc": "Kuinka kauan tehon on pysyttävä Virran sammutuksen kynnyksen alapuolella jakson päätyttyä, ennen kuin tila palaa Pois päältä -tilaan. Käytetään vain, kun Virran sammutuksen kynnys on yli 0. Tarkistetaan taustasyklin mukaan, joten todellinen viive pyöristyy ylöspäin seuraavaan tilan vanhenemisajankohtaan."
       },
       "sampling_interval": {
         "label": "Näytteenottoväli",
@@ -9693,6 +9803,9 @@
       "cycle_end": {
         "label": "Fin de cycle"
       },
+      "power_off": {
+        "label": "Mise hors tension"
+      },
       "signal_processing": {
         "label": "Traitement du signal"
       },
@@ -9814,6 +9927,14 @@
       "end_repeat_count": {
         "label": "Nombre de répétitions de fin",
         "doc": "Nombre de lectures consécutives inférieures au seuil d'arrêt requises avant la fin du cycle. 1 convient à la plupart des prises. Augmentez à 2-3 si votre prise intelligente signale occasionnellement un échantillon faux zéro en cours de cycle et que vos cycles se terminent prématurément."
+      },
+      "power_off_threshold_w": {
+        "label": "Seuil de mise hors tension",
+        "doc": "Détection facultative de l'état Désactivé basée sur la puissance. Lorsqu'il est supérieur à 0, une fois un cycle terminé et si la puissance reste sous ce niveau pendant le Délai de mise hors tension, la machine est considérée comme éteinte et l'état repasse à Désactivé. Laissez à 0 pour désactiver (valeur par défaut). Réglez-le au-dessus de la consommation réelle à l'arrêt complet et en dessous du Seuil d'arrêt ainsi que de la consommation de veille (terminé mais toujours allumé) de votre machine ; s'il n'est pas inférieur au Seuil d'arrêt, il est ignoré. Lorsqu'elle est activée, cette option remplace le Délai de réinitialisation de progression pour le retour à Désactivé, de sorte qu'une machine terminée reste en Terminé/Propre jusqu'à ce qu'elle soit réellement éteinte."
+      },
+      "power_off_delay": {
+        "label": "Délai de mise hors tension",
+        "doc": "Durée pendant laquelle la puissance doit rester sous le Seuil de mise hors tension après la fin d'un cycle avant que l'état ne repasse à Désactivé. Utilisé uniquement lorsque le Seuil de mise hors tension est supérieur à 0. Vérifié selon la cadence en arrière-plan, de sorte que le délai effectif est arrondi au prochain tick d'expiration d'état."
       },
       "sampling_interval": {
         "label": "Intervalle d'échantillonnage",
@@ -10609,6 +10730,9 @@
       "cycle_end": {
         "label": "Kraj ciklusa"
       },
+      "power_off": {
+        "label": "Isključivanje napajanja"
+      },
       "signal_processing": {
         "label": "Obrada signala"
       },
@@ -10730,6 +10854,14 @@
       "end_repeat_count": {
         "label": "Broj ponavljanja završetka",
         "doc": "Broj uzastopnih očitanja ispod granične vrijednosti potrebnih prije završetka ciklusa. 1 je dobar za većinu utikača. Povećajte na 2-3 ako vaš pametni utikač povremeno javlja uzorak lažne nule usred ciklusa i vaši ciklusi prerano završavaju."
+      },
+      "power_off_threshold_w": {
+        "label": "Prag isključivanja napajanja",
+        "doc": "Opcijsko otkrivanje isključenog stanja na temelju snage. Kada je iznad 0, nakon što ciklus završi i snaga ostane ispod ove razine tijekom Odgode isključivanja napajanja, stroj se smatra isključenim i stanje se vraća na „Isključeno“. Ostavite na 0 za onemogućavanje (zadano). Postavite ga iznad stvarne razine isključenog napajanja, a ispod Praga zaustavljanja i ispod potrošnje vašeg stroja u stanju pripravnosti (završeno, ali još uključeno); ako nije ispod Praga zaustavljanja, zanemaruje se. Kada je omogućeno, zamjenjuje Odgodu poništavanja napretka za povratak na „Isključeno“, pa završeni stroj ostaje na „Gotovo/Čist“ dok se stvarno ne isključi."
+      },
+      "power_off_delay": {
+        "label": "Odgoda isključivanja napajanja",
+        "doc": "Koliko dugo snaga mora ostati ispod Praga isključivanja napajanja nakon završetka ciklusa prije nego što se stanje vrati na „Isključeno“. Koristi se samo kada je Prag isključivanja napajanja iznad 0. Provjerava se u pozadinskom ritmu, pa se efektivna odgoda zaokružuje naviše na sljedeći otkucaj isteka stanja."
       },
       "sampling_interval": {
         "label": "Interval uzorkovanja",
@@ -11525,6 +11657,9 @@
       "cycle_end": {
         "label": "Ciklus vége"
       },
+      "power_off": {
+        "label": "Készülék kikapcsolása"
+      },
       "signal_processing": {
         "label": "Jelkondicionálás"
       },
@@ -11646,6 +11781,14 @@
       "end_repeat_count": {
         "label": "Záró ismétlések száma",
         "doc": "Az egymást követő leállási küszöbérték alatti leolvasások száma a ciklus vége előtt. Az 1 megfelelő a legtöbb csatlakozóhoz. Emelje 2-3-ra, ha az intelligens csatlakozó időnként hamis nullát jelez a ciklus közepén, és a ciklusok idő előtt véget érnek."
+      },
+      "power_off_threshold_w": {
+        "label": "Kikapcsolás teljesítményküszöbe",
+        "doc": "Opcionális, teljesítményalapú Kikapcsolva állapot érzékelése. Ha az érték 0 fölött van, akkor amint egy ciklus befejeződött és a teljesítmény a Kikapcsolás késleltetése ideig e szint alatt marad, a gépet kikapcsoltnak tekinti, és az állapot visszatér a Kikapcsolva értékre. A letiltáshoz hagyja 0 értéken (alapértelmezett). Állítsa a valódi kikapcsolt szint fölé, de a Leállítási küszöb és a gép befejezett-de-bekapcsolt készenléti fogyasztása alá; ha nincs a Leállítási küszöb alatt, a rendszer figyelmen kívül hagyja. Bekapcsolva a Kikapcsolva állapotba való visszatéréshez a Folyamat visszaállítási késleltetés helyébe lép, így a befejezett gép Befejezett/Tiszta állapotban marad, amíg ténylegesen ki nem kapcsolják."
+      },
+      "power_off_delay": {
+        "label": "Kikapcsolás késleltetése",
+        "doc": "Mennyi ideig kell a teljesítménynek a Kikapcsolás teljesítményküszöbe alatt maradnia egy ciklus befejezése után, mielőtt az állapot visszatér a Kikapcsolva értékre. Csak akkor használatos, ha a Kikapcsolás teljesítményküszöbe 0 fölött van. A háttérben futó ütem szerint ellenőrzi, így a tényleges késleltetés felfelé kerekít a következő állapotlejárati lépéshez."
       },
       "sampling_interval": {
         "label": "Mintavételezési intervallum",
@@ -12441,6 +12584,9 @@
       "cycle_end": {
         "label": "Lok lotu"
       },
+      "power_off": {
+        "label": "Slökkun"
+      },
       "signal_processing": {
         "label": "Merkjavinnsla"
       },
@@ -12562,6 +12708,14 @@
       "end_repeat_count": {
         "label": "Fjöldi lokakorna",
         "doc": "Fjöldi samfelldra aflestra undir stöðvunarþröskuldi sem þarf áður en lotunni lýkur. 1 er fínt fyrir flestar innstungur. Hækkaðu í 2-3 ef snjalltappið þitt tilkynnir stundum um rangt núll sýni í miðjum lotu og loturnar þínar eru að ljúka of snemma."
+      },
+      "power_off_threshold_w": {
+        "label": "Slökkunarþröskuldur",
+        "doc": "Valfrjáls aflbyggð greining á slökkun. Þegar gildið er yfir 0 telst tækið slökkt og staðan fer aftur í Slökkt um leið og lotu er lokið og aflið helst undir þessu marki alla Slökkunartöfina. Hafðu á 0 til að slökkva á þessu (sjálfgefið). Stilltu það yfir raunverulegt slökkt-núllstig og undir Stöðvunarþröskuld og undir biðstöðunotkun tækisins í stöðunni lokið-en-kveikt; ef það er ekki undir Stöðvunarþröskuldi er það hunsað. Þegar kveikt er á því kemur það í stað framfaraendurstillingartafarinnar við að fara aftur í Slökkt, þannig að tæki sem er búið helst í Lokið/Hreint þar til raunverulega er slökkt á því."
+      },
+      "power_off_delay": {
+        "label": "Slökkunartöf",
+        "doc": "Hversu lengi aflið verður að haldast undir Slökkunarþröskuldi eftir að lotu lýkur áður en staðan fer aftur í Slökkt. Aðeins notað þegar Slökkunarþröskuldur er yfir 0. Athugað á bakgrunnstaktinum, þannig að raunveruleg töf er námunduð upp að næsta stöðulokatakti."
       },
       "sampling_interval": {
         "label": "Sýnitakabil",
@@ -13357,6 +13511,9 @@
       "cycle_end": {
         "label": "Fine ciclo"
       },
+      "power_off": {
+        "label": "Spegnimento"
+      },
       "signal_processing": {
         "label": "Elaborazione del segnale"
       },
@@ -13478,6 +13635,14 @@
       "end_repeat_count": {
         "label": "Conteggio ripetizioni fine",
         "doc": "Numero di letture consecutive al di sotto della soglia di arresto richieste prima della fine del ciclo. 1 va bene per la maggior parte delle prese. Aumenta a 2-3 se la tua presa intelligente segnala occasionalmente un campione di falsi zero a metà ciclo e i tuoi cicli terminano prematuramente."
+      },
+      "power_off_threshold_w": {
+        "label": "Soglia di spegnimento",
+        "doc": "Rilevamento facoltativo dello stato Spento basato sulla potenza. Quando è maggiore di 0, una volta terminato un ciclo e se la potenza rimane sotto questo livello per il Ritardo di spegnimento, la macchina viene considerata spenta e lo stato torna a Spento. Lascia a 0 per disattivarlo (valore predefinito). Impostalo sopra il consumo reale a macchina spenta e sotto la Soglia di arresto e il consumo in standby della tua macchina (terminata ma ancora accesa); se non è inferiore alla Soglia di arresto, viene ignorato. Quando è attivo, sostituisce il Ritardo reset avanzamento per il ritorno a Spento, così una macchina terminata resta su Completato/Pulito finché non viene effettivamente spenta."
+      },
+      "power_off_delay": {
+        "label": "Ritardo di spegnimento",
+        "doc": "Per quanto tempo la potenza deve rimanere sotto la Soglia di spegnimento dopo la fine di un ciclo prima che lo stato torni a Spento. Usato solo quando la Soglia di spegnimento è maggiore di 0. Viene controllato secondo la cadenza in background, quindi il ritardo effettivo viene arrotondato per eccesso al successivo tick di scadenza dello stato."
       },
       "sampling_interval": {
         "label": "Intervallo di campionamento",
@@ -14273,6 +14438,9 @@
       "cycle_end": {
         "label": "サイクル終了"
       },
+      "power_off": {
+        "label": "電源オフ"
+      },
       "signal_processing": {
         "label": "信号処理"
       },
@@ -14394,6 +14562,14 @@
       "end_repeat_count": {
         "label": "終了繰り返し回数",
         "doc": "サイクルが終了するまでに必要な連続停止しきい値未満の読み取り値の数。ほとんどのプラグでは 1 で問題ありません。スマート プラグがサイクル途中で偽ゼロ サンプルを報告することがあり、サイクルが途中で終了する場合は、2 ～ 3 に上げます。"
+      },
+      "power_off_threshold_w": {
+        "label": "電源オフしきい値",
+        "doc": "消費電力に基づくオフ検出（任意）。0 より大きい値に設定すると、サイクルが完了した後、電源オフ遅延の間、電力がこのレベルを下回ったままになると、機器はスイッチが切られたとみなされ、状態がオフに戻ります。無効にするには 0 のままにします（既定値）。実際にスイッチを切ったときの下限より高く、停止しきい値と、機器が完了後もオンのままの待機時消費電力より低い値に設定してください。停止しきい値を下回っていない場合は無視されます。有効にすると、オフに戻す処理で進捗リセット遅延の代わりに使用されるため、完了した機器は実際に電源が切られるまで完了／クリーンのままになります。"
+      },
+      "power_off_delay": {
+        "label": "電源オフ遅延",
+        "doc": "サイクル完了後、状態がオフに戻るまでに、電力が電源オフしきい値を下回ったまま維持しなければならない時間です。電源オフしきい値が 0 より大きい場合にのみ使用されます。バックグラウンドの周期でチェックされるため、実際の遅延は次の状態失効タイミングまで切り上げられます。"
       },
       "sampling_interval": {
         "label": "サンプリング間隔",
@@ -15189,6 +15365,9 @@
       "cycle_end": {
         "label": "사이클 종료"
       },
+      "power_off": {
+        "label": "전원 꺼짐"
+      },
       "signal_processing": {
         "label": "신호 처리"
       },
@@ -15310,6 +15489,14 @@
       "end_repeat_count": {
         "label": "종료 반복 횟수",
         "doc": "사이클이 끝나기 전에 필요한 연속 정지 임계값 미만 판독 횟수입니다. 대부분의 플러그에는 1이 적합합니다. 스마트 플러그가 주기 중간에 가끔 잘못된 제로 샘플을 보고하고 주기가 조기에 종료되는 경우 2~3으로 올리세요."
+      },
+      "power_off_threshold_w": {
+        "label": "전원 꺼짐 임계값",
+        "doc": "전력 기반 꺼짐 감지(선택 사항)입니다. 0보다 큰 값으로 설정하면 사이클이 완료된 후 전력이 전원 꺼짐 지연 시간 동안 이 값 미만으로 유지될 경우 기기가 꺼진 것으로 간주되어 상태가 꺼짐으로 돌아갑니다. 사용하지 않으려면 0으로 두세요(기본값). 실제로 전원을 끈 상태의 최저값보다 높고, 중지 임계값 및 기기가 완료된 후에도 켜져 있을 때의 대기 전력보다 낮게 설정하세요. 중지 임계값 미만이 아니면 무시됩니다. 활성화하면 꺼짐으로 돌아갈 때 진행 초기화 지연 대신 사용되므로, 완료된 기기는 실제로 전원이 꺼질 때까지 완료됨/깨끗한 상태로 유지됩니다."
+      },
+      "power_off_delay": {
+        "label": "전원 꺼짐 지연",
+        "doc": "사이클이 완료된 후 상태가 꺼짐으로 돌아가기 전까지 전력이 전원 꺼짐 임계값 미만으로 유지되어야 하는 시간입니다. 전원 꺼짐 임계값이 0보다 클 때만 사용됩니다. 백그라운드 주기로 확인되므로 실제 지연 시간은 다음 상태 만료 시점까지 올림 처리됩니다."
       },
       "sampling_interval": {
         "label": "샘플링 간격",
@@ -16105,6 +16292,9 @@
       "cycle_end": {
         "label": "Ciklo pabaiga"
       },
+      "power_off": {
+        "label": "Maitinimo išjungimas"
+      },
       "signal_processing": {
         "label": "Signalo apdorojimas"
       },
@@ -16226,6 +16416,14 @@
       "end_repeat_count": {
         "label": "Pabaigos pakartojimų sk.",
         "doc": "Iš eilės mažesnių nei sustojimo slenksčio rodmenų skaičius, reikalingas iki ciklo pabaigos. 1 tinka daugeliui kištukų. Padidinkite iki 2–3, jei jūsų išmanusis kištukas ciklo viduryje kartais praneša apie klaidingą nulį, o ciklai baigiasi anksčiau laiko."
+      },
+      "power_off_threshold_w": {
+        "label": "Maitinimo išjungimo slenkstis",
+        "doc": "Pasirenkamas galia pagrįstas Išjungta būsenos aptikimas. Kai reikšmė didesnė nei 0 ir ciklas baigėsi, o galia išlieka žemiau šio lygio Maitinimo išjungimo delsimo laiką, laikoma, kad mašina išjungta, ir būsena grįžta į Išjungta. Norėdami išjungti, palikite 0 (numatytoji reikšmė). Nustatykite ją aukščiau tikrojo išjungtos būsenos lygio, bet žemiau Sustabdymo slenksčio ir jūsų mašinos baigto-bet-įjungto budėjimo režimo suvartojimo; jei ji nėra žemiau Sustabdymo slenksčio, ji ignoruojama. Kai įjungta, grįžtant į Išjungta ji pakeičia Pažangos atstatymo delsimą, todėl baigusi mašina lieka Baigta/Švarus būsenoje, kol iš tikrųjų neišjungiama."
+      },
+      "power_off_delay": {
+        "label": "Maitinimo išjungimo delsimas",
+        "doc": "Kiek laiko galia turi išlikti žemiau Maitinimo išjungimo slenksčio pasibaigus ciklui, kol būsena grįžta į Išjungta. Naudojama tik tada, kai Maitinimo išjungimo slenkstis didesnis nei 0. Tikrinama pagal foninį ciklą, todėl faktinis delsimas suapvalinamas iki kitos būsenos galiojimo pabaigos žymos."
       },
       "sampling_interval": {
         "label": "Mėginių ėmimo intervalas",
@@ -17030,6 +17228,9 @@
       "cycle_end": {
         "label": "Cikla beigas"
       },
+      "power_off": {
+        "label": "Barošanas izslēgšana"
+      },
       "signal_processing": {
         "label": "Signālu apstrāde"
       },
@@ -17162,6 +17363,14 @@
       "end_repeat_count": {
         "label": "Beigu atkārtojumu skaits",
         "doc": "Pirms cikla beigām nepieciešamo secīgo rādījumu skaits zem apstāšanās sliekšņa. 1 ir piemērots lielākajai daļai spraudņu. Palieliniet vērtību līdz 2–3, ja viedā spraudnis cikla vidū laiku pa laikam ziņo par nepatiesu nulli un cikli beidzas priekšlaicīgi."
+      },
+      "power_off_threshold_w": {
+        "label": "Barošanas izslēgšanas slieksnis",
+        "doc": "Neobligāta, uz jaudu balstīta Izslēgts stāvokļa noteikšana. Ja vērtība pārsniedz 0 un cikls ir pabeigts, un jauda saglabājas zem šī līmeņa Barošanas izslēgšanas aizkaves laikā, mašīna tiek uzskatīta par izslēgtu, un stāvoklis atgriežas uz Izslēgts. Lai atspējotu, atstājiet 0 (noklusējums). Iestatiet to virs patiesā izslēgtā līmeņa, bet zem Apstāšanās sliekšņa un mašīnas pabeigtā-bet-ieslēgtā gaidstāves patēriņa; ja tā nav zem Apstāšanās sliekšņa, tā tiek ignorēta. Kad iespējota, atgriešanās uz Izslēgts aizstāj Progresa atiestatīšanas aizkavi, tāpēc pabeigta mašīna paliek stāvoklī Pabeigts/Tīrs, līdz tā tiek faktiski izslēgta."
+      },
+      "power_off_delay": {
+        "label": "Barošanas izslēgšanas aizkave",
+        "doc": "Cik ilgi jaudai pēc cikla pabeigšanas jāpaliek zem Barošanas izslēgšanas sliekšņa, pirms stāvoklis atgriežas uz Izslēgts. Izmanto tikai tad, ja Barošanas izslēgšanas slieksnis pārsniedz 0. Tiek pārbaudīts fona ritmā, tāpēc faktiskā aizkave tiek noapaļota uz augšu līdz nākamajai stāvokļa derīguma beigu atzīmei."
       },
       "sampling_interval": {
         "label": "Paraugu ņemšanas intervāls",
@@ -17946,6 +18155,9 @@
       "cycle_end": {
         "label": "Крај на циклус"
       },
+      "power_off": {
+        "label": "Исклучување на напојувањето"
+      },
       "signal_processing": {
         "label": "Обработка на сигналот"
       },
@@ -18078,6 +18290,14 @@
       "end_repeat_count": {
         "label": "Броење на повторување при крај",
         "doc": "Број на последователни отчитувања под прагот што се потребни пред да заврши циклусот. 1 е во ред за повеќето приклучоци. Зголемете на 2-3 ако вашиот паметен приклучок повремено пријавува примерок со лажна нула во средината на циклусот и вашите циклуси завршуваат предвреме."
+      },
+      "power_off_threshold_w": {
+        "label": "Праг за исклучување на напојувањето",
+        "doc": "Опционално откривање на исклучена состојба врз основа на моќноста. Кога е над 0, откако циклусот ќе заврши и моќноста остане под ова ниво во текот на Одложувањето на исклучување на напојувањето, машината се третира како исклучена и состојбата се враќа на „Исклучено“. Оставете на 0 за да го оневозможите (стандардно). Поставете го над вистинското ниво на исклучено напојување, а под Прагот за стоп и под потрошувачката на вашата машина во мирување (завршена, но сè уште вклучена); ако не е под Прагот за стоп, се игнорира. Кога е овозможено, го заменува Одложувањето на ресет на напредок за враќање на „Исклучено“, така што завршената машина останува на „Завршено/Чиста“ додека навистина не се исклучи."
+      },
+      "power_off_delay": {
+        "label": "Одложување на исклучување на напојувањето",
+        "doc": "Колку долго моќноста мора да остане под Прагот за исклучување на напојувањето откако циклусот ќе заврши пред состојбата да се врати на „Исклучено“. Се користи само кога Прагот за исклучување на напојувањето е над 0. Се проверува на позадинскиот ритам, така што ефективното одложување се заокружува нагоре до следното отчукување за истек на состојбата."
       },
       "sampling_interval": {
         "label": "Интервал на земање примероци",
@@ -18862,6 +19082,9 @@
       "cycle_end": {
         "label": "Syklusslutt"
       },
+      "power_off": {
+        "label": "Avslåing"
+      },
       "signal_processing": {
         "label": "Signalbehandling"
       },
@@ -18994,6 +19217,14 @@
       "end_repeat_count": {
         "label": "Slutt gjentaksantall",
         "doc": "Antall påfølgende avlesninger under stoppterskel som kreves før syklusen avsluttes. 1 er greit for de fleste plugger. Øk til 2-3 hvis smartpluggen av og til rapporterer en prøve med falsk null midt i syklusen og syklusene dine avsluttes for tidlig."
+      },
+      "power_off_threshold_w": {
+        "label": "Avslåingsterskel",
+        "doc": "Valgfri effektbasert registrering av avslåing. Når verdien er over 0, regnes maskinen som slått av og tilstanden går tilbake til Av så snart en syklus er fullført og effekten holder seg under dette nivået i hele Avslåingsforsinkelsen. La stå på 0 for å deaktivere (standard). Sett verdien over det reelle avslåtte nullnivået og under Stoppterskel samt under maskinens standbyforbruk i tilstanden ferdig-men-på; hvis den ikke er under Stoppterskel, blir den ignorert. Når den er aktivert, erstatter den Fremdriftsreset-forsinkelse for tilbakegang til Av, slik at en ferdig maskin forblir i Ferdig/Rengjøre til den faktisk blir slått av."
+      },
+      "power_off_delay": {
+        "label": "Avslåingsforsinkelse",
+        "doc": "Hvor lenge effekten må holde seg under Avslåingsterskel etter at en syklus er fullført før tilstanden går tilbake til Av. Brukes bare når Avslåingsterskel er over 0. Kontrolleres i bakgrunnstakten, så den effektive forsinkelsen rundes opp til neste tilstandsutløpstakt."
       },
       "sampling_interval": {
         "label": "Sampling-intervall",
@@ -19778,6 +20009,9 @@
       "cycle_end": {
         "label": "Cyclus einde"
       },
+      "power_off": {
+        "label": "Uitschakelen"
+      },
       "signal_processing": {
         "label": "Signaalverwerking"
       },
@@ -19910,6 +20144,14 @@
       "end_repeat_count": {
         "label": "Eindherhalingsaantal",
         "doc": "Aantal opeenvolgende metingen onder de stopdrempel vereist voordat de cyclus eindigt. 1 is prima voor de meeste stekkers. Verhoog naar 2-3 als uw slimme stekker halverwege de cyclus af en toe een vals-nulmonster rapporteert en uw cycli voortijdig eindigen."
+      },
+      "power_off_threshold_w": {
+        "label": "Uitschakeldrempel",
+        "doc": "Optionele, op vermogen gebaseerde Uit-detectie. Bij een waarde boven 0 wordt de machine als uitgeschakeld beschouwd en keert de status terug naar Uit zodra een cyclus is voltooid en het vermogen gedurende de Uitschakelvertraging onder dit niveau blijft. Laat op 0 staan om dit uit te schakelen (de standaard). Stel de waarde in boven het werkelijke uitgeschakelde nulniveau en onder de Stopdrempel en onder het standby-verbruik van uw machine in de toestand voltooid-maar-aan; als de waarde niet onder de Stopdrempel ligt, wordt deze genegeerd. Indien ingeschakeld vervangt deze waarde de Voortgangsreset vertraging voor het terugkeren naar Uit, zodat een voltooide machine in Voltooid/Schoon blijft totdat deze daadwerkelijk wordt uitgeschakeld."
+      },
+      "power_off_delay": {
+        "label": "Uitschakelvertraging",
+        "doc": "Hoe lang het vermogen na het voltooien van een cyclus onder de Uitschakeldrempel moet blijven voordat de status terugkeert naar Uit. Wordt alleen gebruikt wanneer de Uitschakeldrempel boven 0 is. Wordt gecontroleerd op de achtergrondcadans, dus de effectieve vertraging wordt naar boven afgerond tot de volgende tick waarop de status verloopt."
       },
       "sampling_interval": {
         "label": "Samplinginterval",
@@ -20685,6 +20927,9 @@
       "cycle_end": {
         "label": "Koniec Cyklu"
       },
+      "power_off": {
+        "label": "Wyłączenie zasilania"
+      },
       "signal_processing": {
         "label": "Przetwarzanie Sygnału"
       },
@@ -20806,6 +21051,14 @@
       "end_repeat_count": {
         "label": "Liczba Powtórzeń Zakończenia",
         "doc": "Liczba kolejnych odczytów poniżej progu wymaganych przed zakończeniem cyklu. 1 jest odpowiedni dla większości wtyczek. Zwiększ do 2-3, jeśli inteligentna wtyczka czasami zgłasza w połowie cyklu próbkę fałszywie zerową, a cykle kończą się przedwcześnie."
+      },
+      "power_off_threshold_w": {
+        "label": "Próg Wyłączenia Zasilania",
+        "doc": "Opcjonalne wykrywanie stanu „Wyłączony” na podstawie mocy. Gdy wartość jest większa niż 0, po zakończeniu cyklu, jeśli moc pozostaje poniżej tego poziomu przez czas „Opóźnienie Wyłączenia Zasilania”, urządzenie jest traktowane jako wyłączone, a stan wraca do „Wyłączony”. Pozostaw 0, aby wyłączyć (wartość domyślna). Ustaw powyżej rzeczywistego poziomu wyłączonego urządzenia, a poniżej „Próg Zatrzymania” oraz poniżej poboru w trybie czuwania po zakończeniu; jeśli wartość nie jest niższa niż „Próg Zatrzymania”, jest ignorowana. Po włączeniu zastępuje „Opóźnienie Resetowania Postępu” przy powrocie do „Wyłączony”, więc zakończone urządzenie pozostaje w stanie „Zakończony”/„Czysty”, dopóki nie zostanie faktycznie wyłączone."
+      },
+      "power_off_delay": {
+        "label": "Opóźnienie Wyłączenia Zasilania",
+        "doc": "Jak długo moc musi pozostawać poniżej „Próg Wyłączenia Zasilania” po zakończeniu cyklu, zanim stan wróci do „Wyłączony”. Używane tylko wtedy, gdy „Próg Wyłączenia Zasilania” jest większy niż 0. Sprawdzane w rytmie działania w tle, więc efektywne opóźnienie jest zaokrąglane w górę do następnego taktu wygaśnięcia stanu."
       },
       "sampling_interval": {
         "label": "Interwał Próbkowania",
@@ -21601,6 +21854,9 @@
       "cycle_end": {
         "label": "Fim do Ciclo"
       },
+      "power_off": {
+        "label": "Desligamento"
+      },
       "signal_processing": {
         "label": "Processamento de Sinal"
       },
@@ -21722,6 +21978,14 @@
       "end_repeat_count": {
         "label": "Contagem de Repetições de Fim",
         "doc": "Número de leituras consecutivas abaixo do limite de parada necessárias antes do término do ciclo. 1 é adequado para a maioria dos plugues. Aumente para 2-3 se o seu plugue inteligente ocasionalmente relatar uma amostra de falso zero no meio do ciclo e seus ciclos estiverem terminando prematuramente."
+      },
+      "power_off_threshold_w": {
+        "label": "Limite de Desligamento",
+        "doc": "Detecção opcional do estado Desligado com base na potência. Quando maior que 0, assim que um ciclo termina e a potência permanece abaixo deste nível durante o Atraso de Desligamento, a máquina é considerada desligada e o estado volta para Desligado. Deixe em 0 para desativar (padrão). Defina-o acima do consumo real com a máquina desligada e abaixo do Limite de Parada e do consumo em espera da sua máquina (concluída mas ainda ligada); se não for inferior ao Limite de Parada, é ignorado. Quando ativado, substitui o Atraso de Redefinição de Progresso para o retorno a Desligado, de modo que uma máquina concluída permanece em Concluído/Limpar até ser realmente desligada."
+      },
+      "power_off_delay": {
+        "label": "Atraso de Desligamento",
+        "doc": "Por quanto tempo a potência deve permanecer abaixo do Limite de Desligamento após o término de um ciclo antes de o estado voltar para Desligado. Usado apenas quando o Limite de Desligamento é maior que 0. É verificado conforme a cadência em segundo plano, de modo que o atraso efetivo é arredondado para cima até o próximo tick de expiração de estado."
       },
       "sampling_interval": {
         "label": "Intervalo de Amostragem",
@@ -22517,6 +22781,9 @@
       "cycle_end": {
         "label": "Fim do Ciclo"
       },
+      "power_off": {
+        "label": "Desligamento"
+      },
       "signal_processing": {
         "label": "Processamento de Sinal"
       },
@@ -22638,6 +22905,14 @@
       "end_repeat_count": {
         "label": "Contagem de Repetições de Fim",
         "doc": "Número de leituras consecutivas abaixo do limite de parada necessárias antes do término do ciclo. 1 é adequado para a maioria dos plugues. Aumente para 2-3 se o seu plugue inteligente ocasionalmente relatar uma amostra de falso zero no meio do ciclo e seus ciclos estiverem terminando prematuramente."
+      },
+      "power_off_threshold_w": {
+        "label": "Limiar de Desligamento",
+        "doc": "Deteção opcional do estado Desligado com base na potência. Quando superior a 0, assim que um ciclo termina e a potência se mantém abaixo deste nível durante o Atraso de Desligamento, a máquina é considerada desligada e o estado volta a Desligado. Deixe em 0 para desativar (predefinição). Defina-o acima do consumo real com a máquina desligada e abaixo do Limiar de Paragem e do consumo em espera da sua máquina (concluída mas ainda ligada); se não for inferior ao Limiar de Paragem, é ignorado. Quando ativado, substitui o Atraso de Reposição de Progresso para o regresso a Desligado, pelo que uma máquina concluída permanece em Concluído/Limpar até ser efetivamente desligada."
+      },
+      "power_off_delay": {
+        "label": "Atraso de Desligamento",
+        "doc": "Durante quanto tempo a potência deve manter-se abaixo do Limiar de Desligamento após o fim de um ciclo antes de o estado voltar a Desligado. Só é usado quando o Limiar de Desligamento é superior a 0. É verificado segundo a cadência em segundo plano, pelo que o atraso efetivo é arredondado para cima até ao próximo tick de expiração de estado."
       },
       "sampling_interval": {
         "label": "Intervalo de Amostragem",
@@ -23433,6 +23708,9 @@
       "cycle_end": {
         "label": "Sfârșit Ciclu"
       },
+      "power_off": {
+        "label": "Oprire Alimentare"
+      },
       "signal_processing": {
         "label": "Procesare Semnal"
       },
@@ -23554,6 +23832,14 @@
       "end_repeat_count": {
         "label": "Număr de Repetări la Sfârșit",
         "doc": "Numărul de citiri consecutive sub pragul de oprire necesare înainte de încheierea ciclului. 1 este în regulă pentru majoritatea prizei. Ridicați la 2-3 dacă mufa dvs. inteligentă raportează ocazional un eșantion fals zero la jumătatea ciclului și ciclurile dumneavoastră se termină prematur."
+      },
+      "power_off_threshold_w": {
+        "label": "Prag Oprire Alimentare",
+        "doc": "Detectare opțională a stării Oprit pe baza puterii. Când este peste 0, odată ce un ciclu s-a terminat și puterea rămâne sub acest nivel pe durata specificată de Întârziere Oprire Alimentare, mașina este considerată oprită, iar starea revine la Oprit. Lăsați la 0 pentru a dezactiva (valoarea implicită). Setați-l peste consumul real când mașina este oprită și sub Prag de Oprire, precum și sub consumul în standby al mașinii (terminată, dar încă pornită); dacă nu este sub Prag de Oprire, este ignorat. Când este activată, înlocuiește Întârziere Resetare Progres pentru revenirea la Oprit, astfel încât o mașină terminată rămâne în Terminat/Curat până când este oprită efectiv."
+      },
+      "power_off_delay": {
+        "label": "Întârziere Oprire Alimentare",
+        "doc": "Cât timp trebuie să rămână puterea sub Prag Oprire Alimentare după terminarea unui ciclu înainte ca starea să revină la Oprit. Folosit doar când Prag Oprire Alimentare este peste 0. Este verificat conform cadenței din fundal, astfel încât întârzierea efectivă este rotunjită în sus până la următorul tick de expirare a stării."
       },
       "sampling_interval": {
         "label": "Interval de Eșantionare",
@@ -24349,6 +24635,9 @@
       "cycle_end": {
         "label": "Завершение Цикла"
       },
+      "power_off": {
+        "label": "Выключение питания"
+      },
       "signal_processing": {
         "label": "Обработка Сигнала"
       },
@@ -24470,6 +24759,14 @@
       "end_repeat_count": {
         "label": "Количество Повторений Завершения",
         "doc": "Количество последовательных показаний ниже стоп-порога, необходимых до завершения цикла. 1 подходит для большинства вилок. Увеличьте значение до 2–3, если ваша интеллектуальная розетка иногда сообщает о ложном нулевом значении выборки в середине цикла, и ваши циклы заканчиваются преждевременно."
+      },
+      "power_off_threshold_w": {
+        "label": "Порог Выключения Питания",
+        "doc": "Необязательное определение состояния «Выключено» по мощности. Если значение больше 0, то после завершения цикла, когда мощность остаётся ниже этого уровня в течение времени «Задержка Выключения Питания», машина считается выключенной, и состояние возвращается к «Выключено». Оставьте 0, чтобы отключить (по умолчанию). Задайте значение выше реального уровня выключенного прибора, но ниже «Порог Остановки» и ниже потребления машины в режиме ожидания после завершения; если значение не ниже «Порог Остановки», оно игнорируется. Когда параметр включён, он заменяет «Задержка Сброса Прогресса» для возврата к «Выключено», поэтому завершившая работу машина остаётся в состоянии «Завершено»/«Чистый», пока её действительно не выключат."
+      },
+      "power_off_delay": {
+        "label": "Задержка Выключения Питания",
+        "doc": "Как долго мощность должна оставаться ниже «Порог Выключения Питания» после завершения цикла, прежде чем состояние вернётся к «Выключено». Используется только когда «Порог Выключения Питания» больше 0. Проверяется с фоновой периодичностью, поэтому фактическая задержка округляется вверх до следующего момента истечения состояния."
       },
       "sampling_interval": {
         "label": "Интервал Выборки",
@@ -25265,6 +25562,9 @@
       "cycle_end": {
         "label": "Koniec cyklu"
       },
+      "power_off": {
+        "label": "Vypnutie napájania"
+      },
       "signal_processing": {
         "label": "Spracovanie signálu"
       },
@@ -25386,6 +25686,14 @@
       "end_repeat_count": {
         "label": "Počet opakovaní ukončenia",
         "doc": "Počet po sebe idúcich odčítaní pod prahovou hodnotou zastavenia požadovaných pred koncom cyklu. 1 je v poriadku pre väčšinu zástrčiek. Zvýšte na 2-3, ak vaša inteligentná zásuvka občas hlási vzorku s falošnou nulou uprostred cyklu a vaše cykly sa predčasne končia."
+      },
+      "power_off_threshold_w": {
+        "label": "Prah vypnutia napájania",
+        "doc": "Voliteľná detekcia stavu „Vypnuté“ na základe príkonu. Keď je hodnota väčšia než 0, po dokončení cyklu, ak príkon zostane pod touto úrovňou počas času „Oneskorenie vypnutia napájania“, spotrebič sa považuje za vypnutý a stav sa vráti na „Vypnuté“. Ponechajte 0 na vypnutie (predvolené). Nastavte ju nad skutočnú úroveň vypnutého spotrebiča a pod „Prah zastavenia“ aj pod pohotovostný odber dokončeného, ale stále zapnutého spotrebiča; ak nie je nižšia než „Prah zastavenia“, ignoruje sa. Keď je zapnutá, nahrádza „Oneskorenie obnovenia priebehu“ pri návrate na „Vypnuté“, takže dokončený spotrebič zostane v stave „Dokončené“/„Čistý“, kým sa skutočne nevypne."
+      },
+      "power_off_delay": {
+        "label": "Oneskorenie vypnutia napájania",
+        "doc": "Ako dlho musí príkon zostať pod hodnotou „Prah vypnutia napájania“ po dokončení cyklu, kým sa stav vráti na „Vypnuté“. Používa sa iba vtedy, keď je „Prah vypnutia napájania“ väčší než 0. Kontroluje sa v pravidelnom intervale na pozadí, takže sa skutočné oneskorenie zaokrúhľuje nahor na najbližší tik vypršania stavu."
       },
       "sampling_interval": {
         "label": "Interval vzorkovania",
@@ -26181,6 +26489,9 @@
       "cycle_end": {
         "label": "Konec cikla"
       },
+      "power_off": {
+        "label": "Izklop napajanja"
+      },
       "signal_processing": {
         "label": "Obdelava signala"
       },
@@ -26302,6 +26613,14 @@
       "end_repeat_count": {
         "label": "Število ponovitev konca",
         "doc": "Število zaporednih odčitkov pod mejno vrednostjo, potrebnih pred koncem cikla. 1 je primeren za večino vtičev. Povečajte na 2-3, če vaš pametni vtič občasno poroča o vzorcu napačne ničle sredi cikla in se vaši cikli končajo predčasno."
+      },
+      "power_off_threshold_w": {
+        "label": "Prag izklopa napajanja",
+        "doc": "Neobvezno zaznavanje stanja »Izključeno« na podlagi moči. Ko je vrednost večja od 0, se po zaključku cikla, če moč ostane pod to ravnjo v času »Zamuda izklopa napajanja«, naprava obravnava kot izklopljena in stanje se vrne na »Izključeno«. Pustite 0 za onemogočenje (privzeto). Nastavite jo nad dejansko raven izklopljene naprave ter pod »Prag zaustavitve« in pod porabo naprave v pripravljenosti po zaključku; če ni nižja od »Prag zaustavitve«, se prezre. Ko je omogočeno, nadomesti »Zamuda ponastavitve napredka« za vrnitev na »Izključeno«, tako da zaključena naprava ostane v stanju »Končano«/»čisto«, dokler ni dejansko izklopljena."
+      },
+      "power_off_delay": {
+        "label": "Zamuda izklopa napajanja",
+        "doc": "Kako dolgo mora moč ostati pod vrednostjo »Prag izklopa napajanja« po zaključku cikla, preden se stanje vrne na »Izključeno«. Uporablja se samo, ko je »Prag izklopa napajanja« večji od 0. Preverja se v ozadju v rednih intervalih, zato se dejanska zamuda zaokroži navzgor na naslednji korak poteka stanja."
       },
       "sampling_interval": {
         "label": "Interval vzorčenja",
@@ -27097,6 +27416,9 @@
       "cycle_end": {
         "label": "Fundi i ciklit"
       },
+      "power_off": {
+        "label": "Fikja e energjisë"
+      },
       "signal_processing": {
         "label": "Përpunimi i sinjalit"
       },
@@ -27218,6 +27540,14 @@
       "end_repeat_count": {
         "label": "Numri i përsëritjeve të fundit",
         "doc": "Numri i leximeve të njëpasnjëshme nën pragun e ndalimit të kërkuar para përfundimit të ciklit. 1 është e mirë për shumicën e prizave. Rriteni në 2-3 nëse spina juaj inteligjente raporton herë pas here një mostër të rreme me zero në mes të ciklit dhe ciklet tuaja mbarojnë para kohe."
+      },
+      "power_off_threshold_w": {
+        "label": "Pragu i fikjes së energjisë",
+        "doc": "Zbulim opsional i gjendjes Fikur bazuar në fuqinë. Kur është mbi 0, pasi një cikël të ketë përfunduar dhe fuqia të qëndrojë nën këtë nivel për Vonesën e fikjes së energjisë, makina trajtohet si e fikur dhe gjendja kthehet në „Fikur“. Lëreni në 0 për ta çaktivizuar (parazgjedhja). Vendoseni mbi nivelin real të fikjes dhe nën Pragun e ndalimit dhe nën konsumin në gatishmëri të makinës suaj (e përfunduar, por ende e ndezur); nëse nuk është nën Pragun e ndalimit, ai injorohet. Kur aktivizohet, ai zëvendëson Vonesën e rivendosjes së progresit për kthimin në „Fikur“, kështu që një makinë e përfunduar qëndron në „Përfunduar/I pastër“ derisa të fiket vërtet."
+      },
+      "power_off_delay": {
+        "label": "Vonesa e fikjes së energjisë",
+        "doc": "Sa kohë duhet të qëndrojë fuqia nën Pragun e fikjes së energjisë pasi një cikël të përfundojë përpara se gjendja të kthehet në „Fikur“. Përdoret vetëm kur Pragu i fikjes së energjisë është mbi 0. Kontrollohet në ritmin e sfondit, kështu që vonesa efektive rrumbullakoset lart deri te rrahja tjetër e skadimit të gjendjes."
       },
       "sampling_interval": {
         "label": "Intervali i kampionimit",
@@ -28013,6 +28343,9 @@
       "cycle_end": {
         "label": "Kraj ciklusa"
       },
+      "power_off": {
+        "label": "Isključivanje napajanja"
+      },
       "signal_processing": {
         "label": "Obrada signala"
       },
@@ -28134,6 +28467,14 @@
       "end_repeat_count": {
         "label": "Broj ponavljanja kraja",
         "doc": "Број узастопних очитавања испод прага заустављања потребних пре завршетка циклуса. 1 је у реду за већину утикача. Повећајте на 2-3 ако ваш паметни прикључак повремено пријави узорак лажне нуле усред циклуса и ваши циклуси се прерано завршавају."
+      },
+      "power_off_threshold_w": {
+        "label": "Prag isključivanja napajanja",
+        "doc": "Opciono otkrivanje isključenog stanja na osnovu snage. Kada je iznad 0, nakon što se ciklus završi i snaga ostane ispod ovog nivoa tokom Kašnjenja isključivanja napajanja, mašina se tretira kao isključena i stanje se vraća na „Isključeno“. Ostavite na 0 da biste onemogućili (podrazumevano). Postavite ga iznad stvarnog nivoa isključenog napajanja, a ispod Praga zaustavljanja i ispod potrošnje vaše mašine u stanju pripravnosti (završeno, ali još uključeno); ako nije ispod Praga zaustavljanja, ignoriše se. Kada je omogućeno, zamenjuje Kašnjenje resetovanja napretka za povratak na „Isključeno“, tako da završena mašina ostaje na „Završeno/Čisto“ dok se stvarno ne isključi."
+      },
+      "power_off_delay": {
+        "label": "Kašnjenje isključivanja napajanja",
+        "doc": "Koliko dugo snaga mora da ostane ispod Praga isključivanja napajanja nakon što se ciklus završi pre nego što se stanje vrati na „Isključeno“. Koristi se samo kada je Prag isključivanja napajanja iznad 0. Proverava se na pozadinskom ritmu, tako da se efektivno kašnjenje zaokružuje naviše na sledeći otkucaj isteka stanja."
       },
       "sampling_interval": {
         "label": "Interval uzorkovanja",
@@ -28929,6 +29270,9 @@
       "cycle_end": {
         "label": "Cykelslut"
       },
+      "power_off": {
+        "label": "Avstängning"
+      },
       "signal_processing": {
         "label": "Signalbehandling"
       },
@@ -29050,6 +29394,14 @@
       "end_repeat_count": {
         "label": "Antal slutrepetitioner",
         "doc": "Antalet på varandra följande avläsningar under stopptröskelvärdet som krävs innan cykeln avslutas. 1 är bra för de flesta pluggar. Höj till 2-3 om din smarta kontakt då och då rapporterar ett prov med falskt noll i mitten av cykeln och dina cykler slutar i förtid."
+      },
+      "power_off_threshold_w": {
+        "label": "Avstängningströskel",
+        "doc": "Valfri effektbaserad Av-detektering. När värdet är över 0 betraktas maskinen som avstängd och tillståndet återgår till Av så snart en cykel har avslutats och effekten håller sig under denna nivå under hela Avstängningsfördröjningen. Lämna på 0 för att inaktivera (standard). Ställ in värdet över maskinens verkliga avstängda nollnivå och under Stopptröskel samt under maskinens standbyförbrukning i tillståndet färdig-men-på; om det inte är under Stopptröskel ignoreras det. När det är aktiverat ersätter det Förloppåterställningsfördröjning för återgång till Av, så att en färdig maskin stannar i Färdig/Rena tills den faktiskt stängs av."
+      },
+      "power_off_delay": {
+        "label": "Avstängningsfördröjning",
+        "doc": "Hur länge effekten måste hålla sig under Avstängningströskel efter att en cykel har avslutats innan tillståndet återgår till Av. Används endast när Avstängningströskel är över 0. Kontrolleras enligt bakgrundskadensen, så den effektiva fördröjningen avrundas uppåt till nästa tillståndsutgångstick."
       },
       "sampling_interval": {
         "label": "Samplingsintervall",
@@ -29845,6 +30197,9 @@
       "cycle_end": {
         "label": "Döngü Sonu"
       },
+      "power_off": {
+        "label": "Güç Kapatma"
+      },
       "signal_processing": {
         "label": "Sinyal İşleme"
       },
@@ -29966,6 +30321,14 @@
       "end_repeat_count": {
         "label": "Bitiş Tekrar Sayısı",
         "doc": "Döngü sona ermeden önce gereken ardışık durma eşiği altı okumalarının sayısı. Çoğu fiş için 1 uygundur. Akıllı priziniz ara sıra döngünün ortasında yanlış sıfır örneği bildiriyorsa ve döngüleriniz zamanından önce sona eriyorsa 2-3'e yükseltin."
+      },
+      "power_off_threshold_w": {
+        "label": "Güç Kapatma Eşiği",
+        "doc": "Güce dayalı isteğe bağlı Kapalı algılama. 0'ın üzerinde olduğunda, bir döngü bittikten sonra güç, Güç Kapatma Gecikmesi süresince bu seviyenin altında kalırsa makine kapatılmış sayılır ve durum Kapalı'ya döner. Devre dışı bırakmak için 0'da bırakın (varsayılan). Bu değeri, gerçek kapalı taban değerinin üzerinde ve Durdurma Eşiği ile makinenizin bittiği hâlde açık kalan bekleme tüketiminin altında ayarlayın; Durdurma Eşiği'nin altında değilse yok sayılır. Etkinleştirildiğinde, Kapalı'ya dönmek için İlerleme Sıfırlama Gecikmesi'nin yerini alır; böylece biten bir makine, gerçekten kapatılana kadar Bitti/Temiz durumunda kalır."
+      },
+      "power_off_delay": {
+        "label": "Güç Kapatma Gecikmesi",
+        "doc": "Bir döngü bittikten sonra durumun Kapalı'ya dönmesinden önce gücün Güç Kapatma Eşiği'nin altında ne kadar süre kalması gerektiğidir. Yalnızca Güç Kapatma Eşiği 0'ın üzerindeyken kullanılır. Arka plan döngüsünde denetlendiğinden, geçerli gecikme bir sonraki durum sona erme adımına yukarı yuvarlanır."
       },
       "sampling_interval": {
         "label": "Örnekleme Aralığı",
@@ -30761,6 +31124,9 @@
       "cycle_end": {
         "label": "Завершення циклу"
       },
+      "power_off": {
+        "label": "Вимкнення живлення"
+      },
       "signal_processing": {
         "label": "Обробка сигналу"
       },
@@ -30882,6 +31248,14 @@
       "end_repeat_count": {
         "label": "Кількість повторів завершення",
         "doc": "Кількість послідовних вимірювань нижче порогового значення, необхідних до завершення циклу. 1 підходить для більшості розеток. Збільште до 2-3, якщо ваша розумна розетка час від часу повідомляє про хибний нуль у середині циклу, і ваші цикли закінчуються передчасно."
+      },
+      "power_off_threshold_w": {
+        "label": "Поріг вимкнення живлення",
+        "doc": "Необов'язкове визначення стану «Вимкнено» за потужністю. Якщо значення більше 0, то після завершення циклу, коли потужність залишається нижче цього рівня протягом часу «Затримка вимкнення живлення», машина вважається вимкненою, і стан повертається до «Вимкнено». Залиште 0, щоб вимкнути (типово). Задайте значення вище реального рівня вимкненого приладу, але нижче «Поріг зупинки» та нижче споживання машини в режимі очікування після завершення; якщо значення не нижче «Поріг зупинки», воно ігнорується. Коли параметр увімкнено, він замінює «Затримка скидання прогресу» для повернення до «Вимкнено», тож машина, яка завершила роботу, залишається у стані «Готово»/«Чистий», доки її справді не буде вимкнено."
+      },
+      "power_off_delay": {
+        "label": "Затримка вимкнення живлення",
+        "doc": "Як довго потужність має залишатися нижче «Поріг вимкнення живлення» після завершення циклу, перш ніж стан повернеться до «Вимкнено». Використовується лише коли «Поріг вимкнення живлення» більше 0. Перевіряється з фоновою періодичністю, тому фактична затримка округлюється вгору до наступного моменту завершення стану."
       },
       "sampling_interval": {
         "label": "Інтервал вибірки",
@@ -31677,6 +32051,9 @@
       "cycle_end": {
         "label": "周期结束"
       },
+      "power_off": {
+        "label": "电源关闭"
+      },
       "signal_processing": {
         "label": "信号处理"
       },
@@ -31798,6 +32175,14 @@
       "end_repeat_count": {
         "label": "结束重复次数",
         "doc": "周期结束前所需的连续低于停止阈值的读数数。 1 适用于大多数插头。如果您的智能插头偶尔在周期中报告假零样本并且您的周期提前结束，则提高到 2-3。"
+      },
+      "power_off_threshold_w": {
+        "label": "电源关闭阈值",
+        "doc": "基于功率的关闭检测（可选）。当设置为大于 0 时，周期完成后，如果功率在电源关闭延迟期间持续低于此值，则机器被视为已关机，状态会恢复为关闭。保持为 0 可禁用此功能（默认值）。请将其设置为高于真正关机时的最低功率，且低于停止阈值以及机器完成后仍开机时的待机功耗；如果它不低于停止阈值，则会被忽略。启用后，它将取代进度重置延迟来恢复为关闭状态，因此已完成的机器会保持在已完成/干净的状态，直到实际断电为止。"
+      },
+      "power_off_delay": {
+        "label": "电源关闭延迟",
+        "doc": "周期完成后，在状态恢复为关闭之前，功率必须持续低于电源关闭阈值的时长。仅在电源关闭阈值大于 0 时使用。此项按后台周期检查，因此实际延迟会向上取整到下一个状态过期时刻。"
       },
       "sampling_interval": {
         "label": "采样间隔",

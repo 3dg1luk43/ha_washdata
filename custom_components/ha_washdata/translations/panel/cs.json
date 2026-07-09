@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Konec cyklu"
     },
+    "power_off": {
+      "label": "Vypnuto"
+    },
     "signal_processing": {
       "label": "Zpracování signálu"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Počet opakování konce",
       "doc": "Počet po sobě jdoucích čtení pod prahem zastavení, potřebných před ukončením cyklu. 1 je v pořádku pro většinu zástrček. Zvyšte na 2–3, pokud vaše chytrá zástrčka občas hlásí falešně nulový vzorek během cyklu a vaše cykly předčasně končí."
+    },
+    "power_off_threshold_w": {
+      "label": "Práh vypnutí napájení",
+      "doc": "Volitelná detekce stavu „Vypnuto“ podle příkonu. Když je hodnota větší než 0, po dokončení cyklu, pokud příkon zůstane pod touto úrovní po dobu „Zpoždění vypnutí napájení“, je spotřebič považován za vypnutý a stav se vrátí na „Vypnuto“. Ponechte 0 pro vypnutí tohohle nastavení (výchozí). Nastavte ji nad skutečnou úroveň vypnutého spotřebiče a pod „Práh zastavení“ i pod pohotovostní odběr dokončeného, ale stále zapnutého spotřebiče; pokud není nižší než „Práh zastavení“, je ignorována. Když je zapnuta, nahrazuje „Zpoždění resetu průběhu“ pro návrat na „Vypnuto“, takže dokončený spotřebič zůstane ve stavu „Dokončeno“/„Čistý“, dokud není skutečně vypnut."
+    },
+    "power_off_delay": {
+      "label": "Zpoždění vypnutí napájení",
+      "doc": "Jak dlouho musí příkon zůstat pod hodnotou „Práh vypnutí napájení“ po dokončení cyklu, než se stav vrátí na „Vypnuto“. Používá se pouze tehdy, když je „Práh vypnutí napájení“ větší než 0. Kontroluje se v pravidelném intervalu na pozadí, takže se skutečné zpoždění zaokrouhluje nahoru na nejbližší tik vypršení stavu."
     },
     "sampling_interval": {
       "label": "Interval vzorkování",

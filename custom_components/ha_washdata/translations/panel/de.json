@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Zyklusende"
     },
+    "power_off": {
+      "label": "Abschaltung"
+    },
     "signal_processing": {
       "label": "Signalverarbeitung"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "End-Wiederholungsanzahl",
       "doc": "Anzahl der aufeinanderfolgenden Messwerte unterhalb des Stoppschwellenwerts, die erforderlich sind, bevor der Zyklus endet. 1 reicht für die meisten Stecker aus. Erhöhen Sie den Wert auf 2–3, wenn Ihr Smart Plug mitten im Zyklus gelegentlich eine falsche Nullprobe meldet und Ihre Zyklen vorzeitig enden."
+    },
+    "power_off_threshold_w": {
+      "label": "Abschaltschwellenwert",
+      "doc": "Optionale leistungsbasierte Erkennung des Ausschaltens. Bei einem Wert über 0 gilt die Maschine als ausgeschaltet und der Status wechselt zurück zu Aus, sobald ein Zyklus beendet ist und die Leistung für die Dauer der Abschaltverzögerung unter diesem Wert bleibt. Bei 0 belassen, um die Funktion zu deaktivieren (Standard). Setzen Sie den Wert über den echten Abschalt-Nullpegel und unter den Stoppschwellenwert sowie unter die Standby-Leistung Ihrer Maschine im Zustand fertig-aber-eingeschaltet; liegt er nicht unter dem Stoppschwellenwert, wird er ignoriert. Wenn aktiviert, ersetzt dieser Wert die Fortschritts-Reset-Verzögerung für die Rückkehr zu Aus, sodass eine fertige Maschine in Fertig/Sauber bleibt, bis sie tatsächlich ausgeschaltet wird."
+    },
+    "power_off_delay": {
+      "label": "Abschaltverzögerung",
+      "doc": "Wie lange die Leistung nach dem Ende eines Zyklus unter dem Abschaltschwellenwert bleiben muss, bevor der Status zurück zu Aus wechselt. Wird nur verwendet, wenn der Abschaltschwellenwert über 0 liegt. Die Prüfung erfolgt im Hintergrundtakt, daher wird die tatsächliche Verzögerung auf den nächsten Statusablauf-Takt aufgerundet."
     },
     "sampling_interval": {
       "label": "Abtastintervall",

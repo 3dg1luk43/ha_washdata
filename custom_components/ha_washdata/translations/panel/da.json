@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Cyklusslut"
     },
+    "power_off": {
+      "label": "Slukning"
+    },
     "signal_processing": {
       "label": "Signalbehandling"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Slutgentagelsesantal",
       "doc": "Antallet af på hinanden følgende aflæsninger under stop-tærskel, der kræves, før cyklussen slutter. 1 er fint til de fleste stik. Hæv til 2-3, hvis dit smartstik lejlighedsvis rapporterer en falsk nul-prøve midt i cyklussen, og dine cyklusser slutter for tidligt."
+    },
+    "power_off_threshold_w": {
+      "label": "Slukketærskel",
+      "doc": "Valgfri effektbaseret registrering af slukning. Når værdien er over 0, betragtes maskinen som slukket, og tilstanden vender tilbage til Slukket, når en cyklus er afsluttet, og effekten forbliver under dette niveau i hele Slukkeforsinkelsen. Lad den stå på 0 for at deaktivere (standard). Sæt den over det reelle slukkede nulniveau og under Stoptærskel samt under maskinens standbyforbrug i tilstanden færdig-men-tændt; hvis den ikke er under Stoptærskel, ignoreres den. Når den er aktiveret, erstatter den Forsinkelse ved nulstilling af fremskridt for at vende tilbage til Slukket, så en færdig maskine forbliver i Færdig/Ren, indtil den faktisk slukkes."
+    },
+    "power_off_delay": {
+      "label": "Slukkeforsinkelse",
+      "doc": "Hvor længe effekten skal forblive under Slukketærskel, efter at en cyklus er afsluttet, før tilstanden vender tilbage til Slukket. Bruges kun, når Slukketærskel er over 0. Kontrolleres i baggrundstakten, så den effektive forsinkelse rundes op til næste tilstandsudløbstakt."
     },
     "sampling_interval": {
       "label": "Samplingsinterval",

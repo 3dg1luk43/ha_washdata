@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Konec cikla"
     },
+    "power_off": {
+      "label": "Izklop napajanja"
+    },
     "signal_processing": {
       "label": "Obdelava signala"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Število ponovitev konca",
       "doc": "Število zaporednih odčitkov pod mejno vrednostjo, potrebnih pred koncem cikla. 1 je primeren za večino vtičev. Povečajte na 2-3, če vaš pametni vtič občasno poroča o vzorcu napačne ničle sredi cikla in se vaši cikli končajo predčasno."
+    },
+    "power_off_threshold_w": {
+      "label": "Prag izklopa napajanja",
+      "doc": "Neobvezno zaznavanje stanja »Izključeno« na podlagi moči. Ko je vrednost večja od 0, se po zaključku cikla, če moč ostane pod to ravnjo v času »Zamuda izklopa napajanja«, naprava obravnava kot izklopljena in stanje se vrne na »Izključeno«. Pustite 0 za onemogočenje (privzeto). Nastavite jo nad dejansko raven izklopljene naprave ter pod »Prag zaustavitve« in pod porabo naprave v pripravljenosti po zaključku; če ni nižja od »Prag zaustavitve«, se prezre. Ko je omogočeno, nadomesti »Zamuda ponastavitve napredka« za vrnitev na »Izključeno«, tako da zaključena naprava ostane v stanju »Končano«/»čisto«, dokler ni dejansko izklopljena."
+    },
+    "power_off_delay": {
+      "label": "Zamuda izklopa napajanja",
+      "doc": "Kako dolgo mora moč ostati pod vrednostjo »Prag izklopa napajanja« po zaključku cikla, preden se stanje vrne na »Izključeno«. Uporablja se samo, ko je »Prag izklopa napajanja« večji od 0. Preverja se v ozadju v rednih intervalih, zato se dejanska zamuda zaokroži navzgor na naslednji korak poteka stanja."
     },
     "sampling_interval": {
       "label": "Interval vzorčenja",

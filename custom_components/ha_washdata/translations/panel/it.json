@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Fine ciclo"
     },
+    "power_off": {
+      "label": "Spegnimento"
+    },
     "signal_processing": {
       "label": "Elaborazione del segnale"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Conteggio ripetizioni fine",
       "doc": "Numero di letture consecutive al di sotto della soglia di arresto richieste prima della fine del ciclo. 1 va bene per la maggior parte delle prese. Aumenta a 2-3 se la tua presa intelligente segnala occasionalmente un campione di falsi zero a metà ciclo e i tuoi cicli terminano prematuramente."
+    },
+    "power_off_threshold_w": {
+      "label": "Soglia di spegnimento",
+      "doc": "Rilevamento facoltativo dello stato Spento basato sulla potenza. Quando è maggiore di 0, una volta terminato un ciclo e se la potenza rimane sotto questo livello per il Ritardo di spegnimento, la macchina viene considerata spenta e lo stato torna a Spento. Lascia a 0 per disattivarlo (valore predefinito). Impostalo sopra il consumo reale a macchina spenta e sotto la Soglia di arresto e il consumo in standby della tua macchina (terminata ma ancora accesa); se non è inferiore alla Soglia di arresto, viene ignorato. Quando è attivo, sostituisce il Ritardo reset avanzamento per il ritorno a Spento, così una macchina terminata resta su Completato/Pulito finché non viene effettivamente spenta."
+    },
+    "power_off_delay": {
+      "label": "Ritardo di spegnimento",
+      "doc": "Per quanto tempo la potenza deve rimanere sotto la Soglia di spegnimento dopo la fine di un ciclo prima che lo stato torni a Spento. Usato solo quando la Soglia di spegnimento è maggiore di 0. Viene controllato secondo la cadenza in background, quindi il ritardo effettivo viene arrotondato per eccesso al successivo tick di scadenza dello stato."
     },
     "sampling_interval": {
       "label": "Intervallo di campionamento",

@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Ciklo pabaiga"
     },
+    "power_off": {
+      "label": "Maitinimo išjungimas"
+    },
     "signal_processing": {
       "label": "Signalo apdorojimas"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Pabaigos pakartojimų sk.",
       "doc": "Iš eilės mažesnių nei sustojimo slenksčio rodmenų skaičius, reikalingas iki ciklo pabaigos. 1 tinka daugeliui kištukų. Padidinkite iki 2–3, jei jūsų išmanusis kištukas ciklo viduryje kartais praneša apie klaidingą nulį, o ciklai baigiasi anksčiau laiko."
+    },
+    "power_off_threshold_w": {
+      "label": "Maitinimo išjungimo slenkstis",
+      "doc": "Pasirenkamas galia pagrįstas Išjungta būsenos aptikimas. Kai reikšmė didesnė nei 0 ir ciklas baigėsi, o galia išlieka žemiau šio lygio Maitinimo išjungimo delsimo laiką, laikoma, kad mašina išjungta, ir būsena grįžta į Išjungta. Norėdami išjungti, palikite 0 (numatytoji reikšmė). Nustatykite ją aukščiau tikrojo išjungtos būsenos lygio, bet žemiau Sustabdymo slenksčio ir jūsų mašinos baigto-bet-įjungto budėjimo režimo suvartojimo; jei ji nėra žemiau Sustabdymo slenksčio, ji ignoruojama. Kai įjungta, grįžtant į Išjungta ji pakeičia Pažangos atstatymo delsimą, todėl baigusi mašina lieka Baigta/Švarus būsenoje, kol iš tikrųjų neišjungiama."
+    },
+    "power_off_delay": {
+      "label": "Maitinimo išjungimo delsimas",
+      "doc": "Kiek laiko galia turi išlikti žemiau Maitinimo išjungimo slenksčio pasibaigus ciklui, kol būsena grįžta į Išjungta. Naudojama tik tada, kai Maitinimo išjungimo slenkstis didesnis nei 0. Tikrinama pagal foninį ciklą, todėl faktinis delsimas suapvalinamas iki kitos būsenos galiojimo pabaigos žymos."
     },
     "sampling_interval": {
       "label": "Mėginių ėmimo intervalas",

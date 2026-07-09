@@ -541,6 +541,9 @@
     "cycle_end": {
       "label": "Syklusslutt"
     },
+    "power_off": {
+      "label": "Avslåing"
+    },
     "signal_processing": {
       "label": "Signalbehandling"
     },
@@ -673,6 +676,14 @@
     "end_repeat_count": {
       "label": "Slutt gjentaksantall",
       "doc": "Antall påfølgende avlesninger under stoppterskel som kreves før syklusen avsluttes. 1 er greit for de fleste plugger. Øk til 2-3 hvis smartpluggen av og til rapporterer en prøve med falsk null midt i syklusen og syklusene dine avsluttes for tidlig."
+    },
+    "power_off_threshold_w": {
+      "label": "Avslåingsterskel",
+      "doc": "Valgfri effektbasert registrering av avslåing. Når verdien er over 0, regnes maskinen som slått av og tilstanden går tilbake til Av så snart en syklus er fullført og effekten holder seg under dette nivået i hele Avslåingsforsinkelsen. La stå på 0 for å deaktivere (standard). Sett verdien over det reelle avslåtte nullnivået og under Stoppterskel samt under maskinens standbyforbruk i tilstanden ferdig-men-på; hvis den ikke er under Stoppterskel, blir den ignorert. Når den er aktivert, erstatter den Fremdriftsreset-forsinkelse for tilbakegang til Av, slik at en ferdig maskin forblir i Ferdig/Rengjøre til den faktisk blir slått av."
+    },
+    "power_off_delay": {
+      "label": "Avslåingsforsinkelse",
+      "doc": "Hvor lenge effekten må holde seg under Avslåingsterskel etter at en syklus er fullført før tilstanden går tilbake til Av. Brukes bare når Avslåingsterskel er over 0. Kontrolleres i bakgrunnstakten, så den effektive forsinkelsen rundes opp til neste tilstandsutløpstakt."
     },
     "sampling_interval": {
       "label": "Sampling-intervall",

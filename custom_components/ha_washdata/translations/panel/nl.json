@@ -541,6 +541,9 @@
     "cycle_end": {
       "label": "Cyclus einde"
     },
+    "power_off": {
+      "label": "Uitschakelen"
+    },
     "signal_processing": {
       "label": "Signaalverwerking"
     },
@@ -673,6 +676,14 @@
     "end_repeat_count": {
       "label": "Eindherhalingsaantal",
       "doc": "Aantal opeenvolgende metingen onder de stopdrempel vereist voordat de cyclus eindigt. 1 is prima voor de meeste stekkers. Verhoog naar 2-3 als uw slimme stekker halverwege de cyclus af en toe een vals-nulmonster rapporteert en uw cycli voortijdig eindigen."
+    },
+    "power_off_threshold_w": {
+      "label": "Uitschakeldrempel",
+      "doc": "Optionele, op vermogen gebaseerde Uit-detectie. Bij een waarde boven 0 wordt de machine als uitgeschakeld beschouwd en keert de status terug naar Uit zodra een cyclus is voltooid en het vermogen gedurende de Uitschakelvertraging onder dit niveau blijft. Laat op 0 staan om dit uit te schakelen (de standaard). Stel de waarde in boven het werkelijke uitgeschakelde nulniveau en onder de Stopdrempel en onder het standby-verbruik van uw machine in de toestand voltooid-maar-aan; als de waarde niet onder de Stopdrempel ligt, wordt deze genegeerd. Indien ingeschakeld vervangt deze waarde de Voortgangsreset vertraging voor het terugkeren naar Uit, zodat een voltooide machine in Voltooid/Schoon blijft totdat deze daadwerkelijk wordt uitgeschakeld."
+    },
+    "power_off_delay": {
+      "label": "Uitschakelvertraging",
+      "doc": "Hoe lang het vermogen na het voltooien van een cyclus onder de Uitschakeldrempel moet blijven voordat de status terugkeert naar Uit. Wordt alleen gebruikt wanneer de Uitschakeldrempel boven 0 is. Wordt gecontroleerd op de achtergrondcadans, dus de effectieve vertraging wordt naar boven afgerond tot de volgende tick waarop de status verloopt."
     },
     "sampling_interval": {
       "label": "Samplinginterval",

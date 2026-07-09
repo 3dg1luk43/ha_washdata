@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Kraj ciklusa"
     },
+    "power_off": {
+      "label": "Isključivanje napajanja"
+    },
     "signal_processing": {
       "label": "Obrada signala"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Broj ponavljanja kraja",
       "doc": "Broj uzastopnih očitavanja ispod praga zaustavljanja potrebnih prije završetka ciklusa. 1 je u redu za većinu utikača. Povećajte na 2-3 ako vaš pametni utikač povremeno prijavi uzorak lažne nule usred ciklusa i vaši ciklusi se završavaju prerano."
+    },
+    "power_off_threshold_w": {
+      "label": "Prag isključivanja napajanja",
+      "doc": "Opciono otkrivanje isključenog stanja na osnovu snage. Kada je iznad 0, nakon što se ciklus završi i snaga ostane ispod ovog nivoa tokom Kašnjenja isključivanja napajanja, mašina se tretira kao isključena i stanje se vraća na „Isključeno“. Ostavite na 0 da onemogućite (zadano). Postavite ga iznad stvarnog nivoa isključenog napajanja, a ispod Praga zaustavljanja i ispod potrošnje vaše mašine u stanju pripravnosti (završeno, ali još uključeno); ako nije ispod Praga zaustavljanja, zanemaruje se. Kada je omogućeno, zamjenjuje Kašnjenje poništavanja napretka za povratak na „Isključeno“, tako da završena mašina ostaje na „Završeno/Čisto“ dok se stvarno ne isključi."
+    },
+    "power_off_delay": {
+      "label": "Kašnjenje isključivanja napajanja",
+      "doc": "Koliko dugo snaga mora ostati ispod Praga isključivanja napajanja nakon što se ciklus završi prije nego što se stanje vrati na „Isključeno“. Koristi se samo kada je Prag isključivanja napajanja iznad 0. Provjerava se na pozadinskom ritmu, tako da se efektivno kašnjenje zaokružuje naviše na sljedeći otkucaj isteka stanja."
     },
     "sampling_interval": {
       "label": "Interval uzorkovanja",

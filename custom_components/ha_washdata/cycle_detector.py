@@ -96,6 +96,11 @@ class CycleDetectorConfig:
     start_threshold_w: float = 2.0
     stop_threshold_w: float = 2.0
     min_duration_ratio: float = 0.8  # Default deferred finish ratio
+    # Power-based Off detection (issue #284). Carried on the config so the manager
+    # (the single owner of the terminal -> Off transition) can read them live; the
+    # detector itself does not act on them. 0 = disabled.
+    power_off_threshold_w: float = 0.0
+    power_off_delay: float = 30.0
     match_interval: int = 300  # Default profile match interval
     profile_duration_tolerance: float = 0.25  # Default tolerance (±25%)
     anti_wrinkle_enabled: bool = False
@@ -837,13 +842,14 @@ class CycleDetector:
                 self._energy_since_idle_wh = power * (dt / 3600.0) if dt > 0 else 0.0
                 self._cycle_max_power = power
                 self._abrupt_drop = False
-            elif self._state != STATE_OFF:
-                # Auto-expire terminal states after 30 minutes
-                if (
-                    self._state_enter_time
-                    and (timestamp - self._state_enter_time).total_seconds() > 1800
-                ):
-                    self._transition_to(STATE_OFF, timestamp)
+            # NOTE: terminal-state expiry (Finished/Interrupted/Force-Stopped -> Off)
+            # is owned solely by the manager (WashDataManager._handle_state_expiry),
+            # which has a wall-clock timer that also fires when a change-only power
+            # sensor stops reporting, plus the opt-in power-based Off (issue #284).
+            # The detector used to auto-expire here after a hardcoded 30 min, but that
+            # duplicated the manager timer (a weaker, per-reading subset) and left the
+            # manager's bookkeeping (progress, clean overlay, notifications) dangling.
+            # ANTI_WRINKLE -> Off is handled by its own idle/timeout logic above.
 
         elif self._state == STATE_DELAY_WAIT:
             if power >= self._config.start_threshold_w:

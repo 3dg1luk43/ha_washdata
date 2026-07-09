@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Koniec cyklu"
     },
+    "power_off": {
+      "label": "Vypnutie napájania"
+    },
     "signal_processing": {
       "label": "Spracovanie signálu"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Počet opakovaní ukončenia",
       "doc": "Počet po sebe idúcich odčítaní pod prahovou hodnotou zastavenia požadovaných pred koncom cyklu. 1 je v poriadku pre väčšinu zástrčiek. Zvýšte na 2-3, ak vaša inteligentná zásuvka občas hlási vzorku s falošnou nulou uprostred cyklu a vaše cykly sa predčasne končia."
+    },
+    "power_off_threshold_w": {
+      "label": "Prah vypnutia napájania",
+      "doc": "Voliteľná detekcia stavu „Vypnuté“ na základe príkonu. Keď je hodnota väčšia než 0, po dokončení cyklu, ak príkon zostane pod touto úrovňou počas času „Oneskorenie vypnutia napájania“, spotrebič sa považuje za vypnutý a stav sa vráti na „Vypnuté“. Ponechajte 0 na vypnutie (predvolené). Nastavte ju nad skutočnú úroveň vypnutého spotrebiča a pod „Prah zastavenia“ aj pod pohotovostný odber dokončeného, ale stále zapnutého spotrebiča; ak nie je nižšia než „Prah zastavenia“, ignoruje sa. Keď je zapnutá, nahrádza „Oneskorenie obnovenia priebehu“ pri návrate na „Vypnuté“, takže dokončený spotrebič zostane v stave „Dokončené“/„Čistý“, kým sa skutočne nevypne."
+    },
+    "power_off_delay": {
+      "label": "Oneskorenie vypnutia napájania",
+      "doc": "Ako dlho musí príkon zostať pod hodnotou „Prah vypnutia napájania“ po dokončení cyklu, kým sa stav vráti na „Vypnuté“. Používa sa iba vtedy, keď je „Prah vypnutia napájania“ väčší než 0. Kontroluje sa v pravidelnom intervale na pozadí, takže sa skutočné oneskorenie zaokrúhľuje nahor na najbližší tik vypršania stavu."
     },
     "sampling_interval": {
       "label": "Interval vzorkovania",

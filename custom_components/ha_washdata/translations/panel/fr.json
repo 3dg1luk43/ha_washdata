@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Fin de cycle"
     },
+    "power_off": {
+      "label": "Mise hors tension"
+    },
     "signal_processing": {
       "label": "Traitement du signal"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Nombre de répétitions de fin",
       "doc": "Nombre de lectures consécutives inférieures au seuil d'arrêt requises avant la fin du cycle. 1 convient à la plupart des prises. Augmentez à 2-3 si votre prise intelligente signale occasionnellement un échantillon faux zéro en cours de cycle et que vos cycles se terminent prématurément."
+    },
+    "power_off_threshold_w": {
+      "label": "Seuil de mise hors tension",
+      "doc": "Détection facultative de l'état Désactivé basée sur la puissance. Lorsqu'il est supérieur à 0, une fois un cycle terminé et si la puissance reste sous ce niveau pendant le Délai de mise hors tension, la machine est considérée comme éteinte et l'état repasse à Désactivé. Laissez à 0 pour désactiver (valeur par défaut). Réglez-le au-dessus de la consommation réelle à l'arrêt complet et en dessous du Seuil d'arrêt ainsi que de la consommation de veille (terminé mais toujours allumé) de votre machine ; s'il n'est pas inférieur au Seuil d'arrêt, il est ignoré. Lorsqu'elle est activée, cette option remplace le Délai de réinitialisation de progression pour le retour à Désactivé, de sorte qu'une machine terminée reste en Terminé/Propre jusqu'à ce qu'elle soit réellement éteinte."
+    },
+    "power_off_delay": {
+      "label": "Délai de mise hors tension",
+      "doc": "Durée pendant laquelle la puissance doit rester sous le Seuil de mise hors tension après la fin d'un cycle avant que l'état ne repasse à Désactivé. Utilisé uniquement lorsque le Seuil de mise hors tension est supérieur à 0. Vérifié selon la cadence en arrière-plan, de sorte que le délai effectif est arrondi au prochain tick d'expiration d'état."
     },
     "sampling_interval": {
       "label": "Intervalle d'échantillonnage",

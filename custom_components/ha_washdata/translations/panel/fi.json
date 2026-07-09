@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Syklin loppu"
     },
+    "power_off": {
+      "label": "Virran sammutus"
+    },
     "signal_processing": {
       "label": "Signaalinkäsittely"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Lopetuksen toistomäärä",
       "doc": "Peräkkäisten pysäytyskynnyksen alapuolella olevien lukemien määrä, joka vaaditaan ennen syklin päättymistä. 1 sopii useimpiin pistokkeisiin. Nosta arvoon 2–3, jos älypistoke ilmoittaa toisinaan väärän nollan näytteen kesken jakson ja syklisi päättyvät ennenaikaisesti."
+    },
+    "power_off_threshold_w": {
+      "label": "Virran sammutuksen kynnys",
+      "doc": "Valinnainen tehoon perustuva Pois päältä -tilan tunnistus. Kun arvo on yli 0 ja jakso on päättynyt sekä teho pysyy tämän tason alapuolella Virran sammutuksen viiveen ajan, koneen katsotaan olevan sammutettu ja tila palaa Pois päältä -tilaan. Poista käytöstä jättämällä arvoon 0 (oletus). Aseta se todellisen sammutetun tason yläpuolelle mutta Pysäytyskynnyksen ja koneesi valmis-mutta-päällä-valmiustilan kulutuksen alapuolelle; jos se ei ole Pysäytyskynnyksen alapuolella, se ohitetaan. Käytössä ollessaan se korvaa Edistymisen nollausviiveen paluussa Pois päältä -tilaan, joten valmistunut kone pysyy Valmis/Puhdas-tilassa, kunnes se todella sammutetaan."
+    },
+    "power_off_delay": {
+      "label": "Virran sammutuksen viive",
+      "doc": "Kuinka kauan tehon on pysyttävä Virran sammutuksen kynnyksen alapuolella jakson päätyttyä, ennen kuin tila palaa Pois päältä -tilaan. Käytetään vain, kun Virran sammutuksen kynnys on yli 0. Tarkistetaan taustasyklin mukaan, joten todellinen viive pyöristyy ylöspäin seuraavaan tilan vanhenemisajankohtaan."
     },
     "sampling_interval": {
       "label": "Näytteenottoväli",

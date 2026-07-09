@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Lok lotu"
     },
+    "power_off": {
+      "label": "Slökkun"
+    },
     "signal_processing": {
       "label": "Merkjavinnsla"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Fjöldi lokakorna",
       "doc": "Fjöldi samfelldra aflestra undir stöðvunarþröskuldi sem þarf áður en lotunni lýkur. 1 er fínt fyrir flestar innstungur. Hækkaðu í 2-3 ef snjalltappið þitt tilkynnir stundum um rangt núll sýni í miðjum lotu og loturnar þínar eru að ljúka of snemma."
+    },
+    "power_off_threshold_w": {
+      "label": "Slökkunarþröskuldur",
+      "doc": "Valfrjáls aflbyggð greining á slökkun. Þegar gildið er yfir 0 telst tækið slökkt og staðan fer aftur í Slökkt um leið og lotu er lokið og aflið helst undir þessu marki alla Slökkunartöfina. Hafðu á 0 til að slökkva á þessu (sjálfgefið). Stilltu það yfir raunverulegt slökkt-núllstig og undir Stöðvunarþröskuld og undir biðstöðunotkun tækisins í stöðunni lokið-en-kveikt; ef það er ekki undir Stöðvunarþröskuldi er það hunsað. Þegar kveikt er á því kemur það í stað framfaraendurstillingartafarinnar við að fara aftur í Slökkt, þannig að tæki sem er búið helst í Lokið/Hreint þar til raunverulega er slökkt á því."
+    },
+    "power_off_delay": {
+      "label": "Slökkunartöf",
+      "doc": "Hversu lengi aflið verður að haldast undir Slökkunarþröskuldi eftir að lotu lýkur áður en staðan fer aftur í Slökkt. Aðeins notað þegar Slökkunarþröskuldur er yfir 0. Athugað á bakgrunnstaktinum, þannig að raunveruleg töf er námunduð upp að næsta stöðulokatakti."
     },
     "sampling_interval": {
       "label": "Sýnitakabil",

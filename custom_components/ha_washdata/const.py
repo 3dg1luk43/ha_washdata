@@ -73,6 +73,12 @@ CONF_START_THRESHOLD_W = "start_threshold_w"  # Custom power threshold for START
 CONF_STOP_THRESHOLD_W = (
     "stop_threshold_w"  # Custom power threshold for ENDING (hysteresis)
 )
+CONF_POWER_OFF_THRESHOLD_W = (
+    "power_off_threshold_w"  # W; 0 = disabled. Terminal Finished/Clean -> Off when
+)  # smoothed power stays below this (must sit below stop_threshold_w when > 0)
+CONF_POWER_OFF_DELAY = (
+    "power_off_delay"  # Seconds below the power-off threshold before Finished/Clean -> Off
+)
 CONF_EXPOSE_DEBUG_ENTITIES = "expose_debug_entities"  # Expose detailed debug sensors
 CONF_SAVE_DEBUG_TRACES = (
     "save_debug_traces"  # Improve historical cycle data with rich debug info
@@ -162,6 +168,15 @@ DEFAULT_PROFILE_DURATION_TOLERANCE = 0.25
 DEFAULT_INTERRUPTED_MIN_SECONDS = 150  # Internal use only, not exposed
 
 DEFAULT_PROGRESS_RESET_DELAY = 1800  # Seconds (30 minutes state expiry/unload window)
+
+# Power-based Off detection (issue #284; opt-in, default off). Threshold 0 = disabled
+# (the enable marker); when > 0 it must sit BELOW stop_threshold_w (beneath the idle/
+# standby floor) or it is ignored. The delay is a short debounce that is safe to keep
+# small because it only applies in the terminal state (no soak risk there). When enabled,
+# power-off owns the terminal -> Off transition and the progress-reset timer no longer
+# forces Off (the terminal state persists until the machine is actually switched off).
+DEFAULT_POWER_OFF_THRESHOLD_W = 0.0  # Disabled
+DEFAULT_POWER_OFF_DELAY = 30  # Seconds
 DEFAULT_LEARNING_CONFIDENCE = 0.6  # Minimum confidence to request user verification
 DEFAULT_DURATION_TOLERANCE = 0.10  # Allow ±10% duration variance before flagging
 DEFAULT_AUTO_LABEL_CONFIDENCE = 0.9  # High confidence auto-label threshold

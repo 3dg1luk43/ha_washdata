@@ -77,6 +77,8 @@ from .const import (
     CONF_END_ENERGY_THRESHOLD,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
+    CONF_POWER_OFF_THRESHOLD_W,
+    CONF_POWER_OFF_DELAY,
     CONF_SAMPLING_INTERVAL,
     CONF_SAVE_DEBUG_TRACES,
     CONF_DTW_BANDWIDTH,
@@ -118,6 +120,8 @@ from .const import (
     DEFAULT_PROFILE_UNMATCH_THRESHOLD,
     DEFAULT_SAMPLING_INTERVAL,
     DEFAULT_PROGRESS_RESET_DELAY,
+    DEFAULT_POWER_OFF_THRESHOLD_W,
+    DEFAULT_POWER_OFF_DELAY,
     DEFAULT_LEARNING_CONFIDENCE,
     DEFAULT_DURATION_TOLERANCE,
     DEFAULT_AUTO_LABEL_CONFIDENCE,
@@ -158,6 +162,8 @@ from .const import (
     DEFAULT_NOTIFY_UNLOAD_MESSAGE,
     STATE_CLEAN,
     STATE_FINISHED,
+    STATE_INTERRUPTED,
+    STATE_FORCE_STOPPED,
     DEFAULT_NOTIFY_TITLE,
     DEFAULT_NOTIFY_START_MESSAGE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
@@ -365,6 +371,10 @@ class WashDataManager:
 
         # State
         self._current_power = 0.0
+        # Power-based Off detection (issue #284): timestamp at which power first fell
+        # below the power-off threshold while in a terminal state. None = not currently
+        # below (or feature disabled). Cleared on new cycle / when power rises.
+        self._power_off_below_since: datetime | None = None
         self._last_reading_time: datetime | None = None
         self._last_real_reading_time: datetime | None = None # Track last real sensor update
         self._noise_events: list[datetime] = []
@@ -571,6 +581,14 @@ class WashDataManager:
                     CONF_STOP_THRESHOLD_W,
                     float(min_power) * 0.6 if float(min_power) > 0 else 2.0,
                 )
+            ),
+            power_off_threshold_w=float(
+                config_entry.options.get(
+                    CONF_POWER_OFF_THRESHOLD_W, DEFAULT_POWER_OFF_THRESHOLD_W
+                )
+            ),
+            power_off_delay=float(
+                config_entry.options.get(CONF_POWER_OFF_DELAY, DEFAULT_POWER_OFF_DELAY)
             ),
             min_duration_ratio=float(
                 config_entry.options.get(
@@ -1771,6 +1789,14 @@ class WashDataManager:
                 max(0.0, float(new_min_power) - max(0.5, 0.1 * float(new_min_power))),
             )
         )
+        new_power_off_threshold_w = float(
+            config_entry.options.get(
+                CONF_POWER_OFF_THRESHOLD_W, DEFAULT_POWER_OFF_THRESHOLD_W
+            )
+        )
+        new_power_off_delay = float(
+            config_entry.options.get(CONF_POWER_OFF_DELAY, DEFAULT_POWER_OFF_DELAY)
+        )
 
         new_start_energy = float(
             config_entry.options.get(
@@ -1832,6 +1858,8 @@ class WashDataManager:
         self.detector.config.end_repeat_count = new_end_repeat_count
         self.detector.config.start_threshold_w = new_start_threshold_w
         self.detector.config.stop_threshold_w = new_stop_threshold_w
+        self.detector.config.power_off_threshold_w = new_power_off_threshold_w
+        self.detector.config.power_off_delay = new_power_off_delay
         self.detector.config.start_energy_threshold = new_start_energy
         self.detector.config.end_energy_threshold = new_end_energy
         self.detector.config.anti_wrinkle_enabled = new_anti_wrinkle_enabled
@@ -2785,16 +2813,74 @@ class WashDataManager:
                 else:
                     self._notified_clean_laundry = True
 
-        if time_since_complete > self._progress_reset_delay:
-            # Defer the reset when a clean-state unload notification is still pending.
-            # Without this guard the 30-min progress reset fires before the 60-min
-            # unload nag, clearing _is_clean_state before the notification can fire.
+        # Defer leaving the terminal state while a clean-state unload notification is
+        # still pending. Without this guard the 30-min progress reset (or an early
+        # power-off) fires before the unload nag, clearing _is_clean_state before the
+        # notification can fire. Both expiry modes below honour it.
+        nag_pending = (
+            self._is_clean_state
+            and not self._notified_clean_laundry
+            and self._notify_unload_delay_minutes > 0
+            and time_since_complete < self._notify_unload_delay_minutes * 60
+        )
+
+        # Power-based Off detection (issue #284): opt-in, and only valid when the
+        # threshold sits below stop_threshold_w (so it cannot fire while a cycle could
+        # still be running, and cannot re-trigger the #267 spin-down ghost cycle). It is
+        # evaluated ONLY in a terminal state; active states never reach here because
+        # _cycle_completed_time is None until cycle end.
+        cfg = self.detector.config
+        pot = cfg.power_off_threshold_w
+        stop_w = cfg.stop_threshold_w
+        power_off_enabled = (
+            isinstance(pot, (int, float))
+            and isinstance(stop_w, (int, float))
+            and 0.0 < pot < stop_w
+            and self.detector.state
+            in (STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED)
+        )
+
+        if power_off_enabled:
+            # Power owns the Off transition. The classic timer still zeroes the progress
+            # bar after progress_reset_delay, but the terminal state PERSISTS until the
+            # machine is actually switched off (no timer fallback, by design: a machine
+            # whose standby never drops below the threshold stays "Finished").
             if (
-                self._is_clean_state
-                and not self._notified_clean_laundry
-                and self._notify_unload_delay_minutes > 0
-                and time_since_complete < self._notify_unload_delay_minutes * 60
+                time_since_complete > self._progress_reset_delay
+                and self._cycle_progress != 0.0
             ):
+                self._cycle_progress = 0.0
+                self._notify_update()
+
+            if nag_pending:
+                # Hold the terminal state (and pause power sampling) until the nag fires.
+                self._power_off_below_since = None
+                return
+
+            if self._current_power < cfg.power_off_threshold_w:
+                if self._power_off_below_since is None:
+                    self._power_off_below_since = now
+                elif (
+                    now - self._power_off_below_since
+                ).total_seconds() >= cfg.power_off_delay:
+                    self._logger.debug(
+                        "Power-based Off: %.2fW below %.2fW for >= %.0fs in %s. "
+                        "Resetting to OFF.",
+                        self._current_power,
+                        cfg.power_off_threshold_w,
+                        cfg.power_off_delay,
+                        self.detector.state,
+                    )
+                    self._reset_terminal_to_off()
+            else:
+                # Power rose back above the threshold: restart the debounce window.
+                self._power_off_below_since = None
+            return
+
+        # Timer-based Off (feature disabled): classic behaviour, unchanged.
+        self._power_off_below_since = None
+        if time_since_complete > self._progress_reset_delay:
+            if nag_pending:
                 return
             # Auto-expire the "Finished" (or other terminal) state
             self._logger.debug(
@@ -2802,15 +2888,25 @@ class WashDataManager:
                 time_since_complete,
                 self._progress_reset_delay,
             )
-            self._cycle_progress = 0.0
-            self._cycle_completed_time = None
-            # Clear clean state when progress expires
-            self._is_clean_state = False
-            self._clean_state_start = None
-            self._notified_clean_laundry = False
-            self.detector.reset(STATE_OFF)
-            self._stop_state_expiry_timer()
-            self._notify_update()
+            self._reset_terminal_to_off()
+
+    def _reset_terminal_to_off(self) -> None:
+        """Return a terminal state (Finished/Interrupted/Force-Stopped, incl. the Clean
+        overlay) to OFF and clear all post-cycle bookkeeping.
+
+        Single owner of the terminal -> OFF transition, shared by the timer-based and
+        the power-based (issue #284) expiry paths so the two can never diverge.
+        """
+        self._cycle_progress = 0.0
+        self._cycle_completed_time = None
+        # Clear the Clean overlay too, or check_state() keeps reporting "Clean".
+        self._is_clean_state = False
+        self._clean_state_start = None
+        self._notified_clean_laundry = False
+        self._power_off_below_since = None
+        self.detector.reset(STATE_OFF)
+        self._stop_state_expiry_timer()
+        self._notify_update()
 
     async def _watchdog_check_stuck_cycle(self, now: datetime) -> None:
         """Watchdog: check if cycle is stuck (no updates for too long)."""
@@ -3084,6 +3180,7 @@ class WashDataManager:
             self._clean_state_start = None
             self._notified_clean_laundry = False
             self._cycle_progress = 0.0
+            self._power_off_below_since = None
             self._stop_state_expiry_timer()
         if new_state == STATE_RUNNING:
             new_cycle_detected = old_state in (STATE_OFF, STATE_STARTING, STATE_UNKNOWN)

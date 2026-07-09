@@ -541,6 +541,9 @@
     "cycle_end": {
       "label": "Cikla beigas"
     },
+    "power_off": {
+      "label": "Barošanas izslēgšana"
+    },
     "signal_processing": {
       "label": "Signālu apstrāde"
     },
@@ -673,6 +676,14 @@
     "end_repeat_count": {
       "label": "Beigu atkārtojumu skaits",
       "doc": "Pirms cikla beigām nepieciešamo secīgo rādījumu skaits zem apstāšanās sliekšņa. 1 ir piemērots lielākajai daļai spraudņu. Palieliniet vērtību līdz 2–3, ja viedā spraudnis cikla vidū laiku pa laikam ziņo par nepatiesu nulli un cikli beidzas priekšlaicīgi."
+    },
+    "power_off_threshold_w": {
+      "label": "Barošanas izslēgšanas slieksnis",
+      "doc": "Neobligāta, uz jaudu balstīta Izslēgts stāvokļa noteikšana. Ja vērtība pārsniedz 0 un cikls ir pabeigts, un jauda saglabājas zem šī līmeņa Barošanas izslēgšanas aizkaves laikā, mašīna tiek uzskatīta par izslēgtu, un stāvoklis atgriežas uz Izslēgts. Lai atspējotu, atstājiet 0 (noklusējums). Iestatiet to virs patiesā izslēgtā līmeņa, bet zem Apstāšanās sliekšņa un mašīnas pabeigtā-bet-ieslēgtā gaidstāves patēriņa; ja tā nav zem Apstāšanās sliekšņa, tā tiek ignorēta. Kad iespējota, atgriešanās uz Izslēgts aizstāj Progresa atiestatīšanas aizkavi, tāpēc pabeigta mašīna paliek stāvoklī Pabeigts/Tīrs, līdz tā tiek faktiski izslēgta."
+    },
+    "power_off_delay": {
+      "label": "Barošanas izslēgšanas aizkave",
+      "doc": "Cik ilgi jaudai pēc cikla pabeigšanas jāpaliek zem Barošanas izslēgšanas sliekšņa, pirms stāvoklis atgriežas uz Izslēgts. Izmanto tikai tad, ja Barošanas izslēgšanas slieksnis pārsniedz 0. Tiek pārbaudīts fona ritmā, tāpēc faktiskā aizkave tiek noapaļota uz augšu līdz nākamajai stāvokļa derīguma beigu atzīmei."
     },
     "sampling_interval": {
       "label": "Paraugu ņemšanas intervāls",

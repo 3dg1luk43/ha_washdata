@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Cykelslut"
     },
+    "power_off": {
+      "label": "Avstängning"
+    },
     "signal_processing": {
       "label": "Signalbehandling"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Antal slutrepetitioner",
       "doc": "Antalet på varandra följande avläsningar under stopptröskelvärdet som krävs innan cykeln avslutas. 1 är bra för de flesta pluggar. Höj till 2-3 om din smarta kontakt då och då rapporterar ett prov med falskt noll i mitten av cykeln och dina cykler slutar i förtid."
+    },
+    "power_off_threshold_w": {
+      "label": "Avstängningströskel",
+      "doc": "Valfri effektbaserad Av-detektering. När värdet är över 0 betraktas maskinen som avstängd och tillståndet återgår till Av så snart en cykel har avslutats och effekten håller sig under denna nivå under hela Avstängningsfördröjningen. Lämna på 0 för att inaktivera (standard). Ställ in värdet över maskinens verkliga avstängda nollnivå och under Stopptröskel samt under maskinens standbyförbrukning i tillståndet färdig-men-på; om det inte är under Stopptröskel ignoreras det. När det är aktiverat ersätter det Förloppåterställningsfördröjning för återgång till Av, så att en färdig maskin stannar i Färdig/Rena tills den faktiskt stängs av."
+    },
+    "power_off_delay": {
+      "label": "Avstängningsfördröjning",
+      "doc": "Hur länge effekten måste hålla sig under Avstängningströskel efter att en cykel har avslutats innan tillståndet återgår till Av. Används endast när Avstängningströskel är över 0. Kontrolleras enligt bakgrundskadensen, så den effektiva fördröjningen avrundas uppåt till nästa tillståndsutgångstick."
     },
     "sampling_interval": {
       "label": "Samplingsintervall",

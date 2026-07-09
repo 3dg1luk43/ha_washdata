@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Ciklus vége"
     },
+    "power_off": {
+      "label": "Készülék kikapcsolása"
+    },
     "signal_processing": {
       "label": "Jelkondicionálás"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Záró ismétlések száma",
       "doc": "Az egymást követő leállási küszöbérték alatti leolvasások száma a ciklus vége előtt. Az 1 megfelelő a legtöbb csatlakozóhoz. Emelje 2-3-ra, ha az intelligens csatlakozó időnként hamis nullát jelez a ciklus közepén, és a ciklusok idő előtt véget érnek."
+    },
+    "power_off_threshold_w": {
+      "label": "Kikapcsolás teljesítményküszöbe",
+      "doc": "Opcionális, teljesítményalapú Kikapcsolva állapot érzékelése. Ha az érték 0 fölött van, akkor amint egy ciklus befejeződött és a teljesítmény a Kikapcsolás késleltetése ideig e szint alatt marad, a gépet kikapcsoltnak tekinti, és az állapot visszatér a Kikapcsolva értékre. A letiltáshoz hagyja 0 értéken (alapértelmezett). Állítsa a valódi kikapcsolt szint fölé, de a Leállítási küszöb és a gép befejezett-de-bekapcsolt készenléti fogyasztása alá; ha nincs a Leállítási küszöb alatt, a rendszer figyelmen kívül hagyja. Bekapcsolva a Kikapcsolva állapotba való visszatéréshez a Folyamat visszaállítási késleltetés helyébe lép, így a befejezett gép Befejezett/Tiszta állapotban marad, amíg ténylegesen ki nem kapcsolják."
+    },
+    "power_off_delay": {
+      "label": "Kikapcsolás késleltetése",
+      "doc": "Mennyi ideig kell a teljesítménynek a Kikapcsolás teljesítményküszöbe alatt maradnia egy ciklus befejezése után, mielőtt az állapot visszatér a Kikapcsolva értékre. Csak akkor használatos, ha a Kikapcsolás teljesítményküszöbe 0 fölött van. A háttérben futó ütem szerint ellenőrzi, így a tényleges késleltetés felfelé kerekít a következő állapotlejárati lépéshez."
     },
     "sampling_interval": {
       "label": "Mintavételezési intervallum",

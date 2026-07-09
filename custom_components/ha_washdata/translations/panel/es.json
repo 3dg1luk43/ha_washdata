@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Fin del ciclo"
     },
+    "power_off": {
+      "label": "Apagado"
+    },
     "signal_processing": {
       "label": "Procesamiento de señal"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Recuento de repetición de fin",
       "doc": "Número de lecturas consecutivas por debajo del umbral requerido antes de que finalice el ciclo. 1 está bien para la mayoría de los enchufes. Aumente a 2-3 si su enchufe inteligente ocasionalmente informa una muestra de cero falso a mitad del ciclo y sus ciclos terminan prematuramente."
+    },
+    "power_off_threshold_w": {
+      "label": "Umbral de apagado",
+      "doc": "Detección opcional del estado Apagado basada en la potencia. Cuando es mayor que 0, una vez que un ciclo ha finalizado y la potencia se mantiene por debajo de este nivel durante el Retardo de apagado, se considera que la máquina está apagada y el estado vuelve a Apagado. Déjelo en 0 para desactivarlo (valor predeterminado). Ajústelo por encima del nivel real de consumo con la máquina apagada y por debajo del Umbral de parada y del consumo en espera de su máquina (finalizada pero encendida); si no es inferior al Umbral de parada, se ignora. Cuando está activado, sustituye al Retardo de reinicio de progreso para volver a Apagado, de modo que una máquina finalizada permanece en Finalizado/Limpio hasta que se apaga realmente."
+    },
+    "power_off_delay": {
+      "label": "Retardo de apagado",
+      "doc": "Cuánto tiempo debe mantenerse la potencia por debajo del Umbral de apagado tras finalizar un ciclo antes de que el estado vuelva a Apagado. Solo se usa cuando el Umbral de apagado es mayor que 0. Se comprueba según la cadencia en segundo plano, por lo que el retardo efectivo se redondea al alza hasta el siguiente tick de expiración de estado."
     },
     "sampling_interval": {
       "label": "Intervalo de muestreo",

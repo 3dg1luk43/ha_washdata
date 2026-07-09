@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Cycle End"
     },
+    "power_off": {
+      "label": "Power Off"
+    },
     "signal_processing": {
       "label": "Signal Processing"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "End Repeat Count",
       "doc": "Number of consecutive below-stop-threshold readings required before the cycle ends. 1 is fine for most plugs. Raise to 2-3 if your smart plug occasionally reports a false-zero sample mid-cycle and your cycles are ending prematurely."
+    },
+    "power_off_threshold_w": {
+      "label": "Power Off Threshold",
+      "doc": "Optional power-based Off detection. When above 0, once a cycle has finished and power stays below this level for the Power Off Delay, the machine is treated as switched off and the state returns to Off. Leave at 0 to disable (the default). Set it above the true switched-off floor and below the Stop Threshold and your machine's finished-but-on standby draw; if it is not below the Stop Threshold it is ignored. When enabled it replaces the Progress Reset Delay for returning to Off, so a finished machine stays in Finished/Clean until it is actually powered off."
+    },
+    "power_off_delay": {
+      "label": "Power Off Delay",
+      "doc": "How long power must stay below the Power Off Threshold after a cycle finishes before the state returns to Off. Only used when the Power Off Threshold is above 0. Checked on the background cadence, so the effective delay rounds up to the next state-expiry tick."
     },
     "sampling_interval": {
       "label": "Sampling Interval",

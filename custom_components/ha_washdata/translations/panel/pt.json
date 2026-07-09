@@ -532,6 +532,9 @@
     "cycle_end": {
       "label": "Fim do Ciclo"
     },
+    "power_off": {
+      "label": "Desligamento"
+    },
     "signal_processing": {
       "label": "Processamento de Sinal"
     },
@@ -653,6 +656,14 @@
     "end_repeat_count": {
       "label": "Contagem de Repetições de Fim",
       "doc": "Número de leituras consecutivas abaixo do limite de parada necessárias antes do término do ciclo. 1 é adequado para a maioria dos plugues. Aumente para 2-3 se o seu plugue inteligente ocasionalmente relatar uma amostra de falso zero no meio do ciclo e seus ciclos estiverem terminando prematuramente."
+    },
+    "power_off_threshold_w": {
+      "label": "Limiar de Desligamento",
+      "doc": "Deteção opcional do estado Desligado com base na potência. Quando superior a 0, assim que um ciclo termina e a potência se mantém abaixo deste nível durante o Atraso de Desligamento, a máquina é considerada desligada e o estado volta a Desligado. Deixe em 0 para desativar (predefinição). Defina-o acima do consumo real com a máquina desligada e abaixo do Limiar de Paragem e do consumo em espera da sua máquina (concluída mas ainda ligada); se não for inferior ao Limiar de Paragem, é ignorado. Quando ativado, substitui o Atraso de Reposição de Progresso para o regresso a Desligado, pelo que uma máquina concluída permanece em Concluído/Limpar até ser efetivamente desligada."
+    },
+    "power_off_delay": {
+      "label": "Atraso de Desligamento",
+      "doc": "Durante quanto tempo a potência deve manter-se abaixo do Limiar de Desligamento após o fim de um ciclo antes de o estado voltar a Desligado. Só é usado quando o Limiar de Desligamento é superior a 0. É verificado segundo a cadência em segundo plano, pelo que o atraso efetivo é arredondado para cima até ao próximo tick de expiração de estado."
     },
     "sampling_interval": {
       "label": "Intervalo de Amostragem",
