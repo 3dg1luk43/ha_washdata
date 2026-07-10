@@ -718,6 +718,14 @@
         "doc": "notify.* services called for live progress updates while a cycle runs. Leave empty to disable live-progress notifications.",
         "label": "Live Progress Services"
       },
+      "notify_milestone_message": {
+        "doc": "Message for the milestone notification. Template variables: {device}, {cycle_count}.",
+        "label": "Milestone Message"
+      },
+      "notify_milestones": {
+        "doc": "Comma-separated cycle counts that trigger a one-off celebration notification when reached (e.g. 50, 100, 500, 1000). Blank disables milestone notifications.",
+        "label": "Cycle Milestones"
+      },
       "notify_only_when_home": {
         "doc": "Only send notifications when at least one of the linked people (above) is home.",
         "label": "Notify Only When Home"
@@ -729,6 +737,14 @@
       "notify_pre_complete_message": {
         "doc": "Body of the pre-end / almost-done alert. Template variables: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
         "label": "Pre-Complete Message"
+      },
+      "notify_quiet_end_hour": {
+        "doc": "End of the do-not-disturb window (0-23). Held notifications are delivered at this hour. Leave blank to disable.",
+        "label": "Quiet Hours End"
+      },
+      "notify_quiet_start_hour": {
+        "doc": "Start of a do-not-disturb window (0-23). Finish, reminder and clean-laundry notifications that would fire during quiet hours are held and delivered when the window ends. Leave blank to disable. Supports windows that cross midnight (e.g. start 22, end 7).",
+        "label": "Quiet Hours Start"
       },
       "notify_reminder_message": {
         "doc": "Body of the still-waiting unload reminder. Blank uses the built-in default. Template variables: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
@@ -910,6 +926,9 @@
       },
       "predictive_end": {
         "label": "Predictive End"
+      },
+      "quiet_hours_milestones": {
+        "label": "Quiet Hours & Milestones"
       },
       "schedule": {
         "label": "Schedule"
