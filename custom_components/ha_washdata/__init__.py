@@ -564,6 +564,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         async_register_commands(hass)
         hass.data["ha_washdata_ws_registered"] = True
 
+    # Register conversation intents (e.g. "is my washer done?") - once per HA
+    # instance. Intents are domain-global, so guard against re-registration when
+    # more than one device is configured.
+    if not hass.data.get("ha_washdata_intents_registered"):
+        from .intents import async_setup_intents  # pylint: disable=import-outside-toplevel
+
+        async_setup_intents(hass)
+        hass.data["ha_washdata_intents_registered"] = True
+
     # Register feedback service
     if not hass.services.has_service(
         DOMAIN, SERVICE_SUBMIT_FEEDBACK.rsplit(".", maxsplit=1)[-1]
