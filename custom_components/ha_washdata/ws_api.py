@@ -59,6 +59,8 @@ from .const import (
     SHOW_ML_LAB,
     STATE_COLORS,
 )
+from . import playground
+from .cycle_detector import CycleDetectorConfig
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -301,7 +303,7 @@ _PANEL_STORE_FILE = "ha_washdata_panel"
 _PANEL_DATA_KEY = "ha_washdata_panel_cfg"
 
 _LEVEL_RANK = {"none": 0, "read": 1, "edit": 2, "full": 3}
-_PANEL_TABS = ("status", "history", "profiles", "settings", "tools", "panel", "ml_lab")
+_PANEL_TABS = ("status", "history", "profiles", "settings", "tools", "panel", "ml_lab", "playground")
 
 # Commands that require 'full' (destructive or full-data export/import).
 _FULL_COMMANDS = frozenset({
@@ -316,8 +318,10 @@ _OPEN_COMMANDS = frozenset({
 _ADMIN_COMMANDS = frozenset({"set_panel_config", "get_logs"})
 # Mutating commands intentionally allowed at the 'read' level. Picking the live
 # program is a benign runtime action (it changes detection, not stored data), so
-# read users may use the Status program selector.
-_READ_WRITE_COMMANDS = frozenset({"set_program"})
+# read users may use the Status program selector. The Playground simulation is a
+# read-only what-if replay (it never persists anything) whose name does not start
+# with get_, so it is whitelisted here to gate at the 'read' level.
+_READ_WRITE_COMMANDS = frozenset({"set_program", "run_playground_simulation"})
 
 _LOG_BUFFER_KEY = "ha_washdata_log_buffer"
 _LOG_LEVELS = {"DEBUG": 10, "INFO": 20, "WARNING": 30, "ERROR": 40, "CRITICAL": 50}
@@ -545,6 +549,8 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_revert_ml_models,
         # Cycle controls (pause / resume / force-stop)
         ws_pause_cycle, ws_resume_cycle, ws_terminate_cycle,
+        # Playground (F3): headless what-if replay + DTW visualizer
+        ws_run_playground_simulation, ws_get_dtw_debug,
     ]
     for handler in handlers:
         websocket_api.async_register_command(hass, _guard(handler))
@@ -3756,3 +3762,130 @@ async def ws_terminate_cycle(
         return
     await manager.async_terminate_cycle()
     connection.send_result(msg["id"], {"ok": True})
+
+
+# ─── Playground (F3): headless what-if replay + DTW visualizer ──────────────────
+
+def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
+    """Resolve the device's live CycleDetectorConfig as the simulation base.
+
+    Prefers the running detector's config (already merged with every default);
+    falls back to a minimal config derived from the entry's effective options so
+    the Playground still works if the detector is not yet initialised.
+    """
+    detector = getattr(manager, "detector", None)
+    cfg = getattr(detector, "config", None)
+    if isinstance(cfg, CycleDetectorConfig):
+        return cfg
+    opts: dict[str, Any] = {}
+    if entry is not None:
+        opts = {**getattr(entry, "data", {}), **getattr(entry, "options", {})}
+    min_power = float(opts.get(CONF_MIN_POWER, 5.0) or 5.0)
+    return CycleDetectorConfig(
+        min_power=min_power,
+        off_delay=int(opts.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY)),
+        device_type=str(opts.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)),
+        completion_min_seconds=int(opts.get(CONF_COMPLETION_MIN_SECONDS, 600)),
+        end_repeat_count=int(opts.get(CONF_END_REPEAT_COUNT, 1)),
+        min_off_gap=int(opts.get(CONF_MIN_OFF_GAP, 60)),
+        running_dead_zone=int(opts.get(CONF_RUNNING_DEAD_ZONE, 0)),
+        start_threshold_w=float(opts.get(CONF_START_THRESHOLD_W, min_power)),
+        stop_threshold_w=float(
+            opts.get(CONF_STOP_THRESHOLD_W, min_power * 0.6 if min_power else 2.0)
+        ),
+    )
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/run_playground_simulation",
+        vol.Required("entry_id"): str,
+        vol.Optional("cycle_ids", default=list): [str],
+        vol.Optional("settings_override", default=dict): dict,
+        vol.Optional("concurrency", default=1): vol.Coerce(int),
+    }
+)
+@websocket_api.async_response
+async def ws_run_playground_simulation(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Replay stored cycles through a headless detector with overridden settings.
+
+    Returns ``{results: [...], summary: {...}}`` - a per-cycle event log +
+    outcome plus aggregate counts. Nothing is persisted; this is a pure what-if.
+    """
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+
+    store = getattr(manager, "profile_store", None)
+    if store is None:
+        connection.send_error(msg["id"], "unavailable", "Profile store unavailable")
+        return
+
+    try:
+        base_config = _playground_base_config(manager, _get_entry(hass, entry_id))
+        cycle_ids = list(msg.get("cycle_ids") or [])
+        settings_override = dict(msg.get("settings_override") or {})
+        concurrency = int(msg.get("concurrency", 1))
+        payload = await hass.async_add_executor_job(
+            playground.run_playground_batch,
+            store,
+            cycle_ids,
+            base_config,
+            settings_override,
+            concurrency,
+        )
+        connection.send_result(msg["id"], payload)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Playground simulation failed for %s: %s", entry_id, exc)
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/get_dtw_debug",
+        vol.Required("entry_id"): str,
+        vol.Required("cycle_id"): str,
+        vol.Optional("profile_name"): vol.Any(str, None),
+    }
+)
+@websocket_api.async_response
+async def ws_get_dtw_debug(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Return the Stage 2 / DTW / Stage 4 score breakdown + resampled traces +
+    DTW warp path for one cycle vs one profile (defaults to the cycle's label)."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+
+    store = getattr(manager, "profile_store", None)
+    if store is None:
+        connection.send_error(msg["id"], "unavailable", "Profile store unavailable")
+        return
+
+    try:
+        payload = await hass.async_add_executor_job(
+            playground.dtw_debug_payload,
+            store,
+            msg["cycle_id"],
+            msg.get("profile_name"),
+        )
+        if isinstance(payload, dict) and payload.get("error"):
+            connection.send_error(
+                msg["id"], payload["error"], payload.get("detail", payload["error"])
+            )
+            return
+        connection.send_result(msg["id"], payload)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("DTW debug failed for %s: %s", entry_id, exc)
+        connection.send_error(msg["id"], "unknown_error", str(exc))
