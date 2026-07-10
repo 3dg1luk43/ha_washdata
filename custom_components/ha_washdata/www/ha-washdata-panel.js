@@ -31,20 +31,20 @@ const _SETTINGS_SECTIONS = [
       doc: 'Appliance class. Sets sensible detection defaults (thresholds, off-delay, end handling) tuned for that appliance type; change it only if the device was originally set up as the wrong type.' },
     { key: 'power_sensor', label: 'Power Sensor', type: 'entity', domain: 'sensor',
       doc: 'The sensor entity reporting live power in watts for this appliance (e.g. sensor.washer_power). All cycle detection is based on this signal.' },
-    { key: 'min_power', label: 'Minimum Power', unit: 'W', type: 'number', step: 0.1, min: 0, def: 2.0,
+    { key: 'min_power', label: 'Minimum Power', unit: 'W', type: 'number', step: 0.1, min: 0, def: 2.0, basic: true,
       doc: 'Absolute minimum power considered active. Readings below this are treated as 0 W (standby), filtering out the phantom load of smart plugs and standby LEDs.' },
-    { key: 'off_delay', label: 'Off Delay', unit: 's', type: 'number', min: 0, def: 180,
+    { key: 'off_delay', label: 'Off Delay', unit: 's', type: 'number', min: 0, def: 180, basic: true,
       doc: 'Time to wait after power drops before declaring the cycle finished. If power resumes within this window the cycle continues seamlessly - this bridges pauses between wash stages. Dishwashers have long drying phases (power off for 20-60 min) so the off-delay must exceed that to keep the whole wash+dry as one cycle.' },
     { key: 'linked_device', label: 'Group Under Device', type: 'device',
       doc: 'Optionally nest this WashData device under another device (e.g. the smart plug) in the HA device registry, shown as "Connected via ...".' },
   ] },
   { id: 'detection', label: 'Detection', intro: 'How a cycle is detected as starting, running and finishing.', groups: [
     { sub: 'Thresholds & Gap', fields: [
-      { key: 'start_threshold_w', label: 'Start Threshold', unit: 'W', type: 'number', step: 1, min: 0,
+      { key: 'start_threshold_w', label: 'Start Threshold', unit: 'W', type: 'number', step: 1, min: 0, basic: true,
         doc: 'Power must rise above this level to confirm a cycle has started. Setting it too low causes false starts from standby power; too high and slow-starting programs (cold fill) are missed. The suggestion engine sets this just above the machine\'s observed lowest active power.' },
-      { key: 'stop_threshold_w', label: 'Stop Threshold', unit: 'W', type: 'number', step: 0.1, min: 0,
+      { key: 'stop_threshold_w', label: 'Stop Threshold', unit: 'W', type: 'number', step: 0.1, min: 0, basic: true,
         doc: 'Power must fall below this level before the off-delay countdown begins. Set it below the Start Threshold - the gap between them is the hysteresis band that prevents flicker. If set too high, low-power phases (rinse holds, anti-crease) falsely trigger the end sequence.' },
-      { key: 'min_off_gap', label: 'Min Off Gap', unit: 's', type: 'number', min: 0,
+      { key: 'min_off_gap', label: 'Min Off Gap', unit: 's', type: 'number', min: 0, basic: true,
         doc: 'If the machine powers off for less than this time, the on/off/on sequence is treated as one continuous cycle. Prevents soak programs (machine powers off for several minutes mid-wash) from being split into two separate cycles. Set it shorter than the gap between your back-to-back loads if you want those counted as separate cycles. Device-type defaults protect the typical intra-cycle pause for each appliance.' },
     ] },
     { sub: 'Cycle Start', fields: [
@@ -52,7 +52,7 @@ const _SETTINGS_SECTIONS = [
         doc: 'Power must stay above the start threshold this long to confirm a real start, preventing split-second on/off toggles from starting a cycle.' },
       { key: 'start_energy_threshold', label: 'Start Energy', unit: 'Wh', type: 'number', step: 0.01, min: 0, def: 0.2,
         doc: 'Energy (power x time) the appliance must consume before RUNNING. A brief high-power spike has very low energy and is ignored, preventing false starts.' },
-      { key: 'completion_min_seconds', label: 'Min Cycle Duration', unit: 's', type: 'number', min: 0, def: 600,
+      { key: 'completion_min_seconds', label: 'Min Cycle Duration', unit: 's', type: 'number', min: 0, def: 600, basic: true,
         doc: 'Cycles shorter than this are discarded as ghost cycles (test runs, opening the door to add a sock).' },
       { key: 'running_dead_zone', label: 'Running Dead Zone', unit: 's', type: 'number', min: 0, def: 3,
         doc: 'After a cycle starts, power dips within this window are ignored. Washing machines fill with cold water (dropping near 0 W before heating) - without this protection that fill phase looks like a cycle end. This does NOT skip data: the full power trace is recorded from T=0. The suggestion engine measures your machine\'s actual startup pattern and sizes this automatically.' },
@@ -164,7 +164,7 @@ const _SETTINGS_SECTIONS = [
         doc: 'Optional switch toggled off on pause and back on when resuming, used together with "Pause also cuts power".' },
     ] },
     { sub: 'Unload Reminder', fields: [
-      { key: 'notify_unload_delay_minutes', label: 'Unload Nag Delay', unit: 'min', type: 'number', min: 0, def: 60,
+      { key: 'notify_unload_delay_minutes', label: 'Unload Nag Delay', unit: 'min', type: 'number', min: 0, def: 60, basic: true,
         doc: 'Minutes after a cycle ends before sending the still-waiting "unload the machine" reminder. Set 0 to disable the reminder.' },
       { key: 'pump_stuck_duration', label: 'Pump Stuck Duration', unit: 's', type: 'number', min: 0, def: 1800,
         onlyDeviceType: 'pump', doc: 'Seconds a pump may run continuously before it is flagged as possibly stuck (fires the stuck-pump event).' },
@@ -172,9 +172,9 @@ const _SETTINGS_SECTIONS = [
   ] },
   { id: 'notifications', label: 'Notifications', groups: [
     { sub: 'Services', fields: [
-      { key: 'notify_start_services', label: 'Start Services', type: 'entitylist', domain: 'notify', placeholder: 'add a notify service…',
+      { key: 'notify_start_services', label: 'Start Services', type: 'entitylist', domain: 'notify', placeholder: 'add a notify service…', basic: true,
         doc: 'notify.* services called when a cycle starts. Add one per target (phone, dashboard, etc.); leave empty for no start notification.' },
-      { key: 'notify_finish_services', label: 'Finish Services', type: 'entitylist', domain: 'notify', placeholder: 'add a notify service…',
+      { key: 'notify_finish_services', label: 'Finish Services', type: 'entitylist', domain: 'notify', placeholder: 'add a notify service…', basic: true,
         doc: 'notify.* services called when a cycle finishes. Add one per target; leave empty for no finish notification.' },
       { key: 'notify_live_services', label: 'Live Progress Services', type: 'entitylist', domain: 'notify', placeholder: 'add a notify service…',
         doc: 'notify.* services called for live progress updates while a cycle runs. Leave empty to disable live-progress notifications.' },
@@ -204,7 +204,7 @@ const _SETTINGS_SECTIONS = [
         doc: 'Optional mdi icon for the notification (e.g. mdi:washing-machine). Leave blank for the platform default.' },
       { key: 'notify_start_message', label: 'Start Message', type: 'textarea', def: '{device} started.',
         doc: `Body sent when a cycle starts. Template variables: ${_NOTIFY_VARS}.` },
-      { key: 'notify_finish_message', label: 'Finish Message', type: 'textarea', def: '{device} finished. Duration: {duration}m.',
+      { key: 'notify_finish_message', label: 'Finish Message', type: 'textarea', def: '{device} finished. Duration: {duration}m.', basic: true,
         doc: `Body sent when a cycle finishes. Template variables: ${_NOTIFY_VARS}. {time_finished} and {vs_typical} are most useful here.` },
       { key: 'notify_pre_complete_message', label: 'Pre-Complete Message', type: 'textarea', def: '{device}: Less than {minutes} minutes remaining.',
         doc: `Body of the pre-end / almost-done alert. Template variables: ${_NOTIFY_VARS}.` },
@@ -218,9 +218,9 @@ const _SETTINGS_SECTIONS = [
         doc: 'Android notification channel name for the finish message. Blank reuses the start/live channel.' },
     ] },
     { sub: 'Energy', fields: [
-      { key: 'energy_price_entity', label: 'Energy Price Entity', type: 'entity', domain: 'sensor',
+      { key: 'energy_price_entity', label: 'Energy Price Entity', type: 'entity', domain: 'sensor', basic: true,
         doc: 'Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Takes precedence over the static price below. Each cycle freezes the price in effect when it finished.' },
-      { key: 'energy_price_static', label: 'Static Energy Price (per kWh)', type: 'number', step: 0.001, min: 0,
+      { key: 'energy_price_static', label: 'Static Energy Price (per kWh)', type: 'number', step: 0.001, min: 0, basic: true,
         doc: 'Fixed price per kWh used for cost figures when no live price entity is set above.' },
       { key: 'peak_rate_threshold', label: 'Peak-Rate Threshold (per kWh)', type: 'number', step: 0.001, min: 0, def: 0,
         doc: 'When a cycle starts and the current price per kWh is at or above this value, append a peak-rate tip to the start notification. 0 or blank disables the tip.' },
@@ -657,6 +657,7 @@ const _CSS = `
   background: transparent; color: var(--secondary-text-color); font-size: .8em; cursor: pointer; transition: background .15s;
 }
 .wd-sec-btn.active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+.wd-level-toggle { display: inline-flex; gap: 4px; }
 .wd-sec-btn { position: relative; }
 .wd-sec-sug-dot { position: absolute; top: 2px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--warning-color, #ff9800); display: inline-block; pointer-events: none; }
 .wd-sec-conf-dot { position: absolute; top: 2px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--error-color, #b71c1c); display: inline-block; pointer-events: none; }
@@ -759,6 +760,11 @@ const _CSS = `
 .wd-attn-body { flex: 1; min-width: 0; }
 .wd-attn-title { font-weight: 600; }
 .wd-attn-sub { font-size: .76em; color: var(--secondary-text-color); }
+/* F1 first-run onboarding card (Status power-chart area) */
+.wd-onboard { margin-top: 12px; padding: 16px; border-radius: 10px; border: 1px dashed var(--divider-color); background: var(--secondary-background-color); }
+.wd-onboard .wd-card-title { margin-top: 0; }
+.wd-onboard-skip { font-size: .8em; color: var(--secondary-text-color); text-decoration: underline; cursor: pointer; }
+.wd-onboard-skip:hover { color: var(--primary-color); }
 /* Logs page */
 .wd-logbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
 .wd-logs { font-family: monospace; font-size: .76em; background: var(--secondary-background-color); border-radius: 8px; padding: 10px; height: 56vh; min-height: 140px; overflow: auto; resize: vertical; }
@@ -1878,6 +1884,11 @@ class HaWashdataPanel extends HTMLElement {
       if (this._tab === 'status') {
         this._powerData = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: eid, with_raw: this._pref('show_raw_active', false) });
         if (!this._profiles.length) await this._fetchProfiles(eid);
+        // F1 onboarding: the getting-started card needs the real cycle count.
+        // Load it only when there are no profiles yet (the sole state where the
+        // card can appear) and it hasn't been loaded for this device, so the
+        // count is correct right after a device switch resets it.
+        if (!this._profiles.length && !this._cycles.length) await this._fetchCycles(eid);
         // D1: matched-profile phases for the compact Status phase timeline.
         await this._ensureStatusPhases(eid, dev.current_program);
         if (this._pref('show_debug', false)) {
@@ -2315,9 +2326,18 @@ class HaWashdataPanel extends HTMLElement {
       ${this._statusEnv ? `<label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_expected" ${showExpected ? 'checked' : ''}><span class="wd-leg-sw" style="background:#ff9800"></span> ${this._t('lbl.expected', {}, 'Expected')}</label>` : ''}
       ${this._pref('show_raw', false) ? `<label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_raw_active" ${showRawLeg ? 'checked' : ''}><span class="wd-leg-sw" style="background:#9e9e9e"></span> ${this._t('lbl.raw_socket', {}, 'Raw socket')}</label>` : ''}
     </div>`;
+    // F1 first-run wizard: on a fresh device (no profiles yet, onboarding not
+    // skipped) replace the empty chart placeholder with a getting-started card
+    // until enough cycles are observed. A live cycle (hasCurve) always wins so
+    // the user sees their appliance being watched in real time.
+    const cycleCount = this._cyclesTotal || 0;
+    const profileCount = (this._profiles || []).length;
+    const showGettingStarted = !this._pref('onboarding_dismissed', false) && profileCount === 0 && !hasCurve;
     const curveHtml = hasCurve
       ? `<div class="wd-canvas-wrap" style="margin-top:14px"><canvas id="wd-status-canvas" style="height:160px"></canvas></div>${legend}`
-      : `<p class="wd-info" style="margin-top:12px">${this._t('msg.live_chart_loading', {}, 'Live power chart appears as readings arrive.')}</p>`;
+      : (showGettingStarted
+          ? this._htmlGettingStarted(cycleCount)
+          : `<p class="wd-info" style="margin-top:12px">${this._t('msg.live_chart_loading', {}, 'Live power chart appears as readings arrive.')}</p>`);
 
     const showDebug = this._pref('show_debug', false);
     let debugHtml = '';
@@ -2377,13 +2397,44 @@ class HaWashdataPanel extends HTMLElement {
         </div>
         ${progressHtml}
         ${this._htmlPhaseTimeline(dev, prog, isRunning)}
-        <div class="wd-card-title" style="margin-top:18px">${this._t('hdr.live_power', {}, 'Live Power')}</div>
+        ${showGettingStarted ? '' : `<div class="wd-card-title" style="margin-top:18px">${this._t('hdr.live_power', {}, 'Live Power')}</div>`}
         ${curveHtml}
       </div>
       ${this._canEdit() ? this._htmlRecordingWidget() : ''}
       ${debugHtml}
       ${advHtml}
     `;
+  }
+
+  // F1: first-run guided card shown in the Status power-chart area of a fresh
+  // device. Below 3 observed cycles it explains the "just run it" learning phase
+  // with a 0..3 progress meter; at 3+ it nudges toward creating the first
+  // profile (reusing the existing create-profile entry point). A "Skip setup"
+  // link dismisses it permanently via the onboarding_dismissed user pref.
+  _htmlGettingStarted(cycleCount) {
+    const n = Math.max(0, Math.min(3, cycleCount || 0));
+    const heading = `<div class="wd-card-title" style="margin:12px 0 4px">${this._t('hdr.getting_started', {}, 'Getting started')}</div>`;
+    const skip = `<div style="margin-top:14px"><span role="button" tabindex="0" data-action="skip-onboarding" class="wd-onboard-skip">${this._t('btn.skip_setup', {}, 'Skip setup')}</span></div>`;
+    if (cycleCount >= 3) {
+      // Enough cycles observed — point the user at naming their first program.
+      const createBtn = this._canEdit()
+        ? `<div style="margin-top:12px"><button class="wd-btn wd-btn-primary" data-action="create-profile">${this._t('btn.new_profile', {}, '+ New Profile')}</button></div>`
+        : '';
+      return `<div class="wd-onboard">
+        ${heading}
+        <p class="wd-info" style="margin:0">${this._t('msg.name_first_program', {}, 'You have enough cycles — name your first program to start matching.')}</p>
+        ${createBtn}
+        ${skip}
+      </div>`;
+    }
+    const pct = (n / 3) * 100;
+    return `<div class="wd-onboard">
+      ${heading}
+      <p class="wd-info" style="margin:0 0 12px">${this._t('msg.onboarding_watching', {}, 'Run your appliance normally — WashData is watching. After 3 cycles, program matching will begin.')}</p>
+      <div class="wd-prog-bg"><div class="wd-prog-fill" style="width:${pct.toFixed(0)}%"></div></div>
+      <div class="wd-prog-row"><span>${this._t('msg.onboarding_progress', {n}, `${n} / 3 cycles observed`)}</span></div>
+      ${skip}
+    </div>`;
   }
 
   // D1: compact horizontal phase timeline for the matched profile, drawn below
@@ -2887,10 +2938,31 @@ class HaWashdataPanel extends HTMLElement {
 
   // ── Settings tab ──────────────────────────────────────────────────────────
 
+  // F2: current Settings disclosure level ("basic" | "advanced"). Default basic.
+  _settingsLevel() {
+    return this._pref('settings_level', 'basic') === 'advanced' ? 'advanced' : 'basic';
+  }
+
+  // F2: whether a schema field is visible under the current disclosure level.
+  // Advanced shows everything; Basic shows only fields flagged `basic: true`.
+  // Purely a visibility filter — hidden fields keep their stored values.
+  _settingFieldVisible(f) {
+    return this._settingsLevel() === 'advanced' || !!f.basic;
+  }
+
+  // F2: does a section expose at least one basic-flagged field? Used to hide
+  // sections that would render empty in Basic mode.
+  _secHasBasicFields(sec) {
+    const fields = sec.fields || (sec.groups || []).flatMap(g => g.fields || []);
+    return fields.some(f => f.basic);
+  }
+
   _htmlSettings() {
     const o = Object.assign({}, this._opts, this._pendingSettings);
     if (!Object.keys(o).length)
       return `<div class="wd-empty"><div class="wd-icon">⚙️</div>${this._t('msg.loading_settings', {}, 'Loading settings…')}</div>`;
+    const level = this._settingsLevel();
+    const basicMode = level === 'basic';
 
     const sugKeys = new Set((this._suggestions || []).map(s => s.key));
     const secHasSug = (sec) => {
@@ -2909,13 +2981,27 @@ class HaWashdataPanel extends HTMLElement {
       if (sec.id === 'ml_training') return false;
       if (currentDeviceType && sec.notDeviceTypes && sec.notDeviceTypes.includes(currentDeviceType)) return false;
       if (currentDeviceType && sec.onlyDeviceTypes && !sec.onlyDeviceTypes.includes(currentDeviceType)) return false;
+      // F2: in Basic mode, hide sections with no essential (basic-flagged) fields.
+      if (basicMode && !this._secHasBasicFields(sec)) return false;
       return true;
     });
+    // The selected section may not be visible under the current filter (e.g. after
+    // switching to Basic while on an advanced-only section) — fall back to the
+    // first visible section so the nav highlight matches the rendered content.
+    const activeSecId = (visibleSections.find(sec => sec.id === this._settingsSec) || visibleSections[0] || {}).id;
     const nav = visibleSections.map(sec => {
       const hasSug = secHasSug(sec);
       const hasConf = secHasConf(sec);
-      return `<button class="wd-sec-btn ${this._settingsSec === sec.id ? 'active' : ''}" data-sec="${sec.id}">${_esc(this._t('section.' + sec.id + '.label', {}, sec.label))}${hasConf ? '<span class="wd-sec-conf-dot"></span>' : (hasSug ? '<span class="wd-sec-sug-dot"></span>' : '')}</button>`;
+      return `<button class="wd-sec-btn ${activeSecId === sec.id ? 'active' : ''}" data-sec="${sec.id}">${_esc(this._t('section.' + sec.id + '.label', {}, sec.label))}${hasConf ? '<span class="wd-sec-conf-dot"></span>' : (hasSug ? '<span class="wd-sec-sug-dot"></span>' : '')}</button>`;
     }).join('');
+    // F2: Basic | Advanced segmented toggle + the Basic-mode helper note.
+    const levelToggle = `<div class="wd-level-toggle" role="group" aria-label="${_esc(this._t('lbl.settings_detail_level', {}, 'Settings detail level'))}">
+      <button class="wd-sec-btn ${basicMode ? 'active' : ''}" data-action="set-settings-level" data-slevel="basic">${this._t('lbl.settings_basic', {}, 'Basic')}</button>
+      <button class="wd-sec-btn ${!basicMode ? 'active' : ''}" data-action="set-settings-level" data-slevel="advanced">${this._t('lbl.settings_advanced', {}, 'Advanced')}</button>
+    </div>`;
+    const basicNote = basicMode
+      ? `<p class="wd-info" style="margin:0 0 10px;font-size:.82em">${this._t('msg.settings_basic_note', {}, 'Showing essential settings. Switch to Advanced for the full list.')}</p>`
+      : '';
 
     const saveBusy = this._busy.has('save-settings');
     const confCount = _secConfKeys.size;
@@ -2949,11 +3035,11 @@ class HaWashdataPanel extends HTMLElement {
     const formContent = q ? this._htmlSettingsSearch(o, q) : (sugOnly ? this._htmlSettingsSugOnly(o) : this._htmlSettingsSection(o));
 
     return `
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap">
         <div class="wd-card-title" style="margin:0">${this._t('tab.settings', {}, 'Settings')}${this._mlSettingsLoading ? ` <span style="font-size:.6em;color:var(--secondary-text-color);font-weight:400">${this._t('msg.ml_loading', {}, 'loading ML…')}</span>` : ''}</div>
-        ${analyzeBtn}
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${levelToggle}${analyzeBtn}</div>
       </div>
-      ${confBanner}${banner}
+      ${confBanner}${banner}${basicNote}
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
         <div class="wd-section-nav" style="flex:1;margin:0">${nav}</div>
         ${searchInput}
@@ -3186,10 +3272,13 @@ class HaWashdataPanel extends HTMLElement {
 
   _htmlSettingsSection(o) {
     const currentDeviceType = (this._opts && this._opts.device_type) || '';
+    const basicMode = this._settingsLevel() === 'basic';
     const _secVisible = sec => {
       if (sec.id === 'ml_training') return false;
       if (currentDeviceType && sec.notDeviceTypes && sec.notDeviceTypes.includes(currentDeviceType)) return false;
       if (currentDeviceType && sec.onlyDeviceTypes && !sec.onlyDeviceTypes.includes(currentDeviceType)) return false;
+      // F2: keep the picked section in sync with the Basic-mode nav filter.
+      if (basicMode && !this._secHasBasicFields(sec)) return false;
       return true;
     };
     const sec = _SETTINGS_SECTIONS.find(s => s.id === this._settingsSec && _secVisible(s))
@@ -3202,22 +3291,24 @@ class HaWashdataPanel extends HTMLElement {
     if (sec.id === 'notifications') {
       const varsHint = `<p class="wd-info" style="margin-bottom:16px">${this._t('msg.notify_services_hint', {entity: '<code>notify.&lt;name&gt;</code>', vars: '<code>' + _esc(_NOTIFY_VARS) + '</code>'}, 'Use {entity} service IDs (comma-separated for multiple). Template variables: {vars}.')}</p>`;
       const groups = sec.groups.map(grp => {
-        const fields = grp.fields.map(f => this._renderField(f, o)).join('');
-        return `<div class="wd-subhead">${_esc(this._t('setting_group.' + _slugSub(grp.sub) + '.label', {}, grp.sub))}</div><div class="wd-form-grid">${fields}</div>`;
+        const fields = (grp.fields || []).filter(f => this._settingFieldVisible(f)).map(f => this._renderField(f, o)).filter(Boolean).join('');
+        return fields ? `<div class="wd-subhead">${_esc(this._t('setting_group.' + _slugSub(grp.sub) + '.label', {}, grp.sub))}</div><div class="wd-form-grid">${fields}</div>` : '';
       }).join('');
-      return `${this._htmlAutomations()}${varsHint}${groups}`;
+      // The automations manager is an advanced power-feature; keep Basic mode clean.
+      const autos = basicMode ? '' : this._htmlAutomations();
+      return `${autos}${varsHint}${groups}`;
     }
 
     if (sec.groups) {
       const groups = sec.groups.map(grp => {
         const sub = grp.sub ? `<div class="wd-subhead">${_esc(this._t('setting_group.' + _slugSub(grp.sub) + '.label', {}, grp.sub))}</div>` : '';
-        const fields = (grp.fields || []).map(f => this._renderField(f, o)).filter(Boolean).join('');
+        const fields = (grp.fields || []).filter(f => this._settingFieldVisible(f)).map(f => this._renderField(f, o)).filter(Boolean).join('');
         return fields ? `${sub}<div class="wd-form-grid">${fields}</div>` : '';
       }).join('');
       return `${intro}${trainCard}${groups}`;
     }
 
-    const fields = (sec.fields || []).map(f => this._renderField(f, o)).join('');
+    const fields = (sec.fields || []).filter(f => this._settingFieldVisible(f)).map(f => this._renderField(f, o)).filter(Boolean).join('');
     return `${intro}${trainCard}<div class="wd-form-grid">${fields}</div>`;
   }
 
@@ -3938,6 +4029,14 @@ class HaWashdataPanel extends HTMLElement {
   _pref(key, def) {
     const p = (this._panelCfg && this._panelCfg.prefs) || {};
     return p[key] === undefined ? def : p[key];
+  }
+
+  // Persist a single user preference (optimistic local update + server save).
+  // Mirrors the data-statustoggle path so callers can flip a pref and re-render.
+  _setPref(key, val) {
+    if (!this._panelCfg) this._panelCfg = {};
+    this._panelCfg.prefs = { ...(this._panelCfg.prefs || {}), [key]: val };
+    this._ws({ type: `${_DOMAIN}/set_user_prefs`, prefs: { [key]: val } }).catch(() => {});
   }
 
   _drawStatusCurve() {
@@ -5580,6 +5679,20 @@ class HaWashdataPanel extends HTMLElement {
 
     } else if (a === 'create-profile') {
       this._modal = { type: 'create-profile' }; this._render();
+
+    } else if (a === 'skip-onboarding') {
+      // F1: dismiss the first-run wizard permanently for this user.
+      this._setPref('onboarding_dismissed', true);
+      this._render();
+
+    } else if (a === 'set-settings-level') {
+      // F2: switch the Settings tab between Basic and Advanced disclosure.
+      const lvl = btn.dataset.slevel === 'advanced' ? 'advanced' : 'basic';
+      if (lvl !== this._pref('settings_level', 'basic')) {
+        this._snapshotFormToPending(sr);  // keep in-progress edits across re-render
+        this._setPref('settings_level', lvl);
+        this._render();
+      }
 
     } else if (a === 'pg-new' || a === 'pg-edit' || a === 'pg-suggest') {
       if (a === 'pg-new') {
