@@ -17,6 +17,7 @@ import numpy as np
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Context, Event, HomeAssistant, State, callback
 from homeassistant.helpers.event import (
+    async_call_later,
     async_track_state_change_event,
     async_track_time_interval,
 )
@@ -163,6 +164,12 @@ from .const import (
     CONF_NOTIFY_UNLOAD_MESSAGE,
     DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES,
     DEFAULT_NOTIFY_UNLOAD_MESSAGE,
+    CONF_NOTIFY_QUIET_START_HOUR,
+    CONF_NOTIFY_QUIET_END_HOUR,
+    CONF_NOTIFY_MILESTONES,
+    CONF_NOTIFY_MILESTONE_MESSAGE,
+    DEFAULT_NOTIFY_MILESTONES,
+    DEFAULT_NOTIFY_MILESTONE_MESSAGE,
     STATE_CLEAN,
     STATE_FINISHED,
     STATE_INTERRUPTED,
@@ -237,6 +244,30 @@ from .log_utils import DeviceLoggerAdapter
 from .time_utils import power_data_to_offsets
 
 _LOGGER = logging.getLogger(__name__)
+
+# Finish-type notification events that would wake someone and are therefore gated by
+# the quiet-hours (do-not-disturb) window. Live-progress ticks (NOTIFY_EVENT_LIVE)
+# and the start notification (NOTIFY_EVENT_START) are intentionally excluded.
+_QUIET_HOURS_EVENT_TYPES = frozenset(
+    {NOTIFY_EVENT_FINISH, NOTIFY_EVENT_CLEAN, "pre_complete"}
+)
+
+# Notification-data keys that may only be forwarded to mobile_app_* notify targets.
+# Strict-schema platforms (e.g. Signal) reject unknown keys, so these are added per
+# service only when the target is a mobile app. Includes the iOS Live Activity
+# enrichment keys (subtitle/content_state/activity) so they never reach non-mobile
+# platforms.
+_MOBILE_ONLY_EXTRA_KEYS = (
+    "tag",
+    "timeout",
+    "channel",
+    "priority",
+    "actions",
+    "sticky",
+    "subtitle",
+    "content_state",
+    "activity",
+)
 
 
 def _pn_create(
@@ -320,6 +351,11 @@ class WashDataManager:
         self._notify_live_chronometer = DEFAULT_NOTIFY_LIVE_CHRONOMETER
         self._notify_timeout_seconds = DEFAULT_NOTIFY_TIMEOUT_SECONDS
         self._pending_notifications: list[dict[str, Any]] = []
+        # Quiet-hours (do-not-disturb) hold queue + release timer. Finish-type
+        # notifications that would fire inside the window are parked here and flushed
+        # at the end of the window by a single async_call_later timer.
+        self._quiet_pending_notifications: list[dict[str, Any]] = []
+        self._remove_quiet_hours_timer: Any | None = None
         self._remove_notify_people_listener = None
         self._live_notification_sent_count = 0
 
@@ -359,6 +395,9 @@ class WashDataManager:
         self._last_live_notification_time: datetime | None = None
         self._live_waiting_notification_sent = False
         self._live_chronometer_overrun_sent = False
+        # iOS Live Activity: whether the "start" lifecycle marker has been emitted on
+        # the first live notification of the current cycle. Reset per cycle.
+        self._live_activity_started = False
         # Single per-device identity shared by start/live/reminder/finished so each
         # replaces the previous on the mobile app (and collapses to one entry on the
         # persistent-notification fallback). The clean-laundry nag uses its own tag
@@ -2077,6 +2116,9 @@ class WashDataManager:
             self._remove_notify_people_listener()
             self._remove_notify_people_listener = None
             self._pending_notifications = []
+        # Cancel any pending quiet-hours release timer so it doesn't fire after unload.
+        self._cancel_quiet_hours_timer()
+        self._quiet_pending_notifications = []
         if self._remove_watchdog:
             self._remove_watchdog()
         if (
@@ -4013,8 +4055,17 @@ class WashDataManager:
                     # the live notification in place. No live_update/alert_once here,
                     # so the companion app surfaces it with sound.
                     "tag": self._lifecycle_tag,
+                    # C3: end the iOS Live Activity (mobile_app_* only downstream).
+                    "activity": "end",
                 },
             )
+
+        # C2: milestone (cycle-count achievement) notification. Fires at most once per
+        # cycle, only when the cycle actually persisted (so the lifetime count is real)
+        # and a finish delivery channel is configured. Respects quiet hours via
+        # _dispatch_notification's finish-type gate.
+        if cycle_persisted:
+            self._maybe_notify_milestone()
 
         # Request user feedback if we had a confident match.
         # AND perform learning analysis on the completed cycle.
@@ -4077,6 +4128,263 @@ class WashDataManager:
     def suggestions(self) -> dict[str, Any]:
         """Suggested settings computed by learning/heuristics (never auto-applied)."""
         return self.profile_store.get_suggestions()
+
+    # ------------------------------------------------------------------
+    # C1 - Quiet hours (do-not-disturb window)
+    # ------------------------------------------------------------------
+    def _quiet_hours_bounds(self) -> tuple[int, int] | None:
+        """Return validated (start_hour, end_hour) or None when the feature is off.
+
+        Off when either hour is unset/None/non-int/out-of-range, or start == end.
+        """
+        opts = self.config_entry.options
+        raw_start = opts.get(CONF_NOTIFY_QUIET_START_HOUR)
+        raw_end = opts.get(CONF_NOTIFY_QUIET_END_HOUR)
+        if raw_start is None or raw_end is None:
+            return None
+        try:
+            start = int(raw_start)
+            end = int(raw_end)
+        except (TypeError, ValueError):
+            return None
+        if not (0 <= start <= 23) or not (0 <= end <= 23):
+            return None
+        if start == end:
+            # Zero-length window -> feature off (avoids "always quiet" ambiguity).
+            return None
+        return start, end
+
+    def _in_quiet_hours(self, when: datetime | None = None) -> bool:
+        """Return True when ``when`` (default now) falls inside the quiet window.
+
+        Supports windows that wrap midnight (start > end, e.g. 22 -> 7 means
+        22:00-06:59). The end hour is exclusive at the hour granularity, so a window
+        of start=22, end=7 covers hours 22, 23, 0..6.
+        """
+        bounds = self._quiet_hours_bounds()
+        if bounds is None:
+            return False
+        start, end = bounds
+        hour = (when or dt_util.now()).hour
+        if start < end:
+            # Same-day window, e.g. 1 -> 6 covers hours 1..5.
+            return start <= hour < end
+        # Wrap-around window, e.g. 22 -> 7 covers 22,23,0..6.
+        return hour >= start or hour < end
+
+    def _seconds_until_quiet_end(self, when: datetime | None = None) -> float:
+        """Seconds from ``when`` until the next end-of-quiet-window boundary (end:00).
+
+        Returns 0.0 when the feature is off or when not currently in quiet hours.
+        """
+        bounds = self._quiet_hours_bounds()
+        if bounds is None:
+            return 0.0
+        now = when or dt_util.now()
+        if not self._in_quiet_hours(now):
+            return 0.0
+        _start, end = bounds
+        target = now.replace(hour=end, minute=0, second=0, microsecond=0)
+        if target <= now:
+            # End hour is earlier today (wrap-around window) -> it lands tomorrow.
+            target = target + timedelta(days=1)
+        return max(0.0, (target - now).total_seconds())
+
+    def _queue_quiet_hours_notification(
+        self,
+        message: str,
+        *,
+        title: str | None,
+        icon: str | None,
+        event_type: str | None,
+        extra_vars: dict[str, Any] | None,
+    ) -> None:
+        """Park a finish-type notification until the quiet window ends."""
+        self._quiet_pending_notifications.append(
+            {
+                "message": message,
+                "title": title,
+                "icon": icon,
+                "event_type": event_type,
+                "extra_vars": extra_vars,
+            }
+        )
+        self._schedule_quiet_hours_flush()
+
+    def _schedule_quiet_hours_flush(self) -> None:
+        """(Re)arm the single async_call_later timer that flushes the quiet queue."""
+        if self._remove_quiet_hours_timer is not None:
+            # A timer is already pending; keep it (all queued items share one release).
+            return
+        delay = self._seconds_until_quiet_end()
+        if delay <= 0:
+            # Not actually in quiet hours (defensive) -> flush immediately.
+            self._flush_quiet_hours_notifications()
+            return
+
+        @callback
+        def _fire(_now: datetime) -> None:
+            self._remove_quiet_hours_timer = None
+            self._flush_quiet_hours_notifications()
+
+        self._remove_quiet_hours_timer = async_call_later(self.hass, delay, _fire)
+
+    def _flush_quiet_hours_notifications(self) -> None:
+        """Deliver every queued quiet-hours notification (same service/message/tag)."""
+        if self._remove_quiet_hours_timer is not None:
+            self._remove_quiet_hours_timer()
+            self._remove_quiet_hours_timer = None
+        if not self._quiet_pending_notifications:
+            return
+        pending = list(self._quiet_pending_notifications)
+        self._quiet_pending_notifications = []
+        for entry in pending:
+            # allow_deferral=False so a still-open quiet window / presence gate cannot
+            # re-defer these (mirrors the presence-delay flush).
+            self._dispatch_notification(
+                entry["message"],
+                title=entry.get("title"),
+                icon=entry.get("icon"),
+                event_type=entry.get("event_type"),
+                extra_vars=entry.get("extra_vars"),
+                allow_deferral=False,
+            )
+
+    def _cancel_quiet_hours_timer(self) -> None:
+        """Cancel the pending quiet-hours release timer (shutdown/unload)."""
+        if self._remove_quiet_hours_timer is not None:
+            self._remove_quiet_hours_timer()
+            self._remove_quiet_hours_timer = None
+
+    # ------------------------------------------------------------------
+    # C2 - Milestone (cycle-count achievement) notifications
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _milestone_crossed(
+        prev_count: int, cur_count: int, milestones: Any
+    ) -> int | None:
+        """Return the milestone just crossed, or None.
+
+        A milestone ``m`` is crossed when ``prev_count < m <= cur_count``. Empty or
+        malformed ``milestones`` is a no-op (returns None). If several are crossed in
+        one step the largest is returned so a single, most-significant notification
+        fires.
+        """
+        if not milestones:
+            return None
+        try:
+            iterator = list(milestones)
+        except TypeError:
+            return None
+        crossed: int | None = None
+        for raw in iterator:
+            try:
+                m = int(raw)
+            except (TypeError, ValueError):
+                continue
+            if m <= 0:
+                continue
+            if prev_count < m <= cur_count and (crossed is None or m > crossed):
+                crossed = m
+        return crossed
+
+    def _maybe_notify_milestone(self) -> int | None:
+        """Fire one milestone notification if the lifetime count just crossed one.
+
+        Called at cycle end AFTER the cycle has persisted, so ``self.cycle_count``
+        already includes the finished cycle (previous = current - 1). Returns the
+        crossed milestone value (for tests/logging) or None. Never raises.
+        """
+        try:
+            if not (self._notify_finish_services or self._notify_actions):
+                return None
+            milestones = self.config_entry.options.get(
+                CONF_NOTIFY_MILESTONES, DEFAULT_NOTIFY_MILESTONES
+            )
+            cur_count = self.cycle_count
+            prev_count = cur_count - 1
+            crossed = self._milestone_crossed(prev_count, cur_count, milestones)
+            if crossed is None:
+                return None
+            msg_template = self.config_entry.options.get(
+                CONF_NOTIFY_MILESTONE_MESSAGE, DEFAULT_NOTIFY_MILESTONE_MESSAGE
+            )
+            msg = self._safe_format_template(
+                msg_template,
+                fallback_template=DEFAULT_NOTIFY_MILESTONE_MESSAGE,
+                device=self.config_entry.title,
+                cycle_count=crossed,
+            )
+            self._dispatch_notification(
+                msg,
+                event_type=NOTIFY_EVENT_FINISH,
+                extra_vars={
+                    "cycle_count": crossed,
+                    # Distinct tag so a milestone alert does not clobber (or get
+                    # clobbered by) the lifecycle finish thread.
+                    "tag": f"{self._lifecycle_tag}_milestone",
+                },
+            )
+            self._logger.info(
+                "Sent milestone notification: %s cycles", crossed
+            )
+            return crossed
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Milestone notification check failed: %s", err)
+            return None
+
+    # ------------------------------------------------------------------
+    # C3 - iOS Live Activity enrichment (HA Companion beta, mobile_app_* only)
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _build_ios_live_activity_extras(
+        *,
+        state: str,
+        progress_pct: float,
+        eta_timestamp: Any,
+        program: str | None,
+        device: str,
+        activity: str | None = None,
+    ) -> dict[str, Any]:
+        """Build the iOS Live Activity payload additions (mobile-only keys).
+
+        Returns a dict containing ``content_state`` (always), ``subtitle`` (only when
+        a program is matched) and ``activity`` (only when a lifecycle marker is
+        supplied). These keys are forwarded to mobile_app_* targets only by
+        ``_send_notification_service``; other platforms never receive them.
+        """
+        try:
+            pct = int(round(float(progress_pct)))
+        except (TypeError, ValueError):
+            pct = 0
+        pct = max(0, min(100, pct))
+        extras: dict[str, Any] = {
+            "content_state": {
+                "state": state,
+                "progress_pct": pct,
+                "eta_timestamp": eta_timestamp,
+                "program": program or "",
+                "device": device,
+            }
+        }
+        if program:
+            extras["subtitle"] = program
+        if activity:
+            extras["activity"] = activity
+        return extras
+
+    @staticmethod
+    def _mobile_service_extras(
+        ev: dict[str, Any], notify_service: str | None
+    ) -> dict[str, Any]:
+        """Return extra_vars keys allowed only on mobile_app_* targets.
+
+        For non-mobile services this is always empty, so strict-schema platforms and
+        the iOS Live Activity enrichment keys stay isolated to mobile targets.
+        """
+        if not WashDataManager._is_mobile_notify_service(notify_service):
+            return {}
+        return {k: ev[k] for k in _MOBILE_ONLY_EXTRA_KEYS if k in ev}
 
     def _safe_format_template(
         self,
@@ -4205,6 +4513,24 @@ class WashDataManager:
             variables["timeout"] = self._notify_timeout_seconds
             extra_vars = {**(extra_vars or {}), "timeout": self._notify_timeout_seconds}
 
+        # Quiet hours (do-not-disturb): hold finish-type notifications that would
+        # wake someone and deliver them at the end of the window. Live-progress ticks
+        # and the start notification are never delayed. Guarded by allow_deferral so a
+        # quiet-window flush (allow_deferral=False) cannot re-defer.
+        if (
+            allow_deferral
+            and event_type in _QUIET_HOURS_EVENT_TYPES
+            and self._in_quiet_hours()
+        ):
+            self._queue_quiet_hours_notification(
+                message,
+                title=title,
+                icon=icon,
+                event_type=event_type,
+                extra_vars=extra_vars,
+            )
+            return False
+
         if allow_deferral and self._notify_only_when_home and self._notify_people:
             if not self._is_any_notify_person_home():
                 if event_type == NOTIFY_EVENT_LIVE:
@@ -4293,15 +4619,13 @@ class WashDataManager:
                 )
                 continue
 
-            # Mobile-app-specific keys (tag/timeout/channel/priority) are
+            # Mobile-app-specific keys (tag/timeout/channel/priority) plus the iOS
+            # Live Activity enrichment keys (subtitle/content_state/activity) are
             # rejected by some strict-schema platforms such as Signal Messenger.
             # Only add them for mobile_app targets; all other platforms receive
             # the base payload only.
             svc_data = dict(data)
-            if self._is_mobile_notify_service(notify_service):
-                for key in ("tag", "timeout", "channel", "priority", "actions", "sticky"):
-                    if key in ev:
-                        svc_data[key] = ev[key]
+            svc_data.update(self._mobile_service_extras(ev, notify_service))
 
             state = (
                 self.hass.states.get(notify_service)
@@ -4617,6 +4941,7 @@ class WashDataManager:
         self._last_live_notification_time = None
         self._live_waiting_notification_sent = False
         self._live_chronometer_overrun_sent = False
+        self._live_activity_started = False
 
     @staticmethod
     def _is_mobile_notify_service(notify_service: str | None) -> bool:
@@ -4672,16 +4997,23 @@ class WashDataManager:
                 device=self.config_entry.title,
                 program=self._current_program,
             )
+            waiting_extra_vars: dict[str, Any] = {
+                "tag": self._live_notification_tag,
+                "live_update": True,
+                "alert_once": True,
+            }
+            # C3: mark the first live notification of the cycle so iOS can begin a
+            # Live Activity even before a profile is matched (mobile-only key).
+            if not self._live_activity_started:
+                waiting_extra_vars["activity"] = "start"
             sent = self._dispatch_notification(
                 msg,
                 event_type=NOTIFY_EVENT_LIVE,
-                extra_vars={
-                    "tag": self._live_notification_tag,
-                    "live_update": True,
-                    "alert_once": True,
-                },
+                extra_vars=waiting_extra_vars,
             )
             self._live_waiting_notification_sent = sent
+            if sent:
+                self._live_activity_started = True
             return
 
         interval = max(30, int(self._notify_live_interval_seconds))
@@ -4751,12 +5083,32 @@ class WashDataManager:
             extra_vars["chronometer"] = True
             extra_vars["when"] = int(now.timestamp()) + remaining_seconds
             extra_vars["countdown"] = True
+
+        # C3: iOS Live Activity enrichment. Derived from the SAME values feeding the
+        # flat progress/when keys above. Forwarded to mobile_app_* targets only (see
+        # _send_notification_service); non-mobile live targets are already skipped.
+        eta_timestamp = int(now.timestamp()) + remaining_seconds
+        progress_pct = (
+            100.0 * elapsed_seconds / total_seconds if total_seconds > 0 else 0.0
+        )
+        activity_marker = None if self._live_activity_started else "start"
+        extra_vars.update(
+            self._build_ios_live_activity_extras(
+                state="paused" if self.detector.state == STATE_PAUSED else "running",
+                progress_pct=progress_pct,
+                eta_timestamp=eta_timestamp,
+                program=self._current_program,
+                device=self.config_entry.title,
+                activity=activity_marker,
+            )
+        )
         sent = self._dispatch_notification(
             msg,
             event_type=NOTIFY_EVENT_LIVE,
             extra_vars=extra_vars,
         )
         if sent:
+            self._live_activity_started = True
             if chronometer_overrun:
                 self._live_chronometer_overrun_sent = True
             else:
@@ -4814,6 +5166,8 @@ class WashDataManager:
                 "tag": self._live_notification_tag,
                 "live_update": True,
                 "alert_once": True,
+                # C3: tell iOS to end the Live Activity (mobile-only key downstream).
+                "activity": "end",
             }
         )
 
@@ -4826,6 +5180,8 @@ class WashDataManager:
                     "tag": self._live_notification_tag,
                     "live_update": True,
                     "alert_once": True,
+                    # C3: iOS Live Activity end marker (mobile_app_* only downstream).
+                    "activity": "end",
                 },
             )
 

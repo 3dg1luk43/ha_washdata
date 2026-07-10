@@ -134,6 +134,20 @@ CONF_SWITCH_ENTITY = "switch_entity"  # Optional switch entity toggled on pause/
 CONF_NOTIFY_UNLOAD_DELAY_MINUTES = "notify_unload_delay_minutes"  # Minutes before "laundry waiting" nag
 CONF_NOTIFY_UNLOAD_MESSAGE = "notify_unload_message"  # Template for the clean-laundry nag message
 
+# Quiet hours (do-not-disturb window). Both hours 0-23; unset/None (or start==end)
+# = feature off. When configured, finish-type notifications (finish, clean-laundry
+# nag, pre-complete/reminder, milestone) that would fire inside the window are held
+# and delivered at the end of the window. Live-progress ticks and the start
+# notification are never delayed.
+CONF_NOTIFY_QUIET_START_HOUR = "notify_quiet_start_hour"
+CONF_NOTIFY_QUIET_END_HOUR = "notify_quiet_end_hour"
+
+# Milestone (cycle-count achievement) notifications. A list of lifetime completed-
+# cycle counts; a single milestone notification fires when the device's lifetime
+# count crosses one of these values. Empty/malformed list = no-op.
+CONF_NOTIFY_MILESTONES = "notify_milestones"
+CONF_NOTIFY_MILESTONE_MESSAGE = "notify_milestone_message"
+
 # Optional link to an existing HA device (e.g. the smart plug or appliance).
 # When set, the WashData device is exposed as "Connected via <device>" through
 # the device registry's via_device relationship. Stores a device registry id.
@@ -156,6 +170,14 @@ DEFAULT_NOTIFY_FINISH_CHANNEL = ""  # Empty = reuse status channel
 DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES = 60  # 1 hour before "still waiting" nag notification
 DEFAULT_NOTIFY_UNLOAD_MESSAGE = "{device} finished {duration}m ago - laundry is still inside."
 DEFAULT_PEAK_RATE_MESSAGE = "Running at peak rate ({price}/kWh)."
+
+# Quiet hours default: feature off (both hours unset). See CONF_NOTIFY_QUIET_*.
+DEFAULT_NOTIFY_QUIET_START_HOUR = None
+DEFAULT_NOTIFY_QUIET_END_HOUR = None
+
+# Milestone notification defaults.
+DEFAULT_NOTIFY_MILESTONES = [50, 100, 500, 1000]
+DEFAULT_NOTIFY_MILESTONE_MESSAGE = "{device} has completed {cycle_count} cycles!"
 
 # Defaults
 DEFAULT_MIN_POWER = 2.0  # Watts
