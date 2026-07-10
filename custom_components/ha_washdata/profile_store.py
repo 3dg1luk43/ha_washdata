@@ -1437,6 +1437,32 @@ class ProfileStore:
         except Exception:  # noqa: BLE001
             return 0
 
+    # ------------------------------------------------------------------
+    # B1: Lifetime energy accumulator (HA Energy dashboard)
+    # ------------------------------------------------------------------
+
+    def get_lifetime_energy_wh(self) -> float:
+        """Total accumulated lifetime energy (Wh). Pure getter — never persists. Never raises."""
+        try:
+            return float(self._data.get("lifetime_energy_wh", 0.0))
+        except Exception:  # noqa: BLE001
+            return 0.0
+
+    async def async_add_lifetime_energy_wh(self, wh: float) -> None:
+        """Add *wh* (clamped >= 0) to the lifetime energy total and persist.
+
+        Called exactly once per completed cycle so it never double-counts. Does
+        not backfill from history — the meter starts at 0 and accumulates forward.
+        Ignores non-numeric input.
+        """
+        try:
+            add = max(0.0, float(wh))
+        except (ValueError, TypeError):
+            return
+        base = self.get_lifetime_energy_wh()
+        self._data["lifetime_energy_wh"] = round(base + add, 3)
+        await self.async_save()
+
     def compute_profile_health(self) -> dict[str, dict[str, Any]]:
         """Compute per-profile health indicators from labeled cycle history.
 
@@ -3970,6 +3996,19 @@ class ProfileStore:
             avg_energy = envelope.get("avg_energy") if envelope else None
             duration_std_dev = envelope.get("duration_std_dev") if envelope else None
 
+            # Per-profile cost aggregates from frozen per-cycle costs. Never raises;
+            # both default to None when no cycle carries a cost.
+            avg_cost: float | None = None
+            total_cost: float | None = None
+            try:
+                costs = [float(c["cost"]) for c in p_cycles if c.get("cost") is not None]
+                if costs:
+                    total_cost = round(sum(costs), 4)
+                    avg_cost = round(sum(costs) / len(costs), 4)
+            except Exception:  # noqa: BLE001
+                avg_cost = None
+                total_cost = None
+
             profiles.append(
                 {
                     "name": name,
@@ -3981,6 +4020,8 @@ class ProfileStore:
                     "last_run": last_run,
                     "avg_energy": avg_energy,
                     "duration_std_dev": duration_std_dev,
+                    "avg_cost": avg_cost,
+                    "total_cost": total_cost,
                 }
             )
         return sorted(profiles, key=lambda p: profile_sort_key(p.get("name", "")))

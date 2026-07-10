@@ -122,6 +122,10 @@ CONF_NOTIFY_CHANNEL = "notify_channel"  # Android channel for status/live/remind
 CONF_NOTIFY_FINISH_CHANNEL = "notify_finish_channel"  # Distinct Android channel for finished/clean
 CONF_ENERGY_PRICE_STATIC = "energy_price_static"
 CONF_ENERGY_PRICE_ENTITY = "energy_price_entity"
+# Peak-rate awareness: when the current price meets/exceeds this threshold, the
+# start notification gets an informational tip appended (purely advisory).
+CONF_PEAK_RATE_THRESHOLD = "peak_rate_threshold"
+CONF_PEAK_RATE_MESSAGE = "peak_rate_message"
 
 # Door sensor & pause
 CONF_DOOR_SENSOR_ENTITY = "door_sensor_entity"  # Optional binary_sensor for machine door
@@ -151,6 +155,7 @@ DEFAULT_NOTIFY_CHANNEL = ""  # Empty = omit channel (companion app default)
 DEFAULT_NOTIFY_FINISH_CHANNEL = ""  # Empty = reuse status channel
 DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES = 60  # 1 hour before "still waiting" nag notification
 DEFAULT_NOTIFY_UNLOAD_MESSAGE = "{device} finished {duration}m ago - laundry is still inside."
+DEFAULT_PEAK_RATE_MESSAGE = "Running at peak rate ({price}/kWh)."
 
 # Defaults
 DEFAULT_MIN_POWER = 2.0  # Watts

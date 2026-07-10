@@ -7,10 +7,15 @@ import hashlib
 import logging
 from typing import Any
 
-from homeassistant.components.sensor import SensorEntity, SensorEntityDescription, SensorDeviceClass
+from homeassistant.components.sensor import (
+    SensorEntity,
+    SensorEntityDescription,
+    SensorDeviceClass,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.const import EntityCategory
+from homeassistant.const import EntityCategory, UnitOfEnergy
 from homeassistant.helpers import entity_registry
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -160,6 +165,7 @@ async def async_setup_entry(
         WasherDebugSensor(manager, entry),
         WasherSuggestionsSensor(manager, entry),
         WasherCycleCountSensor(manager, entry),
+        WasherEnergyTotalSensor(manager, entry),
     ]
 
     # Add pump-specific sensors
@@ -915,3 +921,23 @@ class WasherCycleCountSensor(WasherBaseSensor):
     @property
     def native_value(self) -> int:  # type: ignore[override]
         return self._manager.cycle_count
+
+
+class WasherEnergyTotalSensor(WasherBaseSensor):
+    """Lifetime-accumulating energy meter for the HA Energy dashboard."""
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="energy_total",
+            translation_key="energy_total",
+            device_class=SensorDeviceClass.ENERGY,
+            state_class=SensorStateClass.TOTAL_INCREASING,
+            native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+            suggested_display_precision=3,
+            icon="mdi:lightning-bolt",
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self) -> float:  # type: ignore[override]
+        return self._manager.lifetime_energy_kwh

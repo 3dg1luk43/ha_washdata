@@ -153,6 +153,9 @@ from .const import (
     CONF_NOTIFY_FINISH_CHANNEL,
     CONF_ENERGY_PRICE_STATIC,
     CONF_ENERGY_PRICE_ENTITY,
+    CONF_PEAK_RATE_THRESHOLD,
+    CONF_PEAK_RATE_MESSAGE,
+    DEFAULT_PEAK_RATE_MESSAGE,
     CONF_DOOR_SENSOR_ENTITY,
     CONF_PAUSE_CUTS_POWER,
     CONF_SWITCH_ENTITY,
@@ -1189,6 +1192,13 @@ class WashDataManager:
                         device=self.config_entry.title,
                         program=self._current_program,
                     )
+                    # B4: append a peak-rate advisory tip when the current price is
+                    # at/above the configured threshold. Purely informational.
+                    tip = self._peak_rate_tip(
+                        self.config_entry.options, self._resolve_energy_price()
+                    )
+                    if tip:
+                        msg = f"{msg}\n{tip}"
 
                     self._dispatch_notification(
                         msg,
@@ -3248,6 +3258,13 @@ class WashDataManager:
                         device=self.config_entry.title,
                         program=self._current_program,
                     )
+                    # B4: append a peak-rate advisory tip when the current price is
+                    # at/above the configured threshold. Purely informational.
+                    tip = self._peak_rate_tip(
+                        self.config_entry.options, self._resolve_energy_price()
+                    )
+                    if tip:
+                        msg = f"{msg}\n{tip}"
                     self._dispatch_notification(
                         msg,
                         event_type=NOTIFY_EVENT_START,
@@ -3679,6 +3696,50 @@ class WashDataManager:
                 pass
         return None
 
+    @staticmethod
+    def _format_vs_typical(duration: float, median: float | None) -> str:
+        """Human comparison of a cycle's duration to its profile median.
+
+        Returns "" when there is no usable median or the difference is under 1%.
+        The English text is the default value of a user-overridable finish-message
+        template variable, so it is intentionally minimal and deterministic.
+        """
+        try:
+            if not median or float(median) <= 0:
+                return ""
+            pct = round((float(duration) - float(median)) / float(median) * 100)
+        except (ValueError, TypeError, ZeroDivisionError):
+            return ""
+        if pct >= 1:
+            return f"{pct}% longer than usual"
+        if pct <= -1:
+            return f"{abs(pct)}% shorter than usual"
+        return ""
+
+    def _peak_rate_tip(self, options: dict[str, Any], price: float | None) -> str:
+        """Return a peak-rate advisory tip for the start notification, or "".
+
+        Appended only when a positive ``peak_rate_threshold`` is configured and the
+        current price meets/exceeds it. Purely informational — no scheduling or
+        appliance control. Never raises; a bad threshold is skipped silently.
+        """
+        try:
+            raw = options.get(CONF_PEAK_RATE_THRESHOLD)
+            if raw in (None, ""):
+                return ""
+            threshold = float(raw)
+            if threshold <= 0 or price is None or float(price) < threshold:
+                return ""
+            tip_template = options.get(CONF_PEAK_RATE_MESSAGE) or DEFAULT_PEAK_RATE_MESSAGE
+            return self._safe_format_template(
+                tip_template,
+                fallback_template=DEFAULT_PEAK_RATE_MESSAGE,
+                device=self.config_entry.title,
+                price=f"{float(price):.3f}",
+            )
+        except (ValueError, TypeError):
+            return ""
+
     async def _async_process_cycle_end(self, cycle_data: dict[str, Any]) -> None:
         """Process cycle completion asynchronously (heavy tasks)."""
 
@@ -3845,6 +3906,17 @@ class WashDataManager:
         except Exception as e: # pylint: disable=broad-exception-caught
             self._logger.error("Failed to add cycle to store: %s", e)
 
+        # B1: accumulate lifetime energy for the HA Energy dashboard sensor. Runs
+        # exactly once per persisted cycle so the TOTAL_INCREASING meter never
+        # double-counts. Never breaks cycle end.
+        if cycle_persisted:
+            try:
+                await self.profile_store.async_add_lifetime_energy_wh(
+                    cycle_data.get("energy_wh", 0.0)
+                )
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                self._logger.debug("Failed to accumulate lifetime energy: %s", e)
+
         # Ensure cycle has a stable ID even if store add failed (or did not mutate).
         if not cycle_data.get("id"):
             try:
@@ -3901,6 +3973,18 @@ class WashDataManager:
             cost_val = cycle_data.get("cost")
             cost_str = f"{cost_val:.2f}" if cost_val is not None else ""
 
+            # B3: extra finish-notification template variables. All are safe to
+            # ignore in a template — str.format drops unused kwargs.
+            time_finished = dt_util.now().strftime("%H:%M")
+            finished_cycle_count = self.cycle_count
+            vs_typical = ""
+            matched_name = cycle_data.get("profile_name")
+            if matched_name:
+                _median = self.profile_store.get_profile_median_duration(matched_name)
+                vs_typical = self._format_vs_typical(
+                    cycle_data.get("duration", 0.0), _median
+                )
+
             msg = self._safe_format_template(
                 msg_template,
                 fallback_template=DEFAULT_NOTIFY_FINISH_MESSAGE,
@@ -3909,6 +3993,9 @@ class WashDataManager:
                 program=program_name,
                 energy_kwh=f"{energy_kwh:.3f}",
                 cost=cost_str,
+                time_finished=time_finished,
+                cycle_count=finished_cycle_count,
+                vs_typical=vs_typical,
             )
             self._dispatch_notification(
                 msg,
@@ -3919,6 +4006,9 @@ class WashDataManager:
                     "program": program_name,
                     "energy_kwh": energy_kwh,
                     "cost": cost_str,
+                    "time_finished": time_finished,
+                    "cycle_count": finished_cycle_count,
+                    "vs_typical": vs_typical,
                     # Same lifecycle tag as start/live so the finished alert replaces
                     # the live notification in place. No live_update/alert_once here,
                     # so the companion app surfaces it with sound.
@@ -5594,6 +5684,11 @@ class WashDataManager:
     def cycle_count(self) -> int:
         """Return the total number of completed cycles stored for this device."""
         return len(self.profile_store.get_past_cycles())
+
+    @property
+    def lifetime_energy_kwh(self) -> float:
+        """Lifetime accumulated energy (kWh) for the HA Energy dashboard sensor."""
+        return round(self.profile_store.get_lifetime_energy_wh() / 1000.0, 3)
 
     @property
     def manual_program_active(self) -> bool:
