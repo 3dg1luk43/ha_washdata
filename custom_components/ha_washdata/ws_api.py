@@ -5,6 +5,7 @@ import collections
 import functools
 import json
 import logging
+import os
 import time
 from typing import Any
 
@@ -61,8 +62,69 @@ from .const import (
 )
 from . import playground
 from .cycle_detector import CycleDetectorConfig
+from .ws_schema import WS_OPEN_RESPONSES, WS_RESPONSE_TYPES
 
 _LOGGER = logging.getLogger(__name__)
+
+# ─── WS response contract (Group H1) ────────────────────────────────────────────
+# Debug-only validation of every send_result payload against the TypedDict
+# registered for its command in ws_schema.py. OFF by default so production has
+# ZERO overhead: _send_result forwards straight to connection.send_result unless
+# the flag is on. Enable by exporting HA_WASHDATA_WS_CONTRACT=1 before starting
+# HA, or by flipping ws_api._WS_CONTRACT_CHECK = True (tests do the latter).
+_WS_CONTRACT_CHECK: bool = bool(os.environ.get("HA_WASHDATA_WS_CONTRACT"))
+
+
+def _validate_ws_contract(command: str, data: Any) -> list[str]:
+    """Return contract-violation messages for ``data`` vs its response TypedDict.
+
+    Pure and defensive: an unknown command or a non-dict payload for a typed
+    command is reported, missing required top-level keys are reported, and
+    unexpected top-level keys are reported unless the command is registered as
+    open-ended in ``WS_OPEN_RESPONSES``. Returns an empty list when everything
+    checks out. Never raises.
+    """
+    td = WS_RESPONSE_TYPES.get(command)
+    if td is None:
+        return [f"{command}: no response type registered"]
+    if not isinstance(data, dict):
+        return [f"{command}: response is {type(data).__name__}, expected dict"]
+    required = set(getattr(td, "__required_keys__", ()) or ())
+    optional = set(getattr(td, "__optional_keys__", ()) or ())
+    keys = set(data.keys())
+    problems: list[str] = []
+    missing = required - keys
+    if missing:
+        problems.append(f"{command}: missing required keys {sorted(missing)}")
+    if command not in WS_OPEN_RESPONSES:
+        unexpected = keys - (required | optional)
+        if unexpected:
+            problems.append(f"{command}: unexpected keys {sorted(unexpected)}")
+    return problems
+
+
+def _send_result(
+    connection: websocket_api.ActiveConnection,
+    msg_id: int,
+    command: str,
+    data: Any,
+) -> None:
+    """Send a WS result, validating its shape against the contract in debug mode.
+
+    Behaviourally identical to ``connection.send_result(msg_id, data)``; the
+    contract check is a no-op (never touched) unless ``_WS_CONTRACT_CHECK`` is on,
+    and even then it only logs — it never mutates ``data`` nor raises, so it can
+    never change what the client receives.
+    """
+    if __debug__ and _WS_CONTRACT_CHECK:
+        try:
+            problems = _validate_ws_contract(command, data)
+            if problems:
+                _LOGGER.warning("WS contract mismatch: %s", "; ".join(problems))
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("WS contract check failed for %s: %s", command, exc)
+    connection.send_result(msg_id, data)
+
 
 # Fields too large or not serialisable to send over WebSocket.
 _CYCLE_STRIP_KEYS = frozenset({"power_data", "power_trace", "debug_data", "samples"})
@@ -642,7 +704,7 @@ def ws_get_devices(
 
         devices.append(info)
 
-    connection.send_result(msg["id"], {"devices": devices})
+    _send_result(connection, msg["id"], "get_devices", {"devices": devices})
 
 
 @websocket_api.websocket_command(
@@ -692,9 +754,7 @@ def ws_get_device_cycles(
         _LOGGER.debug("Error fetching cycles for entry %s: %s", entry_id, exc)
 
     has_more = (offset + len(cycles)) < total
-    connection.send_result(
-        msg["id"],
-        {
+    _send_result(connection, msg["id"], "get_device_cycles", {
             "entry_id": entry_id,
             "cycles": cycles,
             "total": total,
@@ -720,7 +780,7 @@ def ws_get_options(
         connection.send_error(msg["id"], "not_found", f"Entry {msg['entry_id']!r} not found")
         return
     options = {**entry.data, **entry.options}
-    connection.send_result(msg["id"], {"options": options})
+    _send_result(connection, msg["id"], "get_options", {"options": options})
 
 
 @websocket_api.websocket_command(
@@ -786,7 +846,7 @@ async def ws_set_options(
         )
 
     hass.config_entries.async_update_entry(entry, **update_kwargs)
-    connection.send_result(msg["id"], {"success": True})
+    _send_result(connection, msg["id"], "set_options", {"success": True})
 
 
 @websocket_api.websocket_command(
@@ -818,7 +878,7 @@ async def ws_get_settings_changelog(
             "Error fetching settings changelog for entry %s: %s", entry_id, exc
         )
 
-    connection.send_result(msg["id"], {"changelog": changelog})
+    _send_result(connection, msg["id"], "get_settings_changelog", {"changelog": changelog})
 
 
 # ─── Profiles ─────────────────────────────────────────────────────────────────
@@ -879,7 +939,7 @@ async def ws_get_profiles(
         }
 
     stats = await hass.async_add_executor_job(_compute_stats)
-    connection.send_result(msg["id"], stats)
+    _send_result(connection, msg["id"], "get_profiles", stats)
 
 
 @websocket_api.websocket_command(
@@ -920,7 +980,7 @@ async def ws_create_profile(
             avg_duration=avg_duration,
         )
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True, "name": name})
+        _send_result(connection, msg["id"], "create_profile", {"success": True, "name": name})
     except ValueError as exc:
         connection.send_error(msg["id"], "profile_exists", str(exc))
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -962,7 +1022,7 @@ async def ws_rename_profile(
             msg["profile_name"], new_name, avg_duration=avg_duration
         )
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "rename_profile", {"success": True})
     except ValueError as exc:
         connection.send_error(msg["id"], "rename_failed", str(exc))
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -995,7 +1055,7 @@ async def ws_delete_profile(
             msg["profile_name"], msg.get("unlabel_cycles", True)
         )
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "delete_profile", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1034,7 +1094,7 @@ async def ws_get_profile_groups(
             "cohesive": coh >= GROUP_MIN_COHESION,  # False => not aggregated by matcher; UI warns
         })
     suggestions = await hass.async_add_executor_job(store.suggest_profile_groups)
-    connection.send_result(msg["id"], {
+    _send_result(connection, msg["id"], "get_profile_groups", {
         "groups": groups,
         "min_cohesion": GROUP_MIN_COHESION,
         "suggestions": suggestions,
@@ -1068,7 +1128,7 @@ async def ws_save_profile_group(
         else:
             await store.create_profile_group(msg["name"], msg["members"])
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "save_profile_group", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1095,7 +1155,7 @@ async def ws_rename_profile_group(
     try:
         await manager.profile_store.rename_profile_group(msg["name"], msg["new_name"])
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "rename_profile_group", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1121,7 +1181,7 @@ async def ws_delete_profile_group(
     try:
         await manager.profile_store.delete_profile_group(msg["name"])
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "delete_profile_group", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1144,7 +1204,7 @@ async def ws_rebuild_envelopes(
 
     try:
         await manager.profile_store.async_rebuild_all_envelopes()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "rebuild_envelopes", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1175,7 +1235,7 @@ def ws_get_profile_phases(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error getting profile phases: %s", exc)
 
-    connection.send_result(msg["id"], {"phases": phases or []})
+    _send_result(connection, msg["id"], "get_profile_phases", {"phases": phases or []})
 
 
 @websocket_api.websocket_command(
@@ -1203,7 +1263,7 @@ async def ws_set_profile_phases(
         await manager.profile_store.async_set_profile_phase_ranges(
             msg["profile_name"], msg["phases"]
         )
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "set_profile_phases", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1229,7 +1289,7 @@ async def ws_get_maintenance_log(
     cfg = manager.config_entry.options.get(CONF_MAINTENANCE_REMINDER_CYCLES)
     if isinstance(cfg, dict):
         reminders.update(cfg)
-    connection.send_result(msg["id"], {
+    _send_result(connection, msg["id"], "get_maintenance_log", {
         "log": manager.profile_store.get_maintenance_log(),
         "due": manager.maintenance_due,
         "event_types": list(MAINTENANCE_EVENT_TYPES),
@@ -1263,7 +1323,7 @@ async def ws_add_maintenance_event(
             msg["event_type"], msg.get("date"), msg.get("notes", "")
         )
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True, "event": event})
+        _send_result(connection, msg["id"], "add_maintenance_event", {"success": True, "event": event})
     except ValueError as exc:
         connection.send_error(msg["id"], "invalid_format", str(exc))
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -1293,7 +1353,7 @@ async def ws_delete_maintenance_event(
         removed = await manager.profile_store.async_delete_maintenance_event(msg["event_id"])
         if removed:
             manager.notify_update()
-        connection.send_result(msg["id"], {"success": removed})
+        _send_result(connection, msg["id"], "delete_maintenance_event", {"success": removed})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1339,7 +1399,7 @@ async def ws_label_cycle(
         else:
             await manager.profile_store.assign_profile_to_cycle(cycle_id, profile_name)
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "label_cycle", {"success": True})
     except ValueError as exc:
         connection.send_error(msg["id"], "label_failed", str(exc))
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -1369,7 +1429,7 @@ async def ws_delete_cycle(
     try:
         await manager.profile_store.delete_cycle(msg["cycle_id"])
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "delete_cycle", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1400,7 +1460,7 @@ async def ws_auto_label_cycles(
     try:
         await manager.profile_store.auto_label_cycles(threshold, overwrite=True)
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "auto_label_cycles", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1434,7 +1494,7 @@ def ws_get_phase_catalog(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error listing phase catalog: %s", exc)
 
-    connection.send_result(msg["id"], {"phases": phases, "device_type": device_type})
+    _send_result(connection, msg["id"], "get_phase_catalog", {"phases": phases, "device_type": device_type})
 
 
 @websocket_api.websocket_command(
@@ -1463,7 +1523,7 @@ async def ws_create_phase(
         await manager.profile_store.async_create_custom_phase(
             msg["device_type"], msg["name"], msg.get("description", "")
         )
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "create_phase", {"success": True})
     except ValueError as exc:
         connection.send_error(msg["id"], "duplicate_phase", str(exc))
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -1496,7 +1556,7 @@ async def ws_update_phase(
         await manager.profile_store.async_update_custom_phase(
             msg["phase_id"], msg["new_name"], msg.get("description", "")
         )
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "update_phase", {"success": True})
     except ValueError as exc:
         connection.send_error(msg["id"], "phase_not_found", str(exc))
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -1525,7 +1585,7 @@ async def ws_delete_phase(
 
     try:
         await manager.profile_store.async_delete_custom_phase(msg["phase_id"])
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "delete_phase", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1550,7 +1610,7 @@ def ws_get_recording_state(
 
     recorder = getattr(manager, "recorder", None)
     if recorder is None:
-        connection.send_result(msg["id"], {"state": "unavailable"})
+        _send_result(connection, msg["id"], "get_recording_state", {"state": "unavailable"})
         return
 
     is_recording: bool = getattr(recorder, "is_recording", False)
@@ -1578,7 +1638,7 @@ def ws_get_recording_state(
         except Exception:  # pylint: disable=broad-exception-caught
             pass
 
-    connection.send_result(msg["id"], info)
+    _send_result(connection, msg["id"], "get_recording_state", info)
 
 
 @websocket_api.websocket_command(
@@ -1599,7 +1659,7 @@ async def ws_start_recording(
 
     try:
         await manager.async_start_recording()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "start_recording", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1622,7 +1682,7 @@ async def ws_stop_recording(
 
     try:
         await manager.async_stop_recording()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "stop_recording", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1741,7 +1801,7 @@ async def ws_process_recording(
         await recorder.clear_last_run()
         manager.notify_update()
 
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "process_recording", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1766,7 +1826,7 @@ async def ws_discard_recording(
         recorder = getattr(manager, "recorder", None)
         if recorder:
             await recorder.clear_last_run()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "discard_recording", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1800,7 +1860,7 @@ def ws_get_feedbacks(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error fetching feedbacks for %s: %s", entry_id, exc)
 
-    connection.send_result(msg["id"], {"feedbacks": feedbacks})
+    _send_result(connection, msg["id"], "get_feedbacks", {"feedbacks": feedbacks})
 
 
 @websocket_api.websocket_command(
@@ -1850,7 +1910,7 @@ async def ws_resolve_feedback(
             connection.send_error(msg["id"], "not_available", "Learning manager not available")
             return
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "resolve_feedback", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1884,7 +1944,7 @@ async def ws_dismiss_all_feedbacks(
                     dismiss=True,
                 )
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True, "dismissed": len(pending)})
+        _send_result(connection, msg["id"], "dismiss_all_feedbacks", {"success": True, "dismissed": len(pending)})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1909,7 +1969,7 @@ async def ws_get_diagnostics(
 
     try:
         stats = await manager.profile_store.get_storage_stats()
-        connection.send_result(msg["id"], {"stats": stats})
+        _send_result(connection, msg["id"], "get_diagnostics", {"stats": stats})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1985,10 +2045,10 @@ async def ws_reprocess_history(
             _LOGGER.warning(
                 "Manager replaced during reprocess for %s; skipping notify", entry_id
             )
-            connection.send_result(msg["id"], summary)
+            _send_result(connection, msg["id"], "reprocess_history", summary)
             return
         manager.notify_update()
-        connection.send_result(msg["id"], summary)
+        _send_result(connection, msg["id"], "reprocess_history", summary)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -2011,7 +2071,7 @@ async def ws_clear_debug_data(
 
     try:
         count = await manager.profile_store.async_clear_debug_data()
-        connection.send_result(msg["id"], {"success": True, "count": count})
+        _send_result(connection, msg["id"], "clear_debug_data", {"success": True, "count": count})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -2035,7 +2095,7 @@ async def ws_wipe_history(
     try:
         await manager.profile_store.clear_all_data()
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "wipe_history", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -2066,7 +2126,7 @@ async def ws_export_config(
         json_str = await hass.async_add_executor_job(
             lambda: json.dumps(payload, indent=2)
         )
-        connection.send_result(msg["id"], {"json_data": json_str})
+        _send_result(connection, msg["id"], "export_config", {"json_data": json_str})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -2102,7 +2162,7 @@ async def ws_import_config(
             _LOGGER.warning(
                 "Manager replaced during import for %s; aborting notify", entry_id
             )
-            connection.send_result(msg["id"], {"success": True})
+            _send_result(connection, msg["id"], "import_config", {"success": True})
             return
 
         if entry and config_updates:
@@ -2114,7 +2174,7 @@ async def ws_import_config(
                 hass.config_entries.async_update_entry(entry, options=new_options)
 
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "import_config", {"success": True})
     except json.JSONDecodeError as exc:
         connection.send_error(msg["id"], "invalid_json", str(exc))
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -2140,9 +2200,7 @@ def ws_get_constants(
         {"id": key, "label": label}
         for key, label in DEVICE_TYPES.items()
     ]
-    connection.send_result(
-        msg["id"],
-        {
+    _send_result(connection, msg["id"], "get_constants", {
             "device_types": device_types,
             "state_colors": dict(STATE_COLORS),
             "ml_lab_enabled": SHOW_ML_LAB,
@@ -2201,7 +2259,7 @@ def ws_get_suggestions(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error reading suggestions for %s: %s", entry_id, exc)
 
-    connection.send_result(msg["id"], {"suggestions": out})
+    _send_result(connection, msg["id"], "get_suggestions", {"suggestions": out})
 
 
 @websocket_api.websocket_command(
@@ -2253,8 +2311,7 @@ async def ws_apply_suggestions(
             hass.config_entries.async_update_entry(entry, options=new_options)
             manager.notify_update()
 
-        connection.send_result(
-            msg["id"], {"success": True, "applied": list(updates.keys())}
+        _send_result(connection, msg["id"], "apply_suggestions", {"success": True, "applied": list(updates.keys())}
         )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
@@ -2279,7 +2336,7 @@ async def ws_clear_suggestions(
     try:
         await manager.profile_store.clear_suggestions()
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "clear_suggestions", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -2306,7 +2363,7 @@ async def ws_run_suggestion_analysis(
     try:
         result = await learning.async_run_full_analysis()
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True, **(result or {})})
+        _send_result(connection, msg["id"], "run_suggestion_analysis", {"success": True, **(result or {})})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -2366,9 +2423,7 @@ async def ws_get_cycle_power_data(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error getting cycle power data %s: %s", cycle_id, exc)
 
-    connection.send_result(
-        msg["id"],
-        {
+    _send_result(connection, msg["id"], "get_cycle_power_data", {
             "cycle_id": cycle_id,
             "samples": _downsample(samples),
             "full_duration_s": round(float(samples[-1][0]), 1) if samples else 0.0,
@@ -2405,7 +2460,7 @@ async def ws_trim_cycle(
         )
         if ok:
             manager.notify_update()
-            connection.send_result(msg["id"], {"success": True})
+            _send_result(connection, msg["id"], "trim_cycle", {"success": True})
         else:
             connection.send_error(
                 msg["id"], "trim_failed", "Trim produced no data or cycle not found"
@@ -2455,9 +2510,7 @@ async def ws_analyze_split(
         split_offsets = (
             [round(float(s[1]), 1) for s in segs[:-1]] if segs and len(segs) > 1 else []
         )
-        connection.send_result(
-            msg["id"],
-            {
+        _send_result(connection, msg["id"], "analyze_split", {
                 "segments": [
                     [round(float(a), 1), round(float(b), 1)] for a, b in (segs or [])
                 ],
@@ -2525,7 +2578,7 @@ async def ws_apply_split(
         new_ids = await store.apply_split_interactive(cycle_id, segments)
         await store.async_rebuild_all_envelopes()
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True, "new_ids": new_ids})
+        _send_result(connection, msg["id"], "apply_split", {"success": True, "new_ids": new_ids})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -2581,7 +2634,7 @@ async def ws_apply_merge(
 
         await store.async_rebuild_all_envelopes()
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True, "new_id": new_id})
+        _send_result(connection, msg["id"], "apply_merge", {"success": True, "new_id": new_id})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -2624,7 +2677,7 @@ def ws_get_profile_envelope(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error getting envelope for %s: %s", msg.get("profile_name"), exc)
 
-    connection.send_result(msg["id"], {"envelope": env_out})
+    _send_result(connection, msg["id"], "get_profile_envelope", {"envelope": env_out})
 
 
 @websocket_api.websocket_command(
@@ -2680,7 +2733,7 @@ async def ws_get_profile_cycles(
         return out
 
     result = await hass.async_add_executor_job(_collect)
-    connection.send_result(msg["id"], {"cycles": result})
+    _send_result(connection, msg["id"], "get_profile_cycles", {"cycles": result})
 
 
 # ─── Panel config + RBAC commands ──────────────────────────────────────────────
@@ -2722,7 +2775,7 @@ async def ws_get_panel_config(
         except Exception as exc:  # pylint: disable=broad-exception-caught
             _LOGGER.debug("Could not list users: %s", exc)
         out["users"] = users
-    connection.send_result(msg["id"], out)
+    _send_result(connection, msg["id"], "get_panel_config", out)
 
 
 @websocket_api.websocket_command(
@@ -2750,7 +2803,7 @@ async def ws_set_panel_config(
         if isinstance(msg.get("rbac"), dict):
             cfg["rbac"] = _sanitize_rbac(msg["rbac"])
         await _save_panel_data(hass)
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "set_panel_config", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -2790,7 +2843,7 @@ async def ws_set_user_prefs(
         cur["settings_level"] = p["settings_level"]
     prefs[user.id] = cur
     await _save_panel_data(hass)
-    connection.send_result(msg["id"], {"success": True})
+    _send_result(connection, msg["id"], "set_user_prefs", {"success": True})
 
 
 @websocket_api.websocket_command(
@@ -2827,7 +2880,7 @@ def ws_get_match_debug(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error building match debug for %s: %s", entry_id, exc)
 
-    connection.send_result(msg["id"], out)
+    _send_result(connection, msg["id"], "get_match_debug", out)
 
 
 @websocket_api.websocket_command(
@@ -2859,7 +2912,7 @@ def ws_set_program(
         else:
             manager.set_manual_program(prog)
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "set_program", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -2924,7 +2977,7 @@ async def ws_get_power_history(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error building power history for %s: %s", entry_id, exc)
 
-    connection.send_result(msg["id"], out)
+    _send_result(connection, msg["id"], "get_power_history", out)
 
 
 @websocket_api.websocket_command(
@@ -2948,7 +3001,7 @@ def ws_get_logs(
         minl = _LOG_LEVELS[level]
         recs = [r for r in recs if _LOG_LEVELS.get(r["level"], 0) >= minl]
     limit = msg.get("limit", 200)
-    connection.send_result(msg["id"], {"logs": recs[-limit:]})
+    _send_result(connection, msg["id"], "get_logs", {"logs": recs[-limit:]})
 
 
 # ─── ML Lab (shadow-mode comparison) ──────────────────────────────────────────
@@ -3446,7 +3499,7 @@ async def ws_get_ml_comparison(
             if enriched:
                 result["settings_comparison"] = enriched
 
-        connection.send_result(msg["id"], result)
+        _send_result(connection, msg["id"], "get_ml_comparison", result)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.warning("ML comparison failed for %s: %s", entry_id, exc)
         connection.send_error(msg["id"], "unknown_error", str(exc))
@@ -3560,9 +3613,7 @@ async def ws_get_ml_training_status(
         "tuned": tuned_rec or None,
         "active": "tuned" if tuned_cfg else "default",
     }
-    connection.send_result(
-        msg["id"],
-        {
+    _send_result(connection, msg["id"], "get_ml_training_status", {
             "available": ENABLE_ML_TRAINING,
             "enabled": bool(merged.get(CONF_ML_TRAINING_ENABLED, DEFAULT_ML_TRAINING_ENABLED)),
             "running": bool(getattr(manager, "_ml_training_running", False)),
@@ -3599,7 +3650,7 @@ async def ws_trigger_ml_training(
         connection.send_error(msg["id"], "not_available", "ML training is not enabled in this build")
         return
     summary = await manager.async_run_ml_training(force=True)
-    connection.send_result(msg["id"], summary)
+    _send_result(connection, msg["id"], "trigger_ml_training", summary)
 
 
 @websocket_api.websocket_command(
@@ -3626,7 +3677,7 @@ async def ws_revert_matching_config(
         return
     await manager.profile_store.clear_matching_config()
     manager.notify_update()
-    connection.send_result(msg["id"], {"success": True})
+    _send_result(connection, msg["id"], "revert_matching_config", {"success": True})
 
 
 @websocket_api.websocket_command(
@@ -3656,7 +3707,7 @@ async def ws_revert_ml_models(
         return
     await manager.profile_store.clear_ml_model_versions()
     manager.notify_update()
-    connection.send_result(msg["id"], {"success": True})
+    _send_result(connection, msg["id"], "revert_ml_models", {"success": True})
 
 
 _ML_REVIEW_QUALITIES = {"", "good", "bad", "unusable"}
@@ -3698,7 +3749,7 @@ async def ws_set_ml_review(
             notes=msg.get("notes"),
         )
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True})
+        _send_result(connection, msg["id"], "set_ml_review", {"success": True})
     except ValueError as exc:
         connection.send_error(msg["id"], "not_found", str(exc))
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -3723,7 +3774,7 @@ async def ws_pause_cycle(
         _err_not_found(connection, msg["id"], entry_id)
         return
     await manager.async_pause_cycle()
-    connection.send_result(msg["id"], {"ok": True})
+    _send_result(connection, msg["id"], "pause_cycle", {"ok": True})
 
 
 @websocket_api.websocket_command(
@@ -3742,7 +3793,7 @@ async def ws_resume_cycle(
         _err_not_found(connection, msg["id"], entry_id)
         return
     await manager.async_resume_cycle()
-    connection.send_result(msg["id"], {"ok": True})
+    _send_result(connection, msg["id"], "resume_cycle", {"ok": True})
 
 
 @websocket_api.websocket_command(
@@ -3761,7 +3812,7 @@ async def ws_terminate_cycle(
         _err_not_found(connection, msg["id"], entry_id)
         return
     await manager.async_terminate_cycle()
-    connection.send_result(msg["id"], {"ok": True})
+    _send_result(connection, msg["id"], "terminate_cycle", {"ok": True})
 
 
 # ─── Playground (F3): headless what-if replay + DTW visualizer ──────────────────
@@ -3840,7 +3891,7 @@ async def ws_run_playground_simulation(
             settings_override,
             concurrency,
         )
-        connection.send_result(msg["id"], payload)
+        _send_result(connection, msg["id"], "run_playground_simulation", payload)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Playground simulation failed for %s: %s", entry_id, exc)
         connection.send_error(msg["id"], "unknown_error", str(exc))
@@ -3885,7 +3936,7 @@ async def ws_get_dtw_debug(
                 msg["id"], payload["error"], payload.get("detail", payload["error"])
             )
             return
-        connection.send_result(msg["id"], payload)
+        _send_result(connection, msg["id"], "get_dtw_debug", payload)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("DTW debug failed for %s: %s", entry_id, exc)
         connection.send_error(msg["id"], "unknown_error", str(exc))
