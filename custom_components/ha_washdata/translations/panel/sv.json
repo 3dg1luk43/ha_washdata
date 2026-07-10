@@ -295,7 +295,7 @@
     "select_profile": "Välj profil",
     "show_debug": "Visa livefelsökningskort på statussidan (konfidens, tvetydighet, toppkandidater)",
     "show_expected": "Visa förväntat kurvöverlägg (matchad profil, orange)",
-    "show_raw": "Visa råa sensoravläsningar (oglättad, grå)",
+    "show_raw": "Visa växlare för råa uttag-värden i live-effektdiagram",
     "status": "Status",
     "tail_trim": "Sluttrimning (s)",
     "timer_auto_pause": "Automatisk paus",

@@ -1403,7 +1403,7 @@ class HaWashdataPanel extends HTMLElement {
       // Live chart is served from the integration so it survives a refresh:
       // fetch it whenever the Status tab is visible.
       if (dev && this._tab === 'status') {
-        try { this._powerData = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: dev.entry_id, with_raw: this._pref('show_raw', false) }); } catch (_) { /* keep previous */ }
+        try { this._powerData = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: dev.entry_id, with_raw: this._pref('show_raw_active', false) }); } catch (_) { /* keep previous */ }
         if (this._pref('show_debug', false)) {
           try { this._matchDebug = await this._ws({ type: `${_DOMAIN}/get_match_debug`, entry_id: dev.entry_id }); } catch (_) { /* keep previous */ }
         }
@@ -1619,7 +1619,7 @@ class HaWashdataPanel extends HTMLElement {
     this._render();
     try {
       if (this._tab === 'status') {
-        this._powerData = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: eid, with_raw: this._pref('show_raw', false) });
+        this._powerData = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: eid, with_raw: this._pref('show_raw_active', false) });
         if (!this._profiles.length) await this._fetchProfiles(eid);
         if (this._pref('show_debug', false)) {
           try { this._matchDebug = await this._ws({ type: `${_DOMAIN}/get_match_debug`, entry_id: eid }); } catch (_) { /* keep */ }
@@ -2024,11 +2024,11 @@ class HaWashdataPanel extends HTMLElement {
     const pd = this._powerData || {};
     const hasCurve = (pd.live || []).length > 1;
     const showExpected = this._pref('show_expected', true);
-    const showRawLeg = this._pref('show_raw', false);
+    const showRawLeg = this._pref('show_raw_active', false);
     const legend = `<div class="wd-leg">
       <span class="wd-leg-i"><span class="wd-leg-sw" style="background:var(--primary-color)"></span> ${this._t('lbl.power', {}, 'Power')}</span>
       ${this._statusEnv ? `<label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_expected" ${showExpected ? 'checked' : ''}><span class="wd-leg-sw" style="background:#ff9800"></span> ${this._t('lbl.expected', {}, 'Expected')}</label>` : ''}
-      <label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_raw" ${showRawLeg ? 'checked' : ''}><span class="wd-leg-sw" style="background:#9e9e9e"></span> ${this._t('lbl.raw_socket', {}, 'Raw socket')}</label>
+      ${this._pref('show_raw', false) ? `<label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_raw_active" ${showRawLeg ? 'checked' : ''}><span class="wd-leg-sw" style="background:#9e9e9e"></span> ${this._t('lbl.raw_socket', {}, 'Raw socket')}</label>` : ''}
     </div>`;
     const curveHtml = hasCurve
       ? `<div class="wd-canvas-wrap" style="margin-top:14px"><canvas id="wd-status-canvas" style="height:160px"></canvas></div>${legend}`
@@ -3158,7 +3158,7 @@ class HaWashdataPanel extends HTMLElement {
       </div>
       <div class="wd-subhead">${this._t('hdr.status_graph', {}, 'Status Graph')}</div>
       <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-expected" ${(cur.show_expected !== false) ? 'checked' : ''}> ${this._t('lbl.show_expected', {}, 'Show expected curve overlay (matched profile, orange)')}</label></div>
-      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-raw" ${cur.show_raw ? 'checked' : ''}> ${this._t('lbl.show_raw', {}, 'Show raw sensor readings (unsmoothed, grey)')}</label></div>
+      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-raw" ${cur.show_raw ? 'checked' : ''}> ${this._t('lbl.show_raw', {}, 'Show raw socket toggle in live power graph')}</label></div>
       <div class="wd-subhead">${this._t('hdr.diagnostics_pref', {}, 'Diagnostics')}</div>
       <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-debug" ${cur.show_debug ? 'checked' : ''}> ${this._t('lbl.show_debug', {}, 'Show live match debug card on the Status page (confidence, ambiguity, top candidates)')}</label></div>
       <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-prefs">${this._t('btn.save_preferences', {}, 'Save Preferences')}</button></div>
@@ -3425,7 +3425,7 @@ class HaWashdataPanel extends HTMLElement {
     if (live.length < 2) return;
     const env = this._statusEnv;
     const showExpected = this._pref('show_expected', true);
-    const showRaw = this._pref('show_raw', false);
+    const showRaw = this._pref('show_raw_active', false);
     const series = [];
     let xMax = live[live.length - 1][0];
     // Expected (matched) curve, full length, faint orange - drawn behind.
@@ -4228,7 +4228,7 @@ class HaWashdataPanel extends HTMLElement {
       this._ws({ type: `${_DOMAIN}/set_user_prefs`, prefs: { [key]: val } }).catch(() => {});
       const dev = this._devices[this._selIdx];
       if (dev && this._tab === 'status') {
-        try { this._powerData = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: dev.entry_id, with_raw: this._pref('show_raw', false) }); } catch (_) { /* keep */ }
+        try { this._powerData = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: dev.entry_id, with_raw: this._pref('show_raw_active', false) }); } catch (_) { /* keep */ }
       }
       this._render();
     }));

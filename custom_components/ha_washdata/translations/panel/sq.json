@@ -295,7 +295,7 @@
     "select_profile": "Zgjidh profilin",
     "show_debug": "Shfaq kartën e korrigjimit live në faqen e Statusit (besueshmëria, paqartësia, kandidatët kryesorë)",
     "show_expected": "Shfaq mbivendosjen e kurbës së pritshme (profili i përputhshëm, portokalli)",
-    "show_raw": "Shfaq leximet e papërpunuara të sensorit (të palëmuara, gri)",
+    "show_raw": "Shfaq çelësin e të dhënave bruto të prizës në grafikun e fuqisë në kohë reale",
     "status": "Statusi",
     "tail_trim": "Prerja e fundit (s)",
     "timer_auto_pause": "Auto-pauzë",

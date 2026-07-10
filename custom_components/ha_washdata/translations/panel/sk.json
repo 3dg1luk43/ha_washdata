@@ -295,7 +295,7 @@
     "select_profile": "Vybrať profil",
     "show_debug": "Zobraziť ladiaci panel na stránke stavu (spoľahlivosť, nejednoznačnosť, najlepší kandidáti)",
     "show_expected": "Zobraziť očakávanú krivku (zhodný profil, oranžový)",
-    "show_raw": "Zobraziť surové hodnoty senzora (nevyhladeného, sivý)",
+    "show_raw": "Zobraziť prepínač surových dát zásuvky v živom grafe výkonu",
     "status": "Stav",
     "tail_trim": "Orezanie konca (s)",
     "timer_auto_pause": "Automatické pozastavenie",

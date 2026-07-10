@@ -295,7 +295,7 @@
     "select_profile": "Odaberite Profil",
     "show_debug": "Prikaži karticu za otklanjanje grešaka utakmice uživo na stranici Status (pouzdanje, dvosmislenost, najbolji kandidati)",
     "show_expected": "Prikaži očekivani prekrivač krivulje (podudarni profil, narandžasta)",
-    "show_raw": "Prikaži neobrađena očitanja senzora (neuglađena, siva)",
+    "show_raw": "Prikaži prekidač sirovih očitanja utičnice u živom grafu snage",
     "status": "Status",
     "tail_trim": "Obrub repa (s)",
     "timer_auto_pause": "Automatska pauza",

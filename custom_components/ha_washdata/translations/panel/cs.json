@@ -295,7 +295,7 @@
     "select_profile": "Vyberte Profil",
     "show_debug": "Zobrazit živou kartu ladění shody na stránce Přehled (spolehlivost, nejednoznačnost, nejlepší kandidáti)",
     "show_expected": "Zobrazit očekávané překrytí křivky (shodný profil, oranžová)",
-    "show_raw": "Zobrazit nezpracované hodnoty senzoru (nevyhlazené, šedé)",
+    "show_raw": "Zobrazit přepínač surových dat zásuvky v živém grafu výkonu",
     "status": "Stav",
     "tail_trim": "Trimování ocasu (y)",
     "timer_auto_pause": "Automatická pauza",

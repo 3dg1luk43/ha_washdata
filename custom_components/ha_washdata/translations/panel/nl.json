@@ -295,7 +295,7 @@
     "select_profile": "Selecteer Profiel",
     "show_debug": "Toon live wedstrijdfoutopsporingskaart op de statuspagina (vertrouwen, dubbelzinnigheid, topkandidaten)",
     "show_expected": "Verwachte curve-overlay weergeven (overeenkomend profiel, oranje)",
-    "show_raw": "Toon onbewerkte sensormetingen (ongeëffend, grijs)",
+    "show_raw": "Toon schakelaar voor onbewerkte stopcontactwaarden in live vermogensgrafiek",
     "status": "Status",
     "tail_trim": "Staartversiering(en)",
     "timer_auto_pause": "Automatische pauze",

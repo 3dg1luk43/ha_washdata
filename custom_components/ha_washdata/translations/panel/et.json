@@ -295,7 +295,7 @@
     "select_profile": "Valige Profiil",
     "show_debug": "Kuva reaalajas vaste silumiskaart lehel Olek (kindlus, ebaselgus, parimad kandidaadid)",
     "show_expected": "Kuva eeldatav kõvera ülekate (sobiv profiil, oranž)",
-    "show_raw": "Kuva anduri töötlemata näidud (silitamata, hall)",
+    "show_raw": "Kuva töötlemata pistikupesa lülitit reaalajas võimsusgraafikus",
     "status": "Olek",
     "tail_trim": "Saba trimm (id)",
     "timer_auto_pause": "Automaatne paus",

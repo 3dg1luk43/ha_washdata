@@ -295,7 +295,7 @@
     "select_profile": "Seleccionar perfil",
     "show_debug": "Mostrar tarjeta de depuración de partidos en vivo en la página de Estado (confianza, ambigüedad, mejores candidatos)",
     "show_expected": "Mostrar superposición de curva esperada (perfil coincidente, naranja)",
-    "show_raw": "Mostrar lecturas sin procesar del sensor (sin suavizar, gris)",
+    "show_raw": "Mostrar el interruptor de señal bruta del enchufe en el gráfico de potencia en vivo",
     "status": "Estado",
     "tail_trim": "Recorte de fin (s)",
     "timer_auto_pause": "Pausa automática",

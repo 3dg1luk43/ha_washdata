@@ -295,7 +295,7 @@
     "select_profile": "Seleccionar perfil",
     "show_debug": "Mostrar cartão de depuração de correspondência ao vivo na página de Estado (confiança, ambiguidade, principais candidatos)",
     "show_expected": "Mostrar sobreposição da curva esperada (perfil correspondente, laranja)",
-    "show_raw": "Mostrar leituras brutas do sensor (sem suavização, cinzento)",
+    "show_raw": "Mostrar o interruptor de sinal bruto da tomada no gráfico de potência em tempo real",
     "status": "Estado",
     "tail_trim": "Corte final (s)",
     "timer_auto_pause": "Pausa automática",

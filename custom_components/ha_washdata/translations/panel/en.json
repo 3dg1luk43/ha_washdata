@@ -295,7 +295,7 @@
     "select_profile": "Select Profile",
     "show_debug": "Show live match debug card on the Status page (confidence, ambiguity, top candidates)",
     "show_expected": "Show expected curve overlay (matched profile, orange)",
-    "show_raw": "Show raw sensor readings (unsmoothed, grey)",
+    "show_raw": "Show raw socket toggle in live power graph",
     "status": "Status",
     "tail_trim": "Tail Trim (s)",
     "timer_auto_pause": "Auto-pause",

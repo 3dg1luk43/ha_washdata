@@ -295,7 +295,7 @@
     "select_profile": "Atlasiet Profils",
     "show_debug": "Rādīt tiešraides atbilstošā atkļūdošanas kartīti statusa lapā (pārliecība, neskaidrība, labākie kandidāti)",
     "show_expected": "Rādīt paredzamo līknes pārklājumu (atbilstošs profils, oranžs)",
-    "show_raw": "Rādīt neapstrādātus sensora rādījumus (neizlīdzināti, pelēki)",
+    "show_raw": "Rādīt neapstrādātas kontaktligzdas pārslēgu tiešraides jaudas grafikā",
     "status": "Statuss",
     "tail_trim": "Astes apdare (-es)",
     "timer_auto_pause": "Automātiska pauze",

@@ -295,7 +295,7 @@
     "select_profile": "Veldu prófíl",
     "show_debug": "Sýna villuleitarspjald í beinni á stöðusíðunni (sjálfstraust, tvíræðni, efstu frambjóðendur)",
     "show_expected": "Sýna væntanleg ferilyfirlag (samsvörun snið, appelsínugult)",
-    "show_raw": "Sýna hráar skynjaralestur (ósléttaðar, gráar)",
+    "show_raw": "Sýna hráan innstunga-víxlara í rauntíma aflsriti",
     "status": "Staða",
     "tail_trim": "Halaklipping (s)",
     "timer_auto_pause": "Sjálfvirk hlé",

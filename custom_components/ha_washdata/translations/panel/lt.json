@@ -295,7 +295,7 @@
     "select_profile": "Pasirinkite Profilis",
     "show_debug": "Rodyti tiesioginio rungtynių derinimo kortelę būsenos puslapyje (pasitikėjimas, dviprasmiškumas, geriausi kandidatai)",
     "show_expected": "Rodyti numatomą kreivės perdangą (atitinkantį profilį, oranžinė)",
-    "show_raw": "Rodyti neapdorotus jutiklio rodmenis (neišlygintus, pilkus)",
+    "show_raw": "Rodyti neapdoroto lizdo perjungiklį tiesioginiame galios grafike",
     "status": "Būsena",
     "tail_trim": "Uodegos apdaila (-ai)",
     "timer_auto_pause": "Automatinis pristabdymas",

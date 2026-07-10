@@ -295,7 +295,7 @@
     "select_profile": "选择配置文件",
     "show_debug": "在状态页面显示实时匹配调试卡（置信度、歧义、最佳候选）",
     "show_expected": "显示预期曲线叠加（匹配配置文件，橙色）",
-    "show_raw": "显示原始传感器读数（未平滑，灰色）",
+    "show_raw": "在实时功率图中显示原始插座切换开关",
     "status": "状态",
     "tail_trim": "尾部裁剪（秒）",
     "timer_auto_pause": "自动暂停",

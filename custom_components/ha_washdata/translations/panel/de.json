@@ -295,7 +295,7 @@
     "select_profile": "Wählen Sie Profil",
     "show_debug": "Live-Match-Debug-Karte auf der Statusseite anzeigen (Konfidenz, Unklarheit, Spitzenkandidaten)",
     "show_expected": "Erwartete Kurvenüberlagerung anzeigen (angepasstes Profil, orange)",
-    "show_raw": "Rohe Sensorwerte anzeigen (ungeglättet, grau)",
+    "show_raw": "Umschalter für rohe Steckdosenwerte im Live-Leistungsdiagramm anzeigen",
     "status": "Status",
     "tail_trim": "Heckverkleidung(en)",
     "timer_auto_pause": "Automatische Pause",

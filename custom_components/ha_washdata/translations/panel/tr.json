@@ -295,7 +295,7 @@
     "select_profile": "Profil Seç",
     "show_debug": "Durum sayfasında canlı eşleşme hata ayıklama kartını göster (güven, belirsizlik, en iyi adaylar)",
     "show_expected": "Beklenen eğri bindirmesini göster (eşleşen profil, turuncu)",
-    "show_raw": "Ham sensör okumalarını göster (düzleştirilmemiş, gri)",
+    "show_raw": "Canlı güç grafiğinde ham soket değiştiriciyi göster",
     "status": "Durum",
     "tail_trim": "Kuyruk Kırpma (s)",
     "timer_auto_pause": "Otomatik duraklatma",

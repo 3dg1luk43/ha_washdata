@@ -295,7 +295,7 @@
     "select_profile": "Selectați profilul",
     "show_debug": "Afișați cardul de depanare a potrivirii live pe pagina de Stare (încredere, ambiguitate, principalii candidați)",
     "show_expected": "Afișați suprapunerea curbei așteptate (profil potrivit, portocaliu)",
-    "show_raw": "Afișați citirile brute ale senzorului (nesuavizat, gri)",
+    "show_raw": "Afișați comutatorul pentru semnalul brut al prizei în graficul de putere în timp real",
     "status": "Stare",
     "tail_trim": "Tăiere finală (s)",
     "timer_auto_pause": "Pauză automată",

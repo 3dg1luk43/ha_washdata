@@ -295,7 +295,7 @@
     "select_profile": "Sélectionnez un profil",
     "show_debug": "Afficher la carte de débogage du match en direct sur la page Statut (confiance, ambiguïté, meilleurs candidats)",
     "show_expected": "Afficher la superposition de courbe attendue (profil correspondant, orange)",
-    "show_raw": "Afficher les lectures brutes du capteur (non lissées, gris)",
+    "show_raw": "Afficher le commutateur de signal brut de la prise dans le graphique de puissance en direct",
     "status": "Statut",
     "tail_trim": "Rognage de fin (s)",
     "timer_auto_pause": "Pause automatique",

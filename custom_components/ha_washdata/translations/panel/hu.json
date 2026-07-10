@@ -295,7 +295,7 @@
     "select_profile": "Válassza a Profil lehetőséget",
     "show_debug": "Élő mérkőzés hibakereső kártya megjelenítése az Állapot oldalon (bizalom, kétértelműség, legjobb jelöltek)",
     "show_expected": "Várható görbefedvény megjelenítése (egyező profil, narancssárga)",
-    "show_raw": "Az érzékelő nyers leolvasásainak megjelenítése (simítatlan, szürke)",
+    "show_raw": "Nyers csatlakozó kapcsoló megjelenítése az élő teljesítménygrafikonon",
     "status": "Állapot",
     "tail_trim": "Farokszegély(ek)",
     "timer_auto_pause": "Automatikus szünet",

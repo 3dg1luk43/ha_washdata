@@ -295,7 +295,7 @@
     "select_profile": "Seleziona Profilo",
     "show_debug": "Mostra la scheda di debug della partita in tempo reale nella pagina Stato (fiducia, ambiguità, migliori candidati)",
     "show_expected": "Mostra sovrapposizione curva prevista (profilo corrispondente, arancione)",
-    "show_raw": "Mostra letture grezze del sensore (non livellate, grigie)",
+    "show_raw": "Mostra l'interruttore del segnale grezzo della presa nel grafico di potenza in tempo reale",
     "status": "Stato",
     "tail_trim": "Taglio(i) di coda",
     "timer_auto_pause": "Pausa automatica",

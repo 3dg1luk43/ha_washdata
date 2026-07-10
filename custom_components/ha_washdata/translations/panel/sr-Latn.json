@@ -295,7 +295,7 @@
     "select_profile": "Izaberi profil",
     "show_debug": "Prikaži karticu za otklanjanje grešaka uživo na stranici Statusa (pouzdanost, višeznačnost, najbolji kandidati)",
     "show_expected": "Prikaži preklop očekivane krive (usklađeni profil, narandžasta)",
-    "show_raw": "Prikaži sirova očitavanja senzora (neizglađena, siva)",
+    "show_raw": "Prikaži prekidač sirovih očitavanja utičnice u živom grafu snage",
     "status": "Status",
     "tail_trim": "Isecanje kraja (s)",
     "timer_auto_pause": "Automatska pauza",

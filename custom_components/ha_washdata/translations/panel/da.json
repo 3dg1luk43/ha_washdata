@@ -295,7 +295,7 @@
     "select_profile": "Vælg Profil",
     "show_debug": "Vis live-match-fejlretningskort på statussiden (tillid, tvetydighed, topkandidater)",
     "show_expected": "Vis forventet kurveoverlejring (matchet profil, orange)",
-    "show_raw": "Vis rå sensoraflæsninger (uudjævnet, grå)",
+    "show_raw": "Vis kontakt for råe stikkontaktværdier i live strømgraf",
     "status": "Status",
     "tail_trim": "Haletrim(er)",
     "timer_auto_pause": "Auto-pause",

@@ -295,7 +295,7 @@
     "select_profile": "Valitse Profiili",
     "show_debug": "Näytä live-ottelun virheenkorjauskortti Tila-sivulla (luottamus, epäselvyys, parhaat ehdokkaat)",
     "show_expected": "Näytä odotettu käyrän peittokuva (vastaava profiili, oranssi)",
-    "show_raw": "Näytä anturin raakalukemat (tasoittamaton, harmaa)",
+    "show_raw": "Näytä raakadatan pistorasiakytkin reaaliaikaisessa tehograafissa",
     "status": "Status",
     "tail_trim": "Hännän leikkaus (s)",
     "timer_auto_pause": "Automaattinen tauko",

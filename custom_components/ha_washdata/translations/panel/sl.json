@@ -295,7 +295,7 @@
     "select_profile": "Izberi profil",
     "show_debug": "Prikaži kartico za odpravljanje napak na strani stanja (zaupanje, dvoumnost, najboljši kandidati)",
     "show_expected": "Prikaži pričakovano krivuljo (ujemajoči profil, oranžna)",
-    "show_raw": "Prikaži surove odčitke senzorja (neizglajeni, siva)",
+    "show_raw": "Prikaži stikalo za surove odčitke vtičnice v živem grafu moči",
     "status": "Stanje",
     "tail_trim": "Obrezovanje konca (s)",
     "timer_auto_pause": "Samodejna pavza",

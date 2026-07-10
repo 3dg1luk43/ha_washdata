@@ -295,7 +295,7 @@
     "select_profile": "Wybierz opcję Profil",
     "show_debug": "Pokaż kartę debugowania dopasowania na żywo na stronie Status (pewność, niejednoznaczność, najlepsi kandydaci)",
     "show_expected": "Pokaż oczekiwaną nakładkę krzywej (dopasowany profil, pomarańczowy)",
-    "show_raw": "Pokaż surowe odczyty czujnika (niewygładzone, szare)",
+    "show_raw": "Pokaż przełącznik surowych odczytów gniazdka na wykresie mocy na żywo",
     "status": "Status",
     "tail_trim": "Trymowanie ogona",
     "timer_auto_pause": "Automatyczna pauza",

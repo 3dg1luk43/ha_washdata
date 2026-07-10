@@ -41,3 +41,4 @@ bin
 .vscode/settings.json
 .claude
 custom_components/ha_washdata/ml/__pycache__
+ROADMAP.md

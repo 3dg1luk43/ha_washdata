@@ -295,7 +295,7 @@
     "select_profile": "Velg Profil",
     "show_debug": "Vis direkte kampfeilsøkingskort på statussiden (tillit, tvetydighet, toppkandidater)",
     "show_expected": "Vis forventet kurveoverlegg (matchet profil, oransje)",
-    "show_raw": "Vis råsensoravlesninger (uutjevnet, grå)",
+    "show_raw": "Vis veksler for råe stikkontaktverdier i sanntids effektgraf",
     "status": "Status",
     "tail_trim": "Haletrim(er)",
     "timer_auto_pause": "Auto-pause",
