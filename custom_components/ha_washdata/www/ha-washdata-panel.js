@@ -849,6 +849,19 @@ const _CSS = `
   .wd-log-drawer.open { width: 100vw !important; position: fixed; top: 0; right: 0; bottom: 0; z-index: 30; border-left: none; }
   .wd-log-resize { display: none; }
 }
+/* F3: Playground — event-timeline lanes + DTW warp heatmap */
+.wd-pg-timeline { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.wd-pg-lane { display: flex; align-items: center; gap: 10px; }
+.wd-pg-lane-lbl { flex: 0 0 200px; max-width: 200px; font-size: .8em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wd-pg-track { position: relative; flex: 1; height: 18px; border-radius: 5px; background: var(--secondary-background-color); overflow: hidden; }
+.wd-pg-seg { position: absolute; top: 0; bottom: 0; min-width: 2px; }
+.wd-pg-seg:hover { outline: 1px solid var(--primary-color); outline-offset: -1px; }
+.wd-pg-leg { display: flex; gap: 12px; flex-wrap: wrap; margin: 10px 0 0; font-size: .76em; color: var(--secondary-text-color); }
+.wd-pg-leg-i { display: inline-flex; align-items: center; gap: 5px; }
+.wd-pg-leg-sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.wd-pg-delta-up { color: var(--success-color, #4caf50); font-weight: 700; }
+.wd-pg-delta-down { color: var(--error-color, #f44336); font-weight: 700; }
+.wd-pg-delta-flat { color: var(--secondary-text-color); }
 `;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -1376,6 +1389,19 @@ class HaWashdataPanel extends HTMLElement {
     // D7: settings changelog cache
     this._settingsChangelog = null;
     this._settingsChangeByKey = {};
+    // F3: Playground tab state
+    this._pgSubtab = 'simulator';   // 'simulator' | 'ab' | 'dtw'
+    this._pgInitialized = false;    // one-shot default cycle selection
+    this._pgSel = new Set();        // selected cycle ids (Sections 1 & 2)
+    this._pgOverrides = {};         // Section 1 detection-param overrides
+    this._pgAbOverrides = {};       // Section 2 "B" overrides
+    this._pgConcurrency = 1;        // 1..50
+    this._pgResults = null;         // Section 1 simulation response
+    this._pgAbResults = null;       // Section 2 { a, b } responses
+    this._pgDtwCycle = '';          // Section 3 selected cycle id
+    this._pgDtwProfile = '';        // Section 3 selected profile name
+    this._pgDtwData = null;         // Section 3 get_dtw_debug response
+    this._pgNeedsRestart = false;   // WS command not registered yet (restart HA)
   }
 
   set hass(hass) {
@@ -1712,7 +1738,7 @@ class HaWashdataPanel extends HTMLElement {
     // Letter shortcuts don't fire while any (other) modal is open.
     if (this._modal) return;
 
-    const map = { o: 'status', h: 'history', p: 'profiles', s: 'settings', m: 'ml', a: 'advanced', t: 'advanced' };
+    const map = { o: 'status', h: 'history', p: 'profiles', s: 'settings', m: 'ml', g: 'playground', a: 'advanced', t: 'advanced' };
     const target = map[(e.key || '').toLowerCase()];
     if (!target) return;
     if (!this._visibleTabIds().includes(target)) return;  // gracefully no-op for missing tabs
@@ -1835,6 +1861,11 @@ class HaWashdataPanel extends HTMLElement {
     this._selectMode = false; this._cycleSel = new Set();
     this._cycleFilter = { text: '', status: '' };
     this._profSubtab = 'profiles';
+    // F3: reset Playground state so the new device gets its own selection/results.
+    this._pgInitialized = false; this._pgSel = new Set();
+    this._pgOverrides = {}; this._pgAbOverrides = {};
+    this._pgResults = null; this._pgAbResults = null;
+    this._pgDtwCycle = ''; this._pgDtwProfile = ''; this._pgDtwData = null;
     const dev = this._devices[this._selIdx];
     if (dev) await this._fetchSuggestions(dev.entry_id);
     this._fetchTabData();  // loads tab data incl. Status power-history + profiles
@@ -1957,6 +1988,17 @@ class HaWashdataPanel extends HTMLElement {
         const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
         this._opts = r.options || {};
         this._loadMlTrainingStatus(eid).finally(() => { if (this._tab === 'ml') this._render(); });
+      } else if (this._tab === 'playground') {
+        // F3: Playground needs current options (for override pre-fill) + cycles
+        // (the simulator/DTW cycle pickers) + profiles (DTW profile selector).
+        try { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }); this._opts = r.options || {}; } catch (_) {}
+        await this._fetchCycles(eid);
+        if (!this._profiles.length) await this._fetchProfiles(eid);
+        // Default-select the most recent 20 cycles the first time the tab opens.
+        if (!this._pgInitialized) {
+          this._pgSel = new Set((this._cycles || []).slice(0, 20).map(c => c.id));
+          this._pgInitialized = true;
+        }
       } else if (this._tab === 'advanced') {
         // Advanced sub-tabs lazy-load on click; ensure the Maintenance section
         // still fills in when the tab is (re)entered while already on it.
@@ -2088,7 +2130,7 @@ class HaWashdataPanel extends HTMLElement {
     const panel = cfg.panel || {};
     if (!this._tabInitialized) {
       const dt = (cfg.prefs && cfg.prefs.default_tab) || panel.default_tab;
-      if (dt && ['status', 'history', 'profiles', 'settings'].includes(dt)) this._tab = dt;
+      if (dt && ['status', 'history', 'profiles', 'settings', 'playground'].includes(dt)) this._tab = dt;
       this._tabInitialized = true;
     }
   }
@@ -2109,6 +2151,8 @@ class HaWashdataPanel extends HTMLElement {
     const ids = ['status', 'history', 'profiles'];
     if (this._canEdit()) ids.push('settings');
     if (this._canEdit() && this._constants && this._constants.mlTrainingAvailable) ids.push('ml');
+    // F3: Playground (what-if simulator / A-B / DTW inspector) — edit access only.
+    if (this._canEdit()) ids.push('playground');
     // Advanced is also reachable from the header gear; expose it as a tab too.
     ids.push('advanced');
     return ids.filter(id => admin || !hidden.includes(id));
@@ -2155,7 +2199,8 @@ class HaWashdataPanel extends HTMLElement {
     this._drawStatusCurve();
     this._drawModalCanvas();
     this._drawProfileSparklines();  // D2
-    ['wd-status-canvas', 'wd-cyc-canvas', 'wd-compare-canvas', 'wd-env-canvas', 'wd-phase-canvas', 'wd-spag-canvas', 'wd-pg-canvas']
+    this._drawPlaygroundCanvases(); // F3
+    ['wd-status-canvas', 'wd-cyc-canvas', 'wd-compare-canvas', 'wd-env-canvas', 'wd-phase-canvas', 'wd-spag-canvas', 'wd-pg-canvas', 'wd-pg-dtw-canvas']
       .forEach(id => this._attachHover(id));
   }
 
@@ -2216,7 +2261,7 @@ class HaWashdataPanel extends HTMLElement {
     ).length;
     const sugDot = (this._suggestions.length || mlSugCount) ? ' 💡' : '';
     const confIndicator = this._conflictKeysFromOpts().size > 0 ? ' ⚠' : '';
-    const labels = { status: this._t('tab.status',{},'Overview'), history: this._t('tab.history',{},'Cycles'), profiles: this._t('tab.profiles',{},'Profiles'), settings: this._t('tab.settings',{},'Settings') + confIndicator + sugDot, ml: this._t('tab.ml',{},'ML Training'), advanced: this._t('tab.advanced',{},'Advanced') };
+    const labels = { status: this._t('tab.status',{},'Overview'), history: this._t('tab.history',{},'Cycles'), profiles: this._t('tab.profiles',{},'Profiles'), settings: this._t('tab.settings',{},'Settings') + confIndicator + sugDot, ml: this._t('tab.ml',{},'ML Training'), playground: this._t('tab.playground',{},'Playground'), advanced: this._t('tab.advanced',{},'Advanced') };
     const visible = this._visibleTabIds();
     if (!visible.includes(this._tab)) this._tab = 'status';
     const tabBtns = visible.map(id =>
@@ -2233,6 +2278,7 @@ class HaWashdataPanel extends HTMLElement {
       ${pane('profiles', this._htmlProfiles())}
       ${pane('settings', this._htmlSettings())}
       ${pane('ml', this._htmlMlTab())}
+      ${pane('playground', this._htmlPlayground())}
       ${pane('advanced', this._htmlPanel())}
     `;
   }
@@ -3557,6 +3603,485 @@ class HaWashdataPanel extends HTMLElement {
     </div>`;
   }
 
+  // ── F3: Playground tab (what-if simulator / A-B / DTW inspector) ─────────────
+
+  // The small set of detection params the playground lets you tweak. Labels reuse
+  // the canonical setting.* strings; units/steps/mins come from _FIELD_BY_KEY.
+  _pgOverrideFields() {
+    return [
+      ['start_threshold_w', 'Start Threshold', 'W'],
+      ['stop_threshold_w', 'Stop Threshold', 'W'],
+      ['off_delay', 'Off Delay', 's'],
+      ['min_off_gap', 'Min Off Gap', 's'],
+      ['completion_min_seconds', 'Min Cycle Duration', 's'],
+      ['end_repeat_count', 'End Repeat Count', ''],
+    ];
+  }
+
+  // Resolve a pre-fill value for an override field: staged override → live option
+  // → field default → ''.
+  _pgFieldVal(key, store) {
+    const s = store || {};
+    if (s[key] !== undefined) return s[key];
+    const o = this._opts || {};
+    if (o[key] !== undefined && o[key] !== null) return o[key];
+    const f = _FIELD_BY_KEY[key] || {};
+    return f.def !== undefined ? f.def : '';
+  }
+
+  _htmlPlayground() {
+    const dev = this._devices[this._selIdx];
+    if (!dev) return `<div class="wd-empty">${this._t('msg.no_device_selected', {}, 'No device selected.')}</div>`;
+    const sub = ['simulator', 'ab', 'dtw'].includes(this._pgSubtab) ? this._pgSubtab : 'simulator';
+    const subtabBtns = [
+      ['simulator', this._t('hdr.cycle_simulator', {}, 'Cycle Simulator')],
+      ['ab', this._t('hdr.ab_comparison', {}, 'A/B Settings Comparison')],
+      ['dtw', this._t('hdr.dtw_inspector', {}, 'DTW Inspector')],
+    ].map(([id, lbl]) => `<button class="wd-subtab ${sub === id ? 'active' : ''}" data-pgtab="${id}">${_esc(lbl)}</button>`).join('');
+    const restartBanner = this._pgNeedsRestart
+      ? `<div class="wd-card" style="border-color:var(--warning-color,#ff9800);margin-bottom:14px"><p class="wd-info" style="margin:0">⚠ ${this._t('msg.playground_needs_restart', {}, 'Restart Home Assistant to enable the Playground tools.')}</p></div>`
+      : '';
+    let body;
+    if (sub === 'simulator') body = this._htmlPgSimulator();
+    else if (sub === 'ab') body = this._htmlPgAb();
+    else body = this._htmlPgDtw();
+    return `
+      <p class="wd-sec-intro">${this._t('msg.playground_intro', {}, 'A safe sandbox to replay past cycles with different settings, compare two setups side by side, and inspect how a cycle aligns to a profile. Nothing here changes your live data until you explicitly apply it.')}</p>
+      <div class="wd-subtabs">${subtabBtns}</div>
+      ${restartBanner}
+      ${body}
+    `;
+  }
+
+  // Editable number inputs for the override params. `which` selects the state
+  // store the inputs write into ('a' = Section 1, 'ab' = Section 2 B).
+  _htmlPgOverrideForm(store, which) {
+    const rows = this._pgOverrideFields().map(([key, fb, unit]) => {
+      const lbl = this._t('setting.' + key + '.label', {}, fb);
+      const f = _FIELD_BY_KEY[key] || {};
+      const step = f.step != null ? f.step : 1;
+      const min = f.min != null ? f.min : 0;
+      const base = (this._opts || {})[key];
+      const val = this._pgFieldVal(key, store);
+      const unitTxt = unit ? ` (${_esc(unit)})` : '';
+      const ph = (base !== undefined && base !== null) ? _esc(String(base)) : '';
+      return `<div class="wd-field"><label>${_esc(lbl)}${unitTxt}</label>
+        <input type="number" data-pgov="${_esc(key)}" data-pgstore="${which}" step="${step}" min="${min}" value="${val === '' ? '' : _esc(String(val))}" placeholder="${ph}"></div>`;
+    }).join('');
+    return `<div class="wd-form-grid">${rows}</div>`;
+  }
+
+  // Multi-select cycle picker shared by the Simulator and A/B sections.
+  _htmlPgCyclePicker() {
+    const cycles = this._cycles || [];
+    if (!cycles.length) return `<p class="wd-info" style="margin:8px 0">${this._t('msg.no_cycles_yet', {}, 'No cycles recorded yet.')}</p>`;
+    const sel = this._pgSel;
+    const rows = cycles.map(c => {
+      const prog = c.profile_name || c.matched_profile || this._t('lbl.unlabelled', {}, 'Unlabelled');
+      const checked = sel.has(c.id) ? 'checked' : '';
+      return `<label class="wd-rev-tag"><input type="checkbox" class="wd-pg-cyc" value="${_esc(c.id)}" ${checked}> <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_esc(prog)}</span> <span style="color:var(--secondary-text-color);font-size:.8em">${_fmtDate(c.start_time)} · ${_fmtDuration(c.duration)}</span></label>`;
+    }).join('');
+    return `
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+        <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="pg-sel-all">${this._t('btn.select_all', {}, 'Select all')}</button>
+        <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="pg-sel-none">${this._t('btn.select_none', {}, 'Clear')}</button>
+        <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="pg-sel-last20">${this._t('btn.select_last20', {}, 'Last 20')}</button>
+        <span class="wd-info" id="wd-pg-selcount">${this._t('lbl.n_selected', {n: sel.size}, sel.size + ' selected')}</span>
+      </div>
+      <div class="wd-rev-tags" style="max-height:220px;overflow:auto">${rows}</div>`;
+  }
+
+  // Section 1 — Cycle Simulator.
+  _htmlPgSimulator() {
+    const running = this._busy.has('pg-sim');
+    const results = this._pgResultsArray(this._pgResults);
+    const conc = this._pgConcurrency || 1;
+    const outcome = results.length ? `
+      <div class="wd-card-title" style="margin:14px 0 4px">${this._t('lbl.outcome', {}, 'Outcome')}</div>
+      ${this._pgStatTiles(this._pgSummarize(results))}
+      <div class="wd-card-title" style="margin:10px 0 4px">${this._t('lbl.event_timeline', {}, 'Event timeline')}</div>
+      ${this._htmlPgTimeline(results)}
+      ${this._htmlPgLegend()}` : '';
+    return `<div class="wd-card">
+      <div class="wd-card-title" style="margin:0 0 4px">${this._t('hdr.cycle_simulator', {}, 'Cycle Simulator')}</div>
+      <p class="wd-info" style="margin:0 0 10px">${this._t('msg.pg_simulator_intro', {}, 'Replay past cycles through detection with tweaked settings — a dry run that changes nothing.')}</p>
+      <div class="wd-subhead">${this._t('lbl.cycles', {}, 'Cycles')}</div>
+      ${this._htmlPgCyclePicker()}
+      <div class="wd-subhead" style="margin-top:14px">${this._t('lbl.settings_overrides', {}, 'Settings overrides')}</div>
+      ${this._htmlPgOverrideForm(this._pgOverrides, 'a')}
+      <div class="wd-field" style="max-width:360px">
+        <label>${this._t('lbl.concurrency', {}, 'Concurrency')} — <span id="wd-pg-conc-val">${conc}</span></label>
+        <input type="range" min="1" max="50" value="${conc}" data-pgconc style="width:100%">
+      </div>
+      <div class="wd-card-actions">
+        <button class="wd-btn wd-btn-primary" data-action="pg-run" ${running ? 'disabled' : ''}>${running ? `<span class="wd-spin"></span> ${this._t('msg.pg_running', {}, 'Running…')}` : this._t('btn.run_simulation', {}, 'Run simulation')}</button>
+      </div>
+      ${outcome}
+    </div>`;
+  }
+
+  // Section 2 — A/B Settings Comparison.
+  _htmlPgAb() {
+    const running = this._busy.has('pg-ab');
+    const applying = this._busy.has('pg-apply-b');
+    const res = this._pgAbResults;
+    const hasOverrides = Object.keys(this._pgAbOverrides || {}).length > 0;
+    const applyBtn = this._canEdit()
+      ? `<button class="wd-btn wd-btn-secondary" data-action="pg-apply-b" ${(hasOverrides && !applying) ? '' : 'disabled'}>${applying ? `<span class="wd-spin"></span> ${this._t('msg.pg_running', {}, 'Running…')}` : this._t('btn.apply_set_b', {}, 'Apply set B')}</button>`
+      : '';
+    const aRows = this._pgOverrideFields().map(([key, fb, unit]) => {
+      const lbl = this._t('setting.' + key + '.label', {}, fb);
+      const v = this._pgFieldVal(key, {});
+      const unitTxt = unit ? ` (${_esc(unit)})` : '';
+      return `<div class="wd-field"><label>${_esc(lbl)}${unitTxt}</label><input type="number" value="${v === '' ? '' : _esc(String(v))}" disabled></div>`;
+    }).join('');
+    const table = (res && res.a && res.b) ? `
+      <div class="wd-card-title" style="margin:14px 0 4px">${this._t('lbl.outcome', {}, 'Outcome')}</div>
+      ${this._htmlPgAbTable(this._pgResultsArray(res.a), this._pgResultsArray(res.b))}` : '';
+    return `<div class="wd-card">
+      <div class="wd-card-title" style="margin:0 0 4px">${this._t('hdr.ab_comparison', {}, 'A/B Settings Comparison')}</div>
+      <p class="wd-info" style="margin:0 0 10px">${this._t('msg.pg_ab_intro', {}, 'Run the same cycles with your current settings (A) and a tweaked set (B), side by side.')}</p>
+      <div class="wd-subhead">${this._t('lbl.cycles', {}, 'Cycles')}</div>
+      ${this._htmlPgCyclePicker()}
+      <div class="wd-subhead" style="margin-top:14px">${this._t('lbl.settings_a', {}, 'Settings A (current)')}</div>
+      <div class="wd-form-grid">${aRows}</div>
+      <div class="wd-subhead" style="margin-top:14px">${this._t('lbl.settings_b', {}, 'Settings B (test)')}</div>
+      ${this._htmlPgOverrideForm(this._pgAbOverrides, 'ab')}
+      <div class="wd-card-actions">
+        <button class="wd-btn wd-btn-primary" data-action="pg-ab-run" ${running ? 'disabled' : ''}>${running ? `<span class="wd-spin"></span> ${this._t('msg.pg_running', {}, 'Running…')}` : this._t('btn.run_both', {}, 'Run A vs B')}</button>
+        ${applyBtn}
+      </div>
+      ${table}
+    </div>`;
+  }
+
+  // Side-by-side A vs B metric table with signed deltas (green = better).
+  _htmlPgAbTable(a, b) {
+    const sa = this._pgSummarize(a), sb = this._pgSummarize(b);
+    const pct = (n, s) => s.total ? Math.round(n / s.total * 100) : 0;
+    const goodUp = { detected: true, matchCorrect: true, unmatched: false, ambiguous: false };
+    const metrics = [
+      ['detected', this._t('lbl.pg_detected', {}, 'Detected')],
+      ['matchCorrect', this._t('lbl.pg_match_correct', {}, 'Match correct')],
+      ['unmatched', this._t('lbl.pg_unmatched', {}, 'Unmatched')],
+      ['ambiguous', this._t('lbl.pg_ambiguous', {}, 'Ambiguous')],
+    ];
+    const rows = metrics.map(([k, lbl]) => {
+      const va = pct(sa[k], sa), vb = pct(sb[k], sb);
+      const d = vb - va;
+      const better = goodUp[k] ? d > 0 : d < 0;
+      const cls = d === 0 ? 'wd-pg-delta-flat' : (better ? 'wd-pg-delta-up' : 'wd-pg-delta-down');
+      const sign = d > 0 ? '+' : '';
+      return `<tr>
+        <td>${_esc(lbl)}</td>
+        <td style="text-align:right" title="${sa[k]}/${sa.total}">${va}%</td>
+        <td style="text-align:right" title="${sb[k]}/${sb.total}">${vb}%</td>
+        <td style="text-align:right" class="${cls}">${d === 0 ? '—' : sign + d + 'pp'}</td>
+      </tr>`;
+    }).join('');
+    return `<table class="wd-table" style="max-width:520px">
+      <thead><tr><th>${this._t('lbl.metric', {}, 'Metric')}</th><th style="text-align:right">${this._t('lbl.settings_a_short', {}, 'A')}</th><th style="text-align:right">${this._t('lbl.settings_b_short', {}, 'B')}</th><th style="text-align:right">${this._t('lbl.delta', {}, 'Δ')}</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  }
+
+  // Section 3 — DTW Inspector.
+  _htmlPgDtw() {
+    const running = this._busy.has('pg-dtw');
+    const cycles = this._cycles || [];
+    const cycOpts = cycles.map(c => {
+      const prog = c.profile_name || c.matched_profile || this._t('lbl.unlabelled', {}, 'Unlabelled');
+      return `<option value="${_esc(c.id)}" ${String(this._pgDtwCycle) === String(c.id) ? 'selected' : ''}>${_esc(prog)} · ${_fmtDate(c.start_time)}</option>`;
+    }).join('');
+    const profOpts = [`<option value="">${_esc(this._t('lbl.dtw_matched_profile', {}, "(cycle's matched profile)"))}</option>`]
+      .concat((this._profiles || []).map(p => `<option value="${_esc(p.name)}" ${this._pgDtwProfile === p.name ? 'selected' : ''}>${_esc(p.name)}</option>`)).join('');
+    const panel = this._pgDtwData ? this._htmlPgDtwResult(this._pgDtwData) : '';
+    return `<div class="wd-card">
+      <div class="wd-card-title" style="margin:0 0 4px">${this._t('hdr.dtw_inspector', {}, 'DTW Inspector')}</div>
+      <p class="wd-info" style="margin:0 0 10px">${this._t('msg.pg_dtw_intro', {}, 'Inspect how one cycle aligns to a profile: the two curves, the warp path and the score breakdown. Read-only.')}</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+        <div class="wd-field" style="min-width:220px;margin:0"><label>${this._t('lbl.cycle', {}, 'Cycle')}</label><select id="wd-pg-dtw-cyc">${cycOpts}</select></div>
+        <div class="wd-field" style="min-width:220px;margin:0"><label>${this._t('lbl.profile', {}, 'Profile')}</label><select id="wd-pg-dtw-prof">${profOpts}</select></div>
+        <button class="wd-btn wd-btn-primary" data-action="pg-dtw-run" ${(running || !cycles.length) ? 'disabled' : ''}>${running ? `<span class="wd-spin"></span> ${this._t('msg.pg_running', {}, 'Running…')}` : this._t('btn.inspect', {}, 'Inspect')}</button>
+      </div>
+      ${panel}
+    </div>`;
+  }
+
+  _htmlPgDtwResult(d) {
+    const hasWarp = Array.isArray(d.warp_path) && d.warp_path.length;
+    const s2 = d.stage2 || {}, dtw = d.dtw || {}, s4 = d.stage4 || {};
+    const na = this._t('lbl.na', {}, 'n/a');
+    const fmt = (v) => (v == null || (typeof v === 'number' && isNaN(v))) ? na : (typeof v === 'number' ? v.toFixed(3) : _esc(String(v)));
+    const row = (lbl, v) => `<tr><td>${_esc(lbl)}</td><td style="text-align:right">${fmt(v)}</td></tr>`;
+    const warpBlock = hasWarp
+      ? `<div class="wd-card-title" style="margin:12px 0 4px">${this._t('lbl.warp_path', {}, 'Warp path')}</div>
+         <div class="wd-canvas-wrap"><canvas id="wd-pg-warp-canvas" style="height:160px"></canvas></div>`
+      : '';
+    return `
+      <div class="wd-card-title" style="margin:12px 0 4px">${this._t('lbl.curves', {}, 'Curves')}</div>
+      <div class="wd-canvas-wrap"><canvas id="wd-pg-dtw-canvas" style="height:240px"></canvas></div>
+      <div class="wd-pg-leg">
+        <span class="wd-pg-leg-i"><span class="wd-pg-leg-sw" style="background:var(--primary-color)"></span>${_esc(this._t('lbl.cycle', {}, 'Cycle'))}</span>
+        <span class="wd-pg-leg-i"><span class="wd-pg-leg-sw" style="background:#ff9800"></span>${_esc(this._t('lbl.profile', {}, 'Profile'))} (${_esc(this._t('lbl.dashed', {}, 'dashed'))})</span>
+      </div>
+      ${warpBlock}
+      <div class="wd-card-title" style="margin:12px 0 4px">${this._t('lbl.score_breakdown', {}, 'Score breakdown')}</div>
+      <table class="wd-table" style="max-width:460px"><tbody>
+        <tr><td colspan="2" style="font-weight:700">${_esc(this._t('lbl.stage2', {}, 'Stage 2 — core similarity'))}</td></tr>
+        ${row(this._t('lbl.correlation', {}, 'Correlation'), s2.correlation)}
+        ${row(this._t('lbl.mae_score', {}, 'MAE score'), s2.mae_score)}
+        ${row(this._t('lbl.score', {}, 'Score'), s2.score)}
+        <tr><td colspan="2" style="font-weight:700">${_esc(this._t('lbl.stage3', {}, 'Stage 3 — DTW'))}</td></tr>
+        ${row(this._t('lbl.dtw_l1', {}, 'L1 score'), dtw.l1_score)}
+        ${row(this._t('lbl.dtw_ddtw', {}, 'DDTW score'), dtw.ddtw_score)}
+        ${row(this._t('lbl.dtw_blend_w', {}, 'Blend weight'), dtw.blend_weight)}
+        ${row(this._t('lbl.dtw_blended', {}, 'Blended score'), dtw.blended_score)}
+        <tr><td colspan="2" style="font-weight:700">${_esc(this._t('lbl.stage4', {}, 'Stage 4 — agreement'))}</td></tr>
+        ${row(this._t('lbl.duration_agreement', {}, 'Duration agreement'), s4.duration_agreement)}
+        ${row(this._t('lbl.energy_agreement', {}, 'Energy agreement'), s4.energy_agreement)}
+        ${row(this._t('lbl.final_score', {}, 'Final score'), s4.final_score)}
+      </tbody></table>`;
+  }
+
+  // Legend for the event-timeline colours.
+  _htmlPgLegend() {
+    const items = [
+      ['start', this._t('lbl.pg_ev_start', {}, 'Start')],
+      ['running', this._t('lbl.pg_ev_running', {}, 'Running')],
+      ['paused', this._t('lbl.pg_ev_paused', {}, 'Paused')],
+      ['match', this._t('lbl.pg_ev_match', {}, 'Match')],
+      ['ending', this._t('lbl.pg_ev_ending', {}, 'Ending')],
+      ['off', this._t('lbl.pg_ev_off', {}, 'Off')],
+    ];
+    return `<div class="wd-pg-leg">${items.map(([t, l]) => `<span class="wd-pg-leg-i"><span class="wd-pg-leg-sw" style="background:${this._pgEventColor(t)}"></span>${_esc(l)}</span>`).join('')}</div>`;
+  }
+
+  // Horizontal event lanes: one per simulated cycle, coloured segments between
+  // consecutive events. Hover (title) shows the event detail.
+  _htmlPgTimeline(results) {
+    const arr = Array.isArray(results) ? results : [];
+    if (!arr.length) return '';
+    const lanes = arr.map(r => {
+      const o = (r && r.outcome) || {};
+      const name = (r && r.profile_name) || o.match_profile || (r && r.cycle_id) || '?';
+      let events = Array.isArray(r && r.events) ? r.events.filter(e => e && typeof e.t === 'number') : [];
+      events = events.slice().sort((a, b) => a.t - b.t);
+      const lastT = events.length ? events[events.length - 1].t : 0;
+      const dur = Math.max(1, o.detected_duration_s || o.stored_duration_s || lastT || 1);
+      let track;
+      if (events.length) {
+        track = events.map((e, i) => {
+          const start = Math.max(0, e.t);
+          const end = (i + 1 < events.length) ? events[i + 1].t : dur;
+          const left = Math.max(0, Math.min(100, (start / dur) * 100));
+          const w = Math.max(0.8, Math.min(100 - left, ((end - start) / dur) * 100));
+          const col = this._pgEventColor(e.type);
+          const detail = (e.detail != null && e.detail !== '') ? ' — ' + String(e.detail) : '';
+          const tip = `${e.type || '?'} @ ${_fmtClock(start)}${detail}`;
+          return `<div class="wd-pg-seg" title="${_esc(tip)}" style="left:${left}%;width:${w}%;background:${col}"></div>`;
+        }).join('');
+      } else {
+        const col = o.detected ? 'var(--success-color,#4caf50)' : 'var(--secondary-text-color)';
+        const tip = o.detected ? this._t('lbl.pg_detected', {}, 'Detected') : this._t('msg.pg_no_events', {}, 'No events');
+        track = `<div class="wd-pg-seg" title="${_esc(tip)}" style="left:0;width:100%;background:${col};opacity:.35"></div>`;
+      }
+      const dot = o.match_correct ? '✅' : (o.match_profile ? '🟡' : (o.detected ? '⚪' : '⛔'));
+      return `<div class="wd-pg-lane"><div class="wd-pg-lane-lbl" title="${_esc(name)}">${dot} ${_esc(name)}</div><div class="wd-pg-track">${track}</div></div>`;
+    }).join('');
+    return `<div class="wd-pg-timeline">${lanes}</div>`;
+  }
+
+  // Stable colour for an event type. Known state/transition names get a fixed
+  // colour; anything else gets a deterministic hashed hue.
+  _pgEventColor(type) {
+    const t = (type || '').toString().toLowerCase();
+    const map = {
+      start: '#42a5f5', starting: '#42a5f5',
+      running: '#66bb6a', run: '#66bb6a',
+      paused: '#ffa726', pause: '#ffa726',
+      ending: '#ef5350', end: '#ef5350',
+      off: '#bdbdbd', idle: '#bdbdbd',
+      match: '#ab47bc', matched: '#ab47bc',
+      anti_wrinkle: '#26c6da', rinse: '#26a69a',
+    };
+    if (map[t]) return map[t];
+    let h = 0;
+    for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) & 0xffffff;
+    return `hsl(${h % 360}, 55%, 55%)`;
+  }
+
+  // Defensive: pull the results array out of the WS response whatever its shape.
+  _pgResultsArray(resp) {
+    if (!resp) return [];
+    if (Array.isArray(resp)) return resp;
+    if (Array.isArray(resp.results)) return resp.results;
+    return [];
+  }
+
+  // Client-side outcome tally (raw counts; percentages computed at render time).
+  _pgSummarize(results) {
+    const arr = Array.isArray(results) ? results : [];
+    const s = { total: arr.length, detected: 0, matchCorrect: 0, matched: 0, unmatched: 0, ambiguous: 0 };
+    arr.forEach(r => {
+      const o = (r && r.outcome) || {};
+      if (o.detected) s.detected++;
+      if (o.match_correct) s.matchCorrect++;
+      if (o.match_profile) s.matched++;
+      if (o.ambiguous) s.ambiguous++;
+    });
+    s.unmatched = s.total - s.matched;
+    return s;
+  }
+
+  _pgStatTiles(s) {
+    const pct = (n) => s.total ? Math.round((n / s.total) * 100) : 0;
+    const tile = (val, lbl, tip) => `<div class="wd-kv-item" title="${_esc(tip)}"><div class="wd-kv-val">${val}</div><div class="wd-kv-lbl">${_esc(lbl)}</div></div>`;
+    return `<div class="wd-kv">
+      ${tile(s.total, this._t('lbl.pg_cycles', {}, 'Cycles'), this._t('msg.pg_tip_cycles', {n: s.total}, s.total + ' cycles simulated'))}
+      ${tile(pct(s.detected) + '%', this._t('lbl.pg_detected', {}, 'Detected'), this._t('msg.pg_tip_detected', {n: s.detected, total: s.total}, s.detected + '/' + s.total + ' detected'))}
+      ${tile(pct(s.matchCorrect) + '%', this._t('lbl.pg_match_correct', {}, 'Match correct'), this._t('msg.pg_tip_match_correct', {n: s.matchCorrect, total: s.total}, s.matchCorrect + '/' + s.total + ' matched correctly'))}
+      ${tile(pct(s.unmatched) + '%', this._t('lbl.pg_unmatched', {}, 'Unmatched'), this._t('msg.pg_tip_unmatched', {n: s.unmatched, total: s.total}, s.unmatched + '/' + s.total + ' unmatched'))}
+      ${tile(pct(s.ambiguous) + '%', this._t('lbl.pg_ambiguous', {}, 'Ambiguous'), this._t('msg.pg_tip_ambiguous', {n: s.ambiguous, total: s.total}, s.ambiguous + '/' + s.total + ' ambiguous'))}
+    </div>`;
+  }
+
+  // True when a WS call failed because the command isn't registered yet (needs a
+  // full HA restart to pick up the new backend command).
+  _pgIsUnknownCmd(e) {
+    const code = (e && (e.code || (e.error && e.error.code))) || '';
+    const msg = ((e && (e.message || e.error)) || '').toString().toLowerCase();
+    return code === 'unknown_command' || msg.includes('unknown command') || msg.includes('unknown_command');
+  }
+
+  async _pgRunSimulation() {
+    const dev = this._devices[this._selIdx];
+    if (!dev) return;
+    const ids = Array.from(this._pgSel);
+    if (!ids.length) { this._showToast(this._t('msg.no_cycles_selected', {}, 'Select at least one cycle first.'), 'error'); return; }
+    await this._busyRun('pg-sim', async () => {
+      try {
+        const r = await this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: { ...this._pgOverrides }, concurrency: this._pgConcurrency || 1 });
+        this._pgResults = r || {};
+        this._pgNeedsRestart = false;
+      } catch (e) {
+        this._pgResults = null;
+        if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
+        else this._showToast(this._t('toast.pg_sim_failed', {error: (e && e.message) || e}, 'Simulation failed: ' + ((e && e.message) || e)), 'error');
+      }
+    });
+  }
+
+  async _pgRunAb() {
+    const dev = this._devices[this._selIdx];
+    if (!dev) return;
+    const ids = Array.from(this._pgSel);
+    if (!ids.length) { this._showToast(this._t('msg.no_cycles_selected', {}, 'Select at least one cycle first.'), 'error'); return; }
+    await this._busyRun('pg-ab', async () => {
+      try {
+        const [a, b] = await Promise.all([
+          this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: {}, concurrency: this._pgConcurrency || 1 }),
+          this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: { ...this._pgAbOverrides }, concurrency: this._pgConcurrency || 1 }),
+        ]);
+        this._pgAbResults = { a: a || {}, b: b || {} };
+        this._pgNeedsRestart = false;
+      } catch (e) {
+        this._pgAbResults = null;
+        if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
+        else this._showToast(this._t('toast.pg_sim_failed', {error: (e && e.message) || e}, 'Simulation failed: ' + ((e && e.message) || e)), 'error');
+      }
+    });
+  }
+
+  async _pgApplyB() {
+    const dev = this._devices[this._selIdx];
+    if (!dev || !this._canEdit()) return;
+    const overrides = { ...this._pgAbOverrides };
+    if (!Object.keys(overrides).length) { this._showToast(this._t('msg.pg_no_b_overrides', {}, 'No B overrides to apply.'), 'error'); return; }
+    const list = Object.entries(overrides).map(([k, v]) => `${this._t('setting.' + k + '.label', {}, k)} = ${v}`).join('\n');
+    if (!confirm(this._t('msg.pg_apply_b_confirm', {list}, 'Apply set B to the live device?\n\n' + list))) return;
+    await this._busyRun('pg-apply-b', async () => {
+      try {
+        await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: overrides });
+        this._opts = { ...this._opts, ...overrides };
+        this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
+      } catch (e) { this._showToast(this._t('toast.apply_failed', {error: (e && e.message) || e}, 'Apply failed: ' + ((e && e.message) || e)), 'error'); }
+    });
+  }
+
+  async _pgRunDtw() {
+    const dev = this._devices[this._selIdx];
+    if (!dev) return;
+    const cid = this._pgDtwCycle || ((this._cycles && this._cycles[0]) ? this._cycles[0].id : '');
+    if (!cid) { this._showToast(this._t('msg.no_cycles_selected', {}, 'Select at least one cycle first.'), 'error'); return; }
+    this._pgDtwCycle = cid;
+    const msg = { type: `${_DOMAIN}/get_dtw_debug`, entry_id: dev.entry_id, cycle_id: cid };
+    if (this._pgDtwProfile) msg.profile_name = this._pgDtwProfile;
+    await this._busyRun('pg-dtw', async () => {
+      try {
+        const r = await this._ws(msg);
+        this._pgDtwData = r || {};
+        this._pgNeedsRestart = false;
+      } catch (e) {
+        this._pgDtwData = null;
+        if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
+        else this._showToast(this._t('toast.pg_dtw_failed', {error: (e && e.message) || e}, 'DTW inspect failed: ' + ((e && e.message) || e)), 'error');
+      }
+    });
+  }
+
+  // Post-render canvas draws for the DTW inspector (overlay curves + warp path).
+  _drawPlaygroundCanvases() {
+    if (this._tab !== 'playground' || this._pgSubtab !== 'dtw') return;
+    const d = this._pgDtwData;
+    if (!d) return;
+    const clean = a => (Array.isArray(a) ? a.filter(p => Array.isArray(p) && p.length >= 2 && p.every(n => typeof n === 'number' && !isNaN(n))) : []);
+    const cyc = clean(d.cycle_trace);
+    const prof = clean(d.profile_trace);
+    const series = [];
+    if (cyc.length) series.push({ points: cyc, stroke: 'primary', width: 2, name: this._t('lbl.cycle', {}, 'Cycle') });
+    if (prof.length) series.push({ points: prof, stroke: '#ff9800', width: 2, dash: true, name: this._t('lbl.profile', {}, 'Profile') });
+    if (series.length) this._drawCurves('wd-pg-dtw-canvas', { series });
+    this._drawPgWarp(d.warp_path);
+  }
+
+  // Simple warp-path plot: x = profile index, y = cycle index.
+  _drawPgWarp(warp) {
+    const sr = this.shadowRoot;
+    const canvas = sr && sr.getElementById('wd-pg-warp-canvas');
+    if (!canvas) return;
+    const path = Array.isArray(warp) ? warp.filter(p => Array.isArray(p) && p.length >= 2) : [];
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const cw = Math.max(1, Math.round(rect.width * dpr));
+    const ch = Math.max(1, Math.round((rect.height || 160) * dpr));
+    canvas.width = cw; canvas.height = ch;
+    const ctx = canvas.getContext('2d');
+    const cs = getComputedStyle(this);
+    const primary = (cs.getPropertyValue('--primary-color') || '#03a9f4').trim() || '#03a9f4';
+    const grid = (cs.getPropertyValue('--divider-color') || 'rgba(127,127,127,.3)').trim() || 'rgba(127,127,127,.3)';
+    const txt = (cs.getPropertyValue('--secondary-text-color') || '#888').trim() || '#888';
+    ctx.clearRect(0, 0, cw, ch);
+    if (!path.length) return;
+    const padL = 34 * dpr, padR = 8 * dpr, padT = 8 * dpr, padB = 20 * dpr;
+    let maxI = 0, maxJ = 0;
+    path.forEach(p => { if (p[0] > maxI) maxI = p[0]; if (p[1] > maxJ) maxJ = p[1]; });
+    maxI = maxI || 1; maxJ = maxJ || 1;
+    const X = j => padL + (j / maxJ) * (cw - padL - padR);
+    const Y = i => ch - padB - (i / maxI) * (ch - padT - padB);
+    ctx.strokeStyle = grid; ctx.lineWidth = dpr;
+    ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, ch - padB); ctx.lineTo(cw - padR, ch - padB); ctx.stroke();
+    ctx.strokeStyle = primary; ctx.lineWidth = 1.5 * dpr; ctx.beginPath();
+    path.forEach((p, k) => { const x = X(p[1]), y = Y(p[0]); if (k) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
+    ctx.stroke();
+    ctx.fillStyle = primary;
+    path.forEach(p => { ctx.beginPath(); ctx.arc(X(p[1]), Y(p[0]), 1.6 * dpr, 0, 6.2832); ctx.fill(); });
+    ctx.fillStyle = txt; ctx.font = `${10 * dpr}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText(this._t('lbl.profile_index', {}, 'profile index →'), (padL + cw - padR) / 2, ch - 4 * dpr);
+    ctx.save(); ctx.translate(11 * dpr, (padT + ch - padB) / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(this._t('lbl.cycle_index', {}, 'cycle index →'), 0, 0); ctx.restore();
+  }
+
   _htmlPhases() {
     const dev = this._devices[this._selIdx];
     const devType = dev ? (dev.options.device_type || 'washing_machine') : 'washing_machine';
@@ -3750,6 +4275,7 @@ class HaWashdataPanel extends HTMLElement {
       ['history', this._t('tab.history', {}, 'Cycles')],
       ['profiles', this._t('tab.profiles', {}, 'Profiles')],
       ['settings', this._t('tab.settings', {}, 'Settings')],
+      ['playground', this._t('tab.playground', {}, 'Playground')],
     ];
     const opts = tabsAll.map(([v, l]) => `<option value="${v}" ${(cur.default_tab || '') === v ? 'selected' : ''}>${_esc(l)}</option>`).join('');
     const dateOpts = [['relative', this._t('pref.date_relative', {}, 'Relative (e.g. 2 hours ago)')], ['absolute', this._t('pref.date_absolute', {}, 'Absolute (e.g. 14:32 on 2 Jul)')]];
@@ -3784,6 +4310,7 @@ class HaWashdataPanel extends HTMLElement {
       ['history', this._t('tab.history', {}, 'Cycles')],
       ['profiles', this._t('tab.profiles', {}, 'Profiles')],
       ['settings', this._t('tab.settings', {}, 'Settings')],
+      ['playground', this._t('tab.playground', {}, 'Playground')],
     ];
     const dtOpts = tabOpts.map(([v, l]) => `<option value="${v}" ${(p.default_tab || 'status') === v ? 'selected' : ''}>${_esc(l)}</option>`).join('');
     const hidden = p.hidden_tabs || [];
@@ -3963,7 +4490,9 @@ class HaWashdataPanel extends HTMLElement {
       }
       ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1])));
       ctx.strokeStyle = col; ctx.lineWidth = (s.width || 1.5) * dpr; ctx.lineJoin = 'round';
+      if (s.dash) ctx.setLineDash([6 * dpr, 4 * dpr]);
       ctx.globalAlpha = s.alpha != null ? s.alpha : 1; ctx.stroke(); ctx.globalAlpha = 1;
+      if (s.dash) ctx.setLineDash([]);
     });
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     (opts.vlines || []).forEach(v => {
@@ -4306,6 +4835,7 @@ class HaWashdataPanel extends HTMLElement {
         ['P', this._t('msg.kbd_profiles', {}, 'Go to Profiles')],
         ['S', this._t('msg.kbd_settings', {}, 'Go to Settings')],
         ['M', this._t('msg.kbd_ml', {}, 'Go to ML Training')],
+        ['G', this._t('msg.kbd_playground', {}, 'Go to Playground')],
         ['A', this._t('msg.kbd_advanced', {}, 'Go to Advanced')],
         ['Esc', this._t('msg.kbd_escape', {}, 'Close the open dialog')],
       ].map(([k, d]) => `<tr><td style="width:64px"><kbd class="wd-kbd">${_esc(k)}</kbd></td><td>${_esc(d)}</td></tr>`).join('');
@@ -4878,6 +5408,40 @@ class HaWashdataPanel extends HTMLElement {
       else if (sub === 'logs') this._fetchLogs().then(() => { if (this._panelSubtab === 'logs') this._render(); });
       else if (sub === 'maintenance') this._fetchMaintenance(dev.entry_id).then(() => { if (this._panelSubtab === 'maintenance') this._render(); });
     }));
+
+    // F3: Playground sub-tab switch.
+    sr.querySelectorAll('[data-pgtab]').forEach(btn => btn.addEventListener('click', () => {
+      this._pgSubtab = btn.dataset.pgtab;
+      this._render();
+    }));
+    // F3: Playground cycle-picker checkboxes — toggle selection, update the count
+    // label in place (no full re-render, so the list scroll position is kept).
+    sr.querySelectorAll('.wd-pg-cyc').forEach(cb => cb.addEventListener('change', () => {
+      if (cb.checked) this._pgSel.add(cb.value); else this._pgSel.delete(cb.value);
+      const el = sr.getElementById('wd-pg-selcount');
+      if (el) el.textContent = this._t('lbl.n_selected', {n: this._pgSel.size}, this._pgSel.size + ' selected');
+    }));
+    // F3: Playground override inputs — persist into state so they survive re-render.
+    sr.querySelectorAll('[data-pgov]').forEach(inp => inp.addEventListener('input', () => {
+      const key = inp.dataset.pgov;
+      const store = inp.dataset.pgstore === 'ab' ? this._pgAbOverrides : this._pgOverrides;
+      const t = String(inp.value).trim();
+      if (t === '') { delete store[key]; return; }
+      const n = parseFloat(t);
+      if (!isNaN(n)) store[key] = n;
+    }));
+    // F3: Playground concurrency slider — store value + live label.
+    const pgConc = sr.querySelector('[data-pgconc]');
+    if (pgConc) pgConc.addEventListener('input', () => {
+      this._pgConcurrency = Math.max(1, Math.min(50, parseInt(pgConc.value, 10) || 1));
+      const el = sr.getElementById('wd-pg-conc-val');
+      if (el) el.textContent = String(this._pgConcurrency);
+    });
+    // F3: DTW inspector selectors.
+    const pgDtwCyc = sr.getElementById('wd-pg-dtw-cyc');
+    if (pgDtwCyc) pgDtwCyc.addEventListener('change', () => { this._pgDtwCycle = pgDtwCyc.value; });
+    const pgDtwProf = sr.getElementById('wd-pg-dtw-prof');
+    if (pgDtwProf) pgDtwProf.addEventListener('change', () => { this._pgDtwProfile = pgDtwProf.value; });
 
     sr.querySelectorAll('[data-statustoggle]').forEach(el => el.addEventListener('change', async () => {
       const key = el.dataset.statustoggle, val = el.checked;
@@ -5850,6 +6414,23 @@ class HaWashdataPanel extends HTMLElement {
       });
     } else if (a === 'kbd-help') {
       this._toggleKbdHelp();
+    } else if (a === 'pg-run') {
+      this._pgRunSimulation();
+    } else if (a === 'pg-ab-run') {
+      this._pgRunAb();
+    } else if (a === 'pg-apply-b') {
+      this._pgApplyB();
+    } else if (a === 'pg-dtw-run') {
+      this._pgRunDtw();
+    } else if (a === 'pg-sel-all') {
+      this._pgSel = new Set((this._cycles || []).map(c => c.id));
+      this._render();
+    } else if (a === 'pg-sel-none') {
+      this._pgSel = new Set();
+      this._render();
+    } else if (a === 'pg-sel-last20') {
+      this._pgSel = new Set((this._cycles || []).slice(0, 20).map(c => c.id));
+      this._render();
     } else if (a === 'cyc-compare') {
       const ids = Array.from(this._cycleSel);
       if (ids.length < 2) return;
