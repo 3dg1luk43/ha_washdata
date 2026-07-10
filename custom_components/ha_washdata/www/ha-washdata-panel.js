@@ -3961,7 +3961,7 @@ class HaWashdataPanel extends HTMLElement {
     if (!ids.length) { this._showToast(this._t('msg.no_cycles_selected', {}, 'Select at least one cycle first.'), 'error'); return; }
     await this._busyRun('pg-sim', async () => {
       try {
-        const r = await this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: { ...this._pgOverrides }, concurrency: this._pgConcurrency || 1 });
+        const r = await this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: { ...this._pgOverrides }, concurrency: Math.min(50, Math.max(this._pgConcurrency || 1, ids.length)) });
         this._pgResults = r || {};
         this._pgNeedsRestart = false;
       } catch (e) {
@@ -3980,8 +3980,8 @@ class HaWashdataPanel extends HTMLElement {
     await this._busyRun('pg-ab', async () => {
       try {
         const [a, b] = await Promise.all([
-          this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: {}, concurrency: this._pgConcurrency || 1 }),
-          this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: { ...this._pgAbOverrides }, concurrency: this._pgConcurrency || 1 }),
+          this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: {}, concurrency: Math.min(50, Math.max(this._pgConcurrency || 1, ids.length)) }),
+          this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: { ...this._pgAbOverrides }, concurrency: Math.min(50, Math.max(this._pgConcurrency || 1, ids.length)) }),
         ]);
         this._pgAbResults = { a: a || {}, b: b || {} };
         this._pgNeedsRestart = false;
