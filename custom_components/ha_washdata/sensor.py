@@ -293,6 +293,11 @@ class WasherStateSensor(WasherBaseSensor):
         gaps = self._manager.restart_gaps
         if gaps:
             attrs["ha_restart_gaps"] = len(gaps)
+        # Predictive-maintenance reminders (E2): event types whose cycle threshold
+        # has been reached. Automatable by users; never a notification.
+        maintenance_due = self._manager.maintenance_due
+        if maintenance_due:
+            attrs["maintenance_due"] = maintenance_due
         return attrs
 
 

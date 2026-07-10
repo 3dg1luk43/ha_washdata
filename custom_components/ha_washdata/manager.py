@@ -57,6 +57,8 @@ from .const import (
     CONF_DURATION_TOLERANCE,
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_AUTO_MAINTENANCE,
+    CONF_MAINTENANCE_REMINDER_CYCLES,
+    DEFAULT_MAINTENANCE_REMINDER_CYCLES,
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
@@ -5975,6 +5977,21 @@ class WashDataManager:
     def restart_gaps(self) -> list[dict]:
         """HA restart gaps recorded during the current active cycle (may be empty)."""
         return self._restart_gaps
+
+    @property
+    def maintenance_due(self) -> list[str]:
+        """Maintenance event types whose reminder threshold has been reached (E2).
+
+        Surfaced as a state-sensor attribute + read by the panel banner. Never a
+        notification. Returns an empty list on any error.
+        """
+        try:
+            cfg = self.config_entry.options.get(CONF_MAINTENANCE_REMINDER_CYCLES)
+            if not isinstance(cfg, dict) or not cfg:
+                cfg = DEFAULT_MAINTENANCE_REMINDER_CYCLES
+            return self.profile_store.get_maintenance_due(cfg)
+        except Exception:  # noqa: BLE001
+            return []
 
     @property
     def current_power(self):

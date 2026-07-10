@@ -715,3 +715,28 @@ MIN_SUGGESTION_REL_DELTA = 0.08  # 8% minimum relative change
 # completed cycles. Prevents the engine from immediately re-suggesting
 # slightly-different values based on a single new cycle.
 MIN_SUGGESTION_COOLDOWN_CYCLES = 3
+
+# ─── Appliance health & predictive maintenance (Group E) ───────────────────────
+# Per-device maintenance-reminder thresholds: a dict {event_type: cycle_threshold}
+# persisted via ws_set_options. When the number of completed cycles since the most
+# recent maintenance event of a given type reaches its threshold, the event type is
+# surfaced (sensor attribute + panel banner). A threshold of 0 (or an absent key)
+# disables reminders for that event type.
+CONF_MAINTENANCE_REMINDER_CYCLES = "maintenance_reminder_cycles"
+DEFAULT_MAINTENANCE_REMINDER_CYCLES = {
+    "descale": 30,
+    "filter_clean": 50,
+    "drum_clean": 100,
+}
+# Recognised maintenance event types. bearing_service / other default off (absent
+# from the default reminder dict) and are opt-in.
+MAINTENANCE_EVENT_TYPES = (
+    "descale",
+    "filter_clean",
+    "drum_clean",
+    "bearing_service",
+    "other",
+)
+# A logged maintenance event of a matching type within this many days suppresses
+# the "needs maintenance" nag advisory (duration-trend / shape-drift).
+MAINTENANCE_RECENT_SUPPRESS_DAYS = 30

@@ -26,6 +26,7 @@ from .const import (
     CONF_EXTERNAL_END_TRIGGER,
     CONF_LEARNING_CONFIDENCE,
     CONF_LINKED_DEVICE,
+    CONF_MAINTENANCE_REMINDER_CYCLES,
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
@@ -46,9 +47,11 @@ from .const import (
     CONF_SWITCH_ENTITY,
     CONF_WATCHDOG_INTERVAL,
     DEFAULT_DEVICE_TYPE,
+    DEFAULT_MAINTENANCE_REMINDER_CYCLES,
     DEFAULT_OFF_DELAY,
     DEFAULT_OFF_DELAY_BY_DEVICE,
     DEVICE_TYPE_PUMP,
+    MAINTENANCE_EVENT_TYPES,
     DEVICE_TYPES,
     DOMAIN,
     ENABLE_ML_SUGGESTIONS,
@@ -501,6 +504,8 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_rebuild_envelopes, ws_get_profile_phases, ws_set_profile_phases,
         # Profile groups (Stage 5)
         ws_get_profile_groups, ws_save_profile_group, ws_rename_profile_group, ws_delete_profile_group,
+        # Maintenance log (Group E)
+        ws_get_maintenance_log, ws_add_maintenance_event, ws_delete_maintenance_event,
         # Cycles
         ws_label_cycle, ws_delete_cycle, ws_auto_label_cycles,
         # Phase catalog
@@ -1193,6 +1198,96 @@ async def ws_set_profile_phases(
             msg["profile_name"], msg["phases"]
         )
         connection.send_result(msg["id"], {"success": True})
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+# ─── Maintenance log (Group E) ──────────────────────────────────────────────
+
+@websocket_api.websocket_command(
+    {vol.Required("type"): "ha_washdata/get_maintenance_log", vol.Required("entry_id"): str}
+)
+@websocket_api.async_response
+async def ws_get_maintenance_log(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Return the maintenance log, due reminders, event types, and reminder config."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    reminders = dict(DEFAULT_MAINTENANCE_REMINDER_CYCLES)
+    cfg = manager.config_entry.options.get(CONF_MAINTENANCE_REMINDER_CYCLES)
+    if isinstance(cfg, dict):
+        reminders.update(cfg)
+    connection.send_result(msg["id"], {
+        "log": manager.profile_store.get_maintenance_log(),
+        "due": manager.maintenance_due,
+        "event_types": list(MAINTENANCE_EVENT_TYPES),
+        "reminders": reminders,
+    })
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/add_maintenance_event",
+        vol.Required("entry_id"): str,
+        vol.Required("event_type"): str,
+        vol.Optional("date"): vol.Any(str, None),
+        vol.Optional("notes"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_add_maintenance_event(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Log a maintenance event (requires edit access via central RBAC guard)."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        event = await manager.profile_store.async_add_maintenance_event(
+            msg["event_type"], msg.get("date"), msg.get("notes", "")
+        )
+        manager.notify_update()
+        connection.send_result(msg["id"], {"success": True, "event": event})
+    except ValueError as exc:
+        connection.send_error(msg["id"], "invalid_format", str(exc))
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/delete_maintenance_event",
+        vol.Required("entry_id"): str,
+        vol.Required("event_id"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_delete_maintenance_event(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Delete a maintenance event by id (requires edit access via central RBAC guard)."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        removed = await manager.profile_store.async_delete_maintenance_event(msg["event_id"])
+        if removed:
+            manager.notify_update()
+        connection.send_result(msg["id"], {"success": removed})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 

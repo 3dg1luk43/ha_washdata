@@ -22,6 +22,8 @@ from .const import (
     CLUSTER_RESAMPLE_N,
     CLUSTER_SHAPE_SIMILARITY_THRESHOLD,
     GROUP_MIN_COHESION,
+    MAINTENANCE_EVENT_TYPES,
+    MAINTENANCE_RECENT_SUPPRESS_DAYS,
     MATCH_AMBIGUITY_MARGIN,
     SHAPE_DRIFT_MIN_CYCLES,
     SHAPE_DRIFT_RESAMPLE_N,
@@ -155,6 +157,24 @@ def _parse_start_dt(value: Any) -> datetime | None:
         except (TypeError, ValueError):
             return None
     return None
+
+
+def _parse_maintenance_dt(value: Any) -> datetime | None:
+    """Parse a maintenance-log date (ISO date or datetime) into an aware datetime.
+
+    Accepts both full ISO datetimes (as written by ``dt_util.now().isoformat()``)
+    and bare ISO dates (``"2026-07-01"``) that the user may enter. Naive results are
+    localised so recency/comparison math stays timezone-consistent. Never raises.
+    """
+    dt = _parse_start_dt(value)
+    if dt is None and isinstance(value, str) and value:
+        try:
+            dt = datetime.fromisoformat(value)
+        except ValueError:
+            dt = None
+    if dt is not None and dt.tzinfo is None:
+        dt = dt.replace(tzinfo=dt_util.DEFAULT_TIME_ZONE or dt_util.UTC)
+    return dt
 
 
 def _empty_debug_details() -> dict[str, Any]:
@@ -842,6 +862,7 @@ class ProfileStore:
             "custom_phases": [],  # Shared custom phase catalog
             "ml_model_versions": {},  # On-device trained model specs (Stage 4)
             "profile_groups": {},  # Named groups of near-duplicate profiles (Stage 5)
+            "maintenance_log": [],  # User-logged maintenance events (Group E)
         }
 
 
@@ -1520,6 +1541,137 @@ class ProfileStore:
         self._data["lifetime_energy_wh"] = round(base + add, 3)
         await self.async_save()
 
+    # ------------------------------------------------------------------
+    # E1: Maintenance log & predictive-maintenance reminders (Group E)
+    # ------------------------------------------------------------------
+
+    def get_maintenance_log(self) -> list[dict[str, Any]]:
+        """Return logged maintenance events, most-recent-first. Never raises.
+
+        Each entry is ``{"id", "date", "event_type", "notes"}``. Entries with an
+        unparseable date sort last.
+        """
+        try:
+            raw = self._data.get("maintenance_log", [])
+            if not isinstance(raw, list):
+                return []
+            entries = [dict(e) for e in raw if isinstance(e, dict)]
+            _floor = datetime.min.replace(tzinfo=dt_util.UTC)
+            entries.sort(
+                key=lambda e: _parse_maintenance_dt(e.get("date")) or _floor,
+                reverse=True,
+            )
+            return entries
+        except Exception:  # noqa: BLE001
+            return []
+
+    async def async_add_maintenance_event(
+        self, event_type: str, date: str | None = None, notes: str = ""
+    ) -> dict[str, Any]:
+        """Append a maintenance event and persist. Returns the created entry.
+
+        ``event_type`` must be one of :data:`MAINTENANCE_EVENT_TYPES` (else raises
+        ``ValueError``). ``date`` defaults to the current timestamp; a short unique
+        id is generated for the entry.
+        """
+        if event_type not in MAINTENANCE_EVENT_TYPES:
+            raise ValueError(f"Unknown maintenance event_type: {event_type!r}")
+        entry: dict[str, Any] = {
+            "id": uuid.uuid4().hex[:12],
+            "date": date if isinstance(date, str) and date else dt_util.now().isoformat(),
+            "event_type": event_type,
+            "notes": str(notes or ""),
+        }
+        log = self._data.setdefault("maintenance_log", [])
+        if not isinstance(log, list):
+            log = []
+            self._data["maintenance_log"] = log
+        log.append(entry)
+        await self.async_save()
+        return entry
+
+    async def async_delete_maintenance_event(self, event_id: str) -> bool:
+        """Remove a maintenance event by id, persist, and report whether removed."""
+        log = self._data.get("maintenance_log")
+        if not isinstance(log, list):
+            return False
+        remaining = [e for e in log if not (isinstance(e, dict) and e.get("id") == event_id)]
+        if len(remaining) == len(log):
+            return False
+        self._data["maintenance_log"] = remaining
+        await self.async_save()
+        return True
+
+    def cycles_since_maintenance(self, event_type: str) -> int:
+        """Count completed cycles since the most recent maintenance event of a type.
+
+        Counts completed cycles (``status == "completed"``) whose ``start_time`` is
+        after the most recent maintenance event of ``event_type``. If no such event
+        was ever logged, returns the total completed-cycle count. Never raises.
+        """
+        try:
+            completed = [
+                c for c in self.get_past_cycles()
+                if isinstance(c, dict) and c.get("status") == "completed"
+            ]
+            latest_dt: datetime | None = None
+            for e in self._data.get("maintenance_log", []) or []:
+                if not isinstance(e, dict) or e.get("event_type") != event_type:
+                    continue
+                dt = _parse_maintenance_dt(e.get("date"))
+                if dt is not None and (latest_dt is None or dt > latest_dt):
+                    latest_dt = dt
+            if latest_dt is None:
+                return len(completed)
+            count = 0
+            for c in completed:
+                start = _parse_start_dt(c.get("start_time"))
+                if start is not None and start > latest_dt:
+                    count += 1
+            return count
+        except Exception:  # noqa: BLE001
+            return 0
+
+    def get_maintenance_due(self, reminder_cfg: dict[str, Any] | None) -> list[str]:
+        """Return event types whose cycles-since threshold has been reached.
+
+        For each event type with a positive integer threshold in ``reminder_cfg``,
+        includes it when ``cycles_since_maintenance(event_type) >= threshold``.
+        Never raises.
+        """
+        try:
+            if not isinstance(reminder_cfg, dict):
+                return []
+            due: list[str] = []
+            for event_type, threshold in reminder_cfg.items():
+                try:
+                    thr = int(threshold)
+                except (TypeError, ValueError):
+                    continue
+                if thr <= 0:
+                    continue
+                if self.cycles_since_maintenance(str(event_type)) >= thr:
+                    due.append(str(event_type))
+            return due
+        except Exception:  # noqa: BLE001
+            return []
+
+    def has_recent_maintenance(
+        self, event_type: str, days: int = MAINTENANCE_RECENT_SUPPRESS_DAYS
+    ) -> bool:
+        """True if a matching maintenance event was logged within ``days``. Never raises."""
+        try:
+            cutoff = dt_util.now() - timedelta(days=max(0, int(days)))
+            for e in self._data.get("maintenance_log", []) or []:
+                if not isinstance(e, dict) or e.get("event_type") != event_type:
+                    continue
+                dt = _parse_maintenance_dt(e.get("date"))
+                if dt is not None and dt >= cutoff:
+                    return True
+            return False
+        except Exception:  # noqa: BLE001
+            return False
+
     def compute_profile_health(self) -> dict[str, dict[str, Any]]:
         """Compute per-profile health indicators from labeled cycle history.
 
@@ -1916,6 +2068,21 @@ class ProfileStore:
                             "appliance if that is unexpected."
                         ),
                     })
+
+            # E1: suppress the "needs maintenance" nag (duration-trending-longer /
+            # shape-drift/poor-fit) when the user recently logged a descale, filter
+            # clean, or drum clean — any recent maintenance clears the reminder.
+            try:
+                # ``is True`` (not truthiness) so a mocked store whose method
+                # returns a MagicMock does not accidentally suppress advisories.
+                if any(
+                    self.has_recent_maintenance(evt) is True
+                    for evt in ("descale", "filter_clean", "drum_clean")
+                ):
+                    _nag_codes = {"duration_trend_up", "poor_health"}
+                    advisories = [a for a in advisories if a.get("code") not in _nag_codes]
+            except Exception:  # noqa: BLE001
+                pass
 
             order = {"warning": 0, "info": 1}
             advisories.sort(key=lambda a: order.get(a["severity"], 2))
