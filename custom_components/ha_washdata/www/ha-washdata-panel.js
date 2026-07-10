@@ -2203,6 +2203,21 @@ class HaWashdataPanel extends HTMLElement {
       const r = c.overrun_ratio ? ` (${Number(c.overrun_ratio).toFixed(1)}x expected)` : '';
       return ` <span title="${_esc(this._t('badge.overrun', {}, 'Ran longer than usual'))}${r}" style="color:var(--warning-color,#ff9800)">⏱</span>`;
     };
+    const underrunBadge = c => {
+      if (c.anomaly !== 'underrun') return '';
+      const r = c.underrun_ratio ? ` (${Math.round(c.underrun_ratio * 100)}% of expected)` : '';
+      return ` <span title="${_esc(this._t('badge.underrun', {}, 'Finished faster than usual'))}${_esc(r)}" style="color:var(--info-color,#2196f3)">⚡</span>`;
+    };
+    const energyAnomalyBadge = c => {
+      if (!c.energy_anomaly || c.energy_anomaly === 'none') return '';
+      const isSpike = c.energy_anomaly === 'energy_spike';
+      const zStr = c.energy_z_score != null ? ` (${c.energy_z_score > 0 ? '+' : ''}${Number(c.energy_z_score).toFixed(1)}σ)` : '';
+      const key = isSpike ? 'badge.energy_spike' : 'badge.energy_low';
+      const fallback = isSpike ? 'Higher energy than usual' : 'Lower energy than usual';
+      const icon = isSpike ? '🔺' : '🔻';
+      const color = isSpike ? 'var(--error-color,#f44336)' : 'var(--info-color,#2196f3)';
+      return ` <span title="${_esc(this._t(key, {}, fallback))}${_esc(zStr)}" style="color:${color}">${icon}</span>`;
+    };
     const artifactBadge = c => {
       const n = Array.isArray(c.artifacts) ? c.artifacts.length : 0;
       if (!n) return '';
@@ -2227,7 +2242,7 @@ class HaWashdataPanel extends HTMLElement {
       const stLabel = { completed: this._t('status.completed',{},'Completed'), interrupted: this._t('status.interrupted',{},'Interrupted'), force_stopped: this._t('status.force_stopped',{},'Force stopped'), active: this._t('status.active',{},'Active') }[st] || st;
       return `<tr data-cid="${_esc(c.id)}" data-selmode="${selMode ? 1 : 0}" style="cursor:pointer">
         <td style="width:26px;padding:6px 4px 6px 8px">${check}</td>
-        <td>${prog ? _esc(prog) : `<span style="color:var(--secondary-text-color)">${this._t('lbl.unlabelled', {}, 'Unlabelled')}</span>`}${reviewBadge(c)}${overrunBadge(c)}${artifactBadge(c)}${restartGapBadge(c)}</td>
+        <td>${prog ? _esc(prog) : `<span style="color:var(--secondary-text-color)">${this._t('lbl.unlabelled', {}, 'Unlabelled')}</span>`}${reviewBadge(c)}${overrunBadge(c)}${underrunBadge(c)}${energyAnomalyBadge(c)}${artifactBadge(c)}${restartGapBadge(c)}</td>
         <td><span style="color:${statusDotColor(st)};font-size:.9em">${_esc(stLabel)}</span></td>
         <td class="wd-tc-date">${_fmtDate(c.start_time)}</td>
         <td class="wd-tc-num">${_fmtDuration(c.duration)}</td>
@@ -2324,7 +2339,13 @@ class HaWashdataPanel extends HTMLElement {
         trendBadge = `<span class="wd-badge" style="color:var(--secondary-text-color,#888)" title="${_esc(tip)}">${durIcon}${enIcon || ''}</span>`;
       }
     }
-    const badges = [healthBadge, trendBadge].filter(Boolean).join(' ');
+    const warmupThreshold = (this._constants && this._constants.PROFILE_MIN_WARMUP_CYCLES) || 5;
+    const cycleCount = (h && h.cycle_count) || 0;
+    const isWarmup = cycleCount < warmupThreshold;
+    const warmupBadge = isWarmup
+      ? `<span class="wd-badge" title="${_esc(this._t('msg.warmup_detail', {needed: warmupThreshold}, `This profile needs ${warmupThreshold} labelled cycles before auto-matching begins. Every confirmed cycle helps it learn.`))}" style="background:var(--info-color,#2196f3);color:#fff;padding:2px 6px;border-radius:4px;font-size:.75em">${this._t('msg.warmup_badge', {done: cycleCount, needed: warmupThreshold}, `Still learning (${cycleCount}/${warmupThreshold} cycles)`)}</span>`
+      : '';
+    const badges = [healthBadge, trendBadge, warmupBadge].filter(Boolean).join(' ');
     return `
       <div class="wd-profile-card" data-action="open-profile" data-pname="${_esc(p.name)}">
         <div class="wd-profile-name">${_esc(p.name)}${badges ? ' ' + badges : ''}</div>
@@ -2353,9 +2374,18 @@ class HaWashdataPanel extends HTMLElement {
     const cgBanner = (canEdit && cg.suggest_create) ? (() => {
       const clusters = (cg.duration_clusters || []).slice(0, 3);
       const clusterHints = clusters.map(cl => `~${cl.duration_bucket_min}–${cl.duration_bucket_min + 15} min (${cl.count}×)`).join(', ');
+      const profileSuggestions = (cg.profile_suggestions || []).slice(0, 2);
+      const suggestionHtml = profileSuggestions.length > 0
+        ? profileSuggestions.map(ps => `
+            <div style="margin-top:6px;display:flex;align-items:center;gap:8px">
+              <span style="font-size:.9em">${this._t('msg.coverage_gap_similar_cycles', {count: ps.count}, `${ps.count} similar unlabelled cycles found — create a profile to start matching them.`)}</span>
+              <button class="wd-btn wd-btn-sm wd-btn-primary wd-create-cluster" data-cycle-ids="${_esc(JSON.stringify(ps.cycle_ids))}" data-name="${_esc(ps.suggested_name)}">${this._t('btn.create_from_cluster', {count: ps.count}, `Create profile from ${ps.count} cycles`)}</button>
+            </div>`).join('')
+        : '';
       return `<div class="wd-sug-banner" style="border-color:var(--info-color,#2196f3);background:rgba(33,150,243,.07)">
         <span>📂 <b>${cg.unmatched_count}</b> ${this._t('msg.coverage_gap', {pct: Math.round(cg.unmatched_rate * 100)}, `recent cycles have no matching profile (${Math.round(cg.unmatched_rate * 100)}% of last 30).`)}${clusterHints ? ` ${this._t('lbl.duration', {}, 'Duration')}: ${clusterHints}.` : ''} ${this._t('msg.consider_new_profile', {}, 'Consider creating a new profile.')}</span>
         ${canEdit ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="create-profile">${this._t('btn.create_profile', {}, '+ Create profile')}</button>` : ''}
+        ${suggestionHtml}
       </div>`;
     })() : '';
 
@@ -3613,7 +3643,7 @@ class HaWashdataPanel extends HTMLElement {
       const cycleOpts = (this._cycles || []).slice(0, 40).map(c =>
         `<option value="${_esc(c.id)}">${_fmtDate(c.start_time)} - ${Math.round((c.duration || 0) / 60)}m - ${_esc(c.profile_name || 'Unlabelled')}</option>`).join('');
       body = `<h2>${this._t('modal.create_profile', {}, 'Create Profile')}</h2>
-        <div class="wd-field"><label>${this._t('lbl.profile_name', {}, 'Profile Name')}</label><input type="text" id="wd-cp-name" placeholder="${_esc(this._t('placeholder.profile_name', {}, 'e.g. Cotton 40°C'))}"></div>
+        <div class="wd-field"><label>${this._t('lbl.profile_name', {}, 'Profile Name')}</label><input type="text" id="wd-cp-name" placeholder="${_esc(this._t('placeholder.profile_name', {}, 'e.g. Cotton 40°C'))}" value="${_esc(m.prefillName || '')}"></div>
         <div class="wd-field"><label>${this._t('lbl.ref_cycle', {}, 'Reference Cycle (optional)')}</label><select id="wd-cp-cycle"><option value="">None</option>${cycleOpts}</select></div>
         <div class="wd-field"><label>${this._t('lbl.manual_duration', {}, 'Manual Duration (min, optional)')}</label><input type="number" id="wd-cp-dur" min="0" max="600" value="0"></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
@@ -3939,6 +3969,13 @@ class HaWashdataPanel extends HTMLElement {
         </div>
         ${healthRow}
         ${trendRow}
+        ${(ph && ph.shape_drift) ? (() => {
+          const corr = ph.shape_drift_correlation != null ? ` (r=${Number(ph.shape_drift_correlation).toFixed(2)})` : '';
+          return `<div style="margin-top:8px;padding:8px 10px;background:var(--warning-color,#ff9800)18;border-radius:6px;border-left:3px solid var(--warning-color,#ff9800)">
+            <span style="font-weight:600;color:var(--warning-color,#ff9800)">${this._t('msg.shape_drift_advisory', {}, '⚠ Shape drifting')}${_esc(corr)}</span>
+            <span style="font-size:.82em;opacity:.75;display:block;margin-top:4px">${this._t('msg.shape_drift_detail', {}, 'The power pattern for this profile has shifted over time — possible appliance wear or maintenance needed (e.g. descaling, filter cleaning).')}</span>
+          </div>`;
+        })() : ''}
         ${env.avg && env.avg.length ? `<div class="wd-canvas-wrap"><canvas id="wd-env-canvas"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_envelope', {}, 'No envelope yet - rebuild after labelling cycles.')}</p>`}`;
     } else if (m.tab === 'phases') {
       const cat = m.catalog || [];
@@ -4625,6 +4662,13 @@ class HaWashdataPanel extends HTMLElement {
 
     sr.querySelectorAll('[data-action]').forEach(btn => btn.addEventListener('click', e => this._onAction(e.currentTarget)));
     sr.querySelectorAll('[data-maction]').forEach(btn => btn.addEventListener('click', e => this._onModalAction(e.currentTarget.dataset.maction, e.currentTarget)));
+
+    // Coverage gap cluster suggestion: open create-profile modal with pre-filled name.
+    sr.querySelectorAll('.wd-create-cluster').forEach(btn => btn.addEventListener('click', () => {
+      const name = btn.dataset.name || '';
+      this._modal = { type: 'create-profile', prefillName: name };
+      this._render();
+    }));
 
     // Suggestion "Use" -> stage value into the field, then cascade-fix downstream conflicts.
     sr.querySelectorAll('[data-sugkey]').forEach(btn => btn.addEventListener('click', () => {
