@@ -18,7 +18,9 @@ makes the intent handleable — it can be fired immediately from automations, th
 sentence maps text to it**. Home Assistant has no public runtime API for a
 *custom* integration to inject sentences into the built-in conversation agent,
 so trigger sentences are wired by the user with a config-directory sentence pack.
-Create ``<config>/custom_sentences/en/ha_washdata.yaml`` (one file per language)::
+A ready-to-use pack ships in the repo at ``docs/custom_sentences/en/ha_washdata.yaml``
+- copy it to ``<config>/custom_sentences/en/ha_washdata.yaml`` and restart HA. The
+minimal shape is (one file per language)::
 
     language: en
     intents:

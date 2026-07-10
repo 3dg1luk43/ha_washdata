@@ -358,8 +358,10 @@ The intent handler is registered automatically and works immediately from **auto
 the `intent_script` integration, developer tools, and the **Assist pipeline**. What Home
 Assistant does *not* allow a custom integration to do is inject trigger sentences into the
 built-in conversation agent at runtime, so you teach Assist which phrases map to the intent
-with a config-directory **sentence pack**. Create
-`<config>/custom_sentences/en/ha_washdata.yaml` (one file per language):
+with a config-directory **sentence pack**. A ready-to-use English pack ships at
+`docs/custom_sentences/en/ha_washdata.yaml` - copy it to
+`<config>/custom_sentences/en/ha_washdata.yaml` and restart Home Assistant. The minimal
+shape (one file per language) is:
 
 ```yaml
 language: en

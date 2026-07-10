@@ -389,11 +389,12 @@ voice or text assistant about an appliance in plain language and get a live answ
 
 Home Assistant does not let a custom integration inject sentences into the built-in
 conversation agent at runtime, so you wire the trigger phrases once with a sentence pack.
-Create `<config>/custom_sentences/en/ha_washdata.yaml` (one file per language) mapping
-sentences to the `HaWashdataStatus` intent (with an optional `{name}` slot for the
-appliance). The intent works immediately from automations and the Assist pipeline; the
-sentence pack is only what teaches Assist which phrases to route to it. See
-[NOTIFICATIONS.md](NOTIFICATIONS.md) for the exact YAML.
+A ready-to-use English pack ships at [docs/custom_sentences/en/ha_washdata.yaml](docs/custom_sentences/en/ha_washdata.yaml):
+copy it to `<config>/custom_sentences/en/ha_washdata.yaml` and restart Home Assistant.
+It maps a wide set of phrases to the `HaWashdataStatus` intent, with an optional `{name}`
+slot to pick an appliance when you have more than one. The intent works immediately from
+automations and the Assist pipeline; the sentence pack is only what teaches Assist which
+phrases to route to it. See [NOTIFICATIONS.md](NOTIFICATIONS.md) for the exact YAML.
 
 ### Notifications & Events
 

@@ -1,0 +1,44 @@
+# WashData conversation sentences (English)
+#
+# Home Assistant has no runtime API for a custom integration to add sentences to
+# the built-in conversation agent, so copy this file to your config directory:
+#
+#     <config>/custom_sentences/en/ha_washdata.yaml
+#
+# then restart Home Assistant (or reload the conversation integration). After that
+# you can ask Assist (voice or text) things like "is my washer done?" and it will
+# answer from the live WashData state. The optional {name} slot picks a specific
+# appliance when you have more than one (it matches the device's WashData name,
+# e.g. "washer", "dryer", "dishwasher"); leave it out to ask about all of them.
+#
+# One file per language: for other languages create
+# <config>/custom_sentences/<lang>/ha_washdata.yaml with translated sentences.
+# The intent name (HaWashdataStatus) and the {name} slot stay the same.
+language: en
+intents:
+  HaWashdataStatus:
+    data:
+      # With an appliance name
+      - sentences:
+          - "is (my|the) {name} done"
+          - "is (my|the) {name} finished"
+          - "has (my|the) {name} finished"
+          - "how long until (my|the) {name} (finishes|is done)"
+          - "how long (is|does my|does the) {name} (left|have left|got left)"
+          - "how (much longer|long more) (for|on) (my|the) {name}"
+          - "what is the {name} doing"
+          - "status of (my|the) {name}"
+          - "is (my|the) {name} (running|still running|on)"
+      # Without a name (single appliance, or "any of them")
+      - sentences:
+          - "is (my|the) laundry done"
+          - "is the wash(ing)? done"
+          - "how long until (it|the cycle) (finishes|is done)"
+          - "how long is left"
+          - "is anything (running|still running)"
+          - "are any appliances running"
+lists:
+  # Free-text appliance name; the handler matches it against your WashData device
+  # names (case-insensitive, partial match), so "washer" finds "Laundry Washer".
+  name:
+    wildcard: true
