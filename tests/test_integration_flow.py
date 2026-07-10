@@ -27,7 +27,9 @@ def mock_entry():
         "min_off_gap": 30, # Small value for fast test
         "end_energy_threshold": 0.05,
         "device_type": "washing_machine",
-        "notify_fire_events": False
+        # The end-to-end test below asserts EVENT_CYCLE_STARTED/ENDED fire, so the
+        # bus events must be enabled (they are gated on this flag, default True).
+        "notify_fire_events": True
     }
     entry.data = {}
     return entry
