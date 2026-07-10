@@ -22,7 +22,7 @@ const _PALETTE = [
 // type: number | text | textarea | checkbox | select | entity | device | devicetype | list
 // `doc` is shown in a hover tooltip (condensed from SETTINGS_VISUALIZED.md).
 // Defined before _SETTINGS_SECTIONS because notification field docs reference it.
-const _NOTIFY_VARS = '{device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}';
+const _NOTIFY_VARS = '{device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}';
 const _SETTINGS_SECTIONS = [
   { id: 'basic', label: 'Basic', intro: 'Core identity and the essentials most setups need.', fields: [
     { key: 'name', label: 'Device Name', type: 'text',
@@ -205,7 +205,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'notify_start_message', label: 'Start Message', type: 'textarea', def: '{device} started.',
         doc: `Body sent when a cycle starts. Template variables: ${_NOTIFY_VARS}.` },
       { key: 'notify_finish_message', label: 'Finish Message', type: 'textarea', def: '{device} finished. Duration: {duration}m.',
-        doc: `Body sent when a cycle finishes. Template variables: ${_NOTIFY_VARS}.` },
+        doc: `Body sent when a cycle finishes. Template variables: ${_NOTIFY_VARS}. {time_finished} and {vs_typical} are most useful here.` },
       { key: 'notify_pre_complete_message', label: 'Pre-Complete Message', type: 'textarea', def: '{device}: Less than {minutes} minutes remaining.',
         doc: `Body of the pre-end / almost-done alert. Template variables: ${_NOTIFY_VARS}.` },
       { key: 'notify_reminder_message', label: 'Reminder Message', type: 'textarea', def: '',
@@ -222,6 +222,10 @@ const _SETTINGS_SECTIONS = [
         doc: 'Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Takes precedence over the static price below. Each cycle freezes the price in effect when it finished.' },
       { key: 'energy_price_static', label: 'Static Energy Price (per kWh)', type: 'number', step: 0.001, min: 0,
         doc: 'Fixed price per kWh used for cost figures when no live price entity is set above.' },
+      { key: 'peak_rate_threshold', label: 'Peak-Rate Threshold (per kWh)', type: 'number', step: 0.001, min: 0, def: 0,
+        doc: 'When a cycle starts and the current price per kWh is at or above this value, append a peak-rate tip to the start notification. 0 or blank disables the tip.' },
+      { key: 'peak_rate_message', label: 'Peak-Rate Message', type: 'text', def: '', placeholder: 'Running at peak rate ({price}/kWh).',
+        doc: 'Optional custom text for the peak-rate tip appended to the start notification. Template variables: {device}, {price}. Blank uses the built-in default.' },
     ] },
     { sub: 'Cycle Timers', fields: [
       { key: 'notify_cycle_timers', label: 'Cycle Timers', type: 'timerlist',
@@ -2318,6 +2322,8 @@ class HaWashdataPanel extends HTMLElement {
     const energy = p.avg_energy != null ? ` · ${_fmtEnergy(p.avg_energy)}/cycle` : '';
     const total = (p.avg_energy != null && p.cycle_count)
       ? ` · <strong>${_fmtEnergy(p.avg_energy * p.cycle_count)}</strong> total` : '';
+    const cur = (this._hass && this._hass.config && this._hass.config.currency) || '';
+    const cost = p.avg_cost != null ? ` · ${this._t('lbl.avg_cost', {}, 'Avg')} ${p.avg_cost.toFixed(2)}${cur ? ' ' + cur : ''}/${this._t('lbl.per_cycle_short', {}, 'cycle')}` : '';
     const h = (this._profileHealth || {})[p.name];
     const t = (this._profileTrends || {})[p.name];
     let healthBadge = '';
@@ -2349,7 +2355,7 @@ class HaWashdataPanel extends HTMLElement {
     return `
       <div class="wd-profile-card" data-action="open-profile" data-pname="${_esc(p.name)}">
         <div class="wd-profile-name">${_esc(p.name)}${badges ? ' ' + badges : ''}</div>
-        <div class="wd-profile-meta">${p.cycle_count || 0} cycles · ${dur}${energy}${total}</div>
+        <div class="wd-profile-meta">${p.cycle_count || 0} cycles · ${dur}${energy}${total}${cost}</div>
       </div>`;
   }
 
@@ -3918,6 +3924,7 @@ class HaWashdataPanel extends HTMLElement {
     } else if (m.tab === 'stats') {
       const st = m.stats || {};
       const env = m.env || {};
+      const cur = (this._hass && this._hass.config && this._hass.config.currency) || '';
       const total = (st.avg_energy != null && st.cycle_count) ? st.avg_energy * st.cycle_count : null;
       const mins = s => (s ? Math.round(s / 60) + 'm' : '-');
       const ph = (this._profileHealth || {})[m.name];
@@ -3961,6 +3968,11 @@ class HaWashdataPanel extends HTMLElement {
             <div class="wd-sg-main">${_fmtEnergy(st.avg_energy)}<span>avg</span></div>
             <div class="wd-sg-sub">total ${_fmtEnergy(total)}</div>
           </div>
+          ${st.avg_cost != null ? `<div class="wd-sg">
+            <div class="wd-sg-h">${this._t('lbl.avg_cost', {}, 'Avg cost')}</div>
+            <div class="wd-sg-main">${st.avg_cost.toFixed(2)}${cur ? ' ' + cur : ''}<span>avg</span></div>
+            <div class="wd-sg-sub">total ${st.total_cost != null ? st.total_cost.toFixed(2) + (cur ? ' ' + cur : '') : '-'}</div>
+          </div>` : ''}
           <div class="wd-sg">
             <div class="wd-sg-h">${this._t('lbl.activity', {}, 'Activity')}</div>
             <div class="wd-sg-main">${st.cycle_count || 0}<span>cycles</span></div>
