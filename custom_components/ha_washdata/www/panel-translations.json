@@ -237,6 +237,7 @@
       "artifact_low_power": "Low power",
       "auto_fine_tune_off": "auto fine-tune off",
       "auto_fine_tune_on": "auto fine-tune on (around {hour}:00)",
+      "avg_cost": "Avg cost",
       "clock_time": "Clock time",
       "cohesion_good": "cohesion {pct}%",
       "cohesion_low": "⚠ low cohesion {pct}%",
@@ -282,6 +283,7 @@
       "new_profile_name": "New Profile Name",
       "panel_default_tab": "Default tab",
       "panel_language": "Panel language",
+      "per_cycle_short": "cycle",
       "phase_name": "Name",
       "power": "Power",
       "profile": "Profile",
@@ -685,7 +687,7 @@
         "label": "Android Channel (finish)"
       },
       "notify_finish_message": {
-        "doc": "Body sent when a cycle finishes. Template variables: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+        "doc": "Body sent when a cycle finishes. Template variables: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} and {vs_typical} are most useful here.",
         "label": "Finish Message"
       },
       "notify_finish_services": {
@@ -725,15 +727,15 @@
         "label": "People (for Only When Home)"
       },
       "notify_pre_complete_message": {
-        "doc": "Body of the pre-end / almost-done alert. Template variables: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+        "doc": "Body of the pre-end / almost-done alert. Template variables: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
         "label": "Pre-Complete Message"
       },
       "notify_reminder_message": {
-        "doc": "Body of the still-waiting unload reminder. Blank uses the built-in default. Template variables: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+        "doc": "Body of the still-waiting unload reminder. Blank uses the built-in default. Template variables: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
         "label": "Reminder Message"
       },
       "notify_start_message": {
-        "doc": "Body sent when a cycle starts. Template variables: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+        "doc": "Body sent when a cycle starts. Template variables: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
         "label": "Start Message"
       },
       "notify_start_services": {
@@ -759,6 +761,14 @@
       "pause_cuts_power": {
         "doc": "When a cycle is paused, also switch off the Switch Entity below. Only for appliances whose plug can safely be cut mid-cycle.",
         "label": "Pause Also Cuts Power (via switch)"
+      },
+      "peak_rate_message": {
+        "doc": "Optional custom text for the peak-rate tip appended to the start notification. Template variables: {device}, {price}. Blank uses the built-in default.",
+        "label": "Peak-Rate Message"
+      },
+      "peak_rate_threshold": {
+        "doc": "When a cycle starts and the current price per kWh is at or above this value, append a peak-rate tip to the start notification. 0 or blank disables the tip.",
+        "label": "Peak-Rate Threshold (per kWh)"
       },
       "power_off_delay": {
         "doc": "How long power must stay below the Power Off Threshold after a cycle finishes before the state returns to Off. Only used when the Power Off Threshold is above 0. Checked on the background cadence, so the effective delay rounds up to the next state-expiry tick.",
