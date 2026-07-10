@@ -1,66 +1,30 @@
 {
-  "hdr": {
-    "toggle_sidebar": "Växla Home Assistant-sidofältet",
-    "logs": "Loggar",
-    "access_control": "Åtkomstkontroll",
-    "automation_delete": "Ta bort denna automatisering",
-    "automation_needs_review": "Denna cykel behöver granskning",
-    "automation_open": "Öppna i automatiseringsredigeraren",
-    "automation_review_this_cycle": "Granska denna cykel",
-    "automations": "Automatiseringar",
-    "clear_debug": "Rensa felsökningsspår",
-    "diagnostics_pref": "Diagnostik",
-    "display": "Visning",
-    "export_import": "Exportera / Importera",
-    "live_power": "Direkteffekt",
-    "logs_diagnostics": "Diagnostik",
-    "maintenance": "Underhållsåtgärder",
-    "manual_recording": "Manuell inspelning",
-    "ml_learned": "Vad WashData har lärt sig",
-    "ml_matching_tuning": "Finjustering av programmatchning",
-    "ml_settings_card": "Inställningar",
-    "ml_smart_learning": "Smart inlärning",
-    "my_preferences": "Mina inställningar",
-    "no_automations": "Inga automatiseringar refererar till denna enhet ännu.",
-    "panel_settings": "Panelinställningar",
-    "phase_catalog": "Faskatalog",
-    "process_history": "Processhistorik",
-    "status": "Status",
-    "status_graph": "Statusdiagram",
-    "storage_stats": "Lagringsstatistik",
-    "tools_and_data": "Verktyg och data",
-    "wipe_history": "Rensa historik"
-  },
   "badge": {
-    "golden_cycle": "Inspelad referenscykel",
-    "reviewed": "Granskad",
-    "feedback_requested": "Feedback begärd",
-    "needs_review": "Behöver granskning",
-    "overrun": "Sprang längre än vanligt",
     "artifact_tip": "{n} anomalier upptäckta (t.ex. dörren öppnades mitt i cykeln) — öppna för att se dem i diagrammet",
-    "restart_gap_tip": "{n} HA-omstartslucka: effektspåret har ett hål",
-    "poor_fit_tip": "Inkonsekvent matchhistorik — överväg att bygga om den här profilen",
-    "fair_fit_tip": "Måttlig matchkonsistens — vissa cykler tilldelade den här profilen har lägre konfidenspoäng. Märk fler cykler eller spela in profilen igen för att förbättra noggrannheten.",
     "auto": "(automatiskt identifierat)",
     "built_in_tag": "inbyggd",
     "declining": "↘ sjunkande",
     "fair_fit": "acceptabel kvalitet",
+    "fair_fit_tip": "Måttlig matchkonsistens — vissa cykler tilldelade den här profilen har lägre konfidenspoäng. Märk fler cykler eller spela in profilen igen för att förbättra noggrannheten.",
+    "feedback_requested": "Feedback begärd",
+    "golden_cycle": "Inspelad referenscykel",
     "improving": "↗ förbättras",
     "manual": "(manuellt valt)",
+    "needs_review": "Behöver granskning",
+    "overrun": "Sprang längre än vanligt",
     "poor_fit": "dålig kvalitet",
+    "poor_fit_tip": "Inkonsekvent matchhistorik — överväg att bygga om den här profilen",
+    "restart_gap_tip": "{n} HA-omstartslucka: effektspåret har ett hål",
+    "reviewed": "Granskad",
     "steady": "→ stabil",
     "using_defaults": "Använder standardinställningar",
     "using_tuned": "Använder finjusterade vikter"
   },
   "btn": {
-    "add_timer": "+ Lägg till timer",
-    "remove_timer": "Ta bort timern",
-    "add_device_tip": "Lägg till ytterligare en WashData-enhet",
-    "delete_group_tip": "Ta bara bort denna grupp - medlemsprofilerna behålls",
-    "run_analysis_tip": "Analysera dina inspelade cykler nu och uppdatera inställningsförslag",
-    "reset_ml_models_tip": "Släng de finjusterade modellerna och gå tillbaka till de inbyggda. WashData kan lära sig om dem senare.",
     "add_device": "+ Lägg till enhet",
+    "add_device_tip": "Lägg till ytterligare en WashData-enhet",
     "add_phase": "+ Lägg till fas",
+    "add_timer": "+ Lägg till timer",
     "apply_all": "Tillämpa alla",
     "apply_label": "Tillämpa etikett",
     "apply_split": "Tillämpa delning",
@@ -79,6 +43,7 @@
     "create_profile": "+ Skapa profil",
     "delete": "Ta bort",
     "delete_group": "Ta bort grupp",
+    "delete_group_tip": "Ta bara bort denna grupp - medlemsprofilerna behålls",
     "delete_profile": "Ta bort profil",
     "discard": "Kasta",
     "dismiss": "Avfärda",
@@ -111,12 +76,15 @@
     "record": "Starta inspelning",
     "refresh": "Uppdatera",
     "remove": "Ta bort",
+    "remove_timer": "Ta bort timern",
     "reset": "Återställ",
+    "reset_ml_models_tip": "Släng de finjusterade modellerna och gå tillbaka till de inbyggda. WashData kan lära sig om dem senare.",
     "reset_to_builtin": "Återställ till inbyggda modeller",
     "reset_to_defaults": "Återställ till standardvärden",
     "resume_cycle": "Återuppta cykel",
     "review": "Granska",
     "run_analysis": "🔍 Kör förslagsanalys",
+    "run_analysis_tip": "Analysera dina inspelade cykler nu och uppdatera inställningsförslag",
     "run_auto_label": "Kör automatisk märkning",
     "save": "Spara",
     "save_access_control": "Spara åtkomstkontroll",
@@ -126,6 +94,9 @@
     "save_preferences": "Spara inställningar",
     "save_review": "Spara granskning",
     "save_settings": "Spara inställningar",
+    "revert_settings": "Ångra ändringar",
+    "revert_settings_tip": "Återställ inställningar från innan den senaste sparningen",
+    "revert_settings_tip_none": "Spara först för att aktivera ångra",
     "select": "Välj",
     "show_only": "Visa bara",
     "split": "Dela",
@@ -136,15 +107,116 @@
     "use": "Använd",
     "wipe_all": "Rensa all data"
   },
+  "conflict": {
+    "anti_wrinkle_exit": {
+      "exit": "Måste vara under stopptröskel ({stop} W); annars ignoreras skrynkelskyddets uteffekt",
+      "stop": "Måste vara över skrynkelskyddets uteffekt ({exit} W)"
+    },
+    "anti_wrinkle_max": {
+      "max": "Måste vara över starttröskel ({start} W); annars kringgås skrynkelskyddets varaktighetsgräns",
+      "start": "Måste vara under skrynkelskyddets maxeffekt ({max} W)"
+    },
+    "attn_sub": "Åtgärda konflikter innan du sparar",
+    "attn_title": "{n} inställningskonflikt{s}",
+    "confidence": {
+      "auto": "Måste vara vid eller över matchningströskel ({match})",
+      "learning": "Måste vara vid eller under matchningströskel ({match})",
+      "match_for_auto": "Måste vara vid eller under automatisk-märknings-konfidensen ({alc})",
+      "match_for_learning": "Måste vara vid eller över inlärningskonfidensen ({lc})"
+    },
+    "duration_ratio": {
+      "max": "Måste vara större än minimal varaktighetskvot ({min})",
+      "min": "Måste vara mindre än maximal varaktighetskvot ({max})"
+    },
+    "hysteresis": {
+      "start": "Måste vara över stopptröskel ({stop} W)",
+      "stop": "Måste vara under starttröskel ({start} W)"
+    },
+    "min_power": {
+      "min_power": "Måste vara vid eller under stopptröskel ({stop} W)",
+      "stop": "Måste vara vid eller över mineffekt ({min} W)"
+    },
+    "no_update_timeout": {
+      "timeout": "Måste vara större än vakthundsintervallet ({wi} s)",
+      "watchdog": "Måste vara mindre än timeout utan uppdatering ({to} s)"
+    },
+    "off_delay": {
+      "gap": "Minsta uppehåll bör vara minst fördröjningen ({delay} s)",
+      "off_delay": "Fördröjning ({off_delay} s) överstiger minsta uppehåll ({gap} s); på varandra följande cykler kan slås ihop"
+    },
+    "power_off": {
+      "stop": "Måste vara över avstängningströskel ({pot} W)",
+      "threshold": "Måste vara under stopptröskel ({stop} W) för att ha effekt"
+    },
+    "pump_stuck": {
+      "duration": "Måste vara kortare än timeout utan uppdatering ({to} s) så att fastnar-larmet utlöses innan vakthunden stoppar cykeln",
+      "timeout": "Måste överskrida pumpens fastnar-varaktighet ({ps} s) så att larmet utlöses innan cykeln tvångsstoppas"
+    },
+    "start_dur": {
+      "sampling": "Samplingsintervall överstiger startvaraktighet ({sdt} s); enstaka mätvärdestoppar kan öppna en cykel",
+      "threshold": "Bör vara minst ett samplingsintervall ({si} s) för att förhindra falsklarm med enstaka mätvärden"
+    },
+    "unmatch": {
+      "match": "Måste vara över avmatchningströskel ({un})",
+      "unmatch": "Måste vara under matchningströskel ({match}); annars avmatchas en bekräftad matchning omedelbart"
+    },
+    "cascade_toast": "Även {n} inställningar justerades för konsekvens.",
+    "use_fix": "Använd {val}",
+    "watchdog": {
+      "interval": "Bör vara minst 2x samplingsintervallet ({si} s)",
+      "sampling": "Samplingsintervall bör vara högst hälften av vakthundsintervallet ({wi} s)"
+    }
+  },
+  "hdr": {
+    "access_control": "Åtkomstkontroll",
+    "automation_delete": "Ta bort denna automatisering",
+    "automation_needs_review": "Denna cykel behöver granskning",
+    "automation_open": "Öppna i automatiseringsredigeraren",
+    "automation_review_this_cycle": "Granska denna cykel",
+    "automations": "Automatiseringar",
+    "clear_debug": "Rensa felsökningsspår",
+    "diagnostics_pref": "Diagnostik",
+    "display": "Visning",
+    "export_import": "Exportera / Importera",
+    "live_power": "Direkteffekt",
+    "logs": "Loggar",
+    "logs_diagnostics": "Diagnostik",
+    "maintenance": "Underhållsåtgärder",
+    "manual_recording": "Manuell inspelning",
+    "ml_learned": "Vad WashData har lärt sig",
+    "ml_matching_tuning": "Finjustering av programmatchning",
+    "ml_settings_card": "Inställningar",
+    "ml_smart_learning": "Smart inlärning",
+    "my_preferences": "Mina inställningar",
+    "no_automations": "Inga automatiseringar refererar till denna enhet ännu.",
+    "panel_settings": "Panelinställningar",
+    "phase_catalog": "Faskatalog",
+    "process_history": "Processhistorik",
+    "status": "Status",
+    "status_graph": "Statusdiagram",
+    "storage_stats": "Lagringsstatistik",
+    "toggle_sidebar": "Växla Home Assistant-sidofältet",
+    "tools_and_data": "Verktyg och data",
+    "wipe_history": "Rensa historik"
+  },
+  "health": {
+    "fair": "Acceptabel profilkvalitet",
+    "good": "✓ Bra profilkvalitet",
+    "poor": "⚠ Dålig profilkvalitet"
+  },
   "lbl": {
-    "timer_min": "min",
-    "timer_msg_placeholder": "Meddelande (valfritt, {device}/{program}/{minutes})",
-    "timer_auto_pause": "Automatisk paus",
     "actions": "Åtgärder",
     "activity": "Aktivitet",
     "administrators": "Administratörer",
+    "artifact_anomaly": "Anomali",
+    "artifact_high_power": "Hög effekt",
+    "artifact_interruption": "Avbrott",
+    "artifact_low_power": "Låg effekt",
     "auto_fine_tune_off": "automatisk finjustering av",
+    "auto_fine_tune_on": "automatisk finjustering aktiv (ungefär {hour}:00)",
     "clock_time": "Klockslag",
+    "cohesion_good": "samhörighet {pct} %",
+    "cohesion_low": "⚠ låg samhörighet {pct} %",
     "compare_profiles": "Jämför med profiler",
     "confidence": "Konfidens",
     "confidence_threshold": "Konfidenströskel",
@@ -166,9 +238,11 @@
     "emphasis": "Betoning",
     "enable_access_control": "Aktivera åtkomstkontroll per användare",
     "energy": "Energi",
+    "expected": "Förväntad",
     "expected_duration": "Förväntad varaktighet (min)",
     "file_kb": "Fil (kB)",
     "gap_s": "Lucka (s)",
+    "group_name": "Gruppnamn",
     "head_trim": "Starttrimning (s)",
     "health": "Hälsa",
     "hide_tabs": "Dölj flikar för icke-administratörer",
@@ -178,15 +252,19 @@
     "last_checked": "Senast kontrollerad:",
     "load_from_file": "Läs in från fil",
     "manual_duration": "Manuell varaktighet (min, valfritt)",
+    "members": "Medlemmar",
     "mode_existing_profile": "Lägg till i befintlig profil",
     "mode_new_profile": "Skapa ny profil",
+    "models_fine_tuned": "({count} modeller finjusterade)",
     "new_profile_name": "Nytt profilnamn",
     "panel_default_tab": "Standardflik",
+    "panel_language": "Panelspråk",
     "phase_name": "Namn",
     "power": "Effekt",
     "profile": "Profil",
     "profile_name": "Profilnamn",
     "progress": "Förlopp",
+    "raw_socket": "Råsocket",
     "read_only": "Skrivskyddad",
     "ref_cycle": "Referenscykel (valfritt)",
     "refresh_interval": "Uppdateringsintervall (s)",
@@ -202,95 +280,85 @@
     "show_raw": "Visa råa sensoravläsningar (oglättad, grå)",
     "status": "Status",
     "tail_trim": "Sluttrimning (s)",
+    "timer_auto_pause": "Automatisk paus",
+    "timer_min": "min",
+    "timer_msg_placeholder": "Meddelande (valfritt, {device}/{program}/{minutes})",
     "ungrouped": "Ej grupperad",
     "unlabelled": "Omärkt",
-    "unlabelled_paren": "(omärkt)",
-    "expected": "Förväntad",
-    "raw_socket": "Råsocket",
-    "artifact_interruption": "Avbrott",
-    "artifact_low_power": "Låg effekt",
-    "artifact_high_power": "Hög effekt",
-    "artifact_anomaly": "Anomali",
-    "auto_fine_tune_on": "automatisk finjustering aktiv (ungefär {hour}:00)",
-    "cohesion_good": "samhörighet {pct} %",
-    "cohesion_low": "⚠ låg samhörighet {pct} %",
-    "group_name": "Gruppnamn",
-    "members": "Medlemmar",
-    "models_fine_tuned": "({count} modeller finjusterade)",
-    "panel_language": "Panelspråk"
+    "unlabelled_paren": "(omärkt)"
+  },
+  "log": {
+    "all_levels": "Alla nivåer"
+  },
+  "ml": {
+    "builtin_models": "● Använder inbyggda modeller",
+    "fit_fair": "Acceptabel",
+    "fit_good": "Bra",
+    "fit_slight": "Liten",
+    "fit_strong": "Stark",
+    "fit_weak": "Svag",
+    "fit_word": "passform",
+    "personalized": "● Anpassad till denna maskin"
   },
   "modal": {
-    "merge_cycles": "Slå samman {n} cykler",
     "auto_label": "Automatisk märkning av cykler",
     "correct_feedback": "Korrigera feedback",
     "create_profile": "Skapa profil",
     "cycle": "Cykel",
+    "edit_group": "Redigera profilgrupp",
     "edit_phase": "Redigera fas",
     "import_config": "Importera konfiguration",
     "label_cycle": "Märk cykel",
-    "new_phase": "Ny fas",
-    "process_recording": "Bearbeta inspelning",
-    "edit_group": "Redigera profilgrupp",
+    "merge_cycles": "Slå samman {n} cykler",
     "new_group": "Ny profilgrupp",
-    "process_history_title": "Bearbeta historik",
+    "new_phase": "Ny fas",
     "process_history_msg": "Kör matchning igen, uppdatera förslag, träna om ML (om aktiverat) och beräkna om cyklernas hälsa för alla lagrade cykler. Detta kan ta ett tag.",
-    "process_history_ok": "Bearbeta"
+    "process_history_ok": "Bearbeta",
+    "process_history_title": "Bearbeta historik",
+    "process_recording": "Bearbeta inspelning"
   },
   "msg": {
-    "near_duplicate_cluster": "nästan duplicerat profilkluster upptäcktes. Gruppering gör att matchning på ett tillförlitligt sätt kan välja mellan look-alikes (t.ex. samma program vid olika temperaturer/centrifugering).",
-    "coverage_gap": "de senaste cyklerna har ingen matchande profil ({pct}% av de senaste 30).",
-    "consider_new_profile": "Överväg att skapa en ny profil.",
-    "group_not_cohesive": "Dessa profiler är inte tillräckligt lika för att gruppera på ett tillförlitligt sätt, så matchning behandlar dem individuellt tills du tar bort avvikelsen eller delar upp gruppen.",
-    "group_modal_help": "Gruppera program med samma form som skiljer sig i temperatur/centrifugering (längderna kan variera). Matchning ger gruppen poäng som en kandidat och väljer sedan den medlem som passar bäst. Välj minst 2; överlägget visar hur lika de är.",
-    "showing_suggestions": "Visar {count} inställning med förslag.",
-    "show_all_settings": "Visa alla inställningar",
-    "tuning_suggestions_available": "{count} inställningsförslag tillgängligt från observerade cykler. De visas bredvid de relevanta fälten.",
-    "legacy_actions_title": "{count} äldre anpassad åtgärd körs fortfarande",
-    "old_actions_warning": "Konfigurerad med den gamla åtgärdsredigeraren (nu borttagen). De skjuter fortfarande på cykelhändelser men kan inte längre redigeras här. Konvertera dem till en normal automatisering, eller ta bort dem.",
-    "no_settings_match": "Inga inställningar matchar \"{q}\"",
-    "clear_debug_hint": "Ta bort lagrad felsökningsdata för att frigöra utrymme.",
-    "wipe_history_warning": "Ta bort alla cykler och profiler permanent. Kan inte ångras.",
-    "export_description": "Exportera alla profiler och cykler till JSON, eller återställ från en tidigare export.",
-    "log_buffer_hint": "Nyaste först · buffrar de senaste 500 ha_washdataposterna sedan omstart · dra den nedre kanten för att ändra storlek.",
-    "review_profile_tip": "Programmet som denna cykel är märkt som. Om det automatiskt identifierade programmet var fel, korrigera det här - märkning lär ut matchning för framtida cykler.",
-    "review_quality_tip": "Hur ren den här cykeln är. Bra = ett läroboksexempel på detta program; Dåligt = identifierat men bullrigt eller atypiskt; Oanvändbart = felidentifierat (sammanslagna, trunkerade eller falska). Driver hälsopoängen och vilka cykler som tillåts träna modellen.",
-    "review_recorded_tip": "Markera detta som en handplockad referenscykel för sitt program - samma roll som en manuellt inspelad cykel. Referenscykler hålls alltid, såddar den matchande mallen och släpps aldrig vid rengöring. (Detta är den \"gyllene\"/inspelade flaggan; båda är samma sak.)",
-    "review_tags_tip": "Valfria flaggor som beskriver vad som gick fel med den här cykeln, så träning och städning kan förklara det.",
-    "review_notes_tip": "Fritextanteckningar för din egen referens. Används inte av matchning eller träning.",
-    "review_confirm_help": "Bekräfta om denna cykel identifierades korrekt. Dina granskningar tränar modellen på din maskin - ju fler cykler du bekräftar, desto bättre matchning och hälsopoäng får du. En snabb bra/dålig räcker.",
-    "review_notes_placeholder": "Anteckningar (valfritt)",
-    "compare_profiles_tip": "Lägg över andra profilkuvert på diagrammet ovan för att se vilket som passar bäst för denna cykel.",
-    "artifact_header": "{n} anomalier upptäcktes under denna cykel",
-    "artifact_footer": "Markerad i grafen ovan. Dessa är övergående artefakter (t.ex. dörren öppnas mitt i cykeln), inte nödvändigtvis problem.",
-    "restart_gap_header": "{n} HA-omstartslucka under denna cykel",
-    "restart_gap_item": "{dur} lucka",
-    "restart_gap_footer": "Markerat i diagrammet. Effektdata saknas för dessa intervall; matchning använde bara faktiska avläsningar.",
-    "profile_poor_health_detail": "Cykler som tilldelats den här profilen har inkonsekventa former eller låg konfidens. Överväg att bygga om kuvertet eller granska märkta cykler.",
-    "trend_duration_longer": "Varaktighet trendar längre ({pct}%/cykel) — senaste medelvärde {avg}",
-    "trend_duration_shorter": "Varaktighet trendar kortare ({pct}%/cykel) — senaste medelvärde {avg}",
-    "trend_energy_up": "Energitrend uppåt ({pct}%/cykel) — senaste snitt {avg}",
-    "trend_energy_down": "Energin går ned ({pct}%/cykel)",
-    "performance_trend": "Prestandatrend ({n} cykler)",
-    "maintenance_advisory": "Ökande varaktighet/energi kan indikera att apparaten behöver underhållas (t.ex. avkalkning, filterrengöring).",
-    "manual_duration_hint": "Profilens genomsnittliga/förväntade cykellängd, som används för återstående uppskattningar. Redigera för att ställa in den; om den lämnas oförändrad behålls det aktuella värdet.",
     "appliance_monitor": "Apparatövervakning",
+    "artifact_dip_detail": "Föll under det normala effektbandet i ~{n} s.",
+    "artifact_footer": "Markerad i grafen ovan. Dessa är övergående artefakter (t.ex. dörren öppnas mitt i cykeln), inte nödvändigtvis problem.",
+    "artifact_header": "{n} anomalier upptäcktes under denna cykel",
+    "artifact_pause_detail": "Effekten föll till nära noll i ~{n} s och återupptogs sedan — troligtvis öppnades dörren mitt i cykeln eller cykeln pausades.",
+    "artifact_spike_detail": "Drog över det normala effektbandet i ~{n} s.",
     "auto_label_intro": "Tilldela profiler till omärkta cykler vars matchningskonfidens överstiger tröskeln.",
+    "automations_intro": "WashData utlöser {start} / {end}-händelser och tillhandahåller entiteter — aviseringar och åtgärder byggs bäst som vanliga Home Assistant-automatiseringar. Automatiseringar som använder den här enheten visas nedan.",
     "cleanup_intro": "Alla märkta cykler är överlagda. Kryssa i avvikare och ta bort dem för att rensa profilen.",
+    "clear_debug_hint": "Ta bort lagrad felsökningsdata för att frigöra utrymme.",
+    "collecting_data": "Samlar in data — {need} cykler kvar innan finjustering kan starta ({current}/{min}).",
     "compare_overlay_profiles": "Lägg över profiler (svag)",
+    "compare_profiles_tip": "Lägg över andra profilkuvert på diagrammet ovan för att se vilket som passar bäst för denna cykel.",
     "compare_selected_cycles": "Valda cykler (solid) — visa / dölj",
+    "consider_new_profile": "Överväg att skapa en ny profil.",
+    "coverage_gap": "de senaste cyklerna har ingen matchande profil ({pct}% av de senaste 30).",
+    "enough_data": "Tillräckligt med data för att lära sig av ({current}/{min} cykler).",
+    "export_description": "Exportera alla profiler och cykler till JSON, eller återställ från en tidigare export.",
+    "feedback_cycles_pending": "{n} cykel{s} att granska",
     "feedback_prompt": "Bekräfta att det var rätt, korrigera programmet eller ignorera.",
+    "filter_by_profile": "Filtrera efter profil…",
+    "group_modal_help": "Gruppera program med samma form som skiljer sig i temperatur/centrifugering (längderna kan variera). Matchning ger gruppen poäng som en kandidat och väljer sedan den medlem som passar bäst. Välj minst 2; överlägget visar hur lika de är.",
+    "group_not_cohesive": "Dessa profiler är inte tillräckligt lika för att gruppera på ett tillförlitligt sätt, så matchning behandlar dem individuellt tills du tar bort avvikelsen eller delar upp gruppen.",
+    "group_preview_hint": "Markera 2 eller fler medlemmar för att förhandsgranska och jämföra deras effektkurvor.",
     "import_intro": "Läs in en exporterad fil eller klistra in en JSON-nyttolast nedan.",
+    "legacy_actions_title": "{count} äldre anpassad åtgärd körs fortfarande",
     "live_chart_loading": "Direkteffektdiagrammet visas när avläsningarna kommer in.",
     "loading": "Laddar…",
     "loading_curve": "Laddar kurva…",
     "loading_settings": "Laddar inställningar…",
+    "log_buffer_hint": "Nyaste först · buffrar de senaste 500 ha_washdataposterna sedan omstart · dra den nedre kanten för att ändra storlek.",
+    "maintenance_advisory": "Ökande varaktighet/energi kan indikera att apparaten behöver underhållas (t.ex. avkalkning, filterrengöring).",
     "maintenance_requires_access": "Underhåll och export/import kräver fullständig åtkomst.",
+    "manual_duration_hint": "Profilens genomsnittliga/förväntade cykellängd, som används för återstående uppskattningar. Redigera för att ställa in den; om den lämnas oförändrad behålls det aktuella värdet.",
     "matching_tuning_intro": "Under inlärning justerar WashData också hur mycket programmatchning väger form mot varaktighet och energi.",
     "merge_intro": "De valda cyklerna kombineras till en (kronologisk ordning; luckor fylls med 0 W). Välj den resulterande profilen.",
     "ml_intro": "WashData levereras med smarta modeller som fungerar direkt.",
     "ml_learned_intro": "Modeller finjusterade till denna maskin.",
     "ml_loading": "laddar ML…",
     "ml_settings_intro": "Två oberoende switchar: en tillämpar modellerna medan en cykel körs, den andra låter WashData finjustera dem till din maskin över tid.",
+    "near_duplicate_cluster": "nästan duplicerat profilkluster upptäcktes. Gruppering gör att matchning på ett tillförlitligt sätt kan välja mellan look-alikes (t.ex. samma program vid olika temperaturer/centrifugering).",
     "no_cycles_match": "Inga cykler matchar det aktuella filtret.",
     "no_cycles_profile": "Inga cykler för denna profil.",
     "no_cycles_yet": "Inga cykler registrerade än.",
@@ -308,77 +376,82 @@
     "no_profiles_overlay": "Inga profiler att lägga över.",
     "no_profiles_yet": "Inga profiler ännu. Skapa en från en märkt cykel.",
     "no_profiles_yet_short": "Inga profiler ännu.",
+    "no_settings_match": "Inga inställningar matchar \"{q}\"",
     "no_split_points": "Inga delningspunkter ännu.",
     "no_suggestions": "Inga aktiva förslag.",
+    "notify_services_hint": "Använd {entity}-tjänst-ID:n (kommaavgränsade för flera). Mallvariabler: {vars}.",
+    "old_actions_warning": "Konfigurerad med den gamla åtgärdsredigeraren (nu borttagen). De skjuter fortfarande på cykelhändelser men kan inte längre redigeras här. Konvertera dem till en normal automatisering, eller ta bort dem.",
     "pending_feedback": "Väntande detektionsfeedback",
+    "performance_trend": "Prestandatrend ({n} cykler)",
     "phase_catalog_intro": "Namngivna segment av en cykel (Förhandstvätt, Uppvärmning, Centrifugering…). Tilldela dem till en profil från dess kontrollpanel.",
     "phase_ranges_intro": "Fasintervall (minuter från cykelstart) överlagda på genomsnittskurvan. Redigera värden för förhandsvisning live.",
     "preferences_admin": "Inställningar, panel och åtkomstkontroll",
     "preferences_adv": "Inställningar",
     "prefs_personal": "Dessa gäller endast ditt Home Assistant-konto.",
+    "process_history_hint": "Kör matchning igen på alla lagrade cykler, uppdatera justeringsförslag, träna om ML-modellerna (om aktiverat) och beräkna om cyklernas hälsa. Kör detta efter en omgång granskningar.",
+    "profile_poor_health_detail": "Cykler som tilldelats den här profilen har inkonsekventa former eller låg konfidens. Överväg att bygga om kuvertet eller granska märkta cykler.",
     "profiles_intro": "Klicka på en profil för statistik, faser och rensning. Gruppera nästan identiska program (samma form/varaktighet, olika temperatur eller centrifugering) så att matchning tillförlitligt väljer mellan dem.",
     "rbac_hint": "När det är av har varje Home Assistant-användare fullständig åtkomst (standard). Administratörer har alltid fullständig åtkomst och kan hantera alla.",
     "recent_logs": "Senaste ha_washdata-poster",
     "recording_in_progress": "Inspelning pågår",
+    "restart_gap_footer": "Markerat i diagrammet. Effektdata saknas för dessa intervall; matchning använde bara faktiska avläsningar.",
+    "restart_gap_header": "{n} HA-omstartslucka under denna cykel",
+    "restart_gap_item": "{dur} lucka",
+    "review_confirm_help": "Bekräfta om denna cykel identifierades korrekt. Dina granskningar tränar modellen på din maskin - ju fler cykler du bekräftar, desto bättre matchning och hälsopoäng får du. En snabb bra/dålig räcker.",
     "review_in_settings": "Granska i Inställningar",
+    "review_notes_placeholder": "Anteckningar (valfritt)",
+    "review_notes_tip": "Fritextanteckningar för din egen referens. Används inte av matchning eller träning.",
+    "review_profile_tip": "Programmet som denna cykel är märkt som. Om det automatiskt identifierade programmet var fel, korrigera det här - märkning lär ut matchning för framtida cykler.",
+    "review_quality_tip": "Hur ren den här cykeln är. Bra = ett läroboksexempel på detta program; Dåligt = identifierat men bullrigt eller atypiskt; Oanvändbart = felidentifierat (sammanslagna, trunkerade eller falska). Driver hälsopoängen och vilka cykler som tillåts träna modellen.",
+    "review_recorded_tip": "Markera detta som en handplockad referenscykel för sitt program - samma roll som en manuellt inspelad cykel. Referenscykler hålls alltid, såddar den matchande mallen och släpps aldrig vid rengöring. (Detta är den \"gyllene\"/inspelade flaggan; båda är samma sak.)",
+    "review_tags_tip": "Valfria flaggor som beskriver vad som gick fel med den här cykeln, så träning och städning kan förklara det.",
     "review_to_cycles": "Öppna granskningskön för Cykler",
     "saving_triggers_reload": "Sparande utlöser en integration-omladdning. HA-enheter kan kortvarigt visas som otillgängliga.",
     "search_placeholder": "Sök inställningar…",
     "see_recorder": "Se inspelningswidgeten nedan",
+    "show_all_settings": "Visa alla inställningar",
+    "showing_suggestions": "Visar {count} inställning med förslag.",
     "split_intro": "Klicka på diagrammet för att lägga till eller ta bort en delningspunkt, eller autoidentifiera via tomma luckor. Varje resulterande segment kan få sin egen profil.",
     "storage_diagnostics": "Lagringsstatistik, underhåll, export/import",
+    "trend_duration_longer": "Varaktighet trendar längre ({pct}%/cykel) — senaste medelvärde {avg}",
+    "trend_duration_shorter": "Varaktighet trendar kortare ({pct}%/cykel) — senaste medelvärde {avg}",
+    "trend_energy_down": "Energin går ned ({pct}%/cykel)",
+    "trend_energy_up": "Energitrend uppåt ({pct}%/cykel) — senaste snitt {avg}",
     "trim_intro": "Dra de röda handtagen eller ange värden. Allt utanför fönstret tas bort.",
+    "tuning_suggestions_available": "{count} inställningsförslag tillgängligt från observerade cykler. De visas bredvid de relevanta fälten.",
     "unsure_detected_prefix": "WashData är osäker på att den identifierade",
     "updated": "Uppdaterad",
-    "feedback_cycles_pending": "{n} cykel{s} att granska",
-    "artifact_spike_detail": "Drog över det normala effektbandet i ~{n} s.",
-    "artifact_dip_detail": "Föll under det normala effektbandet i ~{n} s.",
-    "artifact_pause_detail": "Effekten föll till nära noll i ~{n} s och återupptogs sedan — troligtvis öppnades dörren mitt i cykeln eller cykeln pausades.",
-    "automations_intro": "WashData utlöser {start} / {end}-händelser och tillhandahåller entiteter — aviseringar och åtgärder byggs bäst som vanliga Home Assistant-automatiseringar. Automatiseringar som använder den här enheten visas nedan.",
-    "collecting_data": "Samlar in data — {need} cykler kvar innan finjustering kan starta ({current}/{min}).",
-    "enough_data": "Tillräckligt med data för att lära sig av ({current}/{min} cykler).",
-    "filter_by_profile": "Filtrera efter profil…",
-    "group_preview_hint": "Markera 2 eller fler medlemmar för att förhandsgranska och jämföra deras effektkurvor.",
-    "notify_services_hint": "Använd {entity}-tjänst-ID:n (kommaavgränsade för flera). Mallvariabler: {vars}.",
-    "process_history_hint": "Kör matchning igen på alla lagrade cykler, uppdatera justeringsförslag, träna om ML-modellerna (om aktiverat) och beräkna om cyklernas hälsa. Kör detta efter en omgång granskningar."
+    "wipe_history_warning": "Ta bort alla cykler och profiler permanent. Kan inte ångras."
   },
   "phase_desc": {
+    "anti_crease": "Enstaka korta tumlar efter färdigställandet för att förhindra skrynklor i tvätten.",
+    "anti_wrinkle": "Periodisk tumlande efter cykeln för att förhindra skrynklor i tvätten.",
+    "cool_down": "Tumling utan värme nära cykelns slut.",
+    "drain_and_switch": "Övergångsperiod från tvätt- till torkläge.",
+    "dry": "Torkningssteg med värmare och/eller restvärme.",
+    "drying": "Huvudsaklig uppvärmd tumlingsperiod.",
+    "heat_up": "Första uppvärmningen av värmaren innan full torkning börjar.",
+    "pre_rinse": "Initial sprayning innan tvättmedelstvätt.",
     "pre_wash": "Inledande blötläggning eller förbehandling före huvudtvätt.",
-    "wash": "Huvudtvättprogram med trumrörelse och valfri uppvärmning.",
-    "wash_dw": "Huvudtvättmedelstvätt med värme.",
     "rinse": "Sköljningssteg med rent vatten. Denna fas kan upprepas flera gånger.",
-    "spin": "Höghastighetsutsug för att avlägsna vatten från lasten.",
-    "spin_wd": "Höghastighetsextraktion före torkningsövergång.",
+    "sanitize": "Högtemperaturrengöringssteg för saneringsprogram.",
+    "sensor_check": "Kort lågeffektpaus medan torrhet mäts.",
     "soak": "Lågaktivitets blötläggningsperiod mellan aktiva tvättsteg.",
     "soak_dw": "Förlängd blötläggningstid för starkt nedsmutsad disk.",
-    "anti_crease": "Enstaka korta tumlar efter färdigställandet för att förhindra skrynklor i tvätten.",
-    "heat_up": "Första uppvärmningen av värmaren innan full torkning börjar.",
-    "drying": "Huvudsaklig uppvärmd tumlingsperiod.",
-    "cool_down": "Tumling utan värme nära cykelns slut.",
-    "anti_wrinkle": "Periodisk tumlande efter cykeln för att förhindra skrynklor i tvätten.",
-    "sensor_check": "Kort lågeffektpaus medan torrhet mäts.",
-    "drain_and_switch": "Övergångsperiod från tvätt- till torkläge.",
-    "pre_rinse": "Initial sprayning innan tvättmedelstvätt.",
-    "dry": "Torkningssteg med värmare och/eller restvärme.",
-    "sanitize": "Högtemperaturrengöringssteg för saneringsprogram."
+    "spin": "Höghastighetsutsug för att avlägsna vatten från lasten.",
+    "spin_wd": "Höghastighetsextraktion före torkningsövergång.",
+    "wash": "Huvudtvättprogram med trumrörelse och valfri uppvärmning.",
+    "wash_dw": "Huvudtvättmedelstvätt med värme."
   },
-  "health": {
-    "good": "✓ Bra profilkvalitet",
-    "fair": "Acceptabel profilkvalitet",
-    "poor": "⚠ Dålig profilkvalitet"
-  },
-  "log": {
-    "all_levels": "Alla nivåer"
-  },
-  "ml": {
-    "builtin_models": "● Använder inbyggda modeller",
-    "fit_fair": "Acceptabel",
-    "fit_good": "Bra",
-    "fit_slight": "Liten",
-    "fit_strong": "Stark",
-    "fit_weak": "Svag",
-    "fit_word": "passform",
-    "personalized": "● Anpassad till denna maskin"
+  "placeholder": {
+    "add": "lägg till…",
+    "group_name": "t.ex. Bomull 2:47",
+    "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+    "notify": "lägg till en aviseringstjänst…",
+    "notify_services_list": "notify.mobile_app_phone, ...",
+    "person": "lägg till en person…",
+    "phase_name": "t.ex. Förtvättning",
+    "profile_name": "t.ex. Bomull 40°C"
   },
   "pref": {
     "date_absolute": "Absolut (t.ex. 14:32 den 2 jul)",
@@ -391,6 +464,436 @@
     "bad": "Dålig",
     "good": "Bra",
     "unusable": "Oanvändbar"
+  },
+  "section": {
+    "anti_wrinkle": {
+      "intro": "Skrynkelskyddsläget identifierar korta lågeffektstumlingspulser efter huvudfasen och håller dem kopplade till den avslutade cykeln för att förhindra skrynklor i tvätten.",
+      "label": "Skrynkelskydd"
+    },
+    "basic": {
+      "intro": "Kärn-identitet och grunderna som de flesta konfigurationer behöver.",
+      "label": "Grundläggande"
+    },
+    "delay": {
+      "intro": "Detektering av försenad start identifierar när apparaten är påslagen men ännu inte har startat sin cykel.",
+      "label": "Försenad start"
+    },
+    "detection": {
+      "intro": "Hur start, körning och slutföring av en cykel identifieras.",
+      "label": "Detektering"
+    },
+    "matching": {
+      "intro": "Hur avslutade cykler matchas mot inlärda profiler och märks.",
+      "label": "Matchning"
+    },
+    "ml_training": {
+      "intro": "Schema för omskolning av maskininlärning på enheten och datainställningar.",
+      "label": "ML-träning"
+    },
+    "notifications": {
+      "intro": "När och hur du meddelas om cykelhändelser.",
+      "label": "Meddelanden"
+    },
+    "timing": {
+      "intro": "Bakgrundskadensen, offline-vakthunden och hushållning.",
+      "label": "Timing och vakthund"
+    },
+    "triggers": {
+      "intro": "Valfria externa signaler: en slututlösare, en dörrsensor, en pausknapp och en lossningspåminnelse.",
+      "label": "Utlösare och dörrar"
+    }
+  },
+  "setting": {
+    "abrupt_drop_ratio": {
+      "doc": "Ett fall som är större än denna andel av strömeffekten behandlas också som abrupt (0,6 = 60 % minskning). Kompletterar watt-tröskeln över apparatstorlekar.",
+      "label": "Abrupt fallförhållande"
+    },
+    "abrupt_drop_watts": {
+      "doc": "Ett effektfall större än detta flaggar cykeln som avbruten (manuell avbrytning) snarare än en naturlig finish.",
+      "label": "Abrupt fall"
+    },
+    "anti_wrinkle_enabled": {
+      "doc": "Känn igen de korta torktumlarpulser med låg effekt en torktumlare avger efter huvuduppvärmningsfasen och håll dem kopplade till den färdiga cykeln istället för att läsa dem som nya cykler.",
+      "label": "Aktivera skrynkelskyddsdetektering"
+    },
+    "anti_wrinkle_exit_power": {
+      "doc": "Effekten måste sjunka under detta mellan pulserna för att anti-rynkläget ska förbli aktivt.",
+      "label": "Avslutningseffekttröskel"
+    },
+    "anti_wrinkle_max_duration": {
+      "doc": "Pulser längre än detta behandlas som en riktig cykel snarare än en anti-rynktumling.",
+      "label": "Maks. varaktighet"
+    },
+    "anti_wrinkle_max_power": {
+      "doc": "En puls över denna effekt behandlas som en riktig ny cykel, inte en anti-rynktumling. Ställ in precis ovanför tumlingspulseffekten.",
+      "label": "Maks. skrynkelskyddseffekt"
+    },
+    "auto_label_confidence": {
+      "doc": "Om matchresultatet vid cykelslutet är på eller över detta, märks programmet automatiskt utan någon bekräftelse. Höj den för att kräva högre säkerhet innan automatisk märkning; sänk den för att automatisera mer. Fungerar tillsammans med Learning Confidence under den.",
+      "label": "Automärkningskonfidens"
+    },
+    "auto_maintenance": {
+      "doc": "Kör nattlig städning: bygg om profilkuvert, beräkna om cykelns hälsa, beskära felsökningsspår och behåll de senaste cyklerna.",
+      "label": "Automatiskt underhåll (nattlig städning)"
+    },
+    "completion_min_seconds": {
+      "doc": "Cykler som är kortare än detta kasseras som spökcykler (testkörningar, öppna dörren för att lägga till en strumpa).",
+      "label": "Min. cykelvaraktighet"
+    },
+    "delay_confirm_seconds": {
+      "doc": "Strömmen måste stanna i standby-bandet så länge innan apparaten behandlas som att den väntar på att starta snarare än att den är igång.",
+      "label": "Bekräftelsesekunder"
+    },
+    "delay_start_detect_enabled": {
+      "doc": "Upptäck när apparaten är påslagen och väntar (fördröjd start/standby) men inte har börjat sin cykel, så standby-dragning förväxlas inte med en pågående cykel.",
+      "label": "Aktivera detektering av försenad start"
+    },
+    "delay_timeout_hours": {
+      "doc": "Sluta vänta i fördröjd start efter så här många timmar och återgå till tomgång, så en maskin som lämnas strömförsörjd men aldrig startad väntar inte för evigt.",
+      "label": "Tidsgränstimmar"
+    },
+    "device_type": {
+      "doc": "Apparatklass. Ställer in förnuftiga detekteringsstandarder (tröskelvärden, avstängningsfördröjning, sluthantering) inställda för den apparattypen; ändra den endast om enheten ursprungligen var inställd som fel typ.",
+      "label": "Enhetstyp"
+    },
+    "door_sensor_entity": {
+      "doc": "Tillval dörr binär sensor. Används för att upptäcka när apparaten har öppnats/avlastats efter en cykel.",
+      "label": "Dörrsensorentitet"
+    },
+    "duration_tolerance": {
+      "doc": "Tolerans för återstående uppskattningar (inlärningsfeedback, inte matchning). Om den faktiska varaktigheten är inom +/-X % av uppskattningen räknas det som en bra matchning.",
+      "label": "Uppskattingstolerans"
+    },
+    "enable_ml_models": {
+      "doc": "Medan en cykel körs, låt modellerna förfina liveresultaten: en stabilare tid som återstår och energi/kostnadsuppskattning, och ett skydd mot för tidigt stopp vid slutdetektering (det kan bara någonsin fördröja en målgång, aldrig avsluta en för tidigt och är begränsad). Använder dina finjusterade modeller när sådana finns, annars de inbyggda. Av = endast den klassiska kraftbaserade logiken (fortfarande tillförlitlig).",
+      "label": "Tillämpa smarta modeller under en cykel"
+    },
+    "end_energy_threshold": {
+      "doc": "Under nedräkningen av frånslagsfördröjningen jämförs ackumulerad energi (watt x tid) med denna tröskel. Om den överskrids återställs nedräkningen - bibehåller skrynkelskydd och diskmaskinstorkande svansar på cykeln istället för att korta dem. Höj den om cyklerna slutar för tidigt under nedkylning; sänk den om detekteringen är trög.",
+      "label": "Slutenergi"
+    },
+    "end_repeat_count": {
+      "doc": "Antalet på varandra följande avläsningar under stopptröskelvärdet som krävs innan cykeln avslutas. 1 är bra för de flesta pluggar. Höj till 2-3 om din smarta kontakt då och då rapporterar ett prov med falskt noll i mitten av cykeln och dina cykler slutar i förtid.",
+      "label": "Antal slutrepetitioner"
+    },
+    "energy_price_entity": {
+      "doc": "Sensor med aktuellt elpris per kWh (t.ex. en dynamisk tariff). Har företräde framför det statiska priset nedan. Varje cykel fryser det pris som gäller när den är klar.",
+      "label": "Energiprisentitet"
+    },
+    "energy_price_static": {
+      "doc": "Fast pris per kWh som används för kostnadssiffror när ingen levande prisenhet anges ovan.",
+      "label": "Statiskt energipris (per kWh)"
+    },
+    "expose_debug_entities": {
+      "doc": "Publicera extra diagnostiska HA-enheter (matchningsförtroende, tvetydighet, tillståndsinterna). Av håller enhetslistan ren för normal användning.",
+      "label": "Exponera felsökningsentiteter"
+    },
+    "external_end_trigger": {
+      "doc": "Binär sensor vars tillståndsändring markerar cykelns slut (t.ex. en \"färdig\" kontakt med apparaten eller en kompletterande integration).",
+      "label": "Extern utlösarentitet"
+    },
+    "external_end_trigger_enabled": {
+      "doc": "Låt en extern binär sensor signalera slutet på en cykel, förutom den inbyggda effektbaserade detekteringen.",
+      "label": "Aktivera extern slututlösare"
+    },
+    "external_end_trigger_inverted": {
+      "doc": "Behandla avtryckarsensorn som stängs AV (istället för PÅ) som slutsignalen.",
+      "label": "Invertera extern utlösare (utlös vid AV)"
+    },
+    "learning_confidence": {
+      "doc": "Om matchresultatet faller mellan detta och Auto-Label Confidence, uppmanas du i ett feedbackmeddelande att verifiera det identifierade programmet. Under denna poäng är matchen för osäker för att ytan. Måste hållas under Auto-Label Confidence.",
+      "label": "Inlärningskonfidens"
+    },
+    "linked_device": {
+      "doc": "Eventuellt kapslar denna WashData-enhet under en annan enhet (t.ex. den smarta kontakten) i HA-enhetsregistret, visad som \"Ansluten via ...\".",
+      "label": "Gruppera under enhet"
+    },
+    "min_off_gap": {
+      "doc": "Om maskinen stängs av under kortare tid än denna tid, behandlas på/av/på-sekvensen som en kontinuerlig cykel. Förhindrar att blötläggningsprogram (maskinen stängs av i flera minuter mitt i tvätten) delas upp i två separata cykler. Ställ in det kortare än avståndet mellan dina rygg-mot-rygg-laster om du vill att de ska räknas som separata cykler. Standardinställningarna för enhetstyp skyddar den typiska pausen inom cykeln för varje apparat.",
+      "label": "Min. avlucka"
+    },
+    "min_power": {
+      "doc": "Absolut minimieffekt anses vara aktiv. Avläsningar under detta behandlas som 0 W (standby), vilket filtrerar bort fantombelastningen av smarta pluggar och standby-lysdioder.",
+      "label": "Minimieffekt"
+    },
+    "ml_training_enabled": {
+      "doc": "Studera regelbundet dina granskade cykler över natten och finjustera modellerna till denna specifika maskin. En förändring behålls bara när den verkligen ger bättre resultat på uthållna cykler, så detta kan bara hjälpa eller förbli oförändrat - aldrig gå tillbaka.",
+      "label": "Lär dig av denna maskin"
+    },
+    "ml_training_hour": {
+      "doc": "Lokal timme på dygnet (0-23) för att göra finjusteringen över natten. Välj en lugn timme som 2 (02:00).",
+      "label": "Lär dig vid timmen"
+    },
+    "ml_training_interval_days": {
+      "doc": "Kontrollera igen efter förbättringar högst en gång per så många dagar.",
+      "label": "Kontrollera som mest varje"
+    },
+    "ml_training_min_cycles": {
+      "doc": "Vänta tills åtminstone så många cykler har spelats in innan du finjusterar, så det finns tillräckligt att lära av.",
+      "label": "Cykler som behövs först"
+    },
+    "name": {
+      "doc": "Visningsnamn som visas i HA-integreringslistan och enhetsregistret.",
+      "label": "Enhetsnamn"
+    },
+    "no_update_active_timeout": {
+      "doc": "Om det inte kommer några strömuppdateringar under så här lång tid medan du kör, anta att kontakten tappade offline och tvångsstopp för att undvika en zombiecykel. Standard 600 s tillåter moln eller mesh lag.",
+      "label": "Tidsgräns utan uppdatering"
+    },
+    "notify_before_end_minutes": {
+      "doc": "Skicka en nästan klar-varning när den beräknade återstående tiden sjunker under detta. 0 inaktiverar den.",
+      "label": "Förvarning före slut"
+    },
+    "notify_channel": {
+      "doc": "Android-aviseringskanalnamn för start-/livemeddelanden (kontrollerar ljud per kanal och prioritet i mobilappen). Blank använder standardappen för kompletterande app.",
+      "label": "Android-kanal (start/direkt)"
+    },
+    "notify_cycle_timers": {
+      "doc": "Aviseringar vid specifika minuter in i en cykel (t.ex. för att lägga till mjukgörare). Meddelande stöder {device}, {program}, {minutes}. Aktivera automatisk paus för att pausa vid den punkten och få ett interaktivt meddelande med en Fortsätt-knapp; återuppta via panelen, paus-/återuppta-tjänsten eller aviseringsåtgärden.",
+      "label": "Cykeltidurar"
+    },
+    "notify_finish_channel": {
+      "doc": "Android-aviseringskanalnamn för slutmeddelandet. Blank återanvänder start/live-kanalen.",
+      "label": "Android-kanal (slut)"
+    },
+    "notify_finish_message": {
+      "doc": "Kropp skickas när en cykel är klar. Mallvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "label": "Slutmeddelande"
+    },
+    "notify_finish_services": {
+      "doc": "notify.* tjänster anropas när en cykel avslutas. Lägg till en per mål; lämna tomt för ingen avisering om avslutad.",
+      "label": "Sluttjänster"
+    },
+    "notify_fire_events": {
+      "doc": "Avfyra även ha_washdata_*-händelser på cykelstart/slut så att du kan bygga dina egna automatiseringar.",
+      "label": "Avfyra HA-händelser för meddelanden"
+    },
+    "notify_icon": {
+      "doc": "Valfri mdi-ikon för meddelandet (t.ex. mdi:tvättmaskin). Lämna tomt för plattformens standard.",
+      "label": "Meddelandeikon"
+    },
+    "notify_live_chronometer": {
+      "doc": "Visa en nedräkningstimer som uppdateras live i meddelandet (på plattformar som stöder det) istället för en statisk uppskattning.",
+      "label": "Använd direktkronometer"
+    },
+    "notify_live_interval_seconds": {
+      "doc": "Hur ofta aviseringar om realtidsförlopp uppdateras medan en cykel körs.",
+      "label": "Direktuppdateringsintervall"
+    },
+    "notify_live_overrun_percent": {
+      "doc": "Om en cykel går förbi sin uppskattning med mer än denna procentsats, skicka en överskridningsvarning.",
+      "label": "% överköring innan varning"
+    },
+    "notify_live_services": {
+      "doc": "notify.*-tjänster kallas för uppdateringar av förlopp i realtid medan en cykel körs. Lämna tomt för att inaktivera aviseringar om liveförlopp.",
+      "label": "Direktframstegstjänster"
+    },
+    "notify_only_when_home": {
+      "doc": "Skicka bara aviseringar när minst en av de länkade personerna (ovan) är hemma.",
+      "label": "Meddela bara när hemma"
+    },
+    "notify_people": {
+      "doc": "person.* enheter som används av \"Meddela endast när hemma\" för att avgöra om någon är hemma.",
+      "label": "Personer (för Bara när hemma)"
+    },
+    "notify_pre_complete_message": {
+      "doc": "Brödtexten för varningen före slut / nästan klar. Mallvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "label": "Nästan klart-meddelande"
+    },
+    "notify_reminder_message": {
+      "doc": "Brödtexten på påminnelsen om urladdning som fortfarande väntar. Blank använder den inbyggda standarden. Mallvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "label": "Påminnelsemeddelande"
+    },
+    "notify_start_message": {
+      "doc": "Kropp skickas när en cykel startar. Mallvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "label": "Startmeddelande"
+    },
+    "notify_start_services": {
+      "doc": "notify.* tjänster anropas när en cykel startar. Lägg till en per mål (telefon, instrumentpanel, etc.); lämna tomt för ingen startavisering.",
+      "label": "Starttjänster"
+    },
+    "notify_timeout_seconds": {
+      "doc": "Avvisa meddelandet automatiskt efter så här många sekunder (på plattformar som stöder det). 0 behåller den tills den avvisas manuellt.",
+      "label": "Avfärda automatiskt efter"
+    },
+    "notify_title": {
+      "doc": "Aviseringsrubrik. Mallvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "label": "Meddelanderubrik"
+    },
+    "notify_unload_delay_minutes": {
+      "doc": "Minuter efter att en cykel har avslutats innan den fortfarande väntande påminnelsen om \"lasta av maskinen\" skickas. Ställ in 0 för att inaktivera påminnelsen.",
+      "label": "Lossningspåminnelsefördröjning"
+    },
+    "off_delay": {
+      "doc": "Dags att vänta efter strömavbrott innan man förklarar att cykeln är avslutad. Om strömmen återupptas inom detta fönster fortsätter cykeln sömlöst - detta överbryggar pauser mellan tvättstegen. Diskmaskiner har långa torkningsfaser (ström av i 20-60 min) så avstängningsfördröjningen måste överstiga den för att hålla hela tvätten+torr som en cykel.",
+      "label": "Avfördröjning"
+    },
+    "pause_cuts_power": {
+      "doc": "När en cykel är pausad, stäng även av Switch Entity nedan. Endast för apparater vars kontakt säkert kan skäras av mitt i cykeln.",
+      "label": "Paus bryter även ström (via switch)"
+    },
+    "power_off_delay": {
+      "doc": "Hur länge effekten måste hålla sig under Avstängningströskel efter att en cykel har avslutats innan tillståndet återgår till Av. Används endast när Avstängningströskel är över 0. Kontrolleras enligt bakgrundskadensen, så den effektiva fördröjningen avrundas uppåt till nästa tillståndsutgångstick.",
+      "label": "Avstängningsfördröjning"
+    },
+    "power_off_threshold_w": {
+      "doc": "Valfri effektbaserad Av-detektering. När värdet är över 0 betraktas maskinen som avstängd och tillståndet återgår till Av så snart en cykel har avslutats och effekten håller sig under denna nivå under hela Avstängningsfördröjningen. Lämna på 0 för att inaktivera (standard). Ställ in värdet över maskinens verkliga avstängda nollnivå och under Stopptröskel samt under maskinens standbyförbrukning i tillståndet färdig-men-på; om det inte är under Stopptröskel ignoreras det. När det är aktiverat ersätter det Förloppåterställningsfördröjning för återgång till Av, så att en färdig maskin stannar i Färdig/Rena tills den faktiskt stängs av.",
+      "label": "Avstängningströskel"
+    },
+    "power_sensor": {
+      "doc": "Sensorenheten rapporterar levande effekt i watt för denna apparat (t.ex. sensor.washer_power). All cykeldetektering baseras på denna signal.",
+      "label": "Effektsensor"
+    },
+    "profile_duration_tolerance": {
+      "doc": "+/- bandet runt en profils genomsnittliga varaktighet som används under matchning. 0,25 betyder att en 60 min profil matchar 45-75 min cykler.",
+      "label": "Profilvaraktighetstolerans"
+    },
+    "profile_match_interval": {
+      "doc": "Hur ofta man ska försöka profilmatcha under en löpcykel. Standard 300 s (5 minuter) balanserar detekteringshastighet och CPU.",
+      "label": "Matchningsintervall"
+    },
+    "profile_match_max_duration_ratio": {
+      "doc": "Maximal cykellängd i förhållande till profilen. 1.3 betyder att en cykel måste vara under 130 % av profilens varaktighet för att matcha.",
+      "label": "Maks. varaktighetsförhållande"
+    },
+    "profile_match_min_duration_ratio": {
+      "doc": "Minsta cykellängd i förhållande till profilen. 0,9 betyder att en cykel måste vara minst 90 % av profilens varaktighet för att matcha.",
+      "label": "Min. varaktighetsförhållande"
+    },
+    "profile_match_threshold": {
+      "doc": "Minsta likhetspoäng (0-1) krävs i slutet av cykeln för att acceptera en programidentifiering. Höj den för att minska felaktiga identifieringar; sänk den om din maskins program inte matchas. Standard 0,4 är en konservativ utgångspunkt.",
+      "label": "Matchningströskel"
+    },
+    "profile_unmatch_threshold": {
+      "doc": "Om en livematch i mitten av cykeln sjunker under denna poäng, rensas den preliminära identifieringen. Håll den lite under matchtröskeln så att en kort dopp i likhet inte vänder tillbaka skärmen till oöverträffad.",
+      "label": "Omatchningströskel"
+    },
+    "progress_reset_delay": {
+      "doc": "När du är klar håller du framsteg på 100 % så länge så att Slutfört är synligt på instrumentpanelerna innan du återställer till viloläge.",
+      "label": "Förloppåterställningsfördröjning"
+    },
+    "pump_stuck_duration": {
+      "doc": "Sekunder kan en pump köras kontinuerligt innan den flaggas som eventuellt fast (utlöser händelsen med fast pump).",
+      "label": "Pumpens fastnadsvaraktighet"
+    },
+    "running_dead_zone": {
+      "doc": "Efter att en cykel har startat ignoreras effektfall inom detta fönster. Tvättmaskiner fylls med kallt vatten (sjunker nära 0 W före uppvärmning) - utan detta skydd ser fyllningsfasen ut som ett cykelslut. Detta hoppar INTE över data: spåret för full effekt registreras från T=0. Förslagsmotorn mäter din maskins faktiska startmönster och dimensionerar detta automatiskt.",
+      "label": "Löpande dödzon"
+    },
+    "sampling_interval": {
+      "doc": "Förväntad tid mellan sensoravläsningarna - används för att dimensionera utjämningsfönstret och starta avstudsningen korrekt. Varje sensoruppdatering registreras oavsett detta värde; den kalibrerar bara nedströmsberäkningarna. Förslagsmotorn mäter din sensors faktiska kadens från tidigare cykler och ställer in denna automatiskt.",
+      "label": "Samplingsintervall"
+    },
+    "save_debug_traces": {
+      "doc": "Lagra spårningen av full effekt och matchande felsökningsdata för varje cykel. Användbar för felsökning men ökar lagringsstorleken.",
+      "label": "Spara felsökningsspår"
+    },
+    "smoothing_window": {
+      "doc": "Hur mycket råeffektsignalen utjämnas. Låg (2) är lyhörd men bullrig; hög (5) jämnar ut spikar men lägger till eftersläpning.",
+      "label": "Utjämningsfönster"
+    },
+    "start_duration_threshold": {
+      "doc": "Strömmen måste ligga över starttröskeln så här länge för att bekräfta en riktig start, vilket förhindrar att på/av-växlar på en sekund startar en cykel.",
+      "label": "Startvaraktighet"
+    },
+    "start_energy_threshold": {
+      "doc": "Energi (effekt x tid) som apparaten måste förbruka innan den KÖR. En kort spik med hög effekt har mycket låg energi och ignoreras, vilket förhindrar felstarter.",
+      "label": "Startenergi"
+    },
+    "start_threshold_w": {
+      "doc": "Effekten måste stiga över denna nivå för att bekräfta att en cykel har startat. Om den ställs in för lågt orsakar felstarter från standby-ström; för högt och långsamt startande program (kallfyllning) missas. Förslagsmotorn ställer in detta strax över maskinens observerade lägsta aktiva effekt.",
+      "label": "Starttröskel"
+    },
+    "stop_threshold_w": {
+      "doc": "Effekten måste sjunka under denna nivå innan nedräkningen av avstängningsfördröjningen börjar. Ställ in den under starttröskeln - gapet mellan dem är hysteresbandet som förhindrar flimmer. Om inställningen är för hög, utlöser lågeffektfaser (sköljstopp, skrynkelskydd) felaktigt slutsekvensen.",
+      "label": "Stopptröskel"
+    },
+    "suppress_feedback_notifications": {
+      "doc": "Ge inte ett ihållande meddelande när en avslutad cykel behöver granskas; feedbacken visas fortfarande i kön för cyklergranskning.",
+      "label": "Undertryck feedbackmeddelanden"
+    },
+    "switch_entity": {
+      "doc": "Valfri strömbrytare slås av vid paus och på igen vid återupptagning, används tillsammans med \"Pausen bryter också strömmen\".",
+      "label": "Switchentitet"
+    },
+    "watchdog_interval": {
+      "doc": "Hur ofta kontrollerar bakgrundsvakten efter avstängda sensorer och förflutna timeouts. Standard 30 s.",
+      "label": "Vakthundsintervall"
+    }
+  },
+  "setting_group": {
+    "auto_labeling": {
+      "label": "Automatisk märkning"
+    },
+    "cycle_end": {
+      "label": "Cykelslut"
+    },
+    "cycle_start": {
+      "label": "Cykelstart"
+    },
+    "cycle_timers": {
+      "label": "Cykeltidurar"
+    },
+    "data_management": {
+      "label": "Datahantering"
+    },
+    "debug": {
+      "label": "Felsökning"
+    },
+    "dishwasher_end": {
+      "label": "Diskmaskinsslut"
+    },
+    "door_pause": {
+      "label": "Dörr och paus"
+    },
+    "dtw_refinement": {
+      "label": "DTW-förfining"
+    },
+    "duration_gates": {
+      "label": "Varaktighetsportar"
+    },
+    "energy": {
+      "label": "Energi"
+    },
+    "external_end_trigger": {
+      "label": "Extern slututlösare"
+    },
+    "housekeeping": {
+      "label": "Hushållning"
+    },
+    "match_scoring": {
+      "label": "Matchningspoäng"
+    },
+    "messages": {
+      "label": "Meddelanden"
+    },
+    "power_off": {
+      "label": "Avstängning"
+    },
+    "predictive_end": {
+      "label": "Prediktivt slut"
+    },
+    "schedule": {
+      "label": "Schema"
+    },
+    "services": {
+      "label": "Tjänster"
+    },
+    "signal_processing": {
+      "label": "Signalbehandling"
+    },
+    "thresholds_gap": {
+      "label": "Trösklar och lucka"
+    },
+    "timing": {
+      "label": "Timing"
+    },
+    "unload_reminder": {
+      "label": "Lossningspåminnelse"
+    },
+    "watchdog": {
+      "label": "Vakthund"
+    }
   },
   "status": {
     "active": "Aktiv",
@@ -476,6 +979,8 @@
     "recording_started": "Inspelning startad",
     "recording_stopped": "Inspelning stoppad",
     "review_saved": "Granskning sparad",
+    "settings_conflicts": "Åtgärda de markerade inställningskonflikterna innan du sparar.",
+    "settings_reverted": "Inställningar återställda; integration laddas om",
     "settings_saved": "Inställningar sparade; integration laddas om",
     "suggestions_applied": "Förslag tillämpade; integration laddas om",
     "suggestions_dismissed": "Förslag avfärdade"
@@ -483,445 +988,5 @@
   "trend": {
     "down": "Nedåtgående trend",
     "up": "Uppåtgående trend"
-  },
-  "section": {
-    "basic": {
-      "label": "Grundläggande",
-      "intro": "Kärn-identitet och grunderna som de flesta konfigurationer behöver."
-    },
-    "detection": {
-      "label": "Detektering",
-      "intro": "Hur start, körning och slutföring av en cykel identifieras."
-    },
-    "matching": {
-      "label": "Matchning",
-      "intro": "Hur avslutade cykler matchas mot inlärda profiler och märks."
-    },
-    "timing": {
-      "label": "Timing och vakthund",
-      "intro": "Bakgrundskadensen, offline-vakthunden och hushållning."
-    },
-    "anti_wrinkle": {
-      "label": "Skrynkelskydd",
-      "intro": "Skrynkelskyddsläget identifierar korta lågeffektstumlingspulser efter huvudfasen och håller dem kopplade till den avslutade cykeln för att förhindra skrynklor i tvätten."
-    },
-    "delay": {
-      "label": "Försenad start",
-      "intro": "Detektering av försenad start identifierar när apparaten är påslagen men ännu inte har startat sin cykel."
-    },
-    "triggers": {
-      "label": "Utlösare och dörrar",
-      "intro": "Valfria externa signaler: en slututlösare, en dörrsensor, en pausknapp och en lossningspåminnelse."
-    },
-    "notifications": {
-      "label": "Meddelanden",
-      "intro": "När och hur du meddelas om cykelhändelser."
-    },
-    "ml_training": {
-      "label": "ML-träning",
-      "intro": "Schema för omskolning av maskininlärning på enheten och datainställningar."
-    }
-  },
-  "setting_group": {
-    "thresholds_gap": {
-      "label": "Trösklar och lucka"
-    },
-    "cycle_start": {
-      "label": "Cykelstart"
-    },
-    "cycle_end": {
-      "label": "Cykelslut"
-    },
-    "power_off": {
-      "label": "Avstängning"
-    },
-    "signal_processing": {
-      "label": "Signalbehandling"
-    },
-    "predictive_end": {
-      "label": "Prediktivt slut"
-    },
-    "dishwasher_end": {
-      "label": "Diskmaskinsslut"
-    },
-    "dtw_refinement": {
-      "label": "DTW-förfining"
-    },
-    "match_scoring": {
-      "label": "Matchningspoäng"
-    },
-    "duration_gates": {
-      "label": "Varaktighetsportar"
-    },
-    "auto_labeling": {
-      "label": "Automatisk märkning"
-    },
-    "watchdog": {
-      "label": "Vakthund"
-    },
-    "housekeeping": {
-      "label": "Hushållning"
-    },
-    "debug": {
-      "label": "Felsökning"
-    },
-    "external_end_trigger": {
-      "label": "Extern slututlösare"
-    },
-    "door_pause": {
-      "label": "Dörr och paus"
-    },
-    "unload_reminder": {
-      "label": "Lossningspåminnelse"
-    },
-    "services": {
-      "label": "Tjänster"
-    },
-    "timing": {
-      "label": "Timing"
-    },
-    "messages": {
-      "label": "Meddelanden"
-    },
-    "energy": {
-      "label": "Energi"
-    },
-    "cycle_timers": {
-      "label": "Cykeltidurar"
-    },
-    "schedule": {
-      "label": "Schema"
-    },
-    "data_management": {
-      "label": "Datahantering"
-    }
-  },
-  "setting": {
-    "name": {
-      "label": "Enhetsnamn",
-      "doc": "Visningsnamn som visas i HA-integreringslistan och enhetsregistret."
-    },
-    "device_type": {
-      "label": "Enhetstyp",
-      "doc": "Apparatklass. Ställer in förnuftiga detekteringsstandarder (tröskelvärden, avstängningsfördröjning, sluthantering) inställda för den apparattypen; ändra den endast om enheten ursprungligen var inställd som fel typ."
-    },
-    "power_sensor": {
-      "label": "Effektsensor",
-      "doc": "Sensorenheten rapporterar levande effekt i watt för denna apparat (t.ex. sensor.washer_power). All cykeldetektering baseras på denna signal."
-    },
-    "min_power": {
-      "label": "Minimieffekt",
-      "doc": "Absolut minimieffekt anses vara aktiv. Avläsningar under detta behandlas som 0 W (standby), vilket filtrerar bort fantombelastningen av smarta pluggar och standby-lysdioder."
-    },
-    "off_delay": {
-      "label": "Avfördröjning",
-      "doc": "Dags att vänta efter strömavbrott innan man förklarar att cykeln är avslutad. Om strömmen återupptas inom detta fönster fortsätter cykeln sömlöst - detta överbryggar pauser mellan tvättstegen. Diskmaskiner har långa torkningsfaser (ström av i 20-60 min) så avstängningsfördröjningen måste överstiga den för att hålla hela tvätten+torr som en cykel."
-    },
-    "linked_device": {
-      "label": "Gruppera under enhet",
-      "doc": "Eventuellt kapslar denna WashData-enhet under en annan enhet (t.ex. den smarta kontakten) i HA-enhetsregistret, visad som \"Ansluten via ...\"."
-    },
-    "start_threshold_w": {
-      "label": "Starttröskel",
-      "doc": "Effekten måste stiga över denna nivå för att bekräfta att en cykel har startat. Om den ställs in för lågt orsakar felstarter från standby-ström; för högt och långsamt startande program (kallfyllning) missas. Förslagsmotorn ställer in detta strax över maskinens observerade lägsta aktiva effekt."
-    },
-    "stop_threshold_w": {
-      "label": "Stopptröskel",
-      "doc": "Effekten måste sjunka under denna nivå innan nedräkningen av avstängningsfördröjningen börjar. Ställ in den under starttröskeln - gapet mellan dem är hysteresbandet som förhindrar flimmer. Om inställningen är för hög, utlöser lågeffektfaser (sköljstopp, skrynkelskydd) felaktigt slutsekvensen."
-    },
-    "min_off_gap": {
-      "label": "Min. avlucka",
-      "doc": "Om maskinen stängs av under kortare tid än denna tid, behandlas på/av/på-sekvensen som en kontinuerlig cykel. Förhindrar att blötläggningsprogram (maskinen stängs av i flera minuter mitt i tvätten) delas upp i två separata cykler. Ställ in det kortare än avståndet mellan dina rygg-mot-rygg-laster om du vill att de ska räknas som separata cykler. Standardinställningarna för enhetstyp skyddar den typiska pausen inom cykeln för varje apparat."
-    },
-    "start_duration_threshold": {
-      "label": "Startvaraktighet",
-      "doc": "Strömmen måste ligga över starttröskeln så här länge för att bekräfta en riktig start, vilket förhindrar att på/av-växlar på en sekund startar en cykel."
-    },
-    "start_energy_threshold": {
-      "label": "Startenergi",
-      "doc": "Energi (effekt x tid) som apparaten måste förbruka innan den KÖR. En kort spik med hög effekt har mycket låg energi och ignoreras, vilket förhindrar felstarter."
-    },
-    "completion_min_seconds": {
-      "label": "Min. cykelvaraktighet",
-      "doc": "Cykler som är kortare än detta kasseras som spökcykler (testkörningar, öppna dörren för att lägga till en strumpa)."
-    },
-    "running_dead_zone": {
-      "label": "Löpande dödzon",
-      "doc": "Efter att en cykel har startat ignoreras effektfall inom detta fönster. Tvättmaskiner fylls med kallt vatten (sjunker nära 0 W före uppvärmning) - utan detta skydd ser fyllningsfasen ut som ett cykelslut. Detta hoppar INTE över data: spåret för full effekt registreras från T=0. Förslagsmotorn mäter din maskins faktiska startmönster och dimensionerar detta automatiskt."
-    },
-    "end_energy_threshold": {
-      "label": "Slutenergi",
-      "doc": "Under nedräkningen av frånslagsfördröjningen jämförs ackumulerad energi (watt x tid) med denna tröskel. Om den överskrids återställs nedräkningen - bibehåller skrynkelskydd och diskmaskinstorkande svansar på cykeln istället för att korta dem. Höj den om cyklerna slutar för tidigt under nedkylning; sänk den om detekteringen är trög."
-    },
-    "end_repeat_count": {
-      "label": "Antal slutrepetitioner",
-      "doc": "Antalet på varandra följande avläsningar under stopptröskelvärdet som krävs innan cykeln avslutas. 1 är bra för de flesta pluggar. Höj till 2-3 om din smarta kontakt då och då rapporterar ett prov med falskt noll i mitten av cykeln och dina cykler slutar i förtid."
-    },
-    "power_off_threshold_w": {
-      "label": "Avstängningströskel",
-      "doc": "Valfri effektbaserad Av-detektering. När värdet är över 0 betraktas maskinen som avstängd och tillståndet återgår till Av så snart en cykel har avslutats och effekten håller sig under denna nivå under hela Avstängningsfördröjningen. Lämna på 0 för att inaktivera (standard). Ställ in värdet över maskinens verkliga avstängda nollnivå och under Stopptröskel samt under maskinens standbyförbrukning i tillståndet färdig-men-på; om det inte är under Stopptröskel ignoreras det. När det är aktiverat ersätter det Förloppåterställningsfördröjning för återgång till Av, så att en färdig maskin stannar i Färdig/Rena tills den faktiskt stängs av."
-    },
-    "power_off_delay": {
-      "label": "Avstängningsfördröjning",
-      "doc": "Hur länge effekten måste hålla sig under Avstängningströskel efter att en cykel har avslutats innan tillståndet återgår till Av. Används endast när Avstängningströskel är över 0. Kontrolleras enligt bakgrundskadensen, så den effektiva fördröjningen avrundas uppåt till nästa tillståndsutgångstick."
-    },
-    "sampling_interval": {
-      "label": "Samplingsintervall",
-      "doc": "Förväntad tid mellan sensoravläsningarna - används för att dimensionera utjämningsfönstret och starta avstudsningen korrekt. Varje sensoruppdatering registreras oavsett detta värde; den kalibrerar bara nedströmsberäkningarna. Förslagsmotorn mäter din sensors faktiska kadens från tidigare cykler och ställer in denna automatiskt."
-    },
-    "smoothing_window": {
-      "label": "Utjämningsfönster",
-      "doc": "Hur mycket råeffektsignalen utjämnas. Låg (2) är lyhörd men bullrig; hög (5) jämnar ut spikar men lägger till eftersläpning."
-    },
-    "abrupt_drop_watts": {
-      "label": "Abrupt fall",
-      "doc": "Ett effektfall större än detta flaggar cykeln som avbruten (manuell avbrytning) snarare än en naturlig finish."
-    },
-    "abrupt_drop_ratio": {
-      "label": "Abrupt fallförhållande",
-      "doc": "Ett fall som är större än denna andel av strömeffekten behandlas också som abrupt (0,6 = 60 % minskning). Kompletterar watt-tröskeln över apparatstorlekar."
-    },
-    "profile_match_threshold": {
-      "label": "Matchningströskel",
-      "doc": "Minsta likhetspoäng (0-1) krävs i slutet av cykeln för att acceptera en programidentifiering. Höj den för att minska felaktiga identifieringar; sänk den om din maskins program inte matchas. Standard 0,4 är en konservativ utgångspunkt."
-    },
-    "profile_unmatch_threshold": {
-      "label": "Omatchningströskel",
-      "doc": "Om en livematch i mitten av cykeln sjunker under denna poäng, rensas den preliminära identifieringen. Håll den lite under matchtröskeln så att en kort dopp i likhet inte vänder tillbaka skärmen till oöverträffad."
-    },
-    "profile_match_interval": {
-      "label": "Matchningsintervall",
-      "doc": "Hur ofta man ska försöka profilmatcha under en löpcykel. Standard 300 s (5 minuter) balanserar detekteringshastighet och CPU."
-    },
-    "profile_match_min_duration_ratio": {
-      "label": "Min. varaktighetsförhållande",
-      "doc": "Minsta cykellängd i förhållande till profilen. 0,9 betyder att en cykel måste vara minst 90 % av profilens varaktighet för att matcha."
-    },
-    "profile_match_max_duration_ratio": {
-      "label": "Maks. varaktighetsförhållande",
-      "doc": "Maximal cykellängd i förhållande till profilen. 1.3 betyder att en cykel måste vara under 130 % av profilens varaktighet för att matcha."
-    },
-    "profile_duration_tolerance": {
-      "label": "Profilvaraktighetstolerans",
-      "doc": "+/- bandet runt en profils genomsnittliga varaktighet som används under matchning. 0,25 betyder att en 60 min profil matchar 45-75 min cykler."
-    },
-    "duration_tolerance": {
-      "label": "Uppskattingstolerans",
-      "doc": "Tolerans för återstående uppskattningar (inlärningsfeedback, inte matchning). Om den faktiska varaktigheten är inom +/-X % av uppskattningen räknas det som en bra matchning."
-    },
-    "auto_label_confidence": {
-      "label": "Automärkningskonfidens",
-      "doc": "Om matchresultatet vid cykelslutet är på eller över detta, märks programmet automatiskt utan någon bekräftelse. Höj den för att kräva högre säkerhet innan automatisk märkning; sänk den för att automatisera mer. Fungerar tillsammans med Learning Confidence under den."
-    },
-    "learning_confidence": {
-      "label": "Inlärningskonfidens",
-      "doc": "Om matchresultatet faller mellan detta och Auto-Label Confidence, uppmanas du i ett feedbackmeddelande att verifiera det identifierade programmet. Under denna poäng är matchen för osäker för att ytan. Måste hållas under Auto-Label Confidence."
-    },
-    "suppress_feedback_notifications": {
-      "label": "Undertryck feedbackmeddelanden",
-      "doc": "Ge inte ett ihållande meddelande när en avslutad cykel behöver granskas; feedbacken visas fortfarande i kön för cyklergranskning."
-    },
-    "watchdog_interval": {
-      "label": "Vakthundsintervall",
-      "doc": "Hur ofta kontrollerar bakgrundsvakten efter avstängda sensorer och förflutna timeouts. Standard 30 s."
-    },
-    "no_update_active_timeout": {
-      "label": "Tidsgräns utan uppdatering",
-      "doc": "Om det inte kommer några strömuppdateringar under så här lång tid medan du kör, anta att kontakten tappade offline och tvångsstopp för att undvika en zombiecykel. Standard 600 s tillåter moln eller mesh lag."
-    },
-    "progress_reset_delay": {
-      "label": "Förloppåterställningsfördröjning",
-      "doc": "När du är klar håller du framsteg på 100 % så länge så att Slutfört är synligt på instrumentpanelerna innan du återställer till viloläge."
-    },
-    "auto_maintenance": {
-      "label": "Automatiskt underhåll (nattlig städning)",
-      "doc": "Kör nattlig städning: bygg om profilkuvert, beräkna om cykelns hälsa, beskära felsökningsspår och behåll de senaste cyklerna."
-    },
-    "expose_debug_entities": {
-      "label": "Exponera felsökningsentiteter",
-      "doc": "Publicera extra diagnostiska HA-enheter (matchningsförtroende, tvetydighet, tillståndsinterna). Av håller enhetslistan ren för normal användning."
-    },
-    "save_debug_traces": {
-      "label": "Spara felsökningsspår",
-      "doc": "Lagra spårningen av full effekt och matchande felsökningsdata för varje cykel. Användbar för felsökning men ökar lagringsstorleken."
-    },
-    "anti_wrinkle_enabled": {
-      "label": "Aktivera skrynkelskyddsdetektering",
-      "doc": "Känn igen de korta torktumlarpulser med låg effekt en torktumlare avger efter huvuduppvärmningsfasen och håll dem kopplade till den färdiga cykeln istället för att läsa dem som nya cykler."
-    },
-    "anti_wrinkle_max_power": {
-      "label": "Maks. skrynkelskyddseffekt",
-      "doc": "En puls över denna effekt behandlas som en riktig ny cykel, inte en anti-rynktumling. Ställ in precis ovanför tumlingspulseffekten."
-    },
-    "anti_wrinkle_max_duration": {
-      "label": "Maks. varaktighet",
-      "doc": "Pulser längre än detta behandlas som en riktig cykel snarare än en anti-rynktumling."
-    },
-    "anti_wrinkle_exit_power": {
-      "label": "Avslutningseffekttröskel",
-      "doc": "Effekten måste sjunka under detta mellan pulserna för att anti-rynkläget ska förbli aktivt."
-    },
-    "delay_start_detect_enabled": {
-      "label": "Aktivera detektering av försenad start",
-      "doc": "Upptäck när apparaten är påslagen och väntar (fördröjd start/standby) men inte har börjat sin cykel, så standby-dragning förväxlas inte med en pågående cykel."
-    },
-    "delay_confirm_seconds": {
-      "label": "Bekräftelsesekunder",
-      "doc": "Strömmen måste stanna i standby-bandet så länge innan apparaten behandlas som att den väntar på att starta snarare än att den är igång."
-    },
-    "delay_timeout_hours": {
-      "label": "Tidsgränstimmar",
-      "doc": "Sluta vänta i fördröjd start efter så här många timmar och återgå till tomgång, så en maskin som lämnas strömförsörjd men aldrig startad väntar inte för evigt."
-    },
-    "external_end_trigger_enabled": {
-      "label": "Aktivera extern slututlösare",
-      "doc": "Låt en extern binär sensor signalera slutet på en cykel, förutom den inbyggda effektbaserade detekteringen."
-    },
-    "external_end_trigger": {
-      "label": "Extern utlösarentitet",
-      "doc": "Binär sensor vars tillståndsändring markerar cykelns slut (t.ex. en \"färdig\" kontakt med apparaten eller en kompletterande integration)."
-    },
-    "external_end_trigger_inverted": {
-      "label": "Invertera extern utlösare (utlös vid AV)",
-      "doc": "Behandla avtryckarsensorn som stängs AV (istället för PÅ) som slutsignalen."
-    },
-    "door_sensor_entity": {
-      "label": "Dörrsensorentitet",
-      "doc": "Tillval dörr binär sensor. Används för att upptäcka när apparaten har öppnats/avlastats efter en cykel."
-    },
-    "pause_cuts_power": {
-      "label": "Paus bryter även ström (via switch)",
-      "doc": "När en cykel är pausad, stäng även av Switch Entity nedan. Endast för apparater vars kontakt säkert kan skäras av mitt i cykeln."
-    },
-    "switch_entity": {
-      "label": "Switchentitet",
-      "doc": "Valfri strömbrytare slås av vid paus och på igen vid återupptagning, används tillsammans med \"Pausen bryter också strömmen\"."
-    },
-    "notify_unload_delay_minutes": {
-      "label": "Lossningspåminnelsefördröjning",
-      "doc": "Minuter efter att en cykel har avslutats innan den fortfarande väntande påminnelsen om \"lasta av maskinen\" skickas. Ställ in 0 för att inaktivera påminnelsen."
-    },
-    "pump_stuck_duration": {
-      "label": "Pumpens fastnadsvaraktighet",
-      "doc": "Sekunder kan en pump köras kontinuerligt innan den flaggas som eventuellt fast (utlöser händelsen med fast pump)."
-    },
-    "notify_start_services": {
-      "label": "Starttjänster",
-      "doc": "notify.* tjänster anropas när en cykel startar. Lägg till en per mål (telefon, instrumentpanel, etc.); lämna tomt för ingen startavisering."
-    },
-    "notify_finish_services": {
-      "label": "Sluttjänster",
-      "doc": "notify.* tjänster anropas när en cykel avslutas. Lägg till en per mål; lämna tomt för ingen avisering om avslutad."
-    },
-    "notify_live_services": {
-      "label": "Direktframstegstjänster",
-      "doc": "notify.*-tjänster kallas för uppdateringar av förlopp i realtid medan en cykel körs. Lämna tomt för att inaktivera aviseringar om liveförlopp."
-    },
-    "notify_people": {
-      "label": "Personer (för Bara när hemma)",
-      "doc": "person.* enheter som används av \"Meddela endast när hemma\" för att avgöra om någon är hemma."
-    },
-    "notify_only_when_home": {
-      "label": "Meddela bara när hemma",
-      "doc": "Skicka bara aviseringar när minst en av de länkade personerna (ovan) är hemma."
-    },
-    "notify_fire_events": {
-      "label": "Avfyra HA-händelser för meddelanden",
-      "doc": "Avfyra även ha_washdata_*-händelser på cykelstart/slut så att du kan bygga dina egna automatiseringar."
-    },
-    "notify_before_end_minutes": {
-      "label": "Förvarning före slut",
-      "doc": "Skicka en nästan klar-varning när den beräknade återstående tiden sjunker under detta. 0 inaktiverar den."
-    },
-    "notify_live_interval_seconds": {
-      "label": "Direktuppdateringsintervall",
-      "doc": "Hur ofta aviseringar om realtidsförlopp uppdateras medan en cykel körs."
-    },
-    "notify_live_overrun_percent": {
-      "label": "% överköring innan varning",
-      "doc": "Om en cykel går förbi sin uppskattning med mer än denna procentsats, skicka en överskridningsvarning."
-    },
-    "notify_live_chronometer": {
-      "label": "Använd direktkronometer",
-      "doc": "Visa en nedräkningstimer som uppdateras live i meddelandet (på plattformar som stöder det) istället för en statisk uppskattning."
-    },
-    "notify_timeout_seconds": {
-      "label": "Avfärda automatiskt efter",
-      "doc": "Avvisa meddelandet automatiskt efter så här många sekunder (på plattformar som stöder det). 0 behåller den tills den avvisas manuellt."
-    },
-    "notify_title": {
-      "label": "Meddelanderubrik",
-      "doc": "Aviseringsrubrik. Mallvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
-    },
-    "notify_icon": {
-      "label": "Meddelandeikon",
-      "doc": "Valfri mdi-ikon för meddelandet (t.ex. mdi:tvättmaskin). Lämna tomt för plattformens standard."
-    },
-    "notify_start_message": {
-      "label": "Startmeddelande",
-      "doc": "Kropp skickas när en cykel startar. Mallvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
-    },
-    "notify_finish_message": {
-      "label": "Slutmeddelande",
-      "doc": "Kropp skickas när en cykel är klar. Mallvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
-    },
-    "notify_pre_complete_message": {
-      "label": "Nästan klart-meddelande",
-      "doc": "Brödtexten för varningen före slut / nästan klar. Mallvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
-    },
-    "notify_reminder_message": {
-      "label": "Påminnelsemeddelande",
-      "doc": "Brödtexten på påminnelsen om urladdning som fortfarande väntar. Blank använder den inbyggda standarden. Mallvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
-    },
-    "notify_channel": {
-      "label": "Android-kanal (start/direkt)",
-      "doc": "Android-aviseringskanalnamn för start-/livemeddelanden (kontrollerar ljud per kanal och prioritet i mobilappen). Blank använder standardappen för kompletterande app."
-    },
-    "notify_finish_channel": {
-      "label": "Android-kanal (slut)",
-      "doc": "Android-aviseringskanalnamn för slutmeddelandet. Blank återanvänder start/live-kanalen."
-    },
-    "energy_price_entity": {
-      "label": "Energiprisentitet",
-      "doc": "Sensor med aktuellt elpris per kWh (t.ex. en dynamisk tariff). Har företräde framför det statiska priset nedan. Varje cykel fryser det pris som gäller när den är klar."
-    },
-    "energy_price_static": {
-      "label": "Statiskt energipris (per kWh)",
-      "doc": "Fast pris per kWh som används för kostnadssiffror när ingen levande prisenhet anges ovan."
-    },
-    "notify_cycle_timers": {
-      "label": "Cykeltidurar",
-      "doc": "Aviseringar vid specifika minuter in i en cykel (t.ex. för att lägga till mjukgörare). Meddelande stöder {device}, {program}, {minutes}. Aktivera automatisk paus för att pausa vid den punkten och få ett interaktivt meddelande med en Fortsätt-knapp; återuppta via panelen, paus-/återuppta-tjänsten eller aviseringsåtgärden."
-    },
-    "enable_ml_models": {
-      "label": "Tillämpa smarta modeller under en cykel",
-      "doc": "Medan en cykel körs, låt modellerna förfina liveresultaten: en stabilare tid som återstår och energi/kostnadsuppskattning, och ett skydd mot för tidigt stopp vid slutdetektering (det kan bara någonsin fördröja en målgång, aldrig avsluta en för tidigt och är begränsad). Använder dina finjusterade modeller när sådana finns, annars de inbyggda. Av = endast den klassiska kraftbaserade logiken (fortfarande tillförlitlig)."
-    },
-    "ml_training_enabled": {
-      "label": "Lär dig av denna maskin",
-      "doc": "Studera regelbundet dina granskade cykler över natten och finjustera modellerna till denna specifika maskin. En förändring behålls bara när den verkligen ger bättre resultat på uthållna cykler, så detta kan bara hjälpa eller förbli oförändrat - aldrig gå tillbaka."
-    },
-    "ml_training_hour": {
-      "label": "Lär dig vid timmen",
-      "doc": "Lokal timme på dygnet (0-23) för att göra finjusteringen över natten. Välj en lugn timme som 2 (02:00)."
-    },
-    "ml_training_min_cycles": {
-      "label": "Cykler som behövs först",
-      "doc": "Vänta tills åtminstone så många cykler har spelats in innan du finjusterar, så det finns tillräckligt att lära av."
-    },
-    "ml_training_interval_days": {
-      "label": "Kontrollera som mest varje",
-      "doc": "Kontrollera igen efter förbättringar högst en gång per så många dagar."
-    }
-  },
-  "placeholder": {
-    "add": "lägg till…",
-    "group_name": "t.ex. Bomull 2:47",
-    "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
-    "notify": "lägg till en aviseringstjänst…",
-    "notify_services_list": "notify.mobile_app_phone, ...",
-    "person": "lägg till en person…",
-    "phase_name": "t.ex. Förtvättning",
-    "profile_name": "t.ex. Bomull 40°C"
   }
 }

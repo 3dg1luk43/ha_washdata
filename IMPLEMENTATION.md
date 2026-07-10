@@ -917,3 +917,60 @@ async_set_profile_phase_ranges(profile_name: str, ranges: list[dict])
    - Modify the name and/or description
    - An override entry is automatically created for default phases
    - This allows device-specific customization without affecting the built-in defaults
+
+---
+
+### Setting Conflict Validation (0.5.0)
+
+WashData has over 180 tunables; many pairs have ordering constraints that the runtime enforces silently (e.g. by ignoring a setting when it violates a guard). Conflict validation makes those constraints **visible and fixable** before saving.
+
+#### Conflict rules
+
+Fourteen constraints are checked, covering:
+
+| Rule | Constraint | Why it matters |
+|------|-----------|----------------|
+| **Hysteresis band** | `start_threshold_w > stop_threshold_w` | The cycle-detector state machine requires start > stop; equal values collapse the hysteresis band and cause rapid toggling |
+| **Min power / stop** | `min_power <= stop_threshold_w` | `min_power` is a display/filter floor; values above stop silently discard all readings and prevent detection |
+| **Power-off / stop** | `power_off_threshold_w < stop_threshold_w` | The runtime disables power-off detection when this threshold is ≥ stop; setting it there is a silent no-op |
+| **Off delay / min off gap** | `off_delay <= min_off_gap` | Off Delay exceeding Min Off Gap lets two consecutive cycles merge into one |
+| **Watchdog / sampling** | `watchdog_interval >= 2 × sampling_interval` | A watchdog firing in less than one sampling period can kill a healthy cycle mid-reading |
+| **No-update timeout / watchdog** | `no_update_active_timeout > watchdog_interval` | The watchdog must fire before the cycle is force-stopped, not after |
+| **Start duration / sampling** | `start_duration >= sampling_interval` | A start-duration shorter than the sampling interval means a single spike can open a cycle |
+| **Confidence ordering** | `learning_confidence ≤ match_threshold ≤ auto_label_confidence` | All three thresholds form a strict ladder; inverting any pair breaks the auto-label / review / ignore routing |
+| **Unmatch / match** | `unmatch_threshold < match_threshold` | An unmatch threshold at or above the match threshold instantly un-matches every commit |
+| **Anti-wrinkle exit / stop** | `anti_wrinkle_exit_power < stop_threshold_w` | The exit power marks the true-off state for anti-wrinkle mode; if it is at or above stop, the runtime uses `max(exit, stop)`, making the setting a no-op *(washing machine / dryer / washer-dryer only)* |
+| **Anti-wrinkle max / start** | `anti_wrinkle_max_power > start_threshold_w` | The max-power cap for anti-wrinkle mode must exceed start threshold or the duration limit is never applied *(washing machine / dryer / washer-dryer only)* |
+| **Pump stuck / no-update timeout** | `pump_stuck_duration < no_update_active_timeout` | The pump-stuck alarm must fire before the watchdog force-stops the cycle *(pump / sump-pump only)* |
+| **Duration ratio** | `profile_match_min_duration_ratio < profile_match_max_duration_ratio` | Inverted min/max eliminates all candidates at the first matching stage |
+
+#### Frontend (panel)
+
+`_SETTING_CONFLICTS` (a `const` array in `ha-washdata-panel.js`) encodes all 14 rules as objects with three fields:
+- `keys` — the setting keys involved
+- `check(vals)` → bool — returns `true` when the constraint is violated. Device-type-specific rules include a guard: the anti-wrinkle rules check `['washing_machine','dryer','washer_dryer'].includes(v.device_type)`; the pump-stuck rule checks `v.device_type === 'pump'`. `vals` always includes `device_type` via `_readSettingsFormValues` (which merges `this._opts`, and `this._opts` is populated from `get_options` which returns merged `entry.data + entry.options`).
+- `fieldErrors(vals)` → map — for each affected key, returns `{msgKey, msgVars, msgFb, fixVal}` where `fixVal` is a safe corrected value
+
+`_readSettingsFormValues(sr)` merges DOM form values (from the current settings section) over `this._opts` (last-saved values for off-screen fields), so cross-section conflicts (e.g. `min_power` in the Basic section vs `stop_threshold_w` in the Detection section) are caught even when the two fields are not on-screen simultaneously.
+
+`_liveValidateSettings(sr)` runs every conflict rule on every `input` / `change` event and on initial render, adding a red `wd-conflict-row` below each affected field (with the translated message and a **Use X** fix button) and an `wd-has-conflict` outline. It returns the map of active conflicts; `_saveSettings()` blocks if it is non-empty.
+
+**Cascade fix** (`_cascadeConflictFix`): clicking **Use X** triggers a loop that fixes the clicked field, then re-validates and automatically applies the next downstream fix, repeating until stable. Fields in the current section update their DOM inputs directly; fields in other sections (off-screen) update `this._opts` in memory and are tracked in `this._cascadePending`. `_saveSettings()` prefixes the `updates` payload with `_cascadePending` so off-screen cascade values are included in the next save even though they never enter a DOM input. `_cascadePending` is cleared on successful save, Refresh, or Apply Suggestions. The same cascade also fires when a tuning suggestion's **Use** button is clicked: after staging the new value in `this._opts` and re-rendering the settings form, `_cascadeConflictFix` runs with the suggestion key as `initialKey` so downstream settings are auto-fixed in the same interaction.
+
+**Revert changes button**: `_saveSettings()` snapshots `this._opts` into `this._prevOpts` immediately before sending to the server. The "Revert changes" button (disabled until the first save in the session) sends `_prevOpts` back to the server and restores local state, giving the user one-level post-save undo. Cleared on Refresh or Apply Suggestions.
+
+#### Backend (`suggestion_engine.py`)
+
+`reconcile_suggestions()` enforces the same 14 constraints on the suggestion engine's proposed values via a **direction-aware, cascade-creative, fixpoint loop**:
+
+- **Direction-aware**: each rule knows which setting is the more-fundamental *anchor* and which is the *derivative* that yields. When `start_threshold_w` is the anchor being suggested lower, `stop_threshold_w` is cascade-adjusted down — not the other way around. When `stop_threshold_w` is the anchor, `start_threshold_w` is cascaded up.
+- **Cascade-create**: `adjust(key, new_val, reason)` now *creates* a new suggestion entry (`"cascade": True`) for keys not originally in the suggestion set, rather than being a no-op. This ensures the full returned map is jointly valid — e.g. suggesting a lower Start Threshold automatically cascade-creates a matching Stop Threshold and Min Power entry.
+- **`in_out()` guard**: rules only fire when at least one key in the constraint is already in the suggestion map (original or cascade). Live-vs-live conflicts in device options are left to the frontend conflict check, not invented here.
+- **Fixpoint loop** (up to 8 iterations, breaks early when stable): a cascade entry created in iteration N may trigger a further rule in iteration N+1. The loop converges in ≤ 2 iterations for typical chains.
+- **`original_keys`**: a frozenset of keys the engine originally proposed, used to determine cascade direction within each rule.
+
+`_reconcile_stored_suggestions()` in `SuggestionEngine` calls `reconcile_suggestions(stored, self._entry_options())` after each `apply_suggestions()` call, persisting cascade-created entries into the profile store via `set_suggestion`. This ensures the full coherent set is shown in the panel and applied together via "Apply all". The anti-wrinkle rules (8, 9) and pump-stuck rule (10) are **device-type-aware**: they compute `_dt = current.get(CONF_DEVICE_TYPE)` and skip the rule unless `_dt` matches the applicable types (anti-wrinkle: `washing_machine | dryer | washer_dryer`; pump-stuck: `pump`). A `None` device_type is treated as "eligible" to preserve backward compatibility with existing tests that call `reconcile_suggestions` without a device_type in `current`.
+
+#### Translations
+
+All conflict message strings, the save-blocked toast (`toast.settings_conflicts`), the cascade toast (`conflict.cascade_toast`), the Revert button label and tooltips (`btn.revert_settings`, `btn.revert_settings_tip`, `btn.revert_settings_tip_none`), and the revert success toast (`toast.settings_reverted`) are fully translated across all 35 supported panel languages via `_t()`. English strings live in `translations/panel/en.json` and serve as the `_t()` fallback when a translation is missing.

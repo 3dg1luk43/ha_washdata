@@ -20,6 +20,7 @@ from .const import (
     CONF_PROFILE_DURATION_TOLERANCE,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
+    CONF_POWER_OFF_THRESHOLD_W,
     CONF_END_ENERGY_THRESHOLD,
     CONF_RUNNING_DEAD_ZONE,
     CONF_MIN_OFF_GAP,
@@ -30,8 +31,17 @@ from .const import (
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_LEARNING_CONFIDENCE,
     CONF_PROFILE_MATCH_THRESHOLD,
+    CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_END_REPEAT_COUNT,
     CONF_START_DURATION_THRESHOLD,
+    CONF_ANTI_WRINKLE_MAX_POWER,
+    CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_DEVICE_TYPE,
+    CONF_PUMP_STUCK_DURATION,
+    DEVICE_TYPE_DRYER,
+    DEVICE_TYPE_PUMP,
+    DEVICE_TYPE_WASHING_MACHINE,
+    DEVICE_TYPE_WASHER_DRYER,
     DEFAULT_OFF_DELAY_BY_DEVICE,
     DEFAULT_OFF_DELAY,
     DEFAULT_MIN_OFF_GAP_BY_DEVICE,
@@ -240,14 +250,29 @@ def reconcile_suggestions(
 ) -> tuple[dict[str, Any], set[str]]:
     """Enforce cross-parameter invariants over a suggestion map.
 
-    ``suggestions`` maps a config key to ``{"value", "reason", ...}``.
-    ``current`` holds the device's live option values (the anchor for keys that
-    are not being suggested). Only *suggested* values are adjusted - the pass
-    never invents a suggestion for a key the engine did not propose. Returns the
-    (mutated copy of the) map and the set of keys that were changed.
+    Runs a direction-aware fixpoint loop with cascade-create.  When fixing a
+    conflict requires adjusting a key that was not originally proposed by the
+    engine, a *cascade* entry is created (``"cascade": True``) so the returned
+    map is a *coherent, jointly-valid* set of suggested values.
+
+    Direction follows the dependency hierarchy: the more-fundamental setting
+    anchors; the derived setting yields.
+    - ``start_threshold_w`` is the detection trigger (primary).
+    - ``stop_threshold_w`` is derived from start (must stay below it).
+    - ``min_power`` is a display floor (derived from stop).
+    Rules that straddle two original suggestions prefer adjusting the derived
+    (lower-priority) side.  Rules that affect only one original suggestion
+    cascade-create an entry for the other so the full set is self-consistent.
+
+    A cascade-created entry is NOT written if neither key in the constraint is
+    in ``out`` (live-vs-live conflicts are the frontend's responsibility).
     """
     out: dict[str, Any] = {k: dict(v) if isinstance(v, dict) else v for k, v in suggestions.items()}
-    changed: set[str] = set()
+    # Track which keys the engine originally proposed — used for direction logic.
+    original_keys: frozenset[str] = frozenset(
+        k for k, v in out.items() if isinstance(v, dict) and v.get("value") is not None
+    )
+    all_changed: set[str] = set()
 
     def eff(key: str) -> float | None:
         entry = out.get(key)
@@ -255,65 +280,147 @@ def reconcile_suggestions(
             return _num(entry.get("value"))
         return _num(current.get(key))
 
+    def is_original(key: str) -> bool:
+        return key in original_keys
+
+    def in_out(*keys: str) -> bool:
+        """True if at least one key is already in the suggestion map (original or cascade)."""
+        return any(isinstance(out.get(k), dict) for k in keys)
+
     def adjust(key: str, new_value: float, why: str) -> None:
-        """Adjust a *suggested* value (no-op if the key isn't suggested)."""
-        entry = out.get(key)
-        if not isinstance(entry, dict) or entry.get("value") is None:
-            return
+        """Set a suggestion value; cascade-creates an entry when the key is absent."""
         rounded = round(new_value, 2)
-        if _num(entry.get("value")) == rounded:
-            return
-        entry["value"] = rounded
-        base = entry.get("reason", "")
-        entry["reason"] = f"{base} Adjusted to {rounded} for consistency with {why}.".strip()
-        changed.add(key)
-
-    # 1) min_power <= stop_threshold_w < start_threshold_w
-    mp, stop, start = eff(CONF_MIN_POWER), eff(CONF_STOP_THRESHOLD_W), eff(CONF_START_THRESHOLD_W)
-    if stop is not None and mp is not None and mp > stop:
-        adjust(CONF_MIN_POWER, stop * 0.8, "the stop threshold")
-    if stop is not None and start is not None and start <= stop:
-        adjust(CONF_START_THRESHOLD_W, max(stop + 0.5, stop * 1.25), "the stop threshold")
-
-    # 2) off_delay <= min_off_gap (a pause long enough to end a cycle must not be
-    #    shorter than the gap used to keep the next run separate). Prefer raising
-    #    the gap; only lower off_delay if the gap isn't itself suggested.
-    off_delay, min_gap = eff(CONF_OFF_DELAY), eff(CONF_MIN_OFF_GAP)
-    if off_delay is not None and min_gap is not None and min_gap < off_delay:
-        if isinstance(out.get(CONF_MIN_OFF_GAP), dict) and out[CONF_MIN_OFF_GAP].get("value") is not None:
-            adjust(CONF_MIN_OFF_GAP, off_delay, "the off delay")
+        entry = out.get(key)
+        if isinstance(entry, dict):
+            if _num(entry.get("value")) == rounded:
+                return
+            entry["value"] = rounded
+            base = entry.get("reason", "")
+            entry["reason"] = f"{base} Adjusted to {rounded} for consistency with {why}.".strip()
+        elif entry is None:
+            out[key] = {
+                "value": rounded,
+                "reason": f"Adjusted to {rounded} for consistency with {why}.",
+                "cascade": True,
+            }
         else:
-            adjust(CONF_OFF_DELAY, min_gap, "the minimum off gap")
+            return
+        all_changed.add(key)
 
-    # 3) watchdog_interval >= 2 x sampling_interval (avoid false stops), and
-    #    no_update_active_timeout > watchdog_interval.
-    sampling = eff(CONF_SAMPLING_INTERVAL)
-    watchdog = eff(CONF_WATCHDOG_INTERVAL)
-    if sampling is not None and watchdog is not None and watchdog < 2.0 * sampling:
-        adjust(CONF_WATCHDOG_INTERVAL, 2.0 * sampling + 1.0, "the sampling interval")
+    for _iteration in range(8):
+        prev_size = len(all_changed)
+
+        # ── Rule 1a: stop_threshold_w < start_threshold_w ─────────────────────
+        # start is more fundamental (the detection trigger); stop is derived.
+        # When start is the original suggestion → cascade stop downward.
+        # When start was not originally suggested → cascade start upward.
+        start = eff(CONF_START_THRESHOLD_W)
+        stop = eff(CONF_STOP_THRESHOLD_W)
+        if start is not None and stop is not None and start <= stop and in_out(CONF_START_THRESHOLD_W, CONF_STOP_THRESHOLD_W):
+            if is_original(CONF_START_THRESHOLD_W):
+                adjust(CONF_STOP_THRESHOLD_W, round(start * 0.8, 1), "the start threshold")
+            else:
+                adjust(CONF_START_THRESHOLD_W, round(max(stop + 0.5, stop * 1.25), 1), "the stop threshold")
+            stop = eff(CONF_STOP_THRESHOLD_W)
+
+        # ── Rule 1b: min_power <= stop_threshold_w ────────────────────────────
+        # min_power is a display floor; always yields to the stop threshold.
+        mp = eff(CONF_MIN_POWER)
+        if stop is not None and mp is not None and mp > stop and in_out(CONF_STOP_THRESHOLD_W, CONF_MIN_POWER):
+            adjust(CONF_MIN_POWER, round(stop * 0.8, 1), "the stop threshold")
+
+        # ── Rule 2: min_off_gap >= off_delay ──────────────────────────────────
+        # Prefer raising the gap (derived); lower off_delay only when the gap is
+        # a fixed current value.
+        min_gap = eff(CONF_MIN_OFF_GAP)
+        off_delay = eff(CONF_OFF_DELAY)
+        if off_delay is not None and min_gap is not None and min_gap < off_delay and in_out(CONF_MIN_OFF_GAP, CONF_OFF_DELAY):
+            if is_original(CONF_MIN_OFF_GAP):
+                adjust(CONF_MIN_OFF_GAP, off_delay, "the off delay")
+            else:
+                adjust(CONF_OFF_DELAY, min_gap, "the minimum off gap")
+
+        # ── Rule 3a: watchdog_interval >= 2 × sampling_interval ───────────────
+        sampling = eff(CONF_SAMPLING_INTERVAL)
         watchdog = eff(CONF_WATCHDOG_INTERVAL)
-    timeout = eff(CONF_NO_UPDATE_ACTIVE_TIMEOUT)
-    if watchdog is not None and timeout is not None and timeout <= watchdog:
-        adjust(CONF_NO_UPDATE_ACTIVE_TIMEOUT, watchdog * 2.0, "the watchdog interval")
+        if sampling is not None and watchdog is not None and watchdog < 2.0 * sampling and in_out(CONF_SAMPLING_INTERVAL, CONF_WATCHDOG_INTERVAL):
+            adjust(CONF_WATCHDOG_INTERVAL, 2.0 * sampling + 1.0, "the sampling interval")
+            watchdog = eff(CONF_WATCHDOG_INTERVAL)
 
-    # 4) start_duration_threshold >= one sampling interval (debounce must cover a sample).
-    start_dur = eff(CONF_START_DURATION_THRESHOLD)
-    if sampling is not None and start_dur is not None and start_dur < sampling:
-        adjust(CONF_START_DURATION_THRESHOLD, sampling, "the sampling interval")
+        # ── Rule 3b: no_update_active_timeout > watchdog_interval ─────────────
+        timeout = eff(CONF_NO_UPDATE_ACTIVE_TIMEOUT)
+        if watchdog is not None and timeout is not None and timeout <= watchdog and in_out(CONF_WATCHDOG_INTERVAL, CONF_NO_UPDATE_ACTIVE_TIMEOUT):
+            adjust(CONF_NO_UPDATE_ACTIVE_TIMEOUT, round(watchdog * 2.0, 1), "the watchdog interval")
 
-    # 5) learning_confidence <= profile_match_threshold <= auto_label_confidence.
-    #    Reconcile top-down (match<=auto first) so a later adjustment cannot
-    #    re-break an ordering already fixed above.
-    match_thr = eff(CONF_PROFILE_MATCH_THRESHOLD)
-    auto = eff(CONF_AUTO_LABEL_CONFIDENCE)
-    if match_thr is not None and auto is not None and match_thr > auto:
-        adjust(CONF_PROFILE_MATCH_THRESHOLD, auto, "the auto-label confidence")
+        # ── Rule 4: start_duration_threshold >= sampling_interval ─────────────
+        start_dur = eff(CONF_START_DURATION_THRESHOLD)
+        if sampling is not None and start_dur is not None and start_dur < sampling and in_out(CONF_SAMPLING_INTERVAL, CONF_START_DURATION_THRESHOLD):
+            adjust(CONF_START_DURATION_THRESHOLD, sampling, "the sampling interval")
+
+        # ── Rule 5: learning_confidence <= match_threshold <= auto_label ───────
+        # Reconcile top-down (match<=auto first) so a lower fix cannot re-break
+        # the ordering already set above.
         match_thr = eff(CONF_PROFILE_MATCH_THRESHOLD)
-    learn = eff(CONF_LEARNING_CONFIDENCE)
-    if learn is not None and match_thr is not None and learn > match_thr:
-        adjust(CONF_LEARNING_CONFIDENCE, match_thr, "the profile match threshold")
+        auto = eff(CONF_AUTO_LABEL_CONFIDENCE)
+        if match_thr is not None and auto is not None and match_thr > auto and in_out(CONF_PROFILE_MATCH_THRESHOLD, CONF_AUTO_LABEL_CONFIDENCE):
+            adjust(CONF_PROFILE_MATCH_THRESHOLD, auto, "the auto-label confidence")
+            match_thr = eff(CONF_PROFILE_MATCH_THRESHOLD)
+        learn = eff(CONF_LEARNING_CONFIDENCE)
+        if learn is not None and match_thr is not None and learn > match_thr and in_out(CONF_LEARNING_CONFIDENCE, CONF_PROFILE_MATCH_THRESHOLD):
+            adjust(CONF_LEARNING_CONFIDENCE, match_thr, "the profile match threshold")
 
-    return out, changed
+        # ── Rule 6: profile_unmatch_threshold < profile_match_threshold ────────
+        unmatch = eff(CONF_PROFILE_UNMATCH_THRESHOLD)
+        match_thr2 = eff(CONF_PROFILE_MATCH_THRESHOLD)
+        if unmatch is not None and match_thr2 is not None and unmatch >= match_thr2 and in_out(CONF_PROFILE_UNMATCH_THRESHOLD, CONF_PROFILE_MATCH_THRESHOLD):
+            adjust(CONF_PROFILE_UNMATCH_THRESHOLD, round(match_thr2 - 0.05, 2), "the profile match threshold")
+
+        # ── Rule 7: power_off_threshold_w < stop_threshold_w (when > 0) ───────
+        pot = eff(CONF_POWER_OFF_THRESHOLD_W)
+        stop_eff = eff(CONF_STOP_THRESHOLD_W)
+        if pot is not None and pot > 0.0 and stop_eff is not None and pot >= stop_eff and in_out(CONF_POWER_OFF_THRESHOLD_W, CONF_STOP_THRESHOLD_W):
+            adjust(CONF_POWER_OFF_THRESHOLD_W, round(stop_eff * 0.6, 1), "the stop threshold")
+
+        # ── Rule 8: anti_wrinkle_exit_power < stop_threshold_w ────────────────
+        # Anti-wrinkle only applies to washing machines, dryers, and washer-dryer
+        # combos; skip the constraint for all other device types.
+        _dt = current.get(CONF_DEVICE_TYPE)
+        _aw_eligible = _dt is None or _dt in {DEVICE_TYPE_WASHING_MACHINE, DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER}
+        if _aw_eligible:
+            aw_exit = eff(CONF_ANTI_WRINKLE_EXIT_POWER)
+            if stop_eff is not None and aw_exit is not None and aw_exit >= stop_eff and in_out(CONF_ANTI_WRINKLE_EXIT_POWER, CONF_STOP_THRESHOLD_W):
+                adjust(CONF_ANTI_WRINKLE_EXIT_POWER, round(stop_eff * 0.4, 1), "the stop threshold")
+
+        # ── Rule 9: anti_wrinkle_max_power > start_threshold_w ────────────────
+        if _aw_eligible:
+            aw_max = eff(CONF_ANTI_WRINKLE_MAX_POWER)
+            start_eff = eff(CONF_START_THRESHOLD_W)
+            if aw_max is not None and start_eff is not None and aw_max <= start_eff and in_out(CONF_ANTI_WRINKLE_MAX_POWER, CONF_START_THRESHOLD_W):
+                adjust(CONF_ANTI_WRINKLE_MAX_POWER, round(start_eff * 2.0, 1), "the start threshold")
+
+        # ── Rule 10: pump_stuck_duration < no_update_active_timeout ───────────
+        # Pump stuck detection is only relevant for pump/sump-pump device types.
+        if _dt is None or _dt == DEVICE_TYPE_PUMP:
+            pump_stuck = eff(CONF_PUMP_STUCK_DURATION)
+            no_upd = eff(CONF_NO_UPDATE_ACTIVE_TIMEOUT)
+            if pump_stuck is not None and no_upd is not None and no_upd <= pump_stuck and in_out(CONF_PUMP_STUCK_DURATION, CONF_NO_UPDATE_ACTIVE_TIMEOUT):
+                adjust(CONF_NO_UPDATE_ACTIVE_TIMEOUT, round(pump_stuck + 60.0), "the pump stuck duration")
+
+        # ── Rule 11: min_duration_ratio < max_duration_ratio ──────────────────
+        # Direction: when min_ratio is the original anchor (raised), max must
+        # rise to stay above it.  Otherwise lower min to stay below max.
+        min_r = eff(CONF_PROFILE_MATCH_MIN_DURATION_RATIO)
+        max_r = eff(CONF_PROFILE_MATCH_MAX_DURATION_RATIO)
+        if min_r is not None and max_r is not None and min_r >= max_r and in_out(CONF_PROFILE_MATCH_MIN_DURATION_RATIO, CONF_PROFILE_MATCH_MAX_DURATION_RATIO):
+            if is_original(CONF_PROFILE_MATCH_MIN_DURATION_RATIO):
+                adjust(CONF_PROFILE_MATCH_MAX_DURATION_RATIO, round(min_r * 2.0, 2), "the min duration ratio")
+            else:
+                adjust(CONF_PROFILE_MATCH_MIN_DURATION_RATIO, round(max_r * 0.5, 2), "the max duration ratio")
+
+        if len(all_changed) == prev_size:
+            break
+
+    return out, all_changed
 
 if TYPE_CHECKING:
     from .profile_store import ProfileStore

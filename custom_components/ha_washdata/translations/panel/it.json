@@ -1,14 +1,30 @@
 {
+  "badge": {
+    "artifact_tip": "{n} anomalie rilevate (ad esempio porta aperta a metà ciclo): apri per vederle sul grafico",
+    "auto": "(rilevato automaticamente)",
+    "built_in_tag": "integrato",
+    "declining": "↘ in calo",
+    "fair_fit": "qualità accettabile",
+    "fair_fit_tip": "Coerenza della corrispondenza moderata: alcuni cicli assegnati a questo profilo hanno punteggi di confidenza inferiori. Etichettare più cicli o registrare nuovamente il profilo per migliorare la precisione.",
+    "feedback_requested": "Feedback richiesto",
+    "golden_cycle": "Ciclo di riferimento registrato",
+    "improving": "↗ in miglioramento",
+    "manual": "(selezionato manualmente)",
+    "needs_review": "Necessita di revisione",
+    "overrun": "Ha funzionato più a lungo del solito",
+    "poor_fit": "scarsa vestibilità",
+    "poor_fit_tip": "Cronologia delle partite incoerente: valuta la possibilità di ricostruire questo profilo",
+    "restart_gap_tip": "{n} interruzione riavvio HA: il tracciato di potenza ha un buco",
+    "reviewed": "Revisionato",
+    "steady": "→ stabile",
+    "using_defaults": "Utilizzo delle impostazioni predefinite fornite",
+    "using_tuned": "Utilizzo di pesi accordati"
+  },
   "btn": {
-    "add_timer": "+ Aggiungi timer",
-    "remove_timer": "Rimuovi il timer",
-    "add_device_tip": "Aggiungi un altro dispositivo WashData",
-    "delete_group_tip": "Elimina solo questo gruppo: i profili dei membri verranno mantenuti",
-    "run_analysis_tip": "Analizza subito i tuoi cicli registrati e aggiorna i suggerimenti di ottimizzazione",
-    "reset_ml_models_tip": "Scarta i modelli ottimizzati e torna a quelli integrati. WashData può riapprenderli in seguito.",
-    "resume_cycle": "Riprendi ciclo",
     "add_device": "+ Aggiungi dispositivo",
+    "add_device_tip": "Aggiungi un altro dispositivo WashData",
     "add_phase": "+ Aggiungi fase",
+    "add_timer": "+ Aggiungi timer",
     "apply_all": "Applica tutto",
     "apply_label": "Applica etichetta",
     "apply_split": "Applica divisione",
@@ -27,6 +43,7 @@
     "create_profile": "+ Crea profilo",
     "delete": "Eliminare",
     "delete_group": "Elimina gruppo",
+    "delete_group_tip": "Elimina solo questo gruppo: i profili dei membri verranno mantenuti",
     "delete_profile": "Elimina profilo",
     "discard": "Scartare",
     "dismiss": "Congedare",
@@ -59,11 +76,15 @@
     "record": "Inizia a registrare",
     "refresh": "Aggiorna",
     "remove": "Rimuovere",
+    "remove_timer": "Rimuovi il timer",
     "reset": "Reset",
+    "reset_ml_models_tip": "Scarta i modelli ottimizzati e torna a quelli integrati. WashData può riapprenderli in seguito.",
     "reset_to_builtin": "Ripristina i modelli integrati",
     "reset_to_defaults": "Ripristina le impostazioni predefinite",
+    "resume_cycle": "Riprendi ciclo",
     "review": "Rivedi",
     "run_analysis": "🔍 Esegui l'analisi dei suggerimenti",
+    "run_analysis_tip": "Analizza subito i tuoi cicli registrati e aggiorna i suggerimenti di ottimizzazione",
     "run_auto_label": "Esegui l'etichettatura automatica",
     "save": "Salva",
     "save_access_control": "Salva controllo accessi",
@@ -73,6 +94,9 @@
     "save_preferences": "Salva preferenze",
     "save_review": "Salva revisione",
     "save_settings": "Salva impostazioni",
+    "revert_settings": "Annulla modifiche",
+    "revert_settings_tip": "Ripristina le impostazioni precedenti all'ultimo salvataggio",
+    "revert_settings_tip_none": "Salva prima per abilitare l'annullamento",
     "select": "Selezionare",
     "show_only": "Mostra solo",
     "split": "Diviso",
@@ -83,9 +107,67 @@
     "use": "Usa",
     "wipe_all": "Cancella tutti i dati"
   },
+  "conflict": {
+    "anti_wrinkle_exit": {
+      "exit": "Deve essere inferiore alla Soglia di arresto ({stop} W); altrimenti la potenza di uscita anti-grinze viene ignorata",
+      "stop": "Deve essere superiore alla Potenza di uscita anti-grinze ({exit} W)"
+    },
+    "anti_wrinkle_max": {
+      "max": "Deve essere superiore alla Soglia di avvio ({start} W); altrimenti il limite di durata anti-grinze viene ignorato",
+      "start": "Deve essere inferiore alla Potenza massima anti-grinze ({max} W)"
+    },
+    "attn_sub": "Correggi i conflitti prima di salvare",
+    "attn_title": "{n} conflitto{s} nelle impostazioni",
+    "confidence": {
+      "auto": "Deve essere maggiore o uguale alla Soglia di corrispondenza ({match})",
+      "learning": "Deve essere minore o uguale alla Soglia di corrispondenza ({match})",
+      "match_for_auto": "Deve essere minore o uguale alla Confidenza di etichettatura automatica ({alc})",
+      "match_for_learning": "Deve essere maggiore o uguale alla Confidenza di apprendimento ({lc})"
+    },
+    "duration_ratio": {
+      "max": "Deve essere superiore al Rapporto di durata minimo ({min})",
+      "min": "Deve essere inferiore al Rapporto di durata massimo ({max})"
+    },
+    "hysteresis": {
+      "start": "Deve essere superiore alla Soglia di arresto ({stop} W)",
+      "stop": "Deve essere inferiore alla Soglia di avvio ({start} W)"
+    },
+    "min_power": {
+      "min_power": "Deve essere minore o uguale alla Soglia di arresto ({stop} W)",
+      "stop": "Deve essere maggiore o uguale alla Potenza minima ({min} W)"
+    },
+    "no_update_timeout": {
+      "timeout": "Deve essere maggiore dell'Intervallo watchdog ({wi} s)",
+      "watchdog": "Deve essere minore del Timeout assenza aggiornamenti ({to} s)"
+    },
+    "off_delay": {
+      "gap": "L'Intervallo minimo dovrebbe essere almeno uguale al Ritardo di arresto ({delay} s)",
+      "off_delay": "Il Ritardo di arresto ({off_delay} s) supera l'Intervallo minimo tra cicli ({gap} s); i cicli consecutivi potrebbero fondersi"
+    },
+    "power_off": {
+      "stop": "Deve essere superiore alla Soglia di spegnimento ({pot} W)",
+      "threshold": "Deve essere inferiore alla Soglia di arresto ({stop} W) per avere effetto"
+    },
+    "pump_stuck": {
+      "duration": "Deve essere inferiore al Timeout assenza aggiornamenti ({to} s) affinché l'allarme pompa bloccata scatti prima che il watchdog termini il ciclo",
+      "timeout": "Deve superare la Durata pompa bloccata ({ps} s) affinché l'allarme scatti prima che il ciclo venga fermato forzatamente"
+    },
+    "start_dur": {
+      "sampling": "L'Intervallo di campionamento supera la Durata di avvio ({sdt} s); picchi su un singolo campione possono aprire un ciclo",
+      "threshold": "Dovrebbe essere almeno un Intervallo di campionamento ({si} s) per evitare falsi avvii su un singolo campione"
+    },
+    "unmatch": {
+      "match": "Deve essere superiore alla Soglia di non corrispondenza ({un})",
+      "unmatch": "Deve essere inferiore alla Soglia di corrispondenza ({match}); altrimenti una corrispondenza confermata viene annullata istantaneamente"
+    },
+    "cascade_toast": "Adattate anche {n} impostazioni per coerenza.",
+    "use_fix": "Usa {val}",
+    "watchdog": {
+      "interval": "Dovrebbe essere almeno 2x l'Intervallo di campionamento ({si} s)",
+      "sampling": "L'Intervallo di campionamento dovrebbe essere al massimo la metà dell'Intervallo watchdog ({wi} s)"
+    }
+  },
   "hdr": {
-    "logs": "Registri",
-    "toggle_sidebar": "Attiva/disattiva la barra laterale di Home Assistant",
     "access_control": "Controllo degli accessi",
     "automation_delete": "Elimina questa automazione",
     "automation_needs_review": "Questo ciclo necessita di revisione",
@@ -97,6 +179,7 @@
     "display": "Display",
     "export_import": "Esporta/Importa",
     "live_power": "Potenza viva",
+    "logs": "Registri",
     "logs_diagnostics": "Diagnostica",
     "maintenance": "Azioni di manutenzione",
     "manual_recording": "Registrazione manuale",
@@ -112,19 +195,28 @@
     "status": "Stato",
     "status_graph": "Grafico dello stato",
     "storage_stats": "Statistiche di archiviazione",
+    "toggle_sidebar": "Attiva/disattiva la barra laterale di Home Assistant",
     "tools_and_data": "Strumenti e dati",
     "wipe_history": "Cancella la storia"
   },
+  "health": {
+    "fair": "Qualità profilo accettabile",
+    "good": "✓ Buona qualità profilo",
+    "poor": "⚠ Qualità profilo scarsa"
+  },
   "lbl": {
-    "timer_min": "min",
-    "timer_msg_placeholder": "Messaggio (facoltativo, {device}/{program}/{minutes})",
-    "timer_auto_pause": "Pausa automatica",
-    "label": "Programma",
     "actions": "Azioni",
     "activity": "Attività",
     "administrators": "Amministratori",
+    "artifact_anomaly": "Anomalia",
+    "artifact_high_power": "Alta potenza",
+    "artifact_interruption": "Interruzione",
+    "artifact_low_power": "Bassa potenza",
     "auto_fine_tune_off": "disattivazione della sintonizzazione automatica",
+    "auto_fine_tune_on": "ottimizzazione automatica attiva (intorno alle {hour}:00)",
     "clock_time": "Ora dell'orologio",
+    "cohesion_good": "coesione {pct}%",
+    "cohesion_low": "⚠ coesione bassa {pct}%",
     "compare_profiles": "Confronta con i profili",
     "confidence": "Fiducia",
     "confidence_threshold": "Soglia di fiducia",
@@ -146,26 +238,33 @@
     "emphasis": "Enfasi",
     "enable_access_control": "Abilita il controllo dell'accesso per utente",
     "energy": "Energia",
+    "expected": "Atteso",
     "expected_duration": "Durata prevista (min)",
     "file_kb": "File (kB)",
     "gap_s": "Divario/i",
+    "group_name": "Nome del gruppo",
     "head_trim": "Taglio della testa",
     "health": "Salute",
     "hide_tabs": "Nascondi le schede per i non amministratori",
     "in_use": "In uso",
     "json_data": "Dati JSON",
+    "label": "Programma",
     "last_checked": "Ultimo controllo:",
     "load_from_file": "Carica da file",
     "manual_duration": "Durata manuale (min, opzionale)",
+    "members": "Membri",
     "mode_existing_profile": "Aggiungi al profilo esistente",
     "mode_new_profile": "Crea nuovo profilo",
+    "models_fine_tuned": "({count} modelli ottimizzati)",
     "new_profile_name": "Nuovo nome del profilo",
     "panel_default_tab": "Scheda predefinita",
+    "panel_language": "Lingua del pannello",
     "phase_name": "Nome",
     "power": "Energia",
     "profile": "Profilo",
     "profile_name": "Nome del profilo",
     "progress": "Progressi",
+    "raw_socket": "Segnale grezzo",
     "read_only": "Sola lettura",
     "ref_cycle": "Ciclo di riferimento (facoltativo)",
     "refresh_interval": "Intervallo di aggiornamento (s)",
@@ -181,116 +280,85 @@
     "show_raw": "Mostra letture grezze del sensore (non livellate, grigie)",
     "status": "Stato",
     "tail_trim": "Taglio(i) di coda",
+    "timer_auto_pause": "Pausa automatica",
+    "timer_min": "min",
+    "timer_msg_placeholder": "Messaggio (facoltativo, {device}/{program}/{minutes})",
     "ungrouped": "Non raggruppato",
     "unlabelled": "Senza etichetta",
-    "unlabelled_paren": "(senza etichetta)",
-    "expected": "Atteso",
-    "raw_socket": "Segnale grezzo",
-    "artifact_interruption": "Interruzione",
-    "artifact_low_power": "Bassa potenza",
-    "artifact_high_power": "Alta potenza",
-    "artifact_anomaly": "Anomalia",
-    "auto_fine_tune_on": "ottimizzazione automatica attiva (intorno alle {hour}:00)",
-    "cohesion_good": "coesione {pct}%",
-    "cohesion_low": "⚠ coesione bassa {pct}%",
-    "group_name": "Nome del gruppo",
-    "members": "Membri",
-    "models_fine_tuned": "({count} modelli ottimizzati)",
-    "panel_language": "Lingua del pannello"
+    "unlabelled_paren": "(senza etichetta)"
   },
-  "badge": {
-    "golden_cycle": "Ciclo di riferimento registrato",
-    "reviewed": "Revisionato",
-    "feedback_requested": "Feedback richiesto",
-    "needs_review": "Necessita di revisione",
-    "overrun": "Ha funzionato più a lungo del solito",
-    "artifact_tip": "{n} anomalie rilevate (ad esempio porta aperta a metà ciclo): apri per vederle sul grafico",
-    "restart_gap_tip": "{n} interruzione riavvio HA: il tracciato di potenza ha un buco",
-    "poor_fit_tip": "Cronologia delle partite incoerente: valuta la possibilità di ricostruire questo profilo",
-    "fair_fit_tip": "Coerenza della corrispondenza moderata: alcuni cicli assegnati a questo profilo hanno punteggi di confidenza inferiori. Etichettare più cicli o registrare nuovamente il profilo per migliorare la precisione.",
-    "fair_fit": "qualità accettabile",
-    "poor_fit": "scarsa vestibilità",
-    "auto": "(rilevato automaticamente)",
-    "built_in_tag": "integrato",
-    "declining": "↘ in calo",
-    "improving": "↗ in miglioramento",
-    "manual": "(selezionato manualmente)",
-    "steady": "→ stabile",
-    "using_defaults": "Utilizzo delle impostazioni predefinite fornite",
-    "using_tuned": "Utilizzo di pesi accordati"
+  "log": {
+    "all_levels": "Tutti i livelli"
+  },
+  "ml": {
+    "builtin_models": "● Utilizzo di modelli integrati",
+    "fit_fair": "Accettabile",
+    "fit_good": "Bene",
+    "fit_slight": "Lieve",
+    "fit_strong": "Forte",
+    "fit_weak": "Debole",
+    "fit_word": "accuratezza",
+    "personalized": "● Personalizzato per questa macchina"
   },
   "modal": {
-    "merge_cycles": "Unisci {n} cicli",
     "auto_label": "Cicli di etichettatura automatica",
     "correct_feedback": "Feedback corretto",
     "create_profile": "Crea profilo",
     "cycle": "Ciclo",
+    "edit_group": "Modifica gruppo di profili",
     "edit_phase": "Modifica fase",
     "import_config": "Importa configurazione",
     "label_cycle": "Ciclo delle etichette",
-    "new_phase": "Nuova Fase",
-    "process_recording": "Registrazione del processo",
-    "edit_group": "Modifica gruppo di profili",
+    "merge_cycles": "Unisci {n} cicli",
     "new_group": "Nuovo gruppo di profili",
-    "process_history_title": "Elabora storico",
+    "new_phase": "Nuova Fase",
     "process_history_msg": "Riesegui il confronto, aggiorna i suggerimenti, riaddestra i modelli ML (se abilitati) e ricalcola lo stato di tutti i cicli memorizzati. Potrebbe richiedere del tempo.",
-    "process_history_ok": "Elabora"
+    "process_history_ok": "Elabora",
+    "process_history_title": "Elabora storico",
+    "process_recording": "Registrazione del processo"
   },
   "msg": {
-    "near_duplicate_cluster": "rilevato cluster di profili quasi duplicati. Il raggruppamento consente all'abbinamento di scegliere in modo affidabile tra sosia (ad esempio lo stesso programma a temperatura/centrifuga diversa).",
-    "coverage_gap": "i cicli recenti non hanno un profilo corrispondente ({pct}% degli ultimi 30).",
-    "consider_new_profile": "Valuta la possibilità di creare un nuovo profilo.",
-    "group_not_cohesive": "Questi profili non sono sufficientemente simili per essere raggruppati in modo affidabile, quindi la corrispondenza li tratta individualmente finché non rimuovi il valore anomalo o dividi il gruppo.",
-    "group_modal_help": "Raggruppare programmi con la stessa forma che differiscono per temperatura/centrifuga (le durate possono variare). La corrispondenza valuta il gruppo come un candidato, quindi sceglie il membro più adatto. Scegline almeno 2; la sovrapposizione mostra quanto sono simili.",
-    "showing_suggestions": "Visualizzazione dell'impostazione {count} con suggerimenti.",
-    "show_all_settings": "Mostra tutte le impostazioni",
-    "tuning_suggestions_available": "{count} suggerimento di ottimizzazione disponibile dai cicli osservati. Appaiono accanto ai campi pertinenti.",
-    "legacy_actions_title": "{count} azione personalizzata precedente ancora in esecuzione",
-    "old_actions_warning": "Configurato con il vecchio editor delle azioni (ora rimosso). Si attivano ancora durante gli eventi del ciclo ma non possono più essere modificati qui. Convertili in una normale automazione o rimuovili.",
-    "no_settings_match": "Nessuna impostazione corrisponde a \"{q}\"",
-    "clear_debug_hint": "Rimuovi i dati di debug archiviati per liberare spazio.",
-    "wipe_history_warning": "Elimina definitivamente tutti i cicli e i profili. L'operazione non può essere annullata.",
-    "export_description": "Esporta tutti i profili e i cicli in JSON o ripristina da un'esportazione precedente.",
-    "log_buffer_hint": "Prima il più recente · memorizza nel buffer gli ultimi 500 record ha_washdata dal riavvio · trascina il bordo inferiore per ridimensionare.",
-    "review_profile_tip": "Il programma con cui è etichettato questo ciclo. Se il programma rilevato automaticamente era sbagliato, correggilo qui: l'etichettatura insegna la corrispondenza per i cicli futuri.",
-    "review_quality_tip": "Quanto è pulito questo ciclo. Buono = un esempio da manuale di questo programma; Cattivo = rilevato ma rumoroso o atipico; Inutilizzabile = rilevato erroneamente (unito, troncato o spurio). Determina il punteggio di integrità e quali cicli sono autorizzati ad addestrare il modello.",
-    "review_recorded_tip": "Contrassegnalo come ciclo di riferimento selezionato manualmente per il suo programma: lo stesso ruolo di un ciclo registrato manualmente. I cicli di riferimento vengono sempre mantenuti, seminano il modello corrispondente e non vengono mai eliminati dalla pulizia. (Questa è la bandiera \"d'oro\"/registrata; entrambe sono la stessa cosa.)",
-    "review_tags_tip": "Flag facoltativi che descrivono cosa è andato storto in questo ciclo, in modo che l'addestramento e la pulizia possano tenerne conto.",
-    "review_notes_tip": "Note di testo libero per riferimento personale. Non utilizzato dall'abbinamento o dalla formazione.",
-    "review_confirm_help": "Confermare se questo ciclo è stato rilevato correttamente. Le tue revisioni addestrano il modello sulla tua macchina: più cicli confermi, migliore sarà la corrispondenza e il punteggio di salute. È sufficiente un breve Buono/Cattivo.",
-    "review_notes_placeholder": "Note (facoltativo)",
-    "compare_profiles_tip": "Sovrapponi altri involucri del profilo sulla tabella sopra per vedere quale si adatta meglio a questo ciclo.",
-    "artifact_header": "{n} anomalie rilevate durante questo ciclo",
-    "artifact_footer": "Evidenziato nel grafico sopra. Si tratta di artefatti temporanei (ad esempio la porta aperta a metà ciclo), non necessariamente problemi.",
-    "restart_gap_header": "{n} interruzione riavvio HA durante questo ciclo",
-    "restart_gap_item": "{dur} interruzione",
-    "restart_gap_footer": "Evidenziato nel grafico. I dati di potenza mancano per questi intervalli; il riconoscimento ha usato solo letture reali.",
-    "profile_poor_health_detail": "I cicli assegnati a questo profilo hanno forme incoerenti o bassa confidenza. Considerare la ricostruzione della busta o la revisione dei cicli etichettati.",
-    "trend_duration_longer": "Durata tendenzialmente più lunga ({pct}%/ciclo) — media recente {avg}",
-    "trend_duration_shorter": "La durata tendenzialmente è più breve ({pct}%/ciclo) — media recente {avg}",
-    "trend_energy_up": "Energia in aumento ({pct}%/ciclo) — media recente {avg}",
-    "trend_energy_down": "Energia in diminuzione ({pct}%/ciclo)",
-    "performance_trend": "Andamento delle prestazioni ({n} cicli)",
-    "maintenance_advisory": "L'aumento della durata/energia può indicare la necessità di manutenzione dell'apparecchio (ad esempio decalcificazione, pulizia del filtro).",
-    "manual_duration_hint": "La durata del ciclo media/prevista del profilo, utilizzata per le stime del tempo rimanente. Modifica per impostarlo; lasciandolo invariato mantiene il valore corrente.",
     "appliance_monitor": "Monitor degli elettrodomestici",
+    "artifact_dip_detail": "È sceso sotto la banda di potenza normale per ~{n}s.",
+    "artifact_footer": "Evidenziato nel grafico sopra. Si tratta di artefatti temporanei (ad esempio la porta aperta a metà ciclo), non necessariamente problemi.",
+    "artifact_header": "{n} anomalie rilevate durante questo ciclo",
+    "artifact_pause_detail": "La potenza è scesa quasi a zero per ~{n}s poi è ripresa — probabilmente la porta è stata aperta a metà ciclo o il ciclo è stato messo in pausa.",
+    "artifact_spike_detail": "Ha superato la banda di potenza normale per ~{n}s.",
     "auto_label_intro": "Assegnare profili a cicli senza etichetta la cui confidenza di corrispondenza supera la soglia.",
+    "automations_intro": "WashData genera gli eventi {start} / {end} ed espone entità, quindi le notifiche e le azioni si costruiscono al meglio come normali automatizzazioni di Home Assistant. Le automatizzazioni che utilizzano questo dispositivo appaiono di seguito.",
     "cleanup_intro": "Ogni ciclo etichettato è sovrapposto. Spunta i valori anomali ed elimina per ripulire il profilo.",
+    "clear_debug_hint": "Rimuovi i dati di debug archiviati per liberare spazio.",
+    "collecting_data": "Raccolta dati - ancora {need} cicli prima che l'ottimizzazione possa iniziare ({current}/{min}).",
     "compare_overlay_profiles": "Profili sovrapposti (debole)",
+    "compare_profiles_tip": "Sovrapponi altri involucri del profilo sulla tabella sopra per vedere quale si adatta meglio a questo ciclo.",
     "compare_selected_cycles": "Cicli selezionati (fissi) — mostra/nascondi",
+    "consider_new_profile": "Valuta la possibilità di creare un nuovo profilo.",
+    "coverage_gap": "i cicli recenti non hanno un profilo corrispondente ({pct}% degli ultimi 30).",
+    "enough_data": "Dati sufficienti per apprendere ({current}/{min} cicli).",
+    "export_description": "Esporta tutti i profili e i cicli in JSON o ripristina da un'esportazione precedente.",
+    "feedback_cycles_pending": "{n} ciclo{s} da revisionare",
     "feedback_prompt": "Conferma che fosse corretto, correggi il programma o ignoralo.",
+    "filter_by_profile": "Filtra per profilo…",
+    "group_modal_help": "Raggruppare programmi con la stessa forma che differiscono per temperatura/centrifuga (le durate possono variare). La corrispondenza valuta il gruppo come un candidato, quindi sceglie il membro più adatto. Scegline almeno 2; la sovrapposizione mostra quanto sono simili.",
+    "group_not_cohesive": "Questi profili non sono sufficientemente simili per essere raggruppati in modo affidabile, quindi la corrispondenza li tratta individualmente finché non rimuovi il valore anomalo o dividi il gruppo.",
+    "group_preview_hint": "Seleziona 2 o più membri per visualizzare in anteprima e confrontare le loro curve di potenza.",
     "import_intro": "Carica un file esportato o incolla un payload JSON di seguito.",
+    "legacy_actions_title": "{count} azione personalizzata precedente ancora in esecuzione",
     "live_chart_loading": "Il grafico della potenza in tempo reale viene visualizzato quando arrivano le letture.",
     "loading": "Caricamento…",
     "loading_curve": "Curva di caricamento…",
     "loading_settings": "Caricamento impostazioni…",
+    "log_buffer_hint": "Prima il più recente · memorizza nel buffer gli ultimi 500 record ha_washdata dal riavvio · trascina il bordo inferiore per ridimensionare.",
+    "maintenance_advisory": "L'aumento della durata/energia può indicare la necessità di manutenzione dell'apparecchio (ad esempio decalcificazione, pulizia del filtro).",
     "maintenance_requires_access": "La manutenzione e l'esportazione/importazione richiedono l'accesso completo.",
+    "manual_duration_hint": "La durata del ciclo media/prevista del profilo, utilizzata per le stime del tempo rimanente. Modifica per impostarlo; lasciandolo invariato mantiene il valore corrente.",
     "matching_tuning_intro": "Durante l'apprendimento, WashData regola anche la misura in cui l'abbinamento del programma pesa la forma rispetto alla durata e all'energia.",
     "merge_intro": "I cicli selezionati vengono combinati in uno solo (ordine cronologico; spazi vuoti riempiti con 0 W). Scegli il profilo risultante.",
     "ml_intro": "WashData viene fornito con modelli intelligenti che funzionano immediatamente.",
     "ml_learned_intro": "Modelli ottimizzati per questa macchina.",
     "ml_loading": "caricamento ML...",
     "ml_settings_intro": "Due interruttori indipendenti: uno applica i modelli durante l'esecuzione di un ciclo, l'altro consente a WashData di adattarli alla tua macchina nel tempo.",
+    "near_duplicate_cluster": "rilevato cluster di profili quasi duplicati. Il raggruppamento consente all'abbinamento di scegliere in modo affidabile tra sosia (ad esempio lo stesso programma a temperatura/centrifuga diversa).",
     "no_cycles_match": "Nessun ciclo corrisponde al filtro corrente.",
     "no_cycles_profile": "Nessun ciclo per questo profilo.",
     "no_cycles_yet": "Nessun ciclo ancora registrato.",
@@ -308,81 +376,82 @@
     "no_profiles_overlay": "Nessun profilo da sovrapporre.",
     "no_profiles_yet": "Nessun profilo ancora. Creane uno da un ciclo etichettato.",
     "no_profiles_yet_short": "Nessun profilo ancora.",
+    "no_settings_match": "Nessuna impostazione corrisponde a \"{q}\"",
     "no_split_points": "Nessun punto di divisione ancora.",
     "no_suggestions": "Nessun suggerimento attivo.",
+    "notify_services_hint": "Usa gli ID servizio {entity} (separati da virgole per più servizi). Variabili del modello: {vars}.",
+    "old_actions_warning": "Configurato con il vecchio editor delle azioni (ora rimosso). Si attivano ancora durante gli eventi del ciclo ma non possono più essere modificati qui. Convertili in una normale automazione o rimuovili.",
     "pending_feedback": "In attesa di feedback sul rilevamento",
+    "performance_trend": "Andamento delle prestazioni ({n} cicli)",
     "phase_catalog_intro": "Segmenti con nome di un ciclo (Prelavaggio, Riscaldamento, Centrifuga...). Assegnali a un profilo dal suo pannello di controllo.",
     "phase_ranges_intro": "Intervalli di fasi (minuti dall'inizio del ciclo) sovrapposti alla curva media. Modifica i valori per visualizzare l'anteprima dal vivo.",
     "preferences_admin": "Preferenze, pannello e controllo degli accessi",
     "preferences_adv": "Preferenze",
     "prefs_personal": "Questi si applicano solo al tuo account Home Assistant.",
+    "process_history_hint": "Riesegui il confronto su tutti i cicli memorizzati, aggiorna i suggerimenti di ottimizzazione, riaddestra i modelli ML (se abilitati) e ricalcola lo stato dei cicli. Da eseguire dopo una serie di revisioni.",
+    "profile_poor_health_detail": "I cicli assegnati a questo profilo hanno forme incoerenti o bassa confidenza. Considerare la ricostruzione della busta o la revisione dei cicli etichettati.",
     "profiles_intro": "Fai clic su un profilo per statistiche, fasi e pulizia. Raggruppa programmi quasi identici (stessa forma/durata, temperatura o centrifuga diversa) in modo che l'abbinamento sia affidabile tra loro.",
     "rbac_hint": "Quando è disattivato, ogni utente di Home Assistant ha accesso completo (impostazione predefinita). Gli amministratori hanno sempre accesso completo e possono gestire tutti.",
     "recent_logs": "Record ha_washdata recenti",
     "recording_in_progress": "Registrazione in corso",
+    "restart_gap_footer": "Evidenziato nel grafico. I dati di potenza mancano per questi intervalli; il riconoscimento ha usato solo letture reali.",
+    "restart_gap_header": "{n} interruzione riavvio HA durante questo ciclo",
+    "restart_gap_item": "{dur} interruzione",
+    "review_confirm_help": "Confermare se questo ciclo è stato rilevato correttamente. Le tue revisioni addestrano il modello sulla tua macchina: più cicli confermi, migliore sarà la corrispondenza e il punteggio di salute. È sufficiente un breve Buono/Cattivo.",
     "review_in_settings": "Controlla nelle Impostazioni",
+    "review_notes_placeholder": "Note (facoltativo)",
+    "review_notes_tip": "Note di testo libero per riferimento personale. Non utilizzato dall'abbinamento o dalla formazione.",
+    "review_profile_tip": "Il programma con cui è etichettato questo ciclo. Se il programma rilevato automaticamente era sbagliato, correggilo qui: l'etichettatura insegna la corrispondenza per i cicli futuri.",
+    "review_quality_tip": "Quanto è pulito questo ciclo. Buono = un esempio da manuale di questo programma; Cattivo = rilevato ma rumoroso o atipico; Inutilizzabile = rilevato erroneamente (unito, troncato o spurio). Determina il punteggio di integrità e quali cicli sono autorizzati ad addestrare il modello.",
+    "review_recorded_tip": "Contrassegnalo come ciclo di riferimento selezionato manualmente per il suo programma: lo stesso ruolo di un ciclo registrato manualmente. I cicli di riferimento vengono sempre mantenuti, seminano il modello corrispondente e non vengono mai eliminati dalla pulizia. (Questa è la bandiera \"d'oro\"/registrata; entrambe sono la stessa cosa.)",
+    "review_tags_tip": "Flag facoltativi che descrivono cosa è andato storto in questo ciclo, in modo che l'addestramento e la pulizia possano tenerne conto.",
     "review_to_cycles": "Apri la coda di revisione dei cicli",
     "saving_triggers_reload": "Il salvataggio attiva un ricaricamento dell'integrazione. Le entità HA potrebbero essere visualizzate brevemente come non disponibili.",
     "search_placeholder": "Cerca impostazioni...",
     "see_recorder": "Vedi il widget del registratore di seguito",
+    "show_all_settings": "Mostra tutte le impostazioni",
+    "showing_suggestions": "Visualizzazione dell'impostazione {count} con suggerimenti.",
     "split_intro": "Fare clic sul grafico per aggiungere o rimuovere un punto di divisione o per rilevare automaticamente gli spazi inattivi. Ogni segmento risultante può ottenere il proprio profilo.",
     "storage_diagnostics": "Statistiche di archiviazione, manutenzione, esportazione/importazione",
+    "trend_duration_longer": "Durata tendenzialmente più lunga ({pct}%/ciclo) — media recente {avg}",
+    "trend_duration_shorter": "La durata tendenzialmente è più breve ({pct}%/ciclo) — media recente {avg}",
+    "trend_energy_down": "Energia in diminuzione ({pct}%/ciclo)",
+    "trend_energy_up": "Energia in aumento ({pct}%/ciclo) — media recente {avg}",
     "trim_intro": "Trascina le maniglie rosse o inserisci i valori. Tutto fuori dalla finestra viene rimosso.",
+    "tuning_suggestions_available": "{count} suggerimento di ottimizzazione disponibile dai cicli osservati. Appaiono accanto ai campi pertinenti.",
     "unsure_detected_prefix": "WashData non è sicuro di averlo rilevato",
     "updated": "Aggiornato",
-    "feedback_cycles_pending": "{n} ciclo{s} da revisionare",
-    "artifact_spike_detail": "Ha superato la banda di potenza normale per ~{n}s.",
-    "artifact_dip_detail": "È sceso sotto la banda di potenza normale per ~{n}s.",
-    "artifact_pause_detail": "La potenza è scesa quasi a zero per ~{n}s poi è ripresa — probabilmente la porta è stata aperta a metà ciclo o il ciclo è stato messo in pausa.",
-    "automations_intro": "WashData genera gli eventi {start} / {end} ed espone entità, quindi le notifiche e le azioni si costruiscono al meglio come normali automatizzazioni di Home Assistant. Le automatizzazioni che utilizzano questo dispositivo appaiono di seguito.",
-    "collecting_data": "Raccolta dati - ancora {need} cicli prima che l'ottimizzazione possa iniziare ({current}/{min}).",
-    "enough_data": "Dati sufficienti per apprendere ({current}/{min} cicli).",
-    "filter_by_profile": "Filtra per profilo…",
-    "group_preview_hint": "Seleziona 2 o più membri per visualizzare in anteprima e confrontare le loro curve di potenza.",
-    "notify_services_hint": "Usa gli ID servizio {entity} (separati da virgole per più servizi). Variabili del modello: {vars}.",
-    "process_history_hint": "Riesegui il confronto su tutti i cicli memorizzati, aggiorna i suggerimenti di ottimizzazione, riaddestra i modelli ML (se abilitati) e ricalcola lo stato dei cicli. Da eseguire dopo una serie di revisioni."
+    "wipe_history_warning": "Elimina definitivamente tutti i cicli e i profili. L'operazione non può essere annullata."
   },
   "phase_desc": {
+    "anti_crease": "Brevi tumble occasionali dopo il completamento per ridurre le grinze del bucato.",
+    "anti_wrinkle": "Tumble periodico post-ciclo per ridurre le grinze del bucato.",
+    "cool_down": "Burattatura senza calore verso la fine del ciclo.",
+    "drain_and_switch": "Periodo di transizione dalla modalità lavaggio a asciugatura.",
+    "dry": "Fase di asciugatura tramite riscaldatore e/o calore residuo.",
+    "drying": "Periodo principale di burattatura riscaldato.",
+    "heat_up": "Riscaldamento iniziale del riscaldatore prima dell'inizio dell'asciugatura completa.",
+    "pre_rinse": "Spruzzatura iniziale prima del lavaggio con detergente.",
     "pre_wash": "Ammollo iniziale o pretrattamento prima del lavaggio principale.",
-    "wash": "Ciclo di lavaggio principale con movimento del cesto e riscaldamento opzionale.",
-    "wash_dw": "Lavaggio principale con detersivo con riscaldamento.",
     "rinse": "Fase di risciacquo con acqua pulita. Questa fase può ripetersi più volte.",
-    "spin": "Estrazione ad alta velocità per rimuovere l'acqua dal carico.",
-    "spin_wd": "Estrazione ad alta velocità prima della transizione di essiccazione.",
+    "sanitize": "Fase di pulizia ad alta temperatura per programmi di sanificazione.",
+    "sensor_check": "Breve pausa a bassa potenza durante la misurazione della secchezza.",
     "soak": "Periodo di ammollo a bassa attività tra le fasi di lavaggio attive.",
     "soak_dw": "Periodo di ammollo prolungato per terreni pesanti.",
-    "anti_crease": "Brevi tumble occasionali dopo il completamento per ridurre le grinze del bucato.",
-    "heat_up": "Riscaldamento iniziale del riscaldatore prima dell'inizio dell'asciugatura completa.",
-    "drying": "Periodo principale di burattatura riscaldato.",
-    "cool_down": "Burattatura senza calore verso la fine del ciclo.",
-    "anti_wrinkle": "Tumble periodico post-ciclo per ridurre le grinze del bucato.",
-    "sensor_check": "Breve pausa a bassa potenza durante la misurazione della secchezza.",
-    "drain_and_switch": "Periodo di transizione dalla modalità lavaggio a asciugatura.",
-    "pre_rinse": "Spruzzatura iniziale prima del lavaggio con detergente.",
-    "dry": "Fase di asciugatura tramite riscaldatore e/o calore residuo.",
-    "sanitize": "Fase di pulizia ad alta temperatura per programmi di sanificazione."
+    "spin": "Estrazione ad alta velocità per rimuovere l'acqua dal carico.",
+    "spin_wd": "Estrazione ad alta velocità prima della transizione di essiccazione.",
+    "wash": "Ciclo di lavaggio principale con movimento del cesto e riscaldamento opzionale.",
+    "wash_dw": "Lavaggio principale con detersivo con riscaldamento."
   },
-  "health": {
-    "good": "✓ Buona qualità profilo",
-    "fair": "Qualità profilo accettabile",
-    "poor": "⚠ Qualità profilo scarsa"
-  },
-  "ml": {
-    "fit_fair": "Accettabile",
-    "builtin_models": "● Utilizzo di modelli integrati",
-    "fit_good": "Bene",
-    "fit_slight": "Lieve",
-    "fit_strong": "Forte",
-    "fit_weak": "Debole",
-    "fit_word": "accuratezza",
-    "personalized": "● Personalizzato per questa macchina"
-  },
-  "trend": {
-    "up": "Tendenza in alto",
-    "down": "Tendenza al ribasso"
-  },
-  "log": {
-    "all_levels": "Tutti i livelli"
+  "placeholder": {
+    "add": "aggiungi…",
+    "group_name": "es. Cotone 2:47",
+    "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+    "notify": "aggiungi un servizio di notifica…",
+    "notify_services_list": "notify.mobile_app_phone, ...",
+    "person": "aggiungi una persona…",
+    "phase_name": "es. Prelavaggio",
+    "profile_name": "es. Cotone 40°C"
   },
   "pref": {
     "date_absolute": "Assoluto (es. 14:32 del 2 luglio)",
@@ -395,6 +464,436 @@
     "bad": "Cattivo",
     "good": "Bene",
     "unusable": "Inutilizzabile"
+  },
+  "section": {
+    "anti_wrinkle": {
+      "intro": "La modalità antirughe/antistropicciamento rileva gli impulsi di tumbling a bassa potenza dopo la fase principale e li mantiene collegati al ciclo completato.",
+      "label": "Antirughe"
+    },
+    "basic": {
+      "intro": "Identità principale e gli elementi essenziali che la maggior parte delle configurazioni richiede.",
+      "label": "Base"
+    },
+    "delay": {
+      "intro": "Il rilevamento dell'avvio ritardato identifica quando un elettrodomestico è alimentato ma non ha ancora iniziato il suo ciclo.",
+      "label": "Avvio ritardato"
+    },
+    "detection": {
+      "intro": "Come un ciclo viene rilevato come avviato, in esecuzione e terminato.",
+      "label": "Rilevamento"
+    },
+    "matching": {
+      "intro": "Come i cicli completati vengono abbinati ai profili appresi ed etichettati.",
+      "label": "Abbinamento"
+    },
+    "ml_training": {
+      "intro": "Pianificazione del riaddestramento del machine learning sul dispositivo e impostazioni dei dati.",
+      "label": "Addestramento ML"
+    },
+    "notifications": {
+      "intro": "Quando e come ricevi notifiche sugli eventi del ciclo.",
+      "label": "Notifiche"
+    },
+    "timing": {
+      "intro": "Cadenza di sfondo, il supervisore offline e la manutenzione.",
+      "label": "Temporizzazione e supervisore"
+    },
+    "triggers": {
+      "intro": "Segnali esterni opzionali: un trigger di fine, un sensore di porta, un interruttore di pausa e il promemoria di scarico.",
+      "label": "Trigger e porte"
+    }
+  },
+  "setting": {
+    "abrupt_drop_ratio": {
+      "doc": "Anche un calo maggiore di questa frazione della potenza attuale viene considerato brusco (0,6 = calo del 60%). Completa la soglia dei watt per tutte le dimensioni degli elettrodomestici.",
+      "label": "Rapporto calo brusco"
+    },
+    "abrupt_drop_watts": {
+      "doc": "Un calo di potenza maggiore segnala il ciclo come Interrotto (annullamento manuale) piuttosto che come completamento naturale.",
+      "label": "Calo brusco"
+    },
+    "anti_wrinkle_enabled": {
+      "doc": "Riconosci i brevi impulsi di asciugatrice a bassa potenza emessi da un'asciugatrice dopo la fase di riscaldamento principale e mantienili collegati al ciclo finito invece di leggerli come nuovi cicli.",
+      "label": "Abilita rilevamento antirughe"
+    },
+    "anti_wrinkle_exit_power": {
+      "doc": "La potenza deve scendere al di sotto di questo valore tra gli impulsi affinché la modalità antirughe rimanga attiva.",
+      "label": "Soglia potenza uscita"
+    },
+    "anti_wrinkle_max_duration": {
+      "doc": "Gli impulsi più lunghi vengono trattati come un vero e proprio ciclo piuttosto che come una caduta antirughe.",
+      "label": "Durata massima"
+    },
+    "anti_wrinkle_max_power": {
+      "doc": "Un impulso superiore a questa potenza viene trattato come un vero e proprio nuovo ciclo, non come un capitombolo antirughe. Impostare appena sopra la potenza dell'impulso di rotazione.",
+      "label": "Potenza massima antirughe"
+    },
+    "auto_label_confidence": {
+      "doc": "Se il punteggio della partita alla fine del ciclo è pari o superiore a questo, il programma viene etichettato automaticamente senza alcuna richiesta di conferma. Aumentarlo per richiedere una maggiore certezza prima dell'etichettatura automatica; abbassarlo per automatizzare di più. Funziona insieme al Learning Confidence sottostante.",
+      "label": "Confidenza etichettatura automatica"
+    },
+    "auto_maintenance": {
+      "doc": "Esegui le pulizie notturne: ricostruisci le buste del profilo, ricalcola l'integrità del ciclo, elimina le tracce di debug e conserva i cicli più recenti.",
+      "label": "Manutenzione automatica (pulizia notturna)"
+    },
+    "completion_min_seconds": {
+      "doc": "I cicli più brevi di questo vengono scartati come cicli fantasma (corse di prova, apertura della porta per aggiungere un calzino).",
+      "label": "Durata minima ciclo"
+    },
+    "delay_confirm_seconds": {
+      "doc": "L'alimentazione deve rimanere nella banda di standby per tutto questo tempo prima che l'apparecchio venga considerato in attesa di avvio anziché in funzione.",
+      "label": "Secondi di conferma"
+    },
+    "delay_start_detect_enabled": {
+      "doc": "Rileva quando l'apparecchio è acceso e in attesa (avvio ritardato/standby) ma non ha iniziato il ciclo, quindi l'erogazione in standby non viene confusa con un ciclo in esecuzione.",
+      "label": "Abilita rilevamento avvio ritardato"
+    },
+    "delay_timeout_hours": {
+      "doc": "Smetti di aspettare in modalità di avvio ritardato dopo così tante ore e torna al minimo, quindi una macchina lasciata accesa ma mai avviata non aspetta per sempre.",
+      "label": "Ore di timeout"
+    },
+    "device_type": {
+      "doc": "Classe dell'apparecchio. Imposta valori predefiniti di rilevamento sensibili (soglie, ritardo di disattivazione, gestione delle estremità) ottimizzati per quel tipo di apparecchio; cambiarlo solo se il dispositivo era stato originariamente configurato come tipo sbagliato.",
+      "label": "Tipo di dispositivo"
+    },
+    "door_sensor_entity": {
+      "doc": "Sensore binario porta opzionale. Utilizzato per rilevare quando l'apparecchiatura è stata aperta/scaricata dopo un ciclo.",
+      "label": "Entità sensore porta"
+    },
+    "duration_tolerance": {
+      "doc": "Tolleranza per le stime del tempo rimanente (feedback di apprendimento, non corrispondenza). Se la durata effettiva rientra nel +/-X% della stima, viene considerata una buona corrispondenza.",
+      "label": "Tolleranza stima"
+    },
+    "enable_ml_models": {
+      "doc": "Mentre un ciclo viene eseguito, lascia che i modelli affinino i risultati in tempo reale: una stima più stabile del tempo rimanente e di energia/costi e una protezione anti-arresto prematuro al rilevamento della fine (può solo ritardare un traguardo, mai terminarne uno in anticipo ed è limitato). Utilizza i tuoi modelli ottimizzati quando disponibili, altrimenti quelli integrati. Spento = solo la classica logica basata sulla potenza (ancora affidabile).",
+      "label": "Applica modelli intelligenti durante un ciclo"
+    },
+    "end_energy_threshold": {
+      "doc": "Durante il conto alla rovescia del ritardo di spegnimento, l'energia accumulata (watt x tempo) viene confrontata con questa soglia. Se superato, il conto alla rovescia si azzera, mantenendo i capi antipiega e i residui di asciugatura della lavastoviglie attaccati al ciclo invece di tagliarli. Alzarlo se i cicli terminano troppo presto durante il raffreddamento; abbassarlo se il rilevamento è lento.",
+      "label": "Energia fine ciclo"
+    },
+    "end_repeat_count": {
+      "doc": "Numero di letture consecutive al di sotto della soglia di arresto richieste prima della fine del ciclo. 1 va bene per la maggior parte delle prese. Aumenta a 2-3 se la tua presa intelligente segnala occasionalmente un campione di falsi zero a metà ciclo e i tuoi cicli terminano prematuramente.",
+      "label": "Conteggio ripetizioni fine"
+    },
+    "energy_price_entity": {
+      "doc": "Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Ha la precedenza sul prezzo statico riportato di seguito. Ogni ciclo blocca il prezzo in vigore al termine.",
+      "label": "Entità prezzo energia"
+    },
+    "energy_price_static": {
+      "doc": "Prezzo fisso per kWh utilizzato per i dati sui costi quando non è impostata alcuna entità di prezzo in tempo reale sopra.",
+      "label": "Prezzo energia statico (per kWh)"
+    },
+    "expose_debug_entities": {
+      "doc": "Pubblica entità HA diagnostiche aggiuntive (confidenza della corrispondenza, ambiguità, stati interni). Disattivato mantiene l'elenco delle entità pulito per l'uso normale.",
+      "label": "Esponi entità di debug"
+    },
+    "external_end_trigger": {
+      "doc": "Sensore binario il cui cambio di stato segna la fine del ciclo (es. contatto \"finito\" di un elettrodomestico o integrazione di un compagno).",
+      "label": "Entità trigger esterno"
+    },
+    "external_end_trigger_enabled": {
+      "doc": "Lascia che un sensore binario esterno segnali la fine di un ciclo, oltre al rilevamento integrato basato sulla potenza.",
+      "label": "Abilita trigger di fine esterno"
+    },
+    "external_end_trigger_inverted": {
+      "doc": "Considerare lo spegnimento del sensore di trigger (anziché l'attivazione) come segnale di fine ciclo.",
+      "label": "Inverti trigger esterno (attiva su SPENTO)"
+    },
+    "learning_confidence": {
+      "doc": "Se il punteggio di corrispondenza è compreso tra questo e la sicurezza dell'etichetta automatica, una notifica di feedback ti chiede di verificare il programma identificato. Al di sotto di questo punteggio la partita è troppo incerta per emergere. Deve essere mantenuto al di sotto del livello di confidenza dell'etichetta automatica.",
+      "label": "Confidenza apprendimento"
+    },
+    "linked_device": {
+      "doc": "Facoltativamente nidificare questo dispositivo WashData sotto un altro dispositivo (ad esempio la presa intelligente) nel registro dei dispositivi HA, mostrato come \"Connesso tramite ...\".",
+      "label": "Raggruppa sotto il dispositivo"
+    },
+    "min_off_gap": {
+      "doc": "Se la macchina si spegne per meno di questo tempo, la sequenza di accensione/spegnimento/accensione viene trattata come un ciclo continuo. Impedisce che i programmi di ammollo (la macchina si spegne per diversi minuti durante il lavaggio) vengano suddivisi in due cicli separati. Impostalo più breve dell'intervallo tra i carichi consecutivi se desideri che vengano conteggiati come cicli separati. Le impostazioni predefinite del tipo di dispositivo proteggono la tipica pausa intraciclo per ciascun apparecchio.",
+      "label": "Intervallo minimo di spegnimento"
+    },
+    "min_power": {
+      "doc": "Potenza minima assoluta considerata attiva. Le letture inferiori a questo valore vengono trattate come 0 W (standby), filtrando il carico fantasma delle prese intelligenti e dei LED di standby.",
+      "label": "Potenza minima"
+    },
+    "ml_training_enabled": {
+      "doc": "Studia periodicamente i cicli esaminati durante la notte e ottimizza i modelli per questa macchina specifica. Un cambiamento viene mantenuto solo quando ottiene effettivamente risultati migliori nei cicli sospesi, quindi questo può solo aiutare o rimanere lo stesso, senza mai regredire.",
+      "label": "Impara da questa macchina"
+    },
+    "ml_training_hour": {
+      "doc": "Ora locale del giorno (0-23) per effettuare la messa a punto notturna. Scegli un'ora tranquilla, ad esempio le 2 (02:00).",
+      "label": "Impara all'ora"
+    },
+    "ml_training_interval_days": {
+      "doc": "Ricontrolla i miglioramenti al massimo una volta ogni questi giorni.",
+      "label": "Controlla al massimo ogni"
+    },
+    "ml_training_min_cycles": {
+      "doc": "Attendere fino a quando almeno questo numero di cicli non sarà stato registrato prima della messa a punto, in modo che ci sia abbastanza da cui imparare.",
+      "label": "Cicli necessari prima"
+    },
+    "name": {
+      "doc": "Nome visualizzato mostrato nell'elenco delle integrazioni HA e nel registro del dispositivo.",
+      "label": "Nome dispositivo"
+    },
+    "no_update_active_timeout": {
+      "doc": "Se non arrivano aggiornamenti di alimentazione per così tanto tempo durante il funzionamento, presumi che la spina sia caduta offline e forza l'arresto per evitare un ciclo di zombie. Il valore predefinito di 600 s consente il ritardo cloud o mesh.",
+      "label": "Timeout senza aggiornamenti"
+    },
+    "notify_before_end_minutes": {
+      "doc": "Invia un avviso di quasi finito quando il tempo rimanente stimato scende al di sotto di questo valore. 0 lo disabilita.",
+      "label": "Avviso pre-fine"
+    },
+    "notify_channel": {
+      "doc": "Nome del canale di notifica Android per i messaggi di avvio/live (controlla l'audio e la priorità per canale sull'app mobile). Vuoto utilizza l'impostazione predefinita dell'app complementare.",
+      "label": "Canale Android (avvio/tempo reale)"
+    },
+    "notify_cycle_timers": {
+      "doc": "Notifiche in minuti specifici dell'inizio di un ciclo (ad esempio per aggiungere ammorbidente). Il messaggio supporta {device}, {program}, {minutes}. Abilita la pausa automatica per mettere in pausa a quel punto e ricevere una notifica interattiva con un pulsante Riprendi; riprendere tramite il pannello, il servizio Pausa/Riprendi o l'azione di notifica.",
+      "label": "Timer ciclo"
+    },
+    "notify_finish_channel": {
+      "doc": "Nome del canale di notifica Android per il messaggio di fine. Vuoto riutilizza il canale iniziale/live.",
+      "label": "Canale Android (fine)"
+    },
+    "notify_finish_message": {
+      "doc": "Corpo inviato al termine di un ciclo. Variabili modello: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "label": "Messaggio di fine"
+    },
+    "notify_finish_services": {
+      "doc": "notify.* servizi chiamati al termine di un ciclo. Aggiungine uno per bersaglio; lasciare vuoto per nessuna notifica di fine.",
+      "label": "Servizi di fine"
+    },
+    "notify_fire_events": {
+      "doc": "Attiva anche gli eventi ha_washdata_* all'inizio/fine del ciclo in modo da poter creare le tue automazioni.",
+      "label": "Genera eventi HA per le notifiche"
+    },
+    "notify_icon": {
+      "doc": "Icona mdi opzionale per la notifica (es. mdi:lavatrice). Lascia vuoto per l'impostazione predefinita della piattaforma.",
+      "label": "Icona notifica"
+    },
+    "notify_live_chronometer": {
+      "doc": "Mostra un timer per il conto alla rovescia con aggiornamento in tempo reale nella notifica (sulle piattaforme che lo supportano) invece di una stima statica.",
+      "label": "Usa cronometro in tempo reale"
+    },
+    "notify_live_interval_seconds": {
+      "doc": "La frequenza con cui le notifiche di avanzamento in tempo reale vengono aggiornate durante l'esecuzione di un ciclo.",
+      "label": "Intervallo aggiornamento in tempo reale"
+    },
+    "notify_live_overrun_percent": {
+      "doc": "Se un ciclo supera la stima di oltre questa percentuale, invia un avviso di superamento.",
+      "label": "% Sforamento in tempo reale prima dell'avviso"
+    },
+    "notify_live_services": {
+      "doc": "notify.* servizi richiedevano aggiornamenti in tempo reale sullo stato di avanzamento durante l'esecuzione di un ciclo. Lascia vuoto per disabilitare le notifiche di avanzamento in tempo reale.",
+      "label": "Servizi avanzamento in tempo reale"
+    },
+    "notify_only_when_home": {
+      "doc": "Invia notifiche solo quando almeno una delle persone collegate (sopra) è a casa.",
+      "label": "Notifica solo quando a casa"
+    },
+    "notify_people": {
+      "doc": "persona.* entità utilizzate da \"Notifica solo quando a casa\" per decidere se qualcuno è a casa.",
+      "label": "Persone (per Solo a Casa)"
+    },
+    "notify_pre_complete_message": {
+      "doc": "Corpo dell'avviso pre-fine/quasi terminato. Variabili modello: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "label": "Messaggio pre-completamento"
+    },
+    "notify_reminder_message": {
+      "doc": "Corpo del promemoria di scarico ancora in attesa. Vuoto utilizza l'impostazione predefinita incorporata. Variabili modello: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "label": "Messaggio promemoria"
+    },
+    "notify_start_message": {
+      "doc": "Corpo inviato all'avvio di un ciclo. Variabili modello: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "label": "Messaggio di avvio"
+    },
+    "notify_start_services": {
+      "doc": "notify.* servizi chiamati all'avvio di un ciclo. Aggiungine uno per target (telefono, dashboard, ecc.); lasciare vuoto per nessuna notifica di avvio.",
+      "label": "Servizi di avvio"
+    },
+    "notify_timeout_seconds": {
+      "doc": "Ignora automaticamente la notifica dopo questo numero di secondi (sulle piattaforme che la supportano). 0 lo mantiene finché non viene eliminato manualmente.",
+      "label": "Chiusura automatica dopo"
+    },
+    "notify_title": {
+      "doc": "Titolo della notifica. Variabili modello: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "label": "Titolo notifica"
+    },
+    "notify_unload_delay_minutes": {
+      "doc": "Minuti dopo la fine di un ciclo prima dell'invio del promemoria \"scaricare la macchina\" ancora in attesa. Impostare 0 per disabilitare il promemoria.",
+      "label": "Ritardo promemoria scarico"
+    },
+    "off_delay": {
+      "doc": "È tempo di attendere dopo l'interruzione della corrente prima di dichiarare terminato il ciclo. Se l'alimentazione viene ripristinata entro questo intervallo, il ciclo continua senza interruzioni, consentendo di colmare le pause tra le fasi di lavaggio. Le lavastoviglie hanno fasi di asciugatura lunghe (spegnimento per 20-60 minuti), quindi il ritardo di spegnimento deve superare quello per mantenere l'intero ciclo di lavaggio+asciugatura come un ciclo.",
+      "label": "Ritardo spegnimento"
+    },
+    "pause_cuts_power": {
+      "doc": "Quando un ciclo è in pausa, spegni anche l'entità Switch di seguito. Solo per apparecchi la cui spina può essere tagliata in sicurezza a metà ciclo.",
+      "label": "La pausa interrompe anche l'alimentazione (tramite interruttore)"
+    },
+    "power_off_delay": {
+      "doc": "Per quanto tempo la potenza deve rimanere sotto la Soglia di spegnimento dopo la fine di un ciclo prima che lo stato torni a Spento. Usato solo quando la Soglia di spegnimento è maggiore di 0. Viene controllato secondo la cadenza in background, quindi il ritardo effettivo viene arrotondato per eccesso al successivo tick di scadenza dello stato.",
+      "label": "Ritardo di spegnimento"
+    },
+    "power_off_threshold_w": {
+      "doc": "Rilevamento facoltativo dello stato Spento basato sulla potenza. Quando è maggiore di 0, una volta terminato un ciclo e se la potenza rimane sotto questo livello per il Ritardo di spegnimento, la macchina viene considerata spenta e lo stato torna a Spento. Lascia a 0 per disattivarlo (valore predefinito). Impostalo sopra il consumo reale a macchina spenta e sotto la Soglia di arresto e il consumo in standby della tua macchina (terminata ma ancora accesa); se non è inferiore alla Soglia di arresto, viene ignorato. Quando è attivo, sostituisce il Ritardo reset avanzamento per il ritorno a Spento, così una macchina terminata resta su Completato/Pulito finché non viene effettivamente spenta.",
+      "label": "Soglia di spegnimento"
+    },
+    "power_sensor": {
+      "doc": "L'entità sensore che segnala la potenza in tempo reale in watt per questo elettrodomestico (ad esempio sensor.washer_power). Tutto il rilevamento del ciclo si basa su questo segnale.",
+      "label": "Sensore di potenza"
+    },
+    "profile_duration_tolerance": {
+      "doc": "La fascia +/- attorno alla durata media del profilo utilizzata durante la corrispondenza. 0,25 significa che un profilo di 60 minuti corrisponde a cicli di 45-75 minuti.",
+      "label": "Tolleranza durata profilo"
+    },
+    "profile_match_interval": {
+      "doc": "La frequenza con cui tentare la corrispondenza del profilo durante un ciclo di esecuzione. Il valore predefinito di 300 s (5 minuti) bilancia la velocità di rilevamento e la CPU.",
+      "label": "Intervallo di corrispondenza"
+    },
+    "profile_match_max_duration_ratio": {
+      "doc": "Durata massima del ciclo rispetto al profilo. 1.3 significa che un ciclo deve essere inferiore al 130% della durata del profilo per corrispondere.",
+      "label": "Rapporto durata massima"
+    },
+    "profile_match_min_duration_ratio": {
+      "doc": "Durata minima del ciclo rispetto al profilo. 0,9 significa che un ciclo deve corrispondere almeno al 90% della durata del profilo per corrispondere.",
+      "label": "Rapporto durata minima"
+    },
+    "profile_match_threshold": {
+      "doc": "Punteggio di somiglianza minimo (0-1) richiesto alla fine del ciclo per accettare l'identificazione del programma. Alzarlo per ridurre le identificazioni errate; abbassarlo se i programmi della macchina non corrispondono. Il valore predefinito 0,4 è un punto di partenza conservativo.",
+      "label": "Soglia di corrispondenza"
+    },
+    "profile_unmatch_threshold": {
+      "doc": "Se una partita in diretta a metà ciclo scende al di sotto di questo punteggio, l'identificazione provvisoria viene cancellata. Mantienilo leggermente al di sotto della Soglia di corrispondenza in modo che un breve calo nella somiglianza non riporti la visualizzazione su senza corrispondenza.",
+      "label": "Soglia di non corrispondenza"
+    },
+    "progress_reset_delay": {
+      "doc": "Al termine, mantieni l'avanzamento al 100% per questo tempo in modo che Completato sia visibile sui dashboard prima di reimpostare su Inattivo.",
+      "label": "Ritardo reset avanzamento"
+    },
+    "pump_stuck_duration": {
+      "doc": "Secondi in cui una pompa può funzionare continuamente prima che venga contrassegnata come probabilmente bloccata (avvia l'evento pompa bloccata).",
+      "label": "Durata pompa bloccata"
+    },
+    "running_dead_zone": {
+      "doc": "Dopo l'avvio di un ciclo, i cali di potenza all'interno di questa finestra vengono ignorati. Le lavatrici si riempiono con acqua fredda (che scende vicino a 0 W prima del riscaldamento): senza questa protezione la fase di riempimento assomiglia alla fine del ciclo. Ciò NON salta i dati: la traccia completa della potenza viene registrata da T=0. Il motore dei suggerimenti misura l'effettivo modello di avvio della macchina e lo dimensiona automaticamente.",
+      "label": "Zona morta in esecuzione"
+    },
+    "sampling_interval": {
+      "doc": "Tempo previsto tra le letture del sensore: utilizzato per dimensionare la finestra di livellamento e avviare correttamente il rimbalzo. Ogni aggiornamento del sensore viene acquisito indipendentemente da questo valore; calibra solo i calcoli a valle. Il motore dei suggerimenti misura la cadenza effettiva del sensore dai cicli precedenti e la imposta automaticamente.",
+      "label": "Intervallo di campionamento"
+    },
+    "save_debug_traces": {
+      "doc": "Memorizzare la traccia di potenza completa e i dati di debug corrispondenti per ciascun ciclo. Utile per la risoluzione dei problemi ma aumenta le dimensioni dello spazio di archiviazione.",
+      "label": "Salva tracce di debug"
+    },
+    "smoothing_window": {
+      "doc": "Quanto viene attenuato il segnale di potenza grezza. Basso (2) è reattivo ma rumoroso; alto (5) attenua i picchi ma aggiunge ritardo.",
+      "label": "Finestra di smussamento"
+    },
+    "start_duration_threshold": {
+      "doc": "La potenza deve rimanere al di sopra della soglia di avvio per questo tempo per confermare un avvio reale, impedendo che gli interruttori di accensione/spegnimento in frazioni di secondo avviino un ciclo.",
+      "label": "Durata avvio"
+    },
+    "start_energy_threshold": {
+      "doc": "Energia (potenza x tempo) che l'apparecchio deve consumare prima di FUNZIONARE. Un breve picco ad alta potenza ha un'energia molto bassa e viene ignorato, impedendo false partenze.",
+      "label": "Energia avvio"
+    },
+    "start_threshold_w": {
+      "doc": "La potenza deve superare questo livello per confermare l'inizio di un ciclo. Un valore troppo basso provoca false partenze dall'alimentazione in standby; vengono persi programmi troppo elevati e con avvio lento (riempimento a freddo). Il motore dei suggerimenti imposta questo valore appena al di sopra della potenza attiva più bassa osservata della macchina.",
+      "label": "Soglia di avvio"
+    },
+    "stop_threshold_w": {
+      "doc": "La potenza deve scendere al di sotto di questo livello prima che inizi il conto alla rovescia del ritardo di disattivazione. Impostalo al di sotto della Soglia iniziale: lo spazio tra loro è la banda di isteresi che impedisce lo sfarfallio. Se impostato su un valore troppo alto, le fasi a basso consumo (trattenimento risciacquo, antipiega) attivano erroneamente la sequenza finale.",
+      "label": "Soglia di arresto"
+    },
+    "suppress_feedback_notifications": {
+      "doc": "Non inviare una notifica persistente quando un ciclo finito necessita di revisione; il feedback appare ancora nella coda di revisione di Cicli.",
+      "label": "Sopprimi notifiche feedback"
+    },
+    "switch_entity": {
+      "doc": "L'interruttore opzionale può essere disattivato durante la pausa e riattivato alla ripresa, utilizzato insieme a \"La pausa interrompe anche l'alimentazione\".",
+      "label": "Entità interruttore"
+    },
+    "watchdog_interval": {
+      "doc": "La frequenza con cui il watchdog in background controlla i sensori bloccati e i timeout trascorsi. Predefinito 30 secondi.",
+      "label": "Intervallo supervisore"
+    }
+  },
+  "setting_group": {
+    "auto_labeling": {
+      "label": "Etichettatura automatica"
+    },
+    "cycle_end": {
+      "label": "Fine ciclo"
+    },
+    "cycle_start": {
+      "label": "Avvio ciclo"
+    },
+    "cycle_timers": {
+      "label": "Timer ciclo"
+    },
+    "data_management": {
+      "label": "Gestione dati"
+    },
+    "debug": {
+      "label": "Debug"
+    },
+    "dishwasher_end": {
+      "label": "Fine lavastoviglie"
+    },
+    "door_pause": {
+      "label": "Porta e pausa"
+    },
+    "dtw_refinement": {
+      "label": "Raffinamento DTW"
+    },
+    "duration_gates": {
+      "label": "Porte durata"
+    },
+    "energy": {
+      "label": "Energia"
+    },
+    "external_end_trigger": {
+      "label": "Trigger di fine esterno"
+    },
+    "housekeeping": {
+      "label": "Manutenzione"
+    },
+    "match_scoring": {
+      "label": "Punteggio corrispondenza"
+    },
+    "messages": {
+      "label": "Messaggi"
+    },
+    "power_off": {
+      "label": "Spegnimento"
+    },
+    "predictive_end": {
+      "label": "Fine predittiva"
+    },
+    "schedule": {
+      "label": "Pianificazione"
+    },
+    "services": {
+      "label": "Servizi"
+    },
+    "signal_processing": {
+      "label": "Elaborazione del segnale"
+    },
+    "thresholds_gap": {
+      "label": "Soglie e intervallo"
+    },
+    "timing": {
+      "label": "Temporizzazione"
+    },
+    "unload_reminder": {
+      "label": "Promemoria scarico"
+    },
+    "watchdog": {
+      "label": "Supervisore"
+    }
   },
   "status": {
     "active": "Attivo",
@@ -480,448 +979,14 @@
     "recording_started": "La registrazione è iniziata",
     "recording_stopped": "La registrazione è stata interrotta",
     "review_saved": "Revisione salvata",
+    "settings_conflicts": "Correggere i conflitti di impostazioni evidenziati prima di salvare.",
+    "settings_reverted": "Impostazioni ripristinate; ricarica dell'integrazione",
     "settings_saved": "Impostazioni salvate; ricarica dell'integrazione",
     "suggestions_applied": "Suggerimenti applicati; ricarica dell'integrazione",
     "suggestions_dismissed": "Suggerimenti respinti"
   },
-  "section": {
-    "basic": {
-      "label": "Base",
-      "intro": "Identità principale e gli elementi essenziali che la maggior parte delle configurazioni richiede."
-    },
-    "detection": {
-      "label": "Rilevamento",
-      "intro": "Come un ciclo viene rilevato come avviato, in esecuzione e terminato."
-    },
-    "matching": {
-      "label": "Abbinamento",
-      "intro": "Come i cicli completati vengono abbinati ai profili appresi ed etichettati."
-    },
-    "timing": {
-      "label": "Temporizzazione e supervisore",
-      "intro": "Cadenza di sfondo, il supervisore offline e la manutenzione."
-    },
-    "anti_wrinkle": {
-      "label": "Antirughe",
-      "intro": "La modalità antirughe/antistropicciamento rileva gli impulsi di tumbling a bassa potenza dopo la fase principale e li mantiene collegati al ciclo completato."
-    },
-    "delay": {
-      "label": "Avvio ritardato",
-      "intro": "Il rilevamento dell'avvio ritardato identifica quando un elettrodomestico è alimentato ma non ha ancora iniziato il suo ciclo."
-    },
-    "triggers": {
-      "label": "Trigger e porte",
-      "intro": "Segnali esterni opzionali: un trigger di fine, un sensore di porta, un interruttore di pausa e il promemoria di scarico."
-    },
-    "notifications": {
-      "label": "Notifiche",
-      "intro": "Quando e come ricevi notifiche sugli eventi del ciclo."
-    },
-    "ml_training": {
-      "label": "Addestramento ML",
-      "intro": "Pianificazione del riaddestramento del machine learning sul dispositivo e impostazioni dei dati."
-    }
-  },
-  "setting_group": {
-    "thresholds_gap": {
-      "label": "Soglie e intervallo"
-    },
-    "cycle_start": {
-      "label": "Avvio ciclo"
-    },
-    "cycle_end": {
-      "label": "Fine ciclo"
-    },
-    "power_off": {
-      "label": "Spegnimento"
-    },
-    "signal_processing": {
-      "label": "Elaborazione del segnale"
-    },
-    "predictive_end": {
-      "label": "Fine predittiva"
-    },
-    "dishwasher_end": {
-      "label": "Fine lavastoviglie"
-    },
-    "dtw_refinement": {
-      "label": "Raffinamento DTW"
-    },
-    "match_scoring": {
-      "label": "Punteggio corrispondenza"
-    },
-    "duration_gates": {
-      "label": "Porte durata"
-    },
-    "auto_labeling": {
-      "label": "Etichettatura automatica"
-    },
-    "watchdog": {
-      "label": "Supervisore"
-    },
-    "housekeeping": {
-      "label": "Manutenzione"
-    },
-    "debug": {
-      "label": "Debug"
-    },
-    "external_end_trigger": {
-      "label": "Trigger di fine esterno"
-    },
-    "door_pause": {
-      "label": "Porta e pausa"
-    },
-    "unload_reminder": {
-      "label": "Promemoria scarico"
-    },
-    "services": {
-      "label": "Servizi"
-    },
-    "timing": {
-      "label": "Temporizzazione"
-    },
-    "messages": {
-      "label": "Messaggi"
-    },
-    "energy": {
-      "label": "Energia"
-    },
-    "cycle_timers": {
-      "label": "Timer ciclo"
-    },
-    "schedule": {
-      "label": "Pianificazione"
-    },
-    "data_management": {
-      "label": "Gestione dati"
-    }
-  },
-  "setting": {
-    "name": {
-      "label": "Nome dispositivo",
-      "doc": "Nome visualizzato mostrato nell'elenco delle integrazioni HA e nel registro del dispositivo."
-    },
-    "device_type": {
-      "label": "Tipo di dispositivo",
-      "doc": "Classe dell'apparecchio. Imposta valori predefiniti di rilevamento sensibili (soglie, ritardo di disattivazione, gestione delle estremità) ottimizzati per quel tipo di apparecchio; cambiarlo solo se il dispositivo era stato originariamente configurato come tipo sbagliato."
-    },
-    "power_sensor": {
-      "label": "Sensore di potenza",
-      "doc": "L'entità sensore che segnala la potenza in tempo reale in watt per questo elettrodomestico (ad esempio sensor.washer_power). Tutto il rilevamento del ciclo si basa su questo segnale."
-    },
-    "min_power": {
-      "label": "Potenza minima",
-      "doc": "Potenza minima assoluta considerata attiva. Le letture inferiori a questo valore vengono trattate come 0 W (standby), filtrando il carico fantasma delle prese intelligenti e dei LED di standby."
-    },
-    "off_delay": {
-      "label": "Ritardo spegnimento",
-      "doc": "È tempo di attendere dopo l'interruzione della corrente prima di dichiarare terminato il ciclo. Se l'alimentazione viene ripristinata entro questo intervallo, il ciclo continua senza interruzioni, consentendo di colmare le pause tra le fasi di lavaggio. Le lavastoviglie hanno fasi di asciugatura lunghe (spegnimento per 20-60 minuti), quindi il ritardo di spegnimento deve superare quello per mantenere l'intero ciclo di lavaggio+asciugatura come un ciclo."
-    },
-    "linked_device": {
-      "label": "Raggruppa sotto il dispositivo",
-      "doc": "Facoltativamente nidificare questo dispositivo WashData sotto un altro dispositivo (ad esempio la presa intelligente) nel registro dei dispositivi HA, mostrato come \"Connesso tramite ...\"."
-    },
-    "start_threshold_w": {
-      "label": "Soglia di avvio",
-      "doc": "La potenza deve superare questo livello per confermare l'inizio di un ciclo. Un valore troppo basso provoca false partenze dall'alimentazione in standby; vengono persi programmi troppo elevati e con avvio lento (riempimento a freddo). Il motore dei suggerimenti imposta questo valore appena al di sopra della potenza attiva più bassa osservata della macchina."
-    },
-    "stop_threshold_w": {
-      "label": "Soglia di arresto",
-      "doc": "La potenza deve scendere al di sotto di questo livello prima che inizi il conto alla rovescia del ritardo di disattivazione. Impostalo al di sotto della Soglia iniziale: lo spazio tra loro è la banda di isteresi che impedisce lo sfarfallio. Se impostato su un valore troppo alto, le fasi a basso consumo (trattenimento risciacquo, antipiega) attivano erroneamente la sequenza finale."
-    },
-    "min_off_gap": {
-      "label": "Intervallo minimo di spegnimento",
-      "doc": "Se la macchina si spegne per meno di questo tempo, la sequenza di accensione/spegnimento/accensione viene trattata come un ciclo continuo. Impedisce che i programmi di ammollo (la macchina si spegne per diversi minuti durante il lavaggio) vengano suddivisi in due cicli separati. Impostalo più breve dell'intervallo tra i carichi consecutivi se desideri che vengano conteggiati come cicli separati. Le impostazioni predefinite del tipo di dispositivo proteggono la tipica pausa intraciclo per ciascun apparecchio."
-    },
-    "start_duration_threshold": {
-      "label": "Durata avvio",
-      "doc": "La potenza deve rimanere al di sopra della soglia di avvio per questo tempo per confermare un avvio reale, impedendo che gli interruttori di accensione/spegnimento in frazioni di secondo avviino un ciclo."
-    },
-    "start_energy_threshold": {
-      "label": "Energia avvio",
-      "doc": "Energia (potenza x tempo) che l'apparecchio deve consumare prima di FUNZIONARE. Un breve picco ad alta potenza ha un'energia molto bassa e viene ignorato, impedendo false partenze."
-    },
-    "completion_min_seconds": {
-      "label": "Durata minima ciclo",
-      "doc": "I cicli più brevi di questo vengono scartati come cicli fantasma (corse di prova, apertura della porta per aggiungere un calzino)."
-    },
-    "running_dead_zone": {
-      "label": "Zona morta in esecuzione",
-      "doc": "Dopo l'avvio di un ciclo, i cali di potenza all'interno di questa finestra vengono ignorati. Le lavatrici si riempiono con acqua fredda (che scende vicino a 0 W prima del riscaldamento): senza questa protezione la fase di riempimento assomiglia alla fine del ciclo. Ciò NON salta i dati: la traccia completa della potenza viene registrata da T=0. Il motore dei suggerimenti misura l'effettivo modello di avvio della macchina e lo dimensiona automaticamente."
-    },
-    "end_energy_threshold": {
-      "label": "Energia fine ciclo",
-      "doc": "Durante il conto alla rovescia del ritardo di spegnimento, l'energia accumulata (watt x tempo) viene confrontata con questa soglia. Se superato, il conto alla rovescia si azzera, mantenendo i capi antipiega e i residui di asciugatura della lavastoviglie attaccati al ciclo invece di tagliarli. Alzarlo se i cicli terminano troppo presto durante il raffreddamento; abbassarlo se il rilevamento è lento."
-    },
-    "end_repeat_count": {
-      "label": "Conteggio ripetizioni fine",
-      "doc": "Numero di letture consecutive al di sotto della soglia di arresto richieste prima della fine del ciclo. 1 va bene per la maggior parte delle prese. Aumenta a 2-3 se la tua presa intelligente segnala occasionalmente un campione di falsi zero a metà ciclo e i tuoi cicli terminano prematuramente."
-    },
-    "power_off_threshold_w": {
-      "label": "Soglia di spegnimento",
-      "doc": "Rilevamento facoltativo dello stato Spento basato sulla potenza. Quando è maggiore di 0, una volta terminato un ciclo e se la potenza rimane sotto questo livello per il Ritardo di spegnimento, la macchina viene considerata spenta e lo stato torna a Spento. Lascia a 0 per disattivarlo (valore predefinito). Impostalo sopra il consumo reale a macchina spenta e sotto la Soglia di arresto e il consumo in standby della tua macchina (terminata ma ancora accesa); se non è inferiore alla Soglia di arresto, viene ignorato. Quando è attivo, sostituisce il Ritardo reset avanzamento per il ritorno a Spento, così una macchina terminata resta su Completato/Pulito finché non viene effettivamente spenta."
-    },
-    "power_off_delay": {
-      "label": "Ritardo di spegnimento",
-      "doc": "Per quanto tempo la potenza deve rimanere sotto la Soglia di spegnimento dopo la fine di un ciclo prima che lo stato torni a Spento. Usato solo quando la Soglia di spegnimento è maggiore di 0. Viene controllato secondo la cadenza in background, quindi il ritardo effettivo viene arrotondato per eccesso al successivo tick di scadenza dello stato."
-    },
-    "sampling_interval": {
-      "label": "Intervallo di campionamento",
-      "doc": "Tempo previsto tra le letture del sensore: utilizzato per dimensionare la finestra di livellamento e avviare correttamente il rimbalzo. Ogni aggiornamento del sensore viene acquisito indipendentemente da questo valore; calibra solo i calcoli a valle. Il motore dei suggerimenti misura la cadenza effettiva del sensore dai cicli precedenti e la imposta automaticamente."
-    },
-    "smoothing_window": {
-      "label": "Finestra di smussamento",
-      "doc": "Quanto viene attenuato il segnale di potenza grezza. Basso (2) è reattivo ma rumoroso; alto (5) attenua i picchi ma aggiunge ritardo."
-    },
-    "abrupt_drop_watts": {
-      "label": "Calo brusco",
-      "doc": "Un calo di potenza maggiore segnala il ciclo come Interrotto (annullamento manuale) piuttosto che come completamento naturale."
-    },
-    "abrupt_drop_ratio": {
-      "label": "Rapporto calo brusco",
-      "doc": "Anche un calo maggiore di questa frazione della potenza attuale viene considerato brusco (0,6 = calo del 60%). Completa la soglia dei watt per tutte le dimensioni degli elettrodomestici."
-    },
-    "profile_match_threshold": {
-      "label": "Soglia di corrispondenza",
-      "doc": "Punteggio di somiglianza minimo (0-1) richiesto alla fine del ciclo per accettare l'identificazione del programma. Alzarlo per ridurre le identificazioni errate; abbassarlo se i programmi della macchina non corrispondono. Il valore predefinito 0,4 è un punto di partenza conservativo."
-    },
-    "profile_unmatch_threshold": {
-      "label": "Soglia di non corrispondenza",
-      "doc": "Se una partita in diretta a metà ciclo scende al di sotto di questo punteggio, l'identificazione provvisoria viene cancellata. Mantienilo leggermente al di sotto della Soglia di corrispondenza in modo che un breve calo nella somiglianza non riporti la visualizzazione su senza corrispondenza."
-    },
-    "profile_match_interval": {
-      "label": "Intervallo di corrispondenza",
-      "doc": "La frequenza con cui tentare la corrispondenza del profilo durante un ciclo di esecuzione. Il valore predefinito di 300 s (5 minuti) bilancia la velocità di rilevamento e la CPU."
-    },
-    "profile_match_min_duration_ratio": {
-      "label": "Rapporto durata minima",
-      "doc": "Durata minima del ciclo rispetto al profilo. 0,9 significa che un ciclo deve corrispondere almeno al 90% della durata del profilo per corrispondere."
-    },
-    "profile_match_max_duration_ratio": {
-      "label": "Rapporto durata massima",
-      "doc": "Durata massima del ciclo rispetto al profilo. 1.3 significa che un ciclo deve essere inferiore al 130% della durata del profilo per corrispondere."
-    },
-    "profile_duration_tolerance": {
-      "label": "Tolleranza durata profilo",
-      "doc": "La fascia +/- attorno alla durata media del profilo utilizzata durante la corrispondenza. 0,25 significa che un profilo di 60 minuti corrisponde a cicli di 45-75 minuti."
-    },
-    "duration_tolerance": {
-      "label": "Tolleranza stima",
-      "doc": "Tolleranza per le stime del tempo rimanente (feedback di apprendimento, non corrispondenza). Se la durata effettiva rientra nel +/-X% della stima, viene considerata una buona corrispondenza."
-    },
-    "auto_label_confidence": {
-      "label": "Confidenza etichettatura automatica",
-      "doc": "Se il punteggio della partita alla fine del ciclo è pari o superiore a questo, il programma viene etichettato automaticamente senza alcuna richiesta di conferma. Aumentarlo per richiedere una maggiore certezza prima dell'etichettatura automatica; abbassarlo per automatizzare di più. Funziona insieme al Learning Confidence sottostante."
-    },
-    "learning_confidence": {
-      "label": "Confidenza apprendimento",
-      "doc": "Se il punteggio di corrispondenza è compreso tra questo e la sicurezza dell'etichetta automatica, una notifica di feedback ti chiede di verificare il programma identificato. Al di sotto di questo punteggio la partita è troppo incerta per emergere. Deve essere mantenuto al di sotto del livello di confidenza dell'etichetta automatica."
-    },
-    "suppress_feedback_notifications": {
-      "label": "Sopprimi notifiche feedback",
-      "doc": "Non inviare una notifica persistente quando un ciclo finito necessita di revisione; il feedback appare ancora nella coda di revisione di Cicli."
-    },
-    "watchdog_interval": {
-      "label": "Intervallo supervisore",
-      "doc": "La frequenza con cui il watchdog in background controlla i sensori bloccati e i timeout trascorsi. Predefinito 30 secondi."
-    },
-    "no_update_active_timeout": {
-      "label": "Timeout senza aggiornamenti",
-      "doc": "Se non arrivano aggiornamenti di alimentazione per così tanto tempo durante il funzionamento, presumi che la spina sia caduta offline e forza l'arresto per evitare un ciclo di zombie. Il valore predefinito di 600 s consente il ritardo cloud o mesh."
-    },
-    "progress_reset_delay": {
-      "label": "Ritardo reset avanzamento",
-      "doc": "Al termine, mantieni l'avanzamento al 100% per questo tempo in modo che Completato sia visibile sui dashboard prima di reimpostare su Inattivo."
-    },
-    "auto_maintenance": {
-      "label": "Manutenzione automatica (pulizia notturna)",
-      "doc": "Esegui le pulizie notturne: ricostruisci le buste del profilo, ricalcola l'integrità del ciclo, elimina le tracce di debug e conserva i cicli più recenti."
-    },
-    "expose_debug_entities": {
-      "label": "Esponi entità di debug",
-      "doc": "Pubblica entità HA diagnostiche aggiuntive (confidenza della corrispondenza, ambiguità, stati interni). Disattivato mantiene l'elenco delle entità pulito per l'uso normale."
-    },
-    "save_debug_traces": {
-      "label": "Salva tracce di debug",
-      "doc": "Memorizzare la traccia di potenza completa e i dati di debug corrispondenti per ciascun ciclo. Utile per la risoluzione dei problemi ma aumenta le dimensioni dello spazio di archiviazione."
-    },
-    "anti_wrinkle_enabled": {
-      "label": "Abilita rilevamento antirughe",
-      "doc": "Riconosci i brevi impulsi di asciugatrice a bassa potenza emessi da un'asciugatrice dopo la fase di riscaldamento principale e mantienili collegati al ciclo finito invece di leggerli come nuovi cicli."
-    },
-    "anti_wrinkle_max_power": {
-      "label": "Potenza massima antirughe",
-      "doc": "Un impulso superiore a questa potenza viene trattato come un vero e proprio nuovo ciclo, non come un capitombolo antirughe. Impostare appena sopra la potenza dell'impulso di rotazione."
-    },
-    "anti_wrinkle_max_duration": {
-      "label": "Durata massima",
-      "doc": "Gli impulsi più lunghi vengono trattati come un vero e proprio ciclo piuttosto che come una caduta antirughe."
-    },
-    "anti_wrinkle_exit_power": {
-      "label": "Soglia potenza uscita",
-      "doc": "La potenza deve scendere al di sotto di questo valore tra gli impulsi affinché la modalità antirughe rimanga attiva."
-    },
-    "delay_start_detect_enabled": {
-      "label": "Abilita rilevamento avvio ritardato",
-      "doc": "Rileva quando l'apparecchio è acceso e in attesa (avvio ritardato/standby) ma non ha iniziato il ciclo, quindi l'erogazione in standby non viene confusa con un ciclo in esecuzione."
-    },
-    "delay_confirm_seconds": {
-      "label": "Secondi di conferma",
-      "doc": "L'alimentazione deve rimanere nella banda di standby per tutto questo tempo prima che l'apparecchio venga considerato in attesa di avvio anziché in funzione."
-    },
-    "delay_timeout_hours": {
-      "label": "Ore di timeout",
-      "doc": "Smetti di aspettare in modalità di avvio ritardato dopo così tante ore e torna al minimo, quindi una macchina lasciata accesa ma mai avviata non aspetta per sempre."
-    },
-    "external_end_trigger_enabled": {
-      "label": "Abilita trigger di fine esterno",
-      "doc": "Lascia che un sensore binario esterno segnali la fine di un ciclo, oltre al rilevamento integrato basato sulla potenza."
-    },
-    "external_end_trigger": {
-      "label": "Entità trigger esterno",
-      "doc": "Sensore binario il cui cambio di stato segna la fine del ciclo (es. contatto \"finito\" di un elettrodomestico o integrazione di un compagno)."
-    },
-    "external_end_trigger_inverted": {
-      "label": "Inverti trigger esterno (attiva su SPENTO)",
-      "doc": "Considerare lo spegnimento del sensore di trigger (anziché l'attivazione) come segnale di fine ciclo."
-    },
-    "door_sensor_entity": {
-      "label": "Entità sensore porta",
-      "doc": "Sensore binario porta opzionale. Utilizzato per rilevare quando l'apparecchiatura è stata aperta/scaricata dopo un ciclo."
-    },
-    "pause_cuts_power": {
-      "label": "La pausa interrompe anche l'alimentazione (tramite interruttore)",
-      "doc": "Quando un ciclo è in pausa, spegni anche l'entità Switch di seguito. Solo per apparecchi la cui spina può essere tagliata in sicurezza a metà ciclo."
-    },
-    "switch_entity": {
-      "label": "Entità interruttore",
-      "doc": "L'interruttore opzionale può essere disattivato durante la pausa e riattivato alla ripresa, utilizzato insieme a \"La pausa interrompe anche l'alimentazione\"."
-    },
-    "notify_unload_delay_minutes": {
-      "label": "Ritardo promemoria scarico",
-      "doc": "Minuti dopo la fine di un ciclo prima dell'invio del promemoria \"scaricare la macchina\" ancora in attesa. Impostare 0 per disabilitare il promemoria."
-    },
-    "pump_stuck_duration": {
-      "label": "Durata pompa bloccata",
-      "doc": "Secondi in cui una pompa può funzionare continuamente prima che venga contrassegnata come probabilmente bloccata (avvia l'evento pompa bloccata)."
-    },
-    "notify_start_services": {
-      "label": "Servizi di avvio",
-      "doc": "notify.* servizi chiamati all'avvio di un ciclo. Aggiungine uno per target (telefono, dashboard, ecc.); lasciare vuoto per nessuna notifica di avvio."
-    },
-    "notify_finish_services": {
-      "label": "Servizi di fine",
-      "doc": "notify.* servizi chiamati al termine di un ciclo. Aggiungine uno per bersaglio; lasciare vuoto per nessuna notifica di fine."
-    },
-    "notify_live_services": {
-      "label": "Servizi avanzamento in tempo reale",
-      "doc": "notify.* servizi richiedevano aggiornamenti in tempo reale sullo stato di avanzamento durante l'esecuzione di un ciclo. Lascia vuoto per disabilitare le notifiche di avanzamento in tempo reale."
-    },
-    "notify_people": {
-      "label": "Persone (per Solo a Casa)",
-      "doc": "persona.* entità utilizzate da \"Notifica solo quando a casa\" per decidere se qualcuno è a casa."
-    },
-    "notify_only_when_home": {
-      "label": "Notifica solo quando a casa",
-      "doc": "Invia notifiche solo quando almeno una delle persone collegate (sopra) è a casa."
-    },
-    "notify_fire_events": {
-      "label": "Genera eventi HA per le notifiche",
-      "doc": "Attiva anche gli eventi ha_washdata_* all'inizio/fine del ciclo in modo da poter creare le tue automazioni."
-    },
-    "notify_before_end_minutes": {
-      "label": "Avviso pre-fine",
-      "doc": "Invia un avviso di quasi finito quando il tempo rimanente stimato scende al di sotto di questo valore. 0 lo disabilita."
-    },
-    "notify_live_interval_seconds": {
-      "label": "Intervallo aggiornamento in tempo reale",
-      "doc": "La frequenza con cui le notifiche di avanzamento in tempo reale vengono aggiornate durante l'esecuzione di un ciclo."
-    },
-    "notify_live_overrun_percent": {
-      "label": "% Sforamento in tempo reale prima dell'avviso",
-      "doc": "Se un ciclo supera la stima di oltre questa percentuale, invia un avviso di superamento."
-    },
-    "notify_live_chronometer": {
-      "label": "Usa cronometro in tempo reale",
-      "doc": "Mostra un timer per il conto alla rovescia con aggiornamento in tempo reale nella notifica (sulle piattaforme che lo supportano) invece di una stima statica."
-    },
-    "notify_timeout_seconds": {
-      "label": "Chiusura automatica dopo",
-      "doc": "Ignora automaticamente la notifica dopo questo numero di secondi (sulle piattaforme che la supportano). 0 lo mantiene finché non viene eliminato manualmente."
-    },
-    "notify_title": {
-      "label": "Titolo notifica",
-      "doc": "Titolo della notifica. Variabili modello: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
-    },
-    "notify_icon": {
-      "label": "Icona notifica",
-      "doc": "Icona mdi opzionale per la notifica (es. mdi:lavatrice). Lascia vuoto per l'impostazione predefinita della piattaforma."
-    },
-    "notify_start_message": {
-      "label": "Messaggio di avvio",
-      "doc": "Corpo inviato all'avvio di un ciclo. Variabili modello: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
-    },
-    "notify_finish_message": {
-      "label": "Messaggio di fine",
-      "doc": "Corpo inviato al termine di un ciclo. Variabili modello: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
-    },
-    "notify_pre_complete_message": {
-      "label": "Messaggio pre-completamento",
-      "doc": "Corpo dell'avviso pre-fine/quasi terminato. Variabili modello: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
-    },
-    "notify_reminder_message": {
-      "label": "Messaggio promemoria",
-      "doc": "Corpo del promemoria di scarico ancora in attesa. Vuoto utilizza l'impostazione predefinita incorporata. Variabili modello: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}."
-    },
-    "notify_channel": {
-      "label": "Canale Android (avvio/tempo reale)",
-      "doc": "Nome del canale di notifica Android per i messaggi di avvio/live (controlla l'audio e la priorità per canale sull'app mobile). Vuoto utilizza l'impostazione predefinita dell'app complementare."
-    },
-    "notify_finish_channel": {
-      "label": "Canale Android (fine)",
-      "doc": "Nome del canale di notifica Android per il messaggio di fine. Vuoto riutilizza il canale iniziale/live."
-    },
-    "energy_price_entity": {
-      "label": "Entità prezzo energia",
-      "doc": "Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Ha la precedenza sul prezzo statico riportato di seguito. Ogni ciclo blocca il prezzo in vigore al termine."
-    },
-    "energy_price_static": {
-      "label": "Prezzo energia statico (per kWh)",
-      "doc": "Prezzo fisso per kWh utilizzato per i dati sui costi quando non è impostata alcuna entità di prezzo in tempo reale sopra."
-    },
-    "notify_cycle_timers": {
-      "label": "Timer ciclo",
-      "doc": "Notifiche in minuti specifici dell'inizio di un ciclo (ad esempio per aggiungere ammorbidente). Il messaggio supporta {device}, {program}, {minutes}. Abilita la pausa automatica per mettere in pausa a quel punto e ricevere una notifica interattiva con un pulsante Riprendi; riprendere tramite il pannello, il servizio Pausa/Riprendi o l'azione di notifica."
-    },
-    "enable_ml_models": {
-      "label": "Applica modelli intelligenti durante un ciclo",
-      "doc": "Mentre un ciclo viene eseguito, lascia che i modelli affinino i risultati in tempo reale: una stima più stabile del tempo rimanente e di energia/costi e una protezione anti-arresto prematuro al rilevamento della fine (può solo ritardare un traguardo, mai terminarne uno in anticipo ed è limitato). Utilizza i tuoi modelli ottimizzati quando disponibili, altrimenti quelli integrati. Spento = solo la classica logica basata sulla potenza (ancora affidabile)."
-    },
-    "ml_training_enabled": {
-      "label": "Impara da questa macchina",
-      "doc": "Studia periodicamente i cicli esaminati durante la notte e ottimizza i modelli per questa macchina specifica. Un cambiamento viene mantenuto solo quando ottiene effettivamente risultati migliori nei cicli sospesi, quindi questo può solo aiutare o rimanere lo stesso, senza mai regredire."
-    },
-    "ml_training_hour": {
-      "label": "Impara all'ora",
-      "doc": "Ora locale del giorno (0-23) per effettuare la messa a punto notturna. Scegli un'ora tranquilla, ad esempio le 2 (02:00)."
-    },
-    "ml_training_min_cycles": {
-      "label": "Cicli necessari prima",
-      "doc": "Attendere fino a quando almeno questo numero di cicli non sarà stato registrato prima della messa a punto, in modo che ci sia abbastanza da cui imparare."
-    },
-    "ml_training_interval_days": {
-      "label": "Controlla al massimo ogni",
-      "doc": "Ricontrolla i miglioramenti al massimo una volta ogni questi giorni."
-    }
-  },
-  "placeholder": {
-    "add": "aggiungi…",
-    "group_name": "es. Cotone 2:47",
-    "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
-    "notify": "aggiungi un servizio di notifica…",
-    "notify_services_list": "notify.mobile_app_phone, ...",
-    "person": "aggiungi una persona…",
-    "phase_name": "es. Prelavaggio",
-    "profile_name": "es. Cotone 40°C"
+  "trend": {
+    "down": "Tendenza al ribasso",
+    "up": "Tendenza in alto"
   }
 }

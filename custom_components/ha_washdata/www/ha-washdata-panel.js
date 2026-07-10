@@ -249,6 +249,140 @@ for (const sec of _SETTINGS_SECTIONS) {
   for (const grp of groups) for (const f of (grp.fields || [])) _FIELD_BY_KEY[f.key] = f;
 }
 
+// ─── Setting conflict rules ───────────────────────────────────────────────────
+// Each rule describes a cross-parameter invariant. `check(vals)` returns true
+// when the invariant is violated. `fieldErrors(vals)` maps each affected key to
+// an error descriptor: `{msgKey, msgVars, msgFb, fixVal}` where `fixVal` is the
+// suggested value for THAT field (always actionable in the current section).
+const _SETTING_CONFLICTS = [
+  {
+    // start_threshold_w > stop_threshold_w (hysteresis band must be positive)
+    keys: ['start_threshold_w', 'stop_threshold_w'],
+    check: v => v.start_threshold_w != null && v.stop_threshold_w != null && v.start_threshold_w <= v.stop_threshold_w,
+    fieldErrors: v => ({
+      start_threshold_w: { msgKey: 'conflict.hysteresis.start', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be above Stop Threshold (${v.stop_threshold_w} W)`, fixVal: +Math.max(v.stop_threshold_w + 0.5, v.stop_threshold_w * 1.25).toFixed(1) },
+      stop_threshold_w:  { msgKey: 'conflict.hysteresis.stop',  msgVars: {start: v.start_threshold_w}, msgFb: `Must be below Start Threshold (${v.start_threshold_w} W)`, fixVal: +Math.min(v.start_threshold_w - 0.5, v.start_threshold_w * 0.8).toFixed(1) },
+    }),
+  },
+  {
+    // min_power <= stop_threshold_w (noise gate must sit below the stop floor)
+    keys: ['min_power', 'stop_threshold_w'],
+    check: v => v.min_power != null && v.stop_threshold_w != null && v.min_power > v.stop_threshold_w,
+    fieldErrors: v => ({
+      min_power:        { msgKey: 'conflict.min_power.min_power', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be at or below Stop Threshold (${v.stop_threshold_w} W)`, fixVal: +(v.stop_threshold_w * 0.8).toFixed(1) },
+      stop_threshold_w: { msgKey: 'conflict.min_power.stop',      msgVars: {min: v.min_power},  msgFb: `Must be at or above Min Power (${v.min_power} W)`, fixVal: +(v.min_power * 1.25).toFixed(1) },
+    }),
+  },
+  {
+    // power_off_threshold_w < stop_threshold_w when > 0 (else feature silently ignored)
+    keys: ['power_off_threshold_w', 'stop_threshold_w'],
+    check: v => v.power_off_threshold_w != null && v.power_off_threshold_w > 0 && v.stop_threshold_w != null && v.power_off_threshold_w >= v.stop_threshold_w,
+    fieldErrors: v => ({
+      power_off_threshold_w: { msgKey: 'conflict.power_off.threshold', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be below Stop Threshold (${v.stop_threshold_w} W) to take effect`, fixVal: +(v.stop_threshold_w * 0.6).toFixed(1) },
+      stop_threshold_w:      { msgKey: 'conflict.power_off.stop',      msgVars: {pot: v.power_off_threshold_w}, msgFb: `Must be above Power Off Threshold (${v.power_off_threshold_w} W)`, fixVal: +(v.power_off_threshold_w * 1.67).toFixed(1) },
+    }),
+  },
+  {
+    // off_delay <= min_off_gap (effective_off_delay = max(off_delay, min_off_gap))
+    keys: ['off_delay', 'min_off_gap'],
+    check: v => v.off_delay != null && v.min_off_gap != null && v.off_delay > v.min_off_gap,
+    fieldErrors: v => ({
+      off_delay:  { msgKey: 'conflict.off_delay.off_delay', msgVars: {gap: v.min_off_gap},  msgFb: `Off Delay (${v.off_delay} s) overrides Min Off Gap (${v.min_off_gap} s); cycles within the gap may merge`, fixVal: v.min_off_gap },
+      min_off_gap: { msgKey: 'conflict.off_delay.gap',     msgVars: {delay: v.off_delay},  msgFb: `Min Off Gap should be at least Off Delay (${v.off_delay} s)`, fixVal: v.off_delay },
+    }),
+  },
+  {
+    // watchdog_interval >= 2 * sampling_interval (avoid false-zero injections)
+    keys: ['watchdog_interval', 'sampling_interval'],
+    check: v => v.watchdog_interval != null && v.sampling_interval != null && v.watchdog_interval < 2 * v.sampling_interval,
+    fieldErrors: v => ({
+      watchdog_interval:  { msgKey: 'conflict.watchdog.interval',  msgVars: {si: v.sampling_interval}, msgFb: `Should be at least 2× Sampling Interval (${v.sampling_interval} s)`, fixVal: +(2 * v.sampling_interval + 1) },
+      sampling_interval:  { msgKey: 'conflict.watchdog.sampling',  msgVars: {wi: v.watchdog_interval}, msgFb: `Sampling Interval should be at most half of Watchdog Interval (${v.watchdog_interval} s)`, fixVal: +Math.floor(v.watchdog_interval / 2) },
+    }),
+  },
+  {
+    // no_update_active_timeout > watchdog_interval (timeout must outlast one tick)
+    keys: ['no_update_active_timeout', 'watchdog_interval'],
+    check: v => v.no_update_active_timeout != null && v.watchdog_interval != null && v.no_update_active_timeout <= v.watchdog_interval,
+    fieldErrors: v => ({
+      no_update_active_timeout: { msgKey: 'conflict.no_update_timeout.timeout', msgVars: {wi: v.watchdog_interval}, msgFb: `Must be greater than Watchdog Interval (${v.watchdog_interval} s)`, fixVal: v.watchdog_interval * 2 },
+      watchdog_interval:        { msgKey: 'conflict.no_update_timeout.watchdog', msgVars: {to: v.no_update_active_timeout}, msgFb: `Must be less than No-Update Timeout (${v.no_update_active_timeout} s)`, fixVal: +Math.floor(v.no_update_active_timeout / 2) },
+    }),
+  },
+  {
+    // start_duration_threshold >= sampling_interval (debounce must span at least one sample)
+    keys: ['start_duration_threshold', 'sampling_interval'],
+    check: v => v.start_duration_threshold != null && v.sampling_interval != null && v.start_duration_threshold < v.sampling_interval,
+    fieldErrors: v => ({
+      start_duration_threshold: { msgKey: 'conflict.start_dur.threshold', msgVars: {si: v.sampling_interval}, msgFb: `Should be at least one Sampling Interval (${v.sampling_interval} s) to prevent single-sample false starts`, fixVal: v.sampling_interval },
+      sampling_interval:        { msgKey: 'conflict.start_dur.sampling',  msgVars: {sdt: v.start_duration_threshold}, msgFb: `Sampling Interval exceeds Start Duration (${v.start_duration_threshold} s); single-sample spikes can open a cycle`, fixVal: v.start_duration_threshold },
+    }),
+  },
+  {
+    // learning_confidence <= profile_match_threshold
+    keys: ['learning_confidence', 'profile_match_threshold'],
+    check: v => v.learning_confidence != null && v.profile_match_threshold != null && v.learning_confidence > v.profile_match_threshold,
+    fieldErrors: v => ({
+      learning_confidence:    { msgKey: 'conflict.confidence.learning',  msgVars: {match: v.profile_match_threshold}, msgFb: `Must be at or below Match Threshold (${v.profile_match_threshold})`, fixVal: +(v.profile_match_threshold).toFixed(2) },
+      profile_match_threshold: { msgKey: 'conflict.confidence.match_for_learning', msgVars: {lc: v.learning_confidence}, msgFb: `Must be at or above Learning Confidence (${v.learning_confidence})`, fixVal: +(v.learning_confidence).toFixed(2) },
+    }),
+  },
+  {
+    // profile_match_threshold <= auto_label_confidence
+    keys: ['profile_match_threshold', 'auto_label_confidence'],
+    check: v => v.profile_match_threshold != null && v.auto_label_confidence != null && v.profile_match_threshold > v.auto_label_confidence,
+    fieldErrors: v => ({
+      profile_match_threshold: { msgKey: 'conflict.confidence.match_for_auto', msgVars: {alc: v.auto_label_confidence}, msgFb: `Must be at or below Auto-Label Confidence (${v.auto_label_confidence})`, fixVal: +(v.auto_label_confidence).toFixed(2) },
+      auto_label_confidence:   { msgKey: 'conflict.confidence.auto',           msgVars: {match: v.profile_match_threshold}, msgFb: `Must be at or above Match Threshold (${v.profile_match_threshold})`, fixVal: +(v.profile_match_threshold).toFixed(2) },
+    }),
+  },
+  {
+    // profile_unmatch_threshold < profile_match_threshold (committed match must not immediately un-match)
+    keys: ['profile_unmatch_threshold', 'profile_match_threshold'],
+    check: v => v.profile_unmatch_threshold != null && v.profile_match_threshold != null && v.profile_unmatch_threshold >= v.profile_match_threshold,
+    fieldErrors: v => ({
+      profile_unmatch_threshold: { msgKey: 'conflict.unmatch.unmatch', msgVars: {match: v.profile_match_threshold}, msgFb: `Must be below Match Threshold (${v.profile_match_threshold}); otherwise a committed match un-matches instantly`, fixVal: +(v.profile_match_threshold - 0.05).toFixed(2) },
+      profile_match_threshold:   { msgKey: 'conflict.unmatch.match',   msgVars: {un: v.profile_unmatch_threshold},   msgFb: `Must be above Unmatch Threshold (${v.profile_unmatch_threshold})`, fixVal: +(v.profile_unmatch_threshold + 0.05).toFixed(2) },
+    }),
+  },
+  {
+    // anti_wrinkle_exit_power < stop_threshold_w — only for devices that support anti-wrinkle
+    keys: ['anti_wrinkle_exit_power', 'stop_threshold_w'],
+    check: v => ['washing_machine','dryer','washer_dryer'].includes(v.device_type) && v.anti_wrinkle_exit_power != null && v.stop_threshold_w != null && v.anti_wrinkle_exit_power >= v.stop_threshold_w,
+    fieldErrors: v => ({
+      anti_wrinkle_exit_power: { msgKey: 'conflict.anti_wrinkle_exit.exit', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be below Stop Threshold (${v.stop_threshold_w} W); otherwise the anti-wrinkle exit power is ignored`, fixVal: +(v.stop_threshold_w * 0.4).toFixed(1) },
+      stop_threshold_w:        { msgKey: 'conflict.anti_wrinkle_exit.stop', msgVars: {exit: v.anti_wrinkle_exit_power}, msgFb: `Must be above Anti-Wrinkle Exit Power (${v.anti_wrinkle_exit_power} W)`, fixVal: +(v.anti_wrinkle_exit_power * 2.5).toFixed(1) },
+    }),
+  },
+  {
+    // anti_wrinkle_max_power > start_threshold_w — only for devices that support anti-wrinkle
+    keys: ['anti_wrinkle_max_power', 'start_threshold_w'],
+    check: v => ['washing_machine','dryer','washer_dryer'].includes(v.device_type) && v.anti_wrinkle_max_power != null && v.start_threshold_w != null && v.anti_wrinkle_max_power <= v.start_threshold_w,
+    fieldErrors: v => ({
+      anti_wrinkle_max_power: { msgKey: 'conflict.anti_wrinkle_max.max',   msgVars: {start: v.start_threshold_w}, msgFb: `Must be above Start Threshold (${v.start_threshold_w} W); otherwise anti-wrinkle duration limit is bypassed`, fixVal: +(v.start_threshold_w * 2.0).toFixed(0) },
+      start_threshold_w:      { msgKey: 'conflict.anti_wrinkle_max.start', msgVars: {max: v.anti_wrinkle_max_power}, msgFb: `Must be below Anti-Wrinkle Max Power (${v.anti_wrinkle_max_power} W)`, fixVal: +(v.anti_wrinkle_max_power * 0.5).toFixed(1) },
+    }),
+  },
+  {
+    // pump_stuck_duration < no_update_active_timeout — only for pump/sump-pump devices
+    keys: ['pump_stuck_duration', 'no_update_active_timeout'],
+    check: v => v.device_type === 'pump' && v.pump_stuck_duration != null && v.no_update_active_timeout != null && v.no_update_active_timeout <= v.pump_stuck_duration,
+    fieldErrors: v => ({
+      pump_stuck_duration:      { msgKey: 'conflict.pump_stuck.duration', msgVars: {to: v.no_update_active_timeout}, msgFb: `Must be less than No-Update Timeout (${v.no_update_active_timeout} s) so the stuck alarm fires before the watchdog kills the cycle`, fixVal: v.no_update_active_timeout - 60 },
+      no_update_active_timeout: { msgKey: 'conflict.pump_stuck.timeout',  msgVars: {ps: v.pump_stuck_duration}, msgFb: `Must exceed Pump Stuck Duration (${v.pump_stuck_duration} s) so the stuck alarm fires before the cycle is force-stopped`, fixVal: v.pump_stuck_duration + 60 },
+    }),
+  },
+  {
+    // profile_match_min_duration_ratio < profile_match_max_duration_ratio (matching window must be non-empty)
+    keys: ['profile_match_min_duration_ratio', 'profile_match_max_duration_ratio'],
+    check: v => v.profile_match_min_duration_ratio != null && v.profile_match_max_duration_ratio != null && v.profile_match_min_duration_ratio >= v.profile_match_max_duration_ratio,
+    fieldErrors: v => ({
+      profile_match_min_duration_ratio: { msgKey: 'conflict.duration_ratio.min', msgVars: {max: v.profile_match_max_duration_ratio}, msgFb: `Must be less than Max Duration Ratio (${v.profile_match_max_duration_ratio})`, fixVal: +(v.profile_match_max_duration_ratio * 0.5).toFixed(2) },
+      profile_match_max_duration_ratio: { msgKey: 'conflict.duration_ratio.max', msgVars: {min: v.profile_match_min_duration_ratio}, msgFb: `Must be greater than Min Duration Ratio (${v.profile_match_min_duration_ratio})`, fixVal: +(v.profile_match_min_duration_ratio * 2.0).toFixed(2) },
+    }),
+  },
+];
+
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const _CSS = `
 :host {
@@ -475,6 +609,11 @@ const _CSS = `
   background: rgba(255,152,0,.12); border: 1px solid rgba(255,152,0,.45);
 }
 .wd-sug-use { border: none; background: var(--warning-color, #ff9800); color: #fff; border-radius: 4px; padding: 2px 8px; font-size: .92em; cursor: pointer; }
+.wd-conflict-err { display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
+.wd-conflict-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .8em; color: var(--error-color, #b71c1c); padding: 5px 9px; border-left: 3px solid var(--error-color, #b71c1c); background: rgba(183,28,28,.07); border-radius: 0 5px 5px 0; }
+.wd-conflict-fix { border: 1px solid var(--error-color, #b71c1c); background: none; color: var(--error-color, #b71c1c); border-radius: 4px; padding: 1px 7px; font-size: .92em; cursor: pointer; white-space: nowrap; flex: none; }
+.wd-conflict-fix:hover { background: var(--error-color, #b71c1c); color: #fff; }
+#wd-settings-form .wd-field.wd-has-conflict { outline: 2px solid var(--error-color, #b71c1c); outline-offset: -1px; }
 .wd-rev-sub { display: flex; align-items: center; gap: 6px; margin: 14px 0 6px; font-size: .85em; font-weight: 600; color: var(--primary-text-color); }
 .wd-rev-tags { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .wd-rev-tag { display: flex; align-items: center; gap: 7px; padding: 7px 10px; border-radius: 8px; background: var(--secondary-background-color); border: 1px solid var(--divider-color); font-size: .85em; cursor: pointer; }
@@ -494,6 +633,7 @@ const _CSS = `
 .wd-sec-btn.active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
 .wd-sec-btn { position: relative; }
 .wd-sec-sug-dot { position: absolute; top: 2px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--warning-color, #ff9800); display: inline-block; pointer-events: none; }
+.wd-sec-conf-dot { position: absolute; top: 2px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--error-color, #b71c1c); display: inline-block; pointer-events: none; }
 .wd-subtabs { display: flex; gap: 2px; border-bottom: 1px solid var(--divider-color); margin-bottom: 18px; flex-wrap: wrap; }
 .wd-subtab { padding: 8px 18px; border: none; background: transparent; color: var(--secondary-text-color); font-size: .8em; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; transition: color .15s; }
 .wd-subtab.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
@@ -857,7 +997,7 @@ function _field(f, value, extra) {
     sugHtml = `<div class="wd-sug"><span>🤖 ML: <b>${_esc(mlVal)}</b></span>${useBtn(mlVal)}${r}</div>`;
   }
 
-  return `<div class="wd-field"><div class="wd-label-row"><label style="margin:0">${_esc(labelText)}</label>${tip}</div>${input}${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}${sugHtml}</div>`;
+  return `<div class="wd-field" data-field="${key}"><div class="wd-label-row"><label style="margin:0">${_esc(labelText)}</label>${tip}</div>${input}${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}<div class="wd-conflict-err" data-cerr="${key}" hidden></div>${sugHtml}</div>`;
 }
 
 // Are two suggestion/option values effectively equal? Numeric-tolerant so an
@@ -1747,7 +1887,8 @@ class HaWashdataPanel extends HTMLElement {
       mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, this._opts[key])
     ).length;
     const sugDot = (this._suggestions.length || mlSugCount) ? ' 💡' : '';
-    const labels = { status: this._t('tab.status',{},'Overview'), history: this._t('tab.history',{},'Cycles'), profiles: this._t('tab.profiles',{},'Profiles'), settings: this._t('tab.settings',{},'Settings') + sugDot, ml: this._t('tab.ml',{},'ML Training'), advanced: this._t('tab.advanced',{},'Advanced') };
+    const confIndicator = this._conflictKeysFromOpts().size > 0 ? ' ⚠' : '';
+    const labels = { status: this._t('tab.status',{},'Overview'), history: this._t('tab.history',{},'Cycles'), profiles: this._t('tab.profiles',{},'Profiles'), settings: this._t('tab.settings',{},'Settings') + confIndicator + sugDot, ml: this._t('tab.ml',{},'ML Training'), advanced: this._t('tab.advanced',{},'Advanced') };
     const visible = this._visibleTabIds();
     if (!visible.includes(this._tab)) this._tab = 'status';
     const tabBtns = visible.map(id =>
@@ -1825,6 +1966,11 @@ class HaWashdataPanel extends HTMLElement {
     const attn = [];
     if (dev.recording && this._canEdit()) attn.push(`<div class="wd-attn-card"><span class="wd-attn-icon">●</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.recording_in_progress', {}, 'Recording in progress')}</div><div class="wd-attn-sub">${this._t('msg.see_recorder', {}, 'See recorder widget below')}</div></div></div>`);
     if (dev.feedback_count && this._canEdit()) attn.push(`<div class="wd-attn-card" data-action="goto-feedbacks"><span class="wd-attn-icon">💬</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.feedback_cycles_pending', {n: dev.feedback_count, s: dev.feedback_count > 1 ? 's' : ''}, `${dev.feedback_count} cycle${dev.feedback_count > 1 ? 's' : ''} to review`)}</div><div class="wd-attn-sub">${this._t('msg.review_to_cycles', {}, 'Open the Cycles review queue')}</div></div></div>`);
+    const _confKeys = this._conflictKeysFromOpts();
+    if (_confKeys.size && this._canEdit()) {
+      const n = _confKeys.size, s = n > 1 ? 's' : '';
+      attn.push(`<div class="wd-attn-card" style="border-color:var(--error-color,#b71c1c)" data-action="goto-conflicts"><span class="wd-attn-icon">⚠</span><div class="wd-attn-body"><div class="wd-attn-title" style="color:var(--error-color,#b71c1c)">${this._t('conflict.attn_title', {n, s}, `${n} setting conflict${s}`)}</div><div class="wd-attn-sub">${this._t('conflict.attn_sub', {}, 'Fix conflicts before saving')}</div></div></div>`);
+    }
     const _mlSugCount = Object.entries(this._mlSettings || {}).filter(([key, mlc]) =>
       mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, this._opts[key])
     ).length;
@@ -2310,6 +2456,11 @@ class HaWashdataPanel extends HTMLElement {
       const fields = sec.fields || (sec.groups || []).flatMap(g => g.fields || []);
       return fields.some(f => sugKeys.has(f.key));
     };
+    const _secConfKeys = this._conflictKeysFromOpts();
+    const secHasConf = (sec) => {
+      const fields = sec.fields || (sec.groups || []).flatMap(g => g.fields || []);
+      return fields.some(f => _secConfKeys.has(f.key));
+    };
     // ml_training moved to its own "ML Training" tab; never show it under Settings.
     // Also filter sections by device type (e.g. hide Matching for "other" device type).
     const currentDeviceType = (this._opts && this._opts.device_type) || '';
@@ -2321,7 +2472,8 @@ class HaWashdataPanel extends HTMLElement {
     });
     const nav = visibleSections.map(sec => {
       const hasSug = secHasSug(sec);
-      return `<button class="wd-sec-btn ${this._settingsSec === sec.id ? 'active' : ''}" data-sec="${sec.id}">${_esc(this._t('section.' + sec.id + '.label', {}, sec.label))}${hasSug ? '<span class="wd-sec-sug-dot"></span>' : ''}</button>`;
+      const hasConf = secHasConf(sec);
+      return `<button class="wd-sec-btn ${this._settingsSec === sec.id ? 'active' : ''}" data-sec="${sec.id}">${_esc(this._t('section.' + sec.id + '.label', {}, sec.label))}${hasConf ? '<span class="wd-sec-conf-dot"></span>' : (hasSug ? '<span class="wd-sec-sug-dot"></span>' : '')}</button>`;
     }).join('');
 
     const saveBusy = this._busy.has('save-settings');
@@ -2362,6 +2514,7 @@ class HaWashdataPanel extends HTMLElement {
         <form id="wd-settings-form">${formContent}</form>
         <div class="wd-card-actions" style="margin-top:20px">
           <button class="wd-btn wd-btn-primary" id="wd-settings-save" ${saveBusy ? 'disabled' : ''}>${saveBusy ? '<span class="wd-spin"></span> Saving…' : this._t('btn.save_settings', {}, 'Save Settings')}</button>
+          <button class="wd-btn wd-btn-secondary" id="wd-settings-revert" ${this._prevOpts ? '' : 'disabled'} title="${this._prevOpts ? this._t('btn.revert_settings_tip', {}, 'Restore settings from before your last save') : this._t('btn.revert_settings_tip_none', {}, 'Save first to enable undo')}">${this._t('btn.revert_settings', {}, 'Revert changes')}</button>
           <button class="wd-btn wd-btn-secondary" id="wd-settings-reload">${this._t('btn.refresh', {}, 'Refresh')}</button>
         </div>
         <p class="wd-info" style="margin-top:12px;font-size:.78em">${this._t('msg.saving_triggers_reload', {}, 'Saving triggers an integration reload. HA entities may briefly show as unavailable.')}</p>
@@ -4381,17 +4534,56 @@ class HaWashdataPanel extends HTMLElement {
     // Guard: a stray in-form button (or Enter) must never submit the settings
     // form and reload the panel to "/?". Saving is explicit via the buttons above.
     const settingsForm = sr.getElementById('wd-settings-form');
-    if (settingsForm) settingsForm.addEventListener('submit', e => e.preventDefault());
+    if (settingsForm) {
+      settingsForm.addEventListener('submit', e => e.preventDefault());
+      // Live conflict validation: re-check on any field change.
+      settingsForm.addEventListener('input', () => this._liveValidateSettings(sr));
+      settingsForm.addEventListener('change', () => this._liveValidateSettings(sr));
+      // Conflict fix-button delegation: apply the fix then cascade any downstream conflicts.
+      settingsForm.addEventListener('click', e => {
+        const btn = e.target.closest('.wd-conflict-fix');
+        if (!btn) return;
+        const key = btn.dataset.ckey, val = parseFloat(btn.dataset.cval);
+        const inp = settingsForm.querySelector(`[data-opt="${key}"]`);
+        if (inp && !isNaN(val)) { inp.value = val; this._cascadeConflictFix(sr, settingsForm, key); }
+      });
+      // Run initial validation in case the current saved opts already conflict.
+      this._liveValidateSettings(sr);
+    }
+    const revertBtn = sr.getElementById('wd-settings-revert');
+    if (revertBtn) revertBtn.addEventListener('click', async () => {
+      if (!this._prevOpts) return;
+      const dev = this._devices[this._selIdx];
+      if (!dev) return;
+      await this._busyRun('save-settings', async () => {
+        try {
+          const snap = this._prevOpts;
+          await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: snap });
+          this._opts = {...snap};
+          this._prevOpts = null;
+          this._cascadePending = {};
+          this._showToast(this._t('toast.settings_reverted', {}, 'Settings reverted; integration reloading'));
+          this._render();
+        } catch (e) { this._showToast('Revert failed: ' + (e.message || e), 'error'); }
+      });
+    });
     const reloadBtn = sr.getElementById('wd-settings-reload');
     if (reloadBtn) reloadBtn.addEventListener('click', async () => {
       const dev = this._devices[this._selIdx];
-      if (dev) { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: dev.entry_id }); this._opts = r.options || {}; await this._fetchSuggestions(dev.entry_id); this._render(); }
+      if (dev) {
+        this._prevOpts = null;
+        this._cascadePending = {};
+        const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: dev.entry_id });
+        this._opts = r.options || {};
+        await this._fetchSuggestions(dev.entry_id);
+        this._render();
+      }
     });
 
     sr.querySelectorAll('[data-action]').forEach(btn => btn.addEventListener('click', e => this._onAction(e.currentTarget)));
     sr.querySelectorAll('[data-maction]').forEach(btn => btn.addEventListener('click', e => this._onModalAction(e.currentTarget.dataset.maction, e.currentTarget)));
 
-    // Suggestion "Use" -> stage value into the field.
+    // Suggestion "Use" -> stage value into the field, then cascade-fix downstream conflicts.
     sr.querySelectorAll('[data-sugkey]').forEach(btn => btn.addEventListener('click', () => {
       const k = btn.dataset.sugkey, v = btn.dataset.sugval;
       const numV = parseFloat(v);
@@ -4403,6 +4595,11 @@ class HaWashdataPanel extends HTMLElement {
       this._suggestions = this._suggestions.filter(s => s.key !== k);
       this._showToast(`Set ${k} = ${v}. Save to apply.`, 'info');
       this._render();
+      // Auto-cascade: fix any downstream conflicts the staged value introduced.
+      // _render() is synchronous, so the new form DOM is immediately available.
+      const _sr = this.shadowRoot;
+      const _form = _sr?.getElementById('wd-settings-form');
+      if (_form) this._cascadeConflictFix(_sr, _form, k);
     }));
 
     // Label profile select (show/hide new-name field).
@@ -4669,6 +4866,8 @@ class HaWashdataPanel extends HTMLElement {
           await this._fetchSuggestions(eid);
           const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
           this._opts = r.options || {};
+          this._prevOpts = null;
+          this._cascadePending = {};
         } catch (e) { this._showToast(this._t('toast.apply_failed', {error: e.message || e}, 'Apply failed: ' + (e.message || e)), 'error'); }
       });
 
@@ -4902,6 +5101,8 @@ class HaWashdataPanel extends HTMLElement {
       this._render();
     } else if (a === 'goto-suggestions') {
       this._settingsSugOnly = true; this._tab = 'settings'; this._fetchTabData();
+    } else if (a === 'goto-conflicts') {
+      this._tab = 'settings'; this._fetchTabData();
     } else if (a === 'toggle-log-drawer') {
       this._logOpen = !this._logOpen;
       try { localStorage.setItem('wd-log-open', this._logOpen ? '1' : '0'); } catch (_) {}
@@ -5278,12 +5479,124 @@ class HaWashdataPanel extends HTMLElement {
 
   // ── Settings save ─────────────────────────────────────────────────────────
 
+  // Runs all conflict rules against this._opts (no DOM required).
+  // Returns a Set of setting keys that have at least one active conflict.
+  // Used by the Overview attention card, the tab-bar indicator, and the Settings
+  // section-pill dots to surface saved-settings conflicts without needing the form.
+  _conflictKeysFromOpts() {
+    const vals = Object.assign({}, this._opts);
+    const keys = new Set();
+    for (const rule of _SETTING_CONFLICTS) {
+      if (!rule.check(vals)) continue;
+      for (const key of Object.keys(rule.fieldErrors(vals))) keys.add(key);
+    }
+    return keys;
+  }
+
+  // Collect current numeric form values from DOM, falling back to saved opts for
+  // fields not rendered in the current section (cross-section conflicts).
+  _readSettingsFormValues(sr) {
+    const vals = Object.assign({}, this._opts);
+    if (!sr) return vals;
+    sr.querySelectorAll('#wd-settings-form [data-opt]').forEach(el => {
+      const key = el.dataset.opt;
+      if (el.type === 'checkbox') { vals[key] = el.checked; return; }
+      const n = parseFloat(el.value);
+      if (!isNaN(n)) vals[key] = n;
+      else if (el.value !== '') vals[key] = el.value;
+    });
+    return vals;
+  }
+
+  // Run all conflict checks against current form values, update the error DOM,
+  // and return an object mapping each affected key -> true when a conflict exists.
+  // Called on every form input change and before saving.
+  _liveValidateSettings(sr) {
+    if (!sr) return {};
+    const vals = this._readSettingsFormValues(sr);
+    const form = sr.getElementById('wd-settings-form');
+    if (!form) return {};
+
+    // Compute per-key errors across all conflict rules.
+    const keyErrors = {};   // key -> [{msgKey, msgVars, msgFb, fixVal}, ...]
+    for (const rule of _SETTING_CONFLICTS) {
+      if (!rule.check(vals)) continue;
+      const errs = rule.fieldErrors(vals);
+      for (const [key, info] of Object.entries(errs)) {
+        (keyErrors[key] = keyErrors[key] || []).push(info);
+      }
+    }
+
+    // Update the DOM: show/hide conflict error divs and field highlights.
+    form.querySelectorAll('[data-cerr]').forEach(div => {
+      const key = div.dataset.cerr;
+      const errs = keyErrors[key];
+      const fieldEl = form.querySelector(`.wd-field[data-field="${key}"]`);
+      if (!errs || !errs.length) {
+        div.hidden = true;
+        div.innerHTML = '';
+        if (fieldEl) fieldEl.classList.remove('wd-has-conflict');
+      } else {
+        div.hidden = false;
+        if (fieldEl) fieldEl.classList.add('wd-has-conflict');
+        div.innerHTML = errs.map(e => {
+          const msg = this._t(e.msgKey, e.msgVars, e.msgFb);
+          let fixHtml = '';
+          if (e.fixVal != null && e.fixVal > 0) {
+            const displayVal = Number.isInteger(e.fixVal) ? e.fixVal : +e.fixVal.toFixed(2);
+            fixHtml = `<button type="button" class="wd-conflict-fix" data-ckey="${key}" data-cval="${e.fixVal}">${this._t('conflict.use_fix', {val: displayVal}, `Use ${displayVal}`)}</button>`;
+          }
+          return `<div class="wd-conflict-row">⚠ ${_esc(msg)}${fixHtml}</div>`;
+        }).join('');
+      }
+    });
+
+    return keyErrors;
+  }
+
+  // After the user clicks a "Use X" fix button, re-validate in a loop and
+  // automatically apply cascading fixes for downstream conflicts.
+  // On-screen fields: update the DOM input directly.
+  // Off-screen fields (different settings section): update this._opts so the
+  // validation fallback picks up the new value; track in _cascadePending so
+  // _saveSettings includes them in the next save payload.
+  _cascadeConflictFix(sr, form, initialKey) {
+    const autoChanged = new Set();
+    for (let i = 0; i < 10; i++) {
+      const keyErrors = this._liveValidateSettings(sr);
+      let anyFixed = false;
+      for (const [key, errs] of Object.entries(keyErrors)) {
+        if (key === initialKey) continue;
+        const fixErr = errs.find(e => e.fixVal != null && !isNaN(+e.fixVal) && +e.fixVal > 0);
+        if (!fixErr) continue;
+        const inp = form.querySelector(`[data-opt="${key}"]`);
+        if (inp) {
+          inp.value = fixErr.fixVal;
+        } else {
+          // Off-screen: mutate this._opts so validation fallback sees the new value.
+          this._opts = {...this._opts, [key]: fixErr.fixVal};
+          (this._cascadePending ??= {})[key] = fixErr.fixVal;
+        }
+        autoChanged.add(key);
+        anyFixed = true;
+        break; // one fix per pass so each fixVal is computed on fresh state
+      }
+      if (!anyFixed) break;
+    }
+    this._liveValidateSettings(sr);
+    if (autoChanged.size > 0) {
+      const n = autoChanged.size, s = n > 1 ? 's' : '';
+      this._showToast(this._t('conflict.cascade_toast', {n, s}, `Also adjusted ${n} setting${s} for consistency.`), 'success');
+    }
+  }
+
   async _saveSettings() {
     const sr = this.shadowRoot;
     const dev = this._devices[this._selIdx];
     if (!dev) return;
 
-    const updates = {};
+    // Start with any off-screen cascade fixes; DOM values will override them below.
+    const updates = Object.assign({}, this._cascadePending);
     this._invalidJson = null;
     sr.querySelectorAll('[data-opt]').forEach(el => {
       const key = el.dataset.opt;
@@ -5317,13 +5630,22 @@ class HaWashdataPanel extends HTMLElement {
       this._showToast(this._t('toast.invalid_json', {key: this._invalidJson}, `"${this._invalidJson}" is not valid JSON - fix it or clear the field before saving.`), 'error');
       return;
     }
+    const conflicts = this._liveValidateSettings(sr);
+    if (Object.keys(conflicts).length > 0) {
+      this._showToast(this._t('toast.settings_conflicts', {}, 'Fix the highlighted setting conflicts before saving.'), 'error');
+      return;
+    }
     await this._busyRun('save-settings', async () => {
       try {
+        // Snapshot current state before overwriting — one-level undo for the Revert button.
+        const prevSnap = {...this._opts};
         await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: updates });
         // Reflect the saved values locally so the re-render keeps them (the
         // backend reload is async; without this the form snaps back to the
         // pre-edit values because this._opts was never updated).
         this._opts = { ...this._opts, ...updates };
+        this._prevOpts = prevSnap;
+        this._cascadePending = {};
         if (this._stagedSuggestions) {
           try { await this._ws({ type: `${_DOMAIN}/clear_suggestions`, entry_id: dev.entry_id }); } catch (_) { /* non-fatal */ }
           this._stagedSuggestions = false; this._suggestions = [];

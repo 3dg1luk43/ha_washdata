@@ -75,6 +75,8 @@ The biggest release in WashData's history, and the first since 0.4.5.2 - everyth
 
 ### 🔧 Improvements
 
+- **Setting conflict validation with coherent cascade**: The Settings panel detects and highlights incompatible setting combinations inline, before saving. When two settings conflict (e.g. Start Threshold below Stop Threshold), a red error row appears under each affected field with a clickable **Use X** button. Clicking it now *cascades automatically*: if fixing Start Threshold means Stop Threshold must also drop, and Stop Threshold means Min Power must also drop, all three are adjusted in one click — fields in the current section update their DOM inputs; fields in other sections are updated via `this._opts` and tracked in `_cascadePending` so the next Save includes them. Clicking a tuning suggestion's **Use** button also triggers the same cascade immediately, so staging one suggestion auto-fixes any downstream settings that need to move with it. Saving is blocked while any conflict is unresolved. Conflicts in the *saved* settings are surfaced in the **Overview** tab (red attention card, ⚠ tab-label indicator, red section-pill dot). The backend `reconcile_suggestions()` is now **direction-aware** and **cascade-creative**: it determines which setting is the intended anchor (e.g. a lowered Start Threshold) and cascade-creates consistent entries for dependent settings (Stop Threshold, Min Power) so the full suggestion set is jointly valid before it's ever shown. A **fixpoint loop** (up to 8 iterations) ensures multi-step chains converge. A new **Revert changes** button sits next to Save and Refresh: it snapshots the settings state before each save and can restore it in one click, even after saving — disabled until the first save in the session. **Conflict rules are now device-type-aware**: the anti-wrinkle constraints (exit power vs stop threshold, max power vs start threshold) only fire for washing machines, dryers, and washer-dryer combos; the pump-stuck-duration constraint only fires for pump devices. This prevents spurious conflict errors on dishwashers and other appliances where those features don't exist. Fully localised across all 35 supported panel languages.
+
 - **ML suggestions surfaced in overview**: ML-calibrated setting recommendations appear beside the yellow suggestion dot and the attention card in the Overview tab, the same way classic statistical suggestions do.
 
 - **Built-in phases fully editable**: All phases in the per-profile phase editor - including the default/built-in ranges - can be edited. They remain un-deletable (only custom phases can be deleted), and built-in phases display a "Built-in" tag with a note that changes override the default.
@@ -132,6 +134,9 @@ The biggest release in WashData's history, and the first since 0.4.5.2 - everyth
 - This release sets a minimum Home Assistant version of **2026.5.0**.
 - The raw-socket overlay needs the Recorder to be retaining history for the configured power sensor; it degrades gracefully if the recorder is unavailable.
 - If your device was set to Coffee Machine, Electric Vehicle, Heat Pump, or Oven, it is migrated to **Threshold Device** automatically (your tuned settings and profiles are kept). Since Threshold Device ships intentionally generic defaults, review the detection thresholds under Settings for that device.
+
+## New Contributors
+* @Olen made their first contribution in https://github.com/3dg1luk43/ha_washdata/pull/283
 
 ## 0.4.5.2 - 2026-06-13
 

@@ -14,6 +14,10 @@ import pytest
 from custom_components.ha_washdata import analysis
 from custom_components.ha_washdata.const import (
     ANTI_WRINKLE_ELIGIBLE_REASONS,
+    CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_ANTI_WRINKLE_MAX_POWER,
+    CONF_DEVICE_TYPE,
+    CONF_PUMP_STUCK_DURATION,
     MATCH_AMBIGUITY_MARGIN,
     MATCH_MAE_REF_PEAK,
     TerminationReason,
@@ -107,9 +111,11 @@ def _sug(value, reason="r"):
 
 
 def test_reconcile_start_above_stop() -> None:
+    # start is the primary anchor — when both conflict, stop (derivative) yields.
     s = {CONF_STOP_THRESHOLD_W: _sug(10.0), CONF_START_THRESHOLD_W: _sug(8.0)}
     out, changed = reconcile_suggestions(s, {})
-    assert CONF_START_THRESHOLD_W in changed
+    assert CONF_STOP_THRESHOLD_W in changed
+    assert CONF_START_THRESHOLD_W not in changed  # start was the anchor; unchanged
     assert out[CONF_START_THRESHOLD_W]["value"] > out[CONF_STOP_THRESHOLD_W]["value"]
 
 
@@ -165,13 +171,81 @@ def test_reconcile_coherent_set_unchanged() -> None:
     assert changed == set()
 
 
-def test_reconcile_only_touches_suggested_keys() -> None:
-    # start below stop, but only stop is suggested and start is a fixed option:
-    # the pass must not invent a start suggestion.
+def test_reconcile_cascade_creates_consistent_set() -> None:
+    # stop=10 is suggested; start is a live value at 8 (below stop).
+    # Since start is not the original anchor, it must be cascade-raised above stop.
     s = {CONF_STOP_THRESHOLD_W: _sug(10.0)}
     out, changed = reconcile_suggestions(s, {CONF_START_THRESHOLD_W: 8.0})
-    assert CONF_START_THRESHOLD_W not in out
+    assert CONF_START_THRESHOLD_W in out
+    assert out[CONF_START_THRESHOLD_W].get("cascade") is True
+    assert out[CONF_START_THRESHOLD_W]["value"] > 10.0
+    assert CONF_START_THRESHOLD_W in changed
+
+
+def test_reconcile_direction_start_is_anchor() -> None:
+    # start suggested lower; stop is live above start → stop cascades down.
+    s = {CONF_START_THRESHOLD_W: _sug(15.0)}
+    out, changed = reconcile_suggestions(s, {CONF_STOP_THRESHOLD_W: 30.0})
+    assert CONF_STOP_THRESHOLD_W in out
+    assert out[CONF_STOP_THRESHOLD_W].get("cascade") is True
+    assert out[CONF_STOP_THRESHOLD_W]["value"] < 15.0
+    assert CONF_START_THRESHOLD_W not in changed  # anchor unchanged
+
+
+def test_reconcile_cascade_chain() -> None:
+    # start suggested lower → stop cascades down → min_power cascades down.
+    s = {CONF_START_THRESHOLD_W: _sug(15.0)}
+    out, changed = reconcile_suggestions(s, {CONF_STOP_THRESHOLD_W: 30.0, CONF_MIN_POWER: 25.0})
+    assert CONF_STOP_THRESHOLD_W in changed
+    assert CONF_MIN_POWER in changed
+    assert out[CONF_STOP_THRESHOLD_W]["value"] < 15.0
+    assert out[CONF_MIN_POWER]["value"] < out[CONF_STOP_THRESHOLD_W]["value"]
+    assert out[CONF_MIN_POWER].get("cascade") is True
+
+
+def test_reconcile_fixpoint_converges() -> None:
+    # A coherent set produces an empty changed set regardless of iteration count.
+    s = {CONF_START_THRESHOLD_W: _sug(30.0), CONF_STOP_THRESHOLD_W: _sug(10.0), CONF_MIN_POWER: _sug(5.0)}
+    out, changed = reconcile_suggestions(s, {})
     assert changed == set()
+
+
+def test_reconcile_anti_wrinkle_skipped_for_dishwasher() -> None:
+    # Anti-wrinkle rules must not fire for dishwashers; stop should not be raised.
+    s = {CONF_STOP_THRESHOLD_W: _sug(0.72)}
+    current = {
+        CONF_DEVICE_TYPE: "dishwasher",
+        CONF_ANTI_WRINKLE_EXIT_POWER: 0.8,  # would conflict without the guard
+        CONF_START_THRESHOLD_W: 0.95,
+    }
+    out, changed = reconcile_suggestions(s, current)
+    # stop must not be raised by anti_wrinkle rule
+    assert out[CONF_STOP_THRESHOLD_W]["value"] == pytest.approx(0.72, abs=0.01)
+    assert CONF_ANTI_WRINKLE_EXIT_POWER not in changed
+
+
+def test_reconcile_anti_wrinkle_fires_for_dryer() -> None:
+    # Anti-wrinkle rule must fire when the device is a dryer.
+    s = {CONF_STOP_THRESHOLD_W: _sug(0.72), CONF_ANTI_WRINKLE_EXIT_POWER: _sug(0.8)}
+    current = {CONF_DEVICE_TYPE: "dryer"}
+    out, changed = reconcile_suggestions(s, current)
+    assert CONF_ANTI_WRINKLE_EXIT_POWER in changed
+    assert out[CONF_ANTI_WRINKLE_EXIT_POWER]["value"] < out[CONF_STOP_THRESHOLD_W]["value"]
+
+
+def test_reconcile_pump_stuck_skipped_for_dishwasher() -> None:
+    # Pump stuck duration rule must not fire for a dishwasher.
+    s = {CONF_PUMP_STUCK_DURATION: _sug(1800), CONF_NO_UPDATE_ACTIVE_TIMEOUT: _sug(1800)}
+    out, changed = reconcile_suggestions(s, {CONF_DEVICE_TYPE: "dishwasher"})
+    assert CONF_NO_UPDATE_ACTIVE_TIMEOUT not in changed
+
+
+def test_reconcile_pump_stuck_fires_for_pump() -> None:
+    # Pump stuck duration rule must fire for pump devices.
+    s = {CONF_PUMP_STUCK_DURATION: _sug(1800), CONF_NO_UPDATE_ACTIVE_TIMEOUT: _sug(1800)}
+    out, changed = reconcile_suggestions(s, {CONF_DEVICE_TYPE: "pump"})
+    assert CONF_NO_UPDATE_ACTIVE_TIMEOUT in changed
+    assert out[CONF_NO_UPDATE_ACTIVE_TIMEOUT]["value"] > out[CONF_PUMP_STUCK_DURATION]["value"]
 
 
 # ---------------------------------------------------------------------------
