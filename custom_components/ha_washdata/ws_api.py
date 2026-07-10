@@ -2776,9 +2776,12 @@ async def ws_set_user_prefs(
     p = msg["prefs"]
     if p.get("default_tab") in _PANEL_TABS:
         cur["default_tab"] = p["default_tab"]
-    for k in ("show_expected", "show_raw", "show_debug"):
+    for k in ("show_expected", "show_raw", "show_raw_active", "show_debug", "onboarding_dismissed"):
         if k in p:
             cur[k] = bool(p[k])
+    # F2: per-user Basic/Advanced settings disclosure level.
+    if p.get("settings_level") in ("basic", "advanced"):
+        cur["settings_level"] = p["settings_level"]
     prefs[user.id] = cur
     await _save_panel_data(hass)
     connection.send_result(msg["id"], {"success": True})
