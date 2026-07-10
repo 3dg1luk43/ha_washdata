@@ -1,7 +1,7 @@
 import pytest
 from datetime import timedelta, datetime, timezone
 from unittest.mock import MagicMock, AsyncMock, patch
-from custom_components.ha_washdata.learning import LearningManager, StatisticalModel
+from custom_components.ha_washdata.learning import LearningManager, StatisticalModel, _suggestion_min_abs_delta
 from custom_components.ha_washdata.const import (
     CONF_WATCHDOG_INTERVAL,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
@@ -9,6 +9,12 @@ from custom_components.ha_washdata.const import (
     CONF_LEARNING_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
     CONF_PROFILE_DURATION_TOLERANCE,
+    CONF_START_THRESHOLD_W,
+    CONF_STOP_THRESHOLD_W,
+    CONF_MIN_POWER,
+    CONF_OFF_DELAY,
+    MIN_SUGGESTION_REL_DELTA,
+    MIN_SUGGESTION_COOLDOWN_CYCLES,
 )
 
 # Mock ProfileStore
@@ -20,6 +26,7 @@ class MockProfileStore:
         self.profiles = {}
         self.suggestions = {}
         self.rebuilt_profiles: list[str] = []
+        self._suggestion_apply_cycle_count = 0
 
     def get_feedback_history(self):
         return self.feedback
@@ -32,7 +39,7 @@ class MockProfileStore:
 
     def get_profiles(self):
         return self.profiles
-    
+
     def get_suggestions(self):
         return self.suggestions
 
@@ -41,7 +48,13 @@ class MockProfileStore:
 
     def delete_suggestion(self, key):
         self.suggestions.pop(key, None)
-    
+
+    def get_suggestion_apply_cycle_count(self):
+        return self._suggestion_apply_cycle_count
+
+    def set_suggestion_apply_cycle_count(self, count):
+        self._suggestion_apply_cycle_count = count
+
     def add_pending_feedback(self, cycle_id, data):
         self.pending[cycle_id] = data
 
@@ -239,3 +252,102 @@ async def test_process_cycle_end_triggers_simulation(learning_manager):
     await learning_manager._async_run_simulation(cycle_data)
     
     learning_manager.suggestion_engine.run_simulation.assert_called_once_with(cycle_data)
+
+
+# ---------------------------------------------------------------------------
+# Suggestion quality gates
+# ---------------------------------------------------------------------------
+
+def _sug(value, reason="engine"):
+    return {"value": value, "reason": reason}
+
+
+def _make_lm(mock_hass, options, past_cycle_count=0, apply_cycle_count=0):
+    """Build a LearningManager with a pre-configured MockProfileStore."""
+    store = MockProfileStore()
+    store.past_cycles = [{}] * past_cycle_count
+    store._suggestion_apply_cycle_count = apply_cycle_count
+    entry = MagicMock()
+    entry.data = {}
+    entry.options = options
+    entry.title = "Test"
+    mock_hass.config_entries.async_get_entry.return_value = entry
+    return LearningManager(mock_hass, "test_entry", store), store
+
+
+def test_suggestion_min_abs_delta_by_key_suffix() -> None:
+    """_suggestion_min_abs_delta returns sensible per-category minimums."""
+    assert _suggestion_min_abs_delta("start_threshold_w") == 0.3
+    assert _suggestion_min_abs_delta("anti_wrinkle_exit_power") == 0.3
+    assert _suggestion_min_abs_delta("off_delay") == 5.0
+    assert _suggestion_min_abs_delta("no_update_active_timeout") == 5.0
+    assert _suggestion_min_abs_delta("duration_ratio") == 0.02
+    assert _suggestion_min_abs_delta("auto_label_confidence") == 0.02
+    assert _suggestion_min_abs_delta("end_repeat_count") == 1.0
+    assert _suggestion_min_abs_delta("unknown_key") == 0.05
+
+
+def test_quality_gate_removes_trivial_delta(mock_hass) -> None:
+    """A suggestion that is noise (delta below both thresholds) is deleted."""
+    lm, store = _make_lm(mock_hass, {CONF_START_THRESHOLD_W: 0.95})
+    # 0.95 → 0.97: rel=2.1% < 8%, abs=0.02 < 0.3 W → deleted
+    lm._apply_suggestions_and_notify({CONF_START_THRESHOLD_W: _sug(0.97)})
+    assert CONF_START_THRESHOLD_W not in store.suggestions
+
+
+def test_quality_gate_keeps_significant_rel_delta(mock_hass) -> None:
+    """A suggestion with large relative change (≥8%) is kept even if abs is small."""
+    lm, store = _make_lm(mock_hass, {CONF_START_THRESHOLD_W: 2.0})
+    # 2.0 → 0.95: rel=52.5% >> 8% → kept
+    lm._apply_suggestions_and_notify({CONF_START_THRESHOLD_W: _sug(0.95)})
+    assert CONF_START_THRESHOLD_W in store.suggestions
+
+
+def test_quality_gate_keeps_significant_abs_delta(mock_hass) -> None:
+    """A suggestion with large absolute change (≥min_abs) is kept even if rel is small."""
+    # stop=1.0 → 1.5: rel=50% >> 8% → kept
+    lm, store = _make_lm(mock_hass, {CONF_STOP_THRESHOLD_W: 1.0})
+    lm._apply_suggestions_and_notify({CONF_STOP_THRESHOLD_W: _sug(1.5)})
+    assert CONF_STOP_THRESHOLD_W in store.suggestions
+
+
+def test_quality_gate_deletes_equal_value(mock_hass) -> None:
+    """A suggestion equal to the current value is deleted (stale)."""
+    lm, store = _make_lm(mock_hass, {CONF_STOP_THRESHOLD_W: 0.76})
+    store.suggestions[CONF_STOP_THRESHOLD_W] = {"value": 0.76, "reason": "old"}
+    lm._apply_suggestions_and_notify({CONF_STOP_THRESHOLD_W: _sug(0.76)})
+    assert CONF_STOP_THRESHOLD_W not in store.suggestions
+
+
+def test_quality_gate_cooldown_suppresses_new_suggestions(mock_hass) -> None:
+    """During cooldown, new suggestions are not stored."""
+    # 5 cycles total, apply at cycle 4 → only 1 cycle since apply < MIN (3)
+    lm, store = _make_lm(
+        mock_hass,
+        {CONF_STOP_THRESHOLD_W: 0.76},
+        past_cycle_count=5,
+        apply_cycle_count=4,
+    )
+    # 0.76 → 0.60: significant change (21%), but cooldown active
+    lm._apply_suggestions_and_notify({CONF_STOP_THRESHOLD_W: _sug(0.60)})
+    assert CONF_STOP_THRESHOLD_W not in store.suggestions
+
+
+def test_quality_gate_cooldown_lifts_after_enough_cycles(mock_hass) -> None:
+    """After MIN_SUGGESTION_COOLDOWN_CYCLES cycles, suggestions are stored again."""
+    # 10 cycles, apply at cycle 7 → 3 cycles since apply == MIN → allowed
+    lm, store = _make_lm(
+        mock_hass,
+        {CONF_STOP_THRESHOLD_W: 0.76},
+        past_cycle_count=10,
+        apply_cycle_count=7,
+    )
+    lm._apply_suggestions_and_notify({CONF_STOP_THRESHOLD_W: _sug(0.60)})
+    assert CONF_STOP_THRESHOLD_W in store.suggestions
+
+
+def test_quality_gate_no_cooldown_on_first_suggestion(mock_hass) -> None:
+    """When no previous apply has occurred (count=0), cooldown is inactive."""
+    lm, store = _make_lm(mock_hass, {CONF_STOP_THRESHOLD_W: 0.76}, past_cycle_count=1)
+    lm._apply_suggestions_and_notify({CONF_STOP_THRESHOLD_W: _sug(0.60)})
+    assert CONF_STOP_THRESHOLD_W in store.suggestions

@@ -161,6 +161,7 @@
       "unmatch": "Jābūt zem atbilstības sliekšņa ({match}); pretējā gadījumā apstiprināta atbilstība uzreiz tiek atcelta"
     },
     "cascade_toast": "Automātiski tika koriģēti arī {n} iestatījumi konsekvences labad.",
+    "suggestion_resolves": "Lai to labotu, lietojiet zemāk esošo gaidošo ieteikumu ({val})",
     "use_fix": "Izmantot {val}",
     "watchdog": {
       "interval": "Jābūt vismaz 2x lielākam par paraugu ņemšanas intervālu ({si} s)",

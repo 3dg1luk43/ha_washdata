@@ -161,6 +161,7 @@
       "unmatch": "Muss unter dem Übereinstimmungsschwellenwert ({match}) liegen; andernfalls wird eine bestätigte Übereinstimmung sofort aufgehoben"
     },
     "cascade_toast": "Außerdem {n} Einstellung(en) zur Konsistenz angepasst.",
+    "suggestion_resolves": "Unten den ausstehenden Vorschlag ({val}) übernehmen, um dies zu beheben",
     "use_fix": "Verwende {val}",
     "watchdog": {
       "interval": "Sollte mindestens das 2-fache des Abtastintervalls ({si} s) betragen",

@@ -161,6 +161,7 @@
       "unmatch": "必须低于匹配阈值 ({match})；否则已确认的匹配会立即取消"
     },
     "cascade_toast": "为保持一致性，还自动调整了 {n} 项设置。",
+    "suggestion_resolves": "应用下方的待处理建议（{val}）以修复此问题",
     "use_fix": "使用 {val}",
     "watchdog": {
       "interval": "应至少为采样间隔 ({si} 秒) 的 2 倍",

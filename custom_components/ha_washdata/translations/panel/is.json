@@ -161,6 +161,7 @@
       "unmatch": "Verður að vera undir Samsvarþröskuldi ({match}); annars er staðfest samsvörun afturkölluð samstundis"
     },
     "cascade_toast": "Einnig voru {n} stillingar leiðréttar til samræmis.",
+    "suggestion_resolves": "Notaðu tillöguna hér að neðan ({val}) til að laga þetta",
     "use_fix": "Nota {val}",
     "watchdog": {
       "interval": "Ætti að vera að minnsta kosti 2x Sýnitakabil ({si} s)",

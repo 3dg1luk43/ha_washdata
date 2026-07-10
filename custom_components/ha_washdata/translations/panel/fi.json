@@ -161,6 +161,7 @@
       "unmatch": "Täytyy olla alle täsmäytyskynnyksen ({match}); muuten vahvistettu vastaavuus purkautuu heti"
     },
     "cascade_toast": "Myös {n} asetusta muutettiin johdonmukaisuuden vuoksi.",
+    "suggestion_resolves": "Ota alla oleva ehdotus ({val}) käyttöön tämän korjaamiseksi",
     "use_fix": "Käytä {val}",
     "watchdog": {
       "interval": "Tulisi olla vähintään 2x näytteenottoväli ({si} s)",

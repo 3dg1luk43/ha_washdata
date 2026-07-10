@@ -161,6 +161,7 @@
       "unmatch": "Musi być poniżej Progu Dopasowania ({match}); w przeciwnym razie potwierdzone dopasowanie natychmiast się cofa"
     },
     "cascade_toast": "Dodatkowo dostosowano {n} ustawień w celu zachowania spójności.",
+    "suggestion_resolves": "Zastosuj oczekującą sugestię ({val}) poniżej, aby rozwiązać ten konflikt",
     "use_fix": "Użyj {val}",
     "watchdog": {
       "interval": "Powinien wynosić co najmniej 2× Interwał Próbkowania ({si} s)",

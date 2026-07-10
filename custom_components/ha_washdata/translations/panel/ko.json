@@ -161,6 +161,7 @@
       "unmatch": "매칭 임계값 ({match}) 미만이어야 합니다. 그렇지 않으면 확정된 일치가 즉시 해제됩니다"
     },
     "cascade_toast": "일관성을 위해 {n}개 설정을 추가로 자동 조정했습니다.",
+    "suggestion_resolves": "이 문제를 해결하려면 아래의 보류 중인 제안({val})을 적용하세요",
     "use_fix": "{val} 사용",
     "watchdog": {
       "interval": "샘플링 간격 ({si} 초)의 최소 2배이어야 합니다",

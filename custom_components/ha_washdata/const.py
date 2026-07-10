@@ -644,3 +644,16 @@ ML_PROGRESS_BLEND_WEIGHT = 0.5
 # Service + event names for the training loop.
 SERVICE_TRIGGER_ML_TRAINING = "trigger_ml_training"
 EVENT_ML_TRAINING_COMPLETE = "ha_washdata_ml_training_complete"
+
+# ─── Suggestion quality gates ──────────────────────────────────────────────────
+# A suggestion is only stored / surfaced when it clears both thresholds:
+#   (a) relative delta >= MIN_SUGGESTION_REL_DELTA  OR
+#       absolute delta >= per-key absolute minimum (see _suggestion_min_abs_delta)
+# Suggestions that are below BOTH thresholds are deleted so they don't clutter
+# the panel with noise (e.g. 0.67 → 0.68).
+MIN_SUGGESTION_REL_DELTA = 0.08  # 8% minimum relative change
+
+# After the user applies suggestions, suppress new suggestions for this many
+# completed cycles. Prevents the engine from immediately re-suggesting
+# slightly-different values based on a single new cycle.
+MIN_SUGGESTION_COOLDOWN_CYCLES = 3

@@ -613,6 +613,7 @@ const _CSS = `
 .wd-conflict-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .8em; color: var(--error-color, #b71c1c); padding: 5px 9px; border-left: 3px solid var(--error-color, #b71c1c); background: rgba(183,28,28,.07); border-radius: 0 5px 5px 0; }
 .wd-conflict-fix { border: 1px solid var(--error-color, #b71c1c); background: none; color: var(--error-color, #b71c1c); border-radius: 4px; padding: 1px 7px; font-size: .92em; cursor: pointer; white-space: nowrap; flex: none; }
 .wd-conflict-fix:hover { background: var(--error-color, #b71c1c); color: #fff; }
+.wd-conflict-sug-note { font-style: italic; opacity: 0.85; flex: none; }
 #wd-settings-form .wd-field.wd-has-conflict { outline: 2px solid var(--error-color, #b71c1c); outline-offset: -1px; }
 .wd-rev-sub { display: flex; align-items: center; gap: 6px; margin: 14px 0 6px; font-size: .85em; font-weight: 600; color: var(--primary-text-color); }
 .wd-rev-tags { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
@@ -5517,13 +5518,27 @@ class HaWashdataPanel extends HTMLElement {
     const form = sr.getElementById('wd-settings-form');
     if (!form) return {};
 
+    // Build a map of pending suggestion values so we can note when a suggestion
+    // would resolve a conflict (instead of showing a generic fix button).
+    const suggMap = {};
+    for (const s of (this._suggestions || [])) {
+      if (s.key != null && s.suggested != null) suggMap[s.key] = +s.suggested;
+    }
+
     // Compute per-key errors across all conflict rules.
-    const keyErrors = {};   // key -> [{msgKey, msgVars, msgFb, fixVal}, ...]
+    const keyErrors = {};   // key -> [{msgKey, msgVars, msgFb, fixVal, suggFix?}, ...]
     for (const rule of _SETTING_CONFLICTS) {
       if (!rule.check(vals)) continue;
       const errs = rule.fieldErrors(vals);
       for (const [key, info] of Object.entries(errs)) {
-        (keyErrors[key] = keyErrors[key] || []).push(info);
+        // Tag the error with `suggFix` when a pending suggestion for this key
+        // would satisfy the constraint — so the panel can explain that instead
+        // of offering a generic "Use X" fix button.
+        const sugV = suggMap[key];
+        const errInfo = (sugV != null && !rule.check({...vals, [key]: sugV}))
+          ? {...info, suggFix: sugV}
+          : info;
+        (keyErrors[key] = keyErrors[key] || []).push(errInfo);
       }
     }
 
@@ -5542,7 +5557,10 @@ class HaWashdataPanel extends HTMLElement {
         div.innerHTML = errs.map(e => {
           const msg = this._t(e.msgKey, e.msgVars, e.msgFb);
           let fixHtml = '';
-          if (e.fixVal != null && e.fixVal > 0) {
+          if (e.suggFix != null) {
+            const displaySug = +e.suggFix.toFixed(2);
+            fixHtml = `<span class="wd-conflict-sug-note">${this._t('conflict.suggestion_resolves', {val: displaySug}, `Stage the pending suggestion (${displaySug}) below to fix this`)}</span>`;
+          } else if (e.fixVal != null && e.fixVal > 0) {
             const displayVal = Number.isInteger(e.fixVal) ? e.fixVal : +e.fixVal.toFixed(2);
             fixHtml = `<button type="button" class="wd-conflict-fix" data-ckey="${key}" data-cval="${e.fixVal}">${this._t('conflict.use_fix', {val: displayVal}, `Use ${displayVal}`)}</button>`;
           }

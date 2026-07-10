@@ -161,6 +161,7 @@
       "unmatch": "Deve ser inferior ao Limiar de correspondência ({match}); caso contrário, uma correspondência confirmada é imediatamente anulada"
     },
     "cascade_toast": "Também foram ajustadas {n} definições por consistência.",
+    "suggestion_resolves": "Aplique a sugestão pendente ({val}) abaixo para corrigir este conflito",
     "use_fix": "Usar {val}",
     "watchdog": {
       "interval": "Deve ser pelo menos 2x o Intervalo de amostragem ({si} s)",

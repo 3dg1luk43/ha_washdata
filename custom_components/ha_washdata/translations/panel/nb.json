@@ -161,6 +161,7 @@
       "unmatch": "Må være under matchingsterskelen ({match}); ellers avmatchs en bekreftet match øyeblikkelig"
     },
     "cascade_toast": "Også {n} innstillinger justert for konsistens.",
+    "suggestion_resolves": "Bruk forslaget nedenfor ({val}) for å løse dette",
     "use_fix": "Bruk {val}",
     "watchdog": {
       "interval": "Bør være minst 2x samplingsintervallet ({si} s)",

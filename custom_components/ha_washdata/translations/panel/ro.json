@@ -161,6 +161,7 @@
       "unmatch": "Trebuie să fie sub Pragul de potrivire ({match}); altfel o potrivire confirmată este anulată instantaneu"
     },
     "cascade_toast": "S-au ajustat automat și alte {n} setări pentru consecvență.",
+    "suggestion_resolves": "Aplicați sugestia în așteptare ({val}) de mai jos pentru a remedia aceasta",
     "use_fix": "Folosiți {val}",
     "watchdog": {
       "interval": "Ar trebui să fie de cel puțin 2x Intervalul de eșantionare ({si} s)",

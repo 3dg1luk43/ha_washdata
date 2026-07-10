@@ -161,6 +161,7 @@
       "unmatch": "Must be below Match Threshold ({match}); otherwise a committed match un-matches instantly"
     },
     "cascade_toast": "Also adjusted {n} setting{s} for consistency.",
+    "suggestion_resolves": "Stage the pending suggestion ({val}) below to fix this",
     "use_fix": "Use {val}",
     "watchdog": {
       "interval": "Should be at least 2x Sampling Interval ({si} s)",

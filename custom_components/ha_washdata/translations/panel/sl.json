@@ -161,6 +161,7 @@
       "unmatch": "Mora biti pod Pragom ujemanja ({match}); sicer se potrjeno ujemanje takoj razveljavi"
     },
     "cascade_toast": "Samodejno je bilo prilagojenih {n} nastavitev za doslednost.",
+    "suggestion_resolves": "Uveljavite čakajoči predlog ({val}) spodaj za odpravo tega konflikta",
     "use_fix": "Uporabi {val}",
     "watchdog": {
       "interval": "Mora biti vsaj 2× Interval vzorčenja ({si} s)",

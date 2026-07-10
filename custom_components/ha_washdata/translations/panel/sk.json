@@ -161,6 +161,7 @@
       "unmatch": "Musí byť pod Prahom zhody ({match}); inak sa potvrdená zhoda ihneď zruší"
     },
     "cascade_toast": "Bolo tiež automaticky upravených {n} nastavení pre zachovanie konzistencie.",
+    "suggestion_resolves": "Uplatnite nižšie čakajúci návrh ({val}) na vyriešenie tohto konfliktu",
     "use_fix": "Použiť {val}",
     "watchdog": {
       "interval": "Mal by byť aspoň 2× Interval vzorkovania ({si} s)",

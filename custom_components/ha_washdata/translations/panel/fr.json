@@ -161,6 +161,7 @@
       "unmatch": "Doit être inférieur au Seuil de correspondance ({match}) ; sinon une correspondance confirmée est immédiatement annulée"
     },
     "cascade_toast": "Également {n} paramètre{s} mis à jour pour la cohérence.",
+    "suggestion_resolves": "Appliquez la suggestion en attente ({val}) ci-dessous pour corriger ceci",
     "use_fix": "Utiliser {val}",
     "watchdog": {
       "interval": "Devrait être au moins 2x l'Intervalle d'échantillonnage ({si} s)",

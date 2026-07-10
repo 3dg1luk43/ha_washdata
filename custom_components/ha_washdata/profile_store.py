@@ -869,6 +869,14 @@ class ProfileStore:
         self._data["suggestions"] = {}
         await self.async_save()
 
+    def get_suggestion_apply_cycle_count(self) -> int:
+        """Return the total cycle count recorded at the last user suggestion apply."""
+        return int(self._data.get("suggestion_apply_cycle_count", 0))
+
+    def set_suggestion_apply_cycle_count(self, count: int) -> None:
+        """Record the total cycle count at the moment the user applies suggestions."""
+        self._data["suggestion_apply_cycle_count"] = count
+
     # ─── On-device ML model versions (Stage 4) ────────────────────────────────
 
     def get_ml_model_versions(self) -> dict[str, Any]:

@@ -161,6 +161,7 @@
       "unmatch": "Debe ser inferior al Umbral de coincidencia ({match}); de lo contrario, una coincidencia confirmada se deshace instantáneamente"
     },
     "cascade_toast": "También se ajustaron {n} ajustes adicionales por coherencia.",
+    "suggestion_resolves": "Aplique la sugerencia pendiente ({val}) abajo para corregir esto",
     "use_fix": "Usar {val}",
     "watchdog": {
       "interval": "Debería ser al menos 2x el Intervalo de muestreo ({si} s)",

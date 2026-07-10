@@ -162,6 +162,7 @@
         "unmatch": "Must be below Match Threshold ({match}); otherwise a committed match un-matches instantly"
       },
       "cascade_toast": "Also adjusted {n} setting{s} for consistency.",
+      "suggestion_resolves": "Stage the pending suggestion ({val}) below to fix this",
       "use_fix": "Use {val}",
       "watchdog": {
         "interval": "Should be at least 2x Sampling Interval ({si} s)",
@@ -1154,6 +1155,7 @@
         "unmatch": "Трябва да е под Праг на Съвпадение ({match}); иначе потвърденото съвпадение веднага се губи"
       },
       "cascade_toast": "Автоматично бяха коригирани и {n} настройки за последователност.",
+      "suggestion_resolves": "Активирайте чакащото предложение ({val}) по-долу, за да поправите това",
       "use_fix": "Използвай {val}",
       "watchdog": {
         "interval": "Трябва да е поне 2x Интервала на Вземане на Проби ({si} с)",
@@ -2146,6 +2148,7 @@
         "unmatch": "Mora biti ispod Praga podudaranja ({match}); inače se potvrđeno podudaranje odmah poništava"
       },
       "cascade_toast": "Radi dosljednosti, automatski je podešeno još {n} postavki.",
+      "suggestion_resolves": "Primijenite prijedlog na čekanju ({val}) ispod za rješavanje ovog sukoba",
       "use_fix": "Koristite {val}",
       "watchdog": {
         "interval": "Treba biti najmanje 2× Interval uzorkovanja ({si} s)",
@@ -3138,6 +3141,7 @@
         "unmatch": "Musí být pod Prahem shody ({match}); jinak potvrzená shoda se okamžitě zruší"
       },
       "cascade_toast": "Bylo také upraveno {n} nastavení pro zachování konzistence.",
+      "suggestion_resolves": "Uplatněte níže čekající návrh ({val}) pro vyřešení tohoto konfliktu",
       "use_fix": "Použít {val}",
       "watchdog": {
         "interval": "Měl by být alespoň 2× Interval vzorkování ({si} s)",
@@ -4130,6 +4134,7 @@
         "unmatch": "Skal være under matchningstærsklen ({match}); ellers ophæves en bekræftet matchning øjeblikkeligt"
       },
       "cascade_toast": "Desuden {n} indstillinger justeret for konsistens.",
+      "suggestion_resolves": "Anvend forslaget nedenfor ({val}) for at løse dette",
       "use_fix": "Brug {val}",
       "watchdog": {
         "interval": "Bør være mindst 2x samplingsintervallet ({si} s)",
@@ -5122,6 +5127,7 @@
         "unmatch": "Muss unter dem Übereinstimmungsschwellenwert ({match}) liegen; andernfalls wird eine bestätigte Übereinstimmung sofort aufgehoben"
       },
       "cascade_toast": "Außerdem {n} Einstellung(en) zur Konsistenz angepasst.",
+      "suggestion_resolves": "Unten den ausstehenden Vorschlag ({val}) übernehmen, um dies zu beheben",
       "use_fix": "Verwende {val}",
       "watchdog": {
         "interval": "Sollte mindestens das 2-fache des Abtastintervalls ({si} s) betragen",
@@ -6114,6 +6120,7 @@
         "unmatch": "Πρέπει να είναι κάτω από το Κατώφλι Αντιστοίχισης ({match})· διαφορετικά μια επιβεβαιωμένη αντιστοίχιση ακυρώνεται αμέσως"
       },
       "cascade_toast": "Για συνέπεια, προσαρμόστηκαν επίσης {n} ρυθμίσεις.",
+      "suggestion_resolves": "Εφαρμόστε την εκκρεμή πρόταση ({val}) παρακάτω για να διορθώσετε αυτό",
       "use_fix": "Χρήση {val}",
       "watchdog": {
         "interval": "Πρέπει να είναι τουλάχιστον 2× το Διάστημα Δειγματοληψίας ({si} s)",
@@ -7106,6 +7113,7 @@
         "unmatch": "Debe ser inferior al Umbral de coincidencia ({match}); de lo contrario, una coincidencia confirmada se deshace instantáneamente"
       },
       "cascade_toast": "También se ajustaron {n} ajustes adicionales por coherencia.",
+      "suggestion_resolves": "Aplique la sugerencia pendiente ({val}) abajo para corregir esto",
       "use_fix": "Usar {val}",
       "watchdog": {
         "interval": "Debería ser al menos 2x el Intervalo de muestreo ({si} s)",
@@ -8098,6 +8106,7 @@
         "unmatch": "Peab olema alla vaste läve ({match}); muidu tühistatakse kinnitatud vaste kohe"
       },
       "cascade_toast": "Järjepidevuse tagamiseks kohandati automaatselt ka {n} seadistust.",
+      "suggestion_resolves": "Rakendage allpool kuvatav ootel soovitus ({val}), et see parandada",
       "use_fix": "Kasuta {val}",
       "watchdog": {
         "interval": "Peaks olema vähemalt 2x proovivõtu intervall ({si} s)",
@@ -9090,6 +9099,7 @@
         "unmatch": "Täytyy olla alle täsmäytyskynnyksen ({match}); muuten vahvistettu vastaavuus purkautuu heti"
       },
       "cascade_toast": "Myös {n} asetusta muutettiin johdonmukaisuuden vuoksi.",
+      "suggestion_resolves": "Ota alla oleva ehdotus ({val}) käyttöön tämän korjaamiseksi",
       "use_fix": "Käytä {val}",
       "watchdog": {
         "interval": "Tulisi olla vähintään 2x näytteenottoväli ({si} s)",
@@ -10082,6 +10092,7 @@
         "unmatch": "Doit être inférieur au Seuil de correspondance ({match}) ; sinon une correspondance confirmée est immédiatement annulée"
       },
       "cascade_toast": "Également {n} paramètre{s} mis à jour pour la cohérence.",
+      "suggestion_resolves": "Appliquez la suggestion en attente ({val}) ci-dessous pour corriger ceci",
       "use_fix": "Utiliser {val}",
       "watchdog": {
         "interval": "Devrait être au moins 2x l'Intervalle d'échantillonnage ({si} s)",
@@ -11074,6 +11085,7 @@
         "unmatch": "Mora biti ispod Praga podudaranja ({match}); inače potvrđeno podudaranje odmah prestaje"
       },
       "cascade_toast": "Automatski je prilagođeno i {n} postavki radi dosljednosti.",
+      "suggestion_resolves": "Primijenite prijedlog ({val}) u nastavku za rješavanje ovog sukoba",
       "use_fix": "Koristi {val}",
       "watchdog": {
         "interval": "Trebao bi biti najmanje 2× Interval uzorkovanja ({si} s)",
@@ -12066,6 +12078,7 @@
         "unmatch": "Az Egyezési küszöb alatt kell lennie ({match}); különben egy megerősített egyezés azonnal visszavonódik"
       },
       "cascade_toast": "Konzisztencia megőrzése érdekében {n} beállítás is automatikusan módosult.",
+      "suggestion_resolves": "A javításhoz alkalmazza az alábbi függőben lévő javaslatot ({val})",
       "use_fix": "Használja a következőt: {val}",
       "watchdog": {
         "interval": "Legalább kétszerese kell legyen a Mintavételezési intervallumnak ({si} s)",
@@ -13058,6 +13071,7 @@
         "unmatch": "Verður að vera undir Samsvarþröskuldi ({match}); annars er staðfest samsvörun afturkölluð samstundis"
       },
       "cascade_toast": "Einnig voru {n} stillingar leiðréttar til samræmis.",
+      "suggestion_resolves": "Notaðu tillöguna hér að neðan ({val}) til að laga þetta",
       "use_fix": "Nota {val}",
       "watchdog": {
         "interval": "Ætti að vera að minnsta kosti 2x Sýnitakabil ({si} s)",
@@ -14050,6 +14064,7 @@
         "unmatch": "Deve essere inferiore alla Soglia di corrispondenza ({match}); altrimenti una corrispondenza confermata viene annullata istantaneamente"
       },
       "cascade_toast": "Adattate anche {n} impostazioni per coerenza.",
+      "suggestion_resolves": "Applica la proposta in attesa ({val}) in basso per correggere questo",
       "use_fix": "Usa {val}",
       "watchdog": {
         "interval": "Dovrebbe essere almeno 2x l'Intervallo di campionamento ({si} s)",
@@ -15042,6 +15057,7 @@
         "unmatch": "マッチしきい値 ({match}) を下回る必要があります。そうでないと確定した一致が即座に解除されます"
       },
       "cascade_toast": "整合性のため、さらに{n}件の設定も自動調整しました。",
+      "suggestion_resolves": "下の保留中の提案（{val}）を適用してこれを修正してください",
       "use_fix": "{val} を使用",
       "watchdog": {
         "interval": "サンプリング間隔 ({si} 秒) の少なくとも 2 倍である必要があります",
@@ -16034,6 +16050,7 @@
         "unmatch": "매칭 임계값 ({match}) 미만이어야 합니다. 그렇지 않으면 확정된 일치가 즉시 해제됩니다"
       },
       "cascade_toast": "일관성을 위해 {n}개 설정을 추가로 자동 조정했습니다.",
+      "suggestion_resolves": "이 문제를 해결하려면 아래의 보류 중인 제안({val})을 적용하세요",
       "use_fix": "{val} 사용",
       "watchdog": {
         "interval": "샘플링 간격 ({si} 초)의 최소 2배이어야 합니다",
@@ -17026,6 +17043,7 @@
         "unmatch": "Turi būti žemiau atitikimo slenksčio ({match}); priešingu atveju patvirtintas atitikimas iškart panaikinamas"
       },
       "cascade_toast": "Taip pat automatiškai pakoreguoti {n} nustatymai dėl nuoseklumo.",
+      "suggestion_resolves": "Pritaikykite žemiau esantį laukiantį pasiūlymą ({val}), kad tai ištaisytumėte",
       "use_fix": "Naudoti {val}",
       "watchdog": {
         "interval": "Turi būti bent 2 kartus didesnis nei mėginių ėmimo intervalas ({si} s)",
@@ -18018,6 +18036,7 @@
         "unmatch": "Jābūt zem atbilstības sliekšņa ({match}); pretējā gadījumā apstiprināta atbilstība uzreiz tiek atcelta"
       },
       "cascade_toast": "Automātiski tika koriģēti arī {n} iestatījumi konsekvences labad.",
+      "suggestion_resolves": "Lai to labotu, lietojiet zemāk esošo gaidošo ieteikumu ({val})",
       "use_fix": "Izmantot {val}",
       "watchdog": {
         "interval": "Jābūt vismaz 2x lielākam par paraugu ņemšanas intervālu ({si} s)",
@@ -19010,6 +19029,7 @@
         "unmatch": "Мора да е под Прагот за Совпаѓање ({match}); инаку потврденото совпаѓање веднаш се откажува"
       },
       "cascade_toast": "За конзистентност, исто така се прилагодени уште {n} поставки.",
+      "suggestion_resolves": "Активирајте го чекечкиот предлог ({val}) подолу за да го поправите ова",
       "use_fix": "Користи {val}",
       "watchdog": {
         "interval": "Треба да е барем 2x Интервалот на Земање Примероци ({si} с)",
@@ -20002,6 +20022,7 @@
         "unmatch": "Må være under matchingsterskelen ({match}); ellers avmatchs en bekreftet match øyeblikkelig"
       },
       "cascade_toast": "Også {n} innstillinger justert for konsistens.",
+      "suggestion_resolves": "Bruk forslaget nedenfor ({val}) for å løse dette",
       "use_fix": "Bruk {val}",
       "watchdog": {
         "interval": "Bør være minst 2x samplingsintervallet ({si} s)",
@@ -20994,6 +21015,7 @@
         "unmatch": "Moet onder de overeenkomstdrempel ({match}) liggen; anders wordt een bevestigde overeenkomst direct ongedaan gemaakt"
       },
       "cascade_toast": "Ook {n} instelling(en) aangepast voor consistentie.",
+      "suggestion_resolves": "Pas hieronder de openstaande suggestie ({val}) toe om dit op te lossen",
       "use_fix": "Gebruik {val}",
       "watchdog": {
         "interval": "Moet minimaal 2x het bemonsteringsinterval ({si} s) zijn",
@@ -21986,6 +22008,7 @@
         "unmatch": "Musi być poniżej Progu Dopasowania ({match}); w przeciwnym razie potwierdzone dopasowanie natychmiast się cofa"
       },
       "cascade_toast": "Dodatkowo dostosowano {n} ustawień w celu zachowania spójności.",
+      "suggestion_resolves": "Zastosuj oczekującą sugestię ({val}) poniżej, aby rozwiązać ten konflikt",
       "use_fix": "Użyj {val}",
       "watchdog": {
         "interval": "Powinien wynosić co najmniej 2× Interwał Próbkowania ({si} s)",
@@ -22978,6 +23001,7 @@
         "unmatch": "Deve ser abaixo do Limiar de correspondência ({match}); caso contrário, uma correspondência confirmada é imediatamente desfeita"
       },
       "cascade_toast": "Também foram ajustadas {n} configurações por consistência.",
+      "suggestion_resolves": "Aplique a sugestão pendente ({val}) abaixo para corrigir este conflito",
       "use_fix": "Usar {val}",
       "watchdog": {
         "interval": "Deve ser pelo menos 2x o Intervalo de amostragem ({si} s)",
@@ -23970,6 +23994,7 @@
         "unmatch": "Deve ser inferior ao Limiar de correspondência ({match}); caso contrário, uma correspondência confirmada é imediatamente anulada"
       },
       "cascade_toast": "Também foram ajustadas {n} definições por consistência.",
+      "suggestion_resolves": "Aplique a sugestão pendente ({val}) abaixo para corrigir este conflito",
       "use_fix": "Usar {val}",
       "watchdog": {
         "interval": "Deve ser pelo menos 2x o Intervalo de amostragem ({si} s)",
@@ -24962,6 +24987,7 @@
         "unmatch": "Trebuie să fie sub Pragul de potrivire ({match}); altfel o potrivire confirmată este anulată instantaneu"
       },
       "cascade_toast": "S-au ajustat automat și alte {n} setări pentru consecvență.",
+      "suggestion_resolves": "Aplicați sugestia în așteptare ({val}) de mai jos pentru a remedia aceasta",
       "use_fix": "Folosiți {val}",
       "watchdog": {
         "interval": "Ar trebui să fie de cel puțin 2x Intervalul de eșantionare ({si} s)",
@@ -25954,6 +25980,7 @@
         "unmatch": "Должен быть ниже Порога Совпадения ({match}); иначе принятое совпадение немедленно теряется"
       },
       "cascade_toast": "Для согласованности также автоматически изменено ещё {n} параметров.",
+      "suggestion_resolves": "Активируйте ожидающее предложение ({val}) ниже, чтобы исправить это",
       "use_fix": "Использовать {val}",
       "watchdog": {
         "interval": "Должен быть не менее 2x Интервала Выборки ({si} с)",
@@ -26946,6 +26973,7 @@
         "unmatch": "Musí byť pod Prahom zhody ({match}); inak sa potvrdená zhoda ihneď zruší"
       },
       "cascade_toast": "Bolo tiež automaticky upravených {n} nastavení pre zachovanie konzistencie.",
+      "suggestion_resolves": "Uplatnite nižšie čakajúci návrh ({val}) na vyriešenie tohto konfliktu",
       "use_fix": "Použiť {val}",
       "watchdog": {
         "interval": "Mal by byť aspoň 2× Interval vzorkovania ({si} s)",
@@ -27938,6 +27966,7 @@
         "unmatch": "Mora biti pod Pragom ujemanja ({match}); sicer se potrjeno ujemanje takoj razveljavi"
       },
       "cascade_toast": "Samodejno je bilo prilagojenih {n} nastavitev za doslednost.",
+      "suggestion_resolves": "Uveljavite čakajoči predlog ({val}) spodaj za odpravo tega konflikta",
       "use_fix": "Uporabi {val}",
       "watchdog": {
         "interval": "Mora biti vsaj 2× Interval vzorčenja ({si} s)",
@@ -28930,6 +28959,7 @@
         "unmatch": "Duhet të jetë nën Pragun e Përputhjes ({match}); përndryshe një përputhje e konfirmuar zhbëhet menjëherë"
       },
       "cascade_toast": "Për konsistencë, u rregulluan automatikisht edhe {n} cilësime të tjera.",
+      "suggestion_resolves": "Zbato sugjerimin e pritshëm ({val}) më poshtë për ta rregulluar këtë",
       "use_fix": "Përdor {val}",
       "watchdog": {
         "interval": "Duhet të jetë të paktën 2× Intervali i Kampionimit ({si} s)",
@@ -29922,6 +29952,7 @@
         "unmatch": "Mora biti ispod Praga podudaranja ({match}); inače potvrđeno podudaranje odmah prestaje"
       },
       "cascade_toast": "Automatski je prilagođeno i {n} postavki radi doslednosti.",
+      "suggestion_resolves": "Primenite predlog na čekanju ({val}) ispod za rešavanje ovog konflikta",
       "use_fix": "Koristi {val}",
       "watchdog": {
         "interval": "Treba biti najmanje 2× Interval uzorkovanja ({si} s)",
@@ -30914,6 +30945,7 @@
         "unmatch": "Måste vara under matchningströskel ({match}); annars avmatchas en bekräftad matchning omedelbart"
       },
       "cascade_toast": "Även {n} inställningar justerades för konsekvens.",
+      "suggestion_resolves": "Tillämpa förslaget nedan ({val}) för att lösa detta",
       "use_fix": "Använd {val}",
       "watchdog": {
         "interval": "Bör vara minst 2x samplingsintervallet ({si} s)",
@@ -31906,6 +31938,7 @@
         "unmatch": "Eşleşme Eşiğinin altında olmalıdır ({match}); aksi takdirde onaylanan bir eşleşme anında iptal olur"
       },
       "cascade_toast": "Tutarlılık için {n} ayar daha otomatik olarak düzenlendi.",
+      "suggestion_resolves": "Bunu düzeltmek için aşağıdaki bekleyen öneriyi ({val}) etkinleştirin",
       "use_fix": "{val} kullan",
       "watchdog": {
         "interval": "En az 2 kat Örnekleme Aralığı olmalıdır ({si} s)",
@@ -32898,6 +32931,7 @@
         "unmatch": "Має бути нижчим за Поріг Зіставлення ({match}); інакше підтверджений збіг одразу скасовується"
       },
       "cascade_toast": "Для узгодженості також автоматично скориговано ще {n} параметрів.",
+      "suggestion_resolves": "Активуйте очікувану пропозицію ({val}) нижче, щоб виправити це",
       "use_fix": "Використати {val}",
       "watchdog": {
         "interval": "Має бути щонайменше 2x Інтервалу Вибірки ({si} с)",
@@ -33890,6 +33924,7 @@
         "unmatch": "必须低于匹配阈值 ({match})；否则已确认的匹配会立即取消"
       },
       "cascade_toast": "为保持一致性，还自动调整了 {n} 项设置。",
+      "suggestion_resolves": "应用下方的待处理建议（{val}）以修复此问题",
       "use_fix": "使用 {val}",
       "watchdog": {
         "interval": "应至少为采样间隔 ({si} 秒) 的 2 倍",

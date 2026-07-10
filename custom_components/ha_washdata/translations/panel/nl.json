@@ -161,6 +161,7 @@
       "unmatch": "Moet onder de overeenkomstdrempel ({match}) liggen; anders wordt een bevestigde overeenkomst direct ongedaan gemaakt"
     },
     "cascade_toast": "Ook {n} instelling(en) aangepast voor consistentie.",
+    "suggestion_resolves": "Pas hieronder de openstaande suggestie ({val}) toe om dit op te lossen",
     "use_fix": "Gebruik {val}",
     "watchdog": {
       "interval": "Moet minimaal 2x het bemonsteringsinterval ({si} s) zijn",

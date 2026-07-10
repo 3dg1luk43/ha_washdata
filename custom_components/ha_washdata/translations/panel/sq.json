@@ -161,6 +161,7 @@
       "unmatch": "Duhet të jetë nën Pragun e Përputhjes ({match}); përndryshe një përputhje e konfirmuar zhbëhet menjëherë"
     },
     "cascade_toast": "Për konsistencë, u rregulluan automatikisht edhe {n} cilësime të tjera.",
+    "suggestion_resolves": "Zbato sugjerimin e pritshëm ({val}) më poshtë për ta rregulluar këtë",
     "use_fix": "Përdor {val}",
     "watchdog": {
       "interval": "Duhet të jetë të paktën 2× Intervali i Kampionimit ({si} s)",

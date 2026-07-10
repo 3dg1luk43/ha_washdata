@@ -955,6 +955,8 @@ Fourteen constraints are checked, covering:
 
 `_liveValidateSettings(sr)` runs every conflict rule on every `input` / `change` event and on initial render, adding a red `wd-conflict-row` below each affected field (with the translated message and a **Use X** fix button) and an `wd-has-conflict` outline. It returns the map of active conflicts; `_saveSettings()` blocks if it is non-empty.
 
+**Conflict-suggestion coherence**: When `_liveValidateSettings` emits an error for a field, it checks whether a pending suggestion for that same field would resolve the constraint. It builds a `suggMap = {key: +s.suggested}` from `this._suggestions`; for each `(key, info)` returned by `rule.fieldErrors(vals)`, if `suggMap[key]` exists and applying that suggestion value passes `rule.check({...vals, [key]: sugV})`, the error object is tagged `{...info, suggFix: sugV}`. The rendered row then shows a `<span class="wd-conflict-sug-note">` with the translation key `conflict.suggestion_resolves` ("Stage the pending suggestion (X) below to fix this") instead of the generic **Use X** fix button. `_cascadeConflictFix` skips entries tagged with `suggFix` (they carry no `fixVal`), so the cascade loop never fights a pending suggestion.
+
 **Cascade fix** (`_cascadeConflictFix`): clicking **Use X** triggers a loop that fixes the clicked field, then re-validates and automatically applies the next downstream fix, repeating until stable. Fields in the current section update their DOM inputs directly; fields in other sections (off-screen) update `this._opts` in memory and are tracked in `this._cascadePending`. `_saveSettings()` prefixes the `updates` payload with `_cascadePending` so off-screen cascade values are included in the next save even though they never enter a DOM input. `_cascadePending` is cleared on successful save, Refresh, or Apply Suggestions. The same cascade also fires when a tuning suggestion's **Use** button is clicked: after staging the new value in `this._opts` and re-rendering the settings form, `_cascadeConflictFix` runs with the suggestion key as `initialKey` so downstream settings are auto-fixed in the same interaction.
 
 **Revert changes button**: `_saveSettings()` snapshots `this._opts` into `this._prevOpts` immediately before sending to the server. The "Revert changes" button (disabled until the first save in the session) sends `_prevOpts` back to the server and restores local state, giving the user one-level post-save undo. Cleared on Refresh or Apply Suggestions.
@@ -970,6 +972,47 @@ Fourteen constraints are checked, covering:
 - **`original_keys`**: a frozenset of keys the engine originally proposed, used to determine cascade direction within each rule.
 
 `_reconcile_stored_suggestions()` in `SuggestionEngine` calls `reconcile_suggestions(stored, self._entry_options())` after each `apply_suggestions()` call, persisting cascade-created entries into the profile store via `set_suggestion`. This ensures the full coherent set is shown in the panel and applied together via "Apply all". The anti-wrinkle rules (8, 9) and pump-stuck rule (10) are **device-type-aware**: they compute `_dt = current.get(CONF_DEVICE_TYPE)` and skip the rule unless `_dt` matches the applicable types (anti-wrinkle: `washing_machine | dryer | washer_dryer`; pump-stuck: `pump`). A `None` device_type is treated as "eligible" to preserve backward compatibility with existing tests that call `reconcile_suggestions` without a device_type in `current`.
+
+#### Suggestion quality gates (learning.py)
+
+`_apply_suggestions_and_notify()` in `learning.py` is the single path that writes a new suggestion into the profile store. Two gates run before any `set_suggestion` call:
+
+**Gate 1 — Minimum significant delta**: A suggestion is discarded (deleted from the store) if the proposed change is too small to be meaningful. For each suggestion value `sv` vs the current option value `cv`:
+
+```
+rel_delta = abs(sv - cv) / max(abs(cv), 1e-3)
+```
+
+The suggestion is dropped when **both** of the following hold simultaneously — either threshold passing is enough to keep it:
+
+- `rel_delta < MIN_SUGGESTION_REL_DELTA` (constant: `0.08`, i.e. less than 8% relative change), **AND**
+- `abs(sv - cv) < _suggestion_min_abs_delta(key)` — a per-key absolute floor:
+
+| Key pattern | Absolute minimum | Unit |
+|-------------|-----------------|------|
+| `*_w`, `*_power` | 0.3 | Watts |
+| `*_interval`, `*_timeout`, `*_delay`, `*_gap`, `*_duration`, `*_seconds` | 5.0 | seconds |
+| `*_ratio`, `*_tolerance`, `*_confidence`, `*_threshold` | 0.02 | dimensionless |
+| `*_count`, `*_window`, `*_repeat` | 1.0 | count |
+| *(all others)* | 0.05 | — |
+
+This prevents the suggestions panel from surfacing cosmetic noise (e.g. a 1 W shift in a 1000 W threshold) while still catching genuine drift that only appears as an absolute change on already-near-zero values.
+
+**Gate 2 — Post-apply cooldown**: After the user clicks "Apply suggestions" (`ws_apply_suggestions`), `ws_api.py` records the current cycle count via `profile_store.set_suggestion_apply_cycle_count(len(past_cycles))`. On every subsequent call to `_apply_suggestions_and_notify()`, the gate checks:
+
+```
+(current_count - last_apply_count) < MIN_SUGGESTION_COOLDOWN_CYCLES  (constant: 3)
+```
+
+When fewer than 3 new cycles have completed since the last apply, new suggestions are **skipped** — neither stored nor deleted, leaving the store unchanged. The first-ever suggestion (when `last_apply_count == 0`) is exempt so new installs receive suggestions immediately.
+
+The cooldown prevents the engine from immediately re-suggesting changes that were just applied: the first 1–2 cycles after an apply still carry the prior device signature, so waiting for at least 3 cycles gives the detector time to observe the updated thresholds before re-evaluating.
+
+**Profile-store support**: `profile_store.py` exposes two thin helpers for the cooldown state:
+- `get_suggestion_apply_cycle_count() -> int` — returns the stored count, defaulting to `0`.
+- `set_suggestion_apply_cycle_count(count: int) -> None` — persists the count; called by `ws_api.py` after `ws_apply_suggestions`.
+
+The two constants (`MIN_SUGGESTION_REL_DELTA`, `MIN_SUGGESTION_COOLDOWN_CYCLES`) live in `const.py`.
 
 #### Translations
 

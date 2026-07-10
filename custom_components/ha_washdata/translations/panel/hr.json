@@ -161,6 +161,7 @@
       "unmatch": "Mora biti ispod Praga podudaranja ({match}); inače potvrđeno podudaranje odmah prestaje"
     },
     "cascade_toast": "Automatski je prilagođeno i {n} postavki radi dosljednosti.",
+    "suggestion_resolves": "Primijenite prijedlog ({val}) u nastavku za rješavanje ovog sukoba",
     "use_fix": "Koristi {val}",
     "watchdog": {
       "interval": "Trebao bi biti najmanje 2× Interval uzorkovanja ({si} s)",

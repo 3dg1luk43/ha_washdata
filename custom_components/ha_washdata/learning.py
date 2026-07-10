@@ -41,6 +41,8 @@ from .const import (
     DEFAULT_LEARNING_CONFIDENCE,
     DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
     DOMAIN,
+    MIN_SUGGESTION_COOLDOWN_CYCLES,
+    MIN_SUGGESTION_REL_DELTA,
     ML_QUALITY_SUSPICIOUS_THRESHOLD,
 )
 from .suggestion_engine import SuggestionEngine
@@ -51,6 +53,25 @@ if TYPE_CHECKING:
 
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _suggestion_min_abs_delta(key: str) -> float:
+    """Return the minimum absolute change that makes a suggestion worth surfacing.
+
+    Both this threshold AND MIN_SUGGESTION_REL_DELTA must be missed for a
+    suggestion to be suppressed — either one passing is enough to keep it.
+    """
+    if key.endswith(("_w", "_power")):
+        return 0.3      # Watts: sub-0.3 W changes are below sensor noise
+    if key.endswith(("_interval", "_timeout", "_delay", "_gap", "_duration", "_seconds")):
+        return 5.0      # Seconds: 5 s is imperceptible to the detector
+    if key.endswith(("_ratio", "_tolerance")):
+        return 0.02     # Unitless ratio: 0.02 is the minimum meaningful step
+    if key.endswith(("_confidence", "_threshold")):
+        return 0.02     # Probability (0–1): 0.02 is the minimum meaningful step
+    if key.endswith(("_count", "_window", "_repeat")):
+        return 1.0      # Integer count: less than 1 is a no-op
+    return 0.05
 
 
 class StatisticalModel:
@@ -155,12 +176,19 @@ class LearningManager:
             CONF_END_REPEAT_COUNT,
         )
 
-        # Drop suggestions whose value already matches the current config - so
-        # that applied suggestions don't immediately reappear on the next cycle.
+        # Quality gate: drop or suppress suggestions that are not worth surfacing.
         entry = self.hass.config_entries.async_get_entry(self.entry_id)
         current_options: dict[str, Any] = {}
         if entry:
             current_options = {**entry.data, **entry.options}
+
+        # Cooldown: how many cycles have elapsed since the user last applied suggestions?
+        past_cycles = self.profile_store.get_past_cycles()
+        last_apply_count = self.profile_store.get_suggestion_apply_cycle_count()
+        cooldown_active = (
+            last_apply_count > 0
+            and (len(past_cycles) - last_apply_count) < MIN_SUGGESTION_COOLDOWN_CYCLES
+        )
 
         filtered_suggestions: dict[str, Any] = {}
         for key, data in suggestions.items():
@@ -169,9 +197,28 @@ class LearningManager:
                 suggested_val = data["value"]
                 if current_val is not None and suggested_val is not None:
                     try:
-                        if float(current_val) == float(suggested_val):
+                        cv, sv = float(current_val), float(suggested_val)
+                        abs_delta = abs(sv - cv)
+
+                        # Gate 1: exact equality → stale, delete so it doesn't linger.
+                        if abs_delta < 1e-9:
                             self.profile_store.delete_suggestion(key)
-                            continue  # already applied, remove stale entry
+                            continue
+
+                        # Gate 2: change too small to be meaningful → delete (noise).
+                        rel_delta = abs_delta / max(abs(cv), 1e-3)
+                        if (rel_delta < MIN_SUGGESTION_REL_DELTA
+                                and abs_delta < _suggestion_min_abs_delta(key)):
+                            self.profile_store.delete_suggestion(key)
+                            continue
+
+                        # Gate 3: cooldown active → skip update without deleting.
+                        # After the user applies suggestions, wait for a few more
+                        # cycles before surfacing new ones (avoids immediately
+                        # re-suggesting a slightly-different value on the next cycle).
+                        if cooldown_active:
+                            continue
+
                     except (TypeError, ValueError):
                         pass
             filtered_suggestions[key] = data

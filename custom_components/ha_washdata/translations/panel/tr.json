@@ -161,6 +161,7 @@
       "unmatch": "Eşleşme Eşiğinin altında olmalıdır ({match}); aksi takdirde onaylanan bir eşleşme anında iptal olur"
     },
     "cascade_toast": "Tutarlılık için {n} ayar daha otomatik olarak düzenlendi.",
+    "suggestion_resolves": "Bunu düzeltmek için aşağıdaki bekleyen öneriyi ({val}) etkinleştirin",
     "use_fix": "{val} kullan",
     "watchdog": {
       "interval": "En az 2 kat Örnekleme Aralığı olmalıdır ({si} s)",

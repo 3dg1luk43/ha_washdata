@@ -161,6 +161,7 @@
       "unmatch": "Skal være under matchningstærsklen ({match}); ellers ophæves en bekræftet matchning øjeblikkeligt"
     },
     "cascade_toast": "Desuden {n} indstillinger justeret for konsistens.",
+    "suggestion_resolves": "Anvend forslaget nedenfor ({val}) for at løse dette",
     "use_fix": "Brug {val}",
     "watchdog": {
       "interval": "Bør være mindst 2x samplingsintervallet ({si} s)",

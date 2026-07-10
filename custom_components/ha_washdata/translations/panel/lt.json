@@ -161,6 +161,7 @@
       "unmatch": "Turi būti žemiau atitikimo slenksčio ({match}); priešingu atveju patvirtintas atitikimas iškart panaikinamas"
     },
     "cascade_toast": "Taip pat automatiškai pakoreguoti {n} nustatymai dėl nuoseklumo.",
+    "suggestion_resolves": "Pritaikykite žemiau esantį laukiantį pasiūlymą ({val}), kad tai ištaisytumėte",
     "use_fix": "Naudoti {val}",
     "watchdog": {
       "interval": "Turi būti bent 2 kartus didesnis nei mėginių ėmimo intervalas ({si} s)",

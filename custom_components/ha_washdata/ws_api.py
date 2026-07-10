@@ -2023,6 +2023,8 @@ async def ws_apply_suggestions(
         if updates:
             # Clear before updating the entry: async_update_entry schedules a
             # reload that rebuilds the store, so persist the cleared state first.
+            cycle_count = len(manager.profile_store.get_past_cycles())
+            manager.profile_store.set_suggestion_apply_cycle_count(cycle_count)
             await manager.profile_store.clear_suggestions()
             new_options = {**entry.data, **entry.options, **updates}
             hass.config_entries.async_update_entry(entry, options=new_options)

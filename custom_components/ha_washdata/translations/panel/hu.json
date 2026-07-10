@@ -161,6 +161,7 @@
       "unmatch": "Az Egyezési küszöb alatt kell lennie ({match}); különben egy megerősített egyezés azonnal visszavonódik"
     },
     "cascade_toast": "Konzisztencia megőrzése érdekében {n} beállítás is automatikusan módosult.",
+    "suggestion_resolves": "A javításhoz alkalmazza az alábbi függőben lévő javaslatot ({val})",
     "use_fix": "Használja a következőt: {val}",
     "watchdog": {
       "interval": "Legalább kétszerese kell legyen a Mintavételezési intervallumnak ({si} s)",

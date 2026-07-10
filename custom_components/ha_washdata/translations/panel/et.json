@@ -161,6 +161,7 @@
       "unmatch": "Peab olema alla vaste läve ({match}); muidu tühistatakse kinnitatud vaste kohe"
     },
     "cascade_toast": "Järjepidevuse tagamiseks kohandati automaatselt ka {n} seadistust.",
+    "suggestion_resolves": "Rakendage allpool kuvatav ootel soovitus ({val}), et see parandada",
     "use_fix": "Kasuta {val}",
     "watchdog": {
       "interval": "Peaks olema vähemalt 2x proovivõtu intervall ({si} s)",
