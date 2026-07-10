@@ -1061,3 +1061,71 @@ This mechanism fixes two related bugs: (1) values typed in a section were discar
 #### Suggestion-ready notification removed
 
 `_async_send_suggestions_ready_notification()` and its call site in `_apply_suggestions_and_notify()` have been removed from `learning.py`. WashData no longer posts a Home Assistant persistent notification when tuning suggestions first appear for a device. Suggestions are surfaced exclusively through the panel: the yellow banner in the Settings tab, section-dot indicators, and per-field pill widgets. The `suggestions_ready_notification_title` and `suggestions_ready_notification_message` keys were removed from `strings.json`, `translations/en.json`, and all other supported language files.
+
+---
+
+## 10. Detection, Energy, Notifications, Maintenance & Panel Additions
+
+A batch of feature groups (roadmap A-H) layered on top of the 0.5.0 architecture. All are additive: new statistics, store keys, sensors, WS commands, and panel surfaces that never change the proven detection/matching core.
+
+### A. Detection & Intelligence Accuracy
+
+**A1 - Underrun anomaly.** The mirror image of the runtime overrun signal (§ Runtime Overrun Anomaly). A completed cycle whose duration is below `CYCLE_UNDERRUN_ANOMALY_RATIO` (0.55) of its matched profile's median is frozen with `cycle_data["anomaly"] = "underrun"` plus `underrun_ratio`. It shares the `anomaly` field with `overrun`, so the two are mutually exclusive on one cycle. Surfaced as a ⚡ badge in the Cycles list. Pure statistics, no notification, never terminates a cycle.
+
+**A2 - Energy anomaly.** At cycle end, the cycle's energy is compared against the matched profile's own energy history via a z-score (requires `>= 3` labelled cycles for a stable mean/stdev). When `|z| > ENERGY_ANOMALY_Z_THRESHOLD` (2.5), `cycle_data["energy_anomaly"]` is set to `"energy_spike"` or `"energy_low"` with `energy_z_score`. It is a **separate field** from `anomaly`, so a cycle can be simultaneously an overrun and an energy spike. Rendered as 🔺 / 🔻 badges in the Cycles list.
+
+**A3 - Unlabeled cluster suggestions.** `suggest_coverage_gaps` (§ 3c) now additionally runs pairwise correlation of the recent *unmatched* cycles within each duration bucket and emits `profile_suggestions` (a cluster is kept when its average intra-cluster similarity `>= 0.75`). Returned alongside `coverage_gaps` in `ws_get_profiles`; drives a one-click **Create profile from N cycles** button in the Profiles coverage-gap banner.
+
+**A4 - Profile warm-up.** A profile with fewer than `CONF_PROFILE_MIN_WARMUP_CYCLES` (5) labelled cycles is not yet trustworthy, so auto-labelling against it is suppressed and the match routes to a manual-confirm feedback request instead. The profile card shows a "Still learning (n/5)" badge. The threshold is exposed to the panel via `get_constants` as `PROFILE_MIN_WARMUP_CYCLES`.
+
+**A5 - Shape drift.** `compute_profile_health` (§ 3b) gains two fields when a profile has `>= SHAPE_DRIFT_MIN_CYCLES` (10) traced cycles: `shape_drift_correlation` (the Pearson r between the *average envelope of the earliest third* of the cycles and that of the *latest third*, both resampled onto a common grid via the new `signal_processing.resample_to_n`) and `shape_drift` (bool, true when `r < SHAPE_DRIFT_THRESHOLD`, 0.85). A drifting profile raises a maintenance advisory in its detail view. Complementary to duration/energy trends: it catches a change in curve *shape* even when duration is steady.
+
+### B. Energy, Cost & Sustainability
+
+**B1 - HA Energy dashboard entity.** A new `sensor.<name>_energy_total` (`device_class=ENERGY`, `state_class=TOTAL_INCREASING`, unit kWh, 3-decimal precision) reports lifetime energy so Home Assistant's Energy dashboard ingests it automatically. The running total is persisted in the store as `lifetime_energy_wh` and bumped **once per completed cycle** in `manager._on_cycle_end` (`ProfileStore.async_add_lifetime_energy_wh`). Read via `ProfileStore.get_lifetime_energy_wh` / `manager.lifetime_energy_kwh`.
+
+**B2 - Per-profile average cost.** `ProfileStore.list_profiles()` now computes `avg_cost` / `total_cost` from each member cycle's frozen `cost` (falling back to `None` when no priced cycles exist). Shown on profile cards and in the profile panel in the HA currency.
+
+**B3 - Finish-notification template variables.** `manager._on_cycle_end` builds three new placeholders for the finish message and mirrors them into the fired event data: `{time_finished}` (`dt_util.now().strftime("%H:%M")`), `{cycle_count}` (`self.cycle_count`), and `{vs_typical}` from `manager._format_vs_typical(duration, median)` - a deterministic "N% longer/shorter than usual" against the profile median, empty when there is no usable median or the delta is under 1%.
+
+**B4 - Peak-rate awareness.** `manager._peak_rate_tip(options, price)` returns a one-line advisory appended to the **start** notification when `CONF_PEAK_RATE_THRESHOLD` (`peak_rate_threshold`) is positive and the resolved current price is at or above it. Text comes from `CONF_PEAK_RATE_MESSAGE` (`DEFAULT_PEAK_RATE_MESSAGE = "Running at peak rate ({price}/kWh)."`, vars `{device}` / `{price}`). Purely informational - no scheduling or appliance control; never raises (a bad threshold is skipped).
+
+### C. Notification & Alerting
+
+**C1 - Quiet hours.** `notify_quiet_start_hour` / `notify_quiet_end_hour` (`0-23`; unset or equal = off) define a do-not-disturb window that correctly handles windows crossing midnight. Finish-type notifications (finished, clean-laundry nag, pre-completion/reminder, and the C2 milestone) that would fire inside the window are queued and delivered at the window's end; live-progress ticks and the start notification are **never** delayed.
+
+**C2 - Cycle milestones.** `CONF_NOTIFY_MILESTONES` (`DEFAULT_NOTIFY_MILESTONES = [50, 100, 500, 1000]`) is a list of lifetime completed-cycle counts. After a cycle persists (so `self.cycle_count` is current), the manager fires a single milestone notification when the count crosses a threshold, using `CONF_NOTIFY_MILESTONE_MESSAGE` (`DEFAULT_NOTIFY_MILESTONE_MESSAGE = "{device} has completed {cycle_count} cycles!"`, vars `{device}` / `{cycle_count}`). Respects quiet hours; no new notification type or entity.
+
+**C3 - iOS Live Activity enrichment.** For `mobile_app_*` **live** targets only, the notification `data` gains `subtitle` (program), a `content_state` dict `{state, progress_pct, eta_timestamp, program, device}`, and `activity` start/end lifecycle markers so a companion-app Live Activity can begin and end with the cycle. Gated on the target prefix, so Android and strict-schema notify platforms never receive the extra keys.
+
+### D. Panel & UI
+
+- **D1 - Live phase timeline.** Below the Status progress bar, the matched profile's phase ranges are rendered as color-coded segments with a live cursor. Falls back to the plain bar when the matched profile has no phases.
+- **D2 - Duration sparkline.** Profile cards draw a mini sparkline of the last ~10 cycle durations (hidden under 3 cycles).
+- **D3 - Cycles pagination.** `ws_get_device_cycles` gained an `offset` parameter and returns `total` + `has_more` (`has_more = (offset + len(cycles)) < total`); the panel adds a **Load more** button.
+- **D4 - Undo toast.** Cycle and profile deletion show a 10s undo toast; the actual delete only fires after the window closes (client-side deferral).
+- **D5 - Keyboard shortcuts.** Number keys jump tabs, Escape closes modals, `?` opens a help overlay.
+- **D6 - Bulk relabel.** The Cycles multi-select toolbar can reassign many cycles to one profile in a single action.
+- **D7 - Settings change history.** Every options save appends `{key, old, new, timestamp}` to the `settings_changelog` store key (capped at `SETTINGS_CHANGELOG_MAX` = 50). New WS command `get_settings_changelog`; changed fields render a dot with a "Changed from X to Y on {date}" tooltip plus a Settings history table.
+
+### E. Appliance Health & Predictive Maintenance
+
+**E1 - Maintenance log.** A per-device `maintenance_log` store key holds `{id, date, event_type, notes}` records. `MAINTENANCE_EVENT_TYPES` = descale / filter_clean / drum_clean / bearing_service / other. WS commands: `get_maintenance_log`, `add_maintenance_event`, `delete_maintenance_event` (`ProfileStore.get_maintenance_log` / `async_add_maintenance_event` / `async_delete_maintenance_event`). A new **Maintenance** sub-tab under Advanced offers an add form, timeline list, and reminder editor. A logged event of a matching type within the last 30 days suppresses the corresponding drift/health advisory.
+
+**E2 - Service reminders.** `CONF_MAINTENANCE_REMINDER_CYCLES` (`DEFAULT_MAINTENANCE_REMINDER_CYCLES = {descale: 30, filter_clean: 50, drum_clean: 100}`; bearing_service / other default off). `ProfileStore.get_maintenance_due(reminder_cfg)` returns the list of event types whose cycles-since-last-logged-event has reached/exceeded the threshold; `manager.maintenance_due` surfaces it as a `maintenance_due` attribute on the state sensor and a panel banner. No new notification type.
+
+### F. Onboarding, Settings Disclosure & Playground
+
+**F1 - First-run wizard.** With zero cycles and zero profiles, the Status tab renders an onboarding card ("run your appliance normally... after 3 cycles matching begins") with an N/3 progress meter and a Skip link that stores an `onboarding_dismissed` per-user preference (via `ws_set_panel_prefs`). Once `>= 3` cycles exist, it prompts the user to name their first program.
+
+**F2 - Basic / Advanced settings.** A per-user `settings_level` preference (`basic` | `advanced`) drives a Basic|Advanced toggle atop the Settings tab. Basic renders ~12 highest-impact fields; Advanced renders everything. It is purely a visibility filter - hidden fields keep their stored values.
+
+**F3 - Playground tab.** A new top-level Playground tab backed by `playground.py`, a headless replay harness that runs stored cycles through a genuine detector + matcher pass with overridden settings (concurrency 1-50). Three tools: (1) **Cycle Simulator** - per-cycle event timeline + outcome summary; (2) **A/B Settings Comparison** - the same cycles through current vs proposed settings side by side with deltas and an "apply set B"; (3) **DTW Inspector** - overlays a cycle vs a profile envelope with the DTW warp path and the full Stage-2/DTW/Stage-4 score breakdown. Two new WS commands: `run_playground_simulation` (in `_READ_WRITE_COMMANDS`) and `get_dtw_debug`. **Both require a full Home Assistant restart to register.**
+
+### G. Conversation intents (Assist)
+
+`intents.py` defines a single `HaWashdataStatus` intent (`INTENT_STATUS`), registered once per HA instance from `async_setup_entry` via `async_setup_intents` (no import-time side effects). The handler answers "is my washer done / how long left" from live manager/sensor state ("still running, about N minutes left" / "finished N minutes ago" / "not running"), resolving the device by an optional `{name}` slot. `conversation` is added to `manifest.json` dependencies. Because HA has no runtime API for a custom integration to inject sentences into the built-in conversation agent, trigger sentences are wired by the user via a `<config>/custom_sentences/en/ha_washdata.yaml` pack (one file per language); the intent is fireable immediately from automations / `intent_script` / the Assist pipeline. (Roadmap G2, a community profile library, is deferred / not shipped.)
+
+### H. Type-safe WS API contract (developer)
+
+`ws_schema.py` is the single source of truth for the panel's WebSocket surface: a `TypedDict` response per command plus a `WS_COMMANDS` request registry covering all ~70 commands. A debug-only `_send_result` wrapper validates outgoing responses against the declared shape when `HA_WASHDATA_WS_CONTRACT=1` (zero overhead otherwise). `devtools/generate_ws_types.py` regenerates `www/ws-types.d.ts` (TypeScript types) and `docs/WS_API.md` (auto-generated command reference). `tests/test_ws_contract.py` fails if a command is added or removed without updating the contract, keeping `ws_api.py`, `ws_schema.py`, and the generated docs in sync.

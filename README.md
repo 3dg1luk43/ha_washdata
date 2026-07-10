@@ -22,8 +22,9 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Automatic detection & program matching** - Detects cycle start/stop from the power trace and identifies *which program* ran by curve shape, duration, and energy. You teach it your programs once (it never auto-creates profiles); it recognises them thereafter and gives phase-aware time-remaining estimates.
 - **Full-screen management panel** - A **WashData** sidebar entry for live status, cycle and profile management, settings, diagnostics, and logs. Replaces the old multi-screen options flow.
 - **Many appliance types** - Washing machines, dryers, washer-dryer combos, dishwashers, air fryers, bread makers, and pumps/sump pumps, each with tuned defaults; plus an **Other (Advanced)** bucket you tune yourself. (Coffee machines, EVs, heat pumps, and ovens remain as deprecated types, scheduled for removal in 0.6.0.)
-- **Per-cycle energy & cost** - Energy and cost tracked for every cycle; cost is frozen at the price in effect when the cycle finished, so later price changes don't rewrite history.
-- **Automation-first notifications** - Ready-made per-event push alerts, or your own Home Assistant automations driven by WashData's cycle events - found and created from the panel. See [NOTIFICATIONS.md](NOTIFICATIONS.md).
+- **Per-cycle energy & cost** - Energy and cost tracked for every cycle; cost is frozen at the price in effect when the cycle finished, so later price changes don't rewrite history. Per-profile **average cost** and a lifetime **Energy dashboard** sensor (`sensor.<name>_energy_total`) come built in.
+- **Automation-first notifications** - Ready-made per-event push alerts, or your own Home Assistant automations driven by WashData's cycle events - found and created from the panel. **Quiet hours**, **cycle milestones**, and richer finish-message variables included. See [NOTIFICATIONS.md](NOTIFICATIONS.md).
+- **Ask your assistant** - "Is my washer done?" / "How long until the dryer finishes?" answered through Home Assistant's voice/text Assist. See [Ask Home Assistant](#ask-home-assistant).
 - **Pause/Resume, Door & Clean state** - Pause/resume active cycles (optionally cutting power), add-clothes support via a door sensor, and a "laundry still waiting" reminder after a cycle ends.
 - **Robust & self-correcting** - Energy-gated start/end detection, ghost-cycle suppression that persists across restarts, dishwasher end-spike handling, and learning feedback that refines estimates over time.
 - **Experimental on-device ML (opt-in, off by default)** - A gated, NumPy-only ML subsystem with a dedicated **ML Training** tab, running *alongside* the proven detection code and never replacing it.
@@ -178,12 +179,13 @@ Everything is managed from the **WashData** panel in the Home Assistant sidebar.
 
 | Tab | What you do there |
 | --- | --- |
-| **Overview** | Live state, power chart, progress and time remaining, a program selector, attention cards for pending suggestions and feedback, and **Manual Recording** (start/stop) right here on the home screen. |
-| **Cycles** | Cycle history (with per-cycle energy **cost**); open a cycle to label, trim, split, merge, or delete it; a "needs review" filter. |
-| **Profiles** | Create (**+ New Profile**), rename, rebuild, group, and clean up profiles; a **Phase Catalog** sub-tab and a phase-range editor. |
-| **Settings** | All tunables (detection, matching, timing, notifications, energy price, ...), each with a tooltip and inline suggestions. **Notifications** includes an **Automations** section (see below). |
+| **Overview** | Live state, power chart, progress with a color-coded **phase timeline**, and time remaining, a program selector, attention cards for pending suggestions and feedback, a first-run onboarding card on new devices, and **Manual Recording** (start/stop) right here on the home screen. |
+| **Cycles** | Cycle history (with per-cycle energy **cost**), paginated with **Load more**; open a cycle to label, trim, split, merge, or delete it; multi-select for **compare / merge / bulk relabel / delete**, a 10s **undo** on deletes, and a "needs review" filter. |
+| **Profiles** | Create (**+ New Profile**), rename, rebuild, group, and clean up profiles; per-profile **average cost** and a duration sparkline; a **Phase Catalog** sub-tab and a phase-range editor. |
+| **Settings** | All tunables (detection, matching, timing, notifications, energy price, ...), each with a tooltip and inline suggestions, behind a **Basic / Advanced** toggle. **Notifications** includes an **Automations** section (see below). |
 | **ML Training** | The opt-in, experimental ML subsystem: on-device training, matcher tuning, and the runtime-models toggle. (Shown only when ML training is available.) |
-| **Advanced** | Sub-tabs for **My Preferences**, **Diagnostics** (storage stats, maintenance, and config **export / import**), **Logs**, **Panel Settings**, and **Access Control** (per-user RBAC). |
+| **Playground** | Power-user tools: a **Cycle Simulator** that replays real cycles through the detector/matcher with overridden settings, an **A/B Settings Comparison**, and a **DTW Inspector** for seeing exactly why a cycle matched. |
+| **Advanced** | Sub-tabs for **My Preferences**, **Diagnostics** (storage stats, maintenance, and config **export / import**), a **Maintenance** log with service reminders, **Logs**, **Panel Settings**, and **Access Control** (per-user RBAC). Keyboard shortcuts throughout (press **?** for the list). |
 
 The integration's **Configure** dialog ([Settings → Devices & Services → WashData](https://my.home-assistant.io/redirect/integration/?domain=ha_washdata)) is now a small stub with just device type, power sensor, and minimum power - everything else lives in the panel. (The panel itself is a custom sidebar entry at `/ha-washdata`; open it from the Home Assistant sidebar.)
 
@@ -350,6 +352,7 @@ Per-user RBAC. Enable per-user control, set the fallback level for unlisted user
 - **`sensor.<name>_total_duration`**: Total predicted duration (Elapsed + Remaining). Ideal for `timer-bar-card`.
 - **`sensor.<name>_cycle_progress`**: 0–100% (resets after unload timeout).
 - **`sensor.<name>_cycle_count`**: Total completed cycles stored - use in automations to schedule maintenance by cycle count.
+- **`sensor.<name>_energy_total`**: Lifetime energy in kWh (`total_increasing`) - add it to the Home Assistant **Energy dashboard** to track consumption over time.
 - **`sensor.<name>_current_phase`**: Active cycle phase label (e.g. "Rinsing", "Spin").
 - **`sensor.<name>_pump_runs_today`**: *(Pump device type only)* Completed pump cycles in a rolling 24-hour window.
 - **`binary_sensor.<name>_running`**: Simple on/off running state.
@@ -375,6 +378,22 @@ data:
 ```
 - `ha_washdata.label_cycle`: Assign a profile to a cycle in history programmatically.
 
+
+### Ask Home Assistant
+
+WashData registers an Assist conversation intent (`HaWashdataStatus`) so you can ask your
+voice or text assistant about an appliance in plain language and get a live answer:
+
+- *"Is my washer done?"* → "still running, about 20 minutes left" / "finished 5 minutes ago" / "not running"
+- *"How long until the dryer finishes?"* - name the appliance when you have more than one.
+
+Home Assistant does not let a custom integration inject sentences into the built-in
+conversation agent at runtime, so you wire the trigger phrases once with a sentence pack.
+Create `<config>/custom_sentences/en/ha_washdata.yaml` (one file per language) mapping
+sentences to the `HaWashdataStatus` intent (with an optional `{name}` slot for the
+appliance). The intent works immediately from automations and the Assist pipeline; the
+sentence pack is only what teaches Assist which phrases to route to it. See
+[NOTIFICATIONS.md](NOTIFICATIONS.md) for the exact YAML.
 
 ### Notifications & Events
 

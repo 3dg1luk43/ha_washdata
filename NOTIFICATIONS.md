@@ -156,6 +156,9 @@ Cycle start  ->  Live progress (recurring, replaces start)
 | Notification Icon | `notify_icon` | Icon (e.g. `mdi:washing-machine`). Empty = none. |
 | Start / Finish / Live Update / Reminder Message | `notify_*_message` | Message templates (see placeholders). |
 | Energy Price - Entity / Static | `energy_price_*` | Enables the `{cost}` placeholder in the finish message. |
+| Quiet Hours Start / End (hour) | `notify_quiet_start_hour` / `notify_quiet_end_hour` | Do-not-disturb window (0-23; unset or equal = off). Finish-type notifications are held and delivered when it ends. See [Quiet hours](#quiet-hours). |
+| Peak-Rate Threshold / Message | `peak_rate_threshold` / `peak_rate_message` | Append an advisory tip to the start notification when the current price is at or above the threshold. See [Peak-rate tip on start](#peak-rate-tip-on-start). |
+| Cycle Milestones / Message | `notify_milestones` / `notify_milestone_message` | Celebrate lifetime cycle-count milestones. See [Cycle milestones](#cycle-milestones). |
 
 ### A note on Android channels
 
@@ -175,6 +178,10 @@ lifecycle tag) so it stays audible even if your status channel is silenced.
 | `{minutes}` | live, reminder |
 | `{duration}` | finish, laundry nag |
 | `{energy_kwh}`, `{cost}` | finish (cost needs an energy price configured) |
+| `{time_finished}` | finish (the clock time, `HH:MM`, the cycle ended) |
+| `{vs_typical}` | finish (e.g. `12% longer than usual` vs the profile median; empty when unknown) |
+| `{cycle_count}` | finish (the appliance's lifetime completed-cycle count) |
+| `{price}` | the peak-rate start tip (see [Peak-rate tip on start](#peak-rate-tip-on-start)) |
 
 ### A note on language
 
@@ -205,6 +212,52 @@ notification `data` (useful if you replicate the behaviour in your own action):
 - Live only: `progress`, `progress_max`, `live_update`, `alert_once`, `cycle_seconds`,
   `time_remaining_seconds`, `minutes_left`, `live_updates_sent`, `live_updates_cap`,
   and (with the chronometer on) `chronometer`, `when`, `countdown`.
+
+### iOS Live Activity enrichment
+
+For `mobile_app_*` **live** targets only, WashData adds the fields an iOS Live Activity
+needs so a companion-app widget can track the cycle on the lock screen:
+
+- `subtitle` - the matched program name.
+- `content_state` - a dict `{state, progress_pct, eta_timestamp, program, device}` for the
+  Live Activity to render.
+- `activity` - `start` / `end` lifecycle markers so the Activity begins with the cycle and
+  is dismissed when it finishes.
+
+These keys are only attached to `mobile_app_*` targets; Android and other notify platforms
+are unaffected (they never receive them, so strict-schema platforms are not broken).
+
+---
+
+## Quiet hours, milestones & rate tips
+
+### Quiet hours
+
+Set a do-not-disturb window with **Quiet Hours Start / End** (`notify_quiet_start_hour` /
+`notify_quiet_end_hour`), both hours `0-23`. The feature is **off** when either is unset or
+the two are equal, and windows that **cross midnight** are supported (e.g. start `22`, end
+`7`).
+
+- **Held inside the window:** the finished, clean-laundry nag, pre-completion / reminder,
+  and milestone notifications. They are queued and delivered the moment the window ends.
+- **Never delayed:** live-progress ticks and the start notification, so a cycle you kick
+  off at night still confirms it started.
+
+### Cycle milestones
+
+`notify_milestones` is a list of lifetime completed-cycle counts (default `[50, 100, 500,
+1000]`). When the appliance's lifetime count crosses one of them, a single celebration
+notification fires using `notify_milestone_message` (default *"{device} has completed
+{cycle_count} cycles!"*). It is a one-off per milestone, respects quiet hours, and adds no
+new notification type or entity. Placeholders: `{device}`, `{cycle_count}`.
+
+### Peak-rate tip on start
+
+When an energy price is configured and `peak_rate_threshold` is set (and positive), a
+cycle that starts while the current price is **at or above** the threshold gets a one-line
+tip appended to the start notification, from `peak_rate_message` (default *"Running at peak
+rate ({price}/kWh)."*). It is purely informational - WashData never schedules, delays, or
+controls the appliance. Placeholders: `{device}`, `{price}`.
 
 ---
 
@@ -287,6 +340,48 @@ data:
   elapsed_seconds: 1830                     # how long the pump had been running
   threshold_seconds: 1800                   # the configured stuck-pump threshold
 ```
+
+---
+
+## Ask Assist (conversation intent)
+
+WashData registers a Home Assistant **conversation intent**, `HaWashdataStatus`, so you can
+ask your voice or text assistant about an appliance and get a live, plain-language answer
+derived from the manager/sensor state:
+
+- *"Is my washer done?"* → "still running, about 20 minutes left" / "finished 5 minutes
+  ago" / "not running"
+- *"How long until the dryer finishes?"* - an optional appliance name disambiguates when
+  more than one device is configured.
+
+The intent handler is registered automatically and works immediately from **automations**,
+the `intent_script` integration, developer tools, and the **Assist pipeline**. What Home
+Assistant does *not* allow a custom integration to do is inject trigger sentences into the
+built-in conversation agent at runtime, so you teach Assist which phrases map to the intent
+with a config-directory **sentence pack**. Create
+`<config>/custom_sentences/en/ha_washdata.yaml` (one file per language):
+
+```yaml
+language: en
+intents:
+  HaWashdataStatus:
+    data:
+      - sentences:
+          - "is my {name} done"
+          - "is the {name} finished"
+          - "how long until the {name} finishes"
+          - "how long is left on the {name}"
+      - sentences:
+          - "is the laundry done"
+          - "how long until it finishes"
+lists:
+  name:
+    wildcard: true
+```
+
+The `{name}` slot is optional; without it the assistant answers for the single (or first)
+configured device. Prefer templated responses? Declare the same `intent_type`
+(`HaWashdataStatus`) via the `intent_script` integration instead.
 
 ---
 
