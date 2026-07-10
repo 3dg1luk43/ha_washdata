@@ -479,6 +479,13 @@ const _CSS = `
 .wd-prog-bg { background: var(--secondary-background-color); border-radius: 6px; height: 10px; overflow: hidden; }
 .wd-prog-fill { height: 100%; background: var(--primary-color); border-radius: 6px; transition: width .6s ease; }
 .wd-prog-row { display: flex; justify-content: space-between; margin-top: 6px; font-size: .78em; color: var(--secondary-text-color); }
+/* D1: compact phase timeline below the progress bar */
+.wd-ptl-wrap { margin-top: 8px; }
+.wd-ptl { position: relative; height: 12px; border-radius: 6px; overflow: hidden; background: var(--secondary-background-color); }
+.wd-ptl-seg { position: absolute; top: 0; bottom: 0; }
+.wd-ptl-seg-lbl { position: absolute; left: 4px; top: 50%; transform: translateY(-50%); font-size: 8px; line-height: 1; color: #fff; white-space: nowrap; overflow: hidden; max-width: calc(100% - 6px); text-shadow: 0 0 2px rgba(0,0,0,.55); pointer-events: none; }
+.wd-ptl-cursor { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--primary-text-color, #111); box-shadow: 0 0 0 1px rgba(255,255,255,.6); }
+.wd-ptl-cur { margin-top: 5px; font-size: .74em; color: var(--secondary-text-color); }
 .wd-cycle-ctrl { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
 .wd-spark-wrap { margin-top: 14px; }
 .wd-spark-wrap canvas { width: 100%; height: 70px; display: block; border-radius: 6px; background: var(--secondary-background-color); }
@@ -664,6 +671,9 @@ const _CSS = `
 .wd-profile-card:hover { border-color: var(--primary-color); transform: translateY(-1px); }
 .wd-profile-name { font-weight: 600; font-size: 1em; margin-bottom: 6px; }
 .wd-profile-meta { font-size: .8em; color: var(--secondary-text-color); }
+/* D2: mini duration sparkline on profile cards */
+.wd-profile-name { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.wd-prof-spark { margin-left: auto; width: 64px; height: 20px; display: block; flex-shrink: 0; }
 .wd-empty { text-align: center; padding: 48px 24px; color: var(--secondary-text-color); }
 .wd-empty .wd-icon { font-size: 3em; margin-bottom: 10px; }
 .wd-info { font-size: .9em; color: var(--secondary-text-color); line-height: 1.6; margin: 0; }
@@ -689,6 +699,14 @@ const _CSS = `
 .wd-toast-success { background: var(--success-color, #4caf50); color: #fff; }
 .wd-toast-error   { background: var(--error-color, #f44336); color: #fff; }
 .wd-toast-info    { background: var(--info-color, #2196f3); color: #fff; }
+/* D4: undo toast — action button + row layout */
+.wd-toast { display: flex; align-items: center; gap: 14px; }
+.wd-toast-action { background: rgba(255,255,255,.22); color: inherit; border: none; border-radius: 6px; padding: 5px 12px; font: inherit; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: .04em; font-size: .85em; }
+.wd-toast-action:hover { background: rgba(255,255,255,.34); }
+/* D5: keyboard-shortcut key caps in the help overlay */
+.wd-kbd { display: inline-block; min-width: 22px; text-align: center; padding: 2px 7px; border-radius: 5px; border: 1px solid var(--divider-color, rgba(127,127,127,.4)); background: var(--secondary-background-color); font-family: monospace; font-size: .85em; font-weight: 700; }
+/* D7: "changed since last save" marker beside a settings field label */
+.wd-chg-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--info-color, #2196f3); margin-left: 6px; flex-shrink: 0; cursor: help; }
 .wd-diag-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 16px; }
 .wd-diag-stat { background: var(--secondary-background-color); border-radius: 8px; padding: 12px; text-align: center; }
 .wd-diag-val { font-size: 1.6em; font-weight: 700; }
@@ -853,6 +871,14 @@ function _esc(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 function _num(v, def) { const n = parseFloat(v); return isNaN(n) ? def : n; }
+// D7: humanize a changelog value for display (null → em-dash-free placeholder).
+function _chgVal(v) {
+  if (v == null || v === '') return '(none)';
+  if (v === true) return 'on';
+  if (v === false) return 'off';
+  if (Array.isArray(v)) return v.join(', ') || '(none)';
+  return String(v);
+}
 
 // Sort an array by a getter function, direction +1=asc -1=desc.
 function _sortBy(arr, getter, dir) {
@@ -927,13 +953,16 @@ function _field(f, value, extra) {
   const key = f.key;
   const labelText = f.unit ? `${f.label} (${f.unit})` : f.label;
   const tip = f.doc ? _tip(f.doc, f.diagram || _DIAGRAM_BY_KEY[key]) : '';
+  // D7: "changed" marker (a small dot with a tooltip) when this field has a
+  // recorded change in the settings changelog.
+  const chgDot = extra.changed ? `<span class="wd-chg-dot" title="${_esc(extra.changed)}" aria-label="${_esc(extra.changed)}"></span>` : '';
 
   if (f.type === 'checkbox') {
     const chk = value ? 'checked' : '';
     // Switch style. The tooltip sits inline at the end of the row (outside the
     // <label> so hovering/clicking it never toggles the switch), matching how
     // non-checkbox fields render their tip.
-    return `<div class="wd-field wd-field-switch"><div class="wd-switch-row"><label class="wd-switch-lbl"><span class="wd-switch"><input type="checkbox" data-opt="${key}" ${chk}><span class="wd-switch-slider"></span></span><span class="wd-switch-text">${_esc(f.label)}</span></label>${tip}</div>${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}</div>`;
+    return `<div class="wd-field wd-field-switch"><div class="wd-switch-row"><label class="wd-switch-lbl"><span class="wd-switch"><input type="checkbox" data-opt="${key}" ${chk}><span class="wd-switch-slider"></span></span><span class="wd-switch-text">${_esc(f.label)}</span></label>${chgDot}${tip}</div>${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}</div>`;
   }
 
   let input = '';
@@ -1058,7 +1087,7 @@ function _field(f, value, extra) {
     sugHtml = `<div class="wd-sug"><span>🤖 ${_esc(t('suggestion.calibrated_label', {}, 'Calibrated'))}: <b>${_esc(mlVal)}</b></span>${useBtn(mlVal)}${r}</div>`;
   }
 
-  return `<div class="wd-field" data-field="${key}"><div class="wd-label-row"><label style="margin:0">${_esc(labelText)}</label>${tip}</div>${input}${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}<div class="wd-conflict-err" data-cerr="${key}" hidden></div>${sugHtml}</div>`;
+  return `<div class="wd-field" data-field="${key}"><div class="wd-label-row"><label style="margin:0">${_esc(labelText)}</label>${chgDot}${tip}</div>${input}${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}<div class="wd-conflict-err" data-cerr="${key}" hidden></div>${sugHtml}</div>`;
 }
 
 // Are two suggestion/option values effectively equal? Numeric-tolerant so an
@@ -1325,6 +1354,21 @@ class HaWashdataPanel extends HTMLElement {
     this._cycleFilter = { text: '', status: '' };
     this._cleanupSort = { col: 'date', dir: -1 };
     this._profSubtab = 'profiles'; // 'profiles' | 'phase-catalog'
+    // D1: matched-profile phases for the Status-tab phase timeline
+    this._statusPhases = [];
+    this._statusPhasesName = null;
+    // D3: cycle-list pagination
+    this._cycleOffset = 0;
+    this._cyclesTotal = 0;
+    this._cyclesHasMore = false;
+    // D4: pending optimistic deletions keyed by an undo token
+    this._undoBuffer = new Map();
+    this._undoSeq = 0;
+    // D5: bound keyboard-shortcut handler (attached once in _boot)
+    this._kbdHandler = null;
+    // D7: settings changelog cache
+    this._settingsChangelog = null;
+    this._settingsChangeByKey = {};
   }
 
   set hass(hass) {
@@ -1349,6 +1393,10 @@ class HaWashdataPanel extends HTMLElement {
     if (this._hassUpdateThrottle) { clearTimeout(this._hassUpdateThrottle); this._hassUpdateThrottle = null; }
     this._evtUnsubs.forEach(u => { try { u(); } catch (_) {} });
     this._evtUnsubs = [];
+    // D4: commit any pending optimistic deletes before we go away.
+    this._flushPendingDeletes();
+    // D5: remove the keyboard-shortcut listener.
+    if (this._kbdHandler && this.shadowRoot) { this.shadowRoot.removeEventListener('keydown', this._kbdHandler); this._kbdHandler = null; }
   }
 
   // ── Init ─────────────────────────────────────────────────────────────────
@@ -1363,6 +1411,10 @@ class HaWashdataPanel extends HTMLElement {
     this._gtip = document.createElement('div');
     this._gtip.className = 'wd-gtip';
     shadow.appendChild(this._gtip);
+    // D5: register keyboard shortcuts once on the (persistent) shadow root so the
+    // handler survives every _render() innerHTML swap. Removed on disconnect.
+    this._kbdHandler = (e) => this._onKeydown(e);
+    shadow.addEventListener('keydown', this._kbdHandler);
     // Load per-user-language panel translations before first render.
     // Falls back to JS-embedded strings if the fetch fails.
     this._loadPanelTranslations().catch(() => {}).finally(() => {
@@ -1454,8 +1506,11 @@ class HaWashdataPanel extends HTMLElement {
             this._statusEnv = r.envelope || null;
           } catch (_) { this._statusEnv = null; }
         }
+        // D1: keep the matched profile's phase ranges for the Status timeline.
+        await this._ensureStatusPhases(dev.entry_id, dev.current_program);
       } else {
         this._statusEnv = null; this._statusEnvName = null;
+        this._statusPhases = []; this._statusPhasesName = null;
       }
       // Cycles/suggestions load per-tab; only prime them on the very first paint.
       if (firstLoad && dev) {
@@ -1492,10 +1547,175 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   async _fetchCycles(entryId) {
+    // D3: (re)load the first page and reset pagination state. The backend accepts
+    // `offset` and returns `total`/`has_more`; older backends omit them, in which
+    // case pagination degrades gracefully (no "Load more" button).
     try {
-      const res = await this._ws({ type: `${_DOMAIN}/get_device_cycles`, entry_id: entryId, limit: 100 });
+      const res = await this._ws({ type: `${_DOMAIN}/get_device_cycles`, entry_id: entryId, limit: 100, offset: 0 });
       this._cycles = res.cycles || [];
-    } catch (_) { this._cycles = []; }
+      this._cycleOffset = this._cycles.length;
+      this._cyclesTotal = (res.total != null) ? res.total : this._cycles.length;
+      this._cyclesHasMore = (res.has_more != null) ? !!res.has_more : false;
+    } catch (_) { this._cycles = []; this._cycleOffset = 0; this._cyclesTotal = 0; this._cyclesHasMore = false; }
+  }
+
+  // D3: fetch the next page and append (deduping by id so optimistic removals or
+  // overlaps never double up). Preserves the current client-side sort/filter.
+  async _loadMoreCycles(entryId) {
+    const res = await this._ws({ type: `${_DOMAIN}/get_device_cycles`, entry_id: entryId, limit: 100, offset: this._cycleOffset });
+    const more = res.cycles || [];
+    const have = new Set(this._cycles.map(c => c.id));
+    for (const c of more) if (!have.has(c.id)) this._cycles.push(c);
+    this._cycleOffset += more.length;
+    this._cyclesTotal = (res.total != null) ? res.total : this._cyclesTotal;
+    this._cyclesHasMore = (res.has_more != null) ? !!res.has_more : (more.length >= 100);
+  }
+
+  // D1: cache the matched profile's phase ranges (start/end in seconds) for the
+  // Status-tab phase timeline. Cheap + cached per program name.
+  async _ensureStatusPhases(entryId, program) {
+    if (!program) { this._statusPhases = []; this._statusPhasesName = null; return; }
+    if (this._statusPhasesName === program) return;
+    this._statusPhasesName = program;
+    try {
+      const r = await this._ws({ type: `${_DOMAIN}/get_profile_phases`, entry_id: entryId, profile_name: program });
+      this._statusPhases = (r.phases || []).map(p => ({ name: p.name, start: p.start, end: p.end }));
+    } catch (_) { this._statusPhases = []; }
+  }
+
+  // D7: fetch the per-setting changelog (most-recent-first) and index it by key
+  // so the Settings form can flag changed fields and list the full history.
+  async _fetchSettingsChangelog(entryId) {
+    try {
+      const r = await this._ws({ type: `${_DOMAIN}/get_settings_changelog`, entry_id: entryId });
+      this._settingsChangelog = r.changelog || [];
+    } catch (_) { this._settingsChangelog = this._settingsChangelog || []; }
+    const byKey = {};
+    for (const c of (this._settingsChangelog || [])) { if (c && c.key != null && !(c.key in byKey)) byKey[c.key] = c; }
+    this._settingsChangeByKey = byKey;
+  }
+
+  // ── D4: optimistic delete + undo ────────────────────────────────────────────
+  // Records are removed from the rendered list immediately and held in an
+  // in-memory buffer. The real delete WS call fires on timeout (10s), on Undo we
+  // restore instead. Navigating away / switching device flushes pending deletes.
+
+  _registerUndo(entry) {
+    const token = 'u' + (++this._undoSeq);
+    entry.timer = setTimeout(() => this._commitDelete(token), 10000);
+    this._undoBuffer.set(token, entry);
+    return token;
+  }
+
+  _undoDelete(token) {
+    const e = this._undoBuffer.get(token);
+    if (!e) return;
+    this._undoBuffer.delete(token);
+    if (e.timer) clearTimeout(e.timer);
+    try { e.restore(); } catch (_) {}
+    if (this._toastTimer) clearTimeout(this._toastTimer);
+    this._toast = null;
+    this._render();
+  }
+
+  async _commitDelete(token) {
+    const e = this._undoBuffer.get(token);
+    if (!e) return;
+    this._undoBuffer.delete(token);
+    if (e.timer) clearTimeout(e.timer);
+    try {
+      await e.commit();
+    } catch (err) {
+      try { e.restore(); } catch (_) {}
+      this._showToast(this._t('toast.delete_failed', { error: (err && err.message) || err }, 'Delete failed: ' + ((err && err.message) || err)), 'error');
+      this._render();
+    }
+  }
+
+  // Fire all pending real deletes now (unload / device switch / timeout catch-up).
+  _flushPendingDeletes() {
+    if (!this._undoBuffer || !this._undoBuffer.size) return;
+    for (const token of Array.from(this._undoBuffer.keys())) this._commitDelete(token);
+  }
+
+  // Optimistically drop cycles from the list and offer Undo.
+  _deleteCyclesWithUndo(eid, ids) {
+    const idset = new Set(ids);
+    const removed = [];
+    this._cycles = (this._cycles || []).filter((c, idx) => {
+      if (idset.has(c.id)) { removed.push({ idx, rec: c }); return false; }
+      return true;
+    });
+    if (!removed.length) return;
+    this._cycleSel.clear(); this._selectMode = false;
+    this._render();
+    const restore = () => {
+      const arr = this._cycles.slice();
+      removed.slice().sort((a, b) => a.idx - b.idx).forEach(({ idx, rec }) => arr.splice(Math.min(idx, arr.length), 0, rec));
+      this._cycles = arr;
+    };
+    const commit = async () => {
+      for (const { rec } of removed) await this._ws({ type: `${_DOMAIN}/delete_cycle`, entry_id: eid, cycle_id: rec.id });
+    };
+    const token = this._registerUndo({ eid, restore, commit });
+    this._showToast(this._t('msg.cycles_deleted', { count: removed.length }, `${removed.length} cycle(s) deleted`), 'success',
+      { actionLabel: this._t('btn.undo', {}, 'Undo'), actionToken: token, duration: 10000 });
+  }
+
+  // Optimistically drop a profile from the list and offer Undo.
+  _deleteProfileWithUndo(eid, name) {
+    const idx = (this._profiles || []).findIndex(p => p.name === name);
+    const rec = idx >= 0 ? this._profiles[idx] : { name };
+    if (idx >= 0) this._profiles = this._profiles.filter(p => p.name !== name);
+    this._modal = null;
+    this._render();
+    const restore = () => {
+      const arr = this._profiles.slice();
+      arr.splice(Math.min(idx < 0 ? arr.length : idx, arr.length), 0, rec);
+      this._profiles = arr;
+    };
+    const commit = async () => {
+      await this._ws({ type: `${_DOMAIN}/delete_profile`, entry_id: eid, profile_name: name, unlabel_cycles: true });
+      await this._fetchProfiles(eid);
+      if (this._tab === 'profiles') this._render();
+    };
+    const token = this._registerUndo({ eid, restore, commit });
+    this._showToast(this._t('msg.profile_deleted', { name }, 'Profile deleted'), 'success',
+      { actionLabel: this._t('btn.undo', {}, 'Undo'), actionToken: token, duration: 10000 });
+  }
+
+  // ── D5: keyboard shortcuts ──────────────────────────────────────────────────
+  _onKeydown(e) {
+    if (e.defaultPrevented) return;
+    const path = e.composedPath ? e.composedPath() : [];
+    const el = path[0] || e.target;
+    const tag = el && el.tagName;
+    const inField = !!(tag && (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable));
+
+    // Escape always closes the top modal (even from a field inside it).
+    if (e.key === 'Escape') {
+      if (this._modal) { e.preventDefault(); this._onModalAction('cancel', null); }
+      return;
+    }
+    if (inField || e.metaKey || e.ctrlKey || e.altKey) return;
+
+    // Help overlay toggle.
+    if (e.key === '?') { e.preventDefault(); this._toggleKbdHelp(); return; }
+
+    // Letter shortcuts don't fire while any (other) modal is open.
+    if (this._modal) return;
+
+    const map = { o: 'status', h: 'history', p: 'profiles', s: 'settings', m: 'ml', a: 'advanced', t: 'advanced' };
+    const target = map[(e.key || '').toLowerCase()];
+    if (!target) return;
+    if (!this._visibleTabIds().includes(target)) return;  // gracefully no-op for missing tabs
+    e.preventDefault();
+    if (this._tab !== target) { this._pendingSettings = {}; this._tab = target; this._fetchTabData(); }
+  }
+
+  _toggleKbdHelp() {
+    if (this._modal && this._modal.type === 'kbd-help') { this._modal = null; this._render(); }
+    else if (!this._modal) { this._modal = { type: 'kbd-help' }; this._render(); }
   }
 
   // Fetch the ML shadow assessment once and index it by cycle id, so the
@@ -1591,9 +1811,14 @@ class HaWashdataPanel extends HTMLElement {
 
   async _selectDevice(idx) {
     if (idx === this._selIdx) return;
+    // Commit any pending optimistic deletes for the outgoing device first.
+    this._flushPendingDeletes();
     this._selIdx = idx;
     this._pendingSettings = {};
     this._powerHistory = []; this._powerT0 = null; this._statusEnv = null; this._statusEnvName = null;
+    this._statusPhases = []; this._statusPhasesName = null;
+    this._cycleOffset = 0; this._cyclesTotal = 0; this._cyclesHasMore = false;
+    this._settingsChangelog = null; this._settingsChangeByKey = {};
     this._powerData = { live: [], raw: [], cycle_active: false, cycle_elapsed_s: 0 };
     this._matchDebug = null;
     this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._opts = {}; this._suggestions = [];
@@ -1652,6 +1877,8 @@ class HaWashdataPanel extends HTMLElement {
       if (this._tab === 'status') {
         this._powerData = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: eid, with_raw: this._pref('show_raw_active', false) });
         if (!this._profiles.length) await this._fetchProfiles(eid);
+        // D1: matched-profile phases for the compact Status phase timeline.
+        await this._ensureStatusPhases(eid, dev.current_program);
         if (this._pref('show_debug', false)) {
           try { this._matchDebug = await this._ws({ type: `${_DOMAIN}/get_match_debug`, entry_id: eid }); } catch (_) { /* keep */ }
         }
@@ -1683,6 +1910,9 @@ class HaWashdataPanel extends HTMLElement {
         // Groups require DTW cohesion calculations - load in background so the
         // profile list renders immediately while groups fill in behind it.
         this._fetchProfileGroups(eid).then(() => { if (this._tab === 'profiles') this._render(); });
+        // D2: profile cards draw a duration sparkline from recent cycles. Load
+        // them in the background if not already fetched, then repaint.
+        if (!this._cycles.length) this._fetchCycles(eid).then(() => { if (this._tab === 'profiles') this._render(); });
         if (this._profSubtab === 'phase-catalog') {
           try { const r = await this._ws({ type: `${_DOMAIN}/get_phase_catalog`, entry_id: eid }); this._phases = r.phases || []; } catch (_) {}
         }
@@ -1690,6 +1920,9 @@ class HaWashdataPanel extends HTMLElement {
         const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
         this._opts = r.options || {};
         await this._fetchSuggestions(eid);
+        // D7: "What changed" — load the settings changelog (best-effort; older
+        // backends without this command simply show no change markers).
+        await this._fetchSettingsChangelog(eid);
         // Defer the heavy ML settings comparison: the form renders immediately
         // and the "🤖 ML" recommendations fill in inline when ready.
         if (this._constants.mlSuggestionsEnabled) {
@@ -1893,12 +2126,15 @@ class HaWashdataPanel extends HTMLElement {
     this._wire();
     this._drawStatusCurve();
     this._drawModalCanvas();
+    this._drawProfileSparklines();  // D2
     ['wd-status-canvas', 'wd-cyc-canvas', 'wd-compare-canvas', 'wd-env-canvas', 'wd-phase-canvas', 'wd-spag-canvas', 'wd-pg-canvas']
       .forEach(id => this._attachHover(id));
   }
 
   _buildHtml() {
-    const toast = this._toast ? `<div class="wd-toast ${this._toast.cls}">${_esc(this._toast.msg)}</div>` : '';
+    const toast = this._toast
+      ? `<div class="wd-toast ${this._toast.cls}"><span>${_esc(this._toast.msg)}</span>${this._toast.actionLabel ? `<button type="button" class="wd-toast-action" data-toast-undo="${_esc(this._toast.actionToken || '')}">${_esc(this._toast.actionLabel)}</button>` : ''}</div>`
+      : '';
     return `
       <div class="wd-shell">
         ${this._htmlHeader()}
@@ -1938,6 +2174,7 @@ class HaWashdataPanel extends HTMLElement {
         <div><h1>WashData</h1><div class="wd-sub">${this._t('msg.appliance_monitor', {}, 'Appliance monitor')}</div></div>
         ${working}
         <span style="flex:1"></span>
+        <button class="wd-gear-btn" data-action="kbd-help" title="${_esc(this._t('btn.kbd_help', {}, 'Keyboard shortcuts'))}" aria-label="${_esc(this._t('btn.kbd_help', {}, 'Keyboard shortcuts'))}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg></button>
         ${this._isAdmin() ? `<button class="wd-gear-btn${this._logOpen ? ' log-active' : ''}" data-action="toggle-log-drawer" title="${_esc(this._t('hdr.logs', {}, 'Logs'))}" aria-label="Logs" aria-pressed="${this._logOpen}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16"/><path d="M4 10h16"/><path d="M4 15h10"/><path d="M4 20h7"/></svg></button>` : ''}
       </div>
     `;
@@ -2122,6 +2359,7 @@ class HaWashdataPanel extends HTMLElement {
           <div class="wd-stat"><div class="wd-stat-val">${_fmtDuration(rem)}</div><div class="wd-stat-lbl">${this._t('lbl.remaining', {}, 'Remaining')}</div></div>
         </div>
         ${progressHtml}
+        ${this._htmlPhaseTimeline(dev, prog, isRunning)}
         <div class="wd-card-title" style="margin-top:18px">${this._t('hdr.live_power', {}, 'Live Power')}</div>
         ${curveHtml}
       </div>
@@ -2129,6 +2367,37 @@ class HaWashdataPanel extends HTMLElement {
       ${debugHtml}
       ${advHtml}
     `;
+  }
+
+  // D1: compact horizontal phase timeline for the matched profile, drawn below
+  // the progress bar. Reuses the phase-editor palette + labels. Renders nothing
+  // when nothing is matched or the matched profile has no phases.
+  _htmlPhaseTimeline(dev, prog, isRunning) {
+    const phases = this._statusPhases || [];
+    if (!isRunning || !phases.length || !dev.current_program) return '';
+    // Total expected duration for placing phases (fractions of the cycle).
+    let total = (this._statusEnv && this._statusEnv.target_duration) || 0;
+    if (!total) { const p = (this._profiles || []).find(x => x.name === dev.current_program); total = (p && p.avg_duration) || 0; }
+    if (!total) total = Math.max(1, ...phases.map(p => p.end || 0));
+    if (total <= 0) return '';
+    const curFrac = (prog != null) ? Math.min(1, Math.max(0, prog / 100)) : null;
+    let curPhase = '';
+    const segs = phases.map((ph, i) => {
+      const x0 = Math.max(0, Math.min(1, (ph.start || 0) / total));
+      const x1 = Math.max(0, Math.min(1, (ph.end || 0) / total));
+      const width = Math.max(0, (x1 - x0) * 100);
+      const col = _PALETTE[i % _PALETTE.length];
+      const reached = curFrac == null ? true : (x0 <= curFrac);
+      if (curFrac != null && curFrac >= x0 && curFrac < x1) curPhase = ph.name || '';
+      const label = (ph.name && width > 12) ? `<span class="wd-ptl-seg-lbl">${_esc(ph.name)}</span>` : '';
+      return `<div class="wd-ptl-seg" style="left:${(x0 * 100).toFixed(2)}%;width:${width.toFixed(2)}%;background:${col};opacity:${reached ? 0.85 : 0.28}" title="${_esc(ph.name || '')}">${label}</div>`;
+    }).join('');
+    const cursor = curFrac != null ? `<div class="wd-ptl-cursor" style="left:${(curFrac * 100).toFixed(2)}%"></div>` : '';
+    const curLbl = curPhase ? `<div class="wd-ptl-cur">${this._t('lbl.current_phase', {}, 'Current phase')}: <b>${_esc(curPhase)}</b></div>` : '';
+    return `<div class="wd-ptl-wrap">
+      <div class="wd-ptl" role="img" aria-label="${_esc(this._t('lbl.phase_timeline', {}, 'Phase timeline'))}">${segs}${cursor}</div>
+      ${curLbl}
+    </div>`;
   }
 
   _htmlRecordingWidget() {
@@ -2320,7 +2589,14 @@ class HaWashdataPanel extends HTMLElement {
       <span class="wd-info" style="margin:0">${sel.size} selected</span>
       <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-compare" ${sel.size < 2 ? 'disabled' : ''}>${this._t('btn.compare', {}, 'Compare')}${sel.size >= 2 ? ` (${sel.size})` : ''}</button>
       <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-merge" ${sel.size < 2 ? 'disabled' : ''}>${this._t('btn.merge', {}, 'Merge')}${sel.size >= 2 ? ` (${sel.size})` : ''}</button>
+      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-relabel" ${sel.size < 1 ? 'disabled' : ''}>${this._t('btn.relabel', {count: sel.size}, `Relabel (${sel.size})`)}</button>
       <button class="wd-btn wd-btn-danger wd-btn-sm" data-action="cyc-bulk-del" ${sel.size < 1 ? 'disabled' : ''}>${this._t('btn.delete', {}, 'Delete')}${sel.size >= 1 ? ` (${sel.size})` : ''}</button>
+    </div>` : '';
+
+    // D3: "Load more" pagination — only when the backend reports more rows.
+    const loadMoreBusy = this._busy.has('cyc-load-more');
+    const loadMore = this._cyclesHasMore ? `<div style="text-align:center;margin-top:12px">
+      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-load-more" ${loadMoreBusy ? 'disabled' : ''}>${loadMoreBusy ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.load_more', {}, 'Load more')}</button>
     </div>` : '';
 
     const cyclesHtml = `
@@ -2331,6 +2607,7 @@ class HaWashdataPanel extends HTMLElement {
         ${cycles.length === 0
           ? `<div class="wd-empty" style="padding:24px"><div class="wd-icon">📋</div>${allCycles.length ? this._t('msg.no_cycles_match', {}, 'No cycles match the current filter.') : this._t('msg.no_cycles_yet', {}, 'No cycles recorded yet.')}</div>`
           : `<div class="wd-table-wrap"><table class="wd-table">${thead}<tbody>${rows}</tbody></table></div>`}
+        ${loadMore}
       </div>`;
 
     return cyclesHtml;
@@ -2379,11 +2656,61 @@ class HaWashdataPanel extends HTMLElement {
       ? `<span class="wd-badge" title="${_esc(this._t('msg.warmup_detail', {needed: warmupThreshold}, `This profile needs ${warmupThreshold} labelled cycles before auto-matching begins. Every confirmed cycle helps it learn.`))}" style="background:var(--info-color,#2196f3);color:#fff;padding:2px 6px;border-radius:4px;font-size:.75em">${this._t('msg.warmup_badge', {done: cycleCount, needed: warmupThreshold}, `Still learning (${cycleCount}/${warmupThreshold} cycles)`)}</span>`
       : '';
     const badges = [healthBadge, trendBadge, warmupBadge].filter(Boolean).join(' ');
+    // D2: mini duration sparkline (needs ≥3 recent cycles). The canvas is painted
+    // after render by _drawProfileSparklines.
+    const spark = this._profileRecentDurations(p.name).length >= 3
+      ? `<canvas class="wd-prof-spark" data-spark-prof="${_esc(p.name)}" width="64" height="20" aria-label="${_esc(this._t('lbl.sparkline', { name: p.name }, 'Recent cycle-duration trend'))}"></canvas>`
+      : '';
     return `
       <div class="wd-profile-card" data-action="open-profile" data-pname="${_esc(p.name)}">
-        <div class="wd-profile-name">${_esc(p.name)}${badges ? ' ' + badges : ''}</div>
+        <div class="wd-profile-name">${_esc(p.name)}${badges ? ' ' + badges : ''}${spark}</div>
         <div class="wd-profile-meta">${p.cycle_count || 0} cycles · ${dur}${energy}${total}${cost}</div>
       </div>`;
+  }
+
+  // D2: most-recent (≤10) cycle durations for a profile, oldest→newest (so the
+  // sparkline reads left-to-right with the newest point on the right).
+  _profileRecentDurations(name) {
+    const out = [];
+    for (const c of (this._cycles || [])) {
+      const nm = c.profile_name || c.matched_profile;
+      if (nm !== name || c.duration == null) continue;
+      out.push({ t: c.start_time ? new Date(c.start_time).getTime() : 0, d: c.duration });
+    }
+    return out.sort((a, b) => a.t - b.t).slice(-10).map(x => x.d);
+  }
+
+  // D2: paint every profile-card sparkline after a render.
+  _drawProfileSparklines() {
+    const sr = this.shadowRoot;
+    if (!sr) return;
+    const canvases = sr.querySelectorAll('canvas[data-spark-prof]');
+    if (!canvases.length) return;
+    const secColor = (getComputedStyle(this).getPropertyValue('--secondary-text-color') || '#888').trim() || '#888';
+    canvases.forEach(cv => {
+      const name = cv.dataset.sparkProf;
+      const durs = this._profileRecentDurations(name);
+      if (durs.length < 3) return;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = cv.getBoundingClientRect();
+      const w = cv.width = Math.max(1, Math.round((rect.width || 64) * dpr));
+      const h = cv.height = Math.max(1, Math.round((rect.height || 20) * dpr));
+      const ctx = cv.getContext('2d');
+      ctx.clearRect(0, 0, w, h);
+      const min = Math.min(...durs), max = Math.max(...durs), span = (max - min) || 1;
+      const pad = 2 * dpr;
+      const trend = (this._profileTrends || {})[name];
+      const dir = trend ? trend.duration_trend : 'stable';
+      const color = dir === 'up' ? '#ff9800' : dir === 'down' ? '#2196f3' : secColor;
+      const X = i => pad + (durs.length === 1 ? 0 : (i / (durs.length - 1)) * (w - 2 * pad));
+      const Y = v => h - pad - ((v - min) / span) * (h - 2 * pad);
+      ctx.beginPath();
+      durs.forEach((v, i) => { const x = X(i), y = Y(v); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+      ctx.strokeStyle = color; ctx.lineWidth = 1.5 * dpr; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+      // last-point dot
+      const lx = X(durs.length - 1), ly = Y(durs[durs.length - 1]);
+      ctx.beginPath(); ctx.arc(lx, ly, 2 * dpr, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
+    });
   }
 
   _htmlProfiles() {
@@ -2623,7 +2950,27 @@ class HaWashdataPanel extends HTMLElement {
         </div>
         <p class="wd-info" style="margin-top:12px;font-size:.78em">${this._t('msg.saving_triggers_reload', {}, 'Saving triggers an integration reload. HA entities may briefly show as unavailable.')}</p>
       </div>
+      ${this._htmlSettingsHistory()}
     `;
+  }
+
+  // D7: full settings changelog (key, old → new, date). Empty when no history.
+  _htmlSettingsHistory() {
+    const log = this._settingsChangelog || [];
+    if (!log.length) return '';
+    const rows = log.slice(0, 100).map(c => `<tr>
+      <td>${_esc(this._t('setting.' + c.key + '.label', {}, c.key))}</td>
+      <td>${_esc(_chgVal(c.old))} → ${_esc(_chgVal(c.new))}</td>
+      <td class="wd-tc-date">${_fmtDate(c.timestamp)}</td>
+    </tr>`).join('');
+    return `<div class="wd-card" style="margin-top:12px">
+      <div class="wd-card-title">${this._t('hdr.settings_history', {}, 'Settings history')}</div>
+      <div class="wd-table-wrap"><table class="wd-table"><thead><tr>
+        <th>${this._t('lbl.setting', {}, 'Setting')}</th>
+        <th>${this._t('lbl.change', {}, 'Change')}</th>
+        <th>${this._t('lbl.date', {}, 'Date')}</th>
+      </tr></thead><tbody>${rows}</tbody></table></div>
+    </div>`;
   }
 
   // Resolve a schema field's current value, options, datalist and suggestion,
@@ -2669,6 +3016,14 @@ class HaWashdataPanel extends HTMLElement {
 
     extra.useBtnLabel = this._t('btn.use', {}, 'Use');
     extra.t = this._t.bind(this);
+    // D7: "what changed" marker — a dot with a tooltip when this field appears in
+    // the settings changelog.
+    const chg = (this._settingsChangeByKey || {})[f.key];
+    if (chg) {
+      extra.changed = this._t('msg.setting_changed',
+        { old: _chgVal(chg.old), new: _chgVal(chg.new), date: _fmtDate(chg.timestamp) },
+        `Changed from ${_chgVal(chg.old)} to ${_chgVal(chg.new)} on ${_fmtDate(chg.timestamp)}`);
+    }
     const tf = Object.assign({}, f, { label: this._t('setting.' + f.key + '.label', {}, f.label || ''), doc: f.doc != null ? this._t('setting.' + f.key + '.doc', {}, f.doc) : f.doc });
     return _field(tf, value, extra);
   }
@@ -3638,11 +3993,12 @@ class HaWashdataPanel extends HTMLElement {
 
   // ── Toast ────────────────────────────────────────────────────────────────
 
-  _showToast(msg, type = 'success') {
+  _showToast(msg, type = 'success', opts = {}) {
     if (this._toastTimer) clearTimeout(this._toastTimer);
-    this._toast = { msg, cls: `wd-toast-${type}` };
+    const duration = opts.duration || 3500;
+    this._toast = { msg, cls: `wd-toast-${type}`, actionLabel: opts.actionLabel || null, actionToken: opts.actionToken || null };
     this._render();
-    this._toastTimer = setTimeout(() => { this._toast = null; this._render(); }, 3500);
+    this._toastTimer = setTimeout(() => { this._toast = null; this._render(); }, duration);
   }
 
   // ── Modals ────────────────────────────────────────────────────────────────
@@ -3732,6 +4088,29 @@ class HaWashdataPanel extends HTMLElement {
         <div id="wd-merge-new" class="wd-field" style="display:none"><label>${this._t('lbl.new_profile_name', {}, 'New profile name')}</label><input type="text" id="wd-merge-newname" placeholder="${_esc(this._t('placeholder.profile_name', {}, 'e.g. Cotton 40°C'))}"></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="merge-ok">${this._t('btn.merge', {}, 'Merge')}</button></div>`;
+    } else if (m.type === 'bulk-relabel') {
+      // D6: reuses the same profile picker as the single-cycle label modal.
+      body = `<h2>${this._t('modal.relabel_cycles', {count: m.ids.length}, `Relabel ${m.ids.length} cycles`)}</h2>
+        <div class="wd-field"><label>${this._t('lbl.select_profile', {}, 'Select Profile')}</label>
+          <select id="wd-relabel-profile"><option value="">${this._t('lbl.remove_label', {}, '- Remove label -')}</option>${this._profileOptions()}</select></div>
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="bulk-relabel-ok">${this._t('btn.apply_label', {}, 'Apply Label')}</button></div>`;
+    } else if (m.type === 'kbd-help') {
+      // D5: keyboard-shortcut reference overlay.
+      const rows = [
+        ['?', this._t('msg.kbd_help', {}, 'Show / hide this help')],
+        ['O', this._t('msg.kbd_overview', {}, 'Go to Overview')],
+        ['H', this._t('msg.kbd_cycles', {}, 'Go to Cycles')],
+        ['P', this._t('msg.kbd_profiles', {}, 'Go to Profiles')],
+        ['S', this._t('msg.kbd_settings', {}, 'Go to Settings')],
+        ['M', this._t('msg.kbd_ml', {}, 'Go to ML Training')],
+        ['A', this._t('msg.kbd_advanced', {}, 'Go to Advanced')],
+        ['Esc', this._t('msg.kbd_escape', {}, 'Close the open dialog')],
+      ].map(([k, d]) => `<tr><td style="width:64px"><kbd class="wd-kbd">${_esc(k)}</kbd></td><td>${_esc(d)}</td></tr>`).join('');
+      body = `<h2>${this._t('hdr.kbd_shortcuts', {}, 'Keyboard Shortcuts')}</h2>
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.kbd_help_intro', {}, 'Shortcuts are ignored while typing in a field. Only tabs that exist for this device respond.')}</p>
+        <table class="wd-table"><tbody>${rows}</tbody></table>
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-primary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button></div>`;
     }
     return `<div class="wd-overlay"><div class="wd-modal">${body}</div></div>`;
   }
@@ -4702,6 +5081,10 @@ class HaWashdataPanel extends HTMLElement {
     sr.querySelectorAll('[data-action]').forEach(btn => btn.addEventListener('click', e => this._onAction(e.currentTarget)));
     sr.querySelectorAll('[data-maction]').forEach(btn => btn.addEventListener('click', e => this._onModalAction(e.currentTarget.dataset.maction, e.currentTarget)));
 
+    // D4: Undo action inside the delete toast.
+    const toastUndo = sr.querySelector('[data-toast-undo]');
+    if (toastUndo) toastUndo.addEventListener('click', () => this._undoDelete(toastUndo.dataset.toastUndo));
+
     // Coverage gap cluster suggestion: open create-profile modal with pre-filled name.
     sr.querySelectorAll('.wd-create-cluster').forEach(btn => btn.addEventListener('click', () => {
       const name = btn.dataset.name || '';
@@ -5193,6 +5576,19 @@ class HaWashdataPanel extends HTMLElement {
       const ids = Array.from(this._cycleSel);
       if (ids.length < 2) return;
       this._fetchProfiles(eid).then(() => { this._modal = { type: 'merge-cycles', ids }; this._render(); });
+    } else if (a === 'cyc-relabel') {
+      // D6: bulk relabel — reuse the existing profile picker.
+      const ids = Array.from(this._cycleSel);
+      if (!ids.length) return;
+      this._fetchProfiles(eid).then(() => { this._modal = { type: 'bulk-relabel', ids }; this._render(); });
+    } else if (a === 'cyc-load-more') {
+      // D3: append the next page, preserving current sort/filter.
+      this._busyRun('cyc-load-more', async () => {
+        try { await this._loadMoreCycles(eid); }
+        catch (e) { this._showToast(this._t('toast.load_more_failed', { error: e.message || e }, 'Could not load more: ' + (e.message || e)), 'error'); }
+      });
+    } else if (a === 'kbd-help') {
+      this._toggleKbdHelp();
     } else if (a === 'cyc-compare') {
       const ids = Array.from(this._cycleSel);
       if (ids.length < 2) return;
@@ -5211,20 +5607,10 @@ class HaWashdataPanel extends HTMLElement {
         this._render();
       });
     } else if (a === 'cyc-bulk-del') {
+      // D4: optimistic delete with a 10s Undo window (no confirm dialog).
       const ids = Array.from(this._cycleSel);
       if (!ids.length) return;
-      this._modal = {
-        type: 'confirm', title: 'Delete Cycles', message: `Permanently delete ${ids.length} selected cycle(s)? This cannot be undone.`, okLabel: 'Delete',
-        onOk: () => this._busyRun('cyc-bulk-del', async () => {
-          try {
-            for (const cid of ids) await this._ws({ type: `${_DOMAIN}/delete_cycle`, entry_id: eid, cycle_id: cid });
-            this._showToast(this._t('toast.cycles_deleted', {count: ids.length}, `Deleted ${ids.length} cycle(s)`));
-            this._cycleSel.clear(); this._selectMode = false;
-            await this._fetchCycles(eid);
-          } catch (e) { this._showToast('Delete failed: ' + (e.message || e), 'error'); }
-        }),
-      };
-      this._render();
+      this._deleteCyclesWithUndo(eid, ids);
     } else if (a === 'goto-suggestions') {
       this._settingsSugOnly = true; this._tab = 'settings'; this._fetchTabData();
     } else if (a === 'goto-conflicts') {
@@ -5429,10 +5815,11 @@ class HaWashdataPanel extends HTMLElement {
       if (action === 'cyc-clear-split') { m.split = { offsets: [], profiles: [] }; this._render(); return; }
       if (action === 'cyc-label') { if (!this._profiles.length) await this._fetchProfiles(eid); this._modal = { type: 'label-cycle', cycleId: m.cycleId }; this._render(); return; }
       if (action === 'cyc-delete') {
+        // D4: optimistic delete with Undo (close the inspector first).
         const cid = m.cycleId;
-        this._modal = { type: 'confirm', title: 'Delete Cycle', message: 'Permanently delete this cycle? This cannot be undone.', okLabel: 'Delete',
-          onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_cycle`, entry_id: eid, cycle_id: cid }); this._showToast(this._t('toast.cycle_deleted', {}, 'Cycle deleted')); await this._fetchCycles(eid); } catch (e) { this._showToast('Delete failed: ' + (e.message || e), 'error'); } } };
-        this._render(); return;
+        this._modal = null; this._render();
+        this._deleteCyclesWithUndo(eid, [cid]);
+        return;
       }
       if (action === 'cyc-auto-split') {
         const gap = parseInt(sr.getElementById('wd-split-gap')?.value || '900', 10);
@@ -5520,10 +5907,9 @@ class HaWashdataPanel extends HTMLElement {
         return;
       }
       if (action === 'pp-delete') {
-        const name = m.name;
-        this._modal = { type: 'confirm', title: 'Delete Profile', message: `Delete profile "${name}"? Labelled cycles will be unlabelled.`, okLabel: 'Delete',
-          onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_profile`, entry_id: eid, profile_name: name, unlabel_cycles: true }); this._showToast(this._t('toast.profile_deleted', {name}, `Profile "${name}" deleted`)); await this._fetchProfiles(eid); } catch (e) { this._showToast('Delete failed: ' + (e.message || e), 'error'); } } };
-        this._render(); return;
+        // D4: optimistic delete with Undo (close the profile panel first).
+        this._deleteProfileWithUndo(eid, m.name);
+        return;
       }
     }
 
@@ -5605,6 +5991,20 @@ class HaWashdataPanel extends HTMLElement {
           this._cycleSel.clear(); this._selectMode = false;
           await this._fetchCycles(eid); await this._fetchProfiles(eid);
         } catch (e) { this._showToast(this._t('toast.merge_failed', {error: e.message || e}, 'Merge failed: ' + (e.message || e)), 'error'); }
+      });
+    } else if (action === 'bulk-relabel-ok' && eid) {
+      // D6: apply the chosen label to every selected cycle via label_cycle.
+      const profileName = sr.getElementById('wd-relabel-profile')?.value || '';
+      const ids = (m.ids || []).slice();
+      this._modal = null; this._render();
+      if (!ids.length) return;
+      await this._busyRun('cyc-relabel', async () => {
+        try {
+          for (const cid of ids) await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: cid, profile_name: profileName || null });
+          this._showToast(this._t('toast.relabel_done', { count: ids.length }, `Relabelled ${ids.length} cycle(s)`));
+          this._cycleSel.clear(); this._selectMode = false;
+          await this._fetchCycles(eid); await this._fetchProfiles(eid);
+        } catch (e) { this._showToast(this._t('toast.relabel_failed', { error: e.message || e }, 'Relabel failed: ' + (e.message || e)), 'error'); }
       });
     }
   }
