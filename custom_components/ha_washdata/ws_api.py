@@ -246,6 +246,51 @@ def _strip_cycle(c: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in c.items() if k not in _CYCLE_STRIP_KEYS}
 
 
+# Option keys that are identity/transient churn and are never recorded in the
+# settings changelog (D7): name/title edits flow through the separate `title`
+# kwarg, and suggestion application uses its own apply_suggestions command.
+_CHANGELOG_SKIP_KEYS = frozenset({CONF_NAME})
+
+
+def _json_safe(value: Any) -> Any:
+    """Best-effort coercion of an option value to a JSON-serializable form."""
+    try:
+        json.dumps(value)
+        return value
+    except (TypeError, ValueError):
+        return str(value)
+
+
+def _diff_option_changes(
+    old_effective: dict[str, Any], submitted: dict[str, Any]
+) -> list[dict[str, Any]]:
+    """Diff submitted option values against the pre-update effective options.
+
+    Returns one changelog entry ``{"key", "old", "new", "timestamp"}`` per key
+    whose value genuinely changed, skipping identity/transient keys. Only keys
+    present in ``submitted`` are considered so unrelated merged options never
+    produce spurious entries. ``old=None`` with a real ``new`` value is
+    recorded; an unchanged ``None -> None`` is not.
+    """
+    ts = dt_util.now().isoformat()
+    changes: list[dict[str, Any]] = []
+    for key, new_val in submitted.items():
+        if key in _CHANGELOG_SKIP_KEYS:
+            continue
+        old_val = old_effective.get(key)
+        if old_val == new_val:
+            continue
+        changes.append(
+            {
+                "key": str(key),
+                "old": _json_safe(old_val),
+                "new": _json_safe(new_val),
+                "timestamp": ts,
+            }
+        )
+    return changes
+
+
 # ─── Panel config + RBAC ────────────────────────────────────────────────────────
 
 _PANEL_STORE_VERSION = 1
@@ -450,7 +495,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
     handlers = [
         ws_get_devices, ws_get_device_cycles,
         # Settings
-        ws_get_options, ws_set_options,
+        ws_get_options, ws_set_options, ws_get_settings_changelog,
         # Profiles
         ws_get_profiles, ws_create_profile, ws_rename_profile, ws_delete_profile,
         ws_rebuild_envelopes, ws_get_profile_phases, ws_set_profile_phases,
@@ -594,6 +639,7 @@ def ws_get_devices(
         vol.Required("type"): "ha_washdata/get_device_cycles",
         vol.Required("entry_id"): str,
         vol.Optional("limit", default=50): vol.All(int, vol.Range(min=1, max=200)),
+        vol.Optional("offset", default=0): vol.All(int, vol.Range(min=0)),
     }
 )
 @callback
@@ -602,9 +648,15 @@ def ws_get_device_cycles(
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Return recent cycles for a device, stripping large binary fields."""
+    """Return a page of recent cycles for a device, stripping large binary fields.
+
+    Cycles are returned most-recent-first and sliced ``[offset : offset+limit]``
+    so the panel can page. ``total`` is the device's full cycle count and
+    ``has_more`` is True when cycles remain beyond the returned window.
+    """
     entry_id: str = msg["entry_id"]
     limit: int = msg.get("limit", 50)
+    offset: int = msg.get("offset", 0)
 
     manager = _get_manager(hass, entry_id)
     if manager is None:
@@ -612,16 +664,32 @@ def ws_get_device_cycles(
         return
 
     cycles: list[dict[str, Any]] = []
+    total = 0
     try:
         store = getattr(manager, "profile_store", None)
         if store is not None:
             raw: list[Any] = store.get_past_cycles()
-            for c in reversed(raw[-limit:]):
+            total = len(raw)
+            # History order is oldest-first in storage; present most-recent-first
+            # and slice the requested page. offset=0 is identical to the legacy
+            # reversed(raw[-limit:]) behaviour.
+            ordered = list(reversed(raw))
+            window = ordered[offset:offset + limit]
+            for c in window:
                 cycles.append(_strip_cycle(c))
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error fetching cycles for entry %s: %s", entry_id, exc)
 
-    connection.send_result(msg["id"], {"entry_id": entry_id, "cycles": cycles})
+    has_more = (offset + len(cycles)) < total
+    connection.send_result(
+        msg["id"],
+        {
+            "entry_id": entry_id,
+            "cycles": cycles,
+            "total": total,
+            "has_more": has_more,
+        },
+    )
 
 
 # ─── Settings ─────────────────────────────────────────────────────────────────
@@ -686,8 +754,60 @@ async def ws_set_options(
     if CONF_NAME in new_options and new_options[CONF_NAME]:
         update_kwargs["title"] = new_options[CONF_NAME].strip()
 
+    # Settings change history (D7): diff the pre-update effective options against
+    # the post-normalization values, but only for keys the user actually
+    # submitted, and persist BEFORE async_update_entry (which schedules a reload
+    # that rebuilds the store). A changelog failure must never block the save.
+    try:
+        old_effective = {**entry.data, **entry.options}
+        submitted_post = {
+            k: new_options[k] for k in msg["options"] if k in new_options
+        }
+        changes = _diff_option_changes(old_effective, submitted_post)
+        if changes:
+            manager = _get_manager(hass, msg["entry_id"])
+            store = getattr(manager, "profile_store", None) if manager else None
+            if store is not None:
+                await store.async_record_settings_changes(changes)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug(
+            "Settings changelog recording failed for %s: %s", msg["entry_id"], exc
+        )
+
     hass.config_entries.async_update_entry(entry, **update_kwargs)
     connection.send_result(msg["id"], {"success": True})
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/get_settings_changelog",
+        vol.Required("entry_id"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_get_settings_changelog(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Return the settings-change history for a device (most-recent-first)."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+
+    changelog: list[dict[str, Any]] = []
+    try:
+        store = getattr(manager, "profile_store", None)
+        if store is not None:
+            changelog = store.get_settings_changelog()
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug(
+            "Error fetching settings changelog for entry %s: %s", entry_id, exc
+        )
+
+    connection.send_result(msg["id"], {"changelog": changelog})
 
 
 # ─── Profiles ─────────────────────────────────────────────────────────────────

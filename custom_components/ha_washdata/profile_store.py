@@ -882,6 +882,63 @@ class ProfileStore:
         """Record the total cycle count at the moment the user applies suggestions."""
         self._data["suggestion_apply_cycle_count"] = count
 
+    # ─── Settings changelog (Group D7) ─────────────────────────────────────────
+
+    #: Maximum settings-changelog entries retained per device (newest kept).
+    SETTINGS_CHANGELOG_MAX = 50
+
+    def get_settings_changelog(self) -> list[dict[str, Any]]:
+        """Return the recorded settings-change history (most-recent-first).
+
+        Never raises: returns an empty list when no changelog exists yet.
+        """
+        try:
+            raw = self._data.get("settings_changelog", [])
+            if isinstance(raw, list):
+                return raw
+        except Exception:  # pylint: disable=broad-exception-caught
+            pass
+        return []
+
+    async def async_record_settings_changes(self, changes: list[dict]) -> None:
+        """Append settings-change entries and persist (capped at the newest 50).
+
+        Each entry is normalized to ``{"key", "old", "new", "timestamp"}`` and
+        prepended so the list stays most-recent-first. No-op on empty/invalid
+        input.
+        """
+        if not changes:
+            return
+        log = self._data.setdefault("settings_changelog", [])
+        if not isinstance(log, list):
+            log = []
+            self._data["settings_changelog"] = log
+
+        now_iso = dt_util.now().isoformat()
+        added = False
+        for ch in changes:
+            if not isinstance(ch, dict) or "key" not in ch:
+                continue
+            log.insert(
+                0,
+                {
+                    "key": str(ch.get("key")),
+                    "old": ch.get("old"),
+                    "new": ch.get("new"),
+                    "timestamp": ch.get("timestamp") or now_iso,
+                },
+            )
+            added = True
+
+        if not added:
+            return
+
+        # Keep only the newest entries (list is most-recent-first).
+        if len(log) > self.SETTINGS_CHANGELOG_MAX:
+            del log[self.SETTINGS_CHANGELOG_MAX:]
+        self._data["settings_changelog"] = log
+        await self.async_save()
+
     # ─── On-device ML model versions (Stage 4) ────────────────────────────────
 
     def get_ml_model_versions(self) -> dict[str, Any]:
