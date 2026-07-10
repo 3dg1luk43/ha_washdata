@@ -123,7 +123,20 @@
     "trim": "Leikata",
     "trim_split": "Trimma/halkaisu",
     "use": "Käyttää",
-    "wipe_all": "Pyyhi kaikki tiedot"
+    "wipe_all": "Pyyhi kaikki tiedot",
+    "add_maintenance": "Lisää huoltotapahtuma",
+    "apply_set_b": "Ota käyttöön joukko B",
+    "kbd_help": "Pikanäppäimet",
+    "load_more": "Lataa lisää",
+    "relabel": "Nimeä uudelleen ({count})",
+    "run_both": "Aja A vs B",
+    "run_simulation": "Aja simulaatio",
+    "save_reminders": "Tallenna muistutukset",
+    "select_all": "Valitse kaikki",
+    "select_last20": "Viimeiset 20",
+    "select_none": "Ei mitään",
+    "skip_setup": "Ohita määritys",
+    "undo": "Kumoa"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Tallennustilastot",
     "toggle_sidebar": "Vaihda Home Assistant -sivupalkki",
     "tools_and_data": "Työkalut ja tiedot",
-    "wipe_history": "Pyyhi historia"
+    "wipe_history": "Pyyhi historia",
+    "ab_comparison": "A/B-asetusten vertailu",
+    "add_maintenance": "Lisää huoltotapahtuma",
+    "cycle_simulator": "Syklisimulaattori",
+    "dtw_inspector": "DTW-tarkastin",
+    "getting_started": "Aloittaminen",
+    "kbd_shortcuts": "Pikanäppäimet",
+    "maintenance_log": "Huoltoloki",
+    "maintenance_reminders": "Huoltomuistutukset",
+    "settings_history": "Asetusten historia"
   },
   "health": {
     "fair": "Tyydyttävä profiililaatu",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Viesti (valinnainen, {device}/{program}/{minutes})",
     "ungrouped": "Ryhmittelemätön",
     "unlabelled": "Merkitsemätön",
-    "unlabelled_paren": "(merkitsemätön)"
+    "unlabelled_paren": "(merkitsemätön)",
+    "avg_cost": "Keskim. kustannus",
+    "change": "Muutos",
+    "concurrency": "Samanaikaisuus",
+    "correlation": "Korrelaatio",
+    "current_phase": "Nykyinen vaihe",
+    "curves": "Käyrät",
+    "cycle": "Sykli",
+    "cycle_index": "syklin indeksi →",
+    "cycles": "Syklit",
+    "dashed": "katkoviiva",
+    "delta": "Δ",
+    "dtw_blend_w": "Sekoituspaino",
+    "dtw_blended": "Yhdistetty pisteet",
+    "dtw_ddtw": "DDTW-pisteet",
+    "dtw_l1": "L1-pisteet",
+    "dtw_matched_profile": "(syklin täsmätty profiili)",
+    "duration_agreement": "Keston vastaavuus",
+    "energy_agreement": "Energian vastaavuus",
+    "event_timeline": "Tapahtumien aikajana",
+    "event_type": "Tapahtuman tyyppi",
+    "final_score": "Lopulliset pisteet",
+    "mae_score": "MAE-pisteet",
+    "metric": "Mittari",
+    "n_selected": "{n} valittu",
+    "na": "ei saatavilla",
+    "notes": "Muistiinpanot",
+    "outcome": "Tulos",
+    "per_cycle_short": "sykli",
+    "pg_ambiguous": "Epäselvä",
+    "pg_cycles": "Syklit",
+    "pg_detected": "Havaittu",
+    "pg_ev_ending": "Päättyy",
+    "pg_ev_match": "Osuma",
+    "pg_ev_off": "Pois",
+    "pg_ev_paused": "Keskeytetty",
+    "pg_ev_running": "Käynnissä",
+    "pg_ev_start": "Aloitus",
+    "pg_match_correct": "Osuma oikein",
+    "pg_unmatched": "Ei osumaa",
+    "phase_timeline": "Vaiheiden aikajana",
+    "profile_index": "profiilin indeksi →",
+    "reminder_every": "Muistuta joka (sykli)",
+    "score": "Pisteet",
+    "score_breakdown": "Pisteiden erittely",
+    "setting": "Asetus",
+    "settings_a": "Asetukset A (nykyiset)",
+    "settings_a_short": "A",
+    "settings_advanced": "Edistynyt",
+    "settings_b": "Asetukset B (testi)",
+    "settings_b_short": "B",
+    "settings_basic": "Perus",
+    "settings_detail_level": "Asetusten yksityiskohtien taso",
+    "settings_overrides": "Asetusten ohitukset",
+    "sparkline": "Viimeaikainen syklin keston suuntaus",
+    "stage2": "Vaihe 2 — ydinsamankaltaisuus",
+    "stage3": "Vaihe 3 — DTW",
+    "stage4": "Vaihe 4 — vastaavuus",
+    "warp_path": "Vääntöpolku"
   },
   "log": {
     "all_levels": "Kaikki tasot"
@@ -337,7 +417,10 @@
     "process_history_msg": "Suorita täsmäytys uudelleen, päivitä ehdotukset, kouluta ML uudelleen (jos käytössä) ja laske syklipistemäärät uudelleen kaikkien tallennettujen syklien osalta. Tämä voi kestää hetken.",
     "process_history_ok": "Käsittele",
     "process_history_title": "Käsittele historia",
-    "process_recording": "Prosessin tallennus"
+    "process_recording": "Prosessin tallennus",
+    "delete_maintenance_msg": "Poistetaanko tämä huoltomerkintä? Tätä ei voi kumota.",
+    "delete_maintenance_title": "Poista huoltotapahtuma",
+    "relabel_cycles": "Nimeä uudelleen {count} sykliä"
   },
   "msg": {
     "appliance_monitor": "Laitteen näyttö",
@@ -448,7 +531,44 @@
     "updated": "Päivitetty",
     "warmup_badge": "Oppii vielä ({done}/{needed} sykliä)",
     "warmup_detail": "Tämä profiili tarvitsee {needed} merkittyä sykliä ennen automaattisen täsmäämisen alkua. Jokainen vahvistettu sykli auttaa sitä oppimaan.",
-    "wipe_history_warning": "Poista pysyvästi kaikki syklit ja profiilit. Ei voi kumota."
+    "wipe_history_warning": "Poista pysyvästi kaikki syklit ja profiilit. Ei voi kumota.",
+    "cycles_deleted": "{count} sykli(ä) poistettu",
+    "kbd_advanced": "Siirry: Edistynyt",
+    "kbd_cycles": "Siirry: Syklit",
+    "kbd_escape": "Sulje avoin valintaikkuna",
+    "kbd_help": "Näytä / piilota tämä ohje",
+    "kbd_help_intro": "Pikanäppäimet ohitetaan, kun kirjoitat kenttään. Vain tälle laitteelle olemassa olevat välilehdet reagoivat.",
+    "kbd_ml": "Siirry: ML koulutus",
+    "kbd_overview": "Siirry: Yleiskatsaus",
+    "kbd_playground": "Siirry: Hiekkalaatikko",
+    "kbd_profiles": "Siirry: Profiilit",
+    "kbd_settings": "Siirry: Asetukset",
+    "maintenance_due": "Huolto tarpeen: {items}",
+    "maintenance_intro": "Kirjaa tälle laitteelle tekemäsi huoltotoimet ja saat muistutuksen, kun kukin tehtävä on taas ajankohtainen.",
+    "maintenance_load_error": "Huoltotietoja ei voitu ladata: {error}",
+    "name_first_program": "Sinulla on tarpeeksi syklejä — nimeä ensimmäinen ohjelma aloittaaksesi täsmäyksen.",
+    "no_cycles_selected": "Valitse ensin vähintään yksi sykli.",
+    "no_maintenance": "Huoltoja ei ole vielä kirjattu.",
+    "onboarding_progress": "{n} / 3 sykliä havaittu",
+    "onboarding_watching": "Käytä laitettasi normaalisti — WashData tarkkailee. Kolmen syklin jälkeen ohjelmien täsmäys alkaa.",
+    "pg_ab_intro": "Aja samat syklit nykyisillä asetuksillasi (A) ja muokatulla joukolla (B) rinnakkain.",
+    "pg_apply_b_confirm": "Otetaanko joukko B käyttöön live-laitteessa?\n\n{list}",
+    "pg_dtw_intro": "Tarkastele, miten yksi sykli kohdistuu profiiliin: kaksi käyrää, vääntöpolku ja pisteiden erittely. Vain luku.",
+    "pg_no_b_overrides": "Ei sovellettavia B-ohituksia.",
+    "pg_no_events": "Ei tapahtumia",
+    "pg_running": "Suoritetaan…",
+    "pg_simulator_intro": "Toista aiemmat syklit tunnistuksen läpi muokatuilla asetuksilla — kuivaharjoitus, joka ei muuta mitään.",
+    "pg_tip_ambiguous": "{n}/{total} epäselvää",
+    "pg_tip_cycles": "{n} sykliä simuloitu",
+    "pg_tip_detected": "{n}/{total} havaittu",
+    "pg_tip_match_correct": "{n}/{total} täsmätty oikein",
+    "pg_tip_unmatched": "{n}/{total} ilman osumaa",
+    "playground_intro": "Turvallinen hiekkalaatikko aiempien syklien toistamiseen eri asetuksilla, kahden kokoonpanon vertailuun rinnakkain ja sen tarkasteluun, miten sykli kohdistuu profiiliin. Mikään tässä ei muuta live-tietojasi ennen kuin otat sen nimenomaisesti käyttöön.",
+    "playground_needs_restart": "Käynnistä Home Assistant uudelleen ottaaksesi Hiekkalaatikko-työkalut käyttöön.",
+    "profile_deleted": "Profiili poistettu",
+    "reminders_intro": "Näytä paneelissa muistutus näin monta sykliä viimeisen huollon jälkeen. Poista muistutus käytöstä jättämällä tyhjäksi tai asettamalla 0.",
+    "setting_changed": "Muutettu {old} → {new} {date}",
+    "settings_basic_note": "Näytetään olennaiset asetukset. Vaihda Edistynyt-tilaan nähdäksesi koko luettelon."
   },
   "phase_desc": {
     "anti_crease": "Satunnaisia lyhyitä rumpujaksia valmistumisen jälkeen vaatteiden rypistyistä ehkäisemiseksi.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "lisää henkilö…",
     "phase_name": "esim. Esipesu",
-    "profile_name": "esim. Puuvilla 40°C"
+    "profile_name": "esim. Puuvilla 40°C",
+    "maintenance_notes": "esim. suodatin vaihdettu, luukun tiiviste puhdistettu"
   },
   "pref": {
     "date_absolute": "Absoluuttinen (esim. 14:32 2. heinäkuuta)",
@@ -684,7 +805,7 @@
       "label": "Android-kanava (lopetus)"
     },
     "notify_finish_message": {
-      "doc": "Keho lähetetään, kun sykli päättyy. Mallin muuttujat: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Ilmoituksen runko, joka lähetetään syklin päättyessä. Mallin muuttujat: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} ja {vs_typical} ovat tässä hyödyllisimmät.",
       "label": "Lopetusviesti"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Henkilöt (Ilmoita vain kotona ollessa)"
     },
     "notify_pre_complete_message": {
-      "doc": "Loppua edeltävän / melkein valmis -ilmoituksen runko. Mallin muuttujat: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Loppua edeltävän / melkein valmis -ilmoituksen runko. Mallin muuttujat: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Ennen valmistumista -viesti"
     },
     "notify_reminder_message": {
-      "doc": "Vielä odottavan purkumuistutuksen runko. Tyhjä käyttää sisäänrakennettua oletusarvoa. Mallin muuttujat: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Vielä odottavan purkumuistutuksen runko. Tyhjä käyttää sisäänrakennettua oletusarvoa. Mallin muuttujat: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Muistutusviesti"
     },
     "notify_start_message": {
-      "doc": "Keho lähetetään, kun sykli alkaa. Mallin muuttujat: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Ilmoituksen runko, joka lähetetään syklin alkaessa. Mallin muuttujat: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Käynnistysviesti"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Kuinka usein taustavahti tarkistaa jumiutuneiden antureiden ja kuluneiden aikakatkaisujen varalta. Oletusarvo 30 s.",
       "label": "Tarkkailijaväli"
+    },
+    "notify_milestone_message": {
+      "doc": "Virstanpylväsilmoituksen viesti. Mallin muuttujat: {device}, {cycle_count}.",
+      "label": "Virstanpylväsviesti"
+    },
+    "notify_milestones": {
+      "doc": "Pilkuin eroteltu määrä syklejä, jotka saavutettaessa laukaisevat kertaluontoisen juhlistusilmoituksen (esim. 50, 100, 500, 1000). Tyhjä poistaa virstanpylväsilmoitukset käytöstä.",
+      "label": "Syklien virstanpylväät"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Älä häiritse -ikkunan loppu (0-23). Pidätetyt ilmoitukset toimitetaan tällä tunnilla. Poista käytöstä jättämällä tyhjäksi.",
+      "label": "Hiljaisten tuntien loppu"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Älä häiritse -ikkunan alku (0-23). Valmistumis-, muistutus- ja puhtaat pyykit -ilmoitukset, jotka laukeaisivat hiljaisina tunteina, pidätetään ja toimitetaan ikkunan päättyessä. Poista käytöstä jättämällä tyhjäksi. Tukee keskiyön yli meneviä ikkunoita (esim. alku 22, loppu 7).",
+      "label": "Hiljaisten tuntien alku"
+    },
+    "peak_rate_message": {
+      "doc": "Valinnainen mukautettu teksti huippuhintavihjeelle, joka liitetään käynnistysilmoitukseen. Mallin muuttujat: {device}, {price}. Tyhjä käyttää sisäänrakennettua oletusarvoa.",
+      "label": "Huippuhintaviesti"
+    },
+    "peak_rate_threshold": {
+      "doc": "Kun sykli alkaa ja nykyinen hinta per kWh on tämä arvo tai suurempi, käynnistysilmoitukseen liitetään huippuhintavihje. 0 tai tyhjä poistaa vihjeen käytöstä.",
+      "label": "Huippuhintakynnys (per kWh)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Tarkkailija"
+    },
+    "quiet_hours_milestones": {
+      "label": "Hiljaiset tunnit ja virstanpylväät"
     }
   },
   "status": {
@@ -1013,7 +1161,9 @@
     "settings": "Asetukset",
     "status": "Yleiskatsaus",
     "subtab_phase_catalog": "Vaiheen katalogi",
-    "subtab_profiles": "Profiilit"
+    "subtab_profiles": "Profiilit",
+    "maintenance": "Huolto",
+    "playground": "Hiekkalaatikko"
   },
   "tag": {
     "early_end": "Varhainen loppu",
@@ -1073,10 +1223,30 @@
     "settings_reverted": "Asetukset palautettu; integroinnin uudelleenlataus",
     "settings_saved": "Asetukset tallennettu; integroinnin uudelleenlataus",
     "suggestions_applied": "Ehdotuksia otettu käyttöön; integroinnin uudelleenlataus",
-    "suggestions_dismissed": "Ehdotukset hylätty"
+    "suggestions_dismissed": "Ehdotukset hylätty",
+    "apply_failed": "Käyttöönotto epäonnistui: {error}",
+    "delete_failed": "Poisto epäonnistui: {error}",
+    "load_more_failed": "Lisää ei voitu ladata: {error}",
+    "maint_add_failed": "Tapahtuman lisääminen epäonnistui: {error}",
+    "maint_added": "Huoltotapahtuma lisätty",
+    "maint_delete_failed": "Tapahtuman poisto epäonnistui: {error}",
+    "maint_deleted": "Huoltotapahtuma poistettu",
+    "pg_dtw_failed": "DTW-tarkastus epäonnistui: {error}",
+    "pg_sim_failed": "Simulointi epäonnistui: {error}",
+    "relabel_done": "{count} sykli(ä) nimetty uudelleen",
+    "relabel_failed": "Uudelleennimeäminen epäonnistui: {error}",
+    "reminders_save_failed": "Muistutuksia ei voitu tallentaa: {error}",
+    "reminders_saved": "Huoltomuistutukset tallennettu"
   },
   "trend": {
     "down": "Trendikäs alaspäin",
     "up": "Nouseva suunta"
+  },
+  "maint": {
+    "bearing_service": "Laakerihuolto",
+    "descale": "Kalkinpoisto",
+    "drum_clean": "Puhdista rumpu",
+    "filter_clean": "Puhdista suodatin",
+    "other": "Muu"
   }
 }

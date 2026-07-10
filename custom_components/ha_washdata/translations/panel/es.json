@@ -123,7 +123,20 @@
     "trim": "Recortar",
     "trim_split": "Recortar / Dividir",
     "use": "Usar",
-    "wipe_all": "Borrar todos los datos"
+    "wipe_all": "Borrar todos los datos",
+    "add_maintenance": "Agregar evento de mantenimiento",
+    "apply_set_b": "Aplicar conjunto B",
+    "kbd_help": "Atajos de teclado",
+    "load_more": "Cargar más",
+    "relabel": "Reetiquetar ({count})",
+    "run_both": "Ejecutar A vs B",
+    "run_simulation": "Ejecutar simulación",
+    "save_reminders": "Guardar recordatorios",
+    "select_all": "Seleccionar todo",
+    "select_last20": "Últimos 20",
+    "select_none": "Ninguno",
+    "skip_setup": "Omitir configuración",
+    "undo": "Deshacer"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Estadísticas de almacenamiento",
     "toggle_sidebar": "Alternar barra lateral de Home Assistant",
     "tools_and_data": "Herramientas y datos",
-    "wipe_history": "Limpiar historial"
+    "wipe_history": "Limpiar historial",
+    "ab_comparison": "Comparación de ajustes A/B",
+    "add_maintenance": "Agregar evento de mantenimiento",
+    "cycle_simulator": "Simulador de ciclos",
+    "dtw_inspector": "Inspector DTW",
+    "getting_started": "Primeros pasos",
+    "kbd_shortcuts": "Atajos de teclado",
+    "maintenance_log": "Registro de mantenimiento",
+    "maintenance_reminders": "Recordatorios de servicio",
+    "settings_history": "Historial de ajustes"
   },
   "health": {
     "fair": "Calidad de perfil aceptable",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Mensaje (opcional, {device}/{program}/{minutes})",
     "ungrouped": "Desagrupados",
     "unlabelled": "Sin etiquetar",
-    "unlabelled_paren": "(sin etiquetar)"
+    "unlabelled_paren": "(sin etiquetar)",
+    "avg_cost": "Costo promedio",
+    "change": "Cambio",
+    "concurrency": "Concurrencia",
+    "correlation": "Correlación",
+    "current_phase": "Fase actual",
+    "curves": "Curvas",
+    "cycle": "Ciclo",
+    "cycle_index": "índice de ciclo →",
+    "cycles": "Ciclos",
+    "dashed": "discontinua",
+    "delta": "Δ",
+    "dtw_blend_w": "Peso de mezcla",
+    "dtw_blended": "Puntuación combinada",
+    "dtw_ddtw": "Puntuación DDTW",
+    "dtw_l1": "Puntuación L1",
+    "dtw_matched_profile": "(perfil coincidente del ciclo)",
+    "duration_agreement": "Concordancia de duración",
+    "energy_agreement": "Concordancia de energía",
+    "event_timeline": "Cronología de eventos",
+    "event_type": "Tipo de evento",
+    "final_score": "Puntuación final",
+    "mae_score": "Puntuación MAE",
+    "metric": "Métrica",
+    "n_selected": "{n} seleccionados",
+    "na": "n/d",
+    "notes": "Notas",
+    "outcome": "Resultado",
+    "per_cycle_short": "ciclo",
+    "pg_ambiguous": "Ambiguo",
+    "pg_cycles": "Ciclos",
+    "pg_detected": "Detectado",
+    "pg_ev_ending": "Finalizando",
+    "pg_ev_match": "Coincidencia",
+    "pg_ev_off": "Apagado",
+    "pg_ev_paused": "En pausa",
+    "pg_ev_running": "En marcha",
+    "pg_ev_start": "Inicio",
+    "pg_match_correct": "Coincidencia correcta",
+    "pg_unmatched": "Sin coincidencia",
+    "phase_timeline": "Cronología de fases",
+    "profile_index": "índice de perfil →",
+    "reminder_every": "Recordar cada (ciclos)",
+    "score": "Puntuación",
+    "score_breakdown": "Desglose de puntuación",
+    "setting": "Ajuste",
+    "settings_a": "Ajustes A (actual)",
+    "settings_a_short": "A",
+    "settings_advanced": "Avanzado",
+    "settings_b": "Ajustes B (prueba)",
+    "settings_b_short": "B",
+    "settings_basic": "Básico",
+    "settings_detail_level": "Nivel de detalle de ajustes",
+    "settings_overrides": "Anulaciones de ajustes",
+    "sparkline": "Tendencia reciente de duración de ciclos",
+    "stage2": "Etapa 2 — similitud principal",
+    "stage3": "Etapa 3 — DTW",
+    "stage4": "Etapa 4 — concordancia",
+    "warp_path": "Ruta de deformación"
   },
   "log": {
     "all_levels": "Todos los niveles"
@@ -337,7 +417,10 @@
     "process_history_msg": "Vuelva a ejecutar la coincidencia, actualice las sugerencias, vuelva a entrenar los modelos ML (si están habilitados) y recalcule el estado de todos los ciclos almacenados. Esto puede tardar un momento.",
     "process_history_ok": "Procesar",
     "process_history_title": "Procesar historial",
-    "process_recording": "Grabación de procesos"
+    "process_recording": "Grabación de procesos",
+    "delete_maintenance_msg": "¿Eliminar este registro de mantenimiento? Esto no se puede deshacer.",
+    "delete_maintenance_title": "Eliminar evento de mantenimiento",
+    "relabel_cycles": "Reetiquetar {count} ciclos"
   },
   "msg": {
     "appliance_monitor": "monitor de electrodomésticos",
@@ -448,7 +531,44 @@
     "updated": "Actualizado",
     "warmup_badge": "Aún aprendiendo ({done}/{needed} ciclos)",
     "warmup_detail": "Este perfil necesita {needed} ciclos etiquetados antes de que comience la coincidencia automática. Cada ciclo confirmado le ayuda a aprender.",
-    "wipe_history_warning": "Eliminar permanentemente todos los ciclos y perfiles. No se puede deshacer."
+    "wipe_history_warning": "Eliminar permanentemente todos los ciclos y perfiles. No se puede deshacer.",
+    "cycles_deleted": "{count} ciclo(s) eliminado(s)",
+    "kbd_advanced": "Ir a Avanzado",
+    "kbd_cycles": "Ir a Ciclos",
+    "kbd_escape": "Cerrar el diálogo abierto",
+    "kbd_help": "Mostrar / ocultar esta ayuda",
+    "kbd_help_intro": "Los atajos se ignoran mientras escribe en un campo. Solo responden las pestañas que existen para este dispositivo.",
+    "kbd_ml": "Ir a Entrenamiento ML",
+    "kbd_overview": "Ir a Descripción general",
+    "kbd_playground": "Ir a Zona de pruebas",
+    "kbd_profiles": "Ir a Perfiles",
+    "kbd_settings": "Ir a Ajustes",
+    "maintenance_due": "Mantenimiento pendiente: {items}",
+    "maintenance_intro": "Registre el mantenimiento que realiza en este electrodoméstico y reciba un recordatorio cuando cada tarea vuelva a estar pendiente.",
+    "maintenance_load_error": "No se pudieron cargar los datos de mantenimiento: {error}",
+    "name_first_program": "Ya tiene suficientes ciclos — nombre su primer programa para empezar a hacer coincidencias.",
+    "no_cycles_selected": "Seleccione al menos un ciclo primero.",
+    "no_maintenance": "Aún no hay mantenimiento registrado.",
+    "onboarding_progress": "{n} / 3 ciclos observados",
+    "onboarding_watching": "Use su electrodoméstico con normalidad — WashData está observando. Después de 3 ciclos, comenzará la coincidencia de programas.",
+    "pg_ab_intro": "Ejecute los mismos ciclos con sus ajustes actuales (A) y un conjunto modificado (B), en paralelo.",
+    "pg_apply_b_confirm": "¿Aplicar el conjunto B al dispositivo en vivo?\n\n{list}",
+    "pg_dtw_intro": "Inspeccione cómo se alinea un ciclo con un perfil: las dos curvas, la ruta de deformación y el desglose de la puntuación. Solo lectura.",
+    "pg_no_b_overrides": "No hay anulaciones B para aplicar.",
+    "pg_no_events": "Sin eventos",
+    "pg_running": "Ejecutando…",
+    "pg_simulator_intro": "Reproduzca ciclos anteriores a través de la detección con ajustes modificados — una simulación que no cambia nada.",
+    "pg_tip_ambiguous": "{n}/{total} ambiguos",
+    "pg_tip_cycles": "{n} ciclos simulados",
+    "pg_tip_detected": "{n}/{total} detectados",
+    "pg_tip_match_correct": "{n}/{total} coincidieron correctamente",
+    "pg_tip_unmatched": "{n}/{total} sin coincidencia",
+    "playground_intro": "Un entorno de pruebas seguro para reproducir ciclos anteriores con distintos ajustes, comparar dos configuraciones en paralelo e inspeccionar cómo se alinea un ciclo con un perfil. Nada de esto cambia sus datos en vivo hasta que lo aplique explícitamente.",
+    "playground_needs_restart": "Reinicie Home Assistant para habilitar las herramientas de la Zona de pruebas.",
+    "profile_deleted": "Perfil eliminado",
+    "reminders_intro": "Muestra un recordatorio en el panel tantos ciclos después del último servicio. Deje en blanco o 0 para desactivar un recordatorio.",
+    "setting_changed": "Cambiado de {old} a {new} el {date}",
+    "settings_basic_note": "Mostrando ajustes esenciales. Cambie a Avanzado para ver la lista completa."
   },
   "phase_desc": {
     "anti_crease": "Volteos breves ocasionales tras finalizar para evitar que la ropa se arrugue.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "añadir una persona…",
     "phase_name": "ej. Prelavado",
-    "profile_name": "ej. Algodón 40°C"
+    "profile_name": "ej. Algodón 40°C",
+    "maintenance_notes": "p. ej., filtro reemplazado, junta de puerta limpiada"
   },
   "pref": {
     "date_absolute": "Absoluto (por ejemplo, 14:32 del 2 de julio)",
@@ -684,7 +805,7 @@
       "label": "Canal Android (fin)"
     },
     "notify_finish_message": {
-      "doc": "Cuerpo enviado cuando finaliza un ciclo. Variables de plantilla: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Cuerpo enviado cuando finaliza un ciclo. Variables de plantilla: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} y {vs_typical} son los más útiles aquí.",
       "label": "Mensaje de fin"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Personas (para solo cuando esté en casa)"
     },
     "notify_pre_complete_message": {
-      "doc": "Cuerpo de la alerta previa al final/casi terminado. Variables de plantilla: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Cuerpo de la alerta previa al final/casi terminado. Variables de plantilla: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Mensaje de pre-finalización"
     },
     "notify_reminder_message": {
-      "doc": "Cuerpo del recordatorio de descarga que aún está en espera. Blank utiliza el valor predeterminado incorporado. Variables de plantilla: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Cuerpo del recordatorio de descarga que aún está en espera. En blanco usa el valor predeterminado incorporado. Variables de plantilla: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Mensaje de recordatorio"
     },
     "notify_start_message": {
-      "doc": "Cuerpo enviado cuando comienza un ciclo. Variables de plantilla: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Cuerpo enviado cuando comienza un ciclo. Variables de plantilla: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Mensaje de inicio"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Con qué frecuencia el organismo de control en segundo plano comprueba si hay sensores bloqueados y tiempos de espera transcurridos. Por defecto 30 s.",
       "label": "Intervalo de vigilancia"
+    },
+    "notify_milestone_message": {
+      "doc": "Mensaje para la notificación de hito. Variables de plantilla: {device}, {cycle_count}.",
+      "label": "Mensaje de hito"
+    },
+    "notify_milestones": {
+      "doc": "Recuentos de ciclos separados por comas que activan una notificación de celebración única al alcanzarse (p. ej., 50, 100, 500, 1000). En blanco desactiva las notificaciones de hitos.",
+      "label": "Hitos de ciclos"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Fin de la franja de no molestar (0-23). Las notificaciones retenidas se entregan a esta hora. Deje en blanco para desactivar.",
+      "label": "Fin de horas de silencio"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Inicio de una franja de no molestar (0-23). Las notificaciones de finalización, recordatorio y ropa limpia que se activarían durante las horas de silencio se retienen y se entregan cuando termina la franja. Deje en blanco para desactivar. Admite franjas que cruzan la medianoche (p. ej., inicio 22, fin 7).",
+      "label": "Inicio de horas de silencio"
+    },
+    "peak_rate_message": {
+      "doc": "Texto personalizado opcional para el aviso de tarifa alta que se añade a la notificación de inicio. Variables de plantilla: {device}, {price}. En blanco usa el valor predeterminado incorporado.",
+      "label": "Mensaje de tarifa alta"
+    },
+    "peak_rate_threshold": {
+      "doc": "Cuando comienza un ciclo y el precio actual por kWh es igual o superior a este valor, añade un aviso de tarifa alta a la notificación de inicio. 0 o en blanco desactiva el aviso.",
+      "label": "Umbral de tarifa alta (por kWh)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Vigilancia"
+    },
+    "quiet_hours_milestones": {
+      "label": "Horas de silencio e hitos"
     }
   },
   "status": {
@@ -950,7 +1098,9 @@
     "settings": "Ajustes",
     "status": "Descripción general",
     "subtab_phase_catalog": "Catálogo de fases",
-    "subtab_profiles": "Perfiles"
+    "subtab_profiles": "Perfiles",
+    "maintenance": "Mantenimiento",
+    "playground": "Zona de pruebas"
   },
   "tag": {
     "early_end": "Fin anticipado",
@@ -1010,7 +1160,20 @@
     "settings_reverted": "Configuración revertida; recarga de integración",
     "settings_saved": "Configuración guardada; recarga de integración",
     "suggestions_applied": "Sugerencias aplicadas; recarga de integración",
-    "suggestions_dismissed": "Sugerencias descartadas"
+    "suggestions_dismissed": "Sugerencias descartadas",
+    "apply_failed": "Error al aplicar: {error}",
+    "delete_failed": "Error al eliminar: {error}",
+    "load_more_failed": "No se pudo cargar más: {error}",
+    "maint_add_failed": "No se pudo agregar el evento: {error}",
+    "maint_added": "Evento de mantenimiento agregado",
+    "maint_delete_failed": "No se pudo eliminar el evento: {error}",
+    "maint_deleted": "Evento de mantenimiento eliminado",
+    "pg_dtw_failed": "Error en la inspección DTW: {error}",
+    "pg_sim_failed": "La simulación falló: {error}",
+    "relabel_done": "{count} ciclo(s) reetiquetado(s)",
+    "relabel_failed": "Error al reetiquetar: {error}",
+    "reminders_save_failed": "No se pudieron guardar los recordatorios: {error}",
+    "reminders_saved": "Recordatorios de servicio guardados"
   },
   "suggestion": {
     "both_agree": "WashData recomienda",
@@ -1078,5 +1241,12 @@
   "trend": {
     "down": "Tendencia a la baja",
     "up": "Tendencia ascendente"
+  },
+  "maint": {
+    "bearing_service": "Servicio de rodamientos",
+    "descale": "Descalcificar",
+    "drum_clean": "Limpiar tambor",
+    "filter_clean": "Limpiar filtro",
+    "other": "Otro"
   }
 }

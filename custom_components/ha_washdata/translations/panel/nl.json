@@ -123,7 +123,20 @@
     "trim": "Trimmen",
     "trim_split": "Trimmen/splitsen",
     "use": "Gebruik",
-    "wipe_all": "Wis alle gegevens"
+    "wipe_all": "Wis alle gegevens",
+    "add_maintenance": "Onderhoudsgebeurtenis toevoegen",
+    "apply_set_b": "Set B toepassen",
+    "kbd_help": "Sneltoetsen",
+    "load_more": "Meer laden",
+    "relabel": "Opnieuw labelen ({count})",
+    "run_both": "A vs B uitvoeren",
+    "run_simulation": "Simulatie uitvoeren",
+    "save_reminders": "Herinneringen opslaan",
+    "select_all": "Alles selecteren",
+    "select_last20": "Laatste 20",
+    "select_none": "Wissen",
+    "skip_setup": "Installatie overslaan",
+    "undo": "Ongedaan maken"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Opslagstatistieken",
     "toggle_sidebar": "Schakel de Home Assistant-zijbalk in of uit",
     "tools_and_data": "Hulpmiddelen en gegevens",
-    "wipe_history": "Geschiedenis wissen"
+    "wipe_history": "Geschiedenis wissen",
+    "ab_comparison": "Vergelijking van instellingen A/B",
+    "add_maintenance": "Onderhoudsgebeurtenis toevoegen",
+    "cycle_simulator": "Cyclussimulator",
+    "dtw_inspector": "DTW-inspecteur",
+    "getting_started": "Aan de slag",
+    "kbd_shortcuts": "Sneltoetsen",
+    "maintenance_log": "Onderhoudslogboek",
+    "maintenance_reminders": "Serviceherinneringen",
+    "settings_history": "Instellingengeschiedenis"
   },
   "health": {
     "fair": "Acceptabele profielkwaliteit",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Bericht (optioneel, {device}/{program}/{minutes})",
     "ungrouped": "Niet-gegroepeerd",
     "unlabelled": "Zonder etiket",
-    "unlabelled_paren": "(ongelabeld)"
+    "unlabelled_paren": "(ongelabeld)",
+    "avg_cost": "Gem. kosten",
+    "change": "Wijziging",
+    "concurrency": "Gelijktijdigheid",
+    "correlation": "Correlatie",
+    "current_phase": "Huidige fase",
+    "curves": "Curves",
+    "cycle": "Cyclus",
+    "cycle_index": "cyclusindex →",
+    "cycles": "Cycli",
+    "dashed": "gestreept",
+    "delta": "Δ",
+    "dtw_blend_w": "Mengingsgewicht",
+    "dtw_blended": "Gemengde score",
+    "dtw_ddtw": "DDTW-score",
+    "dtw_l1": "L1-score",
+    "dtw_matched_profile": "(gematcht profiel van de cyclus)",
+    "duration_agreement": "Duurovereenkomst",
+    "energy_agreement": "Energieovereenkomst",
+    "event_timeline": "Gebeurtenistijdlijn",
+    "event_type": "Gebeurtenistype",
+    "final_score": "Eindscore",
+    "mae_score": "MAE-score",
+    "metric": "Metriek",
+    "n_selected": "{n} geselecteerd",
+    "na": "n.v.t.",
+    "notes": "Opmerkingen",
+    "outcome": "Uitkomst",
+    "per_cycle_short": "cyclus",
+    "pg_ambiguous": "Dubbelzinnig",
+    "pg_cycles": "Cycli",
+    "pg_detected": "Gedetecteerd",
+    "pg_ev_ending": "Afsluiten",
+    "pg_ev_match": "Match",
+    "pg_ev_off": "Uit",
+    "pg_ev_paused": "Gepauzeerd",
+    "pg_ev_running": "Actief",
+    "pg_ev_start": "Start",
+    "pg_match_correct": "Correcte match",
+    "pg_unmatched": "Geen match",
+    "phase_timeline": "Fasetijdlijn",
+    "profile_index": "profielindex →",
+    "reminder_every": "Herinneren om de (cycli)",
+    "score": "Score",
+    "score_breakdown": "Score-uitsplitsing",
+    "setting": "Instelling",
+    "settings_a": "Instellingen A (huidig)",
+    "settings_a_short": "A",
+    "settings_advanced": "Geavanceerd",
+    "settings_b": "Instellingen B (test)",
+    "settings_b_short": "B",
+    "settings_basic": "Basis",
+    "settings_detail_level": "Detailniveau van instellingen",
+    "settings_overrides": "Overschreven instellingen",
+    "sparkline": "Recente trend van cyclusduur",
+    "stage2": "Stap 2 — kerngelijkenis",
+    "stage3": "Stap 3 — DTW",
+    "stage4": "Stap 4 — overeenkomst",
+    "warp_path": "Uitlijningspad"
   },
   "log": {
     "all_levels": "Alle niveaus"
@@ -337,7 +417,10 @@
     "process_history_msg": "Voer opnieuw matching uit, vernieuw suggesties, train ML opnieuw (indien ingeschakeld) en herbereken de cyclusgezondheid over alle opgeslagen cycli. Dit kan even duren.",
     "process_history_ok": "Verwerken",
     "process_history_title": "Geschiedenis verwerken",
-    "process_recording": "Procesregistratie"
+    "process_recording": "Procesregistratie",
+    "delete_maintenance_msg": "Deze onderhoudsregistratie verwijderen? Dit kan niet ongedaan worden gemaakt.",
+    "delete_maintenance_title": "Onderhoudsgebeurtenis verwijderen",
+    "relabel_cycles": "{count} cycli opnieuw labelen"
   },
   "msg": {
     "appliance_monitor": "Apparaatmonitor",
@@ -448,7 +531,44 @@
     "updated": "Bijgewerkt",
     "warmup_badge": "Nog aan het leren ({done}/{needed} cycli)",
     "warmup_detail": "Dit profiel heeft {needed} gelabelde cycli nodig voordat automatisch matchen begint. Elke bevestigde cyclus helpt het te leren.",
-    "wipe_history_warning": "Verwijder definitief alle cycli en profielen. Kan niet ongedaan worden gemaakt."
+    "wipe_history_warning": "Verwijder definitief alle cycli en profielen. Kan niet ongedaan worden gemaakt.",
+    "cycles_deleted": "{count} cyclus(sen) verwijderd",
+    "kbd_advanced": "Ga naar Geavanceerd",
+    "kbd_cycles": "Ga naar Cycli",
+    "kbd_escape": "Sluit het geopende dialoogvenster",
+    "kbd_help": "Deze help tonen / verbergen",
+    "kbd_help_intro": "Sneltoetsen worden genegeerd terwijl je in een veld typt. Alleen tabbladen die voor dit apparaat bestaan, reageren.",
+    "kbd_ml": "Ga naar ML-training",
+    "kbd_overview": "Ga naar Overzicht",
+    "kbd_playground": "Ga naar Speeltuin",
+    "kbd_profiles": "Ga naar Profielen",
+    "kbd_settings": "Ga naar Instellingen",
+    "maintenance_due": "Onderhoud nodig: {items}",
+    "maintenance_intro": "Registreer het onderhoud dat je aan dit apparaat uitvoert en word herinnerd wanneer elke taak weer aan de beurt is.",
+    "maintenance_load_error": "Kan onderhoudsgegevens niet laden: {error}",
+    "name_first_program": "Je hebt genoeg cycli — geef je eerste programma een naam om te beginnen met matchen.",
+    "no_cycles_selected": "Selecteer eerst minstens één cyclus.",
+    "no_maintenance": "Nog geen onderhoud geregistreerd.",
+    "onboarding_progress": "{n} / 3 cycli waargenomen",
+    "onboarding_watching": "Gebruik je apparaat normaal — WashData kijkt mee. Na 3 cycli begint het matchen van programma's.",
+    "pg_ab_intro": "Voer dezelfde cycli uit met je huidige instellingen (A) en een aangepaste set (B), naast elkaar.",
+    "pg_apply_b_confirm": "Set B toepassen op het actieve apparaat?\n\n{list}",
+    "pg_dtw_intro": "Bekijk hoe één cyclus wordt uitgelijnd met een profiel: de twee curves, het uitlijningspad en de score-uitsplitsing. Alleen-lezen.",
+    "pg_no_b_overrides": "Geen B-overschrijvingen om toe te passen.",
+    "pg_no_events": "Geen gebeurtenissen",
+    "pg_running": "Bezig…",
+    "pg_simulator_intro": "Speel eerdere cycli opnieuw af door de detectie met aangepaste instellingen — een proefrun die niets verandert.",
+    "pg_tip_ambiguous": "{n}/{total} dubbelzinnig",
+    "pg_tip_cycles": "{n} cycli gesimuleerd",
+    "pg_tip_detected": "{n}/{total} gedetecteerd",
+    "pg_tip_match_correct": "{n}/{total} correct gematcht",
+    "pg_tip_unmatched": "{n}/{total} zonder match",
+    "playground_intro": "Een veilige speeltuin om eerdere cycli met andere instellingen opnieuw af te spelen, twee configuraties naast elkaar te vergelijken en te bekijken hoe een cyclus wordt uitgelijnd met een profiel. Niets hier verandert je actieve gegevens totdat je het expliciet toepast.",
+    "playground_needs_restart": "Start Home Assistant opnieuw op om de Speeltuin-tools in te schakelen.",
+    "profile_deleted": "Profiel verwijderd",
+    "reminders_intro": "Toon een herinnering in het paneel dit aantal cycli na de laatste servicebeurt. Laat leeg of 0 om een herinnering uit te schakelen.",
+    "setting_changed": "Gewijzigd van {old} naar {new} op {date}",
+    "settings_basic_note": "Essentiële instellingen worden getoond. Schakel over naar Geavanceerd voor de volledige lijst."
   },
   "phase_desc": {
     "anti_crease": "Af en toe kort tuimelen na voltooiing om rimpels te verminderen.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "voeg een persoon toe…",
     "phase_name": "bijv. Voorwas",
-    "profile_name": "bijv. Katoen 40°C"
+    "profile_name": "bijv. Katoen 40°C",
+    "maintenance_notes": "bijv. filter vervangen, deurrubber gereinigd"
   },
   "pref": {
     "date_absolute": "Absoluut (bijv. 14:32 op 2 juli)",
@@ -684,7 +805,7 @@
       "label": "Android-kanaal (eind)"
     },
     "notify_finish_message": {
-      "doc": "Lichaam verzonden wanneer een cyclus is voltooid. Sjabloonvariabelen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Berichttekst die wordt verzonden wanneer een cyclus is voltooid. Sjabloonvariabelen: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} en {vs_typical} zijn hier het nuttigst.",
       "label": "Eindbericht"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Personen (voor Alleen thuis)"
     },
     "notify_pre_complete_message": {
-      "doc": "Hoofdgedeelte van de waarschuwing vóór het einde/bijna klaar. Sjabloonvariabelen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Tekst van de melding vóór het einde / bijna klaar. Sjabloonvariabelen: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Bijna klaar-bericht"
     },
     "notify_reminder_message": {
-      "doc": "Hoofdgedeelte van de nog steeds wachtende losherinnering. Blank gebruikt de ingebouwde standaard. Sjabloonvariabelen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Tekst van de herinnering dat er nog moet worden uitgeladen. Leeg gebruikt de ingebouwde standaard. Sjabloonvariabelen: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Herinneringsbericht"
     },
     "notify_start_message": {
-      "doc": "Lichaam verzonden wanneer een cyclus start. Sjabloonvariabelen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Berichttekst die wordt verzonden wanneer een cyclus start. Sjabloonvariabelen: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Startbericht"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Hoe vaak de achtergrondwaakhond controleert op vastgelopen sensoren en verstreken time-outs. Standaard 30 sec.",
       "label": "Waakhondinterval"
+    },
+    "notify_milestone_message": {
+      "doc": "Bericht voor de mijlpaalmelding. Sjabloonvariabelen: {device}, {cycle_count}.",
+      "label": "Mijlpaalbericht"
+    },
+    "notify_milestones": {
+      "doc": "Door komma's gescheiden aantallen cycli die een eenmalige felicitatiemelding activeren wanneer ze worden bereikt (bijv. 50, 100, 500, 1000). Leeg schakelt mijlpaalmeldingen uit.",
+      "label": "Cyclusmijlpalen"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Einde van het niet-storen-venster (0-23). Vastgehouden meldingen worden op dit uur bezorgd. Laat leeg om uit te schakelen.",
+      "label": "Einde stille uren"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Begin van een niet-storen-venster (0-23). Meldingen over voltooiing, herinneringen en schone-was-meldingen die tijdens de stille uren zouden afgaan, worden vastgehouden en bezorgd wanneer het venster eindigt. Laat leeg om uit te schakelen. Ondersteunt vensters die middernacht overschrijden (bijv. start 22, einde 7).",
+      "label": "Begin stille uren"
+    },
+    "peak_rate_message": {
+      "doc": "Optionele aangepaste tekst voor de piektarief-tip die aan de startmelding wordt toegevoegd. Sjabloonvariabelen: {device}, {price}. Leeg gebruikt de ingebouwde standaard.",
+      "label": "Bericht bij piektarief"
+    },
+    "peak_rate_threshold": {
+      "doc": "Wanneer een cyclus start en de huidige prijs per kWh op of boven deze waarde ligt, wordt een piektarief-tip aan de startmelding toegevoegd. 0 of leeg schakelt de tip uit.",
+      "label": "Drempel piektarief (per kWh)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Waakhond"
+    },
+    "quiet_hours_milestones": {
+      "label": "Stille uren en mijlpalen"
     }
   },
   "status": {
@@ -1013,7 +1161,9 @@
     "settings": "Instellingen",
     "status": "Overzicht",
     "subtab_phase_catalog": "Fasecatalogus",
-    "subtab_profiles": "Profielen"
+    "subtab_profiles": "Profielen",
+    "maintenance": "Onderhoud",
+    "playground": "Speeltuin"
   },
   "tag": {
     "early_end": "Vroeg einde",
@@ -1073,10 +1223,30 @@
     "settings_reverted": "Instellingen hersteld; integratie herladen",
     "settings_saved": "Instellingen opgeslagen; integratie herladen",
     "suggestions_applied": "Suggesties toegepast; integratie herladen",
-    "suggestions_dismissed": "Suggesties afgewezen"
+    "suggestions_dismissed": "Suggesties afgewezen",
+    "apply_failed": "Toepassen mislukt: {error}",
+    "delete_failed": "Verwijderen mislukt: {error}",
+    "load_more_failed": "Kan niet meer laden: {error}",
+    "maint_add_failed": "Kan gebeurtenis niet toevoegen: {error}",
+    "maint_added": "Onderhoudsgebeurtenis toegevoegd",
+    "maint_delete_failed": "Kan gebeurtenis niet verwijderen: {error}",
+    "maint_deleted": "Onderhoudsgebeurtenis verwijderd",
+    "pg_dtw_failed": "DTW-inspectie mislukt: {error}",
+    "pg_sim_failed": "Simulatie mislukt: {error}",
+    "relabel_done": "{count} cyclus(sen) opnieuw gelabeld",
+    "relabel_failed": "Opnieuw labelen mislukt: {error}",
+    "reminders_save_failed": "Kan herinneringen niet opslaan: {error}",
+    "reminders_saved": "Serviceherinneringen opgeslagen"
   },
   "trend": {
     "down": "Trend naar beneden",
     "up": "Trend omhoog"
+  },
+  "maint": {
+    "bearing_service": "Lageronderhoud",
+    "descale": "Ontkalken",
+    "drum_clean": "Trommel reinigen",
+    "filter_clean": "Filter reinigen",
+    "other": "Overig"
   }
 }

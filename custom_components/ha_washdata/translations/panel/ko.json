@@ -123,7 +123,20 @@
     "trim": "손질",
     "trim_split": "다듬기/분할",
     "use": "사용",
-    "wipe_all": "모든 데이터 지우기"
+    "wipe_all": "모든 데이터 지우기",
+    "add_maintenance": "유지보수 이벤트 추가",
+    "apply_set_b": "세트 B 적용",
+    "kbd_help": "키보드 단축키",
+    "load_more": "더 불러오기",
+    "relabel": "다시 라벨 지정 ({count})",
+    "run_both": "A 대 B 실행",
+    "run_simulation": "시뮬레이션 실행",
+    "save_reminders": "알림 저장",
+    "select_all": "모두 선택",
+    "select_last20": "최근 20개",
+    "select_none": "지우기",
+    "skip_setup": "설정 건너뛰기",
+    "undo": "실행 취소"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "스토리지 통계",
     "toggle_sidebar": "홈어시스턴트 사이드바 전환",
     "tools_and_data": "도구 및 데이터",
-    "wipe_history": "기록 지우기"
+    "wipe_history": "기록 지우기",
+    "ab_comparison": "A/B 설정 비교",
+    "add_maintenance": "유지보수 이벤트 추가",
+    "cycle_simulator": "사이클 시뮬레이터",
+    "dtw_inspector": "DTW 검사기",
+    "getting_started": "시작하기",
+    "kbd_shortcuts": "키보드 단축키",
+    "maintenance_log": "유지보수 기록",
+    "maintenance_reminders": "서비스 알림",
+    "settings_history": "설정 기록"
   },
   "health": {
     "fair": "프로파일 품질: 보통",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "메시지(선택사항, {device}/{program}/{minutes})",
     "ungrouped": "그룹 해제됨",
     "unlabelled": "라벨이 지정되지 않음",
-    "unlabelled_paren": "(라벨 없음)"
+    "unlabelled_paren": "(라벨 없음)",
+    "avg_cost": "평균 비용",
+    "change": "변경",
+    "concurrency": "동시 실행 수",
+    "correlation": "상관관계",
+    "current_phase": "현재 단계",
+    "curves": "곡선",
+    "cycle": "사이클",
+    "cycle_index": "사이클 번호 →",
+    "cycles": "사이클",
+    "dashed": "점선",
+    "delta": "Δ",
+    "dtw_blend_w": "혼합 가중치",
+    "dtw_blended": "혼합 점수",
+    "dtw_ddtw": "DDTW 점수",
+    "dtw_l1": "L1 점수",
+    "dtw_matched_profile": "(사이클의 일치 프로필)",
+    "duration_agreement": "지속 시간 일치도",
+    "energy_agreement": "에너지 일치도",
+    "event_timeline": "이벤트 타임라인",
+    "event_type": "이벤트 유형",
+    "final_score": "최종 점수",
+    "mae_score": "MAE 점수",
+    "metric": "지표",
+    "n_selected": "{n}개 선택됨",
+    "na": "해당 없음",
+    "notes": "메모",
+    "outcome": "결과",
+    "per_cycle_short": "사이클",
+    "pg_ambiguous": "모호함",
+    "pg_cycles": "사이클",
+    "pg_detected": "감지됨",
+    "pg_ev_ending": "종료 중",
+    "pg_ev_match": "일치",
+    "pg_ev_off": "꺼짐",
+    "pg_ev_paused": "일시정지",
+    "pg_ev_running": "실행 중",
+    "pg_ev_start": "시작",
+    "pg_match_correct": "일치 정확",
+    "pg_unmatched": "일치 없음",
+    "phase_timeline": "단계 타임라인",
+    "profile_index": "프로필 번호 →",
+    "reminder_every": "알림 주기 (사이클)",
+    "score": "점수",
+    "score_breakdown": "점수 세부 내역",
+    "setting": "설정",
+    "settings_a": "설정 A (현재)",
+    "settings_a_short": "A",
+    "settings_advanced": "고급",
+    "settings_b": "설정 B (테스트)",
+    "settings_b_short": "B",
+    "settings_basic": "기본",
+    "settings_detail_level": "설정 상세 수준",
+    "settings_overrides": "설정 재정의",
+    "sparkline": "최근 사이클 지속 시간 추세",
+    "stage2": "2단계 — 핵심 유사도",
+    "stage3": "3단계 — DTW",
+    "stage4": "4단계 — 일치도",
+    "warp_path": "워프 경로"
   },
   "log": {
     "all_levels": "모든 레벨"
@@ -337,7 +417,10 @@
     "process_history_msg": "매칭을 재실행하고, 제안을 새로 고치고, ML을 재훈련하고（활성화된 경우）, 저장된 모든 사이클의 사이클 상태를 재계산합니다. 시간이 걸릴 수 있습니다.",
     "process_history_ok": "처리",
     "process_history_title": "기록 처리",
-    "process_recording": "프로세스 기록"
+    "process_recording": "프로세스 기록",
+    "delete_maintenance_msg": "이 유지보수 기록을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
+    "delete_maintenance_title": "유지보수 이벤트 삭제",
+    "relabel_cycles": "{count}개 사이클 다시 라벨 지정"
   },
   "msg": {
     "appliance_monitor": "가전제품 모니터",
@@ -448,7 +531,44 @@
     "updated": "업데이트됨",
     "warmup_badge": "학습 중 ({done}/{needed} 사이클)",
     "warmup_detail": "이 프로필은 자동 매칭이 시작되기 전에 {needed}개의 라벨이 지정된 사이클이 필요합니다. 확인된 사이클마다 학습에 도움이 됩니다.",
-    "wipe_history_warning": "모든 사이클과 프로필을 영구적으로 삭제합니다. 취소할 수 없습니다."
+    "wipe_history_warning": "모든 사이클과 프로필을 영구적으로 삭제합니다. 취소할 수 없습니다.",
+    "cycles_deleted": "{count}개 사이클이 삭제되었습니다",
+    "kbd_advanced": "고급으로 이동",
+    "kbd_cycles": "사이클로 이동",
+    "kbd_escape": "열린 대화 상자 닫기",
+    "kbd_help": "이 도움말 표시 / 숨기기",
+    "kbd_help_intro": "필드에 입력하는 동안에는 단축키가 무시됩니다. 이 기기에 존재하는 탭만 반응합니다.",
+    "kbd_ml": "ML 훈련으로 이동",
+    "kbd_overview": "개요로 이동",
+    "kbd_playground": "플레이그라운드로 이동",
+    "kbd_profiles": "프로필로 이동",
+    "kbd_settings": "설정으로 이동",
+    "maintenance_due": "유지보수 예정: {items}",
+    "maintenance_intro": "이 가전에 수행한 정비를 기록하면 각 작업의 다음 예정 시기에 알림을 받습니다.",
+    "maintenance_load_error": "유지보수 데이터를 불러올 수 없습니다: {error}",
+    "name_first_program": "충분한 사이클이 모였습니다 — 첫 프로그램에 이름을 지정하여 일치를 시작하세요.",
+    "no_cycles_selected": "먼저 사이클을 하나 이상 선택하세요.",
+    "no_maintenance": "아직 기록된 유지보수가 없습니다.",
+    "onboarding_progress": "{n} / 3개 사이클 관찰됨",
+    "onboarding_watching": "가전을 평소처럼 사용하세요 — WashData가 관찰하고 있습니다. 3개 사이클 후 프로그램 일치가 시작됩니다.",
+    "pg_ab_intro": "현재 설정(A)과 조정한 설정(B)으로 동일한 사이클을 나란히 실행합니다.",
+    "pg_apply_b_confirm": "세트 B를 실사용 기기에 적용하시겠습니까?\n\n{list}",
+    "pg_dtw_intro": "하나의 사이클이 프로필에 어떻게 정렬되는지 살펴봅니다: 두 곡선, 워프 경로, 점수 세부 내역. 읽기 전용입니다.",
+    "pg_no_b_overrides": "적용할 B 재정의가 없습니다.",
+    "pg_no_events": "이벤트 없음",
+    "pg_running": "실행 중…",
+    "pg_simulator_intro": "과거 사이클을 조정한 설정으로 감지에 통과시켜 재생합니다 — 아무것도 바꾸지 않는 시험 실행입니다.",
+    "pg_tip_ambiguous": "{n}/{total}개 모호함",
+    "pg_tip_cycles": "{n}개 사이클 시뮬레이션됨",
+    "pg_tip_detected": "{n}/{total}개 감지됨",
+    "pg_tip_match_correct": "{n}/{total}개 정확히 일치",
+    "pg_tip_unmatched": "{n}/{total}개 일치 없음",
+    "playground_intro": "과거 사이클을 다른 설정으로 재생하고, 두 구성을 나란히 비교하며, 사이클이 프로필에 어떻게 정렬되는지 살펴볼 수 있는 안전한 샌드박스입니다. 명시적으로 적용하기 전까지 여기서의 작업은 실제 데이터를 변경하지 않습니다.",
+    "playground_needs_restart": "플레이그라운드 도구를 활성화하려면 Home Assistant를 다시 시작하세요.",
+    "profile_deleted": "프로필이 삭제되었습니다",
+    "reminders_intro": "마지막 서비스 이후 지정한 사이클 수가 지나면 패널에 알림을 표시합니다. 비워 두거나 0으로 설정하면 알림이 꺼집니다.",
+    "setting_changed": "{date}에 {old}에서 {new}(으)로 변경됨",
+    "settings_basic_note": "필수 설정만 표시하고 있습니다. 전체 목록을 보려면 고급으로 전환하세요."
   },
   "phase_desc": {
     "anti_crease": "메인 사이클 후 드럼이 간헐적으로 회전하여 의류 구김을 방지합니다.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "사람 추가…",
     "phase_name": "예：예비 세탁",
-    "profile_name": "예：면 40°C"
+    "profile_name": "예：면 40°C",
+    "maintenance_notes": "예: 필터 교체, 도어 씰 청소"
   },
   "pref": {
     "date_absolute": "절대값(예: 7월 2일 14:32)",
@@ -684,7 +805,7 @@
       "label": "Android 채널 (종료)"
     },
     "notify_finish_message": {
-      "doc": "주기가 끝나면 본문이 전송됩니다. 템플릿 변수: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "사이클이 끝날 때 전송되는 본문. 템플릿 변수: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. 여기서는 {time_finished}와 {vs_typical}이 가장 유용합니다.",
       "label": "종료 메시지"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "사람 (집에 있을 때)"
     },
     "notify_pre_complete_message": {
-      "doc": "종료 전/거의 완료 알림의 본문입니다. 템플릿 변수: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "종료 전 / 거의 완료 알림의 본문. 템플릿 변수: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "완료 전 메시지"
     },
     "notify_reminder_message": {
-      "doc": "아직 대기 중인 언로드 알림의 본문입니다. 공백은 내장된 기본값을 사용합니다. 템플릿 변수: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "아직 대기 중인 꺼내기 알림의 본문. 비워 두면 기본 제공 값이 사용됩니다. 템플릿 변수: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "알림 메시지"
     },
     "notify_start_message": {
-      "doc": "주기가 시작되면 본문이 전송됩니다. 템플릿 변수: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "사이클이 시작될 때 전송되는 본문. 템플릿 변수: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "시작 메시지"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "백그라운드 감시 장치가 정지된 센서와 경과된 시간 초과를 확인하는 빈도입니다. 기본값은 30초입니다.",
       "label": "워치독 간격"
+    },
+    "notify_milestone_message": {
+      "doc": "마일스톤 알림 메시지. 템플릿 변수: {device}, {cycle_count}.",
+      "label": "마일스톤 메시지"
+    },
+    "notify_milestones": {
+      "doc": "도달 시 한 번만 축하 알림을 보낼 사이클 수를 쉼표로 구분하여 지정합니다(예: 50, 100, 500, 1000). 비워 두면 마일스톤 알림이 비활성화됩니다.",
+      "label": "사이클 마일스톤"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "방해 금지 시간대의 종료(0-23). 보류된 알림은 이 시각에 전달됩니다. 비워 두면 비활성화됩니다.",
+      "label": "방해 금지 시간 종료"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "방해 금지 시간대의 시작(0-23). 방해 금지 시간 중 발생할 완료, 알림, 세탁 완료 알림은 보류되었다가 시간대가 끝날 때 전달됩니다. 비워 두면 비활성화됩니다. 자정을 넘는 시간대도 지원합니다(예: 시작 22, 종료 7).",
+      "label": "방해 금지 시간 시작"
+    },
+    "peak_rate_message": {
+      "doc": "시작 알림에 추가되는 피크 요금 팁의 사용자 지정 텍스트(선택 사항). 템플릿 변수: {device}, {price}. 비워 두면 기본 제공 값이 사용됩니다.",
+      "label": "피크 요금 메시지"
+    },
+    "peak_rate_threshold": {
+      "doc": "사이클이 시작될 때 현재 kWh당 가격이 이 값 이상이면 시작 알림에 피크 요금 팁을 추가합니다. 0 또는 비워 두면 팁이 비활성화됩니다.",
+      "label": "피크 요금 임계값 (kWh당)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "워치독"
+    },
+    "quiet_hours_milestones": {
+      "label": "방해 금지 시간 및 마일스톤"
     }
   },
   "status": {
@@ -950,7 +1098,9 @@
     "settings": "설정",
     "status": "개요",
     "subtab_phase_catalog": "단계 카탈로그",
-    "subtab_profiles": "프로필"
+    "subtab_profiles": "프로필",
+    "maintenance": "유지보수",
+    "playground": "플레이그라운드"
   },
   "tag": {
     "early_end": "조기 종료",
@@ -1010,7 +1160,20 @@
     "settings_reverted": "설정이 복원되었습니다. 통합 리로드 중",
     "settings_saved": "설정이 저장되었습니다. 통합 다시 로드",
     "suggestions_applied": "제안이 적용되었습니다. 통합 다시 로드",
-    "suggestions_dismissed": "제안이 무시되었습니다."
+    "suggestions_dismissed": "제안이 무시되었습니다.",
+    "apply_failed": "적용 실패: {error}",
+    "delete_failed": "삭제 실패: {error}",
+    "load_more_failed": "더 불러올 수 없습니다: {error}",
+    "maint_add_failed": "이벤트를 추가할 수 없습니다: {error}",
+    "maint_added": "유지보수 이벤트가 추가되었습니다",
+    "maint_delete_failed": "이벤트를 삭제할 수 없습니다: {error}",
+    "maint_deleted": "유지보수 이벤트가 삭제되었습니다",
+    "pg_dtw_failed": "DTW 검사 실패: {error}",
+    "pg_sim_failed": "시뮬레이션 실패: {error}",
+    "relabel_done": "{count}개 사이클을 다시 라벨 지정했습니다",
+    "relabel_failed": "다시 라벨 지정 실패: {error}",
+    "reminders_save_failed": "알림을 저장할 수 없습니다: {error}",
+    "reminders_saved": "서비스 알림이 저장되었습니다"
   },
   "suggestion": {
     "both_agree": "WashData 권장",
@@ -1078,5 +1241,12 @@
   "trend": {
     "down": "하락세",
     "up": "추세 상승"
+  },
+  "maint": {
+    "bearing_service": "베어링 정비",
+    "descale": "석회질 제거",
+    "drum_clean": "드럼 청소",
+    "filter_clean": "필터 청소",
+    "other": "기타"
   }
 }

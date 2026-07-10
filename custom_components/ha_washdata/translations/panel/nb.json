@@ -123,7 +123,20 @@
     "trim": "Trim",
     "trim_split": "Trim / Splitt",
     "use": "Bruk",
-    "wipe_all": "Tørk alle data"
+    "wipe_all": "Tørk alle data",
+    "add_maintenance": "Legg til vedlikeholdshendelse",
+    "apply_set_b": "Bruk sett B",
+    "kbd_help": "Hurtigtaster",
+    "load_more": "Last inn mer",
+    "relabel": "Merk på nytt ({count})",
+    "run_both": "Kjør A mot B",
+    "run_simulation": "Kjør simulering",
+    "save_reminders": "Lagre påminnelser",
+    "select_all": "Velg alle",
+    "select_last20": "Siste 20",
+    "select_none": "Tøm",
+    "skip_setup": "Hopp over oppsett",
+    "undo": "Angre"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Lagringsstatistikk",
     "toggle_sidebar": "Slå på Home Assistant-sidepanelet",
     "tools_and_data": "Verktøy og data",
-    "wipe_history": "Tørk historikk"
+    "wipe_history": "Tørk historikk",
+    "ab_comparison": "Sammenligning av innstillinger A/B",
+    "add_maintenance": "Legg til vedlikeholdshendelse",
+    "cycle_simulator": "Syklussimulator",
+    "dtw_inspector": "DTW-inspektør",
+    "getting_started": "Kom i gang",
+    "kbd_shortcuts": "Hurtigtaster",
+    "maintenance_log": "Vedlikeholdslogg",
+    "maintenance_reminders": "Servicepåminnelser",
+    "settings_history": "Innstillingshistorikk"
   },
   "health": {
     "fair": "Akseptabel profilkvalitet",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Melding (valgfritt, {device}/{program}/{minutes})",
     "ungrouped": "Ugruppert",
     "unlabelled": "Umerket",
-    "unlabelled_paren": "(umerket)"
+    "unlabelled_paren": "(umerket)",
+    "avg_cost": "Gj.sn. kostnad",
+    "change": "Endring",
+    "concurrency": "Samtidighet",
+    "correlation": "Korrelasjon",
+    "current_phase": "Gjeldende fase",
+    "curves": "Kurver",
+    "cycle": "Syklus",
+    "cycle_index": "syklusindeks →",
+    "cycles": "Sykluser",
+    "dashed": "stiplet",
+    "delta": "Δ",
+    "dtw_blend_w": "Blandingsvekt",
+    "dtw_blended": "Blandet poengsum",
+    "dtw_ddtw": "DDTW-poengsum",
+    "dtw_l1": "L1-poengsum",
+    "dtw_matched_profile": "(syklusens samsvarende profil)",
+    "duration_agreement": "Varighetssamsvar",
+    "energy_agreement": "Energisamsvar",
+    "event_timeline": "Hendelsestidslinje",
+    "event_type": "Hendelsestype",
+    "final_score": "Endelig poengsum",
+    "mae_score": "MAE-poengsum",
+    "metric": "Metrikk",
+    "n_selected": "{n} valgt",
+    "na": "–",
+    "notes": "Merknader",
+    "outcome": "Utfall",
+    "per_cycle_short": "syklus",
+    "pg_ambiguous": "Tvetydig",
+    "pg_cycles": "Sykluser",
+    "pg_detected": "Oppdaget",
+    "pg_ev_ending": "Avslutter",
+    "pg_ev_match": "Treff",
+    "pg_ev_off": "Av",
+    "pg_ev_paused": "Pauset",
+    "pg_ev_running": "Kjører",
+    "pg_ev_start": "Start",
+    "pg_match_correct": "Riktig treff",
+    "pg_unmatched": "Ingen treff",
+    "phase_timeline": "Fasetidslinje",
+    "profile_index": "profilindeks →",
+    "reminder_every": "Påminn hver (sykluser)",
+    "score": "Poengsum",
+    "score_breakdown": "Poengfordeling",
+    "setting": "Innstilling",
+    "settings_a": "Innstillinger A (gjeldende)",
+    "settings_a_short": "A",
+    "settings_advanced": "Avansert",
+    "settings_b": "Innstillinger B (test)",
+    "settings_b_short": "B",
+    "settings_basic": "Grunnleggende",
+    "settings_detail_level": "Detaljnivå for innstillinger",
+    "settings_overrides": "Overstyringer",
+    "sparkline": "Nylig trend for syklusvarighet",
+    "stage2": "Trinn 2 — kjernelikhet",
+    "stage3": "Trinn 3 — DTW",
+    "stage4": "Trinn 4 — samsvar",
+    "warp_path": "Justeringsbane"
   },
   "log": {
     "all_levels": "Alle nivåer"
@@ -337,7 +417,10 @@
     "process_history_msg": "Kjør matching på nytt, oppdater forslag, tren ML på nytt (hvis aktivert) og beregn syklusenes tilstand på nytt for alle lagrede sykluser. Dette kan ta litt tid.",
     "process_history_ok": "Behandle",
     "process_history_title": "Behandle historikk",
-    "process_recording": "Prosessopptak"
+    "process_recording": "Prosessopptak",
+    "delete_maintenance_msg": "Slette denne vedlikeholdsoppføringen? Dette kan ikke angres.",
+    "delete_maintenance_title": "Slett vedlikeholdshendelse",
+    "relabel_cycles": "Merk {count} sykluser på nytt"
   },
   "msg": {
     "appliance_monitor": "Apparatmonitor",
@@ -448,7 +531,44 @@
     "updated": "Oppdatert",
     "warmup_badge": "Lærer fortsatt ({done}/{needed} sykluser)",
     "warmup_detail": "Denne profilen trenger {needed} merkede sykluser før automatisk matching begynner. Hver bekreftede syklus hjelper den med å lære.",
-    "wipe_history_warning": "Slett alle sykluser og profiler permanent. Kan ikke angres."
+    "wipe_history_warning": "Slett alle sykluser og profiler permanent. Kan ikke angres.",
+    "cycles_deleted": "{count} syklus(er) slettet",
+    "kbd_advanced": "Gå til Avansert",
+    "kbd_cycles": "Gå til Sykluser",
+    "kbd_escape": "Lukk den åpne dialogen",
+    "kbd_help": "Vis / skjul denne hjelpen",
+    "kbd_help_intro": "Snarveier ignoreres mens du skriver i et felt. Bare faner som finnes for denne enheten, reagerer.",
+    "kbd_ml": "Gå til ML opplæring",
+    "kbd_overview": "Gå til Oversikt",
+    "kbd_playground": "Gå til Sandkasse",
+    "kbd_profiles": "Gå til Profiler",
+    "kbd_settings": "Gå til Innstillinger",
+    "maintenance_due": "Vedlikehold forfaller: {items}",
+    "maintenance_intro": "Loggfør vedlikeholdet du utfører på dette apparatet, og få påminnelser når hver oppgave forfaller igjen.",
+    "maintenance_load_error": "Kunne ikke laste vedlikeholdsdata: {error}",
+    "name_first_program": "Du har nok sykluser — gi det første programmet et navn for å starte samsvarssøket.",
+    "no_cycles_selected": "Velg minst én syklus først.",
+    "no_maintenance": "Ingen vedlikehold registrert ennå.",
+    "onboarding_progress": "{n} / 3 sykluser observert",
+    "onboarding_watching": "Bruk apparatet som normalt — WashData følger med. Etter 3 sykluser starter programsamsvaret.",
+    "pg_ab_intro": "Kjør de samme syklusene med gjeldende innstillinger (A) og et justert sett (B), side om side.",
+    "pg_apply_b_confirm": "Bruke sett B på den aktive enheten?\n\n{list}",
+    "pg_dtw_intro": "Se hvordan én syklus justeres mot en profil: de to kurvene, justeringsbanen og poengfordelingen. Skrivebeskyttet.",
+    "pg_no_b_overrides": "Ingen B-overstyringer å bruke.",
+    "pg_no_events": "Ingen hendelser",
+    "pg_running": "Kjører…",
+    "pg_simulator_intro": "Spill av tidligere sykluser gjennom deteksjonen med justerte innstillinger — en tørrkjøring som ikke endrer noe.",
+    "pg_tip_ambiguous": "{n}/{total} tvetydige",
+    "pg_tip_cycles": "{n} sykluser simulert",
+    "pg_tip_detected": "{n}/{total} oppdaget",
+    "pg_tip_match_correct": "{n}/{total} riktig samsvart",
+    "pg_tip_unmatched": "{n}/{total} uten treff",
+    "playground_intro": "En trygg sandkasse for å spille av tidligere sykluser med ulike innstillinger, sammenligne to oppsett side om side og se hvordan en syklus justeres mot en profil. Ingenting her endrer de aktive dataene dine før du uttrykkelig tar det i bruk.",
+    "playground_needs_restart": "Start Home Assistant på nytt for å aktivere Sandkasse-verktøyene.",
+    "profile_deleted": "Profil slettet",
+    "reminders_intro": "Vis en påminnelse i panelet så mange sykluser etter forrige service. La stå tomt eller 0 for å slå av en påminnelse.",
+    "setting_changed": "Endret fra {old} til {new} den {date}",
+    "settings_basic_note": "Viser de viktigste innstillingene. Bytt til Avansert for hele listen."
   },
   "phase_desc": {
     "anti_crease": "Enkelte korte fall etter ferdigstillelse for å redusere rynker.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "legg til en person…",
     "phase_name": "f.eks. Forsk",
-    "profile_name": "f.eks. Bomull 40°C"
+    "profile_name": "f.eks. Bomull 40°C",
+    "maintenance_notes": "f.eks. byttet filter, rengjort dørpakning"
   },
   "pref": {
     "date_absolute": "Absolutt (f.eks. kl. 14.32 2. juli)",
@@ -684,7 +805,7 @@
       "label": "Android-kanal (slutt)"
     },
     "notify_finish_message": {
-      "doc": "Kroppen sendes når en syklus er ferdig. Malvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Meldingstekst som sendes når en syklus er ferdig. Malvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} og {vs_typical} er mest nyttige her.",
       "label": "Sluttmelding"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Personer (for Kun hjemme)"
     },
     "notify_pre_complete_message": {
-      "doc": "Brødteksten til forhånds-/nesten-ferdig-varselet. Malvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Teksten i varselet før slutt / nesten ferdig. Malvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Nesten ferdig-melding"
     },
     "notify_reminder_message": {
-      "doc": "Hoveddelen av påminnelsen om lossing som fortsatt venter. Blank bruker den innebygde standarden. Malvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Teksten i påminnelsen om at tøyet fortsatt venter på å tas ut. Tomt bruker den innebygde standarden. Malvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Påminnelsesmelding"
     },
     "notify_start_message": {
-      "doc": "Kroppen sendes når en syklus starter. Malvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Meldingstekst som sendes når en syklus starter. Malvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Startmelding"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Hvor ofte bakgrunnsvakthunden sjekker for stansede sensorer og medgåtte tidsavbrudd. Standard 30 s.",
       "label": "Vokter-intervall"
+    },
+    "notify_milestone_message": {
+      "doc": "Melding for milepælvarselet. Malvariabler: {device}, {cycle_count}.",
+      "label": "Milepælmelding"
+    },
+    "notify_milestones": {
+      "doc": "Kommaseparerte syklusantall som utløser et engangs feiringsvarsel når de nås (f.eks. 50, 100, 500, 1000). Tomt deaktiverer milepælvarsler.",
+      "label": "Syklusmilepæler"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Slutten på ikke-forstyrr-vinduet (0-23). Tilbakeholdte varsler leveres på dette klokkeslettet. La stå tomt for å deaktivere.",
+      "label": "Slutt på stilletid"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Starten på et ikke-forstyrr-vindu (0-23). Varsler om ferdig, påminnelser og rent-tøy-varsler som ellers ville utløses i stilletiden, holdes tilbake og leveres når vinduet slutter. La stå tomt for å deaktivere. Støtter vinduer som krysser midnatt (f.eks. start 22, slutt 7).",
+      "label": "Start på stilletid"
+    },
+    "peak_rate_message": {
+      "doc": "Valgfri egendefinert tekst for topptarifftipset som legges til i startvarselet. Malvariabler: {device}, {price}. Tomt bruker den innebygde standarden.",
+      "label": "Melding om topptariff"
+    },
+    "peak_rate_threshold": {
+      "doc": "Når en syklus starter og gjeldende pris per kWh er på eller over denne verdien, legges et topptarifftips til i startvarselet. 0 eller tomt deaktiverer tipset.",
+      "label": "Terskel for topptariff (per kWh)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Vokter"
+    },
+    "quiet_hours_milestones": {
+      "label": "Stilletid og milepæler"
     }
   },
   "status": {
@@ -1013,7 +1161,9 @@
     "settings": "Innstillinger",
     "status": "Oversikt",
     "subtab_phase_catalog": "Fasekatalog",
-    "subtab_profiles": "Profiler"
+    "subtab_profiles": "Profiler",
+    "maintenance": "Vedlikehold",
+    "playground": "Sandkasse"
   },
   "tag": {
     "early_end": "Tidlig slutt",
@@ -1073,10 +1223,30 @@
     "settings_reverted": "Innstillinger gjenopprettet; integrering omlasting",
     "settings_saved": "Innstillinger lagret; integrering omlasting",
     "suggestions_applied": "Forslag brukt; integrering omlasting",
-    "suggestions_dismissed": "Forslag avvist"
+    "suggestions_dismissed": "Forslag avvist",
+    "apply_failed": "Bruk mislyktes: {error}",
+    "delete_failed": "Sletting mislyktes: {error}",
+    "load_more_failed": "Kunne ikke laste mer: {error}",
+    "maint_add_failed": "Kunne ikke legge til hendelse: {error}",
+    "maint_added": "Vedlikeholdshendelse lagt til",
+    "maint_delete_failed": "Kunne ikke slette hendelse: {error}",
+    "maint_deleted": "Vedlikeholdshendelse slettet",
+    "pg_dtw_failed": "DTW-inspeksjon mislyktes: {error}",
+    "pg_sim_failed": "Simulering mislyktes: {error}",
+    "relabel_done": "{count} syklus(er) merket på nytt",
+    "relabel_failed": "Ny merking mislyktes: {error}",
+    "reminders_save_failed": "Kunne ikke lagre påminnelser: {error}",
+    "reminders_saved": "Servicepåminnelser lagret"
   },
   "trend": {
     "down": "Trender nedover",
     "up": "Trender opp"
+  },
+  "maint": {
+    "bearing_service": "Lagerservice",
+    "descale": "Avkalking",
+    "drum_clean": "Rengjør trommel",
+    "filter_clean": "Rengjør filter",
+    "other": "Annet"
   }
 }

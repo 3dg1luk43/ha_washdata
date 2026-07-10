@@ -123,7 +123,20 @@
     "trim": "Snyrta",
     "trim_split": "Klippta / Kljúfa",
     "use": "Notaðu",
-    "wipe_all": "Þurrkaðu öll gögn"
+    "wipe_all": "Þurrkaðu öll gögn",
+    "add_maintenance": "Bæta við viðhaldsatburði",
+    "apply_set_b": "Beita stillingum B",
+    "kbd_help": "Flýtilyklar",
+    "load_more": "Hlaða meira",
+    "relabel": "Endurmerkja ({count})",
+    "run_both": "Keyra A á móti B",
+    "run_simulation": "Keyra hermun",
+    "save_reminders": "Vista áminningar",
+    "select_all": "Velja allt",
+    "select_last20": "Síðustu 20",
+    "select_none": "Hreinsa",
+    "skip_setup": "Sleppa uppsetningu",
+    "undo": "Afturkalla"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Geymslutölfræði",
     "toggle_sidebar": "Skiptu um hliðarstiku Home Assistant",
     "tools_and_data": "Verkfæri og gögn",
-    "wipe_history": "Þurrkaðu sögu"
+    "wipe_history": "Þurrkaðu sögu",
+    "ab_comparison": "Samanburður á stillingum A/B",
+    "add_maintenance": "Bæta við viðhaldsatburði",
+    "cycle_simulator": "Lotuhermir",
+    "dtw_inspector": "DTW skoðari",
+    "getting_started": "Að byrja",
+    "kbd_shortcuts": "Flýtilyklar",
+    "maintenance_log": "Viðhaldsskrá",
+    "maintenance_reminders": "Þjónustuáminningar",
+    "settings_history": "Stillingasaga"
   },
   "health": {
     "fair": "Viðunanlegt prófíl",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Skilaboð (valfrjálst, {device}/{program}/{minutes})",
     "ungrouped": "Óhópað",
     "unlabelled": "Ómerkt",
-    "unlabelled_paren": "(ómerkt)"
+    "unlabelled_paren": "(ómerkt)",
+    "avg_cost": "Meðalkostnaður",
+    "change": "Breyting",
+    "concurrency": "Samhliða vinnsla",
+    "correlation": "Fylgni",
+    "current_phase": "Núverandi fasi",
+    "curves": "Ferlar",
+    "cycle": "Lota",
+    "cycle_index": "lotunúmer →",
+    "cycles": "Lotur",
+    "dashed": "strikað",
+    "delta": "Δ",
+    "dtw_blend_w": "Blöndunarvægi",
+    "dtw_blended": "Blönduð einkunn",
+    "dtw_ddtw": "DDTW-einkunn",
+    "dtw_l1": "L1-einkunn",
+    "dtw_matched_profile": "(samsvarað snið lotunnar)",
+    "duration_agreement": "Samræmi tímalengdar",
+    "energy_agreement": "Samræmi orku",
+    "event_timeline": "Tímalína atburða",
+    "event_type": "Tegund atburðar",
+    "final_score": "Lokaeinkunn",
+    "mae_score": "MAE-einkunn",
+    "metric": "Mæligildi",
+    "n_selected": "{n} valin",
+    "na": "á ekki við",
+    "notes": "Athugasemdir",
+    "outcome": "Niðurstaða",
+    "per_cycle_short": "lota",
+    "pg_ambiguous": "Óljóst",
+    "pg_cycles": "Lotur",
+    "pg_detected": "Greint",
+    "pg_ev_ending": "Að ljúka",
+    "pg_ev_match": "Samsvörun",
+    "pg_ev_off": "Slökkt",
+    "pg_ev_paused": "Í hléi",
+    "pg_ev_running": "Í gangi",
+    "pg_ev_start": "Ræsing",
+    "pg_match_correct": "Rétt samsvörun",
+    "pg_unmatched": "Ósamsvarað",
+    "phase_timeline": "Tímalína fasa",
+    "profile_index": "sniðnúmer →",
+    "reminder_every": "Minna á eftir hverjar (lotur)",
+    "score": "Einkunn",
+    "score_breakdown": "Sundurliðun einkunnar",
+    "setting": "Stilling",
+    "settings_a": "Stillingar A (núverandi)",
+    "settings_a_short": "A",
+    "settings_advanced": "Ítarlegri",
+    "settings_b": "Stillingar B (prófun)",
+    "settings_b_short": "B",
+    "settings_basic": "Grunn",
+    "settings_detail_level": "Nákvæmnisstig stillinga",
+    "settings_overrides": "Yfirskriftir stillinga",
+    "sparkline": "Nýleg þróun lotulengdar",
+    "stage2": "Þrep 2 — kjarnalíkindi",
+    "stage3": "Þrep 3 — DTW",
+    "stage4": "Þrep 4 — samræmi",
+    "warp_path": "Sveigjuleið"
   },
   "log": {
     "all_levels": "Öll stig"
@@ -337,7 +417,10 @@
     "process_history_msg": "Keyra samsvörun aftur, uppfæra tillögur, þjálfa ML aftur (ef virkt) og endurreikna heilsu lotu yfir allar geymdar lotur. Þetta kann taka smá tíma.",
     "process_history_ok": "Keyra",
     "process_history_title": "Ferli Sögu",
-    "process_recording": "Ferli Upptaka"
+    "process_recording": "Ferli Upptaka",
+    "delete_maintenance_msg": "Eyða þessari viðhaldsfærslu? Þetta er ekki hægt að afturkalla.",
+    "delete_maintenance_title": "Eyða viðhaldsatburði",
+    "relabel_cycles": "Endurmerkja {count} lotur"
   },
   "msg": {
     "appliance_monitor": "Vöktunartæki",
@@ -448,7 +531,44 @@
     "updated": "Uppfært",
     "warmup_badge": "Enn að læra ({done}/{needed} lotur)",
     "warmup_detail": "Þessi prófíll þarfnast {needed} merktra lota áður en sjálfvirk samsvörun hefst. Sérhver staðfest lota hjálpar honum að læra.",
-    "wipe_history_warning": "Eyða öllum lotum og sniðum varanlega. Ekki hægt að afturkalla."
+    "wipe_history_warning": "Eyða öllum lotum og sniðum varanlega. Ekki hægt að afturkalla.",
+    "cycles_deleted": "{count} lotu(m) eytt",
+    "kbd_advanced": "Fara í Ítarlegri",
+    "kbd_cycles": "Fara í Lotur",
+    "kbd_escape": "Loka opnum glugga",
+    "kbd_help": "Sýna / fela þessa hjálp",
+    "kbd_help_intro": "Flýtilyklar eru hunsaðir þegar skrifað er í reit. Aðeins flipar sem eru til fyrir þetta tæki svara.",
+    "kbd_ml": "Fara í ML þjálfun",
+    "kbd_overview": "Fara í Yfirlit",
+    "kbd_playground": "Fara í Leiksvæði",
+    "kbd_profiles": "Fara í Snið",
+    "kbd_settings": "Fara í Stillingar",
+    "maintenance_due": "Viðhald tímabært: {items}",
+    "maintenance_intro": "Skráðu þjónustu sem þú framkvæmir á þessu tæki og fáðu áminningu þegar hvert verk er aftur tímabært.",
+    "maintenance_load_error": "Ekki tókst að hlaða viðhaldsgögnum: {error}",
+    "name_first_program": "Þú ert með nægar lotur — gefðu fyrsta prógramminu nafn til að hefja samsvörun.",
+    "no_cycles_selected": "Veldu að minnsta kosti eina lotu fyrst.",
+    "no_maintenance": "Ekkert viðhald skráð enn.",
+    "onboarding_progress": "{n} / 3 lotur skoðaðar",
+    "onboarding_watching": "Notaðu tækið eins og venjulega — WashData fylgist með. Eftir 3 lotur hefst samsvörun prógramma.",
+    "pg_ab_intro": "Keyrðu sömu lotur með núverandi stillingum (A) og breyttu safni (B), hlið við hlið.",
+    "pg_apply_b_confirm": "Beita safni B á virka tækið?\n\n{list}",
+    "pg_dtw_intro": "Skoðaðu hvernig ein lota samræmist sniði: ferlana tvo, sveigjuleiðina og sundurliðun einkunnar. Aðeins til skoðunar.",
+    "pg_no_b_overrides": "Engar B-yfirskriftir til að beita.",
+    "pg_no_events": "Engir atburðir",
+    "pg_running": "Keyrir…",
+    "pg_simulator_intro": "Spilaðu fyrri lotur aftur gegnum greiningu með breyttum stillingum — þurrkeyrsla sem breytir engu.",
+    "pg_tip_ambiguous": "{n}/{total} óljósar",
+    "pg_tip_cycles": "{n} lotur hermdar",
+    "pg_tip_detected": "{n}/{total} greindar",
+    "pg_tip_match_correct": "{n}/{total} rétt samsvaraðar",
+    "pg_tip_unmatched": "{n}/{total} ósamsvaraðar",
+    "playground_intro": "Öruggt leiksvæði til að spila fyrri lotur aftur með mismunandi stillingum, bera saman tvær uppsetningar hlið við hlið og skoða hvernig lota samræmist sniði. Ekkert hér breytir raungögnunum þínum fyrr en þú beitir því sérstaklega.",
+    "playground_needs_restart": "Endurræstu Home Assistant til að virkja Leiksvæðistólin.",
+    "profile_deleted": "Sniði eytt",
+    "reminders_intro": "Sýna áminningu í spjaldinu svona mörgum lotum eftir síðustu þjónustu. Skildu eftir autt eða 0 til að slökkva á áminningu.",
+    "setting_changed": "Breytt úr {old} í {new} þann {date}",
+    "settings_basic_note": "Sýni nauðsynlegar stillingar. Skiptu yfir í Ítarlegri fyrir allan listann."
   },
   "phase_desc": {
     "anti_crease": "Stundum hrynur stutt eftir að því er lokið til að draga úr hrukkum.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "bæta við einstakling…",
     "phase_name": "t.d. Forþvottur",
-    "profile_name": "t.d. Bómull 40°C"
+    "profile_name": "t.d. Bómull 40°C",
+    "maintenance_notes": "t.d. skipti um síu, hreinsaði hurðarþéttingu"
   },
   "pref": {
     "date_absolute": "Algjört (t.d. 14:32 þann 2. júlí)",
@@ -684,7 +805,7 @@
       "label": "Android rás (lok)"
     },
     "notify_finish_message": {
-      "doc": "Líkami sendur þegar lotu lýkur. Sniðbreytur: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Meginmál sent þegar lotu lýkur. Sniðbreytur: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} og {vs_typical} eru gagnlegust hér.",
       "label": "Lokaskilaboð"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Fólk (fyrir Aðeins Heima)"
     },
     "notify_pre_complete_message": {
-      "doc": "Meginmál fyrir-loka / næstum lokið viðvörun. Sniðbreytur: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Meginmál viðvörunar fyrir lok / næstum búið. Sniðbreytur: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "For-lokar­skilaboð"
     },
     "notify_reminder_message": {
-      "doc": "Meginmál áminningar um affermingu sem enn bíður. Blank notar innbyggða sjálfgefna. Sniðbreytur: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Meginmál áminningar um að taka enn úr. Autt notar innbyggða sjálfgefna gildið. Sniðbreytur: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Minningarboð"
     },
     "notify_start_message": {
-      "doc": "Líkami sendur þegar hringrás byrjar. Sniðbreytur: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Meginmál sent þegar lota hefst. Sniðbreytur: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Ræsingarskilaboð"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Hversu oft bakgrunnsvaktin athugar hvort skynjarar hafi verið stöðvaðir og liðinn tími. Sjálfgefið 30 s.",
       "label": "Gæsluabil"
+    },
+    "notify_milestone_message": {
+      "doc": "Skilaboð fyrir áfangatilkynninguna. Sniðbreytur: {device}, {cycle_count}.",
+      "label": "Áfangaskilaboð"
+    },
+    "notify_milestones": {
+      "doc": "Kommuaðgreind lotutalning sem kveikir á einstakri fagnaðartilkynningu þegar henni er náð (t.d. 50, 100, 500, 1000). Autt slekkur á áfangatilkynningum.",
+      "label": "Lotuáfangar"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Lok ónæðislauss glugga (0-23). Tafðar tilkynningar eru afhentar á þessari klukkustund. Skildu eftir autt til að slökkva.",
+      "label": "Lok hljóðláts tíma"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Upphaf ónæðislauss glugga (0-23). Loka-, áminningar- og hreinþvottatilkynningar sem myndu berast á hljóðlátum tíma eru tafðar og afhentar þegar glugganum lýkur. Skildu eftir autt til að slökkva. Styður glugga sem ná yfir miðnætti (t.d. upphaf 22, lok 7).",
+      "label": "Upphaf hljóðláts tíma"
+    },
+    "peak_rate_message": {
+      "doc": "Valfrjáls sérsniðinn texti fyrir háannaálagsábendinguna sem bætt er við ræsitilkynninguna. Sniðbreytur: {device}, {price}. Autt notar innbyggða sjálfgefna gildið.",
+      "label": "Skilaboð um háannaverð"
+    },
+    "peak_rate_threshold": {
+      "doc": "Þegar lota hefst og núverandi verð á kWst er á eða yfir þessu gildi er háannaverðsábendingu bætt við ræsitilkynninguna. 0 eða autt slekkur á ábendingunni.",
+      "label": "Háannaverðsmörk (á kWst)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Gæsla"
+    },
+    "quiet_hours_milestones": {
+      "label": "Hljóðlátur tími og áfangar"
     }
   },
   "status": {
@@ -1013,7 +1161,9 @@
     "settings": "Stillingar",
     "status": "Yfirlit",
     "subtab_phase_catalog": "Áfangaskrá",
-    "subtab_profiles": "Snið"
+    "subtab_profiles": "Snið",
+    "maintenance": "Viðhald",
+    "playground": "Leiksvæði"
   },
   "tag": {
     "early_end": "Snemma enda",
@@ -1073,10 +1223,30 @@
     "settings_reverted": "Stillingar endurheimtar; endurhleðsla samþættingar",
     "settings_saved": "Stillingar vistaðar; endurhleðsla samþættingar",
     "suggestions_applied": "Tillögur beitt; endurhleðsla samþættingar",
-    "suggestions_dismissed": "Tillögum vísað frá"
+    "suggestions_dismissed": "Tillögum vísað frá",
+    "apply_failed": "Beiting mistókst: {error}",
+    "delete_failed": "Eyðing mistókst: {error}",
+    "load_more_failed": "Ekki tókst að hlaða meira: {error}",
+    "maint_add_failed": "Ekki tókst að bæta við atburði: {error}",
+    "maint_added": "Viðhaldsatburði bætt við",
+    "maint_delete_failed": "Ekki tókst að eyða atburði: {error}",
+    "maint_deleted": "Viðhaldsatburði eytt",
+    "pg_dtw_failed": "DTW-skoðun mistókst: {error}",
+    "pg_sim_failed": "Hermun mistókst: {error}",
+    "relabel_done": "Endurmerkti {count} lotu(r)",
+    "relabel_failed": "Endurmerking mistókst: {error}",
+    "reminders_save_failed": "Ekki tókst að vista áminningar: {error}",
+    "reminders_saved": "Þjónustuáminningar vistaðar"
   },
   "trend": {
     "down": "Stefnir niður",
     "up": "Stefna upp"
+  },
+  "maint": {
+    "bearing_service": "Þjónusta á legum",
+    "descale": "Afkalka",
+    "drum_clean": "Hreinsa tromlu",
+    "filter_clean": "Hreinsa síu",
+    "other": "Annað"
   }
 }

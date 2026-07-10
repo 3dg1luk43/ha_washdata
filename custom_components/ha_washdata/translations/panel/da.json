@@ -123,7 +123,20 @@
     "trim": "Trim",
     "trim_split": "Trim / Split",
     "use": "Bruge",
-    "wipe_all": "Slet alle data"
+    "wipe_all": "Slet alle data",
+    "add_maintenance": "Tilføj vedligeholdelseshændelse",
+    "apply_set_b": "Anvend sæt B",
+    "kbd_help": "Tastaturgenveje",
+    "load_more": "Indlæs flere",
+    "relabel": "Ommærk ({count})",
+    "run_both": "Kør A mod B",
+    "run_simulation": "Kør simulering",
+    "save_reminders": "Gem påmindelser",
+    "select_all": "Vælg alle",
+    "select_last20": "Seneste 20",
+    "select_none": "Ryd",
+    "skip_setup": "Spring opsætning over",
+    "undo": "Fortryd"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Opbevaringsstatistik",
     "toggle_sidebar": "Skift Home Assistant-sidebjælken",
     "tools_and_data": "Værktøjer og data",
-    "wipe_history": "Tør historie"
+    "wipe_history": "Tør historie",
+    "ab_comparison": "A/B-indstillingssammenligning",
+    "add_maintenance": "Tilføj vedligeholdelseshændelse",
+    "cycle_simulator": "Cyklussimulator",
+    "dtw_inspector": "DTW-inspektor",
+    "getting_started": "Kom godt i gang",
+    "kbd_shortcuts": "Tastaturgenveje",
+    "maintenance_log": "Vedligeholdelseslog",
+    "maintenance_reminders": "Servicepåmindelser",
+    "settings_history": "Indstillingshistorik"
   },
   "health": {
     "fair": "Acceptabel matchkvalitet",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Besked (valgfrit, {device}/{program}/{minutes})",
     "ungrouped": "Ugrupperet",
     "unlabelled": "Umærket",
-    "unlabelled_paren": "(umærket)"
+    "unlabelled_paren": "(umærket)",
+    "avg_cost": "Gns. omkostning",
+    "change": "Ændring",
+    "concurrency": "Samtidighed",
+    "correlation": "Korrelation",
+    "current_phase": "Aktuel fase",
+    "curves": "Kurver",
+    "cycle": "Cyklus",
+    "cycle_index": "cyklusindeks →",
+    "cycles": "Cyklusser",
+    "dashed": "stiplet",
+    "delta": "Δ",
+    "dtw_blend_w": "Blandingsvægt",
+    "dtw_blended": "Blandet score",
+    "dtw_ddtw": "DDTW-score",
+    "dtw_l1": "L1-score",
+    "dtw_matched_profile": "(cyklussens matchede profil)",
+    "duration_agreement": "Varighedsoverensstemmelse",
+    "energy_agreement": "Energioverensstemmelse",
+    "event_timeline": "Hændelsestidslinje",
+    "event_type": "Hændelsestype",
+    "final_score": "Endelig score",
+    "mae_score": "MAE-score",
+    "metric": "Metrik",
+    "n_selected": "{n} valgt",
+    "na": "n/a",
+    "notes": "Noter",
+    "outcome": "Resultat",
+    "per_cycle_short": "cyklus",
+    "pg_ambiguous": "Tvetydig",
+    "pg_cycles": "Cyklusser",
+    "pg_detected": "Registreret",
+    "pg_ev_ending": "Afslutter",
+    "pg_ev_match": "Match",
+    "pg_ev_off": "Fra",
+    "pg_ev_paused": "Pauset",
+    "pg_ev_running": "Kører",
+    "pg_ev_start": "Start",
+    "pg_match_correct": "Match korrekt",
+    "pg_unmatched": "Uden match",
+    "phase_timeline": "Fasetidslinje",
+    "profile_index": "profilindeks →",
+    "reminder_every": "Påmind hver (cyklusser)",
+    "score": "Score",
+    "score_breakdown": "Scoreopdeling",
+    "setting": "Indstilling",
+    "settings_a": "Indstillinger A (nuværende)",
+    "settings_a_short": "A",
+    "settings_advanced": "Avanceret",
+    "settings_b": "Indstillinger B (test)",
+    "settings_b_short": "B",
+    "settings_basic": "Grundlæggende",
+    "settings_detail_level": "Detaljeniveau for indstillinger",
+    "settings_overrides": "Tilsidesættelser af indstillinger",
+    "sparkline": "Tendens for seneste cyklusvarigheder",
+    "stage2": "Trin 2 — kerneligning",
+    "stage3": "Trin 3 — DTW",
+    "stage4": "Trin 4 — overensstemmelse",
+    "warp_path": "Warp-sti"
   },
   "log": {
     "all_levels": "Alle niveauer"
@@ -337,7 +417,10 @@
     "process_history_msg": "Kør matching igen, opdater forslag, gentræn ML (hvis aktiveret) og genberegn cyklernes tilstand på tværs af alle gemte cyklusser. Dette kan tage et øjeblik.",
     "process_history_ok": "Behandl",
     "process_history_title": "Behandl historik",
-    "process_recording": "Procesoptagelse"
+    "process_recording": "Procesoptagelse",
+    "delete_maintenance_msg": "Slet denne vedligeholdelsespost? Dette kan ikke fortrydes.",
+    "delete_maintenance_title": "Slet vedligeholdelseshændelse",
+    "relabel_cycles": "Ommærk {count} cyklusser"
   },
   "msg": {
     "appliance_monitor": "Apparat monitor",
@@ -448,7 +531,44 @@
     "updated": "Opdateret",
     "warmup_badge": "Lærer stadig ({done}/{needed} cyklusser)",
     "warmup_detail": "Denne profil har brug for {needed} mærkede cyklusser, før automatisk matchning begynder. Hver bekræftet cyklus hjælper den med at lære.",
-    "wipe_history_warning": "Slet alle cyklusser og profiler permanent. Kan ikke fortrydes."
+    "wipe_history_warning": "Slet alle cyklusser og profiler permanent. Kan ikke fortrydes.",
+    "cycles_deleted": "{count} cyklus(ser) slettet",
+    "kbd_advanced": "Gå til Avanceret",
+    "kbd_cycles": "Gå til Cyklusser",
+    "kbd_escape": "Luk den åbne dialog",
+    "kbd_help": "Vis / skjul denne hjælp",
+    "kbd_help_intro": "Genveje ignoreres, mens du skriver i et felt. Kun faner, der findes for denne enhed, reagerer.",
+    "kbd_ml": "Gå til ML-træning",
+    "kbd_overview": "Gå til Oversigt",
+    "kbd_playground": "Gå til Legeplads",
+    "kbd_profiles": "Gå til Profiler",
+    "kbd_settings": "Gå til Indstillinger",
+    "maintenance_due": "Vedligeholdelse forfalder: {items}",
+    "maintenance_intro": "Log den service, du udfører på dette apparat, og bliv mindet om det, når hver opgave forfalder igen.",
+    "maintenance_load_error": "Kunne ikke indlæse vedligeholdelsesdata: {error}",
+    "name_first_program": "Du har nok cyklusser — navngiv dit første program for at begynde matchning.",
+    "no_cycles_selected": "Vælg mindst én cyklus først.",
+    "no_maintenance": "Ingen vedligeholdelse registreret endnu.",
+    "onboarding_progress": "{n} / 3 cyklusser observeret",
+    "onboarding_watching": "Lad dit apparat køre normalt — WashData holder øje. Efter 3 cyklusser begynder programmatchning.",
+    "pg_ab_intro": "Kør de samme cyklusser med dine nuværende indstillinger (A) og et justeret sæt (B), side om side.",
+    "pg_apply_b_confirm": "Anvend sæt B på den aktive enhed?\n\n{list}",
+    "pg_dtw_intro": "Undersøg, hvordan en cyklus justeres til en profil: de to kurver, warp-stien og scoreopdelingen. Skrivebeskyttet.",
+    "pg_no_b_overrides": "Ingen B-tilsidesættelser at anvende.",
+    "pg_no_events": "Ingen hændelser",
+    "pg_running": "Kører…",
+    "pg_simulator_intro": "Afspil tidligere cyklusser gennem registrering med justerede indstillinger — en prøvekørsel, der ikke ændrer noget.",
+    "pg_tip_ambiguous": "{n}/{total} tvetydige",
+    "pg_tip_cycles": "{n} cyklusser simuleret",
+    "pg_tip_detected": "{n}/{total} registreret",
+    "pg_tip_match_correct": "{n}/{total} matchet korrekt",
+    "pg_tip_unmatched": "{n}/{total} uden match",
+    "playground_intro": "En sikker sandkasse til at afspille tidligere cyklusser med andre indstillinger, sammenligne to opsætninger side om side og undersøge, hvordan en cyklus justeres til en profil. Intet her ændrer dine aktive data, før du udtrykkeligt anvender det.",
+    "playground_needs_restart": "Genstart Home Assistant for at aktivere Legeplads-værktøjerne.",
+    "profile_deleted": "Profil slettet",
+    "reminders_intro": "Vis en påmindelse i panelet så mange cyklusser efter sidste service. Lad feltet være tomt eller 0 for at slå en påmindelse fra.",
+    "setting_changed": "Ændret fra {old} til {new} den {date}",
+    "settings_basic_note": "Viser væsentlige indstillinger. Skift til Avanceret for hele listen."
   },
   "phase_desc": {
     "anti_crease": "Lejlighedsvis korte tumblinger efter færdiggørelse for at reducere rynker.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "tilføj en person…",
     "phase_name": "f.eks. Forsk",
-    "profile_name": "f.eks. Bomuld 40°C"
+    "profile_name": "f.eks. Bomuld 40°C",
+    "maintenance_notes": "f.eks. udskiftede filter, rensede dørpakning"
   },
   "pref": {
     "date_absolute": "Absolut (f.eks. 14:32 den 2. juli)",
@@ -684,7 +805,7 @@
       "label": "Android-kanal (slut)"
     },
     "notify_finish_message": {
-      "doc": "Kroppen sendes, når en cyklus afsluttes. Skabelonvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Tekst sendt, når en cyklus afsluttes. Skabelonvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} og {vs_typical} er mest nyttige her.",
       "label": "Slutbesked"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Personer (for kun når hjemme)"
     },
     "notify_pre_complete_message": {
-      "doc": "Brødtekst af advarslen før slut / næsten færdig. Skabelonvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Tekst i før-slut / næsten-færdig-advarslen. Skabelonvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Besked om næsten færdig"
     },
     "notify_reminder_message": {
-      "doc": "Brødtekst af påmindelsen om aflæsning, der stadig venter. Blank bruger den indbyggede standard. Skabelonvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Tekst i påmindelsen om stadig ventende tømning. Tom bruger den indbyggede standard. Skabelonvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Påmindelsesbesked"
     },
     "notify_start_message": {
-      "doc": "Krop sendes, når en cyklus starter. Skabelonvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Tekst sendt, når en cyklus starter. Skabelonvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Startbesked"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Hvor ofte vagthunden i baggrunden tjekker for fastholdte sensorer og forløbne timeouts. Standard 30 s.",
       "label": "Watchdog-interval"
+    },
+    "notify_milestone_message": {
+      "doc": "Besked til milepælsnotifikationen. Skabelonvariabler: {device}, {cycle_count}.",
+      "label": "Milepælsbesked"
+    },
+    "notify_milestones": {
+      "doc": "Kommaseparerede cyklustællinger, der udløser en engangs-fejringsnotifikation, når de nås (f.eks. 50, 100, 500, 1000). Tom deaktiverer milepælsnotifikationer.",
+      "label": "Cyklusmilepæle"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Afslutning på forstyr-ikke-vinduet (0-23). Tilbageholdte notifikationer leveres på denne time. Lad feltet være tomt for at deaktivere.",
+      "label": "Stilletimer slut"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Start på et forstyr-ikke-vindue (0-23). Notifikationer om afslutning, påmindelser og ren-vasketøj, der ville blive udløst i stilletimerne, tilbageholdes og leveres, når vinduet slutter. Lad feltet være tomt for at deaktivere. Understøtter vinduer, der krydser midnat (f.eks. start 22, slut 7).",
+      "label": "Stilletimer start"
+    },
+    "peak_rate_message": {
+      "doc": "Valgfri brugerdefineret tekst til spidsbelastningstippet, der føjes til startnotifikationen. Skabelonvariabler: {device}, {price}. Tom bruger den indbyggede standard.",
+      "label": "Spidsbelastningsbesked"
+    },
+    "peak_rate_threshold": {
+      "doc": "Når en cyklus starter, og den aktuelle pris pr. kWh er på eller over denne værdi, føjes et spidsbelastningstip til startnotifikationen. 0 eller tom deaktiverer tippet.",
+      "label": "Spidsbelastningstærskel (pr. kWh)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Watchdog"
+    },
+    "quiet_hours_milestones": {
+      "label": "Stilletimer og milepæle"
     }
   },
   "status": {
@@ -1013,7 +1161,9 @@
     "settings": "Indstillinger",
     "status": "Oversigt",
     "subtab_phase_catalog": "Fasekatalog",
-    "subtab_profiles": "Profiler"
+    "subtab_profiles": "Profiler",
+    "maintenance": "Vedligeholdelse",
+    "playground": "Legeplads"
   },
   "tag": {
     "early_end": "Tidlig slutning",
@@ -1073,10 +1223,30 @@
     "settings_reverted": "Indstillinger gendannet; integration genindlæsning",
     "settings_saved": "Indstillinger gemt; integration genindlæsning",
     "suggestions_applied": "Forslag anvendt; integration genindlæsning",
-    "suggestions_dismissed": "Forslag afvist"
+    "suggestions_dismissed": "Forslag afvist",
+    "apply_failed": "Anvendelse mislykkedes: {error}",
+    "delete_failed": "Sletning mislykkedes: {error}",
+    "load_more_failed": "Kunne ikke indlæse flere: {error}",
+    "maint_add_failed": "Kunne ikke tilføje hændelse: {error}",
+    "maint_added": "Vedligeholdelseshændelse tilføjet",
+    "maint_delete_failed": "Kunne ikke slette hændelse: {error}",
+    "maint_deleted": "Vedligeholdelseshændelse slettet",
+    "pg_dtw_failed": "DTW-inspektion mislykkedes: {error}",
+    "pg_sim_failed": "Simulering mislykkedes: {error}",
+    "relabel_done": "Ommærkede {count} cyklus(ser)",
+    "relabel_failed": "Ommærkning mislykkedes: {error}",
+    "reminders_save_failed": "Kunne ikke gemme påmindelser: {error}",
+    "reminders_saved": "Servicepåmindelser gemt"
   },
   "trend": {
     "down": "Trend nedad",
     "up": "Opadgående tendens"
+  },
+  "maint": {
+    "bearing_service": "Lejeservice",
+    "descale": "Afkalk",
+    "drum_clean": "Rengør tromle",
+    "filter_clean": "Rengør filter",
+    "other": "Andet"
   }
 }

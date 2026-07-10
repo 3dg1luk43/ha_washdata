@@ -123,7 +123,20 @@
     "trim": "Vágás",
     "trim_split": "Trim / Split",
     "use": "Használat",
-    "wipe_all": "Törölje az összes adatot"
+    "wipe_all": "Törölje az összes adatot",
+    "add_maintenance": "Karbantartási esemény hozzáadása",
+    "apply_set_b": "B készlet alkalmazása",
+    "kbd_help": "Billentyűparancsok",
+    "load_more": "Több betöltése",
+    "relabel": "Átcímkézés ({count})",
+    "run_both": "A vs B futtatása",
+    "run_simulation": "Szimuláció futtatása",
+    "save_reminders": "Emlékeztetők mentése",
+    "select_all": "Összes kijelölése",
+    "select_last20": "Utolsó 20",
+    "select_none": "Egyik sem",
+    "skip_setup": "Beállítás kihagyása",
+    "undo": "Visszavonás"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Tárolási statisztikák",
     "toggle_sidebar": "Kapcsolja be a Home Assistant oldalsávot",
     "tools_and_data": "Eszközök és adatok",
-    "wipe_history": "Törölje az előzményeket"
+    "wipe_history": "Törölje az előzményeket",
+    "ab_comparison": "A/B beállítások összehasonlítása",
+    "add_maintenance": "Karbantartási esemény hozzáadása",
+    "cycle_simulator": "Ciklusszimulátor",
+    "dtw_inspector": "DTW-vizsgáló",
+    "getting_started": "Első lépések",
+    "kbd_shortcuts": "Billentyűparancsok",
+    "maintenance_log": "Karbantartási napló",
+    "maintenance_reminders": "Szerviz emlékeztetők",
+    "settings_history": "Beállítások előzményei"
   },
   "health": {
     "fair": "Elfogadható profilminőség",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Üzenet (nem kötelező, {device}/{program}/{minutes})",
     "ungrouped": "Csoportosítás nélkül",
     "unlabelled": "Címkézetlen",
-    "unlabelled_paren": "(címkézetlen)"
+    "unlabelled_paren": "(címkézetlen)",
+    "avg_cost": "Átlagos költség",
+    "change": "Változás",
+    "concurrency": "Egyidejűség",
+    "correlation": "Korreláció",
+    "current_phase": "Jelenlegi fázis",
+    "curves": "Görbék",
+    "cycle": "Ciklus",
+    "cycle_index": "ciklusindex →",
+    "cycles": "Ciklusok",
+    "dashed": "szaggatott",
+    "delta": "Δ",
+    "dtw_blend_w": "Keverési súly",
+    "dtw_blended": "Kombinált pontszám",
+    "dtw_ddtw": "DDTW pontszám",
+    "dtw_l1": "L1 pontszám",
+    "dtw_matched_profile": "(a ciklus egyeztetett profilja)",
+    "duration_agreement": "Időtartam-egyezés",
+    "energy_agreement": "Energia-egyezés",
+    "event_timeline": "Eseményidővonal",
+    "event_type": "Eseménytípus",
+    "final_score": "Végső pontszám",
+    "mae_score": "MAE pontszám",
+    "metric": "Mérőszám",
+    "n_selected": "{n} kijelölve",
+    "na": "nincs",
+    "notes": "Jegyzetek",
+    "outcome": "Eredmény",
+    "per_cycle_short": "ciklus",
+    "pg_ambiguous": "Nem egyértelmű",
+    "pg_cycles": "Ciklusok",
+    "pg_detected": "Észlelve",
+    "pg_ev_ending": "Befejezés",
+    "pg_ev_match": "Egyezés",
+    "pg_ev_off": "Ki",
+    "pg_ev_paused": "Szüneteltetve",
+    "pg_ev_running": "Fut",
+    "pg_ev_start": "Indítás",
+    "pg_match_correct": "Egyezés helyes",
+    "pg_unmatched": "Nincs egyezés",
+    "phase_timeline": "Fázisidővonal",
+    "profile_index": "profilindex →",
+    "reminder_every": "Emlékeztetés (ciklusonként)",
+    "score": "Pontszám",
+    "score_breakdown": "Pontszám részletezése",
+    "setting": "Beállítás",
+    "settings_a": "Beállítások A (jelenlegi)",
+    "settings_a_short": "A",
+    "settings_advanced": "Fejlett",
+    "settings_b": "Beállítások B (teszt)",
+    "settings_b_short": "B",
+    "settings_basic": "Alap",
+    "settings_detail_level": "Beállítások részletességi szintje",
+    "settings_overrides": "Beállítás-felülírások",
+    "sparkline": "Legutóbbi ciklusidőtartam-trend",
+    "stage2": "2. szakasz — alapvető hasonlóság",
+    "stage3": "3. szakasz — DTW",
+    "stage4": "4. szakasz — egyezés",
+    "warp_path": "Torzítási útvonal"
   },
   "log": {
     "all_levels": "Minden szinten"
@@ -337,7 +417,10 @@
     "process_history_msg": "Futtassa újra az egyeztetést, frissítse a javaslatokat, tanítsa újra az ML-t (ha engedélyezve van) és számolja újra a ciklusok egészségét az összes tárolt cikluson. Ez eltarthat egy ideig.",
     "process_history_ok": "Feldolgozás",
     "process_history_title": "Előzmények feldolgozása",
-    "process_recording": "Folyamat rögzítése"
+    "process_recording": "Folyamat rögzítése",
+    "delete_maintenance_msg": "Törli ezt a karbantartási bejegyzést? Ez nem vonható vissza.",
+    "delete_maintenance_title": "Karbantartási esemény törlése",
+    "relabel_cycles": "{count} ciklus átcímkézése"
   },
   "msg": {
     "appliance_monitor": "Készülék monitor",
@@ -448,7 +531,44 @@
     "updated": "Frissítve",
     "warmup_badge": "Még tanul ({done}/{needed} ciklus)",
     "warmup_detail": "Ez a profil {needed} felcímkézett ciklust igényel, mielőtt az automatikus egyeztetés megkezdődik. Minden megerősített ciklus segít tanulni.",
-    "wipe_history_warning": "Véglegesen törölje az összes ciklust és profilt. Nem vonható vissza."
+    "wipe_history_warning": "Véglegesen törölje az összes ciklust és profilt. Nem vonható vissza.",
+    "cycles_deleted": "{count} ciklus törölve",
+    "kbd_advanced": "Ugrás: Fejlett",
+    "kbd_cycles": "Ugrás: Ciklusok",
+    "kbd_escape": "A megnyitott párbeszédpanel bezárása",
+    "kbd_help": "Súgó megjelenítése / elrejtése",
+    "kbd_help_intro": "A gyorsbillentyűk figyelmen kívül maradnak, amíg egy mezőbe gépel. Csak az ehhez az eszközhöz létező fülek reagálnak.",
+    "kbd_ml": "Ugrás: ML képzés",
+    "kbd_overview": "Ugrás: Áttekintés",
+    "kbd_playground": "Ugrás: Homokozó",
+    "kbd_profiles": "Ugrás: Profilok",
+    "kbd_settings": "Ugrás: Beállítások",
+    "maintenance_due": "Esedékes karbantartás: {items}",
+    "maintenance_intro": "Rögzítse az ezen a készüléken végzett karbantartást, és emlékeztetőt kap, amikor egy feladat ismét esedékessé válik.",
+    "maintenance_load_error": "Nem sikerült betölteni a karbantartási adatokat: {error}",
+    "name_first_program": "Elég ciklusa van — nevezze el az első programját az egyeztetés elindításához.",
+    "no_cycles_selected": "Először válasszon legalább egy ciklust.",
+    "no_maintenance": "Még nincs rögzített karbantartás.",
+    "onboarding_progress": "{n} / 3 ciklus megfigyelve",
+    "onboarding_watching": "Használja a készülékét a szokásos módon — a WashData figyel. 3 ciklus után elindul a programegyeztetés.",
+    "pg_ab_intro": "Futtassa ugyanazokat a ciklusokat a jelenlegi beállításaival (A) és egy módosított készlettel (B), egymás mellett.",
+    "pg_apply_b_confirm": "Alkalmazza a B készletet az élő eszközre?\n\n{list}",
+    "pg_dtw_intro": "Vizsgálja meg, hogyan illeszkedik egy ciklus egy profilhoz: a két görbe, a torzítási útvonal és a pontszám részletezése. Csak olvasható.",
+    "pg_no_b_overrides": "Nincs alkalmazandó B-felülírás.",
+    "pg_no_events": "Nincs esemény",
+    "pg_running": "Fut…",
+    "pg_simulator_intro": "Játssza le a korábbi ciklusokat az észlelésen keresztül módosított beállításokkal — próbafuttatás, amely semmit sem változtat.",
+    "pg_tip_ambiguous": "{n}/{total} nem egyértelmű",
+    "pg_tip_cycles": "{n} ciklus szimulálva",
+    "pg_tip_detected": "{n}/{total} észlelve",
+    "pg_tip_match_correct": "{n}/{total} helyesen egyeztetve",
+    "pg_tip_unmatched": "{n}/{total} egyeztetés nélkül",
+    "playground_intro": "Biztonságos homokozó a korábbi ciklusok különböző beállításokkal való lejátszásához, két konfiguráció egymás melletti összehasonlításához, és annak vizsgálatához, hogyan illeszkedik egy ciklus egy profilhoz. Itt semmi sem változtatja meg az élő adatait, amíg kifejezetten nem alkalmazza.",
+    "playground_needs_restart": "Indítsa újra a Home Assistantot a Homokozó eszközök engedélyezéséhez.",
+    "profile_deleted": "Profil törölve",
+    "reminders_intro": "Emlékeztető megjelenítése a panelen ennyi ciklussal az utolsó szerviz után. Hagyja üresen vagy 0-ra az emlékeztető kikapcsolásához.",
+    "setting_changed": "Módosítva: {old} → {new} ekkor: {date}",
+    "settings_basic_note": "Az alapvető beállítások láthatók. Váltson Fejlett nézetre a teljes listához."
   },
   "phase_desc": {
     "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "személy hozzáadása…",
     "phase_name": "pl. Előmosás",
-    "profile_name": "pl. Pamut 40°C"
+    "profile_name": "pl. Pamut 40°C",
+    "maintenance_notes": "pl. szűrő cserélve, ajtótömítés tisztítva"
   },
   "pref": {
     "date_absolute": "Abszolút (pl. július 2-án 14:32)",
@@ -684,7 +805,7 @@
       "label": "Android csatorna (befejezés)"
     },
     "notify_finish_message": {
-      "doc": "A testet a ciklus végén küldik el. Sablonváltozók: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "A ciklus befejezésekor elküldött üzenettörzs. Sablonváltozók: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. Itt a {time_finished} és a {vs_typical} a leghasznosabbak.",
       "label": "Befejezési üzenet"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Személyek (Csak otthon értesítéshez)"
     },
     "notify_pre_complete_message": {
-      "doc": "A vég előtti / majdnem kész riasztás törzse. Sablonváltozók: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "A vég előtti / majdnem kész riasztás törzse. Sablonváltozók: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Befejezés előtti üzenet"
     },
     "notify_reminder_message": {
-      "doc": "A még várakozó kirakodási emlékeztető törzse. Az üres a beépített alapértelmezést használja. Sablonváltozók: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "A még várakozó kirakodási emlékeztető törzse. Az üres a beépített alapértelmezést használja. Sablonváltozók: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Emlékeztető üzenet"
     },
     "notify_start_message": {
-      "doc": "A testet a ciklus indulásakor küldik el. Sablonváltozók: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "A ciklus indulásakor elküldött üzenettörzs. Sablonváltozók: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Indítási üzenet"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Milyen gyakran ellenőrzi a háttérfigyelő az elakadt érzékelőket és az eltelt időtúllépéseket. Alapértelmezett 30 s.",
       "label": "Felügyelő intervallum"
+    },
+    "notify_milestone_message": {
+      "doc": "A mérföldkő értesítés üzenete. Sablonváltozók: {device}, {cycle_count}.",
+      "label": "Mérföldkő üzenet"
+    },
+    "notify_milestones": {
+      "doc": "Vesszővel elválasztott ciklusszámok, amelyek elérésekor egyszeri ünneplő értesítést váltanak ki (pl. 50, 100, 500, 1000). Üresen a mérföldkő-értesítések ki vannak kapcsolva.",
+      "label": "Ciklus mérföldkövek"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "A ne zavarjanak időszak vége (0-23). A visszatartott értesítéseket ekkor kézbesíti. Hagyja üresen a kikapcsoláshoz.",
+      "label": "Csendes órák vége"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "A ne zavarjanak időszak kezdete (0-23). A csendes órák alatt kiváltódó befejezési, emlékeztető és tiszta ruha értesítéseket visszatartja, és az időszak végén kézbesíti. Hagyja üresen a kikapcsoláshoz. Támogatja az éjfélt átlépő időszakokat (pl. kezdet 22, vég 7).",
+      "label": "Csendes órák kezdete"
+    },
+    "peak_rate_message": {
+      "doc": "Opcionális egyéni szöveg az indítási értesítéshez fűzött csúcstarifa-tipphez. Sablonváltozók: {device}, {price}. Az üres a beépített alapértelmezést használja.",
+      "label": "Csúcstarifa üzenet"
+    },
+    "peak_rate_threshold": {
+      "doc": "Amikor egy ciklus elindul, és az aktuális kWh-ár eléri vagy meghaladja ezt az értéket, csúcstarifa-tippet fűz az indítási értesítéshez. A 0 vagy üres kikapcsolja a tippet.",
+      "label": "Csúcstarifa-küszöb (kWh-ként)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Felügyelő"
+    },
+    "quiet_hours_milestones": {
+      "label": "Csendes órák és mérföldkövek"
     }
   },
   "status": {
@@ -950,7 +1098,9 @@
     "settings": "Beállítások elemre",
     "status": "Áttekintés",
     "subtab_phase_catalog": "Fázis katalógus",
-    "subtab_profiles": "Profilok"
+    "subtab_profiles": "Profilok",
+    "maintenance": "Karbantartás",
+    "playground": "Homokozó"
   },
   "tag": {
     "early_end": "Korai vége",
@@ -1010,7 +1160,20 @@
     "settings_reverted": "A beállítások visszaállítva; integráció újratöltése",
     "settings_saved": "A beállítások elmentve; integráció újratöltése",
     "suggestions_applied": "Javaslatok alkalmazva; integráció újratöltése",
-    "suggestions_dismissed": "Javaslatok elutasítva"
+    "suggestions_dismissed": "Javaslatok elutasítva",
+    "apply_failed": "Az alkalmazás sikertelen: {error}",
+    "delete_failed": "A törlés sikertelen: {error}",
+    "load_more_failed": "Nem sikerült többet betölteni: {error}",
+    "maint_add_failed": "Nem sikerült hozzáadni az eseményt: {error}",
+    "maint_added": "Karbantartási esemény hozzáadva",
+    "maint_delete_failed": "Nem sikerült törölni az eseményt: {error}",
+    "maint_deleted": "Karbantartási esemény törölve",
+    "pg_dtw_failed": "A DTW-vizsgálat sikertelen: {error}",
+    "pg_sim_failed": "A szimuláció sikertelen: {error}",
+    "relabel_done": "{count} ciklus átcímkézve",
+    "relabel_failed": "Az átcímkézés sikertelen: {error}",
+    "reminders_save_failed": "Nem sikerült menteni az emlékeztetőket: {error}",
+    "reminders_saved": "Szerviz emlékeztetők mentve"
   },
   "suggestion": {
     "both_agree": "A WashData javasolja",
@@ -1078,5 +1241,12 @@
   "trend": {
     "down": "Lefelé trend",
     "up": "Felkapott"
+  },
+  "maint": {
+    "bearing_service": "Csapágy szerviz",
+    "descale": "Vízkőmentesítés",
+    "drum_clean": "Dob tisztítása",
+    "filter_clean": "Szűrő tisztítása",
+    "other": "Egyéb"
   }
 }

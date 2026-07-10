@@ -123,7 +123,20 @@
     "trim": "Apgriezt",
     "trim_split": "Apgriezt / sadalīt",
     "use": "Izmantot",
-    "wipe_all": "Noslaukiet visus datus"
+    "wipe_all": "Noslaukiet visus datus",
+    "add_maintenance": "Pievienot apkopes notikumu",
+    "apply_set_b": "Lietot kopu B",
+    "kbd_help": "Īsinājumtaustiņi",
+    "load_more": "Ielādēt vairāk",
+    "relabel": "Pārmarķēt ({count})",
+    "run_both": "Palaist A pret B",
+    "run_simulation": "Palaist simulāciju",
+    "save_reminders": "Saglabāt atgādinājumus",
+    "select_all": "Atlasīt visu",
+    "select_last20": "Pēdējie 20",
+    "select_none": "Notīrīt",
+    "skip_setup": "Izlaist iestatīšanu",
+    "undo": "Atsaukt"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Krātuves statistika",
     "toggle_sidebar": "Pārslēgt mājas palīga sānjoslu",
     "tools_and_data": "Rīki un dati",
-    "wipe_history": "Noslaukiet vēsturi"
+    "wipe_history": "Noslaukiet vēsturi",
+    "ab_comparison": "A/B iestatījumu salīdzinājums",
+    "add_maintenance": "Pievienot apkopes notikumu",
+    "cycle_simulator": "Ciklu simulators",
+    "dtw_inspector": "DTW inspektors",
+    "getting_started": "Darba sākšana",
+    "kbd_shortcuts": "Īsinājumtaustiņi",
+    "maintenance_log": "Apkopes žurnāls",
+    "maintenance_reminders": "Apkopes atgādinājumi",
+    "settings_history": "Iestatījumu vēsture"
   },
   "health": {
     "fair": "Pieņemama profila kvalitāte",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Ziņojums (neobligāti, {device}/{program}/{minutes})",
     "ungrouped": "Negrupēts",
     "unlabelled": "Bez etiķetes",
-    "unlabelled_paren": "(bez etiķetes)"
+    "unlabelled_paren": "(bez etiķetes)",
+    "avg_cost": "Vid. izmaksas",
+    "change": "Izmaiņa",
+    "concurrency": "Vienlaicīgums",
+    "correlation": "Korelācija",
+    "current_phase": "Pašreizējā fāze",
+    "curves": "Līknes",
+    "cycle": "Cikls",
+    "cycle_index": "cikla numurs →",
+    "cycles": "Cikli",
+    "dashed": "raustīta",
+    "delta": "Δ",
+    "dtw_blend_w": "Sajaukšanas svars",
+    "dtw_blended": "Sajauktais rezultāts",
+    "dtw_ddtw": "DDTW rezultāts",
+    "dtw_l1": "L1 rezultāts",
+    "dtw_matched_profile": "(cikla saskaņotais profils)",
+    "duration_agreement": "Ilguma atbilstība",
+    "energy_agreement": "Enerģijas atbilstība",
+    "event_timeline": "Notikumu laika josla",
+    "event_type": "Notikuma veids",
+    "final_score": "Galīgais rezultāts",
+    "mae_score": "MAE rezultāts",
+    "metric": "Metrika",
+    "n_selected": "Atlasīti: {n}",
+    "na": "n/p",
+    "notes": "Piezīmes",
+    "outcome": "Iznākums",
+    "per_cycle_short": "cikls",
+    "pg_ambiguous": "Neviennozīmīgs",
+    "pg_cycles": "Cikli",
+    "pg_detected": "Noteikts",
+    "pg_ev_ending": "Beidzas",
+    "pg_ev_match": "Atbilstība",
+    "pg_ev_off": "Izslēgts",
+    "pg_ev_paused": "Pauzēts",
+    "pg_ev_running": "Darbojas",
+    "pg_ev_start": "Sākums",
+    "pg_match_correct": "Atbilstība pareiza",
+    "pg_unmatched": "Nav atbilstības",
+    "phase_timeline": "Fāžu laika josla",
+    "profile_index": "profila numurs →",
+    "reminder_every": "Atgādināt ik pēc (cikliem)",
+    "score": "Rezultāts",
+    "score_breakdown": "Rezultāta sadalījums",
+    "setting": "Iestatījums",
+    "settings_a": "Iestatījumi A (pašreizējie)",
+    "settings_a_short": "A",
+    "settings_advanced": "Papildu",
+    "settings_b": "Iestatījumi B (tests)",
+    "settings_b_short": "B",
+    "settings_basic": "Pamata",
+    "settings_detail_level": "Iestatījumu detalizācijas līmenis",
+    "settings_overrides": "Iestatījumu aizstāšana",
+    "sparkline": "Neseno ciklu ilguma tendence",
+    "stage2": "2. posms — galvenā līdzība",
+    "stage3": "3. posms — DTW",
+    "stage4": "4. posms — atbilstība",
+    "warp_path": "Deformācijas ceļš"
   },
   "log": {
     "all_levels": "Visi līmeņi"
@@ -337,7 +417,10 @@
     "process_history_msg": "Atkārtoti palaist atbilstību, atjaunināt ieteikumus, pārtrenēt ML (ja iespējots) un pārrēķināt ciklu veselību visos saglabātajos ciklos. Tas var aizņemt kādu laiku.",
     "process_history_ok": "Apstrādāt",
     "process_history_title": "Apstrādāt vēsturi",
-    "process_recording": "Procesa ierakstīšana"
+    "process_recording": "Procesa ierakstīšana",
+    "delete_maintenance_msg": "Dzēst šo apkopes ierakstu? To nevarēs atsaukt.",
+    "delete_maintenance_title": "Dzēst apkopes notikumu",
+    "relabel_cycles": "Pārmarķēt {count} ciklus"
   },
   "msg": {
     "appliance_monitor": "Ierīces monitors",
@@ -448,7 +531,44 @@
     "updated": "Atjaunināts",
     "warmup_badge": "Vēl mācoties ({done}/{needed} cikli)",
     "warmup_detail": "Šim profilam nepieciešami {needed} iezīmēti cikli, pirms sākas automātiskā saskaņošana. Katrs apstiprināts cikls palīdz mācīties.",
-    "wipe_history_warning": "Neatgriezeniski dzēst visus ciklus un profilus. Nevar atsaukt."
+    "wipe_history_warning": "Neatgriezeniski dzēst visus ciklus un profilus. Nevar atsaukt.",
+    "cycles_deleted": "Dzēsti cikli: {count}",
+    "kbd_advanced": "Pāriet uz Papildu",
+    "kbd_cycles": "Pāriet uz Cikli",
+    "kbd_escape": "Aizvērt atvērto dialoglodziņu",
+    "kbd_help": "Rādīt / slēpt šo palīdzību",
+    "kbd_help_intro": "Īsinājumtaustiņi tiek ignorēti, kamēr rakstāt laukā. Reaģē tikai tās cilnes, kas pastāv šai ierīcei.",
+    "kbd_ml": "Pāriet uz ML apmācība",
+    "kbd_overview": "Pāriet uz Pārskats",
+    "kbd_playground": "Pāriet uz Izmēģinājumu laukums",
+    "kbd_profiles": "Pāriet uz Profili",
+    "kbd_settings": "Pāriet uz Iestatījumi",
+    "maintenance_due": "Jāveic apkope: {items}",
+    "maintenance_intro": "Reģistrējiet apkopi, ko veicat šai ierīcei, un saņemiet atgādinājumu, kad katrs uzdevums atkal jāveic.",
+    "maintenance_load_error": "Neizdevās ielādēt apkopes datus: {error}",
+    "name_first_program": "Jums ir pietiekami daudz ciklu — nosauciet savu pirmo programmu, lai sāktu saskaņošanu.",
+    "no_cycles_selected": "Vispirms atlasiet vismaz vienu ciklu.",
+    "no_maintenance": "Vēl nav reģistrēta neviena apkope.",
+    "onboarding_progress": "Novēroti cikli: {n} / 3",
+    "onboarding_watching": "Lietojiet ierīci kā parasti — WashData vēro. Pēc 3 cikliem sāksies programmu saskaņošana.",
+    "pg_ab_intro": "Palaidiet tos pašus ciklus ar pašreizējiem iestatījumiem (A) un pielāgotu kopu (B) blakus.",
+    "pg_apply_b_confirm": "Lietot kopu B aktīvajai ierīcei?\n\n{list}",
+    "pg_dtw_intro": "Pārbaudiet, kā viens cikls saskan ar profilu: divas līknes, deformācijas ceļu un rezultāta sadalījumu. Tikai lasāms.",
+    "pg_no_b_overrides": "Nav B aizstāšanu, ko lietot.",
+    "pg_no_events": "Nav notikumu",
+    "pg_running": "Darbojas…",
+    "pg_simulator_intro": "Atkārtoti palaidiet iepriekšējos ciklus caur noteikšanu ar pielāgotiem iestatījumiem — izmēģinājuma palaišana, kas neko nemaina.",
+    "pg_tip_ambiguous": "{n}/{total} neviennozīmīgi",
+    "pg_tip_cycles": "Simulēti cikli: {n}",
+    "pg_tip_detected": "{n}/{total} noteikti",
+    "pg_tip_match_correct": "{n}/{total} saskaņoti pareizi",
+    "pg_tip_unmatched": "{n}/{total} bez atbilstības",
+    "playground_intro": "Droša izmēģinājumu vide, kur atkārtoti palaist iepriekšējos ciklus ar citiem iestatījumiem, salīdzināt divas konfigurācijas blakus un pārbaudīt, kā cikls saskan ar profilu. Nekas šeit nemaina jūsu reālos datus, kamēr to nepārprotami nelietojat.",
+    "playground_needs_restart": "Lai iespējotu izmēģinājumu laukuma rīkus, restartējiet Home Assistant.",
+    "profile_deleted": "Profils dzēsts",
+    "reminders_intro": "Rādīt atgādinājumu panelī pēc tik cikliem kopš pēdējās apkopes. Atstājiet tukšu vai 0, lai izslēgtu atgādinājumu.",
+    "setting_changed": "Mainīts no {old} uz {new} {date}",
+    "settings_basic_note": "Tiek rādīti būtiskākie iestatījumi. Pārslēdzieties uz Papildu, lai skatītu pilnu sarakstu."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "pievienot personu…",
     "phase_name": "piem. Priekšmazgāšana",
-    "profile_name": "piem. Kokvilna 40°C"
+    "profile_name": "piem. Kokvilna 40°C",
+    "maintenance_notes": "piem., nomainīts filtrs, iztīrīts durvju blīvējums"
   },
   "pref": {
     "date_absolute": "Absolūtais (piemēram, 14:32 2. jūlijā)",
@@ -684,7 +805,7 @@
       "label": "Android kanāls (beigas)"
     },
     "notify_finish_message": {
-      "doc": "Ķermenis tiek nosūtīts, kad cikls beidzas. Veidnes mainīgie: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Pamatteksts, ko nosūta, kad cikls beidzas. Veidnes mainīgie: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. Šeit visnoderīgākie ir {time_finished} un {vs_typical}.",
       "label": "Beigu ziņojums"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Personas (priekš Tikai mājās)"
     },
     "notify_pre_complete_message": {
-      "doc": "Pirms-beigšanas/gandrīz pabeigta brīdinājuma pamatteksts. Veidnes mainīgie: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Pirmsbeigu / gandrīz pabeigts brīdinājuma pamatteksts. Veidnes mainīgie: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Gandrīz pabeigšanas ziņojums"
     },
     "notify_reminder_message": {
-      "doc": "Joprojām gaidošā izkraušanas atgādinājuma pamatteksts. Blank izmanto iebūvēto noklusējuma iestatījumu. Veidnes mainīgie: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Pamatteksts atgādinājumam par joprojām gaidāmo izkraušanu. Tukšs izmanto iebūvēto noklusējuma vērtību. Veidnes mainīgie: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Atgādinājuma ziņojums"
     },
     "notify_start_message": {
-      "doc": "Ķermenis tiek nosūtīts, kad sākas cikls. Veidnes mainīgie: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Pamatteksts, ko nosūta, kad cikls sākas. Veidnes mainīgie: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Starta ziņojums"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Cik bieži fona sargsuns pārbauda, ​​vai sensori nav apstājušies un vai nav pagājis noildzes laiks. Noklusējums 30 s.",
       "label": "Sargsuna intervāls"
+    },
+    "notify_milestone_message": {
+      "doc": "Ziņojums atskaites punkta paziņojumam. Veidnes mainīgie: {device}, {cycle_count}.",
+      "label": "Atskaites punkta ziņojums"
+    },
+    "notify_milestones": {
+      "doc": "Ar komatu atdalīti ciklu skaiti, kuri, tos sasniedzot, izraisa vienreizēju svinību paziņojumu (piem., 50, 100, 500, 1000). Tukšs atspējo atskaites punktu paziņojumus.",
+      "label": "Ciklu atskaites punkti"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Netraucēšanas loga beigas (0-23). Aizturētie paziņojumi tiek piegādāti šajā stundā. Atstājiet tukšu, lai atspējotu.",
+      "label": "Kluso stundu beigas"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Netraucēšanas loga sākums (0-23). Beigu, atgādinājuma un tīrās veļas paziņojumi, kas nostrādātu kluso stundu laikā, tiek aizturēti un piegādāti, kad logs beidzas. Atstājiet tukšu, lai atspējotu. Atbalsta logus, kas šķērso pusnakti (piem., sākums 22, beigas 7).",
+      "label": "Kluso stundu sākums"
+    },
+    "peak_rate_message": {
+      "doc": "Neobligāts pielāgots teksts maksimālā tarifa padomam, ko pievieno sākuma paziņojumam. Veidnes mainīgie: {device}, {price}. Tukšs izmanto iebūvēto noklusējuma vērtību.",
+      "label": "Maksimālā tarifa ziņojums"
+    },
+    "peak_rate_threshold": {
+      "doc": "Kad cikls sākas un pašreizējā cena par kWh ir vienāda vai lielāka par šo vērtību, sākuma paziņojumam pievieno maksimālā tarifa padomu. 0 vai tukšs atspējo padomu.",
+      "label": "Maksimālā tarifa slieksnis (par kWh)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Sargsuns"
+    },
+    "quiet_hours_milestones": {
+      "label": "Klusās stundas un atskaites punkti"
     }
   },
   "status": {
@@ -950,7 +1098,9 @@
     "settings": "Iestatījumi",
     "status": "Pārskats",
     "subtab_phase_catalog": "Fāzes katalogs",
-    "subtab_profiles": "Profili"
+    "subtab_profiles": "Profili",
+    "maintenance": "Apkope",
+    "playground": "Izmēģinājumu laukums"
   },
   "tag": {
     "early_end": "Agrās beigas",
@@ -1010,7 +1160,20 @@
     "settings_reverted": "Iestatījumi atjaunoti; integrācijas pārlādēšana",
     "settings_saved": "Iestatījumi saglabāti; integrācijas pārlādēšana",
     "suggestions_applied": "Ieteikumi piemēroti; integrācijas pārlādēšana",
-    "suggestions_dismissed": "Ieteikumi noraidīti"
+    "suggestions_dismissed": "Ieteikumi noraidīti",
+    "apply_failed": "Lietošana neizdevās: {error}",
+    "delete_failed": "Dzēšana neizdevās: {error}",
+    "load_more_failed": "Neizdevās ielādēt vairāk: {error}",
+    "maint_add_failed": "Neizdevās pievienot notikumu: {error}",
+    "maint_added": "Apkopes notikums pievienots",
+    "maint_delete_failed": "Neizdevās dzēst notikumu: {error}",
+    "maint_deleted": "Apkopes notikums dzēsts",
+    "pg_dtw_failed": "DTW pārbaude neizdevās: {error}",
+    "pg_sim_failed": "Simulācija neizdevās: {error}",
+    "relabel_done": "Pārmarķēti cikli: {count}",
+    "relabel_failed": "Pārmarķēšana neizdevās: {error}",
+    "reminders_save_failed": "Neizdevās saglabāt atgādinājumus: {error}",
+    "reminders_saved": "Apkopes atgādinājumi saglabāti"
   },
   "suggestion": {
     "both_agree": "WashData iesaka",
@@ -1078,5 +1241,12 @@
   "trend": {
     "down": "Tendences uz leju",
     "up": "Tendences uz augšu"
+  },
+  "maint": {
+    "bearing_service": "Gultņu apkope",
+    "descale": "Atkaļķošana",
+    "drum_clean": "Tīrīt tromeli",
+    "filter_clean": "Tīrīt filtru",
+    "other": "Cits"
   }
 }

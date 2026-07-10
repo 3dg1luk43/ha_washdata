@@ -123,7 +123,20 @@
     "trim": "Kärbi",
     "trim_split": "Kärbi / Poolita",
     "use": "Kasutage",
-    "wipe_all": "Pühkige kõik andmed"
+    "wipe_all": "Pühkige kõik andmed",
+    "add_maintenance": "Lisa hooldussündmus",
+    "apply_set_b": "Rakenda komplekt B",
+    "kbd_help": "Kiirklahvid",
+    "load_more": "Laadi rohkem",
+    "relabel": "Märgista uuesti ({count})",
+    "run_both": "Käivita A vs B",
+    "run_simulation": "Käivita simulatsioon",
+    "save_reminders": "Salvesta meeldetuletused",
+    "select_all": "Vali kõik",
+    "select_last20": "Viimased 20",
+    "select_none": "Tühista",
+    "skip_setup": "Jäta seadistus vahele",
+    "undo": "Võta tagasi"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Salvestusstatistika",
     "toggle_sidebar": "Koduabilise külgriba sisse- ja väljalülitamine",
     "tools_and_data": "Tööriistad ja andmed",
-    "wipe_history": "Pühkige ajalugu"
+    "wipe_history": "Pühkige ajalugu",
+    "ab_comparison": "A/B seadete võrdlus",
+    "add_maintenance": "Lisa hooldussündmus",
+    "cycle_simulator": "Tsükli simulaator",
+    "dtw_inspector": "DTW inspektor",
+    "getting_started": "Alustamine",
+    "kbd_shortcuts": "Kiirklahvid",
+    "maintenance_log": "Hoolduslogi",
+    "maintenance_reminders": "Hoolduse meeldetuletused",
+    "settings_history": "Seadete ajalugu"
   },
   "health": {
     "fair": "Rahuldav profiili kvaliteet",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Sõnum (valikuline, {device}/{program}/{minutes})",
     "ungrouped": "Grupeerimata",
     "unlabelled": "Märgistamata",
-    "unlabelled_paren": "(sildistamata)"
+    "unlabelled_paren": "(sildistamata)",
+    "avg_cost": "Keskmine maksumus",
+    "change": "Muutus",
+    "concurrency": "Samaaegsus",
+    "correlation": "Korrelatsioon",
+    "current_phase": "Praegune faas",
+    "curves": "Kõverad",
+    "cycle": "Tsükkel",
+    "cycle_index": "tsükli indeks →",
+    "cycles": "Tsüklid",
+    "dashed": "kriipsjoon",
+    "delta": "Δ",
+    "dtw_blend_w": "Segamise kaal",
+    "dtw_blended": "Segatud skoor",
+    "dtw_ddtw": "DDTW skoor",
+    "dtw_l1": "L1 skoor",
+    "dtw_matched_profile": "(tsükli sobitatud profiil)",
+    "duration_agreement": "Kestuse kokkulangevus",
+    "energy_agreement": "Energia kokkulangevus",
+    "event_timeline": "Sündmuste ajajoon",
+    "event_type": "Sündmuse tüüp",
+    "final_score": "Lõppskoor",
+    "mae_score": "MAE skoor",
+    "metric": "Mõõdik",
+    "n_selected": "{n} valitud",
+    "na": "pole",
+    "notes": "Märkmed",
+    "outcome": "Tulemus",
+    "per_cycle_short": "tsükkel",
+    "pg_ambiguous": "Mitmetähenduslik",
+    "pg_cycles": "Tsüklid",
+    "pg_detected": "Tuvastatud",
+    "pg_ev_ending": "Lõpetamine",
+    "pg_ev_match": "Vaste",
+    "pg_ev_off": "Väljas",
+    "pg_ev_paused": "Peatatud",
+    "pg_ev_running": "Töötab",
+    "pg_ev_start": "Algus",
+    "pg_match_correct": "Vaste õige",
+    "pg_unmatched": "Sobitamata",
+    "phase_timeline": "Faaside ajajoon",
+    "profile_index": "profiili indeks →",
+    "reminder_every": "Tuleta meelde iga (tsüklit)",
+    "score": "Skoor",
+    "score_breakdown": "Skoori jaotus",
+    "setting": "Säte",
+    "settings_a": "Seaded A (praegune)",
+    "settings_a_short": "A",
+    "settings_advanced": "Täpsemalt",
+    "settings_b": "Seaded B (test)",
+    "settings_b_short": "B",
+    "settings_basic": "Põhiline",
+    "settings_detail_level": "Seadete detailsuse tase",
+    "settings_overrides": "Seadete alistamised",
+    "sparkline": "Hiljutine tsükli kestuse trend",
+    "stage2": "Etapp 2 — põhisarnasus",
+    "stage3": "Etapp 3 — DTW",
+    "stage4": "Etapp 4 — kokkulangevus",
+    "warp_path": "Moondamistee"
   },
   "log": {
     "all_levels": "Kõik tasemed"
@@ -337,7 +417,10 @@
     "process_history_msg": "Käivitage sobitamine uuesti, värskendage soovitusi, treenige ML uuesti (kui lubatud) ja arvutage tsükli tervis ümber kõigi salvestatud tsüklite jaoks. See võib võtta aega.",
     "process_history_ok": "Töötle",
     "process_history_title": "Töötle ajalugu",
-    "process_recording": "Protsessi salvestamine"
+    "process_recording": "Protsessi salvestamine",
+    "delete_maintenance_msg": "Kustutada see hoolduskirje? Seda ei saa tagasi võtta.",
+    "delete_maintenance_title": "Kustuta hooldussündmus",
+    "relabel_cycles": "Märgista uuesti {count} tsüklit"
   },
   "msg": {
     "appliance_monitor": "Seadmete monitor",
@@ -448,7 +531,44 @@
     "updated": "Uuendatud",
     "warmup_badge": "Õpib veel ({done}/{needed} tsüklit)",
     "warmup_detail": "See profiil vajab {needed} märgistatud tsüklit enne automaatse sobitamise algust. Iga kinnitatud tsükkel aitab sellel õppida.",
-    "wipe_history_warning": "Kustutage jäädavalt kõik tsüklid ja profiilid. Seda ei saa tagasi võtta."
+    "wipe_history_warning": "Kustutage jäädavalt kõik tsüklid ja profiilid. Seda ei saa tagasi võtta.",
+    "cycles_deleted": "{count} tsüklit kustutatud",
+    "kbd_advanced": "Ava Täpsemalt",
+    "kbd_cycles": "Ava Tsüklid",
+    "kbd_escape": "Sulge avatud dialoog",
+    "kbd_help": "Näita / peida see abi",
+    "kbd_help_intro": "Kiirklahve eiratakse väljale tippimise ajal. Reageerivad ainult selle seadme jaoks olemasolevad vahekaardid.",
+    "kbd_ml": "Ava ML koolitus",
+    "kbd_overview": "Ava Ülevaade",
+    "kbd_playground": "Ava Katseala",
+    "kbd_profiles": "Ava Profiilid",
+    "kbd_settings": "Ava Seaded",
+    "maintenance_due": "Hooldus vajalik: {items}",
+    "maintenance_intro": "Registreeri selle seadme hooldustööd ja saa meeldetuletus, kui iga ülesanne on taas vajalik.",
+    "maintenance_load_error": "Hooldusandmete laadimine ebaõnnestus: {error}",
+    "name_first_program": "Sul on piisavalt tsükleid — pane oma esimesele programmile nimi, et alustada sobitamist.",
+    "no_cycles_selected": "Vali esmalt vähemalt üks tsükkel.",
+    "no_maintenance": "Hooldust pole veel registreeritud.",
+    "onboarding_progress": "{n} / 3 tsüklit jälgitud",
+    "onboarding_watching": "Kasuta oma seadet tavapäraselt — WashData jälgib. Pärast 3 tsüklit algab programmide sobitamine.",
+    "pg_ab_intro": "Käivita samad tsüklid oma praeguste seadetega (A) ja muudetud komplektiga (B) kõrvuti.",
+    "pg_apply_b_confirm": "Kas rakendada komplekt B otseseadmele?\n\n{list}",
+    "pg_dtw_intro": "Uuri, kuidas üks tsükkel profiiliga joondub: kaks kõverat, moondamistee ja skoori jaotus. Ainult lugemiseks.",
+    "pg_no_b_overrides": "Pole B alistamisi, mida rakendada.",
+    "pg_no_events": "Sündmusi pole",
+    "pg_running": "Töötab…",
+    "pg_simulator_intro": "Esita varasemad tsüklid tuvastuse kaudu uuesti muudetud seadetega — proovikäik, mis ei muuda midagi.",
+    "pg_tip_ambiguous": "{n}/{total} mitmetähenduslikku",
+    "pg_tip_cycles": "{n} tsüklit simuleeritud",
+    "pg_tip_detected": "{n}/{total} tuvastatud",
+    "pg_tip_match_correct": "{n}/{total} õigesti sobitatud",
+    "pg_tip_unmatched": "{n}/{total} sobitamata",
+    "playground_intro": "Turvaline katsekeskkond varasemate tsüklite uuesti esitamiseks erinevate seadetega, kahe seadistuse kõrvuti võrdlemiseks ja selle uurimiseks, kuidas tsükkel profiiliga joondub. Miski siin ei muuda su otseandmeid enne, kui sa selle sõnaselgelt rakendad.",
+    "playground_needs_restart": "Katseala tööriistade lubamiseks taaskäivita Home Assistant.",
+    "profile_deleted": "Profiil kustutatud",
+    "reminders_intro": "Näita paneelil meeldetuletust nii mitu tsüklit pärast viimast hooldust. Meeldetuletuse väljalülitamiseks jäta tühjaks või pane 0.",
+    "setting_changed": "Muudetud {old} → {new} kuupäeval {date}",
+    "settings_basic_note": "Kuvatakse olulisi seadeid. Täieliku loendi nägemiseks vali Täpsemalt."
   },
   "phase_desc": {
     "anti_crease": "Kortsude vähendamiseks tehke aeg-ajalt lühikesi tõmblusi pärast lõpetamist.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "lisa isik…",
     "phase_name": "nt. Eelpesemine",
-    "profile_name": "nt. Puuvill 40°C"
+    "profile_name": "nt. Puuvill 40°C",
+    "maintenance_notes": "nt filter vahetatud, ukse tihend puhastatud"
   },
   "pref": {
     "date_absolute": "Absoluutne (nt 2. juulil 14:32)",
@@ -684,7 +805,7 @@
       "label": "Android Kanal (lõpetamine)"
     },
     "notify_finish_message": {
-      "doc": "Keha saadetakse pärast tsükli lõppemist. Malli muutujad: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Keha, mis saadetakse tsükli lõppedes. Malli muutujad: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} ja {vs_typical} on siin kõige kasulikumad.",
       "label": "Lõpetamise Sõnum"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Inimesed (Ainult Kodus Olles)"
     },
     "notify_pre_complete_message": {
-      "doc": "Eel-/peaaegu valmis hoiatuse sisu. Malli muutujad: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Eel-/peaaegu valmis hoiatuse sisu. Malli muutujad: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Eel-Lõpetamise Sõnum"
     },
     "notify_reminder_message": {
-      "doc": "Ikka ootava mahalaadimise meeldetuletuse sisu. Tühi kasutab sisseehitatud vaikeseadet. Malli muutujad: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Ikka ootava mahalaadimise meeldetuletuse sisu. Tühi kasutab sisseehitatud vaikeseadet. Malli muutujad: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Meeldetuletuse Sõnum"
     },
     "notify_start_message": {
-      "doc": "Keha saadetakse tsükli alguses. Malli muutujad: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Keha, mis saadetakse tsükli alguses. Malli muutujad: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Käivitamise Sõnum"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Kui sageli taustavalve kontrollib andureid seiskunud ja aegunud aegu. Vaikimisi 30 s.",
       "label": "Valvekoera Intervall"
+    },
+    "notify_milestone_message": {
+      "doc": "Verstaposti teavituse sõnum. Malli muutujad: {device}, {cycle_count}.",
+      "label": "Verstaposti sõnum"
+    },
+    "notify_milestones": {
+      "doc": "Komadega eraldatud tsüklite arvud, mis saavutamisel käivitavad ühekordse tähistusteavituse (nt 50, 100, 500, 1000). Tühi keelab verstaposti teavitused.",
+      "label": "Tsükli verstapostid"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Mittehäirimise akna lõpp (0-23). Kinnipeetud teavitused edastatakse sel tunnil. Keelamiseks jäta tühjaks.",
+      "label": "Vaikuse tundide lõpp"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Mittehäirimise akna algus (0-23). Lõpetamise, meeldetuletuse ja puhta pesu teavitused, mis vaikuse tundidel käivituksid, peetakse kinni ja edastatakse akna lõppedes. Keelamiseks jäta tühjaks. Toetab keskööd ületavaid aknaid (nt algus 22, lõpp 7).",
+      "label": "Vaikuse tundide algus"
+    },
+    "peak_rate_message": {
+      "doc": "Valikuline kohandatud tekst tipptunni tariifi vihjele, mis lisatakse käivitamise teavitusele. Malli muutujad: {device}, {price}. Tühi kasutab sisseehitatud vaikeseadet.",
+      "label": "Tipptunni tariifi sõnum"
+    },
+    "peak_rate_threshold": {
+      "doc": "Kui tsükkel algab ja praegune hind kWh kohta on sellel väärtusel või kõrgem, lisatakse käivitamise teavitusele tipptunni tariifi vihje. 0 või tühi keelab vihje.",
+      "label": "Tipptunni tariifi lävi (kWh kohta)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Valvekoer"
+    },
+    "quiet_hours_milestones": {
+      "label": "Vaikuse tunnid ja verstapostid"
     }
   },
   "status": {
@@ -950,7 +1098,9 @@
     "settings": "Seaded",
     "status": "Ülevaade",
     "subtab_phase_catalog": "Faaside kataloog",
-    "subtab_profiles": "Profiilid"
+    "subtab_profiles": "Profiilid",
+    "maintenance": "Hooldus",
+    "playground": "Katseala"
   },
   "tag": {
     "early_end": "Varajane lõpp",
@@ -1010,7 +1160,20 @@
     "settings_reverted": "Seaded taastatud; integratsiooni uuesti laadimine",
     "settings_saved": "Seaded salvestatud; integratsiooni uuesti laadimine",
     "suggestions_applied": "Soovitused rakendatud; integratsiooni uuesti laadimine",
-    "suggestions_dismissed": "Soovitused lükati tagasi"
+    "suggestions_dismissed": "Soovitused lükati tagasi",
+    "apply_failed": "Rakendamine ebaõnnestus: {error}",
+    "delete_failed": "Kustutamine ebaõnnestus: {error}",
+    "load_more_failed": "Rohkema laadimine ebaõnnestus: {error}",
+    "maint_add_failed": "Sündmuse lisamine ebaõnnestus: {error}",
+    "maint_added": "Hooldussündmus lisatud",
+    "maint_delete_failed": "Sündmuse kustutamine ebaõnnestus: {error}",
+    "maint_deleted": "Hooldussündmus kustutatud",
+    "pg_dtw_failed": "DTW ülevaatus ebaõnnestus: {error}",
+    "pg_sim_failed": "Simulatsioon ebaõnnestus: {error}",
+    "relabel_done": "{count} tsüklit uuesti märgistatud",
+    "relabel_failed": "Uuesti märgistamine ebaõnnestus: {error}",
+    "reminders_save_failed": "Meeldetuletuste salvestamine ebaõnnestus: {error}",
+    "reminders_saved": "Hoolduse meeldetuletused salvestatud"
   },
   "suggestion": {
     "both_agree": "WashData soovitab",
@@ -1078,5 +1241,12 @@
   "trend": {
     "down": "Trend langeb",
     "up": "Tõusev trend"
+  },
+  "maint": {
+    "bearing_service": "Laagrite hooldus",
+    "descale": "Katlakivi eemaldamine",
+    "drum_clean": "Puhasta trummel",
+    "filter_clean": "Puhasta filter",
+    "other": "Muu"
   }
 }

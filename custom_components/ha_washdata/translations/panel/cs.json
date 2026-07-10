@@ -123,7 +123,20 @@
     "trim": "Oříznout",
     "trim_split": "Trim / Split",
     "use": "Použití",
-    "wipe_all": "Vymazat všechna data"
+    "wipe_all": "Vymazat všechna data",
+    "add_maintenance": "Přidat údržbovou událost",
+    "apply_set_b": "Použít sadu B",
+    "kbd_help": "Klávesové zkratky",
+    "load_more": "Načíst více",
+    "relabel": "Přeznačit ({count})",
+    "run_both": "Spustit A vs B",
+    "run_simulation": "Spustit simulaci",
+    "save_reminders": "Uložit připomínky",
+    "select_all": "Vybrat vše",
+    "select_last20": "Posledních 20",
+    "select_none": "Zrušit výběr",
+    "skip_setup": "Přeskočit nastavení",
+    "undo": "Zpět"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Statistiky úložiště",
     "toggle_sidebar": "Přepnout postranní panel Home Assistant",
     "tools_and_data": "Nástroje a data",
-    "wipe_history": "Vymazat historii"
+    "wipe_history": "Vymazat historii",
+    "ab_comparison": "Porovnání nastavení A/B",
+    "add_maintenance": "Přidat údržbovou událost",
+    "cycle_simulator": "Simulátor cyklů",
+    "dtw_inspector": "Inspektor DTW",
+    "getting_started": "Začínáme",
+    "kbd_shortcuts": "Klávesové zkratky",
+    "maintenance_log": "Protokol údržby",
+    "maintenance_reminders": "Připomínky servisu",
+    "settings_history": "Historie nastavení"
   },
   "health": {
     "fair": "Přijatelná shoda",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Zpráva (volitelné, {device}/{program}/{minutes})",
     "ungrouped": "Neseskupeno",
     "unlabelled": "Neoznačené",
-    "unlabelled_paren": "(neoznačeno)"
+    "unlabelled_paren": "(neoznačeno)",
+    "avg_cost": "Prům. náklady",
+    "change": "Změna",
+    "concurrency": "Souběžnost",
+    "correlation": "Korelace",
+    "current_phase": "Aktuální fáze",
+    "curves": "Křivky",
+    "cycle": "Cyklus",
+    "cycle_index": "index cyklu →",
+    "cycles": "Cykly",
+    "dashed": "přerušovaná",
+    "delta": "Δ",
+    "dtw_blend_w": "Váha směsi",
+    "dtw_blended": "Smíšené skóre",
+    "dtw_ddtw": "Skóre DDTW",
+    "dtw_l1": "Skóre L1",
+    "dtw_matched_profile": "(profil přiřazený cyklu)",
+    "duration_agreement": "Shoda trvání",
+    "energy_agreement": "Shoda energie",
+    "event_timeline": "Časová osa událostí",
+    "event_type": "Typ události",
+    "final_score": "Konečné skóre",
+    "mae_score": "Skóre MAE",
+    "metric": "Metrika",
+    "n_selected": "{n} vybráno",
+    "na": "n/a",
+    "notes": "Poznámky",
+    "outcome": "Výsledek",
+    "per_cycle_short": "cyklus",
+    "pg_ambiguous": "Nejednoznačné",
+    "pg_cycles": "Cykly",
+    "pg_detected": "Detekováno",
+    "pg_ev_ending": "Končí",
+    "pg_ev_match": "Shoda",
+    "pg_ev_off": "Vypnuto",
+    "pg_ev_paused": "Pozastaveno",
+    "pg_ev_running": "Běží",
+    "pg_ev_start": "Start",
+    "pg_match_correct": "Shoda správná",
+    "pg_unmatched": "Bez shody",
+    "phase_timeline": "Časová osa fází",
+    "profile_index": "index profilu →",
+    "reminder_every": "Připomenout každých (cyklů)",
+    "score": "Skóre",
+    "score_breakdown": "Rozpis skóre",
+    "setting": "Nastavení",
+    "settings_a": "Nastavení A (aktuální)",
+    "settings_a_short": "A",
+    "settings_advanced": "Pokročilé",
+    "settings_b": "Nastavení B (test)",
+    "settings_b_short": "B",
+    "settings_basic": "Základní",
+    "settings_detail_level": "Úroveň podrobností nastavení",
+    "settings_overrides": "Přepsání nastavení",
+    "sparkline": "Trend délky posledních cyklů",
+    "stage2": "Fáze 2 — jádrová podobnost",
+    "stage3": "Fáze 3 — DTW",
+    "stage4": "Fáze 4 — shoda",
+    "warp_path": "Cesta warpingu"
   },
   "log": {
     "all_levels": "Všechny úrovně"
@@ -337,7 +417,10 @@
     "process_history_msg": "Znovu spustí párování, obnoví návrhy, přetrénuje ML (je-li povoleno) a přepočítá zdraví cyklů pro všechny uložené cykly. Může to chvíli trvat.",
     "process_history_ok": "Zpracovat",
     "process_history_title": "Zpracovat historii",
-    "process_recording": "Procesní záznam"
+    "process_recording": "Procesní záznam",
+    "delete_maintenance_msg": "Smazat tento záznam o údržbě? Tuto akci nelze vrátit zpět.",
+    "delete_maintenance_title": "Smazat údržbovou událost",
+    "relabel_cycles": "Přeznačit {count} cyklů"
   },
   "msg": {
     "appliance_monitor": "Monitor spotřebiče",
@@ -448,7 +531,44 @@
     "updated": "Aktualizováno",
     "warmup_badge": "Stále se učí ({done}/{needed} cyklů)",
     "warmup_detail": "Tento profil potřebuje {needed} označených cyklů, než začne automatické párování. Každý potvrzený cyklus pomáhá učení.",
-    "wipe_history_warning": "Trvale smažte všechny cykly a profily. Nelze vrátit zpět."
+    "wipe_history_warning": "Trvale smažte všechny cykly a profily. Nelze vrátit zpět.",
+    "cycles_deleted": "Smazáno cyklů: {count}",
+    "kbd_advanced": "Přejít na Pokročilé",
+    "kbd_cycles": "Přejít na Cykly",
+    "kbd_escape": "Zavřít otevřený dialog",
+    "kbd_help": "Zobrazit / skrýt tuto nápovědu",
+    "kbd_help_intro": "Zkratky jsou při psaní do pole ignorovány. Reagují pouze karty, které pro toto zařízení existují.",
+    "kbd_ml": "Přejít na Trénování ML",
+    "kbd_overview": "Přejít na Přehled",
+    "kbd_playground": "Přejít na Testovací prostředí",
+    "kbd_profiles": "Přejít na Profily",
+    "kbd_settings": "Přejít na Nastavení",
+    "maintenance_due": "Údržba je na řadě: {items}",
+    "maintenance_intro": "Zaznamenávejte servis, který na tomto spotřebiči provádíte, a nechte se upozornit, až bude každý úkol znovu na řadě.",
+    "maintenance_load_error": "Nepodařilo se načíst data údržby: {error}",
+    "name_first_program": "Máte dostatek cyklů — pojmenujte svůj první program a zahajte párování.",
+    "no_cycles_selected": "Nejprve vyberte alespoň jeden cyklus.",
+    "no_maintenance": "Zatím není zaznamenána žádná údržba.",
+    "onboarding_progress": "{n} / 3 sledovaných cyklů",
+    "onboarding_watching": "Nechte spotřebič běžet normálně — WashData sleduje. Po 3 cyklech začne párování programů.",
+    "pg_ab_intro": "Spusťte stejné cykly vedle sebe s aktuálním nastavením (A) a upravenou sadou (B).",
+    "pg_apply_b_confirm": "Použít sadu B na aktivní zařízení?\n\n{list}",
+    "pg_dtw_intro": "Prozkoumejte, jak se cyklus zarovná k profilu: obě křivky, cestu warpingu a rozpis skóre. Pouze pro čtení.",
+    "pg_no_b_overrides": "Žádná přepsání B k použití.",
+    "pg_no_events": "Žádné události",
+    "pg_running": "Probíhá…",
+    "pg_simulator_intro": "Přehrajte minulé cykly detekcí s upraveným nastavením — zkušební běh, který nic nezmění.",
+    "pg_tip_ambiguous": "{n}/{total} nejednoznačných",
+    "pg_tip_cycles": "{n} simulovaných cyklů",
+    "pg_tip_detected": "{n}/{total} detekováno",
+    "pg_tip_match_correct": "{n}/{total} správně spárováno",
+    "pg_tip_unmatched": "{n}/{total} bez shody",
+    "playground_intro": "Bezpečné prostředí pro přehrávání minulých cyklů s jiným nastavením, porovnání dvou konfigurací vedle sebe a prozkoumání, jak se cyklus zarovná k profilu. Nic zde nezmění vaše aktivní data, dokud to výslovně nepoužijete.",
+    "playground_needs_restart": "Restartujte Home Assistant, abyste povolili nástroje Testovacího prostředí.",
+    "profile_deleted": "Profil smazán",
+    "reminders_intro": "Zobrazit připomínku v panelu tolik cyklů po posledním servisu. Ponechte prázdné nebo 0 pro vypnutí připomínky.",
+    "setting_changed": "Změněno z {old} na {new} dne {date}",
+    "settings_basic_note": "Zobrazují se základní nastavení. Přepněte na Pokročilé pro úplný seznam."
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_telefon, ...",
     "person": "přidat osobu…",
     "phase_name": "např. Předpírka",
-    "profile_name": "např. Bavlna 40 °C"
+    "profile_name": "např. Bavlna 40 °C",
+    "maintenance_notes": "např. vyměněn filtr, vyčištěno těsnění dvířek"
   },
   "pref": {
     "date_absolute": "Absolutní (např. 2. července 14:32)",
@@ -684,7 +805,7 @@
       "label": "Kanál Android (dokončení)"
     },
     "notify_finish_message": {
-      "doc": "Text odeslávaný při dokončení cyklu. Šalonové proměnné: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Text odeslaný při dokončení cyklu. Proměnné šablony: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} a {vs_typical} jsou zde nejužitečnější.",
       "label": "Zpráva o dokončení"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Osoby (pro Pouze když doma)"
     },
     "notify_pre_complete_message": {
-      "doc": "Text předčasného / téměř-hotovo upozornění. Šalonové proměnné: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Text upozornění před koncem / téměř hotovo. Proměnné šablony: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Zpráva před dokončením"
     },
     "notify_reminder_message": {
-      "doc": "Text stále čekající připomínky na vyloučení. Prázdné používá vestavbě výchozí hodnotu. Šalonové proměnné: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Text připomínky stále čekajícího vyložení. Prázdné použije vestavěnou výchozí hodnotu. Proměnné šablony: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Zpráva připomínky"
     },
     "notify_start_message": {
-      "doc": "Text odeslávaný při spouštění cyklu. Šalonové proměnné: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Text odeslaný při spuštění cyklu. Proměnné šablony: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Startovní zpráva"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Jak často hlídáč na pozadí kontroluje zastavené senzory a uplynulé časové limity. Výchozí 30 s.",
       "label": "Interval hlídače"
+    },
+    "notify_milestone_message": {
+      "doc": "Zpráva pro oznámení o milníku. Proměnné šablony: {device}, {cycle_count}.",
+      "label": "Zpráva o milníku"
+    },
+    "notify_milestones": {
+      "doc": "Čárkami oddělené počty cyklů, které po dosažení spustí jednorázové oslavné oznámení (např. 50, 100, 500, 1000). Prázdné vypne oznámení o milnících.",
+      "label": "Milníky cyklů"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Konec okna nerušit (0-23). Zadržená oznámení jsou doručena v tuto hodinu. Ponechte prázdné pro vypnutí.",
+      "label": "Konec tichých hodin"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Začátek okna nerušit (0-23). Oznámení o dokončení, připomínky a upozornění na čisté prádlo, která by se spustila během tichých hodin, jsou zadržena a doručena po skončení okna. Ponechte prázdné pro vypnutí. Podporuje okna přes půlnoc (např. začátek 22, konec 7).",
+      "label": "Začátek tichých hodin"
+    },
+    "peak_rate_message": {
+      "doc": "Volitelný vlastní text tipu na špičkovou sazbu připojený ke spouštěcímu oznámení. Proměnné šablony: {device}, {price}. Prázdné použije vestavěnou výchozí hodnotu.",
+      "label": "Zpráva o špičkové sazbě"
+    },
+    "peak_rate_threshold": {
+      "doc": "Když cyklus začne a aktuální cena za kWh je na této hodnotě nebo vyšší, připojí ke spouštěcímu oznámení tip na špičkovou sazbu. 0 nebo prázdné tip vypne.",
+      "label": "Práh špičkové sazby (za kWh)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Hlídač"
+    },
+    "quiet_hours_milestones": {
+      "label": "Tiché hodiny a milníky"
     }
   },
   "status": {
@@ -1013,7 +1161,9 @@
     "settings": "Nastavení",
     "status": "Přehled",
     "subtab_phase_catalog": "Katalog fází",
-    "subtab_profiles": "Profily"
+    "subtab_profiles": "Profily",
+    "maintenance": "Údržba",
+    "playground": "Testovací prostředí"
   },
   "tag": {
     "early_end": "Předčasný konec",
@@ -1073,10 +1223,30 @@
     "settings_reverted": "Nastavení bylo obnoveno; integrace se znovu načítá",
     "settings_saved": "Nastavení uloženo; znovunačtení integrace",
     "suggestions_applied": "Byly použity návrhy; znovunačtení integrace",
-    "suggestions_dismissed": "Návrhy zamítnuty"
+    "suggestions_dismissed": "Návrhy zamítnuty",
+    "apply_failed": "Použití selhalo: {error}",
+    "delete_failed": "Smazání selhalo: {error}",
+    "load_more_failed": "Nepodařilo se načíst více: {error}",
+    "maint_add_failed": "Nepodařilo se přidat událost: {error}",
+    "maint_added": "Údržbová událost přidána",
+    "maint_delete_failed": "Nepodařilo se smazat událost: {error}",
+    "maint_deleted": "Údržbová událost smazána",
+    "pg_dtw_failed": "Kontrola DTW selhala: {error}",
+    "pg_sim_failed": "Simulace selhala: {error}",
+    "relabel_done": "Přeznačeno cyklů: {count}",
+    "relabel_failed": "Přeznačení selhalo: {error}",
+    "reminders_save_failed": "Nepodařilo se uložit připomínky: {error}",
+    "reminders_saved": "Připomínky servisu uloženy"
   },
   "trend": {
     "down": "Klesající trend",
     "up": "Rostoucí trend"
+  },
+  "maint": {
+    "bearing_service": "Servis ložisek",
+    "descale": "Odvápnění",
+    "drum_clean": "Vyčistit buben",
+    "filter_clean": "Vyčistit filtr",
+    "other": "Jiné"
   }
 }

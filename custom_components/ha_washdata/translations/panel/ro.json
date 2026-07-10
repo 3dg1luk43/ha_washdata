@@ -123,7 +123,20 @@
     "trim": "Tăiați",
     "trim_split": "Tăiați / Divizați",
     "use": "Utilizați",
-    "wipe_all": "Ștergeți toate datele"
+    "wipe_all": "Ștergeți toate datele",
+    "add_maintenance": "Adăugați eveniment de întreținere",
+    "apply_set_b": "Aplicați setul B",
+    "kbd_help": "Comenzi rapide de la tastatură",
+    "load_more": "Încărcați mai multe",
+    "relabel": "Reetichetați ({count})",
+    "run_both": "Rulați A vs B",
+    "run_simulation": "Rulați simularea",
+    "save_reminders": "Salvați mementourile",
+    "select_all": "Selectați tot",
+    "select_last20": "Ultimele 20",
+    "select_none": "Deselectați",
+    "skip_setup": "Omiteți configurarea",
+    "undo": "Anulați"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Statistici stocare",
     "toggle_sidebar": "Comutați bara laterală Home Assistant",
     "tools_and_data": "Instrumente și date",
-    "wipe_history": "Ștergeți istoricul"
+    "wipe_history": "Ștergeți istoricul",
+    "ab_comparison": "Comparație setări A/B",
+    "add_maintenance": "Adăugați eveniment de întreținere",
+    "cycle_simulator": "Simulator de cicluri",
+    "dtw_inspector": "Inspector DTW",
+    "getting_started": "Primii pași",
+    "kbd_shortcuts": "Comenzi rapide de la tastatură",
+    "maintenance_log": "Jurnal de întreținere",
+    "maintenance_reminders": "Mementouri de service",
+    "settings_history": "Istoric setări"
   },
   "health": {
     "fair": "Calitate acceptabilă a profilului",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Mesaj (opțional, {device}/{program}/{minutes})",
     "ungrouped": "Negrupat",
     "unlabelled": "Neetichetat",
-    "unlabelled_paren": "(neetichetat)"
+    "unlabelled_paren": "(neetichetat)",
+    "avg_cost": "Cost mediu",
+    "change": "Modificare",
+    "concurrency": "Concurență",
+    "correlation": "Corelație",
+    "current_phase": "Faza curentă",
+    "curves": "Curbe",
+    "cycle": "Ciclu",
+    "cycle_index": "index ciclu →",
+    "cycles": "Cicluri",
+    "dashed": "întrerupt",
+    "delta": "Δ",
+    "dtw_blend_w": "Pondere de amestecare",
+    "dtw_blended": "Scor amestecat",
+    "dtw_ddtw": "Scor DDTW",
+    "dtw_l1": "Scor L1",
+    "dtw_matched_profile": "(profilul potrivit al ciclului)",
+    "duration_agreement": "Concordanță durată",
+    "energy_agreement": "Concordanță energie",
+    "event_timeline": "Cronologie evenimente",
+    "event_type": "Tip eveniment",
+    "final_score": "Scor final",
+    "mae_score": "Scor MAE",
+    "metric": "Metrică",
+    "n_selected": "{n} selectate",
+    "na": "n/a",
+    "notes": "Note",
+    "outcome": "Rezultat",
+    "per_cycle_short": "ciclu",
+    "pg_ambiguous": "Ambiguu",
+    "pg_cycles": "Cicluri",
+    "pg_detected": "Detectat",
+    "pg_ev_ending": "Se încheie",
+    "pg_ev_match": "Potrivire",
+    "pg_ev_off": "Oprit",
+    "pg_ev_paused": "În pauză",
+    "pg_ev_running": "În funcțiune",
+    "pg_ev_start": "Pornire",
+    "pg_match_correct": "Potrivire corectă",
+    "pg_unmatched": "Nepotrivit",
+    "phase_timeline": "Cronologie faze",
+    "profile_index": "index profil →",
+    "reminder_every": "Amintește la fiecare (cicluri)",
+    "score": "Scor",
+    "score_breakdown": "Detalierea scorului",
+    "setting": "Setare",
+    "settings_a": "Setări A (curente)",
+    "settings_a_short": "A",
+    "settings_advanced": "Avansat",
+    "settings_b": "Setări B (test)",
+    "settings_b_short": "B",
+    "settings_basic": "De bază",
+    "settings_detail_level": "Nivel de detaliu al setărilor",
+    "settings_overrides": "Suprascrieri de setări",
+    "sparkline": "Tendința recentă a duratei ciclurilor",
+    "stage2": "Etapa 2 — similaritate de bază",
+    "stage3": "Etapa 3 — DTW",
+    "stage4": "Etapa 4 — concordanță",
+    "warp_path": "Cale de deformare"
   },
   "log": {
     "all_levels": "Toate nivelurile"
@@ -337,7 +417,10 @@
     "process_history_msg": "Reexecutați potrivirea, actualizați sugestiile, reantrenați ML (dacă este activat) și recalculați starea ciclurilor pentru toate ciclurile stocate. Acest lucru poate dura ceva timp.",
     "process_history_ok": "Procesare",
     "process_history_title": "Procesare Istoric",
-    "process_recording": "Procesați înregistrarea"
+    "process_recording": "Procesați înregistrarea",
+    "delete_maintenance_msg": "Ștergeți acest istoric de întreținere? Această acțiune nu poate fi anulată.",
+    "delete_maintenance_title": "Ștergeți evenimentul de întreținere",
+    "relabel_cycles": "Reetichetați {count} cicluri"
   },
   "msg": {
     "appliance_monitor": "Monitor de aparate",
@@ -448,7 +531,44 @@
     "updated": "Actualizat",
     "warmup_badge": "Încă învață ({done}/{needed} cicluri)",
     "warmup_detail": "Acest profil are nevoie de {needed} cicluri etichetate înainte ca potrivirea automată să înceapă. Fiecare ciclu confirmat îl ajută să învețe.",
-    "wipe_history_warning": "Ștergeți definitiv toate ciclurile și profilurile. Nu poate fi anulat."
+    "wipe_history_warning": "Ștergeți definitiv toate ciclurile și profilurile. Nu poate fi anulat.",
+    "cycles_deleted": "{count} ciclu(ri) șterse",
+    "kbd_advanced": "Mergeți la Avansat",
+    "kbd_cycles": "Mergeți la Cicluri",
+    "kbd_escape": "Închideți dialogul deschis",
+    "kbd_help": "Afișați / ascundeți acest ajutor",
+    "kbd_help_intro": "Comenzile rapide sunt ignorate în timp ce scrieți într-un câmp. Răspund doar filele care există pentru acest dispozitiv.",
+    "kbd_ml": "Mergeți la Antrenare ML",
+    "kbd_overview": "Mergeți la Prezentare generală",
+    "kbd_playground": "Mergeți la Zona de test",
+    "kbd_profiles": "Mergeți la Profiluri",
+    "kbd_settings": "Mergeți la Setări",
+    "maintenance_due": "Întreținere scadentă: {items}",
+    "maintenance_intro": "Înregistrați lucrările de service efectuate pe acest aparat și primiți un memento când fiecare sarcină devine din nou scadentă.",
+    "maintenance_load_error": "Nu s-au putut încărca datele de întreținere: {error}",
+    "name_first_program": "Aveți suficiente cicluri — denumiți primul program pentru a începe potrivirea.",
+    "no_cycles_selected": "Selectați mai întâi cel puțin un ciclu.",
+    "no_maintenance": "Nicio întreținere înregistrată încă.",
+    "onboarding_progress": "{n} / 3 cicluri observate",
+    "onboarding_watching": "Utilizați aparatul în mod normal — WashData monitorizează. După 3 cicluri, va începe potrivirea programelor.",
+    "pg_ab_intro": "Rulați aceleași cicluri cu setările actuale (A) și un set modificat (B), unul lângă altul.",
+    "pg_apply_b_confirm": "Aplicați setul B pe dispozitivul activ?\n\n{list}",
+    "pg_dtw_intro": "Inspectați cum se aliniază un ciclu la un profil: cele două curbe, calea de deformare și detalierea scorului. Doar citire.",
+    "pg_no_b_overrides": "Nicio suprascriere B de aplicat.",
+    "pg_no_events": "Niciun eveniment",
+    "pg_running": "Se rulează…",
+    "pg_simulator_intro": "Redați ciclurile anterioare prin detecție cu setări modificate — o simulare care nu schimbă nimic.",
+    "pg_tip_ambiguous": "{n}/{total} ambigue",
+    "pg_tip_cycles": "{n} cicluri simulate",
+    "pg_tip_detected": "{n}/{total} detectate",
+    "pg_tip_match_correct": "{n}/{total} potrivite corect",
+    "pg_tip_unmatched": "{n}/{total} nepotrivite",
+    "playground_intro": "Un spațiu sigur de testare pentru a reda ciclurile anterioare cu setări diferite, a compara două configurații una lângă alta și a inspecta cum se aliniază un ciclu la un profil. Nimic de aici nu vă modifică datele active până când nu aplicați în mod explicit.",
+    "playground_needs_restart": "Reporniți Home Assistant pentru a activa instrumentele Zonei de test.",
+    "profile_deleted": "Profil șters",
+    "reminders_intro": "Afișați un memento în panou după acest număr de cicluri de la ultimul service. Lăsați necompletat sau 0 pentru a dezactiva un memento.",
+    "setting_changed": "Modificat de la {old} la {new} pe {date}",
+    "settings_basic_note": "Se afișează setările esențiale. Comutați la Avansat pentru lista completă."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "adaugă o persoană…",
     "phase_name": "ex. Preclătire",
-    "profile_name": "ex. Bumbac 40°C"
+    "profile_name": "ex. Bumbac 40°C",
+    "maintenance_notes": "de exemplu, filtru înlocuit, garnitura ușii curățată"
   },
   "pref": {
     "date_absolute": "Absolut (ex.: 14:32 pe 2 iul.)",
@@ -684,7 +805,7 @@
       "label": "Canal Android (finalizare)"
     },
     "notify_finish_message": {
-      "doc": "Corpul trimis când un ciclu se termină. Variabile de șablon: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Corpul trimis când se termină un ciclu. Variabile de șablon: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} și {vs_typical} sunt cele mai utile aici.",
       "label": "Mesaj de Finalizare"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Persoane (pentru Doar Când Acasă)"
     },
     "notify_pre_complete_message": {
-      "doc": "Corpul alertei pre-final / aproape terminat. Variabile de șablon: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Corpul alertei de aproape gata / pre-finalizare. Variabile de șablon: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Mesaj Pre-Finalizare"
     },
     "notify_reminder_message": {
-      "doc": "Corpul mementoului de descărcare încă în așteptare. Blank utilizează valoarea implicită încorporată. Variabile de șablon: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Corpul mementoului de descărcare care încă așteaptă. Necompletat folosește valoarea implicită. Variabile de șablon: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Mesaj Reamintire"
     },
     "notify_start_message": {
-      "doc": "Corpul trimis când începe un ciclu. Variabile de șablon: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Corpul trimis când începe un ciclu. Variabile de șablon: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Mesaj de Pornire"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Cât de des verifică monitorul de fundal pentru senzori blocați și timeout-uri scurse. Implicit 30 s.",
       "label": "Interval Watchdog"
+    },
+    "notify_milestone_message": {
+      "doc": "Mesajul pentru notificarea de etapă importantă. Variabile de șablon: {device}, {cycle_count}.",
+      "label": "Mesaj de etapă importantă"
+    },
+    "notify_milestones": {
+      "doc": "Numere de cicluri separate prin virgulă care declanșează o notificare unică de sărbătorire când sunt atinse (de exemplu, 50, 100, 500, 1000). Necompletat dezactivează notificările de etapă.",
+      "label": "Etape de cicluri"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Sfârșitul intervalului nu deranjați (0-23). Notificările reținute sunt livrate la această oră. Lăsați necompletat pentru a dezactiva.",
+      "label": "Sfârșitul orelor de liniște"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Începutul unui interval nu deranjați (0-23). Notificările de finalizare, memento și rufe curate care s-ar declanșa în timpul orelor de liniște sunt reținute și livrate când se încheie intervalul. Lăsați necompletat pentru a dezactiva. Acceptă intervale care trec de miezul nopții (de exemplu, început 22, sfârșit 7).",
+      "label": "Începutul orelor de liniște"
+    },
+    "peak_rate_message": {
+      "doc": "Text personalizat opțional pentru sfatul privind tariful de vârf, adăugat la notificarea de pornire. Variabile de șablon: {device}, {price}. Necompletat folosește valoarea implicită.",
+      "label": "Mesaj tarif de vârf"
+    },
+    "peak_rate_threshold": {
+      "doc": "Când începe un ciclu și prețul curent pe kWh este la această valoare sau peste, se adaugă un sfat privind tariful de vârf la notificarea de pornire. 0 sau necompletat dezactivează sfatul.",
+      "label": "Prag tarif de vârf (pe kWh)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Watchdog"
+    },
+    "quiet_hours_milestones": {
+      "label": "Ore de liniște și etape"
     }
   },
   "status": {
@@ -950,7 +1098,9 @@
     "settings": "Setări",
     "status": "Prezentare generală",
     "subtab_phase_catalog": "Catalog de faze",
-    "subtab_profiles": "Profiluri"
+    "subtab_profiles": "Profiluri",
+    "maintenance": "Întreținere",
+    "playground": "Zonă de test"
   },
   "tag": {
     "early_end": "Sfârșit anticipat",
@@ -1010,7 +1160,20 @@
     "settings_reverted": "Setări restaurate; integrarea se reîncarcă",
     "settings_saved": "Setări salvate; integrarea se reîncarcă",
     "suggestions_applied": "Sugestii aplicate; integrarea se reîncarcă",
-    "suggestions_dismissed": "Sugestii ignorate"
+    "suggestions_dismissed": "Sugestii ignorate",
+    "apply_failed": "Aplicarea a eșuat: {error}",
+    "delete_failed": "Ștergerea a eșuat: {error}",
+    "load_more_failed": "Nu s-au putut încărca mai multe: {error}",
+    "maint_add_failed": "Nu s-a putut adăuga evenimentul: {error}",
+    "maint_added": "Eveniment de întreținere adăugat",
+    "maint_delete_failed": "Nu s-a putut șterge evenimentul: {error}",
+    "maint_deleted": "Eveniment de întreținere șters",
+    "pg_dtw_failed": "Inspecția DTW a eșuat: {error}",
+    "pg_sim_failed": "Simularea a eșuat: {error}",
+    "relabel_done": "{count} ciclu(ri) reetichetate",
+    "relabel_failed": "Reetichetarea a eșuat: {error}",
+    "reminders_save_failed": "Nu s-au putut salva mementourile: {error}",
+    "reminders_saved": "Mementouri de service salvate"
   },
   "suggestion": {
     "both_agree": "WashData recomandă",
@@ -1078,5 +1241,12 @@
   "trend": {
     "down": "Tendință descendentă",
     "up": "Tendință ascendentă"
+  },
+  "maint": {
+    "bearing_service": "Service rulmenți",
+    "descale": "Detartrare",
+    "drum_clean": "Curățare tambur",
+    "filter_clean": "Curățare filtru",
+    "other": "Altele"
   }
 }

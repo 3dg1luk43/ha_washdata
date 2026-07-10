@@ -123,7 +123,20 @@
     "trim": "Trimma",
     "trim_split": "Trimma / Dela",
     "use": "Använd",
-    "wipe_all": "Rensa all data"
+    "wipe_all": "Rensa all data",
+    "add_maintenance": "Lägg till underhållshändelse",
+    "apply_set_b": "Använd uppsättning B",
+    "kbd_help": "Tangentbordsgenvägar",
+    "load_more": "Ladda fler",
+    "relabel": "Märk om ({count})",
+    "run_both": "Kör A mot B",
+    "run_simulation": "Kör simulering",
+    "save_reminders": "Spara påminnelser",
+    "select_all": "Markera alla",
+    "select_last20": "Senaste 20",
+    "select_none": "Rensa",
+    "skip_setup": "Hoppa över konfiguration",
+    "undo": "Ångra"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Lagringsstatistik",
     "toggle_sidebar": "Växla Home Assistant-sidofältet",
     "tools_and_data": "Verktyg och data",
-    "wipe_history": "Rensa historik"
+    "wipe_history": "Rensa historik",
+    "ab_comparison": "A/B-inställningsjämförelse",
+    "add_maintenance": "Lägg till underhållshändelse",
+    "cycle_simulator": "Cykelsimulator",
+    "dtw_inspector": "DTW-inspektör",
+    "getting_started": "Kom igång",
+    "kbd_shortcuts": "Tangentbordsgenvägar",
+    "maintenance_log": "Underhållslogg",
+    "maintenance_reminders": "Servicepåminnelser",
+    "settings_history": "Inställningshistorik"
   },
   "health": {
     "fair": "Acceptabel profilkvalitet",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Meddelande (valfritt, {device}/{program}/{minutes})",
     "ungrouped": "Ej grupperad",
     "unlabelled": "Omärkt",
-    "unlabelled_paren": "(omärkt)"
+    "unlabelled_paren": "(omärkt)",
+    "avg_cost": "Snittkostnad",
+    "change": "Ändring",
+    "concurrency": "Samtidighet",
+    "correlation": "Korrelation",
+    "current_phase": "Aktuell fas",
+    "curves": "Kurvor",
+    "cycle": "Cykel",
+    "cycle_index": "cykelindex →",
+    "cycles": "Cykler",
+    "dashed": "streckad",
+    "delta": "Δ",
+    "dtw_blend_w": "Blandningsvikt",
+    "dtw_blended": "Blandad poäng",
+    "dtw_ddtw": "DDTW-poäng",
+    "dtw_l1": "L1-poäng",
+    "dtw_matched_profile": "(cykelns matchade profil)",
+    "duration_agreement": "Varaktighetsöverensstämmelse",
+    "energy_agreement": "Energiöverensstämmelse",
+    "event_timeline": "Händelsetidslinje",
+    "event_type": "Händelsetyp",
+    "final_score": "Slutpoäng",
+    "mae_score": "MAE-poäng",
+    "metric": "Mått",
+    "n_selected": "{n} valda",
+    "na": "ej tillg.",
+    "notes": "Anteckningar",
+    "outcome": "Resultat",
+    "per_cycle_short": "cykel",
+    "pg_ambiguous": "Tvetydig",
+    "pg_cycles": "Cykler",
+    "pg_detected": "Upptäckt",
+    "pg_ev_ending": "Avslutas",
+    "pg_ev_match": "Matchning",
+    "pg_ev_off": "Av",
+    "pg_ev_paused": "Pausad",
+    "pg_ev_running": "Körs",
+    "pg_ev_start": "Start",
+    "pg_match_correct": "Matchning korrekt",
+    "pg_unmatched": "Omatchad",
+    "phase_timeline": "Fastidslinje",
+    "profile_index": "profilindex →",
+    "reminder_every": "Påminn var (cykler)",
+    "score": "Poäng",
+    "score_breakdown": "Poänguppdelning",
+    "setting": "Inställning",
+    "settings_a": "Inställningar A (aktuella)",
+    "settings_a_short": "A",
+    "settings_advanced": "Avancerat",
+    "settings_b": "Inställningar B (test)",
+    "settings_b_short": "B",
+    "settings_basic": "Grundläggande",
+    "settings_detail_level": "Detaljnivå för inställningar",
+    "settings_overrides": "Åsidosatta inställningar",
+    "sparkline": "Trend för senaste cykellängder",
+    "stage2": "Steg 2 — kärnlikhet",
+    "stage3": "Steg 3 — DTW",
+    "stage4": "Steg 4 — överensstämmelse",
+    "warp_path": "Warp-väg"
   },
   "log": {
     "all_levels": "Alla nivåer"
@@ -337,7 +417,10 @@
     "process_history_msg": "Kör matchning igen, uppdatera förslag, träna om ML (om aktiverat) och beräkna om cyklernas hälsa för alla lagrade cykler. Detta kan ta ett tag.",
     "process_history_ok": "Bearbeta",
     "process_history_title": "Bearbeta historik",
-    "process_recording": "Bearbeta inspelning"
+    "process_recording": "Bearbeta inspelning",
+    "delete_maintenance_msg": "Ta bort denna underhållspost? Detta kan inte ångras.",
+    "delete_maintenance_title": "Ta bort underhållshändelse",
+    "relabel_cycles": "Märk om {count} cykler"
   },
   "msg": {
     "appliance_monitor": "Apparatövervakning",
@@ -448,7 +531,44 @@
     "updated": "Uppdaterad",
     "warmup_badge": "Lär sig fortfarande ({done}/{needed} cykler)",
     "warmup_detail": "Den här profilen behöver {needed} märkta cykler innan automatisk matchning börjar. Varje bekräftad cykel hjälper den att lära sig.",
-    "wipe_history_warning": "Ta bort alla cykler och profiler permanent. Kan inte ångras."
+    "wipe_history_warning": "Ta bort alla cykler och profiler permanent. Kan inte ångras.",
+    "cycles_deleted": "{count} cykler borttagna",
+    "kbd_advanced": "Gå till Avancerat",
+    "kbd_cycles": "Gå till Cykler",
+    "kbd_escape": "Stäng den öppna dialogrutan",
+    "kbd_help": "Visa/dölj denna hjälp",
+    "kbd_help_intro": "Genvägar ignoreras när du skriver i ett fält. Endast flikar som finns för den här enheten reagerar.",
+    "kbd_ml": "Gå till ML-träning",
+    "kbd_overview": "Gå till Översikt",
+    "kbd_playground": "Gå till Testyta",
+    "kbd_profiles": "Gå till Profiler",
+    "kbd_settings": "Gå till Inställningar",
+    "maintenance_due": "Underhåll att göra: {items}",
+    "maintenance_intro": "Logga underhåll du utför på den här apparaten och få en påminnelse när varje uppgift behöver göras igen.",
+    "maintenance_load_error": "Kunde inte ladda underhållsdata: {error}",
+    "name_first_program": "Du har tillräckligt med cykler — namnge ditt första program för att börja matcha.",
+    "no_cycles_selected": "Välj minst en cykel först.",
+    "no_maintenance": "Inget underhåll registrerat ännu.",
+    "onboarding_progress": "{n} / 3 cykler observerade",
+    "onboarding_watching": "Använd apparaten som vanligt — WashData observerar. Efter 3 cykler börjar programmatchningen.",
+    "pg_ab_intro": "Kör samma cykler med dina nuvarande inställningar (A) och en justerad uppsättning (B), sida vid sida.",
+    "pg_apply_b_confirm": "Använd uppsättning B på den aktiva enheten?\n\n{list}",
+    "pg_dtw_intro": "Granska hur en cykel matchar en profil: de två kurvorna, warp-vägen och poänguppdelningen. Skrivskyddat.",
+    "pg_no_b_overrides": "Inga B-åsidosättningar att använda.",
+    "pg_no_events": "Inga händelser",
+    "pg_running": "Kör…",
+    "pg_simulator_intro": "Spela upp tidigare cykler genom detektering med justerade inställningar — en testkörning som inte ändrar något.",
+    "pg_tip_ambiguous": "{n}/{total} tvetydiga",
+    "pg_tip_cycles": "{n} cykler simulerade",
+    "pg_tip_detected": "{n}/{total} upptäckta",
+    "pg_tip_match_correct": "{n}/{total} korrekt matchade",
+    "pg_tip_unmatched": "{n}/{total} omatchade",
+    "playground_intro": "En säker testyta för att spela upp tidigare cykler med olika inställningar, jämföra två konfigurationer sida vid sida och granska hur en cykel matchar en profil. Inget här ändrar dina aktiva data förrän du uttryckligen tillämpar det.",
+    "playground_needs_restart": "Starta om Home Assistant för att aktivera Testyta-verktygen.",
+    "profile_deleted": "Profil borttagen",
+    "reminders_intro": "Visa en påminnelse i panelen så här många cykler efter senaste servicen. Lämna tomt eller 0 för att stänga av en påminnelse.",
+    "setting_changed": "Ändrad från {old} till {new} den {date}",
+    "settings_basic_note": "Visar väsentliga inställningar. Byt till Avancerat för hela listan."
   },
   "phase_desc": {
     "anti_crease": "Enstaka korta tumlar efter färdigställandet för att förhindra skrynklor i tvätten.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "lägg till en person…",
     "phase_name": "t.ex. Förtvättning",
-    "profile_name": "t.ex. Bomull 40°C"
+    "profile_name": "t.ex. Bomull 40°C",
+    "maintenance_notes": "t.ex. bytte filter, rengjorde dörrtätning"
   },
   "pref": {
     "date_absolute": "Absolut (t.ex. 14:32 den 2 jul)",
@@ -684,7 +805,7 @@
       "label": "Android-kanal (slut)"
     },
     "notify_finish_message": {
-      "doc": "Kropp skickas när en cykel är klar. Mallvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Brödtext som skickas när en cykel är klar. Mallvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} och {vs_typical} är mest användbara här.",
       "label": "Slutmeddelande"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Personer (för Bara när hemma)"
     },
     "notify_pre_complete_message": {
-      "doc": "Brödtexten för varningen före slut / nästan klar. Mallvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Brödtext för varningen före slut / nästan klar. Mallvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Nästan klart-meddelande"
     },
     "notify_reminder_message": {
-      "doc": "Brödtexten på påminnelsen om urladdning som fortfarande väntar. Blank använder den inbyggda standarden. Mallvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Brödtext för påminnelsen om att tömma maskinen som fortfarande väntar. Tomt använder det inbyggda standardvärdet. Mallvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Påminnelsemeddelande"
     },
     "notify_start_message": {
-      "doc": "Kropp skickas när en cykel startar. Mallvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Brödtext som skickas när en cykel startar. Mallvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Startmeddelande"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Hur ofta kontrollerar bakgrundsvakten efter avstängda sensorer och förflutna timeouts. Standard 30 s.",
       "label": "Vakthundsintervall"
+    },
+    "notify_milestone_message": {
+      "doc": "Meddelande för milstolpsnotisen. Mallvariabler: {device}, {cycle_count}.",
+      "label": "Milstolpsmeddelande"
+    },
+    "notify_milestones": {
+      "doc": "Kommaseparerade cykelantal som utlöser en engångsnotis med gratulation när de uppnås (t.ex. 50, 100, 500, 1000). Tomt inaktiverar milstolpsnotiser.",
+      "label": "Cykelmilstolpar"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Slut på stör ej-fönstret (0-23). Kvarhållna notiser levereras vid denna timme. Lämna tomt för att inaktivera.",
+      "label": "Tystnadstimmar slut"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Start på ett stör ej-fönster (0-23). Notiser om slutförande, påminnelser och ren tvätt som skulle skickas under tystnadstimmar hålls kvar och levereras när fönstret slutar. Lämna tomt för att inaktivera. Stöder fönster som passerar midnatt (t.ex. start 22, slut 7).",
+      "label": "Tystnadstimmar start"
+    },
+    "peak_rate_message": {
+      "doc": "Valfri anpassad text för högtaxetipset som läggs till i startnotisen. Mallvariabler: {device}, {price}. Tomt använder det inbyggda standardvärdet.",
+      "label": "Högtaxemeddelande"
+    },
+    "peak_rate_threshold": {
+      "doc": "När en cykel startar och det aktuella priset per kWh är lika med eller över detta värde läggs ett högtaxetips till i startnotisen. 0 eller tomt inaktiverar tipset.",
+      "label": "Högtaxetröskel (per kWh)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Vakthund"
+    },
+    "quiet_hours_milestones": {
+      "label": "Tystnadstimmar och milstolpar"
     }
   },
   "status": {
@@ -1013,7 +1161,9 @@
     "settings": "Inställningar",
     "status": "Översikt",
     "subtab_phase_catalog": "Faskatalog",
-    "subtab_profiles": "Profiler"
+    "subtab_profiles": "Profiler",
+    "maintenance": "Underhåll",
+    "playground": "Testyta"
   },
   "tag": {
     "early_end": "Tidigt slut",
@@ -1073,10 +1223,30 @@
     "settings_reverted": "Inställningar återställda; integration laddas om",
     "settings_saved": "Inställningar sparade; integration laddas om",
     "suggestions_applied": "Förslag tillämpade; integration laddas om",
-    "suggestions_dismissed": "Förslag avfärdade"
+    "suggestions_dismissed": "Förslag avfärdade",
+    "apply_failed": "Tillämpning misslyckades: {error}",
+    "delete_failed": "Borttagning misslyckades: {error}",
+    "load_more_failed": "Kunde inte ladda fler: {error}",
+    "maint_add_failed": "Kunde inte lägga till händelse: {error}",
+    "maint_added": "Underhållshändelse tillagd",
+    "maint_delete_failed": "Kunde inte ta bort händelse: {error}",
+    "maint_deleted": "Underhållshändelse borttagen",
+    "pg_dtw_failed": "DTW-granskning misslyckades: {error}",
+    "pg_sim_failed": "Simulering misslyckades: {error}",
+    "relabel_done": "{count} cykler ommärkta",
+    "relabel_failed": "Ommärkning misslyckades: {error}",
+    "reminders_save_failed": "Kunde inte spara påminnelser: {error}",
+    "reminders_saved": "Servicepåminnelser sparade"
   },
   "trend": {
     "down": "Nedåtgående trend",
     "up": "Uppåtgående trend"
+  },
+  "maint": {
+    "bearing_service": "Lagerservice",
+    "descale": "Avkalka",
+    "drum_clean": "Rengör trumma",
+    "filter_clean": "Rengör filter",
+    "other": "Övrigt"
   }
 }

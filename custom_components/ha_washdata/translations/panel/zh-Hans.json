@@ -123,7 +123,20 @@
     "trim": "裁剪",
     "trim_split": "裁剪 / 拆分",
     "use": "使用",
-    "wipe_all": "清除所有数据"
+    "wipe_all": "清除所有数据",
+    "add_maintenance": "添加维护事件",
+    "apply_set_b": "应用设置 B",
+    "kbd_help": "键盘快捷键",
+    "load_more": "加载更多",
+    "relabel": "重新标记（{count}）",
+    "run_both": "运行 A 对比 B",
+    "run_simulation": "运行模拟",
+    "save_reminders": "保存提醒",
+    "select_all": "全选",
+    "select_last20": "最近 20",
+    "select_none": "清除",
+    "skip_setup": "跳过设置",
+    "undo": "撤销"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "存储统计",
     "toggle_sidebar": "切换家庭助理侧边栏",
     "tools_and_data": "工具与数据",
-    "wipe_history": "清除历史"
+    "wipe_history": "清除历史",
+    "ab_comparison": "A/B 设置对比",
+    "add_maintenance": "添加维护事件",
+    "cycle_simulator": "周期模拟器",
+    "dtw_inspector": "DTW 检查器",
+    "getting_started": "快速上手",
+    "kbd_shortcuts": "键盘快捷键",
+    "maintenance_log": "维护日志",
+    "maintenance_reminders": "保养提醒",
+    "settings_history": "设置历史"
   },
   "health": {
     "fair": "配置文件质量尚可",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "消息（可选，{device}/{program}/{minutes}）",
     "ungrouped": "未分组",
     "unlabelled": "未标记",
-    "unlabelled_paren": "（未标记）"
+    "unlabelled_paren": "（未标记）",
+    "avg_cost": "平均成本",
+    "change": "变更",
+    "concurrency": "并发",
+    "correlation": "相关性",
+    "current_phase": "当前阶段",
+    "curves": "曲线",
+    "cycle": "周期",
+    "cycle_index": "周期序号 →",
+    "cycles": "周期",
+    "dashed": "虚线",
+    "delta": "Δ",
+    "dtw_blend_w": "混合权重",
+    "dtw_blended": "混合得分",
+    "dtw_ddtw": "DDTW 得分",
+    "dtw_l1": "L1 得分",
+    "dtw_matched_profile": "（该周期匹配的配置文件）",
+    "duration_agreement": "时长一致度",
+    "energy_agreement": "能耗一致度",
+    "event_timeline": "事件时间线",
+    "event_type": "事件类型",
+    "final_score": "最终得分",
+    "mae_score": "MAE 得分",
+    "metric": "指标",
+    "n_selected": "已选 {n} 个",
+    "na": "不适用",
+    "notes": "备注",
+    "outcome": "结果",
+    "per_cycle_short": "周期",
+    "pg_ambiguous": "模糊",
+    "pg_cycles": "周期",
+    "pg_detected": "已检测",
+    "pg_ev_ending": "结束中",
+    "pg_ev_match": "匹配",
+    "pg_ev_off": "关闭",
+    "pg_ev_paused": "已暂停",
+    "pg_ev_running": "运行中",
+    "pg_ev_start": "开始",
+    "pg_match_correct": "匹配正确",
+    "pg_unmatched": "未匹配",
+    "phase_timeline": "阶段时间线",
+    "profile_index": "配置文件序号 →",
+    "reminder_every": "提醒间隔（周期）",
+    "score": "得分",
+    "score_breakdown": "得分明细",
+    "setting": "设置",
+    "settings_a": "设置 A（当前）",
+    "settings_a_short": "A",
+    "settings_advanced": "高级",
+    "settings_b": "设置 B（测试）",
+    "settings_b_short": "B",
+    "settings_basic": "基础",
+    "settings_detail_level": "设置详细程度",
+    "settings_overrides": "设置覆盖项",
+    "sparkline": "近期周期时长趋势",
+    "stage2": "阶段 2 — 核心相似度",
+    "stage3": "阶段 3 — DTW",
+    "stage4": "阶段 4 — 一致度",
+    "warp_path": "规整路径"
   },
   "log": {
     "all_levels": "所有级别"
@@ -337,7 +417,10 @@
     "process_history_msg": "重新运行匹配、刷新建议、重新训练 ML（如果启用）并重新计算所有存储循环的循环健康状态。这可能需要一些时间。",
     "process_history_ok": "处理",
     "process_history_title": "处理历史记录",
-    "process_recording": "处理录制"
+    "process_recording": "处理录制",
+    "delete_maintenance_msg": "删除此维护记录？此操作无法撤销。",
+    "delete_maintenance_title": "删除维护事件",
+    "relabel_cycles": "重新标记 {count} 个周期"
   },
   "msg": {
     "appliance_monitor": "设备监控",
@@ -448,7 +531,44 @@
     "updated": "已更新",
     "warmup_badge": "仍在学习中（{done}/{needed} 个周期）",
     "warmup_detail": "该配置文件需要 {needed} 个已标记的周期后才能开始自动匹配。每个已确认的周期都有助于学习。",
-    "wipe_history_warning": "永久删除所有周期和配置文件。无法撤销。"
+    "wipe_history_warning": "永久删除所有周期和配置文件。无法撤销。",
+    "cycles_deleted": "已删除 {count} 个周期",
+    "kbd_advanced": "转到高级",
+    "kbd_cycles": "转到周期",
+    "kbd_escape": "关闭打开的对话框",
+    "kbd_help": "显示 / 隐藏此帮助",
+    "kbd_help_intro": "在字段中输入时快捷键将被忽略。仅此设备存在的选项卡会响应。",
+    "kbd_ml": "转到 ML 训练",
+    "kbd_overview": "转到概览",
+    "kbd_playground": "转到试验场",
+    "kbd_profiles": "转到配置文件",
+    "kbd_settings": "转到设置",
+    "maintenance_due": "待办维护：{items}",
+    "maintenance_intro": "记录您对此设备执行的保养，并在每项任务再次到期时收到提醒。",
+    "maintenance_load_error": "无法加载维护数据：{error}",
+    "name_first_program": "您已有足够的周期 — 为您的第一个程序命名即可开始匹配。",
+    "no_cycles_selected": "请先至少选择一个周期。",
+    "no_maintenance": "尚未记录任何维护。",
+    "onboarding_progress": "已观察 {n} / 3 个周期",
+    "onboarding_watching": "照常使用您的设备 — WashData 正在观察。3 个周期后将开始程序匹配。",
+    "pg_ab_intro": "使用当前设置 (A) 和调整后的设置 (B) 并排运行相同的周期。",
+    "pg_apply_b_confirm": "将设置 B 应用到当前设备？\n\n{list}",
+    "pg_dtw_intro": "查看一个周期如何与配置文件对齐：两条曲线、规整路径和得分明细。只读。",
+    "pg_no_b_overrides": "没有可应用的 B 覆盖项。",
+    "pg_no_events": "无事件",
+    "pg_running": "运行中…",
+    "pg_simulator_intro": "使用调整后的设置对过去的周期重新进行检测回放 — 这是一次不会改变任何内容的试运行。",
+    "pg_tip_ambiguous": "{n}/{total} 个模糊",
+    "pg_tip_cycles": "已模拟 {n} 个周期",
+    "pg_tip_detected": "{n}/{total} 个已检测",
+    "pg_tip_match_correct": "{n}/{total} 个匹配正确",
+    "pg_tip_unmatched": "{n}/{total} 个未匹配",
+    "playground_intro": "一个安全的沙盒，可用不同设置回放过去的周期、并排比较两套配置，并查看周期如何与配置文件对齐。在您明确应用之前，此处的任何操作都不会更改您的实时数据。",
+    "playground_needs_restart": "重启 Home Assistant 以启用试验场工具。",
+    "profile_deleted": "配置文件已删除",
+    "reminders_intro": "在上次保养后经过这么多个周期时在面板中显示提醒。留空或填 0 可关闭提醒。",
+    "setting_changed": "于 {date} 从 {old} 更改为 {new}",
+    "settings_basic_note": "正在显示基本设置。切换到高级可查看完整列表。"
   },
   "phase_desc": {
     "anti_crease": "完成后偶尔进行短暂的翻滚以减少皱纹。",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "添加人员…",
     "phase_name": "例如 预洗",
-    "profile_name": "例如 棉布 40°C"
+    "profile_name": "例如 棉布 40°C",
+    "maintenance_notes": "例如：更换了过滤器、清洁了门封"
   },
   "pref": {
     "date_absolute": "绝对时间（例如：7月2日 14:32）",
@@ -684,7 +805,7 @@
       "label": "Android 频道（结束）"
     },
     "notify_finish_message": {
-      "doc": "循环结束时发送主体。模板变量：{device}、{program}、{duration}、{energy}、{cost}、{date}、{time}、{minutes}。",
+      "doc": "循环结束时发送的正文。模板变量：{device}、{duration}、{minutes}、{program}、{energy_kwh}、{cost}、{time_finished}、{vs_typical}、{cycle_count}。此处 {time_finished} 和 {vs_typical} 最为有用。",
       "label": "结束消息"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "人员（仅在家时通知用）"
     },
     "notify_pre_complete_message": {
-      "doc": "正文预结束/即将完成警报。模板变量：{device}、{program}、{duration}、{energy}、{cost}、{date}、{time}、{minutes}。",
+      "doc": "临近结束 / 即将完成提醒的正文。模板变量：{device}、{duration}、{minutes}、{program}、{energy_kwh}、{cost}、{time_finished}、{vs_typical}、{cycle_count}。",
       "label": "完成前消息"
     },
     "notify_reminder_message": {
-      "doc": "机身还在等待卸载提醒。空白使用内置默认值。模板变量：{device}、{program}、{duration}、{energy}、{cost}、{date}、{time}、{minutes}。",
+      "doc": "仍在等待的取出衣物提醒的正文。留空则使用内置默认值。模板变量：{device}、{duration}、{minutes}、{program}、{energy_kwh}、{cost}、{time_finished}、{vs_typical}、{cycle_count}。",
       "label": "提醒消息"
     },
     "notify_start_message": {
-      "doc": "循环开始时发送主体。模板变量：{device}、{program}、{duration}、{energy}、{cost}、{date}、{time}、{minutes}。",
+      "doc": "循环开始时发送的正文。模板变量：{device}、{duration}、{minutes}、{program}、{energy_kwh}、{cost}、{time_finished}、{vs_typical}、{cycle_count}。",
       "label": "启动消息"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "后台看门狗检查停滞的传感器和超时的频率。默认 30 秒。",
       "label": "看门狗间隔"
+    },
+    "notify_milestone_message": {
+      "doc": "里程碑通知的消息。模板变量：{device}、{cycle_count}。",
+      "label": "里程碑消息"
+    },
+    "notify_milestones": {
+      "doc": "以逗号分隔的周期计数，达到时触发一次性庆祝通知（例如 50、100、500、1000）。留空则禁用里程碑通知。",
+      "label": "周期里程碑"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "免打扰时段的结束时间（0-23）。暂存的通知将在此时段发送。留空则禁用。",
+      "label": "免打扰结束"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "免打扰时段的开始时间（0-23）。在免打扰时段内本应触发的完成、提醒和衣物已洗好通知将被暂存，并在时段结束时发送。留空则禁用。支持跨越午夜的时段（例如开始 22，结束 7）。",
+      "label": "免打扰开始"
+    },
+    "peak_rate_message": {
+      "doc": "附加到启动通知的高峰电价提示的可选自定义文本。模板变量：{device}、{price}。留空则使用内置默认值。",
+      "label": "高峰电价消息"
+    },
+    "peak_rate_threshold": {
+      "doc": "当周期开始且当前每千瓦时电价达到或超过此值时，在启动通知中附加高峰电价提示。0 或留空则禁用该提示。",
+      "label": "高峰电价阈值（每千瓦时）"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "看门狗"
+    },
+    "quiet_hours_milestones": {
+      "label": "免打扰时段与里程碑"
     }
   },
   "status": {
@@ -950,7 +1098,9 @@
     "settings": "设置",
     "status": "概览",
     "subtab_phase_catalog": "阶段目录",
-    "subtab_profiles": "配置文件"
+    "subtab_profiles": "配置文件",
+    "maintenance": "维护",
+    "playground": "试验场"
   },
   "tag": {
     "early_end": "提前结束",
@@ -1010,7 +1160,20 @@
     "settings_reverted": "设置已恢复；集成正在重新加载",
     "settings_saved": "设置已保存；集成重载中",
     "suggestions_applied": "建议已应用；集成重载中",
-    "suggestions_dismissed": "建议已关闭"
+    "suggestions_dismissed": "建议已关闭",
+    "apply_failed": "应用失败：{error}",
+    "delete_failed": "删除失败：{error}",
+    "load_more_failed": "无法加载更多：{error}",
+    "maint_add_failed": "无法添加事件：{error}",
+    "maint_added": "已添加维护事件",
+    "maint_delete_failed": "无法删除事件：{error}",
+    "maint_deleted": "已删除维护事件",
+    "pg_dtw_failed": "DTW 检查失败：{error}",
+    "pg_sim_failed": "模拟失败：{error}",
+    "relabel_done": "已重新标记 {count} 个周期",
+    "relabel_failed": "重新标记失败：{error}",
+    "reminders_save_failed": "无法保存提醒：{error}",
+    "reminders_saved": "已保存保养提醒"
   },
   "suggestion": {
     "both_agree": "WashData建议",
@@ -1078,5 +1241,12 @@
   "trend": {
     "down": "下降趋势",
     "up": "上升趋势"
+  },
+  "maint": {
+    "bearing_service": "轴承保养",
+    "descale": "除垢",
+    "drum_clean": "清洁滚筒",
+    "filter_clean": "清洁过滤器",
+    "other": "其他"
   }
 }

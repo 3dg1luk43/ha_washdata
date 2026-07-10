@@ -123,7 +123,20 @@
     "trim": "Kırp",
     "trim_split": "Kırp / Böl",
     "use": "Kullan",
-    "wipe_all": "Tüm Verileri Sil"
+    "wipe_all": "Tüm Verileri Sil",
+    "add_maintenance": "Bakım kaydı ekle",
+    "apply_set_b": "B setini uygula",
+    "kbd_help": "Klavye kısayolları",
+    "load_more": "Daha fazla yükle",
+    "relabel": "Yeniden etiketle ({count})",
+    "run_both": "A ile B'yi çalıştır",
+    "run_simulation": "Simülasyonu çalıştır",
+    "save_reminders": "Hatırlatıcıları kaydet",
+    "select_all": "Tümünü seç",
+    "select_last20": "Son 20",
+    "select_none": "Temizle",
+    "skip_setup": "Kurulumu atla",
+    "undo": "Geri al"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Depolama İstatistikleri",
     "toggle_sidebar": "Ev Asistanı kenar çubuğunu aç/kapat",
     "tools_and_data": "Araçlar ve Veriler",
-    "wipe_history": "Geçmişi Sil"
+    "wipe_history": "Geçmişi Sil",
+    "ab_comparison": "A/B Ayar Karşılaştırması",
+    "add_maintenance": "Bakım Kaydı Ekle",
+    "cycle_simulator": "Döngü Simülatörü",
+    "dtw_inspector": "DTW İnceleyici",
+    "getting_started": "Başlarken",
+    "kbd_shortcuts": "Klavye Kısayolları",
+    "maintenance_log": "Bakım Günlüğü",
+    "maintenance_reminders": "Servis Hatırlatıcıları",
+    "settings_history": "Ayar geçmişi"
   },
   "health": {
     "fair": "Kabul edilebilir profil kalitesi",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Mesaj (isteğe bağlı, {device}/{program}/{minutes})",
     "ungrouped": "Grupsuz",
     "unlabelled": "Etiketsiz",
-    "unlabelled_paren": "(etiketsiz)"
+    "unlabelled_paren": "(etiketsiz)",
+    "avg_cost": "Ort. maliyet",
+    "change": "Değişim",
+    "concurrency": "Eşzamanlılık",
+    "correlation": "Korelasyon",
+    "current_phase": "Geçerli aşama",
+    "curves": "Eğriler",
+    "cycle": "Döngü",
+    "cycle_index": "döngü dizini →",
+    "cycles": "Döngüler",
+    "dashed": "kesikli",
+    "delta": "Δ",
+    "dtw_blend_w": "Karışım ağırlığı",
+    "dtw_blended": "Karışık puan",
+    "dtw_ddtw": "DDTW puanı",
+    "dtw_l1": "L1 puanı",
+    "dtw_matched_profile": "(döngünün eşleşen profili)",
+    "duration_agreement": "Süre uyumu",
+    "energy_agreement": "Enerji uyumu",
+    "event_timeline": "Olay zaman çizelgesi",
+    "event_type": "Olay türü",
+    "final_score": "Nihai puan",
+    "mae_score": "MAE puanı",
+    "metric": "Metrik",
+    "n_selected": "{n} seçili",
+    "na": "yok",
+    "notes": "Notlar",
+    "outcome": "Sonuç",
+    "per_cycle_short": "döngü",
+    "pg_ambiguous": "Belirsiz",
+    "pg_cycles": "Döngüler",
+    "pg_detected": "Algılandı",
+    "pg_ev_ending": "Bitiyor",
+    "pg_ev_match": "Eşleşme",
+    "pg_ev_off": "Kapalı",
+    "pg_ev_paused": "Duraklatıldı",
+    "pg_ev_running": "Çalışıyor",
+    "pg_ev_start": "Başlangıç",
+    "pg_match_correct": "Eşleşme doğru",
+    "pg_unmatched": "Eşleşmedi",
+    "phase_timeline": "Aşama zaman çizelgesi",
+    "profile_index": "profil dizini →",
+    "reminder_every": "Hatırlatma sıklığı (döngü)",
+    "score": "Puan",
+    "score_breakdown": "Puan dökümü",
+    "setting": "Ayar",
+    "settings_a": "Ayarlar A (geçerli)",
+    "settings_a_short": "A",
+    "settings_advanced": "Gelişmiş",
+    "settings_b": "Ayarlar B (test)",
+    "settings_b_short": "B",
+    "settings_basic": "Temel",
+    "settings_detail_level": "Ayar ayrıntı düzeyi",
+    "settings_overrides": "Ayar geçersiz kılmaları",
+    "sparkline": "Son döngü süresi eğilimi",
+    "stage2": "Aşama 2 — çekirdek benzerlik",
+    "stage3": "Aşama 3 — DTW",
+    "stage4": "Aşama 4 — uyum",
+    "warp_path": "Büküm yolu"
   },
   "log": {
     "all_levels": "Tüm seviyeler"
@@ -337,7 +417,10 @@
     "process_history_msg": "Tüm saklanan döngülerde eşleştirmeyi yeniden çalıştırın, önerileri yenileyin, ML'yi yeniden eğitin (etkinleştirilmişse) ve döngü sağlığını yeniden hesaplayın. Bu biraz zaman alabilir.",
     "process_history_ok": "İşle",
     "process_history_title": "Geçmişi İşle",
-    "process_recording": "Kaydı İşle"
+    "process_recording": "Kaydı İşle",
+    "delete_maintenance_msg": "Bu bakım kaydı silinsin mi? Bu işlem geri alınamaz.",
+    "delete_maintenance_title": "Bakım Kaydını Sil",
+    "relabel_cycles": "{count} döngüyü yeniden etiketle"
   },
   "msg": {
     "appliance_monitor": "Cihaz monitörü",
@@ -448,7 +531,44 @@
     "updated": "Güncellendi",
     "warmup_badge": "Hâlâ öğreniyor ({done}/{needed} döngü)",
     "warmup_detail": "Bu profil, otomatik eşleştirme başlamadan önce {needed} etiketli döngüye ihtiyaç duyar. Her onaylanan döngü öğrenmesine yardımcı olur.",
-    "wipe_history_warning": "Tüm döngüleri ve profilleri kalıcı olarak silin. Geri alınamaz."
+    "wipe_history_warning": "Tüm döngüleri ve profilleri kalıcı olarak silin. Geri alınamaz.",
+    "cycles_deleted": "{count} döngü silindi",
+    "kbd_advanced": "Gelişmiş'e git",
+    "kbd_cycles": "Döngüler'e git",
+    "kbd_escape": "Açık iletişim kutusunu kapat",
+    "kbd_help": "Bu yardımı göster / gizle",
+    "kbd_help_intro": "Bir alana yazarken kısayollar yok sayılır. Yalnızca bu cihazda bulunan sekmeler yanıt verir.",
+    "kbd_ml": "ML Eğitimi'ne git",
+    "kbd_overview": "Genel Bakış'a git",
+    "kbd_playground": "Test Alanı'na git",
+    "kbd_profiles": "Profiller'e git",
+    "kbd_settings": "Ayarlar'a git",
+    "maintenance_due": "Zamanı gelen bakım: {items}",
+    "maintenance_intro": "Bu cihazda yaptığınız bakımları kaydedin ve her görevin zamanı yeniden geldiğinde hatırlatma alın.",
+    "maintenance_load_error": "Bakım verileri yüklenemedi: {error}",
+    "name_first_program": "Yeterli döngünüz var — eşleştirmeye başlamak için ilk programınıza ad verin.",
+    "no_cycles_selected": "Önce en az bir döngü seçin.",
+    "no_maintenance": "Henüz bakım kaydı yok.",
+    "onboarding_progress": "{n} / 3 döngü gözlemlendi",
+    "onboarding_watching": "Cihazınızı normal şekilde kullanın — WashData izliyor. 3 döngüden sonra program eşleştirmesi başlar.",
+    "pg_ab_intro": "Aynı döngüleri mevcut ayarlarınızla (A) ve ince ayarlı bir setle (B) yan yana çalıştırın.",
+    "pg_apply_b_confirm": "B seti canlı cihaza uygulansın mı?\n\n{list}",
+    "pg_dtw_intro": "Bir döngünün bir profile nasıl hizalandığını inceleyin: iki eğri, büküm yolu ve puan dökümü. Salt okunur.",
+    "pg_no_b_overrides": "Uygulanacak B geçersiz kılması yok.",
+    "pg_no_events": "Olay yok",
+    "pg_running": "Çalışıyor…",
+    "pg_simulator_intro": "Geçmiş döngüleri ince ayarlı ayarlarla algılamadan yeniden geçirin — hiçbir şeyi değiştirmeyen bir deneme çalıştırması.",
+    "pg_tip_ambiguous": "{n}/{total} belirsiz",
+    "pg_tip_cycles": "{n} döngü simüle edildi",
+    "pg_tip_detected": "{n}/{total} algılandı",
+    "pg_tip_match_correct": "{n}/{total} doğru eşleşti",
+    "pg_tip_unmatched": "{n}/{total} eşleşmedi",
+    "playground_intro": "Geçmiş döngüleri farklı ayarlarla yeniden oynatmak, iki kurulumu yan yana karşılaştırmak ve bir döngünün bir profile nasıl hizalandığını incelemek için güvenli bir test alanı. Siz açıkça uygulamadıkça buradaki hiçbir şey canlı verilerinizi değiştirmez.",
+    "playground_needs_restart": "Test Alanı araçlarını etkinleştirmek için Home Assistant'ı yeniden başlatın.",
+    "profile_deleted": "Profil silindi",
+    "reminders_intro": "Son servisten bu kadar döngü sonra panelde bir hatırlatma göster. Bir hatırlatmayı kapatmak için boş bırakın veya 0 girin.",
+    "setting_changed": "{date} tarihinde {old} değerinden {new} değerine değiştirildi",
+    "settings_basic_note": "Temel ayarlar gösteriliyor. Tam liste için Gelişmiş'e geçin."
   },
   "phase_desc": {
     "anti_crease": "Kırışıklıkları azaltmak için tamamlandıktan sonra ara sıra kısa yuvarlanmalar.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "bir kişi ekle…",
     "phase_name": "örn. Ön yıkama",
-    "profile_name": "örn. Pamuk 40°C"
+    "profile_name": "örn. Pamuk 40°C",
+    "maintenance_notes": "örn. filtre değiştirildi, kapı contası temizlendi"
   },
   "pref": {
     "date_absolute": "Mutlak (ör. 2 Tem 14:32)",
@@ -684,7 +805,7 @@
       "label": "Android Kanalı (bitiş)"
     },
     "notify_finish_message": {
-      "doc": "Bir döngü bittiğinde gövde gönderilir. Şablon değişkenleri: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Bir döngü bittiğinde gönderilen gövde metni. Şablon değişkenleri: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. Burada en kullanışlı olanlar {time_finished} ve {vs_typical}.",
       "label": "Bitiş Mesajı"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Kişiler (Evde İken için)"
     },
     "notify_pre_complete_message": {
-      "doc": "Ön uç / neredeyse tamamlandı uyarısının gövdesi. Şablon değişkenleri: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Bitiş öncesi / neredeyse tamam uyarısının gövde metni. Şablon değişkenleri: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Bitiş Öncesi Mesaj"
     },
     "notify_reminder_message": {
-      "doc": "Hala bekleyen boşaltma hatırlatıcısının metni. Boş, yerleşik varsayılanı kullanır. Şablon değişkenleri: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Hâlâ bekleyen boşaltma hatırlatıcısının gövde metni. Boş bırakmak yerleşik varsayılanı kullanır. Şablon değişkenleri: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Hatırlatıcı Mesaj"
     },
     "notify_start_message": {
-      "doc": "Bir döngü başladığında gövde gönderilir. Şablon değişkenleri: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Bir döngü başladığında gönderilen gövde metni. Şablon değişkenleri: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Başlangıç Mesajı"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Arka plan gözlemcisinin durmuş sensörleri ve geçen zaman aşımlarını ne sıklıkla kontrol ettiği. Varsayılan 30 sn.",
       "label": "Bekçi Aralığı"
+    },
+    "notify_milestone_message": {
+      "doc": "Kilometre taşı bildirimi için mesaj. Şablon değişkenleri: {device}, {cycle_count}.",
+      "label": "Kilometre Taşı Mesajı"
+    },
+    "notify_milestones": {
+      "doc": "Ulaşıldığında bir kerelik kutlama bildirimi tetikleyen, virgülle ayrılmış döngü sayıları (örn. 50, 100, 500, 1000). Boş bırakmak kilometre taşı bildirimlerini devre dışı bırakır.",
+      "label": "Döngü Kilometre Taşları"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Rahatsız etmeyin aralığının sonu (0-23). Bekletilen bildirimler bu saatte iletilir. Devre dışı bırakmak için boş bırakın.",
+      "label": "Sessiz Saatler Sonu"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Rahatsız etmeyin aralığının başlangıcı (0-23). Sessiz saatlerde gönderilecek bitiş, hatırlatma ve temiz çamaşır bildirimleri bekletilir ve aralık bittiğinde iletilir. Devre dışı bırakmak için boş bırakın. Gece yarısını geçen aralıkları destekler (örn. başlangıç 22, bitiş 7).",
+      "label": "Sessiz Saatler Başlangıcı"
+    },
+    "peak_rate_message": {
+      "doc": "Başlangıç bildirimine eklenen yüksek tarife ipucu için isteğe bağlı özel metin. Şablon değişkenleri: {device}, {price}. Boş bırakmak yerleşik varsayılanı kullanır.",
+      "label": "Yüksek Tarife Mesajı"
+    },
+    "peak_rate_threshold": {
+      "doc": "Bir döngü başladığında ve kWh başına geçerli fiyat bu değere eşit veya bu değerin üzerindeyse, başlangıç bildirimine bir yüksek tarife ipucu eklenir. 0 veya boş bırakmak ipucunu devre dışı bırakır.",
+      "label": "Yüksek Tarife Eşiği (kWh başına)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Bekçi"
+    },
+    "quiet_hours_milestones": {
+      "label": "Sessiz Saatler ve Kilometre Taşları"
     }
   },
   "status": {
@@ -950,7 +1098,9 @@
     "settings": "Ayarlar",
     "status": "Genel Bakış",
     "subtab_phase_catalog": "Aşama Kataloğu",
-    "subtab_profiles": "Profiller"
+    "subtab_profiles": "Profiller",
+    "maintenance": "Bakım",
+    "playground": "Test Alanı"
   },
   "tag": {
     "early_end": "Erken bitiş",
@@ -1010,7 +1160,20 @@
     "settings_reverted": "Ayarlar geri yüklendi; entegrasyon yeniden yükleniyor",
     "settings_saved": "Ayarlar kaydedildi; entegrasyon yeniden yükleniyor",
     "suggestions_applied": "Öneriler uygulandı; entegrasyon yeniden yükleniyor",
-    "suggestions_dismissed": "Öneriler reddedildi"
+    "suggestions_dismissed": "Öneriler reddedildi",
+    "apply_failed": "Uygulama başarısız: {error}",
+    "delete_failed": "Silme başarısız: {error}",
+    "load_more_failed": "Daha fazlası yüklenemedi: {error}",
+    "maint_add_failed": "Kayıt eklenemedi: {error}",
+    "maint_added": "Bakım kaydı eklendi",
+    "maint_delete_failed": "Kayıt silinemedi: {error}",
+    "maint_deleted": "Bakım kaydı silindi",
+    "pg_dtw_failed": "DTW incelemesi başarısız: {error}",
+    "pg_sim_failed": "Simülasyon başarısız: {error}",
+    "relabel_done": "{count} döngü yeniden etiketlendi",
+    "relabel_failed": "Yeniden etiketleme başarısız: {error}",
+    "reminders_save_failed": "Hatırlatıcılar kaydedilemedi: {error}",
+    "reminders_saved": "Servis hatırlatıcıları kaydedildi"
   },
   "suggestion": {
     "both_agree": "WashData öneriyor",
@@ -1078,5 +1241,12 @@
   "trend": {
     "down": "Düşen eğilim",
     "up": "Yükselen eğilim"
+  },
+  "maint": {
+    "bearing_service": "Rulman servisi",
+    "descale": "Kireç çözme",
+    "drum_clean": "Tamburu temizle",
+    "filter_clean": "Filtreyi temizle",
+    "other": "Diğer"
   }
 }

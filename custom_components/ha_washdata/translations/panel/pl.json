@@ -123,7 +123,20 @@
     "trim": "Przycinać",
     "trim_split": "Przytnij / Podziel",
     "use": "Używać",
-    "wipe_all": "Wyczyść wszystkie dane"
+    "wipe_all": "Wyczyść wszystkie dane",
+    "add_maintenance": "Dodaj zdarzenie konserwacji",
+    "apply_set_b": "Zastosuj zestaw B",
+    "kbd_help": "Skróty klawiszowe",
+    "load_more": "Wczytaj więcej",
+    "relabel": "Zmień etykietę ({count})",
+    "run_both": "Uruchom A vs B",
+    "run_simulation": "Uruchom symulację",
+    "save_reminders": "Zapisz przypomnienia",
+    "select_all": "Zaznacz wszystko",
+    "select_last20": "Ostatnie 20",
+    "select_none": "Wyczyść",
+    "skip_setup": "Pomiń konfigurację",
+    "undo": "Cofnij"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Statystyki przechowywania",
     "toggle_sidebar": "Przełącz pasek boczny Asystenta Home",
     "tools_and_data": "Narzędzia i dane",
-    "wipe_history": "Wyczyść historię"
+    "wipe_history": "Wyczyść historię",
+    "ab_comparison": "Porównanie ustawień A/B",
+    "add_maintenance": "Dodaj zdarzenie konserwacji",
+    "cycle_simulator": "Symulator cykli",
+    "dtw_inspector": "Inspektor DTW",
+    "getting_started": "Pierwsze kroki",
+    "kbd_shortcuts": "Skróty klawiszowe",
+    "maintenance_log": "Dziennik konserwacji",
+    "maintenance_reminders": "Przypomnienia serwisowe",
+    "settings_history": "Historia ustawień"
   },
   "health": {
     "fair": "Akceptowalna jakość profilu",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Wiadomość (opcjonalnie, {device}/{program}/{minutes})",
     "ungrouped": "Rozgrupowane",
     "unlabelled": "Nieoznakowane",
-    "unlabelled_paren": "(bez etykiety)"
+    "unlabelled_paren": "(bez etykiety)",
+    "avg_cost": "Śr. koszt",
+    "change": "Zmiana",
+    "concurrency": "Współbieżność",
+    "correlation": "Korelacja",
+    "current_phase": "Bieżąca faza",
+    "curves": "Krzywe",
+    "cycle": "Cykl",
+    "cycle_index": "indeks cyklu →",
+    "cycles": "Cykle",
+    "dashed": "przerywana",
+    "delta": "Δ",
+    "dtw_blend_w": "Waga mieszania",
+    "dtw_blended": "Wynik mieszany",
+    "dtw_ddtw": "Wynik DDTW",
+    "dtw_l1": "Wynik L1",
+    "dtw_matched_profile": "(dopasowany profil cyklu)",
+    "duration_agreement": "Zgodność czasu trwania",
+    "energy_agreement": "Zgodność energii",
+    "event_timeline": "Oś czasu zdarzeń",
+    "event_type": "Typ zdarzenia",
+    "final_score": "Wynik końcowy",
+    "mae_score": "Wynik MAE",
+    "metric": "Metryka",
+    "n_selected": "Wybrano {n}",
+    "na": "nd.",
+    "notes": "Notatki",
+    "outcome": "Wynik",
+    "per_cycle_short": "cykl",
+    "pg_ambiguous": "Niejednoznaczny",
+    "pg_cycles": "Cykle",
+    "pg_detected": "Wykryto",
+    "pg_ev_ending": "Kończenie",
+    "pg_ev_match": "Dopasowanie",
+    "pg_ev_off": "Wył.",
+    "pg_ev_paused": "Wstrzymano",
+    "pg_ev_running": "Działa",
+    "pg_ev_start": "Start",
+    "pg_match_correct": "Poprawne dopasowanie",
+    "pg_unmatched": "Bez dopasowania",
+    "phase_timeline": "Oś czasu faz",
+    "profile_index": "indeks profilu →",
+    "reminder_every": "Przypominaj co (cykle)",
+    "score": "Wynik",
+    "score_breakdown": "Rozbicie wyniku",
+    "setting": "Ustawienie",
+    "settings_a": "Ustawienia A (bieżące)",
+    "settings_a_short": "A",
+    "settings_advanced": "Zaawansowane",
+    "settings_b": "Ustawienia B (test)",
+    "settings_b_short": "B",
+    "settings_basic": "Podstawowe",
+    "settings_detail_level": "Poziom szczegółowości ustawień",
+    "settings_overrides": "Zastąpienia ustawień",
+    "sparkline": "Ostatni trend czasu trwania cykli",
+    "stage2": "Etap 2 — podstawowe podobieństwo",
+    "stage3": "Etap 3 — DTW",
+    "stage4": "Etap 4 — zgodność",
+    "warp_path": "Ścieżka dopasowania"
   },
   "log": {
     "all_levels": "Wszystkie poziomy"
@@ -337,7 +417,10 @@
     "process_history_msg": "Ponownie uruchom dopasowywanie, odśwież sugestie, przetrenuj ML (jeśli włączone) i przelicz kondycję cykli dla wszystkich zapisanych cykli. Może to chwilę potrwać.",
     "process_history_ok": "Przetwórz",
     "process_history_title": "Przetwarzanie historii",
-    "process_recording": "Nagrywanie procesu"
+    "process_recording": "Nagrywanie procesu",
+    "delete_maintenance_msg": "Usunąć ten wpis konserwacji? Tej operacji nie można cofnąć.",
+    "delete_maintenance_title": "Usuń zdarzenie konserwacji",
+    "relabel_cycles": "Zmień etykietę {count} cykli"
   },
   "msg": {
     "appliance_monitor": "Monitor urządzenia",
@@ -448,7 +531,44 @@
     "updated": "Zaktualizowano",
     "warmup_badge": "Wciąż się uczy ({done}/{needed} cykli)",
     "warmup_detail": "Ten profil potrzebuje {needed} oznaczonych cykli, zanim rozpocznie się automatyczne dopasowywanie. Każdy potwierdzony cykl pomaga mu się uczyć.",
-    "wipe_history_warning": "Usuń trwale wszystkie cykle i profile. Nie można tego cofnąć."
+    "wipe_history_warning": "Usuń trwale wszystkie cykle i profile. Nie można tego cofnąć.",
+    "cycles_deleted": "Usunięto cykle: {count}",
+    "kbd_advanced": "Przejdź do Zaawansowane",
+    "kbd_cycles": "Przejdź do Cykle",
+    "kbd_escape": "Zamknij otwarte okno dialogowe",
+    "kbd_help": "Pokaż / ukryj tę pomoc",
+    "kbd_help_intro": "Skróty są ignorowane podczas pisania w polu. Reagują tylko karty dostępne dla tego urządzenia.",
+    "kbd_ml": "Przejdź do Szkolenia ML",
+    "kbd_overview": "Przejdź do Przegląd",
+    "kbd_playground": "Przejdź do Piaskownica",
+    "kbd_profiles": "Przejdź do Profile",
+    "kbd_settings": "Przejdź do Ustawienia",
+    "maintenance_due": "Wymagana konserwacja: {items}",
+    "maintenance_intro": "Zapisuj czynności serwisowe wykonywane przy tym urządzeniu i otrzymuj przypomnienia, gdy każde zadanie znów będzie wymagane.",
+    "maintenance_load_error": "Nie można wczytać danych konserwacji: {error}",
+    "name_first_program": "Masz wystarczająco dużo cykli — nadaj nazwę pierwszemu programowi, aby rozpocząć dopasowywanie.",
+    "no_cycles_selected": "Najpierw wybierz co najmniej jeden cykl.",
+    "no_maintenance": "Nie zarejestrowano jeszcze żadnej konserwacji.",
+    "onboarding_progress": "Zaobserwowano {n} / 3 cykli",
+    "onboarding_watching": "Używaj urządzenia normalnie — WashData obserwuje. Po 3 cyklach rozpocznie się dopasowywanie programów.",
+    "pg_ab_intro": "Uruchom te same cykle z bieżącymi ustawieniami (A) i ze zmodyfikowanym zestawem (B), obok siebie.",
+    "pg_apply_b_confirm": "Zastosować zestaw B do aktywnego urządzenia?\n\n{list}",
+    "pg_dtw_intro": "Sprawdź, jak jeden cykl dopasowuje się do profilu: dwie krzywe, ścieżkę dopasowania i rozbicie wyniku. Tylko do odczytu.",
+    "pg_no_b_overrides": "Brak zmian B do zastosowania.",
+    "pg_no_events": "Brak zdarzeń",
+    "pg_running": "W toku…",
+    "pg_simulator_intro": "Odtwórz wcześniejsze cykle przez detekcję ze zmienionymi ustawieniami — próbne uruchomienie, które niczego nie zmienia.",
+    "pg_tip_ambiguous": "{n}/{total} niejednoznacznych",
+    "pg_tip_cycles": "Zasymulowano {n} cykli",
+    "pg_tip_detected": "{n}/{total} wykrytych",
+    "pg_tip_match_correct": "{n}/{total} poprawnie dopasowanych",
+    "pg_tip_unmatched": "{n}/{total} bez dopasowania",
+    "playground_intro": "Bezpieczna piaskownica do odtwarzania wcześniejszych cykli z innymi ustawieniami, porównywania dwóch konfiguracji obok siebie i sprawdzania, jak cykl dopasowuje się do profilu. Nic tutaj nie zmienia Twoich aktywnych danych, dopóki wyraźnie tego nie zastosujesz.",
+    "playground_needs_restart": "Uruchom ponownie Home Assistant, aby włączyć narzędzia Piaskownicy.",
+    "profile_deleted": "Profil usunięty",
+    "reminders_intro": "Pokaż przypomnienie w panelu po tylu cyklach od ostatniego serwisu. Pozostaw puste lub 0, aby wyłączyć przypomnienie.",
+    "setting_changed": "Zmieniono z {old} na {new} dnia {date}",
+    "settings_basic_note": "Wyświetlane są podstawowe ustawienia. Przełącz na Zaawansowane, aby zobaczyć pełną listę."
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "dodaj osobę…",
     "phase_name": "np. Pranie wstępne",
-    "profile_name": "np. Bawełna 40°C"
+    "profile_name": "np. Bawełna 40°C",
+    "maintenance_notes": "np. wymieniono filtr, wyczyszczono uszczelkę drzwi"
   },
   "pref": {
     "date_absolute": "Absolutne (np. 14:32 w dniu 2 lipca)",
@@ -684,7 +805,7 @@
       "label": "Kanał Android (zakończenie)"
     },
     "notify_finish_message": {
-      "doc": "Treść wysyłana po zakończeniu cyklu. Zmienne szablonu: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Treść wysyłana po zakończeniu cyklu. Zmienne szablonu: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} i {vs_typical} są tutaj najbardziej przydatne.",
       "label": "Wiadomość Zakończenia"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Osoby (dla Tylko Gdy Jestem w Domu)"
     },
     "notify_pre_complete_message": {
-      "doc": "Treść alertu poprzedzającego zakończenie/prawie gotowe. Zmienne szablonu: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Treść alertu przed zakończeniem / prawie gotowe. Zmienne szablonu: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Wiadomość Przed Zakończeniem"
     },
     "notify_reminder_message": {
-      "doc": "Treść wciąż oczekującego przypomnienia o rozładunku. Puste używa wbudowanej wartości domyślnej. Zmienne szablonu: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Treść przypomnienia o wciąż oczekującym rozładunku. Puste używa wbudowanej wartości domyślnej. Zmienne szablonu: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Wiadomość Przypomnienia"
     },
     "notify_start_message": {
-      "doc": "Treść wysyłana po rozpoczęciu cyklu. Zmienne szablonu: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Treść wysyłana po rozpoczęciu cyklu. Zmienne szablonu: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Wiadomość Startu"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Jak często funkcja nadzorująca działająca w tle sprawdza, czy czujniki nie uległy zablokowaniu i nie upłynęły limity czasu. Domyślnie 30 s.",
       "label": "Interwał Watchdog"
+    },
+    "notify_milestone_message": {
+      "doc": "Wiadomość powiadomienia o kamieniu milowym. Zmienne szablonu: {device}, {cycle_count}.",
+      "label": "Wiadomość o kamieniu milowym"
+    },
+    "notify_milestones": {
+      "doc": "Rozdzielone przecinkami liczby cykli, które po osiągnięciu wyzwalają jednorazowe powiadomienie z gratulacjami (np. 50, 100, 500, 1000). Puste wyłącza powiadomienia o kamieniach milowych.",
+      "label": "Kamienie milowe cykli"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Koniec okna „nie przeszkadzać” (0–23). Wstrzymane powiadomienia są dostarczane o tej godzinie. Pozostaw puste, aby wyłączyć.",
+      "label": "Koniec cichych godzin"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Początek okna „nie przeszkadzać” (0–23). Powiadomienia o zakończeniu, przypomnienia i powiadomienia o czystym praniu, które wypadłyby w cichych godzinach, są wstrzymywane i dostarczane po zakończeniu okna. Pozostaw puste, aby wyłączyć. Obsługuje okna przekraczające północ (np. początek 22, koniec 7).",
+      "label": "Początek cichych godzin"
+    },
+    "peak_rate_message": {
+      "doc": "Opcjonalny własny tekst wskazówki o taryfie szczytowej dołączanej do powiadomienia o starcie. Zmienne szablonu: {device}, {price}. Puste używa wbudowanej wartości domyślnej.",
+      "label": "Wiadomość o taryfie szczytowej"
+    },
+    "peak_rate_threshold": {
+      "doc": "Gdy cykl się rozpoczyna, a bieżąca cena za kWh jest równa tej wartości lub wyższa, do powiadomienia o starcie dołączana jest wskazówka o taryfie szczytowej. 0 lub puste wyłącza wskazówkę.",
+      "label": "Próg taryfy szczytowej (za kWh)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Watchdog"
+    },
+    "quiet_hours_milestones": {
+      "label": "Ciche godziny i kamienie milowe"
     }
   },
   "status": {
@@ -1013,7 +1161,9 @@
     "settings": "Ustawienia",
     "status": "Przegląd",
     "subtab_phase_catalog": "Katalog faz",
-    "subtab_profiles": "Profile"
+    "subtab_profiles": "Profile",
+    "maintenance": "Konserwacja",
+    "playground": "Piaskownica"
   },
   "tag": {
     "early_end": "Wczesny koniec",
@@ -1073,10 +1223,30 @@
     "settings_reverted": "Ustawienia przywrócono; integracja jest przeładowywana",
     "settings_saved": "Ustawienia zapisane; przeładowanie integracji",
     "suggestions_applied": "Zastosowano sugestie; przeładowanie integracji",
-    "suggestions_dismissed": "Sugestie odrzucone"
+    "suggestions_dismissed": "Sugestie odrzucone",
+    "apply_failed": "Zastosowanie nie powiodło się: {error}",
+    "delete_failed": "Usuwanie nie powiodło się: {error}",
+    "load_more_failed": "Nie można wczytać więcej: {error}",
+    "maint_add_failed": "Nie można dodać zdarzenia: {error}",
+    "maint_added": "Dodano zdarzenie konserwacji",
+    "maint_delete_failed": "Nie można usunąć zdarzenia: {error}",
+    "maint_deleted": "Usunięto zdarzenie konserwacji",
+    "pg_dtw_failed": "Inspekcja DTW nie powiodła się: {error}",
+    "pg_sim_failed": "Symulacja nie powiodła się: {error}",
+    "relabel_done": "Zmieniono etykietę {count} cykli",
+    "relabel_failed": "Zmiana etykiety nie powiodła się: {error}",
+    "reminders_save_failed": "Nie można zapisać przypomnień: {error}",
+    "reminders_saved": "Zapisano przypomnienia serwisowe"
   },
   "trend": {
     "down": "Trend w dół",
     "up": "Trendy"
+  },
+  "maint": {
+    "bearing_service": "Serwis łożysk",
+    "descale": "Odkamienianie",
+    "drum_clean": "Wyczyść bęben",
+    "filter_clean": "Wyczyść filtr",
+    "other": "Inne"
   }
 }

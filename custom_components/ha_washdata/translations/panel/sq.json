@@ -123,7 +123,20 @@
     "trim": "Priti",
     "trim_split": "Priti / Ndaj",
     "use": "Përdor",
-    "wipe_all": "Fshi të gjitha të dhënat"
+    "wipe_all": "Fshi të gjitha të dhënat",
+    "add_maintenance": "Shto ngjarje mirëmbajtjeje",
+    "apply_set_b": "Apliko grupin B",
+    "kbd_help": "Shkurtore të tastierës",
+    "load_more": "Ngarko më shumë",
+    "relabel": "Rietiketo ({count})",
+    "run_both": "Ekzekuto A kundër B",
+    "run_simulation": "Ekzekuto simulimin",
+    "save_reminders": "Ruaj kujtesat",
+    "select_all": "Zgjidh të gjitha",
+    "select_last20": "20 e fundit",
+    "select_none": "Pastro",
+    "skip_setup": "Anashkalo konfigurimin",
+    "undo": "Zhbëj"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Statistikat e ruajtjes",
     "toggle_sidebar": "Ndrysho shiritin anësor të Asistentit në Shtëpi",
     "tools_and_data": "Mjete dhe të dhëna",
-    "wipe_history": "Fshi historikun"
+    "wipe_history": "Fshi historikun",
+    "ab_comparison": "Krahasimi i cilësimeve A/B",
+    "add_maintenance": "Shto ngjarje mirëmbajtjeje",
+    "cycle_simulator": "Simulator ciklesh",
+    "dtw_inspector": "Inspektor DTW",
+    "getting_started": "Fillimi",
+    "kbd_shortcuts": "Shkurtore të tastierës",
+    "maintenance_log": "Regjistri i mirëmbajtjes",
+    "maintenance_reminders": "Kujtesa për servisin",
+    "settings_history": "Historiku i cilësimeve"
   },
   "health": {
     "fair": "Cilësi e pranueshme e profilit",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Mesazh (opsionale, {device}/{program}/{minutes})",
     "ungrouped": "I pagrupuar",
     "unlabelled": "I paetiketuar",
-    "unlabelled_paren": "(i paetiketuar)"
+    "unlabelled_paren": "(i paetiketuar)",
+    "avg_cost": "Kosto mesatare",
+    "change": "Ndryshim",
+    "concurrency": "Njëkohshmëri",
+    "correlation": "Korrelacion",
+    "current_phase": "Faza aktuale",
+    "curves": "Kurbat",
+    "cycle": "Cikël",
+    "cycle_index": "indeksi i ciklit →",
+    "cycles": "Ciklet",
+    "dashed": "me vija",
+    "delta": "Δ",
+    "dtw_blend_w": "Pesha e përzierjes",
+    "dtw_blended": "Rezultati i përzier",
+    "dtw_ddtw": "Rezultati DDTW",
+    "dtw_l1": "Rezultati L1",
+    "dtw_matched_profile": "(profili i përputhur i ciklit)",
+    "duration_agreement": "Përputhja e kohëzgjatjes",
+    "energy_agreement": "Përputhja e energjisë",
+    "event_timeline": "Kronologjia e ngjarjeve",
+    "event_type": "Lloji i ngjarjes",
+    "final_score": "Rezultati përfundimtar",
+    "mae_score": "Rezultati MAE",
+    "metric": "Metrika",
+    "n_selected": "{n} të zgjedhura",
+    "na": "s'ka",
+    "notes": "Shënime",
+    "outcome": "Përfundimi",
+    "per_cycle_short": "cikël",
+    "pg_ambiguous": "I paqartë",
+    "pg_cycles": "Ciklet",
+    "pg_detected": "Zbuluar",
+    "pg_ev_ending": "Duke përfunduar",
+    "pg_ev_match": "Përputhje",
+    "pg_ev_off": "Fikur",
+    "pg_ev_paused": "Në pauzë",
+    "pg_ev_running": "Në punë",
+    "pg_ev_start": "Fillimi",
+    "pg_match_correct": "Përputhje e saktë",
+    "pg_unmatched": "Pa përputhje",
+    "phase_timeline": "Kronologjia e fazave",
+    "profile_index": "indeksi i profilit →",
+    "reminder_every": "Kujto çdo (cikle)",
+    "score": "Rezultati",
+    "score_breakdown": "Zbërthimi i rezultatit",
+    "setting": "Cilësim",
+    "settings_a": "Cilësimet A (aktuale)",
+    "settings_a_short": "A",
+    "settings_advanced": "Të avancuara",
+    "settings_b": "Cilësimet B (provë)",
+    "settings_b_short": "B",
+    "settings_basic": "Bazë",
+    "settings_detail_level": "Niveli i detajeve të cilësimeve",
+    "settings_overrides": "Mbivendosjet e cilësimeve",
+    "sparkline": "Prirja e fundit e kohëzgjatjes së cikleve",
+    "stage2": "Etapa 2 — ngjashmëria bazë",
+    "stage3": "Etapa 3 — DTW",
+    "stage4": "Etapa 4 — përputhja",
+    "warp_path": "Rruga e deformimit"
   },
   "log": {
     "all_levels": "Të gjitha nivelet"
@@ -337,7 +417,10 @@
     "process_history_msg": "Riekzekutoni përputhjen, rifreskoni sugjerimet, stërvitni ML (nëse aktivizuara) dhe rillogaritni shëndetin e cikleve në të gjitha ciklet e ruajtura. Kjo mund të marrë pak kohë.",
     "process_history_ok": "Proceso",
     "process_history_title": "Proceso historinë",
-    "process_recording": "Proceso regjistrimin"
+    "process_recording": "Proceso regjistrimin",
+    "delete_maintenance_msg": "Të fshihet ky regjistrim i mirëmbajtjes? Ky veprim nuk mund të zhbëhet.",
+    "delete_maintenance_title": "Fshi ngjarjen e mirëmbajtjes",
+    "relabel_cycles": "Rietiketo {count} cikle"
   },
   "msg": {
     "appliance_monitor": "Monitor i pajisjes",
@@ -448,7 +531,44 @@
     "updated": "Përditësuar",
     "warmup_badge": "Akoma duke mësuar ({done}/{needed} cikle)",
     "warmup_detail": "Ky profil ka nevojë për {needed} cikle të etiketuara para se të fillojë përputhja automatike. Çdo cikël i konfirmuar e ndihmon të mësojë.",
-    "wipe_history_warning": "Fshini përgjithmonë të gjitha ciklet dhe profilet. Nuk mund të zhbëhet."
+    "wipe_history_warning": "Fshini përgjithmonë të gjitha ciklet dhe profilet. Nuk mund të zhbëhet.",
+    "cycles_deleted": "{count} cikël(e) u fshinë",
+    "kbd_advanced": "Shko te Të avancuara",
+    "kbd_cycles": "Shko te Ciklet",
+    "kbd_escape": "Mbyll dialogun e hapur",
+    "kbd_help": "Shfaq / fshih këtë ndihmë",
+    "kbd_help_intro": "Shkurtoret shpërfillen ndërsa shkruani në një fushë. Përgjigjen vetëm skedat që ekzistojnë për këtë pajisje.",
+    "kbd_ml": "Shko te Trajnimi ML",
+    "kbd_overview": "Shko te Përmbledhja",
+    "kbd_playground": "Shko te Zona e provave",
+    "kbd_profiles": "Shko te Profilet",
+    "kbd_settings": "Shko te Cilësimet",
+    "maintenance_due": "Mirëmbajtja e duhur: {items}",
+    "maintenance_intro": "Regjistroni servisimin që kryeni në këtë pajisje dhe merrni kujtesë kur çdo detyrë të jetë përsëri e nevojshme.",
+    "maintenance_load_error": "Nuk u ngarkuan dot të dhënat e mirëmbajtjes: {error}",
+    "name_first_program": "Keni cikle të mjaftueshme — emërtoni programin tuaj të parë për të nisur përputhjen.",
+    "no_cycles_selected": "Zgjidhni së pari të paktën një cikël.",
+    "no_maintenance": "Ende nuk është regjistruar asnjë mirëmbajtje.",
+    "onboarding_progress": "{n} / 3 cikle të vëzhguara",
+    "onboarding_watching": "Përdorni pajisjen normalisht — WashData po vëzhgon. Pas 3 cikleve, do të nisë përputhja e programeve.",
+    "pg_ab_intro": "Ekzekutoni të njëjtat cikle me cilësimet tuaja aktuale (A) dhe një grup të ndryshuar (B), krah për krah.",
+    "pg_apply_b_confirm": "Të aplikohet grupi B te pajisja aktive?\n\n{list}",
+    "pg_dtw_intro": "Inspektoni si përputhet një cikël me një profil: dy kurbat, rrugën e deformimit dhe zbërthimin e rezultatit. Vetëm për lexim.",
+    "pg_no_b_overrides": "Asnjë mbivendosje B për t'u aplikuar.",
+    "pg_no_events": "Asnjë ngjarje",
+    "pg_running": "Duke u ekzekutuar…",
+    "pg_simulator_intro": "Riluani ciklet e kaluara përmes zbulimit me cilësime të ndryshuara — një provë që nuk ndryshon asgjë.",
+    "pg_tip_ambiguous": "{n}/{total} të paqarta",
+    "pg_tip_cycles": "{n} cikle të simuluara",
+    "pg_tip_detected": "{n}/{total} të zbuluara",
+    "pg_tip_match_correct": "{n}/{total} të përputhura saktë",
+    "pg_tip_unmatched": "{n}/{total} pa përputhje",
+    "playground_intro": "Një zonë e sigurt provash për të riluajtur ciklet e kaluara me cilësime të ndryshme, për të krahasuar dy konfigurime krah për krah dhe për të inspektuar si përputhet një cikël me një profil. Asgjë këtu nuk i ndryshon të dhënat tuaja aktive derisa ta aplikoni shprehimisht.",
+    "playground_needs_restart": "Rinisni Home Assistant për të aktivizuar veglat e zonës së provave.",
+    "profile_deleted": "Profili u fshi",
+    "reminders_intro": "Shfaq një kujtesë në panel pas kaq cikleve nga servisimi i fundit. Lëreni bosh ose 0 për ta çaktivizuar një kujtesë.",
+    "setting_changed": "Ndryshuar nga {old} në {new} më {date}",
+    "settings_basic_note": "Po shfaqen cilësimet thelbësore. Kaloni te Të avancuara për listën e plotë."
   },
   "phase_desc": {
     "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "shto një person…",
     "phase_name": "p.sh. Paralandje",
-    "profile_name": "p.sh. Pambuk 40°C"
+    "profile_name": "p.sh. Pambuk 40°C",
+    "maintenance_notes": "p.sh. u ndërrua filtri, u pastrua guarnicioni i derës"
   },
   "pref": {
     "date_absolute": "Absolute (p.sh. 14:32 më 2 Korrik)",
@@ -684,7 +805,7 @@
       "label": "Kanal Android (përfundim)"
     },
     "notify_finish_message": {
-      "doc": "Trupi dërgohet kur përfundon një cikël. Variablat shabllon: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Trupi dërgohet kur përfundon një cikël. Variablat shabllon: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} dhe {vs_typical} janë më të dobishmet këtu.",
       "label": "Mesazh përfundimi"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Njerëzit (për Vetëm kur në shtëpi)"
     },
     "notify_pre_complete_message": {
-      "doc": "Trupi i sinjalizimit para përfundimit / pothuajse i përfunduar. Variablat shabllon: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Trupi i alarmit para përfundimit / gati së shpejti. Variablat shabllon: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Mesazh para-përfundimi"
     },
     "notify_reminder_message": {
-      "doc": "Trupi i kujtesës së shkarkimit ende në pritje. Blank përdor parazgjedhjen e integruar. Variablat shabllon: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Trupi i kujtesës që rrobat ende presin të hiqen. Bosh përdor vlerën e paracaktuar të integruar. Variablat shabllon: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Mesazh kujtues"
     },
     "notify_start_message": {
-      "doc": "Trupi dërgohet kur fillon një cikël. Variablat shabllon: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Trupi dërgohet kur fillon një cikël. Variablat shabllon: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Mesazh nisje"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Sa shpesh mbikëqyrësi i sfondit kontrollon për sensorë të bllokuar dhe afate kohore të kaluara. Parazgjedhja 30 s.",
       "label": "Intervali i rojëtarit"
+    },
+    "notify_milestone_message": {
+      "doc": "Mesazhi për njoftimin e piketës. Variablat shabllon: {device}, {cycle_count}.",
+      "label": "Mesazhi i piketës"
+    },
+    "notify_milestones": {
+      "doc": "Numra ciklesh të ndarë me presje që, kur arrihen, aktivizojnë një njoftim festiv një herësh (p.sh. 50, 100, 500, 1000). Bosh çaktivizon njoftimet e piketave.",
+      "label": "Piketat e cikleve"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Fundi i dritares mos shqetëso (0-23). Njoftimet e mbajtura dërgohen në këtë orë. Lëreni bosh për ta çaktivizuar.",
+      "label": "Fundi i orëve të qeta"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Fillimi i një dritareje mos shqetëso (0-23). Njoftimet e përfundimit, kujtesat dhe njoftimet për rroba të pastra që do të aktivizoheshin gjatë orëve të qeta mbahen dhe dërgohen kur mbaron dritarja. Lëreni bosh për ta çaktivizuar. Mbështet dritare që kalojnë mesnatën (p.sh. fillimi 22, fundi 7).",
+      "label": "Fillimi i orëve të qeta"
+    },
+    "peak_rate_message": {
+      "doc": "Tekst opsional i personalizuar për këshillën e tarifës së pikut, i shtuar te njoftimi i nisjes. Variablat shabllon: {device}, {price}. Bosh përdor vlerën e paracaktuar të integruar.",
+      "label": "Mesazhi i tarifës së pikut"
+    },
+    "peak_rate_threshold": {
+      "doc": "Kur nis një cikël dhe çmimi aktual për kWh është në këtë vlerë ose mbi të, i shtohet një këshillë për tarifën e pikut njoftimit të nisjes. 0 ose bosh e çaktivizon këshillën.",
+      "label": "Pragu i tarifës së pikut (për kWh)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Rojtar"
+    },
+    "quiet_hours_milestones": {
+      "label": "Orët e qeta dhe piketat"
     }
   },
   "status": {
@@ -950,7 +1098,9 @@
     "settings": "Cilësimet",
     "status": "Pasqyra",
     "subtab_phase_catalog": "Katalog fazash",
-    "subtab_profiles": "Profile"
+    "subtab_profiles": "Profile",
+    "maintenance": "Mirëmbajtja",
+    "playground": "Zona e provave"
   },
   "tag": {
     "early_end": "Fund i hershëm",
@@ -1010,7 +1160,20 @@
     "settings_reverted": "Cilësimet u rivendosën; integrimi po ringarkohet",
     "settings_saved": "Cilësimet u ruajtën; integrimi po ringarkohet",
     "suggestions_applied": "Sugjerimet u zbatuan; integrimi po ringarkohet",
-    "suggestions_dismissed": "Sugjerimet u injoruan"
+    "suggestions_dismissed": "Sugjerimet u injoruan",
+    "apply_failed": "Aplikimi dështoi: {error}",
+    "delete_failed": "Fshirja dështoi: {error}",
+    "load_more_failed": "Nuk u ngarkuan dot më shumë: {error}",
+    "maint_add_failed": "Nuk u shtua dot ngjarja: {error}",
+    "maint_added": "Ngjarja e mirëmbajtjes u shtua",
+    "maint_delete_failed": "Nuk u fshi dot ngjarja: {error}",
+    "maint_deleted": "Ngjarja e mirëmbajtjes u fshi",
+    "pg_dtw_failed": "Inspektimi DTW dështoi: {error}",
+    "pg_sim_failed": "Simulimi dështoi: {error}",
+    "relabel_done": "U rietiketuan {count} cikël(e)",
+    "relabel_failed": "Rietiketimi dështoi: {error}",
+    "reminders_save_failed": "Nuk u ruajtën dot kujtesat: {error}",
+    "reminders_saved": "Kujtesat e servisit u ruajtën"
   },
   "suggestion": {
     "both_agree": "WashData rekomandon",
@@ -1078,5 +1241,12 @@
   "trend": {
     "down": "Tendencë rënëse",
     "up": "Tendencë rritëse"
+  },
+  "maint": {
+    "bearing_service": "Servisi i kushinetave",
+    "descale": "Heqja e gurëve",
+    "drum_clean": "Pastro tamburin",
+    "filter_clean": "Pastro filtrin",
+    "other": "Tjetër"
   }
 }

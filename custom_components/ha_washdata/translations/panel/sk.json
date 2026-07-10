@@ -123,7 +123,20 @@
     "trim": "Orezať",
     "trim_split": "Orezať / Rozdeliť",
     "use": "Použiť",
-    "wipe_all": "Vymazať všetky dáta"
+    "wipe_all": "Vymazať všetky dáta",
+    "add_maintenance": "Pridať udalosť údržby",
+    "apply_set_b": "Použiť sadu B",
+    "kbd_help": "Klávesové skratky",
+    "load_more": "Načítať viac",
+    "relabel": "Zmeniť štítok ({count})",
+    "run_both": "Spustiť A vs B",
+    "run_simulation": "Spustiť simuláciu",
+    "save_reminders": "Uložiť pripomienky",
+    "select_all": "Vybrať všetko",
+    "select_last20": "Posledných 20",
+    "select_none": "Zrušiť výber",
+    "skip_setup": "Preskočiť nastavenie",
+    "undo": "Späť"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Štatistiky úložiska",
     "toggle_sidebar": "Prepnúť bočný panel Asistenta domácnosti",
     "tools_and_data": "Nástroje a dáta",
-    "wipe_history": "Vymazať históriu"
+    "wipe_history": "Vymazať históriu",
+    "ab_comparison": "Porovnanie nastavení A/B",
+    "add_maintenance": "Pridať udalosť údržby",
+    "cycle_simulator": "Simulátor cyklov",
+    "dtw_inspector": "Inšpektor DTW",
+    "getting_started": "Začíname",
+    "kbd_shortcuts": "Klávesové skratky",
+    "maintenance_log": "Denník údržby",
+    "maintenance_reminders": "Pripomienky servisu",
+    "settings_history": "História nastavení"
   },
   "health": {
     "fair": "Prijateľná kvalita profilu",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Správa (voliteľné, {device}/{program}/{minutes})",
     "ungrouped": "Nezoskupené",
     "unlabelled": "Bez štítku",
-    "unlabelled_paren": "(bez štítku)"
+    "unlabelled_paren": "(bez štítku)",
+    "avg_cost": "Priem. náklady",
+    "change": "Zmena",
+    "concurrency": "Súbežnosť",
+    "correlation": "Korelácia",
+    "current_phase": "Aktuálna fáza",
+    "curves": "Krivky",
+    "cycle": "Cyklus",
+    "cycle_index": "index cyklu →",
+    "cycles": "Cykly",
+    "dashed": "prerušovaná",
+    "delta": "Δ",
+    "dtw_blend_w": "Váha zmiešania",
+    "dtw_blended": "Zmiešané skóre",
+    "dtw_ddtw": "Skóre DDTW",
+    "dtw_l1": "Skóre L1",
+    "dtw_matched_profile": "(priradený profil cyklu)",
+    "duration_agreement": "Zhoda trvania",
+    "energy_agreement": "Zhoda energie",
+    "event_timeline": "Časová os udalostí",
+    "event_type": "Typ udalosti",
+    "final_score": "Konečné skóre",
+    "mae_score": "Skóre MAE",
+    "metric": "Metrika",
+    "n_selected": "{n} vybraných",
+    "na": "neuv.",
+    "notes": "Poznámky",
+    "outcome": "Výsledok",
+    "per_cycle_short": "cyklus",
+    "pg_ambiguous": "Nejednoznačné",
+    "pg_cycles": "Cykly",
+    "pg_detected": "Zistené",
+    "pg_ev_ending": "Ukončovanie",
+    "pg_ev_match": "Zhoda",
+    "pg_ev_off": "Vypnuté",
+    "pg_ev_paused": "Pozastavené",
+    "pg_ev_running": "Beží",
+    "pg_ev_start": "Štart",
+    "pg_match_correct": "Správna zhoda",
+    "pg_unmatched": "Bez zhody",
+    "phase_timeline": "Časová os fáz",
+    "profile_index": "index profilu →",
+    "reminder_every": "Pripomenúť každých (cyklov)",
+    "score": "Skóre",
+    "score_breakdown": "Rozbor skóre",
+    "setting": "Nastavenie",
+    "settings_a": "Nastavenia A (aktuálne)",
+    "settings_a_short": "A",
+    "settings_advanced": "Rozšírené",
+    "settings_b": "Nastavenia B (test)",
+    "settings_b_short": "B",
+    "settings_basic": "Základné",
+    "settings_detail_level": "Úroveň detailov nastavení",
+    "settings_overrides": "Prepísania nastavení",
+    "sparkline": "Nedávny trend trvania cyklov",
+    "stage2": "Etapa 2 — základná podobnosť",
+    "stage3": "Etapa 3 — DTW",
+    "stage4": "Etapa 4 — zhoda",
+    "warp_path": "Cesta deformácie"
   },
   "log": {
     "all_levels": "Všetky úrovne"
@@ -337,7 +417,10 @@
     "process_history_msg": "Znova spustite párovanie, obnovte návrhy, preškolte ML (ak je povolené) a prepočítajte zdravie cyklov pre všetky uložené cykly. Môže to chvíľu trvať.",
     "process_history_ok": "Spracovať",
     "process_history_title": "Spracovanie histórie",
-    "process_recording": "Spracovať nahrávku"
+    "process_recording": "Spracovať nahrávku",
+    "delete_maintenance_msg": "Odstrániť tento záznam údržby? Túto akciu nie je možné vrátiť späť.",
+    "delete_maintenance_title": "Odstrániť udalosť údržby",
+    "relabel_cycles": "Zmeniť štítok pre {count} cyklov"
   },
   "msg": {
     "appliance_monitor": "Monitor spotrebiča",
@@ -448,7 +531,44 @@
     "updated": "Aktualizované",
     "warmup_badge": "Ešte sa učí ({done}/{needed} cyklov)",
     "warmup_detail": "Tento profil potrebuje {needed} označených cyklov, kým sa spustí automatické párovanie. Každý potvrdený cyklus mu pomáha učiť sa.",
-    "wipe_history_warning": "Natrvalo odstrániť všetky cykly a profily. Nedá sa vrátiť späť."
+    "wipe_history_warning": "Natrvalo odstrániť všetky cykly a profily. Nedá sa vrátiť späť.",
+    "cycles_deleted": "Odstránených cyklov: {count}",
+    "kbd_advanced": "Prejsť na Rozšírené",
+    "kbd_cycles": "Prejsť na Cykly",
+    "kbd_escape": "Zavrieť otvorené dialógové okno",
+    "kbd_help": "Zobraziť / skryť tohto pomocníka",
+    "kbd_help_intro": "Skratky sa počas písania v poli ignorujú. Reagujú iba karty, ktoré existujú pre toto zariadenie.",
+    "kbd_ml": "Prejsť na Tréning ML",
+    "kbd_overview": "Prejsť na Prehľad",
+    "kbd_playground": "Prejsť na Testovacie prostredie",
+    "kbd_profiles": "Prejsť na Profily",
+    "kbd_settings": "Prejsť na Nastavenia",
+    "maintenance_due": "Údržba je splatná: {items}",
+    "maintenance_intro": "Zaznamenávajte servis, ktorý na tomto spotrebiči vykonávate, a nechajte sa upozorniť, keď je každá úloha opäť na rade.",
+    "maintenance_load_error": "Nepodarilo sa načítať údaje o údržbe: {error}",
+    "name_first_program": "Máte dostatok cyklov — pomenujte svoj prvý program a spustite priraďovanie.",
+    "no_cycles_selected": "Najprv vyberte aspoň jeden cyklus.",
+    "no_maintenance": "Zatiaľ nebola zaznamenaná žiadna údržba.",
+    "onboarding_progress": "Pozorovaných cyklov: {n} / 3",
+    "onboarding_watching": "Používajte spotrebič bežne — WashData sleduje. Po 3 cykloch sa spustí priraďovanie programov.",
+    "pg_ab_intro": "Spustite tie isté cykly s aktuálnymi nastaveniami (A) a upravenou sadou (B) vedľa seba.",
+    "pg_apply_b_confirm": "Použiť sadu B na aktívne zariadenie?\n\n{list}",
+    "pg_dtw_intro": "Preskúmajte, ako sa jeden cyklus zarovnáva s profilom: dve krivky, cestu deformácie a rozbor skóre. Iba na čítanie.",
+    "pg_no_b_overrides": "Žiadne prepísania B na použitie.",
+    "pg_no_events": "Žiadne udalosti",
+    "pg_running": "Prebieha…",
+    "pg_simulator_intro": "Prehrajte minulé cykly cez detekciu s upravenými nastaveniami — skúšobný beh, ktorý nič nezmení.",
+    "pg_tip_ambiguous": "{n}/{total} nejednoznačných",
+    "pg_tip_cycles": "Simulovaných cyklov: {n}",
+    "pg_tip_detected": "{n}/{total} zistených",
+    "pg_tip_match_correct": "{n}/{total} správne priradených",
+    "pg_tip_unmatched": "{n}/{total} bez zhody",
+    "playground_intro": "Bezpečné testovacie prostredie na prehrávanie minulých cyklov s rôznymi nastaveniami, porovnávanie dvoch konfigurácií vedľa seba a skúmanie, ako sa cyklus zarovnáva s profilom. Nič tu nezmení vaše aktívne údaje, kým to výslovne nepoužijete.",
+    "playground_needs_restart": "Reštartujte Home Assistant, aby ste povolili nástroje testovacieho prostredia.",
+    "profile_deleted": "Profil odstránený",
+    "reminders_intro": "Zobraziť pripomienku v paneli po tomto počte cyklov od posledného servisu. Ponechajte prázdne alebo 0 na vypnutie pripomienky.",
+    "setting_changed": "Zmenené z {old} na {new} dňa {date}",
+    "settings_basic_note": "Zobrazujú sa základné nastavenia. Prepnite na Rozšírené pre úplný zoznam."
   },
   "phase_desc": {
     "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "pridať osobu…",
     "phase_name": "napr. Predpierka",
-    "profile_name": "napr. Bavlna 40°C"
+    "profile_name": "napr. Bavlna 40°C",
+    "maintenance_notes": "napr. vymenený filter, vyčistené tesnenie dvierok"
   },
   "pref": {
     "date_absolute": "Absolútny (napr. 14:32 dňa 2. júla)",
@@ -684,7 +805,7 @@
       "label": "Android kanál (dokončenie)"
     },
     "notify_finish_message": {
-      "doc": "Telo sa odošle po skončení cyklu. Premenné šablóny: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Telo odoslané po skončení cyklu. Premenné šablóny: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} a {vs_typical} sú tu najužitočnejšie.",
       "label": "Správa pri dokončení"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Osoby (pre Iba keď doma)"
     },
     "notify_pre_complete_message": {
-      "doc": "Telo predbežného / takmer hotového upozornenia. Premenné šablóny: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Telo upozornenia pred koncom / takmer hotové. Premenné šablóny: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Správa pred dokončením"
     },
     "notify_reminder_message": {
-      "doc": "Telo stále čakajúcej pripomienky vykládky. Blank používa vstavané predvolené nastavenie. Premenné šablóny: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Telo pripomienky, že bielizeň stále čaká na vybratie. Prázdne pole použije vstavanú predvolenú hodnotu. Premenné šablóny: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Správa pripomienky"
     },
     "notify_start_message": {
-      "doc": "Telo odoslané, keď sa začne cyklus. Premenné šablóny: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Telo odoslané pri spustení cyklu. Premenné šablóny: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Správa pri štarte"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Ako často strážny pes na pozadí kontroluje zablokované senzory a uplynuté časové limity. Predvolených 30 s.",
       "label": "Interval watchdog"
+    },
+    "notify_milestone_message": {
+      "doc": "Správa pre upozornenie na míľnik. Premenné šablóny: {device}, {cycle_count}.",
+      "label": "Správa o míľniku"
+    },
+    "notify_milestones": {
+      "doc": "Počty cyklov oddelené čiarkami, ktoré po dosiahnutí spustia jednorazové oslavné upozornenie (napr. 50, 100, 500, 1000). Prázdne pole vypne upozornenia na míľniky.",
+      "label": "Míľniky cyklov"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Koniec okna nerušiť (0-23). Zadržané upozornenia sa doručia v túto hodinu. Ponechajte prázdne na vypnutie.",
+      "label": "Koniec tichých hodín"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Začiatok okna nerušiť (0-23). Upozornenia na dokončenie, pripomienky a upozornenia na čistú bielizeň, ktoré by sa spustili počas tichých hodín, sa zadržia a doručia po skončení okna. Ponechajte prázdne na vypnutie. Podporuje okná prechádzajúce cez polnoc (napr. začiatok 22, koniec 7).",
+      "label": "Začiatok tichých hodín"
+    },
+    "peak_rate_message": {
+      "doc": "Voliteľný vlastný text tipu o špičkovej sadzbe pripojený k upozorneniu o spustení. Premenné šablóny: {device}, {price}. Prázdne pole použije vstavanú predvolenú hodnotu.",
+      "label": "Správa o špičkovej sadzbe"
+    },
+    "peak_rate_threshold": {
+      "doc": "Keď sa cyklus spustí a aktuálna cena za kWh je na tejto hodnote alebo nad ňou, k upozorneniu o spustení sa pripojí tip o špičkovej sadzbe. 0 alebo prázdne pole tip vypne.",
+      "label": "Prah špičkovej sadzby (za kWh)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Watchdog"
+    },
+    "quiet_hours_milestones": {
+      "label": "Tiché hodiny a míľniky"
     }
   },
   "status": {
@@ -1013,7 +1161,9 @@
     "settings": "Nastavenia",
     "status": "Prehľad",
     "subtab_phase_catalog": "Katalóg fáz",
-    "subtab_profiles": "Profily"
+    "subtab_profiles": "Profily",
+    "maintenance": "Údržba",
+    "playground": "Testovacie prostredie"
   },
   "tag": {
     "early_end": "Predčasné ukončenie",
@@ -1073,10 +1223,30 @@
     "settings_reverted": "Nastavenia boli obnovené; integrácia sa znovu načítava",
     "settings_saved": "Nastavenia uložené; integrácia sa znovu načítava",
     "suggestions_applied": "Návrhy použité; integrácia sa znovu načítava",
-    "suggestions_dismissed": "Návrhy zamietnuté"
+    "suggestions_dismissed": "Návrhy zamietnuté",
+    "apply_failed": "Použitie zlyhalo: {error}",
+    "delete_failed": "Odstránenie zlyhalo: {error}",
+    "load_more_failed": "Nepodarilo sa načítať viac: {error}",
+    "maint_add_failed": "Nepodarilo sa pridať udalosť: {error}",
+    "maint_added": "Udalosť údržby pridaná",
+    "maint_delete_failed": "Nepodarilo sa odstrániť udalosť: {error}",
+    "maint_deleted": "Udalosť údržby odstránená",
+    "pg_dtw_failed": "Kontrola DTW zlyhala: {error}",
+    "pg_sim_failed": "Simulácia zlyhala: {error}",
+    "relabel_done": "Zmenený štítok pre {count} cyklov",
+    "relabel_failed": "Zmena štítka zlyhala: {error}",
+    "reminders_save_failed": "Nepodarilo sa uložiť pripomienky: {error}",
+    "reminders_saved": "Pripomienky servisu uložené"
   },
   "trend": {
     "down": "Klesajúci trend",
     "up": "Rastúca tendencia"
+  },
+  "maint": {
+    "bearing_service": "Servis ložísk",
+    "descale": "Odstránenie vodného kameňa",
+    "drum_clean": "Vyčistiť bubon",
+    "filter_clean": "Vyčistiť filter",
+    "other": "Iné"
   }
 }

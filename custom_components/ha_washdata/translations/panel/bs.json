@@ -123,7 +123,20 @@
     "trim": "Skrati",
     "trim_split": "Skrati / Podijeli",
     "use": "Koristi",
-    "wipe_all": "Obriši sve podatke"
+    "wipe_all": "Obriši sve podatke",
+    "add_maintenance": "Dodaj događaj održavanja",
+    "apply_set_b": "Primijeni skup B",
+    "kbd_help": "Prečice na tastaturi",
+    "load_more": "Učitaj još",
+    "relabel": "Ponovo označi ({count})",
+    "run_both": "Pokreni A vs B",
+    "run_simulation": "Pokreni simulaciju",
+    "save_reminders": "Sačuvaj podsjetnike",
+    "select_all": "Odaberi sve",
+    "select_last20": "Zadnjih 20",
+    "select_none": "Očisti",
+    "skip_setup": "Preskoči podešavanje",
+    "undo": "Poništi"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Statistike pohrane",
     "toggle_sidebar": "Uključite bočnu traku Home Assistant",
     "tools_and_data": "Alati i podaci",
-    "wipe_history": "Obriši historiju"
+    "wipe_history": "Obriši historiju",
+    "ab_comparison": "Poređenje postavki A/B",
+    "add_maintenance": "Dodaj događaj održavanja",
+    "cycle_simulator": "Simulator ciklusa",
+    "dtw_inspector": "DTW inspektor",
+    "getting_started": "Početak rada",
+    "kbd_shortcuts": "Prečice na tastaturi",
+    "maintenance_log": "Dnevnik održavanja",
+    "maintenance_reminders": "Podsjetnici za servis",
+    "settings_history": "Historija postavki"
   },
   "health": {
     "fair": "Prihvatljiva kvaliteta podudaranja",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Poruka (opcionalno, {device}/{program}/{minutes})",
     "ungrouped": "Negrupisano",
     "unlabelled": "Neoznačeno",
-    "unlabelled_paren": "(neoznačeno)"
+    "unlabelled_paren": "(neoznačeno)",
+    "avg_cost": "Prosj. trošak",
+    "change": "Promjena",
+    "concurrency": "Paralelnost",
+    "correlation": "Korelacija",
+    "current_phase": "Trenutna faza",
+    "curves": "Krive",
+    "cycle": "Ciklus",
+    "cycle_index": "indeks ciklusa →",
+    "cycles": "Ciklusi",
+    "dashed": "isprekidano",
+    "delta": "Δ",
+    "dtw_blend_w": "Težina miješanja",
+    "dtw_blended": "Miješani rezultat",
+    "dtw_ddtw": "DDTW rezultat",
+    "dtw_l1": "L1 rezultat",
+    "dtw_matched_profile": "(profil podudaran ciklusu)",
+    "duration_agreement": "Slaganje trajanja",
+    "energy_agreement": "Slaganje energije",
+    "event_timeline": "Vremenska linija događaja",
+    "event_type": "Tip događaja",
+    "final_score": "Konačni rezultat",
+    "mae_score": "MAE rezultat",
+    "metric": "Metrika",
+    "n_selected": "{n} odabrano",
+    "na": "n/a",
+    "notes": "Napomene",
+    "outcome": "Ishod",
+    "per_cycle_short": "ciklus",
+    "pg_ambiguous": "Dvosmisleno",
+    "pg_cycles": "Ciklusi",
+    "pg_detected": "Detektovano",
+    "pg_ev_ending": "Završava",
+    "pg_ev_match": "Podudaranje",
+    "pg_ev_off": "Isključeno",
+    "pg_ev_paused": "Pauzirano",
+    "pg_ev_running": "U toku",
+    "pg_ev_start": "Početak",
+    "pg_match_correct": "Podudaranje ispravno",
+    "pg_unmatched": "Bez podudaranja",
+    "phase_timeline": "Vremenska linija faza",
+    "profile_index": "indeks profila →",
+    "reminder_every": "Podsjeti svakih (ciklusa)",
+    "score": "Rezultat",
+    "score_breakdown": "Raščlamba rezultata",
+    "setting": "Postavka",
+    "settings_a": "Postavke A (trenutne)",
+    "settings_a_short": "A",
+    "settings_advanced": "Napredno",
+    "settings_b": "Postavke B (test)",
+    "settings_b_short": "B",
+    "settings_basic": "Osnovno",
+    "settings_detail_level": "Nivo detalja postavki",
+    "settings_overrides": "Zamjene postavki",
+    "sparkline": "Trend trajanja posljednjih ciklusa",
+    "stage2": "Faza 2 — osnovna sličnost",
+    "stage3": "Faza 3 — DTW",
+    "stage4": "Faza 4 — slaganje",
+    "warp_path": "Warp putanja"
   },
   "log": {
     "all_levels": "Svi nivoi"
@@ -337,7 +417,10 @@
     "process_history_msg": "Ponovo pokrenite uparivanje, osvježite prijedloge, trenirajte ML (ako je omogućeno) i preračunajte zdravlje ciklusa za sve pohranjene cikluse. Ovo može potrajati.",
     "process_history_ok": "Obradi",
     "process_history_title": "Obradi povijest",
-    "process_recording": "Snimanje procesa"
+    "process_recording": "Snimanje procesa",
+    "delete_maintenance_msg": "Izbrisati ovaj zapis o održavanju? Ovo se ne može poništiti.",
+    "delete_maintenance_title": "Izbriši događaj održavanja",
+    "relabel_cycles": "Ponovo označi {count} ciklusa"
   },
   "msg": {
     "appliance_monitor": "Monitor uređaja",
@@ -448,7 +531,44 @@
     "updated": "Ažurirano",
     "warmup_badge": "Još uvijek uči ({done}/{needed} ciklusa)",
     "warmup_detail": "Ovom profilu je potrebno {needed} označenih ciklusa prije nego što počne automatsko uparivanje. Svaki potvrđeni ciklus pomaže učenju.",
-    "wipe_history_warning": "Trajno obrišite sve cikluse i profile. Ne može se poništiti."
+    "wipe_history_warning": "Trajno obrišite sve cikluse i profile. Ne može se poništiti.",
+    "cycles_deleted": "Izbrisano ciklusa: {count}",
+    "kbd_advanced": "Idi na Napredno",
+    "kbd_cycles": "Idi na Cikluse",
+    "kbd_escape": "Zatvori otvoreni dijalog",
+    "kbd_help": "Prikaži / sakrij ovu pomoć",
+    "kbd_help_intro": "Prečice se zanemaruju dok kucate u polju. Reaguju samo kartice koje postoje za ovaj uređaj.",
+    "kbd_ml": "Idi na ML obuku",
+    "kbd_overview": "Idi na Pregled",
+    "kbd_playground": "Idi na Testno okruženje",
+    "kbd_profiles": "Idi na Profile",
+    "kbd_settings": "Idi na Postavke",
+    "maintenance_due": "Održavanje dospijeva: {items}",
+    "maintenance_intro": "Zabilježite servis koji obavljate na ovom uređaju i budite podsjećeni kada svaki zadatak ponovo dospije.",
+    "maintenance_load_error": "Nije moguće učitati podatke o održavanju: {error}",
+    "name_first_program": "Imate dovoljno ciklusa — imenujte svoj prvi program da započnete podudaranje.",
+    "no_cycles_selected": "Prvo odaberite barem jedan ciklus.",
+    "no_maintenance": "Održavanje još nije zabilježeno.",
+    "onboarding_progress": "{n} / 3 ciklusa promatrano",
+    "onboarding_watching": "Pustite uređaj da radi normalno — WashData prati. Nakon 3 ciklusa počinje podudaranje programa.",
+    "pg_ab_intro": "Pokrenite iste cikluse sa trenutnim postavkama (A) i prilagođenim skupom (B), jedan pored drugog.",
+    "pg_apply_b_confirm": "Primijeniti skup B na aktivni uređaj?\n\n{list}",
+    "pg_dtw_intro": "Pregledajte kako se ciklus poravnava s profilom: dvije krive, warp putanju i raščlambu rezultata. Samo za čitanje.",
+    "pg_no_b_overrides": "Nema B zamjena za primjenu.",
+    "pg_no_events": "Nema događaja",
+    "pg_running": "U toku…",
+    "pg_simulator_intro": "Ponovo reproducirajte prošle cikluse kroz detekciju s prilagođenim postavkama — probni rad koji ništa ne mijenja.",
+    "pg_tip_ambiguous": "{n}/{total} dvosmisleno",
+    "pg_tip_cycles": "{n} simuliranih ciklusa",
+    "pg_tip_detected": "{n}/{total} detektovano",
+    "pg_tip_match_correct": "{n}/{total} ispravno podudareno",
+    "pg_tip_unmatched": "{n}/{total} bez podudaranja",
+    "playground_intro": "Sigurno okruženje za ponovnu reprodukciju prošlih ciklusa s različitim postavkama, poređenje dvije konfiguracije jednu pored druge i pregled kako se ciklus poravnava s profilom. Ništa ovdje ne mijenja vaše aktivne podatke dok to izričito ne primijenite.",
+    "playground_needs_restart": "Ponovo pokrenite Home Assistant da omogućite alate Testnog okruženja.",
+    "profile_deleted": "Profil izbrisan",
+    "reminders_intro": "Prikaži podsjetnik u panelu toliko ciklusa nakon posljednjeg servisa. Ostavite prazno ili 0 da isključite podsjetnik.",
+    "setting_changed": "Promijenjeno sa {old} na {new} dana {date}",
+    "settings_basic_note": "Prikazuju se osnovne postavke. Prebacite na Napredno za potpunu listu."
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka spuštanja nakon završetka za smanjenje bora.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "dodaj osobu…",
     "phase_name": "npr. Pranje",
-    "profile_name": "npr. Pamuk 40°C"
+    "profile_name": "npr. Pamuk 40°C",
+    "maintenance_notes": "npr. zamijenjen filter, očišćena brtva vrata"
   },
   "pref": {
     "date_absolute": "Apsolutno (npr. 14:32 2. jula)",
@@ -684,7 +805,7 @@
       "label": "Android kanal (završetak)"
     },
     "notify_finish_message": {
-      "doc": "Telo se šalje kada se ciklus završi. Varijable šablona: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Tekst poslan kada se ciklus završi. Varijable predloška: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} i {vs_typical} su ovdje najkorisniji.",
       "label": "Poruka završetka"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Osobe (za samo dok su kod kuće)"
     },
     "notify_pre_complete_message": {
-      "doc": "Tijelo upozorenja prije kraja/skoro gotovo. Varijable šablona: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Tekst upozorenja prije kraja / skoro gotovo. Varijable predloška: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Poruka pred završetak"
     },
     "notify_reminder_message": {
-      "doc": "Tijelo podsjetnika za istovar koji još uvijek čeka. Prazno koristi ugrađenu zadanu vrijednost. Varijable šablona: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Tekst podsjetnika za još neizvađeno rublje. Prazno koristi ugrađenu zadanu vrijednost. Varijable predloška: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Poruka podsjetnika"
     },
     "notify_start_message": {
-      "doc": "Tijelo se šalje kada ciklus počne. Varijable šablona: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Tekst poslan kada ciklus započne. Varijable predloška: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Poruka pokretanja"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Koliko često pozadinski nadzornik provjerava zastoje senzora i protekla vremena. Standardno 30 s.",
       "label": "Interval čuvara"
+    },
+    "notify_milestone_message": {
+      "doc": "Poruka za obavijest o prekretnici. Varijable predloška: {device}, {cycle_count}.",
+      "label": "Poruka o prekretnici"
+    },
+    "notify_milestones": {
+      "doc": "Zarezima odvojeni brojevi ciklusa koji pokreću jednokratnu obavijest o slavlju kada se dosegnu (npr. 50, 100, 500, 1000). Prazno onemogućava obavijesti o prekretnicama.",
+      "label": "Prekretnice ciklusa"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Kraj prozora ne ometaj (0-23). Zadržane obavijesti se dostavljaju u ovaj sat. Ostavite prazno da onemogućite.",
+      "label": "Kraj tihih sati"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Početak prozora ne ometaj (0-23). Obavijesti o završetku, podsjetnici i obavijesti o čistom rublju koje bi se aktivirale tokom tihih sati zadržavaju se i dostavljaju kada prozor završi. Ostavite prazno da onemogućite. Podržava prozore koji prelaze ponoć (npr. početak 22, kraj 7).",
+      "label": "Početak tihih sati"
+    },
+    "peak_rate_message": {
+      "doc": "Opcionalni prilagođeni tekst za savjet o vršnoj tarifi dodan uz obavijest o pokretanju. Varijable predloška: {device}, {price}. Prazno koristi ugrađenu zadanu vrijednost.",
+      "label": "Poruka o vršnoj tarifi"
+    },
+    "peak_rate_threshold": {
+      "doc": "Kada ciklus započne i trenutna cijena po kWh je na ovoj vrijednosti ili iznad nje, dodaje savjet o vršnoj tarifi uz obavijest o pokretanju. 0 ili prazno onemogućava savjet.",
+      "label": "Prag vršne tarife (po kWh)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Čuvar"
+    },
+    "quiet_hours_milestones": {
+      "label": "Tihi sati i prekretnice"
     }
   },
   "status": {
@@ -1013,7 +1161,9 @@
     "settings": "Postavke",
     "status": "Pregled",
     "subtab_phase_catalog": "Katalog faza",
-    "subtab_profiles": "Profili"
+    "subtab_profiles": "Profili",
+    "maintenance": "Održavanje",
+    "playground": "Testno okruženje"
   },
   "tag": {
     "early_end": "Rani kraj",
@@ -1073,10 +1223,30 @@
     "settings_reverted": "Postavke vraćene; ponovno učitavanje integracije",
     "settings_saved": "Postavke sačuvane; ponovno učitavanje integracije",
     "suggestions_applied": "Primijenjeni prijedlozi; ponovno učitavanje integracije",
-    "suggestions_dismissed": "Prijedlozi su odbačeni"
+    "suggestions_dismissed": "Prijedlozi su odbačeni",
+    "apply_failed": "Primjena nije uspjela: {error}",
+    "delete_failed": "Brisanje nije uspjelo: {error}",
+    "load_more_failed": "Nije moguće učitati još: {error}",
+    "maint_add_failed": "Nije moguće dodati događaj: {error}",
+    "maint_added": "Događaj održavanja dodan",
+    "maint_delete_failed": "Nije moguće izbrisati događaj: {error}",
+    "maint_deleted": "Događaj održavanja izbrisan",
+    "pg_dtw_failed": "DTW pregled nije uspio: {error}",
+    "pg_sim_failed": "Simulacija nije uspjela: {error}",
+    "relabel_done": "Ponovo označeno ciklusa: {count}",
+    "relabel_failed": "Ponovno označavanje nije uspjelo: {error}",
+    "reminders_save_failed": "Nije moguće sačuvati podsjetnike: {error}",
+    "reminders_saved": "Podsjetnici za servis sačuvani"
   },
   "trend": {
     "down": "Opadajući trend",
     "up": "Rastući trend"
+  },
+  "maint": {
+    "bearing_service": "Servis ležajeva",
+    "descale": "Uklanjanje kamenca",
+    "drum_clean": "Očisti bubanj",
+    "filter_clean": "Očisti filter",
+    "other": "Ostalo"
   }
 }

@@ -123,7 +123,20 @@
     "trim": "Apkarpyti",
     "trim_split": "Apkarpyti / padalinti",
     "use": "Naudokite",
-    "wipe_all": "Išvalykite visus duomenis"
+    "wipe_all": "Išvalykite visus duomenis",
+    "add_maintenance": "Pridėti priežiūros įvykį",
+    "apply_set_b": "Taikyti rinkinį B",
+    "kbd_help": "Spartieji klavišai",
+    "load_more": "Įkelti daugiau",
+    "relabel": "Pažymėti iš naujo ({count})",
+    "run_both": "Vykdyti A prieš B",
+    "run_simulation": "Vykdyti simuliaciją",
+    "save_reminders": "Įrašyti priminimus",
+    "select_all": "Žymėti viską",
+    "select_last20": "Paskutiniai 20",
+    "select_none": "Išvalyti",
+    "skip_setup": "Praleisti sąranką",
+    "undo": "Anuliuoti"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Saugyklos statistika",
     "toggle_sidebar": "Perjungti „Home Assistant“ šoninę juostą",
     "tools_and_data": "Įrankiai ir duomenys",
-    "wipe_history": "Išvalyti istoriją"
+    "wipe_history": "Išvalyti istoriją",
+    "ab_comparison": "A/B nustatymų palyginimas",
+    "add_maintenance": "Pridėti priežiūros įvykį",
+    "cycle_simulator": "Ciklų simuliatorius",
+    "dtw_inspector": "DTW inspektorius",
+    "getting_started": "Pradžia",
+    "kbd_shortcuts": "Spartieji klavišai",
+    "maintenance_log": "Priežiūros žurnalas",
+    "maintenance_reminders": "Aptarnavimo priminimai",
+    "settings_history": "Nustatymų istorija"
   },
   "health": {
     "fair": "Priimtina profilio kokybė",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Pranešimas (pasirenkama, {device}/{program}/{minutes})",
     "ungrouped": "Nesugrupuota",
     "unlabelled": "Nepaženklinta",
-    "unlabelled_paren": "(be etiketės)"
+    "unlabelled_paren": "(be etiketės)",
+    "avg_cost": "Vid. kaina",
+    "change": "Pakeitimas",
+    "concurrency": "Lygiagretumas",
+    "correlation": "Koreliacija",
+    "current_phase": "Dabartinė fazė",
+    "curves": "Kreivės",
+    "cycle": "Ciklas",
+    "cycle_index": "ciklo numeris →",
+    "cycles": "Ciklai",
+    "dashed": "brūkšninė",
+    "delta": "Δ",
+    "dtw_blend_w": "Maišymo svoris",
+    "dtw_blended": "Sujungtas balas",
+    "dtw_ddtw": "DDTW balas",
+    "dtw_l1": "L1 balas",
+    "dtw_matched_profile": "(ciklo suderintas profilis)",
+    "duration_agreement": "Trukmės atitikimas",
+    "energy_agreement": "Energijos atitikimas",
+    "event_timeline": "Įvykių laiko juosta",
+    "event_type": "Įvykio tipas",
+    "final_score": "Galutinis balas",
+    "mae_score": "MAE balas",
+    "metric": "Metrika",
+    "n_selected": "Pasirinkta: {n}",
+    "na": "n/d",
+    "notes": "Pastabos",
+    "outcome": "Rezultatas",
+    "per_cycle_short": "ciklas",
+    "pg_ambiguous": "Dviprasmiška",
+    "pg_cycles": "Ciklai",
+    "pg_detected": "Aptikta",
+    "pg_ev_ending": "Baigiama",
+    "pg_ev_match": "Atitiktis",
+    "pg_ev_off": "Išjungta",
+    "pg_ev_paused": "Pristabdyta",
+    "pg_ev_running": "Vykdoma",
+    "pg_ev_start": "Pradžia",
+    "pg_match_correct": "Teisinga atitiktis",
+    "pg_unmatched": "Nesuderinta",
+    "phase_timeline": "Fazių laiko juosta",
+    "profile_index": "profilio numeris →",
+    "reminder_every": "Priminti kas (ciklų)",
+    "score": "Balas",
+    "score_breakdown": "Balo išklotinė",
+    "setting": "Nustatymas",
+    "settings_a": "Nustatymai A (dabartiniai)",
+    "settings_a_short": "A",
+    "settings_advanced": "Išplėstinė",
+    "settings_b": "Nustatymai B (bandymas)",
+    "settings_b_short": "B",
+    "settings_basic": "Pagrindiniai",
+    "settings_detail_level": "Nustatymų detalumo lygis",
+    "settings_overrides": "Nustatymų nepaisymai",
+    "sparkline": "Naujausia ciklų trukmės tendencija",
+    "stage2": "2 etapas — pagrindinis panašumas",
+    "stage3": "3 etapas — DTW",
+    "stage4": "4 etapas — atitikimas",
+    "warp_path": "Iškraipymo kelias"
   },
   "log": {
     "all_levels": "Visi lygiai"
@@ -337,7 +417,10 @@
     "process_history_msg": "Pakartotinai paleisti atitikimą, atnaujinti pasiūlymus, iš naujo apmokyti ML (jei įjungta) ir perskaičiuoti ciklų sveikatą visuose saugomuose cikluose. Tai gali užtrukti.",
     "process_history_ok": "Apdoroti",
     "process_history_title": "Apdoroti istoriją",
-    "process_recording": "Proceso įrašymas"
+    "process_recording": "Proceso įrašymas",
+    "delete_maintenance_msg": "Ištrinti šį priežiūros įrašą? To atšaukti nepavyks.",
+    "delete_maintenance_title": "Ištrinti priežiūros įvykį",
+    "relabel_cycles": "Pažymėti iš naujo {count} ciklus"
   },
   "msg": {
     "appliance_monitor": "Prietaisų monitorius",
@@ -448,7 +531,44 @@
     "updated": "Atnaujinta",
     "warmup_badge": "Vis dar mokosi ({done}/{needed} ciklai)",
     "warmup_detail": "Šiam profiliui reikia {needed} pažymėtų ciklų, kol prasidės automatinis atitikimas. Kiekvienas patvirtintas ciklas padeda mokytis.",
-    "wipe_history_warning": "Visam laikui ištrinti visus ciklus ir profilius. Negalima anuliuoti."
+    "wipe_history_warning": "Visam laikui ištrinti visus ciklus ir profilius. Negalima anuliuoti.",
+    "cycles_deleted": "Ištrinta ciklų: {count}",
+    "kbd_advanced": "Eiti į „Išplėstinė“",
+    "kbd_cycles": "Eiti į „Ciklai“",
+    "kbd_escape": "Uždaryti atidarytą dialogą",
+    "kbd_help": "Rodyti / slėpti šį žinyną",
+    "kbd_help_intro": "Spartieji klavišai ignoruojami, kol rašote lauke. Reaguoja tik tie skirtukai, kurie yra šiam įrenginiui.",
+    "kbd_ml": "Eiti į „ML treniruotės“",
+    "kbd_overview": "Eiti į „Apžvalga“",
+    "kbd_playground": "Eiti į „Bandymų aikštelė“",
+    "kbd_profiles": "Eiti į „Profiliai“",
+    "kbd_settings": "Eiti į „Nustatymai“",
+    "maintenance_due": "Laikas atlikti priežiūrą: {items}",
+    "maintenance_intro": "Registruokite šio buitinio prietaiso aptarnavimą ir gaukite priminimą, kai vėl reikės atlikti kiekvieną užduotį.",
+    "maintenance_load_error": "Nepavyko įkelti priežiūros duomenų: {error}",
+    "name_first_program": "Turite pakankamai ciklų — pavadinkite pirmąją programą, kad prasidėtų suderinimas.",
+    "no_cycles_selected": "Pirmiausia pasirinkite bent vieną ciklą.",
+    "no_maintenance": "Priežiūros dar neužregistruota.",
+    "onboarding_progress": "Stebėta ciklų: {n} / 3",
+    "onboarding_watching": "Naudokite prietaisą įprastai — „WashData“ stebi. Po 3 ciklų prasidės programų suderinimas.",
+    "pg_ab_intro": "Vykdykite tuos pačius ciklus su dabartiniais nustatymais (A) ir pakoreguotu rinkiniu (B) greta.",
+    "pg_apply_b_confirm": "Taikyti rinkinį B veikiančiam prietaisui?\n\n{list}",
+    "pg_dtw_intro": "Peržiūrėkite, kaip vienas ciklas sutampa su profiliu: dvi kreives, iškraipymo kelią ir balo išklotinę. Tik skaitymui.",
+    "pg_no_b_overrides": "Nėra B nepaisymų, kuriuos būtų galima taikyti.",
+    "pg_no_events": "Įvykių nėra",
+    "pg_running": "Vykdoma…",
+    "pg_simulator_intro": "Iš naujo paleiskite ankstesnius ciklus per aptikimą su pakoreguotais nustatymais — bandomasis paleidimas, kuris nieko nekeičia.",
+    "pg_tip_ambiguous": "{n}/{total} dviprasmiški",
+    "pg_tip_cycles": "Simuliuota ciklų: {n}",
+    "pg_tip_detected": "{n}/{total} aptikta",
+    "pg_tip_match_correct": "{n}/{total} suderinta teisingai",
+    "pg_tip_unmatched": "{n}/{total} nesuderinta",
+    "playground_intro": "Saugi bandymų aplinka, kurioje galima iš naujo paleisti ankstesnius ciklus su kitais nustatymais, palyginti dvi konfigūracijas greta ir peržiūrėti, kaip ciklas sutampa su profiliu. Niekas čia nekeičia jūsų tikrųjų duomenų, kol to aiškiai nepritaikysite.",
+    "playground_needs_restart": "Kad įjungtumėte bandymų aikštelės įrankius, iš naujo paleiskite „Home Assistant“.",
+    "profile_deleted": "Profilis ištrintas",
+    "reminders_intro": "Rodyti priminimą skydelyje praėjus tiek ciklų po paskutinio aptarnavimo. Palikite tuščią arba 0, kad priminimas būtų išjungtas.",
+    "setting_changed": "Pakeista iš {old} į {new} {date}",
+    "settings_basic_note": "Rodomi esminiai nustatymai. Norėdami pamatyti visą sąrašą, perjunkite į „Išplėstinė“."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "pridėti asmenį…",
     "phase_name": "pvz. Išankstinis skalbimas",
-    "profile_name": "pvz. Medvilnė 40°C"
+    "profile_name": "pvz. Medvilnė 40°C",
+    "maintenance_notes": "pvz., pakeistas filtras, išvalytas durelių sandariklis"
   },
   "pref": {
     "date_absolute": "Absoliutus (pvz., liepos 2 d. 14:32)",
@@ -684,7 +805,7 @@
       "label": "Android kanalas (baigimas)"
     },
     "notify_finish_message": {
-      "doc": "Kūnas siunčiamas, kai ciklas baigiasi. Šablono kintamieji: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Tekstas, siunčiamas ciklui pasibaigus. Šablono kintamieji: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. Čia naudingiausi {time_finished} ir {vs_typical}.",
       "label": "Baigimo žinutė"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Žmonės (kai namuose)"
     },
     "notify_pre_complete_message": {
-      "doc": "Išankstinio / beveik baigto įspėjimo turinys. Šablono kintamieji: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Įspėjimo prieš pabaigą / beveik baigta tekstas. Šablono kintamieji: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Žinutė prieš baigimą"
     },
     "notify_reminder_message": {
-      "doc": "Vis dar laukiančio iškrovimo priminimo turinys. Blank naudoja integruotą numatytąjį. Šablono kintamieji: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Vis dar laukiančio iškrovimo priminimo tekstas. Tuščia naudoja įtaisytąją numatytąją reikšmę. Šablono kintamieji: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Priminimo žinutė"
     },
     "notify_start_message": {
-      "doc": "Kūnas siunčiamas, kai prasideda ciklas. Šablono kintamieji: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Tekstas, siunčiamas ciklui prasidėjus. Šablono kintamieji: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Paleidimo žinutė"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Kaip dažnai foninis sergėtojas tikrina, ar neužstrigo jutikliai ir ar nėra laiko. Numatytasis 30 s.",
       "label": "Stebėjimo intervalas"
+    },
+    "notify_milestone_message": {
+      "doc": "Etapo pranešimo tekstas. Šablono kintamieji: {device}, {cycle_count}.",
+      "label": "Etapo pranešimas"
+    },
+    "notify_milestones": {
+      "doc": "Kableliais atskirti ciklų skaičiai, kuriuos pasiekus vieną kartą siunčiamas šventinis pranešimas (pvz., 50, 100, 500, 1000). Tuščia išjungia etapų pranešimus.",
+      "label": "Ciklų etapai"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Netrukdymo lango pabaiga (0-23). Sulaikyti pranešimai pristatomi šią valandą. Palikite tuščią, kad išjungtumėte.",
+      "label": "Tylos valandų pabaiga"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Netrukdymo lango pradžia (0-23). Pabaigos, priminimo ir švarių skalbinių pranešimai, kurie suveiktų tylos valandomis, sulaikomi ir pristatomi langui pasibaigus. Palikite tuščią, kad išjungtumėte. Palaikomi langai, kertantys vidurnaktį (pvz., pradžia 22, pabaiga 7).",
+      "label": "Tylos valandų pradžia"
+    },
+    "peak_rate_message": {
+      "doc": "Neprivalomas pasirinktinis tekstas piko tarifo patarimui, pridedamam prie paleidimo pranešimo. Šablono kintamieji: {device}, {price}. Tuščia naudoja įtaisytąją numatytąją reikšmę.",
+      "label": "Piko tarifo pranešimas"
+    },
+    "peak_rate_threshold": {
+      "doc": "Kai ciklas prasideda ir dabartinė kaina už kWh yra lygi šiai reikšmei ar didesnė, prie paleidimo pranešimo pridedamas piko tarifo patarimas. 0 arba tuščia išjungia patarimą.",
+      "label": "Piko tarifo slenkstis (už kWh)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Stebėjimas"
+    },
+    "quiet_hours_milestones": {
+      "label": "Tylos valandos ir etapai"
     }
   },
   "status": {
@@ -950,7 +1098,9 @@
     "settings": "Nustatymai",
     "status": "Apžvalga",
     "subtab_phase_catalog": "Fazių katalogas",
-    "subtab_profiles": "Profiliai"
+    "subtab_profiles": "Profiliai",
+    "maintenance": "Priežiūra",
+    "playground": "Bandymų aikštelė"
   },
   "tag": {
     "early_end": "Ankstyva pabaiga",
@@ -1010,7 +1160,20 @@
     "settings_reverted": "Nustatymai atkurti; integracijos perkrovimas",
     "settings_saved": "Nustatymai išsaugoti; integracijos perkrovimas",
     "suggestions_applied": "Pasiūlymai pritaikyti; integracijos perkrovimas",
-    "suggestions_dismissed": "Pasiūlymai atmesti"
+    "suggestions_dismissed": "Pasiūlymai atmesti",
+    "apply_failed": "Nepavyko pritaikyti: {error}",
+    "delete_failed": "Nepavyko ištrinti: {error}",
+    "load_more_failed": "Nepavyko įkelti daugiau: {error}",
+    "maint_add_failed": "Nepavyko pridėti įvykio: {error}",
+    "maint_added": "Priežiūros įvykis pridėtas",
+    "maint_delete_failed": "Nepavyko ištrinti įvykio: {error}",
+    "maint_deleted": "Priežiūros įvykis ištrintas",
+    "pg_dtw_failed": "DTW patikra nepavyko: {error}",
+    "pg_sim_failed": "Simuliacija nepavyko: {error}",
+    "relabel_done": "Iš naujo pažymėta ciklų: {count}",
+    "relabel_failed": "Nepavyko pažymėti iš naujo: {error}",
+    "reminders_save_failed": "Nepavyko įrašyti priminimų: {error}",
+    "reminders_saved": "Aptarnavimo priminimai įrašyti"
   },
   "suggestion": {
     "both_agree": "WashData rekomenduoja",
@@ -1078,5 +1241,12 @@
   "trend": {
     "down": "Tendencija žemyn",
     "up": "Populiarėja"
+  },
+  "maint": {
+    "bearing_service": "Guolių aptarnavimas",
+    "descale": "Kalkių šalinimas",
+    "drum_clean": "Valyti būgną",
+    "filter_clean": "Valyti filtrą",
+    "other": "Kita"
   }
 }

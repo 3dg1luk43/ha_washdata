@@ -123,7 +123,20 @@
     "trim": "Trimmen",
     "trim_split": "Trimmen / Teilen",
     "use": "Verwenden",
-    "wipe_all": "Alle Daten löschen"
+    "wipe_all": "Alle Daten löschen",
+    "add_maintenance": "Wartungsereignis hinzufügen",
+    "apply_set_b": "Set B anwenden",
+    "kbd_help": "Tastenkürzel",
+    "load_more": "Mehr laden",
+    "relabel": "Neu beschriften ({count})",
+    "run_both": "A gegen B ausführen",
+    "run_simulation": "Simulation ausführen",
+    "save_reminders": "Erinnerungen speichern",
+    "select_all": "Alle auswählen",
+    "select_last20": "Letzte 20",
+    "select_none": "Leeren",
+    "skip_setup": "Einrichtung überspringen",
+    "undo": "Rückgängig"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -219,7 +232,16 @@
     "storage_stats": "Speicherstatistiken",
     "toggle_sidebar": "Schalten Sie die Seitenleiste von Home Assistant um",
     "tools_and_data": "Tools & Daten",
-    "wipe_history": "Verlauf löschen"
+    "wipe_history": "Verlauf löschen",
+    "ab_comparison": "A/B-Einstellungsvergleich",
+    "add_maintenance": "Wartungsereignis hinzufügen",
+    "cycle_simulator": "Zyklussimulator",
+    "dtw_inspector": "DTW-Inspektor",
+    "getting_started": "Erste Schritte",
+    "kbd_shortcuts": "Tastenkürzel",
+    "maintenance_log": "Wartungsprotokoll",
+    "maintenance_reminders": "Service-Erinnerungen",
+    "settings_history": "Einstellungsverlauf"
   },
   "health": {
     "fair": "Akzeptable Übereinstimmungsqualität",
@@ -307,7 +329,65 @@
     "timer_msg_placeholder": "Nachricht (optional, {device}/{program}/{minutes})",
     "ungrouped": "Nicht gruppiert",
     "unlabelled": "Unbeschriftet",
-    "unlabelled_paren": "(unbeschriftet)"
+    "unlabelled_paren": "(unbeschriftet)",
+    "avg_cost": "Ø-Kosten",
+    "change": "Änderung",
+    "concurrency": "Parallelität",
+    "correlation": "Korrelation",
+    "current_phase": "Aktuelle Phase",
+    "curves": "Kurven",
+    "cycle": "Zyklus",
+    "cycle_index": "Zyklusindex →",
+    "cycles": "Zyklen",
+    "dashed": "gestrichelt",
+    "delta": "Δ",
+    "dtw_blend_w": "Mischgewicht",
+    "dtw_blended": "Gemischter Score",
+    "dtw_ddtw": "DDTW-Score",
+    "dtw_l1": "L1-Score",
+    "dtw_matched_profile": "(zugeordnetes Profil des Zyklus)",
+    "duration_agreement": "Dauerübereinstimmung",
+    "energy_agreement": "Energieübereinstimmung",
+    "event_timeline": "Ereignis-Zeitachse",
+    "event_type": "Ereignistyp",
+    "final_score": "Endscore",
+    "mae_score": "MAE-Score",
+    "metric": "Metrik",
+    "n_selected": "{n} ausgewählt",
+    "na": "n/a",
+    "notes": "Notizen",
+    "outcome": "Ergebnis",
+    "per_cycle_short": "Zyklus",
+    "pg_ambiguous": "Mehrdeutig",
+    "pg_cycles": "Zyklen",
+    "pg_detected": "Erkannt",
+    "pg_ev_ending": "Endet",
+    "pg_ev_match": "Übereinstimmung",
+    "pg_ev_off": "Aus",
+    "pg_ev_paused": "Pausiert",
+    "pg_ev_running": "Läuft",
+    "pg_ev_start": "Start",
+    "pg_match_correct": "Übereinstimmung korrekt",
+    "pg_unmatched": "Nicht zugeordnet",
+    "phase_timeline": "Phasen-Zeitachse",
+    "profile_index": "Profilindex →",
+    "reminder_every": "Erinnern alle (Zyklen)",
+    "score": "Score",
+    "score_breakdown": "Score-Aufschlüsselung",
+    "setting": "Einstellung",
+    "settings_a": "Einstellungen A (aktuell)",
+    "settings_a_short": "A",
+    "settings_advanced": "Erweitert",
+    "settings_b": "Einstellungen B (Test)",
+    "settings_b_short": "B",
+    "settings_basic": "Grundlegend",
+    "settings_detail_level": "Detailgrad der Einstellungen",
+    "settings_overrides": "Einstellungsüberschreibungen",
+    "sparkline": "Trend der letzten Zyklusdauern",
+    "stage2": "Stufe 2 — Kernähnlichkeit",
+    "stage3": "Stufe 3 — DTW",
+    "stage4": "Stufe 4 — Übereinstimmung",
+    "warp_path": "Warp-Pfad"
   },
   "log": {
     "all_levels": "Alle Ebenen"
@@ -337,7 +417,10 @@
     "process_history_msg": "Gleiche Zyklen erneut ab, aktualisiere Vorschläge, trainiere ML neu (falls aktiviert) und berechne den Zykluszustand über alle gespeicherten Zyklen neu. Dies kann einige Zeit dauern.",
     "process_history_ok": "Verarbeiten",
     "process_history_title": "Verlauf verarbeiten",
-    "process_recording": "Prozessaufzeichnung"
+    "process_recording": "Prozessaufzeichnung",
+    "delete_maintenance_msg": "Diesen Wartungseintrag löschen? Dies kann nicht rückgängig gemacht werden.",
+    "delete_maintenance_title": "Wartungsereignis löschen",
+    "relabel_cycles": "{count} Zyklen neu beschriften"
   },
   "msg": {
     "appliance_monitor": "Gerätemonitor",
@@ -448,7 +531,44 @@
     "updated": "Aktualisiert",
     "warmup_badge": "Noch in der Lernphase ({done}/{needed} Zyklen)",
     "warmup_detail": "Dieses Profil benötigt {needed} beschriftete Zyklen, bevor die automatische Erkennung beginnt. Jeder bestätigte Zyklus hilft beim Lernen.",
-    "wipe_history_warning": "Alle Zyklen und Profile dauerhaft löschen. Kann nicht rückgängig gemacht werden."
+    "wipe_history_warning": "Alle Zyklen und Profile dauerhaft löschen. Kann nicht rückgängig gemacht werden.",
+    "cycles_deleted": "{count} Zyklen gelöscht",
+    "kbd_advanced": "Zu Erweitert wechseln",
+    "kbd_cycles": "Zu Zyklen wechseln",
+    "kbd_escape": "Geöffneten Dialog schließen",
+    "kbd_help": "Diese Hilfe ein-/ausblenden",
+    "kbd_help_intro": "Tastenkürzel werden ignoriert, während Sie in ein Feld tippen. Nur für dieses Gerät vorhandene Tabs reagieren.",
+    "kbd_ml": "Zu ML-Training wechseln",
+    "kbd_overview": "Zur Übersicht wechseln",
+    "kbd_playground": "Zum Testbereich wechseln",
+    "kbd_profiles": "Zu Profile wechseln",
+    "kbd_settings": "Zu Einstellungen wechseln",
+    "maintenance_due": "Wartung fällig: {items}",
+    "maintenance_intro": "Protokollieren Sie die an diesem Gerät durchgeführten Wartungen und lassen Sie sich erinnern, wenn eine Aufgabe wieder ansteht.",
+    "maintenance_load_error": "Wartungsdaten konnten nicht geladen werden: {error}",
+    "name_first_program": "Sie haben genügend Zyklen — benennen Sie Ihr erstes Programm, um den Abgleich zu starten.",
+    "no_cycles_selected": "Wählen Sie zuerst mindestens einen Zyklus aus.",
+    "no_maintenance": "Noch keine Wartung erfasst.",
+    "onboarding_progress": "{n} / 3 Zyklen beobachtet",
+    "onboarding_watching": "Lassen Sie Ihr Gerät normal laufen — WashData beobachtet. Nach 3 Zyklen beginnt der Programmabgleich.",
+    "pg_ab_intro": "Führen Sie dieselben Zyklen mit Ihren aktuellen Einstellungen (A) und einem angepassten Satz (B) nebeneinander aus.",
+    "pg_apply_b_confirm": "Set B auf das Live-Gerät anwenden?\n\n{list}",
+    "pg_dtw_intro": "Untersuchen Sie, wie ein Zyklus zu einem Profil ausgerichtet wird: die beiden Kurven, den Warp-Pfad und die Score-Aufschlüsselung. Schreibgeschützt.",
+    "pg_no_b_overrides": "Keine B-Überschreibungen zum Anwenden.",
+    "pg_no_events": "Keine Ereignisse",
+    "pg_running": "Läuft…",
+    "pg_simulator_intro": "Vergangene Zyklen mit angepassten Einstellungen erneut durch die Erkennung abspielen — ein Probelauf, der nichts verändert.",
+    "pg_tip_ambiguous": "{n}/{total} mehrdeutig",
+    "pg_tip_cycles": "{n} Zyklen simuliert",
+    "pg_tip_detected": "{n}/{total} erkannt",
+    "pg_tip_match_correct": "{n}/{total} korrekt zugeordnet",
+    "pg_tip_unmatched": "{n}/{total} nicht zugeordnet",
+    "playground_intro": "Eine sichere Sandbox, um vergangene Zyklen mit anderen Einstellungen abzuspielen, zwei Konfigurationen nebeneinander zu vergleichen und zu untersuchen, wie ein Zyklus zu einem Profil passt. Nichts hier verändert Ihre Live-Daten, bis Sie es ausdrücklich anwenden.",
+    "playground_needs_restart": "Starten Sie Home Assistant neu, um die Testbereich-Tools zu aktivieren.",
+    "profile_deleted": "Profil gelöscht",
+    "reminders_intro": "Eine Erinnerung im Panel so viele Zyklen nach der letzten Wartung anzeigen. Leer lassen oder 0, um eine Erinnerung auszuschalten.",
+    "setting_changed": "Geändert von {old} zu {new} am {date}",
+    "settings_basic_note": "Es werden die wesentlichen Einstellungen angezeigt. Wechseln Sie zu Erweitert für die vollständige Liste."
   },
   "phase_desc": {
     "anti_crease": "Gelegentliche kurze Trommelumwälzungen nach Abschluss, um Knitterung zu vermeiden.",
@@ -478,7 +598,8 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "Person hinzufügen…",
     "phase_name": "z. B. Vorwäsche",
-    "profile_name": "z. B. Baumwolle 40 °C"
+    "profile_name": "z. B. Baumwolle 40 °C",
+    "maintenance_notes": "z. B. Filter ersetzt, Türdichtung gereinigt"
   },
   "pref": {
     "date_absolute": "Absolut (z. B. 14:32 Uhr am 2. Juli)",
@@ -684,7 +805,7 @@
       "label": "Android-Kanal (Ende)"
     },
     "notify_finish_message": {
-      "doc": "Der Text wird gesendet, wenn ein Zyklus beendet ist. Vorlagenvariablen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Text, der gesendet wird, wenn ein Zyklus endet. Vorlagenvariablen: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} und {vs_typical} sind hier am nützlichsten.",
       "label": "Endnachricht"
     },
     "notify_finish_services": {
@@ -724,15 +845,15 @@
       "label": "Personen (für Nur wenn zu Hause)"
     },
     "notify_pre_complete_message": {
-      "doc": "Text der Vorab-/Fast-Fertig-Warnung. Vorlagenvariablen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Text der Vorab-/Fast-fertig-Benachrichtigung. Vorlagenvariablen: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Vorend-Nachricht"
     },
     "notify_reminder_message": {
-      "doc": "Text der noch wartenden Entladeerinnerung. Blank verwendet die integrierte Standardeinstellung. Vorlagenvariablen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Text der Ausräum-Erinnerung (noch ausstehend). Leer verwendet die eingebaute Vorgabe. Vorlagenvariablen: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Erinnerungsnachricht"
     },
     "notify_start_message": {
-      "doc": "Der Text wird gesendet, wenn ein Zyklus beginnt. Vorlagenvariablen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Text, der gesendet wird, wenn ein Zyklus startet. Vorlagenvariablen: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
       "label": "Startnachricht"
     },
     "notify_start_services": {
@@ -846,6 +967,30 @@
     "watchdog_interval": {
       "doc": "Wie oft prüft der Hintergrund-Watchdog auf blockierte Sensoren und abgelaufene Zeitüberschreitungen? Standard 30 s.",
       "label": "Watchdog-Intervall"
+    },
+    "notify_milestone_message": {
+      "doc": "Nachricht für die Meilenstein-Benachrichtigung. Vorlagenvariablen: {device}, {cycle_count}.",
+      "label": "Meilenstein-Nachricht"
+    },
+    "notify_milestones": {
+      "doc": "Kommagetrennte Zykluszahlen, die beim Erreichen eine einmalige Glückwunsch-Benachrichtigung auslösen (z. B. 50, 100, 500, 1000). Leer deaktiviert Meilenstein-Benachrichtigungen.",
+      "label": "Zyklus-Meilensteine"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Ende des Ruhezeitfensters (0-23). Zurückgehaltene Benachrichtigungen werden zu dieser Stunde zugestellt. Leer lassen zum Deaktivieren.",
+      "label": "Ende der Ruhezeiten"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Beginn eines Ruhezeitfensters (0-23). Abschluss-, Erinnerungs- und Wäsche-fertig-Benachrichtigungen, die während der Ruhezeiten ausgelöst würden, werden zurückgehalten und bei Fensterende zugestellt. Leer lassen zum Deaktivieren. Unterstützt Fenster über Mitternacht (z. B. Start 22, Ende 7).",
+      "label": "Beginn der Ruhezeiten"
+    },
+    "peak_rate_message": {
+      "doc": "Optionaler benutzerdefinierter Text für den Spitzentarif-Hinweis, der an die Start-Benachrichtigung angehängt wird. Vorlagenvariablen: {device}, {price}. Leer verwendet die eingebaute Vorgabe.",
+      "label": "Spitzentarif-Nachricht"
+    },
+    "peak_rate_threshold": {
+      "doc": "Wenn ein Zyklus startet und der aktuelle Preis pro kWh bei oder über diesem Wert liegt, wird ein Spitzentarif-Hinweis an die Start-Benachrichtigung angehängt. 0 oder leer deaktiviert den Hinweis.",
+      "label": "Spitzentarif-Schwelle (pro kWh)"
     }
   },
   "setting_group": {
@@ -920,6 +1065,9 @@
     },
     "watchdog": {
       "label": "Watchdog"
+    },
+    "quiet_hours_milestones": {
+      "label": "Ruhezeiten & Meilensteine"
     }
   },
   "status": {
@@ -1013,7 +1161,9 @@
     "settings": "Einstellungen",
     "status": "Überblick",
     "subtab_phase_catalog": "Phasenkatalog",
-    "subtab_profiles": "Profile"
+    "subtab_profiles": "Profile",
+    "maintenance": "Wartung",
+    "playground": "Testbereich"
   },
   "tag": {
     "early_end": "Frühes Ende",
@@ -1073,10 +1223,30 @@
     "settings_reverted": "Einstellungen wiederhergestellt; Neuladen der Integration",
     "settings_saved": "Einstellungen gespeichert; Neuladen der Integration",
     "suggestions_applied": "Angewendete Vorschläge; Neuladen der Integration",
-    "suggestions_dismissed": "Vorschläge abgelehnt"
+    "suggestions_dismissed": "Vorschläge abgelehnt",
+    "apply_failed": "Anwenden fehlgeschlagen: {error}",
+    "delete_failed": "Löschen fehlgeschlagen: {error}",
+    "load_more_failed": "Konnte nicht mehr laden: {error}",
+    "maint_add_failed": "Ereignis konnte nicht hinzugefügt werden: {error}",
+    "maint_added": "Wartungsereignis hinzugefügt",
+    "maint_delete_failed": "Ereignis konnte nicht gelöscht werden: {error}",
+    "maint_deleted": "Wartungsereignis gelöscht",
+    "pg_dtw_failed": "DTW-Prüfung fehlgeschlagen: {error}",
+    "pg_sim_failed": "Simulation fehlgeschlagen: {error}",
+    "relabel_done": "{count} Zyklen neu beschriftet",
+    "relabel_failed": "Neu beschriften fehlgeschlagen: {error}",
+    "reminders_save_failed": "Erinnerungen konnten nicht gespeichert werden: {error}",
+    "reminders_saved": "Service-Erinnerungen gespeichert"
   },
   "trend": {
     "down": "Abwärtstrend",
     "up": "Aufwärtstrend"
+  },
+  "maint": {
+    "bearing_service": "Lagerwartung",
+    "descale": "Entkalken",
+    "drum_clean": "Trommel reinigen",
+    "filter_clean": "Filter reinigen",
+    "other": "Sonstiges"
   }
 }
