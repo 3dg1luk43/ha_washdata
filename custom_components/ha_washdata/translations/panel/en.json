@@ -986,6 +986,69 @@
     "suggestions_applied": "Suggestions applied; integration reloading",
     "suggestions_dismissed": "Suggestions dismissed"
   },
+  "suggestion": {
+    "both_agree": "WashData recommends",
+    "calibrated_label": "Calibrated",
+    "observed_label": "Observed",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Labels fewer cycles automatically; more go to review",
+        "lower": "Labels more cycles automatically; some may be misidentified"
+      },
+      "duration_tolerance": {
+        "higher": "Accepts a wider duration range — more flexible matching",
+        "lower": "Requires closer duration match — stricter but may reject unusual cycles"
+      },
+      "end_energy_threshold": {
+        "higher": "Closes only cycles that used substantial energy",
+        "lower": "Closes shorter or lower-energy cycles too"
+      },
+      "end_repeat_count": {
+        "higher": "Requires the end signal to repeat more times — more robust, slightly slower",
+        "lower": "Ends after fewer repetitions — faster detection, more false-end risk"
+      },
+      "learning_confidence": {
+        "higher": "Learns only from very confident matches — slower but more reliable",
+        "lower": "Learns from more cycles; model may be noisier"
+      },
+      "min_off_gap": {
+        "higher": "Longer idle needed before a new cycle starts",
+        "lower": "Brief idle triggers a new cycle — back-to-back runs may split"
+      },
+      "min_power": {
+        "higher": "Less sensitive to idle power draw; may miss very quiet programs",
+        "lower": "More sensitive; may log standby power as activity"
+      },
+      "no_update_active_timeout": {
+        "higher": "More time before declaring a cycle stuck",
+        "lower": "Force-stops a stuck cycle sooner"
+      },
+      "off_delay": {
+        "higher": "More time for appliance pauses — handles long soak or drying phases",
+        "lower": "Faster end detection — works well for clean on/off appliances"
+      },
+      "profile_match_threshold": {
+        "higher": "Commits only high-confidence matches; more cycles stay unlabelled",
+        "lower": "Matches more cycles; some may be slightly wrong"
+      },
+      "running_dead_zone": {
+        "higher": "Ignores brief power spikes during idle — less noise-sensitive",
+        "lower": "Responds to shorter power bursts — catches fast transient activity"
+      },
+      "start_threshold_w": {
+        "higher": "Avoids false starts from brief power spikes",
+        "lower": "Catches low-power programs; may trigger on noise"
+      },
+      "stop_threshold_w": {
+        "higher": "Ends cycle faster — may close during a pause",
+        "lower": "Waits longer to end — fewer premature completions"
+      },
+      "watchdog_interval": {
+        "higher": "Longer quiet phases allowed; fewer false force-stops",
+        "lower": "Catches stuck cycles more aggressively"
+      }
+    }
+  },
   "trend": {
     "down": "Trending down",
     "up": "Trending up"

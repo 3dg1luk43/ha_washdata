@@ -911,6 +911,69 @@
     "recording": "Spelar in",
     "training": "Tränar…"
   },
+  "suggestion": {
+    "both_agree": "WashData rekommenderar",
+    "calibrated_label": "Kalibrerat",
+    "observed_label": "Observerat",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Färre automatiska märkningar – fler cykler går till granskning",
+        "lower": "Fler automatiska märkningar – vissa kan vara felaktiga"
+      },
+      "duration_tolerance": {
+        "higher": "Accepterar ett bredare varaktighetsintervall – flexiblare igenkänning",
+        "lower": "Kräver noggrannare varaktighetsmatchning – striktare men kan avvisa ovanliga cykler"
+      },
+      "end_energy_threshold": {
+        "higher": "Avslutar bara cykler med betydande energiförbrukning",
+        "lower": "Avslutar även kortare eller energisnålare cykler"
+      },
+      "end_repeat_count": {
+        "higher": "Slutsignalen måste upprepas fler gånger – robustare, något långsammare",
+        "lower": "Avslutar efter färre upprepningar – snabbare detektering, mer risk för falskt slut"
+      },
+      "learning_confidence": {
+        "higher": "Lär sig bara från mycket säkra matchningar – långsammare men mer tillförlitligt",
+        "lower": "Lär sig från fler cykler – modellen kan bli mer oprecis"
+      },
+      "min_off_gap": {
+        "higher": "Längre paus krävs innan en ny cykel börjar",
+        "lower": "Kort paus räcker – körningar i följd kan delas upp"
+      },
+      "min_power": {
+        "higher": "Mindre känslig för standby-förbrukning – mycket tysta program kan missas",
+        "lower": "Känsligare – standby-förbrukning kan uppfattas som aktivitet"
+      },
+      "no_update_active_timeout": {
+        "higher": "Mer tid innan en fast cykel tvingas stoppas",
+        "lower": "Tvångsstoppar en fast cykel snabbare"
+      },
+      "off_delay": {
+        "higher": "Mer tid för apparatpauser – långa blöt- eller torkfaser bryggs över",
+        "lower": "Snabbare slutdetektering – passar apparater med tydligt på/av-beteende"
+      },
+      "profile_match_threshold": {
+        "higher": "Bara mycket säkra matchningar bekräftas – fler cykler förblir omärkta",
+        "lower": "Fler cykler matchas – vissa kan vara något felaktiga"
+      },
+      "running_dead_zone": {
+        "higher": "Korta effekttoppar under tomgång ignoreras – mindre brusig",
+        "lower": "Reagerar på kortare effektimpulser – fångar snabba transienter"
+      },
+      "start_threshold_w": {
+        "higher": "Undviker falska starter från korta effekttoppar",
+        "lower": "Fångar lågeffektsprogram – kan triggas av brus"
+      },
+      "stop_threshold_w": {
+        "higher": "Avslutar cykeln snabbare – kan utlösas under en paus",
+        "lower": "Väntar längre med att avsluta – färre förtida avslutningar"
+      },
+      "watchdog_interval": {
+        "higher": "Längre tysta faser tillåts – färre oavsiktliga tvångsstopp",
+        "lower": "Detekterar fasta cykler snabbare"
+      }
+    }
+  },
   "tab": {
     "advanced": "Avancerat",
     "diagnostics": "Diagnostik",

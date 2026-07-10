@@ -986,6 +986,69 @@
     "suggestions_applied": "Pasiūlymai pritaikyti; integracijos perkrovimas",
     "suggestions_dismissed": "Pasiūlymai atmesti"
   },
+  "suggestion": {
+    "both_agree": "WashData rekomenduoja",
+    "calibrated_label": "Sukalibruota",
+    "observed_label": "Pastebėta",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Automatiškai pažymi mažiau ciklų; daugiau siunčiama peržiūrėti",
+        "lower": "Automatiškai pažymi daugiau ciklų; kai kurie gali būti neteisingai identifikuoti"
+      },
+      "duration_tolerance": {
+        "higher": "Priima platesnį trukmės diapazoną — lankstesnis atitikimas",
+        "lower": "Reikalauja tikslesnio trukmės atitikimo — griežtesnė, bet gali atmesti neįprastus ciklus"
+      },
+      "end_energy_threshold": {
+        "higher": "Uždaro tik ciklus, kurie sunaudojo daug energijos",
+        "lower": "Uždaro ir trumpesnius arba mažiau energijos naudojančius ciklus"
+      },
+      "end_repeat_count": {
+        "higher": "Reikalauja, kad pabaigos signalas kartotųsi daugiau kartų — patikimesnis, šiek tiek lėtesnis",
+        "lower": "Baigia po mažiau pasikartojimų — greitesnis aptikimas, didesnis klaidingo pabaigos pavojus"
+      },
+      "learning_confidence": {
+        "higher": "Mokosi tik iš labai tikrų atitikimų — lėčiau, bet patikimiau",
+        "lower": "Mokosi iš daugiau ciklų; modelis gali būti triukšmingesnis"
+      },
+      "min_off_gap": {
+        "higher": "Prieš naują ciklą reikia ilgesnio neveiklumo laikotarpio",
+        "lower": "Trumpas neveiklumas paleidžia naują ciklą — vienas po kito einantys paleidimai gali išsiskirti"
+      },
+      "min_power": {
+        "higher": "Mažiau jautrus budėjimo galiai; gali praleisti labai tylias programas",
+        "lower": "Jautresnė; gali registruoti budėjimo galios sąnaudas kaip veiklą"
+      },
+      "no_update_active_timeout": {
+        "higher": "Daugiau laiko prieš paskelbiant ciklą įstrigusiu",
+        "lower": "Greičiau priverstinai sustabdo įstrigusį ciklą"
+      },
+      "off_delay": {
+        "higher": "Daugiau laiko prietaiso pauzėms — valdo ilgas mirkymo arba džiovinimo fazes",
+        "lower": "Greitesnis pabaigos aptikimas — tinka aiškiems įjungimo/išjungimo prietaisams"
+      },
+      "profile_match_threshold": {
+        "higher": "Patvirtina tik aukšto pasitikėjimo atitikimus; daugiau ciklų lieka nepažymėtų",
+        "lower": "Atitinka daugiau ciklų; kai kurie gali būti šiek tiek neteisingi"
+      },
+      "running_dead_zone": {
+        "higher": "Ignoruoja trumpus galios šuolius neveiklumo metu — mažiau jautrus triukšmui",
+        "lower": "Reaguoja į trumpesnius galios pliūpsnius — aptinka greitą trumpalaikę veiklą"
+      },
+      "start_threshold_w": {
+        "higher": "Išvengia netikrų paleidimų dėl trumpų galios šuolių",
+        "lower": "Aptinka mažos galios programas; gali suaktyvėti nuo triukšmo"
+      },
+      "stop_threshold_w": {
+        "higher": "Greičiau baigia ciklą — gali uždaryti pauzės metu",
+        "lower": "Laukia ilgiau prieš baigiant — mažiau ankstyvų pabaigimų"
+      },
+      "watchdog_interval": {
+        "higher": "Leidžiamos ilgesnės tylios fazės; mažiau klaidingų priverstinių sustabdymų",
+        "lower": "Agresyviau aptinka įstrigusius ciklus"
+      }
+    }
+  },
   "trend": {
     "down": "Tendencija žemyn",
     "up": "Populiarėja"

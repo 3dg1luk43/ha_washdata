@@ -911,6 +911,69 @@
     "recording": "Nahrávanie",
     "training": "Trénovanie…"
   },
+  "suggestion": {
+    "both_agree": "WashData odporúča",
+    "calibrated_label": "Kalibrované",
+    "observed_label": "Namerané",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Menej cyklov je označených automaticky; viac ide na kontrolu",
+        "lower": "Viac cyklov je označených automaticky; niektoré môžu byť nesprávne určené"
+      },
+      "duration_tolerance": {
+        "higher": "Akceptuje širší rozsah trvania — flexibilnejšie porovnávanie",
+        "lower": "Vyžaduje bližšiu zhodu trvania — prísnejšie, ale môže odmietnuť nezvyčajné cykly"
+      },
+      "end_energy_threshold": {
+        "higher": "Uzatvára iba cykly so značnou spotrebou energie",
+        "lower": "Uzatvára aj kratšie alebo menej energetické cykly"
+      },
+      "end_repeat_count": {
+        "higher": "Vyžaduje viac opakovaní signálu konca — spoľahlivejšie, mierne pomalšie",
+        "lower": "Ukončí po menej opakovaniach — rýchlejšia detekcia, väčšie riziko predčasného ukončenia"
+      },
+      "learning_confidence": {
+        "higher": "Učí sa iba z veľmi istých zhôd — pomalšie, ale spoľahlivejšie",
+        "lower": "Učí sa z viacerých cyklov; model môže byť menej presný"
+      },
+      "min_off_gap": {
+        "higher": "Pred začiatkom nového cyklu je potrebný dlhší pokoj",
+        "lower": "Krátky pokoj spustí nový cyklus — po sebe idúce cykly sa môžu rozdeliť"
+      },
+      "min_power": {
+        "higher": "Menej citlivý na kľudový príkon; môže prehliadnuť veľmi tichý program",
+        "lower": "Citlivejší; môže zaznamenať kľudový príkon ako aktivitu"
+      },
+      "no_update_active_timeout": {
+        "higher": "Viac času pred vyhlásením cyklu za zaseknutý",
+        "lower": "Zaseknutý cyklus je ukončený skôr"
+      },
+      "off_delay": {
+        "higher": "Viac času na prestávky spotrebiča — vhodné pre dlhé fázy namáčania alebo sušenia",
+        "lower": "Rýchlejšia detekcia konca — vhodné pre spotrebiče s čistým zapínaním/vypínaním"
+      },
+      "profile_match_threshold": {
+        "higher": "Potvrdzuje iba vysoko isté zhody; viac cyklov zostane neoznačených",
+        "lower": "Páruje viac cyklov; niektoré môžu byť mierne nesprávne"
+      },
+      "running_dead_zone": {
+        "higher": "Ignoruje krátke výkonové špičky počas nečinnosti — menej citlivý na rušenie",
+        "lower": "Reaguje na kratšie výkonové impulzy — zachytí rýchlu prechodnú aktivitu"
+      },
+      "start_threshold_w": {
+        "higher": "Zabraňuje falošným štartom z krátkych výkonových špiček",
+        "lower": "Zachytí programy s nízkym príkonom; môže reagovať na šum"
+      },
+      "stop_threshold_w": {
+        "higher": "Ukončí cyklus rýchlejšie — môže uzatvoriť počas pauzy",
+        "lower": "Čaká dlhšie na ukončenie — menej predčasných dokončení"
+      },
+      "watchdog_interval": {
+        "higher": "Umožňuje dlhšie tiché fázy; menej falošných vynútených zastavení",
+        "lower": "Zaseknuté cykly sú detegované agresívnejšie"
+      }
+    }
+  },
   "tab": {
     "advanced": "Rozšírené",
     "diagnostics": "Diagnostika",

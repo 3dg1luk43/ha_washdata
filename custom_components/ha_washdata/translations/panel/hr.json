@@ -911,6 +911,69 @@
     "recording": "Snimanje",
     "training": "Treniranje…"
   },
+  "suggestion": {
+    "both_agree": "WashData preporučuje",
+    "calibrated_label": "Kalibrirano",
+    "observed_label": "Izmjereno",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Manje ciklusa se automatski označava; više ih ide na pregled",
+        "lower": "Više ciklusa se automatski označava; neki mogu biti pogrešno identificirani"
+      },
+      "duration_tolerance": {
+        "higher": "Prihvaća širi raspon trajanja — fleksibilnije podudaranje",
+        "lower": "Zahtijeva bliže podudaranje trajanja — strože, ali može odbiti neobične cikluse"
+      },
+      "end_energy_threshold": {
+        "higher": "Zatvara samo cikluse sa značajnom potrošnjom energije",
+        "lower": "Zatvara i kraće ili manje energetske cikluse"
+      },
+      "end_repeat_count": {
+        "higher": "Zahtijeva više ponavljanja signala kraja — pouzdanije, malo sporije",
+        "lower": "Završava nakon manje ponavljanja — brže otkrivanje, veći rizik od lažnog kraja"
+      },
+      "learning_confidence": {
+        "higher": "Uči samo iz visoko pouzdanih podudaranja — sporije, ali pouzdanije",
+        "lower": "Uči iz više ciklusa; model može biti manje precizan"
+      },
+      "min_off_gap": {
+        "higher": "Potreban je duži odmor prije početka novog ciklusa",
+        "lower": "Kratki odmor pokreće novi ciklus — uzastopni ciklusi se mogu razdijeliti"
+      },
+      "min_power": {
+        "higher": "Manje osjetljiv na potrošnju u mirovanju; može propustiti tihe programe",
+        "lower": "Osjetljiviji; može bilježiti potrošnju u pripravnosti kao aktivnost"
+      },
+      "no_update_active_timeout": {
+        "higher": "Više vremena prije proglašavanja ciklusa zaglavljenim",
+        "lower": "Zaglavljeni ciklus se prisilno zaustavlja ranije"
+      },
+      "off_delay": {
+        "higher": "Više vremena za pauze uređaja — prikladno za duge faze namakanja ili sušenja",
+        "lower": "Brže otkrivanje kraja — dobro za uređaje s čistim uključivanjem/isključivanjem"
+      },
+      "profile_match_threshold": {
+        "higher": "Potvrđuje samo visoko pouzdana podudaranja; više ciklusa ostaje neoznačeno",
+        "lower": "Podudara više ciklusa; neki mogu biti blago pogrešni"
+      },
+      "running_dead_zone": {
+        "higher": "Zanemaruje kratke skokove snage u mirovanju — manje osjetljiv na šum",
+        "lower": "Reagira na kraće impulse snage — otkriva brzu prolaznu aktivnost"
+      },
+      "start_threshold_w": {
+        "higher": "Sprječava lažne startove od kratkih skokova snage",
+        "lower": "Otkriva programe s niskom snagom; može reagirati na šum"
+      },
+      "stop_threshold_w": {
+        "higher": "Završava ciklus brže — može zatvoriti za vrijeme pauze",
+        "lower": "Dulje čeka na završetak — manje prijevremenih završetaka"
+      },
+      "watchdog_interval": {
+        "higher": "Dopušta dulje tihe faze; manje lažnih prisilnih zaustavljanja",
+        "lower": "Zaglavljene cikluse otkriva agresivnije"
+      }
+    }
+  },
   "tab": {
     "advanced": "Napredno",
     "diagnostics": "Dijagnostika",

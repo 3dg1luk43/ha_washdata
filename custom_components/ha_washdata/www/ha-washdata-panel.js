@@ -608,6 +608,10 @@ const _CSS = `
   padding: 4px 8px; border-radius: 6px; font-size: .78em;
   background: rgba(255,152,0,.12); border: 1px solid rgba(255,152,0,.45);
 }
+.wd-sug.wd-sug-split { flex-direction: column; align-items: flex-start; gap: 4px; }
+.wd-sug-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.wd-sug-sep { opacity: .4; }
+.wd-sug-impact { font-size: .9em; opacity: .72; font-style: italic; }
 .wd-sug-use { border: none; background: var(--warning-color, #ff9800); color: #fff; border-radius: 4px; padding: 2px 8px; font-size: .92em; cursor: pointer; }
 .wd-conflict-err { display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
 .wd-conflict-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .8em; color: var(--error-color, #b71c1c); padding: 5px 9px; border-left: 3px solid var(--error-color, #b71c1c); background: rgba(183,28,28,.07); border-radius: 0 5px 5px 0; }
@@ -975,27 +979,52 @@ function _field(f, value, extra) {
   }
 
   // Suggestions: drop any recommendation that already equals the current value,
-  // and when BOTH a Classic and an ML recommendation remain, render them in a
-  // single shared pill (never two stacked pills). If they agree, collapse to one.
+  // and when BOTH an Observed (classic) and a Calibrated (ML) recommendation
+  // remain, render them in a single shared pill (never two stacked pills).
+  // When they agree within 5%, collapse to one "WashData recommends" label.
+  // When they diverge, show both with a per-setting one-liner explaining what
+  // choosing each value will actually do to the appliance's behaviour.
   const sug = extra.suggestion;
   const mlSug = extra.mlSuggestion;
   const classicVal = (sug && sug.suggested != null && !_sugSame(sug.suggested, value)) ? sug.suggested : null;
   const mlVal = (mlSug && mlSug.value != null && !_sugSame(mlSug.value, value)) ? mlSug.value : null;
+  const t = extra.t;
   const useBtn = (val) => `<button type="button" class="wd-sug-use" data-sugkey="${key}" data-sugval="${_esc(val)}">${extra.useBtnLabel || 'Use'}</button>`;
   let sugHtml = '';
-  if (classicVal != null && mlVal != null && _sugSame(classicVal, mlVal)) {
-    const reason = _tip([sug.reason, mlSug.reason ? `ML: ${mlSug.reason}` : ''].filter(Boolean).join('\n\n'));
-    sugHtml = `<div class="wd-sug"><span>💡🤖 Suggested: <b>${_esc(classicVal)}</b> <span style="opacity:.75">(Classic &amp; ML agree)</span></span>${useBtn(classicVal)}${reason}</div>`;
-  } else if (classicVal != null && mlVal != null) {
-    const cr = sug.reason ? _tip(sug.reason) : '';
-    const mr = mlSug.reason ? _tip(mlSug.reason) : '';
-    sugHtml = `<div class="wd-sug"><span>💡 Classic <b>${_esc(classicVal)}</b></span>${useBtn(classicVal)}${cr}<span style="opacity:.4">·</span><span>🤖 ML <b>${_esc(mlVal)}</b></span>${useBtn(mlVal)}${mr}</div>`;
+  if (classicVal != null && mlVal != null) {
+    const cN = parseFloat(classicVal), mN = parseFloat(mlVal);
+    const relDiff = (!isNaN(cN) && !isNaN(mN)) ? Math.abs(cN - mN) / Math.max(Math.abs(cN), Math.abs(mN), 1e-9) : 1;
+    if (relDiff < 0.05) {
+      // Both engines agree — collapse to one clear recommendation.
+      const calLbl = t('suggestion.calibrated_label', {}, 'Calibrated');
+      const reason = _tip([sug.reason, mlSug.reason ? `${calLbl}: ${mlSug.reason}` : ''].filter(Boolean).join('\n\n'));
+      sugHtml = `<div class="wd-sug"><span>💡 ${_esc(t('suggestion.both_agree', {}, 'WashData recommends'))}: <b>${_esc(classicVal)}</b></span>${useBtn(classicVal)}${reason}</div>`;
+    } else {
+      // Engines diverge — show both with a one-line tradeoff explanation.
+      const cr = sug.reason ? _tip(sug.reason) : '';
+      const mr = mlSug.reason ? _tip(mlSug.reason) : '';
+      const obsLbl = t('suggestion.observed_label', {}, 'Observed');
+      const calLbl = t('suggestion.calibrated_label', {}, 'Calibrated');
+      let impactHtml = '';
+      if (!isNaN(cN) && !isNaN(mN)) {
+        const calIsHigher = mN > cN;
+        const calImpact = t(`suggestion.impact.${key}.${calIsHigher ? 'higher' : 'lower'}`, {}, '');
+        const obsImpact = t(`suggestion.impact.${key}.${calIsHigher ? 'lower' : 'higher'}`, {}, '');
+        if (calImpact || obsImpact) {
+          const parts = [];
+          if (obsImpact) parts.push(`💡 ${_esc(obsImpact)}`);
+          if (calImpact) parts.push(`🤖 ${_esc(calImpact)}`);
+          impactHtml = `<div class="wd-sug-impact">${parts.join('  ·  ')}</div>`;
+        }
+      }
+      sugHtml = `<div class="wd-sug wd-sug-split"><div class="wd-sug-row"><span>💡 ${_esc(obsLbl)} <b>${_esc(classicVal)}</b></span>${useBtn(classicVal)}${cr}<span class="wd-sug-sep">·</span><span>🤖 ${_esc(calLbl)} <b>${_esc(mlVal)}</b></span>${useBtn(mlVal)}${mr}</div>${impactHtml}</div>`;
+    }
   } else if (classicVal != null) {
     const reason = sug.reason ? _tip(sug.reason) : '';
-    sugHtml = `<div class="wd-sug"><span>💡 Classic: <b>${_esc(classicVal)}</b>${value != null && value !== '' ? ` (now ${_esc(value)})` : ''}</span>${useBtn(classicVal)}${reason}</div>`;
+    sugHtml = `<div class="wd-sug"><span>💡 ${_esc(t('suggestion.observed_label', {}, 'Observed'))}: <b>${_esc(classicVal)}</b>${value != null && value !== '' ? ` (now ${_esc(value)})` : ''}</span>${useBtn(classicVal)}${reason}</div>`;
   } else if (mlVal != null) {
     const r = mlSug.reason ? _tip(mlSug.reason) : '';
-    sugHtml = `<div class="wd-sug"><span>🤖 ML: <b>${_esc(mlVal)}</b></span>${useBtn(mlVal)}${r}</div>`;
+    sugHtml = `<div class="wd-sug"><span>🤖 ${_esc(t('suggestion.calibrated_label', {}, 'Calibrated'))}: <b>${_esc(mlVal)}</b></span>${useBtn(mlVal)}${r}</div>`;
   }
 
   return `<div class="wd-field" data-field="${key}"><div class="wd-label-row"><label style="margin:0">${_esc(labelText)}</label>${tip}</div>${input}${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}<div class="wd-conflict-err" data-cerr="${key}" hidden></div>${sugHtml}</div>`;
@@ -1241,6 +1270,7 @@ class HaWashdataPanel extends HTMLElement {
     this._statusEnvName = null;
     this._powerData = { live: [], raw: [], cycle_active: false, cycle_elapsed_s: 0 };
     this._stagedSuggestions = false;   // a suggestion was applied to a field this session
+    this._pendingSettings = {};        // unsaved edits accumulated across section switches
     this._busy = new Set();            // in-flight long operations (drives spinners)
     this._panelCfg = null;             // panel settings + RBAC + current-user info
     this._panelTrans = null;           // loaded from /ha_washdata/panel-translations.json
@@ -1531,6 +1561,7 @@ class HaWashdataPanel extends HTMLElement {
   async _selectDevice(idx) {
     if (idx === this._selIdx) return;
     this._selIdx = idx;
+    this._pendingSettings = {};
     this._powerHistory = []; this._powerT0 = null; this._statusEnv = null; this._statusEnvName = null;
     this._powerData = { live: [], raw: [], cycle_active: false, cycle_elapsed_s: 0 };
     this._matchDebug = null;
@@ -2448,7 +2479,7 @@ class HaWashdataPanel extends HTMLElement {
   // ── Settings tab ──────────────────────────────────────────────────────────
 
   _htmlSettings() {
-    const o = this._opts;
+    const o = Object.assign({}, this._opts, this._pendingSettings);
     if (!Object.keys(o).length)
       return `<div class="wd-empty"><div class="wd-icon">⚙️</div>${this._t('msg.loading_settings', {}, 'Loading settings…')}</div>`;
 
@@ -4169,8 +4200,8 @@ class HaWashdataPanel extends HTMLElement {
 
     sr.querySelectorAll('.wd-devcard[data-idx]').forEach(btn => btn.addEventListener('click', () => this._selectDevice(parseInt(btn.dataset.idx, 10))));
 
-    sr.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => { this._tab = btn.dataset.tab; this._fetchTabData(); }));
-    sr.querySelectorAll('[data-sec]').forEach(btn => btn.addEventListener('click', () => { this._settingsSec = btn.dataset.sec; this._settingsSearch = ''; this._settingsSugOnly = false; this._render(); }));
+    sr.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => { if (btn.dataset.tab !== 'settings') this._pendingSettings = {}; this._tab = btn.dataset.tab; this._fetchTabData(); }));
+    sr.querySelectorAll('[data-sec]').forEach(btn => btn.addEventListener('click', () => { this._snapshotFormToPending(sr); this._settingsSec = btn.dataset.sec; this._settingsSearch = ''; this._settingsSugOnly = false; this._render(); }));
     sr.querySelectorAll('[data-ptab]').forEach(btn => btn.addEventListener('click', () => {
       const sub = this._panelSubtab = btn.dataset.ptab;
       this._render();
@@ -4563,6 +4594,7 @@ class HaWashdataPanel extends HTMLElement {
           this._opts = {...snap};
           this._prevOpts = null;
           this._cascadePending = {};
+          this._pendingSettings = {};
           this._showToast(this._t('toast.settings_reverted', {}, 'Settings reverted; integration reloading'));
           this._render();
         } catch (e) { this._showToast('Revert failed: ' + (e.message || e), 'error'); }
@@ -4574,6 +4606,7 @@ class HaWashdataPanel extends HTMLElement {
       if (dev) {
         this._prevOpts = null;
         this._cascadePending = {};
+        this._pendingSettings = {};
         const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: dev.entry_id });
         this._opts = r.options || {};
         await this._fetchSuggestions(dev.entry_id);
@@ -5483,9 +5516,43 @@ class HaWashdataPanel extends HTMLElement {
   // Runs all conflict rules against this._opts (no DOM required).
   // Returns a Set of setting keys that have at least one active conflict.
   // Used by the Overview attention card, the tab-bar indicator, and the Settings
+  // Capture current form values into this._pendingSettings before a section
+  // switch so edits survive re-renders (mirrors the read logic in _saveSettings).
+  _snapshotFormToPending(sr) {
+    if (!sr) return;
+    sr.querySelectorAll('#wd-settings-form [data-opt]').forEach(el => {
+      const key = el.dataset.opt;
+      const f = _FIELD_BY_KEY[key];
+      const ftype = (f && f.type) || el.dataset.ftype || 'text';
+      if (el.type === 'checkbox') { this._pendingSettings[key] = el.checked; return; }
+      if (ftype === 'entitylist') {
+        this._pendingSettings[key] = Array.from(el.querySelectorAll('.wd-pill')).map(p => p.dataset.val).filter(Boolean);
+        return;
+      }
+      if (ftype === 'timerlist') {
+        this._pendingSettings[key] = Array.from(el.querySelectorAll('.wd-timer-row')).map(row => ({
+          offset_minutes: parseFloat(row.querySelector('[data-field="offset_minutes"]').value) || 0,
+          message: (row.querySelector('[data-field="message"]').value || '').trim(),
+          auto_pause: row.querySelector('[data-field="auto_pause"]').checked,
+        })).filter(t => t.offset_minutes > 0);
+        return;
+      }
+      if (ftype === 'number') { const n = parseFloat(el.value); if (!isNaN(n)) this._pendingSettings[key] = n; return; }
+      if (ftype === 'list') { this._pendingSettings[key] = String(el.value).split(',').map(s => s.trim()).filter(Boolean); return; }
+      if (ftype === 'json') {
+        const t = String(el.value).trim();
+        if (!t) { this._pendingSettings[key] = []; return; }
+        try { this._pendingSettings[key] = JSON.parse(t); } catch (_) { /* leave previous value */ }
+        return;
+      }
+      if (ftype === 'entity' || ftype === 'device') { const t = String(el.value).trim(); this._pendingSettings[key] = t ? t : null; return; }
+      this._pendingSettings[key] = el.value;
+    });
+  }
+
   // section-pill dots to surface saved-settings conflicts without needing the form.
   _conflictKeysFromOpts() {
-    const vals = Object.assign({}, this._opts);
+    const vals = Object.assign({}, this._opts, this._pendingSettings);
     const keys = new Set();
     for (const rule of _SETTING_CONFLICTS) {
       if (!rule.check(vals)) continue;
@@ -5497,7 +5564,7 @@ class HaWashdataPanel extends HTMLElement {
   // Collect current numeric form values from DOM, falling back to saved opts for
   // fields not rendered in the current section (cross-section conflicts).
   _readSettingsFormValues(sr) {
-    const vals = Object.assign({}, this._opts);
+    const vals = Object.assign({}, this._opts, this._pendingSettings);
     if (!sr) return vals;
     sr.querySelectorAll('#wd-settings-form [data-opt]').forEach(el => {
       const key = el.dataset.opt;
@@ -5613,8 +5680,9 @@ class HaWashdataPanel extends HTMLElement {
     const dev = this._devices[this._selIdx];
     if (!dev) return;
 
-    // Start with any off-screen cascade fixes; DOM values will override them below.
-    const updates = Object.assign({}, this._cascadePending);
+    // Start with off-screen pending edits (section switches) and cascade fixes;
+    // DOM values (current section) will override both below.
+    const updates = Object.assign({}, this._pendingSettings, this._cascadePending);
     this._invalidJson = null;
     sr.querySelectorAll('[data-opt]').forEach(el => {
       const key = el.dataset.opt;
@@ -5664,6 +5732,7 @@ class HaWashdataPanel extends HTMLElement {
         this._opts = { ...this._opts, ...updates };
         this._prevOpts = prevSnap;
         this._cascadePending = {};
+        this._pendingSettings = {};
         if (this._stagedSuggestions) {
           try { await this._ws({ type: `${_DOMAIN}/clear_suggestions`, entry_id: dev.entry_id }); } catch (_) { /* non-fatal */ }
           this._stagedSuggestions = false; this._suggestions = [];

@@ -986,6 +986,69 @@
     "suggestions_applied": "Ieteikumi piemēroti; integrācijas pārlādēšana",
     "suggestions_dismissed": "Ieteikumi noraidīti"
   },
+  "suggestion": {
+    "both_agree": "WashData iesaka",
+    "calibrated_label": "Kalibrēts",
+    "observed_label": "Novērotais",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Automātiski iezīmē mazāk ciklu; vairāk nonāk pārskatīšanā",
+        "lower": "Automātiski iezīmē vairāk ciklu; daži var tikt nepareizi identificēti"
+      },
+      "duration_tolerance": {
+        "higher": "Pieņem plašāku ilguma diapazonu — elastīgāka atbilstības noteikšana",
+        "lower": "Prasa precīzāku ilguma atbilstību — stingrāks, bet var noraidīt neparastus ciklus"
+      },
+      "end_energy_threshold": {
+        "higher": "Aizver tikai ciklus, kas patērēja ievērojamu enerģiju",
+        "lower": "Aizver arī īsākus vai zemas enerģijas ciklus"
+      },
+      "end_repeat_count": {
+        "higher": "Prasa beigu signālu atkārtot vairāk reižu — uzticamāks, nedaudz lēnāks",
+        "lower": "Beidz pēc mazākiem atkārtojumiem — ātrāka atklāšana, lielāks viltus beigu risks"
+      },
+      "learning_confidence": {
+        "higher": "Mācās tikai no ļoti pārliecinošām atbilstībām — lēnāks, bet uzticamāks",
+        "lower": "Mācās no vairākiem cikliem; modelis var būt trokšņaināks"
+      },
+      "min_off_gap": {
+        "higher": "Pirms jauna cikla nepieciešams ilgāks dīkstāves periods",
+        "lower": "Īsa dīkstāve aktivizē jaunu ciklu — secīgas palaišanas var sadalīties"
+      },
+      "min_power": {
+        "higher": "Mazāk jutīgs pret dīkstāves jaudas patēriņu; var palaist garām klusus režīmus",
+        "lower": "Jutīgāks; var reģistrēt gaidīšanas jaudas patēriņu kā darbību"
+      },
+      "no_update_active_timeout": {
+        "higher": "Vairāk laika pirms cikla atzīšanas par iestrēgušu",
+        "lower": "Piespiedu kārtā aptur iestrēgušu ciklu ātrāk"
+      },
+      "off_delay": {
+        "higher": "Vairāk laika ierīces pauzēm — apstrādā ilgu mērcēšanu vai žāvēšanu",
+        "lower": "Ātrāka beigu atklāšana — labi darbojas skaidrām ieslēgt/izslēgt ierīcēm"
+      },
+      "profile_match_threshold": {
+        "higher": "Apstiprina tikai augstas pārliecības atbilstības; vairāk ciklu paliek bez iezīmes",
+        "lower": "Atbilst vairākiem cikliem; daži var būt nedaudz nepareizi"
+      },
+      "running_dead_zone": {
+        "higher": "Ignorē īsus jaudas pieauguma momentus dīkstāvē — mazāk jutīgs pret troksni",
+        "lower": "Reaģē uz īsākiem jaudas uzliesmojumiem — uztver ātru pārejošu aktivitāti"
+      },
+      "start_threshold_w": {
+        "higher": "Novērš viltus palaišanas no īslaicīgiem jaudas pieaugumiem",
+        "lower": "Uztver mazjaudas programmas; var reaģēt uz troksni"
+      },
+      "stop_threshold_w": {
+        "higher": "Beidz ciklu ātrāk — var aizvērt pauzes laikā",
+        "lower": "Gaida ilgāk līdz beigām — mazāk priekšlaicīgu pabeigšanu"
+      },
+      "watchdog_interval": {
+        "higher": "Atļautas garākas klusas fāzes; mazāk viltus piespiedu apstāšanās",
+        "lower": "Agresīvāk uztver iestrēgušos ciklus"
+      }
+    }
+  },
   "trend": {
     "down": "Tendences uz leju",
     "up": "Tendences uz augšu"

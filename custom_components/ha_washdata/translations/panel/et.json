@@ -986,6 +986,69 @@
     "suggestions_applied": "Soovitused rakendatud; integratsiooni uuesti laadimine",
     "suggestions_dismissed": "Soovitused lükati tagasi"
   },
+  "suggestion": {
+    "both_agree": "WashData soovitab",
+    "calibrated_label": "Kalibreeritud",
+    "observed_label": "Mõõdetud",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Märgistab automaatselt vähem tsükleid; rohkem suunatakse ülevaatusele",
+        "lower": "Märgistab automaatselt rohkem tsükleid; mõnda võidakse valesti tuvastada"
+      },
+      "duration_tolerance": {
+        "higher": "Aktsepteerib laiemat kestuse vahemikku — paindlikum sobitamine",
+        "lower": "Nõuab täpsemat kestuse vastavust — rangem, kuid võib lükata tagasi ebatavalisi tsükleid"
+      },
+      "end_energy_threshold": {
+        "higher": "Sulgeb ainult tsüklid, mis kasutasid olulisel määral energiat",
+        "lower": "Sulgeb ka lühemad või madalama energiatarbe tsüklid"
+      },
+      "end_repeat_count": {
+        "higher": "Nõuab lõpusignaali kordamist rohkem kordi — usaldusväärsem, pisut aeglasem",
+        "lower": "Lõpetab pärast vähemat kordust — kiirem tuvastamine, suurem vale lõpu oht"
+      },
+      "learning_confidence": {
+        "higher": "Õpib ainult väga kindlatest vastetest — aeglasem, kuid usaldusväärsem",
+        "lower": "Õpib rohkematest tsüklitest; mudel võib olla müraram"
+      },
+      "min_off_gap": {
+        "higher": "Enne uue tsükli algust on vajalik pikem tegevusetus",
+        "lower": "Lühike tegevusetus käivitab uue tsükli — järjestikused käivitused võivad jaguneda"
+      },
+      "min_power": {
+        "higher": "Vähem tundlik ooterežiimi tarbimise suhtes; võib vahele jätta vaikse töörežiimi",
+        "lower": "Tundlikum; võib logida ooterežiimi tarbimise tegevusena"
+      },
+      "no_update_active_timeout": {
+        "higher": "Rohkem aega enne tsükli kinni jäänuks kuulutamist",
+        "lower": "Jõudab kinni jäänud tsükli sundpeatamise kiiremini"
+      },
+      "off_delay": {
+        "higher": "Rohkem aega seadme paussideks — käsitleb pikka leotamist või kuivatamist",
+        "lower": "Kiirem lõpu tuvastamine — sobib hästi selge sisse/välja seadmetele"
+      },
+      "profile_match_threshold": {
+        "higher": "Kinnitab ainult suure kindlusega vasteid; rohkem tsükleid jääb märgistamata",
+        "lower": "Sobib rohkema tsükliga; mõnda võib olla veidi vale"
+      },
+      "running_dead_zone": {
+        "higher": "Ignoreerib lühikesi voolutõuse jõudeolekus — vähem müra suhtes tundlik",
+        "lower": "Reageerib lühematele energiapursetele — tabab kiiret mööduvat aktiivsust"
+      },
+      "start_threshold_w": {
+        "higher": "Väldib lühikestest energiatõusudest tulenevaid valesid käivitusi",
+        "lower": "Tabab madalvõimsusega programmid; võib käivituda müra peale"
+      },
+      "stop_threshold_w": {
+        "higher": "Lõpetab tsükli kiiremini — võib sulgeda pausi ajal",
+        "lower": "Ootab lõpetamisega kauem — vähem enneaegseid lõpetusi"
+      },
+      "watchdog_interval": {
+        "higher": "Lubatud pikemad vaiksed faasid; vähem valesid sundpeatusi",
+        "lower": "Tuvastab kinni jäänud tsükleid agressiivsemalt"
+      }
+    }
+  },
   "trend": {
     "down": "Trend langeb",
     "up": "Tõusev trend"

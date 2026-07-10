@@ -911,6 +911,69 @@
     "recording": "Opnemen",
     "training": "Trainen…"
   },
+  "suggestion": {
+    "both_agree": "WashData raadt aan",
+    "calibrated_label": "Gekalibreerd",
+    "observed_label": "Gemeten",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Minder automatische labels – meer cycli gaan naar beoordeling",
+        "lower": "Meer automatische labels – sommige kunnen onjuist zijn"
+      },
+      "duration_tolerance": {
+        "higher": "Accepteert een bredere duurtolerantie – flexibelere herkenning",
+        "lower": "Vereist nauwkeurigere duurovereenkomst – strenger, maar kan ongewone cycli weigeren"
+      },
+      "end_energy_threshold": {
+        "higher": "Sluit alleen cycli af met aanzienlijk energieverbruik",
+        "lower": "Sluit ook kortere of energiearme cycli af"
+      },
+      "end_repeat_count": {
+        "higher": "Eindsignaal moet vaker herhalen – robuuster, iets langzamer",
+        "lower": "Stopt na minder herhalingen – snellere detectie, meer kans op vals einde"
+      },
+      "learning_confidence": {
+        "higher": "Leert alleen van zeer zekere overeenkomsten – langzamer maar betrouwbaarder",
+        "lower": "Leert van meer cycli – model kan minder nauwkeurig worden"
+      },
+      "min_off_gap": {
+        "higher": "Langere pauze vereist voordat een nieuwe cyclus begint",
+        "lower": "Korte pauze volstaat – opeenvolgende runs kunnen worden gesplitst"
+      },
+      "min_power": {
+        "higher": "Minder gevoelig voor standby-verbruik – zeer stille programma's kunnen worden gemist",
+        "lower": "Gevoeliger – standby-verbruik kan als activiteit worden herkend"
+      },
+      "no_update_active_timeout": {
+        "higher": "Meer tijd voordat een vastgelopen cyclus wordt gedwongen gestopt",
+        "lower": "Stopt een vastgelopen cyclus eerder"
+      },
+      "off_delay": {
+        "higher": "Meer tijd voor apparaatpauzes – lange week- of droogfasen worden overbrugd",
+        "lower": "Snellere einddetectie – ideaal voor apparaten met duidelijk aan/uit-gedrag"
+      },
+      "profile_match_threshold": {
+        "higher": "Alleen zeer zekere overeenkomsten worden bevestigd – meer cycli blijven ongelabeld",
+        "lower": "Meer cycli worden gekoppeld – sommige kunnen licht onjuist zijn"
+      },
+      "running_dead_zone": {
+        "higher": "Korte vermogenspieken tijdens stilstand worden genegeerd – minder ruisgevoelig",
+        "lower": "Reageert op kortere vermogensimpulsen – detecteert snelle transiënten"
+      },
+      "start_threshold_w": {
+        "higher": "Voorkomt valse starts door korte vermogenspieken",
+        "lower": "Herkent programma's met laag vermogen – kan op ruis reageren"
+      },
+      "stop_threshold_w": {
+        "higher": "Beëindigt cycli sneller – kan tijdens een pauze activeren",
+        "lower": "Wacht langer met stoppen – minder voortijdige afsluitingen"
+      },
+      "watchdog_interval": {
+        "higher": "Langere stille fasen toegestaan – minder onbedoelde gedwongen stops",
+        "lower": "Detecteert vastgelopen cycli sneller"
+      }
+    }
+  },
   "tab": {
     "advanced": "Geavanceerd",
     "diagnostics": "Diagnostiek",

@@ -987,6 +987,69 @@
       "suggestions_applied": "Suggestions applied; integration reloading",
       "suggestions_dismissed": "Suggestions dismissed"
     },
+    "suggestion": {
+      "both_agree": "WashData recommends",
+      "calibrated_label": "Calibrated",
+      "observed_label": "Observed",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Labels fewer cycles automatically; more go to review",
+          "lower": "Labels more cycles automatically; some may be misidentified"
+        },
+        "duration_tolerance": {
+          "higher": "Accepts a wider duration range — more flexible matching",
+          "lower": "Requires closer duration match — stricter but may reject unusual cycles"
+        },
+        "end_energy_threshold": {
+          "higher": "Closes only cycles that used substantial energy",
+          "lower": "Closes shorter or lower-energy cycles too"
+        },
+        "end_repeat_count": {
+          "higher": "Requires the end signal to repeat more times — more robust, slightly slower",
+          "lower": "Ends after fewer repetitions — faster detection, more false-end risk"
+        },
+        "learning_confidence": {
+          "higher": "Learns only from very confident matches — slower but more reliable",
+          "lower": "Learns from more cycles; model may be noisier"
+        },
+        "min_off_gap": {
+          "higher": "Longer idle needed before a new cycle starts",
+          "lower": "Brief idle triggers a new cycle — back-to-back runs may split"
+        },
+        "min_power": {
+          "higher": "Less sensitive to idle power draw; may miss very quiet programs",
+          "lower": "More sensitive; may log standby power as activity"
+        },
+        "no_update_active_timeout": {
+          "higher": "More time before declaring a cycle stuck",
+          "lower": "Force-stops a stuck cycle sooner"
+        },
+        "off_delay": {
+          "higher": "More time for appliance pauses — handles long soak or drying phases",
+          "lower": "Faster end detection — works well for clean on/off appliances"
+        },
+        "profile_match_threshold": {
+          "higher": "Commits only high-confidence matches; more cycles stay unlabelled",
+          "lower": "Matches more cycles; some may be slightly wrong"
+        },
+        "running_dead_zone": {
+          "higher": "Ignores brief power spikes during idle — less noise-sensitive",
+          "lower": "Responds to shorter power bursts — catches fast transient activity"
+        },
+        "start_threshold_w": {
+          "higher": "Avoids false starts from brief power spikes",
+          "lower": "Catches low-power programs; may trigger on noise"
+        },
+        "stop_threshold_w": {
+          "higher": "Ends cycle faster — may close during a pause",
+          "lower": "Waits longer to end — fewer premature completions"
+        },
+        "watchdog_interval": {
+          "higher": "Longer quiet phases allowed; fewer false force-stops",
+          "lower": "Catches stuck cycles more aggressively"
+        }
+      }
+    },
     "trend": {
       "down": "Trending down",
       "up": "Trending up"
@@ -1980,6 +2043,69 @@
       "suggestions_applied": "Приложени предложения; презареждане на интеграцията",
       "suggestions_dismissed": "Предложенията са отхвърлени"
     },
+    "suggestion": {
+      "both_agree": "WashData препоръчва",
+      "calibrated_label": "Калибрирано",
+      "observed_label": "Наблюдавано",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Означава по-малко цикли автоматично; повече отиват за преглед",
+          "lower": "Означава повече цикли автоматично; някои може да са грешно идентифицирани"
+        },
+        "duration_tolerance": {
+          "higher": "Приема по-широк диапазон на продължителност — по-гъвкаво съвпадение",
+          "lower": "Изисква по-точно съвпадение на продължителността — по-строго, но може да отхвърли необичайни цикли"
+        },
+        "end_energy_threshold": {
+          "higher": "Затваря само цикли, използвали значителна енергия",
+          "lower": "Затваря и по-кратки или по-малко енергийни цикли"
+        },
+        "end_repeat_count": {
+          "higher": "Изисква сигналът за край да се повтори повече пъти — по-надеждно, малко по-бавно",
+          "lower": "Завършва след по-малко повторения — по-бързо откриване, по-висок риск от фалшиво завършване"
+        },
+        "learning_confidence": {
+          "higher": "Учи само от много уверени съвпадения — по-бавно, но по-надеждно",
+          "lower": "Учи от повече цикли; моделът може да е по-зашумен"
+        },
+        "min_off_gap": {
+          "higher": "Необходим е по-дълъг период на неактивност преди нов цикъл",
+          "lower": "Кратък период на неактивност стартира нов цикъл — последователните работи може да се разделят"
+        },
+        "min_power": {
+          "higher": "По-малко чувствителен към фоновата консумация; може да пропусне тихи програми",
+          "lower": "По-чувствителен; може да регистрира консумацията в режим на готовност като активност"
+        },
+        "no_update_active_timeout": {
+          "higher": "Повече време преди деклариране на заседнал цикъл",
+          "lower": "По-бързо принудително спиране на заседнал цикъл"
+        },
+        "off_delay": {
+          "higher": "Повече време за паузи на уреда — справя се с дълги накисвания или сушене",
+          "lower": "По-бързо засичане на края — подходящо за уреди с ясно вкл./изкл."
+        },
+        "profile_match_threshold": {
+          "higher": "Потвърждава само съвпадения с висока увереност; повече цикли остават без етикет",
+          "lower": "Съпоставя повече цикли; някои може да са леко грешни"
+        },
+        "running_dead_zone": {
+          "higher": "Игнорира кратките скокове на мощност в режим на готовност — по-малко чувствителен към шум",
+          "lower": "Реагира на по-кратки изблици на мощност — улавя бързи преходни активности"
+        },
+        "start_threshold_w": {
+          "higher": "Избягва фалшиви стартове от кратковременни скокове на мощност",
+          "lower": "Улавя програми с ниска мощност; може да се задейства от смущения"
+        },
+        "stop_threshold_w": {
+          "higher": "Завършва цикъла по-бързо — може да затвори при пауза",
+          "lower": "Изчаква по-дълго за завършване — по-малко преждевременни завършвания"
+        },
+        "watchdog_interval": {
+          "higher": "Разрешени по-дълги тихи фази; по-малко фалшиви принудни спирания",
+          "lower": "По-агресивно улавя заседнали цикли"
+        }
+      }
+    },
     "trend": {
       "down": "Тенденция надолу",
       "up": "Нарастваща тенденция"
@@ -2897,6 +3023,69 @@
       "ready": "Spreman za obradu",
       "recording": "Snimanje",
       "training": "Treniranje…"
+    },
+    "suggestion": {
+      "both_agree": "WashData preporučuje",
+      "calibrated_label": "Kalibrisano",
+      "observed_label": "Izmjereno",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Manje ciklusa se automatski označava; više ih odlazi na pregled",
+          "lower": "Više ciklusa se automatski označava; neki mogu biti pogrešno identificirani"
+        },
+        "duration_tolerance": {
+          "higher": "Prihvata širi raspon trajanja — fleksibilnije podudaranje",
+          "lower": "Zahtijeva bliže podudaranje trajanja — strože, ali može odbiti neobične cikluse"
+        },
+        "end_energy_threshold": {
+          "higher": "Zatvara samo cikluse sa značajnom potrošnjom energije",
+          "lower": "Zatvara i kraće ili manje energetske cikluse"
+        },
+        "end_repeat_count": {
+          "higher": "Zahtijeva više ponavljanja signala kraja — pouzdanije, malo sporije",
+          "lower": "Završava nakon manje ponavljanja — brže otkrivanje, veći rizik lažnog završetka"
+        },
+        "learning_confidence": {
+          "higher": "Uči samo iz visoko pouzdanih podudaranja — sporije, ali pouzdanije",
+          "lower": "Uči iz više ciklusa; model može biti manje precizan"
+        },
+        "min_off_gap": {
+          "higher": "Potreban je duži odmor prije početka novog ciklusa",
+          "lower": "Kratak odmor pokreće novi ciklus — uzastopni ciklusi se mogu razdijeliti"
+        },
+        "min_power": {
+          "higher": "Manje osjetljiv na potrošnju u mirovanju; može propustiti tihe programe",
+          "lower": "Osjetljiviji; može bilježiti potrošnju u stanju pripravnosti kao aktivnost"
+        },
+        "no_update_active_timeout": {
+          "higher": "Više vremena prije proglašenja ciklusa zaglavljenim",
+          "lower": "Zaglavljeni ciklus se prisilno zaustavlja ranije"
+        },
+        "off_delay": {
+          "higher": "Više vremena za pauze uređaja — prikladno za duge faze namakanja ili sušenja",
+          "lower": "Brže otkrivanje kraja — dobro za uređaje s čistim uključivanjem/isključivanjem"
+        },
+        "profile_match_threshold": {
+          "higher": "Potvrđuje samo visoko pouzdana podudaranja; više ciklusa ostaje neoznačeno",
+          "lower": "Podudara više ciklusa; neki mogu biti blago pogrešni"
+        },
+        "running_dead_zone": {
+          "higher": "Zanemaruje kratke skokove snage tokom mirovanja — manje osjetljiv na šum",
+          "lower": "Reagira na kraće impulse snage — otkriva brzu prolaznu aktivnost"
+        },
+        "start_threshold_w": {
+          "higher": "Sprečava lažne startove od kratkih skokova snage",
+          "lower": "Otkriva programe s niskom snagom; može reagirati na šum"
+        },
+        "stop_threshold_w": {
+          "higher": "Završava ciklus brže — može zatvoriti tokom pauze",
+          "lower": "Dulje čeka na završetak — manje prijevremenih završetaka"
+        },
+        "watchdog_interval": {
+          "higher": "Dopušta dulje tihe faze; manje lažnih prisilnih zaustavljanja",
+          "lower": "Zaglavljene cikluse otkriva agresivnije"
+        }
+      }
     },
     "tab": {
       "advanced": "Napredno",
@@ -3891,6 +4080,69 @@
       "recording": "Nahrávání",
       "training": "Trénování…"
     },
+    "suggestion": {
+      "both_agree": "WashData doporučuje",
+      "calibrated_label": "Kalibrováno",
+      "observed_label": "Naměřeno",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Méně cyklů je označeno automaticky; více jich jde k revizi",
+          "lower": "Více cyklů je označeno automaticky; některé mohou být nesprávně určeny"
+        },
+        "duration_tolerance": {
+          "higher": "Přijímá širší rozsah délky — flexibilnější shoda",
+          "lower": "Vyžaduje bližší shodu délky — přísnější, ale může odmítnout neobvyklé cykly"
+        },
+        "end_energy_threshold": {
+          "higher": "Uzavírá pouze cykly se značnou spotřebou energie",
+          "lower": "Uzavírá i kratší nebo méně energetické cykly"
+        },
+        "end_repeat_count": {
+          "higher": "Vyžaduje více opakování signálu konce — spolehlivější, mírně pomalejší",
+          "lower": "Ukončí po méně opakováních — rychlejší detekce, větší riziko předčasného ukončení"
+        },
+        "learning_confidence": {
+          "higher": "Učí se pouze z velmi jistých shod — pomalejší, ale spolehlivější",
+          "lower": "Učí se z více cyklů; model může být méně přesný"
+        },
+        "min_off_gap": {
+          "higher": "Potřebuje delší klid před začátkem nového cyklu",
+          "lower": "Krátký klid spustí nový cyklus — cykly za sebou se mohou rozdělit"
+        },
+        "min_power": {
+          "higher": "Méně citlivý na klidový příkon; může přehlédnout velmi tichý program",
+          "lower": "Citlivější; může zaznamenat klidový příkon jako aktivitu"
+        },
+        "no_update_active_timeout": {
+          "higher": "Více času před prohlášením cyklu za zaseklý",
+          "lower": "Zaseklý cyklus je ukončen dříve"
+        },
+        "off_delay": {
+          "higher": "Více času pro pauzy spotřebiče — vhodné pro dlouhé máchání nebo sušení",
+          "lower": "Rychlejší detekce konce — vhodné pro spotřebiče s čistým zapínáním/vypínáním"
+        },
+        "profile_match_threshold": {
+          "higher": "Potvrzuje pouze vysoce jisté shody; více cyklů zůstane neoznačených",
+          "lower": "Páruje více cyklů; některé mohou být mírně nesprávné"
+        },
+        "running_dead_zone": {
+          "higher": "Ignoruje krátké výkonové špičky během klidu — méně citlivý na šum",
+          "lower": "Reaguje na kratší výkonové impulzy — zachytí rychlou přechodnou aktivitu"
+        },
+        "start_threshold_w": {
+          "higher": "Zabraňuje falešným startům z krátkých výkonových špiček",
+          "lower": "Zachytí programy s nízkým příkonem; může reagovat na rušení"
+        },
+        "stop_threshold_w": {
+          "higher": "Ukončí cyklus rychleji — může uzavřít v průběhu pauzy",
+          "lower": "Čeká déle na ukončení — méně předčasných dokončení"
+        },
+        "watchdog_interval": {
+          "higher": "Povoluje delší tichá úseky; méně falešných vynucených ukončení",
+          "lower": "Zaseklé cykly jsou detekovány agresivněji"
+        }
+      }
+    },
     "tab": {
       "advanced": "Pokročilé",
       "diagnostics": "Diagnostika",
@@ -4884,6 +5136,69 @@
       "recording": "Optager",
       "training": "Træner…"
     },
+    "suggestion": {
+      "both_agree": "WashData anbefaler",
+      "calibrated_label": "Kalibreret",
+      "observed_label": "Observeret",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Færre automatiske mærker – flere cyklusser sendes til gennemgang",
+          "lower": "Flere automatiske mærker – nogle kan være forkerte"
+        },
+        "duration_tolerance": {
+          "higher": "Accepterer et bredere varighedsinterval – mere fleksibel genkendelse",
+          "lower": "Kræver tættere varighedsmatch – strengere, men kan afvise usædvanlige cyklusser"
+        },
+        "end_energy_threshold": {
+          "higher": "Afslutter kun cyklusser med væsentligt energiforbrug",
+          "lower": "Afslutter også kortere eller lavenergi-cyklusser"
+        },
+        "end_repeat_count": {
+          "higher": "Slutsignal skal gentages flere gange – mere robust, lidt langsommere",
+          "lower": "Slutter efter færre gentagelser – hurtigere detektering, mere risiko for falsk afslutning"
+        },
+        "learning_confidence": {
+          "higher": "Lærer kun fra meget sikre matches – langsommere men mere pålidelig",
+          "lower": "Lærer fra flere cyklusser – modellen kan blive mere upræcis"
+        },
+        "min_off_gap": {
+          "higher": "Længere pause krævet, inden ny cyklus begynder",
+          "lower": "Kort pause er nok – successive kørsler kan adskilles"
+        },
+        "min_power": {
+          "higher": "Mindre følsom over for standby-forbrug – meget stille programmer kan overses",
+          "lower": "Mere følsom – standby-forbrug kan opfattes som aktivitet"
+        },
+        "no_update_active_timeout": {
+          "higher": "Mere tid, inden en fastlåst cyklus tvinges stoppet",
+          "lower": "Tvangsstopper en fastlåst cyklus hurtigere"
+        },
+        "off_delay": {
+          "higher": "Mere tid til apparatpauser – lange iblødsætnings- eller tørrefaser overbrygges",
+          "lower": "Hurtigere slutdetektering – velegnet til apparater med klart til/fra-adfærd"
+        },
+        "profile_match_threshold": {
+          "higher": "Kun meget sikre matches bekræftes – flere cyklusser forbliver umærkede",
+          "lower": "Flere cyklusser matches – nogle kan være lidt forkerte"
+        },
+        "running_dead_zone": {
+          "higher": "Korte effekttoppe i tomgang ignoreres – mindre støjfølsom",
+          "lower": "Reagerer på kortere effektimpulser – opfanger hurtige transienter"
+        },
+        "start_threshold_w": {
+          "higher": "Undgår falske starter fra korte effekttoppe",
+          "lower": "Opfanger laveffektsprogrammer – kan aktiveres af støj"
+        },
+        "stop_threshold_w": {
+          "higher": "Afslutter cyklus hurtigere – kan aktiveres under en pause",
+          "lower": "Venter længere med at afslutte – færre for tidlige afslutninger"
+        },
+        "watchdog_interval": {
+          "higher": "Længere stille faser tillades – færre utilsigtede tvangsstop",
+          "lower": "Detekterer fastlåste cyklusser hurtigere"
+        }
+      }
+    },
     "tab": {
       "advanced": "Fremskreden",
       "diagnostics": "Diagnostik",
@@ -5876,6 +6191,69 @@
       "ready": "Bereit zur Verarbeitung",
       "recording": "Aufzeichnung",
       "training": "Training…"
+    },
+    "suggestion": {
+      "both_agree": "WashData empfiehlt",
+      "calibrated_label": "Kalibriert",
+      "observed_label": "Gemessen",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Weniger automatische Beschriftungen – mehr Zyklen kommen zur Überprüfung",
+          "lower": "Mehr automatische Beschriftungen – einzelne könnten falsch zugeordnet sein"
+        },
+        "duration_tolerance": {
+          "higher": "Akzeptiert einen größeren Dauerkorridor – flexiblere Erkennung",
+          "lower": "Erfordert engere Dauerübereinstimmung – strenger, kann ungewöhnliche Zyklen ablehnen"
+        },
+        "end_energy_threshold": {
+          "higher": "Beendet nur Zyklen mit wesentlichem Energieverbrauch",
+          "lower": "Beendet auch kürzere oder energieärmere Zyklen"
+        },
+        "end_repeat_count": {
+          "higher": "Endmeldung muss sich öfter wiederholen – robuster, minimal langsamer",
+          "lower": "Endet nach weniger Wiederholungen – schnellere Erkennung, höheres Fehlendrisiko"
+        },
+        "learning_confidence": {
+          "higher": "Lernt nur aus sehr sicheren Übereinstimmungen – langsamer, aber zuverlässiger",
+          "lower": "Lernt aus mehr Zyklen – Modell kann ungenauer werden"
+        },
+        "min_off_gap": {
+          "higher": "Längere Pause erforderlich, bevor ein neuer Zyklus beginnt",
+          "lower": "Kurze Pause reicht für einen neuen Zyklus – aufeinanderfolgende Läufe können getrennt werden"
+        },
+        "min_power": {
+          "higher": "Weniger empfindlich für Standby-Leistung – sehr leise Programme könnten übersehen werden",
+          "lower": "Empfindlicher – Standby-Leistung kann als Aktivität erkannt werden"
+        },
+        "no_update_active_timeout": {
+          "higher": "Mehr Zeit, bevor ein Zyklus als hängend gemeldet wird",
+          "lower": "Beendet hängende Zyklen früher zwangsweise"
+        },
+        "off_delay": {
+          "higher": "Mehr Zeit für Gerätepausen – lange Einweich- oder Trockenphasen werden überbrückt",
+          "lower": "Schnellere Enderkennung – ideal für Geräte mit sauberem Ein/Aus-Verhalten"
+        },
+        "profile_match_threshold": {
+          "higher": "Nur sehr sichere Übereinstimmungen werden bestätigt – mehr Zyklen bleiben unbeschriftet",
+          "lower": "Mehr Zyklen werden zugeordnet – einzelne könnten leicht falsch sein"
+        },
+        "running_dead_zone": {
+          "higher": "Kurze Leistungsspitzen im Leerlauf werden ignoriert – weniger rauschempfindlich",
+          "lower": "Reagiert auf kürzere Leistungsimpulse – erfasst schnelle Transienten"
+        },
+        "start_threshold_w": {
+          "higher": "Vermeidet Fehlstarts durch kurze Leistungsspitzen",
+          "lower": "Erkennt leistungsschwache Programme – kann auf Rauschen reagieren"
+        },
+        "stop_threshold_w": {
+          "higher": "Beendet Zyklen schneller – kann während einer Pause auslösen",
+          "lower": "Wartet länger mit dem Ende – weniger vorzeitige Abschlüsse"
+        },
+        "watchdog_interval": {
+          "higher": "Längere Ruhephasen erlaubt – weniger versehentliche Zwangsstopps",
+          "lower": "Erkennt hängende Zyklen schneller"
+        }
+      }
     },
     "tab": {
       "advanced": "Erweitert",
@@ -6945,6 +7323,69 @@
       "suggestions_applied": "Εφαρμόστηκαν προτάσεις. επαναφόρτωση ενσωμάτωσης",
       "suggestions_dismissed": "Οι προτάσεις απορρίφθηκαν"
     },
+    "suggestion": {
+      "both_agree": "Το WashData προτείνει",
+      "calibrated_label": "Βαθμονομημένο",
+      "observed_label": "Παρατηρήθηκε",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Επισημαίνει αυτόματα λιγότερους κύκλους; περισσότεροι πηγαίνουν σε έλεγχο",
+          "lower": "Επισημαίνει αυτόματα περισσότερους κύκλους; κάποιοι ενδέχεται να αναγνωριστούν λανθασμένα"
+        },
+        "duration_tolerance": {
+          "higher": "Αποδέχεται ευρύτερο εύρος διάρκειας — πιο ευέλικτη αντιστοίχιση",
+          "lower": "Απαιτεί πιο ακριβή αντιστοίχιση διάρκειας — αυστηρότερο, μπορεί να απορρίψει ασυνήθεις κύκλους"
+        },
+        "end_energy_threshold": {
+          "higher": "Κλείνει μόνο κύκλους που κατανάλωσαν σημαντική ενέργεια",
+          "lower": "Κλείνει και συντομότερους ή χαμηλής ενέργειας κύκλους"
+        },
+        "end_repeat_count": {
+          "higher": "Απαιτεί επανάληψη του σήματος λήξης περισσότερες φορές — πιο αξιόπιστο, ελαφρώς πιο αργό",
+          "lower": "Τερματίζει μετά από λιγότερες επαναλήψεις — ταχύτερη ανίχνευση, μεγαλύτερος κίνδυνος ψευδούς λήξης"
+        },
+        "learning_confidence": {
+          "higher": "Μαθαίνει μόνο από πολύ σίγουρες αντιστοιχίσεις — πιο αργό αλλά πιο αξιόπιστο",
+          "lower": "Μαθαίνει από περισσότερους κύκλους; το μοντέλο μπορεί να έχει περισσότερο θόρυβο"
+        },
+        "min_off_gap": {
+          "higher": "Απαιτείται μεγαλύτερη αδράνεια πριν ξεκινήσει νέος κύκλος",
+          "lower": "Σύντομη αδράνεια εκκινεί νέο κύκλο — διαδοχικές λειτουργίες μπορεί να διαχωριστούν"
+        },
+        "min_power": {
+          "higher": "Λιγότερο ευαίσθητο στην κατανάλωση αδράνειας; μπορεί να χάσει ήσυχα προγράμματα",
+          "lower": "Πιο ευαίσθητο; μπορεί να καταγράφει την κατανάλωση σε αναμονή ως δραστηριότητα"
+        },
+        "no_update_active_timeout": {
+          "higher": "Περισσότερος χρόνος πριν δηλωθεί κύκλος κολλημένος",
+          "lower": "Αναγκαστική διακοπή κολλημένου κύκλου νωρίτερα"
+        },
+        "off_delay": {
+          "higher": "Περισσότερος χρόνος για παύσεις συσκευής — χειρίζεται μακρά εμποτίσματα ή φάσεις στεγνώματος",
+          "lower": "Ταχύτερη ανίχνευση λήξης — καλό για συσκευές με καθαρό ενεργό/ανενεργό"
+        },
+        "profile_match_threshold": {
+          "higher": "Επιβεβαιώνει μόνο αντιστοιχίσεις υψηλής εμπιστοσύνης; περισσότεροι κύκλοι παραμένουν χωρίς ετικέτα",
+          "lower": "Αντιστοιχεί περισσότερους κύκλους; κάποιοι μπορεί να είναι ελαφρώς λανθασμένοι"
+        },
+        "running_dead_zone": {
+          "higher": "Αγνοεί σύντομες αιχμές ισχύος κατά την αδράνεια — λιγότερο ευαίσθητο σε θόρυβο",
+          "lower": "Ανταποκρίνεται σε συντομότερες αναλαμπές ισχύος — εντοπίζει γρήγορη παροδική δραστηριότητα"
+        },
+        "start_threshold_w": {
+          "higher": "Αποφεύγει ψευδείς εκκινήσεις από σύντομες αιχμές ισχύος",
+          "lower": "Εντοπίζει προγράμματα χαμηλής ισχύος; μπορεί να ενεργοποιηθεί από θόρυβο"
+        },
+        "stop_threshold_w": {
+          "higher": "Τερματίζει τον κύκλο γρηγορότερα — μπορεί να κλείσει κατά τη διάρκεια παύσης",
+          "lower": "Αναμένει περισσότερο για τερματισμό — λιγότερες πρόωρες ολοκληρώσεις"
+        },
+        "watchdog_interval": {
+          "higher": "Επιτρέπονται μακρύτερες ήσυχες φάσεις; λιγότερες ψευδείς αναγκαστικές διακοπές",
+          "lower": "Εντοπίζει κολλημένους κύκλους πιο επιθετικά"
+        }
+      }
+    },
     "trend": {
       "down": "Πτωτικές τάσεις",
       "up": "Ανοδική τάση"
@@ -7937,6 +8378,69 @@
       "settings_saved": "Configuración guardada; recarga de integración",
       "suggestions_applied": "Sugerencias aplicadas; recarga de integración",
       "suggestions_dismissed": "Sugerencias descartadas"
+    },
+    "suggestion": {
+      "both_agree": "WashData recomienda",
+      "calibrated_label": "Calibrado",
+      "observed_label": "Observado",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Etiqueta menos ciclos automáticamente; más van a revisión",
+          "lower": "Etiqueta más ciclos automáticamente; algunos pueden ser mal identificados"
+        },
+        "duration_tolerance": {
+          "higher": "Acepta un rango de duración más amplio — correspondencia más flexible",
+          "lower": "Exige una duración más cercana — más estricto, puede rechazar ciclos inusuales"
+        },
+        "end_energy_threshold": {
+          "higher": "Solo cierra ciclos que usaron energía significativa",
+          "lower": "También cierra ciclos cortos o de baja energía"
+        },
+        "end_repeat_count": {
+          "higher": "Exige que la señal de fin se repita más veces — más robusto, ligeramente más lento",
+          "lower": "Termina tras menos repeticiones — detección más rápida, mayor riesgo de fin falso"
+        },
+        "learning_confidence": {
+          "higher": "Aprende solo de coincidencias muy confiables — más lento pero más fiable",
+          "lower": "Aprende de más ciclos; el modelo puede ser menos preciso"
+        },
+        "min_off_gap": {
+          "higher": "Se necesita más tiempo de inactividad antes de iniciar un nuevo ciclo",
+          "lower": "Un breve reposo inicia un nuevo ciclo — ejecuciones consecutivas pueden dividirse"
+        },
+        "min_power": {
+          "higher": "Menos sensible al consumo en reposo; puede perder programas muy silenciosos",
+          "lower": "Más sensible; puede registrar el consumo en espera como actividad"
+        },
+        "no_update_active_timeout": {
+          "higher": "Más tiempo antes de declarar un ciclo atascado",
+          "lower": "Detiene un ciclo atascado antes"
+        },
+        "off_delay": {
+          "higher": "Más tiempo para pausas del electrodoméstico — gestiona fases largas de remojo o secado",
+          "lower": "Detección de fin más rápida — ideal para electrodomésticos con encendido/apagado limpio"
+        },
+        "profile_match_threshold": {
+          "higher": "Solo confirma coincidencias de alta confianza; más ciclos quedan sin etiquetar",
+          "lower": "Coincide con más ciclos; algunos pueden ser ligeramente incorrectos"
+        },
+        "running_dead_zone": {
+          "higher": "Ignora breves picos de potencia en reposo — menos sensible al ruido",
+          "lower": "Reacciona a impulsos más cortos — detecta actividad transitoria rápida"
+        },
+        "start_threshold_w": {
+          "higher": "Evita arranques falsos por breves picos de potencia",
+          "lower": "Detecta programas de baja potencia; puede activarse con ruido"
+        },
+        "stop_threshold_w": {
+          "higher": "Termina el ciclo antes — puede cerrarse durante una pausa",
+          "lower": "Espera más para terminar — menos finales prematuros"
+        },
+        "watchdog_interval": {
+          "higher": "Se permiten fases silenciosas más largas; menos paradas forzadas falsas",
+          "lower": "Detecta ciclos atascados de forma más agresiva"
+        }
+      }
     },
     "trend": {
       "down": "Tendencia a la baja",
@@ -8931,6 +9435,69 @@
       "suggestions_applied": "Soovitused rakendatud; integratsiooni uuesti laadimine",
       "suggestions_dismissed": "Soovitused lükati tagasi"
     },
+    "suggestion": {
+      "both_agree": "WashData soovitab",
+      "calibrated_label": "Kalibreeritud",
+      "observed_label": "Mõõdetud",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Märgistab automaatselt vähem tsükleid; rohkem suunatakse ülevaatusele",
+          "lower": "Märgistab automaatselt rohkem tsükleid; mõnda võidakse valesti tuvastada"
+        },
+        "duration_tolerance": {
+          "higher": "Aktsepteerib laiemat kestuse vahemikku — paindlikum sobitamine",
+          "lower": "Nõuab täpsemat kestuse vastavust — rangem, kuid võib lükata tagasi ebatavalisi tsükleid"
+        },
+        "end_energy_threshold": {
+          "higher": "Sulgeb ainult tsüklid, mis kasutasid olulisel määral energiat",
+          "lower": "Sulgeb ka lühemad või madalama energiatarbe tsüklid"
+        },
+        "end_repeat_count": {
+          "higher": "Nõuab lõpusignaali kordamist rohkem kordi — usaldusväärsem, pisut aeglasem",
+          "lower": "Lõpetab pärast vähemat kordust — kiirem tuvastamine, suurem vale lõpu oht"
+        },
+        "learning_confidence": {
+          "higher": "Õpib ainult väga kindlatest vastetest — aeglasem, kuid usaldusväärsem",
+          "lower": "Õpib rohkematest tsüklitest; mudel võib olla müraram"
+        },
+        "min_off_gap": {
+          "higher": "Enne uue tsükli algust on vajalik pikem tegevusetus",
+          "lower": "Lühike tegevusetus käivitab uue tsükli — järjestikused käivitused võivad jaguneda"
+        },
+        "min_power": {
+          "higher": "Vähem tundlik ooterežiimi tarbimise suhtes; võib vahele jätta vaikse töörežiimi",
+          "lower": "Tundlikum; võib logida ooterežiimi tarbimise tegevusena"
+        },
+        "no_update_active_timeout": {
+          "higher": "Rohkem aega enne tsükli kinni jäänuks kuulutamist",
+          "lower": "Jõudab kinni jäänud tsükli sundpeatamise kiiremini"
+        },
+        "off_delay": {
+          "higher": "Rohkem aega seadme paussideks — käsitleb pikka leotamist või kuivatamist",
+          "lower": "Kiirem lõpu tuvastamine — sobib hästi selge sisse/välja seadmetele"
+        },
+        "profile_match_threshold": {
+          "higher": "Kinnitab ainult suure kindlusega vasteid; rohkem tsükleid jääb märgistamata",
+          "lower": "Sobib rohkema tsükliga; mõnda võib olla veidi vale"
+        },
+        "running_dead_zone": {
+          "higher": "Ignoreerib lühikesi voolutõuse jõudeolekus — vähem müra suhtes tundlik",
+          "lower": "Reageerib lühematele energiapursetele — tabab kiiret mööduvat aktiivsust"
+        },
+        "start_threshold_w": {
+          "higher": "Väldib lühikestest energiatõusudest tulenevaid valesid käivitusi",
+          "lower": "Tabab madalvõimsusega programmid; võib käivituda müra peale"
+        },
+        "stop_threshold_w": {
+          "higher": "Lõpetab tsükli kiiremini — võib sulgeda pausi ajal",
+          "lower": "Ootab lõpetamisega kauem — vähem enneaegseid lõpetusi"
+        },
+        "watchdog_interval": {
+          "higher": "Lubatud pikemad vaiksed faasid; vähem valesid sundpeatusi",
+          "lower": "Tuvastab kinni jäänud tsükleid agressiivsemalt"
+        }
+      }
+    },
     "trend": {
       "down": "Trend langeb",
       "up": "Tõusev trend"
@@ -9848,6 +10415,69 @@
       "ready": "Valmis käsiteltäväksi",
       "recording": "Tallennetaan",
       "training": "Koulutetaan…"
+    },
+    "suggestion": {
+      "both_agree": "WashData suosittelee",
+      "calibrated_label": "Kalibroitu",
+      "observed_label": "Havaittu",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Vähemmän automaattisia merkintöjä – useammat syklit menevät tarkistukseen",
+          "lower": "Enemmän automaattisia merkintöjä – osa voi olla virheellisiä"
+        },
+        "duration_tolerance": {
+          "higher": "Hyväksyy laajemman kestoalueen – joustavampi tunnistus",
+          "lower": "Edellyttää tarkempaa kestomatchausta – tiukempi, mutta voi hylätä epätavalliset syklit"
+        },
+        "end_energy_threshold": {
+          "higher": "Sulkee vain syklit, jotka kuluttivat merkittävästi energiaa",
+          "lower": "Sulkee myös lyhyemmät tai vähän energiaa kuluttavat syklit"
+        },
+        "end_repeat_count": {
+          "higher": "Päätyssignaali täytyy toistua useammin – luotettavampi, hieman hitaampi",
+          "lower": "Päättyy vähemmän toistojen jälkeen – nopeampi tunnistus, enemmän riskiä väärästä lopetuksesta"
+        },
+        "learning_confidence": {
+          "higher": "Oppii vain erittäin varmoista osumista – hitaampi mutta luotettavampi",
+          "lower": "Oppii useammista sykleistä – malli voi olla epätarkempi"
+        },
+        "min_off_gap": {
+          "higher": "Pidempi tauko vaaditaan ennen uuden syklin alkua",
+          "lower": "Lyhyt tauko riittää – peräkkäiset ajot voivat jakaantua"
+        },
+        "min_power": {
+          "higher": "Vähemmän herkkä standby-teholle – hyvin hiljaiset ohjelmat voivat jäädä huomaamatta",
+          "lower": "Herkempi – standby-teho voidaan tunnistaa aktiviteetiksi"
+        },
+        "no_update_active_timeout": {
+          "higher": "Enemmän aikaa ennen kuin jumiutunut sykli pakotetaan lopetettavaksi",
+          "lower": "Pakottaa jumiutuneen syklin loppumaan nopeammin"
+        },
+        "off_delay": {
+          "higher": "Enemmän aikaa laitteen tauoille – pitkät likoamis- tai kuivausvaiheet sillataan",
+          "lower": "Nopeampi lopetuksen tunnistus – sopii laitteille, joilla on selkeä päällä/pois-käyttäytyminen"
+        },
+        "profile_match_threshold": {
+          "higher": "Vain erittäin varmat osumat vahvistetaan – useammat syklit jäävät merkitsemättä",
+          "lower": "Useammat syklit täsmäytetään – osa voi olla hieman väärin"
+        },
+        "running_dead_zone": {
+          "higher": "Lyhyet tehohuiput tyhjäkäynnin aikana ohitetaan – vähemmän häiriöherkkä",
+          "lower": "Reagoi lyhyempiin tehoimpulsseihin – havaitsee nopeat transientit"
+        },
+        "start_threshold_w": {
+          "higher": "Välttää väärät käynnistykset lyhyistä tehohuipuista",
+          "lower": "Tunnistaa vähätehoiset ohjelmat – voi aktivoitua häiriöistä"
+        },
+        "stop_threshold_w": {
+          "higher": "Päättää syklin nopeammin – voi aktivoitua tauon aikana",
+          "lower": "Odottaa kauemmin ennen lopetusta – vähemmän ennenaikaisia päätöksiä"
+        },
+        "watchdog_interval": {
+          "higher": "Pidempiä hiljaisia vaiheita sallitaan – vähemmän tahattomia pakotettuja pysäytyksiä",
+          "lower": "Havaitsee jumissa olevat syklit nopeammin"
+        }
+      }
     },
     "tab": {
       "advanced": "Edistynyt",
@@ -10917,6 +11547,69 @@
       "suggestions_applied": "Suggestions appliquées ; rechargement de l'intégration",
       "suggestions_dismissed": "Suggestions rejetées"
     },
+    "suggestion": {
+      "both_agree": "WashData recommande",
+      "calibrated_label": "Calibré",
+      "observed_label": "Observé",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Étiquette moins de cycles automatiquement ; davantage sont envoyés en révision",
+          "lower": "Étiquette plus de cycles automatiquement ; certains peuvent être mal identifiés"
+        },
+        "duration_tolerance": {
+          "higher": "Accepte une plage de durée plus large — correspondance plus flexible",
+          "lower": "Exige une durée plus proche — plus strict, peut rejeter des cycles inhabituels"
+        },
+        "end_energy_threshold": {
+          "higher": "Clôture uniquement les cycles ayant consommé une énergie significative",
+          "lower": "Clôture aussi les cycles courts ou à faible consommation"
+        },
+        "end_repeat_count": {
+          "higher": "Exige que le signal de fin se répète davantage — plus robuste, légèrement plus lent",
+          "lower": "Termine après moins de répétitions — détection plus rapide, risque de fausse fin accru"
+        },
+        "learning_confidence": {
+          "higher": "N'apprend que des correspondances très confiantes — plus lent mais plus fiable",
+          "lower": "Apprend à partir de plus de cycles ; le modèle peut être moins précis"
+        },
+        "min_off_gap": {
+          "higher": "Repos plus long requis avant le démarrage d'un nouveau cycle",
+          "lower": "Un bref repos déclenche un nouveau cycle — des cycles successifs peuvent être scindés"
+        },
+        "min_power": {
+          "higher": "Moins sensible à la consommation au repos ; peut manquer des programmes très silencieux",
+          "lower": "Plus sensible ; peut enregistrer la consommation en veille comme activité"
+        },
+        "no_update_active_timeout": {
+          "higher": "Plus de temps avant de déclarer un cycle bloqué",
+          "lower": "Arrête un cycle bloqué plus tôt"
+        },
+        "off_delay": {
+          "higher": "Plus de temps pour les pauses de l'appareil — gère les longues phases de trempage ou de séchage",
+          "lower": "Détection de fin plus rapide — adapté aux appareils marche/arrêt nets"
+        },
+        "profile_match_threshold": {
+          "higher": "Ne valide que les correspondances très confiantes ; plus de cycles restent non étiquetés",
+          "lower": "Fait correspondre plus de cycles ; certains peuvent être légèrement erronés"
+        },
+        "running_dead_zone": {
+          "higher": "Ignore les brèves pointes de puissance au repos — moins sensible au bruit",
+          "lower": "Réagit à des impulsions plus courtes — capte les activités transitoires rapides"
+        },
+        "start_threshold_w": {
+          "higher": "Évite les faux démarrages dus à de brèves pointes de puissance",
+          "lower": "Capte les programmes à faible puissance ; peut se déclencher sur du bruit"
+        },
+        "stop_threshold_w": {
+          "higher": "Termine le cycle plus vite — peut se clôturer lors d'une pause",
+          "lower": "Attend plus longtemps pour terminer — moins de fins prématurées"
+        },
+        "watchdog_interval": {
+          "higher": "Phases silencieuses plus longues autorisées ; moins de faux arrêts forcés",
+          "lower": "Détecte les cycles bloqués de manière plus agressive"
+        }
+      }
+    },
     "trend": {
       "down": "Tendance à la baisse",
       "up": "Tendance à la hausse"
@@ -11834,6 +12527,69 @@
       "ready": "Spremno za obradu",
       "recording": "Snimanje",
       "training": "Treniranje…"
+    },
+    "suggestion": {
+      "both_agree": "WashData preporučuje",
+      "calibrated_label": "Kalibrirano",
+      "observed_label": "Izmjereno",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Manje ciklusa se automatski označava; više ih ide na pregled",
+          "lower": "Više ciklusa se automatski označava; neki mogu biti pogrešno identificirani"
+        },
+        "duration_tolerance": {
+          "higher": "Prihvaća širi raspon trajanja — fleksibilnije podudaranje",
+          "lower": "Zahtijeva bliže podudaranje trajanja — strože, ali može odbiti neobične cikluse"
+        },
+        "end_energy_threshold": {
+          "higher": "Zatvara samo cikluse sa značajnom potrošnjom energije",
+          "lower": "Zatvara i kraće ili manje energetske cikluse"
+        },
+        "end_repeat_count": {
+          "higher": "Zahtijeva više ponavljanja signala kraja — pouzdanije, malo sporije",
+          "lower": "Završava nakon manje ponavljanja — brže otkrivanje, veći rizik od lažnog kraja"
+        },
+        "learning_confidence": {
+          "higher": "Uči samo iz visoko pouzdanih podudaranja — sporije, ali pouzdanije",
+          "lower": "Uči iz više ciklusa; model može biti manje precizan"
+        },
+        "min_off_gap": {
+          "higher": "Potreban je duži odmor prije početka novog ciklusa",
+          "lower": "Kratki odmor pokreće novi ciklus — uzastopni ciklusi se mogu razdijeliti"
+        },
+        "min_power": {
+          "higher": "Manje osjetljiv na potrošnju u mirovanju; može propustiti tihe programe",
+          "lower": "Osjetljiviji; može bilježiti potrošnju u pripravnosti kao aktivnost"
+        },
+        "no_update_active_timeout": {
+          "higher": "Više vremena prije proglašavanja ciklusa zaglavljenim",
+          "lower": "Zaglavljeni ciklus se prisilno zaustavlja ranije"
+        },
+        "off_delay": {
+          "higher": "Više vremena za pauze uređaja — prikladno za duge faze namakanja ili sušenja",
+          "lower": "Brže otkrivanje kraja — dobro za uređaje s čistim uključivanjem/isključivanjem"
+        },
+        "profile_match_threshold": {
+          "higher": "Potvrđuje samo visoko pouzdana podudaranja; više ciklusa ostaje neoznačeno",
+          "lower": "Podudara više ciklusa; neki mogu biti blago pogrešni"
+        },
+        "running_dead_zone": {
+          "higher": "Zanemaruje kratke skokove snage u mirovanju — manje osjetljiv na šum",
+          "lower": "Reagira na kraće impulse snage — otkriva brzu prolaznu aktivnost"
+        },
+        "start_threshold_w": {
+          "higher": "Sprječava lažne startove od kratkih skokova snage",
+          "lower": "Otkriva programe s niskom snagom; može reagirati na šum"
+        },
+        "stop_threshold_w": {
+          "higher": "Završava ciklus brže — može zatvoriti za vrijeme pauze",
+          "lower": "Dulje čeka na završetak — manje prijevremenih završetaka"
+        },
+        "watchdog_interval": {
+          "higher": "Dopušta dulje tihe faze; manje lažnih prisilnih zaustavljanja",
+          "lower": "Zaglavljene cikluse otkriva agresivnije"
+        }
+      }
     },
     "tab": {
       "advanced": "Napredno",
@@ -12903,6 +13659,69 @@
       "suggestions_applied": "Javaslatok alkalmazva; integráció újratöltése",
       "suggestions_dismissed": "Javaslatok elutasítva"
     },
+    "suggestion": {
+      "both_agree": "A WashData javasolja",
+      "calibrated_label": "Kalibrált",
+      "observed_label": "Megfigyelt",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Automatikusan kevesebb ciklust jelöl; több kerül áttekintésre",
+          "lower": "Automatikusan több ciklust jelöl; néhány félre lehet azonosítva"
+        },
+        "duration_tolerance": {
+          "higher": "Szélesebb időtartomány elfogadása — rugalmasabb egyeztetés",
+          "lower": "Pontosabb időtartam-egyezést igényel — szigorúbb, de szokatlan ciklusokat elutasíthat"
+        },
+        "end_energy_threshold": {
+          "higher": "Csak jelentős energiát felhasználó ciklusokat zár be",
+          "lower": "Rövidebb vagy alacsony energiájú ciklusokat is bezár"
+        },
+        "end_repeat_count": {
+          "higher": "A befejezési jelet több ismétlés után fogadja el — megbízhatóbb, kissé lassabb",
+          "lower": "Kevesebb ismétlés után ér véget — gyorsabb érzékelés, több hamis befejezési kockázat"
+        },
+        "learning_confidence": {
+          "higher": "Csak nagyon magabiztos egyezésekből tanul — lassabb, de megbízhatóbb",
+          "lower": "Több ciklusból tanul; a modell zajosabb lehet"
+        },
+        "min_off_gap": {
+          "higher": "Hosszabb tétlenség szükséges az új ciklus indulása előtt",
+          "lower": "Rövid tétlenség új ciklust indít — egymást követő futások szétválhatnak"
+        },
+        "min_power": {
+          "higher": "Kevésbé érzékeny a tétlenségi fogyasztásra; nagyon csendes programokat elszalaszthat",
+          "lower": "Érzékenyebb; a készenléti fogyasztást aktivitásként naplózhatja"
+        },
+        "no_update_active_timeout": {
+          "higher": "Több idő a ciklus elakadtnak nyilvánítása előtt",
+          "lower": "Elakadt ciklust gyorsabban kényszerít leállítani"
+        },
+        "off_delay": {
+          "higher": "Több idő a készülék szüneteire — hosszú áztatás vagy szárítás kezelése",
+          "lower": "Gyorsabb vége érzékelés — egyértelmű be/ki készülékekhez jól működik"
+        },
+        "profile_match_threshold": {
+          "higher": "Csak nagy magabiztosságú egyezéseket erősít meg; több ciklus marad jelöletlen",
+          "lower": "Több ciklust egyeztet; néhány kissé helytelen lehet"
+        },
+        "running_dead_zone": {
+          "higher": "Figyelmen kívül hagyja a rövid teljesítménycsúcsokat tétlenség közben — zajra kevésbé érzékeny",
+          "lower": "Rövidebb teljesítménylökésekre reagál — gyors átmeneti aktivitást észlel"
+        },
+        "start_threshold_w": {
+          "higher": "Elkerüli a rövid teljesítménycsúcsokból eredő hamis indításokat",
+          "lower": "Kis teljesítményű programokat is érzékel; zajra is aktiválódhat"
+        },
+        "stop_threshold_w": {
+          "higher": "Gyorsabban fejezi be a ciklust — szünet közben is zárhat",
+          "lower": "Hosszabb ideig vár a befejezésre — kevesebb idő előtti befejezés"
+        },
+        "watchdog_interval": {
+          "higher": "Hosszabb csendes fázisok megengedett; kevesebb hamis kényszeres leállítás",
+          "lower": "Agresszívabban észleli az elakadt ciklusokat"
+        }
+      }
+    },
     "trend": {
       "down": "Lefelé trend",
       "up": "Felkapott"
@@ -13820,6 +14639,69 @@
       "ready": "Tilbúið til vinnslu",
       "recording": "Tekur upp",
       "training": "Þjálfun…"
+    },
+    "suggestion": {
+      "both_agree": "WashData mælir með",
+      "calibrated_label": "Kvarðað",
+      "observed_label": "Mælt",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Merkir færri lotur sjálfkrafa – fleiri fara í yfirferð",
+          "lower": "Merkir fleiri lotur sjálfkrafa – sumar kunna að vera rangar"
+        },
+        "duration_tolerance": {
+          "higher": "Þiggur víðara lengdarsvið – sveigjanlegri samsvörun",
+          "lower": "Krefst nákvæmari lengdarsamsvörunar – strangara en getur hafnað óvenjulegum lotum"
+        },
+        "end_energy_threshold": {
+          "higher": "Lokar aðeins lotum með umtalsverðan orkuNotkun",
+          "lower": "Lokar einnig styttri eða orkuminni lotum"
+        },
+        "end_repeat_count": {
+          "higher": "Lokaboð þarf að endurtaka sig oftar – öruggara, lítið eitt hægar",
+          "lower": "Lýkur eftir færri endurtekningar – hraðari greining, meiri hætta á röngu loki"
+        },
+        "learning_confidence": {
+          "higher": "Lærir aðeins af mjög öruggum samsvörunum – hægar en áreiðanlegra",
+          "lower": "Lærir af fleiri lotum – líkan kann að verða ónákvæmara"
+        },
+        "min_off_gap": {
+          "higher": "Lengra hlé þarf áður en ný lota byrjar",
+          "lower": "Stutt hlé nægir – lotur á eftir hverri annarri kunna að skiptast"
+        },
+        "min_power": {
+          "higher": "Minna næmt fyrir biðstöðuafli – mjög hljóð forrit kunna að gleymast",
+          "lower": "Næmara – biðstöðuafl gæti skráðst sem virkni"
+        },
+        "no_update_active_timeout": {
+          "higher": "Meiri tími áður en föst lota er þvinguð stöðvuð",
+          "lower": "Þvingarstöðvar fastar lotur hraðar"
+        },
+        "off_delay": {
+          "higher": "Meiri tími fyrir hlé tækis – langar bleyti- eða þurrkunarfasir brúaðar",
+          "lower": "Hraðari lokagreining – hentar tækjum með skýra kveikt/slökkt-hegðun"
+        },
+        "profile_match_threshold": {
+          "higher": "Aðeins mjög öruggar samsvörunir staðfestar – fleiri lotur vera ómerktar",
+          "lower": "Fleiri lotur samsvara – sumar kunna að vera lítið eitt rangar"
+        },
+        "running_dead_zone": {
+          "higher": "Stuttar aflhækkingar í aðgerðaleysi hunsar – minna næmt fyrir hávaða",
+          "lower": "Bregst við styttri aflboðum – skráir skjótar sveiflur"
+        },
+        "start_threshold_w": {
+          "higher": "Forðast rangar ræsingar vegna stuttra aflhækkinga",
+          "lower": "Þekkir forrit með lágt afl – gæti kviknaðu af hávaða"
+        },
+        "stop_threshold_w": {
+          "higher": "Lýkur lotu hraðar – gæti kviknaður í hlé",
+          "lower": "Bíður lengur með lok – færri of snemmara lok"
+        },
+        "watchdog_interval": {
+          "higher": "Lengri þagnar leyfast – færri óviljandi þvinganir",
+          "lower": "Greinir fastar lotur hraðar"
+        }
+      }
     },
     "tab": {
       "advanced": "Ítarlegri",
@@ -14889,6 +15771,69 @@
       "suggestions_applied": "Suggerimenti applicati; ricarica dell'integrazione",
       "suggestions_dismissed": "Suggerimenti respinti"
     },
+    "suggestion": {
+      "both_agree": "WashData consiglia",
+      "calibrated_label": "Calibrato",
+      "observed_label": "Osservato",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Etichetta meno cicli automaticamente; più vanno in revisione",
+          "lower": "Etichetta più cicli automaticamente; alcuni possono essere mal identificati"
+        },
+        "duration_tolerance": {
+          "higher": "Accetta un intervallo di durata più ampio — corrispondenza più flessibile",
+          "lower": "Richiede una durata più vicina — più rigoroso, può rifiutare cicli insoliti"
+        },
+        "end_energy_threshold": {
+          "higher": "Chiude solo i cicli che hanno consumato energia sostanziale",
+          "lower": "Chiude anche cicli brevi o a basso consumo energetico"
+        },
+        "end_repeat_count": {
+          "higher": "Richiede che il segnale di fine si ripeta più volte — più robusto, leggermente più lento",
+          "lower": "Termina dopo meno ripetizioni — rilevamento più rapido, maggior rischio di fine falsa"
+        },
+        "learning_confidence": {
+          "higher": "Impara solo da corrispondenze molto affidabili — più lento ma più preciso",
+          "lower": "Impara da più cicli; il modello potrebbe essere meno preciso"
+        },
+        "min_off_gap": {
+          "higher": "Richiede più tempo di inattività prima di avviare un nuovo ciclo",
+          "lower": "Una breve inattività avvia un nuovo ciclo — esecuzioni consecutive possono dividersi"
+        },
+        "min_power": {
+          "higher": "Meno sensibile al consumo in standby; potrebbe non rilevare programmi a bassa potenza",
+          "lower": "Più sensibile; potrebbe registrare il consumo in standby come attività"
+        },
+        "no_update_active_timeout": {
+          "higher": "Più tempo prima di dichiarare un ciclo bloccato",
+          "lower": "Interrompe prima un ciclo bloccato"
+        },
+        "off_delay": {
+          "higher": "Più tempo per le pause dell'elettrodomestico — gestisce lunghe fasi di ammollo o asciugatura",
+          "lower": "Rilevamento della fine più rapido — ideale per elettrodomestici con on/off netto"
+        },
+        "profile_match_threshold": {
+          "higher": "Conferma solo le corrispondenze ad alta affidabilità; più cicli rimangono senza etichetta",
+          "lower": "Corrisponde a più cicli; alcuni potrebbero essere leggermente errati"
+        },
+        "running_dead_zone": {
+          "higher": "Ignora brevi picchi di potenza durante il riposo — meno sensibile al rumore",
+          "lower": "Risponde a impulsi più brevi — rileva attività transitorie rapide"
+        },
+        "start_threshold_w": {
+          "higher": "Evita avvii falsi causati da brevi picchi di potenza",
+          "lower": "Rileva programmi a bassa potenza; può attivarsi con il rumore"
+        },
+        "stop_threshold_w": {
+          "higher": "Termina il ciclo prima — potrebbe chiudersi durante una pausa",
+          "lower": "Attende più a lungo per terminare — meno completamenti prematuri"
+        },
+        "watchdog_interval": {
+          "higher": "Fasi silenziose più lunghe consentite; meno false fermate forzate",
+          "lower": "Rileva cicli bloccati in modo più aggressivo"
+        }
+      }
+    },
     "trend": {
       "down": "Tendenza al ribasso",
       "up": "Tendenza in alto"
@@ -15881,6 +16826,69 @@
       "settings_saved": "設定が保存されました。統合のリロード",
       "suggestions_applied": "提案が適用されました。統合のリロード",
       "suggestions_dismissed": "提案は却下されました"
+    },
+    "suggestion": {
+      "both_agree": "WashDataの推奨",
+      "calibrated_label": "調整済み",
+      "observed_label": "観測値",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "自動ラベル付けされるサイクルが少なくなります。より多くがレビューに回されます",
+          "lower": "より多くのサイクルを自動ラベル付けします。一部は誤識別される可能性があります"
+        },
+        "duration_tolerance": {
+          "higher": "より広い時間範囲を受け入れます。柔軟なマッチング",
+          "lower": "より近い時間のマッチングが必要です。厳格ですが、異常なサイクルを拒否する場合があります"
+        },
+        "end_energy_threshold": {
+          "higher": "相当なエネルギーを使用したサイクルのみを終了します",
+          "lower": "短いまたは低エネルギーのサイクルも終了します"
+        },
+        "end_repeat_count": {
+          "higher": "終了信号をより多く繰り返す必要があります。より堅牢ですが、わずかに遅くなります",
+          "lower": "より少ない繰り返しで終了します。検出が速くなりますが、誤終了のリスクが高まります"
+        },
+        "learning_confidence": {
+          "higher": "非常に確信度の高いマッチングのみから学習します。遅くなりますが、より信頼性が高くなります",
+          "lower": "より多くのサイクルから学習します。モデルにノイズが増える可能性があります"
+        },
+        "min_off_gap": {
+          "higher": "新しいサイクルが始まる前により長いアイドル時間が必要です",
+          "lower": "短いアイドルで新しいサイクルが開始されます。連続運転が分割される場合があります"
+        },
+        "min_power": {
+          "higher": "アイドル消費電力への感度が低くなります。非常に静かなプログラムを見逃す場合があります",
+          "lower": "感度が高くなります。スタンバイ電力をアクティビティとして記録する場合があります"
+        },
+        "no_update_active_timeout": {
+          "higher": "サイクルが停止していると判断するまでの時間が長くなります",
+          "lower": "停止したサイクルをより早く強制停止します"
+        },
+        "off_delay": {
+          "higher": "家電の一時停止のための時間が長くなります。長い浸漬や乾燥フェーズに対応します",
+          "lower": "終了検出が速くなります。オン/オフが明確な家電に適しています"
+        },
+        "profile_match_threshold": {
+          "higher": "高い確信度のマッチングのみをコミットします。より多くのサイクルがラベルなしのままになります",
+          "lower": "より多くのサイクルをマッチングします。一部が若干間違っている場合があります"
+        },
+        "running_dead_zone": {
+          "higher": "アイドル中の短い電力スパイクを無視します。ノイズへの感度が低くなります",
+          "lower": "より短い電力バーストに反応します。短時間の一時的なアクティビティを検出します"
+        },
+        "start_threshold_w": {
+          "higher": "短い電力スパイクによる誤起動を防ぎます",
+          "lower": "低電力プログラムを検出します。ノイズでトリガーされる場合があります"
+        },
+        "stop_threshold_w": {
+          "higher": "サイクルをより速く終了します。一時停止中に閉じる場合があります",
+          "lower": "終了するまで長く待ちます。早期終了が少なくなります"
+        },
+        "watchdog_interval": {
+          "higher": "より長い静止フェーズが許可されます。誤った強制停止が少なくなります",
+          "lower": "停止したサイクルをより積極的に検出します"
+        }
+      }
     },
     "trend": {
       "down": "下降傾向",
@@ -16875,6 +17883,69 @@
       "suggestions_applied": "제안이 적용되었습니다. 통합 다시 로드",
       "suggestions_dismissed": "제안이 무시되었습니다."
     },
+    "suggestion": {
+      "both_agree": "WashData 권장",
+      "calibrated_label": "보정됨",
+      "observed_label": "관측값",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "자동 라벨링 사이클이 줄어들고, 더 많이 검토로 넘어갑니다",
+          "lower": "더 많은 사이클을 자동 라벨링합니다. 일부는 잘못 식별될 수 있습니다"
+        },
+        "duration_tolerance": {
+          "higher": "더 넓은 시간 범위를 허용합니다. 유연한 매칭",
+          "lower": "더 정확한 시간 매칭이 필요합니다. 엄격하지만 비정상 사이클을 거부할 수 있습니다"
+        },
+        "end_energy_threshold": {
+          "higher": "상당한 에너지를 사용한 사이클만 종료합니다",
+          "lower": "짧거나 저에너지 사이클도 종료합니다"
+        },
+        "end_repeat_count": {
+          "higher": "종료 신호를 더 많이 반복해야 합니다. 더 안정적이지만 약간 느려집니다",
+          "lower": "더 적은 반복 후 종료합니다. 빠른 감지이지만 오종료 위험이 있습니다"
+        },
+        "learning_confidence": {
+          "higher": "매우 신뢰도 높은 매칭에서만 학습합니다. 느리지만 더 신뢰할 수 있습니다",
+          "lower": "더 많은 사이클에서 학습합니다. 모델에 노이즈가 더 많을 수 있습니다"
+        },
+        "min_off_gap": {
+          "higher": "새 사이클이 시작되기 전에 더 긴 대기 시간이 필요합니다",
+          "lower": "짧은 대기 시간으로 새 사이클이 시작됩니다. 연속 실행이 분할될 수 있습니다"
+        },
+        "min_power": {
+          "higher": "대기 전력 소비에 덜 민감합니다. 매우 조용한 프로그램을 놓칠 수 있습니다",
+          "lower": "더 민감합니다. 대기 전력을 활동으로 기록할 수 있습니다"
+        },
+        "no_update_active_timeout": {
+          "higher": "사이클이 멈췄다고 판단하기까지 더 많은 시간이 걸립니다",
+          "lower": "멈춘 사이클을 더 빨리 강제 종료합니다"
+        },
+        "off_delay": {
+          "higher": "가전제품 일시 정지를 위한 시간이 늘어납니다. 긴 담금 또는 건조 단계를 처리합니다",
+          "lower": "종료 감지가 빨라집니다. 깔끔한 온/오프 가전제품에 적합합니다"
+        },
+        "profile_match_threshold": {
+          "higher": "높은 신뢰도 매칭만 확정합니다. 더 많은 사이클이 라벨 없이 남습니다",
+          "lower": "더 많은 사이클을 매칭합니다. 일부가 약간 틀릴 수 있습니다"
+        },
+        "running_dead_zone": {
+          "higher": "대기 중 짧은 전력 스파이크를 무시합니다. 노이즈에 덜 민감합니다",
+          "lower": "더 짧은 전력 버스트에 반응합니다. 빠른 일시적 활동을 감지합니다"
+        },
+        "start_threshold_w": {
+          "higher": "짧은 전력 스파이크로 인한 오동작을 방지합니다",
+          "lower": "저전력 프로그램을 감지합니다. 노이즈에 트리거될 수 있습니다"
+        },
+        "stop_threshold_w": {
+          "higher": "사이클을 더 빨리 종료합니다. 일시 정지 중에 닫힐 수 있습니다",
+          "lower": "종료까지 더 오래 기다립니다. 조기 완료가 줄어듭니다"
+        },
+        "watchdog_interval": {
+          "higher": "더 긴 정지 단계가 허용됩니다. 오탐 강제 종료가 줄어듭니다",
+          "lower": "멈춘 사이클을 더 적극적으로 감지합니다"
+        }
+      }
+    },
     "trend": {
       "down": "하락세",
       "up": "추세 상승"
@@ -17867,6 +18938,69 @@
       "settings_saved": "Nustatymai išsaugoti; integracijos perkrovimas",
       "suggestions_applied": "Pasiūlymai pritaikyti; integracijos perkrovimas",
       "suggestions_dismissed": "Pasiūlymai atmesti"
+    },
+    "suggestion": {
+      "both_agree": "WashData rekomenduoja",
+      "calibrated_label": "Sukalibruota",
+      "observed_label": "Pastebėta",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Automatiškai pažymi mažiau ciklų; daugiau siunčiama peržiūrėti",
+          "lower": "Automatiškai pažymi daugiau ciklų; kai kurie gali būti neteisingai identifikuoti"
+        },
+        "duration_tolerance": {
+          "higher": "Priima platesnį trukmės diapazoną — lankstesnis atitikimas",
+          "lower": "Reikalauja tikslesnio trukmės atitikimo — griežtesnė, bet gali atmesti neįprastus ciklus"
+        },
+        "end_energy_threshold": {
+          "higher": "Uždaro tik ciklus, kurie sunaudojo daug energijos",
+          "lower": "Uždaro ir trumpesnius arba mažiau energijos naudojančius ciklus"
+        },
+        "end_repeat_count": {
+          "higher": "Reikalauja, kad pabaigos signalas kartotųsi daugiau kartų — patikimesnis, šiek tiek lėtesnis",
+          "lower": "Baigia po mažiau pasikartojimų — greitesnis aptikimas, didesnis klaidingo pabaigos pavojus"
+        },
+        "learning_confidence": {
+          "higher": "Mokosi tik iš labai tikrų atitikimų — lėčiau, bet patikimiau",
+          "lower": "Mokosi iš daugiau ciklų; modelis gali būti triukšmingesnis"
+        },
+        "min_off_gap": {
+          "higher": "Prieš naują ciklą reikia ilgesnio neveiklumo laikotarpio",
+          "lower": "Trumpas neveiklumas paleidžia naują ciklą — vienas po kito einantys paleidimai gali išsiskirti"
+        },
+        "min_power": {
+          "higher": "Mažiau jautrus budėjimo galiai; gali praleisti labai tylias programas",
+          "lower": "Jautresnė; gali registruoti budėjimo galios sąnaudas kaip veiklą"
+        },
+        "no_update_active_timeout": {
+          "higher": "Daugiau laiko prieš paskelbiant ciklą įstrigusiu",
+          "lower": "Greičiau priverstinai sustabdo įstrigusį ciklą"
+        },
+        "off_delay": {
+          "higher": "Daugiau laiko prietaiso pauzėms — valdo ilgas mirkymo arba džiovinimo fazes",
+          "lower": "Greitesnis pabaigos aptikimas — tinka aiškiems įjungimo/išjungimo prietaisams"
+        },
+        "profile_match_threshold": {
+          "higher": "Patvirtina tik aukšto pasitikėjimo atitikimus; daugiau ciklų lieka nepažymėtų",
+          "lower": "Atitinka daugiau ciklų; kai kurie gali būti šiek tiek neteisingi"
+        },
+        "running_dead_zone": {
+          "higher": "Ignoruoja trumpus galios šuolius neveiklumo metu — mažiau jautrus triukšmui",
+          "lower": "Reaguoja į trumpesnius galios pliūpsnius — aptinka greitą trumpalaikę veiklą"
+        },
+        "start_threshold_w": {
+          "higher": "Išvengia netikrų paleidimų dėl trumpų galios šuolių",
+          "lower": "Aptinka mažos galios programas; gali suaktyvėti nuo triukšmo"
+        },
+        "stop_threshold_w": {
+          "higher": "Greičiau baigia ciklą — gali uždaryti pauzės metu",
+          "lower": "Laukia ilgiau prieš baigiant — mažiau ankstyvų pabaigimų"
+        },
+        "watchdog_interval": {
+          "higher": "Leidžiamos ilgesnės tylios fazės; mažiau klaidingų priverstinių sustabdymų",
+          "lower": "Agresyviau aptinka įstrigusius ciklus"
+        }
+      }
     },
     "trend": {
       "down": "Tendencija žemyn",
@@ -18861,6 +19995,69 @@
       "suggestions_applied": "Ieteikumi piemēroti; integrācijas pārlādēšana",
       "suggestions_dismissed": "Ieteikumi noraidīti"
     },
+    "suggestion": {
+      "both_agree": "WashData iesaka",
+      "calibrated_label": "Kalibrēts",
+      "observed_label": "Novērotais",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Automātiski iezīmē mazāk ciklu; vairāk nonāk pārskatīšanā",
+          "lower": "Automātiski iezīmē vairāk ciklu; daži var tikt nepareizi identificēti"
+        },
+        "duration_tolerance": {
+          "higher": "Pieņem plašāku ilguma diapazonu — elastīgāka atbilstības noteikšana",
+          "lower": "Prasa precīzāku ilguma atbilstību — stingrāks, bet var noraidīt neparastus ciklus"
+        },
+        "end_energy_threshold": {
+          "higher": "Aizver tikai ciklus, kas patērēja ievērojamu enerģiju",
+          "lower": "Aizver arī īsākus vai zemas enerģijas ciklus"
+        },
+        "end_repeat_count": {
+          "higher": "Prasa beigu signālu atkārtot vairāk reižu — uzticamāks, nedaudz lēnāks",
+          "lower": "Beidz pēc mazākiem atkārtojumiem — ātrāka atklāšana, lielāks viltus beigu risks"
+        },
+        "learning_confidence": {
+          "higher": "Mācās tikai no ļoti pārliecinošām atbilstībām — lēnāks, bet uzticamāks",
+          "lower": "Mācās no vairākiem cikliem; modelis var būt trokšņaināks"
+        },
+        "min_off_gap": {
+          "higher": "Pirms jauna cikla nepieciešams ilgāks dīkstāves periods",
+          "lower": "Īsa dīkstāve aktivizē jaunu ciklu — secīgas palaišanas var sadalīties"
+        },
+        "min_power": {
+          "higher": "Mazāk jutīgs pret dīkstāves jaudas patēriņu; var palaist garām klusus režīmus",
+          "lower": "Jutīgāks; var reģistrēt gaidīšanas jaudas patēriņu kā darbību"
+        },
+        "no_update_active_timeout": {
+          "higher": "Vairāk laika pirms cikla atzīšanas par iestrēgušu",
+          "lower": "Piespiedu kārtā aptur iestrēgušu ciklu ātrāk"
+        },
+        "off_delay": {
+          "higher": "Vairāk laika ierīces pauzēm — apstrādā ilgu mērcēšanu vai žāvēšanu",
+          "lower": "Ātrāka beigu atklāšana — labi darbojas skaidrām ieslēgt/izslēgt ierīcēm"
+        },
+        "profile_match_threshold": {
+          "higher": "Apstiprina tikai augstas pārliecības atbilstības; vairāk ciklu paliek bez iezīmes",
+          "lower": "Atbilst vairākiem cikliem; daži var būt nedaudz nepareizi"
+        },
+        "running_dead_zone": {
+          "higher": "Ignorē īsus jaudas pieauguma momentus dīkstāvē — mazāk jutīgs pret troksni",
+          "lower": "Reaģē uz īsākiem jaudas uzliesmojumiem — uztver ātru pārejošu aktivitāti"
+        },
+        "start_threshold_w": {
+          "higher": "Novērš viltus palaišanas no īslaicīgiem jaudas pieaugumiem",
+          "lower": "Uztver mazjaudas programmas; var reaģēt uz troksni"
+        },
+        "stop_threshold_w": {
+          "higher": "Beidz ciklu ātrāk — var aizvērt pauzes laikā",
+          "lower": "Gaida ilgāk līdz beigām — mazāk priekšlaicīgu pabeigšanu"
+        },
+        "watchdog_interval": {
+          "higher": "Atļautas garākas klusas fāzes; mazāk viltus piespiedu apstāšanās",
+          "lower": "Agresīvāk uztver iestrēgušos ciklus"
+        }
+      }
+    },
     "trend": {
       "down": "Tendences uz leju",
       "up": "Tendences uz augšu"
@@ -19854,6 +21051,69 @@
       "suggestions_applied": "Применети предлози; интеграција повторно вчитување",
       "suggestions_dismissed": "Предлозите се отфрлени"
     },
+    "suggestion": {
+      "both_agree": "WashData препорачува",
+      "calibrated_label": "Калибрирано",
+      "observed_label": "Набљудувано",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Автоматски означува помалку циклуси; повеќе одат на преглед",
+          "lower": "Автоматски означува повеќе циклуси; некои може да бидат погрешно идентификувани"
+        },
+        "duration_tolerance": {
+          "higher": "Прифаќа поширок опсег на траење — пофлексибилно поврзување",
+          "lower": "Бара поточно совпаѓање на траење — построго, но може да ги отфрли невообичаените циклуси"
+        },
+        "end_energy_threshold": {
+          "higher": "Затвора само циклуси со значителна потрошувачка на енергија",
+          "lower": "Затвора и пократки или понискоенергетски циклуси"
+        },
+        "end_repeat_count": {
+          "higher": "Бара сигналот за крај да се повтори повеќе пати — посигурно, малку побавно",
+          "lower": "Завршува по помалку повторувања — побрзо откривање, поголем ризик од лажен крај"
+        },
+        "learning_confidence": {
+          "higher": "Учи само од многу сигурни совпаѓања — побавно, но посигурно",
+          "lower": "Учи од повеќе циклуси; моделот може да биде позашумен"
+        },
+        "min_off_gap": {
+          "higher": "Потребен е подолг период на неактивност пред нов циклус",
+          "lower": "Краток период на неактивност стартува нов циклус — последователните работи може да се поделат"
+        },
+        "min_power": {
+          "higher": "Помалку чувствителен на фонска потрошувачка; може да ги пропушти тивките програми",
+          "lower": "Почувствителен; може да ја регистрира потрошувачката во режим на мирување како активност"
+        },
+        "no_update_active_timeout": {
+          "higher": "Повеќе време пред прогласување на заглавен циклус",
+          "lower": "Принудно запира заглавен циклус побрзо"
+        },
+        "off_delay": {
+          "higher": "Повеќе време за паузи на уредот — управува со долго натопување или сушење",
+          "lower": "Побрзо откривање на крај — добро за уреди со јасно вкл./искл."
+        },
+        "profile_match_threshold": {
+          "higher": "Потврдува само совпаѓања со висока сигурност; повеќе циклуси остануваат без ознака",
+          "lower": "Поврзува повеќе циклуси; некои може да бидат малку погрешни"
+        },
+        "running_dead_zone": {
+          "higher": "Ги игнорира кратките скокови на моќност во неактивност — помалку чувствителен на шум",
+          "lower": "Реагира на пократки наплив на моќност — ги фаќа брзите преодни активности"
+        },
+        "start_threshold_w": {
+          "higher": "Избегнува лажни стартови од кратковремени скокови на моќност",
+          "lower": "Ги фаќа програмите со мала моќност; може да се активира на шум"
+        },
+        "stop_threshold_w": {
+          "higher": "Го завршува циклусот побрзо — може да затвори за време на пауза",
+          "lower": "Чека подолго за завршување — помалку предвремени завршувања"
+        },
+        "watchdog_interval": {
+          "higher": "Дозволени подолги тивки фази; помалку лажни принудни запирања",
+          "lower": "Поагресивно ги фаќа заглавените циклуси"
+        }
+      }
+    },
     "trend": {
       "down": "Во тренд надолу",
       "up": "Во тренд нагоре"
@@ -20771,6 +22031,69 @@
       "ready": "Klar til å behandle",
       "recording": "Tar opp",
       "training": "Trener…"
+    },
+    "suggestion": {
+      "both_agree": "WashData anbefaler",
+      "calibrated_label": "Kalibrert",
+      "observed_label": "Observert",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Færre automatiske etiketter – flere sykluser sendes til gjennomgang",
+          "lower": "Flere automatiske etiketter – noen kan være feilmerket"
+        },
+        "duration_tolerance": {
+          "higher": "Aksepterer et bredere varighetsintervall – mer fleksibel gjenkjenning",
+          "lower": "Krever tettere varighetssamsvar – strengere, men kan avvise uvanlige sykluser"
+        },
+        "end_energy_threshold": {
+          "higher": "Avslutter bare sykluser med betydelig energiforbruk",
+          "lower": "Avslutter også kortere eller energisvake sykluser"
+        },
+        "end_repeat_count": {
+          "higher": "Sluttsignal må gjentas flere ganger – mer robust, litt tregere",
+          "lower": "Avslutter etter færre repetisjoner – raskere deteksjon, mer risiko for falsk avslutning"
+        },
+        "learning_confidence": {
+          "higher": "Lærer bare fra svært sikre treff – langsommere men mer pålitelig",
+          "lower": "Lærer fra flere sykluser – modellen kan bli mer unøyaktig"
+        },
+        "min_off_gap": {
+          "higher": "Lengre pause kreves før en ny syklus starter",
+          "lower": "Kort pause er nok – påfølgende kjøringer kan deles"
+        },
+        "min_power": {
+          "higher": "Mindre følsom for standby-forbruk – veldig stille programmer kan overses",
+          "lower": "Mer følsom – standby-forbruk kan tolkes som aktivitet"
+        },
+        "no_update_active_timeout": {
+          "higher": "Mer tid før en fastlåst syklus tvangstopper",
+          "lower": "Tvangsstopper en fastlåst syklus raskere"
+        },
+        "off_delay": {
+          "higher": "Mer tid til apparatpauser – lange bløtleggings- eller tørkefaser overbrygges",
+          "lower": "Raskere sluttdeteksjon – passer apparater med tydelig på/av-atferd"
+        },
+        "profile_match_threshold": {
+          "higher": "Bare svært sikre treff bekreftes – flere sykluser forblir umerket",
+          "lower": "Flere sykluser matches – noen kan være litt feil"
+        },
+        "running_dead_zone": {
+          "higher": "Korte effekttopper under tomgang ignoreres – mindre støyfølsom",
+          "lower": "Reagerer på kortere effektimpulser – fanger raske transienter"
+        },
+        "start_threshold_w": {
+          "higher": "Unngår falske starter fra korte effekttopper",
+          "lower": "Fanger lavomsatte programmer – kan trigges av støy"
+        },
+        "stop_threshold_w": {
+          "higher": "Avslutter syklusen raskere – kan aktiveres under en pause",
+          "lower": "Venter lengre med å avslutte – færre for tidlige avslutninger"
+        },
+        "watchdog_interval": {
+          "higher": "Lengre stille faser tillates – færre utilsiktede tvangstopp",
+          "lower": "Oppdager fastlåste sykluser raskere"
+        }
+      }
     },
     "tab": {
       "advanced": "Avansert",
@@ -21765,6 +23088,69 @@
       "recording": "Opnemen",
       "training": "Trainen…"
     },
+    "suggestion": {
+      "both_agree": "WashData raadt aan",
+      "calibrated_label": "Gekalibreerd",
+      "observed_label": "Gemeten",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Minder automatische labels – meer cycli gaan naar beoordeling",
+          "lower": "Meer automatische labels – sommige kunnen onjuist zijn"
+        },
+        "duration_tolerance": {
+          "higher": "Accepteert een bredere duurtolerantie – flexibelere herkenning",
+          "lower": "Vereist nauwkeurigere duurovereenkomst – strenger, maar kan ongewone cycli weigeren"
+        },
+        "end_energy_threshold": {
+          "higher": "Sluit alleen cycli af met aanzienlijk energieverbruik",
+          "lower": "Sluit ook kortere of energiearme cycli af"
+        },
+        "end_repeat_count": {
+          "higher": "Eindsignaal moet vaker herhalen – robuuster, iets langzamer",
+          "lower": "Stopt na minder herhalingen – snellere detectie, meer kans op vals einde"
+        },
+        "learning_confidence": {
+          "higher": "Leert alleen van zeer zekere overeenkomsten – langzamer maar betrouwbaarder",
+          "lower": "Leert van meer cycli – model kan minder nauwkeurig worden"
+        },
+        "min_off_gap": {
+          "higher": "Langere pauze vereist voordat een nieuwe cyclus begint",
+          "lower": "Korte pauze volstaat – opeenvolgende runs kunnen worden gesplitst"
+        },
+        "min_power": {
+          "higher": "Minder gevoelig voor standby-verbruik – zeer stille programma's kunnen worden gemist",
+          "lower": "Gevoeliger – standby-verbruik kan als activiteit worden herkend"
+        },
+        "no_update_active_timeout": {
+          "higher": "Meer tijd voordat een vastgelopen cyclus wordt gedwongen gestopt",
+          "lower": "Stopt een vastgelopen cyclus eerder"
+        },
+        "off_delay": {
+          "higher": "Meer tijd voor apparaatpauzes – lange week- of droogfasen worden overbrugd",
+          "lower": "Snellere einddetectie – ideaal voor apparaten met duidelijk aan/uit-gedrag"
+        },
+        "profile_match_threshold": {
+          "higher": "Alleen zeer zekere overeenkomsten worden bevestigd – meer cycli blijven ongelabeld",
+          "lower": "Meer cycli worden gekoppeld – sommige kunnen licht onjuist zijn"
+        },
+        "running_dead_zone": {
+          "higher": "Korte vermogenspieken tijdens stilstand worden genegeerd – minder ruisgevoelig",
+          "lower": "Reageert op kortere vermogensimpulsen – detecteert snelle transiënten"
+        },
+        "start_threshold_w": {
+          "higher": "Voorkomt valse starts door korte vermogenspieken",
+          "lower": "Herkent programma's met laag vermogen – kan op ruis reageren"
+        },
+        "stop_threshold_w": {
+          "higher": "Beëindigt cycli sneller – kan tijdens een pauze activeren",
+          "lower": "Wacht langer met stoppen – minder voortijdige afsluitingen"
+        },
+        "watchdog_interval": {
+          "higher": "Langere stille fasen toegestaan – minder onbedoelde gedwongen stops",
+          "lower": "Detecteert vastgelopen cycli sneller"
+        }
+      }
+    },
     "tab": {
       "advanced": "Geavanceerd",
       "diagnostics": "Diagnostiek",
@@ -22757,6 +24143,69 @@
       "ready": "Gotowe do przetworzenia",
       "recording": "Nagrywanie",
       "training": "Trenowanie…"
+    },
+    "suggestion": {
+      "both_agree": "WashData zaleca",
+      "calibrated_label": "Skalibrowano",
+      "observed_label": "Zmierzono",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Mniej cykli jest oznaczanych automatycznie; więcej trafia do przeglądu",
+          "lower": "Więcej cykli jest oznaczanych automatycznie; niektóre mogą być błędnie zidentyfikowane"
+        },
+        "duration_tolerance": {
+          "higher": "Akceptuje szerszy zakres czasu trwania — bardziej elastyczne dopasowanie",
+          "lower": "Wymaga bliższego dopasowania czasu trwania — bardziej rygorystyczne, ale może odrzucić nietypowe cykle"
+        },
+        "end_energy_threshold": {
+          "higher": "Zamyka tylko cykle o znacznym zużyciu energii",
+          "lower": "Zamyka również krótsze lub mniej energochłonne cykle"
+        },
+        "end_repeat_count": {
+          "higher": "Wymaga więcej powtórzeń sygnału końca — bardziej niezawodne, nieco wolniejsze",
+          "lower": "Kończy po mniejszej liczbie powtórzeń — szybsze wykrywanie, większe ryzyko fałszywego zakończenia"
+        },
+        "learning_confidence": {
+          "higher": "Uczy się tylko z bardzo pewnych dopasowań — wolniejsze, ale bardziej niezawodne",
+          "lower": "Uczy się z większej liczby cykli; model może być mniej precyzyjny"
+        },
+        "min_off_gap": {
+          "higher": "Potrzeba dłuższego spokoju przed rozpoczęciem nowego cyklu",
+          "lower": "Krótki spokój uruchamia nowy cykl — kolejne uruchomienia mogą się rozdzielić"
+        },
+        "min_power": {
+          "higher": "Mniej wrażliwy na pobór mocy w stanie gotowości; może przeoczyć bardzo ciche programy",
+          "lower": "Bardziej wrażliwy; może rejestrować pobór mocy w trybie czuwania jako aktywność"
+        },
+        "no_update_active_timeout": {
+          "higher": "Więcej czasu przed uznaniem cyklu za zablokowany",
+          "lower": "Zablokowany cykl jest kończony wcześniej"
+        },
+        "off_delay": {
+          "higher": "Więcej czasu na przerwy urządzenia — dobre dla długich faz namaczania lub suszenia",
+          "lower": "Szybsze wykrywanie końca — działa dobrze dla urządzeń z czystym włączaniem/wyłączaniem"
+        },
+        "profile_match_threshold": {
+          "higher": "Zatwierdza tylko dopasowania o wysokiej pewności; więcej cykli pozostaje nieoznakowanych",
+          "lower": "Dopasowuje więcej cykli; niektóre mogą być lekko błędne"
+        },
+        "running_dead_zone": {
+          "higher": "Ignoruje krótkie skoki mocy podczas bezczynności — mniej wrażliwy na zakłócenia",
+          "lower": "Reaguje na krótsze impulsy mocy — wykrywa szybką aktywność przejściową"
+        },
+        "start_threshold_w": {
+          "higher": "Zapobiega fałszywym startom z krótkich skoków mocy",
+          "lower": "Wykrywa programy o niskiej mocy; może reagować na zakłócenia"
+        },
+        "stop_threshold_w": {
+          "higher": "Kończy cykl szybciej — może zamknąć w trakcie przerwy",
+          "lower": "Czeka dłużej na zakończenie — mniej przedwczesnych zakończeń"
+        },
+        "watchdog_interval": {
+          "higher": "Dopuszcza dłuższe ciche fazy; mniej fałszywych wymuszeń zatrzymania",
+          "lower": "Zablokowane cykle są wykrywane bardziej agresywnie"
+        }
+      }
     },
     "tab": {
       "advanced": "Zaawansowany",
@@ -23826,6 +25275,69 @@
       "suggestions_applied": "Sugestões aplicadas; a integração está recarregando",
       "suggestions_dismissed": "Sugestões dispensadas"
     },
+    "suggestion": {
+      "both_agree": "WashData recomenda",
+      "calibrated_label": "Calibrado",
+      "observed_label": "Observado",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Rotula menos ciclos automaticamente; mais vão para revisão",
+          "lower": "Rotula mais ciclos automaticamente; alguns podem ser mal identificados"
+        },
+        "duration_tolerance": {
+          "higher": "Aceita um intervalo de duração mais amplo — correspondência mais flexível",
+          "lower": "Exige duração mais próxima — mais rigoroso, pode rejeitar ciclos incomuns"
+        },
+        "end_energy_threshold": {
+          "higher": "Encerra apenas ciclos que consumiram energia substancial",
+          "lower": "Encerra também ciclos curtos ou de baixa energia"
+        },
+        "end_repeat_count": {
+          "higher": "Exige que o sinal de fim se repita mais vezes — mais robusto, ligeiramente mais lento",
+          "lower": "Termina após menos repetições — detecção mais rápida, maior risco de fim falso"
+        },
+        "learning_confidence": {
+          "higher": "Aprende apenas com correspondências muito confiantes — mais lento mas mais confiável",
+          "lower": "Aprende com mais ciclos; o modelo pode ser menos preciso"
+        },
+        "min_off_gap": {
+          "higher": "Requer mais tempo inativo antes de iniciar um novo ciclo",
+          "lower": "Um breve repouso inicia um novo ciclo — execuções consecutivas podem ser divididas"
+        },
+        "min_power": {
+          "higher": "Menos sensível ao consumo em repouso; pode não detectar programas muito silenciosos",
+          "lower": "Mais sensível; pode registrar consumo em standby como atividade"
+        },
+        "no_update_active_timeout": {
+          "higher": "Mais tempo antes de declarar um ciclo travado",
+          "lower": "Para um ciclo travado mais cedo"
+        },
+        "off_delay": {
+          "higher": "Mais tempo para pausas do eletrodoméstico — gerencia fases longas de molho ou secagem",
+          "lower": "Detecção de fim mais rápida — ideal para eletrodomésticos com liga/desliga limpo"
+        },
+        "profile_match_threshold": {
+          "higher": "Confirma apenas correspondências de alta confiança; mais ciclos ficam sem rótulo",
+          "lower": "Corresponde a mais ciclos; alguns podem estar ligeiramente errados"
+        },
+        "running_dead_zone": {
+          "higher": "Ignora breves picos de potência em repouso — menos sensível ao ruído",
+          "lower": "Responde a impulsos mais curtos — detecta atividade transitória rápida"
+        },
+        "start_threshold_w": {
+          "higher": "Evita partidas falsas por breves picos de potência",
+          "lower": "Detecta programas de baixa potência; pode ser ativado por ruído"
+        },
+        "stop_threshold_w": {
+          "higher": "Encerra o ciclo mais cedo — pode fechar durante uma pausa",
+          "lower": "Aguarda mais para terminar — menos conclusões prematuras"
+        },
+        "watchdog_interval": {
+          "higher": "Fases silenciosas mais longas permitidas; menos paradas forçadas falsas",
+          "lower": "Detecta ciclos travados de forma mais agressiva"
+        }
+      }
+    },
     "trend": {
       "down": "Tendência de queda",
       "up": "Tendência de alta"
@@ -24818,6 +26330,69 @@
       "settings_saved": "Definições guardadas; a integração está a recarregar",
       "suggestions_applied": "Sugestões aplicadas; a integração está a recarregar",
       "suggestions_dismissed": "Sugestões dispensadas"
+    },
+    "suggestion": {
+      "both_agree": "WashData recomenda",
+      "calibrated_label": "Calibrado",
+      "observed_label": "Observado",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Etiqueta menos ciclos automaticamente; mais vão para revisão",
+          "lower": "Etiqueta mais ciclos automaticamente; alguns podem ser mal identificados"
+        },
+        "duration_tolerance": {
+          "higher": "Aceita um intervalo de duração mais amplo — correspondência mais flexível",
+          "lower": "Exige duração mais próxima — mais rigoroso, pode rejeitar ciclos invulgares"
+        },
+        "end_energy_threshold": {
+          "higher": "Fecha apenas ciclos que consumiram energia substancial",
+          "lower": "Também fecha ciclos curtos ou de baixa energia"
+        },
+        "end_repeat_count": {
+          "higher": "Exige que o sinal de fim se repita mais vezes — mais robusto, ligeiramente mais lento",
+          "lower": "Termina após menos repetições — deteção mais rápida, maior risco de fim falso"
+        },
+        "learning_confidence": {
+          "higher": "Aprende apenas com correspondências muito confiantes — mais lento mas mais fiável",
+          "lower": "Aprende com mais ciclos; o modelo pode ser menos preciso"
+        },
+        "min_off_gap": {
+          "higher": "Requer mais tempo inativo antes de iniciar um novo ciclo",
+          "lower": "Um breve repouso inicia um novo ciclo — execuções consecutivas podem ser divididas"
+        },
+        "min_power": {
+          "higher": "Menos sensível ao consumo em repouso; pode não detetar programas muito silenciosos",
+          "lower": "Mais sensível; pode registar consumo em standby como atividade"
+        },
+        "no_update_active_timeout": {
+          "higher": "Mais tempo antes de declarar um ciclo bloqueado",
+          "lower": "Para um ciclo bloqueado mais cedo"
+        },
+        "off_delay": {
+          "higher": "Mais tempo para pausas do aparelho — gere fases longas de molho ou secagem",
+          "lower": "Deteção de fim mais rápida — adequado para aparelhos com ligação/desligação limpa"
+        },
+        "profile_match_threshold": {
+          "higher": "Confirma apenas correspondências de alta confiança; mais ciclos ficam sem etiqueta",
+          "lower": "Corresponde a mais ciclos; alguns podem estar ligeiramente errados"
+        },
+        "running_dead_zone": {
+          "higher": "Ignora breves picos de potência em repouso — menos sensível ao ruído",
+          "lower": "Responde a impulsos mais curtos — deteta atividade transitória rápida"
+        },
+        "start_threshold_w": {
+          "higher": "Evita arranques falsos por breves picos de potência",
+          "lower": "Deteta programas de baixa potência; pode ser ativado por ruído"
+        },
+        "stop_threshold_w": {
+          "higher": "Termina o ciclo mais cedo — pode fechar durante uma pausa",
+          "lower": "Aguarda mais para terminar — menos conclusões prematuras"
+        },
+        "watchdog_interval": {
+          "higher": "Fases silenciosas mais longas permitidas; menos paragens forçadas falsas",
+          "lower": "Deteta ciclos bloqueados de forma mais agressiva"
+        }
+      }
     },
     "trend": {
       "down": "Tendência descendente",
@@ -25812,6 +27387,69 @@
       "suggestions_applied": "Sugestii aplicate; integrarea se reîncarcă",
       "suggestions_dismissed": "Sugestii ignorate"
     },
+    "suggestion": {
+      "both_agree": "WashData recomandă",
+      "calibrated_label": "Calibrat",
+      "observed_label": "Observat",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Etichetează mai puține cicluri automat; mai multe merg la revizuire",
+          "lower": "Etichetează mai multe cicluri automat; unele pot fi identificate greșit"
+        },
+        "duration_tolerance": {
+          "higher": "Acceptă un interval de durată mai larg — potrivire mai flexibilă",
+          "lower": "Necesită durată mai apropiată — mai strict, poate respinge cicluri neobișnuite"
+        },
+        "end_energy_threshold": {
+          "higher": "Închide doar ciclurile care au consumat energie substanțială",
+          "lower": "Închide și cicluri scurte sau cu consum redus de energie"
+        },
+        "end_repeat_count": {
+          "higher": "Necesită repetarea semnalului de final de mai multe ori — mai robust, puțin mai lent",
+          "lower": "Se termină după mai puține repetări — detectare mai rapidă, risc mai mare de final fals"
+        },
+        "learning_confidence": {
+          "higher": "Învață doar din potriviri foarte sigure — mai lent dar mai fiabil",
+          "lower": "Învață din mai multe cicluri; modelul poate fi mai puțin precis"
+        },
+        "min_off_gap": {
+          "higher": "Este nevoie de mai mult timp de inactivitate înainte de a începe un nou ciclu",
+          "lower": "O pauză scurtă declanșează un nou ciclu — rulările consecutive pot fi împărțite"
+        },
+        "min_power": {
+          "higher": "Mai puțin sensibil la consumul de repaus; poate rata programe foarte silențioase",
+          "lower": "Mai sensibil; poate înregistra consumul în standby ca activitate"
+        },
+        "no_update_active_timeout": {
+          "higher": "Mai mult timp înainte de a declara un ciclu blocat",
+          "lower": "Oprește mai devreme un ciclu blocat"
+        },
+        "off_delay": {
+          "higher": "Mai mult timp pentru pauzele aparatului — gestionează faze lungi de înmuiere sau uscare",
+          "lower": "Detectare mai rapidă a finalului — funcționează bine pentru aparate cu pornire/oprire clară"
+        },
+        "profile_match_threshold": {
+          "higher": "Confirmă doar potriviri de înaltă încredere; mai multe cicluri rămân neetichetate",
+          "lower": "Potrivește mai multe cicluri; unele pot fi ușor greșite"
+        },
+        "running_dead_zone": {
+          "higher": "Ignoră scurte vârfuri de putere în repaus — mai puțin sensibil la zgomot",
+          "lower": "Răspunde la impulsuri mai scurte — detectează activitate tranzitorie rapidă"
+        },
+        "start_threshold_w": {
+          "higher": "Evită pornirile false cauzate de scurte vârfuri de putere",
+          "lower": "Detectează programe de putere redusă; poate fi declanșat de zgomot"
+        },
+        "stop_threshold_w": {
+          "higher": "Termină ciclul mai repede — se poate închide în timpul unei pauze",
+          "lower": "Așteaptă mai mult să termine — mai puține finalizări premature"
+        },
+        "watchdog_interval": {
+          "higher": "Faze silențioase mai lungi permise; mai puține opriri forțate false",
+          "lower": "Detectează ciclurile blocate mai agresiv"
+        }
+      }
+    },
     "trend": {
       "down": "Tendință descendentă",
       "up": "Tendință ascendentă"
@@ -26805,6 +28443,69 @@
       "suggestions_applied": "Предложения применены; интеграция перезагружается",
       "suggestions_dismissed": "Предложения отклонены"
     },
+    "suggestion": {
+      "both_agree": "WashData рекомендует",
+      "calibrated_label": "Откалиброванное",
+      "observed_label": "Наблюдаемое",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Автоматически маркирует меньше циклов; больше отправляется на проверку",
+          "lower": "Автоматически маркирует больше циклов; некоторые могут быть определены неверно"
+        },
+        "duration_tolerance": {
+          "higher": "Принимает более широкий диапазон длительности — более гибкое сопоставление",
+          "lower": "Требует более точного совпадения длительности — строже, но может отклонить необычные циклы"
+        },
+        "end_energy_threshold": {
+          "higher": "Закрывает только циклы, использовавшие значительное количество энергии",
+          "lower": "Закрывает и короткие или маломощные циклы"
+        },
+        "end_repeat_count": {
+          "higher": "Требует повторения сигнала завершения больше раз — надёжнее, немного медленнее",
+          "lower": "Завершает после меньшего числа повторений — быстрее, выше риск ложного завершения"
+        },
+        "learning_confidence": {
+          "higher": "Учится только на очень уверенных совпадениях — медленнее, но надёжнее",
+          "lower": "Учится на большем числе циклов; модель может быть более шумной"
+        },
+        "min_off_gap": {
+          "higher": "Перед новым циклом требуется более длительный простой",
+          "lower": "Короткий простой запускает новый цикл — последовательные запуски могут разделиться"
+        },
+        "min_power": {
+          "higher": "Менее чувствителен к фоновому потреблению; может пропустить тихие программы",
+          "lower": "Более чувствителен; может регистрировать потребление в режиме ожидания как активность"
+        },
+        "no_update_active_timeout": {
+          "higher": "Больше времени до признания цикла зависшим",
+          "lower": "Принудительно останавливает зависший цикл быстрее"
+        },
+        "off_delay": {
+          "higher": "Больше времени для пауз устройства — справляется с длительным замачиванием или сушкой",
+          "lower": "Более быстрое определение конца — подходит для устройств с чётким вкл./выкл."
+        },
+        "profile_match_threshold": {
+          "higher": "Подтверждает только высокоуверенные совпадения; больше циклов остаётся без метки",
+          "lower": "Сопоставляет больше циклов; некоторые могут быть немного неверны"
+        },
+        "running_dead_zone": {
+          "higher": "Игнорирует кратковременные скачки мощности в простое — менее чувствителен к шуму",
+          "lower": "Реагирует на более короткие всплески мощности — улавливает быструю переходную активность"
+        },
+        "start_threshold_w": {
+          "higher": "Исключает ложные запуски от кратковременных скачков мощности",
+          "lower": "Улавливает маломощные программы; может сработать на шум"
+        },
+        "stop_threshold_w": {
+          "higher": "Завершает цикл быстрее — может закрыть во время паузы",
+          "lower": "Дольше ждёт завершения — меньше преждевременных завершений"
+        },
+        "watchdog_interval": {
+          "higher": "Допускает более длительные тихие фазы; меньше ложных принудительных остановок",
+          "lower": "Более агрессивно обнаруживает зависшие циклы"
+        }
+      }
+    },
     "trend": {
       "down": "Нисходящая тенденция",
       "up": "Восходящая тенденция"
@@ -27722,6 +29423,69 @@
       "ready": "Pripravený na spracovanie",
       "recording": "Nahrávanie",
       "training": "Trénovanie…"
+    },
+    "suggestion": {
+      "both_agree": "WashData odporúča",
+      "calibrated_label": "Kalibrované",
+      "observed_label": "Namerané",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Menej cyklov je označených automaticky; viac ide na kontrolu",
+          "lower": "Viac cyklov je označených automaticky; niektoré môžu byť nesprávne určené"
+        },
+        "duration_tolerance": {
+          "higher": "Akceptuje širší rozsah trvania — flexibilnejšie porovnávanie",
+          "lower": "Vyžaduje bližšiu zhodu trvania — prísnejšie, ale môže odmietnuť nezvyčajné cykly"
+        },
+        "end_energy_threshold": {
+          "higher": "Uzatvára iba cykly so značnou spotrebou energie",
+          "lower": "Uzatvára aj kratšie alebo menej energetické cykly"
+        },
+        "end_repeat_count": {
+          "higher": "Vyžaduje viac opakovaní signálu konca — spoľahlivejšie, mierne pomalšie",
+          "lower": "Ukončí po menej opakovaniach — rýchlejšia detekcia, väčšie riziko predčasného ukončenia"
+        },
+        "learning_confidence": {
+          "higher": "Učí sa iba z veľmi istých zhôd — pomalšie, ale spoľahlivejšie",
+          "lower": "Učí sa z viacerých cyklov; model môže byť menej presný"
+        },
+        "min_off_gap": {
+          "higher": "Pred začiatkom nového cyklu je potrebný dlhší pokoj",
+          "lower": "Krátky pokoj spustí nový cyklus — po sebe idúce cykly sa môžu rozdeliť"
+        },
+        "min_power": {
+          "higher": "Menej citlivý na kľudový príkon; môže prehliadnuť veľmi tichý program",
+          "lower": "Citlivejší; môže zaznamenať kľudový príkon ako aktivitu"
+        },
+        "no_update_active_timeout": {
+          "higher": "Viac času pred vyhlásením cyklu za zaseknutý",
+          "lower": "Zaseknutý cyklus je ukončený skôr"
+        },
+        "off_delay": {
+          "higher": "Viac času na prestávky spotrebiča — vhodné pre dlhé fázy namáčania alebo sušenia",
+          "lower": "Rýchlejšia detekcia konca — vhodné pre spotrebiče s čistým zapínaním/vypínaním"
+        },
+        "profile_match_threshold": {
+          "higher": "Potvrdzuje iba vysoko isté zhody; viac cyklov zostane neoznačených",
+          "lower": "Páruje viac cyklov; niektoré môžu byť mierne nesprávne"
+        },
+        "running_dead_zone": {
+          "higher": "Ignoruje krátke výkonové špičky počas nečinnosti — menej citlivý na rušenie",
+          "lower": "Reaguje na kratšie výkonové impulzy — zachytí rýchlu prechodnú aktivitu"
+        },
+        "start_threshold_w": {
+          "higher": "Zabraňuje falošným štartom z krátkych výkonových špiček",
+          "lower": "Zachytí programy s nízkym príkonom; môže reagovať na šum"
+        },
+        "stop_threshold_w": {
+          "higher": "Ukončí cyklus rýchlejšie — môže uzatvoriť počas pauzy",
+          "lower": "Čaká dlhšie na ukončenie — menej predčasných dokončení"
+        },
+        "watchdog_interval": {
+          "higher": "Umožňuje dlhšie tiché fázy; menej falošných vynútených zastavení",
+          "lower": "Zaseknuté cykly sú detegované agresívnejšie"
+        }
+      }
     },
     "tab": {
       "advanced": "Rozšírené",
@@ -28715,6 +30479,69 @@
       "ready": "Pripravljeno za obdelavo",
       "recording": "Snemanje",
       "training": "Učenje…"
+    },
+    "suggestion": {
+      "both_agree": "WashData priporoča",
+      "calibrated_label": "Umerjeno",
+      "observed_label": "Izmerjeno",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Manj ciklov je samodejno označenih; več gre v pregled",
+          "lower": "Več ciklov je samodejno označenih; nekateri so lahko napačno prepoznani"
+        },
+        "duration_tolerance": {
+          "higher": "Sprejme širši razpon trajanja — bolj prilagodljivo ujemanje",
+          "lower": "Zahteva bližje ujemanje trajanja — strožje, a lahko zavrne neobičajne cikle"
+        },
+        "end_energy_threshold": {
+          "higher": "Zaključi samo cikle z znatno porabo energije",
+          "lower": "Zaključi tudi krajše ali manj energijsko zahtevne cikle"
+        },
+        "end_repeat_count": {
+          "higher": "Zahteva več ponovitev signala konca — bolj zanesljivo, nekoliko počasneje",
+          "lower": "Konča po manj ponovitvah — hitrejše zaznavanje, večje tveganje lažnega konca"
+        },
+        "learning_confidence": {
+          "higher": "Uči se le iz zelo zanesljivih ujemanj — počasneje, a zanesljiveje",
+          "lower": "Uči se iz več ciklov; model je lahko manj natančen"
+        },
+        "min_off_gap": {
+          "higher": "Pred začetkom novega cikla je potreben daljši mir",
+          "lower": "Kratek mir sproži nov cikel — zaporedni zagoni se lahko razdelijo"
+        },
+        "min_power": {
+          "higher": "Manj občutljiv na porabo moči v mirovanju; lahko spregleda zelo tihe programe",
+          "lower": "Bolj občutljiv; poraba v stanju pripravljenosti se lahko zabeleži kot aktivnost"
+        },
+        "no_update_active_timeout": {
+          "higher": "Več časa preden se cikel razglasi za zataknjnega",
+          "lower": "Zataknjen cikel se prisili zaključiti prej"
+        },
+        "off_delay": {
+          "higher": "Več časa za premor naprave — primerno za dolge faze namakanja ali sušenja",
+          "lower": "Hitrejše zaznavanje konca — primerno za naprave z jasnim vklopom/izklopom"
+        },
+        "profile_match_threshold": {
+          "higher": "Potrdi le visoko zanesljiva ujemanja; več ciklov ostane neoznačenih",
+          "lower": "Ujema več ciklov; nekateri so lahko rahlo napačni"
+        },
+        "running_dead_zone": {
+          "higher": "Prezre kratke skoke moči med mirovanjem — manj občutljiv na šum",
+          "lower": "Odziva se na krajše impulze moči — zazna hitro prehodno aktivnost"
+        },
+        "start_threshold_w": {
+          "higher": "Preprečuje lažne zagone iz kratkih skokov moči",
+          "lower": "Zazna programe z nizko močjo; lahko se odzove na šum"
+        },
+        "stop_threshold_w": {
+          "higher": "Zaključi cikel hitreje — lahko zapre med premorom",
+          "lower": "Čaka dlje na zaključek — manj prezgodnjih zaključkov"
+        },
+        "watchdog_interval": {
+          "higher": "Dovoli daljše tihe faze; manj lažnih prisilnih ustavitev",
+          "lower": "Zataknjena cikle zaznava bolj agresivno"
+        }
+      }
     },
     "tab": {
       "advanced": "Napredno",
@@ -29784,6 +31611,69 @@
       "suggestions_applied": "Sugjerimet u zbatuan; integrimi po ringarkohet",
       "suggestions_dismissed": "Sugjerimet u injoruan"
     },
+    "suggestion": {
+      "both_agree": "WashData rekomandon",
+      "calibrated_label": "I kalibruar",
+      "observed_label": "I vëzhguar",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Etiketimet automatike zvogëlohen; më shumë cikle shkojnë për rishikim",
+          "lower": "Etiketimet automatike rriten; disa mund të identifikohen gabim"
+        },
+        "duration_tolerance": {
+          "higher": "Pranon gamë më të gjerë kohëzgjatjeje — përputhje më fleksibël",
+          "lower": "Kërkon përputhje më të ngushtë kohëzgjatjeje — më rigoroze por mund të refuzojë cikle të pazakonshme"
+        },
+        "end_energy_threshold": {
+          "higher": "Mbyll vetëm ciklet që kanë konsumuar energji të konsiderueshme",
+          "lower": "Mbyll edhe ciklet e shkurtra ose me konsum të ulët energjie"
+        },
+        "end_repeat_count": {
+          "higher": "Kërkon që sinjali i fundit të përsëritet më shumë herë — më i qëndrueshëm, pak më i ngadaltë",
+          "lower": "Mbyllet pas përsëritjeve më të pakta — detektim më i shpejtë, rrezik më i lartë mbylljeje false"
+        },
+        "learning_confidence": {
+          "higher": "Mëson vetëm nga përputhjet me besueshmëri shumë të lartë — më e ngadaltë por më e besueshme",
+          "lower": "Mëson nga më shumë cikle; modeli mund të jetë më i zhurmshëm"
+        },
+        "min_off_gap": {
+          "higher": "Nevojitet pushim më i gjatë para se të fillojë një cikël i ri",
+          "lower": "Pushimi i shkurtër nis ciklin e ri — rrotullimet e njëpasnjëshme mund të ndahen"
+        },
+        "min_power": {
+          "higher": "Më pak e ndjeshme ndaj konsumit në gjendje pritjeje; mund të humbasë programe shumë të heshtura",
+          "lower": "Më e ndjeshme; mund të regjistrojë fuqinë e pritjes si aktivitet"
+        },
+        "no_update_active_timeout": {
+          "higher": "Më shumë kohë para se të deklarohet cikli i bllokuar",
+          "lower": "Ndërpret ciklin e bllokuar më shpejt"
+        },
+        "off_delay": {
+          "higher": "Më shumë kohë për pauza të pajisjes — trajton faza të gjata njomjeje ose tharjeje",
+          "lower": "Detektim më i shpejtë i fundit — i përshtatshëm për pajisje me ndezje/shuarje të qarta"
+        },
+        "profile_match_threshold": {
+          "higher": "Konfirmon vetëm përputhjet me besueshmëri të lartë; më shumë cikle mbeten pa etiketë",
+          "lower": "Përputhet me më shumë cikle; disa mund të jenë paksa të gabuara"
+        },
+        "running_dead_zone": {
+          "higher": "Injoron kumbëzat e shkurtra të fuqisë gjatë pushimit — më pak e ndjeshme ndaj zhurmës",
+          "lower": "Reagron ndaj shpërthimeve më të shkurtra të fuqisë — kap aktivitetin kalimtar të shpejtë"
+        },
+        "start_threshold_w": {
+          "higher": "Shmang startet false nga kumbëzat e shkurtra të fuqisë",
+          "lower": "Kap programet me fuqi të ulët; mund të aktivizohet nga zhurma"
+        },
+        "stop_threshold_w": {
+          "higher": "Mbyll ciklin më shpejt — mund të mbyllet gjatë një pauze",
+          "lower": "Pret më gjatë para mbylljes — redukton përfundimet e parakohshme"
+        },
+        "watchdog_interval": {
+          "higher": "Lejon faza më të gjata të heshtura; më pak ndërprerje false",
+          "lower": "Kap ciklet e bllokuara më agresivisht"
+        }
+      }
+    },
     "trend": {
       "down": "Tendencë rënëse",
       "up": "Tendencë rritëse"
@@ -30701,6 +32591,69 @@
       "ready": "Spreman za obradu",
       "recording": "Snimanje",
       "training": "Treniranje…"
+    },
+    "suggestion": {
+      "both_agree": "WashData preporučuje",
+      "calibrated_label": "Kalibrisano",
+      "observed_label": "Izmereno",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Manje ciklusa se automatski označava; više ide na pregled",
+          "lower": "Više ciklusa se automatski označava; neki mogu biti pogrešno identifikovani"
+        },
+        "duration_tolerance": {
+          "higher": "Prihvata širi opseg trajanja — fleksibilnije podudaranje",
+          "lower": "Zahteva bliže podudaranje trajanja — strože, ali može odbiti neobične cikluse"
+        },
+        "end_energy_threshold": {
+          "higher": "Zatvara samo cikluse sa značajnom potrošnjom energije",
+          "lower": "Zatvara i kraće ili manje energetske cikluse"
+        },
+        "end_repeat_count": {
+          "higher": "Zahteva više ponavljanja signala kraja — pouzdanije, malo sporije",
+          "lower": "Završava nakon manje ponavljanja — brže otkrivanje, veći rizik lažnog završetka"
+        },
+        "learning_confidence": {
+          "higher": "Uči se samo iz visoko pouzdanih podudaranja — sporije, ali pouzdanije",
+          "lower": "Uči se iz više ciklusa; model može biti manje precizan"
+        },
+        "min_off_gap": {
+          "higher": "Potreban je duži odmor pre početka novog ciklusa",
+          "lower": "Kratak odmor pokreće novi ciklus — uzastopni ciklusi se mogu razdeliti"
+        },
+        "min_power": {
+          "higher": "Manje osetljiv na potrošnju u mirovanju; može propustiti tihe programe",
+          "lower": "Osetljiviji; može beležiti potrošnju u stanju pripravnosti kao aktivnost"
+        },
+        "no_update_active_timeout": {
+          "higher": "Više vremena pre proglašavanja ciklusa zaglavljenim",
+          "lower": "Zaglavljen ciklus se prisilno zaustavlja ranije"
+        },
+        "off_delay": {
+          "higher": "Više vremena za pauze uređaja — prikladno za duge faze namakanja ili sušenja",
+          "lower": "Brže otkrivanje kraja — dobro za uređaje s čistim uključivanjem/isključivanjem"
+        },
+        "profile_match_threshold": {
+          "higher": "Potvrđuje samo visoko pouzdana podudaranja; više ciklusa ostaje neoznačeno",
+          "lower": "Podudara više ciklusa; neki mogu biti blago pogrešni"
+        },
+        "running_dead_zone": {
+          "higher": "Zanemaruje kratke skokove snage tokom mirovanja — manje osetljiv na šum",
+          "lower": "Reaguje na kraće impulse snage — otkriva brzu prolaznu aktivnost"
+        },
+        "start_threshold_w": {
+          "higher": "Sprečava lažne startove od kratkih skokova snage",
+          "lower": "Otkriva programe s niskom snagom; može reagovati na šum"
+        },
+        "stop_threshold_w": {
+          "higher": "Završava ciklus brže — može zatvoriti tokom pauze",
+          "lower": "Duže čeka na završetak — manje prevremenih završetaka"
+        },
+        "watchdog_interval": {
+          "higher": "Dozvoljava duže tihe faze; manje lažnih prisilnih zaustavljanja",
+          "lower": "Zaglavlje cikluse otkriva agresivnije"
+        }
+      }
     },
     "tab": {
       "advanced": "Napredno",
@@ -31694,6 +33647,69 @@
       "ready": "Redo att bearbeta",
       "recording": "Spelar in",
       "training": "Tränar…"
+    },
+    "suggestion": {
+      "both_agree": "WashData rekommenderar",
+      "calibrated_label": "Kalibrerat",
+      "observed_label": "Observerat",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Färre automatiska märkningar – fler cykler går till granskning",
+          "lower": "Fler automatiska märkningar – vissa kan vara felaktiga"
+        },
+        "duration_tolerance": {
+          "higher": "Accepterar ett bredare varaktighetsintervall – flexiblare igenkänning",
+          "lower": "Kräver noggrannare varaktighetsmatchning – striktare men kan avvisa ovanliga cykler"
+        },
+        "end_energy_threshold": {
+          "higher": "Avslutar bara cykler med betydande energiförbrukning",
+          "lower": "Avslutar även kortare eller energisnålare cykler"
+        },
+        "end_repeat_count": {
+          "higher": "Slutsignalen måste upprepas fler gånger – robustare, något långsammare",
+          "lower": "Avslutar efter färre upprepningar – snabbare detektering, mer risk för falskt slut"
+        },
+        "learning_confidence": {
+          "higher": "Lär sig bara från mycket säkra matchningar – långsammare men mer tillförlitligt",
+          "lower": "Lär sig från fler cykler – modellen kan bli mer oprecis"
+        },
+        "min_off_gap": {
+          "higher": "Längre paus krävs innan en ny cykel börjar",
+          "lower": "Kort paus räcker – körningar i följd kan delas upp"
+        },
+        "min_power": {
+          "higher": "Mindre känslig för standby-förbrukning – mycket tysta program kan missas",
+          "lower": "Känsligare – standby-förbrukning kan uppfattas som aktivitet"
+        },
+        "no_update_active_timeout": {
+          "higher": "Mer tid innan en fast cykel tvingas stoppas",
+          "lower": "Tvångsstoppar en fast cykel snabbare"
+        },
+        "off_delay": {
+          "higher": "Mer tid för apparatpauser – långa blöt- eller torkfaser bryggs över",
+          "lower": "Snabbare slutdetektering – passar apparater med tydligt på/av-beteende"
+        },
+        "profile_match_threshold": {
+          "higher": "Bara mycket säkra matchningar bekräftas – fler cykler förblir omärkta",
+          "lower": "Fler cykler matchas – vissa kan vara något felaktiga"
+        },
+        "running_dead_zone": {
+          "higher": "Korta effekttoppar under tomgång ignoreras – mindre brusig",
+          "lower": "Reagerar på kortare effektimpulser – fångar snabba transienter"
+        },
+        "start_threshold_w": {
+          "higher": "Undviker falska starter från korta effekttoppar",
+          "lower": "Fångar lågeffektsprogram – kan triggas av brus"
+        },
+        "stop_threshold_w": {
+          "higher": "Avslutar cykeln snabbare – kan utlösas under en paus",
+          "lower": "Väntar längre med att avsluta – färre förtida avslutningar"
+        },
+        "watchdog_interval": {
+          "higher": "Längre tysta faser tillåts – färre oavsiktliga tvångsstopp",
+          "lower": "Detekterar fasta cykler snabbare"
+        }
+      }
     },
     "tab": {
       "advanced": "Avancerat",
@@ -32763,6 +34779,69 @@
       "suggestions_applied": "Öneriler uygulandı; entegrasyon yeniden yükleniyor",
       "suggestions_dismissed": "Öneriler reddedildi"
     },
+    "suggestion": {
+      "both_agree": "WashData öneriyor",
+      "calibrated_label": "Kalibre edilmiş",
+      "observed_label": "Gözlemlenen",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Daha az döngüyü otomatik etiketler; daha fazlası incelemeye gider",
+          "lower": "Daha fazla döngüyü otomatik etiketler; bazıları yanlış tanımlanabilir"
+        },
+        "duration_tolerance": {
+          "higher": "Daha geniş süre aralığı kabul eder — daha esnek eşleştirme",
+          "lower": "Daha yakın süre eşleşmesi gerektirir — daha katı ama alışılmadık döngüleri reddedebilir"
+        },
+        "end_energy_threshold": {
+          "higher": "Yalnızca önemli enerji kullanan döngüleri kapatır",
+          "lower": "Daha kısa veya düşük enerjili döngüleri de kapatır"
+        },
+        "end_repeat_count": {
+          "higher": "Bitiş sinyalinin daha fazla tekrarlanmasını gerektirir — daha güvenilir, biraz daha yavaş",
+          "lower": "Daha az tekrardan sonra biter — daha hızlı algılama, daha yüksek yanlış bitiş riski"
+        },
+        "learning_confidence": {
+          "higher": "Yalnızca çok güvenli eşleşmelerden öğrenir — daha yavaş ama daha güvenilir",
+          "lower": "Daha fazla döngüden öğrenir; model daha gürültülü olabilir"
+        },
+        "min_off_gap": {
+          "higher": "Yeni döngü başlamadan önce daha uzun boşta kalma süresi gerekir",
+          "lower": "Kısa boşta kalma yeni döngü başlatır — arka arkaya çalışmalar bölünebilir"
+        },
+        "min_power": {
+          "higher": "Boşta güç çekimine daha az duyarlı; çok sessiz programları kaçırabilir",
+          "lower": "Daha duyarlı; bekleme modundaki güç tüketimini etkinlik olarak kaydedebilir"
+        },
+        "no_update_active_timeout": {
+          "higher": "Döngü takılı sayılmadan önce daha fazla zaman",
+          "lower": "Takılı döngüyü daha erken zorunlu durdurur"
+        },
+        "off_delay": {
+          "higher": "Cihaz duraklamaları için daha fazla süre — uzun ıslatma veya kurutma aşamalarını yönetir",
+          "lower": "Daha hızlı bitiş algılama — net açık/kapalı cihazlar için iyi çalışır"
+        },
+        "profile_match_threshold": {
+          "higher": "Yalnızca yüksek güvenli eşleşmeleri onaylar; daha fazla döngü etiketsiz kalır",
+          "lower": "Daha fazla döngüyle eşleşir; bazıları hafif hatalı olabilir"
+        },
+        "running_dead_zone": {
+          "higher": "Boşta kısa güç artışlarını yoksayar — gürültüye daha az duyarlı",
+          "lower": "Daha kısa güç patlamalarına yanıt verir — hızlı geçici etkinliği yakalar"
+        },
+        "start_threshold_w": {
+          "higher": "Kısa güç artışlarından kaynaklanan yanlış başlatmaları önler",
+          "lower": "Düşük güçlü programları yakalar; gürültüde tetiklenebilir"
+        },
+        "stop_threshold_w": {
+          "higher": "Döngüyü daha hızlı bitirir — duraklamada kapanabilir",
+          "lower": "Bitişi daha uzun bekler — daha az erken tamamlanma"
+        },
+        "watchdog_interval": {
+          "higher": "Daha uzun sessiz aşamalara izin verilir; daha az yanlış zorunlu durdurma",
+          "lower": "Takılı döngüleri daha agresif şekilde yakalar"
+        }
+      }
+    },
     "trend": {
       "down": "Düşen eğilim",
       "up": "Yükselen eğilim"
@@ -33756,6 +35835,69 @@
       "suggestions_applied": "Пропозиції застосовано; інтеграція перезавантажується",
       "suggestions_dismissed": "Пропозиції відхилено"
     },
+    "suggestion": {
+      "both_agree": "WashData рекомендує",
+      "calibrated_label": "Відкалібровано",
+      "observed_label": "Спостережуване",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "Автоматично позначає менше циклів; більше йде на перевірку",
+          "lower": "Автоматично позначає більше циклів; деякі можуть бути визначені неправильно"
+        },
+        "duration_tolerance": {
+          "higher": "Приймає ширший діапазон тривалості — гнучкіше зіставлення",
+          "lower": "Потребує точнішого збігу тривалості — суворіше, але може відхилити незвичні цикли"
+        },
+        "end_energy_threshold": {
+          "higher": "Закриває лише цикли зі значним споживанням енергії",
+          "lower": "Закриває також коротші або маломощні цикли"
+        },
+        "end_repeat_count": {
+          "higher": "Потребує більшої кількості повторень сигналу завершення — надійніше, дещо повільніше",
+          "lower": "Завершує після меншої кількості повторень — швидше, більший ризик хибного завершення"
+        },
+        "learning_confidence": {
+          "higher": "Навчається лише на дуже впевнених збігах — повільніше, але надійніше",
+          "lower": "Навчається на більшій кількості циклів; модель може бути більш зашумленою"
+        },
+        "min_off_gap": {
+          "higher": "Перед новим циклом потрібен тривалий простій",
+          "lower": "Короткий простій запускає новий цикл — послідовні запуски можуть розділитися"
+        },
+        "min_power": {
+          "higher": "Менш чутливий до фонового споживання; може пропустити тихі програми",
+          "lower": "Більш чутливий; може реєструвати споживання в режимі очікування як активність"
+        },
+        "no_update_active_timeout": {
+          "higher": "Більше часу до визначення циклу як зависшого",
+          "lower": "Швидше примусово зупиняє зависший цикл"
+        },
+        "off_delay": {
+          "higher": "Більше часу для пауз пристрою — обробляє тривале замочування або сушку",
+          "lower": "Швидше визначення завершення — добре для пристроїв із чітким вкл./викл."
+        },
+        "profile_match_threshold": {
+          "higher": "Підтверджує лише збіги з високою впевненістю; більше циклів залишаються без мітки",
+          "lower": "Зіставляє більше циклів; деякі можуть бути дещо неправильними"
+        },
+        "running_dead_zone": {
+          "higher": "Ігнорує короткочасні стрибки потужності в режимі простою — менш чутливий до шуму",
+          "lower": "Реагує на коротші сплески потужності — вловлює швидку перехідну активність"
+        },
+        "start_threshold_w": {
+          "higher": "Запобігає хибним запускам від короткочасних стрибків потужності",
+          "lower": "Вловлює маломощні програми; може спрацювати на шум"
+        },
+        "stop_threshold_w": {
+          "higher": "Завершує цикл швидше — може закрити під час паузи",
+          "lower": "Довше очікує завершення — менше передчасних завершень"
+        },
+        "watchdog_interval": {
+          "higher": "Дозволяє триваліші тихі фази; менше хибних примусових зупинок",
+          "lower": "Більш агресивно виявляє зависші цикли"
+        }
+      }
+    },
     "trend": {
       "down": "Низхідна тенденція",
       "up": "Висхідна тенденція"
@@ -34748,6 +36890,69 @@
       "settings_saved": "设置已保存；集成重载中",
       "suggestions_applied": "建议已应用；集成重载中",
       "suggestions_dismissed": "建议已关闭"
+    },
+    "suggestion": {
+      "both_agree": "WashData建议",
+      "calibrated_label": "已校准",
+      "observed_label": "观测值",
+      "impact": {
+        "auto_label_confidence": {
+          "higher": "自动标记的循环减少，更多循环进入审核",
+          "lower": "自动标记更多循环，部分可能被误识别"
+        },
+        "duration_tolerance": {
+          "higher": "接受更宽的时长范围——匹配更灵活",
+          "lower": "要求时长更接近——更严格，但可能拒绝非常规循环"
+        },
+        "end_energy_threshold": {
+          "higher": "仅关闭消耗大量能量的循环",
+          "lower": "也关闭较短或低能耗的循环"
+        },
+        "end_repeat_count": {
+          "higher": "结束信号需重复更多次——更稳健，但略慢",
+          "lower": "更少重复后结束——检测更快，但误结束风险更高"
+        },
+        "learning_confidence": {
+          "higher": "仅从高置信度匹配中学习——较慢但更可靠",
+          "lower": "从更多循环中学习，模型可能更嘈杂"
+        },
+        "min_off_gap": {
+          "higher": "新循环开始前需要更长的空闲时间",
+          "lower": "短暂空闲即触发新循环——连续运行可能被拆分"
+        },
+        "min_power": {
+          "higher": "对待机功耗不那么敏感，可能遗漏非常安静的程序",
+          "lower": "更灵敏，可能将待机功耗记录为活动"
+        },
+        "no_update_active_timeout": {
+          "higher": "在判定循环卡住前等待更长时间",
+          "lower": "更快地强制终止卡住的循环"
+        },
+        "off_delay": {
+          "higher": "为设备暂停留出更多时间——适合长时间浸泡或烘干阶段",
+          "lower": "更快检测结束——适合干净的开关设备"
+        },
+        "profile_match_threshold": {
+          "higher": "仅提交高置信度匹配，更多循环保持未标记",
+          "lower": "匹配更多循环，部分可能略有偏差"
+        },
+        "running_dead_zone": {
+          "higher": "忽略待机时的短暂功率尖峰——对噪声不那么敏感",
+          "lower": "响应更短的功率突发——捕捉快速瞬态活动"
+        },
+        "start_threshold_w": {
+          "higher": "避免因短暂功率尖峰引起的误启动",
+          "lower": "捕捉低功率程序，可能对噪声触发"
+        },
+        "stop_threshold_w": {
+          "higher": "更快结束循环——可能在暂停时关闭",
+          "lower": "等待更长时间结束——减少提前完成"
+        },
+        "watchdog_interval": {
+          "higher": "允许更长的静默阶段，减少误强制停止",
+          "lower": "更积极地捕捉卡住的循环"
+        }
+      }
     },
     "trend": {
       "down": "下降趋势",

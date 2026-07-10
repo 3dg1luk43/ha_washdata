@@ -911,6 +911,69 @@
     "recording": "Nagrywanie",
     "training": "Trenowanie…"
   },
+  "suggestion": {
+    "both_agree": "WashData zaleca",
+    "calibrated_label": "Skalibrowano",
+    "observed_label": "Zmierzono",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Mniej cykli jest oznaczanych automatycznie; więcej trafia do przeglądu",
+        "lower": "Więcej cykli jest oznaczanych automatycznie; niektóre mogą być błędnie zidentyfikowane"
+      },
+      "duration_tolerance": {
+        "higher": "Akceptuje szerszy zakres czasu trwania — bardziej elastyczne dopasowanie",
+        "lower": "Wymaga bliższego dopasowania czasu trwania — bardziej rygorystyczne, ale może odrzucić nietypowe cykle"
+      },
+      "end_energy_threshold": {
+        "higher": "Zamyka tylko cykle o znacznym zużyciu energii",
+        "lower": "Zamyka również krótsze lub mniej energochłonne cykle"
+      },
+      "end_repeat_count": {
+        "higher": "Wymaga więcej powtórzeń sygnału końca — bardziej niezawodne, nieco wolniejsze",
+        "lower": "Kończy po mniejszej liczbie powtórzeń — szybsze wykrywanie, większe ryzyko fałszywego zakończenia"
+      },
+      "learning_confidence": {
+        "higher": "Uczy się tylko z bardzo pewnych dopasowań — wolniejsze, ale bardziej niezawodne",
+        "lower": "Uczy się z większej liczby cykli; model może być mniej precyzyjny"
+      },
+      "min_off_gap": {
+        "higher": "Potrzeba dłuższego spokoju przed rozpoczęciem nowego cyklu",
+        "lower": "Krótki spokój uruchamia nowy cykl — kolejne uruchomienia mogą się rozdzielić"
+      },
+      "min_power": {
+        "higher": "Mniej wrażliwy na pobór mocy w stanie gotowości; może przeoczyć bardzo ciche programy",
+        "lower": "Bardziej wrażliwy; może rejestrować pobór mocy w trybie czuwania jako aktywność"
+      },
+      "no_update_active_timeout": {
+        "higher": "Więcej czasu przed uznaniem cyklu za zablokowany",
+        "lower": "Zablokowany cykl jest kończony wcześniej"
+      },
+      "off_delay": {
+        "higher": "Więcej czasu na przerwy urządzenia — dobre dla długich faz namaczania lub suszenia",
+        "lower": "Szybsze wykrywanie końca — działa dobrze dla urządzeń z czystym włączaniem/wyłączaniem"
+      },
+      "profile_match_threshold": {
+        "higher": "Zatwierdza tylko dopasowania o wysokiej pewności; więcej cykli pozostaje nieoznakowanych",
+        "lower": "Dopasowuje więcej cykli; niektóre mogą być lekko błędne"
+      },
+      "running_dead_zone": {
+        "higher": "Ignoruje krótkie skoki mocy podczas bezczynności — mniej wrażliwy na zakłócenia",
+        "lower": "Reaguje na krótsze impulsy mocy — wykrywa szybką aktywność przejściową"
+      },
+      "start_threshold_w": {
+        "higher": "Zapobiega fałszywym startom z krótkich skoków mocy",
+        "lower": "Wykrywa programy o niskiej mocy; może reagować na zakłócenia"
+      },
+      "stop_threshold_w": {
+        "higher": "Kończy cykl szybciej — może zamknąć w trakcie przerwy",
+        "lower": "Czeka dłużej na zakończenie — mniej przedwczesnych zakończeń"
+      },
+      "watchdog_interval": {
+        "higher": "Dopuszcza dłuższe ciche fazy; mniej fałszywych wymuszeń zatrzymania",
+        "lower": "Zablokowane cykle są wykrywane bardziej agresywnie"
+      }
+    }
+  },
   "tab": {
     "advanced": "Zaawansowany",
     "diagnostics": "Diagnostyka",

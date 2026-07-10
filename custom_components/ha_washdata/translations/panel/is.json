@@ -911,6 +911,69 @@
     "recording": "Tekur upp",
     "training": "Þjálfun…"
   },
+  "suggestion": {
+    "both_agree": "WashData mælir með",
+    "calibrated_label": "Kvarðað",
+    "observed_label": "Mælt",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Merkir færri lotur sjálfkrafa – fleiri fara í yfirferð",
+        "lower": "Merkir fleiri lotur sjálfkrafa – sumar kunna að vera rangar"
+      },
+      "duration_tolerance": {
+        "higher": "Þiggur víðara lengdarsvið – sveigjanlegri samsvörun",
+        "lower": "Krefst nákvæmari lengdarsamsvörunar – strangara en getur hafnað óvenjulegum lotum"
+      },
+      "end_energy_threshold": {
+        "higher": "Lokar aðeins lotum með umtalsverðan orkuNotkun",
+        "lower": "Lokar einnig styttri eða orkuminni lotum"
+      },
+      "end_repeat_count": {
+        "higher": "Lokaboð þarf að endurtaka sig oftar – öruggara, lítið eitt hægar",
+        "lower": "Lýkur eftir færri endurtekningar – hraðari greining, meiri hætta á röngu loki"
+      },
+      "learning_confidence": {
+        "higher": "Lærir aðeins af mjög öruggum samsvörunum – hægar en áreiðanlegra",
+        "lower": "Lærir af fleiri lotum – líkan kann að verða ónákvæmara"
+      },
+      "min_off_gap": {
+        "higher": "Lengra hlé þarf áður en ný lota byrjar",
+        "lower": "Stutt hlé nægir – lotur á eftir hverri annarri kunna að skiptast"
+      },
+      "min_power": {
+        "higher": "Minna næmt fyrir biðstöðuafli – mjög hljóð forrit kunna að gleymast",
+        "lower": "Næmara – biðstöðuafl gæti skráðst sem virkni"
+      },
+      "no_update_active_timeout": {
+        "higher": "Meiri tími áður en föst lota er þvinguð stöðvuð",
+        "lower": "Þvingarstöðvar fastar lotur hraðar"
+      },
+      "off_delay": {
+        "higher": "Meiri tími fyrir hlé tækis – langar bleyti- eða þurrkunarfasir brúaðar",
+        "lower": "Hraðari lokagreining – hentar tækjum með skýra kveikt/slökkt-hegðun"
+      },
+      "profile_match_threshold": {
+        "higher": "Aðeins mjög öruggar samsvörunir staðfestar – fleiri lotur vera ómerktar",
+        "lower": "Fleiri lotur samsvara – sumar kunna að vera lítið eitt rangar"
+      },
+      "running_dead_zone": {
+        "higher": "Stuttar aflhækkingar í aðgerðaleysi hunsar – minna næmt fyrir hávaða",
+        "lower": "Bregst við styttri aflboðum – skráir skjótar sveiflur"
+      },
+      "start_threshold_w": {
+        "higher": "Forðast rangar ræsingar vegna stuttra aflhækkinga",
+        "lower": "Þekkir forrit með lágt afl – gæti kviknaðu af hávaða"
+      },
+      "stop_threshold_w": {
+        "higher": "Lýkur lotu hraðar – gæti kviknaður í hlé",
+        "lower": "Bíður lengur með lok – færri of snemmara lok"
+      },
+      "watchdog_interval": {
+        "higher": "Lengri þagnar leyfast – færri óviljandi þvinganir",
+        "lower": "Greinir fastar lotur hraðar"
+      }
+    }
+  },
   "tab": {
     "advanced": "Ítarlegri",
     "diagnostics": "Greining",

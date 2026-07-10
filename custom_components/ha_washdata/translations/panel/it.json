@@ -986,6 +986,69 @@
     "suggestions_applied": "Suggerimenti applicati; ricarica dell'integrazione",
     "suggestions_dismissed": "Suggerimenti respinti"
   },
+  "suggestion": {
+    "both_agree": "WashData consiglia",
+    "calibrated_label": "Calibrato",
+    "observed_label": "Osservato",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Etichetta meno cicli automaticamente; più vanno in revisione",
+        "lower": "Etichetta più cicli automaticamente; alcuni possono essere mal identificati"
+      },
+      "duration_tolerance": {
+        "higher": "Accetta un intervallo di durata più ampio — corrispondenza più flessibile",
+        "lower": "Richiede una durata più vicina — più rigoroso, può rifiutare cicli insoliti"
+      },
+      "end_energy_threshold": {
+        "higher": "Chiude solo i cicli che hanno consumato energia sostanziale",
+        "lower": "Chiude anche cicli brevi o a basso consumo energetico"
+      },
+      "end_repeat_count": {
+        "higher": "Richiede che il segnale di fine si ripeta più volte — più robusto, leggermente più lento",
+        "lower": "Termina dopo meno ripetizioni — rilevamento più rapido, maggior rischio di fine falsa"
+      },
+      "learning_confidence": {
+        "higher": "Impara solo da corrispondenze molto affidabili — più lento ma più preciso",
+        "lower": "Impara da più cicli; il modello potrebbe essere meno preciso"
+      },
+      "min_off_gap": {
+        "higher": "Richiede più tempo di inattività prima di avviare un nuovo ciclo",
+        "lower": "Una breve inattività avvia un nuovo ciclo — esecuzioni consecutive possono dividersi"
+      },
+      "min_power": {
+        "higher": "Meno sensibile al consumo in standby; potrebbe non rilevare programmi a bassa potenza",
+        "lower": "Più sensibile; potrebbe registrare il consumo in standby come attività"
+      },
+      "no_update_active_timeout": {
+        "higher": "Più tempo prima di dichiarare un ciclo bloccato",
+        "lower": "Interrompe prima un ciclo bloccato"
+      },
+      "off_delay": {
+        "higher": "Più tempo per le pause dell'elettrodomestico — gestisce lunghe fasi di ammollo o asciugatura",
+        "lower": "Rilevamento della fine più rapido — ideale per elettrodomestici con on/off netto"
+      },
+      "profile_match_threshold": {
+        "higher": "Conferma solo le corrispondenze ad alta affidabilità; più cicli rimangono senza etichetta",
+        "lower": "Corrisponde a più cicli; alcuni potrebbero essere leggermente errati"
+      },
+      "running_dead_zone": {
+        "higher": "Ignora brevi picchi di potenza durante il riposo — meno sensibile al rumore",
+        "lower": "Risponde a impulsi più brevi — rileva attività transitorie rapide"
+      },
+      "start_threshold_w": {
+        "higher": "Evita avvii falsi causati da brevi picchi di potenza",
+        "lower": "Rileva programmi a bassa potenza; può attivarsi con il rumore"
+      },
+      "stop_threshold_w": {
+        "higher": "Termina il ciclo prima — potrebbe chiudersi durante una pausa",
+        "lower": "Attende più a lungo per terminare — meno completamenti prematuri"
+      },
+      "watchdog_interval": {
+        "higher": "Fasi silenziose più lunghe consentite; meno false fermate forzate",
+        "lower": "Rileva cicli bloccati in modo più aggressivo"
+      }
+    }
+  },
   "trend": {
     "down": "Tendenza al ribasso",
     "up": "Tendenza in alto"

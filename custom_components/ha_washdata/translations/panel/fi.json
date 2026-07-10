@@ -911,6 +911,69 @@
     "recording": "Tallennetaan",
     "training": "Koulutetaan…"
   },
+  "suggestion": {
+    "both_agree": "WashData suosittelee",
+    "calibrated_label": "Kalibroitu",
+    "observed_label": "Havaittu",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Vähemmän automaattisia merkintöjä – useammat syklit menevät tarkistukseen",
+        "lower": "Enemmän automaattisia merkintöjä – osa voi olla virheellisiä"
+      },
+      "duration_tolerance": {
+        "higher": "Hyväksyy laajemman kestoalueen – joustavampi tunnistus",
+        "lower": "Edellyttää tarkempaa kestomatchausta – tiukempi, mutta voi hylätä epätavalliset syklit"
+      },
+      "end_energy_threshold": {
+        "higher": "Sulkee vain syklit, jotka kuluttivat merkittävästi energiaa",
+        "lower": "Sulkee myös lyhyemmät tai vähän energiaa kuluttavat syklit"
+      },
+      "end_repeat_count": {
+        "higher": "Päätyssignaali täytyy toistua useammin – luotettavampi, hieman hitaampi",
+        "lower": "Päättyy vähemmän toistojen jälkeen – nopeampi tunnistus, enemmän riskiä väärästä lopetuksesta"
+      },
+      "learning_confidence": {
+        "higher": "Oppii vain erittäin varmoista osumista – hitaampi mutta luotettavampi",
+        "lower": "Oppii useammista sykleistä – malli voi olla epätarkempi"
+      },
+      "min_off_gap": {
+        "higher": "Pidempi tauko vaaditaan ennen uuden syklin alkua",
+        "lower": "Lyhyt tauko riittää – peräkkäiset ajot voivat jakaantua"
+      },
+      "min_power": {
+        "higher": "Vähemmän herkkä standby-teholle – hyvin hiljaiset ohjelmat voivat jäädä huomaamatta",
+        "lower": "Herkempi – standby-teho voidaan tunnistaa aktiviteetiksi"
+      },
+      "no_update_active_timeout": {
+        "higher": "Enemmän aikaa ennen kuin jumiutunut sykli pakotetaan lopetettavaksi",
+        "lower": "Pakottaa jumiutuneen syklin loppumaan nopeammin"
+      },
+      "off_delay": {
+        "higher": "Enemmän aikaa laitteen tauoille – pitkät likoamis- tai kuivausvaiheet sillataan",
+        "lower": "Nopeampi lopetuksen tunnistus – sopii laitteille, joilla on selkeä päällä/pois-käyttäytyminen"
+      },
+      "profile_match_threshold": {
+        "higher": "Vain erittäin varmat osumat vahvistetaan – useammat syklit jäävät merkitsemättä",
+        "lower": "Useammat syklit täsmäytetään – osa voi olla hieman väärin"
+      },
+      "running_dead_zone": {
+        "higher": "Lyhyet tehohuiput tyhjäkäynnin aikana ohitetaan – vähemmän häiriöherkkä",
+        "lower": "Reagoi lyhyempiin tehoimpulsseihin – havaitsee nopeat transientit"
+      },
+      "start_threshold_w": {
+        "higher": "Välttää väärät käynnistykset lyhyistä tehohuipuista",
+        "lower": "Tunnistaa vähätehoiset ohjelmat – voi aktivoitua häiriöistä"
+      },
+      "stop_threshold_w": {
+        "higher": "Päättää syklin nopeammin – voi aktivoitua tauon aikana",
+        "lower": "Odottaa kauemmin ennen lopetusta – vähemmän ennenaikaisia päätöksiä"
+      },
+      "watchdog_interval": {
+        "higher": "Pidempiä hiljaisia vaiheita sallitaan – vähemmän tahattomia pakotettuja pysäytyksiä",
+        "lower": "Havaitsee jumissa olevat syklit nopeammin"
+      }
+    }
+  },
   "tab": {
     "advanced": "Edistynyt",
     "diagnostics": "Diagnostiikka",

@@ -986,6 +986,69 @@
     "suggestions_applied": "Sugestii aplicate; integrarea se reîncarcă",
     "suggestions_dismissed": "Sugestii ignorate"
   },
+  "suggestion": {
+    "both_agree": "WashData recomandă",
+    "calibrated_label": "Calibrat",
+    "observed_label": "Observat",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Etichetează mai puține cicluri automat; mai multe merg la revizuire",
+        "lower": "Etichetează mai multe cicluri automat; unele pot fi identificate greșit"
+      },
+      "duration_tolerance": {
+        "higher": "Acceptă un interval de durată mai larg — potrivire mai flexibilă",
+        "lower": "Necesită durată mai apropiată — mai strict, poate respinge cicluri neobișnuite"
+      },
+      "end_energy_threshold": {
+        "higher": "Închide doar ciclurile care au consumat energie substanțială",
+        "lower": "Închide și cicluri scurte sau cu consum redus de energie"
+      },
+      "end_repeat_count": {
+        "higher": "Necesită repetarea semnalului de final de mai multe ori — mai robust, puțin mai lent",
+        "lower": "Se termină după mai puține repetări — detectare mai rapidă, risc mai mare de final fals"
+      },
+      "learning_confidence": {
+        "higher": "Învață doar din potriviri foarte sigure — mai lent dar mai fiabil",
+        "lower": "Învață din mai multe cicluri; modelul poate fi mai puțin precis"
+      },
+      "min_off_gap": {
+        "higher": "Este nevoie de mai mult timp de inactivitate înainte de a începe un nou ciclu",
+        "lower": "O pauză scurtă declanșează un nou ciclu — rulările consecutive pot fi împărțite"
+      },
+      "min_power": {
+        "higher": "Mai puțin sensibil la consumul de repaus; poate rata programe foarte silențioase",
+        "lower": "Mai sensibil; poate înregistra consumul în standby ca activitate"
+      },
+      "no_update_active_timeout": {
+        "higher": "Mai mult timp înainte de a declara un ciclu blocat",
+        "lower": "Oprește mai devreme un ciclu blocat"
+      },
+      "off_delay": {
+        "higher": "Mai mult timp pentru pauzele aparatului — gestionează faze lungi de înmuiere sau uscare",
+        "lower": "Detectare mai rapidă a finalului — funcționează bine pentru aparate cu pornire/oprire clară"
+      },
+      "profile_match_threshold": {
+        "higher": "Confirmă doar potriviri de înaltă încredere; mai multe cicluri rămân neetichetate",
+        "lower": "Potrivește mai multe cicluri; unele pot fi ușor greșite"
+      },
+      "running_dead_zone": {
+        "higher": "Ignoră scurte vârfuri de putere în repaus — mai puțin sensibil la zgomot",
+        "lower": "Răspunde la impulsuri mai scurte — detectează activitate tranzitorie rapidă"
+      },
+      "start_threshold_w": {
+        "higher": "Evită pornirile false cauzate de scurte vârfuri de putere",
+        "lower": "Detectează programe de putere redusă; poate fi declanșat de zgomot"
+      },
+      "stop_threshold_w": {
+        "higher": "Termină ciclul mai repede — se poate închide în timpul unei pauze",
+        "lower": "Așteaptă mai mult să termine — mai puține finalizări premature"
+      },
+      "watchdog_interval": {
+        "higher": "Faze silențioase mai lungi permise; mai puține opriri forțate false",
+        "lower": "Detectează ciclurile blocate mai agresiv"
+      }
+    }
+  },
   "trend": {
     "down": "Tendință descendentă",
     "up": "Tendință ascendentă"

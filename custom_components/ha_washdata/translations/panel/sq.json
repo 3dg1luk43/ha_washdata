@@ -986,6 +986,69 @@
     "suggestions_applied": "Sugjerimet u zbatuan; integrimi po ringarkohet",
     "suggestions_dismissed": "Sugjerimet u injoruan"
   },
+  "suggestion": {
+    "both_agree": "WashData rekomandon",
+    "calibrated_label": "I kalibruar",
+    "observed_label": "I vëzhguar",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Etiketimet automatike zvogëlohen; më shumë cikle shkojnë për rishikim",
+        "lower": "Etiketimet automatike rriten; disa mund të identifikohen gabim"
+      },
+      "duration_tolerance": {
+        "higher": "Pranon gamë më të gjerë kohëzgjatjeje — përputhje më fleksibël",
+        "lower": "Kërkon përputhje më të ngushtë kohëzgjatjeje — më rigoroze por mund të refuzojë cikle të pazakonshme"
+      },
+      "end_energy_threshold": {
+        "higher": "Mbyll vetëm ciklet që kanë konsumuar energji të konsiderueshme",
+        "lower": "Mbyll edhe ciklet e shkurtra ose me konsum të ulët energjie"
+      },
+      "end_repeat_count": {
+        "higher": "Kërkon që sinjali i fundit të përsëritet më shumë herë — më i qëndrueshëm, pak më i ngadaltë",
+        "lower": "Mbyllet pas përsëritjeve më të pakta — detektim më i shpejtë, rrezik më i lartë mbylljeje false"
+      },
+      "learning_confidence": {
+        "higher": "Mëson vetëm nga përputhjet me besueshmëri shumë të lartë — më e ngadaltë por më e besueshme",
+        "lower": "Mëson nga më shumë cikle; modeli mund të jetë më i zhurmshëm"
+      },
+      "min_off_gap": {
+        "higher": "Nevojitet pushim më i gjatë para se të fillojë një cikël i ri",
+        "lower": "Pushimi i shkurtër nis ciklin e ri — rrotullimet e njëpasnjëshme mund të ndahen"
+      },
+      "min_power": {
+        "higher": "Më pak e ndjeshme ndaj konsumit në gjendje pritjeje; mund të humbasë programe shumë të heshtura",
+        "lower": "Më e ndjeshme; mund të regjistrojë fuqinë e pritjes si aktivitet"
+      },
+      "no_update_active_timeout": {
+        "higher": "Më shumë kohë para se të deklarohet cikli i bllokuar",
+        "lower": "Ndërpret ciklin e bllokuar më shpejt"
+      },
+      "off_delay": {
+        "higher": "Më shumë kohë për pauza të pajisjes — trajton faza të gjata njomjeje ose tharjeje",
+        "lower": "Detektim më i shpejtë i fundit — i përshtatshëm për pajisje me ndezje/shuarje të qarta"
+      },
+      "profile_match_threshold": {
+        "higher": "Konfirmon vetëm përputhjet me besueshmëri të lartë; më shumë cikle mbeten pa etiketë",
+        "lower": "Përputhet me më shumë cikle; disa mund të jenë paksa të gabuara"
+      },
+      "running_dead_zone": {
+        "higher": "Injoron kumbëzat e shkurtra të fuqisë gjatë pushimit — më pak e ndjeshme ndaj zhurmës",
+        "lower": "Reagron ndaj shpërthimeve më të shkurtra të fuqisë — kap aktivitetin kalimtar të shpejtë"
+      },
+      "start_threshold_w": {
+        "higher": "Shmang startet false nga kumbëzat e shkurtra të fuqisë",
+        "lower": "Kap programet me fuqi të ulët; mund të aktivizohet nga zhurma"
+      },
+      "stop_threshold_w": {
+        "higher": "Mbyll ciklin më shpejt — mund të mbyllet gjatë një pauze",
+        "lower": "Pret më gjatë para mbylljes — redukton përfundimet e parakohshme"
+      },
+      "watchdog_interval": {
+        "higher": "Lejon faza më të gjata të heshtura; më pak ndërprerje false",
+        "lower": "Kap ciklet e bllokuara më agresivisht"
+      }
+    }
+  },
   "trend": {
     "down": "Tendencë rënëse",
     "up": "Tendencë rritëse"

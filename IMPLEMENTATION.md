@@ -1014,6 +1014,34 @@ The cooldown prevents the engine from immediately re-suggesting changes that wer
 
 The two constants (`MIN_SUGGESTION_REL_DELTA`, `MIN_SUGGESTION_COOLDOWN_CYCLES`) live in `const.py`.
 
+#### Suggestion label design and impact explanations (`_field()` in panel)
+
+The `_field()` function in the panel renders the suggestion widget below each settings input. The labels and layout depend on which combination of classic and ML recommendations is available:
+
+| Case | Rendering |
+|---|---|
+| Both classic and ML exist, within 5% relative | `💡 WashData recommends: X [Use]` (one value, one button) |
+| Both exist, diverging ≥5% | Two-row split pill: `💡 Observed X [Use] · 🤖 Calibrated Y [Use]` plus a per-setting impact line |
+| Classic only | `💡 Observed: X [Use]` |
+| ML only | `🤖 Calibrated: X [Use]` |
+
+**Label semantics**:
+- **Observed** (`suggestion.observed_label`) — what the appliance's power trace statistically shows; the value comes from the stored classic suggestion (`this._suggestions`)
+- **Calibrated** (`suggestion.calibrated_label`) — what would have reduced detection errors on past cycles; the value comes from `this._mlSettings[key].ml_value` (fresh ML run via `_build_settings_comparison`)
+- **WashData recommends** (`suggestion.both_agree`) — used when both engines agree within 5% relative; no distinction shown to the user
+
+**5% agreement threshold** (`relDiff < 0.05`): computed as `|cN - mN| / max(|cN|, |mN|, ε)`. Below this threshold the values are statistically indistinguishable given typical sensor noise, so collapsing to one recommendation is correct.
+
+**Per-setting impact explanations** (`suggestion.impact.<key>.higher` / `.lower`): when the two values diverge, a `<div class="wd-sug-impact">` line is rendered below the value row. The `_t()` call uses the key name and the direction of each value relative to the other:
+
+```js
+const calIsHigher = mN > cN;
+const calImpact = t(`suggestion.impact.${key}.${calIsHigher ? 'higher' : 'lower'}`, {}, '');
+const obsImpact = t(`suggestion.impact.${key}.${calIsHigher ? 'lower' : 'higher'}`, {}, '');
+```
+
+The impact line is omitted when no translation key exists for the setting (the `_t()` fallback is `''`). Covered settings: `stop_threshold_w`, `start_threshold_w`, `off_delay`, `min_off_gap`, `auto_label_confidence`, `profile_match_threshold`, `watchdog_interval`, `no_update_active_timeout`, `learning_confidence`, `min_power`, `duration_tolerance`, `end_energy_threshold`, `end_repeat_count`, `running_dead_zone`.
+
 #### Translations
 
-All conflict message strings, the save-blocked toast (`toast.settings_conflicts`), the cascade toast (`conflict.cascade_toast`), the Revert button label and tooltips (`btn.revert_settings`, `btn.revert_settings_tip`, `btn.revert_settings_tip_none`), and the revert success toast (`toast.settings_reverted`) are fully translated across all 35 supported panel languages via `_t()`. English strings live in `translations/panel/en.json` and serve as the `_t()` fallback when a translation is missing.
+All conflict message strings, the save-blocked toast (`toast.settings_conflicts`), the cascade toast (`conflict.cascade_toast`), the Revert button label and tooltips (`btn.revert_settings`, `btn.revert_settings_tip`, `btn.revert_settings_tip_none`), and the revert success toast (`toast.settings_reverted`) are fully translated across all 35 supported panel languages via `_t()`. The suggestion label and impact strings live under the `suggestion.*` key namespace in `translations/panel/en.json` and are likewise translated across all 35 languages. English strings serve as the `_t()` fallback when a translation is missing.

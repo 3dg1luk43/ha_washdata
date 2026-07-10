@@ -986,6 +986,69 @@
     "suggestions_applied": "Javaslatok alkalmazva; integráció újratöltése",
     "suggestions_dismissed": "Javaslatok elutasítva"
   },
+  "suggestion": {
+    "both_agree": "A WashData javasolja",
+    "calibrated_label": "Kalibrált",
+    "observed_label": "Megfigyelt",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Automatikusan kevesebb ciklust jelöl; több kerül áttekintésre",
+        "lower": "Automatikusan több ciklust jelöl; néhány félre lehet azonosítva"
+      },
+      "duration_tolerance": {
+        "higher": "Szélesebb időtartomány elfogadása — rugalmasabb egyeztetés",
+        "lower": "Pontosabb időtartam-egyezést igényel — szigorúbb, de szokatlan ciklusokat elutasíthat"
+      },
+      "end_energy_threshold": {
+        "higher": "Csak jelentős energiát felhasználó ciklusokat zár be",
+        "lower": "Rövidebb vagy alacsony energiájú ciklusokat is bezár"
+      },
+      "end_repeat_count": {
+        "higher": "A befejezési jelet több ismétlés után fogadja el — megbízhatóbb, kissé lassabb",
+        "lower": "Kevesebb ismétlés után ér véget — gyorsabb érzékelés, több hamis befejezési kockázat"
+      },
+      "learning_confidence": {
+        "higher": "Csak nagyon magabiztos egyezésekből tanul — lassabb, de megbízhatóbb",
+        "lower": "Több ciklusból tanul; a modell zajosabb lehet"
+      },
+      "min_off_gap": {
+        "higher": "Hosszabb tétlenség szükséges az új ciklus indulása előtt",
+        "lower": "Rövid tétlenség új ciklust indít — egymást követő futások szétválhatnak"
+      },
+      "min_power": {
+        "higher": "Kevésbé érzékeny a tétlenségi fogyasztásra; nagyon csendes programokat elszalaszthat",
+        "lower": "Érzékenyebb; a készenléti fogyasztást aktivitásként naplózhatja"
+      },
+      "no_update_active_timeout": {
+        "higher": "Több idő a ciklus elakadtnak nyilvánítása előtt",
+        "lower": "Elakadt ciklust gyorsabban kényszerít leállítani"
+      },
+      "off_delay": {
+        "higher": "Több idő a készülék szüneteire — hosszú áztatás vagy szárítás kezelése",
+        "lower": "Gyorsabb vége érzékelés — egyértelmű be/ki készülékekhez jól működik"
+      },
+      "profile_match_threshold": {
+        "higher": "Csak nagy magabiztosságú egyezéseket erősít meg; több ciklus marad jelöletlen",
+        "lower": "Több ciklust egyeztet; néhány kissé helytelen lehet"
+      },
+      "running_dead_zone": {
+        "higher": "Figyelmen kívül hagyja a rövid teljesítménycsúcsokat tétlenség közben — zajra kevésbé érzékeny",
+        "lower": "Rövidebb teljesítménylökésekre reagál — gyors átmeneti aktivitást észlel"
+      },
+      "start_threshold_w": {
+        "higher": "Elkerüli a rövid teljesítménycsúcsokból eredő hamis indításokat",
+        "lower": "Kis teljesítményű programokat is érzékel; zajra is aktiválódhat"
+      },
+      "stop_threshold_w": {
+        "higher": "Gyorsabban fejezi be a ciklust — szünet közben is zárhat",
+        "lower": "Hosszabb ideig vár a befejezésre — kevesebb idő előtti befejezés"
+      },
+      "watchdog_interval": {
+        "higher": "Hosszabb csendes fázisok megengedett; kevesebb hamis kényszeres leállítás",
+        "lower": "Agresszívabban észleli az elakadt ciklusokat"
+      }
+    }
+  },
   "trend": {
     "down": "Lefelé trend",
     "up": "Felkapott"

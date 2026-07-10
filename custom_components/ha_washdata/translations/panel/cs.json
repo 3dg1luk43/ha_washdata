@@ -911,6 +911,69 @@
     "recording": "Nahrávání",
     "training": "Trénování…"
   },
+  "suggestion": {
+    "both_agree": "WashData doporučuje",
+    "calibrated_label": "Kalibrováno",
+    "observed_label": "Naměřeno",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Méně cyklů je označeno automaticky; více jich jde k revizi",
+        "lower": "Více cyklů je označeno automaticky; některé mohou být nesprávně určeny"
+      },
+      "duration_tolerance": {
+        "higher": "Přijímá širší rozsah délky — flexibilnější shoda",
+        "lower": "Vyžaduje bližší shodu délky — přísnější, ale může odmítnout neobvyklé cykly"
+      },
+      "end_energy_threshold": {
+        "higher": "Uzavírá pouze cykly se značnou spotřebou energie",
+        "lower": "Uzavírá i kratší nebo méně energetické cykly"
+      },
+      "end_repeat_count": {
+        "higher": "Vyžaduje více opakování signálu konce — spolehlivější, mírně pomalejší",
+        "lower": "Ukončí po méně opakováních — rychlejší detekce, větší riziko předčasného ukončení"
+      },
+      "learning_confidence": {
+        "higher": "Učí se pouze z velmi jistých shod — pomalejší, ale spolehlivější",
+        "lower": "Učí se z více cyklů; model může být méně přesný"
+      },
+      "min_off_gap": {
+        "higher": "Potřebuje delší klid před začátkem nového cyklu",
+        "lower": "Krátký klid spustí nový cyklus — cykly za sebou se mohou rozdělit"
+      },
+      "min_power": {
+        "higher": "Méně citlivý na klidový příkon; může přehlédnout velmi tichý program",
+        "lower": "Citlivější; může zaznamenat klidový příkon jako aktivitu"
+      },
+      "no_update_active_timeout": {
+        "higher": "Více času před prohlášením cyklu za zaseklý",
+        "lower": "Zaseklý cyklus je ukončen dříve"
+      },
+      "off_delay": {
+        "higher": "Více času pro pauzy spotřebiče — vhodné pro dlouhé máchání nebo sušení",
+        "lower": "Rychlejší detekce konce — vhodné pro spotřebiče s čistým zapínáním/vypínáním"
+      },
+      "profile_match_threshold": {
+        "higher": "Potvrzuje pouze vysoce jisté shody; více cyklů zůstane neoznačených",
+        "lower": "Páruje více cyklů; některé mohou být mírně nesprávné"
+      },
+      "running_dead_zone": {
+        "higher": "Ignoruje krátké výkonové špičky během klidu — méně citlivý na šum",
+        "lower": "Reaguje na kratší výkonové impulzy — zachytí rychlou přechodnou aktivitu"
+      },
+      "start_threshold_w": {
+        "higher": "Zabraňuje falešným startům z krátkých výkonových špiček",
+        "lower": "Zachytí programy s nízkým příkonem; může reagovat na rušení"
+      },
+      "stop_threshold_w": {
+        "higher": "Ukončí cyklus rychleji — může uzavřít v průběhu pauzy",
+        "lower": "Čeká déle na ukončení — méně předčasných dokončení"
+      },
+      "watchdog_interval": {
+        "higher": "Povoluje delší tichá úseky; méně falešných vynucených ukončení",
+        "lower": "Zaseklé cykly jsou detekovány agresivněji"
+      }
+    }
+  },
   "tab": {
     "advanced": "Pokročilé",
     "diagnostics": "Diagnostika",

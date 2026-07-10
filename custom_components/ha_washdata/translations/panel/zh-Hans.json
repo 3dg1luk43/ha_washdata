@@ -986,6 +986,69 @@
     "suggestions_applied": "建议已应用；集成重载中",
     "suggestions_dismissed": "建议已关闭"
   },
+  "suggestion": {
+    "both_agree": "WashData建议",
+    "calibrated_label": "已校准",
+    "observed_label": "观测值",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "自动标记的循环减少，更多循环进入审核",
+        "lower": "自动标记更多循环，部分可能被误识别"
+      },
+      "duration_tolerance": {
+        "higher": "接受更宽的时长范围——匹配更灵活",
+        "lower": "要求时长更接近——更严格，但可能拒绝非常规循环"
+      },
+      "end_energy_threshold": {
+        "higher": "仅关闭消耗大量能量的循环",
+        "lower": "也关闭较短或低能耗的循环"
+      },
+      "end_repeat_count": {
+        "higher": "结束信号需重复更多次——更稳健，但略慢",
+        "lower": "更少重复后结束——检测更快，但误结束风险更高"
+      },
+      "learning_confidence": {
+        "higher": "仅从高置信度匹配中学习——较慢但更可靠",
+        "lower": "从更多循环中学习，模型可能更嘈杂"
+      },
+      "min_off_gap": {
+        "higher": "新循环开始前需要更长的空闲时间",
+        "lower": "短暂空闲即触发新循环——连续运行可能被拆分"
+      },
+      "min_power": {
+        "higher": "对待机功耗不那么敏感，可能遗漏非常安静的程序",
+        "lower": "更灵敏，可能将待机功耗记录为活动"
+      },
+      "no_update_active_timeout": {
+        "higher": "在判定循环卡住前等待更长时间",
+        "lower": "更快地强制终止卡住的循环"
+      },
+      "off_delay": {
+        "higher": "为设备暂停留出更多时间——适合长时间浸泡或烘干阶段",
+        "lower": "更快检测结束——适合干净的开关设备"
+      },
+      "profile_match_threshold": {
+        "higher": "仅提交高置信度匹配，更多循环保持未标记",
+        "lower": "匹配更多循环，部分可能略有偏差"
+      },
+      "running_dead_zone": {
+        "higher": "忽略待机时的短暂功率尖峰——对噪声不那么敏感",
+        "lower": "响应更短的功率突发——捕捉快速瞬态活动"
+      },
+      "start_threshold_w": {
+        "higher": "避免因短暂功率尖峰引起的误启动",
+        "lower": "捕捉低功率程序，可能对噪声触发"
+      },
+      "stop_threshold_w": {
+        "higher": "更快结束循环——可能在暂停时关闭",
+        "lower": "等待更长时间结束——减少提前完成"
+      },
+      "watchdog_interval": {
+        "higher": "允许更长的静默阶段，减少误强制停止",
+        "lower": "更积极地捕捉卡住的循环"
+      }
+    }
+  },
   "trend": {
     "down": "下降趋势",
     "up": "上升趋势"

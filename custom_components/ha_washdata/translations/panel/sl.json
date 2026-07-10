@@ -911,6 +911,69 @@
     "recording": "Snemanje",
     "training": "Učenje…"
   },
+  "suggestion": {
+    "both_agree": "WashData priporoča",
+    "calibrated_label": "Umerjeno",
+    "observed_label": "Izmerjeno",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Manj ciklov je samodejno označenih; več gre v pregled",
+        "lower": "Več ciklov je samodejno označenih; nekateri so lahko napačno prepoznani"
+      },
+      "duration_tolerance": {
+        "higher": "Sprejme širši razpon trajanja — bolj prilagodljivo ujemanje",
+        "lower": "Zahteva bližje ujemanje trajanja — strožje, a lahko zavrne neobičajne cikle"
+      },
+      "end_energy_threshold": {
+        "higher": "Zaključi samo cikle z znatno porabo energije",
+        "lower": "Zaključi tudi krajše ali manj energijsko zahtevne cikle"
+      },
+      "end_repeat_count": {
+        "higher": "Zahteva več ponovitev signala konca — bolj zanesljivo, nekoliko počasneje",
+        "lower": "Konča po manj ponovitvah — hitrejše zaznavanje, večje tveganje lažnega konca"
+      },
+      "learning_confidence": {
+        "higher": "Uči se le iz zelo zanesljivih ujemanj — počasneje, a zanesljiveje",
+        "lower": "Uči se iz več ciklov; model je lahko manj natančen"
+      },
+      "min_off_gap": {
+        "higher": "Pred začetkom novega cikla je potreben daljši mir",
+        "lower": "Kratek mir sproži nov cikel — zaporedni zagoni se lahko razdelijo"
+      },
+      "min_power": {
+        "higher": "Manj občutljiv na porabo moči v mirovanju; lahko spregleda zelo tihe programe",
+        "lower": "Bolj občutljiv; poraba v stanju pripravljenosti se lahko zabeleži kot aktivnost"
+      },
+      "no_update_active_timeout": {
+        "higher": "Več časa preden se cikel razglasi za zataknjnega",
+        "lower": "Zataknjen cikel se prisili zaključiti prej"
+      },
+      "off_delay": {
+        "higher": "Več časa za premor naprave — primerno za dolge faze namakanja ali sušenja",
+        "lower": "Hitrejše zaznavanje konca — primerno za naprave z jasnim vklopom/izklopom"
+      },
+      "profile_match_threshold": {
+        "higher": "Potrdi le visoko zanesljiva ujemanja; več ciklov ostane neoznačenih",
+        "lower": "Ujema več ciklov; nekateri so lahko rahlo napačni"
+      },
+      "running_dead_zone": {
+        "higher": "Prezre kratke skoke moči med mirovanjem — manj občutljiv na šum",
+        "lower": "Odziva se na krajše impulze moči — zazna hitro prehodno aktivnost"
+      },
+      "start_threshold_w": {
+        "higher": "Preprečuje lažne zagone iz kratkih skokov moči",
+        "lower": "Zazna programe z nizko močjo; lahko se odzove na šum"
+      },
+      "stop_threshold_w": {
+        "higher": "Zaključi cikel hitreje — lahko zapre med premorom",
+        "lower": "Čaka dlje na zaključek — manj prezgodnjih zaključkov"
+      },
+      "watchdog_interval": {
+        "higher": "Dovoli daljše tihe faze; manj lažnih prisilnih ustavitev",
+        "lower": "Zataknjena cikle zaznava bolj agresivno"
+      }
+    }
+  },
   "tab": {
     "advanced": "Napredno",
     "diagnostics": "Diagnostika",

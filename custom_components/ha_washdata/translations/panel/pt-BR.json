@@ -986,6 +986,69 @@
     "suggestions_applied": "Sugestões aplicadas; a integração está recarregando",
     "suggestions_dismissed": "Sugestões dispensadas"
   },
+  "suggestion": {
+    "both_agree": "WashData recomenda",
+    "calibrated_label": "Calibrado",
+    "observed_label": "Observado",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Rotula menos ciclos automaticamente; mais vão para revisão",
+        "lower": "Rotula mais ciclos automaticamente; alguns podem ser mal identificados"
+      },
+      "duration_tolerance": {
+        "higher": "Aceita um intervalo de duração mais amplo — correspondência mais flexível",
+        "lower": "Exige duração mais próxima — mais rigoroso, pode rejeitar ciclos incomuns"
+      },
+      "end_energy_threshold": {
+        "higher": "Encerra apenas ciclos que consumiram energia substancial",
+        "lower": "Encerra também ciclos curtos ou de baixa energia"
+      },
+      "end_repeat_count": {
+        "higher": "Exige que o sinal de fim se repita mais vezes — mais robusto, ligeiramente mais lento",
+        "lower": "Termina após menos repetições — detecção mais rápida, maior risco de fim falso"
+      },
+      "learning_confidence": {
+        "higher": "Aprende apenas com correspondências muito confiantes — mais lento mas mais confiável",
+        "lower": "Aprende com mais ciclos; o modelo pode ser menos preciso"
+      },
+      "min_off_gap": {
+        "higher": "Requer mais tempo inativo antes de iniciar um novo ciclo",
+        "lower": "Um breve repouso inicia um novo ciclo — execuções consecutivas podem ser divididas"
+      },
+      "min_power": {
+        "higher": "Menos sensível ao consumo em repouso; pode não detectar programas muito silenciosos",
+        "lower": "Mais sensível; pode registrar consumo em standby como atividade"
+      },
+      "no_update_active_timeout": {
+        "higher": "Mais tempo antes de declarar um ciclo travado",
+        "lower": "Para um ciclo travado mais cedo"
+      },
+      "off_delay": {
+        "higher": "Mais tempo para pausas do eletrodoméstico — gerencia fases longas de molho ou secagem",
+        "lower": "Detecção de fim mais rápida — ideal para eletrodomésticos com liga/desliga limpo"
+      },
+      "profile_match_threshold": {
+        "higher": "Confirma apenas correspondências de alta confiança; mais ciclos ficam sem rótulo",
+        "lower": "Corresponde a mais ciclos; alguns podem estar ligeiramente errados"
+      },
+      "running_dead_zone": {
+        "higher": "Ignora breves picos de potência em repouso — menos sensível ao ruído",
+        "lower": "Responde a impulsos mais curtos — detecta atividade transitória rápida"
+      },
+      "start_threshold_w": {
+        "higher": "Evita partidas falsas por breves picos de potência",
+        "lower": "Detecta programas de baixa potência; pode ser ativado por ruído"
+      },
+      "stop_threshold_w": {
+        "higher": "Encerra o ciclo mais cedo — pode fechar durante uma pausa",
+        "lower": "Aguarda mais para terminar — menos conclusões prematuras"
+      },
+      "watchdog_interval": {
+        "higher": "Fases silenciosas mais longas permitidas; menos paradas forçadas falsas",
+        "lower": "Detecta ciclos travados de forma mais agressiva"
+      }
+    }
+  },
   "trend": {
     "down": "Tendência de queda",
     "up": "Tendência de alta"

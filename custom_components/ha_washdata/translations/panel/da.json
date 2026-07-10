@@ -911,6 +911,69 @@
     "recording": "Optager",
     "training": "Træner…"
   },
+  "suggestion": {
+    "both_agree": "WashData anbefaler",
+    "calibrated_label": "Kalibreret",
+    "observed_label": "Observeret",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Færre automatiske mærker – flere cyklusser sendes til gennemgang",
+        "lower": "Flere automatiske mærker – nogle kan være forkerte"
+      },
+      "duration_tolerance": {
+        "higher": "Accepterer et bredere varighedsinterval – mere fleksibel genkendelse",
+        "lower": "Kræver tættere varighedsmatch – strengere, men kan afvise usædvanlige cyklusser"
+      },
+      "end_energy_threshold": {
+        "higher": "Afslutter kun cyklusser med væsentligt energiforbrug",
+        "lower": "Afslutter også kortere eller lavenergi-cyklusser"
+      },
+      "end_repeat_count": {
+        "higher": "Slutsignal skal gentages flere gange – mere robust, lidt langsommere",
+        "lower": "Slutter efter færre gentagelser – hurtigere detektering, mere risiko for falsk afslutning"
+      },
+      "learning_confidence": {
+        "higher": "Lærer kun fra meget sikre matches – langsommere men mere pålidelig",
+        "lower": "Lærer fra flere cyklusser – modellen kan blive mere upræcis"
+      },
+      "min_off_gap": {
+        "higher": "Længere pause krævet, inden ny cyklus begynder",
+        "lower": "Kort pause er nok – successive kørsler kan adskilles"
+      },
+      "min_power": {
+        "higher": "Mindre følsom over for standby-forbrug – meget stille programmer kan overses",
+        "lower": "Mere følsom – standby-forbrug kan opfattes som aktivitet"
+      },
+      "no_update_active_timeout": {
+        "higher": "Mere tid, inden en fastlåst cyklus tvinges stoppet",
+        "lower": "Tvangsstopper en fastlåst cyklus hurtigere"
+      },
+      "off_delay": {
+        "higher": "Mere tid til apparatpauser – lange iblødsætnings- eller tørrefaser overbrygges",
+        "lower": "Hurtigere slutdetektering – velegnet til apparater med klart til/fra-adfærd"
+      },
+      "profile_match_threshold": {
+        "higher": "Kun meget sikre matches bekræftes – flere cyklusser forbliver umærkede",
+        "lower": "Flere cyklusser matches – nogle kan være lidt forkerte"
+      },
+      "running_dead_zone": {
+        "higher": "Korte effekttoppe i tomgang ignoreres – mindre støjfølsom",
+        "lower": "Reagerer på kortere effektimpulser – opfanger hurtige transienter"
+      },
+      "start_threshold_w": {
+        "higher": "Undgår falske starter fra korte effekttoppe",
+        "lower": "Opfanger laveffektsprogrammer – kan aktiveres af støj"
+      },
+      "stop_threshold_w": {
+        "higher": "Afslutter cyklus hurtigere – kan aktiveres under en pause",
+        "lower": "Venter længere med at afslutte – færre for tidlige afslutninger"
+      },
+      "watchdog_interval": {
+        "higher": "Længere stille faser tillades – færre utilsigtede tvangsstop",
+        "lower": "Detekterer fastlåste cyklusser hurtigere"
+      }
+    }
+  },
   "tab": {
     "advanced": "Fremskreden",
     "diagnostics": "Diagnostik",

@@ -986,6 +986,69 @@
     "suggestions_applied": "Suggestions appliquées ; rechargement de l'intégration",
     "suggestions_dismissed": "Suggestions rejetées"
   },
+  "suggestion": {
+    "both_agree": "WashData recommande",
+    "calibrated_label": "Calibré",
+    "observed_label": "Observé",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Étiquette moins de cycles automatiquement ; davantage sont envoyés en révision",
+        "lower": "Étiquette plus de cycles automatiquement ; certains peuvent être mal identifiés"
+      },
+      "duration_tolerance": {
+        "higher": "Accepte une plage de durée plus large — correspondance plus flexible",
+        "lower": "Exige une durée plus proche — plus strict, peut rejeter des cycles inhabituels"
+      },
+      "end_energy_threshold": {
+        "higher": "Clôture uniquement les cycles ayant consommé une énergie significative",
+        "lower": "Clôture aussi les cycles courts ou à faible consommation"
+      },
+      "end_repeat_count": {
+        "higher": "Exige que le signal de fin se répète davantage — plus robuste, légèrement plus lent",
+        "lower": "Termine après moins de répétitions — détection plus rapide, risque de fausse fin accru"
+      },
+      "learning_confidence": {
+        "higher": "N'apprend que des correspondances très confiantes — plus lent mais plus fiable",
+        "lower": "Apprend à partir de plus de cycles ; le modèle peut être moins précis"
+      },
+      "min_off_gap": {
+        "higher": "Repos plus long requis avant le démarrage d'un nouveau cycle",
+        "lower": "Un bref repos déclenche un nouveau cycle — des cycles successifs peuvent être scindés"
+      },
+      "min_power": {
+        "higher": "Moins sensible à la consommation au repos ; peut manquer des programmes très silencieux",
+        "lower": "Plus sensible ; peut enregistrer la consommation en veille comme activité"
+      },
+      "no_update_active_timeout": {
+        "higher": "Plus de temps avant de déclarer un cycle bloqué",
+        "lower": "Arrête un cycle bloqué plus tôt"
+      },
+      "off_delay": {
+        "higher": "Plus de temps pour les pauses de l'appareil — gère les longues phases de trempage ou de séchage",
+        "lower": "Détection de fin plus rapide — adapté aux appareils marche/arrêt nets"
+      },
+      "profile_match_threshold": {
+        "higher": "Ne valide que les correspondances très confiantes ; plus de cycles restent non étiquetés",
+        "lower": "Fait correspondre plus de cycles ; certains peuvent être légèrement erronés"
+      },
+      "running_dead_zone": {
+        "higher": "Ignore les brèves pointes de puissance au repos — moins sensible au bruit",
+        "lower": "Réagit à des impulsions plus courtes — capte les activités transitoires rapides"
+      },
+      "start_threshold_w": {
+        "higher": "Évite les faux démarrages dus à de brèves pointes de puissance",
+        "lower": "Capte les programmes à faible puissance ; peut se déclencher sur du bruit"
+      },
+      "stop_threshold_w": {
+        "higher": "Termine le cycle plus vite — peut se clôturer lors d'une pause",
+        "lower": "Attend plus longtemps pour terminer — moins de fins prématurées"
+      },
+      "watchdog_interval": {
+        "higher": "Phases silencieuses plus longues autorisées ; moins de faux arrêts forcés",
+        "lower": "Détecte les cycles bloqués de manière plus agressive"
+      }
+    }
+  },
   "trend": {
     "down": "Tendance à la baisse",
     "up": "Tendance à la hausse"

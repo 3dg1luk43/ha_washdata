@@ -911,6 +911,69 @@
     "recording": "Aufzeichnung",
     "training": "Training…"
   },
+  "suggestion": {
+    "both_agree": "WashData empfiehlt",
+    "calibrated_label": "Kalibriert",
+    "observed_label": "Gemessen",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Weniger automatische Beschriftungen – mehr Zyklen kommen zur Überprüfung",
+        "lower": "Mehr automatische Beschriftungen – einzelne könnten falsch zugeordnet sein"
+      },
+      "duration_tolerance": {
+        "higher": "Akzeptiert einen größeren Dauerkorridor – flexiblere Erkennung",
+        "lower": "Erfordert engere Dauerübereinstimmung – strenger, kann ungewöhnliche Zyklen ablehnen"
+      },
+      "end_energy_threshold": {
+        "higher": "Beendet nur Zyklen mit wesentlichem Energieverbrauch",
+        "lower": "Beendet auch kürzere oder energieärmere Zyklen"
+      },
+      "end_repeat_count": {
+        "higher": "Endmeldung muss sich öfter wiederholen – robuster, minimal langsamer",
+        "lower": "Endet nach weniger Wiederholungen – schnellere Erkennung, höheres Fehlendrisiko"
+      },
+      "learning_confidence": {
+        "higher": "Lernt nur aus sehr sicheren Übereinstimmungen – langsamer, aber zuverlässiger",
+        "lower": "Lernt aus mehr Zyklen – Modell kann ungenauer werden"
+      },
+      "min_off_gap": {
+        "higher": "Längere Pause erforderlich, bevor ein neuer Zyklus beginnt",
+        "lower": "Kurze Pause reicht für einen neuen Zyklus – aufeinanderfolgende Läufe können getrennt werden"
+      },
+      "min_power": {
+        "higher": "Weniger empfindlich für Standby-Leistung – sehr leise Programme könnten übersehen werden",
+        "lower": "Empfindlicher – Standby-Leistung kann als Aktivität erkannt werden"
+      },
+      "no_update_active_timeout": {
+        "higher": "Mehr Zeit, bevor ein Zyklus als hängend gemeldet wird",
+        "lower": "Beendet hängende Zyklen früher zwangsweise"
+      },
+      "off_delay": {
+        "higher": "Mehr Zeit für Gerätepausen – lange Einweich- oder Trockenphasen werden überbrückt",
+        "lower": "Schnellere Enderkennung – ideal für Geräte mit sauberem Ein/Aus-Verhalten"
+      },
+      "profile_match_threshold": {
+        "higher": "Nur sehr sichere Übereinstimmungen werden bestätigt – mehr Zyklen bleiben unbeschriftet",
+        "lower": "Mehr Zyklen werden zugeordnet – einzelne könnten leicht falsch sein"
+      },
+      "running_dead_zone": {
+        "higher": "Kurze Leistungsspitzen im Leerlauf werden ignoriert – weniger rauschempfindlich",
+        "lower": "Reagiert auf kürzere Leistungsimpulse – erfasst schnelle Transienten"
+      },
+      "start_threshold_w": {
+        "higher": "Vermeidet Fehlstarts durch kurze Leistungsspitzen",
+        "lower": "Erkennt leistungsschwache Programme – kann auf Rauschen reagieren"
+      },
+      "stop_threshold_w": {
+        "higher": "Beendet Zyklen schneller – kann während einer Pause auslösen",
+        "lower": "Wartet länger mit dem Ende – weniger vorzeitige Abschlüsse"
+      },
+      "watchdog_interval": {
+        "higher": "Längere Ruhephasen erlaubt – weniger versehentliche Zwangsstopps",
+        "lower": "Erkennt hängende Zyklen schneller"
+      }
+    }
+  },
   "tab": {
     "advanced": "Erweitert",
     "diagnostics": "Diagnose",

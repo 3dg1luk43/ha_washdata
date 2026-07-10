@@ -911,6 +911,69 @@
     "recording": "Tar opp",
     "training": "Trener…"
   },
+  "suggestion": {
+    "both_agree": "WashData anbefaler",
+    "calibrated_label": "Kalibrert",
+    "observed_label": "Observert",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Færre automatiske etiketter – flere sykluser sendes til gjennomgang",
+        "lower": "Flere automatiske etiketter – noen kan være feilmerket"
+      },
+      "duration_tolerance": {
+        "higher": "Aksepterer et bredere varighetsintervall – mer fleksibel gjenkjenning",
+        "lower": "Krever tettere varighetssamsvar – strengere, men kan avvise uvanlige sykluser"
+      },
+      "end_energy_threshold": {
+        "higher": "Avslutter bare sykluser med betydelig energiforbruk",
+        "lower": "Avslutter også kortere eller energisvake sykluser"
+      },
+      "end_repeat_count": {
+        "higher": "Sluttsignal må gjentas flere ganger – mer robust, litt tregere",
+        "lower": "Avslutter etter færre repetisjoner – raskere deteksjon, mer risiko for falsk avslutning"
+      },
+      "learning_confidence": {
+        "higher": "Lærer bare fra svært sikre treff – langsommere men mer pålitelig",
+        "lower": "Lærer fra flere sykluser – modellen kan bli mer unøyaktig"
+      },
+      "min_off_gap": {
+        "higher": "Lengre pause kreves før en ny syklus starter",
+        "lower": "Kort pause er nok – påfølgende kjøringer kan deles"
+      },
+      "min_power": {
+        "higher": "Mindre følsom for standby-forbruk – veldig stille programmer kan overses",
+        "lower": "Mer følsom – standby-forbruk kan tolkes som aktivitet"
+      },
+      "no_update_active_timeout": {
+        "higher": "Mer tid før en fastlåst syklus tvangstopper",
+        "lower": "Tvangsstopper en fastlåst syklus raskere"
+      },
+      "off_delay": {
+        "higher": "Mer tid til apparatpauser – lange bløtleggings- eller tørkefaser overbrygges",
+        "lower": "Raskere sluttdeteksjon – passer apparater med tydelig på/av-atferd"
+      },
+      "profile_match_threshold": {
+        "higher": "Bare svært sikre treff bekreftes – flere sykluser forblir umerket",
+        "lower": "Flere sykluser matches – noen kan være litt feil"
+      },
+      "running_dead_zone": {
+        "higher": "Korte effekttopper under tomgang ignoreres – mindre støyfølsom",
+        "lower": "Reagerer på kortere effektimpulser – fanger raske transienter"
+      },
+      "start_threshold_w": {
+        "higher": "Unngår falske starter fra korte effekttopper",
+        "lower": "Fanger lavomsatte programmer – kan trigges av støy"
+      },
+      "stop_threshold_w": {
+        "higher": "Avslutter syklusen raskere – kan aktiveres under en pause",
+        "lower": "Venter lengre med å avslutte – færre for tidlige avslutninger"
+      },
+      "watchdog_interval": {
+        "higher": "Lengre stille faser tillates – færre utilsiktede tvangstopp",
+        "lower": "Oppdager fastlåste sykluser raskere"
+      }
+    }
+  },
   "tab": {
     "advanced": "Avansert",
     "diagnostics": "Diagnostikk",

@@ -986,6 +986,69 @@
     "suggestions_applied": "Öneriler uygulandı; entegrasyon yeniden yükleniyor",
     "suggestions_dismissed": "Öneriler reddedildi"
   },
+  "suggestion": {
+    "both_agree": "WashData öneriyor",
+    "calibrated_label": "Kalibre edilmiş",
+    "observed_label": "Gözlemlenen",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Daha az döngüyü otomatik etiketler; daha fazlası incelemeye gider",
+        "lower": "Daha fazla döngüyü otomatik etiketler; bazıları yanlış tanımlanabilir"
+      },
+      "duration_tolerance": {
+        "higher": "Daha geniş süre aralığı kabul eder — daha esnek eşleştirme",
+        "lower": "Daha yakın süre eşleşmesi gerektirir — daha katı ama alışılmadık döngüleri reddedebilir"
+      },
+      "end_energy_threshold": {
+        "higher": "Yalnızca önemli enerji kullanan döngüleri kapatır",
+        "lower": "Daha kısa veya düşük enerjili döngüleri de kapatır"
+      },
+      "end_repeat_count": {
+        "higher": "Bitiş sinyalinin daha fazla tekrarlanmasını gerektirir — daha güvenilir, biraz daha yavaş",
+        "lower": "Daha az tekrardan sonra biter — daha hızlı algılama, daha yüksek yanlış bitiş riski"
+      },
+      "learning_confidence": {
+        "higher": "Yalnızca çok güvenli eşleşmelerden öğrenir — daha yavaş ama daha güvenilir",
+        "lower": "Daha fazla döngüden öğrenir; model daha gürültülü olabilir"
+      },
+      "min_off_gap": {
+        "higher": "Yeni döngü başlamadan önce daha uzun boşta kalma süresi gerekir",
+        "lower": "Kısa boşta kalma yeni döngü başlatır — arka arkaya çalışmalar bölünebilir"
+      },
+      "min_power": {
+        "higher": "Boşta güç çekimine daha az duyarlı; çok sessiz programları kaçırabilir",
+        "lower": "Daha duyarlı; bekleme modundaki güç tüketimini etkinlik olarak kaydedebilir"
+      },
+      "no_update_active_timeout": {
+        "higher": "Döngü takılı sayılmadan önce daha fazla zaman",
+        "lower": "Takılı döngüyü daha erken zorunlu durdurur"
+      },
+      "off_delay": {
+        "higher": "Cihaz duraklamaları için daha fazla süre — uzun ıslatma veya kurutma aşamalarını yönetir",
+        "lower": "Daha hızlı bitiş algılama — net açık/kapalı cihazlar için iyi çalışır"
+      },
+      "profile_match_threshold": {
+        "higher": "Yalnızca yüksek güvenli eşleşmeleri onaylar; daha fazla döngü etiketsiz kalır",
+        "lower": "Daha fazla döngüyle eşleşir; bazıları hafif hatalı olabilir"
+      },
+      "running_dead_zone": {
+        "higher": "Boşta kısa güç artışlarını yoksayar — gürültüye daha az duyarlı",
+        "lower": "Daha kısa güç patlamalarına yanıt verir — hızlı geçici etkinliği yakalar"
+      },
+      "start_threshold_w": {
+        "higher": "Kısa güç artışlarından kaynaklanan yanlış başlatmaları önler",
+        "lower": "Düşük güçlü programları yakalar; gürültüde tetiklenebilir"
+      },
+      "stop_threshold_w": {
+        "higher": "Döngüyü daha hızlı bitirir — duraklamada kapanabilir",
+        "lower": "Bitişi daha uzun bekler — daha az erken tamamlanma"
+      },
+      "watchdog_interval": {
+        "higher": "Daha uzun sessiz aşamalara izin verilir; daha az yanlış zorunlu durdurma",
+        "lower": "Takılı döngüleri daha agresif şekilde yakalar"
+      }
+    }
+  },
   "trend": {
     "down": "Düşen eğilim",
     "up": "Yükselen eğilim"
