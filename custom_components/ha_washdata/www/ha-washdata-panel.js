@@ -231,6 +231,16 @@ const _SETTINGS_SECTIONS = [
       { key: 'notify_cycle_timers', label: 'Cycle Timers', type: 'timerlist',
         doc: 'Notifications at specific minutes into a cycle (e.g. to add softener). Message supports {device}, {program}, {minutes}. Enable Auto-pause to pause at that point and receive an interactive notification with a Resume button; resume via the panel, the pause/resume service, or the notification action.' },
     ] },
+    { sub: 'Quiet Hours & Milestones', fields: [
+      { key: 'notify_quiet_start_hour', label: 'Quiet Hours Start', unit: 'h', type: 'number', min: 0, max: 23,
+        doc: 'Start of a do-not-disturb window (0-23). Finish, reminder and clean-laundry notifications that would fire during quiet hours are held and delivered when the window ends. Leave blank to disable. Supports windows that cross midnight (e.g. start 22, end 7).' },
+      { key: 'notify_quiet_end_hour', label: 'Quiet Hours End', unit: 'h', type: 'number', min: 0, max: 23,
+        doc: 'End of the do-not-disturb window (0-23). Held notifications are delivered at this hour. Leave blank to disable.' },
+      { key: 'notify_milestones', label: 'Cycle Milestones', type: 'intlist', def: '50, 100, 500, 1000', placeholder: '50, 100, 500, 1000',
+        doc: 'Comma-separated cycle counts that trigger a one-off celebration notification when reached (e.g. 50, 100, 500, 1000). Blank disables milestone notifications.' },
+      { key: 'notify_milestone_message', label: 'Milestone Message', type: 'textarea', def: '{device} has completed {cycle_count} cycles!',
+        doc: 'Message for the milestone notification. Template variables: {device}, {cycle_count}.' },
+    ] },
   ] },
   { id: 'ml_training', label: 'ML Training', fields: [
     { key: 'enable_ml_models', label: 'Apply smart models during a cycle', type: 'checkbox', def: false,
@@ -884,6 +894,18 @@ function _slugSub(s) {
   return s.toLowerCase().replace(/[\s&/\-]+/g, '_').replace(/^_+|_+$/g, '').replace(/_+/g, '_');
 }
 
+// Parse a comma-separated string into a sorted list of unique positive ints.
+// Backs the `intlist` setting type (e.g. notify_milestones), which the backend
+// stores as a list of ints but the panel edits as a comma-separated string.
+function _parseIntList(s) {
+  const seen = new Set();
+  String(s == null ? '' : s).split(',').forEach(part => {
+    const n = parseInt(part.trim(), 10);
+    if (Number.isFinite(n) && n > 0) seen.add(n);
+  });
+  return Array.from(seen).sort((a, b) => a - b);
+}
+
 // Linear-interpolated y at offset x for a sorted [[x,y],...] series.
 function _valueAt(pts, x) {
   if (!pts || !pts.length) return null;
@@ -972,6 +994,11 @@ function _field(f, value, extra) {
   } else if (f.type === 'list') {
     const joined = Array.isArray(v) ? v.join(', ') : _esc(v);
     input = `<input type="text" data-opt="${key}" data-ftype="list" value="${_esc(joined)}" placeholder="${_esc(extra.t('placeholder.notify_services_list', {}, 'notify.mobile_app_phone, ...'))}">` ;
+  } else if (f.type === 'intlist') {
+    // Comma-separated ints edited as text; parsed to a sorted unique int list on save.
+    const joined = Array.isArray(v) ? v.join(', ') : String(v == null ? '' : v);
+    const ph = f.placeholder ? ` placeholder="${_esc(f.placeholder)}"` : '';
+    input = `<input type="text" data-opt="${key}" data-ftype="intlist" value="${_esc(joined)}"${ph}>`;
   } else {
     const t = f.type === 'number' ? 'number' : 'text';
     const dl = extra.datalistId ? ` list="${extra.datalistId}"` : '';
@@ -5610,6 +5637,7 @@ class HaWashdataPanel extends HTMLElement {
       }
       if (ftype === 'number') { const n = parseFloat(el.value); if (!isNaN(n)) this._pendingSettings[key] = n; return; }
       if (ftype === 'list') { this._pendingSettings[key] = String(el.value).split(',').map(s => s.trim()).filter(Boolean); return; }
+      if (ftype === 'intlist') { this._pendingSettings[key] = _parseIntList(el.value); return; }
       if (ftype === 'json') {
         const t = String(el.value).trim();
         if (!t) { this._pendingSettings[key] = []; return; }
@@ -5778,6 +5806,7 @@ class HaWashdataPanel extends HTMLElement {
       const val = el.value;
       if (ftype === 'number') { const n = parseFloat(val); if (!isNaN(n)) updates[key] = n; return; }
       if (ftype === 'list') { updates[key] = String(val).split(',').map(s => s.trim()).filter(Boolean); return; }
+      if (ftype === 'intlist') { updates[key] = _parseIntList(val); return; }
       if (ftype === 'json') {
         const t = String(val).trim();
         if (!t) { updates[key] = []; return; }
