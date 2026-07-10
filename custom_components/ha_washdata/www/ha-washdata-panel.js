@@ -2028,7 +2028,7 @@ class HaWashdataPanel extends HTMLElement {
     const legend = `<div class="wd-leg">
       <span class="wd-leg-i"><span class="wd-leg-sw" style="background:var(--primary-color)"></span> ${this._t('lbl.power', {}, 'Power')}</span>
       ${this._statusEnv ? `<label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_expected" ${showExpected ? 'checked' : ''}><span class="wd-leg-sw" style="background:#ff9800"></span> ${this._t('lbl.expected', {}, 'Expected')}</label>` : ''}
-      ${(pd.raw || []).length > 1 ? `<label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_raw" ${showRawLeg ? 'checked' : ''}><span class="wd-leg-sw" style="background:#9e9e9e"></span> ${this._t('lbl.raw_socket', {}, 'Raw socket')}</label>` : ''}
+      <label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_raw" ${showRawLeg ? 'checked' : ''}><span class="wd-leg-sw" style="background:#9e9e9e"></span> ${this._t('lbl.raw_socket', {}, 'Raw socket')}</label>
     </div>`;
     const curveHtml = hasCurve
       ? `<div class="wd-canvas-wrap" style="margin-top:14px"><canvas id="wd-status-canvas" style="height:160px"></canvas></div>${legend}`
@@ -2067,9 +2067,9 @@ class HaWashdataPanel extends HTMLElement {
       const showStop = cycleActive || isUserPaused;
       if (!showPause && !showResume && !showStop) return '';
       return `<div class="wd-cycle-ctrl" style="margin-top:0">
-        ${showResume ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="resume-cycle">${this._t('btn.resume_cycle', {}, 'Resume')}</button>` : ''}
-        ${showPause ? `<button class="wd-btn wd-btn-sm" data-action="pause-cycle">${this._t('btn.pause_cycle', {}, 'Pause')}</button>` : ''}
-        ${showStop ? `<button class="wd-btn wd-btn-sm wd-btn-danger" data-action="terminate-cycle">${this._t('btn.force_stop', {}, 'Force Stop')}</button>` : ''}
+        ${showResume ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="resume-cycle" title="${_esc(this._t('btn.resume_cycle_tip', {}, 'Resume the paused cycle'))}">${this._t('btn.resume_cycle', {}, 'Resume')}</button>` : ''}
+        ${showPause ? `<button class="wd-btn wd-btn-sm" data-action="pause-cycle" title="${_esc(this._t('btn.pause_cycle_tip', {}, 'Pause the running cycle — the appliance will resume where it left off'))}">${this._t('btn.pause_cycle', {}, 'Pause')}</button>` : ''}
+        ${showStop ? `<button class="wd-btn wd-btn-sm wd-btn-danger" data-action="terminate-cycle" title="${_esc(this._t('btn.force_stop_tip', {}, 'Immediately end the current cycle and mark it as force-stopped'))}">${this._t('btn.force_stop', {}, 'Force Stop')}</button>` : ''}
       </div>`;
     })();
 
@@ -2109,16 +2109,16 @@ class HaWashdataPanel extends HTMLElement {
     if (state === 'recording') detail = `${_fmtDuration(rs.duration_s)} · ${rs.sample_count || 0} samples`;
     else if (state === 'stopped') detail = `${rs.sample_count || 0} samples · ${_fmtDuration(rs.duration_s)}`;
     const buttons = state === 'recording'
-      ? `<button class="wd-btn wd-btn-danger wd-btn-sm" data-action="rec-stop">${this._t('btn.rec_stop', {}, 'Stop')}</button>`
+      ? `<button class="wd-btn wd-btn-danger wd-btn-sm" data-action="rec-stop" title="${_esc(this._t('btn.rec_stop_tip', {}, 'Stop recording and hold the captured trace for review'))}">${this._t('btn.rec_stop', {}, 'Stop')}</button>`
       : state === 'stopped'
-        ? `<button class="wd-btn wd-btn-primary wd-btn-sm" data-action="rec-process-open">${this._t('btn.process', {}, 'Process')}</button>
-           <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="rec-discard">${this._t('btn.discard', {}, 'Discard')}</button>`
-        : `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="rec-start">${this._t('btn.record', {}, 'Start Recording')}</button>`;
+        ? `<button class="wd-btn wd-btn-primary wd-btn-sm" data-action="rec-process-open" title="${_esc(this._t('btn.process_tip', {}, 'Save the recorded trace as a new or existing profile'))}">${this._t('btn.process', {}, 'Process')}</button>
+           <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="rec-discard" title="${_esc(this._t('btn.discard_tip', {}, 'Discard the recorded trace without saving'))}">${this._t('btn.discard', {}, 'Discard')}</button>`
+        : `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="rec-start" title="${_esc(this._t('btn.rec_start_tip', {}, 'Begin recording the appliance\'s power trace — start just before running a cycle'))}">${this._t('btn.record', {}, 'Start Recording')}</button>`;
     return `<div class="wd-card" style="margin-top:0">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:8px">
           <div class="wd-rec-dot ${dotCls}"></div>
-          <div><strong>${this._t('hdr.manual_recording', {}, 'Manual Recording')}</strong>${detail ? `<span class="wd-field-hint" style="margin-left:8px">${detail}</span>` : ''}</div>
+          <div><strong>${this._t('hdr.manual_recording', {}, 'Manual Recording')}</strong>${_tip(this._t('hdr.manual_recording_tip', {}, 'Run a cycle intentionally while WashData records the power trace. Start just before the appliance starts, Stop when it finishes, then Process to save it as a named profile.'))}${detail ? `<span class="wd-field-hint" style="margin-left:8px">${detail}</span>` : ''}</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">${buttons}</div>
       </div>
@@ -2266,7 +2266,7 @@ class HaWashdataPanel extends HTMLElement {
     const title = `Cycles (${allCycles.length}${shown})`;
 
     const toolbar = canEdit ? `<div class="wd-card-actions" style="margin:0 0 4px;justify-content:flex-end">
-      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-auto-open">${this._t('btn.auto_label_cycles', {}, 'Auto-label cycles')}</button>
+      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-auto-open" title="${_esc(this._t('btn.auto_label_cycles_tip', {}, 'Automatically assign profile names to unlabelled cycles whose match confidence clears the threshold'))}">${this._t('btn.auto_label_cycles', {}, 'Auto-label cycles')}</button>
       <button class="wd-btn ${selMode ? 'wd-btn-primary' : 'wd-btn-secondary'} wd-btn-sm" data-action="cyc-select-toggle">${selMode ? this._t('btn.done', {}, 'Done') : this._t('btn.select', {}, 'Select')}</button>
     </div>` : '';
 
@@ -2398,9 +2398,9 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-card-title">${this._t('tab.profiles', {}, 'Profiles')} (${this._profiles.length})</div>
         <p class="wd-info">${this._t('msg.profiles_intro', {}, 'Click a profile for stats, phases and cleanup. Group near-identical programs (same shape/duration, different temperature or spin) so matching reliably picks between them.')}</p>
         ${canEdit ? `<div class="wd-card-actions">
-          <button class="wd-btn wd-btn-primary" data-action="create-profile">${this._t('btn.new_profile', {}, '+ New Profile')}</button>
-          <button class="wd-btn wd-btn-secondary" data-action="pg-new">${this._t('btn.new_group', {}, '+ New Group')}</button>
-          <button class="wd-btn wd-btn-secondary" data-action="rebuild-envelopes" ${rebuildBusy ? 'disabled' : ''}>${rebuildBusy ? '<span class="wd-spin"></span> Rebuilding…' : this._t('btn.rebuild', {}, 'Rebuild Envelopes')}</button>
+          <button class="wd-btn wd-btn-primary" data-action="create-profile" title="${_esc(this._t('btn.new_profile_tip', {}, 'Create a new program profile from an existing labelled cycle or recording'))}">${this._t('btn.new_profile', {}, '+ New Profile')}</button>
+          <button class="wd-btn wd-btn-secondary" data-action="pg-new" title="${_esc(this._t('btn.new_group_tip', {}, 'Group near-identical profiles (same shape/duration, different temperature or spin) so the matcher reliably picks between them'))}">${this._t('btn.new_group', {}, '+ New Group')}</button>
+          <button class="wd-btn wd-btn-secondary" data-action="rebuild-envelopes" ${rebuildBusy ? 'disabled' : ''} title="${_esc(this._t('btn.rebuild_tip', {}, 'Recompute the expected power envelope (min/max band) for all profiles from their labelled cycles — run after labelling new cycles or correcting old ones'))}">${rebuildBusy ? '<span class="wd-spin"></span> Rebuilding…' : this._t('btn.rebuild', {}, 'Rebuild Envelopes')}</button>
         </div>` : ''}
       </div>
       ${sugBanner}
@@ -2556,7 +2556,7 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-card-actions" style="margin-top:20px">
           <button class="wd-btn wd-btn-primary" id="wd-settings-save" ${saveBusy ? 'disabled' : ''}>${saveBusy ? '<span class="wd-spin"></span> Saving…' : this._t('btn.save_settings', {}, 'Save Settings')}</button>
           <button class="wd-btn wd-btn-secondary" id="wd-settings-revert" ${this._prevOpts ? '' : 'disabled'} title="${this._prevOpts ? this._t('btn.revert_settings_tip', {}, 'Restore settings from before your last save') : this._t('btn.revert_settings_tip_none', {}, 'Save first to enable undo')}">${this._t('btn.revert_settings', {}, 'Revert changes')}</button>
-          <button class="wd-btn wd-btn-secondary" id="wd-settings-reload">${this._t('btn.refresh', {}, 'Refresh')}</button>
+          <button class="wd-btn wd-btn-secondary" id="wd-settings-reload" title="${_esc(this._t('btn.refresh_settings_tip', {}, 'Reload settings from the server'))}">${this._t('btn.refresh', {}, 'Refresh')}</button>
         </div>
         <p class="wd-info" style="margin-top:12px;font-size:.78em">${this._t('msg.saving_triggers_reload', {}, 'Saving triggers an integration reload. HA entities may briefly show as unavailable.')}</p>
       </div>
@@ -3075,7 +3075,7 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-card">
         <div class="wd-card-title">${this._t('hdr.storage_stats', {}, 'Storage Stats')}</div>
         ${statsHtml}
-        <div class="wd-card-actions"><button class="wd-btn wd-btn-secondary" data-action="diag-refresh">${this._t('btn.refresh', {}, 'Refresh')}</button></div>
+        <div class="wd-card-actions"><button class="wd-btn wd-btn-secondary" data-action="diag-refresh" title="${_esc(this._t('btn.refresh_diag_tip', {}, 'Reload storage statistics'))}">${this._t('btn.refresh', {}, 'Refresh')}</button></div>
       </div>
       ${this._canFull() ? `<div class="wd-card">
         <div class="wd-card-title">${this._t('hdr.maintenance', {}, 'Maintenance Actions')}</div>
@@ -3253,7 +3253,7 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-card-title">${this._t('hdr.logs', {}, 'Logs')}</div>
       <div class="wd-logbar">
         <select id="wd-log-level">${sel}</select>
-        <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="logs-refresh">${this._t('btn.refresh', {}, 'Refresh')}</button>
+        <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="logs-refresh" title="${_esc(this._t('btn.refresh_logs_tip', {}, 'Reload the latest log records'))}">${this._t('btn.refresh', {}, 'Refresh')}</button>
         <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="logs-export">${this._t('btn.export', {}, 'Export')}</button>
         <span class="wd-field-hint" style="margin:0">${this._t('msg.log_buffer_hint', {}, 'Newest first · buffers the last 500 ha_washdata records since restart · drag the left edge to resize.')}</span>
       </div>
