@@ -6004,6 +6004,15 @@ class WashDataManager:
         return self.detector.current_cycle_start
 
     @property
+    def last_cycle_end_time(self) -> datetime | None:
+        """Return when the most recent completed cycle ended (or None).
+
+        Set at cycle end and restored from stored history on startup. Consumed by
+        the conversation intent handler to answer "how long ago did it finish".
+        """
+        return self._last_cycle_end_time
+
+    @property
     def last_match_details(self) -> dict[str, Any] | None:
         """Return details of the last profile match."""
         res = getattr(self, "_last_match_result", None)
