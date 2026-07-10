@@ -166,7 +166,9 @@
     "watchdog": {
       "interval": "Bør være mindst 2x samplingsintervallet ({si} s)",
       "sampling": "Samplingsinterval bør højst være halvdelen af watchdog-intervallet ({wi} s)"
-    }
+    },
+    "settings_banner": "{n} indstillingskonflikt{s} — tjek de fremhævede sektioner og ret dem inden du gemmer.",
+    "settings_banner_btn": "Gå til første"
   },
   "hdr": {
     "access_control": "Adgangskontrol",

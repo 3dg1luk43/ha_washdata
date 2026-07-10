@@ -63,8 +63,6 @@
     "error": {
       "feedback_notification_title": "WashData: cyclus verifiëren ({device})",
       "feedback_notification_message": "**Apparaat**: {device}\n**Programma**: {program} ({confidence}% betrouwbaarheid)\n**Tijd**: {time}\n\nWashData heeft uw hulp nodig om deze gedetecteerde cyclus te verifiëren.\n\nGa naar **Instellingen > Apparaten en services > WashData > Configureren > Leerfeedback** om dit resultaat te bevestigen of te corrigeren.",
-      "suggestions_ready_notification_title": "WashData: voorgestelde instellingen gereed ({device})",
-      "suggestions_ready_notification_message": "De sensor **Voorgestelde instellingen** rapporteert nu **{count}** bruikbare aanbevelingen.\n\nOm ze te bekijken en toe te passen: **Instellingen > Apparaten en services > WashData > Configureren > Geavanceerde instellingen > Voorgestelde waarden toepassen**.\n\nSuggesties zijn optioneel en worden ter beoordeling getoond voordat u ze opslaat.",
       "auto_tune_suggestion": "{device_type} {device_title} heeft spookcycli gedetecteerd. Voorgestelde min_power wijziging: {current_min}W -> {new_min}W (niet automatisch toegepast).",
       "auto_tune_title": "WashData automatisch afstemmen",
       "auto_tune_fallback": "{device_type} {device_title} heeft spookcycli gedetecteerd. Voorgestelde min_power wijziging: {current_min}W -> {new_min}W (niet automatisch toegepast).",

@@ -63,8 +63,6 @@
     "error": {
       "feedback_notification_title": "WashData: Pārbaudīt ciklu ({device})",
       "feedback_notification_message": "**Ierīce**: {device}\n**Programma**: {program} ({confidence}% ticamība)\n**Laiks**: {time}\n\nWashData ir nepieciešama jūsu palīdzība, lai pārbaudītu šo noteikto ciklu.\n\nLai apstiprinātu vai labotu šo rezultātu, lūdzu, dodieties uz sadaļu **Iestatījumi > Ierīces un pakalpojumi > WashData > Konfigurēt > Mācību atsauksmes**.",
-      "suggestions_ready_notification_title": "WashData: ieteicamie iestatījumi ir gatavi ({device})",
-      "suggestions_ready_notification_message": "Sensors **Ieteiktie iestatījumi** tagad ziņo par **{count}** praktiski izmantojamiem ieteikumiem.\n\nLai tos pārskatītu un lietotu: **Iestatījumi > Ierīces un pakalpojumi > WashData > Konfigurēt > Papildu iestatījumi > Lietot ieteiktās vērtības**.\n\nIeteikumi nav obligāti un tiek parādīti pārskatīšanai pirms saglabāšanas.",
       "auto_tune_suggestion": "{device_type} {device_title} konstatēja spoku ciklus. Ieteicamās minimālās jaudas izmaiņas: {current_min}W -> {new_min}W (nav lietots automātiski).",
       "auto_tune_title": "WashData automātiskā noregulēšana",
       "auto_tune_fallback": "{device_type} {device_title} konstatēja spoku ciklus. Ieteicamās minimālās jaudas izmaiņas: {current_min}W -> {new_min}W (nav lietots automātiski).",

@@ -118,6 +118,8 @@
     },
     "attn_sub": "Corrija os conflitos antes de salvar",
     "attn_title": "{n} conflito{s} de configurações",
+    "settings_banner": "{n} conflito{s} de configurações — verifique as seções destacadas e corrija antes de salvar.",
+    "settings_banner_btn": "Ir para o primeiro",
     "confidence": {
       "auto": "Deve ser maior ou igual ao Limiar de correspondência ({match})",
       "learning": "Deve ser menor ou igual ao Limiar de correspondência ({match})",

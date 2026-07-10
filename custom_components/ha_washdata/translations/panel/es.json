@@ -118,6 +118,8 @@
     },
     "attn_sub": "Corrige los conflictos antes de guardar",
     "attn_title": "{n} conflicto{s} de ajustes",
+    "settings_banner": "{n} conflicto{s} de ajustes — revisa las secciones resaltadas y corrígelos antes de guardar.",
+    "settings_banner_btn": "Ir al primero",
     "confidence": {
       "auto": "Debe ser mayor o igual al Umbral de coincidencia ({match})",
       "learning": "Debe ser menor o igual al Umbral de coincidencia ({match})",

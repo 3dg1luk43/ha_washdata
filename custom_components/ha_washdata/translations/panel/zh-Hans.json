@@ -166,7 +166,9 @@
     "watchdog": {
       "interval": "应至少为采样间隔 ({si} 秒) 的 2 倍",
       "sampling": "采样间隔应最多为看门狗间隔 ({wi} 秒) 的一半"
-    }
+    },
+    "settings_banner": "{n} 个设置冲突{s} — 请检查高亮显示的部分，并在保存前修复。",
+    "settings_banner_btn": "前往第一处"
   },
   "hdr": {
     "access_control": "访问控制",

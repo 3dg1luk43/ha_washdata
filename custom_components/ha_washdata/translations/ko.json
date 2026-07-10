@@ -63,8 +63,6 @@
     "error": {
       "feedback_notification_title": "WashData: 사이클 확인 ({device})",
       "feedback_notification_message": "**장치**: {device}\n**프로그램**: {program} ({confidence}% 신뢰도)\n**시간**: {time}\n\nWashData가 감지된 사이클을 확인하려면 귀하의 도움이 필요합니다.\n\n이 결과를 확인하거나 수정하려면 **설정 > 장치 및 서비스 > WashData > 구성 > 학습 피드백**으로 이동하세요.",
-      "suggestions_ready_notification_title": "WashData: 제안 설정 준비됨 ({device})",
-      "suggestions_ready_notification_message": "**제안 설정** 센서가 이제 **{count}**개의 실행 가능한 권장사항을 보고합니다.\n\n검토 및 적용하려면: **설정 > 장치 및 서비스 > WashData > 구성 > 고급 설정 > 제안 값 적용**.\n\n제안사항은 선택사항이며 저장하기 전에 검토용으로 표시됩니다.",
       "auto_tune_suggestion": "{device_type} {device_title}이(가) 고스트 사이클을 감지했습니다. 권장되는 min_power 변경: {current_min}W -> {new_min}W(자동으로 적용되지 않음).",
       "auto_tune_title": "WashData 자동 조정",
       "auto_tune_fallback": "{device_type} {device_title}이(가) 고스트 사이클을 감지했습니다. 권장되는 min_power 변경: {current_min}W -> {new_min}W(자동으로 적용되지 않음).",

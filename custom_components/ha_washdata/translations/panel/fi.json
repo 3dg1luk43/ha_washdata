@@ -166,7 +166,9 @@
     "watchdog": {
       "interval": "Tulisi olla vähintään 2x näytteenottoväli ({si} s)",
       "sampling": "Näytteenottovälin tulee olla enintään puolet tarkkailijavälistä ({wi} s)"
-    }
+    },
+    "settings_banner": "{n} asetusten ristiriita{s} — tarkista korostetut osiot ja korjaa ne ennen tallentamista.",
+    "settings_banner_btn": "Siirry ensimmäiseen"
   },
   "hdr": {
     "access_control": "Kulunvalvonta",

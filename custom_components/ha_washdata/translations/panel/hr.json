@@ -166,7 +166,9 @@
     "watchdog": {
       "interval": "Trebao bi biti najmanje 2× Interval uzorkovanja ({si} s)",
       "sampling": "Interval uzorkovanja trebao bi biti najviše pola Intervala nadzora ({wi} s)"
-    }
+    },
+    "settings_banner": "{n} sukob{s} postavki — provjerite istaknute odjeljke i ispravite prije pohrane.",
+    "settings_banner_btn": "Idi na prvi"
   },
   "hdr": {
     "access_control": "Kontrola pristupa",

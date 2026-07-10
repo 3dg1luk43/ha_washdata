@@ -63,8 +63,6 @@
     "error": {
       "feedback_notification_title": "WashData : Vérifier le cycle ({device})",
       "feedback_notification_message": "**Appareil** : {device}\n**Programme** : {program} ({confidence} % de confiance)\n**Heure** : {time}\n\nWashData a besoin de votre aide pour vérifier ce cycle détecté.\n\nVeuillez accéder à **Paramètres > Appareils et services > WashData > Configurer > Commentaires d'apprentissage** pour confirmer ou corriger ce résultat.",
-      "suggestions_ready_notification_title": "WashData : Paramètres suggérés prêts ({device})",
-      "suggestions_ready_notification_message": "Le capteur **Paramètres suggérés** signale désormais **{count}** recommandations exploitables.\n\nPour les consulter et les appliquer : **Paramètres > Appareils et services > WashData > Configurer > Paramètres avancés > Appliquer les valeurs suggérées**.\n\nLes suggestions sont facultatives et affichées pour examen avant d’enregistrer.",
       "auto_tune_suggestion": "{device_type} {device_title} cycles fantômes détectés. Modification de min_power suggérée : {current_min}W -> {new_min}W (non appliqué automatiquement).",
       "auto_tune_title": "Réglage automatique des données WashData",
       "auto_tune_fallback": "{device_type} {device_title} cycles fantômes détectés. Modification de min_power suggérée : {current_min}W -> {new_min}W (non appliqué automatiquement).",

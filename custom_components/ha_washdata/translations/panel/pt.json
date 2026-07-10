@@ -118,6 +118,8 @@
     },
     "attn_sub": "Corrija os conflitos antes de guardar",
     "attn_title": "{n} conflito{s} de definições",
+    "settings_banner": "{n} conflito{s} de definições — verifique as secções realçadas e corrija antes de guardar.",
+    "settings_banner_btn": "Ir para o primeiro",
     "confidence": {
       "auto": "Deve ser superior ou igual ao Limiar de correspondência ({match})",
       "learning": "Deve ser inferior ou igual ao Limiar de correspondência ({match})",

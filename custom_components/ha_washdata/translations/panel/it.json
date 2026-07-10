@@ -118,6 +118,8 @@
     },
     "attn_sub": "Correggi i conflitti prima di salvare",
     "attn_title": "{n} conflitto{s} nelle impostazioni",
+    "settings_banner": "{n} conflitto{s} nelle impostazioni — controlla le sezioni evidenziate e correggile prima di salvare.",
+    "settings_banner_btn": "Vai al primo",
     "confidence": {
       "auto": "Deve essere maggiore o uguale alla Soglia di corrispondenza ({match})",
       "learning": "Deve essere minore o uguale alla Soglia di corrispondenza ({match})",

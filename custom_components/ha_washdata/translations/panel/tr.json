@@ -118,6 +118,8 @@
     },
     "attn_sub": "Kaydetmeden önce çakışmaları düzeltin",
     "attn_title": "{n} ayar çakışması{s}",
+    "settings_banner": "{n} ayar çakışması{s} — vurgulanan bölümleri kontrol edin ve kaydetmeden önce düzeltin.",
+    "settings_banner_btn": "İlkine git",
     "confidence": {
       "auto": "Eşleşme Eşiğinde veya üzerinde olmalıdır ({match})",
       "learning": "Eşleşme Eşiğinde veya altında olmalıdır ({match})",

@@ -63,8 +63,6 @@
     "error": {
       "feedback_notification_title": "WashData: Verifiera cykel ({device})",
       "feedback_notification_message": "**Enhet**: {device}\n**Program**: {program} ({confidence}% konfidens)\n**Tid**: {time}\n\nWashData behöver din hjälp för att verifiera denna identifierade cykel.\n\nGå till **Inställningar > Enheter och tjänster > WashData > Konfigurera > Inlärningsfeedback** för att bekräfta eller korrigera detta resultat.",
-      "suggestions_ready_notification_title": "WashData: Föreslagna inställningar klara ({device})",
-      "suggestions_ready_notification_message": "Sensorn **Tillgängliga föreslagna inställningar** rapporterar nu **{count}** åtgärdbara rekommendationer.\n\nSå här granskar och tillämpar du dem: **Inställningar > Enheter och tjänster > WashData > Konfigurera > Avancerade inställningar > Tillämpa föreslagna värden**.\n\nFörslag är valfria och visas för granskning innan du sparar.",
       "auto_tune_suggestion": "{device_type} {device_title} upptäckte spökcykler. Föreslagen min_effektändring: {current_min}W -> {new_min}W (tillämpas inte automatiskt).",
       "auto_tune_title": "WashData Auto-Tune",
       "auto_tune_fallback": "{device_type} {device_title} upptäckte spökcykler. Föreslagen min_effektändring: {current_min}W -> {new_min}W (tillämpas inte automatiskt).",

@@ -63,8 +63,6 @@
     "error": {
       "feedback_notification_title": "WashData: kontrolli tsükkel ({device})",
       "feedback_notification_message": "**Seade**: {device}\n**Programm**: {program} ({confidence}% usaldusväärsus)\n**Aeg**: {time}\n\nWashData vajab tuvastatud tsükli kontrollimiseks teie abi.\n\nSelle tulemuse kinnitamiseks või parandamiseks minge jaotisse **Seaded > Seadmed ja teenused > WashData > Seadistamine > Tagasiside õppimine**.",
-      "suggestions_ready_notification_title": "WashData: soovituslikud seaded on valmis ({device})",
-      "suggestions_ready_notification_message": "Andur **Soovitatud seaded** annab nüüd **{count}** rakendatavaid soovitusi.\n\nNende ülevaatamiseks ja rakendamiseks tehke järgmist. **Seaded > Seadmed ja teenused > WashData > Seadistamine > Täpsemad seaded > Rakenda soovitatud väärtused**.\n\nSoovitused on valikulised ja neid kuvatakse enne salvestamist ülevaatamiseks.",
       "auto_tune_suggestion": "{device_type} {device_title} tuvastas kummitustsüklit. Soovitatav min_võimsuse muutus: {current_min}W -> {new_min}W (ei rakendata automaatselt).",
       "auto_tune_title": "WashData automaatne häälestus",
       "auto_tune_fallback": "{device_type} {device_title} tuvastas kummitustsüklit. Soovitatav min_võimsuse muutus: {current_min}W -> {new_min}W (ei rakendata automaatselt).",

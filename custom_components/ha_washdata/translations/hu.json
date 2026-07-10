@@ -63,8 +63,6 @@
     "error": {
       "feedback_notification_title": "WashData: Ciklus ellenőrzése ({device})",
       "feedback_notification_message": "**Eszköz**: {device}\n**Program**: {program} ({confidence}%-os megbízhatóság)\n**Idő**: {time}\n\nA WashData segítségére van szüksége az észlelt ciklus ellenőrzéséhez.\n\nAz eredmény megerősítéséhez vagy javításához lépjen a **Beállítások > Eszközök és szolgáltatások > WashData > Konfigurálás > Tanulási visszajelzések** menüpontra.",
-      "suggestions_ready_notification_title": "WashData: A javasolt beállítások készen állnak ({device})",
-      "suggestions_ready_notification_message": "A **Javasolt beállítások** érzékelő mostantól **{count}** használható javaslatokat közöl.\n\nÁttekintésük és alkalmazásuk: **Beállítások > Eszközök és szolgáltatások > WashData > Konfigurálás > Speciális beállítások > Javasolt értékek alkalmazása**.\n\nA javaslatok nem kötelezőek, és mentés előtt áttekinthetők.",
       "auto_tune_suggestion": "{device_type} {device_title} szellemciklusokat észlelt. Javasolt minimális teljesítményváltozás: {current_min}W -> {new_min}W (nem alkalmazzák automatikusan).",
       "auto_tune_title": "WashData automatikus hangolás",
       "auto_tune_fallback": "{device_type} {device_title} szellemciklusokat észlelt. Javasolt minimális teljesítményváltozás: {current_min}W -> {new_min}W (nem alkalmazzák automatikusan).",

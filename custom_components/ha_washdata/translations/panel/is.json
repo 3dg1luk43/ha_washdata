@@ -166,7 +166,9 @@
     "watchdog": {
       "interval": "Ætti að vera að minnsta kosti 2x Sýnitakabil ({si} s)",
       "sampling": "Sýnitakabil ætti að vera í mesta lagi helmingur Gæsluabils ({wi} s)"
-    }
+    },
+    "settings_banner": "{n} stillingarárekstur{s} — skoðaðu auðkenndu hlutana og lagaðu þá áður en þú vistar.",
+    "settings_banner_btn": "Fara á fyrsta"
   },
   "hdr": {
     "access_control": "Aðgangsstýring",

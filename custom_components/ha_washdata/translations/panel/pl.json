@@ -166,7 +166,9 @@
     "watchdog": {
       "interval": "Powinien wynosić co najmniej 2× Interwał Próbkowania ({si} s)",
       "sampling": "Interwał Próbkowania powinien wynosić co najwyżej połowę Interwału Watchdog ({wi} s)"
-    }
+    },
+    "settings_banner": "{n} konflikt{s} ustawień — sprawdź podświetlone sekcje i popraw przed zapisaniem.",
+    "settings_banner_btn": "Przejdź do pierwszego"
   },
   "hdr": {
     "access_control": "Kontrola dostępu",

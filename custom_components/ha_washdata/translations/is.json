@@ -63,8 +63,6 @@
     "error": {
       "feedback_notification_title": "WashData: Staðfestu hringrás ({device})",
       "feedback_notification_message": "**Tæki**: {device}\n**Prógramm**: {program} ({confidence}% sjálfstraust)\n**Tími**: {time}\n\nWashData þarf á aðstoð þinni að halda til að staðfesta þessa greindu lotu.\n\nVinsamlegast farðu í **Stillingar > Tæki og þjónusta > WashData > Stilla > Námsendurgjöf** til að staðfesta eða leiðrétta þessa niðurstöðu.",
-      "suggestions_ready_notification_title": "WashData: Ráðlagðar stillingar tilbúnar ({device})",
-      "suggestions_ready_notification_message": "Skynjarinn **Tillögur að stillingum** tilkynnir nú **{count}** ráðleggingar sem hægt er að nota.\n\nTil að fara yfir og nota þær: **Stillingar > Tæki og þjónusta > WashData > Stilla > Ítarlegar stillingar > Nota ráðlögð gildi**.\n\nTillögur eru valfrjálsar og sýndar til skoðunar áður en þú vistar.",
       "auto_tune_suggestion": "{device_type} {device_title} fundu draugalotur. Ráðlagður min_power breyting: {current_min}W -> {new_min}W (ekki beitt sjálfkrafa).",
       "auto_tune_title": "WashData sjálfvirk stilling",
       "auto_tune_fallback": "{device_type} {device_title} fundu draugalotur. Ráðlagður min_power breyting: {current_min}W -> {new_min}W (ekki beitt sjálfkrafa).",

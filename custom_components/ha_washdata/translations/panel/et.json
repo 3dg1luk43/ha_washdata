@@ -118,6 +118,8 @@
     },
     "attn_sub": "Lahendage konfliktid enne salvestamist",
     "attn_title": "{n} seadete konflikt{s}",
+    "settings_banner": "{n} seadete konflikt{s} — kontrollige esile tõstetud sektsioone ja parandage enne salvestamist.",
+    "settings_banner_btn": "Mine esimesele",
     "confidence": {
       "auto": "Peab olema vähemalt vaste läve tasemel ({match})",
       "learning": "Peab olema kuni vaste läve ({match})",

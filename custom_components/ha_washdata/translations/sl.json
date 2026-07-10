@@ -63,8 +63,6 @@
     "error": {
       "feedback_notification_title": "WashData: preveritev cikla ({device})",
       "feedback_notification_message": "**Naprava**: {device}\n**Program**: {program} ({confidence} % zaupanja)\n**Čas**: {time}\n\nWashData potrebuje vašo pomoč, da preveri ta zaznani cikel.\n\nPojdite na **Nastavitve > Naprave in storitve > WashData > Konfiguracija > Povratne informacije o učenju**, da potrdite ali popravite ta rezultat.",
-      "suggestions_ready_notification_title": "WashData: predlagane nastavitve pripravljene ({device})",
-      "suggestions_ready_notification_message": "Senzor **Predlagane nastavitve** zdaj poroča o **{count}** priporočilih za ukrepanje.\n\nČe jih želite pregledati in uporabiti: **Nastavitve > Naprave in storitve > WashData > Konfiguracija > Napredne nastavitve > Uporabi predlagane vrednosti**.\n\nPredlogi niso obvezni in so prikazani v pregledu, preden jih shranite.",
       "auto_tune_suggestion": "{device_type} {device_title} zaznanih ciklov duhov. Predlagana sprememba najmanjše moči: {current_min}W -> {new_min}W (se ne uporabi samodejno).",
       "auto_tune_title": "Samodejna nastavitev WashData",
       "auto_tune_fallback": "{device_type} {device_title} zaznanih ciklov duhov. Predlagana sprememba najmanjše moči: {current_min}W -> {new_min}W (se ne uporabi samodejno).",

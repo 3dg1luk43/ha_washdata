@@ -118,6 +118,8 @@
     },
     "attn_sub": "Pirms saglabāšanas novērsiet konfliktus",
     "attn_title": "{n} iestatījumu konflikts{s}",
+    "settings_banner": "{n} iestatījumu konflikts{s} — pārbaudiet iezīmētās sadaļas un labojiet pirms saglabāšanas.",
+    "settings_banner_btn": "Doties uz pirmo",
     "confidence": {
       "auto": "Jābūt vienādam vai virs atbilstības sliekšņa ({match})",
       "learning": "Jābūt vienādam vai zem atbilstības sliekšņa ({match})",

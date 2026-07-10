@@ -119,6 +119,8 @@
       },
       "attn_sub": "Fix conflicts before saving",
       "attn_title": "{n} setting conflict{s}",
+      "settings_banner": "{n} setting conflict{s} — check the highlighted sections and fix before saving.",
+      "settings_banner_btn": "Go to first",
       "confidence": {
         "auto": "Must be at or above Match Threshold ({match})",
         "learning": "Must be at or below Match Threshold ({match})",
@@ -1175,6 +1177,8 @@
       },
       "attn_sub": "Поправете конфликтите преди запазване",
       "attn_title": "{n} конфликт{s} в настройките",
+      "settings_banner": "{n} конфликт{s} в настройките — проверете маркираните раздели и поправете преди запазване.",
+      "settings_banner_btn": "Към първия",
       "confidence": {
         "auto": "Трябва да е на или над Праг на Съвпадение ({match})",
         "learning": "Трябва да е на или под Праг на Съвпадение ({match})",
@@ -2279,7 +2283,9 @@
       "watchdog": {
         "interval": "Treba biti najmanje 2× Interval uzorkovanja ({si} s)",
         "sampling": "Interval uzorkovanja treba biti najviše polovina Intervala čuvara ({wi} s)"
-      }
+      },
+      "settings_banner": "{n} konflikt{s} postavki — provjerite istaknute sekcije i ispravite prije pohrane.",
+      "settings_banner_btn": "Idi na prvi"
     },
     "hdr": {
       "access_control": "Kontrola pristupa",
@@ -3335,7 +3341,9 @@
       "watchdog": {
         "interval": "Měl by být alespoň 2× Interval vzorkování ({si} s)",
         "sampling": "Interval vzorkování by měl být nejvýše polovina Intervalu hlídače ({wi} s)"
-      }
+      },
+      "settings_banner": "{n} konflikt{s} nastavení — zkontrolujte zvýrazněné sekce a opravte před uložením.",
+      "settings_banner_btn": "Přejít na první"
     },
     "hdr": {
       "access_control": "Řízení přístupu",
@@ -4391,7 +4399,9 @@
       "watchdog": {
         "interval": "Bør være mindst 2x samplingsintervallet ({si} s)",
         "sampling": "Samplingsinterval bør højst være halvdelen af watchdog-intervallet ({wi} s)"
-      }
+      },
+      "settings_banner": "{n} indstillingskonflikt{s} — tjek de fremhævede sektioner og ret dem inden du gemmer.",
+      "settings_banner_btn": "Gå til første"
     },
     "hdr": {
       "access_control": "Adgangskontrol",
@@ -5447,7 +5457,9 @@
       "watchdog": {
         "interval": "Sollte mindestens das 2-fache des Abtastintervalls ({si} s) betragen",
         "sampling": "Abtastintervall sollte höchstens die Hälfte des Watchdog-Intervalls ({wi} s) betragen"
-      }
+      },
+      "settings_banner": "{n} Einstellungskonflikt{s} — markierte Abschnitte prüfen und vor dem Speichern beheben.",
+      "settings_banner_btn": "Zum ersten"
     },
     "hdr": {
       "access_control": "Zugangskontrolle",
@@ -6455,6 +6467,8 @@
       },
       "attn_sub": "Διορθώστε τις συγκρούσεις πριν αποθηκεύσετε",
       "attn_title": "{n} σύγκρουση{s} ρυθμίσεων",
+      "settings_banner": "{n} σύγκρουση{s} ρυθμίσεων — ελέγξτε τα επισημασμένα τμήματα και διορθώστε πριν αποθηκεύσετε.",
+      "settings_banner_btn": "Μετάβαση στο πρώτο",
       "confidence": {
         "auto": "Πρέπει να είναι μεγαλύτερο ή ίσο με το Κατώφλι Αντιστοίχισης ({match})",
         "learning": "Πρέπει να είναι μικρότερο ή ίσο με το Κατώφλι Αντιστοίχισης ({match})",
@@ -7511,6 +7525,8 @@
       },
       "attn_sub": "Corrige los conflictos antes de guardar",
       "attn_title": "{n} conflicto{s} de ajustes",
+      "settings_banner": "{n} conflicto{s} de ajustes — revisa las secciones resaltadas y corrígelos antes de guardar.",
+      "settings_banner_btn": "Ir al primero",
       "confidence": {
         "auto": "Debe ser mayor o igual al Umbral de coincidencia ({match})",
         "learning": "Debe ser menor o igual al Umbral de coincidencia ({match})",
@@ -8567,6 +8583,8 @@
       },
       "attn_sub": "Lahendage konfliktid enne salvestamist",
       "attn_title": "{n} seadete konflikt{s}",
+      "settings_banner": "{n} seadete konflikt{s} — kontrollige esile tõstetud sektsioone ja parandage enne salvestamist.",
+      "settings_banner_btn": "Mine esimesele",
       "confidence": {
         "auto": "Peab olema vähemalt vaste läve tasemel ({match})",
         "learning": "Peab olema kuni vaste läve ({match})",
@@ -9671,7 +9689,9 @@
       "watchdog": {
         "interval": "Tulisi olla vähintään 2x näytteenottoväli ({si} s)",
         "sampling": "Näytteenottovälin tulee olla enintään puolet tarkkailijavälistä ({wi} s)"
-      }
+      },
+      "settings_banner": "{n} asetusten ristiriita{s} — tarkista korostetut osiot ja korjaa ne ennen tallentamista.",
+      "settings_banner_btn": "Siirry ensimmäiseen"
     },
     "hdr": {
       "access_control": "Kulunvalvonta",
@@ -10679,6 +10699,8 @@
       },
       "attn_sub": "Corriger les conflits avant d'enregistrer",
       "attn_title": "{n} conflit{s} de paramètres",
+      "settings_banner": "{n} conflit{s} de paramètres — vérifiez les sections surlignées et corrigez avant d'enregistrer.",
+      "settings_banner_btn": "Aller au premier",
       "confidence": {
         "auto": "Doit être supérieur ou égal au Seuil de correspondance ({match})",
         "learning": "Doit être inférieur ou égal au Seuil de correspondance ({match})",
@@ -11783,7 +11805,9 @@
       "watchdog": {
         "interval": "Trebao bi biti najmanje 2× Interval uzorkovanja ({si} s)",
         "sampling": "Interval uzorkovanja trebao bi biti najviše pola Intervala nadzora ({wi} s)"
-      }
+      },
+      "settings_banner": "{n} sukob{s} postavki — provjerite istaknute odjeljke i ispravite prije pohrane.",
+      "settings_banner_btn": "Idi na prvi"
     },
     "hdr": {
       "access_control": "Kontrola pristupa",
@@ -12791,6 +12815,8 @@
       },
       "attn_sub": "Mentés előtt javítsa az ütközéseket",
       "attn_title": "{n} beállítási ütközés{s}",
+      "settings_banner": "{n} beállítási ütközés{s} — ellenőrizze a kijelölt szakaszokat és javítsa ki mentés előtt.",
+      "settings_banner_btn": "Ugrás az elsőhöz",
       "confidence": {
         "auto": "Legalább az Egyezési küszöb értékén kell lennie ({match})",
         "learning": "Legfeljebb az Egyezési küszöb értékén lehet ({match})",
@@ -13895,7 +13921,9 @@
       "watchdog": {
         "interval": "Ætti að vera að minnsta kosti 2x Sýnitakabil ({si} s)",
         "sampling": "Sýnitakabil ætti að vera í mesta lagi helmingur Gæsluabils ({wi} s)"
-      }
+      },
+      "settings_banner": "{n} stillingarárekstur{s} — skoðaðu auðkenndu hlutana og lagaðu þá áður en þú vistar.",
+      "settings_banner_btn": "Fara á fyrsta"
     },
     "hdr": {
       "access_control": "Aðgangsstýring",
@@ -14903,6 +14931,8 @@
       },
       "attn_sub": "Correggi i conflitti prima di salvare",
       "attn_title": "{n} conflitto{s} nelle impostazioni",
+      "settings_banner": "{n} conflitto{s} nelle impostazioni — controlla le sezioni evidenziate e correggile prima di salvare.",
+      "settings_banner_btn": "Vai al primo",
       "confidence": {
         "auto": "Deve essere maggiore o uguale alla Soglia di corrispondenza ({match})",
         "learning": "Deve essere minore o uguale alla Soglia di corrispondenza ({match})",
@@ -16007,7 +16037,9 @@
       "watchdog": {
         "interval": "サンプリング間隔 ({si} 秒) の少なくとも 2 倍である必要があります",
         "sampling": "サンプリング間隔はウォッチドッグ間隔 ({wi} 秒) の半分以下である必要があります"
-      }
+      },
+      "settings_banner": "{n} 件の設定競合{s} — 強調表示されたセクションを確認し、保存前に修正してください。",
+      "settings_banner_btn": "最初へ"
     },
     "hdr": {
       "access_control": "アクセス制御",
@@ -17063,7 +17095,9 @@
       "watchdog": {
         "interval": "샘플링 간격 ({si} 초)의 최소 2배이어야 합니다",
         "sampling": "샘플링 간격은 워치독 간격 ({wi} 초)의 절반 이하이어야 합니다"
-      }
+      },
+      "settings_banner": "{n}건의 설정 충돌{s} — 강조 표시된 섹션을 확인하고 저장 전에 수정하세요.",
+      "settings_banner_btn": "첫 번째로"
     },
     "hdr": {
       "access_control": "접근 제어",
@@ -18071,6 +18105,8 @@
       },
       "attn_sub": "Prieš išsaugant ištaisykite konfliktus",
       "attn_title": "{n} nustatymų konfliktas{s}",
+      "settings_banner": "{n} nustatymų konfliktas{s} — patikrinkite pažymėtas sekcijas ir ištaisykite prieš išsaugant.",
+      "settings_banner_btn": "Eiti į pirmą",
       "confidence": {
         "auto": "Turi būti lygus arba aukščiau atitikimo slenksčio ({match})",
         "learning": "Turi būti lygus arba žemiau atitikimo slenksčio ({match})",
@@ -19127,6 +19163,8 @@
       },
       "attn_sub": "Pirms saglabāšanas novērsiet konfliktus",
       "attn_title": "{n} iestatījumu konflikts{s}",
+      "settings_banner": "{n} iestatījumu konflikts{s} — pārbaudiet iezīmētās sadaļas un labojiet pirms saglabāšanas.",
+      "settings_banner_btn": "Doties uz pirmo",
       "confidence": {
         "auto": "Jābūt vienādam vai virs atbilstības sliekšņa ({match})",
         "learning": "Jābūt vienādam vai zem atbilstības sliekšņa ({match})",
@@ -20183,6 +20221,8 @@
       },
       "attn_sub": "Поправете ги конфликтите пред зачувување",
       "attn_title": "{n} конфликт{s} во поставките",
+      "settings_banner": "{n} конфликт{s} во поставките — проверете ги означените раздели и поправете пред зачувување.",
+      "settings_banner_btn": "Оди на прв",
       "confidence": {
         "auto": "Мора да е на или над Прагот за Совпаѓање ({match})",
         "learning": "Мора да е на или под Прагот за Совпаѓање ({match})",
@@ -21287,7 +21327,9 @@
       "watchdog": {
         "interval": "Bør være minst 2x samplingsintervallet ({si} s)",
         "sampling": "Samplingsintervall bør være høyst halvparten av vaktbikkjeintervallet ({wi} s)"
-      }
+      },
+      "settings_banner": "{n} innstillingskonflikt{s} — sjekk de fremhevede seksjonene og rett dem opp før du lagrer.",
+      "settings_banner_btn": "Gå til første"
     },
     "hdr": {
       "access_control": "Tilgangskontroll",
@@ -22343,7 +22385,9 @@
       "watchdog": {
         "interval": "Moet minimaal 2x het bemonsteringsinterval ({si} s) zijn",
         "sampling": "Bemonsteringsinterval moet maximaal de helft van het watchdog-interval ({wi} s) zijn"
-      }
+      },
+      "settings_banner": "{n} instellingsconflict{s} — controleer de gemarkeerde secties en los ze op voor het opslaan.",
+      "settings_banner_btn": "Ga naar eerste"
     },
     "hdr": {
       "access_control": "Toegangscontrole",
@@ -23399,7 +23443,9 @@
       "watchdog": {
         "interval": "Powinien wynosić co najmniej 2× Interwał Próbkowania ({si} s)",
         "sampling": "Interwał Próbkowania powinien wynosić co najwyżej połowę Interwału Watchdog ({wi} s)"
-      }
+      },
+      "settings_banner": "{n} konflikt{s} ustawień — sprawdź podświetlone sekcje i popraw przed zapisaniem.",
+      "settings_banner_btn": "Przejdź do pierwszego"
     },
     "hdr": {
       "access_control": "Kontrola dostępu",
@@ -24407,6 +24453,8 @@
       },
       "attn_sub": "Corrija os conflitos antes de salvar",
       "attn_title": "{n} conflito{s} de configurações",
+      "settings_banner": "{n} conflito{s} de configurações — verifique as seções destacadas e corrija antes de salvar.",
+      "settings_banner_btn": "Ir para o primeiro",
       "confidence": {
         "auto": "Deve ser maior ou igual ao Limiar de correspondência ({match})",
         "learning": "Deve ser menor ou igual ao Limiar de correspondência ({match})",
@@ -25463,6 +25511,8 @@
       },
       "attn_sub": "Corrija os conflitos antes de guardar",
       "attn_title": "{n} conflito{s} de definições",
+      "settings_banner": "{n} conflito{s} de definições — verifique as secções realçadas e corrija antes de guardar.",
+      "settings_banner_btn": "Ir para o primeiro",
       "confidence": {
         "auto": "Deve ser superior ou igual ao Limiar de correspondência ({match})",
         "learning": "Deve ser inferior ou igual ao Limiar de correspondência ({match})",
@@ -26519,6 +26569,8 @@
       },
       "attn_sub": "Rezolvați conflictele înainte de salvare",
       "attn_title": "{n} conflict{s} de setări",
+      "settings_banner": "{n} conflict{s} de setări — verificați secțiunile evidențiate și remediați înainte de salvare.",
+      "settings_banner_btn": "Salt la primul",
       "confidence": {
         "auto": "Trebuie să fie cel puțin egal cu Pragul de potrivire ({match})",
         "learning": "Trebuie să fie cel mult egal cu Pragul de potrivire ({match})",
@@ -27575,6 +27627,8 @@
       },
       "attn_sub": "Исправьте конфликты перед сохранением",
       "attn_title": "{n} конфликт{s} настроек",
+      "settings_banner": "{n} конфликт{s} настроек — проверьте выделенные разделы и исправьте перед сохранением.",
+      "settings_banner_btn": "К первому",
       "confidence": {
         "auto": "Должен быть не ниже Порога Совпадения ({match})",
         "learning": "Должен быть не выше Порога Совпадения ({match})",
@@ -28679,7 +28733,9 @@
       "watchdog": {
         "interval": "Mal by byť aspoň 2× Interval vzorkovania ({si} s)",
         "sampling": "Interval vzorkovania by mal byť najviac polovica Intervalu watchdog ({wi} s)"
-      }
+      },
+      "settings_banner": "{n} konflikt{s} nastavení — skontrolujte zvýraznené sekcie a opravte pred uložením.",
+      "settings_banner_btn": "Prejsť na prvý"
     },
     "hdr": {
       "access_control": "Kontrola prístupu",
@@ -29735,7 +29791,9 @@
       "watchdog": {
         "interval": "Mora biti vsaj 2× Interval vzorčenja ({si} s)",
         "sampling": "Interval vzorčenja mora biti največ polovica Intervala nadzornika ({wi} s)"
-      }
+      },
+      "settings_banner": "{n} konflikt{s} nastavitev — preverite označene razdelke in popravite pred shranjevanjem.",
+      "settings_banner_btn": "Pojdi na prvega"
     },
     "hdr": {
       "access_control": "Nadzor dostopa",
@@ -30791,7 +30849,9 @@
       "watchdog": {
         "interval": "Duhet të jetë të paktën 2× Intervali i Kampionimit ({si} s)",
         "sampling": "Intervali i Kampionimit duhet të jetë të paktën gjysma e Intervalit të Rojtarit ({wi} s)"
-      }
+      },
+      "settings_banner": "{n} konflikt{s} cilësimi — kontrolloni seksionet e theksuara dhe korrigjojini para ruajtjes.",
+      "settings_banner_btn": "Shko te i pari"
     },
     "hdr": {
       "access_control": "Kontrolli i aksesit",
@@ -31847,7 +31907,9 @@
       "watchdog": {
         "interval": "Treba biti najmanje 2× Interval uzorkovanja ({si} s)",
         "sampling": "Interval uzorkovanja treba biti najviše pola Intervala nadzornika ({wi} s)"
-      }
+      },
+      "settings_banner": "{n} konflikt{s} podešavanja — proverite istaknute odeljke i ispravite pre čuvanja.",
+      "settings_banner_btn": "Idi na prvi"
     },
     "hdr": {
       "access_control": "Kontrola pristupa",
@@ -32903,7 +32965,9 @@
       "watchdog": {
         "interval": "Bör vara minst 2x samplingsintervallet ({si} s)",
         "sampling": "Samplingsintervall bör vara högst hälften av vakthundsintervallet ({wi} s)"
-      }
+      },
+      "settings_banner": "{n} inställningskonflikt{s} — kontrollera de markerade avsnitten och åtgärda dem innan du sparar.",
+      "settings_banner_btn": "Gå till första"
     },
     "hdr": {
       "access_control": "Åtkomstkontroll",
@@ -33911,6 +33975,8 @@
       },
       "attn_sub": "Kaydetmeden önce çakışmaları düzeltin",
       "attn_title": "{n} ayar çakışması{s}",
+      "settings_banner": "{n} ayar çakışması{s} — vurgulanan bölümleri kontrol edin ve kaydetmeden önce düzeltin.",
+      "settings_banner_btn": "İlkine git",
       "confidence": {
         "auto": "Eşleşme Eşiğinde veya üzerinde olmalıdır ({match})",
         "learning": "Eşleşme Eşiğinde veya altında olmalıdır ({match})",
@@ -34967,6 +35033,8 @@
       },
       "attn_sub": "Виправте конфлікти перед збереженням",
       "attn_title": "{n} конфлікт{s} налаштувань",
+      "settings_banner": "{n} конфлікт{s} налаштувань — перевірте виділені розділи й виправте перед збереженням.",
+      "settings_banner_btn": "До першого",
       "confidence": {
         "auto": "Має бути не нижчим за Поріг Зіставлення ({match})",
         "learning": "Має бути не вищим за Поріг Зіставлення ({match})",
@@ -36071,7 +36139,9 @@
       "watchdog": {
         "interval": "应至少为采样间隔 ({si} 秒) 的 2 倍",
         "sampling": "采样间隔应最多为看门狗间隔 ({wi} 秒) 的一半"
-      }
+      },
+      "settings_banner": "{n} 个设置冲突{s} — 请检查高亮显示的部分，并在保存前修复。",
+      "settings_banner_btn": "前往第一处"
     },
     "hdr": {
       "access_control": "访问控制",

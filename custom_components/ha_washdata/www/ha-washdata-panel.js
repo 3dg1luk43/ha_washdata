@@ -719,6 +719,7 @@ const _CSS = `
 .wd-dbadge.rec { background: var(--error-color, #f44336); color: #fff; }
 .wd-dbadge.sug { background: rgba(255,152,0,.22); }
 .wd-dbadge.fb { background: rgba(33,150,243,.22); }
+.wd-dbadge.conf { background: rgba(183,28,28,.18); color: var(--error-color, #b71c1c); }
 /* Attention cards (status dashboard) */
 .wd-attn { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-bottom: 16px; }
 .wd-attn-card { display: flex; align-items: center; gap: 11px; padding: 12px 14px; border-radius: 10px; background: var(--card-background-color); border: 1px solid var(--divider-color); cursor: pointer; transition: border-color .15s; }
@@ -1956,6 +1957,8 @@ class HaWashdataPanel extends HTMLElement {
       const dotColor = rec ? 'var(--error-color, #f44336)' : this._stateColor(st);
       const label = rec ? this._t('status.recording', {}, 'Recording') : this._stateLabel(st);
       const badges = [];
+      const confN = this._conflictCountForOpts(d.options || {});
+      if (confN) badges.push(`<span class="wd-dbadge conf">⚠ ${confN}</span>`);
       if (d.suggestions_count) badges.push(`<span class="wd-dbadge sug">💡 ${d.suggestions_count}</span>`);
       if (d.feedback_count) badges.push(`<span class="wd-dbadge fb">💬 ${d.feedback_count}</span>`);
       return `<button class="wd-devcard ${i === this._selIdx ? 'active' : ''}" data-idx="${i}">
@@ -2509,6 +2512,13 @@ class HaWashdataPanel extends HTMLElement {
     }).join('');
 
     const saveBusy = this._busy.has('save-settings');
+    const confCount = _secConfKeys.size;
+    const s = confCount !== 1 ? 's' : '';
+    const confBanner = confCount ? `
+      <div class="wd-sug-banner" style="background:rgba(183,28,28,.10);border-color:rgba(183,28,28,.4);color:var(--error-color,#b71c1c)">
+        <span>⚠ ${this._t('conflict.settings_banner', {n: confCount, s}, `${confCount} setting conflict${s} — check the highlighted sections and fix before saving.`)}</span>
+        <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="conf-goto-section">${this._t('conflict.settings_banner_btn', {}, 'Go to first')}</button>
+      </div>` : '';
     const sugCount = this._suggestions.length;
     const sugOnly = this._settingsSugOnly && !this._settingsSearch;
     const banner = sugCount ? (sugOnly ? `
@@ -2537,7 +2547,7 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-card-title" style="margin:0">${this._t('tab.settings', {}, 'Settings')}${this._mlSettingsLoading ? ` <span style="font-size:.6em;color:var(--secondary-text-color);font-weight:400">${this._t('msg.ml_loading', {}, 'loading ML…')}</span>` : ''}</div>
         ${analyzeBtn}
       </div>
-      ${banner}
+      ${confBanner}${banner}
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
         <div class="wd-section-nav" style="flex:1;margin:0">${nav}</div>
         ${searchInput}
@@ -5137,6 +5147,12 @@ class HaWashdataPanel extends HTMLElement {
       this._settingsSugOnly = true; this._tab = 'settings'; this._fetchTabData();
     } else if (a === 'goto-conflicts') {
       this._tab = 'settings'; this._fetchTabData();
+    } else if (a === 'conf-goto-section') {
+      const confKeys = this._conflictKeysFromOpts();
+      for (const sec of _SETTINGS_SECTIONS) {
+        const fields = sec.fields || (sec.groups || []).flatMap(g => g.fields || []);
+        if (fields.some(f => confKeys.has(f.key))) { this._settingsSec = sec.id; this._render(); break; }
+      }
     } else if (a === 'toggle-log-drawer') {
       this._logOpen = !this._logOpen;
       try { localStorage.setItem('wd-log-open', this._logOpen ? '1' : '0'); } catch (_) {}
@@ -5550,15 +5566,21 @@ class HaWashdataPanel extends HTMLElement {
     });
   }
 
-  // section-pill dots to surface saved-settings conflicts without needing the form.
-  _conflictKeysFromOpts() {
-    const vals = Object.assign({}, this._opts, this._pendingSettings);
+  // Compute conflicting field keys from any options dict (used by device cards and section dots).
+  _conflictKeysForOpts(opts) {
     const keys = new Set();
     for (const rule of _SETTING_CONFLICTS) {
-      if (!rule.check(vals)) continue;
-      for (const key of Object.keys(rule.fieldErrors(vals))) keys.add(key);
+      if (!rule.check(opts)) continue;
+      for (const key of Object.keys(rule.fieldErrors(opts))) keys.add(key);
     }
     return keys;
+  }
+
+  _conflictCountForOpts(opts) { return this._conflictKeysForOpts(opts).size; }
+
+  // section-pill dots to surface saved-settings conflicts without needing the form.
+  _conflictKeysFromOpts() {
+    return this._conflictKeysForOpts(Object.assign({}, this._opts, this._pendingSettings));
   }
 
   // Collect current numeric form values from DOM, falling back to saved opts for

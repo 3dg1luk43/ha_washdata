@@ -63,8 +63,6 @@
     "error": {
       "feedback_notification_title": "WashData：验证周期 ({device})",
       "feedback_notification_message": "**设备**：{device}\n**程序**：{program}（{confidence}% 置信度）\n**时间**：{time}\n\nWashData 需要您的帮助来验证检测到的此周期。\n\n请转至 **设置 > 设备和服务 > WashData > 配置 > 学习反馈** 以确认或更正此结果。",
-      "suggestions_ready_notification_title": "WashData：建议设置已就绪 ({device})",
-      "suggestions_ready_notification_message": "**建议设置**传感器现在报告 **{count}** 可操作的建议。\n\n要查看并应用它们：**设置 > 设备和服务 > WashData > 配置 > 高级设置 > 应用建议值**。\n\n建议是可选的，并会在您保存之前显示以供审核。",
       "auto_tune_suggestion": "{device_type} {device_title} 检测到幽灵周期。建议的 min_power 更改：{current_min}W -> {new_min}W（不会自动应用）。",
       "auto_tune_title": "WashData 自动调整",
       "auto_tune_fallback": "{device_type} {device_title} 检测到幽灵周期。建议的 min_power 更改：{current_min}W -> {new_min}W（不会自动应用）。",

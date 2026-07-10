@@ -166,7 +166,9 @@
     "watchdog": {
       "interval": "Moet minimaal 2x het bemonsteringsinterval ({si} s) zijn",
       "sampling": "Bemonsteringsinterval moet maximaal de helft van het watchdog-interval ({wi} s) zijn"
-    }
+    },
+    "settings_banner": "{n} instellingsconflict{s} — controleer de gemarkeerde secties en los ze op voor het opslaan.",
+    "settings_banner_btn": "Ga naar eerste"
   },
   "hdr": {
     "access_control": "Toegangscontrole",

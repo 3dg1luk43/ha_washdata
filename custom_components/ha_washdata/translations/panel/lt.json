@@ -118,6 +118,8 @@
     },
     "attn_sub": "Prieš išsaugant ištaisykite konfliktus",
     "attn_title": "{n} nustatymų konfliktas{s}",
+    "settings_banner": "{n} nustatymų konfliktas{s} — patikrinkite pažymėtas sekcijas ir ištaisykite prieš išsaugant.",
+    "settings_banner_btn": "Eiti į pirmą",
     "confidence": {
       "auto": "Turi būti lygus arba aukščiau atitikimo slenksčio ({match})",
       "learning": "Turi būti lygus arba žemiau atitikimo slenksčio ({match})",

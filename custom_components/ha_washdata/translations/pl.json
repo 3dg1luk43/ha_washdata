@@ -63,8 +63,6 @@
     "error": {
       "feedback_notification_title": "WashData: sprawdź cykl ({device})",
       "feedback_notification_message": "**Urządzenie**: {device}\n**Program**: {program} ({confidence}% pewności)\n**Czas**: {time}\n\nWashData potrzebuje Twojej pomocy, aby zweryfikować wykryty cykl.\n\nPrzejdź do **Ustawienia > Urządzenia i usługi > WashData > Konfiguruj > Opinie dotyczące uczenia**, aby potwierdzić lub poprawić ten wynik.",
-      "suggestions_ready_notification_title": "WashData: sugerowane ustawienia gotowe ({device})",
-      "suggestions_ready_notification_message": "Czujnik **Sugerowane ustawienia** zgłasza teraz **{count}** możliwych do zastosowania zaleceń.\n\nAby je przejrzeć i zastosować: **Ustawienia > Urządzenia i usługi > WashData > Konfiguruj > Ustawienia zaawansowane > Zastosuj sugerowane wartości**.\n\nSugestie są opcjonalne i wyświetlane do przeglądu przed zapisaniem.",
       "auto_tune_suggestion": "{device_type} {device_title} wykrył cykle duchów. Sugerowana zmiana min_power: {current_min}W -> {new_min}W (nie stosowana automatycznie).",
       "auto_tune_title": "Automatyczne dostrajanie WashData",
       "auto_tune_fallback": "{device_type} {device_title} wykrył cykle duchów. Sugerowana zmiana min_power: {current_min}W -> {new_min}W (nie stosowana automatycznie).",

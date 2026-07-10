@@ -118,6 +118,8 @@
     },
     "attn_sub": "Fix conflicts before saving",
     "attn_title": "{n} setting conflict{s}",
+    "settings_banner": "{n} setting conflict{s} — check the highlighted sections and fix before saving.",
+    "settings_banner_btn": "Go to first",
     "confidence": {
       "auto": "Must be at or above Match Threshold ({match})",
       "learning": "Must be at or below Match Threshold ({match})",

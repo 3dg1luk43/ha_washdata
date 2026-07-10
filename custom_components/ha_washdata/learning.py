@@ -146,35 +146,9 @@ class LearningManager:
         self._last_batch_simulation_count: int = 0  # track when to re-run batch
 
     def _apply_suggestions_and_notify(self, suggestions: dict[str, Any]) -> None:
-        """Apply suggestions and notify once when they become actionable."""
+        """Apply suggestions that pass quality gates."""
         if not suggestions:
             return
-
-        _actionable_keys = (
-            CONF_MIN_POWER,
-            CONF_OFF_DELAY,
-            CONF_WATCHDOG_INTERVAL,
-            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-            CONF_SAMPLING_INTERVAL,
-            CONF_PROFILE_MATCH_INTERVAL,
-            CONF_AUTO_LABEL_CONFIDENCE,
-            CONF_DURATION_TOLERANCE,
-            CONF_PROFILE_DURATION_TOLERANCE,
-            CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-            CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-            CONF_MIN_OFF_GAP,
-            CONF_STOP_THRESHOLD_W,
-            CONF_START_THRESHOLD_W,
-            CONF_END_ENERGY_THRESHOLD,
-            CONF_RUNNING_DEAD_ZONE,
-            # Stage 1 detection suggestions
-            CONF_SMOOTHING_WINDOW,
-            CONF_START_DURATION_THRESHOLD,
-            CONF_COMPLETION_MIN_SECONDS,
-            CONF_LEARNING_CONFIDENCE,
-            CONF_PROFILE_MATCH_THRESHOLD,
-            CONF_END_REPEAT_COUNT,
-        )
 
         # Quality gate: drop or suppress suggestions that are not worth surfacing.
         entry = self.hass.config_entries.async_get_entry(self.entry_id)
@@ -226,25 +200,7 @@ class LearningManager:
         if not filtered_suggestions:
             return
 
-        def _count_actionable(s: dict) -> int:
-            return sum(
-                1 for k in _actionable_keys
-                if isinstance(s.get(k), dict) and s[k].get("value") is not None
-            )
-
-        current = self.profile_store.get_suggestions()
-        before_count = _count_actionable(current) if isinstance(current, dict) else 0
-
         self.suggestion_engine.apply_suggestions(filtered_suggestions)
-
-        updated = self.profile_store.get_suggestions()
-        after_count = _count_actionable(updated) if isinstance(updated, dict) else 0
-
-        if before_count == 0 and after_count > 0:
-            device_title = entry.title if entry else DOMAIN
-            self.hass.async_create_task(
-                self._async_send_suggestions_ready_notification(device_title, after_count)
-            )
 
     def process_power_reading(
         self, _power: float, now: datetime, last_reading_time: datetime | None
@@ -423,49 +379,6 @@ class LearningManager:
         count = len(self.profile_store.get_suggestions() or {})
         self._logger.info("Manual suggestion analysis complete: %d suggestion(s)", count)
         return {"count": count}
-
-    async def _async_send_suggestions_ready_notification(
-        self, device_title: str, suggestions_count: int
-    ) -> None:
-        """Send a one-time persistent notification when suggestions become available."""
-        try:
-            notification_id = f"ha_washdata_suggestions_ready_{self.entry_id}"
-
-            translations = await translation.async_get_translations(
-                self.hass, self.hass.config.language, "options", {DOMAIN}
-            )
-
-            default_title = "WashData: Suggested Settings Ready ({device})"
-            default_msg = (
-                "The **Suggested Settings** sensor now reports **{count}** actionable recommendations.\n\n"
-                "To review and apply them: **Settings > Devices & Services > WashData > Configure > "
-                "Advanced Settings > Apply Suggested Values**.\n\n"
-                "Suggestions are optional and shown for review before you save."
-            )
-
-            title_template = translations.get(
-                f"component.{DOMAIN}.options.error.suggestions_ready_notification_title",
-                default_title,
-            )
-            msg_template = translations.get(
-                f"component.{DOMAIN}.options.error.suggestions_ready_notification_message",
-                default_msg,
-            )
-
-            title = title_template.format(device=device_title)
-            message = msg_template.format(count=suggestions_count)
-
-            await self.hass.services.async_call(
-                "persistent_notification",
-                "create",
-                {
-                    "message": message,
-                    "title": title,
-                    "notification_id": notification_id,
-                },
-            )
-        except Exception:  # pylint: disable=broad-exception-caught
-            self._logger.exception("Failed to create suggestions-ready notification")
 
     def _maybe_request_feedback(
         self,

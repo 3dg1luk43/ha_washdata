@@ -166,7 +166,9 @@
     "watchdog": {
       "interval": "Duhet të jetë të paktën 2× Intervali i Kampionimit ({si} s)",
       "sampling": "Intervali i Kampionimit duhet të jetë të paktën gjysma e Intervalit të Rojtarit ({wi} s)"
-    }
+    },
+    "settings_banner": "{n} konflikt{s} cilësimi — kontrolloni seksionet e theksuara dhe korrigjojini para ruajtjes.",
+    "settings_banner_btn": "Shko te i pari"
   },
   "hdr": {
     "access_control": "Kontrolli i aksesit",

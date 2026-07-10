@@ -166,7 +166,9 @@
     "watchdog": {
       "interval": "Bör vara minst 2x samplingsintervallet ({si} s)",
       "sampling": "Samplingsintervall bör vara högst hälften av vakthundsintervallet ({wi} s)"
-    }
+    },
+    "settings_banner": "{n} inställningskonflikt{s} — kontrollera de markerade avsnitten och åtgärda dem innan du sparar.",
+    "settings_banner_btn": "Gå till första"
   },
   "hdr": {
     "access_control": "Åtkomstkontroll",

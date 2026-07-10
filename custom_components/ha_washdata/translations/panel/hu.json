@@ -118,6 +118,8 @@
     },
     "attn_sub": "Mentés előtt javítsa az ütközéseket",
     "attn_title": "{n} beállítási ütközés{s}",
+    "settings_banner": "{n} beállítási ütközés{s} — ellenőrizze a kijelölt szakaszokat és javítsa ki mentés előtt.",
+    "settings_banner_btn": "Ugrás az elsőhöz",
     "confidence": {
       "auto": "Legalább az Egyezési küszöb értékén kell lennie ({match})",
       "learning": "Legfeljebb az Egyezési küszöb értékén lehet ({match})",

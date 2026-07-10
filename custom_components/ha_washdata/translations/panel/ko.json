@@ -166,7 +166,9 @@
     "watchdog": {
       "interval": "샘플링 간격 ({si} 초)의 최소 2배이어야 합니다",
       "sampling": "샘플링 간격은 워치독 간격 ({wi} 초)의 절반 이하이어야 합니다"
-    }
+    },
+    "settings_banner": "{n}건의 설정 충돌{s} — 강조 표시된 섹션을 확인하고 저장 전에 수정하세요.",
+    "settings_banner_btn": "첫 번째로"
   },
   "hdr": {
     "access_control": "접근 제어",

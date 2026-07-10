@@ -63,8 +63,6 @@
     "error": {
       "feedback_notification_title": "WashData：サイクルの確認（{device}）",
       "feedback_notification_message": "**デバイス**：{device}\n**プログラム**：{program}（信頼度 {confidence}%）\n**時刻**：{time}\n\nWashData は検出されたこのサイクルの確認にあなたの助けを必要としています。\n\n**設定 > デバイスとサービス > WashData > 設定 > 学習フィードバック** で結果を確認または修正してください。",
-      "suggestions_ready_notification_title": "WashData：推奨設定が準備できました（{device}）",
-      "suggestions_ready_notification_message": "**推奨設定**センサーが **{count}** 件の実行可能な提案を報告しています。\n\n確認して適用するには：**設定 > デバイスとサービス > WashData > 設定 > 詳細設定 > 推奨値を適用**。\n\n提案は任意であり、保存前に確認のために表示されます。",
       "auto_tune_suggestion": "{device_type} {device_title} がゴースト サイクルを検出しました。推奨される min_power の変更: {current_min}W -> {new_min}W (自動的には適用されません)。",
       "auto_tune_title": "WashData 自動調整",
       "auto_tune_fallback": "{device_type} {device_title} がゴースト サイクルを検出しました。推奨される min_power の変更: {current_min}W -> {new_min}W (自動的には適用されません)。",

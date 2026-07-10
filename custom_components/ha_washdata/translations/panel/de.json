@@ -166,7 +166,9 @@
     "watchdog": {
       "interval": "Sollte mindestens das 2-fache des Abtastintervalls ({si} s) betragen",
       "sampling": "Abtastintervall sollte höchstens die Hälfte des Watchdog-Intervalls ({wi} s) betragen"
-    }
+    },
+    "settings_banner": "{n} Einstellungskonflikt{s} — markierte Abschnitte prüfen und vor dem Speichern beheben.",
+    "settings_banner_btn": "Zum ersten"
   },
   "hdr": {
     "access_control": "Zugangskontrolle",

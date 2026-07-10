@@ -118,6 +118,8 @@
     },
     "attn_sub": "Corriger les conflits avant d'enregistrer",
     "attn_title": "{n} conflit{s} de paramètres",
+    "settings_banner": "{n} conflit{s} de paramètres — vérifiez les sections surlignées et corrigez avant d'enregistrer.",
+    "settings_banner_btn": "Aller au premier",
     "confidence": {
       "auto": "Doit être supérieur ou égal au Seuil de correspondance ({match})",
       "learning": "Doit être inférieur ou égal au Seuil de correspondance ({match})",

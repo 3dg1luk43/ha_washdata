@@ -118,6 +118,8 @@
     },
     "attn_sub": "Rezolvați conflictele înainte de salvare",
     "attn_title": "{n} conflict{s} de setări",
+    "settings_banner": "{n} conflict{s} de setări — verificați secțiunile evidențiate și remediați înainte de salvare.",
+    "settings_banner_btn": "Salt la primul",
     "confidence": {
       "auto": "Trebuie să fie cel puțin egal cu Pragul de potrivire ({match})",
       "learning": "Trebuie să fie cel mult egal cu Pragul de potrivire ({match})",
