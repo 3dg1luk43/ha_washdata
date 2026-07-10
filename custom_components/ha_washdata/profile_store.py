@@ -19,8 +19,13 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    CLUSTER_RESAMPLE_N,
+    CLUSTER_SHAPE_SIMILARITY_THRESHOLD,
     GROUP_MIN_COHESION,
     MATCH_AMBIGUITY_MARGIN,
+    SHAPE_DRIFT_MIN_CYCLES,
+    SHAPE_DRIFT_RESAMPLE_N,
+    SHAPE_DRIFT_THRESHOLD,
     SMART_TERM_LANDSCAPE_RATIO,
     SMART_TERM_LANDSCAPE_MIN_SHAPE,
     STORAGE_KEY,
@@ -1386,6 +1391,52 @@ class ProfileStore:
                 out.append({"members": sorted(members), "existing_group": existing})
         return out
 
+    # ------------------------------------------------------------------
+    # A1: Underrun anomaly helpers
+    # ------------------------------------------------------------------
+
+    def get_profile_median_duration(self, profile_name: str) -> float | None:
+        """Median cycle duration (s) for this profile across all labeled cycles. Never raises."""
+        try:
+            durations = [
+                float(c["duration"])
+                for c in self.get_past_cycles()
+                if c.get("profile_name") == profile_name and c.get("duration")
+            ]
+            return float(np.median(durations)) if len(durations) >= 2 else None
+        except Exception:  # noqa: BLE001
+            return None
+
+    # ------------------------------------------------------------------
+    # A2: Energy anomaly helpers
+    # ------------------------------------------------------------------
+
+    def get_profile_energy_stats(self, profile_name: str) -> dict[str, float] | None:
+        """Energy stats {avg_wh, std_wh, n} for this profile. None if fewer than 3 cycles. Never raises."""
+        try:
+            energies = [
+                float(c["energy_wh"])
+                for c in self.get_past_cycles()
+                if c.get("profile_name") == profile_name and c.get("energy_wh")
+            ]
+            if len(energies) < 3:
+                return None
+            arr = np.asarray(energies, dtype=float)
+            return {"avg_wh": float(np.mean(arr)), "std_wh": float(np.std(arr)), "n": len(energies)}
+        except Exception:  # noqa: BLE001
+            return None
+
+    # ------------------------------------------------------------------
+    # A4: Profile warm-up mode helper
+    # ------------------------------------------------------------------
+
+    def get_profile_labeled_count(self, profile_name: str) -> int:
+        """Number of labeled cycles for this profile. Never raises."""
+        try:
+            return sum(1 for c in self.get_past_cycles() if c.get("profile_name") == profile_name)
+        except Exception:  # noqa: BLE001
+            return 0
+
     def compute_profile_health(self) -> dict[str, dict[str, Any]]:
         """Compute per-profile health indicators from labeled cycle history.
 
@@ -1395,6 +1446,10 @@ class ProfileStore:
           ``duration_cv``      – coefficient of variation of cycle durations (lower = consistent)
           ``health_score``     – composite 0–1 health score (1 = healthy, 0 = needs attention)
           ``health_status``    – "healthy" / "fair" / "poor" / "unknown"
+          ``shape_drift``      – True when the early/recent envelope correlation is below
+                                 SHAPE_DRIFT_THRESHOLD (only present when >= SHAPE_DRIFT_MIN_CYCLES
+                                 labeled cycles with power_data exist)
+          ``shape_drift_correlation`` – Pearson r between early and recent average envelopes
 
         Profiles with fewer than 3 labeled cycles return ``health_status="unknown"``.
         Never raises — returns an empty dict on any error.
@@ -1435,12 +1490,54 @@ class ProfileStore:
                 else:
                     status = "poor"
 
+                # A5: Shape drift — compare early vs recent power curve envelopes.
+                _sd: dict[str, Any] = {}
+                _traced = [c for c in pcy if c.get("power_data")]
+                if len(_traced) >= SHAPE_DRIFT_MIN_CYCLES:
+                    _third = len(_traced) // 3
+                    _early = _traced[:_third]
+                    _recent = _traced[-_third:]
+                    try:
+                        from .signal_processing import resample_to_n as _resamp  # noqa: PLC0415
+
+                        def _avg_env(cycles: list[dict[str, Any]]) -> "np.ndarray | None":
+                            _traces = []
+                            for _c in cycles:
+                                _raw = decompress_power_data(_c)
+                                if not _raw:
+                                    continue
+                                _pwr = [float(_p) for _, _p in _raw]
+                                if len(_pwr) < 5:
+                                    continue
+                                _t = np.asarray(_resamp(_pwr, SHAPE_DRIFT_RESAMPLE_N), dtype=float)
+                                _mx = _t.max()
+                                if _mx > 0:
+                                    _t = _t / _mx
+                                _traces.append(_t)
+                            if len(_traces) < 2:
+                                return None
+                            return np.mean(np.stack(_traces), axis=0)
+
+                        _early_env = _avg_env(_early)
+                        _rec_env = _avg_env(_recent)
+                        if _early_env is not None and _rec_env is not None:
+                            _corr = float(np.corrcoef(_early_env, _rec_env)[0, 1])
+                            if not np.isfinite(_corr):
+                                _corr = 1.0
+                            _sd = {
+                                "shape_drift": _corr < SHAPE_DRIFT_THRESHOLD,
+                                "shape_drift_correlation": round(_corr, 3),
+                            }
+                    except Exception:  # noqa: BLE001
+                        pass
+
                 result[name] = {
                     "cycle_count": count,
                     "confidence_mean": round(conf_mean, 3),
                     "duration_cv": round(dur_cv, 3),
                     "health_score": health_score,
                     "health_status": status,
+                    **_sd,   # merges shape_drift and shape_drift_correlation when available
                 }
             return result
         except Exception:  # noqa: BLE001
@@ -1524,12 +1621,66 @@ class ProfileStore:
                         "avg_duration_s": round(float(np.mean(durs)), 1),
                     })
 
+            # A3: Shape-similarity clustering within duration buckets
+            profile_suggestions: list[dict[str, Any]] = []
+            for bucket, durs in sorted(bucket_dur.items(), key=lambda kv: -len(kv[1])):
+                if len(durs) < 2:
+                    continue
+                bucket_cycles = [
+                    c for c in unmatched
+                    if c.get("power_data")
+                    and c.get("duration")
+                    and int(float(c["duration"]) // duration_bucket_s) == bucket
+                ]
+                if len(bucket_cycles) < 2:
+                    continue
+                try:
+                    from .signal_processing import resample_to_n  # noqa: PLC0415
+                    traces: list[np.ndarray] = []
+                    ids: list[str] = []
+                    for c in bucket_cycles[:5]:  # cap at 5 per bucket for performance
+                        raw = decompress_power_data(c)
+                        if not raw:
+                            continue
+                        pwr = [float(p) for _, p in raw]
+                        if len(pwr) < 5:
+                            continue
+                        t = np.asarray(resample_to_n(pwr, CLUSTER_RESAMPLE_N), dtype=float)
+                        mx = t.max()
+                        if mx > 0:
+                            t = t / mx
+                        traces.append(t)
+                        ids.append(str(c.get("id", "")))
+                    if len(traces) < 2:
+                        continue
+                    corrs = [
+                        float(np.corrcoef(traces[i], traces[j])[0, 1])
+                        for i in range(len(traces))
+                        for j in range(i + 1, len(traces))
+                    ]
+                    valid_corrs = [r for r in corrs if np.isfinite(r)]
+                    if not valid_corrs:
+                        continue
+                    avg_corr = float(np.mean(valid_corrs))
+                    if avg_corr >= CLUSTER_SHAPE_SIMILARITY_THRESHOLD:
+                        avg_dur_s = float(np.mean(durs))
+                        profile_suggestions.append({
+                            "suggested_name": f"~{int(avg_dur_s // 60)} min program",
+                            "cycle_ids": [cid for cid in ids if cid],
+                            "avg_duration_s": round(avg_dur_s, 1),
+                            "count": len(ids),
+                            "similarity": round(avg_corr, 3),
+                        })
+                except Exception:  # noqa: BLE001
+                    continue
+
             return {
                 "unmatched_count": n_unmatched,
                 "low_confidence_count": len(low_conf),
                 "unmatched_rate": round(rate, 3),
                 "suggest_create": bool(n_unmatched >= min_unmatched and rate >= min_unmatched_rate),
                 "duration_clusters": clusters,
+                "profile_suggestions": profile_suggestions,   # NEW (A3)
             }
         except Exception:  # noqa: BLE001
             return {}

@@ -35,6 +35,7 @@ from .const import (
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_THRESHOLD,
+    CONF_PROFILE_MIN_WARMUP_CYCLES,
     CONF_PUMP_STUCK_DURATION,
     CONF_RUNNING_DEAD_ZONE,
     CONF_SAMPLING_INTERVAL,
@@ -1926,6 +1927,7 @@ def ws_get_constants(
             "ml_lab_enabled": SHOW_ML_LAB,
             "ml_suggestions_enabled": ENABLE_ML_SUGGESTIONS,
             "ml_training_available": ENABLE_ML_TRAINING,
+            "PROFILE_MIN_WARMUP_CYCLES": CONF_PROFILE_MIN_WARMUP_CYCLES,
         },
     )
 

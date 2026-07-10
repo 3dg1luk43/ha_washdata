@@ -226,6 +226,37 @@ MATCH_RANKING_HISTORY_MAX = 500
 # hard limit: this only surfaces "running longer than usual" for the UI. Kept
 # below the zombie threshold so it lights up well before any termination.
 CYCLE_OVERRUN_ANOMALY_RATIO = 1.5
+# Underrun anomaly: a cycle that finishes in less than this fraction of its
+# matched profile's median duration is flagged "underrun" (post-cycle only,
+# never a live signal — computed in _async_process_cycle_end after the cycle
+# ends). Mutually exclusive with overrun: only set when no runtime anomaly fired.
+CYCLE_UNDERRUN_ANOMALY_RATIO = 0.55   # below 55% of expected duration = underrun
+
+# Energy anomaly thresholds: a cycle whose energy deviates by more than this
+# many standard deviations from the profile's historical average is flagged
+# "energy_spike" or "energy_low". Stored separately from the duration anomaly
+# so both can coexist. Requires at least 3 labeled cycles for the reference stats.
+ENERGY_ANOMALY_Z_THRESHOLD = 2.5   # |z-score| above this = energy anomaly
+
+# Profile warm-up mode: a newly-created profile with fewer than this many
+# labeled cycles skips auto-labeling and always requests manual confirmation.
+# Prevents the system from confidently mis-labeling cycles before it has seen
+# enough examples of the program.
+CONF_PROFILE_MIN_WARMUP_CYCLES = 5   # labeled cycles before auto-matching is enabled
+
+# Shape drift detection: compares the average power-curve envelope of the
+# earliest third of a profile's cycles against the most recent third.
+# A Pearson correlation below SHAPE_DRIFT_THRESHOLD signals drift.
+SHAPE_DRIFT_THRESHOLD = 0.85          # envelope correlation below this = shape drifting
+SHAPE_DRIFT_MIN_CYCLES = 10           # minimum labeled cycles to check drift
+SHAPE_DRIFT_RESAMPLE_N = 50           # points for envelope comparison
+
+# Unlabeled-cycle shape clustering (A3): when suggest_coverage_gaps finds
+# duration-bucketed clusters of unmatched cycles, it also checks whether the
+# power-curve shapes within each bucket are similar enough to suggest a new
+# profile.  Uses a normalized cross-correlation on resampled traces.
+CLUSTER_SHAPE_SIMILARITY_THRESHOLD = 0.75   # min correlation for shape-similar cluster
+CLUSTER_RESAMPLE_N = 50                      # points for pairwise comparison
 
 # Terminal-drop fast finalize (opt-in; gated on CONF_ENABLE_ML_MODELS via the
 # manager provider). A hard cliff-to-~0 at an elapsed offset EARLIER than this

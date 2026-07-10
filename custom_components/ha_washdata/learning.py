@@ -28,6 +28,7 @@ from .const import (
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_THRESHOLD,
+    CONF_PROFILE_MIN_WARMUP_CYCLES,
     CONF_RUNNING_DEAD_ZONE,
     CONF_SAMPLING_INTERVAL,
     CONF_SMOOTHING_WINDOW,
@@ -417,6 +418,23 @@ class LearningManager:
         duration_tol = entry.options.get(
             CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE
         )
+
+        # A4: Warmup mode — profiles with fewer than CONF_PROFILE_MIN_WARMUP_CYCLES labeled
+        # cycles skip auto-labeling entirely and always request user confirmation.
+        # Only applied when confidence would otherwise trigger auto-labeling; cycles
+        # already below the learning threshold follow the normal skip path unchanged.
+        if confidence >= auto_label_conf:
+            _wm_count = self.profile_store.get_profile_labeled_count(detected_profile)
+            _is_warmup = isinstance(_wm_count, int) and _wm_count < CONF_PROFILE_MIN_WARMUP_CYCLES
+            if _is_warmup:
+                self._logger.info(
+                    "Profile '%s' in warmup mode (%d/%d cycles); requiring manual confirmation.",
+                    detected_profile, _wm_count, CONF_PROFILE_MIN_WARMUP_CYCLES,
+                )
+                # Clamp confidence just below auto_label threshold so we fall through to
+                # feedback-request path, but stay above learning_conf to request (not skip).
+                confidence = auto_label_conf - 0.001
+                confidence = max(confidence, learning_conf + 0.001)
 
         # Auto-label if very high confidence — but skip auto-labeling when the ML
         # quality model flagged this cycle as suspicious (P(problem) >= threshold),

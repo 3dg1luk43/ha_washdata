@@ -58,6 +58,10 @@ class MockProfileStore:
     def add_pending_feedback(self, cycle_id, data):
         self.pending[cycle_id] = data
 
+    def get_profile_labeled_count(self, profile_name: str) -> int:
+        # Return a high count so warmup mode never fires in these tests
+        return 100
+
     async def async_save(self):
         pass
 

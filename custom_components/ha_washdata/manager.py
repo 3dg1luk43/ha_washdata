@@ -198,6 +198,8 @@ from .const import (
     DEVICE_SMOOTHING_THRESHOLDS,
     DEVICE_COMPLETION_THRESHOLDS,
     CYCLE_OVERRUN_ANOMALY_RATIO,
+    CYCLE_UNDERRUN_ANOMALY_RATIO,
+    ENERGY_ANOMALY_Z_THRESHOLD,
     TERMINAL_DROP_MIN_CLEAN_CYCLES,
     TERMINAL_DROP_MIN_QUIET_SPAN_S,
     TERMINAL_DROP_EARLINESS_RATIO,
@@ -3766,6 +3768,45 @@ class WashDataManager:
             cycle_data["anomaly"] = self._cycle_anomaly
             if self._overrun_ratio > 0:
                 cycle_data["overrun_ratio"] = round(float(self._overrun_ratio), 3)
+
+        # A1: Underrun check — computed post-cycle only, not a live signal.
+        # Only applied when no runtime anomaly was detected (underrun and overrun are mutually exclusive).
+        try:
+            if not cycle_data.get("anomaly") or cycle_data["anomaly"] == "none":
+                _uc_profile = cycle_data.get("profile_name")
+                _uc_dur = float(cycle_data.get("duration", 0))
+                if _uc_profile and _uc_dur > 0:
+                    _uc_median = self.profile_store.get_profile_median_duration(_uc_profile)
+                    if (
+                        isinstance(_uc_median, (int, float))
+                        and not isinstance(_uc_median, bool)
+                        and _uc_median > 0
+                        and _uc_dur < _uc_median * CYCLE_UNDERRUN_ANOMALY_RATIO
+                    ):
+                        cycle_data["anomaly"] = "underrun"
+                        cycle_data["underrun_ratio"] = round(_uc_dur / _uc_median, 3)
+        except Exception:  # noqa: BLE001
+            pass
+
+        # A2: Energy spike/low anomaly — stored separately from duration anomaly.
+        try:
+            _ea_profile = cycle_data.get("profile_name")
+            _ea_energy = float(cycle_data.get("energy_wh", 0))
+            if _ea_profile and _ea_energy > 0:
+                _ea_stats = self.profile_store.get_profile_energy_stats(_ea_profile)
+                if (
+                    isinstance(_ea_stats, dict)
+                    and isinstance(_ea_stats.get("std_wh"), (int, float))
+                    and _ea_stats["std_wh"] > 0
+                ):
+                    _ea_z = (_ea_energy - _ea_stats["avg_wh"]) / _ea_stats["std_wh"]
+                    cycle_data["energy_z_score"] = round(_ea_z, 2)
+                    if _ea_z > ENERGY_ANOMALY_Z_THRESHOLD:
+                        cycle_data["energy_anomaly"] = "energy_spike"
+                    elif _ea_z < -ENERGY_ANOMALY_Z_THRESHOLD:
+                        cycle_data["energy_anomaly"] = "energy_low"
+        except Exception:  # noqa: BLE001
+            pass
 
         # Store any HA restart gaps that occurred during this cycle.
         # The panel shades these regions in the power trace and shows a badge.

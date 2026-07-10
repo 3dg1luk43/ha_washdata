@@ -146,6 +146,31 @@ def resample_uniform(
     return segments
 
 
+def resample_to_n(power: list[float], n: int) -> list[float]:
+    """Resample a power trace to exactly *n* evenly-spaced points via linear interpolation.
+
+    Works on raw power-value lists (no timestamp required — assumes uniform
+    original spacing).  Returns a plain Python list so callers can convert to
+    NumPy as needed.
+
+    Args:
+        power: Input power values (at least 2 points).
+        n: Desired number of output points (>= 2).
+
+    Returns:
+        List of *n* float values.  Returns the original list unchanged when it
+        already has exactly *n* points.
+    """
+    if len(power) == n:
+        return list(power)
+    if len(power) < 2 or n < 2:
+        return list(power)
+    src = np.asarray(power, dtype=float)
+    src_x = np.linspace(0.0, 1.0, len(src))
+    dst_x = np.linspace(0.0, 1.0, n)
+    return list(np.interp(dst_x, src_x, src))
+
+
 def resample_adaptive(
     timestamps: np.ndarray,
     power: np.ndarray,
