@@ -52,6 +52,7 @@ async def test_end_to_end_integration(hass: HomeAssistant, mock_entry):
         store.get_profiles.return_value = {}
         store.get_active_cycle.return_value = None
         store.get_past_cycles.return_value = []
+        store.get_suggestion_apply_cycle_count.return_value = 0
         store.get_last_active_save.return_value = None
         store.async_load = AsyncMock()
         store.async_save = AsyncMock()
@@ -147,6 +148,7 @@ async def test_notify_fire_events_disabled_suppresses_both_events(hass: HomeAssi
         store.get_profiles.return_value = {}
         store.get_active_cycle.return_value = None
         store.get_past_cycles.return_value = []
+        store.get_suggestion_apply_cycle_count.return_value = 0
         store.get_last_active_save.return_value = None
         store.async_load = AsyncMock()
         store.async_save = AsyncMock()
@@ -237,6 +239,7 @@ async def test_notify_fire_events_enabled_fires_both_events(hass: HomeAssistant)
         store.get_profiles.return_value = {}
         store.get_active_cycle.return_value = None
         store.get_past_cycles.return_value = []
+        store.get_suggestion_apply_cycle_count.return_value = 0
         store.get_last_active_save.return_value = None
         store.async_load = AsyncMock()
         store.async_save = AsyncMock()
