@@ -368,6 +368,9 @@
       },
       "cycle_count": {
         "name": "Tsüklite arv"
+      },
+      "energy_total": {
+        "name": "Energia kokku"
       }
     },
     "select": {
@@ -420,6 +423,19 @@
     },
     "no_active_cycle": {
       "message": "Peatamiseks või jätkamiseks pole aktiivset tsüklit."
+    }
+  },
+  "intent": {
+    "HaWashdataStatus": {
+      "running_with_estimate": "{device} töötab endiselt. Jäänud on umbes {minutes} minutit.",
+      "running_no_estimate": "{device} töötab endiselt.",
+      "finished_recently": "{device} lõpetas {minutes} minutit tagasi.",
+      "just_finished": "{device} lõpetas äsja.",
+      "not_running": "{device} ei tööta.",
+      "no_devices": "Ma ei leidnud ühtegi WashData seadet.",
+      "unknown_device": "Ma ei leidnud WashData seadet nimega {device}.",
+      "none_running": "Ükski teie WashData seadetest ei tööta.",
+      "error": "Vabandust, ma ei saanud praegu teie seadmeid kontrollida."
     }
   }
 }

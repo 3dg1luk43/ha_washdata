@@ -368,6 +368,9 @@
       },
       "cycle_count": {
         "name": "Підрахунок циклу"
+      },
+      "energy_total": {
+        "name": "Загальна енергія"
       }
     },
     "select": {
@@ -420,6 +423,19 @@
     },
     "no_active_cycle": {
       "message": "Немає активного циклу для призупинення або відновлення."
+    }
+  },
+  "intent": {
+    "HaWashdataStatus": {
+      "running_with_estimate": "Ваш {device} усе ще працює. Залишилося близько {minutes} хвилин.",
+      "running_no_estimate": "Ваш {device} усе ще працює.",
+      "finished_recently": "Ваш {device} завершив роботу {minutes} хвилин тому.",
+      "just_finished": "Ваш {device} щойно завершив роботу.",
+      "not_running": "Ваш {device} не працює.",
+      "no_devices": "Не вдалося знайти жодного пристрою WashData.",
+      "unknown_device": "Не вдалося знайти пристрій WashData з назвою {device}.",
+      "none_running": "Жоден із ваших пристроїв WashData не працює.",
+      "error": "Вибачте, зараз не вдалося перевірити ваші пристрої."
     }
   }
 }

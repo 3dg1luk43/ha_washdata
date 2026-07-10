@@ -368,6 +368,9 @@
       },
       "cycle_count": {
         "name": "Zyklusanzahl"
+      },
+      "energy_total": {
+        "name": "Energie gesamt"
       }
     },
     "select": {
@@ -420,6 +423,19 @@
     },
     "no_active_cycle": {
       "message": "Kein aktiver Zyklus zum Anhalten oder Fortsetzen."
+    }
+  },
+  "intent": {
+    "HaWashdataStatus": {
+      "running_with_estimate": "{device} läuft noch. Es dauert noch etwa {minutes} Minuten.",
+      "running_no_estimate": "{device} läuft noch.",
+      "finished_recently": "{device} ist vor {minutes} Minuten fertig geworden.",
+      "just_finished": "{device} ist gerade fertig geworden.",
+      "not_running": "{device} läuft nicht.",
+      "no_devices": "Ich konnte keine WashData-Geräte finden.",
+      "unknown_device": "Ich konnte kein WashData-Gerät namens {device} finden.",
+      "none_running": "Keines Ihrer WashData-Geräte läuft.",
+      "error": "Entschuldigung, ich konnte Ihre Geräte gerade nicht überprüfen."
     }
   }
 }

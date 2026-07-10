@@ -368,6 +368,9 @@
       },
       "cycle_count": {
         "name": "Cyclustelling"
+      },
+      "energy_total": {
+        "name": "Totale energie"
       }
     },
     "select": {
@@ -420,6 +423,19 @@
     },
     "no_active_cycle": {
       "message": "Geen actieve cyclus om te pauzeren of te hervatten."
+    }
+  },
+  "intent": {
+    "HaWashdataStatus": {
+      "running_with_estimate": "Je {device} is nog bezig. Nog ongeveer {minutes} minuten.",
+      "running_no_estimate": "Je {device} is nog bezig.",
+      "finished_recently": "Je {device} is {minutes} minuten geleden klaar geworden.",
+      "just_finished": "Je {device} is net klaar.",
+      "not_running": "Je {device} is niet bezig.",
+      "no_devices": "Ik kon geen WashData-apparaten vinden.",
+      "unknown_device": "Ik kon geen WashData-apparaat met de naam {device} vinden.",
+      "none_running": "Geen van je WashData-apparaten is bezig.",
+      "error": "Sorry, ik kon je apparaten nu niet controleren."
     }
   }
 }

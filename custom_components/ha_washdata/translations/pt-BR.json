@@ -368,6 +368,9 @@
       },
       "cycle_count": {
         "name": "Contagem de ciclos"
+      },
+      "energy_total": {
+        "name": "Energia total"
       }
     },
     "select": {
@@ -420,6 +423,19 @@
     },
     "no_active_cycle": {
       "message": "Nenhum ciclo ativo para pausar ou retomar."
+    }
+  },
+  "intent": {
+    "HaWashdataStatus": {
+      "running_with_estimate": "Seu {device} ainda está funcionando. Faltam cerca de {minutes} minutos.",
+      "running_no_estimate": "Seu {device} ainda está funcionando.",
+      "finished_recently": "Seu {device} terminou há {minutes} minutos.",
+      "just_finished": "Seu {device} acabou de terminar.",
+      "not_running": "Seu {device} não está funcionando.",
+      "no_devices": "Não encontrei nenhum aparelho WashData.",
+      "unknown_device": "Não encontrei nenhum aparelho WashData chamado {device}.",
+      "none_running": "Nenhum dos seus aparelhos WashData está funcionando.",
+      "error": "Desculpe, não consegui verificar seus aparelhos agora."
     }
   }
 }

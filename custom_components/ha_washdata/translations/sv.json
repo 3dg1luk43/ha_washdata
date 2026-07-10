@@ -368,6 +368,9 @@
       },
       "ambiguity": {
         "name": "Match Tvetydighet"
+      },
+      "energy_total": {
+        "name": "Total energi"
       }
     },
     "select": {
@@ -420,6 +423,19 @@
     },
     "no_active_cycle": {
       "message": "Ingen aktiv cykel att pausa eller återuppta."
+    }
+  },
+  "intent": {
+    "HaWashdataStatus": {
+      "running_with_estimate": "Din {device} körs fortfarande. Ungefär {minutes} minuter kvar.",
+      "running_no_estimate": "Din {device} körs fortfarande.",
+      "finished_recently": "Din {device} blev klar för {minutes} minuter sedan.",
+      "just_finished": "Din {device} blev precis klar.",
+      "not_running": "Din {device} körs inte.",
+      "no_devices": "Jag kunde inte hitta några WashData-apparater.",
+      "unknown_device": "Jag kunde inte hitta någon WashData-apparat som heter {device}.",
+      "none_running": "Inga av dina WashData-apparater körs.",
+      "error": "Tyvärr kunde jag inte kontrollera dina apparater just nu."
     }
   }
 }

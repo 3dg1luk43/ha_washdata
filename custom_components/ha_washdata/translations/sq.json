@@ -368,6 +368,9 @@
       },
       "cycle_count": {
         "name": "Numri i cikleve"
+      },
+      "energy_total": {
+        "name": "Energjia totale"
       }
     },
     "select": {
@@ -420,6 +423,19 @@
     },
     "no_active_cycle": {
       "message": "Nuk ka cikël aktiv për të ndaluar ose rifilluar."
+    }
+  },
+  "intent": {
+    "HaWashdataStatus": {
+      "running_with_estimate": "{device} është ende duke punuar. Kanë mbetur rreth {minutes} minuta.",
+      "running_no_estimate": "{device} është ende duke punuar.",
+      "finished_recently": "{device} përfundoi {minutes} minuta më parë.",
+      "just_finished": "{device} sapo përfundoi.",
+      "not_running": "{device} nuk është duke punuar.",
+      "no_devices": "Nuk gjeta asnjë pajisje WashData.",
+      "unknown_device": "Nuk gjeta asnjë pajisje WashData me emrin {device}.",
+      "none_running": "Asnjë nga pajisjet tuaja WashData nuk është duke punuar.",
+      "error": "Më vjen keq, nuk munda t'i kontrolloj pajisjet tuaja tani."
     }
   }
 }

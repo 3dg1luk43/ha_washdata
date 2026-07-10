@@ -368,6 +368,9 @@
       },
       "cycle_count": {
         "name": "Αριθμός Κύκλων"
+      },
+      "energy_total": {
+        "name": "Συνολική ενέργεια"
       }
     },
     "select": {
@@ -420,6 +423,19 @@
     },
     "no_active_cycle": {
       "message": "Δεν υπάρχει ενεργός κύκλος για παύση ή συνέχιση."
+    }
+  },
+  "intent": {
+    "HaWashdataStatus": {
+      "running_with_estimate": "{device} εξακολουθεί να λειτουργεί. Απομένουν περίπου {minutes} λεπτά.",
+      "running_no_estimate": "{device} εξακολουθεί να λειτουργεί.",
+      "finished_recently": "{device} τελείωσε πριν από {minutes} λεπτά.",
+      "just_finished": "{device} μόλις τελείωσε.",
+      "not_running": "{device} δεν λειτουργεί.",
+      "no_devices": "Δεν βρήκα καμία συσκευή WashData.",
+      "unknown_device": "Δεν βρήκα συσκευή WashData με το όνομα {device}.",
+      "none_running": "Καμία από τις συσκευές σας WashData δεν λειτουργεί.",
+      "error": "Λυπάμαι, δεν μπόρεσα να ελέγξω τις συσκευές σας αυτή τη στιγμή."
     }
   }
 }

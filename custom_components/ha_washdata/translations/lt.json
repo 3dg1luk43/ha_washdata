@@ -368,6 +368,9 @@
       },
       "cycle_count": {
         "name": "Ciklų skaičius"
+      },
+      "energy_total": {
+        "name": "Bendra energija"
       }
     },
     "select": {
@@ -420,6 +423,19 @@
     },
     "no_active_cycle": {
       "message": "Nėra aktyvaus ciklo pristabdyti ar tęsti."
+    }
+  },
+  "intent": {
+    "HaWashdataStatus": {
+      "running_with_estimate": "Jūsų {device} vis dar veikia. Liko maždaug {minutes} min.",
+      "running_no_estimate": "Jūsų {device} vis dar veikia.",
+      "finished_recently": "Jūsų {device} baigė darbą prieš {minutes} min.",
+      "just_finished": "Jūsų {device} ką tik baigė darbą.",
+      "not_running": "Jūsų {device} neveikia.",
+      "no_devices": "Nepavyko rasti jokių WashData prietaisų.",
+      "unknown_device": "Nepavyko rasti WashData prietaiso pavadinimu {device}.",
+      "none_running": "Nė vienas jūsų WashData prietaisas neveikia.",
+      "error": "Atsiprašau, dabar nepavyko patikrinti jūsų prietaisų."
     }
   }
 }
