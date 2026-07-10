@@ -1336,6 +1336,7 @@ class HaWashdataPanel extends HTMLElement {
     this._panelTrans = null;           // loaded from /ha_washdata/panel-translations.json
     this._pollMs = _POLL_MS;
     this._panelSubtab = 'prefs';
+    this._maintenance = null;          // cached maintenance log/reminders (Advanced → Maintenance)
     this._logs = [];
     this._logLevel = '';
     try {
@@ -1822,7 +1823,7 @@ class HaWashdataPanel extends HTMLElement {
     this._powerData = { live: [], raw: [], cycle_active: false, cycle_elapsed_s: 0 };
     this._matchDebug = null;
     this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._opts = {}; this._suggestions = [];
-    this._cycles = []; this._recState = null; this._diag = null; this._phases = [];
+    this._cycles = []; this._recState = null; this._diag = null; this._maintenance = null; this._phases = [];
     this._mlTrainingStatus = null;  // per-device; re-fetched by _fetchTabData
     this._deviceAutomations = [];   // per-device; re-fetched on the settings tab
     this._selectMode = false; this._cycleSel = new Set();
@@ -1945,6 +1946,12 @@ class HaWashdataPanel extends HTMLElement {
         const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
         this._opts = r.options || {};
         this._loadMlTrainingStatus(eid).finally(() => { if (this._tab === 'ml') this._render(); });
+      } else if (this._tab === 'advanced') {
+        // Advanced sub-tabs lazy-load on click; ensure the Maintenance section
+        // still fills in when the tab is (re)entered while already on it.
+        if (this._panelSubtab === 'maintenance' && !this._maintenance) {
+          this._fetchMaintenance(eid).then(() => { if (this._tab === 'advanced') this._render(); });
+        }
       }
     } catch (err) {
       console.warn('[WashData panel] tab data fetch error:', err);
@@ -1961,6 +1968,16 @@ class HaWashdataPanel extends HTMLElement {
     } catch (err) {
       console.warn('[WashData panel] tools fetch error:', err);
       this._diag = { _error: String(err && err.message || err) };
+    }
+  }
+
+  async _fetchMaintenance(eid) {
+    try {
+      const r = await this._ws({ type: `${_DOMAIN}/get_maintenance_log`, entry_id: eid });
+      this._maintenance = r || {};
+    } catch (err) {
+      console.warn('[WashData panel] maintenance fetch error:', err);
+      this._maintenance = { _error: String(err && err.message || err) };
     }
   }
 
@@ -3516,6 +3533,91 @@ class HaWashdataPanel extends HTMLElement {
       </div>` : `<div class="wd-card"><p class="wd-info">${this._t('msg.maintenance_requires_access', {}, 'Maintenance and export/import require full access.')}</p></div>`}`;
   }
 
+  // ── Maintenance (Advanced → Maintenance): service log + reminders ────────────
+
+  // Localized label for a maintenance event type (falls back to the raw key).
+  _maintLabel(type) {
+    const map = {
+      descale: this._t('maint.descale', {}, 'Descale'),
+      filter_clean: this._t('maint.filter_clean', {}, 'Clean filter'),
+      drum_clean: this._t('maint.drum_clean', {}, 'Clean drum'),
+      bearing_service: this._t('maint.bearing_service', {}, 'Bearing service'),
+      other: this._t('maint.other', {}, 'Other'),
+    };
+    return map[type] || type;
+  }
+
+  _htmlMaintenance() {
+    const canEdit = this._canEdit();
+    const mt = this._maintenance;
+    if (mt && mt._error) {
+      return `<div class="wd-card"><p class="wd-info" style="color:var(--error-color)">${this._t('msg.maintenance_load_error', { error: mt._error }, 'Could not load maintenance data: ' + mt._error)}</p></div>`;
+    }
+    if (!mt) {
+      return `<div class="wd-card"><p class="wd-info">${this._t('msg.loading', {}, 'Loading…')}</p></div>`;
+    }
+    const eventTypes = (mt.event_types && mt.event_types.length) ? mt.event_types : ['descale', 'filter_clean', 'drum_clean', 'bearing_service', 'other'];
+    const due = mt.due || [];
+    const log = mt.log || [];
+    const reminders = mt.reminders || {};
+
+    // Reminder-due banner (advisory style; never a notification).
+    const dueBanner = due.length ? (() => {
+      const items = due.map(t => this._maintLabel(t)).join(', ');
+      return `<div style="margin-bottom:14px;padding:10px 12px;border-radius:6px;background:rgba(255,152,0,.10);border-left:3px solid var(--warning-color,#ff9800)">
+        <span style="font-weight:600;color:var(--warning-color,#ff9800)">${this._t('msg.maintenance_due', { items: _esc(items) }, 'Maintenance due: ' + items)}</span>
+      </div>`;
+    })() : '';
+
+    // Add-event form (edit access only).
+    const today = new Date().toISOString().slice(0, 10);
+    const typeOpts = eventTypes.map(t => `<option value="${_esc(t)}">${_esc(this._maintLabel(t))}</option>`).join('');
+    const addForm = canEdit ? `<div class="wd-card">
+      <div class="wd-card-title">${this._t('hdr.add_maintenance', {}, 'Add Maintenance Event')}</div>
+      <div class="wd-form-grid">
+        <div class="wd-field"><label>${this._t('lbl.date', {}, 'Date')}</label><input type="date" id="wd-maint-date" value="${today}" max="${today}"></div>
+        <div class="wd-field"><label>${this._t('lbl.event_type', {}, 'Event type')}</label><select id="wd-maint-type">${typeOpts}</select></div>
+      </div>
+      <div class="wd-field"><label>${this._t('lbl.notes', {}, 'Notes')}</label><input type="text" id="wd-maint-notes" placeholder="${_esc(this._t('placeholder.maintenance_notes', {}, 'e.g. replaced filter, cleaned door seal'))}"></div>
+      <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="maint-add">${this._t('btn.add_maintenance', {}, 'Add maintenance event')}</button></div>
+    </div>` : '';
+
+    // Timeline / list (most-recent-first, provided by the backend).
+    const rows = log.length ? log.map(e => {
+      const del = canEdit ? `<button class="wd-btn wd-btn-danger wd-btn-sm" data-action="maint-delete" data-mid="${_esc(e.id)}">${this._t('btn.delete', {}, 'Delete')}</button>` : '';
+      const notes = e.notes ? `<div class="wd-info" style="margin-top:2px">${_esc(e.notes)}</div>` : '';
+      return `<div class="wd-card" style="background:var(--secondary-background-color);padding:10px 12px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+          <div>
+            <div style="font-weight:600">${_esc(this._maintLabel(e.event_type))}</div>
+            <div class="wd-info" style="margin-top:2px">${_fmtDate(e.date)}</div>
+            ${notes}
+          </div>
+          ${del}
+        </div>
+      </div>`;
+    }).join('') : `<p class="wd-info">${this._t('msg.no_maintenance', {}, 'No maintenance recorded yet.')}</p>`;
+
+    // Reminder thresholds editor (edit access only).
+    const remEditor = canEdit ? `<div class="wd-card">
+      <div class="wd-card-title">${this._t('hdr.maintenance_reminders', {}, 'Service Reminders')}</div>
+      <p class="wd-info" style="margin-bottom:12px">${this._t('msg.reminders_intro', {}, 'Show a reminder in the panel this many cycles after the last service. Leave blank or 0 to turn a reminder off.')}</p>
+      <div class="wd-form-grid">
+        ${eventTypes.map(t => `<div class="wd-field"><label>${_esc(this._maintLabel(t))}</label><input type="number" min="0" step="1" data-maint-rem="${_esc(t)}" value="${reminders[t] != null ? _esc(reminders[t]) : ''}" placeholder="${_esc(this._t('lbl.reminder_every', {}, 'Remind every (cycles)'))}"></div>`).join('')}
+      </div>
+      <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="maint-save-reminders">${this._t('btn.save_reminders', {}, 'Save reminders')}</button></div>
+    </div>` : '';
+
+    return `${dueBanner}
+      ${addForm}
+      <div class="wd-card">
+        <div class="wd-card-title">${this._t('hdr.maintenance_log', {}, 'Maintenance Log')}</div>
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.maintenance_intro', {}, 'Log servicing you perform on this appliance and get reminded when each task is due again.')}</p>
+        <div style="display:flex;flex-direction:column;gap:8px">${rows}</div>
+      </div>
+      ${remEditor}`;
+  }
+
   // ── Panel tab (preferences + admin settings + RBAC) ─────────────────────────
 
   _htmlPanel() {
@@ -3524,16 +3626,17 @@ class HaWashdataPanel extends HTMLElement {
     // Subtabs allowed for the current permission level. Diagnostics folds the
     // old Diagnostics tab (storage stats + maintenance); Logs folds the old
     // Logs tab (admin only); Panel Settings + Access Control are admin-only.
-    const allowed = new Set(['prefs']);
+    const allowed = new Set(['prefs', 'maintenance']);
     if (canEdit) allowed.add('diagnostics');
     if (admin) { allowed.add('logs'); allowed.add('settings'); allowed.add('access'); }
     let sub = this._panelSubtab;
     if (!allowed.has(sub)) sub = this._panelSubtab = 'prefs';
-    const subtabs = [['prefs', this._t('hdr.my_preferences', {}, 'My Preferences')]];
+    const subtabs = [['prefs', this._t('hdr.my_preferences', {}, 'My Preferences')], ['maintenance', this._t('tab.maintenance', {}, 'Maintenance')]];
     if (canEdit) subtabs.push(['diagnostics', this._t('tab.diagnostics', {}, 'Diagnostics')]);
     if (admin) subtabs.push(['logs', this._t('hdr.logs', {}, 'Logs')], ['settings', this._t('hdr.panel_settings', {}, 'Panel Settings')], ['access', this._t('hdr.access_control', {}, 'Access Control')]);
     const stBtns = subtabs.map(([id, lbl]) => `<button class="wd-subtab ${sub === id ? 'active' : ''}" data-ptab="${id}">${lbl}</button>`).join('');
-    const body = sub === 'diagnostics' && canEdit ? this._htmlDiagnostics()
+    const body = sub === 'maintenance' ? this._htmlMaintenance()
+      : sub === 'diagnostics' && canEdit ? this._htmlDiagnostics()
       : sub === 'logs' && admin ? this._htmlLogs()
       : sub === 'settings' && admin ? this._htmlPanelSettings()
       : sub === 'access' && admin ? this._htmlPanelAccess()
@@ -4674,6 +4777,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!dev) return;
       if (sub === 'diagnostics' && !this._diag) this._fetchToolsData(dev.entry_id).then(() => { if (this._panelSubtab === 'diagnostics') this._render(); });
       else if (sub === 'logs') this._fetchLogs().then(() => { if (this._panelSubtab === 'logs') this._render(); });
+      else if (sub === 'maintenance') this._fetchMaintenance(dev.entry_id).then(() => { if (this._panelSubtab === 'maintenance') this._render(); });
     }));
 
     sr.querySelectorAll('[data-statustoggle]').forEach(el => el.addEventListener('change', async () => {
@@ -5535,6 +5639,50 @@ class HaWashdataPanel extends HTMLElement {
 
     } else if (a === 'diag-refresh') {
       this._fetchToolsData(eid).then(() => this._render());
+
+    } else if (a === 'maint-add') {
+      const eventType = sr.getElementById('wd-maint-type')?.value || '';
+      const date = sr.getElementById('wd-maint-date')?.value || '';
+      const notes = (sr.getElementById('wd-maint-notes')?.value || '').trim();
+      if (!eventType) { this._showToast(this._t('toast.maint_add_failed', { error: this._t('lbl.event_type', {}, 'Event type') }, 'Could not add event: Event type'), 'error'); return; }
+      this._busyRun('maint-add', async () => {
+        try {
+          const payload = { type: `${_DOMAIN}/add_maintenance_event`, entry_id: eid, event_type: eventType };
+          if (date) payload.date = date;
+          if (notes) payload.notes = notes;
+          await this._ws(payload);
+          await this._fetchMaintenance(eid);
+          this._showToast(this._t('toast.maint_added', {}, 'Maintenance event added'));
+          this._render();
+        } catch (e) { this._showToast(this._t('toast.maint_add_failed', { error: e.message || e }, 'Could not add event: ' + (e.message || e)), 'error'); }
+      });
+    } else if (a === 'maint-delete') {
+      const mid = btn.dataset.mid;
+      this._modal = { type: 'confirm', title: this._t('modal.delete_maintenance_title', {}, 'Delete Maintenance Event'), message: this._t('modal.delete_maintenance_msg', {}, 'Delete this maintenance record? This cannot be undone.'), okLabel: this._t('btn.delete', {}, 'Delete'),
+        onOk: () => this._busyRun('maint-delete', async () => {
+          try {
+            await this._ws({ type: `${_DOMAIN}/delete_maintenance_event`, entry_id: eid, event_id: mid });
+            await this._fetchMaintenance(eid);
+            this._showToast(this._t('toast.maint_deleted', {}, 'Maintenance event deleted'));
+          } catch (e) { this._showToast(this._t('toast.maint_delete_failed', { error: e.message || e }, 'Could not delete event: ' + (e.message || e)), 'error'); }
+        }) };
+      this._render();
+    } else if (a === 'maint-save-reminders') {
+      const dict = {};
+      sr.querySelectorAll('[data-maint-rem]').forEach(el => {
+        const t = el.dataset.maintRem;
+        const n = parseInt(el.value, 10);
+        dict[t] = (!isNaN(n) && n > 0) ? n : 0;
+      });
+      this._busyRun('maint-save-reminders', async () => {
+        try {
+          await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: { maintenance_reminder_cycles: dict } });
+          await this._fetchMaintenance(eid);
+          this._showToast(this._t('toast.reminders_saved', {}, 'Service reminders saved'));
+          this._render();
+        } catch (e) { this._showToast(this._t('toast.reminders_save_failed', { error: e.message || e }, 'Could not save reminders: ' + (e.message || e)), 'error'); }
+      });
+
     } else if (a === 'reprocess-history') {
       this._modal = { type: 'confirm', title: this._t('modal.process_history_title', {}, 'Process History'), message: this._t('modal.process_history_msg', {}, 'Re-run matching, refresh suggestions, retrain ML (if enabled) and recompute cycle health across all stored cycles. This may take a while.'), okLabel: this._t('modal.process_history_ok', {}, 'Process'),
         onOk: () => this._busyRun('reprocess', async () => {
@@ -5634,6 +5782,7 @@ class HaWashdataPanel extends HTMLElement {
       this._render();
       if (this._panelSubtab === 'diagnostics' && !this._diag) this._fetchToolsData(eid).then(() => { if (this._tab === 'advanced') this._render(); });
       else if (this._panelSubtab === 'logs') this._fetchLogs().then(() => { if (this._tab === 'advanced') this._render(); });
+      else if (this._panelSubtab === 'maintenance') this._fetchMaintenance(eid).then(() => { if (this._tab === 'advanced') this._render(); });
     } else if (a === 'add-device') {
       this._navigate(`/config/integrations/integration/${_DOMAIN}`);
     } else if (a === 'goto-feedbacks') {
