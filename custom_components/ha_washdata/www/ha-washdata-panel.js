@@ -710,7 +710,6 @@ const _CSS = `
 .wd-devcard.active { border-color: var(--primary-color); box-shadow: 0 0 0 1px var(--primary-color); }
 .wd-devadd { border-style: dashed; color: var(--secondary-text-color); }
 .wd-devadd:hover { border-color: var(--primary-color); color: var(--primary-color); }
-.wd-devadd-plus { font-size: 1.2em; line-height: 1; font-weight: 600; }
 .wd-devdot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .wd-devdot.run { animation: wd-pulse 1.4s ease-in-out infinite; }
 .wd-devname { font-weight: 600; }
@@ -1947,7 +1946,7 @@ class HaWashdataPanel extends HTMLElement {
   _htmlDeviceBar() {
     // Always offer onboarding another device; show the picker only when >1.
     const addBtn = this._isAdmin()
-      ? `<button class="wd-devcard wd-devadd" data-action="add-device" title="${_esc(this._t('btn.add_device_tip', {}, 'Add another WashData device'))}"><span class="wd-devadd-plus">+</span> ${this._t('btn.add_device', {}, '+ Add device')}</button>`
+      ? `<button class="wd-devcard wd-devadd" data-action="add-device" title="${_esc(this._t('btn.add_device_tip', {}, 'Add another WashData device'))}">${this._t('btn.add_device', {}, '+ Add device')}</button>`
       : '';
     if (this._devices.length <= 1) return addBtn ? `<div class="wd-devbar">${addBtn}</div>` : '';
     return `<div class="wd-devbar">${this._devices.map((d, i) => {
