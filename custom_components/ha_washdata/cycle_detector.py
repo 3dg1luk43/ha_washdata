@@ -940,10 +940,10 @@ class CycleDetector:
                     "False start detected: power dropped after %.2fs",
                     self._time_above_threshold,
                 )
-                self._delay_band_start = None
-                self._delay_band_seconds = 0.0
-                self._delay_band_peak = 0.0
-                self._preserve_delay_band_on_off = False
+                # Do NOT reset _delay_band_* here — _transition_to(STATE_OFF) will
+                # preserve the band via _preserve_delay_band_on_off if it was set
+                # at STARTING entry (line 838), so a brief high-power peak (menu
+                # navigation) doesn't restart the delayed-start accumulation from zero.
                 self._transition_to(STATE_OFF, timestamp)
 
         elif self._state == STATE_RUNNING:
@@ -1704,6 +1704,7 @@ class CycleDetector:
             "end_spike_seen": self._end_spike_seen,
             "match_ambiguous": self._match_ambiguous,
             "match_prefix_ambiguous": self._match_prefix_ambiguous,
+            "ml_defer_start_duration": self._ml_defer_start_duration,
         }
 
     def get_elapsed_seconds(self) -> float:
@@ -1755,6 +1756,7 @@ class CycleDetector:
             self._end_spike_seen = snapshot.get("end_spike_seen", False)
             self._match_ambiguous = snapshot.get("match_ambiguous", False)
             self._match_prefix_ambiguous = snapshot.get("match_prefix_ambiguous", False)
+            self._ml_defer_start_duration = snapshot.get("ml_defer_start_duration")
 
             # Restore state enter time and recompute time_in_state from it
             enter_time = snapshot.get("state_enter_time")

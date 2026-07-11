@@ -1,0 +1,24 @@
+{
+  "devices": [
+    {
+      "entry_id": "test-entry-001",
+      "name": "Test Washer",
+      "title": "Test Washer",
+      "device_type": "washing_machine",
+      "state": "running",
+      "detector_state": "running",
+      "current_power": 820.0,
+      "current_program": "Cotton 40°C",
+      "time_remaining": 1800,
+      "time_remaining_s": 1800,
+      "progress": 45.2,
+      "cycle_progress_pct": 45.2,
+      "last_cycle_end_time": null,
+      "cycle_count": 13,
+      "feedback_count": 1,
+      "suggestions_count": 2,
+      "energy_kwh": 0.42,
+      "lifetime_energy_kwh": 25.0
+    }
+  ]
+}

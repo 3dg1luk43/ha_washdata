@@ -42,3 +42,7 @@ bin
 .claude
 custom_components/ha_washdata/ml/__pycache__
 ROADMAP.md
+playwright-tests/test-results
+playwright-tests/playwright-report
+playwright-tests/package-lock.json
+playwright-tests/node_modules

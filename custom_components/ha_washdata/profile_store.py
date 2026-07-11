@@ -2043,6 +2043,18 @@ class ProfileStore:
                             "the profile so matching and time estimates stay accurate."
                         ),
                     })
+                elif h.get("shape_drift"):
+                    corr = h.get("shape_drift_correlation")
+                    corr_str = f" (correlation {corr:.2f})" if corr is not None else ""
+                    advisories.append({
+                        "profile": name, "severity": "info", "code": "shape_drift",
+                        "message": (
+                            f"'{name}' has drifted significantly from its original "
+                            f"power shape{corr_str}. The appliance may have changed "
+                            "behaviour over time (e.g. limescale, wear). Consider "
+                            "re-recording this profile with recent cycles."
+                        ),
+                    })
 
             for name, t in trends.items():
                 # Skip profiles already flagged poor to avoid double advice.
@@ -2079,7 +2091,7 @@ class ProfileStore:
                     self.has_recent_maintenance(evt) is True
                     for evt in ("descale", "filter_clean", "drum_clean")
                 ):
-                    _nag_codes = {"duration_trend_up", "poor_health"}
+                    _nag_codes = {"duration_trend_up", "poor_health", "shape_drift"}
                     advisories = [a for a in advisories if a.get("code") not in _nag_codes]
             except Exception:  # noqa: BLE001
                 pass

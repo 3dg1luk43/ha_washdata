@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WashData E2E Test Shell</title>
+  <style>
+    /* HA CSS custom properties — just enough for the panel to render */
+    :root {
+      --primary-color: #03a9f4;
+      --primary-text-color: #212121;
+      --secondary-text-color: #757575;
+      --card-background-color: #ffffff;
+      --primary-background-color: #fafafa;
+      --secondary-background-color: #e8e8e8;
+      --divider-color: rgba(0,0,0,0.12);
+      --warning-color: #ff9800;
+      --error-color: #f44336;
+      --success-color: #4caf50;
+      --info-color: #2196f3;
+      --teal-color: #009688;
+      --disabled-color: #bdbdbd;
+      --state-inactive-color: #9e9e9e;
+      --ha-card-box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      --switch-checked-track-color: #03a9f4;
+      --switch-unchecked-track-color: rgba(120,120,120,0.5);
+      --switch-checked-button-color: #fff;
+      --switch-unchecked-button-color: #fafafa;
+    }
+    body { margin: 0; font-family: Roboto, sans-serif; background: var(--primary-background-color); }
+    ha-washdata-panel { display: block; height: 100vh; }
+  </style>
+</head>
+<body>
+  <script src="/mock-hass.js"></script>
+  <script src="/panel.js"></script>
+</body>
+</html>

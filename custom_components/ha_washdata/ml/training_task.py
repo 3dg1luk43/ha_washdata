@@ -334,6 +334,13 @@ def _train_regression_capability(
                 "reason": f"insufficient data (rows={n})"}
 
     X_tr, y_tr, X_te, y_te = _regression_split(X, y)
+    # Detect in-sample fallback (too few rows to split).
+    if X_tr is X and X_te is X:
+        _LOGGER.warning(
+            "ML training '%s': too few rows (%d) to split for regression — "
+            "evaluating in-sample. Add more cycles for reliable holdout.",
+            capability, n,
+        )
     try:
         fit = T.fit_ridge(X_tr, y_tr, alpha=1.0)
     except ValueError as err:
@@ -437,6 +444,14 @@ def _train_capability(
                 "reason": f"insufficient data (rows={n}, pos={n_pos}, neg={n_neg})"}
 
     X_tr, y_tr, X_te, y_te = _holdout_split(X, y)
+    # Detect in-sample fallback (holdout returned full dataset for both splits).
+    if X_tr is X and X_te is X:
+        _LOGGER.warning(
+            "ML training '%s': dataset too small or imbalanced to split "
+            "(n=%d, pos=%d, neg=%d) — AUC evaluated in-sample. "
+            "Promoted model may not generalise; add more labeled cycles.",
+            capability, n, n_pos, n_neg,
+        )
     fit = T.fit_logistic(X_tr, y_tr)
     default_thr = _baseline_threshold(capability, 0.5)
     spec_probe = {"center": fit["center"], "scale": fit["scale"], "coef": fit["coef"],

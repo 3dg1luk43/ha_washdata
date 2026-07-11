@@ -1,0 +1,59 @@
+{
+  "profiles": [
+    {
+      "name": "Cotton 40°C",
+      "cycle_count": 8,
+      "labeled_count": 8,
+      "avg_duration": 6500,
+      "avg_energy_wh": 840,
+      "total_energy_wh": 6720,
+      "avg_cost": 0.14,
+      "total_cost": 1.12,
+      "health_score": 0.82,
+      "health_status": "healthy",
+      "shape_drift": false,
+      "phases": [
+        {"name": "Fill",    "start": 0,    "end": 600},
+        {"name": "Heat",    "start": 600,  "end": 2400},
+        {"name": "Wash",    "start": 2400, "end": 4800},
+        {"name": "Rinse",   "start": 4800, "end": 6000},
+        {"name": "Spin",    "start": 6000, "end": 6500}
+      ]
+    },
+    {
+      "name": "Eco 60°C",
+      "cycle_count": 3,
+      "labeled_count": 2,
+      "avg_duration": 9600,
+      "avg_energy_wh": 1100,
+      "total_energy_wh": 3300,
+      "avg_cost": 0.18,
+      "total_cost": 0.54,
+      "health_score": 0.45,
+      "health_status": "fair",
+      "shape_drift": false,
+      "phases": []
+    },
+    {
+      "name": "Quick 30°C",
+      "cycle_count": 1,
+      "labeled_count": 1,
+      "avg_duration": 2400,
+      "avg_energy_wh": 220,
+      "total_energy_wh": 220,
+      "avg_cost": 0.04,
+      "total_cost": 0.04,
+      "health_score": null,
+      "health_status": "unknown",
+      "shape_drift": false,
+      "phases": []
+    }
+  ],
+  "advisories": [],
+  "coverage_gap": {
+    "suggest_create": false,
+    "unmatched_count": 1,
+    "unmatched_rate": 0.2,
+    "profile_suggestions": []
+  }
+}

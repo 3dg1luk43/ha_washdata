@@ -625,15 +625,27 @@ const _CSS = `
 .wd-dg text { fill: var(--secondary-text-color); font-size: 9px; }
 .wd-dg .ax { stroke: var(--divider-color); stroke-width: 1; }
 .wd-sug {
-  display: inline-flex; align-items: center; gap: 8px; margin-top: 6px;
-  padding: 4px 8px; border-radius: 6px; font-size: .78em;
-  background: rgba(255,152,0,.12); border: 1px solid rgba(255,152,0,.45);
+  display: flex; align-items: center; gap: 8px; margin-top: 6px;
+  padding: 6px 10px; border-radius: 8px; font-size: .82em;
+  background: rgba(255,152,0,.10); border: 1px solid rgba(255,152,0,.40);
+  box-sizing: border-box; flex-wrap: wrap;
 }
-.wd-sug.wd-sug-split { flex-direction: column; align-items: flex-start; gap: 4px; }
+.wd-sug.wd-sug-split { flex-direction: column; align-items: stretch; gap: 0; padding: 0; overflow: hidden; }
+.wd-sug-opt { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 10px; }
+.wd-sug-opt:not(:last-child) { border-bottom: 1px solid rgba(255,152,0,.28); }
+.wd-sug-chip {
+  display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0;
+  font-size: .75em; font-weight: 700; letter-spacing: .04em;
+  padding: 2px 7px; border-radius: 10px; white-space: nowrap;
+}
+.wd-sug-chip-obs { background: rgba(255,152,0,.22); }
+.wd-sug-chip-cal { background: rgba(33,150,243,.18); }
+.wd-sug-val { font-weight: 700; flex-shrink: 0; }
+.wd-sug-impact-line { flex-basis: 100%; font-size: .86em; opacity: .70; font-style: italic; margin-top: 2px; }
 .wd-sug-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.wd-sug-sep { opacity: .4; }
-.wd-sug-impact { font-size: .9em; opacity: .72; font-style: italic; }
-.wd-sug-use { border: none; background: var(--warning-color, #ff9800); color: #fff; border-radius: 4px; padding: 2px 8px; font-size: .92em; cursor: pointer; }
+.wd-sug-sep { display: none; }
+.wd-sug-impact { display: none; }
+.wd-sug-use { border: none; background: var(--warning-color, #ff9800); color: #fff; border-radius: 4px; padding: 2px 8px; font-size: .92em; cursor: pointer; flex-shrink: 0; }
 .wd-conflict-err { display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
 .wd-conflict-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .8em; color: var(--error-color, #b71c1c); padding: 5px 9px; border-left: 3px solid var(--error-color, #b71c1c); background: rgba(183,28,28,.07); border-radius: 0 5px 5px 0; }
 .wd-conflict-fix { border: 1px solid var(--error-color, #b71c1c); background: none; color: var(--error-color, #b71c1c); border-radius: 4px; padding: 1px 7px; font-size: .92em; cursor: pointer; white-space: nowrap; flex: none; }
@@ -815,6 +827,8 @@ const _CSS = `
   .wd-header { padding: 12px 14px; }
   .wd-btn { padding: 9px 15px; }  /* larger touch targets */
   .wd-tip-pop { width: 210px; }
+  .wd-pg-lane-lbl { flex: 0 1 120px; max-width: 120px; }
+  #wd-settings-form .wd-form-grid { grid-template-columns: 1fr; gap: 12px 0; }
 }
 /* Log drawer */
 .wd-shell { display: flex; flex-direction: column; min-height: 100%; }
@@ -971,6 +985,7 @@ function _field(f, value, extra) {
   extra = extra || {};
   const key = f.key;
   const labelText = f.unit ? `${f.label} (${f.unit})` : f.label;
+  const _u = f.unit ? ` ${f.unit}` : '';
   const tip = f.doc ? _tip(f.doc, f.diagram || _DIAGRAM_BY_KEY[key]) : '';
   // D7: "changed" marker (a small dot with a tooltip) when this field has a
   // recorded change in the settings changelog.
@@ -1077,33 +1092,33 @@ function _field(f, value, extra) {
       // Both engines agree — collapse to one clear recommendation.
       const calLbl = t('suggestion.calibrated_label', {}, 'Calibrated');
       const reason = _tip([sug.reason, mlSug.reason ? `${calLbl}: ${mlSug.reason}` : ''].filter(Boolean).join('\n\n'));
-      sugHtml = `<div class="wd-sug"><span>💡 ${_esc(t('suggestion.both_agree', {}, 'WashData recommends'))}: <b>${_esc(classicVal)}</b></span>${useBtn(classicVal)}${reason}</div>`;
+      sugHtml = `<div class="wd-sug"><span class="wd-sug-chip wd-sug-chip-obs">💡 ${_esc(t('suggestion.both_agree', {}, 'WashData recommends'))}</span><span class="wd-sug-val">${_esc(classicVal)}${_u}</span>${useBtn(classicVal)}${reason}</div>`;
     } else {
-      // Engines diverge — show both with a one-line tradeoff explanation.
+      // Engines diverge — show two stacked option rows with per-option context.
       const cr = sug.reason ? _tip(sug.reason) : '';
       const mr = mlSug.reason ? _tip(mlSug.reason) : '';
       const obsLbl = t('suggestion.observed_label', {}, 'Observed');
       const calLbl = t('suggestion.calibrated_label', {}, 'Calibrated');
-      let impactHtml = '';
+      let obsImpact = '', calImpact = '';
       if (!isNaN(cN) && !isNaN(mN)) {
         const calIsHigher = mN > cN;
-        const calImpact = t(`suggestion.impact.${key}.${calIsHigher ? 'higher' : 'lower'}`, {}, '');
-        const obsImpact = t(`suggestion.impact.${key}.${calIsHigher ? 'lower' : 'higher'}`, {}, '');
-        if (calImpact || obsImpact) {
-          const parts = [];
-          if (obsImpact) parts.push(`💡 ${_esc(obsImpact)}`);
-          if (calImpact) parts.push(`🤖 ${_esc(calImpact)}`);
-          impactHtml = `<div class="wd-sug-impact">${parts.join('  ·  ')}</div>`;
-        }
+        calImpact = t(`suggestion.impact.${key}.${calIsHigher ? 'higher' : 'lower'}`, {}, '');
+        obsImpact = t(`suggestion.impact.${key}.${calIsHigher ? 'lower' : 'higher'}`, {}, '');
       }
-      sugHtml = `<div class="wd-sug wd-sug-split"><div class="wd-sug-row"><span>💡 ${_esc(obsLbl)} <b>${_esc(classicVal)}</b></span>${useBtn(classicVal)}${cr}<span class="wd-sug-sep">·</span><span>🤖 ${_esc(calLbl)} <b>${_esc(mlVal)}</b></span>${useBtn(mlVal)}${mr}</div>${impactHtml}</div>`;
+      const obsImpactHtml = obsImpact ? `<div class="wd-sug-impact-line">${_esc(obsImpact)}</div>` : '';
+      const calImpactHtml = calImpact ? `<div class="wd-sug-impact-line">${_esc(calImpact)}</div>` : '';
+      sugHtml = `<div class="wd-sug wd-sug-split">` +
+        `<div class="wd-sug-opt"><span class="wd-sug-chip wd-sug-chip-obs">💡 ${_esc(obsLbl)}</span><span class="wd-sug-val">${_esc(classicVal)}${_u}</span>${useBtn(classicVal)}${cr}${obsImpactHtml}</div>` +
+        `<div class="wd-sug-opt"><span class="wd-sug-chip wd-sug-chip-cal">🤖 ${_esc(calLbl)}</span><span class="wd-sug-val">${_esc(mlVal)}${_u}</span>${useBtn(mlVal)}${mr}${calImpactHtml}</div>` +
+        `</div>`;
     }
   } else if (classicVal != null) {
     const reason = sug.reason ? _tip(sug.reason) : '';
-    sugHtml = `<div class="wd-sug"><span>💡 ${_esc(t('suggestion.observed_label', {}, 'Observed'))}: <b>${_esc(classicVal)}</b>${value != null && value !== '' ? ` (now ${_esc(value)})` : ''}</span>${useBtn(classicVal)}${reason}</div>`;
+    const nowNote = value != null && value !== '' ? ` <span style="opacity:.6;font-size:.9em">(now ${_esc(value)}${_u})</span>` : '';
+    sugHtml = `<div class="wd-sug"><span class="wd-sug-chip wd-sug-chip-obs">💡 ${_esc(t('suggestion.observed_label', {}, 'Observed'))}</span><span class="wd-sug-val">${_esc(classicVal)}${_u}</span>${nowNote}${useBtn(classicVal)}${reason}</div>`;
   } else if (mlVal != null) {
     const r = mlSug.reason ? _tip(mlSug.reason) : '';
-    sugHtml = `<div class="wd-sug"><span>🤖 ${_esc(t('suggestion.calibrated_label', {}, 'Calibrated'))}: <b>${_esc(mlVal)}</b></span>${useBtn(mlVal)}${r}</div>`;
+    sugHtml = `<div class="wd-sug"><span class="wd-sug-chip wd-sug-chip-cal">🤖 ${_esc(t('suggestion.calibrated_label', {}, 'Calibrated'))}</span><span class="wd-sug-val">${_esc(mlVal)}${_u}</span>${useBtn(mlVal)}${r}</div>`;
   }
 
   return `<div class="wd-field" data-field="${key}"><div class="wd-label-row"><label style="margin:0">${_esc(labelText)}</label>${chgDot}${tip}</div>${input}${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}<div class="wd-conflict-err" data-cerr="${key}" hidden></div>${sugHtml}</div>`;
@@ -1395,7 +1410,7 @@ class HaWashdataPanel extends HTMLElement {
     this._pgSel = new Set();        // selected cycle ids (Sections 1 & 2)
     this._pgOverrides = {};         // Section 1 detection-param overrides
     this._pgAbOverrides = {};       // Section 2 "B" overrides
-    this._pgConcurrency = 1;        // 1..50
+    this._pgConcurrency = 50;       // 1..50; default to max so all selected cycles run
     this._pgResults = null;         // Section 1 simulation response
     this._pgAbResults = null;       // Section 2 { a, b } responses
     this._pgDtwCycle = '';          // Section 3 selected cycle id
@@ -2333,7 +2348,7 @@ class HaWashdataPanel extends HTMLElement {
     const tag = suffix ? `<span class="wd-prog-tag ${manual ? 'manual' : 'auto'}">${suffix}</span>` : '';
     // Program selection is allowed for any user who can see the device (read+),
     // since it only changes live detection, not stored data.
-    const programCtl = `<div class="wd-prog-ctl"><label>Program</label>${_tip('Override which profile is matched to the current cycle. Auto-detect lets the integration pick the best match automatically. Pin a specific program to force-match it when auto-detect is wrong or you know what is running.')}
+    const programCtl = `<div class="wd-prog-ctl"><label>${this._t('lbl.program', {}, 'Program')}</label>${_tip(this._t('lbl.program_tip', {}, 'Override which profile is matched to the current cycle. Auto-detect lets the integration pick the best match automatically. Pin a specific program to force-match it when auto-detect is wrong or you know what is running.'))}
           <select id="wd-status-prog">
             <option value="auto_detect" ${selVal === 'auto_detect' ? 'selected' : ''}>${this._t('status.auto_detect', {}, 'Auto-detect')}</option>
             ${profOpts}
@@ -2353,9 +2368,9 @@ class HaWashdataPanel extends HTMLElement {
     if ((dev.suggestions_count || _mlSugCount) && this._canEdit()) {
       const total = (dev.suggestions_count || 0) + _mlSugCount;
       const parts = [];
-      if (dev.suggestions_count) parts.push(`${dev.suggestions_count} classic`);
-      if (_mlSugCount) parts.push(`${_mlSugCount} ML`);
-      attn.push(`<div class="wd-attn-card" data-action="goto-suggestions"><span class="wd-attn-icon">💡</span><div class="wd-attn-body"><div class="wd-attn-title">${total} tuning suggestion${total > 1 ? 's' : ''}</div><div class="wd-attn-sub">${parts.join(' · ')} · ${this._t('msg.review_in_settings', {}, 'Review in Settings')}</div></div></div>`);
+      if (dev.suggestions_count) parts.push(this._t('lbl.n_classic_suggestions', {n: dev.suggestions_count}, `${dev.suggestions_count} classic`));
+      if (_mlSugCount) parts.push(this._t('lbl.n_ml_suggestions', {n: _mlSugCount}, `${_mlSugCount} ML`));
+      attn.push(`<div class="wd-attn-card" data-action="goto-suggestions"><span class="wd-attn-icon">💡</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('lbl.n_tuning_suggestions', {n: total}, `${total} tuning suggestion${total > 1 ? 's' : ''}`)}</div><div class="wd-attn-sub">${parts.join(' · ')} · ${this._t('msg.review_in_settings', {}, 'Review in Settings')}</div></div></div>`);
     }
     const attnHtml = attn.length ? `<div class="wd-attn">${attn.join('')}</div>` : '';
 
@@ -3278,7 +3293,7 @@ class HaWashdataPanel extends HTMLElement {
         this._navigate('/config/automation/edit/new');
       }
     } catch (e) {
-      this._showToast('Could not create automation: ' + (e.message || e), 'error');
+      this._showToast(this._t('msg.toast_automation_failed', {error: e.message || e}, 'Could not create automation: ' + (e.message || e)), 'error');
     }
   }
 
@@ -3305,14 +3320,14 @@ class HaWashdataPanel extends HTMLElement {
     };
     const id = 'washdata_' + Date.now().toString(36);
     try {
-      if (!hass || !hass.callApi) { this._showToast('Cannot create automation here', 'error'); return; }
+      if (!hass || !hass.callApi) { this._showToast(this._t('msg.toast_no_automation', {}, 'Cannot create automation here'), 'error'); return; }
       await hass.callApi('POST', 'config/automation/config/' + id, config);
       await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: { notify_actions: [] } });
       this._opts = { ...this._opts, notify_actions: [] };
-      this._showToast('Actions migrated to an automation; opening editor');
+      this._showToast(this._t('msg.toast_automation_migrated', {}, 'Actions migrated to an automation; opening editor'));
       this._navigate('/config/automation/edit/' + id);
     } catch (e) {
-      this._showToast('Convert failed: ' + (e.message || e), 'error');
+      this._showToast(this._t('msg.toast_convert_failed', {error: e.message || e}, 'Convert failed: ' + (e.message || e)), 'error');
     }
   }
 
@@ -3695,7 +3710,7 @@ class HaWashdataPanel extends HTMLElement {
   _htmlPgSimulator() {
     const running = this._busy.has('pg-sim');
     const results = this._pgResultsArray(this._pgResults);
-    const conc = this._pgConcurrency || 1;
+    const conc = this._pgConcurrency || 50;
     const outcome = results.length ? `
       <div class="wd-card-title" style="margin:14px 0 4px">${this._t('lbl.outcome', {}, 'Outcome')}</div>
       ${this._pgStatTiles(this._pgSummarize(results))}
@@ -3779,10 +3794,10 @@ class HaWashdataPanel extends HTMLElement {
         <td style="text-align:right" class="${cls}">${d === 0 ? '—' : sign + d + 'pp'}</td>
       </tr>`;
     }).join('');
-    return `<table class="wd-table" style="max-width:520px">
+    return `<div class="wd-table-wrap"><table class="wd-table" style="max-width:520px;width:100%">
       <thead><tr><th>${this._t('lbl.metric', {}, 'Metric')}</th><th style="text-align:right">${this._t('lbl.settings_a_short', {}, 'A')}</th><th style="text-align:right">${this._t('lbl.settings_b_short', {}, 'B')}</th><th style="text-align:right">${this._t('lbl.delta', {}, 'Δ')}</th></tr></thead>
       <tbody>${rows}</tbody>
-    </table>`;
+    </table></div>`;
   }
 
   // Section 3 — DTW Inspector.
@@ -3827,7 +3842,7 @@ class HaWashdataPanel extends HTMLElement {
       </div>
       ${warpBlock}
       <div class="wd-card-title" style="margin:12px 0 4px">${this._t('lbl.score_breakdown', {}, 'Score breakdown')}</div>
-      <table class="wd-table" style="max-width:460px"><tbody>
+      <div class="wd-table-wrap"><table class="wd-table" style="max-width:460px;width:100%"><tbody>
         <tr><td colspan="2" style="font-weight:700">${_esc(this._t('lbl.stage2', {}, 'Stage 2 — core similarity'))}</td></tr>
         ${row(this._t('lbl.correlation', {}, 'Correlation'), s2.correlation)}
         ${row(this._t('lbl.mae_score', {}, 'MAE score'), s2.mae_score)}
@@ -3841,7 +3856,7 @@ class HaWashdataPanel extends HTMLElement {
         ${row(this._t('lbl.duration_agreement', {}, 'Duration agreement'), s4.duration_agreement)}
         ${row(this._t('lbl.energy_agreement', {}, 'Energy agreement'), s4.energy_agreement)}
         ${row(this._t('lbl.final_score', {}, 'Final score'), s4.final_score)}
-      </tbody></table>`;
+      </tbody></table></div>`;
   }
 
   // Legend for the event-timeline colours.
@@ -3961,7 +3976,7 @@ class HaWashdataPanel extends HTMLElement {
     if (!ids.length) { this._showToast(this._t('msg.no_cycles_selected', {}, 'Select at least one cycle first.'), 'error'); return; }
     await this._busyRun('pg-sim', async () => {
       try {
-        const r = await this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: { ...this._pgOverrides }, concurrency: Math.min(50, Math.max(this._pgConcurrency || 1, ids.length)) });
+        const r = await this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: { ...this._pgOverrides }, concurrency: Math.min(50, Math.min(this._pgConcurrency || 50, ids.length)) });
         this._pgResults = r || {};
         this._pgNeedsRestart = false;
       } catch (e) {
@@ -3980,8 +3995,8 @@ class HaWashdataPanel extends HTMLElement {
     await this._busyRun('pg-ab', async () => {
       try {
         const [a, b] = await Promise.all([
-          this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: {}, concurrency: Math.min(50, Math.max(this._pgConcurrency || 1, ids.length)) }),
-          this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: { ...this._pgAbOverrides }, concurrency: Math.min(50, Math.max(this._pgConcurrency || 1, ids.length)) }),
+          this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: {}, concurrency: Math.min(50, Math.min(this._pgConcurrency || 50, ids.length)) }),
+          this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: { ...this._pgAbOverrides }, concurrency: Math.min(50, Math.min(this._pgConcurrency || 50, ids.length)) }),
         ]);
         this._pgAbResults = { a: a || {}, b: b || {} };
         this._pgNeedsRestart = false;
@@ -5433,7 +5448,7 @@ class HaWashdataPanel extends HTMLElement {
     // F3: Playground concurrency slider — store value + live label.
     const pgConc = sr.querySelector('[data-pgconc]');
     if (pgConc) pgConc.addEventListener('input', () => {
-      this._pgConcurrency = Math.max(1, Math.min(50, parseInt(pgConc.value, 10) || 1));
+      this._pgConcurrency = Math.max(1, Math.min(50, parseInt(pgConc.value, 10) || 50));
       const el = sr.getElementById('wd-pg-conc-val');
       if (el) el.textContent = String(this._pgConcurrency);
     });
@@ -5653,8 +5668,8 @@ class HaWashdataPanel extends HTMLElement {
       const dev = this._devices[this._selIdx]; if (!dev) return;
       const val = progSel.value;
       this._ws({ type: `${_DOMAIN}/set_program`, entry_id: dev.entry_id, program: val })
-        .then(() => { this._showToast(val === 'auto_detect' ? 'Auto-detect enabled' : `Program set: ${val}`); return this._fetchAll(); })
-        .catch(e => this._showToast('Failed: ' + (e.message || e), 'error'));
+        .then(() => { this._showToast(val === 'auto_detect' ? this._t('msg.toast_auto_detect_enabled', {}, 'Auto-detect enabled') : this._t('msg.toast_program_set', {program: val}, `Program set: ${val}`)); return this._fetchAll(); })
+        .catch(e => this._showToast(this._t('msg.toast_failed', {error: e.message || e}, 'Failed: ' + (e.message || e)), 'error'));
     });
 
     // Compact cycle rows: toggle selection in select mode, else open the cycle.
@@ -5828,7 +5843,7 @@ class HaWashdataPanel extends HTMLElement {
           this._pendingSettings = {};
           this._showToast(this._t('toast.settings_reverted', {}, 'Settings reverted; integration reloading'));
           this._render();
-        } catch (e) { this._showToast('Revert failed: ' + (e.message || e), 'error'); }
+        } catch (e) { this._showToast(this._t('msg.toast_revert_failed', {error: e.message || e}, 'Revert failed: ' + (e.message || e)), 'error'); }
       });
     });
     const reloadBtn = sr.getElementById('wd-settings-reload');
@@ -5869,7 +5884,7 @@ class HaWashdataPanel extends HTMLElement {
       // "N tuning suggestions" count update immediately. Not persisted - a
       // refresh without saving re-fetches suggestions and restores it.
       this._suggestions = this._suggestions.filter(s => s.key !== k);
-      this._showToast(`Set ${k} = ${v}. Save to apply.`, 'info');
+      this._showToast(this._t('msg.sug_staged', {key: k, val: v}, `Set ${k} = ${v}. Save to apply.`), 'info');
       this._render();
       // Auto-cascade: fix any downstream conflicts the staged value introduced.
       // _render() is synchronous, so the new form DOM is immediately available.
@@ -6196,7 +6211,7 @@ class HaWashdataPanel extends HTMLElement {
           await this._ws({ type: `${_DOMAIN}/revert_ml_models`, entry_id: eid });
           this._showToast(this._t('toast.models_reverted', {}, 'On-device models reverted to baseline'));
           await this._loadMlTrainingStatus(eid);
-        } catch (e) { this._showToast('Revert failed: ' + (e.message || e), 'error'); }
+        } catch (e) { this._showToast(this._t('msg.toast_revert_failed', {error: e.message || e}, 'Revert failed: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'auto-new') {
@@ -6294,14 +6309,14 @@ class HaWashdataPanel extends HTMLElement {
       this._render();
 
     } else if (a === 'fb-confirm') {
-      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'confirm' }).then(() => { this._showToast(this._t('toast.feedback_confirmed', {}, 'Feedback confirmed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast('Error: ' + (e.message || e), 'error'));
+      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'confirm' }).then(() => { this._showToast(this._t('toast.feedback_confirmed', {}, 'Feedback confirmed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
     } else if (a === 'fb-ignore') {
-      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'ignore' }).then(() => { this._showToast(this._t('toast.feedback_dismissed', {}, 'Feedback dismissed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast('Error: ' + (e.message || e), 'error'));
+      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'ignore' }).then(() => { this._showToast(this._t('toast.feedback_dismissed', {}, 'Feedback dismissed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
     } else if (a === 'fb-correct') {
       this._fetchProfiles(eid).then(() => { this._modal = { type: 'correct-feedback', cycleId: btn.dataset.cid, detectedProfile: btn.dataset.prof }; this._render(); });
     } else if (a === 'fb-dismiss-all') {
       this._modal = { type: 'confirm', title: 'Dismiss All Feedbacks', message: `Dismiss all ${this._feedbacks.length} pending feedback requests?`, okLabel: 'Dismiss All',
-        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/dismiss_all_feedbacks`, entry_id: eid }); this._showToast(this._t('toast.feedback_all_dismissed', {}, 'All feedbacks dismissed')); await this._fetchFeedbacks(eid); } catch (e) { this._showToast('Error: ' + (e.message || e), 'error'); } } };
+        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/dismiss_all_feedbacks`, entry_id: eid }); this._showToast(this._t('toast.feedback_all_dismissed', {}, 'All feedbacks dismissed')); await this._fetchFeedbacks(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } } };
       this._render();
 
     } else if (a === 'create-phase') {
@@ -6311,7 +6326,7 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'del-phase') {
       const pname = btn.dataset.pname, pid = btn.dataset.pid;
       this._modal = { type: 'confirm', title: 'Delete Phase', message: `Delete phase "${pname}"?`, okLabel: 'Delete',
-        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_phase`, entry_id: eid, phase_id: pid }); this._showToast(this._t('toast.phase_deleted', {name: pname}, `Phase "${pname}" deleted`)); await this._fetchPhases(eid); } catch (e) { this._showToast('Delete failed: ' + (e.message || e), 'error'); } } };
+        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_phase`, entry_id: eid, phase_id: pid }); this._showToast(this._t('toast.phase_deleted', {name: pname}, `Phase "${pname}" deleted`)); await this._fetchPhases(eid); } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); } } };
       this._render();
 
     } else if (a === 'diag-refresh') {
@@ -6370,16 +6385,16 @@ class HaWashdataPanel extends HTMLElement {
             if (r.ml_training && r.ml_training.ok && (r.ml_training.promoted || []).length) bits.push(`${r.ml_training.promoted.length} model(s) promoted`);
             this._showToast(this._t('toast.processed', {bits: bits.join(', ')}, 'Processed ' + bits.join(', ')));
             await this._fetchToolsData(eid);
-          } catch (e) { this._showToast('Error: ' + (e.message || e), 'error'); }
+          } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
         }) };
       this._render();
     } else if (a === 'clear-debug') {
       this._modal = { type: 'confirm', title: 'Clear Debug Data', message: 'Delete all stored debug traces?', okLabel: 'Clear',
-        onOk: () => this._busyRun('clear-debug', async () => { try { const r = await this._ws({ type: `${_DOMAIN}/clear_debug_data`, entry_id: eid }); this._showToast(this._t('toast.debug_cleared', {count: r.count || 0}, `Cleared ${r.count || 0} debug traces`)); await this._fetchToolsData(eid); } catch (e) { this._showToast('Error: ' + (e.message || e), 'error'); } }) };
+        onOk: () => this._busyRun('clear-debug', async () => { try { const r = await this._ws({ type: `${_DOMAIN}/clear_debug_data`, entry_id: eid }); this._showToast(this._t('toast.debug_cleared', {count: r.count || 0}, `Cleared ${r.count || 0} debug traces`)); await this._fetchToolsData(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
       this._render();
     } else if (a === 'wipe-history') {
       this._modal = { type: 'confirm', title: 'Wipe All Data', message: '⚠️ This permanently deletes ALL cycles and profiles. This cannot be undone.', okLabel: 'Wipe Everything',
-        onOk: () => this._busyRun('wipe', async () => { try { await this._ws({ type: `${_DOMAIN}/wipe_history`, entry_id: eid }); this._showToast(this._t('toast.all_wiped', {}, 'All data wiped')); this._cycles = []; this._profiles = []; await this._fetchToolsData(eid); } catch (e) { this._showToast('Error: ' + (e.message || e), 'error'); } }) };
+        onOk: () => this._busyRun('wipe', async () => { try { await this._ws({ type: `${_DOMAIN}/wipe_history`, entry_id: eid }); this._showToast(this._t('toast.all_wiped', {}, 'All data wiped')); this._cycles = []; this._profiles = []; await this._fetchToolsData(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
       this._render();
 
     } else if (a === 'export-config') {
@@ -6526,7 +6541,7 @@ class HaWashdataPanel extends HTMLElement {
           this._tabInitialized = true;  // keep the user on the current tab
           this._applyPanelConfig();
           this._showToast(this._t('toast.panel_settings_saved', {}, 'Panel settings saved'));
-        } catch (e) { this._showToast('Save failed: ' + (e.message || e), 'error'); }
+        } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'pause-cycle') {
@@ -6537,7 +6552,7 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'resume-cycle') {
       this._ws({ type: `${_DOMAIN}/resume_cycle`, entry_id: eid })
         .then(() => { this._showToast(this._t('toast.cycle_resumed', {}, 'Cycle resumed')); return this._fetchAll(); })
-        .catch(e => this._showToast('Resume failed: ' + (e.message || e), 'error'));
+        .catch(e => this._showToast(this._t('msg.toast_resume_failed', {error: e.message || e}, 'Resume failed: ' + (e.message || e)), 'error'));
 
     } else if (a === 'terminate-cycle') {
       this._modal = {
@@ -6550,7 +6565,7 @@ class HaWashdataPanel extends HTMLElement {
             await this._ws({ type: `${_DOMAIN}/terminate_cycle`, entry_id: eid });
             this._showToast(this._t('toast.cycle_force_stopped', {}, 'Cycle force-stopped'));
             await this._fetchAll();
-          } catch (e) { this._showToast('Force stop failed: ' + (e.message || e), 'error'); }
+          } catch (e) { this._showToast(this._t('msg.toast_force_stop_failed', {error: e.message || e}, 'Force stop failed: ' + (e.message || e)), 'error'); }
         },
       };
       this._render();
@@ -6570,7 +6585,7 @@ class HaWashdataPanel extends HTMLElement {
           await this._ws({ type: `${_DOMAIN}/set_panel_config`, rbac: { enabled, default_level, users: usersMap } });
           this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
           this._showToast(this._t('toast.access_saved', {}, 'Access control saved'));
-        } catch (e) { this._showToast('Save failed: ' + (e.message || e), 'error'); }
+        } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
       });
     }
   }
@@ -6607,7 +6622,7 @@ class HaWashdataPanel extends HTMLElement {
             await this._ws({ type: `${_DOMAIN}/save_profile_group`, entry_id: eid, name, members });
             this._showToast(this._t('toast.group_saved', {}, 'Group saved')); this._modal = null;
             await this._fetchProfileGroups(eid);
-          } catch (e) { this._showToast('Save failed: ' + (e.message || e), 'error'); }
+          } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -6617,7 +6632,7 @@ class HaWashdataPanel extends HTMLElement {
             await this._ws({ type: `${_DOMAIN}/delete_profile_group`, entry_id: eid, name: m.orig });
             this._showToast(this._t('toast.group_deleted', {}, 'Group deleted')); this._modal = null;
             await this._fetchProfileGroups(eid);
-          } catch (e) { this._showToast('Delete failed: ' + (e.message || e), 'error'); }
+          } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -6648,7 +6663,7 @@ class HaWashdataPanel extends HTMLElement {
             await this._fetchCycles(eid);
             await this._loadMlIndex(eid);
             if (this._modal && this._modal.cycleId === cid) this._modal.ml = (this._mlById || {})[cid] || this._modal.ml;
-          } catch (e) { this._showToast('Save failed: ' + (e.message || e), 'error'); }
+          } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -6713,7 +6728,7 @@ class HaWashdataPanel extends HTMLElement {
         const phases = m.phases.filter(p => p.name).map(p => ({ name: p.name, start: p.start, end: p.end }));
         await this._busyRun('pp-phase-save', async () => {
           try { await this._ws({ type: `${_DOMAIN}/set_profile_phases`, entry_id: eid, profile_name: m.name, phases }); this._showToast(this._t('toast.phases_saved', {}, 'Phases saved')); }
-          catch (e) { this._showToast('Save failed: ' + (e.message || e), 'error'); }
+          catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -6727,14 +6742,14 @@ class HaWashdataPanel extends HTMLElement {
             const r = await this._ws({ type: `${_DOMAIN}/get_profile_cycles`, entry_id: eid, profile_name: m.name });
             if (this._modal) this._modal.cleanup = { cycles: r.cycles || [], selected: new Set() };
             await this._fetchProfiles(eid);
-          } catch (e) { this._showToast('Delete failed: ' + (e.message || e), 'error'); }
+          } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
       if (action === 'pp-rename') {
         const nn = sr.getElementById('wd-pp-rename')?.value?.trim();
         const dur = parseFloat(sr.getElementById('wd-pp-dur')?.value || '0');
-        if (!nn) { this._showToast('Name required', 'error'); return; }
+        if (!nn) { this._showToast(this._t('msg.toast_name_required', {}, 'Name required'), 'error'); return; }
         try {
           await this._ws({ type: `${_DOMAIN}/rename_profile`, entry_id: eid, profile_name: m.name, new_name: nn, manual_duration_min: dur > 0 ? dur : null });
           this._showToast(this._t('toast.profile_renamed', {}, 'Profile renamed')); m.name = nn; await this._fetchProfiles(eid);
@@ -6745,7 +6760,7 @@ class HaWashdataPanel extends HTMLElement {
       if (action === 'pp-rebuild') {
         await this._busyRun('pp-rebuild', async () => {
           try { await this._ws({ type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid }); const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: eid, profile_name: m.name }); if (this._modal) this._modal.env = r.envelope; this._showToast(this._t('toast.envelope_rebuilt', {}, 'Envelope rebuilt')); }
-          catch (e) { this._showToast('Rebuild failed: ' + (e.message || e), 'error'); }
+          catch (e) { this._showToast(this._t('msg.toast_rebuild_failed', {error: e.message || e}, 'Rebuild failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -6780,7 +6795,7 @@ class HaWashdataPanel extends HTMLElement {
       this._modal = null;
       if (!name) { this._showToast(this._t('toast.phase_name_required', {}, 'Phase name is required'), 'error'); this._render(); return; }
       try { await this._ws({ type: `${_DOMAIN}/create_phase`, entry_id: eid, device_type: m.deviceType || '', name, description: desc }); this._showToast(this._t('toast.phase_created', {name}, `Phase "${name}" created`)); await this._fetchPhases(eid); }
-      catch (e) { this._showToast('Create failed: ' + (e.message || e), 'error'); }
+      catch (e) { this._showToast(this._t('msg.toast_create_failed', {error: e.message || e}, 'Create failed: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'edit-phase-ok' && eid) {
       const newName = sr.getElementById('wd-eph-name')?.value?.trim();
@@ -6797,16 +6812,16 @@ class HaWashdataPanel extends HTMLElement {
       const head = parseFloat(sr.getElementById('wd-pr-head')?.value || 0);
       const tail = parseFloat(sr.getElementById('wd-pr-tail')?.value || 0);
       this._modal = null;
-      if (!profileName) { this._showToast('Profile name is required', 'error'); this._render(); return; }
+      if (!profileName) { this._showToast(this._t('msg.toast_profile_name_required', {}, 'Profile name is required'), 'error'); this._render(); return; }
       try { await this._ws({ type: `${_DOMAIN}/process_recording`, entry_id: eid, profile_name: profileName, save_mode: mode, head_trim: head, tail_trim: tail }); this._showToast(this._t('toast.recording_saved', {}, 'Recording saved to profile')); await this._fetchRecState(eid); await this._fetchProfiles(eid); }
-      catch (e) { this._showToast('Save failed: ' + (e.message || e), 'error'); }
+      catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'correct-fb-ok' && eid) {
       const corrected = sr.getElementById('wd-fb-profile')?.value;
       const dur = parseFloat(sr.getElementById('wd-fb-dur')?.value || 0) || null;
       this._modal = null;
       try { await this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: m.cycleId, action: 'correct', corrected_profile: corrected, corrected_duration_min: dur }); this._showToast(this._t('toast.correction_submitted', {}, 'Correction submitted')); await this._fetchFeedbacks(eid); }
-      catch (e) { this._showToast('Error: ' + (e.message || e), 'error'); }
+      catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'import-ok' && eid) {
       const jsonData = sr.getElementById('wd-import-json')?.value;
@@ -6819,8 +6834,8 @@ class HaWashdataPanel extends HTMLElement {
       const thr = parseFloat(sr.getElementById('wd-al-thr')?.value || '0.75');
       this._modal = null; this._render();
       await this._busyRun('auto-label', async () => {
-        try { await this._ws({ type: `${_DOMAIN}/auto_label_cycles`, entry_id: eid, confidence_threshold: thr }); this._showToast('Auto-label complete'); await this._fetchCycles(eid); }
-        catch (e) { this._showToast('Auto-label failed: ' + (e.message || e), 'error'); }
+        try { await this._ws({ type: `${_DOMAIN}/auto_label_cycles`, entry_id: eid, confidence_threshold: thr }); this._showToast(this._t('msg.toast_auto_label_complete', {}, 'Auto-label complete')); await this._fetchCycles(eid); }
+        catch (e) { this._showToast(this._t('msg.toast_auto_label_failed', {error: e.message || e}, 'Auto-label failed: ' + (e.message || e)), 'error'); }
       });
     } else if (action === 'merge-ok' && eid) {
       const target = sr.getElementById('wd-merge-prof')?.value || '';
@@ -6975,7 +6990,7 @@ class HaWashdataPanel extends HTMLElement {
           if (e.suggFix != null) {
             const displaySug = +e.suggFix.toFixed(2);
             fixHtml = `<span class="wd-conflict-sug-note">${this._t('conflict.suggestion_resolves', {val: displaySug}, `Stage the pending suggestion (${displaySug}) below to fix this`)}</span>`;
-          } else if (e.fixVal != null && e.fixVal > 0) {
+          } else if (e.fixVal != null && !isNaN(+e.fixVal)) {
             const displayVal = Number.isInteger(e.fixVal) ? e.fixVal : +e.fixVal.toFixed(2);
             fixHtml = `<button type="button" class="wd-conflict-fix" data-ckey="${key}" data-cval="${e.fixVal}">${this._t('conflict.use_fix', {val: displayVal}, `Use ${displayVal}`)}</button>`;
           }
@@ -7087,7 +7102,7 @@ class HaWashdataPanel extends HTMLElement {
           this._stagedSuggestions = false; this._suggestions = [];
         }
         this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
-      } catch (e) { this._showToast('Save failed: ' + (e.message || e), 'error'); }
+      } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
     });
   }
 }

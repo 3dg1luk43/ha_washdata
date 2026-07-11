@@ -1,0 +1,15 @@
+{
+  "name": "ha-washdata-e2e",
+  "private": true,
+  "description": "Playwright E2E tests for the WashData HA panel",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}

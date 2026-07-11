@@ -1,0 +1,21 @@
+{
+  "is_admin": true,
+  "access_level": "full",
+  "prefs": {
+    "settings_level": "advanced",
+    "onboarding_dismissed": false,
+    "show_raw": false,
+    "show_debug": false,
+    "date_format": "relative",
+    "lang_override": ""
+  },
+  "panel": {
+    "hidden_tabs": []
+  },
+  "rbac": {
+    "enabled": false,
+    "default_level": "edit",
+    "users": {}
+  },
+  "users": []
+}

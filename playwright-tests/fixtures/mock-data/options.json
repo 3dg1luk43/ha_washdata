@@ -1,0 +1,20 @@
+{
+  "name": "Test Washer",
+  "device_type": "washing_machine",
+  "power_sensor": "sensor.washer_power",
+  "min_power": 2.0,
+  "off_delay": 120,
+  "start_threshold_w": 10,
+  "stop_threshold_w": 3,
+  "min_off_gap": 180,
+  "energy_price": 0.17,
+  "energy_price_entity": null,
+  "notify_service": "",
+  "notify_finish_message": "Your {device} is done! Ran for {duration}.",
+  "notify_fire_events": true,
+  "peak_rate_threshold": null,
+  "notify_quiet_start_hour": null,
+  "notify_quiet_end_hour": null,
+  "notify_milestones": [50, 100, 500, 1000],
+  "maintenance_reminder_cycles": {}
+}

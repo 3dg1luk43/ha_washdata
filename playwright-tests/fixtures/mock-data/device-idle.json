@@ -1,0 +1,21 @@
+{
+  "devices": [
+    {
+      "entry_id": "test-entry-001",
+      "name": "Test Washer",
+      "title": "Test Washer",
+      "device_type": "washing_machine",
+      "state": "idle",
+      "current_power": 1.2,
+      "current_program": null,
+      "time_remaining": null,
+      "progress": null,
+      "last_cycle_end_time": "2026-07-10T14:30:00+00:00",
+      "cycle_count": 12,
+      "feedback_count": 0,
+      "suggestions_count": 2,
+      "energy_kwh": 0.0,
+      "lifetime_energy_kwh": 24.5
+    }
+  ]
+}

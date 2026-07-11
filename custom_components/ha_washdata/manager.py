@@ -777,6 +777,9 @@ class WashDataManager:
         # and frozen onto the cycle at end for panel badging.
         self._cycle_anomaly: str = "none"
         self._overrun_ratio: float = 0.0
+        # Post-cycle anomaly cache: holds energy/underrun anomaly from the last
+        # completed cycle so sensor attributes can surface them after idle.
+        self._last_cycle_post_anomaly: dict = {}
         self._cycle_completed_time: datetime | None = None  # Track when cycle finished
         self._progress_reset_delay: int = int(
             progress_reset_delay
@@ -3260,6 +3263,7 @@ class WashDataManager:
                 self._current_match_candidate = None  # Reset candidate
                 self._notified_start = False # Reset start notification state
                 self._start_event_fired = False
+                self._last_cycle_post_anomaly = {}  # Clear previous cycle's anomaly cache
                 self._cycle_start_time = self.detector.current_cycle_start or dt_util.now()
                 self._ranking_snapshot_cycle_id = str(uuid.uuid4())
                 self._reset_live_notification_state()
@@ -3912,6 +3916,13 @@ class WashDataManager:
                         cycle_data["energy_anomaly"] = "energy_low"
         except Exception:  # noqa: BLE001
             pass
+
+        # Cache post-cycle anomaly data so sensor attributes surface it while idle.
+        self._last_cycle_post_anomaly = {
+            k: cycle_data[k]
+            for k in ("anomaly", "underrun_ratio", "energy_anomaly", "energy_z_score")
+            if k in cycle_data
+        }
 
         # Store any HA restart gaps that occurred during this cycle.
         # The panel shades these regions in the power trace and shows a badge.
@@ -5972,6 +5983,16 @@ class WashDataManager:
     def overrun_ratio(self) -> float:
         """Elapsed / expected duration for the running cycle (0.0 when unknown)."""
         return self._overrun_ratio
+
+    @property
+    def last_cycle_post_anomaly(self) -> dict:
+        """Post-cycle anomaly data from the last completed cycle.
+
+        Contains subset of keys present: anomaly (underrun/overrun/none),
+        underrun_ratio, energy_anomaly (energy_spike/energy_low), energy_z_score.
+        Empty dict when no completed cycle or no anomaly detected.
+        """
+        return self._last_cycle_post_anomaly
 
     @property
     def restart_gaps(self) -> list[dict]:

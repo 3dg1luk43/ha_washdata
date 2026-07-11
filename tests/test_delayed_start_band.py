@@ -97,24 +97,37 @@ def test_first_band_sample_does_not_count_prior_gap():
     assert det._delay_band_seconds == 0.0
 
 
-def test_false_start_back_to_band_clears_candidate():
-    """A false start that drops back below threshold should clear delayed-start evidence."""
+def test_false_start_band_preserved_through_brief_spike():
+    """A false start (brief high spike) should NOT reset the delay-band timer.
+
+    The appliance is in standby (20 W) for 40 s, then a menu-navigation spike
+    (100 W) triggers a brief STATE_STARTING that immediately false-starts back
+    to STATE_OFF.  The band timer must continue from when it originally started
+    (t=5), NOT restart from the false-start exit (t=50).  So at t=65 (60 s
+    after the first 20 W reading) DELAY_WAIT is expected — the machine has
+    been demonstrably in standby mode for the required confirmation window.
+
+    The old behaviour (erasing the band on false-start) contradicted the code
+    comment at STATE_STARTING lines 829-834 and was fixed in 0.5.x.
+    """
     det = _make_detector(delay_confirm_seconds=60.0, start_duration_threshold=10.0)
     det.process_reading(0.0, dt(0))
     for i in range(1, 9):
-        det.process_reading(20.0, dt(i * 5))
+        det.process_reading(20.0, dt(i * 5))   # band accumulates t=5..t=40 (40 s)
     assert det.state == STATE_OFF
 
-    det.process_reading(100.0, dt(45))
+    det.process_reading(100.0, dt(45))          # brief spike → STARTING
     assert det.state == STATE_STARTING
 
-    det.process_reading(20.0, dt(50))
-    assert det.state == STATE_OFF
+    det.process_reading(20.0, dt(50))           # drops back → false start → OFF
+    assert det.state == STATE_OFF               # band timer preserved from t=5
 
-    for offset in (55, 60, 65):
-        det.process_reading(20.0, dt(offset))
+    for offset in (55, 60):
+        det.process_reading(20.0, dt(offset))   # still accumulating: 50 s, 55 s
+    assert det.state == STATE_OFF               # 55 s < 60 s, still waiting
 
-    assert det.state == STATE_OFF
+    det.process_reading(20.0, dt(65))           # 60 s since t=5 → DELAY_WAIT fires
+    assert det.state == STATE_DELAY_WAIT
 
 
 def test_delay_wait_start_bootstraps_from_first_high_sample():

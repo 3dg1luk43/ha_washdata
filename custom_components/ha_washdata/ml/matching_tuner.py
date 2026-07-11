@@ -3,9 +3,9 @@
 Mirrors the offline ``devtools/dtw_ab_eval.py`` methodology but as a shippable,
 NumPy-only, executor-safe pure function: it does leave-one-out matching over the
 device's own labelled cycles, sweeps a small grid of the highest-impact scoring
-weights (corr/MAE split and the duration/energy agreement weight), and - only if
-a candidate beats the shipped defaults on a HELD-OUT split by a margin - returns
-a per-device config override. The caller persists it; the matcher reads it live
+weights (corr/MAE split, duration agreement weight, energy agreement weight, and
+DTW ensemble weight independently), and - only if a candidate beats the shipped
+defaults on a HELD-OUT split by a margin - returns a per-device config override. The caller persists it; the matcher reads it live
 and falls back to the const defaults otherwise.
 
 Discipline (same as model promotion): tune on a train split, gate on a held-out
@@ -108,19 +108,27 @@ OVERRIDE_KEYS = ("corr_weight", "duration_weight", "energy_weight", "dtw_ensembl
 
 
 def _grid() -> list[dict[str, Any]]:
-    """Small, high-impact grid: corr/MAE weight x duration+energy weight x the
-    DTW/DDTW ensemble weight. All are bounded scoring weights (see OVERRIDE_KEYS),
-    so a tuned config can never change structural matching behaviour."""
+    """Small, high-impact grid over four bounded scoring weights.
+
+    Axes: corr/MAE split × duration agreement weight × energy agreement weight
+    × DTW ensemble weight. The duration and energy axes are now independent so
+    the tuner can find asymmetric configurations (e.g. a device with highly
+    variable energy but stable duration benefits from a low energy_weight and a
+    high duration_weight). All values are bounded scoring weights (see
+    OVERRIDE_KEYS) so a promoted config can never change structural behaviour.
+    Grid size: 4 × 2 × 2 × 3 = 48 configurations (was 4 × 2 × 3 = 24).
+    """
     out = []
     for cw in (0.40, 0.45, 0.50, 0.60):
-        for de in (0.15, 0.22):
-            for ew in (0.55, 0.70, 0.85):
-                out.append({
-                    "corr_weight": cw,
-                    "duration_weight": de,
-                    "energy_weight": de,
-                    "dtw_ensemble_w": ew,
-                })
+        for dur_w in (0.15, 0.22):
+            for en_w in (0.15, 0.22):
+                for ew in (0.55, 0.70, 0.85):
+                    out.append({
+                        "corr_weight": cw,
+                        "duration_weight": dur_w,
+                        "energy_weight": en_w,
+                        "dtw_ensemble_w": ew,
+                    })
     return out
 
 
