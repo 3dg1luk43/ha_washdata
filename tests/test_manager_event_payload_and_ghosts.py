@@ -1,6 +1,7 @@
 """Focused tests for cycle-end event payload and ghost-cycle detection."""
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -100,6 +101,9 @@ async def test_short_low_energy_cycle_is_marked_noise(
     await hass.async_block_till_done()
 
     manager._handle_noise_cycle.assert_called_once_with(25)
+    # A ghost must be suppressed like the dishwasher pump-out: never run the
+    # cycle-end pipeline (no persistence, no phantom "cycle finished" notice).
+    manager._async_process_cycle_end.assert_not_called()
 
 
 @pytest.mark.asyncio
@@ -120,6 +124,95 @@ async def test_short_high_energy_cycle_is_not_marked_noise(
     await hass.async_block_till_done()
 
     manager._handle_noise_cycle.assert_not_called()
+
+
+def _wire_cycle_end_mocks(manager: WashDataManager) -> None:
+    """Stub the heavy/persistence calls in _async_process_cycle_end so a test can
+    exercise just the terminal-state reset logic."""
+    manager._auto_label_confidence = 0.0
+    manager._cycle_anomaly = "none"
+    manager._last_match_result = None
+    manager._notify_finish_services = []
+    manager._notify_actions = []
+    manager.profile_store.get_profiles = MagicMock(return_value={})
+    manager.profile_store.async_add_cycle = AsyncMock()
+    manager.profile_store.async_clear_active_cycle = AsyncMock()
+    manager.profile_store.async_rebuild_envelope = AsyncMock()
+    manager.profile_store.async_add_lifetime_energy_wh = AsyncMock()
+    manager._run_post_cycle_processing = AsyncMock()
+    manager._run_final_match_from_cycle_data = AsyncMock()
+    manager._compute_cycle_quality_score = MagicMock()
+    manager._maybe_notify_milestone = MagicMock()
+    manager.learning_manager = MagicMock()
+
+
+@pytest.mark.asyncio
+async def test_cycle_end_reset_skipped_when_new_cycle_started(
+    hass: HomeAssistant, manager: WashDataManager
+) -> None:
+    """B1: if a new cycle starts while post-processing awaits, the terminal-state
+    reset must NOT clobber the live cycle (no zeroing, no expiry-timer re-arm)."""
+    _wire_cycle_end_mocks(manager)
+    manager._start_state_expiry_timer = MagicMock()
+
+    # Cycle B is already live by the time cycle A's tail runs: the ranking token has
+    # rolled over to B's id and B's live state is in place.
+    b_start = datetime(2026, 1, 1, 11, 0, 0, tzinfo=timezone.utc)
+    manager._ranking_snapshot_cycle_id = "cycleB"
+    manager._current_program = "detecting..."
+    manager._cycle_start_time = b_start
+    manager._cycle_progress = 42.0
+
+    cycle_data = {
+        "id": "cycle-A",
+        "start_time": "2026-01-01T10:00:00+00:00",
+        "duration": 1200,
+        "status": "completed",
+        "energy_wh": 500.0,
+        "power_data": [[0.0, 50.0], [60.0, 200.0]],
+    }
+
+    await manager._async_process_cycle_end(dict(cycle_data), cycle_token="cycleA")
+    await hass.async_block_till_done()
+
+    # Cycle B's live state survives untouched.
+    assert manager._current_program == "detecting..."
+    assert manager._cycle_start_time == b_start
+    assert manager._ranking_snapshot_cycle_id == "cycleB"
+    assert manager._cycle_progress == 42.0
+    manager._start_state_expiry_timer.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_cycle_end_reset_runs_when_no_new_cycle(
+    hass: HomeAssistant, manager: WashDataManager
+) -> None:
+    """B1 control: with no back-to-back cycle (token unchanged) the normal
+    terminal-state reset still runs."""
+    _wire_cycle_end_mocks(manager)
+    manager._start_state_expiry_timer = MagicMock()
+
+    manager._ranking_snapshot_cycle_id = "cycleA"
+    manager._current_program = "detecting..."
+    manager._cycle_start_time = datetime(2026, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
+    manager._door_sensor_entity = None
+
+    cycle_data = {
+        "id": "cycle-A",
+        "start_time": "2026-01-01T10:00:00+00:00",
+        "duration": 1200,
+        "status": "completed",
+        "energy_wh": 500.0,
+        "power_data": [[0.0, 50.0], [60.0, 200.0]],
+    }
+
+    await manager._async_process_cycle_end(dict(cycle_data), cycle_token="cycleA")
+    await hass.async_block_till_done()
+
+    assert manager._current_program == "off"
+    assert manager._cycle_start_time is None
+    assert manager._cycle_progress == 100.0
+    manager._start_state_expiry_timer.assert_called_once()
 
 
 @pytest.mark.asyncio

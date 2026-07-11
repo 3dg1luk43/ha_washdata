@@ -185,7 +185,7 @@ def test_live_match_dataset_labels_correct_as_positive():
         _make_snapshot("2025-01-02", "Cotton 60°", confirmed_label="Cotton 60°", feat_seed=0.2),
         _make_snapshot("2025-01-03", "Cotton 60°", confirmed_label="Eco 40°", feat_seed=0.3),
     ]
-    X, y, cols = _live_match_dataset(snaps)
+    X, y, cols, _g = _live_match_dataset(snaps)
     assert X.shape == (3, len(_COLUMNS))
     # First two: top1 == confirmed → positive (1.0)
     assert y[0] == 1.0
@@ -199,13 +199,13 @@ def test_live_match_dataset_skips_unconfirmed():
         _make_snapshot("2025-01-01", "Cotton 60°", confirmed_label=None),
         _make_snapshot("2025-01-02", "Cotton 60°", confirmed_label="Cotton 60°"),
     ]
-    X, y, cols = _live_match_dataset(snaps)
+    X, y, cols, _g = _live_match_dataset(snaps)
     assert X.shape[0] == 1  # only confirmed snapshot included
     assert y[0] == 1.0
 
 
 def test_live_match_dataset_empty_returns_empty_matrix():
-    X, y, cols = _live_match_dataset([])
+    X, y, cols, _g = _live_match_dataset([])
     assert X.shape[0] == 0
     assert y.shape[0] == 0
     assert cols == _COLUMNS
@@ -218,7 +218,7 @@ def test_live_match_dataset_skips_bad_entries():
         {"confirmed_label": "A", "top1_profile": None, "features": _make_feat()},  # bad top1
         _make_snapshot("2025-01-01", "A", "A"),  # good
     ]
-    X, y, cols = _live_match_dataset(snaps)
+    X, y, cols, _g = _live_match_dataset(snaps)
     assert X.shape[0] == 1
 
 
@@ -229,7 +229,7 @@ def test_live_match_dataset_missing_feature_keys_default_zero():
         "top1_profile": "A",
         "confirmed_label": "A",
     }
-    X, y, cols = _live_match_dataset([snap])
+    X, y, cols, _g = _live_match_dataset([snap])
     assert X.shape == (1, len(_COLUMNS))
     assert float(X[0, 0]) == pytest.approx(0.5)
     # Missing keys → 0.0

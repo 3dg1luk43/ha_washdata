@@ -555,6 +555,18 @@ const _CSS = `
 .wd-switch input:checked + .wd-switch-slider { background: var(--switch-checked-track-color, var(--primary-color, #03a9f4)); }
 .wd-switch input:checked + .wd-switch-slider::before { transform: translateX(18px); background: var(--switch-checked-button-color, #fff); }
 .wd-switch input:focus-visible + .wd-switch-slider { outline: 2px solid var(--primary-color, #03a9f4); outline-offset: 2px; }
+/* A11y: a shared keyboard focus ring for all interactive controls (many HA themes
+   suppress the UA default outline). */
+.wd-tab:focus-visible, .wd-btn:focus-visible, .wd-chip:focus-visible,
+.wd-sec-btn:focus-visible, .wd-subtab:focus-visible, .wd-mini-tab:focus-visible,
+.wd-devcard:focus-visible, [tabindex]:focus-visible, a:focus-visible, select:focus-visible {
+  outline: 2px solid var(--primary-color, #03a9f4); outline-offset: 2px; border-radius: 4px;
+}
+/* A11y: honor the user's reduced-motion preference — drop non-essential animation. */
+@media (prefers-reduced-motion: reduce) {
+  .wd-dot, .wd-devdot, .wd-rec-active, .wd-spin, .wd-toast { animation: none !important; }
+  * { scroll-behavior: auto !important; }
+}
 /* Notifications > Automations: split "New" dropdown + pills. */
 .wd-auto-dd summary { cursor: pointer; list-style: none; }
 .wd-auto-dd summary::-webkit-details-marker { display: none; }
@@ -863,19 +875,37 @@ const _CSS = `
   .wd-log-drawer.open { width: 100vw !important; position: fixed; top: 0; right: 0; bottom: 0; z-index: 30; border-left: none; }
   .wd-log-resize { display: none; }
 }
-/* F3: Playground — event-timeline lanes + DTW warp heatmap */
-.wd-pg-timeline { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
-.wd-pg-lane { display: flex; align-items: center; gap: 10px; }
-.wd-pg-lane-lbl { flex: 0 0 200px; max-width: 200px; font-size: .8em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.wd-pg-track { position: relative; flex: 1; height: 18px; border-radius: 5px; background: var(--secondary-background-color); overflow: hidden; }
-.wd-pg-seg { position: absolute; top: 0; bottom: 0; min-width: 2px; }
-.wd-pg-seg:hover { outline: 1px solid var(--primary-color); outline-offset: -1px; }
-.wd-pg-leg { display: flex; gap: 12px; flex-wrap: wrap; margin: 10px 0 0; font-size: .76em; color: var(--secondary-text-color); }
-.wd-pg-leg-i { display: inline-flex; align-items: center; gap: 5px; }
-.wd-pg-leg-sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
 .wd-pg-delta-up { color: var(--success-color, #4caf50); font-weight: 700; }
 .wd-pg-delta-down { color: var(--error-color, #f44336); font-weight: 700; }
 .wd-pg-delta-flat { color: var(--secondary-text-color); }
+/* F3: Unified Playground */
+.wd-pg-canvas-wrap { position: relative; width: 100%; }
+#wd-pg-canvas { display: block; width: 100%; height: 280px; cursor: crosshair; border-radius: 6px; background: var(--secondary-background-color); margin: 10px 0 0; }
+.wd-pg-strip { display: flex; align-items: center; gap: 10px; padding: 8px 2px; font-size: .88em; font-variant-numeric: tabular-nums; flex-wrap: wrap; border-bottom: 1px solid var(--divider-color, rgba(127,127,127,.2)); margin-bottom: 12px; }
+.wd-pg-strip-state { padding: 2px 10px; border-radius: 20px; font-weight: 700; font-size: .83em; white-space: nowrap; }
+.wd-pg-strip-pbar { display: inline-flex; align-items: center; gap: 5px; }
+.wd-pg-strip-track { width: 60px; height: 6px; background: var(--secondary-background-color); border-radius: 3px; overflow: hidden; display: inline-block; vertical-align: middle; }
+.wd-pg-strip-fill { height: 100%; background: var(--primary-color); border-radius: 3px; transition: width .15s; }
+.wd-pg-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 4px; }
+.wd-pg-params { display: flex; flex-direction: column; gap: 2px; }
+.wd-pg-param-row { display: flex; align-items: center; gap: 6px; }
+.wd-pg-param-lbl { flex: 1; font-size: .83em; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wd-pg-param-inp { width: 76px; flex: 0 0 76px; }
+.wd-pg-param-drag { font-size: .75em; color: var(--primary-color); cursor: default; flex: 0 0 12px; }
+.wd-pg-score-bar-row { display: flex; align-items: center; gap: 6px; font-size: .82em; margin: 2px 0; }
+.wd-pg-score-bar-lbl { flex: 0 0 80px; color: var(--secondary-text-color); }
+.wd-pg-score-bar-track { flex: 1; height: 6px; background: var(--secondary-background-color); border-radius: 3px; overflow: hidden; }
+.wd-pg-score-bar-fill { height: 100%; border-radius: 3px; }
+.wd-pg-score-bar-val { flex: 0 0 42px; text-align: right; font-variant-numeric: tabular-nums; color: var(--secondary-text-color); }
+.wd-pg-cand-row { display: flex; align-items: center; gap: 6px; font-size: .82em; margin: 3px 0; }
+.wd-pg-cand-name { flex: 0 0 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wd-pg-cand-track { flex: 1; height: 7px; background: var(--secondary-background-color); border-radius: 4px; overflow: hidden; }
+.wd-pg-cand-fill { height: 100%; border-radius: 4px; }
+.wd-pg-cand-pct { flex: 0 0 34px; text-align: right; color: var(--secondary-text-color); }
+@media (max-width: 640px) {
+  .wd-pg-bottom { grid-template-columns: 1fr; }
+  .wd-pg-strip { gap: 7px; font-size: .82em; }
+}
 `;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -1404,19 +1434,34 @@ class HaWashdataPanel extends HTMLElement {
     // D7: settings changelog cache
     this._settingsChangelog = null;
     this._settingsChangeByKey = {};
-    // F3: Playground tab state
-    this._pgSubtab = 'simulator';   // 'simulator' | 'ab' | 'dtw'
-    this._pgInitialized = false;    // one-shot default cycle selection
-    this._pgSel = new Set();        // selected cycle ids (Sections 1 & 2)
-    this._pgOverrides = {};         // Section 1 detection-param overrides
-    this._pgAbOverrides = {};       // Section 2 "B" overrides
-    this._pgConcurrency = 50;       // 1..50; default to max so all selected cycles run
-    this._pgResults = null;         // Section 1 simulation response
-    this._pgAbResults = null;       // Section 2 { a, b } responses
-    this._pgDtwCycle = '';          // Section 3 selected cycle id
-    this._pgDtwProfile = '';        // Section 3 selected profile name
-    this._pgDtwData = null;         // Section 3 get_dtw_debug response
-    this._pgNeedsRestart = false;   // WS command not registered yet (restart HA)
+    // F3: Unified Playground state
+    this._pgCycleId = '';           // selected cycle id (compact dropdown)
+    this._pgProfileName = '';       // '' = auto-detect from cycle metadata
+    this._pgPowerPts = null;        // [{t,w}] — fetched from get_cycle_power_data
+    this._pgDtwData = null;         // get_dtw_debug response (profile overlay + scores)
+    this._pgEnvData = null;         // get_profile_envelope response (±1σ band)
+    this._pgThreshStart = null;     // null = use live option; number = dragged override (W)
+    this._pgThreshStop = null;      // same for stop threshold
+    this._pgParamOverrides = {};    // other params: off_delay, min_off_gap, etc.
+    this._pgScrubFrac = 0;          // 0–1 scrub position shown when not playing
+    this._pgPlaying = false;        // animation playing
+    this._pgAnimFrame = null;       // rAF handle
+    this._pgAnimDuration = 10;      // replay wall-clock seconds (user sets 3–60)
+    this._pgAnimStartWall = null;   // Date.now() at play start
+    this._pgDragging = null;        // 'start_thr' | 'stop_thr' | 'scrub' | null
+    this._pgNeedsRestart = false;   // WS playground commands not yet registered
+    this._pgSimCycles = 20;         // last-N cycles for multi-cycle sim
+    this._pgSimResults = null;      // {total, detected, matchCorrect, matched, unmatched, ambiguous}
+    this._pgSweepParam = 'off_delay';
+    this._pgSweepFrom = '';
+    this._pgSweepTo = '';
+    this._pgSweepSteps = 5;
+    this._pgSweepResults = null;    // [{paramVal, summary}]
+    this._pgLoading = false;        // data load in progress
+    this._pgLastSimAt = null;       // Date.now() when last sim/sweep completed
+    this._pgSimProgress = null;   // {done, total} while running; null otherwise
+    this._pgSweepProgress = null; // {done, total} for sweep
+    this._pgSimCancelled = false;
   }
 
   set hass(hass) {
@@ -1876,11 +1921,14 @@ class HaWashdataPanel extends HTMLElement {
     this._selectMode = false; this._cycleSel = new Set();
     this._cycleFilter = { text: '', status: '' };
     this._profSubtab = 'profiles';
-    // F3: reset Playground state so the new device gets its own selection/results.
-    this._pgInitialized = false; this._pgSel = new Set();
-    this._pgOverrides = {}; this._pgAbOverrides = {};
-    this._pgResults = null; this._pgAbResults = null;
-    this._pgDtwCycle = ''; this._pgDtwProfile = ''; this._pgDtwData = null;
+    // F3: reset Playground on device change.
+    this._pgCycleId = ''; this._pgProfileName = '';
+    this._pgPowerPts = null; this._pgDtwData = null; this._pgEnvData = null;
+    this._pgThreshStart = null; this._pgThreshStop = null; this._pgParamOverrides = {};
+    this._pgScrubFrac = 0;
+    if (this._pgPlaying) { this._pgPlaying = false; if (this._pgAnimFrame) { cancelAnimationFrame(this._pgAnimFrame); this._pgAnimFrame = null; } }
+    this._pgSimResults = null; this._pgSweepResults = null; this._pgLastSimAt = null; this._pgNeedsRestart = false; this._pgLoading = false;
+    this._pgSimProgress = null; this._pgSweepProgress = null; this._pgSimCancelled = false;
     const dev = this._devices[this._selIdx];
     if (dev) await this._fetchSuggestions(dev.entry_id);
     this._fetchTabData();  // loads tab data incl. Status power-history + profiles
@@ -2004,15 +2052,13 @@ class HaWashdataPanel extends HTMLElement {
         this._opts = r.options || {};
         this._loadMlTrainingStatus(eid).finally(() => { if (this._tab === 'ml') this._render(); });
       } else if (this._tab === 'playground') {
-        // F3: Playground needs current options (for override pre-fill) + cycles
-        // (the simulator/DTW cycle pickers) + profiles (DTW profile selector).
         try { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }); this._opts = r.options || {}; } catch (_) {}
         await this._fetchCycles(eid);
         if (!this._profiles.length) await this._fetchProfiles(eid);
-        // Default-select the most recent 20 cycles the first time the tab opens.
-        if (!this._pgInitialized) {
-          this._pgSel = new Set((this._cycles || []).slice(0, 20).map(c => c.id));
-          this._pgInitialized = true;
+        // Auto-select most recent cycle on first load
+        if (!this._pgCycleId && this._cycles?.length) {
+          this._pgCycleId = this._cycles[0].id;
+          this._pgProfileName = this._cycles[0].profile_name || this._cycles[0].matched_profile || '';
         }
       } else if (this._tab === 'advanced') {
         // Advanced sub-tabs lazy-load on click; ensure the Maintenance section
@@ -2215,13 +2261,13 @@ class HaWashdataPanel extends HTMLElement {
     this._drawModalCanvas();
     this._drawProfileSparklines();  // D2
     this._drawPlaygroundCanvases(); // F3
-    ['wd-status-canvas', 'wd-cyc-canvas', 'wd-compare-canvas', 'wd-env-canvas', 'wd-phase-canvas', 'wd-spag-canvas', 'wd-pg-canvas', 'wd-pg-dtw-canvas']
+    ['wd-status-canvas', 'wd-cyc-canvas', 'wd-compare-canvas', 'wd-env-canvas', 'wd-phase-canvas', 'wd-spag-canvas', 'wd-pgroup-canvas']
       .forEach(id => this._attachHover(id));
   }
 
   _buildHtml() {
     const toast = this._toast
-      ? `<div class="wd-toast ${this._toast.cls}"><span>${_esc(this._toast.msg)}</span>${this._toast.actionLabel ? `<button type="button" class="wd-toast-action" data-toast-undo="${_esc(this._toast.actionToken || '')}">${_esc(this._toast.actionLabel)}</button>` : ''}</div>`
+      ? `<div class="wd-toast ${this._toast.cls}" role="${this._toast.cls.includes('error') ? 'alert' : 'status'}" aria-live="${this._toast.cls.includes('error') ? 'assertive' : 'polite'}"><span>${_esc(this._toast.msg)}</span>${this._toast.actionLabel ? `<button type="button" class="wd-toast-action" data-toast-undo="${_esc(this._toast.actionToken || '')}">${_esc(this._toast.actionLabel)}</button>` : ''}</div>`
       : '';
     return `
       <div class="wd-shell">
@@ -2276,7 +2322,9 @@ class HaWashdataPanel extends HTMLElement {
     ).length;
     const sugDot = (this._suggestions.length || mlSugCount) ? ' 💡' : '';
     const confIndicator = this._conflictKeysFromOpts().size > 0 ? ' ⚠' : '';
-    const labels = { status: this._t('tab.status',{},'Overview'), history: this._t('tab.history',{},'Cycles'), profiles: this._t('tab.profiles',{},'Profiles'), settings: this._t('tab.settings',{},'Settings') + confIndicator + sugDot, ml: this._t('tab.ml',{},'ML Training'), playground: this._t('tab.playground',{},'Playground'), advanced: this._t('tab.advanced',{},'Advanced') };
+    const pgBusy = this._busy.has('pg-sim') || this._busy.has('pg-sweep');
+    const pgSpinner = pgBusy ? `<span class="wd-spin" style="margin-left:4px;vertical-align:middle"></span>` : '';
+    const labels = { status: this._t('tab.status',{},'Overview'), history: this._t('tab.history',{},'Cycles'), profiles: this._t('tab.profiles',{},'Profiles'), settings: this._t('tab.settings',{},'Settings') + confIndicator + sugDot, ml: this._t('tab.ml',{},'ML Training'), playground: this._t('tab.playground',{},'Playground') + pgSpinner, advanced: this._t('tab.advanced',{},'Advanced') };
     const visible = this._visibleTabIds();
     if (!visible.includes(this._tab)) this._tab = 'status';
     const tabBtns = visible.map(id =>
@@ -2395,7 +2443,7 @@ class HaWashdataPanel extends HTMLElement {
     const profileCount = (this._profiles || []).length;
     const showGettingStarted = !this._pref('onboarding_dismissed', false) && profileCount === 0 && !hasCurve;
     const curveHtml = hasCurve
-      ? `<div class="wd-canvas-wrap" style="margin-top:14px"><canvas id="wd-status-canvas" style="height:160px"></canvas></div>${legend}`
+      ? `<div class="wd-canvas-wrap" style="margin-top:14px"><canvas id="wd-status-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_power_chart', {}, 'Power consumption chart'))}" style="height:160px"></canvas></div>${legend}`
       : (showGettingStarted
           ? this._htmlGettingStarted(cycleCount)
           : `<p class="wd-info" style="margin-top:12px">${this._t('msg.live_chart_loading', {}, 'Live power chart appears as readings arrive.')}</p>`);
@@ -2446,7 +2494,7 @@ class HaWashdataPanel extends HTMLElement {
           <div class="wd-card-title" style="margin:0">${_esc(dev.title)}</div>
           ${cycleCtrlHtml}
         </div>
-        <div class="wd-badge ${isRunning ? 'wd-running' : ''}" style="color:${color};background:${color}22;">
+        <div class="wd-badge ${isRunning ? 'wd-running' : ''}" style="color:${color};background:color-mix(in srgb, ${color} 13%, transparent);">
           <span class="wd-dot"></span>${_esc(label)}
           ${dev.sub_state ? `<span style="opacity:.7;font-size:.85em">(${_esc(dev.sub_state)})</span>` : ''}
         </div>
@@ -2961,7 +3009,7 @@ class HaWashdataPanel extends HTMLElement {
     const drawable = members.filter(n => cache[n] && (cache[n].avg || []).length);
     const legend = drawable.length ? `<div class="wd-leg">${drawable.map(n => `<span class="wd-leg-i"><span class="wd-leg-sw" style="background:${colOf(n)}"></span> ${_esc(n)}</span>`).join('')}</div>` : '';
     const canvas = drawable.length
-      ? `<div class="wd-canvas-wrap" style="margin-top:8px"><canvas id="wd-pg-canvas" style="height:150px"></canvas></div>${legend}`
+      ? `<div class="wd-canvas-wrap" style="margin-top:8px"><canvas id="wd-pgroup-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_envelope_chart', {}, 'Profile power envelope chart'))}" style="height:150px"></canvas></div>${legend}`
       : `<p class="wd-info">${this._t('msg.group_preview_hint', {}, 'Tick 2+ members to preview and compare their power curves.')}</p>`;
 
     // Cohesion of the stored group (recomputed on save), if editing one.
@@ -2994,7 +3042,7 @@ class HaWashdataPanel extends HTMLElement {
       xMax = Math.max(xMax, env.target_duration || (last ? last[0] : 0));
       return { points: env.avg, stroke: colOf(n), width: 2, alpha: 0.9, name: n };
     });
-    if (series.length) this._drawCurves('wd-pg-canvas', { series, xMax });
+    if (series.length) this._drawCurves('wd-pgroup-canvas', { series, xMax });
   }
 
   // ── Settings tab ──────────────────────────────────────────────────────────
@@ -3624,12 +3672,15 @@ class HaWashdataPanel extends HTMLElement {
   // the canonical setting.* strings; units/steps/mins come from _FIELD_BY_KEY.
   _pgOverrideFields() {
     return [
-      ['start_threshold_w', 'Start Threshold', 'W'],
-      ['stop_threshold_w', 'Stop Threshold', 'W'],
-      ['off_delay', 'Off Delay', 's'],
-      ['min_off_gap', 'Min Off Gap', 's'],
-      ['completion_min_seconds', 'Min Cycle Duration', 's'],
-      ['end_repeat_count', 'End Repeat Count', ''],
+      ['start_threshold_w',       'Start Threshold',       'W', 'Minimum watts to count as started',            'detection'],
+      ['stop_threshold_w',        'Stop Threshold',        'W', 'Below this, machine counts as off',            'detection'],
+      ['off_delay',               'Off Delay',             's', 'Seconds of low power before cycle ends',       'timing'],
+      ['min_off_gap',             'Min Off Gap',           's', 'Gap required to separate two cycles',          'timing'],
+      ['completion_min_seconds',  'Min Cycle Duration',    's', 'Shortest run that counts as a real cycle',     'timing'],
+      ['start_duration_threshold','Start Duration',        's', 'Seconds above threshold to confirm start',     'timing'],
+      ['end_repeat_count',        'End Repeat Count',      '',  'Low readings in a row before ending',          'advanced'],
+      ['abrupt_drop_watts',       'Abrupt Drop Threshold', 'W', 'Sudden drop treated as immediate end',         'advanced'],
+      ['interrupted_min_seconds', 'Interrupted Min',       's', 'Short cycles flagged as interrupted',          'advanced'],
     ];
   }
 
@@ -3647,318 +3698,720 @@ class HaWashdataPanel extends HTMLElement {
   _htmlPlayground() {
     const dev = this._devices[this._selIdx];
     if (!dev) return `<div class="wd-empty">${this._t('msg.no_device_selected', {}, 'No device selected.')}</div>`;
-    const sub = ['simulator', 'ab', 'dtw'].includes(this._pgSubtab) ? this._pgSubtab : 'simulator';
-    const subtabBtns = [
-      ['simulator', this._t('hdr.cycle_simulator', {}, 'Cycle Simulator')],
-      ['ab', this._t('hdr.ab_comparison', {}, 'A/B Settings Comparison')],
-      ['dtw', this._t('hdr.dtw_inspector', {}, 'DTW Inspector')],
-    ].map(([id, lbl]) => `<button class="wd-subtab ${sub === id ? 'active' : ''}" data-pgtab="${id}">${_esc(lbl)}</button>`).join('');
-    const restartBanner = this._pgNeedsRestart
-      ? `<div class="wd-card" style="border-color:var(--warning-color,#ff9800);margin-bottom:14px"><p class="wd-info" style="margin:0">⚠ ${this._t('msg.playground_needs_restart', {}, 'Restart Home Assistant to enable the Playground tools.')}</p></div>`
-      : '';
-    let body;
-    if (sub === 'simulator') body = this._htmlPgSimulator();
-    else if (sub === 'ab') body = this._htmlPgAb();
-    else body = this._htmlPgDtw();
-    return `
-      <p class="wd-sec-intro">${this._t('msg.playground_intro', {}, 'A safe sandbox to replay past cycles with different settings, compare two setups side by side, and inspect how a cycle aligns to a profile. Nothing here changes your live data until you explicitly apply it.')}</p>
-      <div class="wd-subtabs">${subtabBtns}</div>
-      ${restartBanner}
-      ${body}
-    `;
-  }
 
-  // Editable number inputs for the override params. `which` selects the state
-  // store the inputs write into ('a' = Section 1, 'ab' = Section 2 B).
-  _htmlPgOverrideForm(store, which) {
-    const rows = this._pgOverrideFields().map(([key, fb, unit]) => {
-      const lbl = this._t('setting.' + key + '.label', {}, fb);
-      const f = _FIELD_BY_KEY[key] || {};
-      const step = f.step != null ? f.step : 1;
-      const min = f.min != null ? f.min : 0;
-      const base = (this._opts || {})[key];
-      const val = this._pgFieldVal(key, store);
-      const unitTxt = unit ? ` (${_esc(unit)})` : '';
-      const ph = (base !== undefined && base !== null) ? _esc(String(base)) : '';
-      return `<div class="wd-field"><label>${_esc(lbl)}${unitTxt}</label>
-        <input type="number" data-pgov="${_esc(key)}" data-pgstore="${which}" step="${step}" min="${min}" value="${val === '' ? '' : _esc(String(val))}" placeholder="${ph}"></div>`;
-    }).join('');
-    return `<div class="wd-form-grid">${rows}</div>`;
-  }
-
-  // Multi-select cycle picker shared by the Simulator and A/B sections.
-  _htmlPgCyclePicker() {
     const cycles = this._cycles || [];
-    if (!cycles.length) return `<p class="wd-info" style="margin:8px 0">${this._t('msg.no_cycles_yet', {}, 'No cycles recorded yet.')}</p>`;
-    const sel = this._pgSel;
-    const rows = cycles.map(c => {
+    const profiles = this._profiles || [];
+
+    // Compact cycle dropdown
+    const cycleOpts = cycles.map(c => {
       const prog = c.profile_name || c.matched_profile || this._t('lbl.unlabelled', {}, 'Unlabelled');
-      const checked = sel.has(c.id) ? 'checked' : '';
-      return `<label class="wd-rev-tag"><input type="checkbox" class="wd-pg-cyc" value="${_esc(c.id)}" ${checked}> <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_esc(prog)}</span> <span style="color:var(--secondary-text-color);font-size:.8em">${_fmtDate(c.start_time)} · ${_fmtDuration(c.duration)}</span></label>`;
+      const dur = c.duration ? ` · ${Math.round(c.duration / 60)} min` : '';
+      const dateStr = c.start_time ? ` · ${_fmtDate(c.start_time)}` : '';
+      return `<option value="${_esc(c.id)}" ${this._pgCycleId === c.id ? 'selected' : ''}>${_esc(prog + dur + dateStr)}</option>`;
     }).join('');
-    return `
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
-        <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="pg-sel-all">${this._t('btn.select_all', {}, 'Select all')}</button>
-        <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="pg-sel-none">${this._t('btn.select_none', {}, 'Clear')}</button>
-        <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="pg-sel-last20">${this._t('btn.select_last20', {}, 'Last 20')}</button>
-        <span class="wd-info" id="wd-pg-selcount">${this._t('lbl.n_selected', {n: sel.size}, sel.size + ' selected')}</span>
-      </div>
-      <div class="wd-rev-tags" style="max-height:220px;overflow:auto">${rows}</div>`;
-  }
 
-  // Section 1 — Cycle Simulator.
-  _htmlPgSimulator() {
-    const running = this._busy.has('pg-sim');
-    const results = this._pgResultsArray(this._pgResults);
-    const conc = this._pgConcurrency || 50;
-    const outcome = results.length ? `
-      <div class="wd-card-title" style="margin:14px 0 4px">${this._t('lbl.outcome', {}, 'Outcome')}</div>
-      ${this._pgStatTiles(this._pgSummarize(results))}
-      <div class="wd-card-title" style="margin:10px 0 4px">${this._t('lbl.event_timeline', {}, 'Event timeline')}</div>
-      ${this._htmlPgTimeline(results)}
-      ${this._htmlPgLegend()}` : '';
-    return `<div class="wd-card">
-      <div class="wd-card-title" style="margin:0 0 4px">${this._t('hdr.cycle_simulator', {}, 'Cycle Simulator')}</div>
-      <p class="wd-info" style="margin:0 0 10px">${this._t('msg.pg_simulator_intro', {}, 'Replay past cycles through detection with tweaked settings — a dry run that changes nothing.')}</p>
-      <div class="wd-subhead">${this._t('lbl.cycles', {}, 'Cycles')}</div>
-      ${this._htmlPgCyclePicker()}
-      <div class="wd-subhead" style="margin-top:14px">${this._t('lbl.settings_overrides', {}, 'Settings overrides')}</div>
-      ${this._htmlPgOverrideForm(this._pgOverrides, 'a')}
-      <div class="wd-field" style="max-width:360px">
-        <label>${this._t('lbl.concurrency', {}, 'Concurrency')} — <span id="wd-pg-conc-val">${conc}</span></label>
-        <input type="range" min="1" max="50" value="${conc}" data-pgconc style="width:100%">
+    // Compact profile dropdown
+    const profOpts = `<option value="">${_esc(this._t('lbl.auto_detect', {}, 'Auto-detect'))}</option>`
+      + profiles.map(p => `<option value="${_esc(p.name)}" ${this._pgProfileName === p.name ? 'selected' : ''}>${_esc(p.name)}</option>`).join('');
+
+    const dur = this._pgAnimDuration || 10;
+
+    // Top controls
+    const topBar = `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:4px">
+      <div class="wd-field" style="min-width:180px;margin:0"><label>${this._t('lbl.cycle', {}, 'Cycle')}</label><select id="wd-pg-cyc-sel">${cycleOpts || '<option value="">—</option>'}</select></div>
+      <div class="wd-field" style="min-width:160px;margin:0"><label>${this._t('lbl.profile', {}, 'Profile')}</label><select id="wd-pg-prof-sel">${profOpts}</select></div>
+      <div class="wd-field" style="margin:0;min-width:130px">
+        <label>${this._t('lbl.replay_duration', {}, 'Replay')} — <span id="wd-pg-dur-lbl">${dur}s</span></label>
+        <input type="range" id="wd-pg-dur" min="3" max="60" value="${dur}" style="width:100%" ${this._pgPlaying ? 'disabled' : ''}>
       </div>
-      <div class="wd-card-actions">
-        <button class="wd-btn wd-btn-primary" data-action="pg-run" ${running ? 'disabled' : ''}>${running ? `<span class="wd-spin"></span> ${this._t('msg.pg_running', {}, 'Running…')}` : this._t('btn.run_simulation', {}, 'Run simulation')}</button>
+      <div style="display:flex;gap:6px;align-items:flex-end;padding-bottom:2px">
+        <button class="wd-btn wd-btn-primary" data-action="pg-play" ${(this._pgPlaying || !this._pgPowerPts || this._pgLoading) ? 'disabled' : ''} style="min-width:68px">▶ ${this._t('btn.play', {}, 'Play')}</button>
+        <button class="wd-btn" data-action="pg-stop" ${!this._pgPlaying ? 'disabled' : ''} style="min-width:52px">⏹ ${this._t('btn.stop', {}, 'Stop')}</button>
+        <button class="wd-btn" data-action="pg-load" ${this._pgLoading ? 'disabled' : ''} style="min-width:64px">${this._pgLoading ? `<span class="wd-spin"></span>` : '↺ ' + this._t('btn.load', {}, 'Load')}</button>
       </div>
-      ${outcome}
     </div>`;
-  }
 
-  // Section 2 — A/B Settings Comparison.
-  _htmlPgAb() {
-    const running = this._busy.has('pg-ab');
-    const applying = this._busy.has('pg-apply-b');
-    const res = this._pgAbResults;
-    const hasOverrides = Object.keys(this._pgAbOverrides || {}).length > 0;
-    const applyBtn = this._canEdit()
-      ? `<button class="wd-btn wd-btn-secondary" data-action="pg-apply-b" ${(hasOverrides && !applying) ? '' : 'disabled'}>${applying ? `<span class="wd-spin"></span> ${this._t('msg.pg_running', {}, 'Running…')}` : this._t('btn.apply_set_b', {}, 'Apply set B')}</button>`
+    // Canvas
+    const canvasEmptyOverlay = (!this._pgPowerPts && !this._pgLoading)
+      ? `<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;gap:6px">
+          <div style="font-size:1.6em;opacity:.25">&#12316;</div>
+          <div style="font-size:.82em;color:var(--secondary-text-color);text-align:center">${this._t('msg.pg_canvas_empty', {}, 'Select a cycle above, then press Load to see its power trace.')}</div>
+        </div>`
       : '';
-    const aRows = this._pgOverrideFields().map(([key, fb, unit]) => {
-      const lbl = this._t('setting.' + key + '.label', {}, fb);
-      const v = this._pgFieldVal(key, {});
-      const unitTxt = unit ? ` (${_esc(unit)})` : '';
-      return `<div class="wd-field"><label>${_esc(lbl)}${unitTxt}</label><input type="number" value="${v === '' ? '' : _esc(String(v))}" disabled></div>`;
-    }).join('');
-    const table = (res && res.a && res.b) ? `
-      <div class="wd-card-title" style="margin:14px 0 4px">${this._t('lbl.outcome', {}, 'Outcome')}</div>
-      ${this._htmlPgAbTable(this._pgResultsArray(res.a), this._pgResultsArray(res.b))}` : '';
-    return `<div class="wd-card">
-      <div class="wd-card-title" style="margin:0 0 4px">${this._t('hdr.ab_comparison', {}, 'A/B Settings Comparison')}</div>
-      <p class="wd-info" style="margin:0 0 10px">${this._t('msg.pg_ab_intro', {}, 'Run the same cycles with your current settings (A) and a tweaked set (B), side by side.')}</p>
-      <div class="wd-subhead">${this._t('lbl.cycles', {}, 'Cycles')}</div>
-      ${this._htmlPgCyclePicker()}
-      <div class="wd-subhead" style="margin-top:14px">${this._t('lbl.settings_a', {}, 'Settings A (current)')}</div>
-      <div class="wd-form-grid">${aRows}</div>
-      <div class="wd-subhead" style="margin-top:14px">${this._t('lbl.settings_b', {}, 'Settings B (test)')}</div>
-      ${this._htmlPgOverrideForm(this._pgAbOverrides, 'ab')}
-      <div class="wd-card-actions">
-        <button class="wd-btn wd-btn-primary" data-action="pg-ab-run" ${running ? 'disabled' : ''}>${running ? `<span class="wd-spin"></span> ${this._t('msg.pg_running', {}, 'Running…')}` : this._t('btn.run_both', {}, 'Run A vs B')}</button>
-        ${applyBtn}
-      </div>
-      ${table}
-    </div>`;
-  }
+    const canvas = `<div class="wd-pg-canvas-wrap" style="position:relative"><canvas id="wd-pg-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_playground_chart', {}, 'Cycle power trace with draggable detection thresholds'))}"></canvas>${canvasEmptyOverlay}</div>`;
 
-  // Side-by-side A vs B metric table with signed deltas (green = better).
-  _htmlPgAbTable(a, b) {
-    const sa = this._pgSummarize(a), sb = this._pgSummarize(b);
-    const pct = (n, s) => s.total ? Math.round(n / s.total * 100) : 0;
-    const goodUp = { detected: true, matchCorrect: true, unmatched: false, ambiguous: false };
-    const metrics = [
-      ['detected', this._t('lbl.pg_detected', {}, 'Detected')],
-      ['matchCorrect', this._t('lbl.pg_match_correct', {}, 'Match correct')],
-      ['unmatched', this._t('lbl.pg_unmatched', {}, 'Unmatched')],
-      ['ambiguous', this._t('lbl.pg_ambiguous', {}, 'Ambiguous')],
-    ];
-    const rows = metrics.map(([k, lbl]) => {
-      const va = pct(sa[k], sa), vb = pct(sb[k], sb);
-      const d = vb - va;
-      const better = goodUp[k] ? d > 0 : d < 0;
-      const cls = d === 0 ? 'wd-pg-delta-flat' : (better ? 'wd-pg-delta-up' : 'wd-pg-delta-down');
-      const sign = d > 0 ? '+' : '';
-      return `<tr>
-        <td>${_esc(lbl)}</td>
-        <td style="text-align:right" title="${sa[k]}/${sa.total}">${va}%</td>
-        <td style="text-align:right" title="${sb[k]}/${sb.total}">${vb}%</td>
-        <td style="text-align:right" class="${cls}">${d === 0 ? '—' : sign + d + 'pp'}</td>
-      </tr>`;
-    }).join('');
-    return `<div class="wd-table-wrap"><table class="wd-table" style="max-width:520px;width:100%">
-      <thead><tr><th>${this._t('lbl.metric', {}, 'Metric')}</th><th style="text-align:right">${this._t('lbl.settings_a_short', {}, 'A')}</th><th style="text-align:right">${this._t('lbl.settings_b_short', {}, 'B')}</th><th style="text-align:right">${this._t('lbl.delta', {}, 'Δ')}</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table></div>`;
-  }
+    // Sensor strip (static placeholders; updated by animation/scrub)
+    const strip = this._htmlPgStrip();
 
-  // Section 3 — DTW Inspector.
-  _htmlPgDtw() {
-    const running = this._busy.has('pg-dtw');
-    const cycles = this._cycles || [];
-    const cycOpts = cycles.map(c => {
-      const prog = c.profile_name || c.matched_profile || this._t('lbl.unlabelled', {}, 'Unlabelled');
-      return `<option value="${_esc(c.id)}" ${String(this._pgDtwCycle) === String(c.id) ? 'selected' : ''}>${_esc(prog)} · ${_fmtDate(c.start_time)}</option>`;
-    }).join('');
-    const profOpts = [`<option value="">${_esc(this._t('lbl.dtw_matched_profile', {}, "(cycle's matched profile)"))}</option>`]
-      .concat((this._profiles || []).map(p => `<option value="${_esc(p.name)}" ${this._pgDtwProfile === p.name ? 'selected' : ''}>${_esc(p.name)}</option>`)).join('');
-    const panel = this._pgDtwData ? this._htmlPgDtwResult(this._pgDtwData) : '';
-    return `<div class="wd-card">
-      <div class="wd-card-title" style="margin:0 0 4px">${this._t('hdr.dtw_inspector', {}, 'DTW Inspector')}</div>
-      <p class="wd-info" style="margin:0 0 10px">${this._t('msg.pg_dtw_intro', {}, 'Inspect how one cycle aligns to a profile: the two curves, the warp path and the score breakdown. Read-only.')}</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
-        <div class="wd-field" style="min-width:220px;margin:0"><label>${this._t('lbl.cycle', {}, 'Cycle')}</label><select id="wd-pg-dtw-cyc">${cycOpts}</select></div>
-        <div class="wd-field" style="min-width:220px;margin:0"><label>${this._t('lbl.profile', {}, 'Profile')}</label><select id="wd-pg-dtw-prof">${profOpts}</select></div>
-        <button class="wd-btn wd-btn-primary" data-action="pg-dtw-run" ${(running || !cycles.length) ? 'disabled' : ''}>${running ? `<span class="wd-spin"></span> ${this._t('msg.pg_running', {}, 'Running…')}` : this._t('btn.inspect', {}, 'Inspect')}</button>
-      </div>
-      ${panel}
-    </div>`;
-  }
+    // Bottom columns
+    const paramsCol = this._htmlPgParams();
+    const analysisCol = this._htmlPgAnalysis();
 
-  _htmlPgDtwResult(d) {
-    const hasWarp = Array.isArray(d.warp_path) && d.warp_path.length;
-    const s2 = d.stage2 || {}, dtw = d.dtw || {}, s4 = d.stage4 || {};
-    const na = this._t('lbl.na', {}, 'n/a');
-    const fmt = (v) => (v == null || (typeof v === 'number' && isNaN(v))) ? na : (typeof v === 'number' ? v.toFixed(3) : _esc(String(v)));
-    const row = (lbl, v) => `<tr><td>${_esc(lbl)}</td><td style="text-align:right">${fmt(v)}</td></tr>`;
-    const warpBlock = hasWarp
-      ? `<div class="wd-card-title" style="margin:12px 0 4px">${this._t('lbl.warp_path', {}, 'Warp path')}</div>
-         <div class="wd-canvas-wrap"><canvas id="wd-pg-warp-canvas" style="height:160px"></canvas></div>`
+    const restartNote = this._pgNeedsRestart
+      ? `<p class="wd-info" style="color:var(--warning-color,#ff9800);margin:4px 0">⚠ ${this._t('msg.pg_restart_note', {}, 'Restart Home Assistant to enable simulation tools.')}</p>`
       : '';
-    return `
-      <div class="wd-card-title" style="margin:12px 0 4px">${this._t('lbl.curves', {}, 'Curves')}</div>
-      <div class="wd-canvas-wrap"><canvas id="wd-pg-dtw-canvas" style="height:240px"></canvas></div>
-      <div class="wd-pg-leg">
-        <span class="wd-pg-leg-i"><span class="wd-pg-leg-sw" style="background:var(--primary-color)"></span>${_esc(this._t('lbl.cycle', {}, 'Cycle'))}</span>
-        <span class="wd-pg-leg-i"><span class="wd-pg-leg-sw" style="background:#ff9800"></span>${_esc(this._t('lbl.profile', {}, 'Profile'))} (${_esc(this._t('lbl.dashed', {}, 'dashed'))})</span>
-      </div>
-      ${warpBlock}
-      <div class="wd-card-title" style="margin:12px 0 4px">${this._t('lbl.score_breakdown', {}, 'Score breakdown')}</div>
-      <div class="wd-table-wrap"><table class="wd-table" style="max-width:460px;width:100%"><tbody>
-        <tr><td colspan="2" style="font-weight:700">${_esc(this._t('lbl.stage2', {}, 'Stage 2 — core similarity'))}</td></tr>
-        ${row(this._t('lbl.correlation', {}, 'Correlation'), s2.correlation)}
-        ${row(this._t('lbl.mae_score', {}, 'MAE score'), s2.mae_score)}
-        ${row(this._t('lbl.score', {}, 'Score'), s2.score)}
-        <tr><td colspan="2" style="font-weight:700">${_esc(this._t('lbl.stage3', {}, 'Stage 3 — DTW'))}</td></tr>
-        ${row(this._t('lbl.dtw_l1', {}, 'L1 score'), dtw.l1_score)}
-        ${row(this._t('lbl.dtw_ddtw', {}, 'DDTW score'), dtw.ddtw_score)}
-        ${row(this._t('lbl.dtw_blend_w', {}, 'Blend weight'), dtw.blend_weight)}
-        ${row(this._t('lbl.dtw_blended', {}, 'Blended score'), dtw.blended_score)}
-        <tr><td colspan="2" style="font-weight:700">${_esc(this._t('lbl.stage4', {}, 'Stage 4 — agreement'))}</td></tr>
-        ${row(this._t('lbl.duration_agreement', {}, 'Duration agreement'), s4.duration_agreement)}
-        ${row(this._t('lbl.energy_agreement', {}, 'Energy agreement'), s4.energy_agreement)}
-        ${row(this._t('lbl.final_score', {}, 'Final score'), s4.final_score)}
-      </tbody></table></div>`;
+
+    return `<div class="wd-card">
+      <div class="wd-card-title" style="margin:0 0 10px">${this._t('hdr.playground', {}, 'Playground')}</div>
+      <p class="wd-sec-intro" style="margin:0 0 10px">${this._t('msg.playground_intro', {}, 'Explore how settings affect detection on your real cycle data. Nothing here changes live configuration until you explicitly apply it.')}</p>
+      ${restartNote}
+      ${topBar}
+      ${canvas}
+      ${strip}
+      <div class="wd-pg-bottom">${paramsCol}${analysisCol}</div>
+    </div>`;
   }
 
-  // Legend for the event-timeline colours.
-  _htmlPgLegend() {
-    const items = [
-      ['start', this._t('lbl.pg_ev_start', {}, 'Start')],
-      ['running', this._t('lbl.pg_ev_running', {}, 'Running')],
-      ['paused', this._t('lbl.pg_ev_paused', {}, 'Paused')],
-      ['match', this._t('lbl.pg_ev_match', {}, 'Match')],
-      ['ending', this._t('lbl.pg_ev_ending', {}, 'Ending')],
-      ['off', this._t('lbl.pg_ev_off', {}, 'Off')],
-    ];
-    return `<div class="wd-pg-leg">${items.map(([t, l]) => `<span class="wd-pg-leg-i"><span class="wd-pg-leg-sw" style="background:${this._pgEventColor(t)}"></span>${_esc(l)}</span>`).join('')}</div>`;
+  _htmlPgStrip() {
+    return `<div class="wd-pg-strip" id="wd-pg-strip">
+      <span class="wd-pg-strip-state" id="wd-pg-state-badge" style="background:var(--secondary-background-color);text-transform:uppercase">${this._t('lbl.pg_idle', {}, 'Idle')}</span>
+      <span style="font-size:.75em"><span style="color:var(--secondary-text-color);text-transform:uppercase">${this._t('lbl.power', {}, 'Power')} </span><span id="wd-pg-power">—</span></span>
+      <span class="wd-pg-strip-pbar">
+        <span class="wd-pg-strip-track"><span class="wd-pg-strip-fill" id="wd-pg-pbar" style="width:0%"></span></span>
+        <span id="wd-pg-pct">—%</span>
+      </span>
+      <span style="font-size:.75em;color:var(--secondary-text-color);text-transform:uppercase">${this._t('lbl.pg_time_left', {}, 'Time left')} <span id="wd-pg-rem" style="color:var(--primary-text-color,inherit)">—</span></span>
+      <span style="font-size:.75em;color:var(--secondary-text-color);text-transform:uppercase">${this._t('lbl.energy', {}, 'Energy')} <span id="wd-pg-energy" style="color:var(--primary-text-color,inherit)">—</span></span>
+      <span style="font-size:.75em;color:var(--secondary-text-color);text-transform:uppercase">${this._t('lbl.match', {}, 'Match')} <span id="wd-pg-conf" style="color:var(--primary-text-color,inherit)">—</span></span>
+    </div>`;
   }
 
-  // Horizontal event lanes: one per simulated cycle, coloured segments between
-  // consecutive events. Hover (title) shows the event detail.
-  _htmlPgTimeline(results) {
-    const arr = Array.isArray(results) ? results : [];
-    if (!arr.length) return '';
-    const lanes = arr.map(r => {
-      const o = (r && r.outcome) || {};
-      const name = (r && r.profile_name) || o.match_profile || (r && r.cycle_id) || '?';
-      let events = Array.isArray(r && r.events) ? r.events.filter(e => e && typeof e.t === 'number') : [];
-      events = events.slice().sort((a, b) => a.t - b.t);
-      const lastT = events.length ? events[events.length - 1].t : 0;
-      const dur = Math.max(1, o.detected_duration_s || o.stored_duration_s || lastT || 1);
-      let track;
-      if (events.length) {
-        track = events.map((e, i) => {
-          const start = Math.max(0, e.t);
-          const end = (i + 1 < events.length) ? events[i + 1].t : dur;
-          const left = Math.max(0, Math.min(100, (start / dur) * 100));
-          const w = Math.max(0.8, Math.min(100 - left, ((end - start) / dur) * 100));
-          const col = this._pgEventColor(e.type);
-          const detail = (e.detail != null && e.detail !== '') ? ' — ' + String(e.detail) : '';
-          const tip = `${e.type || '?'} @ ${_fmtClock(start)}${detail}`;
-          return `<div class="wd-pg-seg" title="${_esc(tip)}" style="left:${left}%;width:${w}%;background:${col}"></div>`;
-        }).join('');
-      } else {
-        const col = o.detected ? 'var(--success-color,#4caf50)' : 'var(--secondary-text-color)';
-        const tip = o.detected ? this._t('lbl.pg_detected', {}, 'Detected') : this._t('msg.pg_no_events', {}, 'No events');
-        track = `<div class="wd-pg-seg" title="${_esc(tip)}" style="left:0;width:100%;background:${col};opacity:.35"></div>`;
-      }
-      const dot = o.match_correct ? '✅' : (o.match_profile ? '🟡' : (o.detected ? '⚪' : '⛔'));
-      return `<div class="wd-pg-lane"><div class="wd-pg-lane-lbl" title="${_esc(name)}">${dot} ${_esc(name)}</div><div class="wd-pg-track">${track}</div></div>`;
-    }).join('');
-    return `<div class="wd-pg-timeline">${lanes}</div>`;
-  }
+  _htmlPgParams() {
+    const fields = this._pgOverrideFields();
+    const threshFields = new Set(['start_threshold_w', 'stop_threshold_w']);
 
-  // Stable colour for an event type. Known state/transition names get a fixed
-  // colour; anything else gets a deterministic hashed hue.
-  _pgEventColor(type) {
-    const t = (type || '').toString().toLowerCase();
-    const map = {
-      start: '#42a5f5', starting: '#42a5f5',
-      running: '#66bb6a', run: '#66bb6a',
-      paused: '#ffa726', pause: '#ffa726',
-      ending: '#ef5350', end: '#ef5350',
-      off: '#bdbdbd', idle: '#bdbdbd',
-      match: '#ab47bc', matched: '#ab47bc',
-      anti_wrinkle: '#26c6da', rinse: '#26a69a',
+    const groupColors = { detection: '#2a78d6', timing: '#1baf7a', advanced: '#eda100' };
+    const groupLabels = {
+      detection: this._t('lbl.pg_group_detection', {}, 'Detection triggers'),
+      timing: this._t('lbl.pg_group_timing', {}, 'Timing rules'),
+      advanced: this._t('lbl.pg_group_advanced', {}, 'Edge cases'),
     };
-    if (map[t]) return map[t];
-    let h = 0;
-    for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) & 0xffffff;
-    return `hsl(${h % 360}, 55%, 55%)`;
-  }
+    let lastGroup = '';
+    const paramRows = fields.map(([key, fb, unit, desc, group]) => {
+      const lbl = this._t('setting.' + key + '.label', {}, fb);
+      const liveVal = this._pgFieldVal(key, {});
+      let curVal;
+      if (key === 'start_threshold_w') curVal = this._pgThreshStart ?? liveVal;
+      else if (key === 'stop_threshold_w') curVal = this._pgThreshStop ?? liveVal;
+      else curVal = this._pgParamOverrides[key] ?? liveVal;
+      const isDrag = threshFields.has(key);
+      const unitTxt = unit ? unit : '';
+      const gc = groupColors[group] || '#2a78d6';
+      const gl = groupLabels[group] || '';
 
-  // Defensive: pull the results array out of the WS response whatever its shape.
-  _pgResultsArray(resp) {
-    if (!resp) return [];
-    if (Array.isArray(resp)) return resp;
-    if (Array.isArray(resp.results)) return resp.results;
-    return [];
-  }
+      let header = '';
+      if (group && group !== lastGroup) {
+        header = `<div style="display:flex;align-items:center;gap:8px;margin:${lastGroup ? '12px' : '2px'} 0 5px">
+          <div style="width:3px;height:14px;border-radius:2px;background:${gc};flex-shrink:0"></div>
+          <span style="font-size:.7em;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--secondary-text-color)">${_esc(gl)}</span>
+        </div>`;
+        lastGroup = group;
+      }
 
-  // Client-side outcome tally (raw counts; percentages computed at render time).
-  _pgSummarize(results) {
-    const arr = Array.isArray(results) ? results : [];
-    const s = { total: arr.length, detected: 0, matchCorrect: 0, matched: 0, unmatched: 0, ambiguous: 0 };
-    arr.forEach(r => {
-      const o = (r && r.outcome) || {};
-      if (o.detected) s.detected++;
-      if (o.match_correct) s.matchCorrect++;
-      if (o.match_profile) s.matched++;
-      if (o.ambiguous) s.ambiguous++;
-    });
-    s.unmatched = s.total - s.matched;
-    return s;
-  }
+      return `${header}<div style="display:flex;align-items:flex-start;gap:6px;margin:0 0 6px 11px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.82em;font-weight:600;margin-bottom:1px">${_esc(lbl)}${isDrag ? ` <span style="color:${gc};font-size:.85em" title="${_esc(this._t('lbl.pg_drag_hint', {}, 'Drag line on graph'))}">↕</span>` : ''}</div>
+          ${desc ? `<div style="font-size:.72em;color:var(--secondary-text-color);line-height:1.3">${_esc(this._t('pg_desc.' + key, {}, desc))}</div>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <input class="wd-pg-param-inp" type="number" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" style="width:72px">
+          ${unitTxt ? `<span style="font-size:.75em;color:var(--secondary-text-color);min-width:14px">${_esc(unitTxt)}</span>` : ''}
+        </div>
+      </div>`;
+    }).join('');
 
-  _pgStatTiles(s) {
-    const pct = (n) => s.total ? Math.round((n / s.total) * 100) : 0;
-    const tile = (val, lbl, tip) => `<div class="wd-kv-item" title="${_esc(tip)}"><div class="wd-kv-val">${val}</div><div class="wd-kv-lbl">${_esc(lbl)}</div></div>`;
-    return `<div class="wd-kv">
-      ${tile(s.total, this._t('lbl.pg_cycles', {}, 'Cycles'), this._t('msg.pg_tip_cycles', {n: s.total}, s.total + ' cycles simulated'))}
-      ${tile(pct(s.detected) + '%', this._t('lbl.pg_detected', {}, 'Detected'), this._t('msg.pg_tip_detected', {n: s.detected, total: s.total}, s.detected + '/' + s.total + ' detected'))}
-      ${tile(pct(s.matchCorrect) + '%', this._t('lbl.pg_match_correct', {}, 'Match correct'), this._t('msg.pg_tip_match_correct', {n: s.matchCorrect, total: s.total}, s.matchCorrect + '/' + s.total + ' matched correctly'))}
-      ${tile(pct(s.unmatched) + '%', this._t('lbl.pg_unmatched', {}, 'Unmatched'), this._t('msg.pg_tip_unmatched', {n: s.unmatched, total: s.total}, s.unmatched + '/' + s.total + ' unmatched'))}
-      ${tile(pct(s.ambiguous) + '%', this._t('lbl.pg_ambiguous', {}, 'Ambiguous'), this._t('msg.pg_tip_ambiguous', {n: s.ambiguous, total: s.total}, s.ambiguous + '/' + s.total + ' ambiguous'))}
+    // --- Test on history section ---
+    const simBusy = this._busy.has('pg-sim');
+    const simProg = this._pgSimProgress;
+    const simS = this._pgSimResults;
+
+    const tile = (label, n, total, color, tip) => {
+      const p = total ? Math.round(n / total * 100) : 0;
+      return `<div style="background:var(--secondary-background-color);border-radius:8px;padding:10px 8px;text-align:center;border-top:3px solid ${color}" title="${_esc(tip)}">
+        <div style="font-size:1.5em;font-weight:700;line-height:1;color:${color}">${n}</div>
+        <div style="font-size:.72em;color:var(--secondary-text-color);margin:2px 0">${this._t('lbl.pg_pct_of', {p, total}, p + '% of ' + total)}</div>
+        <div style="font-size:.75em;font-weight:600;margin-top:3px">${_esc(label)}</div>
+      </div>`;
+    };
+
+    const simProgressHtml = simBusy ? `
+      <div style="margin:6px 0">
+        <div style="display:flex;justify-content:space-between;font-size:.8em;color:var(--secondary-text-color);margin-bottom:3px">
+          <span id="wd-pg-sim-progress-lbl">${simProg ? this._t('msg.pg_sim_progress', {done: simProg.done, total: simProg.total}, simProg.done + ' / ' + simProg.total + ' cycles') : this._t('msg.pg_starting', {}, 'Starting…')}</span>
+          <button class="wd-btn wd-btn-sm" data-action="pg-cancel" style="padding:0 8px;height:20px;font-size:.78em">✕ ${this._t('btn.cancel', {}, 'Cancel')}</button>
+        </div>
+        <div style="height:6px;border-radius:3px;background:var(--secondary-background-color);overflow:hidden">
+          <div id="wd-pg-sim-progress-bar" style="height:100%;border-radius:3px;background:var(--primary-color);transition:width .3s;width:${simProg ? Math.round(simProg.done/simProg.total*100) : 0}%"></div>
+        </div>
+      </div>` : '';
+
+    const simResultsHtml = (!simBusy && simS && simS.total > 0) ? (() => {
+      const detPct = simS.total ? simS.detected / simS.total : 0;
+      const matPct = simS.total ? simS.matchCorrect / simS.total : 0;
+      let verdictText, verdictColor;
+      if (detPct >= 0.80 && matPct >= 0.70) {
+        verdictText = this._t('msg.pg_verdict_good', {}, 'Well tuned: most cycles are correctly identified and matched.');
+        verdictColor = '#0ca30c';
+      } else if (detPct >= 0.60) {
+        verdictText = this._t('msg.pg_verdict_ok', {}, 'Acceptable: some cycles missed. Try lowering the start threshold.');
+        verdictColor = '#eda100';
+      } else {
+        verdictText = this._t('msg.pg_verdict_bad', {}, 'Needs attention: many cycles are going undetected.');
+        verdictColor = '#e34948';
+      }
+      return `
+      <div style="margin:8px 0 0">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0">
+          ${tile(this._t('lbl.pg_tile_detected', {}, 'Detected'), simS.detected, simS.total, '#0ca30c', this._t('lbl.pg_tile_detected_tip', {}, 'Cycles where power crossed the start threshold long enough to register as running'))}
+          ${tile(this._t('lbl.pg_tile_matched', {}, 'Matched'), simS.matchCorrect, simS.total, '#2a78d6', this._t('lbl.pg_tile_matched_tip', {}, 'Cycles correctly attributed to a known program'))}
+          ${tile(this._t('lbl.pg_tile_ambiguous', {}, 'Ambiguous'), simS.ambiguous, simS.total, '#eda100', this._t('lbl.pg_tile_ambiguous_tip', {}, 'Cycles with a near-tie between two programs'))}
+        </div>
+        ${(simS.total - simS.detected) > 0 ? `<div style="font-size:.8em;color:#e34948;margin:-4px 0 6px">&#9888; ${this._t('msg.pg_undetected', {n: simS.total - simS.detected, s: (simS.total - simS.detected) > 1 ? 's' : ''}, (simS.total - simS.detected) + ' cycle' + ((simS.total-simS.detected)>1?'s':'') + ' undetected')}</div>` : ''}
+        <div style="font-size:.8em;margin:4px 0;padding:6px 8px;border-radius:6px;border-left:3px solid ${verdictColor};background:${verdictColor}18;color:var(--primary-text-color,inherit)">${_esc(verdictText)}</div>
+        ${this._pgLastSimAt ? `<div style="font-size:.75em;color:var(--secondary-text-color);margin-top:4px">${_esc(this._t('lbl.pg_last_run', {date: _fmtDate(this._pgLastSimAt)}, 'Last run: ' + _fmtDate(this._pgLastSimAt)))}</div>` : ''}
+      </div>`;
+    })() : '';
+
+    // --- Sweep section ---
+    const swBusy = this._busy.has('pg-sweep');
+    const swProg = this._pgSweepProgress;
+    const swFields = this._pgOverrideFields();
+    const swOpts = swFields.map(([k, fb]) => `<option value="${k}" ${this._pgSweepParam===k?'selected':''}>${_esc(this._t('setting.'+k+'.label',{},fb))}</option>`).join('');
+    const swLiveVal = this._pgFieldVal(this._pgSweepParam, {});
+    const swParamLabel = this._t('setting.' + (this._pgSweepParam || 'off_delay') + '.label', {}, this._pgSweepParam || 'Off Delay');
+    const swFromN = parseFloat(this._pgSweepFrom), swToN = parseFloat(this._pgSweepTo);
+    const swCanRun = !isNaN(swFromN) && !isNaN(swToN) && swFromN !== swToN;
+    const swSteps = Math.max(2, Math.min(20, this._pgSweepSteps || 5));
+    const swIntro = `<div style="font-size:.8em;color:var(--secondary-text-color);margin:0 0 8px;line-height:1.4">${this._t('msg.pg_sweep_intro', {param: '<strong>' + _esc(swParamLabel) + '</strong>', steps: swSteps, cycles: this._pgSimCycles || 20}, 'What if ' + _esc(swParamLabel) + ' were different? Test ' + swSteps + ' values across your last ' + (this._pgSimCycles || 20) + ' cycles to find the setting where the most cycles are correctly matched.')}</div>`;
+    const swPreview = swCanRun
+      ? Array.from({length: swSteps}, (_, i) => parseFloat((swFromN + (swToN - swFromN) * i / (swSteps-1)).toFixed(1))).join(', ')
+      : '';
+
+    const autoRange = swLiveVal !== '' ? (() => {
+      const v = parseFloat(String(swLiveVal));
+      if (isNaN(v) || v <= 0) return null;
+      return { lo: Math.max(1, Math.round(v * 0.25)), hi: Math.round(v * 4) };
+    })() : null;
+
+    const swProgressHtml = swBusy ? `
+      <div style="margin:6px 0">
+        <div style="display:flex;justify-content:space-between;font-size:.8em;color:var(--secondary-text-color);margin-bottom:3px">
+          <span id="wd-pg-sw-progress-lbl">${swProg ? this._t('msg.pg_sweep_step', {done: swProg.done, total: swProg.total}, 'Step ' + swProg.done + ' / ' + swProg.total) : this._t('msg.pg_starting', {}, 'Starting…')}</span>
+          <button class="wd-btn wd-btn-sm" data-action="pg-cancel" style="padding:0 8px;height:20px;font-size:.78em">✕ ${this._t('btn.cancel', {}, 'Cancel')}</button>
+        </div>
+        <div style="height:6px;border-radius:3px;background:var(--secondary-background-color);overflow:hidden">
+          <div id="wd-pg-sw-progress-bar" style="height:100%;border-radius:3px;background:var(--primary-color);transition:width .3s;width:${swProg ? Math.round(swProg.done/swProg.total*100) : 0}%"></div>
+        </div>
+      </div>` : '';
+
+    const sweepResults = this._pgSweepResults;
+    const swBestHtml = (sweepResults?.length >= 2 && !swBusy) ? (() => {
+      const cf = swFields.find(([k]) => k === this._pgSweepParam);
+      const unit = cf ? (cf[2] || '') : '';
+      let best = null, bestScore = -1, bestS = null;
+      sweepResults.forEach(({paramVal, summary: s}) => {
+        const score = s && s.total ? s.matchCorrect / s.total : 0;
+        if (score > bestScore) { bestScore = score; best = paramVal; bestS = s; }
+      });
+      if (best == null) return '';
+      const bestPct = bestS && bestS.total ? Math.round(bestS.matchCorrect / bestS.total * 100) : 0;
+      const swCf = cf;
+      return `
+      <div style="background:var(--secondary-background-color);border-radius:8px;padding:10px;margin:8px 0">
+        <div style="font-weight:700;font-size:.88em;margin-bottom:4px">${this._t('lbl.pg_best_value', {}, 'Best value found')}</div>
+        <div style="font-size:1.1em;font-weight:700;color:var(--primary-color)">${typeof best === 'number' ? best.toFixed(1).replace(/\.0$/,'') : best}${unit ? ' '+unit : ''}</div>
+        <div style="font-size:.8em;color:var(--secondary-text-color);margin:2px 0">${this._t('msg.pg_match_rate', {pct: bestPct, total: bestS.total}, bestPct + '% match rate on ' + bestS.total + ' cycles')}</div>
+        ${this._canEdit() ? `<div style="display:flex;gap:6px;margin-top:8px">
+          <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-sweep-apply-best">${this._t('btn.pg_apply_device', {}, 'Apply to device')}</button>
+          <button class="wd-btn wd-btn-sm" data-action="pg-sweep-dismiss">${this._t('btn.dismiss', {}, 'Dismiss')}</button>
+        </div>` : ''}
+      </div>
+      <div style="font-size:.78em;color:var(--secondary-text-color);margin-bottom:3px">
+        ${this._t('msg.pg_chart_caption', {param: '<strong>' + _esc(swCf ? this._t('setting.'+swCf[0]+'.label',{},swCf[1]) : this._pgSweepParam) + '</strong>'}, 'Detection/match rate across values of ' + _esc(swCf ? this._t('setting.'+swCf[0]+'.label',{},swCf[1]) : this._pgSweepParam))}
+        <span style="float:right;display:inline-flex;align-items:center;gap:4px">
+          <svg width="18" height="2" style="display:inline;vertical-align:middle"><line x1="0" y1="1" x2="18" y2="1" stroke="#2a78d6" stroke-width="2" stroke-linecap="round"/></svg>${this._t('lbl.pg_tile_matched', {}, 'Matched')}
+          <svg width="18" height="2" style="display:inline;vertical-align:middle;margin-left:8px"><line x1="0" y1="1" x2="18" y2="1" stroke="#1baf7a" stroke-width="2" stroke-linecap="round"/></svg>${this._t('lbl.pg_tile_detected', {}, 'Detected')}
+          <svg width="18" height="2" style="display:inline;vertical-align:middle;margin-left:8px"><line x1="0" y1="1" x2="18" y2="1" stroke="#eda100" stroke-width="2" stroke-linecap="round"/></svg>${this._t('lbl.pg_tile_ambiguous', {}, 'Ambiguous')}
+        </span>
+      </div>
+      <canvas id="wd-pg-sweep-chart" role="img" aria-label="${_esc(this._t('lbl.aria_sweep_chart', {}, 'Parameter sweep results chart'))}" style="width:100%;height:180px;display:block;border-radius:4px"></canvas>`;
+    })() : '';
+
+    return `<div class="wd-pg-params">
+      ${paramRows}
+      <div style="display:flex;gap:6px;margin:8px 0 4px">
+        <button class="wd-btn wd-btn-sm" data-action="pg-reset-params">${this._t('btn.reset', {}, 'Reset')}</button>
+      </div>
+      <div style="border-top:1px solid var(--divider-color,rgba(127,127,127,.2));margin:8px 0;padding-top:8px">
+        <div class="wd-subhead" style="margin:0 0 6px">${this._t('hdr.test_history', {}, 'Test on history')}</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
+          <span style="font-size:.85em">${this._t('lbl.last', {}, 'Last')}</span>
+          <input type="number" id="wd-pg-simn" value="${this._pgSimCycles}" min="1" max="200" style="width:54px">
+          <span style="font-size:.85em">${this._t('lbl.cycles_lc', {}, 'cycles')}</span>
+          <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-run-sim" ${simBusy ? 'disabled' : ''}>${simBusy ? '<span class="wd-spin"></span>' : '▶ ' + this._t('btn.run', {}, 'Run')}</button>
+        </div>
+        ${simProgressHtml}
+        ${simResultsHtml}
+      </div>
+      <div style="border-top:1px solid var(--divider-color,rgba(127,127,127,.2));margin:8px 0;padding-top:8px">
+        <div class="wd-subhead" style="margin:0 0 4px">${this._t('hdr.param_sweep', {}, 'Parameter sweep')}</div>
+        ${swIntro}
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end">
+          <select id="wd-pg-sw-param" style="flex:1;min-width:120px">${swOpts}</select>
+        </div>
+        ${swLiveVal !== '' ? `<div style="font-size:.77em;color:var(--secondary-text-color);margin:2px 0 6px">${this._t('lbl.pg_current_value', {}, 'Current value:')} <strong>${_esc(String(swLiveVal))}${swFields.find(([k])=>k===this._pgSweepParam)?.[2] ? ' ' + _esc(swFields.find(([k])=>k===this._pgSweepParam)[2]) : ''}</strong></div>` : ''}
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end;margin-top:4px">
+          <input type="number" id="wd-pg-sw-from" placeholder="${_esc(this._t('lbl.from', {}, 'From'))}" value="${_esc(String(this._pgSweepFrom))}" style="width:64px" step="any">
+          <span>→</span>
+          <input type="number" id="wd-pg-sw-to" placeholder="${_esc(this._t('lbl.to', {}, 'To'))}" value="${_esc(String(this._pgSweepTo))}" style="width:64px" step="any">
+          <input type="number" id="wd-pg-sw-steps" value="${swSteps}" min="2" max="20" style="width:44px">
+          ${autoRange ? `<button class="wd-btn wd-btn-sm" data-action="pg-sweep-autofill" title="${_esc(this._t('lbl.pg_autofill_tip', {lo: autoRange.lo, hi: autoRange.hi}, 'Auto-fill range from current value (' + autoRange.lo + '–' + autoRange.hi + ')'))}">${this._t('btn.pg_autofill', {}, 'Auto-fill')}</button>` : ''}
+          <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-sweep-run" ${(swBusy || !swCanRun) ? 'disabled' : ''}>${swBusy ? '<span class="wd-spin"></span>' : '▶'}</button>
+        </div>
+        ${swPreview ? `<div style="font-size:.78em;color:var(--secondary-text-color);margin-top:2px">→ ${_esc(swPreview)}</div>` : ''}
+        ${swProgressHtml}
+        ${swBestHtml}
+      </div>
     </div>`;
+  }
+
+  _htmlPgAnalysis() {
+    const d = this._pgDtwData;
+
+    const scoreBar = (lbl, val, maxVal, color, dispVal) => {
+      const frac = (maxVal && val != null) ? Math.max(0, Math.min(1, val / maxVal)) : (val != null ? Math.max(0, Math.min(1, val)) : 0);
+      return `<div class="wd-pg-score-bar-row">
+        <span class="wd-pg-score-bar-lbl">${_esc(lbl)}</span>
+        <div class="wd-pg-score-bar-track"><div class="wd-pg-score-bar-fill" style="width:${Math.round(frac*100)}%;background:${color}"></div></div>
+        <span class="wd-pg-score-bar-val">${dispVal != null ? _esc(String(dispVal)) : '—'}</span>
+      </div>`;
+    };
+
+    let analysisHtml = '';
+
+    if (d && (d.stage2 || d.stage4)) {
+      const s2 = d.stage2 || {}, s4 = d.stage4 || {}, dtw = d.dtw || {};
+      const finalScore = s4.final_score ?? dtw.blended_score ?? s2.score;
+      let verdict = '—', vColor = 'var(--secondary-text-color)';
+      if (finalScore != null) {
+        if (finalScore >= 0.7) { verdict = '✅ ' + this._t('lbl.pg_strong_match', {}, 'Strong match'); vColor = 'var(--success-color, #4caf50)'; }
+        else if (finalScore >= 0.4) { verdict = '⚠ ' + this._t('lbl.pg_weak_match', {}, 'Weak match'); vColor = 'var(--warning-color, #ff9800)'; }
+        else { verdict = '❌ ' + this._t('lbl.pg_poor_match', {}, 'Poor match'); vColor = 'var(--error-color, #f44336)'; }
+      }
+      const profName = d.profile_name || this._pgProfileName || '—';
+      analysisHtml += `<div style="font-weight:700;font-size:.9em;color:${vColor};margin-bottom:8px">${verdict}</div>`;
+      if (profName !== '—') analysisHtml += `<div style="font-size:.82em;color:var(--secondary-text-color);margin-bottom:6px">${_esc(profName)} · ${_esc(this._t('lbl.score', {}, 'score'))} ${finalScore != null ? finalScore.toFixed(3) : '—'}</div>`;
+      analysisHtml += scoreBar(this._t('lbl.correlation', {}, 'Correlation'), s2.correlation, 1, '#42a5f5', s2.correlation != null ? s2.correlation.toFixed(2) : null);
+      if (dtw.blended_score != null) analysisHtml += scoreBar(this._t('lbl.pg_dtw', {}, 'DTW'), dtw.blended_score, 1, '#ab47bc', dtw.blended_score.toFixed(2));
+      if (s4.duration_agreement != null) analysisHtml += scoreBar(this._t('lbl.duration', {}, 'Duration'), s4.duration_agreement, 1, '#66bb6a', s4.duration_agreement.toFixed(2));
+      if (s4.energy_agreement != null) analysisHtml += scoreBar(this._t('lbl.energy', {}, 'Energy'), s4.energy_agreement, 1, '#ffa726', s4.energy_agreement.toFixed(2));
+      analysisHtml += `<div style="height:1px;background:var(--divider-color,rgba(127,127,127,.2));margin:8px 0"></div>`;
+    } else if (!d) {
+      analysisHtml += `<p class="wd-info" style="margin:0 0 8px">${this._t('msg.pg_analysis_empty', {}, 'Load a cycle to see match analysis.')}</p>`;
+    }
+
+    // Match score for the analyzed profile. get_dtw_debug scores ONE profile vs the
+    // cycle, so there is no honest cross-profile ranking available here — never
+    // fabricate competitor confidences. Show the single real score, or nothing.
+    const matchedName = (d && d.profile_name) || this._pgProfileName || (this._cycles || []).find(c => c.id === this._pgCycleId)?.profile_name || '';
+    const realScore = d && d.stage4 && d.stage4.final_score;
+    if (matchedName && realScore != null) {
+      const pctC = Math.round(Math.max(0, Math.min(1, realScore)) * 100);
+      analysisHtml += `<div class="wd-subhead" style="margin:0 0 4px">${_esc(this._t('lbl.pg_match_score', {}, 'Match score'))}</div>`;
+      analysisHtml += `<div class="wd-pg-cand-row">
+        <span class="wd-pg-cand-name" title="${_esc(matchedName)}">${_esc(matchedName)}</span>
+        <div class="wd-pg-cand-track"><div class="wd-pg-cand-fill" style="width:${pctC}%;background:var(--primary-color)"></div></div>
+        <span class="wd-pg-cand-pct">${pctC}%</span>
+      </div>`;
+    }
+
+    return `<div>${analysisHtml || '<p class="wd-info" style="margin:0">Select a cycle and click ↺ to load analysis.</p>'}</div>`;
+  }
+
+  async _pgLoad() {
+    const dev = this._devices[this._selIdx];
+    if (!dev || this._pgLoading) return;
+    const cid = this._pgCycleId || (this._cycles?.[0]?.id || '');
+    if (!cid) return;
+    this._pgCycleId = cid;
+    this._pgLoading = true;
+    this._pgPowerPts = null; this._pgDtwData = null; this._pgEnvData = null;
+    this._render();
+    try {
+      const pwResp = await this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: dev.entry_id, cycle_id: cid });
+      const samples = pwResp.samples || [];
+      const pts = [];
+      for (const p of samples) {
+        if (!Array.isArray(p) || p.length < 2) continue;
+        const t = +p[0], w = +p[1];
+        if (!isNaN(t) && !isNaN(w)) pts.push({t, w});
+      }
+      this._pgPowerPts = pts.length ? pts : null;
+      if (typeof pwResp.full_duration_s === 'number' && pwResp.full_duration_s > 0) {
+        const cy = (this._cycles || []).find(c => c.id === cid);
+        if (cy) cy._pg_duration = pwResp.full_duration_s;
+      }
+      const profName = this._pgProfileName || (this._cycles || []).find(c => c.id === cid)?.profile_name || '';
+      if (pts.length && !this._pgNeedsRestart) {
+        try {
+          const dtwMsg = { type: `${_DOMAIN}/get_dtw_debug`, entry_id: dev.entry_id, cycle_id: cid };
+          if (profName) dtwMsg.profile_name = profName;
+          this._pgDtwData = await this._ws(dtwMsg);
+          this._pgNeedsRestart = false;
+        } catch (e) {
+          if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
+          this._pgDtwData = null;
+        }
+      }
+      const resolvedProf = this._pgDtwData?.profile_name || profName;
+      if (resolvedProf && !this._pgNeedsRestart) {
+        try {
+          const envR = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: dev.entry_id, profile_name: resolvedProf });
+          this._pgEnvData = envR.envelope || null;
+        } catch (_) { this._pgEnvData = null; }
+      }
+    } catch (e) {
+      this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+    }
+    this._pgLoading = false;
+    this._render();
+    requestAnimationFrame(() => this._pgDrawCanvas());
+  }
+
+  _pgDrawCanvas() {
+    if (this._tab !== 'playground') return;
+    const sr = this.shadowRoot;
+    const canvas = sr && sr.getElementById('wd-pg-canvas');
+    if (!canvas) return;
+    const pts = this._pgPowerPts;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const cw = Math.max(1, Math.round(rect.width * dpr));
+    const ch = Math.max(1, Math.round((rect.height || 280) * dpr));
+    if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
+    const ctx = canvas.getContext('2d');
+    const cs = getComputedStyle(this);
+    const primary = (cs.getPropertyValue('--primary-color') || '#03a9f4').trim();
+    const gridCol = (cs.getPropertyValue('--divider-color') || 'rgba(127,127,127,.2)').trim();
+    const txtCol = (cs.getPropertyValue('--secondary-text-color') || '#888').trim();
+    const bgCol = (cs.getPropertyValue('--secondary-background-color') || '#1a1a1a').trim();
+    ctx.clearRect(0, 0, cw, ch);
+
+    const stateBandH = 34 * dpr;
+    const phaseBandH = 14 * dpr;
+    const padL = 44 * dpr, padR = 8 * dpr, padT = 10 * dpr, padB = stateBandH + phaseBandH + 4 * dpr;
+    const powerH = ch - padT - padB;
+
+    if (!pts || !pts.length) {
+      ctx.fillStyle = txtCol;
+      ctx.font = `${12*dpr}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(this._pgLoading ? 'Loading…' : 'Select a cycle and click ↺ to load', cw/2, ch/2);
+      return;
+    }
+
+    const totalDur = (this._cycles || []).find(c => c.id === this._pgCycleId)?._pg_duration || pts[pts.length-1].t || 1;
+    const maxW = Math.max(...pts.map(p => p.w), 1);
+    const threshStart = this._pgThreshStart ?? this._pgFieldVal('start_threshold_w', {}) ?? 50;
+    const threshStop = this._pgThreshStop ?? this._pgFieldVal('stop_threshold_w', {}) ?? 5;
+
+    const toX = t => padL + (t / totalDur) * (cw - padL - padR);
+    const toY = w => padT + (1 - Math.max(0, w) / maxW) * powerH;
+
+    // Grid lines (solid, not dashed)
+    ctx.strokeStyle = 'rgba(127,127,127,0.12)'; ctx.lineWidth = dpr; ctx.setLineDash([]);
+    const gridWatts = [0.25, 0.5, 0.75, 1.0].map(f => Math.round(f * maxW / 100) * 100 || Math.round(f * maxW));
+    gridWatts.forEach(w => {
+      const y = toY(w);
+      if (y < padT || y > padT + powerH) return;
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(cw - padR, y); ctx.stroke();
+      ctx.fillStyle = txtCol; ctx.font = `${9*dpr}px sans-serif`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(w + 'W', padL - 4*dpr, y);
+    });
+
+    // Profile envelope band. get_profile_envelope returns avg/min/max as
+    // [offset_s, watts] pairs on the profile's own time base; normalize x onto the
+    // cycle axis (like the DTW profile trace below). Draw the min..max spread as a
+    // shaded band; the mean line is drawn by the DTW profile trace when analysis is
+    // loaded, so drawing it here only when there is no spread avoids a duplicate line.
+    const env = this._pgEnvData;
+    const envAvg = env && Array.isArray(env.avg) ? env.avg.filter(p => Array.isArray(p) && p.length >= 2) : [];
+    if (envAvg.length) {
+      const envMaxX = Math.max(...envAvg.map(p => p[0])) || 1;
+      const envX = t => toX(t / envMaxX * totalDur);
+      const envMin = Array.isArray(env.min) ? env.min.filter(p => Array.isArray(p) && p.length >= 2) : [];
+      const envMax = Array.isArray(env.max) ? env.max.filter(p => Array.isArray(p) && p.length >= 2) : [];
+      if (envMin.length && envMax.length) {
+        ctx.beginPath();
+        envMax.forEach((p, i) => i ? ctx.lineTo(envX(p[0]), toY(p[1])) : ctx.moveTo(envX(p[0]), toY(p[1])));
+        for (let i = envMin.length - 1; i >= 0; i--) ctx.lineTo(envX(envMin[i][0]), toY(envMin[i][1]));
+        ctx.closePath();
+        ctx.fillStyle = '#eda10012'; ctx.fill();
+      } else {
+        ctx.beginPath(); ctx.strokeStyle = '#eda100'; ctx.lineWidth = 2*dpr; ctx.setLineDash([5*dpr, 4*dpr]);
+        envAvg.forEach((p, i) => i ? ctx.lineTo(envX(p[0]), toY(p[1])) : ctx.moveTo(envX(p[0]), toY(p[1])));
+        ctx.stroke(); ctx.setLineDash([]);
+      }
+    }
+
+    // DTW alignment lines
+    const d = this._pgDtwData;
+    const profTrace = d && Array.isArray(d.profile_trace) ? d.profile_trace.filter(p => Array.isArray(p) && p.length >= 2) : [];
+    const cycTrace = d && Array.isArray(d.cycle_trace) ? d.cycle_trace.filter(p => Array.isArray(p) && p.length >= 2) : [];
+    const warp = d && Array.isArray(d.warp_path) ? d.warp_path : [];
+    if (cycTrace.length && profTrace.length && warp.length) {
+      const profMaxX = Math.max(...profTrace.map(p=>p[0])) || 1;
+      const cycMaxX = Math.max(...cycTrace.map(p=>p[0])) || 1;
+      const step = Math.max(1, Math.floor(warp.length / 25));
+      ctx.save(); ctx.globalAlpha = 0.13; ctx.strokeStyle = '#fff'; ctx.lineWidth = dpr;
+      for (let i = 0; i < warp.length; i += step) {
+        const wp = warp[i];
+        if (!Array.isArray(wp) || wp.length < 2) continue;
+        const ci = Math.min(wp[0], cycTrace.length-1), pi = Math.min(wp[1], profTrace.length-1);
+        const cx1 = toX(cycTrace[ci][0] / cycMaxX * totalDur);
+        const cy1 = toY(cycTrace[ci][1]);
+        const cx2 = toX(profTrace[pi][0] / profMaxX * totalDur);
+        const cy2 = toY(profTrace[pi][1]);
+        ctx.beginPath(); ctx.moveTo(cx1, cy1); ctx.lineTo(cx2, cy2); ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // Profile mean trace from DTW data
+    if (profTrace.length) {
+      const profMaxX = Math.max(...profTrace.map(p=>p[0])) || 1;
+      ctx.beginPath(); ctx.strokeStyle = '#eda100'; ctx.lineWidth = 2*dpr; ctx.setLineDash([6*dpr, 4*dpr]);
+      profTrace.forEach((p, i) => {
+        const x = toX(p[0] / profMaxX * totalDur), y = toY(p[1]);
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      });
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+
+    // Cycle power trace fill
+    ctx.beginPath();
+    ctx.moveTo(toX(0), toY(0));
+    pts.forEach(p => ctx.lineTo(toX(p.t), toY(p.w)));
+    ctx.lineTo(toX(pts[pts.length-1].t), toY(0));
+    ctx.closePath();
+    ctx.fillStyle = primary + '1a'; ctx.fill();
+
+    // Cycle power trace line
+    ctx.beginPath(); ctx.strokeStyle = primary; ctx.lineWidth = 2*dpr;
+    pts.forEach((p, i) => i ? ctx.lineTo(toX(p.t), toY(p.w)) : ctx.moveTo(toX(p.t), toY(p.w)));
+    ctx.stroke();
+
+    // Threshold lines
+    const drawThrLine = (watts, color, label) => {
+      const y = toY(watts);
+      if (y < padT - 2 || y > padT + powerH + 2) return;
+      ctx.save();
+      ctx.strokeStyle = color; ctx.lineWidth = 2*dpr; ctx.setLineDash([8*dpr, 4*dpr]);
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(cw - padR, y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = color; ctx.beginPath(); ctx.arc(padL + (cw - padL - padR) * 0.06, y, 5*dpr, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = color; ctx.font = `bold ${9*dpr}px sans-serif`; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+      ctx.fillText(label + ' ' + Math.round(watts) + 'W', padL + 14*dpr, y - 2*dpr);
+      ctx.restore();
+    };
+    drawThrLine(+threshStart, '#2a78d6', 'Start');
+    drawThrLine(+threshStop, '#e34948', 'Stop');
+
+    // State band
+    const stateColors = { idle: bgCol, detecting: '#42a5f566', running: '#66bb6a66', ending: '#ef535066' };
+    const stateY = ch - stateBandH - phaseBandH;
+    ctx.fillStyle = bgCol; ctx.fillRect(padL, stateY, cw - padL - padR, stateBandH);
+    const statePts = this._pgComputeDetection(pts, +threshStart, +threshStop, totalDur);
+    statePts.forEach(seg => {
+      const x1 = toX(seg.start), x2 = toX(seg.end);
+      ctx.fillStyle = stateColors[seg.state] || gridCol;
+      ctx.fillRect(x1, stateY, Math.max(1, x2 - x1), stateBandH);
+      if ((x2 - x1) > 50*dpr) {
+        ctx.fillStyle = txtCol; ctx.font = `${8*dpr}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(seg.state.toUpperCase(), (x1 + x2) / 2, stateY + stateBandH/2);
+      }
+    });
+
+    // Phase bar
+    const cycle = (this._cycles || []).find(c => c.id === this._pgCycleId);
+    const profN = this._pgDtwData?.profile_name || this._pgProfileName || cycle?.profile_name;
+    const prof = profN ? (this._profiles || []).find(p => p.name === profN) : null;
+    const phaseY = ch - phaseBandH;
+    if (prof && Array.isArray(prof.phases) && prof.phases.length) {
+      prof.phases.forEach((ph, i) => {
+        const x1 = toX((ph.start || 0) * totalDur), x2 = toX((ph.end || 1) * totalDur);
+        const hue = (i * 47) % 360;
+        ctx.fillStyle = `hsla(${hue},60%,55%,0.55)`;
+        ctx.fillRect(x1, phaseY, Math.max(1, x2 - x1), phaseBandH);
+        if ((x2 - x1) > 40*dpr) {
+          ctx.fillStyle = '#fff'; ctx.font = `${7*dpr}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(ph.name, (x1 + x2)/2, phaseY + phaseBandH/2);
+        }
+      });
+    }
+
+    // Scrub cursor
+    const scrubX = toX(this._pgScrubFrac * totalDur);
+    ctx.save(); ctx.strokeStyle = '#e34948'; ctx.lineWidth = 1.5*dpr; ctx.setLineDash([4*dpr, 3*dpr]);
+    ctx.beginPath(); ctx.moveTo(scrubX, padT); ctx.lineTo(scrubX, ch - phaseBandH); ctx.stroke();
+    ctx.setLineDash([]); ctx.restore();
+
+    // Time axis labels
+    ctx.fillStyle = txtCol; ctx.font = `${9*dpr}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [0.25, 0.5, 0.75, 1.0].forEach(f => {
+      const t = f * totalDur;
+      const x = toX(t);
+      const m = Math.floor(t/60), s = Math.round(t%60);
+      ctx.fillText(`${m}:${String(s).padStart(2,'0')}`, x, stateY + stateBandH + 1*dpr);
+    });
+  }
+
+  _pgComputeDetection(pts, startThr, stopThr, totalDur) {
+    if (!pts.length) return [];
+    const segments = [];
+    const offDelay = parseFloat(this._pgParamOverrides.off_delay ?? this._pgFieldVal('off_delay', {}) ?? 120);
+    let state = 'idle', segStart = 0;
+    let offStart = null, onStart = null;
+    const push = (end, st) => { if (end > segStart + 0.5) segments.push({start: segStart, end, state: st}); };
+    for (let i = 1; i < pts.length; i++) {
+      const {t, w} = pts[i];
+      if (state === 'idle') {
+        if (w >= startThr) {
+          if (!onStart) onStart = t;
+          if (t - onStart >= 10) { push(onStart, 'idle'); segStart = onStart; state = 'detecting'; onStart = null; }
+        } else { onStart = null; }
+      } else if (state === 'detecting') {
+        if (w >= startThr) { if (t - segStart >= 20) { push(t, 'detecting'); segStart = t; state = 'running'; } }
+        else { push(t, 'detecting'); segStart = t; state = 'idle'; }
+      } else if (state === 'running') {
+        if (w < stopThr) {
+          if (!offStart) offStart = t;
+          if (t - offStart >= offDelay) { push(offStart, 'running'); segStart = offStart; state = 'ending'; offStart = null; }
+        } else { offStart = null; }
+      } else if (state === 'ending') {
+        if (w >= startThr) { push(t, 'ending'); segStart = t; state = 'running'; offStart = null; }
+        else if (w < stopThr && t - segStart >= offDelay * 0.5) { push(t, 'ending'); segStart = t; state = 'idle'; }
+      }
+    }
+    push(totalDur, state);
+    return segments;
+  }
+
+  _pgPlay() {
+    if (this._pgPlaying || !this._pgPowerPts?.length) return;
+    const pts = this._pgPowerPts;
+    const cy = (this._cycles || []).find(c => c.id === this._pgCycleId);
+    const totalDur = cy?._pg_duration || pts[pts.length-1].t || 1;
+    this._pgPlaying = true;
+    this._pgAnimStartWall = Date.now() - this._pgScrubFrac * (this._pgAnimDuration || 10) * 1000;
+    this._render();
+    this._pgAnimFrame = requestAnimationFrame(() => this._pgPlayTick());
+  }
+
+  _pgStop() {
+    if (!this._pgPlaying) return;
+    this._pgPlaying = false;
+    if (this._pgAnimFrame) { cancelAnimationFrame(this._pgAnimFrame); this._pgAnimFrame = null; }
+    this._render();
+  }
+
+  _pgPlayTick() {
+    if (!this._pgPlaying || !this._pgPowerPts?.length) return;
+    const pts = this._pgPowerPts;
+    const cy = (this._cycles || []).find(c => c.id === this._pgCycleId);
+    const totalDur = cy?._pg_duration || pts[pts.length-1].t || 1;
+    const replayMs = (this._pgAnimDuration || 10) * 1000;
+    const wallElapsed = Date.now() - this._pgAnimStartWall;
+    this._pgScrubFrac = Math.min(1, wallElapsed / replayMs);
+    this._pgUpdateStripFromScrub(this._pgScrubFrac, totalDur);
+    this._pgDrawCanvas();
+    if (this._pgScrubFrac >= 1) {
+      this._pgPlaying = false; this._pgAnimFrame = null; this._render();
+    } else {
+      this._pgAnimFrame = requestAnimationFrame(() => this._pgPlayTick());
+    }
+  }
+
+  _pgUpdateParamInput(key, val) {
+    const sr = this.shadowRoot;
+    const inp = sr && sr.querySelector(`[data-pgkey="${key}"]`);
+    if (inp) inp.value = typeof val === 'number' ? Math.round(val) : val;
+  }
+
+  _pgUpdateStripFromScrub(frac, totalDur) {
+    const pts = this._pgPowerPts;
+    if (!pts?.length) return;
+    const elapsed = frac * totalDur;
+    const power = this._pgInterpPower(pts, elapsed);
+    const energy = this._pgTrapEnergy(pts, elapsed);
+    const remaining = Math.max(0, totalDur - elapsed);
+    const pct = Math.round(frac * 100);
+    const opts = this._opts || {};
+    const startThr = this._pgThreshStart ?? opts.start_threshold_w ?? 50;
+    const stopThr = this._pgThreshStop ?? opts.stop_threshold_w ?? 5;
+    let stateText = 'IDLE', stateColor = 'var(--secondary-background-color)';
+    if (power >= startThr) {
+      if (frac < 0.08) { stateText = 'DETECTING'; stateColor = '#42a5f5'; }
+      else if (frac > 0.9) { stateText = 'ENDING'; stateColor = '#ef5350'; }
+      else { stateText = 'RUNNING'; stateColor = '#66bb6a'; }
+    }
+    const cycle = (this._cycles || []).find(c => c.id === this._pgCycleId);
+    const matchConf = this._pgDtwData?.stage4?.final_score ?? cycle?.match_confidence ?? null;
+    const confDisp = matchConf != null ? Math.round(matchConf * 100) + '%' : '—';
+    const fmtTime = s => { const m = Math.floor(s/60); return m + ':' + String(Math.round(s%60)).padStart(2,'0'); };
+    const fmtE = wh => wh >= 1000 ? (wh/1000).toFixed(2) + ' kWh' : wh.toFixed(0) + ' Wh';
+    const fmtP = w => w >= 1000 ? (w/1000).toFixed(1) + ' kW' : Math.round(w) + ' W';
+    const sr = this.shadowRoot;
+    const $id = id => sr && sr.getElementById(id);
+    const set = (id, v) => { const el = $id(id); if (el) el.textContent = v; };
+    const setStyle = (id, p, v) => { const el = $id(id); if (el) el.style[p] = v; };
+    const badge = $id('wd-pg-state-badge');
+    if (badge) { badge.textContent = stateText; badge.style.background = stateColor; badge.style.color = stateColor.includes('var') ? '' : '#fff'; }
+    set('wd-pg-power', fmtP(power));
+    set('wd-pg-pct', pct + '%');
+    setStyle('wd-pg-pbar', 'width', pct + '%');
+    set('wd-pg-rem', fmtTime(remaining));
+    set('wd-pg-energy', fmtE(energy));
+    set('wd-pg-conf', confDisp);
+  }
+
+  async _pgRunSim() {
+    const dev = this._devices[this._selIdx];
+    if (!dev) return;
+    const cycles = this._cycles || [];
+    const ids = cycles.slice(0, Math.max(1, this._pgSimCycles || 20)).map(c => c.id);
+    if (!ids.length) { this._showToast(this._t('msg.no_cycles_selected', {}, 'No cycles available.'), 'error'); return; }
+    const override = { ...this._pgParamOverrides };
+    if (this._pgThreshStart != null) override.start_threshold_w = this._pgThreshStart;
+    if (this._pgThreshStop != null) override.stop_threshold_w = this._pgThreshStop;
+    this._pgSimCancelled = false;
+    this._pgSimProgress = { done: 0, total: ids.length };
+    this._render();
+    const CHUNK = 5;
+    const s = { total: ids.length, detected: 0, matchCorrect: 0, matched: 0, unmatched: 0, ambiguous: 0 };
+    await this._busyRun('pg-sim', async () => {
+      try {
+        for (let i = 0; i < ids.length && !this._pgSimCancelled; i += CHUNK) {
+          const chunk = ids.slice(i, i + CHUNK);
+          const r = await this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: chunk, settings_override: override, concurrency: chunk.length });
+          const arr = Array.isArray(r) ? r : (Array.isArray(r?.results) ? r.results : []);
+          arr.forEach(r => { const o = (r && r.outcome) || {}; if (o.detected) s.detected++; if (o.match_correct) s.matchCorrect++; if (o.match_profile) s.matched++; if (o.ambiguous) s.ambiguous++; });
+          s.unmatched = s.total - s.matched;
+          this._pgSimProgress = { done: Math.min(i + CHUNK, ids.length), total: ids.length };
+          this._pgSimProgressUpdate();
+        }
+        if (!this._pgSimCancelled) {
+          this._pgSimResults = s;
+          this._pgLastSimAt = Date.now();
+          this._pgNeedsRestart = false;
+        }
+      } catch (e) {
+        if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
+        else this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+      }
+      this._pgSimProgress = null;
+    });
   }
 
   // True when a WS call failed because the command isn't registered yet (needs a
@@ -3969,132 +4422,292 @@ class HaWashdataPanel extends HTMLElement {
     return code === 'unknown_command' || msg.includes('unknown command') || msg.includes('unknown_command');
   }
 
-  async _pgRunSimulation() {
-    const dev = this._devices[this._selIdx];
-    if (!dev) return;
-    const ids = Array.from(this._pgSel);
-    if (!ids.length) { this._showToast(this._t('msg.no_cycles_selected', {}, 'Select at least one cycle first.'), 'error'); return; }
-    await this._busyRun('pg-sim', async () => {
-      try {
-        const r = await this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: { ...this._pgOverrides }, concurrency: Math.min(50, Math.min(this._pgConcurrency || 50, ids.length)) });
-        this._pgResults = r || {};
-        this._pgNeedsRestart = false;
-      } catch (e) {
-        this._pgResults = null;
-        if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
-        else this._showToast(this._t('toast.pg_sim_failed', {error: (e && e.message) || e}, 'Simulation failed: ' + ((e && e.message) || e)), 'error');
-      }
-    });
-  }
-
-  async _pgRunAb() {
-    const dev = this._devices[this._selIdx];
-    if (!dev) return;
-    const ids = Array.from(this._pgSel);
-    if (!ids.length) { this._showToast(this._t('msg.no_cycles_selected', {}, 'Select at least one cycle first.'), 'error'); return; }
-    await this._busyRun('pg-ab', async () => {
-      try {
-        const [a, b] = await Promise.all([
-          this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: {}, concurrency: Math.min(50, Math.min(this._pgConcurrency || 50, ids.length)) }),
-          this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: { ...this._pgAbOverrides }, concurrency: Math.min(50, Math.min(this._pgConcurrency || 50, ids.length)) }),
-        ]);
-        this._pgAbResults = { a: a || {}, b: b || {} };
-        this._pgNeedsRestart = false;
-      } catch (e) {
-        this._pgAbResults = null;
-        if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
-        else this._showToast(this._t('toast.pg_sim_failed', {error: (e && e.message) || e}, 'Simulation failed: ' + ((e && e.message) || e)), 'error');
-      }
-    });
-  }
-
-  async _pgApplyB() {
-    const dev = this._devices[this._selIdx];
-    if (!dev || !this._canEdit()) return;
-    const overrides = { ...this._pgAbOverrides };
-    if (!Object.keys(overrides).length) { this._showToast(this._t('msg.pg_no_b_overrides', {}, 'No B overrides to apply.'), 'error'); return; }
-    const list = Object.entries(overrides).map(([k, v]) => `${this._t('setting.' + k + '.label', {}, k)} = ${v}`).join('\n');
-    if (!confirm(this._t('msg.pg_apply_b_confirm', {list}, 'Apply set B to the live device?\n\n' + list))) return;
-    await this._busyRun('pg-apply-b', async () => {
-      try {
-        await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: overrides });
-        this._opts = { ...this._opts, ...overrides };
-        this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
-      } catch (e) { this._showToast(this._t('toast.apply_failed', {error: (e && e.message) || e}, 'Apply failed: ' + ((e && e.message) || e)), 'error'); }
-    });
-  }
-
-  async _pgRunDtw() {
-    const dev = this._devices[this._selIdx];
-    if (!dev) return;
-    const cid = this._pgDtwCycle || ((this._cycles && this._cycles[0]) ? this._cycles[0].id : '');
-    if (!cid) { this._showToast(this._t('msg.no_cycles_selected', {}, 'Select at least one cycle first.'), 'error'); return; }
-    this._pgDtwCycle = cid;
-    const msg = { type: `${_DOMAIN}/get_dtw_debug`, entry_id: dev.entry_id, cycle_id: cid };
-    if (this._pgDtwProfile) msg.profile_name = this._pgDtwProfile;
-    await this._busyRun('pg-dtw', async () => {
-      try {
-        const r = await this._ws(msg);
-        this._pgDtwData = r || {};
-        this._pgNeedsRestart = false;
-      } catch (e) {
-        this._pgDtwData = null;
-        if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
-        else this._showToast(this._t('toast.pg_dtw_failed', {error: (e && e.message) || e}, 'DTW inspect failed: ' + ((e && e.message) || e)), 'error');
-      }
-    });
-  }
-
-  // Post-render canvas draws for the DTW inspector (overlay curves + warp path).
-  _drawPlaygroundCanvases() {
-    if (this._tab !== 'playground' || this._pgSubtab !== 'dtw') return;
-    const d = this._pgDtwData;
-    if (!d) return;
-    const clean = a => (Array.isArray(a) ? a.filter(p => Array.isArray(p) && p.length >= 2 && p.every(n => typeof n === 'number' && !isNaN(n))) : []);
-    const cyc = clean(d.cycle_trace);
-    const prof = clean(d.profile_trace);
-    const series = [];
-    if (cyc.length) series.push({ points: cyc, stroke: 'primary', width: 2, name: this._t('lbl.cycle', {}, 'Cycle') });
-    if (prof.length) series.push({ points: prof, stroke: '#ff9800', width: 2, dash: true, name: this._t('lbl.profile', {}, 'Profile') });
-    if (series.length) this._drawCurves('wd-pg-dtw-canvas', { series });
-    this._drawPgWarp(d.warp_path);
-  }
-
-  // Simple warp-path plot: x = profile index, y = cycle index.
-  _drawPgWarp(warp) {
+  _pgSimProgressUpdate() {
     const sr = this.shadowRoot;
-    const canvas = sr && sr.getElementById('wd-pg-warp-canvas');
-    if (!canvas) return;
-    const path = Array.isArray(warp) ? warp.filter(p => Array.isArray(p) && p.length >= 2) : [];
+    const prog = this._pgSimProgress;
+    const bar = sr && sr.getElementById('wd-pg-sim-progress-bar');
+    const lbl = sr && sr.getElementById('wd-pg-sim-progress-lbl');
+    if (bar && prog) { bar.style.width = Math.round(prog.done / prog.total * 100) + '%'; }
+    if (lbl && prog) { lbl.textContent = `${prog.done} / ${prog.total} cycles`; }
+  }
+
+  _pgSweepProgressUpdate() {
+    const sr = this.shadowRoot;
+    const prog = this._pgSweepProgress;
+    const bar = sr && sr.getElementById('wd-pg-sw-progress-bar');
+    const lbl = sr && sr.getElementById('wd-pg-sw-progress-lbl');
+    if (bar && prog) bar.style.width = Math.round(prog.done / prog.total * 100) + '%';
+    if (lbl && prog) lbl.textContent = `Step ${prog.done} / ${prog.total}`;
+  }
+
+  // F3: Linear interpolation of power at a given cycle offset (seconds)
+  _pgInterpPower(points, t) {
+    if (!points.length) return 0;
+    if (t <= points[0].t) return points[0].w;
+    for (let i = 1; i < points.length; i++) {
+      if (t <= points[i].t) {
+        const dt = points[i].t - points[i-1].t;
+        if (dt <= 0) return points[i].w;
+        const alpha = (t - points[i-1].t) / dt;
+        return points[i-1].w + alpha * (points[i].w - points[i-1].w);
+      }
+    }
+    return points[points.length - 1].w;
+  }
+
+  // F3: Trapezoid energy integration up to offset t (seconds) -> Wh
+  _pgTrapEnergy(points, t) {
+    let wh = 0;
+    for (let i = 1; i < points.length; i++) {
+      const t1 = points[i - 1].t, w1 = points[i - 1].w;
+      const t2 = Math.min(points[i].t, t), w2 = this._pgInterpPower(points, t2);
+      if (t2 <= t1) continue;
+      wh += (w1 + w2) / 2 * (t2 - t1) / 3600;
+      if (t2 >= t) break;
+    }
+    return wh;
+  }
+
+  async _pgRunSweep() {
+    const dev = this._devices[this._selIdx];
+    if (!dev) return;
+    const fromN = parseFloat(this._pgSweepFrom), toN = parseFloat(this._pgSweepTo);
+    if (isNaN(fromN) || isNaN(toN) || fromN === toN) { this._showToast(this._t('msg.toast_name_required', {}, 'Set a valid From/To range.'), 'error'); return; }
+    const cycles = this._cycles || [];
+    const ids = cycles.slice(0, Math.max(1, this._pgSimCycles || 20)).map(c => c.id);
+    if (!ids.length) { this._showToast(this._t('msg.no_cycles_selected', {}, 'No cycles available.'), 'error'); return; }
+    const steps = Math.max(2, Math.min(20, this._pgSweepSteps || 5));
+    const vals = Array.from({length: steps}, (_, i) => fromN + (toN - fromN) * i / (steps - 1));
+    const paramKey = this._pgSweepParam || 'off_delay';
+    // Honor dragged threshold lines in the sweep, exactly like _pgRunSim, so the
+    // "best value" is computed under the detection settings the user set up.
+    const baseOverride = { ...this._pgParamOverrides };
+    if (this._pgThreshStart != null) baseOverride.start_threshold_w = this._pgThreshStart;
+    if (this._pgThreshStop != null) baseOverride.stop_threshold_w = this._pgThreshStop;
+    this._pgSimCancelled = false;
+    this._pgSweepProgress = null;
+    await this._busyRun('pg-sweep', async () => {
+      try {
+        const sweep = [];
+        for (let sweepIndex = 0; sweepIndex < vals.length && !this._pgSimCancelled; sweepIndex++) {
+          const v = vals[sweepIndex];
+          const r = await this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: { ...baseOverride, [paramKey]: v }, concurrency: Math.min(50, ids.length) });
+          const arr = Array.isArray(r) ? r : (Array.isArray(r?.results) ? r.results : []);
+          const s = { total: arr.length, detected: 0, matchCorrect: 0, matched: 0, unmatched: 0, ambiguous: 0 };
+          arr.forEach(r => { const o = (r && r.outcome) || {}; if (o.detected) s.detected++; if (o.match_correct) s.matchCorrect++; if (o.match_profile) s.matched++; if (o.ambiguous) s.ambiguous++; });
+          s.unmatched = s.total - s.matched;
+          sweep.push({ paramVal: v, summary: s });
+          this._pgSweepProgress = { done: sweepIndex + 1, total: vals.length };
+          this._pgSweepProgressUpdate();
+        }
+        this._pgSweepResults = sweep;
+        this._pgLastSimAt = Date.now();
+        this._pgNeedsRestart = false;
+      } catch (e) {
+        if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
+        else this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+      } finally {
+        this._pgSweepProgress = null;
+      }
+    });
+  }
+
+  async _pgApplySweepBest() {
+    const dev = this._devices[this._selIdx];
+    if (!dev || !this._canEdit() || !this._pgSweepResults?.length) return;
+    // Best = highest matchCorrect fraction
+    let best = null, bestScore = -1;
+    for (const {paramVal, summary} of this._pgSweepResults) {
+      const s = summary || {};
+      const score = s.total ? s.matchCorrect / s.total : 0;
+      if (score > bestScore) { bestScore = score; best = paramVal; }
+    }
+    if (best == null) return;
+    const paramKey = this._pgSweepParam;
+    const lbl = this._t('setting.' + paramKey + '.label', {}, paramKey);
+    if (!confirm(this._t('msg.pg_apply_confirm', {label: lbl, value: best}, 'Apply best value: ' + lbl + ' = ' + best + '?'))) return;
+    await this._busyRun('pg-sweep-apply', async () => {
+      try {
+        await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: { [paramKey]: best } });
+        this._opts = { ...this._opts, [paramKey]: best };
+        this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
+      } catch(e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message||e}, 'Save failed: '+(e.message||e)), 'error'); }
+    });
+  }
+
+  _drawPlaygroundCanvases() {
+    if (this._tab !== 'playground') return;
+    this._pgDrawCanvas();
+    if (this._pgSweepResults?.length >= 2) this._drawPgSweepChart();
+  }
+
+  _drawPgSweepChart() {
+    const sr = this.shadowRoot;
+    const canvas = sr && sr.getElementById('wd-pg-sweep-chart');
+    const results = this._pgSweepResults;
+    if (!canvas || !results?.length) return;
+
+    // Wire hover interactions once
+    if (!canvas._wdHooked) {
+      canvas._wdHooked = true;
+      canvas.addEventListener('pointermove', e => {
+        const r = canvas.getBoundingClientRect();
+        this._pgSweepHoverX = e.clientX - r.left;
+        this._drawPgSweepChart();
+      });
+      canvas.addEventListener('mouseleave', () => {
+        this._pgSweepHoverX = null;
+        this._drawPgSweepChart();
+      });
+    }
+
     const rect = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     const cw = Math.max(1, Math.round(rect.width * dpr));
-    const ch = Math.max(1, Math.round((rect.height || 160) * dpr));
-    canvas.width = cw; canvas.height = ch;
+    const ch = Math.max(1, Math.round(180 * dpr));
+    if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
     const ctx = canvas.getContext('2d');
     const cs = getComputedStyle(this);
-    const primary = (cs.getPropertyValue('--primary-color') || '#03a9f4').trim() || '#03a9f4';
-    const grid = (cs.getPropertyValue('--divider-color') || 'rgba(127,127,127,.3)').trim() || 'rgba(127,127,127,.3)';
-    const txt = (cs.getPropertyValue('--secondary-text-color') || '#888').trim() || '#888';
+    const isDark = cs.getPropertyValue('--primary-background-color').trim().length > 0 &&
+      window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const txtCol = (cs.getPropertyValue('--secondary-text-color') || '#888').trim();
+
+    // Categorical series: slot-1 blue, slot-2 aqua/green, slot-3 yellow
+    const series = [
+      { key: 'matchCorrect', label: 'Matched',   color: isDark ? '#3987e5' : '#2a78d6' },
+      { key: 'detected',     label: 'Detected',  color: isDark ? '#199e70' : '#1baf7a' },
+      { key: 'ambiguous',    label: 'Ambiguous', color: isDark ? '#c98500' : '#eda100' },
+    ];
+
+    const legendH = 18 * dpr;
+    const pad = { l: 30*dpr, r: 12*dpr, t: legendH + 8*dpr, b: 22*dpr };
+    const plotW = cw - pad.l - pad.r;
+    const plotH = ch - pad.t - pad.b;
+
+    const sums = results.map(({paramVal, summary}) => ({ x: paramVal, ...(summary || {}) }));
+    const xs = sums.map(s => s.x);
+    const minX = Math.min(...xs), maxX = Math.max(...xs, minX + 0.001);
+    const toX = x => pad.l + (x - minX) / (maxX - minX) * plotW;
+    const toY = v => pad.t + (1 - v) * plotH;
+
     ctx.clearRect(0, 0, cw, ch);
-    if (!path.length) return;
-    const padL = 34 * dpr, padR = 8 * dpr, padT = 8 * dpr, padB = 20 * dpr;
-    let maxI = 0, maxJ = 0;
-    path.forEach(p => { if (p[0] > maxI) maxI = p[0]; if (p[1] > maxJ) maxJ = p[1]; });
-    maxI = maxI || 1; maxJ = maxJ || 1;
-    const X = j => padL + (j / maxJ) * (cw - padL - padR);
-    const Y = i => ch - padB - (i / maxI) * (ch - padT - padB);
-    ctx.strokeStyle = grid; ctx.lineWidth = dpr;
-    ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, ch - padB); ctx.lineTo(cw - padR, ch - padB); ctx.stroke();
-    ctx.strokeStyle = primary; ctx.lineWidth = 1.5 * dpr; ctx.beginPath();
-    path.forEach((p, k) => { const x = X(p[1]), y = Y(p[0]); if (k) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
-    ctx.stroke();
-    ctx.fillStyle = primary;
-    path.forEach(p => { ctx.beginPath(); ctx.arc(X(p[1]), Y(p[0]), 1.6 * dpr, 0, 6.2832); ctx.fill(); });
-    ctx.fillStyle = txt; ctx.font = `${10 * dpr}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-    ctx.fillText(this._t('lbl.profile_index', {}, 'profile index →'), (padL + cw - padR) / 2, ch - 4 * dpr);
-    ctx.save(); ctx.translate(11 * dpr, (padT + ch - padB) / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    ctx.fillText(this._t('lbl.cycle_index', {}, 'cycle index →'), 0, 0); ctx.restore();
+
+    // Legend (horizontal, above chart)
+    let legX = pad.l;
+    const legY = 6 * dpr;
+    series.forEach(({label, color}) => {
+      ctx.strokeStyle = color; ctx.lineWidth = 2*dpr; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(legX, legY + 5*dpr); ctx.lineTo(legX + 20*dpr, legY + 5*dpr); ctx.stroke();
+      ctx.fillStyle = txtCol; ctx.font = `${9*dpr}px sans-serif`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillText(label, legX + 24*dpr, legY + 5*dpr);
+      legX += (24 + ctx.measureText(label).width / dpr + 16) * dpr;
+    });
+
+    // Gridlines (solid, not dashed)
+    ctx.setLineDash([]);
+    [0, 0.25, 0.5, 0.75, 1].forEach(v => {
+      const y = toY(v);
+      ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+      ctx.lineWidth = dpr;
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(cw - pad.r, y); ctx.stroke();
+      ctx.fillStyle = txtCol; ctx.font = `${8*dpr}px sans-serif`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(Math.round(v * 100) + '%', pad.l - 4*dpr, y);
+    });
+
+    // Compute best value (highest matchCorrect fraction)
+    let bestX = null, bestScore = -1;
+    sums.forEach(s => {
+      const score = s.total ? (s.matchCorrect || 0) / s.total : 0;
+      if (score > bestScore) { bestScore = score; bestX = s.x; }
+    });
+
+    // Best value marker (dashed vertical line)
+    if (bestX != null) {
+      const bx = toX(bestX);
+      ctx.save();
+      ctx.strokeStyle = 'rgba(42,120,214,0.30)';
+      ctx.lineWidth = dpr;
+      ctx.setLineDash([4*dpr, 3*dpr]);
+      ctx.beginPath(); ctx.moveTo(bx, pad.t); ctx.lineTo(bx, pad.t + plotH); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = isDark ? '#3987e5' : '#2a78d6';
+      ctx.font = `bold ${8*dpr}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText('Best: ' + (typeof bestX === 'number' ? bestX.toFixed(1).replace(/\.0$/,'') : bestX), bx, pad.t - 2*dpr);
+      ctx.restore();
+    }
+
+    // Lines + dots per series
+    series.forEach(({key, color}) => {
+      ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2*dpr;
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.setLineDash([]);
+      sums.forEach((s, i) => {
+        const v = (s[key] || 0) / (s.total || 1);
+        i ? ctx.lineTo(toX(s.x), toY(v)) : ctx.moveTo(toX(s.x), toY(v));
+      });
+      ctx.stroke();
+      // Dots with surface-color ring
+      sums.forEach(s => {
+        const v = (s[key] || 0) / (s.total || 1);
+        const dx = toX(s.x), dy = toY(v);
+        ctx.fillStyle = (cs.getPropertyValue('--card-background-color') || '#fff').trim();
+        ctx.beginPath(); ctx.arc(dx, dy, 5*dpr, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(dx, dy, 4*dpr, 0, Math.PI*2); ctx.fill();
+      });
+    });
+
+    // X-axis labels
+    ctx.fillStyle = txtCol; ctx.font = `${8*dpr}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    sums.forEach(s => ctx.fillText(s.x.toFixed?.(1).replace(/\.0$/,'') ?? s.x, toX(s.x), pad.t + plotH + 4*dpr));
+
+    // Crosshair + tooltip
+    const hoverCssX = this._pgSweepHoverX;
+    if (hoverCssX != null) {
+      const hoverPx = hoverCssX * dpr;
+      // Snap to nearest data point
+      let snapS = null, snapDist = Infinity;
+      sums.forEach(s => { const d = Math.abs(toX(s.x) - hoverPx); if (d < snapDist) { snapDist = d; snapS = s; } });
+      if (snapS && snapDist < 40*dpr) {
+        const sx = toX(snapS.x);
+        // Vertical crosshair
+        ctx.save();
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.20)';
+        ctx.lineWidth = dpr; ctx.setLineDash([]);
+        ctx.beginPath(); ctx.moveTo(sx, pad.t); ctx.lineTo(sx, pad.t + plotH); ctx.stroke();
+        ctx.restore();
+
+        // Tooltip
+        const swCf = this._pgOverrideFields().find(([k]) => k === this._pgSweepParam);
+        const paramLabel = swCf ? this._t('setting.'+swCf[0]+'.label',{},swCf[1]) : this._pgSweepParam;
+        const unit = swCf ? (swCf[2] || '') : '';
+        const tipLines = [
+          { text: `${paramLabel}: ${typeof snapS.x === 'number' ? snapS.x.toFixed(1).replace(/\.0$/,'') : snapS.x}${unit ? ' '+unit : ''}`, bold: true, color: txtCol },
+          ...series.map(({key, label, color}) => {
+            const pct = snapS.total ? Math.round((snapS[key] || 0) / snapS.total * 100) : 0;
+            return { text: label + ': ' + pct + '%', bold: false, color };
+          }),
+        ];
+        const tipPad = 6*dpr, tipLineH = 13*dpr;
+        ctx.font = `${9*dpr}px sans-serif`;
+        const tipW = Math.max(...tipLines.map(l => ctx.measureText(l.text).width)) + tipPad * 2;
+        const tipH = tipLines.length * tipLineH + tipPad * 2;
+        let tx = sx + 8*dpr, ty = pad.t + 4*dpr;
+        if (tx + tipW > cw - pad.r) tx = sx - tipW - 8*dpr;
+        if (ty + tipH > ch - pad.b) ty = ch - pad.b - tipH;
+        ctx.fillStyle = isDark ? 'rgba(30,30,30,0.92)' : 'rgba(255,255,255,0.95)';
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(tx, ty, tipW, tipH, 4*dpr) : ctx.rect(tx, ty, tipW, tipH);
+        ctx.fill();
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)';
+        ctx.lineWidth = dpr; ctx.stroke();
+        tipLines.forEach((line, i) => {
+          ctx.fillStyle = line.color;
+          ctx.font = `${line.bold ? 'bold ' : ''}${9*dpr}px sans-serif`;
+          ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+          ctx.fillText(line.text, tx + tipPad, ty + tipPad + i * tipLineH);
+        });
+      }
+    }
   }
 
   _htmlPhases() {
@@ -4561,7 +5174,7 @@ class HaWashdataPanel extends HTMLElement {
     else if (id === 'wd-env-canvas') this._drawProfileEnvelope();
     else if (id === 'wd-phase-canvas') this._drawPhaseEditor();
     else if (id === 'wd-spag-canvas') this._drawSpaghetti();
-    else if (id === 'wd-pg-canvas') this._drawGroupCanvas();
+    else if (id === 'wd-pgroup-canvas') this._drawGroupCanvas();
     else {
       // Generic fallback: replay _drawCurves with the stored opts so hover
       // crosshairs on any other canvas don't accumulate stale traces.
@@ -4757,10 +5370,10 @@ class HaWashdataPanel extends HTMLElement {
 
   _htmlModal() {
     const m = this._modal;
-    if (m.type === 'cycle-detail') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg">${this._htmlCycleModal(m)}</div></div>`;
-    if (m.type === 'profile-panel') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg">${this._htmlProfilePanel(m)}</div></div>`;
-    if (m.type === 'profile-group') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg">${this._htmlProfileGroupModal(m)}</div></div>`;
-    if (m.type === 'compare-cycles') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg">${this._htmlCompareModal(m)}</div></div>`;
+    if (m.type === 'cycle-detail') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true">${this._htmlCycleModal(m)}</div></div>`;
+    if (m.type === 'profile-panel') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true">${this._htmlProfilePanel(m)}</div></div>`;
+    if (m.type === 'profile-group') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true">${this._htmlProfileGroupModal(m)}</div></div>`;
+    if (m.type === 'compare-cycles') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true">${this._htmlCompareModal(m)}</div></div>`;
 
     let body = '';
     if (m.type === 'confirm') {
@@ -4859,7 +5472,7 @@ class HaWashdataPanel extends HTMLElement {
         <table class="wd-table"><tbody>${rows}</tbody></table>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-primary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button></div>`;
     }
-    return `<div class="wd-overlay"><div class="wd-modal">${body}</div></div>`;
+    return `<div class="wd-overlay"><div class="wd-modal" role="dialog" aria-modal="true">${body}</div></div>`;
   }
 
   // Interactive cycle inspector: view / trim / split.
@@ -5057,7 +5670,7 @@ class HaWashdataPanel extends HTMLElement {
     }
     return `<h2>Cycle · ${_esc(_fmtDate(cur.start_time))}</h2>
       ${meta}${modeBar}
-      <div class="wd-canvas-wrap"><canvas id="wd-cyc-canvas"></canvas></div>
+      <div class="wd-canvas-wrap"><canvas id="wd-cyc-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_cycle_chart', {}, 'Cycle power trace'))}"></canvas></div>
       ${artifactBox}
       ${restartGapBox}
       ${controls}`;
@@ -5088,7 +5701,7 @@ class HaWashdataPanel extends HTMLElement {
         const pct = Math.round((ph.health_score || 0) * 100);
         const cvPct = ph.duration_cv != null ? ` · duration CV ${Math.round(ph.duration_cv * 100)}%` : '';
         const confPct = ph.confidence_mean != null ? ` · avg confidence ${Math.round(ph.confidence_mean * 100)}%` : '';
-        return `<div style="margin:8px 0 4px;padding:8px 12px;border-radius:6px;background:${bg};border:1px solid ${col}22;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        return `<div style="margin:8px 0 4px;padding:8px 12px;border-radius:6px;background:${bg};border:1px solid color-mix(in srgb, ${col} 13%, transparent);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <span style="font-weight:600;color:${col}">${ph.health_status === 'poor' ? this._t('health.poor', {}, '⚠ Poor match fit') : ph.health_status === 'fair' ? this._t('health.fair', {}, 'Fair match fit') : this._t('health.good', {}, '✓ Good match fit')}</span>
           <span style="font-size:.85em;opacity:.8">score ${pct}%${cvPct}${confPct}</span>
           ${ph.health_status === 'poor' ? `<span style="font-size:.82em;opacity:.75;flex-basis:100%">${this._t('msg.profile_poor_health_detail', {}, 'Cycles assigned to this profile have inconsistent shapes or low confidence. Consider rebuilding the envelope or reviewing labelled cycles.')}</span>` : ''}
@@ -5141,7 +5754,7 @@ class HaWashdataPanel extends HTMLElement {
             <span style="font-size:.82em;opacity:.75;display:block;margin-top:4px">${this._t('msg.shape_drift_detail', {}, 'The power pattern for this profile has shifted over time — possible appliance wear or maintenance needed (e.g. descaling, filter cleaning).')}</span>
           </div>`;
         })() : ''}
-        ${env.avg && env.avg.length ? `<div class="wd-canvas-wrap"><canvas id="wd-env-canvas"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_envelope', {}, 'No envelope yet - rebuild after labelling cycles.')}</p>`}`;
+        ${env.avg && env.avg.length ? `<div class="wd-canvas-wrap"><canvas id="wd-env-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_envelope_chart', {}, 'Profile power envelope chart'))}"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_envelope', {}, 'No envelope yet - rebuild after labelling cycles.')}</p>`}`;
     } else if (m.tab === 'phases') {
       const cat = m.catalog || [];
       const rows = (m.phases || []).map((ph, i) => {
@@ -5154,7 +5767,7 @@ class HaWashdataPanel extends HTMLElement {
       }).join('');
       const busy = this._busy.has('pp-phase-save');
       body = `<p class="wd-info" style="margin-bottom:10px">${this._t('msg.phase_ranges_intro', {}, 'Phase ranges (minutes from cycle start) overlaid on the average curve. Edit values to preview live.')}</p>
-        ${m.env && m.env.avg && m.env.avg.length ? `<div class="wd-canvas-wrap"><canvas id="wd-phase-canvas"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_envelope_overlay', {}, 'No envelope available to overlay.')}</p>`}
+        ${m.env && m.env.avg && m.env.avg.length ? `<div class="wd-canvas-wrap"><canvas id="wd-phase-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_phase_chart', {}, 'Phase editor chart'))}"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_envelope_overlay', {}, 'No envelope available to overlay.')}</p>`}
         <div style="margin:10px 0">${rows || `<p class="wd-info">${this._t('msg.no_phases_assigned', {}, 'No phases assigned.')}</p>`}</div>
         ${canEdit ? `<div class="wd-mode-bar">
           <button class="wd-btn wd-btn-sm wd-btn-secondary" data-maction="pp-phase-add">${this._t('btn.add_phase', {}, '+ Add phase')}</button>
@@ -5196,7 +5809,7 @@ class HaWashdataPanel extends HTMLElement {
       </tr></thead>`;
       const busy = this._busy.has('pp-cleanup-del');
       body = `<p class="wd-info" style="margin-bottom:10px">${this._t('msg.cleanup_intro', {}, 'Every labelled cycle overlaid. Tick outliers and delete to clean up the profile.')}</p>
-        ${allCyc.length ? `<div class="wd-canvas-wrap"><canvas id="wd-spag-canvas"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_cycles_profile', {}, 'No cycles for this profile.')}</p>`}
+        ${allCyc.length ? `<div class="wd-canvas-wrap"><canvas id="wd-spag-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_spaghetti_chart', {}, 'Overlaid cycle power traces'))}"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_cycles_profile', {}, 'No cycles for this profile.')}</p>`}
         ${allCyc.length ? `<div class="wd-table-wrap" style="max-height:420px;overflow:auto;margin:10px 0"><table class="wd-table">${thead}<tbody>${rows}</tbody></table></div>` : ''}
         ${canEdit ? `<div class="wd-modal-actions"><button class="wd-btn wd-btn-danger" data-maction="pp-cleanup-del" ${busy || sel.size === 0 ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Deleting…' : `Delete selected (${sel.size})`}</button></div>` : ''}`;
     } else if (m.tab === 'danger') {
@@ -5304,7 +5917,7 @@ class HaWashdataPanel extends HTMLElement {
     }).join('') || `<span class="wd-info">${this._t('msg.no_profiles_overlay', {}, 'No profiles to overlay.')}</span>`;
     return `<h2>${this._t('msg.compare_cycles_title', { count: ids.length }, `Compare ${ids.length} cycles`)}</h2>
       ${m.loaded ? '' : `<div class="wd-info" style="margin-bottom:6px">${this._t('msg.loading', {}, 'Loading…')}</div>`}
-      <div class="wd-canvas-wrap"><canvas id="wd-compare-canvas"></canvas></div>
+      <div class="wd-canvas-wrap"><canvas id="wd-compare-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_compare_chart', {}, 'Cycle comparison chart'))}"></canvas></div>
       <div class="wd-rev-sub" style="margin-top:10px">${this._t('msg.compare_selected_cycles', {}, 'Selected cycles (solid) — show / hide')}</div>
       <div class="wd-rev-tags">${cycRows}</div>
       <div class="wd-rev-sub">${this._t('msg.compare_overlay_profiles', {}, 'Overlay profiles (faint)')}${_tip('Overlay learned profile envelopes to see which program each cycle resembles.')}</div>
@@ -5424,39 +6037,121 @@ class HaWashdataPanel extends HTMLElement {
       else if (sub === 'maintenance') this._fetchMaintenance(dev.entry_id).then(() => { if (this._panelSubtab === 'maintenance') this._render(); });
     }));
 
-    // F3: Playground sub-tab switch.
-    sr.querySelectorAll('[data-pgtab]').forEach(btn => btn.addEventListener('click', () => {
-      this._pgSubtab = btn.dataset.pgtab;
-      this._render();
+    // F3: Playground canvas pointer interaction (threshold drag + scrub)
+    const pgCanvas = sr.getElementById('wd-pg-canvas');
+    if (pgCanvas) {
+      const _canvasLayout = () => {
+        const rect = pgCanvas.getBoundingClientRect();
+        const ch = rect.height || 280;
+        const stateBandH = 34, phaseBandH = 14;
+        const padT = 10, padB = stateBandH + phaseBandH + 4;
+        const powerH = ch - padT - padB;
+        const padL = 44;
+        return { rect, ch, padT, padB, powerH, padL };
+      };
+      const _yToWatts = (clientY) => {
+        const { rect, padT, powerH } = _canvasLayout();
+        const y = clientY - rect.top;
+        const pts = this._pgPowerPts;
+        if (!pts?.length) return 0;
+        const maxW = Math.max(...pts.map(p => p.w), 1);
+        return Math.max(0, (1 - Math.max(0, y - padT) / powerH) * maxW);
+      };
+      const _xToFrac = (clientX) => {
+        const { rect, padL } = _canvasLayout();
+        const x = clientX - rect.left;
+        const usableW = rect.width - padL - 8;
+        return Math.max(0, Math.min(1, (x - padL) / usableW));
+      };
+      const _thresholdY = (watts) => {
+        const { rect, padT, powerH } = _canvasLayout();
+        const pts = this._pgPowerPts;
+        if (!pts?.length) return 0;
+        const maxW = Math.max(...pts.map(p => p.w), 1);
+        return rect.top + padT + (1 - Math.max(0, +watts) / maxW) * powerH;
+      };
+      pgCanvas.addEventListener('pointermove', (e) => {
+        if (!this._pgDragging) {
+          const startThr = this._pgThreshStart ?? this._pgFieldVal('start_threshold_w', {}) ?? 50;
+          const stopThr = this._pgThreshStop ?? this._pgFieldVal('stop_threshold_w', {}) ?? 5;
+          const startY = _thresholdY(startThr), stopY = _thresholdY(stopThr);
+          const relY = e.clientY;
+          const nearThr = Math.abs(relY - startY) < 10 || Math.abs(relY - stopY) < 10;
+          pgCanvas.style.cursor = nearThr ? 'ns-resize' : 'crosshair';
+          return;
+        }
+        if (this._pgDragging === 'start_thr') {
+          this._pgThreshStart = Math.max(0, _yToWatts(e.clientY));
+          this._pgUpdateParamInput('start_threshold_w', this._pgThreshStart);
+        } else if (this._pgDragging === 'stop_thr') {
+          this._pgThreshStop = Math.max(0, _yToWatts(e.clientY));
+          this._pgUpdateParamInput('stop_threshold_w', this._pgThreshStop);
+        } else if (this._pgDragging === 'scrub') {
+          this._pgScrubFrac = _xToFrac(e.clientX);
+          const pts = this._pgPowerPts;
+          const cy = (this._cycles || []).find(c => c.id === this._pgCycleId);
+          const totalDur = cy?._pg_duration || (pts?.length ? pts[pts.length-1].t : 1) || 1;
+          this._pgUpdateStripFromScrub(this._pgScrubFrac, totalDur);
+        }
+        this._pgDrawCanvas();
+      });
+      pgCanvas.addEventListener('pointerdown', (e) => {
+        pgCanvas.setPointerCapture(e.pointerId);
+        const startThr = this._pgThreshStart ?? this._pgFieldVal('start_threshold_w', {}) ?? 50;
+        const stopThr = this._pgThreshStop ?? this._pgFieldVal('stop_threshold_w', {}) ?? 5;
+        const startY = _thresholdY(startThr), stopY = _thresholdY(stopThr);
+        const relY = e.clientY;
+        const scrubX = pgCanvas.getBoundingClientRect().left + 44 + this._pgScrubFrac * (pgCanvas.getBoundingClientRect().width - 52);
+        if (Math.abs(e.clientX - scrubX) < 12) { this._pgDragging = 'scrub'; }
+        else if (Math.abs(relY - startY) < 12) { this._pgDragging = 'start_thr'; }
+        else if (Math.abs(relY - stopY) < 12) { this._pgDragging = 'stop_thr'; }
+      });
+      pgCanvas.addEventListener('pointerup', (e) => {
+        pgCanvas.releasePointerCapture(e.pointerId);
+        this._pgDragging = null;
+      });
+    }
+
+    // F3: Param input fields → sync to threshold state + redraw
+    sr.querySelectorAll('[data-pgkey]').forEach(inp => inp.addEventListener('input', () => {
+      const key = inp.dataset.pgkey;
+      const val = parseFloat(inp.value);
+      if (isNaN(val)) return;
+      if (key === 'start_threshold_w') this._pgThreshStart = val;
+      else if (key === 'stop_threshold_w') this._pgThreshStop = val;
+      else this._pgParamOverrides[key] = val;
+      this._pgDrawCanvas();
     }));
-    // F3: Playground cycle-picker checkboxes — toggle selection, update the count
-    // label in place (no full re-render, so the list scroll position is kept).
-    sr.querySelectorAll('.wd-pg-cyc').forEach(cb => cb.addEventListener('change', () => {
-      if (cb.checked) this._pgSel.add(cb.value); else this._pgSel.delete(cb.value);
-      const el = sr.getElementById('wd-pg-selcount');
-      if (el) el.textContent = this._t('lbl.n_selected', {n: this._pgSel.size}, this._pgSel.size + ' selected');
-    }));
-    // F3: Playground override inputs — persist into state so they survive re-render.
-    sr.querySelectorAll('[data-pgov]').forEach(inp => inp.addEventListener('input', () => {
-      const key = inp.dataset.pgov;
-      const store = inp.dataset.pgstore === 'ab' ? this._pgAbOverrides : this._pgOverrides;
-      const t = String(inp.value).trim();
-      if (t === '') { delete store[key]; return; }
-      const n = parseFloat(t);
-      if (!isNaN(n)) store[key] = n;
-    }));
-    // F3: Playground concurrency slider — store value + live label.
-    const pgConc = sr.querySelector('[data-pgconc]');
-    if (pgConc) pgConc.addEventListener('input', () => {
-      this._pgConcurrency = Math.max(1, Math.min(50, parseInt(pgConc.value, 10) || 50));
-      const el = sr.getElementById('wd-pg-conc-val');
-      if (el) el.textContent = String(this._pgConcurrency);
+
+    // F3: Cycle selector
+    const pgCycSel = sr.getElementById('wd-pg-cyc-sel');
+    if (pgCycSel) pgCycSel.addEventListener('change', () => { this._pgCycleId = pgCycSel.value; this._pgLoad(); });
+
+    // F3: Profile selector
+    const pgProfSel = sr.getElementById('wd-pg-prof-sel');
+    if (pgProfSel) pgProfSel.addEventListener('change', () => { this._pgProfileName = pgProfSel.value; this._pgLoad(); });
+
+    // F3: Replay duration
+    const pgDur = sr.getElementById('wd-pg-dur');
+    if (pgDur) pgDur.addEventListener('input', () => {
+      this._pgAnimDuration = Math.max(3, Math.min(60, parseInt(pgDur.value, 10) || 10));
+      const el = sr.getElementById('wd-pg-dur-lbl');
+      if (el) el.textContent = this._pgAnimDuration + 's';
     });
-    // F3: DTW inspector selectors.
-    const pgDtwCyc = sr.getElementById('wd-pg-dtw-cyc');
-    if (pgDtwCyc) pgDtwCyc.addEventListener('change', () => { this._pgDtwCycle = pgDtwCyc.value; });
-    const pgDtwProf = sr.getElementById('wd-pg-dtw-prof');
-    if (pgDtwProf) pgDtwProf.addEventListener('change', () => { this._pgDtwProfile = pgDtwProf.value; });
+
+    // F3: Sim cycle count
+    const pgSimN = sr.getElementById('wd-pg-simn');
+    if (pgSimN) pgSimN.addEventListener('input', () => { this._pgSimCycles = Math.max(1, Math.min(200, parseInt(pgSimN.value, 10) || 20)); });
+
+    // F3: Sweep controls
+    const pgSwParam = sr.getElementById('wd-pg-sw-param');
+    if (pgSwParam) pgSwParam.addEventListener('change', () => { this._pgSweepParam = pgSwParam.value; this._pgSweepResults = null; this._render(); });
+    const pgSwFrom = sr.getElementById('wd-pg-sw-from');
+    if (pgSwFrom) pgSwFrom.addEventListener('input', () => { this._pgSweepFrom = pgSwFrom.value; });
+    const pgSwTo = sr.getElementById('wd-pg-sw-to');
+    if (pgSwTo) pgSwTo.addEventListener('input', () => { this._pgSweepTo = pgSwTo.value; });
+    const pgSwSteps = sr.getElementById('wd-pg-sw-steps');
+    if (pgSwSteps) pgSwSteps.addEventListener('input', () => { this._pgSweepSteps = parseInt(pgSwSteps.value, 10) || 5; this._render(); });
 
     sr.querySelectorAll('[data-statustoggle]').forEach(el => el.addEventListener('change', async () => {
       const key = el.dataset.statustoggle, val = el.checked;
@@ -6429,23 +7124,28 @@ class HaWashdataPanel extends HTMLElement {
       });
     } else if (a === 'kbd-help') {
       this._toggleKbdHelp();
-    } else if (a === 'pg-run') {
-      this._pgRunSimulation();
-    } else if (a === 'pg-ab-run') {
-      this._pgRunAb();
-    } else if (a === 'pg-apply-b') {
-      this._pgApplyB();
-    } else if (a === 'pg-dtw-run') {
-      this._pgRunDtw();
-    } else if (a === 'pg-sel-all') {
-      this._pgSel = new Set((this._cycles || []).map(c => c.id));
-      this._render();
-    } else if (a === 'pg-sel-none') {
-      this._pgSel = new Set();
-      this._render();
-    } else if (a === 'pg-sel-last20') {
-      this._pgSel = new Set((this._cycles || []).slice(0, 20).map(c => c.id));
-      this._render();
+    } else if (a === 'pg-load') {
+      this._pgLoad();
+    } else if (a === 'pg-play') {
+      this._pgPlay();
+    } else if (a === 'pg-stop') {
+      this._pgStop();
+    } else if (a === 'pg-reset-params') {
+      this._pgThreshStart = null; this._pgThreshStop = null; this._pgParamOverrides = {};
+      this._render(); requestAnimationFrame(() => this._pgDrawCanvas());
+    } else if (a === 'pg-run-sim') {
+      this._pgRunSim();
+    } else if (a === 'pg-cancel') {
+      this._pgSimCancelled = true;
+    } else if (a === 'pg-sweep-run') {
+      this._pgRunSweep();
+    } else if (a === 'pg-sweep-apply-best') {
+      this._pgApplySweepBest();
+    } else if (a === 'pg-sweep-dismiss') {
+      this._pgSweepResults = null; this._pgLastSimAt = null; this._render();
+    } else if (a === 'pg-sweep-autofill') {
+      const v = parseFloat(String(this._pgFieldVal(this._pgSweepParam, {})));
+      if (!isNaN(v) && v > 0) { this._pgSweepFrom = String(Math.max(1, Math.round(v * 0.25))); this._pgSweepTo = String(Math.round(v * 4)); this._render(); }
     } else if (a === 'cyc-compare') {
       const ids = Array.from(this._cycleSel);
       if (ids.length < 2) return;

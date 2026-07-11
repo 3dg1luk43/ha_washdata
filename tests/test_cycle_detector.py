@@ -537,6 +537,166 @@ def test_dishwasher_no_spike_uses_full_off_delay(mock_callbacks):
     )
 
 
+# ── Pump-out just before the 99% smart_ratio gate ────────────────────────────
+#
+# Regression: when the pump-out (terminal end spike) occurs at ≥90% of the
+# expected duration but the cycle's actual length falls slightly below
+# avg_duration × 0.99, neither smart termination nor the fallback timeout could
+# fire.  Smart termination was blocked by the outer duration gate (0.99) and the
+# fallback was blocked because the pump-out reset _time_below_threshold just
+# before the threshold was reached.  Fix: once _end_spike_seen was set at ≥90%
+# of expected, lower smart_ratio to 0.90 so the next low-power reading after the
+# pump-out fires smart termination.
+
+
+def test_dishwasher_pump_out_below_99pct_threshold_fires_smart_term(mock_callbacks):
+    """Pump-out at ~97% of expected fires smart termination even if actual cycle
+    duration stays below avg_duration × 0.99.
+
+    Setup: expected = 9000 s.  Cycle runs at full power until t=6700 s, drops to
+    0, then shows a pump-out burst (3 readings at 150 W) at t=8750–8810 s
+    (≈97.2–98.0% of expected).  The next 0 W reading at t=8840 s should trigger
+    smart termination because _end_spike_duration (8750 s) ≥ 0.90 × 9000 = 8100 s.
+
+    Without the fix, smart_ratio = 0.99 → threshold = 8910 s; at t=8840 s
+    (8840 < 8910) it would never fire.
+    """
+    EXPECTED_DUR = 9000.0
+    config = CycleDetectorConfig(
+        min_power=2.0,
+        stop_threshold_w=2.0,
+        start_threshold_w=3.0,
+        off_delay=180,
+        min_off_gap=1999,
+        interrupted_min_seconds=150,
+        completion_min_seconds=900,
+        start_duration_threshold=0.0,
+        device_type=DEVICE_TYPE_DISHWASHER,
+    )
+    detector = CycleDetector(
+        config=config,
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+    )
+
+    # Start the cycle (two readings to pass energy gate)
+    detector.process_reading(2000.0, dt(0))
+    detector.process_reading(2000.0, dt(30))
+    assert detector.state == STATE_RUNNING
+
+    # Run at full power until t=6700 s
+    for t in range(60, 6701, 30):
+        detector.process_reading(2000.0, dt(t))
+
+    # Inject a profile match: confident, unambiguous, expected = 9000 s
+    detector.update_match(("eco_60", 0.85, EXPECTED_DUR, None, False, False, False))
+    assert detector._matched_profile == "eco_60"
+
+    # Power drops → ENDING (two low readings to pass pause+ending thresholds)
+    for t in range(6730, 6901, 30):
+        detector.process_reading(0.0, dt(t))
+    assert detector.state == STATE_ENDING
+
+    # Brief mid-cycle blips below 85% of expected (must NOT set _end_spike_seen)
+    # 85% of 9000 = 7650 s; these are at 6960–7020 s (77%)
+    for t in (6960, 6990, 7020):
+        detector.process_reading(25.0, dt(t))  # below stop_threshold? No, 25 > 2 → is_high
+        detector.process_reading(0.0, dt(t + 30))
+    # At 7050 s (<85%), end_spike_seen must still be False
+    assert not detector._end_spike_seen, "Spike before 85% must not arm end_spike_seen"
+
+    # Silence until just before the pump-out
+    for t in range(7080, 8751, 30):
+        detector.process_reading(0.0, dt(t))
+
+    # Pump-out burst at 97.2–98.0% of expected (8750–8810 s)
+    detector.process_reading(150.0, dt(8750))
+    detector.process_reading(150.0, dt(8780))
+    detector.process_reading(150.0, dt(8810))
+    # The pump-out must set _end_spike_seen at 97%+
+    assert detector._end_spike_seen, "Pump-out at 97% must set _end_spike_seen"
+    assert detector._end_spike_duration >= EXPECTED_DUR * 0.90, (
+        f"_end_spike_duration ({detector._end_spike_duration:.0f}) should be ≥ 90% of "
+        f"expected ({EXPECTED_DUR * 0.90:.0f})"
+    )
+
+    # Next low reading after pump-out ends — smart termination must fire here.
+    # Without the fix: current_duration (8840) < 0.99 × 9000 (8910) → no fire.
+    # With the fix:    current_duration (8840) ≥ 0.90 × 9000 (8100) → FIRES.
+    detector.process_reading(0.0, dt(8840))
+    assert detector.state == STATE_FINISHED, (
+        "Smart termination must fire immediately after pump-out ends, even when "
+        "actual cycle duration (8840 s) < avg_duration × 0.99 (8910 s)"
+    )
+    mock_callbacks["on_cycle_end"].assert_called_once()
+    cycle_data = mock_callbacks["on_cycle_end"].call_args[0][0]
+    assert cycle_data["status"] == "completed"
+    assert cycle_data["termination_reason"] == "smart"
+
+
+def test_dishwasher_pre_rinse_drain_below_90pct_does_not_lower_smart_ratio(mock_callbacks):
+    """A mid-cycle drain spike that fires at 87% (below the 90% pump-out gate)
+    must NOT lower smart_ratio to 0.90, so the cycle is not prematurely closed
+    during the passive Dry phase that follows.
+
+    Setup: expected = 9000 s.  A drain spike at t=7950 s (88.3% of expected) sets
+    _end_spike_seen but _end_spike_duration < 90% × 9000 = 8100 s.  The cycle then
+    enters the Dry phase with 0 W readings up to t=8500 s (94.4%).  During this
+    window, smart termination must NOT fire (old gate 0.99 × 9000 = 8910 still
+    applies), keeping the cycle open for the real pump-out at 98%+.
+    """
+    EXPECTED_DUR = 9000.0
+    config = CycleDetectorConfig(
+        min_power=2.0,
+        stop_threshold_w=2.0,
+        start_threshold_w=3.0,
+        off_delay=180,
+        min_off_gap=1999,
+        interrupted_min_seconds=150,
+        completion_min_seconds=900,
+        start_duration_threshold=0.0,
+        device_type=DEVICE_TYPE_DISHWASHER,
+    )
+    detector = CycleDetector(
+        config=config,
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+    )
+
+    detector.process_reading(2000.0, dt(0))
+    detector.process_reading(2000.0, dt(30))
+    assert detector.state == STATE_RUNNING
+    for t in range(60, 7651, 30):
+        detector.process_reading(2000.0, dt(t))
+
+    detector.update_match(("eco_60", 0.85, EXPECTED_DUR, None, False, False, False))
+
+    # Drop to ENDING
+    for t in range(7680, 7831, 30):
+        detector.process_reading(0.0, dt(t))
+    assert detector.state == STATE_ENDING
+
+    # Pre-rinse drain spike at 7950 s = 88.3% of expected (below 90% gate)
+    detector.process_reading(200.0, dt(7950))
+    assert detector._end_spike_seen, "88% spike must still arm _end_spike_seen (≥85% gate)"
+    assert detector._end_spike_duration < EXPECTED_DUR * 0.90, (
+        "But _end_spike_duration must be < 90% of expected (not a pump-out)"
+    )
+    detector.process_reading(0.0, dt(7980))
+
+    # Dry phase — silence from 7980 to 8500 s (≤94.4% of expected).
+    # Without the fix we'd have smart_ratio = 0.90 → 8100 s threshold → fires at 8130 s.
+    # With the fix:  _end_spike_duration < 90% → smart_ratio stays at 0.99 → no fire.
+    for t in range(8010, 8501, 30):
+        detector.process_reading(0.0, dt(t))
+
+    # Cycle must still be in ENDING — not prematurely finished
+    assert detector.state == STATE_ENDING, (
+        "Cycle must remain in ENDING during Dry phase after a pre-rinse drain at 88%"
+    )
+    mock_callbacks["on_cycle_end"].assert_not_called()
+
+
 # ── Smart Termination prefix-landscape guard (#288) ──────────────────────────
 #
 # When is_prefix_ambiguous=True (a longer look-alike profile exists in the

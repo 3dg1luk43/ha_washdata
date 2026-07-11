@@ -68,6 +68,7 @@
     "inspect": "Inspect",
     "kbd_help": "Keyboard shortcuts",
     "label": "Label",
+    "load": "Load",
     "load_more": "Load more",
     "manage": "Manage",
     "merge": "Merge",
@@ -81,6 +82,9 @@
     "on_cycle_started": "On cycle started",
     "pause_cycle": "Pause",
     "pause_cycle_tip": "Pause the running cycle — the appliance will resume where it left off",
+    "pg_apply_device": "Apply to device",
+    "pg_autofill": "Auto-fill",
+    "play": "Play",
     "process": "Process",
     "process_history": "Process Now",
     "process_recording": "Save Recording",
@@ -109,6 +113,7 @@
     "revert_settings_tip": "Restore settings from before your last save",
     "revert_settings_tip_none": "Save first to enable undo",
     "review": "Review",
+    "run": "Run",
     "run_analysis": "🔍 Run suggestion analysis",
     "run_analysis_tip": "Analyze your recorded cycles now and refresh tuning suggestions",
     "run_auto_label": "Run Auto-Label",
@@ -130,6 +135,7 @@
     "show_only": "Show only",
     "skip_setup": "Skip setup",
     "split": "Split",
+    "stop": "Stop",
     "submit_correction": "Submit Correction",
     "train_now": "Train now",
     "trim": "Trim",
@@ -233,12 +239,15 @@
     "my_preferences": "My Preferences",
     "no_automations": "No automations reference this device yet.",
     "panel_settings": "Panel Settings",
+    "param_sweep": "Parameter sweep",
     "phase_catalog": "Phase Catalog",
+    "playground": "Playground",
     "process_history": "Process History",
     "settings_history": "Settings history",
     "status": "Status",
     "status_graph": "Status Graph",
     "storage_stats": "Storage Stats",
+    "test_history": "Test on history",
     "toggle_sidebar": "Toggle Home Assistant sidebar",
     "tools_and_data": "Tools & Data",
     "wipe_history": "Wipe History"
@@ -252,10 +261,19 @@
     "actions": "Actions",
     "activity": "Activity",
     "administrators": "Administrators",
+    "aria_compare_chart": "Cycle comparison chart",
+    "aria_cycle_chart": "Cycle power trace",
+    "aria_envelope_chart": "Profile power envelope chart",
+    "aria_phase_chart": "Phase editor chart",
+    "aria_playground_chart": "Cycle power trace with draggable detection thresholds",
+    "aria_power_chart": "Power consumption chart",
+    "aria_spaghetti_chart": "Overlaid cycle power traces",
+    "aria_sweep_chart": "Parameter sweep results chart",
     "artifact_anomaly": "Anomaly",
     "artifact_high_power": "High power",
     "artifact_interruption": "Interruption",
     "artifact_low_power": "Low power",
+    "auto_detect": "Auto-detect",
     "auto_fine_tune_off": "auto fine-tune off",
     "auto_fine_tune_on": "auto fine-tune on (around {hour}:00)",
     "avg_cost": "Avg cost",
@@ -280,6 +298,7 @@
     "cycle_index": "cycle index →",
     "cycles": "Cycles",
     "cycles_count": "Cycles",
+    "cycles_lc": "cycles",
     "dashed": "dashed",
     "date": "Date",
     "debug_traces": "Debug Traces",
@@ -306,6 +325,7 @@
     "expected_duration": "Expected Duration (min)",
     "file_kb": "File (kB)",
     "final_score": "Final score",
+    "from": "From",
     "gap_s": "Gap (s)",
     "group_name": "Group name",
     "head_trim": "Head Trim (s)",
@@ -314,10 +334,12 @@
     "in_use": "In use",
     "json_data": "JSON Data",
     "label": "Matched program",
+    "last": "Last",
     "last_checked": "Last checked:",
     "load_from_file": "Load from file",
     "mae_score": "MAE score",
     "manual_duration": "Manual Duration (min, optional)",
+    "match": "Match",
     "members": "Members",
     "metric": "Metric",
     "mode_existing_profile": "Add to Existing Profile",
@@ -330,21 +352,44 @@
     "na": "n/a",
     "new_profile_name": "New Profile Name",
     "notes": "Notes",
+    "of": "of",
     "outcome": "Outcome",
     "panel_default_tab": "Default tab",
     "panel_language": "Panel language",
     "per_cycle_short": "cycle",
     "pg_ambiguous": "Ambiguous",
+    "pg_autofill_tip": "Auto-fill range from current value ({lo}–{hi})",
+    "pg_best_value": "Best value found",
+    "pg_current_value": "Current value:",
     "pg_cycles": "Cycles",
     "pg_detected": "Detected",
+    "pg_drag_hint": "Drag line on graph",
+    "pg_dtw": "DTW",
     "pg_ev_ending": "Ending",
     "pg_ev_match": "Match",
     "pg_ev_off": "Off",
     "pg_ev_paused": "Paused",
     "pg_ev_running": "Running",
     "pg_ev_start": "Start",
+    "pg_group_advanced": "Edge cases",
+    "pg_group_detection": "Detection triggers",
+    "pg_group_timing": "Timing rules",
+    "pg_idle": "Idle",
+    "pg_last_run": "Last run: {date}",
     "pg_match_correct": "Match correct",
+    "pg_match_score": "Match score",
+    "pg_pct_of": "{p}% of {total}",
+    "pg_poor_match": "Poor match",
+    "pg_strong_match": "Strong match",
+    "pg_tile_ambiguous": "Ambiguous",
+    "pg_tile_ambiguous_tip": "Cycles with a near-tie between two programs",
+    "pg_tile_detected": "Detected",
+    "pg_tile_detected_tip": "Cycles where power crossed the start threshold long enough to register as running",
+    "pg_tile_matched": "Matched",
+    "pg_tile_matched_tip": "Cycles correctly attributed to a known program",
+    "pg_time_left": "Time left",
     "pg_unmatched": "Unmatched",
+    "pg_weak_match": "Weak match",
     "phase_name": "Name",
     "phase_timeline": "Phase timeline",
     "power": "Power",
@@ -362,6 +407,7 @@
     "reminder_every": "Remind every (cycles)",
     "remove_label": "- Remove label -",
     "rename_profile": "Rename Profile",
+    "replay_duration": "Replay",
     "resulting_profile": "Resulting profile",
     "save_mode": "Save Mode",
     "score": "Score",
@@ -389,6 +435,7 @@
     "timer_auto_pause": "Auto-pause",
     "timer_min": "min",
     "timer_msg_placeholder": "Message (optional, {device}/{program}/{minutes})",
+    "to": "To",
     "ungrouped": "Ungrouped",
     "unlabelled": "Unlabelled",
     "unlabelled_paren": "(unlabelled)",
@@ -514,26 +561,6 @@
     "no_settings_match": "No settings match \"{q}\"",
     "no_split_points": "No split points yet.",
     "no_suggestions": "No active suggestions.",
-    "sug_staged": "Set {key} = {val}. Save to apply.",
-    "toast_auto_detect_enabled": "Auto-detect enabled",
-    "toast_auto_label_complete": "Auto-label complete",
-    "toast_auto_label_failed": "Auto-label failed: {error}",
-    "toast_automation_failed": "Could not create automation: {error}",
-    "toast_automation_migrated": "Actions migrated to an automation; opening editor",
-    "toast_convert_failed": "Convert failed: {error}",
-    "toast_create_failed": "Create failed: {error}",
-    "toast_delete_failed": "Delete failed: {error}",
-    "toast_error": "Error: {error}",
-    "toast_failed": "Failed: {error}",
-    "toast_force_stop_failed": "Force stop failed: {error}",
-    "toast_name_required": "Name required",
-    "toast_no_automation": "Cannot create automation here",
-    "toast_profile_name_required": "Profile name is required",
-    "toast_program_set": "Program set: {program}",
-    "toast_rebuild_failed": "Rebuild failed: {error}",
-    "toast_resume_failed": "Resume failed: {error}",
-    "toast_revert_failed": "Revert failed: {error}",
-    "toast_save_failed": "Save failed: {error}",
     "notify_services_hint": "Use {entity} service IDs (comma-separated for multiple). Template variables: {vars}.",
     "old_actions_warning": "Configured with the old actions editor (now removed). They still fire on cycle events but can no longer be edited here. Convert them into a normal automation, or remove them.",
     "onboarding_progress": "{n} / 3 cycles observed",
@@ -541,17 +568,31 @@
     "pending_feedback": "Pending detection feedback",
     "performance_trend": "Performance trend ({n} cycles)",
     "pg_ab_intro": "Run the same cycles with your current settings (A) and a tweaked set (B), side by side.",
+    "pg_analysis_empty": "Load a cycle to see match analysis.",
     "pg_apply_b_confirm": "Apply set B to the live device?\n\n{list}",
+    "pg_apply_confirm": "Apply best value: {label} = {value}?",
+    "pg_canvas_empty": "Select a cycle above, then press Load to see its power trace.",
+    "pg_chart_caption": "Detection/match rate across values of {param}",
     "pg_dtw_intro": "Inspect how one cycle aligns to a profile: the two curves, the warp path and the score breakdown. Read-only.",
+    "pg_match_rate": "{pct}% match rate on {total} cycles",
     "pg_no_b_overrides": "No B overrides to apply.",
     "pg_no_events": "No events",
+    "pg_restart_note": "Restart Home Assistant to enable simulation tools.",
     "pg_running": "Running…",
+    "pg_sim_progress": "{done} / {total} cycles",
     "pg_simulator_intro": "Replay past cycles through detection with tweaked settings — a dry run that changes nothing.",
+    "pg_starting": "Starting…",
+    "pg_sweep_intro": "What if {param} were different? Test {steps} values across your last {cycles} cycles to find the setting where the most cycles are correctly matched.",
+    "pg_sweep_step": "Step {done} / {total}",
     "pg_tip_ambiguous": "{n}/{total} ambiguous",
     "pg_tip_cycles": "{n} cycles simulated",
     "pg_tip_detected": "{n}/{total} detected",
     "pg_tip_match_correct": "{n}/{total} matched correctly",
     "pg_tip_unmatched": "{n}/{total} unmatched",
+    "pg_undetected": "{n} cycle{s} undetected",
+    "pg_verdict_bad": "Needs attention: many cycles are going undetected.",
+    "pg_verdict_good": "Well tuned: most cycles are correctly identified and matched.",
+    "pg_verdict_ok": "Acceptable: some cycles missed. Try lowering the start threshold.",
     "phase_catalog_intro": "Named segments of a cycle (Pre-wash, Heating, Spin…). Assign them to a profile from its control panel.",
     "phase_ranges_intro": "Phase ranges (minutes from cycle start) overlaid on the average curve. Edit values to preview live.",
     "playground_intro": "A safe sandbox to replay past cycles with different settings, compare two setups side by side, and inspect how a cycle aligns to a profile. Nothing here changes your live data until you explicitly apply it.",
@@ -590,6 +631,26 @@
     "showing_suggestions": "Showing {count} setting with suggestions.",
     "split_intro": "Click the graph to add or remove a split point, or auto-detect by idle gaps. Each resulting segment can get its own profile.",
     "storage_diagnostics": "Storage stats, maintenance, export/import",
+    "sug_staged": "Set {key} = {val}. Save to apply.",
+    "toast_auto_detect_enabled": "Auto-detect enabled",
+    "toast_auto_label_complete": "Auto-label complete",
+    "toast_auto_label_failed": "Auto-label failed: {error}",
+    "toast_automation_failed": "Could not create automation: {error}",
+    "toast_automation_migrated": "Actions migrated to an automation; opening editor",
+    "toast_convert_failed": "Convert failed: {error}",
+    "toast_create_failed": "Create failed: {error}",
+    "toast_delete_failed": "Delete failed: {error}",
+    "toast_error": "Error: {error}",
+    "toast_failed": "Failed: {error}",
+    "toast_force_stop_failed": "Force stop failed: {error}",
+    "toast_name_required": "Name required",
+    "toast_no_automation": "Cannot create automation here",
+    "toast_profile_name_required": "Profile name is required",
+    "toast_program_set": "Program set: {program}",
+    "toast_rebuild_failed": "Rebuild failed: {error}",
+    "toast_resume_failed": "Resume failed: {error}",
+    "toast_revert_failed": "Revert failed: {error}",
+    "toast_save_failed": "Save failed: {error}",
     "trend_duration_longer": "Duration trending longer ({pct}%/cycle) — recent avg {avg}",
     "trend_duration_shorter": "Duration trending shorter ({pct}%/cycle) — recent avg {avg}",
     "trend_energy_down": "Energy trending down ({pct}%/cycle)",
@@ -601,6 +662,17 @@
     "warmup_badge": "Still learning ({done}/{needed} cycles)",
     "warmup_detail": "This profile needs {needed} labelled cycles before auto-matching begins. Every confirmed cycle helps it learn.",
     "wipe_history_warning": "Permanently delete all cycles and profiles. Cannot be undone."
+  },
+  "pg_desc": {
+    "abrupt_drop_watts": "Sudden drop treated as immediate end",
+    "completion_min_seconds": "Shortest run that counts as a real cycle",
+    "end_repeat_count": "Low readings in a row before ending",
+    "interrupted_min_seconds": "Short cycles flagged as interrupted",
+    "min_off_gap": "Gap required to separate two cycles",
+    "off_delay": "Seconds of low power before cycle ends",
+    "start_duration_threshold": "Seconds above threshold to confirm start",
+    "start_threshold_w": "Minimum watts to count as started",
+    "stop_threshold_w": "Below this, machine counts as off"
   },
   "phase_desc": {
     "anti_crease": "Occasional short tumbles after completion to reduce wrinkles.",
@@ -1117,6 +1189,69 @@
     "recording": "Recording",
     "training": "Training…"
   },
+  "suggestion": {
+    "both_agree": "WashData recommends",
+    "calibrated_label": "Calibrated",
+    "observed_label": "Observed",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Labels fewer cycles automatically; more go to review",
+        "lower": "Labels more cycles automatically; some may be misidentified"
+      },
+      "duration_tolerance": {
+        "higher": "Accepts a wider duration range — more flexible matching",
+        "lower": "Requires closer duration match — stricter but may reject unusual cycles"
+      },
+      "end_energy_threshold": {
+        "higher": "Closes only cycles that used substantial energy",
+        "lower": "Closes shorter or lower-energy cycles too"
+      },
+      "end_repeat_count": {
+        "higher": "Requires the end signal to repeat more times — more robust, slightly slower",
+        "lower": "Ends after fewer repetitions — faster detection, more false-end risk"
+      },
+      "learning_confidence": {
+        "higher": "Learns only from very confident matches — slower but more reliable",
+        "lower": "Learns from more cycles; model may be noisier"
+      },
+      "min_off_gap": {
+        "higher": "Longer idle needed before a new cycle starts",
+        "lower": "Brief idle triggers a new cycle — back-to-back runs may split"
+      },
+      "min_power": {
+        "higher": "Less sensitive to idle power draw; may miss very quiet programs",
+        "lower": "More sensitive; may log standby power as activity"
+      },
+      "no_update_active_timeout": {
+        "higher": "More time before declaring a cycle stuck",
+        "lower": "Force-stops a stuck cycle sooner"
+      },
+      "off_delay": {
+        "higher": "More time for appliance pauses — handles long soak or drying phases",
+        "lower": "Faster end detection — works well for clean on/off appliances"
+      },
+      "profile_match_threshold": {
+        "higher": "Commits only high-confidence matches; more cycles stay unlabelled",
+        "lower": "Matches more cycles; some may be slightly wrong"
+      },
+      "running_dead_zone": {
+        "higher": "Ignores brief power spikes during idle — less noise-sensitive",
+        "lower": "Responds to shorter power bursts — catches fast transient activity"
+      },
+      "start_threshold_w": {
+        "higher": "Avoids false starts from brief power spikes",
+        "lower": "Catches low-power programs; may trigger on noise"
+      },
+      "stop_threshold_w": {
+        "higher": "Ends cycle faster — may close during a pause",
+        "lower": "Waits longer to end — fewer premature completions"
+      },
+      "watchdog_interval": {
+        "higher": "Longer quiet phases allowed; fewer false force-stops",
+        "lower": "Catches stuck cycles more aggressively"
+      }
+    }
+  },
   "tab": {
     "advanced": "Advanced",
     "diagnostics": "Diagnostics",
@@ -1206,69 +1341,6 @@
     "settings_saved": "Settings saved; integration reloading",
     "suggestions_applied": "Suggestions applied; integration reloading",
     "suggestions_dismissed": "Suggestions dismissed"
-  },
-  "suggestion": {
-    "both_agree": "WashData recommends",
-    "calibrated_label": "Calibrated",
-    "observed_label": "Observed",
-    "impact": {
-      "auto_label_confidence": {
-        "higher": "Labels fewer cycles automatically; more go to review",
-        "lower": "Labels more cycles automatically; some may be misidentified"
-      },
-      "duration_tolerance": {
-        "higher": "Accepts a wider duration range — more flexible matching",
-        "lower": "Requires closer duration match — stricter but may reject unusual cycles"
-      },
-      "end_energy_threshold": {
-        "higher": "Closes only cycles that used substantial energy",
-        "lower": "Closes shorter or lower-energy cycles too"
-      },
-      "end_repeat_count": {
-        "higher": "Requires the end signal to repeat more times — more robust, slightly slower",
-        "lower": "Ends after fewer repetitions — faster detection, more false-end risk"
-      },
-      "learning_confidence": {
-        "higher": "Learns only from very confident matches — slower but more reliable",
-        "lower": "Learns from more cycles; model may be noisier"
-      },
-      "min_off_gap": {
-        "higher": "Longer idle needed before a new cycle starts",
-        "lower": "Brief idle triggers a new cycle — back-to-back runs may split"
-      },
-      "min_power": {
-        "higher": "Less sensitive to idle power draw; may miss very quiet programs",
-        "lower": "More sensitive; may log standby power as activity"
-      },
-      "no_update_active_timeout": {
-        "higher": "More time before declaring a cycle stuck",
-        "lower": "Force-stops a stuck cycle sooner"
-      },
-      "off_delay": {
-        "higher": "More time for appliance pauses — handles long soak or drying phases",
-        "lower": "Faster end detection — works well for clean on/off appliances"
-      },
-      "profile_match_threshold": {
-        "higher": "Commits only high-confidence matches; more cycles stay unlabelled",
-        "lower": "Matches more cycles; some may be slightly wrong"
-      },
-      "running_dead_zone": {
-        "higher": "Ignores brief power spikes during idle — less noise-sensitive",
-        "lower": "Responds to shorter power bursts — catches fast transient activity"
-      },
-      "start_threshold_w": {
-        "higher": "Avoids false starts from brief power spikes",
-        "lower": "Catches low-power programs; may trigger on noise"
-      },
-      "stop_threshold_w": {
-        "higher": "Ends cycle faster — may close during a pause",
-        "lower": "Waits longer to end — fewer premature completions"
-      },
-      "watchdog_interval": {
-        "higher": "Longer quiet phases allowed; fewer false force-stops",
-        "lower": "Catches stuck cycles more aggressively"
-      }
-    }
   },
   "trend": {
     "down": "Trending down",

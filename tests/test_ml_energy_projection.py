@@ -52,7 +52,7 @@ def _front_loaded_cycle(i: int, total: float) -> dict:
 
 def test_energy_dataset_labels_are_energy_fractions():
     cycles = [_front_loaded_cycle(i, 3600.0) for i in range(6)]
-    X, y, columns = _energy_dataset(cycles, {_PROFILE: _EXP})
+    X, y, columns, _g = _energy_dataset(cycles, {_PROFILE: _EXP})
     assert columns == list(PROGRESS_FEATURE_COLUMNS)
     assert X.shape[0] == y.shape[0] >= 6 * 5
     assert float(np.min(y)) > 0.0 and float(np.max(y)) <= 1.0
@@ -65,7 +65,7 @@ def test_energy_dataset_labels_are_energy_fractions():
 def test_energy_dataset_skips_zero_energy_cycles():
     flat = {**_front_loaded_cycle(0, 3600.0),
             "power_data": [[float(i), 0.0] for i in range(0, 3600, 30)]}
-    X, _y, _c = _energy_dataset([flat], {_PROFILE: _EXP})
+    X, _y, _c, _g = _energy_dataset([flat], {_PROFILE: _EXP})
     assert X.shape[0] == 0
 
 

@@ -5,9 +5,9 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.5.0 - "Goodbye OptionsFlow, Hello Panel" - 2026-07-09
 
-Building on 0.5.0's panel, this cycle sharpens what WashData notices and how it talks to you. Detection learns to flag cycles that finish suspiciously early or draw unusual energy, energy tracking grows into a full Home Assistant Energy dashboard sensor with per-profile cost, notifications gain quiet hours and celebration milestones, the panel picks up a phase timeline and a genuine power-user **Playground**, and you can now simply ask your voice assistant whether the washer is done.
+The biggest release in WashData's history. It retires the 180-plus-tunable options dialog in favour of a full-screen management panel, overhauls matching accuracy, rebuilds notifications on native Home Assistant automations, and adds an experimental, fully-gated, NumPy-only ML subsystem that runs *alongside* the proven detection/matching engine (see **Earlier in 0.5.0** below for that foundation). On top of that panel it also sharpens what WashData notices and how it talks to you: detection flags cycles that finish suspiciously early or draw unusual energy, energy tracking grows into a full Home Assistant Energy dashboard sensor with per-profile cost, notifications gain quiet hours and celebration milestones, the panel picks up a phase timeline and a genuine power-user **Playground**, and you can now simply ask your voice assistant whether the washer is done.
 
 ### ✨ Features
 
@@ -47,7 +47,7 @@ Building on 0.5.0's panel, this cycle sharpens what WashData notices and how it 
 
 - **Basic / Advanced settings**: A **Basic | Advanced** toggle now sits atop the Settings tab. **Basic** shows roughly the dozen highest-impact fields for a clean first pass; **Advanced** shows everything. It is purely a visibility filter (hidden fields keep their values) and the choice is remembered per account.
 
-- **Playground tab (power users)**: A new top-level **Playground** tab with three tools for people who want to see exactly what the engine is doing. **Cycle Simulator** replays real stored cycles through a genuine headless run of the detector and matcher with settings you override, so you can test a tuning change against your own history before saving it. **A/B Settings Comparison** runs the same cycles through your current settings and a proposed set side by side, shows the deltas, and lets you apply the winning set. **DTW Inspector** overlays a cycle against a profile envelope and draws the DTW warp path plus the full Stage-2 / DTW / Stage-4 score breakdown, so you can see *why* a cycle matched (or didn't).
+- **Playground tab (power users)**: A new top-level **Playground** tab for people who want to see exactly what the engine is doing. Load any stored cycle onto an interactive power-trace canvas with **draggable start/stop threshold lines**, then scrub or play the run back to watch state, power, progress, time-left, energy and match update live. **Test on history** replays your recent cycles through a genuine headless run of the detector and matcher with the settings you override (detected / matched / ambiguous tallies plus a plain-language verdict), and **Parameter sweep** tries a range of values for any one setting across your history and highlights the value with the best match rate - one click to apply it. The canvas also overlays the profile's power envelope and the DTW alignment with the full Stage-2 / DTW / Stage-4 score breakdown, so you can see *why* a cycle matched (or didn't).
 
 - **Ask Home Assistant if it's done**: WashData now answers natural-language questions through Assist (voice or text) - "is my washer done?", "how long until the dryer finishes?" - with a live, plain-language reply ("still running, about 20 minutes left" / "finished 5 minutes ago" / "not running"), disambiguating by appliance name when you have more than one. Because Home Assistant does not let a custom integration inject sentences into the built-in voice agent at runtime, you wire the trigger phrases with a small `custom_sentences` pack (one line to copy; see [NOTIFICATIONS.md](NOTIFICATIONS.md)); the intent itself works immediately from automations and the Assist pipeline.
 
@@ -56,11 +56,20 @@ Building on 0.5.0's panel, this cycle sharpens what WashData notices and how it 
 - **Type-safe WebSocket API contract + generated reference**: A new `ws_schema.py` is the single source of truth for the panel's WebSocket surface - a request registry (`WS_COMMANDS`) plus a typed response (`TypedDict`) for every one of the ~70 commands. A debug-only response validator runs when `HA_WASHDATA_WS_CONTRACT=1` (zero overhead otherwise), a sync test fails if a command is added or removed without updating the contract, and `devtools/generate_ws_types.py` regenerates both the TypeScript types (`www/ws-types.d.ts`) and an auto-generated command reference at [`docs/WS_API.md`](docs/WS_API.md).
 - New modules: `playground.py` (headless detector/matcher replay behind the Playground tab) and `intents.py` (the `HaWashdataStatus` conversation intent; `conversation` added to `manifest.json` dependencies). Two new WebSocket commands (`run_playground_simulation`, `get_dtw_debug`) require a **full Home Assistant restart** to register.
 
-## 0.5.0 - "Goodbye OptionsFlow, Hello Panel" - 2026-07-09
+### 🐛 Fixes & refinements
+
+- **Back-to-back cycles no longer clobber each other**: when one cycle's end-of-cycle processing overlapped the start of the very next cycle, the cleanup could reset the newly-started cycle back to *Off* mid-run. Cycle-end processing now detects that a new cycle has begun and leaves its live state untouched.
+- **No more phantom "cycle finished" alerts from noise**: a very short, near-zero-energy power blip is now fully suppressed (the way dishwasher pump-outs already were) instead of being stored as a cycle and firing a finish notification.
+- **Interrupted cycles survive a restart with their trace intact**: a cycle resurrected after a Home Assistant restart mid-run no longer loses its pre-restart power trace (a timestamp-format mismatch had silently dropped it), and a stale verified-pause flag can no longer carry into the next cycle.
+- **Playground polish**: the profile envelope band now renders correctly, the match analysis shows only real per-cycle scores (no placeholder confidences), a duplicate canvas id was fixed, and the parameter sweep now honours dragged thresholds and can be cancelled mid-run. Every Playground string is now translated into all supported languages.
+- **Accessibility**: keyboard focus rings on all controls, `prefers-reduced-motion` support, screen-reader roles on toasts and dialogs, and text labels on every chart canvas. Status/health colour tints now render correctly against custom themes.
+- **On-device ML training accuracy**: the quality model now trains on the real per-cycle anomaly-flag count (not a constant), and every model's held-out evaluation groups rows by source cycle so the promotion gate can't be fooled by same-cycle leakage - a personalised model is kept only when it genuinely generalises.
+
+### Earlier in 0.5.0: panel migration, matching overhaul & ML foundation
 
 The biggest release in WashData's history, and the first since 0.4.5.2 - everything below is new relative to that version. For as long as WashData has existed, its 180-plus tunables lived behind Home Assistant's options dialog: a stack of dropdown-only screens you paged through one at a time, with no charts, no context, and no easy way to see what a setting actually did. **That era ends here.** 0.5.0 retires the options flow in favour of a full-screen **management panel** - live dashboards, interactive power-curve editors, drag-to-trim and cycle splitting, near-duplicate profile grouping, per-user access control, and every setting laid out with room to breathe and a diagram explaining it. The old options flow doesn't disappear, but it steps back to a single job: onboarding a new device (device type, power sensor, minimum power, and an optional first profile). Everything else now happens in the panel. Around it: a major matching-accuracy overhaul, notifications rebuilt on native Home Assistant automations, and an experimental, fully-gated, NumPy-only machine-learning subsystem that runs *alongside* - never replaces - the proven detection and matching engine. Several of the headline pieces - profile grouping, the ML subsystem, and on-device anomaly detection - land here as a **work-in-progress foundation** that will keep getting sharper and more accurate over the coming releases.
 
-### ✨ Features
+#### ✨ Features
 
 - **Per-cycle energy cost**: The Cycles list has a new **Cost** column. Cost is frozen onto each cycle when it finishes (energy × the price per kWh in effect at that moment), so later price changes never rewrite historical costs. Shown in your Home Assistant currency; set a static price or a price-entity under Settings to populate it.
 
@@ -124,7 +133,7 @@ The biggest release in WashData's history, and the first since 0.4.5.2 - everyth
 
 - **Revert on-device models to baseline**: The **ML Training** tab gained a **Revert models to baseline** button that discards all on-device-trained models and falls back to the shipped baselines (training may re-promote them later), mirroring the existing matcher-tuning revert.
 
-### 🔧 Improvements
+#### 🔧 Improvements
 
 - **Setting conflict validation with coherent cascade**: The Settings panel detects and highlights incompatible setting combinations inline, before saving. When two settings conflict (e.g. Start Threshold below Stop Threshold), a red error row appears under each affected field with a clickable **Use X** button. Clicking it now *cascades automatically*: if fixing Start Threshold means Stop Threshold must also drop, and Stop Threshold means Min Power must also drop, all three are adjusted in one click — fields in the current section update their DOM inputs; fields in other sections are updated via `this._opts` and tracked in `_cascadePending` so the next Save includes them. Clicking a tuning suggestion's **Use** button also triggers the same cascade immediately, so staging one suggestion auto-fixes any downstream settings that need to move with it. Saving is blocked while any conflict is unresolved. Conflicts in the *saved* settings are surfaced in the **Overview** tab (red attention card, ⚠ tab-label indicator, red section-pill dot). The backend `reconcile_suggestions()` is now **direction-aware** and **cascade-creative**: it determines which setting is the intended anchor (e.g. a lowered Start Threshold) and cascade-creates consistent entries for dependent settings (Stop Threshold, Min Power) so the full suggestion set is jointly valid before it's ever shown. A **fixpoint loop** (up to 8 iterations) ensures multi-step chains converge. A new **Revert changes** button sits next to Save and Refresh: it snapshots the settings state before each save and can restore it in one click, even after saving — disabled until the first save in the session. **Conflict rules are now device-type-aware**: the anti-wrinkle constraints (exit power vs stop threshold, max power vs start threshold) only fire for washing machines, dryers, and washer-dryer combos; the pump-stuck-duration constraint only fires for pump devices. This prevents spurious conflict errors on dishwashers and other appliances where those features don't exist. **Conflict-suggestion coherence**: when a conflict fires and a pending tuning suggestion for the affected setting would resolve it, the panel shows *"Stage the pending suggestion (X) below to fix this"* in place of the generic **Use X** fix button — directing the user to the already-computed, data-backed value rather than a mechanical minimum. Fully localised across all 35 supported panel languages.
 
@@ -148,7 +157,7 @@ The biggest release in WashData's history, and the first since 0.4.5.2 - everyth
 
 - **Conflict banner and jump-to-section in Settings**: When any setting conflict is active, a red banner appears at the top of the Settings tab stating the conflict count and offering a **Go to first** button that switches directly to the first section containing a conflicted field. This makes it easy to locate and fix a conflict in a section that is not currently visible without manually clicking through each section tab. New translation keys: `conflict.settings_banner`, `conflict.settings_banner_btn`.
 
-### 🐛 Bug Fixes
+#### 🐛 Bug Fixes
 
 - **Smart Termination could split one wash into several cycles when two similar programs exist** (#288): When a device has a short program ("Quick 40°C", ~46 min) and a longer program whose first half looks almost identical ("Normal 40°C", ~88 min), the matcher would lock onto the shorter one during the opening minutes of a Normal wash - because the traces really are the same up to that point. If the machine then went quiet during a mid-cycle soak, Smart Termination could fire at the *short* program's expected duration and close the cycle early, leaving the remaining 30+ minutes to be re-detected as one or more extra cycles. WashData now recognises this "prefix ambiguity" - a plausible longer program that an ongoing soak could still be inside - and in that case blocks Smart Termination, falling back to the power-based timeout so a Normal wash is no longer chopped into pieces. For a genuine Quick cycle this only delays completion by a few minutes.
 
@@ -167,7 +176,7 @@ The biggest release in WashData's history, and the first since 0.4.5.2 - everyth
 
 - **Settings values lost on section switch; off-screen conflicts blocked save**: Two related bugs in the Settings tab. (1) Switching sections discarded any values typed but not yet saved, because each section switch rebuilt the DOM from the last-saved options. (2) A save could be blocked by a conflict error in a section the user was not viewing, even if their pending edits there were already consistent, because conflict validation used stale saved values for off-screen fields. Both are fixed by a `_pendingSettings` map that captures live form values before each re-render. Field values are restored from it on render, cross-section conflict checks use it instead of stale saved state, and every Save merges it in full so no in-progress edit is silently dropped.
 
-### 🛠 Internal / Developer Experience
+#### 🛠 Internal / Developer Experience
 
 - **Panel localisation reworked**: All panel UI strings now resolve through the panel's `_t()` system, served from `www/panel-translations.json` (built by `build_panel_translations.py` from `translations/panel/`). Scope covers section titles, sub-group headers, field labels and tooltip/doc strings, artifact detail messages, button labels, dynamic chart labels, and the new-profile input label. The shipped language set was trimmed to the languages that can be kept accurate and maintained (see Removed); a revised translation workflow is in progress and will ship in a follow-up release. The config-flow translation files were audited to match the reduced onboarding flow (obsolete multi-step-flow keys removed, keys added for the reconfigure and simplified setup steps).
 - New WebSocket command surface (`ws_api.py`) backing the panel (settings, profiles, cycles, phases, recording, feedback, diagnostics, suggestions, curve and envelope data, merge / split / trim, logs, panel config, and RBAC), plus commands for profile groups, ML shadow-comparison / per-cycle review, ML training status / trigger, and matcher-tuning revert. Every async handler is registered with `@websocket_api.async_response`, and all commands pass through a single server-side RBAC guard.
@@ -183,7 +192,7 @@ The biggest release in WashData's history, and the first since 0.4.5.2 - everyth
 - **Config-entry schema bumped to 3.6**: a deterministic, non-destructive migration remaps any entry still on a removed device type to `other`, preserving all tuned options.
 - **Dead-code and duplicate cleanup (no behaviour change)**: removed ~900+ lines of unused code - the config-flow-era server-side SVG/chart generators and markdown-table helpers (the panel renders charts client-side), assorted orphaned methods/constants, an orphaned feedback-detail WebSocket endpoint, and the unused `apply_suggestions` option. Consolidated duplicated logic behind single helpers: one gap-aware trapezoidal energy integrator (`signal_processing.integrate_wh`, used by both persistence paths), a shared `profile_expectations`, a single ambiguity-margin helper, and one power-trace decompression path. Verified byte-identical on the real-data replay suite.
 
-### 🗑 Removed
+#### 🗑 Removed
 
 - **Coffee Machine, Electric Vehicle, Heat Pump, and Oven device types have been removed.** They were deprecated because each fails one of WashData's appliance fit tests (a user-selected discrete program, a reproducible power signature, a clean return to OFF), so profile matching and time-remaining estimation produced noise rather than signal. Existing config entries on any of these types are **automatically migrated to Threshold Device** on load, with all stored options and learned profiles preserved - WashData keeps working, it just stops layering appliance-specific defaults it never had good values for. Their device-type-specific defaults, phase catalogs, translations, and the associated deprecation UI (the "(deprecated)" picker labels and the "hide deprecated device types" panel option) were all removed.
 
@@ -191,14 +200,14 @@ The biggest release in WashData's history, and the first since 0.4.5.2 - everyth
 
 - **Tuning-suggestions persistent notification removed**: WashData no longer posts a Home Assistant persistent notification when tuning suggestions first become available for a device. Suggestions are surfaced exclusively through the panel (the yellow banner in Settings, section-dot indicators, and per-field pill widgets). The `suggestions_ready_notification_title` and `suggestions_ready_notification_message` translation keys have been removed from `strings.json`, `translations/en.json`, and all 34 other supported language files.
 
-### ⚠️ Notes & Prerequisites
+#### ⚠️ Notes & Prerequisites
 
 - After updating, perform a **full Home Assistant restart** (not just an integration reload) so the new WebSocket commands register, then hard-refresh the panel.
 - This release sets a minimum Home Assistant version of **2026.5.0**.
 - The raw-socket overlay needs the Recorder to be retaining history for the configured power sensor; it degrades gracefully if the recorder is unavailable.
 - If your device was set to Coffee Machine, Electric Vehicle, Heat Pump, or Oven, it is migrated to **Threshold Device** automatically (your tuned settings and profiles are kept). Since Threshold Device ships intentionally generic defaults, review the detection thresholds under Settings for that device.
 
-## New Contributors
+#### New Contributors
 * @Olen made their first contribution in https://github.com/3dg1luk43/ha_washdata/pull/283
 
 ## 0.4.5.2 - 2026-06-13

@@ -260,6 +260,7 @@ class CycleDetector:
         self._expected_duration: float = 0.0
         self._last_match_confidence: float = 0.0
         self._end_spike_seen: bool = False
+        self._end_spike_duration: float = 0.0  # cycle duration (s) when _end_spike_seen was last set
         self._match_ambiguous: bool = False  # last live match was ambiguous (gates predictive end)
         self._match_prefix_ambiguous: bool = False  # longer candidate with good shape exists (prefix guard)
 
@@ -542,6 +543,10 @@ class CycleDetector:
         self._matched_profile = None
         self._ignore_power_until_idle = False  # Reset lockout
         self._lockout_high_seconds = 0.0
+        # Clear the verified-pause flag so it can't leak into the next cycle (B6):
+        # a stale True would make an early low-power dip look like a verified pause
+        # before the first live match of the new cycle runs.
+        self._verified_pause = False
         self._anti_wrinkle_candidate_start = None
         self._anti_wrinkle_candidate_peak = 0.0
         self._anti_wrinkle_candidate_start_power = 0.0
@@ -1005,6 +1010,7 @@ class CycleDetector:
                     >= self._expected_duration * DISHWASHER_END_SPIKE_MIN_PROGRESS
                 ):
                     self._end_spike_seen = True
+                    self._end_spike_duration = current_duration
                     self._logger.debug(
                         "End spike detected (power high in ENDING state, "
                         "%.0fs/%.0fs)",
@@ -1087,9 +1093,23 @@ class CycleDetector:
                     # 2. Require debounce to be measured FROM entry into ENDING state
 
                     if self._config.device_type == "dishwasher":
-                        smart_ratio = (
-                            0.99  # Very conservative for dishwashers to catch end spikes
-                        )
+                        # If the most-recent in-ENDING spike occurred at ≥90% of
+                        # expected, it is the terminal pump-out, not a mid-cycle
+                        # rinse drain.  Once that pump-out is confirmed, we don't
+                        # need to wait for 99% of the rolling avg — individual
+                        # cycles can be up to ~7% shorter than avg_duration and
+                        # still terminate cleanly.  Keeping the 0.99 gate for
+                        # spikes at <90% prevents premature closes during the
+                        # passive Dry phase that follows the pre-final-rinse drain.
+                        _esp_dur = getattr(self, "_end_spike_duration", 0.0)
+                        if (
+                            getattr(self, "_end_spike_seen", False)
+                            and self._expected_duration > 0
+                            and _esp_dur >= self._expected_duration * 0.90
+                        ):
+                            smart_ratio = 0.90  # pump-out confirmed near end
+                        else:
+                            smart_ratio = 0.99  # conservative: wait for expected duration
                     else:
                         smart_ratio = 0.98
 
@@ -1322,6 +1342,7 @@ class CycleDetector:
         # Reset end spike tracker when entering ENDING state
         if new_state == STATE_ENDING:
             self._end_spike_seen = False
+            self._end_spike_duration = 0.0
         elif new_state == STATE_DELAY_WAIT:
             # Band-accumulation tracker already played its role getting us
             # here; reset it so a future OFF→band cycle starts fresh.
@@ -1702,6 +1723,7 @@ class CycleDetector:
                 self._state_enter_time.isoformat() if self._state_enter_time else None
             ),
             "end_spike_seen": self._end_spike_seen,
+            "end_spike_duration": self._end_spike_duration,
             "match_ambiguous": self._match_ambiguous,
             "match_prefix_ambiguous": self._match_prefix_ambiguous,
             "ml_defer_start_duration": self._ml_defer_start_duration,
@@ -1754,6 +1776,7 @@ class CycleDetector:
                 self._matched_profile = restored_match
             self._expected_duration = sanitized_expected
             self._end_spike_seen = snapshot.get("end_spike_seen", False)
+            self._end_spike_duration = float(snapshot.get("end_spike_duration", 0.0))
             self._match_ambiguous = snapshot.get("match_ambiguous", False)
             self._match_prefix_ambiguous = snapshot.get("match_prefix_ambiguous", False)
             self._ml_defer_start_duration = snapshot.get("ml_defer_start_duration")

@@ -60,7 +60,11 @@ def resolve_scorer(capability: str, store: object | None):
             versions = store.get_ml_model_versions() or {}  # type: ignore[attr-defined]
             record = versions.get(capability)
             spec = record.get("spec") if isinstance(record, dict) else None
-            if isinstance(spec, dict):
+            # Only treat a spec as a classifier here. A regression spec
+            # (standardized_linear) must never be sigmoid-squashed by score_spec;
+            # classifier and regression capability keys are disjoint today, but this
+            # guard keeps it safe if a key were ever reused.
+            if isinstance(spec, dict) and spec.get("kind") != "standardized_linear":
                 from .trainer import score_spec
 
                 return (lambda feats, _s=spec: float(score_spec(_s, feats)), "on_device")
@@ -86,13 +90,13 @@ def resolve_scorer(capability: str, store: object | None):
 def resolve_regressor(capability: str, store: object | None):
     """Return ``(predict_fn, source)`` for a regression capability.
 
-    Regression models (currently only ``"remaining_time"``) have **no** shipped
-    embedded baseline - they are trained purely on-device (Stage 4) and stored as
-    ``standardized_linear`` specs. This returns ``(None, None)`` until on-device
-    training promotes one, so live behaviour is unchanged until then.
+    Regression models (``"remaining_time"`` and ``"total_energy"``) have **no**
+    shipped embedded baseline - they are trained purely on-device (Stage 4) and
+    stored as ``standardized_linear`` specs. This returns ``(None, None)`` until
+    on-device training promotes one, so live behaviour is unchanged until then.
 
     ``predict_fn`` maps a feature mapping -> float in the model's target units
-    (for ``remaining_time`` that is a completion fraction in ~[0, 1]).
+    (a completion fraction in ~[0, 1] for both regression capabilities).
     """
     if store is None:
         return (None, None)

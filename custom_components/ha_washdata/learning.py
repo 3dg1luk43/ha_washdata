@@ -668,7 +668,7 @@ class LearningManager:
 
         # Verify it was labeled (cycle found)
         cycles = self.profile_store.get_past_cycles()
-        cycle = next((c for c in cycles if c["id"] == cycle_id), None)
+        cycle = next((c for c in cycles if c.get("id") == cycle_id), None)
 
         return bool(cycle and cycle.get("auto_labeled"))
 
@@ -724,7 +724,7 @@ class LearningManager:
                 self._auto_label_cycle(cycle_id, profile_name, duration_sec)
                 if duration_sec is not None:
                     cycles = self.profile_store.get_past_cycles()
-                    confirmed_cycle = next((c for c in cycles if c["id"] == cycle_id), None)
+                    confirmed_cycle = next((c for c in cycles if c.get("id") == cycle_id), None)
                     if confirmed_cycle:
                         confirmed_cycle["duration"] = duration_sec
                 profiles_to_rebuild.add(profile_name)
@@ -750,7 +750,7 @@ class LearningManager:
                 # explicitly provided - apply it directly to the cycle so the value
                 # is never silently dropped.
                 cycles = self.profile_store.get_past_cycles()
-                cycle_to_fix = next((c for c in cycles if c["id"] == cycle_id), None)
+                cycle_to_fix = next((c for c in cycles if c.get("id") == cycle_id), None)
                 if cycle_to_fix:
                     cycle_to_fix["duration"] = duration_sec
                     cycle_to_fix["manual_duration"] = duration_sec
@@ -784,7 +784,7 @@ class LearningManager:
 
     def _auto_label_cycle(self, cycle_id: str, profile_name: str, manual_duration: float | None = None) -> None:
         cycles = self.profile_store.get_past_cycles()
-        cycle = next((c for c in cycles if c["id"] == cycle_id), None)
+        cycle = next((c for c in cycles if c.get("id") == cycle_id), None)
         if cycle:
             cycle["profile_name"] = profile_name
             cycle["auto_labeled"] = True
@@ -806,7 +806,7 @@ class LearningManager:
         self._auto_label_cycle(cycle_id, corrected_profile, corrected_duration)
         if corrected_duration is not None:
             cycles = self.profile_store.get_past_cycles()
-            cycle = next((c for c in cycles if c["id"] == cycle_id), None)
+            cycle = next((c for c in cycles if c.get("id") == cycle_id), None)
             if cycle:
                 cycle["duration"] = corrected_duration
         # Profile stats will be recalculated when envelope is rebuilt

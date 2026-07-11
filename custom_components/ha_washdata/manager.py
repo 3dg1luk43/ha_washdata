@@ -1437,6 +1437,31 @@ class WashDataManager:
                             try:
                                 power_data = decompress_power_data(last_cycle)
                                 if power_data:
+                                    # decompress_power_data returns (offset_seconds, watts)
+                                    # tuples, but restore_state_snapshot parses reading[0]
+                                    # as an ISO datetime. Convert offsets to absolute ISO
+                                    # timestamps (base = cycle start) so the resurrected
+                                    # trace is not silently dropped (B4).
+                                    _res_start = dt_util.parse_datetime(
+                                        last_cycle["start_time"]
+                                    )
+                                    if _res_start is not None:
+                                        if _res_start.tzinfo is None:
+                                            _res_start = _res_start.replace(
+                                                tzinfo=dt_util.now().tzinfo
+                                            )
+                                        power_readings = [
+                                            (
+                                                (
+                                                    _res_start
+                                                    + timedelta(seconds=float(off))
+                                                ).isoformat(),
+                                                p,
+                                            )
+                                            for off, p in power_data
+                                        ]
+                                    else:
+                                        power_readings = power_data
                                     active_snapshot_to_restore = {
                                         # Reconstruct basic running state
                                         "state": "running",
@@ -1449,7 +1474,7 @@ class WashDataManager:
                                             if power_data
                                             else 0
                                         ),
-                                        "power_readings": power_data,
+                                        "power_readings": power_readings,
                                         "ma_buffer": (
                                             [p for _, p in power_data[-10:]]
                                             if power_data
@@ -3375,10 +3400,15 @@ class WashDataManager:
                 except (TypeError, ValueError, ArithmeticError):
                     cycle_energy_wh = 0.0
 
-        # Ghost cycle: short AND low energy (real cycles have energy even if short)
+        # Ghost cycle: short AND low energy (real cycles have energy even if short).
+        # Suppress it exactly like the dishwasher pump-out branch below: feed the
+        # auto-tune counter but do NOT store it or run the cycle-end pipeline. Without
+        # the return a sub-60 s / sub-0.05 Wh blip would fall through to persistence
+        # and the (un-gated) finish notification, firing a phantom "cycle finished".
         if duration < 60 and cycle_energy_wh < 0.05:
             self._handle_noise_cycle(max_power)
-        elif self.device_type == "dishwasher" and prev_cycle_end_time is not None:
+            return  # Do not store this as a real cycle
+        if self.device_type == "dishwasher" and prev_cycle_end_time is not None:
             # Pump-out suppression: dishwashers end cycles with a brief drain pump
             # (typically 30-300 s, < 1 Wh) a few minutes after the main cycle
             # finishes.  If a short, low-energy cycle starts within 10 minutes of
@@ -3403,8 +3433,15 @@ class WashDataManager:
         # Store energy for notification and persistence (calculated above for ghost detection)
         cycle_data["energy_wh"] = round(cycle_energy_wh, 3)
 
-        # Schedule heavy post-processing asynchronously
-        self.hass.async_create_task(self._async_process_cycle_end(cycle_data))
+        # Schedule heavy post-processing asynchronously. Capture this cycle's identity
+        # token so the async tail can tell if a NEW cycle started while it was awaiting
+        # (power changes are handled synchronously, so a back-to-back load can drive the
+        # detector into a fresh RUNNING before post-processing completes). See B1 in
+        # _async_process_cycle_end.
+        end_token = self._ranking_snapshot_cycle_id
+        self.hass.async_create_task(
+            self._async_process_cycle_end(cycle_data, cycle_token=end_token)
+        )
 
     def _ml_end_confidence(
         self, points: list[tuple[float, float]], expected_duration: float
@@ -3788,8 +3825,15 @@ class WashDataManager:
         except (ValueError, TypeError):
             return ""
 
-    async def _async_process_cycle_end(self, cycle_data: dict[str, Any]) -> None:
-        """Process cycle completion asynchronously (heavy tasks)."""
+    async def _async_process_cycle_end(
+        self, cycle_data: dict[str, Any], cycle_token: str | None = None
+    ) -> None:
+        """Process cycle completion asynchronously (heavy tasks).
+
+        ``cycle_token`` is the ``_ranking_snapshot_cycle_id`` captured when this cycle
+        ended. The terminal-state reset at the tail is skipped if a new cycle has
+        started since (token changed), so back-to-back cycles are not clobbered (B1).
+        """
 
         # FINAL PROFILE MATCH: If still detecting, try one last match with complete cycle data
         if self._current_program in ("detecting...", "restored..."):
@@ -4094,6 +4138,24 @@ class WashDataManager:
                 predicted_duration=self._matched_profile_duration,
                 match_result=self._last_match_result,
             )
+
+        # B1: a new cycle may have started while the heavy post-processing above was
+        # awaiting. If so, the manager's live-cycle fields (_current_program,
+        # _cycle_start_time, _ranking_snapshot_cycle_id, progress) now belong to the
+        # NEW cycle. Zeroing them here — and re-arming the state-expiry timer — used to
+        # clobber the running cycle and, once it hit PAUSED/ENDING past the reset delay,
+        # reset it to Off mid-run. Detect the new cycle via the identity token and skip
+        # the terminal-state reset; cycle A was already persisted/learned/notified above.
+        if cycle_token is not None and self._ranking_snapshot_cycle_id != cycle_token:
+            self._logger.debug(
+                "Cycle-end post-processing completed after a new cycle started "
+                "(token %s -> %s); skipping terminal-state reset to preserve the "
+                "live cycle.",
+                cycle_token,
+                self._ranking_snapshot_cycle_id,
+            )
+            self._notify_update()
+            return
 
         # Clear all state and timers - zero everything out
         self._current_program = "off"

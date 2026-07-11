@@ -25,7 +25,9 @@ from custom_components.ha_washdata.ml.feature_extraction import (
     progress_features,
 )
 from custom_components.ha_washdata.ml.training_task import (
+    _holdout_split,
     _progress_dataset,
+    _regression_split,
     _train_regression_capability,
     train_from_cycles,
 )
@@ -176,7 +178,7 @@ def _cycle(i: int, total: float) -> dict:
 def test_progress_dataset_synthesizes_labelled_prefixes() -> None:
     cycles = [_cycle(i, 3600.0) for i in range(6)]
     expectations = {"Cotton": _EXP}
-    X, y, columns = _progress_dataset(cycles, expectations)
+    X, y, columns, _g = _progress_dataset(cycles, expectations)
     assert columns == list(PROGRESS_FEATURE_COLUMNS)
     assert X.shape[0] == y.shape[0]
     assert X.shape[0] >= 6 * 5  # ~6 cut fractions per cycle
@@ -187,15 +189,58 @@ def test_progress_dataset_synthesizes_labelled_prefixes() -> None:
     assert np.corrcoef(X[:, 0], y)[0, 1] > 0.8
 
 
+def test_progress_dataset_returns_per_cycle_groups() -> None:
+    """B5: each cycle's prefix rows share one group id (so a group == a source cycle)."""
+    cycles = [_cycle(i, 3600.0) for i in range(6)]
+    X, _y, _columns, groups = _progress_dataset(cycles, {"Cotton": _EXP})
+    assert groups.shape[0] == X.shape[0]
+    # 6 cycles all produced rows -> 6 distinct groups, each with multiple prefix rows.
+    assert len(np.unique(groups)) == 6
+    counts = np.bincount(groups)
+    assert np.all(counts >= 2)
+
+
+def test_group_holdout_indices_are_group_disjoint() -> None:
+    """B5: the group-aware index split assigns whole groups to one side only."""
+    from custom_components.ha_washdata.ml.training_task import _group_holdout_indices
+    # 4 groups, uneven row counts (mimics 1+N end rows / prefix rows per cycle).
+    groups = np.array([0, 0, 0, 1, 1, 2, 3, 3, 3, 3], dtype=int)
+    for seed in range(6):
+        split = _group_holdout_indices(groups, frac=0.25, seed=seed)
+        assert split is not None
+        train_idx, test_idx = split
+        tr_groups = set(groups[train_idx].tolist())
+        te_groups = set(groups[test_idx].tolist())
+        assert tr_groups and te_groups
+        assert tr_groups.isdisjoint(te_groups)              # no cycle straddles the split
+        assert tr_groups | te_groups == {0, 1, 2, 3}         # every group placed
+    # A single group can never be split (nothing to hold out).
+    assert _group_holdout_indices(np.zeros(5, dtype=int), frac=0.25, seed=0) is None
+
+
+def test_regression_split_respects_groups() -> None:
+    """B5: _regression_split with groups never leaks a group across train/test."""
+    from custom_components.ha_washdata.ml.training_task import _group_holdout_indices
+    X = np.arange(20, dtype=float).reshape(10, 2)
+    y = np.arange(10, dtype=float)
+    groups = np.array([0, 0, 1, 1, 2, 2, 3, 3, 4, 4], dtype=int)
+    # The split must agree with the group-index helper (whole groups per side).
+    split = _group_holdout_indices(groups, frac=0.2, seed=0)
+    assert split is not None
+    X_tr, _y_tr, X_te, _y_te = _regression_split(X, y, groups, frac=0.2, seed=0)
+    assert X_tr.shape[0] + X_te.shape[0] == X.shape[0]
+    assert X_tr.shape[0] > 0 and X_te.shape[0] > 0
+
+
 def test_progress_dataset_skips_profiles_without_expectation() -> None:
     cycles = [_cycle(i, 3600.0) for i in range(6)]
-    X, y, _ = _progress_dataset(cycles, {})  # no expectations at all
+    X, y, _, _g = _progress_dataset(cycles, {})  # no expectations at all
     assert X.shape[0] == 0
 
 
 def test_progress_dataset_skips_short_cycles() -> None:
     tiny = {**_cycle(0, 30.0), "power_data": [[0.0, 500.0], [30.0, 0.0]]}
-    X, _y, _ = _progress_dataset([tiny], {"Cotton": _EXP})
+    X, _y, _, _g = _progress_dataset([tiny], {"Cotton": _EXP})
     assert X.shape[0] == 0
 
 
