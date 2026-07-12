@@ -21,7 +21,9 @@
     "steady": "→ sabit",
     "underrun": "Normalden daha hızlı bitti",
     "using_defaults": "Varsayılan değerler kullanılıyor",
-    "using_tuned": "Ayarlanmış ağırlıklar kullanılıyor"
+    "using_tuned": "Ayarlanmış ağırlıklar kullanılıyor",
+    "overrun_ratio": "({x}x beklenen)",
+    "underrun_ratio": "(beklenenin %{pct}'i)"
   },
   "btn": {
     "add_device": "+ Cihaz ekle",
@@ -142,7 +144,9 @@
     "trim_split": "Kırp / Böl",
     "undo": "Geri al",
     "use": "Kullan",
-    "wipe_all": "Tüm Verileri Sil"
+    "wipe_all": "Tüm Verileri Sil",
+    "delete_selected": "Seçilenleri sil ({n})",
+    "group_suggest": "Grup {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Geçmiş üzerinde test et",
     "toggle_sidebar": "Ev Asistanı kenar çubuğunu aç/kapat",
     "tools_and_data": "Araçlar ve Veriler",
-    "wipe_history": "Geçmişi Sil"
+    "wipe_history": "Geçmişi Sil",
+    "recommendations": "Öneriler ({n})"
   },
   "health": {
     "fair": "Kabul edilebilir profil kalitesi",
@@ -439,7 +444,32 @@
     "ungrouped": "Grupsuz",
     "unlabelled": "Etiketsiz",
     "unlabelled_paren": "(etiketsiz)",
-    "warp_path": "Büküm yolu"
+    "warp_path": "Büküm yolu",
+    "input": "Girdi:",
+    "start": "Başlangıç",
+    "end": "Bitiş",
+    "unit_s": "(s)",
+    "reviewed_on": "{date} tarihinde incelendi",
+    "unknown": "Bilinmiyor",
+    "quality": "Kalite",
+    "tags": "Etiketler",
+    "at": "saat",
+    "pct_match_confidence": "%{pct} eşleşme güveni",
+    "ha_restarted": "HA yeniden başlatıldı",
+    "from_start": "Başlangıçtan",
+    "to_end": "Bitişe kadar",
+    "click_to_select": "seçmek için tıklayın",
+    "envelope": "Zarf",
+    "zoom_hint": "yakınlaştırmak için kaydırın · sıfırlamak için çift tıklayın",
+    "loading_paren": "(yükleniyor…)",
+    "time_remaining": "~{v} kaldı",
+    "no_duration": "süre yok",
+    "duration_avg": "~{v}dk ort.",
+    "name_placeholder": "(ad)",
+    "n_shown": ", {n} gösteriliyor",
+    "cycles_title": "Döngüler ({n})",
+    "pg_detecting": "Algılanıyor",
+    "pg_best_marker": "En iyi: {v}"
   },
   "log": {
     "all_levels": "Tüm seviyeler"
@@ -452,7 +482,11 @@
     "fit_strong": "Güçlü",
     "fit_weak": "Zayıf",
     "fit_word": "uyum",
-    "personalized": "● Bu makineye kişiselleştirilmiş"
+    "personalized": "● Bu makineye kişiselleştirilmiş",
+    "better_than_baseline": "temel tahminden %{pct} daha iyi ({metric})",
+    "trend_improving_tip": "Bu modelin uyumu son yeniden kontrollerde iyileşti.",
+    "trend_declining_tip": "Bu modelin uyumu son yeniden kontrollerde geriledi, daha fazla döngü incelemek yeniden öğrenmesine yardımcı olabilir.",
+    "trend_steady_tip": "Bu modelin uyumu son yeniden kontrollerde yaklaşık olarak sabit kaldı."
   },
   "modal": {
     "auto_label": "Döngüleri Otomatik Etiketle",
@@ -472,7 +506,25 @@
     "process_recording": "Kaydı İşle",
     "delete_maintenance_msg": "Bu bakım kaydı silinsin mi? Bu işlem geri alınamaz.",
     "delete_maintenance_title": "Bakım Kaydını Sil",
-    "relabel_cycles": "{count} döngüyü yeniden etiketle"
+    "relabel_cycles": "{count} döngüyü yeniden etiketle",
+    "delete_automation_title": "Otomasyonu Sil",
+    "delete_automation_msg": "\"{name}\" otomasyonu Home Assistant'tan silinsin mi? Bu işlem geri alınamaz.",
+    "remove_legacy_title": "Eski Eylemleri Kaldır",
+    "remove_legacy_msg": "Eski özel eylemler kaldırılsın mı? Döngü olaylarında tetiklenmeyi durduracaklar. Bu işlem panelden geri alınamaz.",
+    "discard_recording_title": "Kaydı At",
+    "discard_recording_msg": "Saklanan kayıt atılsın mı? Bu işlem geri alınamaz.",
+    "dismiss_all_title": "Tüm Geri Bildirimleri Kapat",
+    "dismiss_all_msg": "Bekleyen {count} geri bildirim isteğinin tümü kapatılsın mı?",
+    "dismiss_all_ok": "Tümünü Kapat",
+    "delete_phase_title": "Aşamayı Sil",
+    "delete_phase_msg": "\"{name}\" aşaması silinsin mi?",
+    "clear_debug_title": "Hata Ayıklama Verilerini Temizle",
+    "clear_debug_msg": "Saklanan tüm hata ayıklama izleri silinsin mi?",
+    "wipe_all_title": "Tüm Verileri Sil",
+    "wipe_all_msg": "⚠️ Bu, TÜM döngüleri ve profilleri kalıcı olarak siler. Bu işlem geri alınamaz.",
+    "wipe_all_ok": "Her Şeyi Sil",
+    "force_stop_title": "Döngüyü Zorla Durdur",
+    "force_stop_msg": "Etkin döngü şimdi zorla durdurulsun mu? Döngü, kesintiye uğramış olarak kaydedilecek."
   },
   "msg": {
     "appliance_monitor": "Cihaz monitörü",
@@ -654,7 +706,17 @@
     "updated": "Güncellendi",
     "warmup_badge": "Hâlâ öğreniyor ({done}/{needed} döngü)",
     "warmup_detail": "Bu profil, otomatik eşleştirme başlamadan önce {needed} etiketli döngüye ihtiyaç duyar. Her onaylanan döngü öğrenmesine yardımcı olur.",
-    "wipe_history_warning": "Tüm döngüleri ve profilleri kalıcı olarak silin. Geri alınamaz."
+    "wipe_history_warning": "Tüm döngüleri ve profilleri kalıcı olarak silin. Geri alınamaz.",
+    "compare_overlay_tip": "Her döngünün hangi programa benzediğini görmek için öğrenilen profil zarflarını üst üste bindirin.",
+    "duration_trend_up_tip": "Süre artıyor (%{pct}/döngü)",
+    "duration_trend_down_tip": "Süre azalıyor (%{pct}/döngü)",
+    "energy_trend_up_tip": "Enerji artıyor (%{pct}/döngü)",
+    "energy_trend_down_tip": "Enerji azalıyor (%{pct}/döngü)",
+    "performance_trending": "Performans eğilimi",
+    "pg_select_cycle_hint": "Yüklemek için bir döngü seçin ve ↺ düğmesine tıklayın",
+    "pg_sweep_progress": "Adım {done} / {total}",
+    "pg_analysis_hint": "Analizi yüklemek için bir döngü seçin ve ↺ düğmesine tıklayın.",
+    "diagnostics_load_failed": "Tanılamalar yüklenemedi: {error}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Ani düşüş anında bitiş sayılır",
@@ -1180,7 +1242,15 @@
     "interrupted": "Kesintiye uğradı",
     "ready": "İşlemeye hazır",
     "recording": "Kaydediliyor",
-    "training": "Eğitiliyor…"
+    "training": "Eğitiliyor…",
+    "saving": "Kaydediliyor…",
+    "rebuilding": "Yeniden oluşturuluyor…",
+    "analyzing": "Analiz ediliyor…",
+    "resetting": "Sıfırlanıyor…",
+    "reverting": "Geri alınıyor…",
+    "trimming": "Kırpılıyor…",
+    "splitting": "Bölünüyor…",
+    "deleting": "Siliniyor…"
   },
   "tab": {
     "advanced": "Gelişmiş",
@@ -1270,7 +1340,9 @@
     "relabel_done": "{count} döngü yeniden etiketlendi",
     "relabel_failed": "Yeniden etiketleme başarısız: {error}",
     "reminders_save_failed": "Hatırlatıcılar kaydedilemedi: {error}",
-    "reminders_saved": "Servis hatırlatıcıları kaydedildi"
+    "reminders_saved": "Servis hatırlatıcıları kaydedildi",
+    "pause_no_cycle": "Duraklatılacak etkin döngü yok",
+    "resume_no_cycle": "Sürdürülecek duraklatılmış döngü yok"
   },
   "suggestion": {
     "both_agree": "WashData öneriyor",
@@ -1345,5 +1417,26 @@
     "drum_clean": "Tamburu temizle",
     "filter_clean": "Filtreyi temizle",
     "other": "Diğer"
+  },
+  "col": {
+    "profile_tip": "Eşleşen program adı. Etiketsiz, döngünün sonunda hiçbir profilin eşleşmediği anlamına gelir.",
+    "status_tip": "Döngü sonucu: Tamamlandı (doğal bitiş), Kesintili (ani güç düşüşü), Zorla Durduruldu (manuel) veya İnceleme Gerekiyor (geri bildirim bekliyor).",
+    "date_tip": "Döngünün başladığı tarih ve saat.",
+    "duration_tip": "Baştan sona toplam döngü çalışma süresi.",
+    "energy_tip": "Tüketilen toplam enerji (kWh). Gücün zamana göre integrali alınarak hesaplanır.",
+    "cost_tip": "Bu döngünün enerji maliyeti; tamamlandığında o an geçerli olan fiyat kullanılarak sabitlenir (enerji x kWh başına fiyat). Doldurmak için Ayarlar altında bir fiyat belirleyin.",
+    "confidence_tip": "Profil eşleşme güveni (0-100%). Döngünün güç eğrisinin, tanımlanan programla ne kadar yakından eşleştiği.",
+    "health_tip": "ML döngü sağlığı (yüksek = daha iyi). İncelemek ve gözden geçirmek için bir döngüye tıklayın."
+  },
+  "stat": {
+    "avg": "ort.",
+    "min": "min {v}",
+    "max": "maks {v}",
+    "consistency": "tutarlılık ±{v}",
+    "total": "toplam {v}",
+    "last_run": "son çalıştırma {v}",
+    "score": "puan %{pct}",
+    "duration_cv": "süre CV %{pct}",
+    "avg_confidence": "ort. güven %{pct}"
   }
 }

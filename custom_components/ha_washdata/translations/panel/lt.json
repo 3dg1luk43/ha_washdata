@@ -21,7 +21,9 @@
     "steady": "→ pastovus",
     "underrun": "Baigėsi greičiau nei įprastai",
     "using_defaults": "Naudojami pristatyti numatytieji nustatymai",
-    "using_tuned": "Naudojant suderintus svorius"
+    "using_tuned": "Naudojant suderintus svorius",
+    "overrun_ratio": "({x}x tikėtino)",
+    "underrun_ratio": "({pct}% tikėtino)"
   },
   "btn": {
     "add_device": "+ Pridėti įrenginį",
@@ -142,7 +144,9 @@
     "trim_split": "Apkarpyti / padalinti",
     "undo": "Anuliuoti",
     "use": "Naudokite",
-    "wipe_all": "Išvalykite visus duomenis"
+    "wipe_all": "Išvalykite visus duomenis",
+    "delete_selected": "Ištrinti pasirinktus ({n})",
+    "group_suggest": "Grupė {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Testavimas su istorija",
     "toggle_sidebar": "Perjungti „Home Assistant“ šoninę juostą",
     "tools_and_data": "Įrankiai ir duomenys",
-    "wipe_history": "Išvalyti istoriją"
+    "wipe_history": "Išvalyti istoriją",
+    "recommendations": "Rekomendacijos ({n})"
   },
   "health": {
     "fair": "Priimtina profilio kokybė",
@@ -439,7 +444,32 @@
     "ungrouped": "Nesugrupuota",
     "unlabelled": "Nepaženklinta",
     "unlabelled_paren": "(be etiketės)",
-    "warp_path": "Iškraipymo kelias"
+    "warp_path": "Iškraipymo kelias",
+    "input": "Įvestis:",
+    "start": "Pradžia",
+    "end": "Pabaiga",
+    "unit_s": "(s)",
+    "reviewed_on": "peržiūrėta {date}",
+    "unknown": "Nežinoma",
+    "quality": "Kokybė",
+    "tags": "Žymos",
+    "at": "ties",
+    "pct_match_confidence": "{pct}% atitikties pasitikėjimas",
+    "ha_restarted": "HA paleista iš naujo",
+    "from_start": "Nuo pradžios",
+    "to_end": "Iki pabaigos",
+    "click_to_select": "spustelėkite norėdami pasirinkti",
+    "envelope": "Galios juosta",
+    "zoom_hint": "slinkite norėdami priartinti · dukart spustelėkite atstatymui",
+    "loading_paren": "(kraunama…)",
+    "time_remaining": "liko ~{v}",
+    "no_duration": "nėra trukmės",
+    "duration_avg": "~{v}min vid.",
+    "name_placeholder": "(pavadinimas)",
+    "n_shown": ", rodoma {n}",
+    "cycles_title": "Ciklai ({n})",
+    "pg_detecting": "Aptinkama",
+    "pg_best_marker": "Geriausia: {v}"
   },
   "log": {
     "all_levels": "Visi lygiai"
@@ -452,7 +482,11 @@
     "fit_strong": "Stiprus",
     "fit_weak": "Silpnas",
     "fit_word": "tinka",
-    "personalized": "● Pritaikyta šiai mašinai"
+    "personalized": "● Pritaikyta šiai mašinai",
+    "better_than_baseline": "{pct}% geriau nei bazinis įvertis ({metric})",
+    "trend_improving_tip": "Šio modelio atitiktis pagerėjo per pastarąsias patikras.",
+    "trend_declining_tip": "Šio modelio atitiktis suprastėjo per pastarąsias patikras · daugiau peržiūrėtų ciklų gali padėti jam iš naujo mokytis.",
+    "trend_steady_tip": "Šio modelio atitiktis per pastarąsias patikras išliko maždaug pastovi."
   },
   "modal": {
     "auto_label": "Automatinio etikečių ciklai",
@@ -472,7 +506,25 @@
     "process_recording": "Proceso įrašymas",
     "delete_maintenance_msg": "Ištrinti šį priežiūros įrašą? To atšaukti nepavyks.",
     "delete_maintenance_title": "Ištrinti priežiūros įvykį",
-    "relabel_cycles": "Pažymėti iš naujo {count} ciklus"
+    "relabel_cycles": "Pažymėti iš naujo {count} ciklus",
+    "delete_automation_title": "Ištrinti automatizavimą",
+    "delete_automation_msg": "Ištrinti automatizavimą „{name}“ iš Home Assistant? To nebus galima atšaukti.",
+    "remove_legacy_title": "Pašalinti pasenusius veiksmus",
+    "remove_legacy_msg": "Pašalinti pasenusius pasirinktinius veiksmus? Jie nustos veikti ciklo įvykiuose. To nebus galima atšaukti iš skydelio.",
+    "discard_recording_title": "Išmesti įrašą",
+    "discard_recording_msg": "Išmesti išsaugotą įrašą? To nebus galima atšaukti.",
+    "dismiss_all_title": "Atsisakyti visų atsiliepimų",
+    "dismiss_all_msg": "Atsisakyti visų {count} laukiančių atsiliepimų užklausų?",
+    "dismiss_all_ok": "Atsisakyti visų",
+    "delete_phase_title": "Ištrinti fazę",
+    "delete_phase_msg": "Ištrinti fazę „{name}“?",
+    "clear_debug_title": "Išvalyti derinimo duomenis",
+    "clear_debug_msg": "Ištrinti visus išsaugotus derinimo pėdsakus?",
+    "wipe_all_title": "Ištrinti visus duomenis",
+    "wipe_all_msg": "⚠️ Tai visam laikui ištrina VISUS ciklus ir profilius. To nebus galima atšaukti.",
+    "wipe_all_ok": "Ištrinti viską",
+    "force_stop_title": "Priverstinai sustabdyti ciklą",
+    "force_stop_msg": "Priverstinai sustabdyti aktyvų ciklą dabar? Ciklas bus išsaugotas kaip nutrauktas."
   },
   "msg": {
     "appliance_monitor": "Prietaisų monitorius",
@@ -654,7 +706,17 @@
     "updated": "Atnaujinta",
     "warmup_badge": "Vis dar mokosi ({done}/{needed} ciklai)",
     "warmup_detail": "Šiam profiliui reikia {needed} pažymėtų ciklų, kol prasidės automatinis atitikimas. Kiekvienas patvirtintas ciklas padeda mokytis.",
-    "wipe_history_warning": "Visam laikui ištrinti visus ciklus ir profilius. Negalima anuliuoti."
+    "wipe_history_warning": "Visam laikui ištrinti visus ciklus ir profilius. Negalima anuliuoti.",
+    "compare_overlay_tip": "Uždėkite išmoktų profilių galios juostas, kad matytumėte, kurią programą primena kiekvienas ciklas.",
+    "duration_trend_up_tip": "Trukmė didėja ({pct}%/ciklui)",
+    "duration_trend_down_tip": "Trukmė mažėja ({pct}%/ciklui)",
+    "energy_trend_up_tip": "Energija didėja ({pct}%/ciklui)",
+    "energy_trend_down_tip": "Energija mažėja ({pct}%/ciklui)",
+    "performance_trending": "Našumo tendencija",
+    "pg_select_cycle_hint": "Pasirinkite ciklą ir spustelėkite ↺, kad įkeltumėte",
+    "pg_sweep_progress": "Žingsnis {done} / {total}",
+    "pg_analysis_hint": "Pasirinkite ciklą ir spustelėkite ↺, kad įkeltumėte analizę.",
+    "diagnostics_load_failed": "Nepavyko įkelti diagnostikos: {error}"
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1169,7 +1231,15 @@
     "interrupted": "Pertraukė",
     "ready": "Paruošta apdoroti",
     "recording": "Įrašoma",
-    "training": "Mokymas…"
+    "training": "Mokymas…",
+    "saving": "Įrašoma…",
+    "rebuilding": "Perkuriama…",
+    "analyzing": "Analizuojama…",
+    "resetting": "Atstatoma…",
+    "reverting": "Grąžinama…",
+    "trimming": "Apkarpoma…",
+    "splitting": "Padalijama…",
+    "deleting": "Trinama…"
   },
   "tab": {
     "advanced": "Išplėstinė",
@@ -1259,7 +1329,9 @@
     "relabel_done": "Iš naujo pažymėta ciklų: {count}",
     "relabel_failed": "Nepavyko pažymėti iš naujo: {error}",
     "reminders_save_failed": "Nepavyko įrašyti priminimų: {error}",
-    "reminders_saved": "Aptarnavimo priminimai įrašyti"
+    "reminders_saved": "Aptarnavimo priminimai įrašyti",
+    "pause_no_cycle": "Nėra aktyvaus ciklo, kurį būtų galima pristabdyti",
+    "resume_no_cycle": "Nėra pristabdyto ciklo, kurį būtų galima tęsti"
   },
   "suggestion": {
     "both_agree": "WashData rekomenduoja",
@@ -1345,5 +1417,26 @@
     "start_duration_threshold": "Sekundės virš slenksčio startui patvirtinti",
     "start_threshold_w": "Mažiausia galia (W), kad būtų skaičiuojama kaip prasidėjęs",
     "stop_threshold_w": "Žemiau šios ribos aparatas laikomas išjungtu"
+  },
+  "col": {
+    "profile_tip": "Atitikusios programos pavadinimas. Nepažymėta reiškia, kad ciklo pabaigoje neatitiko joks profilis.",
+    "status_tip": "Ciklo rezultatas: Baigta (natūrali pabaiga), Nutraukta (staigus galios kritimas), Priverstinai sustabdyta (rankiniu būdu) arba Reikia peržiūros (laukia atsiliepimo).",
+    "date_tip": "Data ir laikas, kada ciklas prasidėjo.",
+    "duration_tip": "Bendra ciklo veikimo trukmė nuo pradžios iki pabaigos.",
+    "energy_tip": "Bendras suvartotos energijos kiekis (kWh). Apskaičiuojamas integruojant galią laike.",
+    "cost_tip": "Šio ciklo energijos kaina, užfiksuota jam pasibaigus pagal tuo metu galiojusią kainą (energija x kaina už kWh). Nustatykite kainą Nustatymuose, kad ji būtų užpildyta.",
+    "confidence_tip": "Profilio atitikties pasitikėjimas (0–100 %). Kaip glaudžiai ciklo galios kreivė atitiko atpažintą programą.",
+    "health_tip": "ML ciklo būklė (daugiau = geriau). Spustelėkite ciklą, kad jį patikrintumėte ir peržiūrėtumėte."
+  },
+  "stat": {
+    "avg": "vid.",
+    "min": "min {v}",
+    "max": "maks. {v}",
+    "consistency": "pastovumas ±{v}",
+    "total": "iš viso {v}",
+    "last_run": "paskutinis paleidimas {v}",
+    "score": "balas {pct}%",
+    "duration_cv": "trukmės CV {pct}%",
+    "avg_confidence": "vid. pasitikėjimas {pct}%"
   }
 }

@@ -33,6 +33,37 @@ def _device_type_options(
     return list(DEVICE_TYPES)
 
 
+def _resolve_options_first(
+    entry: config_entries.ConfigEntry, key: str, default: Any = None
+) -> Any:
+    """Resolve a config value options-first (then data), matching WashDataManager.
+
+    Reading data-first would surface the creation-time value and, after the 3.6
+    device-type remap (which updates only options), a value no longer in
+    DEVICE_TYPES.
+    """
+    return entry.options.get(key, entry.data.get(key, default))
+
+
+def _merge_structural_options(
+    entry: config_entries.ConfigEntry, user_input: dict[str, Any]
+) -> dict[str, Any]:
+    """Merge the three structural tunables into the existing options.
+
+    Only the structural fields are merged; ``entry.data`` (identity keys, name)
+    is deliberately NOT spread in. Also strip identity/data-only keys that legacy
+    entries may have leaked into options (e.g. ``CONF_NAME`` from the old
+    data-spread bug) so they don't persist there.
+    """
+    preserved = {k: v for k, v in entry.options.items() if k != CONF_NAME}
+    return {
+        **preserved,
+        CONF_DEVICE_TYPE: user_input[CONF_DEVICE_TYPE],
+        CONF_POWER_SENSOR: user_input[CONF_POWER_SENSOR],
+        CONF_MIN_POWER: user_input[CONF_MIN_POWER],
+    }
+
+
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
@@ -146,20 +177,22 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
                 errors["base"] = "unknown"
 
             if not errors:
-                new_options = {
-                    **entry.options,
-                    CONF_DEVICE_TYPE: user_input[CONF_DEVICE_TYPE],
-                    CONF_POWER_SENSOR: user_input[CONF_POWER_SENSOR],
-                    CONF_MIN_POWER: user_input[CONF_MIN_POWER],
-                }
+                new_options = _merge_structural_options(entry, user_input)
+                # NB: intentionally do NOT write entry.data here — post-3.6 the
+                # structural fields live in options and the display name is carried
+                # by the entry title (see test_reconfigure_saves_and_aborts_on_valid_input).
                 return self.async_update_reload_and_abort(
                     entry,
                     title=user_input[CONF_NAME],
                     options=new_options,
                 )
 
-        current_device_type = entry.data.get(
-            CONF_DEVICE_TYPE, entry.options.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
+        # Resolve options-first to mirror WashDataManager (which reads
+        # options.get(..., data.get(...))). Reading data-first here would show the
+        # creation-time value and, after the 3.6 device-type remap (which updates
+        # only options), a value no longer in DEVICE_TYPES.
+        current_device_type = _resolve_options_first(
+            entry, CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE
         )
         schema = vol.Schema(
             {
@@ -179,19 +212,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
                 ),
                 vol.Required(
                     CONF_POWER_SENSOR,
-                    default=entry.data.get(
-                        CONF_POWER_SENSOR,
-                        entry.options.get(CONF_POWER_SENSOR, ""),
-                    ),
+                    default=_resolve_options_first(entry, CONF_POWER_SENSOR, ""),
                 ): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="sensor"),
                 ),
                 vol.Optional(
                     CONF_MIN_POWER,
-                    default=entry.data.get(
-                        CONF_MIN_POWER,
-                        entry.options.get(CONF_MIN_POWER, DEFAULT_MIN_POWER),
-                    ),
+                    default=_resolve_options_first(entry, CONF_MIN_POWER, DEFAULT_MIN_POWER),
                 ): vol.Coerce(float),
             }
         )
@@ -228,8 +255,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Show the minimal options form."""
         entry = self._config_entry
-        current_device_type = entry.data.get(
-            CONF_DEVICE_TYPE, entry.options.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
+        # Resolve options-first to mirror WashDataManager (which reads
+        # options.get(..., data.get(...))). Reading data-first here would show the
+        # creation-time value and, after the 3.6 device-type remap (which updates
+        # only options), a value no longer in DEVICE_TYPES.
+        current_device_type = _resolve_options_first(
+            entry, CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE
         )
 
         errors: dict[str, str] = {}
@@ -239,7 +270,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 errors[CONF_MIN_POWER] = "invalid_power"
             if not errors:
                 new_name = str(user_input.get(CONF_NAME, "")).strip()
-                new_options = {**entry.data, **entry.options, **user_input}
+                new_options = _merge_structural_options(entry, user_input)
                 if new_name and new_name != entry.title:
                     self.hass.config_entries.async_update_entry(
                         entry,
@@ -266,19 +297,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 ),
                 vol.Required(
                     CONF_POWER_SENSOR,
-                    default=entry.data.get(
-                        CONF_POWER_SENSOR,
-                        entry.options.get(CONF_POWER_SENSOR, ""),
-                    ),
+                    default=_resolve_options_first(entry, CONF_POWER_SENSOR, ""),
                 ): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="sensor"),
                 ),
                 vol.Optional(
                     CONF_MIN_POWER,
-                    default=entry.data.get(
-                        CONF_MIN_POWER,
-                        entry.options.get(CONF_MIN_POWER, DEFAULT_MIN_POWER),
-                    ),
+                    default=_resolve_options_first(entry, CONF_MIN_POWER, DEFAULT_MIN_POWER),
                 ): vol.Coerce(float),
             }
         )

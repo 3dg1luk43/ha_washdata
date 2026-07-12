@@ -2061,7 +2061,9 @@ class ProfileStore:
                 if health.get(name, {}).get("health_status") == "poor":
                     continue
                 if t.get("duration_trend") == "up":
-                    pct = abs(float(t.get("duration_slope_pct") or 0.0)) * 100.0
+                    # duration_slope_pct is already expressed as %/cycle by
+                    # compute_profile_trends (dur_slope * 100); do NOT re-scale.
+                    pct = abs(float(t.get("duration_slope_pct") or 0.0))
                     advisories.append({
                         "profile": name, "severity": "info", "code": "duration_trend_up",
                         "message": (
@@ -2071,7 +2073,8 @@ class ProfileStore:
                         ),
                     })
                 elif t.get("energy_trend") == "up":
-                    pct = abs(float(t.get("energy_slope_pct") or 0.0)) * 100.0
+                    # energy_slope_pct is already %/cycle (en_slope * 100); no re-scale.
+                    pct = abs(float(t.get("energy_slope_pct") or 0.0))
                     advisories.append({
                         "profile": name, "severity": "info", "code": "energy_trend_up",
                         "message": (

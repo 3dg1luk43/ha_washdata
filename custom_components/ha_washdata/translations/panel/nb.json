@@ -21,7 +21,9 @@
     "steady": "→ stødig",
     "underrun": "Ble ferdig raskere enn vanlig",
     "using_defaults": "Bruker standardverdier for levering",
-    "using_tuned": "Bruker avstemte vekter"
+    "using_tuned": "Bruker avstemte vekter",
+    "overrun_ratio": "({x}x forventet)",
+    "underrun_ratio": "({pct}% av forventet)"
   },
   "btn": {
     "add_device": "+ Legg til enhet",
@@ -142,7 +144,9 @@
     "trim_split": "Trim / Splitt",
     "undo": "Angre",
     "use": "Bruk",
-    "wipe_all": "Tørk alle data"
+    "wipe_all": "Tørk alle data",
+    "delete_selected": "Slett valgte ({n})",
+    "group_suggest": "Gruppe {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Test på historikk",
     "toggle_sidebar": "Slå på Home Assistant-sidepanelet",
     "tools_and_data": "Verktøy og data",
-    "wipe_history": "Tørk historikk"
+    "wipe_history": "Tørk historikk",
+    "recommendations": "Anbefalinger ({n})"
   },
   "health": {
     "fair": "Akseptabel profilkvalitet",
@@ -439,7 +444,32 @@
     "ungrouped": "Ugruppert",
     "unlabelled": "Umerket",
     "unlabelled_paren": "(umerket)",
-    "warp_path": "Justeringsbane"
+    "warp_path": "Justeringsbane",
+    "input": "Inndata:",
+    "start": "Start",
+    "end": "Slutt",
+    "unit_s": "(s)",
+    "reviewed_on": "gjennomgått {date}",
+    "unknown": "Ukjent",
+    "quality": "Kvalitet",
+    "tags": "Merker",
+    "at": "kl.",
+    "pct_match_confidence": "{pct}% matchkonfidens",
+    "ha_restarted": "HA startet på nytt",
+    "from_start": "Fra start",
+    "to_end": "Til slutt",
+    "click_to_select": "klikk for å velge",
+    "envelope": "Omhylling",
+    "zoom_hint": "rull for å zoome · dobbeltklikk for å tilbakestille",
+    "loading_paren": "(laster…)",
+    "time_remaining": "~{v} gjenstår",
+    "no_duration": "ingen varighet",
+    "duration_avg": "~{v}m gj.sn.",
+    "name_placeholder": "(navn)",
+    "n_shown": ", {n} vist",
+    "cycles_title": "Sykluser ({n})",
+    "pg_detecting": "Oppdager",
+    "pg_best_marker": "Beste: {v}"
   },
   "log": {
     "all_levels": "Alle nivåer"
@@ -452,7 +482,11 @@
     "fit_strong": "Sterk",
     "fit_weak": "Svak",
     "fit_word": "passe",
-    "personalized": "● Personlig tilpasset denne maskinen"
+    "personalized": "● Personlig tilpasset denne maskinen",
+    "better_than_baseline": "{pct}% bedre enn grunnlinjeestimatet ({metric})",
+    "trend_improving_tip": "Denne modellens tilpasning har blitt bedre ved de siste ny-sjekkene.",
+    "trend_declining_tip": "Denne modellens tilpasning har blitt dårligere ved de siste ny-sjekkene. Å gjennomgå flere sykluser kan hjelpe den å lære på nytt.",
+    "trend_steady_tip": "Denne modellens tilpasning har holdt seg omtrent stabil ved de siste ny-sjekkene."
   },
   "modal": {
     "auto_label": "Automatiske etikettsykluser",
@@ -472,7 +506,25 @@
     "process_recording": "Prosessopptak",
     "delete_maintenance_msg": "Slette denne vedlikeholdsoppføringen? Dette kan ikke angres.",
     "delete_maintenance_title": "Slett vedlikeholdshendelse",
-    "relabel_cycles": "Merk {count} sykluser på nytt"
+    "relabel_cycles": "Merk {count} sykluser på nytt",
+    "delete_automation_title": "Slett automasjon",
+    "delete_automation_msg": "Slette automasjonen \"{name}\" fra Home Assistant? Dette kan ikke angres.",
+    "remove_legacy_title": "Fjern eldre handlinger",
+    "remove_legacy_msg": "Fjerne de eldre egendefinerte handlingene? De vil ikke lenger utløses ved syklushendelser. Dette kan ikke angres fra panelet.",
+    "discard_recording_title": "Forkast opptak",
+    "discard_recording_msg": "Forkaste det lagrede opptaket? Dette kan ikke angres.",
+    "dismiss_all_title": "Avvis all tilbakemelding",
+    "dismiss_all_msg": "Avvise alle {count} ventende tilbakemeldingsforespørsler?",
+    "dismiss_all_ok": "Avvis alle",
+    "delete_phase_title": "Slett fase",
+    "delete_phase_msg": "Slette fase \"{name}\"?",
+    "clear_debug_title": "Tøm feilsøkingsdata",
+    "clear_debug_msg": "Slette alle lagrede feilsøkingsspor?",
+    "wipe_all_title": "Slett alle data",
+    "wipe_all_msg": "⚠️ Dette sletter permanent ALLE sykluser og profiler. Dette kan ikke angres.",
+    "wipe_all_ok": "Slett alt",
+    "force_stop_title": "Tvangsstopp av syklus",
+    "force_stop_msg": "Tvangsstoppe den aktive syklusen nå? Syklusen lagres som avbrutt."
   },
   "msg": {
     "appliance_monitor": "Apparatmonitor",
@@ -654,7 +706,17 @@
     "updated": "Oppdatert",
     "warmup_badge": "Lærer fortsatt ({done}/{needed} sykluser)",
     "warmup_detail": "Denne profilen trenger {needed} merkede sykluser før automatisk matching begynner. Hver bekreftede syklus hjelper den med å lære.",
-    "wipe_history_warning": "Slett alle sykluser og profiler permanent. Kan ikke angres."
+    "wipe_history_warning": "Slett alle sykluser og profiler permanent. Kan ikke angres.",
+    "compare_overlay_tip": "Legg innlærte profilomhyllinger oppå hverandre for å se hvilket program hver syklus ligner på.",
+    "duration_trend_up_tip": "Varighet øker ({pct}%/syklus)",
+    "duration_trend_down_tip": "Varighet synker ({pct}%/syklus)",
+    "energy_trend_up_tip": "Energi øker ({pct}%/syklus)",
+    "energy_trend_down_tip": "Energi synker ({pct}%/syklus)",
+    "performance_trending": "Ytelsestrend",
+    "pg_select_cycle_hint": "Velg en syklus og klikk på ↺ for å laste inn",
+    "pg_sweep_progress": "Trinn {done} / {total}",
+    "pg_analysis_hint": "Velg en syklus og klikk på ↺ for å laste inn analysen.",
+    "diagnostics_load_failed": "Kunne ikke laste inn diagnostikk: {error}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plutselig fall behandlet som umiddelbar slutt",
@@ -1180,7 +1242,15 @@
     "interrupted": "Avbrutt",
     "ready": "Klar til å behandle",
     "recording": "Tar opp",
-    "training": "Trener…"
+    "training": "Trener…",
+    "saving": "Lagrer…",
+    "rebuilding": "Bygger opp igjen…",
+    "analyzing": "Analyserer…",
+    "resetting": "Tilbakestiller…",
+    "reverting": "Tilbakefører…",
+    "trimming": "Beskjærer…",
+    "splitting": "Deler opp…",
+    "deleting": "Sletter…"
   },
   "suggestion": {
     "both_agree": "WashData anbefaler",
@@ -1333,7 +1403,9 @@
     "relabel_done": "{count} syklus(er) merket på nytt",
     "relabel_failed": "Ny merking mislyktes: {error}",
     "reminders_save_failed": "Kunne ikke lagre påminnelser: {error}",
-    "reminders_saved": "Servicepåminnelser lagret"
+    "reminders_saved": "Servicepåminnelser lagret",
+    "pause_no_cycle": "Ingen aktiv syklus å sette på pause",
+    "resume_no_cycle": "Ingen pauset syklus å gjenoppta"
   },
   "trend": {
     "down": "Trender nedover",
@@ -1345,5 +1417,26 @@
     "drum_clean": "Rengjør trommel",
     "filter_clean": "Rengjør filter",
     "other": "Annet"
+  },
+  "col": {
+    "profile_tip": "Navnet på det matchede programmet. Uten merke betyr at ingen profil matchet ved syklusens slutt.",
+    "status_tip": "Syklusresultat: Fullført (naturlig slutt), Avbrutt (brått effektfall), Tvangsstoppet (manuelt) eller Trenger gjennomgang (tilbakemelding venter).",
+    "date_tip": "Dato og klokkeslett da syklusen startet.",
+    "duration_tip": "Total kjøretid for syklusen fra start til slutt.",
+    "energy_tip": "Totalt forbrukt energi (kWh). Beregnet ved å integrere effekten over tid.",
+    "cost_tip": "Energikostnad for denne syklusen, låst ved fullføring med prisen som gjaldt da (energi x pris per kWh). Angi en pris under Innstillinger for å fylle den ut.",
+    "confidence_tip": "Profilmatchkonfidens (0-100 %). Hvor tett syklusens effektkurve matchet det identifiserte programmet.",
+    "health_tip": "ML-syklushelse (høyere = bedre). Klikk på en syklus for å inspisere og gjennomgå den."
+  },
+  "stat": {
+    "avg": "gj.sn.",
+    "min": "min. {v}",
+    "max": "maks. {v}",
+    "consistency": "konsistens ±{v}",
+    "total": "totalt {v}",
+    "last_run": "siste kjøring {v}",
+    "score": "poengsum {pct}%",
+    "duration_cv": "varighets-CV {pct}%",
+    "avg_confidence": "gj.sn. konfidens {pct}%"
   }
 }

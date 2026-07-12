@@ -136,7 +136,11 @@ def tune_matching_config(
     cycles: list[dict[str, Any]],
     *,
     min_cycles: int = 25,
-    min_targets: int = 10,
+    # Require enough eligible targets that the held-out half (~min_targets/2) can
+    # move top-1 in increments meaningfully finer than ``margin``. At 10 the test
+    # split was ~5 targets (0.2 granularity) so a single lucky match dwarfed the
+    # 0.03 gate; 20 keeps ~10 held-out targets before an override is trusted.
+    min_targets: int = 20,
     margin: float = 0.03,
     seed: int = 0,
 ) -> dict[str, Any]:

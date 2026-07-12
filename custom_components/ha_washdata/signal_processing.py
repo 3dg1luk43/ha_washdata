@@ -154,19 +154,31 @@ def resample_to_n(power: list[float], n: int) -> list[float]:
     NumPy as needed.
 
     Args:
-        power: Input power values (at least 2 points).
-        n: Desired number of output points (>= 2).
+        power: Input power values. 2+ points are interpolated; fewer are handled
+            explicitly (see Returns).
+        n: Desired number of output points.
 
     Returns:
-        List of *n* float values.  Returns the original list unchanged when it
-        already has exactly *n* points.
+        List of *n* float values, except:
+        - returns the input unchanged when it already has exactly *n* points;
+        - returns ``[]`` for non-positive *n* or an empty input (no data to
+          resample — a "missing" marker, not fabricated zeros);
+        - returns *n* copies of the sole value for a single-sample input.
     """
     if len(power) == n:
         return list(power)
-    if len(power) < 2 or n < 2:
-        return list(power)
+    if n < 1:
+        return []
     src = np.asarray(power, dtype=float)
-    src_x = np.linspace(0.0, 1.0, len(src))
+    # An empty trace has no data to resample: return empty (a "missing" marker)
+    # rather than fabricating n zeros that read as real zero-power samples.
+    # Callers already guard empty/short input before calling.
+    if src.size == 0:
+        return []
+    # A single sample can only be replicated: return n copies of that value.
+    if src.size == 1:
+        return [float(src[0])] * n
+    src_x = np.linspace(0.0, 1.0, src.size)
     dst_x = np.linspace(0.0, 1.0, n)
     return list(np.interp(dst_x, src_x, src))
 

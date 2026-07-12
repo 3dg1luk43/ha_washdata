@@ -21,7 +21,9 @@
     "steady": "→ stabile",
     "underrun": "Terminato prima del solito",
     "using_defaults": "Utilizzo delle impostazioni predefinite fornite",
-    "using_tuned": "Utilizzo di pesi accordati"
+    "using_tuned": "Utilizzo di pesi accordati",
+    "overrun_ratio": "({x}x il previsto)",
+    "underrun_ratio": "({pct}% del previsto)"
   },
   "btn": {
     "add_device": "+ Aggiungi dispositivo",
@@ -142,7 +144,9 @@
     "trim_split": "Taglia/Dividi",
     "undo": "Annulla",
     "use": "Usa",
-    "wipe_all": "Cancella tutti i dati"
+    "wipe_all": "Cancella tutti i dati",
+    "delete_selected": "Elimina selezionati ({n})",
+    "group_suggest": "Gruppo {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Prova sullo storico",
     "toggle_sidebar": "Attiva/disattiva la barra laterale di Home Assistant",
     "tools_and_data": "Strumenti e dati",
-    "wipe_history": "Cancella la storia"
+    "wipe_history": "Cancella la storia",
+    "recommendations": "Consigli ({n})"
   },
   "health": {
     "fair": "Qualità profilo accettabile",
@@ -439,7 +444,32 @@
     "ungrouped": "Non raggruppato",
     "unlabelled": "Senza etichetta",
     "unlabelled_paren": "(senza etichetta)",
-    "warp_path": "Percorso di warping"
+    "warp_path": "Percorso di warping",
+    "input": "Input:",
+    "start": "Inizio",
+    "end": "Fine",
+    "unit_s": "(s)",
+    "reviewed_on": "revisionato il {date}",
+    "unknown": "Sconosciuto",
+    "quality": "Qualità",
+    "tags": "Etichette",
+    "at": "alle",
+    "pct_match_confidence": "{pct}% di confidenza di corrispondenza",
+    "ha_restarted": "HA riavviato",
+    "from_start": "Dall'inizio",
+    "to_end": "Alla fine",
+    "click_to_select": "clicca per selezionare",
+    "envelope": "Busta",
+    "zoom_hint": "scorri per ingrandire · doppio clic per reimpostare",
+    "loading_paren": "(caricamento…)",
+    "time_remaining": "~{v} rimanente",
+    "no_duration": "nessuna durata",
+    "duration_avg": "~{v}m media",
+    "name_placeholder": "(nome)",
+    "n_shown": ", {n} mostrati",
+    "cycles_title": "Cicli ({n})",
+    "pg_detecting": "Rilevamento",
+    "pg_best_marker": "Migliore: {v}"
   },
   "log": {
     "all_levels": "Tutti i livelli"
@@ -452,7 +482,11 @@
     "fit_strong": "Forte",
     "fit_weak": "Debole",
     "fit_word": "accuratezza",
-    "personalized": "● Personalizzato per questa macchina"
+    "personalized": "● Personalizzato per questa macchina",
+    "better_than_baseline": "{pct}% migliore della stima di riferimento ({metric})",
+    "trend_improving_tip": "L'adattamento di questo modello è migliorato nelle ultime verifiche.",
+    "trend_declining_tip": "L'adattamento di questo modello è peggiorato nelle ultime verifiche: rivedere più cicli può aiutarlo a riapprendere.",
+    "trend_steady_tip": "L'adattamento di questo modello è rimasto pressoché stabile nelle ultime verifiche."
   },
   "modal": {
     "auto_label": "Cicli di etichettatura automatica",
@@ -472,7 +506,25 @@
     "process_recording": "Registrazione del processo",
     "delete_maintenance_msg": "Eliminare questo record di manutenzione? L'operazione non può essere annullata.",
     "delete_maintenance_title": "Elimina evento di manutenzione",
-    "relabel_cycles": "Rietichetta {count} cicli"
+    "relabel_cycles": "Rietichetta {count} cicli",
+    "delete_automation_title": "Elimina automazione",
+    "delete_automation_msg": "Eliminare l'automazione \"{name}\" da Home Assistant? L'operazione non può essere annullata.",
+    "remove_legacy_title": "Rimuovi azioni legacy",
+    "remove_legacy_msg": "Rimuovere le azioni personalizzate legacy? Smetteranno di attivarsi sugli eventi di ciclo. L'operazione non può essere annullata dal pannello.",
+    "discard_recording_title": "Elimina la registrazione",
+    "discard_recording_msg": "Eliminare la registrazione salvata? L'operazione non può essere annullata.",
+    "dismiss_all_title": "Ignora tutti i feedback",
+    "dismiss_all_msg": "Ignorare tutte le {count} richieste di feedback in sospeso?",
+    "dismiss_all_ok": "Ignora tutto",
+    "delete_phase_title": "Elimina fase",
+    "delete_phase_msg": "Eliminare la fase \"{name}\"?",
+    "clear_debug_title": "Cancella dati di debug",
+    "clear_debug_msg": "Eliminare tutte le tracce di debug memorizzate?",
+    "wipe_all_title": "Cancella tutti i dati",
+    "wipe_all_msg": "⚠️ Questo elimina definitivamente TUTTI i cicli e i profili. L'operazione non può essere annullata.",
+    "wipe_all_ok": "Cancella tutto",
+    "force_stop_title": "Forza l'arresto del ciclo",
+    "force_stop_msg": "Forzare l'arresto del ciclo attivo ora? Il ciclo verrà salvato come interrotto."
   },
   "msg": {
     "appliance_monitor": "Monitor degli elettrodomestici",
@@ -654,7 +706,17 @@
     "updated": "Aggiornato",
     "warmup_badge": "In apprendimento ({done}/{needed} cicli)",
     "warmup_detail": "Questo profilo richiede {needed} cicli etichettati prima che inizi la corrispondenza automatica. Ogni ciclo confermato aiuta l'apprendimento.",
-    "wipe_history_warning": "Elimina definitivamente tutti i cicli e i profili. L'operazione non può essere annullata."
+    "wipe_history_warning": "Elimina definitivamente tutti i cicli e i profili. L'operazione non può essere annullata.",
+    "compare_overlay_tip": "Sovrapponi le buste dei profili appresi per vedere a quale programma somiglia ogni ciclo.",
+    "duration_trend_up_tip": "Durata in aumento ({pct}%/ciclo)",
+    "duration_trend_down_tip": "Durata in calo ({pct}%/ciclo)",
+    "energy_trend_up_tip": "Energia in aumento ({pct}%/ciclo)",
+    "energy_trend_down_tip": "Energia in calo ({pct}%/ciclo)",
+    "performance_trending": "Andamento delle prestazioni",
+    "pg_select_cycle_hint": "Seleziona un ciclo e clicca su ↺ per caricare",
+    "pg_sweep_progress": "Passo {done} / {total}",
+    "pg_analysis_hint": "Seleziona un ciclo e clicca su ↺ per caricare l'analisi.",
+    "diagnostics_load_failed": "Impossibile caricare la diagnostica: {error}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Calo improvviso trattato come fine immediata",
@@ -1180,7 +1242,15 @@
     "interrupted": "Interrotto",
     "ready": "Pronto per l'elaborazione",
     "recording": "Registrazione",
-    "training": "Addestramento…"
+    "training": "Addestramento…",
+    "saving": "Salvataggio…",
+    "rebuilding": "Ricostruzione…",
+    "analyzing": "Analisi…",
+    "resetting": "Reimpostazione…",
+    "reverting": "Ripristino…",
+    "trimming": "Rifinitura…",
+    "splitting": "Divisione…",
+    "deleting": "Eliminazione…"
   },
   "tab": {
     "advanced": "Avanzato",
@@ -1270,7 +1340,9 @@
     "relabel_done": "Rietichettati {count} cicli",
     "relabel_failed": "Rietichettatura non riuscita: {error}",
     "reminders_save_failed": "Impossibile salvare i promemoria: {error}",
-    "reminders_saved": "Promemoria di servizio salvati"
+    "reminders_saved": "Promemoria di servizio salvati",
+    "pause_no_cycle": "Nessun ciclo attivo da mettere in pausa",
+    "resume_no_cycle": "Nessun ciclo in pausa da riprendere"
   },
   "suggestion": {
     "both_agree": "WashData consiglia",
@@ -1345,5 +1417,26 @@
     "drum_clean": "Pulisci cestello",
     "filter_clean": "Pulisci filtro",
     "other": "Altro"
+  },
+  "col": {
+    "profile_tip": "Nome del programma corrispondente. Senza etichetta significa che nessun profilo ha corrisposto alla fine del ciclo.",
+    "status_tip": "Esito del ciclo: Completato (fine naturale), Interrotto (calo improvviso di potenza), Arrestato forzatamente (manuale) o Necessita di revisione (feedback in sospeso).",
+    "date_tip": "Data e ora di inizio del ciclo.",
+    "duration_tip": "Tempo totale di esecuzione del ciclo, dall'inizio alla fine.",
+    "energy_tip": "Energia totale consumata (kWh). Calcolata integrando la potenza nel tempo.",
+    "cost_tip": "Costo energetico di questo ciclo, fissato al completamento usando il prezzo allora in vigore (energia x prezzo per kWh). Imposta un prezzo nelle Impostazioni per popolarlo.",
+    "confidence_tip": "Confidenza di corrispondenza del profilo (0-100%). Quanto la curva di potenza del ciclo corrispondeva al programma identificato.",
+    "health_tip": "Salute del ciclo tramite ML (più alto = migliore). Clicca su un ciclo per ispezionarlo e revisionarlo."
+  },
+  "stat": {
+    "avg": "media",
+    "min": "min {v}",
+    "max": "max {v}",
+    "consistency": "coerenza ±{v}",
+    "total": "totale {v}",
+    "last_run": "ultima esec. {v}",
+    "score": "punteggio {pct}%",
+    "duration_cv": "CV della durata {pct}%",
+    "avg_confidence": "confidenza media {pct}%"
   }
 }

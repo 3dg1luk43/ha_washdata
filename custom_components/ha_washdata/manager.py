@@ -388,6 +388,9 @@ class WashDataManager:
         self._is_clean_state: bool = False
         self._clean_state_start: datetime | None = None
         self._notified_clean_laundry: bool = False
+        # Set by _dispatch_notification when a call is queued for later (quiet
+        # hours / presence) rather than sent; read by dedup-flag callers.
+        self._last_dispatch_deferred: bool = False
         self._notify_unload_delay_minutes: int = int(
             config_entry.options.get(
                 CONF_NOTIFY_UNLOAD_DELAY_MINUTES, DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES
@@ -2894,6 +2897,11 @@ class WashDataManager:
                             "Sent clean laundry nag notification (%.0f min after cycle end)",
                             time_since_complete / 60,
                         )
+                    elif self._last_dispatch_deferred:
+                        # Held for quiet-hours / presence delivery; the queued copy
+                        # fires later. Mark handled so the 60s expiry tick doesn't
+                        # enqueue a duplicate nag every minute for the whole window.
+                        self._notified_clean_laundry = True
                 else:
                     self._notified_clean_laundry = True
 
@@ -3888,7 +3896,11 @@ class WashDataManager:
                 self.profile_store.confirm_match_ranking_snapshots(
                     _start_iso,
                     _confirmed_profile,
-                    cycle_id=self._ranking_snapshot_cycle_id,
+                    # Use the token captured when THIS cycle ended, not the live
+                    # field, which may already have rolled to a newly-started cycle
+                    # during the awaits above (else this cycle's snapshots go
+                    # unlabelled and a new cycle's snapshot gets mislabelled).
+                    cycle_id=cycle_token or None,
                 )
             except Exception:  # noqa: BLE001
                 pass
@@ -4543,6 +4555,12 @@ class WashDataManager:
         allow_deferral: bool = True,
     ) -> bool:
         """Route notification via actions or notify service with optional gating."""
+        # Signals whether this call *queued* the notification for later delivery
+        # (quiet-hours / presence hold) instead of sending or dropping it. Callers
+        # that use a "fire once" dedup flag (e.g. the clean-laundry nag) must treat
+        # a deferral as handled, otherwise they re-queue a duplicate on every retry
+        # tick for the whole quiet/away window.
+        self._last_dispatch_deferred = False
         if not title:
             title_template = self.config_entry.options.get(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE)
             title = self._safe_format_template(
@@ -4604,6 +4622,7 @@ class WashDataManager:
                 event_type=event_type,
                 extra_vars=extra_vars,
             )
+            self._last_dispatch_deferred = True
             return False
 
         if allow_deferral and self._notify_only_when_home and self._notify_people:
@@ -4623,6 +4642,7 @@ class WashDataManager:
                         "extra_vars": extra_vars,
                     }
                 )
+                self._last_dispatch_deferred = True
                 return False
 
         actions_sent = False
@@ -5272,9 +5292,15 @@ class WashDataManager:
         app instead of lingering. A clear for a non-existent tag is harmless, so
         this runs whenever the user has any clean/finish delivery configured.
         """
-        # Drop any still-queued clean entries so they cannot replay later.
+        # Drop any still-queued clean entries so they cannot replay later — from
+        # both the presence-hold queue and the quiet-hours queue (the nag can be
+        # deferred into either).
         self._pending_notifications = [
             n for n in self._pending_notifications
+            if n.get("event_type") != NOTIFY_EVENT_CLEAN
+        ]
+        self._quiet_pending_notifications = [
+            n for n in self._quiet_pending_notifications
             if n.get("event_type") != NOTIFY_EVENT_CLEAN
         ]
 

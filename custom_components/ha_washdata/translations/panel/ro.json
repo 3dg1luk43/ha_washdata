@@ -21,7 +21,9 @@
     "steady": "→ stabil",
     "underrun": "S-a terminat mai repede decât de obicei",
     "using_defaults": "Folosind setările implicite",
-    "using_tuned": "Folosind ponderi ajustate"
+    "using_tuned": "Folosind ponderi ajustate",
+    "overrun_ratio": "({x}x față de estimat)",
+    "underrun_ratio": "({pct}% din estimat)"
   },
   "btn": {
     "add_device": "+ Adăugați dispozitiv",
@@ -142,7 +144,9 @@
     "trim_split": "Tăiați / Divizați",
     "undo": "Anulați",
     "use": "Utilizați",
-    "wipe_all": "Ștergeți toate datele"
+    "wipe_all": "Ștergeți toate datele",
+    "delete_selected": "Ștergeți selecția ({n})",
+    "group_suggest": "Grup {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Testare pe istoric",
     "toggle_sidebar": "Comutați bara laterală Home Assistant",
     "tools_and_data": "Instrumente și date",
-    "wipe_history": "Ștergeți istoricul"
+    "wipe_history": "Ștergeți istoricul",
+    "recommendations": "Recomandări ({n})"
   },
   "health": {
     "fair": "Calitate acceptabilă a profilului",
@@ -439,7 +444,32 @@
     "ungrouped": "Negrupat",
     "unlabelled": "Neetichetat",
     "unlabelled_paren": "(neetichetat)",
-    "warp_path": "Cale de deformare"
+    "warp_path": "Cale de deformare",
+    "input": "Intrare:",
+    "start": "Început",
+    "end": "Sfârșit",
+    "unit_s": "(s)",
+    "reviewed_on": "revizuit la {date}",
+    "unknown": "Necunoscut",
+    "quality": "Calitate",
+    "tags": "Etichete",
+    "at": "la",
+    "pct_match_confidence": "{pct}% încredere de potrivire",
+    "ha_restarted": "HA repornit",
+    "from_start": "De la început",
+    "to_end": "Până la sfârșit",
+    "click_to_select": "faceți clic pentru a selecta",
+    "envelope": "Plic",
+    "zoom_hint": "derulați pentru zoom · dublu clic pentru resetare",
+    "loading_paren": "(se încarcă…)",
+    "time_remaining": "~{v} rămas",
+    "no_duration": "fără durată",
+    "duration_avg": "~{v}m medie",
+    "name_placeholder": "(nume)",
+    "n_shown": ", {n} afișate",
+    "cycles_title": "Cicluri ({n})",
+    "pg_detecting": "Detectare",
+    "pg_best_marker": "Cel mai bun: {v}"
   },
   "log": {
     "all_levels": "Toate nivelurile"
@@ -452,7 +482,11 @@
     "fit_strong": "Puternic",
     "fit_weak": "Slab",
     "fit_word": "potrivire",
-    "personalized": "● Personalizat pentru această mașină"
+    "personalized": "● Personalizat pentru această mașină",
+    "better_than_baseline": "{pct}% mai bine decât estimarea de referință ({metric})",
+    "trend_improving_tip": "Potrivirea acestui model s-a îmbunătățit în ultimele reverificări.",
+    "trend_declining_tip": "Potrivirea acestui model s-a înrăutățit în ultimele reverificări: revizuirea mai multor cicluri îl poate ajuta să reînvețe.",
+    "trend_steady_tip": "Potrivirea acestui model a rămas aproximativ stabilă în ultimele reverificări."
   },
   "modal": {
     "auto_label": "Etichetare automată a ciclurilor",
@@ -472,7 +506,25 @@
     "process_recording": "Procesați înregistrarea",
     "delete_maintenance_msg": "Ștergeți acest istoric de întreținere? Această acțiune nu poate fi anulată.",
     "delete_maintenance_title": "Ștergeți evenimentul de întreținere",
-    "relabel_cycles": "Reetichetați {count} cicluri"
+    "relabel_cycles": "Reetichetați {count} cicluri",
+    "delete_automation_title": "Ștergeți automatizarea",
+    "delete_automation_msg": "Ștergeți automatizarea \"{name}\" din Home Assistant? Această acțiune nu poate fi anulată.",
+    "remove_legacy_title": "Eliminați acțiunile vechi",
+    "remove_legacy_msg": "Eliminați acțiunile personalizate vechi? Nu se vor mai declanșa la evenimentele de ciclu. Această acțiune nu poate fi anulată din panou.",
+    "discard_recording_title": "Renunțați la înregistrare",
+    "discard_recording_msg": "Renunțați la înregistrarea salvată? Această acțiune nu poate fi anulată.",
+    "dismiss_all_title": "Ignorați toate feedbackurile",
+    "dismiss_all_msg": "Ignorați toate cele {count} cereri de feedback în așteptare?",
+    "dismiss_all_ok": "Ignorați tot",
+    "delete_phase_title": "Ștergeți faza",
+    "delete_phase_msg": "Ștergeți faza \"{name}\"?",
+    "clear_debug_title": "Curățați datele de depanare",
+    "clear_debug_msg": "Ștergeți toate urmele de depanare stocate?",
+    "wipe_all_title": "Ștergeți toate datele",
+    "wipe_all_msg": "⚠️ Aceasta șterge definitiv TOATE ciclurile și profilurile. Această acțiune nu poate fi anulată.",
+    "wipe_all_ok": "Ștergeți tot",
+    "force_stop_title": "Opriți forțat ciclul",
+    "force_stop_msg": "Opriți forțat ciclul activ acum? Ciclul va fi salvat ca întrerupt."
   },
   "msg": {
     "appliance_monitor": "Monitor de aparate",
@@ -654,7 +706,17 @@
     "updated": "Actualizat",
     "warmup_badge": "Încă învață ({done}/{needed} cicluri)",
     "warmup_detail": "Acest profil are nevoie de {needed} cicluri etichetate înainte ca potrivirea automată să înceapă. Fiecare ciclu confirmat îl ajută să învețe.",
-    "wipe_history_warning": "Ștergeți definitiv toate ciclurile și profilurile. Nu poate fi anulat."
+    "wipe_history_warning": "Ștergeți definitiv toate ciclurile și profilurile. Nu poate fi anulat.",
+    "compare_overlay_tip": "Suprapuneți plicurile profilurilor învățate pentru a vedea cărui program seamănă fiecare ciclu.",
+    "duration_trend_up_tip": "Durată în creștere ({pct}%/ciclu)",
+    "duration_trend_down_tip": "Durată în scădere ({pct}%/ciclu)",
+    "energy_trend_up_tip": "Energie în creștere ({pct}%/ciclu)",
+    "energy_trend_down_tip": "Energie în scădere ({pct}%/ciclu)",
+    "performance_trending": "Tendință de performanță",
+    "pg_select_cycle_hint": "Selectați un ciclu și faceți clic pe ↺ pentru a încărca",
+    "pg_sweep_progress": "Pasul {done} / {total}",
+    "pg_analysis_hint": "Selectați un ciclu și faceți clic pe ↺ pentru a încărca analiza.",
+    "diagnostics_load_failed": "Nu s-au putut încărca diagnosticele: {error}"
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1169,7 +1231,15 @@
     "interrupted": "Întrerupt",
     "ready": "Gata de procesare",
     "recording": "Înregistrare",
-    "training": "Se antrenează…"
+    "training": "Se antrenează…",
+    "saving": "Se salvează…",
+    "rebuilding": "Se reconstruiește…",
+    "analyzing": "Se analizează…",
+    "resetting": "Se resetează…",
+    "reverting": "Se revine…",
+    "trimming": "Se taie…",
+    "splitting": "Se divide…",
+    "deleting": "Se șterge…"
   },
   "tab": {
     "advanced": "Avansat",
@@ -1259,7 +1329,9 @@
     "relabel_done": "{count} ciclu(ri) reetichetate",
     "relabel_failed": "Reetichetarea a eșuat: {error}",
     "reminders_save_failed": "Nu s-au putut salva mementourile: {error}",
-    "reminders_saved": "Mementouri de service salvate"
+    "reminders_saved": "Mementouri de service salvate",
+    "pause_no_cycle": "Niciun ciclu activ de pus în pauză",
+    "resume_no_cycle": "Niciun ciclu în pauză de reluat"
   },
   "suggestion": {
     "both_agree": "WashData recomandă",
@@ -1345,5 +1417,26 @@
     "start_duration_threshold": "Secunde peste prag pentru a confirma pornirea",
     "start_threshold_w": "Wați minimi pentru a fi considerat pornit",
     "stop_threshold_w": "Sub această valoare, mașina este considerată oprită"
+  },
+  "col": {
+    "profile_tip": "Numele programului corespunzător. Neetichetat înseamnă că niciun profil nu a corespuns la sfârșitul ciclului.",
+    "status_tip": "Rezultatul ciclului: Finalizat (sfârșit natural), Întrerupt (scădere bruscă de putere), Oprit forțat (manual) sau Necesită revizuire (feedback în așteptare).",
+    "date_tip": "Data și ora la care a început ciclul.",
+    "duration_tip": "Durata totală de rulare a ciclului, de la început până la sfârșit.",
+    "energy_tip": "Energia totală consumată (kWh). Calculată prin integrarea puterii în timp.",
+    "cost_tip": "Costul energetic al acestui ciclu, fixat la finalizare folosind prețul în vigoare atunci (energie x preț pe kWh). Setați un preț în Setări pentru a-l completa.",
+    "confidence_tip": "Încrederea de potrivire a profilului (0-100%). Cât de bine s-a potrivit curba de putere a ciclului cu programul identificat.",
+    "health_tip": "Starea ciclului prin ML (mai mare = mai bine). Faceți clic pe un ciclu pentru a-l inspecta și revizui."
+  },
+  "stat": {
+    "avg": "medie",
+    "min": "min {v}",
+    "max": "max {v}",
+    "consistency": "consistență ±{v}",
+    "total": "total {v}",
+    "last_run": "ultima rulare {v}",
+    "score": "scor {pct}%",
+    "duration_cv": "CV al duratei {pct}%",
+    "avg_confidence": "încredere medie {pct}%"
   }
 }

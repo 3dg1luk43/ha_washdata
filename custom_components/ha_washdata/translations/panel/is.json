@@ -21,7 +21,9 @@
     "steady": "→ stöðugt",
     "underrun": "Kláraðist hraðar en venjulega",
     "using_defaults": "Notar sjálfgefnar sendingar",
-    "using_tuned": "Notaðu stilltar lóðir"
+    "using_tuned": "Notaðu stilltar lóðir",
+    "overrun_ratio": "({x}x áætlað)",
+    "underrun_ratio": "({pct}% af áætluðu)"
   },
   "btn": {
     "add_device": "+ Bæta við tæki",
@@ -142,7 +144,9 @@
     "trim_split": "Klippta / Kljúfa",
     "undo": "Afturkalla",
     "use": "Notaðu",
-    "wipe_all": "Þurrkaðu öll gögn"
+    "wipe_all": "Þurrkaðu öll gögn",
+    "delete_selected": "Eyða völdum ({n})",
+    "group_suggest": "Hópur {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Prófa á sögu",
     "toggle_sidebar": "Skiptu um hliðarstiku Home Assistant",
     "tools_and_data": "Verkfæri og gögn",
-    "wipe_history": "Þurrkaðu sögu"
+    "wipe_history": "Þurrkaðu sögu",
+    "recommendations": "Ráðleggingar ({n})"
   },
   "health": {
     "fair": "Viðunanlegt prófíl",
@@ -439,7 +444,32 @@
     "ungrouped": "Óhópað",
     "unlabelled": "Ómerkt",
     "unlabelled_paren": "(ómerkt)",
-    "warp_path": "Sveigjuleið"
+    "warp_path": "Sveigjuleið",
+    "input": "Inntak:",
+    "start": "Upphaf",
+    "end": "Endir",
+    "unit_s": "(s)",
+    "reviewed_on": "yfirfarið {date}",
+    "unknown": "Óþekkt",
+    "quality": "Gæði",
+    "tags": "Merki",
+    "at": "kl.",
+    "pct_match_confidence": "{pct}% samsvörunaröryggi",
+    "ha_restarted": "HA endurræst",
+    "from_start": "Frá upphafi",
+    "to_end": "Til enda",
+    "click_to_select": "smelltu til að velja",
+    "envelope": "Aflsvið",
+    "zoom_hint": "skrunaðu til að þysja · tvísmelltu til að endurstilla",
+    "loading_paren": "(hleð…)",
+    "time_remaining": "~{v} eftir",
+    "no_duration": "engin lengd",
+    "duration_avg": "~{v}m meðalt.",
+    "name_placeholder": "(nafn)",
+    "n_shown": ", {n} sýnd",
+    "cycles_title": "Lotur ({n})",
+    "pg_detecting": "Greinir",
+    "pg_best_marker": "Best: {v}"
   },
   "log": {
     "all_levels": "Öll stig"
@@ -452,7 +482,11 @@
     "fit_strong": "Sterkur",
     "fit_weak": "Veik",
     "fit_word": "passa",
-    "personalized": "● Sérsniðin að þessari vél"
+    "personalized": "● Sérsniðin að þessari vél",
+    "better_than_baseline": "{pct}% betri en grunnmatið ({metric})",
+    "trend_improving_tip": "Mátun þessa líkans hefur batnað í nýlegum endurskoðunum.",
+    "trend_declining_tip": "Mátun þessa líkans hefur versnað í nýlegum endurskoðunum. Að fara yfir fleiri lotur getur hjálpað því að læra á ný.",
+    "trend_steady_tip": "Mátun þessa líkans hefur haldist nokkurn veginn stöðug í nýlegum endurskoðunum."
   },
   "modal": {
     "auto_label": "Sjálfvirk merkingarlotur",
@@ -472,7 +506,25 @@
     "process_recording": "Ferli Upptaka",
     "delete_maintenance_msg": "Eyða þessari viðhaldsfærslu? Þetta er ekki hægt að afturkalla.",
     "delete_maintenance_title": "Eyða viðhaldsatburði",
-    "relabel_cycles": "Endurmerkja {count} lotur"
+    "relabel_cycles": "Endurmerkja {count} lotur",
+    "delete_automation_title": "Eyða sjálfvirkni",
+    "delete_automation_msg": "Eyða sjálfvirkninni \"{name}\" úr Home Assistant? Þetta er ekki hægt að afturkalla.",
+    "remove_legacy_title": "Fjarlægja eldri aðgerðir",
+    "remove_legacy_msg": "Fjarlægja eldri sérsniðnu aðgerðirnar? Þær hætta að keyra við lotuatburði. Þetta er ekki hægt að afturkalla úr stjórnborðinu.",
+    "discard_recording_title": "Henda upptöku",
+    "discard_recording_msg": "Henda vistuðu upptökunni? Þetta er ekki hægt að afturkalla.",
+    "dismiss_all_title": "Hafna allri endurgjöf",
+    "dismiss_all_msg": "Hafna öllum {count} biðjandi endurgjöfarbeiðnum?",
+    "dismiss_all_ok": "Hafna öllum",
+    "delete_phase_title": "Eyða fasa",
+    "delete_phase_msg": "Eyða fasa \"{name}\"?",
+    "clear_debug_title": "Hreinsa villuleitargögn",
+    "clear_debug_msg": "Eyða öllum vistuðum villuleitarferlum?",
+    "wipe_all_title": "Þurrka út öll gögn",
+    "wipe_all_msg": "⚠️ Þetta eyðir varanlega ÖLLUM lotum og prófílum. Þetta er ekki hægt að afturkalla.",
+    "wipe_all_ok": "Þurrka út allt",
+    "force_stop_title": "Þvinga stöðvun lotu",
+    "force_stop_msg": "Þvinga virku lotuna til að stöðvast núna? Lotan verður vistuð sem trufluð."
   },
   "msg": {
     "appliance_monitor": "Vöktunartæki",
@@ -654,7 +706,17 @@
     "updated": "Uppfært",
     "warmup_badge": "Enn að læra ({done}/{needed} lotur)",
     "warmup_detail": "Þessi prófíll þarfnast {needed} merktra lota áður en sjálfvirk samsvörun hefst. Sérhver staðfest lota hjálpar honum að læra.",
-    "wipe_history_warning": "Eyða öllum lotum og sniðum varanlega. Ekki hægt að afturkalla."
+    "wipe_history_warning": "Eyða öllum lotum og sniðum varanlega. Ekki hægt að afturkalla.",
+    "compare_overlay_tip": "Leggðu lærð aflsvið prófíla yfir hvert annað til að sjá hvaða forriti hver lota líkist.",
+    "duration_trend_up_tip": "Lengd eykst ({pct}%/lotu)",
+    "duration_trend_down_tip": "Lengd minnkar ({pct}%/lotu)",
+    "energy_trend_up_tip": "Orka eykst ({pct}%/lotu)",
+    "energy_trend_down_tip": "Orka minnkar ({pct}%/lotu)",
+    "performance_trending": "Afkastaþróun",
+    "pg_select_cycle_hint": "Veldu lotu og smelltu á ↺ til að hlaða",
+    "pg_sweep_progress": "Skref {done} / {total}",
+    "pg_analysis_hint": "Veldu lotu og smelltu á ↺ til að hlaða greiningunni.",
+    "diagnostics_load_failed": "Ekki tókst að hlaða greiningu: {error}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Skyndilegt fall meðhöndlað sem tafarlaus endir",
@@ -1180,7 +1242,15 @@
     "interrupted": "Truflað",
     "ready": "Tilbúið til vinnslu",
     "recording": "Tekur upp",
-    "training": "Þjálfun…"
+    "training": "Þjálfun…",
+    "saving": "Vista…",
+    "rebuilding": "Endurbyggi…",
+    "analyzing": "Greini…",
+    "resetting": "Endurstilli…",
+    "reverting": "Afturkalla…",
+    "trimming": "Klippi til…",
+    "splitting": "Skipti…",
+    "deleting": "Eyði…"
   },
   "suggestion": {
     "both_agree": "WashData mælir með",
@@ -1333,7 +1403,9 @@
     "relabel_done": "Endurmerkti {count} lotu(r)",
     "relabel_failed": "Endurmerking mistókst: {error}",
     "reminders_save_failed": "Ekki tókst að vista áminningar: {error}",
-    "reminders_saved": "Þjónustuáminningar vistaðar"
+    "reminders_saved": "Þjónustuáminningar vistaðar",
+    "pause_no_cycle": "Engin virk lota til að gera hlé á",
+    "resume_no_cycle": "Engin lota í hléi til að halda áfram"
   },
   "trend": {
     "down": "Stefnir niður",
@@ -1345,5 +1417,26 @@
     "drum_clean": "Hreinsa tromlu",
     "filter_clean": "Hreinsa síu",
     "other": "Annað"
+  },
+  "col": {
+    "profile_tip": "Nafn samsvarandi forrits. Ómerkt þýðir að enginn prófíll samsvaraði við lok lotu.",
+    "status_tip": "Niðurstaða lotu: Lokið (eðlilegur endir), Truflað (skyndilegt aflfall), Þvingað stopp (handvirkt) eða Þarf yfirferð (endurgjöf í bið).",
+    "date_tip": "Dagsetning og tími þegar lotan hófst.",
+    "duration_tip": "Heildarkeyrslutími lotu frá upphafi til enda.",
+    "energy_tip": "Heildarorka sem notuð er (kWh). Reiknuð með því að heilda afl yfir tíma.",
+    "cost_tip": "Orkukostnaður fyrir þessa lotu, fastsettur við lok út frá verðinu sem var í gildi þá (orka x verð á kWh). Stilltu verð undir Stillingar til að fylla það út.",
+    "confidence_tip": "Samsvörunaröryggi prófíls (0-100%). Hversu vel aflferill lotu samsvaraði auðkenndu forriti.",
+    "health_tip": "ML-heilsa lotu (hærra = betra). Smelltu á lotu til að skoða og fara yfir hana."
+  },
+  "stat": {
+    "avg": "meðalt.",
+    "min": "lágm. {v}",
+    "max": "hám. {v}",
+    "consistency": "samkvæmni ±{v}",
+    "total": "samtals {v}",
+    "last_run": "síðasta keyrsla {v}",
+    "score": "einkunn {pct}%",
+    "duration_cv": "lengdar-CV {pct}%",
+    "avg_confidence": "meðal-öryggi {pct}%"
   }
 }

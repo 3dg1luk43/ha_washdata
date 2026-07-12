@@ -21,7 +21,9 @@
     "steady": "→ tasainen",
     "underrun": "Päättyi tavallista nopeammin",
     "using_defaults": "Toimitettujen oletusarvojen käyttäminen",
-    "using_tuned": "Käyttämällä viritettyjä painoja"
+    "using_tuned": "Käyttämällä viritettyjä painoja",
+    "overrun_ratio": "({x}x odotetusta)",
+    "underrun_ratio": "({pct}% odotetusta)"
   },
   "btn": {
     "add_device": "+ Lisää laite",
@@ -142,7 +144,9 @@
     "trim_split": "Trimma/halkaisu",
     "undo": "Kumoa",
     "use": "Käyttää",
-    "wipe_all": "Pyyhi kaikki tiedot"
+    "wipe_all": "Pyyhi kaikki tiedot",
+    "delete_selected": "Poista valitut ({n})",
+    "group_suggest": "Ryhmä {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Testaa historialla",
     "toggle_sidebar": "Vaihda Home Assistant -sivupalkki",
     "tools_and_data": "Työkalut ja tiedot",
-    "wipe_history": "Pyyhi historia"
+    "wipe_history": "Pyyhi historia",
+    "recommendations": "Suositukset ({n})"
   },
   "health": {
     "fair": "Tyydyttävä profiililaatu",
@@ -439,7 +444,32 @@
     "ungrouped": "Ryhmittelemätön",
     "unlabelled": "Merkitsemätön",
     "unlabelled_paren": "(merkitsemätön)",
-    "warp_path": "Vääntöpolku"
+    "warp_path": "Vääntöpolku",
+    "input": "Syöte:",
+    "start": "Alku",
+    "end": "Loppu",
+    "unit_s": "(s)",
+    "reviewed_on": "tarkistettu {date}",
+    "unknown": "Tuntematon",
+    "quality": "Laatu",
+    "tags": "Tunnisteet",
+    "at": "klo",
+    "pct_match_confidence": "{pct}% osumaluottamus",
+    "ha_restarted": "HA käynnistyi uudelleen",
+    "from_start": "Alusta",
+    "to_end": "Loppuun",
+    "click_to_select": "napsauta valitaksesi",
+    "envelope": "Tehoalue",
+    "zoom_hint": "vieritä zoomataksesi · kaksoisnapsauta nollataksesi",
+    "loading_paren": "(ladataan…)",
+    "time_remaining": "~{v} jäljellä",
+    "no_duration": "ei kestoa",
+    "duration_avg": "~{v}m ka.",
+    "name_placeholder": "(nimi)",
+    "n_shown": ", {n} näkyvissä",
+    "cycles_title": "Syklit ({n})",
+    "pg_detecting": "Havaitaan",
+    "pg_best_marker": "Paras: {v}"
   },
   "log": {
     "all_levels": "Kaikki tasot"
@@ -452,7 +482,11 @@
     "fit_strong": "Vahva",
     "fit_weak": "Heikko",
     "fit_word": "sopivuus",
-    "personalized": "● Mukautettu tälle koneelle"
+    "personalized": "● Mukautettu tälle koneelle",
+    "better_than_baseline": "{pct}% parempi kuin perusarvio ({metric})",
+    "trend_improving_tip": "Tämän mallin sopivuus on parantunut viimeisimpien tarkistusten aikana.",
+    "trend_declining_tip": "Tämän mallin sopivuus on heikentynyt viimeisimpien tarkistusten aikana · useampien syklien tarkistaminen voi auttaa sitä oppimaan uudelleen.",
+    "trend_steady_tip": "Tämän mallin sopivuus on pysynyt suunnilleen vakaana viimeisimpien tarkistusten aikana."
   },
   "modal": {
     "auto_label": "Automaattiset etikettisyklit",
@@ -472,7 +506,25 @@
     "process_recording": "Prosessin tallennus",
     "delete_maintenance_msg": "Poistetaanko tämä huoltomerkintä? Tätä ei voi kumota.",
     "delete_maintenance_title": "Poista huoltotapahtuma",
-    "relabel_cycles": "Nimeä uudelleen {count} sykliä"
+    "relabel_cycles": "Nimeä uudelleen {count} sykliä",
+    "delete_automation_title": "Poista automaatio",
+    "delete_automation_msg": "Poistetaanko automaatio \"{name}\" Home Assistantista? Tätä ei voi kumota.",
+    "remove_legacy_title": "Poista vanhat toiminnot",
+    "remove_legacy_msg": "Poistetaanko vanhat mukautetut toiminnot? Ne eivät enää laukea syklitapahtumista. Tätä ei voi kumota paneelista.",
+    "discard_recording_title": "Hävitä nauhoitus",
+    "discard_recording_msg": "Hävitetäänkö tallennettu nauhoitus? Tätä ei voi kumota.",
+    "dismiss_all_title": "Hylkää kaikki palautteet",
+    "dismiss_all_msg": "Hylätäänkö kaikki {count} odottavaa palautepyyntöä?",
+    "dismiss_all_ok": "Hylkää kaikki",
+    "delete_phase_title": "Poista vaihe",
+    "delete_phase_msg": "Poistetaanko vaihe \"{name}\"?",
+    "clear_debug_title": "Tyhjennä vianmääritystiedot",
+    "clear_debug_msg": "Poistetaanko kaikki tallennetut vianmääritysjäljet?",
+    "wipe_all_title": "Pyyhi kaikki tiedot",
+    "wipe_all_msg": "⚠️ Tämä poistaa pysyvästi KAIKKI syklit ja profiilit. Tätä ei voi kumota.",
+    "wipe_all_ok": "Pyyhi kaikki",
+    "force_stop_title": "Pakota sykli pysähtymään",
+    "force_stop_msg": "Pakotetaanko aktiivinen sykli pysähtymään nyt? Sykli tallennetaan keskeytyneenä."
   },
   "msg": {
     "appliance_monitor": "Laitteen näyttö",
@@ -654,7 +706,17 @@
     "updated": "Päivitetty",
     "warmup_badge": "Oppii vielä ({done}/{needed} sykliä)",
     "warmup_detail": "Tämä profiili tarvitsee {needed} merkittyä sykliä ennen automaattisen täsmäämisen alkua. Jokainen vahvistettu sykli auttaa sitä oppimaan.",
-    "wipe_history_warning": "Poista pysyvästi kaikki syklit ja profiilit. Ei voi kumota."
+    "wipe_history_warning": "Poista pysyvästi kaikki syklit ja profiilit. Ei voi kumota.",
+    "compare_overlay_tip": "Aseta opitut profiilien tehoalueet päällekkäin nähdäksesi, mitä ohjelmaa kukin sykli muistuttaa.",
+    "duration_trend_up_tip": "Kesto nousussa ({pct}%/sykli)",
+    "duration_trend_down_tip": "Kesto laskussa ({pct}%/sykli)",
+    "energy_trend_up_tip": "Energia nousussa ({pct}%/sykli)",
+    "energy_trend_down_tip": "Energia laskussa ({pct}%/sykli)",
+    "performance_trending": "Suorituskyvyn kehityssuunta",
+    "pg_select_cycle_hint": "Valitse sykli ja napsauta ↺ ladataksesi",
+    "pg_sweep_progress": "Askel {done} / {total}",
+    "pg_analysis_hint": "Valitse sykli ja napsauta ↺ ladataksesi analyysin.",
+    "diagnostics_load_failed": "Diagnostiikkaa ei voitu ladata: {error}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Äkillinen pudotus tulkitaan välittömäksi lopuksi",
@@ -1180,7 +1242,15 @@
     "interrupted": "Keskeytetty",
     "ready": "Valmis käsiteltäväksi",
     "recording": "Tallennetaan",
-    "training": "Koulutetaan…"
+    "training": "Koulutetaan…",
+    "saving": "Tallennetaan…",
+    "rebuilding": "Rakennetaan uudelleen…",
+    "analyzing": "Analysoidaan…",
+    "resetting": "Nollataan…",
+    "reverting": "Palautetaan…",
+    "trimming": "Leikataan…",
+    "splitting": "Jaetaan…",
+    "deleting": "Poistetaan…"
   },
   "suggestion": {
     "both_agree": "WashData suosittelee",
@@ -1333,7 +1403,9 @@
     "relabel_done": "{count} sykli(ä) nimetty uudelleen",
     "relabel_failed": "Uudelleennimeäminen epäonnistui: {error}",
     "reminders_save_failed": "Muistutuksia ei voitu tallentaa: {error}",
-    "reminders_saved": "Huoltomuistutukset tallennettu"
+    "reminders_saved": "Huoltomuistutukset tallennettu",
+    "pause_no_cycle": "Ei aktiivista sykliä tauotettavaksi",
+    "resume_no_cycle": "Ei tauotettua sykliä jatkettavaksi"
   },
   "trend": {
     "down": "Trendikäs alaspäin",
@@ -1345,5 +1417,26 @@
     "drum_clean": "Puhdista rumpu",
     "filter_clean": "Puhdista suodatin",
     "other": "Muu"
+  },
+  "col": {
+    "profile_tip": "Osunut ohjelman nimi. Merkitsemätön tarkoittaa, ettei yksikään profiili osunut syklin lopussa.",
+    "status_tip": "Syklin lopputulos: Valmistunut (luonnollinen loppu), Keskeytynyt (äkillinen tehon lasku), Pakotettu pysäytys (manuaalinen) tai Vaatii tarkistuksen (palaute odottaa).",
+    "date_tip": "Syklin alkamispäivä ja -aika.",
+    "duration_tip": "Syklin kokonaiskesto alusta loppuun.",
+    "energy_tip": "Kulutettu kokonaisenergia (kWh). Laskettu integroimalla teho ajan yli.",
+    "cost_tip": "Tämän syklin energiakustannus, lukittu valmistuessa käyttäen silloin voimassa ollutta hintaa (energia x hinta per kWh). Aseta hinta Asetuksista täyttääksesi sen.",
+    "confidence_tip": "Profiilin osumaluottamus (0-100%). Kuinka tarkasti syklin tehokäyrä osui tunnistettuun ohjelmaan.",
+    "health_tip": "ML-syklin kunto (korkeampi = parempi). Napsauta sykliä tarkastellaksesi ja arvioidaksesi sitä."
+  },
+  "stat": {
+    "avg": "ka.",
+    "min": "min {v}",
+    "max": "max {v}",
+    "consistency": "johdonmukaisuus ±{v}",
+    "total": "yhteensä {v}",
+    "last_run": "viimeisin ajo {v}",
+    "score": "pisteet {pct}%",
+    "duration_cv": "keston CV {pct}%",
+    "avg_confidence": "ka. luottamus {pct}%"
   }
 }

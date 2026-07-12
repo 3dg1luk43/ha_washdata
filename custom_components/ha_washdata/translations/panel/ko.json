@@ -21,7 +21,9 @@
     "steady": "→ 꾸준한",
     "underrun": "평소보다 빨리 완료됨",
     "using_defaults": "배송된 기본값 사용",
-    "using_tuned": "조정된 가중치 사용"
+    "using_tuned": "조정된 가중치 사용",
+    "overrun_ratio": "(예상의 {x}배)",
+    "underrun_ratio": "(예상의 {pct}%)"
   },
   "btn": {
     "add_device": "+ 장치 추가",
@@ -142,7 +144,9 @@
     "trim_split": "다듬기/분할",
     "undo": "실행 취소",
     "use": "사용",
-    "wipe_all": "모든 데이터 지우기"
+    "wipe_all": "모든 데이터 지우기",
+    "delete_selected": "선택 항목 삭제 ({n})",
+    "group_suggest": "그룹 {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "기록으로 테스트",
     "toggle_sidebar": "홈어시스턴트 사이드바 전환",
     "tools_and_data": "도구 및 데이터",
-    "wipe_history": "기록 지우기"
+    "wipe_history": "기록 지우기",
+    "recommendations": "권장 사항 ({n})"
   },
   "health": {
     "fair": "프로파일 품질: 보통",
@@ -439,7 +444,32 @@
     "ungrouped": "그룹 해제됨",
     "unlabelled": "라벨이 지정되지 않음",
     "unlabelled_paren": "(라벨 없음)",
-    "warp_path": "워프 경로"
+    "warp_path": "워프 경로",
+    "input": "입력:",
+    "start": "시작",
+    "end": "종료",
+    "unit_s": "(초)",
+    "reviewed_on": "{date}에 검토됨",
+    "unknown": "알 수 없음",
+    "quality": "품질",
+    "tags": "태그",
+    "at": "시각",
+    "pct_match_confidence": "매칭 신뢰도 {pct}%",
+    "ha_restarted": "HA 재시작됨",
+    "from_start": "시작부터",
+    "to_end": "끝까지",
+    "click_to_select": "클릭하여 선택",
+    "envelope": "봉투",
+    "zoom_hint": "스크롤하여 확대 · 더블클릭하여 초기화",
+    "loading_paren": "(로드 중…)",
+    "time_remaining": "~{v} 남음",
+    "no_duration": "기간 없음",
+    "duration_avg": "평균 ~{v}분",
+    "name_placeholder": "(이름)",
+    "n_shown": ", {n}개 표시됨",
+    "cycles_title": "사이클 ({n})",
+    "pg_detecting": "감지 중",
+    "pg_best_marker": "최적: {v}"
   },
   "log": {
     "all_levels": "모든 레벨"
@@ -452,7 +482,11 @@
     "fit_strong": "강한",
     "fit_weak": "약한",
     "fit_word": "맞다",
-    "personalized": "● 이 기계에 맞춤화됨"
+    "personalized": "● 이 기계에 맞춤화됨",
+    "better_than_baseline": "기준 추정치보다 {pct}% 향상 ({metric})",
+    "trend_improving_tip": "이 모델의 적합도가 최근 재확인을 거치며 개선되었습니다.",
+    "trend_declining_tip": "이 모델의 적합도가 최근 재확인에서 하락했습니다 · 더 많은 사이클을 검토하면 다시 학습하는 데 도움이 될 수 있습니다.",
+    "trend_steady_tip": "이 모델의 적합도가 최근 재확인에서 거의 꾸준히 유지되었습니다."
   },
   "modal": {
     "auto_label": "자동 라벨 주기",
@@ -472,7 +506,25 @@
     "process_recording": "프로세스 기록",
     "delete_maintenance_msg": "이 유지보수 기록을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
     "delete_maintenance_title": "유지보수 이벤트 삭제",
-    "relabel_cycles": "{count}개 사이클 다시 라벨 지정"
+    "relabel_cycles": "{count}개 사이클 다시 라벨 지정",
+    "delete_automation_title": "자동화 삭제",
+    "delete_automation_msg": "Home Assistant에서 자동화 \"{name}\"을(를) 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
+    "remove_legacy_title": "레거시 작업 제거",
+    "remove_legacy_msg": "레거시 맞춤 작업을 제거하시겠습니까? 사이클 이벤트에서 더 이상 실행되지 않습니다. 이 작업은 패널에서 취소할 수 없습니다.",
+    "discard_recording_title": "녹음 삭제",
+    "discard_recording_msg": "저장된 녹음을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
+    "dismiss_all_title": "모든 피드백 무시",
+    "dismiss_all_msg": "보류 중인 피드백 요청 {count}건을 모두 무시하시겠습니까?",
+    "dismiss_all_ok": "모두 무시",
+    "delete_phase_title": "단계 삭제",
+    "delete_phase_msg": "단계 \"{name}\"을(를) 삭제하시겠습니까?",
+    "clear_debug_title": "디버그 데이터 지우기",
+    "clear_debug_msg": "저장된 모든 디버그 추적을 삭제하시겠습니까?",
+    "wipe_all_title": "모든 데이터 지우기",
+    "wipe_all_msg": "⚠️ 모든 사이클과 프로필이 영구적으로 삭제됩니다. 이 작업은 취소할 수 없습니다.",
+    "wipe_all_ok": "전부 지우기",
+    "force_stop_title": "사이클 강제 정지",
+    "force_stop_msg": "지금 실행 중인 사이클을 강제 정지하시겠습니까? 사이클은 중단됨으로 저장됩니다."
   },
   "msg": {
     "appliance_monitor": "가전제품 모니터",
@@ -654,7 +706,17 @@
     "updated": "업데이트됨",
     "warmup_badge": "학습 중 ({done}/{needed} 사이클)",
     "warmup_detail": "이 프로필은 자동 매칭이 시작되기 전에 {needed}개의 라벨이 지정된 사이클이 필요합니다. 확인된 사이클마다 학습에 도움이 됩니다.",
-    "wipe_history_warning": "모든 사이클과 프로필을 영구적으로 삭제합니다. 취소할 수 없습니다."
+    "wipe_history_warning": "모든 사이클과 프로필을 영구적으로 삭제합니다. 취소할 수 없습니다.",
+    "compare_overlay_tip": "학습된 프로필 봉투를 겹쳐서 각 사이클이 어떤 프로그램과 유사한지 확인하세요.",
+    "duration_trend_up_tip": "지속 시간 증가 ({pct}%/사이클)",
+    "duration_trend_down_tip": "지속 시간 감소 ({pct}%/사이클)",
+    "energy_trend_up_tip": "에너지 증가 ({pct}%/사이클)",
+    "energy_trend_down_tip": "에너지 감소 ({pct}%/사이클)",
+    "performance_trending": "실적 추세",
+    "pg_select_cycle_hint": "사이클을 선택하고 ↺를 클릭하여 불러오세요",
+    "pg_sweep_progress": "단계 {done} / {total}",
+    "pg_analysis_hint": "사이클을 선택하고 ↺를 클릭하여 분석을 불러오세요.",
+    "diagnostics_load_failed": "진단을 불러올 수 없습니다: {error}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "급격한 강하는 즉시 종료로 처리",
@@ -1180,7 +1242,15 @@
     "interrupted": "중단된",
     "ready": "처리 준비 완료",
     "recording": "녹화 중",
-    "training": "훈련 중…"
+    "training": "훈련 중…",
+    "saving": "저장 중…",
+    "rebuilding": "재구축 중…",
+    "analyzing": "분석 중…",
+    "resetting": "재설정 중…",
+    "reverting": "되돌리는 중…",
+    "trimming": "다듬는 중…",
+    "splitting": "분할 중…",
+    "deleting": "삭제 중…"
   },
   "tab": {
     "advanced": "고급의",
@@ -1270,7 +1340,9 @@
     "relabel_done": "{count}개 사이클을 다시 라벨 지정했습니다",
     "relabel_failed": "다시 라벨 지정 실패: {error}",
     "reminders_save_failed": "알림을 저장할 수 없습니다: {error}",
-    "reminders_saved": "서비스 알림이 저장되었습니다"
+    "reminders_saved": "서비스 알림이 저장되었습니다",
+    "pause_no_cycle": "일시 정지할 실행 중인 사이클이 없습니다",
+    "resume_no_cycle": "재개할 일시 정지된 사이클이 없습니다"
   },
   "suggestion": {
     "both_agree": "WashData 권장",
@@ -1345,5 +1417,26 @@
     "drum_clean": "드럼 청소",
     "filter_clean": "필터 청소",
     "other": "기타"
+  },
+  "col": {
+    "profile_tip": "매칭된 프로그램 이름입니다. 라벨 없음은 사이클 종료 시 일치하는 프로필이 없음을 의미합니다.",
+    "status_tip": "사이클 결과: 완료됨(자연 종료), 중단됨(급격한 전력 강하), 강제 정지됨(수동), 또는 검토 필요(피드백 대기 중).",
+    "date_tip": "사이클이 시작된 날짜와 시간입니다.",
+    "duration_tip": "시작부터 종료까지의 총 사이클 실행 시간입니다.",
+    "energy_tip": "소비된 총 에너지(kWh)입니다. 시간에 따라 전력을 적분하여 계산합니다.",
+    "cost_tip": "이 사이클의 에너지 비용으로, 완료 시점에 적용된 가격(에너지 x kWh당 가격)으로 고정됩니다. 값을 채우려면 설정에서 가격을 지정하세요.",
+    "confidence_tip": "프로필 매칭 신뢰도(0-100%)입니다. 사이클 전력 곡선이 식별된 프로그램과 얼마나 근접하게 일치했는지를 나타냅니다.",
+    "health_tip": "ML 사이클 건강(높을수록 좋음)입니다. 검사하고 검토하려면 사이클을 클릭하세요."
+  },
+  "stat": {
+    "avg": "평균",
+    "min": "최소 {v}",
+    "max": "최대 {v}",
+    "consistency": "일관성 ±{v}",
+    "total": "총 {v}",
+    "last_run": "마지막 실행 {v}",
+    "score": "점수 {pct}%",
+    "duration_cv": "지속 시간 CV {pct}%",
+    "avg_confidence": "평균 신뢰도 {pct}%"
   }
 }

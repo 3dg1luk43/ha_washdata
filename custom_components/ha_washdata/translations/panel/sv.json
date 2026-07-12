@@ -21,7 +21,9 @@
     "steady": "→ stabil",
     "underrun": "Klart snabbare än vanligt",
     "using_defaults": "Använder standardinställningar",
-    "using_tuned": "Använder finjusterade vikter"
+    "using_tuned": "Använder finjusterade vikter",
+    "overrun_ratio": "({x}x förväntat)",
+    "underrun_ratio": "({pct}% av förväntat)"
   },
   "btn": {
     "add_device": "+ Lägg till enhet",
@@ -142,7 +144,9 @@
     "trim_split": "Trimma / Dela",
     "undo": "Ångra",
     "use": "Använd",
-    "wipe_all": "Rensa all data"
+    "wipe_all": "Rensa all data",
+    "delete_selected": "Radera valda ({n})",
+    "group_suggest": "Grupp {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Testa på historik",
     "toggle_sidebar": "Växla Home Assistant-sidofältet",
     "tools_and_data": "Verktyg och data",
-    "wipe_history": "Rensa historik"
+    "wipe_history": "Rensa historik",
+    "recommendations": "Rekommendationer ({n})"
   },
   "health": {
     "fair": "Acceptabel profilkvalitet",
@@ -439,7 +444,32 @@
     "ungrouped": "Ej grupperad",
     "unlabelled": "Omärkt",
     "unlabelled_paren": "(omärkt)",
-    "warp_path": "Warp-väg"
+    "warp_path": "Warp-väg",
+    "input": "Indata:",
+    "start": "Start",
+    "end": "Slut",
+    "unit_s": "(s)",
+    "reviewed_on": "granskad {date}",
+    "unknown": "Okänd",
+    "quality": "Kvalitet",
+    "tags": "Taggar",
+    "at": "kl.",
+    "pct_match_confidence": "{pct}% matchkonfidens",
+    "ha_restarted": "HA startades om",
+    "from_start": "Från start",
+    "to_end": "Till slut",
+    "click_to_select": "klicka för att välja",
+    "envelope": "Envelopp",
+    "zoom_hint": "scrolla för att zooma · dubbelklicka för att återställa",
+    "loading_paren": "(laddar…)",
+    "time_remaining": "~{v} kvar",
+    "no_duration": "ingen varaktighet",
+    "duration_avg": "~{v}m snitt",
+    "name_placeholder": "(namn)",
+    "n_shown": ", {n} visas",
+    "cycles_title": "Cykler ({n})",
+    "pg_detecting": "Upptäcker",
+    "pg_best_marker": "Bästa: {v}"
   },
   "log": {
     "all_levels": "Alla nivåer"
@@ -452,7 +482,11 @@
     "fit_strong": "Stark",
     "fit_weak": "Svag",
     "fit_word": "passform",
-    "personalized": "● Anpassad till denna maskin"
+    "personalized": "● Anpassad till denna maskin",
+    "better_than_baseline": "{pct}% bättre än basuppskattningen ({metric})",
+    "trend_improving_tip": "Den här modellens passning har förbättrats vid de senaste omkontrollerna.",
+    "trend_declining_tip": "Den här modellens passning har försämrats vid de senaste omkontrollerna. Att granska fler cykler kan hjälpa den att lära om.",
+    "trend_steady_tip": "Den här modellens passning har hållit sig ungefär stabil vid de senaste omkontrollerna."
   },
   "modal": {
     "auto_label": "Automatisk märkning av cykler",
@@ -472,7 +506,25 @@
     "process_recording": "Bearbeta inspelning",
     "delete_maintenance_msg": "Ta bort denna underhållspost? Detta kan inte ångras.",
     "delete_maintenance_title": "Ta bort underhållshändelse",
-    "relabel_cycles": "Märk om {count} cykler"
+    "relabel_cycles": "Märk om {count} cykler",
+    "delete_automation_title": "Radera automation",
+    "delete_automation_msg": "Radera automationen \"{name}\" från Home Assistant? Detta kan inte ångras.",
+    "remove_legacy_title": "Ta bort äldre åtgärder",
+    "remove_legacy_msg": "Ta bort de äldre anpassade åtgärderna? De slutar att utlösas vid cykelhändelser. Detta kan inte ångras från panelen.",
+    "discard_recording_title": "Kasta inspelning",
+    "discard_recording_msg": "Kasta den sparade inspelningen? Detta kan inte ångras.",
+    "dismiss_all_title": "Avfärda all feedback",
+    "dismiss_all_msg": "Avfärda alla {count} väntande feedbackförfrågningar?",
+    "dismiss_all_ok": "Avfärda alla",
+    "delete_phase_title": "Radera fas",
+    "delete_phase_msg": "Radera fas \"{name}\"?",
+    "clear_debug_title": "Rensa felsökningsdata",
+    "clear_debug_msg": "Radera alla lagrade felsökningsspår?",
+    "wipe_all_title": "Radera all data",
+    "wipe_all_msg": "⚠️ Detta raderar permanent ALLA cykler och profiler. Detta kan inte ångras.",
+    "wipe_all_ok": "Radera allt",
+    "force_stop_title": "Tvångsstoppa cykel",
+    "force_stop_msg": "Tvångsstoppa den aktiva cykeln nu? Cykeln sparas som avbruten."
   },
   "msg": {
     "appliance_monitor": "Apparatövervakning",
@@ -654,7 +706,17 @@
     "updated": "Uppdaterad",
     "warmup_badge": "Lär sig fortfarande ({done}/{needed} cykler)",
     "warmup_detail": "Den här profilen behöver {needed} märkta cykler innan automatisk matchning börjar. Varje bekräftad cykel hjälper den att lära sig.",
-    "wipe_history_warning": "Ta bort alla cykler och profiler permanent. Kan inte ångras."
+    "wipe_history_warning": "Ta bort alla cykler och profiler permanent. Kan inte ångras.",
+    "compare_overlay_tip": "Lägg inlärda profilenvelopper ovanpå varandra för att se vilket program varje cykel liknar.",
+    "duration_trend_up_tip": "Varaktighet ökar ({pct}%/cykel)",
+    "duration_trend_down_tip": "Varaktighet minskar ({pct}%/cykel)",
+    "energy_trend_up_tip": "Energi ökar ({pct}%/cykel)",
+    "energy_trend_down_tip": "Energi minskar ({pct}%/cykel)",
+    "performance_trending": "Prestandatrend",
+    "pg_select_cycle_hint": "Välj en cykel och klicka på ↺ för att läsa in",
+    "pg_sweep_progress": "Steg {done} / {total}",
+    "pg_analysis_hint": "Välj en cykel och klicka på ↺ för att läsa in analysen.",
+    "diagnostics_load_failed": "Kunde inte läsa in diagnostik: {error}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plötsligt fall som tolkas som omedelbart slut",
@@ -1180,7 +1242,15 @@
     "interrupted": "Avbruten",
     "ready": "Redo att bearbeta",
     "recording": "Spelar in",
-    "training": "Tränar…"
+    "training": "Tränar…",
+    "saving": "Sparar…",
+    "rebuilding": "Bygger om…",
+    "analyzing": "Analyserar…",
+    "resetting": "Återställer…",
+    "reverting": "Återgår…",
+    "trimming": "Beskär…",
+    "splitting": "Delar upp…",
+    "deleting": "Raderar…"
   },
   "suggestion": {
     "both_agree": "WashData rekommenderar",
@@ -1333,7 +1403,9 @@
     "relabel_done": "{count} cykler ommärkta",
     "relabel_failed": "Ommärkning misslyckades: {error}",
     "reminders_save_failed": "Kunde inte spara påminnelser: {error}",
-    "reminders_saved": "Servicepåminnelser sparade"
+    "reminders_saved": "Servicepåminnelser sparade",
+    "pause_no_cycle": "Ingen aktiv cykel att pausa",
+    "resume_no_cycle": "Ingen pausad cykel att återuppta"
   },
   "trend": {
     "down": "Nedåtgående trend",
@@ -1345,5 +1417,26 @@
     "drum_clean": "Rengör trumma",
     "filter_clean": "Rengör filter",
     "other": "Övrigt"
+  },
+  "col": {
+    "profile_tip": "Namnet på det matchade programmet. Utan etikett betyder att ingen profil matchade vid cykelns slut.",
+    "status_tip": "Cykelresultat: Slutförd (naturligt slut), Avbruten (plötsligt effektfall), Tvångsstoppad (manuellt) eller Behöver granskning (feedback väntar).",
+    "date_tip": "Datum och tid då cykeln startade.",
+    "duration_tip": "Total körtid för cykeln från start till slut.",
+    "energy_tip": "Total förbrukad energi (kWh). Beräknad genom att integrera effekten över tid.",
+    "cost_tip": "Energikostnad för denna cykel, låst vid slutförandet utifrån priset som gällde då (energi x pris per kWh). Ange ett pris under Inställningar för att fylla i den.",
+    "confidence_tip": "Profilmatchkonfidens (0-100 %). Hur nära cykelns effektkurva matchade det identifierade programmet.",
+    "health_tip": "ML-cykelhälsa (högre = bättre). Klicka på en cykel för att inspektera och granska den."
+  },
+  "stat": {
+    "avg": "snitt",
+    "min": "min {v}",
+    "max": "max {v}",
+    "consistency": "konsistens ±{v}",
+    "total": "totalt {v}",
+    "last_run": "senaste körning {v}",
+    "score": "poäng {pct}%",
+    "duration_cv": "varaktighets-CV {pct}%",
+    "avg_confidence": "snitt-konfidens {pct}%"
   }
 }

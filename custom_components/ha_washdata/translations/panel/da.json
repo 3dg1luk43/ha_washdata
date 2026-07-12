@@ -21,7 +21,9 @@
     "reviewed": "Gennemgået",
     "steady": "→ stabil",
     "using_defaults": "Brug af afsendte standardindstillinger",
-    "using_tuned": "Brug af indstillede vægte"
+    "using_tuned": "Brug af indstillede vægte",
+    "overrun_ratio": "({x}x forventet)",
+    "underrun_ratio": "({pct}% af forventet)"
   },
   "btn": {
     "add_device": "+ Tilføj enhed",
@@ -142,7 +144,9 @@
     "trim_split": "Trim / Split",
     "undo": "Fortryd",
     "use": "Bruge",
-    "wipe_all": "Slet alle data"
+    "wipe_all": "Slet alle data",
+    "delete_selected": "Slet valgte ({n})",
+    "group_suggest": "Gruppe {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Test på historik",
     "toggle_sidebar": "Skift Home Assistant-sidebjælken",
     "tools_and_data": "Værktøjer og data",
-    "wipe_history": "Tør historie"
+    "wipe_history": "Tør historie",
+    "recommendations": "Anbefalinger ({n})"
   },
   "health": {
     "fair": "Acceptabel matchkvalitet",
@@ -439,7 +444,32 @@
     "ungrouped": "Ugrupperet",
     "unlabelled": "Umærket",
     "unlabelled_paren": "(umærket)",
-    "warp_path": "Warp-sti"
+    "warp_path": "Warp-sti",
+    "input": "Input:",
+    "start": "Start",
+    "end": "Slut",
+    "unit_s": "(s)",
+    "reviewed_on": "gennemgået {date}",
+    "unknown": "Ukendt",
+    "quality": "Kvalitet",
+    "tags": "Mærker",
+    "at": "kl.",
+    "pct_match_confidence": "{pct}% matchkonfidens",
+    "ha_restarted": "HA genstartet",
+    "from_start": "Fra start",
+    "to_end": "Til slut",
+    "click_to_select": "klik for at vælge",
+    "envelope": "Indhylning",
+    "zoom_hint": "rul for at zoome · dobbeltklik for at nulstille",
+    "loading_paren": "(indlæser…)",
+    "time_remaining": "~{v} tilbage",
+    "no_duration": "ingen varighed",
+    "duration_avg": "~{v}m gns.",
+    "name_placeholder": "(navn)",
+    "n_shown": ", {n} vist",
+    "cycles_title": "Cyklusser ({n})",
+    "pg_detecting": "Registrerer",
+    "pg_best_marker": "Bedste: {v}"
   },
   "log": {
     "all_levels": "Alle niveauer"
@@ -452,7 +482,11 @@
     "fit_strong": "Stærk",
     "fit_weak": "Svag",
     "fit_word": "passe",
-    "personalized": "● Personliggjort til denne maskine"
+    "personalized": "● Personliggjort til denne maskine",
+    "better_than_baseline": "{pct}% bedre end grundlinjeestimatet ({metric})",
+    "trend_improving_tip": "Denne models tilpasning er blevet bedre ved de seneste gentjek.",
+    "trend_declining_tip": "Denne models tilpasning er blevet dårligere ved de seneste gentjek. At gennemgå flere cyklusser kan hjælpe den med at lære igen.",
+    "trend_steady_tip": "Denne models tilpasning har holdt sig nogenlunde stabil ved de seneste gentjek."
   },
   "modal": {
     "auto_label": "Auto-label cyklusser",
@@ -472,7 +506,25 @@
     "process_recording": "Procesoptagelse",
     "delete_maintenance_msg": "Slet denne vedligeholdelsespost? Dette kan ikke fortrydes.",
     "delete_maintenance_title": "Slet vedligeholdelseshændelse",
-    "relabel_cycles": "Ommærk {count} cyklusser"
+    "relabel_cycles": "Ommærk {count} cyklusser",
+    "delete_automation_title": "Slet automatisering",
+    "delete_automation_msg": "Slet automatiseringen \"{name}\" fra Home Assistant? Dette kan ikke fortrydes.",
+    "remove_legacy_title": "Fjern ældre handlinger",
+    "remove_legacy_msg": "Fjern de ældre brugerdefinerede handlinger? De vil ikke længere blive udløst ved cyklushændelser. Dette kan ikke fortrydes fra panelet.",
+    "discard_recording_title": "Kassér optagelse",
+    "discard_recording_msg": "Kassér den gemte optagelse? Dette kan ikke fortrydes.",
+    "dismiss_all_title": "Afvis al feedback",
+    "dismiss_all_msg": "Afvis alle {count} afventende feedbackanmodninger?",
+    "dismiss_all_ok": "Afvis alle",
+    "delete_phase_title": "Slet fase",
+    "delete_phase_msg": "Slet fase \"{name}\"?",
+    "clear_debug_title": "Ryd fejlfindingsdata",
+    "clear_debug_msg": "Slet alle gemte fejlfindingsspor?",
+    "wipe_all_title": "Slet alle data",
+    "wipe_all_msg": "⚠️ Dette sletter permanent ALLE cyklusser og profiler. Dette kan ikke fortrydes.",
+    "wipe_all_ok": "Slet alt",
+    "force_stop_title": "Tving stop af cyklus",
+    "force_stop_msg": "Tving den aktive cyklus til at stoppe nu? Cyklussen gemmes som afbrudt."
   },
   "msg": {
     "appliance_monitor": "Apparat monitor",
@@ -654,7 +706,17 @@
     "updated": "Opdateret",
     "warmup_badge": "Lærer stadig ({done}/{needed} cyklusser)",
     "warmup_detail": "Denne profil har brug for {needed} mærkede cyklusser, før automatisk matchning begynder. Hver bekræftet cyklus hjælper den med at lære.",
-    "wipe_history_warning": "Slet alle cyklusser og profiler permanent. Kan ikke fortrydes."
+    "wipe_history_warning": "Slet alle cyklusser og profiler permanent. Kan ikke fortrydes.",
+    "compare_overlay_tip": "Læg indlærte profilindhylninger oven på hinanden for at se, hvilket program hver cyklus ligner.",
+    "duration_trend_up_tip": "Varighed stiger ({pct}%/cyklus)",
+    "duration_trend_down_tip": "Varighed falder ({pct}%/cyklus)",
+    "energy_trend_up_tip": "Energi stiger ({pct}%/cyklus)",
+    "energy_trend_down_tip": "Energi falder ({pct}%/cyklus)",
+    "performance_trending": "Ydelsestendens",
+    "pg_select_cycle_hint": "Vælg en cyklus og klik på ↺ for at indlæse",
+    "pg_sweep_progress": "Trin {done} / {total}",
+    "pg_analysis_hint": "Vælg en cyklus og klik på ↺ for at indlæse analysen.",
+    "diagnostics_load_failed": "Kunne ikke indlæse diagnostik: {error}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Pludseligt fald behandlet som øjeblikkelig afslutning",
@@ -1180,7 +1242,15 @@
     "interrupted": "Afbrudt",
     "ready": "Klar til at behandle",
     "recording": "Optager",
-    "training": "Træner…"
+    "training": "Træner…",
+    "saving": "Gemmer…",
+    "rebuilding": "Genopbygger…",
+    "analyzing": "Analyserer…",
+    "resetting": "Nulstiller…",
+    "reverting": "Tilbagefører…",
+    "trimming": "Beskærer…",
+    "splitting": "Opdeler…",
+    "deleting": "Sletter…"
   },
   "suggestion": {
     "both_agree": "WashData anbefaler",
@@ -1333,7 +1403,9 @@
     "relabel_done": "Ommærkede {count} cyklus(ser)",
     "relabel_failed": "Ommærkning mislykkedes: {error}",
     "reminders_save_failed": "Kunne ikke gemme påmindelser: {error}",
-    "reminders_saved": "Servicepåmindelser gemt"
+    "reminders_saved": "Servicepåmindelser gemt",
+    "pause_no_cycle": "Ingen aktiv cyklus at sætte på pause",
+    "resume_no_cycle": "Ingen pauset cyklus at genoptage"
   },
   "trend": {
     "down": "Trend nedad",
@@ -1345,5 +1417,26 @@
     "drum_clean": "Rengør tromle",
     "filter_clean": "Rengør filter",
     "other": "Andet"
+  },
+  "col": {
+    "profile_tip": "Navnet på det matchede program. Uden mærke betyder, at ingen profil matchede ved cyklussens afslutning.",
+    "status_tip": "Cyklusresultat: Fuldført (naturlig afslutning), Afbrudt (pludseligt effektfald), Tvunget stoppet (manuelt) eller Kræver gennemgang (feedback afventer).",
+    "date_tip": "Dato og klokkeslæt, hvor cyklussen startede.",
+    "duration_tip": "Samlet kørselstid for cyklussen fra start til slut.",
+    "energy_tip": "Samlet forbrugt energi (kWh). Beregnet ved at integrere effekten over tid.",
+    "cost_tip": "Energiomkostning for denne cyklus, låst ved afslutningen ud fra den pris, der var gældende da (energi x pris pr. kWh). Angiv en pris under Indstillinger for at udfylde den.",
+    "confidence_tip": "Profilmatchkonfidens (0-100 %). Hvor tæt cyklussens effektkurve matchede det identificerede program.",
+    "health_tip": "ML-cyklussundhed (højere = bedre). Klik på en cyklus for at inspicere og gennemgå den."
+  },
+  "stat": {
+    "avg": "gns.",
+    "min": "min. {v}",
+    "max": "maks. {v}",
+    "consistency": "konsistens ±{v}",
+    "total": "i alt {v}",
+    "last_run": "sidste kørsel {v}",
+    "score": "score {pct}%",
+    "duration_cv": "varigheds-CV {pct}%",
+    "avg_confidence": "gns. konfidens {pct}%"
   }
 }

@@ -21,7 +21,9 @@
     "steady": "→ stabilný",
     "underrun": "Skončil rýchlejšie ako zvyčajne",
     "using_defaults": "Používa predvolené nastavenia",
-    "using_tuned": "Používa vyladené váhy"
+    "using_tuned": "Používa vyladené váhy",
+    "overrun_ratio": "({x}x očakávaného)",
+    "underrun_ratio": "({pct}% očakávaného)"
   },
   "btn": {
     "add_device": "+ Pridať zariadenie",
@@ -142,7 +144,9 @@
     "trim_split": "Orezať / Rozdeliť",
     "undo": "Späť",
     "use": "Použiť",
-    "wipe_all": "Vymazať všetky dáta"
+    "wipe_all": "Vymazať všetky dáta",
+    "delete_selected": "Odstrániť vybrané ({n})",
+    "group_suggest": "Skupina {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Otestovať na histórii",
     "toggle_sidebar": "Prepnúť bočný panel Asistenta domácnosti",
     "tools_and_data": "Nástroje a dáta",
-    "wipe_history": "Vymazať históriu"
+    "wipe_history": "Vymazať históriu",
+    "recommendations": "Odporúčania ({n})"
   },
   "health": {
     "fair": "Prijateľná kvalita profilu",
@@ -439,7 +444,32 @@
     "ungrouped": "Nezoskupené",
     "unlabelled": "Bez štítku",
     "unlabelled_paren": "(bez štítku)",
-    "warp_path": "Cesta deformácie"
+    "warp_path": "Cesta deformácie",
+    "input": "Vstup:",
+    "start": "Začiatok",
+    "end": "Koniec",
+    "unit_s": "(s)",
+    "reviewed_on": "skontrolované {date}",
+    "unknown": "Neznáme",
+    "quality": "Kvalita",
+    "tags": "Štítky",
+    "at": "o",
+    "pct_match_confidence": "{pct}% spoľahlivosti zhody",
+    "ha_restarted": "HA reštartované",
+    "from_start": "Od začiatku",
+    "to_end": "Do konca",
+    "click_to_select": "kliknutím vyberte",
+    "envelope": "Obálka",
+    "zoom_hint": "posunutím priblížite · dvojklikom obnovíte",
+    "loading_paren": "(načítava sa…)",
+    "time_remaining": "~{v} zostáva",
+    "no_duration": "bez trvania",
+    "duration_avg": "~{v}m priem.",
+    "name_placeholder": "(názov)",
+    "n_shown": ", zobrazených {n}",
+    "cycles_title": "Cykly ({n})",
+    "pg_detecting": "Rozpoznávanie",
+    "pg_best_marker": "Najlepší: {v}"
   },
   "log": {
     "all_levels": "Všetky úrovne"
@@ -452,7 +482,11 @@
     "fit_strong": "Silný",
     "fit_weak": "Slabý",
     "fit_word": "zhoda",
-    "personalized": "● Prispôsobený tomuto stroju"
+    "personalized": "● Prispôsobený tomuto stroju",
+    "better_than_baseline": "{pct}% lepšie ako základný odhad ({metric})",
+    "trend_improving_tip": "Prispôsobenie tohto modelu sa v posledných opakovaných kontrolách zlepšilo.",
+    "trend_declining_tip": "Prispôsobenie tohto modelu sa v posledných opakovaných kontrolách zhoršilo, kontrola viacerých cyklov mu môže pomôcť znovu sa naučiť.",
+    "trend_steady_tip": "Prispôsobenie tohto modelu zostalo v posledných opakovaných kontrolách približne stabilné."
   },
   "modal": {
     "auto_label": "Automatické označovanie cyklov",
@@ -472,7 +506,25 @@
     "process_recording": "Spracovať nahrávku",
     "delete_maintenance_msg": "Odstrániť tento záznam údržby? Túto akciu nie je možné vrátiť späť.",
     "delete_maintenance_title": "Odstrániť udalosť údržby",
-    "relabel_cycles": "Zmeniť štítok pre {count} cyklov"
+    "relabel_cycles": "Zmeniť štítok pre {count} cyklov",
+    "delete_automation_title": "Odstrániť automatizáciu",
+    "delete_automation_msg": "Odstrániť automatizáciu \"{name}\" z Home Assistant? Túto akciu nie je možné vrátiť späť.",
+    "remove_legacy_title": "Odstrániť staršie akcie",
+    "remove_legacy_msg": "Odstrániť staršie vlastné akcie? Prestanú sa spúšťať pri udalostiach cyklu. Z panela to nie je možné vrátiť späť.",
+    "discard_recording_title": "Zahodiť záznam",
+    "discard_recording_msg": "Zahodiť uložený záznam? Túto akciu nie je možné vrátiť späť.",
+    "dismiss_all_title": "Zamietnuť všetky žiadosti o spätnú väzbu",
+    "dismiss_all_msg": "Zamietnuť všetkých {count} čakajúcich žiadostí o spätnú väzbu?",
+    "dismiss_all_ok": "Zamietnuť všetky",
+    "delete_phase_title": "Odstrániť fázu",
+    "delete_phase_msg": "Odstrániť fázu \"{name}\"?",
+    "clear_debug_title": "Vymazať ladiace dáta",
+    "clear_debug_msg": "Odstrániť všetky uložené ladiace záznamy?",
+    "wipe_all_title": "Vymazať všetky dáta",
+    "wipe_all_msg": "⚠️ Týmto trvalo odstránite VŠETKY cykly a profily. Túto akciu nie je možné vrátiť späť.",
+    "wipe_all_ok": "Vymazať všetko",
+    "force_stop_title": "Vynútiť zastavenie cyklu",
+    "force_stop_msg": "Vynútiť teraz zastavenie aktívneho cyklu? Cyklus sa uloží ako prerušený."
   },
   "msg": {
     "appliance_monitor": "Monitor spotrebiča",
@@ -654,7 +706,17 @@
     "updated": "Aktualizované",
     "warmup_badge": "Ešte sa učí ({done}/{needed} cyklov)",
     "warmup_detail": "Tento profil potrebuje {needed} označených cyklov, kým sa spustí automatické párovanie. Každý potvrdený cyklus mu pomáha učiť sa.",
-    "wipe_history_warning": "Natrvalo odstrániť všetky cykly a profily. Nedá sa vrátiť späť."
+    "wipe_history_warning": "Natrvalo odstrániť všetky cykly a profily. Nedá sa vrátiť späť.",
+    "compare_overlay_tip": "Prekryte naučené obálky profilov, aby ste videli, ktorý program každý cyklus pripomína.",
+    "duration_trend_up_tip": "Trvanie rastie ({pct}%/cyklus)",
+    "duration_trend_down_tip": "Trvanie klesá ({pct}%/cyklus)",
+    "energy_trend_up_tip": "Energia rastie ({pct}%/cyklus)",
+    "energy_trend_down_tip": "Energia klesá ({pct}%/cyklus)",
+    "performance_trending": "Trend výkonu",
+    "pg_select_cycle_hint": "Vyberte cyklus a kliknutím na ↺ ho načítajte",
+    "pg_sweep_progress": "Krok {done} / {total}",
+    "pg_analysis_hint": "Vyberte cyklus a kliknutím na ↺ načítajte analýzu.",
+    "diagnostics_load_failed": "Nepodarilo sa načítať diagnostiku: {error}"
   },
   "phase_desc": {
     "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",
@@ -1169,7 +1231,15 @@
     "interrupted": "Prerušený",
     "ready": "Pripravený na spracovanie",
     "recording": "Nahrávanie",
-    "training": "Trénovanie…"
+    "training": "Trénovanie…",
+    "saving": "Ukladanie…",
+    "rebuilding": "Prebudovávanie…",
+    "analyzing": "Analyzovanie…",
+    "resetting": "Resetovanie…",
+    "reverting": "Vracanie späť…",
+    "trimming": "Orezávanie…",
+    "splitting": "Rozdeľovanie…",
+    "deleting": "Odstraňovanie…"
   },
   "suggestion": {
     "both_agree": "WashData odporúča",
@@ -1322,7 +1392,9 @@
     "relabel_done": "Zmenený štítok pre {count} cyklov",
     "relabel_failed": "Zmena štítka zlyhala: {error}",
     "reminders_save_failed": "Nepodarilo sa uložiť pripomienky: {error}",
-    "reminders_saved": "Pripomienky servisu uložené"
+    "reminders_saved": "Pripomienky servisu uložené",
+    "pause_no_cycle": "Žiadny aktívny cyklus na pozastavenie",
+    "resume_no_cycle": "Žiadny pozastavený cyklus na obnovenie"
   },
   "trend": {
     "down": "Klesajúci trend",
@@ -1345,5 +1417,26 @@
     "start_duration_threshold": "Sekundy nad prahom na potvrdenie spustenia",
     "start_threshold_w": "Minimálny výkon vo wattoch na započítanie spustenia",
     "stop_threshold_w": "Pod touto hodnotou sa stroj počíta ako vypnutý"
+  },
+  "col": {
+    "profile_tip": "Názov zhodného programu. Bez štítku znamená, že na konci cyklu sa nezhodoval žiadny profil.",
+    "status_tip": "Výsledok cyklu: Dokončené (prirodzený koniec), Prerušené (náhly pokles výkonu), Vynútené zastavenie (ručne) alebo Vyžaduje kontrolu (čaká sa spätná väzba).",
+    "date_tip": "Dátum a čas začatia cyklu.",
+    "duration_tip": "Celkový čas behu cyklu od začiatku do konca.",
+    "energy_tip": "Celková spotrebovaná energia (kWh). Vypočítané integráciou výkonu v čase.",
+    "cost_tip": "Náklady na energiu pre tento cyklus, zafixované pri dokončení podľa ceny platnej v tom čase (energia x cena za kWh). Nastavte cenu v Nastaveniach, aby ste ho vyplnili.",
+    "confidence_tip": "Spoľahlivosť zhody profilu (0-100%). Ako presne krivka výkonu cyklu zodpovedala identifikovanému programu.",
+    "health_tip": "Zdravie cyklu ML (vyššie = lepšie). Kliknutím na cyklus ho skontrolujete a zhodnotíte."
+  },
+  "stat": {
+    "avg": "priem.",
+    "min": "min {v}",
+    "max": "max {v}",
+    "consistency": "konzistencia ±{v}",
+    "total": "spolu {v}",
+    "last_run": "posledný beh {v}",
+    "score": "skóre {pct}%",
+    "duration_cv": "CV trvania {pct}%",
+    "avg_confidence": "priem. spoľahlivosť {pct}%"
   }
 }

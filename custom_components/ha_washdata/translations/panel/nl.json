@@ -21,7 +21,9 @@
     "steady": "→ stabiel",
     "underrun": "Sneller klaar dan normaal",
     "using_defaults": "Standaardwaarden voor verzending gebruiken",
-    "using_tuned": "Gebruik van afgestemde gewichten"
+    "using_tuned": "Gebruik van afgestemde gewichten",
+    "overrun_ratio": "({x}x verwacht)",
+    "underrun_ratio": "({pct}% van verwacht)"
   },
   "btn": {
     "add_device": "+ Apparaat toevoegen",
@@ -142,7 +144,9 @@
     "trim_split": "Trimmen/splitsen",
     "undo": "Ongedaan maken",
     "use": "Gebruik",
-    "wipe_all": "Wis alle gegevens"
+    "wipe_all": "Wis alle gegevens",
+    "delete_selected": "Selectie verwijderen ({n})",
+    "group_suggest": "Groep {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Testen op geschiedenis",
     "toggle_sidebar": "Schakel de Home Assistant-zijbalk in of uit",
     "tools_and_data": "Hulpmiddelen en gegevens",
-    "wipe_history": "Geschiedenis wissen"
+    "wipe_history": "Geschiedenis wissen",
+    "recommendations": "Aanbevelingen ({n})"
   },
   "health": {
     "fair": "Acceptabele profielkwaliteit",
@@ -439,7 +444,32 @@
     "ungrouped": "Niet-gegroepeerd",
     "unlabelled": "Zonder etiket",
     "unlabelled_paren": "(ongelabeld)",
-    "warp_path": "Uitlijningspad"
+    "warp_path": "Uitlijningspad",
+    "input": "Invoer:",
+    "start": "Start",
+    "end": "Einde",
+    "unit_s": "(s)",
+    "reviewed_on": "beoordeeld op {date}",
+    "unknown": "Onbekend",
+    "quality": "Kwaliteit",
+    "tags": "Tags",
+    "at": "om",
+    "pct_match_confidence": "{pct}% matchbetrouwbaarheid",
+    "ha_restarted": "HA opnieuw opgestart",
+    "from_start": "Vanaf begin",
+    "to_end": "Tot einde",
+    "click_to_select": "klik om te selecteren",
+    "envelope": "Envelop",
+    "zoom_hint": "scroll om te zoomen · dubbelklik om te resetten",
+    "loading_paren": "(laden…)",
+    "time_remaining": "~{v} resterend",
+    "no_duration": "geen duur",
+    "duration_avg": "~{v}m gem.",
+    "name_placeholder": "(naam)",
+    "n_shown": ", {n} weergegeven",
+    "cycles_title": "Cycli ({n})",
+    "pg_detecting": "Detecteren",
+    "pg_best_marker": "Beste: {v}"
   },
   "log": {
     "all_levels": "Alle niveaus"
@@ -452,7 +482,11 @@
     "fit_strong": "Sterk",
     "fit_weak": "Zwak",
     "fit_word": "fit",
-    "personalized": "● Gepersonaliseerd voor deze machine"
+    "personalized": "● Gepersonaliseerd voor deze machine",
+    "better_than_baseline": "{pct}% beter dan de basisschatting ({metric})",
+    "trend_improving_tip": "De pasvorm van dit model is bij recente hercontroles verbeterd.",
+    "trend_declining_tip": "De pasvorm van dit model is bij recente hercontroles achteruitgegaan. Meer cycli beoordelen kan het helpen opnieuw te leren.",
+    "trend_steady_tip": "De pasvorm van dit model is bij recente hercontroles ongeveer stabiel gebleven."
   },
   "modal": {
     "auto_label": "Automatische labelcycli",
@@ -472,7 +506,25 @@
     "process_recording": "Procesregistratie",
     "delete_maintenance_msg": "Deze onderhoudsregistratie verwijderen? Dit kan niet ongedaan worden gemaakt.",
     "delete_maintenance_title": "Onderhoudsgebeurtenis verwijderen",
-    "relabel_cycles": "{count} cycli opnieuw labelen"
+    "relabel_cycles": "{count} cycli opnieuw labelen",
+    "delete_automation_title": "Automatisering verwijderen",
+    "delete_automation_msg": "De automatisering \"{name}\" uit Home Assistant verwijderen? Dit kan niet ongedaan worden gemaakt.",
+    "remove_legacy_title": "Verouderde acties verwijderen",
+    "remove_legacy_msg": "De verouderde aangepaste acties verwijderen? Ze worden niet meer geactiveerd bij cyclusgebeurtenissen. Dit kan niet vanuit het paneel ongedaan worden gemaakt.",
+    "discard_recording_title": "Opname verwijderen",
+    "discard_recording_msg": "De opgeslagen opname verwijderen? Dit kan niet ongedaan worden gemaakt.",
+    "dismiss_all_title": "Alle feedback afwijzen",
+    "dismiss_all_msg": "Alle {count} openstaande feedbackverzoeken afwijzen?",
+    "dismiss_all_ok": "Alles afwijzen",
+    "delete_phase_title": "Fase verwijderen",
+    "delete_phase_msg": "Fase \"{name}\" verwijderen?",
+    "clear_debug_title": "Foutopsporingsgegevens wissen",
+    "clear_debug_msg": "Alle opgeslagen foutopsporingssporen verwijderen?",
+    "wipe_all_title": "Alle gegevens wissen",
+    "wipe_all_msg": "⚠️ Hiermee worden ALLE cycli en profielen permanent verwijderd. Dit kan niet ongedaan worden gemaakt.",
+    "wipe_all_ok": "Alles wissen",
+    "force_stop_title": "Cyclus geforceerd stoppen",
+    "force_stop_msg": "De actieve cyclus nu geforceerd stoppen? De cyclus wordt opgeslagen als onderbroken."
   },
   "msg": {
     "appliance_monitor": "Apparaatmonitor",
@@ -654,7 +706,17 @@
     "updated": "Bijgewerkt",
     "warmup_badge": "Nog aan het leren ({done}/{needed} cycli)",
     "warmup_detail": "Dit profiel heeft {needed} gelabelde cycli nodig voordat automatisch matchen begint. Elke bevestigde cyclus helpt het te leren.",
-    "wipe_history_warning": "Verwijder definitief alle cycli en profielen. Kan niet ongedaan worden gemaakt."
+    "wipe_history_warning": "Verwijder definitief alle cycli en profielen. Kan niet ongedaan worden gemaakt.",
+    "compare_overlay_tip": "Leg geleerde profielenvelopen over elkaar om te zien op welk programma elke cyclus lijkt.",
+    "duration_trend_up_tip": "Duur omhoog ({pct}%/cyclus)",
+    "duration_trend_down_tip": "Duur omlaag ({pct}%/cyclus)",
+    "energy_trend_up_tip": "Energie omhoog ({pct}%/cyclus)",
+    "energy_trend_down_tip": "Energie omlaag ({pct}%/cyclus)",
+    "performance_trending": "Prestatietrend",
+    "pg_select_cycle_hint": "Selecteer een cyclus en klik op ↺ om te laden",
+    "pg_sweep_progress": "Stap {done} / {total}",
+    "pg_analysis_hint": "Selecteer een cyclus en klik op ↺ om de analyse te laden.",
+    "diagnostics_load_failed": "Kon diagnostiek niet laden: {error}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plotselinge daling behandeld als onmiddellijk einde",
@@ -1180,7 +1242,15 @@
     "interrupted": "Onderbroken",
     "ready": "Klaar om te verwerken",
     "recording": "Opnemen",
-    "training": "Trainen…"
+    "training": "Trainen…",
+    "saving": "Opslaan…",
+    "rebuilding": "Opnieuw opbouwen…",
+    "analyzing": "Analyseren…",
+    "resetting": "Resetten…",
+    "reverting": "Terugzetten…",
+    "trimming": "Bijsnijden…",
+    "splitting": "Splitsen…",
+    "deleting": "Verwijderen…"
   },
   "suggestion": {
     "both_agree": "WashData raadt aan",
@@ -1333,7 +1403,9 @@
     "relabel_done": "{count} cyclus(sen) opnieuw gelabeld",
     "relabel_failed": "Opnieuw labelen mislukt: {error}",
     "reminders_save_failed": "Kan herinneringen niet opslaan: {error}",
-    "reminders_saved": "Serviceherinneringen opgeslagen"
+    "reminders_saved": "Serviceherinneringen opgeslagen",
+    "pause_no_cycle": "Geen actieve cyclus om te pauzeren",
+    "resume_no_cycle": "Geen gepauzeerde cyclus om te hervatten"
   },
   "trend": {
     "down": "Trend naar beneden",
@@ -1345,5 +1417,26 @@
     "drum_clean": "Trommel reinigen",
     "filter_clean": "Filter reinigen",
     "other": "Overig"
+  },
+  "col": {
+    "profile_tip": "Naam van het overeenkomende programma. Geen label betekent dat er aan het einde van de cyclus geen profiel overeenkwam.",
+    "status_tip": "Cyclusresultaat: Voltooid (natuurlijk einde), Onderbroken (abrupte vermogensdaling), Geforceerd gestopt (handmatig) of Beoordeling nodig (feedback in behandeling).",
+    "date_tip": "Datum en tijd waarop de cyclus is gestart.",
+    "duration_tip": "Totale looptijd van de cyclus van begin tot einde.",
+    "energy_tip": "Totaal verbruikte energie (kWh). Berekend door het vermogen over de tijd te integreren.",
+    "cost_tip": "Energiekosten voor deze cyclus, vastgezet bij voltooiing met de op dat moment geldende prijs (energie x prijs per kWh). Stel een prijs in onder Instellingen om deze te vullen.",
+    "confidence_tip": "Betrouwbaarheid van de profielovereenkomst (0-100%). Hoe nauwkeurig de vermogenscurve van de cyclus overeenkwam met het geïdentificeerde programma.",
+    "health_tip": "ML-cyclusgezondheid (hoger = beter). Klik op een cyclus om deze te inspecteren en te beoordelen."
+  },
+  "stat": {
+    "avg": "gem.",
+    "min": "min. {v}",
+    "max": "max. {v}",
+    "consistency": "consistentie ±{v}",
+    "total": "totaal {v}",
+    "last_run": "laatste run {v}",
+    "score": "score {pct}%",
+    "duration_cv": "duur-CV {pct}%",
+    "avg_confidence": "gem. betrouwbaarheid {pct}%"
   }
 }

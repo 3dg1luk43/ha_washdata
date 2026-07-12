@@ -235,13 +235,20 @@ def _format_exclusions(excluded: dict[str, int]) -> str:
 
 
 def _num(value: Any) -> float | None:
-    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
-        if not isinstance(value, (int, float)):
-            return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
+    # Reject bool first: bool is a subclass of int, so the old combined guard
+    # let True/False fall through to float() and coerce to 1.0/0.0.
+    if isinstance(value, bool):
         return None
+    if not isinstance(value, (int, float, str)):
+        return None
+    try:
+        result = float(value)
+    except (TypeError, ValueError, OverflowError):
+        # OverflowError: huge integer strings like "1e100000" / 10**10000.
+        return None
+    # Reject NaN/inf (e.g. from a malformed "nan"/"inf" string or bad option)
+    # so they can't poison the invariant arithmetic downstream.
+    return result if np.isfinite(result) else None
 
 
 def reconcile_suggestions(

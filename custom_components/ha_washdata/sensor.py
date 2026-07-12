@@ -612,7 +612,7 @@ class WasherAmbiguitySensor(WasherBaseSensor):
             key="ambiguity",
             translation_key="ambiguity",
             icon="mdi:help-rhombus-outline",
-            state_class="measurement",
+            state_class=SensorStateClass.MEASUREMENT,
             native_unit_of_measurement="%",
             entity_category=EntityCategory.DIAGNOSTIC,
         )

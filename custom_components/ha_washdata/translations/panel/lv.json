@@ -21,7 +21,9 @@
     "steady": "→ stabils",
     "underrun": "Pabeidza ātrāk nekā parasti",
     "using_defaults": "Tiek izmantoti piegādātie noklusējuma iestatījumi",
-    "using_tuned": "Izmantojot noregulētus svarus"
+    "using_tuned": "Izmantojot noregulētus svarus",
+    "overrun_ratio": "({x}x paredzētā)",
+    "underrun_ratio": "({pct}% no paredzētā)"
   },
   "btn": {
     "add_device": "+ Pievienot ierīci",
@@ -142,7 +144,9 @@
     "trim_split": "Apgriezt / sadalīt",
     "undo": "Atsaukt",
     "use": "Izmantot",
-    "wipe_all": "Noslaukiet visus datus"
+    "wipe_all": "Noslaukiet visus datus",
+    "delete_selected": "Dzēst atlasītos ({n})",
+    "group_suggest": "Grupa {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Testēšana ar vēsturi",
     "toggle_sidebar": "Pārslēgt mājas palīga sānjoslu",
     "tools_and_data": "Rīki un dati",
-    "wipe_history": "Noslaukiet vēsturi"
+    "wipe_history": "Noslaukiet vēsturi",
+    "recommendations": "Ieteikumi ({n})"
   },
   "health": {
     "fair": "Pieņemama profila kvalitāte",
@@ -439,7 +444,32 @@
     "ungrouped": "Negrupēts",
     "unlabelled": "Bez etiķetes",
     "unlabelled_paren": "(bez etiķetes)",
-    "warp_path": "Deformācijas ceļš"
+    "warp_path": "Deformācijas ceļš",
+    "input": "Ievade:",
+    "start": "Sākums",
+    "end": "Beigas",
+    "unit_s": "(s)",
+    "reviewed_on": "pārskatīts {date}",
+    "unknown": "Nezināms",
+    "quality": "Kvalitāte",
+    "tags": "Birkas",
+    "at": "plkst.",
+    "pct_match_confidence": "{pct}% atbilstības pārliecība",
+    "ha_restarted": "HA restartēts",
+    "from_start": "No sākuma",
+    "to_end": "Līdz beigām",
+    "click_to_select": "noklikšķiniet, lai atlasītu",
+    "envelope": "Josla",
+    "zoom_hint": "ritiniet, lai tuvinātu · veiciet dubultklikšķi, lai atiestatītu",
+    "loading_paren": "(ielādē…)",
+    "time_remaining": "~{v} atlicis",
+    "no_duration": "nav ilguma",
+    "duration_avg": "~{v}m vidēji",
+    "name_placeholder": "(nosaukums)",
+    "n_shown": ", parādīti {n}",
+    "cycles_title": "Cikli ({n})",
+    "pg_detecting": "Notiek noteikšana",
+    "pg_best_marker": "Labākais: {v}"
   },
   "log": {
     "all_levels": "Visi līmeņi"
@@ -452,7 +482,11 @@
     "fit_strong": "Spēcīgs",
     "fit_weak": "Vāja",
     "fit_word": "der",
-    "personalized": "● Personalizēta šai iekārtai"
+    "personalized": "● Personalizēta šai iekārtai",
+    "better_than_baseline": "{pct}% labāk nekā bāzes novērtējums ({metric})",
+    "trend_improving_tip": "Šā modeļa atbilstība ir uzlabojusies pēdējās atkārtotajās pārbaudēs.",
+    "trend_declining_tip": "Šā modeļa atbilstība ir pasliktinājusies pēdējās atkārtotajās pārbaudēs, vairāk ciklu pārskatīšana var palīdzēt tam pārmācīties.",
+    "trend_steady_tip": "Šā modeļa atbilstība ir saglabājusies aptuveni nemainīga pēdējās atkārtotajās pārbaudēs."
   },
   "modal": {
     "auto_label": "Automātiskās etiķetes cikli",
@@ -472,7 +506,25 @@
     "process_recording": "Procesa ierakstīšana",
     "delete_maintenance_msg": "Dzēst šo apkopes ierakstu? To nevarēs atsaukt.",
     "delete_maintenance_title": "Dzēst apkopes notikumu",
-    "relabel_cycles": "Pārmarķēt {count} ciklus"
+    "relabel_cycles": "Pārmarķēt {count} ciklus",
+    "delete_automation_title": "Dzēst automatizāciju",
+    "delete_automation_msg": "Dzēst automatizāciju \"{name}\" no Home Assistant? Šo nevar atsaukt.",
+    "remove_legacy_title": "Noņemt novecojušās darbības",
+    "remove_legacy_msg": "Noņemt novecojušās pielāgotās darbības? Tās vairs netiks izpildītas cikla notikumos. Šo no paneļa nevar atsaukt.",
+    "discard_recording_title": "Izmest ierakstu",
+    "discard_recording_msg": "Izmest saglabāto ierakstu? Šo nevar atsaukt.",
+    "dismiss_all_title": "Atlaist visas atsauksmes",
+    "dismiss_all_msg": "Atlaist visus {count} gaidošos atsauksmju pieprasījumus?",
+    "dismiss_all_ok": "Atlaist visus",
+    "delete_phase_title": "Dzēst fāzi",
+    "delete_phase_msg": "Dzēst fāzi \"{name}\"?",
+    "clear_debug_title": "Notīrīt atkļūdošanas datus",
+    "clear_debug_msg": "Dzēst visas saglabātās atkļūdošanas trases?",
+    "wipe_all_title": "Notīrīt visus datus",
+    "wipe_all_msg": "⚠️ Tas neatgriezeniski dzēš VISUS ciklus un profilus. Šo nevar atsaukt.",
+    "wipe_all_ok": "Dzēst visu",
+    "force_stop_title": "Piespiedu kārtā apturēt ciklu",
+    "force_stop_msg": "Piespiedu kārtā apturēt aktīvo ciklu tagad? Cikls tiks saglabāts kā pārtraukts."
   },
   "msg": {
     "appliance_monitor": "Ierīces monitors",
@@ -654,7 +706,17 @@
     "updated": "Atjaunināts",
     "warmup_badge": "Vēl mācoties ({done}/{needed} cikli)",
     "warmup_detail": "Šim profilam nepieciešami {needed} iezīmēti cikli, pirms sākas automātiskā saskaņošana. Katrs apstiprināts cikls palīdz mācīties.",
-    "wipe_history_warning": "Neatgriezeniski dzēst visus ciklus un profilus. Nevar atsaukt."
+    "wipe_history_warning": "Neatgriezeniski dzēst visus ciklus un profilus. Nevar atsaukt.",
+    "compare_overlay_tip": "Pārklājiet apgūto profilu joslas, lai redzētu, kurai programmai katrs cikls līdzinās.",
+    "duration_trend_up_tip": "Ilgums pieaug ({pct}%/ciklā)",
+    "duration_trend_down_tip": "Ilgums samazinās ({pct}%/ciklā)",
+    "energy_trend_up_tip": "Enerģija pieaug ({pct}%/ciklā)",
+    "energy_trend_down_tip": "Enerģija samazinās ({pct}%/ciklā)",
+    "performance_trending": "Veiktspējas tendence",
+    "pg_select_cycle_hint": "Atlasiet ciklu un noklikšķiniet ↺, lai ielādētu",
+    "pg_sweep_progress": "Solis {done} / {total}",
+    "pg_analysis_hint": "Atlasiet ciklu un noklikšķiniet ↺, lai ielādētu analīzi.",
+    "diagnostics_load_failed": "Neizdevās ielādēt diagnostiku: {error}"
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -1169,7 +1231,15 @@
     "interrupted": "Pārtrauca",
     "ready": "Gatavs apstrādei",
     "recording": "Ierakstīšana",
-    "training": "Trenēšana…"
+    "training": "Trenēšana…",
+    "saving": "Saglabā…",
+    "rebuilding": "Pārbūvē…",
+    "analyzing": "Analizē…",
+    "resetting": "Atiestata…",
+    "reverting": "Atgriež…",
+    "trimming": "Apgriež…",
+    "splitting": "Sadala…",
+    "deleting": "Dzēš…"
   },
   "tab": {
     "advanced": "Papildu",
@@ -1259,7 +1329,9 @@
     "relabel_done": "Pārmarķēti cikli: {count}",
     "relabel_failed": "Pārmarķēšana neizdevās: {error}",
     "reminders_save_failed": "Neizdevās saglabāt atgādinājumus: {error}",
-    "reminders_saved": "Apkopes atgādinājumi saglabāti"
+    "reminders_saved": "Apkopes atgādinājumi saglabāti",
+    "pause_no_cycle": "Nav aktīva cikla, ko pauzēt",
+    "resume_no_cycle": "Nav pauzēta cikla, ko atsākt"
   },
   "suggestion": {
     "both_agree": "WashData iesaka",
@@ -1345,5 +1417,26 @@
     "start_duration_threshold": "Sekundes virs sliekšņa, lai apstiprinātu sākumu",
     "start_threshold_w": "Minimālais vatu skaits, lai skaitītos kā sācies",
     "stop_threshold_w": "Zem šīs vērtības iekārta skaitās izslēgta"
+  },
+  "col": {
+    "profile_tip": "Atbilstošās programmas nosaukums. Bez birkas nozīmē, ka cikla beigās neatbilda neviens profils.",
+    "status_tip": "Cikla iznākums: Pabeigts (dabiskas beigas), Pārtraukts (straujš jaudas kritums), Piespiedu apturēts (manuāli) vai Nepieciešams pārskats (gaida atsauksmi).",
+    "date_tip": "Datums un laiks, kad cikls sākās.",
+    "duration_tip": "Kopējais cikla darbības laiks no sākuma līdz beigām.",
+    "energy_tip": "Kopējā patērētā enerģija (kWh). Aprēķināta, integrējot jaudu laikā.",
+    "cost_tip": "Šā cikla enerģijas izmaksas, fiksētas pabeigšanas brīdī, izmantojot tobrīd spēkā esošo cenu (enerģija x cena par kWh). Iestatiet cenu sadaļā Iestatījumi, lai tās aizpildītu.",
+    "confidence_tip": "Profila atbilstības pārliecība (0-100%). Cik cieši cikla jaudas līkne atbilda identificētajai programmai.",
+    "health_tip": "ML cikla veselība (augstāks = labāk). Noklikšķiniet uz cikla, lai to apskatītu un pārskatītu."
+  },
+  "stat": {
+    "avg": "vidēji",
+    "min": "min {v}",
+    "max": "maks {v}",
+    "consistency": "konsekvence ±{v}",
+    "total": "kopā {v}",
+    "last_run": "pēdējā darbība {v}",
+    "score": "rezultāts {pct}%",
+    "duration_cv": "ilguma CV {pct}%",
+    "avg_confidence": "vidējā pārliecība {pct}%"
   }
 }

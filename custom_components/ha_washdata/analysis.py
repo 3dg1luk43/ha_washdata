@@ -348,8 +348,19 @@ def compute_matches_worker(
     # cannot separate profiles that differ mainly in duration/energy (the main
     # multi-program washing-machine failure mode), so nudge the score toward
     # candidates whose expected duration/energy match the observed cycle.
-    shape_w = 1.0 - dur_weight - en_weight
-    if (dur_weight > 0 or en_weight > 0) and candidates and current_duration > 0:
+    # Sanitize the configured weights so the blended score stays a convex
+    # combination in [0, 1]: clamp negatives to 0 and, if duration+energy exceed
+    # 1.0, scale them down proportionally (shape then contributes 0) rather than
+    # letting shape_w go negative or the total exceed 1.
+    # Drop non-finite configured weights (NaN/inf) so de_sum, the normalized
+    # weights, and every candidate score stay finite.
+    dur_w = max(0.0, dur_weight) if np.isfinite(dur_weight) else 0.0
+    en_w = max(0.0, en_weight) if np.isfinite(en_weight) else 0.0
+    de_sum = dur_w + en_w
+    if de_sum > 1.0:
+        dur_w, en_w = dur_w / de_sum, en_w / de_sum
+    shape_w = max(0.0, 1.0 - dur_w - en_w)
+    if (dur_w > 0 or en_w > 0) and candidates and current_duration > 0:
         cur_energy = float(np.mean(curr_arr))  # mean power (W) — no duration multiplication
         for cand in candidates:
             prof_dur = float(cand.get("profile_duration") or 0.0)
@@ -360,8 +371,8 @@ def compute_matches_worker(
             cand["shape_score"] = float(cand["score"])
             cand["score"] = float(
                 shape_w * cand["score"]
-                + dur_weight * dur_ag
-                + en_weight * en_ag
+                + dur_w * dur_ag
+                + en_w * en_ag
             )
         candidates.sort(key=lambda x: x["score"], reverse=True)
 

@@ -175,6 +175,39 @@ class TestRestartGapStoredAtCycleEnd:
 
         assert "restart_gaps" not in cycle_data
 
+    @pytest.mark.asyncio
+    async def test_ranking_backfill_uses_captured_token_not_live_field(
+        self, manager: WashDataManager
+    ) -> None:
+        """The snapshot back-fill must use the captured cycle_token, not the live
+        _ranking_snapshot_cycle_id, which can roll to a newly-started cycle during
+        the awaits in _async_process_cycle_end (else cycle A's snapshots go
+        unlabelled and cycle B's get mislabelled)."""
+        now = _now_utc()
+        self._stub_manager(manager)
+        cycle_data = self._build_cycle_data(now)
+        cycle_data["profile_name"] = "Cotton 60"  # so the confirm block runs
+        # Simulate cycle B having started during processing: the live field has
+        # already rolled over to B's id, but this call is finishing cycle A.
+        manager._ranking_snapshot_cycle_id = "cycle_B"
+
+        with patch.object(manager, "_run_final_match_from_cycle_data", AsyncMock()):
+            with patch.object(manager, "_compute_cycle_quality_score", MagicMock()):
+                with patch.object(manager, "_clear_live_progress_notification", MagicMock()):
+                    with patch.object(manager, "_reset_live_notification_state", MagicMock()):
+                        with patch.object(manager, "_resolve_energy_price", MagicMock(return_value=None)):
+                            with patch("custom_components.ha_washdata.manager.dt_util") as mock_dt:
+                                mock_dt.now.return_value = now
+                                await manager._async_process_cycle_end(
+                                    cycle_data, cycle_token="cycle_A"
+                                )
+
+        manager.profile_store.confirm_match_ranking_snapshots.assert_called_once()
+        _, kwargs = manager.profile_store.confirm_match_ranking_snapshots.call_args
+        assert kwargs.get("cycle_id") == "cycle_A", (
+            "back-fill must use the captured token, not the rolled-over live id 'cycle_B'"
+        )
+
 
 class TestRestartGapStructure:
     """Validate the structure of a restart gap record."""

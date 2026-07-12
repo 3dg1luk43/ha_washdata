@@ -21,7 +21,9 @@
     "steady": "→ estável",
     "underrun": "Terminou mais rápido do que o habitual",
     "using_defaults": "A usar predefinições",
-    "using_tuned": "A usar pesos ajustados"
+    "using_tuned": "A usar pesos ajustados",
+    "overrun_ratio": "({x}x o esperado)",
+    "underrun_ratio": "({pct}% do esperado)"
   },
   "btn": {
     "add_device": "+ Adicionar dispositivo",
@@ -142,7 +144,9 @@
     "trim_split": "Cortar / Dividir",
     "undo": "Anular",
     "use": "Usar",
-    "wipe_all": "Apagar todos os dados"
+    "wipe_all": "Apagar todos os dados",
+    "delete_selected": "Eliminar selecionados ({n})",
+    "group_suggest": "Grupo {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Testar no histórico",
     "toggle_sidebar": "Alternar barra lateral do Home Assistant",
     "tools_and_data": "Ferramentas e dados",
-    "wipe_history": "Apagar histórico"
+    "wipe_history": "Apagar histórico",
+    "recommendations": "Recomendações ({n})"
   },
   "health": {
     "fair": "Qualidade de perfil aceitável",
@@ -439,7 +444,32 @@
     "ungrouped": "Sem grupo",
     "unlabelled": "Sem rótulo",
     "unlabelled_paren": "(sem rótulo)",
-    "warp_path": "Caminho de alinhamento"
+    "warp_path": "Caminho de alinhamento",
+    "input": "Entrada:",
+    "start": "Início",
+    "end": "Fim",
+    "unit_s": "(s)",
+    "reviewed_on": "revisto em {date}",
+    "unknown": "Desconhecido",
+    "quality": "Qualidade",
+    "tags": "Etiquetas",
+    "at": "às",
+    "pct_match_confidence": "{pct}% de confiança de correspondência",
+    "ha_restarted": "HA reiniciado",
+    "from_start": "Desde o início",
+    "to_end": "Até ao fim",
+    "click_to_select": "clique para selecionar",
+    "envelope": "Envelope",
+    "zoom_hint": "deslocar para ampliar · duplo clique para repor",
+    "loading_paren": "(a carregar…)",
+    "time_remaining": "~{v} restante",
+    "no_duration": "sem duração",
+    "duration_avg": "~{v}m méd.",
+    "name_placeholder": "(nome)",
+    "n_shown": ", {n} mostrados",
+    "cycles_title": "Ciclos ({n})",
+    "pg_detecting": "A detetar",
+    "pg_best_marker": "Melhor: {v}"
   },
   "log": {
     "all_levels": "Todos os níveis"
@@ -452,7 +482,11 @@
     "fit_strong": "Forte",
     "fit_weak": "Fraco",
     "fit_word": "ajuste",
-    "personalized": "● Personalizado para esta máquina"
+    "personalized": "● Personalizado para esta máquina",
+    "better_than_baseline": "{pct}% melhor do que a estimativa de referência ({metric})",
+    "trend_improving_tip": "O ajuste deste modelo melhorou ao longo das verificações recentes.",
+    "trend_declining_tip": "O ajuste deste modelo piorou ao longo das verificações recentes: rever mais ciclos pode ajudá-lo a reaprender.",
+    "trend_steady_tip": "O ajuste deste modelo manteve-se praticamente estável ao longo das verificações recentes."
   },
   "modal": {
     "auto_label": "Rotulagem automática de ciclos",
@@ -472,7 +506,25 @@
     "process_recording": "Processar gravação",
     "delete_maintenance_msg": "Eliminar este registo de manutenção? Esta ação não pode ser anulada.",
     "delete_maintenance_title": "Eliminar evento de manutenção",
-    "relabel_cycles": "Reetiquetar {count} ciclos"
+    "relabel_cycles": "Reetiquetar {count} ciclos",
+    "delete_automation_title": "Eliminar automação",
+    "delete_automation_msg": "Eliminar a automação \"{name}\" do Home Assistant? Esta ação não pode ser anulada.",
+    "remove_legacy_title": "Remover ações antigas",
+    "remove_legacy_msg": "Remover as ações personalizadas antigas? Deixarão de ser acionadas nos eventos de ciclo. Esta ação não pode ser anulada a partir do painel.",
+    "discard_recording_title": "Descartar a gravação",
+    "discard_recording_msg": "Descartar a gravação guardada? Esta ação não pode ser anulada.",
+    "dismiss_all_title": "Dispensar todos os feedbacks",
+    "dismiss_all_msg": "Dispensar todos os {count} pedidos de feedback pendentes?",
+    "dismiss_all_ok": "Dispensar tudo",
+    "delete_phase_title": "Eliminar fase",
+    "delete_phase_msg": "Eliminar a fase \"{name}\"?",
+    "clear_debug_title": "Limpar dados de depuração",
+    "clear_debug_msg": "Eliminar todos os rastreios de depuração armazenados?",
+    "wipe_all_title": "Apagar todos os dados",
+    "wipe_all_msg": "⚠️ Isto elimina permanentemente TODOS os ciclos e perfis. Esta ação não pode ser anulada.",
+    "wipe_all_ok": "Apagar tudo",
+    "force_stop_title": "Forçar paragem do ciclo",
+    "force_stop_msg": "Forçar a paragem do ciclo ativo agora? O ciclo será guardado como interrompido."
   },
   "msg": {
     "appliance_monitor": "Monitor de electrodoméstico",
@@ -654,7 +706,17 @@
     "updated": "Actualizado",
     "warmup_badge": "Ainda a aprender ({done}/{needed} ciclos)",
     "warmup_detail": "Este perfil precisa de {needed} ciclos rotulados antes de a correspondência automática começar. Cada ciclo confirmado ajuda-o a aprender.",
-    "wipe_history_warning": "Eliminar permanentemente todos os ciclos e perfis. Não é possível desfazer."
+    "wipe_history_warning": "Eliminar permanentemente todos os ciclos e perfis. Não é possível desfazer.",
+    "compare_overlay_tip": "Sobreponha os envelopes dos perfis aprendidos para ver a que programa cada ciclo se assemelha.",
+    "duration_trend_up_tip": "Duração a aumentar ({pct}%/ciclo)",
+    "duration_trend_down_tip": "Duração a diminuir ({pct}%/ciclo)",
+    "energy_trend_up_tip": "Energia a aumentar ({pct}%/ciclo)",
+    "energy_trend_down_tip": "Energia a diminuir ({pct}%/ciclo)",
+    "performance_trending": "Tendência de desempenho",
+    "pg_select_cycle_hint": "Selecione um ciclo e clique em ↺ para carregar",
+    "pg_sweep_progress": "Passo {done} / {total}",
+    "pg_analysis_hint": "Selecione um ciclo e clique em ↺ para carregar a análise.",
+    "diagnostics_load_failed": "Não foi possível carregar os diagnósticos: {error}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Queda repentina tratada como fim imediato",
@@ -1180,7 +1242,15 @@
     "interrupted": "Interrompido",
     "ready": "Pronto para processar",
     "recording": "A gravar",
-    "training": "A treinar…"
+    "training": "A treinar…",
+    "saving": "A guardar…",
+    "rebuilding": "A reconstruir…",
+    "analyzing": "A analisar…",
+    "resetting": "A repor…",
+    "reverting": "A reverter…",
+    "trimming": "A cortar…",
+    "splitting": "A dividir…",
+    "deleting": "A eliminar…"
   },
   "tab": {
     "advanced": "Avançado",
@@ -1270,7 +1340,9 @@
     "relabel_done": "{count} ciclo(s) reetiquetado(s)",
     "relabel_failed": "Falha ao reetiquetar: {error}",
     "reminders_save_failed": "Não foi possível guardar os lembretes: {error}",
-    "reminders_saved": "Lembretes de manutenção guardados"
+    "reminders_saved": "Lembretes de manutenção guardados",
+    "pause_no_cycle": "Nenhum ciclo ativo para pausar",
+    "resume_no_cycle": "Nenhum ciclo em pausa para retomar"
   },
   "suggestion": {
     "both_agree": "WashData recomenda",
@@ -1345,5 +1417,26 @@
     "drum_clean": "Limpar o tambor",
     "filter_clean": "Limpar o filtro",
     "other": "Outro"
+  },
+  "col": {
+    "profile_tip": "Nome do programa correspondente. Sem rótulo significa que nenhum perfil correspondeu no fim do ciclo.",
+    "status_tip": "Resultado do ciclo: Concluído (fim natural), Interrompido (queda abrupta de potência), Parado forçosamente (manual) ou Precisa de revisão (feedback pendente).",
+    "date_tip": "Data e hora de início do ciclo.",
+    "duration_tip": "Tempo total de execução do ciclo, do início ao fim.",
+    "energy_tip": "Energia total consumida (kWh). Calculada integrando a potência ao longo do tempo.",
+    "cost_tip": "Custo de energia deste ciclo, fixado na conclusão usando o preço então em vigor (energia x preço por kWh). Defina um preço nas Definições para o preencher.",
+    "confidence_tip": "Confiança de correspondência do perfil (0-100%). Quão próxima a curva de potência do ciclo correspondeu ao programa identificado.",
+    "health_tip": "Saúde do ciclo por ML (mais alto = melhor). Clique num ciclo para o inspecionar e rever."
+  },
+  "stat": {
+    "avg": "méd.",
+    "min": "mín {v}",
+    "max": "máx {v}",
+    "consistency": "consistência ±{v}",
+    "total": "total {v}",
+    "last_run": "última exec. {v}",
+    "score": "pontuação {pct}%",
+    "duration_cv": "CV de duração {pct}%",
+    "avg_confidence": "confiança méd. {pct}%"
   }
 }

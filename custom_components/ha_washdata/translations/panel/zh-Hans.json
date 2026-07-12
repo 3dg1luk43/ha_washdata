@@ -21,7 +21,9 @@
     "steady": "→ 稳定",
     "underrun": "完成比通常更快",
     "using_defaults": "使用出厂默认值",
-    "using_tuned": "使用已调整的权重"
+    "using_tuned": "使用已调整的权重",
+    "overrun_ratio": "（预期的 {x} 倍）",
+    "underrun_ratio": "（预期的 {pct}%）"
   },
   "btn": {
     "add_device": "+ 添加设备",
@@ -142,7 +144,9 @@
     "trim_split": "裁剪 / 拆分",
     "undo": "撤销",
     "use": "使用",
-    "wipe_all": "清除所有数据"
+    "wipe_all": "清除所有数据",
+    "delete_selected": "删除所选（{n}）",
+    "group_suggest": "组 {n}：{members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "在历史数据上测试",
     "toggle_sidebar": "切换家庭助理侧边栏",
     "tools_and_data": "工具与数据",
-    "wipe_history": "清除历史"
+    "wipe_history": "清除历史",
+    "recommendations": "建议（{n}）"
   },
   "health": {
     "fair": "配置文件质量尚可",
@@ -439,7 +444,32 @@
     "ungrouped": "未分组",
     "unlabelled": "未标记",
     "unlabelled_paren": "（未标记）",
-    "warp_path": "规整路径"
+    "warp_path": "规整路径",
+    "input": "输入：",
+    "start": "开始",
+    "end": "结束",
+    "unit_s": "（秒）",
+    "reviewed_on": "审核于 {date}",
+    "unknown": "未知",
+    "quality": "质量",
+    "tags": "标签",
+    "at": "于",
+    "pct_match_confidence": "{pct}% 匹配置信度",
+    "ha_restarted": "HA 已重启",
+    "from_start": "从开始",
+    "to_end": "到结束",
+    "click_to_select": "点击选择",
+    "envelope": "包络",
+    "zoom_hint": "滚动缩放 · 双击重置",
+    "loading_paren": "（加载中…）",
+    "time_remaining": "剩余 ~{v}",
+    "no_duration": "无时长",
+    "duration_avg": "平均 ~{v}分钟",
+    "name_placeholder": "（名称）",
+    "n_shown": "，显示 {n} 个",
+    "cycles_title": "周期（{n}）",
+    "pg_detecting": "检测中",
+    "pg_best_marker": "最佳：{v}"
   },
   "log": {
     "all_levels": "所有级别"
@@ -452,7 +482,11 @@
     "fit_strong": "强",
     "fit_weak": "弱",
     "fit_word": "拟合",
-    "personalized": "● 已针对此机器个性化"
+    "personalized": "● 已针对此机器个性化",
+    "better_than_baseline": "比基线估计好 {pct}%（{metric}）",
+    "trend_improving_tip": "该模型的拟合度在最近几次重新检查中有所提升。",
+    "trend_declining_tip": "该模型的拟合度在最近几次重新检查中有所下降，审查更多周期可能有助于它重新学习。",
+    "trend_steady_tip": "该模型的拟合度在最近几次重新检查中大致保持稳定。"
   },
   "modal": {
     "auto_label": "自动标记周期",
@@ -472,7 +506,25 @@
     "process_recording": "处理录制",
     "delete_maintenance_msg": "删除此维护记录？此操作无法撤销。",
     "delete_maintenance_title": "删除维护事件",
-    "relabel_cycles": "重新标记 {count} 个周期"
+    "relabel_cycles": "重新标记 {count} 个周期",
+    "delete_automation_title": "删除自动化",
+    "delete_automation_msg": "从 Home Assistant 中删除自动化“{name}”吗？此操作无法撤销。",
+    "remove_legacy_title": "移除旧版操作",
+    "remove_legacy_msg": "移除旧版自定义操作吗？它们将不再在周期事件上触发。此操作无法从面板撤销。",
+    "discard_recording_title": "丢弃录制",
+    "discard_recording_msg": "丢弃已保存的录制吗？此操作无法撤销。",
+    "dismiss_all_title": "关闭所有反馈",
+    "dismiss_all_msg": "关闭全部 {count} 个待处理的反馈请求吗？",
+    "dismiss_all_ok": "全部关闭",
+    "delete_phase_title": "删除阶段",
+    "delete_phase_msg": "删除阶段“{name}”吗？",
+    "clear_debug_title": "清除调试数据",
+    "clear_debug_msg": "删除所有已存储的调试追踪吗？",
+    "wipe_all_title": "清除所有数据",
+    "wipe_all_msg": "⚠️ 这将永久删除所有周期和配置文件。此操作无法撤销。",
+    "wipe_all_ok": "清除全部",
+    "force_stop_title": "强制停止周期",
+    "force_stop_msg": "立即强制停止当前周期吗？该周期将被保存为已中断。"
   },
   "msg": {
     "appliance_monitor": "设备监控",
@@ -654,7 +706,17 @@
     "updated": "已更新",
     "warmup_badge": "仍在学习中（{done}/{needed} 个周期）",
     "warmup_detail": "该配置文件需要 {needed} 个已标记的周期后才能开始自动匹配。每个已确认的周期都有助于学习。",
-    "wipe_history_warning": "永久删除所有周期和配置文件。无法撤销。"
+    "wipe_history_warning": "永久删除所有周期和配置文件。无法撤销。",
+    "compare_overlay_tip": "叠加已学习的配置文件包络，查看每个周期与哪个程序相似。",
+    "duration_trend_up_tip": "时长上升（{pct}%/周期）",
+    "duration_trend_down_tip": "时长下降（{pct}%/周期）",
+    "energy_trend_up_tip": "能耗上升（{pct}%/周期）",
+    "energy_trend_down_tip": "能耗下降（{pct}%/周期）",
+    "performance_trending": "性能趋势变化",
+    "pg_select_cycle_hint": "选择一个周期并点击 ↺ 加载",
+    "pg_sweep_progress": "步骤 {done} / {total}",
+    "pg_analysis_hint": "选择一个周期并点击 ↺ 加载分析。",
+    "diagnostics_load_failed": "无法加载诊断：{error}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "骤降视为立即结束",
@@ -1180,7 +1242,15 @@
     "interrupted": "已中断",
     "ready": "准备处理",
     "recording": "录制中",
-    "training": "训练中…"
+    "training": "训练中…",
+    "saving": "保存中…",
+    "rebuilding": "重建中…",
+    "analyzing": "分析中…",
+    "resetting": "重置中…",
+    "reverting": "还原中…",
+    "trimming": "裁剪中…",
+    "splitting": "拆分中…",
+    "deleting": "删除中…"
   },
   "tab": {
     "advanced": "高级",
@@ -1270,7 +1340,9 @@
     "relabel_done": "已重新标记 {count} 个周期",
     "relabel_failed": "重新标记失败：{error}",
     "reminders_save_failed": "无法保存提醒：{error}",
-    "reminders_saved": "已保存保养提醒"
+    "reminders_saved": "已保存保养提醒",
+    "pause_no_cycle": "没有可暂停的运行周期",
+    "resume_no_cycle": "没有可恢复的已暂停周期"
   },
   "suggestion": {
     "both_agree": "WashData建议",
@@ -1345,5 +1417,26 @@
     "drum_clean": "清洁滚筒",
     "filter_clean": "清洁过滤器",
     "other": "其他"
+  },
+  "col": {
+    "profile_tip": "匹配的程序名称。未标记表示周期结束时没有配置文件匹配。",
+    "status_tip": "周期结果：已完成（自然结束）、已中断（功率骤降）、已强制停止（手动）或需要审查（反馈待处理）。",
+    "date_tip": "周期开始的日期和时间。",
+    "duration_tip": "从开始到结束的总周期运行时间。",
+    "energy_tip": "消耗的总能量（kWh）。通过对功率随时间积分计算得出。",
+    "cost_tip": "此周期的能耗成本，在完成时按当时生效的价格冻结（能量 x 每 kWh 价格）。在设置中设定价格以填充此项。",
+    "confidence_tip": "配置文件匹配置信度（0-100%）。周期功率曲线与识别出的程序的匹配程度。",
+    "health_tip": "ML 周期健康（越高越好）。点击周期以检查并审查。"
+  },
+  "stat": {
+    "avg": "平均",
+    "min": "最小 {v}",
+    "max": "最大 {v}",
+    "consistency": "一致性 ±{v}",
+    "total": "总计 {v}",
+    "last_run": "上次运行 {v}",
+    "score": "得分 {pct}%",
+    "duration_cv": "时长 CV {pct}%",
+    "avg_confidence": "平均置信度 {pct}%"
   }
 }

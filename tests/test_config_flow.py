@@ -82,22 +82,40 @@ async def test_options_flow_saves_merged_options():
     result = await handler.async_step_init(user_input)
     assert handler.async_create_entry.called
     saved = handler.async_create_entry.call_args[1]["data"]
-    # Entry data is merged in
-    assert saved[CONF_NAME] == "My Washer"
+    # The three structural tunables are saved into options.
     assert saved[CONF_DEVICE_TYPE] == "dryer"
     assert saved[CONF_POWER_SENSOR] == "sensor.dryer_power"
     assert saved[CONF_MIN_POWER] == 3.0
+    # Identity/data-only keys must NOT leak into options (name lives in
+    # entry.data / entry.title; the reconfigure flow behaves the same way).
+    assert CONF_NAME not in saved
+
+
+def _schema_default(schema, key):
+    """Extract the default value voluptuous will render for *key*."""
+    for marker in schema.schema:
+        if getattr(marker, "schema", None) == key:
+            default = marker.default
+            return default() if callable(default) else default
+    return None
 
 
 @pytest.mark.asyncio
 async def test_options_flow_uses_options_over_data_for_defaults():
-    entry = _make_entry()
+    # data (creation-time) says washing_machine; options (a later edit) says
+    # dishwasher. The manager reads options-first, so the form default MUST too,
+    # otherwise a later device-type change silently appears reverted (and, after
+    # the 3.6 remap which only updates options, the form would show a removed type).
+    entry = _make_entry()  # data device_type == "washing_machine"
     entry.options = {CONF_DEVICE_TYPE: "dishwasher", CONF_MIN_POWER: 10.0}
     handler = OptionsFlowHandler(entry)
     handler.async_show_form = MagicMock(return_value={"type": "form"})
     await handler.async_step_init(None)
-    # The schema should reflect options overriding data - spot-check by
-    # passing the options input through and checking the merged result
+    schema = handler.async_show_form.call_args[1]["data_schema"]
+    assert _schema_default(schema, CONF_DEVICE_TYPE) == "dishwasher"
+    assert _schema_default(schema, CONF_MIN_POWER) == 10.0
+
+    # And saving reflects the same options-first resolution.
     handler.async_create_entry = MagicMock(return_value={"type": "create_entry"})
     await handler.async_step_init({
         CONF_DEVICE_TYPE: "dishwasher",

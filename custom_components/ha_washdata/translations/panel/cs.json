@@ -21,7 +21,9 @@
     "reviewed": "Zkontrolováno",
     "steady": "→ stabilní",
     "using_defaults": "Pomocí dodaných výchozích nastavení",
-    "using_tuned": "Použití vyladěných závaží"
+    "using_tuned": "Použití vyladěných závaží",
+    "overrun_ratio": "({x}x očekávaného)",
+    "underrun_ratio": "({pct}% očekávaného)"
   },
   "btn": {
     "add_device": "+ Přidat zařízení",
@@ -142,7 +144,9 @@
     "trim_split": "Trim / Split",
     "undo": "Zpět",
     "use": "Použití",
-    "wipe_all": "Vymazat všechna data"
+    "wipe_all": "Vymazat všechna data",
+    "delete_selected": "Smazat vybrané ({n})",
+    "group_suggest": "Skupina {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Otestovat na historii",
     "toggle_sidebar": "Přepnout postranní panel Home Assistant",
     "tools_and_data": "Nástroje a data",
-    "wipe_history": "Vymazat historii"
+    "wipe_history": "Vymazat historii",
+    "recommendations": "Doporučení ({n})"
   },
   "health": {
     "fair": "Přijatelná shoda",
@@ -439,7 +444,32 @@
     "ungrouped": "Neseskupeno",
     "unlabelled": "Neoznačené",
     "unlabelled_paren": "(neoznačeno)",
-    "warp_path": "Cesta warpingu"
+    "warp_path": "Cesta warpingu",
+    "input": "Vstup:",
+    "start": "Začátek",
+    "end": "Konec",
+    "unit_s": "(s)",
+    "reviewed_on": "zkontrolováno {date}",
+    "unknown": "Neznámé",
+    "quality": "Kvalita",
+    "tags": "Štítky",
+    "at": "v",
+    "pct_match_confidence": "{pct}% spolehlivosti shody",
+    "ha_restarted": "HA restartováno",
+    "from_start": "Od začátku",
+    "to_end": "Do konce",
+    "click_to_select": "kliknutím vyberte",
+    "envelope": "Obálka",
+    "zoom_hint": "posunutím přiblížíte · dvojklikem obnovíte",
+    "loading_paren": "(načítání…)",
+    "time_remaining": "~{v} zbývá",
+    "no_duration": "bez doby trvání",
+    "duration_avg": "~{v}m prům.",
+    "name_placeholder": "(název)",
+    "n_shown": ", zobrazeno {n}",
+    "cycles_title": "Cykly ({n})",
+    "pg_detecting": "Rozpoznávání",
+    "pg_best_marker": "Nejlepší: {v}"
   },
   "log": {
     "all_levels": "Všechny úrovně"
@@ -452,7 +482,11 @@
     "fit_strong": "Silný",
     "fit_weak": "Slabý",
     "fit_word": "shoda",
-    "personalized": "● Přizpůsobeno pro tento stroj"
+    "personalized": "● Přizpůsobeno pro tento stroj",
+    "better_than_baseline": "{pct}% lepší než základní odhad ({metric})",
+    "trend_improving_tip": "Přizpůsobení tohoto modelu se v posledních opakovaných kontrolách zlepšilo.",
+    "trend_declining_tip": "Přizpůsobení tohoto modelu se v posledních opakovaných kontrolách zhoršilo, kontrola více cyklů mu může pomoci znovu se naučit.",
+    "trend_steady_tip": "Přizpůsobení tohoto modelu zůstalo v posledních opakovaných kontrolách zhruba stabilní."
   },
   "modal": {
     "auto_label": "Cykly automatického označování",
@@ -472,7 +506,25 @@
     "process_recording": "Procesní záznam",
     "delete_maintenance_msg": "Smazat tento záznam o údržbě? Tuto akci nelze vrátit zpět.",
     "delete_maintenance_title": "Smazat údržbovou událost",
-    "relabel_cycles": "Přeznačit {count} cyklů"
+    "relabel_cycles": "Přeznačit {count} cyklů",
+    "delete_automation_title": "Smazat automatizaci",
+    "delete_automation_msg": "Smazat automatizaci \"{name}\" z Home Assistant? Tuto akci nelze vrátit zpět.",
+    "remove_legacy_title": "Odebrat starší akce",
+    "remove_legacy_msg": "Odebrat starší vlastní akce? Přestanou se spouštět při událostech cyklu. Z panelu to nelze vrátit zpět.",
+    "discard_recording_title": "Zahodit záznam",
+    "discard_recording_msg": "Zahodit uložený záznam? Tuto akci nelze vrátit zpět.",
+    "dismiss_all_title": "Zamítnout všechny žádosti o zpětnou vazbu",
+    "dismiss_all_msg": "Zamítnout všech {count} čekajících žádostí o zpětnou vazbu?",
+    "dismiss_all_ok": "Zamítnout vše",
+    "delete_phase_title": "Smazat fázi",
+    "delete_phase_msg": "Smazat fázi \"{name}\"?",
+    "clear_debug_title": "Vymazat ladicí data",
+    "clear_debug_msg": "Smazat všechny uložené ladicí záznamy?",
+    "wipe_all_title": "Vymazat všechna data",
+    "wipe_all_msg": "⚠️ Tímto trvale smažete VŠECHNY cykly a profily. Tuto akci nelze vrátit zpět.",
+    "wipe_all_ok": "Vymazat vše",
+    "force_stop_title": "Vynutit zastavení cyklu",
+    "force_stop_msg": "Vynutit nyní zastavení aktivního cyklu? Cyklus bude uložen jako přerušený."
   },
   "msg": {
     "appliance_monitor": "Monitor spotřebiče",
@@ -654,7 +706,17 @@
     "updated": "Aktualizováno",
     "warmup_badge": "Stále se učí ({done}/{needed} cyklů)",
     "warmup_detail": "Tento profil potřebuje {needed} označených cyklů, než začne automatické párování. Každý potvrzený cyklus pomáhá učení.",
-    "wipe_history_warning": "Trvale smažte všechny cykly a profily. Nelze vrátit zpět."
+    "wipe_history_warning": "Trvale smažte všechny cykly a profily. Nelze vrátit zpět.",
+    "compare_overlay_tip": "Překryjte naučené obálky profilů, abyste viděli, který program každý cyklus připomíná.",
+    "duration_trend_up_tip": "Doba trvání roste ({pct}%/cyklus)",
+    "duration_trend_down_tip": "Doba trvání klesá ({pct}%/cyklus)",
+    "energy_trend_up_tip": "Energie roste ({pct}%/cyklus)",
+    "energy_trend_down_tip": "Energie klesá ({pct}%/cyklus)",
+    "performance_trending": "Trend výkonu",
+    "pg_select_cycle_hint": "Vyberte cyklus a kliknutím na ↺ jej načtěte",
+    "pg_sweep_progress": "Krok {done} / {total}",
+    "pg_analysis_hint": "Vyberte cyklus a kliknutím na ↺ načtěte analýzu.",
+    "diagnostics_load_failed": "Nepodařilo se načíst diagnostiku: {error}"
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -1169,7 +1231,15 @@
     "interrupted": "Přerušeno",
     "ready": "Připraveno ke zpracování",
     "recording": "Nahrávání",
-    "training": "Trénování…"
+    "training": "Trénování…",
+    "saving": "Ukládání…",
+    "rebuilding": "Obnovování…",
+    "analyzing": "Analýza…",
+    "resetting": "Resetování…",
+    "reverting": "Vracení zpět…",
+    "trimming": "Ořezávání…",
+    "splitting": "Rozdělování…",
+    "deleting": "Mazání…"
   },
   "suggestion": {
     "both_agree": "WashData doporučuje",
@@ -1322,7 +1392,9 @@
     "relabel_done": "Přeznačeno cyklů: {count}",
     "relabel_failed": "Přeznačení selhalo: {error}",
     "reminders_save_failed": "Nepodařilo se uložit připomínky: {error}",
-    "reminders_saved": "Připomínky servisu uloženy"
+    "reminders_saved": "Připomínky servisu uloženy",
+    "pause_no_cycle": "Žádný aktivní cyklus k pozastavení",
+    "resume_no_cycle": "Žádný pozastavený cyklus k obnovení"
   },
   "trend": {
     "down": "Klesající trend",
@@ -1345,5 +1417,26 @@
     "start_duration_threshold": "Sekundy nad prahem pro potvrzení spuštění",
     "start_threshold_w": "Minimální výkon ve wattech pro započtení spuštění",
     "stop_threshold_w": "Pod touto hodnotou se stroj počítá jako vypnutý"
+  },
+  "col": {
+    "profile_tip": "Název odpovídajícího programu. Bez štítku znamená, že na konci cyklu nebyl nalezen žádný profil.",
+    "status_tip": "Výsledek cyklu: Dokončeno (přirozený konec), Přerušeno (náhlý pokles výkonu), Vynuceně zastaveno (ručně) nebo Vyžaduje kontrolu (čeká zpětná vazba).",
+    "date_tip": "Datum a čas zahájení cyklu.",
+    "duration_tip": "Celková doba běhu cyklu od začátku do konce.",
+    "energy_tip": "Celková spotřebovaná energie (kWh). Vypočteno integrací výkonu v čase.",
+    "cost_tip": "Náklady na energii pro tento cyklus, zafixované při dokončení podle ceny platné v té době (energie x cena za kWh). Nastavte cenu v Nastavení, abyste ho vyplnili.",
+    "confidence_tip": "Spolehlivost shody profilu (0-100%). Jak přesně křivka výkonu cyklu odpovídala identifikovanému programu.",
+    "health_tip": "Zdraví cyklu ML (vyšší = lepší). Kliknutím na cyklus jej prohlédnete a zhodnotíte."
+  },
+  "stat": {
+    "avg": "prům.",
+    "min": "min {v}",
+    "max": "max {v}",
+    "consistency": "konzistence ±{v}",
+    "total": "celkem {v}",
+    "last_run": "poslední běh {v}",
+    "score": "skóre {pct}%",
+    "duration_cv": "CV doby trvání {pct}%",
+    "avg_confidence": "prům. spolehlivost {pct}%"
   }
 }

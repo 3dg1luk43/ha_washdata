@@ -21,7 +21,9 @@
     "steady": "→安定",
     "underrun": "普段より早く終了した",
     "using_defaults": "出荷時のデフォルトを使用する",
-    "using_tuned": "調整された重みの使用"
+    "using_tuned": "調整された重みの使用",
+    "overrun_ratio": "（予想の{x}倍）",
+    "underrun_ratio": "（予想の{pct}%）"
   },
   "btn": {
     "add_device": "+ デバイスを追加",
@@ -142,7 +144,9 @@
     "trim_split": "トリム/スプリット",
     "undo": "元に戻す",
     "use": "使用",
-    "wipe_all": "すべてのデータを消去"
+    "wipe_all": "すべてのデータを消去",
+    "delete_selected": "選択項目を削除（{n}）",
+    "group_suggest": "グループ {n}：{members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "履歴でテスト",
     "toggle_sidebar": "ホームアシスタントサイドバーの切り替え",
     "tools_and_data": "ツールとデータ",
-    "wipe_history": "履歴を消去"
+    "wipe_history": "履歴を消去",
+    "recommendations": "推奨事項（{n}）"
   },
   "health": {
     "fair": "プロファイル品質: 普通",
@@ -439,7 +444,32 @@
     "ungrouped": "グループ化されていない",
     "unlabelled": "ラベルなし",
     "unlabelled_paren": "(ラベルなし)",
-    "warp_path": "ワープパス"
+    "warp_path": "ワープパス",
+    "input": "入力：",
+    "start": "開始",
+    "end": "終了",
+    "unit_s": "（秒）",
+    "reviewed_on": "{date} にレビュー済み",
+    "unknown": "不明",
+    "quality": "品質",
+    "tags": "タグ",
+    "at": "＠",
+    "pct_match_confidence": "マッチ信頼度 {pct}%",
+    "ha_restarted": "HA が再起動しました",
+    "from_start": "開始から",
+    "to_end": "終了まで",
+    "click_to_select": "クリックして選択",
+    "envelope": "エンベロープ",
+    "zoom_hint": "スクロールでズーム · ダブルクリックでリセット",
+    "loading_paren": "（読み込み中…）",
+    "time_remaining": "残り約{v}",
+    "no_duration": "継続時間なし",
+    "duration_avg": "平均約{v}分",
+    "name_placeholder": "（名前）",
+    "n_shown": "、{n} 件表示",
+    "cycles_title": "サイクル（{n}）",
+    "pg_detecting": "検出中",
+    "pg_best_marker": "ベスト：{v}"
   },
   "log": {
     "all_levels": "すべてのレベル"
@@ -452,7 +482,11 @@
     "fit_strong": "強い",
     "fit_weak": "弱い",
     "fit_word": "フィット",
-    "personalized": "● このマシンに合わせてカスタマイズ可能"
+    "personalized": "● このマシンに合わせてカスタマイズ可能",
+    "better_than_baseline": "ベースライン推定より {pct}% 良好（{metric}）",
+    "trend_improving_tip": "このモデルのフィットは最近の再チェックで改善しました。",
+    "trend_declining_tip": "このモデルのフィットは最近の再チェックで低下しました。さらにサイクルをレビューすると再学習に役立つ場合があります。",
+    "trend_steady_tip": "このモデルのフィットは最近の再チェックでおおむね安定しています。"
   },
   "modal": {
     "auto_label": "自動ラベル付けサイクル",
@@ -472,7 +506,25 @@
     "process_recording": "プロセスの記録",
     "delete_maintenance_msg": "このメンテナンス記録を削除しますか? この操作は元に戻せません。",
     "delete_maintenance_title": "メンテナンスイベントを削除",
-    "relabel_cycles": "{count} 件のサイクルを再ラベル付け"
+    "relabel_cycles": "{count} 件のサイクルを再ラベル付け",
+    "delete_automation_title": "オートメーションを削除",
+    "delete_automation_msg": "オートメーション「{name}」を Home Assistant から削除しますか？この操作は元に戻せません。",
+    "remove_legacy_title": "従来のアクションを削除",
+    "remove_legacy_msg": "従来のカスタムアクションを削除しますか？サイクルイベントでの発火が停止します。この操作はパネルから元に戻せません。",
+    "discard_recording_title": "録音を破棄",
+    "discard_recording_msg": "保存された録音を破棄しますか？この操作は元に戻せません。",
+    "dismiss_all_title": "すべてのフィードバックを却下",
+    "dismiss_all_msg": "保留中の {count} 件のフィードバックリクエストをすべて却下しますか？",
+    "dismiss_all_ok": "すべて却下",
+    "delete_phase_title": "フェーズを削除",
+    "delete_phase_msg": "フェーズ「{name}」を削除しますか？",
+    "clear_debug_title": "デバッグデータをクリア",
+    "clear_debug_msg": "保存されているすべてのデバッグトレースを削除しますか？",
+    "wipe_all_title": "すべてのデータを消去",
+    "wipe_all_msg": "⚠️ すべてのサイクルとプロファイルを完全に削除します。この操作は元に戻せません。",
+    "wipe_all_ok": "すべて消去",
+    "force_stop_title": "サイクルを強制停止",
+    "force_stop_msg": "アクティブなサイクルを今すぐ強制停止しますか？サイクルは中断として保存されます。"
   },
   "msg": {
     "appliance_monitor": "アプライアンスモニター",
@@ -654,7 +706,17 @@
     "updated": "更新",
     "warmup_badge": "学習中 ({done}/{needed} サイクル)",
     "warmup_detail": "このプロファイルは自動マッチングが開始されるまで {needed} 個のラベル付きサイクルが必要です。確認されたサイクルごとに学習が進みます。",
-    "wipe_history_warning": "すべてのサイクルとプロファイルを完全に削除します。元に戻すことはできません。"
+    "wipe_history_warning": "すべてのサイクルとプロファイルを完全に削除します。元に戻すことはできません。",
+    "compare_overlay_tip": "学習済みプロファイルのエンベロープを重ねて、各サイクルがどのプログラムに似ているかを確認します。",
+    "duration_trend_up_tip": "継続時間の増加（{pct}%/サイクル）",
+    "duration_trend_down_tip": "継続時間の減少（{pct}%/サイクル）",
+    "energy_trend_up_tip": "エネルギーの増加（{pct}%/サイクル）",
+    "energy_trend_down_tip": "エネルギーの減少（{pct}%/サイクル）",
+    "performance_trending": "パフォーマンスの傾向",
+    "pg_select_cycle_hint": "サイクルを選択し、↺ をクリックして読み込みます",
+    "pg_sweep_progress": "ステップ {done} / {total}",
+    "pg_analysis_hint": "サイクルを選択し、↺ をクリックして分析を読み込みます。",
+    "diagnostics_load_failed": "診断を読み込めませんでした: {error}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "急激な低下は即時終了として扱う",
@@ -1180,7 +1242,15 @@
     "interrupted": "中断されました",
     "ready": "処理の準備ができました",
     "recording": "録音中",
-    "training": "トレーニング中…"
+    "training": "トレーニング中…",
+    "saving": "保存中…",
+    "rebuilding": "再構築中…",
+    "analyzing": "分析中…",
+    "resetting": "リセット中…",
+    "reverting": "元に戻しています…",
+    "trimming": "トリム中…",
+    "splitting": "分割中…",
+    "deleting": "削除中…"
   },
   "tab": {
     "advanced": "高度な",
@@ -1270,7 +1340,9 @@
     "relabel_done": "{count} 件のサイクルを再ラベル付けしました",
     "relabel_failed": "再ラベル付けに失敗しました: {error}",
     "reminders_save_failed": "リマインダーを保存できませんでした: {error}",
-    "reminders_saved": "サービスリマインダーを保存しました"
+    "reminders_saved": "サービスリマインダーを保存しました",
+    "pause_no_cycle": "一時停止できるアクティブなサイクルがありません",
+    "resume_no_cycle": "再開できる一時停止中のサイクルがありません"
   },
   "suggestion": {
     "both_agree": "WashDataの推奨",
@@ -1345,5 +1417,26 @@
     "drum_clean": "ドラムの清掃",
     "filter_clean": "フィルターの清掃",
     "other": "その他"
+  },
+  "col": {
+    "profile_tip": "一致したプログラム名。ラベルなしは、サイクル終了時にプロファイルが一致しなかったことを意味します。",
+    "status_tip": "サイクルの結果: 完了（自然終了）、中断（急激な電力低下）、強制停止（手動）、または要レビュー（フィードバック保留中）。",
+    "date_tip": "サイクルが開始された日時。",
+    "duration_tip": "開始から終了までのサイクル全体の実行時間。",
+    "energy_tip": "消費された総エネルギー（kWh）。電力を時間で積分して計算されます。",
+    "cost_tip": "このサイクルのエネルギー料金。完了時にその時点で有効な価格（エネルギー x kWh あたりの価格）で確定されます。設定で価格を指定すると入力されます。",
+    "confidence_tip": "プロファイルのマッチ信頼度（0～100%）。サイクルの電力曲線が識別されたプログラムとどれだけ一致したか。",
+    "health_tip": "ML サイクルの健康度（高いほど良好）。サイクルをクリックして検査・レビューします。"
+  },
+  "stat": {
+    "avg": "平均",
+    "min": "最小 {v}",
+    "max": "最大 {v}",
+    "consistency": "一貫性 ±{v}",
+    "total": "合計 {v}",
+    "last_run": "前回の実行 {v}",
+    "score": "スコア {pct}%",
+    "duration_cv": "継続時間 CV {pct}%",
+    "avg_confidence": "平均信頼度 {pct}%"
   }
 }

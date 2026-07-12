@@ -443,10 +443,17 @@ def run_playground_batch(
         selected = past[-DEFAULT_RECENT_CYCLES:]
 
     summary["requested"] = len(cycle_ids) if cycle_ids else len(selected)
-    summary["skipped_ids"] = skipped
 
-    # Batch-size cap: simulate up to ``concurrency`` of the selected cycles.
+    # Batch-size cap: simulate up to ``concurrency`` of the selected cycles
+    # (the runner is sequential). Any selected cycles beyond the cap are reported
+    # as skipped rather than silently dropped, so ``requested`` always reconciles
+    # with ``len(results) + len(skipped_ids)``.
     to_run = selected[:concurrency]
+    if len(selected) > concurrency:
+        # Account for every capped cycle (even one lacking an id) so that
+        # requested == len(results) + len(skipped_ids) always reconciles.
+        skipped.extend(str(c.get("id") or "") for c in selected[concurrency:])
+    summary["skipped_ids"] = skipped
 
     config = build_sim_config(base_config, settings_override)
     snapshots, match_config = _build_match_snapshots(store)

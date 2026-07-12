@@ -21,7 +21,9 @@
     "steady": "→ stabilno",
     "underrun": "Končal se je hitreje kot običajno",
     "using_defaults": "Uporablja privzete nastavitve",
-    "using_tuned": "Uporablja nastavljene uteži"
+    "using_tuned": "Uporablja nastavljene uteži",
+    "overrun_ratio": "({x}x pričakovanega)",
+    "underrun_ratio": "({pct}% pričakovanega)"
   },
   "btn": {
     "add_device": "+ Dodaj napravo",
@@ -142,7 +144,9 @@
     "trim_split": "Obreži / Razdeli",
     "undo": "Razveljavi",
     "use": "Uporabi",
-    "wipe_all": "Izbriši vse podatke"
+    "wipe_all": "Izbriši vse podatke",
+    "delete_selected": "Izbriši izbrano ({n})",
+    "group_suggest": "Skupina {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Preizkusi na zgodovini",
     "toggle_sidebar": "Preklop stranske vrstice domačega pomočnika",
     "tools_and_data": "Orodja in podatki",
-    "wipe_history": "Izbriši zgodovino"
+    "wipe_history": "Izbriši zgodovino",
+    "recommendations": "Priporočila ({n})"
   },
   "health": {
     "fair": "Sprejemljiva kakovost profila",
@@ -439,7 +444,32 @@
     "ungrouped": "Brez skupine",
     "unlabelled": "Brez oznake",
     "unlabelled_paren": "(brez oznake)",
-    "warp_path": "Pot deformacije"
+    "warp_path": "Pot deformacije",
+    "input": "Vhod:",
+    "start": "Začetek",
+    "end": "Konec",
+    "unit_s": "(s)",
+    "reviewed_on": "pregledano {date}",
+    "unknown": "Neznano",
+    "quality": "Kakovost",
+    "tags": "Oznake",
+    "at": "ob",
+    "pct_match_confidence": "{pct}% zaupanja ujemanja",
+    "ha_restarted": "HA znova zagnan",
+    "from_start": "Od začetka",
+    "to_end": "Do konca",
+    "click_to_select": "kliknite za izbiro",
+    "envelope": "Ovojnica",
+    "zoom_hint": "pomaknite za povečavo · dvojni klik za ponastavitev",
+    "loading_paren": "(nalaganje…)",
+    "time_remaining": "~{v} preostalo",
+    "no_duration": "brez trajanja",
+    "duration_avg": "~{v}m povpr.",
+    "name_placeholder": "(ime)",
+    "n_shown": ", prikazano {n}",
+    "cycles_title": "Cikli ({n})",
+    "pg_detecting": "Zaznavanje",
+    "pg_best_marker": "Najboljši: {v}"
   },
   "log": {
     "all_levels": "Vse ravni"
@@ -452,7 +482,11 @@
     "fit_strong": "Močno",
     "fit_weak": "Šibko",
     "fit_word": "prileganje",
-    "personalized": "● Prilagojeno tej napravi"
+    "personalized": "● Prilagojeno tej napravi",
+    "better_than_baseline": "{pct}% bolje od osnovne ocene ({metric})",
+    "trend_improving_tip": "Prileganje tega modela se je v zadnjih ponovnih preverjanjih izboljšalo.",
+    "trend_declining_tip": "Prileganje tega modela se je v zadnjih ponovnih preverjanjih poslabšalo, pregled več ciklov mu lahko pomaga, da se ponovno nauči.",
+    "trend_steady_tip": "Prileganje tega modela je v zadnjih ponovnih preverjanjih ostalo približno enako."
   },
   "modal": {
     "auto_label": "Samodejno označevanje ciklov",
@@ -472,7 +506,25 @@
     "process_recording": "Obdelaj posnetek",
     "delete_maintenance_msg": "Izbrišem ta zapis vzdrževanja? Tega ni mogoče razveljaviti.",
     "delete_maintenance_title": "Izbriši dogodek vzdrževanja",
-    "relabel_cycles": "Spremeni oznako za {count} ciklov"
+    "relabel_cycles": "Spremeni oznako za {count} ciklov",
+    "delete_automation_title": "Izbriši avtomatizacijo",
+    "delete_automation_msg": "Izbrišem avtomatizacijo \"{name}\" iz Home Assistant? Tega dejanja ni mogoče razveljaviti.",
+    "remove_legacy_title": "Odstrani zastarela dejanja",
+    "remove_legacy_msg": "Odstranim zastarela dejanja po meri? Ob dogodkih cikla se ne bodo več sprožala. Tega iz plošče ni mogoče razveljaviti.",
+    "discard_recording_title": "Zavrzi posnetek",
+    "discard_recording_msg": "Zavržem shranjeni posnetek? Tega dejanja ni mogoče razveljaviti.",
+    "dismiss_all_title": "Opusti vse zahteve za povratne informacije",
+    "dismiss_all_msg": "Opustim vseh {count} čakajočih zahtev za povratne informacije?",
+    "dismiss_all_ok": "Opusti vse",
+    "delete_phase_title": "Izbriši fazo",
+    "delete_phase_msg": "Izbrišem fazo \"{name}\"?",
+    "clear_debug_title": "Počisti razhroščevalne podatke",
+    "clear_debug_msg": "Izbrišem vse shranjene razhroščevalne sledi?",
+    "wipe_all_title": "Izbriši vse podatke",
+    "wipe_all_msg": "⚠️ To trajno izbriše VSE cikle in profile. Tega dejanja ni mogoče razveljaviti.",
+    "wipe_all_ok": "Izbriši vse",
+    "force_stop_title": "Prisilno ustavi cikel",
+    "force_stop_msg": "Zdaj prisilno ustavim aktivni cikel? Cikel bo shranjen kot prekinjen."
   },
   "msg": {
     "appliance_monitor": "Monitor naprave",
@@ -654,7 +706,17 @@
     "updated": "Posodobljeno",
     "warmup_badge": "Še se uči ({done}/{needed} ciklov)",
     "warmup_detail": "Ta profil potrebuje {needed} označenih ciklov, preden se začne samodejno ujemanje. Vsak potrjen cikel mu pomaga pri učenju.",
-    "wipe_history_warning": "Trajno izbrišite vse cikle in profile. Ni mogoče razveljaviti."
+    "wipe_history_warning": "Trajno izbrišite vse cikle in profile. Ni mogoče razveljaviti.",
+    "compare_overlay_tip": "Prekrijte naučene ovojnice profilov, da vidite, kateri program je podoben posameznemu ciklu.",
+    "duration_trend_up_tip": "Trajanje narašča ({pct}%/cikel)",
+    "duration_trend_down_tip": "Trajanje upada ({pct}%/cikel)",
+    "energy_trend_up_tip": "Energija narašča ({pct}%/cikel)",
+    "energy_trend_down_tip": "Energija upada ({pct}%/cikel)",
+    "performance_trending": "Trend zmogljivosti",
+    "pg_select_cycle_hint": "Izberite cikel in kliknite ↺ za nalaganje",
+    "pg_sweep_progress": "Korak {done} / {total}",
+    "pg_analysis_hint": "Izberite cikel in kliknite ↺ za nalaganje analize.",
+    "diagnostics_load_failed": "Diagnostike ni bilo mogoče naložiti: {error}"
   },
   "phase_desc": {
     "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",
@@ -1169,7 +1231,15 @@
     "interrupted": "Prekinjeno",
     "ready": "Pripravljeno za obdelavo",
     "recording": "Snemanje",
-    "training": "Učenje…"
+    "training": "Učenje…",
+    "saving": "Shranjevanje…",
+    "rebuilding": "Obnavljanje…",
+    "analyzing": "Analiziranje…",
+    "resetting": "Ponastavljanje…",
+    "reverting": "Povrnitev…",
+    "trimming": "Obrezovanje…",
+    "splitting": "Deljenje…",
+    "deleting": "Brisanje…"
   },
   "suggestion": {
     "both_agree": "WashData priporoča",
@@ -1322,7 +1392,9 @@
     "relabel_done": "Spremenjena oznaka za {count} ciklov",
     "relabel_failed": "Sprememba oznake ni uspela: {error}",
     "reminders_save_failed": "Opomnikov ni bilo mogoče shraniti: {error}",
-    "reminders_saved": "Opomniki za servis shranjeni"
+    "reminders_saved": "Opomniki za servis shranjeni",
+    "pause_no_cycle": "Ni aktivnega cikla za začasno zaustavitev",
+    "resume_no_cycle": "Ni začasno zaustavljenega cikla za nadaljevanje"
   },
   "trend": {
     "down": "Padajoči trend",
@@ -1345,5 +1417,26 @@
     "start_duration_threshold": "Sekunde nad pragom za potrditev zagona",
     "start_threshold_w": "Najmanjša moč v vatih, da šteje kot zagnano",
     "stop_threshold_w": "Pod to vrednostjo naprava šteje kot izklopljena"
+  },
+  "col": {
+    "profile_tip": "Ime ujemajočega programa. Brez oznake pomeni, da se ob koncu cikla ni ujemal noben profil.",
+    "status_tip": "Izid cikla: Dokončano (naravni konec), Prekinjeno (nenaden padec moči), Prisilno ustavljeno (ročno) ali Potrebuje pregled (čaka na povratne informacije).",
+    "date_tip": "Datum in čas začetka cikla.",
+    "duration_tip": "Skupni čas trajanja cikla od začetka do konca.",
+    "energy_tip": "Skupna porabljena energija (kWh). Izračunano z integracijo moči skozi čas.",
+    "cost_tip": "Strošek energije za ta cikel, zamrznjen ob zaključku po takrat veljavni ceni (energija x cena na kWh). Nastavite ceno v Nastavitvah, da ga izpolnite.",
+    "confidence_tip": "Zaupanje ujemanja profila (0-100%). Kako natančno se je krivulja moči cikla ujemala z določenim programom.",
+    "health_tip": "Zdravje cikla ML (višje = boljše). Kliknite cikel, da ga pregledate in ocenite."
+  },
+  "stat": {
+    "avg": "povpr.",
+    "min": "min {v}",
+    "max": "max {v}",
+    "consistency": "doslednost ±{v}",
+    "total": "skupaj {v}",
+    "last_run": "zadnji zagon {v}",
+    "score": "ocena {pct}%",
+    "duration_cv": "CV trajanja {pct}%",
+    "avg_confidence": "povpr. zaupanje {pct}%"
   }
 }

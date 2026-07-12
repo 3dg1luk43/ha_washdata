@@ -250,6 +250,9 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             options.get(CONF_DEVICE_TYPE), DEVICE_TYPE_OTHER,
         )
         options[CONF_DEVICE_TYPE] = DEVICE_TYPE_OTHER
+        # NB: CONF_DEVICE_TYPE was already popped from ``data`` above (keys_to_remove),
+        # so no stale removed value can linger there; the flow/manager read it from
+        # options (options-first).
 
     hass.config_entries.async_update_entry(
         entry,

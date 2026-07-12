@@ -21,7 +21,9 @@
     "steady": "→ i qëndrueshëm",
     "underrun": "Përfundoi më shpejt se zakonisht",
     "using_defaults": "Duke përdorur vlerat e parazgjedhura",
-    "using_tuned": "Duke përdorur peshat e rregulluara"
+    "using_tuned": "Duke përdorur peshat e rregulluara",
+    "overrun_ratio": "({x}x e pritur)",
+    "underrun_ratio": "({pct}% e pritur)"
   },
   "btn": {
     "add_device": "+ Shto pajisje",
@@ -142,7 +144,9 @@
     "trim_split": "Priti / Ndaj",
     "undo": "Zhbëj",
     "use": "Përdor",
-    "wipe_all": "Fshi të gjitha të dhënat"
+    "wipe_all": "Fshi të gjitha të dhënat",
+    "delete_selected": "Fshi të zgjedhurat ({n})",
+    "group_suggest": "Grupi {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Testim mbi historikun",
     "toggle_sidebar": "Ndrysho shiritin anësor të Asistentit në Shtëpi",
     "tools_and_data": "Mjete dhe të dhëna",
-    "wipe_history": "Fshi historikun"
+    "wipe_history": "Fshi historikun",
+    "recommendations": "Rekomandime ({n})"
   },
   "health": {
     "fair": "Cilësi e pranueshme e profilit",
@@ -439,7 +444,32 @@
     "ungrouped": "I pagrupuar",
     "unlabelled": "I paetiketuar",
     "unlabelled_paren": "(i paetiketuar)",
-    "warp_path": "Rruga e deformimit"
+    "warp_path": "Rruga e deformimit",
+    "input": "Hyrje:",
+    "start": "Fillimi",
+    "end": "Fundi",
+    "unit_s": "(s)",
+    "reviewed_on": "shqyrtuar më {date}",
+    "unknown": "E panjohur",
+    "quality": "Cilësia",
+    "tags": "Etiketa",
+    "at": "në",
+    "pct_match_confidence": "{pct}% besueshmëri përputhjeje",
+    "ha_restarted": "HA u rinis",
+    "from_start": "Nga fillimi",
+    "to_end": "Deri në fund",
+    "click_to_select": "kliko për të zgjedhur",
+    "envelope": "Brezi",
+    "zoom_hint": "rrëshqit për zmadhim · klikim i dyfishtë për rivendosje",
+    "loading_paren": "(po ngarkohet…)",
+    "time_remaining": "~{v} të mbetura",
+    "no_duration": "pa kohëzgjatje",
+    "duration_avg": "~{v}m mesatare",
+    "name_placeholder": "(emri)",
+    "n_shown": ", {n} të shfaqura",
+    "cycles_title": "Ciklet ({n})",
+    "pg_detecting": "Po zbulohet",
+    "pg_best_marker": "Më i miri: {v}"
   },
   "log": {
     "all_levels": "Të gjitha nivelet"
@@ -452,7 +482,11 @@
     "fit_strong": "I fortë",
     "fit_weak": "I dobët",
     "fit_word": "përshtatje",
-    "personalized": "● I personalizuar për këtë makinë"
+    "personalized": "● I personalizuar për këtë makinë",
+    "better_than_baseline": "{pct}% më mirë se vlerësimi bazë ({metric})",
+    "trend_improving_tip": "Përshtatja e këtij modeli është përmirësuar gjatë rikontrolleve të fundit.",
+    "trend_declining_tip": "Përshtatja e këtij modeli ka rënë gjatë rikontrolleve të fundit · shqyrtimi i më shumë cikleve mund ta ndihmojë të rimësojë.",
+    "trend_steady_tip": "Përshtatja e këtij modeli ka mbetur afërsisht e qëndrueshme gjatë rikontrolleve të fundit."
   },
   "modal": {
     "auto_label": "Etiketim automatik i cikleve",
@@ -472,7 +506,25 @@
     "process_recording": "Proceso regjistrimin",
     "delete_maintenance_msg": "Të fshihet ky regjistrim i mirëmbajtjes? Ky veprim nuk mund të zhbëhet.",
     "delete_maintenance_title": "Fshi ngjarjen e mirëmbajtjes",
-    "relabel_cycles": "Rietiketo {count} cikle"
+    "relabel_cycles": "Rietiketo {count} cikle",
+    "delete_automation_title": "Fshi Automatizimin",
+    "delete_automation_msg": "Të fshihet automatizimi \"{name}\" nga Home Assistant? Kjo nuk mund të zhbëhet.",
+    "remove_legacy_title": "Hiq Veprimet e Vjetra",
+    "remove_legacy_msg": "Të hiqen veprimet e personalizuara të vjetra? Ato do të ndalojnë së aktivizuari në ngjarjet e cikleve. Kjo nuk mund të zhbëhet nga paneli.",
+    "discard_recording_title": "Hidh Poshtë Regjistrimin",
+    "discard_recording_msg": "Të hidhet poshtë regjistrimi i ruajtur? Kjo nuk mund të zhbëhet.",
+    "dismiss_all_title": "Injoro të Gjitha Reagimet",
+    "dismiss_all_msg": "Të injorohen të gjitha {count} kërkesat për reagim në pritje?",
+    "dismiss_all_ok": "Injoro të Gjitha",
+    "delete_phase_title": "Fshi Fazën",
+    "delete_phase_msg": "Të fshihet faza \"{name}\"?",
+    "clear_debug_title": "Pastro të Dhënat e Korrigjimit",
+    "clear_debug_msg": "Të fshihen të gjitha gjurmët e ruajtura të korrigjimit?",
+    "wipe_all_title": "Fshi të Gjitha të Dhënat",
+    "wipe_all_msg": "⚠️ Kjo fshin përgjithmonë TË GJITHA ciklet dhe profilet. Kjo nuk mund të zhbëhet.",
+    "wipe_all_ok": "Fshi Gjithçka",
+    "force_stop_title": "Ndalo me Forcë Ciklin",
+    "force_stop_msg": "Të ndalohet me forcë cikli aktiv tani? Cikli do të ruhet si i ndërprerë."
   },
   "msg": {
     "appliance_monitor": "Monitor i pajisjes",
@@ -654,7 +706,17 @@
     "updated": "Përditësuar",
     "warmup_badge": "Akoma duke mësuar ({done}/{needed} cikle)",
     "warmup_detail": "Ky profil ka nevojë për {needed} cikle të etiketuara para se të fillojë përputhja automatike. Çdo cikël i konfirmuar e ndihmon të mësojë.",
-    "wipe_history_warning": "Fshini përgjithmonë të gjitha ciklet dhe profilet. Nuk mund të zhbëhet."
+    "wipe_history_warning": "Fshini përgjithmonë të gjitha ciklet dhe profilet. Nuk mund të zhbëhet.",
+    "compare_overlay_tip": "Mbivendos brezat e profileve të mësuara për të parë se cilin program i ngjason secili cikël.",
+    "duration_trend_up_tip": "Kohëzgjatja në rritje ({pct}%/cikël)",
+    "duration_trend_down_tip": "Kohëzgjatja në rënie ({pct}%/cikël)",
+    "energy_trend_up_tip": "Energjia në rritje ({pct}%/cikël)",
+    "energy_trend_down_tip": "Energjia në rënie ({pct}%/cikël)",
+    "performance_trending": "Tendenca e performancës",
+    "pg_select_cycle_hint": "Zgjidh një cikël dhe kliko ↺ për ta ngarkuar",
+    "pg_sweep_progress": "Hapi {done} / {total}",
+    "pg_analysis_hint": "Zgjidh një cikël dhe kliko ↺ për të ngarkuar analizën.",
+    "diagnostics_load_failed": "Diagnostikat nuk u ngarkuan dot: {error}"
   },
   "phase_desc": {
     "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1169,7 +1231,15 @@
     "interrupted": "I ndërprerë",
     "ready": "Gati për procesim",
     "recording": "Regjistrim",
-    "training": "Duke stërvitut…"
+    "training": "Duke stërvitut…",
+    "saving": "Po ruhet…",
+    "rebuilding": "Po rindërtohet…",
+    "analyzing": "Po analizohet…",
+    "resetting": "Po rivendoset…",
+    "reverting": "Po kthehet…",
+    "trimming": "Po pritet…",
+    "splitting": "Po ndahet…",
+    "deleting": "Po fshihet…"
   },
   "tab": {
     "advanced": "I avancuar",
@@ -1259,7 +1329,9 @@
     "relabel_done": "U rietiketuan {count} cikël(e)",
     "relabel_failed": "Rietiketimi dështoi: {error}",
     "reminders_save_failed": "Nuk u ruajtën dot kujtesat: {error}",
-    "reminders_saved": "Kujtesat e servisit u ruajtën"
+    "reminders_saved": "Kujtesat e servisit u ruajtën",
+    "pause_no_cycle": "Nuk ka cikël aktiv për të ndalur",
+    "resume_no_cycle": "Nuk ka cikël të ndalur për të vazhduar"
   },
   "suggestion": {
     "both_agree": "WashData rekomandon",
@@ -1345,5 +1417,26 @@
     "start_duration_threshold": "Sekonda mbi prag për të konfirmuar nisjen",
     "start_threshold_w": "Watt minimalë për t'u llogaritur si nisur",
     "stop_threshold_w": "Nën këtë, makina llogaritet e fikur"
+  },
+  "col": {
+    "profile_tip": "Emri i programit të përputhur. I paetiketuar do të thotë se asnjë profil nuk u përputh në fund të ciklit.",
+    "status_tip": "Përfundimi i ciklit: I përfunduar (fund natyror), I ndërprerë (rënie e menjëhershme e energjisë), I Ndaluar me Forcë (manual), ose Kërkon Shqyrtim (reagim në pritje).",
+    "date_tip": "Data dhe ora kur filloi cikli.",
+    "duration_tip": "Koha e plotë e ekzekutimit të ciklit nga fillimi deri në fund.",
+    "energy_tip": "Energjia e plotë e konsumuar (kWh). Llogaritur duke integruar fuqinë me kalimin e kohës.",
+    "cost_tip": "Kostoja e energjisë për këtë cikël, e ngrirë në përfundim duke përdorur çmimin në fuqi atëherë (energjia x çmimi për kWh). Vendos një çmim te Cilësimet për ta plotësuar.",
+    "confidence_tip": "Besueshmëria e përputhjes së profilit (0-100%). Sa afër përputhej kurba e fuqisë së ciklit me programin e identifikuar.",
+    "health_tip": "Shëndeti ML i ciklit (më lart = më mirë). Kliko një cikël për ta inspektuar dhe shqyrtuar."
+  },
+  "stat": {
+    "avg": "mesatare",
+    "min": "min {v}",
+    "max": "maks {v}",
+    "consistency": "qëndrueshmëri ±{v}",
+    "total": "gjithsej {v}",
+    "last_run": "ekzekutimi i fundit {v}",
+    "score": "rezultati {pct}%",
+    "duration_cv": "CV e kohëzgjatjes {pct}%",
+    "avg_confidence": "besueshmëria mesatare {pct}%"
   }
 }

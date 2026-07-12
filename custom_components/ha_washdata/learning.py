@@ -423,6 +423,11 @@ class LearningManager:
         # cycles skip auto-labeling entirely and always request user confirmation.
         # Only applied when confidence would otherwise trigger auto-labeling; cycles
         # already below the learning threshold follow the normal skip path unchanged.
+        warmup_request = False
+        # ``route_conf`` drives the auto-label/skip routing only; ``confidence``
+        # remains the real match score that gets displayed and persisted, so warmup
+        # clamping never fabricates the value shown to the user.
+        route_conf = confidence
         if confidence >= auto_label_conf:
             _wm_count = self.profile_store.get_profile_labeled_count(detected_profile)
             _is_warmup = isinstance(_wm_count, int) and _wm_count < CONF_PROFILE_MIN_WARMUP_CYCLES
@@ -431,10 +436,18 @@ class LearningManager:
                     "Profile '%s' in warmup mode (%d/%d cycles); requiring manual confirmation.",
                     detected_profile, _wm_count, CONF_PROFILE_MIN_WARMUP_CYCLES,
                 )
-                # Clamp confidence just below auto_label threshold so we fall through to
-                # feedback-request path, but stay above learning_conf to request (not skip).
-                confidence = auto_label_conf - 0.001
-                confidence = max(confidence, learning_conf + 0.001)
+                # A warmup cycle must always request confirmation: never auto-label,
+                # and never silently skip — even under a misconfigured inverted
+                # (learning_conf >= auto_label_conf) threshold pair.
+                warmup_request = True
+                # Clamp the ROUTING confidence just below auto_label so we fall through
+                # to the feedback-request path, but stay above learning_conf to request
+                # (not skip). Only raise toward learning_conf when there is room below
+                # auto_label_conf; otherwise an inverted config would push it back to/above
+                # auto_label_conf and silently bypass the warmup guard.
+                route_conf = auto_label_conf - 0.001
+                if learning_conf + 0.001 < auto_label_conf:
+                    route_conf = max(route_conf, learning_conf + 0.001)
 
         # Auto-label if very high confidence — but skip auto-labeling when the ML
         # quality model flagged this cycle as suspicious (P(problem) >= threshold),
@@ -453,7 +466,7 @@ class LearningManager:
             isinstance(_conformance, float)
             and _conformance < 0.40
         )
-        if confidence >= auto_label_conf:
+        if route_conf >= auto_label_conf:
             if ml_suspicious or envelope_suspicious:
                 if ml_suspicious:
                     self._logger.info(
@@ -483,8 +496,9 @@ class LearningManager:
                     self._logger.debug("Auto-labeled high-confidence cycle %s", cycle_id)
                 return
 
-        # Skip low-confidence matches below learning threshold
-        if confidence < learning_conf:
+        # Skip low-confidence matches below learning threshold — but a warmup cycle
+        # always requests confirmation, even if the thresholds are misconfigured.
+        if route_conf < learning_conf and not warmup_request:
             self._logger.debug(
                 "Skipping feedback for low-confidence match (conf=%.2f < %.2f)",
                 confidence,

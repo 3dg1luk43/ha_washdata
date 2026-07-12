@@ -21,7 +21,9 @@
     "reviewed": "Bewertet",
     "steady": "→ stetig",
     "using_defaults": "Verwendung der Standardeinstellungen",
-    "using_tuned": "Verwendung abgestimmter Gewichte"
+    "using_tuned": "Verwendung abgestimmter Gewichte",
+    "overrun_ratio": "({x}x erwartet)",
+    "underrun_ratio": "({pct}% des Erwarteten)"
   },
   "btn": {
     "add_device": "+ Gerät hinzufügen",
@@ -142,7 +144,9 @@
     "trim_split": "Trimmen / Teilen",
     "undo": "Rückgängig",
     "use": "Verwenden",
-    "wipe_all": "Alle Daten löschen"
+    "wipe_all": "Alle Daten löschen",
+    "delete_selected": "Auswahl löschen ({n})",
+    "group_suggest": "Gruppe {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Auf Verlauf testen",
     "toggle_sidebar": "Schalten Sie die Seitenleiste von Home Assistant um",
     "tools_and_data": "Tools & Daten",
-    "wipe_history": "Verlauf löschen"
+    "wipe_history": "Verlauf löschen",
+    "recommendations": "Empfehlungen ({n})"
   },
   "health": {
     "fair": "Akzeptable Übereinstimmungsqualität",
@@ -439,7 +444,32 @@
     "ungrouped": "Nicht gruppiert",
     "unlabelled": "Unbeschriftet",
     "unlabelled_paren": "(unbeschriftet)",
-    "warp_path": "Warp-Pfad"
+    "warp_path": "Warp-Pfad",
+    "input": "Eingabe:",
+    "start": "Start",
+    "end": "Ende",
+    "unit_s": "(s)",
+    "reviewed_on": "überprüft am {date}",
+    "unknown": "Unbekannt",
+    "quality": "Qualität",
+    "tags": "Tags",
+    "at": "um",
+    "pct_match_confidence": "{pct}% Übereinstimmungskonfidenz",
+    "ha_restarted": "HA neu gestartet",
+    "from_start": "Vom Anfang",
+    "to_end": "Bis Ende",
+    "click_to_select": "zum Auswählen klicken",
+    "envelope": "Hüllkurve",
+    "zoom_hint": "scrollen zum Zoomen · Doppelklick zum Zurücksetzen",
+    "loading_paren": "(wird geladen…)",
+    "time_remaining": "~{v} verbleibend",
+    "no_duration": "keine Dauer",
+    "duration_avg": "~{v}m Ø",
+    "name_placeholder": "(Name)",
+    "n_shown": ", {n} angezeigt",
+    "cycles_title": "Zyklen ({n})",
+    "pg_detecting": "Erkennung",
+    "pg_best_marker": "Beste: {v}"
   },
   "log": {
     "all_levels": "Alle Ebenen"
@@ -452,7 +482,11 @@
     "fit_strong": "Stark",
     "fit_weak": "Schwach",
     "fit_word": "fit",
-    "personalized": "● Personalisiert für diese Maschine"
+    "personalized": "● Personalisiert für diese Maschine",
+    "better_than_baseline": "{pct}% besser als die Basisschätzung ({metric})",
+    "trend_improving_tip": "Die Passung dieses Modells hat sich bei den letzten Überprüfungen verbessert.",
+    "trend_declining_tip": "Die Passung dieses Modells hat sich bei den letzten Überprüfungen verschlechtert. Mehr Zyklen zu überprüfen kann ihm beim erneuten Lernen helfen.",
+    "trend_steady_tip": "Die Passung dieses Modells ist bei den letzten Überprüfungen weitgehend stabil geblieben."
   },
   "modal": {
     "auto_label": "Auto-Label-Zyklen",
@@ -472,7 +506,25 @@
     "process_recording": "Prozessaufzeichnung",
     "delete_maintenance_msg": "Diesen Wartungseintrag löschen? Dies kann nicht rückgängig gemacht werden.",
     "delete_maintenance_title": "Wartungsereignis löschen",
-    "relabel_cycles": "{count} Zyklen neu beschriften"
+    "relabel_cycles": "{count} Zyklen neu beschriften",
+    "delete_automation_title": "Automatisierung löschen",
+    "delete_automation_msg": "Die Automatisierung \"{name}\" aus Home Assistant löschen? Dies kann nicht rückgängig gemacht werden.",
+    "remove_legacy_title": "Alte Aktionen entfernen",
+    "remove_legacy_msg": "Die alten benutzerdefinierten Aktionen entfernen? Sie werden bei Zyklusereignissen nicht mehr ausgelöst. Dies kann über das Panel nicht rückgängig gemacht werden.",
+    "discard_recording_title": "Aufnahme verwerfen",
+    "discard_recording_msg": "Die gespeicherte Aufnahme verwerfen? Dies kann nicht rückgängig gemacht werden.",
+    "dismiss_all_title": "Alle Rückmeldungen verwerfen",
+    "dismiss_all_msg": "Alle {count} ausstehenden Feedback-Anfragen verwerfen?",
+    "dismiss_all_ok": "Alle verwerfen",
+    "delete_phase_title": "Phase löschen",
+    "delete_phase_msg": "Phase \"{name}\" löschen?",
+    "clear_debug_title": "Debug-Daten löschen",
+    "clear_debug_msg": "Alle gespeicherten Debug-Aufzeichnungen löschen?",
+    "wipe_all_title": "Alle Daten löschen",
+    "wipe_all_msg": "⚠️ Dies löscht dauerhaft ALLE Zyklen und Profile. Dies kann nicht rückgängig gemacht werden.",
+    "wipe_all_ok": "Alles löschen",
+    "force_stop_title": "Zyklus zwangsweise stoppen",
+    "force_stop_msg": "Den aktiven Zyklus jetzt zwangsweise stoppen? Der Zyklus wird als unterbrochen gespeichert."
   },
   "msg": {
     "appliance_monitor": "Gerätemonitor",
@@ -654,7 +706,17 @@
     "updated": "Aktualisiert",
     "warmup_badge": "Noch in der Lernphase ({done}/{needed} Zyklen)",
     "warmup_detail": "Dieses Profil benötigt {needed} beschriftete Zyklen, bevor die automatische Erkennung beginnt. Jeder bestätigte Zyklus hilft beim Lernen.",
-    "wipe_history_warning": "Alle Zyklen und Profile dauerhaft löschen. Kann nicht rückgängig gemacht werden."
+    "wipe_history_warning": "Alle Zyklen und Profile dauerhaft löschen. Kann nicht rückgängig gemacht werden.",
+    "compare_overlay_tip": "Legen Sie gelernte Profilhüllkurven übereinander, um zu sehen, welchem Programm jeder Zyklus ähnelt.",
+    "duration_trend_up_tip": "Dauer steigend ({pct}%/Zyklus)",
+    "duration_trend_down_tip": "Dauer fallend ({pct}%/Zyklus)",
+    "energy_trend_up_tip": "Energie steigend ({pct}%/Zyklus)",
+    "energy_trend_down_tip": "Energie fallend ({pct}%/Zyklus)",
+    "performance_trending": "Leistungstrend",
+    "pg_select_cycle_hint": "Wählen Sie einen Zyklus und klicken Sie auf ↺, um ihn zu laden",
+    "pg_sweep_progress": "Schritt {done} / {total}",
+    "pg_analysis_hint": "Wählen Sie einen Zyklus und klicken Sie auf ↺, um die Analyse zu laden.",
+    "diagnostics_load_failed": "Diagnose konnte nicht geladen werden: {error}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plötzlicher Abfall gilt als sofortiges Ende",
@@ -1180,7 +1242,15 @@
     "interrupted": "Unterbrochen",
     "ready": "Bereit zur Verarbeitung",
     "recording": "Aufzeichnung",
-    "training": "Training…"
+    "training": "Training…",
+    "saving": "Wird gespeichert…",
+    "rebuilding": "Wird neu aufgebaut…",
+    "analyzing": "Wird analysiert…",
+    "resetting": "Wird zurückgesetzt…",
+    "reverting": "Wird zurückgeführt…",
+    "trimming": "Wird zugeschnitten…",
+    "splitting": "Wird geteilt…",
+    "deleting": "Wird gelöscht…"
   },
   "suggestion": {
     "both_agree": "WashData empfiehlt",
@@ -1333,7 +1403,9 @@
     "relabel_done": "{count} Zyklen neu beschriftet",
     "relabel_failed": "Neu beschriften fehlgeschlagen: {error}",
     "reminders_save_failed": "Erinnerungen konnten nicht gespeichert werden: {error}",
-    "reminders_saved": "Service-Erinnerungen gespeichert"
+    "reminders_saved": "Service-Erinnerungen gespeichert",
+    "pause_no_cycle": "Kein aktiver Zyklus zum Anhalten",
+    "resume_no_cycle": "Kein pausierter Zyklus zum Fortsetzen"
   },
   "trend": {
     "down": "Abwärtstrend",
@@ -1345,5 +1417,26 @@
     "drum_clean": "Trommel reinigen",
     "filter_clean": "Filter reinigen",
     "other": "Sonstiges"
+  },
+  "col": {
+    "profile_tip": "Name des zugeordneten Programms. Ohne Kennzeichnung bedeutet, dass am Zyklusende kein Profil zugeordnet wurde.",
+    "status_tip": "Zyklusergebnis: Abgeschlossen (natürliches Ende), Unterbrochen (plötzlicher Leistungsabfall), Zwangsweise gestoppt (manuell) oder Überprüfung nötig (Feedback ausstehend).",
+    "date_tip": "Datum und Uhrzeit, zu der der Zyklus gestartet ist.",
+    "duration_tip": "Gesamtlaufzeit des Zyklus von Anfang bis Ende.",
+    "energy_tip": "Insgesamt verbrauchte Energie (kWh). Berechnet durch Integration der Leistung über die Zeit.",
+    "cost_tip": "Energiekosten für diesen Zyklus, beim Abschluss anhand des damals gültigen Preises festgeschrieben (Energie x Preis pro kWh). Legen Sie unter Einstellungen einen Preis fest, um sie anzuzeigen.",
+    "confidence_tip": "Profilübereinstimmungskonfidenz (0-100 %). Wie genau die Leistungskurve des Zyklus mit dem identifizierten Programm übereinstimmte.",
+    "health_tip": "ML-Zyklusgesundheit (höher = besser). Klicken Sie auf einen Zyklus, um ihn zu prüfen und zu überprüfen."
+  },
+  "stat": {
+    "avg": "Ø",
+    "min": "Min. {v}",
+    "max": "Max. {v}",
+    "consistency": "Konsistenz ±{v}",
+    "total": "gesamt {v}",
+    "last_run": "letzter Lauf {v}",
+    "score": "Score {pct}%",
+    "duration_cv": "Dauer-CV {pct}%",
+    "avg_confidence": "Ø Konfidenz {pct}%"
   }
 }

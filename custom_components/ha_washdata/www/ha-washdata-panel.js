@@ -2276,7 +2276,7 @@ class HaWashdataPanel extends HTMLElement {
           <div class="wd-main">
             <div class="wd-body">
               ${this._loading
-                ? '<div class="wd-empty"><div class="wd-icon">⏳</div>Loading…</div>'
+                ? `<div class="wd-empty"><div class="wd-icon">⏳</div>${this._t('msg.loading', {}, 'Loading…')}</div>`
                 : this._htmlBody()}
             </div>
           </div>
@@ -2335,7 +2335,7 @@ class HaWashdataPanel extends HTMLElement {
     return `
       ${this._htmlDeviceBar()}
       <div class="wd-tabs">${tabBtns}</div>
-      ${this._tabLoading ? '<div class="wd-empty" style="padding:24px"><div class="wd-icon">⏳</div>Loading…</div>' : ''}
+      ${this._tabLoading ? `<div class="wd-empty" style="padding:24px"><div class="wd-icon">⏳</div>${this._t('msg.loading', {}, 'Loading…')}</div>` : ''}
       ${pane('status', this._htmlStatus())}
       ${pane('history', this._htmlHistory())}
       ${pane('profiles', this._htmlProfiles())}
@@ -2424,7 +2424,7 @@ class HaWashdataPanel extends HTMLElement {
 
     const progressHtml = (isRunning && prog != null) ? `
       <div class="wd-prog-bg"><div class="wd-prog-fill" style="width:${Math.min(100, prog)}%"></div></div>
-      <div class="wd-prog-row"><span>${prog.toFixed(1)}%</span>${rem != null ? `<span>~${_fmtDuration(rem)} remaining</span>` : ''}</div>
+      <div class="wd-prog-row"><span>${prog.toFixed(1)}%</span>${rem != null ? `<span>${this._t('lbl.time_remaining', {v: _fmtDuration(rem)}, `~${_fmtDuration(rem)} remaining`)}</span>` : ''}</div>
     ` : '';
     const pd = this._powerData || {};
     const hasCurve = (pd.live || []).length > 1;
@@ -2677,12 +2677,12 @@ class HaWashdataPanel extends HTMLElement {
     };
     const overrunBadge = c => {
       if (c.anomaly !== 'overrun') return '';
-      const r = c.overrun_ratio ? ` (${Number(c.overrun_ratio).toFixed(1)}x expected)` : '';
-      return ` <span title="${_esc(this._t('badge.overrun', {}, 'Ran longer than usual'))}${r}" style="color:var(--warning-color,#ff9800)">⏱</span>`;
+      const r = c.overrun_ratio ? ' ' + this._t('badge.overrun_ratio', {x: Number(c.overrun_ratio).toFixed(1)}, `(${Number(c.overrun_ratio).toFixed(1)}x expected)`) : '';
+      return ` <span title="${_esc(this._t('badge.overrun', {}, 'Ran longer than usual'))}${_esc(r)}" style="color:var(--warning-color,#ff9800)">⏱</span>`;
     };
     const underrunBadge = c => {
       if (c.anomaly !== 'underrun') return '';
-      const r = c.underrun_ratio ? ` (${Math.round(c.underrun_ratio * 100)}% of expected)` : '';
+      const r = c.underrun_ratio ? ' ' + this._t('badge.underrun_ratio', {pct: Math.round(c.underrun_ratio * 100)}, `(${Math.round(c.underrun_ratio * 100)}% of expected)`) : '';
       return ` <span title="${_esc(this._t('badge.underrun', {}, 'Finished faster than usual'))}${_esc(r)}" style="color:var(--info-color,#2196f3)">⚡</span>`;
     };
     const energyAnomalyBadge = c => {
@@ -2732,14 +2732,14 @@ class HaWashdataPanel extends HTMLElement {
 
     const thead = `<thead><tr>
       <th style="width:26px;padding:6px 4px 6px 8px"></th>
-      ${_th(this._t('lbl.profile', {}, 'Profile'), 'profile', col === 'profile', dir, 'cycsort', '', 'Matched program name. Unlabelled means no profile matched at end of cycle.')}
-      ${_th(this._t('lbl.status', {}, 'Status'), 'status', col === 'status', dir, 'cycsort', '', 'Cycle outcome: Completed (natural end), Interrupted (abrupt power drop), Force Stopped (manual), or Needs Review (feedback pending).')}
-      ${_th(this._t('lbl.date', {}, 'Date'), 'date', col === 'date', dir, 'cycsort', '', 'Date and time the cycle started.')}
-      ${_th(this._t('lbl.duration', {}, 'Duration'), 'duration', col === 'duration', dir, 'cycsort', 'right', 'Total cycle run time from start to end.')}
-      ${_th(this._t('lbl.energy', {}, 'Energy'), 'energy', col === 'energy', dir, 'cycsort', 'right', 'Total energy consumed (kWh). Computed by integrating power over time.')}
-      ${_th(this._t('lbl.cost', {}, 'Cost'), 'cost', col === 'cost', dir, 'cycsort', 'right', 'Energy cost for this cycle, frozen at completion using the price in effect then (energy x price per kWh). Set a price under Settings to populate it.')}
-      ${_th(this._t('lbl.confidence', {}, 'Confidence'), 'confidence', col === 'confidence', dir, 'cycsort', 'right', 'Profile match confidence (0-100%). How closely the cycle power curve matched the identified program.')}
-      ${_th(this._t('lbl.health', {}, 'Health'), 'health', col === 'health', dir, 'cycsort', 'right', 'ML cycle health (higher = better). Click a cycle to inspect and review it.')}
+      ${_th(this._t('lbl.profile', {}, 'Profile'), 'profile', col === 'profile', dir, 'cycsort', '', this._t('col.profile_tip', {}, 'Matched program name. Unlabelled means no profile matched at end of cycle.'))}
+      ${_th(this._t('lbl.status', {}, 'Status'), 'status', col === 'status', dir, 'cycsort', '', this._t('col.status_tip', {}, 'Cycle outcome: Completed (natural end), Interrupted (abrupt power drop), Force Stopped (manual), or Needs Review (feedback pending).'))}
+      ${_th(this._t('lbl.date', {}, 'Date'), 'date', col === 'date', dir, 'cycsort', '', this._t('col.date_tip', {}, 'Date and time the cycle started.'))}
+      ${_th(this._t('lbl.duration', {}, 'Duration'), 'duration', col === 'duration', dir, 'cycsort', 'right', this._t('col.duration_tip', {}, 'Total cycle run time from start to end.'))}
+      ${_th(this._t('lbl.energy', {}, 'Energy'), 'energy', col === 'energy', dir, 'cycsort', 'right', this._t('col.energy_tip', {}, 'Total energy consumed (kWh). Computed by integrating power over time.'))}
+      ${_th(this._t('lbl.cost', {}, 'Cost'), 'cost', col === 'cost', dir, 'cycsort', 'right', this._t('col.cost_tip', {}, 'Energy cost for this cycle, frozen at completion using the price in effect then (energy x price per kWh). Set a price under Settings to populate it.'))}
+      ${_th(this._t('lbl.confidence', {}, 'Confidence'), 'confidence', col === 'confidence', dir, 'cycsort', 'right', this._t('col.confidence_tip', {}, 'Profile match confidence (0-100%). How closely the cycle power curve matched the identified program.'))}
+      ${_th(this._t('lbl.health', {}, 'Health'), 'health', col === 'health', dir, 'cycsort', 'right', this._t('col.health_tip', {}, 'ML cycle health (higher = better). Click a cycle to inspect and review it.'))}
     </tr></thead>`;
 
     const filterBar = `<div class="wd-filter-bar">
@@ -2754,8 +2754,8 @@ class HaWashdataPanel extends HTMLElement {
       </select>
     </div>`;
 
-    const shown = cycles.length !== allCycles.length ? `, ${cycles.length} shown` : '';
-    const title = `Cycles (${allCycles.length}${shown})`;
+    const shown = cycles.length !== allCycles.length ? this._t('lbl.n_shown', {n: cycles.length}, `, ${cycles.length} shown`) : '';
+    const title = this._t('lbl.cycles_title', {n: `${allCycles.length}${shown}`}, `Cycles (${allCycles.length}${shown})`);
 
     const toolbar = canEdit ? `<div class="wd-card-actions" style="margin:0 0 4px;justify-content:flex-end">
       <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-auto-open" title="${_esc(this._t('btn.auto_label_cycles_tip', {}, 'Automatically assign profile names to unlabelled cycles whose match confidence clears the threshold'))}">${this._t('btn.auto_label_cycles', {}, 'Auto-label cycles')}</button>
@@ -2763,7 +2763,7 @@ class HaWashdataPanel extends HTMLElement {
     </div>` : '';
 
     const bulk = selMode ? `<div class="wd-card-actions" style="margin:0 0 10px">
-      <span class="wd-info" style="margin:0">${sel.size} selected</span>
+      <span class="wd-info" style="margin:0">${this._t('lbl.n_selected', {n: sel.size}, `${sel.size} selected`)}</span>
       <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-compare" ${sel.size < 2 ? 'disabled' : ''}>${this._t('btn.compare', {}, 'Compare')}${sel.size >= 2 ? ` (${sel.size})` : ''}</button>
       <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-merge" ${sel.size < 2 ? 'disabled' : ''}>${this._t('btn.merge', {}, 'Merge')}${sel.size >= 2 ? ` (${sel.size})` : ''}</button>
       <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-relabel" ${sel.size < 1 ? 'disabled' : ''}>${this._t('btn.relabel', {count: sel.size}, `Relabel (${sel.size})`)}</button>
@@ -2799,7 +2799,7 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   _profileCardHtml(p) {
-    const dur = p.avg_duration ? `~${Math.round(p.avg_duration / 60)}m avg` : 'no duration';
+    const dur = p.avg_duration ? this._t('lbl.duration_avg', {v: Math.round(p.avg_duration / 60)}, `~${Math.round(p.avg_duration / 60)}m avg`) : this._t('lbl.no_duration', {}, 'no duration');
     const energy = p.avg_energy != null ? ` · ${_fmtEnergy(p.avg_energy)}/cycle` : '';
     const total = (p.avg_energy != null && p.cycle_count)
       ? ` · <strong>${_fmtEnergy(p.avg_energy * p.cycle_count)}</strong> total` : '';
@@ -2820,9 +2820,19 @@ class HaWashdataPanel extends HTMLElement {
       const enIcon = t.energy_trend ? this._trendIcon(t.energy_trend) : '';
       if (t.duration_trend !== 'stable' || t.energy_trend === 'up') {
         const tipParts = [];
-        if (t.duration_trend !== 'stable') tipParts.push(`Duration ${t.duration_trend} (${t.duration_slope_pct > 0 ? '+' : ''}${t.duration_slope_pct}%/cycle)`);
-        if (t.energy_trend && t.energy_trend !== 'stable') tipParts.push(`Energy ${t.energy_trend} (${t.energy_slope_pct > 0 ? '+' : ''}${t.energy_slope_pct}%/cycle)`);
-        const tip = tipParts.join(', ') || 'Performance trending';
+        if (t.duration_trend !== 'stable') {
+          const dp = `${t.duration_slope_pct > 0 ? '+' : ''}${t.duration_slope_pct}`;
+          tipParts.push(t.duration_trend === 'up'
+            ? this._t('msg.duration_trend_up_tip', {pct: dp}, `Duration up (${dp}%/cycle)`)
+            : this._t('msg.duration_trend_down_tip', {pct: dp}, `Duration down (${dp}%/cycle)`));
+        }
+        if (t.energy_trend && t.energy_trend !== 'stable') {
+          const ep = `${t.energy_slope_pct > 0 ? '+' : ''}${t.energy_slope_pct}`;
+          tipParts.push(t.energy_trend === 'up'
+            ? this._t('msg.energy_trend_up_tip', {pct: ep}, `Energy up (${ep}%/cycle)`)
+            : this._t('msg.energy_trend_down_tip', {pct: ep}, `Energy down (${ep}%/cycle)`));
+        }
+        const tip = tipParts.join(', ') || this._t('msg.performance_trending', {}, 'Performance trending');
         trendBadge = `<span class="wd-badge" style="color:var(--secondary-text-color,#888)" title="${_esc(tip)}">${durIcon}${enIcon || ''}</span>`;
       }
     }
@@ -2903,7 +2913,7 @@ class HaWashdataPanel extends HTMLElement {
     const sugBanner = (canEdit && (pg.suggestions || []).length) ? `
       <div class="wd-sug-banner">
         <span>🔗 <b>${pg.suggestions.length}</b> ${this._t('msg.near_duplicate_cluster', {}, 'near-duplicate profile cluster' + (pg.suggestions.length > 1 ? 's' : '') + ' detected. Grouping lets matching reliably pick between look-alikes (e.g. same program at different temperature/spin).')}</span>
-        ${pg.suggestions.map((s, i) => `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-suggest" data-idx="${i}">Group ${s.members.length}: ${_esc(s.members.join(', ').slice(0, 48))}</button>`).join('')}
+        ${pg.suggestions.map((s, i) => `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-suggest" data-idx="${i}">${this._t('btn.group_suggest', {n: s.members.length, members: _esc(s.members.join(', ').slice(0, 48))}, `Group ${s.members.length}: ${_esc(s.members.join(', ').slice(0, 48))}`)}</button>`).join('')}
       </div>` : '';
 
     // Coverage gap banner: unmatched cycles that might represent unknown programs.
@@ -2931,7 +2941,7 @@ class HaWashdataPanel extends HTMLElement {
     const advisories = this._profileAdvisories || [];
     const advBanner = advisories.length ? `
       <div class="wd-sug-banner" style="border-color:var(--warning-color,#ff9800);background:rgba(255,152,0,.06);flex-direction:column;align-items:stretch;gap:6px">
-        <span style="font-weight:600">💡 Recommendations (${advisories.length})</span>
+        <span style="font-weight:600">💡 ${this._t('hdr.recommendations', {n: advisories.length}, `Recommendations (${advisories.length})`)}</span>
         ${advisories.slice(0, 5).map(a => `<div style="font-size:.9em">${a.severity === 'warning' ? '⚠' : 'ℹ️'} ${_esc(a.message)}</div>`).join('')}
       </div>` : '';
 
@@ -2967,7 +2977,7 @@ class HaWashdataPanel extends HTMLElement {
         ${canEdit ? `<div class="wd-card-actions">
           <button class="wd-btn wd-btn-primary" data-action="create-profile" title="${_esc(this._t('btn.new_profile_tip', {}, 'Create a new program profile from an existing labelled cycle or recording'))}">${this._t('btn.new_profile', {}, '+ New Profile')}</button>
           <button class="wd-btn wd-btn-secondary" data-action="pg-new" title="${_esc(this._t('btn.new_group_tip', {}, 'Group near-identical profiles (same shape/duration, different temperature or spin) so the matcher reliably picks between them'))}">${this._t('btn.new_group', {}, '+ New Group')}</button>
-          <button class="wd-btn wd-btn-secondary" data-action="rebuild-envelopes" ${rebuildBusy ? 'disabled' : ''} title="${_esc(this._t('btn.rebuild_tip', {}, 'Recompute the expected power envelope (min/max band) for all profiles from their labelled cycles — run after labelling new cycles or correcting old ones'))}">${rebuildBusy ? '<span class="wd-spin"></span> Rebuilding…' : this._t('btn.rebuild', {}, 'Rebuild Envelopes')}</button>
+          <button class="wd-btn wd-btn-secondary" data-action="rebuild-envelopes" ${rebuildBusy ? 'disabled' : ''} title="${_esc(this._t('btn.rebuild_tip', {}, 'Recompute the expected power envelope (min/max band) for all profiles from their labelled cycles — run after labelling new cycles or correcting old ones'))}">${rebuildBusy ? ('<span class="wd-spin"></span> ' + this._t('status.rebuilding', {}, 'Rebuilding…')) : this._t('btn.rebuild', {}, 'Rebuild Envelopes')}</button>
         </div>` : ''}
       </div>
       ${sugBanner}
@@ -3026,7 +3036,7 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-modal-actions">
         <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         ${m.orig ? `<button class="wd-btn wd-btn-danger" data-maction="pg-delete" title="${_esc(this._t('btn.delete_group_tip', {}, 'Delete this group only - the member profiles are kept'))}">${this._t('btn.delete_group', {}, 'Delete Group')}</button>` : ''}
-        <button class="wd-btn wd-btn-primary" data-maction="pg-save" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Saving…' : this._t('btn.save_group', {}, 'Save Group')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="pg-save" ${busy ? 'disabled' : ''}>${busy ? ('<span class="wd-spin"></span> ' + this._t('status.saving', {}, 'Saving…')) : this._t('btn.save_group', {}, 'Save Group')}</button>
       </div>`;
   }
 
@@ -3135,7 +3145,7 @@ class HaWashdataPanel extends HTMLElement {
       </div>`) : '';
 
     const analyzeBusy = this._busy.has('sug-analyze');
-    const analyzeBtn = `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="sug-analyze" ${analyzeBusy ? 'disabled' : ''} title="${_esc(this._t('btn.run_analysis_tip', {}, 'Analyze your recorded cycles now and refresh tuning suggestions'))}">${analyzeBusy ? '<span class="wd-spin"></span> Analyzing…' : this._t('btn.run_analysis', {}, '🔍 Run suggestion analysis')}</button>`;
+    const analyzeBtn = `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="sug-analyze" ${analyzeBusy ? 'disabled' : ''} title="${_esc(this._t('btn.run_analysis_tip', {}, 'Analyze your recorded cycles now and refresh tuning suggestions'))}">${analyzeBusy ? ('<span class="wd-spin"></span> ' + this._t('status.analyzing', {}, 'Analyzing…')) : this._t('btn.run_analysis', {}, '🔍 Run suggestion analysis')}</button>`;
 
     const search = this._settingsSearch || '';
     const q = search.trim().toLowerCase();
@@ -3156,7 +3166,7 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-card">
         <form id="wd-settings-form">${formContent}</form>
         <div class="wd-card-actions" style="margin-top:20px">
-          <button class="wd-btn wd-btn-primary" id="wd-settings-save" ${saveBusy ? 'disabled' : ''}>${saveBusy ? '<span class="wd-spin"></span> Saving…' : this._t('btn.save_settings', {}, 'Save Settings')}</button>
+          <button class="wd-btn wd-btn-primary" id="wd-settings-save" ${saveBusy ? 'disabled' : ''}>${saveBusy ? ('<span class="wd-spin"></span> ' + this._t('status.saving', {}, 'Saving…')) : this._t('btn.save_settings', {}, 'Save Settings')}</button>
           <button class="wd-btn wd-btn-secondary" id="wd-settings-revert" ${this._prevOpts ? '' : 'disabled'} title="${this._prevOpts ? this._t('btn.revert_settings_tip', {}, 'Restore settings from before your last save') : this._t('btn.revert_settings_tip_none', {}, 'Save first to enable undo')}">${this._t('btn.revert_settings', {}, 'Revert changes')}</button>
           <button class="wd-btn wd-btn-secondary" id="wd-settings-reload" title="${_esc(this._t('btn.refresh_settings_tip', {}, 'Reload settings from the server'))}">${this._t('btn.refresh', {}, 'Refresh')}</button>
         </div>
@@ -3494,7 +3504,7 @@ class HaWashdataPanel extends HTMLElement {
         <p class="wd-info" style="margin:0 0 12px">${this._t('msg.ml_settings_intro', {}, 'Two independent switches: one applies the models while a cycle runs, the other lets WashData fine-tune them to your machine over time.')}</p>
         <form id="wd-ml-form"><div class="wd-form-grid">${fields}</div></form>
         <div class="wd-card-actions" style="margin-top:12px">
-          <button class="wd-btn wd-btn-primary" id="wd-ml-save" ${saveBusy ? 'disabled' : ''}>${saveBusy ? '<span class="wd-spin"></span> Saving…' : this._t('btn.save', {}, 'Save')}</button>
+          <button class="wd-btn wd-btn-primary" id="wd-ml-save" ${saveBusy ? 'disabled' : ''}>${saveBusy ? ('<span class="wd-spin"></span> ' + this._t('status.saving', {}, 'Saving…')) : this._t('btn.save', {}, 'Save')}</button>
         </div>
         <p class="wd-info" style="margin-top:10px;font-size:.78em">${this._t('msg.saving_triggers_reload', {}, 'Saving triggers an integration reload.')}</p>
       </div>
@@ -3564,7 +3574,7 @@ class HaWashdataPanel extends HTMLElement {
         </div>`;
       }).join('');
       const resetBtn = this._canEdit()
-        ? `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="ml-revert-models" ${reverting ? 'disabled' : ''} title="${_esc(this._t('btn.reset_ml_models_tip', {}, 'Discard the fine-tuned models and go back to the built-in ones. WashData can re-learn them later.'))}" style="margin-top:12px">${reverting ? '<span class="wd-spin"></span> Resetting…' : this._t('btn.reset_to_builtin', {}, 'Reset to built-in models')}</button>`
+        ? `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="ml-revert-models" ${reverting ? 'disabled' : ''} title="${_esc(this._t('btn.reset_ml_models_tip', {}, 'Discard the fine-tuned models and go back to the built-in ones. WashData can re-learn them later.'))}" style="margin-top:12px">${reverting ? ('<span class="wd-spin"></span> ' + this._t('status.resetting', {}, 'Resetting…')) : this._t('btn.reset_to_builtin', {}, 'Reset to built-in models')}</button>`
         : '';
       body = `<div>${rows}</div>${resetBtn}`;
     }
@@ -3587,7 +3597,7 @@ class HaWashdataPanel extends HTMLElement {
       const impr = Math.max(0, (m.naive_mae - m.model_mae) / m.naive_mae);
       pct = Math.min(1, impr) * 100;
       word = impr >= 0.5 ? this._t('ml.fit_strong',{},'Strong') : impr >= 0.2 ? this._t('ml.fit_good',{},'Good') : this._t('ml.fit_slight',{},'Slight');
-      title = `${(impr * 100).toFixed(0)}% better than the baseline estimate (${title})`;
+      title = this._t('ml.better_than_baseline', {pct: (impr * 100).toFixed(0), metric: title}, `${(impr * 100).toFixed(0)}% better than the baseline estimate (${title})`);
     } else {
       return '';
     }
@@ -3603,9 +3613,9 @@ class HaWashdataPanel extends HTMLElement {
   _mlTrendBadge(trend) {
     if (!trend) return '';
     const map = {
-      improving: [this._t('badge.improving',{},'↗ improving'), 'var(--success-color,#4caf50)', "This model's fit has improved across recent re-checks."],
-      declining: [this._t('badge.declining',{},'↘ declining'), 'var(--warning-color,#ff9800)', "This model's fit has slipped across recent re-checks — reviewing more cycles may help it re-learn."],
-      steady: [this._t('badge.steady',{},'→ steady'), 'var(--secondary-text-color)', "This model's fit has held roughly steady across recent re-checks."],
+      improving: [this._t('badge.improving',{},'↗ improving'), 'var(--success-color,#4caf50)', this._t('ml.trend_improving_tip', {}, "This model's fit has improved across recent re-checks.")],
+      declining: [this._t('badge.declining',{},'↘ declining'), 'var(--warning-color,#ff9800)', this._t('ml.trend_declining_tip', {}, "This model's fit has slipped across recent re-checks — reviewing more cycles may help it re-learn.")],
+      steady: [this._t('badge.steady',{},'→ steady'), 'var(--secondary-text-color)', this._t('ml.trend_steady_tip', {}, "This model's fit has held roughly steady across recent re-checks.")],
     };
     const e = map[trend];
     if (!e) return '';
@@ -3650,7 +3660,7 @@ class HaWashdataPanel extends HTMLElement {
       meta = `<p class="wd-info" style="margin:8px 0 0">Tuned ${_esc(when)} from ${rec.cycle_count || 0} cycles${gain}.</p>`;
     }
     const revertBtn = tuned
-      ? `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="ml-revert-match" ${reverting ? 'disabled' : ''}>${reverting ? '<span class="wd-spin"></span> Reverting…' : this._t('btn.reset_to_defaults', {}, 'Reset to defaults')}</button>`
+      ? `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="ml-revert-match" ${reverting ? 'disabled' : ''}>${reverting ? ('<span class="wd-spin"></span> ' + this._t('status.reverting', {}, 'Reverting…')) : this._t('btn.reset_to_defaults', {}, 'Reset to defaults')}</button>`
       : '';
     return `<div class="wd-card" style="margin-top:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px">
@@ -4025,7 +4035,7 @@ class HaWashdataPanel extends HTMLElement {
       </div>`;
     }
 
-    return `<div>${analysisHtml || '<p class="wd-info" style="margin:0">Select a cycle and click ↺ to load analysis.</p>'}</div>`;
+    return `<div>${analysisHtml || `<p class="wd-info" style="margin:0">${this._t('msg.pg_analysis_hint', {}, 'Select a cycle and click ↺ to load analysis.')}</p>`}</div>`;
   }
 
   async _pgLoad() {
@@ -4107,7 +4117,7 @@ class HaWashdataPanel extends HTMLElement {
       ctx.font = `${12*dpr}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(this._pgLoading ? 'Loading…' : 'Select a cycle and click ↺ to load', cw/2, ch/2);
+      ctx.fillText(this._pgLoading ? this._t('msg.loading', {}, 'Loading…') : this._t('msg.pg_select_cycle_hint', {}, 'Select a cycle and click ↺ to load'), cw/2, ch/2);
       return;
     }
 
@@ -4215,11 +4225,12 @@ class HaWashdataPanel extends HTMLElement {
       ctx.fillText(label + ' ' + Math.round(watts) + 'W', padL + 14*dpr, y - 2*dpr);
       ctx.restore();
     };
-    drawThrLine(+threshStart, '#2a78d6', 'Start');
-    drawThrLine(+threshStop, '#e34948', 'Stop');
+    drawThrLine(+threshStart, '#2a78d6', this._t('lbl.start', {}, 'Start'));
+    drawThrLine(+threshStop, '#e34948', this._t('btn.stop', {}, 'Stop'));
 
     // State band
     const stateColors = { idle: bgCol, detecting: '#42a5f566', running: '#66bb6a66', ending: '#ef535066' };
+    const stateLabels = { idle: this._t('lbl.pg_idle', {}, 'Idle'), detecting: this._t('lbl.pg_detecting', {}, 'Detecting'), running: this._t('lbl.pg_ev_running', {}, 'Running'), ending: this._t('lbl.pg_ev_ending', {}, 'Ending') };
     const stateY = ch - stateBandH - phaseBandH;
     ctx.fillStyle = bgCol; ctx.fillRect(padL, stateY, cw - padL - padR, stateBandH);
     const statePts = this._pgComputeDetection(pts, +threshStart, +threshStop, totalDur);
@@ -4229,7 +4240,7 @@ class HaWashdataPanel extends HTMLElement {
       ctx.fillRect(x1, stateY, Math.max(1, x2 - x1), stateBandH);
       if ((x2 - x1) > 50*dpr) {
         ctx.fillStyle = txtCol; ctx.font = `${8*dpr}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(seg.state.toUpperCase(), (x1 + x2) / 2, stateY + stateBandH/2);
+        ctx.fillText((stateLabels[seg.state] || seg.state).toUpperCase(), (x1 + x2) / 2, stateY + stateBandH/2);
       }
     });
 
@@ -4350,11 +4361,11 @@ class HaWashdataPanel extends HTMLElement {
     const opts = this._opts || {};
     const startThr = this._pgThreshStart ?? opts.start_threshold_w ?? 50;
     const stopThr = this._pgThreshStop ?? opts.stop_threshold_w ?? 5;
-    let stateText = 'IDLE', stateColor = 'var(--secondary-background-color)';
+    let stateText = this._t('lbl.pg_idle', {}, 'Idle'), stateColor = 'var(--secondary-background-color)';
     if (power >= startThr) {
-      if (frac < 0.08) { stateText = 'DETECTING'; stateColor = '#42a5f5'; }
-      else if (frac > 0.9) { stateText = 'ENDING'; stateColor = '#ef5350'; }
-      else { stateText = 'RUNNING'; stateColor = '#66bb6a'; }
+      if (frac < 0.08) { stateText = this._t('lbl.pg_detecting', {}, 'Detecting'); stateColor = '#42a5f5'; }
+      else if (frac > 0.9) { stateText = this._t('lbl.pg_ev_ending', {}, 'Ending'); stateColor = '#ef5350'; }
+      else { stateText = this._t('lbl.pg_ev_running', {}, 'Running'); stateColor = '#66bb6a'; }
     }
     const cycle = (this._cycles || []).find(c => c.id === this._pgCycleId);
     const matchConf = this._pgDtwData?.stage4?.final_score ?? cycle?.match_confidence ?? null;
@@ -4428,7 +4439,7 @@ class HaWashdataPanel extends HTMLElement {
     const bar = sr && sr.getElementById('wd-pg-sim-progress-bar');
     const lbl = sr && sr.getElementById('wd-pg-sim-progress-lbl');
     if (bar && prog) { bar.style.width = Math.round(prog.done / prog.total * 100) + '%'; }
-    if (lbl && prog) { lbl.textContent = `${prog.done} / ${prog.total} cycles`; }
+    if (lbl && prog) { lbl.textContent = this._t('msg.pg_sim_progress', {done: prog.done, total: prog.total}, `${prog.done} / ${prog.total} cycles`); }
   }
 
   _pgSweepProgressUpdate() {
@@ -4437,7 +4448,7 @@ class HaWashdataPanel extends HTMLElement {
     const bar = sr && sr.getElementById('wd-pg-sw-progress-bar');
     const lbl = sr && sr.getElementById('wd-pg-sw-progress-lbl');
     if (bar && prog) bar.style.width = Math.round(prog.done / prog.total * 100) + '%';
-    if (lbl && prog) lbl.textContent = `Step ${prog.done} / ${prog.total}`;
+    if (lbl && prog) lbl.textContent = this._t('msg.pg_sweep_progress', {done: prog.done, total: prog.total}, `Step ${prog.done} / ${prog.total}`);
   }
 
   // F3: Linear interpolation of power at a given cycle offset (seconds)
@@ -4491,10 +4502,20 @@ class HaWashdataPanel extends HTMLElement {
         const sweep = [];
         for (let sweepIndex = 0; sweepIndex < vals.length && !this._pgSimCancelled; sweepIndex++) {
           const v = vals[sweepIndex];
-          const r = await this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: { ...baseOverride, [paramKey]: v }, concurrency: Math.min(50, ids.length) });
-          const arr = Array.isArray(r) ? r : (Array.isArray(r?.results) ? r.results : []);
-          const s = { total: arr.length, detected: 0, matchCorrect: 0, matched: 0, unmatched: 0, ambiguous: 0 };
-          arr.forEach(r => { const o = (r && r.outcome) || {}; if (o.detected) s.detected++; if (o.match_correct) s.matchCorrect++; if (o.match_profile) s.matched++; if (o.ambiguous) s.ambiguous++; });
+          // Chunk over ALL ids (backend caps a batch at 50) so every selected
+          // cycle is evaluated for each param value — otherwise cycles past the
+          // cap are silently dropped and the "best" value is picked on a partial set.
+          const SWEEP_CHUNK = 50;
+          const s = { total: 0, detected: 0, matchCorrect: 0, matched: 0, unmatched: 0, ambiguous: 0 };
+          for (let ci = 0; ci < ids.length && !this._pgSimCancelled; ci += SWEEP_CHUNK) {
+            const chunk = ids.slice(ci, ci + SWEEP_CHUNK);
+            const r = await this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: chunk, settings_override: { ...baseOverride, [paramKey]: v }, concurrency: chunk.length });
+            const arr = Array.isArray(r) ? r : (Array.isArray(r?.results) ? r.results : []);
+            arr.forEach(rr => { const o = (rr && rr.outcome) || {}; s.total++; if (o.detected) s.detected++; if (o.match_correct) s.matchCorrect++; if (o.match_profile) s.matched++; if (o.ambiguous) s.ambiguous++; });
+          }
+          // If cancelled mid-chunk, this param value's summary is incomplete —
+          // discard it so it can't skew the "best value" selection.
+          if (this._pgSimCancelled) break;
           s.unmatched = s.total - s.matched;
           sweep.push({ paramVal: v, summary: s });
           this._pgSweepProgress = { done: sweepIndex + 1, total: vals.length };
@@ -4574,9 +4595,9 @@ class HaWashdataPanel extends HTMLElement {
 
     // Categorical series: slot-1 blue, slot-2 aqua/green, slot-3 yellow
     const series = [
-      { key: 'matchCorrect', label: 'Matched',   color: isDark ? '#3987e5' : '#2a78d6' },
-      { key: 'detected',     label: 'Detected',  color: isDark ? '#199e70' : '#1baf7a' },
-      { key: 'ambiguous',    label: 'Ambiguous', color: isDark ? '#c98500' : '#eda100' },
+      { key: 'matchCorrect', label: this._t('lbl.pg_tile_matched', {}, 'Matched'),   color: isDark ? '#3987e5' : '#2a78d6' },
+      { key: 'detected',     label: this._t('lbl.pg_tile_detected', {}, 'Detected'),  color: isDark ? '#199e70' : '#1baf7a' },
+      { key: 'ambiguous',    label: this._t('lbl.pg_tile_ambiguous', {}, 'Ambiguous'), color: isDark ? '#c98500' : '#eda100' },
     ];
 
     const legendH = 18 * dpr;
@@ -4632,7 +4653,7 @@ class HaWashdataPanel extends HTMLElement {
       ctx.setLineDash([]);
       ctx.fillStyle = isDark ? '#3987e5' : '#2a78d6';
       ctx.font = `bold ${8*dpr}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-      ctx.fillText('Best: ' + (typeof bestX === 'number' ? bestX.toFixed(1).replace(/\.0$/,'') : bestX), bx, pad.t - 2*dpr);
+      ctx.fillText(this._t('lbl.pg_best_marker', {v: (typeof bestX === 'number' ? bestX.toFixed(1).replace(/\.0$/,'') : bestX)}, 'Best: ' + (typeof bestX === 'number' ? bestX.toFixed(1).replace(/\.0$/,'') : bestX)), bx, pad.t - 2*dpr);
       ctx.restore();
     }
 
@@ -4739,7 +4760,7 @@ class HaWashdataPanel extends HTMLElement {
     const d = this._diag;
     let statsHtml;
     if (d && d._error) {
-      statsHtml = `<p class="wd-info" style="color:var(--error-color)">Could not load diagnostics: ${_esc(d._error)}</p>`;
+      statsHtml = `<p class="wd-info" style="color:var(--error-color)">${this._t('msg.diagnostics_load_failed', {error: _esc(d._error)}, 'Could not load diagnostics: ' + _esc(d._error))}</p>`;
     } else if (d) {
       statsHtml = `<div class="wd-diag-grid">
         <div class="wd-diag-stat"><div class="wd-diag-val">${d.total_cycles ?? '-'}</div><div class="wd-diag-lbl">${this._t('lbl.cycles_count', {}, 'Cycles')}</div></div>
@@ -5289,7 +5310,7 @@ class HaWashdataPanel extends HTMLElement {
     ctx.setLineDash([]);
     const colOf = s => (s.stroke === 'primary' ? wd.primary : s.stroke);
     const dot = (v, col) => { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(xp, wd.Ypx(v), 3.4 * wd.dpr, 0, 6.2832); ctx.fill(); };
-    const lines = [`From start: <b>${_fmtClock(x)}</b>`, `To end: <b>${_fmtClock(Math.max(0, wd.xMax - x))}</b>`];
+    const lines = [`${this._t('lbl.from_start', {}, 'From start')}: <b>${_fmtClock(x)}</b>`, `${this._t('lbl.to_end', {}, 'To end')}: <b>${_fmtClock(Math.max(0, wd.xMax - x))}</b>`];
     const series = wd.series || [];
     this._hoverNearest = null;
     if (series.length > 4) {
@@ -5303,14 +5324,14 @@ class HaWashdataPanel extends HTMLElement {
         (best.s.points || []).forEach((p, i) => i ? ctx.lineTo(wd.Xpx(p[0]), wd.Ypx(p[1])) : ctx.moveTo(wd.Xpx(p[0]), wd.Ypx(p[1]))); ctx.stroke();
         dot(best.v, col);
         lines.push(`${_esc(best.s.name || '')}: <b>${best.v.toFixed(best.v < 100 ? 1 : 0)} W</b>`);
-        if (best.s.cid) { lines.push('<span style="opacity:.7">click to select</span>'); this._hoverNearest = { id, cid: best.s.cid }; }
+        if (best.s.cid) { lines.push(`<span style="opacity:.7">${this._t('lbl.click_to_select', {}, 'click to select')}</span>`); this._hoverNearest = { id, cid: best.s.cid }; }
       }
     } else {
-      series.forEach(s => { const v = _valueAt(s.points, x); if (v == null) return; dot(v, colOf(s)); lines.push(`${_esc(s.name || 'Power')}: <b>${v.toFixed(v < 100 ? 1 : 0)} W</b>`); });
+      series.forEach(s => { const v = _valueAt(s.points, x); if (v == null) return; dot(v, colOf(s)); lines.push(`${_esc(s.name || this._t('lbl.power', {}, 'Power'))}: <b>${v.toFixed(v < 100 ? 1 : 0)} W</b>`); });
     }
     if (wd.band) {
       const lo = _valueAt(wd.band.min, x), hi = _valueAt(wd.band.max, x);
-      if (lo != null && hi != null) lines.push(`Envelope: ${lo.toFixed(0)}–${hi.toFixed(0)} W`);
+      if (lo != null && hi != null) lines.push(`${this._t('lbl.envelope', {}, 'Envelope')}: ${lo.toFixed(0)}–${hi.toFixed(0)} W`);
     }
     // Anomaly detail when hovering inside a detected artifact span.
     (wd.artifacts || []).forEach(a => {
@@ -5319,7 +5340,7 @@ class HaWashdataPanel extends HTMLElement {
         lines.push(`<span style="color:var(--warning-color,#ff9800)">⚠ ${_esc(_artifactLabel(a.type, (k, v, f) => this._t(k, v, f)))}</span>: ${_esc(detail)}`);
       }
     });
-    if (this._canvasZoom[id]) lines.push('<span style="opacity:.45">scroll to zoom · dblclick to reset</span>');
+    if (this._canvasZoom[id]) lines.push(`<span style="opacity:.45">${this._t('lbl.zoom_hint', {}, 'scroll to zoom · dblclick to reset')}</span>`);
     ctx.restore();
     this._showGraphTip(e.clientX, e.clientY, lines);
     this._syncSpagRowHighlight(this._hoverNearest ? this._hoverNearest.cid : null);
@@ -5389,7 +5410,7 @@ class HaWashdataPanel extends HTMLElement {
         <button class="wd-btn wd-btn-primary" data-maction="label-ok">${this._t('btn.apply_label', {}, 'Apply Label')}</button></div>`;
     } else if (m.type === 'create-profile') {
       const cycleOpts = (this._cycles || []).slice(0, 40).map(c =>
-        `<option value="${_esc(c.id)}">${_fmtDate(c.start_time)} - ${Math.round((c.duration || 0) / 60)}m - ${_esc(c.profile_name || 'Unlabelled')}</option>`).join('');
+        `<option value="${_esc(c.id)}">${_fmtDate(c.start_time)} - ${Math.round((c.duration || 0) / 60)}m - ${_esc(c.profile_name || this._t('lbl.unlabelled', {}, 'Unlabelled'))}</option>`).join('');
       body = `<h2>${this._t('modal.create_profile', {}, 'Create Profile')}</h2>
         <div class="wd-field"><label>${this._t('lbl.profile_name', {}, 'Profile Name')}</label><input type="text" id="wd-cp-name" placeholder="${_esc(this._t('placeholder.profile_name', {}, 'e.g. Cotton 40°C'))}" value="${_esc(m.prefillName || '')}"></div>
         <div class="wd-field"><label>${this._t('lbl.ref_cycle', {}, 'Reference Cycle (optional)')}</label><select id="wd-cp-cycle"><option value="">None</option>${cycleOpts}</select></div>
@@ -5496,7 +5517,7 @@ class HaWashdataPanel extends HTMLElement {
     const meta = `<div class="wd-kv">
       <div class="wd-kv-item"><div class="wd-kv-val">${_fmtDuration(cur.duration || full)}</div><div class="wd-kv-lbl">${this._t('lbl.duration', {}, 'Duration')}</div></div>
       <div class="wd-kv-item"><div class="wd-kv-val">${_fmtEnergy(kwh)}</div><div class="wd-kv-lbl">${this._t('lbl.energy', {}, 'Energy')}</div></div>
-      <div class="wd-kv-item"><div class="wd-kv-val" style="font-size:.95em">${_esc(cur.profile_name || 'unlabelled')}</div><div class="wd-kv-lbl">${this._t('lbl.profile', {}, 'Profile')}</div></div>
+      <div class="wd-kv-item"><div class="wd-kv-val" style="font-size:.95em">${_esc(cur.profile_name || this._t('lbl.unlabelled', {}, 'Unlabelled'))}</div><div class="wd-kv-lbl">${this._t('lbl.profile', {}, 'Profile')}</div></div>
       <div class="wd-kv-item"><div class="wd-kv-val" style="font-size:.95em">${_esc(cur.status || '-')}</div><div class="wd-kv-lbl">${this._t('lbl.status', {}, 'Status')}</div></div>
       ${healthCell}
     </div>`;
@@ -5533,21 +5554,21 @@ class HaWashdataPanel extends HTMLElement {
       const ev = tm === 'clock' ? this._offsetToClock(m.trim.end) : Math.round(m.trim.end);
       const itype = tm === 'clock' ? 'time' : 'number';
       const iattr = tm === 'clock' ? 'step="1"' : `min="0" max="${Math.ceil(full)}" step="1"`;
-      const ulbl = tm === 'clock' ? '' : ' (s)';
+      const ulbl = tm === 'clock' ? '' : ' ' + this._t('lbl.unit_s', {}, '(s)');
       controls = `<p class="wd-info" style="margin:4px 0 8px">${this._t('msg.trim_intro', {}, 'Drag the red handles, or enter values. Everything outside the window is removed.')}</p>
         <div class="wd-mode-bar" style="margin-bottom:8px;align-items:center">
-          <span class="wd-info" style="margin:0">Input:</span>
+          <span class="wd-info" style="margin:0">${this._t('lbl.input', {}, 'Input:')}</span>
           <button class="wd-btn wd-btn-sm ${tm === 's' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="trim-mode-s">${this._t('lbl.seconds_from_start', {}, 'Seconds from start')}</button>
           <button class="wd-btn wd-btn-sm ${tm === 'clock' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="trim-mode-clock">${this._t('lbl.clock_time', {}, 'Clock time')}</button>
         </div>
         <div class="wd-form-grid">
-          <div class="wd-field"><label>Start${ulbl}</label><input type="${itype}" id="wd-trim-start" ${iattr} value="${sv}"></div>
-          <div class="wd-field"><label>End${ulbl}</label><input type="${itype}" id="wd-trim-end" ${iattr} value="${ev}"></div>
+          <div class="wd-field"><label>${this._t('lbl.start', {}, 'Start')}${ulbl}</label><input type="${itype}" id="wd-trim-start" ${iattr} value="${sv}"></div>
+          <div class="wd-field"><label>${this._t('lbl.end', {}, 'End')}${ulbl}</label><input type="${itype}" id="wd-trim-end" ${iattr} value="${ev}"></div>
         </div>
         <div class="wd-modal-actions">
           <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
           <button class="wd-btn wd-btn-secondary" data-maction="cyc-reset-trim">${this._t('btn.reset', {}, 'Reset')}</button>
-          <button class="wd-btn wd-btn-primary" data-maction="cyc-apply-trim" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Trimming…' : this._t('btn.apply_trim', {}, 'Apply Trim')}</button>
+          <button class="wd-btn wd-btn-primary" data-maction="cyc-apply-trim" ${busy ? 'disabled' : ''}>${busy ? ('<span class="wd-spin"></span> ' + this._t('status.trimming', {}, 'Trimming…')) : this._t('btn.apply_trim', {}, 'Apply Trim')}</button>
         </div>`;
     } else if (m.mode === 'split') {
       const busy = this._busy.has('cyc-split-apply');
@@ -5557,7 +5578,7 @@ class HaWashdataPanel extends HTMLElement {
         const e = bounds[i + 1];
         return `<div class="wd-seg-row"><span class="wd-swatch" style="background:${_PALETTE[i % _PALETTE.length]}"></span>
           <span style="min-width:120px">${_fmtDuration(s)} – ${_fmtDuration(e)}</span>
-          <select data-segidx="${i}"><option value="">(unlabelled)</option>${this._profileOptions(m.split.profiles[i])}</select></div>`;
+          <select data-segidx="${i}"><option value="">${this._t('lbl.unlabelled_paren', {}, '(unlabelled)')}</option>${this._profileOptions(m.split.profiles[i])}</select></div>`;
       }).join('');
       controls = `<p class="wd-info" style="margin:4px 0 8px">${this._t('msg.split_intro', {}, 'Click the graph to add or remove a split point, or auto-detect by idle gaps. Each resulting segment can get its own profile.')}</p>
         <div class="wd-mode-bar">
@@ -5568,7 +5589,7 @@ class HaWashdataPanel extends HTMLElement {
         <div style="margin:10px 0">${offs.length ? segRows : `<p class="wd-info">${this._t('msg.no_split_points', {}, 'No split points yet.')}</p>`}</div>
         <div class="wd-modal-actions">
           <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
-          <button class="wd-btn wd-btn-primary" data-maction="cyc-apply-split" ${busy || !offs.length ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Splitting…' : this._t('btn.apply_split', {}, 'Apply Split')}</button>
+          <button class="wd-btn wd-btn-primary" data-maction="cyc-apply-split" ${busy || !offs.length ? 'disabled' : ''}>${busy ? ('<span class="wd-spin"></span> ' + this._t('status.splitting', {}, 'Splitting…')) : this._t('btn.apply_split', {}, 'Apply Split')}</button>
         </div>`;
     } else if (m.mode === 'review') {
       const rv = (ml && ml.ml_review) || {};
@@ -5584,12 +5605,12 @@ class HaWashdataPanel extends HTMLElement {
         ['sensor_gap', this._t('tag.sensor_gap', {}, 'Sensor gap')],
       ];
       const tagChecks = TAGS.map(([v, l]) => `<label class="wd-rev-tag"><input type="checkbox" class="wd-cyc-rev-tag" value="${v}" ${(rv.tags || []).includes(v) ? 'checked' : ''}> ${l}</label>`).join('');
-      const reviewedBadge = rv.reviewed_at ? `<span style="font-size:.75em;color:var(--secondary-text-color)">reviewed ${new Date(rv.reviewed_at).toLocaleDateString()}</span>` : '';
+      const reviewedBadge = rv.reviewed_at ? `<span style="font-size:.75em;color:var(--secondary-text-color)">${this._t('lbl.reviewed_on', {date: new Date(rv.reviewed_at).toLocaleDateString()}, `reviewed ${new Date(rv.reviewed_at).toLocaleDateString()}`)}</span>` : '';
       // If this cycle has a pending detection feedback (the learning loop is
       // unsure of the program it matched), surface Confirm/Correct/Ignore right
       // here. This folds the old Feedbacks subtab into the unified review flow.
       const pendingFb = (this._feedbacks || []).find(f => f.cycle_id === m.cycleId);
-      const fbProf = pendingFb ? (pendingFb.detected_profile || pendingFb.profile_name || 'Unknown') : '';
+      const fbProf = pendingFb ? (pendingFb.detected_profile || pendingFb.profile_name || this._t('lbl.unknown', {}, 'Unknown')) : '';
       const fbBanner = pendingFb ? `
         <div class="wd-card" style="background:var(--secondary-background-color);border-left:3px solid var(--warning-color,#ff9800);margin:0 0 12px;padding:12px">
           <div style="font-weight:600;margin-bottom:4px">⚠ ${this._t('msg.pending_feedback', {}, 'Pending detection feedback')}</div>
@@ -5611,10 +5632,10 @@ class HaWashdataPanel extends HTMLElement {
           ${this._t('msg.review_confirm_help', {}, 'Confirm whether this cycle was detected correctly. Your reviews train the model on your machine - the more cycles you confirm, the better matching and health scoring get. A quick Good/Bad is enough.')}
         </p>
         <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin:6px 0">
-          <label style="display:inline-flex;align-items:center;gap:6px">Profile${tProfile}
-            <select id="wd-cyc-rev-label" class="wd-filter-select"><option value="">(unlabelled)</option>${this._profileOptions(cur.profile_name)}</select>
+          <label style="display:inline-flex;align-items:center;gap:6px">${this._t('lbl.profile', {}, 'Profile')}${tProfile}
+            <select id="wd-cyc-rev-label" class="wd-filter-select"><option value="">${this._t('lbl.unlabelled_paren', {}, '(unlabelled)')}</option>${this._profileOptions(cur.profile_name)}</select>
           </label>
-          <label style="display:inline-flex;align-items:center;gap:6px">Quality${tQuality}
+          <label style="display:inline-flex;align-items:center;gap:6px">${this._t('lbl.quality', {}, 'Quality')}${tQuality}
             <select id="wd-cyc-rev-quality" class="wd-filter-select">${qOpt('', '-')}${qOpt('good', this._t('quality.good', {}, 'Good'))}${qOpt('bad', this._t('quality.bad', {}, 'Bad'))}${qOpt('unusable', this._t('quality.unusable', {}, 'Unusable'))}</select>
           </label>
           <label style="display:inline-flex;align-items:center;gap:6px"><input type="checkbox" id="wd-cyc-rev-golden" ${rv.golden ? 'checked' : ''}> ${this._t('badge.golden_cycle', {}, 'Recorded reference cycle')}${tRecorded}</label>
@@ -5626,13 +5647,13 @@ class HaWashdataPanel extends HTMLElement {
           const sw = on ? `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${_PALETTE[Math.max(0, this._profiles.findIndex(x => x.name === p.name)) % _PALETTE.length]};margin:0 2px"></span>` : '';
           return `<label class="wd-rev-tag"><input type="checkbox" class="wd-cyc-overlay" value="${_esc(p.name)}" ${on ? 'checked' : ''}> ${sw}${_esc(p.name)}</label>`;
         }).join('') || `<span class="wd-info">${this._t('msg.no_profiles_compare', {}, 'No profiles to compare.')}</span>`}</div>
-        <div class="wd-rev-sub">Tags${tTags}</div>
+        <div class="wd-rev-sub">${this._t('lbl.tags', {}, 'Tags')}${tTags}</div>
         <div class="wd-rev-tags">${tagChecks}</div>
-        <div class="wd-rev-sub">Notes${tNotes}</div>
+        <div class="wd-rev-sub">${this._t('lbl.notes', {}, 'Notes')}${tNotes}</div>
         <textarea id="wd-cyc-rev-notes" class="wd-rev-notes" rows="3" placeholder="${this._t('msg.review_notes_placeholder', {}, 'Notes (optional)')}">${_esc(rv.notes || '')}</textarea>
         <div class="wd-modal-actions" style="margin-top:16px">
           <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
-          <button class="wd-btn wd-btn-primary" data-maction="cyc-review-save" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Saving…' : this._t('btn.save_review', {}, 'Save Review')}</button>
+          <button class="wd-btn wd-btn-primary" data-maction="cyc-review-save" ${busy ? 'disabled' : ''}>${busy ? ('<span class="wd-spin"></span> ' + this._t('status.saving', {}, 'Saving…')) : this._t('btn.save_review', {}, 'Save Review')}</button>
         </div>`;
     }
 
@@ -5643,7 +5664,7 @@ class HaWashdataPanel extends HTMLElement {
     if (arts.length) {
       const items = arts.map(a => {
         const detail = a.detail_key ? this._t(a.detail_key, a.detail_params || {}, a.detail || '') : (a.detail || '');
-        return `<li><b>${_esc(_artifactLabel(a.type, (k, v, f) => this._t(k, v, f)))}</b> at ${_fmtClock(a.start_s)}–${_fmtClock(a.end_s)} — ${_esc(detail)}</li>`;
+        return `<li><b>${_esc(_artifactLabel(a.type, (k, v, f) => this._t(k, v, f)))}</b> ${this._t('lbl.at', {}, 'at')} ${_fmtClock(a.start_s)}–${_fmtClock(a.end_s)} — ${_esc(detail)}</li>`;
       }).join('');
       artifactBox = `<div class="wd-card" style="margin:10px 0 0;padding:10px 12px;border-left:3px solid var(--warning-color,#ff9800)">
         <div style="font-weight:600;font-size:.9em">⚠ ${this._t('msg.artifact_header', {n: arts.length}, `${arts.length} anomal${arts.length > 1 ? 'ies' : 'y'} detected during this cycle`)}</div>
@@ -5658,9 +5679,9 @@ class HaWashdataPanel extends HTMLElement {
       const items = gaps.map(g => {
         const mins = Math.round((g.gap_seconds || 0) / 60);
         const dur = mins >= 1 ? `${mins}m` : `${Math.round(g.gap_seconds || 0)}s`;
-        const conf = g.match_confidence != null ? ` · ${Math.round(g.match_confidence * 100)}% match confidence` : '';
-        const prof = g.profile ? ` (${g.profile})` : '';
-        return `<li>${this._t('msg.restart_gap_item', {dur}, `${dur} gap`)}: HA restarted${prof}${conf}</li>`;
+        const conf = g.match_confidence != null ? ` · ${this._t('lbl.pct_match_confidence', {pct: Math.round(g.match_confidence * 100)}, `${Math.round(g.match_confidence * 100)}% match confidence`)}` : '';
+        const prof = g.profile ? ` (${_esc(g.profile)})` : '';
+        return `<li>${this._t('msg.restart_gap_item', {dur}, `${dur} gap`)}: ${this._t('lbl.ha_restarted', {}, 'HA restarted')}${prof}${conf}</li>`;
       }).join('');
       restartGapBox = `<div class="wd-card" style="margin:10px 0 0;padding:10px 12px;border-left:3px solid var(--info-color,#2196f3)">
         <div style="font-weight:600;font-size:.9em">↻ ${this._t('msg.restart_gap_header', {n: gaps.length}, `${gaps.length} HA restart gap${gaps.length > 1 ? 's' : ''} during this cycle`)}</div>
@@ -5668,7 +5689,7 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-info" style="margin:6px 0 0;font-size:.75em">${this._t('msg.restart_gap_footer', {}, 'Highlighted on the graph. Power data is missing for these intervals — matching used only real readings.')}</div>
       </div>`;
     }
-    return `<h2>Cycle · ${_esc(_fmtDate(cur.start_time))}</h2>
+    return `<h2>${this._t('lbl.cycle', {}, 'Cycle')} · ${_esc(_fmtDate(cur.start_time))}</h2>
       ${meta}${modeBar}
       <div class="wd-canvas-wrap"><canvas id="wd-cyc-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_cycle_chart', {}, 'Cycle power trace'))}"></canvas></div>
       ${artifactBox}
@@ -5686,7 +5707,7 @@ class HaWashdataPanel extends HTMLElement {
     let body = '';
 
     if (!m.loaded) {
-      body = `<div class="wd-empty" style="padding:32px"><div class="wd-icon">⏳</div>Loading…</div>`;
+      body = `<div class="wd-empty" style="padding:32px"><div class="wd-icon">⏳</div>${this._t('msg.loading', {}, 'Loading…')}</div>`;
     } else if (m.tab === 'stats') {
       const st = m.stats || {};
       const env = m.env || {};
@@ -5699,11 +5720,11 @@ class HaWashdataPanel extends HTMLElement {
         const statusColors = { healthy: ['var(--success-color,#4caf50)', 'rgba(76,175,80,.12)'], fair: ['var(--warning-color,#ff9800)', 'rgba(255,152,0,.12)'], poor: ['var(--error-color,#f44336)', 'rgba(244,67,54,.12)'] };
         const [col, bg] = statusColors[ph.health_status] || statusColors.fair;
         const pct = Math.round((ph.health_score || 0) * 100);
-        const cvPct = ph.duration_cv != null ? ` · duration CV ${Math.round(ph.duration_cv * 100)}%` : '';
-        const confPct = ph.confidence_mean != null ? ` · avg confidence ${Math.round(ph.confidence_mean * 100)}%` : '';
+        const cvPct = ph.duration_cv != null ? ` · ${this._t('stat.duration_cv', {pct: Math.round(ph.duration_cv * 100)}, `duration CV ${Math.round(ph.duration_cv * 100)}%`)}` : '';
+        const confPct = ph.confidence_mean != null ? ` · ${this._t('stat.avg_confidence', {pct: Math.round(ph.confidence_mean * 100)}, `avg confidence ${Math.round(ph.confidence_mean * 100)}%`)}` : '';
         return `<div style="margin:8px 0 4px;padding:8px 12px;border-radius:6px;background:${bg};border:1px solid color-mix(in srgb, ${col} 13%, transparent);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <span style="font-weight:600;color:${col}">${ph.health_status === 'poor' ? this._t('health.poor', {}, '⚠ Poor match fit') : ph.health_status === 'fair' ? this._t('health.fair', {}, 'Fair match fit') : this._t('health.good', {}, '✓ Good match fit')}</span>
-          <span style="font-size:.85em;opacity:.8">score ${pct}%${cvPct}${confPct}</span>
+          <span style="font-size:.85em;opacity:.8">${this._t('stat.score', {pct: pct}, `score ${pct}%`)}${cvPct}${confPct}</span>
           ${ph.health_status === 'poor' ? `<span style="font-size:.82em;opacity:.75;flex-basis:100%">${this._t('msg.profile_poor_health_detail', {}, 'Cycles assigned to this profile have inconsistent shapes or low confidence. Consider rebuilding the envelope or reviewing labelled cycles.')}</span>` : ''}
         </div>`;
       })() : '';
@@ -5726,30 +5747,30 @@ class HaWashdataPanel extends HTMLElement {
       body = `<div class="wd-sg-row">
           <div class="wd-sg">
             <div class="wd-sg-h">${this._t('lbl.duration', {}, 'Duration')}</div>
-            <div class="wd-sg-main">${mins(st.avg_duration)}<span>avg</span></div>
-            <div class="wd-sg-sub">min ${mins(st.min_duration)} · max ${mins(st.max_duration)}${env.duration_std_dev != null ? ` · consistency ±${Math.round(env.duration_std_dev / 60)}m` : ''}</div>
+            <div class="wd-sg-main">${mins(st.avg_duration)}<span>${this._t('stat.avg', {}, 'avg')}</span></div>
+            <div class="wd-sg-sub">${this._t('stat.min', {v: mins(st.min_duration)}, `min ${mins(st.min_duration)}`)} · ${this._t('stat.max', {v: mins(st.max_duration)}, `max ${mins(st.max_duration)}`)}${env.duration_std_dev != null ? ` · ${this._t('stat.consistency', {v: `${Math.round(env.duration_std_dev / 60)}m`}, `consistency ±${Math.round(env.duration_std_dev / 60)}m`)}` : ''}</div>
           </div>
           <div class="wd-sg">
             <div class="wd-sg-h">${this._t('lbl.energy', {}, 'Energy')}</div>
-            <div class="wd-sg-main">${_fmtEnergy(st.avg_energy)}<span>avg</span></div>
-            <div class="wd-sg-sub">total ${_fmtEnergy(total)}</div>
+            <div class="wd-sg-main">${_fmtEnergy(st.avg_energy)}<span>${this._t('stat.avg', {}, 'avg')}</span></div>
+            <div class="wd-sg-sub">${this._t('stat.total', {v: _fmtEnergy(total)}, `total ${_fmtEnergy(total)}`)}</div>
           </div>
           ${st.avg_cost != null ? `<div class="wd-sg">
             <div class="wd-sg-h">${this._t('lbl.avg_cost', {}, 'Avg cost')}</div>
-            <div class="wd-sg-main">${st.avg_cost.toFixed(2)}${cur ? ' ' + cur : ''}<span>avg</span></div>
-            <div class="wd-sg-sub">total ${st.total_cost != null ? st.total_cost.toFixed(2) + (cur ? ' ' + cur : '') : '-'}</div>
+            <div class="wd-sg-main">${st.avg_cost.toFixed(2)}${cur ? ' ' + cur : ''}<span>${this._t('stat.avg', {}, 'avg')}</span></div>
+            <div class="wd-sg-sub">${this._t('stat.total', {v: st.total_cost != null ? st.total_cost.toFixed(2) + (cur ? ' ' + cur : '') : '-'}, `total ${st.total_cost != null ? st.total_cost.toFixed(2) + (cur ? ' ' + cur : '') : '-'}`)}</div>
           </div>` : ''}
           <div class="wd-sg">
             <div class="wd-sg-h">${this._t('lbl.activity', {}, 'Activity')}</div>
-            <div class="wd-sg-main">${st.cycle_count || 0}<span>cycles</span></div>
-            <div class="wd-sg-sub">last run ${st.last_run ? _fmtDate(st.last_run) : '-'}</div>
+            <div class="wd-sg-main">${st.cycle_count || 0}<span>${this._t('lbl.cycles_lc', {}, 'cycles')}</span></div>
+            <div class="wd-sg-sub">${this._t('stat.last_run', {v: st.last_run ? _fmtDate(st.last_run) : '-'}, `last run ${st.last_run ? _fmtDate(st.last_run) : '-'}`)}</div>
           </div>
         </div>
         ${healthRow}
         ${trendRow}
         ${(ph && ph.shape_drift) ? (() => {
           const corr = ph.shape_drift_correlation != null ? ` (r=${Number(ph.shape_drift_correlation).toFixed(2)})` : '';
-          return `<div style="margin-top:8px;padding:8px 10px;background:var(--warning-color,#ff9800)18;border-radius:6px;border-left:3px solid var(--warning-color,#ff9800)">
+          return `<div style="margin-top:8px;padding:8px 10px;background:color-mix(in srgb, var(--warning-color,#ff9800) 9%, transparent);border-radius:6px;border-left:3px solid var(--warning-color,#ff9800)">
             <span style="font-weight:600;color:var(--warning-color,#ff9800)">${this._t('msg.shape_drift_advisory', {}, '⚠ Shape drifting')}${_esc(corr)}</span>
             <span style="font-size:.82em;opacity:.75;display:block;margin-top:4px">${this._t('msg.shape_drift_detail', {}, 'The power pattern for this profile has shifted over time — possible appliance wear or maintenance needed (e.g. descaling, filter cleaning).')}</span>
           </div>`;
@@ -5760,9 +5781,9 @@ class HaWashdataPanel extends HTMLElement {
       const rows = (m.phases || []).map((ph, i) => {
         const opts = cat.map(name => `<option value="${_esc(name)}" ${ph.name === name ? 'selected' : ''}>${_esc(name)}</option>`).join('');
         return `<div class="wd-phase-row"><span class="wd-swatch" style="background:${_PALETTE[i % _PALETTE.length]}"></span>
-          <select data-phidx="${i}" data-phfield="name" style="min-width:130px"><option value="">(name)</option>${opts}</select>
+          <select data-phidx="${i}" data-phfield="name" style="min-width:130px"><option value="">${this._t('lbl.name_placeholder', {}, '(name)')}</option>${opts}</select>
           <input type="number" data-phidx="${i}" data-phfield="start" value="${(ph.start / 60).toFixed(1)}" step="0.5" min="0" style="width:80px"> –
-          <input type="number" data-phidx="${i}" data-phfield="end" value="${(ph.end / 60).toFixed(1)}" step="0.5" min="0" style="width:80px"><span class="wd-field-hint" style="margin:0">min</span>
+          <input type="number" data-phidx="${i}" data-phfield="end" value="${(ph.end / 60).toFixed(1)}" step="0.5" min="0" style="width:80px"><span class="wd-field-hint" style="margin:0">${this._t('lbl.timer_min', {}, 'min')}</span>
           <button class="wd-btn wd-btn-danger wd-btn-sm" data-maction="pp-phase-rm" data-idx="${i}">✕</button></div>`;
       }).join('');
       const busy = this._busy.has('pp-phase-save');
@@ -5771,7 +5792,7 @@ class HaWashdataPanel extends HTMLElement {
         <div style="margin:10px 0">${rows || `<p class="wd-info">${this._t('msg.no_phases_assigned', {}, 'No phases assigned.')}</p>`}</div>
         ${canEdit ? `<div class="wd-mode-bar">
           <button class="wd-btn wd-btn-sm wd-btn-secondary" data-maction="pp-phase-add">${this._t('btn.add_phase', {}, '+ Add phase')}</button>
-          <button class="wd-btn wd-btn-sm wd-btn-primary" data-maction="pp-phase-save" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Saving…' : this._t('btn.save_phases', {}, 'Save phases')}</button>
+          <button class="wd-btn wd-btn-sm wd-btn-primary" data-maction="pp-phase-save" ${busy ? 'disabled' : ''}>${busy ? ('<span class="wd-spin"></span> ' + this._t('status.saving', {}, 'Saving…')) : this._t('btn.save_phases', {}, 'Save phases')}</button>
         </div>` : ''}`;
     } else if (m.tab === 'cleanup') {
       const allCyc = (m.cleanup && m.cleanup.cycles) || [];
@@ -5811,7 +5832,7 @@ class HaWashdataPanel extends HTMLElement {
       body = `<p class="wd-info" style="margin-bottom:10px">${this._t('msg.cleanup_intro', {}, 'Every labelled cycle overlaid. Tick outliers and delete to clean up the profile.')}</p>
         ${allCyc.length ? `<div class="wd-canvas-wrap"><canvas id="wd-spag-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_spaghetti_chart', {}, 'Overlaid cycle power traces'))}"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_cycles_profile', {}, 'No cycles for this profile.')}</p>`}
         ${allCyc.length ? `<div class="wd-table-wrap" style="max-height:420px;overflow:auto;margin:10px 0"><table class="wd-table">${thead}<tbody>${rows}</tbody></table></div>` : ''}
-        ${canEdit ? `<div class="wd-modal-actions"><button class="wd-btn wd-btn-danger" data-maction="pp-cleanup-del" ${busy || sel.size === 0 ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> Deleting…' : `Delete selected (${sel.size})`}</button></div>` : ''}`;
+        ${canEdit ? `<div class="wd-modal-actions"><button class="wd-btn wd-btn-danger" data-maction="pp-cleanup-del" ${busy || sel.size === 0 ? 'disabled' : ''}>${busy ? ('<span class="wd-spin"></span> ' + this._t('status.deleting', {}, 'Deleting…')) : this._t('btn.delete_selected', {n: sel.size}, `Delete selected (${sel.size})`)}</button></div>` : ''}`;
     } else if (m.tab === 'danger') {
       const busyR = this._busy.has('pp-rebuild');
       const curDurMin = (m.stats && m.stats.avg_duration) ? Math.round(m.stats.avg_duration / 60) : 0;
@@ -5820,7 +5841,7 @@ class HaWashdataPanel extends HTMLElement {
           <div class="wd-field-hint">${this._t('msg.manual_duration_hint', {}, "The profile's average/expected cycle length, used for time-remaining estimates. Edit to set it; leaving it unchanged keeps the current value.")}</div></div>
         <div class="wd-card-actions">
           <button class="wd-btn wd-btn-primary" data-maction="pp-rename">${this._t('btn.save', {}, 'Save')}</button>
-          <button class="wd-btn wd-btn-secondary" data-maction="pp-rebuild" ${busyR ? 'disabled' : ''}>${busyR ? '<span class="wd-spin"></span> Rebuilding…' : this._t('btn.rebuild_envelope', {}, 'Rebuild Envelope')}</button>
+          <button class="wd-btn wd-btn-secondary" data-maction="pp-rebuild" ${busyR ? 'disabled' : ''}>${busyR ? ('<span class="wd-spin"></span> ' + this._t('status.rebuilding', {}, 'Rebuilding…')) : this._t('btn.rebuild_envelope', {}, 'Rebuild Envelope')}</button>
           <button class="wd-btn wd-btn-danger" data-maction="pp-delete">${this._t('btn.delete_profile', {}, 'Delete Profile')}</button>
         </div>`;
     }
@@ -5905,9 +5926,9 @@ class HaWashdataPanel extends HTMLElement {
       const col = _PALETTE[i % _PALETTE.length];
       const on = !hidden.has(cid);
       const loaded = !!(m.cycles && m.cycles[cid]);
-      const label = `${_fmtDate(c.start_time) || String(cid).slice(0, 8)} · ${Math.round((c.duration || 0) / 60)}m · ${_esc(c.profile_name || 'Unlabelled')}`;
+      const label = `${_fmtDate(c.start_time) || String(cid).slice(0, 8)} · ${Math.round((c.duration || 0) / 60)}m · ${_esc(c.profile_name || this._t('lbl.unlabelled', {}, 'Unlabelled'))}`;
       return `<label class="wd-rev-tag"><input type="checkbox" class="wd-compare-cyc" value="${_esc(cid)}" ${on ? 'checked' : ''} ${loaded ? '' : 'disabled'}>` +
-        `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${col};margin:0 2px"></span>${label}${loaded ? '' : ' <span class="wd-info">(loading…)</span>'}</label>`;
+        `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${col};margin:0 2px"></span>${label}${loaded ? '' : ` <span class="wd-info">${this._t('lbl.loading_paren', {}, '(loading…)')}</span>`}</label>`;
     }).join('');
     const profRows = (this._profiles || []).map(p => {
       const on = (m.overlays || []).includes(p.name);
@@ -5920,7 +5941,7 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-canvas-wrap"><canvas id="wd-compare-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_compare_chart', {}, 'Cycle comparison chart'))}"></canvas></div>
       <div class="wd-rev-sub" style="margin-top:10px">${this._t('msg.compare_selected_cycles', {}, 'Selected cycles (solid) — show / hide')}</div>
       <div class="wd-rev-tags">${cycRows}</div>
-      <div class="wd-rev-sub">${this._t('msg.compare_overlay_profiles', {}, 'Overlay profiles (faint)')}${_tip('Overlay learned profile envelopes to see which program each cycle resembles.')}</div>
+      <div class="wd-rev-sub">${this._t('msg.compare_overlay_profiles', {}, 'Overlay profiles (faint)')}${_tip(this._t('msg.compare_overlay_tip', {}, 'Overlay learned profile envelopes to see which program each cycle resembles.'))}</div>
       <div class="wd-rev-tags">${profRows}</div>
       <div class="wd-modal-actions" style="margin-top:16px">
         <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
@@ -6772,7 +6793,7 @@ class HaWashdataPanel extends HTMLElement {
       const delBtn = sr.querySelector('[data-maction="pp-cleanup-del"]');
       if (delBtn && !this._busy.has('pp-cleanup-del')) {
         delBtn.disabled = sel.size === 0;
-        delBtn.textContent = `Delete selected (${sel.size})`;
+        delBtn.textContent = this._t('btn.delete_selected', {n: sel.size}, `Delete selected (${sel.size})`);
       }
       this._drawSpaghetti();
     }));
@@ -6920,7 +6941,7 @@ class HaWashdataPanel extends HTMLElement {
 
     } else if (a === 'auto-delete') {
       const autoId = btn.dataset.autoid, autoName = btn.dataset.autoname || 'this automation';
-      this._modal = { type: 'confirm', title: 'Delete Automation', message: `Delete the automation "${autoName}" from Home Assistant? This cannot be undone.`, okLabel: 'Delete',
+      this._modal = { type: 'confirm', title: this._t('modal.delete_automation_title', {}, 'Delete Automation'), message: this._t('modal.delete_automation_msg', {name: autoName}, `Delete the automation "${autoName}" from Home Assistant? This cannot be undone.`), okLabel: this._t('btn.delete', {}, 'Delete'),
         onOk: async () => {
           try {
             await this._hass.callApi('DELETE', 'config/automation/config/' + autoId);
@@ -6934,7 +6955,7 @@ class HaWashdataPanel extends HTMLElement {
       this._convertLegacyActions();
 
     } else if (a === 'auto-remove-legacy') {
-      this._modal = { type: 'confirm', title: 'Remove Legacy Actions', message: 'Remove the legacy custom actions? They will stop firing on cycle events. This cannot be undone from the panel.', okLabel: 'Remove',
+      this._modal = { type: 'confirm', title: this._t('modal.remove_legacy_title', {}, 'Remove Legacy Actions'), message: this._t('modal.remove_legacy_msg', {}, 'Remove the legacy custom actions? They will stop firing on cycle events. This cannot be undone from the panel.'), okLabel: this._t('btn.remove', {}, 'Remove'),
         onOk: async () => {
           try {
             await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: { notify_actions: [] } });
@@ -6999,7 +7020,7 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'rec-process-open') {
       this._fetchProfiles(eid).then(() => { this._modal = { type: 'process-recording' }; this._render(); });
     } else if (a === 'rec-discard') {
-      this._modal = { type: 'confirm', title: 'Discard Recording', message: 'Discard the saved recording? This cannot be undone.', okLabel: 'Discard',
+      this._modal = { type: 'confirm', title: this._t('modal.discard_recording_title', {}, 'Discard Recording'), message: this._t('modal.discard_recording_msg', {}, 'Discard the saved recording? This cannot be undone.'), okLabel: this._t('btn.discard', {}, 'Discard'),
         onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/discard_recording`, entry_id: eid }); this._showToast(this._t('toast.recording_discarded', {}, 'Recording discarded')); await this._fetchRecState(eid); } catch (e) { this._showToast(this._t('toast.discard_failed', {error: e.message || e}, 'Discard failed: ' + (e.message || e)), 'error'); } } };
       this._render();
 
@@ -7010,7 +7031,7 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'fb-correct') {
       this._fetchProfiles(eid).then(() => { this._modal = { type: 'correct-feedback', cycleId: btn.dataset.cid, detectedProfile: btn.dataset.prof }; this._render(); });
     } else if (a === 'fb-dismiss-all') {
-      this._modal = { type: 'confirm', title: 'Dismiss All Feedbacks', message: `Dismiss all ${this._feedbacks.length} pending feedback requests?`, okLabel: 'Dismiss All',
+      this._modal = { type: 'confirm', title: this._t('modal.dismiss_all_title', {}, 'Dismiss All Feedbacks'), message: this._t('modal.dismiss_all_msg', {count: this._feedbacks.length}, `Dismiss all ${this._feedbacks.length} pending feedback requests?`), okLabel: this._t('modal.dismiss_all_ok', {}, 'Dismiss All'),
         onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/dismiss_all_feedbacks`, entry_id: eid }); this._showToast(this._t('toast.feedback_all_dismissed', {}, 'All feedbacks dismissed')); await this._fetchFeedbacks(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } } };
       this._render();
 
@@ -7020,7 +7041,7 @@ class HaWashdataPanel extends HTMLElement {
       this._modal = { type: 'edit-phase', phaseId: btn.dataset.pid, phaseName: btn.dataset.pname, phaseDesc: btn.dataset.pdesc, isDefault: btn.dataset.pisdefault === 'true' }; this._render();
     } else if (a === 'del-phase') {
       const pname = btn.dataset.pname, pid = btn.dataset.pid;
-      this._modal = { type: 'confirm', title: 'Delete Phase', message: `Delete phase "${pname}"?`, okLabel: 'Delete',
+      this._modal = { type: 'confirm', title: this._t('modal.delete_phase_title', {}, 'Delete Phase'), message: this._t('modal.delete_phase_msg', {name: pname}, `Delete phase "${pname}"?`), okLabel: this._t('btn.delete', {}, 'Delete'),
         onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_phase`, entry_id: eid, phase_id: pid }); this._showToast(this._t('toast.phase_deleted', {name: pname}, `Phase "${pname}" deleted`)); await this._fetchPhases(eid); } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); } } };
       this._render();
 
@@ -7084,11 +7105,11 @@ class HaWashdataPanel extends HTMLElement {
         }) };
       this._render();
     } else if (a === 'clear-debug') {
-      this._modal = { type: 'confirm', title: 'Clear Debug Data', message: 'Delete all stored debug traces?', okLabel: 'Clear',
+      this._modal = { type: 'confirm', title: this._t('modal.clear_debug_title', {}, 'Clear Debug Data'), message: this._t('modal.clear_debug_msg', {}, 'Delete all stored debug traces?'), okLabel: this._t('status.clear', {}, 'Clear'),
         onOk: () => this._busyRun('clear-debug', async () => { try { const r = await this._ws({ type: `${_DOMAIN}/clear_debug_data`, entry_id: eid }); this._showToast(this._t('toast.debug_cleared', {count: r.count || 0}, `Cleared ${r.count || 0} debug traces`)); await this._fetchToolsData(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
       this._render();
     } else if (a === 'wipe-history') {
-      this._modal = { type: 'confirm', title: 'Wipe All Data', message: '⚠️ This permanently deletes ALL cycles and profiles. This cannot be undone.', okLabel: 'Wipe Everything',
+      this._modal = { type: 'confirm', title: this._t('modal.wipe_all_title', {}, 'Wipe All Data'), message: this._t('modal.wipe_all_msg', {}, '⚠️ This permanently deletes ALL cycles and profiles. This cannot be undone.'), okLabel: this._t('modal.wipe_all_ok', {}, 'Wipe Everything'),
         onOk: () => this._busyRun('wipe', async () => { try { await this._ws({ type: `${_DOMAIN}/wipe_history`, entry_id: eid }); this._showToast(this._t('toast.all_wiped', {}, 'All data wiped')); this._cycles = []; this._profiles = []; await this._fetchToolsData(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
       this._render();
 
@@ -7246,20 +7267,28 @@ class HaWashdataPanel extends HTMLElement {
 
     } else if (a === 'pause-cycle') {
       this._ws({ type: `${_DOMAIN}/pause_cycle`, entry_id: eid })
-        .then(() => { this._showToast(this._t('toast.cycle_paused', {}, 'Cycle paused')); return this._fetchAll(); })
+        .then(r => {
+          if (r && r.ok === false) { this._showToast(this._t('toast.pause_no_cycle', {}, 'No active cycle to pause'), 'error'); return; }
+          this._showToast(this._t('toast.cycle_paused', {}, 'Cycle paused'));
+          return this._fetchAll();
+        })
         .catch(e => this._showToast(this._t('toast.pause_failed', {error: e.message || e}, 'Pause failed: ' + (e.message || e)), 'error'));
 
     } else if (a === 'resume-cycle') {
       this._ws({ type: `${_DOMAIN}/resume_cycle`, entry_id: eid })
-        .then(() => { this._showToast(this._t('toast.cycle_resumed', {}, 'Cycle resumed')); return this._fetchAll(); })
+        .then(r => {
+          if (r && r.ok === false) { this._showToast(this._t('toast.resume_no_cycle', {}, 'No paused cycle to resume'), 'error'); return; }
+          this._showToast(this._t('toast.cycle_resumed', {}, 'Cycle resumed'));
+          return this._fetchAll();
+        })
         .catch(e => this._showToast(this._t('msg.toast_resume_failed', {error: e.message || e}, 'Resume failed: ' + (e.message || e)), 'error'));
 
     } else if (a === 'terminate-cycle') {
       this._modal = {
         type: 'confirm',
-        title: 'Force Stop Cycle',
-        message: 'Force-stop the active cycle now? The cycle will be saved as interrupted.',
-        okLabel: 'Force Stop',
+        title: this._t('modal.force_stop_title', {}, 'Force Stop Cycle'),
+        message: this._t('modal.force_stop_msg', {}, 'Force-stop the active cycle now? The cycle will be saved as interrupted.'),
+        okLabel: this._t('btn.force_stop', {}, 'Force Stop'),
         onOk: async () => {
           try {
             await this._ws({ type: `${_DOMAIN}/terminate_cycle`, entry_id: eid });

@@ -42,9 +42,9 @@ from .const import (
 # branch).  They MUST release the cycle at the same instant - sanity-check
 # that the constants module loaded a sensible value rather than allowing the
 # paths to silently drift if one was changed and the other forgotten.
-assert DISHWASHER_END_SPIKE_WAIT_SECONDS > 0, (
-    "DISHWASHER_END_SPIKE_WAIT_SECONDS must be positive"
-)
+if DISHWASHER_END_SPIKE_WAIT_SECONDS <= 0:
+    # Runtime check (not assert: asserts are stripped under python -O).
+    raise ValueError("DISHWASHER_END_SPIKE_WAIT_SECONDS must be positive")
 
 # Opt-in ML end-detection guard (Stage 6). When the manager injects an
 # end-confidence provider (only when the user enabled ML models for the device),
@@ -57,9 +57,8 @@ assert DISHWASHER_END_SPIKE_WAIT_SECONDS > 0, (
 # self-contained (it is detector-internal policy, not user configuration).
 ML_END_GUARD_MIN_CONFIDENCE = 0.5        # P(true end) below this -> treat as a likely pause
 ML_END_GUARD_MAX_DEFER_SECONDS = 1800.0  # cap the extra wait the guard may add (30 min)
-assert 0 < DISHWASHER_END_SPIKE_MIN_PROGRESS < 1, (
-    "DISHWASHER_END_SPIKE_MIN_PROGRESS must be a fraction in (0, 1)"
-)
+if not 0 < DISHWASHER_END_SPIKE_MIN_PROGRESS < 1:
+    raise ValueError("DISHWASHER_END_SPIKE_MIN_PROGRESS must be a fraction in (0, 1)")
 from .signal_processing import integrate_wh
 
 _LOGGER = logging.getLogger(__name__)

@@ -3773,8 +3773,8 @@ async def ws_pause_cycle(
     if manager is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
-    await manager.async_pause_cycle()
-    _send_result(connection, msg["id"], "pause_cycle", {"ok": True})
+    ok = await manager.async_pause_cycle()
+    _send_result(connection, msg["id"], "pause_cycle", {"ok": bool(ok)})
 
 
 @websocket_api.websocket_command(
@@ -3792,8 +3792,8 @@ async def ws_resume_cycle(
     if manager is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
-    await manager.async_resume_cycle()
-    _send_result(connection, msg["id"], "resume_cycle", {"ok": True})
+    ok = await manager.async_resume_cycle()
+    _send_result(connection, msg["id"], "resume_cycle", {"ok": bool(ok)})
 
 
 @websocket_api.websocket_command(

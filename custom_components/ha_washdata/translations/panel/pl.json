@@ -21,7 +21,9 @@
     "steady": "→ stały",
     "underrun": "Zakończono szybciej niż zwykle",
     "using_defaults": "Używanie dostarczonych ustawień domyślnych",
-    "using_tuned": "Używanie dostrojonych ciężarków"
+    "using_tuned": "Używanie dostrojonych ciężarków",
+    "overrun_ratio": "({x}x oczekiwanego)",
+    "underrun_ratio": "({pct}% oczekiwanego)"
   },
   "btn": {
     "add_device": "+ Dodaj urządzenie",
@@ -142,7 +144,9 @@
     "trim_split": "Przytnij / Podziel",
     "undo": "Cofnij",
     "use": "Używać",
-    "wipe_all": "Wyczyść wszystkie dane"
+    "wipe_all": "Wyczyść wszystkie dane",
+    "delete_selected": "Usuń zaznaczone ({n})",
+    "group_suggest": "Grupa {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Testuj na historii",
     "toggle_sidebar": "Przełącz pasek boczny Asystenta Home",
     "tools_and_data": "Narzędzia i dane",
-    "wipe_history": "Wyczyść historię"
+    "wipe_history": "Wyczyść historię",
+    "recommendations": "Zalecenia ({n})"
   },
   "health": {
     "fair": "Akceptowalna jakość profilu",
@@ -439,7 +444,32 @@
     "ungrouped": "Rozgrupowane",
     "unlabelled": "Nieoznakowane",
     "unlabelled_paren": "(bez etykiety)",
-    "warp_path": "Ścieżka dopasowania"
+    "warp_path": "Ścieżka dopasowania",
+    "input": "Wejście:",
+    "start": "Początek",
+    "end": "Koniec",
+    "unit_s": "(s)",
+    "reviewed_on": "sprawdzono {date}",
+    "unknown": "Nieznany",
+    "quality": "Jakość",
+    "tags": "Etykiety",
+    "at": "o",
+    "pct_match_confidence": "{pct}% pewności dopasowania",
+    "ha_restarted": "HA uruchomiono ponownie",
+    "from_start": "Od początku",
+    "to_end": "Do końca",
+    "click_to_select": "kliknij, aby wybrać",
+    "envelope": "Obwiednia",
+    "zoom_hint": "przewiń, aby przybliżyć · dwuklik, aby zresetować",
+    "loading_paren": "(wczytywanie…)",
+    "time_remaining": "~{v} pozostało",
+    "no_duration": "brak czasu trwania",
+    "duration_avg": "~{v}m śr.",
+    "name_placeholder": "(nazwa)",
+    "n_shown": ", pokazano {n}",
+    "cycles_title": "Cykle ({n})",
+    "pg_detecting": "Wykrywanie",
+    "pg_best_marker": "Najlepszy: {v}"
   },
   "log": {
     "all_levels": "Wszystkie poziomy"
@@ -452,7 +482,11 @@
     "fit_strong": "Mocny",
     "fit_weak": "Słaby",
     "fit_word": "dopasowanie",
-    "personalized": "● Spersonalizowane dla tego urządzenia"
+    "personalized": "● Spersonalizowane dla tego urządzenia",
+    "better_than_baseline": "{pct}% lepiej niż szacunek bazowy ({metric})",
+    "trend_improving_tip": "Dopasowanie tego modelu poprawiło się w ostatnich ponownych sprawdzeniach.",
+    "trend_declining_tip": "Dopasowanie tego modelu pogorszyło się w ostatnich ponownych sprawdzeniach, przejrzenie większej liczby cykli może pomóc mu ponownie się nauczyć.",
+    "trend_steady_tip": "Dopasowanie tego modelu pozostało mniej więcej stabilne w ostatnich ponownych sprawdzeniach."
   },
   "modal": {
     "auto_label": "Cykle automatycznego etykietowania",
@@ -472,7 +506,25 @@
     "process_recording": "Nagrywanie procesu",
     "delete_maintenance_msg": "Usunąć ten wpis konserwacji? Tej operacji nie można cofnąć.",
     "delete_maintenance_title": "Usuń zdarzenie konserwacji",
-    "relabel_cycles": "Zmień etykietę {count} cykli"
+    "relabel_cycles": "Zmień etykietę {count} cykli",
+    "delete_automation_title": "Usuń automatyzację",
+    "delete_automation_msg": "Usunąć automatyzację \"{name}\" z Home Assistant? Tej operacji nie można cofnąć.",
+    "remove_legacy_title": "Usuń starsze akcje",
+    "remove_legacy_msg": "Usunąć starsze niestandardowe akcje? Przestaną się uruchamiać przy zdarzeniach cyklu. Nie można tego cofnąć z panelu.",
+    "discard_recording_title": "Odrzuć nagranie",
+    "discard_recording_msg": "Odrzucić zapisane nagranie? Tej operacji nie można cofnąć.",
+    "dismiss_all_title": "Odrzuć wszystkie prośby o opinię",
+    "dismiss_all_msg": "Odrzucić wszystkie {count} oczekujące prośby o opinię?",
+    "dismiss_all_ok": "Odrzuć wszystkie",
+    "delete_phase_title": "Usuń fazę",
+    "delete_phase_msg": "Usunąć fazę \"{name}\"?",
+    "clear_debug_title": "Wyczyść dane debugowania",
+    "clear_debug_msg": "Usunąć wszystkie zapisane ślady debugowania?",
+    "wipe_all_title": "Wyczyść wszystkie dane",
+    "wipe_all_msg": "⚠️ To trwale usuwa WSZYSTKIE cykle i profile. Tej operacji nie można cofnąć.",
+    "wipe_all_ok": "Wyczyść wszystko",
+    "force_stop_title": "Wymuś zatrzymanie cyklu",
+    "force_stop_msg": "Wymusić teraz zatrzymanie aktywnego cyklu? Cykl zostanie zapisany jako przerwany."
   },
   "msg": {
     "appliance_monitor": "Monitor urządzenia",
@@ -654,7 +706,17 @@
     "updated": "Zaktualizowano",
     "warmup_badge": "Wciąż się uczy ({done}/{needed} cykli)",
     "warmup_detail": "Ten profil potrzebuje {needed} oznaczonych cykli, zanim rozpocznie się automatyczne dopasowywanie. Każdy potwierdzony cykl pomaga mu się uczyć.",
-    "wipe_history_warning": "Usuń trwale wszystkie cykle i profile. Nie można tego cofnąć."
+    "wipe_history_warning": "Usuń trwale wszystkie cykle i profile. Nie można tego cofnąć.",
+    "compare_overlay_tip": "Nałóż wyuczone obwiednie profili, aby zobaczyć, który program przypomina każdy cykl.",
+    "duration_trend_up_tip": "Czas trwania rośnie ({pct}%/cykl)",
+    "duration_trend_down_tip": "Czas trwania spada ({pct}%/cykl)",
+    "energy_trend_up_tip": "Energia rośnie ({pct}%/cykl)",
+    "energy_trend_down_tip": "Energia spada ({pct}%/cykl)",
+    "performance_trending": "Trend wydajności",
+    "pg_select_cycle_hint": "Wybierz cykl i kliknij ↺, aby wczytać",
+    "pg_sweep_progress": "Krok {done} / {total}",
+    "pg_analysis_hint": "Wybierz cykl i kliknij ↺, aby wczytać analizę.",
+    "diagnostics_load_failed": "Nie udało się wczytać diagnostyki: {error}"
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -1169,7 +1231,15 @@
     "interrupted": "Przerwano",
     "ready": "Gotowe do przetworzenia",
     "recording": "Nagrywanie",
-    "training": "Trenowanie…"
+    "training": "Trenowanie…",
+    "saving": "Zapisywanie…",
+    "rebuilding": "Przebudowywanie…",
+    "analyzing": "Analizowanie…",
+    "resetting": "Resetowanie…",
+    "reverting": "Przywracanie…",
+    "trimming": "Przycinanie…",
+    "splitting": "Dzielenie…",
+    "deleting": "Usuwanie…"
   },
   "suggestion": {
     "both_agree": "WashData zaleca",
@@ -1322,7 +1392,9 @@
     "relabel_done": "Zmieniono etykietę {count} cykli",
     "relabel_failed": "Zmiana etykiety nie powiodła się: {error}",
     "reminders_save_failed": "Nie można zapisać przypomnień: {error}",
-    "reminders_saved": "Zapisano przypomnienia serwisowe"
+    "reminders_saved": "Zapisano przypomnienia serwisowe",
+    "pause_no_cycle": "Brak aktywnego cyklu do wstrzymania",
+    "resume_no_cycle": "Brak wstrzymanego cyklu do wznowienia"
   },
   "trend": {
     "down": "Trend w dół",
@@ -1345,5 +1417,26 @@
     "start_duration_threshold": "Sekundy powyżej progu, by potwierdzić start",
     "start_threshold_w": "Minimalna moc w watach, by uznać za rozpoczęty",
     "stop_threshold_w": "Poniżej tej wartości urządzenie liczone jest jako wyłączone"
+  },
+  "col": {
+    "profile_tip": "Nazwa dopasowanego programu. Brak etykiety oznacza, że na końcu cyklu nie dopasowano żadnego profilu.",
+    "status_tip": "Wynik cyklu: Zakończony (naturalny koniec), Przerwany (nagły spadek mocy), Wymuszone zatrzymanie (ręczne) lub Wymaga sprawdzenia (oczekuje opinii).",
+    "date_tip": "Data i godzina rozpoczęcia cyklu.",
+    "duration_tip": "Całkowity czas działania cyklu od początku do końca.",
+    "energy_tip": "Całkowite zużycie energii (kWh). Obliczone przez całkowanie mocy w czasie.",
+    "cost_tip": "Koszt energii dla tego cyklu, ustalony w momencie zakończenia na podstawie ceny obowiązującej wtedy (energia x cena za kWh). Ustaw cenę w Ustawieniach, aby go wypełnić.",
+    "confidence_tip": "Pewność dopasowania profilu (0-100%). Jak dokładnie krzywa mocy cyklu dopasowała się do zidentyfikowanego programu.",
+    "health_tip": "Kondycja cyklu ML (wyższa = lepsza). Kliknij cykl, aby go sprawdzić i ocenić."
+  },
+  "stat": {
+    "avg": "śr.",
+    "min": "min {v}",
+    "max": "max {v}",
+    "consistency": "spójność ±{v}",
+    "total": "razem {v}",
+    "last_run": "ostatnie uruchomienie {v}",
+    "score": "wynik {pct}%",
+    "duration_cv": "CV czasu trwania {pct}%",
+    "avg_confidence": "śr. pewność {pct}%"
   }
 }

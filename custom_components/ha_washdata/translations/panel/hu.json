@@ -21,7 +21,9 @@
     "steady": "→ állandó",
     "underrun": "A szokásosnál gyorsabban fejeződött be",
     "using_defaults": "A szállított alapértelmezett értékek használata",
-    "using_tuned": "Hangolt súlyok használata"
+    "using_tuned": "Hangolt súlyok használata",
+    "overrun_ratio": "(a várt {x}-szerese)",
+    "underrun_ratio": "(a várt {pct}%-a)"
   },
   "btn": {
     "add_device": "+ Eszköz hozzáadása",
@@ -142,7 +144,9 @@
     "trim_split": "Trim / Split",
     "undo": "Visszavonás",
     "use": "Használat",
-    "wipe_all": "Törölje az összes adatot"
+    "wipe_all": "Törölje az összes adatot",
+    "delete_selected": "Kijelöltek törlése ({n})",
+    "group_suggest": "{n}. csoport: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Tesztelés előzményeken",
     "toggle_sidebar": "Kapcsolja be a Home Assistant oldalsávot",
     "tools_and_data": "Eszközök és adatok",
-    "wipe_history": "Törölje az előzményeket"
+    "wipe_history": "Törölje az előzményeket",
+    "recommendations": "Javaslatok ({n})"
   },
   "health": {
     "fair": "Elfogadható profilminőség",
@@ -439,7 +444,32 @@
     "ungrouped": "Csoportosítás nélkül",
     "unlabelled": "Címkézetlen",
     "unlabelled_paren": "(címkézetlen)",
-    "warp_path": "Torzítási útvonal"
+    "warp_path": "Torzítási útvonal",
+    "input": "Bemenet:",
+    "start": "Kezdés",
+    "end": "Vége",
+    "unit_s": "(s)",
+    "reviewed_on": "áttekintve: {date}",
+    "unknown": "Ismeretlen",
+    "quality": "Minőség",
+    "tags": "Címkék",
+    "at": "ekkor:",
+    "pct_match_confidence": "{pct}% egyezési bizalom",
+    "ha_restarted": "HA újraindult",
+    "from_start": "Az elejétől",
+    "to_end": "A végéig",
+    "click_to_select": "kattints a kijelöléshez",
+    "envelope": "Sáv",
+    "zoom_hint": "görgetés a nagyításhoz · dupla kattintás a visszaállításhoz",
+    "loading_paren": "(betöltés…)",
+    "time_remaining": "~{v} van hátra",
+    "no_duration": "nincs időtartam",
+    "duration_avg": "~{v} perc átlag",
+    "name_placeholder": "(név)",
+    "n_shown": ", {n} látható",
+    "cycles_title": "Ciklusok ({n})",
+    "pg_detecting": "Észlelés folyamatban",
+    "pg_best_marker": "Legjobb: {v}"
   },
   "log": {
     "all_levels": "Minden szinten"
@@ -452,7 +482,11 @@
     "fit_strong": "Erős",
     "fit_weak": "Gyenge",
     "fit_word": "illeszkedési minőség",
-    "personalized": "● Személyre szabott ehhez a géphez"
+    "personalized": "● Személyre szabott ehhez a géphez",
+    "better_than_baseline": "{pct}%-kal jobb az alap becslésnél ({metric})",
+    "trend_improving_tip": "Ennek a modellnek az illeszkedése javult a legutóbbi újraellenőrzések során.",
+    "trend_declining_tip": "Ennek a modellnek az illeszkedése romlott a legutóbbi újraellenőrzések során · több ciklus áttekintése segíthet az újratanulásban.",
+    "trend_steady_tip": "Ennek a modellnek az illeszkedése nagyjából változatlan maradt a legutóbbi újraellenőrzések során."
   },
   "modal": {
     "auto_label": "Automatikus címkézési ciklusok",
@@ -472,7 +506,25 @@
     "process_recording": "Folyamat rögzítése",
     "delete_maintenance_msg": "Törli ezt a karbantartási bejegyzést? Ez nem vonható vissza.",
     "delete_maintenance_title": "Karbantartási esemény törlése",
-    "relabel_cycles": "{count} ciklus átcímkézése"
+    "relabel_cycles": "{count} ciklus átcímkézése",
+    "delete_automation_title": "Automatizálás törlése",
+    "delete_automation_msg": "Törlöd a(z) \"{name}\" automatizálást a Home Assistantból? Ez nem vonható vissza.",
+    "remove_legacy_title": "Régi műveletek eltávolítása",
+    "remove_legacy_msg": "Eltávolítod a régi egyéni műveleteket? A ciklusesemények során többé nem fognak elsülni. Ez a panelről nem vonható vissza.",
+    "discard_recording_title": "Felvétel eldobása",
+    "discard_recording_msg": "Eldobod a mentett felvételt? Ez nem vonható vissza.",
+    "dismiss_all_title": "Összes visszajelzés elvetése",
+    "dismiss_all_msg": "Elveted mind a(z) {count} függőben lévő visszajelzési kérést?",
+    "dismiss_all_ok": "Összes elvetése",
+    "delete_phase_title": "Fázis törlése",
+    "delete_phase_msg": "Törlöd a(z) \"{name}\" fázist?",
+    "clear_debug_title": "Hibakeresési adatok törlése",
+    "clear_debug_msg": "Törlöd az összes tárolt hibakeresési nyomvonalat?",
+    "wipe_all_title": "Összes adat törlése",
+    "wipe_all_msg": "⚠️ Ez véglegesen törli az ÖSSZES ciklust és profilt. Ez nem vonható vissza.",
+    "wipe_all_ok": "Minden törlése",
+    "force_stop_title": "Ciklus kényszerített leállítása",
+    "force_stop_msg": "Kényszerítve leállítod most az aktív ciklust? A ciklus megszakítottként lesz elmentve."
   },
   "msg": {
     "appliance_monitor": "Készülék monitor",
@@ -654,7 +706,17 @@
     "updated": "Frissítve",
     "warmup_badge": "Még tanul ({done}/{needed} ciklus)",
     "warmup_detail": "Ez a profil {needed} felcímkézett ciklust igényel, mielőtt az automatikus egyeztetés megkezdődik. Minden megerősített ciklus segít tanulni.",
-    "wipe_history_warning": "Véglegesen törölje az összes ciklust és profilt. Nem vonható vissza."
+    "wipe_history_warning": "Véglegesen törölje az összes ciklust és profilt. Nem vonható vissza.",
+    "compare_overlay_tip": "Rárajzolt tanult profilsávok, hogy lásd, melyik programra hasonlít az egyes ciklusok.",
+    "duration_trend_up_tip": "Időtartam nő ({pct}%/ciklus)",
+    "duration_trend_down_tip": "Időtartam csökken ({pct}%/ciklus)",
+    "energy_trend_up_tip": "Energia nő ({pct}%/ciklus)",
+    "energy_trend_down_tip": "Energia csökken ({pct}%/ciklus)",
+    "performance_trending": "Teljesítmény tendenciát mutat",
+    "pg_select_cycle_hint": "Jelölj ki egy ciklust, majd kattints a ↺ gombra a betöltéshez",
+    "pg_sweep_progress": "{done}. / {total}. lépés",
+    "pg_analysis_hint": "Jelölj ki egy ciklust, majd kattints a ↺ gombra az elemzés betöltéséhez.",
+    "diagnostics_load_failed": "Nem sikerült betölteni a diagnosztikát: {error}"
   },
   "phase_desc": {
     "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -1169,7 +1231,15 @@
     "interrupted": "Megszakított",
     "ready": "Feldolgozásra kész",
     "recording": "Felvétel",
-    "training": "Tanítás…"
+    "training": "Tanítás…",
+    "saving": "Mentés…",
+    "rebuilding": "Újraépítés…",
+    "analyzing": "Elemzés…",
+    "resetting": "Visszaállítás…",
+    "reverting": "Visszavonás…",
+    "trimming": "Vágás…",
+    "splitting": "Felosztás…",
+    "deleting": "Törlés…"
   },
   "tab": {
     "advanced": "Fejlett",
@@ -1259,7 +1329,9 @@
     "relabel_done": "{count} ciklus átcímkézve",
     "relabel_failed": "Az átcímkézés sikertelen: {error}",
     "reminders_save_failed": "Nem sikerült menteni az emlékeztetőket: {error}",
-    "reminders_saved": "Szerviz emlékeztetők mentve"
+    "reminders_saved": "Szerviz emlékeztetők mentve",
+    "pause_no_cycle": "Nincs szüneteltethető aktív ciklus",
+    "resume_no_cycle": "Nincs folytatható szüneteltetett ciklus"
   },
   "suggestion": {
     "both_agree": "A WashData javasolja",
@@ -1345,5 +1417,26 @@
     "start_duration_threshold": "A küszöb feletti másodpercek az indulás megerősítéséhez",
     "start_threshold_w": "Minimális wattérték az indulás elismeréséhez",
     "stop_threshold_w": "Ez alatt a gép kikapcsoltnak számít"
+  },
+  "col": {
+    "profile_tip": "Az egyezést mutató program neve. A címkézetlen azt jelenti, hogy a ciklus végén egyetlen profil sem egyezett.",
+    "status_tip": "A ciklus kimenetele: Befejezve (természetes vég), Megszakítva (hirtelen teljesítményesés), Kényszerítve leállítva (kézi) vagy Áttekintendő (függőben lévő visszajelzés).",
+    "date_tip": "A ciklus indulásának dátuma és időpontja.",
+    "duration_tip": "A ciklus teljes futásideje kezdéstől végéig.",
+    "energy_tip": "Az összes elfogyasztott energia (kWh). A teljesítmény idő szerinti integrálásával számítva.",
+    "cost_tip": "A ciklus energiaköltsége, befejezéskor rögzítve az akkor érvényes árral (energia x kWh-ár). Állíts be egy árat a Beállításokban a kitöltéséhez.",
+    "confidence_tip": "A profilegyezés bizalma (0-100%). Mennyire pontosan illeszkedett a ciklus teljesítménygörbéje az azonosított programhoz.",
+    "health_tip": "ML ciklusállapot (magasabb = jobb). Kattints egy ciklusra a vizsgálatához és áttekintéséhez."
+  },
+  "stat": {
+    "avg": "átlag",
+    "min": "min {v}",
+    "max": "max {v}",
+    "consistency": "konzisztencia ±{v}",
+    "total": "összesen {v}",
+    "last_run": "utolsó futás {v}",
+    "score": "pontszám {pct}%",
+    "duration_cv": "időtartam CV {pct}%",
+    "avg_confidence": "átlagos bizalom {pct}%"
   }
 }

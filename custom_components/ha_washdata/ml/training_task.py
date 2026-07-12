@@ -416,10 +416,11 @@ def _train_regression_capability(
 
     X_tr, y_tr, X_te, y_te = _regression_split(X, y, groups)
     # Detect in-sample fallback (too few rows to split).
-    if X_tr is X and X_te is X:
+    in_sample = X_tr is X and X_te is X
+    if in_sample:
         _LOGGER.warning(
             "ML training '%s': too few rows (%d) to split for regression — "
-            "evaluating in-sample. Add more cycles for reliable holdout.",
+            "evaluating in-sample; NOT promoting. Add more cycles for a reliable holdout.",
             capability, n,
         )
     try:
@@ -440,11 +441,20 @@ def _train_regression_capability(
     naive = np.clip(X_te[:, naive_col], 0.0, 1.0)
     naive_mae = float(np.mean(np.abs(naive - y_te))) if y_te.size else 1.0
 
-    promote = model_mae <= naive_mae * (1.0 - ML_TRAINING_REGRESSION_MARGIN)
+    # Distinct source cycles: each clean cycle contributes several prefix rows via
+    # `groups`, so ``n`` (rows) overstates how many real cycles trained the model.
+    n_cycles = (
+        int(np.unique(groups).size)
+        if groups is not None and getattr(groups, "size", 0) == n
+        else n
+    )
+    # Never promote on an in-sample (non-held-out) evaluation.
+    promote = (model_mae <= naive_mae * (1.0 - ML_TRAINING_REGRESSION_MARGIN)) and not in_sample
     record: dict[str, Any] = {
         "capability": capability,
         "promoted": bool(promote),
         "rows": n,
+        "cycle_count": n_cycles,
         "model_mae": round(model_mae, 5),
         "naive_mae": round(naive_mae, 5),
         "metrics": metrics,
@@ -455,10 +465,11 @@ def _train_regression_capability(
             target_units=target_units,
             metrics={"holdout": metrics, "model_mae": round(model_mae, 5),
                      "naive_mae": round(naive_mae, 5)},
-            trained_at=trained_at, cycle_count=n,
+            trained_at=trained_at, cycle_count=n_cycles,
         )
         record["trained_at"] = trained_at
-        record["cycle_count"] = n
+    elif in_sample:
+        record["reason"] = "no held-out split (in-sample eval); not promoted"
     else:
         record["reason"] = f"MAE {model_mae:.4f} not below naive {naive_mae:.4f} - margin"
     return record
@@ -542,11 +553,12 @@ def _train_capability(
 
     X_tr, y_tr, X_te, y_te = _holdout_split(X, y, groups)
     # Detect in-sample fallback (holdout returned full dataset for both splits).
-    if X_tr is X and X_te is X:
+    in_sample = X_tr is X and X_te is X
+    if in_sample:
         _LOGGER.warning(
             "ML training '%s': dataset too small or imbalanced to split "
-            "(n=%d, pos=%d, neg=%d) — AUC evaluated in-sample. "
-            "Promoted model may not generalise; add more labeled cycles.",
+            "(n=%d, pos=%d, neg=%d) — AUC evaluated in-sample; NOT promoting "
+            "(an in-sample AUC is optimistic). Add more labeled cycles.",
             capability, n, n_pos, n_neg,
         )
     fit = T.fit_logistic(X_tr, y_tr)
@@ -560,13 +572,29 @@ def _train_capability(
     new_auc = T.auc(y_te, test_scores)
     metrics = T.binary_metrics(y_te, test_scores, threshold)
     base_auc = _baseline_auc(capability, X_te, y_te, columns)
-    baseline = base_auc if base_auc is not None else 0.5
+    if base_auc is None:
+        # Every classifier capability ships an embedded baseline; None here means
+        # it failed to load/score, NOT that it is legitimately absent. Don't promote
+        # against a fabricated 0.5 bar (that would let a near-random model win).
+        return {"capability": capability, "promoted": False,
+                "rows": n, "positives": n_pos, "negatives": n_neg,
+                "reason": "embedded baseline unavailable; cannot gate promotion"}
+    baseline = base_auc
 
-    promote = new_auc >= (baseline - ML_TRAINING_AUC_MARGIN)
+    # Never promote on an in-sample (non-held-out) evaluation: the AUC is optimistic.
+    promote = (new_auc >= (baseline - ML_TRAINING_AUC_MARGIN)) and not in_sample
+    # Distinct source cycles (some capabilities emit >1 row per cycle, e.g. an
+    # end classifier with several candidate events); mirror the regression path.
+    n_cycles = (
+        int(np.unique(groups).size)
+        if groups is not None and getattr(groups, "size", 0) == n
+        else n
+    )
     record: dict[str, Any] = {
         "capability": capability,
         "promoted": bool(promote),
         "rows": n, "positives": n_pos, "negatives": n_neg,
+        "cycle_count": n_cycles,
         "new_auc": round(new_auc, 4),
         "baseline_auc": round(baseline, 4),
         "threshold": threshold,
@@ -577,10 +605,11 @@ def _train_capability(
             name=capability, target=target, feature_columns=columns,
             fit=fit, threshold=threshold,
             metrics={"holdout": metrics, "auc": round(new_auc, 4), "baseline_auc": round(baseline, 4)},
-            trained_at=trained_at, cycle_count=n,
+            trained_at=trained_at, cycle_count=n_cycles,
         )
         record["trained_at"] = trained_at
-        record["cycle_count"] = n
+    elif in_sample:
+        record["reason"] = "no held-out split (in-sample eval); not promoted"
     else:
         record["reason"] = f"AUC {new_auc:.3f} below baseline {baseline:.3f} - margin"
     return record

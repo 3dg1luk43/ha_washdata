@@ -21,7 +21,9 @@
     "reviewed": "Reviewed",
     "steady": "→ steady",
     "using_defaults": "Using shipped defaults",
-    "using_tuned": "Using tuned weights"
+    "using_tuned": "Using tuned weights",
+    "overrun_ratio": "({x}x expected)",
+    "underrun_ratio": "({pct}% of expected)"
   },
   "btn": {
     "add_device": "+ Add device",
@@ -142,7 +144,9 @@
     "trim_split": "Trim / Split",
     "undo": "Undo",
     "use": "Use",
-    "wipe_all": "Wipe All Data"
+    "wipe_all": "Wipe All Data",
+    "delete_selected": "Delete selected ({n})",
+    "group_suggest": "Group {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Test on history",
     "toggle_sidebar": "Toggle Home Assistant sidebar",
     "tools_and_data": "Tools & Data",
-    "wipe_history": "Wipe History"
+    "wipe_history": "Wipe History",
+    "recommendations": "Recommendations ({n})"
   },
   "health": {
     "fair": "Acceptable profile quality",
@@ -439,7 +444,32 @@
     "ungrouped": "Ungrouped",
     "unlabelled": "Unlabelled",
     "unlabelled_paren": "(unlabelled)",
-    "warp_path": "Warp path"
+    "warp_path": "Warp path",
+    "input": "Input:",
+    "start": "Start",
+    "end": "End",
+    "unit_s": "(s)",
+    "reviewed_on": "reviewed {date}",
+    "unknown": "Unknown",
+    "quality": "Quality",
+    "tags": "Tags",
+    "at": "at",
+    "pct_match_confidence": "{pct}% match confidence",
+    "ha_restarted": "HA restarted",
+    "from_start": "From start",
+    "to_end": "To end",
+    "click_to_select": "click to select",
+    "envelope": "Envelope",
+    "zoom_hint": "scroll to zoom · dblclick to reset",
+    "loading_paren": "(loading…)",
+    "time_remaining": "~{v} remaining",
+    "no_duration": "no duration",
+    "duration_avg": "~{v}m avg",
+    "name_placeholder": "(name)",
+    "n_shown": ", {n} shown",
+    "cycles_title": "Cycles ({n})",
+    "pg_detecting": "Detecting",
+    "pg_best_marker": "Best: {v}"
   },
   "log": {
     "all_levels": "All levels"
@@ -459,7 +489,11 @@
     "fit_strong": "Strong",
     "fit_weak": "Weak",
     "fit_word": "fit",
-    "personalized": "● Personalized to this machine"
+    "personalized": "● Personalized to this machine",
+    "better_than_baseline": "{pct}% better than the baseline estimate ({metric})",
+    "trend_improving_tip": "This model's fit has improved across recent re-checks.",
+    "trend_declining_tip": "This model's fit has slipped across recent re-checks — reviewing more cycles may help it re-learn.",
+    "trend_steady_tip": "This model's fit has held roughly steady across recent re-checks."
   },
   "modal": {
     "auto_label": "Auto-Label Cycles",
@@ -479,7 +513,25 @@
     "process_history_ok": "Process",
     "process_history_title": "Process History",
     "process_recording": "Process Recording",
-    "relabel_cycles": "Relabel {count} cycles"
+    "relabel_cycles": "Relabel {count} cycles",
+    "delete_automation_title": "Delete Automation",
+    "delete_automation_msg": "Delete the automation \"{name}\" from Home Assistant? This cannot be undone.",
+    "remove_legacy_title": "Remove Legacy Actions",
+    "remove_legacy_msg": "Remove the legacy custom actions? They will stop firing on cycle events. This cannot be undone from the panel.",
+    "discard_recording_title": "Discard Recording",
+    "discard_recording_msg": "Discard the saved recording? This cannot be undone.",
+    "dismiss_all_title": "Dismiss All Feedbacks",
+    "dismiss_all_msg": "Dismiss all {count} pending feedback requests?",
+    "dismiss_all_ok": "Dismiss All",
+    "delete_phase_title": "Delete Phase",
+    "delete_phase_msg": "Delete phase \"{name}\"?",
+    "clear_debug_title": "Clear Debug Data",
+    "clear_debug_msg": "Delete all stored debug traces?",
+    "wipe_all_title": "Wipe All Data",
+    "wipe_all_msg": "⚠️ This permanently deletes ALL cycles and profiles. This cannot be undone.",
+    "wipe_all_ok": "Wipe Everything",
+    "force_stop_title": "Force Stop Cycle",
+    "force_stop_msg": "Force-stop the active cycle now? The cycle will be saved as interrupted."
   },
   "msg": {
     "appliance_monitor": "Appliance monitor",
@@ -661,7 +713,17 @@
     "updated": "Updated",
     "warmup_badge": "Still learning ({done}/{needed} cycles)",
     "warmup_detail": "This profile needs {needed} labelled cycles before auto-matching begins. Every confirmed cycle helps it learn.",
-    "wipe_history_warning": "Permanently delete all cycles and profiles. Cannot be undone."
+    "wipe_history_warning": "Permanently delete all cycles and profiles. Cannot be undone.",
+    "compare_overlay_tip": "Overlay learned profile envelopes to see which program each cycle resembles.",
+    "duration_trend_up_tip": "Duration up ({pct}%/cycle)",
+    "duration_trend_down_tip": "Duration down ({pct}%/cycle)",
+    "energy_trend_up_tip": "Energy up ({pct}%/cycle)",
+    "energy_trend_down_tip": "Energy down ({pct}%/cycle)",
+    "performance_trending": "Performance trending",
+    "pg_select_cycle_hint": "Select a cycle and click ↺ to load",
+    "pg_sweep_progress": "Step {done} / {total}",
+    "pg_analysis_hint": "Select a cycle and click ↺ to load analysis.",
+    "diagnostics_load_failed": "Could not load diagnostics: {error}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Sudden drop treated as immediate end",
@@ -1187,7 +1249,15 @@
     "interrupted": "Interrupted",
     "ready": "Ready to process",
     "recording": "Recording",
-    "training": "Training…"
+    "training": "Training…",
+    "saving": "Saving…",
+    "rebuilding": "Rebuilding…",
+    "analyzing": "Analyzing…",
+    "resetting": "Resetting…",
+    "reverting": "Reverting…",
+    "trimming": "Trimming…",
+    "splitting": "Splitting…",
+    "deleting": "Deleting…"
   },
   "suggestion": {
     "both_agree": "WashData recommends",
@@ -1340,10 +1410,33 @@
     "settings_reverted": "Settings reverted; integration reloading",
     "settings_saved": "Settings saved; integration reloading",
     "suggestions_applied": "Suggestions applied; integration reloading",
-    "suggestions_dismissed": "Suggestions dismissed"
+    "suggestions_dismissed": "Suggestions dismissed",
+    "pause_no_cycle": "No active cycle to pause",
+    "resume_no_cycle": "No paused cycle to resume"
   },
   "trend": {
     "down": "Trending down",
     "up": "Trending up"
+  },
+  "col": {
+    "profile_tip": "Matched program name. Unlabelled means no profile matched at end of cycle.",
+    "status_tip": "Cycle outcome: Completed (natural end), Interrupted (abrupt power drop), Force Stopped (manual), or Needs Review (feedback pending).",
+    "date_tip": "Date and time the cycle started.",
+    "duration_tip": "Total cycle run time from start to end.",
+    "energy_tip": "Total energy consumed (kWh). Computed by integrating power over time.",
+    "cost_tip": "Energy cost for this cycle, frozen at completion using the price in effect then (energy x price per kWh). Set a price under Settings to populate it.",
+    "confidence_tip": "Profile match confidence (0-100%). How closely the cycle power curve matched the identified program.",
+    "health_tip": "ML cycle health (higher = better). Click a cycle to inspect and review it."
+  },
+  "stat": {
+    "avg": "avg",
+    "min": "min {v}",
+    "max": "max {v}",
+    "consistency": "consistency ±{v}",
+    "total": "total {v}",
+    "last_run": "last run {v}",
+    "score": "score {pct}%",
+    "duration_cv": "duration CV {pct}%",
+    "avg_confidence": "avg confidence {pct}%"
   }
 }

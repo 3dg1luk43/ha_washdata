@@ -21,7 +21,9 @@
     "steady": "→ stabiilne",
     "underrun": "Lõppes tavalisest kiiremini",
     "using_defaults": "Tarnitud vaikeseadete kasutamine",
-    "using_tuned": "Häälestatud raskuste kasutamine"
+    "using_tuned": "Häälestatud raskuste kasutamine",
+    "overrun_ratio": "({x}x oodatust)",
+    "underrun_ratio": "({pct}% oodatust)"
   },
   "btn": {
     "add_device": "+ Lisa seade",
@@ -142,7 +144,9 @@
     "trim_split": "Kärbi / Poolita",
     "undo": "Võta tagasi",
     "use": "Kasutage",
-    "wipe_all": "Pühkige kõik andmed"
+    "wipe_all": "Pühkige kõik andmed",
+    "delete_selected": "Kustuta valitud ({n})",
+    "group_suggest": "Rühm {n}: {members}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -250,7 +254,8 @@
     "test_history": "Testi ajalool",
     "toggle_sidebar": "Koduabilise külgriba sisse- ja väljalülitamine",
     "tools_and_data": "Tööriistad ja andmed",
-    "wipe_history": "Pühkige ajalugu"
+    "wipe_history": "Pühkige ajalugu",
+    "recommendations": "Soovitused ({n})"
   },
   "health": {
     "fair": "Rahuldav profiili kvaliteet",
@@ -439,7 +444,32 @@
     "ungrouped": "Grupeerimata",
     "unlabelled": "Märgistamata",
     "unlabelled_paren": "(sildistamata)",
-    "warp_path": "Moondamistee"
+    "warp_path": "Moondamistee",
+    "input": "Sisend:",
+    "start": "Algus",
+    "end": "Lõpp",
+    "unit_s": "(s)",
+    "reviewed_on": "üle vaadatud {date}",
+    "unknown": "Teadmata",
+    "quality": "Kvaliteet",
+    "tags": "Sildid",
+    "at": "kell",
+    "pct_match_confidence": "{pct}% vaste usaldus",
+    "ha_restarted": "HA taaskäivitatud",
+    "from_start": "Algusest",
+    "to_end": "Lõpuni",
+    "click_to_select": "klõpsa valimiseks",
+    "envelope": "Võimsusvahemik",
+    "zoom_hint": "keri suumimiseks · topeltklõps lähtestamiseks",
+    "loading_paren": "(laadimine…)",
+    "time_remaining": "~{v} jäänud",
+    "no_duration": "kestus puudub",
+    "duration_avg": "~{v}m keskm.",
+    "name_placeholder": "(nimi)",
+    "n_shown": ", {n} kuvatud",
+    "cycles_title": "Tsüklid ({n})",
+    "pg_detecting": "Tuvastamine",
+    "pg_best_marker": "Parim: {v}"
   },
   "log": {
     "all_levels": "Kõik tasemed"
@@ -452,7 +482,11 @@
     "fit_strong": "Tugev",
     "fit_weak": "Nõrk",
     "fit_word": "sobima",
-    "personalized": "● Selle masina jaoks kohandatud"
+    "personalized": "● Selle masina jaoks kohandatud",
+    "better_than_baseline": "{pct}% parem kui lähtehinnang ({metric})",
+    "trend_improving_tip": "Selle mudeli sobivus on viimaste ülekontrollide jooksul paranenud.",
+    "trend_declining_tip": "Selle mudeli sobivus on viimaste ülekontrollide jooksul halvenenud, rohkemate tsüklite ülevaatamine võib aidata sel uuesti õppida.",
+    "trend_steady_tip": "Selle mudeli sobivus on viimaste ülekontrollide jooksul jäänud enam-vähem stabiilseks."
   },
   "modal": {
     "auto_label": "Automaatsed sildistamise tsüklid",
@@ -472,7 +506,25 @@
     "process_recording": "Protsessi salvestamine",
     "delete_maintenance_msg": "Kustutada see hoolduskirje? Seda ei saa tagasi võtta.",
     "delete_maintenance_title": "Kustuta hooldussündmus",
-    "relabel_cycles": "Märgista uuesti {count} tsüklit"
+    "relabel_cycles": "Märgista uuesti {count} tsüklit",
+    "delete_automation_title": "Kustuta automaatika",
+    "delete_automation_msg": "Kas kustutada automaatika \"{name}\" Home Assistantist? Seda ei saa tagasi võtta.",
+    "remove_legacy_title": "Eemalda vananenud toimingud",
+    "remove_legacy_msg": "Kas eemaldada vananenud kohandatud toimingud? Need lõpetavad tsükli sündmustele reageerimise. Seda ei saa paneelilt tagasi võtta.",
+    "discard_recording_title": "Visake salvestis ära",
+    "discard_recording_msg": "Kas visata salvestatud salvestis ära? Seda ei saa tagasi võtta.",
+    "dismiss_all_title": "Loobu kõigist tagasisidedest",
+    "dismiss_all_msg": "Kas loobuda kõigist {count} ootel olevast tagasiside päringust?",
+    "dismiss_all_ok": "Loobu kõigist",
+    "delete_phase_title": "Kustuta faas",
+    "delete_phase_msg": "Kas kustutada faas \"{name}\"?",
+    "clear_debug_title": "Tühjenda silumisandmed",
+    "clear_debug_msg": "Kas kustutada kõik salvestatud silumisjäljed?",
+    "wipe_all_title": "Pühi kõik andmed",
+    "wipe_all_msg": "⚠️ See kustutab jäädavalt KÕIK tsüklid ja profiilid. Seda ei saa tagasi võtta.",
+    "wipe_all_ok": "Pühi kõik",
+    "force_stop_title": "Peata tsükkel jõuga",
+    "force_stop_msg": "Kas peatada aktiivne tsükkel kohe jõuga? Tsükkel salvestatakse katkestatuna."
   },
   "msg": {
     "appliance_monitor": "Seadmete monitor",
@@ -654,7 +706,17 @@
     "updated": "Uuendatud",
     "warmup_badge": "Õpib veel ({done}/{needed} tsüklit)",
     "warmup_detail": "See profiil vajab {needed} märgistatud tsüklit enne automaatse sobitamise algust. Iga kinnitatud tsükkel aitab sellel õppida.",
-    "wipe_history_warning": "Kustutage jäädavalt kõik tsüklid ja profiilid. Seda ei saa tagasi võtta."
+    "wipe_history_warning": "Kustutage jäädavalt kõik tsüklid ja profiilid. Seda ei saa tagasi võtta.",
+    "compare_overlay_tip": "Aseta õpitud profiilide võimsusvahemikud peale, et näha, millist programmi iga tsükkel meenutab.",
+    "duration_trend_up_tip": "Kestus tõuseb ({pct}%/tsükkel)",
+    "duration_trend_down_tip": "Kestus langeb ({pct}%/tsükkel)",
+    "energy_trend_up_tip": "Energia tõuseb ({pct}%/tsükkel)",
+    "energy_trend_down_tip": "Energia langeb ({pct}%/tsükkel)",
+    "performance_trending": "Jõudluse suundumus",
+    "pg_select_cycle_hint": "Vali tsükkel ja klõpsa ↺ laadimiseks",
+    "pg_sweep_progress": "Samm {done} / {total}",
+    "pg_analysis_hint": "Vali tsükkel ja klõpsa ↺ analüüsi laadimiseks.",
+    "diagnostics_load_failed": "Diagnostikat ei õnnestunud laadida: {error}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Järsk langus käsitletakse kohese lõpuna",
@@ -1180,7 +1242,15 @@
     "interrupted": "Katkestatud",
     "ready": "Töötlemiseks valmis",
     "recording": "Salvestamine",
-    "training": "Treenimine…"
+    "training": "Treenimine…",
+    "saving": "Salvestamine…",
+    "rebuilding": "Taasehitamine…",
+    "analyzing": "Analüüsimine…",
+    "resetting": "Lähtestamine…",
+    "reverting": "Taastamine…",
+    "trimming": "Kärpimine…",
+    "splitting": "Lõhestamine…",
+    "deleting": "Kustutamine…"
   },
   "tab": {
     "advanced": "Täpsemalt",
@@ -1270,7 +1340,9 @@
     "relabel_done": "{count} tsüklit uuesti märgistatud",
     "relabel_failed": "Uuesti märgistamine ebaõnnestus: {error}",
     "reminders_save_failed": "Meeldetuletuste salvestamine ebaõnnestus: {error}",
-    "reminders_saved": "Hoolduse meeldetuletused salvestatud"
+    "reminders_saved": "Hoolduse meeldetuletused salvestatud",
+    "pause_no_cycle": "Pole aktiivset tsüklit, mida peatada",
+    "resume_no_cycle": "Pole peatatud tsüklit, mida jätkata"
   },
   "suggestion": {
     "both_agree": "WashData soovitab",
@@ -1345,5 +1417,26 @@
     "drum_clean": "Puhasta trummel",
     "filter_clean": "Puhasta filter",
     "other": "Muu"
+  },
+  "col": {
+    "profile_tip": "Vastendatud programmi nimi. Sildistamata tähendab, et tsükli lõpus ei sobitunud ükski profiil.",
+    "status_tip": "Tsükli tulemus: Lõpetatud (loomulik lõpp), Katkestatud (järsk võimsuse langus), Jõuga peatatud (käsitsi) või Vajab ülevaatust (tagasiside ootel).",
+    "date_tip": "Kuupäev ja kellaaeg, mil tsükkel algas.",
+    "duration_tip": "Tsükli kogukestus algusest lõpuni.",
+    "energy_tip": "Kokku tarbitud energia (kWh). Arvutatud võimsuse integreerimisel aja jooksul.",
+    "cost_tip": "Selle tsükli energiakulu, fikseeritud lõpetamisel tollal kehtinud hinna järgi (energia x hind kWh kohta). Selle täitmiseks määra hind seadetes.",
+    "confidence_tip": "Profiili vaste usaldus (0-100%). Kui täpselt tsükli võimsuskõver vastas tuvastatud programmile.",
+    "health_tip": "ML tsükli tervis (kõrgem = parem). Klõpsa tsüklil, et seda uurida ja üle vaadata."
+  },
+  "stat": {
+    "avg": "keskm.",
+    "min": "min {v}",
+    "max": "max {v}",
+    "consistency": "järjepidevus ±{v}",
+    "total": "kokku {v}",
+    "last_run": "viimane käivitus {v}",
+    "score": "skoor {pct}%",
+    "duration_cv": "kestuse CV {pct}%",
+    "avg_confidence": "keskm. usaldus {pct}%"
   }
 }
