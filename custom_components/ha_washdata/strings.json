@@ -81,7 +81,10 @@
       "auto_tune_fallback": "{device_type} {device_title} detected ghost cycles. Suggested min_power change: {current_min}W -> {new_min}W (not applied automatically).",
       "timer_default_message": "{device}: {minutes} min timer",
       "timer_pause_action_title": "Resume Cycle",
-      "timer_pause_body_suffix": "The cycle is paused. Open the WashData panel to resume."
+      "timer_pause_body_suffix": "The cycle is paused. Open the WashData panel to resume.",
+      "vs_typical_longer": "{pct}% longer than usual",
+      "vs_typical_shorter": "{pct}% shorter than usual",
+      "notify_live_waiting_message": "{device}: No profile matched yet."
     }
   },
   "selector": {
@@ -364,7 +367,7 @@
         }
       },
       "ambiguity": {
-        "name": "Match Ambiguity"
+        "name": "Ambiguity Score"
       },
       "current_phase": {
         "name": "Current Phase"
@@ -436,6 +439,18 @@
     },
     "no_active_cycle": {
       "message": "No active cycle to pause or resume."
+    },
+    "path_not_allowed": {
+      "message": "Path is not allowed: {path}. Add its directory to 'allowlist_external_dirs' in configuration.yaml."
+    },
+    "export_path_exists": {
+      "message": "Export target already exists: {path}. Choose a different path or remove the existing file first."
+    },
+    "export_write_failed": {
+      "message": "Could not write export to {path}: {error}"
+    },
+    "create_profile_failed": {
+      "message": "Could not create profile: {error}"
     }
   }
 }

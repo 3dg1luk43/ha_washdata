@@ -57,6 +57,12 @@ if DISHWASHER_END_SPIKE_WAIT_SECONDS <= 0:
 # self-contained (it is detector-internal policy, not user configuration).
 ML_END_GUARD_MIN_CONFIDENCE = 0.5        # P(true end) below this -> treat as a likely pause
 ML_END_GUARD_MAX_DEFER_SECONDS = 1800.0  # cap the extra wait the guard may add (30 min)
+# The opt-in ML end-guard / terminal-drop providers rebuild the trace and run
+# inference on every ENDING-phase evaluation. During a long quiet tail (e.g. a
+# dishwasher's up-to-1h soak) that is wasteful, so recompute at most this often
+# (data-clock seconds). Safe to cache: the guard only ever *defers* and terminal
+# drop only ever *shortens*, so both tolerate a value up to this window stale.
+ML_PROVIDER_THROTTLE_SECONDS = 30.0
 if not 0 < DISHWASHER_END_SPIKE_MIN_PROGRESS < 1:
     raise ValueError("DISHWASHER_END_SPIKE_MIN_PROGRESS must be a fraction in (0, 1)")
 from .signal_processing import integrate_wh
@@ -214,6 +220,11 @@ class CycleDetector:
         # Injected by the manager; None disables it (existing behavior). Opposite
         # asymmetry to the end-guard: it can only ever *shorten* the end wait.
         self._terminal_drop_provider = terminal_drop_provider
+        # Throttle caches for the two providers, scoped to the cycle + expectation:
+        # (last_reading_ts, expected_duration, cycle_start, result). Reused only
+        # within the recompute window when expected_duration and cycle_start match.
+        self._ml_end_cache: tuple[datetime, float, datetime, float | None] | None = None
+        self._terminal_drop_cache: tuple[datetime, float, datetime, bool] | None = None
         # Cycle duration (s) at which the ML guard first deferred the current
         # ending episode; bounds how long the guard may keep deferring.
         self._ml_defer_start_duration: float | None = None
@@ -1380,17 +1391,32 @@ class CycleDetector:
         so the caller keeps the existing power/energy-based behavior.
         """
         provider = self._end_confidence_provider
-        if provider is None or self._current_cycle_start is None or not self._power_readings:
-            return None
         start = self._current_cycle_start
+        if provider is None or start is None or not self._power_readings:
+            return None
+        # Throttle: reuse the last result within the recompute window, but only when
+        # it was computed for THIS cycle and the same expected_duration (which can
+        # change under overrun) — otherwise recompute.
+        now_ts = self._power_readings[-1][0]
+        exp = float(self._expected_duration)
+        cache = self._ml_end_cache
+        if (
+            cache is not None
+            and cache[1] == exp
+            and cache[2] == start
+            and (now_ts - cache[0]).total_seconds() < ML_PROVIDER_THROTTLE_SECONDS
+        ):
+            return cache[3]
         points = [
             ((ts - start).total_seconds(), float(power))
             for ts, power in self._power_readings
         ]
         try:
-            return provider(points, float(self._expected_duration))
+            result = provider(points, exp)
         except Exception:  # noqa: BLE001 - ML must never break detection
-            return None
+            result = None
+        self._ml_end_cache = (now_ts, exp, start, result)
+        return result
 
     def _is_terminal_drop(self) -> bool:
         """Whether the current low-power event is an anomalously-early hard drop.
@@ -1402,17 +1428,30 @@ class CycleDetector:
         so the caller keeps the proven soak-bridging end-detection.
         """
         provider = self._terminal_drop_provider
-        if provider is None or self._current_cycle_start is None or not self._power_readings:
-            return False
         start = self._current_cycle_start
+        if provider is None or start is None or not self._power_readings:
+            return False
+        # Throttle: reuse within the window, scoped to this cycle + expected_duration.
+        now_ts = self._power_readings[-1][0]
+        exp = float(self._expected_duration)
+        cache = self._terminal_drop_cache
+        if (
+            cache is not None
+            and cache[1] == exp
+            and cache[2] == start
+            and (now_ts - cache[0]).total_seconds() < ML_PROVIDER_THROTTLE_SECONDS
+        ):
+            return cache[3]
         points = [
             ((ts - start).total_seconds(), float(power))
             for ts, power in self._power_readings
         ]
         try:
-            return bool(provider(points, float(self._expected_duration)))
+            result = bool(provider(points, exp))
         except Exception:  # noqa: BLE001 - ML must never break detection
-            return False
+            result = False
+        self._terminal_drop_cache = (now_ts, exp, start, result)
+        return result
 
     def _should_defer_finish(self, duration: float) -> bool:
         """Check if we should defer termination based on expected duration."""

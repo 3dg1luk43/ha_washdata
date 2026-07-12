@@ -486,7 +486,23 @@
     "better_than_baseline": "temel tahminden %{pct} daha iyi ({metric})",
     "trend_improving_tip": "Bu modelin uyumu son yeniden kontrollerde iyileşti.",
     "trend_declining_tip": "Bu modelin uyumu son yeniden kontrollerde geriledi, daha fazla döngü incelemek yeniden öğrenmesine yardımcı olabilir.",
-    "trend_steady_tip": "Bu modelin uyumu son yeniden kontrollerde yaklaşık olarak sabit kaldı."
+    "trend_steady_tip": "Bu modelin uyumu son yeniden kontrollerde yaklaşık olarak sabit kaldı.",
+    "cap_blurb": {
+      "end": "Bir çevrimin gerçekten bittiğini anlama",
+      "live_match": "Çalışan programı daha erken tanıma",
+      "quality": "Yanlış algılanan veya bozuk çevrimleri fark etme",
+      "remaining_time": "Ne kadar süre kaldığını tahmin etme",
+      "total_energy": "Toplam enerji ve maliyeti tahmin etme"
+    },
+    "cap_label": {
+      "end": "Çevrim sonu algılama",
+      "live_match": "Program eşleştirme",
+      "quality": "Çevrim kalite kontrolü",
+      "remaining_time": "Kalan süre tahmini",
+      "total_energy": "Enerji tahmini"
+    },
+    "metric_auc": "Ayrılmış doğrulama verisinde AUC {auc}",
+    "metric_mae": "hata {model} - temel model {baseline}"
   },
   "modal": {
     "auto_label": "Döngüleri Otomatik Etiketle",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Yüklemek için bir döngü seçin ve ↺ düğmesine tıklayın",
     "pg_sweep_progress": "Adım {done} / {total}",
     "pg_analysis_hint": "Analizi yüklemek için bir döngü seçin ve ↺ düğmesine tıklayın.",
-    "diagnostics_load_failed": "Tanılamalar yüklenemedi: {error}"
+    "diagnostics_load_failed": "Tanılamalar yüklenemedi: {error}",
+    "manual_duration_ref_hint": "Yalnızca hiçbir referans döngü seçilmediğinde kullanılır. Bir referans döngü, süreyi kendi uzunluğuna göre belirler.",
+    "toast_convert_rolled_back": "Dönüştürme başarısız oldu ve geri alındı (geride otomasyon bırakılmadı): {error}",
+    "toast_convert_orphan": "Otomasyon oluşturuldu ancak eski eylemler temizlenemedi. Tekrar denemeyin: yinelenen bir otomasyondan kaçınmak için eski eylemleri elle kaldırın.",
+    "advisory_duration_trend_up": "'{name}' çevrimleri giderek uzuyor (çevrim başına yaklaşık +{pct}%). Cihazın davranışı değiştiyse bu profili yeniden kaydedin veya yeniden oluşturun.",
+    "advisory_energy_trend_up": "'{name}' giderek daha fazla enerji çekiyor (çevrim başına yaklaşık +{pct}%) - beklenmedikse cihazı kontrol etmekte fayda var.",
+    "advisory_poor_health": "'{name}' düşük bir uyum puanına sahip - son çevrimleri çok değişkenlik gösteriyor veya zayıf eşleşiyor. Eşleştirme ve süre tahminlerinin doğru kalması için çevrimlerini gözden geçirin ya da profili yeniden kaydedin.",
+    "advisory_shape_drift": "'{name}' orijinal güç eğrisinden önemli ölçüde uzaklaştı. Cihazın davranışı zamanla değişmiş olabilir (ör. kireçlenme, aşınma). Bu profili son çevrimlerle yeniden kaydetmeyi düşünün.",
+    "advisory_shape_drift_corr": "'{name}' orijinal güç eğrisinden önemli ölçüde uzaklaştı (korelasyon {corr}). Cihazın davranışı zamanla değişmiş olabilir (ör. kireçlenme, aşınma). Bu profili son çevrimlerle yeniden kaydetmeyi düşünün."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Ani düşüş anında bitiş sayılır",
@@ -1342,7 +1366,8 @@
     "reminders_save_failed": "Hatırlatıcılar kaydedilemedi: {error}",
     "reminders_saved": "Servis hatırlatıcıları kaydedildi",
     "pause_no_cycle": "Duraklatılacak etkin döngü yok",
-    "resume_no_cycle": "Sürdürülecek duraklatılmış döngü yok"
+    "resume_no_cycle": "Sürdürülecek duraklatılmış döngü yok",
+    "delete_partial_failed": "Bazı öğeler silinemedi ve geri yüklendi"
   },
   "suggestion": {
     "both_agree": "WashData öneriyor",
@@ -1405,6 +1430,39 @@
         "higher": "Daha uzun sessiz aşamalara izin verilir; daha az yanlış zorunlu durdurma",
         "lower": "Takılı döngüleri daha agresif şekilde yakalar"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "Kullanıcının hiç düzeltmediği {cycles} otomatik etiketin 15. yüzdelik güven değeri ({p15}).",
+      "completion_min_seconds": "{cycles} çevrim boyunca p05 temiz çevrim süresinin yarısı ({minutes} min); sahte çevrimleri filtreler.{excl}",
+      "dead_zone_batch": "Kısa tutuldu ({cycles} çevrim boyunca medyan başlangıç kararsızlık penceresi = {s}s), böylece gerçek bir son hemen algılanır.",
+      "dead_zone_from_dip": "{s}s'de algılanan erken güç düşüşüne dayalı.",
+      "end_energy_default": "Çevrim sonu gürültü eşiği için önerilen varsayılan değer.",
+      "end_energy_false": "{cycles} çevrim boyunca p95 sahte-son enerjisi ({p95}Wh); medyan çevrim enerjisinin %0.2'sinde ({floor}Wh) alt sınırlandı.",
+      "end_energy_no_false": "{cycles} çevrim boyunca sahte son yok; medyan çevrim enerjisinin %0.2'sinde ({floor}Wh) alt sınırlandı.",
+      "end_repeat_count": "{false}/{total} temiz çevrimde (%{pct}) devam eden 60s'den uzun bir iç duraklama vardı; {val} son doğrulaması gerektir.",
+      "learning_confidence": "{cycles} kullanıcı etiketli çevrimin p05 güven değeri ({p05}); bunun altında doğrulama iste.",
+      "match_interval": "Gözlemlenen güncelleme sıklığına dayalı (medyan={median}s) * 10.",
+      "max_duration_ratio": "Etiketli çevrim sürelerine dayalı (p95={p95}).",
+      "min_active": "Son çevrimde gözlemlenen minimum aktif güce ({min}W) dayalı.",
+      "min_duration_ratio": "Bir programın çevrimin başında tanınabilmesi için olabildiğince düşük tutuldu; güven ve belirsizlik eşikleri erken kesinleşmeyi önler.",
+      "min_off_gap": "Gözlemlenen {gaps} çevrimler arası boşluğa dayalı (p05={p05}s). Cihaz alt sınırı: {floor}s.",
+      "min_power": "{cycles} temiz çevrim boyunca p05 en düşük aktif gücün ({p05}W) %40'ı; kapalı eşiğini gerçek çekişin altında tutar.{excl}",
+      "ml_auto_label": "Kalite modelinin hâlâ temiz olarak değerlendirdiği en düşük güven değeri ({cycles} temiz çevrimin p10'u = {p10}).",
+      "ml_end_repeat": "{false}/{total} çevrimde (%{pct}) çevrim sonu algılayıcısının 50%'nin üzerinde puanladığı bir duraklama vardı; {val} son doğrulaması gerektir.",
+      "ml_off_delay": "Çevrim sonu algılayıcısının onayladığı duraklamalar: p95 {p95}s + 60s tampon, {cycles} çevrim boyunca modelce doğrulanmış {pauses} duraklamadan (alt sınır {floor}s).",
+      "no_update_timeout": "Gözlemlenen güncelleme sıklığına dayalı (p95={p95}s) * 20 (en az 60s).",
+      "off_delay_cadence": "Gözlemlenen güncelleme sıklığına dayalı (p95={p95}s) * 5",
+      "off_delay_device_floor": "{device} için cihaza özgü güvenli minimum kullanıldı ({floor}s).",
+      "off_delay_generic_floor": "Genel güvenli minimum kullanıldı ({floor}s).",
+      "off_delay_pauses": "Gerçek duraklamalardan uzun sürecek şekilde boyutlandırıldı: p95 çevrim içi duraklama {p95}s + 60s tampon, {cycles} temiz çevrim boyunca {pauses} duraklamadan (alt sınır {floor}s).",
+      "profile_match_threshold": "{cycles} doğru otomatik etiketin p10 güven değeri ({p10}); güvenli canlı kesinleşme alt sınırı.",
+      "sampling_interval": "{cycles} temiz çevrim boyunca gözlemlenen medyan güncelleme aralığı ({si}s).{excl}",
+      "smoothing_window": "{si}s örnekleme ile ~30s'lik okumaları yumuşatacak şekilde boyutlandırıldı ({samples} örnek).",
+      "start_duration": "Kısa tutuldu (~bir {si}s örnekleme aralığı), böylece tek örneklik ani sıçramalar yok sayılırken algılama olabildiğince erken başlar.",
+      "thr_batch": "{cycles} çevrim boyunca p05 en düşük aktif gücün ({p05}W) hemen üzerinde tutuldu; böylece başlangıç olabildiğince erken yakalanır ve durdurma eşiği makinenin en düşük çalışma gücünün altında kalır.",
+      "tol_per_profile": "{profiles} profil boyunca ({cycles} çevrim) profil başına süre varyansının p75'i; tutarlı profiller cezalandırılmaz.",
+      "tol_pooled": "{cycles} son etiketli çevrimin birleştirilmiş süre varyansına dayalı (p95 sapma={dev}).",
+      "watchdog": "Güvenli olduğu kadar düşük tutuldu ({p95}s'lik p95 güncelleme boşluğunun 3 katı, en az 30s); böylece takılmalar yanlış durdurmalar olmadan hızlıca yakalanır."
     }
   },
   "trend": {

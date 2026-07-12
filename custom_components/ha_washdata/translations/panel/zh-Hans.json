@@ -486,7 +486,23 @@
     "better_than_baseline": "比基线估计好 {pct}%（{metric}）",
     "trend_improving_tip": "该模型的拟合度在最近几次重新检查中有所提升。",
     "trend_declining_tip": "该模型的拟合度在最近几次重新检查中有所下降，审查更多周期可能有助于它重新学习。",
-    "trend_steady_tip": "该模型的拟合度在最近几次重新检查中大致保持稳定。"
+    "trend_steady_tip": "该模型的拟合度在最近几次重新检查中大致保持稳定。",
+    "cap_blurb": {
+      "end": "判断洗涤周期何时真正结束",
+      "live_match": "更早识别正在运行的程序",
+      "quality": "发现误检或损坏的周期",
+      "remaining_time": "预测剩余时间",
+      "total_energy": "预测总能耗和费用"
+    },
+    "cap_label": {
+      "end": "周期结束检测",
+      "live_match": "程序匹配",
+      "quality": "周期质量检查",
+      "remaining_time": "剩余时间估算",
+      "total_energy": "能耗估算"
+    },
+    "metric_auc": "留出验证数据上的 AUC {auc}",
+    "metric_mae": "误差 {model} vs 基线 {baseline}"
   },
   "modal": {
     "auto_label": "自动标记周期",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "选择一个周期并点击 ↺ 加载",
     "pg_sweep_progress": "步骤 {done} / {total}",
     "pg_analysis_hint": "选择一个周期并点击 ↺ 加载分析。",
-    "diagnostics_load_failed": "无法加载诊断：{error}"
+    "diagnostics_load_failed": "无法加载诊断：{error}",
+    "manual_duration_ref_hint": "仅在未选择参考周期时使用。参考周期会根据自身长度设置时长。",
+    "toast_convert_rolled_back": "转换失败并已回滚（未遗留任何自动化）：{error}",
+    "toast_convert_orphan": "自动化已创建，但清除旧操作失败。请勿重试：请手动移除旧操作，以避免自动化重复。",
+    "advisory_duration_trend_up": "'{name}' 的周期正逐渐变长（每个周期约 +{pct}%）。如果设备行为发生了变化，请重新录制或重建此配置文件。",
+    "advisory_energy_trend_up": "'{name}' 的能耗正逐渐增加（每个周期约 +{pct}%） - 如果这不符合预期，建议检查一下设备。",
+    "advisory_poor_health": "'{name}' 的拟合度评分较低 - 其近期周期波动较大或匹配较弱。请检查其周期或重新录制该配置文件，以保持匹配和时间估算的准确性。",
+    "advisory_shape_drift": "'{name}' 已明显偏离其原始功率曲线。设备行为可能随时间发生了变化（例如水垢、磨损）。建议用近期周期重新录制此配置文件。",
+    "advisory_shape_drift_corr": "'{name}' 已明显偏离其原始功率曲线（相关系数 {corr}）。设备行为可能随时间发生了变化（例如水垢、磨损）。建议用近期周期重新录制此配置文件。"
   },
   "pg_desc": {
     "abrupt_drop_watts": "骤降视为立即结束",
@@ -1342,7 +1366,8 @@
     "reminders_save_failed": "无法保存提醒：{error}",
     "reminders_saved": "已保存保养提醒",
     "pause_no_cycle": "没有可暂停的运行周期",
-    "resume_no_cycle": "没有可恢复的已暂停周期"
+    "resume_no_cycle": "没有可恢复的已暂停周期",
+    "delete_partial_failed": "部分项目无法删除，已恢复"
   },
   "suggestion": {
     "both_agree": "WashData建议",
@@ -1405,6 +1430,39 @@
         "higher": "允许更长的静默阶段，减少误强制停止",
         "lower": "更积极地捕捉卡住的循环"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "用户从未纠正的 {cycles} 个自动标注的第 15 百分位置信度（{p15}）。",
+      "completion_min_seconds": "{cycles} 个周期中 p05 正常周期时长的一半（{minutes} min）；用于过滤误检周期。{excl}",
+      "dead_zone_batch": "保持较短（{cycles} 个周期中启动不稳定窗口的中位数 = {s}s），以便及时检测到真正的结束。",
+      "dead_zone_from_dip": "基于在 {s}s 时检测到的早期功率下降。",
+      "end_energy_default": "周期结束噪声门限的推荐默认值。",
+      "end_energy_false": "{cycles} 个周期中 p95 的误结束能量（{p95}Wh），下限为周期能量中位数的 0.2%（{floor}Wh）。",
+      "end_energy_no_false": "{cycles} 个周期中无误结束；下限为周期能量中位数的 0.2%（{floor}Wh）。",
+      "end_repeat_count": "{false}/{total} 个正常周期（{pct}%）出现了超过 60s 且随后恢复的内部暂停；要求进行 {val} 次结束确认。",
+      "learning_confidence": "{cycles} 个用户标注周期的 p05 置信度（{p05}）；低于此值时请求验证。",
+      "match_interval": "基于观测到的更新频率（中位数={median}s） * 10。",
+      "max_duration_ratio": "基于已标注的周期时长（p95={p95}）。",
+      "min_active": "基于上一个周期中观测到的最小工作功率（{min}W）。",
+      "min_duration_ratio": "尽可能保持较低，以便在周期早期识别出程序；置信度和歧义门限可防止过早确定。",
+      "min_off_gap": "基于观测到的 {gaps} 个周期间间隔（p05={p05}s）。设备下限：{floor}s。",
+      "min_power": "{cycles} 个正常周期中 p05 最低工作功率（{p05}W）的 40%，使关闭门限保持在实际功耗之下。{excl}",
+      "ml_auto_label": "质量模型仍判定为正常的最低置信度（{cycles} 个正常周期的 p10 = {p10}）。",
+      "ml_end_repeat": "{false}/{total} 个周期（{pct}%）出现了结束检测器评分超过 50% 的暂停；要求进行 {val} 次结束确认。",
+      "ml_off_delay": "结束检测器已确认的暂停：p95 {p95}s + 60s 缓冲，来自 {cycles} 个周期中经模型验证的 {pauses} 次暂停（下限 {floor}s）。",
+      "no_update_timeout": "基于观测到的更新频率（p95={p95}s） * 20（最小 60s）。",
+      "off_delay_cadence": "基于观测到的更新频率（p95={p95}s） * 5",
+      "off_delay_device_floor": "对 {device} 使用了特定于设备的安全最小值（{floor}s）。",
+      "off_delay_generic_floor": "使用了通用安全最小值（{floor}s）。",
+      "off_delay_pauses": "设定为足以超过真实暂停：p95 周期内暂停 {p95}s + 60s 缓冲，来自 {cycles} 个正常周期中的 {pauses} 次暂停（下限 {floor}s）。",
+      "profile_match_threshold": "{cycles} 个正确自动标注的 p10 置信度（{p10}）；安全的实时确定下限。",
+      "sampling_interval": "{cycles} 个正常周期中观测到的更新间隔中位数（{si}s）。{excl}",
+      "smoothing_window": "设定为在 {si}s 采样下平滑约 30s 的读数（{samples} 个样本）。",
+      "start_duration": "保持较短（约一个 {si}s 采样间隔），以便尽早开始检测，同时忽略单个采样的尖峰。",
+      "thr_batch": "保持在 {cycles} 个周期中 p05 最低工作功率（{p05}W）略上方，以便尽早捕捉到启动，同时使停止阈值保持在设备最低运行功率之下。",
+      "tol_per_profile": "{profiles} 个配置文件（{cycles} 个周期）中每个配置文件时长方差的 p75；波动小的配置文件不受惩罚。",
+      "tol_pooled": "基于 {cycles} 个近期已标注周期的合并时长方差（p95 偏差={dev}）。",
+      "watchdog": "在安全范围内保持尽可能低（p95 更新间隔 {p95}s 的 3 倍，最小 30s），以便快速捕捉到停滞而不产生误停止。"
     }
   },
   "trend": {

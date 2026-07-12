@@ -136,20 +136,34 @@ def tune_matching_config(
     cycles: list[dict[str, Any]],
     *,
     min_cycles: int = 25,
-    # Require enough eligible targets that the held-out half (~min_targets/2) can
-    # move top-1 in increments meaningfully finer than ``margin``. At 10 the test
-    # split was ~5 targets (0.2 granularity) so a single lucky match dwarfed the
-    # 0.03 gate; 20 keeps ~10 held-out targets before an override is trusted.
-    min_targets: int = 20,
+    # Kept intentionally low so per-device tuning becomes useful early; the noise
+    # a small sample would introduce is controlled by the multi-split majority gate
+    # below (a lucky single split can't promote), not by a large ``min_targets``.
+    min_targets: int = 12,
     margin: float = 0.03,
     seed: int = 0,
 ) -> dict[str, Any]:
     """Leave-one-out per-device tuning of matcher scoring weights.
 
-    Returns a status dict; ``promoted`` is True only when a candidate config
-    beats the shipped defaults on a held-out split by at least ``margin``. When
-    promoted, ``config`` holds the override to persist (bounded scoring weights).
-    Never raises for data reasons; returns {"promoted": False, "reason": ...}.
+    Methodology (no target leakage between selection and gating):
+      1. Partition the device's labelled cycles ONCE into a *search* pool and an
+         untouched *holdout* pool; no target is ever used for both.
+      2. **Select** the candidate config as the grid entry with the best
+         leave-one-out top-1 on the SEARCH pool only. (Reference snapshots are
+         built from all cycles — as in production, where a query is matched
+         against aggregates of the full profile library; only the *query* targets
+         are partitioned.)
+      3. **Gate** the fixed candidate on the HOLDOUT pool: it must beat the
+         shipped defaults by at least ``margin`` on a MAJORITY of reshuffled
+         holdout subsamples (a variance check that rejects a lucky single split)
+         AND on the holdout mean. ``min_targets`` is kept intentionally low so
+         per-device tuning becomes useful early; the majority gate — not a large
+         sample — controls the noise.
+
+    Returns a status dict; ``promoted`` is True only when both holdout gates pass.
+    When promoted, ``config`` holds the override to persist (bounded scoring
+    weights only — never structural matching behaviour). Never raises for data
+    reasons; returns {"promoted": False, "reason": ...}.
     """
     by_profile = _prep(cycles)
     multi = {n: items for n, items in by_profile.items() if len(items) >= 2}
@@ -157,36 +171,69 @@ def tune_matching_config(
     if len(multi) < 2 or n_cycles < min_cycles:
         return {"promoted": False, "reason": "insufficient data", "n_cycles": n_cycles, "n_profiles": len(by_profile)}
 
-    # Deterministic train/test split of eligible targets (profiles with >=2 cycles).
+    # Partition targets ONCE, up front, into a search pool (used to pick the
+    # candidate config) and an untouched holdout pool (used only to gate it). No
+    # target is ever used for both selection and gating -> no target leakage.
     rng = np.random.default_rng(seed)
     targets = [(n, i) for n, items in multi.items() for i in range(len(items))]
     rng.shuffle(targets)
     if len(targets) < min_targets:
         return {"promoted": False, "reason": "too few targets", "n_targets": len(targets)}
-    split = max(1, len(targets) // 2)
-    train, test = targets[:split], targets[split:]
+    cut = max(1, len(targets) // 2)
+    search_pool, holdout_pool = targets[:cut], targets[cut:]
+    if not holdout_pool:
+        return {"promoted": False, "reason": "too few targets", "n_targets": len(targets)}
 
     base = {**_BASE_CFG}
-    base_train = _top1(by_profile, train, base)
-    # Pick the grid config with the best TRAIN top-1 (defaults included).
-    best_cfg, best_train = base, base_train
+    # Candidate: the grid config with the best top-1 on the SEARCH pool only.
+    best_search = _top1(by_profile, search_pool, base)
+    best_cfg = base
     for extra in _grid():
-        acc = _top1(by_profile, train, {**base, **extra})
-        if acc > best_train:
-            best_train, best_cfg = acc, {**base, **extra}
-
-    # Gate on the held-out TEST split: only promote if the tuned config beats the
-    # defaults there by the margin (otherwise it's noise/over-fit).
-    base_test = _top1(by_profile, test, base)
-    tuned_test = _top1(by_profile, test, best_cfg)
+        acc = _top1(by_profile, search_pool, {**base, **extra})
+        if acc > best_search:
+            best_search, best_cfg = acc, {**base, **extra}
     override = {k: best_cfg[k] for k in OVERRIDE_KEYS if k in best_cfg}
-    promoted = bool(override) and (tuned_test >= base_test + margin)
+
+    # Gate the FIXED candidate on the held-out pool: require it to beat the defaults
+    # by ``margin`` on a MAJORITY of reshuffled subsamples of the holdout (variance
+    # check), rejecting a lucky single split while keeping min_targets low.
+    n_splits, min_wins = 5, 4
+    base_tests: list[float] = []
+    tuned_tests: list[float] = []
+    wins = 0
+    for k in range(n_splits):
+        r = np.random.default_rng(seed + 1 + k)
+        pool = list(holdout_pool)
+        r.shuffle(pool)
+        held = pool[: max(1, len(pool) // 2)]
+        bt = _top1(by_profile, held, base)
+        tt = _top1(by_profile, held, best_cfg)
+        base_tests.append(bt)
+        tuned_tests.append(tt)
+        if tt - bt >= margin:
+            wins += 1
+    mean_base = float(np.mean(base_tests)) if base_tests else 0.0
+    mean_tuned = float(np.mean(tuned_tests)) if tuned_tests else 0.0
+    has_override = bool(override)
+    enough_wins = wins >= min_wins
+    enough_margin = (mean_tuned - mean_base) >= margin
+    promoted = has_override and enough_wins and enough_margin
+    if promoted:
+        reason = f"beat baseline on {wins}/{n_splits} held-out subsamples"
+    elif not has_override:
+        reason = "defaults already optimal (no override)"
+    elif not enough_wins:
+        reason = f"only {wins}/{n_splits} held-out subsamples beat baseline by margin"
+    else:
+        reason = f"mean held-out gain {mean_tuned - mean_base:+.3f} below margin {margin}"
     return {
         "promoted": promoted,
         "config": override if promoted else None,
-        "baseline_test_top1": round(base_test, 3),
-        "tuned_test_top1": round(tuned_test, 3),
-        "train_top1": round(best_train, 3),
+        "baseline_test_top1": round(mean_base, 3),
+        "tuned_test_top1": round(mean_tuned, 3),
+        "train_top1": round(best_search, 3),
+        "holdout_wins": wins,
+        "holdout_splits": n_splits,
         "n_targets": len(targets),
-        "reason": "beat baseline on held-out" if promoted else "no held-out improvement",
+        "reason": reason,
     }

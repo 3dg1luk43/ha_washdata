@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import datetime
-from typing import Any, Optional, TYPE_CHECKING
+from typing import Any, Callable, Optional, TYPE_CHECKING
 
 import numpy as np
 from homeassistant.core import HomeAssistant
@@ -310,7 +311,13 @@ class LearningManager:
             self._logger.error("Background simulation failed: %s", e)
 
     def _update_operational_suggestions(self, now: datetime) -> None:
-        """Generate suggestions for operational parameters (intervals, timeouts)."""
+        """Generate suggestions for operational parameters (intervals, timeouts).
+
+        The cadence stats (p95/median) are read on the event loop and captured as
+        immutable snapshots; the historical-trace scan inside
+        ``generate_operational_suggestions`` is offloaded to an executor thread by
+        ``_dispatch_scan_and_apply`` so it never runs on the loop.
+        """
         if self._sample_interval_model.count < 20:
             return
 
@@ -320,14 +327,63 @@ class LearningManager:
         if p95 is None or median is None:
             return
 
-        suggestions = self.suggestion_engine.generate_operational_suggestions(p95, median)
-        self._apply_suggestions_and_notify(suggestions)
+        # Throttle before dispatching so repeated readings within the window do
+        # not schedule overlapping passes.
         self._last_suggestion_update = now
+        self._dispatch_scan_and_apply(
+            lambda: self.suggestion_engine.generate_operational_suggestions(p95, median),
+            "Operational",
+        )
 
     def _update_model_suggestions(self, now: datetime) -> None:
-        """Generate suggestions for model parameters (tolerances, ratios)."""
-        suggestions = self.suggestion_engine.generate_model_suggestions()
-        self._apply_suggestions_and_notify(suggestions)
+        """Generate suggestions for model parameters (tolerances, ratios).
+
+        The historical-cycle scan inside ``generate_model_suggestions`` is
+        offloaded to an executor thread by ``_dispatch_scan_and_apply``.
+        """
+        self._dispatch_scan_and_apply(
+            self.suggestion_engine.generate_model_suggestions,
+            "Model",
+        )
+
+    def _dispatch_scan_and_apply(
+        self, generate: Callable[[], dict[str, Any]], label: str
+    ) -> None:
+        """Run a heavy suggestion scan off the event loop, then apply results.
+
+        ``generate`` is a pure suggestion-engine call that scans historical power
+        traces (up to ~100-200 cycles) and is too heavy to run on the event loop.
+        When a running loop is present (normal operation) the scan is offloaded to
+        an executor thread and the resulting suggestions are applied back on the
+        loop. In a synchronous context with no running loop (unit tests / direct
+        callers) it runs inline so results are observable immediately. ``generate``
+        must only read shared state and return suggestions — the state mutation
+        (``_apply_suggestions_and_notify``) always runs on the loop.
+        """
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            # No running event loop: run inline (synchronous callers / unit tests).
+            try:
+                suggestions = generate()
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                self._logger.error("%s suggestion pass failed: %s", label, e)
+                return
+            if suggestions:
+                self._apply_suggestions_and_notify(suggestions)
+            return
+        self.hass.async_create_task(self._async_scan_and_apply(generate, label))
+
+    async def _async_scan_and_apply(
+        self, generate: Callable[[], dict[str, Any]], label: str
+    ) -> None:
+        """Offload ``generate`` to an executor thread, then apply on the loop."""
+        try:
+            suggestions = await self.hass.async_add_executor_job(generate)
+            if suggestions:
+                self._apply_suggestions_and_notify(suggestions)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.error("%s suggestion pass failed: %s", label, e)
 
     def _update_detection_suggestions(self) -> None:
         """Generate statistical detection suggestions from clean cycles.
@@ -362,14 +418,20 @@ class LearningManager:
         try:
             model = self._sample_interval_model
             if model.count >= 20 and model.p95 is not None and model.median is not None:
-                self._apply_suggestions_and_notify(
-                    self.suggestion_engine.generate_operational_suggestions(model.p95, model.median)
+                p95, median = model.p95, model.median
+                op = await self.hass.async_add_executor_job(
+                    self.suggestion_engine.generate_operational_suggestions, p95, median
                 )
-            self._apply_suggestions_and_notify(
-                self.suggestion_engine.generate_model_suggestions()
+                if op:
+                    self._apply_suggestions_and_notify(op)
+            model_sug = await self.hass.async_add_executor_job(
+                self.suggestion_engine.generate_model_suggestions
             )
+            if model_sug:
+                self._apply_suggestions_and_notify(model_sug)
             await self._async_run_detection_suggestions()
-            cycles = self.profile_store.get_past_cycles()
+            # Snapshot the live cycles list before handing it to the executor.
+            cycles = list(self.profile_store.get_past_cycles())
             batch = await self.hass.async_add_executor_job(
                 self.suggestion_engine.run_batch_simulation, cycles
             )

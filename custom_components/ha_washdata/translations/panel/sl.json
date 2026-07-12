@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% bolje od osnovne ocene ({metric})",
     "trend_improving_tip": "Prileganje tega modela se je v zadnjih ponovnih preverjanjih izboljšalo.",
     "trend_declining_tip": "Prileganje tega modela se je v zadnjih ponovnih preverjanjih poslabšalo, pregled več ciklov mu lahko pomaga, da se ponovno nauči.",
-    "trend_steady_tip": "Prileganje tega modela je v zadnjih ponovnih preverjanjih ostalo približno enako."
+    "trend_steady_tip": "Prileganje tega modela je v zadnjih ponovnih preverjanjih ostalo približno enako.",
+    "cap_blurb": {
+      "end": "Prepoznavanje, kdaj se je cikel resnično končal",
+      "live_match": "Hitrejše prepoznavanje delujočega programa",
+      "quality": "Odkrivanje napačno zaznanih ali poškodovanih ciklov",
+      "remaining_time": "Napovedovanje preostalega časa",
+      "total_energy": "Napovedovanje skupne porabe energije in stroškov"
+    },
+    "cap_label": {
+      "end": "Zaznavanje konca cikla",
+      "live_match": "Prepoznavanje programa",
+      "quality": "Preverjanje kakovosti cikla",
+      "remaining_time": "Ocena preostalega časa",
+      "total_energy": "Ocena porabe energije"
+    },
+    "metric_auc": "AUC {auc} na ločenih podatkih",
+    "metric_mae": "napaka {model} v primerjavi z izhodiščem {baseline}"
   },
   "modal": {
     "auto_label": "Samodejno označevanje ciklov",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Izberite cikel in kliknite ↺ za nalaganje",
     "pg_sweep_progress": "Korak {done} / {total}",
     "pg_analysis_hint": "Izberite cikel in kliknite ↺ za nalaganje analize.",
-    "diagnostics_load_failed": "Diagnostike ni bilo mogoče naložiti: {error}"
+    "diagnostics_load_failed": "Diagnostike ni bilo mogoče naložiti: {error}",
+    "manual_duration_ref_hint": "Uporablja se samo, kadar ni izbran noben referenčni cikel. Referenčni cikel nastavi trajanje glede na svojo dolžino.",
+    "toast_convert_rolled_back": "Pretvorba ni uspela in je bila razveljavljena (nobena avtomatizacija ni ostala): {error}",
+    "toast_convert_orphan": "Avtomatizacija je bila ustvarjena, vendar čiščenje starih dejanj ni uspelo. Ne poskušajte znova: stara dejanja odstranite ročno, da se izognete podvojeni avtomatizaciji.",
+    "advisory_duration_trend_up": "Cikli programa '{name}' postajajo vse daljši (približno +{pct}% na cikel). Če se je vedenje naprave spremenilo, ponovno posnemite ali obnovite ta profil.",
+    "advisory_energy_trend_up": "Program '{name}' porablja vse več energije (približno +{pct}% na cikel) - če je to nepričakovano, preverite napravo.",
+    "advisory_poor_health": "Profil '{name}' ima nizko oceno ujemanja - njegovi nedavni cikli se močno razlikujejo ali se slabo ujemajo. Preglejte njegove cikle ali ponovno posnemite profil, da prepoznavanje in ocene časa ostanejo natančni.",
+    "advisory_shape_drift": "Profil '{name}' je znatno odstopil od prvotne oblike porabe moči. Naprava je morda sčasoma spremenila vedenje (npr. vodni kamen, obraba). Razmislite o ponovnem snemanju tega profila z nedavnimi cikli.",
+    "advisory_shape_drift_corr": "Profil '{name}' je znatno odstopil od prvotne oblike porabe moči (korelacija {corr}). Naprava je morda sčasoma spremenila vedenje (npr. vodni kamen, obraba). Razmislite o ponovnem snemanju tega profila z nedavnimi cikli."
   },
   "phase_desc": {
     "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",
@@ -1302,6 +1326,39 @@
         "higher": "Dovoli daljše tihe faze; manj lažnih prisilnih ustavitev",
         "lower": "Zataknjena cikle zaznava bolj agresivno"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "Zaupanje 15. percentila za {cycles} samodejnih oznak, ki jih uporabnik ni nikoli popravil ({p15}).",
+      "completion_min_seconds": "Polovica trajanja čistega cikla p05 ({minutes} min) čez {cycles} ciklov; odfiltrira lažne cikle.{excl}",
+      "dead_zone_batch": "Ohranjeno kratko (mediana okna nestabilnosti ob zagonu čez {cycles} ciklov = {s}s), da se resnični konec zazna nemudoma.",
+      "dead_zone_from_dip": "Na podlagi zgodnjega padca moči, zaznanega pri {s}s.",
+      "end_energy_default": "Privzeta priporočena izhodiščna vrednost za prag šuma ob koncu cikla.",
+      "end_energy_false": "Energija lažnih koncev p95 ({p95}Wh) čez {cycles} ciklov, z najnižjo mejo 0,2 % mediane energije cikla ({floor}Wh).",
+      "end_energy_no_false": "Ni lažnih koncev čez {cycles} ciklov; z najnižjo mejo 0,2 % mediane energije cikla ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} čistih ciklov ({pct}%) je imelo notranji premor, daljši od 60s, ki se je nadaljeval; zahtevaj {val} potrditev konca.",
+      "learning_confidence": "Zaupanje p05 za {cycles} uporabniško označenih ciklov ({p05}); pod to vrednostjo zahtevaj preverjanje.",
+      "match_interval": "Na podlagi opažene frekvence posodobitev (mediana={median}s) * 10.",
+      "max_duration_ratio": "Na podlagi trajanj označenih ciklov (p95={p95}).",
+      "min_active": "Na podlagi najmanjše delovne moči ({min}W), opažene v zadnjem ciklu.",
+      "min_duration_ratio": "Ohranjeno čim nižje, da se program prepozna zgodaj v ciklu; pragova zaupanja in dvoumnosti preprečujeta prezgodnje potrditve.",
+      "min_off_gap": "Na podlagi {gaps} opaženih vrzeli med cikli (p05={p05}s). Spodnja meja naprave: {floor}s.",
+      "min_power": "40 % najnižje delovne moči p05 ({p05}W) čez {cycles} čistih ciklov, da prag izklopa ostane pod dejansko porabo.{excl}",
+      "ml_auto_label": "Najnižje zaupanje, ki ga je model kakovosti še ocenil kot čisto (p10 od {cycles} čistih ciklov = {p10}).",
+      "ml_end_repeat": "{false}/{total} ciklov ({pct}%) je imelo premor, ki ga je detektor konca ocenil z >50 %; zahtevaj {val} potrditev konca.",
+      "ml_off_delay": "Premori, potrjeni z detektorjem konca: p95 {p95}s + 60s rezerve, iz {pauses} z modelom preverjenih premorov čez {cycles} ciklov (spodnja meja {floor}s).",
+      "no_update_timeout": "Na podlagi opažene frekvence posodobitev (p95={p95}s) * 20 (najmanj 60s).",
+      "off_delay_cadence": "Na podlagi opažene frekvence posodobitev (p95={p95}s) * 5",
+      "off_delay_device_floor": "Uporabljen varni minimum, značilen za napravo {device} ({floor}s).",
+      "off_delay_generic_floor": "Uporabljen splošni varni minimum ({floor}s).",
+      "off_delay_pauses": "Nastavljeno tako, da preseže resnične premore: premor znotraj cikla p95 {p95}s + 60s rezerve, iz {pauses} premorov čez {cycles} čistih ciklov (spodnja meja {floor}s).",
+      "profile_match_threshold": "Zaupanje p10 za {cycles} pravilnih samodejnih oznak ({p10}); varna spodnja meja za sprotno potrditev.",
+      "sampling_interval": "Mediana intervala posodobitev, opažena čez {cycles} čistih ciklov ({si}s).{excl}",
+      "smoothing_window": "Nastavljeno za glajenje ~30s meritev pri vzorčenju {si}s ({samples} vzorcev).",
+      "start_duration": "Ohranjeno kratko (~en interval vzorčenja {si}s), da se zaznavanje začne čim prej, hkrati pa še vedno prezre posamezne konice.",
+      "thr_batch": "Ohranjeno tik nad najnižjo delovno močjo p05 čez {cycles} ciklov ({p05}W), da se začetek zazna čim prej in da prag ustavitve ostane pod najnižjo delovno močjo naprave.",
+      "tol_per_profile": "p75 variance trajanja po posameznih profilih čez {profiles} profilov ({cycles} ciklov); dosledni profili niso kaznovani.",
+      "tol_pooled": "Na podlagi združene variance trajanja {cycles} nedavnih označenih ciklov (p95 odklon={dev}).",
+      "watchdog": "Ohranjeno tako nizko, kot je varno (3x vrzel posodobitve p95 {p95}s, najmanj 30s), da se zastoji hitro zaznajo brez lažnih ustavitev."
     }
   },
   "tab": {
@@ -1394,7 +1451,8 @@
     "reminders_save_failed": "Opomnikov ni bilo mogoče shraniti: {error}",
     "reminders_saved": "Opomniki za servis shranjeni",
     "pause_no_cycle": "Ni aktivnega cikla za začasno zaustavitev",
-    "resume_no_cycle": "Ni začasno zaustavljenega cikla za nadaljevanje"
+    "resume_no_cycle": "Ni začasno zaustavljenega cikla za nadaljevanje",
+    "delete_partial_failed": "Nekaterih elementov ni bilo mogoče izbrisati in so bili obnovljeni"
   },
   "trend": {
     "down": "Padajoči trend",

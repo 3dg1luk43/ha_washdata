@@ -180,7 +180,8 @@ def resample_to_n(power: list[float], n: int) -> list[float]:
         return [float(src[0])] * n
     src_x = np.linspace(0.0, 1.0, src.size)
     dst_x = np.linspace(0.0, 1.0, n)
-    return list(np.interp(dst_x, src_x, src))
+    # Return native Python floats (not np.float64) so callers/JSON get plain floats.
+    return [float(v) for v in np.interp(dst_x, src_x, src)]
 
 
 def resample_adaptive(

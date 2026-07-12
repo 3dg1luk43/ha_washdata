@@ -486,7 +486,23 @@
     "better_than_baseline": "ベースライン推定より {pct}% 良好（{metric}）",
     "trend_improving_tip": "このモデルのフィットは最近の再チェックで改善しました。",
     "trend_declining_tip": "このモデルのフィットは最近の再チェックで低下しました。さらにサイクルをレビューすると再学習に役立つ場合があります。",
-    "trend_steady_tip": "このモデルのフィットは最近の再チェックでおおむね安定しています。"
+    "trend_steady_tip": "このモデルのフィットは最近の再チェックでおおむね安定しています。",
+    "cap_blurb": {
+      "end": "サイクルが本当に終了したタイミングを把握する",
+      "live_match": "実行中のプログラムをより早く識別する",
+      "quality": "誤検出や不完全なサイクルを見つける",
+      "remaining_time": "残り時間を予測する",
+      "total_energy": "総消費エネルギーとコストを予測する"
+    },
+    "cap_label": {
+      "end": "サイクル終了の検出",
+      "live_match": "プログラム照合",
+      "quality": "サイクル品質チェック",
+      "remaining_time": "残り時間の推定",
+      "total_energy": "エネルギー推定"
+    },
+    "metric_auc": "検証データでの AUC {auc}",
+    "metric_mae": "誤差 {model} vs ベースライン {baseline}"
   },
   "modal": {
     "auto_label": "自動ラベル付けサイクル",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "サイクルを選択し、↺ をクリックして読み込みます",
     "pg_sweep_progress": "ステップ {done} / {total}",
     "pg_analysis_hint": "サイクルを選択し、↺ をクリックして分析を読み込みます。",
-    "diagnostics_load_failed": "診断を読み込めませんでした: {error}"
+    "diagnostics_load_failed": "診断を読み込めませんでした: {error}",
+    "manual_duration_ref_hint": "基準サイクルが選択されていない場合にのみ使用されます。基準サイクルは、自身の長さから持続時間を設定します。",
+    "toast_convert_rolled_back": "変換に失敗し、ロールバックされました（オートメーションは残っていません）: {error}",
+    "toast_convert_orphan": "オートメーションは作成されましたが、古いアクションのクリアに失敗しました。再試行しないでください。オートメーションの重複を避けるため、古いアクションを手動で削除してください。",
+    "advisory_duration_trend_up": "'{name}' のサイクルが次第に長くなっています（1サイクルあたり約 +{pct}%）。機器の動作が変わった場合は、このプロファイルを再記録または再構築してください。",
+    "advisory_energy_trend_up": "'{name}' の消費エネルギーが次第に増えています（1サイクルあたり約 +{pct}%）。想定外であれば機器を確認することをおすすめします。",
+    "advisory_poor_health": "'{name}' の適合スコアが低くなっています。最近のサイクルはばらつきが大きい、または照合が弱いようです。照合と時間推定の精度を保つため、サイクルを確認するかプロファイルを再記録してください。",
+    "advisory_shape_drift": "'{name}' が元の電力波形から大きく変化しています。機器の動作が時間とともに変わった可能性があります（例: 石灰の付着、摩耗）。最近のサイクルでこのプロファイルを再記録することを検討してください。",
+    "advisory_shape_drift_corr": "'{name}' が元の電力波形から大きく変化しています（相関 {corr}）。機器の動作が時間とともに変わった可能性があります（例: 石灰の付着、摩耗）。最近のサイクルでこのプロファイルを再記録することを検討してください。"
   },
   "pg_desc": {
     "abrupt_drop_watts": "急激な低下は即時終了として扱う",
@@ -1342,7 +1366,8 @@
     "reminders_save_failed": "リマインダーを保存できませんでした: {error}",
     "reminders_saved": "サービスリマインダーを保存しました",
     "pause_no_cycle": "一時停止できるアクティブなサイクルがありません",
-    "resume_no_cycle": "再開できる一時停止中のサイクルがありません"
+    "resume_no_cycle": "再開できる一時停止中のサイクルがありません",
+    "delete_partial_failed": "一部の項目を削除できなかったため、復元されました"
   },
   "suggestion": {
     "both_agree": "WashDataの推奨",
@@ -1405,6 +1430,39 @@
         "higher": "より長い静止フェーズが許可されます。誤った強制停止が少なくなります",
         "lower": "停止したサイクルをより積極的に検出します"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "ユーザーが一度も修正しなかった {cycles} 件の自動ラベルの15パーセンタイル信頼度（{p15}）。",
+      "completion_min_seconds": "{cycles} サイクルにわたる p05 の正常サイクル時間の半分（{minutes} min）。誤検出サイクルを除外します。{excl}",
+      "dead_zone_batch": "短めに設定（{cycles} サイクルの起動時の不安定期間の中央値 = {s}s）。これにより本当の終了を速やかに検出します。",
+      "dead_zone_from_dip": "{s}s で検出された初期の電力低下に基づく。",
+      "end_energy_default": "サイクル終了時のノイズゲートに推奨される既定値。",
+      "end_energy_false": "{cycles} サイクルにわたる p95 の誤終了エネルギー（{p95}Wh）。サイクルエネルギー中央値の 0.2%（{floor}Wh）を下限とします。",
+      "end_energy_no_false": "{cycles} サイクルで誤終了なし。サイクルエネルギー中央値の 0.2%（{floor}Wh）を下限とします。",
+      "end_repeat_count": "{false}/{total} 件の正常サイクル（{pct}%）で、再開を伴う 60s を超える内部の一時停止がありました。{val} 回の終了確認を要求します。",
+      "learning_confidence": "{cycles} 件のユーザーラベル付きサイクルの p05 信頼度（{p05}）。これを下回る場合は確認を要求します。",
+      "match_interval": "観測された更新間隔に基づく（中央値={median}s）* 10。",
+      "max_duration_ratio": "ラベル付きサイクル時間に基づく（p95={p95}）。",
+      "min_active": "直近のサイクルで観測された最小の稼働電力（{min}W）に基づく。",
+      "min_duration_ratio": "プログラムをサイクルの早い段階で識別できるよう、できるだけ低く設定。信頼度と曖昧さのゲートが早すぎる確定を防ぎます。",
+      "min_off_gap": "観測された {gaps} 件のサイクル間の間隔に基づく（p05={p05}s）。機器の下限: {floor}s。",
+      "min_power": "{cycles} 件の正常サイクルにわたる p05 の最低稼働電力（{p05}W）の 40%。オフゲートを実際の消費電力より低く保ちます。{excl}",
+      "ml_auto_label": "品質モデルが正常と判定した最低の信頼度（{cycles} 件の正常サイクルの p10 = {p10}）。",
+      "ml_end_repeat": "{false}/{total} サイクル（{pct}%）で、終了検出器が 50% を超えるスコアを付けた一時停止がありました。{val} 回の終了確認を要求します。",
+      "ml_off_delay": "終了検出器が確認した一時停止: p95 {p95}s + 60s のバッファ。{cycles} サイクルにわたるモデル検証済みの一時停止 {pauses} 件から算出（下限 {floor}s）。",
+      "no_update_timeout": "観測された更新間隔に基づく（p95={p95}s）* 20（最小 60s）。",
+      "off_delay_cadence": "観測された更新間隔に基づく（p95={p95}s）* 5",
+      "off_delay_device_floor": "{device} 向けの機器固有の安全な最小値を使用（{floor}s）。",
+      "off_delay_generic_floor": "汎用の安全な最小値を使用（{floor}s）。",
+      "off_delay_pauses": "実際の一時停止を上回るよう設定: p95 のサイクル内一時停止 {p95}s + 60s のバッファ。{cycles} 件の正常サイクルにわたる {pauses} 件の一時停止から算出（下限 {floor}s）。",
+      "profile_match_threshold": "{cycles} 件の正しい自動ラベルの p10 信頼度（{p10}）。安全なライブ確定の下限。",
+      "sampling_interval": "{cycles} 件の正常サイクルにわたって観測された更新間隔の中央値（{si}s）。{excl}",
+      "smoothing_window": "{si}s のサンプリングで約 30s 分の測定値を平滑化するよう設定（{samples} サンプル）。",
+      "start_duration": "短めに設定（約 1 回の {si}s サンプル間隔）。単一サンプルのスパイクを無視しつつ、検出をできるだけ早く開始します。",
+      "thr_batch": "{cycles} サイクルにわたる p05 の最低稼働電力（{p05}W）のすぐ上に設定。これにより開始をできるだけ早く捉え、停止しきい値は機器の最低稼働電力を下回ったままになります。",
+      "tol_per_profile": "{profiles} 件のプロファイル（{cycles} サイクル）にわたるプロファイルごとの時間分散の p75。ばらつきの小さいプロファイルは不利になりません。",
+      "tol_pooled": "{cycles} 件の直近のラベル付きサイクルの統合時間分散に基づく（p95 偏差={dev}）。",
+      "watchdog": "安全な範囲でできるだけ低く設定（p95 の更新間隔 {p95}s の 3 倍、最小 30s）。誤った停止なしに停滞を素早く検出します。"
     }
   },
   "trend": {

@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} 检测到幽灵周期。建议的 min_power 更改：{current_min}W -> {new_min}W（不会自动应用）。",
       "timer_default_message": "{device}：{minutes} 分钟定时器",
       "timer_pause_action_title": "恢复周期",
-      "timer_pause_body_suffix": "周期已暂停。打开 WashData 面板以恢复。"
+      "timer_pause_body_suffix": "周期已暂停。打开 WashData 面板以恢复。",
+      "notify_live_waiting_message": "{device}：尚未匹配到配置文件。",
+      "vs_typical_longer": "比平常长 {pct}%",
+      "vs_typical_shorter": "比平常短 {pct}%"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "匹配歧义"
+        "name": "歧义评分"
       },
       "current_phase": {
         "name": "当前阶段"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "没有可暂停或恢复的活动周期。"
+    },
+    "path_not_allowed": {
+      "message": "路径不被允许：{path}。请将其目录添加到 configuration.yaml 中的 'allowlist_external_dirs'。"
+    },
+    "create_profile_failed": {
+      "message": "无法创建配置文件：{error}"
+    },
+    "export_path_exists": {
+      "message": "导出目标已存在：{path}。请选择其他路径，或先移除现有文件。"
+    },
+    "export_write_failed": {
+      "message": "无法将导出写入 {path}：{error}"
     }
   },
   "intent": {

@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} oppdaget spøkelsessykluser. Foreslått endring av min_effekt: {current_min}W -> {new_min}W (ikke brukt automatisk).",
       "timer_default_message": "{device}: {minutes} min. timer",
       "timer_pause_action_title": "Fortsett syklus",
-      "timer_pause_body_suffix": "Syklusen er satt på pause. Åpne WashData-panelet for å fortsette."
+      "timer_pause_body_suffix": "Syklusen er satt på pause. Åpne WashData-panelet for å fortsette.",
+      "notify_live_waiting_message": "{device}: Ingen profil gjenkjent ennå.",
+      "vs_typical_longer": "{pct}% lengre enn vanlig",
+      "vs_typical_shorter": "{pct}% kortere enn vanlig"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Matchtvetydighet"
+        "name": "Tvetydighetsscore"
       },
       "current_phase": {
         "name": "Nåværende fase"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Ingen aktiv syklus å pause eller gjenoppta."
+    },
+    "path_not_allowed": {
+      "message": "Stien er ikke tillatt: {path}. Legg til katalogen dens i 'allowlist_external_dirs' i configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Kunne ikke opprette profil: {error}"
+    },
+    "export_path_exists": {
+      "message": "Eksportmålet finnes allerede: {path}. Velg en annen sti, eller fjern den eksisterende filen først."
+    },
+    "export_write_failed": {
+      "message": "Kunne ikke skrive eksporten til {path}: {error}"
     }
   },
   "intent": {

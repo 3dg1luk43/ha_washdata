@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} tuvastas kummitustsüklit. Soovitatav min_võimsuse muutus: {current_min}W -> {new_min}W (ei rakendata automaatselt).",
       "timer_default_message": "{device}: {minutes} min taimer",
       "timer_pause_action_title": "Tsükli jätkamine",
-      "timer_pause_body_suffix": "Tsükkel on peatatud. Jätkamiseks avage WashData paneel."
+      "timer_pause_body_suffix": "Tsükkel on peatatud. Jätkamiseks avage WashData paneel.",
+      "notify_live_waiting_message": "{device}: Ühtki profiili pole veel tuvastatud.",
+      "vs_typical_longer": "{pct}% tavapärasest pikem",
+      "vs_typical_shorter": "{pct}% tavapärasest lühem"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Vaste ebamäärasus"
+        "name": "Ebamäärasuse skoor"
       },
       "current_phase": {
         "name": "Praegune faas"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Peatamiseks või jätkamiseks pole aktiivset tsüklit."
+    },
+    "path_not_allowed": {
+      "message": "Tee ei ole lubatud: {path}. Lisage selle kataloog jaotisse 'allowlist_external_dirs' failis configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Profiili loomine ebaõnnestus: {error}"
+    },
+    "export_path_exists": {
+      "message": "Ekspordi sihtkoht on juba olemas: {path}. Valige teine tee või eemaldage esmalt olemasolev fail."
+    },
+    "export_write_failed": {
+      "message": "Ekspordi kirjutamine faili {path} ebaõnnestus: {error}"
     }
   },
   "intent": {

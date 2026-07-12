@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} zistilo cykly duchov. Navrhovaná zmena minimálneho výkonu: {current_min}W -> {new_min}W (neaplikuje sa automaticky).",
       "timer_default_message": "{device}: časovač {minutes} min",
       "timer_pause_action_title": "Obnoviť cyklus",
-      "timer_pause_body_suffix": "Cyklus je pozastavený. Otvorte panel WashData na obnovenie."
+      "timer_pause_body_suffix": "Cyklus je pozastavený. Otvorte panel WashData na obnovenie.",
+      "notify_live_waiting_message": "{device}: Zatiaľ nebol rozpoznaný žiadny profil.",
+      "vs_typical_longer": "o {pct}% dlhšie než zvyčajne",
+      "vs_typical_shorter": "o {pct}% kratšie než zvyčajne"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Nejednoznačnosť zhody"
+        "name": "Skóre nejednoznačnosti"
       },
       "current_phase": {
         "name": "Aktuálna fáza"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Žiadny aktívny cyklus na pozastavenie alebo obnovenie."
+    },
+    "path_not_allowed": {
+      "message": "Cesta nie je povolená: {path}. Pridajte jej adresár do 'allowlist_external_dirs' v configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Nepodarilo sa vytvoriť profil: {error}"
+    },
+    "export_path_exists": {
+      "message": "Cieľ exportu už existuje: {path}. Vyberte inú cestu alebo najprv odstráňte existujúci súbor."
+    },
+    "export_write_failed": {
+      "message": "Nepodarilo sa zapísať export do {path}: {error}"
     }
   },
   "intent": {

@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} がゴースト サイクルを検出しました。推奨される min_power の変更: {current_min}W -> {new_min}W (自動的には適用されません)。",
       "timer_default_message": "{device}: {minutes} 分タイマー",
       "timer_pause_action_title": "サイクルを再開する",
-      "timer_pause_body_suffix": "サイクルが一時停止中です。再開するには WashData パネルを開いてください。"
+      "timer_pause_body_suffix": "サイクルが一時停止中です。再開するには WashData パネルを開いてください。",
+      "notify_live_waiting_message": "{device}: まだ一致するプロファイルがありません。",
+      "vs_typical_longer": "通常より {pct}% 長い",
+      "vs_typical_shorter": "通常より {pct}% 短い"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "照合の曖昧さ"
+        "name": "曖昧さスコア"
       },
       "current_phase": {
         "name": "現在のフェーズ"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "一時停止または再開できるアクティブなサイクルがありません。"
+    },
+    "path_not_allowed": {
+      "message": "パスは許可されていません：{path}。そのディレクトリを configuration.yaml の 'allowlist_external_dirs' に追加してください。"
+    },
+    "create_profile_failed": {
+      "message": "プロファイルを作成できませんでした：{error}"
+    },
+    "export_path_exists": {
+      "message": "エクスポート先はすでに存在します：{path}。別のパスを選択するか、既存のファイルを先に削除してください。"
+    },
+    "export_write_failed": {
+      "message": "エクスポートを{path}に書き込めませんでした：{error}"
     }
   },
   "intent": {

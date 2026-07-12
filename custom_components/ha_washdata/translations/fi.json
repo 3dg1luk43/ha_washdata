@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} havaitsi haamujaksoja. Ehdotettu minimitehon muutos: {current_min}W -> {new_min}W (ei käytössä automaattisesti).",
       "timer_default_message": "{device}: {minutes} min ajastin",
       "timer_pause_action_title": "Jatka sykliä",
-      "timer_pause_body_suffix": "Sykli on keskeytetty. Avaa WashData-paneeli jatkaaksesi."
+      "timer_pause_body_suffix": "Sykli on keskeytetty. Avaa WashData-paneeli jatkaaksesi.",
+      "notify_live_waiting_message": "{device}: Yhtään profiilia ei ole vielä tunnistettu.",
+      "vs_typical_longer": "{pct}% tavallista pidempi",
+      "vs_typical_shorter": "{pct}% tavallista lyhyempi"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Vastaavuuden epäselvyys"
+        "name": "Epäselvyyspisteet"
       },
       "current_phase": {
         "name": "Nykyinen vaihe"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Ei aktiivista jaksoa keskeyttää tai jatkaa."
+    },
+    "path_not_allowed": {
+      "message": "Polku ei ole sallittu: {path}. Lisää sen hakemisto asetukseen 'allowlist_external_dirs' tiedostossa configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Profiilin luominen epäonnistui: {error}"
+    },
+    "export_path_exists": {
+      "message": "Viennin kohde on jo olemassa: {path}. Valitse toinen polku tai poista ensin olemassa oleva tiedosto."
+    },
+    "export_write_failed": {
+      "message": "Viennin kirjoittaminen kohteeseen {path} epäonnistui: {error}"
     }
   },
   "intent": {

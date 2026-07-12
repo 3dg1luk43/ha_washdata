@@ -280,10 +280,10 @@ export interface ProfileEnvelope {
   avg: number[][];
   min: number[][];
   max: number[][];
-  target_duration: unknown;
-  avg_energy: unknown;
-  duration_std_dev: unknown;
-  cycle_count: unknown;
+  target_duration: number | null;
+  avg_energy: number | null;
+  duration_std_dev: number | null;
+  cycle_count: number;
 }
 
 export interface ProfileGroupInfo {

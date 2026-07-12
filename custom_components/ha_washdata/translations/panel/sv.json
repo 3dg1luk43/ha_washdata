@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% bättre än basuppskattningen ({metric})",
     "trend_improving_tip": "Den här modellens passning har förbättrats vid de senaste omkontrollerna.",
     "trend_declining_tip": "Den här modellens passning har försämrats vid de senaste omkontrollerna. Att granska fler cykler kan hjälpa den att lära om.",
-    "trend_steady_tip": "Den här modellens passning har hållit sig ungefär stabil vid de senaste omkontrollerna."
+    "trend_steady_tip": "Den här modellens passning har hållit sig ungefär stabil vid de senaste omkontrollerna.",
+    "cap_blurb": {
+      "end": "Veta när en cykel verkligen är klar",
+      "live_match": "Identifiera det pågående programmet snabbare",
+      "quality": "Upptäcka feldetekterade eller skadade cykler",
+      "remaining_time": "Förutsäga hur lång tid som är kvar",
+      "total_energy": "Förutsäga total energi och kostnad"
+    },
+    "cap_label": {
+      "end": "Detektering av cykelslut",
+      "live_match": "Programmatchning",
+      "quality": "Kvalitetskontroll av cykler",
+      "remaining_time": "Uppskattning av återstående tid",
+      "total_energy": "Energiuppskattning"
+    },
+    "metric_auc": "AUC {auc} på valideringsdata",
+    "metric_mae": "fel {model} mot baslinje {baseline}"
   },
   "modal": {
     "auto_label": "Automatisk märkning av cykler",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Välj en cykel och klicka på ↺ för att läsa in",
     "pg_sweep_progress": "Steg {done} / {total}",
     "pg_analysis_hint": "Välj en cykel och klicka på ↺ för att läsa in analysen.",
-    "diagnostics_load_failed": "Kunde inte läsa in diagnostik: {error}"
+    "diagnostics_load_failed": "Kunde inte läsa in diagnostik: {error}",
+    "manual_duration_ref_hint": "Används endast när ingen referenscykel är vald. En referenscykel anger varaktigheten utifrån sin egen längd.",
+    "toast_convert_rolled_back": "Konverteringen misslyckades och återställdes (ingen automatisering lämnades kvar): {error}",
+    "toast_convert_orphan": "Automatiseringen skapades, men rensningen av de gamla åtgärderna misslyckades. Försök inte igen: ta bort de gamla åtgärderna manuellt för att undvika en dubblerad automatisering.",
+    "advisory_duration_trend_up": "Cyklerna för '{name}' blir gradvis längre (cirka +{pct}% per cykel). Om apparatens beteende har förändrats, spela in eller bygg om profilen på nytt.",
+    "advisory_energy_trend_up": "'{name}' drar gradvis mer energi (cirka +{pct}% per cykel) - värt att kontrollera apparaten om det är oväntat.",
+    "advisory_poor_health": "'{name}' har ett lågt passningsvärde - dess senaste cykler varierar mycket eller matchar svagt. Granska dess cykler eller spela in profilen på nytt så att matchning och tidsuppskattningar förblir korrekta.",
+    "advisory_shape_drift": "'{name}' har drivit iväg avsevärt från sin ursprungliga effektkurva. Apparaten kan ha förändrat sitt beteende över tid (t.ex. kalkavlagringar, slitage). Överväg att spela in profilen på nytt med aktuella cykler.",
+    "advisory_shape_drift_corr": "'{name}' har drivit iväg avsevärt från sin ursprungliga effektkurva (korrelation {corr}). Apparaten kan ha förändrat sitt beteende över tid (t.ex. kalkavlagringar, slitage). Överväg att spela in profilen på nytt med aktuella cykler."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plötsligt fall som tolkas som omedelbart slut",
@@ -1313,6 +1337,39 @@
         "higher": "Längre tysta faser tillåts – färre oavsiktliga tvångsstopp",
         "lower": "Detekterar fasta cykler snabbare"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "Konfidens vid 15:e percentilen för {cycles} automatiska etiketter som användaren aldrig korrigerade ({p15}).",
+      "completion_min_seconds": "Hälften av p05-varaktigheten för rena cykler ({minutes} min) över {cycles} cykler; filtrerar bort spökcykler.{excl}",
+      "dead_zone_batch": "Hålls kort (median för uppstartsinstabilitetsfönstret över {cycles} cykler = {s}s) så att ett verkligt slut upptäcks snabbt.",
+      "dead_zone_from_dip": "Baserat på ett tidigt effektfall som upptäcktes vid {s}s.",
+      "end_energy_default": "Standardrekommenderad baslinje för brusgränsen vid cykelslut.",
+      "end_energy_false": "p95 för energi vid falska slut ({p95}Wh) över {cycles} cykler, med golv på 0.2% av medianens cykelenergi ({floor}Wh).",
+      "end_energy_no_false": "Inga falska slut över {cycles} cykler; med golv på 0.2% av medianens cykelenergi ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} rena cykler ({pct}%) hade en intern paus på >60s som återupptogs; kräver {val} slutbekräftelse(r).",
+      "learning_confidence": "p05-konfidens för {cycles} användarmärkta cykler ({p05}); under detta begärs verifiering.",
+      "match_interval": "Baserat på observerad uppdateringstakt (median={median}s) * 10.",
+      "max_duration_ratio": "Baserat på varaktigheter för märkta cykler (p95={p95}).",
+      "min_active": "Baserat på lägsta aktiva effekt ({min}W) som observerades i senaste cykeln.",
+      "min_duration_ratio": "Hålls så låg som möjligt så att ett program känns igen tidigt i cykeln; konfidens- och tvetydighetsgränserna förhindrar förhastade beslut.",
+      "min_off_gap": "Baserat på {gaps} observerade mellanrum mellan cykler (p05={p05}s). Enhetsgolv: {floor}s.",
+      "min_power": "40% av den lägsta aktiva effekten vid p05 ({p05}W) över {cycles} rena cykler, vilket håller av-tröskeln under verklig förbrukning.{excl}",
+      "ml_auto_label": "Lägsta konfidens som kvalitetsmodellen fortfarande bedömde som ren (p10 av {cycles} rena cykler = {p10}).",
+      "ml_end_repeat": "{false}/{total} cykler ({pct}%) hade en paus som slutdetektorn bedömde till >50%; kräver {val} slutbekräftelse(r).",
+      "ml_off_delay": "Pauser bekräftade av slutdetektorn: p95 {p95}s + 60s buffert, från {pauses} modellverifierade pauser över {cycles} cykler (golv {floor}s).",
+      "no_update_timeout": "Baserat på observerad uppdateringstakt (p95={p95}s) * 20 (min 60s).",
+      "off_delay_cadence": "Baserat på observerad uppdateringstakt (p95={p95}s) * 5",
+      "off_delay_device_floor": "Använde ett enhetsspecifikt säkert minimum för {device} ({floor}s).",
+      "off_delay_generic_floor": "Använde ett generiskt säkert minimum ({floor}s).",
+      "off_delay_pauses": "Dimensionerad för att vara längre än verkliga pauser: p95 för pauser inom cykeln {p95}s + 60s buffert, från {pauses} pauser över {cycles} rena cykler (golv {floor}s).",
+      "profile_match_threshold": "p10-konfidens för {cycles} korrekta automatiska etiketter ({p10}); säkert golv för direktmatchning.",
+      "sampling_interval": "Median för uppdateringsintervallet observerat över {cycles} rena cykler ({si}s).{excl}",
+      "smoothing_window": "Dimensionerad för att jämna ut ~30s avläsningar vid {si}s samplingsintervall ({samples} sampel).",
+      "start_duration": "Hålls kort (~ett samplingsintervall på {si}s) så att detekteringen börjar så tidigt som möjligt men fortfarande ignorerar enstaka toppar.",
+      "thr_batch": "Hålls precis över den lägsta aktiva effekten vid p05 över {cycles} cykler ({p05}W) så att en start fångas så tidigt som möjligt och stopptröskeln stannar under maskinens lägsta driftseffekt.",
+      "tol_per_profile": "p75 för varaktighetsvariansen per profil över {profiles} profiler ({cycles} cykler); snäva profiler bestraffas inte.",
+      "tol_pooled": "Baserat på sammanslagen varaktighetsvarians för {cycles} senaste märkta cykler (p95 avvikelse={dev}).",
+      "watchdog": "Hålls så lågt som är säkert (3x p95-uppdateringsmellanrummet på {p95}s, min 30s) så att stillestånd upptäcks snabbt utan falska stopp."
     }
   },
   "tab": {
@@ -1405,7 +1462,8 @@
     "reminders_save_failed": "Kunde inte spara påminnelser: {error}",
     "reminders_saved": "Servicepåminnelser sparade",
     "pause_no_cycle": "Ingen aktiv cykel att pausa",
-    "resume_no_cycle": "Ingen pausad cykel att återuppta"
+    "resume_no_cycle": "Ingen pausad cykel att återuppta",
+    "delete_partial_failed": "Vissa objekt kunde inte tas bort och återställdes"
   },
   "trend": {
     "down": "Nedåtgående trend",

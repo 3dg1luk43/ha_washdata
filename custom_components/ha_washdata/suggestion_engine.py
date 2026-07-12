@@ -56,12 +56,12 @@ from .time_utils import power_data_to_offsets
 # or fragmented by a mid-cycle restart) would poison the statistics, so it is
 # excluded before any suggestion is derived.
 _CLEAN_MIN_DURATION_S = 120.0          # shorter completed cycles are treated as noise
-_CLEAN_HIGH_START_RATIO = 0.5          # first active power >= this*peak => started mid-cycle
-_CLEAN_HIGH_START_WINDOW_S = 30.0      # ... reached within this many seconds of the start
+_CLEAN_HIGH_START_RATIO = 0.5          # first *sample* already >= this*peak (no lead-in) => started mid-cycle
 _CLEAN_ABRUPT_END_RATIO = 0.30         # mean tail power >= this*peak => cut off mid-operation
 _CLEAN_MID_RESTART_MIN_S = 600.0       # internal near-zero run >= this => merged/restarted
 _CLEAN_MID_RESTART_END_GUARD = 0.90    # ... and ending before this fraction (not the tail)
 _CLEAN_ACTIVE_FLOOR_RATIO = 0.02       # "active" means power above max(stop_thr, this*peak)
+_MAX_PAUSE_GAP_H = 1.0                  # a gap > this (hours) between samples is a data outage, not a pause
 
 
 def _cycle_readings(cycle: dict[str, Any]) -> list[tuple[float, float]]:
@@ -95,20 +95,27 @@ def _classify_cycle_health(
         return "no_power"
     active_thr = max(stop_threshold_w, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
 
-    # First active reading (and how long after the trace start it appears)
+    # First active reading (and its index within the trace)
     first_active_p: float | None = None
-    first_active_t: float | None = None
-    for t, p in readings:
+    first_active_i: int | None = None
+    for i, (_t, p) in enumerate(readings):
         if p >= active_thr:
-            first_active_p, first_active_t = p, t
+            first_active_p, first_active_i = p, i
             break
-    if first_active_p is None or first_active_t is None:
+    if first_active_p is None or first_active_i is None:
         return "no_active_power"
 
-    # High start: the trace opens at/near peak with no ramp-up (detection began
-    # after the appliance was already running, e.g. restored state).
     t0 = readings[0][0]
-    if (first_active_t - t0) < _CLEAN_HIGH_START_WINDOW_S and first_active_p >= _CLEAN_HIGH_START_RATIO * peak:
+
+    # High start: the trace's very first sample is already at/near peak, with no
+    # captured low-power lead-in.  When detection begins mid-cycle (e.g. restored
+    # state) the first recorded reading is already at operating power because the
+    # OFF->ON edge was never observed.  A cycle that legitimately begins at high
+    # power (pump, resistive heater) is still preceded by at least one
+    # below-active reading whenever the sensor captured that OFF->ON transition,
+    # so requiring the first active reading to be the very first sample
+    # (first_active_i == 0) avoids flagging those valid immediate-start cycles.
+    if first_active_i == 0 and first_active_p >= _CLEAN_HIGH_START_RATIO * peak:
         return "high_start"
 
     # Abrupt end: the tail is still drawing significant power, so the cycle was
@@ -304,6 +311,13 @@ def reconcile_suggestions(
             entry["value"] = rounded
             base = entry.get("reason", "")
             entry["reason"] = f"{base} Adjusted to {rounded} for consistency with {why}.".strip()
+            # The composed English reason now differs from the base suggestion's
+            # localization key, so drop the sidecars — the panel falls back to the
+            # (updated) English ``reason``. Reconcile-composed reasons embed both a
+            # nested base reason and a "why" fragment, which the flat single-key
+            # _t() mechanism cannot recompose; leaving English here is correct.
+            entry.pop("reason_key", None)
+            entry.pop("reason_params", None)
         elif entry is None:
             out[key] = {
                 "value": rounded,
@@ -473,14 +487,18 @@ class SuggestionEngine:
         suggested_watchdog = int(max(30, round(p95_dt * 3)))
         suggestions[CONF_WATCHDOG_INTERVAL] = {
             "value": suggested_watchdog,
-            "reason": f"Kept as low as safe (3x the p95 update gap of {p95_dt:.1f}s, min 30s) so stalls are caught quickly without false stops."
+            "reason": f"Kept as low as safe (3x the p95 update gap of {p95_dt:.1f}s, min 30s) so stalls are caught quickly without false stops.",
+            "reason_key": "suggestion.reason.watchdog",
+            "reason_params": {"p95": f"{p95_dt:.1f}"},
         }
 
         # 2. No Update Timeout
         suggested_timeout = int(max(60, p95_dt * 20))
         suggestions[CONF_NO_UPDATE_ACTIVE_TIMEOUT] = {
             "value": suggested_timeout,
-            "reason": f"Based on observed update cadence (p95={p95_dt:.1f}s) * 20 (min 60s)."
+            "reason": f"Based on observed update cadence (p95={p95_dt:.1f}s) * 20 (min 60s).",
+            "reason_key": "suggestion.reason.no_update_timeout",
+            "reason_params": {"p95": f"{p95_dt:.1f}"},
         }
 
         # 3. Off Delay
@@ -500,29 +518,41 @@ class SuggestionEngine:
         clean, _excl = select_clean_cycles(raw_cycles, stop_threshold_w=stop_thr)
         pause_based = self._suggest_off_delay_from_pauses(clean, stop_thr, device_floor)
 
+        reason_off_key: str | None = None
+        reason_off_params: dict[str, Any] | None = None
         if pause_based is not None:
-            suggested_off_delay, reason_off = pause_based
+            suggested_off_delay, reason_off, reason_off_key, reason_off_params = pause_based
         else:
             suggested_off_delay = int(max(device_floor, p95_dt * 5))
             reason_off = f"Based on observed update cadence (p95={p95_dt:.1f}s) * 5"
+            reason_off_key = "suggestion.reason.off_delay_cadence"
+            reason_off_params = {"p95": f"{p95_dt:.1f}"}
             if suggested_off_delay == device_floor:
                 if self.device_type and self.device_type in DEFAULT_OFF_DELAY_BY_DEVICE:
                     reason_off = (
                         f"Used device-specific safe minimum for {self.device_type} ({device_floor}s)."
                     )
+                    reason_off_key = "suggestion.reason.off_delay_device_floor"
+                    reason_off_params = {"device": self.device_type, "floor": device_floor}
                 else:
                     reason_off = f"Used generic safe minimum ({DEFAULT_OFF_DELAY}s)."
+                    reason_off_key = "suggestion.reason.off_delay_generic_floor"
+                    reason_off_params = {"floor": DEFAULT_OFF_DELAY}
 
         suggestions[CONF_OFF_DELAY] = {
             "value": suggested_off_delay,
-            "reason": reason_off
+            "reason": reason_off,
+            "reason_key": reason_off_key,
+            "reason_params": reason_off_params,
         }
 
         # 4. Profile Match Interval
         suggested_match = int(max(10, median_dt * 10))
         suggestions[CONF_PROFILE_MATCH_INTERVAL] = {
             "value": suggested_match,
-            "reason": f"Based on observed update cadence (median={median_dt:.1f}s) * 10."
+            "reason": f"Based on observed update cadence (median={median_dt:.1f}s) * 10.",
+            "reason_key": "suggestion.reason.match_interval",
+            "reason_params": {"median": f"{median_dt:.1f}"},
         }
 
         return suggestions
@@ -577,17 +607,34 @@ class SuggestionEngine:
                     f"{len(per_profile_p95)} profiles ({len(ratios)} cycles); "
                     f"tight profiles not penalised."
                 )
+                reason_tol_key = "suggestion.reason.tol_per_profile"
+                reason_tol_params: dict[str, Any] = {
+                    "profiles": len(per_profile_p95),
+                    "cycles": len(ratios),
+                }
             else:
                 agg_dev = float(np.percentile(np.abs(arr - 1.0), 95))
                 reason_tol = (
                     f"Based on pooled duration variance of {len(ratios)} recent "
                     f"labeled cycles (p95 dev={agg_dev:.2f})."
                 )
+                reason_tol_key = "suggestion.reason.tol_pooled"
+                reason_tol_params = {"cycles": len(ratios), "dev": f"{agg_dev:.2f}"}
 
             suggested_tol = min(0.50, max(0.10, round(agg_dev + 0.05, 2)))
 
-            suggestions[CONF_DURATION_TOLERANCE] = {"value": suggested_tol, "reason": reason_tol}
-            suggestions[CONF_PROFILE_DURATION_TOLERANCE] = {"value": suggested_tol, "reason": reason_tol}
+            suggestions[CONF_DURATION_TOLERANCE] = {
+                "value": suggested_tol,
+                "reason": reason_tol,
+                "reason_key": reason_tol_key,
+                "reason_params": reason_tol_params,
+            }
+            suggestions[CONF_PROFILE_DURATION_TOLERANCE] = {
+                "value": suggested_tol,
+                "reason": reason_tol,
+                "reason_key": reason_tol_key,
+                "reason_params": reason_tol_params,
+            }
 
             p95_ratio = float(np.percentile(arr, 95))
 
@@ -602,11 +649,15 @@ class SuggestionEngine:
             if min_r < max_r - 0.2:
                 suggestions[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] = {
                     "value": min_r,
-                    "reason": "Kept as low as possible so a program is recognised early in the cycle; the confidence and ambiguity gates prevent premature commits."
+                    "reason": "Kept as low as possible so a program is recognised early in the cycle; the confidence and ambiguity gates prevent premature commits.",
+                    "reason_key": "suggestion.reason.min_duration_ratio",
+                    "reason_params": {},
                 }
                 suggestions[CONF_PROFILE_MATCH_MAX_DURATION_RATIO] = {
                     "value": max_r,
-                    "reason": f"Based on labeled cycle durations (p95={p95_ratio:.2f})."
+                    "reason": f"Based on labeled cycle durations (p95={p95_ratio:.2f}).",
+                    "reason_key": "suggestion.reason.max_duration_ratio",
+                    "reason_params": {"p95": f"{p95_ratio:.2f}"},
                 }
 
         # Min-off-gap: derived from observed inter-cycle gaps
@@ -676,6 +727,12 @@ class SuggestionEngine:
                     f"Median update interval observed across {len(sampling_vals)} "
                     f"clean cycles ({observed_si:.1f}s).{excl_note}"
                 ),
+                "reason_key": "suggestion.reason.sampling_interval",
+                "reason_params": {
+                    "cycles": len(sampling_vals),
+                    "si": f"{observed_si:.1f}",
+                    "excl": excl_note,
+                },
             }
 
         si_for_calc = observed_si if observed_si else DEFAULT_SAMPLING_INTERVAL
@@ -688,6 +745,8 @@ class SuggestionEngine:
                 f"Sized to smooth ~30s of readings at {si_for_calc:.0f}s sampling "
                 f"({suggested_smooth} samples)."
             ),
+            "reason_key": "suggestion.reason.smoothing_window",
+            "reason_params": {"si": f"{si_for_calc:.0f}", "samples": suggested_smooth},
         }
 
         # --- Start debounce ---
@@ -701,6 +760,8 @@ class SuggestionEngine:
                 f"Kept short (~one {si_for_calc:.0f}s sample interval) so detection "
                 f"starts as early as possible while still ignoring single-sample spikes."
             ),
+            "reason_key": "suggestion.reason.start_duration",
+            "reason_params": {"si": f"{si_for_calc:.0f}"},
         }
 
         # --- min_power: keep the noise gate below the lowest genuine draw ---
@@ -722,6 +783,12 @@ class SuggestionEngine:
                     f"{len(lowest_active)} clean cycles, keeping the off-gate below "
                     f"real draw.{excl_note}"
                 ),
+                "reason_key": "suggestion.reason.min_power",
+                "reason_params": {
+                    "p05": f"{p05:.1f}",
+                    "cycles": len(lowest_active),
+                    "excl": excl_note,
+                },
             }
 
         # --- completion_min_seconds: filter ghosts below half the shortest run ---
@@ -741,6 +808,12 @@ class SuggestionEngine:
                     f"Half the p05 clean-cycle duration ({p05d / 60:.0f} min) across "
                     f"{len(durations)} cycles; filters ghost cycles.{excl_note}"
                 ),
+                "reason_key": "suggestion.reason.completion_min_seconds",
+                "reason_params": {
+                    "minutes": f"{p05d / 60:.0f}",
+                    "cycles": len(durations),
+                    "excl": excl_note,
+                },
             }
 
         # --- Confidence-calibrated thresholds (labeled clean cycles only) ---
@@ -789,6 +862,8 @@ class SuggestionEngine:
                     f"p05 confidence of {len(manual_conf)} user-labeled cycles "
                     f"({p05c:.2f}); below this, request verification."
                 ),
+                "reason_key": "suggestion.reason.learning_confidence",
+                "reason_params": {"cycles": len(manual_conf), "p05": f"{p05c:.2f}"},
             }
 
         if len(auto_ok_conf) >= 15:
@@ -799,6 +874,8 @@ class SuggestionEngine:
                     f"15th-percentile confidence of {len(auto_ok_conf)} auto-labels "
                     f"the user never corrected ({p15:.2f})."
                 ),
+                "reason_key": "suggestion.reason.auto_label_confidence",
+                "reason_params": {"cycles": len(auto_ok_conf), "p15": f"{p15:.2f}"},
             }
             p10 = float(np.percentile(auto_ok_conf, 10))
             suggestions[CONF_PROFILE_MATCH_THRESHOLD] = {
@@ -807,6 +884,8 @@ class SuggestionEngine:
                     f"p10 confidence of {len(auto_ok_conf)} correct auto-labels "
                     f"({p10:.2f}); safe live-commit floor."
                 ),
+                "reason_key": "suggestion.reason.profile_match_threshold",
+                "reason_params": {"cycles": len(auto_ok_conf), "p10": f"{p10:.2f}"},
             }
 
     def _suggest_end_repeat_count(
@@ -830,9 +909,17 @@ class SuggestionEngine:
             if peak <= 0:
                 continue
             active_thr = max(stop_threshold_w, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
+            max_gap_s = _MAX_PAUSE_GAP_H * 3600
             dead_start: float | None = None
             seen_active = False
+            prev_t: float | None = None
             for t, p in readings:
+                # A gap larger than the outage ceiling is a sensor dropout, not a
+                # pause: abandon the current low run so its untrustworthy span is
+                # not miscounted as a >60s false end.
+                if prev_t is not None and (t - prev_t) > max_gap_s:
+                    dead_start = None
+                prev_t = t
                 if p >= active_thr:
                     seen_active = True
                 if not seen_active:
@@ -861,6 +948,13 @@ class SuggestionEngine:
                 f"{n_false_end}/{n_total} clean cycles ({frac * 100:.0f}%) had a "
                 f">60s internal pause that resumed; require {val} end confirmation(s)."
             ),
+            "reason_key": "suggestion.reason.end_repeat_count",
+            "reason_params": {
+                "false": n_false_end,
+                "total": n_total,
+                "pct": f"{frac * 100:.0f}",
+                "val": val,
+            },
         }
 
     def _suggest_off_delay_from_pauses(
@@ -868,7 +962,7 @@ class SuggestionEngine:
         cycles: list[dict[str, Any]],
         stop_threshold_w: float,
         device_floor: int,
-    ) -> tuple[int, str] | None:
+    ) -> tuple[int, str, str, dict[str, Any]] | None:
         """Off-delay sized to outlast the longest genuine intra-cycle pause.
 
         Collects every low-power segment that *resumed* (a proven pause, not the
@@ -889,9 +983,16 @@ class SuggestionEngine:
             if peak <= 0:
                 continue
             active_thr = max(stop_threshold_w, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
+            max_gap_s = _MAX_PAUSE_GAP_H * 3600
             dead_start: float | None = None
             seen_active = False
+            prev_t: float | None = None
             for t, p in readings:
+                # An outage-sized gap between samples is a dropout, not a pause:
+                # abandon the current low run so its span never inflates the p95.
+                if prev_t is not None and (t - prev_t) > max_gap_s:
+                    dead_start = None
+                prev_t = t
                 if p < active_thr:
                     if dead_start is None:
                         dead_start = t
@@ -915,7 +1016,17 @@ class SuggestionEngine:
             f"+ 60s buffer, from {len(pause_durations)} pauses across {n_traced} "
             f"clean cycles (floor {device_floor}s)."
         )
-        return value, reason
+        return (
+            value,
+            reason,
+            "suggestion.reason.off_delay_pauses",
+            {
+                "p95": f"{p95_pause:.0f}",
+                "pauses": len(pause_durations),
+                "cycles": n_traced,
+                "floor": device_floor,
+            },
+        )
 
     def _suggest_min_off_gap(
         self, cycles: list[dict[str, Any]]
@@ -975,7 +1086,16 @@ class SuggestionEngine:
             f"Based on {len(gaps)} observed inter-cycle gaps "
             f"(p05={p05_gap:.0f}s). Device floor: {device_floor}s."
         )
-        return {"value": suggested, "reason": reason}
+        return {
+            "value": suggested,
+            "reason": reason,
+            "reason_key": "suggestion.reason.min_off_gap",
+            "reason_params": {
+                "gaps": len(gaps),
+                "p05": f"{p05_gap:.0f}",
+                "floor": device_floor,
+            },
+        }
 
     def run_simulation(self, cycle_data: dict[str, Any]) -> dict[str, Any]:
         """Replay a single cycle with varied parameters to find optimal settings.
@@ -1032,19 +1152,27 @@ class SuggestionEngine:
         return {
             CONF_STOP_THRESHOLD_W: {
                 "value": suggested_stop,
-                "reason": f"Based on minimum active power ({min_active:.1f}W) observed in last cycle."
+                "reason": f"Based on minimum active power ({min_active:.1f}W) observed in last cycle.",
+                "reason_key": "suggestion.reason.min_active",
+                "reason_params": {"min": f"{min_active:.1f}"},
             },
             CONF_START_THRESHOLD_W: {
                 "value": suggested_start,
-                "reason": f"Based on minimum active power ({min_active:.1f}W) observed in last cycle."
+                "reason": f"Based on minimum active power ({min_active:.1f}W) observed in last cycle.",
+                "reason_key": "suggestion.reason.min_active",
+                "reason_params": {"min": f"{min_active:.1f}"},
             },
             CONF_END_ENERGY_THRESHOLD: {
                 "value": suggested_end_energy,
-                "reason": "Default recommended baseline for end-of-cycle noise gate."
+                "reason": "Default recommended baseline for end-of-cycle noise gate.",
+                "reason_key": "suggestion.reason.end_energy_default",
+                "reason_params": {},
             },
             CONF_RUNNING_DEAD_ZONE: {
                 "value": suggested_dead_zone,
-                "reason": f"Based on early power dip detected at {suggested_dead_zone}s."
+                "reason": f"Based on early power dip detected at {suggested_dead_zone}s.",
+                "reason_key": "suggestion.reason.dead_zone_from_dip",
+                "reason_params": {"s": suggested_dead_zone},
             },
         }
 
@@ -1105,7 +1233,6 @@ class SuggestionEngine:
         false_end_energies: list[float] = []
         dead_zone_candidates: list[int] = []
 
-        _MAX_PAUSE_GAP_H = 1.0
         max_gap_s = _MAX_PAUSE_GAP_H * 3600
         for readings in valid_cycles:
             powers = np.array([p for _, p in readings])
@@ -1185,8 +1312,19 @@ class SuggestionEngine:
                 f"({p05_min:.1f}W) so a start is caught as early as possible and the "
                 f"stop threshold stays below the machine's lowest running power."
             )
-            suggestions[CONF_STOP_THRESHOLD_W] = {"value": suggested_stop, "reason": reason_thr}
-            suggestions[CONF_START_THRESHOLD_W] = {"value": suggested_start, "reason": reason_thr}
+            reason_thr_params = {"cycles": n, "p05": f"{p05_min:.1f}"}
+            suggestions[CONF_STOP_THRESHOLD_W] = {
+                "value": suggested_stop,
+                "reason": reason_thr,
+                "reason_key": "suggestion.reason.thr_batch",
+                "reason_params": reason_thr_params,
+            }
+            suggestions[CONF_START_THRESHOLD_W] = {
+                "value": suggested_start,
+                "reason": reason_thr,
+                "reason_key": "suggestion.reason.thr_batch",
+                "reason_params": reason_thr_params,
+            }
 
         # End-energy: p95 of resuming-pause energies (outlier-robust) with a
         # floor proportional to the cycle's own energy, not a fixed Wh value.
@@ -1199,13 +1337,29 @@ class SuggestionEngine:
                 f"p95 false-end energy ({p95_false:.4f}Wh) across {len(valid_cycles)} "
                 f"cycles, floored at 0.2% of median cycle energy ({prop_floor:.4f}Wh)."
             )
+            reason_end_key = "suggestion.reason.end_energy_false"
+            reason_end_params: dict[str, Any] = {
+                "p95": f"{p95_false:.4f}",
+                "cycles": len(valid_cycles),
+                "floor": f"{prop_floor:.4f}",
+            }
         else:
             suggested_end = round(max(0.01, prop_floor), 4)
             reason_end = (
                 f"No false ends across {len(valid_cycles)} cycles; floored at 0.2% "
                 f"of median cycle energy ({prop_floor:.4f}Wh)."
             )
-        suggestions[CONF_END_ENERGY_THRESHOLD] = {"value": suggested_end, "reason": reason_end}
+            reason_end_key = "suggestion.reason.end_energy_no_false"
+            reason_end_params = {
+                "cycles": len(valid_cycles),
+                "floor": f"{prop_floor:.4f}",
+            }
+        suggestions[CONF_END_ENERGY_THRESHOLD] = {
+            "value": suggested_end,
+            "reason": reason_end,
+            "reason_key": reason_end_key,
+            "reason_params": reason_end_params,
+        }
 
         if dead_zone_candidates:
             # Goal: as SHORT as safely possible so a real end is detected
@@ -1219,6 +1373,8 @@ class SuggestionEngine:
                     f"Kept short (median startup-instability window across "
                     f"{len(dead_zone_candidates)} cycles = {suggested_dz}s) so a real end is detected promptly."
                 ),
+                "reason_key": "suggestion.reason.dead_zone_batch",
+                "reason_params": {"cycles": len(dead_zone_candidates), "s": suggested_dz},
             }
 
         min_off_gap = self._suggest_min_off_gap(cycles)
@@ -1236,7 +1392,13 @@ class SuggestionEngine:
         :func:`reconcile_suggestions`).
         """
         for key, data in suggestions.items():
-            self.profile_store.set_suggestion(key, data["value"], reason=data["reason"])
+            self.profile_store.set_suggestion(
+                key,
+                data["value"],
+                reason=data["reason"],
+                reason_key=data.get("reason_key"),
+                reason_params=data.get("reason_params"),
+            )
         if suggestions:
             _LOGGER.info("Applied %d setting suggestion(s): %s", len(suggestions), ", ".join(sorted(suggestions)))
 
@@ -1253,7 +1415,13 @@ class SuggestionEngine:
         adjusted, changed = reconcile_suggestions(stored, self._entry_options())
         for key in changed:
             entry = adjusted[key]
-            self.profile_store.set_suggestion(key, entry["value"], reason=entry.get("reason"))
+            self.profile_store.set_suggestion(
+                key,
+                entry["value"],
+                reason=entry.get("reason"),
+                reason_key=entry.get("reason_key"),
+                reason_params=entry.get("reason_params"),
+            )
         if changed:
             _LOGGER.info("Reconciled coupled parameters for consistency: %s", ", ".join(sorted(changed)))
 
@@ -1326,25 +1494,42 @@ class MLSuggestionEngine:
         if peak <= 0:
             return []
         active_thr = max(stop_threshold_w, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
+        # Data-outage ceiling: the same pause-gap bound used elsewhere in this file
+        # (a real intra-cycle pause never exceeds ~1h). A gap larger than this
+        # between consecutive samples is a sensor dropout / restart, not a genuine
+        # pause; its span must not be counted as pause duration (it would inflate
+        # dur and, downstream, the p95 that sizes _ml_off_delay / off_delay_pauses).
+        max_gap_s = _MAX_PAUSE_GAP_H * 3600
         out: list[tuple[float, float | None]] = []
         in_low = False
+        seen_active = False
         low_start_s = 0.0
         for i, (t, p) in enumerate(points):
+            # Abandon a low run that straddles an outage: its duration is untrustworthy.
+            if i > 0 and (t - points[i - 1][0]) > max_gap_s:
+                in_low = False
             if not in_low and p < active_thr:
                 in_low = True
                 low_start_s = t
             elif in_low and p >= active_thr:
-                dur = points[i - 1][0] - low_start_s
-                if dur >= 30.0:  # ignore motor micro-dips
-                    score: float | None = None
-                    try:
-                        feat = end_feat_fn(points[:i], expectation)  # tail is the low run
-                        if feat is not None:
-                            score = float(end_score_fn(feat))
-                    except Exception:  # pylint: disable=broad-exception-caught
-                        pass
-                    out.append((dur, score))
+                # Only score a low run that resumed *after* the cycle became
+                # active. A leading below-active stretch is baseline idle (the
+                # appliance had not started yet), not an intra-cycle pause, so it
+                # must not be counted as a resumed low run / false end.
+                if seen_active:
+                    dur = points[i - 1][0] - low_start_s
+                    if dur >= 30.0:  # ignore motor micro-dips
+                        score: float | None = None
+                        try:
+                            feat = end_feat_fn(points[:i], expectation)  # tail is the low run
+                            if feat is not None:
+                                score = float(end_score_fn(feat))
+                        except Exception:  # pylint: disable=broad-exception-caught
+                            pass
+                        out.append((dur, score))
                 in_low = False
+            if p >= active_thr:
+                seen_active = True
         return out
 
     def generate_ml_suggestions(self) -> dict[str, Any]:
@@ -1420,6 +1605,13 @@ class MLSuggestionEngine:
                 f"{len(confirmed)} model-verified pauses across {n_cycles} cycles "
                 f"(floor {device_floor}s)."
             ),
+            "reason_key": "suggestion.reason.ml_off_delay",
+            "reason_params": {
+                "p95": f"{p95:.0f}",
+                "pauses": len(confirmed),
+                "cycles": n_cycles,
+                "floor": device_floor,
+            },
         }
 
     def _ml_end_repeat_count(
@@ -1456,6 +1648,13 @@ class MLSuggestionEngine:
                 f"{n_false}/{n_total} cycles ({frac * 100:.0f}%) had a pause the "
                 f"end-detector scored >50%; require {val} end confirmation(s)."
             ),
+            "reason_key": "suggestion.reason.ml_end_repeat",
+            "reason_params": {
+                "false": n_false,
+                "total": n_total,
+                "pct": f"{frac * 100:.0f}",
+                "val": val,
+            },
         }
 
     def _ml_auto_label_confidence(
@@ -1507,4 +1706,6 @@ class MLSuggestionEngine:
                 f"Lowest confidence the quality model still rated clean "
                 f"(p10 of {len(clean_confs)} clean cycles = {p10:.2f})."
             ),
+            "reason_key": "suggestion.reason.ml_auto_label",
+            "reason_params": {"cycles": len(clean_confs), "p10": f"{p10:.2f}"},
         }

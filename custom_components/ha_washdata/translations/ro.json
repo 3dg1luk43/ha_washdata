@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} cicluri fantomă detectate. Modificare sugerată de min_power: {current_min}W -> {new_min}W (nu se aplică automat).",
       "timer_default_message": "{device}: cronometru de {minutes} min",
       "timer_pause_action_title": "Reluați ciclul",
-      "timer_pause_body_suffix": "Ciclul este în pauză. Deschideți panoul WashData pentru a relua."
+      "timer_pause_body_suffix": "Ciclul este în pauză. Deschideți panoul WashData pentru a relua.",
+      "notify_live_waiting_message": "{device}: Niciun profil nu a fost recunoscut încă.",
+      "vs_typical_longer": "cu {pct}% mai mult decât de obicei",
+      "vs_typical_shorter": "cu {pct}% mai puțin decât de obicei"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Ambiguitate la potrivire"
+        "name": "Scor de ambiguitate"
       },
       "current_phase": {
         "name": "Faza curentă"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Niciun ciclu activ de întrerupt sau reluat."
+    },
+    "path_not_allowed": {
+      "message": "Calea nu este permisă: {path}. Adăugați directorul acesteia la 'allowlist_external_dirs' în configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Nu s-a putut crea profilul: {error}"
+    },
+    "export_path_exists": {
+      "message": "Ținta de export există deja: {path}. Alegeți o altă cale sau eliminați mai întâi fișierul existent."
+    },
+    "export_write_failed": {
+      "message": "Nu s-a putut scrie exportul în {path}: {error}"
     }
   },
   "intent": {

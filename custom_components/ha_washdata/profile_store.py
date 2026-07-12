@@ -868,14 +868,34 @@ class ProfileStore:
 
 
 
-    def set_suggestion(self, key: str, value: Any, reason: str | None = None) -> None:
-        """Store a suggested setting value without changing config entry options."""
+    def set_suggestion(
+        self,
+        key: str,
+        value: Any,
+        reason: str | None = None,
+        reason_key: str | None = None,
+        reason_params: dict[str, Any] | None = None,
+    ) -> None:
+        """Store a suggested setting value without changing config entry options.
+
+        ``reason`` is the English fallback text; ``reason_key`` + ``reason_params``
+        are the localization key + interpolation values the panel resolves via
+        ``_t(reason_key, reason_params, reason)``. Both localization fields are
+        optional so old callers / persisted entries keep working.
+        """
         suggestions: JSONDict = self._data.setdefault("suggestions", {})
-        suggestions[key] = {
+        entry: dict[str, Any] = {
             "value": value,
             "reason": reason,
             "updated": dt_util.now().isoformat(),
         }
+        # Store localization sidecars only when present so we never overwrite an
+        # existing key with a stale ``None`` (keeps the shape lean for old data).
+        if reason_key is not None:
+            entry["reason_key"] = reason_key
+        if reason_params is not None:
+            entry["reason_params"] = reason_params
+        suggestions[key] = entry
 
     def get_suggestions(self) -> dict[str, Any]:
         """Return current suggestion map."""
@@ -1113,7 +1133,9 @@ class ProfileStore:
         )
         if not cycle:
             raise ValueError(f"Cycle {cycle_id} not found")
-        review = dict(cycle.get("ml_review") or {})
+        prev_review = cycle.get("ml_review")
+        prev_golden = bool(prev_review.get("golden")) if isinstance(prev_review, dict) else False
+        review = dict(prev_review or {})
         if quality is not None:
             review["quality"] = quality
         if golden is not None:
@@ -1124,8 +1146,24 @@ class ProfileStore:
             review["notes"] = notes
         review["reviewed_at"] = dt_util.now().isoformat()
         cycle["ml_review"] = review
+        # Golden cycles seed the profile's matching reference/envelope. When the
+        # golden flag actually flips (either direction), rebuild the affected
+        # profile so its envelope + reference cycle + cohesion cache reflect the
+        # new golden set. Only when the value changed — an unchanged save stays
+        # idempotent and skips the (executor-bound) rebuild.
+        golden_changed = golden is not None and bool(golden) != prev_golden
+        profile_name = cycle.get("profile_name")
+        if golden_changed and isinstance(profile_name, str) and profile_name:
+            await self.async_rebuild_envelope(profile_name)
         await self.async_save()
-        self._logger.info("Recorded ML review for cycle %s: %s", cycle_id, review)
+        # Don't log the full review (notes/tags are user-entered) — only field names.
+        _changed = [
+            n for n, v in (("quality", quality), ("golden", golden), ("tags", tags), ("notes", notes))
+            if v is not None
+        ]
+        self._logger.info(
+            "Recorded ML review for cycle %s (updated: %s)", cycle_id, ", ".join(_changed) or "none"
+        )
         return True
 
     async def async_backfill_recorded_golden(self) -> int:
@@ -1136,8 +1174,29 @@ class ProfileStore:
         cycles = self._data.get("past_cycles", [])
         if not isinstance(cycles, list):
             return 0
+        # Snapshot each cycle's golden state (aligned by list position, which
+        # _flag_recorded_cycles_golden never reorders) so we can rebuild exactly
+        # the profiles whose cycles get newly flagged — golden cycles seed the
+        # matching reference/envelope.
+        before_golden = [
+            bool(c.get("ml_review", {}).get("golden"))
+            if isinstance(c, dict) and isinstance(c.get("ml_review"), dict)
+            else False
+            for c in cycles
+        ]
         flagged = _flag_recorded_cycles_golden(cycles)
         if flagged:
+            affected: set[str] = set()
+            for was_golden, cycle in zip(before_golden, cycles):
+                if was_golden or not isinstance(cycle, dict):
+                    continue
+                review = cycle.get("ml_review")
+                if isinstance(review, dict) and review.get("golden"):
+                    pname = cycle.get("profile_name")
+                    if isinstance(pname, str) and pname:
+                        affected.add(pname)
+            for pname in affected:
+                await self.async_rebuild_envelope(pname)
             await self.async_save()
             self._logger.info("Backfilled golden flag on %s recorded cycle(s)", flagged)
         return flagged
@@ -1204,6 +1263,16 @@ class ProfileStore:
                 g["members"] = [m for m in g["members"] if m in profiles]
         return cast(dict[str, JSONDict], raw)
 
+    def _members_in_other_groups(self, members: list[str], exclude: str | None) -> dict[str, str]:
+        """Map any member already assigned to a DIFFERENT group -> that group name."""
+        owner: dict[str, str] = {}
+        for gname, g in self.get_profile_groups().items():
+            if gname == exclude or not isinstance(g, dict):
+                continue
+            for m in (g.get("members") or []):
+                owner.setdefault(m, gname)
+        return {m: owner[m] for m in members if m in owner}
+
     async def create_profile_group(self, name: str, members: list[str]) -> bool:
         """Create (or overwrite) a group with the given member profile names."""
         name = (name or "").strip()
@@ -1211,6 +1280,14 @@ class ProfileStore:
             raise ValueError("Group name is required")
         profiles = self.get_profiles()
         members = [m for m in dict.fromkeys(members or []) if m in profiles]
+        # A profile may belong to at most one group (else _grouped_snapshots would
+        # collapse it inconsistently). Reject up front — no partial mutation.
+        conflicts = self._members_in_other_groups(members, exclude=name)
+        if conflicts:
+            raise ValueError(
+                "Already in another group: "
+                + ", ".join(f"{m} ({g})" for m, g in conflicts.items())
+            )
         groups = self.get_profile_groups()
         groups[name] = {"members": members, "created_at": dt_util.now().isoformat()}
         self._cohesion_cache_generation += 1
@@ -1225,6 +1302,12 @@ class ProfileStore:
             raise ValueError(f"Group {name} not found")
         profiles = self.get_profiles()
         members = [m for m in dict.fromkeys(members or []) if m in profiles]
+        conflicts = self._members_in_other_groups(members, exclude=name)
+        if conflicts:
+            raise ValueError(
+                "Already in another group: "
+                + ", ".join(f"{m} ({g})" for m, g in conflicts.items())
+            )
         if members:
             groups[name]["members"] = members
         else:
@@ -1239,6 +1322,8 @@ class ProfileStore:
         if name not in groups or not new_name:
             raise ValueError("Group not found or new name empty")
         if new_name != name:
+            if new_name in groups:
+                raise ValueError(f"A group named {new_name!r} already exists")
             groups[new_name] = groups.pop(name)
         self._cohesion_cache_generation += 1
         await self.async_save()
@@ -1299,8 +1384,14 @@ class ProfileStore:
         if key in self._cohesion_cache:
             return self._cohesion_cache[key]
         curves = [c for c in (self._profile_curve(m) for m in members) if c is not None]
-        if len(curves) < 2:
+        if len(members) < 2:
+            # A genuinely single-member group is trivially cohesive (and is never
+            # collapsed anyway — nothing to aggregate).
             result = 1.0
+        elif len(curves) < 2:
+            # Multi-member but too few built curves -> insufficient evidence, treat as
+            # NOT cohesive so the group isn't collapsed into a blurry aggregate yet.
+            result = 0.0
         else:
             result = 1.0
             for i in range(len(curves)):
@@ -1702,7 +1793,11 @@ class ProfileStore:
             for name, pcy in by_profile.items():
                 count = len(pcy)
                 durations = [float(c["duration"]) for c in pcy if c.get("duration")]
-                confidences = [float(c["match_confidence"]) for c in pcy if c.get("match_confidence")]
+                confidences = [
+                    float(c["match_confidence"])
+                    for c in pcy
+                    if c.get("match_confidence") is not None  # keep genuine 0.0, drop only absent
+                ]
 
                 if count < 3 or not durations:
                     result[name] = {"cycle_count": count, "health_status": "unknown"}
@@ -2042,6 +2137,10 @@ class ProfileStore:
                             "a lot or match weakly. Review its cycles or re-record "
                             "the profile so matching and time estimates stay accurate."
                         ),
+                        # Localization: panel renders _t(message_key, message_params,
+                        # message). The English `message` above is the fallback.
+                        "message_key": "msg.advisory_poor_health",
+                        "message_params": {"name": name},
                     })
                 elif h.get("shape_drift"):
                     corr = h.get("shape_drift_correlation")
@@ -2053,6 +2152,16 @@ class ProfileStore:
                             f"power shape{corr_str}. The appliance may have changed "
                             "behaviour over time (e.g. limescale, wear). Consider "
                             "re-recording this profile with recent cycles."
+                        ),
+                        "message_key": (
+                            "msg.advisory_shape_drift_corr"
+                            if corr is not None
+                            else "msg.advisory_shape_drift"
+                        ),
+                        "message_params": (
+                            {"name": name, "corr": f"{corr:.2f}"}
+                            if corr is not None
+                            else {"name": name}
                         ),
                     })
 
@@ -2071,6 +2180,8 @@ class ProfileStore:
                             f"(about +{pct:.0f}% per cycle). If the appliance's "
                             "behaviour changed, re-record or rebuild this profile."
                         ),
+                        "message_key": "msg.advisory_duration_trend_up",
+                        "message_params": {"name": name, "pct": f"{pct:.0f}"},
                     })
                 elif t.get("energy_trend") == "up":
                     # energy_slope_pct is already %/cycle (en_slope * 100); no re-scale.
@@ -2082,6 +2193,8 @@ class ProfileStore:
                             f"(about +{pct:.0f}% per cycle) - worth checking the "
                             "appliance if that is unexpected."
                         ),
+                        "message_key": "msg.advisory_energy_trend_up",
+                        "message_params": {"name": name, "pct": f"{pct:.0f}"},
                     })
 
             # E1: suppress the "needs maintenance" nag (duration-trending-longer /
@@ -2960,8 +3073,9 @@ class ProfileStore:
         rebuilt = 0
         for profile_name in list(self._data.get("profiles", {}).keys()):
             try:
-                await self.async_rebuild_envelope(profile_name)
-                rebuilt += 1
+                # Count only real rebuilds; a no-op/failed rebuild returns False.
+                if await self.async_rebuild_envelope(profile_name):
+                    rebuilt += 1
             except Exception:  # pylint: disable=broad-exception-caught
                 self._logger.debug(
                     "Envelope rebuild failed for %s during maintenance", profile_name, exc_info=True
@@ -3353,6 +3467,10 @@ class ProfileStore:
         Build/rebuild statistical envelope for a profile asynchronously.
         Offloads heavy DTW/normalization to executor.
         """
+        # A rebuild changes this profile's curve, which feeds group cohesion, so
+        # invalidate the cohesion cache (not only on group mutations) to avoid stale
+        # cohesion approving/rejecting a collapse against outdated shapes.
+        self._cohesion_cache_generation += 1
         # 1. Gather Data (Main Thread)
         labeled_cycles = [
             c
@@ -4024,9 +4142,10 @@ class ProfileStore:
             best["score"],
             best_duration,
             matched_phase,
-            candidates[:5], # Ranking
+            candidates[:5],
             is_ambiguous,
             margin,
+            ranking=candidates[:5],  # populate ranking (consumed for training snapshots)
             is_prefix_ambiguous=is_prefix_ambiguous,
         )
 
@@ -4422,7 +4541,23 @@ class ProfileStore:
         self._data["auto_adjustments"] = []
         self._data["active_cycle"] = None
         self._data["last_active_save"] = None
+        # Newer persisted state must also be wiped, else a "wipe all" leaves trained
+        # models, groups, matcher tuning, histories, and counters behind.
+        self._data["custom_phases"] = []
+        self._data["ml_model_versions"] = {}
+        self._data["profile_groups"] = {}
+        self._data["maintenance_log"] = []
+        self._data["matching_config"] = {}
+        self._data["match_ranking_history"] = []
+        self._data["ml_last_training_run"] = None
+        self._data["ml_training_history"] = {}
+        self._data["lifetime_energy_wh"] = 0.0
+        self._data["lifetime_cycle_count"] = 0
+        self._data["settings_changelog"] = []
+        self._data["suggestion_apply_cycle_count"] = 0
         self._cached_sample_segments = {}
+        self._cohesion_cache = {}
+        self._cohesion_cache_generation += 1
         await self.async_save()
         self._logger.info("Cleared all WashData storage")
 
@@ -4506,9 +4641,18 @@ class ProfileStore:
             # Try to match
             result = await self.async_match_profile(power_data, cycle["duration"])
 
-            if result.best_profile and result.confidence >= confidence_threshold:
+            # Honor the ambiguity safeguard: never auto-label a close/ambiguous match.
+            if result.best_profile and result.confidence >= confidence_threshold and not result.is_ambiguous:
                 current_label = cycle.get("profile_name")
-                ranking_top5 = getattr(result, "ranking", [])[:5]
+                # Sanitize: strip heavy current/sample arrays before persisting.
+                ranking_top5 = [
+                    {
+                        "name": c.get("name"),
+                        "score": round(float(c.get("score", 0.0)), 3),
+                        "profile_duration": c.get("profile_duration"),
+                    }
+                    for c in (getattr(result, "ranking", []) or [])[:5]
+                ]
 
                 # If overwriting, check if new match is different and better/valid
                 if current_label:

@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title}이(가) 고스트 사이클을 감지했습니다. 권장되는 min_power 변경: {current_min}W -> {new_min}W(자동으로 적용되지 않음).",
       "timer_default_message": "{device}: {minutes}분 타이머",
       "timer_pause_action_title": "사이클 재개",
-      "timer_pause_body_suffix": "사이클이 일시 정지되었습니다. 재개하려면 WashData 패널을 여세요."
+      "timer_pause_body_suffix": "사이클이 일시 정지되었습니다. 재개하려면 WashData 패널을 여세요.",
+      "notify_live_waiting_message": "{device}: 아직 일치하는 프로필이 없습니다.",
+      "vs_typical_longer": "평소보다 {pct}% 더 김",
+      "vs_typical_shorter": "평소보다 {pct}% 더 짧음"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "일치 모호도"
+        "name": "모호도 점수"
       },
       "current_phase": {
         "name": "현재 단계"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "일시 중지하거나 재개할 활성 주기가 없습니다."
+    },
+    "path_not_allowed": {
+      "message": "경로가 허용되지 않습니다: {path}. configuration.yaml의 'allowlist_external_dirs'에 해당 디렉터리를 추가하세요."
+    },
+    "create_profile_failed": {
+      "message": "프로필을 만들 수 없습니다: {error}"
+    },
+    "export_path_exists": {
+      "message": "내보내기 대상이 이미 존재합니다: {path}. 다른 경로를 선택하거나 기존 파일을 먼저 제거하세요."
+    },
+    "export_write_failed": {
+      "message": "내보내기를 {path}에 쓸 수 없습니다: {error}"
     }
   },
   "intent": {

@@ -493,7 +493,23 @@
     "better_than_baseline": "{pct}% better than the baseline estimate ({metric})",
     "trend_improving_tip": "This model's fit has improved across recent re-checks.",
     "trend_declining_tip": "This model's fit has slipped across recent re-checks — reviewing more cycles may help it re-learn.",
-    "trend_steady_tip": "This model's fit has held roughly steady across recent re-checks."
+    "trend_steady_tip": "This model's fit has held roughly steady across recent re-checks.",
+    "cap_label": {
+      "end": "Cycle-end detection",
+      "quality": "Cycle quality check",
+      "live_match": "Program matching",
+      "remaining_time": "Time-remaining estimate",
+      "total_energy": "Energy estimate"
+    },
+    "cap_blurb": {
+      "end": "Knowing when a cycle has truly finished",
+      "quality": "Spotting mis-detected or corrupted cycles",
+      "live_match": "Identifying the running program sooner",
+      "remaining_time": "Predicting how long is left",
+      "total_energy": "Predicting total energy and cost"
+    },
+    "metric_auc": "AUC {auc} on held-out data",
+    "metric_mae": "error {model} vs {baseline} baseline"
   },
   "modal": {
     "auto_label": "Auto-Label Cycles",
@@ -690,6 +706,8 @@
     "toast_automation_failed": "Could not create automation: {error}",
     "toast_automation_migrated": "Actions migrated to an automation; opening editor",
     "toast_convert_failed": "Convert failed: {error}",
+    "toast_convert_rolled_back": "Migration failed and was rolled back (no automation left behind): {error}",
+    "toast_convert_orphan": "The automation was created, but clearing the old actions failed. Do not retry: remove the legacy actions manually to avoid a duplicate automation.",
     "toast_create_failed": "Create failed: {error}",
     "toast_delete_failed": "Delete failed: {error}",
     "toast_error": "Error: {error}",
@@ -723,7 +741,13 @@
     "pg_select_cycle_hint": "Select a cycle and click ↺ to load",
     "pg_sweep_progress": "Step {done} / {total}",
     "pg_analysis_hint": "Select a cycle and click ↺ to load analysis.",
-    "diagnostics_load_failed": "Could not load diagnostics: {error}"
+    "diagnostics_load_failed": "Could not load diagnostics: {error}",
+    "manual_duration_ref_hint": "Only used when no reference cycle is selected — a reference cycle sets the duration from its own length.",
+    "advisory_poor_health": "'{name}' has a low fit score - its recent cycles vary a lot or match weakly. Review its cycles or re-record the profile so matching and time estimates stay accurate.",
+    "advisory_shape_drift": "'{name}' has drifted significantly from its original power shape. The appliance may have changed behaviour over time (e.g. limescale, wear). Consider re-recording this profile with recent cycles.",
+    "advisory_shape_drift_corr": "'{name}' has drifted significantly from its original power shape (correlation {corr}). The appliance may have changed behaviour over time (e.g. limescale, wear). Consider re-recording this profile with recent cycles.",
+    "advisory_duration_trend_up": "'{name}' cycles are running progressively longer (about +{pct}% per cycle). If the appliance's behaviour changed, re-record or rebuild this profile.",
+    "advisory_energy_trend_up": "'{name}' is drawing progressively more energy (about +{pct}% per cycle) - worth checking the appliance if that is unexpected."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Sudden drop treated as immediate end",
@@ -1320,6 +1344,39 @@
         "higher": "Longer quiet phases allowed; fewer false force-stops",
         "lower": "Catches stuck cycles more aggressively"
       }
+    },
+    "reason": {
+      "watchdog": "Kept as low as safe (3x the p95 update gap of {p95}s, min 30s) so stalls are caught quickly without false stops.",
+      "no_update_timeout": "Based on observed update cadence (p95={p95}s) * 20 (min 60s).",
+      "off_delay_cadence": "Based on observed update cadence (p95={p95}s) * 5",
+      "off_delay_device_floor": "Used device-specific safe minimum for {device} ({floor}s).",
+      "off_delay_generic_floor": "Used generic safe minimum ({floor}s).",
+      "off_delay_pauses": "Sized to outlast real pauses: p95 intra-cycle pause {p95}s + 60s buffer, from {pauses} pauses across {cycles} clean cycles (floor {floor}s).",
+      "match_interval": "Based on observed update cadence (median={median}s) * 10.",
+      "tol_per_profile": "p75 of per-profile duration variance across {profiles} profiles ({cycles} cycles); tight profiles not penalised.",
+      "tol_pooled": "Based on pooled duration variance of {cycles} recent labeled cycles (p95 dev={dev}).",
+      "min_duration_ratio": "Kept as low as possible so a program is recognised early in the cycle; the confidence and ambiguity gates prevent premature commits.",
+      "max_duration_ratio": "Based on labeled cycle durations (p95={p95}).",
+      "sampling_interval": "Median update interval observed across {cycles} clean cycles ({si}s).{excl}",
+      "smoothing_window": "Sized to smooth ~30s of readings at {si}s sampling ({samples} samples).",
+      "start_duration": "Kept short (~one {si}s sample interval) so detection starts as early as possible while still ignoring single-sample spikes.",
+      "min_power": "40% of the p05 lowest active power ({p05}W) across {cycles} clean cycles, keeping the off-gate below real draw.{excl}",
+      "completion_min_seconds": "Half the p05 clean-cycle duration ({minutes} min) across {cycles} cycles; filters ghost cycles.{excl}",
+      "learning_confidence": "p05 confidence of {cycles} user-labeled cycles ({p05}); below this, request verification.",
+      "auto_label_confidence": "15th-percentile confidence of {cycles} auto-labels the user never corrected ({p15}).",
+      "profile_match_threshold": "p10 confidence of {cycles} correct auto-labels ({p10}); safe live-commit floor.",
+      "end_repeat_count": "{false}/{total} clean cycles ({pct}%) had a >60s internal pause that resumed; require {val} end confirmation(s).",
+      "min_off_gap": "Based on {gaps} observed inter-cycle gaps (p05={p05}s). Device floor: {floor}s.",
+      "min_active": "Based on minimum active power ({min}W) observed in last cycle.",
+      "end_energy_default": "Default recommended baseline for end-of-cycle noise gate.",
+      "dead_zone_from_dip": "Based on early power dip detected at {s}s.",
+      "thr_batch": "Kept just above the p05 lowest active power across {cycles} cycles ({p05}W) so a start is caught as early as possible and the stop threshold stays below the machine's lowest running power.",
+      "end_energy_false": "p95 false-end energy ({p95}Wh) across {cycles} cycles, floored at 0.2% of median cycle energy ({floor}Wh).",
+      "end_energy_no_false": "No false ends across {cycles} cycles; floored at 0.2% of median cycle energy ({floor}Wh).",
+      "dead_zone_batch": "Kept short (median startup-instability window across {cycles} cycles = {s}s) so a real end is detected promptly.",
+      "ml_off_delay": "End-detector-confirmed pauses: p95 {p95}s + 60s buffer, from {pauses} model-verified pauses across {cycles} cycles (floor {floor}s).",
+      "ml_end_repeat": "{false}/{total} cycles ({pct}%) had a pause the end-detector scored >50%; require {val} end confirmation(s).",
+      "ml_auto_label": "Lowest confidence the quality model still rated clean (p10 of {cycles} clean cycles = {p10})."
     }
   },
   "tab": {
@@ -1364,6 +1421,7 @@
     "cycle_trimmed": "Cycle trimmed",
     "cycles_merged": "Cycles merged",
     "delete_failed": "Delete failed: {error}",
+    "delete_partial_failed": "Some items could not be deleted and were restored",
     "envelope_rebuilt": "Envelope rebuilt",
     "envelopes_rebuilt": "Envelopes rebuilt",
     "export_downloaded": "Export downloaded",

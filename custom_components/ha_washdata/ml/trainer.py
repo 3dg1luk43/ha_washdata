@@ -96,11 +96,17 @@ def binary_metrics(labels: np.ndarray, scores: np.ndarray, threshold: float) -> 
     specificity = _safe_ratio(tn, tn + fp)
     f1 = _safe_ratio(2.0 * precision * recall, precision + recall)
     accuracy = _safe_ratio(tp + tn, labels.size)
+    positive_rate = _safe_ratio(int(np.sum(labels == 1)), labels.size)
+    # Key names mirror the shipped MODEL_METRICS schema (see *_model.py):
+    # ``problem_recall`` (recall of the positive/"problem" class) and
+    # ``positive_rate`` (base rate of positives), so on-device-trained metrics
+    # are schema-identical to the embedded baselines they are compared against.
     return {
         "rows": int(labels.size),
         "tp": tp, "fp": fp, "tn": tn, "fn": fn,
         "precision": round(precision, 6),
-        "recall": round(recall, 6),
+        "problem_recall": round(recall, 6),
+        "positive_rate": round(positive_rate, 6),
         "specificity": round(specificity, 6),
         "balanced_accuracy": round((recall + specificity) / 2.0, 6),
         "f1": round(f1, 6),
@@ -241,10 +247,15 @@ def score_matrix_spec(spec: Mapping[str, Any], matrix: np.ndarray) -> np.ndarray
 
 
 def score_spec(spec: Mapping[str, Any], features: Mapping[str, float]) -> float:
-    """Pure-NumPy probability for one feature mapping (matches embedded score()).
+    """Pure-NumPy probability for one feature mapping.
 
-    Missing feature keys are filled with the training center (which standardises
-    to 0.0 = neutral), not raw 0.0, to avoid 8+ SD corruption of inference.
+    Byte-identical to the embedded ``score()`` in ``*_model.py`` for *complete*
+    feature mappings (the normal case: the extractors in ``feature_extraction``
+    always populate every ``FEATURE_COLUMNS`` key). The two intentionally differ
+    only on the defensive missing-key fallback: this fills a missing feature with
+    the training center (standardises to 0.0 = neutral, avoiding 8+ SD corruption
+    of inference), whereas the embedded ``score()`` fills raw 0.0. That path is
+    not exercised by the parity fixtures and is not reachable in practice.
     """
     columns = spec["feature_columns"]
     center = np.asarray(spec["center"], dtype=float)

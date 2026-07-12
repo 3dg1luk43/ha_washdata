@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% parempi kuin perusarvio ({metric})",
     "trend_improving_tip": "Tämän mallin sopivuus on parantunut viimeisimpien tarkistusten aikana.",
     "trend_declining_tip": "Tämän mallin sopivuus on heikentynyt viimeisimpien tarkistusten aikana · useampien syklien tarkistaminen voi auttaa sitä oppimaan uudelleen.",
-    "trend_steady_tip": "Tämän mallin sopivuus on pysynyt suunnilleen vakaana viimeisimpien tarkistusten aikana."
+    "trend_steady_tip": "Tämän mallin sopivuus on pysynyt suunnilleen vakaana viimeisimpien tarkistusten aikana.",
+    "cap_blurb": {
+      "end": "Sen tunnistaminen, milloin jakso on todella päättynyt",
+      "live_match": "Käynnissä olevan ohjelman tunnistaminen nopeammin",
+      "quality": "Väärin tunnistettujen tai vioittuneiden jaksojen havaitseminen",
+      "remaining_time": "Jäljellä olevan ajan ennustaminen",
+      "total_energy": "Kokonaisenergian ja -kustannuksen ennustaminen"
+    },
+    "cap_label": {
+      "end": "Jakson lopun tunnistus",
+      "live_match": "Ohjelman tunnistus",
+      "quality": "Jakson laatutarkistus",
+      "remaining_time": "Jäljellä olevan ajan arvio",
+      "total_energy": "Energia-arvio"
+    },
+    "metric_auc": "AUC {auc} validointidatalla",
+    "metric_mae": "virhe {model} vs. perustaso {baseline}"
   },
   "modal": {
     "auto_label": "Automaattiset etikettisyklit",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Valitse sykli ja napsauta ↺ ladataksesi",
     "pg_sweep_progress": "Askel {done} / {total}",
     "pg_analysis_hint": "Valitse sykli ja napsauta ↺ ladataksesi analyysin.",
-    "diagnostics_load_failed": "Diagnostiikkaa ei voitu ladata: {error}"
+    "diagnostics_load_failed": "Diagnostiikkaa ei voitu ladata: {error}",
+    "manual_duration_ref_hint": "Käytetään vain, kun viitesykliä ei ole valittu. Viitesykli asettaa keston oman pituutensa mukaan.",
+    "toast_convert_rolled_back": "Muuntaminen epäonnistui ja peruttiin (automaatiota ei jäänyt): {error}",
+    "toast_convert_orphan": "Automaatio luotiin, mutta vanhojen toimintojen poistaminen epäonnistui. Älä yritä uudelleen: poista vanhat toiminnot manuaalisesti, jotta vältät automaation kahdentumisen.",
+    "advisory_duration_trend_up": "'{name}'-jaksot kestävät vähitellen pidempään (noin +{pct}% per jakso). Jos laitteen toiminta on muuttunut, tallenna tai rakenna tämä profiili uudelleen.",
+    "advisory_energy_trend_up": "'{name}' kuluttaa vähitellen enemmän energiaa (noin +{pct}% per jakso) - laite kannattaa tarkistaa, jos tämä on odottamatonta.",
+    "advisory_poor_health": "'{name}'-profiilin sopivuusarvo on matala - sen viimeaikaiset jaksot vaihtelevat paljon tai tunnistuvat heikosti. Käy läpi sen jaksot tai tallenna profiili uudelleen, jotta tunnistus ja aika-arviot pysyvät tarkkoina.",
+    "advisory_shape_drift": "'{name}' on muuttunut merkittävästi alkuperäisestä tehokäyrästään. Laitteen toiminta on voinut muuttua ajan myötä (esim. kalkki, kuluminen). Harkitse profiilin tallentamista uudelleen tuoreilla jaksoilla.",
+    "advisory_shape_drift_corr": "'{name}' on muuttunut merkittävästi alkuperäisestä tehokäyrästään (korrelaatio {corr}). Laitteen toiminta on voinut muuttua ajan myötä (esim. kalkki, kuluminen). Harkitse profiilin tallentamista uudelleen tuoreilla jaksoilla."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Äkillinen pudotus tulkitaan välittömäksi lopuksi",
@@ -1313,6 +1337,39 @@
         "higher": "Pidempiä hiljaisia vaiheita sallitaan – vähemmän tahattomia pakotettuja pysäytyksiä",
         "lower": "Havaitsee jumissa olevat syklit nopeammin"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "15. persentiilin luottamus {cycles} automaattiselle merkinnälle, joita käyttäjä ei koskaan korjannut ({p15}).",
+      "completion_min_seconds": "Puolet puhtaiden jaksojen p05-kestosta ({minutes} min) {cycles} jakson joukossa; suodattaa haamujaksot pois.{excl}",
+      "dead_zone_batch": "Pidetään lyhyenä (käynnistyksen epävakausikkunan mediaani {cycles} jakson joukossa = {s}s), jotta todellinen loppu havaitaan nopeasti.",
+      "dead_zone_from_dip": "Perustuu varhaiseen tehonlaskuun, joka havaittiin kohdassa {s}s.",
+      "end_energy_default": "Suositeltu oletusarvo jakson lopun kohinakynnykselle.",
+      "end_energy_false": "p95 väärien loppujen energialle ({p95}Wh) {cycles} jakson joukossa, alarajana 0.2% jakson mediaanienergiasta ({floor}Wh).",
+      "end_energy_no_false": "Ei vääriä loppuja {cycles} jakson joukossa; alarajana 0.2% jakson mediaanienergiasta ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} puhtaasta jaksosta ({pct}%) sisälsi yli 60s kestäneen sisäisen tauon, joka jatkui; vaatii {val} loppuvahvistusta.",
+      "learning_confidence": "p05-luottamus {cycles} käyttäjän merkitsemälle jaksolle ({p05}); tämän alle pyydetään vahvistusta.",
+      "match_interval": "Perustuu havaittuun päivitystahtiin (mediaani={median}s) * 10.",
+      "max_duration_ratio": "Perustuu merkittyjen jaksojen kestoihin (p95={p95}).",
+      "min_active": "Perustuu pienimpään aktiiviseen tehoon ({min}W), joka havaittiin viime jaksossa.",
+      "min_duration_ratio": "Pidetään mahdollisimman matalana, jotta ohjelma tunnistetaan jakson alkuvaiheessa; luottamus- ja epäselvyysrajat estävät ennenaikaiset päätökset.",
+      "min_off_gap": "Perustuu {gaps} havaittuun jaksojen väliseen taukoon (p05={p05}s). Laitteen alaraja: {floor}s.",
+      "min_power": "40% pienimmästä aktiivisesta tehosta p05:ssä ({p05}W) {cycles} puhtaan jakson joukossa, mikä pitää sammutuskynnyksen todellisen kulutuksen alapuolella.{excl}",
+      "ml_auto_label": "Pienin luottamus, jonka laatumalli arvioi vielä puhtaaksi (p10 {cycles} puhtaasta jaksosta = {p10}).",
+      "ml_end_repeat": "{false}/{total} jaksosta ({pct}%) sisälsi tauon, jolle loppudetektori antoi >50%; vaatii {val} loppuvahvistusta.",
+      "ml_off_delay": "Loppudetektorin vahvistamat tauot: p95 {p95}s + 60s puskuri, {pauses} mallin varmistamasta tauosta {cycles} jakson joukossa (alaraja {floor}s).",
+      "no_update_timeout": "Perustuu havaittuun päivitystahtiin (p95={p95}s) * 20 (väh. 60s).",
+      "off_delay_cadence": "Perustuu havaittuun päivitystahtiin (p95={p95}s) * 5",
+      "off_delay_device_floor": "Käytettiin laitekohtaista turvallista vähimmäisarvoa laitteelle {device} ({floor}s).",
+      "off_delay_generic_floor": "Käytettiin yleistä turvallista vähimmäisarvoa ({floor}s).",
+      "off_delay_pauses": "Mitoitettu kestämään todellisia taukoja pidempään: p95 jakson sisäiselle tauolle {p95}s + 60s puskuri, {pauses} tauosta {cycles} puhtaan jakson joukossa (alaraja {floor}s).",
+      "profile_match_threshold": "p10-luottamus {cycles} oikealle automaattiselle merkinnälle ({p10}); turvallinen alaraja reaaliaikaiselle vahvistukselle.",
+      "sampling_interval": "Päivitysvälin mediaani {cycles} puhtaan jakson joukossa ({si}s).{excl}",
+      "smoothing_window": "Mitoitettu tasoittamaan noin 30s lukemia {si}s näytteenottovälillä ({samples} näytettä).",
+      "start_duration": "Pidetään lyhyenä (~yksi {si}s näytteenottoväli), jotta tunnistus alkaa mahdollisimman aikaisin mutta jättää silti yksittäiset piikit huomiotta.",
+      "thr_batch": "Pidetään juuri pienimmän aktiivisen tehon yläpuolella p05:ssä {cycles} jakson joukossa ({p05}W), jotta käynnistys havaitaan mahdollisimman aikaisin ja pysäytyskynnys pysyy koneen pienimmän käyntitehon alapuolella.",
+      "tol_per_profile": "p75 profiilikohtaisesta keston varianssista {profiles} profiilin joukossa ({cycles} jaksoa); tiiviitä profiileja ei rangaista.",
+      "tol_pooled": "Perustuu {cycles} viimeisimmän merkityn jakson yhdistettyyn keston varianssiin (p95 poikkeama={dev}).",
+      "watchdog": "Pidetään niin matalana kuin on turvallista (3x p95-päivitysväli {p95}s, väh. 30s), jotta pysähdykset havaitaan nopeasti ilman vääriä pysäytyksiä."
     }
   },
   "tab": {
@@ -1405,7 +1462,8 @@
     "reminders_save_failed": "Muistutuksia ei voitu tallentaa: {error}",
     "reminders_saved": "Huoltomuistutukset tallennettu",
     "pause_no_cycle": "Ei aktiivista sykliä tauotettavaksi",
-    "resume_no_cycle": "Ei tauotettua sykliä jatkettavaksi"
+    "resume_no_cycle": "Ei tauotettua sykliä jatkettavaksi",
+    "delete_partial_failed": "Joitakin kohteita ei voitu poistaa, ja ne palautettiin"
   },
   "trend": {
     "down": "Trendikäs alaspäin",

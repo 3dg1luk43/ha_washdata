@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% labāk nekā bāzes novērtējums ({metric})",
     "trend_improving_tip": "Šā modeļa atbilstība ir uzlabojusies pēdējās atkārtotajās pārbaudēs.",
     "trend_declining_tip": "Šā modeļa atbilstība ir pasliktinājusies pēdējās atkārtotajās pārbaudēs, vairāk ciklu pārskatīšana var palīdzēt tam pārmācīties.",
-    "trend_steady_tip": "Šā modeļa atbilstība ir saglabājusies aptuveni nemainīga pēdējās atkārtotajās pārbaudēs."
+    "trend_steady_tip": "Šā modeļa atbilstība ir saglabājusies aptuveni nemainīga pēdējās atkārtotajās pārbaudēs.",
+    "cap_blurb": {
+      "end": "Noteikt, kad cikls patiešām ir pabeigts",
+      "live_match": "Ātrāk atpazīt notiekošo programmu",
+      "quality": "Atklāt kļūdaini noteiktus vai bojātus ciklus",
+      "remaining_time": "Paredzēt, cik ilgs laiks atlicis",
+      "total_energy": "Paredzēt kopējo enerģiju un izmaksas"
+    },
+    "cap_label": {
+      "end": "Cikla beigu noteikšana",
+      "live_match": "Programmas atpazīšana",
+      "quality": "Cikla kvalitātes pārbaude",
+      "remaining_time": "Atlikušā laika novērtējums",
+      "total_energy": "Enerģijas novērtējums"
+    },
+    "metric_auc": "AUC {auc} uz validācijas datiem",
+    "metric_mae": "kļūda: {model} pret {baseline} bāzlīniju"
   },
   "modal": {
     "auto_label": "Automātiskās etiķetes cikli",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Atlasiet ciklu un noklikšķiniet ↺, lai ielādētu",
     "pg_sweep_progress": "Solis {done} / {total}",
     "pg_analysis_hint": "Atlasiet ciklu un noklikšķiniet ↺, lai ielādētu analīzi.",
-    "diagnostics_load_failed": "Neizdevās ielādēt diagnostiku: {error}"
+    "diagnostics_load_failed": "Neizdevās ielādēt diagnostiku: {error}",
+    "manual_duration_ref_hint": "Izmanto tikai tad, ja nav atlasīts atsauces cikls. Atsauces cikls nosaka ilgumu, ņemot vērā tā paša garumu.",
+    "toast_convert_rolled_back": "Konvertēšana neizdevās un tika atcelta (neviena automatizācija netika atstāta): {error}",
+    "toast_convert_orphan": "Automatizācija tika izveidota, taču veco darbību notīrīšana neizdevās. Nemēģiniet vēlreiz: manuāli noņemiet vecās darbības, lai izvairītos no dublētas automatizācijas.",
+    "advisory_duration_trend_up": "'{name}' cikli kļūst arvien garāki (apmēram +{pct}% katrā ciklā). Ja ierīces darbība ir mainījusies, ierakstiet no jauna vai pārbūvējiet šo profilu.",
+    "advisory_energy_trend_up": "'{name}' patērē arvien vairāk enerģijas (apmēram +{pct}% katrā ciklā) - vērts pārbaudīt ierīci, ja tas ir negaidīti.",
+    "advisory_poor_health": "'{name}' ir zems atbilstības rādītājs - tā nesenie cikli stipri atšķiras vai atpazīti vāji. Pārskatiet tā ciklus vai ierakstiet profilu no jauna, lai atpazīšana un laika aplēses paliktu precīzas.",
+    "advisory_shape_drift": "'{name}' ir ievērojami novirzījies no sākotnējās jaudas līknes. Ierīces darbība laika gaitā, iespējams, ir mainījusies (piemēram, katlakmens, nolietojums). Apsveriet šī profila ierakstīšanu no jauna, izmantojot nesenos ciklus.",
+    "advisory_shape_drift_corr": "'{name}' ir ievērojami novirzījies no sākotnējās jaudas līknes (korelācija {corr}). Ierīces darbība laika gaitā, iespējams, ir mainījusies (piemēram, katlakmens, nolietojums). Apsveriet šī profila ierakstīšanu no jauna, izmantojot nesenos ciklus."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -1331,7 +1355,8 @@
     "reminders_save_failed": "Neizdevās saglabāt atgādinājumus: {error}",
     "reminders_saved": "Apkopes atgādinājumi saglabāti",
     "pause_no_cycle": "Nav aktīva cikla, ko pauzēt",
-    "resume_no_cycle": "Nav pauzēta cikla, ko atsākt"
+    "resume_no_cycle": "Nav pauzēta cikla, ko atsākt",
+    "delete_partial_failed": "Dažus vienumus nevarēja izdzēst, un tie tika atjaunoti"
   },
   "suggestion": {
     "both_agree": "WashData iesaka",
@@ -1394,6 +1419,39 @@
         "higher": "Atļautas garākas klusas fāzes; mazāk viltus piespiedu apstāšanās",
         "lower": "Agresīvāk uztver iestrēgušos ciklus"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "15. procentiles ticamība {cycles} automātiskajiem marķējumiem, kurus lietotājs nekad nelaboja ({p15}).",
+      "completion_min_seconds": "Puse no p05 tīro ciklu ilguma ({minutes} min) {cycles} ciklos; filtrē viltus ciklus.{excl}",
+      "dead_zone_batch": "Saglabāts īss (mediānais palaišanas nestabilitātes logs {cycles} ciklos = {s}s), lai patiesās beigas tiktu noteiktas ātri.",
+      "dead_zone_from_dip": "Pamatots ar agrīnu jaudas kritumu, kas konstatēts pie {s}s.",
+      "end_energy_default": "Noklusējuma ieteicamā bāzlīnija cikla beigu trokšņa slieksnim.",
+      "end_energy_false": "p95 viltus beigu enerģija ({p95}Wh) {cycles} ciklos, ar apakšējo robežu 0.2% no mediānās cikla enerģijas ({floor}Wh).",
+      "end_energy_no_false": "Nav viltus beigu {cycles} ciklos; ar apakšējo robežu 0.2% no mediānās cikla enerģijas ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} tīro ciklu ({pct}%) bija >60s iekšēja pauze, kas atsākās; pieprasīt {val} beigu apstiprinājumu(s).",
+      "learning_confidence": "p05 ticamība {cycles} lietotāja marķētajiem cikliem ({p05}); zem šīs vērtības pieprasīt pārbaudi.",
+      "match_interval": "Pamatots ar novēroto atjaunināšanas biežumu (mediāna={median}s) * 10.",
+      "max_duration_ratio": "Pamatots ar marķēto ciklu ilgumiem (p95={p95}).",
+      "min_active": "Pamatots ar minimālo aktīvo jaudu ({min}W), kas novērota pēdējā ciklā.",
+      "min_duration_ratio": "Saglabāts pēc iespējas zemāks, lai programma tiktu atpazīta cikla sākumā; ticamības un neskaidrības sliekšņi novērš pāragru apstiprināšanu.",
+      "min_off_gap": "Pamatots ar {gaps} novērotiem starpciklu intervāliem (p05={p05}s). Ierīces apakšējā robeža: {floor}s.",
+      "min_power": "40% no p05 zemākās aktīvās jaudas ({p05}W) {cycles} tīros ciklos, saglabājot izslēgšanas slieksni zem reālā patēriņa.{excl}",
+      "ml_auto_label": "Zemākā ticamība, ko kvalitātes modelis vēl novērtēja kā tīru (p10 no {cycles} tīriem cikliem = {p10}).",
+      "ml_end_repeat": "{false}/{total} ciklu ({pct}%) bija pauze, ko beigu detektors novērtēja >50%; pieprasīt {val} beigu apstiprinājumu(s).",
+      "ml_off_delay": "Beigu detektora apstiprinātās pauzes: p95 {p95}s + 60s buferis, no {pauses} modeļa pārbaudītām pauzēm {cycles} ciklos (apakšējā robeža {floor}s).",
+      "no_update_timeout": "Pamatots ar novēroto atjaunināšanas biežumu (p95={p95}s) * 20 (min. 60s).",
+      "off_delay_cadence": "Pamatots ar novēroto atjaunināšanas biežumu (p95={p95}s) * 5",
+      "off_delay_device_floor": "Izmantots ierīcei {device} raksturīgais drošais minimums ({floor}s).",
+      "off_delay_generic_floor": "Izmantots vispārīgs drošais minimums ({floor}s).",
+      "off_delay_pauses": "Aprēķināts, lai pārsniegtu reālās pauzes: p95 cikla iekšējā pauze {p95}s + 60s buferis, no {pauses} pauzēm {cycles} tīros ciklos (apakšējā robeža {floor}s).",
+      "profile_match_threshold": "p10 ticamība {cycles} pareiziem automātiskajiem marķējumiem ({p10}); drošais reāllaika apstiprināšanas slieksnis.",
+      "sampling_interval": "Mediānais atjaunināšanas intervāls, kas novērots {cycles} tīros ciklos ({si}s).{excl}",
+      "smoothing_window": "Aprēķināts, lai izlīdzinātu ~30s rādījumu pie {si}s nolases intervāla ({samples} paraugi).",
+      "start_duration": "Saglabāts īss (~viens {si}s nolases intervāls), lai noteikšana sāktos pēc iespējas agrāk, vienlaikus ignorējot atsevišķu paraugu izlēcienus.",
+      "thr_batch": "Saglabāts nedaudz virs p05 zemākās aktīvās jaudas {cycles} ciklos ({p05}W), lai sākums tiktu uztverts pēc iespējas agrāk un apturēšanas slieksnis paliktu zem mašīnas zemākās darbības jaudas.",
+      "tol_per_profile": "p75 no katra profila ilguma dispersijas {profiles} profilos ({cycles} cikli); stabili profili netiek sodīti.",
+      "tol_pooled": "Pamatots ar apvienoto ilguma dispersiju {cycles} nesen marķētiem cikliem (p95 novirze={dev}).",
+      "watchdog": "Saglabāts pēc iespējas zemāks, cik droši (3x p95 atjaunināšanas intervāls {p95}s, min. 30s), lai apstāšanās tiktu atklāta ātri bez viltus apturēšanas."
     }
   },
   "trend": {

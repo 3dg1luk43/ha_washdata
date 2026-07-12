@@ -54,6 +54,41 @@ def resolve_scorer(capability: str, store: object | None):
     actually reach inference (ML Lab shadow comparison + MLSuggestionEngine)
     while transparently falling back to the baseline.
     """
+    def _baseline():
+        """Resolve the shipped embedded baseline scorer for this capability.
+
+        Kept as a lazily-invoked helper so the baseline module is only imported
+        when the on-device spec is absent *or* fails at call time - preserving the
+        original "baseline only loaded when needed" semantics.
+        """
+        module_name = _MODEL_MODULES.get(capability)
+        if module_name is None:
+            return (None, None)
+        try:
+            module = importlib.import_module(f"{__package__}.{module_name}")
+        except Exception as exc:  # noqa: BLE001
+            _LOGGER.warning(
+                "Failed to load embedded baseline for capability %r: %s",
+                capability, exc,
+            )
+            return (None, None)
+
+        def _baseline_score(feats, _m=module):
+            # The embedded baseline must never raise into live inference either
+            # (mirrors _on_device_score's call-time guard): on any scoring error
+            # log and return a neutral 0.0 so a gate treats the signal as absent
+            # rather than letting the exception reach live detection/matching.
+            try:
+                return float(_m.score(feats))
+            except Exception as exc:  # noqa: BLE001 - never raise into live inference
+                _LOGGER.warning(
+                    "Embedded baseline scorer for capability %r failed at call "
+                    "time, returning neutral 0.0: %s", capability, exc,
+                )
+                return 0.0
+
+        return (_baseline_score, "baseline")
+
     # 1) On-device trained spec from the store.
     if store is not None:
         try:
@@ -67,24 +102,33 @@ def resolve_scorer(capability: str, store: object | None):
             if isinstance(spec, dict) and spec.get("kind") != "standardized_linear":
                 from .trainer import score_spec
 
-                return (lambda feats, _s=spec: float(score_spec(_s, feats)), "on_device")
+                def _on_device_score(feats, _s=spec):
+                    # A malformed / dimensionally-incompatible promoted spec must
+                    # never raise into live detection/matching: on any call-time
+                    # error fall back to the embedded baseline (or a neutral 0.0).
+                    try:
+                        return float(score_spec(_s, feats))
+                    except Exception as exc:  # noqa: BLE001 - never raise into live inference
+                        _LOGGER.warning(
+                            "Trained scorer for capability %r failed at call time, "
+                            "falling back to baseline: %s", capability, exc,
+                        )
+                        fn, _src = _baseline()
+                        if fn is not None:
+                            try:
+                                return fn(feats)
+                            except Exception:  # noqa: BLE001 - baseline must not raise either
+                                pass
+                        return 0.0
+
+                return (_on_device_score, "on_device")
         except Exception as exc:  # noqa: BLE001 - never let a bad store break inference
             _LOGGER.warning(
                 "Failed to load trained spec for capability %r, falling back to baseline: %s",
                 capability, exc,
             )
     # 2) Shipped embedded baseline module.
-    module_name = _MODEL_MODULES.get(capability)
-    if module_name is not None:
-        try:
-            module = importlib.import_module(f"{__package__}.{module_name}")
-            return (lambda feats, _m=module: float(_m.score(feats)), "baseline")
-        except Exception as exc:  # noqa: BLE001
-            _LOGGER.warning(
-                "Failed to load embedded baseline for capability %r: %s",
-                capability, exc,
-            )
-    return (None, None)
+    return _baseline()
 
 
 def resolve_regressor(capability: str, store: object | None):
@@ -107,7 +151,21 @@ def resolve_regressor(capability: str, store: object | None):
         if isinstance(spec, dict) and spec.get("kind") == "standardized_linear":
             from .trainer import predict_value_spec
 
-            return (lambda feats, _s=spec: float(predict_value_spec(_s, feats)), "on_device")
+            def _on_device_predict(feats, _s=spec):
+                # A malformed / incompatible promoted regression spec must never
+                # raise into the live remaining-time / energy estimates: on any
+                # call-time error return NaN so the (isfinite-guarded) consumers
+                # treat this capability as inert.
+                try:
+                    return float(predict_value_spec(_s, feats))
+                except Exception as exc:  # noqa: BLE001 - never raise into live inference
+                    _LOGGER.warning(
+                        "Trained regressor for capability %r failed at call time, "
+                        "returning inert value: %s", capability, exc,
+                    )
+                    return float("nan")
+
+            return (_on_device_predict, "on_device")
     except Exception as exc:  # noqa: BLE001 - never let a bad store break inference
         _LOGGER.warning(
             "Failed to load trained regression spec for capability %r, capability will be inert: %s",
@@ -116,8 +174,19 @@ def resolve_regressor(capability: str, store: object | None):
     return (None, None)
 
 
+_MANIFEST_MODELS_CACHE: list[dict[str, object]] | None = None
+
+
 def available_models() -> list[dict[str, object]]:
-    """Return provenance for the embedded models, or [] if none are shipped."""
+    """Return provenance for the embedded models, or [] if none are shipped.
+
+    The manifest is a shipped baseline file that never changes at runtime
+    (on-device training writes specs into the store, not this file), so the parsed
+    result is cached module-side after the first read.
+    """
+    global _MANIFEST_MODELS_CACHE
+    if _MANIFEST_MODELS_CACHE is not None:
+        return _MANIFEST_MODELS_CACHE
     manifest = Path(__file__).resolve().parent / "promoted_manifest.json"
     if not manifest.exists():
         return []
@@ -126,4 +195,6 @@ def available_models() -> list[dict[str, object]]:
     except (OSError, ValueError):
         return []
     models = payload.get("models")
-    return models if isinstance(models, list) else []
+    result = models if isinstance(models, list) else []
+    _MANIFEST_MODELS_CACHE = result
+    return result

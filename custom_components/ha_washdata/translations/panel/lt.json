@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% geriau nei bazinis įvertis ({metric})",
     "trend_improving_tip": "Šio modelio atitiktis pagerėjo per pastarąsias patikras.",
     "trend_declining_tip": "Šio modelio atitiktis suprastėjo per pastarąsias patikras · daugiau peržiūrėtų ciklų gali padėti jam iš naujo mokytis.",
-    "trend_steady_tip": "Šio modelio atitiktis per pastarąsias patikras išliko maždaug pastovi."
+    "trend_steady_tip": "Šio modelio atitiktis per pastarąsias patikras išliko maždaug pastovi.",
+    "cap_blurb": {
+      "end": "Nustatoma, kada ciklas iš tikrųjų baigėsi",
+      "live_match": "Greičiau atpažįstama vykdoma programa",
+      "quality": "Aptinkami klaidingai nustatyti ar sugadinti ciklai",
+      "remaining_time": "Numatoma, kiek liko laiko",
+      "total_energy": "Numatoma bendra energija ir kaina"
+    },
+    "cap_label": {
+      "end": "Ciklo pabaigos nustatymas",
+      "live_match": "Programos atpažinimas",
+      "quality": "Ciklo kokybės patikra",
+      "remaining_time": "Likusio laiko įvertis",
+      "total_energy": "Energijos įvertis"
+    },
+    "metric_auc": "AUC {auc} patikros duomenimis",
+    "metric_mae": "paklaida: {model} palyginti su {baseline} baze"
   },
   "modal": {
     "auto_label": "Automatinio etikečių ciklai",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Pasirinkite ciklą ir spustelėkite ↺, kad įkeltumėte",
     "pg_sweep_progress": "Žingsnis {done} / {total}",
     "pg_analysis_hint": "Pasirinkite ciklą ir spustelėkite ↺, kad įkeltumėte analizę.",
-    "diagnostics_load_failed": "Nepavyko įkelti diagnostikos: {error}"
+    "diagnostics_load_failed": "Nepavyko įkelti diagnostikos: {error}",
+    "manual_duration_ref_hint": "Naudojama tik tada, kai nepasirinktas etaloninis ciklas. Etaloninis ciklas nustato trukmę pagal savo paties ilgį.",
+    "toast_convert_rolled_back": "Konvertavimas nepavyko ir buvo atšauktas (nepaliktas joks automatizavimas): {error}",
+    "toast_convert_orphan": "Automatizavimas buvo sukurtas, tačiau senų veiksmų išvalyti nepavyko. Nebandykite dar kartą: senus veiksmus pašalinkite rankiniu būdu, kad išvengtumėte pasikartojančio automatizavimo.",
+    "advisory_duration_trend_up": "'{name}' ciklai vis ilgėja (maždaug +{pct}% per ciklą). Jei prietaiso veikimas pasikeitė, įrašykite iš naujo arba perkurkite šį profilį.",
+    "advisory_energy_trend_up": "'{name}' naudoja vis daugiau energijos (maždaug +{pct}% per ciklą) - verta patikrinti prietaisą, jei to nesitikėjote.",
+    "advisory_poor_health": "'{name}' turi žemą atitikties įvertį - naujausi jo ciklai labai skiriasi arba silpnai atpažįstami. Peržiūrėkite jo ciklus arba įrašykite profilį iš naujo, kad atpažinimas ir laiko įverčiai išliktų tikslūs.",
+    "advisory_shape_drift": "'{name}' smarkiai nukrypo nuo pradinės galios kreivės. Prietaiso veikimas laikui bėgant galėjo pasikeisti (pvz., kalkės, nusidėvėjimas). Apsvarstykite galimybę įrašyti šį profilį iš naujo pagal naujausius ciklus.",
+    "advisory_shape_drift_corr": "'{name}' smarkiai nukrypo nuo pradinės galios kreivės (koreliacija {corr}). Prietaiso veikimas laikui bėgant galėjo pasikeisti (pvz., kalkės, nusidėvėjimas). Apsvarstykite galimybę įrašyti šį profilį iš naujo pagal naujausius ciklus."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1331,7 +1355,8 @@
     "reminders_save_failed": "Nepavyko įrašyti priminimų: {error}",
     "reminders_saved": "Aptarnavimo priminimai įrašyti",
     "pause_no_cycle": "Nėra aktyvaus ciklo, kurį būtų galima pristabdyti",
-    "resume_no_cycle": "Nėra pristabdyto ciklo, kurį būtų galima tęsti"
+    "resume_no_cycle": "Nėra pristabdyto ciklo, kurį būtų galima tęsti",
+    "delete_partial_failed": "Kai kurių elementų nepavyko ištrinti ir jie buvo atkurti"
   },
   "suggestion": {
     "both_agree": "WashData rekomenduoja",
@@ -1394,6 +1419,39 @@
         "higher": "Leidžiamos ilgesnės tylios fazės; mažiau klaidingų priverstinių sustabdymų",
         "lower": "Agresyviau aptinka įstrigusius ciklus"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "15-ojo procentilio patikimumas {cycles} automatinių žymų, kurių naudotojas niekada netaisė ({p15}).",
+      "completion_min_seconds": "Pusė p05 švarių ciklų trukmės ({minutes} min) iš {cycles} ciklų; atfiltruoja netikrus ciklus.{excl}",
+      "dead_zone_batch": "Paliktas trumpas (medianinis paleidimo nestabilumo langas per {cycles} ciklus = {s}s), kad tikra pabaiga būtų aptikta greitai.",
+      "dead_zone_from_dip": "Pagrįsta ankstyvu galios kryčiu, aptiktu ties {s}s.",
+      "end_energy_default": "Numatytoji rekomenduojama bazė ciklo pabaigos triukšmo slenksčiui.",
+      "end_energy_false": "p95 klaidingos pabaigos energija ({p95}Wh) per {cycles} ciklus, apribota iki 0.2% medianinės ciklo energijos ({floor}Wh).",
+      "end_energy_no_false": "Nėra klaidingų pabaigų per {cycles} ciklus; apribota iki 0.2% medianinės ciklo energijos ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} švarių ciklų ({pct}%) turėjo >60s vidinę pauzę, kuri vėl tęsėsi; reikalauti {val} pabaigos patvirtinimo(-ų).",
+      "learning_confidence": "p05 patikimumas {cycles} naudotojo pažymėtų ciklų ({p05}); žemiau šios ribos prašyti patikrinimo.",
+      "match_interval": "Pagrįsta stebimu atnaujinimo dažniu (mediana={median}s) * 10.",
+      "max_duration_ratio": "Pagrįsta pažymėtų ciklų trukmėmis (p95={p95}).",
+      "min_active": "Pagrįsta mažiausia aktyvia galia ({min}W), stebėta paskutiniame cikle.",
+      "min_duration_ratio": "Paliktas kuo mažesnis, kad programa būtų atpažinta ciklo pradžioje; patikimumo ir dviprasmiškumo slenksčiai neleidžia patvirtinti per anksti.",
+      "min_off_gap": "Pagrįsta {gaps} stebimais tarpcikliniais tarpais (p05={p05}s). Prietaiso apatinė riba: {floor}s.",
+      "min_power": "40% p05 mažiausios aktyvios galios ({p05}W) per {cycles} švarius ciklus, išlaikant išjungimo slenkstį žemiau realaus suvartojimo.{excl}",
+      "ml_auto_label": "Mažiausias patikimumas, kurį kokybės modelis vis dar įvertino kaip švarų (p10 iš {cycles} švarių ciklų = {p10}).",
+      "ml_end_repeat": "{false}/{total} ciklų ({pct}%) turėjo pauzę, kurią pabaigos detektorius įvertino >50%; reikalauti {val} pabaigos patvirtinimo(-ų).",
+      "ml_off_delay": "Pabaigos detektoriaus patvirtintos pauzės: p95 {p95}s + 60s buferis, iš {pauses} modelio patvirtintų pauzių per {cycles} ciklus (apatinė riba {floor}s).",
+      "no_update_timeout": "Pagrįsta stebimu atnaujinimo dažniu (p95={p95}s) * 20 (min. 60s).",
+      "off_delay_cadence": "Pagrįsta stebimu atnaujinimo dažniu (p95={p95}s) * 5",
+      "off_delay_device_floor": "Naudotas prietaisui {device} būdingas saugus minimumas ({floor}s).",
+      "off_delay_generic_floor": "Naudotas bendrinis saugus minimumas ({floor}s).",
+      "off_delay_pauses": "Nustatyta taip, kad viršytų realias pauzes: p95 ciklo vidinė pauzė {p95}s + 60s buferis, iš {pauses} pauzių per {cycles} švarius ciklus (apatinė riba {floor}s).",
+      "profile_match_threshold": "p10 patikimumas {cycles} teisingų automatinių žymų ({p10}); saugi tiesioginio patvirtinimo riba.",
+      "sampling_interval": "Medianinis atnaujinimo intervalas, stebėtas per {cycles} švarius ciklus ({si}s).{excl}",
+      "smoothing_window": "Nustatyta taip, kad išlygintų ~30s rodmenų esant {si}s diskretizavimui ({samples} pavyzdžiai).",
+      "start_duration": "Paliktas trumpas (~vienas {si}s pavyzdžių intervalas), kad aptikimas prasidėtų kuo anksčiau, tačiau būtų ignoruojami pavieniai pavyzdžio šuoliai.",
+      "thr_batch": "Paliktas šiek tiek virš p05 mažiausios aktyvios galios per {cycles} ciklus ({p05}W), kad pradžia būtų aptikta kuo anksčiau, o sustabdymo slenkstis liktų žemiau mažiausios veikiančios mašinos galios.",
+      "tol_per_profile": "p75 kiekvieno profilio trukmės dispersijos per {profiles} profilius ({cycles} ciklai); stabilūs profiliai nebaudžiami.",
+      "tol_pooled": "Pagrįsta sujungta {cycles} naujausių pažymėtų ciklų trukmės dispersija (p95 nuokrypis={dev}).",
+      "watchdog": "Paliktas kuo mažesnis, kiek saugu (3x p95 atnaujinimo tarpas {p95}s, min. 30s), kad strigtys būtų aptiktos greitai be klaidingų sustabdymų."
     }
   },
   "trend": {

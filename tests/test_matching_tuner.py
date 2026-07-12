@@ -57,3 +57,18 @@ def test_deterministic_for_seed():
     a = tune_matching_config(_dataset(), min_cycles=10, min_targets=6, seed=3)
     b = tune_matching_config(_dataset(), min_cycles=10, min_targets=6, seed=3)
     assert a == b
+
+
+def test_multi_split_gate_fields_and_invariants():
+    out = tune_matching_config(_dataset(), min_cycles=10, min_targets=6, seed=1)
+    # The multi-split gate exposes its win/split ratio and a descriptive reason.
+    assert out["holdout_splits"] == 5
+    assert 0 <= out["holdout_wins"] <= out["holdout_splits"]
+    assert out.get("reason")
+    if out["promoted"]:
+        # Promotion needs a MAJORITY of held-out subsamples AND a mean margin.
+        assert out["holdout_wins"] >= 4
+        assert (out["tuned_test_top1"] - out["baseline_test_top1"]) >= 0.03 - 1e-9
+    else:
+        # Not promoted -> no override applied.
+        assert out["config"] is None

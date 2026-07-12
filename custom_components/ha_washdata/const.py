@@ -678,6 +678,11 @@ DEFAULT_ML_TRAINING_INTERVAL_DAYS = 7 # retrain at most weekly
 # held-out AUC is at least (baseline AUC - this margin). Small negative slack is
 # allowed so personalisation can win even at a tiny AUC cost.
 ML_TRAINING_AUC_MARGIN = 0.02
+# Separate tolerance for the calibration gate: a retrained classifier must not
+# degrade balanced accuracy AT the live operating cutoff by more than this. Kept
+# distinct from ML_TRAINING_AUC_MARGIN because it bounds a different metric (decision
+# quality at a fixed threshold, not overall rank quality); same 0.02 default today.
+ML_TRAINING_BACC_MARGIN = 0.02
 ML_TRAINING_MIN_POSITIVES = 20  # need at least this many positive examples to trust a fit
 
 # Per-capability held-out-score history kept across training runs, so the panel

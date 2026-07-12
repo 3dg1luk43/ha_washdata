@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} открија циклуси на духови. Предложена промена на мин_моќноста: {current_min}W -> {new_min}W (не се применува автоматски).",
       "timer_default_message": "{device}: тајмер од {minutes} мин.",
       "timer_pause_action_title": "Продолжи со циклусот",
-      "timer_pause_body_suffix": "Циклусот е паузиран. Отворете го WashData панелот за да продолжите."
+      "timer_pause_body_suffix": "Циклусот е паузиран. Отворете го WashData панелот за да продолжите.",
+      "notify_live_waiting_message": "{device}: Сè уште нема совпаднат профил.",
+      "vs_typical_longer": "{pct}% подолго од вообичаено",
+      "vs_typical_shorter": "{pct}% пократко од вообичаено"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Нејасност на совпаѓање"
+        "name": "Оцена на нејасноста"
       },
       "current_phase": {
         "name": "Тековна фаза"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Нема активен циклус за паузирање или продолжување."
+    },
+    "path_not_allowed": {
+      "message": "Патеката не е дозволена: {path}. Додајте го нејзиниот директориум во 'allowlist_external_dirs' во configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Не може да се креира профил: {error}"
+    },
+    "export_path_exists": {
+      "message": "Целта за извоз веќе постои: {path}. Изберете друга патека или прво отстранете ја постојната датотека."
+    },
+    "export_write_failed": {
+      "message": "Не може да се запише извозот во {path}: {error}"
     }
   },
   "intent": {

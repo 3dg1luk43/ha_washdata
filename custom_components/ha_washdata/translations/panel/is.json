@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% betri en grunnmatið ({metric})",
     "trend_improving_tip": "Mátun þessa líkans hefur batnað í nýlegum endurskoðunum.",
     "trend_declining_tip": "Mátun þessa líkans hefur versnað í nýlegum endurskoðunum. Að fara yfir fleiri lotur getur hjálpað því að læra á ný.",
-    "trend_steady_tip": "Mátun þessa líkans hefur haldist nokkurn veginn stöðug í nýlegum endurskoðunum."
+    "trend_steady_tip": "Mátun þessa líkans hefur haldist nokkurn veginn stöðug í nýlegum endurskoðunum.",
+    "cap_blurb": {
+      "end": "Að vita hvenær lotu er raunverulega lokið",
+      "live_match": "Að bera kennsl á kerfið sem er í gangi fyrr",
+      "quality": "Að koma auga á rangt greindar eða skemmdar lotur",
+      "remaining_time": "Að spá fyrir um hversu langt er eftir",
+      "total_energy": "Að spá fyrir um heildarorku og kostnað"
+    },
+    "cap_label": {
+      "end": "Greining á lokum lotu",
+      "live_match": "Kerfisgreining",
+      "quality": "Gæðaeftirlit lotu",
+      "remaining_time": "Mat á tíma sem eftir er",
+      "total_energy": "Orkumat"
+    },
+    "metric_auc": "AUC {auc} á staðfestingargögnum",
+    "metric_mae": "villa {model} á móti grunnlínu {baseline}"
   },
   "modal": {
     "auto_label": "Sjálfvirk merkingarlotur",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Veldu lotu og smelltu á ↺ til að hlaða",
     "pg_sweep_progress": "Skref {done} / {total}",
     "pg_analysis_hint": "Veldu lotu og smelltu á ↺ til að hlaða greiningunni.",
-    "diagnostics_load_failed": "Ekki tókst að hlaða greiningu: {error}"
+    "diagnostics_load_failed": "Ekki tókst að hlaða greiningu: {error}",
+    "manual_duration_ref_hint": "Aðeins notað þegar engin viðmiðunarlota er valin. Viðmiðunarlota ákvarðar lengdina út frá eigin tímalengd.",
+    "toast_convert_rolled_back": "Umbreyting mistókst og var afturkölluð (engin sjálfvirkni skilin eftir): {error}",
+    "toast_convert_orphan": "Sjálfvirknin var búin til, en hreinsun gömlu aðgerðanna mistókst. Reyndu ekki aftur: fjarlægðu gömlu aðgerðirnar handvirkt til að forðast tvítekna sjálfvirkni.",
+    "advisory_duration_trend_up": "Lotur fyrir '{name}' verða smám saman lengri (um +{pct}% á hverja lotu). Ef hegðun tækisins hefur breyst skaltu taka þetta snið upp aftur eða endurbyggja það.",
+    "advisory_energy_trend_up": "'{name}' dregur smám saman meiri orku (um +{pct}% á hverja lotu) - það er þess virði að athuga tækið ef þetta er óvænt.",
+    "advisory_poor_health": "'{name}' er með lágt samsvörunargildi - nýlegar lotur þess eru mjög breytilegar eða samsvara illa. Farðu yfir lotur þess eða taktu sniðið upp aftur svo að greining og tímamat haldist nákvæm.",
+    "advisory_shape_drift": "'{name}' hefur breyst verulega frá upprunalegri aflkúrfu sinni. Tækið kann að hafa breytt hegðun sinni með tímanum (t.d. kalk, slit). Íhugaðu að taka þetta snið upp aftur með nýlegum lotum.",
+    "advisory_shape_drift_corr": "'{name}' hefur breyst verulega frá upprunalegri aflkúrfu sinni (fylgni {corr}). Tækið kann að hafa breytt hegðun sinni með tímanum (t.d. kalk, slit). Íhugaðu að taka þetta snið upp aftur með nýlegum lotum."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Skyndilegt fall meðhöndlað sem tafarlaus endir",
@@ -1313,6 +1337,39 @@
         "higher": "Lengri þagnar leyfast – færri óviljandi þvinganir",
         "lower": "Greinir fastar lotur hraðar"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "Vissa við 15. hundraðsmark fyrir {cycles} sjálfvirkar merkingar sem notandinn leiðrétti aldrei ({p15}).",
+      "completion_min_seconds": "Helmingur af p05-lengd hreinna lota ({minutes} min) yfir {cycles} lotur; síar út draugalotur.{excl}",
+      "dead_zone_batch": "Haldið stuttu (miðgildi óstöðugleikaglugga við ræsingu yfir {cycles} lotur = {s}s) svo að raunveruleg lok greinist fljótt.",
+      "dead_zone_from_dip": "Byggt á snemmbúnu aflfalli sem greindist við {s}s.",
+      "end_energy_default": "Sjálfgefin ráðlögð grunnlína fyrir suðþröskuld við lok lotu.",
+      "end_energy_false": "p95 fyrir orku við fölsk lok ({p95}Wh) yfir {cycles} lotur, með lágmark við 0.2% af miðgildi orku lotu ({floor}Wh).",
+      "end_energy_no_false": "Engin fölsk lok yfir {cycles} lotur; með lágmark við 0.2% af miðgildi orku lotu ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} hreinar lotur ({pct}%) höfðu innri hlé lengra en 60s sem hélt svo áfram; krefst {val} staðfestinga á lokum.",
+      "learning_confidence": "p05-vissa fyrir {cycles} lotur sem notandi merkti ({p05}); undir þessu er beðið um staðfestingu.",
+      "match_interval": "Byggt á mældri uppfærslutíðni (miðgildi={median}s) * 10.",
+      "max_duration_ratio": "Byggt á lengd merktra lota (p95={p95}).",
+      "min_active": "Byggt á lægsta virka afli ({min}W) sem mældist í síðustu lotu.",
+      "min_duration_ratio": "Haldið eins lágu og hægt er svo að kerfi greinist snemma í lotunni; vissu- og tvíræðnimörkin koma í veg fyrir ótímabærar ákvarðanir.",
+      "min_off_gap": "Byggt á {gaps} mældum millibilum milli lota (p05={p05}s). Lágmark tækis: {floor}s.",
+      "min_power": "40% af lægsta virka afli við p05 ({p05}W) yfir {cycles} hreinar lotur, sem heldur slökkviþröskuldinum undir raunverulegri notkun.{excl}",
+      "ml_auto_label": "Lægsta vissa sem gæðalíkanið mat samt sem hreint (p10 af {cycles} hreinum lotum = {p10}).",
+      "ml_end_repeat": "{false}/{total} lotur ({pct}%) höfðu hlé sem lokagreinirinn gaf einkunnina >50%; krefst {val} staðfestinga á lokum.",
+      "ml_off_delay": "Hlé staðfest af lokagreini: p95 {p95}s + 60s biðminni, úr {pauses} hléum sem líkanið staðfesti yfir {cycles} lotur (lágmark {floor}s).",
+      "no_update_timeout": "Byggt á mældri uppfærslutíðni (p95={p95}s) * 20 (lágm. 60s).",
+      "off_delay_cadence": "Byggt á mældri uppfærslutíðni (p95={p95}s) * 5",
+      "off_delay_device_floor": "Notaði tækjasértækt öruggt lágmark fyrir {device} ({floor}s).",
+      "off_delay_generic_floor": "Notaði almennt öruggt lágmark ({floor}s).",
+      "off_delay_pauses": "Stærðin valin til að endast lengur en raunveruleg hlé: p95 fyrir hlé innan lotu {p95}s + 60s biðminni, úr {pauses} hléum yfir {cycles} hreinar lotur (lágmark {floor}s).",
+      "profile_match_threshold": "p10-vissa fyrir {cycles} réttar sjálfvirkar merkingar ({p10}); öruggt lágmark fyrir staðfestingu í rauntíma.",
+      "sampling_interval": "Miðgildi uppfærslubils sem mældist yfir {cycles} hreinar lotur ({si}s).{excl}",
+      "smoothing_window": "Stærðin valin til að jafna út um það bil 30s af mælingum við {si}s sýnatökubil ({samples} sýni).",
+      "start_duration": "Haldið stuttu (~eitt {si}s sýnatökubil) svo að greining hefjist eins snemma og hægt er en hunsi samt staka toppa.",
+      "thr_batch": "Haldið rétt yfir lægsta virka afli við p05 yfir {cycles} lotur ({p05}W) svo að ræsing náist eins snemma og hægt er og stöðvunarþröskuldurinn haldist undir lægsta gangafli vélarinnar.",
+      "tol_per_profile": "p75 af dreifni lengdar á hvert snið yfir {profiles} snið ({cycles} lotur); þröngum sniðum er ekki refsað.",
+      "tol_pooled": "Byggt á sameinaðri dreifni lengdar {cycles} nýjustu merktu lota (p95 frávik={dev}).",
+      "watchdog": "Haldið eins lágu og óhætt er (3x p95-uppfærslubilið {p95}s, lágm. 30s) svo að stöðnun greinist fljótt án falskra stöðvana."
     }
   },
   "tab": {
@@ -1405,7 +1462,8 @@
     "reminders_save_failed": "Ekki tókst að vista áminningar: {error}",
     "reminders_saved": "Þjónustuáminningar vistaðar",
     "pause_no_cycle": "Engin virk lota til að gera hlé á",
-    "resume_no_cycle": "Engin lota í hléi til að halda áfram"
+    "resume_no_cycle": "Engin lota í hléi til að halda áfram",
+    "delete_partial_failed": "Ekki tókst að eyða sumum atriðum og þau voru endurheimt"
   },
   "trend": {
     "down": "Stefnir niður",

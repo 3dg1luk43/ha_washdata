@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} hat Geisterzyklen erkannt. Vorgeschlagene Änderung der Mindestleistung: {current_min}W -> {new_min}W (wird nicht automatisch angewendet).",
       "timer_default_message": "{device}: {minutes}-Min.-Timer",
       "timer_pause_action_title": "Zyklus fortsetzen",
-      "timer_pause_body_suffix": "Der Zyklus ist angehalten. Öffnen Sie das WashData-Panel, um fortzufahren."
+      "timer_pause_body_suffix": "Der Zyklus ist angehalten. Öffnen Sie das WashData-Panel, um fortzufahren.",
+      "notify_live_waiting_message": "{device}: Noch kein Profil erkannt.",
+      "vs_typical_longer": "{pct}% länger als üblich",
+      "vs_typical_shorter": "{pct}% kürzer als üblich"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Match Ambiguity"
+        "name": "Mehrdeutigkeitswert"
       },
       "current_phase": {
         "name": "Aktuelle Phase"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Kein aktiver Zyklus zum Anhalten oder Fortsetzen."
+    },
+    "path_not_allowed": {
+      "message": "Pfad ist nicht zulässig: {path}. Fügen Sie dessen Verzeichnis zu 'allowlist_external_dirs' in configuration.yaml hinzu."
+    },
+    "create_profile_failed": {
+      "message": "Profil konnte nicht erstellt werden: {error}"
+    },
+    "export_path_exists": {
+      "message": "Das Exportziel existiert bereits: {path}. Wählen Sie einen anderen Pfad oder entfernen Sie zuerst die vorhandene Datei."
+    },
+    "export_write_failed": {
+      "message": "Export konnte nicht nach {path} geschrieben werden: {error}"
     }
   },
   "intent": {

@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} открити призрачни цикли. Предложена промяна на min_power: {current_min}W -> {new_min}W (не се прилага автоматично).",
       "timer_default_message": "{device}: таймер за {minutes} мин",
       "timer_pause_action_title": "Възобновяване на цикъла",
-      "timer_pause_body_suffix": "Цикълът е на пауза. Отворете панела на WashData, за да го възобновите."
+      "timer_pause_body_suffix": "Цикълът е на пауза. Отворете панела на WashData, за да го възобновите.",
+      "notify_live_waiting_message": "{device}: Все още няма съвпадащ профил.",
+      "vs_typical_longer": "{pct}% по-дълго от обичайното",
+      "vs_typical_shorter": "{pct}% по-кратко от обичайното"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Match Ambiguity"
+        "name": "Оценка на неяснотата"
       },
       "current_phase": {
         "name": "Текуща фаза"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Няма активен цикъл за пауза или възобновяване."
+    },
+    "path_not_allowed": {
+      "message": "Пътят не е разрешен: {path}. Добавете неговата директория към 'allowlist_external_dirs' в configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Неуспешно създаване на профил: {error}"
+    },
+    "export_path_exists": {
+      "message": "Целта за експорт вече съществува: {path}. Изберете друг път или първо премахнете съществуващия файл."
+    },
+    "export_write_failed": {
+      "message": "Неуспешно записване на експорта в {path}: {error}"
     }
   },
   "intent": {

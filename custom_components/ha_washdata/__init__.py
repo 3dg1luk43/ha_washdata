@@ -393,7 +393,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     profile_name, reference_cycle_id
                 )
             except ValueError as exc:
-                raise ServiceValidationError(str(exc)) from exc
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="create_profile_failed",
+                    translation_placeholders={"error": str(exc)},
+                ) from exc
             manager.notify_update()
 
         hass.services.async_register(DOMAIN, "create_profile", handle_create_profile)
@@ -675,10 +679,47 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
             target = target.resolve()
 
-            # Write export (offloaded to executor to avoid blocking the event loop)
+            # Restrict caller-supplied paths to HA-allowed dirs (path-traversal /
+            # arbitrary-write guard). The default (no path) lands in the config dir.
+            if file_path and not hass.config.is_allowed_path(str(target)):
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="path_not_allowed",
+                    translation_placeholders={"path": str(target)},
+                )
+
+            # Write export (offloaded to executor to avoid blocking the event
+            # loop). A caller-supplied path must never silently overwrite an
+            # existing file even when is_allowed_path() accepts it; exclusive
+            # creation ("x") makes that no-overwrite check atomic (no TOCTOU
+            # window). The default generated path may be re-written freely.
             def _dump_and_write():
                 text = json.dumps(payload, indent=2)
-                target.write_text(text, encoding="utf-8")
+                try:
+                    if file_path:
+                        # Exclusive creation ("x") makes the no-overwrite check
+                        # atomic; the default generated path may be re-written.
+                        with open(target, "x", encoding="utf-8") as handle:
+                            handle.write(text)
+                    else:
+                        target.write_text(text, encoding="utf-8")
+                except FileExistsError as exc:
+                    # Subclass of OSError -> must be caught first (no-overwrite).
+                    raise ServiceValidationError(
+                        translation_domain=DOMAIN,
+                        translation_key="export_path_exists",
+                        translation_placeholders={"path": str(target)},
+                    ) from exc
+                except OSError as exc:
+                    # Disk full / permission denied / bad path: surface a clean
+                    # localized error instead of a raw OSError from the executor.
+                    raise ServiceValidationError(
+                        translation_domain=DOMAIN,
+                        translation_key="export_write_failed",
+                        translation_placeholders={
+                            "path": str(target), "error": str(exc)
+                        },
+                    ) from exc
             await hass.async_add_executor_job(_dump_and_write)
             manager._logger.info("Exported ha_washdata entry %s to %s", entry_id, target)
 
@@ -711,6 +752,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 raise ValueError(f"Config entry not found: {entry_id}")
 
             source = Path(file_path).resolve()
+            # Restrict reads to HA-allowed dirs (path-traversal / arbitrary-read guard).
+            if not hass.config.is_allowed_path(str(source)):
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="path_not_allowed",
+                    translation_placeholders={"path": str(source)},
+                )
             if not source.exists():
                 raise ValueError(f"File not found: {source}")
 
@@ -926,5 +974,10 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         manager = hass.data[DOMAIN].pop(entry.entry_id)
         await manager.async_shutdown()
+        # When the last WashData entry is removed, tear down the shared panel/sidebar
+        # so no stale registration flags or sidebar entry linger.
+        if not hass.data.get(DOMAIN):
+            from .frontend import async_unregister_panel
+            await async_unregister_panel(hass)
 
     return unload_ok

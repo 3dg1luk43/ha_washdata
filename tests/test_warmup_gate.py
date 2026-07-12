@@ -44,7 +44,7 @@ class _MockStore:
     def get_suggestions(self):
         return self.suggestions
 
-    def set_suggestion(self, key, value, reason):
+    def set_suggestion(self, key, value, reason, reason_key=None, reason_params=None):
         self.suggestions[key] = {"value": value, "reason": reason}
 
     def delete_suggestion(self, key):

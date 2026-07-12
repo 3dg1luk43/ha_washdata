@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% lepšie ako základný odhad ({metric})",
     "trend_improving_tip": "Prispôsobenie tohto modelu sa v posledných opakovaných kontrolách zlepšilo.",
     "trend_declining_tip": "Prispôsobenie tohto modelu sa v posledných opakovaných kontrolách zhoršilo, kontrola viacerých cyklov mu môže pomôcť znovu sa naučiť.",
-    "trend_steady_tip": "Prispôsobenie tohto modelu zostalo v posledných opakovaných kontrolách približne stabilné."
+    "trend_steady_tip": "Prispôsobenie tohto modelu zostalo v posledných opakovaných kontrolách približne stabilné.",
+    "cap_blurb": {
+      "end": "Rozpoznanie, kedy sa cyklus skutočne skončil",
+      "live_match": "Skoršie rozpoznanie spusteného programu",
+      "quality": "Odhaľovanie chybne rozpoznaných alebo poškodených cyklov",
+      "remaining_time": "Predpoveď zostávajúceho času",
+      "total_energy": "Predpoveď celkovej spotreby energie a nákladov"
+    },
+    "cap_label": {
+      "end": "Rozpoznanie konca cyklu",
+      "live_match": "Rozpoznávanie programu",
+      "quality": "Kontrola kvality cyklu",
+      "remaining_time": "Odhad zostávajúceho času",
+      "total_energy": "Odhad spotreby energie"
+    },
+    "metric_auc": "AUC {auc} na validačných dátach",
+    "metric_mae": "chyba {model} oproti základnému modelu {baseline}"
   },
   "modal": {
     "auto_label": "Automatické označovanie cyklov",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Vyberte cyklus a kliknutím na ↺ ho načítajte",
     "pg_sweep_progress": "Krok {done} / {total}",
     "pg_analysis_hint": "Vyberte cyklus a kliknutím na ↺ načítajte analýzu.",
-    "diagnostics_load_failed": "Nepodarilo sa načítať diagnostiku: {error}"
+    "diagnostics_load_failed": "Nepodarilo sa načítať diagnostiku: {error}",
+    "manual_duration_ref_hint": "Použije sa iba vtedy, keď nie je vybraný žiadny referenčný cyklus. Referenčný cyklus nastaví trvanie podľa vlastnej dĺžky.",
+    "toast_convert_rolled_back": "Konverzia zlyhala a bola vrátená späť (nezostala žiadna automatizácia): {error}",
+    "toast_convert_orphan": "Automatizácia bola vytvorená, ale vymazanie starých akcií zlyhalo. Neskúšajte to znova: staré akcie odstráňte ručne, aby ste predišli duplicitnej automatizácii.",
+    "advisory_duration_trend_up": "Cykly '{name}' trvajú čoraz dlhšie (približne +{pct}% na cyklus). Ak sa správanie spotrebiča zmenilo, nahrajte alebo prebudujte tento profil znova.",
+    "advisory_energy_trend_up": "'{name}' odoberá čoraz viac energie (približne +{pct}% na cyklus) - ak je to nečakané, oplatí sa spotrebič skontrolovať.",
+    "advisory_poor_health": "'{name}' má nízke skóre zhody - jeho posledné cykly sa veľmi líšia alebo sa slabo rozpoznávajú. Prezrite jeho cykly alebo profil nahrajte znova, aby rozpoznávanie a odhady času zostali presné.",
+    "advisory_shape_drift": "'{name}' sa výrazne odchýlil od pôvodného tvaru krivky výkonu. Správanie spotrebiča sa mohlo časom zmeniť (napr. vodný kameň, opotrebenie). Zvážte opätovné nahranie tohto profilu z posledných cyklov.",
+    "advisory_shape_drift_corr": "'{name}' sa výrazne odchýlil od pôvodného tvaru krivky výkonu (korelácia {corr}). Správanie spotrebiča sa mohlo časom zmeniť (napr. vodný kameň, opotrebenie). Zvážte opätovné nahranie tohto profilu z posledných cyklov."
   },
   "phase_desc": {
     "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",
@@ -1302,6 +1326,39 @@
         "higher": "Umožňuje dlhšie tiché fázy; menej falošných vynútených zastavení",
         "lower": "Zaseknuté cykly sú detegované agresívnejšie"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "Istota na 15. percentile z {cycles} automatických štítkov, ktoré používateľ nikdy neopravil ({p15}).",
+      "completion_min_seconds": "Polovica dĺžky p05 čistého cyklu ({minutes} min) naprieč {cycles} cyklami; odfiltruje falošné cykly.{excl}",
+      "dead_zone_batch": "Ponechané krátke (medián okna nestability pri spustení naprieč {cycles} cyklami = {s}s), aby sa skutočný koniec rozpoznal rýchlo.",
+      "dead_zone_from_dip": "Na základe skorého poklesu výkonu zisteného v {s}s.",
+      "end_energy_default": "Predvolená odporúčaná hodnota pre prah šumu na konci cyklu.",
+      "end_energy_false": "Energia p95 falošných koncov ({p95}Wh) naprieč {cycles} cyklami, s dolnou hranicou 0.2% mediánovej energie cyklu ({floor}Wh).",
+      "end_energy_no_false": "Žiadne falošné konce naprieč {cycles} cyklami; dolná hranica 0.2% mediánovej energie cyklu ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} čistých cyklov ({pct}%) malo vnútornú pauzu >60s, ktorá pokračovala; vyžadovať {val} potvrdení konca.",
+      "learning_confidence": "Istota p05 z {cycles} cyklov označených používateľom ({p05}); pod touto hodnotou vyžiadať overenie.",
+      "match_interval": "Na základe pozorovanej frekvencie aktualizácií (medián={median}s) * 10.",
+      "max_duration_ratio": "Na základe dĺžok označených cyklov (p95={p95}).",
+      "min_active": "Na základe minimálneho činného výkonu ({min}W) zaznamenaného v poslednom cykle.",
+      "min_duration_ratio": "Ponechané čo najnižšie, aby sa program rozpoznal skoro v cykle; prahy istoty a nejednoznačnosti bránia predčasnému potvrdeniu.",
+      "min_off_gap": "Na základe {gaps} pozorovaných medzier medzi cyklami (p05={p05}s). Minimum zariadenia: {floor}s.",
+      "min_power": "40% najnižšieho činného výkonu p05 ({p05}W) naprieč {cycles} čistými cyklami, aby prah vypnutia zostal pod skutočným odberom.{excl}",
+      "ml_auto_label": "Najnižšia istota, pri ktorej model kvality stále hodnotil cyklus ako čistý (p10 z {cycles} čistých cyklov = {p10}).",
+      "ml_end_repeat": "{false}/{total} cyklov ({pct}%) malo pauzu, ktorú detektor konca ohodnotil nad 50%; vyžadovať {val} potvrdení konca.",
+      "ml_off_delay": "Pauzy potvrdené detektorom konca: p95 {p95}s + rezerva 60s, z {pauses} páuz overených modelom naprieč {cycles} cyklami (minimum {floor}s).",
+      "no_update_timeout": "Na základe pozorovanej frekvencie aktualizácií (p95={p95}s) * 20 (min. 60s).",
+      "off_delay_cadence": "Na základe pozorovanej frekvencie aktualizácií (p95={p95}s) * 5",
+      "off_delay_device_floor": "Použité bezpečné minimum špecifické pre zariadenie {device} ({floor}s).",
+      "off_delay_generic_floor": "Použité všeobecné bezpečné minimum ({floor}s).",
+      "off_delay_pauses": "Nastavené tak, aby prečkalo skutočné pauzy: pauza vnútri cyklu p95 {p95}s + rezerva 60s, z {pauses} páuz naprieč {cycles} čistými cyklami (minimum {floor}s).",
+      "profile_match_threshold": "Istota p10 z {cycles} správnych automatických štítkov ({p10}); bezpečná hranica pre potvrdenie za behu.",
+      "sampling_interval": "Mediánový interval aktualizácie pozorovaný naprieč {cycles} čistými cyklami ({si}s).{excl}",
+      "smoothing_window": "Nastavené na vyhladenie ~30s odčítaní pri vzorkovaní {si}s ({samples} vzoriek).",
+      "start_duration": "Ponechané krátke (~jeden interval vzorkovania {si}s), aby detekcia začínala čo najskôr a pritom ignorovala jednotlivé špičky.",
+      "thr_batch": "Ponechané tesne nad najnižším činným výkonom p05 naprieč {cycles} cyklami ({p05}W), aby sa štart zachytil čo najskôr a prah zastavenia zostal pod najnižším prevádzkovým výkonom stroja.",
+      "tol_per_profile": "p75 rozptylu dĺžky podľa profilu naprieč {profiles} profilmi ({cycles} cyklov); konzistentné profily nie sú penalizované.",
+      "tol_pooled": "Na základe zlúčeného rozptylu dĺžky {cycles} nedávnych označených cyklov (odchýlka p95={dev}).",
+      "watchdog": "Ponechané čo najnižšie pri zachovaní bezpečnosti (3x interval aktualizácie p95 vo výške {p95}s, min. 30s), aby sa zaseknutia rýchlo odhalili bez falošných zastavení."
     }
   },
   "tab": {
@@ -1394,7 +1451,8 @@
     "reminders_save_failed": "Nepodarilo sa uložiť pripomienky: {error}",
     "reminders_saved": "Pripomienky servisu uložené",
     "pause_no_cycle": "Žiadny aktívny cyklus na pozastavenie",
-    "resume_no_cycle": "Žiadny pozastavený cyklus na obnovenie"
+    "resume_no_cycle": "Žiadny pozastavený cyklus na obnovenie",
+    "delete_partial_failed": "Niektoré položky sa nepodarilo odstrániť a boli obnovené"
   },
   "trend": {
     "down": "Klesajúci trend",

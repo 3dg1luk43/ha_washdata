@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% mai bine decât estimarea de referință ({metric})",
     "trend_improving_tip": "Potrivirea acestui model s-a îmbunătățit în ultimele reverificări.",
     "trend_declining_tip": "Potrivirea acestui model s-a înrăutățit în ultimele reverificări: revizuirea mai multor cicluri îl poate ajuta să reînvețe.",
-    "trend_steady_tip": "Potrivirea acestui model a rămas aproximativ stabilă în ultimele reverificări."
+    "trend_steady_tip": "Potrivirea acestui model a rămas aproximativ stabilă în ultimele reverificări.",
+    "cap_blurb": {
+      "end": "Să știe când un ciclu s-a încheiat cu adevărat",
+      "live_match": "Identificarea mai rapidă a programului în curs",
+      "quality": "Depistarea ciclurilor detectate greșit sau corupte",
+      "remaining_time": "Estimarea timpului rămas",
+      "total_energy": "Estimarea energiei totale și a costului"
+    },
+    "cap_label": {
+      "end": "Detectarea sfârșitului ciclului",
+      "live_match": "Recunoașterea programului",
+      "quality": "Verificarea calității ciclului",
+      "remaining_time": "Estimarea timpului rămas",
+      "total_energy": "Estimarea energiei"
+    },
+    "metric_auc": "AUC {auc} pe datele de validare",
+    "metric_mae": "eroare: {model} față de referința {baseline}"
   },
   "modal": {
     "auto_label": "Etichetare automată a ciclurilor",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Selectați un ciclu și faceți clic pe ↺ pentru a încărca",
     "pg_sweep_progress": "Pasul {done} / {total}",
     "pg_analysis_hint": "Selectați un ciclu și faceți clic pe ↺ pentru a încărca analiza.",
-    "diagnostics_load_failed": "Nu s-au putut încărca diagnosticele: {error}"
+    "diagnostics_load_failed": "Nu s-au putut încărca diagnosticele: {error}",
+    "manual_duration_ref_hint": "Se folosește doar când nu este selectat niciun ciclu de referință. Un ciclu de referință stabilește durata în funcție de propria lungime.",
+    "toast_convert_rolled_back": "Conversia a eșuat și a fost anulată (nu a rămas nicio automatizare): {error}",
+    "toast_convert_orphan": "Automatizarea a fost creată, dar ștergerea acțiunilor vechi a eșuat. Nu încercați din nou: eliminați manual acțiunile vechi pentru a evita o automatizare duplicată.",
+    "advisory_duration_trend_up": "Ciclurile '{name}' durează tot mai mult (aproximativ +{pct}% pe ciclu). Dacă comportamentul aparatului s-a schimbat, reînregistrați sau reconstruiți acest profil.",
+    "advisory_energy_trend_up": "'{name}' consumă tot mai multă energie (aproximativ +{pct}% pe ciclu) - merită să verificați aparatul dacă acest lucru este neașteptat.",
+    "advisory_poor_health": "'{name}' are un scor de potrivire scăzut - ciclurile sale recente variază mult sau se potrivesc slab. Examinați ciclurile sau reînregistrați profilul pentru ca recunoașterea și estimările de timp să rămână exacte.",
+    "advisory_shape_drift": "'{name}' a deviat semnificativ față de forma inițială a puterii. Comportamentul aparatului s-ar putea să se fi schimbat în timp (de ex. calcar, uzură). Luați în considerare reînregistrarea acestui profil cu cicluri recente.",
+    "advisory_shape_drift_corr": "'{name}' a deviat semnificativ față de forma inițială a puterii (corelație {corr}). Comportamentul aparatului s-ar putea să se fi schimbat în timp (de ex. calcar, uzură). Luați în considerare reînregistrarea acestui profil cu cicluri recente."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1331,7 +1355,8 @@
     "reminders_save_failed": "Nu s-au putut salva mementourile: {error}",
     "reminders_saved": "Mementouri de service salvate",
     "pause_no_cycle": "Niciun ciclu activ de pus în pauză",
-    "resume_no_cycle": "Niciun ciclu în pauză de reluat"
+    "resume_no_cycle": "Niciun ciclu în pauză de reluat",
+    "delete_partial_failed": "Unele elemente nu au putut fi șterse și au fost restaurate"
   },
   "suggestion": {
     "both_agree": "WashData recomandă",
@@ -1394,6 +1419,39 @@
         "higher": "Faze silențioase mai lungi permise; mai puține opriri forțate false",
         "lower": "Detectează ciclurile blocate mai agresiv"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "Încrederea la percentila 15 a {cycles} etichete automate pe care utilizatorul nu le-a corectat niciodată ({p15}).",
+      "completion_min_seconds": "Jumătate din durata p05 a ciclurilor curate ({minutes} min) pe {cycles} cicluri; filtrează ciclurile false.{excl}",
+      "dead_zone_batch": "Păstrat scurt (fereastra mediană de instabilitate la pornire pe {cycles} cicluri = {s}s), astfel încât un sfârșit real să fie detectat prompt.",
+      "dead_zone_from_dip": "Pe baza unei scăderi timpurii de putere detectate la {s}s.",
+      "end_energy_default": "Valoare de referință recomandată implicit pentru pragul de zgomot la sfârșitul ciclului.",
+      "end_energy_false": "Energia p95 de sfârșit fals ({p95}Wh) pe {cycles} cicluri, limitată inferior la 0.2% din energia mediană a ciclului ({floor}Wh).",
+      "end_energy_no_false": "Niciun sfârșit fals pe {cycles} cicluri; limitată inferior la 0.2% din energia mediană a ciclului ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} cicluri curate ({pct}%) au avut o pauză internă de >60s care a fost reluată; necesită {val} confirmare(i) de sfârșit.",
+      "learning_confidence": "Încrederea p05 a {cycles} cicluri etichetate de utilizator ({p05}); sub această valoare, se solicită verificare.",
+      "match_interval": "Pe baza cadenței de actualizare observate (mediană={median}s) * 10.",
+      "max_duration_ratio": "Pe baza duratelor ciclurilor etichetate (p95={p95}).",
+      "min_active": "Pe baza puterii active minime ({min}W) observate în ultimul ciclu.",
+      "min_duration_ratio": "Păstrat cât mai mic posibil, astfel încât un program să fie recunoscut devreme în ciclu; pragurile de încredere și de ambiguitate previn confirmările premature.",
+      "min_off_gap": "Pe baza a {gaps} intervale între cicluri observate (p05={p05}s). Limita inferioară a dispozitivului: {floor}s.",
+      "min_power": "40% din cea mai mică putere activă p05 ({p05}W) pe {cycles} cicluri curate, menținând pragul de oprire sub consumul real.{excl}",
+      "ml_auto_label": "Cea mai mică încredere pe care modelul de calitate a considerat-o încă drept curată (p10 din {cycles} cicluri curate = {p10}).",
+      "ml_end_repeat": "{false}/{total} cicluri ({pct}%) au avut o pauză pe care detectorul de sfârșit a evaluat-o la >50%; necesită {val} confirmare(i) de sfârșit.",
+      "ml_off_delay": "Pauze confirmate de detectorul de sfârșit: p95 {p95}s + 60s marjă, din {pauses} pauze verificate de model pe {cycles} cicluri (limită inferioară {floor}s).",
+      "no_update_timeout": "Pe baza cadenței de actualizare observate (p95={p95}s) * 20 (min. 60s).",
+      "off_delay_cadence": "Pe baza cadenței de actualizare observate (p95={p95}s) * 5",
+      "off_delay_device_floor": "S-a folosit minimul sigur specific dispozitivului pentru {device} ({floor}s).",
+      "off_delay_generic_floor": "S-a folosit minimul sigur generic ({floor}s).",
+      "off_delay_pauses": "Dimensionat pentru a depăși pauzele reale: pauza p95 din interiorul ciclului {p95}s + 60s marjă, din {pauses} pauze pe {cycles} cicluri curate (limită inferioară {floor}s).",
+      "profile_match_threshold": "Încrederea p10 a {cycles} etichete automate corecte ({p10}); prag inferior sigur de confirmare în timp real.",
+      "sampling_interval": "Intervalul median de actualizare observat pe {cycles} cicluri curate ({si}s).{excl}",
+      "smoothing_window": "Dimensionat pentru a netezi ~30s de citiri la eșantionare de {si}s ({samples} eșantioane).",
+      "start_duration": "Păstrat scurt (~un interval de eșantionare de {si}s), astfel încât detectarea să înceapă cât mai devreme posibil, ignorând totuși vârfurile de un singur eșantion.",
+      "thr_batch": "Păstrat chiar deasupra celei mai mici puteri active p05 pe {cycles} cicluri ({p05}W), astfel încât o pornire să fie surprinsă cât mai devreme posibil, iar pragul de oprire să rămână sub cea mai mică putere de funcționare a mașinii.",
+      "tol_per_profile": "p75 al varianței duratei per profil pe {profiles} profiluri ({cycles} cicluri); profilurile stabile nu sunt penalizate.",
+      "tol_pooled": "Pe baza varianței combinate a duratei a {cycles} cicluri recente etichetate (deviație p95={dev}).",
+      "watchdog": "Păstrat cât mai mic în siguranță (de 3x intervalul de actualizare p95 de {p95}s, min. 30s), astfel încât blocajele să fie surprinse rapid fără opriri false."
     }
   },
   "trend": {

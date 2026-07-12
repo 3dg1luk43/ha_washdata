@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} heeft spookcycli gedetecteerd. Voorgestelde min_power wijziging: {current_min}W -> {new_min}W (niet automatisch toegepast).",
       "timer_default_message": "{device}: timer van {minutes} min.",
       "timer_pause_action_title": "Hervat cyclus",
-      "timer_pause_body_suffix": "De cyclus is gepauzeerd. Open het WashData-paneel om te hervatten."
+      "timer_pause_body_suffix": "De cyclus is gepauzeerd. Open het WashData-paneel om te hervatten.",
+      "notify_live_waiting_message": "{device}: nog geen profiel herkend.",
+      "vs_typical_longer": "{pct}% langer dan gebruikelijk",
+      "vs_typical_shorter": "{pct}% korter dan gebruikelijk"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Overeenkomstambiguïteit"
+        "name": "Ambiguïteitsscore"
       },
       "current_phase": {
         "name": "Huidige fase"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Geen actieve cyclus om te pauzeren of te hervatten."
+    },
+    "path_not_allowed": {
+      "message": "Pad is niet toegestaan: {path}. Voeg de map ervan toe aan 'allowlist_external_dirs' in configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Kan profiel niet aanmaken: {error}"
+    },
+    "export_path_exists": {
+      "message": "Het exportdoel bestaat al: {path}. Kies een ander pad of verwijder eerst het bestaande bestand."
+    },
+    "export_write_failed": {
+      "message": "Kan de export niet naar {path} schrijven: {error}"
     }
   },
   "intent": {

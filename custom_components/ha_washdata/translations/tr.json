@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} hayalet döngüleri algıladı. Önerilen min_güç değişikliği: {current_min}W -> {new_min}W (otomatik olarak uygulanmaz).",
       "timer_default_message": "{device}: {minutes} dk zamanlayıcı",
       "timer_pause_action_title": "Döngüyü Devam Ettir",
-      "timer_pause_body_suffix": "Döngü duraklatıldı. Devam ettirmek için WashData panelini açın."
+      "timer_pause_body_suffix": "Döngü duraklatıldı. Devam ettirmek için WashData panelini açın.",
+      "notify_live_waiting_message": "{device}: Henüz eşleşen profil yok.",
+      "vs_typical_longer": "olağandan %{pct} daha uzun",
+      "vs_typical_shorter": "olağandan %{pct} daha kısa"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Match Ambiguity"
+        "name": "Belirsizlik Puanı"
       },
       "current_phase": {
         "name": "Mevcut Aşama"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Duraklatılacak veya devam ettirilecek etkin döngü yok."
+    },
+    "path_not_allowed": {
+      "message": "Yola izin verilmiyor: {path}. Dizinini configuration.yaml içindeki 'allowlist_external_dirs' listesine ekleyin."
+    },
+    "create_profile_failed": {
+      "message": "Profil oluşturulamadı: {error}"
+    },
+    "export_path_exists": {
+      "message": "Dışa aktarma hedefi zaten mevcut: {path}. Farklı bir yol seçin veya önce mevcut dosyayı kaldırın."
+    },
+    "export_write_failed": {
+      "message": "Dışa aktarma {path} konumuna yazılamadı: {error}"
     }
   },
   "intent": {

@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} zaznanih ciklov duhov. Predlagana sprememba najmanjše moči: {current_min}W -> {new_min}W (se ne uporabi samodejno).",
       "timer_default_message": "{device}: časovnik {minutes} min",
       "timer_pause_action_title": "Nadaljuj cikel",
-      "timer_pause_body_suffix": "Cikel je zaustavljen. Odprite ploščo WashData za nadaljevanje."
+      "timer_pause_body_suffix": "Cikel je zaustavljen. Odprite ploščo WashData za nadaljevanje.",
+      "notify_live_waiting_message": "{device}: Noben profil se še ne ujema.",
+      "vs_typical_longer": "{pct}% dlje kot običajno",
+      "vs_typical_shorter": "{pct}% krajše kot običajno"
     }
   },
   "selector": {
@@ -367,7 +370,7 @@
         "name": "Štetje ciklov"
       },
       "ambiguity": {
-        "name": "Dvoumnost ujemanja"
+        "name": "Ocena dvoumnosti"
       },
       "energy_total": {
         "name": "Skupna energija"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Ni aktivnega cikla za premor ali nadaljevanje."
+    },
+    "path_not_allowed": {
+      "message": "Pot ni dovoljena: {path}. Dodajte njen imenik v 'allowlist_external_dirs' v configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Profila ni bilo mogoče ustvariti: {error}"
+    },
+    "export_path_exists": {
+      "message": "Cilj izvoza že obstaja: {path}. Izberite drugo pot ali najprej odstranite obstoječo datoteko."
+    },
+    "export_write_failed": {
+      "message": "Izvoza ni bilo mogoče zapisati v {path}: {error}"
     }
   },
   "intent": {

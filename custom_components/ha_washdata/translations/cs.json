@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} detekovaných cyklů duchů. Navrhovaná změna min_power: {current_min}W -> {new_min}W (nepoužije se automaticky).",
       "timer_default_message": "{device}: {minutes} min časovač",
       "timer_pause_action_title": "Obnovit cyklus",
-      "timer_pause_body_suffix": "Cyklus je pozastaven. Pro pokračování otevřete panel WashData."
+      "timer_pause_body_suffix": "Cyklus je pozastaven. Pro pokračování otevřete panel WashData.",
+      "notify_live_waiting_message": "{device}: Zatím nebyl rozpoznán žádný profil.",
+      "vs_typical_longer": "o {pct}% déle než obvykle",
+      "vs_typical_shorter": "o {pct}% kratší než obvykle"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Match Ambiguity"
+        "name": "Skóre nejednoznačnosti"
       },
       "current_phase": {
         "name": "Aktuální fáze"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Žádný aktivní cyklus k pozastavení nebo obnovení."
+    },
+    "path_not_allowed": {
+      "message": "Cesta není povolena: {path}. Přidejte její adresář do 'allowlist_external_dirs' v configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Profil se nepodařilo vytvořit: {error}"
+    },
+    "export_path_exists": {
+      "message": "Cíl exportu již existuje: {path}. Zvolte jinou cestu nebo nejprve odstraňte existující soubor."
+    },
+    "export_write_failed": {
+      "message": "Export se nepodařilo zapsat do {path}: {error}"
     }
   },
   "intent": {

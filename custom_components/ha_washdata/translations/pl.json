@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} wykrył cykle duchów. Sugerowana zmiana min_power: {current_min}W -> {new_min}W (nie stosowana automatycznie).",
       "timer_default_message": "{device}: timer {minutes} min",
       "timer_pause_action_title": "Wznów cykl",
-      "timer_pause_body_suffix": "Cykl jest wstrzymany. Otwórz panel WashData, aby wznowić."
+      "timer_pause_body_suffix": "Cykl jest wstrzymany. Otwórz panel WashData, aby wznowić.",
+      "notify_live_waiting_message": "{device}: Nie rozpoznano jeszcze żadnego profilu.",
+      "vs_typical_longer": "o {pct}% dłużej niż zwykle",
+      "vs_typical_shorter": "o {pct}% krócej niż zwykle"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Niejednoznaczność dopasowania"
+        "name": "Wynik niejednoznaczności"
       },
       "current_phase": {
         "name": "Bieżąca faza"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Brak aktywnego cyklu, który można wstrzymać lub wznowić."
+    },
+    "path_not_allowed": {
+      "message": "Ścieżka jest niedozwolona: {path}. Dodaj jej katalog do 'allowlist_external_dirs' w configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Nie można utworzyć profilu: {error}"
+    },
+    "export_path_exists": {
+      "message": "Cel eksportu już istnieje: {path}. Wybierz inną ścieżkę lub najpierw usuń istniejący plik."
+    },
+    "export_write_failed": {
+      "message": "Nie można zapisać eksportu do {path}: {error}"
     }
   },
   "intent": {

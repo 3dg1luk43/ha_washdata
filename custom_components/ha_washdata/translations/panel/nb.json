@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% bedre enn grunnlinjeestimatet ({metric})",
     "trend_improving_tip": "Denne modellens tilpasning har blitt bedre ved de siste ny-sjekkene.",
     "trend_declining_tip": "Denne modellens tilpasning har blitt dårligere ved de siste ny-sjekkene. Å gjennomgå flere sykluser kan hjelpe den å lære på nytt.",
-    "trend_steady_tip": "Denne modellens tilpasning har holdt seg omtrent stabil ved de siste ny-sjekkene."
+    "trend_steady_tip": "Denne modellens tilpasning har holdt seg omtrent stabil ved de siste ny-sjekkene.",
+    "cap_blurb": {
+      "end": "Å vite når en syklus faktisk er ferdig",
+      "live_match": "Å identifisere det pågående programmet raskere",
+      "quality": "Å oppdage feildetekterte eller ødelagte sykluser",
+      "remaining_time": "Å forutsi hvor lang tid som er igjen",
+      "total_energy": "Å forutsi total energi og kostnad"
+    },
+    "cap_label": {
+      "end": "Deteksjon av syklusslutt",
+      "live_match": "Programgjenkjenning",
+      "quality": "Kvalitetssjekk av syklus",
+      "remaining_time": "Estimat av gjenstående tid",
+      "total_energy": "Energiestimat"
+    },
+    "metric_auc": "AUC {auc} på valideringsdata",
+    "metric_mae": "feil {model} mot baseline {baseline}"
   },
   "modal": {
     "auto_label": "Automatiske etikettsykluser",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Velg en syklus og klikk på ↺ for å laste inn",
     "pg_sweep_progress": "Trinn {done} / {total}",
     "pg_analysis_hint": "Velg en syklus og klikk på ↺ for å laste inn analysen.",
-    "diagnostics_load_failed": "Kunne ikke laste inn diagnostikk: {error}"
+    "diagnostics_load_failed": "Kunne ikke laste inn diagnostikk: {error}",
+    "manual_duration_ref_hint": "Brukes bare når ingen referansesyklus er valgt. En referansesyklus setter varigheten ut fra sin egen lengde.",
+    "toast_convert_rolled_back": "Konverteringen mislyktes og ble rullet tilbake (ingen automatisering ble igjen): {error}",
+    "toast_convert_orphan": "Automatiseringen ble opprettet, men tømming av de gamle handlingene mislyktes. Ikke prøv igjen: fjern de gamle handlingene manuelt for å unngå en duplisert automatisering.",
+    "advisory_duration_trend_up": "Syklusene for '{name}' blir gradvis lengre (omtrent +{pct}% per syklus). Hvis apparatets oppførsel har endret seg, ta opp eller bygg opp denne profilen på nytt.",
+    "advisory_energy_trend_up": "'{name}' trekker gradvis mer energi (omtrent +{pct}% per syklus) - verdt å sjekke apparatet hvis det er uventet.",
+    "advisory_poor_health": "'{name}' har en lav samsvarsscore - de siste syklusene varierer mye eller samsvarer svakt. Gå gjennom syklusene, eller ta opp profilen på nytt slik at gjenkjenning og tidsestimater forblir nøyaktige.",
+    "advisory_shape_drift": "'{name}' har endret seg betydelig fra sin opprinnelige effektkurve. Apparatet kan ha endret oppførsel over tid (f.eks. kalk, slitasje). Vurder å ta opp denne profilen på nytt med nye sykluser.",
+    "advisory_shape_drift_corr": "'{name}' har endret seg betydelig fra sin opprinnelige effektkurve (korrelasjon {corr}). Apparatet kan ha endret oppførsel over tid (f.eks. kalk, slitasje). Vurder å ta opp denne profilen på nytt med nye sykluser."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plutselig fall behandlet som umiddelbar slutt",
@@ -1313,6 +1337,39 @@
         "higher": "Lengre stille faser tillates – færre utilsiktede tvangstopp",
         "lower": "Oppdager fastlåste sykluser raskere"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "Konfidens ved 15. persentil for {cycles} automatiske etiketter som brukeren aldri korrigerte ({p15}).",
+      "completion_min_seconds": "Halvparten av p05-varigheten for rene sykluser ({minutes} min) på tvers av {cycles} sykluser; filtrerer bort spøkelsessykluser.{excl}",
+      "dead_zone_batch": "Holdt kort (median for oppstarts-ustabilitetsvindu på tvers av {cycles} sykluser = {s}s) slik at en reell slutt oppdages raskt.",
+      "dead_zone_from_dip": "Basert på et tidlig effektfall oppdaget ved {s}s.",
+      "end_energy_default": "Standardanbefalt baseline for støygrensen ved syklusslutt.",
+      "end_energy_false": "p95 for energi ved falske slutter ({p95}Wh) på tvers av {cycles} sykluser, med gulv på 0.2% av medianens syklusenergi ({floor}Wh).",
+      "end_energy_no_false": "Ingen falske slutter på tvers av {cycles} sykluser; med gulv på 0.2% av medianens syklusenergi ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} rene sykluser ({pct}%) hadde en intern pause på >60s som ble gjenopptatt; krever {val} sluttbekreftelse(r).",
+      "learning_confidence": "p05-konfidens for {cycles} brukermerkede sykluser ({p05}); under dette bes det om verifisering.",
+      "match_interval": "Basert på observert oppdateringskadens (median={median}s) * 10.",
+      "max_duration_ratio": "Basert på varigheter for merkede sykluser (p95={p95}).",
+      "min_active": "Basert på laveste aktive effekt ({min}W) observert i siste syklus.",
+      "min_duration_ratio": "Holdt så lav som mulig slik at et program gjenkjennes tidlig i syklusen; konfidens- og tvetydighetsgrensene hindrer forhastede beslutninger.",
+      "min_off_gap": "Basert på {gaps} observerte mellomrom mellom sykluser (p05={p05}s). Enhetsgulv: {floor}s.",
+      "min_power": "40% av den laveste aktive effekten ved p05 ({p05}W) på tvers av {cycles} rene sykluser, noe som holder av-terskelen under reelt forbruk.{excl}",
+      "ml_auto_label": "Laveste konfidens som kvalitetsmodellen fortsatt vurderte som ren (p10 av {cycles} rene sykluser = {p10}).",
+      "ml_end_repeat": "{false}/{total} sykluser ({pct}%) hadde en pause som sluttdetektoren vurderte til >50%; krever {val} sluttbekreftelse(r).",
+      "ml_off_delay": "Pauser bekreftet av sluttdetektoren: p95 {p95}s + 60s buffer, fra {pauses} modellverifiserte pauser på tvers av {cycles} sykluser (gulv {floor}s).",
+      "no_update_timeout": "Basert på observert oppdateringskadens (p95={p95}s) * 20 (min 60s).",
+      "off_delay_cadence": "Basert på observert oppdateringskadens (p95={p95}s) * 5",
+      "off_delay_device_floor": "Brukte et enhetsspesifikt sikkert minimum for {device} ({floor}s).",
+      "off_delay_generic_floor": "Brukte et generisk sikkert minimum ({floor}s).",
+      "off_delay_pauses": "Dimensjonert for å vare lenger enn reelle pauser: p95 for pause i syklusen {p95}s + 60s buffer, fra {pauses} pauser på tvers av {cycles} rene sykluser (gulv {floor}s).",
+      "profile_match_threshold": "p10-konfidens for {cycles} korrekte automatiske etiketter ({p10}); sikkert gulv for direkte gjenkjenning.",
+      "sampling_interval": "Median for oppdateringsintervallet observert på tvers av {cycles} rene sykluser ({si}s).{excl}",
+      "smoothing_window": "Dimensjonert for å jevne ut ~30s med avlesninger ved {si}s sampling ({samples} prøver).",
+      "start_duration": "Holdt kort (~ett samplingsintervall på {si}s) slik at deteksjonen starter så tidlig som mulig, men fortsatt ignorerer enkelttopper.",
+      "thr_batch": "Holdt like over den laveste aktive effekten ved p05 på tvers av {cycles} sykluser ({p05}W) slik at en start fanges så tidlig som mulig og stoppterskelen holder seg under maskinens laveste driftseffekt.",
+      "tol_per_profile": "p75 for varighetsvariansen per profil på tvers av {profiles} profiler ({cycles} sykluser); stramme profiler straffes ikke.",
+      "tol_pooled": "Basert på samlet varighetsvarians for {cycles} nyeste merkede sykluser (p95 avvik={dev}).",
+      "watchdog": "Holdt så lavt som forsvarlig (3x p95-oppdateringsmellomrommet på {p95}s, min 30s) slik at stans fanges raskt uten falske stopp."
     }
   },
   "tab": {
@@ -1405,7 +1462,8 @@
     "reminders_save_failed": "Kunne ikke lagre påminnelser: {error}",
     "reminders_saved": "Servicepåminnelser lagret",
     "pause_no_cycle": "Ingen aktiv syklus å sette på pause",
-    "resume_no_cycle": "Ingen pauset syklus å gjenoppta"
+    "resume_no_cycle": "Ingen pauset syklus å gjenoppta",
+    "delete_partial_failed": "Noen elementer kunne ikke slettes og ble gjenopprettet"
   },
   "trend": {
     "down": "Trender nedover",

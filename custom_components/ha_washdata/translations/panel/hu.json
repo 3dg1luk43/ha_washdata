@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}%-kal jobb az alap becslésnél ({metric})",
     "trend_improving_tip": "Ennek a modellnek az illeszkedése javult a legutóbbi újraellenőrzések során.",
     "trend_declining_tip": "Ennek a modellnek az illeszkedése romlott a legutóbbi újraellenőrzések során · több ciklus áttekintése segíthet az újratanulásban.",
-    "trend_steady_tip": "Ennek a modellnek az illeszkedése nagyjából változatlan maradt a legutóbbi újraellenőrzések során."
+    "trend_steady_tip": "Ennek a modellnek az illeszkedése nagyjából változatlan maradt a legutóbbi újraellenőrzések során.",
+    "cap_blurb": {
+      "end": "Annak felismerése, hogy egy ciklus valóban befejeződött",
+      "live_match": "A futó program gyorsabb azonosítása",
+      "quality": "Tévesen észlelt vagy sérült ciklusok felismerése",
+      "remaining_time": "A hátralévő idő előrejelzése",
+      "total_energy": "A teljes energia és költség előrejelzése"
+    },
+    "cap_label": {
+      "end": "Ciklus végének észlelése",
+      "live_match": "Programfelismerés",
+      "quality": "Ciklusminőség ellenőrzése",
+      "remaining_time": "Hátralévő idő becslése",
+      "total_energy": "Energiabecslés"
+    },
+    "metric_auc": "AUC {auc} a félretett adatokon",
+    "metric_mae": "hiba: {model} a(z) {baseline} referenciához képest"
   },
   "modal": {
     "auto_label": "Automatikus címkézési ciklusok",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Jelölj ki egy ciklust, majd kattints a ↺ gombra a betöltéshez",
     "pg_sweep_progress": "{done}. / {total}. lépés",
     "pg_analysis_hint": "Jelölj ki egy ciklust, majd kattints a ↺ gombra az elemzés betöltéséhez.",
-    "diagnostics_load_failed": "Nem sikerült betölteni a diagnosztikát: {error}"
+    "diagnostics_load_failed": "Nem sikerült betölteni a diagnosztikát: {error}",
+    "manual_duration_ref_hint": "Csak akkor használatos, ha nincs kiválasztva referenciaciklus. A referenciaciklus a saját hossza alapján állítja be az időtartamot.",
+    "toast_convert_rolled_back": "Az átalakítás sikertelen volt, és visszavonásra került (nem maradt automatizálás): {error}",
+    "toast_convert_orphan": "Az automatizálás létrejött, de a régi műveletek törlése sikertelen volt. Ne próbálja újra: távolítsa el a régi műveleteket kézzel a duplikált automatizálás elkerülése érdekében.",
+    "advisory_duration_trend_up": "A(z) '{name}' ciklusai fokozatosan hosszabbak (ciklusonként kb. +{pct}%). Ha a készülék működése megváltozott, rögzítse újra vagy építse újra ezt a profilt.",
+    "advisory_energy_trend_up": "A(z) '{name}' fokozatosan több energiát fogyaszt (ciklusonként kb. +{pct}%) - érdemes ellenőrizni a készüléket, ha ez váratlan.",
+    "advisory_poor_health": "A(z) '{name}' illeszkedési pontszáma alacsony - a közelmúltbeli ciklusai erősen ingadoznak vagy gyengén illeszkednek. Nézze át a ciklusait, vagy rögzítse újra a profilt, hogy a felismerés és az időbecslés pontos maradjon.",
+    "advisory_shape_drift": "A(z) '{name}' jelentősen eltért az eredeti teljesítménygörbéjétől. A készülék működése idővel megváltozhatott (pl. vízkő, kopás). Fontolja meg a profil újrarögzítését a közelmúltbeli ciklusokkal.",
+    "advisory_shape_drift_corr": "A(z) '{name}' jelentősen eltért az eredeti teljesítménygörbéjétől (korreláció: {corr}). A készülék működése idővel megváltozhatott (pl. vízkő, kopás). Fontolja meg a profil újrarögzítését a közelmúltbeli ciklusokkal."
   },
   "phase_desc": {
     "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -1331,7 +1355,8 @@
     "reminders_save_failed": "Nem sikerült menteni az emlékeztetőket: {error}",
     "reminders_saved": "Szerviz emlékeztetők mentve",
     "pause_no_cycle": "Nincs szüneteltethető aktív ciklus",
-    "resume_no_cycle": "Nincs folytatható szüneteltetett ciklus"
+    "resume_no_cycle": "Nincs folytatható szüneteltetett ciklus",
+    "delete_partial_failed": "Egyes elemeket nem sikerült törölni, ezért visszaállításra kerültek"
   },
   "suggestion": {
     "both_agree": "A WashData javasolja",
@@ -1394,6 +1419,39 @@
         "higher": "Hosszabb csendes fázisok megengedett; kevesebb hamis kényszeres leállítás",
         "lower": "Agresszívabban észleli az elakadt ciklusokat"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "{cycles} olyan automatikus címke 15. percentilis megbízhatósága, amelyet a felhasználó soha nem javított ({p15}).",
+      "completion_min_seconds": "A p05 tiszta ciklus időtartamának fele ({minutes} perc) {cycles} cikluson át; kiszűri a fantomciklusokat.{excl}",
+      "dead_zone_batch": "Rövidre hagyva (a médián indítási instabilitási ablak {cycles} cikluson át = {s}s), hogy a valódi vég gyorsan észlelhető legyen.",
+      "dead_zone_from_dip": "A(z) {s}s-nál észlelt korai teljesítménycsökkenés alapján.",
+      "end_energy_default": "Alapértelmezett ajánlott referenciaérték a ciklus végi zajküszöbhöz.",
+      "end_energy_false": "p95 téves végű energia ({p95}Wh) {cycles} cikluson át, alsó korláttal a médián ciklusenergia 0.2%-ánál ({floor}Wh).",
+      "end_energy_no_false": "Nincs téves vég {cycles} cikluson át; alsó korláttal a médián ciklusenergia 0.2%-ánál ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} tiszta ciklusban ({pct}%) volt >60s belső szünet, amely folytatódott; {val} végmegerősítés szükséges.",
+      "learning_confidence": "{cycles} felhasználó által címkézett ciklus p05 megbízhatósága ({p05}); ez alatt ellenőrzés kérése.",
+      "match_interval": "A megfigyelt frissítési ütem alapján (médián={median}s) * 10.",
+      "max_duration_ratio": "A címkézett ciklusok időtartama alapján (p95={p95}).",
+      "min_active": "Az utolsó ciklusban megfigyelt legkisebb aktív teljesítmény ({min}W) alapján.",
+      "min_duration_ratio": "A lehető legalacsonyabbra állítva, hogy a program a ciklus elején felismerhető legyen; a megbízhatósági és bizonytalansági küszöbök megakadályozzák a korai megerősítést.",
+      "min_off_gap": "{gaps} megfigyelt ciklusközi szünet alapján (p05={p05}s). Készülék alsó korlátja: {floor}s.",
+      "min_power": "A(z) {cycles} tiszta ciklus p05 legkisebb aktív teljesítményének ({p05}W) 40%-a, hogy a kikapcsolási küszöb a valós fogyasztás alatt maradjon.{excl}",
+      "ml_auto_label": "A legalacsonyabb megbízhatóság, amelyet a minőségi modell még tisztának minősített (a(z) {cycles} tiszta ciklus p10 értéke = {p10}).",
+      "ml_end_repeat": "{false}/{total} ciklusban ({pct}%) volt olyan szünet, amelyet a végérzékelő >50%-ra értékelt; {val} végmegerősítés szükséges.",
+      "ml_off_delay": "Végérzékelővel megerősített szünetek: p95 {p95}s + 60s ráhagyás, {pauses} modell által ellenőrzött szünetből {cycles} cikluson át (alsó korlát {floor}s).",
+      "no_update_timeout": "A megfigyelt frissítési ütem alapján (p95={p95}s) * 20 (min. 60s).",
+      "off_delay_cadence": "A megfigyelt frissítési ütem alapján (p95={p95}s) * 5",
+      "off_delay_device_floor": "A(z) {device} eszközre jellemző biztonságos minimum használva ({floor}s).",
+      "off_delay_generic_floor": "Általános biztonságos minimum használva ({floor}s).",
+      "off_delay_pauses": "Úgy méretezve, hogy túlélje a valódi szüneteket: p95 cikluson belüli szünet {p95}s + 60s ráhagyás, {pauses} szünetből {cycles} tiszta cikluson át (alsó korlát {floor}s).",
+      "profile_match_threshold": "{cycles} helyes automatikus címke p10 megbízhatósága ({p10}); biztonságos élő megerősítési alsó korlát.",
+      "sampling_interval": "A(z) {cycles} tiszta cikluson át megfigyelt médián frissítési intervallum ({si}s).{excl}",
+      "smoothing_window": "Úgy méretezve, hogy ~30s-nyi mérést simítson {si}s mintavételezésnél ({samples} minta).",
+      "start_duration": "Rövidre hagyva (~egy {si}s mintavételi intervallum), hogy az észlelés a lehető legkorábban induljon, miközben az egyetlen mintás kiugrásokat figyelmen kívül hagyja.",
+      "thr_batch": "Éppen a p05 legkisebb aktív teljesítmény fölött tartva {cycles} cikluson át ({p05}W), hogy az indítás a lehető legkorábban észlelhető legyen, a leállítási küszöb pedig a gép legkisebb üzemi teljesítménye alatt maradjon.",
+      "tol_per_profile": "A profilonkénti időtartam-szórás p75 értéke {profiles} profilon át ({cycles} ciklus); a stabil profilok nem kapnak büntetést.",
+      "tol_pooled": "{cycles} legutóbbi címkézett ciklus összevont időtartam-szórása alapján (p95 szórás={dev}).",
+      "watchdog": "A biztonságosan lehető legalacsonyabbra állítva (a p95 frissítési szünet 3-szorosa, {p95}s, min. 30s), hogy az elakadások gyorsan észlelhetők legyenek téves leállítások nélkül."
     }
   },
   "trend": {

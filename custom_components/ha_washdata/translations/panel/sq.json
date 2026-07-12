@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% më mirë se vlerësimi bazë ({metric})",
     "trend_improving_tip": "Përshtatja e këtij modeli është përmirësuar gjatë rikontrolleve të fundit.",
     "trend_declining_tip": "Përshtatja e këtij modeli ka rënë gjatë rikontrolleve të fundit · shqyrtimi i më shumë cikleve mund ta ndihmojë të rimësojë.",
-    "trend_steady_tip": "Përshtatja e këtij modeli ka mbetur afërsisht e qëndrueshme gjatë rikontrolleve të fundit."
+    "trend_steady_tip": "Përshtatja e këtij modeli ka mbetur afërsisht e qëndrueshme gjatë rikontrolleve të fundit.",
+    "cap_blurb": {
+      "end": "Të dijë kur një cikël ka përfunduar vërtet",
+      "live_match": "Identifikimi më i shpejtë i programit në ekzekutim",
+      "quality": "Zbulimi i cikleve të gabuara ose të dëmtuara",
+      "remaining_time": "Parashikimi se sa kohë ka mbetur",
+      "total_energy": "Parashikimi i energjisë totale dhe kostos"
+    },
+    "cap_label": {
+      "end": "Zbulimi i fundit të ciklit",
+      "live_match": "Njohja e programit",
+      "quality": "Kontrolli i cilësisë së ciklit",
+      "remaining_time": "Vlerësimi i kohës së mbetur",
+      "total_energy": "Vlerësimi i energjisë"
+    },
+    "metric_auc": "AUC {auc} në të dhënat e vlerësimit",
+    "metric_mae": "gabimi: {model} kundrejt bazës {baseline}"
   },
   "modal": {
     "auto_label": "Etiketim automatik i cikleve",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Zgjidh një cikël dhe kliko ↺ për ta ngarkuar",
     "pg_sweep_progress": "Hapi {done} / {total}",
     "pg_analysis_hint": "Zgjidh një cikël dhe kliko ↺ për të ngarkuar analizën.",
-    "diagnostics_load_failed": "Diagnostikat nuk u ngarkuan dot: {error}"
+    "diagnostics_load_failed": "Diagnostikat nuk u ngarkuan dot: {error}",
+    "manual_duration_ref_hint": "Përdoret vetëm kur nuk është zgjedhur asnjë cikël referues. Një cikël referues e cakton kohëzgjatjen sipas gjatësisë së vet.",
+    "toast_convert_rolled_back": "Konvertimi dështoi dhe u kthye mbrapsht (nuk mbeti asnjë automatizim): {error}",
+    "toast_convert_orphan": "Automatizimi u krijua, por pastrimi i veprimeve të vjetra dështoi. Mos provoni përsëri: hiqni veprimet e vjetra manualisht për të shmangur një automatizim të dyfishuar.",
+    "advisory_duration_trend_up": "Ciklet '{name}' po zgjaten gjithnjë e më shumë (rreth +{pct}% për cikël). Nëse sjellja e pajisjes ka ndryshuar, regjistrojeni sërish ose rindërtojeni këtë profil.",
+    "advisory_energy_trend_up": "'{name}' po konsumon gjithnjë e më shumë energji (rreth +{pct}% për cikël) - ia vlen ta kontrolloni pajisjen nëse kjo është e papritur.",
+    "advisory_poor_health": "'{name}' ka një rezultat të ulët përputhjeje - ciklet e tij të fundit ndryshojnë shumë ose përputhen dobët. Rishikoni ciklet e tij ose regjistrojeni sërish profilin që njohja dhe vlerësimet e kohës të mbeten të sakta.",
+    "advisory_shape_drift": "'{name}' ka devijuar ndjeshëm nga forma e tij fillestare e fuqisë. Sjellja e pajisjes mund të ketë ndryshuar me kalimin e kohës (p.sh. gëlqerëzim, konsumim). Merrni në konsideratë regjistrimin sërish të këtij profili me ciklet e fundit.",
+    "advisory_shape_drift_corr": "'{name}' ka devijuar ndjeshëm nga forma e tij fillestare e fuqisë (korrelacioni {corr}). Sjellja e pajisjes mund të ketë ndryshuar me kalimin e kohës (p.sh. gëlqerëzim, konsumim). Merrni në konsideratë regjistrimin sërish të këtij profili me ciklet e fundit."
   },
   "phase_desc": {
     "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1331,7 +1355,8 @@
     "reminders_save_failed": "Nuk u ruajtën dot kujtesat: {error}",
     "reminders_saved": "Kujtesat e servisit u ruajtën",
     "pause_no_cycle": "Nuk ka cikël aktiv për të ndalur",
-    "resume_no_cycle": "Nuk ka cikël të ndalur për të vazhduar"
+    "resume_no_cycle": "Nuk ka cikël të ndalur për të vazhduar",
+    "delete_partial_failed": "Disa artikuj nuk mund të fshiheshin dhe u rikthyen"
   },
   "suggestion": {
     "both_agree": "WashData rekomandon",
@@ -1394,6 +1419,39 @@
         "higher": "Lejon faza më të gjata të heshtura; më pak ndërprerje false",
         "lower": "Kap ciklet e bllokuara më agresivisht"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "Besueshmëria e percentilit të 15-të e {cycles} etiketave automatike që përdoruesi nuk i korrigjoi kurrë ({p15}).",
+      "completion_min_seconds": "Gjysma e kohëzgjatjes p05 të cikleve të pastra ({minutes} min) në {cycles} cikle; filtron ciklet e rreme.{excl}",
+      "dead_zone_batch": "Mbahet i shkurtër (dritarja mesatare e paqëndrueshmërisë në nisje në {cycles} cikle = {s}s) që një fund i vërtetë të zbulohet menjëherë.",
+      "dead_zone_from_dip": "Bazuar në një rënie të hershme të fuqisë të zbuluar në {s}s.",
+      "end_energy_default": "Baza e rekomanduar e paracaktuar për pragun e zhurmës në fund të ciklit.",
+      "end_energy_false": "Energjia p95 e fundit të rremë ({p95}Wh) në {cycles} cikle, e kufizuar në minimum në 0.2% të energjisë mesatare të ciklit ({floor}Wh).",
+      "end_energy_no_false": "Asnjë fund i rremë në {cycles} cikle; e kufizuar në minimum në 0.2% të energjisë mesatare të ciklit ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} cikle të pastra ({pct}%) patën një pauzë të brendshme >60s që vazhdoi; kërkohen {val} konfirmim(e) fundi.",
+      "learning_confidence": "Besueshmëria p05 e {cycles} cikleve të etiketuara nga përdoruesi ({p05}); nën këtë vlerë, kërkohet verifikim.",
+      "match_interval": "Bazuar në ritmin e vëzhguar të përditësimit (mesatarja={median}s) * 10.",
+      "max_duration_ratio": "Bazuar në kohëzgjatjet e cikleve të etiketuara (p95={p95}).",
+      "min_active": "Bazuar në fuqinë minimale aktive ({min}W) të vëzhguar në ciklin e fundit.",
+      "min_duration_ratio": "Mbahet sa më i ulët që një program të njihet herët në cikël; pragjet e besueshmërisë dhe të paqartësisë parandalojnë konfirmimet e parakohshme.",
+      "min_off_gap": "Bazuar në {gaps} boshllëqe të vëzhguara ndërmjet cikleve (p05={p05}s). Kufiri minimal i pajisjes: {floor}s.",
+      "min_power": "40% e fuqisë aktive më të ulët p05 ({p05}W) në {cycles} cikle të pastra, duke e mbajtur pragun e fikjes nën konsumin real.{excl}",
+      "ml_auto_label": "Besueshmëria më e ulët që modeli i cilësisë e vlerësoi ende si të pastër (p10 e {cycles} cikleve të pastra = {p10}).",
+      "ml_end_repeat": "{false}/{total} cikle ({pct}%) patën një pauzë që zbuluesi i fundit e vlerësoi >50%; kërkohen {val} konfirmim(e) fundi.",
+      "ml_off_delay": "Pauza të konfirmuara nga zbuluesi i fundit: p95 {p95}s + 60s rezervë, nga {pauses} pauza të verifikuara nga modeli në {cycles} cikle (kufiri minimal {floor}s).",
+      "no_update_timeout": "Bazuar në ritmin e vëzhguar të përditësimit (p95={p95}s) * 20 (min. 60s).",
+      "off_delay_cadence": "Bazuar në ritmin e vëzhguar të përditësimit (p95={p95}s) * 5",
+      "off_delay_device_floor": "U përdor minimumi i sigurt specifik për pajisjen {device} ({floor}s).",
+      "off_delay_generic_floor": "U përdor minimumi i sigurt i përgjithshëm ({floor}s).",
+      "off_delay_pauses": "Përcaktuar që të zgjasë më shumë se pauzat e vërteta: pauza brenda ciklit p95 {p95}s + 60s rezervë, nga {pauses} pauza në {cycles} cikle të pastra (kufiri minimal {floor}s).",
+      "profile_match_threshold": "Besueshmëria p10 e {cycles} etiketave automatike të sakta ({p10}); kufi i sigurt i konfirmimit të drejtpërdrejtë.",
+      "sampling_interval": "Intervali mesatar i përditësimit i vëzhguar në {cycles} cikle të pastra ({si}s).{excl}",
+      "smoothing_window": "Përcaktuar që të zbusë ~30s leximesh me kampionim {si}s ({samples} kampione).",
+      "start_duration": "Mbahet i shkurtër (~një interval kampionimi {si}s) që zbulimi të fillojë sa më herët të jetë e mundur, duke injoruar njëkohësisht majat e një kampioni të vetëm.",
+      "thr_batch": "Mbahet pak mbi fuqinë aktive më të ulët p05 në {cycles} cikle ({p05}W) që një nisje të kapet sa më herët të jetë e mundur dhe pragu i ndalimit të mbetet nën fuqinë më të ulët të punës së makinës.",
+      "tol_per_profile": "p75 e variancës së kohëzgjatjes për profil në {profiles} profile ({cycles} cikle); profilet e qëndrueshme nuk penalizohen.",
+      "tol_pooled": "Bazuar në variancën e bashkuar të kohëzgjatjes së {cycles} cikleve të fundit të etiketuara (devijimi p95={dev}).",
+      "watchdog": "Mbahet sa më i ulët në mënyrë të sigurt (3x boshllëku i përditësimit p95 prej {p95}s, min. 30s) që bllokimet të kapen shpejt pa ndalime të rreme."
     }
   },
   "trend": {

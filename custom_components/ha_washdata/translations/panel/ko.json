@@ -486,7 +486,23 @@
     "better_than_baseline": "기준 추정치보다 {pct}% 향상 ({metric})",
     "trend_improving_tip": "이 모델의 적합도가 최근 재확인을 거치며 개선되었습니다.",
     "trend_declining_tip": "이 모델의 적합도가 최근 재확인에서 하락했습니다 · 더 많은 사이클을 검토하면 다시 학습하는 데 도움이 될 수 있습니다.",
-    "trend_steady_tip": "이 모델의 적합도가 최근 재확인에서 거의 꾸준히 유지되었습니다."
+    "trend_steady_tip": "이 모델의 적합도가 최근 재확인에서 거의 꾸준히 유지되었습니다.",
+    "cap_blurb": {
+      "end": "사이클이 실제로 완료된 시점 파악",
+      "live_match": "실행 중인 프로그램을 더 빨리 식별",
+      "quality": "잘못 감지되었거나 손상된 사이클 찾기",
+      "remaining_time": "남은 시간 예측",
+      "total_energy": "총 에너지와 비용 예측"
+    },
+    "cap_label": {
+      "end": "사이클 종료 감지",
+      "live_match": "프로그램 매칭",
+      "quality": "사이클 품질 검사",
+      "remaining_time": "남은 시간 추정",
+      "total_energy": "에너지 추정"
+    },
+    "metric_auc": "검증 데이터 기준 AUC {auc}",
+    "metric_mae": "오차 {model} vs 기준선 {baseline}"
   },
   "modal": {
     "auto_label": "자동 라벨 주기",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "사이클을 선택하고 ↺를 클릭하여 불러오세요",
     "pg_sweep_progress": "단계 {done} / {total}",
     "pg_analysis_hint": "사이클을 선택하고 ↺를 클릭하여 분석을 불러오세요.",
-    "diagnostics_load_failed": "진단을 불러올 수 없습니다: {error}"
+    "diagnostics_load_failed": "진단을 불러올 수 없습니다: {error}",
+    "manual_duration_ref_hint": "참조 주기가 선택되지 않았을 때만 사용됩니다. 참조 주기는 자체 길이에 따라 기간을 설정합니다.",
+    "toast_convert_rolled_back": "변환에 실패하여 롤백되었습니다(남은 자동화 없음): {error}",
+    "toast_convert_orphan": "자동화는 생성되었지만 이전 작업 삭제에 실패했습니다. 다시 시도하지 마세요. 중복 자동화를 방지하려면 이전 작업을 수동으로 제거하세요.",
+    "advisory_duration_trend_up": "'{name}' 사이클이 점점 길어지고 있습니다(사이클당 약 +{pct}%). 기기 동작이 바뀌었다면 이 프로필을 다시 기록하거나 재구성하세요.",
+    "advisory_energy_trend_up": "'{name}'의 에너지 사용량이 점점 늘고 있습니다(사이클당 약 +{pct}%) - 예상 밖이라면 기기를 점검해 보세요.",
+    "advisory_poor_health": "'{name}'의 적합도 점수가 낮습니다 - 최근 사이클의 편차가 크거나 매칭이 약합니다. 매칭과 시간 추정의 정확도를 유지하려면 사이클을 검토하거나 프로필을 다시 기록하세요.",
+    "advisory_shape_drift": "'{name}'이(가) 원래 전력 파형에서 크게 벗어났습니다. 시간이 지나며 기기 동작이 변했을 수 있습니다(예: 물때, 마모). 최근 사이클로 이 프로필을 다시 기록하는 것을 고려하세요.",
+    "advisory_shape_drift_corr": "'{name}'이(가) 원래 전력 파형에서 크게 벗어났습니다(상관관계 {corr}). 시간이 지나며 기기 동작이 변했을 수 있습니다(예: 물때, 마모). 최근 사이클로 이 프로필을 다시 기록하는 것을 고려하세요."
   },
   "pg_desc": {
     "abrupt_drop_watts": "급격한 강하는 즉시 종료로 처리",
@@ -1342,7 +1366,8 @@
     "reminders_save_failed": "알림을 저장할 수 없습니다: {error}",
     "reminders_saved": "서비스 알림이 저장되었습니다",
     "pause_no_cycle": "일시 정지할 실행 중인 사이클이 없습니다",
-    "resume_no_cycle": "재개할 일시 정지된 사이클이 없습니다"
+    "resume_no_cycle": "재개할 일시 정지된 사이클이 없습니다",
+    "delete_partial_failed": "일부 항목을 삭제할 수 없어 복원되었습니다"
   },
   "suggestion": {
     "both_agree": "WashData 권장",
@@ -1405,6 +1430,39 @@
         "higher": "더 긴 정지 단계가 허용됩니다. 오탐 강제 종료가 줄어듭니다",
         "lower": "멈춘 사이클을 더 적극적으로 감지합니다"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "사용자가 한 번도 수정하지 않은 {cycles}개 자동 라벨의 15백분위 신뢰도({p15}).",
+      "completion_min_seconds": "{cycles} 사이클의 p05 정상 사이클 시간의 절반({minutes} min). 허위 사이클을 걸러냅니다.{excl}",
+      "dead_zone_batch": "짧게 유지({cycles} 사이클의 시작 불안정 구간 중앙값 = {s}s). 실제 종료를 신속하게 감지합니다.",
+      "dead_zone_from_dip": "{s}s에서 감지된 초기 전력 저하를 기반으로 함.",
+      "end_energy_default": "사이클 종료 노이즈 게이트에 권장되는 기본값.",
+      "end_energy_false": "{cycles} 사이클의 p95 허위 종료 에너지({p95}Wh). 사이클 에너지 중앙값의 0.2%({floor}Wh)를 하한으로 함.",
+      "end_energy_no_false": "{cycles} 사이클에서 허위 종료 없음. 사이클 에너지 중앙값의 0.2%({floor}Wh)를 하한으로 함.",
+      "end_repeat_count": "{false}/{total}개 정상 사이클({pct}%)에서 재개된 60s 초과 내부 일시정지가 있었습니다. {val}회의 종료 확인을 요구합니다.",
+      "learning_confidence": "{cycles}개 사용자 라벨 사이클의 p05 신뢰도({p05}). 이보다 낮으면 확인을 요청합니다.",
+      "match_interval": "관측된 업데이트 주기 기반(중앙값={median}s) * 10.",
+      "max_duration_ratio": "라벨이 지정된 사이클 시간 기반(p95={p95}).",
+      "min_active": "마지막 사이클에서 관측된 최소 활성 전력({min}W) 기반.",
+      "min_duration_ratio": "프로그램을 사이클 초반에 식별할 수 있도록 최대한 낮게 유지합니다. 신뢰도와 모호성 게이트가 조기 확정을 방지합니다.",
+      "min_off_gap": "관측된 {gaps}개 사이클 간 간격 기반(p05={p05}s). 기기 하한: {floor}s.",
+      "min_power": "{cycles}개 정상 사이클의 p05 최저 활성 전력({p05}W)의 40%. 꺼짐 게이트를 실제 소비 전력보다 낮게 유지합니다.{excl}",
+      "ml_auto_label": "품질 모델이 여전히 정상으로 평가한 최저 신뢰도({cycles}개 정상 사이클의 p10 = {p10}).",
+      "ml_end_repeat": "{false}/{total} 사이클({pct}%)에서 종료 검출기가 50% 초과로 평가한 일시정지가 있었습니다. {val}회의 종료 확인을 요구합니다.",
+      "ml_off_delay": "종료 검출기가 확인한 일시정지: p95 {p95}s + 60s 버퍼. {cycles} 사이클에 걸친 모델 검증 일시정지 {pauses}건에서 산출(하한 {floor}s).",
+      "no_update_timeout": "관측된 업데이트 주기 기반(p95={p95}s) * 20(최소 60s).",
+      "off_delay_cadence": "관측된 업데이트 주기 기반(p95={p95}s) * 5",
+      "off_delay_device_floor": "{device}에 대한 기기별 안전 최소값을 사용({floor}s).",
+      "off_delay_generic_floor": "일반 안전 최소값을 사용({floor}s).",
+      "off_delay_pauses": "실제 일시정지보다 길도록 설정: p95 사이클 내 일시정지 {p95}s + 60s 버퍼. {cycles}개 정상 사이클에 걸친 {pauses}건의 일시정지에서 산출(하한 {floor}s).",
+      "profile_match_threshold": "{cycles}개 올바른 자동 라벨의 p10 신뢰도({p10}). 안전한 실시간 확정 하한.",
+      "sampling_interval": "{cycles}개 정상 사이클에서 관측된 중앙값 업데이트 간격({si}s).{excl}",
+      "smoothing_window": "{si}s 샘플링에서 약 30s 분량의 측정값을 평활화하도록 설정({samples} 샘플).",
+      "start_duration": "짧게 유지(약 1회 {si}s 샘플 간격). 단일 샘플 스파이크는 무시하면서 감지를 최대한 빨리 시작합니다.",
+      "thr_batch": "{cycles} 사이클의 p05 최저 활성 전력({p05}W) 바로 위로 유지합니다. 그래서 시작을 최대한 빨리 포착하고, 정지 임계값은 기기의 최저 작동 전력보다 낮게 유지됩니다.",
+      "tol_per_profile": "{profiles}개 프로필({cycles} 사이클)의 프로필별 시간 분산 p75. 편차가 작은 프로필은 불이익을 받지 않습니다.",
+      "tol_pooled": "{cycles}개 최근 라벨 사이클의 통합 시간 분산 기반(p95 편차={dev}).",
+      "watchdog": "안전한 범위에서 최대한 낮게 유지(p95 업데이트 간격 {p95}s의 3배, 최소 30s). 잘못된 정지 없이 멈춤을 빠르게 감지합니다."
     }
   },
   "trend": {

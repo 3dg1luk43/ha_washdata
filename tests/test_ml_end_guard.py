@@ -19,6 +19,7 @@ from custom_components.ha_washdata.cycle_detector import (
     CycleDetector,
     CycleDetectorConfig,
     ML_END_GUARD_MAX_DEFER_SECONDS,
+    ML_PROVIDER_THROTTLE_SECONDS,
 )
 from custom_components.ha_washdata.const import DEFAULT_DEFER_FINISH_CONFIDENCE
 
@@ -84,6 +85,53 @@ def test_provider_exception_is_swallowed() -> None:
     assert det._should_defer_finish(3600.0) is False  # must not raise, must not hang
 
 
+def test_ml_end_confidence_is_throttled() -> None:
+    """The provider is not re-invoked within the throttle window (data clock)."""
+    calls = {"n": 0}
+
+    def provider(points, dur):
+        calls["n"] += 1
+        return 0.3
+
+    det = _detector(provider)  # readings up to t=110s
+    assert det._ml_end_confidence() == 0.3
+    assert det._ml_end_confidence() == 0.3  # same last-reading ts -> cached
+    assert calls["n"] == 1
+    last = det._power_readings[-1][0]
+    # A new reading within the window is still served from cache.
+    det._power_readings.append((last + timedelta(seconds=ML_PROVIDER_THROTTLE_SECONDS - 5), 0.0))
+    assert det._ml_end_confidence() == 0.3
+    assert calls["n"] == 1
+    # A reading past the window forces exactly one recompute.
+    det._power_readings.append((last + timedelta(seconds=ML_PROVIDER_THROTTLE_SECONDS + 5), 0.0))
+    assert det._ml_end_confidence() == 0.3
+    assert calls["n"] == 2
+    # A NEW cycle (different start) invalidates the cache even within the window.
+    new_start = _BASE + timedelta(seconds=10_000)
+    det._current_cycle_start = new_start
+    det._power_readings = [(new_start + timedelta(seconds=s), 0.0) for s in range(0, 20, 10)]
+    assert det._ml_end_confidence() == 0.3
+    assert calls["n"] == 3
+
+
+def test_ml_end_confidence_recomputes_when_expected_duration_changes() -> None:
+    """A changed expected_duration (overrun) invalidates the throttle cache."""
+    calls = {"n": 0}
+
+    def provider(points, dur):
+        calls["n"] += 1
+        return 0.4
+
+    det = _detector(provider)
+    assert det._ml_end_confidence() == 0.4
+    assert calls["n"] == 1
+    det._ml_end_confidence()
+    assert calls["n"] == 1  # cached
+    det._expected_duration = det._expected_duration + 600.0  # overrun raised expectation
+    assert det._ml_end_confidence() == 0.4
+    assert calls["n"] == 2  # recomputed for the new expectation
+
+
 def test_low_match_confidence_disables_guard() -> None:
     # Even with a "pause" verdict, an untrusted match must not trigger ML deferral
     # (the expected duration/energy the model relies on would be unreliable).
@@ -103,6 +151,10 @@ def test_confidence_recovery_resets_defer_tracker() -> None:
 
     det = _detector(provider)
     assert det._should_defer_finish(3600.0) is True   # defers, records start
+    # Recovery is driven by new readings arriving; advance the trace past the
+    # provider-throttle window so the guard re-evaluates (not served from cache).
+    last = det._power_readings[-1][0]
+    det._power_readings.append((last + timedelta(seconds=ML_PROVIDER_THROTTLE_SECONDS + 10), 0.0))
     assert det._should_defer_finish(3700.0) is False  # model agrees -> release + reset
     assert det._ml_defer_start_duration is None
 

@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} ciclos fantasma detectados. Cambio de min_power sugerido: {current_min}W -> {new_min}W (no se aplica automáticamente).",
       "timer_default_message": "{device}: temporizador de {minutes} min",
       "timer_pause_action_title": "Reanudar ciclo",
-      "timer_pause_body_suffix": "El ciclo está en pausa. Abre el panel de WashData para reanudarlo."
+      "timer_pause_body_suffix": "El ciclo está en pausa. Abre el panel de WashData para reanudarlo.",
+      "notify_live_waiting_message": "{device}: todavía no se ha reconocido ningún perfil.",
+      "vs_typical_longer": "{pct}% más largo de lo habitual",
+      "vs_typical_shorter": "{pct}% más corto de lo habitual"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Ambigüedad de coincidencia"
+        "name": "Puntuación de ambigüedad"
       },
       "current_phase": {
         "name": "Fase actual"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "No hay ningún ciclo activo para pausar o reanudar."
+    },
+    "path_not_allowed": {
+      "message": "La ruta no está permitida: {path}. Añada su directorio a 'allowlist_external_dirs' en configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "No se pudo crear el perfil: {error}"
+    },
+    "export_path_exists": {
+      "message": "El destino de exportación ya existe: {path}. Elija una ruta diferente o elimine primero el archivo existente."
+    },
+    "export_write_failed": {
+      "message": "No se pudo escribir la exportación en {path}: {error}"
     }
   },
   "intent": {

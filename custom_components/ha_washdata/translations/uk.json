@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} виявлено цикли привидів. Пропонована зміна min_power: {current_min}W -> {new_min}W (не застосовується автоматично).",
       "timer_default_message": "{device}: таймер {minutes} хв",
       "timer_pause_action_title": "Відновити цикл",
-      "timer_pause_body_suffix": "Цикл призупинено. Відкрийте панель WashData для відновлення."
+      "timer_pause_body_suffix": "Цикл призупинено. Відкрийте панель WashData для відновлення.",
+      "notify_live_waiting_message": "{device}: Профіль ще не розпізнано.",
+      "vs_typical_longer": "на {pct}% довше, ніж зазвичай",
+      "vs_typical_shorter": "на {pct}% коротше, ніж зазвичай"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Match Ambiguity"
+        "name": "Оцінка неоднозначності"
       },
       "current_phase": {
         "name": "Поточна фаза"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Немає активного циклу для призупинення або відновлення."
+    },
+    "path_not_allowed": {
+      "message": "Шлях не дозволено: {path}. Додайте його каталог до 'allowlist_external_dirs' у configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Не вдалося створити профіль: {error}"
+    },
+    "export_path_exists": {
+      "message": "Ціль експорту вже існує: {path}. Виберіть інший шлях або спочатку вилучіть наявний файл."
+    },
+    "export_write_failed": {
+      "message": "Не вдалося записати експорт до {path}: {error}"
     }
   },
   "intent": {

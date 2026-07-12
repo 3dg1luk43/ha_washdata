@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% lepiej niż szacunek bazowy ({metric})",
     "trend_improving_tip": "Dopasowanie tego modelu poprawiło się w ostatnich ponownych sprawdzeniach.",
     "trend_declining_tip": "Dopasowanie tego modelu pogorszyło się w ostatnich ponownych sprawdzeniach, przejrzenie większej liczby cykli może pomóc mu ponownie się nauczyć.",
-    "trend_steady_tip": "Dopasowanie tego modelu pozostało mniej więcej stabilne w ostatnich ponownych sprawdzeniach."
+    "trend_steady_tip": "Dopasowanie tego modelu pozostało mniej więcej stabilne w ostatnich ponownych sprawdzeniach.",
+    "cap_blurb": {
+      "end": "Wykrywanie, kiedy cykl faktycznie się zakończył",
+      "live_match": "Szybsze rozpoznawanie uruchomionego programu",
+      "quality": "Wykrywanie błędnie rozpoznanych lub uszkodzonych cykli",
+      "remaining_time": "Przewidywanie, ile czasu pozostało",
+      "total_energy": "Przewidywanie całkowitej energii i kosztu"
+    },
+    "cap_label": {
+      "end": "Wykrywanie końca cyklu",
+      "live_match": "Rozpoznawanie programu",
+      "quality": "Kontrola jakości cyklu",
+      "remaining_time": "Szacowanie pozostałego czasu",
+      "total_energy": "Szacowanie energii"
+    },
+    "metric_auc": "AUC {auc} na danych walidacyjnych",
+    "metric_mae": "błąd {model} względem modelu bazowego {baseline}"
   },
   "modal": {
     "auto_label": "Cykle automatycznego etykietowania",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Wybierz cykl i kliknij ↺, aby wczytać",
     "pg_sweep_progress": "Krok {done} / {total}",
     "pg_analysis_hint": "Wybierz cykl i kliknij ↺, aby wczytać analizę.",
-    "diagnostics_load_failed": "Nie udało się wczytać diagnostyki: {error}"
+    "diagnostics_load_failed": "Nie udało się wczytać diagnostyki: {error}",
+    "manual_duration_ref_hint": "Używane tylko wtedy, gdy nie wybrano cyklu referencyjnego. Cykl referencyjny ustawia czas trwania na podstawie własnej długości.",
+    "toast_convert_rolled_back": "Konwersja nie powiodła się i została wycofana (nie pozostawiono żadnej automatyzacji): {error}",
+    "toast_convert_orphan": "Automatyzacja została utworzona, ale wyczyszczenie starych akcji nie powiodło się. Nie próbuj ponownie: usuń stare akcje ręcznie, aby uniknąć zduplikowanej automatyzacji.",
+    "advisory_duration_trend_up": "Cykle '{name}' trwają coraz dłużej (około +{pct}% na cykl). Jeśli zachowanie urządzenia się zmieniło, nagraj ponownie lub przebuduj ten profil.",
+    "advisory_energy_trend_up": "'{name}' pobiera coraz więcej energii (około +{pct}% na cykl) - warto sprawdzić urządzenie, jeśli jest to nieoczekiwane.",
+    "advisory_poor_health": "'{name}' ma niski wskaźnik dopasowania - jego ostatnie cykle mocno się różnią lub słabo pasują. Przejrzyj jego cykle lub nagraj profil ponownie, aby rozpoznawanie i szacunki czasu pozostały dokładne.",
+    "advisory_shape_drift": "'{name}' znacząco odbiegł od pierwotnego kształtu krzywej mocy. Zachowanie urządzenia mogło zmienić się z czasem (np. kamień, zużycie). Rozważ ponowne nagranie tego profilu na podstawie ostatnich cykli.",
+    "advisory_shape_drift_corr": "'{name}' znacząco odbiegł od pierwotnego kształtu krzywej mocy (korelacja {corr}). Zachowanie urządzenia mogło zmienić się z czasem (np. kamień, zużycie). Rozważ ponowne nagranie tego profilu na podstawie ostatnich cykli."
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -1302,6 +1326,39 @@
         "higher": "Dopuszcza dłuższe ciche fazy; mniej fałszywych wymuszeń zatrzymania",
         "lower": "Zablokowane cykle są wykrywane bardziej agresywnie"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "Pewność na 15. percentylu dla {cycles} etykiet automatycznych, których użytkownik nigdy nie poprawił ({p15}).",
+      "completion_min_seconds": "Połowa czasu trwania p05 poprawnego cyklu ({minutes} min) dla {cycles} cykli; odfiltrowuje fałszywe cykle.{excl}",
+      "dead_zone_batch": "Utrzymane krótkie (mediana okna niestabilności rozruchu dla {cycles} cykli = {s}s), aby rzeczywisty koniec był szybko wykrywany.",
+      "dead_zone_from_dip": "Na podstawie wczesnego spadku mocy wykrytego przy {s}s.",
+      "end_energy_default": "Domyślna zalecana wartość bazowa dla progu szumu na końcu cyklu.",
+      "end_energy_false": "Energia p95 fałszywych zakończeń ({p95}Wh) dla {cycles} cykli, z dolną granicą 0.2% mediany energii cyklu ({floor}Wh).",
+      "end_energy_no_false": "Brak fałszywych zakończeń dla {cycles} cykli; dolna granica 0.2% mediany energii cyklu ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} poprawnych cykli ({pct}%) miało wewnętrzną pauzę >60s, która została wznowiona; wymagaj {val} potwierdzeń zakończenia.",
+      "learning_confidence": "Pewność p05 dla {cycles} cykli oznaczonych przez użytkownika ({p05}); poniżej tej wartości żądaj weryfikacji.",
+      "match_interval": "Na podstawie obserwowanej częstotliwości aktualizacji (mediana={median}s) * 10.",
+      "max_duration_ratio": "Na podstawie czasów trwania oznaczonych cykli (p95={p95}).",
+      "min_active": "Na podstawie minimalnej mocy czynnej ({min}W) zaobserwowanej w ostatnim cyklu.",
+      "min_duration_ratio": "Utrzymane jak najniżej, aby program był rozpoznawany na wczesnym etapie cyklu; progi pewności i niejednoznaczności zapobiegają przedwczesnym decyzjom.",
+      "min_off_gap": "Na podstawie {gaps} zaobserwowanych przerw między cyklami (p05={p05}s). Minimum urządzenia: {floor}s.",
+      "min_power": "40% najniższej mocy czynnej p05 ({p05}W) w {cycles} poprawnych cyklach, tak aby próg wyłączenia pozostał poniżej rzeczywistego poboru.{excl}",
+      "ml_auto_label": "Najniższa pewność, przy której model jakości nadal uznawał cykl za poprawny (p10 z {cycles} poprawnych cykli = {p10}).",
+      "ml_end_repeat": "{false}/{total} cykli ({pct}%) miało pauzę, którą detektor końca ocenił powyżej 50%; wymagaj {val} potwierdzeń zakończenia.",
+      "ml_off_delay": "Pauzy potwierdzone przez detektor końca: p95 {p95}s + zapas 60s, z {pauses} pauz zweryfikowanych przez model w {cycles} cyklach (minimum {floor}s).",
+      "no_update_timeout": "Na podstawie obserwowanej częstotliwości aktualizacji (p95={p95}s) * 20 (min. 60s).",
+      "off_delay_cadence": "Na podstawie obserwowanej częstotliwości aktualizacji (p95={p95}s) * 5",
+      "off_delay_device_floor": "Użyto bezpiecznego minimum specyficznego dla urządzenia {device} ({floor}s).",
+      "off_delay_generic_floor": "Użyto ogólnego bezpiecznego minimum ({floor}s).",
+      "off_delay_pauses": "Dobrane tak, aby przetrwać rzeczywiste pauzy: pauza w cyklu p95 {p95}s + zapas 60s, z {pauses} pauz w {cycles} poprawnych cyklach (minimum {floor}s).",
+      "profile_match_threshold": "Pewność p10 dla {cycles} poprawnych etykiet automatycznych ({p10}); bezpieczny próg potwierdzenia na żywo.",
+      "sampling_interval": "Mediana interwału aktualizacji zaobserwowana w {cycles} poprawnych cyklach ({si}s).{excl}",
+      "smoothing_window": "Dobrane do wygładzania ~30s odczytów przy próbkowaniu {si}s ({samples} próbek).",
+      "start_duration": "Utrzymane krótkie (~jeden interwał próbkowania {si}s), aby wykrywanie rozpoczynało się jak najwcześniej, jednocześnie ignorując pojedyncze skoki.",
+      "thr_batch": "Utrzymane tuż powyżej najniższej mocy czynnej p05 w {cycles} cyklach ({p05}W), aby start był wykrywany jak najwcześniej, a próg zatrzymania pozostawał poniżej najniższej mocy pracy urządzenia.",
+      "tol_per_profile": "p75 wariancji czasu trwania na profil w {profiles} profilach ({cycles} cykli); spójne profile nie są karane.",
+      "tol_pooled": "Na podstawie łącznej wariancji czasu trwania {cycles} ostatnich oznaczonych cykli (odchylenie p95={dev}).",
+      "watchdog": "Utrzymane tak nisko, jak to bezpieczne (3x przerwa aktualizacji p95 wynosząca {p95}s, min. 30s), aby zawieszenia były szybko wykrywane bez fałszywych zatrzymań."
     }
   },
   "tab": {
@@ -1394,7 +1451,8 @@
     "reminders_save_failed": "Nie można zapisać przypomnień: {error}",
     "reminders_saved": "Zapisano przypomnienia serwisowe",
     "pause_no_cycle": "Brak aktywnego cyklu do wstrzymania",
-    "resume_no_cycle": "Brak wstrzymanego cyklu do wznowienia"
+    "resume_no_cycle": "Brak wstrzymanego cyklu do wznowienia",
+    "delete_partial_failed": "Nie można było usunąć niektórych elementów i zostały one przywrócone"
   },
   "trend": {
     "down": "Trend w dół",

@@ -19,7 +19,7 @@ class CycleSignature:
     duration: float
     total_energy: float
     max_power: float
-    event_density: float  # Events per minute
+    event_density: float  # Deprecated/reserved: always 0.0 (event detector removed); kept for signature back-compat
     time_to_first_high: float  # Seconds to first HEATER/HIGH phase
     high_phase_ratio: float  # Duration of high phases / total duration
     # Distributions (quantiles of power)

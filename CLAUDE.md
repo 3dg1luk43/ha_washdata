@@ -160,7 +160,7 @@ The `ml/` package adds ML *alongside* the proven detection/matching code — it 
 - **No inline strings in Python** for UI text - all labels/descriptions go in `strings.json` and `translations/en.json`
 - Translation key format: `step_name.data.field_name` or `step_name.description`
 - **Every user-visible string in the panel must go through `_t(key, vars, fallback)`** — no raw English strings in HTML templates, `title=` attributes, `placeholder=` attributes, `aria-label=`, settings schema labels/docs/intros, or tooltip text. The English value goes in `translations/panel/en.json` as the canonical source and as the `_t()` fallback. The only exception is the hardcoded `'WashData'` brand name.
-- **Never use `translate.py --all` (the machine translator) for new keys** — machine translation produces domain-wrong output (sports for "match", lumber for "logs", CV for "Resume"). All new panel translations must be done by Claude subagents with explicit domain context. The `translate.py` script may only be used for HA-layer keys (config flow, entity names) where machine quality is acceptable.
+- **NEVER machine-translate — hard rule, no exceptions.** Do not run `translate.py`/`translate.py --all` (or any machine translator) for ANY keys — panel OR HA-layer (config flow, entity names, exceptions, services). Machine translation produces domain-wrong output (sports for "match", lumber for "logs", CV for "Resume") and has corrupted the translation files before. **ALL** translations — every language, every key namespace — must be produced by Claude subagents with explicit domain context (see the grouped-subagent pattern in the translation-maintenance section). The `scripts/ha_integration_translator` submodule / `translate.py` must not be invoked to write translations.
 - **Settings schema strings** are auto-resolved at render time: section labels via `_t('section.{id}.label', {}, fallback)`, section intros via `_t('section.{id}.intro', {}, fallback)`, field labels via `_t('setting.{key}.label', {}, fallback)`, field docs via `_t('setting.{key}.doc', {}, fallback)`, sub-group headers via `_t('setting_group.{slug}.label', {}, fallback)`. Adding a key to `translations/panel/en.json` is all that is needed to make the UI translatable; the code already handles it.
 - **Artifact detail strings** from Python must return `detail_key` + `detail_params` alongside the English `detail` fallback. JS renders them as `_t(a.detail_key, a.detail_params, a.detail)`.
 
@@ -172,29 +172,25 @@ The `ml/` package adds ML *alongside* the proven detection/matching code — it 
 1. `translations/panel/{lang}.json` — one JSON file per language (the panel section, NOT in the main `translations/{lang}.json` to avoid hassfest validation errors)
 2. `custom_components/ha_washdata/www/panel-translations.json` — client-side bundle served to browsers, built from `translations/panel/` by `build_panel_translations.py`
 
-`translations/panel/en.json` is the English source. All other `translations/panel/{lang}.json` files are maintained by Claude subagents (one per language).
+Both `translations/panel/en.json` AND `translations/en.json` (HA-layer) are English sources. **Every** other `{lang}.json` file — panel and HA-layer alike — is maintained by Claude subagents (never the machine translator).
 
 **After adding or removing translation keys, you MUST:**
 
 ```bash
-# 1. Remove deprecated keys from all 35 HA-layer language files (syncs them to strings.json
-#    structure). Also automatically rebuilds panel-translations.json at the end.
-#    Does NOT touch translations/panel/ — panel files are managed separately.
+# 1. Sync structure: remove deprecated keys from all HA-layer language files (aligns them
+#    to strings.json). Also rebuilds panel-translations.json. Safe, no network. Does NOT
+#    add or machine-translate new keys, and does NOT touch translations/panel/.
 python3 devtools/sync_translations.py
 
-# 2. Translate new HA-layer keys from en.json into all languages (needs network; adds new keys,
-#    removes deleted ones, updates ha-washdata-card.js TRANSLATIONS object).
-cd scripts/ha_integration_translator
-python3 translate.py ../../custom_components/ha_washdata/translations \
-  --all \
-  --card-file ../../custom_components/ha_washdata/www/ha-washdata-card.js
+# 2. Translate the NEW keys (HA-layer AND panel) into every language via Claude subagents
+#    with domain context (grouped by language family; deep-merge into each {lang}.json;
+#    preserve placeholders; no em-dash). NEVER run translate.py / any machine translator.
 
-# 3. Rebuild panel-translations.json after the translate step (step 1 does this automatically,
-#    but translate.py does not, so run this after step 2).
+# 3. Rebuild panel-translations.json after any panel/*.json changes.
 python3 devtools/build_panel_translations.py
 ```
 
-Step 1 and 3 are fast and safe to run without network access. **Step 2 must NOT be run for panel.* keys** — use Claude subagents instead (see UI Localization rules above). The machine translator may be used for HA-layer keys (config flow, entity names) only.
+Steps 1 and 3 are fast and network-free. **Step 2 is subagents only — for HA-layer keys too.** The machine translator (`translate.py`) is banned; it has corrupted the files and produces domain-wrong output. If new HA-layer keys are English-only in other languages temporarily, that is hassfest-safe (English fallback) — fix it with subagents, not the machine translator.
 
 ### Home Assistant Patterns
 - Use `async_update_entry` for config entry modifications

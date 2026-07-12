@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} konstatēja spoku ciklus. Ieteicamās minimālās jaudas izmaiņas: {current_min}W -> {new_min}W (nav lietots automātiski).",
       "timer_default_message": "{device}: {minutes} min. taimeris",
       "timer_pause_action_title": "Atsākt ciklu",
-      "timer_pause_body_suffix": "Cikls ir apturēts. Atveriet WashData paneli, lai atsāktu."
+      "timer_pause_body_suffix": "Cikls ir apturēts. Atveriet WashData paneli, lai atsāktu.",
+      "notify_live_waiting_message": "{device}: Vēl nav atpazīts neviens profils.",
+      "vs_typical_longer": "{pct}% ilgāk nekā parasti",
+      "vs_typical_shorter": "{pct}% īsāk nekā parasti"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Atbilstības neskaidrība"
+        "name": "Neskaidrības rādītājs"
       },
       "current_phase": {
         "name": "Pašreizējā fāze"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Nav aktīva cikla, ko apturēt vai atsākt."
+    },
+    "path_not_allowed": {
+      "message": "Ceļš nav atļauts: {path}. Pievienojiet tā direktoriju sarakstam 'allowlist_external_dirs' failā configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Neizdevās izveidot profilu: {error}"
+    },
+    "export_path_exists": {
+      "message": "Eksporta mērķis jau pastāv: {path}. Izvēlieties citu ceļu vai vispirms noņemiet esošo failu."
+    },
+    "export_write_failed": {
+      "message": "Neizdevās ierakstīt eksportu uz {path}: {error}"
     }
   },
   "intent": {

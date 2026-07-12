@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} szellemciklusokat észlelt. Javasolt minimális teljesítményváltozás: {current_min}W -> {new_min}W (nem alkalmazzák automatikusan).",
       "timer_default_message": "{device}: {minutes} perces időzítő",
       "timer_pause_action_title": "Ciklus folytatása",
-      "timer_pause_body_suffix": "A ciklus szünetel. A folytatáshoz nyissa meg a WashData-panelt."
+      "timer_pause_body_suffix": "A ciklus szünetel. A folytatáshoz nyissa meg a WashData-panelt.",
+      "notify_live_waiting_message": "{device}: Még nincs illeszkedő profil.",
+      "vs_typical_longer": "{pct}%-kal hosszabb a szokásosnál",
+      "vs_typical_shorter": "{pct}%-kal rövidebb a szokásosnál"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Egyezési kétértelműség"
+        "name": "Kétértelműségi pontszám"
       },
       "current_phase": {
         "name": "Jelenlegi fázis"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Nincs aktív ciklus szüneteltetésre vagy folytatásra."
+    },
+    "path_not_allowed": {
+      "message": "Az elérési út nem engedélyezett: {path}. Adja hozzá a könyvtárát az 'allowlist_external_dirs' beállításhoz a configuration.yaml fájlban."
+    },
+    "create_profile_failed": {
+      "message": "A profil létrehozása nem sikerült: {error}"
+    },
+    "export_path_exists": {
+      "message": "Az exportálási cél már létezik: {path}. Válasszon másik elérési utat, vagy először távolítsa el a meglévő fájlt."
+    },
+    "export_write_failed": {
+      "message": "Az exportálás {path} helyre írása nem sikerült: {error}"
     }
   },
   "intent": {

@@ -266,10 +266,10 @@ class ProfileEnvelope(TypedDict):
     avg: list[list[float]]
     min: list[list[float]]
     max: list[list[float]]
-    target_duration: Any
-    avg_energy: Any
-    duration_std_dev: Any
-    cycle_count: Any
+    target_duration: float | None
+    avg_energy: float | None
+    duration_std_dev: float | None
+    cycle_count: int
 
 
 class GetProfileEnvelopeResponse(TypedDict):

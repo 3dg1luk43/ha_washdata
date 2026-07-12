@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} zbuloi cikle fantazmë. Ndryshimi i sugjeruar min_fuqi: {current_min}W -> {new_min}W (nuk zbatohet automatikisht).",
       "timer_default_message": "{device}: kohëmatës {minutes} min",
       "timer_pause_action_title": "Rifillo ciklin",
-      "timer_pause_body_suffix": "Cikli është në pauzë. Hapni panelin WashData për të vazhduar."
+      "timer_pause_body_suffix": "Cikli është në pauzë. Hapni panelin WashData për të vazhduar.",
+      "notify_live_waiting_message": "{device}: Ende nuk është njohur asnjë profil.",
+      "vs_typical_longer": "{pct}% më gjatë se zakonisht",
+      "vs_typical_shorter": "{pct}% më shkurt se zakonisht"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Paqartësia e përputhjes"
+        "name": "Rezultati i paqartësisë"
       },
       "current_phase": {
         "name": "Faza aktuale"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Nuk ka cikël aktiv për të ndaluar ose rifilluar."
+    },
+    "path_not_allowed": {
+      "message": "Rruga nuk lejohet: {path}. Shtoni direktorinë e saj te 'allowlist_external_dirs' në configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Profili nuk mund të krijohej: {error}"
+    },
+    "export_path_exists": {
+      "message": "Objektivi i eksportimit ekziston tashmë: {path}. Zgjidhni një rrugë tjetër ose hiqni fillimisht skedarin ekzistues."
+    },
+    "export_write_failed": {
+      "message": "Eksportimi nuk mund të shkruhej në {path}: {error}"
     }
   },
   "intent": {

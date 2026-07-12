@@ -68,7 +68,10 @@
       "auto_tune_fallback": "Η συσκευή {device_type} {device_title} εντόπισε κύκλους φαντασμάτων. Προτεινόμενη αλλαγή ελάχιστης ισχύος: {current_min}W -> {new_min}W (δεν εφαρμόζεται αυτόματα).",
       "timer_default_message": "{device}: χρονόμετρο {minutes} λεπτών",
       "timer_pause_action_title": "Συνέχιση κύκλου",
-      "timer_pause_body_suffix": "Ο κύκλος είναι σε παύση. Ανοίξτε τον πίνακα WashData για να συνεχίσετε."
+      "timer_pause_body_suffix": "Ο κύκλος είναι σε παύση. Ανοίξτε τον πίνακα WashData για να συνεχίσετε.",
+      "notify_live_waiting_message": "{device}: Δεν έχει αναγνωριστεί ακόμη κανένα προφίλ.",
+      "vs_typical_longer": "{pct}% περισσότερο από το συνηθισμένο",
+      "vs_typical_shorter": "{pct}% λιγότερο από το συνηθισμένο"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Ασάφεια αντιστοίχισης"
+        "name": "Βαθμολογία ασάφειας"
       },
       "current_phase": {
         "name": "Τρέχουσα φάση"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Δεν υπάρχει ενεργός κύκλος για παύση ή συνέχιση."
+    },
+    "path_not_allowed": {
+      "message": "Η διαδρομή δεν επιτρέπεται: {path}. Προσθέστε τον κατάλογό της στο 'allowlist_external_dirs' στο configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Δεν ήταν δυνατή η δημιουργία προφίλ: {error}"
+    },
+    "export_path_exists": {
+      "message": "Ο προορισμός εξαγωγής υπάρχει ήδη: {path}. Επιλέξτε διαφορετική διαδρομή ή αφαιρέστε πρώτα το υπάρχον αρχείο."
+    },
+    "export_write_failed": {
+      "message": "Δεν ήταν δυνατή η εγγραφή της εξαγωγής στο {path}: {error}"
     }
   },
   "intent": {

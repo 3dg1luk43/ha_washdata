@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% besser als die Basisschätzung ({metric})",
     "trend_improving_tip": "Die Passung dieses Modells hat sich bei den letzten Überprüfungen verbessert.",
     "trend_declining_tip": "Die Passung dieses Modells hat sich bei den letzten Überprüfungen verschlechtert. Mehr Zyklen zu überprüfen kann ihm beim erneuten Lernen helfen.",
-    "trend_steady_tip": "Die Passung dieses Modells ist bei den letzten Überprüfungen weitgehend stabil geblieben."
+    "trend_steady_tip": "Die Passung dieses Modells ist bei den letzten Überprüfungen weitgehend stabil geblieben.",
+    "cap_blurb": {
+      "end": "Erkennen, wann ein Zyklus wirklich beendet ist",
+      "live_match": "Das laufende Programm früher erkennen",
+      "quality": "Fehlerkannte oder fehlerhafte Zyklen erkennen",
+      "remaining_time": "Vorhersagen, wie lange es noch dauert",
+      "total_energy": "Gesamtverbrauch und Kosten vorhersagen"
+    },
+    "cap_label": {
+      "end": "Zyklusende-Erkennung",
+      "live_match": "Programmerkennung",
+      "quality": "Zyklusqualitätsprüfung",
+      "remaining_time": "Schätzung der Restzeit",
+      "total_energy": "Energieschätzung"
+    },
+    "metric_auc": "AUC {auc} auf Validierungsdaten",
+    "metric_mae": "Fehler {model} vs. Baseline {baseline}"
   },
   "modal": {
     "auto_label": "Auto-Label-Zyklen",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Wählen Sie einen Zyklus und klicken Sie auf ↺, um ihn zu laden",
     "pg_sweep_progress": "Schritt {done} / {total}",
     "pg_analysis_hint": "Wählen Sie einen Zyklus und klicken Sie auf ↺, um die Analyse zu laden.",
-    "diagnostics_load_failed": "Diagnose konnte nicht geladen werden: {error}"
+    "diagnostics_load_failed": "Diagnose konnte nicht geladen werden: {error}",
+    "manual_duration_ref_hint": "Wird nur verwendet, wenn kein Referenzzyklus ausgewählt ist. Ein Referenzzyklus legt die Dauer anhand seiner eigenen Länge fest.",
+    "toast_convert_rolled_back": "Konvertierung fehlgeschlagen und zurückgesetzt (keine Automatisierung zurückgelassen): {error}",
+    "toast_convert_orphan": "Die Automatisierung wurde erstellt, aber das Entfernen der alten Aktionen ist fehlgeschlagen. Nicht erneut versuchen: Entfernen Sie die alten Aktionen manuell, um eine doppelte Automatisierung zu vermeiden.",
+    "advisory_duration_trend_up": "Die Zyklen von '{name}' werden zunehmend länger (etwa +{pct}% pro Zyklus). Falls sich das Verhalten des Geräts geändert hat, zeichnen Sie dieses Profil neu auf oder erstellen Sie es neu.",
+    "advisory_energy_trend_up": "'{name}' verbraucht zunehmend mehr Energie (etwa +{pct}% pro Zyklus) - prüfen Sie das Gerät, falls das unerwartet ist.",
+    "advisory_poor_health": "'{name}' hat einen niedrigen Übereinstimmungswert - die letzten Zyklen schwanken stark oder passen nur schwach. Überprüfen Sie die Zyklen oder zeichnen Sie das Profil neu auf, damit Erkennung und Zeitschätzungen genau bleiben.",
+    "advisory_shape_drift": "'{name}' hat sich deutlich vom ursprünglichen Leistungsverlauf entfernt. Das Gerät hat sein Verhalten möglicherweise mit der Zeit verändert (z. B. Verkalkung, Verschleiß). Erwägen Sie, dieses Profil mit aktuellen Zyklen neu aufzuzeichnen.",
+    "advisory_shape_drift_corr": "'{name}' hat sich deutlich vom ursprünglichen Leistungsverlauf entfernt (Korrelation {corr}). Das Gerät hat sein Verhalten möglicherweise mit der Zeit verändert (z. B. Verkalkung, Verschleiß). Erwägen Sie, dieses Profil mit aktuellen Zyklen neu aufzuzeichnen."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plötzlicher Abfall gilt als sofortiges Ende",
@@ -1313,6 +1337,39 @@
         "higher": "Längere Ruhephasen erlaubt – weniger versehentliche Zwangsstopps",
         "lower": "Erkennt hängende Zyklen schneller"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "15. Perzentil der Konfidenz von {cycles} automatischen Labels, die der Benutzer nie korrigiert hat ({p15}).",
+      "completion_min_seconds": "Die Hälfte der p05-Dauer sauberer Zyklen ({minutes} min) über {cycles} Zyklen; filtert Geisterzyklen heraus.{excl}",
+      "dead_zone_batch": "Kurz gehalten (mittleres Startinstabilitätsfenster über {cycles} Zyklen = {s}s), damit ein echtes Ende zügig erkannt wird.",
+      "dead_zone_from_dip": "Basierend auf einem frühen Leistungseinbruch, der bei {s}s erkannt wurde.",
+      "end_energy_default": "Empfohlener Standardwert für die Rauschschwelle am Zyklusende.",
+      "end_energy_false": "p95 der Energie bei falschen Enden ({p95}Wh) über {cycles} Zyklen, begrenzt auf mindestens 0.2% der medianen Zyklusenergie ({floor}Wh).",
+      "end_energy_no_false": "Keine falschen Enden über {cycles} Zyklen; begrenzt auf mindestens 0.2% der medianen Zyklusenergie ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} sauberen Zyklen ({pct}%) hatten eine interne Pause >60s, die wieder fortgesetzt wurde; {val} Endbestätigung(en) erforderlich.",
+      "learning_confidence": "p05-Konfidenz von {cycles} vom Benutzer gelabelten Zyklen ({p05}); darunter wird eine Bestätigung angefordert.",
+      "match_interval": "Basierend auf dem beobachteten Aktualisierungsrhythmus (Median={median}s) * 10.",
+      "max_duration_ratio": "Basierend auf den Dauern gelabelter Zyklen (p95={p95}).",
+      "min_active": "Basierend auf der minimalen aktiven Leistung ({min}W), die im letzten Zyklus beobachtet wurde.",
+      "min_duration_ratio": "So niedrig wie möglich gehalten, damit ein Programm früh im Zyklus erkannt wird; die Konfidenz- und Mehrdeutigkeitsschranken verhindern vorzeitige Festlegungen.",
+      "min_off_gap": "Basierend auf {gaps} beobachteten Pausen zwischen Zyklen (p05={p05}s). Geräte-Untergrenze: {floor}s.",
+      "min_power": "40% der p05-niedrigsten aktiven Leistung ({p05}W) über {cycles} saubere Zyklen, sodass die Aus-Schwelle unter der tatsächlichen Leistungsaufnahme bleibt.{excl}",
+      "ml_auto_label": "Niedrigste Konfidenz, die das Qualitätsmodell noch als sauber bewertet hat (p10 von {cycles} sauberen Zyklen = {p10}).",
+      "ml_end_repeat": "{false}/{total} Zyklen ({pct}%) hatten eine Pause, die der Endedetektor mit >50% bewertete; {val} Endbestätigung(en) erforderlich.",
+      "ml_off_delay": "Vom Endedetektor bestätigte Pausen: p95 {p95}s + 60s Puffer, aus {pauses} modellgeprüften Pausen über {cycles} Zyklen (Untergrenze {floor}s).",
+      "no_update_timeout": "Basierend auf dem beobachteten Aktualisierungsrhythmus (p95={p95}s) * 20 (min 60s).",
+      "off_delay_cadence": "Basierend auf dem beobachteten Aktualisierungsrhythmus (p95={p95}s) * 5",
+      "off_delay_device_floor": "Gerätespezifisches sicheres Minimum für {device} verwendet ({floor}s).",
+      "off_delay_generic_floor": "Generisches sicheres Minimum verwendet ({floor}s).",
+      "off_delay_pauses": "So bemessen, dass echte Pausen überbrückt werden: p95 der Pause innerhalb eines Zyklus {p95}s + 60s Puffer, aus {pauses} Pausen über {cycles} saubere Zyklen (Untergrenze {floor}s).",
+      "profile_match_threshold": "p10-Konfidenz von {cycles} korrekten automatischen Labels ({p10}); sichere Untergrenze für Live-Festlegungen.",
+      "sampling_interval": "Median-Aktualisierungsintervall, beobachtet über {cycles} saubere Zyklen ({si}s).{excl}",
+      "smoothing_window": "So bemessen, dass ~30s an Messwerten bei {si}s-Abtastung geglättet werden ({samples} Messwerte).",
+      "start_duration": "Kurz gehalten (~ein {si}s-Abtastintervall), damit die Erkennung so früh wie möglich beginnt, einzelne Messwertspitzen aber weiterhin ignoriert werden.",
+      "thr_batch": "Knapp über der p05-niedrigsten aktiven Leistung über {cycles} Zyklen ({p05}W) gehalten, damit ein Start so früh wie möglich erkannt wird und die Stopp-Schwelle unter der niedrigsten Betriebsleistung der Maschine bleibt.",
+      "tol_per_profile": "p75 der Dauervarianz pro Profil über {profiles} Profile ({cycles} Zyklen); enge Profile werden nicht benachteiligt.",
+      "tol_pooled": "Basierend auf der zusammengefassten Dauervarianz von {cycles} kürzlich gelabelten Zyklen (p95-Abweichung={dev}).",
+      "watchdog": "So niedrig wie sicher gehalten (3x die p95-Aktualisierungslücke von {p95}s, min 30s), damit Hänger schnell erkannt werden, ohne Fehl-Stopps auszulösen."
     }
   },
   "tab": {
@@ -1405,7 +1462,8 @@
     "reminders_save_failed": "Erinnerungen konnten nicht gespeichert werden: {error}",
     "reminders_saved": "Service-Erinnerungen gespeichert",
     "pause_no_cycle": "Kein aktiver Zyklus zum Anhalten",
-    "resume_no_cycle": "Kein pausierter Zyklus zum Fortsetzen"
+    "resume_no_cycle": "Kein pausierter Zyklus zum Fortsetzen",
+    "delete_partial_failed": "Einige Elemente konnten nicht gelöscht werden und wurden wiederhergestellt"
   },
   "trend": {
     "down": "Abwärtstrend",

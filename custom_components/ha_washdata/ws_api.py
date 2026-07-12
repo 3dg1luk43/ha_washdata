@@ -1,12 +1,15 @@
 """WebSocket API commands for the WashData full-screen panel."""
 from __future__ import annotations
 
+import asyncio
 import collections
 import functools
 import json
 import logging
 import os
+import re
 import time
+import uuid
 from typing import Any
 
 import voluptuous as vol
@@ -247,7 +250,7 @@ async def _recorder_power(hass: HomeAssistant, entity_id: str, start_dt: Any) ->
         )
     except Exception:  # pylint: disable=broad-exception-caught
         return []
-    end_dt = dt_util.utcnow()
+    end_dt = dt_util.now()  # tz-aware; use dt_util.now() per the datetime convention
 
     def _query() -> list[tuple[float, float]]:
         res = history.state_changes_during_period(
@@ -298,6 +301,25 @@ def _get_manager(hass: HomeAssistant, entry_id: str) -> Any | None:
     return domain_data.get(entry_id) if isinstance(domain_data, dict) else None
 
 
+# Per-entry serialization lock for the heavy, multi-await store-mutating WS
+# handlers (process_recording / reprocess_history / import_config). Holding one
+# lock for the whole operation prevents two of them from interleaving and
+# clobbering each other's persisted state or colliding on cycle IDs. Stored on
+# hass.data (not module-global) so each lock is created inside — and bound to —
+# the running event loop, which keeps it correct across test event loops.
+_WS_WRITE_LOCKS_KEY = f"{DOMAIN}_ws_write_locks"
+
+
+def _entry_write_lock(hass: HomeAssistant, entry_id: str) -> asyncio.Lock:
+    """Return the shared per-entry write lock, creating it on first use."""
+    locks: dict[str, asyncio.Lock] = hass.data.setdefault(_WS_WRITE_LOCKS_KEY, {})
+    lock = locks.get(entry_id)
+    if lock is None:
+        lock = asyncio.Lock()
+        locks[entry_id] = lock
+    return lock
+
+
 def _get_entry(hass: HomeAssistant, entry_id: str) -> Any | None:
     return next(
         (e for e in hass.config_entries.async_entries(DOMAIN) if e.entry_id == entry_id),
@@ -317,6 +339,15 @@ def _strip_cycle(c: dict[str, Any]) -> dict[str, Any]:
 # settings changelog (D7): name/title edits flow through the separate `title`
 # kwarg, and suggestion application uses its own apply_suggestions command.
 _CHANGELOG_SKIP_KEYS = frozenset({CONF_NAME})
+
+# Identity keys that must NEVER be persisted into entry.options; they are
+# partitioned out of any submitted/imported option payload before it is saved.
+# In this integration only the display name is a pure options-forbidden identity
+# key -- it is carried by the config entry title. device_type / power_sensor /
+# min_power deliberately live in entry.options post-3.6 (config_flow writes them
+# there and the manager resolves them options-first), so they are NOT listed
+# here; relocating them to entry.data would shadow the option-first reads.
+_OPTIONS_IDENTITY_KEYS = frozenset({CONF_NAME})
 
 
 def _json_safe(value: Any) -> Any:
@@ -367,17 +398,39 @@ _PANEL_DATA_KEY = "ha_washdata_panel_cfg"
 _LEVEL_RANK = {"none": 0, "read": 1, "edit": 2, "full": 3}
 _PANEL_TABS = ("status", "history", "profiles", "settings", "tools", "panel", "ml_lab", "playground")
 
+# Valid values for the two per-user string prefs (validated in ws_set_user_prefs).
+_PREF_DATE_FORMATS = ("relative", "absolute")
+# lang_override: empty string clears it (fall back to system language); otherwise a
+# BCP-47-ish tag (e.g. "en", "pt-BR", "sr-Latn"). Kept as a bounded pattern rather
+# than coupling the WS handler to the www/panel-translations.json language list —
+# the panel already falls back to system language for any tag it can't load.
+_PREF_LANG_TAG_RE = re.compile(r"^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$")
+
 # Commands that require 'full' (destructive or full-data export/import).
 _FULL_COMMANDS = frozenset({
     "wipe_history", "import_config", "export_config", "clear_debug_data", "reprocess_history",
     "trigger_ml_training",
+    # Reverting on-device models / matcher tuning discards learned state -> full access.
+    "revert_matching_config", "revert_ml_models",
 })
 # Commands allowed for any authenticated user regardless of device permissions.
 _OPEN_COMMANDS = frozenset({
     "get_constants", "get_panel_config", "set_user_prefs",
 })
 # Admin-only commands.
-_ADMIN_COMMANDS = frozenset({"set_panel_config", "get_logs"})
+# Commands that require administrator access ALWAYS — even when RBAC is disabled
+# (default), where every authenticated user otherwise resolves to "full". These are
+# destructive/global: they can wipe stored data, overwrite config, read/write files
+# on disk, or reprocess the whole history. A non-admin HA user must not reach them.
+_ADMIN_COMMANDS = frozenset({
+    "set_panel_config",
+    "get_logs",
+    "wipe_history",
+    "import_config",
+    "export_config",
+    "reprocess_history",
+    "clear_debug_data",
+})
 # Mutating commands intentionally allowed at the 'read' level. Picking the live
 # program is a benign runtime action (it changes detection, not stored data), so
 # read users may use the Status program selector. The Playground simulation is a
@@ -801,7 +854,17 @@ async def ws_set_options(
     if not entry:
         connection.send_error(msg["id"], "not_found", f"Entry {msg['entry_id']!r} not found")
         return
-    new_options = {**entry.data, **entry.options, **msg["options"]}
+    # Build the new options from the *existing* options plus the submitted
+    # values only. Never spread entry.data in: that would copy identity and
+    # data-only keys (name, initial_profile, stale creation-time identity) into
+    # options where they don't belong. Tunables (including device_type /
+    # power_sensor / min_power, which live in options post-3.6) are preserved
+    # from entry.options and overridden by the submission.
+    new_options = {**entry.options, **msg["options"]}
+
+    # Capture the submitted display name for the entry title before it is
+    # stripped out of options below.
+    submitted_name = new_options.get(CONF_NAME)
 
     # Mirror the OptionsFlow save-time normalization so the panel can never
     # persist stale or invalid values:
@@ -818,12 +881,24 @@ async def ws_set_options(
         if key in new_options and not new_options[key]:
             new_options[key] = None
 
-    if new_options.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE) != DEVICE_TYPE_PUMP:
+    # Resolve the effective device type option-first (submission -> existing
+    # options -> data -> default) so the pump-only key is dropped correctly even
+    # when the submission omits device_type.
+    effective_device_type = new_options.get(
+        CONF_DEVICE_TYPE, entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
+    )
+    if effective_device_type != DEVICE_TYPE_PUMP:
         new_options.pop(CONF_PUMP_STUCK_DURATION, None)
 
+    # Partition identity out of options: the display name is carried by the
+    # entry title, never persisted in options (matches the config-flow invariant
+    # that CONF_NAME is absent from options).
+    for key in _OPTIONS_IDENTITY_KEYS:
+        new_options.pop(key, None)
+
     update_kwargs: dict[str, Any] = {"options": new_options}
-    if CONF_NAME in new_options and new_options[CONF_NAME]:
-        update_kwargs["title"] = new_options[CONF_NAME].strip()
+    if isinstance(submitted_name, str) and submitted_name.strip():
+        update_kwargs["title"] = submitted_name.strip()
 
     # Settings change history (D7): diff the pre-update effective options against
     # the post-normalization values, but only for keys the user actually
@@ -1711,12 +1786,10 @@ async def ws_process_recording(
         return
 
     recorder = getattr(manager, "recorder", None)
-    if not recorder or not getattr(recorder, "last_run", None):
+    if not recorder:
         connection.send_error(msg["id"], "no_recording", "No completed recording to process")
         return
 
-    last_run: dict[str, Any] = recorder.last_run
-    data = last_run.get("data", [])
     head_trim: float = msg.get("head_trim", 0.0)
     tail_trim: float = msg.get("tail_trim", 0.0)
     profile_name: str = msg["profile_name"].strip()
@@ -1726,84 +1799,129 @@ async def ws_process_recording(
         connection.send_error(msg["id"], "invalid_format", "Profile name must not be empty")
         return
 
-    try:
-        rec_start_str = last_run.get("start_time")
-        rec_end_str = last_run.get("end_time")
+    # Serialize the whole claim+persist under the per-entry write lock so two
+    # concurrent process_recording calls cannot both consume the same recording
+    # (which would double-persist and collide on cycle IDs). The claim is the
+    # read of ``last_run`` *inside* the lock; it is cleared only after a
+    # successful persist, so a failure leaves the recording intact for retry.
+    async with _entry_write_lock(hass, entry_id):
+        last_run = getattr(recorder, "last_run", None)
+        if not last_run:
+            connection.send_error(msg["id"], "no_recording", "No completed recording to process")
+            return
+        data = last_run.get("data", [])
 
-        parsed: list[tuple[float, float]] = []
-        for item in data:
-            t_str, p = (item[0], item[1]) if isinstance(item, (list, tuple)) else (None, None)
-            if t_str:
-                t = dt_util.parse_datetime(str(t_str))
-                if t:
-                    parsed.append((t.timestamp(), float(p or 0)))
+        try:
+            rec_start_str = last_run.get("start_time")
+            rec_end_str = last_run.get("end_time")
 
-        data_start_ts = parsed[0][0] if parsed else 0.0
-        data_end_ts = parsed[-1][0] if parsed else 0.0
+            parsed: list[tuple[float, float]] = []
+            for item in data:
+                t_str, p = (item[0], item[1]) if isinstance(item, (list, tuple)) else (None, None)
+                if t_str:
+                    t = dt_util.parse_datetime(str(t_str))
+                    if t:
+                        parsed.append((t.timestamp(), float(p or 0)))
 
-        if rec_start_str:
-            parsed_dt = dt_util.parse_datetime(rec_start_str)
-            if parsed_dt is None:
-                connection.send_error(msg["id"], "invalid_format", "Invalid recording start_time format")
+            data_start_ts = parsed[0][0] if parsed else 0.0
+            data_end_ts = parsed[-1][0] if parsed else 0.0
+
+            if rec_start_str:
+                parsed_dt = dt_util.parse_datetime(rec_start_str)
+                if parsed_dt is None:
+                    connection.send_error(msg["id"], "invalid_format", "Invalid recording start_time format")
+                    return
+                start_ts = parsed_dt.timestamp()
+            else:
+                start_ts = data_start_ts
+
+            if rec_end_str:
+                parsed_dt = dt_util.parse_datetime(rec_end_str)
+                if parsed_dt is None:
+                    connection.send_error(msg["id"], "invalid_format", "Invalid recording end_time format")
+                    return
+                end_ts = parsed_dt.timestamp()
+            else:
+                end_ts = data_end_ts
+
+            if parsed:
+                start_ts = min(start_ts, data_start_ts)
+                end_ts = max(end_ts, data_end_ts)
+
+            keep_start = start_ts + head_trim
+            keep_end = end_ts - tail_trim
+            duration = keep_end - keep_start
+
+            trimmed_data = [
+                (dt_util.utc_from_timestamp(t).isoformat(), p)
+                for t, p in parsed
+                if keep_start <= t <= keep_end
+            ]
+
+            # Reject a trim that removes everything before it can persist a
+            # corrupt cycle: an inverted/empty window (end <= start) or a window
+            # that keeps no samples.
+            if keep_end <= keep_start:
+                connection.send_error(
+                    msg["id"], "invalid_format",
+                    "Trim removes the entire recording (end is at or before start)",
+                )
                 return
-            start_ts = parsed_dt.timestamp()
-        else:
-            start_ts = data_start_ts
-
-        if rec_end_str:
-            parsed_dt = dt_util.parse_datetime(rec_end_str)
-            if parsed_dt is None:
-                connection.send_error(msg["id"], "invalid_format", "Invalid recording end_time format")
+            if not trimmed_data:
+                connection.send_error(
+                    msg["id"], "invalid_format",
+                    "Trim leaves no power data",
+                )
                 return
-            end_ts = parsed_dt.timestamp()
-        else:
-            end_ts = data_end_ts
 
-        if parsed:
-            start_ts = min(start_ts, data_start_ts)
-            end_ts = max(end_ts, data_end_ts)
+            cycle_data: dict[str, Any] = {
+                # High-entropy ID so two recordings processed in the same second
+                # (or a retry) never collide on an existing cycle ID.
+                "id": f"rec_{int(time.time())}_{uuid.uuid4().hex[:8]}",
+                "start_time": dt_util.utc_from_timestamp(keep_start).isoformat(),
+                "end_time": dt_util.utc_from_timestamp(keep_end).isoformat(),
+                "duration": duration,
+                "profile_name": profile_name,
+                "power_data": trimmed_data,
+                "status": "completed",
+                "meta": {"source": "recorder", "original_samples": len(data)},
+                # A recorded cycle is a hand-picked clean example -> it IS the golden
+                # reference. Prefill the single ml_review flag (recorded == golden;
+                # no separate "recorded" field) so it seeds matching immediately.
+                "ml_review": {
+                    "golden": True,
+                    "quality": "good",
+                    "reviewed_at": dt_util.now().isoformat(),
+                },
+            }
 
-        keep_start = start_ts + head_trim
-        keep_end = end_ts - tail_trim
-        duration = max(0.0, keep_end - keep_start)
+            if save_mode == "new_profile":
+                await manager.profile_store.create_profile_standalone(profile_name)
 
-        trimmed_data = [
-            (dt_util.utc_from_timestamp(t).isoformat(), p)
-            for t, p in parsed
-            if keep_start <= t <= keep_end
-        ]
+            await manager.profile_store.async_add_cycle(cycle_data)
+            await manager.profile_store.async_rebuild_envelope(profile_name)
+            await manager.profile_store.async_save()
+            # Clear only after a successful persist so the recording is consumed
+            # exactly once; a failure above keeps it available for another try.
+            await recorder.clear_last_run()
 
-        cycle_data: dict[str, Any] = {
-            "id": f"rec_{int(time.time())}",
-            "start_time": dt_util.utc_from_timestamp(keep_start).isoformat(),
-            "end_time": dt_util.utc_from_timestamp(keep_end).isoformat(),
-            "duration": duration,
-            "profile_name": profile_name,
-            "power_data": trimmed_data,
-            "status": "completed",
-            "meta": {"source": "recorder", "original_samples": len(data)},
-            # A recorded cycle is a hand-picked clean example -> it IS the golden
-            # reference. Prefill the single ml_review flag (recorded == golden;
-            # no separate "recorded" field) so it seeds matching immediately.
-            "ml_review": {
-                "golden": True,
-                "quality": "good",
-                "reviewed_at": dt_util.now().isoformat(),
-            },
-        }
+            # Re-validate the manager is still live after the awaited persist chain
+            # (create/add/rebuild/save/clear): if the entry was reloaded meanwhile
+            # the original manager is detached and its notify would target stale
+            # state. Mirror the ws_reprocess_history guard.
+            current_manager = _get_manager(hass, entry_id)
+            if current_manager is not manager:
+                _LOGGER.warning(
+                    "Manager replaced during recording persist for %s; skipping notify",
+                    entry_id,
+                )
+                _send_result(connection, msg["id"], "process_recording", {"success": True})
+                return
+            manager.notify_update()
 
-        if save_mode == "new_profile":
-            await manager.profile_store.create_profile_standalone(profile_name)
-
-        await manager.profile_store.async_add_cycle(cycle_data)
-        await manager.profile_store.async_rebuild_envelope(profile_name)
-        await manager.profile_store.async_save()
-        await recorder.clear_last_run()
-        manager.notify_update()
-
-        _send_result(connection, msg["id"], "process_recording", {"success": True})
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        connection.send_error(msg["id"], "unknown_error", str(exc))
+            _send_result(connection, msg["id"], "process_recording", {"success": True})
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            connection.send_error(msg["id"], "unknown_error", str(exc))
 
 
 @websocket_api.websocket_command(
@@ -1998,6 +2116,11 @@ async def ws_reprocess_history(
 
     store = manager.profile_store
     summary: dict[str, Any] = {"success": True}
+    # Serialize under the per-entry write lock: this multi-await pass rematches,
+    # retrains and rewrites the store, and must not interleave with a concurrent
+    # import / recording persist for the same entry.
+    lock = _entry_write_lock(hass, entry_id)
+    await lock.acquire()
     try:
         summary["count"] = await store.async_reprocess_all_data()
 
@@ -2051,6 +2174,8 @@ async def ws_reprocess_history(
         _send_result(connection, msg["id"], "reprocess_history", summary)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
+    finally:
+        lock.release()
 
 
 @websocket_api.websocket_command(
@@ -2151,34 +2276,51 @@ async def ws_import_config(
         _err_not_found(connection, msg["id"], entry_id)
         return
 
-    entry = _get_entry(hass, entry_id)
-    try:
-        payload = await hass.async_add_executor_job(json.loads, msg["json_data"])
-        config_updates = await manager.profile_store.async_import_data(payload)
+    # Serialize the whole import under the per-entry write lock so it cannot
+    # interleave with a concurrent reprocess / recording persist (which would
+    # corrupt the store the import is rewriting).
+    async with _entry_write_lock(hass, entry_id):
+        try:
+            payload = await hass.async_add_executor_job(json.loads, msg["json_data"])
+            config_updates = await manager.profile_store.async_import_data(payload)
 
-        # Re-validate after awaits — entry may have been reloaded during import.
-        current_manager = _get_manager(hass, entry_id)
-        if current_manager is not manager:
-            _LOGGER.warning(
-                "Manager replaced during import for %s; aborting notify", entry_id
-            )
+            # Re-validate after the awaits — the entry may have been reloaded
+            # (a new manager + store) during the import. Persisting through the
+            # detached manager/entry would clobber the live one, so re-fetch both
+            # and bail out if the manager is no longer the live one.
+            current_manager = _get_manager(hass, entry_id)
+            if current_manager is not manager:
+                _LOGGER.warning(
+                    "Manager replaced during import for %s; aborting notify", entry_id
+                )
+                _send_result(connection, msg["id"], "import_config", {"success": True})
+                return
+
+            entry = _get_entry(hass, entry_id)
+            if entry and config_updates:
+                entry_options_updates = dict(config_updates.get("entry_options", {}))
+                # Identity must never be persisted into options; the display name
+                # rides the entry title. device_type/power_sensor/min_power stay
+                # in options and are applied as tunables.
+                for key in _OPTIONS_IDENTITY_KEYS:
+                    entry_options_updates.pop(key, None)
+                if entry_options_updates:
+                    # Apply the imported tunables on top of the current options;
+                    # never spread entry.data into options.
+                    new_options = {**entry.options, **entry_options_updates}
+                    hass.config_entries.async_update_entry(entry, options=new_options)
+                # NB: config_updates["entry_data"] is intentionally NOT written to
+                # entry.data. export_data ships the raw, un-redacted entry.data of
+                # the *source* device (its power_sensor and other identity), so
+                # blindly applying it would hijack this device's sensor binding.
+                # Identity changes must go through the reconfigure flow.
+
+            manager.notify_update()
             _send_result(connection, msg["id"], "import_config", {"success": True})
-            return
-
-        if entry and config_updates:
-            entry_data_updates = config_updates.get("entry_data", {})
-            entry_options_updates = config_updates.get("entry_options", {})
-            if entry_data_updates or entry_options_updates:
-                new_options = {**entry.data, **entry.options}
-                new_options.update(entry_options_updates)
-                hass.config_entries.async_update_entry(entry, options=new_options)
-
-        manager.notify_update()
-        _send_result(connection, msg["id"], "import_config", {"success": True})
-    except json.JSONDecodeError as exc:
-        connection.send_error(msg["id"], "invalid_json", str(exc))
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        connection.send_error(msg["id"], "unknown_error", str(exc))
+        except json.JSONDecodeError as exc:
+            connection.send_error(msg["id"], "invalid_json", str(exc))
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            connection.send_error(msg["id"], "unknown_error", str(exc))
 
 
 # ─── Shared constants ─────────────────────────────────────────────────────────
@@ -2252,6 +2394,10 @@ def ws_get_suggestions(
                     "key": key,
                     "suggested": suggested,
                     "reason": item.get("reason", ""),
+                    # Localization sidecars: panel renders _t(reason_key,
+                    # reason_params, reason). Absent on old/reconciled entries.
+                    "reason_key": item.get("reason_key"),
+                    "reason_params": item.get("reason_params"),
                     "current": current,
                     "updated": item.get("updated"),
                 }
@@ -2307,7 +2453,9 @@ async def ws_apply_suggestions(
             cycle_count = len(manager.profile_store.get_past_cycles())
             manager.profile_store.set_suggestion_apply_cycle_count(cycle_count)
             await manager.profile_store.clear_suggestions()
-            new_options = {**entry.data, **entry.options, **updates}
+            # Suggested values are all tunables -> layer them onto the existing
+            # options; never spread entry.data into options.
+            new_options = {**entry.options, **updates}
             hass.config_entries.async_update_entry(entry, options=new_options)
             manager.notify_update()
 
@@ -2841,6 +2989,16 @@ async def ws_set_user_prefs(
     # F2: per-user Basic/Advanced settings disclosure level.
     if p.get("settings_level") in ("basic", "advanced"):
         cur["settings_level"] = p["settings_level"]
+    # Display prefs: cycle date format + panel language override (paired with the
+    # panel's save-prefs payload; without these they would be silently dropped).
+    if p.get("date_format") in _PREF_DATE_FORMATS:
+        cur["date_format"] = p["date_format"]
+    if "lang_override" in p:
+        lang = p["lang_override"]
+        if lang == "":
+            cur.pop("lang_override", None)  # empty clears -> system default
+        elif isinstance(lang, str) and _PREF_LANG_TAG_RE.match(lang):
+            cur["lang_override"] = lang
     prefs[user.id] = cur
     await _save_panel_data(hass)
     _send_result(connection, msg["id"], "set_user_prefs", {"success": True})
@@ -3154,11 +3312,15 @@ def _compute_ml_comparison(
             "count": len(s["durations"]),
         }
 
-    # --- Evaluate cycles (most recent 200 for display; all for pause analysis) ---
+    # --- Evaluate cycles (newest 200 for scoring/display; all for pause analysis) ---
+    # `cycles` is oldest-first (new cycles are appended at the end), so the newest
+    # 200 are the tail. Score / persist health for only that window; the pause
+    # scan below still runs over every cycle.
     intra_pauses: list[float] = []
     evaluated: list[dict[str, Any]] = []
+    recent_start_idx = max(0, len(cycles) - 200)
 
-    for cycle in cycles:
+    for idx, cycle in enumerate(cycles):
         profile_name: str | None = cycle.get("profile_name")
         duration: float = float(cycle.get("duration") or 0)
         energy_wh: float = float(cycle.get("energy_wh") or 0)
@@ -3201,8 +3363,9 @@ def _compute_ml_comparison(
                         intra_pauses.append(pause_dur)
                     in_pause = False
 
-        # Only score and display the most recent 200 cycles.
-        if len(evaluated) >= 200:
+        # Only score and display the newest 200 cycles (the tail of the
+        # oldest-first list); older cycles still contributed pauses above.
+        if idx < recent_start_idx:
             continue
 
         # Reuse persisted per-cycle health when it was computed against the
@@ -3310,6 +3473,9 @@ def _compute_ml_comparison(
             "ml_review": cycle.get("ml_review") or {},
         })
 
+    # Panel expects most-recent-first ordering; the loop appended oldest-first.
+    evaluated.reverse()
+
     # --- Settings comparison: off_delay ---
     settings_comparison: dict[str, Any] = {}
     ml_off_delay: int | None = None
@@ -3400,7 +3566,12 @@ def _build_settings_comparison(manager: Any, merged: dict[str, Any]) -> dict[str
         ) if classic.device_type else DEFAULT_OFF_DELAY
         od = classic._suggest_off_delay_from_pauses(clean, stop_thr, device_floor)  # pylint: disable=protected-access
         if od is not None:
-            classic_vals[CONF_OFF_DELAY] = {"value": od[0], "reason": od[1]}
+            classic_vals[CONF_OFF_DELAY] = {
+                "value": od[0],
+                "reason": od[1],
+                "reason_key": od[2],
+                "reason_params": od[3],
+            }
     except Exception:  # pylint: disable=broad-exception-caught
         pass
 
@@ -3416,6 +3587,12 @@ def _build_settings_comparison(manager: Any, merged: dict[str, Any]) -> dict[str
 
     def _reason(entry: Any) -> str:
         return entry.get("reason", "") if isinstance(entry, dict) else ""
+
+    def _reason_key(entry: Any) -> str | None:
+        return entry.get("reason_key") if isinstance(entry, dict) else None
+
+    def _reason_params(entry: Any) -> dict[str, Any] | None:
+        return entry.get("reason_params") if isinstance(entry, dict) else None
 
     comparison: dict[str, Any] = {}
     for key, label, unit in _ML_COMPARE_SETTINGS:
@@ -3434,13 +3611,20 @@ def _build_settings_comparison(manager: Any, merged: dict[str, Any]) -> dict[str
             continue
         comparison[key] = {
             "key": key,
+            # ``label`` is the English fallback; the panel renders the field's own
+            # localized setting label (setting.<key>.label) so this is not shown
+            # directly. Reasons carry _key/_params sidecars for _t() rendering.
             "label": label,
             "unit": unit,
             "current_value": current,
             "classic_value": classic_value,
             "classic_reason": _reason(cv) if classic_value is not None else "",
+            "classic_reason_key": _reason_key(cv) if classic_value is not None else None,
+            "classic_reason_params": _reason_params(cv) if classic_value is not None else None,
             "ml_value": ml_value,
             "ml_reason": _reason(mv) if ml_value is not None else "",
+            "ml_reason_key": _reason_key(mv) if ml_value is not None else None,
+            "ml_reason_params": _reason_params(mv) if ml_value is not None else None,
         }
     return comparison
 
@@ -3562,8 +3746,13 @@ async def ws_get_ml_training_status(
             "trained_at": v.get("trained_at"),
             "cycle_count": v.get("cycle_count"),
             "kind": spec.get("kind"),
+            # ``label``/``blurb`` are the English fallbacks; the panel renders
+            # _t(label_key/blurb_key, {}, fallback). Keyed by capability so a
+            # missing key falls back cleanly to the English text.
             "label": label,
+            "label_key": f"ml.cap_label.{cap}" if cap in _cap_labels else None,
             "blurb": blurb,
+            "blurb_key": f"ml.cap_blurb.{cap}" if cap in _cap_labels else None,
         }
         # Raw metric numbers so the panel can render a humanized quality indicator
         # (a bar + word) with the exact figure on hover: held-out AUC for
@@ -3571,10 +3760,17 @@ async def ws_get_ml_training_status(
         if v.get("new_auc") is not None:
             info["auc"] = round(float(v["new_auc"]), 4)
             info["metric"] = f"AUC {float(v['new_auc']):.2f} on held-out data"
+            info["metric_key"] = "ml.metric_auc"
+            info["metric_params"] = {"auc": f"{float(v['new_auc']):.2f}"}
         elif v.get("model_mae") is not None and v.get("naive_mae") is not None:
             info["model_mae"] = round(float(v["model_mae"]), 5)
             info["naive_mae"] = round(float(v["naive_mae"]), 5)
             info["metric"] = f"error {float(v['model_mae']):.3f} vs {float(v['naive_mae']):.3f} baseline"
+            info["metric_key"] = "ml.metric_mae"
+            info["metric_params"] = {
+                "model": f"{float(v['model_mae']):.3f}",
+                "baseline": f"{float(v['naive_mae']):.3f}",
+            }
         models[cap] = info
 
     # Fit trend across recent training runs (drift): compare the mean held-out

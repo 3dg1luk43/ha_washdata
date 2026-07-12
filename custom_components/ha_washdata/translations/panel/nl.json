@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% beter dan de basisschatting ({metric})",
     "trend_improving_tip": "De pasvorm van dit model is bij recente hercontroles verbeterd.",
     "trend_declining_tip": "De pasvorm van dit model is bij recente hercontroles achteruitgegaan. Meer cycli beoordelen kan het helpen opnieuw te leren.",
-    "trend_steady_tip": "De pasvorm van dit model is bij recente hercontroles ongeveer stabiel gebleven."
+    "trend_steady_tip": "De pasvorm van dit model is bij recente hercontroles ongeveer stabiel gebleven.",
+    "cap_blurb": {
+      "end": "Weten wanneer een cyclus echt is afgelopen",
+      "live_match": "Het lopende programma sneller herkennen",
+      "quality": "Verkeerd gedetecteerde of beschadigde cycli opsporen",
+      "remaining_time": "Voorspellen hoe lang het nog duurt",
+      "total_energy": "Totaal energieverbruik en kosten voorspellen"
+    },
+    "cap_label": {
+      "end": "Detectie van cycluseinde",
+      "live_match": "Programmaherkenning",
+      "quality": "Kwaliteitscontrole van de cyclus",
+      "remaining_time": "Schatting van de resterende tijd",
+      "total_energy": "Schatting van het energieverbruik"
+    },
+    "metric_auc": "AUC {auc} op validatiegegevens",
+    "metric_mae": "fout {model} vs. referentie {baseline}"
   },
   "modal": {
     "auto_label": "Automatische labelcycli",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Selecteer een cyclus en klik op ↺ om te laden",
     "pg_sweep_progress": "Stap {done} / {total}",
     "pg_analysis_hint": "Selecteer een cyclus en klik op ↺ om de analyse te laden.",
-    "diagnostics_load_failed": "Kon diagnostiek niet laden: {error}"
+    "diagnostics_load_failed": "Kon diagnostiek niet laden: {error}",
+    "manual_duration_ref_hint": "Wordt alleen gebruikt wanneer er geen referentiecyclus is geselecteerd. Een referentiecyclus stelt de duur in op basis van de eigen lengte.",
+    "toast_convert_rolled_back": "Conversie mislukt en teruggedraaid (geen automatisering achtergelaten): {error}",
+    "toast_convert_orphan": "De automatisering is aangemaakt, maar het wissen van de oude acties is mislukt. Probeer het niet opnieuw: verwijder de oude acties handmatig om een dubbele automatisering te voorkomen.",
+    "advisory_duration_trend_up": "De cycli van '{name}' worden steeds langer (ongeveer +{pct}% per cyclus). Als het gedrag van het apparaat is veranderd, neem dit profiel dan opnieuw op of bouw het opnieuw op.",
+    "advisory_energy_trend_up": "'{name}' verbruikt steeds meer energie (ongeveer +{pct}% per cyclus) - controleer het apparaat als dat onverwacht is.",
+    "advisory_poor_health": "'{name}' heeft een lage overeenkomstscore - de recente cycli variëren sterk of komen zwak overeen. Bekijk de cycli of neem het profiel opnieuw op zodat de herkenning en tijdschattingen nauwkeurig blijven.",
+    "advisory_shape_drift": "'{name}' is aanzienlijk afgeweken van de oorspronkelijke vermogenscurve. Het apparaat heeft zijn gedrag mogelijk in de loop van de tijd veranderd (bijv. kalkaanslag, slijtage). Overweeg dit profiel opnieuw op te nemen met recente cycli.",
+    "advisory_shape_drift_corr": "'{name}' is aanzienlijk afgeweken van de oorspronkelijke vermogenscurve (correlatie {corr}). Het apparaat heeft zijn gedrag mogelijk in de loop van de tijd veranderd (bijv. kalkaanslag, slijtage). Overweeg dit profiel opnieuw op te nemen met recente cycli."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plotselinge daling behandeld als onmiddellijk einde",
@@ -1313,6 +1337,39 @@
         "higher": "Langere stille fasen toegestaan – minder onbedoelde gedwongen stops",
         "lower": "Detecteert vastgelopen cycli sneller"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "Betrouwbaarheid op het 15e percentiel van {cycles} automatische labels die de gebruiker nooit heeft gecorrigeerd ({p15}).",
+      "completion_min_seconds": "De helft van de p05-duur van schone cycli ({minutes} min) over {cycles} cycli; filtert spookcycli eruit.{excl}",
+      "dead_zone_batch": "Kort gehouden (mediane instabiliteitsvenster bij het opstarten over {cycles} cycli = {s}s) zodat een echt einde snel wordt gedetecteerd.",
+      "dead_zone_from_dip": "Op basis van een vroege vermogensdip die is gedetecteerd bij {s}s.",
+      "end_energy_default": "Aanbevolen standaardwaarde voor de ruisdrempel aan het einde van de cyclus.",
+      "end_energy_false": "p95 van de energie bij valse einden ({p95}Wh) over {cycles} cycli, met een ondergrens van 0.2% van de mediane cyclusenergie ({floor}Wh).",
+      "end_energy_no_false": "Geen valse einden over {cycles} cycli; met een ondergrens van 0.2% van de mediane cyclusenergie ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} schone cycli ({pct}%) hadden een interne pauze >60s die werd hervat; vereis {val} eindbevestiging(en).",
+      "learning_confidence": "p05-betrouwbaarheid van {cycles} door de gebruiker gelabelde cycli ({p05}); daaronder wordt om verificatie gevraagd.",
+      "match_interval": "Op basis van de waargenomen updatecadans (mediaan={median}s) * 10.",
+      "max_duration_ratio": "Op basis van de duur van gelabelde cycli (p95={p95}).",
+      "min_active": "Op basis van het minimale actieve vermogen ({min}W) dat in de laatste cyclus is waargenomen.",
+      "min_duration_ratio": "Zo laag mogelijk gehouden zodat een programma vroeg in de cyclus wordt herkend; de betrouwbaarheids- en ambiguïteitsdrempels voorkomen voortijdige beslissingen.",
+      "min_off_gap": "Op basis van {gaps} waargenomen tussenpozen tussen cycli (p05={p05}s). Ondergrens van het apparaat: {floor}s.",
+      "min_power": "40% van het laagste actieve vermogen op p05 ({p05}W) over {cycles} schone cycli, zodat de uitschakeldrempel onder het werkelijke verbruik blijft.{excl}",
+      "ml_auto_label": "Laagste betrouwbaarheid die het kwaliteitsmodel nog als schoon beoordeelde (p10 van {cycles} schone cycli = {p10}).",
+      "ml_end_repeat": "{false}/{total} cycli ({pct}%) hadden een pauze die de einddetector >50% scoorde; vereis {val} eindbevestiging(en).",
+      "ml_off_delay": "Door de einddetector bevestigde pauzes: p95 {p95}s + 60s buffer, uit {pauses} door het model geverifieerde pauzes over {cycles} cycli (ondergrens {floor}s).",
+      "no_update_timeout": "Op basis van de waargenomen updatecadans (p95={p95}s) * 20 (min. 60s).",
+      "off_delay_cadence": "Op basis van de waargenomen updatecadans (p95={p95}s) * 5",
+      "off_delay_device_floor": "Apparaatspecifiek veilig minimum gebruikt voor {device} ({floor}s).",
+      "off_delay_generic_floor": "Generiek veilig minimum gebruikt ({floor}s).",
+      "off_delay_pauses": "Zo gedimensioneerd dat echte pauzes worden overbrugd: p95 van de pauze binnen een cyclus {p95}s + 60s buffer, uit {pauses} pauzes over {cycles} schone cycli (ondergrens {floor}s).",
+      "profile_match_threshold": "p10-betrouwbaarheid van {cycles} correcte automatische labels ({p10}); veilige ondergrens voor live-bevestiging.",
+      "sampling_interval": "Mediaan-updateinterval waargenomen over {cycles} schone cycli ({si}s).{excl}",
+      "smoothing_window": "Zo gedimensioneerd dat ~30s aan metingen bij {si}s-bemonstering wordt afgevlakt ({samples} metingen).",
+      "start_duration": "Kort gehouden (~één bemonsteringsinterval van {si}s) zodat de detectie zo vroeg mogelijk begint, maar losse pieken van één meting toch worden genegeerd.",
+      "thr_batch": "Net boven het laagste actieve vermogen op p05 over {cycles} cycli ({p05}W) gehouden zodat een start zo vroeg mogelijk wordt opgemerkt en de stopdrempel onder het laagste draaivermogen van de machine blijft.",
+      "tol_per_profile": "p75 van de duurvariantie per profiel over {profiles} profielen ({cycles} cycli); strakke profielen worden niet benadeeld.",
+      "tol_pooled": "Op basis van de gebundelde duurvariantie van {cycles} recent gelabelde cycli (p95-afwijking={dev}).",
+      "watchdog": "Zo laag als veilig gehouden (3x de p95-updatekloof van {p95}s, min. 30s) zodat vastlopers snel worden opgemerkt zonder valse stops."
     }
   },
   "tab": {
@@ -1405,7 +1462,8 @@
     "reminders_save_failed": "Kan herinneringen niet opslaan: {error}",
     "reminders_saved": "Serviceherinneringen opgeslagen",
     "pause_no_cycle": "Geen actieve cyclus om te pauzeren",
-    "resume_no_cycle": "Geen gepauzeerde cyclus om te hervatten"
+    "resume_no_cycle": "Geen gepauzeerde cyclus om te hervatten",
+    "delete_partial_failed": "Sommige items konden niet worden verwijderd en zijn hersteld"
   },
   "trend": {
     "down": "Trend naar beneden",

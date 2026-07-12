@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% bolje od osnovne procjene ({metric})",
     "trend_improving_tip": "Prilagodba ovog modela poboljšala se u nedavnim ponovnim provjerama.",
     "trend_declining_tip": "Prilagodba ovog modela pogoršala se u nedavnim ponovnim provjerama, pregled više ciklusa može mu pomoći da ponovno nauči.",
-    "trend_steady_tip": "Prilagodba ovog modela ostala je otprilike stabilna u nedavnim ponovnim provjerama."
+    "trend_steady_tip": "Prilagodba ovog modela ostala je otprilike stabilna u nedavnim ponovnim provjerama.",
+    "cap_blurb": {
+      "end": "Prepoznavanje kada je ciklus stvarno završio",
+      "live_match": "Brže prepoznavanje programa koji je u tijeku",
+      "quality": "Uočavanje pogrešno prepoznatih ili oštećenih ciklusa",
+      "remaining_time": "Predviđanje preostalog vremena",
+      "total_energy": "Predviđanje ukupne potrošnje energije i troška"
+    },
+    "cap_label": {
+      "end": "Prepoznavanje kraja ciklusa",
+      "live_match": "Prepoznavanje programa",
+      "quality": "Provjera kvalitete ciklusa",
+      "remaining_time": "Procjena preostalog vremena",
+      "total_energy": "Procjena potrošnje energije"
+    },
+    "metric_auc": "AUC {auc} na izdvojenim podacima",
+    "metric_mae": "pogreška {model} u odnosu na osnovnu vrijednost {baseline}"
   },
   "modal": {
     "auto_label": "Ciklusi automatskog označavanja",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Odaberite ciklus i kliknite ↺ za učitavanje",
     "pg_sweep_progress": "Korak {done} / {total}",
     "pg_analysis_hint": "Odaberite ciklus i kliknite ↺ za učitavanje analize.",
-    "diagnostics_load_failed": "Nije moguće učitati dijagnostiku: {error}"
+    "diagnostics_load_failed": "Nije moguće učitati dijagnostiku: {error}",
+    "manual_duration_ref_hint": "Koristi se samo kada nije odabran referentni ciklus. Referentni ciklus postavlja trajanje prema vlastitoj duljini.",
+    "toast_convert_rolled_back": "Pretvorba nije uspjela i poništena je (nije ostala nijedna automatizacija): {error}",
+    "toast_convert_orphan": "Automatizacija je stvorena, ali brisanje starih radnji nije uspjelo. Nemojte pokušavati ponovno: ručno uklonite stare radnje kako biste izbjegli dupliciranu automatizaciju.",
+    "advisory_duration_trend_up": "Ciklusi programa '{name}' postaju sve dulji (otprilike +{pct}% po ciklusu). Ako se ponašanje uređaja promijenilo, ponovno snimite ili obnovite ovaj profil.",
+    "advisory_energy_trend_up": "Program '{name}' troši sve više energije (otprilike +{pct}% po ciklusu) - vrijedi provjeriti uređaj ako je to neočekivano.",
+    "advisory_poor_health": "Profil '{name}' ima nisku ocjenu podudaranja - njegovi noviji ciklusi znatno variraju ili se slabo podudaraju. Pregledajte njegove cikluse ili ponovno snimite profil kako bi prepoznavanje i procjene vremena ostali točni.",
+    "advisory_shape_drift": "Profil '{name}' znatno je odstupio od svog izvornog oblika potrošnje snage. Uređaj je možda s vremenom promijenio ponašanje (npr. kamenac, trošenje). Razmislite o ponovnom snimanju ovog profila s novijim ciklusima.",
+    "advisory_shape_drift_corr": "Profil '{name}' znatno je odstupio od svog izvornog oblika potrošnje snage (korelacija {corr}). Uređaj je možda s vremenom promijenio ponašanje (npr. kamenac, trošenje). Razmislite o ponovnom snimanju ovog profila s novijim ciklusima."
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka prevrtanja nakon završetka kako bi se smanjile bore.",
@@ -1302,6 +1326,39 @@
         "higher": "Dopušta dulje tihe faze; manje lažnih prisilnih zaustavljanja",
         "lower": "Zaglavljene cikluse otkriva agresivnije"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "Pouzdanost 15. percentila za {cycles} automatskih oznaka koje korisnik nikad nije ispravio ({p15}).",
+      "completion_min_seconds": "Polovica trajanja čistog ciklusa p05 ({minutes} min) kroz {cycles} ciklusa; filtrira lažne cikluse.{excl}",
+      "dead_zone_batch": "Zadržano kratkim (medijan prozora nestabilnosti pri pokretanju kroz {cycles} ciklusa = {s}s) kako bi se stvarni kraj brzo prepoznao.",
+      "dead_zone_from_dip": "Na temelju ranog pada snage prepoznatog pri {s}s.",
+      "end_energy_default": "Zadana preporučena osnovna vrijednost za prag šuma na kraju ciklusa.",
+      "end_energy_false": "Energija lažnih završetaka p95 ({p95}Wh) kroz {cycles} ciklusa, s donjom granicom od 0,2 % medijana energije ciklusa ({floor}Wh).",
+      "end_energy_no_false": "Nema lažnih završetaka kroz {cycles} ciklusa; s donjom granicom od 0,2 % medijana energije ciklusa ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} čistih ciklusa ({pct}%) imalo je unutarnju pauzu dulju od 60s koja se nastavila; zatraži {val} potvrdu/potvrde kraja.",
+      "learning_confidence": "Pouzdanost p05 za {cycles} korisnički označenih ciklusa ({p05}); ispod ove vrijednosti zatraži provjeru.",
+      "match_interval": "Na temelju uočene učestalosti ažuriranja (medijan={median}s) * 10.",
+      "max_duration_ratio": "Na temelju trajanja označenih ciklusa (p95={p95}).",
+      "min_active": "Na temelju najmanje radne snage ({min}W) uočene u posljednjem ciklusu.",
+      "min_duration_ratio": "Zadržano što nižim kako bi se program prepoznao rano u ciklusu; pragovi pouzdanosti i dvosmislenosti sprječavaju prijevremene potvrde.",
+      "min_off_gap": "Na temelju {gaps} uočenih razmaka između ciklusa (p05={p05}s). Donja granica uređaja: {floor}s.",
+      "min_power": "40 % najniže radne snage p05 ({p05}W) kroz {cycles} čistih ciklusa, čime prag isključenja ostaje ispod stvarne potrošnje.{excl}",
+      "ml_auto_label": "Najniža pouzdanost koju je model kvalitete još ocijenio čistom (p10 od {cycles} čistih ciklusa = {p10}).",
+      "ml_end_repeat": "{false}/{total} ciklusa ({pct}%) imalo je pauzu koju je detektor kraja ocijenio s >50 %; zatraži {val} potvrdu/potvrde kraja.",
+      "ml_off_delay": "Pauze potvrđene detektorom kraja: p95 {p95}s + 60s rezerve, iz {pauses} modelom provjerenih pauza kroz {cycles} ciklusa (donja granica {floor}s).",
+      "no_update_timeout": "Na temelju uočene učestalosti ažuriranja (p95={p95}s) * 20 (najmanje 60s).",
+      "off_delay_cadence": "Na temelju uočene učestalosti ažuriranja (p95={p95}s) * 5",
+      "off_delay_device_floor": "Korišten sigurni minimum specifičan za uređaj {device} ({floor}s).",
+      "off_delay_generic_floor": "Korišten opći sigurni minimum ({floor}s).",
+      "off_delay_pauses": "Postavljeno tako da nadmaši stvarne pauze: pauza unutar ciklusa p95 {p95}s + 60s rezerve, iz {pauses} pauza kroz {cycles} čistih ciklusa (donja granica {floor}s).",
+      "profile_match_threshold": "Pouzdanost p10 za {cycles} točnih automatskih oznaka ({p10}); sigurna donja granica za potvrdu tijekom rada.",
+      "sampling_interval": "Medijan intervala ažuriranja uočen kroz {cycles} čistih ciklusa ({si}s).{excl}",
+      "smoothing_window": "Postavljeno za izglađivanje ~30s očitanja pri uzorkovanju od {si}s ({samples} uzoraka).",
+      "start_duration": "Zadržano kratkim (~jedan interval uzorkovanja od {si}s) kako bi prepoznavanje počelo što ranije, uz zanemarivanje pojedinačnih skokova.",
+      "thr_batch": "Zadržano tik iznad najniže radne snage p05 kroz {cycles} ciklusa ({p05}W) kako bi se početak uhvatio što ranije, a prag zaustavljanja ostao ispod najniže radne snage stroja.",
+      "tol_per_profile": "p75 varijance trajanja po profilu kroz {profiles} profila ({cycles} ciklusa); dosljedni profili nisu kažnjeni.",
+      "tol_pooled": "Na temelju objedinjene varijance trajanja {cycles} novijih označenih ciklusa (p95 odstupanje={dev}).",
+      "watchdog": "Zadržano što nižim uz sigurnost (3x razmak ažuriranja p95 od {p95}s, najmanje 30s) kako bi se zastoji brzo uhvatili bez lažnih zaustavljanja."
     }
   },
   "tab": {
@@ -1394,7 +1451,8 @@
     "reminders_save_failed": "Nije moguće spremiti podsjetnike: {error}",
     "reminders_saved": "Podsjetnici za servis spremljeni",
     "pause_no_cycle": "Nema aktivnog ciklusa za pauziranje",
-    "resume_no_cycle": "Nema pauziranog ciklusa za nastavak"
+    "resume_no_cycle": "Nema pauziranog ciklusa za nastavak",
+    "delete_partial_failed": "Neke stavke nije bilo moguće izbrisati i vraćene su"
   },
   "trend": {
     "down": "Trend pada",

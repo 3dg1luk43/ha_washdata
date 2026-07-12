@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} je otkrio cikluse duhova. Predložena promena min_snage: {current_min}W -> {new_min}W (ne primenjuje se automatski).",
       "timer_default_message": "{device}: tajmer {minutes} min",
       "timer_pause_action_title": "Nastavi ciklus",
-      "timer_pause_body_suffix": "Ciklus je pauziran. Otvori WashData panel da nastaviš."
+      "timer_pause_body_suffix": "Ciklus je pauziran. Otvori WashData panel da nastaviš.",
+      "notify_live_waiting_message": "{device}: Nijedan profil još nije podudaran.",
+      "vs_typical_longer": "{pct}% duže nego obično",
+      "vs_typical_shorter": "{pct}% kraće nego obično"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Višeznačnost podudaranja"
+        "name": "Rezultat višeznačnosti"
       },
       "current_phase": {
         "name": "Trenutna faza"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Нема активног циклуса за паузирање или наставак."
+    },
+    "path_not_allowed": {
+      "message": "Putanja nije dozvoljena: {path}. Dodajte njen direktorijum u 'allowlist_external_dirs' u configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Nije moguće napraviti profil: {error}"
+    },
+    "export_path_exists": {
+      "message": "Odredište izvoza već postoji: {path}. Izaberite drugu putanju ili prvo uklonite postojeću datoteku."
+    },
+    "export_write_failed": {
+      "message": "Nije moguće zapisati izvoz u {path}: {error}"
     }
   },
   "intent": {

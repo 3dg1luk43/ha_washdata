@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% bedre end grundlinjeestimatet ({metric})",
     "trend_improving_tip": "Denne models tilpasning er blevet bedre ved de seneste gentjek.",
     "trend_declining_tip": "Denne models tilpasning er blevet dårligere ved de seneste gentjek. At gennemgå flere cyklusser kan hjælpe den med at lære igen.",
-    "trend_steady_tip": "Denne models tilpasning har holdt sig nogenlunde stabil ved de seneste gentjek."
+    "trend_steady_tip": "Denne models tilpasning har holdt sig nogenlunde stabil ved de seneste gentjek.",
+    "cap_blurb": {
+      "end": "At vide, hvornår en cyklus reelt er færdig",
+      "live_match": "At identificere det kørende program hurtigere",
+      "quality": "At opdage fejldetekterede eller beskadigede cyklusser",
+      "remaining_time": "At forudsige, hvor lang tid der er tilbage",
+      "total_energy": "At forudsige samlet energi og omkostning"
+    },
+    "cap_label": {
+      "end": "Registrering af cyklusslut",
+      "live_match": "Programgenkendelse",
+      "quality": "Kvalitetstjek af cyklus",
+      "remaining_time": "Estimat af resterende tid",
+      "total_energy": "Energiestimat"
+    },
+    "metric_auc": "AUC {auc} på valideringsdata",
+    "metric_mae": "fejl {model} mod baseline {baseline}"
   },
   "modal": {
     "auto_label": "Auto-label cyklusser",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Vælg en cyklus og klik på ↺ for at indlæse",
     "pg_sweep_progress": "Trin {done} / {total}",
     "pg_analysis_hint": "Vælg en cyklus og klik på ↺ for at indlæse analysen.",
-    "diagnostics_load_failed": "Kunne ikke indlæse diagnostik: {error}"
+    "diagnostics_load_failed": "Kunne ikke indlæse diagnostik: {error}",
+    "manual_duration_ref_hint": "Bruges kun, når der ikke er valgt en referencecyklus. En referencecyklus fastsætter varigheden ud fra sin egen længde.",
+    "toast_convert_rolled_back": "Konverteringen mislykkedes og blev rullet tilbage (ingen automatisering blev efterladt): {error}",
+    "toast_convert_orphan": "Automatiseringen blev oprettet, men rydningen af de gamle handlinger mislykkedes. Prøv ikke igen: fjern de gamle handlinger manuelt for at undgå en dubleret automatisering.",
+    "advisory_duration_trend_up": "Cyklusserne for '{name}' bliver gradvist længere (ca. +{pct}% pr. cyklus). Hvis apparatets adfærd har ændret sig, så optag eller genopbyg denne profil.",
+    "advisory_energy_trend_up": "'{name}' trækker gradvist mere energi (ca. +{pct}% pr. cyklus) - værd at tjekke apparatet, hvis det er uventet.",
+    "advisory_poor_health": "'{name}' har en lav pasningsscore - dens seneste cyklusser varierer meget eller matcher svagt. Gennemgå dens cyklusser, eller optag profilen igen, så matchning og tidsestimater forbliver præcise.",
+    "advisory_shape_drift": "'{name}' har afveget markant fra sin oprindelige effektkurve. Apparatet kan have ændret adfærd med tiden (f.eks. kalk, slid). Overvej at optage denne profil igen med nye cyklusser.",
+    "advisory_shape_drift_corr": "'{name}' har afveget markant fra sin oprindelige effektkurve (korrelation {corr}). Apparatet kan have ændret adfærd med tiden (f.eks. kalk, slid). Overvej at optage denne profil igen med nye cyklusser."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Pludseligt fald behandlet som øjeblikkelig afslutning",
@@ -1313,6 +1337,39 @@
         "higher": "Længere stille faser tillades – færre utilsigtede tvangsstop",
         "lower": "Detekterer fastlåste cyklusser hurtigere"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "Konfidens ved 15. percentil for {cycles} automatiske etiketter, som brugeren aldrig rettede ({p15}).",
+      "completion_min_seconds": "Halvdelen af p05-varigheden for rene cyklusser ({minutes} min) på tværs af {cycles} cyklusser; filtrerer spøgelsescyklusser fra.{excl}",
+      "dead_zone_batch": "Holdt kort (median for opstarts-ustabilitetsvindue på tværs af {cycles} cyklusser = {s}s), så et reelt slut registreres hurtigt.",
+      "dead_zone_from_dip": "Baseret på et tidligt effektfald registreret ved {s}s.",
+      "end_energy_default": "Standardanbefalet baseline for støjgrænsen ved cyklusslut.",
+      "end_energy_false": "p95 for energi ved falske slut ({p95}Wh) på tværs af {cycles} cyklusser, med gulv på 0.2% af medianens cyklusenergi ({floor}Wh).",
+      "end_energy_no_false": "Ingen falske slut på tværs af {cycles} cyklusser; med gulv på 0.2% af medianens cyklusenergi ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} rene cyklusser ({pct}%) havde en intern pause på >60s, der blev genoptaget; kræver {val} slutbekræftelse(r).",
+      "learning_confidence": "p05-konfidens for {cycles} brugermærkede cyklusser ({p05}); under dette anmodes om verificering.",
+      "match_interval": "Baseret på observeret opdateringskadence (median={median}s) * 10.",
+      "max_duration_ratio": "Baseret på varigheder for mærkede cyklusser (p95={p95}).",
+      "min_active": "Baseret på laveste aktive effekt ({min}W) observeret i sidste cyklus.",
+      "min_duration_ratio": "Holdt så lav som muligt, så et program genkendes tidligt i cyklussen; konfidens- og tvetydighedsgrænserne forhindrer forhastede beslutninger.",
+      "min_off_gap": "Baseret på {gaps} observerede mellemrum mellem cyklusser (p05={p05}s). Enhedsgulv: {floor}s.",
+      "min_power": "40% af den laveste aktive effekt ved p05 ({p05}W) på tværs af {cycles} rene cyklusser, hvilket holder sluk-tærsklen under reelt forbrug.{excl}",
+      "ml_auto_label": "Laveste konfidens, som kvalitetsmodellen stadig vurderede som ren (p10 af {cycles} rene cyklusser = {p10}).",
+      "ml_end_repeat": "{false}/{total} cyklusser ({pct}%) havde en pause, som slutdetektoren vurderede til >50%; kræver {val} slutbekræftelse(r).",
+      "ml_off_delay": "Pauser bekræftet af slutdetektoren: p95 {p95}s + 60s buffer, fra {pauses} modelverificerede pauser på tværs af {cycles} cyklusser (gulv {floor}s).",
+      "no_update_timeout": "Baseret på observeret opdateringskadence (p95={p95}s) * 20 (min 60s).",
+      "off_delay_cadence": "Baseret på observeret opdateringskadence (p95={p95}s) * 5",
+      "off_delay_device_floor": "Brugte et enhedsspecifikt sikkert minimum for {device} ({floor}s).",
+      "off_delay_generic_floor": "Brugte et generisk sikkert minimum ({floor}s).",
+      "off_delay_pauses": "Dimensioneret til at vare længere end reelle pauser: p95 for pause i cyklussen {p95}s + 60s buffer, fra {pauses} pauser på tværs af {cycles} rene cyklusser (gulv {floor}s).",
+      "profile_match_threshold": "p10-konfidens for {cycles} korrekte automatiske etiketter ({p10}); sikkert gulv for direkte matchning.",
+      "sampling_interval": "Median for opdateringsintervallet observeret på tværs af {cycles} rene cyklusser ({si}s).{excl}",
+      "smoothing_window": "Dimensioneret til at udjævne ~30s aflæsninger ved {si}s sampling ({samples} prøver).",
+      "start_duration": "Holdt kort (~ét samplingsinterval på {si}s), så detekteringen starter så tidligt som muligt, men stadig ignorerer enkelte spidser.",
+      "thr_batch": "Holdt lige over den laveste aktive effekt ved p05 på tværs af {cycles} cyklusser ({p05}W), så en start fanges så tidligt som muligt, og stoptærsklen forbliver under maskinens laveste driftseffekt.",
+      "tol_per_profile": "p75 for varighedsvariansen pr. profil på tværs af {profiles} profiler ({cycles} cyklusser); stramme profiler straffes ikke.",
+      "tol_pooled": "Baseret på samlet varighedsvarians for {cycles} seneste mærkede cyklusser (p95 afvigelse={dev}).",
+      "watchdog": "Holdt så lavt som forsvarligt (3x p95-opdateringsmellemrummet på {p95}s, min 30s), så stilstande fanges hurtigt uden falske stop."
     }
   },
   "tab": {
@@ -1405,7 +1462,8 @@
     "reminders_save_failed": "Kunne ikke gemme påmindelser: {error}",
     "reminders_saved": "Servicepåmindelser gemt",
     "pause_no_cycle": "Ingen aktiv cyklus at sætte på pause",
-    "resume_no_cycle": "Ingen pauset cyklus at genoptage"
+    "resume_no_cycle": "Ingen pauset cyklus at genoptage",
+    "delete_partial_failed": "Nogle elementer kunne ikke slettes og blev gendannet"
   },
   "trend": {
     "down": "Trend nedad",

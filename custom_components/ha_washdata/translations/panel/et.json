@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% parem kui lähtehinnang ({metric})",
     "trend_improving_tip": "Selle mudeli sobivus on viimaste ülekontrollide jooksul paranenud.",
     "trend_declining_tip": "Selle mudeli sobivus on viimaste ülekontrollide jooksul halvenenud, rohkemate tsüklite ülevaatamine võib aidata sel uuesti õppida.",
-    "trend_steady_tip": "Selle mudeli sobivus on viimaste ülekontrollide jooksul jäänud enam-vähem stabiilseks."
+    "trend_steady_tip": "Selle mudeli sobivus on viimaste ülekontrollide jooksul jäänud enam-vähem stabiilseks.",
+    "cap_blurb": {
+      "end": "Teadmine, millal tsükkel on tegelikult lõppenud",
+      "live_match": "Käimasoleva programmi kiirem tuvastamine",
+      "quality": "Valesti tuvastatud või rikutud tsüklite märkamine",
+      "remaining_time": "Järelejäänud aja ennustamine",
+      "total_energy": "Koguenergia ja kulu ennustamine"
+    },
+    "cap_label": {
+      "end": "Tsükli lõpu tuvastus",
+      "live_match": "Programmi tuvastus",
+      "quality": "Tsükli kvaliteedikontroll",
+      "remaining_time": "Järelejäänud aja hinnang",
+      "total_energy": "Energiahinnang"
+    },
+    "metric_auc": "AUC {auc} valideerimisandmetel",
+    "metric_mae": "viga {model} vs. baasjoon {baseline}"
   },
   "modal": {
     "auto_label": "Automaatsed sildistamise tsüklid",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Vali tsükkel ja klõpsa ↺ laadimiseks",
     "pg_sweep_progress": "Samm {done} / {total}",
     "pg_analysis_hint": "Vali tsükkel ja klõpsa ↺ analüüsi laadimiseks.",
-    "diagnostics_load_failed": "Diagnostikat ei õnnestunud laadida: {error}"
+    "diagnostics_load_failed": "Diagnostikat ei õnnestunud laadida: {error}",
+    "manual_duration_ref_hint": "Kasutatakse ainult siis, kui võrdlustsüklit pole valitud. Võrdlustsükkel määrab kestuse oma pikkuse järgi.",
+    "toast_convert_rolled_back": "Teisendamine ebaõnnestus ja võeti tagasi (ühtegi automatiseerimist ei jäänud): {error}",
+    "toast_convert_orphan": "Automatiseerimine loodi, kuid vanade toimingute kustutamine ebaõnnestus. Ärge proovige uuesti: eemaldage vanad toimingud käsitsi, et vältida dubleerivat automatiseerimist.",
+    "advisory_duration_trend_up": "'{name}' tsüklid muutuvad järk-järgult pikemaks (umbes +{pct}% tsükli kohta). Kui seadme käitumine on muutunud, salvesta või ehita see profiil uuesti.",
+    "advisory_energy_trend_up": "'{name}' tarbib järk-järgult rohkem energiat (umbes +{pct}% tsükli kohta) - kui see on ootamatu, tasub seade üle kontrollida.",
+    "advisory_poor_health": "'{name}' profiilil on madal sobivusskoor - selle hiljutised tsüklid varieeruvad palju või sobituvad nõrgalt. Vaata selle tsüklid üle või salvesta profiil uuesti, et tuvastus ja ajahinnangud püsiksid täpsed.",
+    "advisory_shape_drift": "'{name}' on oma algsest võimsuskõverast märgatavalt kõrvale kaldunud. Seadme käitumine võib olla aja jooksul muutunud (nt katlakivi, kulumine). Kaalu selle profiili uuesti salvestamist hiljutiste tsüklitega.",
+    "advisory_shape_drift_corr": "'{name}' on oma algsest võimsuskõverast märgatavalt kõrvale kaldunud (korrelatsioon {corr}). Seadme käitumine võib olla aja jooksul muutunud (nt katlakivi, kulumine). Kaalu selle profiili uuesti salvestamist hiljutiste tsüklitega."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Järsk langus käsitletakse kohese lõpuna",
@@ -1342,7 +1366,8 @@
     "reminders_save_failed": "Meeldetuletuste salvestamine ebaõnnestus: {error}",
     "reminders_saved": "Hoolduse meeldetuletused salvestatud",
     "pause_no_cycle": "Pole aktiivset tsüklit, mida peatada",
-    "resume_no_cycle": "Pole peatatud tsüklit, mida jätkata"
+    "resume_no_cycle": "Pole peatatud tsüklit, mida jätkata",
+    "delete_partial_failed": "Mõnda üksust ei õnnestunud kustutada ja need taastati"
   },
   "suggestion": {
     "both_agree": "WashData soovitab",
@@ -1405,6 +1430,39 @@
         "higher": "Lubatud pikemad vaiksed faasid; vähem valesid sundpeatusi",
         "lower": "Tuvastab kinni jäänud tsükleid agressiivsemalt"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "15. protsentiili usaldusväärsus {cycles} automaatse sildi puhul, mida kasutaja kunagi ei parandanud ({p15}).",
+      "completion_min_seconds": "Pool puhaste tsüklite p05 kestusest ({minutes} min) {cycles} tsükli lõikes; filtreerib välja kummitustsüklid.{excl}",
+      "dead_zone_batch": "Hoitakse lühike (käivitusaegse ebastabiilsuse akna mediaan {cycles} tsükli lõikes = {s}s), et tegelik lõpp tuvastataks kiiresti.",
+      "dead_zone_from_dip": "Põhineb varasel võimsuse langusel, mis tuvastati hetkel {s}s.",
+      "end_energy_default": "Vaikimisi soovitatud baasjoon tsükli lõpu mürakünnisele.",
+      "end_energy_false": "p95 valelõppude energia ({p95}Wh) {cycles} tsükli lõikes, alampiiriga 0.2% tsükli mediaanenergiast ({floor}Wh).",
+      "end_energy_no_false": "Ei ühtki valelõppu {cycles} tsükli lõikes; alampiiriga 0.2% tsükli mediaanenergiast ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} puhtast tsüklist ({pct}%) sisaldas üle 60s kestnud sisemist pausi, mis jätkus; nõuab {val} lõpukinnitust.",
+      "learning_confidence": "p05 usaldusväärsus {cycles} kasutaja märgistatud tsükli puhul ({p05}); sellest allpool küsitakse kinnitust.",
+      "match_interval": "Põhineb täheldatud uuendustempol (mediaan={median}s) * 10.",
+      "max_duration_ratio": "Põhineb märgistatud tsüklite kestustel (p95={p95}).",
+      "min_active": "Põhineb viimases tsüklis täheldatud madalaimal aktiivvõimsusel ({min}W).",
+      "min_duration_ratio": "Hoitakse võimalikult madal, et programm tuvastataks tsükli alguses varakult; usaldus- ja mitmetimõistetavuse lävid hoiavad ära enneaegsed otsused.",
+      "min_off_gap": "Põhineb {gaps} täheldatud tsüklitevahelisel pausil (p05={p05}s). Seadme alampiir: {floor}s.",
+      "min_power": "40% madalaimast aktiivvõimsusest p05 juures ({p05}W) {cycles} puhta tsükli lõikes, hoides väljalülituse läve alla tegeliku tarbimise.{excl}",
+      "ml_auto_label": "Madalaim usaldusväärsus, mida kvaliteedimudel hindas veel puhtaks (p10 {cycles} puhtast tsüklist = {p10}).",
+      "ml_end_repeat": "{false}/{total} tsüklist ({pct}%) sisaldas pausi, millele lõputuvastaja andis >50%; nõuab {val} lõpukinnitust.",
+      "ml_off_delay": "Lõputuvastaja kinnitatud pausid: p95 {p95}s + 60s puhver, {pauses} mudeli kontrollitud pausist {cycles} tsükli lõikes (alampiir {floor}s).",
+      "no_update_timeout": "Põhineb täheldatud uuendustempol (p95={p95}s) * 20 (min 60s).",
+      "off_delay_cadence": "Põhineb täheldatud uuendustempol (p95={p95}s) * 5",
+      "off_delay_device_floor": "Kasutati seadmepõhist ohutut miinimumi seadmele {device} ({floor}s).",
+      "off_delay_generic_floor": "Kasutati üldist ohutut miinimumi ({floor}s).",
+      "off_delay_pauses": "Mõõdetud kestma kauem kui tegelikud pausid: p95 tsüklisisene paus {p95}s + 60s puhver, {pauses} pausist {cycles} puhta tsükli lõikes (alampiir {floor}s).",
+      "profile_match_threshold": "p10 usaldusväärsus {cycles} õige automaatse sildi puhul ({p10}); ohutu alampiir reaalajas kinnitamiseks.",
+      "sampling_interval": "Uuendusintervalli mediaan, mis täheldati {cycles} puhta tsükli lõikes ({si}s).{excl}",
+      "smoothing_window": "Mõõdetud silumaks umbes 30s lugemeid {si}s diskreetimissammuga ({samples} näidet).",
+      "start_duration": "Hoitakse lühike (~üks {si}s diskreetimissamm), et tuvastus algaks võimalikult vara, kuid eiraks siiski üksiknäite piike.",
+      "thr_batch": "Hoitakse veidi üle madalaima aktiivvõimsuse p05 juures {cycles} tsükli lõikes ({p05}W), et käivitus tuvastataks võimalikult vara ja seiskamislävi jääks alla masina madalaima töövõimsuse.",
+      "tol_per_profile": "p75 profiilipõhisest kestuse dispersioonist {profiles} profiili lõikes ({cycles} tsüklit); kitsaid profiile ei karistata.",
+      "tol_pooled": "Põhineb {cycles} viimase märgistatud tsükli koondkestuse dispersioonil (p95 hälve={dev}).",
+      "watchdog": "Hoitakse nii madal kui ohutu (3x p95 uuendusintervall {p95}s, min 30s), et seiskumised tuvastataks kiiresti ilma valeseisakuteta."
     }
   },
   "trend": {

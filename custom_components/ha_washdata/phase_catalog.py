@@ -209,29 +209,36 @@ def get_default_phase_catalog(device_type: str) -> list[PhaseItem]:
 
 
 def get_shared_default_phase_catalog() -> list[PhaseItem]:
-    """Return a shared default catalog deduplicated across all device types."""
-    merged: list[PhaseItem] = []
-    seen: set[str] = set()
+    """Return a shared default catalog deduplicated by name across all device types.
+
+    One entry per phase name (first occurrence wins), but a later same-named phase
+    can back-fill a ``translation_key`` the first occurrence lacked, so a localized
+    label from any device-specific definition is not silently discarded.
+    """
+    by_name: dict[str, PhaseItem] = {}
+    order: list[str] = []
     for device_type, device_phases in DEFAULT_PHASES_BY_DEVICE.items():
         for item in device_phases:
             name = str(item.get("name", "")).strip()
             if not name:
                 continue
             key = name.casefold()
-            if key in seen:
-                continue
-            seen.add(key)
-            entry: PhaseItem = {
-                "id": _builtin_phase_id(device_type, name),
-                "device_type": device_type,
-                "name": name,
-                "description": str(item.get("description", "")).strip(),
-                "is_default": True,
-            }
-            if "translation_key" in item:
-                entry["translation_key"] = item["translation_key"]
-            merged.append(entry)
-    return merged
+            existing = by_name.get(key)
+            if existing is None:
+                entry: PhaseItem = {
+                    "id": _builtin_phase_id(device_type, name),
+                    "device_type": device_type,
+                    "name": name,
+                    "description": str(item.get("description", "")).strip(),
+                    "is_default": True,
+                }
+                if "translation_key" in item:
+                    entry["translation_key"] = item["translation_key"]
+                by_name[key] = entry
+                order.append(key)
+            elif "translation_key" not in existing and "translation_key" in item:
+                existing["translation_key"] = item["translation_key"]
+    return [by_name[k] for k in order]
 
 
 def get_builtin_phase_by_id(phase_id: str) -> PhaseItem | None:

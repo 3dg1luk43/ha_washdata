@@ -446,7 +446,7 @@ class _MockProfileStoreForLearning:
     def request_cycle_verification(self, **kwargs):
         self.pending[kwargs["cycle_id"]] = kwargs
 
-    def set_suggestion(self, key, value, reason):
+    def set_suggestion(self, key, value, reason, reason_key=None, reason_params=None):
         self.suggestions[key] = {"value": value, "reason": reason}
 
     def delete_suggestion(self, key):

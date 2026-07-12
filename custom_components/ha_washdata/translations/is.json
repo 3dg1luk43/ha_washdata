@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} fundu draugalotur. Ráðlagður min_power breyting: {current_min}W -> {new_min}W (ekki beitt sjálfkrafa).",
       "timer_default_message": "{device}: {minutes} mín tímataki",
       "timer_pause_action_title": "Halda áfram hringrás",
-      "timer_pause_body_suffix": "Hringrásin er í bið. Opnaðu WashData-gluggann til að halda áfram."
+      "timer_pause_body_suffix": "Hringrásin er í bið. Opnaðu WashData-gluggann til að halda áfram.",
+      "notify_live_waiting_message": "{device}: Ekkert snið hefur enn verið greint.",
+      "vs_typical_longer": "{pct}% lengri en venjulega",
+      "vs_typical_shorter": "{pct}% styttri en venjulega"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Tvíræðni samsvörunar"
+        "name": "Tvíræðnistig"
       },
       "current_phase": {
         "name": "Núverandi áfangi"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Engin virk lota til að gera hlé á eða halda áfram."
+    },
+    "path_not_allowed": {
+      "message": "Slóðin er ekki leyfð: {path}. Bættu möppu hennar við 'allowlist_external_dirs' í configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Ekki tókst að búa til prófíl: {error}"
+    },
+    "export_path_exists": {
+      "message": "Útflutningsáfangastaður er þegar til: {path}. Veldu aðra slóð eða fjarlægðu núverandi skrá fyrst."
+    },
+    "export_write_failed": {
+      "message": "Ekki tókst að skrifa útflutninginn í {path}: {error}"
     }
   },
   "intent": {

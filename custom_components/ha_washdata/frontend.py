@@ -243,7 +243,9 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
         return True
 
     src = Path(__file__).parent / "www" / PANEL_JS_NAME
-    if not src.exists():
+    # Path.exists() hits the filesystem; offload it so the event loop is not
+    # blocked on I/O during setup.
+    if not await hass.async_add_executor_job(src.exists):
         _LOGGER.warning("Panel JS not found at %s — sidebar panel not registered", src)
         return False
 
@@ -270,7 +272,8 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
 
         # Register panel-translations.json for explicit per-user-language loading.
         trans_src = Path(__file__).parent / "www" / PANEL_TRANSLATIONS_NAME
-        if trans_src.exists():
+        # Filesystem check offloaded to the executor (see note above).
+        if await hass.async_add_executor_job(trans_src.exists):
             try:
                 from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
 
@@ -298,7 +301,11 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
 
         # Cache-buster query so browsers refetch the module after each update
         # while still honoring immutable cache headers between releases.
-        panel_version = get_cache_buster(PANEL_JS_NAME)
+        # get_cache_buster() calls os.path.getmtime(), a synchronous FS stat, so
+        # offload it to the executor rather than blocking the event loop.
+        panel_version = await hass.async_add_executor_job(
+            get_cache_buster, PANEL_JS_NAME
+        )
 
         # HA's ha-panel-custom.ts reads panel.config._panel_custom for the
         # loading parameters (name, module_url, etc.).  Flat config keys at the
@@ -326,3 +333,38 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.warning("Failed to register WashData panel: %s", exc)
         return False
+
+
+async def async_unregister_panel(hass: HomeAssistant) -> None:
+    """Tear down the WashData sidebar panel and its static routes.
+
+    Integration teardown counterpart to :func:`async_register_panel`. Intended to
+    be called from ``async_unload_entry`` when the *final* WashData config entry
+    is removed, so no stale panel registration, sidebar entry, or static route is
+    left behind.  Mirrors the register flow and is guarded by the same
+    once-per-boot keys (``PANEL_REGISTERED_KEY`` / ``PANEL_STATIC_REGISTERED``),
+    so it is a no-op when the panel was never registered and is safe to call
+    repeatedly.  After clearing the guards a later setup revalidates the assets
+    and registers the panel + routes again.
+    """
+    if not hass.data.get(PANEL_REGISTERED_KEY) and not hass.data.get(
+        PANEL_STATIC_REGISTERED
+    ):
+        return
+
+    # Remove the sidebar panel using Home Assistant's supported API.
+    if hass.data.get(PANEL_REGISTERED_KEY):
+        try:
+            from homeassistant.components import frontend  # pylint: disable=import-outside-toplevel
+
+            frontend.async_remove_panel(hass, PANEL_URL_PATH)
+            _LOGGER.debug("WashData sidebar panel removed from /%s", PANEL_URL_PATH)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Failed to remove WashData panel: %s", exc)
+
+    # Home Assistant exposes no public API to unregister a previously registered
+    # static path; clearing the guards lets a later setup revalidate the assets
+    # and re-register the routes (a benign "already registered" debug line at
+    # worst) rather than leaving a stale registration flag behind.
+    hass.data.pop(PANEL_REGISTERED_KEY, None)
+    hass.data.pop(PANEL_STATIC_REGISTERED, None)

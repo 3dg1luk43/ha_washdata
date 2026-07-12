@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} registrerede spøgelsescyklusser. Foreslået min_effektændring: {current_min}W -> {new_min}W (ikke anvendt automatisk).",
       "timer_default_message": "{device}: {minutes} min timer",
       "timer_pause_action_title": "Genoptag cyklus",
-      "timer_pause_body_suffix": "Cyklussen er sat på pause. Åbn WashData-panelet for at genoptage."
+      "timer_pause_body_suffix": "Cyklussen er sat på pause. Åbn WashData-panelet for at genoptage.",
+      "notify_live_waiting_message": "{device}: Ingen profil genkendt endnu.",
+      "vs_typical_longer": "{pct}% længere end normalt",
+      "vs_typical_shorter": "{pct}% kortere end normalt"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Match Ambiguity"
+        "name": "Tvetydighedsscore"
       },
       "current_phase": {
         "name": "Nuværende fase"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Ingen aktiv cyklus til pause eller genoptagelse."
+    },
+    "path_not_allowed": {
+      "message": "Stien er ikke tilladt: {path}. Tilføj dens mappe til 'allowlist_external_dirs' i configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Kunne ikke oprette profil: {error}"
+    },
+    "export_path_exists": {
+      "message": "Eksportmålet findes allerede: {path}. Vælg en anden sti, eller fjern den eksisterende fil først."
+    },
+    "export_write_failed": {
+      "message": "Kunne ikke skrive eksporten til {path}: {error}"
     }
   },
   "intent": {

@@ -73,6 +73,9 @@ def _milestone_stub(
     m._lifecycle_tag = "tag_life"
     m._logger = MagicMock()
     m.cycle_count = cycle_count
+    # Milestones now key off the persisted monotonic lifetime counter (which never
+    # regresses on history trim/merge), not cycle_count == len(history).
+    m._lifetime_cycle_count = MagicMock(return_value=cycle_count)
     m._milestone_crossed = WashDataManager._milestone_crossed  # staticmethod
     m._safe_format_template = WashDataManager._safe_format_template.__get__(
         m, WashDataManager

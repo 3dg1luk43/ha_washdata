@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} ha rilevato cicli fantasma. Modifica min_power suggerita: {current_min}W -> {new_min}W (non applicata automaticamente).",
       "timer_default_message": "{device}: timer di {minutes} min",
       "timer_pause_action_title": "Riprendi ciclo",
-      "timer_pause_body_suffix": "Il ciclo è in pausa. Apri il pannello WashData per riprendere."
+      "timer_pause_body_suffix": "Il ciclo è in pausa. Apri il pannello WashData per riprendere.",
+      "notify_live_waiting_message": "{device}: nessun profilo ancora riconosciuto.",
+      "vs_typical_longer": "{pct}% più lungo del solito",
+      "vs_typical_shorter": "{pct}% più corto del solito"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Ambiguità corrispondenza"
+        "name": "Punteggio di ambiguità"
       },
       "current_phase": {
         "name": "Fase corrente"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Nessun ciclo attivo da mettere in pausa o riprendere."
+    },
+    "path_not_allowed": {
+      "message": "Percorso non consentito: {path}. Aggiungi la sua directory a 'allowlist_external_dirs' in configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Impossibile creare il profilo: {error}"
+    },
+    "export_path_exists": {
+      "message": "La destinazione di esportazione esiste già: {path}. Scegli un percorso diverso o rimuovi prima il file esistente."
+    },
+    "export_write_failed": {
+      "message": "Impossibile scrivere l'esportazione in {path}: {error}"
     }
   },
   "intent": {

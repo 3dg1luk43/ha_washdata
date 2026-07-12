@@ -25,7 +25,11 @@ import numpy as np
 _LOGGER = logging.getLogger(__name__)
 
 from ..const import (
+    DEFAULT_DEFER_FINISH_CONFIDENCE,
+    ML_MATCH_COMMIT_THRESHOLD,
+    ML_QUALITY_SUSPICIOUS_THRESHOLD,
     ML_TRAINING_AUC_MARGIN,
+    ML_TRAINING_BACC_MARGIN,
     ML_TRAINING_MIN_POSITIVES,
     ML_TRAINING_MIN_REGRESSION_ROWS,
     ML_TRAINING_REGRESSION_MARGIN,
@@ -38,6 +42,16 @@ _CAPABILITIES = {
     "end": ("cycle_end_detector_model", "cycle_end"),
     "quality": ("hybrid_curve_quality_model", "cycle_quality"),
     "live_match": ("live_match_commit_model", "match_correct"),
+}
+
+# The FIXED probability cutoff each live consumer applies to this capability's
+# score. AUC alone is calibration-blind, so on-device retraining must also not
+# degrade balanced accuracy AT the operating point the model is actually used at
+# (else a "better AUC" model can silently shift decision rates). See _train_capability.
+_OPERATING_THRESHOLD = {
+    "end": DEFAULT_DEFER_FINISH_CONFIDENCE,
+    "quality": ML_QUALITY_SUSPICIOUS_THRESHOLD,
+    "live_match": ML_MATCH_COMMIT_THRESHOLD,
 }
 
 # Regression capabilities have no embedded baseline module - they are promoted
@@ -244,7 +258,7 @@ def _group_ids(keys: list[Any]) -> np.ndarray:
 def _progress_dataset(
     clean: list[dict[str, Any]],
     expectations: dict[str, dict[str, float]],
-) -> tuple[np.ndarray, np.ndarray, list[str]]:
+) -> tuple[np.ndarray, np.ndarray, list[str], np.ndarray]:
     """Synthesize (features, completion_fraction) rows for the remaining-time model.
 
     Each clean completed cycle is cut at several elapsed fractions; the target is
@@ -291,7 +305,7 @@ def _progress_dataset(
 def _energy_dataset(
     clean: list[dict[str, Any]],
     expectations: dict[str, dict[str, float]],
-) -> tuple[np.ndarray, np.ndarray, list[str]]:
+) -> tuple[np.ndarray, np.ndarray, list[str], np.ndarray]:
     """Synthesize (features, energy_completion_fraction) rows for the total-energy
     model. Same feature vector as the remaining-time model; the label is
     ``energy_so_far / total_energy`` at each cut, so the regressor learns how
@@ -515,17 +529,22 @@ def _embedded_module(capability: str):
         return None
 
 
-def _baseline_auc(capability: str, X_test: np.ndarray, y_test: np.ndarray, columns: list[str]) -> float | None:
+def _baseline_scores(capability: str, X_test: np.ndarray, columns: list[str]) -> np.ndarray | None:
+    """Embedded-baseline probabilities on X_test, or None if it can't load/score."""
     module = _embedded_module(capability)
     if module is None:
         return None
     try:
-        scores = np.array(
+        return np.array(
             [float(module.score(dict(zip(columns, row)))) for row in X_test], dtype=float
         )
     except Exception:  # pylint: disable=broad-exception-caught
         return None
-    return T.auc(y_test, scores)
+
+
+def _baseline_auc(capability: str, X_test: np.ndarray, y_test: np.ndarray, columns: list[str]) -> float | None:
+    scores = _baseline_scores(capability, X_test, columns)
+    return None if scores is None else T.auc(y_test, scores)
 
 
 def _baseline_threshold(capability: str, default: float) -> float:
@@ -571,24 +590,45 @@ def _train_capability(
     test_scores = T.score_matrix_spec(spec_probe, X_te)
     new_auc = T.auc(y_te, test_scores)
     metrics = T.binary_metrics(y_te, test_scores, threshold)
-    base_auc = _baseline_auc(capability, X_te, y_te, columns)
-    if base_auc is None:
-        # Every classifier capability ships an embedded baseline; None here means
-        # it failed to load/score, NOT that it is legitimately absent. Don't promote
-        # against a fabricated 0.5 bar (that would let a near-random model win).
-        return {"capability": capability, "promoted": False,
-                "rows": n, "positives": n_pos, "negatives": n_neg,
-                "reason": "embedded baseline unavailable; cannot gate promotion"}
-    baseline = base_auc
-
-    # Never promote on an in-sample (non-held-out) evaluation: the AUC is optimistic.
-    promote = (new_auc >= (baseline - ML_TRAINING_AUC_MARGIN)) and not in_sample
     # Distinct source cycles (some capabilities emit >1 row per cycle, e.g. an
     # end classifier with several candidate events); mirror the regression path.
     n_cycles = (
         int(np.unique(groups).size)
         if groups is not None and getattr(groups, "size", 0) == n
         else n
+    )
+    base_scores = _baseline_scores(capability, X_te, columns)
+    if base_scores is None:
+        # Every classifier capability ships an embedded baseline; None here means
+        # it failed to load/score, NOT that it is legitimately absent. Don't promote
+        # against a fabricated 0.5 bar (that would let a near-random model win).
+        return {"capability": capability, "promoted": False,
+                "rows": n, "positives": n_pos, "negatives": n_neg,
+                "cycle_count": n_cycles, "new_auc": round(new_auc, 4),
+                "threshold": threshold, "metrics": metrics,
+                "reason": "embedded baseline unavailable; cannot gate promotion"}
+    baseline = T.auc(y_te, base_scores)
+
+    # Calibration-aware gate: the live consumer applies a FIXED probability cutoff to
+    # this capability, so AUC (rank quality) alone isn't enough — a retrained model
+    # must also not degrade balanced accuracy AT that operating cutoff, else a
+    # differently-calibrated on-device model silently shifts decision rates.
+    op_thr = _OPERATING_THRESHOLD.get(capability)
+    trained_op_bacc: float | None = None
+    base_op_bacc: float | None = None
+    calib_ok = True
+    if op_thr is not None:
+        trained_op_bacc = float(
+            T.binary_metrics(y_te, test_scores, op_thr).get("balanced_accuracy") or 0.0
+        )
+        base_op_bacc = float(
+            T.binary_metrics(y_te, base_scores, op_thr).get("balanced_accuracy") or 0.0
+        )
+        calib_ok = trained_op_bacc >= (base_op_bacc - ML_TRAINING_BACC_MARGIN)
+
+    # Never promote on an in-sample (non-held-out) evaluation: the AUC is optimistic.
+    promote = (
+        (new_auc >= (baseline - ML_TRAINING_AUC_MARGIN)) and not in_sample and calib_ok
     )
     record: dict[str, Any] = {
         "capability": capability,
@@ -600,6 +640,10 @@ def _train_capability(
         "threshold": threshold,
         "metrics": metrics,
     }
+    if op_thr is not None:
+        record["operating_threshold"] = op_thr
+        record["op_balanced_accuracy"] = round(trained_op_bacc or 0.0, 4)
+        record["baseline_op_balanced_accuracy"] = round(base_op_bacc or 0.0, 4)
     if promote:
         record["spec"] = T.build_spec(
             name=capability, target=target, feature_columns=columns,
@@ -610,6 +654,11 @@ def _train_capability(
         record["trained_at"] = trained_at
     elif in_sample:
         record["reason"] = "no held-out split (in-sample eval); not promoted"
+    elif not calib_ok:
+        record["reason"] = (
+            f"balanced accuracy at operating threshold {op_thr} "
+            f"({trained_op_bacc:.3f}) below baseline ({base_op_bacc:.3f}) - margin"
+        )
     else:
         record["reason"] = f"AUC {new_auc:.3f} below baseline {baseline:.3f} - margin"
     return record
@@ -712,7 +761,11 @@ async def async_run_training(hass: Any, manager: Any) -> dict[str, Any]:
 
     trained_at = dt_util.now().isoformat()
     cycles = list(store.get_past_cycles())  # snapshot before executor to avoid data race
-    ranking_history = store.get_match_ranking_history()
+    # get_match_ranking_history() already returns a shallow copy of the top-level
+    # list, but wrap it in list(...) too so the executor never iterates a list that
+    # the event loop could mutate mid-training - matching the get_past_cycles()
+    # snapshot above.
+    ranking_history = list(store.get_match_ranking_history())
 
     _LOGGER.info(
         "On-device ML training starting: %d cycles, %d ranking snapshots, "

@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} upptäckte spökcykler. Föreslagen min_effektändring: {current_min}W -> {new_min}W (tillämpas inte automatiskt).",
       "timer_default_message": "{device}: timer {minutes} min",
       "timer_pause_action_title": "Återuppta cykeln",
-      "timer_pause_body_suffix": "Cykeln är pausad. Öppna WashData-panelen för att fortsätta."
+      "timer_pause_body_suffix": "Cykeln är pausad. Öppna WashData-panelen för att fortsätta.",
+      "notify_live_waiting_message": "{device}: Ingen profil matchad ännu.",
+      "vs_typical_longer": "{pct}% längre än vanligt",
+      "vs_typical_shorter": "{pct}% kortare än vanligt"
     }
   },
   "selector": {
@@ -367,7 +370,7 @@
         "name": "Cykelräkning"
       },
       "ambiguity": {
-        "name": "Match Tvetydighet"
+        "name": "Tvetydighetspoäng"
       },
       "energy_total": {
         "name": "Total energi"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Ingen aktiv cykel att pausa eller återuppta."
+    },
+    "path_not_allowed": {
+      "message": "Sökvägen är inte tillåten: {path}. Lägg till dess katalog i 'allowlist_external_dirs' i configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Det gick inte att skapa profilen: {error}"
+    },
+    "export_path_exists": {
+      "message": "Exportmålet finns redan: {path}. Välj en annan sökväg eller ta bort den befintliga filen först."
+    },
+    "export_write_failed": {
+      "message": "Det gick inte att skriva exporten till {path}: {error}"
     }
   },
   "intent": {

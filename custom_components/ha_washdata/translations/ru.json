@@ -68,7 +68,10 @@
       "auto_tune_fallback": "{device_type} {device_title} обнаружил ложные циклы. Рекомендуемое изменение min_power: {current_min}Вт -> {new_min}Вт (не применяется автоматически).",
       "timer_default_message": "{device}: таймер {minutes} мин",
       "timer_pause_action_title": "Возобновить цикл",
-      "timer_pause_body_suffix": "Цикл на паузе. Откройте панель WashData для возобновления."
+      "timer_pause_body_suffix": "Цикл на паузе. Откройте панель WashData для возобновления.",
+      "notify_live_waiting_message": "{device}: Профиль пока не распознан.",
+      "vs_typical_longer": "на {pct}% дольше обычного",
+      "vs_typical_shorter": "на {pct}% короче обычного"
     }
   },
   "selector": {
@@ -351,7 +354,7 @@
         }
       },
       "ambiguity": {
-        "name": "Неоднозначность совпадения"
+        "name": "Показатель неоднозначности"
       },
       "current_phase": {
         "name": "Текущая фаза"
@@ -423,6 +426,18 @@
     },
     "no_active_cycle": {
       "message": "Нет активного цикла для приостановки или возобновления."
+    },
+    "path_not_allowed": {
+      "message": "Путь не разрешён: {path}. Добавьте его каталог в 'allowlist_external_dirs' в configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Не удалось создать профиль: {error}"
+    },
+    "export_path_exists": {
+      "message": "Цель экспорта уже существует: {path}. Выберите другой путь или сначала удалите существующий файл."
+    },
+    "export_write_failed": {
+      "message": "Не удалось записать экспорт в {path}: {error}"
     }
   },
   "intent": {

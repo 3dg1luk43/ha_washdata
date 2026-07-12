@@ -486,7 +486,23 @@
     "better_than_baseline": "{pct}% melhor do que a estimativa de referência ({metric})",
     "trend_improving_tip": "O ajuste deste modelo melhorou ao longo das verificações recentes.",
     "trend_declining_tip": "O ajuste deste modelo piorou ao longo das verificações recentes: rever mais ciclos pode ajudá-lo a reaprender.",
-    "trend_steady_tip": "O ajuste deste modelo manteve-se praticamente estável ao longo das verificações recentes."
+    "trend_steady_tip": "O ajuste deste modelo manteve-se praticamente estável ao longo das verificações recentes.",
+    "cap_blurb": {
+      "end": "Saber quando um ciclo terminou realmente",
+      "live_match": "Identificar mais cedo o programa em curso",
+      "quality": "Detetar ciclos mal detetados ou corrompidos",
+      "remaining_time": "Prever quanto tempo falta",
+      "total_energy": "Prever a energia total e o custo"
+    },
+    "cap_label": {
+      "end": "Deteção de fim de ciclo",
+      "live_match": "Reconhecimento do programa",
+      "quality": "Verificação da qualidade do ciclo",
+      "remaining_time": "Estimativa do tempo restante",
+      "total_energy": "Estimativa da energia"
+    },
+    "metric_auc": "AUC {auc} em dados de validação",
+    "metric_mae": "erro {model} vs. referência {baseline}"
   },
   "modal": {
     "auto_label": "Rotulagem automática de ciclos",
@@ -716,7 +732,15 @@
     "pg_select_cycle_hint": "Selecione um ciclo e clique em ↺ para carregar",
     "pg_sweep_progress": "Passo {done} / {total}",
     "pg_analysis_hint": "Selecione um ciclo e clique em ↺ para carregar a análise.",
-    "diagnostics_load_failed": "Não foi possível carregar os diagnósticos: {error}"
+    "diagnostics_load_failed": "Não foi possível carregar os diagnósticos: {error}",
+    "manual_duration_ref_hint": "Usado apenas quando nenhum ciclo de referência está selecionado. Um ciclo de referência define a duração a partir do seu próprio comprimento.",
+    "toast_convert_rolled_back": "A conversão falhou e foi revertida (não foi deixada nenhuma automatização): {error}",
+    "toast_convert_orphan": "A automatização foi criada, mas a limpeza das ações antigas falhou. Não tente novamente: remova as ações antigas manualmente para evitar uma automatização duplicada.",
+    "advisory_duration_trend_up": "Os ciclos de '{name}' estão a demorar cada vez mais (cerca de +{pct}% por ciclo). Se o comportamento do aparelho mudou, volte a gravar ou reconstrua este perfil.",
+    "advisory_energy_trend_up": "'{name}' está a consumir cada vez mais energia (cerca de +{pct}% por ciclo) - vale a pena verificar o aparelho se isso for inesperado.",
+    "advisory_poor_health": "'{name}' tem uma pontuação de correspondência baixa - os ciclos recentes variam muito ou correspondem fracamente. Reveja os ciclos ou volte a gravar o perfil para que o reconhecimento e as estimativas de tempo se mantenham precisos.",
+    "advisory_shape_drift": "'{name}' afastou-se significativamente da sua curva de potência original. O aparelho pode ter alterado o comportamento ao longo do tempo (por ex. calcário, desgaste). Considere voltar a gravar este perfil com ciclos recentes.",
+    "advisory_shape_drift_corr": "'{name}' afastou-se significativamente da sua curva de potência original (correlação {corr}). O aparelho pode ter alterado o comportamento ao longo do tempo (por ex. calcário, desgaste). Considere voltar a gravar este perfil com ciclos recentes."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Queda repentina tratada como fim imediato",
@@ -1342,7 +1366,8 @@
     "reminders_save_failed": "Não foi possível guardar os lembretes: {error}",
     "reminders_saved": "Lembretes de manutenção guardados",
     "pause_no_cycle": "Nenhum ciclo ativo para pausar",
-    "resume_no_cycle": "Nenhum ciclo em pausa para retomar"
+    "resume_no_cycle": "Nenhum ciclo em pausa para retomar",
+    "delete_partial_failed": "Não foi possível eliminar alguns itens e foram restaurados"
   },
   "suggestion": {
     "both_agree": "WashData recomenda",
@@ -1405,6 +1430,39 @@
         "higher": "Fases silenciosas mais longas permitidas; menos paragens forçadas falsas",
         "lower": "Deteta ciclos bloqueados de forma mais agressiva"
       }
+    },
+    "reason": {
+      "auto_label_confidence": "Confiança no percentil 15 de {cycles} rótulos automáticos que o utilizador nunca corrigiu ({p15}).",
+      "completion_min_seconds": "Metade da duração p05 dos ciclos limpos ({minutes} min) ao longo de {cycles} ciclos; filtra os ciclos fantasma.{excl}",
+      "dead_zone_batch": "Mantido curto (janela mediana de instabilidade no arranque ao longo de {cycles} ciclos = {s}s) para que um fim real seja detetado rapidamente.",
+      "dead_zone_from_dip": "Com base numa queda de potência precoce detetada aos {s}s.",
+      "end_energy_default": "Valor de referência recomendado por predefinição para o limiar de ruído no fim do ciclo.",
+      "end_energy_false": "Energia p95 dos fins falsos ({p95}Wh) ao longo de {cycles} ciclos, com um mínimo de 0.2% da energia mediana do ciclo ({floor}Wh).",
+      "end_energy_no_false": "Sem fins falsos ao longo de {cycles} ciclos; com um mínimo de 0.2% da energia mediana do ciclo ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} ciclos limpos ({pct}%) tiveram uma pausa interna >60s que foi retomada; exigir {val} confirmação(ões) de fim.",
+      "learning_confidence": "Confiança p05 de {cycles} ciclos rotulados pelo utilizador ({p05}); abaixo disto, é pedida uma verificação.",
+      "match_interval": "Com base na cadência de atualização observada (mediana={median}s) * 10.",
+      "max_duration_ratio": "Com base nas durações dos ciclos rotulados (p95={p95}).",
+      "min_active": "Com base na potência ativa mínima ({min}W) observada no último ciclo.",
+      "min_duration_ratio": "Mantido o mais baixo possível para que um programa seja reconhecido cedo no ciclo; os limiares de confiança e ambiguidade evitam decisões prematuras.",
+      "min_off_gap": "Com base em {gaps} intervalos entre ciclos observados (p05={p05}s). Mínimo do dispositivo: {floor}s.",
+      "min_power": "40% da potência ativa mais baixa no p05 ({p05}W) ao longo de {cycles} ciclos limpos, mantendo o limiar de desligamento abaixo do consumo real.{excl}",
+      "ml_auto_label": "Confiança mais baixa que o modelo de qualidade ainda classificou como limpa (p10 de {cycles} ciclos limpos = {p10}).",
+      "ml_end_repeat": "{false}/{total} ciclos ({pct}%) tiveram uma pausa que o detetor de fim pontuou >50%; exigir {val} confirmação(ões) de fim.",
+      "ml_off_delay": "Pausas confirmadas pelo detetor de fim: p95 {p95}s + 60s de margem, a partir de {pauses} pausas verificadas pelo modelo ao longo de {cycles} ciclos (mínimo {floor}s).",
+      "no_update_timeout": "Com base na cadência de atualização observada (p95={p95}s) * 20 (mín. 60s).",
+      "off_delay_cadence": "Com base na cadência de atualização observada (p95={p95}s) * 5",
+      "off_delay_device_floor": "Utilizado o mínimo seguro específico do dispositivo para {device} ({floor}s).",
+      "off_delay_generic_floor": "Utilizado o mínimo seguro genérico ({floor}s).",
+      "off_delay_pauses": "Dimensionado para durar mais do que as pausas reais: pausa intraciclo p95 {p95}s + 60s de margem, a partir de {pauses} pausas ao longo de {cycles} ciclos limpos (mínimo {floor}s).",
+      "profile_match_threshold": "Confiança p10 de {cycles} rótulos automáticos corretos ({p10}); mínimo seguro para confirmação em direto.",
+      "sampling_interval": "Intervalo de atualização mediano observado ao longo de {cycles} ciclos limpos ({si}s).{excl}",
+      "smoothing_window": "Dimensionado para suavizar ~30s de leituras com uma amostragem de {si}s ({samples} amostras).",
+      "start_duration": "Mantido curto (~um intervalo de amostragem de {si}s) para que a deteção comece o mais cedo possível, ignorando ainda assim os picos de uma única amostra.",
+      "thr_batch": "Mantido logo acima da potência ativa mais baixa no p05 ao longo de {cycles} ciclos ({p05}W) para que um arranque seja captado o mais cedo possível e o limiar de paragem se mantenha abaixo da potência de funcionamento mais baixa da máquina.",
+      "tol_per_profile": "p75 da variância de duração por perfil em {profiles} perfis ({cycles} ciclos); os perfis restritos não são penalizados.",
+      "tol_pooled": "Com base na variância de duração agrupada de {cycles} ciclos rotulados recentes (desvio p95={dev}).",
+      "watchdog": "Mantido o mais baixo que é seguro (3x o intervalo de atualização p95 de {p95}s, mín. 30s) para detetar rapidamente os bloqueios sem paragens falsas."
     }
   },
   "trend": {
