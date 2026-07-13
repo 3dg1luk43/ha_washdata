@@ -1,37 +1,31 @@
 /**
- * Playground (Simulator) tab tests.
- * Covers: cycle replay simulator, A/B comparison, DTW inspector, concurrency slider.
+ * Playground tab tests — single-canvas replay + simulation UI.
+ *
+ * Covers: cycle/profile selectors, replay controls (play/stop/load, speed slider),
+ * main canvas, state strip, parameter inputs, simulation button, and parameter
+ * sweep (controls + chart canvas after a sweep run).
  */
 
 import { test, expect } from '@playwright/test';
 import { bootPanel, clickTab, assertWsCalled } from '../helpers/panel';
-import cyclesData from '../fixtures/mock-data/cycles.json';
-import profilesData from '../fixtures/mock-data/profiles.json';
 
 const MOCK_RUN_RESULT = {
   results: [
     {
       cycle_id: 'cyc-001',
       profile_name: 'Cotton 40°C',
-      outcome: { detected: true, match_profile: 'Cotton 40°C', match_correct: true },
-      events: [],
-    },
-    {
-      cycle_id: 'cyc-002',
-      profile_name: 'Eco 60°C',
-      outcome: { detected: true, match_profile: 'Eco 60°C', match_correct: true },
+      outcome: { detected: true, match_profile: 'Cotton 40°C', match_correct: true, ambiguous: false },
       events: [],
     },
   ],
   summary: {
-    total: 2,
-    matched: 2,
-    unmatched: 0,
-    avg_confidence: 0.90,
+    cycles: 1, requested: 1, concurrency: 3,
+    detected: 1, missed: 0, false_end: 0,
+    match_correct: 1, match_wrong: 0, unmatched: 0,
+    skipped_ids: [],
   },
 };
 
-// WS command used by both the simulator and A/B comparison
 const PG_WS_CMD = 'ha_washdata/run_playground_simulation';
 
 test.beforeEach(async ({ page }) => {
@@ -59,162 +53,118 @@ test('playground tab fetches profiles for comparison', async ({ page }) => {
   await assertWsCalled(page, 'ha_washdata/get_profiles');
 });
 
-// ─── Cycle selection ─────────────────────────────────────────────────────────
+// ─── Cycle and profile selectors ─────────────────────────────────────────────
 
-test('playground shows cycle list for selection', async ({ page }) => {
+test('cycle selector exists and has options', async ({ page }) => {
   await clickTab(page, 'playground');
-  // Before running, cycles appear as label.wd-rev-tag (checkbox labels in a grid)
-  const cycleTags = page.locator('label.wd-rev-tag');
-  await expect(cycleTags.first()).toBeVisible({ timeout: 8_000 });
+  const cycSel = page.locator('#wd-pg-cyc-sel');
+  await expect(cycSel).toBeVisible({ timeout: 8_000 });
+  // After cycles load the selector is populated with cycle IDs as option values
+  const firstCycleOpt = cycSel.locator('option[value]:not([value=""])').first();
+  await expect(firstCycleOpt).toBeAttached({ timeout: 8_000 });
 });
 
-test('selecting a cycle lane updates selection count', async ({ page }) => {
+test('profile selector exists with auto-detect option', async ({ page }) => {
   await clickTab(page, 'playground');
-  // Initially all cycles are pre-selected (first 20); the count span should be visible
-  const selCount = page.locator('#wd-pg-selcount').first();
-  await expect(selCount).toBeVisible({ timeout: 8_000 });
-  // Deselect all, then select one
-  const clearBtn = page.locator('button[data-action="pg-sel-none"]').first();
-  const isVisible = await clearBtn.isVisible({ timeout: 2_000 }).catch(() => false);
-  if (isVisible) {
-    await clearBtn.click();
-    const cb = page.locator('input.wd-pg-cyc').first();
-    await expect(cb).toBeVisible({ timeout: 3_000 });
-    await cb.check();
-    await expect(selCount).toHaveText('1 selected', { timeout: 3_000 });
-  }
+  const profSel = page.locator('#wd-pg-prof-sel');
+  await expect(profSel).toBeVisible({ timeout: 8_000 });
+  // First option should be Auto-Detect (empty value)
+  await expect(profSel.locator('option').first()).toBeAttached({ timeout: 5_000 });
 });
 
-// ─── Concurrency slider ───────────────────────────────────────────────────────
+// ─── Replay controls ─────────────────────────────────────────────────────────
 
-test('concurrency slider is visible in playground tab', async ({ page }) => {
+test('replay speed slider exists', async ({ page }) => {
   await clickTab(page, 'playground');
-  const slider = page.locator('[data-pgconc]').first();
-  await expect(slider).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('#wd-pg-dur')).toBeVisible({ timeout: 8_000 });
 });
 
-test('concurrency slider default value is 50', async ({ page }) => {
+test('play stop and load buttons are present', async ({ page }) => {
   await clickTab(page, 'playground');
-  const slider = page.locator('[data-pgconc]').first();
-  await expect(slider).toBeVisible({ timeout: 8_000 });
-  const value = await slider.inputValue();
-  expect(parseInt(value)).toBe(50);
+  await expect(page.locator('button[data-action="pg-play"]')).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('button[data-action="pg-stop"]')).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator('button[data-action="pg-load"]')).toBeVisible({ timeout: 5_000 });
 });
 
-test('concurrency slider can be adjusted to reduce batch size', async ({ page }) => {
+// ─── Canvas ──────────────────────────────────────────────────────────────────
+
+test('replay canvas is present and visible', async ({ page }) => {
   await clickTab(page, 'playground');
-  const slider = page.locator('[data-pgconc]').first();
-  await expect(slider).toBeVisible({ timeout: 8_000 });
-  await slider.fill('5');
-  const label = page.locator('#wd-pg-conc-val').first();
-  await expect(label).toBeVisible({ timeout: 3_000 });
+  await expect(page.locator('canvas#wd-pg-canvas')).toBeVisible({ timeout: 8_000 });
 });
 
-// ─── Run simulation ───────────────────────────────────────────────────────────
+// ─── State strip ─────────────────────────────────────────────────────────────
 
-test('run button is present in playground tab', async ({ page }) => {
+test('state strip is present', async ({ page }) => {
   await clickTab(page, 'playground');
-  const runBtn = page.locator('button[data-action="pg-run"]').first();
-  await expect(runBtn).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('#wd-pg-strip')).toBeVisible({ timeout: 8_000 });
 });
 
-test('clicking run calls run_playground WS command', async ({ page }) => {
-  await clickTab(page, 'playground');
-  // Select all cycles first (select-all checkbox)
-  const selectAll = page.locator('button[data-action="pg-sel-all"]').first();
-  const isVisible = await selectAll.isVisible({ timeout: 2_000 }).catch(() => false);
-  if (isVisible) await selectAll.click();
+// ─── Parameter inputs ────────────────────────────────────────────────────────
 
-  const runBtn = page.locator('button[data-action="pg-run"]').first();
-  await expect(runBtn).toBeVisible({ timeout: 8_000 });
-  await runBtn.click();
+test('parameter inputs exist', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const paramInputs = page.locator('.wd-pg-param-inp[data-pgkey]');
+  await expect(paramInputs.first()).toBeVisible({ timeout: 8_000 });
+});
+
+test('reset params button exists', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await expect(page.locator('button[data-action="pg-reset-params"]')).toBeVisible({ timeout: 8_000 });
+});
+
+// ─── Simulation ──────────────────────────────────────────────────────────────
+
+test('run simulation button exists', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await expect(page.locator('button[data-action="pg-run-sim"]')).toBeVisible({ timeout: 8_000 });
+});
+
+test('clicking run-sim calls run_playground_simulation WS command', async ({ page }) => {
+  await clickTab(page, 'playground');
+  // Wait for cycles to load so run-sim has cycle IDs to pass to the backend
+  const firstCycleOpt = page.locator('#wd-pg-cyc-sel option[value]:not([value=""])').first();
+  await expect(firstCycleOpt).toBeAttached({ timeout: 8_000 });
+  const runSimBtn = page.locator('button[data-action="pg-run-sim"]');
+  await expect(runSimBtn).toBeVisible({ timeout: 5_000 });
+  await runSimBtn.click();
   await assertWsCalled(page, PG_WS_CMD);
 });
 
-test('simulator shows results after run completes', async ({ page }) => {
-  await clickTab(page, 'playground');
-  const selectAll = page.locator('button[data-action="pg-sel-all"]').first();
-  const isVisible = await selectAll.isVisible({ timeout: 2_000 }).catch(() => false);
-  if (isVisible) await selectAll.click();
+// ─── Parameter sweep ─────────────────────────────────────────────────────────
 
-  const runBtn = page.locator('button[data-action="pg-run"]').first();
-  await expect(runBtn).toBeVisible({ timeout: 8_000 });
-  await runBtn.click();
-  // Results lane label with Cotton 40°C should appear in the timeline
-  await expect(page.locator('.wd-pg-lane-lbl').filter({ hasText: 'Cotton 40°C' }).first()).toBeVisible({ timeout: 8_000 });
+test('sweep param select and range inputs exist', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await expect(page.locator('#wd-pg-sw-param')).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('#wd-pg-sw-from')).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator('#wd-pg-sw-to')).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator('#wd-pg-sw-steps')).toBeVisible({ timeout: 5_000 });
 });
 
-// ─── A/B comparison ───────────────────────────────────────────────────────────
-
-test('A/B comparison subtab is present', async ({ page }) => {
+test('run sweep button exists', async ({ page }) => {
   await clickTab(page, 'playground');
-  const abTab = page.locator('[data-pgtab="ab"]').first();
-  await expect(abTab).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('button[data-action="pg-sweep-run"]')).toBeVisible({ timeout: 8_000 });
 });
 
-test('A/B comparison table renders rows', async ({ page }) => {
+test('sweep chart canvas appears after running a parameter sweep', async ({ page }) => {
   await clickTab(page, 'playground');
-  const abTab = page.locator('[data-pgtab="ab"]').first();
-  const isVisible = await abTab.isVisible({ timeout: 3_000 }).catch(() => false);
-  if (isVisible) {
-    await abTab.click();
-    // Trigger A/B run or fetch
-    const runAbBtn = page.locator('button[data-action="pg-ab-run"]').first();
-    const runIsVisible = await runAbBtn.isVisible({ timeout: 2_000 }).catch(() => false);
-    if (runIsVisible) await runAbBtn.click();
-    // A/B results render an "Outcome" section title above the metric table
-    await expect(page.locator('text=Outcome').first()).toBeVisible({ timeout: 8_000 });
-  }
+  // Wait for cycles to load before triggering sweep
+  const firstCycleOpt = page.locator('#wd-pg-cyc-sel option[value]:not([value=""])').first();
+  await expect(firstCycleOpt).toBeAttached({ timeout: 8_000 });
+  // Fill in sweep range — input events update internal _pgSweepFrom/_pgSweepTo state
+  await page.locator('#wd-pg-sw-from').fill('10');
+  await page.locator('#wd-pg-sw-to').fill('100');
+  // Changing steps triggers a re-render that picks up the new from/to values,
+  // setting swCanRun=true and removing the disabled attribute from the sweep button
+  await page.locator('#wd-pg-sw-steps').fill('2');
+  const sweepBtn = page.locator('button[data-action="pg-sweep-run"]');
+  await expect(sweepBtn).not.toBeDisabled({ timeout: 3_000 });
+  await sweepBtn.click();
+  // canvas#wd-pg-sweep-chart is rendered inside swBestHtml once sweepResults.length >= 2
+  await expect(page.locator('canvas#wd-pg-sweep-chart')).toBeVisible({ timeout: 8_000 });
 });
 
-test('A/B comparison table is responsive (wrapped on narrow viewport)', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await clickTab(page, 'playground');
-  const abTab = page.locator('[data-pgtab="ab"]').first();
-  const isVisible = await abTab.isVisible({ timeout: 3_000 }).catch(() => false);
-  if (isVisible) {
-    await abTab.click();
-    // Table should be inside a scroll wrapper
-    const tableWrap = page.locator('.wd-tbl-wrap, .wd-ab-table-wrap').first();
-    if (await tableWrap.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      // Scroll wrapper should not overflow the viewport
-      const wrapOverflow = await page.evaluate(() => {
-        const el = document.querySelector('ha-washdata-panel');
-        if (!el || !el.shadowRoot) return 0;
-        const wrap = el.shadowRoot.querySelector('.wd-tbl-wrap');
-        return wrap ? Math.max(0, wrap.scrollWidth - wrap.clientWidth) : 0;
-      });
-      // The wrap itself should be scrollable internally, but not bleed outside
-      expect(wrapOverflow).toBeGreaterThanOrEqual(0); // just checks it exists
-    }
-  }
-});
-
-// ─── DTW inspector ───────────────────────────────────────────────────────────
-
-test('DTW inspector subtab is present', async ({ page }) => {
-  await clickTab(page, 'playground');
-  const dtwTab = page.locator('[data-pgtab="dtw"]').first();
-  await expect(dtwTab).toBeVisible({ timeout: 8_000 });
-});
-
-test('DTW inspector renders score breakdown table', async ({ page }) => {
-  await clickTab(page, 'playground');
-  const dtwTab = page.locator('[data-pgtab="dtw"]').first();
-  const isVisible = await dtwTab.isVisible({ timeout: 3_000 }).catch(() => false);
-  if (isVisible) {
-    await dtwTab.click();
-    // Select a cycle and run DTW
-    const runDtwBtn = page.locator('button[data-action="pg-dtw-run"]').first();
-    const runIsVisible = await runDtwBtn.isVisible({ timeout: 2_000 }).catch(() => false);
-    if (runIsVisible) await runDtwBtn.click();
-    // DTW result renders a "Score breakdown" section with a table
-    const scoreTitle = page.locator('text=Score breakdown').first();
-    await expect(scoreTitle).toBeVisible({ timeout: 8_000 });
-  }
-});
-
-// ─── Mobile ─────────────────────────────────────────────────────────────────
+// ─── Mobile ──────────────────────────────────────────────────────────────────
 
 test('playground tab renders without overflow on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -226,20 +176,4 @@ test('playground tab renders without overflow on mobile', async ({ page }) => {
     return body ? body.scrollWidth - body.clientWidth : 0;
   });
   expect(overflow).toBeLessThanOrEqual(1);
-});
-
-test('playground lane labels are truncated on mobile (not overflowing)', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await clickTab(page, 'playground');
-  // Before running, cycles appear as label.wd-rev-tag items
-  const cycleTags = page.locator('label.wd-rev-tag');
-  await expect(cycleTags.first()).toBeVisible({ timeout: 8_000 });
-  const laneOverflow = await page.evaluate(() => {
-    const el = document.querySelector('ha-washdata-panel');
-    if (!el || !el.shadowRoot) return -1;
-    const lane = el.shadowRoot.querySelector('label.wd-rev-tag');
-    return lane ? lane.scrollWidth - lane.clientWidth : -1;
-  });
-  // -1 means no lane found; otherwise it should be 0 on mobile
-  if (laneOverflow >= 0) expect(laneOverflow).toBeLessThanOrEqual(1);
 });

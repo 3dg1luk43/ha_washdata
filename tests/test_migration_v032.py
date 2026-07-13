@@ -382,6 +382,38 @@ async def test_v7_auto_detected_cycle_with_max_power_not_flagged():
 
 
 # ---------------------------------------------------------------------------
+# v8 → v9: pre-initialize additive top-level keys
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_v8_init_additive_keys():
+    """v8 → v9: additive keys are created with zero/empty defaults when absent."""
+    store = _make_store()
+    data: dict[str, Any] = {"past_cycles": [], "profiles": {}}
+    result = await store._async_migrate_func(8, 1, data)
+    assert result["lifetime_energy_wh"] == 0.0
+    assert result["settings_changelog"] == []
+    assert result["maintenance_log"] == []
+
+
+@pytest.mark.asyncio
+async def test_v8_init_additive_keys_idempotent():
+    """v8 → v9: existing values for additive keys are preserved (idempotent)."""
+    store = _make_store()
+    data: dict[str, Any] = {
+        "past_cycles": [],
+        "profiles": {},
+        "lifetime_energy_wh": 5.0,
+        "settings_changelog": ["x"],
+    }
+    result = await store._async_migrate_func(8, 1, data)
+    assert result["lifetime_energy_wh"] == 5.0
+    assert result["settings_changelog"] == ["x"]
+    assert result["maintenance_log"] == []
+
+
+# ---------------------------------------------------------------------------
 # Full chain v1 → current: end-to-end through all migration steps
 # ---------------------------------------------------------------------------
 

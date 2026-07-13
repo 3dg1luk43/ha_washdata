@@ -533,6 +533,28 @@ DISHWASHER_END_SPIKE_WAIT_SECONDS = 1800.0
 # dishwasher whose cycle has not yet crossed this floor, regardless of whether
 # a profile match is available yet.
 DISHWASHER_MIN_CYCLE_DURATION_S = 1800.0
+# Once a dishwasher is in ENDING and power has been sustained-quiet for this
+# long, the active cycle is over - only the passive drain/dry tail remains.
+# Live re-matching is frozen past this point: continuing to re-match on the
+# ever-growing idle tail inflates the observed duration and drifts the Stage-4
+# duration-agreement score toward LONGER near-duplicate profiles, which would 
+# flip the stored label and stall smart-termination on the ambiguity gate.  
+# The active-phase match is complete
+# by now, so freezing it preserves the correct program identity.  A real
+# resume (mid-cycle soak) sends a high reading that leaves ENDING and re-arms
+# matching, so this is self-correcting.
+DISHWASHER_MATCH_FREEZE_QUIET_SECONDS = 300.0
+# Release the end-of-cycle pump-out wait early once a dishwasher has BOTH reached
+# its expected duration AND been sustained-quiet this long afterwards.  This lets a
+# cycle that ran slightly shorter than the profile's (drifted-up) average - and whose
+# terminal pump-out landed before the drop into ENDING, so no in-ENDING end-spike ever
+# armed - finalise near its expected end instead of hanging the full
+# DISHWASHER_END_SPIKE_WAIT_SECONDS (30 min) past expected.  Gated on reaching the
+# expected duration so a long passive-drying phase that still precedes a genuinely-late
+# pump-out (quiet from ~50%-99% of expected) keeps waiting and its real pump-out is
+# caught by the end-spike arm first.  Smaller than the 30-min window but large enough
+# to confirm a terminal tail rather than an inter-phase gap.
+DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS = 600.0
 
 DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 1800,  # 30 min (Drying)
@@ -627,7 +649,10 @@ GROUP_MIN_COHESION = 0.80
 # v8: re-run again after _is_recorded_cycle gained the structural fallback
 # (completed + no max_power/termination_reason) so OLD recordings that carry
 # only meta:None — which the marker-only v6/v7 backfill missed — are tagged.
-STORAGE_VERSION = 8
+# v9: pre-initialize additive top-level keys (lifetime_energy_wh,
+# settings_changelog, maintenance_log) so they are present from first load
+# rather than only appearing lazily on first use.
+STORAGE_VERSION = 9
 STORAGE_KEY = "ha_washdata"
 
 # Notification events

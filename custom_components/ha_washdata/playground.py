@@ -140,12 +140,24 @@ def _cycle_label(cycle: dict[str, Any]) -> str | None:
     return None
 
 
-def _build_match_snapshots(store: Any) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+def _build_match_snapshots(
+    store: Any,
+) -> tuple[list[dict[str, Any]], dict[str, Any], dict[str, list[str]], dict[str, Any]]:
     """Prepare the matcher snapshots + config once from the store.
 
     Mirrors :meth:`ProfileStore.match_profile`: one snapshot per profile using
     its sample cycle's decompressed trace, plus the store's live matching config
     (with any on-device tuned weight overrides merged in).
+
+    Also applies Stage-5 group collapsing via
+    :meth:`ProfileStore._grouped_snapshots`: returns the collapsed snapshot list
+    (where each cohesive group is represented by a single ``__group__*``
+    aggregate candidate), plus ``group_members`` and ``member_snaps`` for the
+    Stage-5 member-resolution step in :func:`_simulate_one`.
+
+    Returns ``(grouped_snapshots, match_config, group_members, member_snaps)``.
+    When no cohesive groups exist ``group_members`` and ``member_snaps`` are both
+    empty dicts and behaviour is identical to before.
     """
     snapshots: list[dict[str, Any]] = []
     try:
@@ -177,8 +189,19 @@ def _build_match_snapshots(store: Any) -> tuple[list[dict[str, Any]], dict[str, 
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Playground: snapshot build failed: %s", exc)
 
+    # Stage-5: collapse cohesive profile groups into aggregate candidates.
+    group_members: dict[str, list[str]] = {}
+    member_snaps: dict[str, Any] = {}
+    try:
+        grouped_snaps, group_members, member_snaps = store._grouped_snapshots(  # pylint: disable=protected-access
+            snapshots
+        )
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Playground: _grouped_snapshots failed: %s", exc)
+        grouped_snaps = snapshots
+
     config = _matching_config(store)
-    return snapshots, config
+    return grouped_snaps, config, group_members, member_snaps
 
 
 def _matching_config(store: Any) -> dict[str, Any]:
@@ -212,10 +235,18 @@ def _simulate_one(
     sim_config: CycleDetectorConfig,
     snapshots: list[dict[str, Any]],
     match_config: dict[str, Any],
+    store: Any = None,
+    group_members: dict[str, list[str]] | None = None,
+    member_snaps: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Replay one stored cycle through a fresh headless detector.
 
     Returns ``{cycle_id, profile_name, events, outcome}``. Never raises.
+
+    When ``group_members`` is non-empty the matcher applies Stage-5 group
+    resolution: a winning ``__group__*`` aggregate candidate is resolved to its
+    best-fitting member profile so ``outcome["match_profile"]`` always contains
+    a real profile name, never a group key.
     """
     cycle_id = cycle.get("id")
     label = _cycle_label(cycle)
@@ -300,6 +331,28 @@ def _simulate_one(
             last_match["conf"] = 0.0
             last_match["ambiguous"] = False
             return (None, 0.0, 0.0, None, False, False)
+
+        # Stage-5: resolve a winning group aggregate to its best-fitting member.
+        # This mirrors profile_store._stage5_pick_member used in production.
+        # Note: dtw_debug_payload always works on an individual profile, so
+        # Stage-5 resolution is only needed here in the batch matcher.
+        if group_members and candidates:
+            top = candidates[0]
+            gkey = top.get("name", "")
+            if gkey.startswith("__group__") and store is not None:
+                members = group_members.get(gkey, [])
+                if members:
+                    try:
+                        powers_list = list(powers)
+                        member_name, _, _ = store._stage5_pick_member(  # pylint: disable=protected-access
+                            powers_list, duration, members, member_snaps or {}
+                        )
+                        candidates[0] = dict(top, name=member_name)
+                        _emit("group_resolved", f"{gkey} -> {member_name}")
+                    except Exception as exc:  # pylint: disable=broad-exception-caught
+                        _LOGGER.debug(
+                            "Playground stage5 pick_member failed: %s", exc
+                        )
 
         best = candidates[0]
         margin, is_ambiguous = _ambiguity_from_candidates(candidates)
@@ -456,11 +509,14 @@ def run_playground_batch(
     summary["skipped_ids"] = skipped
 
     config = build_sim_config(base_config, settings_override)
-    snapshots, match_config = _build_match_snapshots(store)
+    snapshots, match_config, group_members, member_snaps = _build_match_snapshots(store)
 
     results: list[dict[str, Any]] = []
     for cycle in to_run:
-        res = _simulate_one(cycle, config, snapshots, match_config)
+        res = _simulate_one(
+            cycle, config, snapshots, match_config,
+            store=store, group_members=group_members, member_snaps=member_snaps,
+        )
         results.append(res)
         oc = res["outcome"]
         summary["cycles"] += 1

@@ -405,6 +405,20 @@ const _CSS = `
   color: var(--primary-text-color);
   min-height: 100%;
   font-family: var(--paper-font-body1_-_font-family, Roboto, sans-serif);
+  --wd-radius-sm: 4px;
+  --wd-radius-md: 8px;
+  --wd-radius-lg: 12px;
+  --wd-space-xs: 4px;
+  --wd-space-sm: 6px;
+  --wd-space-md: 10px;
+  --wd-space-lg: 16px;
+  --wd-space-xl: 24px;
+  --wd-font-sm: 0.75em;
+  --wd-font-xs: 0.7em;
+  --wd-white: #fff;
+  --wd-tint-xs: rgba(0,0,0,0.04);
+  --wd-tint-sm: rgba(0,0,0,0.08);
+  --wd-tint-md: rgba(0,0,0,0.12);
 }
 .wd-header {
   display: flex; align-items: center; gap: 12px;
@@ -416,9 +430,9 @@ const _CSS = `
 }
 .wd-header h1 { margin: 0; font-size: 1.25em; font-weight: 600; letter-spacing: .01em; }
 .wd-logo { flex-shrink: 0; opacity: .95; }
-.wd-burger { display: none; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; cursor: pointer; padding: 5px; margin: -2px 2px -2px -4px; border-radius: 8px; flex-shrink: 0; }
+.wd-burger { display: none; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; cursor: pointer; padding: 5px; margin: -2px 2px -2px -4px; border-radius: var(--wd-radius-md); flex-shrink: 0; }
 .wd-burger:hover { background: rgba(255,255,255,.16); }
-.wd-gear-btn { background: transparent; border: none; color: inherit; cursor: pointer; padding: 5px; margin-left: 4px; border-radius: 8px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; opacity: .8; }
+.wd-gear-btn { background: transparent; border: none; color: inherit; cursor: pointer; padding: 5px; margin-left: 4px; border-radius: var(--wd-radius-md); flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; opacity: .8; }
 .wd-gear-btn:hover { background: rgba(255,255,255,.16); opacity: 1; }
 @media (max-width: 870px) { .wd-burger { display: inline-flex; } }
 .wd-header .wd-sub { font-size: .72em; opacity: .75; margin-top: 2px; }
@@ -432,7 +446,7 @@ const _CSS = `
   cursor: pointer; font-size: .85em; transition: background .15s, color .15s;
 }
 .wd-chip:hover { background: var(--secondary-background-color); }
-.wd-chip.active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+.wd-chip.active { background: var(--primary-color); color: var(--wd-white); border-color: var(--primary-color); }
 .wd-tabs {
   display: flex; gap: 2px;
   border-bottom: 1px solid var(--divider-color, rgba(0,0,0,.1));
@@ -450,7 +464,7 @@ const _CSS = `
 .wd-pane { display: none; }
 .wd-pane.active { display: block; }
 .wd-card {
-  background: var(--card-background-color); border-radius: 12px;
+  background: var(--card-background-color); border-radius: var(--wd-radius-lg);
   padding: 20px 22px; margin-bottom: 16px;
   box-shadow: var(--ha-card-box-shadow, 0 2px 6px rgba(0,0,0,.08));
 }
@@ -473,7 +487,7 @@ const _CSS = `
   display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 12px; margin-bottom: 18px;
 }
-.wd-stat { background: var(--secondary-background-color); border-radius: 8px; padding: 14px 10px; text-align: center; }
+.wd-stat { background: var(--secondary-background-color); border-radius: var(--wd-radius-md); padding: 14px 10px; text-align: center; }
 .wd-stat-val { font-size: 1.5em; font-weight: 600; line-height: 1.1; }
 .wd-stat-lbl { margin-top: 5px; font-size: .72em; color: var(--secondary-text-color); }
 .wd-prog-bg { background: var(--secondary-background-color); border-radius: 6px; height: 10px; overflow: hidden; }
@@ -483,7 +497,7 @@ const _CSS = `
 .wd-ptl-wrap { margin-top: 8px; }
 .wd-ptl { position: relative; height: 12px; border-radius: 6px; overflow: hidden; background: var(--secondary-background-color); }
 .wd-ptl-seg { position: absolute; top: 0; bottom: 0; }
-.wd-ptl-seg-lbl { position: absolute; left: 4px; top: 50%; transform: translateY(-50%); font-size: 8px; line-height: 1; color: #fff; white-space: nowrap; overflow: hidden; max-width: calc(100% - 6px); text-shadow: 0 0 2px rgba(0,0,0,.55); pointer-events: none; }
+.wd-ptl-seg-lbl { position: absolute; left: 4px; top: 50%; transform: translateY(-50%); font-size: 8px; line-height: 1; color: var(--wd-white); white-space: nowrap; overflow: hidden; max-width: calc(100% - 6px); text-shadow: 0 0 2px rgba(0,0,0,.55); pointer-events: none; }
 .wd-ptl-cursor { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--primary-text-color, #111); box-shadow: 0 0 0 1px rgba(255,255,255,.6); }
 .wd-ptl-cur { margin-top: 5px; font-size: .74em; color: var(--secondary-text-color); }
 .wd-cycle-ctrl { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
@@ -508,7 +522,7 @@ const _CSS = `
 .wd-filter-input { flex: 1; min-width: 120px; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color); font-size: .84em; }
 .wd-filter-select { padding: 5px 8px; border-radius: 6px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color); font-size: .84em; }
 .wd-row-link { cursor: pointer; }
-.wd-pill { display: inline-block; padding: 2px 9px; border-radius: 4px; background: var(--secondary-background-color); color: var(--secondary-text-color); font-size: .78em; }
+.wd-pill { display: inline-block; padding: 2px 9px; border-radius: var(--wd-radius-sm); background: var(--secondary-background-color); color: var(--secondary-text-color); font-size: .78em; }
 .wd-tag { display: inline-flex; align-items: center; padding: 1px 6px; border-radius: 10px; font-size: .72em; font-weight: 600; vertical-align: middle; background: var(--secondary-background-color); color: var(--secondary-text-color); margin-left: 4px; }
 .wd-btn {
   display: inline-flex; align-items: center; gap: 6px;
@@ -518,9 +532,9 @@ const _CSS = `
 }
 .wd-btn:hover { opacity: .85; }
 .wd-btn:disabled { opacity: .55; cursor: default; }
-.wd-btn-primary { background: var(--primary-color); color: #fff; }
+.wd-btn-primary { background: var(--primary-color); color: var(--wd-white); }
 .wd-btn-secondary { background: var(--secondary-background-color); color: var(--primary-text-color); border: 1px solid var(--divider-color); }
-.wd-btn-danger { background: var(--error-color, #f44336); color: #fff; }
+.wd-btn-danger { background: var(--error-color, #f44336); color: var(--wd-white); }
 .wd-btn-sm { padding: 4px 10px; font-size: .78em; }
 .wd-spin {
   display: inline-block; width: 13px; height: 13px;
@@ -560,7 +574,7 @@ const _CSS = `
 .wd-tab:focus-visible, .wd-btn:focus-visible, .wd-chip:focus-visible,
 .wd-sec-btn:focus-visible, .wd-subtab:focus-visible, .wd-mini-tab:focus-visible,
 .wd-devcard:focus-visible, [tabindex]:focus-visible, a:focus-visible, select:focus-visible {
-  outline: 2px solid var(--primary-color, #03a9f4); outline-offset: 2px; border-radius: 4px;
+  outline: 2px solid var(--primary-color, #03a9f4); outline-offset: 2px; border-radius: var(--wd-radius-sm);
 }
 /* A11y: honor the user's reduced-motion preference — drop non-essential animation. */
 @media (prefers-reduced-motion: reduce) {
@@ -575,17 +589,17 @@ const _CSS = `
 .wd-auto-pill-link { text-decoration: none; color: var(--primary-text-color); font-size: .92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .wd-auto-pill-link:hover { text-decoration: underline; }
 .wd-auto-pill-x { flex: 0 0 auto; border: none; background: transparent; color: var(--secondary-text-color); cursor: pointer; font-size: 1.15em; line-height: 1; padding: 0 5px; border-radius: 50%; }
-.wd-auto-pill-x:hover { background: var(--error-color, #f44336); color: #fff; }
+.wd-auto-pill-x:hover { background: var(--error-color, #f44336); color: var(--wd-white); }
 .wd-field-hint { font-size: .78em; color: var(--secondary-text-color); margin-top: 4px; }
 /* Entity-pill multi-picker (compact chips + inline add input) */
 .wd-pillbox { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; padding: 5px 6px; min-height: 34px;
-  border: 1px solid var(--divider-color); border-radius: 8px; background: var(--card-background-color); }
+  border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); background: var(--card-background-color); }
 .wd-pillbox:focus-within { border-color: var(--primary-color); }
 .wd-pill { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 2px 4px 2px 9px;
-  font-size: .82em; line-height: 1.4; border-radius: 12px; background: var(--primary-color); color: #fff;
+  font-size: .82em; line-height: 1.4; border-radius: var(--wd-radius-lg); background: var(--primary-color); color: var(--wd-white);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .wd-pill-x { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; padding: 0;
-  border: 0; border-radius: 50%; background: rgba(255,255,255,.25); color: #fff; font-size: 13px; line-height: 1;
+  border: 0; border-radius: 50%; background: rgba(255,255,255,.25); color: var(--wd-white); font-size: 13px; line-height: 1;
   cursor: pointer; flex: none; }
 .wd-pill-x:hover { background: rgba(255,255,255,.45); }
 .wd-pill-add { flex: 1; min-width: 90px; border: 0 !important; background: transparent !important; padding: 3px 4px !important;
@@ -594,7 +608,7 @@ const _CSS = `
 /* Cycle timer list */
 .wd-timerlist { display: flex; flex-direction: column; gap: 8px; }
 .wd-timer-row { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px;
-  border: 1px solid var(--divider-color); border-radius: 8px; background: var(--card-background-color); }
+  border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); background: var(--card-background-color); }
 .wd-timer-top { display: flex; align-items: center; gap: 8px; }
 .wd-timer-top input[type="number"] { width: 70px; flex: 0 0 auto; }
 .wd-timer-top textarea { flex: 1 1 auto; min-width: 0; box-sizing: border-box; resize: vertical; min-height: 32px; height: 34px; }
@@ -619,7 +633,7 @@ const _CSS = `
 .wd-tip-pop {
   display: none; position: absolute; bottom: 150%; left: 50%; transform: translateX(-50%);
   width: 264px; background: var(--card-background-color); color: var(--primary-text-color);
-  border: 1px solid var(--divider-color); border-radius: 8px; padding: 10px 12px;
+  border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); padding: 10px 12px;
   box-shadow: 0 4px 18px rgba(0,0,0,.35); z-index: 60;
   text-align: left; font-weight: 400; text-transform: none; letter-spacing: normal;
 }
@@ -638,7 +652,7 @@ const _CSS = `
 .wd-dg .ax { stroke: var(--divider-color); stroke-width: 1; }
 .wd-sug {
   display: flex; align-items: center; gap: 8px; margin-top: 6px;
-  padding: 6px 10px; border-radius: 8px; font-size: .82em;
+  padding: 6px 10px; border-radius: var(--wd-radius-md); font-size: .82em;
   background: rgba(255,152,0,.10); border: 1px solid rgba(255,152,0,.40);
   box-sizing: border-box; flex-wrap: wrap;
 }
@@ -657,18 +671,18 @@ const _CSS = `
 .wd-sug-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .wd-sug-sep { display: none; }
 .wd-sug-impact { display: none; }
-.wd-sug-use { border: none; background: var(--warning-color, #ff9800); color: #fff; border-radius: 4px; padding: 2px 8px; font-size: .92em; cursor: pointer; flex-shrink: 0; }
+.wd-sug-use { border: none; background: var(--warning-color, #ff9800); color: var(--wd-white); border-radius: var(--wd-radius-sm); padding: 2px 8px; font-size: .92em; cursor: pointer; flex-shrink: 0; }
 .wd-conflict-err { display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
 .wd-conflict-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .8em; color: var(--error-color, #b71c1c); padding: 5px 9px; border-left: 3px solid var(--error-color, #b71c1c); background: rgba(183,28,28,.07); border-radius: 0 5px 5px 0; }
-.wd-conflict-fix { border: 1px solid var(--error-color, #b71c1c); background: none; color: var(--error-color, #b71c1c); border-radius: 4px; padding: 1px 7px; font-size: .92em; cursor: pointer; white-space: nowrap; flex: none; }
-.wd-conflict-fix:hover { background: var(--error-color, #b71c1c); color: #fff; }
+.wd-conflict-fix { border: 1px solid var(--error-color, #b71c1c); background: none; color: var(--error-color, #b71c1c); border-radius: var(--wd-radius-sm); padding: 1px 7px; font-size: .92em; cursor: pointer; white-space: nowrap; flex: none; }
+.wd-conflict-fix:hover { background: var(--error-color, #b71c1c); color: var(--wd-white); }
 .wd-conflict-sug-note { font-style: italic; opacity: 0.85; flex: none; }
 #wd-settings-form .wd-field.wd-has-conflict { outline: 2px solid var(--error-color, #b71c1c); outline-offset: -1px; }
 .wd-rev-sub { display: flex; align-items: center; gap: 6px; margin: 14px 0 6px; font-size: .85em; font-weight: 600; color: var(--primary-text-color); }
 .wd-rev-tags { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
-.wd-rev-tag { display: flex; align-items: center; gap: 7px; padding: 7px 10px; border-radius: 8px; background: var(--secondary-background-color); border: 1px solid var(--divider-color); font-size: .85em; cursor: pointer; }
+.wd-rev-tag { display: flex; align-items: center; gap: 7px; padding: 7px 10px; border-radius: var(--wd-radius-md); background: var(--secondary-background-color); border: 1px solid var(--divider-color); font-size: .85em; cursor: pointer; }
 .wd-rev-tag input { margin: 0; }
-.wd-rev-notes { width: 100%; box-sizing: border-box; background: var(--card-background-color); color: var(--primary-text-color); border: 1px solid var(--divider-color); border-radius: 8px; padding: 9px 11px; font: inherit; resize: vertical; }
+.wd-rev-notes { width: 100%; box-sizing: border-box; background: var(--card-background-color); color: var(--primary-text-color); border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); padding: 9px 11px; font: inherit; resize: vertical; }
 .wd-sug-banner {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   padding: 12px 16px; border-radius: 10px; margin-bottom: 16px;
@@ -680,7 +694,7 @@ const _CSS = `
   padding: 5px 14px; border-radius: 14px; border: 1px solid var(--divider-color);
   background: transparent; color: var(--secondary-text-color); font-size: .8em; cursor: pointer; transition: background .15s;
 }
-.wd-sec-btn.active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+.wd-sec-btn.active { background: var(--primary-color); color: var(--wd-white); border-color: var(--primary-color); }
 .wd-level-toggle { display: inline-flex; gap: 4px; }
 .wd-sec-btn { position: relative; }
 .wd-sec-sug-dot { position: absolute; top: 2px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--warning-color, #ff9800); display: inline-block; pointer-events: none; }
@@ -694,6 +708,8 @@ const _CSS = `
   border: 1px solid var(--divider-color, rgba(0,0,0,.08)); cursor: pointer; transition: border-color .15s, transform .1s;
 }
 .wd-profile-card:hover { border-color: var(--primary-color); transform: translateY(-1px); }
+button.wd-attn-card, button.wd-profile-card { appearance: none; font: inherit; text-align: left; width: 100%; }
+button.wd-profile-card { display: block; }
 .wd-profile-name { font-weight: 600; font-size: 1em; margin-bottom: 6px; }
 .wd-profile-meta { font-size: .8em; color: var(--secondary-text-color); }
 /* D2: mini duration sparkline on profile cards */
@@ -701,39 +717,38 @@ const _CSS = `
 .wd-prof-spark { margin-left: auto; width: 64px; height: 20px; display: block; flex-shrink: 0; }
 .wd-empty { text-align: center; padding: 48px 24px; color: var(--secondary-text-color); }
 .wd-empty .wd-icon { font-size: 3em; margin-bottom: 10px; }
+.wd-error-state { display: flex; align-items: center; gap: 10px; padding: 10px 14px; margin-bottom: 10px; border-radius: var(--wd-radius-md); background: var(--secondary-background-color); border: 1px solid var(--divider-color); color: var(--error-color, #b71c1c); font-size: .9em; }
 .wd-info { font-size: .9em; color: var(--secondary-text-color); line-height: 1.6; margin: 0; }
 .wd-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 100; display: flex; align-items: center; justify-content: center; }
-.wd-modal { background: var(--card-background-color); border-radius: 12px; padding: 24px; max-width: 480px; width: calc(100% - 32px); max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,.3); }
+.wd-modal { background: var(--card-background-color); border-radius: var(--wd-radius-lg); padding: 24px; max-width: 480px; width: calc(100% - 32px); max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,.3); }
 .wd-modal-lg { max-width: 880px; }
 .wd-modal h2 { margin: 0 0 16px; font-size: 1.1em; display: flex; align-items: center; gap: 10px; }
 .wd-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
-.wd-canvas-wrap { margin: 10px 0; background: var(--secondary-background-color); border-radius: 8px; padding: 6px; }
+.wd-canvas-wrap { margin: 10px 0; background: var(--secondary-background-color); border-radius: var(--wd-radius-md); padding: 6px; }
 .wd-canvas-wrap canvas { width: 100%; height: 240px; display: block; touch-action: none; cursor: crosshair; }
 .wd-mode-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
 .wd-mini-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--divider-color); margin-bottom: 16px; flex-wrap: wrap; }
 .wd-mini-tab { padding: 7px 16px; border: none; background: transparent; color: var(--secondary-text-color); font-size: .82em; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; }
 .wd-mini-tab.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
 .wd-kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin: 4px 0 14px; }
-.wd-kv-item { background: var(--secondary-background-color); border-radius: 8px; padding: 10px; text-align: center; }
+.wd-kv-item { background: var(--secondary-background-color); border-radius: var(--wd-radius-md); padding: 10px; text-align: center; }
 .wd-kv-val { font-size: 1.25em; font-weight: 700; }
 .wd-kv-lbl { font-size: .7em; color: var(--secondary-text-color); margin-top: 3px; }
 .wd-seg-row, .wd-phase-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
 .wd-swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; display: inline-block; }
-.wd-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 200; padding: 10px 20px; border-radius: 8px; font-size: .9em; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,.25); animation: wd-toast-in .2s ease; }
+.wd-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 200; padding: 10px 20px; border-radius: var(--wd-radius-md); font-size: .9em; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,.25); animation: wd-toast-in .2s ease; }
 @keyframes wd-toast-in { from { opacity: 0; transform: translateX(-50%) translateY(10px); } }
-.wd-toast-success { background: var(--success-color, #4caf50); color: #fff; }
-.wd-toast-error   { background: var(--error-color, #f44336); color: #fff; }
-.wd-toast-info    { background: var(--info-color, #2196f3); color: #fff; }
+.wd-toast-success { background: var(--success-color, #4caf50); color: var(--wd-white); }
+.wd-toast-error   { background: var(--error-color, #f44336); color: var(--wd-white); }
+.wd-toast-info    { background: var(--info-color, #2196f3); color: var(--wd-white); }
 /* D4: undo toast — action button + row layout */
 .wd-toast { display: flex; align-items: center; gap: 14px; }
 .wd-toast-action { background: rgba(255,255,255,.22); color: inherit; border: none; border-radius: 6px; padding: 5px 12px; font: inherit; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: .04em; font-size: .85em; }
 .wd-toast-action:hover { background: rgba(255,255,255,.34); }
-/* D5: keyboard-shortcut key caps in the help overlay */
-.wd-kbd { display: inline-block; min-width: 22px; text-align: center; padding: 2px 7px; border-radius: 5px; border: 1px solid var(--divider-color, rgba(127,127,127,.4)); background: var(--secondary-background-color); font-family: monospace; font-size: .85em; font-weight: 700; }
 /* D7: "changed since last save" marker beside a settings field label */
 .wd-chg-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--info-color, #2196f3); margin-left: 6px; flex-shrink: 0; cursor: help; }
 .wd-diag-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 16px; }
-.wd-diag-stat { background: var(--secondary-background-color); border-radius: 8px; padding: 12px; text-align: center; }
+.wd-diag-stat { background: var(--secondary-background-color); border-radius: var(--wd-radius-md); padding: 12px; text-align: center; }
 .wd-diag-val { font-size: 1.6em; font-weight: 700; }
 .wd-diag-lbl { font-size: .72em; color: var(--secondary-text-color); margin-top: 4px; }
 .wd-feedback-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--divider-color); }
@@ -747,7 +762,7 @@ const _CSS = `
 .wd-rec-ready  { background: var(--success-color, #4caf50); }
 .wd-rec-idle   { background: var(--disabled-color, #bdbdbd); }
 /* Graph hover tooltip (follows the cursor) */
-.wd-gtip { position: fixed; z-index: 300; display: none; pointer-events: none; background: var(--card-background-color); color: var(--primary-text-color); border: 1px solid var(--divider-color); border-radius: 8px; padding: 7px 10px; font-size: 12px; line-height: 1.5; box-shadow: 0 4px 16px rgba(0,0,0,.4); white-space: nowrap; }
+.wd-gtip { position: fixed; z-index: 300; display: none; pointer-events: none; background: var(--card-background-color); color: var(--primary-text-color); border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); padding: 7px 10px; font-size: 12px; line-height: 1.5; box-shadow: 0 4px 16px rgba(0,0,0,.4); white-space: nowrap; }
 .wd-gtip b { font-weight: 700; }
 /* Status chart legend + toggles */
 .wd-leg { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: .8em; color: var(--secondary-text-color); }
@@ -763,7 +778,7 @@ const _CSS = `
 .wd-prog-tag.manual { background: rgba(255,152,0,.2); color: var(--warning-color, #ff9800); }
 /* Status-rich device selector */
 .wd-devbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-.wd-devcard { display: flex; align-items: center; gap: 9px; padding: 9px 13px; border-radius: 12px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color); cursor: pointer; font-size: .9em; }
+.wd-devcard { display: flex; align-items: center; gap: 9px; padding: 9px 13px; border-radius: var(--wd-radius-lg); border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color); cursor: pointer; font-size: .9em; }
 .wd-devcard.active { border-color: var(--primary-color); box-shadow: 0 0 0 1px var(--primary-color); }
 .wd-devadd { border-style: dashed; color: var(--secondary-text-color); }
 .wd-devadd:hover { border-color: var(--primary-color); color: var(--primary-color); }
@@ -772,7 +787,7 @@ const _CSS = `
 .wd-devname { font-weight: 600; }
 .wd-devsub { font-size: .72em; color: var(--secondary-text-color); }
 .wd-dbadge { font-size: .72em; padding: 1px 7px; border-radius: 10px; background: var(--secondary-background-color); }
-.wd-dbadge.rec { background: var(--error-color, #f44336); color: #fff; }
+.wd-dbadge.rec { background: var(--error-color, #f44336); color: var(--wd-white); }
 .wd-dbadge.sug { background: rgba(255,152,0,.22); }
 .wd-dbadge.fb { background: rgba(33,150,243,.22); }
 .wd-dbadge.conf { background: rgba(183,28,28,.18); color: var(--error-color, #b71c1c); }
@@ -791,7 +806,7 @@ const _CSS = `
 .wd-onboard-skip:hover { color: var(--primary-color); }
 /* Logs page */
 .wd-logbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
-.wd-logs { font-family: monospace; font-size: .76em; background: var(--secondary-background-color); border-radius: 8px; padding: 10px; height: 56vh; min-height: 140px; overflow: auto; resize: vertical; }
+.wd-logs { font-family: monospace; font-size: .76em; background: var(--secondary-background-color); border-radius: var(--wd-radius-md); padding: 10px; height: 56vh; min-height: 140px; overflow: auto; resize: vertical; }
 /* Grouped stat blocks (profile overview) */
 .wd-sg-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin: 4px 0 16px; }
 .wd-sg { background: var(--secondary-background-color); border-radius: 10px; padding: 14px; }
@@ -867,7 +882,7 @@ const _CSS = `
 .wd-log-drawer-body { flex: 1; overflow-y: auto; padding: 10px 14px; min-width: 0; }
 .wd-log-close-btn {
   background: none; border: none; cursor: pointer; color: inherit; opacity: .65;
-  padding: 3px 6px; border-radius: 4px; font-size: 1.1em; line-height: 1;
+  padding: 3px 6px; border-radius: var(--wd-radius-sm); font-size: 1.1em; line-height: 1;
 }
 .wd-log-close-btn:hover { opacity: 1; background: var(--secondary-background-color); }
 .wd-gear-btn.log-active { background: rgba(255,255,255,.22); }
@@ -899,8 +914,8 @@ const _CSS = `
 .wd-pg-score-bar-val { flex: 0 0 42px; text-align: right; font-variant-numeric: tabular-nums; color: var(--secondary-text-color); }
 .wd-pg-cand-row { display: flex; align-items: center; gap: 6px; font-size: .82em; margin: 3px 0; }
 .wd-pg-cand-name { flex: 0 0 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.wd-pg-cand-track { flex: 1; height: 7px; background: var(--secondary-background-color); border-radius: 4px; overflow: hidden; }
-.wd-pg-cand-fill { height: 100%; border-radius: 4px; }
+.wd-pg-cand-track { flex: 1; height: 7px; background: var(--secondary-background-color); border-radius: var(--wd-radius-sm); overflow: hidden; }
+.wd-pg-cand-fill { height: 100%; border-radius: var(--wd-radius-sm); }
 .wd-pg-cand-pct { flex: 0 0 34px; text-align: right; color: var(--secondary-text-color); }
 @media (max-width: 640px) {
   .wd-pg-bottom { grid-template-columns: 1fr; }
@@ -1475,7 +1490,7 @@ class HaWashdataPanel extends HTMLElement {
     // D4: pending optimistic deletions keyed by an undo token
     this._undoBuffer = new Map();
     this._undoSeq = 0;
-    // D5: bound keyboard-shortcut handler (attached once in _boot)
+    // Bound modal keydown handler (Escape / Tab-trap); attached once in _boot.
     this._kbdHandler = null;
     // D7: settings changelog cache
     this._settingsChangelog = null;
@@ -1534,7 +1549,7 @@ class HaWashdataPanel extends HTMLElement {
     this._evtUnsubs = [];
     // D4: commit any pending optimistic deletes before we go away.
     this._flushPendingDeletes();
-    // D5: remove the keyboard-shortcut listener.
+    // Remove the modal keydown listener.
     if (this._kbdHandler && this.shadowRoot) { this.shadowRoot.removeEventListener('keydown', this._kbdHandler); this._kbdHandler = null; }
   }
 
@@ -1550,8 +1565,8 @@ class HaWashdataPanel extends HTMLElement {
     this._gtip = document.createElement('div');
     this._gtip.className = 'wd-gtip';
     shadow.appendChild(this._gtip);
-    // D5: register keyboard shortcuts once on the (persistent) shadow root so the
-    // handler survives every _render() innerHTML swap. Removed on disconnect.
+    // Register the modal keydown handler once on the (persistent) shadow root so it
+    // survives every _render() innerHTML swap. Removed on disconnect.
     this._kbdHandler = (e) => this._onKeydown(e);
     shadow.addEventListener('keydown', this._kbdHandler);
     // Load per-user-language panel translations before first render.
@@ -1689,13 +1704,14 @@ class HaWashdataPanel extends HTMLElement {
     // D3: (re)load the first page and reset pagination state. The backend accepts
     // `offset` and returns `total`/`has_more`; older backends omit them, in which
     // case pagination degrades gracefully (no "Load more" button).
+    this._cyclesError = false;
     try {
       const res = await this._ws({ type: `${_DOMAIN}/get_device_cycles`, entry_id: entryId, limit: 100, offset: 0 });
       this._cycles = res.cycles || [];
       this._cycleOffset = this._cycles.length;
       this._cyclesTotal = (res.total != null) ? res.total : this._cycles.length;
       this._cyclesHasMore = (res.has_more != null) ? !!res.has_more : false;
-    } catch (_) { this._cycles = []; this._cycleOffset = 0; this._cyclesTotal = 0; this._cyclesHasMore = false; }
+    } catch (_) { this._cyclesError = true; this._cycles = []; this._cycleOffset = 0; this._cyclesTotal = 0; this._cyclesHasMore = false; }
   }
 
   // D3: fetch the next page and append (deduping by id so optimistic removals or
@@ -1864,13 +1880,12 @@ class HaWashdataPanel extends HTMLElement {
       { actionLabel: this._t('btn.undo', {}, 'Undo'), actionToken: token, duration: 10000 });
   }
 
-  // ── D5: keyboard shortcuts ──────────────────────────────────────────────────
+  // ── Modal key handling ───────────────────────────────────────────────────────
+  // Escape closes the top modal; Tab/Shift+Tab are trapped within the open dialog
+  // so focus can't escape to the page behind it. Only fires while a modal is open
+  // and focus is inside the shadow root (see _syncModalFocus).
   _onKeydown(e) {
     if (e.defaultPrevented) return;
-    const path = e.composedPath ? e.composedPath() : [];
-    const el = path[0] || e.target;
-    const tag = el && el.tagName;
-    const inField = !!(tag && (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable));
 
     // Escape always closes the top modal (even from a field inside it).
     if (e.key === 'Escape') {
@@ -1878,7 +1893,7 @@ class HaWashdataPanel extends HTMLElement {
       return;
     }
     // Trap Tab / Shift+Tab within the open modal so focus can't escape to the
-    // page behind it (must run before the in-field early-return below).
+    // page behind it.
     if (this._modal && e.key === 'Tab') {
       const sr = this.shadowRoot;
       const modalEl = sr && sr.querySelector('.wd-modal[role="dialog"]');
@@ -1896,25 +1911,24 @@ class HaWashdataPanel extends HTMLElement {
       }
       return;
     }
-    if (inField || e.metaKey || e.ctrlKey || e.altKey) return;
-
-    // Help overlay toggle.
-    if (e.key === '?') { e.preventDefault(); this._toggleKbdHelp(); return; }
-
-    // Letter shortcuts don't fire while any (other) modal is open.
-    if (this._modal) return;
-
-    const map = { o: 'status', h: 'history', p: 'profiles', s: 'settings', m: 'ml', g: 'playground', a: 'advanced', t: 'advanced' };
-    const target = map[(e.key || '').toLowerCase()];
-    if (!target) return;
-    if (!this._visibleTabIds().includes(target)) return;  // gracefully no-op for missing tabs
-    e.preventDefault();
-    if (this._tab !== target) { this._pendingSettings = {}; this._tab = target; this._fetchTabData(); }
-  }
-
-  _toggleKbdHelp() {
-    if (this._modal && this._modal.type === 'kbd-help') { this._modal = null; this._render(); }
-    else if (!this._modal) { this._modal = { type: 'kbd-help' }; this._render(); }
+    // Arrow-key roving navigation for the tab widget.
+    if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+      const sr = this.shadowRoot;
+      const focused = sr && sr.activeElement;
+      if (focused && focused.classList.contains('wd-tab')) {
+        const tabs = [...sr.querySelectorAll('button.wd-tab')];
+        const cur = tabs.indexOf(focused);
+        if (cur === -1) return;
+        let next = cur;
+        if (e.key === 'ArrowRight') next = (cur + 1) % tabs.length;
+        else if (e.key === 'ArrowLeft') next = (cur - 1 + tabs.length) % tabs.length;
+        else if (e.key === 'Home') next = 0;
+        else if (e.key === 'End') next = tabs.length - 1;
+        e.preventDefault();
+        tabs[next].click();
+        tabs[next].focus();
+      }
+    }
   }
 
   // Fetch the ML shadow assessment once and index it by cycle id, so the
@@ -1979,13 +1993,15 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   async _fetchSuggestions(entryId) {
+    this._suggestionsError = false;
     try {
       const res = await this._ws({ type: `${_DOMAIN}/get_suggestions`, entry_id: entryId });
       this._suggestions = res.suggestions || [];
-    } catch (_) { this._suggestions = []; }
+    } catch (_) { this._suggestionsError = true; this._suggestions = []; }
   }
 
   async _fetchProfiles(entryId) {
+    this._profilesError = false;
     try {
       const r = await this._ws({ type: `${_DOMAIN}/get_profiles`, entry_id: entryId });
       this._profiles = r.profiles || [];
@@ -1993,7 +2009,7 @@ class HaWashdataPanel extends HTMLElement {
       this._profileTrends = r.profile_trends || {};
       this._coverageGaps = r.coverage_gaps || {};
       this._profileAdvisories = r.profile_advisories || [];
-    } catch (_) { /* keep previous */ }
+    } catch (_) { this._profilesError = true; /* keep previous data */ }
     return this._profiles;
   }
 
@@ -2012,10 +2028,11 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   async _fetchProfileGroups(entryId) {
+    this._profileGroupsError = false;
     try {
       const r = await this._ws({ type: `${_DOMAIN}/get_profile_groups`, entry_id: entryId });
       this._profileGroups = { groups: r.groups || [], suggestions: r.suggestions || [], min_cohesion: r.min_cohesion || 0.85 };
-    } catch (_) { this._profileGroups = { groups: [], suggestions: [], min_cohesion: 0.85 }; }
+    } catch (_) { this._profileGroupsError = true; this._profileGroups = { groups: [], suggestions: [], min_cohesion: 0.85 }; }
     return this._profileGroups;
   }
 
@@ -2514,7 +2531,6 @@ class HaWashdataPanel extends HTMLElement {
         <div><h1>WashData</h1><div class="wd-sub">${this._t('msg.appliance_monitor', {}, 'Appliance monitor')}</div></div>
         ${working}
         <span style="flex:1"></span>
-        <button class="wd-gear-btn" data-action="kbd-help" title="${_esc(this._t('btn.kbd_help', {}, 'Keyboard shortcuts'))}" aria-label="${_esc(this._t('btn.kbd_help', {}, 'Keyboard shortcuts'))}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg></button>
         ${this._isAdmin() ? `<button class="wd-gear-btn${this._logOpen ? ' log-active' : ''}" data-action="toggle-log-drawer" title="${_esc(this._t('hdr.logs', {}, 'Logs'))}" aria-label="Logs" aria-pressed="${this._logOpen}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16"/><path d="M4 10h16"/><path d="M4 15h10"/><path d="M4 20h7"/></svg></button>` : ''}
       </div>
     `;
@@ -2534,13 +2550,13 @@ class HaWashdataPanel extends HTMLElement {
     const visible = this._visibleTabIds();
     if (!visible.includes(this._tab)) this._tab = 'status';
     const tabBtns = visible.map(id =>
-      `<button class="wd-tab ${this._tab === id ? 'active' : ''}" data-tab="${id}">${labels[id]}</button>`
+      `<button class="wd-tab ${this._tab === id ? 'active' : ''}" role="tab" id="wd-tab-${id}" aria-selected="${this._tab === id}" tabindex="${this._tab === id ? '0' : '-1'}" data-tab="${id}">${labels[id]}</button>`
     ).join('');
     const pane = (id, html) => visible.includes(id)
-      ? `<div class="wd-pane ${this._tab === id && !this._tabLoading ? 'active' : ''}">${html}</div>` : '';
+      ? `<div class="wd-pane ${this._tab === id && !this._tabLoading ? 'active' : ''}" role="tabpanel" aria-labelledby="wd-tab-${id}">${html}</div>` : '';
     return `
       ${this._htmlDeviceBar()}
-      <div class="wd-tabs">${tabBtns}</div>
+      <div class="wd-tabs" role="tablist">${tabBtns}</div>
       ${this._tabLoading ? `<div class="wd-empty" style="padding:24px"><div class="wd-icon">⏳</div>${this._t('msg.loading', {}, 'Loading…')}</div>` : ''}
       ${pane('status', this._htmlStatus())}
       ${pane('history', this._htmlHistory())}
@@ -2610,11 +2626,11 @@ class HaWashdataPanel extends HTMLElement {
 
     const attn = [];
     if (dev.recording && this._canEdit()) attn.push(`<div class="wd-attn-card"><span class="wd-attn-icon">●</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.recording_in_progress', {}, 'Recording in progress')}</div><div class="wd-attn-sub">${this._t('msg.see_recorder', {}, 'See recorder widget below')}</div></div></div>`);
-    if (dev.feedback_count && this._canEdit()) attn.push(`<div class="wd-attn-card" data-action="goto-feedbacks"><span class="wd-attn-icon">💬</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.feedback_cycles_pending', {n: dev.feedback_count, s: dev.feedback_count > 1 ? 's' : ''}, `${dev.feedback_count} cycle${dev.feedback_count > 1 ? 's' : ''} to review`)}</div><div class="wd-attn-sub">${this._t('msg.review_to_cycles', {}, 'Open the Cycles review queue')}</div></div></div>`);
+    if (dev.feedback_count && this._canEdit()) attn.push(`<button class="wd-attn-card" type="button" data-action="goto-feedbacks"><span class="wd-attn-icon">💬</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.feedback_cycles_pending', {n: dev.feedback_count, s: dev.feedback_count > 1 ? 's' : ''}, `${dev.feedback_count} cycle${dev.feedback_count > 1 ? 's' : ''} to review`)}</div><div class="wd-attn-sub">${this._t('msg.review_to_cycles', {}, 'Open the Cycles review queue')}</div></div></button>`);
     const _confKeys = this._conflictKeysFromOpts();
     if (_confKeys.size && this._canEdit()) {
       const n = _confKeys.size, s = n > 1 ? 's' : '';
-      attn.push(`<div class="wd-attn-card" style="border-color:var(--error-color,#b71c1c)" data-action="goto-conflicts"><span class="wd-attn-icon">⚠</span><div class="wd-attn-body"><div class="wd-attn-title" style="color:var(--error-color,#b71c1c)">${this._t('conflict.attn_title', {n, s}, `${n} setting conflict${s}`)}</div><div class="wd-attn-sub">${this._t('conflict.attn_sub', {}, 'Fix conflicts before saving')}</div></div></div>`);
+      attn.push(`<button class="wd-attn-card" type="button" style="border-color:var(--error-color,#b71c1c)" data-action="goto-conflicts"><span class="wd-attn-icon">⚠</span><div class="wd-attn-body"><div class="wd-attn-title" style="color:var(--error-color,#b71c1c)">${this._t('conflict.attn_title', {n, s}, `${n} setting conflict${s}`)}</div><div class="wd-attn-sub">${this._t('conflict.attn_sub', {}, 'Fix conflicts before saving')}</div></div></button>`);
     }
     const _mlSugCount = Object.entries(this._mlSettings || {}).filter(([key, mlc]) =>
       mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, this._opts[key])
@@ -2624,7 +2640,7 @@ class HaWashdataPanel extends HTMLElement {
       const parts = [];
       if (dev.suggestions_count) parts.push(this._t('lbl.n_classic_suggestions', {n: dev.suggestions_count}, `${dev.suggestions_count} classic`));
       if (_mlSugCount) parts.push(this._t('lbl.n_ml_suggestions', {n: _mlSugCount}, `${_mlSugCount} ML`));
-      attn.push(`<div class="wd-attn-card" data-action="goto-suggestions"><span class="wd-attn-icon">💡</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('lbl.n_tuning_suggestions', {n: total}, `${total} tuning suggestion${total > 1 ? 's' : ''}`)}</div><div class="wd-attn-sub">${parts.join(' · ')} · ${this._t('msg.review_in_settings', {}, 'Review in Settings')}</div></div></div>`);
+      attn.push(`<button class="wd-attn-card" type="button" data-action="goto-suggestions"><span class="wd-attn-icon">💡</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('lbl.n_tuning_suggestions', {n: total}, `${total} tuning suggestion${total > 1 ? 's' : ''}`)}</div><div class="wd-attn-sub">${parts.join(' · ')} · ${this._t('msg.review_in_settings', {}, 'Review in Settings')}</div></div></button>`);
     }
     const attnHtml = attn.length ? `<div class="wd-attn">${attn.join('')}</div>` : '';
 
@@ -2674,8 +2690,8 @@ class HaWashdataPanel extends HTMLElement {
     // Logs, and the rest of the Advanced drawer). They open the gear drawer at
     // the relevant subtab so the merged 4-tab layout stays discoverable.
     const advCards = [];
-    if (this._canEdit()) advCards.push(`<div class="wd-attn-card" data-action="open-advanced" data-sub="diagnostics"><span class="wd-attn-icon">🩺</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('hdr.logs_diagnostics', {}, 'Diagnostics')}</div><div class="wd-attn-sub">${this._t('msg.storage_diagnostics', {}, 'Storage stats, maintenance, export/import')}</div></div></div>`);
-    advCards.push(`<div class="wd-attn-card" data-action="open-advanced" data-sub="prefs"><span class="wd-attn-icon">⚙️</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('tab.advanced', {}, 'Advanced')}</div><div class="wd-attn-sub">${this._isAdmin() ? this._t('msg.preferences_admin', {}, 'Preferences, panel & access control') : this._t('msg.preferences_adv', {}, 'Preferences')}</div></div></div>`);
+    if (this._canEdit()) advCards.push(`<button class="wd-attn-card" type="button" data-action="open-advanced" data-sub="diagnostics"><span class="wd-attn-icon">🩺</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('hdr.logs_diagnostics', {}, 'Diagnostics')}</div><div class="wd-attn-sub">${this._t('msg.storage_diagnostics', {}, 'Storage stats, maintenance, export/import')}</div></div></button>`);
+    advCards.push(`<button class="wd-attn-card" type="button" data-action="open-advanced" data-sub="prefs"><span class="wd-attn-icon">⚙️</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('tab.advanced', {}, 'Advanced')}</div><div class="wd-attn-sub">${this._isAdmin() ? this._t('msg.preferences_admin', {}, 'Preferences, panel & access control') : this._t('msg.preferences_adv', {}, 'Preferences')}</div></div></button>`);
     const advHtml = `<div class="wd-card"><div class="wd-card-title">${this._t('hdr.tools_and_data', {}, 'Tools & Data')}</div><div class="wd-attn" style="margin-bottom:0;margin-top:12px">${advCards.join('')}</div></div>`;
 
     const cycleCtrlHtml = (() => {
@@ -2993,7 +3009,8 @@ class HaWashdataPanel extends HTMLElement {
         ${loadMore}
       </div>`;
 
-    return cyclesHtml;
+    const cyclesErrorBanner = this._cyclesError ? `<div class="wd-error-state"><span>${this._t('msg.fetch_error', {}, 'Failed to load data.')}</span><button class="wd-btn" type="button" data-action="retry-cycles">${this._t('btn.retry', {}, 'Retry')}</button></div>` : '';
+    return cyclesErrorBanner + cyclesHtml;
   }
 
   // ── Profiles tab ──────────────────────────────────────────────────────────
@@ -3055,10 +3072,10 @@ class HaWashdataPanel extends HTMLElement {
       ? `<canvas class="wd-prof-spark" data-spark-prof="${_esc(p.name)}" width="64" height="20" aria-label="${_esc(this._t('lbl.sparkline', { name: p.name }, 'Recent cycle-duration trend'))}"></canvas>`
       : '';
     return `
-      <div class="wd-profile-card" data-action="open-profile" data-pname="${_esc(p.name)}">
+      <button class="wd-profile-card" type="button" data-action="open-profile" data-pname="${_esc(p.name)}">
         <div class="wd-profile-name">${_esc(p.name)}${badges ? ' ' + badges : ''}${spark}</div>
         <div class="wd-profile-meta">${p.cycle_count || 0} cycles · ${dur}${energy}${total}${cost}</div>
-      </div>`;
+      </button>`;
   }
 
   // D2: most-recent (≤10) cycle durations for a profile, oldest→newest (so the
@@ -3201,9 +3218,10 @@ class HaWashdataPanel extends HTMLElement {
       ['phase-catalog', this._t('tab.subtab_phase_catalog', {}, 'Phase Catalog')],
     ].map(([id, lbl]) => `<button class="wd-subtab ${this._profSubtab === id ? 'active' : ''}" data-proftab="${id}">${lbl}</button>`).join('');
 
+    const profilesErrorBanner = (this._profilesError || this._profileGroupsError) ? `<div class="wd-error-state"><span>${this._t('msg.fetch_error', {}, 'Failed to load data.')}</span><button class="wd-btn" type="button" data-action="retry-profiles">${this._t('btn.retry', {}, 'Retry')}</button></div>` : '';
     return `
       <div class="wd-subtabs">${subtabBtns}</div>
-      ${this._profSubtab === 'phase-catalog' ? this._htmlPhases() : profilesHtml}
+      ${this._profSubtab === 'phase-catalog' ? this._htmlPhases() : (profilesErrorBanner + profilesHtml)}
     `;
   }
 
@@ -3286,6 +3304,7 @@ class HaWashdataPanel extends HTMLElement {
     const o = Object.assign({}, this._opts, this._pendingSettings);
     if (!Object.keys(o).length)
       return `<div class="wd-empty"><div class="wd-icon">⚙️</div>${this._t('msg.loading_settings', {}, 'Loading settings…')}</div>`;
+    const suggestionsErrorBanner = this._suggestionsError ? `<div class="wd-error-state"><span>${this._t('msg.fetch_error', {}, 'Failed to load data.')}</span><button class="wd-btn" type="button" data-action="retry-suggestions">${this._t('btn.retry', {}, 'Retry')}</button></div>` : '';
     const level = this._settingsLevel();
     const basicMode = level === 'basic';
 
@@ -3360,6 +3379,7 @@ class HaWashdataPanel extends HTMLElement {
     const formContent = q ? this._htmlSettingsSearch(o, q) : (sugOnly ? this._htmlSettingsSugOnly(o) : this._htmlSettingsSection(o));
 
     return `
+      ${suggestionsErrorBanner}
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap">
         <div class="wd-card-title" style="margin:0">${this._t('tab.settings', {}, 'Settings')}${this._mlSettingsLoading ? ` <span style="font-size:.6em;color:var(--secondary-text-color);font-weight:400">${this._t('msg.ml_loading', {}, 'loading ML…')}</span>` : ''}</div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${levelToggle}${analyzeBtn}</div>
@@ -5037,7 +5057,7 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-diag-stat"><div class="wd-diag-val">${d.file_size_kb != null ? d.file_size_kb.toFixed(1) : '-'}</div><div class="wd-diag-lbl">${this._t('lbl.file_kb', {}, 'File (kB)')}</div></div>
       </div>`;
     } else {
-      statsHtml = '<p class="wd-info">Loading diagnostics…</p>';
+      statsHtml = `<p class="wd-info">${this._t('msg.loading', {}, 'Loading…')}</p>`;
     }
     return `
       <div class="wd-card">
@@ -5743,23 +5763,6 @@ class HaWashdataPanel extends HTMLElement {
           <select id="wd-relabel-profile"><option value="">${this._t('lbl.remove_label', {}, '- Remove label -')}</option>${this._profileOptions()}</select></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="bulk-relabel-ok">${this._t('btn.apply_label', {}, 'Apply Label')}</button></div>`;
-    } else if (m.type === 'kbd-help') {
-      // D5: keyboard-shortcut reference overlay.
-      const rows = [
-        ['?', this._t('msg.kbd_help', {}, 'Show / hide this help')],
-        ['O', this._t('msg.kbd_overview', {}, 'Go to Overview')],
-        ['H', this._t('msg.kbd_cycles', {}, 'Go to Cycles')],
-        ['P', this._t('msg.kbd_profiles', {}, 'Go to Profiles')],
-        ['S', this._t('msg.kbd_settings', {}, 'Go to Settings')],
-        ['M', this._t('msg.kbd_ml', {}, 'Go to ML Training')],
-        ['G', this._t('msg.kbd_playground', {}, 'Go to Playground')],
-        ['A', this._t('msg.kbd_advanced', {}, 'Go to Advanced')],
-        ['Esc', this._t('msg.kbd_escape', {}, 'Close the open dialog')],
-      ].map(([k, d]) => `<tr><td style="width:64px"><kbd class="wd-kbd">${_esc(k)}</kbd></td><td>${_esc(d)}</td></tr>`).join('');
-      body = `<h2>${this._t('hdr.kbd_shortcuts', {}, 'Keyboard Shortcuts')}</h2>
-        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.kbd_help_intro', {}, 'Shortcuts are ignored while typing in a field. Only tabs that exist for this device respond.')}</p>
-        <table class="wd-table"><tbody>${rows}</tbody></table>
-        <div class="wd-modal-actions"><button class="wd-btn wd-btn-primary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button></div>`;
     }
     return `<div class="wd-overlay"><div class="wd-modal" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${body}</div></div>`;
   }
@@ -7458,8 +7461,6 @@ class HaWashdataPanel extends HTMLElement {
         try { await this._loadMoreCycles(eid); }
         catch (e) { this._showToast(this._t('toast.load_more_failed', { error: e.message || e }, 'Could not load more: ' + (e.message || e)), 'error'); }
       });
-    } else if (a === 'kbd-help') {
-      this._toggleKbdHelp();
     } else if (a === 'pg-load') {
       this._pgLoad();
     } else if (a === 'pg-play') {
@@ -7504,6 +7505,12 @@ class HaWashdataPanel extends HTMLElement {
       const ids = Array.from(this._cycleSel);
       if (!ids.length) return;
       this._deleteCyclesWithUndo(eid, ids);
+    } else if (a === 'retry-cycles') {
+      this._fetchCycles(eid).then(() => this._render());
+    } else if (a === 'retry-profiles') {
+      Promise.all([this._fetchProfiles(eid), this._fetchProfileGroups(eid)]).then(() => this._render());
+    } else if (a === 'retry-suggestions') {
+      this._fetchSuggestions(eid).then(() => this._render());
     } else if (a === 'goto-suggestions') {
       this._settingsSugOnly = true; this._tab = 'settings'; this._fetchTabData();
     } else if (a === 'goto-conflicts') {

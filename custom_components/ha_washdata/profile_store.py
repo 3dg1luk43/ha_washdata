@@ -743,6 +743,15 @@ class WashDataStore(Store[JSONDict]):
                 flagged,
             )
 
+        if old_major_version < 9:
+            # Pre-initialize additive top-level keys so they are present from the
+            # first load rather than appearing lazily on first use. Idempotent:
+            # setdefault leaves existing values untouched.
+            _LOGGER.info("Migrating storage from v%s to v9", old_major_version)
+            old_data.setdefault("lifetime_energy_wh", 0.0)
+            old_data.setdefault("settings_changelog", [])
+            old_data.setdefault("maintenance_log", [])
+
         return old_data
 
     async def get_storage_stats(self) -> dict[str, Any]:

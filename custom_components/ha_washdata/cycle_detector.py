@@ -32,7 +32,9 @@ from .const import (
     DEFAULT_MAX_DEFERRAL_SECONDS,
     DEFAULT_DEFER_FINISH_CONFIDENCE,
     DISHWASHER_END_SPIKE_MIN_PROGRESS,
+    DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     DISHWASHER_END_SPIKE_WAIT_SECONDS,
+    DISHWASHER_MATCH_FREEZE_QUIET_SECONDS,
     DISHWASHER_MIN_CYCLE_DURATION_S,
     TERMINAL_DROP_OFF_DELAY_SECONDS,
 )
@@ -65,7 +67,7 @@ ML_END_GUARD_MAX_DEFER_SECONDS = 1800.0  # cap the extra wait the guard may add 
 ML_PROVIDER_THROTTLE_SECONDS = 30.0
 if not 0 < DISHWASHER_END_SPIKE_MIN_PROGRESS < 1:
     raise ValueError("DISHWASHER_END_SPIKE_MIN_PROGRESS must be a fraction in (0, 1)")
-from .signal_processing import integrate_wh
+from .signal_processing import energy_gap_threshold_s, integrate_wh
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -350,6 +352,22 @@ class CycleDetector:
         if not self._profile_matcher:
             return
         if not self._power_readings:
+            return
+
+        # Terminal-tail match freeze (dishwashers): once we are in ENDING with a
+        # profile already matched and power has been sustained-quiet, the active
+        # cycle is over - only the passive drain/dry tail remains. Re-matching on
+        # the growing idle tail inflates the observed duration and drifts the
+        # Stage-4 duration-agreement toward a LONGER near-duplicate profile,
+        # flipping the label and stalling smart-termination on the ambiguity gate.
+        # Keep the active-phase match instead. Self-correcting: a real resume sends
+        # a high reading that leaves ENDING, so this guard stops applying.
+        if (
+            self._state == STATE_ENDING
+            and self._config.device_type == "dishwasher"
+            and self._matched_profile
+            and self._time_below_threshold >= DISHWASHER_MATCH_FREEZE_QUIET_SECONDS
+        ):
             return
 
         # Rate limiting
@@ -1182,9 +1200,31 @@ class CycleDetector:
                             # guarantees the cycle terminates eventually for
                             # dishwashers that have no pump-out at all.
                             end_spike_seen = getattr(self, "_end_spike_seen", False)
+                            # Release the pump-out wait once EITHER the cycle has run
+                            # DISHWASHER_END_SPIKE_WAIT_SECONDS past its expected
+                            # duration OR it has already reached its expected duration
+                            # AND power has since stayed sustained-quiet for
+                            # DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS.  The second arm
+                            # closes cycles that finish shorter than the profile's
+                            # (drifted-up) average and whose terminal pump-out lands
+                            # *before* the drop into ENDING, so no in-ENDING end-spike
+                            # ever arms - without it they hang to the fallback timeout
+                            # (~30-44 min late) and their label can even drift to a longer
+                            # near-duplicate profile.  It is gated on
+                            # ``current_duration >= expected`` so it can NOT fire during a
+                            # long passive-drying phase that precedes a genuinely-late
+                            # pump-out (e.g. an ECO cycle quiet from 50%-99% of expected):
+                            # while still short of expected the cycle keeps waiting, and a
+                            # real pump-out at ~99% arms the end-spike first.  Takes the
+                            # SOONER of the two anchors, so it can only ever shorten the
+                            # wait, never extend it.
                             past_wait_period = current_duration >= (
                                 self._expected_duration
                                 + DISHWASHER_END_SPIKE_WAIT_SECONDS
+                            ) or (
+                                current_duration >= self._expected_duration
+                                and self._time_below_threshold
+                                >= DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
                             )
                             if (
                                 self._config.device_type == "dishwasher"
@@ -1300,7 +1340,8 @@ class CycleDetector:
                     # Compute energy in recent window
                     recent_ts = np.array([r[0].timestamp() for r in recent_window])
                     recent_p = np.array([r[1] for r in recent_window])
-                    recent_e = integrate_wh(recent_ts, recent_p)
+                    max_gap_s = energy_gap_threshold_s(recent_ts)
+                    recent_e = integrate_wh(recent_ts, recent_p, max_gap_s=max_gap_s)
 
                     if recent_e <= self.config.end_energy_threshold:
                         start_time = self._current_cycle_start or timestamp
@@ -1553,6 +1594,19 @@ class CycleDetector:
         # past_wait_period kicks in and finalises; below it, the fallback
         # timeout's energy gate is the safety net for cycles whose pump-out
         # never arrives.
+        # Mirrors the STATE_ENDING pump-out wait so both paths release together.
+        # Keep deferring while we are still inside the wait window, UNLESS the cycle
+        # has already reached its expected duration and has since been sustained-quiet
+        # for DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS - in which case any terminal
+        # pump-out has already happened, so a cycle that finished slightly short of the
+        # profile's (drifted-up) average is released here instead of hanging to
+        # expected + 30 min.  The ``duration >= expected`` gate keeps a long
+        # passive-drying phase that still precedes a late pump-out deferred.
+        quiet_released = (
+            duration >= self._expected_duration
+            and self._time_below_threshold
+            >= DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
+        )
         if (
             self._config.device_type == "dishwasher"
             and self._matched_profile
@@ -1560,13 +1614,15 @@ class CycleDetector:
             and not self._end_spike_seen
             and duration
             < (self._expected_duration + DISHWASHER_END_SPIKE_WAIT_SECONDS)
+            and not quiet_released
         ):
             self._logger.debug(
                 "Deferring cycle finish: dishwasher waiting for end-of-cycle "
-                "pump-out (%.0fs < expected %.0fs + %.0fs wait, profile: %s)",
+                "pump-out (%.0fs < expected %.0fs + %.0fs wait, quiet %.0fs, profile: %s)",
                 duration,
                 self._expected_duration,
                 DISHWASHER_END_SPIKE_WAIT_SECONDS,
+                self._time_below_threshold,
                 self._matched_profile,
             )
             return True
