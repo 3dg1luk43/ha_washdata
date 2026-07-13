@@ -34,6 +34,10 @@ export interface ApplySuggestionsResponse {
   applied: string[];
 }
 
+export interface CancelTaskResponse {
+  cancelled: boolean;
+}
+
 export interface ClearDebugDataResponse {
   success: boolean;
   count: number;
@@ -259,6 +263,10 @@ export interface GetSuggestionsResponse {
   suggestions: Record<string, unknown>[];
 }
 
+export interface ListTasksResponse {
+  tasks: TaskSnapshot[];
+}
+
 export interface OkResponse {
   ok: boolean;
 }
@@ -302,9 +310,46 @@ export interface ReprocessHistoryResponse {
   health_recomputed?: number;
 }
 
+export interface RunPlaygroundCycleDetailResponse {
+  cycle_id?: unknown;
+  label?: string | null;
+  duration_s?: number | null;
+  config_summary?: Record<string, unknown>;
+  series?: Record<string, unknown>[];
+  events?: Record<string, unknown>[];
+  alerts?: Record<string, unknown>[];
+  outcome?: Record<string, unknown>;
+  error?: string;
+}
+
+export interface RunPlaygroundHistoryResponse {
+  rows?: Record<string, unknown>[];
+  summary?: Record<string, unknown>;
+  baseline_rows?: Record<string, unknown>[];
+  baseline_summary?: Record<string, unknown>;
+  diff?: Record<string, string[]>;
+}
+
 export interface RunPlaygroundSimulationResponse {
   results: Record<string, unknown>[];
   summary: PlaygroundSummary;
+}
+
+export interface RunPlaygroundSweepResponse {
+  param?: string;
+  objective?: string;
+  points?: Record<string, unknown>[];
+  current_value?: unknown;
+  best_value?: unknown;
+  best_metric?: number | null;
+  param_x?: string;
+  param_y?: string;
+  x_values?: number[];
+  y_values?: number[];
+  grid?: unknown[][];
+  best?: Record<string, unknown>;
+  current?: Record<string, unknown>;
+  error?: string;
 }
 
 export interface RunSuggestionAnalysisResponse {
@@ -312,8 +357,33 @@ export interface RunSuggestionAnalysisResponse {
   count?: number;
 }
 
+export interface StartTaskResponse {
+  task_id: string;
+}
+
+export interface SubscribeTasksResponse {
+}
+
 export interface SuccessResponse {
   success: boolean;
+}
+
+export interface TaskSnapshot {
+  id?: string;
+  entry_id?: string;
+  kind?: string;
+  label?: string;
+  state?: string;
+  done?: number;
+  total?: number;
+  progress?: number | null;
+  eta_s?: number | null;
+  started_at?: number;
+  updated_at?: number;
+  finished_at?: number | null;
+  error?: string | null;
+  has_result?: boolean;
+  result?: unknown;
 }
 
 export interface TriggerMlTrainingResponse {
@@ -673,10 +743,65 @@ export interface RunPlaygroundSimulationRequest {
   concurrency?: number;
 }
 
+export interface RunPlaygroundCycleDetailRequest {
+  entry_id: string;
+  cycle_id: string;
+  settings_override?: Record<string, unknown>;
+}
+
+export interface RunPlaygroundHistoryRequest {
+  entry_id: string;
+  cycle_ids?: string[];
+  settings_override?: Record<string, unknown>;
+  concurrency?: number;
+}
+
+export interface RunPlaygroundSweepRequest {
+  entry_id: string;
+  param: string;
+  values: number[];
+  objective: string;
+  cycle_ids?: string[];
+  concurrency?: number;
+  param_y?: string;
+  values_y?: number[];
+}
+
 export interface GetDtwDebugRequest {
   entry_id: string;
   cycle_id: string;
   profile_name?: string | null;
+}
+
+export interface ListTasksRequest {
+  entry_id?: string | null;
+}
+
+export interface SubscribeTasksRequest {
+  entry_id?: string | null;
+}
+
+export interface CancelTaskRequest {
+  task_id: string;
+}
+
+export interface GetTaskResultRequest {
+  task_id: string;
+}
+
+export interface StartPlaygroundHistoryRequest {
+  entry_id: string;
+  cycle_ids?: string[];
+  settings_override?: Record<string, unknown>;
+}
+
+export interface StartPlaygroundSweepRequest {
+  entry_id: string;
+  param: string;
+  values: number[];
+  objective: string;
+  param_y?: string | null;
+  values_y?: number[];
 }
 
 // ── Command maps ───────────────────────────────────────────────────────────
@@ -751,7 +876,16 @@ export interface WashDataWsRequests {
   "ha_washdata/resume_cycle": ResumeCycleRequest;
   "ha_washdata/terminate_cycle": TerminateCycleRequest;
   "ha_washdata/run_playground_simulation": RunPlaygroundSimulationRequest;
+  "ha_washdata/run_playground_cycle_detail": RunPlaygroundCycleDetailRequest;
+  "ha_washdata/run_playground_history": RunPlaygroundHistoryRequest;
+  "ha_washdata/run_playground_sweep": RunPlaygroundSweepRequest;
   "ha_washdata/get_dtw_debug": GetDtwDebugRequest;
+  "ha_washdata/list_tasks": ListTasksRequest;
+  "ha_washdata/subscribe_tasks": SubscribeTasksRequest;
+  "ha_washdata/cancel_task": CancelTaskRequest;
+  "ha_washdata/get_task_result": GetTaskResultRequest;
+  "ha_washdata/start_playground_history": StartPlaygroundHistoryRequest;
+  "ha_washdata/start_playground_sweep": StartPlaygroundSweepRequest;
 }
 
 export interface WashDataWsResponses {
@@ -824,5 +958,14 @@ export interface WashDataWsResponses {
   "ha_washdata/resume_cycle": OkResponse;
   "ha_washdata/terminate_cycle": OkResponse;
   "ha_washdata/run_playground_simulation": RunPlaygroundSimulationResponse;
+  "ha_washdata/run_playground_cycle_detail": RunPlaygroundCycleDetailResponse;
+  "ha_washdata/run_playground_history": RunPlaygroundHistoryResponse;
+  "ha_washdata/run_playground_sweep": RunPlaygroundSweepResponse;
   "ha_washdata/get_dtw_debug": GetDtwDebugResponse;
+  "ha_washdata/list_tasks": ListTasksResponse;
+  "ha_washdata/subscribe_tasks": SubscribeTasksResponse;
+  "ha_washdata/cancel_task": CancelTaskResponse;
+  "ha_washdata/get_task_result": TaskSnapshot;
+  "ha_washdata/start_playground_history": StartTaskResponse;
+  "ha_washdata/start_playground_sweep": StartTaskResponse;
 }

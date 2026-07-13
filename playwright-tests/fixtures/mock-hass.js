@@ -17,6 +17,15 @@
 window.__ws_handlers = {};
 window.__ws_calls = [];       // log of all WS calls for test assertions
 window.__ws_errors = {};      // command → error to throw (simulates backend failures)
+window.__ws_tasks = [];       // background-task snapshots (registry mock)
+window.__ws_task_subs = [];   // active subscribe_tasks callbacks
+
+// Push/replace a task snapshot and notify subscribers (mirrors the real registry).
+window.__emit_task = function (task) {
+  const i = window.__ws_tasks.findIndex((t) => t.id === task.id);
+  if (i >= 0) window.__ws_tasks[i] = task; else window.__ws_tasks.push(task);
+  (window.__ws_task_subs || []).forEach((cb) => { try { cb({ type: 'task', task: task }); } catch (e) { /* ignore */ } });
+};
 
 window.__create_mock_hass = function (extra) {
   extra = extra || {};
@@ -26,6 +35,36 @@ window.__create_mock_hass = function (extra) {
         window.__ws_calls.push(msg);
         const err = window.__ws_errors[msg.type];
         if (err) return Promise.reject(err);
+        // Background-task registry mock: start_* kicks off a task that completes
+        // ~immediately (setTimeout 0), emitting a done `task` event to subscribers
+        // and storing the result for get_task_result. Reuses the existing static
+        // run_playground_* result data as the task payload.
+        if (msg.type === 'ha_washdata/start_playground_history' ||
+            msg.type === 'ha_washdata/start_playground_sweep') {
+          const isHist = msg.type.slice(-7) === 'history';
+          const resKey = isHist ? 'ha_washdata/run_playground_history' : 'ha_washdata/run_playground_sweep';
+          const result = window.__ws_handlers[resKey] || {};
+          const id = 'task-' + (window.__ws_tasks.length + 1) + (isHist ? '-h' : '-s');
+          const task = {
+            id: id, entry_id: msg.entry_id, kind: isHist ? 'pg_history' : 'pg_sweep',
+            label: isHist ? 'Test on history' : 'Optimize', state: 'done',
+            done: 1, total: 1, progress: 1, eta_s: null, has_result: true,
+            updated_at: Date.now() / 1000, result: result,
+          };
+          window.__task_results[id] = task;
+          setTimeout(function () { window.__emit_task(task); }, 0);
+          return Promise.resolve({ task_id: id });
+        }
+        if (msg.type === 'ha_washdata/get_task_result') {
+          const t = window.__task_results[msg.task_id];
+          return t ? Promise.resolve(t) : Promise.reject({ code: 'not_found', message: 'Task not found' });
+        }
+        if (msg.type === 'ha_washdata/list_tasks') {
+          return Promise.resolve({ tasks: (window.__ws_tasks || []).slice() });
+        }
+        if (msg.type === 'ha_washdata/cancel_task') {
+          return Promise.resolve({ cancelled: true });
+        }
         const h = window.__ws_handlers[msg.type];
         if (h == null) {
           console.warn('[mock-hass] No handler for', msg.type);
@@ -38,7 +77,15 @@ window.__create_mock_hass = function (extra) {
           return Promise.reject(e);
         }
       },
-      subscribeMessage: function (_cb, _msg) {
+      subscribeMessage: function (cb, msg) {
+        if (msg && msg.type === 'ha_washdata/subscribe_tasks') {
+          window.__ws_task_subs.push(cb);
+          // Emit the current snapshot (like the real subscribe_tasks handler).
+          (window.__ws_tasks || []).forEach((t) => { try { cb({ type: 'task', task: t }); } catch (e) { /* ignore */ } });
+          return Promise.resolve(function () {
+            window.__ws_task_subs = (window.__ws_task_subs || []).filter((f) => f !== cb);
+          });
+        }
         return Promise.resolve(function () {});
       },
     },
@@ -64,6 +111,9 @@ window.__boot_panel = function (handlers, hassExtra) {
   window.__ws_handlers = handlers;
   window.__ws_calls = [];
   window.__ws_errors = {};
+  window.__ws_tasks = [];
+  window.__ws_task_subs = [];
+  window.__task_results = {};
 
   const el = document.createElement('ha-washdata-panel');
   el.setAttribute('id', 'wd-panel');

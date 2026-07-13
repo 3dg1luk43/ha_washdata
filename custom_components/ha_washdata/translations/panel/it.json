@@ -145,7 +145,10 @@
     "use": "Usa",
     "wipe_all": "Cancella tutti i dati",
     "delete_selected": "Elimina selezionati ({n})",
-    "group_suggest": "Gruppo {n}: {members}"
+    "group_suggest": "Gruppo {n}: {members}",
+    "pg_apply_best": "Applica migliore",
+    "pg_apply_to_settings": "Salva nelle impostazioni",
+    "pg_apply_to_settings_tip": "Copia i valori che hai modificato qui nelle impostazioni attive di questo dispositivo"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Attiva/disattiva la barra laterale di Home Assistant",
     "tools_and_data": "Strumenti e dati",
     "wipe_history": "Cancella la storia",
-    "recommendations": "Consigli ({n})"
+    "recommendations": "Consigli ({n})",
+    "pg_detection_params": "Impostazioni di rilevamento",
+    "pg_timeline": "Cronologia eventi",
+    "pg_outcome": "Esito della simulazione",
+    "pg_across_cycles": "Su tutti i tuoi cicli"
   },
   "health": {
     "fair": "Qualità profilo accettabile",
@@ -458,7 +465,62 @@
     "n_shown": ", {n} mostrati",
     "cycles_title": "Cicli ({n})",
     "pg_detecting": "Rilevamento",
-    "pg_best_marker": "Migliore: {v}"
+    "pg_best_marker": "Migliore: {v}",
+    "pg_time_left_model": "Tempo rimanente (modello)",
+    "pg_time_left_model_tip": "Tempo rimanente stimato dal modello (stimatore di fase + combinazione ML), non un conto alla rovescia fisso",
+    "phase": "Fase",
+    "pg_mode_simulate": "Simula",
+    "pg_mode_history": "Prova sullo storico",
+    "pg_mode_sweep": "Scansione",
+    "pg_ev_detected": "Rilevato",
+    "pg_ev_match": "Abbinamento confermato",
+    "pg_ev_match_changed": "Abbinamento cambiato",
+    "pg_ev_ambiguous": "Ambiguo",
+    "pg_ev_unmatched": "Senza abbinamento",
+    "pg_ev_notify_start": "Notifica di avvio",
+    "pg_ev_notify_pre": "Notifica pre-completamento",
+    "pg_ev_notify_finish": "Notifica di fine",
+    "pg_ev_notify_milestone": "Notifica traguardo",
+    "pg_ev_notify_held": "Notifica trattenuta (ore di silenzio)",
+    "pg_ev_finished": "Terminato",
+    "pg_ended": "Fine",
+    "pg_proj_energy": "Energia prev.",
+    "pg_alert_overrun": "Troppo lungo",
+    "pg_alert_underrun": "Troppo corto",
+    "pg_alert_did_not_finish": "Non terminato",
+    "pg_alert_false_end": "Diviso in più cicli",
+    "pg_alert_unmatched": "Senza abbinamento",
+    "pg_alert_ambiguous": "Abbinamento ambiguo",
+    "pg_alert_energy": "Anomalia di energia",
+    "pg_newly_correct": "ora corretto",
+    "pg_regressed": "peggiorato",
+    "pg_end_timing_changed": "momento di fine modificato",
+    "pg_vs_current": "vs attuale",
+    "pg_fixed": "risolto",
+    "pg_broke": "rotto",
+    "pg_sweep_param": "Parametro",
+    "pg_objective": "Obiettivo",
+    "pg_steps": "Passaggi",
+    "pg_sweep_2d": "Mappa di calore 2D",
+    "pg_sweep_param_y": "2° parametro",
+    "pg_obj_match": "Precisione di abbinamento",
+    "pg_obj_endtiming": "Precisione del momento di fine",
+    "pg_obj_falseend": "Tasso di false conclusioni",
+    "pg_obj_overrun": "Scostamento di durata",
+    "pg_obj_ambiguity": "Tasso di ambiguità",
+    "pg_best_combo": "migliore combinazione",
+    "pg_mode_optimize": "Ottimizza",
+    "pg_group_matching": "Corrispondenza del programma",
+    "pg_zoom_hint": "fai doppio clic per reimpostare lo zoom",
+    "aria_playground_chart2": "Grafico interattivo della potenza del ciclo: passa il puntatore per leggere tempo/potenza, scorri per ingrandire, trascina per spostarti",
+    "pg_alert_timeout_end": "Terminato per timeout, non per previsione",
+    "pg_alert_indefinite": "Continuerebbe all'infinito",
+    "task_pg_history": "Prova sullo storico",
+    "task_pg_sweep": "Ottimizza",
+    "task_reprocess": "Rielaborazione",
+    "task_ml_training": "Apprendimento",
+    "eta_secs": "~{n} s rimasti",
+    "eta_mins": "~{n} min rimasti"
   },
   "log": {
     "all_levels": "Tutti i livelli"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' consuma sempre più energia (circa +{pct}% per ciclo) - vale la pena controllare l'elettrodomestico se non è previsto.",
     "advisory_poor_health": "'{name}' ha un punteggio di corrispondenza basso - i cicli recenti variano molto o corrispondono debolmente. Controlla i suoi cicli o registra di nuovo il profilo affinché il riconoscimento e le stime dei tempi restino accurati.",
     "advisory_shape_drift": "'{name}' si è discostato notevolmente dalla curva di potenza originale. L'elettrodomestico potrebbe aver cambiato comportamento nel tempo (ad es. calcare, usura). Valuta di registrare di nuovo questo profilo con cicli recenti.",
-    "advisory_shape_drift_corr": "'{name}' si è discostato notevolmente dalla curva di potenza originale (correlazione {corr}). L'elettrodomestico potrebbe aver cambiato comportamento nel tempo (ad es. calcare, usura). Valuta di registrare di nuovo questo profilo con cicli recenti."
+    "advisory_shape_drift_corr": "'{name}' si è discostato notevolmente dalla curva di potenza originale (correlazione {corr}). L'elettrodomestico potrebbe aver cambiato comportamento nel tempo (ad es. calcare, usura). Valuta di registrare di nuovo questo profilo con cicli recenti.",
+    "pg_no_alerts": "Nessun problema rilevato in questa esecuzione.",
+    "pg_override_active": "Utilizzo delle tue impostazioni modificate vs attuali",
+    "pg_history_intro": "Riproduci i tuoi cicli recenti con il rilevatore e il sistema di abbinamento reali. Modifica prima un'impostazione di rilevamento in Simula per vedere qui un confronto prima/dopo.",
+    "pg_history_empty": "Premi Esegui per riprodurre i tuoi cicli.",
+    "pg_history_summary": "{detected}/{total} rilevati · {correct} abbinati correttamente",
+    "pg_sweep_no_metric": "Dati insufficienti per valutare questo obiettivo.",
+    "pg_sweep_intro2": "Trova l'impostazione che soddisfa al meglio un obiettivo sui tuoi cicli recenti. Nulla cambia finché non la applichi.",
+    "pg_running_history": "Riproduzione dei tuoi cicli…",
+    "pg_running_sweep": "Test dei valori su tutti i tuoi cicli…",
+    "pg_row_load_hint": "Carica questo ciclo nel grafico qui sopra",
+    "pg_history_intro2": "Riproduci i tuoi cicli recenti attraverso il rilevatore e il sistema di corrispondenza reali con le impostazioni qui sopra. Fai clic su una riga per caricare quel ciclo nel grafico; modifica un'impostazione per vedere un confronto prima/dopo.",
+    "pg_simulating": "Simulazione del ciclo…",
+    "pg_canvas_empty2": "Scegli un ciclo qui sopra e premi Esegui per simularlo. Poi passa il puntatore per leggere i valori, scorri per ingrandire e trascina per spostarti.",
+    "pg_apply_settings_confirm": "Salvare queste {n} impostazioni su questo dispositivo? {list}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Calo improvviso trattato come fine immediata",
@@ -718,7 +794,13 @@
     "off_delay": "Secondi di bassa potenza prima della fine del ciclo",
     "start_duration_threshold": "Secondi sopra la soglia per confermare l'avvio",
     "start_threshold_w": "Watt minimi per contare come avviato",
-    "stop_threshold_w": "Al di sotto, la macchina è considerata spenta"
+    "stop_threshold_w": "Al di sotto, la macchina è considerata spenta",
+    "dtw_bandwidth": "Quanta deformazione temporale consente la corrispondenza della forma",
+    "corr_weight": "Peso della forma della curva rispetto al livello di potenza nella corrispondenza",
+    "duration_weight": "Quanto la concordanza della durata influisce sulla corrispondenza",
+    "energy_weight": "Quanto la concordanza dell'energia influisce sulla corrispondenza",
+    "profile_match_min_duration_ratio": "Ciclo più breve (rispetto al profilo) che può ancora corrispondere",
+    "profile_match_max_duration_ratio": "Ciclo più lungo (rispetto al profilo) che può ancora corrispondere"
   },
   "phase_desc": {
     "anti_crease": "Brevi tumble occasionali dopo il completamento per ridurre le grinze del bucato.",
@@ -1141,6 +1223,22 @@
     "peak_rate_threshold": {
       "doc": "Quando un ciclo inizia e il prezzo attuale per kWh è pari o superiore a questo valore, aggiunge un suggerimento sulla tariffa di picco alla notifica di avvio. 0 o vuoto disattiva il suggerimento.",
       "label": "Soglia tariffa di picco (per kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Tolleranza di corrispondenza della forma",
+      "doc": "Quanta deformazione temporale può applicare il sistema di corrispondenza a un ciclo per adattarlo alla forma di un programma salvato. Un valore più alto tollera maggiori variazioni di velocità; troppo alto rischia di corrispondere al programma sbagliato."
+    },
+    "corr_weight": {
+      "label": "Peso forma / livello",
+      "doc": "Equilibrio tra la forma della curva e il livello di potenza assoluto nel valutare una corrispondenza. Un valore più alto privilegia la forma; uno più basso privilegia la corrispondenza del livello di potenza."
+    },
+    "duration_weight": {
+      "label": "Peso della durata",
+      "doc": "Quanto viene preferito un programma la cui durata tipica corrisponde a questo ciclo."
+    },
+    "energy_weight": {
+      "label": "Peso dell'energia",
+      "doc": "Quanto viene preferito un programma il cui consumo di energia tipico corrisponde a questo ciclo."
     }
   },
   "setting_group": {
@@ -1461,5 +1559,18 @@
     "score": "punteggio {pct}%",
     "duration_cv": "CV della durata {pct}%",
     "avg_confidence": "confidenza media {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Il rilevatore ha riconosciuto che un ciclo era iniziato.",
+    "match_commit": "Il sistema di corrispondenza ha scelto un programma con sufficiente sicurezza.",
+    "match_changed": "Il programma in testa è cambiato man mano che si osservava una parte maggiore del ciclo.",
+    "match_ambiguous": "Due programmi hanno ottenuto punteggi molto vicini, quindi la corrispondenza era incerta.",
+    "unmatched": "Nessun programma salvato corrispondeva a questo ciclo.",
+    "notify_start": "Verrebbe inviata una notifica di avvio.",
+    "notify_pre_complete": "Verrebbe inviata una notifica di quasi completamento.",
+    "notify_finish": "Verrebbe inviata una notifica di completamento.",
+    "notify_milestone": "Verrebbe inviata una notifica di traguardo.",
+    "notify_held": "Una notifica è stata trattenuta per le ore di silenzio.",
+    "finished": "Il ciclo ha raggiunto lo stato finale e si è concluso."
   }
 }

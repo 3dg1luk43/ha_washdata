@@ -385,6 +385,43 @@ class RunPlaygroundSimulationResponse(TypedDict):
     summary: PlaygroundSummary
 
 
+class RunPlaygroundCycleDetailResponse(TypedDict, total=False):
+    cycle_id: Any
+    label: str | None
+    duration_s: float | None
+    config_summary: dict[str, Any]
+    series: list[dict[str, Any]]
+    events: list[dict[str, Any]]
+    alerts: list[dict[str, Any]]
+    outcome: dict[str, Any]
+    error: str
+
+
+class RunPlaygroundHistoryResponse(TypedDict, total=False):
+    rows: list[dict[str, Any]]
+    summary: dict[str, Any]
+    baseline_rows: list[dict[str, Any]]
+    baseline_summary: dict[str, Any]
+    diff: dict[str, list[str]]
+
+
+class RunPlaygroundSweepResponse(TypedDict, total=False):
+    param: str
+    objective: str
+    points: list[dict[str, Any]]
+    current_value: Any
+    best_value: Any
+    best_metric: float | None
+    param_x: str
+    param_y: str
+    x_values: list[float]
+    y_values: list[float]
+    grid: list[list[Any]]
+    best: dict[str, Any]
+    current: dict[str, Any]
+    error: str
+
+
 class DtwStage2Scores(TypedDict):
     correlation: float
     mae_score: float
@@ -417,6 +454,42 @@ class GetDtwDebugResponse(TypedDict):
     dtw: DtwScores
     stage4: DtwStage4Scores
     warp_path: list[list[int]]
+
+
+class TaskSnapshot(TypedDict, total=False):
+    id: str
+    entry_id: str
+    kind: str
+    label: str
+    state: str
+    done: int
+    total: int
+    progress: float | None
+    eta_s: float | None
+    started_at: float
+    updated_at: float
+    finished_at: float | None
+    error: str | None
+    has_result: bool
+    result: Any
+
+
+class ListTasksResponse(TypedDict):
+    tasks: list[TaskSnapshot]
+
+
+class CancelTaskResponse(TypedDict):
+    cancelled: bool
+
+
+class StartTaskResponse(TypedDict):
+    task_id: str
+
+
+class SubscribeTasksResponse(TypedDict, total=False):
+    """Empty ack for the ``subscribe_tasks`` subscription; the live data arrives
+    as ``{"type": "task", "task": TaskSnapshot}`` event messages, not in this
+    result."""
 
 
 # ─── Response-type registry ────────────────────────────────────────────────────
@@ -494,7 +567,16 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "resume_cycle": OkResponse,
     "terminate_cycle": OkResponse,
     "run_playground_simulation": RunPlaygroundSimulationResponse,
+    "run_playground_cycle_detail": RunPlaygroundCycleDetailResponse,
+    "run_playground_history": RunPlaygroundHistoryResponse,
+    "run_playground_sweep": RunPlaygroundSweepResponse,
     "get_dtw_debug": GetDtwDebugResponse,
+    "list_tasks": ListTasksResponse,
+    "subscribe_tasks": SubscribeTasksResponse,
+    "cancel_task": CancelTaskResponse,
+    "get_task_result": TaskSnapshot,
+    "start_playground_history": StartTaskResponse,
+    "start_playground_sweep": StartTaskResponse,
 }
 
 #: Commands whose response splats an upstream summary dict and therefore has an
@@ -503,6 +585,13 @@ WS_RESPONSE_TYPES: dict[str, type] = {
 WS_OPEN_RESPONSES: frozenset[str] = frozenset({
     "run_suggestion_analysis",
     "trigger_ml_training",
+    # Playground what-if responses carry nested/variant shapes (incl. an error
+    # variant); skip strict extra-key validation.
+    "run_playground_cycle_detail",
+    "run_playground_history",
+    "run_playground_sweep",
+    # Task snapshot splats a variant key set (result present only when finished).
+    "get_task_result",
 })
 
 
@@ -706,10 +795,48 @@ WS_COMMANDS: dict[str, dict] = {
         _p("settings_override", "dict", False),
         _p("concurrency", "int", False),
     ]},
+    "run_playground_cycle_detail": {"params": [
+        _entry(),
+        _p("cycle_id", "str"),
+        _p("settings_override", "dict", False),
+    ]},
+    "run_playground_history": {"params": [
+        _entry(),
+        _p("cycle_ids", "list[str]", False),
+        _p("settings_override", "dict", False),
+        _p("concurrency", "int", False),
+    ]},
+    "run_playground_sweep": {"params": [
+        _entry(),
+        _p("param", "str"),
+        _p("values", "list[float]"),
+        _p("objective", "str"),
+        _p("cycle_ids", "list[str]", False),
+        _p("concurrency", "int", False),
+        _p("param_y", "str", False),
+        _p("values_y", "list[float]", False),
+    ]},
     "get_dtw_debug": {"params": [
         _entry(),
         _p("cycle_id", "str"),
         _p("profile_name", "str|null", False),
+    ]},
+    "list_tasks": {"params": [_p("entry_id", "str|null", False)]},
+    "subscribe_tasks": {"params": [_p("entry_id", "str|null", False)]},
+    "cancel_task": {"params": [_p("task_id", "str")]},
+    "get_task_result": {"params": [_p("task_id", "str")]},
+    "start_playground_history": {"params": [
+        _entry(),
+        _p("cycle_ids", "list[str]", False),
+        _p("settings_override", "dict", False),
+    ]},
+    "start_playground_sweep": {"params": [
+        _entry(),
+        _p("param", "str"),
+        _p("values", "list[float]"),
+        _p("objective", "str"),
+        _p("param_y", "str|null", False),
+        _p("values_y", "list[float]", False),
     ]},
 }
 

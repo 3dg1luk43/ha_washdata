@@ -9,6 +9,10 @@
 
 const _DOMAIN = 'ha_washdata';
 const _POLL_MS = 5000;
+// Height (CSS px) of the band above the Playground plot where event pin heads
+// sit, out of the busy curve area. Shared by _pgDrawCanvas and the pointer
+// layout() closure so threshold-drag math stays aligned with the drawn plot.
+const _PG_PIN_BAND_H = 34;
 
 // Distinct colors for overlaying many cycle curves (history cleanup).
 const _PALETTE = [
@@ -895,13 +899,12 @@ button.wd-profile-card { display: block; }
 .wd-pg-delta-flat { color: var(--secondary-text-color); }
 /* F3: Unified Playground */
 .wd-pg-canvas-wrap { position: relative; width: 100%; }
-#wd-pg-canvas { display: block; width: 100%; height: 280px; cursor: crosshair; border-radius: 6px; background: var(--secondary-background-color); margin: 10px 0 0; }
+#wd-pg-canvas { display: block; width: 100%; height: 330px; cursor: crosshair; border-radius: 6px; background: var(--secondary-background-color); margin: 10px 0 0; }
 .wd-pg-strip { display: flex; align-items: center; gap: 10px; padding: 8px 2px; font-size: .88em; font-variant-numeric: tabular-nums; flex-wrap: wrap; border-bottom: 1px solid var(--divider-color, rgba(127,127,127,.2)); margin-bottom: 12px; }
 .wd-pg-strip-state { padding: 2px 10px; border-radius: 20px; font-weight: 700; font-size: .83em; white-space: nowrap; }
 .wd-pg-strip-pbar { display: inline-flex; align-items: center; gap: 5px; }
 .wd-pg-strip-track { width: 60px; height: 6px; background: var(--secondary-background-color); border-radius: 3px; overflow: hidden; display: inline-block; vertical-align: middle; }
 .wd-pg-strip-fill { height: 100%; background: var(--primary-color); border-radius: 3px; transition: width .15s; }
-.wd-pg-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 4px; }
 .wd-pg-params { display: flex; flex-direction: column; gap: 2px; }
 .wd-pg-param-row { display: flex; align-items: center; gap: 6px; }
 .wd-pg-param-lbl { flex: 1; font-size: .83em; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -917,8 +920,56 @@ button.wd-profile-card { display: block; }
 .wd-pg-cand-track { flex: 1; height: 7px; background: var(--secondary-background-color); border-radius: var(--wd-radius-sm); overflow: hidden; }
 .wd-pg-cand-fill { height: 100%; border-radius: var(--wd-radius-sm); }
 .wd-pg-cand-pct { flex: 0 0 34px; text-align: right; color: var(--secondary-text-color); }
+/* Playground: unified workbench (graph+settings always on top) + "Across your
+   cycles" drawer with History/Optimize sub-tabs. */
+.wd-pg-drawer { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--divider-color, rgba(127,127,127,.25)); }
+.wd-pg-drawer-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0 0 12px; }
+.wd-pg-subtabs { display: inline-flex; gap: 2px; padding: 3px; border-radius: 10px; background: var(--secondary-background-color); }
+.wd-pg-subtab { border: none; background: transparent; color: var(--secondary-text-color); font: inherit; font-size: .84em; font-weight: 600; padding: 5px 13px; border-radius: 8px; cursor: pointer; }
+.wd-pg-subtab:hover { color: var(--primary-text-color); }
+.wd-pg-subtab.active { background: var(--card-background-color, var(--primary-background-color)); color: var(--primary-color); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.wd-pg-hrow { cursor: pointer; }
+.wd-pg-hrow:hover td { background: var(--secondary-background-color); }
+.wd-pg-hrow.selected td { background: color-mix(in srgb, var(--primary-color) 14%, transparent); box-shadow: inset 2px 0 0 var(--primary-color); }
+.wd-pg-sim-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; margin-top: 4px; }
+.wd-pg-sim-main, .wd-pg-sim-side { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.wd-pg-simbar { height: 6px; border-radius: 3px; background: var(--secondary-background-color); overflow: hidden; margin: 6px 0 0; }
+.wd-pg-simbar-fill { height: 100%; width: 40%; border-radius: 3px; background: var(--primary-color); animation: wd-pg-indeterminate 1.1s ease-in-out infinite; }
+@keyframes wd-pg-indeterminate { 0% { margin-left: -40%; } 100% { margin-left: 100%; } }
+.wd-pg-batchbar-fill { height: 100%; width: 0%; border-radius: 3px; background: var(--primary-color); transition: width .18s ease; }
+/* Header activity pills (background-task registry) */
+.wd-task-pills { display: inline-flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 0 0 0 12px; }
+.wd-task-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 4px 3px 9px; border-radius: 12px; background: rgba(255,255,255,.16); color: var(--app-header-text-color, #fff); font-size: .78em; line-height: 1; }
+.wd-task-pill-lbl { font-weight: 600; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wd-task-pill-pct { font-variant-numeric: tabular-nums; opacity: .95; }
+.wd-task-pill-eta { opacity: .75; }
+.wd-task-pill-x { border: none; background: rgba(0,0,0,.18); color: inherit; width: 16px; height: 16px; border-radius: 50%; cursor: pointer; font-size: .9em; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+.wd-task-pill-x:hover { background: rgba(0,0,0,.32); }
+.wd-task-spin { width: 10px; height: 10px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: wd-spin-kf .8s linear infinite; opacity: .9; }
+@keyframes wd-spin-kf { to { transform: rotate(360deg); } }
+.wd-pg-batchrow { display: flex; align-items: center; gap: 10px; margin: 6px 0 8px; }
+.wd-pg-batchrow .wd-pg-simbar { flex: 1; margin: 0; }
+#wd-pg-canvas.wd-pg-panning { cursor: grabbing; }
+.wd-pg-alerts-card { background: var(--secondary-background-color); border-radius: 10px; padding: 12px; }
+.wd-pg-outcome-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.wd-pg-outcome-item { text-align: center; background: var(--card-background-color, var(--primary-background-color)); border-radius: 8px; padding: 8px 4px; }
+.wd-pg-outcome-val { font-size: 1.05em; font-weight: 700; }
+.wd-pg-outcome-lbl { font-size: .68em; color: var(--secondary-text-color); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+.wd-pg-alert { border-left: 3px solid var(--info-color, #2196f3); padding: 4px 0 4px 10px; }
+/* History table */
+.wd-pg-htable { width: 100%; border-collapse: collapse; font-size: .84em; }
+.wd-pg-htable th { text-align: left; font-weight: 600; color: var(--secondary-text-color); padding: 6px 8px; border-bottom: 1px solid var(--divider-color, rgba(127,127,127,.2)); font-size: .82em; }
+.wd-pg-htable td { padding: 6px 8px; border-bottom: 1px solid var(--divider-color, rgba(127,127,127,.12)); }
+.wd-pg-htable tr[data-action] { cursor: pointer; }
+.wd-pg-htable tr[data-action]:hover { background: var(--secondary-background-color); }
+.wd-pg-diffbadge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: .82em; font-weight: 600; margin: 0 6px 6px 0; }
+/* Sweep heatmap */
+.wd-pg-heat { display: grid; gap: 2px; margin: 8px 0; }
+.wd-pg-heat-cell { aspect-ratio: 1.6; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: .72em; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.4); cursor: help; }
+@media (max-width: 720px) {
+  .wd-pg-sim-grid { grid-template-columns: 1fr; }
+}
 @media (max-width: 640px) {
-  .wd-pg-bottom { grid-template-columns: 1fr; }
   .wd-pg-strip { gap: 7px; font-size: .82em; }
 }
 `;
@@ -969,7 +1020,7 @@ function _fmtDate(ts, mode) {
   let ms;
   if (typeof ts === 'number') {
     // Numeric epoch: ms (Date.now(), ~1e12+) vs seconds (~1e9). Anything >= 1e12
-    // is already-milliseconds — handles _pgLastSimAt (Date.now()) consistently.
+    // is already-milliseconds — handles Date.now() values consistently.
     ms = ts >= 1e12 ? ts : ts * 1000;
   } else {
     const s = String(ts);
@@ -1457,6 +1508,10 @@ class HaWashdataPanel extends HTMLElement {
     this._stagedSuggestions = false;   // a suggestion was applied to a field this session
     this._pendingSettings = {};        // unsaved edits accumulated across section switches
     this._busy = new Set();            // in-flight long operations (drives spinners)
+    this._tasks = {};                  // id -> background-task snapshot (registry, reconnect-safe)
+    this._tasksSubscribed = false;     // subscribe_tasks succeeded (else poll fallback)
+    this._pgHistoryTaskId = null;      // active Test-on-history task id
+    this._pgSweepTaskId = null;        // active Optimize task id
     this._panelCfg = null;             // panel settings + RBAC + current-user info
     this._panelTrans = null;           // loaded from /ha_washdata/panel-translations.json
     this._pollMs = _POLL_MS;
@@ -1501,28 +1556,34 @@ class HaWashdataPanel extends HTMLElement {
     this._pgPowerPts = null;        // [{t,w}] — fetched from get_cycle_power_data
     this._pgDtwData = null;         // get_dtw_debug response (profile overlay + scores)
     this._pgEnvData = null;         // get_profile_envelope response (±1σ band)
+    this._pgAnalysisTab = 'history'; // bottom "Across your cycles" drawer: 'history' | 'sweep'
+    this._pgDetail = null;          // run_playground_cycle_detail telemetry (series/events/alerts/outcome)
+    this._pgDetailBusy = false;     // detail sim in flight
+    this._pgHistory = null;         // run_playground_history result (rows + diff)
+    this._pgSweep2D = false;        // sweep mode: 1D curve vs 2D heatmap
+    this._pgSweepObjective = 'match_accuracy';
+    this._pgSweepParamY = 'min_off_gap';
+    this._pgSweepNew = null;        // run_playground_sweep result (points or grid)
+    this._pgDetailDebounceTimer = null;
     this._pgThreshStart = null;     // null = use live option; number = dragged override (W)
     this._pgThreshStop = null;      // same for stop threshold
     this._pgParamOverrides = {};    // other params: off_delay, min_off_gap, etc.
-    this._pgScrubFrac = 0;          // 0–1 scrub position shown when not playing
-    this._pgPlaying = false;        // animation playing
-    this._pgAnimFrame = null;       // rAF handle
-    this._pgAnimDuration = 10;      // replay wall-clock seconds (user sets 3–60)
-    this._pgAnimStartWall = null;   // Date.now() at play start
-    this._pgDragging = null;        // 'start_thr' | 'stop_thr' | 'scrub' | null
+    this._pgView = null;            // {min,max} time-axis zoom window (seconds); null = full
+    this._pgHoverT = null;          // hovered time (seconds) for cursor readout; null = none
+    this._pgMap = null;             // current time<->x mapping, set by _pgDrawCanvas
+    this._pgPanStart = null;        // pan drag anchor {clientX, vMin, vMax, totalDur}
+    this._pgHoverEvent = null;      // {t,type} of the event pin under the cursor (tooltip)
+    this._pgBatchProgress = null;   // {done,total} for history/sweep chunked runs (determinate bar)
+    this._pgBatchCancel = false;    // set by Cancel to stop a chunked batch loop
+    this._pgLoadSeq = 0;            // load-sequence token so Cancel drops a stale sim result
+    this._pgDragging = null;        // 'start_thr' | 'stop_thr' | 'pan' | null
     this._pgNeedsRestart = false;   // WS playground commands not yet registered
-    this._pgSimCycles = 20;         // last-N cycles for multi-cycle sim
-    this._pgSimResults = null;      // {total, detected, matchCorrect, matched, unmatched, ambiguous}
+    this._pgSimCycles = 20;         // last-N cycles for history/sweep replay
     this._pgSweepParam = 'off_delay';
     this._pgSweepFrom = '';
     this._pgSweepTo = '';
     this._pgSweepSteps = 5;
-    this._pgSweepResults = null;    // [{paramVal, summary}]
     this._pgLoading = false;        // data load in progress
-    this._pgLastSimAt = null;       // Date.now() when last sim/sweep completed
-    this._pgSimProgress = null;   // {done, total} while running; null otherwise
-    this._pgSweepProgress = null; // {done, total} for sweep
-    this._pgSimCancelled = false;
   }
 
   set hass(hass) {
@@ -1599,6 +1660,120 @@ class HaWashdataPanel extends HTMLElement {
           .then(unsub => { this._evtUnsubs.push(unsub); })
           .catch(() => {});
       }
+      // Background-task registry: live push of progress/cancel/result across all
+      // devices. Re-hydrates automatically on reconnect (HA replays the subscribe),
+      // so a backgrounded tab that dropped its socket picks tasks back up.
+      conn.subscribeMessage((ev) => this._onTaskEvent(ev), { type: `${_DOMAIN}/subscribe_tasks` })
+        .then(unsub => { this._tasksSubscribed = true; this._evtUnsubs.push(unsub); })
+        .catch(() => { this._tasksSubscribed = false; });
+    }
+  }
+
+  // A task snapshot arrived over the subscription. Keep the freshest by
+  // updated_at, refresh the header pills in place, drive any active Playground
+  // batch bar, and load the result when a tracked task finishes.
+  _onTaskEvent(ev) {
+    const t = ev && ev.task;
+    if (!t || !t.id) return;
+    const prev = this._tasks[t.id];
+    if (prev && (prev.updated_at || 0) > (t.updated_at || 0)) return;
+    this._tasks[t.id] = t;
+    this._updateTaskPills();
+    this._onTrackedTaskProgress(t);
+  }
+
+  // Map a task's entry_id to a device label for the pill.
+  _deviceName(entryId) {
+    const d = (this._devices || []).find(x => x.entry_id === entryId);
+    return d ? (d.name || d.title || '') : '';
+  }
+
+  _taskActionLabel(kind) {
+    const m = {
+      pg_history: this._t('lbl.task_pg_history', {}, 'Test on history'),
+      pg_sweep: this._t('lbl.task_pg_sweep', {}, 'Optimize'),
+      reprocess: this._t('lbl.task_reprocess', {}, 'Reprocessing'),
+      ml_training: this._t('lbl.task_ml_training', {}, 'Learning'),
+    };
+    return m[kind] || kind;
+  }
+
+  _fmtEta(s) {
+    s = Math.round(s);
+    if (s < 60) return this._t('lbl.eta_secs', {n: s}, `~${s}s left`);
+    return this._t('lbl.eta_mins', {n: Math.round(s / 60)}, `~${Math.round(s / 60)}m left`);
+  }
+
+  // Header activity cluster: one pill per running task (device · action · % · ✕).
+  _htmlTaskPills() {
+    const running = Object.values(this._tasks || {}).filter(t => t.state === 'running');
+    if (!running.length) return '';
+    return running.map(t => {
+      const dev = this._deviceName(t.entry_id);
+      const label = (dev ? dev + ' · ' : '') + this._taskActionLabel(t.kind);
+      const pct = t.progress != null ? Math.round(t.progress * 100) + '%' : '';
+      const eta = (t.eta_s != null && t.eta_s > 0) ? this._fmtEta(t.eta_s) : '';
+      return `<span class="wd-task-pill" title="${_esc(label + (pct ? ' ' + pct : ''))}">`
+        + `<span class="wd-task-spin"></span>`
+        + `<span class="wd-task-pill-lbl">${_esc(label)}</span>`
+        + (pct ? `<span class="wd-task-pill-pct">${pct}</span>` : '')
+        + (eta ? `<span class="wd-task-pill-eta">${_esc(eta)}</span>` : '')
+        + `<button class="wd-task-pill-x" data-action="task-cancel" data-task-id="${_esc(t.id)}" title="${_esc(this._t('btn.cancel', {}, 'Cancel'))}">✕</button>`
+        + `</span>`;
+    }).join('');
+  }
+
+  _updateTaskPills() {
+    const sr = this.shadowRoot; if (!sr) return;
+    const el = sr.getElementById('wd-task-pills');
+    if (el) el.innerHTML = this._htmlTaskPills();
+  }
+
+  // Drive the Playground drawer bar for a task this panel started; on finish,
+  // load the (reconnect-safe) result from the registry.
+  _onTrackedTaskProgress(t) {
+    if (t.id !== this._pgHistoryTaskId && t.id !== this._pgSweepTaskId) return;
+    if (t.state === 'running') {
+      this._pgBatchProgress = { done: t.done || 0, total: t.total || 0 };
+      this._pgUpdateBatchBar(t.done || 0, t.total || 0);
+      return;
+    }
+    this._pgFinishTask(t, t.id === this._pgHistoryTaskId);
+  }
+
+  async _pgFinishTask(t, isHistory) {
+    try {
+      if (t.state === 'done' || t.state === 'cancelled') {
+        const r = await this._ws({ type: `${_DOMAIN}/get_task_result`, task_id: t.id });
+        const result = r && r.result;
+        if (result) {
+          if (isHistory) this._pgHistory = result;
+          else this._pgSweepNew = (result && !result.error) ? result : null;
+        }
+      } else if (t.state === 'error') {
+        this._showToast(this._t('msg.toast_error', {error: t.error || ''}, 'Error: ' + (t.error || '')), 'error');
+      }
+    } catch (_) { /* result may have been evicted; leave prior view */ }
+    if (isHistory) { this._busy.delete('pg-history'); this._pgHistoryTaskId = null; }
+    else { this._busy.delete('pg-sweep'); this._pgSweepTaskId = null; }
+    this._pgBatchProgress = null;
+    this._render();
+  }
+
+  // Poll fallback used when the task subscription isn't available (older backend
+  // or a mock): watch one task via get_task_result until it settles.
+  async _pgPollTask(taskId) {
+    for (let i = 0; i < 3600 && (taskId === this._pgHistoryTaskId || taskId === this._pgSweepTaskId); i++) {
+      let snap;
+      try { snap = await this._ws({ type: `${_DOMAIN}/get_task_result`, task_id: taskId }); }
+      catch (_) { break; }
+      if (!snap) break;
+      this._tasks[taskId] = snap;
+      this._updateTaskPills();
+      if (snap.state !== 'running') { this._onTrackedTaskProgress(snap); return; }
+      this._pgBatchProgress = { done: snap.done || 0, total: snap.total || 0 };
+      this._pgUpdateBatchBar(snap.done || 0, snap.total || 0);
+      await new Promise(res => setTimeout(res, 1200));
     }
   }
 
@@ -2068,10 +2243,15 @@ class HaWashdataPanel extends HTMLElement {
     this._pgCycleId = ''; this._pgProfileName = '';
     this._pgPowerPts = null; this._pgDtwData = null; this._pgEnvData = null;
     this._pgThreshStart = null; this._pgThreshStop = null; this._pgParamOverrides = {};
-    this._pgScrubFrac = 0;
-    if (this._pgPlaying) { this._pgPlaying = false; if (this._pgAnimFrame) { cancelAnimationFrame(this._pgAnimFrame); this._pgAnimFrame = null; } }
-    this._pgSimResults = null; this._pgSweepResults = null; this._pgLastSimAt = null; this._pgNeedsRestart = false; this._pgLoading = false;
-    this._pgSimProgress = null; this._pgSweepProgress = null; this._pgSimCancelled = false;
+    this._pgView = null; this._pgHoverT = null; this._pgLoadSeq++;
+    this._pgNeedsRestart = false; this._pgLoading = false;
+    this._pgDetail = null; this._pgHistory = null; this._pgSweepNew = null;
+    // Stop tracking any in-flight batch task for the outgoing device (it keeps
+    // running server-side + shows in the header pills; the drawer just detaches).
+    this._pgHistoryTaskId = null; this._pgSweepTaskId = null;
+    this._busy.delete('pg-history'); this._busy.delete('pg-sweep'); this._pgBatchProgress = null;
+    // Cancel any pending detail re-run so it can't repopulate the outgoing device.
+    if (this._pgDetailDebounceTimer) { clearTimeout(this._pgDetailDebounceTimer); this._pgDetailDebounceTimer = null; }
     const dev = this._devices[this._selIdx];
     if (dev) await this._fetchSuggestions(dev.entry_id);
     this._fetchTabData();  // loads tab data incl. Status power-history + profiles
@@ -2200,10 +2380,12 @@ class HaWashdataPanel extends HTMLElement {
         try { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }); if (!this._isActiveEntry(eid)) return; this._opts = r.options || {}; } catch (_) {}
         await this._fetchCycles(eid);
         if (!this._profiles.length) await this._fetchProfiles(eid);
-        // Auto-select most recent cycle on first load
+        // Auto-select most recent cycle on first load. Profile defaults to
+        // auto-detect ('') so the sim shows what the matcher WOULD pick, not the
+        // cycle's stored label.
         if (!this._pgCycleId && this._cycles?.length) {
           this._pgCycleId = this._cycles[0].id;
-          this._pgProfileName = this._cycles[0].profile_name || this._cycles[0].matched_profile || '';
+          this._pgProfileName = '';
         }
       } else if (this._tab === 'advanced') {
         // Advanced sub-tabs lazy-load on click; ensure the Maintenance section
@@ -2530,6 +2712,7 @@ class HaWashdataPanel extends HTMLElement {
         ${logo}
         <div><h1>WashData</h1><div class="wd-sub">${this._t('msg.appliance_monitor', {}, 'Appliance monitor')}</div></div>
         ${working}
+        <span class="wd-task-pills" id="wd-task-pills">${this._htmlTaskPills()}</span>
         <span style="flex:1"></span>
         ${this._isAdmin() ? `<button class="wd-gear-btn${this._logOpen ? ' log-active' : ''}" data-action="toggle-log-drawer" title="${_esc(this._t('hdr.logs', {}, 'Logs'))}" aria-label="Logs" aria-pressed="${this._logOpen}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16"/><path d="M4 10h16"/><path d="M4 15h10"/><path d="M4 20h7"/></svg></button>` : ''}
       </div>
@@ -3967,6 +4150,8 @@ class HaWashdataPanel extends HTMLElement {
       ['end_repeat_count',        'End Repeat Count',      '',  'Low readings in a row before ending',          'advanced'],
       ['abrupt_drop_watts',       'Abrupt Drop Threshold', 'W', 'Sudden drop treated as immediate end',         'advanced'],
       ['interrupted_min_seconds', 'Interrupted Min',       's', 'Short cycles flagged as interrupted',          'advanced'],
+      ['profile_match_min_duration_ratio', 'Min Duration Ratio', '', 'Shortest run (vs the profile) still allowed to match', 'matching'],
+      ['profile_match_max_duration_ratio', 'Max Duration Ratio', '', 'Longest run (vs the profile) still allowed to match', 'matching'],
     ];
   }
 
@@ -4000,77 +4185,90 @@ class HaWashdataPanel extends HTMLElement {
     const profOpts = `<option value="">${_esc(this._t('lbl.auto_detect', {}, 'Auto-detect'))}</option>`
       + profiles.map(p => `<option value="${_esc(p.name)}" ${this._pgProfileName === p.name ? 'selected' : ''}>${_esc(p.name)}</option>`).join('');
 
-    const dur = this._pgAnimDuration || 10;
-
-    // Top controls
+    // Top controls: pick a cycle + Run the real backend simulation. While it runs,
+    // a Cancel button + a progress bar show; there is no JS replay animation.
+    const busy = this._pgLoading;
     const topBar = `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:4px">
-      <div class="wd-field" style="min-width:180px;margin:0"><label>${this._t('lbl.cycle', {}, 'Cycle')}</label><select id="wd-pg-cyc-sel">${cycleOpts || '<option value="">—</option>'}</select></div>
-      <div class="wd-field" style="min-width:160px;margin:0"><label>${this._t('lbl.profile', {}, 'Profile')}</label><select id="wd-pg-prof-sel">${profOpts}</select></div>
-      <div class="wd-field" style="margin:0;min-width:130px">
-        <label>${this._t('lbl.replay_duration', {}, 'Replay')} — <span id="wd-pg-dur-lbl">${dur}s</span></label>
-        <input type="range" id="wd-pg-dur" min="3" max="60" value="${dur}" style="width:100%" ${this._pgPlaying ? 'disabled' : ''}>
-      </div>
+      <div class="wd-field" style="min-width:180px;margin:0"><label>${this._t('lbl.cycle', {}, 'Cycle')}</label><select id="wd-pg-cyc-sel" ${busy ? 'disabled' : ''}>${cycleOpts || '<option value="">—</option>'}</select></div>
+      <div class="wd-field" style="min-width:160px;margin:0"><label>${this._t('lbl.profile', {}, 'Profile')}</label><select id="wd-pg-prof-sel" ${busy ? 'disabled' : ''}>${profOpts}</select></div>
       <div style="display:flex;gap:6px;align-items:flex-end;padding-bottom:2px">
-        <button class="wd-btn wd-btn-primary" data-action="pg-play" ${(this._pgPlaying || !this._pgPowerPts || this._pgLoading) ? 'disabled' : ''} style="min-width:68px">▶ ${this._t('btn.play', {}, 'Play')}</button>
-        <button class="wd-btn" data-action="pg-stop" ${!this._pgPlaying ? 'disabled' : ''} style="min-width:52px">⏹ ${this._t('btn.stop', {}, 'Stop')}</button>
-        <button class="wd-btn" data-action="pg-load" ${this._pgLoading ? 'disabled' : ''} style="min-width:64px">${this._pgLoading ? `<span class="wd-spin"></span>` : '↺ ' + this._t('btn.load', {}, 'Load')}</button>
+        <button class="wd-btn wd-btn-primary" data-action="pg-run" ${busy ? 'disabled' : ''} style="min-width:72px">▶ ${this._t('btn.run', {}, 'Run')}</button>
+        ${busy ? `<button class="wd-btn" data-action="pg-cancel-run" style="min-width:72px">✕ ${this._t('btn.cancel', {}, 'Cancel')}</button>` : ''}
       </div>
     </div>`;
 
+    // Simple progress bar while the backend simulates the selected cycle.
+    const progressBar = busy
+      ? `<div class="wd-pg-simbar" role="progressbar" aria-label="${_esc(this._t('msg.pg_simulating', {}, 'Simulating cycle…'))}"><div class="wd-pg-simbar-fill"></div></div>
+         <div style="font-size:.78em;color:var(--secondary-text-color);margin:4px 0 0">${this._t('msg.pg_simulating', {}, 'Simulating cycle…')}</div>`
+      : '';
+
     // Canvas
-    const canvasEmptyOverlay = (!this._pgPowerPts && !this._pgLoading)
+    const canvasEmptyOverlay = (!this._pgPowerPts && !busy)
       ? `<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;gap:6px">
           <div style="font-size:1.6em;opacity:.25">&#12316;</div>
-          <div style="font-size:.82em;color:var(--secondary-text-color);text-align:center">${this._t('msg.pg_canvas_empty', {}, 'Select a cycle above, then press Load to see its power trace.')}</div>
+          <div style="font-size:.82em;color:var(--secondary-text-color);text-align:center">${this._t('msg.pg_canvas_empty2', {}, 'Pick a cycle above and press Run to simulate it. Then hover to read values, scroll to zoom, and drag to pan.')}</div>
         </div>`
       : '';
-    const canvas = `<div class="wd-pg-canvas-wrap" style="position:relative"><canvas id="wd-pg-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_playground_chart', {}, 'Cycle power trace with draggable detection thresholds'))}"></canvas>${canvasEmptyOverlay}</div>`;
-
-    // Sensor strip (static placeholders; updated by animation/scrub)
+    const canvas = `${progressBar}<div class="wd-pg-canvas-wrap" style="position:relative"><canvas id="wd-pg-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_playground_chart2', {}, 'Interactive cycle power graph: hover to read time/power, scroll to zoom, drag to pan'))}"></canvas>${canvasEmptyOverlay}</div>`;
     const strip = this._htmlPgStrip();
-
-    // Bottom columns
-    const paramsCol = this._htmlPgParams();
-    const analysisCol = this._htmlPgAnalysis();
 
     const restartNote = this._pgNeedsRestart
       ? `<p class="wd-info" style="color:var(--warning-color,#ff9800);margin:4px 0">⚠ ${this._t('msg.pg_restart_note', {}, 'Restart Home Assistant to enable simulation tools.')}</p>`
       : '';
 
+    // Unified workbench: the interactive graph + shared settings + this cycle's
+    // outcome are ALWAYS present. History/Optimize live in a bottom drawer below
+    // and drive this graph in place (no mode switch, no back-and-forth).
+    const workbench = `${topBar}${canvas}${strip}
+      <div class="wd-pg-sim-grid">
+        <div class="wd-pg-sim-main">${this._htmlPgParamRows()}</div>
+        <div class="wd-pg-sim-side">${this._htmlPgAlerts()}${this._htmlPgAnalysis()}</div>
+      </div>`;
+
     return `<div class="wd-card">
       <div class="wd-card-title" style="margin:0 0 10px">${this._t('hdr.playground', {}, 'Playground')}</div>
       <p class="wd-sec-intro" style="margin:0 0 10px">${this._t('msg.playground_intro', {}, 'Explore how settings affect detection on your real cycle data. Nothing here changes live configuration until you explicitly apply it.')}</p>
       ${restartNote}
-      ${topBar}
-      ${canvas}
-      ${strip}
-      <div class="wd-pg-bottom">${paramsCol}${analysisCol}</div>
+      ${workbench}
+      ${this._htmlPgDrawer()}
     </div>`;
   }
 
-  _htmlPgStrip() {
-    return `<div class="wd-pg-strip" id="wd-pg-strip">
-      <span class="wd-pg-strip-state" id="wd-pg-state-badge" style="background:var(--secondary-background-color);text-transform:uppercase">${this._t('lbl.pg_idle', {}, 'Idle')}</span>
-      <span style="font-size:.75em"><span style="color:var(--secondary-text-color);text-transform:uppercase">${this._t('lbl.power', {}, 'Power')} </span><span id="wd-pg-power">—</span></span>
-      <span class="wd-pg-strip-pbar">
-        <span class="wd-pg-strip-track"><span class="wd-pg-strip-fill" id="wd-pg-pbar" style="width:0%"></span></span>
-        <span id="wd-pg-pct">—%</span>
-      </span>
-      <span style="font-size:.75em;color:var(--secondary-text-color);text-transform:uppercase">${this._t('lbl.pg_time_left', {}, 'Time left')} <span id="wd-pg-rem" style="color:var(--primary-text-color,inherit)">—</span></span>
-      <span style="font-size:.75em;color:var(--secondary-text-color);text-transform:uppercase">${this._t('lbl.energy', {}, 'Energy')} <span id="wd-pg-energy" style="color:var(--primary-text-color,inherit)">—</span></span>
-      <span style="font-size:.75em;color:var(--secondary-text-color);text-transform:uppercase">${this._t('lbl.match', {}, 'Match')} <span id="wd-pg-conf" style="color:var(--primary-text-color,inherit)">—</span></span>
+  // Bottom "Across your cycles" drawer. History + Optimize are two lenses on the
+  // SAME backend sim run with the current settings; their results funnel back
+  // into the graph above (a history row loads that cycle; Apply-best stages an
+  // override). Sub-tabs, not full-page modes, so the graph is never hidden.
+  _htmlPgDrawer() {
+    const tab = this._pgAnalysisTab || 'history';
+    const subtabs = [
+      ['history', this._t('lbl.pg_mode_history', {}, 'Test on history')],
+      ['sweep', this._t('lbl.pg_mode_optimize', {}, 'Optimize')],
+    ];
+    const tabBar = `<div class="wd-pg-subtabs" role="tablist">
+      ${subtabs.map(([id, lbl]) => `<button role="tab" aria-selected="${tab === id}" class="wd-pg-subtab${tab === id ? ' active' : ''}" data-action="pg-analysis-tab" data-subtab="${id}">${_esc(lbl)}</button>`).join('')}
     </div>`;
+    const body = tab === 'sweep' ? this._htmlPgSweepMode() : this._htmlPgHistoryMode();
+    return `<section class="wd-pg-drawer">
+      <div class="wd-pg-drawer-head">
+        <span class="wd-subhead" style="margin:0">${this._t('hdr.pg_across_cycles', {}, 'Across your cycles')}</span>
+        ${tabBar}
+      </div>
+      ${body}
+    </section>`;
   }
 
-  _htmlPgParams() {
+  // Just the detection-parameter editor rows (Simulate mode); a change re-runs
+  // the faithful sim so the state band + estimates update.
+  _htmlPgParamRows() {
     const fields = this._pgOverrideFields();
     const threshFields = new Set(['start_threshold_w', 'stop_threshold_w']);
-
-    const groupColors = { detection: '#2a78d6', timing: '#1baf7a', advanced: '#eda100' };
+    const groupColors = { detection: '#2a78d6', timing: '#1baf7a', advanced: '#eda100', matching: '#a05cd6' };
     const groupLabels = {
       detection: this._t('lbl.pg_group_detection', {}, 'Detection triggers'),
       timing: this._t('lbl.pg_group_timing', {}, 'Timing rules'),
       advanced: this._t('lbl.pg_group_advanced', {}, 'Edge cases'),
+      matching: this._t('lbl.pg_group_matching', {}, 'Program matching'),
     };
     let lastGroup = '';
     const paramRows = fields.map(([key, fb, unit, desc, group]) => {
@@ -4084,7 +4282,6 @@ class HaWashdataPanel extends HTMLElement {
       const unitTxt = unit ? unit : '';
       const gc = groupColors[group] || '#2a78d6';
       const gl = groupLabels[group] || '';
-
       let header = '';
       if (group && group !== lastGroup) {
         header = `<div style="display:flex;align-items:center;gap:8px;margin:${lastGroup ? '12px' : '2px'} 0 5px">
@@ -4093,7 +4290,6 @@ class HaWashdataPanel extends HTMLElement {
         </div>`;
         lastGroup = group;
       }
-
       return `${header}<div style="display:flex;align-items:flex-start;gap:6px;margin:0 0 6px 11px">
         <div style="flex:1;min-width:0">
           <div style="font-size:.82em;font-weight:600;margin-bottom:1px">${_esc(lbl)}${isDrag ? ` <span style="color:${gc};font-size:.85em" title="${_esc(this._t('lbl.pg_drag_hint', {}, 'Drag line on graph'))}">↕</span>` : ''}</div>
@@ -4105,161 +4301,384 @@ class HaWashdataPanel extends HTMLElement {
         </div>
       </div>`;
     }).join('');
-
-    // --- Test on history section ---
-    const simBusy = this._busy.has('pg-sim');
-    const simProg = this._pgSimProgress;
-    const simS = this._pgSimResults;
-
-    const tile = (label, n, total, color, tip) => {
-      const p = total ? Math.round(n / total * 100) : 0;
-      return `<div style="background:var(--secondary-background-color);border-radius:8px;padding:10px 8px;text-align:center;border-top:3px solid ${color}" title="${_esc(tip)}">
-        <div style="font-size:1.5em;font-weight:700;line-height:1;color:${color}">${n}</div>
-        <div style="font-size:.72em;color:var(--secondary-text-color);margin:2px 0">${this._t('lbl.pg_pct_of', {p, total}, p + '% of ' + total)}</div>
-        <div style="font-size:.75em;font-weight:600;margin-top:3px">${_esc(label)}</div>
-      </div>`;
-    };
-
-    const simProgressHtml = simBusy ? `
-      <div style="margin:6px 0">
-        <div style="display:flex;justify-content:space-between;font-size:.8em;color:var(--secondary-text-color);margin-bottom:3px">
-          <span id="wd-pg-sim-progress-lbl">${simProg ? this._t('msg.pg_sim_progress', {done: simProg.done, total: simProg.total}, simProg.done + ' / ' + simProg.total + ' cycles') : this._t('msg.pg_starting', {}, 'Starting…')}</span>
-          <button class="wd-btn wd-btn-sm" data-action="pg-cancel" style="padding:0 8px;height:20px;font-size:.78em">✕ ${this._t('btn.cancel', {}, 'Cancel')}</button>
-        </div>
-        <div style="height:6px;border-radius:3px;background:var(--secondary-background-color);overflow:hidden">
-          <div id="wd-pg-sim-progress-bar" style="height:100%;border-radius:3px;background:var(--primary-color);transition:width .3s;width:${simProg ? Math.round(simProg.done/simProg.total*100) : 0}%"></div>
-        </div>
-      </div>` : '';
-
-    const simResultsHtml = (!simBusy && simS && simS.total > 0) ? (() => {
-      const detPct = simS.total ? simS.detected / simS.total : 0;
-      const matPct = simS.total ? simS.matchCorrect / simS.total : 0;
-      let verdictText, verdictColor;
-      if (detPct >= 0.80 && matPct >= 0.70) {
-        verdictText = this._t('msg.pg_verdict_good', {}, 'Well tuned: most cycles are correctly identified and matched.');
-        verdictColor = '#0ca30c';
-      } else if (detPct >= 0.60) {
-        verdictText = this._t('msg.pg_verdict_ok', {}, 'Acceptable: some cycles missed. Try lowering the start threshold.');
-        verdictColor = '#eda100';
-      } else {
-        verdictText = this._t('msg.pg_verdict_bad', {}, 'Needs attention: many cycles are going undetected.');
-        verdictColor = '#e34948';
-      }
-      return `
-      <div style="margin:8px 0 0">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0">
-          ${tile(this._t('lbl.pg_tile_detected', {}, 'Detected'), simS.detected, simS.total, '#0ca30c', this._t('lbl.pg_tile_detected_tip', {}, 'Cycles where power crossed the start threshold long enough to register as running'))}
-          ${tile(this._t('lbl.pg_tile_matched', {}, 'Matched'), simS.matchCorrect, simS.total, '#2a78d6', this._t('lbl.pg_tile_matched_tip', {}, 'Cycles correctly attributed to a known program'))}
-          ${tile(this._t('lbl.pg_tile_ambiguous', {}, 'Ambiguous'), simS.ambiguous, simS.total, '#eda100', this._t('lbl.pg_tile_ambiguous_tip', {}, 'Cycles with a near-tie between two programs'))}
-        </div>
-        ${(simS.total - simS.detected) > 0 ? `<div style="font-size:.8em;color:#e34948;margin:-4px 0 6px">&#9888; ${this._t('msg.pg_undetected', {n: simS.total - simS.detected, s: (simS.total - simS.detected) > 1 ? 's' : ''}, (simS.total - simS.detected) + ' cycle' + ((simS.total-simS.detected)>1?'s':'') + ' undetected')}</div>` : ''}
-        <div style="font-size:.8em;margin:4px 0;padding:6px 8px;border-radius:6px;border-left:3px solid ${verdictColor};background:${verdictColor}18;color:var(--primary-text-color,inherit)">${_esc(verdictText)}</div>
-        ${this._pgLastSimAt ? `<div style="font-size:.75em;color:var(--secondary-text-color);margin-top:4px">${_esc(this._t('lbl.pg_last_run', {date: _fmtDate(this._pgLastSimAt)}, 'Last run: ' + _fmtDate(this._pgLastSimAt)))}</div>` : ''}
-      </div>`;
-    })() : '';
-
-    // --- Sweep section ---
-    const swBusy = this._busy.has('pg-sweep');
-    const swProg = this._pgSweepProgress;
-    const swFields = this._pgOverrideFields();
-    const swOpts = swFields.map(([k, fb]) => `<option value="${k}" ${this._pgSweepParam===k?'selected':''}>${_esc(this._t('setting.'+k+'.label',{},fb))}</option>`).join('');
-    const swLiveVal = this._pgFieldVal(this._pgSweepParam, {});
-    const swParamLabel = this._t('setting.' + (this._pgSweepParam || 'off_delay') + '.label', {}, this._pgSweepParam || 'Off Delay');
-    const swFromN = parseFloat(this._pgSweepFrom), swToN = parseFloat(this._pgSweepTo);
-    const swCanRun = !isNaN(swFromN) && !isNaN(swToN) && swFromN !== swToN;
-    const swSteps = Math.max(2, Math.min(20, this._pgSweepSteps || 5));
-    const swIntro = `<div style="font-size:.8em;color:var(--secondary-text-color);margin:0 0 8px;line-height:1.4">${this._t('msg.pg_sweep_intro', {param: '<strong>' + _esc(swParamLabel) + '</strong>', steps: swSteps, cycles: this._pgSimCycles || 20}, 'What if ' + _esc(swParamLabel) + ' were different? Test ' + swSteps + ' values across your last ' + (this._pgSimCycles || 20) + ' cycles to find the setting where the most cycles are correctly matched.')}</div>`;
-    const swPreview = swCanRun
-      ? Array.from({length: swSteps}, (_, i) => parseFloat((swFromN + (swToN - swFromN) * i / (swSteps-1)).toFixed(1))).join(', ')
+    const hasOverrides = Object.keys(this._pgParamOverrides || {}).length > 0
+      || this._pgThreshStart != null || this._pgThreshStop != null;
+    const applyBtn = (this._canEdit() && hasOverrides)
+      ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-apply-settings" title="${_esc(this._t('btn.pg_apply_to_settings_tip', {}, 'Copy the values you edited here into this device\'s live settings'))}">${this._t('btn.pg_apply_to_settings', {}, 'Save to settings')}</button>`
       : '';
-
-    const autoRange = swLiveVal !== '' ? (() => {
-      const v = parseFloat(String(swLiveVal));
-      if (isNaN(v) || v <= 0) return null;
-      return { lo: Math.max(1, Math.round(v * 0.25)), hi: Math.round(v * 4) };
-    })() : null;
-
-    const swProgressHtml = swBusy ? `
-      <div style="margin:6px 0">
-        <div style="display:flex;justify-content:space-between;font-size:.8em;color:var(--secondary-text-color);margin-bottom:3px">
-          <span id="wd-pg-sw-progress-lbl">${swProg ? this._t('msg.pg_sweep_step', {done: swProg.done, total: swProg.total}, 'Step ' + swProg.done + ' / ' + swProg.total) : this._t('msg.pg_starting', {}, 'Starting…')}</span>
-          <button class="wd-btn wd-btn-sm" data-action="pg-cancel" style="padding:0 8px;height:20px;font-size:.78em">✕ ${this._t('btn.cancel', {}, 'Cancel')}</button>
-        </div>
-        <div style="height:6px;border-radius:3px;background:var(--secondary-background-color);overflow:hidden">
-          <div id="wd-pg-sw-progress-bar" style="height:100%;border-radius:3px;background:var(--primary-color);transition:width .3s;width:${swProg ? Math.round(swProg.done/swProg.total*100) : 0}%"></div>
-        </div>
-      </div>` : '';
-
-    const sweepResults = this._pgSweepResults;
-    const swBestHtml = (sweepResults?.length >= 2 && !swBusy) ? (() => {
-      const cf = swFields.find(([k]) => k === this._pgSweepParam);
-      const unit = cf ? (cf[2] || '') : '';
-      let best = null, bestScore = -1, bestS = null;
-      sweepResults.forEach(({paramVal, summary: s}) => {
-        const score = s && s.total ? s.matchCorrect / s.total : 0;
-        if (score > bestScore) { bestScore = score; best = paramVal; bestS = s; }
-      });
-      if (best == null) return '';
-      const bestPct = bestS && bestS.total ? Math.round(bestS.matchCorrect / bestS.total * 100) : 0;
-      const swCf = cf;
-      return `
-      <div style="background:var(--secondary-background-color);border-radius:8px;padding:10px;margin:8px 0">
-        <div style="font-weight:700;font-size:.88em;margin-bottom:4px">${this._t('lbl.pg_best_value', {}, 'Best value found')}</div>
-        <div style="font-size:1.1em;font-weight:700;color:var(--primary-color)">${typeof best === 'number' ? best.toFixed(1).replace(/\.0$/,'') : best}${unit ? ' '+unit : ''}</div>
-        <div style="font-size:.8em;color:var(--secondary-text-color);margin:2px 0">${this._t('msg.pg_match_rate', {pct: bestPct, total: bestS.total}, bestPct + '% match rate on ' + bestS.total + ' cycles')}</div>
-        ${this._canEdit() ? `<div style="display:flex;gap:6px;margin-top:8px">
-          <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-sweep-apply-best">${this._t('btn.pg_apply_device', {}, 'Apply to device')}</button>
-          <button class="wd-btn wd-btn-sm" data-action="pg-sweep-dismiss">${this._t('btn.dismiss', {}, 'Dismiss')}</button>
-        </div>` : ''}
-      </div>
-      <div style="font-size:.78em;color:var(--secondary-text-color);margin-bottom:3px">
-        ${this._t('msg.pg_chart_caption', {param: '<strong>' + _esc(swCf ? this._t('setting.'+swCf[0]+'.label',{},swCf[1]) : this._pgSweepParam) + '</strong>'}, 'Detection/match rate across values of ' + _esc(swCf ? this._t('setting.'+swCf[0]+'.label',{},swCf[1]) : this._pgSweepParam))}
-        <span style="float:right;display:inline-flex;align-items:center;gap:4px">
-          <svg width="18" height="2" style="display:inline;vertical-align:middle"><line x1="0" y1="1" x2="18" y2="1" stroke="#2a78d6" stroke-width="2" stroke-linecap="round"/></svg>${this._t('lbl.pg_tile_matched', {}, 'Matched')}
-          <svg width="18" height="2" style="display:inline;vertical-align:middle;margin-left:8px"><line x1="0" y1="1" x2="18" y2="1" stroke="#1baf7a" stroke-width="2" stroke-linecap="round"/></svg>${this._t('lbl.pg_tile_detected', {}, 'Detected')}
-          <svg width="18" height="2" style="display:inline;vertical-align:middle;margin-left:8px"><line x1="0" y1="1" x2="18" y2="1" stroke="#eda100" stroke-width="2" stroke-linecap="round"/></svg>${this._t('lbl.pg_tile_ambiguous', {}, 'Ambiguous')}
-        </span>
-      </div>
-      <canvas id="wd-pg-sweep-chart" role="img" aria-label="${_esc(this._t('lbl.aria_sweep_chart', {}, 'Parameter sweep results chart'))}" style="width:100%;height:180px;display:block;border-radius:4px"></canvas>`;
-    })() : '';
-
     return `<div class="wd-pg-params">
+      <div class="wd-subhead" style="margin:0 0 6px">${this._t('hdr.pg_detection_params', {}, 'Detection settings')}</div>
       ${paramRows}
-      <div style="display:flex;gap:6px;margin:8px 0 4px">
+      <div style="display:flex;gap:6px;margin:8px 0 4px;align-items:center;flex-wrap:wrap">
+        ${applyBtn}
         <button class="wd-btn wd-btn-sm" data-action="pg-reset-params">${this._t('btn.reset', {}, 'Reset')}</button>
-      </div>
-      <div style="border-top:1px solid var(--divider-color,rgba(127,127,127,.2));margin:8px 0;padding-top:8px">
-        <div class="wd-subhead" style="margin:0 0 6px">${this._t('hdr.test_history', {}, 'Test on history')}</div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
-          <span style="font-size:.85em">${this._t('lbl.last', {}, 'Last')}</span>
-          <input type="number" id="wd-pg-simn" value="${this._pgSimCycles}" min="1" max="200" style="width:54px">
-          <span style="font-size:.85em">${this._t('lbl.cycles_lc', {}, 'cycles')}</span>
-          <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-run-sim" ${simBusy ? 'disabled' : ''}>${simBusy ? '<span class="wd-spin"></span>' : '▶ ' + this._t('btn.run', {}, 'Run')}</button>
-        </div>
-        ${simProgressHtml}
-        ${simResultsHtml}
-      </div>
-      <div style="border-top:1px solid var(--divider-color,rgba(127,127,127,.2));margin:8px 0;padding-top:8px">
-        <div class="wd-subhead" style="margin:0 0 4px">${this._t('hdr.param_sweep', {}, 'Parameter sweep')}</div>
-        ${swIntro}
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end">
-          <select id="wd-pg-sw-param" style="flex:1;min-width:120px">${swOpts}</select>
-        </div>
-        ${swLiveVal !== '' ? `<div style="font-size:.77em;color:var(--secondary-text-color);margin:2px 0 6px">${this._t('lbl.pg_current_value', {}, 'Current value:')} <strong>${_esc(String(swLiveVal))}${swFields.find(([k])=>k===this._pgSweepParam)?.[2] ? ' ' + _esc(swFields.find(([k])=>k===this._pgSweepParam)[2]) : ''}</strong></div>` : ''}
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end;margin-top:4px">
-          <input type="number" id="wd-pg-sw-from" placeholder="${_esc(this._t('lbl.from', {}, 'From'))}" value="${_esc(String(this._pgSweepFrom))}" style="width:64px" step="any">
-          <span>→</span>
-          <input type="number" id="wd-pg-sw-to" placeholder="${_esc(this._t('lbl.to', {}, 'To'))}" value="${_esc(String(this._pgSweepTo))}" style="width:64px" step="any">
-          <input type="number" id="wd-pg-sw-steps" value="${swSteps}" min="2" max="20" style="width:44px">
-          ${autoRange ? `<button class="wd-btn wd-btn-sm" data-action="pg-sweep-autofill" title="${_esc(this._t('lbl.pg_autofill_tip', {lo: autoRange.lo, hi: autoRange.hi}, 'Auto-fill range from current value (' + autoRange.lo + '–' + autoRange.hi + ')'))}">${this._t('btn.pg_autofill', {}, 'Auto-fill')}</button>` : ''}
-          <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-sweep-run" ${(swBusy || !swCanRun) ? 'disabled' : ''}>${swBusy ? '<span class="wd-spin"></span>' : '▶'}</button>
-        </div>
-        ${swPreview ? `<div style="font-size:.78em;color:var(--secondary-text-color);margin-top:2px">→ ${_esc(swPreview)}</div>` : ''}
-        ${swProgressHtml}
-        ${swBestHtml}
+        ${this._pgDetailBusy ? `<span class="wd-spin" style="align-self:center"></span>` : ''}
       </div>
     </div>`;
   }
+
+  // Synchronized typed-event lane for the Simulate replay: detection, match
+  // commits, notification decision points, and finish, on the cycle time axis.
+  // Side rail: outcome summary + alerts (overrun / did-not-finish / etc.) from
+  // the real simulation, using severity-mapped HA state colors.
+  _htmlPgAlerts() {
+    const d = this._pgDetail;
+    if (!d) return '';
+    const o = d.outcome || {};
+    const sevColor = { error: 'var(--error-color,#f44336)', warn: 'var(--warning-color,#ff9800)', info: 'var(--info-color,#2196f3)' };
+    const alerts = Array.isArray(d.alerts) ? d.alerts : [];
+    const alertRows = alerts.length
+      ? alerts.map(a => `<div class="wd-pg-alert" style="border-left-color:${sevColor[a.severity] || sevColor.info}">
+          <span style="font-weight:600">${_esc(this._pgAlertLabel(a.code))}</span>
+          <div style="font-size:.78em;color:var(--secondary-text-color)">${_esc(a.detail || '')}</div>
+        </div>`).join('')
+      : `<div style="font-size:.82em;color:var(--success-color,#4caf50)">✓ ${this._t('msg.pg_no_alerts', {}, 'No issues detected in this run.')}</div>`;
+    const term = o.termination_reason ? String(o.termination_reason) : '—';
+    const dur = o.final_duration_s ? Math.round(o.final_duration_s / 60) + ' min' : '—';
+    const proj = o.projected_energy_wh != null
+      ? (o.projected_energy_wh >= 1000 ? (o.projected_energy_wh / 1000).toFixed(2) + ' kWh' : Math.round(o.projected_energy_wh) + ' Wh')
+      : '—';
+    const outcomeChip = (label, val) => `<div class="wd-pg-outcome-item"><div class="wd-pg-outcome-val">${_esc(val)}</div><div class="wd-pg-outcome-lbl">${_esc(label)}</div></div>`;
+    return `<div class="wd-pg-alerts-card">
+      <div class="wd-subhead" style="margin:0 0 6px">${this._t('hdr.pg_outcome', {}, 'Simulation outcome')}</div>
+      <div class="wd-pg-outcome-grid">
+        ${outcomeChip(this._t('lbl.pg_ended', {}, 'Ended'), term)}
+        ${outcomeChip(this._t('lbl.duration', {}, 'Duration'), dur)}
+        ${outcomeChip(this._t('lbl.pg_proj_energy', {}, 'Proj. energy'), proj)}
+      </div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">${alertRows}</div>
+    </div>`;
+  }
+
+  _pgAlertLabel(code) {
+    const map = {
+      overrun: this._t('lbl.pg_alert_overrun', {}, 'Overrun'),
+      underrun: this._t('lbl.pg_alert_underrun', {}, 'Underrun'),
+      did_not_finish: this._t('lbl.pg_alert_did_not_finish', {}, 'Did not finish'),
+      false_end: this._t('lbl.pg_alert_false_end', {}, 'Split into multiple cycles'),
+      unmatched: this._t('lbl.pg_alert_unmatched', {}, 'Unmatched'),
+      ambiguous: this._t('lbl.pg_alert_ambiguous', {}, 'Ambiguous match'),
+      energy_anomaly: this._t('lbl.pg_alert_energy', {}, 'Energy anomaly'),
+      timeout_end: this._t('lbl.pg_alert_timeout_end', {}, 'Ended by timeout, not prediction'),
+      would_run_indefinitely: this._t('lbl.pg_alert_indefinite', {}, 'Would run indefinitely'),
+    };
+    return map[code] || code;
+  }
+
+  // ── Test on history mode ──────────────────────────────────────────────────
+  _htmlPgHistoryMode() {
+    const busy = this._busy.has('pg-history');
+    const h = this._pgHistory;
+    const overrideActive = Object.keys(this._pgParamOverrides || {}).length > 0
+      || this._pgThreshStart != null || this._pgThreshStop != null;
+    const controls = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+      <span style="font-size:.85em">${this._t('lbl.last', {}, 'Last')}</span>
+      <input type="number" id="wd-pg-simn" value="${this._pgSimCycles}" min="1" max="200" style="width:56px">
+      <span style="font-size:.85em">${this._t('lbl.cycles_lc', {}, 'cycles')}</span>
+      <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-run-history" ${busy ? 'disabled' : ''}>▶ ${this._t('btn.run', {}, 'Run')}</button>
+      ${overrideActive ? `<span style="font-size:.78em;color:var(--warning-color,#ff9800)">⚙ ${this._t('msg.pg_override_active', {}, 'Using your edited settings vs. current')}</span>` : ''}
+    </div>`;
+    const simbar = busy ? this._htmlPgBatchBar() : '';
+    const intro = `<p class="wd-sec-intro" style="margin:0 0 8px">${this._t('msg.pg_history_intro2', {}, 'Replay your recent cycles through the real detector and matcher with the settings above. Click any row to load that cycle in the graph; edit a setting to see a before/after comparison.')}</p>`;
+    if (!h || !Array.isArray(h.rows)) {
+      return `${intro}${controls}${simbar}${busy ? '' : `<div class="wd-empty" style="padding:24px">${this._t('msg.pg_history_empty', {}, 'Press Run to replay your cycles.')}</div>`}`;
+    }
+    // Before/after diff banner
+    let diffBanner = '';
+    if (h.diff) {
+      const chip = (n, color, label) => `<span class="wd-pg-diffbadge" style="background:${color}22;color:${color}">${n} ${_esc(label)}</span>`;
+      diffBanner = `<div style="margin:0 0 10px">
+        ${chip((h.diff.newly_correct || []).length, 'var(--success-color,#4caf50)', this._t('lbl.pg_newly_correct', {}, 'newly correct'))}
+        ${chip((h.diff.regressed || []).length, 'var(--error-color,#f44336)', this._t('lbl.pg_regressed', {}, 'regressed'))}
+        ${chip((h.diff.end_timing_changed || []).length, 'var(--warning-color,#ff9800)', this._t('lbl.pg_end_timing_changed', {}, 'end-timing changed'))}
+      </div>`;
+    }
+    const s = h.summary || {};
+    const summaryLine = `<div style="font-size:.82em;color:var(--secondary-text-color);margin-bottom:8px">${this._t('msg.pg_history_summary', {detected: s.detected, correct: s.match_correct, total: s.cycles}, `${s.detected}/${s.cycles} detected · ${s.match_correct} matched correctly`)}</div>`;
+    const cyc = id => (this._cycles || []).find(c => c.id === id);
+    const baseById = {};
+    (h.baseline_rows || []).forEach(r => { baseById[r.cycle_id] = r; });
+    const rows = h.rows.map(r => {
+      const c = cyc(r.cycle_id);
+      const when = c && c.start_time ? _fmtDate(c.start_time) : (r.cycle_id || '').slice(0, 8);
+      const ok = r.match_correct === true ? '✓' : (r.match_correct === false ? '✗' : '—');
+      const okColor = r.match_correct === true ? 'var(--success-color,#4caf50)' : (r.match_correct === false ? 'var(--error-color,#f44336)' : 'var(--secondary-text-color)');
+      const match = r.matched_profile || this._t('lbl.unlabelled', {}, 'Unlabelled');
+      const durM = r.duration_s ? Math.round(r.duration_s / 60) + 'm' : '—';
+      const over = r.overrun_ratio != null ? ` (${Math.round(r.overrun_ratio * 100)}%)` : '';
+      const alertGlyph = (r.alerts && r.alerts.length) ? ` <span title="${_esc(r.alerts.join(', '))}" style="color:var(--warning-color,#ff9800)">⚠</span>` : '';
+      const b = baseById[r.cycle_id];
+      let deltaCol = '';
+      if (b) {
+        if (b.match_correct !== true && r.match_correct === true) deltaCol = `<span style="color:var(--success-color,#4caf50)">▲ ${this._t('lbl.pg_fixed', {}, 'fixed')}</span>`;
+        else if (b.match_correct === true && r.match_correct !== true) deltaCol = `<span style="color:var(--error-color,#f44336)">▼ ${this._t('lbl.pg_broke', {}, 'broke')}</span>`;
+        else if (String(b.termination_reason) !== String(r.termination_reason)) deltaCol = `<span style="color:var(--warning-color,#ff9800)">${_esc(String(b.termination_reason || '—'))}→${_esc(String(r.termination_reason || '—'))}</span>`;
+      }
+      const sel = r.cycle_id === this._pgCycleId ? ' selected' : '';
+      return `<tr class="wd-pg-hrow${sel}" data-action="pg-open-cycle" data-cid="${_esc(r.cycle_id)}" title="${_esc(this._t('msg.pg_row_load_hint', {}, 'Load this cycle in the graph above'))}">
+        <td>${_esc(when)}</td>
+        <td><span style="color:${okColor};font-weight:700">${ok}</span> ${_esc(match)}</td>
+        <td>${_esc(String(r.termination_reason || '—'))}</td>
+        <td style="font-variant-numeric:tabular-nums">${durM}${over}${alertGlyph}</td>
+        ${h.diff ? `<td>${deltaCol}</td>` : ''}
+      </tr>`;
+    }).join('');
+    const table = `<table class="wd-pg-htable"><thead><tr>
+      <th>${this._t('lbl.cycle', {}, 'Cycle')}</th>
+      <th>${this._t('lbl.match', {}, 'Match')}</th>
+      <th>${this._t('lbl.pg_ended', {}, 'Ended')}</th>
+      <th>${this._t('lbl.duration', {}, 'Duration')}</th>
+      ${h.diff ? `<th>${this._t('lbl.pg_vs_current', {}, 'vs current')}</th>` : ''}
+    </tr></thead><tbody>${rows}</tbody></table>`;
+    return `${intro}${controls}${diffBanner}${summaryLine}${table}`;
+  }
+
+  // Determinate progress bar for chunked history/sweep runs, rendered once while
+  // busy and then advanced by _pgUpdateBatchBar (direct DOM, no re-render) so it
+  // is smooth and never "lost" mid-run. State lives in _pgBatchProgress so a full
+  // re-render (e.g. a poll) still shows the right fraction.
+  _htmlPgBatchBar() {
+    const p = this._pgBatchProgress;
+    if (!p) return '';
+    const pct = p.total ? Math.round(100 * p.done / p.total) : 0;
+    return `<div class="wd-pg-batchrow">
+      <div class="wd-pg-simbar"><div class="wd-pg-batchbar-fill" id="wd-pg-batch-fill" style="width:${pct}%"></div></div>
+      <span style="font-size:.78em;color:var(--secondary-text-color);white-space:nowrap;font-variant-numeric:tabular-nums"><span id="wd-pg-batch-count">${p.done}</span>/${p.total}</span>
+      <button class="wd-btn wd-btn-sm" data-action="pg-batch-cancel">✕ ${this._t('btn.cancel', {}, 'Cancel')}</button>
+    </div>`;
+  }
+
+  _pgUpdateBatchBar(done, total) {
+    const sr = this.shadowRoot; if (!sr) return;
+    const fill = sr.getElementById('wd-pg-batch-fill');
+    const cnt = sr.getElementById('wd-pg-batch-count');
+    const pct = total ? Math.round(100 * done / total) : 0;
+    if (fill) fill.style.width = pct + '%';
+    if (cnt) cnt.textContent = String(done);
+  }
+
+  // Kick off a detached, reconnect-safe Test-on-history task on the backend. The
+  // heavy replay runs server-side in small chunks (progress via the task
+  // registry); this panel just tracks the task id and loads the result when it
+  // finishes - so a backgrounded tab / dropped socket no longer loses the run.
+  async _pgRunHistory() {
+    const dev = this._devices[this._selIdx];
+    if (!dev) return;
+    const ids = (this._cycles || []).slice(0, Math.max(1, this._pgSimCycles || 20)).map(c => c.id);
+    if (!ids.length) { this._showToast(this._t('msg.no_cycles_selected', {}, 'No cycles available.'), 'error'); return; }
+    const override = { ...this._pgParamOverrides };
+    if (this._pgThreshStart != null) override.start_threshold_w = this._pgThreshStart;
+    if (this._pgThreshStop != null) override.stop_threshold_w = this._pgThreshStop;
+    this._pgBatchProgress = { done: 0, total: ids.length };
+    this._busy.add('pg-history');
+    this._render();
+    try {
+      const r = await this._ws({ type: `${_DOMAIN}/start_playground_history`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: override });
+      this._pgHistoryTaskId = r && r.task_id;
+      this._pgNeedsRestart = false;
+      if (!this._pgHistoryTaskId) throw new Error('no task id');
+      if (!this._tasksSubscribed) this._pgPollTask(this._pgHistoryTaskId);
+    } catch (e) {
+      this._busy.delete('pg-history'); this._pgBatchProgress = null;
+      if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
+      else this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+      this._render();
+    }
+  }
+
+  // ── Sweep mode (objective 1D curve + 2D heatmap) ──────────────────────────
+  _pgSweepObjectives() {
+    return [
+      ['match_accuracy', this._t('lbl.pg_obj_match', {}, 'Match accuracy'), false],
+      ['end_timing_accuracy', this._t('lbl.pg_obj_endtiming', {}, 'End-timing accuracy'), false],
+      ['false_end_rate', this._t('lbl.pg_obj_falseend', {}, 'False-end rate'), true],
+      ['median_overrun', this._t('lbl.pg_obj_overrun', {}, 'Duration off-target'), true],
+      ['ambiguity_rate', this._t('lbl.pg_obj_ambiguity', {}, 'Ambiguity rate'), true],
+    ];
+  }
+
+  _htmlPgSweepMode() {
+    const busy = this._busy.has('pg-sweep');
+    const fields = this._pgOverrideFields();
+    const paramOpts = fields.map(([k, fb]) => `<option value="${k}" ${this._pgSweepParam === k ? 'selected' : ''}>${_esc(this._t('setting.' + k + '.label', {}, fb))}</option>`).join('');
+    const paramYOpts = fields.map(([k, fb]) => `<option value="${k}" ${this._pgSweepParamY === k ? 'selected' : ''}>${_esc(this._t('setting.' + k + '.label', {}, fb))}</option>`).join('');
+    const objOpts = this._pgSweepObjectives().map(([k, lbl]) => `<option value="${k}" ${this._pgSweepObjective === k ? 'selected' : ''}>${_esc(lbl)}</option>`).join('');
+    const is2d = !!this._pgSweep2D;
+    const intro = `<p class="wd-sec-intro" style="margin:0 0 8px">${this._t('msg.pg_sweep_intro2', {}, 'Find the setting that best meets an objective across your recent cycles. Nothing changes until you apply it.')}</p>`;
+    const controls = `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:8px">
+      <div class="wd-field" style="margin:0;min-width:150px"><label>${this._t('lbl.pg_sweep_param', {}, 'Parameter')}</label><select id="wd-pg-sw-param">${paramOpts}</select></div>
+      <div class="wd-field" style="margin:0;min-width:150px"><label>${this._t('lbl.pg_objective', {}, 'Objective')}</label><select id="wd-pg-sw-obj">${objOpts}</select></div>
+      <div class="wd-field" style="margin:0"><label>${this._t('lbl.from', {}, 'From')}</label><input type="number" id="wd-pg-sw-from" value="${_esc(String(this._pgSweepFrom))}" style="width:70px" step="any"></div>
+      <div class="wd-field" style="margin:0"><label>${this._t('lbl.to', {}, 'To')}</label><input type="number" id="wd-pg-sw-to" value="${_esc(String(this._pgSweepTo))}" style="width:70px" step="any"></div>
+      <div class="wd-field" style="margin:0"><label>${this._t('lbl.pg_steps', {}, 'Steps')}</label><input type="number" id="wd-pg-sw-steps" value="${Math.max(2, Math.min(12, this._pgSweepSteps || 5))}" min="2" max="12" style="width:52px"></div>
+      <label style="display:flex;align-items:center;gap:5px;font-size:.85em;padding-bottom:6px"><input type="checkbox" id="wd-pg-sw-2d" ${is2d ? 'checked' : ''} data-action="pg-sweep-2d">${this._t('lbl.pg_sweep_2d', {}, '2D heatmap')}</label>
+      ${is2d ? `<div class="wd-field" style="margin:0;min-width:150px"><label>${this._t('lbl.pg_sweep_param_y', {}, '2nd parameter')}</label><select id="wd-pg-sw-paramy">${paramYOpts}</select></div>` : ''}
+      <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-sweep-run2" ${busy ? 'disabled' : ''} style="margin-bottom:2px">▶ ${this._t('btn.run', {}, 'Run')}</button>
+    </div>`;
+    const simbar = busy ? this._htmlPgBatchBar() : '';
+    return `${intro}${controls}${simbar}${this._htmlPgSweepResult()}`;
+  }
+
+  _htmlPgSweepResult() {
+    const r = this._pgSweepNew;
+    if (!r) return '';
+    if (r.grid) return this._htmlPgHeatmap(r);
+    if (!Array.isArray(r.points) || !r.points.length) return '';
+    const obj = this._pgSweepObjectives().find(o => o[0] === r.objective);
+    const lowerBetter = obj ? obj[2] : false;
+    const metrics = r.points.filter(p => p.metric != null).map(p => p.metric);
+    if (!metrics.length) return `<div class="wd-empty" style="padding:16px">${this._t('msg.pg_sweep_no_metric', {}, 'Not enough data to score this objective.')}</div>`;
+    const mn = Math.min(...metrics), mx = Math.max(...metrics);
+    const best = lowerBetter ? Math.min(...metrics) : Math.max(...metrics);
+    const bestVal = (r.points.find(p => p.metric === best) || {}).value;
+    const fmtMetric = m => (r.objective === 'median_overrun') ? Math.round(m * 100) + '% off' : Math.round(m * 100) + '%';
+    const bars = r.points.map(p => {
+      const frac = (mx > mn && p.metric != null) ? (p.metric - mn) / (mx - mn) : (p.metric != null ? 1 : 0);
+      const isBest = p.metric === best;
+      const isCurrent = r.current_value != null && Math.abs(p.value - r.current_value) < 1e-6;
+      const col = isBest ? 'var(--success-color,#4caf50)' : 'var(--primary-color)';
+      return `<div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:.82em">
+        <span style="flex:0 0 74px;text-align:right;font-variant-numeric:tabular-nums">${_esc(String(p.value))}${isCurrent ? ' ◀' : ''}</span>
+        <div style="flex:1;height:16px;border-radius:4px;background:var(--secondary-background-color);overflow:hidden"><div style="height:100%;width:${Math.round((p.metric != null ? (0.15 + 0.85 * frac) : 0) * 100)}%;background:${col};border-radius:4px"></div></div>
+        <span style="flex:0 0 46px;text-align:right;font-variant-numeric:tabular-nums">${p.metric != null ? fmtMetric(p.metric) : '—'}</span>
+      </div>`;
+    }).join('');
+    const applyBtn = (this._canEdit() && bestVal != null) ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-sweep-apply2" data-val="${_esc(String(bestVal))}">${this._t('btn.pg_apply_best', {}, 'Apply best')}</button>` : '';
+    return `<div style="font-size:.82em;color:var(--secondary-text-color);margin:4px 0 6px">${this._t('lbl.pg_best_value', {}, 'Best value found')}: <strong style="color:var(--primary-text-color)">${_esc(String(bestVal))}</strong> · ${fmtMetric(best)} · <span>◀ ${this._t('lbl.pg_current_value', {}, 'Current value:')}</span></div>
+      ${bars}
+      <div style="margin-top:8px">${applyBtn}</div>`;
+  }
+
+  _htmlPgHeatmap(r) {
+    const obj = this._pgSweepObjectives().find(o => o[0] === r.objective);
+    const lowerBetter = obj ? obj[2] : false;
+    const flat = r.grid.flat().filter(v => v != null);
+    if (!flat.length) return `<div class="wd-empty" style="padding:16px">${this._t('msg.pg_sweep_no_metric', {}, 'Not enough data to score this objective.')}</div>`;
+    const mn = Math.min(...flat), mx = Math.max(...flat);
+    const cols = r.x_values.length;
+    const color = v => {
+      if (v == null) return 'var(--secondary-background-color)';
+      let frac = mx > mn ? (v - mn) / (mx - mn) : 1;
+      if (lowerBetter) frac = 1 - frac;  // green = better
+      const hue = 8 + frac * 130;  // red(8)->green(138)
+      return `hsl(${Math.round(hue)},62%,45%)`;
+    };
+    // rows are y_values (top = last); render top-down reversed so higher y is up
+    const rowsHtml = r.grid.map((row, yi) => row.map((v, xi) => {
+      const title = `${this._t('setting.' + r.param_x + '.label', {}, r.param_x)}=${r.x_values[xi]}, ${this._t('setting.' + r.param_y + '.label', {}, r.param_y)}=${r.y_values[yi]} → ${v != null ? Math.round(v * 100) + '%' : '—'}`;
+      const isBest = r.best && r.best.x === r.x_values[xi] && r.best.y === r.y_values[yi];
+      return `<div class="wd-pg-heat-cell" style="background:${color(v)};${isBest ? 'outline:2px solid #fff;outline-offset:-2px' : ''}" title="${_esc(title)}">${isBest ? '★' : ''}</div>`;
+    }).join('')).join('');
+    return `<div style="font-size:.78em;color:var(--secondary-text-color);margin-bottom:4px">${_esc(this._t('setting.' + r.param_y + '.label', {}, r.param_y))} (rows) × ${_esc(this._t('setting.' + r.param_x + '.label', {}, r.param_x))} (cols)</div>
+      <div class="wd-pg-heat" style="grid-template-columns:repeat(${cols},1fr)">${rowsHtml}</div>
+      <div style="font-size:.78em;color:var(--secondary-text-color)">★ ${this._t('lbl.pg_best_combo', {}, 'best combination')}${r.best ? `: ${_esc(this._t('setting.' + r.param_x + '.label', {}, r.param_x))}=${r.best.x}, ${_esc(this._t('setting.' + r.param_y + '.label', {}, r.param_y))}=${r.best.y}` : ''}</div>`;
+  }
+
+  // Kick off a detached, reconnect-safe Optimize sweep on the backend (1D curve or
+  // 2D grid, chunked server-side per value/cell). Progress + result come via the
+  // task registry, so it survives a backgrounded tab.
+  async _pgRunSweep2() {
+    const dev = this._devices[this._selIdx];
+    if (!dev) return;
+    const fromN = parseFloat(this._pgSweepFrom), toN = parseFloat(this._pgSweepTo);
+    if (isNaN(fromN) || isNaN(toN) || fromN === toN) { this._showToast(this._t('msg.toast_name_required', {}, 'Set a valid From/To range.'), 'error'); return; }
+    const steps = Math.max(2, Math.min(12, this._pgSweepSteps || 5));
+    const values = Array.from({length: steps}, (_, i) => +(fromN + (toN - fromN) * i / (steps - 1)).toFixed(3));
+    const param = this._pgSweepParam || 'off_delay';
+    const objective = this._pgSweepObjective || 'match_accuracy';
+    const is2d = !!this._pgSweep2D;
+    const msg = { type: `${_DOMAIN}/start_playground_sweep`, entry_id: dev.entry_id, param, values, objective };
+    let total = values.length;
+    if (is2d) {
+      const yLive = parseFloat(String(this._pgFieldVal(this._pgSweepParamY, {}))) || 100;
+      const yVals = [0.5, 1.0, 1.5, 2.0].map(f => +(yLive * f).toFixed(3));
+      msg.param_y = this._pgSweepParamY;
+      msg.values_y = yVals;
+      total = values.length * yVals.length;
+    }
+    this._pgBatchProgress = { done: 0, total };
+    this._busy.add('pg-sweep');
+    this._render();
+    try {
+      const r = await this._ws(msg);
+      this._pgSweepTaskId = r && r.task_id;
+      this._pgNeedsRestart = false;
+      if (!this._pgSweepTaskId) throw new Error('no task id');
+      if (!this._tasksSubscribed) this._pgPollTask(this._pgSweepTaskId);
+    } catch (e) {
+      this._busy.delete('pg-sweep'); this._pgBatchProgress = null;
+      if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
+      else this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+      this._render();
+    }
+  }
+
+  // Transfer everything the user edited in the Playground into the device's live
+  // settings in one click, so they don't retype it in the Settings tab. Every
+  // override key is a real settable option (that is why the matching group is
+  // limited to the two duration-ratio settings), so this is a plain set_options.
+  async _pgApplyToSettings() {
+    const dev = this._devices[this._selIdx];
+    if (!dev || !this._canEdit()) return;
+    const opts = { ...this._pgParamOverrides };
+    if (this._pgThreshStart != null) opts.start_threshold_w = this._pgThreshStart;
+    if (this._pgThreshStop != null) opts.stop_threshold_w = this._pgThreshStop;
+    const keys = Object.keys(opts);
+    if (!keys.length) return;
+    const labels = keys.map(k => this._t('setting.' + k + '.label', {}, k)).join(', ');
+    if (!confirm(this._t('msg.pg_apply_settings_confirm', {n: keys.length, list: labels}, `Save these ${keys.length} setting(s) to this device? ${labels}`))) return;
+    await this._busyRun('pg-apply-settings', async () => {
+      try {
+        await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: opts });
+        this._opts = { ...this._opts, ...opts };
+        // Clear the staged overrides: they are the live baseline now.
+        this._pgParamOverrides = {}; this._pgThreshStart = null; this._pgThreshStop = null;
+        this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
+      } catch (e) {
+        this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
+      }
+    });
+    this._render();
+    this._pgRerunDetail();
+  }
+
+  async _pgApplySweepValue(val) {
+    const dev = this._devices[this._selIdx];
+    if (!dev || !this._canEdit() || val == null) return;
+    const paramKey = this._pgSweepParam;
+    const lbl = this._t('setting.' + paramKey + '.label', {}, paramKey);
+    if (!confirm(this._t('msg.pg_apply_confirm', {label: lbl, value: val}, 'Apply best value: ' + lbl + ' = ' + val + '?'))) return;
+    await this._busyRun('pg-sweep-apply', async () => {
+      try {
+        await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: { [paramKey]: +val } });
+        this._opts = { ...this._opts, [paramKey]: +val };
+        // Reflect the applied value in the graph above immediately (the live
+        // reload is async), so Optimize -> Apply drives the same single graph.
+        if (paramKey === 'start_threshold_w') this._pgThreshStart = +val;
+        else if (paramKey === 'stop_threshold_w') this._pgThreshStop = +val;
+        else this._pgParamOverrides[paramKey] = +val;
+        this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
+        this._render();
+        this._pgRerunDetail();
+      } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+    });
+  }
+
+  _htmlPgStrip() {
+    return `<div class="wd-pg-strip" id="wd-pg-strip">
+      <span class="wd-pg-strip-state" id="wd-pg-state-badge" style="background:var(--secondary-background-color);text-transform:uppercase">${this._t('lbl.pg_idle', {}, 'Idle')}</span>
+      <span style="font-size:.75em"><span style="color:var(--secondary-text-color);text-transform:uppercase">${this._t('lbl.power', {}, 'Power')} </span><span id="wd-pg-power">—</span></span>
+      <span class="wd-pg-strip-pbar">
+        <span class="wd-pg-strip-track"><span class="wd-pg-strip-fill" id="wd-pg-pbar" style="width:0%"></span></span>
+        <span id="wd-pg-pct">—%</span>
+      </span>
+      <span style="font-size:.75em;color:var(--secondary-text-color);text-transform:uppercase" title="${_esc(this._t('lbl.pg_time_left_model_tip', {}, 'Model-estimated time remaining (phase estimator + ML blend), not a static countdown'))}">${this._t('lbl.pg_time_left_model', {}, 'Time left (model)')} <span id="wd-pg-rem" style="color:var(--primary-text-color,inherit)">—</span></span>
+      <span style="font-size:.75em;color:var(--secondary-text-color);text-transform:uppercase">${this._t('lbl.energy', {}, 'Energy')} <span id="wd-pg-energy" style="color:var(--primary-text-color,inherit)">—</span></span>
+      <span style="font-size:.75em;color:var(--secondary-text-color);text-transform:uppercase">${this._t('lbl.match', {}, 'Match')} <span id="wd-pg-conf" style="color:var(--primary-text-color,inherit)">—</span></span>
+      <span style="font-size:.75em;color:var(--secondary-text-color);text-transform:uppercase">${this._t('lbl.phase', {}, 'Phase')} <span id="wd-pg-phase" style="color:var(--primary-text-color,inherit)">—</span></span>
+    </div>`;
+  }
+
 
   _htmlPgAnalysis() {
     const d = this._pgDtwData;
@@ -4321,7 +4740,9 @@ class HaWashdataPanel extends HTMLElement {
     if (!cid) return;
     this._pgCycleId = cid;
     this._pgLoading = true;
-    this._pgPowerPts = null; this._pgDtwData = null; this._pgEnvData = null;
+    this._pgView = null; this._pgHoverT = null;
+    this._pgPowerPts = null; this._pgDtwData = null; this._pgEnvData = null; this._pgDetail = null;
+    const seq = ++this._pgLoadSeq;
     this._render();
     try {
       const pwResp = await this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: dev.entry_id, cycle_id: cid });
@@ -4356,12 +4777,111 @@ class HaWashdataPanel extends HTMLElement {
           this._pgEnvData = envR.envelope || null;
         } catch (_) { this._pgEnvData = null; }
       }
+      if (seq !== this._pgLoadSeq) return;  // cancelled or device switched mid-flight
+      // Faithful backend simulation (the real detector + matcher + progress +
+      // notification predicates) for this cycle under the current overrides.
+      await this._pgLoadDetail(dev.entry_id, cid);
     } catch (e) {
       this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
     }
+    if (seq !== this._pgLoadSeq) return;  // a Cancel (or device switch) supersedes this run
     this._pgLoading = false;
     this._render();
-    requestAnimationFrame(() => this._pgDrawCanvas());
+    requestAnimationFrame(() => { this._pgDrawCanvas(); this._pgUpdateStripAt(null); });
+  }
+
+  // Cancel an in-flight Simulate run: bump the load token so the pending result
+  // is dropped when it returns, and restore the idle UI immediately.
+  _pgCancelRun() {
+    this._pgLoadSeq++;
+    this._pgLoading = false;
+    this._render();
+  }
+
+  // The single "load this cycle into the graph" path — used by the cycle dropdown
+  // AND by drilling into a Test-on-history row. Resets the profile to the target
+  // cycle's own label (so we never resimulate the previous cycle's profile),
+  // clears the zoom/hover, supersedes any in-flight load, and scrolls the graph
+  // into view so the drill-down is obviously reflected above the table.
+  _pgSelectCycle(cid) {
+    if (!cid) return;
+    this._pgCycleId = cid;
+    this._pgProfileName = '';   // always auto-detect; sim shows what the matcher picks
+    this._pgView = null; this._pgHoverT = null;
+    this._pgLoading = false;      // let this fresh load supersede any in-flight one
+    this._pgLoad();               // bumps _pgLoadSeq; a stale in-flight result is dropped
+    requestAnimationFrame(() => {
+      const c = this.shadowRoot && this.shadowRoot.getElementById('wd-pg-canvas');
+      if (c && typeof c.scrollIntoView === 'function') {
+        c.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  }
+
+  // Run the faithful backend simulation (real detector + matcher + progress +
+  // notification predicates) for one cycle under the current threshold/param
+  // overrides. Result drives the Simulate state band, readout, event lane and
+  // alerts rail — there is no client-side detection copy.
+  async _pgLoadDetail(entryId, cid) {
+    if (this._pgNeedsRestart) return;
+    const override = { ...this._pgParamOverrides };
+    if (this._pgThreshStart != null) override.start_threshold_w = this._pgThreshStart;
+    if (this._pgThreshStop != null) override.stop_threshold_w = this._pgThreshStop;
+    try {
+      const d = await this._ws({ type: `${_DOMAIN}/run_playground_cycle_detail`, entry_id: entryId, cycle_id: cid, settings_override: override });
+      if (!this._isActiveEntry(entryId)) return;  // device switched mid-flight - drop stale result
+      this._pgDetail = (d && !d.error) ? d : null;
+      this._pgNeedsRestart = false;
+    } catch (e) {
+      if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
+      this._pgDetail = null;
+    }
+  }
+
+  // Re-run just the detail sim (after a threshold drag / param edit), debounced,
+  // then redraw. Keeps the current cycle; no full reload.
+  _pgRerunDetail() {
+    const dev = this._devices[this._selIdx];
+    if (!dev || !this._pgCycleId) return;
+    clearTimeout(this._pgDetailDebounceTimer);
+    this._pgDetailDebounceTimer = setTimeout(async () => {
+      this._pgDetailBusy = true; this._render();
+      await this._pgLoadDetail(dev.entry_id, this._pgCycleId);
+      this._pgDetailBusy = false; this._render();
+      requestAnimationFrame(() => this._pgDrawCanvas());
+    }, 220);
+  }
+
+  // Backend detector state -> one of the four state-band categories.
+  _pgMapState(st) {
+    if (st === 'running' || st === 'paused') return 'running';
+    if (st === 'ending') return 'ending';
+    if (st === 'starting') return 'detecting';
+    return 'idle';
+  }
+
+  // The series telemetry point in effect at a given cycle offset (seconds).
+  _pgSeriesAt(offset) {
+    const s = this._pgDetail && this._pgDetail.series;
+    if (!s || !s.length) return null;
+    let lo = s[0];
+    for (const p of s) { if (p.t <= offset) lo = p; else break; }
+    return lo;
+  }
+
+  // Contiguous [{start,end,state}] state-band segments from the real sim series.
+  _pgStateSegsFromSeries(totalDur) {
+    const s = this._pgDetail && this._pgDetail.series;
+    if (!s || !s.length) return [];
+    const segs = [];
+    let cur = null;
+    for (const p of s) {
+      const st = this._pgMapState(p.state);
+      if (!cur || cur.state !== st) { cur = { start: p.t, end: p.t, state: st }; segs.push(cur); }
+      else cur.end = p.t;
+    }
+    if (segs.length) segs[segs.length - 1].end = totalDur;
+    return segs;
   }
 
   _pgDrawCanvas() {
@@ -4385,7 +4905,8 @@ class HaWashdataPanel extends HTMLElement {
 
     const stateBandH = 34 * dpr;
     const phaseBandH = 14 * dpr;
-    const padL = 44 * dpr, padR = 8 * dpr, padT = 10 * dpr, padB = stateBandH + phaseBandH + 4 * dpr;
+    const pinBandH = _PG_PIN_BAND_H * dpr;   // event pin heads live here, above the plot
+    const padL = 44 * dpr, padR = 8 * dpr, padT = pinBandH + 8 * dpr, padB = stateBandH + phaseBandH + 4 * dpr;
     const powerH = ch - padT - padB;
 
     if (!pts || !pts.length) {
@@ -4402,8 +4923,20 @@ class HaWashdataPanel extends HTMLElement {
     const threshStart = this._pgThreshStart ?? this._pgFieldVal('start_threshold_w', {}) ?? 50;
     const threshStop = this._pgThreshStop ?? this._pgFieldVal('stop_threshold_w', {}) ?? 5;
 
-    const toX = t => padL + (t / totalDur) * (cw - padL - padR);
+    // Zoom/pan viewport on the TIME axis. this._pgView = {min, max} in seconds;
+    // null = full [0, totalDur]. Clamped so it always stays within the cycle.
+    let vMin = 0, vMax = totalDur;
+    if (this._pgView && this._pgView.max - this._pgView.min > 1) {
+      vMin = Math.max(0, this._pgView.min);
+      vMax = Math.min(totalDur, this._pgView.max);
+      if (vMax - vMin <= 1) { vMin = 0; vMax = totalDur; }
+    }
+    const span = Math.max(1e-6, vMax - vMin);
+    const plotW = cw - padL - padR;
+    const toX = t => padL + ((t - vMin) / span) * plotW;
     const toY = w => padT + (1 - Math.max(0, w) / maxW) * powerH;
+    // Mapping in CSS pixels for the pointer handlers (zoom/pan/hover hit-testing).
+    this._pgMap = { vMin, vMax, totalDur, padLpx: padL / dpr, plotWpx: plotW / dpr };
 
     // Grid lines (solid, not dashed)
     ctx.strokeStyle = 'rgba(127,127,127,0.12)'; ctx.lineWidth = dpr; ctx.setLineDash([]);
@@ -4415,6 +4948,10 @@ class HaWashdataPanel extends HTMLElement {
       ctx.fillStyle = txtCol; ctx.font = `${9*dpr}px sans-serif`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
       ctx.fillText(w + 'W', padL - 4*dpr, y);
     });
+
+    // Clip the plotting region so zoomed/panned curves never overflow the axes.
+    ctx.save();
+    ctx.beginPath(); ctx.rect(padL, padT, plotW, powerH); ctx.clip();
 
     // Profile envelope band. get_profile_envelope returns avg/min/max as
     // [offset_s, watts] pairs on the profile's own time base; normalize x onto the
@@ -4488,6 +5025,8 @@ class HaWashdataPanel extends HTMLElement {
     pts.forEach((p, i) => i ? ctx.lineTo(toX(p.t), toY(p.w)) : ctx.moveTo(toX(p.t), toY(p.w)));
     ctx.stroke();
 
+    ctx.restore();  // end plot clip
+
     // Threshold lines
     const drawThrLine = (watts, color, label) => {
       const y = toY(watts);
@@ -4509,7 +5048,9 @@ class HaWashdataPanel extends HTMLElement {
     const stateLabels = { idle: this._t('lbl.pg_idle', {}, 'Idle'), detecting: this._t('lbl.pg_detecting', {}, 'Detecting'), running: this._t('lbl.pg_ev_running', {}, 'Running'), ending: this._t('lbl.pg_ev_ending', {}, 'Ending') };
     const stateY = ch - stateBandH - phaseBandH;
     ctx.fillStyle = bgCol; ctx.fillRect(padL, stateY, cw - padL - padR, stateBandH);
-    const statePts = this._pgComputeDetection(pts, +threshStart, +threshStop, totalDur);
+    // Real detector state band from the backend simulation (no client-side copy).
+    ctx.save(); ctx.beginPath(); ctx.rect(padL, stateY, plotW, stateBandH); ctx.clip();
+    const statePts = this._pgStateSegsFromSeries(totalDur);
     statePts.forEach(seg => {
       const x1 = toX(seg.start), x2 = toX(seg.end);
       ctx.fillStyle = stateColors[seg.state] || gridCol;
@@ -4519,6 +5060,7 @@ class HaWashdataPanel extends HTMLElement {
         ctx.fillText((stateLabels[seg.state] || seg.state).toUpperCase(), (x1 + x2) / 2, stateY + stateBandH/2);
       }
     });
+    ctx.restore();
 
     // Phase bar
     const cycle = (this._cycles || []).find(c => c.id === this._pgCycleId);
@@ -4526,6 +5068,7 @@ class HaWashdataPanel extends HTMLElement {
     const prof = profN ? (this._profiles || []).find(p => p.name === profN) : null;
     const phaseY = ch - phaseBandH;
     if (prof && Array.isArray(prof.phases) && prof.phases.length) {
+      ctx.save(); ctx.beginPath(); ctx.rect(padL, phaseY, plotW, phaseBandH); ctx.clip();
       prof.phases.forEach((ph, i) => {
         const x1 = toX((ph.start || 0) * totalDur), x2 = toX((ph.end || 1) * totalDur);
         const hue = (i * 47) % 360;
@@ -4536,88 +5079,185 @@ class HaWashdataPanel extends HTMLElement {
           ctx.fillText(ph.name, (x1 + x2)/2, phaseY + phaseBandH/2);
         }
       });
+      ctx.restore();
     }
 
-    // Scrub cursor
-    const scrubX = toX(this._pgScrubFrac * totalDur);
-    ctx.save(); ctx.strokeStyle = '#e34948'; ctx.lineWidth = 1.5*dpr; ctx.setLineDash([4*dpr, 3*dpr]);
-    ctx.beginPath(); ctx.moveTo(scrubX, padT); ctx.lineTo(scrubX, ch - phaseBandH); ctx.stroke();
-    ctx.setLineDash([]); ctx.restore();
+    // Event pins. The heads sit in the band ABOVE the plot (out of the busy
+    // curve), each on a stem down to its real time on the curve; hover a head for
+    // a tooltip explaining what that event did. Heads are nudged apart when they
+    // cluster, but the stem always points to the true time. Positions (CSS px)
+    // are cached for hit-testing in the pointer handler.
+    this._pgEventHits = [];
+    const evs = (this._pgDetail && Array.isArray(this._pgDetail.events))
+      ? this._pgDetail.events.filter(e => e.type !== 'state' && e.t >= vMin && e.t <= vMax)
+          .slice().sort((a, b) => a.t - b.t)
+      : [];
+    const headR = 11 * dpr;
+    const headY = padT - pinBandH / 2 - 2 * dpr;   // vertical centre of the head band
+    const minGap = headR * 2 + 3 * dpr;
+    let lastHeadX = -Infinity;
+    const hov = this._pgHoverEvent;
+    evs.forEach(e => {
+      const m = this._pgEventMeta(e.type);
+      const trueX = toX(e.t);
+      let headX = Math.max(trueX, lastHeadX + minGap);
+      headX = Math.max(padL + headR, Math.min(cw - padR - headR, headX));
+      lastHeadX = headX;
+      const isHov = hov && hov.t === e.t && hov.type === e.type;
 
-    // Time axis labels
-    ctx.fillStyle = txtCol; ctx.font = `${9*dpr}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    [0.25, 0.5, 0.75, 1.0].forEach(f => {
-      const t = f * totalDur;
-      const x = toX(t);
-      const m = Math.floor(t/60), s = Math.round(t%60);
-      ctx.fillText(`${m}:${String(s).padStart(2,'0')}`, x, stateY + stateBandH + 1*dpr);
+      // Stem: head -> true time at plot top (diagonal when the head was nudged).
+      ctx.save();
+      ctx.strokeStyle = m.color; ctx.globalAlpha = isHov ? 0.9 : 0.5; ctx.lineWidth = (isHov ? 2 : 1) * dpr;
+      ctx.beginPath(); ctx.moveTo(headX, headY + headR); ctx.lineTo(trueX, padT); ctx.stroke();
+      // For the hovered event, extend a faint full-height guide + a curve dot.
+      if (isHov) {
+        ctx.globalAlpha = 0.3; ctx.setLineDash([2 * dpr, 3 * dpr]);
+        ctx.beginPath(); ctx.moveTo(trueX, padT); ctx.lineTo(trueX, ch - phaseBandH); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      ctx.restore();
+
+      // Head: filled circle + a ring, larger glyph centred inside.
+      ctx.save();
+      ctx.beginPath(); ctx.arc(headX, headY, headR, 0, Math.PI * 2);
+      ctx.fillStyle = isHov ? m.color : (bgCol || '#1a1a1a'); ctx.fill();
+      ctx.lineWidth = (isHov ? 2 : 1.5) * dpr; ctx.strokeStyle = m.color; ctx.stroke();
+      ctx.fillStyle = isHov ? '#fff' : m.color;
+      ctx.font = `${14 * dpr}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(m.glyph, headX, headY + dpr);
+      ctx.restore();
+
+      this._pgEventHits.push({ cx: headX / dpr, cy: headY / dpr, r: headR / dpr, type: e.type, label: m.label, detail: e.detail, t: e.t });
     });
-  }
 
-  _pgComputeDetection(pts, startThr, stopThr, totalDur) {
-    if (!pts.length) return [];
-    const segments = [];
-    const offDelay = parseFloat(this._pgParamOverrides.off_delay ?? this._pgFieldVal('off_delay', {}) ?? 120);
-    let state = 'idle', segStart = 0;
-    let offStart = null, onStart = null;
-    const push = (end, st) => { if (end > segStart + 0.5) segments.push({start: segStart, end, state: st}); };
-    for (let i = 1; i < pts.length; i++) {
-      const {t, w} = pts[i];
-      if (state === 'idle') {
-        if (w >= startThr) {
-          if (!onStart) onStart = t;
-          if (t - onStart >= 10) { push(onStart, 'idle'); segStart = onStart; state = 'detecting'; onStart = null; }
-        } else { onStart = null; }
-      } else if (state === 'detecting') {
-        if (w >= startThr) { if (t - segStart >= 20) { push(t, 'detecting'); segStart = t; state = 'running'; } }
-        else { push(t, 'detecting'); segStart = t; state = 'idle'; }
-      } else if (state === 'running') {
-        if (w < stopThr) {
-          if (!offStart) offStart = t;
-          if (t - offStart >= offDelay) { push(offStart, 'running'); segStart = offStart; state = 'ending'; offStart = null; }
-        } else { offStart = null; }
-      } else if (state === 'ending') {
-        if (w >= startThr) { push(t, 'ending'); segStart = t; state = 'running'; offStart = null; }
-        else if (w < stopThr && t - segStart >= offDelay * 0.5) { push(t, 'ending'); segStart = t; state = 'idle'; }
+    // Event tooltip for the hovered pin: label + what the event did + detail + time.
+    if (hov) {
+      const hit = this._pgEventHits.find(h => h.t === hov.t && h.type === hov.type);
+      if (hit) {
+        const m = this._pgEventMeta(hit.type);
+        const fmtT = t => { const mm = Math.floor(t / 60); return `${mm}:${String(Math.round(t % 60)).padStart(2, '0')}`; };
+        const desc = this._pgEventDescription(hit.type);
+        const lines = [
+          { t: hit.label, bold: true, col: m.color },
+          ...(desc ? [{ t: desc }] : []),
+          ...(hit.detail ? [{ t: hit.detail, dim: true }] : []),
+          { t: `${this._t('lbl.from_start', {}, 'From start')} ${fmtT(hit.t)}`, dim: true },
+        ];
+        ctx.save();
+        ctx.font = `${10 * dpr}px sans-serif`;
+        const wrapW = Math.min(220 * dpr, cw - 2 * padL);
+        // Word-wrap each line to wrapW.
+        const wrapped = [];
+        lines.forEach(ln => {
+          const words = String(ln.t).split(' ');
+          let cur = '';
+          words.forEach(w => {
+            const test = cur ? cur + ' ' + w : w;
+            if (ctx.measureText(test).width > wrapW && cur) { wrapped.push({ ...ln, t: cur }); cur = w; }
+            else cur = test;
+          });
+          wrapped.push({ ...ln, t: cur });
+        });
+        const lh = 14 * dpr;
+        const bw = Math.min(wrapW + 14 * dpr, cw - 8 * dpr);
+        const bh = wrapped.length * lh + 10 * dpr;
+        const cxpx = hit.cx * dpr;
+        let bx = cxpx - bw / 2; bx = Math.max(4 * dpr, Math.min(cw - bw - 4 * dpr, bx));
+        const by = headY + headR + 6 * dpr;
+        ctx.fillStyle = bgCol; ctx.globalAlpha = 0.97; ctx.fillRect(bx, by, bw, bh); ctx.globalAlpha = 1;
+        ctx.strokeStyle = m.color; ctx.lineWidth = dpr; ctx.strokeRect(bx, by, bw, bh);
+        ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+        wrapped.forEach((ln, i) => {
+          ctx.font = `${ln.bold ? '600 ' : ''}${10 * dpr}px sans-serif`;
+          ctx.fillStyle = ln.col || (ln.dim ? txtCol : (cs.getPropertyValue('--primary-text-color') || '#ddd').trim());
+          ctx.fillText(ln.t, bx + 7 * dpr, by + 5 * dpr + i * lh);
+        });
+        ctx.restore();
       }
     }
-    push(totalDur, state);
-    return segments;
-  }
 
-  _pgPlay() {
-    if (this._pgPlaying || !this._pgPowerPts?.length) return;
-    const pts = this._pgPowerPts;
-    const cy = (this._cycles || []).find(c => c.id === this._pgCycleId);
-    const totalDur = cy?._pg_duration || pts[pts.length-1].t || 1;
-    this._pgPlaying = true;
-    this._pgAnimStartWall = Date.now() - this._pgScrubFrac * (this._pgAnimDuration || 10) * 1000;
-    this._render();
-    this._pgAnimFrame = requestAnimationFrame(() => this._pgPlayTick());
-  }
-
-  _pgStop() {
-    if (!this._pgPlaying) return;
-    this._pgPlaying = false;
-    if (this._pgAnimFrame) { cancelAnimationFrame(this._pgAnimFrame); this._pgAnimFrame = null; }
-    this._render();
-  }
-
-  _pgPlayTick() {
-    if (!this._pgPlaying || !this._pgPowerPts?.length) return;
-    const pts = this._pgPowerPts;
-    const cy = (this._cycles || []).find(c => c.id === this._pgCycleId);
-    const totalDur = cy?._pg_duration || pts[pts.length-1].t || 1;
-    const replayMs = (this._pgAnimDuration || 10) * 1000;
-    const wallElapsed = Date.now() - this._pgAnimStartWall;
-    this._pgScrubFrac = Math.min(1, wallElapsed / replayMs);
-    this._pgUpdateStripFromScrub(this._pgScrubFrac, totalDur);
-    this._pgDrawCanvas();
-    if (this._pgScrubFrac >= 1) {
-      this._pgPlaying = false; this._pgAnimFrame = null; this._render();
-    } else {
-      this._pgAnimFrame = requestAnimationFrame(() => this._pgPlayTick());
+    // Hover cursor + inline power dot + a compact readout box (time / to-end /
+    // power) at the hovered time - the "measuring" cursor.
+    if (this._pgHoverT != null && this._pgHoverT >= vMin && this._pgHoverT <= vMax) {
+      const hx = toX(this._pgHoverT);
+      ctx.save(); ctx.strokeStyle = '#e34948'; ctx.lineWidth = 1.5*dpr; ctx.setLineDash([4*dpr, 3*dpr]);
+      ctx.beginPath(); ctx.moveTo(hx, padT); ctx.lineTo(hx, ch - phaseBandH); ctx.stroke();
+      ctx.setLineDash([]);
+      const hw = this._pgInterpPower(pts, this._pgHoverT);
+      const hy = toY(hw);
+      ctx.fillStyle = '#e34948'; ctx.beginPath(); ctx.arc(hx, hy, 3.5*dpr, 0, Math.PI*2); ctx.fill();
+      // Readout box.
+      const fmtT = t => { const m = Math.floor(t/60); return `${m}:${String(Math.round(t%60)).padStart(2,'0')}`; };
+      const fmtW = w => w >= 1000 ? (w/1000).toFixed(2) + ' kW' : Math.round(w) + ' W';
+      const lines = [
+        `${this._t('lbl.from_start', {}, 'From start')} ${fmtT(this._pgHoverT)}`,
+        `${this._t('lbl.to_end', {}, 'To end')} ${fmtT(Math.max(0, totalDur - this._pgHoverT))}`,
+        `${this._t('lbl.power', {}, 'Power')} ${fmtW(hw)}`,
+      ];
+      ctx.font = `${9.5*dpr}px sans-serif`;
+      const bw = Math.max(...lines.map(l => ctx.measureText(l).width)) + 12*dpr;
+      const bh = lines.length * 13*dpr + 8*dpr;
+      let bx = hx + 8*dpr; if (bx + bw > cw - padR) bx = hx - bw - 8*dpr;
+      const by = padT + 4*dpr;
+      ctx.fillStyle = bgCol; ctx.globalAlpha = 0.95;
+      ctx.fillRect(bx, by, bw, bh); ctx.globalAlpha = 1;
+      ctx.strokeStyle = gridCol; ctx.lineWidth = dpr; ctx.strokeRect(bx, by, bw, bh);
+      ctx.fillStyle = txtCol; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      lines.forEach((l, i) => ctx.fillText(l, bx + 6*dpr, by + 5*dpr + i*13*dpr));
+      ctx.restore();
     }
+
+    // Dynamic time axis (adapts to the zoom window).
+    ctx.fillStyle = txtCol; ctx.font = `${9*dpr}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    const fmtT = t => { const m = Math.floor(t/60); return `${m}:${String(Math.round(t%60)).padStart(2,'0')}`; };
+    for (let k = 0; k <= 4; k++) {
+      const t = vMin + (span * k / 4);
+      const x = toX(t);
+      ctx.textAlign = k === 0 ? 'left' : (k === 4 ? 'right' : 'center');
+      ctx.fillText(fmtT(t), Math.max(padL, Math.min(cw - padR, x)), stateY + stateBandH + 1*dpr);
+    }
+    // Zoom hint when zoomed in.
+    if (span < totalDur - 1) {
+      ctx.fillStyle = txtCol; ctx.font = `${8*dpr}px sans-serif`; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+      ctx.fillText(this._t('lbl.pg_zoom_hint', {}, 'double-click to reset zoom'), cw - padR, padT);
+    }
+  }
+
+  // Glyph + color + label for an event type (used by the in-graph markers + hover).
+  _pgEventMeta(type) {
+    const M = {
+      detected:      ['●', '#42a5f5', this._t('lbl.pg_ev_detected', {}, 'Detected')],
+      match_commit:  ['◆', '#66bb6a', this._t('lbl.pg_ev_match', {}, 'Match committed')],
+      match_changed: ['◇', '#eda100', this._t('lbl.pg_ev_match_changed', {}, 'Match changed')],
+      match_ambiguous: ['◈', '#eda100', this._t('lbl.pg_ev_ambiguous', {}, 'Ambiguous')],
+      unmatched:     ['○', '#9e9e9e', this._t('lbl.pg_ev_unmatched', {}, 'Unmatched')],
+      notify_start:  ['🔔', '#2a78d6', this._t('lbl.pg_ev_notify_start', {}, 'Start notification')],
+      notify_pre_complete: ['🔔', '#2a78d6', this._t('lbl.pg_ev_notify_pre', {}, 'Almost-done notification')],
+      notify_finish: ['🔔', '#2a78d6', this._t('lbl.pg_ev_notify_finish', {}, 'Finish notification')],
+      notify_milestone: ['🏆', '#2a78d6', this._t('lbl.pg_ev_notify_milestone', {}, 'Milestone notification')],
+      notify_held:   ['🌙', '#7e57c2', this._t('lbl.pg_ev_notify_held', {}, 'Notification held (quiet hours)')],
+      finished:      ['✓', '#4caf50', this._t('lbl.pg_ev_finished', {}, 'Finished')],
+    };
+    const m = M[type] || ['•', 'var(--secondary-text-color)', type];
+    return { glyph: m[0], color: m[1], label: m[2] };
+  }
+
+  // Plain-language explanation of what an event did, shown in the pin tooltip.
+  _pgEventDescription(type) {
+    const D = {
+      detected: this._t('pg_evd.detected', {}, 'The detector recognized a cycle had started.'),
+      match_commit: this._t('pg_evd.match_commit', {}, 'The matcher committed to a program with enough confidence.'),
+      match_changed: this._t('pg_evd.match_changed', {}, 'The leading program changed as more of the cycle was seen.'),
+      match_ambiguous: this._t('pg_evd.match_ambiguous', {}, 'Two programs scored close together, so the match was uncertain.'),
+      unmatched: this._t('pg_evd.unmatched', {}, 'No saved program fit this cycle.'),
+      notify_start: this._t('pg_evd.notify_start', {}, 'A start notification would be sent.'),
+      notify_pre_complete: this._t('pg_evd.notify_pre_complete', {}, 'An almost-done notification would be sent.'),
+      notify_finish: this._t('pg_evd.notify_finish', {}, 'A finish notification would be sent.'),
+      notify_milestone: this._t('pg_evd.notify_milestone', {}, 'A milestone notification would be sent.'),
+      notify_held: this._t('pg_evd.notify_held', {}, 'A notification was held back for quiet hours.'),
+      finished: this._t('pg_evd.finished', {}, 'The cycle reached a terminal state and ended.'),
+    };
+    return D[type] || '';
   }
 
   _pgUpdateParamInput(key, val) {
@@ -4626,23 +5266,20 @@ class HaWashdataPanel extends HTMLElement {
     if (inp) inp.value = typeof val === 'number' ? Math.round(val) : val;
   }
 
-  _pgUpdateStripFromScrub(frac, totalDur) {
+  // Update the readout strip for a hovered time (seconds), or the final state
+  // when hoverT is null (pointer not over the graph). Everything reads from the
+  // REAL backend simulation series - the same detector state, model progress/
+  // remaining, live confidence, phase and accumulated energy the running
+  // integration would show. No client-side detection or static countdown.
+  _pgUpdateStripAt(hoverT) {
     const pts = this._pgPowerPts;
     if (!pts?.length) return;
-    const elapsed = frac * totalDur;
+    const cy = (this._cycles || []).find(c => c.id === this._pgCycleId);
+    const totalDur = cy?._pg_duration || pts[pts.length - 1].t || 1;
+    const elapsed = hoverT != null ? hoverT : totalDur;
     const power = this._pgInterpPower(pts, elapsed);
-    const energy = this._pgTrapEnergy(pts, elapsed);
-    const remaining = Math.max(0, totalDur - elapsed);
-    const pct = Math.round(frac * 100);
-    // Single source of truth: derive the current state from the SAME detector
-    // segments the canvas state band uses (configured start/stop thresholds +
-    // off_delay), so the scrub-strip readout can never disagree with the band.
-    // The hardcoded 8%/90%-of-progress fabrication has been removed.
-    const startThr = this._pgThreshStart ?? this._pgFieldVal('start_threshold_w', {}) ?? 50;
-    const stopThr = this._pgThreshStop ?? this._pgFieldVal('stop_threshold_w', {}) ?? 5;
-    const segs = this._pgComputeDetection(pts, +startThr, +stopThr, totalDur);
-    const seg = segs.find(s => elapsed >= s.start && elapsed < s.end) || segs[segs.length - 1];
-    const stateKey = seg ? seg.state : 'idle';
+    const sp = this._pgSeriesAt(elapsed);
+    const stateKey = sp ? this._pgMapState(sp.state) : 'idle';
     const stripStateMap = {
       idle: [this._t('lbl.pg_idle', {}, 'Idle'), 'var(--secondary-background-color)'],
       detecting: [this._t('lbl.pg_detecting', {}, 'Detecting'), '#42a5f5'],
@@ -4650,9 +5287,11 @@ class HaWashdataPanel extends HTMLElement {
       ending: [this._t('lbl.pg_ev_ending', {}, 'Ending'), '#ef5350'],
     };
     const [stateText, stateColor] = stripStateMap[stateKey] || stripStateMap.idle;
-    const cycle = (this._cycles || []).find(c => c.id === this._pgCycleId);
-    const matchConf = this._pgDtwData?.stage4?.final_score ?? cycle?.match_confidence ?? null;
-    const confDisp = matchConf != null ? Math.round(matchConf * 100) + '%' : '—';
+    const pct = sp && sp.progress != null ? Math.round(sp.progress) : null;
+    const remaining = sp && sp.remaining_s != null ? sp.remaining_s : null;
+    const energy = sp && sp.energy_wh != null ? sp.energy_wh : this._pgTrapEnergy(pts, elapsed);
+    const confDisp = sp && sp.confidence != null ? Math.round(sp.confidence * 100) + '%' : '—';
+    const phase = sp && sp.phase ? sp.phase : '—';
     const fmtTime = s => { const m = Math.floor(s/60); return m + ':' + String(Math.round(s%60)).padStart(2,'0'); };
     const fmtE = wh => wh >= 1000 ? (wh/1000).toFixed(2) + ' kWh' : wh.toFixed(0) + ' Wh';
     const fmtP = w => w >= 1000 ? (w/1000).toFixed(1) + ' kW' : Math.round(w) + ' W';
@@ -4663,78 +5302,21 @@ class HaWashdataPanel extends HTMLElement {
     const badge = $id('wd-pg-state-badge');
     if (badge) { badge.textContent = stateText; badge.style.background = stateColor; badge.style.color = stateColor.includes('var') ? '' : '#fff'; }
     set('wd-pg-power', fmtP(power));
-    set('wd-pg-pct', pct + '%');
-    setStyle('wd-pg-pbar', 'width', pct + '%');
-    set('wd-pg-rem', fmtTime(remaining));
+    set('wd-pg-pct', pct != null ? pct + '%' : '—%');
+    setStyle('wd-pg-pbar', 'width', (pct != null ? pct : 0) + '%');
+    set('wd-pg-rem', remaining != null ? fmtTime(remaining) : '—');
     set('wd-pg-energy', fmtE(energy));
     set('wd-pg-conf', confDisp);
+    set('wd-pg-phase', phase);
   }
 
-  async _pgRunSim() {
-    const dev = this._devices[this._selIdx];
-    if (!dev) return;
-    const cycles = this._cycles || [];
-    const ids = cycles.slice(0, Math.max(1, this._pgSimCycles || 20)).map(c => c.id);
-    if (!ids.length) { this._showToast(this._t('msg.no_cycles_selected', {}, 'No cycles available.'), 'error'); return; }
-    const override = { ...this._pgParamOverrides };
-    if (this._pgThreshStart != null) override.start_threshold_w = this._pgThreshStart;
-    if (this._pgThreshStop != null) override.stop_threshold_w = this._pgThreshStop;
-    this._pgSimCancelled = false;
-    this._pgSimProgress = { done: 0, total: ids.length };
-    this._render();
-    const CHUNK = 5;
-    const s = { total: ids.length, detected: 0, matchCorrect: 0, matched: 0, unmatched: 0, ambiguous: 0 };
-    await this._busyRun('pg-sim', async () => {
-      try {
-        for (let i = 0; i < ids.length && !this._pgSimCancelled; i += CHUNK) {
-          const chunk = ids.slice(i, i + CHUNK);
-          const r = await this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: chunk, settings_override: override, concurrency: chunk.length });
-          const arr = Array.isArray(r) ? r : (Array.isArray(r?.results) ? r.results : []);
-          arr.forEach(r => { const o = (r && r.outcome) || {}; if (o.detected) s.detected++; if (o.match_correct) s.matchCorrect++; if (o.match_profile) s.matched++; if (o.ambiguous) s.ambiguous++; });
-          s.unmatched = s.total - s.matched;
-          this._pgSimProgress = { done: Math.min(i + CHUNK, ids.length), total: ids.length };
-          this._pgSimProgressUpdate();
-        }
-        if (!this._pgSimCancelled) {
-          this._pgSimResults = s;
-          this._pgLastSimAt = Date.now();
-          this._pgNeedsRestart = false;
-        }
-      } catch (e) {
-        if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
-        else this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
-      }
-      this._pgSimProgress = null;
-    });
-  }
-
-  // True when a WS call failed because the command isn't registered yet (needs a
-  // full HA restart to pick up the new backend command).
   _pgIsUnknownCmd(e) {
     const code = (e && (e.code || (e.error && e.error.code))) || '';
     const msg = ((e && (e.message || e.error)) || '').toString().toLowerCase();
     return code === 'unknown_command' || msg.includes('unknown command') || msg.includes('unknown_command');
   }
 
-  _pgSimProgressUpdate() {
-    const sr = this.shadowRoot;
-    const prog = this._pgSimProgress;
-    const bar = sr && sr.getElementById('wd-pg-sim-progress-bar');
-    const lbl = sr && sr.getElementById('wd-pg-sim-progress-lbl');
-    if (bar && prog) { bar.style.width = Math.round(prog.done / prog.total * 100) + '%'; }
-    if (lbl && prog) { lbl.textContent = this._t('msg.pg_sim_progress', {done: prog.done, total: prog.total}, `${prog.done} / ${prog.total} cycles`); }
-  }
 
-  _pgSweepProgressUpdate() {
-    const sr = this.shadowRoot;
-    const prog = this._pgSweepProgress;
-    const bar = sr && sr.getElementById('wd-pg-sw-progress-bar');
-    const lbl = sr && sr.getElementById('wd-pg-sw-progress-lbl');
-    if (bar && prog) bar.style.width = Math.round(prog.done / prog.total * 100) + '%';
-    if (lbl && prog) lbl.textContent = this._t('msg.pg_sweep_progress', {done: prog.done, total: prog.total}, `Step ${prog.done} / ${prog.total}`);
-  }
-
-  // F3: Linear interpolation of power at a given cycle offset (seconds)
   _pgInterpPower(points, t) {
     if (!points.length) return 0;
     if (t <= points[0].t) return points[0].w;
@@ -4762,257 +5344,13 @@ class HaWashdataPanel extends HTMLElement {
     return wh;
   }
 
-  async _pgRunSweep() {
-    const dev = this._devices[this._selIdx];
-    if (!dev) return;
-    const fromN = parseFloat(this._pgSweepFrom), toN = parseFloat(this._pgSweepTo);
-    if (isNaN(fromN) || isNaN(toN) || fromN === toN) { this._showToast(this._t('msg.toast_name_required', {}, 'Set a valid From/To range.'), 'error'); return; }
-    const cycles = this._cycles || [];
-    const ids = cycles.slice(0, Math.max(1, this._pgSimCycles || 20)).map(c => c.id);
-    if (!ids.length) { this._showToast(this._t('msg.no_cycles_selected', {}, 'No cycles available.'), 'error'); return; }
-    const steps = Math.max(2, Math.min(20, this._pgSweepSteps || 5));
-    const vals = Array.from({length: steps}, (_, i) => fromN + (toN - fromN) * i / (steps - 1));
-    const paramKey = this._pgSweepParam || 'off_delay';
-    // Honor dragged threshold lines in the sweep, exactly like _pgRunSim, so the
-    // "best value" is computed under the detection settings the user set up.
-    const baseOverride = { ...this._pgParamOverrides };
-    if (this._pgThreshStart != null) baseOverride.start_threshold_w = this._pgThreshStart;
-    if (this._pgThreshStop != null) baseOverride.stop_threshold_w = this._pgThreshStop;
-    this._pgSimCancelled = false;
-    this._pgSweepProgress = null;
-    await this._busyRun('pg-sweep', async () => {
-      try {
-        const sweep = [];
-        for (let sweepIndex = 0; sweepIndex < vals.length && !this._pgSimCancelled; sweepIndex++) {
-          const v = vals[sweepIndex];
-          // Chunk over ALL ids (backend caps a batch at 50) so every selected
-          // cycle is evaluated for each param value — otherwise cycles past the
-          // cap are silently dropped and the "best" value is picked on a partial set.
-          const SWEEP_CHUNK = 50;
-          const s = { total: 0, detected: 0, matchCorrect: 0, matched: 0, unmatched: 0, ambiguous: 0 };
-          for (let ci = 0; ci < ids.length && !this._pgSimCancelled; ci += SWEEP_CHUNK) {
-            const chunk = ids.slice(ci, ci + SWEEP_CHUNK);
-            const r = await this._ws({ type: `${_DOMAIN}/run_playground_simulation`, entry_id: dev.entry_id, cycle_ids: chunk, settings_override: { ...baseOverride, [paramKey]: v }, concurrency: chunk.length });
-            const arr = Array.isArray(r) ? r : (Array.isArray(r?.results) ? r.results : []);
-            arr.forEach(rr => { const o = (rr && rr.outcome) || {}; s.total++; if (o.detected) s.detected++; if (o.match_correct) s.matchCorrect++; if (o.match_profile) s.matched++; if (o.ambiguous) s.ambiguous++; });
-          }
-          // If cancelled mid-chunk, this param value's summary is incomplete —
-          // discard it so it can't skew the "best value" selection.
-          if (this._pgSimCancelled) break;
-          s.unmatched = s.total - s.matched;
-          sweep.push({ paramVal: v, summary: s });
-          this._pgSweepProgress = { done: sweepIndex + 1, total: vals.length };
-          this._pgSweepProgressUpdate();
-        }
-        this._pgSweepResults = sweep;
-        this._pgLastSimAt = Date.now();
-        this._pgNeedsRestart = false;
-      } catch (e) {
-        if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
-        else this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
-      } finally {
-        this._pgSweepProgress = null;
-      }
-    });
-  }
 
-  async _pgApplySweepBest() {
-    const dev = this._devices[this._selIdx];
-    if (!dev || !this._canEdit() || !this._pgSweepResults?.length) return;
-    // Best = highest matchCorrect fraction
-    let best = null, bestScore = -1;
-    for (const {paramVal, summary} of this._pgSweepResults) {
-      const s = summary || {};
-      const score = s.total ? s.matchCorrect / s.total : 0;
-      if (score > bestScore) { bestScore = score; best = paramVal; }
-    }
-    if (best == null) return;
-    const paramKey = this._pgSweepParam;
-    const lbl = this._t('setting.' + paramKey + '.label', {}, paramKey);
-    if (!confirm(this._t('msg.pg_apply_confirm', {label: lbl, value: best}, 'Apply best value: ' + lbl + ' = ' + best + '?'))) return;
-    await this._busyRun('pg-sweep-apply', async () => {
-      try {
-        await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: { [paramKey]: best } });
-        this._opts = { ...this._opts, [paramKey]: best };
-        this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
-      } catch(e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message||e}, 'Save failed: '+(e.message||e)), 'error'); }
-    });
-  }
 
   _drawPlaygroundCanvases() {
     if (this._tab !== 'playground') return;
     this._pgDrawCanvas();
-    if (this._pgSweepResults?.length >= 2) this._drawPgSweepChart();
   }
 
-  _drawPgSweepChart() {
-    const sr = this.shadowRoot;
-    const canvas = sr && sr.getElementById('wd-pg-sweep-chart');
-    const results = this._pgSweepResults;
-    if (!canvas || !results?.length) return;
-
-    // Wire hover interactions once
-    if (!canvas._wdHooked) {
-      canvas._wdHooked = true;
-      canvas.addEventListener('pointermove', e => {
-        const r = canvas.getBoundingClientRect();
-        this._pgSweepHoverX = e.clientX - r.left;
-        this._drawPgSweepChart();
-      });
-      canvas.addEventListener('mouseleave', () => {
-        this._pgSweepHoverX = null;
-        this._drawPgSweepChart();
-      });
-    }
-
-    const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    const cw = Math.max(1, Math.round(rect.width * dpr));
-    const ch = Math.max(1, Math.round(180 * dpr));
-    if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
-    const ctx = canvas.getContext('2d');
-    const cs = getComputedStyle(this);
-    const isDark = cs.getPropertyValue('--primary-background-color').trim().length > 0 &&
-      window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const txtCol = (cs.getPropertyValue('--secondary-text-color') || '#888').trim();
-
-    // Categorical series: slot-1 blue, slot-2 aqua/green, slot-3 yellow
-    const series = [
-      { key: 'matchCorrect', label: this._t('lbl.pg_tile_matched', {}, 'Matched'),   color: isDark ? '#3987e5' : '#2a78d6' },
-      { key: 'detected',     label: this._t('lbl.pg_tile_detected', {}, 'Detected'),  color: isDark ? '#199e70' : '#1baf7a' },
-      { key: 'ambiguous',    label: this._t('lbl.pg_tile_ambiguous', {}, 'Ambiguous'), color: isDark ? '#c98500' : '#eda100' },
-    ];
-
-    const legendH = 18 * dpr;
-    const pad = { l: 30*dpr, r: 12*dpr, t: legendH + 8*dpr, b: 22*dpr };
-    const plotW = cw - pad.l - pad.r;
-    const plotH = ch - pad.t - pad.b;
-
-    const sums = results.map(({paramVal, summary}) => ({ x: paramVal, ...(summary || {}) }));
-    const xs = sums.map(s => s.x);
-    const minX = Math.min(...xs), maxX = Math.max(...xs, minX + 0.001);
-    const toX = x => pad.l + (x - minX) / (maxX - minX) * plotW;
-    const toY = v => pad.t + (1 - v) * plotH;
-
-    ctx.clearRect(0, 0, cw, ch);
-
-    // Legend (horizontal, above chart)
-    let legX = pad.l;
-    const legY = 6 * dpr;
-    series.forEach(({label, color}) => {
-      ctx.strokeStyle = color; ctx.lineWidth = 2*dpr; ctx.lineCap = 'round';
-      ctx.beginPath(); ctx.moveTo(legX, legY + 5*dpr); ctx.lineTo(legX + 20*dpr, legY + 5*dpr); ctx.stroke();
-      ctx.fillStyle = txtCol; ctx.font = `${9*dpr}px sans-serif`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.fillText(label, legX + 24*dpr, legY + 5*dpr);
-      legX += (24 + ctx.measureText(label).width / dpr + 16) * dpr;
-    });
-
-    // Gridlines (solid, not dashed)
-    ctx.setLineDash([]);
-    [0, 0.25, 0.5, 0.75, 1].forEach(v => {
-      const y = toY(v);
-      ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
-      ctx.lineWidth = dpr;
-      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(cw - pad.r, y); ctx.stroke();
-      ctx.fillStyle = txtCol; ctx.font = `${8*dpr}px sans-serif`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-      ctx.fillText(Math.round(v * 100) + '%', pad.l - 4*dpr, y);
-    });
-
-    // Compute best value (highest matchCorrect fraction)
-    let bestX = null, bestScore = -1;
-    sums.forEach(s => {
-      const score = s.total ? (s.matchCorrect || 0) / s.total : 0;
-      if (score > bestScore) { bestScore = score; bestX = s.x; }
-    });
-
-    // Best value marker (dashed vertical line)
-    if (bestX != null) {
-      const bx = toX(bestX);
-      ctx.save();
-      ctx.strokeStyle = 'rgba(42,120,214,0.30)';
-      ctx.lineWidth = dpr;
-      ctx.setLineDash([4*dpr, 3*dpr]);
-      ctx.beginPath(); ctx.moveTo(bx, pad.t); ctx.lineTo(bx, pad.t + plotH); ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = isDark ? '#3987e5' : '#2a78d6';
-      ctx.font = `bold ${8*dpr}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-      ctx.fillText(this._t('lbl.pg_best_marker', {v: (typeof bestX === 'number' ? bestX.toFixed(1).replace(/\.0$/,'') : bestX)}, 'Best: ' + (typeof bestX === 'number' ? bestX.toFixed(1).replace(/\.0$/,'') : bestX)), bx, pad.t - 2*dpr);
-      ctx.restore();
-    }
-
-    // Lines + dots per series
-    series.forEach(({key, color}) => {
-      ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2*dpr;
-      ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.setLineDash([]);
-      sums.forEach((s, i) => {
-        const v = (s[key] || 0) / (s.total || 1);
-        i ? ctx.lineTo(toX(s.x), toY(v)) : ctx.moveTo(toX(s.x), toY(v));
-      });
-      ctx.stroke();
-      // Dots with surface-color ring
-      sums.forEach(s => {
-        const v = (s[key] || 0) / (s.total || 1);
-        const dx = toX(s.x), dy = toY(v);
-        ctx.fillStyle = (cs.getPropertyValue('--card-background-color') || '#fff').trim();
-        ctx.beginPath(); ctx.arc(dx, dy, 5*dpr, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = color;
-        ctx.beginPath(); ctx.arc(dx, dy, 4*dpr, 0, Math.PI*2); ctx.fill();
-      });
-    });
-
-    // X-axis labels
-    ctx.fillStyle = txtCol; ctx.font = `${8*dpr}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    sums.forEach(s => ctx.fillText(s.x.toFixed?.(1).replace(/\.0$/,'') ?? s.x, toX(s.x), pad.t + plotH + 4*dpr));
-
-    // Crosshair + tooltip
-    const hoverCssX = this._pgSweepHoverX;
-    if (hoverCssX != null) {
-      const hoverPx = hoverCssX * dpr;
-      // Snap to nearest data point
-      let snapS = null, snapDist = Infinity;
-      sums.forEach(s => { const d = Math.abs(toX(s.x) - hoverPx); if (d < snapDist) { snapDist = d; snapS = s; } });
-      if (snapS && snapDist < 40*dpr) {
-        const sx = toX(snapS.x);
-        // Vertical crosshair
-        ctx.save();
-        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.20)';
-        ctx.lineWidth = dpr; ctx.setLineDash([]);
-        ctx.beginPath(); ctx.moveTo(sx, pad.t); ctx.lineTo(sx, pad.t + plotH); ctx.stroke();
-        ctx.restore();
-
-        // Tooltip
-        const swCf = this._pgOverrideFields().find(([k]) => k === this._pgSweepParam);
-        const paramLabel = swCf ? this._t('setting.'+swCf[0]+'.label',{},swCf[1]) : this._pgSweepParam;
-        const unit = swCf ? (swCf[2] || '') : '';
-        const tipLines = [
-          { text: `${paramLabel}: ${typeof snapS.x === 'number' ? snapS.x.toFixed(1).replace(/\.0$/,'') : snapS.x}${unit ? ' '+unit : ''}`, bold: true, color: txtCol },
-          ...series.map(({key, label, color}) => {
-            const pct = snapS.total ? Math.round((snapS[key] || 0) / snapS.total * 100) : 0;
-            return { text: label + ': ' + pct + '%', bold: false, color };
-          }),
-        ];
-        const tipPad = 6*dpr, tipLineH = 13*dpr;
-        ctx.font = `${9*dpr}px sans-serif`;
-        const tipW = Math.max(...tipLines.map(l => ctx.measureText(l.text).width)) + tipPad * 2;
-        const tipH = tipLines.length * tipLineH + tipPad * 2;
-        let tx = sx + 8*dpr, ty = pad.t + 4*dpr;
-        if (tx + tipW > cw - pad.r) tx = sx - tipW - 8*dpr;
-        if (ty + tipH > ch - pad.b) ty = ch - pad.b - tipH;
-        ctx.fillStyle = isDark ? 'rgba(30,30,30,0.92)' : 'rgba(255,255,255,0.95)';
-        ctx.beginPath();
-        ctx.roundRect ? ctx.roundRect(tx, ty, tipW, tipH, 4*dpr) : ctx.rect(tx, ty, tipW, tipH);
-        ctx.fill();
-        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)';
-        ctx.lineWidth = dpr; ctx.stroke();
-        tipLines.forEach((line, i) => {
-          ctx.fillStyle = line.color;
-          ctx.font = `${line.bold ? 'bold ' : ''}${9*dpr}px sans-serif`;
-          ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-          ctx.fillText(line.text, tx + tipPad, ty + tipPad + i * tipLineH);
-        });
-      }
-    }
-  }
 
   _htmlPhases() {
     const dev = this._devices[this._selIdx];
@@ -6332,76 +6670,123 @@ class HaWashdataPanel extends HTMLElement {
     // F3: Playground canvas pointer interaction (threshold drag + scrub)
     const pgCanvas = sr.getElementById('wd-pg-canvas');
     if (pgCanvas) {
-      const _canvasLayout = () => {
+      const layout = () => {
         const rect = pgCanvas.getBoundingClientRect();
-        const ch = rect.height || 280;
-        const stateBandH = 34, phaseBandH = 14;
-        const padT = 10, padB = stateBandH + phaseBandH + 4;
-        const powerH = ch - padT - padB;
-        const padL = 44;
-        return { rect, ch, padT, padB, powerH, padL };
+        const ch = rect.height || 330;
+        const padT = _PG_PIN_BAND_H + 8, powerH = ch - padT - (34 + 14 + 4);
+        return { rect, padT, powerH };
       };
-      const _yToWatts = (clientY) => {
-        const { rect, padT, powerH } = _canvasLayout();
-        const y = clientY - rect.top;
-        const pts = this._pgPowerPts;
-        if (!pts?.length) return 0;
+      // Return the event pin under a client point (within the pin band), or null.
+      const eventHitAt = (clientX, clientY) => {
+        const rect = pgCanvas.getBoundingClientRect();
+        const x = clientX - rect.left, y = clientY - rect.top;
+        if (y > _PG_PIN_BAND_H + 4) return null;   // only the head band, above the plot
+        const hits = this._pgEventHits || [];
+        let best = null, bestD = Infinity;
+        for (const h of hits) {
+          const d2 = (x - h.cx) ** 2 + (y - h.cy) ** 2;
+          if (d2 <= (h.r + 4) ** 2 && d2 < bestD) { best = h; bestD = d2; }
+        }
+        return best;
+      };
+      const yToWatts = (clientY) => {
+        const { rect, padT, powerH } = layout();
+        const pts = this._pgPowerPts; if (!pts?.length) return 0;
         const maxW = Math.max(...pts.map(p => p.w), 1);
-        return Math.max(0, (1 - Math.max(0, y - padT) / powerH) * maxW);
+        return Math.max(0, (1 - Math.max(0, (clientY - rect.top) - padT) / powerH) * maxW);
       };
-      const _xToFrac = (clientX) => {
-        const { rect, padL } = _canvasLayout();
-        const x = clientX - rect.left;
-        const usableW = rect.width - padL - 8;
-        return Math.max(0, Math.min(1, (x - padL) / usableW));
-      };
-      const _thresholdY = (watts) => {
-        const { rect, padT, powerH } = _canvasLayout();
-        const pts = this._pgPowerPts;
-        if (!pts?.length) return 0;
+      const thresholdY = (watts) => {
+        const { rect, padT, powerH } = layout();
+        const pts = this._pgPowerPts; if (!pts?.length) return 0;
         const maxW = Math.max(...pts.map(p => p.w), 1);
         return rect.top + padT + (1 - Math.max(0, +watts) / maxW) * powerH;
       };
+      // clientX -> time (seconds) using the current viewport mapping set by the draw.
+      const xToTime = (clientX) => {
+        const m = this._pgMap; if (!m) return null;
+        const { rect } = layout();
+        const frac = (clientX - rect.left - m.padLpx) / Math.max(1, m.plotWpx);
+        return m.vMin + Math.max(0, Math.min(1, frac)) * (m.vMax - m.vMin);
+      };
       pgCanvas.addEventListener('pointermove', (e) => {
-        if (!this._pgDragging) {
-          const startThr = this._pgThreshStart ?? this._pgFieldVal('start_threshold_w', {}) ?? 50;
-          const stopThr = this._pgThreshStop ?? this._pgFieldVal('stop_threshold_w', {}) ?? 5;
-          const startY = _thresholdY(startThr), stopY = _thresholdY(stopThr);
-          const relY = e.clientY;
-          const nearThr = Math.abs(relY - startY) < 10 || Math.abs(relY - stopY) < 10;
-          pgCanvas.style.cursor = nearThr ? 'ns-resize' : 'crosshair';
+        if (this._pgDragging === 'start_thr') {
+          this._pgThreshStart = Math.max(0, yToWatts(e.clientY));
+          this._pgUpdateParamInput('start_threshold_w', this._pgThreshStart);
+          this._pgDrawCanvas(); return;
+        }
+        if (this._pgDragging === 'stop_thr') {
+          this._pgThreshStop = Math.max(0, yToWatts(e.clientY));
+          this._pgUpdateParamInput('stop_threshold_w', this._pgThreshStop);
+          this._pgDrawCanvas(); return;
+        }
+        if (this._pgDragging === 'pan' && this._pgPanStart) {
+          const m = this._pgMap;
+          const dxFrac = (e.clientX - this._pgPanStart.clientX) / Math.max(1, m.plotWpx);
+          const span = this._pgPanStart.vMax - this._pgPanStart.vMin;
+          let nMin = this._pgPanStart.vMin - dxFrac * span;
+          nMin = Math.max(0, Math.min(this._pgPanStart.totalDur - span, nMin));
+          this._pgView = { min: nMin, max: nMin + span };
+          this._pgDrawCanvas(); return;
+        }
+        if (!this._pgPowerPts?.length) return;
+        // Event pin heads (above the plot): hover shows a tooltip, not the cursor.
+        const evHit = eventHitAt(e.clientX, e.clientY);
+        if (evHit) {
+          pgCanvas.style.cursor = 'pointer';
+          this._pgHoverEvent = { t: evHit.t, type: evHit.type };
+          this._pgHoverT = null;
+          this._pgDrawCanvas();
           return;
         }
-        if (this._pgDragging === 'start_thr') {
-          this._pgThreshStart = Math.max(0, _yToWatts(e.clientY));
-          this._pgUpdateParamInput('start_threshold_w', this._pgThreshStart);
-        } else if (this._pgDragging === 'stop_thr') {
-          this._pgThreshStop = Math.max(0, _yToWatts(e.clientY));
-          this._pgUpdateParamInput('stop_threshold_w', this._pgThreshStop);
-        } else if (this._pgDragging === 'scrub') {
-          this._pgScrubFrac = _xToFrac(e.clientX);
-          const pts = this._pgPowerPts;
-          const cy = (this._cycles || []).find(c => c.id === this._pgCycleId);
-          const totalDur = cy?._pg_duration || (pts?.length ? pts[pts.length-1].t : 1) || 1;
-          this._pgUpdateStripFromScrub(this._pgScrubFrac, totalDur);
-        }
-        this._pgDrawCanvas();
+        if (this._pgHoverEvent) { this._pgHoverEvent = null; this._pgDrawCanvas(); }
+        const startThr = this._pgThreshStart ?? this._pgFieldVal('start_threshold_w', {}) ?? 50;
+        const stopThr = this._pgThreshStop ?? this._pgFieldVal('stop_threshold_w', {}) ?? 5;
+        const nearThr = Math.abs(e.clientY - thresholdY(startThr)) < 8 || Math.abs(e.clientY - thresholdY(stopThr)) < 8;
+        pgCanvas.style.cursor = nearThr ? 'ns-resize' : 'crosshair';
+        const t = xToTime(e.clientX);
+        if (t != null) { this._pgHoverT = t; this._pgUpdateStripAt(t); this._pgDrawCanvas(); }
       });
       pgCanvas.addEventListener('pointerdown', (e) => {
+        if (!this._pgPowerPts?.length) return;
+        if (eventHitAt(e.clientX, e.clientY)) return;  // clicking a pin head is not a pan
         pgCanvas.setPointerCapture(e.pointerId);
         const startThr = this._pgThreshStart ?? this._pgFieldVal('start_threshold_w', {}) ?? 50;
         const stopThr = this._pgThreshStop ?? this._pgFieldVal('stop_threshold_w', {}) ?? 5;
-        const startY = _thresholdY(startThr), stopY = _thresholdY(stopThr);
-        const relY = e.clientY;
-        const scrubX = pgCanvas.getBoundingClientRect().left + 44 + this._pgScrubFrac * (pgCanvas.getBoundingClientRect().width - 52);
-        if (Math.abs(e.clientX - scrubX) < 12) { this._pgDragging = 'scrub'; }
-        else if (Math.abs(relY - startY) < 12) { this._pgDragging = 'start_thr'; }
-        else if (Math.abs(relY - stopY) < 12) { this._pgDragging = 'stop_thr'; }
+        if (Math.abs(e.clientY - thresholdY(startThr)) < 10) { this._pgDragging = 'start_thr'; }
+        else if (Math.abs(e.clientY - thresholdY(stopThr)) < 10) { this._pgDragging = 'stop_thr'; }
+        else if (this._pgMap) {
+          this._pgDragging = 'pan';
+          this._pgPanStart = { clientX: e.clientX, vMin: this._pgMap.vMin, vMax: this._pgMap.vMax, totalDur: this._pgMap.totalDur };
+          pgCanvas.classList.add('wd-pg-panning');
+        }
       });
       pgCanvas.addEventListener('pointerup', (e) => {
-        pgCanvas.releasePointerCapture(e.pointerId);
-        this._pgDragging = null;
+        try { pgCanvas.releasePointerCapture(e.pointerId); } catch (_) {}
+        const wasThr = this._pgDragging === 'start_thr' || this._pgDragging === 'stop_thr';
+        this._pgDragging = null; this._pgPanStart = null;
+        pgCanvas.classList.remove('wd-pg-panning');
+        if (wasThr) this._pgRerunDetail();  // re-run the sim under the new threshold
       });
+      pgCanvas.addEventListener('pointerleave', () => {
+        if (this._pgDragging) return;
+        this._pgHoverT = null; this._pgHoverEvent = null; this._pgUpdateStripAt(null); this._pgDrawCanvas();
+      });
+      pgCanvas.addEventListener('wheel', (e) => {
+        if (!this._pgPowerPts?.length || !this._pgMap) return;
+        e.preventDefault();
+        const m = this._pgMap;
+        const tCursor = xToTime(e.clientX);
+        if (tCursor == null) return;
+        const span = m.vMax - m.vMin;
+        const factor = e.deltaY > 0 ? 1.25 : 0.8;   // wheel down = zoom out
+        const nSpan = Math.max(30, Math.min(m.totalDur, span * factor));
+        const cursorFrac = span > 0 ? (tCursor - m.vMin) / span : 0.5;
+        let nMin = tCursor - cursorFrac * nSpan;
+        nMin = Math.max(0, Math.min(m.totalDur - nSpan, nMin));
+        this._pgView = (nSpan >= m.totalDur - 1) ? null : { min: nMin, max: nMin + nSpan };
+        this._pgDrawCanvas();
+      }, { passive: false });
+      pgCanvas.addEventListener('dblclick', () => { this._pgView = null; this._pgDrawCanvas(); });
     }
 
     // F3: Param input fields → sync to threshold state + redraw
@@ -6413,23 +6798,18 @@ class HaWashdataPanel extends HTMLElement {
       else if (key === 'stop_threshold_w') this._pgThreshStop = val;
       else this._pgParamOverrides[key] = val;
       this._pgDrawCanvas();
+      // Re-run the faithful sim under the new setting so the state band, model
+      // estimates, events and alerts reflect it (debounced).
+      this._pgRerunDetail();
     }));
 
     // F3: Cycle selector
     const pgCycSel = sr.getElementById('wd-pg-cyc-sel');
-    if (pgCycSel) pgCycSel.addEventListener('change', () => { this._pgCycleId = pgCycSel.value; this._pgLoad(); });
+    if (pgCycSel) pgCycSel.addEventListener('change', () => this._pgSelectCycle(pgCycSel.value));
 
     // F3: Profile selector
     const pgProfSel = sr.getElementById('wd-pg-prof-sel');
     if (pgProfSel) pgProfSel.addEventListener('change', () => { this._pgProfileName = pgProfSel.value; this._pgLoad(); });
-
-    // F3: Replay duration
-    const pgDur = sr.getElementById('wd-pg-dur');
-    if (pgDur) pgDur.addEventListener('input', () => {
-      this._pgAnimDuration = Math.max(3, Math.min(60, parseInt(pgDur.value, 10) || 10));
-      const el = sr.getElementById('wd-pg-dur-lbl');
-      if (el) el.textContent = this._pgAnimDuration + 's';
-    });
 
     // F3: Sim cycle count
     const pgSimN = sr.getElementById('wd-pg-simn');
@@ -6437,13 +6817,17 @@ class HaWashdataPanel extends HTMLElement {
 
     // F3: Sweep controls
     const pgSwParam = sr.getElementById('wd-pg-sw-param');
-    if (pgSwParam) pgSwParam.addEventListener('change', () => { this._pgSweepParam = pgSwParam.value; this._pgSweepResults = null; this._render(); });
+    if (pgSwParam) pgSwParam.addEventListener('change', () => { this._pgSweepParam = pgSwParam.value; this._pgSweepNew = null; this._render(); });
+    const pgSwObj = sr.getElementById('wd-pg-sw-obj');
+    if (pgSwObj) pgSwObj.addEventListener('change', () => { this._pgSweepObjective = pgSwObj.value; this._pgSweepNew = null; this._render(); });
+    const pgSwParamY = sr.getElementById('wd-pg-sw-paramy');
+    if (pgSwParamY) pgSwParamY.addEventListener('change', () => { this._pgSweepParamY = pgSwParamY.value; this._pgSweepNew = null; this._render(); });
     const pgSwFrom = sr.getElementById('wd-pg-sw-from');
     if (pgSwFrom) pgSwFrom.addEventListener('input', () => { this._pgSweepFrom = pgSwFrom.value; });
     const pgSwTo = sr.getElementById('wd-pg-sw-to');
     if (pgSwTo) pgSwTo.addEventListener('input', () => { this._pgSweepTo = pgSwTo.value; });
     const pgSwSteps = sr.getElementById('wd-pg-sw-steps');
-    if (pgSwSteps) pgSwSteps.addEventListener('input', () => { this._pgSweepSteps = parseInt(pgSwSteps.value, 10) || 5; this._render(); });
+    if (pgSwSteps) pgSwSteps.addEventListener('input', () => { this._pgSweepSteps = parseInt(pgSwSteps.value, 10) || 5; });
 
     sr.querySelectorAll('[data-statustoggle]').forEach(el => el.addEventListener('change', async () => {
       const key = el.dataset.statustoggle, val = el.checked;
@@ -7461,28 +7845,35 @@ class HaWashdataPanel extends HTMLElement {
         try { await this._loadMoreCycles(eid); }
         catch (e) { this._showToast(this._t('toast.load_more_failed', { error: e.message || e }, 'Could not load more: ' + (e.message || e)), 'error'); }
       });
-    } else if (a === 'pg-load') {
+    } else if (a === 'pg-analysis-tab') {
+      const tab = btn.dataset.subtab || 'history';
+      if (tab !== this._pgAnalysisTab) { this._pgAnalysisTab = tab; this._render(); requestAnimationFrame(() => this._drawPlaygroundCanvases()); }
+    } else if (a === 'pg-run-history') {
+      this._pgRunHistory();
+    } else if (a === 'pg-batch-cancel') {
+      this._pgBatchCancel = true;
+      const tid = this._pgHistoryTaskId || this._pgSweepTaskId;
+      if (tid) this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {});
+    } else if (a === 'task-cancel') {
+      const tid = btn.dataset.taskId;
+      if (tid) this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {});
+    } else if (a === 'pg-open-cycle') {
+      this._pgSelectCycle(btn.dataset.cid);
+    } else if (a === 'pg-sweep-2d') {
+      this._pgSweep2D = !this._pgSweep2D; this._pgSweepNew = null; this._render();
+    } else if (a === 'pg-sweep-run2') {
+      this._pgRunSweep2();
+    } else if (a === 'pg-sweep-apply2') {
+      this._pgApplySweepValue(btn.dataset.val);
+    } else if (a === 'pg-run' || a === 'pg-load') {
       this._pgLoad();
-    } else if (a === 'pg-play') {
-      this._pgPlay();
-    } else if (a === 'pg-stop') {
-      this._pgStop();
+    } else if (a === 'pg-cancel-run') {
+      this._pgCancelRun();
     } else if (a === 'pg-reset-params') {
       this._pgThreshStart = null; this._pgThreshStop = null; this._pgParamOverrides = {};
       this._render(); requestAnimationFrame(() => this._pgDrawCanvas());
-    } else if (a === 'pg-run-sim') {
-      this._pgRunSim();
-    } else if (a === 'pg-cancel') {
-      this._pgSimCancelled = true;
-    } else if (a === 'pg-sweep-run') {
-      this._pgRunSweep();
-    } else if (a === 'pg-sweep-apply-best') {
-      this._pgApplySweepBest();
-    } else if (a === 'pg-sweep-dismiss') {
-      this._pgSweepResults = null; this._pgLastSimAt = null; this._render();
-    } else if (a === 'pg-sweep-autofill') {
-      const v = parseFloat(String(this._pgFieldVal(this._pgSweepParam, {})));
-      if (!isNaN(v) && v > 0) { this._pgSweepFrom = String(Math.max(1, Math.round(v * 0.25))); this._pgSweepTo = String(Math.round(v * 4)); this._render(); }
+    } else if (a === 'pg-apply-settings') {
+      this._pgApplyToSettings();
     } else if (a === 'cyc-compare') {
       const ids = Array.from(this._cycleSel);
       if (ids.length < 2) return;

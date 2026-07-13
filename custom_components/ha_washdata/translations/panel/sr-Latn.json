@@ -145,7 +145,10 @@
     "use": "Koristi",
     "wipe_all": "Obriši sve podatke",
     "delete_selected": "Izbriši izabrano ({n})",
-    "group_suggest": "Grupa {n}: {members}"
+    "group_suggest": "Grupa {n}: {members}",
+    "pg_apply_best": "Primeni najbolje",
+    "pg_apply_to_settings": "Sačuvaj u podešavanja",
+    "pg_apply_to_settings_tip": "Kopiraj ovde uređene vrednosti u aktivna podešavanja ovog uređaja"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Prebaci Home Assistant bočnu traku",
     "tools_and_data": "Alati i podaci",
     "wipe_history": "Obriši istoriju",
-    "recommendations": "Preporuke ({n})"
+    "recommendations": "Preporuke ({n})",
+    "pg_detection_params": "Podešavanja otkrivanja",
+    "pg_timeline": "Vremenska osa događaja",
+    "pg_outcome": "Ishod simulacije",
+    "pg_across_cycles": "Kroz sve vaše cikluse"
   },
   "health": {
     "fair": "Prihvatljiva kvaliteta profila",
@@ -458,7 +465,62 @@
     "n_shown": ", prikazano {n}",
     "cycles_title": "Ciklusi ({n})",
     "pg_detecting": "Otkrivanje",
-    "pg_best_marker": "Najbolji: {v}"
+    "pg_best_marker": "Najbolji: {v}",
+    "pg_time_left_model": "Preostalo vreme (model)",
+    "pg_time_left_model_tip": "Procena preostalog vremena modelom (procenjivač faza + ML), a ne statično odbrojavanje",
+    "phase": "Faza",
+    "pg_mode_simulate": "Simulacija",
+    "pg_mode_history": "Test na istoriji",
+    "pg_mode_sweep": "Pretraga",
+    "pg_ev_detected": "Otkriveno",
+    "pg_ev_match": "Poklapanje prihvaćeno",
+    "pg_ev_match_changed": "Poklapanje promenjeno",
+    "pg_ev_ambiguous": "Dvosmisleno",
+    "pg_ev_unmatched": "Bez poklapanja",
+    "pg_ev_notify_start": "Obaveštenje o početku",
+    "pg_ev_notify_pre": "Obaveštenje „skoro gotovo“",
+    "pg_ev_notify_finish": "Obaveštenje o završetku",
+    "pg_ev_notify_milestone": "Obaveštenje o prekretnici",
+    "pg_ev_notify_held": "Obaveštenje zadržano (tihi sati)",
+    "pg_ev_finished": "Završeno",
+    "pg_ended": "Okončano",
+    "pg_proj_energy": "Predv. energija",
+    "pg_alert_overrun": "Duže od uobičajenog",
+    "pg_alert_underrun": "Kraće od uobičajenog",
+    "pg_alert_did_not_finish": "Nije završeno",
+    "pg_alert_false_end": "Podeljeno na više ciklusa",
+    "pg_alert_unmatched": "Bez poklapanja",
+    "pg_alert_ambiguous": "Dvosmisleno poklapanje",
+    "pg_alert_energy": "Anomalija energije",
+    "pg_newly_correct": "sada ispravno",
+    "pg_regressed": "pogoršano",
+    "pg_end_timing_changed": "vreme završetka promenjeno",
+    "pg_vs_current": "u odnosu na trenutno",
+    "pg_fixed": "ispravljeno",
+    "pg_broke": "pokvareno",
+    "pg_sweep_param": "Parametar",
+    "pg_objective": "Cilj",
+    "pg_steps": "Koraci",
+    "pg_sweep_2d": "2D toplotna mapa",
+    "pg_sweep_param_y": "2. parametar",
+    "pg_obj_match": "Tačnost poklapanja",
+    "pg_obj_endtiming": "Tačnost završetka",
+    "pg_obj_falseend": "Stopa lažnih završetaka",
+    "pg_obj_overrun": "Odstupanje trajanja",
+    "pg_obj_ambiguity": "Stopa dvosmislenosti",
+    "pg_best_combo": "najbolja kombinacija",
+    "pg_mode_optimize": "Optimizuj",
+    "pg_group_matching": "Podudaranje programa",
+    "pg_zoom_hint": "dvostruki klik poništava zumiranje",
+    "aria_playground_chart2": "Interaktivni grafikon snage ciklusa: pređite mišem za prikaz vremena/snage, pomerajte točkić za zumiranje, prevucite za pomeranje",
+    "pg_alert_timeout_end": "Završeno zbog isteka vremena, a ne na osnovu predviđanja",
+    "pg_alert_indefinite": "Radio bi beskonačno",
+    "task_pg_history": "Test na istoriji",
+    "task_pg_sweep": "Optimizuj",
+    "task_reprocess": "Ponovna obrada",
+    "task_ml_training": "Učenje",
+    "eta_secs": "još ~{n} s",
+    "eta_mins": "još ~{n} min"
   },
   "log": {
     "all_levels": "Svi nivoi"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "Program '{name}' troši sve više energije (otprilike +{pct}% po ciklusu) - vredi proveriti uređaj ako je to neočekivano.",
     "advisory_poor_health": "Profil '{name}' ima nisku ocenu podudaranja - njegovi noviji ciklusi znatno variraju ili se slabo podudaraju. Pregledajte njegove cikluse ili ponovo snimite profil kako bi prepoznavanje i procene vremena ostali tačni.",
     "advisory_shape_drift": "Profil '{name}' je znatno odstupio od svog prvobitnog oblika potrošnje snage. Uređaj je možda vremenom promenio ponašanje (npr. kamenac, habanje). Razmislite o ponovnom snimanju ovog profila sa novijim ciklusima.",
-    "advisory_shape_drift_corr": "Profil '{name}' je znatno odstupio od svog prvobitnog oblika potrošnje snage (korelacija {corr}). Uređaj je možda vremenom promenio ponašanje (npr. kamenac, habanje). Razmislite o ponovnom snimanju ovog profila sa novijim ciklusima."
+    "advisory_shape_drift_corr": "Profil '{name}' je znatno odstupio od svog prvobitnog oblika potrošnje snage (korelacija {corr}). Uređaj je možda vremenom promenio ponašanje (npr. kamenac, habanje). Razmislite o ponovnom snimanju ovog profila sa novijim ciklusima.",
+    "pg_no_alerts": "U ovom pokretanju nisu otkriveni problemi.",
+    "pg_override_active": "Koriste se vaša izmenjena podešavanja umesto trenutnih",
+    "pg_history_intro": "Ponovo pokrenite svoje nedavne cikluse kroz stvarni detektor i uparivač. Prvo izmenite podešavanje otkrivanja u „Simulaciji“ da biste ovde videli poređenje pre/posle.",
+    "pg_history_empty": "Pritisnite „Pokreni“ da biste reprodukovali svoje cikluse.",
+    "pg_history_summary": "{detected}/{total} otkriveno · {correct} ispravno upareno",
+    "pg_sweep_no_metric": "Nema dovoljno podataka za ocenu ovog cilja.",
+    "pg_sweep_intro2": "Pronađite podešavanje koje najbolje ispunjava cilj na vašim nedavnim ciklusima. Ništa se ne menja dok ga ne primenite.",
+    "pg_running_history": "Ponovno izvođenje vaših ciklusa…",
+    "pg_running_sweep": "Isprobavanje vrednosti kroz sve vaše cikluse…",
+    "pg_row_load_hint": "Učitaj ovaj ciklus u grafikon iznad",
+    "pg_history_intro2": "Ponovo izvedite svoje nedavne cikluse kroz stvarni detektor i modul za podudaranje sa postavkama iznad. Kliknite bilo koji red da učitate taj ciklus u grafikon; izmenite postavku da vidite poređenje pre i posle.",
+    "pg_simulating": "Simuliranje ciklusa…",
+    "pg_canvas_empty2": "Izaberite ciklus iznad i pritisnite Pokreni da ga simulirate. Zatim pređite mišem za prikaz vrednosti, pomerajte točkić za zumiranje i prevucite za pomeranje.",
+    "pg_apply_settings_confirm": "Sačuvati ovih {n} podešavanja na ovaj uređaj? {list}"
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka okretanja nakon završetka radi smanjenja gužvanja.",
@@ -1130,6 +1206,22 @@
     "peak_rate_threshold": {
       "doc": "Kada ciklus započne, a trenutna cena po kWh je na ovoj vrednosti ili iznad nje, obaveštenju o početku se dodaje savet o vršnoj tarifi. 0 ili prazno onemogućava savet.",
       "label": "Prag vršne tarife (po kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Tolerancija podudaranja oblika",
+      "doc": "Koliko modul za podudaranje sme vremenski da izobliči ciklus da odgovara obliku sačuvanog programa. Viša vrednost podnosi veće varijacije brzine; previsoka rizikuje podudaranje sa pogrešnim programom."
+    },
+    "corr_weight": {
+      "label": "Težina oblika u odnosu na nivo",
+      "doc": "Ravnoteža između oblika krive i apsolutnog nivoa snage pri ocenjivanju podudaranja. Viša vrednost daje prednost obliku; niža daje prednost slaganju nivoa snage."
+    },
+    "duration_weight": {
+      "label": "Težina trajanja",
+      "doc": "Koliko snažno se daje prednost programu čije se tipično trajanje podudara sa ovim ciklusom."
+    },
+    "energy_weight": {
+      "label": "Težina energije",
+      "doc": "Koliko snažno se daje prednost programu čija se tipična potrošnja energije podudara sa ovim ciklusom."
     }
   },
   "setting_group": {
@@ -1439,7 +1531,13 @@
     "off_delay": "Sekundi niske snage pre završetka ciklusa",
     "start_duration_threshold": "Sekundi iznad praga za potvrdu pokretanja",
     "start_threshold_w": "Minimum vati da bi se računalo kao pokrenuto",
-    "stop_threshold_w": "Ispod ovoga mašina se računa kao isključena"
+    "stop_threshold_w": "Ispod ovoga mašina se računa kao isključena",
+    "dtw_bandwidth": "Koliko vremenskog izobličenja dozvoljava podudaranje oblika",
+    "corr_weight": "Težina oblika krive u odnosu na nivo snage pri podudaranju",
+    "duration_weight": "Koliko slaganje trajanja utiče na podudaranje",
+    "energy_weight": "Koliko slaganje potrošnje energije utiče na podudaranje",
+    "profile_match_min_duration_ratio": "Najkraće izvođenje (u odnosu na profil) koje još može da se podudari",
+    "profile_match_max_duration_ratio": "Najduže izvođenje (u odnosu na profil) koje još može da se podudari"
   },
   "col": {
     "profile_tip": "Naziv podudarnog programa. Bez oznake znači da se na kraju ciklusa nijedan profil nije podudarao.",
@@ -1461,5 +1559,18 @@
     "score": "rezultat {pct}%",
     "duration_cv": "CV trajanja {pct}%",
     "avg_confidence": "pros. pouzdanost {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Detektor je prepoznao da je ciklus započeo.",
+    "match_commit": "Mehanizam podudaranja je sa dovoljno pouzdanosti odabrao program.",
+    "match_changed": "Vodeći program se promenio kako je viđen veći deo ciklusa.",
+    "match_ambiguous": "Dva programa su postigla slične rezultate, pa je podudaranje bilo nesigurno.",
+    "unmatched": "Nijedan sačuvani program nije odgovarao ovom ciklusu.",
+    "notify_start": "Bilo bi poslato obaveštenje o pokretanju.",
+    "notify_pre_complete": "Bilo bi poslato obaveštenje da je ciklus skoro završen.",
+    "notify_finish": "Bilo bi poslato obaveštenje o završetku.",
+    "notify_milestone": "Bilo bi poslato obaveštenje o prekretnici.",
+    "notify_held": "Obaveštenje je zadržano zbog tihih sati.",
+    "finished": "Ciklus je dostigao završno stanje i završio."
   }
 }

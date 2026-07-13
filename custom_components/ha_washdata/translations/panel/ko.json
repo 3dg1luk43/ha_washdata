@@ -145,7 +145,10 @@
     "use": "사용",
     "wipe_all": "모든 데이터 지우기",
     "delete_selected": "선택 항목 삭제 ({n})",
-    "group_suggest": "그룹 {n}: {members}"
+    "group_suggest": "그룹 {n}: {members}",
+    "pg_apply_best": "최적 값 적용",
+    "pg_apply_to_settings": "설정에 저장",
+    "pg_apply_to_settings_tip": "여기서 편집한 값을 이 기기에 현재 적용 중인 설정으로 복사합니다"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "홈어시스턴트 사이드바 전환",
     "tools_and_data": "도구 및 데이터",
     "wipe_history": "기록 지우기",
-    "recommendations": "권장 사항 ({n})"
+    "recommendations": "권장 사항 ({n})",
+    "pg_detection_params": "감지 설정",
+    "pg_timeline": "이벤트 타임라인",
+    "pg_outcome": "시뮬레이션 결과",
+    "pg_across_cycles": "전체 사이클에 걸쳐"
   },
   "health": {
     "fair": "프로파일 품질: 보통",
@@ -458,7 +465,62 @@
     "n_shown": ", {n}개 표시됨",
     "cycles_title": "사이클 ({n})",
     "pg_detecting": "감지 중",
-    "pg_best_marker": "최적: {v}"
+    "pg_best_marker": "최적: {v}",
+    "pg_time_left_model": "남은 시간(모델)",
+    "pg_time_left_model_tip": "모델이 추정한 남은 시간(단계 추정 + ML 혼합)으로, 고정된 카운트다운이 아닙니다.",
+    "phase": "단계",
+    "pg_mode_simulate": "시뮬레이션",
+    "pg_mode_history": "이력 테스트",
+    "pg_mode_sweep": "스윕",
+    "pg_ev_detected": "감지됨",
+    "pg_ev_match": "매칭 확정",
+    "pg_ev_match_changed": "매칭 변경",
+    "pg_ev_ambiguous": "모호함",
+    "pg_ev_unmatched": "매칭 안 됨",
+    "pg_ev_notify_start": "시작 알림",
+    "pg_ev_notify_pre": "거의 완료 알림",
+    "pg_ev_notify_finish": "완료 알림",
+    "pg_ev_notify_milestone": "마일스톤 알림",
+    "pg_ev_notify_held": "알림 보류(방해 금지 시간)",
+    "pg_ev_finished": "완료",
+    "pg_ended": "종료됨",
+    "pg_proj_energy": "예상 에너지",
+    "pg_alert_overrun": "너무 김",
+    "pg_alert_underrun": "너무 짧음",
+    "pg_alert_did_not_finish": "미완료",
+    "pg_alert_false_end": "여러 사이클로 분할됨",
+    "pg_alert_unmatched": "매칭 안 됨",
+    "pg_alert_ambiguous": "모호한 매칭",
+    "pg_alert_energy": "에너지 이상",
+    "pg_newly_correct": "새로 정답",
+    "pg_regressed": "후퇴",
+    "pg_end_timing_changed": "종료 타이밍 변경",
+    "pg_vs_current": "현재 대비",
+    "pg_fixed": "해결됨",
+    "pg_broke": "문제 발생",
+    "pg_sweep_param": "매개변수",
+    "pg_objective": "목표",
+    "pg_steps": "단계 수",
+    "pg_sweep_2d": "2D 히트맵",
+    "pg_sweep_param_y": "두 번째 매개변수",
+    "pg_obj_match": "매칭 정확도",
+    "pg_obj_endtiming": "종료 타이밍 정확도",
+    "pg_obj_falseend": "잘못된 종료율",
+    "pg_obj_overrun": "소요 시간 편차",
+    "pg_obj_ambiguity": "모호 비율",
+    "pg_best_combo": "최적 조합",
+    "pg_mode_optimize": "최적화",
+    "pg_group_matching": "프로그램 매칭",
+    "pg_zoom_hint": "더블클릭하여 확대/축소 초기화",
+    "aria_playground_chart2": "대화형 사이클 전력 그래프: 마우스를 올리면 시간/전력 표시, 스크롤하여 확대/축소, 드래그하여 이동",
+    "pg_alert_timeout_end": "예측이 아닌 타임아웃으로 종료됨",
+    "pg_alert_indefinite": "무한정 계속 실행됨",
+    "task_pg_history": "기록으로 테스트",
+    "task_pg_sweep": "최적화",
+    "task_reprocess": "재처리",
+    "task_ml_training": "학습",
+    "eta_secs": "~{n}초 남음",
+    "eta_mins": "~{n}분 남음"
   },
   "log": {
     "all_levels": "모든 레벨"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}'의 에너지 사용량이 점점 늘고 있습니다(사이클당 약 +{pct}%) - 예상 밖이라면 기기를 점검해 보세요.",
     "advisory_poor_health": "'{name}'의 적합도 점수가 낮습니다 - 최근 사이클의 편차가 크거나 매칭이 약합니다. 매칭과 시간 추정의 정확도를 유지하려면 사이클을 검토하거나 프로필을 다시 기록하세요.",
     "advisory_shape_drift": "'{name}'이(가) 원래 전력 파형에서 크게 벗어났습니다. 시간이 지나며 기기 동작이 변했을 수 있습니다(예: 물때, 마모). 최근 사이클로 이 프로필을 다시 기록하는 것을 고려하세요.",
-    "advisory_shape_drift_corr": "'{name}'이(가) 원래 전력 파형에서 크게 벗어났습니다(상관관계 {corr}). 시간이 지나며 기기 동작이 변했을 수 있습니다(예: 물때, 마모). 최근 사이클로 이 프로필을 다시 기록하는 것을 고려하세요."
+    "advisory_shape_drift_corr": "'{name}'이(가) 원래 전력 파형에서 크게 벗어났습니다(상관관계 {corr}). 시간이 지나며 기기 동작이 변했을 수 있습니다(예: 물때, 마모). 최근 사이클로 이 프로필을 다시 기록하는 것을 고려하세요.",
+    "pg_no_alerts": "이번 실행에서 문제가 감지되지 않았습니다.",
+    "pg_override_active": "편집한 설정을 현재 설정과 비교하여 사용 중",
+    "pg_history_intro": "최근 사이클을 실제 감지기와 매처로 다시 재생합니다. 여기에서 전후 비교를 보려면 먼저 시뮬레이션에서 감지 설정을 편집하세요.",
+    "pg_history_empty": "실행을 눌러 사이클을 다시 재생하세요.",
+    "pg_history_summary": "{detected}/{total} 감지됨 · {correct} 올바르게 매칭",
+    "pg_sweep_no_metric": "이 목표를 평가하기에 데이터가 부족합니다.",
+    "pg_sweep_intro2": "최근 사이클 전체에서 목표를 가장 잘 충족하는 설정을 찾습니다. 적용하기 전까지는 아무것도 변경되지 않습니다.",
+    "pg_running_history": "사이클을 다시 재생하는 중…",
+    "pg_running_sweep": "전체 사이클에서 값을 테스트하는 중…",
+    "pg_row_load_hint": "이 사이클을 위 그래프에 불러오기",
+    "pg_history_intro2": "위 설정으로 최근 사이클을 실제 감지기와 매처를 통해 다시 재생합니다. 행을 클릭하면 해당 사이클을 그래프에 불러옵니다. 설정을 변경하면 변경 전후 비교를 확인할 수 있습니다.",
+    "pg_simulating": "사이클을 시뮬레이션하는 중…",
+    "pg_canvas_empty2": "위에서 사이클을 선택하고 실행을 눌러 시뮬레이션하세요. 그런 다음 마우스를 올려 값을 확인하고, 스크롤하여 확대/축소하고, 드래그하여 이동할 수 있습니다.",
+    "pg_apply_settings_confirm": "이 {n}개 설정을 이 기기에 저장하시겠습니까? {list}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "급격한 강하는 즉시 종료로 처리",
@@ -718,7 +794,13 @@
     "off_delay": "사이클 종료 전 저전력 지속 초",
     "start_duration_threshold": "시작 확정을 위한 임계값 초과 초",
     "start_threshold_w": "시작으로 간주할 최소 와트",
-    "stop_threshold_w": "이 값 미만이면 기기가 꺼진 것으로 간주"
+    "stop_threshold_w": "이 값 미만이면 기기가 꺼진 것으로 간주",
+    "dtw_bandwidth": "형상 매칭에서 허용하는 시간 왜곡의 정도",
+    "corr_weight": "매칭에서 곡선 형상과 전력 레벨의 가중치",
+    "duration_weight": "실행 시간 일치가 매칭에 미치는 영향의 정도",
+    "energy_weight": "에너지 일치가 매칭에 미치는 영향의 정도",
+    "profile_match_min_duration_ratio": "일치 대상으로 허용되는 최단 실행 시간(프로파일 대비)",
+    "profile_match_max_duration_ratio": "일치 대상으로 허용되는 최장 실행 시간(프로파일 대비)"
   },
   "phase_desc": {
     "anti_crease": "메인 사이클 후 드럼이 간헐적으로 회전하여 의류 구김을 방지합니다.",
@@ -1141,6 +1223,22 @@
     "peak_rate_threshold": {
       "doc": "사이클이 시작될 때 현재 kWh당 가격이 이 값 이상이면 시작 알림에 피크 요금 팁을 추가합니다. 0 또는 비워 두면 팁이 비활성화됩니다.",
       "label": "피크 요금 임계값 (kWh당)"
+    },
+    "dtw_bandwidth": {
+      "label": "형상 매칭 허용치",
+      "doc": "저장된 프로그램의 형상에 맞추기 위해 매처가 사이클을 얼마나 시간 왜곡할 수 있는지를 결정합니다. 값이 클수록 속도 변화를 더 허용하지만, 너무 크면 잘못된 프로그램에 매칭될 위험이 있습니다."
+    },
+    "corr_weight": {
+      "label": "형상 대 레벨 가중치",
+      "doc": "매칭 점수를 계산할 때 곡선 형상과 절대 전력 레벨 사이의 균형입니다. 값이 클수록 형상을, 작을수록 전력 레벨 일치를 우선합니다."
+    },
+    "duration_weight": {
+      "label": "실행 시간 가중치",
+      "doc": "일반적인 실행 시간이 이 사이클과 일치하는 프로그램을 얼마나 우선할지 결정합니다."
+    },
+    "energy_weight": {
+      "label": "에너지 가중치",
+      "doc": "일반적인 에너지 사용량이 이 사이클과 일치하는 프로그램을 얼마나 우선할지 결정합니다."
     }
   },
   "setting_group": {
@@ -1461,5 +1559,18 @@
     "score": "점수 {pct}%",
     "duration_cv": "지속 시간 CV {pct}%",
     "avg_confidence": "평균 신뢰도 {pct}%"
+  },
+  "pg_evd": {
+    "detected": "감지기가 사이클 시작을 인식했습니다.",
+    "match_commit": "매칭 기능이 충분한 신뢰도로 프로그램을 확정했습니다.",
+    "match_changed": "사이클이 더 진행되면서 가장 유력한 프로그램이 바뀌었습니다.",
+    "match_ambiguous": "두 프로그램의 점수가 비슷해서 매칭이 불확실했습니다.",
+    "unmatched": "이 사이클에 맞는 저장된 프로그램이 없습니다.",
+    "notify_start": "시작 알림이 전송됩니다.",
+    "notify_pre_complete": "거의 완료 알림이 전송됩니다.",
+    "notify_finish": "완료 알림이 전송됩니다.",
+    "notify_milestone": "마일스톤 알림이 전송됩니다.",
+    "notify_held": "방해 금지 시간대라서 알림이 보류되었습니다.",
+    "finished": "사이클이 종료 상태에 도달하여 끝났습니다."
   }
 }

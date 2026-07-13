@@ -145,7 +145,10 @@
     "use": "Usar",
     "wipe_all": "Apagar todos os dados",
     "delete_selected": "Eliminar selecionados ({n})",
-    "group_suggest": "Grupo {n}: {members}"
+    "group_suggest": "Grupo {n}: {members}",
+    "pg_apply_best": "Aplicar melhor",
+    "pg_apply_to_settings": "Guardar nas definições",
+    "pg_apply_to_settings_tip": "Copiar os valores que editou aqui para as definições ativas deste dispositivo"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Alternar barra lateral do Home Assistant",
     "tools_and_data": "Ferramentas e dados",
     "wipe_history": "Apagar histórico",
-    "recommendations": "Recomendações ({n})"
+    "recommendations": "Recomendações ({n})",
+    "pg_detection_params": "Definições de deteção",
+    "pg_timeline": "Cronologia de eventos",
+    "pg_outcome": "Resultado da simulação",
+    "pg_across_cycles": "Em todos os seus ciclos"
   },
   "health": {
     "fair": "Qualidade de perfil aceitável",
@@ -458,7 +465,62 @@
     "n_shown": ", {n} mostrados",
     "cycles_title": "Ciclos ({n})",
     "pg_detecting": "A detetar",
-    "pg_best_marker": "Melhor: {v}"
+    "pg_best_marker": "Melhor: {v}",
+    "pg_time_left_model": "Tempo restante (modelo)",
+    "pg_time_left_model_tip": "Tempo restante estimado pelo modelo (estimador de fase + combinação de ML), não uma contagem decrescente fixa",
+    "phase": "Fase",
+    "pg_mode_simulate": "Simular",
+    "pg_mode_history": "Testar no histórico",
+    "pg_mode_sweep": "Varrimento",
+    "pg_ev_detected": "Detetado",
+    "pg_ev_match": "Correspondência confirmada",
+    "pg_ev_match_changed": "Correspondência alterada",
+    "pg_ev_ambiguous": "Ambíguo",
+    "pg_ev_unmatched": "Sem correspondência",
+    "pg_ev_notify_start": "Notificação de início",
+    "pg_ev_notify_pre": "Notificação de pré-conclusão",
+    "pg_ev_notify_finish": "Notificação de fim",
+    "pg_ev_notify_milestone": "Notificação de marco",
+    "pg_ev_notify_held": "Notificação retida (horas de silêncio)",
+    "pg_ev_finished": "Terminado",
+    "pg_ended": "Fim",
+    "pg_proj_energy": "Energia proj.",
+    "pg_alert_overrun": "Demasiado longo",
+    "pg_alert_underrun": "Demasiado curto",
+    "pg_alert_did_not_finish": "Não terminou",
+    "pg_alert_false_end": "Dividido em vários ciclos",
+    "pg_alert_unmatched": "Sem correspondência",
+    "pg_alert_ambiguous": "Correspondência ambígua",
+    "pg_alert_energy": "Anomalia de energia",
+    "pg_newly_correct": "agora correto",
+    "pg_regressed": "regrediu",
+    "pg_end_timing_changed": "momento do fim alterado",
+    "pg_vs_current": "vs atual",
+    "pg_fixed": "corrigido",
+    "pg_broke": "estragou",
+    "pg_sweep_param": "Parâmetro",
+    "pg_objective": "Objetivo",
+    "pg_steps": "Passos",
+    "pg_sweep_2d": "Mapa de calor 2D",
+    "pg_sweep_param_y": "2.º parâmetro",
+    "pg_obj_match": "Precisão de correspondência",
+    "pg_obj_endtiming": "Precisão do momento de fim",
+    "pg_obj_falseend": "Taxa de fins falsos",
+    "pg_obj_overrun": "Desvio de duração",
+    "pg_obj_ambiguity": "Taxa de ambiguidade",
+    "pg_best_combo": "melhor combinação",
+    "pg_mode_optimize": "Otimizar",
+    "pg_group_matching": "Correspondência de programa",
+    "pg_zoom_hint": "faça duplo clique para repor o zoom",
+    "aria_playground_chart2": "Gráfico interativo da potência do ciclo: passe o cursor para ler tempo/potência, percorra para ampliar, arraste para deslocar",
+    "pg_alert_timeout_end": "Terminado por tempo limite, não por previsão",
+    "pg_alert_indefinite": "Funcionaria indefinidamente",
+    "task_pg_history": "Testar no histórico",
+    "task_pg_sweep": "Otimizar",
+    "task_reprocess": "Reprocessamento",
+    "task_ml_training": "Aprendizagem",
+    "eta_secs": "~{n} s restantes",
+    "eta_mins": "~{n} min restantes"
   },
   "log": {
     "all_levels": "Todos os níveis"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' está a consumir cada vez mais energia (cerca de +{pct}% por ciclo) - vale a pena verificar o aparelho se isso for inesperado.",
     "advisory_poor_health": "'{name}' tem uma pontuação de correspondência baixa - os ciclos recentes variam muito ou correspondem fracamente. Reveja os ciclos ou volte a gravar o perfil para que o reconhecimento e as estimativas de tempo se mantenham precisos.",
     "advisory_shape_drift": "'{name}' afastou-se significativamente da sua curva de potência original. O aparelho pode ter alterado o comportamento ao longo do tempo (por ex. calcário, desgaste). Considere voltar a gravar este perfil com ciclos recentes.",
-    "advisory_shape_drift_corr": "'{name}' afastou-se significativamente da sua curva de potência original (correlação {corr}). O aparelho pode ter alterado o comportamento ao longo do tempo (por ex. calcário, desgaste). Considere voltar a gravar este perfil com ciclos recentes."
+    "advisory_shape_drift_corr": "'{name}' afastou-se significativamente da sua curva de potência original (correlação {corr}). O aparelho pode ter alterado o comportamento ao longo do tempo (por ex. calcário, desgaste). Considere voltar a gravar este perfil com ciclos recentes.",
+    "pg_no_alerts": "Nenhum problema detetado nesta execução.",
+    "pg_override_active": "A usar as suas definições editadas vs. as atuais",
+    "pg_history_intro": "Reproduza os seus ciclos recentes com o detetor e o comparador reais. Edite primeiro uma definição de deteção em Simular para ver aqui uma comparação antes/depois.",
+    "pg_history_empty": "Prima Executar para reproduzir os seus ciclos.",
+    "pg_history_summary": "{detected}/{total} detetados · {correct} reconhecidos corretamente",
+    "pg_sweep_no_metric": "Dados insuficientes para pontuar este objetivo.",
+    "pg_sweep_intro2": "Encontre a definição que melhor cumpre um objetivo nos seus ciclos recentes. Nada muda até a aplicar.",
+    "pg_running_history": "A reproduzir os seus ciclos…",
+    "pg_running_sweep": "A testar valores em todos os seus ciclos…",
+    "pg_row_load_hint": "Carregar este ciclo no gráfico acima",
+    "pg_history_intro2": "Reproduza os seus ciclos recentes através do detetor e do sistema de correspondência reais com as definições acima. Clique numa linha para carregar esse ciclo no gráfico; edite uma definição para ver uma comparação antes/depois.",
+    "pg_simulating": "A simular o ciclo…",
+    "pg_canvas_empty2": "Escolha um ciclo acima e prima Executar para o simular. Depois passe o cursor para ler os valores, percorra para ampliar e arraste para deslocar.",
+    "pg_apply_settings_confirm": "Guardar estas {n} definição(ões) neste dispositivo? {list}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Queda repentina tratada como fim imediato",
@@ -718,7 +794,13 @@
     "off_delay": "Segundos de baixa potência antes de o ciclo terminar",
     "start_duration_threshold": "Segundos acima do limiar para confirmar o início",
     "start_threshold_w": "Watts mínimos para contar como iniciado",
-    "stop_threshold_w": "Abaixo disto, a máquina conta como desligada"
+    "stop_threshold_w": "Abaixo disto, a máquina conta como desligada",
+    "dtw_bandwidth": "Quanta deformação temporal a correspondência de forma permite",
+    "corr_weight": "Peso da forma da curva face ao nível de potência na correspondência",
+    "duration_weight": "Quanto a concordância de duração afeta a correspondência",
+    "energy_weight": "Quanto a concordância de energia afeta a correspondência",
+    "profile_match_min_duration_ratio": "Ciclo mais curto (face ao perfil) ainda autorizado a corresponder",
+    "profile_match_max_duration_ratio": "Ciclo mais longo (face ao perfil) ainda autorizado a corresponder"
   },
   "phase_desc": {
     "anti_crease": "Rotações curtas ocasionais após a conclusão para reduzir vincos.",
@@ -1141,6 +1223,22 @@
     "peak_rate_threshold": {
       "doc": "Quando um ciclo começa e o preço atual por kWh é igual ou superior a este valor, é anexada uma dica de tarifa de pico à notificação de início. 0 ou em branco desativa a dica.",
       "label": "Limite de tarifa de pico (por kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Tolerância de correspondência de forma",
+      "doc": "Quanta deformação temporal o sistema de correspondência pode aplicar a um ciclo para o ajustar à forma de um programa guardado. Um valor mais alto tolera maior variação de velocidade; demasiado alto corre o risco de corresponder ao programa errado."
+    },
+    "corr_weight": {
+      "label": "Peso da forma face ao nível",
+      "doc": "Equilíbrio entre a forma da curva e o nível de potência absoluto ao pontuar uma correspondência. Um valor mais alto privilegia a forma; um mais baixo privilegia a correspondência do nível de potência."
+    },
+    "duration_weight": {
+      "label": "Peso da duração",
+      "doc": "Com que intensidade é preferido um programa cuja duração habitual corresponde a este ciclo."
+    },
+    "energy_weight": {
+      "label": "Peso da energia",
+      "doc": "Com que intensidade é preferido um programa cujo consumo de energia habitual corresponde a este ciclo."
     }
   },
   "setting_group": {
@@ -1461,5 +1559,18 @@
     "score": "pontuação {pct}%",
     "duration_cv": "CV de duração {pct}%",
     "avg_confidence": "confiança méd. {pct}%"
+  },
+  "pg_evd": {
+    "detected": "O detetor reconheceu que um ciclo tinha começado.",
+    "match_commit": "O comparador escolheu um programa com confiança suficiente.",
+    "match_changed": "O programa principal mudou à medida que se observava mais parte do ciclo.",
+    "match_ambiguous": "Dois programas obtiveram pontuações muito próximas, pelo que a correspondência foi incerta.",
+    "unmatched": "Nenhum programa guardado correspondia a este ciclo.",
+    "notify_start": "Seria enviada uma notificação de início.",
+    "notify_pre_complete": "Seria enviada uma notificação de quase concluído.",
+    "notify_finish": "Seria enviada uma notificação de conclusão.",
+    "notify_milestone": "Seria enviada uma notificação de etapa.",
+    "notify_held": "Uma notificação foi retida durante as horas de silêncio.",
+    "finished": "O ciclo atingiu um estado final e terminou."
   }
 }

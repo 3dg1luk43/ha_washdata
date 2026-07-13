@@ -145,7 +145,10 @@
     "use": "Notaðu",
     "wipe_all": "Þurrkaðu öll gögn",
     "delete_selected": "Eyða völdum ({n})",
-    "group_suggest": "Hópur {n}: {members}"
+    "group_suggest": "Hópur {n}: {members}",
+    "pg_apply_best": "Nota besta",
+    "pg_apply_to_settings": "Vista í stillingar",
+    "pg_apply_to_settings_tip": "Afrita gildin sem þú breyttir hér yfir í virkar stillingar þessa tækis"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Skiptu um hliðarstiku Home Assistant",
     "tools_and_data": "Verkfæri og gögn",
     "wipe_history": "Þurrkaðu sögu",
-    "recommendations": "Ráðleggingar ({n})"
+    "recommendations": "Ráðleggingar ({n})",
+    "pg_detection_params": "Greiningarstillingar",
+    "pg_timeline": "Tímalína atburða",
+    "pg_outcome": "Niðurstaða hermunar",
+    "pg_across_cycles": "Yfir lotur þínar"
   },
   "health": {
     "fair": "Viðunanlegt prófíl",
@@ -458,7 +465,62 @@
     "n_shown": ", {n} sýnd",
     "cycles_title": "Lotur ({n})",
     "pg_detecting": "Greinir",
-    "pg_best_marker": "Best: {v}"
+    "pg_best_marker": "Best: {v}",
+    "pg_time_left_model": "Tími eftir (líkan)",
+    "pg_time_left_model_tip": "Áætlaður tími sem eftir er samkvæmt líkani (fasamatstæki + ML-blanda), ekki föst niðurtalning",
+    "phase": "Fasi",
+    "pg_mode_simulate": "Herma",
+    "pg_mode_history": "Prófa á sögu",
+    "pg_mode_sweep": "Yfirferð",
+    "pg_ev_detected": "Greint",
+    "pg_ev_match": "Samsvörun staðfest",
+    "pg_ev_match_changed": "Samsvörun breytt",
+    "pg_ev_ambiguous": "Óljóst",
+    "pg_ev_unmatched": "Engin samsvörun",
+    "pg_ev_notify_start": "Upphafstilkynning",
+    "pg_ev_notify_pre": "Næstum-lokið-tilkynning",
+    "pg_ev_notify_finish": "Lokatilkynning",
+    "pg_ev_notify_milestone": "Áfangatilkynning",
+    "pg_ev_notify_held": "Tilkynning tafin (hljóðlátur tími)",
+    "pg_ev_finished": "Lokið",
+    "pg_ended": "Endaði",
+    "pg_proj_energy": "Áætl. orka",
+    "pg_alert_overrun": "Of lengi",
+    "pg_alert_underrun": "Of stutt",
+    "pg_alert_did_not_finish": "Lauk ekki",
+    "pg_alert_false_end": "Skipt í margar lotur",
+    "pg_alert_unmatched": "Engin samsvörun",
+    "pg_alert_ambiguous": "Óljós samsvörun",
+    "pg_alert_energy": "Orkufrávik",
+    "pg_newly_correct": "nýlega rétt",
+    "pg_regressed": "versnaði",
+    "pg_end_timing_changed": "lokatími breyttist",
+    "pg_vs_current": "á móti núverandi",
+    "pg_fixed": "lagað",
+    "pg_broke": "bilaði",
+    "pg_sweep_param": "Færibreyta",
+    "pg_objective": "Markmið",
+    "pg_steps": "Skref",
+    "pg_sweep_2d": "2D-hitakort",
+    "pg_sweep_param_y": "2. færibreyta",
+    "pg_obj_match": "Nákvæmni samsvörunar",
+    "pg_obj_endtiming": "Nákvæmni lokatíma",
+    "pg_obj_falseend": "Hlutfall falskra loka",
+    "pg_obj_overrun": "Frávik í lengd",
+    "pg_obj_ambiguity": "Hlutfall óljósra",
+    "pg_best_combo": "besta samsetning",
+    "pg_mode_optimize": "Fínstilla",
+    "pg_group_matching": "Kerfissamsvörun",
+    "pg_zoom_hint": "tvísmelltu til að núllstilla aðdrátt",
+    "aria_playground_chart2": "Gagnvirkt aflrit fyrir lotuna: haltu bendlinum yfir til að lesa tíma/afl, skrunaðu til að þysja, dragðu til að hliðra",
+    "pg_alert_timeout_end": "Endaði vegna tímamarka, ekki vegna spár",
+    "pg_alert_indefinite": "Myndi ganga endalaust",
+    "task_pg_history": "Prófa á sögu",
+    "task_pg_sweep": "Bestun",
+    "task_reprocess": "Endurvinnsla",
+    "task_ml_training": "Nám",
+    "eta_secs": "~{n} s eftir",
+    "eta_mins": "~{n} mín eftir"
   },
   "log": {
     "all_levels": "Öll stig"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' dregur smám saman meiri orku (um +{pct}% á hverja lotu) - það er þess virði að athuga tækið ef þetta er óvænt.",
     "advisory_poor_health": "'{name}' er með lágt samsvörunargildi - nýlegar lotur þess eru mjög breytilegar eða samsvara illa. Farðu yfir lotur þess eða taktu sniðið upp aftur svo að greining og tímamat haldist nákvæm.",
     "advisory_shape_drift": "'{name}' hefur breyst verulega frá upprunalegri aflkúrfu sinni. Tækið kann að hafa breytt hegðun sinni með tímanum (t.d. kalk, slit). Íhugaðu að taka þetta snið upp aftur með nýlegum lotum.",
-    "advisory_shape_drift_corr": "'{name}' hefur breyst verulega frá upprunalegri aflkúrfu sinni (fylgni {corr}). Tækið kann að hafa breytt hegðun sinni með tímanum (t.d. kalk, slit). Íhugaðu að taka þetta snið upp aftur með nýlegum lotum."
+    "advisory_shape_drift_corr": "'{name}' hefur breyst verulega frá upprunalegri aflkúrfu sinni (fylgni {corr}). Tækið kann að hafa breytt hegðun sinni með tímanum (t.d. kalk, slit). Íhugaðu að taka þetta snið upp aftur með nýlegum lotum.",
+    "pg_no_alerts": "Engin vandamál greindust í þessari keyrslu.",
+    "pg_override_active": "Notar breyttu stillingarnar þínar á móti núverandi",
+    "pg_history_intro": "Spilaðu nýlegar lotur þínar aftur í gegnum raunverulega greiningu og samsvörun. Breyttu greiningarstillingu í Herma fyrst til að sjá fyrir/eftir samanburð hér.",
+    "pg_history_empty": "Ýttu á Keyra til að spila lotur þínar aftur.",
+    "pg_history_summary": "{detected}/{total} greindar · {correct} rétt samsvaraðar",
+    "pg_sweep_no_metric": "Ekki nóg af gögnum til að meta þetta markmið.",
+    "pg_sweep_intro2": "Finndu stillinguna sem uppfyllir markmið best yfir nýlegar lotur þínar. Ekkert breytist fyrr en þú beitir henni.",
+    "pg_running_history": "Endurspila lotur þínar…",
+    "pg_running_sweep": "Prófa gildi yfir lotur þínar…",
+    "pg_row_load_hint": "Hlaða þessari lotu í ritið að ofan",
+    "pg_history_intro2": "Endurspilaðu nýlegar lotur í gegnum raunverulegu greininguna og samsvörunina með stillingunum að ofan. Smelltu á línu til að hlaða þeirri lotu í ritið; breyttu stillingu til að sjá samanburð fyrir og eftir.",
+    "pg_simulating": "Hermir lotu…",
+    "pg_canvas_empty2": "Veldu lotu að ofan og ýttu á Keyra til að herma hana. Haltu svo bendlinum yfir til að lesa gildi, skrunaðu til að þysja og dragðu til að hliðra.",
+    "pg_apply_settings_confirm": "Vista þessar {n} stilling(ar) á þetta tæki? {list}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Skyndilegt fall meðhöndlað sem tafarlaus endir",
@@ -718,7 +794,13 @@
     "off_delay": "Sekúndur af lágu afli áður en lotu lýkur",
     "start_duration_threshold": "Sekúndur yfir þröskuldi til að staðfesta ræsingu",
     "start_threshold_w": "Lágmarksvött til að teljast ræst",
-    "stop_threshold_w": "Undir þessu telst vélin af"
+    "stop_threshold_w": "Undir þessu telst vélin af",
+    "dtw_bandwidth": "Hversu mikla tímabjögun formsamsvörunin leyfir",
+    "corr_weight": "Vægi á ferilform á móti aflstigi í samsvöruninni",
+    "duration_weight": "Hversu mikið samræmi í keyrslutíma hefur áhrif á samsvörunina",
+    "energy_weight": "Hversu mikið samræmi í orkunotkun hefur áhrif á samsvörunina",
+    "profile_match_min_duration_ratio": "Stysta keyrsla (miðað við sniðið) sem enn má samsvara",
+    "profile_match_max_duration_ratio": "Lengsta keyrsla (miðað við sniðið) sem enn má samsvara"
   },
   "phase_desc": {
     "anti_crease": "Stundum hrynur stutt eftir að því er lokið til að draga úr hrukkum.",
@@ -1141,6 +1223,22 @@
     "peak_rate_threshold": {
       "doc": "Þegar lota hefst og núverandi verð á kWst er á eða yfir þessu gildi er háannaverðsábendingu bætt við ræsitilkynninguna. 0 eða autt slekkur á ábendingunni.",
       "label": "Háannaverðsmörk (á kWst)"
+    },
+    "dtw_bandwidth": {
+      "label": "Vikmörk formsamsvörunar",
+      "doc": "Hversu mikið samsvörunin má tímabjaga lotu til að passa við form vistaðs kerfis. Hærra þolir meiri hraðabreytileika; of hátt getur samsvarað röngu kerfi."
+    },
+    "corr_weight": {
+      "label": "Vægi forms á móti aflstigi",
+      "doc": "Jafnvægi milli ferilforms og algjörs aflstigs þegar samsvörun er metin. Hærra ívilnar forminu; lægra ívilnar því að hitta aflstigið."
+    },
+    "duration_weight": {
+      "label": "Vægi tímalengdar",
+      "doc": "Hversu sterkt kerfi, sem hefur dæmigerðan keyrslutíma sem passar við þessa lotu, er tekið fram yfir önnur."
+    },
+    "energy_weight": {
+      "label": "Vægi orku",
+      "doc": "Hversu sterkt kerfi, sem hefur dæmigerða orkunotkun sem passar við þessa lotu, er tekið fram yfir önnur."
     }
   },
   "setting_group": {
@@ -1461,5 +1559,18 @@
     "score": "einkunn {pct}%",
     "duration_cv": "lengdar-CV {pct}%",
     "avg_confidence": "meðal-öryggi {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Greiningin bar kennsl á að lota væri hafin.",
+    "match_commit": "Úthlutunin valdi kerfi með nægilegu öryggi.",
+    "match_changed": "Fremsta kerfið breyttist eftir því sem meira af lotunni sást.",
+    "match_ambiguous": "Tvö kerfi fengu svipuð stig, svo úthlutunin var óviss.",
+    "unmatched": "Ekkert vistað kerfi passaði við þessa lotu.",
+    "notify_start": "Upphafstilkynning yrði send.",
+    "notify_pre_complete": "Tilkynning um að lotu sé næstum lokið yrði send.",
+    "notify_finish": "Lokatilkynning yrði send.",
+    "notify_milestone": "Áfangatilkynning yrði send.",
+    "notify_held": "Tilkynningu var haldið eftir vegna hljóðlátra stunda.",
+    "finished": "Lotan náði lokastöðu og endaði."
   }
 }

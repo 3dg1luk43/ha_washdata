@@ -145,7 +145,10 @@
     "use": "Použití",
     "wipe_all": "Vymazat všechna data",
     "delete_selected": "Smazat vybrané ({n})",
-    "group_suggest": "Skupina {n}: {members}"
+    "group_suggest": "Skupina {n}: {members}",
+    "pg_apply_best": "Použít nejlepší",
+    "pg_apply_to_settings": "Uložit do nastavení",
+    "pg_apply_to_settings_tip": "Zkopírovat hodnoty, které jste zde upravili, do aktivního nastavení tohoto zařízení"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Přepnout postranní panel Home Assistant",
     "tools_and_data": "Nástroje a data",
     "wipe_history": "Vymazat historii",
-    "recommendations": "Doporučení ({n})"
+    "recommendations": "Doporučení ({n})",
+    "pg_detection_params": "Nastavení detekce",
+    "pg_timeline": "Časová osa událostí",
+    "pg_outcome": "Výsledek simulace",
+    "pg_across_cycles": "Napříč vašimi cykly"
   },
   "health": {
     "fair": "Přijatelná shoda",
@@ -458,7 +465,62 @@
     "n_shown": ", zobrazeno {n}",
     "cycles_title": "Cykly ({n})",
     "pg_detecting": "Rozpoznávání",
-    "pg_best_marker": "Nejlepší: {v}"
+    "pg_best_marker": "Nejlepší: {v}",
+    "pg_time_left_model": "Zbývající čas (model)",
+    "pg_time_left_model_tip": "Modelem odhadovaný zbývající čas (odhad fáze + kombinace s ML), nikoli statické odpočítávání",
+    "phase": "Fáze",
+    "pg_mode_simulate": "Simulovat",
+    "pg_mode_history": "Otestovat na historii",
+    "pg_mode_sweep": "Prohledávání",
+    "pg_ev_detected": "Detekováno",
+    "pg_ev_match": "Shoda potvrzena",
+    "pg_ev_match_changed": "Shoda změněna",
+    "pg_ev_ambiguous": "Nejednoznačné",
+    "pg_ev_unmatched": "Bez shody",
+    "pg_ev_notify_start": "Oznámení o startu",
+    "pg_ev_notify_pre": "Oznámení před dokončením",
+    "pg_ev_notify_finish": "Oznámení o dokončení",
+    "pg_ev_notify_milestone": "Oznámení o milníku",
+    "pg_ev_notify_held": "Oznámení pozdrženo (tiché hodiny)",
+    "pg_ev_finished": "Dokončeno",
+    "pg_ended": "Ukončeno",
+    "pg_proj_energy": "Odhad energie",
+    "pg_alert_overrun": "Přeběh",
+    "pg_alert_underrun": "Podběh",
+    "pg_alert_did_not_finish": "Nedokončeno",
+    "pg_alert_false_end": "Rozděleno na více cyklů",
+    "pg_alert_unmatched": "Bez shody",
+    "pg_alert_ambiguous": "Nejednoznačná shoda",
+    "pg_alert_energy": "Anomálie energie",
+    "pg_newly_correct": "nově správně",
+    "pg_regressed": "zhoršeno",
+    "pg_end_timing_changed": "změna času konce",
+    "pg_vs_current": "oproti aktuálnímu",
+    "pg_fixed": "opraveno",
+    "pg_broke": "rozbito",
+    "pg_sweep_param": "Parametr",
+    "pg_objective": "Cíl",
+    "pg_steps": "Kroky",
+    "pg_sweep_2d": "Teplotní mapa 2D",
+    "pg_sweep_param_y": "2. parametr",
+    "pg_obj_match": "Přesnost shody",
+    "pg_obj_endtiming": "Přesnost konce",
+    "pg_obj_falseend": "Míra falešných konců",
+    "pg_obj_overrun": "Odchylka trvání",
+    "pg_obj_ambiguity": "Míra nejednoznačnosti",
+    "pg_best_combo": "nejlepší kombinace",
+    "pg_mode_optimize": "Optimalizovat",
+    "pg_group_matching": "Přiřazování programů",
+    "pg_zoom_hint": "dvojklikem obnovíte přiblížení",
+    "aria_playground_chart2": "Interaktivní graf výkonu cyklu: najetím zobrazíte čas/výkon, kolečkem přiblížíte, tažením posunete",
+    "pg_alert_timeout_end": "Ukončeno časovým limitem, ne predikcí",
+    "pg_alert_indefinite": "Běželo by donekonečna",
+    "task_pg_history": "Test na historii",
+    "task_pg_sweep": "Optimalizovat",
+    "task_reprocess": "Opětovné zpracování",
+    "task_ml_training": "Učení",
+    "eta_secs": "zbývá ~{n} s",
+    "eta_mins": "zbývá ~{n} min"
   },
   "log": {
     "all_levels": "Všechny úrovně"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' odebírá stále více energie (přibližně +{pct}% na cyklus) - pokud je to nečekané, vyplatí se spotřebič zkontrolovat.",
     "advisory_poor_health": "'{name}' má nízké skóre shody - jeho poslední cykly se hodně liší nebo se špatně rozpoznávají. Projděte jeho cykly nebo profil nahrajte znovu, aby rozpoznávání a odhady času zůstaly přesné.",
     "advisory_shape_drift": "'{name}' se výrazně odchýlil od původního tvaru křivky výkonu. Chování spotřebiče se mohlo časem změnit (např. vodní kámen, opotřebení). Zvažte opětovné nahrání tohoto profilu z posledních cyklů.",
-    "advisory_shape_drift_corr": "'{name}' se výrazně odchýlil od původního tvaru křivky výkonu (korelace {corr}). Chování spotřebiče se mohlo časem změnit (např. vodní kámen, opotřebení). Zvažte opětovné nahrání tohoto profilu z posledních cyklů."
+    "advisory_shape_drift_corr": "'{name}' se výrazně odchýlil od původního tvaru křivky výkonu (korelace {corr}). Chování spotřebiče se mohlo časem změnit (např. vodní kámen, opotřebení). Zvažte opětovné nahrání tohoto profilu z posledních cyklů.",
+    "pg_no_alerts": "V tomto běhu nebyly zjištěny žádné problémy.",
+    "pg_override_active": "Používají se vaše upravená nastavení oproti aktuálním",
+    "pg_history_intro": "Přehrajte své nedávné cykly přes skutečný detektor a párování. Nejprve upravte nastavení detekce v režimu Simulovat, abyste zde viděli porovnání před/po.",
+    "pg_history_empty": "Stiskněte Spustit pro přehrání vašich cyklů.",
+    "pg_history_summary": "{detected}/{total} detekováno · {correct} správně spárováno",
+    "pg_sweep_no_metric": "Nedostatek dat pro vyhodnocení tohoto cíle.",
+    "pg_sweep_intro2": "Najděte nastavení, které nejlépe splňuje cíl napříč vašimi nedávnými cykly. Dokud jej nepoužijete, nic se nezmění.",
+    "pg_running_history": "Přehrávání vašich cyklů…",
+    "pg_running_sweep": "Testování hodnot napříč vašimi cykly…",
+    "pg_row_load_hint": "Načíst tento cyklus do grafu výše",
+    "pg_history_intro2": "Přehrajte své nedávné cykly skutečným detektorem a nástrojem pro přiřazování programů s nastavením výše. Kliknutím na libovolný řádek načtete daný cyklus do grafu; úpravou nastavení zobrazíte srovnání před úpravou a po ní.",
+    "pg_simulating": "Simulace cyklu…",
+    "pg_canvas_empty2": "Vyberte cyklus výše a stisknutím Spustit jej nasimulujte. Poté najetím zobrazíte hodnoty, kolečkem přiblížíte a tažením posunete.",
+    "pg_apply_settings_confirm": "Uložit těchto {n} nastavení do tohoto zařízení? {list}"
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -1130,6 +1206,22 @@
     "peak_rate_threshold": {
       "doc": "Když cyklus začne a aktuální cena za kWh je na této hodnotě nebo vyšší, připojí ke spouštěcímu oznámení tip na špičkovou sazbu. 0 nebo prázdné tip vypne.",
       "label": "Práh špičkové sazby (za kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Tolerance shody tvaru",
+      "doc": "Jak moc smí nástroj pro přiřazování časově deformovat cyklus, aby odpovídal tvaru uloženého programu. Vyšší hodnota toleruje větší kolísání rychlosti; příliš vysoká riskuje přiřazení nesprávného programu."
+    },
+    "corr_weight": {
+      "label": "Váha tvaru vs. úrovně",
+      "doc": "Rovnováha mezi tvarem křivky a absolutní úrovní výkonu při hodnocení shody. Vyšší upřednostňuje tvar; nižší upřednostňuje shodu úrovně výkonu."
+    },
+    "duration_weight": {
+      "label": "Váha délky trvání",
+      "doc": "Jak silně je upřednostněn program, jehož typická délka trvání odpovídá tomuto cyklu."
+    },
+    "energy_weight": {
+      "label": "Váha spotřeby energie",
+      "doc": "Jak silně je upřednostněn program, jehož typická spotřeba energie odpovídá tomuto cyklu."
     }
   },
   "setting_group": {
@@ -1439,7 +1531,13 @@
     "off_delay": "Sekundy nízkého výkonu před koncem cyklu",
     "start_duration_threshold": "Sekundy nad prahem pro potvrzení spuštění",
     "start_threshold_w": "Minimální výkon ve wattech pro započtení spuštění",
-    "stop_threshold_w": "Pod touto hodnotou se stroj počítá jako vypnutý"
+    "stop_threshold_w": "Pod touto hodnotou se stroj počítá jako vypnutý",
+    "dtw_bandwidth": "Jak velké časové deformace shoda tvaru umožňuje",
+    "corr_weight": "Váha tvaru křivky vs. úrovně výkonu při přiřazování",
+    "duration_weight": "Jak moc shoda délky trvání ovlivňuje přiřazení",
+    "energy_weight": "Jak moc shoda spotřeby energie ovlivňuje přiřazení",
+    "profile_match_min_duration_ratio": "Nejkratší běh (oproti profilu), který ještě může odpovídat",
+    "profile_match_max_duration_ratio": "Nejdelší běh (oproti profilu), který ještě může odpovídat"
   },
   "col": {
     "profile_tip": "Název odpovídajícího programu. Bez štítku znamená, že na konci cyklu nebyl nalezen žádný profil.",
@@ -1461,5 +1559,18 @@
     "score": "skóre {pct}%",
     "duration_cv": "CV doby trvání {pct}%",
     "avg_confidence": "prům. spolehlivost {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Detektor rozpoznal, že cyklus začal.",
+    "match_commit": "Porovnávací mechanismus s dostatečnou jistotou vybral program.",
+    "match_changed": "Vedoucí program se změnil, jak byla vidět větší část cyklu.",
+    "match_ambiguous": "Dva programy získaly podobné skóre, takže shoda byla nejistá.",
+    "unmatched": "Tomuto cyklu neodpovídal žádný uložený program.",
+    "notify_start": "Bylo by odesláno oznámení o spuštění.",
+    "notify_pre_complete": "Bylo by odesláno oznámení, že cyklus téměř končí.",
+    "notify_finish": "Bylo by odesláno oznámení o dokončení.",
+    "notify_milestone": "Bylo by odesláno oznámení o milníku.",
+    "notify_held": "Oznámení bylo zadrženo kvůli tichým hodinám.",
+    "finished": "Cyklus dosáhl koncového stavu a skončil."
   }
 }

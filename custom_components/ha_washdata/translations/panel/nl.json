@@ -145,7 +145,10 @@
     "use": "Gebruik",
     "wipe_all": "Wis alle gegevens",
     "delete_selected": "Selectie verwijderen ({n})",
-    "group_suggest": "Groep {n}: {members}"
+    "group_suggest": "Groep {n}: {members}",
+    "pg_apply_best": "Beste toepassen",
+    "pg_apply_to_settings": "Opslaan in instellingen",
+    "pg_apply_to_settings_tip": "De hier bewerkte waarden kopiëren naar de actieve instellingen van dit apparaat"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Schakel de Home Assistant-zijbalk in of uit",
     "tools_and_data": "Hulpmiddelen en gegevens",
     "wipe_history": "Geschiedenis wissen",
-    "recommendations": "Aanbevelingen ({n})"
+    "recommendations": "Aanbevelingen ({n})",
+    "pg_detection_params": "Detectie-instellingen",
+    "pg_timeline": "Gebeurtenistijdlijn",
+    "pg_outcome": "Simulatieresultaat",
+    "pg_across_cycles": "Over al je cycli"
   },
   "health": {
     "fair": "Acceptabele profielkwaliteit",
@@ -458,7 +465,62 @@
     "n_shown": ", {n} weergegeven",
     "cycles_title": "Cycli ({n})",
     "pg_detecting": "Detecteren",
-    "pg_best_marker": "Beste: {v}"
+    "pg_best_marker": "Beste: {v}",
+    "pg_time_left_model": "Resterende tijd (model)",
+    "pg_time_left_model_tip": "Door het model geschatte resterende tijd (fase-schatter + ML-mix), geen statische aftelling",
+    "phase": "Fase",
+    "pg_mode_simulate": "Simuleren",
+    "pg_mode_history": "Op geschiedenis testen",
+    "pg_mode_sweep": "Scan",
+    "pg_ev_detected": "Gedetecteerd",
+    "pg_ev_match": "Match vastgelegd",
+    "pg_ev_match_changed": "Match gewijzigd",
+    "pg_ev_ambiguous": "Dubbelzinnig",
+    "pg_ev_unmatched": "Geen match",
+    "pg_ev_notify_start": "Startmelding",
+    "pg_ev_notify_pre": "Bijna-klaar-melding",
+    "pg_ev_notify_finish": "Eindmelding",
+    "pg_ev_notify_milestone": "Mijlpaalmelding",
+    "pg_ev_notify_held": "Melding vastgehouden (stille uren)",
+    "pg_ev_finished": "Voltooid",
+    "pg_ended": "Beëindigd",
+    "pg_proj_energy": "Verw. energie",
+    "pg_alert_overrun": "Te lang",
+    "pg_alert_underrun": "Te kort",
+    "pg_alert_did_not_finish": "Niet voltooid",
+    "pg_alert_false_end": "Opgesplitst in meerdere cycli",
+    "pg_alert_unmatched": "Geen match",
+    "pg_alert_ambiguous": "Dubbelzinnige match",
+    "pg_alert_energy": "Energieanomalie",
+    "pg_newly_correct": "nieuw correct",
+    "pg_regressed": "achteruitgegaan",
+    "pg_end_timing_changed": "eindtiming gewijzigd",
+    "pg_vs_current": "t.o.v. huidig",
+    "pg_fixed": "opgelost",
+    "pg_broke": "verslechterd",
+    "pg_sweep_param": "Parameter",
+    "pg_objective": "Doel",
+    "pg_steps": "Stappen",
+    "pg_sweep_2d": "2D-heatmap",
+    "pg_sweep_param_y": "2e parameter",
+    "pg_obj_match": "Matchnauwkeurigheid",
+    "pg_obj_endtiming": "Nauwkeurigheid eindtiming",
+    "pg_obj_falseend": "Vals-einde-percentage",
+    "pg_obj_overrun": "Duurafwijking",
+    "pg_obj_ambiguity": "Dubbelzinnigheidspercentage",
+    "pg_best_combo": "beste combinatie",
+    "pg_mode_optimize": "Optimaliseren",
+    "pg_group_matching": "Programmaherkenning",
+    "pg_zoom_hint": "dubbelklik om de zoom te resetten",
+    "aria_playground_chart2": "Interactieve vermogensgrafiek van de cyclus: beweeg de muis eroverheen om tijd/vermogen af te lezen, scroll om te zoomen, sleep om te verschuiven",
+    "pg_alert_timeout_end": "Beëindigd door time-out, niet door voorspelling",
+    "pg_alert_indefinite": "Zou eindeloos blijven draaien",
+    "task_pg_history": "Testen op geschiedenis",
+    "task_pg_sweep": "Optimaliseren",
+    "task_reprocess": "Opnieuw verwerken",
+    "task_ml_training": "Leren",
+    "eta_secs": "nog ~{n} s",
+    "eta_mins": "nog ~{n} min"
   },
   "log": {
     "all_levels": "Alle niveaus"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' verbruikt steeds meer energie (ongeveer +{pct}% per cyclus) - controleer het apparaat als dat onverwacht is.",
     "advisory_poor_health": "'{name}' heeft een lage overeenkomstscore - de recente cycli variëren sterk of komen zwak overeen. Bekijk de cycli of neem het profiel opnieuw op zodat de herkenning en tijdschattingen nauwkeurig blijven.",
     "advisory_shape_drift": "'{name}' is aanzienlijk afgeweken van de oorspronkelijke vermogenscurve. Het apparaat heeft zijn gedrag mogelijk in de loop van de tijd veranderd (bijv. kalkaanslag, slijtage). Overweeg dit profiel opnieuw op te nemen met recente cycli.",
-    "advisory_shape_drift_corr": "'{name}' is aanzienlijk afgeweken van de oorspronkelijke vermogenscurve (correlatie {corr}). Het apparaat heeft zijn gedrag mogelijk in de loop van de tijd veranderd (bijv. kalkaanslag, slijtage). Overweeg dit profiel opnieuw op te nemen met recente cycli."
+    "advisory_shape_drift_corr": "'{name}' is aanzienlijk afgeweken van de oorspronkelijke vermogenscurve (correlatie {corr}). Het apparaat heeft zijn gedrag mogelijk in de loop van de tijd veranderd (bijv. kalkaanslag, slijtage). Overweeg dit profiel opnieuw op te nemen met recente cycli.",
+    "pg_no_alerts": "Geen problemen gedetecteerd in deze run.",
+    "pg_override_active": "Gebruikt je bewerkte instellingen t.o.v. de huidige",
+    "pg_history_intro": "Speel je recente cycli opnieuw af via de echte detectie en matching. Bewerk eerst een detectie-instelling in Simuleren om hier een voor/na-vergelijking te zien.",
+    "pg_history_empty": "Druk op Uitvoeren om je cycli opnieuw af te spelen.",
+    "pg_history_summary": "{detected}/{total} gedetecteerd · {correct} correct gematcht",
+    "pg_sweep_no_metric": "Niet genoeg gegevens om dit doel te scoren.",
+    "pg_sweep_intro2": "Vind de instelling die een doel het best haalt over je recente cycli. Er verandert niets totdat je het toepast.",
+    "pg_running_history": "Je cycli worden opnieuw afgespeeld…",
+    "pg_running_sweep": "Waarden worden over je cycli getest…",
+    "pg_row_load_hint": "Deze cyclus in de grafiek hierboven laden",
+    "pg_history_intro2": "Laat je recente cycli opnieuw door de echte detector en herkenning lopen met de bovenstaande instellingen. Klik op een rij om die cyclus in de grafiek te laden; wijzig een instelling om een voor/na-vergelijking te zien.",
+    "pg_simulating": "Cyclus simuleren…",
+    "pg_canvas_empty2": "Kies hierboven een cyclus en druk op Uitvoeren om deze te simuleren. Beweeg vervolgens de muis erover om waarden af te lezen, scroll om te zoomen en sleep om te verschuiven.",
+    "pg_apply_settings_confirm": "Deze {n} instelling(en) opslaan voor dit apparaat? {list}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plotselinge daling behandeld als onmiddellijk einde",
@@ -718,7 +794,13 @@
     "off_delay": "Seconden laag vermogen voordat de cyclus eindigt",
     "start_duration_threshold": "Seconden boven de drempel om de start te bevestigen",
     "start_threshold_w": "Minimaal aantal watt om als gestart te tellen",
-    "stop_threshold_w": "Hieronder telt de machine als uit"
+    "stop_threshold_w": "Hieronder telt de machine als uit",
+    "dtw_bandwidth": "Hoeveel tijdvervorming de vormherkenning toestaat",
+    "corr_weight": "Gewicht van curvevorm versus vermogensniveau in de herkenning",
+    "duration_weight": "Hoeveel overeenkomst in looptijd de herkenning beïnvloedt",
+    "energy_weight": "Hoeveel overeenkomst in energieverbruik de herkenning beïnvloedt",
+    "profile_match_min_duration_ratio": "Kortste cyclus (t.o.v. het profiel) die nog mag matchen",
+    "profile_match_max_duration_ratio": "Langste cyclus (t.o.v. het profiel) die nog mag matchen"
   },
   "phase_desc": {
     "anti_crease": "Af en toe kort tuimelen na voltooiing om rimpels te verminderen.",
@@ -1141,6 +1223,22 @@
     "peak_rate_threshold": {
       "doc": "Wanneer een cyclus start en de huidige prijs per kWh op of boven deze waarde ligt, wordt een piektarief-tip aan de startmelding toegevoegd. 0 of leeg schakelt de tip uit.",
       "label": "Drempel piektarief (per kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Tolerantie voor vormherkenning",
+      "doc": "Hoeveel de herkenning een cyclus in de tijd mag vervormen om bij de vorm van een opgeslagen programma te passen. Hoger staat meer snelheidsvariatie toe; te hoog riskeert het verkeerde programma te herkennen."
+    },
+    "corr_weight": {
+      "label": "Gewicht vorm versus niveau",
+      "doc": "Balans tussen curvevorm en absoluut vermogensniveau bij het beoordelen van een herkenning. Hoger geeft voorkeur aan de vorm; lager geeft voorkeur aan het vermogensniveau."
+    },
+    "duration_weight": {
+      "label": "Gewicht van duur",
+      "doc": "Hoe sterk de voorkeur uitgaat naar een programma waarvan de typische looptijd bij deze cyclus past."
+    },
+    "energy_weight": {
+      "label": "Gewicht van energie",
+      "doc": "Hoe sterk de voorkeur uitgaat naar een programma waarvan het typische energieverbruik bij deze cyclus past."
     }
   },
   "setting_group": {
@@ -1461,5 +1559,18 @@
     "score": "score {pct}%",
     "duration_cv": "duur-CV {pct}%",
     "avg_confidence": "gem. betrouwbaarheid {pct}%"
+  },
+  "pg_evd": {
+    "detected": "De detectie herkende dat een cyclus was gestart.",
+    "match_commit": "De toewijzing legde zich met voldoende zekerheid vast op een programma.",
+    "match_changed": "Het leidende programma veranderde naarmate meer van de cyclus zichtbaar werd.",
+    "match_ambiguous": "Twee programma's scoorden dicht bij elkaar, dus de toewijzing was onzeker.",
+    "unmatched": "Geen enkel opgeslagen programma paste bij deze cyclus.",
+    "notify_start": "Er zou een startmelding worden verzonden.",
+    "notify_pre_complete": "Er zou een bijna-klaar-melding worden verzonden.",
+    "notify_finish": "Er zou een voltooiingsmelding worden verzonden.",
+    "notify_milestone": "Er zou een mijlpaalmelding worden verzonden.",
+    "notify_held": "Een melding werd vastgehouden vanwege de stille uren.",
+    "finished": "De cyclus bereikte een eindtoestand en stopte."
   }
 }

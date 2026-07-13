@@ -21,10 +21,9 @@ def _bound(*, progress: float, energy_wh: float, price):
     mgr._resolve_energy_price.return_value = price
     mgr._projected_energy_wh = None
     mgr._projected_cost = None
-    mgr._PROJECTION_MIN_PROGRESS = WashDataManager._PROJECTION_MIN_PROGRESS
-    # Force the ML energy regressor off so these exercise the time-progress
-    # fallback; the regressor path is covered by test_ml_energy_projection.
-    mgr._ml_energy_total = MagicMock(return_value=None)
+    # ML energy regressor is inert here (MagicMock store has no promoted spec), so
+    # these exercise the time-progress fallback; the regressor path is covered by
+    # test_ml_energy_projection.
     fn = WashDataManager._update_projected_energy.__get__(mgr, WashDataManager)
     return mgr, fn
 
@@ -78,7 +77,6 @@ def test_survives_bad_detector():
     mgr._resolve_energy_price.return_value = 0.30
     mgr._projected_energy_wh = "sentinel"
     mgr._projected_cost = "sentinel"
-    mgr._PROJECTION_MIN_PROGRESS = WashDataManager._PROJECTION_MIN_PROGRESS
     fn = WashDataManager._update_projected_energy.__get__(mgr, WashDataManager)
     fn()
     assert mgr._projected_energy_wh is None

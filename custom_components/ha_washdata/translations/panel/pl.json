@@ -145,7 +145,10 @@
     "use": "Używać",
     "wipe_all": "Wyczyść wszystkie dane",
     "delete_selected": "Usuń zaznaczone ({n})",
-    "group_suggest": "Grupa {n}: {members}"
+    "group_suggest": "Grupa {n}: {members}",
+    "pg_apply_best": "Zastosuj najlepsze",
+    "pg_apply_to_settings": "Zapisz w ustawieniach",
+    "pg_apply_to_settings_tip": "Skopiuj wartości edytowane tutaj do aktywnych ustawień tego urządzenia"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Przełącz pasek boczny Asystenta Home",
     "tools_and_data": "Narzędzia i dane",
     "wipe_history": "Wyczyść historię",
-    "recommendations": "Zalecenia ({n})"
+    "recommendations": "Zalecenia ({n})",
+    "pg_detection_params": "Ustawienia wykrywania",
+    "pg_timeline": "Oś czasu zdarzeń",
+    "pg_outcome": "Wynik symulacji",
+    "pg_across_cycles": "We wszystkich Twoich cyklach"
   },
   "health": {
     "fair": "Akceptowalna jakość profilu",
@@ -458,7 +465,62 @@
     "n_shown": ", pokazano {n}",
     "cycles_title": "Cykle ({n})",
     "pg_detecting": "Wykrywanie",
-    "pg_best_marker": "Najlepszy: {v}"
+    "pg_best_marker": "Najlepszy: {v}",
+    "pg_time_left_model": "Pozostały czas (model)",
+    "pg_time_left_model_tip": "Szacowany przez model pozostały czas (estymator faz + mieszanie z ML), a nie statyczne odliczanie",
+    "phase": "Faza",
+    "pg_mode_simulate": "Symuluj",
+    "pg_mode_history": "Testuj na historii",
+    "pg_mode_sweep": "Przemiatanie",
+    "pg_ev_detected": "Wykryto",
+    "pg_ev_match": "Dopasowanie zatwierdzone",
+    "pg_ev_match_changed": "Dopasowanie zmienione",
+    "pg_ev_ambiguous": "Niejednoznaczne",
+    "pg_ev_unmatched": "Bez dopasowania",
+    "pg_ev_notify_start": "Powiadomienie o starcie",
+    "pg_ev_notify_pre": "Powiadomienie o zbliżającym się końcu",
+    "pg_ev_notify_finish": "Powiadomienie o zakończeniu",
+    "pg_ev_notify_milestone": "Powiadomienie o kamieniu milowym",
+    "pg_ev_notify_held": "Powiadomienie wstrzymane (ciche godziny)",
+    "pg_ev_finished": "Zakończono",
+    "pg_ended": "Zakończony",
+    "pg_proj_energy": "Szac. energia",
+    "pg_alert_overrun": "Wydłużenie",
+    "pg_alert_underrun": "Skrócenie",
+    "pg_alert_did_not_finish": "Nie zakończono",
+    "pg_alert_false_end": "Podzielono na wiele cykli",
+    "pg_alert_unmatched": "Bez dopasowania",
+    "pg_alert_ambiguous": "Niejednoznaczne dopasowanie",
+    "pg_alert_energy": "Anomalia energii",
+    "pg_newly_correct": "nowo poprawne",
+    "pg_regressed": "pogorszone",
+    "pg_end_timing_changed": "zmiana czasu końca",
+    "pg_vs_current": "wobec bieżącego",
+    "pg_fixed": "naprawione",
+    "pg_broke": "zepsute",
+    "pg_sweep_param": "Parametr",
+    "pg_objective": "Cel",
+    "pg_steps": "Kroki",
+    "pg_sweep_2d": "Mapa cieplna 2D",
+    "pg_sweep_param_y": "2. parametr",
+    "pg_obj_match": "Trafność dopasowania",
+    "pg_obj_endtiming": "Trafność końca",
+    "pg_obj_falseend": "Wskaźnik fałszywych końców",
+    "pg_obj_overrun": "Odchylenie czasu trwania",
+    "pg_obj_ambiguity": "Wskaźnik niejednoznaczności",
+    "pg_best_combo": "najlepsza kombinacja",
+    "pg_mode_optimize": "Optymalizuj",
+    "pg_group_matching": "Dopasowywanie programów",
+    "pg_zoom_hint": "kliknij dwukrotnie, aby zresetować powiększenie",
+    "aria_playground_chart2": "Interaktywny wykres mocy cyklu: najedź, aby odczytać czas/moc, przewiń, aby powiększyć, przeciągnij, aby przesunąć",
+    "pg_alert_timeout_end": "Zakończono z powodu limitu czasu, nie na podstawie prognozy",
+    "pg_alert_indefinite": "Działałby w nieskończoność",
+    "task_pg_history": "Test na historii",
+    "task_pg_sweep": "Optymalizuj",
+    "task_reprocess": "Ponowne przetwarzanie",
+    "task_ml_training": "Uczenie",
+    "eta_secs": "pozostało ~{n} s",
+    "eta_mins": "pozostało ~{n} min"
   },
   "log": {
     "all_levels": "Wszystkie poziomy"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' pobiera coraz więcej energii (około +{pct}% na cykl) - warto sprawdzić urządzenie, jeśli jest to nieoczekiwane.",
     "advisory_poor_health": "'{name}' ma niski wskaźnik dopasowania - jego ostatnie cykle mocno się różnią lub słabo pasują. Przejrzyj jego cykle lub nagraj profil ponownie, aby rozpoznawanie i szacunki czasu pozostały dokładne.",
     "advisory_shape_drift": "'{name}' znacząco odbiegł od pierwotnego kształtu krzywej mocy. Zachowanie urządzenia mogło zmienić się z czasem (np. kamień, zużycie). Rozważ ponowne nagranie tego profilu na podstawie ostatnich cykli.",
-    "advisory_shape_drift_corr": "'{name}' znacząco odbiegł od pierwotnego kształtu krzywej mocy (korelacja {corr}). Zachowanie urządzenia mogło zmienić się z czasem (np. kamień, zużycie). Rozważ ponowne nagranie tego profilu na podstawie ostatnich cykli."
+    "advisory_shape_drift_corr": "'{name}' znacząco odbiegł od pierwotnego kształtu krzywej mocy (korelacja {corr}). Zachowanie urządzenia mogło zmienić się z czasem (np. kamień, zużycie). Rozważ ponowne nagranie tego profilu na podstawie ostatnich cykli.",
+    "pg_no_alerts": "W tym uruchomieniu nie wykryto żadnych problemów.",
+    "pg_override_active": "Używane są Twoje edytowane ustawienia zamiast bieżących",
+    "pg_history_intro": "Odtwórz swoje ostatnie cykle przez rzeczywisty detektor i mechanizm dopasowania. Najpierw edytuj ustawienie wykrywania w trybie Symuluj, aby zobaczyć tu porównanie przed/po.",
+    "pg_history_empty": "Naciśnij Uruchom, aby odtworzyć swoje cykle.",
+    "pg_history_summary": "{detected}/{total} wykryto · {correct} poprawnie dopasowano",
+    "pg_sweep_no_metric": "Za mało danych, aby ocenić ten cel.",
+    "pg_sweep_intro2": "Znajdź ustawienie, które najlepiej spełnia cel dla Twoich ostatnich cykli. Nic się nie zmieni, dopóki go nie zastosujesz.",
+    "pg_running_history": "Odtwarzanie Twoich cykli…",
+    "pg_running_sweep": "Testowanie wartości w Twoich cyklach…",
+    "pg_row_load_hint": "Wczytaj ten cykl na wykresie powyżej",
+    "pg_history_intro2": "Odtwórz swoje ostatnie cykle przez rzeczywisty detektor i mechanizm dopasowywania programów z ustawieniami powyżej. Kliknij dowolny wiersz, aby wczytać dany cykl na wykresie; zmień ustawienie, aby zobaczyć porównanie przed zmianą i po niej.",
+    "pg_simulating": "Symulowanie cyklu…",
+    "pg_canvas_empty2": "Wybierz cykl powyżej i naciśnij Uruchom, aby go zasymulować. Następnie najedź, aby odczytać wartości, przewiń, aby powiększyć, i przeciągnij, aby przesunąć.",
+    "pg_apply_settings_confirm": "Zapisać te ustawienia ({n}) w tym urządzeniu? {list}"
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -1130,6 +1206,22 @@
     "peak_rate_threshold": {
       "doc": "Gdy cykl się rozpoczyna, a bieżąca cena za kWh jest równa tej wartości lub wyższa, do powiadomienia o starcie dołączana jest wskazówka o taryfie szczytowej. 0 lub puste wyłącza wskazówkę.",
       "label": "Próg taryfy szczytowej (za kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Tolerancja dopasowania kształtu",
+      "doc": "Jak bardzo mechanizm dopasowywania może zniekształcić cykl w czasie, aby dopasować go do kształtu zapisanego programu. Wyższa wartość toleruje większe wahania tempa; zbyt wysoka grozi dopasowaniem niewłaściwego programu."
+    },
+    "corr_weight": {
+      "label": "Waga kształtu względem poziomu",
+      "doc": "Równowaga między kształtem krzywej a bezwzględnym poziomem mocy przy ocenie dopasowania. Wyższa preferuje kształt; niższa preferuje zgodność poziomu mocy."
+    },
+    "duration_weight": {
+      "label": "Waga czasu trwania",
+      "doc": "Jak silnie preferowany jest program, którego typowy czas trwania odpowiada temu cyklowi."
+    },
+    "energy_weight": {
+      "label": "Waga energii",
+      "doc": "Jak silnie preferowany jest program, którego typowe zużycie energii odpowiada temu cyklowi."
     }
   },
   "setting_group": {
@@ -1439,7 +1531,13 @@
     "off_delay": "Sekundy niskiej mocy przed zakończeniem cyklu",
     "start_duration_threshold": "Sekundy powyżej progu, by potwierdzić start",
     "start_threshold_w": "Minimalna moc w watach, by uznać za rozpoczęty",
-    "stop_threshold_w": "Poniżej tej wartości urządzenie liczone jest jako wyłączone"
+    "stop_threshold_w": "Poniżej tej wartości urządzenie liczone jest jako wyłączone",
+    "dtw_bandwidth": "Jak duże zniekształcenie czasowe dopuszcza dopasowanie kształtu",
+    "corr_weight": "Waga kształtu krzywej względem poziomu mocy w dopasowaniu",
+    "duration_weight": "Jak bardzo zgodność czasu trwania wpływa na dopasowanie",
+    "energy_weight": "Jak bardzo zgodność zużycia energii wpływa na dopasowanie",
+    "profile_match_min_duration_ratio": "Najkrótszy przebieg (względem profilu), który nadal może zostać dopasowany",
+    "profile_match_max_duration_ratio": "Najdłuższy przebieg (względem profilu), który nadal może zostać dopasowany"
   },
   "col": {
     "profile_tip": "Nazwa dopasowanego programu. Brak etykiety oznacza, że na końcu cyklu nie dopasowano żadnego profilu.",
@@ -1461,5 +1559,18 @@
     "score": "wynik {pct}%",
     "duration_cv": "CV czasu trwania {pct}%",
     "avg_confidence": "śr. pewność {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Detektor rozpoznał, że cykl się rozpoczął.",
+    "match_commit": "Mechanizm dopasowania z wystarczającą pewnością wybrał program.",
+    "match_changed": "Wiodący program zmienił się, gdy widoczna była większa część cyklu.",
+    "match_ambiguous": "Dwa programy uzyskały zbliżony wynik, więc dopasowanie było niepewne.",
+    "unmatched": "Do tego cyklu nie pasował żaden zapisany program.",
+    "notify_start": "Zostałoby wysłane powiadomienie o rozpoczęciu.",
+    "notify_pre_complete": "Zostałoby wysłane powiadomienie, że cykl prawie się kończy.",
+    "notify_finish": "Zostałoby wysłane powiadomienie o zakończeniu.",
+    "notify_milestone": "Zostałoby wysłane powiadomienie o osiągnięciu etapu.",
+    "notify_held": "Powiadomienie zostało wstrzymane z powodu godzin ciszy.",
+    "finished": "Cykl osiągnął stan końcowy i zakończył się."
   }
 }

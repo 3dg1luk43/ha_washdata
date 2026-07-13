@@ -145,7 +145,10 @@
     "use": "Verwenden",
     "wipe_all": "Alle Daten löschen",
     "delete_selected": "Auswahl löschen ({n})",
-    "group_suggest": "Gruppe {n}: {members}"
+    "group_suggest": "Gruppe {n}: {members}",
+    "pg_apply_best": "Beste anwenden",
+    "pg_apply_to_settings": "In Einstellungen speichern",
+    "pg_apply_to_settings_tip": "Die hier bearbeiteten Werte in die aktiven Einstellungen dieses Geräts übernehmen"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Schalten Sie die Seitenleiste von Home Assistant um",
     "tools_and_data": "Tools & Daten",
     "wipe_history": "Verlauf löschen",
-    "recommendations": "Empfehlungen ({n})"
+    "recommendations": "Empfehlungen ({n})",
+    "pg_detection_params": "Erkennungseinstellungen",
+    "pg_timeline": "Ereignis-Zeitachse",
+    "pg_outcome": "Simulationsergebnis",
+    "pg_across_cycles": "Über deine Zyklen hinweg"
   },
   "health": {
     "fair": "Akzeptable Übereinstimmungsqualität",
@@ -458,7 +465,62 @@
     "n_shown": ", {n} angezeigt",
     "cycles_title": "Zyklen ({n})",
     "pg_detecting": "Erkennung",
-    "pg_best_marker": "Beste: {v}"
+    "pg_best_marker": "Beste: {v}",
+    "pg_time_left_model": "Restzeit (Modell)",
+    "pg_time_left_model_tip": "Modellgeschätzte verbleibende Zeit (Phasenschätzer + ML-Mix), kein statischer Countdown",
+    "phase": "Phase",
+    "pg_mode_simulate": "Simulieren",
+    "pg_mode_history": "An Verlauf testen",
+    "pg_mode_sweep": "Durchlauf",
+    "pg_ev_detected": "Erkannt",
+    "pg_ev_match": "Übereinstimmung bestätigt",
+    "pg_ev_match_changed": "Übereinstimmung geändert",
+    "pg_ev_ambiguous": "Mehrdeutig",
+    "pg_ev_unmatched": "Nicht zugeordnet",
+    "pg_ev_notify_start": "Startbenachrichtigung",
+    "pg_ev_notify_pre": "Fast-fertig-Benachrichtigung",
+    "pg_ev_notify_finish": "Abschlussbenachrichtigung",
+    "pg_ev_notify_milestone": "Meilenstein-Benachrichtigung",
+    "pg_ev_notify_held": "Benachrichtigung zurückgehalten (Ruhezeiten)",
+    "pg_ev_finished": "Abgeschlossen",
+    "pg_ended": "Beendet",
+    "pg_proj_energy": "Prog. Energie",
+    "pg_alert_overrun": "Zu lang",
+    "pg_alert_underrun": "Zu kurz",
+    "pg_alert_did_not_finish": "Nicht abgeschlossen",
+    "pg_alert_false_end": "In mehrere Zyklen geteilt",
+    "pg_alert_unmatched": "Nicht zugeordnet",
+    "pg_alert_ambiguous": "Mehrdeutige Übereinstimmung",
+    "pg_alert_energy": "Energieanomalie",
+    "pg_newly_correct": "neu korrekt",
+    "pg_regressed": "verschlechtert",
+    "pg_end_timing_changed": "Endzeitpunkt geändert",
+    "pg_vs_current": "ggü. aktuell",
+    "pg_fixed": "behoben",
+    "pg_broke": "beschädigt",
+    "pg_sweep_param": "Parameter",
+    "pg_objective": "Ziel",
+    "pg_steps": "Schritte",
+    "pg_sweep_2d": "2D-Heatmap",
+    "pg_sweep_param_y": "2. Parameter",
+    "pg_obj_match": "Zuordnungsgenauigkeit",
+    "pg_obj_endtiming": "Endzeit-Genauigkeit",
+    "pg_obj_falseend": "Falsch-Ende-Rate",
+    "pg_obj_overrun": "Dauerabweichung",
+    "pg_obj_ambiguity": "Mehrdeutigkeitsrate",
+    "pg_best_combo": "beste Kombination",
+    "pg_mode_optimize": "Optimieren",
+    "pg_group_matching": "Programmzuordnung",
+    "pg_zoom_hint": "Doppelklick zum Zurücksetzen des Zooms",
+    "aria_playground_chart2": "Interaktives Leistungsdiagramm des Zyklus: zum Ablesen von Zeit/Leistung mit dem Zeiger darüberfahren, zum Zoomen scrollen, zum Verschieben ziehen",
+    "pg_alert_timeout_end": "Durch Zeitüberschreitung beendet, nicht durch Vorhersage",
+    "pg_alert_indefinite": "Würde unbegrenzt weiterlaufen",
+    "task_pg_history": "Mit Verlauf testen",
+    "task_pg_sweep": "Optimieren",
+    "task_reprocess": "Neuverarbeitung",
+    "task_ml_training": "Lernen",
+    "eta_secs": "noch ~{n} s",
+    "eta_mins": "noch ~{n} Min."
   },
   "log": {
     "all_levels": "Alle Ebenen"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' verbraucht zunehmend mehr Energie (etwa +{pct}% pro Zyklus) - prüfen Sie das Gerät, falls das unerwartet ist.",
     "advisory_poor_health": "'{name}' hat einen niedrigen Übereinstimmungswert - die letzten Zyklen schwanken stark oder passen nur schwach. Überprüfen Sie die Zyklen oder zeichnen Sie das Profil neu auf, damit Erkennung und Zeitschätzungen genau bleiben.",
     "advisory_shape_drift": "'{name}' hat sich deutlich vom ursprünglichen Leistungsverlauf entfernt. Das Gerät hat sein Verhalten möglicherweise mit der Zeit verändert (z. B. Verkalkung, Verschleiß). Erwägen Sie, dieses Profil mit aktuellen Zyklen neu aufzuzeichnen.",
-    "advisory_shape_drift_corr": "'{name}' hat sich deutlich vom ursprünglichen Leistungsverlauf entfernt (Korrelation {corr}). Das Gerät hat sein Verhalten möglicherweise mit der Zeit verändert (z. B. Verkalkung, Verschleiß). Erwägen Sie, dieses Profil mit aktuellen Zyklen neu aufzuzeichnen."
+    "advisory_shape_drift_corr": "'{name}' hat sich deutlich vom ursprünglichen Leistungsverlauf entfernt (Korrelation {corr}). Das Gerät hat sein Verhalten möglicherweise mit der Zeit verändert (z. B. Verkalkung, Verschleiß). Erwägen Sie, dieses Profil mit aktuellen Zyklen neu aufzuzeichnen.",
+    "pg_no_alerts": "In diesem Lauf wurden keine Probleme erkannt.",
+    "pg_override_active": "Verwendet Ihre bearbeiteten Einstellungen ggü. den aktuellen",
+    "pg_history_intro": "Spielen Sie Ihre letzten Zyklen durch die echte Erkennung und Zuordnung ab. Bearbeiten Sie zuerst eine Erkennungseinstellung unter Simulieren, um hier einen Vorher-Nachher-Vergleich zu sehen.",
+    "pg_history_empty": "Drücken Sie Ausführen, um Ihre Zyklen erneut abzuspielen.",
+    "pg_history_summary": "{detected}/{total} erkannt · {correct} korrekt zugeordnet",
+    "pg_sweep_no_metric": "Nicht genügend Daten, um dieses Ziel zu bewerten.",
+    "pg_sweep_intro2": "Finden Sie die Einstellung, die ein Ziel über Ihre letzten Zyklen am besten erfüllt. Es ändert sich nichts, bis Sie es anwenden.",
+    "pg_running_history": "Deine Zyklen werden erneut abgespielt…",
+    "pg_running_sweep": "Werte werden über deine Zyklen hinweg getestet…",
+    "pg_row_load_hint": "Diesen Zyklus im Diagramm oben laden",
+    "pg_history_intro2": "Lass deine letzten Zyklen mit den obigen Einstellungen erneut durch die echte Erkennung und Zuordnung laufen. Klicke auf eine Zeile, um diesen Zyklus im Diagramm zu laden; ändere eine Einstellung, um einen Vorher-Nachher-Vergleich zu sehen.",
+    "pg_simulating": "Zyklus wird simuliert…",
+    "pg_canvas_empty2": "Wähle oben einen Zyklus und drücke auf Ausführen, um ihn zu simulieren. Fahre dann mit dem Zeiger darüber, um Werte abzulesen, scrolle zum Zoomen und ziehe zum Verschieben.",
+    "pg_apply_settings_confirm": "Diese {n} Einstellung(en) für dieses Gerät speichern? {list}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plötzlicher Abfall gilt als sofortiges Ende",
@@ -718,7 +794,13 @@
     "off_delay": "Sekunden mit geringer Leistung, bevor der Zyklus endet",
     "start_duration_threshold": "Sekunden über dem Schwellenwert, um den Start zu bestätigen",
     "start_threshold_w": "Mindestwattzahl, um als gestartet zu gelten",
-    "stop_threshold_w": "Darunter gilt die Maschine als aus"
+    "stop_threshold_w": "Darunter gilt die Maschine als aus",
+    "dtw_bandwidth": "Wie viel Zeitverzerrung der Formabgleich zulässt",
+    "corr_weight": "Gewichtung von Kurvenform gegenüber Leistungspegel bei der Zuordnung",
+    "duration_weight": "Wie stark die Übereinstimmung der Laufzeit die Zuordnung beeinflusst",
+    "energy_weight": "Wie stark die Übereinstimmung des Energieverbrauchs die Zuordnung beeinflusst",
+    "profile_match_min_duration_ratio": "Kürzester Durchlauf (im Vergleich zum Profil), der noch zugeordnet werden darf",
+    "profile_match_max_duration_ratio": "Längster Durchlauf (im Vergleich zum Profil), der noch zugeordnet werden darf"
   },
   "phase_desc": {
     "anti_crease": "Gelegentliche kurze Trommelumwälzungen nach Abschluss, um Knitterung zu vermeiden.",
@@ -1141,6 +1223,22 @@
     "peak_rate_threshold": {
       "doc": "Wenn ein Zyklus startet und der aktuelle Preis pro kWh bei oder über diesem Wert liegt, wird ein Spitzentarif-Hinweis an die Start-Benachrichtigung angehängt. 0 oder leer deaktiviert den Hinweis.",
       "label": "Spitzentarif-Schwelle (pro kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Toleranz beim Formabgleich",
+      "doc": "Wie stark die Zuordnung einen Zyklus zeitlich verzerren darf, damit er zur Form eines gespeicherten Programms passt. Höhere Werte lassen mehr Geschwindigkeitsschwankungen zu; zu hohe Werte bergen das Risiko, das falsche Programm zuzuordnen."
+    },
+    "corr_weight": {
+      "label": "Gewichtung Form gegenüber Pegel",
+      "doc": "Balance zwischen Kurvenform und absolutem Leistungspegel bei der Bewertung einer Zuordnung. Höhere Werte bevorzugen die Form; niedrigere Werte bevorzugen die Übereinstimmung des Leistungspegels."
+    },
+    "duration_weight": {
+      "label": "Gewichtung der Dauer",
+      "doc": "Wie stark ein Programm bevorzugt wird, dessen typische Laufzeit zu diesem Zyklus passt."
+    },
+    "energy_weight": {
+      "label": "Gewichtung der Energie",
+      "doc": "Wie stark ein Programm bevorzugt wird, dessen typischer Energieverbrauch zu diesem Zyklus passt."
     }
   },
   "setting_group": {
@@ -1461,5 +1559,18 @@
     "score": "Score {pct}%",
     "duration_cv": "Dauer-CV {pct}%",
     "avg_confidence": "Ø Konfidenz {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Die Erkennung hat festgestellt, dass ein Zyklus begonnen hat.",
+    "match_commit": "Der Abgleich hat sich mit ausreichender Sicherheit auf ein Programm festgelegt.",
+    "match_changed": "Das führende Programm hat sich geändert, als mehr vom Zyklus sichtbar wurde.",
+    "match_ambiguous": "Zwei Programme erzielten ähnliche Werte, daher war der Abgleich unsicher.",
+    "unmatched": "Kein gespeichertes Programm passte zu diesem Zyklus.",
+    "notify_start": "Eine Startbenachrichtigung würde gesendet werden.",
+    "notify_pre_complete": "Eine Fast-fertig-Benachrichtigung würde gesendet werden.",
+    "notify_finish": "Eine Abschlussbenachrichtigung würde gesendet werden.",
+    "notify_milestone": "Eine Meilenstein-Benachrichtigung würde gesendet werden.",
+    "notify_held": "Eine Benachrichtigung wurde wegen der Ruhezeiten zurückgehalten.",
+    "finished": "Der Zyklus hat einen Endzustand erreicht und wurde beendet."
   }
 }

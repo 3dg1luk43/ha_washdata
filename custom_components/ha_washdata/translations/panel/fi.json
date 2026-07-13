@@ -145,7 +145,10 @@
     "use": "Käyttää",
     "wipe_all": "Pyyhi kaikki tiedot",
     "delete_selected": "Poista valitut ({n})",
-    "group_suggest": "Ryhmä {n}: {members}"
+    "group_suggest": "Ryhmä {n}: {members}",
+    "pg_apply_best": "Käytä parasta",
+    "pg_apply_to_settings": "Tallenna asetuksiin",
+    "pg_apply_to_settings_tip": "Kopioi tässä muokkaamasi arvot tämän laitteen aktiivisiin asetuksiin"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Vaihda Home Assistant -sivupalkki",
     "tools_and_data": "Työkalut ja tiedot",
     "wipe_history": "Pyyhi historia",
-    "recommendations": "Suositukset ({n})"
+    "recommendations": "Suositukset ({n})",
+    "pg_detection_params": "Tunnistusasetukset",
+    "pg_timeline": "Tapahtuma-aikajana",
+    "pg_outcome": "Simulaation tulos",
+    "pg_across_cycles": "Kaikissa jaksoissasi"
   },
   "health": {
     "fair": "Tyydyttävä profiililaatu",
@@ -458,7 +465,62 @@
     "n_shown": ", {n} näkyvissä",
     "cycles_title": "Syklit ({n})",
     "pg_detecting": "Havaitaan",
-    "pg_best_marker": "Paras: {v}"
+    "pg_best_marker": "Paras: {v}",
+    "pg_time_left_model": "Aikaa jäljellä (malli)",
+    "pg_time_left_model_tip": "Mallin arvioima jäljellä oleva aika (vaihe-estimaattori + ML-yhdistelmä), ei kiinteä laskuri",
+    "phase": "Vaihe",
+    "pg_mode_simulate": "Simuloi",
+    "pg_mode_history": "Testaa historialla",
+    "pg_mode_sweep": "Pyyhkäisy",
+    "pg_ev_detected": "Havaittu",
+    "pg_ev_match": "Osuma vahvistettu",
+    "pg_ev_match_changed": "Osuma vaihtui",
+    "pg_ev_ambiguous": "Epäselvä",
+    "pg_ev_unmatched": "Ei osumaa",
+    "pg_ev_notify_start": "Aloitusilmoitus",
+    "pg_ev_notify_pre": "Melkein valmis -ilmoitus",
+    "pg_ev_notify_finish": "Valmistumisilmoitus",
+    "pg_ev_notify_milestone": "Välitavoiteilmoitus",
+    "pg_ev_notify_held": "Ilmoitus pidätetty (hiljaiset tunnit)",
+    "pg_ev_finished": "Valmistui",
+    "pg_ended": "Päättyi",
+    "pg_proj_energy": "Arv. energia",
+    "pg_alert_overrun": "Ylitys",
+    "pg_alert_underrun": "Alitus",
+    "pg_alert_did_not_finish": "Ei valmistunut",
+    "pg_alert_false_end": "Jakautui useaan sykliin",
+    "pg_alert_unmatched": "Ei osumaa",
+    "pg_alert_ambiguous": "Epäselvä osuma",
+    "pg_alert_energy": "Energiapoikkeama",
+    "pg_newly_correct": "nyt oikein",
+    "pg_regressed": "heikkeni",
+    "pg_end_timing_changed": "lopetusaika muuttui",
+    "pg_vs_current": "vs. nykyinen",
+    "pg_fixed": "korjattu",
+    "pg_broke": "rikkoutui",
+    "pg_sweep_param": "Parametri",
+    "pg_objective": "Tavoite",
+    "pg_steps": "Askeleet",
+    "pg_sweep_2d": "2D-lämpökartta",
+    "pg_sweep_param_y": "2. parametri",
+    "pg_obj_match": "Osumatarkkuus",
+    "pg_obj_endtiming": "Lopetusajan tarkkuus",
+    "pg_obj_falseend": "Väärien lopetusten osuus",
+    "pg_obj_overrun": "Keston poikkeama",
+    "pg_obj_ambiguity": "Epäselvyyksien osuus",
+    "pg_best_combo": "paras yhdistelmä",
+    "pg_mode_optimize": "Optimoi",
+    "pg_group_matching": "Ohjelman täsmäytys",
+    "pg_zoom_hint": "kaksoisnapsauta nollataksesi zoomauksen",
+    "aria_playground_chart2": "Interaktiivinen jakson tehokaavio: vie osoitin päälle lukeaksesi ajan/tehon, vieritä zoomataksesi, vedä panoroidaksesi",
+    "pg_alert_timeout_end": "Päättyi aikakatkaisuun, ei ennusteeseen",
+    "pg_alert_indefinite": "Kävisi loputtomiin",
+    "task_pg_history": "Testaa historialla",
+    "task_pg_sweep": "Optimoi",
+    "task_reprocess": "Uudelleenkäsittely",
+    "task_ml_training": "Oppiminen",
+    "eta_secs": "~{n} s jäljellä",
+    "eta_mins": "~{n} min jäljellä"
   },
   "log": {
     "all_levels": "Kaikki tasot"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' kuluttaa vähitellen enemmän energiaa (noin +{pct}% per jakso) - laite kannattaa tarkistaa, jos tämä on odottamatonta.",
     "advisory_poor_health": "'{name}'-profiilin sopivuusarvo on matala - sen viimeaikaiset jaksot vaihtelevat paljon tai tunnistuvat heikosti. Käy läpi sen jaksot tai tallenna profiili uudelleen, jotta tunnistus ja aika-arviot pysyvät tarkkoina.",
     "advisory_shape_drift": "'{name}' on muuttunut merkittävästi alkuperäisestä tehokäyrästään. Laitteen toiminta on voinut muuttua ajan myötä (esim. kalkki, kuluminen). Harkitse profiilin tallentamista uudelleen tuoreilla jaksoilla.",
-    "advisory_shape_drift_corr": "'{name}' on muuttunut merkittävästi alkuperäisestä tehokäyrästään (korrelaatio {corr}). Laitteen toiminta on voinut muuttua ajan myötä (esim. kalkki, kuluminen). Harkitse profiilin tallentamista uudelleen tuoreilla jaksoilla."
+    "advisory_shape_drift_corr": "'{name}' on muuttunut merkittävästi alkuperäisestä tehokäyrästään (korrelaatio {corr}). Laitteen toiminta on voinut muuttua ajan myötä (esim. kalkki, kuluminen). Harkitse profiilin tallentamista uudelleen tuoreilla jaksoilla.",
+    "pg_no_alerts": "Tässä ajossa ei havaittu ongelmia.",
+    "pg_override_active": "Käytetään muokattuja asetuksiasi vs. nykyiset",
+    "pg_history_intro": "Toista viimeisimmät syklisi todellisen tunnistimen ja täsmääjän läpi. Muokkaa ensin tunnistusasetusta Simuloi-tilassa nähdäksesi tässä ennen/jälkeen-vertailun.",
+    "pg_history_empty": "Paina Aja toistaaksesi syklisi.",
+    "pg_history_summary": "{detected}/{total} havaittu · {correct} täsmätty oikein",
+    "pg_sweep_no_metric": "Ei tarpeeksi dataa tämän tavoitteen pisteyttämiseen.",
+    "pg_sweep_intro2": "Etsi asetus, joka parhaiten täyttää tavoitteen viimeisimmissä sykleissäsi. Mikään ei muutu ennen kuin otat sen käyttöön.",
+    "pg_running_history": "Toistetaan jaksojasi…",
+    "pg_running_sweep": "Testataan arvoja kaikissa jaksoissasi…",
+    "pg_row_load_hint": "Lataa tämä jakso yllä olevaan kaavioon",
+    "pg_history_intro2": "Toista viimeisimmät jaksosi todellisen tunnistimen ja täsmäyttimen läpi yllä olevilla asetuksilla. Napsauta mitä tahansa riviä ladataksesi kyseisen jakson kaavioon; muokkaa asetusta nähdäksesi ennen/jälkeen-vertailun.",
+    "pg_simulating": "Simuloidaan jaksoa…",
+    "pg_canvas_empty2": "Valitse jakso yltä ja paina Suorita simuloidaksesi sen. Vie sitten osoitin päälle lukeaksesi arvoja, vieritä zoomataksesi ja vedä panoroidaksesi.",
+    "pg_apply_settings_confirm": "Tallennetaanko nämä {n} asetusta tähän laitteeseen? {list}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Äkillinen pudotus tulkitaan välittömäksi lopuksi",
@@ -718,7 +794,13 @@
     "off_delay": "Sekunteja matalaa tehoa ennen syklin päättymistä",
     "start_duration_threshold": "Sekunteja kynnyksen yläpuolella käynnistyksen vahvistamiseksi",
     "start_threshold_w": "Vähimmäiswatit, jotta lasketaan käynnistyneeksi",
-    "stop_threshold_w": "Tämän alapuolella laite lasketaan pois päältä olevaksi"
+    "stop_threshold_w": "Tämän alapuolella laite lasketaan pois päältä olevaksi",
+    "dtw_bandwidth": "Kuinka paljon ajan venytystä muodon täsmäytys sallii",
+    "corr_weight": "Käyrän muodon ja tehotason painotus täsmäytyksessä",
+    "duration_weight": "Kuinka paljon keston yhteensopivuus vaikuttaa täsmäytykseen",
+    "energy_weight": "Kuinka paljon energian yhteensopivuus vaikuttaa täsmäytykseen",
+    "profile_match_min_duration_ratio": "Lyhin sykli (profiiliin verrattuna), joka voi vielä täsmätä",
+    "profile_match_max_duration_ratio": "Pisin sykli (profiiliin verrattuna), joka voi vielä täsmätä"
   },
   "phase_desc": {
     "anti_crease": "Satunnaisia lyhyitä rumpujaksia valmistumisen jälkeen vaatteiden rypistyistä ehkäisemiseksi.",
@@ -1141,6 +1223,22 @@
     "peak_rate_threshold": {
       "doc": "Kun sykli alkaa ja nykyinen hinta per kWh on tämä arvo tai suurempi, käynnistysilmoitukseen liitetään huippuhintavihje. 0 tai tyhjä poistaa vihjeen käytöstä.",
       "label": "Huippuhintakynnys (per kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Muodon täsmäytyksen toleranssi",
+      "doc": "Kuinka paljon täsmäytin saa venyttää jaksoa ajassa, jotta se sopii tallennetun ohjelman muotoon. Suurempi sallii enemmän nopeusvaihtelua; liian suuri voi täsmätä väärän ohjelman."
+    },
+    "corr_weight": {
+      "label": "Muodon ja tason painotus",
+      "doc": "Tasapaino käyrän muodon ja absoluuttisen tehotason välillä täsmäytystä pisteytettäessä. Suurempi suosii muotoa; pienempi suosii tehotason täsmäystä."
+    },
+    "duration_weight": {
+      "label": "Keston painotus",
+      "doc": "Kuinka voimakkaasti suositaan ohjelmaa, jonka tyypillinen kesto vastaa tätä jaksoa."
+    },
+    "energy_weight": {
+      "label": "Energian painotus",
+      "doc": "Kuinka voimakkaasti suositaan ohjelmaa, jonka tyypillinen energiankulutus vastaa tätä jaksoa."
     }
   },
   "setting_group": {
@@ -1461,5 +1559,18 @@
     "score": "pisteet {pct}%",
     "duration_cv": "keston CV {pct}%",
     "avg_confidence": "ka. luottamus {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Tunnistin havaitsi, että jakso oli alkanut.",
+    "match_commit": "Ohjelmantunnistin valitsi ohjelman riittävän varmasti.",
+    "match_changed": "Johtava ohjelma vaihtui, kun jaksosta nähtiin enemmän.",
+    "match_ambiguous": "Kaksi ohjelmaa sai lähes samat pisteet, joten tunnistus oli epävarma.",
+    "unmatched": "Mikään tallennettu ohjelma ei sopinut tähän jaksoon.",
+    "notify_start": "Lähetettäisiin aloitusilmoitus.",
+    "notify_pre_complete": "Lähetettäisiin lähes valmis -ilmoitus.",
+    "notify_finish": "Lähetettäisiin valmistumisilmoitus.",
+    "notify_milestone": "Lähetettäisiin välitavoiteilmoitus.",
+    "notify_held": "Ilmoitus pidätettiin hiljaisten tuntien vuoksi.",
+    "finished": "Jakso saavutti lopputilan ja päättyi."
   }
 }

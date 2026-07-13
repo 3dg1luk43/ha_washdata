@@ -145,7 +145,10 @@
     "use": "Használat",
     "wipe_all": "Törölje az összes adatot",
     "delete_selected": "Kijelöltek törlése ({n})",
-    "group_suggest": "{n}. csoport: {members}"
+    "group_suggest": "{n}. csoport: {members}",
+    "pg_apply_best": "Legjobb alkalmazása",
+    "pg_apply_to_settings": "Mentés a beállításokba",
+    "pg_apply_to_settings_tip": "Az itt szerkesztett értékek másolása az eszköz aktív beállításaiba"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Kapcsolja be a Home Assistant oldalsávot",
     "tools_and_data": "Eszközök és adatok",
     "wipe_history": "Törölje az előzményeket",
-    "recommendations": "Javaslatok ({n})"
+    "recommendations": "Javaslatok ({n})",
+    "pg_detection_params": "Érzékelési beállítások",
+    "pg_timeline": "Események idővonala",
+    "pg_outcome": "Szimuláció eredménye",
+    "pg_across_cycles": "Az összes ciklusban"
   },
   "health": {
     "fair": "Elfogadható profilminőség",
@@ -458,7 +465,62 @@
     "n_shown": ", {n} látható",
     "cycles_title": "Ciklusok ({n})",
     "pg_detecting": "Észlelés folyamatban",
-    "pg_best_marker": "Legjobb: {v}"
+    "pg_best_marker": "Legjobb: {v}",
+    "pg_time_left_model": "Hátralévő idő (modell)",
+    "pg_time_left_model_tip": "A modell által becsült hátralévő idő (fázisbecslő + ML keverék), nem statikus visszaszámláló",
+    "phase": "Fázis",
+    "pg_mode_simulate": "Szimuláció",
+    "pg_mode_history": "Tesztelés előzményeken",
+    "pg_mode_sweep": "Pásztázás",
+    "pg_ev_detected": "Észlelve",
+    "pg_ev_match": "Egyezés véglegesítve",
+    "pg_ev_match_changed": "Egyezés megváltozott",
+    "pg_ev_ambiguous": "Bizonytalan",
+    "pg_ev_unmatched": "Nincs egyezés",
+    "pg_ev_notify_start": "Indítási értesítés",
+    "pg_ev_notify_pre": "Majdnem kész értesítés",
+    "pg_ev_notify_finish": "Befejezési értesítés",
+    "pg_ev_notify_milestone": "Mérföldkő értesítés",
+    "pg_ev_notify_held": "Értesítés visszatartva (csendes órák)",
+    "pg_ev_finished": "Befejezve",
+    "pg_ended": "Véget ért",
+    "pg_proj_energy": "Becs. energia",
+    "pg_alert_overrun": "Túlfutás",
+    "pg_alert_underrun": "Alulfutás",
+    "pg_alert_did_not_finish": "Nem fejeződött be",
+    "pg_alert_false_end": "Több ciklusra bomlott",
+    "pg_alert_unmatched": "Nincs egyezés",
+    "pg_alert_ambiguous": "Bizonytalan egyezés",
+    "pg_alert_energy": "Energiarendellenesség",
+    "pg_newly_correct": "most már helyes",
+    "pg_regressed": "romlott",
+    "pg_end_timing_changed": "befejezési idő megváltozott",
+    "pg_vs_current": "vs jelenlegi",
+    "pg_fixed": "javítva",
+    "pg_broke": "elromlott",
+    "pg_sweep_param": "Paraméter",
+    "pg_objective": "Cél",
+    "pg_steps": "Lépések",
+    "pg_sweep_2d": "2D hőtérkép",
+    "pg_sweep_param_y": "2. paraméter",
+    "pg_obj_match": "Egyezés pontossága",
+    "pg_obj_endtiming": "Befejezési idő pontossága",
+    "pg_obj_falseend": "Téves befejezések aránya",
+    "pg_obj_overrun": "Időtartam eltérése",
+    "pg_obj_ambiguity": "Bizonytalanság aránya",
+    "pg_best_combo": "legjobb kombináció",
+    "pg_mode_optimize": "Optimalizálás",
+    "pg_group_matching": "Programillesztés",
+    "pg_zoom_hint": "dupla kattintás a nagyítás visszaállításához",
+    "aria_playground_chart2": "Interaktív ciklusteljesítmény-grafikon: vigye rá a mutatót az idő/teljesítmény leolvasásához, görgessen a nagyításhoz, húzza az eltoláshoz",
+    "pg_alert_timeout_end": "Időtúllépés miatt ért véget, nem előrejelzés alapján",
+    "pg_alert_indefinite": "Végtelen ideig futna",
+    "task_pg_history": "Tesztelés előzményeken",
+    "task_pg_sweep": "Optimalizálás",
+    "task_reprocess": "Újrafeldolgozás",
+    "task_ml_training": "Tanulás",
+    "eta_secs": "még ~{n} mp",
+    "eta_mins": "még ~{n} perc"
   },
   "log": {
     "all_levels": "Minden szinten"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "A(z) '{name}' fokozatosan több energiát fogyaszt (ciklusonként kb. +{pct}%) - érdemes ellenőrizni a készüléket, ha ez váratlan.",
     "advisory_poor_health": "A(z) '{name}' illeszkedési pontszáma alacsony - a közelmúltbeli ciklusai erősen ingadoznak vagy gyengén illeszkednek. Nézze át a ciklusait, vagy rögzítse újra a profilt, hogy a felismerés és az időbecslés pontos maradjon.",
     "advisory_shape_drift": "A(z) '{name}' jelentősen eltért az eredeti teljesítménygörbéjétől. A készülék működése idővel megváltozhatott (pl. vízkő, kopás). Fontolja meg a profil újrarögzítését a közelmúltbeli ciklusokkal.",
-    "advisory_shape_drift_corr": "A(z) '{name}' jelentősen eltért az eredeti teljesítménygörbéjétől (korreláció: {corr}). A készülék működése idővel megváltozhatott (pl. vízkő, kopás). Fontolja meg a profil újrarögzítését a közelmúltbeli ciklusokkal."
+    "advisory_shape_drift_corr": "A(z) '{name}' jelentősen eltért az eredeti teljesítménygörbéjétől (korreláció: {corr}). A készülék működése idővel megváltozhatott (pl. vízkő, kopás). Fontolja meg a profil újrarögzítését a közelmúltbeli ciklusokkal.",
+    "pg_no_alerts": "Ebben a futásban nem észlelt problémát.",
+    "pg_override_active": "A szerkesztett beállításait használja a jelenlegiekhez képest",
+    "pg_history_intro": "Játssza le legutóbbi ciklusait a valódi érzékelőn és illesztőn keresztül. Először szerkesszen egy érzékelési beállítást a Szimuláció módban, hogy itt egy előtte/utána összehasonlítást lásson.",
+    "pg_history_empty": "Nyomja meg a Futtatás gombot a ciklusai lejátszásához.",
+    "pg_history_summary": "{detected}/{total} észlelve · {correct} helyesen illesztve",
+    "pg_sweep_no_metric": "Nincs elég adat ennek a célnak az értékeléséhez.",
+    "pg_sweep_intro2": "Keresse meg azt a beállítást, amely a legjobban teljesíti a célt a legutóbbi ciklusaiban. Semmi sem változik, amíg nem alkalmazza.",
+    "pg_running_history": "Ciklusaid visszajátszása…",
+    "pg_running_sweep": "Értékek tesztelése az összes ciklusodon…",
+    "pg_row_load_hint": "Ciklus betöltése a fenti grafikonba",
+    "pg_history_intro2": "Játszd vissza a legutóbbi ciklusaidat a valódi érzékelőn és illesztőn keresztül a fenti beállításokkal. Kattints bármely sorra a ciklus grafikonba töltéséhez; módosíts egy beállítást az előtte/utána összehasonlításhoz.",
+    "pg_simulating": "Ciklus szimulálása…",
+    "pg_canvas_empty2": "Válassz ki egy ciklust fent, és nyomd meg a Futtatás gombot a szimulációhoz. Ezután vidd rá a mutatót az értékek leolvasásához, görgess a nagyításhoz, és húzd az eltoláshoz.",
+    "pg_apply_settings_confirm": "Elmenti ezt a(z) {n} beállítást erre az eszközre? {list}"
   },
   "phase_desc": {
     "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -1130,6 +1206,22 @@
     "peak_rate_threshold": {
       "doc": "Amikor egy ciklus elindul, és az aktuális kWh-ár eléri vagy meghaladja ezt az értéket, csúcstarifa-tippet fűz az indítási értesítéshez. A 0 vagy üres kikapcsolja a tippet.",
       "label": "Csúcstarifa-küszöb (kWh-ként)"
+    },
+    "dtw_bandwidth": {
+      "label": "Alakillesztési tűrés",
+      "doc": "Mennyire torzíthatja időben az illesztő egy ciklust, hogy illeszkedjen egy mentett program alakjához. A magasabb érték nagyobb sebességingadozást tűr; a túl magas rossz programot illeszthet."
+    },
+    "corr_weight": {
+      "label": "Alak és szint súlya",
+      "doc": "Egyensúly a görbe alakja és az abszolút teljesítményszint között az illesztés pontozásakor. A magasabb érték az alakot részesíti előnyben; az alacsonyabb a teljesítményszint illesztését."
+    },
+    "duration_weight": {
+      "label": "Időtartam súlya",
+      "doc": "Mennyire részesül előnyben az a program, amelynek tipikus időtartama illeszkedik ehhez a ciklushoz."
+    },
+    "energy_weight": {
+      "label": "Energia súlya",
+      "doc": "Mennyire részesül előnyben az a program, amelynek tipikus energiafogyasztása illeszkedik ehhez a ciklushoz."
     }
   },
   "setting_group": {
@@ -1439,7 +1531,13 @@
     "off_delay": "Alacsony teljesítmény másodpercei a ciklus vége előtt",
     "start_duration_threshold": "A küszöb feletti másodpercek az indulás megerősítéséhez",
     "start_threshold_w": "Minimális wattérték az indulás elismeréséhez",
-    "stop_threshold_w": "Ez alatt a gép kikapcsoltnak számít"
+    "stop_threshold_w": "Ez alatt a gép kikapcsoltnak számít",
+    "dtw_bandwidth": "Mennyi időbeli torzítást engedélyez az alakillesztés",
+    "corr_weight": "A görbe alakjának és a teljesítményszintnek a súlya az illesztésben",
+    "duration_weight": "Mennyire befolyásolja az időtartam egyezése az illesztést",
+    "energy_weight": "Mennyire befolyásolja az energia egyezése az illesztést",
+    "profile_match_min_duration_ratio": "A legrövidebb ciklus (a profilhoz képest), amely még egyezhet",
+    "profile_match_max_duration_ratio": "A leghosszabb ciklus (a profilhoz képest), amely még egyezhet"
   },
   "col": {
     "profile_tip": "Az egyezést mutató program neve. A címkézetlen azt jelenti, hogy a ciklus végén egyetlen profil sem egyezett.",
@@ -1461,5 +1559,18 @@
     "score": "pontszám {pct}%",
     "duration_cv": "időtartam CV {pct}%",
     "avg_confidence": "átlagos bizalom {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Az érzékelő felismerte, hogy egy ciklus elindult.",
+    "match_commit": "Az illesztő elegendő magabiztossággal választott egy programot.",
+    "match_changed": "A vezető program megváltozott, ahogy a ciklus egyre nagyobb része vált láthatóvá.",
+    "match_ambiguous": "Két program közeli pontszámot ért el, ezért az illesztés bizonytalan volt.",
+    "unmatched": "Egyetlen mentett program sem illett ehhez a ciklushoz.",
+    "notify_start": "Egy indítási értesítés kerülne elküldésre.",
+    "notify_pre_complete": "Egy „majdnem kész” értesítés kerülne elküldésre.",
+    "notify_finish": "Egy befejezési értesítés kerülne elküldésre.",
+    "notify_milestone": "Egy mérföldkő-értesítés kerülne elküldésre.",
+    "notify_held": "Egy értesítés visszatartásra került a csendes órák miatt.",
+    "finished": "A ciklus elérte a végállapotot és befejeződött."
   }
 }

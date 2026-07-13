@@ -64,6 +64,7 @@ from .const import (
     STATE_COLORS,
 )
 from . import playground
+from . import task_registry
 from .cycle_detector import CycleDetectorConfig
 from .ws_schema import WS_OPEN_RESPONSES, WS_RESPONSE_TYPES
 
@@ -436,7 +437,21 @@ _ADMIN_COMMANDS = frozenset({
 # read users may use the Status program selector. The Playground simulation is a
 # read-only what-if replay (it never persists anything) whose name does not start
 # with get_, so it is whitelisted here to gate at the 'read' level.
-_READ_WRITE_COMMANDS = frozenset({"set_program", "run_playground_simulation"})
+_READ_WRITE_COMMANDS = frozenset({
+    "set_program",
+    "run_playground_simulation",
+    "run_playground_cycle_detail",
+    "run_playground_history",
+    "run_playground_sweep",
+    # Background-task registry: read-level runtime actions (watch progress, fetch
+    # a what-if/maintenance result, or stop a task). None mutate stored data.
+    "list_tasks",
+    "subscribe_tasks",
+    "cancel_task",
+    "get_task_result",
+    "start_playground_history",
+    "start_playground_sweep",
+})
 
 _LOG_BUFFER_KEY = "ha_washdata_log_buffer"
 _LOG_LEVELS = {"DEBUG": 10, "INFO": 20, "WARNING": 30, "ERROR": 40, "CRITICAL": 50}
@@ -666,6 +681,13 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_pause_cycle, ws_resume_cycle, ws_terminate_cycle,
         # Playground (F3): headless what-if replay + DTW visualizer
         ws_run_playground_simulation, ws_get_dtw_debug,
+        # Playground redesign: faithful single-cycle sim + history table + sweep
+        ws_run_playground_cycle_detail, ws_run_playground_history,
+        ws_run_playground_sweep,
+        # Background-task registry (progress / cancel / reconnect-safe results)
+        ws_list_tasks, ws_subscribe_tasks, ws_cancel_task, ws_get_task_result,
+        # Playground batch/sweep as detached registry-tracked tasks
+        ws_start_playground_history, ws_start_playground_sweep,
     ]
     for handler in handlers:
         websocket_api.async_register_command(hass, _guard(handler))
@@ -4093,6 +4115,170 @@ async def ws_run_playground_simulation(
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
 
+def _playground_context(hass: HomeAssistant, entry_id: str):
+    """Return (manager, store, base_config, options, price) for a Playground call,
+    or None (after sending the appropriate error) when unavailable."""
+    entry = _get_entry(hass, entry_id)
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        return None
+    store = getattr(manager, "profile_store", None)
+    if store is None:
+        return None
+    base_config = _playground_base_config(manager, entry)
+    options = {}
+    if entry is not None:
+        options = {**getattr(entry, "data", {}), **getattr(entry, "options", {})}
+    try:
+        price = manager._resolve_energy_price()  # noqa: SLF001
+    except Exception:  # pylint: disable=broad-exception-caught
+        price = None
+    return manager, store, base_config, options, price
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/run_playground_cycle_detail",
+        vol.Required("entry_id"): str,
+        vol.Required("cycle_id"): str,
+        vol.Optional("settings_override", default=dict): dict,
+    }
+)
+@websocket_api.async_response
+async def ws_run_playground_cycle_detail(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Faithful single-cycle simulation timeline (series + events + alerts +
+    outcome) for the Playground "Simulate" view. Read-only what-if."""
+    entry_id: str = msg["entry_id"]
+    ctx = _playground_context(hass, entry_id)
+    if ctx is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    _manager, store, base_config, options, price = ctx
+    try:
+        cycle_id = msg["cycle_id"]
+        override = dict(msg.get("settings_override") or {})
+        # The store lookup + replay run together in the executor so no store
+        # access happens on the event loop.
+        payload = await hass.async_add_executor_job(
+            playground.simulate_cycle_detail_by_id,
+            store, cycle_id, base_config, override, options, price,
+        )
+        if isinstance(payload, dict) and payload.get("error") == "not_found":
+            connection.send_error(msg["id"], "not_found", "Cycle not found")
+            return
+        _send_result(connection, msg["id"], "run_playground_cycle_detail", payload)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Playground cycle detail failed for %s: %s", entry_id, exc)
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/run_playground_history",
+        vol.Required("entry_id"): str,
+        vol.Optional("cycle_ids", default=list): [str],
+        vol.Optional("settings_override", default=dict): dict,
+        vol.Optional("concurrency", default=25): vol.Coerce(int),
+    }
+)
+@websocket_api.async_response
+async def ws_run_playground_history(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Per-cycle results table (+ before/after diff when settings_override is set)
+    for the Playground "Test on history" view. Read-only what-if."""
+    entry_id: str = msg["entry_id"]
+    ctx = _playground_context(hass, entry_id)
+    if ctx is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    _manager, store, base_config, options, price = ctx
+    try:
+        cycle_ids = list(msg.get("cycle_ids") or [])
+        override = dict(msg.get("settings_override") or {})
+        # Bound the batch size to the same safe cap as the backend (and sweep),
+        # so an oversized caller value can't request unbounded replay work.
+        concurrency = max(1, min(playground.MAX_BATCH_CYCLES, int(msg.get("concurrency", 25))))
+        payload = await hass.async_add_executor_job(
+            playground.run_playground_history,
+            store, cycle_ids, base_config, override, options, price, concurrency,
+        )
+        _send_result(connection, msg["id"], "run_playground_history", payload)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Playground history failed for %s: %s", entry_id, exc)
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+#: Max sweep points per axis - caps the grid so a caller can't request an
+#: unbounded number of full-history replays (values x values_y x cycles).
+_MAX_SWEEP_VALUES = 20
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/run_playground_sweep",
+        vol.Required("entry_id"): str,
+        vol.Required("param"): str,
+        vol.Required("values"): vol.All([vol.Coerce(float)], vol.Length(min=1, max=_MAX_SWEEP_VALUES)),
+        vol.Required("objective"): str,
+        vol.Optional("cycle_ids", default=list): [str],
+        vol.Optional("concurrency", default=15): vol.Coerce(int),
+        vol.Optional("param_y"): str,
+        vol.Optional("values_y"): vol.All([vol.Coerce(float)], vol.Length(max=_MAX_SWEEP_VALUES)),
+    }
+)
+@websocket_api.async_response
+async def ws_run_playground_sweep(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Objective-driven parameter sweep (1D curve or 2D heatmap) for the
+    Playground "Sweep" view. Read-only what-if."""
+    entry_id: str = msg["entry_id"]
+    ctx = _playground_context(hass, entry_id)
+    if ctx is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    _manager, store, base_config, options, price = ctx
+    param_y = msg.get("param_y")
+    values_y = list(msg["values_y"]) if msg.get("values_y") else None
+    # A 2D sweep needs BOTH the second parameter and its values, or neither.
+    if bool(param_y) != bool(values_y):
+        connection.send_error(
+            msg["id"], "invalid_format",
+            "param_y and values_y must both be provided for a 2D sweep, or both omitted",
+        )
+        return
+    try:
+        cycle_ids = list(msg.get("cycle_ids") or [])
+        concurrency = max(1, min(playground.MAX_BATCH_CYCLES, int(msg.get("concurrency", 15))))
+        payload = await hass.async_add_executor_job(
+            playground.run_playground_sweep,
+            store,
+            cycle_ids,
+            base_config,
+            msg["param"],
+            list(msg.get("values") or []),
+            msg["objective"],
+            options,
+            price,
+            concurrency,
+            param_y,
+            values_y,
+        )
+        _send_result(connection, msg["id"], "run_playground_sweep", payload)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Playground sweep failed for %s: %s", entry_id, exc)
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
 @websocket_api.websocket_command(
     {
         vol.Required("type"): "ha_washdata/get_dtw_debug",
@@ -4136,3 +4322,284 @@ async def ws_get_dtw_debug(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("DTW debug failed for %s: %s", entry_id, exc)
         connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+# ─── Background-task registry (progress / cancel / reconnect-safe results) ──────
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/list_tasks",
+        vol.Optional("entry_id"): vol.Any(str, None),
+    }
+)
+@callback
+def ws_list_tasks(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Snapshot of active + recently-finished background tasks (for reconnect
+    rehydration / a one-shot refresh). Optionally filtered to one device."""
+    reg = task_registry.get_registry(hass)
+    _send_result(connection, msg["id"], "list_tasks", {"tasks": reg.snapshot(msg.get("entry_id"))})
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/subscribe_tasks",
+        vol.Optional("entry_id"): vol.Any(str, None),
+    }
+)
+@callback
+def ws_subscribe_tasks(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Live push of task progress. Sends the current snapshot as `task` events on
+    subscribe, then one event per change until the client unsubscribes / the
+    socket closes. The client dedupes by id and keeps the latest `updated_at`."""
+    reg = task_registry.get_registry(hass)
+    entry_id = msg.get("entry_id")
+    iden = msg["id"]
+
+    @callback
+    def _forward(snap: dict[str, Any]) -> None:
+        if entry_id and snap.get("entry_id") != entry_id:
+            return
+        connection.send_message(
+            websocket_api.event_message(iden, {"type": "task", "task": snap})
+        )
+
+    connection.subscriptions[iden] = reg.add_listener(_forward)
+    connection.send_result(iden)
+    for snap in reg.snapshot(entry_id):
+        connection.send_message(
+            websocket_api.event_message(iden, {"type": "task", "task": snap})
+        )
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/cancel_task",
+        vol.Required("task_id"): str,
+    }
+)
+@callback
+def ws_cancel_task(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Request cancellation of a running task (consumers stop at the next chunk)."""
+    reg = task_registry.get_registry(hass)
+    _send_result(connection, msg["id"], "cancel_task", {"cancelled": reg.cancel(msg["task_id"])})
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/get_task_result",
+        vol.Required("task_id"): str,
+    }
+)
+@callback
+def ws_get_task_result(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Fetch a finished task's stored result (reloadable after a tab switch /
+    reconnect until the task is evicted)."""
+    reg = task_registry.get_registry(hass)
+    task = reg.get(msg["task_id"])
+    if task is None:
+        connection.send_error(msg["id"], "not_found", "Task not found")
+        return
+    _send_result(connection, msg["id"], "get_task_result", task.snapshot(include_result=True))
+
+
+# -- Playground batch/sweep as detached, registry-tracked tasks -----------------
+# The heavy replay runs in the executor CHUNK-BY-CHUNK (awaiting between chunks so
+# the event loop breathes and the executor thread is freed), updating the task's
+# progress and checking its cancel flag. Because the task is detached
+# (async_create_task), it survives a dropped socket; the panel re-attaches via
+# subscribe_tasks and reads the result with get_task_result.
+
+_PG_HISTORY_CHUNK = 2
+
+
+async def _pg_history_task(
+    hass: HomeAssistant, task: Any, entry_id: str,
+    cycle_ids: list[str], override: dict[str, Any] | None,
+) -> None:
+    reg = task_registry.get_registry(hass)
+    ctx = _playground_context(hass, entry_id)
+    if ctx is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+        return
+    _manager, store, base_config, options, price = ctx
+    try:
+        past = await hass.async_add_executor_job(lambda: list(store.get_past_cycles() or []))
+        by_id = {c.get("id"): c for c in past if isinstance(c, dict)}
+        if cycle_ids:
+            ids = [c for c in cycle_ids if c in by_id]
+        else:
+            ids = [c.get("id") for c in past[-playground.DEFAULT_RECENT_CYCLES:]]
+        ids = [i for i in ids[:playground.MAX_BATCH_CYCLES] if i]
+        reg.update(task, total=len(ids))
+        rows: list[dict[str, Any]] = []
+        base_rows: list[dict[str, Any]] = []
+        for i in range(0, len(ids), _PG_HISTORY_CHUNK):
+            if task.cancel_requested:
+                break
+            chunk = ids[i:i + _PG_HISTORY_CHUNK]
+            r = await hass.async_add_executor_job(
+                playground.run_playground_history,
+                store, chunk, base_config, override, options, price, len(chunk),
+            )
+            rows.extend(r.get("rows") or [])
+            base_rows.extend(r.get("baseline_rows") or [])
+            reg.update(task, done=min(len(ids), i + len(chunk)))
+        payload = playground.finalize_history(rows, base_rows, bool(override))
+        payload["partial"] = task.cancel_requested
+        reg.finish(
+            task,
+            state=task_registry.STATE_CANCELLED if task.cancel_requested else task_registry.STATE_DONE,
+            result=payload,
+        )
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Playground history task failed for %s: %s", entry_id, exc)
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
+
+
+async def _pg_sweep_task(
+    hass: HomeAssistant, task: Any, entry_id: str,
+    param: str, values: list[float], objective: str,
+    param_y: str | None, values_y: list[float] | None,
+) -> None:
+    reg = task_registry.get_registry(hass)
+    ctx = _playground_context(hass, entry_id)
+    if ctx is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+        return
+    _manager, store, base_config, options, price = ctx
+    try:
+        past = await hass.async_add_executor_job(lambda: list(store.get_past_cycles() or []))
+        ids = [c.get("id") for c in past[-playground.DEFAULT_RECENT_CYCLES:] if isinstance(c, dict)]
+        ids = [i for i in ids[:playground.MAX_BATCH_CYCLES] if i]
+        n = max(1, len(ids))
+        if param_y and values_y:
+            reg.update(task, total=len(values) * len(values_y))
+            grid: list[list[float | None]] = [[None] * len(values) for _ in values_y]
+            current: dict[str, Any] = {}
+            done = 0
+            cancelled = False
+            for j, vy in enumerate(values_y):
+                for i, vx in enumerate(values):
+                    if task.cancel_requested:
+                        cancelled = True
+                        break
+                    r = await hass.async_add_executor_job(
+                        playground.run_playground_sweep,
+                        store, ids, base_config, param, [vx], objective,
+                        options, price, n, param_y, [vy],
+                    )
+                    cell = (r.get("grid") or [[None]])[0]
+                    grid[j][i] = cell[0] if cell else None
+                    if r.get("current"):
+                        current = r["current"]
+                    done += 1
+                    reg.update(task, done=done)
+                if cancelled:
+                    break
+            payload = playground.finalize_sweep_2d(param, param_y, objective, values, values_y, grid, current)
+        else:
+            reg.update(task, total=len(values))
+            points: list[dict[str, Any]] = []
+            current_value: Any = None
+            for i, vx in enumerate(values):
+                if task.cancel_requested:
+                    break
+                r = await hass.async_add_executor_job(
+                    playground.run_playground_sweep,
+                    store, ids, base_config, param, [vx], objective, options, price, n,
+                )
+                points.extend(r.get("points") or [])
+                if r.get("current_value") is not None:
+                    current_value = r["current_value"]
+                reg.update(task, done=i + 1)
+            payload = playground.finalize_sweep_1d(param, objective, points, current_value)
+        payload["partial"] = task.cancel_requested
+        reg.finish(
+            task,
+            state=task_registry.STATE_CANCELLED if task.cancel_requested else task_registry.STATE_DONE,
+            result=payload,
+        )
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Playground sweep task failed for %s: %s", entry_id, exc)
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/start_playground_history",
+        vol.Required("entry_id"): str,
+        vol.Optional("cycle_ids", default=list): [str],
+        vol.Optional("settings_override", default=dict): dict,
+    }
+)
+@callback
+def ws_start_playground_history(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Kick off a detached, registry-tracked Test-on-history replay; returns the
+    task id immediately. Progress/result come via subscribe_tasks/get_task_result."""
+    entry_id = msg["entry_id"]
+    if _playground_context(hass, entry_id) is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    reg = task_registry.get_registry(hass)
+    task = reg.create(entry_id, "pg_history", "Test on history")
+    override = dict(msg.get("settings_override") or {}) or None
+    cycle_ids = list(msg.get("cycle_ids") or [])
+    hass.async_create_task(_pg_history_task(hass, task, entry_id, cycle_ids, override))
+    _send_result(connection, msg["id"], "start_playground_history", {"task_id": task.id})
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/start_playground_sweep",
+        vol.Required("entry_id"): str,
+        vol.Required("param"): str,
+        vol.Required("values"): [vol.Coerce(float)],
+        vol.Required("objective"): str,
+        vol.Optional("param_y"): vol.Any(str, None),
+        vol.Optional("values_y"): vol.Any([vol.Coerce(float)], None),
+    }
+)
+@callback
+def ws_start_playground_sweep(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Kick off a detached, registry-tracked Optimize sweep; returns the task id."""
+    entry_id = msg["entry_id"]
+    if _playground_context(hass, entry_id) is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    param_y = msg.get("param_y")
+    values_y = msg.get("values_y")
+    if bool(param_y) != bool(values_y):
+        connection.send_error(msg["id"], "invalid_format", "param_y and values_y must be set together")
+        return
+    reg = task_registry.get_registry(hass)
+    task = reg.create(entry_id, "pg_sweep", f"Optimize: {msg['param']}")
+    hass.async_create_task(_pg_sweep_task(
+        hass, task, entry_id, msg["param"], list(msg.get("values") or []),
+        msg["objective"], param_y, list(values_y) if values_y else None,
+    ))
+    _send_result(connection, msg["id"], "start_playground_sweep", {"task_id": task.id})

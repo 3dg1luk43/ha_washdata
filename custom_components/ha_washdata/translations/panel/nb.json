@@ -145,7 +145,10 @@
     "use": "Bruk",
     "wipe_all": "Tørk alle data",
     "delete_selected": "Slett valgte ({n})",
-    "group_suggest": "Gruppe {n}: {members}"
+    "group_suggest": "Gruppe {n}: {members}",
+    "pg_apply_best": "Bruk beste",
+    "pg_apply_to_settings": "Lagre i innstillinger",
+    "pg_apply_to_settings_tip": "Kopier verdiene du redigerte her, til de aktive innstillingene for denne enheten"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Slå på Home Assistant-sidepanelet",
     "tools_and_data": "Verktøy og data",
     "wipe_history": "Tørk historikk",
-    "recommendations": "Anbefalinger ({n})"
+    "recommendations": "Anbefalinger ({n})",
+    "pg_detection_params": "Deteksjonsinnstillinger",
+    "pg_timeline": "Hendelsestidslinje",
+    "pg_outcome": "Simuleringsresultat",
+    "pg_across_cycles": "På tvers av syklusene dine"
   },
   "health": {
     "fair": "Akseptabel profilkvalitet",
@@ -458,7 +465,62 @@
     "n_shown": ", {n} vist",
     "cycles_title": "Sykluser ({n})",
     "pg_detecting": "Oppdager",
-    "pg_best_marker": "Beste: {v}"
+    "pg_best_marker": "Beste: {v}",
+    "pg_time_left_model": "Tid igjen (modell)",
+    "pg_time_left_model_tip": "Modellberegnet gjenværende tid (faseberegner + ML-blanding), ikke en statisk nedtelling",
+    "phase": "Fase",
+    "pg_mode_simulate": "Simuler",
+    "pg_mode_history": "Test på historikk",
+    "pg_mode_sweep": "Sveip",
+    "pg_ev_detected": "Oppdaget",
+    "pg_ev_match": "Treff bekreftet",
+    "pg_ev_match_changed": "Treff endret",
+    "pg_ev_ambiguous": "Tvetydig",
+    "pg_ev_unmatched": "Uten treff",
+    "pg_ev_notify_start": "Startvarsel",
+    "pg_ev_notify_pre": "Nesten-ferdig-varsel",
+    "pg_ev_notify_finish": "Ferdigvarsel",
+    "pg_ev_notify_milestone": "Milepælvarsel",
+    "pg_ev_notify_held": "Varsel holdt tilbake (stilletid)",
+    "pg_ev_finished": "Fullført",
+    "pg_ended": "Avsluttet",
+    "pg_proj_energy": "Est. energi",
+    "pg_alert_overrun": "For lang",
+    "pg_alert_underrun": "For kort",
+    "pg_alert_did_not_finish": "Ble ikke fullført",
+    "pg_alert_false_end": "Delt i flere sykluser",
+    "pg_alert_unmatched": "Uten treff",
+    "pg_alert_ambiguous": "Tvetydig treff",
+    "pg_alert_energy": "Energianomali",
+    "pg_newly_correct": "nylig riktig",
+    "pg_regressed": "forverret",
+    "pg_end_timing_changed": "sluttidspunkt endret",
+    "pg_vs_current": "mot gjeldende",
+    "pg_fixed": "rettet",
+    "pg_broke": "ødelagt",
+    "pg_sweep_param": "Parameter",
+    "pg_objective": "Mål",
+    "pg_steps": "Trinn",
+    "pg_sweep_2d": "2D-varmekart",
+    "pg_sweep_param_y": "2. parameter",
+    "pg_obj_match": "Treffnøyaktighet",
+    "pg_obj_endtiming": "Sluttidsnøyaktighet",
+    "pg_obj_falseend": "Falsk-slutt-rate",
+    "pg_obj_overrun": "Varighetsavvik",
+    "pg_obj_ambiguity": "Tvetydighetsrate",
+    "pg_best_combo": "beste kombinasjon",
+    "pg_mode_optimize": "Optimaliser",
+    "pg_group_matching": "Programgjenkjenning",
+    "pg_zoom_hint": "dobbeltklikk for å tilbakestille zoom",
+    "aria_playground_chart2": "Interaktiv effektgraf for syklusen: hold pekeren over for å lese av tid/effekt, rull for å zoome, dra for å panorere",
+    "pg_alert_timeout_end": "Avsluttet ved tidsavbrudd, ikke ved forutsigelse",
+    "pg_alert_indefinite": "Ville kjøre i det uendelige",
+    "task_pg_history": "Test på historikk",
+    "task_pg_sweep": "Optimaliser",
+    "task_reprocess": "Behandler på nytt",
+    "task_ml_training": "Læring",
+    "eta_secs": "~{n} s igjen",
+    "eta_mins": "~{n} min igjen"
   },
   "log": {
     "all_levels": "Alle nivåer"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' trekker gradvis mer energi (omtrent +{pct}% per syklus) - verdt å sjekke apparatet hvis det er uventet.",
     "advisory_poor_health": "'{name}' har en lav samsvarsscore - de siste syklusene varierer mye eller samsvarer svakt. Gå gjennom syklusene, eller ta opp profilen på nytt slik at gjenkjenning og tidsestimater forblir nøyaktige.",
     "advisory_shape_drift": "'{name}' har endret seg betydelig fra sin opprinnelige effektkurve. Apparatet kan ha endret oppførsel over tid (f.eks. kalk, slitasje). Vurder å ta opp denne profilen på nytt med nye sykluser.",
-    "advisory_shape_drift_corr": "'{name}' har endret seg betydelig fra sin opprinnelige effektkurve (korrelasjon {corr}). Apparatet kan ha endret oppførsel over tid (f.eks. kalk, slitasje). Vurder å ta opp denne profilen på nytt med nye sykluser."
+    "advisory_shape_drift_corr": "'{name}' har endret seg betydelig fra sin opprinnelige effektkurve (korrelasjon {corr}). Apparatet kan ha endret oppførsel over tid (f.eks. kalk, slitasje). Vurder å ta opp denne profilen på nytt med nye sykluser.",
+    "pg_no_alerts": "Ingen problemer oppdaget i denne kjøringen.",
+    "pg_override_active": "Bruker dine redigerte innstillinger mot gjeldende",
+    "pg_history_intro": "Spill av de siste syklusene dine gjennom den ekte deteksjonen og matchingen. Rediger en deteksjonsinnstilling i Simuler først for å se en før/etter-sammenligning her.",
+    "pg_history_empty": "Trykk Kjør for å spille av syklusene dine på nytt.",
+    "pg_history_summary": "{detected}/{total} oppdaget · {correct} matchet riktig",
+    "pg_sweep_no_metric": "Ikke nok data til å score dette målet.",
+    "pg_sweep_intro2": "Finn innstillingen som best oppfyller et mål på tvers av de siste syklusene dine. Ingenting endres før du tar det i bruk.",
+    "pg_running_history": "Spiller av syklusene dine på nytt…",
+    "pg_running_sweep": "Tester verdier på tvers av syklusene dine…",
+    "pg_row_load_hint": "Last inn denne syklusen i grafen ovenfor",
+    "pg_history_intro2": "Spill av de siste syklusene dine gjennom den ekte detektoren og gjenkjenningen med innstillingene ovenfor. Klikk på en rad for å laste inn den syklusen i grafen; endre en innstilling for å se en før/etter-sammenligning.",
+    "pg_simulating": "Simulerer syklus…",
+    "pg_canvas_empty2": "Velg en syklus ovenfor og trykk på Kjør for å simulere den. Hold deretter pekeren over for å lese av verdier, rull for å zoome, og dra for å panorere.",
+    "pg_apply_settings_confirm": "Lagre disse {n} innstilling(er) på denne enheten? {list}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plutselig fall behandlet som umiddelbar slutt",
@@ -718,7 +794,13 @@
     "off_delay": "Sekunder med lav effekt før syklusen avsluttes",
     "start_duration_threshold": "Sekunder over terskelen for å bekrefte start",
     "start_threshold_w": "Minimum watt for å telle som startet",
-    "stop_threshold_w": "Under dette telles maskinen som av"
+    "stop_threshold_w": "Under dette telles maskinen som av",
+    "dtw_bandwidth": "Hvor mye tidsforvrengning formgjenkjenningen tillater",
+    "corr_weight": "Vekt på kurveform kontra effektnivå i gjenkjenningen",
+    "duration_weight": "Hvor mye samsvar i kjøretid påvirker gjenkjenningen",
+    "energy_weight": "Hvor mye samsvar i energiforbruk påvirker gjenkjenningen",
+    "profile_match_min_duration_ratio": "Korteste kjøring (i forhold til profilen) som fortsatt kan matche",
+    "profile_match_max_duration_ratio": "Lengste kjøring (i forhold til profilen) som fortsatt kan matche"
   },
   "phase_desc": {
     "anti_crease": "Enkelte korte fall etter ferdigstillelse for å redusere rynker.",
@@ -1141,6 +1223,22 @@
     "peak_rate_threshold": {
       "doc": "Når en syklus starter og gjeldende pris per kWh er på eller over denne verdien, legges et topptarifftips til i startvarselet. 0 eller tomt deaktiverer tipset.",
       "label": "Terskel for topptariff (per kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Toleranse for formgjenkjenning",
+      "doc": "Hvor mye gjenkjenningen kan forvrenge en syklus i tid for å passe til formen på et lagret program. Høyere tillater mer hastighetsvariasjon; for høyt risikerer å gjenkjenne feil program."
+    },
+    "corr_weight": {
+      "label": "Vekt: form kontra nivå",
+      "doc": "Balanse mellom kurveform og absolutt effektnivå når en gjenkjenning vurderes. Høyere favoriserer formen; lavere favoriserer å treffe effektnivået."
+    },
+    "duration_weight": {
+      "label": "Vekt på varighet",
+      "doc": "Hvor sterkt et program med typisk kjøretid som passer til denne syklusen, foretrekkes."
+    },
+    "energy_weight": {
+      "label": "Vekt på energi",
+      "doc": "Hvor sterkt et program med typisk energiforbruk som passer til denne syklusen, foretrekkes."
     }
   },
   "setting_group": {
@@ -1461,5 +1559,18 @@
     "score": "poengsum {pct}%",
     "duration_cv": "varighets-CV {pct}%",
     "avg_confidence": "gj.sn. konfidens {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Registreringen oppdaget at en syklus hadde startet.",
+    "match_commit": "Tildelingen valgte et program med tilstrekkelig sikkerhet.",
+    "match_changed": "Det ledende programmet endret seg etter hvert som mer av syklusen ble sett.",
+    "match_ambiguous": "To programmer skåret tett på hverandre, så tildelingen var usikker.",
+    "unmatched": "Ingen lagrede programmer passet til denne syklusen.",
+    "notify_start": "Et startvarsel ville bli sendt.",
+    "notify_pre_complete": "Et nesten-ferdig-varsel ville bli sendt.",
+    "notify_finish": "Et ferdigvarsel ville bli sendt.",
+    "notify_milestone": "Et milepælvarsel ville bli sendt.",
+    "notify_held": "Et varsel ble holdt tilbake på grunn av stilletimer.",
+    "finished": "Syklusen nådde en sluttilstand og stoppet."
   }
 }

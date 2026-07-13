@@ -145,7 +145,10 @@
     "use": "Izmantot",
     "wipe_all": "Noslaukiet visus datus",
     "delete_selected": "Dzēst atlasītos ({n})",
-    "group_suggest": "Grupa {n}: {members}"
+    "group_suggest": "Grupa {n}: {members}",
+    "pg_apply_best": "Lietot labāko",
+    "pg_apply_to_settings": "Saglabāt iestatījumos",
+    "pg_apply_to_settings_tip": "Kopēt šeit rediģētās vērtības šīs ierīces aktīvajos iestatījumos"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Pārslēgt mājas palīga sānjoslu",
     "tools_and_data": "Rīki un dati",
     "wipe_history": "Noslaukiet vēsturi",
-    "recommendations": "Ieteikumi ({n})"
+    "recommendations": "Ieteikumi ({n})",
+    "pg_detection_params": "Noteikšanas iestatījumi",
+    "pg_timeline": "Notikumu laika josla",
+    "pg_outcome": "Simulācijas rezultāts",
+    "pg_across_cycles": "Pa visiem jūsu cikliem"
   },
   "health": {
     "fair": "Pieņemama profila kvalitāte",
@@ -458,7 +465,62 @@
     "n_shown": ", parādīti {n}",
     "cycles_title": "Cikli ({n})",
     "pg_detecting": "Notiek noteikšana",
-    "pg_best_marker": "Labākais: {v}"
+    "pg_best_marker": "Labākais: {v}",
+    "pg_time_left_model": "Atlikušais laiks (modelis)",
+    "pg_time_left_model_tip": "Modeļa novērtētais atlikušais laiks (fāzes novērtētājs + ML sajaukums), nevis statisks atpakaļskaitītājs",
+    "phase": "Fāze",
+    "pg_mode_simulate": "Simulēt",
+    "pg_mode_history": "Testēt uz vēstures",
+    "pg_mode_sweep": "Skenēšana",
+    "pg_ev_detected": "Noteikts",
+    "pg_ev_match": "Atbilstība apstiprināta",
+    "pg_ev_match_changed": "Atbilstība mainījās",
+    "pg_ev_ambiguous": "Neskaidra",
+    "pg_ev_unmatched": "Bez atbilstības",
+    "pg_ev_notify_start": "Sākuma paziņojums",
+    "pg_ev_notify_pre": "Gandrīz gatavs paziņojums",
+    "pg_ev_notify_finish": "Beigu paziņojums",
+    "pg_ev_notify_milestone": "Atskaites punkta paziņojums",
+    "pg_ev_notify_held": "Paziņojums aizturēts (klusās stundas)",
+    "pg_ev_finished": "Pabeigts",
+    "pg_ended": "Beidzās",
+    "pg_proj_energy": "Progn. enerģija",
+    "pg_alert_overrun": "Par ilgu",
+    "pg_alert_underrun": "Par īsu",
+    "pg_alert_did_not_finish": "Nepabeidzās",
+    "pg_alert_false_end": "Sadalījās vairākos ciklos",
+    "pg_alert_unmatched": "Bez atbilstības",
+    "pg_alert_ambiguous": "Neskaidra atbilstība",
+    "pg_alert_energy": "Enerģijas anomālija",
+    "pg_newly_correct": "tagad pareizi",
+    "pg_regressed": "pasliktinājās",
+    "pg_end_timing_changed": "beigu laiks mainījās",
+    "pg_vs_current": "vs pašreizējais",
+    "pg_fixed": "novērsts",
+    "pg_broke": "sabojājās",
+    "pg_sweep_param": "Parametrs",
+    "pg_objective": "Mērķis",
+    "pg_steps": "Soļi",
+    "pg_sweep_2d": "2D siltuma karte",
+    "pg_sweep_param_y": "2. parametrs",
+    "pg_obj_match": "Atbilstības precizitāte",
+    "pg_obj_endtiming": "Beigu laika precizitāte",
+    "pg_obj_falseend": "Kļūdaino beigu īpatsvars",
+    "pg_obj_overrun": "Ilguma novirze",
+    "pg_obj_ambiguity": "Neskaidrību īpatsvars",
+    "pg_best_combo": "labākā kombinācija",
+    "pg_mode_optimize": "Optimizēt",
+    "pg_group_matching": "Programmu saskaņošana",
+    "pg_zoom_hint": "veiciet dubultklikšķi, lai atiestatītu tuvinājumu",
+    "aria_playground_chart2": "Interaktīva cikla jaudas diagramma: turiet kursoru virs, lai nolasītu laiku/jaudu, ritiniet, lai tuvinātu, velciet, lai pārvietotu",
+    "pg_alert_timeout_end": "Beidzās pēc noildzes, nevis prognozes",
+    "pg_alert_indefinite": "Darbotos bezgalīgi",
+    "task_pg_history": "Pārbaudīt vēsturē",
+    "task_pg_sweep": "Optimizēt",
+    "task_reprocess": "Atkārtota apstrāde",
+    "task_ml_training": "Mācīšanās",
+    "eta_secs": "vēl ~{n} s",
+    "eta_mins": "vēl ~{n} min"
   },
   "log": {
     "all_levels": "Visi līmeņi"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' patērē arvien vairāk enerģijas (apmēram +{pct}% katrā ciklā) - vērts pārbaudīt ierīci, ja tas ir negaidīti.",
     "advisory_poor_health": "'{name}' ir zems atbilstības rādītājs - tā nesenie cikli stipri atšķiras vai atpazīti vāji. Pārskatiet tā ciklus vai ierakstiet profilu no jauna, lai atpazīšana un laika aplēses paliktu precīzas.",
     "advisory_shape_drift": "'{name}' ir ievērojami novirzījies no sākotnējās jaudas līknes. Ierīces darbība laika gaitā, iespējams, ir mainījusies (piemēram, katlakmens, nolietojums). Apsveriet šī profila ierakstīšanu no jauna, izmantojot nesenos ciklus.",
-    "advisory_shape_drift_corr": "'{name}' ir ievērojami novirzījies no sākotnējās jaudas līknes (korelācija {corr}). Ierīces darbība laika gaitā, iespējams, ir mainījusies (piemēram, katlakmens, nolietojums). Apsveriet šī profila ierakstīšanu no jauna, izmantojot nesenos ciklus."
+    "advisory_shape_drift_corr": "'{name}' ir ievērojami novirzījies no sākotnējās jaudas līknes (korelācija {corr}). Ierīces darbība laika gaitā, iespējams, ir mainījusies (piemēram, katlakmens, nolietojums). Apsveriet šī profila ierakstīšanu no jauna, izmantojot nesenos ciklus.",
+    "pg_no_alerts": "Šajā palaišanā problēmas netika konstatētas.",
+    "pg_override_active": "Tiek izmantoti jūsu rediģētie iestatījumi pret pašreizējiem",
+    "pg_history_intro": "Atkārtoti palaidiet savus nesenos ciklus caur īsto detektoru un saskaņotāju. Vispirms rediģējiet noteikšanas iestatījumu režīmā Simulēt, lai šeit redzētu pirms/pēc salīdzinājumu.",
+    "pg_history_empty": "Nospiediet Palaist, lai atkārtoti palaistu savus ciklus.",
+    "pg_history_summary": "{detected}/{total} noteikti · {correct} pareizi saskaņoti",
+    "pg_sweep_no_metric": "Nav pietiekami daudz datu šī mērķa novērtēšanai.",
+    "pg_sweep_intro2": "Atrodiet iestatījumu, kas vislabāk atbilst mērķim jūsu nesenajos ciklos. Nekas nemainās, kamēr to nelietojat.",
+    "pg_running_history": "Notiek jūsu ciklu atskaņošana…",
+    "pg_running_sweep": "Notiek vērtību pārbaude visos jūsu ciklos…",
+    "pg_row_load_hint": "Ielādēt šo ciklu augšējā diagrammā",
+    "pg_history_intro2": "Atskaņojiet savus nesenos ciklus caur īsto detektoru un saskaņotāju ar iepriekš norādītajiem iestatījumiem. Noklikšķiniet uz jebkuras rindas, lai ielādētu šo ciklu diagrammā; mainiet iestatījumu, lai redzētu salīdzinājumu pirms/pēc.",
+    "pg_simulating": "Notiek cikla simulācija…",
+    "pg_canvas_empty2": "Izvēlieties ciklu augšā un nospiediet Palaist, lai to simulētu. Pēc tam turiet kursoru virs, lai nolasītu vērtības, ritiniet, lai tuvinātu, un velciet, lai pārvietotu.",
+    "pg_apply_settings_confirm": "Vai saglabāt šos {n} iestatījumus šajā ierīcē? {list}"
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -1130,6 +1206,22 @@
     "peak_rate_threshold": {
       "doc": "Kad cikls sākas un pašreizējā cena par kWh ir vienāda vai lielāka par šo vērtību, sākuma paziņojumam pievieno maksimālā tarifa padomu. 0 vai tukšs atspējo padomu.",
       "label": "Maksimālā tarifa slieksnis (par kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Formas saskaņošanas pielaide",
+      "doc": "Cik lielā mērā saskaņotājs var laikā deformēt ciklu, lai tas atbilstu saglabātās programmas formai. Augstāka vērtība pieļauj lielākas ātruma svārstības; pārāk augsta var saskaņot nepareizu programmu."
+    },
+    "corr_weight": {
+      "label": "Formas un līmeņa svars",
+      "doc": "Līdzsvars starp līknes formu un absolūto jaudas līmeni, vērtējot saskaņošanu. Augstāka vērtība dod priekšroku formai; zemāka dod priekšroku jaudas līmeņa saskaņošanai."
+    },
+    "duration_weight": {
+      "label": "Ilguma svars",
+      "doc": "Cik stipri tiek dota priekšroka programmai, kuras tipiskais ilgums atbilst šim ciklam."
+    },
+    "energy_weight": {
+      "label": "Enerģijas svars",
+      "doc": "Cik stipri tiek dota priekšroka programmai, kuras tipiskais enerģijas patēriņš atbilst šim ciklam."
     }
   },
   "setting_group": {
@@ -1439,7 +1531,13 @@
     "off_delay": "Zemas jaudas sekundes pirms cikla beigām",
     "start_duration_threshold": "Sekundes virs sliekšņa, lai apstiprinātu sākumu",
     "start_threshold_w": "Minimālais vatu skaits, lai skaitītos kā sācies",
-    "stop_threshold_w": "Zem šīs vērtības iekārta skaitās izslēgta"
+    "stop_threshold_w": "Zem šīs vērtības iekārta skaitās izslēgta",
+    "dtw_bandwidth": "Cik lielu laika deformāciju pieļauj formas saskaņošana",
+    "corr_weight": "Līknes formas un jaudas līmeņa svars saskaņošanā",
+    "duration_weight": "Cik lielā mērā ilguma atbilstība ietekmē saskaņošanu",
+    "energy_weight": "Cik lielā mērā enerģijas atbilstība ietekmē saskaņošanu",
+    "profile_match_min_duration_ratio": "Īsākais cikls (salīdzinot ar profilu), kuram vēl atļauts atbilst",
+    "profile_match_max_duration_ratio": "Garākais cikls (salīdzinot ar profilu), kuram vēl atļauts atbilst"
   },
   "col": {
     "profile_tip": "Atbilstošās programmas nosaukums. Bez birkas nozīmē, ka cikla beigās neatbilda neviens profils.",
@@ -1461,5 +1559,18 @@
     "score": "rezultāts {pct}%",
     "duration_cv": "ilguma CV {pct}%",
     "avg_confidence": "vidējā pārliecība {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Detektors atpazina, ka cikls ir sācies.",
+    "match_commit": "Saskaņotājs izvēlējās programmu ar pietiekamu pārliecību.",
+    "match_changed": "Vadošā programma mainījās, redzot lielāku daļu cikla.",
+    "match_ambiguous": "Divas programmas ieguva līdzīgus rezultātus, tāpēc atbilstība bija neskaidra.",
+    "unmatched": "Neviena saglabātā programma šim ciklam neatbilda.",
+    "notify_start": "Tiktu nosūtīts sākuma paziņojums.",
+    "notify_pre_complete": "Tiktu nosūtīts paziņojums par gandrīz pabeigtu ciklu.",
+    "notify_finish": "Tiktu nosūtīts pabeigšanas paziņojums.",
+    "notify_milestone": "Tiktu nosūtīts atskaites punkta paziņojums.",
+    "notify_held": "Paziņojums tika aizturēts klusuma stundu dēļ.",
+    "finished": "Cikls sasniedza gala stāvokli un beidzās."
   }
 }

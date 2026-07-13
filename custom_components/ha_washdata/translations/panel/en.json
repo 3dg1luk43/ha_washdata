@@ -145,7 +145,9 @@
     "use": "Use",
     "wipe_all": "Wipe All Data",
     "delete_selected": "Delete selected ({n})",
-    "group_suggest": "Group {n}: {members}"
+    "group_suggest": "Group {n}: {members}",
+    "pg_apply_to_settings": "Save to settings",
+    "pg_apply_to_settings_tip": "Copy the values you edited here into this device's live settings"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +255,8 @@
     "toggle_sidebar": "Toggle Home Assistant sidebar",
     "tools_and_data": "Tools & Data",
     "wipe_history": "Wipe History",
-    "recommendations": "Recommendations ({n})"
+    "recommendations": "Recommendations ({n})",
+    "pg_across_cycles": "Across your cycles"
   },
   "health": {
     "fair": "Acceptable profile quality",
@@ -458,7 +461,19 @@
     "n_shown": ", {n} shown",
     "cycles_title": "Cycles ({n})",
     "pg_detecting": "Detecting",
-    "pg_best_marker": "Best: {v}"
+    "pg_best_marker": "Best: {v}",
+    "pg_mode_optimize": "Optimize",
+    "pg_group_matching": "Program matching",
+    "pg_zoom_hint": "double-click to reset zoom",
+    "aria_playground_chart2": "Interactive cycle power graph: hover to read time/power, scroll to zoom, drag to pan",
+    "pg_alert_timeout_end": "Ended by timeout, not prediction",
+    "pg_alert_indefinite": "Would run indefinitely",
+    "task_pg_history": "Test on history",
+    "task_pg_sweep": "Optimize",
+    "task_reprocess": "Reprocessing",
+    "task_ml_training": "Learning",
+    "eta_secs": "~{n}s left",
+    "eta_mins": "~{n}m left"
   },
   "log": {
     "all_levels": "All levels"
@@ -714,7 +729,14 @@
     "advisory_shape_drift": "'{name}' has drifted significantly from its original power shape. The appliance may have changed behaviour over time (e.g. limescale, wear). Consider re-recording this profile with recent cycles.",
     "advisory_shape_drift_corr": "'{name}' has drifted significantly from its original power shape (correlation {corr}). The appliance may have changed behaviour over time (e.g. limescale, wear). Consider re-recording this profile with recent cycles.",
     "advisory_duration_trend_up": "'{name}' cycles are running progressively longer (about +{pct}% per cycle). If the appliance's behaviour changed, re-record or rebuild this profile.",
-    "advisory_energy_trend_up": "'{name}' is drawing progressively more energy (about +{pct}% per cycle) - worth checking the appliance if that is unexpected."
+    "advisory_energy_trend_up": "'{name}' is drawing progressively more energy (about +{pct}% per cycle) - worth checking the appliance if that is unexpected.",
+    "pg_running_history": "Replaying your cycles…",
+    "pg_running_sweep": "Testing values across your cycles…",
+    "pg_row_load_hint": "Load this cycle in the graph above",
+    "pg_history_intro2": "Replay your recent cycles through the real detector and matcher with the settings above. Click any row to load that cycle in the graph; edit a setting to see a before/after comparison.",
+    "pg_simulating": "Simulating cycle…",
+    "pg_canvas_empty2": "Pick a cycle above and press Run to simulate it. Then hover to read values, scroll to zoom, and drag to pan.",
+    "pg_apply_settings_confirm": "Save these {n} setting(s) to this device? {list}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Sudden drop treated as immediate end",
@@ -725,7 +747,13 @@
     "off_delay": "Seconds of low power before cycle ends",
     "start_duration_threshold": "Seconds above threshold to confirm start",
     "start_threshold_w": "Minimum watts to count as started",
-    "stop_threshold_w": "Below this, machine counts as off"
+    "stop_threshold_w": "Below this, machine counts as off",
+    "dtw_bandwidth": "How much time-warping the shape match allows",
+    "corr_weight": "Weight on curve-shape vs power level in the match",
+    "duration_weight": "How much run-length agreement affects the match",
+    "energy_weight": "How much energy agreement affects the match",
+    "profile_match_min_duration_ratio": "Shortest run (vs the profile) still allowed to match",
+    "profile_match_max_duration_ratio": "Longest run (vs the profile) still allowed to match"
   },
   "phase_desc": {
     "anti_crease": "Occasional short tumbles after completion to reduce wrinkles.",
@@ -1148,6 +1176,22 @@
     "watchdog_interval": {
       "doc": "How often the background watchdog checks for stalled sensors and elapsed timeouts. Default 30 s.",
       "label": "Watchdog Interval"
+    },
+    "dtw_bandwidth": {
+      "label": "Shape Match Tolerance",
+      "doc": "How much the matcher may time-warp a cycle to fit a saved program's shape. Higher tolerates more speed variation; too high risks matching the wrong program."
+    },
+    "corr_weight": {
+      "label": "Shape vs Level Weight",
+      "doc": "Balance between curve shape and absolute power level when scoring a match. Higher favours shape; lower favours matching the power level."
+    },
+    "duration_weight": {
+      "label": "Duration Weight",
+      "doc": "How strongly a program whose typical run-length matches this cycle is preferred."
+    },
+    "energy_weight": {
+      "label": "Energy Weight",
+      "doc": "How strongly a program whose typical energy use matches this cycle is preferred."
     }
   },
   "setting_group": {
@@ -1461,5 +1505,18 @@
     "score": "score {pct}%",
     "duration_cv": "duration CV {pct}%",
     "avg_confidence": "avg confidence {pct}%"
+  },
+  "pg_evd": {
+    "detected": "The detector recognized a cycle had started.",
+    "match_commit": "The matcher committed to a program with enough confidence.",
+    "match_changed": "The leading program changed as more of the cycle was seen.",
+    "match_ambiguous": "Two programs scored close together, so the match was uncertain.",
+    "unmatched": "No saved program fit this cycle.",
+    "notify_start": "A start notification would be sent.",
+    "notify_pre_complete": "An almost-done notification would be sent.",
+    "notify_finish": "A finish notification would be sent.",
+    "notify_milestone": "A milestone notification would be sent.",
+    "notify_held": "A notification was held back for quiet hours.",
+    "finished": "The cycle reached a terminal state and ended."
   }
 }

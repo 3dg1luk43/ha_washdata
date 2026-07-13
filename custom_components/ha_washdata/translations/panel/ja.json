@@ -145,7 +145,10 @@
     "use": "使用",
     "wipe_all": "すべてのデータを消去",
     "delete_selected": "選択項目を削除（{n}）",
-    "group_suggest": "グループ {n}：{members}"
+    "group_suggest": "グループ {n}：{members}",
+    "pg_apply_best": "最適値を適用",
+    "pg_apply_to_settings": "設定に保存",
+    "pg_apply_to_settings_tip": "ここで編集した値をこのデバイスの現在有効な設定にコピーします"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "ホームアシスタントサイドバーの切り替え",
     "tools_and_data": "ツールとデータ",
     "wipe_history": "履歴を消去",
-    "recommendations": "推奨事項（{n}）"
+    "recommendations": "推奨事項（{n}）",
+    "pg_detection_params": "検出設定",
+    "pg_timeline": "イベントタイムライン",
+    "pg_outcome": "シミュレーション結果",
+    "pg_across_cycles": "全サイクルにわたって"
   },
   "health": {
     "fair": "プロファイル品質: 普通",
@@ -458,7 +465,62 @@
     "n_shown": "、{n} 件表示",
     "cycles_title": "サイクル（{n}）",
     "pg_detecting": "検出中",
-    "pg_best_marker": "ベスト：{v}"
+    "pg_best_marker": "ベスト：{v}",
+    "pg_time_left_model": "残り時間（モデル）",
+    "pg_time_left_model_tip": "モデルが推定する残り時間（フェーズ推定＋MLブレンド）。固定のカウントダウンではありません。",
+    "phase": "フェーズ",
+    "pg_mode_simulate": "シミュレート",
+    "pg_mode_history": "履歴テスト",
+    "pg_mode_sweep": "スイープ",
+    "pg_ev_detected": "検出",
+    "pg_ev_match": "マッチ確定",
+    "pg_ev_match_changed": "マッチ変更",
+    "pg_ev_ambiguous": "あいまい",
+    "pg_ev_unmatched": "マッチなし",
+    "pg_ev_notify_start": "開始通知",
+    "pg_ev_notify_pre": "まもなく完了通知",
+    "pg_ev_notify_finish": "完了通知",
+    "pg_ev_notify_milestone": "マイルストーン通知",
+    "pg_ev_notify_held": "通知保留（サイレント時間）",
+    "pg_ev_finished": "完了",
+    "pg_ended": "終了",
+    "pg_proj_energy": "予測エネルギー",
+    "pg_alert_overrun": "長すぎ",
+    "pg_alert_underrun": "短すぎ",
+    "pg_alert_did_not_finish": "未完了",
+    "pg_alert_false_end": "複数サイクルに分割",
+    "pg_alert_unmatched": "マッチなし",
+    "pg_alert_ambiguous": "あいまいなマッチ",
+    "pg_alert_energy": "エネルギー異常",
+    "pg_newly_correct": "新たに正解",
+    "pg_regressed": "悪化",
+    "pg_end_timing_changed": "終了タイミング変更",
+    "pg_vs_current": "現在との比較",
+    "pg_fixed": "解消",
+    "pg_broke": "不具合発生",
+    "pg_sweep_param": "パラメーター",
+    "pg_objective": "目的",
+    "pg_steps": "ステップ数",
+    "pg_sweep_2d": "2Dヒートマップ",
+    "pg_sweep_param_y": "2番目のパラメーター",
+    "pg_obj_match": "マッチ精度",
+    "pg_obj_endtiming": "終了タイミング精度",
+    "pg_obj_falseend": "誤終了率",
+    "pg_obj_overrun": "所要時間のずれ",
+    "pg_obj_ambiguity": "あいまい率",
+    "pg_best_combo": "最適な組み合わせ",
+    "pg_mode_optimize": "最適化",
+    "pg_group_matching": "プログラムマッチング",
+    "pg_zoom_hint": "ダブルクリックでズームをリセット",
+    "aria_playground_chart2": "インタラクティブなサイクル電力グラフ: ホバーで時刻/電力を表示、スクロールでズーム、ドラッグで移動",
+    "pg_alert_timeout_end": "予測ではなくタイムアウトで終了しました",
+    "pg_alert_indefinite": "いつまでも終了しません",
+    "task_pg_history": "履歴でテスト",
+    "task_pg_sweep": "最適化",
+    "task_reprocess": "再処理",
+    "task_ml_training": "学習",
+    "eta_secs": "~{n}秒残り",
+    "eta_mins": "~{n}分残り"
   },
   "log": {
     "all_levels": "すべてのレベル"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' の消費エネルギーが次第に増えています（1サイクルあたり約 +{pct}%）。想定外であれば機器を確認することをおすすめします。",
     "advisory_poor_health": "'{name}' の適合スコアが低くなっています。最近のサイクルはばらつきが大きい、または照合が弱いようです。照合と時間推定の精度を保つため、サイクルを確認するかプロファイルを再記録してください。",
     "advisory_shape_drift": "'{name}' が元の電力波形から大きく変化しています。機器の動作が時間とともに変わった可能性があります（例: 石灰の付着、摩耗）。最近のサイクルでこのプロファイルを再記録することを検討してください。",
-    "advisory_shape_drift_corr": "'{name}' が元の電力波形から大きく変化しています（相関 {corr}）。機器の動作が時間とともに変わった可能性があります（例: 石灰の付着、摩耗）。最近のサイクルでこのプロファイルを再記録することを検討してください。"
+    "advisory_shape_drift_corr": "'{name}' が元の電力波形から大きく変化しています（相関 {corr}）。機器の動作が時間とともに変わった可能性があります（例: 石灰の付着、摩耗）。最近のサイクルでこのプロファイルを再記録することを検討してください。",
+    "pg_no_alerts": "この実行で問題は検出されませんでした。",
+    "pg_override_active": "編集した設定を現在の設定と比較して使用中",
+    "pg_history_intro": "直近のサイクルを実際の検出器とマッチャーで再生します。ビフォー/アフターの比較を見るには、まず「シミュレート」で検出設定を編集してください。",
+    "pg_history_empty": "「実行」を押してサイクルを再生します。",
+    "pg_history_summary": "{detected}/{total} 検出 · {correct} 正しくマッチ",
+    "pg_sweep_no_metric": "この目的を評価するにはデータが不足しています。",
+    "pg_sweep_intro2": "直近のサイクル全体で目的を最もよく満たす設定を見つけます。適用するまで何も変更されません。",
+    "pg_running_history": "サイクルを再生しています…",
+    "pg_running_sweep": "全サイクルで値を検証しています…",
+    "pg_row_load_hint": "このサイクルを上のグラフに読み込む",
+    "pg_history_intro2": "上記の設定で、最近のサイクルを実際の検出器とマッチャーで再生します。行をクリックするとそのサイクルをグラフに読み込みます。設定を変更すると、変更前後の比較が表示されます。",
+    "pg_simulating": "サイクルをシミュレーションしています…",
+    "pg_canvas_empty2": "上でサイクルを選び、「実行」を押してシミュレーションします。その後、ホバーで値を表示、スクロールでズーム、ドラッグで移動できます。",
+    "pg_apply_settings_confirm": "これら {n} 件の設定をこのデバイスに保存しますか？ {list}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "急激な低下は即時終了として扱う",
@@ -718,7 +794,13 @@
     "off_delay": "サイクル終了までの低電力の秒数",
     "start_duration_threshold": "開始を確定するしきい値超えの秒数",
     "start_threshold_w": "開始とみなす最小ワット数",
-    "stop_threshold_w": "これを下回ると停止とみなす"
+    "stop_threshold_w": "これを下回ると停止とみなす",
+    "dtw_bandwidth": "形状マッチングで許容する時間ワーピングの量",
+    "corr_weight": "マッチングにおける曲線形状と電力レベルの重み",
+    "duration_weight": "実行時間の一致がマッチングに与える影響の大きさ",
+    "energy_weight": "消費電力量の一致がマッチングに与える影響の大きさ",
+    "profile_match_min_duration_ratio": "一致対象として許可される最短の運転時間（プロファイル比）",
+    "profile_match_max_duration_ratio": "一致対象として許可される最長の運転時間（プロファイル比）"
   },
   "phase_desc": {
     "anti_crease": "メインサイクル後にドラムが断続的に回転し、衣類のシワを防止します。",
@@ -1141,6 +1223,22 @@
     "peak_rate_threshold": {
       "doc": "サイクル開始時に現在の kWh あたりの価格がこの値以上の場合、開始通知にピーク料金のヒントを追加します。0 または空欄でヒントを無効にします。",
       "label": "ピーク料金のしきい値 (kWh あたり)"
+    },
+    "dtw_bandwidth": {
+      "label": "形状マッチングの許容度",
+      "doc": "保存済みプログラムの形状に合わせるために、マッチャーがサイクルをどれだけ時間ワーピングできるかを決めます。値を大きくすると速度の変動をより許容しますが、大きすぎると誤ったプログラムにマッチするおそれがあります。"
+    },
+    "corr_weight": {
+      "label": "形状とレベルの重み",
+      "doc": "マッチのスコアリング時に、曲線の形状と絶対的な電力レベルのどちらを重視するかのバランスです。値を大きくすると形状を、小さくすると電力レベルの一致を重視します。"
+    },
+    "duration_weight": {
+      "label": "実行時間の重み",
+      "doc": "一般的な実行時間がこのサイクルと一致するプログラムを、どれだけ優先するかを決めます。"
+    },
+    "energy_weight": {
+      "label": "エネルギーの重み",
+      "doc": "一般的な消費電力量がこのサイクルと一致するプログラムを、どれだけ優先するかを決めます。"
     }
   },
   "setting_group": {
@@ -1461,5 +1559,18 @@
     "score": "スコア {pct}%",
     "duration_cv": "継続時間 CV {pct}%",
     "avg_confidence": "平均信頼度 {pct}%"
+  },
+  "pg_evd": {
+    "detected": "検出機能がサイクルの開始を認識しました。",
+    "match_commit": "照合機能が十分な信頼度でプログラムを確定しました。",
+    "match_changed": "サイクルの経過が進むにつれて、最有力のプログラムが変わりました。",
+    "match_ambiguous": "2つのプログラムのスコアが接近していたため、照合結果が不確実でした。",
+    "unmatched": "このサイクルに合致する保存済みプログラムはありませんでした。",
+    "notify_start": "開始通知が送信されます。",
+    "notify_pre_complete": "まもなく完了の通知が送信されます。",
+    "notify_finish": "完了通知が送信されます。",
+    "notify_milestone": "マイルストーン通知が送信されます。",
+    "notify_held": "サイレント時間帯のため、通知が保留されました。",
+    "finished": "サイクルが終了状態に達して終了しました。"
   }
 }

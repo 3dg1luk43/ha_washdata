@@ -145,7 +145,10 @@
     "use": "Naudokite",
     "wipe_all": "Išvalykite visus duomenis",
     "delete_selected": "Ištrinti pasirinktus ({n})",
-    "group_suggest": "Grupė {n}: {members}"
+    "group_suggest": "Grupė {n}: {members}",
+    "pg_apply_best": "Taikyti geriausią",
+    "pg_apply_to_settings": "Įrašyti į nustatymus",
+    "pg_apply_to_settings_tip": "Kopijuoti čia redaguotas reikšmes į aktyvius šio įrenginio nustatymus"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Perjungti „Home Assistant“ šoninę juostą",
     "tools_and_data": "Įrankiai ir duomenys",
     "wipe_history": "Išvalyti istoriją",
-    "recommendations": "Rekomendacijos ({n})"
+    "recommendations": "Rekomendacijos ({n})",
+    "pg_detection_params": "Aptikimo nustatymai",
+    "pg_timeline": "Įvykių chronologija",
+    "pg_outcome": "Simuliacijos rezultatas",
+    "pg_across_cycles": "Per visus jūsų ciklus"
   },
   "health": {
     "fair": "Priimtina profilio kokybė",
@@ -458,7 +465,62 @@
     "n_shown": ", rodoma {n}",
     "cycles_title": "Ciklai ({n})",
     "pg_detecting": "Aptinkama",
-    "pg_best_marker": "Geriausia: {v}"
+    "pg_best_marker": "Geriausia: {v}",
+    "pg_time_left_model": "Liko laiko (modelis)",
+    "pg_time_left_model_tip": "Modelio įvertintas likęs laikas (fazės vertintuvas + ML derinys), ne statinis atgalinis skaičiavimas",
+    "phase": "Fazė",
+    "pg_mode_simulate": "Simuliuoti",
+    "pg_mode_history": "Bandyti su istorija",
+    "pg_mode_sweep": "Skenavimas",
+    "pg_ev_detected": "Aptikta",
+    "pg_ev_match": "Atitiktis patvirtinta",
+    "pg_ev_match_changed": "Atitiktis pasikeitė",
+    "pg_ev_ambiguous": "Neaiški",
+    "pg_ev_unmatched": "Be atitikties",
+    "pg_ev_notify_start": "Pradžios pranešimas",
+    "pg_ev_notify_pre": "Beveik baigta pranešimas",
+    "pg_ev_notify_finish": "Pabaigos pranešimas",
+    "pg_ev_notify_milestone": "Etapo pranešimas",
+    "pg_ev_notify_held": "Pranešimas sulaikytas (tylos valandos)",
+    "pg_ev_finished": "Baigta",
+    "pg_ended": "Pasibaigė",
+    "pg_proj_energy": "Progn. energija",
+    "pg_alert_overrun": "Per ilgai",
+    "pg_alert_underrun": "Per trumpai",
+    "pg_alert_did_not_finish": "Nebaigta",
+    "pg_alert_false_end": "Suskilo į kelis ciklus",
+    "pg_alert_unmatched": "Be atitikties",
+    "pg_alert_ambiguous": "Neaiški atitiktis",
+    "pg_alert_energy": "Energijos anomalija",
+    "pg_newly_correct": "dabar teisinga",
+    "pg_regressed": "pablogėjo",
+    "pg_end_timing_changed": "pabaigos laikas pasikeitė",
+    "pg_vs_current": "vs dabartinis",
+    "pg_fixed": "pataisyta",
+    "pg_broke": "sugedo",
+    "pg_sweep_param": "Parametras",
+    "pg_objective": "Tikslas",
+    "pg_steps": "Žingsniai",
+    "pg_sweep_2d": "2D šilumos žemėlapis",
+    "pg_sweep_param_y": "Antras parametras",
+    "pg_obj_match": "Atitikties tikslumas",
+    "pg_obj_endtiming": "Pabaigos laiko tikslumas",
+    "pg_obj_falseend": "Klaidingų pabaigų dažnis",
+    "pg_obj_overrun": "Trukmės nuokrypis",
+    "pg_obj_ambiguity": "Neaiškumų dažnis",
+    "pg_best_combo": "geriausias derinys",
+    "pg_mode_optimize": "Optimizuoti",
+    "pg_group_matching": "Programų atitiktis",
+    "pg_zoom_hint": "dukart spustelėkite, kad atstatytumėte mastelį",
+    "aria_playground_chart2": "Interaktyvus ciklo galios grafikas: užveskite žymeklį, kad nuskaitytumėte laiką/galią, slinkite, kad priartintumėte, vilkite, kad pastumtumėte",
+    "pg_alert_timeout_end": "Baigta pasibaigus skirtajam laikui, o ne pagal prognozę",
+    "pg_alert_indefinite": "Veiktų neribotą laiką",
+    "task_pg_history": "Testuoti su istorija",
+    "task_pg_sweep": "Optimizuoti",
+    "task_reprocess": "Pakartotinis apdorojimas",
+    "task_ml_training": "Mokymasis",
+    "eta_secs": "liko ~{n} s",
+    "eta_mins": "liko ~{n} min"
   },
   "log": {
     "all_levels": "Visi lygiai"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' naudoja vis daugiau energijos (maždaug +{pct}% per ciklą) - verta patikrinti prietaisą, jei to nesitikėjote.",
     "advisory_poor_health": "'{name}' turi žemą atitikties įvertį - naujausi jo ciklai labai skiriasi arba silpnai atpažįstami. Peržiūrėkite jo ciklus arba įrašykite profilį iš naujo, kad atpažinimas ir laiko įverčiai išliktų tikslūs.",
     "advisory_shape_drift": "'{name}' smarkiai nukrypo nuo pradinės galios kreivės. Prietaiso veikimas laikui bėgant galėjo pasikeisti (pvz., kalkės, nusidėvėjimas). Apsvarstykite galimybę įrašyti šį profilį iš naujo pagal naujausius ciklus.",
-    "advisory_shape_drift_corr": "'{name}' smarkiai nukrypo nuo pradinės galios kreivės (koreliacija {corr}). Prietaiso veikimas laikui bėgant galėjo pasikeisti (pvz., kalkės, nusidėvėjimas). Apsvarstykite galimybę įrašyti šį profilį iš naujo pagal naujausius ciklus."
+    "advisory_shape_drift_corr": "'{name}' smarkiai nukrypo nuo pradinės galios kreivės (koreliacija {corr}). Prietaiso veikimas laikui bėgant galėjo pasikeisti (pvz., kalkės, nusidėvėjimas). Apsvarstykite galimybę įrašyti šį profilį iš naujo pagal naujausius ciklus.",
+    "pg_no_alerts": "Šiame paleidime problemų neaptikta.",
+    "pg_override_active": "Naudojami jūsų redaguoti nustatymai, palyginti su dabartiniais",
+    "pg_history_intro": "Iš naujo paleiskite savo naujausius ciklus per tikrą detektorių ir atitikimo variklį. Pirmiausia redaguokite aptikimo nustatymą režime Simuliuoti, kad čia pamatytumėte prieš/po palyginimą.",
+    "pg_history_empty": "Paspauskite Vykdyti, kad iš naujo paleistumėte savo ciklus.",
+    "pg_history_summary": "{detected}/{total} aptikta · {correct} teisingai suderinta",
+    "pg_sweep_no_metric": "Nepakanka duomenų šiam tikslui įvertinti.",
+    "pg_sweep_intro2": "Raskite nustatymą, kuris geriausiai atitinka tikslą jūsų naujausiuose cikluose. Niekas nepasikeis, kol jo nepritaikysite.",
+    "pg_running_history": "Atkuriami jūsų ciklai…",
+    "pg_running_sweep": "Tikrinamos reikšmės visuose jūsų cikluose…",
+    "pg_row_load_hint": "Įkelti šį ciklą į aukščiau esantį grafiką",
+    "pg_history_intro2": "Atkurkite naujausius ciklus per tikrąjį detektorių ir programų derinimo modulį su aukščiau nurodytais nustatymais. Spustelėkite bet kurią eilutę, kad įkeltumėte tą ciklą į grafiką; pakeiskite nustatymą, kad pamatytumėte palyginimą prieš ir po.",
+    "pg_simulating": "Simuliuojamas ciklas…",
+    "pg_canvas_empty2": "Pasirinkite ciklą aukščiau ir paspauskite Vykdyti, kad jį simuliuotumėte. Tada užveskite žymeklį, kad nuskaitytumėte reikšmes, slinkite, kad priartintumėte, ir vilkite, kad pastumtumėte.",
+    "pg_apply_settings_confirm": "Ar išsaugoti šiuos {n} nustatymus šiame įrenginyje? {list}"
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1130,6 +1206,22 @@
     "peak_rate_threshold": {
       "doc": "Kai ciklas prasideda ir dabartinė kaina už kWh yra lygi šiai reikšmei ar didesnė, prie paleidimo pranešimo pridedamas piko tarifo patarimas. 0 arba tuščia išjungia patarimą.",
       "label": "Piko tarifo slenkstis (už kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Formos atitikties tolerancija",
+      "doc": "Kiek derinimo modulis gali laike iškraipyti ciklą, kad jis atitiktų išsaugotos programos formą. Didesnė reikšmė leidžia didesnį greičio kitimą; per didelė gali priskirti ne tą programą."
+    },
+    "corr_weight": {
+      "label": "Formos ir lygio svoris",
+      "doc": "Pusiausvyra tarp kreivės formos ir absoliučiojo galios lygio vertinant atitiktį. Didesnė reikšmė teikia pirmenybę formai; mažesnė, galios lygio atitikimui."
+    },
+    "duration_weight": {
+      "label": "Trukmės svoris",
+      "doc": "Kaip stipriai teikiama pirmenybė programai, kurios tipinė trukmė atitinka šį ciklą."
+    },
+    "energy_weight": {
+      "label": "Energijos svoris",
+      "doc": "Kaip stipriai teikiama pirmenybė programai, kurios tipinės energijos sąnaudos atitinka šį ciklą."
     }
   },
   "setting_group": {
@@ -1439,7 +1531,13 @@
     "off_delay": "Kiek sekundžių žemos galios prieš baigiantis ciklui",
     "start_duration_threshold": "Sekundės virš slenksčio startui patvirtinti",
     "start_threshold_w": "Mažiausia galia (W), kad būtų skaičiuojama kaip prasidėjęs",
-    "stop_threshold_w": "Žemiau šios ribos aparatas laikomas išjungtu"
+    "stop_threshold_w": "Žemiau šios ribos aparatas laikomas išjungtu",
+    "dtw_bandwidth": "Kiek laiko iškraipymo leidžia formos atitiktis",
+    "corr_weight": "Kreivės formos ir galios lygio svoris atitikime",
+    "duration_weight": "Kiek trukmės sutapimas veikia atitiktį",
+    "energy_weight": "Kiek energijos sutapimas veikia atitiktį",
+    "profile_match_min_duration_ratio": "Trumpiausias ciklas (palyginti su profiliu), kuriam dar leidžiama atitikti",
+    "profile_match_max_duration_ratio": "Ilgiausias ciklas (palyginti su profiliu), kuriam dar leidžiama atitikti"
   },
   "col": {
     "profile_tip": "Atitikusios programos pavadinimas. Nepažymėta reiškia, kad ciklo pabaigoje neatitiko joks profilis.",
@@ -1461,5 +1559,18 @@
     "score": "balas {pct}%",
     "duration_cv": "trukmės CV {pct}%",
     "avg_confidence": "vid. pasitikėjimas {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Detektorius atpažino, kad ciklas prasidėjo.",
+    "match_commit": "Atitikimo modulis pasirinko programą pakankamai užtikrintai.",
+    "match_changed": "Pirmaujanti programa pasikeitė, kai buvo matoma daugiau ciklo.",
+    "match_ambiguous": "Dvi programos surinko panašius rezultatus, todėl atitiktis buvo neaiški.",
+    "unmatched": "Nė viena išsaugota programa netiko šiam ciklui.",
+    "notify_start": "Būtų išsiųstas pradžios pranešimas.",
+    "notify_pre_complete": "Būtų išsiųstas beveik baigto ciklo pranešimas.",
+    "notify_finish": "Būtų išsiųstas pabaigos pranešimas.",
+    "notify_milestone": "Būtų išsiųstas svarbaus etapo pranešimas.",
+    "notify_held": "Pranešimas buvo sulaikytas dėl tylos valandų.",
+    "finished": "Ciklas pasiekė galutinę būseną ir baigėsi."
   }
 }

@@ -1,38 +1,20 @@
 /**
- * Playground tab tests — single-canvas replay + simulation UI.
+ * Playground tab tests — unified workbench.
  *
- * Covers: cycle/profile selectors, replay controls (play/stop/load, speed slider),
- * main canvas, state strip, parameter inputs, simulation button, and parameter
- * sweep (controls + chart canvas after a sweep run).
+ * The interactive graph + shared detection/matching settings are ALWAYS present;
+ * "Test on history" and "Optimize" live in a bottom "Across your cycles" drawer
+ * (sub-tabs, not full-page modes) and drive the same graph in place. Every view
+ * runs the real backend WS commands — there is no client-side detection copy.
  */
 
 import { test, expect } from '@playwright/test';
 import { bootPanel, clickTab, assertWsCalled } from '../helpers/panel';
 
-const MOCK_RUN_RESULT = {
-  results: [
-    {
-      cycle_id: 'cyc-001',
-      profile_name: 'Cotton 40°C',
-      outcome: { detected: true, match_profile: 'Cotton 40°C', match_correct: true, ambiguous: false },
-      events: [],
-    },
-  ],
-  summary: {
-    cycles: 1, requested: 1, concurrency: 3,
-    detected: 1, missed: 0, false_end: 0,
-    match_correct: 1, match_wrong: 0, unmatched: 0,
-    skipped_ids: [],
-  },
-};
-
-const PG_WS_CMD = 'ha_washdata/run_playground_simulation';
-
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
-  await bootPanel(page, {
-    [PG_WS_CMD]: MOCK_RUN_RESULT,
-  });
+  // The playground WS commands (and get_cycle_power_data) have sensible defaults
+  // in helpers/ws-handlers.ts, so no per-test overrides are needed.
+  await bootPanel(page, {});
 });
 
 // ─── Basic rendering ─────────────────────────────────────────────────────────
@@ -43,125 +25,129 @@ test('playground tab renders without errors', async ({ page }) => {
   await expect(body).toBeVisible({ timeout: 8_000 });
 });
 
-test('playground tab fetches cycles for the selector', async ({ page }) => {
+test('playground tab fetches cycles and profiles', async ({ page }) => {
   await clickTab(page, 'playground');
   await assertWsCalled(page, 'ha_washdata/get_device_cycles');
-});
-
-test('playground tab fetches profiles for comparison', async ({ page }) => {
-  await clickTab(page, 'playground');
   await assertWsCalled(page, 'ha_washdata/get_profiles');
 });
 
-// ─── Cycle and profile selectors ─────────────────────────────────────────────
+// ─── Persistent workbench: graph + Run/Cancel + settings ─────────────────────
 
-test('cycle selector exists and has options', async ({ page }) => {
+test('workbench: cycle/profile selectors, Run control, canvas and strip present', async ({ page }) => {
   await clickTab(page, 'playground');
-  const cycSel = page.locator('#wd-pg-cyc-sel');
-  await expect(cycSel).toBeVisible({ timeout: 8_000 });
-  // After cycles load the selector is populated with cycle IDs as option values
-  const firstCycleOpt = cycSel.locator('option[value]:not([value=""])').first();
-  await expect(firstCycleOpt).toBeAttached({ timeout: 8_000 });
+  await expect(page.locator('#wd-pg-cyc-sel')).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('#wd-pg-prof-sel')).toBeVisible();
+  await expect(page.locator('button[data-action="pg-run"]')).toBeVisible();
+  await expect(page.locator('canvas#wd-pg-canvas')).toBeVisible();
+  await expect(page.locator('#wd-pg-strip')).toBeVisible();
+  // The removed JS-replay controls must be gone.
+  await expect(page.locator('button[data-action="pg-play"]')).toHaveCount(0);
+  await expect(page.locator('#wd-pg-dur')).toHaveCount(0);
 });
 
-test('profile selector exists with auto-detect option', async ({ page }) => {
+test('workbench: Run calls the faithful backend sim', async ({ page }) => {
   await clickTab(page, 'playground');
-  const profSel = page.locator('#wd-pg-prof-sel');
-  await expect(profSel).toBeVisible({ timeout: 8_000 });
-  // First option should be Auto-Detect (empty value)
-  await expect(profSel.locator('option').first()).toBeAttached({ timeout: 5_000 });
-});
-
-// ─── Replay controls ─────────────────────────────────────────────────────────
-
-test('replay speed slider exists', async ({ page }) => {
-  await clickTab(page, 'playground');
-  await expect(page.locator('#wd-pg-dur')).toBeVisible({ timeout: 8_000 });
-});
-
-test('play stop and load buttons are present', async ({ page }) => {
-  await clickTab(page, 'playground');
-  await expect(page.locator('button[data-action="pg-play"]')).toBeVisible({ timeout: 8_000 });
-  await expect(page.locator('button[data-action="pg-stop"]')).toBeVisible({ timeout: 5_000 });
-  await expect(page.locator('button[data-action="pg-load"]')).toBeVisible({ timeout: 5_000 });
-});
-
-// ─── Canvas ──────────────────────────────────────────────────────────────────
-
-test('replay canvas is present and visible', async ({ page }) => {
-  await clickTab(page, 'playground');
-  await expect(page.locator('canvas#wd-pg-canvas')).toBeVisible({ timeout: 8_000 });
-});
-
-// ─── State strip ─────────────────────────────────────────────────────────────
-
-test('state strip is present', async ({ page }) => {
-  await clickTab(page, 'playground');
-  await expect(page.locator('#wd-pg-strip')).toBeVisible({ timeout: 8_000 });
-});
-
-// ─── Parameter inputs ────────────────────────────────────────────────────────
-
-test('parameter inputs exist', async ({ page }) => {
-  await clickTab(page, 'playground');
-  const paramInputs = page.locator('.wd-pg-param-inp[data-pgkey]');
-  await expect(paramInputs.first()).toBeVisible({ timeout: 8_000 });
-});
-
-test('reset params button exists', async ({ page }) => {
-  await clickTab(page, 'playground');
-  await expect(page.locator('button[data-action="pg-reset-params"]')).toBeVisible({ timeout: 8_000 });
-});
-
-// ─── Simulation ──────────────────────────────────────────────────────────────
-
-test('run simulation button exists', async ({ page }) => {
-  await clickTab(page, 'playground');
-  await expect(page.locator('button[data-action="pg-run-sim"]')).toBeVisible({ timeout: 8_000 });
-});
-
-test('clicking run-sim calls run_playground_simulation WS command', async ({ page }) => {
-  await clickTab(page, 'playground');
-  // Wait for cycles to load so run-sim has cycle IDs to pass to the backend
   const firstCycleOpt = page.locator('#wd-pg-cyc-sel option[value]:not([value=""])').first();
   await expect(firstCycleOpt).toBeAttached({ timeout: 8_000 });
-  const runSimBtn = page.locator('button[data-action="pg-run-sim"]');
-  await expect(runSimBtn).toBeVisible({ timeout: 5_000 });
-  await runSimBtn.click();
-  await assertWsCalled(page, PG_WS_CMD);
+  await page.locator('button[data-action="pg-run"]').click();
+  await assertWsCalled(page, 'ha_washdata/run_playground_cycle_detail');
 });
 
-// ─── Parameter sweep ─────────────────────────────────────────────────────────
-
-test('sweep param select and range inputs exist', async ({ page }) => {
+test('workbench: model time-left readout and phase field are present', async ({ page }) => {
   await clickTab(page, 'playground');
+  await page.locator('button[data-action="pg-run"]').click();
+  // The strip carries the model-estimated remaining time + live phase (not a
+  // static countdown).
+  await expect(page.locator('#wd-pg-rem')).toBeAttached({ timeout: 8_000 });
+  await expect(page.locator('#wd-pg-phase')).toBeAttached();
+});
+
+test('workbench: outcome + alerts card appears after a sim run', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await page.locator('button[data-action="pg-run"]').click();
+  await expect(page.locator('.wd-pg-alerts-card')).toBeVisible({ timeout: 8_000 });
+});
+
+test('workbench: detection + matching param inputs and reset present', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await expect(page.locator('.wd-pg-param-inp[data-pgkey]').first()).toBeVisible({ timeout: 8_000 });
+  // The matching group exposes only user-configurable matching options.
+  await expect(page.locator('.wd-pg-param-inp[data-pgkey="profile_match_min_duration_ratio"]')).toBeAttached();
+  await expect(page.locator('.wd-pg-param-inp[data-pgkey="profile_match_max_duration_ratio"]')).toBeAttached();
+  await expect(page.locator('button[data-action="pg-reset-params"]')).toBeVisible();
+});
+
+test('workbench: editing a param reveals Save-to-settings and it persists', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const inp = page.locator('.wd-pg-param-inp[data-pgkey="off_delay"]');
+  await expect(inp).toBeVisible({ timeout: 8_000 });
+  await inp.fill('222');
+  const saveBtn = page.locator('button[data-action="pg-apply-settings"]');
+  await expect(saveBtn).toBeVisible({ timeout: 8_000 });
+  page.once('dialog', d => d.accept());   // confirm()
+  await saveBtn.click();
+  await assertWsCalled(page, 'ha_washdata/set_options');
+});
+
+// ─── "Across your cycles" drawer: History + Optimize sub-tabs ────────────────
+
+test('drawer: History and Optimize sub-tabs are present; History is default', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const drawer = page.locator('.wd-pg-drawer');
+  await expect(drawer).toBeVisible({ timeout: 8_000 });
+  const tabs = drawer.locator('.wd-pg-subtabs');
+  await expect(tabs.locator('button[data-subtab="history"]')).toHaveClass(/active/);
+  await expect(tabs.locator('button[data-subtab="sweep"]')).toBeVisible();
+  // The old 3-way mode switch is gone.
+  await expect(page.locator('.wd-pg-modeswitch')).toHaveCount(0);
+});
+
+test('drawer/history: Run starts a task and shows the result table', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const runBtn = page.locator('button[data-action="pg-run-history"]');
+  await expect(runBtn).toBeVisible({ timeout: 8_000 });
+  await runBtn.click();
+  // Kicks off a detached, registry-tracked task (not a blocking call), then the
+  // completed result loads via the task registry.
+  await assertWsCalled(page, 'ha_washdata/start_playground_history');
+  await expect(page.locator('table.wd-pg-htable')).toBeVisible({ timeout: 8_000 });
+});
+
+test('drawer/history: clicking a row loads that cycle into the graph', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await page.locator('button[data-action="pg-run-history"]').click();
+  const firstRow = page.locator('tr.wd-pg-hrow').first();
+  await expect(firstRow).toBeVisible({ timeout: 8_000 });
+  await firstRow.click();
+  // Drilling a row re-runs the single-cycle sim (drives the graph above) rather
+  // than switching to a separate page.
+  await assertWsCalled(page, 'ha_washdata/run_playground_cycle_detail');
+  await expect(page.locator('.wd-pg-drawer')).toBeVisible();
+});
+
+test('drawer/optimize: param + objective selectors and run present', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await page.locator('.wd-pg-subtabs button[data-subtab="sweep"]').click();
   await expect(page.locator('#wd-pg-sw-param')).toBeVisible({ timeout: 8_000 });
-  await expect(page.locator('#wd-pg-sw-from')).toBeVisible({ timeout: 5_000 });
-  await expect(page.locator('#wd-pg-sw-to')).toBeVisible({ timeout: 5_000 });
-  await expect(page.locator('#wd-pg-sw-steps')).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator('#wd-pg-sw-obj')).toBeVisible();
+  await expect(page.locator('button[data-action="pg-sweep-run2"]')).toBeVisible();
 });
 
-test('run sweep button exists', async ({ page }) => {
+test('drawer/optimize: running a 1D sweep starts a sweep task', async ({ page }) => {
   await clickTab(page, 'playground');
-  await expect(page.locator('button[data-action="pg-sweep-run"]')).toBeVisible({ timeout: 8_000 });
+  await page.locator('.wd-pg-subtabs button[data-subtab="sweep"]').click();
+  await page.locator('#wd-pg-sw-from').fill('60');
+  await page.locator('#wd-pg-sw-to').fill('240');
+  await page.locator('#wd-pg-sw-steps').fill('3');
+  await page.locator('button[data-action="pg-sweep-run2"]').click();
+  await assertWsCalled(page, 'ha_washdata/start_playground_sweep');
 });
 
-test('sweep chart canvas appears after running a parameter sweep', async ({ page }) => {
+test('drawer/optimize: 2D toggle reveals the second-parameter selector', async ({ page }) => {
   await clickTab(page, 'playground');
-  // Wait for cycles to load before triggering sweep
-  const firstCycleOpt = page.locator('#wd-pg-cyc-sel option[value]:not([value=""])').first();
-  await expect(firstCycleOpt).toBeAttached({ timeout: 8_000 });
-  // Fill in sweep range — input events update internal _pgSweepFrom/_pgSweepTo state
-  await page.locator('#wd-pg-sw-from').fill('10');
-  await page.locator('#wd-pg-sw-to').fill('100');
-  // Changing steps triggers a re-render that picks up the new from/to values,
-  // setting swCanRun=true and removing the disabled attribute from the sweep button
-  await page.locator('#wd-pg-sw-steps').fill('2');
-  const sweepBtn = page.locator('button[data-action="pg-sweep-run"]');
-  await expect(sweepBtn).not.toBeDisabled({ timeout: 3_000 });
-  await sweepBtn.click();
-  // canvas#wd-pg-sweep-chart is rendered inside swBestHtml once sweepResults.length >= 2
-  await expect(page.locator('canvas#wd-pg-sweep-chart')).toBeVisible({ timeout: 8_000 });
+  await page.locator('.wd-pg-subtabs button[data-subtab="sweep"]').click();
+  await page.locator('input[data-action="pg-sweep-2d"]').click();
+  await expect(page.locator('#wd-pg-sw-paramy')).toBeVisible({ timeout: 5_000 });
 });
 
 // ─── Mobile ──────────────────────────────────────────────────────────────────

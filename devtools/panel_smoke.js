@@ -98,6 +98,61 @@ check('_htmlMlLearnedSection', () => el._htmlMlLearnedSection(el._mlTrainingStat
 check('_htmlMlLearnedSection (empty)', () => { const s = el._mlTrainingStatus; el._mlTrainingStatus = { ...s, on_device_models: {} }; const h = el._htmlMlLearnedSection(el._mlTrainingStatus); el._mlTrainingStatus = s; return h; });
 check('_htmlMatchingTuningCard', () => el._htmlMatchingTuningCard());
 check('_htmlMatchingTuningCard (default)', () => { const s = el._mlTrainingStatus; el._mlTrainingStatus = { ...s, matching: { ...s.matching, tuned: null, active: 'default' } }; const h = el._htmlMatchingTuningCard(); el._mlTrainingStatus = s; return h; });
+// Playground (unified workbench + drawer, with and without backend data)
+check('_htmlPlayground (workbench, empty)', () => { el._pgAnalysisTab = 'history'; return el._htmlPlayground(); });
+check('_htmlPlayground (workbench, with detail)', () => {
+  el._pgAnalysisTab = 'history';
+  el._pgCycleId = 'c1';
+  el._pgPowerPts = [{ t: 0, w: 5 }, { t: 500, w: 900 }, { t: 1000, w: 3 }];
+  el._pgDetail = {
+    cycle_id: 'c1', label: 'Cotton 60', duration_s: 1000,
+    series: [
+      { t: 0, power: 5, energy_wh: 0, state: 'starting', progress: null, remaining_s: null, phase: null, confidence: null, matched_profile: null },
+      { t: 300, power: 900, energy_wh: 80, state: 'running', progress: 30, remaining_s: 700, phase: 'Wash', confidence: 0.72, matched_profile: 'Cotton 60', projected_energy_wh: 500, projected_cost: 3 },
+      { t: 1000, power: 3, energy_wh: 500, state: 'ending', progress: 96, remaining_s: 40, phase: 'Spin', confidence: 0.8, matched_profile: 'Cotton 60', projected_energy_wh: 505, projected_cost: 3 },
+    ],
+    events: [
+      { t: 30, type: 'detected', detail: 'cycle detected', severity: 'info' },
+      { t: 200, type: 'match_commit', detail: 'Cotton 60 (0.7)', severity: 'info' },
+      { t: 900, type: 'notify_pre_complete', detail: 'almost done', severity: 'info' },
+      { t: 1000, type: 'finished', detail: 'reason=smart', severity: 'info' },
+    ],
+    alerts: [{ code: 'overrun', severity: 'warn', detail: 'Ran 110% of typical.' }],
+    outcome: { detected: true, detected_count: 1, termination_reason: 'smart', status: 'completed', final_duration_s: 1000, matched_profile: 'Cotton 60', match_correct: true, overrun_ratio: 1.1, projected_energy_wh: 505, projected_cost: 3 },
+  };
+  const h = el._htmlPlayground(); el._pgUpdateStripAt(500); el._pgUpdateStripAt(null); return h;
+});
+check('_htmlPlayground (drawer: history)', () => {
+  el._pgAnalysisTab = 'history';
+  el._pgHistory = {
+    rows: [
+      { cycle_id: 'c1', label: 'Cotton 60', detected: true, detected_count: 1, matched_profile: 'Cotton 60', match_correct: true, confidence: 0.8, termination_reason: 'smart', duration_s: 1000, expected_s: 1000, overrun_ratio: 1.0, alerts: [] },
+      { cycle_id: 'c2', label: 'Cotton 40', detected: true, detected_count: 1, matched_profile: 'Cotton 60', match_correct: false, confidence: 0.5, termination_reason: 'timeout', duration_s: 1400, expected_s: 1010, overrun_ratio: 1.38, alerts: ['overrun'] },
+    ],
+    summary: { cycles: 2, detected: 2, labelled: 2, match_correct: 1, match_wrong: 1, unmatched: 0, false_end: 0 },
+    baseline_rows: [
+      { cycle_id: 'c1', label: 'Cotton 60', match_correct: true, termination_reason: 'smart', duration_s: 1000 },
+      { cycle_id: 'c2', label: 'Cotton 40', match_correct: false, termination_reason: 'timeout', duration_s: 1400 },
+    ],
+    baseline_summary: { cycles: 2, detected: 2, labelled: 2, match_correct: 1 },
+    diff: { newly_correct: [], regressed: [], end_timing_changed: ['c2'] },
+  };
+  return el._htmlPlayground();
+});
+check('_htmlPlayground (drawer: sweep 1D)', () => {
+  el._pgAnalysisTab = 'sweep'; el._pgSweep2D = false;
+  el._pgSweepNew = { param: 'off_delay', objective: 'match_accuracy', current_value: 180, best_value: 120, best_metric: 0.9,
+    points: [{ value: 120, metric: 0.9, summary: {} }, { value: 180, metric: 0.8, summary: {} }, { value: 240, metric: 0.7, summary: {} }] };
+  return el._htmlPlayground();
+});
+check('_htmlPlayground (drawer: sweep 2D heatmap)', () => {
+  el._pgAnalysisTab = 'sweep'; el._pgSweep2D = true;
+  el._pgSweepNew = { param_x: 'off_delay', param_y: 'min_off_gap', objective: 'match_accuracy',
+    x_values: [120, 180], y_values: [1999, 3600], grid: [[0.8, 0.9], [0.7, 0.85]], best: { x: 180, y: 1999, metric: 0.9 }, current: { x: 180, y: 1999 } };
+  return el._htmlPlayground();
+});
+el._pgAnalysisTab = 'history';
+
 check('_buildHtml', () => el._buildHtml());
 
 // Modals

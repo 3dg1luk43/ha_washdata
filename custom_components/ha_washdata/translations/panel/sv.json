@@ -145,7 +145,10 @@
     "use": "Använd",
     "wipe_all": "Rensa all data",
     "delete_selected": "Radera valda ({n})",
-    "group_suggest": "Grupp {n}: {members}"
+    "group_suggest": "Grupp {n}: {members}",
+    "pg_apply_best": "Använd bästa",
+    "pg_apply_to_settings": "Spara till inställningar",
+    "pg_apply_to_settings_tip": "Kopiera värdena du redigerade här till den här enhetens aktiva inställningar"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Växla Home Assistant-sidofältet",
     "tools_and_data": "Verktyg och data",
     "wipe_history": "Rensa historik",
-    "recommendations": "Rekommendationer ({n})"
+    "recommendations": "Rekommendationer ({n})",
+    "pg_detection_params": "Detekteringsinställningar",
+    "pg_timeline": "Händelsetidslinje",
+    "pg_outcome": "Simuleringsresultat",
+    "pg_across_cycles": "Över dina cykler"
   },
   "health": {
     "fair": "Acceptabel profilkvalitet",
@@ -458,7 +465,62 @@
     "n_shown": ", {n} visas",
     "cycles_title": "Cykler ({n})",
     "pg_detecting": "Upptäcker",
-    "pg_best_marker": "Bästa: {v}"
+    "pg_best_marker": "Bästa: {v}",
+    "pg_time_left_model": "Tid kvar (modell)",
+    "pg_time_left_model_tip": "Modellberäknad återstående tid (fasberäknare + ML-blandning), inte en statisk nedräkning",
+    "phase": "Fas",
+    "pg_mode_simulate": "Simulera",
+    "pg_mode_history": "Testa på historik",
+    "pg_mode_sweep": "Svep",
+    "pg_ev_detected": "Upptäckt",
+    "pg_ev_match": "Matchning bekräftad",
+    "pg_ev_match_changed": "Matchning ändrad",
+    "pg_ev_ambiguous": "Tvetydig",
+    "pg_ev_unmatched": "Ingen matchning",
+    "pg_ev_notify_start": "Startavisering",
+    "pg_ev_notify_pre": "Nästan-klar-avisering",
+    "pg_ev_notify_finish": "Slutavisering",
+    "pg_ev_notify_milestone": "Milstolpsavisering",
+    "pg_ev_notify_held": "Avisering kvarhållen (tystnadstimmar)",
+    "pg_ev_finished": "Slutförd",
+    "pg_ended": "Avslutad",
+    "pg_proj_energy": "Ber. energi",
+    "pg_alert_overrun": "För lång",
+    "pg_alert_underrun": "För kort",
+    "pg_alert_did_not_finish": "Slutfördes inte",
+    "pg_alert_false_end": "Uppdelad i flera cykler",
+    "pg_alert_unmatched": "Ingen matchning",
+    "pg_alert_ambiguous": "Tvetydig matchning",
+    "pg_alert_energy": "Energianomali",
+    "pg_newly_correct": "nyligen korrekt",
+    "pg_regressed": "försämrad",
+    "pg_end_timing_changed": "sluttid ändrad",
+    "pg_vs_current": "mot nuvarande",
+    "pg_fixed": "åtgärdad",
+    "pg_broke": "trasig",
+    "pg_sweep_param": "Parameter",
+    "pg_objective": "Mål",
+    "pg_steps": "Steg",
+    "pg_sweep_2d": "2D-värmekarta",
+    "pg_sweep_param_y": "2:a parametern",
+    "pg_obj_match": "Matchningsnoggrannhet",
+    "pg_obj_endtiming": "Sluttidsnoggrannhet",
+    "pg_obj_falseend": "Falskt-slut-andel",
+    "pg_obj_overrun": "Varaktighetsavvikelse",
+    "pg_obj_ambiguity": "Tvetydighetsandel",
+    "pg_best_combo": "bästa kombinationen",
+    "pg_mode_optimize": "Optimera",
+    "pg_group_matching": "Programmatchning",
+    "pg_zoom_hint": "dubbelklicka för att återställa zoomen",
+    "aria_playground_chart2": "Interaktiv effektgraf för cykeln: hovra för att avläsa tid/effekt, skrolla för att zooma, dra för att panorera",
+    "pg_alert_timeout_end": "Avslutad genom timeout, inte genom förutsägelse",
+    "pg_alert_indefinite": "Skulle köra i all oändlighet",
+    "task_pg_history": "Testa på historik",
+    "task_pg_sweep": "Optimera",
+    "task_reprocess": "Bearbetar igen",
+    "task_ml_training": "Inlärning",
+    "eta_secs": "~{n} s kvar",
+    "eta_mins": "~{n} min kvar"
   },
   "log": {
     "all_levels": "Alla nivåer"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' drar gradvis mer energi (cirka +{pct}% per cykel) - värt att kontrollera apparaten om det är oväntat.",
     "advisory_poor_health": "'{name}' har ett lågt passningsvärde - dess senaste cykler varierar mycket eller matchar svagt. Granska dess cykler eller spela in profilen på nytt så att matchning och tidsuppskattningar förblir korrekta.",
     "advisory_shape_drift": "'{name}' har drivit iväg avsevärt från sin ursprungliga effektkurva. Apparaten kan ha förändrat sitt beteende över tid (t.ex. kalkavlagringar, slitage). Överväg att spela in profilen på nytt med aktuella cykler.",
-    "advisory_shape_drift_corr": "'{name}' har drivit iväg avsevärt från sin ursprungliga effektkurva (korrelation {corr}). Apparaten kan ha förändrat sitt beteende över tid (t.ex. kalkavlagringar, slitage). Överväg att spela in profilen på nytt med aktuella cykler."
+    "advisory_shape_drift_corr": "'{name}' har drivit iväg avsevärt från sin ursprungliga effektkurva (korrelation {corr}). Apparaten kan ha förändrat sitt beteende över tid (t.ex. kalkavlagringar, slitage). Överväg att spela in profilen på nytt med aktuella cykler.",
+    "pg_no_alerts": "Inga problem upptäcktes i den här körningen.",
+    "pg_override_active": "Använder dina redigerade inställningar mot de nuvarande",
+    "pg_history_intro": "Spela upp dina senaste cykler genom den riktiga detekteringen och matchningen. Redigera en detekteringsinställning i Simulera först för att se en före/efter-jämförelse här.",
+    "pg_history_empty": "Tryck på Kör för att spela upp dina cykler igen.",
+    "pg_history_summary": "{detected}/{total} upptäckta · {correct} matchade korrekt",
+    "pg_sweep_no_metric": "Inte tillräckligt med data för att poängsätta det här målet.",
+    "pg_sweep_intro2": "Hitta inställningen som bäst uppfyller ett mål över dina senaste cykler. Ingenting ändras förrän du tillämpar det.",
+    "pg_running_history": "Spelar upp dina cykler igen…",
+    "pg_running_sweep": "Testar värden över dina cykler…",
+    "pg_row_load_hint": "Ladda den här cykeln i grafen ovanför",
+    "pg_history_intro2": "Spela upp dina senaste cykler genom den riktiga detektorn och matchningen med inställningarna ovan. Klicka på en rad för att ladda den cykeln i grafen; ändra en inställning för att se en före/efter-jämförelse.",
+    "pg_simulating": "Simulerar cykel…",
+    "pg_canvas_empty2": "Välj en cykel ovan och tryck på Kör för att simulera den. Hovra sedan för att avläsa värden, skrolla för att zooma och dra för att panorera.",
+    "pg_apply_settings_confirm": "Spara dessa {n} inställning(ar) till den här enheten? {list}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plötsligt fall som tolkas som omedelbart slut",
@@ -718,7 +794,13 @@
     "off_delay": "Sekunder med låg effekt innan cykeln avslutas",
     "start_duration_threshold": "Sekunder över tröskeln för att bekräfta start",
     "start_threshold_w": "Minsta antal watt för att räknas som startad",
-    "stop_threshold_w": "Under detta räknas maskinen som avstängd"
+    "stop_threshold_w": "Under detta räknas maskinen som avstängd",
+    "dtw_bandwidth": "Hur mycket tidsförvrängning formmatchningen tillåter",
+    "corr_weight": "Vikt på kurvform kontra effektnivå i matchningen",
+    "duration_weight": "Hur mycket överensstämmelse i körtid påverkar matchningen",
+    "energy_weight": "Hur mycket överensstämmelse i energiförbrukning påverkar matchningen",
+    "profile_match_min_duration_ratio": "Kortaste körning (jämfört med profilen) som fortfarande får matcha",
+    "profile_match_max_duration_ratio": "Längsta körning (jämfört med profilen) som fortfarande får matcha"
   },
   "phase_desc": {
     "anti_crease": "Enstaka korta tumlar efter färdigställandet för att förhindra skrynklor i tvätten.",
@@ -1141,6 +1223,22 @@
     "peak_rate_threshold": {
       "doc": "När en cykel startar och det aktuella priset per kWh är lika med eller över detta värde läggs ett högtaxetips till i startnotisen. 0 eller tomt inaktiverar tipset.",
       "label": "Högtaxetröskel (per kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Tolerans för formmatchning",
+      "doc": "Hur mycket matchningen får tidsförvränga en cykel för att passa formen på ett sparat program. Högre tillåter mer hastighetsvariation; för högt riskerar att matcha fel program."
+    },
+    "corr_weight": {
+      "label": "Vikt: form kontra nivå",
+      "doc": "Balans mellan kurvform och absolut effektnivå när en matchning bedöms. Högre gynnar formen; lägre gynnar att träffa effektnivån."
+    },
+    "duration_weight": {
+      "label": "Vikt på varaktighet",
+      "doc": "Hur starkt ett program vars typiska körtid stämmer med den här cykeln föredras."
+    },
+    "energy_weight": {
+      "label": "Vikt på energi",
+      "doc": "Hur starkt ett program vars typiska energiförbrukning stämmer med den här cykeln föredras."
     }
   },
   "setting_group": {
@@ -1461,5 +1559,18 @@
     "score": "poäng {pct}%",
     "duration_cv": "varaktighets-CV {pct}%",
     "avg_confidence": "snitt-konfidens {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Detekteringen upptäckte att en cykel hade startat.",
+    "match_commit": "Tilldelningen valde ett program med tillräcklig säkerhet.",
+    "match_changed": "Det ledande programmet ändrades i takt med att mer av cykeln syntes.",
+    "match_ambiguous": "Två program fick poäng nära varandra, så tilldelningen var osäker.",
+    "unmatched": "Inget sparat program passade denna cykel.",
+    "notify_start": "En startavisering skulle skickas.",
+    "notify_pre_complete": "En nästan-klar-avisering skulle skickas.",
+    "notify_finish": "En klaravisering skulle skickas.",
+    "notify_milestone": "En milstolpsavisering skulle skickas.",
+    "notify_held": "En avisering hölls tillbaka på grund av tysta timmar.",
+    "finished": "Cykeln nådde ett sluttillstånd och avslutades."
   }
 }

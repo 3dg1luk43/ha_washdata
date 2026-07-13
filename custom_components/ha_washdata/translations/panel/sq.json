@@ -145,7 +145,10 @@
     "use": "Përdor",
     "wipe_all": "Fshi të gjitha të dhënat",
     "delete_selected": "Fshi të zgjedhurat ({n})",
-    "group_suggest": "Grupi {n}: {members}"
+    "group_suggest": "Grupi {n}: {members}",
+    "pg_apply_best": "Zbato më të mirën",
+    "pg_apply_to_settings": "Ruaj te cilësimet",
+    "pg_apply_to_settings_tip": "Kopjo vlerat që redaktove këtu te cilësimet aktive të kësaj pajisjeje"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Ndrysho shiritin anësor të Asistentit në Shtëpi",
     "tools_and_data": "Mjete dhe të dhëna",
     "wipe_history": "Fshi historikun",
-    "recommendations": "Rekomandime ({n})"
+    "recommendations": "Rekomandime ({n})",
+    "pg_detection_params": "Cilësimet e zbulimit",
+    "pg_timeline": "Kronologjia e ngjarjeve",
+    "pg_outcome": "Rezultati i simulimit",
+    "pg_across_cycles": "Në të gjithë ciklet tuaja"
   },
   "health": {
     "fair": "Cilësi e pranueshme e profilit",
@@ -458,7 +465,62 @@
     "n_shown": ", {n} të shfaqura",
     "cycles_title": "Ciklet ({n})",
     "pg_detecting": "Po zbulohet",
-    "pg_best_marker": "Më i miri: {v}"
+    "pg_best_marker": "Më i miri: {v}",
+    "pg_time_left_model": "Koha e mbetur (modeli)",
+    "pg_time_left_model_tip": "Koha e mbetur e vlerësuar nga modeli (vlerësuesi i fazës + përzierje ML), jo një numërim mbrapsht statik",
+    "phase": "Faza",
+    "pg_mode_simulate": "Simulo",
+    "pg_mode_history": "Testo në histori",
+    "pg_mode_sweep": "Skanim",
+    "pg_ev_detected": "U zbulua",
+    "pg_ev_match": "Përputhja u përcaktua",
+    "pg_ev_match_changed": "Përputhja ndryshoi",
+    "pg_ev_ambiguous": "E paqartë",
+    "pg_ev_unmatched": "Pa përputhje",
+    "pg_ev_notify_start": "Njoftim fillimi",
+    "pg_ev_notify_pre": "Njoftim afër përfundimit",
+    "pg_ev_notify_finish": "Njoftim përfundimi",
+    "pg_ev_notify_milestone": "Njoftim etape",
+    "pg_ev_notify_held": "Njoftimi u mbajt (orët e qeta)",
+    "pg_ev_finished": "Përfundoi",
+    "pg_ended": "Mbaroi",
+    "pg_proj_energy": "Energ. e parash.",
+    "pg_alert_overrun": "Zgjati më gjatë",
+    "pg_alert_underrun": "Zgjati më shkurt",
+    "pg_alert_did_not_finish": "Nuk përfundoi",
+    "pg_alert_false_end": "U nda në disa cikle",
+    "pg_alert_unmatched": "Pa përputhje",
+    "pg_alert_ambiguous": "Përputhje e paqartë",
+    "pg_alert_energy": "Anomali energjie",
+    "pg_newly_correct": "tani i saktë",
+    "pg_regressed": "u përkeqësua",
+    "pg_end_timing_changed": "koha e përfundimit ndryshoi",
+    "pg_vs_current": "vs aktuali",
+    "pg_fixed": "u rregullua",
+    "pg_broke": "u prish",
+    "pg_sweep_param": "Parametër",
+    "pg_objective": "Objektivi",
+    "pg_steps": "Hapat",
+    "pg_sweep_2d": "Hartë nxehtësie 2D",
+    "pg_sweep_param_y": "Parametri 2",
+    "pg_obj_match": "Saktësia e përputhjes",
+    "pg_obj_endtiming": "Saktësia e kohës së përfundimit",
+    "pg_obj_falseend": "Shkalla e përfundimeve të rreme",
+    "pg_obj_overrun": "Devijimi i kohëzgjatjes",
+    "pg_obj_ambiguity": "Shkalla e paqartësisë",
+    "pg_best_combo": "kombinimi më i mirë",
+    "pg_mode_optimize": "Optimizo",
+    "pg_group_matching": "Përputhja e programeve",
+    "pg_zoom_hint": "klikoni dy herë për të rivendosur zmadhimin",
+    "aria_playground_chart2": "Grafik interaktiv i fuqisë së ciklit: kaloni kursorin për të lexuar kohën/fuqinë, rrëshqitni për të zmadhuar, tërhiqni për të lëvizur",
+    "pg_alert_timeout_end": "Përfundoi nga skadimi i kohës, jo nga parashikimi",
+    "pg_alert_indefinite": "Do të vazhdonte pafundësisht",
+    "task_pg_history": "Testo në histori",
+    "task_pg_sweep": "Optimizo",
+    "task_reprocess": "Ripërpunim",
+    "task_ml_training": "Mësim",
+    "eta_secs": "edhe ~{n} s",
+    "eta_mins": "edhe ~{n} min"
   },
   "log": {
     "all_levels": "Të gjitha nivelet"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' po konsumon gjithnjë e më shumë energji (rreth +{pct}% për cikël) - ia vlen ta kontrolloni pajisjen nëse kjo është e papritur.",
     "advisory_poor_health": "'{name}' ka një rezultat të ulët përputhjeje - ciklet e tij të fundit ndryshojnë shumë ose përputhen dobët. Rishikoni ciklet e tij ose regjistrojeni sërish profilin që njohja dhe vlerësimet e kohës të mbeten të sakta.",
     "advisory_shape_drift": "'{name}' ka devijuar ndjeshëm nga forma e tij fillestare e fuqisë. Sjellja e pajisjes mund të ketë ndryshuar me kalimin e kohës (p.sh. gëlqerëzim, konsumim). Merrni në konsideratë regjistrimin sërish të këtij profili me ciklet e fundit.",
-    "advisory_shape_drift_corr": "'{name}' ka devijuar ndjeshëm nga forma e tij fillestare e fuqisë (korrelacioni {corr}). Sjellja e pajisjes mund të ketë ndryshuar me kalimin e kohës (p.sh. gëlqerëzim, konsumim). Merrni në konsideratë regjistrimin sërish të këtij profili me ciklet e fundit."
+    "advisory_shape_drift_corr": "'{name}' ka devijuar ndjeshëm nga forma e tij fillestare e fuqisë (korrelacioni {corr}). Sjellja e pajisjes mund të ketë ndryshuar me kalimin e kohës (p.sh. gëlqerëzim, konsumim). Merrni në konsideratë regjistrimin sërish të këtij profili me ciklet e fundit.",
+    "pg_no_alerts": "Nuk u zbuluan probleme në këtë ekzekutim.",
+    "pg_override_active": "Po përdoren cilësimet tuaja të redaktuara kundrejt atyre aktuale",
+    "pg_history_intro": "Riluani ciklet tuaja të fundit përmes zbuluesit dhe përputhësit të vërtetë. Redaktoni fillimisht një cilësim zbulimi te Simulo për të parë këtu një krahasim para/pas.",
+    "pg_history_empty": "Shtypni Ekzekuto për të riluajtur ciklet tuaja.",
+    "pg_history_summary": "{detected}/{total} u zbuluan · {correct} u përputhën saktë",
+    "pg_sweep_no_metric": "Nuk ka mjaftueshëm të dhëna për të vlerësuar këtë objektiv.",
+    "pg_sweep_intro2": "Gjeni cilësimin që përmbush më mirë një objektiv në ciklet tuaja të fundit. Asgjë nuk ndryshon derisa ta zbatoni.",
+    "pg_running_history": "Po riluhen ciklet tuaja…",
+    "pg_running_sweep": "Po testohen vlerat në të gjithë ciklet tuaja…",
+    "pg_row_load_hint": "Ngarko këtë cikël në grafikun më sipër",
+    "pg_history_intro2": "Riluajini ciklet tuaja të fundit përmes detektorit dhe përputhësit real me cilësimet e mësipërme. Klikoni çdo rresht për të ngarkuar atë cikël në grafik; ndryshoni një cilësim për të parë një krahasim para/pas.",
+    "pg_simulating": "Po simulohet cikli…",
+    "pg_canvas_empty2": "Zgjidhni një cikël më sipër dhe shtypni Ekzekuto për ta simuluar. Pastaj kaloni kursorin për të lexuar vlerat, rrëshqitni për të zmadhuar dhe tërhiqni për të lëvizur.",
+    "pg_apply_settings_confirm": "Të ruhen këto {n} cilësime në këtë pajisje? {list}"
   },
   "phase_desc": {
     "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1130,6 +1206,22 @@
     "peak_rate_threshold": {
       "doc": "Kur nis një cikël dhe çmimi aktual për kWh është në këtë vlerë ose mbi të, i shtohet një këshillë për tarifën e pikut njoftimit të nisjes. 0 ose bosh e çaktivizon këshillën.",
       "label": "Pragu i tarifës së pikut (për kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Toleranca e përputhjes së formës",
+      "doc": "Sa mund ta shtrembërojë në kohë përputhësi një cikël që të përshtatet me formën e një programi të ruajtur. Vlera më e lartë toleron më shumë ndryshim shpejtësie; shumë e lartë rrezikon të përputhë programin e gabuar."
+    },
+    "corr_weight": {
+      "label": "Pesha e formës kundrejt nivelit",
+      "doc": "Ekuilibri midis formës së kurbës dhe nivelit absolut të fuqisë gjatë vlerësimit të një përputhjeje. Vlera më e lartë favorizon formën; më e ulta favorizon përputhjen e nivelit të fuqisë."
+    },
+    "duration_weight": {
+      "label": "Pesha e kohëzgjatjes",
+      "doc": "Sa fort preferohet një program, kohëzgjatja tipike e të cilit përputhet me këtë cikël."
+    },
+    "energy_weight": {
+      "label": "Pesha e energjisë",
+      "doc": "Sa fort preferohet një program, konsumi tipik i energjisë i të cilit përputhet me këtë cikël."
     }
   },
   "setting_group": {
@@ -1439,7 +1531,13 @@
     "off_delay": "Sekonda me fuqi të ulët para se të mbarojë cikli",
     "start_duration_threshold": "Sekonda mbi prag për të konfirmuar nisjen",
     "start_threshold_w": "Watt minimalë për t'u llogaritur si nisur",
-    "stop_threshold_w": "Nën këtë, makina llogaritet e fikur"
+    "stop_threshold_w": "Nën këtë, makina llogaritet e fikur",
+    "dtw_bandwidth": "Sa shtrembërim kohor lejon përputhja e formës",
+    "corr_weight": "Pesha e formës së kurbës kundrejt nivelit të fuqisë në përputhje",
+    "duration_weight": "Sa ndikon përkimi i kohëzgjatjes te përputhja",
+    "energy_weight": "Sa ndikon përkimi i energjisë te përputhja",
+    "profile_match_min_duration_ratio": "Cikli më i shkurtër (krahasuar me profilin) që lejohet ende të përputhet",
+    "profile_match_max_duration_ratio": "Cikli më i gjatë (krahasuar me profilin) që lejohet ende të përputhet"
   },
   "col": {
     "profile_tip": "Emri i programit të përputhur. I paetiketuar do të thotë se asnjë profil nuk u përputh në fund të ciklit.",
@@ -1461,5 +1559,18 @@
     "score": "rezultati {pct}%",
     "duration_cv": "CV e kohëzgjatjes {pct}%",
     "avg_confidence": "besueshmëria mesatare {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Zbuluesi njohu që kishte filluar një cikël.",
+    "match_commit": "Përputhësi zgjodhi një program me besueshmëri të mjaftueshme.",
+    "match_changed": "Programi kryesues ndryshoi ndërsa u pa më shumë nga cikli.",
+    "match_ambiguous": "Dy programe morën rezultate të afërta, prandaj përputhja ishte e pasigurt.",
+    "unmatched": "Asnjë program i ruajtur nuk i përshtatej këtij cikli.",
+    "notify_start": "Do të dërgohej një njoftim fillimi.",
+    "notify_pre_complete": "Do të dërgohej një njoftim «pothuajse gati».",
+    "notify_finish": "Do të dërgohej një njoftim përfundimi.",
+    "notify_milestone": "Do të dërgohej një njoftim për një moment kyç.",
+    "notify_held": "Një njoftim u mbajt për shkak të orëve të qeta.",
+    "finished": "Cikli arriti gjendjen përfundimtare dhe përfundoi."
   }
 }

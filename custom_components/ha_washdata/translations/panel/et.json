@@ -145,7 +145,10 @@
     "use": "Kasutage",
     "wipe_all": "Pühkige kõik andmed",
     "delete_selected": "Kustuta valitud ({n})",
-    "group_suggest": "Rühm {n}: {members}"
+    "group_suggest": "Rühm {n}: {members}",
+    "pg_apply_best": "Rakenda parim",
+    "pg_apply_to_settings": "Salvesta sätetesse",
+    "pg_apply_to_settings_tip": "Kopeeri siin muudetud väärtused selle seadme aktiivsetesse sätetesse"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Koduabilise külgriba sisse- ja väljalülitamine",
     "tools_and_data": "Tööriistad ja andmed",
     "wipe_history": "Pühkige ajalugu",
-    "recommendations": "Soovitused ({n})"
+    "recommendations": "Soovitused ({n})",
+    "pg_detection_params": "Tuvastuse seaded",
+    "pg_timeline": "Sündmuste ajajoon",
+    "pg_outcome": "Simulatsiooni tulemus",
+    "pg_across_cycles": "Sinu tsüklite lõikes"
   },
   "health": {
     "fair": "Rahuldav profiili kvaliteet",
@@ -458,7 +465,62 @@
     "n_shown": ", {n} kuvatud",
     "cycles_title": "Tsüklid ({n})",
     "pg_detecting": "Tuvastamine",
-    "pg_best_marker": "Parim: {v}"
+    "pg_best_marker": "Parim: {v}",
+    "pg_time_left_model": "Aega jäänud (mudel)",
+    "pg_time_left_model_tip": "Mudeli hinnatud järelejäänud aeg (faasi hindaja + ML-segu), mitte staatiline loendur",
+    "phase": "Faas",
+    "pg_mode_simulate": "Simuleeri",
+    "pg_mode_history": "Testi ajalooga",
+    "pg_mode_sweep": "Pühkimine",
+    "pg_ev_detected": "Tuvastatud",
+    "pg_ev_match": "Vaste kinnitatud",
+    "pg_ev_match_changed": "Vaste muutus",
+    "pg_ev_ambiguous": "Ebaselge",
+    "pg_ev_unmatched": "Vasteta",
+    "pg_ev_notify_start": "Alguse teavitus",
+    "pg_ev_notify_pre": "Peaaegu valmis teavitus",
+    "pg_ev_notify_finish": "Lõpetamise teavitus",
+    "pg_ev_notify_milestone": "Vahe-eesmärgi teavitus",
+    "pg_ev_notify_held": "Teavitus kinni peetud (vaikuse tunnid)",
+    "pg_ev_finished": "Lõpetatud",
+    "pg_ended": "Lõppes",
+    "pg_proj_energy": "Prog. energia",
+    "pg_alert_overrun": "Kestis kauem",
+    "pg_alert_underrun": "Kestis lühemalt",
+    "pg_alert_did_not_finish": "Ei lõpetanud",
+    "pg_alert_false_end": "Jagunes mitmeks tsükliks",
+    "pg_alert_unmatched": "Vasteta",
+    "pg_alert_ambiguous": "Ebaselge vaste",
+    "pg_alert_energy": "Energia kõrvalekalle",
+    "pg_newly_correct": "nüüd õige",
+    "pg_regressed": "halvenes",
+    "pg_end_timing_changed": "lõpuaeg muutus",
+    "pg_vs_current": "vs praegune",
+    "pg_fixed": "parandatud",
+    "pg_broke": "läks katki",
+    "pg_sweep_param": "Parameeter",
+    "pg_objective": "Eesmärk",
+    "pg_steps": "Sammud",
+    "pg_sweep_2d": "2D soojuskaart",
+    "pg_sweep_param_y": "2. parameeter",
+    "pg_obj_match": "Vaste täpsus",
+    "pg_obj_endtiming": "Lõpuaja täpsus",
+    "pg_obj_falseend": "Valelõppude määr",
+    "pg_obj_overrun": "Kestuse kõrvalekalle",
+    "pg_obj_ambiguity": "Ebaselguse määr",
+    "pg_best_combo": "parim kombinatsioon",
+    "pg_mode_optimize": "Optimeeri",
+    "pg_group_matching": "Programmi sobitamine",
+    "pg_zoom_hint": "topeltklõps suumi lähtestamiseks",
+    "aria_playground_chart2": "Interaktiivne tsükli võimsusgraafik: hõljuta aja/võimsuse lugemiseks, keri suumimiseks, lohista liigutamiseks",
+    "pg_alert_timeout_end": "Lõpetati aegumisega, mitte ennustuse põhjal",
+    "pg_alert_indefinite": "Töötaks lõputult",
+    "task_pg_history": "Testi ajaloos",
+    "task_pg_sweep": "Optimeeri",
+    "task_reprocess": "Uuesti töötlemine",
+    "task_ml_training": "Õppimine",
+    "eta_secs": "~{n} s jäänud",
+    "eta_mins": "~{n} min jäänud"
   },
   "log": {
     "all_levels": "Kõik tasemed"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' tarbib järk-järgult rohkem energiat (umbes +{pct}% tsükli kohta) - kui see on ootamatu, tasub seade üle kontrollida.",
     "advisory_poor_health": "'{name}' profiilil on madal sobivusskoor - selle hiljutised tsüklid varieeruvad palju või sobituvad nõrgalt. Vaata selle tsüklid üle või salvesta profiil uuesti, et tuvastus ja ajahinnangud püsiksid täpsed.",
     "advisory_shape_drift": "'{name}' on oma algsest võimsuskõverast märgatavalt kõrvale kaldunud. Seadme käitumine võib olla aja jooksul muutunud (nt katlakivi, kulumine). Kaalu selle profiili uuesti salvestamist hiljutiste tsüklitega.",
-    "advisory_shape_drift_corr": "'{name}' on oma algsest võimsuskõverast märgatavalt kõrvale kaldunud (korrelatsioon {corr}). Seadme käitumine võib olla aja jooksul muutunud (nt katlakivi, kulumine). Kaalu selle profiili uuesti salvestamist hiljutiste tsüklitega."
+    "advisory_shape_drift_corr": "'{name}' on oma algsest võimsuskõverast märgatavalt kõrvale kaldunud (korrelatsioon {corr}). Seadme käitumine võib olla aja jooksul muutunud (nt katlakivi, kulumine). Kaalu selle profiili uuesti salvestamist hiljutiste tsüklitega.",
+    "pg_no_alerts": "Selles käivituses ei tuvastatud probleeme.",
+    "pg_override_active": "Kasutatakse su muudetud seadeid vs praegused",
+    "pg_history_intro": "Esita oma hiljutised tsüklid uuesti läbi päris tuvastaja ja sobitaja. Muuda esmalt tuvastuse seadet režiimis Simuleeri, et näha siin enne/pärast võrdlust.",
+    "pg_history_empty": "Vajuta Käivita, et oma tsüklid uuesti esitada.",
+    "pg_history_summary": "{detected}/{total} tuvastatud · {correct} õigesti sobitatud",
+    "pg_sweep_no_metric": "Selle eesmärgi hindamiseks pole piisavalt andmeid.",
+    "pg_sweep_intro2": "Leia seade, mis su hiljutistes tsüklites eesmärki kõige paremini täidab. Miski ei muutu enne, kui selle rakendad.",
+    "pg_running_history": "Tsüklite taasesitus…",
+    "pg_running_sweep": "Väärtuste testimine sinu tsüklites…",
+    "pg_row_load_hint": "Laadi see tsükkel ülalolevale graafikule",
+    "pg_history_intro2": "Taasesita oma hiljutised tsüklid läbi tegeliku tuvastaja ja sobitaja ülaltoodud sätetega. Klõpsa mis tahes real, et laadida see tsükkel graafikule; muuda sätet, et näha enne/pärast võrdlust.",
+    "pg_simulating": "Tsükli simuleerimine…",
+    "pg_canvas_empty2": "Vali ülalt tsükkel ja vajuta Käivita, et seda simuleerida. Seejärel hõljuta väärtuste lugemiseks, keri suumimiseks ja lohista liigutamiseks.",
+    "pg_apply_settings_confirm": "Kas salvestada need {n} sätet sellesse seadmesse? {list}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Järsk langus käsitletakse kohese lõpuna",
@@ -718,7 +794,13 @@
     "off_delay": "Madala võimsuse sekundid enne tsükli lõppu",
     "start_duration_threshold": "Sekundid üle läve käivituse kinnitamiseks",
     "start_threshold_w": "Minimaalne vatt, et lugeda käivitunuks",
-    "stop_threshold_w": "Sellest allpool loetakse masin väljalülitatuks"
+    "stop_threshold_w": "Sellest allpool loetakse masin väljalülitatuks",
+    "dtw_bandwidth": "Kui palju ajalist venitamist kuju sobitamine lubab",
+    "corr_weight": "Kõvera kuju vs võimsustaseme kaal sobitamisel",
+    "duration_weight": "Kui palju kestuse kokkulangevus sobitamist mõjutab",
+    "energy_weight": "Kui palju energia kokkulangevus sobitamist mõjutab",
+    "profile_match_min_duration_ratio": "Lühim tsükkel (profiiliga võrreldes), mida veel lubatakse sobitada",
+    "profile_match_max_duration_ratio": "Pikim tsükkel (profiiliga võrreldes), mida veel lubatakse sobitada"
   },
   "phase_desc": {
     "anti_crease": "Kortsude vähendamiseks tehke aeg-ajalt lühikesi tõmblusi pärast lõpetamist.",
@@ -1141,6 +1223,22 @@
     "peak_rate_threshold": {
       "doc": "Kui tsükkel algab ja praegune hind kWh kohta on sellel väärtusel või kõrgem, lisatakse käivitamise teavitusele tipptunni tariifi vihje. 0 või tühi keelab vihje.",
       "label": "Tipptunni tariifi lävi (kWh kohta)"
+    },
+    "dtw_bandwidth": {
+      "label": "Kuju sobitamise tolerants",
+      "doc": "Kui palju sobitaja võib tsüklit ajaliselt venitada, et see salvestatud programmi kujuga sobiks. Kõrgem lubab suuremat kiiruse varieerumist; liiga kõrge võib sobitada vale programmi."
+    },
+    "corr_weight": {
+      "label": "Kuju vs taseme kaal",
+      "doc": "Tasakaal kõvera kuju ja absoluutse võimsustaseme vahel sobivuse hindamisel. Kõrgem eelistab kuju; madalam eelistab võimsustaseme sobitamist."
+    },
+    "duration_weight": {
+      "label": "Kestuse kaal",
+      "doc": "Kui tugevalt eelistatakse programmi, mille tüüpiline kestus selle tsükliga sobib."
+    },
+    "energy_weight": {
+      "label": "Energia kaal",
+      "doc": "Kui tugevalt eelistatakse programmi, mille tüüpiline energiakulu selle tsükliga sobib."
     }
   },
   "setting_group": {
@@ -1461,5 +1559,18 @@
     "score": "skoor {pct}%",
     "duration_cv": "kestuse CV {pct}%",
     "avg_confidence": "keskm. usaldus {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Tuvastaja tuvastas, et tsükkel oli alanud.",
+    "match_commit": "Sobitaja valis programmi piisava kindlusega.",
+    "match_changed": "Juhtiv programm muutus, kui tsüklit rohkem nähti.",
+    "match_ambiguous": "Kaks programmi said lähedased tulemused, seega oli vaste ebakindel.",
+    "unmatched": "Ükski salvestatud programm sellele tsüklile ei sobinud.",
+    "notify_start": "Saadetaks alustamise teavitus.",
+    "notify_pre_complete": "Saadetaks peaaegu valmis teavitus.",
+    "notify_finish": "Saadetaks lõpetamise teavitus.",
+    "notify_milestone": "Saadetaks verstaposti teavitus.",
+    "notify_held": "Teavitus peeti vaikse aja tõttu kinni.",
+    "finished": "Tsükkel jõudis lõppolekusse ja lõppes."
   }
 }

@@ -145,7 +145,10 @@
     "use": "使用",
     "wipe_all": "清除所有数据",
     "delete_selected": "删除所选（{n}）",
-    "group_suggest": "组 {n}：{members}"
+    "group_suggest": "组 {n}：{members}",
+    "pg_apply_best": "应用最佳值",
+    "pg_apply_to_settings": "保存到设置",
+    "pg_apply_to_settings_tip": "将您在此处编辑的值复制到该设备当前生效的设置中"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "切换家庭助理侧边栏",
     "tools_and_data": "工具与数据",
     "wipe_history": "清除历史",
-    "recommendations": "建议（{n}）"
+    "recommendations": "建议（{n}）",
+    "pg_detection_params": "检测设置",
+    "pg_timeline": "事件时间线",
+    "pg_outcome": "模拟结果",
+    "pg_across_cycles": "所有周期综合"
   },
   "health": {
     "fair": "配置文件质量尚可",
@@ -458,7 +465,62 @@
     "n_shown": "，显示 {n} 个",
     "cycles_title": "周期（{n}）",
     "pg_detecting": "检测中",
-    "pg_best_marker": "最佳：{v}"
+    "pg_best_marker": "最佳：{v}",
+    "pg_time_left_model": "剩余时间（模型）",
+    "pg_time_left_model_tip": "由模型估算的剩余时间（阶段估算 + ML 混合），并非固定倒计时。",
+    "phase": "阶段",
+    "pg_mode_simulate": "模拟",
+    "pg_mode_history": "历史测试",
+    "pg_mode_sweep": "参数扫描",
+    "pg_ev_detected": "已检测",
+    "pg_ev_match": "匹配确定",
+    "pg_ev_match_changed": "匹配已更改",
+    "pg_ev_ambiguous": "不明确",
+    "pg_ev_unmatched": "未匹配",
+    "pg_ev_notify_start": "开始通知",
+    "pg_ev_notify_pre": "即将完成通知",
+    "pg_ev_notify_finish": "完成通知",
+    "pg_ev_notify_milestone": "里程碑通知",
+    "pg_ev_notify_held": "通知已暂存（免打扰时段）",
+    "pg_ev_finished": "已完成",
+    "pg_ended": "已结束",
+    "pg_proj_energy": "预计能耗",
+    "pg_alert_overrun": "运行过长",
+    "pg_alert_underrun": "运行过短",
+    "pg_alert_did_not_finish": "未完成",
+    "pg_alert_false_end": "拆分为多个周期",
+    "pg_alert_unmatched": "未匹配",
+    "pg_alert_ambiguous": "匹配不明确",
+    "pg_alert_energy": "能耗异常",
+    "pg_newly_correct": "新增正确",
+    "pg_regressed": "变差",
+    "pg_end_timing_changed": "结束时机改变",
+    "pg_vs_current": "对比当前",
+    "pg_fixed": "已修复",
+    "pg_broke": "出现问题",
+    "pg_sweep_param": "参数",
+    "pg_objective": "目标",
+    "pg_steps": "步数",
+    "pg_sweep_2d": "2D 热图",
+    "pg_sweep_param_y": "第二个参数",
+    "pg_obj_match": "匹配准确度",
+    "pg_obj_endtiming": "结束时机准确度",
+    "pg_obj_falseend": "误结束率",
+    "pg_obj_overrun": "时长偏离目标",
+    "pg_obj_ambiguity": "不明确率",
+    "pg_best_combo": "最佳组合",
+    "pg_mode_optimize": "优化",
+    "pg_group_matching": "程序匹配",
+    "pg_zoom_hint": "双击可重置缩放",
+    "aria_playground_chart2": "交互式周期功率图：悬停查看时间/功率，滚动缩放，拖动平移",
+    "pg_alert_timeout_end": "因超时而结束，并非预测结束",
+    "pg_alert_indefinite": "将一直运行下去",
+    "task_pg_history": "用历史测试",
+    "task_pg_sweep": "优化",
+    "task_reprocess": "重新处理",
+    "task_ml_training": "学习",
+    "eta_secs": "剩~{n}秒",
+    "eta_mins": "剩~{n}分"
   },
   "log": {
     "all_levels": "所有级别"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' 的能耗正逐渐增加（每个周期约 +{pct}%） - 如果这不符合预期，建议检查一下设备。",
     "advisory_poor_health": "'{name}' 的拟合度评分较低 - 其近期周期波动较大或匹配较弱。请检查其周期或重新录制该配置文件，以保持匹配和时间估算的准确性。",
     "advisory_shape_drift": "'{name}' 已明显偏离其原始功率曲线。设备行为可能随时间发生了变化（例如水垢、磨损）。建议用近期周期重新录制此配置文件。",
-    "advisory_shape_drift_corr": "'{name}' 已明显偏离其原始功率曲线（相关系数 {corr}）。设备行为可能随时间发生了变化（例如水垢、磨损）。建议用近期周期重新录制此配置文件。"
+    "advisory_shape_drift_corr": "'{name}' 已明显偏离其原始功率曲线（相关系数 {corr}）。设备行为可能随时间发生了变化（例如水垢、磨损）。建议用近期周期重新录制此配置文件。",
+    "pg_no_alerts": "本次运行未检测到问题。",
+    "pg_override_active": "正在使用您编辑的设置对比当前设置",
+    "pg_history_intro": "用真实的检测器和匹配器重放您最近的周期。若要在此查看前后对比，请先在模拟中编辑一项检测设置。",
+    "pg_history_empty": "按运行以重放您的周期。",
+    "pg_history_summary": "{detected}/{total} 已检测 · {correct} 正确匹配",
+    "pg_sweep_no_metric": "数据不足，无法为此目标评分。",
+    "pg_sweep_intro2": "在您最近的周期中找到最能满足某个目标的设置。在您应用之前不会有任何更改。",
+    "pg_running_history": "正在重放您的周期…",
+    "pg_running_sweep": "正在所有周期上测试各个值…",
+    "pg_row_load_hint": "在上方图表中加载此周期",
+    "pg_history_intro2": "使用上方设置，将您最近的周期通过真实的检测器和匹配器重新运行。点击任意行可在图表中加载该周期；修改设置可查看修改前后的对比。",
+    "pg_simulating": "正在模拟周期…",
+    "pg_canvas_empty2": "在上方选择一个周期并按“运行”进行模拟。然后悬停查看数值，滚动缩放，拖动平移。",
+    "pg_apply_settings_confirm": "将这 {n} 项设置保存到该设备吗？ {list}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "骤降视为立即结束",
@@ -718,7 +794,13 @@
     "off_delay": "周期结束前低功率持续的秒数",
     "start_duration_threshold": "确认启动所需的超阈值秒数",
     "start_threshold_w": "计为启动的最小瓦数",
-    "stop_threshold_w": "低于此值机器计为关闭"
+    "stop_threshold_w": "低于此值机器计为关闭",
+    "dtw_bandwidth": "形状匹配允许的时间扭曲程度",
+    "corr_weight": "匹配中曲线形状与功率水平的权重",
+    "duration_weight": "运行时长的吻合程度对匹配的影响大小",
+    "energy_weight": "能耗吻合程度对匹配的影响大小",
+    "profile_match_min_duration_ratio": "仍可用于匹配的最短运行时长（相对于程序档案）",
+    "profile_match_max_duration_ratio": "仍可用于匹配的最长运行时长（相对于程序档案）"
   },
   "phase_desc": {
     "anti_crease": "完成后偶尔进行短暂的翻滚以减少皱纹。",
@@ -1141,6 +1223,22 @@
     "peak_rate_threshold": {
       "doc": "当周期开始且当前每千瓦时电价达到或超过此值时，在启动通知中附加高峰电价提示。0 或留空则禁用该提示。",
       "label": "高峰电价阈值（每千瓦时）"
+    },
+    "dtw_bandwidth": {
+      "label": "形状匹配容差",
+      "doc": "匹配器为了贴合已保存程序的形状，可以对周期进行多大程度的时间扭曲。数值越高越能容忍速度变化；过高则可能匹配到错误的程序。"
+    },
+    "corr_weight": {
+      "label": "形状与水平权重",
+      "doc": "在为匹配评分时，曲线形状与绝对功率水平之间的平衡。数值越高越偏重形状；越低越偏重功率水平的吻合。"
+    },
+    "duration_weight": {
+      "label": "时长权重",
+      "doc": "典型运行时长与此周期吻合的程序会被优先选择的程度。"
+    },
+    "energy_weight": {
+      "label": "能耗权重",
+      "doc": "典型能耗与此周期吻合的程序会被优先选择的程度。"
     }
   },
   "setting_group": {
@@ -1461,5 +1559,18 @@
     "score": "得分 {pct}%",
     "duration_cv": "时长 CV {pct}%",
     "avg_confidence": "平均置信度 {pct}%"
+  },
+  "pg_evd": {
+    "detected": "检测器识别到一个循环已经开始。",
+    "match_commit": "匹配器以足够的置信度确定了某个程序。",
+    "match_changed": "随着循环推进，领先的程序发生了变化。",
+    "match_ambiguous": "两个程序的得分很接近，因此匹配结果不确定。",
+    "unmatched": "没有已保存的程序与此循环匹配。",
+    "notify_start": "将发送开始通知。",
+    "notify_pre_complete": "将发送即将完成通知。",
+    "notify_finish": "将发送完成通知。",
+    "notify_milestone": "将发送里程碑通知。",
+    "notify_held": "由于处于免打扰时段，通知已被暂缓。",
+    "finished": "循环到达终止状态并已结束。"
   }
 }

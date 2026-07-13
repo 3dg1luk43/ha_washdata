@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**70 commands.**
+**79 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -77,7 +77,16 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `resume_cycle` | entry_id | `OkResponse` |
 | `terminate_cycle` | entry_id | `OkResponse` |
 | `run_playground_simulation` | entry_id, cycle_ids?, settings_override?, concurrency? | `RunPlaygroundSimulationResponse` |
+| `run_playground_cycle_detail` | entry_id, cycle_id, settings_override? | `RunPlaygroundCycleDetailResponse` |
+| `run_playground_history` | entry_id, cycle_ids?, settings_override?, concurrency? | `RunPlaygroundHistoryResponse` |
+| `run_playground_sweep` | entry_id, param, values, objective, cycle_ids?, concurrency?, param_y?, values_y? | `RunPlaygroundSweepResponse` |
 | `get_dtw_debug` | entry_id, cycle_id, profile_name? | `GetDtwDebugResponse` |
+| `list_tasks` | entry_id? | `ListTasksResponse` |
+| `subscribe_tasks` | entry_id? | `SubscribeTasksResponse` |
+| `cancel_task` | task_id | `CancelTaskResponse` |
+| `get_task_result` | task_id | `TaskSnapshot` |
+| `start_playground_history` | entry_id, cycle_ids?, settings_override? | `StartTaskResponse` |
+| `start_playground_sweep` | entry_id, param, values, objective, param_y?, values_y? | `StartTaskResponse` |
 
 ## `ha_washdata/get_devices`
 
@@ -1199,6 +1208,91 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `results` | yes | list[dict[str, any]] |
 | `summary` | yes | PlaygroundSummary |
 
+## `ha_washdata/run_playground_cycle_detail`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `cycle_id` | yes | str |
+| `settings_override` | no | dict |
+
+**Response** (`RunPlaygroundCycleDetailResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `cycle_id` | no | any |
+| `label` | no | str \| null |
+| `duration_s` | no | number \| null |
+| `config_summary` | no | dict[str, any] |
+| `series` | no | list[dict[str, any]] |
+| `events` | no | list[dict[str, any]] |
+| `alerts` | no | list[dict[str, any]] |
+| `outcome` | no | dict[str, any] |
+| `error` | no | str |
+
+_Open-ended: additional top-level keys from an upstream summary may be present._
+
+## `ha_washdata/run_playground_history`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `cycle_ids` | no | list[str] |
+| `settings_override` | no | dict |
+| `concurrency` | no | int |
+
+**Response** (`RunPlaygroundHistoryResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `rows` | no | list[dict[str, any]] |
+| `summary` | no | dict[str, any] |
+| `baseline_rows` | no | list[dict[str, any]] |
+| `baseline_summary` | no | dict[str, any] |
+| `diff` | no | dict[str, list[str]] |
+
+_Open-ended: additional top-level keys from an upstream summary may be present._
+
+## `ha_washdata/run_playground_sweep`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `param` | yes | str |
+| `values` | yes | list[float] |
+| `objective` | yes | str |
+| `cycle_ids` | no | list[str] |
+| `concurrency` | no | int |
+| `param_y` | no | str |
+| `values_y` | no | list[float] |
+
+**Response** (`RunPlaygroundSweepResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `param` | no | str |
+| `objective` | no | str |
+| `points` | no | list[dict[str, any]] |
+| `current_value` | no | any |
+| `best_value` | no | any |
+| `best_metric` | no | number \| null |
+| `param_x` | no | str |
+| `param_y` | no | str |
+| `x_values` | no | list[number] |
+| `y_values` | no | list[number] |
+| `grid` | no | list[list[any]] |
+| `best` | no | dict[str, any] |
+| `current` | no | dict[str, any] |
+| `error` | no | str |
+
+_Open-ended: additional top-level keys from an upstream summary may be present._
+
 ## `ha_washdata/get_dtw_debug`
 
 **Request parameters**
@@ -1224,3 +1318,108 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `dtw` | yes | DtwScores |
 | `stage4` | yes | DtwStage4Scores |
 | `warp_path` | yes | list[list[number]] |
+
+## `ha_washdata/list_tasks`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | no | str\|null |
+
+**Response** (`ListTasksResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `tasks` | yes | list[TaskSnapshot] |
+
+## `ha_washdata/subscribe_tasks`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | no | str\|null |
+
+**Response** (`SubscribeTasksResponse`)
+
+_Empty object._
+
+## `ha_washdata/cancel_task`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `task_id` | yes | str |
+
+**Response** (`CancelTaskResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `cancelled` | yes | bool |
+
+## `ha_washdata/get_task_result`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `task_id` | yes | str |
+
+**Response** (`TaskSnapshot`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `id` | no | str |
+| `entry_id` | no | str |
+| `kind` | no | str |
+| `label` | no | str |
+| `state` | no | str |
+| `done` | no | number |
+| `total` | no | number |
+| `progress` | no | number \| null |
+| `eta_s` | no | number \| null |
+| `started_at` | no | number |
+| `updated_at` | no | number |
+| `finished_at` | no | number \| null |
+| `error` | no | str \| null |
+| `has_result` | no | bool |
+| `result` | no | any |
+
+_Open-ended: additional top-level keys from an upstream summary may be present._
+
+## `ha_washdata/start_playground_history`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `cycle_ids` | no | list[str] |
+| `settings_override` | no | dict |
+
+**Response** (`StartTaskResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `task_id` | yes | str |
+
+## `ha_washdata/start_playground_sweep`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `param` | yes | str |
+| `values` | yes | list[float] |
+| `objective` | yes | str |
+| `param_y` | no | str\|null |
+| `values_y` | no | list[float] |
+
+**Response** (`StartTaskResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `task_id` | yes | str |

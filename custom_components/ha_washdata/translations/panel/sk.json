@@ -145,7 +145,10 @@
     "use": "Použiť",
     "wipe_all": "Vymazať všetky dáta",
     "delete_selected": "Odstrániť vybrané ({n})",
-    "group_suggest": "Skupina {n}: {members}"
+    "group_suggest": "Skupina {n}: {members}",
+    "pg_apply_best": "Použiť najlepšie",
+    "pg_apply_to_settings": "Uložiť do nastavení",
+    "pg_apply_to_settings_tip": "Skopírovať hodnoty, ktoré ste tu upravili, do aktívnych nastavení tohto zariadenia"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Prepnúť bočný panel Asistenta domácnosti",
     "tools_and_data": "Nástroje a dáta",
     "wipe_history": "Vymazať históriu",
-    "recommendations": "Odporúčania ({n})"
+    "recommendations": "Odporúčania ({n})",
+    "pg_detection_params": "Nastavenia detekcie",
+    "pg_timeline": "Časová os udalostí",
+    "pg_outcome": "Výsledok simulácie",
+    "pg_across_cycles": "Naprieč vašimi cyklami"
   },
   "health": {
     "fair": "Prijateľná kvalita profilu",
@@ -458,7 +465,62 @@
     "n_shown": ", zobrazených {n}",
     "cycles_title": "Cykly ({n})",
     "pg_detecting": "Rozpoznávanie",
-    "pg_best_marker": "Najlepší: {v}"
+    "pg_best_marker": "Najlepší: {v}",
+    "pg_time_left_model": "Zostávajúci čas (model)",
+    "pg_time_left_model_tip": "Modelom odhadovaný zostávajúci čas (odhad fázy + kombinácia s ML), nie statické odpočítavanie",
+    "phase": "Fáza",
+    "pg_mode_simulate": "Simulovať",
+    "pg_mode_history": "Otestovať na histórii",
+    "pg_mode_sweep": "Prehľadávanie",
+    "pg_ev_detected": "Zistené",
+    "pg_ev_match": "Zhoda potvrdená",
+    "pg_ev_match_changed": "Zhoda zmenená",
+    "pg_ev_ambiguous": "Nejednoznačné",
+    "pg_ev_unmatched": "Bez zhody",
+    "pg_ev_notify_start": "Oznámenie o štarte",
+    "pg_ev_notify_pre": "Oznámenie pred dokončením",
+    "pg_ev_notify_finish": "Oznámenie o dokončení",
+    "pg_ev_notify_milestone": "Oznámenie o míľniku",
+    "pg_ev_notify_held": "Oznámenie pozdržané (tiché hodiny)",
+    "pg_ev_finished": "Dokončené",
+    "pg_ended": "Ukončené",
+    "pg_proj_energy": "Odhad energie",
+    "pg_alert_overrun": "Prebeh",
+    "pg_alert_underrun": "Podbeh",
+    "pg_alert_did_not_finish": "Nedokončené",
+    "pg_alert_false_end": "Rozdelené na viac cyklov",
+    "pg_alert_unmatched": "Bez zhody",
+    "pg_alert_ambiguous": "Nejednoznačná zhoda",
+    "pg_alert_energy": "Anomália energie",
+    "pg_newly_correct": "novo správne",
+    "pg_regressed": "zhoršené",
+    "pg_end_timing_changed": "zmena času konca",
+    "pg_vs_current": "oproti aktuálnemu",
+    "pg_fixed": "opravené",
+    "pg_broke": "pokazené",
+    "pg_sweep_param": "Parameter",
+    "pg_objective": "Cieľ",
+    "pg_steps": "Kroky",
+    "pg_sweep_2d": "Teplotná mapa 2D",
+    "pg_sweep_param_y": "2. parameter",
+    "pg_obj_match": "Presnosť zhody",
+    "pg_obj_endtiming": "Presnosť konca",
+    "pg_obj_falseend": "Miera falošných koncov",
+    "pg_obj_overrun": "Odchýlka trvania",
+    "pg_obj_ambiguity": "Miera nejednoznačnosti",
+    "pg_best_combo": "najlepšia kombinácia",
+    "pg_mode_optimize": "Optimalizovať",
+    "pg_group_matching": "Priraďovanie programov",
+    "pg_zoom_hint": "dvojitým kliknutím obnovíte priblíženie",
+    "aria_playground_chart2": "Interaktívny graf výkonu cyklu: prejdením myšou zobrazíte čas/výkon, kolieskom priblížite, ťahaním posuniete",
+    "pg_alert_timeout_end": "Ukončené časovým limitom, nie predikciou",
+    "pg_alert_indefinite": "Bežalo by donekonečna",
+    "task_pg_history": "Test na histórii",
+    "task_pg_sweep": "Optimalizovať",
+    "task_reprocess": "Opätovné spracovanie",
+    "task_ml_training": "Učenie",
+    "eta_secs": "zostáva ~{n} s",
+    "eta_mins": "zostáva ~{n} min"
   },
   "log": {
     "all_levels": "Všetky úrovne"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' odoberá čoraz viac energie (približne +{pct}% na cyklus) - ak je to nečakané, oplatí sa spotrebič skontrolovať.",
     "advisory_poor_health": "'{name}' má nízke skóre zhody - jeho posledné cykly sa veľmi líšia alebo sa slabo rozpoznávajú. Prezrite jeho cykly alebo profil nahrajte znova, aby rozpoznávanie a odhady času zostali presné.",
     "advisory_shape_drift": "'{name}' sa výrazne odchýlil od pôvodného tvaru krivky výkonu. Správanie spotrebiča sa mohlo časom zmeniť (napr. vodný kameň, opotrebenie). Zvážte opätovné nahranie tohto profilu z posledných cyklov.",
-    "advisory_shape_drift_corr": "'{name}' sa výrazne odchýlil od pôvodného tvaru krivky výkonu (korelácia {corr}). Správanie spotrebiča sa mohlo časom zmeniť (napr. vodný kameň, opotrebenie). Zvážte opätovné nahranie tohto profilu z posledných cyklov."
+    "advisory_shape_drift_corr": "'{name}' sa výrazne odchýlil od pôvodného tvaru krivky výkonu (korelácia {corr}). Správanie spotrebiča sa mohlo časom zmeniť (napr. vodný kameň, opotrebenie). Zvážte opätovné nahranie tohto profilu z posledných cyklov.",
+    "pg_no_alerts": "V tomto behu neboli zistené žiadne problémy.",
+    "pg_override_active": "Používajú sa vaše upravené nastavenia oproti aktuálnym",
+    "pg_history_intro": "Prehrajte svoje nedávne cykly cez skutočný detektor a priraďovač. Najprv upravte nastavenie detekcie v režime Simulovať, aby ste tu videli porovnanie pred/po.",
+    "pg_history_empty": "Stlačte Spustiť na prehratie vašich cyklov.",
+    "pg_history_summary": "{detected}/{total} zistených · {correct} správne priradených",
+    "pg_sweep_no_metric": "Nedostatok dát na vyhodnotenie tohto cieľa.",
+    "pg_sweep_intro2": "Nájdite nastavenie, ktoré najlepšie spĺňa cieľ naprieč vašimi nedávnymi cyklami. Kým ho nepoužijete, nič sa nezmení.",
+    "pg_running_history": "Prehrávanie vašich cyklov…",
+    "pg_running_sweep": "Testovanie hodnôt naprieč vašimi cyklami…",
+    "pg_row_load_hint": "Načítať tento cyklus do grafu vyššie",
+    "pg_history_intro2": "Prehrajte svoje nedávne cykly cez skutočný detektor a nástroj na priraďovanie programov s nastaveniami vyššie. Kliknutím na ľubovoľný riadok načítate daný cyklus do grafu; úpravou nastavenia zobrazíte porovnanie pred úpravou a po nej.",
+    "pg_simulating": "Simulácia cyklu…",
+    "pg_canvas_empty2": "Vyberte cyklus vyššie a stlačením Spustiť ho nasimulujte. Potom prejdením myšou zobrazíte hodnoty, kolieskom priblížite a ťahaním posuniete.",
+    "pg_apply_settings_confirm": "Uložiť týchto {n} nastavení do tohto zariadenia? {list}"
   },
   "phase_desc": {
     "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",
@@ -1130,6 +1206,22 @@
     "peak_rate_threshold": {
       "doc": "Keď sa cyklus spustí a aktuálna cena za kWh je na tejto hodnote alebo nad ňou, k upozorneniu o spustení sa pripojí tip o špičkovej sadzbe. 0 alebo prázdne pole tip vypne.",
       "label": "Prah špičkovej sadzby (za kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Tolerancia zhody tvaru",
+      "doc": "Ako veľmi smie nástroj na priraďovanie časovo deformovať cyklus, aby zodpovedal tvaru uloženého programu. Vyššia hodnota toleruje väčšie kolísanie rýchlosti; príliš vysoká riskuje priradenie nesprávneho programu."
+    },
+    "corr_weight": {
+      "label": "Váha tvaru verzus úrovne",
+      "doc": "Rovnováha medzi tvarom krivky a absolútnou úrovňou výkonu pri hodnotení zhody. Vyššia uprednostňuje tvar; nižšia uprednostňuje zhodu úrovne výkonu."
+    },
+    "duration_weight": {
+      "label": "Váha dĺžky trvania",
+      "doc": "Ako silno je uprednostnený program, ktorého typická dĺžka trvania zodpovedá tomuto cyklu."
+    },
+    "energy_weight": {
+      "label": "Váha spotreby energie",
+      "doc": "Ako silno je uprednostnený program, ktorého typická spotreba energie zodpovedá tomuto cyklu."
     }
   },
   "setting_group": {
@@ -1439,7 +1531,13 @@
     "off_delay": "Sekundy nízkeho výkonu pred koncom cyklu",
     "start_duration_threshold": "Sekundy nad prahom na potvrdenie spustenia",
     "start_threshold_w": "Minimálny výkon vo wattoch na započítanie spustenia",
-    "stop_threshold_w": "Pod touto hodnotou sa stroj počíta ako vypnutý"
+    "stop_threshold_w": "Pod touto hodnotou sa stroj počíta ako vypnutý",
+    "dtw_bandwidth": "Aké veľké časové deformácie zhoda tvaru umožňuje",
+    "corr_weight": "Váha tvaru krivky verzus úrovne výkonu pri priraďovaní",
+    "duration_weight": "Ako veľmi zhoda dĺžky trvania ovplyvňuje priradenie",
+    "energy_weight": "Ako veľmi zhoda spotreby energie ovplyvňuje priradenie",
+    "profile_match_min_duration_ratio": "Najkratší beh (oproti profilu), ktorý ešte môže zodpovedať",
+    "profile_match_max_duration_ratio": "Najdlhší beh (oproti profilu), ktorý ešte môže zodpovedať"
   },
   "col": {
     "profile_tip": "Názov zhodného programu. Bez štítku znamená, že na konci cyklu sa nezhodoval žiadny profil.",
@@ -1461,5 +1559,18 @@
     "score": "skóre {pct}%",
     "duration_cv": "CV trvania {pct}%",
     "avg_confidence": "priem. spoľahlivosť {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Detektor rozpoznal, že sa cyklus začal.",
+    "match_commit": "Porovnávací mechanizmus s dostatočnou istotou vybral program.",
+    "match_changed": "Vedúci program sa zmenil, ako bola vidieť väčšia časť cyklu.",
+    "match_ambiguous": "Dva programy získali podobné skóre, takže zhoda bola neistá.",
+    "unmatched": "Tomuto cyklu nezodpovedal žiadny uložený program.",
+    "notify_start": "Odoslalo by sa oznámenie o spustení.",
+    "notify_pre_complete": "Odoslalo by sa oznámenie, že cyklus takmer končí.",
+    "notify_finish": "Odoslalo by sa oznámenie o dokončení.",
+    "notify_milestone": "Odoslalo by sa oznámenie o míľniku.",
+    "notify_held": "Oznámenie bolo pozdržané pre tiché hodiny.",
+    "finished": "Cyklus dosiahol koncový stav a skončil."
   }
 }

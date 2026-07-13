@@ -145,7 +145,10 @@
     "use": "Kullan",
     "wipe_all": "Tüm Verileri Sil",
     "delete_selected": "Seçilenleri sil ({n})",
-    "group_suggest": "Grup {n}: {members}"
+    "group_suggest": "Grup {n}: {members}",
+    "pg_apply_best": "En iyisini uygula",
+    "pg_apply_to_settings": "Ayarlara kaydet",
+    "pg_apply_to_settings_tip": "Burada düzenlediğiniz değerleri bu cihazın etkin ayarlarına kopyalayın"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Ev Asistanı kenar çubuğunu aç/kapat",
     "tools_and_data": "Araçlar ve Veriler",
     "wipe_history": "Geçmişi Sil",
-    "recommendations": "Öneriler ({n})"
+    "recommendations": "Öneriler ({n})",
+    "pg_detection_params": "Algılama ayarları",
+    "pg_timeline": "Olay zaman çizelgesi",
+    "pg_outcome": "Simülasyon sonucu",
+    "pg_across_cycles": "Tüm döngülerinizde"
   },
   "health": {
     "fair": "Kabul edilebilir profil kalitesi",
@@ -458,7 +465,62 @@
     "n_shown": ", {n} gösteriliyor",
     "cycles_title": "Döngüler ({n})",
     "pg_detecting": "Algılanıyor",
-    "pg_best_marker": "En iyi: {v}"
+    "pg_best_marker": "En iyi: {v}",
+    "pg_time_left_model": "Kalan süre (model)",
+    "pg_time_left_model_tip": "Model tarafından tahmin edilen kalan süre (aşama tahmincisi + ML karışımı), sabit bir geri sayım değil",
+    "phase": "Aşama",
+    "pg_mode_simulate": "Simülasyon",
+    "pg_mode_history": "Geçmişte test et",
+    "pg_mode_sweep": "Tarama",
+    "pg_ev_detected": "Algılandı",
+    "pg_ev_match": "Eşleşme kesinleşti",
+    "pg_ev_match_changed": "Eşleşme değişti",
+    "pg_ev_ambiguous": "Belirsiz",
+    "pg_ev_unmatched": "Eşleşmedi",
+    "pg_ev_notify_start": "Başlangıç bildirimi",
+    "pg_ev_notify_pre": "Neredeyse bitti bildirimi",
+    "pg_ev_notify_finish": "Bitiş bildirimi",
+    "pg_ev_notify_milestone": "Kilometre taşı bildirimi",
+    "pg_ev_notify_held": "Bildirim bekletildi (sessiz saatler)",
+    "pg_ev_finished": "Tamamlandı",
+    "pg_ended": "Sona erdi",
+    "pg_proj_energy": "Tahm. enerji",
+    "pg_alert_overrun": "Uzun sürdü",
+    "pg_alert_underrun": "Kısa sürdü",
+    "pg_alert_did_not_finish": "Bitmedi",
+    "pg_alert_false_end": "Birden fazla döngüye bölündü",
+    "pg_alert_unmatched": "Eşleşmedi",
+    "pg_alert_ambiguous": "Belirsiz eşleşme",
+    "pg_alert_energy": "Enerji anomalisi",
+    "pg_newly_correct": "artık doğru",
+    "pg_regressed": "geriledi",
+    "pg_end_timing_changed": "bitiş zamanı değişti",
+    "pg_vs_current": "vs mevcut",
+    "pg_fixed": "düzeltildi",
+    "pg_broke": "bozuldu",
+    "pg_sweep_param": "Parametre",
+    "pg_objective": "Hedef",
+    "pg_steps": "Adımlar",
+    "pg_sweep_2d": "2D ısı haritası",
+    "pg_sweep_param_y": "2. parametre",
+    "pg_obj_match": "Eşleşme doğruluğu",
+    "pg_obj_endtiming": "Bitiş zamanı doğruluğu",
+    "pg_obj_falseend": "Yanlış bitiş oranı",
+    "pg_obj_overrun": "Süre sapması",
+    "pg_obj_ambiguity": "Belirsizlik oranı",
+    "pg_best_combo": "en iyi kombinasyon",
+    "pg_mode_optimize": "Optimize et",
+    "pg_group_matching": "Program eşleştirme",
+    "pg_zoom_hint": "yakınlaştırmayı sıfırlamak için çift tıklayın",
+    "aria_playground_chart2": "Etkileşimli döngü güç grafiği: zamanı/gücü okumak için üzerine gelin, yakınlaştırmak için kaydırın, kaydırmak için sürükleyin",
+    "pg_alert_timeout_end": "Tahminle değil, zaman aşımıyla sona erdi",
+    "pg_alert_indefinite": "Süresiz olarak çalışırdı",
+    "task_pg_history": "Geçmişte test et",
+    "task_pg_sweep": "Optimize et",
+    "task_reprocess": "Yeniden işleme",
+    "task_ml_training": "Öğrenme",
+    "eta_secs": "~{n} sn kaldı",
+    "eta_mins": "~{n} dk kaldı"
   },
   "log": {
     "all_levels": "Tüm seviyeler"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' giderek daha fazla enerji çekiyor (çevrim başına yaklaşık +{pct}%) - beklenmedikse cihazı kontrol etmekte fayda var.",
     "advisory_poor_health": "'{name}' düşük bir uyum puanına sahip - son çevrimleri çok değişkenlik gösteriyor veya zayıf eşleşiyor. Eşleştirme ve süre tahminlerinin doğru kalması için çevrimlerini gözden geçirin ya da profili yeniden kaydedin.",
     "advisory_shape_drift": "'{name}' orijinal güç eğrisinden önemli ölçüde uzaklaştı. Cihazın davranışı zamanla değişmiş olabilir (ör. kireçlenme, aşınma). Bu profili son çevrimlerle yeniden kaydetmeyi düşünün.",
-    "advisory_shape_drift_corr": "'{name}' orijinal güç eğrisinden önemli ölçüde uzaklaştı (korelasyon {corr}). Cihazın davranışı zamanla değişmiş olabilir (ör. kireçlenme, aşınma). Bu profili son çevrimlerle yeniden kaydetmeyi düşünün."
+    "advisory_shape_drift_corr": "'{name}' orijinal güç eğrisinden önemli ölçüde uzaklaştı (korelasyon {corr}). Cihazın davranışı zamanla değişmiş olabilir (ör. kireçlenme, aşınma). Bu profili son çevrimlerle yeniden kaydetmeyi düşünün.",
+    "pg_no_alerts": "Bu çalıştırmada sorun tespit edilmedi.",
+    "pg_override_active": "Düzenlediğiniz ayarlar mevcut ayarlara karşı kullanılıyor",
+    "pg_history_intro": "Son döngülerinizi gerçek algılayıcı ve eşleştirici üzerinden yeniden oynatın. Burada bir önce/sonra karşılaştırması görmek için önce Simülasyon modunda bir algılama ayarını düzenleyin.",
+    "pg_history_empty": "Döngülerinizi yeniden oynatmak için Çalıştır'a basın.",
+    "pg_history_summary": "{detected}/{total} algılandı · {correct} doğru eşleşti",
+    "pg_sweep_no_metric": "Bu hedefi puanlamak için yeterli veri yok.",
+    "pg_sweep_intro2": "Son döngülerinizde bir hedefi en iyi karşılayan ayarı bulun. Siz uygulayana kadar hiçbir şey değişmez.",
+    "pg_running_history": "Döngüleriniz yeniden oynatılıyor…",
+    "pg_running_sweep": "Değerler tüm döngülerinizde test ediliyor…",
+    "pg_row_load_hint": "Bu döngüyü yukarıdaki grafiğe yükle",
+    "pg_history_intro2": "Son döngülerinizi yukarıdaki ayarlarla gerçek algılayıcı ve eşleştiriciden geçirerek yeniden oynatın. Bir döngüyü grafiğe yüklemek için herhangi bir satıra tıklayın; öncesi/sonrası karşılaştırması görmek için bir ayarı değiştirin.",
+    "pg_simulating": "Döngü simüle ediliyor…",
+    "pg_canvas_empty2": "Yukarıdan bir döngü seçin ve simüle etmek için Çalıştır'a basın. Ardından değerleri okumak için üzerine gelin, yakınlaştırmak için kaydırın ve kaydırmak için sürükleyin.",
+    "pg_apply_settings_confirm": "Bu {n} ayar bu cihaza kaydedilsin mi? {list}"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Ani düşüş anında bitiş sayılır",
@@ -718,7 +794,13 @@
     "off_delay": "Döngü bitmeden önceki düşük güç saniyesi",
     "start_duration_threshold": "Başlangıcı onaylamak için eşik üstünde saniye",
     "start_threshold_w": "Başladı sayılması için minimum watt",
-    "stop_threshold_w": "Bunun altında makine kapalı sayılır"
+    "stop_threshold_w": "Bunun altında makine kapalı sayılır",
+    "dtw_bandwidth": "Şekil eşleştirmesinin ne kadar zaman bükmeye izin verdiği",
+    "corr_weight": "Eşleştirmede eğri şekline karşı güç düzeyinin ağırlığı",
+    "duration_weight": "Süre uyumunun eşleştirmeyi ne kadar etkilediği",
+    "energy_weight": "Enerji uyumunun eşleştirmeyi ne kadar etkilediği",
+    "profile_match_min_duration_ratio": "Eşleşmeye hâlâ izin verilen en kısa çevrim (profile göre)",
+    "profile_match_max_duration_ratio": "Eşleşmeye hâlâ izin verilen en uzun çevrim (profile göre)"
   },
   "phase_desc": {
     "anti_crease": "Kırışıklıkları azaltmak için tamamlandıktan sonra ara sıra kısa yuvarlanmalar.",
@@ -1141,6 +1223,22 @@
     "peak_rate_threshold": {
       "doc": "Bir döngü başladığında ve kWh başına geçerli fiyat bu değere eşit veya bu değerin üzerindeyse, başlangıç bildirimine bir yüksek tarife ipucu eklenir. 0 veya boş bırakmak ipucunu devre dışı bırakır.",
       "label": "Yüksek Tarife Eşiği (kWh başına)"
+    },
+    "dtw_bandwidth": {
+      "label": "Şekil eşleştirme toleransı",
+      "doc": "Eşleştiricinin, kaydedilmiş bir programın şekline uyması için bir döngüyü zaman içinde ne kadar bükebileceği. Daha yüksek değer daha fazla hız değişimini tolere eder; çok yüksek olması yanlış programı eşleştirme riski taşır."
+    },
+    "corr_weight": {
+      "label": "Şekil ve düzey ağırlığı",
+      "doc": "Bir eşleşme puanlanırken eğri şekli ile mutlak güç düzeyi arasındaki denge. Daha yüksek değer şekli tercih eder; daha düşük değer güç düzeyinin eşleştirilmesini tercih eder."
+    },
+    "duration_weight": {
+      "label": "Süre ağırlığı",
+      "doc": "Tipik çalışma süresi bu döngüyle eşleşen bir programın ne kadar güçlü tercih edileceği."
+    },
+    "energy_weight": {
+      "label": "Enerji ağırlığı",
+      "doc": "Tipik enerji tüketimi bu döngüyle eşleşen bir programın ne kadar güçlü tercih edileceği."
     }
   },
   "setting_group": {
@@ -1461,5 +1559,18 @@
     "score": "puan %{pct}",
     "duration_cv": "süre CV %{pct}",
     "avg_confidence": "ort. güven %{pct}"
+  },
+  "pg_evd": {
+    "detected": "Algılayıcı, bir döngünün başladığını fark etti.",
+    "match_commit": "Eşleştirici, yeterli güvenle bir programa karar verdi.",
+    "match_changed": "Döngünün daha fazlası görüldükçe önde gelen program değişti.",
+    "match_ambiguous": "İki program birbirine yakın puan aldı, bu yüzden eşleşme belirsizdi.",
+    "unmatched": "Bu döngüye kaydedilmiş hiçbir program uymadı.",
+    "notify_start": "Bir başlangıç bildirimi gönderilirdi.",
+    "notify_pre_complete": "Bir «neredeyse bitti» bildirimi gönderilirdi.",
+    "notify_finish": "Bir bitiş bildirimi gönderilirdi.",
+    "notify_milestone": "Bir kilometre taşı bildirimi gönderilirdi.",
+    "notify_held": "Bir bildirim, sessiz saatler nedeniyle bekletildi.",
+    "finished": "Döngü, son duruma ulaştı ve sona erdi."
   }
 }

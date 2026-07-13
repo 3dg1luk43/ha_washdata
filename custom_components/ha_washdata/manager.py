@@ -166,8 +166,6 @@ from .const import (
     CONF_NOTIFY_UNLOAD_MESSAGE,
     DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES,
     DEFAULT_NOTIFY_UNLOAD_MESSAGE,
-    CONF_NOTIFY_QUIET_START_HOUR,
-    CONF_NOTIFY_QUIET_END_HOUR,
     CONF_NOTIFY_MILESTONES,
     CONF_NOTIFY_MILESTONE_MESSAGE,
     DEFAULT_NOTIFY_MILESTONES,
@@ -207,9 +205,7 @@ from .const import (
     DEFAULT_MAX_DEFERRAL_SECONDS,
     DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
     DEFAULT_END_ENERGY_THRESHOLD,
-    DEVICE_SMOOTHING_THRESHOLDS,
     DEVICE_COMPLETION_THRESHOLDS,
-    CYCLE_OVERRUN_ANOMALY_RATIO,
     CYCLE_UNDERRUN_ANOMALY_RATIO,
     ENERGY_ANOMALY_Z_THRESHOLD,
     TERMINAL_DROP_MIN_CLEAN_CYCLES,
@@ -218,7 +214,6 @@ from .const import (
     TERMINAL_DROP_MIN_PEAK_RATIO,
     TERMINAL_DROP_PEAK_FAMILIAR_TOL,
     ML_MATCH_COMMIT_THRESHOLD,
-    ML_PROGRESS_BLEND_WEIGHT,
     STATE_RUNNING,
     STATE_OFF,
     STATE_STARTING,
@@ -244,6 +239,8 @@ from .recorder import CycleRecorder
 from .diag_buffer import DiagBuffer
 from .log_utils import DeviceLoggerAdapter
 from .time_utils import power_data_to_offsets
+from . import progress as progress_mod
+from . import notification_rules as notif_rules
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -1331,22 +1328,12 @@ class WashDataManager:
         (caller falls back) when not running, no profile is matched, or the
         profile has no configured phase ranges. Never raises.
         """
-        try:
-            if self.detector.state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
-                return None
-            profile = self._current_program
-            if not profile or profile in ("off", "detecting...", "restored...", "none", "unknown"):
-                return None
-            ranges = self.profile_store.get_profile_phase_ranges(profile)
-            if not ranges:
-                return None
-            nominal = max((float(r.get("end") or 0.0) for r in ranges), default=0.0)
-            if nominal <= 0.0:
-                return None
-            frac = max(0.0, min(1.0, float(self._cycle_progress) / 100.0))
-            return self.profile_store.check_phase_match(profile, frac * nominal)
-        except Exception:  # noqa: BLE001 - phase readout must never break
-            return None
+        return progress_mod.current_phase(
+            self.profile_store,
+            self.detector.state,
+            self._current_program,
+            self._cycle_progress,
+        )
 
     @property
     def match_ambiguity(self) -> bool:
@@ -3616,26 +3603,12 @@ class WashDataManager:
         low-power reading during ENDING. The detector's authoritative expected
         duration overrides the median when available.
         """
-        cache = self._ml_end_expectation_cache
-        if cache is not None and cache[0] == profile_name:
-            expectation = dict(cache[1])
-        else:
-            from .ml.feature_extraction import profile_expectation
-
-            points_list: list[list[tuple[float, float]]] = []
-            for cycle in self.profile_store.get_past_cycles():
-                if cycle.get("profile_name") != profile_name:
-                    continue
-                pts = decompress_power_data(cycle)
-                if pts:
-                    points_list.append(pts)
-            base = profile_expectation(points_list[-20:])
-            if base is None:
-                return None
-            self._ml_end_expectation_cache = (profile_name, dict(base))
-            expectation = dict(base)
-        if expected_duration and expected_duration > 0:
-            expectation["duration"] = float(expected_duration)
+        expectation, self._ml_end_expectation_cache = progress_mod.profile_end_expectation(
+            self.profile_store,
+            profile_name,
+            expected_duration,
+            self._ml_end_expectation_cache,
+        )
         return expectation
 
     def _terminal_drop_provider(
@@ -3717,41 +3690,15 @@ class WashDataManager:
         once training has promoted a regressor; otherwise returns ``None`` so the
         caller keeps the proven phase-aware estimate untouched. Never raises.
         """
-        try:
-            from .ml.engine import ml_models_enabled, resolve_regressor
-
-            if not ml_models_enabled(self.config_entry.options):
-                return None
-            if (
-                not profile_name
-                or profile_name in ("off", "detecting...", "restored...")
-                or profile_name not in self.profile_store.get_profiles()
-            ):
-                return None
-            predict_fn, _src = resolve_regressor("remaining_time", self.profile_store)
-            if predict_fn is None:
-                return None
-            if not trace or len(trace) < 4:
-                return None
-            expectation = self._profile_end_expectation(
-                profile_name, float(self._matched_profile_duration or 0.0)
-            )
-            if expectation is None:
-                return None
-            t0 = trace[0][0]
-            pts = [(float((t - t0).total_seconds()), float(p)) for t, p in trace]
-            from .ml.feature_extraction import progress_features
-
-            feat = progress_features(pts, expectation)
-            if feat is None:
-                return None
-            frac = float(predict_fn(feat))
-            if not math.isfinite(frac):
-                return None
-            return float(min(max(frac, 0.0), 0.99)) * 100.0
-        except Exception as err:  # noqa: BLE001 - ML must never break estimates
-            self._logger.debug("ML progress estimate skipped: %s", err)
-            return None
+        return progress_mod.ml_progress_percent(
+            self.profile_store,
+            self.config_entry.options,
+            float(self._matched_profile_duration or 0.0),
+            trace,
+            profile_name,
+            self._profile_end_expectation,
+            self._logger,
+        )
 
     def _ml_energy_total(
         self,
@@ -3769,47 +3716,15 @@ class WashDataManager:
         remaining-time regressor: opt-in, inert until a model is promoted. Never
         raises.
         """
-        try:
-            from .ml.engine import ml_models_enabled, resolve_regressor
-
-            if not ml_models_enabled(self.config_entry.options):
-                return None
-            if (
-                not profile_name
-                or profile_name in ("off", "detecting...", "restored...")
-                or profile_name not in self.profile_store.get_profiles()
-            ):
-                return None
-            predict_fn, _src = resolve_regressor("total_energy", self.profile_store)
-            if predict_fn is None:
-                return None
-            if not trace or len(trace) < 4:
-                return None
-            expectation = self._profile_end_expectation(
-                profile_name, float(self._matched_profile_duration or 0.0)
-            )
-            if expectation is None:
-                return None
-            t0 = trace[0][0]
-            pts = [(float((t - t0).total_seconds()), float(p)) for t, p in trace]
-            from .ml.feature_extraction import progress_features, cumulative_energy_wh
-
-            feat = progress_features(pts, expectation)
-            if feat is None:
-                return None
-            frac = float(predict_fn(feat))
-            # Floor the fraction so an under-confident prediction can't blow the
-            # projection up; below the floor, defer to the time-based fallback.
-            if not math.isfinite(frac) or frac < 0.05:
-                return None
-            energy_so_far = float(cumulative_energy_wh(pts)[-1])
-            if energy_so_far <= 0.0:
-                return None
-            total = energy_so_far / min(max(frac, 0.05), 1.0)
-            return max(total, energy_so_far)  # never below what's already consumed
-        except Exception as err:  # noqa: BLE001 - ML must never break estimates
-            self._logger.debug("ML energy projection skipped: %s", err)
-            return None
+        return progress_mod.ml_energy_total(
+            self.profile_store,
+            self.config_entry.options,
+            float(self._matched_profile_duration or 0.0),
+            trace,
+            profile_name,
+            self._profile_end_expectation,
+            self._logger,
+        )
 
     def _compute_cycle_quality_score(self, cycle_data: dict[str, Any]) -> None:
         """Score a just-finished cycle with the hybrid_curve_quality model (opt-in).
@@ -4421,22 +4336,7 @@ class WashDataManager:
 
         Off when either hour is unset/None/non-int/out-of-range, or start == end.
         """
-        opts = self.config_entry.options
-        raw_start = opts.get(CONF_NOTIFY_QUIET_START_HOUR)
-        raw_end = opts.get(CONF_NOTIFY_QUIET_END_HOUR)
-        if raw_start is None or raw_end is None:
-            return None
-        try:
-            start = int(raw_start)
-            end = int(raw_end)
-        except (TypeError, ValueError):
-            return None
-        if not (0 <= start <= 23) or not (0 <= end <= 23):
-            return None
-        if start == end:
-            # Zero-length window -> feature off (avoids "always quiet" ambiguity).
-            return None
-        return start, end
+        return notif_rules.quiet_hours_bounds(self.config_entry.options)
 
     def _in_quiet_hours(self, when: datetime | None = None) -> bool:
         """Return True when ``when`` (default now) falls inside the quiet window.
@@ -4445,34 +4345,18 @@ class WashDataManager:
         22:00-06:59). The end hour is exclusive at the hour granularity, so a window
         of start=22, end=7 covers hours 22, 23, 0..6.
         """
-        bounds = self._quiet_hours_bounds()
-        if bounds is None:
-            return False
-        start, end = bounds
-        hour = (when or dt_util.now()).hour
-        if start < end:
-            # Same-day window, e.g. 1 -> 6 covers hours 1..5.
-            return start <= hour < end
-        # Wrap-around window, e.g. 22 -> 7 covers 22,23,0..6.
-        return hour >= start or hour < end
+        return notif_rules.in_quiet_hours(
+            self._quiet_hours_bounds(), when or dt_util.now()
+        )
 
     def _seconds_until_quiet_end(self, when: datetime | None = None) -> float:
         """Seconds from ``when`` until the next end-of-quiet-window boundary (end:00).
 
         Returns 0.0 when the feature is off or when not currently in quiet hours.
         """
-        bounds = self._quiet_hours_bounds()
-        if bounds is None:
-            return 0.0
-        now = when or dt_util.now()
-        if not self._in_quiet_hours(now):
-            return 0.0
-        _start, end = bounds
-        target = now.replace(hour=end, minute=0, second=0, microsecond=0)
-        if target <= now:
-            # End hour is earlier today (wrap-around window) -> it lands tomorrow.
-            target = target + timedelta(days=1)
-        return max(0.0, (target - now).total_seconds())
+        return notif_rules.seconds_until_quiet_end(
+            self._quiet_hours_bounds(), when or dt_util.now()
+        )
 
     def _queue_quiet_hours_notification(
         self,
@@ -4558,23 +4442,7 @@ class WashDataManager:
         one step the largest is returned so a single, most-significant notification
         fires.
         """
-        if not milestones:
-            return None
-        try:
-            iterator = list(milestones)
-        except TypeError:
-            return None
-        crossed: int | None = None
-        for raw in iterator:
-            try:
-                m = int(raw)
-            except (TypeError, ValueError):
-                continue
-            if m <= 0:
-                continue
-            if prev_count < m <= cur_count and (crossed is None or m > crossed):
-                crossed = m
-        return crossed
+        return notif_rules.milestone_crossed(prev_count, cur_count, milestones)
 
     def _lifetime_cycle_count(self) -> int:
         """Persisted monotonic lifetime completed-cycle count.
@@ -5577,13 +5445,12 @@ class WashDataManager:
 
     def _check_pre_completion_notification(self) -> None:
         """Check and send pre-completion notification."""
-        if (
-            self._notify_before_end_minutes > 0
-            and not self._notified_pre_completion
-            and self._time_remaining is not None
-            and self._time_remaining <= (self._notify_before_end_minutes * 60)
-            and self._cycle_progress < 100
-            and not self._last_match_ambiguous
+        if notif_rules.should_notify_pre_completion(
+            self._notify_before_end_minutes,
+            self._notified_pre_completion,
+            self._time_remaining,
+            self._cycle_progress,
+            self._last_match_ambiguous,
         ):
             # Send notification!
             self._notified_pre_completion = True
@@ -5618,9 +5485,6 @@ class WashDataManager:
             )
             self._logger.info("Sent pre-completion notification: %s", msg)
 
-    #: Progress floor below which an energy projection is too noisy to publish.
-    _PROJECTION_MIN_PROGRESS = 3.0
-
     def _update_projected_energy(self) -> None:
         """Project total energy/cost for the running cycle.
 
@@ -5635,29 +5499,29 @@ class WashDataManager:
         failure must not disturb the estimate loop.
         """
         try:
-            progress = float(self._cycle_progress or 0.0)
-            energy_so_far = float(getattr(self.detector, "_energy_since_idle_wh", 0.0) or 0.0)
-            if progress < self._PROJECTION_MIN_PROGRESS or energy_so_far <= 0.0:
-                self._projected_energy_wh = None
-                self._projected_cost = None
-                return
-            # Prefer the learned energy regressor; fall back to the time-progress
-            # division when it's unavailable/inert.
-            projected_wh = self._ml_energy_total(
-                self.detector.get_power_trace(), self._current_program
+            trace = self.detector.get_power_trace()
+            energy_so_far = float(
+                getattr(self.detector, "_energy_since_idle_wh", 0.0) or 0.0
             )
-            if projected_wh is None:
-                projected_wh = energy_so_far / (progress / 100.0)
-            # Never project below what has already been consumed.
-            projected_wh = max(projected_wh, energy_so_far)
-            self._projected_energy_wh = projected_wh
             price = self._resolve_energy_price()
-            self._projected_cost = (
-                (projected_wh / 1000.0) * float(price) if price else None
-            )
         except Exception:  # noqa: BLE001 - projection must never break estimates
             self._projected_energy_wh = None
             self._projected_cost = None
+            return
+        wh, cost = progress_mod.projected_energy(
+            self.profile_store,
+            self.config_entry.options,
+            float(self._matched_profile_duration or 0.0),
+            trace,
+            self._current_program,
+            float(self._cycle_progress or 0.0),
+            energy_so_far,
+            price,
+            self._profile_end_expectation,
+            self._logger,
+        )
+        self._projected_energy_wh = wh
+        self._projected_cost = cost
 
     def _update_cycle_anomaly(self, duration_so_far: float) -> None:
         """Flag a *soft* runtime overrun anomaly for the running cycle.
@@ -5668,18 +5532,9 @@ class WashDataManager:
         never notifies and never terminates (the zombie-killer owns hard limits).
         No-op / cleared when no profile duration is known. Never raises.
         """
-        try:
-            expected = float(self._matched_profile_duration or 0.0)
-            if expected <= 0.0 or duration_so_far <= 0.0:
-                self._overrun_ratio = 0.0
-                self._cycle_anomaly = "none"
-                return
-            ratio = duration_so_far / expected
-            self._overrun_ratio = ratio
-            self._cycle_anomaly = "overrun" if ratio >= CYCLE_OVERRUN_ANOMALY_RATIO else "none"
-        except Exception:  # noqa: BLE001 - anomaly signal must never break estimates
-            self._overrun_ratio = 0.0
-            self._cycle_anomaly = "none"
+        self._overrun_ratio, self._cycle_anomaly = progress_mod.cycle_anomaly(
+            self._matched_profile_duration, duration_so_far
+        )
 
     def _update_remaining_only(self) -> None:
         """Recompute remaining/progress using phase-aware estimation."""
@@ -5708,143 +5563,8 @@ class WashDataManager:
         duration_so_far = float(self.net_elapsed_seconds)
         self._check_cycle_timers(duration_so_far)
 
-        if self._matched_profile_duration and self._matched_profile_duration > 0:
-            # Get current power trace for phase analysis
-            trace = self.detector.get_power_trace()
-
-            # --- PHASE-AWARE ESTIMATION ---
-            if len(trace) >= 10 and self._current_program != "detecting...":
-                phase_result = self._estimate_phase_progress(
-                    trace, duration_so_far, self._current_program
-                )
-                if phase_result is not None:
-                    phase_progress, phase_variance = phase_result
-
-                    # Blend an on-device remaining-time regressor (opt-in, no
-                    # shipped baseline) into the raw phase estimate BEFORE the EMA
-                    # smoothing/monotonicity guards run, so a bad model can never
-                    # wholly override the proven phase estimator. No-op unless a
-                    # regressor has been trained and ML models are enabled.
-                    ml_pct = self._ml_progress_percent(trace, self._current_program)
-                    if ml_pct is not None:
-                        w = ML_PROGRESS_BLEND_WEIGHT
-                        phase_progress = (1.0 - w) * phase_progress + w * ml_pct
-
-                    # Smoothing: Exponential Moving Average
-                    # If this is the first reliable estimate, snap to it.
-                    # Otherwise, blend 20% new, 80% old.
-                    if self._smoothed_progress == 0.0:
-                        self._smoothed_progress = phase_progress
-                    else:
-                        current_smoothed = self._smoothed_progress
-                        # Smart Time Prediction (Variance-Based Locking)
-                        # If variance is high (e.g. > 50W std dev), this phase
-                        # is unpredictable. DAMP HEAVILY.
-                        # If variance is low (< 10W), trust the estimate more.
-                        alpha = 0.2  # Default
-                        if phase_variance > 100.0:
-                            alpha = 0.05  # Very slow updates (mostly locked)
-                            self._logger.debug(
-                                "High variance phase (std=%.1fW), "
-                                "locking time estimate (alpha=0.05)",
-                                phase_variance,
-                            )
-                        elif phase_variance > 50.0:
-                            alpha = 0.1
-
-                        # Monotonicity check: don't let it jump BACKWARD
-                        # significantly unless the profile changed (handled
-                        # elsewhere). Allow small fluctuations, but prevent
-                        # large drops. Use device-type-specific threshold to
-                        # handle different cycle characteristics.
-                        smoothing_threshold = DEVICE_SMOOTHING_THRESHOLDS.get(
-                            self.device_type, 5.0
-                        )
-                        if phase_progress < current_smoothed - smoothing_threshold:
-                            # Let's damp it heavily (keep mostly old value).
-                            self._smoothed_progress = (current_smoothed * 0.95) + (
-                                phase_progress * 0.05
-                            )
-                            self._logger.debug(
-                                "Progress drop detected (%.1f%% < %.1f%% - %.1f%%), "
-                                "applying heavy damping for %s",
-                                phase_progress,
-                                current_smoothed,
-                                smoothing_threshold,
-                                self.device_type,
-                            )
-                        else:
-                            # Normal estimate update with dynamic alpha
-                            self._smoothed_progress = (
-                                self._smoothed_progress * (1.0 - alpha)
-                            ) + (phase_progress * alpha)
-
-                    # Ensure we don't exceed 99% until actually finished
-                    self._smoothed_progress = min(99.0, self._smoothed_progress)
-
-                    # Update User-Facing Progress from Smoothed Value
-                    self._cycle_progress = self._smoothed_progress
-
-                    # Back-calculate "Time Remaining" from the smoothed progress
-                    # exact_remaining = duration * (1 - progress)
-                    # This prevents "progress says 90% but time says 20 mins" mismatch
-                    remaining = self._matched_profile_duration * (
-                        1.0 - (self._cycle_progress / 100.0)
-                    )
-                    self._time_remaining = max(0.0, remaining)
-                    self._total_duration = duration_so_far + remaining
-                    self._last_total_duration_update = now
-
-                    self._logger.debug(
-                        "Phase-aware estimate: raw=%.1f%%, smoothed=%.1f%%, remaining=%smin",
-                        phase_progress,
-                        self._cycle_progress,
-                        int(remaining / 60),
-                    )
-                    self._update_projected_energy()
-                    self._update_cycle_anomaly(duration_so_far)
-                    return
-
-            # --- LINEAR FALLBACK (if phase analysis unavailable) ---
-            matched_dur = float(self._matched_profile_duration)
-            remaining = max(matched_dur - duration_so_far, 0.0)
-            progress = (duration_so_far / matched_dur) * 100.0
-
-            # Same opt-in ML regressor blend as the phase-aware branch, so the
-            # personalised progress curve is used even without phase lock.
-            ml_pct = self._ml_progress_percent(trace, self._current_program)
-            if ml_pct is not None:
-                w = ML_PROGRESS_BLEND_WEIGHT
-                progress = (1.0 - w) * progress + w * ml_pct
-                remaining = max(matched_dur * (1.0 - progress / 100.0), 0.0)
-
-            # Blend linear estimate into smoothed tracker too, to prevent
-            # jumps if we lose phase lock
-            if self._smoothed_progress > 0:
-                # Blend gently
-                self._smoothed_progress = (self._smoothed_progress * 0.9) + (
-                    progress * 0.1
-                )
-            else:
-                self._smoothed_progress = progress
-
-            # Set _cycle_progress from the smoothed value FIRST so that
-            # time_remaining is derived from the same value shown to the user.
-            self._cycle_progress = max(0.0, min(self._smoothed_progress, 100.0))
-            remaining = max(matched_dur * (1.0 - self._cycle_progress / 100.0), 0.0)
-            self._time_remaining = remaining
-            self._total_duration = duration_so_far + remaining
-            self._last_total_duration_update = now
-            self._logger.debug(
-                "Linear estimate: remaining=%smin, progress=%.1f%%",
-                int(remaining / 60),
-                self._cycle_progress,
-            )
-            self._update_projected_energy()
-            self._update_cycle_anomaly(duration_so_far)
-        else:
-            # No profile matched - don't provide misleading time estimates
-            # Just show that we're detecting (no Smart Resume based on history)
+        if not (self._matched_profile_duration and self._matched_profile_duration > 0):
+            # No profile matched - don't provide misleading time estimates.
             self._time_remaining = None
             self._total_duration = None
             self._cycle_progress = 0.0
@@ -5856,6 +5576,36 @@ class WashDataManager:
             self._logger.debug(
                 "No profile matched yet, elapsed=%smin", int(duration_so_far / 60)
             )
+            return
+
+        # Compute the phase-aware and ML progress inputs via the manager's own
+        # wrappers (so per-call caching + test mocks apply), then hand them to the
+        # shared pure smoothing/back-calc in :mod:`progress` - the identical math
+        # the Playground simulation runs.
+        trace = self.detector.get_power_trace()
+        phase_result = None
+        if len(trace) >= 10 and self._current_program != "detecting...":
+            phase_result = self._estimate_phase_progress(
+                trace, duration_so_far, self._current_program
+            )
+        ml_pct = self._ml_progress_percent(trace, self._current_program)
+        result = progress_mod.compute_progress(
+            self.device_type,
+            float(self._matched_profile_duration),
+            duration_so_far,
+            self._smoothed_progress,
+            phase_result,
+            ml_pct,
+            self._logger,
+        )
+
+        self._cycle_progress = result.progress
+        self._smoothed_progress = result.smoothed
+        self._time_remaining = result.remaining
+        self._total_duration = result.total
+        self._last_total_duration_update = now
+        self._update_projected_energy()
+        self._update_cycle_anomaly(duration_so_far)
 
     def _check_cycle_timers(self, elapsed_seconds: float) -> None:
         """Fire any user-configured cycle timers whose offset has been reached."""
@@ -6003,245 +5753,14 @@ class WashDataManager:
         current_duration: float,
         profile_name: str,
     ) -> tuple[float, float] | None:
-        """
-        Estimate cycle progress by analyzing which phase we're in.
-
-        Uses cached statistical envelope built from ALL cycles labeled with
-        this profile, normalized by TIME to account for different sampling rates.
-
-        Returns progress percentage (0-100) or None if estimation fails.
-        """
-        # Get cached envelope (fast - already computed and stored)
-        envelope = self.profile_store.get_envelope(profile_name)
-
-        if envelope is None:
-            self._logger.debug("No envelope cached for profile %s", profile_name)
-            return None
-
-        # Convert cached lists back to numpy arrays
-        # Envelope curves are stored as [[t, y], ...] points, extract Y values only
-        try:
-            env_min = envelope.get("min", [])
-            env_max = envelope.get("max", [])
-            env_avg = envelope.get("avg", [])
-            env_std = envelope.get("std", [])
-
-            # Handle both formats: [[t, y], ...] (new) or [y, ...] (legacy)
-            def extract_y_values(data: list[Any]) -> np.ndarray[Any, np.dtype[np.float64]]:
-                if not data:
-                    return np.array([], dtype=float)
-                first = data[0]
-                if isinstance(first, (list, tuple)):
-                    first_seq = cast(list[Any] | tuple[Any, ...], first)
-                    if len(first_seq) < 2:
-                        return np.array([], dtype=float)
-                    # New format: [[t, y], ...]
-                    points = cast(list[list[Any] | tuple[Any, ...]], data)
-                    return np.array([float(pt[1]) for pt in points], dtype=float)
-                # Legacy format: [y, ...]
-                scalars = cast(list[float | int], data)
-                return np.array(scalars, dtype=float)
-
-            envelope_arrays: dict[str, np.ndarray[Any, np.dtype[np.float64]]] = {
-                "min": extract_y_values(env_min),
-                "max": extract_y_values(env_max),
-                "avg": extract_y_values(env_avg),
-                "std": extract_y_values(env_std),
-            }
-            time_grid: np.ndarray[Any, np.dtype[np.float64]] = np.array(
-                envelope.get("time_grid", []), dtype=float
-            )
-            target_duration = float(envelope.get("target_duration", 0.0) or 0.0)
-        except (KeyError, ValueError, TypeError, IndexError) as e:
-            self._logger.warning("Invalid envelope format for %s: %s", profile_name, e)
-            return None
-
-        if len(time_grid) == 0 or target_duration <= 0:
-            if target_duration > 0 and len(envelope_arrays["avg"]) > 0:
-                # Reconstruct time_grid if missing (Legacy envelope support)
-                count = len(envelope_arrays["avg"])
-                time_grid = np.linspace(0, target_duration, count)
-                self._logger.debug(
-                    "Reconstructed missing time_grid for %s (n=%d)",
-                    profile_name,
-                    count,
-                )
-            else:
-                self._logger.debug("Envelope missing time grid/duration, cannot estimate phase")
-                return None
-
-        # Extract power offsets from current cycle (any format → [offset, power])
-        current_offsets_list = power_data_to_offsets(
-            cast(list[list[Any] | tuple[Any, ...]], current_power_data)
+        """Phase-aware progress estimate. Thin wrapper over :mod:`progress`."""
+        return progress_mod.estimate_phase_progress(
+            self.profile_store,
+            current_power_data,
+            current_duration,
+            profile_name,
+            self._logger,
         )
-        current_offsets = np.array([o for o, _ in current_offsets_list])
-        current_values = np.array([p for _, p in current_offsets_list])
-
-        # Use sliding window on TIME, not sample count
-        # Look at last ~1 minute of data or 25% of expected duration, whichever is smaller
-        window_duration = min(60.0, target_duration * 0.25)
-        current_time = current_offsets[-1]
-        window_start_time = max(0, current_time - window_duration)
-
-        # Get current window (last N seconds of data)
-        window_mask = current_offsets >= window_start_time
-        current_window_values = current_values[window_mask]
-
-        if len(current_window_values) < 3:
-            self._logger.debug("Insufficient data in current window for phase estimation")
-            return None
-
-        best_progress: float | None = None
-        best_score = -1.0
-        in_bounds = False
-        best_time_window_start: float | None = None
-
-        # Search through envelope TIME grid for best matching position
-        for i in range(len(time_grid) - 1):
-            time_window_start = float(time_grid[i])
-
-            # Get envelope values for this time window
-            envelope_window_start = i
-            envelope_window_end = min(
-                i + len(current_window_values), len(envelope_arrays["avg"])
-            )
-
-            if envelope_window_end <= envelope_window_start:
-                continue
-
-            avg_window = envelope_arrays["avg"][
-                envelope_window_start:envelope_window_end
-            ]
-            min_window = envelope_arrays["min"][
-                envelope_window_start:envelope_window_end
-            ]
-            max_window = envelope_arrays["max"][
-                envelope_window_start:envelope_window_end
-            ]
-
-            # Interpolate envelope to match current window length if needed
-            if len(avg_window) != len(current_window_values):
-                x_old = np.linspace(0, 1, len(avg_window))
-                x_new = np.linspace(0, 1, len(current_window_values))
-                avg_window = np.interp(x_new, x_old, avg_window)
-                min_window = np.interp(x_new, x_old, min_window)
-                max_window = np.interp(x_new, x_old, max_window)
-
-            # Check if current power is within expected bounds (±20% tolerance)
-            within_bounds = np.all(
-                (current_window_values >= min_window * 0.8)
-                & (current_window_values <= max_window * 1.2)
-            )
-            bounds_score = np.mean(
-                (current_window_values >= min_window)
-                & (current_window_values <= max_window)
-            )
-
-            # Calculate shape similarity to average
-            try:
-                if np.std(current_window_values) > 0 and np.std(avg_window) > 0:
-                    correlation = np.corrcoef(current_window_values, avg_window)[0, 1]
-                else:
-                    correlation = 0.0
-
-                # MAE against average
-                mae = np.mean(np.abs(current_window_values - avg_window))
-                max_power = max(np.max(avg_window), np.max(current_window_values), 1.0)
-                mae_normalized = 1.0 - min(mae / max_power, 1.0)
-
-                # Combined score: shape + amplitude + bounds compliance
-                score = (
-                    0.4 * max(correlation, 0.0)  # Shape matching
-                    + 0.3 * mae_normalized  # Amplitude matching
-                    + 0.3 * bounds_score  # Within expected range
-                )
-
-                # Penalize matches that are far from current elapsed time
-                # (assume linear progress is roughly correct). This prevents
-                # wild jumps in time remaining when patterns repeat
-                time_diff = abs(time_window_start - current_duration)
-                # Max penalty at 30% duration diff
-                time_penalty = min(1.0, time_diff / (target_duration * 0.3))
-
-                # Apply time penalty (reduce score by up to 40%)
-                score = score * (1.0 - 0.4 * time_penalty)
-
-                if score > best_score:
-                    best_score = score
-                    best_progress = (time_window_start / target_duration) * 100.0
-                    in_bounds = within_bounds
-                    best_time_window_start = float(time_window_start)
-            except Exception:  # pylint: disable=broad-exception-caught
-                continue
-
-        if best_progress is None or best_score < 0.4:
-            self._logger.debug("Phase detection failed: best_score=%.3f", best_score)
-            return None
-
-        # Calculate variance for the best window (Smart Time Prediction)
-        # Low variance = high confidence in timing. High variance = low confidence.
-        best_variance = 0.0
-        if best_time_window_start is not None:
-            # Find index in time_grid again (approx)
-            # Optimization: store best_index in loop?
-            # Just map time back to index
-            idx_start = int((best_time_window_start / target_duration) * len(time_grid))
-            idx_end = min(
-                idx_start + len(current_window_values), len(envelope_arrays["std"])
-            )
-            if idx_end > idx_start:
-                window_std = envelope_arrays["std"][idx_start:idx_end]
-                if len(window_std) > 0:
-                    best_variance = float(np.mean(window_std))
-
-        # Cap progress at 99% until actual completion
-        best_progress = max(0.0, min(best_progress, 99.0))
-
-        # Log with envelope metadata
-        cycle_count = envelope.get("cycle_count", 0)
-        avg_sample_rates_raw = envelope.get("sampling_rates", [1.0])
-        avg_sample_rates = (
-            cast(list[float | int], avg_sample_rates_raw)
-            if isinstance(avg_sample_rates_raw, list)
-            else [1.0]
-        )
-        avg_sample_rate = (
-            float(np.median(np.array(avg_sample_rates, dtype=float)))
-            if avg_sample_rates
-            else 1.0
-        )
-
-        tws = (
-            best_time_window_start
-            if best_time_window_start is not None
-            else float(current_duration)
-        )
-        if not in_bounds:
-            self._logger.debug(
-                "Phase detection: progress=%.1f%%, score=%.3f, var=%.1fW, "
-                "time=%.0f/%.0fs [OUT OF BOUNDS, %s cycles, avg_sample_rate=%.1fs]",
-                best_progress,
-                best_score,
-                best_variance,
-                tws,
-                target_duration,
-                cycle_count,
-                avg_sample_rate,
-            )
-        else:
-            self._logger.debug(
-                "Phase detection: progress=%.1f%%, score=%.3f, var=%.1fW, "
-                "time=%.0f/%.0fs [IN BOUNDS, %s cycles, avg_sample_rate=%.1fs]",
-                best_progress,
-                best_score,
-                best_variance,
-                tws,
-                target_duration,
-                cycle_count,
-                avg_sample_rate,
-            )
-
-        return (best_progress, best_variance)
 
     def _notify_update(self) -> None:
         """Notify entities of update."""

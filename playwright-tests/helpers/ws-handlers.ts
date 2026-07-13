@@ -100,6 +100,36 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
   'ha_washdata/delete_maintenance_event': { success: true },
   'ha_washdata/save_maintenance_reminders': { success: true },
   'ha_washdata/run_playground_simulation': { results: {}, summary: {} },
+  'ha_washdata/get_cycle_power_data': {
+    samples: Array.from({ length: 30 }, (_, i) => [i * 60, i < 2 || i > 27 ? 3 : 900]),
+    full_duration_s: 1740,
+  },
+  'ha_washdata/run_playground_cycle_detail': {
+    cycle_id: 'cyc-001', label: 'Cotton 40°C', duration_s: 1740,
+    config_summary: { device_type: 'washing_machine', off_delay: 180 },
+    series: [
+      { t: 0, power: 3, energy_wh: 0, state: 'starting', progress: null, remaining_s: null, phase: null, confidence: null, matched_profile: null },
+      { t: 600, power: 900, energy_wh: 120, state: 'running', progress: 35, remaining_s: 1100, phase: 'Wash', confidence: 0.74, matched_profile: 'Cotton 40°C', projected_energy_wh: 480, projected_cost: 2.4 },
+      { t: 1700, power: 3, energy_wh: 470, state: 'ending', progress: 97, remaining_s: 40, phase: 'Spin', confidence: 0.82, matched_profile: 'Cotton 40°C', projected_energy_wh: 485, projected_cost: 2.5 },
+    ],
+    events: [
+      { t: 30, type: 'detected', detail: 'cycle detected', severity: 'info' },
+      { t: 300, type: 'match_commit', detail: 'Cotton 40°C (0.74)', severity: 'info' },
+      { t: 1700, type: 'finished', detail: 'reason=smart', severity: 'info' },
+    ],
+    alerts: [],
+    outcome: { detected: true, detected_count: 1, termination_reason: 'smart', status: 'completed', final_duration_s: 1740, matched_profile: 'Cotton 40°C', match_correct: true, confidence: 0.82, expected_s: 1720, overrun_ratio: 1.01, projected_energy_wh: 485, projected_cost: 2.5 },
+  },
+  'ha_washdata/run_playground_history': {
+    rows: [
+      { cycle_id: 'cyc-001', label: 'Cotton 40°C', detected: true, detected_count: 1, matched_profile: 'Cotton 40°C', match_correct: true, confidence: 0.82, termination_reason: 'smart', duration_s: 1740, expected_s: 1720, overrun_ratio: 1.01, alerts: [] },
+    ],
+    summary: { cycles: 1, detected: 1, labelled: 1, match_correct: 1, match_wrong: 0, unmatched: 0, false_end: 0 },
+  },
+  'ha_washdata/run_playground_sweep': {
+    param: 'off_delay', objective: 'match_accuracy', current_value: 180, best_value: 120, best_metric: 0.9,
+    points: [{ value: 120, metric: 0.9, summary: {} }, { value: 180, metric: 0.8, summary: {} }],
+  },
   'ha_washdata/get_dtw_debug': {
     stage2: { correlation: 0.91, mae_score: 0.88, score: 0.90 },
     dtw: { l1_score: 0.87, ddtw_score: 0.85, blend_weight: 0.7, blended_score: 0.86 },

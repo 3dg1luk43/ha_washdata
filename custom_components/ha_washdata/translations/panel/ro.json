@@ -145,7 +145,10 @@
     "use": "Utilizați",
     "wipe_all": "Ștergeți toate datele",
     "delete_selected": "Ștergeți selecția ({n})",
-    "group_suggest": "Grup {n}: {members}"
+    "group_suggest": "Grup {n}: {members}",
+    "pg_apply_best": "Aplică cel mai bun",
+    "pg_apply_to_settings": "Salvează în setări",
+    "pg_apply_to_settings_tip": "Copiază valorile pe care le-ai modificat aici în setările active ale acestui dispozitiv"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,7 +256,11 @@
     "toggle_sidebar": "Comutați bara laterală Home Assistant",
     "tools_and_data": "Instrumente și date",
     "wipe_history": "Ștergeți istoricul",
-    "recommendations": "Recomandări ({n})"
+    "recommendations": "Recomandări ({n})",
+    "pg_detection_params": "Setări de detectare",
+    "pg_timeline": "Cronologia evenimentelor",
+    "pg_outcome": "Rezultatul simulării",
+    "pg_across_cycles": "În toate ciclurile tale"
   },
   "health": {
     "fair": "Calitate acceptabilă a profilului",
@@ -458,7 +465,62 @@
     "n_shown": ", {n} afișate",
     "cycles_title": "Cicluri ({n})",
     "pg_detecting": "Detectare",
-    "pg_best_marker": "Cel mai bun: {v}"
+    "pg_best_marker": "Cel mai bun: {v}",
+    "pg_time_left_model": "Timp rămas (model)",
+    "pg_time_left_model_tip": "Timp rămas estimat de model (estimator de fază + combinație ML), nu o numărătoare inversă fixă",
+    "phase": "Fază",
+    "pg_mode_simulate": "Simulează",
+    "pg_mode_history": "Testează pe istoric",
+    "pg_mode_sweep": "Scanare",
+    "pg_ev_detected": "Detectat",
+    "pg_ev_match": "Potrivire confirmată",
+    "pg_ev_match_changed": "Potrivire schimbată",
+    "pg_ev_ambiguous": "Ambiguu",
+    "pg_ev_unmatched": "Fără potrivire",
+    "pg_ev_notify_start": "Notificare de pornire",
+    "pg_ev_notify_pre": "Notificare de pre-finalizare",
+    "pg_ev_notify_finish": "Notificare de finalizare",
+    "pg_ev_notify_milestone": "Notificare de etapă",
+    "pg_ev_notify_held": "Notificare reținută (ore de liniște)",
+    "pg_ev_finished": "Finalizat",
+    "pg_ended": "Încheiere",
+    "pg_proj_energy": "Energie est.",
+    "pg_alert_overrun": "Prea lung",
+    "pg_alert_underrun": "Prea scurt",
+    "pg_alert_did_not_finish": "Nu s-a terminat",
+    "pg_alert_false_end": "Împărțit în mai multe cicluri",
+    "pg_alert_unmatched": "Fără potrivire",
+    "pg_alert_ambiguous": "Potrivire ambiguă",
+    "pg_alert_energy": "Anomalie de energie",
+    "pg_newly_correct": "acum corect",
+    "pg_regressed": "regresat",
+    "pg_end_timing_changed": "moment de încheiere schimbat",
+    "pg_vs_current": "vs actual",
+    "pg_fixed": "rezolvat",
+    "pg_broke": "stricat",
+    "pg_sweep_param": "Parametru",
+    "pg_objective": "Obiectiv",
+    "pg_steps": "Pași",
+    "pg_sweep_2d": "Hartă termică 2D",
+    "pg_sweep_param_y": "Al 2-lea parametru",
+    "pg_obj_match": "Acuratețea potrivirii",
+    "pg_obj_endtiming": "Acuratețea momentului de încheiere",
+    "pg_obj_falseend": "Rata de sfârșituri false",
+    "pg_obj_overrun": "Abatere de durată",
+    "pg_obj_ambiguity": "Rata de ambiguitate",
+    "pg_best_combo": "cea mai bună combinație",
+    "pg_mode_optimize": "Optimizează",
+    "pg_group_matching": "Potrivirea programului",
+    "pg_zoom_hint": "dublu clic pentru a reseta zoomul",
+    "aria_playground_chart2": "Grafic interactiv al puterii ciclului: treci cu cursorul pentru a citi timpul/puterea, derulează pentru a mări, trage pentru a te deplasa",
+    "pg_alert_timeout_end": "Încheiat la expirarea timpului, nu prin predicție",
+    "pg_alert_indefinite": "Ar funcționa la nesfârșit",
+    "task_pg_history": "Testare pe istoric",
+    "task_pg_sweep": "Optimizare",
+    "task_reprocess": "Reprocesare",
+    "task_ml_training": "Învățare",
+    "eta_secs": "~{n} s rămase",
+    "eta_mins": "~{n} min rămase"
   },
   "log": {
     "all_levels": "Toate nivelurile"
@@ -707,7 +769,21 @@
     "advisory_energy_trend_up": "'{name}' consumă tot mai multă energie (aproximativ +{pct}% pe ciclu) - merită să verificați aparatul dacă acest lucru este neașteptat.",
     "advisory_poor_health": "'{name}' are un scor de potrivire scăzut - ciclurile sale recente variază mult sau se potrivesc slab. Examinați ciclurile sau reînregistrați profilul pentru ca recunoașterea și estimările de timp să rămână exacte.",
     "advisory_shape_drift": "'{name}' a deviat semnificativ față de forma inițială a puterii. Comportamentul aparatului s-ar putea să se fi schimbat în timp (de ex. calcar, uzură). Luați în considerare reînregistrarea acestui profil cu cicluri recente.",
-    "advisory_shape_drift_corr": "'{name}' a deviat semnificativ față de forma inițială a puterii (corelație {corr}). Comportamentul aparatului s-ar putea să se fi schimbat în timp (de ex. calcar, uzură). Luați în considerare reînregistrarea acestui profil cu cicluri recente."
+    "advisory_shape_drift_corr": "'{name}' a deviat semnificativ față de forma inițială a puterii (corelație {corr}). Comportamentul aparatului s-ar putea să se fi schimbat în timp (de ex. calcar, uzură). Luați în considerare reînregistrarea acestui profil cu cicluri recente.",
+    "pg_no_alerts": "Nicio problemă detectată în această rulare.",
+    "pg_override_active": "Se folosesc setările editate față de cele actuale",
+    "pg_history_intro": "Reluați ciclurile recente prin detectorul și sistemul de potrivire reale. Modificați mai întâi o setare de detectare în Simulează pentru a vedea aici o comparație înainte/după.",
+    "pg_history_empty": "Apăsați Rulați pentru a relua ciclurile.",
+    "pg_history_summary": "{detected}/{total} detectate · {correct} potrivite corect",
+    "pg_sweep_no_metric": "Date insuficiente pentru a evalua acest obiectiv.",
+    "pg_sweep_intro2": "Găsiți setarea care îndeplinește cel mai bine un obiectiv pe ciclurile recente. Nimic nu se schimbă până nu o aplicați.",
+    "pg_running_history": "Se reiau ciclurile tale…",
+    "pg_running_sweep": "Se testează valori pe toate ciclurile tale…",
+    "pg_row_load_hint": "Încarcă acest ciclu în graficul de mai sus",
+    "pg_history_intro2": "Reia ciclurile tale recente prin detectorul și sistemul de potrivire reale, cu setările de mai sus. Fă clic pe orice rând pentru a încărca acel ciclu în grafic; modifică o setare pentru a vedea o comparație înainte/după.",
+    "pg_simulating": "Se simulează ciclul…",
+    "pg_canvas_empty2": "Alege un ciclu de mai sus și apasă Rulează pentru a-l simula. Apoi treci cu cursorul pentru a citi valorile, derulează pentru a mări și trage pentru a te deplasa.",
+    "pg_apply_settings_confirm": "Salvezi aceste {n} setări pe acest dispozitiv? {list}"
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1130,6 +1206,22 @@
     "peak_rate_threshold": {
       "doc": "Când începe un ciclu și prețul curent pe kWh este la această valoare sau peste, se adaugă un sfat privind tariful de vârf la notificarea de pornire. 0 sau necompletat dezactivează sfatul.",
       "label": "Prag tarif de vârf (pe kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Toleranța potrivirii de formă",
+      "doc": "Cât de mult poate deforma în timp sistemul de potrivire un ciclu pentru a-l adapta la forma unui program salvat. O valoare mai mare tolerează variații de viteză mai mari; prea mare riscă să potrivească programul greșit."
+    },
+    "corr_weight": {
+      "label": "Ponderea formă / nivel",
+      "doc": "Echilibrul dintre forma curbei și nivelul absolut de putere la evaluarea unei potriviri. O valoare mai mare favorizează forma; una mai mică favorizează potrivirea nivelului de putere."
+    },
+    "duration_weight": {
+      "label": "Ponderea duratei",
+      "doc": "Cât de puternic este preferat un program a cărui durată obișnuită corespunde acestui ciclu."
+    },
+    "energy_weight": {
+      "label": "Ponderea energiei",
+      "doc": "Cât de puternic este preferat un program al cărui consum obișnuit de energie corespunde acestui ciclu."
     }
   },
   "setting_group": {
@@ -1439,7 +1531,13 @@
     "off_delay": "Secunde de putere scăzută înainte de încheierea ciclului",
     "start_duration_threshold": "Secunde peste prag pentru a confirma pornirea",
     "start_threshold_w": "Wați minimi pentru a fi considerat pornit",
-    "stop_threshold_w": "Sub această valoare, mașina este considerată oprită"
+    "stop_threshold_w": "Sub această valoare, mașina este considerată oprită",
+    "dtw_bandwidth": "Câtă deformare în timp permite potrivirea formei",
+    "corr_weight": "Ponderea formei curbei față de nivelul de putere în potrivire",
+    "duration_weight": "Cât de mult influențează concordanța duratei potrivirea",
+    "energy_weight": "Cât de mult influențează concordanța energiei potrivirea",
+    "profile_match_min_duration_ratio": "Cel mai scurt ciclu (față de profil) încă permis să corespundă",
+    "profile_match_max_duration_ratio": "Cel mai lung ciclu (față de profil) încă permis să corespundă"
   },
   "col": {
     "profile_tip": "Numele programului corespunzător. Neetichetat înseamnă că niciun profil nu a corespuns la sfârșitul ciclului.",
@@ -1461,5 +1559,18 @@
     "score": "scor {pct}%",
     "duration_cv": "CV al duratei {pct}%",
     "avg_confidence": "încredere medie {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Detectorul a recunoscut că un ciclu a început.",
+    "match_commit": "Modulul de potrivire a ales un program cu suficientă încredere.",
+    "match_changed": "Programul principal s-a schimbat pe măsură ce a fost observată o parte mai mare din ciclu.",
+    "match_ambiguous": "Două programe au obținut scoruri apropiate, așa că potrivirea a fost incertă.",
+    "unmatched": "Niciun program salvat nu s-a potrivit cu acest ciclu.",
+    "notify_start": "Ar fi trimisă o notificare de pornire.",
+    "notify_pre_complete": "Ar fi trimisă o notificare de aproape finalizat.",
+    "notify_finish": "Ar fi trimisă o notificare de finalizare.",
+    "notify_milestone": "Ar fi trimisă o notificare de etapă.",
+    "notify_held": "O notificare a fost reținută pentru orele de liniște.",
+    "finished": "Ciclul a ajuns într-o stare finală și s-a încheiat."
   }
 }
