@@ -447,10 +447,20 @@ class StoreClient:
             # Firestore rejects nested arrays -> store points as {o,w} maps.
             "trace": {"points": pack_points(pts), "sampleIntervalSec": interval},
             "stats": stats if isinstance(stats, dict) else {},
-            "cycleSchemaVersion": 1, "downloads": 0, "commentCount": 0, "qc": qc_code,
+            "cycleSchemaVersion": 1, "downloads": 0, "commentCount": 0, "confirmCount": 0, "qc": qc_code,
         }
         if not await self._commit_create(token, f"cycles/{cyc_id}", cycle_fields):
             return None
+        # Bump the profile's cycleCount for the browse count (best-effort).
+        try:
+            await self._commit(token, [{
+                "transform": {
+                    "document": self._doc_path(f"profiles/{p_id}"),
+                    "fieldTransforms": [{"fieldPath": "cycleCount", "increment": _encode(1)}],
+                },
+            }])
+        except Exception:  # noqa: BLE001 - counter is best-effort
+            pass
         return cyc_id
 
     # ── community catalog: confirm + rate a device (authed) ──────────────────────

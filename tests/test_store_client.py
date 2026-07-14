@@ -46,6 +46,17 @@ def _client(session):
     return StoreClient(MagicMock(), project_id="washdata-store", api_key="KEY", session=session)
 
 
+def _cycle_write(session):
+    """Find the cycle-create commit write (upload also fires a cycleCount-bump commit)."""
+    for url, kw in session.posts:
+        if not url.endswith(":commit"):
+            continue
+        for w in kw.get("json", {}).get("writes", []):
+            if "/cycles/" in w.get("update", {}).get("name", ""):
+                return w
+    raise AssertionError("no cycle-create commit found")
+
+
 # ── id parity with lib/ids.js ──────────────────────────────────────────────────
 
 def test_normalize_token_parity():
@@ -243,7 +254,7 @@ async def test_upload_encodes_points_as_maps_not_nested_arrays():
         [[0, 2000], [60, 100], [120, 0]],
         {"duration": 3600}, 3,
     )
-    write = s.posts[-1][1]["json"]["writes"][0]
+    write = _cycle_write(s)
     vals = write["update"]["fields"]["trace"]["mapValue"]["fields"]["points"]["arrayValue"]["values"]
     assert len(vals) == 3
     assert all("mapValue" in v for v in vals), "points must be maps, not nested arrays"
@@ -307,8 +318,10 @@ async def test_upload_reference_cycle_shape():
         2,
     )
     assert cid and isinstance(cid, str)
-    # The cycle commit is the last POST; assert its write shape.
-    _, kw = s.posts[-1]
+    # Locate the cycle-create commit (upload also fires a cycleCount-bump commit).
+    cyc_post = next(p for p in s.posts if p[0].endswith(":commit")
+                    and any("/cycles/" in w.get("update", {}).get("name", "") for w in p[1]["json"]["writes"]))
+    kw = cyc_post[1]
     write = kw["json"]["writes"][0]
     assert kw["headers"]["Authorization"] == "Bearer T"
     assert write["currentDocument"] == {"exists": False}
@@ -318,6 +331,6 @@ async def test_upload_reference_cycle_shape():
     assert fields["status"] == {"stringValue": "pending"}
     assert fields["uploaderUid"] == {"stringValue": "uid42"}
     assert fields["deviceId"] == {"stringValue": "washer__bosch__wat28660"}
-    # points encoded as array-of-arrays
+    # points encoded as an array of {o,w} maps (Firestore forbids nested arrays)
     pts = fields["trace"]["mapValue"]["fields"]["points"]["arrayValue"]["values"]
     assert len(pts) == 3
