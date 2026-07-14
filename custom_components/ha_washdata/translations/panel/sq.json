@@ -113,6 +113,8 @@
     "revert_settings": "Hiq ndryshimet",
     "revert_settings_tip": "Rivendos cilësimet nga para ruajtjes suaj të fundit",
     "revert_settings_tip_none": "Ruani fillimisht për të aktivizuar zhbërjen",
+    "revert": "Rikthe",
+    "revert_to_previous": "Rikthe këtë cilësim në vlerën e tij të mëparshme",
     "review": "Rishiko",
     "run": "Ekzekuto",
     "run_analysis": "🔍 Ekzekuto analizën e sugjerimeve",
@@ -520,10 +522,18 @@
     "task_reprocess": "Ripërpunim",
     "task_ml_training": "Mësim",
     "eta_secs": "edhe ~{n} s",
-    "eta_mins": "edhe ~{n} min"
+    "eta_mins": "edhe ~{n} min",
+    "pg_recent_runs": "Ekzekutimet e fundit",
+    "pg_load_run": "Ringarko këtë ekzekutim",
+    "pg_match_confidence": "Besueshmëria e përputhjes",
+    "pg_envelope_fit": "Përshtatja me zarfin",
+    "pg_envelope_fit_tip": "Sa mirë cikli qëndron brenda zarfit të ruajtur të fuqisë së këtij profili, një këndvështrim tjetër nga besueshmëria e përputhjes."
   },
   "log": {
-    "all_levels": "Të gjitha nivelet"
+    "all_levels": "Të gjitha nivelet",
+    "all_devices": "Të gjitha pajisjet",
+    "all_components": "Të gjithë komponentët",
+    "search_ph": "Kërko në regjistra…"
   },
   "ml": {
     "builtin_models": "● Duke përdorur modelet e integruara",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Rindërtimi dështoi: {error}",
     "toast_resume_failed": "Rifillimi dështoi: {error}",
     "toast_revert_failed": "Kthimi prapa dështoi: {error}",
+    "toast_reverted": "{key} u rikthye",
     "toast_save_failed": "Ruajtja dështoi: {error}",
     "trend_duration_longer": "Kohëzgjatja në tendencë më e gjatë ({pct}%/cikël) — mesatare e fundit {avg}",
     "trend_duration_shorter": "Kohëzgjatja në tendencë më e shkurtër ({pct}%/cikël) - mesatare e fundit {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Riluajini ciklet tuaja të fundit përmes detektorit dhe përputhësit real me cilësimet e mësipërme. Klikoni çdo rresht për të ngarkuar atë cikël në grafik; ndryshoni një cilësim për të parë një krahasim para/pas.",
     "pg_simulating": "Po simulohet cikli…",
     "pg_canvas_empty2": "Zgjidhni një cikël më sipër dhe shtypni Ekzekuto për ta simuluar. Pastaj kaloni kursorin për të lexuar vlerat, rrëshqitni për të zmadhuar dhe tërhiqni për të lëvizur.",
-    "pg_apply_settings_confirm": "Të ruhen këto {n} cilësime në këtë pajisje? {list}"
+    "pg_apply_settings_confirm": "Të ruhen këto {n} cilësime në këtë pajisje? {list}",
+    "no_logs_match": "Asnjë regjistrim nuk përputhet me këta filtra.",
+    "pg_analysis_hint2": "Zgjidhni një cikël dhe shtypni Ekzekuto për të ngarkuar analizën e përputhjes.",
+    "pg_analysis_empty2": "Shtypni Ekzekuto për të parë analizën e përputhjes."
   },
   "phase_desc": {
     "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1413,7 +1427,13 @@
     "reminders_saved": "Kujtesat e servisit u ruajtën",
     "pause_no_cycle": "Nuk ka cikël aktiv për të ndalur",
     "resume_no_cycle": "Nuk ka cikël të ndalur për të vazhduar",
-    "delete_partial_failed": "Disa artikuj nuk mund të fshiheshin dhe u rikthyen"
+    "delete_partial_failed": "Disa artikuj nuk mund të fshiheshin dhe u rikthyen",
+    "pg_run_gone": "Ai ekzekutim nuk është më i disponueshëm.",
+    "task_cancelled": "U anulua.",
+    "processed": "U përpunuan {bits}",
+    "processed_cycles": "{n} cikël(e)",
+    "processed_suggestions": "{n} sugjerim(e)",
+    "processed_models": "{n} model(e) të promovuar"
   },
   "suggestion": {
     "both_agree": "WashData rekomandon",

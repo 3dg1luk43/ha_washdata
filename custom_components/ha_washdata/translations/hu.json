@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "Ciklus folytatása"
+      },
+      "record_start": {
+        "name": "Ciklusrögzítés indítása"
+      },
+      "record_stop": {
+        "name": "Ciklusrögzítés leállítása"
       }
     }
   },

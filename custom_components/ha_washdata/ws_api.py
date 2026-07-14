@@ -470,6 +470,7 @@ class _RingLogHandler(logging.Handler):
                 "ts": record.created,
                 "level": record.levelname,
                 "logger": record.name.split(".")[-1],
+                "device": getattr(record, "wd_device", None),
                 "msg": record.getMessage(),
             })
         except Exception:  # pylint: disable=broad-exception-caught
@@ -510,7 +511,13 @@ async def async_load_panel_config(hass: HomeAssistant) -> None:
     if _LOG_BUFFER_KEY not in hass.data:
         handler = _RingLogHandler()
         handler.setLevel(logging.DEBUG)
-        logging.getLogger("custom_components.ha_washdata").addHandler(handler)
+        wd_logger = logging.getLogger("custom_components.ha_washdata")
+        wd_logger.addHandler(handler)
+        # The ring handler captures at the logger's configured effective level
+        # (HA's default is INFO, so lifecycle activity shows out of the box). We do
+        # NOT raise the logger level here: doing so would override a user who set
+        # this integration to WARNING and leak INFO records into home-assistant.log.
+        # To see more in the panel Logs view, set the integration's log level in HA.
         hass.data[_LOG_BUFFER_KEY] = handler
 
 
@@ -2114,28 +2121,15 @@ async def ws_get_diagnostics(
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
 
-@websocket_api.websocket_command(
-    {vol.Required("type"): "ha_washdata/reprocess_history", vol.Required("entry_id"): str}
-)
-@websocket_api.async_response
-async def ws_reprocess_history(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-) -> None:
-    """Full processing pass over historical data.
-
-    Runs, in order: reprocess (rematch + rebuild envelopes) -> backfill the
-    recorded/golden flag -> refresh tuning suggestions -> on-device ML training
-    (when enabled) -> recompute per-cycle ML health against the resulting model.
-    This is the single "Process history" trigger in Diagnostics.
-    """
-    entry_id: str = msg["entry_id"]
+async def _reprocess_task(hass: HomeAssistant, task: Any, entry_id: str) -> None:
+    """Detached runner for the full "Process history" pass, reporting phase-level
+    progress to the task registry and storing the summary as the result. Survives
+    a dropped socket; the panel re-attaches via the registry."""
+    reg = task_registry.get_registry(hass)
     manager = _get_manager(hass, entry_id)
     if manager is None:
-        _err_not_found(connection, msg["id"], entry_id)
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
         return
-
     store = manager.profile_store
     summary: dict[str, Any] = {"success": True}
     # Serialize under the per-entry write lock: this multi-await pass rematches,
@@ -2144,15 +2138,16 @@ async def ws_reprocess_history(
     lock = _entry_write_lock(hass, entry_id)
     await lock.acquire()
     try:
+        reg.update(task, total=5, done=0, label="Reprocessing: matching cycles")
         summary["count"] = await store.async_reprocess_all_data()
 
-        # Recorded cycles are golden references - backfill the single flag.
+        reg.update(task, done=1, label="Reprocessing: backfilling golden")
         try:
             summary["golden_backfilled"] = await store.async_backfill_recorded_golden()
         except Exception as exc:  # pylint: disable=broad-exception-caught
             _LOGGER.debug("golden backfill failed for %s: %s", entry_id, exc)
 
-        # Refresh tuning suggestions.
+        reg.update(task, done=2, label="Reprocessing: suggestions")
         learning = getattr(manager, "learning_manager", None)
         if learning is not None and hasattr(learning, "async_run_full_analysis"):
             try:
@@ -2161,8 +2156,8 @@ async def ws_reprocess_history(
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 _LOGGER.debug("suggestion analysis failed for %s: %s", entry_id, exc)
 
-        # On-device ML training (bypasses schedule guards; safe when disabled).
-        if ENABLE_ML_TRAINING:
+        reg.update(task, done=3, label="Reprocessing: ML training")
+        if ENABLE_ML_TRAINING and not task.cancel_requested:
             try:
                 tr = await manager.async_run_ml_training(force=True)
                 summary["ml_training"] = {
@@ -2173,6 +2168,7 @@ async def ws_reprocess_history(
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 _LOGGER.debug("ML training failed for %s: %s", entry_id, exc)
 
+        reg.update(task, done=4, label="Reprocessing: cycle health")
         # Recompute per-cycle health against the (possibly retrained) model.
         # Skip when training already recomputed it (a promotion refreshes health).
         if not (summary.get("ml_training", {}) or {}).get("promoted"):
@@ -2181,23 +2177,42 @@ async def ws_reprocess_history(
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 _LOGGER.debug("health recompute failed for %s: %s", entry_id, exc)
 
-        # Re-validate the manager is still live after a potentially long chain of
-        # awaits (reprocess + ML training can take tens of seconds).  If the entry
-        # was reloaded in the meantime the original manager is detached and its
-        # store saves would overwrite the new manager's data.
-        current_manager = _get_manager(hass, entry_id)
-        if current_manager is not manager:
-            _LOGGER.warning(
-                "Manager replaced during reprocess for %s; skipping notify", entry_id
-            )
-            _send_result(connection, msg["id"], "reprocess_history", summary)
-            return
-        manager.notify_update()
-        _send_result(connection, msg["id"], "reprocess_history", summary)
+        reg.update(task, done=5)
+        # Re-validate the manager is still live after a long chain of awaits; if the
+        # entry was reloaded, the original manager is detached and must not notify.
+        if _get_manager(hass, entry_id) is manager:
+            manager.notify_update()
+        reg.finish(task, state=task_registry.STATE_DONE, result=summary)
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        connection.send_error(msg["id"], "unknown_error", str(exc))
+        # Task-level failure: log at WARNING so it is visible in the default HA log
+        # and the panel Logs view (sub-step failures above stay at debug on purpose).
+        _LOGGER.warning("Reprocess task failed for %s: %s", entry_id, exc)
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
     finally:
         lock.release()
+
+
+@websocket_api.websocket_command(
+    {vol.Required("type"): "ha_washdata/reprocess_history", vol.Required("entry_id"): str}
+)
+@callback
+def ws_reprocess_history(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Kick off the full "Process history" pass as a detached, registry-tracked
+    task; returns its id immediately. Runs, in order: reprocess (rematch + rebuild
+    envelopes) -> backfill golden -> refresh suggestions -> on-device ML training
+    (when enabled) -> recompute cycle health. Progress + result via the registry."""
+    entry_id: str = msg["entry_id"]
+    if _get_manager(hass, entry_id) is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    reg = task_registry.get_registry(hass)
+    task = reg.create(entry_id, "reprocess", "Reprocessing")
+    hass.async_create_task(_reprocess_task(hass, task, entry_id))
+    _send_result(connection, msg["id"], "reprocess_history", {"task_id": task.id})
 
 
 @websocket_api.websocket_command(
@@ -3846,29 +3861,60 @@ async def ws_get_ml_training_status(
     )
 
 
+async def _ml_training_task(hass: HomeAssistant, task: Any, entry_id: str) -> None:
+    """Detached runner for on-device ML training; stores the summary as the result.
+
+    NOT a WS handler: it is a plain coroutine kicked off via ``hass.async_create_task``
+    by ``ws_trigger_ml_training``. It must carry no ``@websocket_command`` /
+    ``@async_response`` decorators (those would rewrite it into a sync handler that
+    returns ``None``, so the direct call would pass ``None`` to ``async_create_task``)."""
+    reg = task_registry.get_registry(hass)
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+        return
+    # Serialize under the per-entry write lock (same lock _reprocess_task uses, and
+    # reprocess itself runs ML training): training rewrites the store, so two runs
+    # for the same entry must not interleave.
+    lock = _entry_write_lock(hass, entry_id)
+    await lock.acquire()
+    try:
+        summary = await manager.async_run_ml_training(force=True)
+        reg.finish(task, state=task_registry.STATE_DONE, result=summary)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        # Task-level failure: log at WARNING so it surfaces in the default HA log and
+        # the panel Logs view (not swallowed at debug like a routine sub-step miss).
+        _LOGGER.warning("ML training task failed for %s: %s", entry_id, exc)
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
+    finally:
+        lock.release()
+
+
 @websocket_api.websocket_command(
     {
         vol.Required("type"): "ha_washdata/trigger_ml_training",
         vol.Required("entry_id"): str,
     }
 )
-@websocket_api.async_response
-async def ws_trigger_ml_training(
+@callback
+def ws_trigger_ml_training(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Run on-device ML training now (manual, bypasses the schedule guards)."""
+    """Kick off on-device ML training as a detached, registry-tracked task (manual,
+    bypasses the schedule guards); returns its id. Result via the registry."""
     entry_id: str = msg["entry_id"]
-    manager = _get_manager(hass, entry_id)
-    if manager is None:
+    if _get_manager(hass, entry_id) is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
     if not ENABLE_ML_TRAINING:
         connection.send_error(msg["id"], "not_available", "ML training is not enabled in this build")
         return
-    summary = await manager.async_run_ml_training(force=True)
-    _send_result(connection, msg["id"], "trigger_ml_training", summary)
+    reg = task_registry.get_registry(hass)
+    task = reg.create(entry_id, "ml_training", "Learning")
+    hass.async_create_task(_ml_training_task(hass, task, entry_id))
+    _send_result(connection, msg["id"], "trigger_ml_training", {"task_id": task.id})
 
 
 @websocket_api.websocket_command(

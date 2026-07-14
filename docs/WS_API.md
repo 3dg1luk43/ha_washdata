@@ -43,7 +43,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `resolve_feedback` | entry_id, cycle_id, action, corrected_profile?, corrected_duration_min? | `SuccessResponse` |
 | `dismiss_all_feedbacks` | entry_id | `DismissAllFeedbacksResponse` |
 | `get_diagnostics` | entry_id | `GetDiagnosticsResponse` |
-| `reprocess_history` | entry_id | `ReprocessHistoryResponse` |
+| `reprocess_history` | entry_id | `StartTaskResponse` |
 | `clear_debug_data` | entry_id | `ClearDebugDataResponse` |
 | `wipe_history` | entry_id | `SuccessResponse` |
 | `export_config` | entry_id | `ExportConfigResponse` |
@@ -69,7 +69,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `get_logs` | level?, limit? | `GetLogsResponse` |
 | `get_ml_comparison` | entry_id | `GetMlComparisonResponse` |
 | `get_ml_training_status` | entry_id | `GetMlTrainingStatusResponse` |
-| `trigger_ml_training` | entry_id | `TriggerMlTrainingResponse` |
+| `trigger_ml_training` | entry_id | `StartTaskResponse` |
 | `revert_matching_config` | entry_id | `SuccessResponse` |
 | `revert_ml_models` | entry_id | `SuccessResponse` |
 | `set_ml_review` | entry_id, cycle_id, quality?, golden?, tags?, notes? | `SuccessResponse` |
@@ -648,16 +648,11 @@ _None._
 | --- | --- | --- |
 | `entry_id` | yes | str |
 
-**Response** (`ReprocessHistoryResponse`)
+**Response** (`StartTaskResponse`)
 
 | Field | Always present | Type |
 | --- | --- | --- |
-| `success` | no | bool |
-| `count` | no | number |
-| `golden_backfilled` | no | number |
-| `suggestions` | no | number |
-| `ml_training` | no | dict[str, any] |
-| `health_recomputed` | no | number |
+| `task_id` | yes | str |
 
 ## `ha_washdata/clear_debug_data`
 
@@ -1088,18 +1083,11 @@ _None._
 | --- | --- | --- |
 | `entry_id` | yes | str |
 
-**Response** (`TriggerMlTrainingResponse`)
+**Response** (`StartTaskResponse`)
 
 | Field | Always present | Type |
 | --- | --- | --- |
-| `ok` | no | bool |
-| `reason` | no | str |
-| `promoted` | no | list[str] |
-| `results` | no | list[dict[str, any]] |
-| `matching` | no | dict[str, any] |
-| `error` | no | str |
-
-_Open-ended: additional top-level keys from an upstream summary may be present._
+| `task_id` | yes | str |
 
 ## `ha_washdata/revert_matching_config`
 

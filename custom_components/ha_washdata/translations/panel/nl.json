@@ -113,6 +113,8 @@
     "revert_settings": "Wijzigingen ongedaan maken",
     "revert_settings_tip": "Instellingen herstellen naar de staat van vóór de laatste opslag",
     "revert_settings_tip_none": "Sla eerst op om ongedaan maken te activeren",
+    "revert": "Terugzetten",
+    "revert_to_previous": "Deze instelling terugzetten naar de vorige waarde",
     "review": "Beoordelen",
     "run": "Uitvoeren",
     "run_analysis": "🔍 Voer suggestieanalyse uit",
@@ -520,10 +522,18 @@
     "task_reprocess": "Opnieuw verwerken",
     "task_ml_training": "Leren",
     "eta_secs": "nog ~{n} s",
-    "eta_mins": "nog ~{n} min"
+    "eta_mins": "nog ~{n} min",
+    "pg_recent_runs": "Recente uitvoeringen",
+    "pg_load_run": "Deze uitvoering opnieuw laden",
+    "pg_match_confidence": "Matchbetrouwbaarheid",
+    "pg_envelope_fit": "Envelop-passing",
+    "pg_envelope_fit_tip": "Hoe strak de cyclus binnen de opgeslagen vermogensenvelop van dit profiel blijft, een andere invalshoek dan matchbetrouwbaarheid."
   },
   "log": {
-    "all_levels": "Alle niveaus"
+    "all_levels": "Alle niveaus",
+    "all_devices": "Alle apparaten",
+    "all_components": "Alle componenten",
+    "search_ph": "Logboeken doorzoeken…"
   },
   "ml": {
     "builtin_models": "● Ingebouwde modellen gebruiken",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Herbouwen mislukt: {error}",
     "toast_resume_failed": "Hervatten mislukt: {error}",
     "toast_revert_failed": "Terugzetten mislukt: {error}",
+    "toast_reverted": "{key} teruggezet",
     "toast_save_failed": "Opslaan mislukt: {error}",
     "trend_duration_longer": "Duur trending langer ({pct}%/cyclus) — recent gemiddelde {avg}",
     "trend_duration_shorter": "Duur trending korter ({pct}%/cyclus) — recent gemiddelde {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Laat je recente cycli opnieuw door de echte detector en herkenning lopen met de bovenstaande instellingen. Klik op een rij om die cyclus in de grafiek te laden; wijzig een instelling om een voor/na-vergelijking te zien.",
     "pg_simulating": "Cyclus simuleren…",
     "pg_canvas_empty2": "Kies hierboven een cyclus en druk op Uitvoeren om deze te simuleren. Beweeg vervolgens de muis erover om waarden af te lezen, scroll om te zoomen en sleep om te verschuiven.",
-    "pg_apply_settings_confirm": "Deze {n} instelling(en) opslaan voor dit apparaat? {list}"
+    "pg_apply_settings_confirm": "Deze {n} instelling(en) opslaan voor dit apparaat? {list}",
+    "no_logs_match": "Geen logrecords komen overeen met deze filters.",
+    "pg_analysis_hint2": "Kies een cyclus en druk op Uitvoeren om de matchanalyse te laden.",
+    "pg_analysis_empty2": "Druk op Uitvoeren om de matchanalyse te zien."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plotselinge daling behandeld als onmiddellijk einde",
@@ -1526,7 +1540,13 @@
     "reminders_saved": "Serviceherinneringen opgeslagen",
     "pause_no_cycle": "Geen actieve cyclus om te pauzeren",
     "resume_no_cycle": "Geen gepauzeerde cyclus om te hervatten",
-    "delete_partial_failed": "Sommige items konden niet worden verwijderd en zijn hersteld"
+    "delete_partial_failed": "Sommige items konden niet worden verwijderd en zijn hersteld",
+    "pg_run_gone": "Die uitvoering is niet meer beschikbaar.",
+    "task_cancelled": "Geannuleerd.",
+    "processed": "Verwerkt: {bits}",
+    "processed_cycles": "{n} cycli",
+    "processed_suggestions": "{n} suggesties",
+    "processed_models": "{n} modellen geactiveerd"
   },
   "trend": {
     "down": "Trend naar beneden",

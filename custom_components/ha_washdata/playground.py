@@ -41,6 +41,7 @@ from .const import (
     CONF_COMPLETION_MIN_SECONDS,
     CONF_END_REPEAT_COUNT,
     CONF_INTERRUPTED_MIN_SECONDS,
+    CONF_MATCH_PERSISTENCE,
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
     CONF_NOTIFY_ACTIONS,
@@ -57,6 +58,7 @@ from .const import (
     CONF_STOP_THRESHOLD_W,
     CYCLE_OVERRUN_ANOMALY_RATIO,
     CYCLE_UNDERRUN_ANOMALY_RATIO,
+    DEFAULT_MATCH_PERSISTENCE,
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
     DEFAULT_NOTIFY_MILESTONES,
     MATCH_CORR_WEIGHT,
@@ -276,6 +278,36 @@ def _matching_config(store: Any) -> dict[str, Any]:
     except Exception:  # pylint: disable=broad-exception-caught
         pass
     return config
+
+
+def decide_commit(
+    raw_name: str | None,
+    is_ambiguous: bool,
+    commit_state: dict[str, Any],
+    persistence: int,
+) -> str | None:
+    """Advance the persistence-gated match-commit state (mirror of the manager's
+    core rule) and report the event to emit.
+
+    Mutates ``commit_state`` (``candidate``/``count``/``name``): a candidate must
+    be the non-ambiguous top-1 for ``persistence`` consecutive calls before it is
+    committed, and the committed ``name`` is held (a one-off wobble resets the
+    streak but never switches the commit). Returns ``"match_commit"`` on the first
+    commit, ``"match_changed"`` on a later switch, or ``None`` otherwise. Pure +
+    unit-testable; event emission / reporting stay in the caller.
+    """
+    if not raw_name or is_ambiguous:
+        return None
+    if raw_name == commit_state["candidate"]:
+        commit_state["count"] += 1
+    else:
+        commit_state["candidate"] = raw_name
+        commit_state["count"] = 1
+    if commit_state["count"] >= persistence and commit_state["name"] != raw_name:
+        prev = commit_state["name"]
+        commit_state["name"] = raw_name
+        return "match_changed" if prev else "match_commit"
+    return None
 
 
 def _readings_from_cycle(
@@ -739,6 +771,16 @@ def _simulate_cycle_detail_inner(
         "name": None, "conf": 0.0, "ambiguous": False, "expected": 0.0,
     }
     last_logged = {"kind": None, "name": None}
+    # Persistence-gated commit mirroring the manager: a candidate must be top-1 for
+    # `match_persistence` consecutive matches (and not ambiguous) before it is
+    # committed, and the committed match is HELD (a one-off wobble doesn't switch
+    # it). The detector still receives the raw top-1 (detection unchanged); only the
+    # reported series/events use the committed match, so the Playground shows what
+    # the live integration would show - not raw per-interval churn.
+    match_persistence = max(1, int(
+        (options or {}).get(CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE)
+    ))
+    commit_state: dict[str, Any] = {"candidate": None, "count": 0, "name": None}
     smoothed = {"v": 0.0}
     flags = {"detected": False, "pre_complete": False, "start": False}
 
@@ -767,6 +809,14 @@ def _simulate_cycle_detail_inner(
 
     def _on_state_change(old_state: str, new_state: str) -> None:
         _emit("state", f"{old_state}->{new_state}")
+        # A new cycle is starting after a previous one ended: clear the inherited
+        # match-persistence streak so this cycle matches fresh (see _on_cycle_end).
+        # PAUSED->RUNNING resumes don't arm pending_reset, so they are unaffected.
+        if new_state == STATE_RUNNING and flags.get("pending_reset"):
+            flags["pending_reset"] = False
+            commit_state.update(candidate=None, count=0, name=None)
+            last_match.update(name=None, conf=0.0, expected=0.0, ambiguous=False)
+            last_logged.update(kind=None, name=None)
         if (
             not flags["detected"]
             and new_state == STATE_RUNNING
@@ -786,6 +836,11 @@ def _simulate_cycle_detail_inner(
         captured.append(cycle_data)
         reason = cycle_data.get("termination_reason")
         _emit("finished", f"reason={reason} status={cycle_data.get('status')}", "info")
+        # Arm a match-state reset for the NEXT cycle. We reset at the next cycle's
+        # start (not here) so the final cycle's committed match survives to be read
+        # into `outcome` after the loop; a second sub-cycle then starts a fresh
+        # match-persistence streak, mirroring the live manager (per-cycle reset).
+        flags["pending_reset"] = True
 
     def _matcher(det_readings: list[tuple[datetime, float]]):
         if len(det_readings) < 5 or not snapshots:
@@ -803,7 +858,8 @@ def _simulate_cycle_detail_inner(
             if last_logged["kind"] != "unmatched":
                 _emit("unmatched", "no candidate")
                 last_logged["kind"] = "unmatched"
-            last_match.update(name=None, conf=0.0, ambiguous=False, expected=0.0)
+            # Hold any committed match on a transient miss (as the manager does).
+            last_match.update(ambiguous=False)
             return (None, 0.0, 0.0, None, False, False)
         if group_members and candidates[0].get("name", "").startswith("__group__"):
             gkey = candidates[0]["name"]
@@ -818,21 +874,40 @@ def _simulate_cycle_detail_inner(
                     pass
         best = candidates[0]
         margin, is_ambiguous = _ambiguity_from_candidates(candidates)
-        name = best.get("name")
-        conf = float(best.get("score") or 0.0)
-        expected = float(best.get("profile_duration") or 0.0)
-        prev_name = last_match["name"]
-        last_match.update(name=name, conf=conf, ambiguous=bool(is_ambiguous), expected=expected)
-        if is_ambiguous:
-            if last_logged["kind"] != "ambiguous" or last_logged["name"] != name:
+        raw_name = best.get("name")
+        raw_conf = float(best.get("score") or 0.0)
+        raw_expected = float(best.get("profile_duration") or 0.0)
+
+        # Persistence-gated commit (mirror of the manager's core rule), extracted
+        # into decide_commit() for unit-testability.
+        commit_event = decide_commit(raw_name, is_ambiguous, commit_state, match_persistence)
+        if commit_event:
+            _emit(commit_event, f"{raw_name} (conf={raw_conf:.2f})")
+            last_logged.update(kind="matched", name=raw_name)
+        elif is_ambiguous and not commit_state["name"]:
+            # Ambiguous before any commit: stay 'detecting', surface it once.
+            if last_logged["kind"] != "ambiguous" or last_logged["name"] != raw_name:
                 runner = candidates[1].get("name") if len(candidates) > 1 else None
-                _emit("match_ambiguous", f"{name} vs {runner} (margin={margin:.3f})", "warn")
-                last_logged.update(kind="ambiguous", name=name)
-        elif last_logged["kind"] != "matched" or last_logged["name"] != name:
-            etype = "match_changed" if (prev_name and prev_name != name) else "match_commit"
-            _emit(etype, f"{name} (conf={conf:.2f})")
-            last_logged.update(kind="matched", name=name)
-        return (name, conf, expected, None, False, bool(is_ambiguous))
+                _emit("match_ambiguous", f"{raw_name} vs {runner} (margin={margin:.3f})", "warn")
+                last_logged.update(kind="ambiguous", name=raw_name)
+
+        # Reported state = the COMMITTED match (held); its confidence/expected are
+        # that profile's own values this interval (looked up among the candidates).
+        cname = commit_state["name"]
+        if cname:
+            cc = next((c for c in candidates if c.get("name") == cname), None)
+            last_match.update(
+                name=cname,
+                conf=float(cc.get("score") or 0.0) if cc else (last_match.get("conf") or 0.0),
+                expected=float(cc.get("profile_duration") or 0.0) if cc else (last_match.get("expected") or 0.0),
+                ambiguous=False,
+            )
+        else:
+            last_match.update(name=None, conf=0.0, expected=0.0, ambiguous=bool(is_ambiguous))
+
+        # The DETECTOR still receives the RAW top-1, so detection / smart-termination
+        # behaviour is byte-identical to before this reporting change.
+        return (raw_name, raw_conf, raw_expected, None, False, bool(is_ambiguous))
 
     detector = CycleDetector(
         config, _on_state_change, _on_cycle_end,

@@ -113,6 +113,8 @@
     "revert_settings": "Annulla modifiche",
     "revert_settings_tip": "Ripristina le impostazioni precedenti all'ultimo salvataggio",
     "revert_settings_tip_none": "Salva prima per abilitare l'annullamento",
+    "revert": "Ripristina",
+    "revert_to_previous": "Ripristina questa impostazione al valore precedente",
     "review": "Rivedi",
     "run": "Esegui",
     "run_analysis": "🔍 Esegui l'analisi dei suggerimenti",
@@ -520,10 +522,18 @@
     "task_reprocess": "Rielaborazione",
     "task_ml_training": "Apprendimento",
     "eta_secs": "~{n} s rimasti",
-    "eta_mins": "~{n} min rimasti"
+    "eta_mins": "~{n} min rimasti",
+    "pg_recent_runs": "Esecuzioni recenti",
+    "pg_load_run": "Ricarica questa esecuzione",
+    "pg_match_confidence": "Affidabilità dell'abbinamento",
+    "pg_envelope_fit": "Aderenza all'inviluppo",
+    "pg_envelope_fit_tip": "Quanto il ciclo rimane all'interno dell'inviluppo di potenza salvato di questo profilo, una prospettiva diversa dall'affidabilità dell'abbinamento."
   },
   "log": {
-    "all_levels": "Tutti i livelli"
+    "all_levels": "Tutti i livelli",
+    "all_devices": "Tutti i dispositivi",
+    "all_components": "Tutti i componenti",
+    "search_ph": "Cerca nei log…"
   },
   "ml": {
     "builtin_models": "● Utilizzo di modelli integrati",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Ricostruzione fallita: {error}",
     "toast_resume_failed": "Ripresa fallita: {error}",
     "toast_revert_failed": "Ripristino fallito: {error}",
+    "toast_reverted": "{key} ripristinato",
     "toast_save_failed": "Salvataggio fallito: {error}",
     "trend_duration_longer": "Durata tendenzialmente più lunga ({pct}%/ciclo) — media recente {avg}",
     "trend_duration_shorter": "La durata tendenzialmente è più breve ({pct}%/ciclo) — media recente {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Riproduci i tuoi cicli recenti attraverso il rilevatore e il sistema di corrispondenza reali con le impostazioni qui sopra. Fai clic su una riga per caricare quel ciclo nel grafico; modifica un'impostazione per vedere un confronto prima/dopo.",
     "pg_simulating": "Simulazione del ciclo…",
     "pg_canvas_empty2": "Scegli un ciclo qui sopra e premi Esegui per simularlo. Poi passa il puntatore per leggere i valori, scorri per ingrandire e trascina per spostarti.",
-    "pg_apply_settings_confirm": "Salvare queste {n} impostazioni su questo dispositivo? {list}"
+    "pg_apply_settings_confirm": "Salvare queste {n} impostazioni su questo dispositivo? {list}",
+    "no_logs_match": "Nessun record di log corrisponde a questi filtri.",
+    "pg_analysis_hint2": "Seleziona un ciclo e premi Esegui per caricare l'analisi di abbinamento.",
+    "pg_analysis_empty2": "Premi Esegui per vedere l'analisi di abbinamento."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Calo improvviso trattato come fine immediata",
@@ -1405,6 +1419,10 @@
     "phase_updated": "Fase aggiornata",
     "phases_saved": "Fasi salvate",
     "preferences_saved": "Preferenze salvate",
+    "processed": "Elaborato {bits}",
+    "processed_cycles": "{n} cicli",
+    "processed_models": "{n} modelli promossi",
+    "processed_suggestions": "{n} suggerimenti",
     "profile_name_required": "Il nome del profilo è obbligatorio",
     "profile_renamed": "Profilo rinominato",
     "recording_discarded": "Registrazione scartata",
@@ -1430,7 +1448,9 @@
     "reminders_saved": "Promemoria di servizio salvati",
     "pause_no_cycle": "Nessun ciclo attivo da mettere in pausa",
     "resume_no_cycle": "Nessun ciclo in pausa da riprendere",
-    "delete_partial_failed": "Non è stato possibile eliminare alcuni elementi e sono stati ripristinati"
+    "delete_partial_failed": "Non è stato possibile eliminare alcuni elementi e sono stati ripristinati",
+    "pg_run_gone": "Questa esecuzione non è più disponibile.",
+    "task_cancelled": "Annullato."
   },
   "suggestion": {
     "both_agree": "WashData consiglia",

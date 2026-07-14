@@ -113,6 +113,8 @@
     "revert_settings": "Zahodit změny",
     "revert_settings_tip": "Obnovit nastavení z doby před posledním uložením",
     "revert_settings_tip_none": "Nejprve uložte, abyste aktivovali funkci zpět",
+    "revert": "Vrátit zpět",
+    "revert_to_previous": "Obnovit toto nastavení na předchozí hodnotu",
     "review": "Hodnotit",
     "run": "Spustit",
     "run_analysis": "🔍 Spustit analýzu návrhů",
@@ -520,10 +522,18 @@
     "task_reprocess": "Opětovné zpracování",
     "task_ml_training": "Učení",
     "eta_secs": "zbývá ~{n} s",
-    "eta_mins": "zbývá ~{n} min"
+    "eta_mins": "zbývá ~{n} min",
+    "pg_recent_runs": "Nedávné běhy",
+    "pg_load_run": "Znovu načíst tento běh",
+    "pg_match_confidence": "Spolehlivost shody",
+    "pg_envelope_fit": "Soulad s obálkou",
+    "pg_envelope_fit_tip": "Jak přesně cyklus zapadá do uložené výkonové obálky tohoto profilu, jiný pohled než spolehlivost shody."
   },
   "log": {
-    "all_levels": "Všechny úrovně"
+    "all_levels": "Všechny úrovně",
+    "all_devices": "Všechna zařízení",
+    "all_components": "Všechny komponenty",
+    "search_ph": "Hledat v protokolech…"
   },
   "ml": {
     "builtin_models": "● Použití vestavěných modelů",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Přestavba selhala: {error}",
     "toast_resume_failed": "Obnovení selhalo: {error}",
     "toast_revert_failed": "Vrácení selhalo: {error}",
+    "toast_reverted": "{key} vráceno zpět",
     "toast_save_failed": "Uložení selhalo: {error}",
     "trend_duration_longer": "Trendy delší ({pct} %/cyklus) – poslední průměr {avg}",
     "trend_duration_shorter": "Trendy kratší ({pct} %/cyklus) – poslední průměr {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Přehrajte své nedávné cykly skutečným detektorem a nástrojem pro přiřazování programů s nastavením výše. Kliknutím na libovolný řádek načtete daný cyklus do grafu; úpravou nastavení zobrazíte srovnání před úpravou a po ní.",
     "pg_simulating": "Simulace cyklu…",
     "pg_canvas_empty2": "Vyberte cyklus výše a stisknutím Spustit jej nasimulujte. Poté najetím zobrazíte hodnoty, kolečkem přiblížíte a tažením posunete.",
-    "pg_apply_settings_confirm": "Uložit těchto {n} nastavení do tohoto zařízení? {list}"
+    "pg_apply_settings_confirm": "Uložit těchto {n} nastavení do tohoto zařízení? {list}",
+    "no_logs_match": "Těmto filtrům neodpovídají žádné záznamy protokolu.",
+    "pg_analysis_hint2": "Vyberte cyklus a stiskněte Spustit pro načtení analýzy shody.",
+    "pg_analysis_empty2": "Stiskněte Spustit pro zobrazení analýzy shody."
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -1509,7 +1523,13 @@
     "reminders_saved": "Připomínky servisu uloženy",
     "pause_no_cycle": "Žádný aktivní cyklus k pozastavení",
     "resume_no_cycle": "Žádný pozastavený cyklus k obnovení",
-    "delete_partial_failed": "Některé položky nebylo možné smazat a byly obnoveny"
+    "delete_partial_failed": "Některé položky nebylo možné smazat a byly obnoveny",
+    "pg_run_gone": "Tento běh už není k dispozici.",
+    "task_cancelled": "Zrušeno.",
+    "processed": "Zpracováno {bits}",
+    "processed_cycles": "{n} cyklů",
+    "processed_suggestions": "{n} návrhů",
+    "processed_models": "{n} aktivovaných modelů"
   },
   "trend": {
     "down": "Klesající trend",

@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "Nastavi ciklus"
+      },
+      "record_start": {
+        "name": "Počni snimanje ciklusa"
+      },
+      "record_stop": {
+        "name": "Zaustavi snimanje ciklusa"
       }
     }
   },

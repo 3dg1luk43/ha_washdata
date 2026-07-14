@@ -113,6 +113,8 @@
     "revert_settings": "Atmesti pakeitimus",
     "revert_settings_tip": "Atkurti nustatymus iki paskutinio išsaugojimo",
     "revert_settings_tip_none": "Pirmiausia išsaugokite, kad įgalintumėte atšaukimą",
+    "revert": "Grąžinti",
+    "revert_to_previous": "Atkurti šį nustatymą į ankstesnę reikšmę",
     "review": "Įvertinti",
     "run": "Vykdyti",
     "run_analysis": "🔍 Vykdykite pasiūlymų analizę",
@@ -520,10 +522,18 @@
     "task_reprocess": "Pakartotinis apdorojimas",
     "task_ml_training": "Mokymasis",
     "eta_secs": "liko ~{n} s",
-    "eta_mins": "liko ~{n} min"
+    "eta_mins": "liko ~{n} min",
+    "pg_recent_runs": "Naujausi vykdymai",
+    "pg_load_run": "Iš naujo įkelti šį vykdymą",
+    "pg_match_confidence": "Atitikties patikimumas",
+    "pg_envelope_fit": "Atitikimas gaubtinei",
+    "pg_envelope_fit_tip": "Kaip tiksliai ciklas telpa šio profilio išsaugotoje galios gaubtinėje, kitoks požiūris nei atitikties patikimumas."
   },
   "log": {
-    "all_levels": "Visi lygiai"
+    "all_levels": "Visi lygiai",
+    "all_devices": "Visi įrenginiai",
+    "all_components": "Visi komponentai",
+    "search_ph": "Ieškoti žurnaluose…"
   },
   "ml": {
     "builtin_models": "● Naudojant įmontuotus modelius",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Atstatymas nepavyko: {error}",
     "toast_resume_failed": "Atnaujinimas nepavyko: {error}",
     "toast_revert_failed": "Grąžinimas nepavyko: {error}",
+    "toast_reverted": "{key} grąžinta",
     "toast_save_failed": "Įrašymas nepavyko: {error}",
     "trend_duration_longer": "Ilgesnė trukmė ({pct} %/ciklas) – pastaruoju metu vid. {avg}",
     "trend_duration_shorter": "Trukmė mažėja ({pct} %/ciklas) – pastaruoju metu vid. {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Atkurkite naujausius ciklus per tikrąjį detektorių ir programų derinimo modulį su aukščiau nurodytais nustatymais. Spustelėkite bet kurią eilutę, kad įkeltumėte tą ciklą į grafiką; pakeiskite nustatymą, kad pamatytumėte palyginimą prieš ir po.",
     "pg_simulating": "Simuliuojamas ciklas…",
     "pg_canvas_empty2": "Pasirinkite ciklą aukščiau ir paspauskite Vykdyti, kad jį simuliuotumėte. Tada užveskite žymeklį, kad nuskaitytumėte reikšmes, slinkite, kad priartintumėte, ir vilkite, kad pastumtumėte.",
-    "pg_apply_settings_confirm": "Ar išsaugoti šiuos {n} nustatymus šiame įrenginyje? {list}"
+    "pg_apply_settings_confirm": "Ar išsaugoti šiuos {n} nustatymus šiame įrenginyje? {list}",
+    "no_logs_match": "Nė vienas žurnalo įrašas neatitinka šių filtrų.",
+    "pg_analysis_hint2": "Pasirinkite ciklą ir paspauskite Vykdyti, kad įkeltumėte atitikties analizę.",
+    "pg_analysis_empty2": "Paspauskite Vykdyti, kad pamatytumėte atitikties analizę."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1413,7 +1427,13 @@
     "reminders_saved": "Aptarnavimo priminimai įrašyti",
     "pause_no_cycle": "Nėra aktyvaus ciklo, kurį būtų galima pristabdyti",
     "resume_no_cycle": "Nėra pristabdyto ciklo, kurį būtų galima tęsti",
-    "delete_partial_failed": "Kai kurių elementų nepavyko ištrinti ir jie buvo atkurti"
+    "delete_partial_failed": "Kai kurių elementų nepavyko ištrinti ir jie buvo atkurti",
+    "pg_run_gone": "Šis vykdymas nebepasiekiamas.",
+    "task_cancelled": "Atšaukta.",
+    "processed": "Apdorota {bits}",
+    "processed_cycles": "{n} ciklų",
+    "processed_suggestions": "{n} pasiūlymų",
+    "processed_models": "{n} modelių paaukštinta"
   },
   "suggestion": {
     "both_agree": "WashData rekomenduoja",

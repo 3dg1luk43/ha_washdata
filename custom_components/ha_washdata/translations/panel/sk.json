@@ -113,6 +113,8 @@
     "revert_settings": "Zahodiť zmeny",
     "revert_settings_tip": "Obnoviť nastavenia z doby pred posledným uložením",
     "revert_settings_tip_none": "Najprv uložte, aby ste aktivovali funkciu späť",
+    "revert": "Vrátiť späť",
+    "revert_to_previous": "Obnoviť toto nastavenie na predchádzajúcu hodnotu",
     "review": "Skontrolovať",
     "run": "Spustiť",
     "run_analysis": "🔍 Spustiť analýzu návrhov",
@@ -520,10 +522,18 @@
     "task_reprocess": "Opätovné spracovanie",
     "task_ml_training": "Učenie",
     "eta_secs": "zostáva ~{n} s",
-    "eta_mins": "zostáva ~{n} min"
+    "eta_mins": "zostáva ~{n} min",
+    "pg_recent_runs": "Nedávne spustenia",
+    "pg_load_run": "Znovu načítať toto spustenie",
+    "pg_match_confidence": "Spoľahlivosť zhody",
+    "pg_envelope_fit": "Súlad s obálkou",
+    "pg_envelope_fit_tip": "Ako presne cyklus zapadá do uloženej výkonovej obálky tohto profilu, iný pohľad než spoľahlivosť zhody."
   },
   "log": {
-    "all_levels": "Všetky úrovne"
+    "all_levels": "Všetky úrovne",
+    "all_devices": "Všetky zariadenia",
+    "all_components": "Všetky komponenty",
+    "search_ph": "Hľadať v protokoloch…"
   },
   "ml": {
     "builtin_models": "● Používa vstavané modely",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Prebudovanie zlyhalo: {error}",
     "toast_resume_failed": "Pokračovanie zlyhalo: {error}",
     "toast_revert_failed": "Vrátenie zmien zlyhalo: {error}",
+    "toast_reverted": "{key} vrátené späť",
     "toast_save_failed": "Uloženie zlyhalo: {error}",
     "trend_duration_longer": "Trvanie je dlhšie trendy ({pct} %/cyklus) — posledný priemer {avg}",
     "trend_duration_shorter": "Trvanie je kratšie ({pct} %/cyklus) — posledný priemer {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Prehrajte svoje nedávne cykly cez skutočný detektor a nástroj na priraďovanie programov s nastaveniami vyššie. Kliknutím na ľubovoľný riadok načítate daný cyklus do grafu; úpravou nastavenia zobrazíte porovnanie pred úpravou a po nej.",
     "pg_simulating": "Simulácia cyklu…",
     "pg_canvas_empty2": "Vyberte cyklus vyššie a stlačením Spustiť ho nasimulujte. Potom prejdením myšou zobrazíte hodnoty, kolieskom priblížite a ťahaním posuniete.",
-    "pg_apply_settings_confirm": "Uložiť týchto {n} nastavení do tohto zariadenia? {list}"
+    "pg_apply_settings_confirm": "Uložiť týchto {n} nastavení do tohto zariadenia? {list}",
+    "no_logs_match": "Týmto filtrom nezodpovedajú žiadne záznamy protokolu.",
+    "pg_analysis_hint2": "Vyberte cyklus a stlačte Spustiť na načítanie analýzy zhody.",
+    "pg_analysis_empty2": "Stlačte Spustiť na zobrazenie analýzy zhody."
   },
   "phase_desc": {
     "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",
@@ -1509,7 +1523,13 @@
     "reminders_saved": "Pripomienky servisu uložené",
     "pause_no_cycle": "Žiadny aktívny cyklus na pozastavenie",
     "resume_no_cycle": "Žiadny pozastavený cyklus na obnovenie",
-    "delete_partial_failed": "Niektoré položky sa nepodarilo odstrániť a boli obnovené"
+    "delete_partial_failed": "Niektoré položky sa nepodarilo odstrániť a boli obnovené",
+    "pg_run_gone": "Toto spustenie už nie je k dispozícii.",
+    "task_cancelled": "Zrušené.",
+    "processed": "Spracované {bits}",
+    "processed_cycles": "{n} cyklov",
+    "processed_suggestions": "{n} návrhov",
+    "processed_models": "{n} aktivovaných modelov"
   },
   "trend": {
     "down": "Klesajúci trend",

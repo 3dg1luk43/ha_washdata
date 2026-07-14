@@ -113,6 +113,8 @@
     "revert_settings": "Änderungen verwerfen",
     "revert_settings_tip": "Einstellungen aus dem Zustand vor dem letzten Speichern wiederherstellen",
     "revert_settings_tip_none": "Zuerst speichern, um Rückgängig zu aktivieren",
+    "revert": "Zurücksetzen",
+    "revert_to_previous": "Diese Einstellung auf ihren vorherigen Wert zurücksetzen",
     "review": "Auswerten",
     "run": "Ausführen",
     "run_analysis": "🔍 Führen Sie eine Vorschlagsanalyse durch",
@@ -520,10 +522,18 @@
     "task_reprocess": "Neuverarbeitung",
     "task_ml_training": "Lernen",
     "eta_secs": "noch ~{n} s",
-    "eta_mins": "noch ~{n} Min."
+    "eta_mins": "noch ~{n} Min.",
+    "pg_recent_runs": "Letzte Durchläufe",
+    "pg_load_run": "Diesen Durchlauf neu laden",
+    "pg_match_confidence": "Zuordnungssicherheit",
+    "pg_envelope_fit": "Hüllkurven-Passung",
+    "pg_envelope_fit_tip": "Wie genau der Zyklus innerhalb der gespeicherten Leistungshüllkurve dieses Profils liegt, eine andere Sicht als die Zuordnungssicherheit."
   },
   "log": {
-    "all_levels": "Alle Ebenen"
+    "all_levels": "Alle Ebenen",
+    "all_devices": "Alle Geräte",
+    "all_components": "Alle Komponenten",
+    "search_ph": "Protokolle durchsuchen…"
   },
   "ml": {
     "builtin_models": "● Verwendung integrierter Modelle",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Neuaufbau fehlgeschlagen: {error}",
     "toast_resume_failed": "Fortsetzen fehlgeschlagen: {error}",
     "toast_revert_failed": "Zurücksetzen fehlgeschlagen: {error}",
+    "toast_reverted": "{key} zurückgesetzt",
     "toast_save_failed": "Speichern fehlgeschlagen: {error}",
     "trend_duration_longer": "Dauer tendenziell länger ({pct} %/Zyklus) – aktueller Durchschnitt {avg}",
     "trend_duration_shorter": "Dauer tendenziell kürzer ({pct} %/Zyklus) – aktueller Durchschnitt {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Lass deine letzten Zyklen mit den obigen Einstellungen erneut durch die echte Erkennung und Zuordnung laufen. Klicke auf eine Zeile, um diesen Zyklus im Diagramm zu laden; ändere eine Einstellung, um einen Vorher-Nachher-Vergleich zu sehen.",
     "pg_simulating": "Zyklus wird simuliert…",
     "pg_canvas_empty2": "Wähle oben einen Zyklus und drücke auf Ausführen, um ihn zu simulieren. Fahre dann mit dem Zeiger darüber, um Werte abzulesen, scrolle zum Zoomen und ziehe zum Verschieben.",
-    "pg_apply_settings_confirm": "Diese {n} Einstellung(en) für dieses Gerät speichern? {list}"
+    "pg_apply_settings_confirm": "Diese {n} Einstellung(en) für dieses Gerät speichern? {list}",
+    "no_logs_match": "Keine Protokolleinträge entsprechen diesen Filtern.",
+    "pg_analysis_hint2": "Wählen Sie einen Zyklus und klicken Sie auf Ausführen, um die Zuordnungsanalyse zu laden.",
+    "pg_analysis_empty2": "Klicken Sie auf Ausführen, um die Zuordnungsanalyse anzuzeigen."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plötzlicher Abfall gilt als sofortiges Ende",
@@ -1526,7 +1540,13 @@
     "reminders_saved": "Service-Erinnerungen gespeichert",
     "pause_no_cycle": "Kein aktiver Zyklus zum Anhalten",
     "resume_no_cycle": "Kein pausierter Zyklus zum Fortsetzen",
-    "delete_partial_failed": "Einige Elemente konnten nicht gelöscht werden und wurden wiederhergestellt"
+    "delete_partial_failed": "Einige Elemente konnten nicht gelöscht werden und wurden wiederhergestellt",
+    "pg_run_gone": "Dieser Durchlauf ist nicht mehr verfügbar.",
+    "task_cancelled": "Abgebrochen.",
+    "processed": "Verarbeitet: {bits}",
+    "processed_cycles": "{n} Zyklen",
+    "processed_suggestions": "{n} Vorschläge",
+    "processed_models": "{n} Modelle aktiviert"
   },
   "trend": {
     "down": "Abwärtstrend",

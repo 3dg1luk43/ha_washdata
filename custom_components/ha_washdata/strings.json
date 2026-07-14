@@ -406,6 +406,12 @@
       },
       "resume_cycle": {
         "name": "Resume Cycle"
+      },
+      "record_start": {
+        "name": "Record Cycle Start"
+      },
+      "record_stop": {
+        "name": "Record Cycle Stop"
       }
     }
   },

@@ -347,7 +347,7 @@ Per-user RBAC. Enable per-user control, set the fallback level for unlisted user
 
 ### Entities Provided
 - **`sensor.<name>_state`**: Current status. Possible values: `idle`, `starting`, `running`, `paused`, `user_paused`, `ending`, `finished`, `anti_wrinkle`, `interrupted`, `force_stopped`, `rinse`, `clean`, `delay_wait`, `unknown`.
-- **`sensor.<name>_program`**: Best-matched profile name.
+- **`sensor.<name>_program`**: Best-matched profile name. While a cycle is matched it also carries a `reference_profile` attribute - a compact `[[offset_s, watts], ...]` curve of the program's expected power over time (with `duration_s` and `cycle_count`) for energy-management automations; see [NOTIFICATIONS.md](NOTIFICATIONS.md#entity-attributes-useful-in-automations).
 - **`sensor.<name>_time_remaining`**: Smart countdown (locks during high-variance phases).
 - **`sensor.<name>_total_duration`**: Total predicted duration (Elapsed + Remaining). Ideal for `timer-bar-card`.
 - **`sensor.<name>_cycle_progress`**: 0–100% (resets after unload timeout).

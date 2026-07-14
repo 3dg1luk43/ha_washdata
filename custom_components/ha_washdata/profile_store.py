@@ -25,6 +25,7 @@ from .const import (
     MAINTENANCE_EVENT_TYPES,
     MAINTENANCE_RECENT_SUPPRESS_DAYS,
     MATCH_AMBIGUITY_MARGIN,
+    REFERENCE_PROFILE_CURVE_POINTS,
     SHAPE_DRIFT_MIN_CYCLES,
     SHAPE_DRIFT_RESAMPLE_N,
     SHAPE_DRIFT_THRESHOLD,
@@ -3597,6 +3598,68 @@ class ProfileStore:
             env = envelopes_map.get(profile_name)
             return cast(JSONDict, env) if isinstance(env, dict) else None
         return None
+
+    def reference_curve(
+        self, profile_name: str, n: int = REFERENCE_PROFILE_CURVE_POINTS
+    ) -> JSONDict | None:
+        """Compact, read-only reference power curve for a matched profile.
+
+        Downsamples the profile envelope's average power-over-time shape to at
+        most ``n`` points so it can be exposed as an entity attribute for
+        consumers (e.g. home energy managers) that want the *forward-looking
+        load shape* rather than a scalar ETA - to anticipate, say, a heating
+        spike later in the cycle. Shape::
+
+            {
+                "points": [[offset_s, watts], ...],  # <= n samples
+                "duration_s": float,                 # profile target duration
+                "cycle_count": int,                  # cycles behind the average
+            }
+
+        Offsets are absolute seconds from cycle start (0 .. ``duration_s``); a
+        consumer derives the *remaining* curve by slicing from the live progress
+        position (already exposed as the progress sensor). The curve is static
+        per profile - it only changes when the profile is re-learned - so it can
+        be surfaced as an attribute without recorder churn.
+
+        Pure statistics (no ML); never raises - returns ``None`` when the
+        envelope is missing or too short to be meaningful.
+        """
+        try:
+            env = self.get_envelope(profile_name)
+            if not isinstance(env, dict):
+                return None
+            avg = env.get("avg")
+            if (
+                not isinstance(avg, list)
+                or len(avg) < 2
+                or not isinstance(avg[0], (list, tuple))
+                or len(avg[0]) < 2
+            ):
+                return None
+            ts = np.asarray([float(p[0]) for p in avg], dtype=float)
+            ws = np.asarray([float(p[1]) for p in avg], dtype=float)
+            if ts.size < 2 or not (np.all(np.isfinite(ts)) and np.all(np.isfinite(ws))):
+                return None
+            if ts[-1] <= ts[0]:
+                return None
+            duration = float(env.get("target_duration") or 0.0)
+            if duration <= 0:
+                duration = float(ts[-1])
+            count = max(2, min(int(n), ts.size))
+            grid = np.linspace(float(ts[0]), float(ts[-1]), count)
+            vals = np.interp(grid, ts, ws)
+            points = [
+                [int(round(float(g))), round(float(v), 1)]
+                for g, v in zip(grid, vals)
+            ]
+            return {
+                "points": points,
+                "duration_s": round(duration, 1),
+                "cycle_count": int(env.get("cycle_count") or 0),
+            }
+        except Exception:  # pragma: no cover - defensive; never break the sensor
+            return None
 
     def compute_envelope_conformance(
         self,

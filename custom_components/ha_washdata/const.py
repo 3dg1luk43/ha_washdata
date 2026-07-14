@@ -401,6 +401,12 @@ MATCH_AMBIGUITY_MARGIN = 0.05
 # but genuine prefix pairs like Quick 46 vs Normal 88 min (ratio 1.91) always do.
 SMART_TERM_LANDSCAPE_RATIO = 1.5       # candidate must be >= 1.5× the matched duration
 SMART_TERM_LANDSCAPE_MIN_SHAPE = 0.40  # minimum shape score (pre-Stage-4) to qualify
+
+# Number of points in the compact reference-profile curve exposed on the
+# `_program` sensor (`profile_store.reference_curve`). Chosen so the resulting
+# `[[offset_s, watts], ...]` attribute stays comfortably under ~1 KB regardless
+# of cycle length; the raw envelope can be hundreds to thousands of points.
+REFERENCE_PROFILE_CURVE_POINTS = 50
 # Duration + energy agreement blended into the final score. Shape correlation
 # alone cannot separate profiles that differ mainly in duration/energy (a real
 # weakness on multi-program washing machines), so the final score is

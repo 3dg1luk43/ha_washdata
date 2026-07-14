@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "Zyklus fortsetzen"
+      },
+      "record_start": {
+        "name": "Zyklusaufzeichnung starten"
+      },
+      "record_stop": {
+        "name": "Zyklusaufzeichnung stoppen"
       }
     }
   },

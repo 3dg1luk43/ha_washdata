@@ -76,6 +76,29 @@ test('log entries render in the log viewer', async ({ page }) => {
   await expect(page.locator('text=Cycle started').first()).toBeVisible({ timeout: 8_000 });
 });
 
+test('log viewer filters by component and search (client-side)', async ({ page }) => {
+  await page.evaluate(() => {
+    window.__ws_handlers['ha_washdata/get_logs'] = () => ({
+      logs: [
+        { ts: 1752200000, level: 'INFO', logger: 'manager', device: 'Dishwasher', msg: 'Cycle started' },
+        { ts: 1752200100, level: 'INFO', logger: 'playground', device: 'Dishwasher', msg: 'Optimize sweep value 120' },
+      ],
+    });
+  });
+  await clickTab(page, 'advanced');
+  await page.locator('[data-ptab="logs"]').first().click();
+  await expect(page.locator('text=Cycle started').first()).toBeVisible({ timeout: 8_000 });
+  // Component filter -> only playground records remain.
+  await page.locator('.wd-log-filter[data-logfilter="component"][data-ctx="page"]').selectOption('playground');
+  await expect(page.locator('text=Optimize sweep value 120').first()).toBeVisible();
+  await expect(page.locator('text=Cycle started')).toHaveCount(0);
+  // Reset component; search narrows instead.
+  await page.locator('.wd-log-filter[data-logfilter="component"][data-ctx="page"]').selectOption('');
+  await page.locator('.wd-log-filter[data-logfilter="search"][data-ctx="page"]').fill('sweep');
+  await expect(page.locator('text=Optimize sweep value 120').first()).toBeVisible();
+  await expect(page.locator('text=Cycle started')).toHaveCount(0);
+});
+
 // ─── Preferences / Panel Config ─────────────────────────────────────────────
 
 test('preferences section renders by default', async ({ page }) => {

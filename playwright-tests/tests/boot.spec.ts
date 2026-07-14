@@ -72,8 +72,11 @@ test('Playground tab is visible when mlTrainingAvailable is true', async ({ page
   await expect(pgTab).toBeVisible();
 });
 
-test('ML Training tab is visible for admin with mlTrainingAvailable', async ({ page }) => {
+test('ML Training is a subtab under Advanced (not a top-level tab)', async ({ page }) => {
   await bootPanel(page);
-  const mlTab = page.locator('button.wd-tab[data-tab="ml"]');
-  await expect(mlTab).toBeVisible();
+  // ML Training moved from a top-level tab into the Advanced tab's subtabs.
+  await expect(page.locator('button.wd-tab[data-tab="ml"]')).toHaveCount(0);
+  await page.locator('button.wd-tab[data-tab="advanced"]').click();
+  const mlSub = page.locator('button.wd-subtab[data-ptab="ml"]');
+  await expect(mlSub).toBeVisible();
 });

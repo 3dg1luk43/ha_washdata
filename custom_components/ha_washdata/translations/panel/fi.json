@@ -113,6 +113,8 @@
     "revert_settings": "Hylkää muutokset",
     "revert_settings_tip": "Palauta asetukset viimeistä tallennusta edeltävään tilaan",
     "revert_settings_tip_none": "Tallenna ensin ottaaksesi kumoamisen käyttöön",
+    "revert": "Palauta",
+    "revert_to_previous": "Palauta tämä asetus edelliseen arvoon",
     "review": "Arvioi",
     "run": "Aja",
     "run_analysis": "🔍 Suorita ehdotusanalyysi",
@@ -520,10 +522,18 @@
     "task_reprocess": "Uudelleenkäsittely",
     "task_ml_training": "Oppiminen",
     "eta_secs": "~{n} s jäljellä",
-    "eta_mins": "~{n} min jäljellä"
+    "eta_mins": "~{n} min jäljellä",
+    "pg_recent_runs": "Viimeaikaiset ajot",
+    "pg_load_run": "Lataa tämä ajo uudelleen",
+    "pg_match_confidence": "Osuman varmuus",
+    "pg_envelope_fit": "Verhokäyrän sopivuus",
+    "pg_envelope_fit_tip": "Kuinka tarkasti sykli pysyy tämän profiilin tallennetun tehon verhokäyrän sisällä, eri näkökulma kuin osuman varmuus."
   },
   "log": {
-    "all_levels": "Kaikki tasot"
+    "all_levels": "Kaikki tasot",
+    "all_devices": "Kaikki laitteet",
+    "all_components": "Kaikki komponentit",
+    "search_ph": "Hae lokeista…"
   },
   "ml": {
     "builtin_models": "● Sisäänrakennettujen mallien käyttö",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Uudelleenrakennus epäonnistui: {error}",
     "toast_resume_failed": "Jatkaminen epäonnistui: {error}",
     "toast_revert_failed": "Palautus epäonnistui: {error}",
+    "toast_reverted": "{key} palautettu",
     "toast_save_failed": "Tallennus epäonnistui: {error}",
     "trend_duration_longer": "Kesto trendi pidempi ({pct} %/sykli) – viimeaikainen keskim. {avg}",
     "trend_duration_shorter": "Kesto trendi lyhyempi ({pct}%/sykli) – viimeaikainen keskim. {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Toista viimeisimmät jaksosi todellisen tunnistimen ja täsmäyttimen läpi yllä olevilla asetuksilla. Napsauta mitä tahansa riviä ladataksesi kyseisen jakson kaavioon; muokkaa asetusta nähdäksesi ennen/jälkeen-vertailun.",
     "pg_simulating": "Simuloidaan jaksoa…",
     "pg_canvas_empty2": "Valitse jakso yltä ja paina Suorita simuloidaksesi sen. Vie sitten osoitin päälle lukeaksesi arvoja, vieritä zoomataksesi ja vedä panoroidaksesi.",
-    "pg_apply_settings_confirm": "Tallennetaanko nämä {n} asetusta tähän laitteeseen? {list}"
+    "pg_apply_settings_confirm": "Tallennetaanko nämä {n} asetusta tähän laitteeseen? {list}",
+    "no_logs_match": "Mikään lokitietue ei vastaa näitä suodattimia.",
+    "pg_analysis_hint2": "Valitse sykli ja paina Aja-painiketta ladataksesi osuma-analyysin.",
+    "pg_analysis_empty2": "Paina Aja-painiketta nähdäksesi osuma-analyysin."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Äkillinen pudotus tulkitaan välittömäksi lopuksi",
@@ -1526,7 +1540,13 @@
     "reminders_saved": "Huoltomuistutukset tallennettu",
     "pause_no_cycle": "Ei aktiivista sykliä tauotettavaksi",
     "resume_no_cycle": "Ei tauotettua sykliä jatkettavaksi",
-    "delete_partial_failed": "Joitakin kohteita ei voitu poistaa, ja ne palautettiin"
+    "delete_partial_failed": "Joitakin kohteita ei voitu poistaa, ja ne palautettiin",
+    "pg_run_gone": "Tätä ajoa ei ole enää saatavilla.",
+    "task_cancelled": "Peruutettu.",
+    "processed": "Käsitelty {bits}",
+    "processed_cycles": "{n} sykliä",
+    "processed_suggestions": "{n} ehdotusta",
+    "processed_models": "{n} mallia otettu käyttöön"
   },
   "trend": {
     "down": "Trendikäs alaspäin",

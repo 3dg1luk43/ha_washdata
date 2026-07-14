@@ -174,18 +174,6 @@ class GetDiagnosticsResponse(TypedDict):
     stats: dict[str, Any]
 
 
-class ReprocessHistoryResponse(TypedDict, total=False):
-    """``success`` + ``count`` are always present; the rest depend on which
-    sub-steps ran (golden backfill / suggestions / ML training / health)."""
-
-    success: bool
-    count: int
-    golden_backfilled: int
-    suggestions: int
-    ml_training: dict[str, Any]
-    health_recomputed: int
-
-
 class ClearDebugDataResponse(TypedDict):
     success: bool
     count: int
@@ -351,18 +339,6 @@ class GetMlTrainingStatusResponse(TypedDict):
     hour: int
     on_device_models: dict[str, Any]
     matching: dict[str, Any]
-
-
-class TriggerMlTrainingResponse(TypedDict, total=False):
-    """The training summary — ``ok`` is always present; the rest depend on the
-    outcome (``reason`` / ``promoted`` / ``results`` / ``matching`` / ``error``)."""
-
-    ok: bool
-    reason: str
-    promoted: list[str]
-    results: list[dict[str, Any]]
-    matching: dict[str, Any]
-    error: str
 
 
 # ─── Playground (F3) ───────────────────────────────────────────────────────────
@@ -533,7 +509,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "resolve_feedback": SuccessResponse,
     "dismiss_all_feedbacks": DismissAllFeedbacksResponse,
     "get_diagnostics": GetDiagnosticsResponse,
-    "reprocess_history": ReprocessHistoryResponse,
+    "reprocess_history": StartTaskResponse,
     "clear_debug_data": ClearDebugDataResponse,
     "wipe_history": SuccessResponse,
     "export_config": ExportConfigResponse,
@@ -559,7 +535,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "get_logs": GetLogsResponse,
     "get_ml_comparison": GetMlComparisonResponse,
     "get_ml_training_status": GetMlTrainingStatusResponse,
-    "trigger_ml_training": TriggerMlTrainingResponse,
+    "trigger_ml_training": StartTaskResponse,
     "revert_matching_config": SuccessResponse,
     "revert_ml_models": SuccessResponse,
     "set_ml_review": SuccessResponse,
@@ -584,7 +560,6 @@ WS_RESPONSE_TYPES: dict[str, type] = {
 #: for these but does not flag extra keys.
 WS_OPEN_RESPONSES: frozenset[str] = frozenset({
     "run_suggestion_analysis",
-    "trigger_ml_training",
     # Playground what-if responses carry nested/variant shapes (incl. an error
     # variant); skip strict extra-key validation.
     "run_playground_cycle_detail",

@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "サイクルを再開する"
+      },
+      "record_start": {
+        "name": "サイクル記録を開始"
+      },
+      "record_stop": {
+        "name": "サイクル記録を停止"
       }
     }
   },

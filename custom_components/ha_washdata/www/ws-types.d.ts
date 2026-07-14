@@ -301,15 +301,6 @@ export interface ProfileGroupInfo {
   cohesive: boolean;
 }
 
-export interface ReprocessHistoryResponse {
-  success?: boolean;
-  count?: number;
-  golden_backfilled?: number;
-  suggestions?: number;
-  ml_training?: Record<string, unknown>;
-  health_recomputed?: number;
-}
-
 export interface RunPlaygroundCycleDetailResponse {
   cycle_id?: unknown;
   label?: string | null;
@@ -384,15 +375,6 @@ export interface TaskSnapshot {
   error?: string | null;
   has_result?: boolean;
   result?: unknown;
-}
-
-export interface TriggerMlTrainingResponse {
-  ok?: boolean;
-  reason?: string;
-  promoted?: string[];
-  results?: Record<string, unknown>[];
-  matching?: Record<string, unknown>;
-  error?: string;
 }
 
 // ── Request parameters ─────────────────────────────────────────────────────
@@ -924,7 +906,7 @@ export interface WashDataWsResponses {
   "ha_washdata/resolve_feedback": SuccessResponse;
   "ha_washdata/dismiss_all_feedbacks": DismissAllFeedbacksResponse;
   "ha_washdata/get_diagnostics": GetDiagnosticsResponse;
-  "ha_washdata/reprocess_history": ReprocessHistoryResponse;
+  "ha_washdata/reprocess_history": StartTaskResponse;
   "ha_washdata/clear_debug_data": ClearDebugDataResponse;
   "ha_washdata/wipe_history": SuccessResponse;
   "ha_washdata/export_config": ExportConfigResponse;
@@ -950,7 +932,7 @@ export interface WashDataWsResponses {
   "ha_washdata/get_logs": GetLogsResponse;
   "ha_washdata/get_ml_comparison": GetMlComparisonResponse;
   "ha_washdata/get_ml_training_status": GetMlTrainingStatusResponse;
-  "ha_washdata/trigger_ml_training": TriggerMlTrainingResponse;
+  "ha_washdata/trigger_ml_training": StartTaskResponse;
   "ha_washdata/revert_matching_config": SuccessResponse;
   "ha_washdata/revert_ml_models": SuccessResponse;
   "ha_washdata/set_ml_review": SuccessResponse;

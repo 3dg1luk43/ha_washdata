@@ -113,6 +113,8 @@
     "revert_settings": "Renunță la modificări",
     "revert_settings_tip": "Restaurați setările de dinainte de ultima salvare",
     "revert_settings_tip_none": "Salvați mai întâi pentru a activa anularea",
+    "revert": "Restaurează",
+    "revert_to_previous": "Restaurați această setare la valoarea anterioară",
     "review": "Evaluează",
     "run": "Rulați",
     "run_analysis": "🔍 Rulați analiza sugestiilor",
@@ -520,10 +522,18 @@
     "task_reprocess": "Reprocesare",
     "task_ml_training": "Învățare",
     "eta_secs": "~{n} s rămase",
-    "eta_mins": "~{n} min rămase"
+    "eta_mins": "~{n} min rămase",
+    "pg_recent_runs": "Rulări recente",
+    "pg_load_run": "Reîncarcă această rulare",
+    "pg_match_confidence": "Încrederea în potrivire",
+    "pg_envelope_fit": "Încadrarea în anvelopă",
+    "pg_envelope_fit_tip": "Cât de bine se încadrează ciclul în anvelopa de putere salvată a acestui profil, o altă perspectivă decât încrederea în potrivire."
   },
   "log": {
-    "all_levels": "Toate nivelurile"
+    "all_levels": "Toate nivelurile",
+    "all_devices": "Toate dispozitivele",
+    "all_components": "Toate componentele",
+    "search_ph": "Căutare în jurnale…"
   },
   "ml": {
     "builtin_models": "● Folosind modele integrate",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Reconstruire eșuată: {error}",
     "toast_resume_failed": "Reluare eșuată: {error}",
     "toast_revert_failed": "Revenire eșuată: {error}",
+    "toast_reverted": "{key} a revenit la valoarea anterioară",
     "toast_save_failed": "Salvare eșuată: {error}",
     "trend_duration_longer": "Durata este în creștere ({pct}%/ciclu) — medie recentă {avg}",
     "trend_duration_shorter": "Durata este în scădere ({pct}%/ciclu) — medie recentă {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Reia ciclurile tale recente prin detectorul și sistemul de potrivire reale, cu setările de mai sus. Fă clic pe orice rând pentru a încărca acel ciclu în grafic; modifică o setare pentru a vedea o comparație înainte/după.",
     "pg_simulating": "Se simulează ciclul…",
     "pg_canvas_empty2": "Alege un ciclu de mai sus și apasă Rulează pentru a-l simula. Apoi treci cu cursorul pentru a citi valorile, derulează pentru a mări și trage pentru a te deplasa.",
-    "pg_apply_settings_confirm": "Salvezi aceste {n} setări pe acest dispozitiv? {list}"
+    "pg_apply_settings_confirm": "Salvezi aceste {n} setări pe acest dispozitiv? {list}",
+    "no_logs_match": "Nicio înregistrare din jurnal nu corespunde acestor filtre.",
+    "pg_analysis_hint2": "Selectați un ciclu și apăsați Rulați pentru a încărca analiza potrivirii.",
+    "pg_analysis_empty2": "Apăsați Rulați pentru a vedea analiza potrivirii."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1388,6 +1402,10 @@
     "phase_updated": "Fază actualizată",
     "phases_saved": "Faze salvate",
     "preferences_saved": "Preferințe salvate",
+    "processed": "Procesat {bits}",
+    "processed_cycles": "{n} cicluri",
+    "processed_models": "{n} modele promovate",
+    "processed_suggestions": "{n} sugestii",
     "profile_name_required": "Numele profilului este obligatoriu",
     "profile_renamed": "Profil redenumit",
     "recording_discarded": "Înregistrare anulată",
@@ -1413,7 +1431,9 @@
     "reminders_saved": "Mementouri de service salvate",
     "pause_no_cycle": "Niciun ciclu activ de pus în pauză",
     "resume_no_cycle": "Niciun ciclu în pauză de reluat",
-    "delete_partial_failed": "Unele elemente nu au putut fi șterse și au fost restaurate"
+    "delete_partial_failed": "Unele elemente nu au putut fi șterse și au fost restaurate",
+    "pg_run_gone": "Această rulare nu mai este disponibilă.",
+    "task_cancelled": "Anulat."
   },
   "suggestion": {
     "both_agree": "WashData recomandă",

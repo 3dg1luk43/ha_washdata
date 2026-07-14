@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "Rifillo ciklin"
+      },
+      "record_start": {
+        "name": "Fillo regjistrimin e ciklit"
+      },
+      "record_stop": {
+        "name": "Ndalo regjistrimin e ciklit"
       }
     }
   },

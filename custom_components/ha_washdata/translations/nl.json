@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "Hervat cyclus"
+      },
+      "record_start": {
+        "name": "Start cyclusopname"
+      },
+      "record_stop": {
+        "name": "Stop cyclusopname"
       }
     }
   },

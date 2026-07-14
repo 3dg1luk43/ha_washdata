@@ -113,6 +113,8 @@
     "revert_settings": "変更を破棄",
     "revert_settings_tip": "前回の保存前の設定を復元します",
     "revert_settings_tip_none": "元に戻す機能を有効にするには先に保存してください",
+    "revert": "元に戻す",
+    "revert_to_previous": "この設定を以前の値に戻す",
     "review": "評価する",
     "run": "実行",
     "run_analysis": "🔍 提案分析を実行する",
@@ -520,10 +522,18 @@
     "task_reprocess": "再処理",
     "task_ml_training": "学習",
     "eta_secs": "~{n}秒残り",
-    "eta_mins": "~{n}分残り"
+    "eta_mins": "~{n}分残り",
+    "pg_recent_runs": "最近の実行",
+    "pg_load_run": "この実行を再読み込み",
+    "pg_match_confidence": "マッチ信頼度",
+    "pg_envelope_fit": "エンベロープ適合度",
+    "pg_envelope_fit_tip": "このプロフィールの保存された電力エンベロープ内にサイクルがどれだけ収まっているか。マッチ信頼度とは異なる視点です。"
   },
   "log": {
-    "all_levels": "すべてのレベル"
+    "all_levels": "すべてのレベル",
+    "all_devices": "すべてのデバイス",
+    "all_components": "すべてのコンポーネント",
+    "search_ph": "ログを検索…"
   },
   "ml": {
     "builtin_models": "● 組み込みモデルの使用",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "再構築に失敗しました: {error}",
     "toast_resume_failed": "再開に失敗しました: {error}",
     "toast_revert_failed": "元に戻すことに失敗しました: {error}",
+    "toast_reverted": "{key}を元に戻しました",
     "toast_save_failed": "保存に失敗しました: {error}",
     "trend_duration_longer": "期間は長くなる傾向にあります ({pct}%/サイクル) - 最近の平均 {avg}",
     "trend_duration_shorter": "期間は短くなる傾向にあります ({pct}%/サイクル) - 最近の平均 {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "上記の設定で、最近のサイクルを実際の検出器とマッチャーで再生します。行をクリックするとそのサイクルをグラフに読み込みます。設定を変更すると、変更前後の比較が表示されます。",
     "pg_simulating": "サイクルをシミュレーションしています…",
     "pg_canvas_empty2": "上でサイクルを選び、「実行」を押してシミュレーションします。その後、ホバーで値を表示、スクロールでズーム、ドラッグで移動できます。",
-    "pg_apply_settings_confirm": "これら {n} 件の設定をこのデバイスに保存しますか？ {list}"
+    "pg_apply_settings_confirm": "これら {n} 件の設定をこのデバイスに保存しますか？ {list}",
+    "no_logs_match": "これらのフィルターに一致するログレコードはありません。",
+    "pg_analysis_hint2": "サイクルを選択して「実行」を押すと、マッチ分析が読み込まれます。",
+    "pg_analysis_empty2": "「実行」を押すとマッチ分析が表示されます。"
   },
   "pg_desc": {
     "abrupt_drop_watts": "急激な低下は即時終了として扱う",
@@ -1430,7 +1444,13 @@
     "reminders_saved": "サービスリマインダーを保存しました",
     "pause_no_cycle": "一時停止できるアクティブなサイクルがありません",
     "resume_no_cycle": "再開できる一時停止中のサイクルがありません",
-    "delete_partial_failed": "一部の項目を削除できなかったため、復元されました"
+    "delete_partial_failed": "一部の項目を削除できなかったため、復元されました",
+    "pg_run_gone": "その実行は利用できなくなりました。",
+    "task_cancelled": "キャンセルしました。",
+    "processed": "{bits} を処理しました",
+    "processed_cycles": "{n} 件のサイクル",
+    "processed_suggestions": "{n} 件の提案",
+    "processed_models": "{n} 件のモデル昇格"
   },
   "suggestion": {
     "both_agree": "WashDataの推奨",

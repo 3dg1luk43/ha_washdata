@@ -4,7 +4,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { bootPanel, clickTab, assertWsCalled } from '../helpers/panel';
+import { bootPanel, clickTab, openMlTab, assertWsCalled } from '../helpers/panel';
 
 // The panel reads: st.on_device_models (dict), st.cycle_count, st.min_cycles,
 // st.last_trained, st.enabled, st.hour, st.running.
@@ -45,26 +45,27 @@ test.beforeEach(async ({ page }) => {
 
 // ─── Tab visibility ───────────────────────────────────────────────────────────
 
-test('ML Training tab is visible when mlTrainingAvailable', async ({ page }) => {
-  const mlTab = page.locator('button.wd-tab[data-tab="ml"], button.wd-tab[data-tab="ml_training"]').first();
+test('ML Training subtab is visible under Advanced when mlTrainingAvailable', async ({ page }) => {
+  await clickTab(page, 'advanced');
+  const mlTab = page.locator('button.wd-subtab[data-ptab="ml"]').first();
   await expect(mlTab).toBeVisible({ timeout: 8_000 });
 });
 
 test('ML Training tab fetches status on navigation', async ({ page }) => {
-  await clickTab(page, 'ml');
+  await openMlTab(page);
   await assertWsCalled(page, 'ha_washdata/get_ml_training_status');
 });
 
 // ─── Status section ───────────────────────────────────────────────────────────
 
 test('ML status section renders data-readiness bar', async ({ page }) => {
-  await clickTab(page, 'ml');
+  await openMlTab(page);
   const bar = page.locator('div[style*="height:8px"]').first();
   await expect(bar).toBeVisible({ timeout: 8_000 });
 });
 
 test('ML status section shows "built-in models" label when not personalized', async ({ page }) => {
-  await clickTab(page, 'ml');
+  await openMlTab(page);
   const label = page.locator('text=built-in models').first();
   await expect(label).toBeVisible({ timeout: 8_000 });
 });
@@ -74,13 +75,13 @@ test('ML status section shows "Personalized to this machine" when on-device mode
   await bootPanel(page, {
     'ha_washdata/get_ml_training_status': ML_STATUS_PERSONALIZED,
   });
-  await clickTab(page, 'ml');
+  await openMlTab(page);
   const label = page.locator('text=Personalized to this machine').first();
   await expect(label).toBeVisible({ timeout: 8_000 });
 });
 
 test('ML status section shows last-checked timestamp', async ({ page }) => {
-  await clickTab(page, 'ml');
+  await openMlTab(page);
   // The paragraph contains "Last checked:" as inline text in a .wd-info paragraph
   const ts = page.locator('p.wd-info:has-text("Last checked")').first();
   await expect(ts).toBeVisible({ timeout: 8_000 });
@@ -89,13 +90,13 @@ test('ML status section shows last-checked timestamp', async ({ page }) => {
 // ─── Train now button ────────────────────────────────────────────────────────
 
 test('"Train now" button is present in ML status section', async ({ page }) => {
-  await clickTab(page, 'ml');
+  await openMlTab(page);
   const trainBtn = page.locator('button[data-action="ml-train-now"]').first();
   await expect(trainBtn).toBeVisible({ timeout: 8_000 });
 });
 
 test('clicking "Train now" calls trigger_ml_training WS command', async ({ page }) => {
-  await clickTab(page, 'ml');
+  await openMlTab(page);
   const trainBtn = page.locator('button[data-action="ml-train-now"]').first();
   await expect(trainBtn).toBeVisible({ timeout: 8_000 });
   await trainBtn.click();
@@ -105,20 +106,20 @@ test('clicking "Train now" calls trigger_ml_training WS command', async ({ page 
 // ─── Settings section ─────────────────────────────────────────────────────────
 
 test('ML settings toggles are present', async ({ page }) => {
-  await clickTab(page, 'ml');
+  await openMlTab(page);
   // "Apply smart models" toggle — the input is visually hidden; target the field container
   const modelToggle = page.locator('.wd-field-switch').filter({ has: page.locator('[data-opt="enable_ml_models"]') }).first();
   await expect(modelToggle).toBeVisible({ timeout: 8_000 });
 });
 
 test('"Learn from this machine" toggle is present', async ({ page }) => {
-  await clickTab(page, 'ml');
+  await openMlTab(page);
   const learnToggle = page.locator('.wd-field-switch').filter({ has: page.locator('[data-opt="ml_training_enabled"]') }).first();
   await expect(learnToggle).toBeVisible({ timeout: 8_000 });
 });
 
 test('toggling "Apply smart models" calls set_options', async ({ page }) => {
-  await clickTab(page, 'ml');
+  await openMlTab(page);
   // The input is visually hidden; click the visible slider instead
   const slider = page.locator('.wd-field-switch').filter({ has: page.locator('[data-opt="enable_ml_models"]') }).locator('.wd-switch-slider').first();
   await expect(slider).toBeVisible({ timeout: 8_000 });
@@ -138,7 +139,7 @@ test('toggling "Apply smart models" calls set_options', async ({ page }) => {
 // ─── What WashData has learned ─────────────────────────────────────────────────
 
 test('"What WashData has learned" section shows no-models message when not personalized', async ({ page }) => {
-  await clickTab(page, 'ml');
+  await openMlTab(page);
   // No on-device models → shows a message about built-in models
   const noModels = page.locator('text=Nothing fine-tuned yet').first();
   await expect(noModels).toBeVisible({ timeout: 8_000 });
@@ -149,9 +150,11 @@ test('"What WashData has learned" section shows model row when personalized', as
   await bootPanel(page, {
     'ha_washdata/get_ml_training_status': ML_STATUS_PERSONALIZED,
   });
-  await clickTab(page, 'ml');
-  // Model label should appear
-  await expect(page.locator('text=Program matching').first()).toBeVisible({ timeout: 8_000 });
+  await openMlTab(page);
+  // Model label should appear. Scope to the "What WashData has learned" card —
+  // the Playground pane also renders a hidden "Program matching" objective label.
+  const learnedCard = page.locator('.wd-card', { hasText: 'What WashData has learned' });
+  await expect(learnedCard.getByText('Program matching')).toBeVisible({ timeout: 8_000 });
 });
 
 test('personalized model row shows a quality chip', async ({ page }) => {
@@ -159,7 +162,7 @@ test('personalized model row shows a quality chip', async ({ page }) => {
   await bootPanel(page, {
     'ha_washdata/get_ml_training_status': ML_STATUS_PERSONALIZED,
   });
-  await clickTab(page, 'ml');
+  await openMlTab(page);
   // AUC 0.94 → "Strong" quality chip
   const chip = page.locator('text=Strong').first();
   await expect(chip).toBeVisible({ timeout: 8_000 });
@@ -171,7 +174,7 @@ test('"Reset to built-in models" button reverts on-device models', async ({ page
     'ha_washdata/get_ml_training_status': ML_STATUS_PERSONALIZED,
     'ha_washdata/revert_ml_models': { ok: true },
   });
-  await clickTab(page, 'ml');
+  await openMlTab(page);
   // The reset button only appears when there are on-device models
   const revertBtn = page.locator('button[data-action="ml-revert-models"]').first();
   await expect(revertBtn).toBeVisible({ timeout: 8_000 });
@@ -193,7 +196,7 @@ test('matching tuning card is present in ML tab when st.matching is provided', a
       },
     },
   });
-  await clickTab(page, 'ml');
+  await openMlTab(page);
   // "Program-matching fine-tuning" card header should appear
   const card = page.locator('text=Program-matching').first();
   await expect(card).toBeVisible({ timeout: 8_000 });
@@ -216,7 +219,7 @@ test('"Reset to defaults" button calls revert_matching_config when tuned weights
     },
     'ha_washdata/revert_matching_config': { ok: true },
   });
-  await clickTab(page, 'ml');
+  await openMlTab(page);
   const revertBtn = page.locator('button[data-action="ml-revert-match"]').first();
   await expect(revertBtn).toBeVisible({ timeout: 8_000 });
   await revertBtn.click();
@@ -227,7 +230,7 @@ test('"Reset to defaults" button calls revert_matching_config when tuned weights
 
 test('ML tab renders without overflow on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await clickTab(page, 'ml');
+  await openMlTab(page);
   const overflow = await page.evaluate(() => {
     const el = document.querySelector('ha-washdata-panel');
     if (!el || !el.shadowRoot) return 0;

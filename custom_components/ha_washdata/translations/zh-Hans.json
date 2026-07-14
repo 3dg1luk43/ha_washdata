@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "恢复周期"
+      },
+      "record_start": {
+        "name": "开始记录循环"
+      },
+      "record_stop": {
+        "name": "停止记录循环"
       }
     }
   },

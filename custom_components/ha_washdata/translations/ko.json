@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "사이클 재개"
+      },
+      "record_start": {
+        "name": "사이클 기록 시작"
+      },
+      "record_stop": {
+        "name": "사이클 기록 중지"
       }
     }
   },

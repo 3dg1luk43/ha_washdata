@@ -58,6 +58,17 @@ export function getModal(page: Page): Locator {
   return page.locator('.wd-modal');
 }
 
+/**
+ * Navigate to the ML Training subtab. ML Training is no longer a top-level tab;
+ * it is a subtab nested under the Advanced tab (data-ptab="ml").
+ */
+export async function openMlTab(page: Page): Promise<void> {
+  await clickTab(page, 'advanced');
+  const sub = page.locator('button.wd-subtab[data-ptab="ml"]');
+  await expect(sub).toBeVisible({ timeout: 5_000 });
+  await sub.click();
+}
+
 /** Click a subtab button by its data attribute (data-ptab or data-pgtab). */
 export async function clickSubtab(page: Page, attr: string, value: string): Promise<void> {
   const btn = page.locator(`[${attr}="${value}"]`);

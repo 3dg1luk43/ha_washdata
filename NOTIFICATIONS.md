@@ -395,7 +395,28 @@ attributes are handy when building dashboards and automations:
 - `sensor.<name>_state` exposes `sub_state` (finer-grained state), `current_program_guess`,
   and `samples_recorded`; pump devices also expose `pump_stuck`.
 - `sensor.<name>_program` exposes the matched profile's phase ranges/catalog when a real
-  profile is matched (used by phase-aware cards).
+  profile is matched (used by phase-aware cards). Once matched it also exposes
+  `reference_profile`, the matched program's expected power-over-time shape:
+
+  ```yaml
+  reference_profile:
+    points:            # up to ~50 samples, absolute seconds from cycle start
+      - [0, 12.0]      # [offset_s, watts]
+      - [72, 2105.3]
+      - [3600, 4.0]
+    duration_s: 3600.0 # profile's typical total duration
+    cycle_count: 12    # cycles behind the learned average
+  ```
+
+  This is a forward-looking load shape for energy-management automations (e.g. peak
+  shaving): slice `points` from the live position - which you already know from
+  `sensor.<name>_cycle_progress` (or elapsed vs. `duration_s`) - to see the expected
+  *remaining* draw, such as a heating spike still to come, rather than only a scalar
+  ETA. It appears **only while a real profile is matched** - it is absent while the
+  state sensor still reads `detecting…` or the cycle is unmatched, so an automation can
+  distinguish "no forecast yet" from "forecast available." The curve is a live signal
+  and is intentionally **not stored in the recorder** (it has no historical value); read
+  it from the current state, not from history.
 
 For the full cycle record (energy, peak power, termination reason, feature signature),
 trigger on `ha_washdata_cycle_ended` and read `cycle_data` as shown above.

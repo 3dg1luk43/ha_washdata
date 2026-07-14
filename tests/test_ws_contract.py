@@ -11,6 +11,7 @@ generated files).
 """
 from __future__ import annotations
 
+import ast
 import importlib.util
 import inspect
 import logging
@@ -36,6 +37,67 @@ _TYPE_RE = re.compile(r"ha_washdata/([a-z0-9_]+)")
 def _registered_commands() -> set[str]:
     src = inspect.getsource(ws_api)
     return set(_TYPE_RE.findall(src))
+
+
+def _registration_handlers() -> list[str]:
+    """Handler names in async_register_commands' ``handlers = [...]`` list.
+
+    AST-parsed (not a raw token scan) so a ``ws_*`` name mentioned only in a comment
+    or elsewhere in the function body can't leak in and produce a false result.
+    """
+    tree = ast.parse(inspect.getsource(ws_api.async_register_commands))
+    names: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign) and any(
+            isinstance(t, ast.Name) and t.id == "handlers" for t in node.targets
+        ) and isinstance(node.value, (ast.List, ast.Tuple)):
+            names = [e.id for e in node.value.elts if isinstance(e, ast.Name)]
+    assert names, "could not find the `handlers = [...]` list in async_register_commands"
+    return list(dict.fromkeys(names))
+
+
+def test_every_registered_handler_is_decorated():
+    """Every handler wired into async_register_commands MUST carry the
+    ``@websocket_api.websocket_command`` decorator (which sets ``_ws_command``).
+
+    A missing decorator makes ``async_register_command`` raise ``AttributeError``
+    mid-loop, silently aborting registration for EVERY command after it (they then
+    fail at runtime with ``unknown_command``). This test is the guard for that
+    class of bug - it caught a dropped decorator on ``ws_trigger_ml_training`` that
+    had un-registered the entire Playground + task-registry command set.
+    """
+    missing = [
+        name
+        for name in _registration_handlers()
+        if getattr(getattr(ws_api, name, None), "_ws_command", None) is None
+    ]
+    assert not missing, (
+        "WS handlers wired into async_register_commands but missing the "
+        f"@websocket_command decorator (would abort registration): {missing}"
+    )
+
+
+def test_detached_task_runners_are_plain_coroutines():
+    """The detached task runners are kicked off directly via
+    ``hass.async_create_task(runner(...))`` - they are NOT registered WS handlers.
+
+    They must therefore carry NO ``@websocket_command`` / ``@async_response``
+    decorators: ``@async_response`` rewrites the function into a *synchronous*
+    ``schedule_handler`` that returns ``None``, so ``async_create_task(None)`` would
+    raise ``TypeError: a coroutine was expected`` at runtime (the "Train now" button
+    would error even though training ran). ``test_every_registered_handler_is_decorated``
+    can't catch this because these runners are not in the registration list.
+    """
+    for name in ("_ml_training_task", "_reprocess_task", "_pg_history_task", "_pg_sweep_task"):
+        fn = getattr(ws_api, name)
+        assert inspect.iscoroutinefunction(fn), (
+            f"{name} must stay a plain coroutine (no @async_response); it is called "
+            f"directly via hass.async_create_task and a sync wrapper returns None."
+        )
+        assert getattr(fn, "_ws_command", None) is None, (
+            f"{name} is a detached runner, not a WS handler - it must not carry a "
+            f"@websocket_command decorator."
+        )
 
 
 # ─── Contract sync: the gate ────────────────────────────────────────────────────
@@ -112,10 +174,31 @@ def test_validate_ws_contract_detects_unexpected_key():
 
 
 def test_validate_ws_contract_allows_extras_on_open_responses():
-    # trigger_ml_training splats a summary dict, so extra keys are allowed.
+    # run_suggestion_analysis splats a summary dict, so extra keys are allowed.
     assert ws_api._validate_ws_contract(
-        "trigger_ml_training", {"ok": True, "promoted": [], "anything_else": 42}
+        "run_suggestion_analysis", {"ok": True, "count": 3, "anything_else": 42}
     ) == []
+    # The Playground one-shot commands return large open result dicts (rows / series
+    # / sweep grids / an {"error": ...} marker), so they are also open responses -
+    # extra keys must not be flagged.
+    for cmd in ("run_playground_cycle_detail", "run_playground_history", "run_playground_sweep"):
+        assert cmd in ws_schema.WS_OPEN_RESPONSES
+        assert ws_api._validate_ws_contract(cmd, {"whatever": 1, "series": []}) == []
+        assert ws_api._validate_ws_contract(cmd, {"error": "boom"}) == []
+
+
+def test_validate_ws_contract_task_start_commands_are_strict():
+    """trigger_ml_training / reprocess_history now return StartTaskResponse (just
+    {task_id}) and are NOT in WS_OPEN_RESPONSES, so an extra response key must be
+    flagged - pinning the migration away from their old open-summary responses."""
+    for cmd in ("trigger_ml_training", "reprocess_history"):
+        assert cmd not in ws_schema.WS_OPEN_RESPONSES
+        # A well-formed response validates clean …
+        assert ws_api._validate_ws_contract(cmd, {"task_id": "abc"}) == []
+        # … but the old-style summary keys are now rejected as unexpected.
+        problems = ws_api._validate_ws_contract(cmd, {"task_id": "abc", "count": 3})
+        assert problems
+        assert any("unexpected keys" in p and "count" in p for p in problems)
 
 
 def test_validate_ws_contract_non_dict_is_flagged():

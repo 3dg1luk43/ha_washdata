@@ -113,6 +113,8 @@
     "revert_settings": "변경 사항 취소",
     "revert_settings_tip": "마지막 저장 전 설정을 복원합니다",
     "revert_settings_tip_none": "실행 취소를 활성화하려면 먼저 저장하세요",
+    "revert": "되돌리기",
+    "revert_to_previous": "이 설정을 이전 값으로 되돌리기",
     "review": "검토",
     "run": "실행",
     "run_analysis": "🔍 제안 분석 실행",
@@ -520,10 +522,18 @@
     "task_reprocess": "재처리",
     "task_ml_training": "학습",
     "eta_secs": "~{n}초 남음",
-    "eta_mins": "~{n}분 남음"
+    "eta_mins": "~{n}분 남음",
+    "pg_recent_runs": "최근 실행",
+    "pg_load_run": "이 실행 다시 불러오기",
+    "pg_match_confidence": "매칭 신뢰도",
+    "pg_envelope_fit": "엔벨로프 적합도",
+    "pg_envelope_fit_tip": "이 프로필의 저장된 전력 엔벨로프 안에 사이클이 얼마나 잘 들어맞는지 보여줍니다. 매칭 신뢰도와는 다른 관점입니다."
   },
   "log": {
-    "all_levels": "모든 레벨"
+    "all_levels": "모든 레벨",
+    "all_devices": "모든 기기",
+    "all_components": "모든 구성 요소",
+    "search_ph": "로그 검색…"
   },
   "ml": {
     "builtin_models": "● 내장 모델 사용",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "재구성 실패: {error}",
     "toast_resume_failed": "재개 실패: {error}",
     "toast_revert_failed": "되돌리기 실패: {error}",
+    "toast_reverted": "{key}을(를) 되돌렸습니다",
     "toast_save_failed": "저장 실패: {error}",
     "trend_duration_longer": "기간이 길어지는 추세({pct}%/주기) — 최근 평균 {avg}",
     "trend_duration_shorter": "기간이 짧아지는 추세({pct}%/주기) — 최근 평균 {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "위 설정으로 최근 사이클을 실제 감지기와 매처를 통해 다시 재생합니다. 행을 클릭하면 해당 사이클을 그래프에 불러옵니다. 설정을 변경하면 변경 전후 비교를 확인할 수 있습니다.",
     "pg_simulating": "사이클을 시뮬레이션하는 중…",
     "pg_canvas_empty2": "위에서 사이클을 선택하고 실행을 눌러 시뮬레이션하세요. 그런 다음 마우스를 올려 값을 확인하고, 스크롤하여 확대/축소하고, 드래그하여 이동할 수 있습니다.",
-    "pg_apply_settings_confirm": "이 {n}개 설정을 이 기기에 저장하시겠습니까? {list}"
+    "pg_apply_settings_confirm": "이 {n}개 설정을 이 기기에 저장하시겠습니까? {list}",
+    "no_logs_match": "이 필터와 일치하는 로그 기록이 없습니다.",
+    "pg_analysis_hint2": "사이클을 선택하고 실행을 누르면 매칭 분석이 로드됩니다.",
+    "pg_analysis_empty2": "실행을 누르면 매칭 분석이 표시됩니다."
   },
   "pg_desc": {
     "abrupt_drop_watts": "급격한 강하는 즉시 종료로 처리",
@@ -1430,7 +1444,13 @@
     "reminders_saved": "서비스 알림이 저장되었습니다",
     "pause_no_cycle": "일시 정지할 실행 중인 사이클이 없습니다",
     "resume_no_cycle": "재개할 일시 정지된 사이클이 없습니다",
-    "delete_partial_failed": "일부 항목을 삭제할 수 없어 복원되었습니다"
+    "delete_partial_failed": "일부 항목을 삭제할 수 없어 복원되었습니다",
+    "pg_run_gone": "해당 실행은 더 이상 사용할 수 없습니다.",
+    "task_cancelled": "취소되었습니다.",
+    "processed": "{bits} 처리 완료",
+    "processed_cycles": "{n}개 사이클",
+    "processed_suggestions": "{n}개 제안",
+    "processed_models": "{n}개 모델 승격"
   },
   "suggestion": {
     "both_agree": "WashData 권장",

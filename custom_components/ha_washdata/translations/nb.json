@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "Fortsett syklus"
+      },
+      "record_start": {
+        "name": "Start syklusopptak"
+      },
+      "record_stop": {
+        "name": "Stopp syklusopptak"
       }
     }
   },

@@ -113,6 +113,8 @@
     "revert_settings": "Atmest izmaiņas",
     "revert_settings_tip": "Atjaunot iestatījumus pirms pēdējās saglabāšanas",
     "revert_settings_tip_none": "Vispirms saglabājiet, lai aktivizētu atsaukšanu",
+    "revert": "Atgriezt",
+    "revert_to_previous": "Atjaunot šo iestatījumu uz iepriekšējo vērtību",
     "review": "Novērtēt",
     "run": "Palaist",
     "run_analysis": "🔍 Palaidiet ieteikumu analīzi",
@@ -520,10 +522,18 @@
     "task_reprocess": "Atkārtota apstrāde",
     "task_ml_training": "Mācīšanās",
     "eta_secs": "vēl ~{n} s",
-    "eta_mins": "vēl ~{n} min"
+    "eta_mins": "vēl ~{n} min",
+    "pg_recent_runs": "Nesenās palaišanas",
+    "pg_load_run": "Pārlādēt šo palaišanu",
+    "pg_match_confidence": "Atbilstības ticamība",
+    "pg_envelope_fit": "Iekļaušanās apvalklīknē",
+    "pg_envelope_fit_tip": "Cik precīzi cikls iekļaujas šī profila saglabātajā jaudas apvalklīknē, cits skatījums nekā atbilstības ticamība."
   },
   "log": {
-    "all_levels": "Visi līmeņi"
+    "all_levels": "Visi līmeņi",
+    "all_devices": "Visas ierīces",
+    "all_components": "Visi komponenti",
+    "search_ph": "Meklēt žurnālos…"
   },
   "ml": {
     "builtin_models": "● Izmantojot iebūvētos modeļus",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Atjaunošana neizdevās: {error}",
     "toast_resume_failed": "Atsākšana neizdevās: {error}",
     "toast_revert_failed": "Atgriešana neizdevās: {error}",
+    "toast_reverted": "{key} atgriezts",
     "toast_save_failed": "Saglabāšana neizdevās: {error}",
     "trend_duration_longer": "Ilgums kļūst arvien garāks ({pct}%/ciklā) — nesenā vidējā {avg}",
     "trend_duration_shorter": "Ilguma tendence ir īsāka ({pct}%/cikls) — nesenā vidējā {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Atskaņojiet savus nesenos ciklus caur īsto detektoru un saskaņotāju ar iepriekš norādītajiem iestatījumiem. Noklikšķiniet uz jebkuras rindas, lai ielādētu šo ciklu diagrammā; mainiet iestatījumu, lai redzētu salīdzinājumu pirms/pēc.",
     "pg_simulating": "Notiek cikla simulācija…",
     "pg_canvas_empty2": "Izvēlieties ciklu augšā un nospiediet Palaist, lai to simulētu. Pēc tam turiet kursoru virs, lai nolasītu vērtības, ritiniet, lai tuvinātu, un velciet, lai pārvietotu.",
-    "pg_apply_settings_confirm": "Vai saglabāt šos {n} iestatījumus šajā ierīcē? {list}"
+    "pg_apply_settings_confirm": "Vai saglabāt šos {n} iestatījumus šajā ierīcē? {list}",
+    "no_logs_match": "Neviens žurnāla ieraksts neatbilst šiem filtriem.",
+    "pg_analysis_hint2": "Atlasiet ciklu un nospiediet Palaist, lai ielādētu atbilstības analīzi.",
+    "pg_analysis_empty2": "Nospiediet Palaist, lai skatītu atbilstības analīzi."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -1413,7 +1427,13 @@
     "reminders_saved": "Apkopes atgādinājumi saglabāti",
     "pause_no_cycle": "Nav aktīva cikla, ko pauzēt",
     "resume_no_cycle": "Nav pauzēta cikla, ko atsākt",
-    "delete_partial_failed": "Dažus vienumus nevarēja izdzēst, un tie tika atjaunoti"
+    "delete_partial_failed": "Dažus vienumus nevarēja izdzēst, un tie tika atjaunoti",
+    "pg_run_gone": "Šī palaišana vairs nav pieejama.",
+    "task_cancelled": "Atcelts.",
+    "processed": "Apstrādāts {bits}",
+    "processed_cycles": "{n} cikli",
+    "processed_suggestions": "{n} ieteikumi",
+    "processed_models": "{n} modeļi paaugstināti"
   },
   "suggestion": {
     "both_agree": "WashData iesaka",

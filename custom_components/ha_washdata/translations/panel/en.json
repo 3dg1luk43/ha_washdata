@@ -110,6 +110,8 @@
     "reset_to_defaults": "Reset to defaults",
     "resume_cycle": "Resume cycle",
     "resume_cycle_tip": "Resume the paused cycle",
+    "revert": "Revert",
+    "revert_to_previous": "Restore this setting to its previous value",
     "revert_settings": "Revert changes",
     "revert_settings_tip": "Restore settings from before your last save",
     "revert_settings_tip_none": "Save first to enable undo",
@@ -473,10 +475,18 @@
     "task_reprocess": "Reprocessing",
     "task_ml_training": "Learning",
     "eta_secs": "~{n}s left",
-    "eta_mins": "~{n}m left"
+    "eta_mins": "~{n}m left",
+    "pg_recent_runs": "Recent runs",
+    "pg_load_run": "Reload this run",
+    "pg_match_confidence": "Match confidence",
+    "pg_envelope_fit": "Envelope fit",
+    "pg_envelope_fit_tip": "How closely the cycle sits inside this profile's saved power envelope - a different lens than match confidence."
   },
   "log": {
-    "all_levels": "All levels"
+    "all_levels": "All levels",
+    "all_devices": "All devices",
+    "all_components": "All components",
+    "search_ph": "Search logs…"
   },
   "maint": {
     "descale": "Descale",
@@ -702,6 +712,7 @@
     "toast_rebuild_failed": "Rebuild failed: {error}",
     "toast_resume_failed": "Resume failed: {error}",
     "toast_revert_failed": "Revert failed: {error}",
+    "toast_reverted": "{key} reverted",
     "toast_save_failed": "Save failed: {error}",
     "trend_duration_longer": "Duration trending longer ({pct}%/cycle) — recent avg {avg}",
     "trend_duration_shorter": "Duration trending shorter ({pct}%/cycle) — recent avg {avg}",
@@ -736,7 +747,10 @@
     "pg_history_intro2": "Replay your recent cycles through the real detector and matcher with the settings above. Click any row to load that cycle in the graph; edit a setting to see a before/after comparison.",
     "pg_simulating": "Simulating cycle…",
     "pg_canvas_empty2": "Pick a cycle above and press Run to simulate it. Then hover to read values, scroll to zoom, and drag to pan.",
-    "pg_apply_settings_confirm": "Save these {n} setting(s) to this device? {list}"
+    "pg_apply_settings_confirm": "Save these {n} setting(s) to this device? {list}",
+    "no_logs_match": "No log records match these filters.",
+    "pg_analysis_hint2": "Pick a cycle and press Run to load match analysis.",
+    "pg_analysis_empty2": "Press Run to see match analysis."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Sudden drop treated as immediate end",
@@ -1479,7 +1493,13 @@
     "suggestions_applied": "Suggestions applied; integration reloading",
     "suggestions_dismissed": "Suggestions dismissed",
     "pause_no_cycle": "No active cycle to pause",
-    "resume_no_cycle": "No paused cycle to resume"
+    "resume_no_cycle": "No paused cycle to resume",
+    "pg_run_gone": "That run is no longer available.",
+    "task_cancelled": "Cancelled.",
+    "processed": "Processed {bits}",
+    "processed_cycles": "{n} cycles",
+    "processed_suggestions": "{n} suggestion(s)",
+    "processed_models": "{n} model(s) promoted"
   },
   "trend": {
     "down": "Trending down",

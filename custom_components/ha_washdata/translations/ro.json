@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "Reluați ciclul"
+      },
+      "record_start": {
+        "name": "Porniți înregistrarea ciclului"
+      },
+      "record_stop": {
+        "name": "Opriți înregistrarea ciclului"
       }
     }
   },

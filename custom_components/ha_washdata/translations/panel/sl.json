@@ -113,6 +113,8 @@
     "revert_settings": "Zavrži spremembe",
     "revert_settings_tip": "Obnovi nastavitve iz stanja pred zadnjim shranjevanjem",
     "revert_settings_tip_none": "Najprej shranite, da omogočite razveljavitev",
+    "revert": "Povrni",
+    "revert_to_previous": "Povrni to nastavitev na prejšnjo vrednost",
     "review": "Oceni",
     "run": "Zaženi",
     "run_analysis": "🔍 Zaženi analizo predlogov",
@@ -520,10 +522,18 @@
     "task_reprocess": "Ponovna obdelava",
     "task_ml_training": "Učenje",
     "eta_secs": "še ~{n} s",
-    "eta_mins": "še ~{n} min"
+    "eta_mins": "še ~{n} min",
+    "pg_recent_runs": "Nedavni zagoni",
+    "pg_load_run": "Znova naloži ta zagon",
+    "pg_match_confidence": "Zanesljivost ujemanja",
+    "pg_envelope_fit": "Prileganje ovojnici",
+    "pg_envelope_fit_tip": "Kako natančno cikel ostane znotraj shranjene ovojnice moči tega profila, drugačen pogled kot zanesljivost ujemanja."
   },
   "log": {
-    "all_levels": "Vse ravni"
+    "all_levels": "Vse ravni",
+    "all_devices": "Vse naprave",
+    "all_components": "Vse komponente",
+    "search_ph": "Iskanje po dnevnikih…"
   },
   "ml": {
     "builtin_models": "● Uporablja vgrajene modele",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Obnova ni uspela: {error}",
     "toast_resume_failed": "Nadaljevanje ni uspelo: {error}",
     "toast_revert_failed": "Razveljavitev ni uspela: {error}",
+    "toast_reverted": "{key} povrnjeno",
     "toast_save_failed": "Shranjevanje ni uspelo: {error}",
     "trend_duration_longer": "Trajanje se povečuje ({pct}%/cikel) — zadnje povprečje {avg}",
     "trend_duration_shorter": "Trajanje se skrajšuje ({pct}%/cikel) — zadnje povprečje {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Znova predvajajte svoje nedavne cikle skozi pravi detektor in modul za ujemanje z zgornjimi nastavitvami. Kliknite poljubno vrstico, da naložite ta cikel v graf; spremenite nastavitev za prikaz primerjave pred in po.",
     "pg_simulating": "Simuliranje cikla…",
     "pg_canvas_empty2": "Izberite cikel zgoraj in pritisnite Zaženi za simulacijo. Nato pomaknite kazalec za prikaz vrednosti, drsajte za povečavo in povlecite za premikanje.",
-    "pg_apply_settings_confirm": "Shrani teh {n} nastavitev v to napravo? {list}"
+    "pg_apply_settings_confirm": "Shrani teh {n} nastavitev v to napravo? {list}",
+    "no_logs_match": "Noben zapis dnevnika ne ustreza tem filtrom.",
+    "pg_analysis_hint2": "Izberite cikel in pritisnite Zaženi za nalaganje analize ujemanja.",
+    "pg_analysis_empty2": "Pritisnite Zaženi za prikaz analize ujemanja."
   },
   "phase_desc": {
     "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",
@@ -1509,7 +1523,13 @@
     "reminders_saved": "Opomniki za servis shranjeni",
     "pause_no_cycle": "Ni aktivnega cikla za začasno zaustavitev",
     "resume_no_cycle": "Ni začasno zaustavljenega cikla za nadaljevanje",
-    "delete_partial_failed": "Nekaterih elementov ni bilo mogoče izbrisati in so bili obnovljeni"
+    "delete_partial_failed": "Nekaterih elementov ni bilo mogoče izbrisati in so bili obnovljeni",
+    "pg_run_gone": "Ta zagon ni več na voljo.",
+    "task_cancelled": "Preklicano.",
+    "processed": "Obdelano {bits}",
+    "processed_cycles": "{n} ciklov",
+    "processed_suggestions": "{n} predlogov",
+    "processed_models": "{n} aktiviranih modelov"
   },
   "trend": {
     "down": "Padajoči trend",

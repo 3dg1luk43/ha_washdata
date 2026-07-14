@@ -113,6 +113,8 @@
     "revert_settings": "Odrzuć zmiany",
     "revert_settings_tip": "Przywróć ustawienia sprzed ostatniego zapisu",
     "revert_settings_tip_none": "Najpierw zapisz, aby włączyć cofanie",
+    "revert": "Cofnij",
+    "revert_to_previous": "Przywróć to ustawienie do poprzedniej wartości",
     "review": "Sprawdź",
     "run": "Uruchom",
     "run_analysis": "🔍 Przeprowadź analizę sugestii",
@@ -520,10 +522,18 @@
     "task_reprocess": "Ponowne przetwarzanie",
     "task_ml_training": "Uczenie",
     "eta_secs": "pozostało ~{n} s",
-    "eta_mins": "pozostało ~{n} min"
+    "eta_mins": "pozostało ~{n} min",
+    "pg_recent_runs": "Ostatnie uruchomienia",
+    "pg_load_run": "Wczytaj ponownie to uruchomienie",
+    "pg_match_confidence": "Pewność dopasowania",
+    "pg_envelope_fit": "Zgodność z obwiednią",
+    "pg_envelope_fit_tip": "Jak dokładnie cykl mieści się w zapisanej obwiedni mocy tego profilu, inne spojrzenie niż pewność dopasowania."
   },
   "log": {
-    "all_levels": "Wszystkie poziomy"
+    "all_levels": "Wszystkie poziomy",
+    "all_devices": "Wszystkie urządzenia",
+    "all_components": "Wszystkie komponenty",
+    "search_ph": "Szukaj w dziennikach…"
   },
   "ml": {
     "builtin_models": "● Korzystanie z wbudowanych modeli",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Odbudowanie nie powiodło się: {error}",
     "toast_resume_failed": "Wznowienie nie powiodło się: {error}",
     "toast_revert_failed": "Przywracanie nie powiodło się: {error}",
+    "toast_reverted": "Cofnięto: {key}",
     "toast_save_failed": "Zapisywanie nie powiodło się: {error}",
     "trend_duration_longer": "Trwanie w trendzie dłuższym ({pct}%/cykl) — ostatnia średnia {avg}",
     "trend_duration_shorter": "Trwanie w trendzie krótszym ({pct}%/cykl) — ostatnia średnia {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Odtwórz swoje ostatnie cykle przez rzeczywisty detektor i mechanizm dopasowywania programów z ustawieniami powyżej. Kliknij dowolny wiersz, aby wczytać dany cykl na wykresie; zmień ustawienie, aby zobaczyć porównanie przed zmianą i po niej.",
     "pg_simulating": "Symulowanie cyklu…",
     "pg_canvas_empty2": "Wybierz cykl powyżej i naciśnij Uruchom, aby go zasymulować. Następnie najedź, aby odczytać wartości, przewiń, aby powiększyć, i przeciągnij, aby przesunąć.",
-    "pg_apply_settings_confirm": "Zapisać te ustawienia ({n}) w tym urządzeniu? {list}"
+    "pg_apply_settings_confirm": "Zapisać te ustawienia ({n}) w tym urządzeniu? {list}",
+    "no_logs_match": "Żadne wpisy dziennika nie pasują do tych filtrów.",
+    "pg_analysis_hint2": "Wybierz cykl i naciśnij Uruchom, aby wczytać analizę dopasowania.",
+    "pg_analysis_empty2": "Naciśnij Uruchom, aby zobaczyć analizę dopasowania."
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -1509,7 +1523,13 @@
     "reminders_saved": "Zapisano przypomnienia serwisowe",
     "pause_no_cycle": "Brak aktywnego cyklu do wstrzymania",
     "resume_no_cycle": "Brak wstrzymanego cyklu do wznowienia",
-    "delete_partial_failed": "Nie można było usunąć niektórych elementów i zostały one przywrócone"
+    "delete_partial_failed": "Nie można było usunąć niektórych elementów i zostały one przywrócone",
+    "pg_run_gone": "To uruchomienie nie jest już dostępne.",
+    "task_cancelled": "Anulowano.",
+    "processed": "Przetworzono {bits}",
+    "processed_cycles": "{n} cykli",
+    "processed_suggestions": "{n} sugestii",
+    "processed_models": "{n} aktywowanych modeli"
   },
   "trend": {
     "down": "Trend w dół",

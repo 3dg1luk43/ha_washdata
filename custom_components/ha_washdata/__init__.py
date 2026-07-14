@@ -560,16 +560,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if not hass.data.get(PANEL_REGISTERED_KEY):
         await async_register_panel(hass)
 
-    # Register WebSocket API commands for the panel - once per HA instance only.
-    if not hass.data.get("ha_washdata_ws_registered"):
-        from .ws_api import (  # pylint: disable=import-outside-toplevel
-            async_load_panel_config,
-            async_register_commands,
-        )
+    # Register WebSocket API commands for the panel. Re-run on every setup/reload:
+    # HA's async_register_command overwrites the handler per command type, so this
+    # is idempotent AND means NEW commands become available after an integration
+    # reload, not only after a full Home Assistant restart (previously the
+    # once-per-instance guard forced a full restart for any newly-added command).
+    from .ws_api import (  # pylint: disable=import-outside-toplevel
+        async_load_panel_config,
+        async_register_commands,
+    )
 
-        await async_load_panel_config(hass)
-        async_register_commands(hass)
-        hass.data["ha_washdata_ws_registered"] = True
+    await async_load_panel_config(hass)  # self-guards; safe to call repeatedly
+    async_register_commands(hass)
+    hass.data["ha_washdata_ws_registered"] = True
 
     # Register conversation intents (e.g. "is my washer done?") - once per HA
     # instance. Intents are domain-global, so guard against re-registration when

@@ -113,6 +113,8 @@
     "revert_settings": "Odbaci izmjene",
     "revert_settings_tip": "Vraćanje postavki na stanje prije posljednjeg spremanja",
     "revert_settings_tip_none": "Spremi prvo da bi aktivirao poništavanje",
+    "revert": "Vrati",
+    "revert_to_previous": "Vrati ovu postavku na prethodnu vrijednost",
     "review": "Pregled",
     "run": "Pokreni",
     "run_analysis": "🔍 Pokrenite analizu prijedloga",
@@ -520,10 +522,18 @@
     "task_reprocess": "Ponovna obrada",
     "task_ml_training": "Učenje",
     "eta_secs": "još ~{n} s",
-    "eta_mins": "još ~{n} min"
+    "eta_mins": "još ~{n} min",
+    "pg_recent_runs": "Nedavna pokretanja",
+    "pg_load_run": "Ponovo učitaj ovo pokretanje",
+    "pg_match_confidence": "Pouzdanost podudaranja",
+    "pg_envelope_fit": "Uklapanje u omotač",
+    "pg_envelope_fit_tip": "Koliko dobro ciklus ostaje unutar sačuvanog omotača snage ovog profila, drugačiji pogled od pouzdanosti podudaranja."
   },
   "log": {
-    "all_levels": "Svi nivoi"
+    "all_levels": "Svi nivoi",
+    "all_devices": "Svi uređaji",
+    "all_components": "Sve komponente",
+    "search_ph": "Pretraži zapisnike…"
   },
   "ml": {
     "builtin_models": "● Korišćenje ugrađenih modela",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Obnova neuspješna: {error}",
     "toast_resume_failed": "Nastavak neuspješan: {error}",
     "toast_revert_failed": "Povrat neuspješan: {error}",
+    "toast_reverted": "{key} vraćeno",
     "toast_save_failed": "Snimanje neuspješno: {error}",
     "trend_duration_longer": "Trajanje u trendu duže ({pct}%/ciklus) — nedavno prosječno {avg}",
     "trend_duration_shorter": "Trajanje trenda kraće ({pct}%/ciklus) — nedavno prosječno {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Ponovo izvedite svoje nedavne cikluse kroz stvarni detektor i modul za podudaranje s postavkama iznad. Kliknite bilo koji red da učitate taj ciklus u grafikon; izmijenite postavku da vidite poređenje prije i poslije.",
     "pg_simulating": "Simuliranje ciklusa…",
     "pg_canvas_empty2": "Odaberite ciklus iznad i pritisnite Pokreni da ga simulirate. Zatim pređite mišem za prikaz vrijednosti, pomjerajte točkić za zumiranje i povucite za pomjeranje.",
-    "pg_apply_settings_confirm": "Sačuvati ovih {n} postavki na ovaj uređaj? {list}"
+    "pg_apply_settings_confirm": "Sačuvati ovih {n} postavki na ovaj uređaj? {list}",
+    "no_logs_match": "Nijedan zapis dnevnika ne odgovara ovim filterima.",
+    "pg_analysis_hint2": "Odaberite ciklus i pritisnite Pokreni za učitavanje analize podudaranja.",
+    "pg_analysis_empty2": "Pritisnite Pokreni za prikaz analize podudaranja."
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka spuštanja nakon završetka za smanjenje bora.",
@@ -1509,7 +1523,13 @@
     "reminders_saved": "Podsjetnici za servis sačuvani",
     "pause_no_cycle": "Nema aktivnog ciklusa za pauziranje",
     "resume_no_cycle": "Nema pauziranog ciklusa za nastavak",
-    "delete_partial_failed": "Neke stavke nije bilo moguće obrisati i vraćene su"
+    "delete_partial_failed": "Neke stavke nije bilo moguće obrisati i vraćene su",
+    "pg_run_gone": "To pokretanje više nije dostupno.",
+    "task_cancelled": "Otkazano.",
+    "processed": "Obrađeno {bits}",
+    "processed_cycles": "{n} ciklusa",
+    "processed_suggestions": "{n} prijedloga",
+    "processed_models": "{n} aktiviranih modela"
   },
   "trend": {
     "down": "Opadajući trend",

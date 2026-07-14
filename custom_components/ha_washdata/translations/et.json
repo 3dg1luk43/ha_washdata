@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "Tsükli jätkamine"
+      },
+      "record_start": {
+        "name": "Alusta tsükli salvestamist"
+      },
+      "record_stop": {
+        "name": "Lõpeta tsükli salvestamine"
       }
     }
   },

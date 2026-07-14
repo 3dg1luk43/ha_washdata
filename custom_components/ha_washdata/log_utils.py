@@ -25,4 +25,12 @@ class DeviceLoggerAdapter(logging.LoggerAdapter):
 
     def process(self, msg: str, kwargs: dict) -> tuple[str, dict]:
         device = self.extra.get("device_name") or "unknown"  # type: ignore[union-attr]
+        # Also attach the device name as a structured field (record.wd_device) so
+        # the Logs page can filter by device, not just parse the "[device]" prefix.
+        src = kwargs.get("extra")
+        # Shallow-copy so we never mutate the caller's dict; the adapter owns the
+        # reserved wd_device field but preserves every other caller-supplied extra.
+        extra = dict(src) if isinstance(src, dict) else {}
+        extra["wd_device"] = device
+        kwargs["extra"] = extra
         return f"[{device}] {msg}", kwargs

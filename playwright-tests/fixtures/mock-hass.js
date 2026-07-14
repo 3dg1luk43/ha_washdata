@@ -35,24 +35,57 @@ window.__create_mock_hass = function (extra) {
         window.__ws_calls.push(msg);
         const err = window.__ws_errors[msg.type];
         if (err) return Promise.reject(err);
-        // Background-task registry mock: start_* kicks off a task that completes
-        // ~immediately (setTimeout 0), emitting a done `task` event to subscribers
-        // and storing the result for get_task_result. Reuses the existing static
-        // run_playground_* result data as the task payload.
-        if (msg.type === 'ha_washdata/start_playground_history' ||
-            msg.type === 'ha_washdata/start_playground_sweep') {
-          const isHist = msg.type.slice(-7) === 'history';
-          const resKey = isHist ? 'ha_washdata/run_playground_history' : 'ha_washdata/run_playground_sweep';
-          const result = window.__ws_handlers[resKey] || {};
-          const id = 'task-' + (window.__ws_tasks.length + 1) + (isHist ? '-h' : '-s');
-          const task = {
-            id: id, entry_id: msg.entry_id, kind: isHist ? 'pg_history' : 'pg_sweep',
-            label: isHist ? 'Test on history' : 'Optimize', state: 'done',
-            done: 1, total: 1, progress: 1, eta_s: null, has_result: true,
-            updated_at: Date.now() / 1000, result: result,
+        // Background-task registry mock: task-start commands kick off a task that
+        // completes ~immediately (setTimeout 0), emitting a done `task` event to
+        // subscribers and storing the result for get_task_result. Reuses existing
+        // static handler data as the task payload where applicable.
+        var TASK_START = {
+          'ha_washdata/start_playground_history': { kind: 'pg_history', resKey: 'ha_washdata/run_playground_history' },
+          'ha_washdata/start_playground_sweep': { kind: 'pg_sweep', resKey: 'ha_washdata/run_playground_sweep' },
+          'ha_washdata/reprocess_history': { kind: 'reprocess', resKey: 'ha_washdata/reprocess_history' },
+          'ha_washdata/trigger_ml_training': { kind: 'ml_training', resKey: 'ha_washdata/trigger_ml_training' },
+        };
+        if (TASK_START[msg.type]) {
+          const spec = TASK_START[msg.type];
+          // Monotonic counter (incremented synchronously per start) so consecutive
+          // same-kind starts get distinct ids and never overwrite __task_results.
+          window.__task_seq = (window.__task_seq || 0) + 1;
+          const id = 'task-' + window.__task_seq + '-' + spec.kind;
+          // Register a RUNNING task synchronously and return its id (mirrors the real
+          // registry's reg.create running before the start request's WS reply), so an
+          // immediate list_tasks after awaiting the start promise already includes it.
+          const running = {
+            id: id, entry_id: msg.entry_id, kind: spec.kind, label: spec.kind,
+            state: 'running', done: 0, total: 1, progress: 0, eta_s: null,
+            has_result: false, updated_at: 0,
           };
-          window.__task_results[id] = task;
-          setTimeout(function () { window.__emit_task(task); }, 0);
+          window.__task_results[id] = running;
+          const ti = window.__ws_tasks.findIndex((t) => t.id === id);
+          if (ti >= 0) window.__ws_tasks[ti] = running; else window.__ws_tasks.push(running);
+          // Resolve the result payload with the SAME function-vs-static dispatch as the
+          // generic path, normalized through Promise.resolve so a sync value, a Promise,
+          // or a synchronous throw are all handled. Then flip the task to done (or error)
+          // and emit the terminal event - mirroring the detached runner's lifecycle.
+          const rh = window.__ws_handlers[spec.resKey];
+          Promise.resolve().then(function () { return typeof rh === 'function' ? rh(msg) : rh; }).then(
+            function (res) {
+              const done = Object.assign({}, running, {
+                state: 'done', done: 1, progress: 1, has_result: true,
+                updated_at: Date.now() / 1000, finished_at: Date.now() / 1000, result: res || {},
+              });
+              window.__task_results[id] = done;
+              window.__emit_task(done);
+            },
+            function (err) {
+              const errored = Object.assign({}, running, {
+                state: 'error', has_result: false,
+                updated_at: Date.now() / 1000, finished_at: Date.now() / 1000,
+                error: String((err && err.message) || err),
+              });
+              window.__task_results[id] = errored;
+              window.__emit_task(errored);
+            }
+          );
           return Promise.resolve({ task_id: id });
         }
         if (msg.type === 'ha_washdata/get_task_result') {
@@ -114,6 +147,7 @@ window.__boot_panel = function (handlers, hassExtra) {
   window.__ws_tasks = [];
   window.__ws_task_subs = [];
   window.__task_results = {};
+  window.__task_seq = 0;
 
   const el = document.createElement('ha-washdata-panel');
   el.setAttribute('id', 'wd-panel');

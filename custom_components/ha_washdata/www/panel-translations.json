@@ -111,6 +111,8 @@
       "reset_to_defaults": "Reset to defaults",
       "resume_cycle": "Resume cycle",
       "resume_cycle_tip": "Resume the paused cycle",
+      "revert": "Revert",
+      "revert_to_previous": "Restore this setting to its previous value",
       "revert_settings": "Revert changes",
       "revert_settings_tip": "Restore settings from before your last save",
       "revert_settings_tip_none": "Save first to enable undo",
@@ -474,10 +476,18 @@
       "task_reprocess": "Reprocessing",
       "task_ml_training": "Learning",
       "eta_secs": "~{n}s left",
-      "eta_mins": "~{n}m left"
+      "eta_mins": "~{n}m left",
+      "pg_recent_runs": "Recent runs",
+      "pg_load_run": "Reload this run",
+      "pg_match_confidence": "Match confidence",
+      "pg_envelope_fit": "Envelope fit",
+      "pg_envelope_fit_tip": "How closely the cycle sits inside this profile's saved power envelope - a different lens than match confidence."
     },
     "log": {
-      "all_levels": "All levels"
+      "all_levels": "All levels",
+      "all_devices": "All devices",
+      "all_components": "All components",
+      "search_ph": "Search logs…"
     },
     "maint": {
       "descale": "Descale",
@@ -703,6 +713,7 @@
       "toast_rebuild_failed": "Rebuild failed: {error}",
       "toast_resume_failed": "Resume failed: {error}",
       "toast_revert_failed": "Revert failed: {error}",
+      "toast_reverted": "{key} reverted",
       "toast_save_failed": "Save failed: {error}",
       "trend_duration_longer": "Duration trending longer ({pct}%/cycle) — recent avg {avg}",
       "trend_duration_shorter": "Duration trending shorter ({pct}%/cycle) — recent avg {avg}",
@@ -737,7 +748,10 @@
       "pg_history_intro2": "Replay your recent cycles through the real detector and matcher with the settings above. Click any row to load that cycle in the graph; edit a setting to see a before/after comparison.",
       "pg_simulating": "Simulating cycle…",
       "pg_canvas_empty2": "Pick a cycle above and press Run to simulate it. Then hover to read values, scroll to zoom, and drag to pan.",
-      "pg_apply_settings_confirm": "Save these {n} setting(s) to this device? {list}"
+      "pg_apply_settings_confirm": "Save these {n} setting(s) to this device? {list}",
+      "no_logs_match": "No log records match these filters.",
+      "pg_analysis_hint2": "Pick a cycle and press Run to load match analysis.",
+      "pg_analysis_empty2": "Press Run to see match analysis."
     },
     "pg_desc": {
       "abrupt_drop_watts": "Sudden drop treated as immediate end",
@@ -1480,7 +1494,13 @@
       "suggestions_applied": "Suggestions applied; integration reloading",
       "suggestions_dismissed": "Suggestions dismissed",
       "pause_no_cycle": "No active cycle to pause",
-      "resume_no_cycle": "No paused cycle to resume"
+      "resume_no_cycle": "No paused cycle to resume",
+      "pg_run_gone": "That run is no longer available.",
+      "task_cancelled": "Cancelled.",
+      "processed": "Processed {bits}",
+      "processed_cycles": "{n} cycles",
+      "processed_suggestions": "{n} suggestion(s)",
+      "processed_models": "{n} model(s) promoted"
     },
     "trend": {
       "down": "Trending down",
@@ -1636,6 +1656,8 @@
       "revert_settings": "Отхвърли промените",
       "revert_settings_tip": "Възстановете настройките отпреди последното запазване",
       "revert_settings_tip_none": "Първо запазете, за да активирате отмяната",
+      "revert": "Върни",
+      "revert_to_previous": "Възстановяване на предишната стойност на тази настройка",
       "review": "Преглед",
       "run": "Изпълни",
       "run_analysis": "🔍 Изпълнете анализ на предложенията",
@@ -2043,10 +2065,18 @@
       "task_reprocess": "Повторна обработка",
       "task_ml_training": "Обучение",
       "eta_secs": "остават ~{n} сек",
-      "eta_mins": "остават ~{n} мин"
+      "eta_mins": "остават ~{n} мин",
+      "pg_recent_runs": "Скорошни изпълнения",
+      "pg_load_run": "Презареди това изпълнение",
+      "pg_match_confidence": "Увереност в съвпадението",
+      "pg_envelope_fit": "Съответствие с обвивката",
+      "pg_envelope_fit_tip": "Колко точно цикълът се вписва в запазената обвивка на мощността на този профил, различен поглед от увереността в съвпадението."
     },
     "log": {
-      "all_levels": "Всички нива"
+      "all_levels": "Всички нива",
+      "all_devices": "Всички устройства",
+      "all_components": "Всички компоненти",
+      "search_ph": "Търсене в дневниците…"
     },
     "ml": {
       "builtin_models": "● Използване на модели за вграждане",
@@ -2263,6 +2293,7 @@
       "toast_rebuild_failed": "Повторното изграждане е неуспешно: {error}",
       "toast_resume_failed": "Възобновяването е неуспешно: {error}",
       "toast_revert_failed": "Отмяната е неуспешна: {error}",
+      "toast_reverted": "{key} е върнато",
       "toast_save_failed": "Запазването е неуспешно: {error}",
       "trend_duration_longer": "Продължителност с по-голяма тенденция ({pct}%/цикъл) — скорошно средно {avg}",
       "trend_duration_shorter": "Продължителността се понижава ({pct}%/цикъл) — скорошно средно {avg}",
@@ -2306,7 +2337,10 @@
       "pg_history_intro2": "Възпроизведете скорошните си цикли през реалния детектор и модула за съпоставяне с настройките по-горе. Щракнете върху който и да е ред, за да заредите този цикъл в графиката; променете настройка, за да видите сравнение преди и след.",
       "pg_simulating": "Симулиране на цикъл…",
       "pg_canvas_empty2": "Изберете цикъл по-горе и натиснете „Стартиране“, за да го симулирате. След това посочете, за да видите стойностите, превъртете за мащабиране и плъзнете за преместване.",
-      "pg_apply_settings_confirm": "Да се запазят ли тези {n} настройки на това устройство? {list}"
+      "pg_apply_settings_confirm": "Да се запазят ли тези {n} настройки на това устройство? {list}",
+      "no_logs_match": "Няма записи в дневника, отговарящи на тези филтри.",
+      "pg_analysis_hint2": "Изберете цикъл и натиснете Изпълни, за да заредите анализа на съвпадението.",
+      "pg_analysis_empty2": "Натиснете Изпълни, за да видите анализа на съвпадението."
     },
     "phase_desc": {
       "anti_crease": "Случайни кратки движения след завършване за намаляване на бръчките.",
@@ -2936,7 +2970,13 @@
       "reminders_saved": "Напомнянията за сервиз са запазени",
       "pause_no_cycle": "Няма активен цикъл за пауза",
       "resume_no_cycle": "Няма поставен на пауза цикъл за продължаване",
-      "delete_partial_failed": "Някои елементи не можаха да бъдат изтрити и бяха възстановени"
+      "delete_partial_failed": "Някои елементи не можаха да бъдат изтрити и бяха възстановени",
+      "pg_run_gone": "Това изпълнение вече не е налично.",
+      "task_cancelled": "Отменено.",
+      "processed": "Обработено {bits}",
+      "processed_cycles": "{n} цикъла",
+      "processed_suggestions": "{n} предложения",
+      "processed_models": "{n} активирани модела"
     },
     "suggestion": {
       "both_agree": "WashData препоръчва",
@@ -3212,6 +3252,8 @@
       "revert_settings": "Odbaci izmjene",
       "revert_settings_tip": "Vraćanje postavki na stanje prije posljednjeg spremanja",
       "revert_settings_tip_none": "Spremi prvo da bi aktivirao poništavanje",
+      "revert": "Vrati",
+      "revert_to_previous": "Vrati ovu postavku na prethodnu vrijednost",
       "review": "Pregled",
       "run": "Pokreni",
       "run_analysis": "🔍 Pokrenite analizu prijedloga",
@@ -3619,10 +3661,18 @@
       "task_reprocess": "Ponovna obrada",
       "task_ml_training": "Učenje",
       "eta_secs": "još ~{n} s",
-      "eta_mins": "još ~{n} min"
+      "eta_mins": "još ~{n} min",
+      "pg_recent_runs": "Nedavna pokretanja",
+      "pg_load_run": "Ponovo učitaj ovo pokretanje",
+      "pg_match_confidence": "Pouzdanost podudaranja",
+      "pg_envelope_fit": "Uklapanje u omotač",
+      "pg_envelope_fit_tip": "Koliko dobro ciklus ostaje unutar sačuvanog omotača snage ovog profila, drugačiji pogled od pouzdanosti podudaranja."
     },
     "log": {
-      "all_levels": "Svi nivoi"
+      "all_levels": "Svi nivoi",
+      "all_devices": "Svi uređaji",
+      "all_components": "Sve komponente",
+      "search_ph": "Pretraži zapisnike…"
     },
     "ml": {
       "builtin_models": "● Korišćenje ugrađenih modela",
@@ -3839,6 +3889,7 @@
       "toast_rebuild_failed": "Obnova neuspješna: {error}",
       "toast_resume_failed": "Nastavak neuspješan: {error}",
       "toast_revert_failed": "Povrat neuspješan: {error}",
+      "toast_reverted": "{key} vraćeno",
       "toast_save_failed": "Snimanje neuspješno: {error}",
       "trend_duration_longer": "Trajanje u trendu duže ({pct}%/ciklus) — nedavno prosječno {avg}",
       "trend_duration_shorter": "Trajanje trenda kraće ({pct}%/ciklus) — nedavno prosječno {avg}",
@@ -3882,7 +3933,10 @@
       "pg_history_intro2": "Ponovo izvedite svoje nedavne cikluse kroz stvarni detektor i modul za podudaranje s postavkama iznad. Kliknite bilo koji red da učitate taj ciklus u grafikon; izmijenite postavku da vidite poređenje prije i poslije.",
       "pg_simulating": "Simuliranje ciklusa…",
       "pg_canvas_empty2": "Odaberite ciklus iznad i pritisnite Pokreni da ga simulirate. Zatim pređite mišem za prikaz vrijednosti, pomjerajte točkić za zumiranje i povucite za pomjeranje.",
-      "pg_apply_settings_confirm": "Sačuvati ovih {n} postavki na ovaj uređaj? {list}"
+      "pg_apply_settings_confirm": "Sačuvati ovih {n} postavki na ovaj uređaj? {list}",
+      "no_logs_match": "Nijedan zapis dnevnika ne odgovara ovim filterima.",
+      "pg_analysis_hint2": "Odaberite ciklus i pritisnite Pokreni za učitavanje analize podudaranja.",
+      "pg_analysis_empty2": "Pritisnite Pokreni za prikaz analize podudaranja."
     },
     "phase_desc": {
       "anti_crease": "Povremena kratka spuštanja nakon završetka za smanjenje bora.",
@@ -4608,7 +4662,13 @@
       "reminders_saved": "Podsjetnici za servis sačuvani",
       "pause_no_cycle": "Nema aktivnog ciklusa za pauziranje",
       "resume_no_cycle": "Nema pauziranog ciklusa za nastavak",
-      "delete_partial_failed": "Neke stavke nije bilo moguće obrisati i vraćene su"
+      "delete_partial_failed": "Neke stavke nije bilo moguće obrisati i vraćene su",
+      "pg_run_gone": "To pokretanje više nije dostupno.",
+      "task_cancelled": "Otkazano.",
+      "processed": "Obrađeno {bits}",
+      "processed_cycles": "{n} ciklusa",
+      "processed_suggestions": "{n} prijedloga",
+      "processed_models": "{n} aktiviranih modela"
     },
     "trend": {
       "down": "Opadajući trend",
@@ -4788,6 +4848,8 @@
       "revert_settings": "Zahodit změny",
       "revert_settings_tip": "Obnovit nastavení z doby před posledním uložením",
       "revert_settings_tip_none": "Nejprve uložte, abyste aktivovali funkci zpět",
+      "revert": "Vrátit zpět",
+      "revert_to_previous": "Obnovit toto nastavení na předchozí hodnotu",
       "review": "Hodnotit",
       "run": "Spustit",
       "run_analysis": "🔍 Spustit analýzu návrhů",
@@ -5195,10 +5257,18 @@
       "task_reprocess": "Opětovné zpracování",
       "task_ml_training": "Učení",
       "eta_secs": "zbývá ~{n} s",
-      "eta_mins": "zbývá ~{n} min"
+      "eta_mins": "zbývá ~{n} min",
+      "pg_recent_runs": "Nedávné běhy",
+      "pg_load_run": "Znovu načíst tento běh",
+      "pg_match_confidence": "Spolehlivost shody",
+      "pg_envelope_fit": "Soulad s obálkou",
+      "pg_envelope_fit_tip": "Jak přesně cyklus zapadá do uložené výkonové obálky tohoto profilu, jiný pohled než spolehlivost shody."
     },
     "log": {
-      "all_levels": "Všechny úrovně"
+      "all_levels": "Všechny úrovně",
+      "all_devices": "Všechna zařízení",
+      "all_components": "Všechny komponenty",
+      "search_ph": "Hledat v protokolech…"
     },
     "ml": {
       "builtin_models": "● Použití vestavěných modelů",
@@ -5415,6 +5485,7 @@
       "toast_rebuild_failed": "Přestavba selhala: {error}",
       "toast_resume_failed": "Obnovení selhalo: {error}",
       "toast_revert_failed": "Vrácení selhalo: {error}",
+      "toast_reverted": "{key} vráceno zpět",
       "toast_save_failed": "Uložení selhalo: {error}",
       "trend_duration_longer": "Trendy delší ({pct} %/cyklus) – poslední průměr {avg}",
       "trend_duration_shorter": "Trendy kratší ({pct} %/cyklus) – poslední průměr {avg}",
@@ -5458,7 +5529,10 @@
       "pg_history_intro2": "Přehrajte své nedávné cykly skutečným detektorem a nástrojem pro přiřazování programů s nastavením výše. Kliknutím na libovolný řádek načtete daný cyklus do grafu; úpravou nastavení zobrazíte srovnání před úpravou a po ní.",
       "pg_simulating": "Simulace cyklu…",
       "pg_canvas_empty2": "Vyberte cyklus výše a stisknutím Spustit jej nasimulujte. Poté najetím zobrazíte hodnoty, kolečkem přiblížíte a tažením posunete.",
-      "pg_apply_settings_confirm": "Uložit těchto {n} nastavení do tohoto zařízení? {list}"
+      "pg_apply_settings_confirm": "Uložit těchto {n} nastavení do tohoto zařízení? {list}",
+      "no_logs_match": "Těmto filtrům neodpovídají žádné záznamy protokolu.",
+      "pg_analysis_hint2": "Vyberte cyklus a stiskněte Spustit pro načtení analýzy shody.",
+      "pg_analysis_empty2": "Stiskněte Spustit pro zobrazení analýzy shody."
     },
     "phase_desc": {
       "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -6184,7 +6258,13 @@
       "reminders_saved": "Připomínky servisu uloženy",
       "pause_no_cycle": "Žádný aktivní cyklus k pozastavení",
       "resume_no_cycle": "Žádný pozastavený cyklus k obnovení",
-      "delete_partial_failed": "Některé položky nebylo možné smazat a byly obnoveny"
+      "delete_partial_failed": "Některé položky nebylo možné smazat a byly obnoveny",
+      "pg_run_gone": "Tento běh už není k dispozici.",
+      "task_cancelled": "Zrušeno.",
+      "processed": "Zpracováno {bits}",
+      "processed_cycles": "{n} cyklů",
+      "processed_suggestions": "{n} návrhů",
+      "processed_models": "{n} aktivovaných modelů"
     },
     "trend": {
       "down": "Klesající trend",
@@ -6364,6 +6444,8 @@
       "revert_settings": "Annuller ændringer",
       "revert_settings_tip": "Gendan indstillinger fra før den seneste lagring",
       "revert_settings_tip_none": "Gem først for at aktivere fortryd",
+      "revert": "Tilbagefør",
+      "revert_to_previous": "Gendan denne indstilling til dens forrige værdi",
       "review": "Vurder",
       "run": "Kør",
       "run_analysis": "🔍 Kør forslagsanalyse",
@@ -6771,10 +6853,18 @@
       "task_reprocess": "Genbehandling",
       "task_ml_training": "Læring",
       "eta_secs": "~{n} s tilbage",
-      "eta_mins": "~{n} min tilbage"
+      "eta_mins": "~{n} min tilbage",
+      "pg_recent_runs": "Seneste kørsler",
+      "pg_load_run": "Genindlæs denne kørsel",
+      "pg_match_confidence": "Matchsikkerhed",
+      "pg_envelope_fit": "Envelope-tilpasning",
+      "pg_envelope_fit_tip": "Hvor tæt cyklussen holder sig inden for denne profils gemte effekt-envelope, en anden vinkel end matchsikkerhed."
     },
     "log": {
-      "all_levels": "Alle niveauer"
+      "all_levels": "Alle niveauer",
+      "all_devices": "Alle enheder",
+      "all_components": "Alle komponenter",
+      "search_ph": "Søg i logfiler…"
     },
     "ml": {
       "builtin_models": "● Brug af indbyggede modeller",
@@ -6991,6 +7081,7 @@
       "toast_rebuild_failed": "Genopbygning mislykkedes: {error}",
       "toast_resume_failed": "Genoptagelse mislykkedes: {error}",
       "toast_revert_failed": "Tilbagerulning mislykkedes: {error}",
+      "toast_reverted": "{key} tilbageført",
       "toast_save_failed": "Lagring mislykkedes: {error}",
       "trend_duration_longer": "Varighed, der trender længere ({pct}%/cyklus) — seneste gennemsnit {avg}",
       "trend_duration_shorter": "Varighed, der trender kortere ({pct}%/cyklus) — seneste gennemsnit {avg}",
@@ -7034,7 +7125,10 @@
       "pg_history_intro2": "Afspil dine seneste cyklusser igennem den rigtige detektor og genkendelse med indstillingerne ovenfor. Klik på en række for at indlæse den cyklus i grafen; rediger en indstilling for at se en før/efter-sammenligning.",
       "pg_simulating": "Simulerer cyklus…",
       "pg_canvas_empty2": "Vælg en cyklus ovenfor, og tryk på Kør for at simulere den. Hold derefter markøren over for at aflæse værdier, rul for at zoome, og træk for at panorere.",
-      "pg_apply_settings_confirm": "Gem disse {n} indstilling(er) på denne enhed? {list}"
+      "pg_apply_settings_confirm": "Gem disse {n} indstilling(er) på denne enhed? {list}",
+      "no_logs_match": "Ingen logposter matcher disse filtre.",
+      "pg_analysis_hint2": "Vælg en cyklus, og tryk på Kør for at indlæse matchanalysen.",
+      "pg_analysis_empty2": "Tryk på Kør for at se matchanalysen."
     },
     "pg_desc": {
       "abrupt_drop_watts": "Pludseligt fald behandlet som øjeblikkelig afslutning",
@@ -7777,7 +7871,13 @@
       "reminders_saved": "Servicepåmindelser gemt",
       "pause_no_cycle": "Ingen aktiv cyklus at sætte på pause",
       "resume_no_cycle": "Ingen pauset cyklus at genoptage",
-      "delete_partial_failed": "Nogle elementer kunne ikke slettes og blev gendannet"
+      "delete_partial_failed": "Nogle elementer kunne ikke slettes og blev gendannet",
+      "pg_run_gone": "Den kørsel er ikke længere tilgængelig.",
+      "task_cancelled": "Annulleret.",
+      "processed": "Behandlet: {bits}",
+      "processed_cycles": "{n} cykler",
+      "processed_suggestions": "{n} forslag",
+      "processed_models": "{n} modeller aktiveret"
     },
     "trend": {
       "down": "Trend nedad",
@@ -7940,6 +8040,8 @@
       "revert_settings": "Änderungen verwerfen",
       "revert_settings_tip": "Einstellungen aus dem Zustand vor dem letzten Speichern wiederherstellen",
       "revert_settings_tip_none": "Zuerst speichern, um Rückgängig zu aktivieren",
+      "revert": "Zurücksetzen",
+      "revert_to_previous": "Diese Einstellung auf ihren vorherigen Wert zurücksetzen",
       "review": "Auswerten",
       "run": "Ausführen",
       "run_analysis": "🔍 Führen Sie eine Vorschlagsanalyse durch",
@@ -8347,10 +8449,18 @@
       "task_reprocess": "Neuverarbeitung",
       "task_ml_training": "Lernen",
       "eta_secs": "noch ~{n} s",
-      "eta_mins": "noch ~{n} Min."
+      "eta_mins": "noch ~{n} Min.",
+      "pg_recent_runs": "Letzte Durchläufe",
+      "pg_load_run": "Diesen Durchlauf neu laden",
+      "pg_match_confidence": "Zuordnungssicherheit",
+      "pg_envelope_fit": "Hüllkurven-Passung",
+      "pg_envelope_fit_tip": "Wie genau der Zyklus innerhalb der gespeicherten Leistungshüllkurve dieses Profils liegt, eine andere Sicht als die Zuordnungssicherheit."
     },
     "log": {
-      "all_levels": "Alle Ebenen"
+      "all_levels": "Alle Ebenen",
+      "all_devices": "Alle Geräte",
+      "all_components": "Alle Komponenten",
+      "search_ph": "Protokolle durchsuchen…"
     },
     "ml": {
       "builtin_models": "● Verwendung integrierter Modelle",
@@ -8567,6 +8677,7 @@
       "toast_rebuild_failed": "Neuaufbau fehlgeschlagen: {error}",
       "toast_resume_failed": "Fortsetzen fehlgeschlagen: {error}",
       "toast_revert_failed": "Zurücksetzen fehlgeschlagen: {error}",
+      "toast_reverted": "{key} zurückgesetzt",
       "toast_save_failed": "Speichern fehlgeschlagen: {error}",
       "trend_duration_longer": "Dauer tendenziell länger ({pct} %/Zyklus) – aktueller Durchschnitt {avg}",
       "trend_duration_shorter": "Dauer tendenziell kürzer ({pct} %/Zyklus) – aktueller Durchschnitt {avg}",
@@ -8610,7 +8721,10 @@
       "pg_history_intro2": "Lass deine letzten Zyklen mit den obigen Einstellungen erneut durch die echte Erkennung und Zuordnung laufen. Klicke auf eine Zeile, um diesen Zyklus im Diagramm zu laden; ändere eine Einstellung, um einen Vorher-Nachher-Vergleich zu sehen.",
       "pg_simulating": "Zyklus wird simuliert…",
       "pg_canvas_empty2": "Wähle oben einen Zyklus und drücke auf Ausführen, um ihn zu simulieren. Fahre dann mit dem Zeiger darüber, um Werte abzulesen, scrolle zum Zoomen und ziehe zum Verschieben.",
-      "pg_apply_settings_confirm": "Diese {n} Einstellung(en) für dieses Gerät speichern? {list}"
+      "pg_apply_settings_confirm": "Diese {n} Einstellung(en) für dieses Gerät speichern? {list}",
+      "no_logs_match": "Keine Protokolleinträge entsprechen diesen Filtern.",
+      "pg_analysis_hint2": "Wählen Sie einen Zyklus und klicken Sie auf Ausführen, um die Zuordnungsanalyse zu laden.",
+      "pg_analysis_empty2": "Klicken Sie auf Ausführen, um die Zuordnungsanalyse anzuzeigen."
     },
     "pg_desc": {
       "abrupt_drop_watts": "Plötzlicher Abfall gilt als sofortiges Ende",
@@ -9353,7 +9467,13 @@
       "reminders_saved": "Service-Erinnerungen gespeichert",
       "pause_no_cycle": "Kein aktiver Zyklus zum Anhalten",
       "resume_no_cycle": "Kein pausierter Zyklus zum Fortsetzen",
-      "delete_partial_failed": "Einige Elemente konnten nicht gelöscht werden und wurden wiederhergestellt"
+      "delete_partial_failed": "Einige Elemente konnten nicht gelöscht werden und wurden wiederhergestellt",
+      "pg_run_gone": "Dieser Durchlauf ist nicht mehr verfügbar.",
+      "task_cancelled": "Abgebrochen.",
+      "processed": "Verarbeitet: {bits}",
+      "processed_cycles": "{n} Zyklen",
+      "processed_suggestions": "{n} Vorschläge",
+      "processed_models": "{n} Modelle aktiviert"
     },
     "trend": {
       "down": "Abwärtstrend",
@@ -9516,6 +9636,8 @@
       "revert_settings": "Απόρριψη αλλαγών",
       "revert_settings_tip": "Επαναφέρετε τις ρυθμίσεις από πριν την τελευταία αποθήκευσή σας",
       "revert_settings_tip_none": "Αποθηκεύστε πρώτα για να ενεργοποιήσετε την αναίρεση",
+      "revert": "Επαναφορά",
+      "revert_to_previous": "Επαναφορά αυτής της ρύθμισης στην προηγούμενη τιμή της",
       "review": "Αξιολόγηση",
       "run": "Εκτέλεση",
       "run_analysis": "🔍 Εκτέλεση ανάλυσης προτάσεων",
@@ -9923,10 +10045,18 @@
       "task_reprocess": "Επανεπεξεργασία",
       "task_ml_training": "Εκμάθηση",
       "eta_secs": "απομένουν ~{n} δευτ.",
-      "eta_mins": "απομένουν ~{n} λεπτά"
+      "eta_mins": "απομένουν ~{n} λεπτά",
+      "pg_recent_runs": "Πρόσφατες εκτελέσεις",
+      "pg_load_run": "Επαναφόρτωση αυτής της εκτέλεσης",
+      "pg_match_confidence": "Βεβαιότητα αντιστοίχισης",
+      "pg_envelope_fit": "Προσαρμογή στην περιβάλλουσα",
+      "pg_envelope_fit_tip": "Πόσο καλά ο κύκλος παραμένει μέσα στην αποθηκευμένη περιβάλλουσα ισχύος αυτού του προφίλ, μια διαφορετική οπτική από τη βεβαιότητα αντιστοίχισης."
     },
     "log": {
-      "all_levels": "Όλα τα επίπεδα"
+      "all_levels": "Όλα τα επίπεδα",
+      "all_devices": "Όλες οι συσκευές",
+      "all_components": "Όλα τα στοιχεία",
+      "search_ph": "Αναζήτηση στα αρχεία καταγραφής…"
     },
     "ml": {
       "builtin_models": "● Χρήση ενσωματωμένων μοντέλων",
@@ -10143,6 +10273,7 @@
       "toast_rebuild_failed": "Η ανακατασκευή απέτυχε: {error}",
       "toast_resume_failed": "Η επανέναρξη απέτυχε: {error}",
       "toast_revert_failed": "Η επαναφορά απέτυχε: {error}",
+      "toast_reverted": "Έγινε επαναφορά: {key}",
       "toast_save_failed": "Η αποθήκευση απέτυχε: {error}",
       "trend_duration_longer": "Μεγαλύτερη τάση διάρκειας ({pct}%/κύκλος) — πρόσφατος μέσος όρος {avg}",
       "trend_duration_shorter": "Μικρότερη τάση διάρκειας ({pct}%/κύκλος) — πρόσφατος μέσος όρος {avg}",
@@ -10186,7 +10317,10 @@
       "pg_history_intro2": "Αναπαραγάγετε τους πρόσφατους κύκλους σας μέσω του πραγματικού ανιχνευτή και μηχανισμού αντιστοίχισης με τις παραπάνω ρυθμίσεις. Κάντε κλικ σε οποιαδήποτε γραμμή για να φορτώσετε αυτόν τον κύκλο στο γράφημα. Επεξεργαστείτε μια ρύθμιση για να δείτε μια σύγκριση πριν/μετά.",
       "pg_simulating": "Προσομοίωση κύκλου…",
       "pg_canvas_empty2": "Επιλέξτε έναν κύκλο παραπάνω και πατήστε Εκτέλεση για να τον προσομοιώσετε. Στη συνέχεια τοποθετήστε τον δείκτη για ανάγνωση τιμών, κυλήστε για ζουμ και σύρετε για μετακίνηση.",
-      "pg_apply_settings_confirm": "Αποθήκευση αυτών των {n} ρυθμίσεων σε αυτήν τη συσκευή; {list}"
+      "pg_apply_settings_confirm": "Αποθήκευση αυτών των {n} ρυθμίσεων σε αυτήν τη συσκευή; {list}",
+      "no_logs_match": "Καμία εγγραφή καταγραφής δεν ταιριάζει με αυτά τα φίλτρα.",
+      "pg_analysis_hint2": "Επιλέξτε έναν κύκλο και πατήστε Εκτέλεση για να φορτώσετε την ανάλυση αντιστοίχισης.",
+      "pg_analysis_empty2": "Πατήστε Εκτέλεση για να δείτε την ανάλυση αντιστοίχισης."
     },
     "phase_desc": {
       "anti_crease": "Περιστασιακά σύντομες ανατροπές μετά την ολοκλήρωση για μείωση των ρυτίδων.",
@@ -10816,7 +10950,13 @@
       "reminders_saved": "Οι υπενθυμίσεις σέρβις αποθηκεύτηκαν",
       "pause_no_cycle": "Δεν υπάρχει ενεργός κύκλος για παύση",
       "resume_no_cycle": "Δεν υπάρχει παυσμένος κύκλος για συνέχιση",
-      "delete_partial_failed": "Ορισμένα στοιχεία δεν ήταν δυνατό να διαγραφούν και επαναφέρθηκαν"
+      "delete_partial_failed": "Ορισμένα στοιχεία δεν ήταν δυνατό να διαγραφούν και επαναφέρθηκαν",
+      "pg_run_gone": "Αυτή η εκτέλεση δεν είναι πλέον διαθέσιμη.",
+      "task_cancelled": "Ακυρώθηκε.",
+      "processed": "Επεξεργάστηκαν {bits}",
+      "processed_cycles": "{n} κύκλοι",
+      "processed_suggestions": "{n} προτάσεις",
+      "processed_models": "{n} μοντέλα που προήχθησαν"
     },
     "suggestion": {
       "both_agree": "Το WashData προτείνει",
@@ -11092,6 +11232,8 @@
       "revert_settings": "Descartar cambios",
       "revert_settings_tip": "Restaurar la configuración previa al último guardado",
       "revert_settings_tip_none": "Guarda primero para activar la opción de deshacer",
+      "revert": "Revertir",
+      "revert_to_previous": "Revertir este ajuste a su valor anterior",
       "review": "Revisar",
       "run": "Ejecutar",
       "run_analysis": "🔍 Ejecutar análisis de sugerencias",
@@ -11499,10 +11641,18 @@
       "task_reprocess": "Reprocesando",
       "task_ml_training": "Aprendizaje",
       "eta_secs": "quedan ~{n} s",
-      "eta_mins": "quedan ~{n} min"
+      "eta_mins": "quedan ~{n} min",
+      "pg_recent_runs": "Ejecuciones recientes",
+      "pg_load_run": "Volver a cargar esta ejecución",
+      "pg_match_confidence": "Confianza de coincidencia",
+      "pg_envelope_fit": "Ajuste a la envolvente",
+      "pg_envelope_fit_tip": "Qué tan bien el ciclo se mantiene dentro de la envolvente de potencia guardada de este perfil, una perspectiva distinta a la confianza de coincidencia."
     },
     "log": {
-      "all_levels": "Todos los niveles"
+      "all_levels": "Todos los niveles",
+      "all_devices": "Todos los dispositivos",
+      "all_components": "Todos los componentes",
+      "search_ph": "Buscar en registros…"
     },
     "ml": {
       "builtin_models": "● Uso de modelos integrados",
@@ -11719,6 +11869,7 @@
       "toast_rebuild_failed": "Error al reconstruir: {error}",
       "toast_resume_failed": "Error al reanudar: {error}",
       "toast_revert_failed": "Error al revertir: {error}",
+      "toast_reverted": "{key} revertido",
       "toast_save_failed": "Error al guardar: {error}",
       "trend_duration_longer": "Tendencia de duración más larga ({pct}%/ciclo): promedio reciente {avg}",
       "trend_duration_shorter": "Tendencia de duración más corta ({pct} %/ciclo): promedio reciente {avg}",
@@ -11762,7 +11913,10 @@
       "pg_history_intro2": "Reproduce tus ciclos recientes a través del detector y el comparador reales con los ajustes de arriba. Haz clic en cualquier fila para cargar ese ciclo en el gráfico; edita un ajuste para ver una comparación antes/después.",
       "pg_simulating": "Simulando el ciclo…",
       "pg_canvas_empty2": "Elige un ciclo de arriba y pulsa Ejecutar para simularlo. Después, pasa el cursor para leer los valores, desplázate para hacer zoom y arrastra para desplazarte.",
-      "pg_apply_settings_confirm": "¿Guardar estos {n} ajuste(s) en este dispositivo? {list}"
+      "pg_apply_settings_confirm": "¿Guardar estos {n} ajuste(s) en este dispositivo? {list}",
+      "no_logs_match": "Ningún registro coincide con estos filtros.",
+      "pg_analysis_hint2": "Seleccione un ciclo y pulse Ejecutar para cargar el análisis de coincidencia.",
+      "pg_analysis_empty2": "Pulse Ejecutar para ver el análisis de coincidencia."
     },
     "pg_desc": {
       "abrupt_drop_watts": "Caída repentina tratada como fin inmediato",
@@ -12384,6 +12538,10 @@
       "phase_updated": "Fase actualizada",
       "phases_saved": "Fases guardadas",
       "preferences_saved": "Preferencias guardadas",
+      "processed": "Procesado {bits}",
+      "processed_cycles": "{n} ciclos",
+      "processed_models": "{n} modelos promovidos",
+      "processed_suggestions": "{n} sugerencias",
       "profile_name_required": "El nombre del perfil es obligatorio.",
       "profile_renamed": "Perfil renombrado",
       "recording_discarded": "Grabación descartada",
@@ -12409,7 +12567,9 @@
       "reminders_saved": "Recordatorios de servicio guardados",
       "pause_no_cycle": "No hay ningún ciclo activo para pausar",
       "resume_no_cycle": "No hay ningún ciclo en pausa para reanudar",
-      "delete_partial_failed": "No se pudieron eliminar algunos elementos y se restauraron"
+      "delete_partial_failed": "No se pudieron eliminar algunos elementos y se restauraron",
+      "pg_run_gone": "Esa ejecución ya no está disponible.",
+      "task_cancelled": "Cancelado."
     },
     "suggestion": {
       "both_agree": "WashData recomienda",
@@ -12668,6 +12828,8 @@
       "revert_settings": "Hülga muudatused",
       "revert_settings_tip": "Taasta viimase salvestuse eelsed seaded",
       "revert_settings_tip_none": "Salvestage esmalt tagasivõtmise lubamiseks",
+      "revert": "Taasta",
+      "revert_to_previous": "Taasta selle sätte eelmine väärtus",
       "review": "Ülevaade",
       "run": "Käivita",
       "run_analysis": "🔍 Käivitage soovituste analüüs",
@@ -13075,10 +13237,18 @@
       "task_reprocess": "Uuesti töötlemine",
       "task_ml_training": "Õppimine",
       "eta_secs": "~{n} s jäänud",
-      "eta_mins": "~{n} min jäänud"
+      "eta_mins": "~{n} min jäänud",
+      "pg_recent_runs": "Hiljutised käitused",
+      "pg_load_run": "Laadi see käitus uuesti",
+      "pg_match_confidence": "Vaste kindlus",
+      "pg_envelope_fit": "Sobivus mähisjoonega",
+      "pg_envelope_fit_tip": "Kui täpselt tsükkel püsib selle profiili salvestatud võimsuse mähisjoone sees, teistsugune vaatenurk kui vaste kindlus."
     },
     "log": {
-      "all_levels": "Kõik tasemed"
+      "all_levels": "Kõik tasemed",
+      "all_devices": "Kõik seadmed",
+      "all_components": "Kõik komponendid",
+      "search_ph": "Otsi logidest…"
     },
     "ml": {
       "builtin_models": "● Sisseehitatud mudelite kasutamine",
@@ -13295,6 +13465,7 @@
       "toast_rebuild_failed": "Ülesehitamine ebaõnnestus: {error}",
       "toast_resume_failed": "Jätkamine ebaõnnestus: {error}",
       "toast_revert_failed": "Tagasipööramine ebaõnnestus: {error}",
+      "toast_reverted": "{key} taastatud",
       "toast_save_failed": "Salvestamine ebaõnnestus: {error}",
       "trend_duration_longer": "Kestus on pikem ({pct}%/tsükkel) – hiljutine keskmine {avg}",
       "trend_duration_shorter": "Kestus on lühem ({pct}%/tsükkel) – hiljutine keskmine {avg}",
@@ -13338,7 +13509,10 @@
       "pg_history_intro2": "Taasesita oma hiljutised tsüklid läbi tegeliku tuvastaja ja sobitaja ülaltoodud sätetega. Klõpsa mis tahes real, et laadida see tsükkel graafikule; muuda sätet, et näha enne/pärast võrdlust.",
       "pg_simulating": "Tsükli simuleerimine…",
       "pg_canvas_empty2": "Vali ülalt tsükkel ja vajuta Käivita, et seda simuleerida. Seejärel hõljuta väärtuste lugemiseks, keri suumimiseks ja lohista liigutamiseks.",
-      "pg_apply_settings_confirm": "Kas salvestada need {n} sätet sellesse seadmesse? {list}"
+      "pg_apply_settings_confirm": "Kas salvestada need {n} sätet sellesse seadmesse? {list}",
+      "no_logs_match": "Ükski logikirje ei vasta nendele filtritele.",
+      "pg_analysis_hint2": "Vali tsükkel ja vajuta Käivita, et laadida vaste analüüs.",
+      "pg_analysis_empty2": "Vajuta Käivita, et näha vaste analüüsi."
     },
     "pg_desc": {
       "abrupt_drop_watts": "Järsk langus käsitletakse kohese lõpuna",
@@ -13985,7 +14159,13 @@
       "reminders_saved": "Hoolduse meeldetuletused salvestatud",
       "pause_no_cycle": "Pole aktiivset tsüklit, mida peatada",
       "resume_no_cycle": "Pole peatatud tsüklit, mida jätkata",
-      "delete_partial_failed": "Mõnda üksust ei õnnestunud kustutada ja need taastati"
+      "delete_partial_failed": "Mõnda üksust ei õnnestunud kustutada ja need taastati",
+      "pg_run_gone": "See käitus pole enam saadaval.",
+      "task_cancelled": "Tühistatud.",
+      "processed": "Töödeldud {bits}",
+      "processed_cycles": "{n} tsüklit",
+      "processed_suggestions": "{n} soovitust",
+      "processed_models": "{n} mudelit edutatud"
     },
     "suggestion": {
       "both_agree": "WashData soovitab",
@@ -14244,6 +14424,8 @@
       "revert_settings": "Hylkää muutokset",
       "revert_settings_tip": "Palauta asetukset viimeistä tallennusta edeltävään tilaan",
       "revert_settings_tip_none": "Tallenna ensin ottaaksesi kumoamisen käyttöön",
+      "revert": "Palauta",
+      "revert_to_previous": "Palauta tämä asetus edelliseen arvoon",
       "review": "Arvioi",
       "run": "Aja",
       "run_analysis": "🔍 Suorita ehdotusanalyysi",
@@ -14651,10 +14833,18 @@
       "task_reprocess": "Uudelleenkäsittely",
       "task_ml_training": "Oppiminen",
       "eta_secs": "~{n} s jäljellä",
-      "eta_mins": "~{n} min jäljellä"
+      "eta_mins": "~{n} min jäljellä",
+      "pg_recent_runs": "Viimeaikaiset ajot",
+      "pg_load_run": "Lataa tämä ajo uudelleen",
+      "pg_match_confidence": "Osuman varmuus",
+      "pg_envelope_fit": "Verhokäyrän sopivuus",
+      "pg_envelope_fit_tip": "Kuinka tarkasti sykli pysyy tämän profiilin tallennetun tehon verhokäyrän sisällä, eri näkökulma kuin osuman varmuus."
     },
     "log": {
-      "all_levels": "Kaikki tasot"
+      "all_levels": "Kaikki tasot",
+      "all_devices": "Kaikki laitteet",
+      "all_components": "Kaikki komponentit",
+      "search_ph": "Hae lokeista…"
     },
     "ml": {
       "builtin_models": "● Sisäänrakennettujen mallien käyttö",
@@ -14871,6 +15061,7 @@
       "toast_rebuild_failed": "Uudelleenrakennus epäonnistui: {error}",
       "toast_resume_failed": "Jatkaminen epäonnistui: {error}",
       "toast_revert_failed": "Palautus epäonnistui: {error}",
+      "toast_reverted": "{key} palautettu",
       "toast_save_failed": "Tallennus epäonnistui: {error}",
       "trend_duration_longer": "Kesto trendi pidempi ({pct} %/sykli) – viimeaikainen keskim. {avg}",
       "trend_duration_shorter": "Kesto trendi lyhyempi ({pct}%/sykli) – viimeaikainen keskim. {avg}",
@@ -14914,7 +15105,10 @@
       "pg_history_intro2": "Toista viimeisimmät jaksosi todellisen tunnistimen ja täsmäyttimen läpi yllä olevilla asetuksilla. Napsauta mitä tahansa riviä ladataksesi kyseisen jakson kaavioon; muokkaa asetusta nähdäksesi ennen/jälkeen-vertailun.",
       "pg_simulating": "Simuloidaan jaksoa…",
       "pg_canvas_empty2": "Valitse jakso yltä ja paina Suorita simuloidaksesi sen. Vie sitten osoitin päälle lukeaksesi arvoja, vieritä zoomataksesi ja vedä panoroidaksesi.",
-      "pg_apply_settings_confirm": "Tallennetaanko nämä {n} asetusta tähän laitteeseen? {list}"
+      "pg_apply_settings_confirm": "Tallennetaanko nämä {n} asetusta tähän laitteeseen? {list}",
+      "no_logs_match": "Mikään lokitietue ei vastaa näitä suodattimia.",
+      "pg_analysis_hint2": "Valitse sykli ja paina Aja-painiketta ladataksesi osuma-analyysin.",
+      "pg_analysis_empty2": "Paina Aja-painiketta nähdäksesi osuma-analyysin."
     },
     "pg_desc": {
       "abrupt_drop_watts": "Äkillinen pudotus tulkitaan välittömäksi lopuksi",
@@ -15657,7 +15851,13 @@
       "reminders_saved": "Huoltomuistutukset tallennettu",
       "pause_no_cycle": "Ei aktiivista sykliä tauotettavaksi",
       "resume_no_cycle": "Ei tauotettua sykliä jatkettavaksi",
-      "delete_partial_failed": "Joitakin kohteita ei voitu poistaa, ja ne palautettiin"
+      "delete_partial_failed": "Joitakin kohteita ei voitu poistaa, ja ne palautettiin",
+      "pg_run_gone": "Tätä ajoa ei ole enää saatavilla.",
+      "task_cancelled": "Peruutettu.",
+      "processed": "Käsitelty {bits}",
+      "processed_cycles": "{n} sykliä",
+      "processed_suggestions": "{n} ehdotusta",
+      "processed_models": "{n} mallia otettu käyttöön"
     },
     "trend": {
       "down": "Trendikäs alaspäin",
@@ -15820,6 +16020,8 @@
       "revert_settings": "Annuler les modifications",
       "revert_settings_tip": "Restaurer les paramètres d'avant la dernière sauvegarde",
       "revert_settings_tip_none": "Enregistrez d'abord pour activer l'annulation",
+      "revert": "Rétablir",
+      "revert_to_previous": "Rétablir ce paramètre à sa valeur précédente",
       "review": "Réviser",
       "run": "Exécuter",
       "run_analysis": "🔍 Exécutez l'analyse des suggestions",
@@ -16227,10 +16429,18 @@
       "task_reprocess": "Retraitement",
       "task_ml_training": "Apprentissage",
       "eta_secs": "~{n} s restantes",
-      "eta_mins": "~{n} min restantes"
+      "eta_mins": "~{n} min restantes",
+      "pg_recent_runs": "Exécutions récentes",
+      "pg_load_run": "Recharger cette exécution",
+      "pg_match_confidence": "Confiance de correspondance",
+      "pg_envelope_fit": "Conformité à l'enveloppe",
+      "pg_envelope_fit_tip": "Dans quelle mesure le cycle reste à l'intérieur de l'enveloppe de puissance enregistrée de ce profil, un autre angle que la confiance de correspondance."
     },
     "log": {
-      "all_levels": "Tous niveaux"
+      "all_levels": "Tous niveaux",
+      "all_devices": "Tous les appareils",
+      "all_components": "Tous les composants",
+      "search_ph": "Rechercher dans les journaux…"
     },
     "ml": {
       "builtin_models": "● Utilisation de modèles intégrés",
@@ -16447,6 +16657,7 @@
       "toast_rebuild_failed": "Échec de la reconstruction : {error}",
       "toast_resume_failed": "Échec de la reprise : {error}",
       "toast_revert_failed": "Échec du rétablissement : {error}",
+      "toast_reverted": "{key} rétabli",
       "toast_save_failed": "Échec de l'enregistrement : {error}",
       "trend_duration_longer": "Durée tendance plus longue ({pct} %/cycle) – moyenne récente {avg}",
       "trend_duration_shorter": "Tendance de durée plus courte ({pct} %/cycle) – moyenne récente {avg}",
@@ -16490,7 +16701,10 @@
       "pg_history_intro2": "Rejouez vos cycles récents dans le détecteur et le moteur de correspondance réels avec les réglages ci-dessus. Cliquez sur une ligne pour charger ce cycle dans le graphique ; modifiez un réglage pour voir une comparaison avant/après.",
       "pg_simulating": "Simulation du cycle…",
       "pg_canvas_empty2": "Choisissez un cycle ci-dessus et appuyez sur Exécuter pour le simuler. Survolez ensuite pour lire les valeurs, faites défiler pour zoomer et faites glisser pour vous déplacer.",
-      "pg_apply_settings_confirm": "Enregistrer ces {n} réglage(s) sur cet appareil ? {list}"
+      "pg_apply_settings_confirm": "Enregistrer ces {n} réglage(s) sur cet appareil ? {list}",
+      "no_logs_match": "Aucun enregistrement de journal ne correspond à ces filtres.",
+      "pg_analysis_hint2": "Sélectionnez un cycle et cliquez sur Exécuter pour charger l'analyse de correspondance.",
+      "pg_analysis_empty2": "Cliquez sur Exécuter pour voir l'analyse de correspondance."
     },
     "pg_desc": {
       "abrupt_drop_watts": "Chute soudaine traitée comme une fin immédiate",
@@ -17112,6 +17326,10 @@
       "phase_updated": "Phase mise à jour",
       "phases_saved": "Phases enregistrées",
       "preferences_saved": "Préférences enregistrées",
+      "processed": "Traité {bits}",
+      "processed_cycles": "{n} cycles",
+      "processed_models": "{n} modèles promus",
+      "processed_suggestions": "{n} suggestions",
       "profile_name_required": "Le nom du profil est requis",
       "profile_renamed": "Profil renommé",
       "recording_discarded": "Enregistrement supprimé",
@@ -17137,7 +17355,9 @@
       "reminders_saved": "Rappels d'entretien enregistrés",
       "pause_no_cycle": "Aucun cycle actif à mettre en pause",
       "resume_no_cycle": "Aucun cycle en pause à reprendre",
-      "delete_partial_failed": "Certains éléments n'ont pas pu être supprimés et ont été restaurés"
+      "delete_partial_failed": "Certains éléments n'ont pas pu être supprimés et ont été restaurés",
+      "pg_run_gone": "Cette exécution n'est plus disponible.",
+      "task_cancelled": "Annulé."
     },
     "suggestion": {
       "both_agree": "WashData recommande",
@@ -17396,6 +17616,8 @@
       "revert_settings": "Odbaci izmjene",
       "revert_settings_tip": "Vrati postavke na stanje prije zadnjeg spremanja",
       "revert_settings_tip_none": "Prvo spremi da bi se omogućilo poništavanje",
+      "revert": "Vrati",
+      "revert_to_previous": "Vrati ovu postavku na prethodnu vrijednost",
       "review": "Ocijeni",
       "run": "Pokreni",
       "run_analysis": "🔍 Pokrenite analizu prijedloga",
@@ -17803,10 +18025,18 @@
       "task_reprocess": "Ponovna obrada",
       "task_ml_training": "Učenje",
       "eta_secs": "još ~{n} s",
-      "eta_mins": "još ~{n} min"
+      "eta_mins": "još ~{n} min",
+      "pg_recent_runs": "Nedavna pokretanja",
+      "pg_load_run": "Ponovno učitaj ovo pokretanje",
+      "pg_match_confidence": "Pouzdanost podudaranja",
+      "pg_envelope_fit": "Uklapanje u ovojnicu",
+      "pg_envelope_fit_tip": "Koliko dobro ciklus ostaje unutar spremljene ovojnice snage ovog profila, drugačiji pogled od pouzdanosti podudaranja."
     },
     "log": {
-      "all_levels": "Sve razine"
+      "all_levels": "Sve razine",
+      "all_devices": "Svi uređaji",
+      "all_components": "Sve komponente",
+      "search_ph": "Pretraži zapisnike…"
     },
     "ml": {
       "builtin_models": "● Korištenje ugrađenih modela",
@@ -18023,6 +18253,7 @@
       "toast_rebuild_failed": "Obnova neuspješna: {error}",
       "toast_resume_failed": "Nastavak neuspješan: {error}",
       "toast_revert_failed": "Vraćanje neuspješno: {error}",
+      "toast_reverted": "{key} vraćeno",
       "toast_save_failed": "Spremanje neuspješno: {error}",
       "trend_duration_longer": "Dulje trajanje ({pct}%/ciklus) — nedavni prosjek {avg}",
       "trend_duration_shorter": "Trajanje je sve kraće ({pct}%/ciklus) — nedavni prosjek {avg}",
@@ -18066,7 +18297,10 @@
       "pg_history_intro2": "Ponovno izvedite svoje nedavne cikluse kroz stvarni detektor i modul za podudaranje s postavkama iznad. Kliknite bilo koji redak da učitate taj ciklus u grafikon; uredite postavku da vidite usporedbu prije i poslije.",
       "pg_simulating": "Simuliranje ciklusa…",
       "pg_canvas_empty2": "Odaberite ciklus iznad i pritisnite Pokreni da ga simulirate. Zatim prijeđite mišem za prikaz vrijednosti, pomičite kotačić za zumiranje i povucite za pomicanje.",
-      "pg_apply_settings_confirm": "Spremiti ovih {n} postavki na ovaj uređaj? {list}"
+      "pg_apply_settings_confirm": "Spremiti ovih {n} postavki na ovaj uređaj? {list}",
+      "no_logs_match": "Nijedan zapis dnevnika ne odgovara ovim filtrima.",
+      "pg_analysis_hint2": "Odaberite ciklus i pritisnite Pokreni za učitavanje analize podudaranja.",
+      "pg_analysis_empty2": "Pritisnite Pokreni za prikaz analize podudaranja."
     },
     "phase_desc": {
       "anti_crease": "Povremena kratka prevrtanja nakon završetka kako bi se smanjile bore.",
@@ -18792,7 +19026,13 @@
       "reminders_saved": "Podsjetnici za servis spremljeni",
       "pause_no_cycle": "Nema aktivnog ciklusa za pauziranje",
       "resume_no_cycle": "Nema pauziranog ciklusa za nastavak",
-      "delete_partial_failed": "Neke stavke nije bilo moguće izbrisati i vraćene su"
+      "delete_partial_failed": "Neke stavke nije bilo moguće izbrisati i vraćene su",
+      "pg_run_gone": "To pokretanje više nije dostupno.",
+      "task_cancelled": "Otkazano.",
+      "processed": "Obrađeno {bits}",
+      "processed_cycles": "{n} ciklusa",
+      "processed_suggestions": "{n} prijedloga",
+      "processed_models": "{n} aktiviranih modela"
     },
     "trend": {
       "down": "Trend pada",
@@ -18972,6 +19212,8 @@
       "revert_settings": "Változtatások elvetése",
       "revert_settings_tip": "Állítsa vissza az utolsó mentés előtti beállításokat",
       "revert_settings_tip_none": "Először mentsen a visszavonás engedélyezéséhez",
+      "revert": "Visszaállítás",
+      "revert_to_previous": "Állítsa vissza ezt a beállítást az előző értékére",
       "review": "Értékel",
       "run": "Futtatás",
       "run_analysis": "🔍 Javaslatelemzés futtatása",
@@ -19379,10 +19621,18 @@
       "task_reprocess": "Újrafeldolgozás",
       "task_ml_training": "Tanulás",
       "eta_secs": "még ~{n} mp",
-      "eta_mins": "még ~{n} perc"
+      "eta_mins": "még ~{n} perc",
+      "pg_recent_runs": "Legutóbbi futtatások",
+      "pg_load_run": "Futtatás újratöltése",
+      "pg_match_confidence": "Egyezés megbízhatósága",
+      "pg_envelope_fit": "Illeszkedés a burkológörbéhez",
+      "pg_envelope_fit_tip": "Mennyire pontosan marad a ciklus a profil mentett teljesítmény-burkológörbéjén belül, más nézőpont, mint az egyezés megbízhatósága."
     },
     "log": {
-      "all_levels": "Minden szinten"
+      "all_levels": "Minden szinten",
+      "all_devices": "Minden eszköz",
+      "all_components": "Minden komponens",
+      "search_ph": "Keresés a naplókban…"
     },
     "ml": {
       "builtin_models": "● Beépített modellek használata",
@@ -19599,6 +19849,7 @@
       "toast_rebuild_failed": "Újraépítés sikertelen: {error}",
       "toast_resume_failed": "Folytatás sikertelen: {error}",
       "toast_revert_failed": "Visszaállítás sikertelen: {error}",
+      "toast_reverted": "{key} visszaállítva",
       "toast_save_failed": "Mentés sikertelen: {error}",
       "trend_duration_longer": "Az időtartam egyre hosszabb ({pct}%/ciklus) – legutóbbi átlag: {avg}",
       "trend_duration_shorter": "Az időtartam egyre rövidebb ({pct}%/ciklus) – legutóbbi átlag: {avg}",
@@ -19642,7 +19893,10 @@
       "pg_history_intro2": "Játszd vissza a legutóbbi ciklusaidat a valódi érzékelőn és illesztőn keresztül a fenti beállításokkal. Kattints bármely sorra a ciklus grafikonba töltéséhez; módosíts egy beállítást az előtte/utána összehasonlításhoz.",
       "pg_simulating": "Ciklus szimulálása…",
       "pg_canvas_empty2": "Válassz ki egy ciklust fent, és nyomd meg a Futtatás gombot a szimulációhoz. Ezután vidd rá a mutatót az értékek leolvasásához, görgess a nagyításhoz, és húzd az eltoláshoz.",
-      "pg_apply_settings_confirm": "Elmenti ezt a(z) {n} beállítást erre az eszközre? {list}"
+      "pg_apply_settings_confirm": "Elmenti ezt a(z) {n} beállítást erre az eszközre? {list}",
+      "no_logs_match": "Egyetlen naplóbejegyzés sem felel meg ezeknek a szűrőknek.",
+      "pg_analysis_hint2": "Válasszon egy ciklust, és nyomja meg a Futtatás gombot az egyezéselemzés betöltéséhez.",
+      "pg_analysis_empty2": "Nyomja meg a Futtatás gombot az egyezéselemzés megtekintéséhez."
     },
     "phase_desc": {
       "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -20272,7 +20526,13 @@
       "reminders_saved": "Szerviz emlékeztetők mentve",
       "pause_no_cycle": "Nincs szüneteltethető aktív ciklus",
       "resume_no_cycle": "Nincs folytatható szüneteltetett ciklus",
-      "delete_partial_failed": "Egyes elemeket nem sikerült törölni, ezért visszaállításra kerültek"
+      "delete_partial_failed": "Egyes elemeket nem sikerült törölni, ezért visszaállításra kerültek",
+      "pg_run_gone": "Ez a futtatás már nem érhető el.",
+      "task_cancelled": "Megszakítva.",
+      "processed": "Feldolgozva: {bits}",
+      "processed_cycles": "{n} ciklus",
+      "processed_suggestions": "{n} javaslat",
+      "processed_models": "{n} modell előléptetve"
     },
     "suggestion": {
       "both_agree": "A WashData javasolja",
@@ -20548,6 +20808,8 @@
       "revert_settings": "Hafa breytingar niður",
       "revert_settings_tip": "Endurheimtu stillingar frá tíma fyrir síðustu vistun þína",
       "revert_settings_tip_none": "Vistaðu fyrst til að virkja afturköllunareiginleikann",
+      "revert": "Afturkalla",
+      "revert_to_previous": "Endurheimta þessa stillingu í fyrra gildi",
       "review": "Upprifjun",
       "run": "Keyra",
       "run_analysis": "🔍 Keyra tillögugreiningu",
@@ -20955,10 +21217,18 @@
       "task_reprocess": "Endurvinnsla",
       "task_ml_training": "Nám",
       "eta_secs": "~{n} s eftir",
-      "eta_mins": "~{n} mín eftir"
+      "eta_mins": "~{n} mín eftir",
+      "pg_recent_runs": "Nýlegar keyrslur",
+      "pg_load_run": "Endurhlaða þessa keyrslu",
+      "pg_match_confidence": "Áreiðanleiki samsvörunar",
+      "pg_envelope_fit": "Samræmi við hjúpferil",
+      "pg_envelope_fit_tip": "Hversu vel lotan helst innan vistaðs afl-hjúpferils þessa sniðs, önnur sýn en áreiðanleiki samsvörunar."
     },
     "log": {
-      "all_levels": "Öll stig"
+      "all_levels": "Öll stig",
+      "all_devices": "Öll tæki",
+      "all_components": "Allar einingar",
+      "search_ph": "Leita í annálum…"
     },
     "ml": {
       "builtin_models": "● Að nota innbyggðar gerðir",
@@ -21175,6 +21445,7 @@
       "toast_rebuild_failed": "Endurgerð mistókst: {error}",
       "toast_resume_failed": "Haldið áfram mistókst: {error}",
       "toast_revert_failed": "Endurstilling mistókst: {error}",
+      "toast_reverted": "{key} afturkallað",
       "toast_save_failed": "Vistun mistókst: {error}",
       "trend_duration_longer": "Tímalengd í vændum lengri ({pct}%/lotu) — nýleg meðaltal {avg}",
       "trend_duration_shorter": "Tímalengd styttist ({pct}%/lotu) — nýleg meðaltal {avg}",
@@ -21218,7 +21489,10 @@
       "pg_history_intro2": "Endurspilaðu nýlegar lotur í gegnum raunverulegu greininguna og samsvörunina með stillingunum að ofan. Smelltu á línu til að hlaða þeirri lotu í ritið; breyttu stillingu til að sjá samanburð fyrir og eftir.",
       "pg_simulating": "Hermir lotu…",
       "pg_canvas_empty2": "Veldu lotu að ofan og ýttu á Keyra til að herma hana. Haltu svo bendlinum yfir til að lesa gildi, skrunaðu til að þysja og dragðu til að hliðra.",
-      "pg_apply_settings_confirm": "Vista þessar {n} stilling(ar) á þetta tæki? {list}"
+      "pg_apply_settings_confirm": "Vista þessar {n} stilling(ar) á þetta tæki? {list}",
+      "no_logs_match": "Engar annálafærslur passa við þessar síur.",
+      "pg_analysis_hint2": "Veldu lotu og ýttu á Keyra til að hlaða samsvörunargreiningu.",
+      "pg_analysis_empty2": "Ýttu á Keyra til að sjá samsvörunargreiningu."
     },
     "pg_desc": {
       "abrupt_drop_watts": "Skyndilegt fall meðhöndlað sem tafarlaus endir",
@@ -21961,7 +22235,13 @@
       "reminders_saved": "Þjónustuáminningar vistaðar",
       "pause_no_cycle": "Engin virk lota til að gera hlé á",
       "resume_no_cycle": "Engin lota í hléi til að halda áfram",
-      "delete_partial_failed": "Ekki tókst að eyða sumum atriðum og þau voru endurheimt"
+      "delete_partial_failed": "Ekki tókst að eyða sumum atriðum og þau voru endurheimt",
+      "pg_run_gone": "Þessi keyrsla er ekki lengur tiltæk.",
+      "task_cancelled": "Hætt við.",
+      "processed": "Vinnslu lokið: {bits}",
+      "processed_cycles": "{n} hringrásir",
+      "processed_suggestions": "{n} tillögur",
+      "processed_models": "{n} líkön virkjuð"
     },
     "trend": {
       "down": "Stefnir niður",
@@ -22124,6 +22404,8 @@
       "revert_settings": "Annulla modifiche",
       "revert_settings_tip": "Ripristina le impostazioni precedenti all'ultimo salvataggio",
       "revert_settings_tip_none": "Salva prima per abilitare l'annullamento",
+      "revert": "Ripristina",
+      "revert_to_previous": "Ripristina questa impostazione al valore precedente",
       "review": "Rivedi",
       "run": "Esegui",
       "run_analysis": "🔍 Esegui l'analisi dei suggerimenti",
@@ -22531,10 +22813,18 @@
       "task_reprocess": "Rielaborazione",
       "task_ml_training": "Apprendimento",
       "eta_secs": "~{n} s rimasti",
-      "eta_mins": "~{n} min rimasti"
+      "eta_mins": "~{n} min rimasti",
+      "pg_recent_runs": "Esecuzioni recenti",
+      "pg_load_run": "Ricarica questa esecuzione",
+      "pg_match_confidence": "Affidabilità dell'abbinamento",
+      "pg_envelope_fit": "Aderenza all'inviluppo",
+      "pg_envelope_fit_tip": "Quanto il ciclo rimane all'interno dell'inviluppo di potenza salvato di questo profilo, una prospettiva diversa dall'affidabilità dell'abbinamento."
     },
     "log": {
-      "all_levels": "Tutti i livelli"
+      "all_levels": "Tutti i livelli",
+      "all_devices": "Tutti i dispositivi",
+      "all_components": "Tutti i componenti",
+      "search_ph": "Cerca nei log…"
     },
     "ml": {
       "builtin_models": "● Utilizzo di modelli integrati",
@@ -22751,6 +23041,7 @@
       "toast_rebuild_failed": "Ricostruzione fallita: {error}",
       "toast_resume_failed": "Ripresa fallita: {error}",
       "toast_revert_failed": "Ripristino fallito: {error}",
+      "toast_reverted": "{key} ripristinato",
       "toast_save_failed": "Salvataggio fallito: {error}",
       "trend_duration_longer": "Durata tendenzialmente più lunga ({pct}%/ciclo) — media recente {avg}",
       "trend_duration_shorter": "La durata tendenzialmente è più breve ({pct}%/ciclo) — media recente {avg}",
@@ -22794,7 +23085,10 @@
       "pg_history_intro2": "Riproduci i tuoi cicli recenti attraverso il rilevatore e il sistema di corrispondenza reali con le impostazioni qui sopra. Fai clic su una riga per caricare quel ciclo nel grafico; modifica un'impostazione per vedere un confronto prima/dopo.",
       "pg_simulating": "Simulazione del ciclo…",
       "pg_canvas_empty2": "Scegli un ciclo qui sopra e premi Esegui per simularlo. Poi passa il puntatore per leggere i valori, scorri per ingrandire e trascina per spostarti.",
-      "pg_apply_settings_confirm": "Salvare queste {n} impostazioni su questo dispositivo? {list}"
+      "pg_apply_settings_confirm": "Salvare queste {n} impostazioni su questo dispositivo? {list}",
+      "no_logs_match": "Nessun record di log corrisponde a questi filtri.",
+      "pg_analysis_hint2": "Seleziona un ciclo e premi Esegui per caricare l'analisi di abbinamento.",
+      "pg_analysis_empty2": "Premi Esegui per vedere l'analisi di abbinamento."
     },
     "pg_desc": {
       "abrupt_drop_watts": "Calo improvviso trattato come fine immediata",
@@ -23416,6 +23710,10 @@
       "phase_updated": "Fase aggiornata",
       "phases_saved": "Fasi salvate",
       "preferences_saved": "Preferenze salvate",
+      "processed": "Elaborato {bits}",
+      "processed_cycles": "{n} cicli",
+      "processed_models": "{n} modelli promossi",
+      "processed_suggestions": "{n} suggerimenti",
       "profile_name_required": "Il nome del profilo è obbligatorio",
       "profile_renamed": "Profilo rinominato",
       "recording_discarded": "Registrazione scartata",
@@ -23441,7 +23739,9 @@
       "reminders_saved": "Promemoria di servizio salvati",
       "pause_no_cycle": "Nessun ciclo attivo da mettere in pausa",
       "resume_no_cycle": "Nessun ciclo in pausa da riprendere",
-      "delete_partial_failed": "Non è stato possibile eliminare alcuni elementi e sono stati ripristinati"
+      "delete_partial_failed": "Non è stato possibile eliminare alcuni elementi e sono stati ripristinati",
+      "pg_run_gone": "Questa esecuzione non è più disponibile.",
+      "task_cancelled": "Annullato."
     },
     "suggestion": {
       "both_agree": "WashData consiglia",
@@ -23700,6 +24000,8 @@
       "revert_settings": "変更を破棄",
       "revert_settings_tip": "前回の保存前の設定を復元します",
       "revert_settings_tip_none": "元に戻す機能を有効にするには先に保存してください",
+      "revert": "元に戻す",
+      "revert_to_previous": "この設定を以前の値に戻す",
       "review": "評価する",
       "run": "実行",
       "run_analysis": "🔍 提案分析を実行する",
@@ -24107,10 +24409,18 @@
       "task_reprocess": "再処理",
       "task_ml_training": "学習",
       "eta_secs": "~{n}秒残り",
-      "eta_mins": "~{n}分残り"
+      "eta_mins": "~{n}分残り",
+      "pg_recent_runs": "最近の実行",
+      "pg_load_run": "この実行を再読み込み",
+      "pg_match_confidence": "マッチ信頼度",
+      "pg_envelope_fit": "エンベロープ適合度",
+      "pg_envelope_fit_tip": "このプロフィールの保存された電力エンベロープ内にサイクルがどれだけ収まっているか。マッチ信頼度とは異なる視点です。"
     },
     "log": {
-      "all_levels": "すべてのレベル"
+      "all_levels": "すべてのレベル",
+      "all_devices": "すべてのデバイス",
+      "all_components": "すべてのコンポーネント",
+      "search_ph": "ログを検索…"
     },
     "ml": {
       "builtin_models": "● 組み込みモデルの使用",
@@ -24327,6 +24637,7 @@
       "toast_rebuild_failed": "再構築に失敗しました: {error}",
       "toast_resume_failed": "再開に失敗しました: {error}",
       "toast_revert_failed": "元に戻すことに失敗しました: {error}",
+      "toast_reverted": "{key}を元に戻しました",
       "toast_save_failed": "保存に失敗しました: {error}",
       "trend_duration_longer": "期間は長くなる傾向にあります ({pct}%/サイクル) - 最近の平均 {avg}",
       "trend_duration_shorter": "期間は短くなる傾向にあります ({pct}%/サイクル) - 最近の平均 {avg}",
@@ -24370,7 +24681,10 @@
       "pg_history_intro2": "上記の設定で、最近のサイクルを実際の検出器とマッチャーで再生します。行をクリックするとそのサイクルをグラフに読み込みます。設定を変更すると、変更前後の比較が表示されます。",
       "pg_simulating": "サイクルをシミュレーションしています…",
       "pg_canvas_empty2": "上でサイクルを選び、「実行」を押してシミュレーションします。その後、ホバーで値を表示、スクロールでズーム、ドラッグで移動できます。",
-      "pg_apply_settings_confirm": "これら {n} 件の設定をこのデバイスに保存しますか？ {list}"
+      "pg_apply_settings_confirm": "これら {n} 件の設定をこのデバイスに保存しますか？ {list}",
+      "no_logs_match": "これらのフィルターに一致するログレコードはありません。",
+      "pg_analysis_hint2": "サイクルを選択して「実行」を押すと、マッチ分析が読み込まれます。",
+      "pg_analysis_empty2": "「実行」を押すとマッチ分析が表示されます。"
     },
     "pg_desc": {
       "abrupt_drop_watts": "急激な低下は即時終了として扱う",
@@ -25017,7 +25331,13 @@
       "reminders_saved": "サービスリマインダーを保存しました",
       "pause_no_cycle": "一時停止できるアクティブなサイクルがありません",
       "resume_no_cycle": "再開できる一時停止中のサイクルがありません",
-      "delete_partial_failed": "一部の項目を削除できなかったため、復元されました"
+      "delete_partial_failed": "一部の項目を削除できなかったため、復元されました",
+      "pg_run_gone": "その実行は利用できなくなりました。",
+      "task_cancelled": "キャンセルしました。",
+      "processed": "{bits} を処理しました",
+      "processed_cycles": "{n} 件のサイクル",
+      "processed_suggestions": "{n} 件の提案",
+      "processed_models": "{n} 件のモデル昇格"
     },
     "suggestion": {
       "both_agree": "WashDataの推奨",
@@ -25276,6 +25596,8 @@
       "revert_settings": "변경 사항 취소",
       "revert_settings_tip": "마지막 저장 전 설정을 복원합니다",
       "revert_settings_tip_none": "실행 취소를 활성화하려면 먼저 저장하세요",
+      "revert": "되돌리기",
+      "revert_to_previous": "이 설정을 이전 값으로 되돌리기",
       "review": "검토",
       "run": "실행",
       "run_analysis": "🔍 제안 분석 실행",
@@ -25683,10 +26005,18 @@
       "task_reprocess": "재처리",
       "task_ml_training": "학습",
       "eta_secs": "~{n}초 남음",
-      "eta_mins": "~{n}분 남음"
+      "eta_mins": "~{n}분 남음",
+      "pg_recent_runs": "최근 실행",
+      "pg_load_run": "이 실행 다시 불러오기",
+      "pg_match_confidence": "매칭 신뢰도",
+      "pg_envelope_fit": "엔벨로프 적합도",
+      "pg_envelope_fit_tip": "이 프로필의 저장된 전력 엔벨로프 안에 사이클이 얼마나 잘 들어맞는지 보여줍니다. 매칭 신뢰도와는 다른 관점입니다."
     },
     "log": {
-      "all_levels": "모든 레벨"
+      "all_levels": "모든 레벨",
+      "all_devices": "모든 기기",
+      "all_components": "모든 구성 요소",
+      "search_ph": "로그 검색…"
     },
     "ml": {
       "builtin_models": "● 내장 모델 사용",
@@ -25903,6 +26233,7 @@
       "toast_rebuild_failed": "재구성 실패: {error}",
       "toast_resume_failed": "재개 실패: {error}",
       "toast_revert_failed": "되돌리기 실패: {error}",
+      "toast_reverted": "{key}을(를) 되돌렸습니다",
       "toast_save_failed": "저장 실패: {error}",
       "trend_duration_longer": "기간이 길어지는 추세({pct}%/주기) — 최근 평균 {avg}",
       "trend_duration_shorter": "기간이 짧아지는 추세({pct}%/주기) — 최근 평균 {avg}",
@@ -25946,7 +26277,10 @@
       "pg_history_intro2": "위 설정으로 최근 사이클을 실제 감지기와 매처를 통해 다시 재생합니다. 행을 클릭하면 해당 사이클을 그래프에 불러옵니다. 설정을 변경하면 변경 전후 비교를 확인할 수 있습니다.",
       "pg_simulating": "사이클을 시뮬레이션하는 중…",
       "pg_canvas_empty2": "위에서 사이클을 선택하고 실행을 눌러 시뮬레이션하세요. 그런 다음 마우스를 올려 값을 확인하고, 스크롤하여 확대/축소하고, 드래그하여 이동할 수 있습니다.",
-      "pg_apply_settings_confirm": "이 {n}개 설정을 이 기기에 저장하시겠습니까? {list}"
+      "pg_apply_settings_confirm": "이 {n}개 설정을 이 기기에 저장하시겠습니까? {list}",
+      "no_logs_match": "이 필터와 일치하는 로그 기록이 없습니다.",
+      "pg_analysis_hint2": "사이클을 선택하고 실행을 누르면 매칭 분석이 로드됩니다.",
+      "pg_analysis_empty2": "실행을 누르면 매칭 분석이 표시됩니다."
     },
     "pg_desc": {
       "abrupt_drop_watts": "급격한 강하는 즉시 종료로 처리",
@@ -26593,7 +26927,13 @@
       "reminders_saved": "서비스 알림이 저장되었습니다",
       "pause_no_cycle": "일시 정지할 실행 중인 사이클이 없습니다",
       "resume_no_cycle": "재개할 일시 정지된 사이클이 없습니다",
-      "delete_partial_failed": "일부 항목을 삭제할 수 없어 복원되었습니다"
+      "delete_partial_failed": "일부 항목을 삭제할 수 없어 복원되었습니다",
+      "pg_run_gone": "해당 실행은 더 이상 사용할 수 없습니다.",
+      "task_cancelled": "취소되었습니다.",
+      "processed": "{bits} 처리 완료",
+      "processed_cycles": "{n}개 사이클",
+      "processed_suggestions": "{n}개 제안",
+      "processed_models": "{n}개 모델 승격"
     },
     "suggestion": {
       "both_agree": "WashData 권장",
@@ -26852,6 +27192,8 @@
       "revert_settings": "Atmesti pakeitimus",
       "revert_settings_tip": "Atkurti nustatymus iki paskutinio išsaugojimo",
       "revert_settings_tip_none": "Pirmiausia išsaugokite, kad įgalintumėte atšaukimą",
+      "revert": "Grąžinti",
+      "revert_to_previous": "Atkurti šį nustatymą į ankstesnę reikšmę",
       "review": "Įvertinti",
       "run": "Vykdyti",
       "run_analysis": "🔍 Vykdykite pasiūlymų analizę",
@@ -27259,10 +27601,18 @@
       "task_reprocess": "Pakartotinis apdorojimas",
       "task_ml_training": "Mokymasis",
       "eta_secs": "liko ~{n} s",
-      "eta_mins": "liko ~{n} min"
+      "eta_mins": "liko ~{n} min",
+      "pg_recent_runs": "Naujausi vykdymai",
+      "pg_load_run": "Iš naujo įkelti šį vykdymą",
+      "pg_match_confidence": "Atitikties patikimumas",
+      "pg_envelope_fit": "Atitikimas gaubtinei",
+      "pg_envelope_fit_tip": "Kaip tiksliai ciklas telpa šio profilio išsaugotoje galios gaubtinėje, kitoks požiūris nei atitikties patikimumas."
     },
     "log": {
-      "all_levels": "Visi lygiai"
+      "all_levels": "Visi lygiai",
+      "all_devices": "Visi įrenginiai",
+      "all_components": "Visi komponentai",
+      "search_ph": "Ieškoti žurnaluose…"
     },
     "ml": {
       "builtin_models": "● Naudojant įmontuotus modelius",
@@ -27479,6 +27829,7 @@
       "toast_rebuild_failed": "Atstatymas nepavyko: {error}",
       "toast_resume_failed": "Atnaujinimas nepavyko: {error}",
       "toast_revert_failed": "Grąžinimas nepavyko: {error}",
+      "toast_reverted": "{key} grąžinta",
       "toast_save_failed": "Įrašymas nepavyko: {error}",
       "trend_duration_longer": "Ilgesnė trukmė ({pct} %/ciklas) – pastaruoju metu vid. {avg}",
       "trend_duration_shorter": "Trukmė mažėja ({pct} %/ciklas) – pastaruoju metu vid. {avg}",
@@ -27522,7 +27873,10 @@
       "pg_history_intro2": "Atkurkite naujausius ciklus per tikrąjį detektorių ir programų derinimo modulį su aukščiau nurodytais nustatymais. Spustelėkite bet kurią eilutę, kad įkeltumėte tą ciklą į grafiką; pakeiskite nustatymą, kad pamatytumėte palyginimą prieš ir po.",
       "pg_simulating": "Simuliuojamas ciklas…",
       "pg_canvas_empty2": "Pasirinkite ciklą aukščiau ir paspauskite Vykdyti, kad jį simuliuotumėte. Tada užveskite žymeklį, kad nuskaitytumėte reikšmes, slinkite, kad priartintumėte, ir vilkite, kad pastumtumėte.",
-      "pg_apply_settings_confirm": "Ar išsaugoti šiuos {n} nustatymus šiame įrenginyje? {list}"
+      "pg_apply_settings_confirm": "Ar išsaugoti šiuos {n} nustatymus šiame įrenginyje? {list}",
+      "no_logs_match": "Nė vienas žurnalo įrašas neatitinka šių filtrų.",
+      "pg_analysis_hint2": "Pasirinkite ciklą ir paspauskite Vykdyti, kad įkeltumėte atitikties analizę.",
+      "pg_analysis_empty2": "Paspauskite Vykdyti, kad pamatytumėte atitikties analizę."
     },
     "phase_desc": {
       "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -28152,7 +28506,13 @@
       "reminders_saved": "Aptarnavimo priminimai įrašyti",
       "pause_no_cycle": "Nėra aktyvaus ciklo, kurį būtų galima pristabdyti",
       "resume_no_cycle": "Nėra pristabdyto ciklo, kurį būtų galima tęsti",
-      "delete_partial_failed": "Kai kurių elementų nepavyko ištrinti ir jie buvo atkurti"
+      "delete_partial_failed": "Kai kurių elementų nepavyko ištrinti ir jie buvo atkurti",
+      "pg_run_gone": "Šis vykdymas nebepasiekiamas.",
+      "task_cancelled": "Atšaukta.",
+      "processed": "Apdorota {bits}",
+      "processed_cycles": "{n} ciklų",
+      "processed_suggestions": "{n} pasiūlymų",
+      "processed_models": "{n} modelių paaukštinta"
     },
     "suggestion": {
       "both_agree": "WashData rekomenduoja",
@@ -28428,6 +28788,8 @@
       "revert_settings": "Atmest izmaiņas",
       "revert_settings_tip": "Atjaunot iestatījumus pirms pēdējās saglabāšanas",
       "revert_settings_tip_none": "Vispirms saglabājiet, lai aktivizētu atsaukšanu",
+      "revert": "Atgriezt",
+      "revert_to_previous": "Atjaunot šo iestatījumu uz iepriekšējo vērtību",
       "review": "Novērtēt",
       "run": "Palaist",
       "run_analysis": "🔍 Palaidiet ieteikumu analīzi",
@@ -28835,10 +29197,18 @@
       "task_reprocess": "Atkārtota apstrāde",
       "task_ml_training": "Mācīšanās",
       "eta_secs": "vēl ~{n} s",
-      "eta_mins": "vēl ~{n} min"
+      "eta_mins": "vēl ~{n} min",
+      "pg_recent_runs": "Nesenās palaišanas",
+      "pg_load_run": "Pārlādēt šo palaišanu",
+      "pg_match_confidence": "Atbilstības ticamība",
+      "pg_envelope_fit": "Iekļaušanās apvalklīknē",
+      "pg_envelope_fit_tip": "Cik precīzi cikls iekļaujas šī profila saglabātajā jaudas apvalklīknē, cits skatījums nekā atbilstības ticamība."
     },
     "log": {
-      "all_levels": "Visi līmeņi"
+      "all_levels": "Visi līmeņi",
+      "all_devices": "Visas ierīces",
+      "all_components": "Visi komponenti",
+      "search_ph": "Meklēt žurnālos…"
     },
     "ml": {
       "builtin_models": "● Izmantojot iebūvētos modeļus",
@@ -29055,6 +29425,7 @@
       "toast_rebuild_failed": "Atjaunošana neizdevās: {error}",
       "toast_resume_failed": "Atsākšana neizdevās: {error}",
       "toast_revert_failed": "Atgriešana neizdevās: {error}",
+      "toast_reverted": "{key} atgriezts",
       "toast_save_failed": "Saglabāšana neizdevās: {error}",
       "trend_duration_longer": "Ilgums kļūst arvien garāks ({pct}%/ciklā) — nesenā vidējā {avg}",
       "trend_duration_shorter": "Ilguma tendence ir īsāka ({pct}%/cikls) — nesenā vidējā {avg}",
@@ -29098,7 +29469,10 @@
       "pg_history_intro2": "Atskaņojiet savus nesenos ciklus caur īsto detektoru un saskaņotāju ar iepriekš norādītajiem iestatījumiem. Noklikšķiniet uz jebkuras rindas, lai ielādētu šo ciklu diagrammā; mainiet iestatījumu, lai redzētu salīdzinājumu pirms/pēc.",
       "pg_simulating": "Notiek cikla simulācija…",
       "pg_canvas_empty2": "Izvēlieties ciklu augšā un nospiediet Palaist, lai to simulētu. Pēc tam turiet kursoru virs, lai nolasītu vērtības, ritiniet, lai tuvinātu, un velciet, lai pārvietotu.",
-      "pg_apply_settings_confirm": "Vai saglabāt šos {n} iestatījumus šajā ierīcē? {list}"
+      "pg_apply_settings_confirm": "Vai saglabāt šos {n} iestatījumus šajā ierīcē? {list}",
+      "no_logs_match": "Neviens žurnāla ieraksts neatbilst šiem filtriem.",
+      "pg_analysis_hint2": "Atlasiet ciklu un nospiediet Palaist, lai ielādētu atbilstības analīzi.",
+      "pg_analysis_empty2": "Nospiediet Palaist, lai skatītu atbilstības analīzi."
     },
     "phase_desc": {
       "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -29728,7 +30102,13 @@
       "reminders_saved": "Apkopes atgādinājumi saglabāti",
       "pause_no_cycle": "Nav aktīva cikla, ko pauzēt",
       "resume_no_cycle": "Nav pauzēta cikla, ko atsākt",
-      "delete_partial_failed": "Dažus vienumus nevarēja izdzēst, un tie tika atjaunoti"
+      "delete_partial_failed": "Dažus vienumus nevarēja izdzēst, un tie tika atjaunoti",
+      "pg_run_gone": "Šī palaišana vairs nav pieejama.",
+      "task_cancelled": "Atcelts.",
+      "processed": "Apstrādāts {bits}",
+      "processed_cycles": "{n} cikli",
+      "processed_suggestions": "{n} ieteikumi",
+      "processed_models": "{n} modeļi paaugstināti"
     },
     "suggestion": {
       "both_agree": "WashData iesaka",
@@ -30004,6 +30384,8 @@
       "revert_settings": "Откажи промени",
       "revert_settings_tip": "Вратете ги поставките пред последното зачувување",
       "revert_settings_tip_none": "Прво зачувајте за да ја активирате отката",
+      "revert": "Врати",
+      "revert_to_previous": "Вратете ја оваа поставка на претходната вредност",
       "review": "Преглед",
       "run": "Изврши",
       "run_analysis": "🔍 Изврши анализа на предлози",
@@ -30411,10 +30793,18 @@
       "task_reprocess": "Повторна обработка",
       "task_ml_training": "Учење",
       "eta_secs": "уште ~{n} сек",
-      "eta_mins": "уште ~{n} мин"
+      "eta_mins": "уште ~{n} мин",
+      "pg_recent_runs": "Неодамнешни извршувања",
+      "pg_load_run": "Повторно вчитај го ова извршување",
+      "pg_match_confidence": "Сигурност на совпаѓањето",
+      "pg_envelope_fit": "Вклопување во обвивката",
+      "pg_envelope_fit_tip": "Колку добро циклусот се вклопува во зачуваната обвивка на моќноста на овој профил, поинаков поглед од сигурноста на совпаѓањето."
     },
     "log": {
-      "all_levels": "Сите нивоа"
+      "all_levels": "Сите нивоа",
+      "all_devices": "Сите уреди",
+      "all_components": "Сите компоненти",
+      "search_ph": "Пребарај дневници…"
     },
     "ml": {
       "builtin_models": "● Користење на вградени модели",
@@ -30631,6 +31021,7 @@
       "toast_rebuild_failed": "Реконструкцијата неуспешна: {error}",
       "toast_resume_failed": "Продолжувањето неуспешно: {error}",
       "toast_revert_failed": "Враќањето неуспешно: {error}",
+      "toast_reverted": "{key} е вратено",
       "toast_save_failed": "Зачувувањето неуспешно: {error}",
       "trend_duration_longer": "Времетраењето е во тренд подолго ({pct}%/циклус) - неодамнешниот просек {avg}",
       "trend_duration_shorter": "Времетраењето е во тренд пократко ({pct}%/циклус) - неодамнешниот просек {avg}",
@@ -30674,7 +31065,10 @@
       "pg_history_intro2": "Повторно изведете ги неодамнешните циклуси преку вистинскиот детектор и модулот за совпаѓање со поставките погоре. Кликнете на кој било ред за да го вчитате тој циклус во графикот; изменете поставка за да видите споредба пред и потоа.",
       "pg_simulating": "Симулирање на циклус…",
       "pg_canvas_empty2": "Изберете циклус погоре и притиснете Стартувај за да го симулирате. Потоа посочете за да ги видите вредностите, лизгајте за зумирање и влечете за поместување.",
-      "pg_apply_settings_confirm": "Да се зачуваат ли овие {n} поставки на овој уред? {list}"
+      "pg_apply_settings_confirm": "Да се зачуваат ли овие {n} поставки на овој уред? {list}",
+      "no_logs_match": "Ниту еден запис од дневникот не одговара на овие филтри.",
+      "pg_analysis_hint2": "Изберете циклус и притиснете Изврши за да се вчита анализата на совпаѓање.",
+      "pg_analysis_empty2": "Притиснете Изврши за да ја видите анализата на совпаѓање."
     },
     "phase_desc": {
       "anti_crease": "Повремени кратки превртувања по завршувањето за да се намалат брчките.",
@@ -31304,7 +31698,13 @@
       "reminders_saved": "Потсетниците за сервис се зачувани",
       "pause_no_cycle": "Нема активен циклус за паузирање",
       "resume_no_cycle": "Нема паузиран циклус за продолжување",
-      "delete_partial_failed": "Некои ставки не можеа да се избришат и беа вратени"
+      "delete_partial_failed": "Некои ставки не можеа да се избришат и беа вратени",
+      "pg_run_gone": "Тоа извршување повеќе не е достапно.",
+      "task_cancelled": "Откажано.",
+      "processed": "Обработено {bits}",
+      "processed_cycles": "{n} циклуси",
+      "processed_suggestions": "{n} предлози",
+      "processed_models": "{n} активирани модели"
     },
     "suggestion": {
       "both_agree": "WashData препорачува",
@@ -31580,6 +31980,8 @@
       "revert_settings": "Forkast endringer",
       "revert_settings_tip": "Gjenopprett innstillinger fra før siste lagring",
       "revert_settings_tip_none": "Lagre først for å aktivere angre",
+      "revert": "Tilbakestill",
+      "revert_to_previous": "Gjenopprett denne innstillingen til forrige verdi",
       "review": "Gjennomgå",
       "run": "Kjør",
       "run_analysis": "🔍 Kjør forslagsanalyse",
@@ -31987,10 +32389,18 @@
       "task_reprocess": "Behandler på nytt",
       "task_ml_training": "Læring",
       "eta_secs": "~{n} s igjen",
-      "eta_mins": "~{n} min igjen"
+      "eta_mins": "~{n} min igjen",
+      "pg_recent_runs": "Nylige kjøringer",
+      "pg_load_run": "Last inn denne kjøringen på nytt",
+      "pg_match_confidence": "Treffsikkerhet",
+      "pg_envelope_fit": "Envelope-tilpasning",
+      "pg_envelope_fit_tip": "Hvor tett syklusen holder seg innenfor denne profilens lagrede effekt-envelope, en annen innfallsvinkel enn treffsikkerhet."
     },
     "log": {
-      "all_levels": "Alle nivåer"
+      "all_levels": "Alle nivåer",
+      "all_devices": "Alle enheter",
+      "all_components": "Alle komponenter",
+      "search_ph": "Søk i logger…"
     },
     "ml": {
       "builtin_models": "● Bruke innebygde modeller",
@@ -32207,6 +32617,7 @@
       "toast_rebuild_failed": "Gjenoppbygging mislyktes: {error}",
       "toast_resume_failed": "Gjenopptaking mislyktes: {error}",
       "toast_revert_failed": "Tilbakestilling mislyktes: {error}",
+      "toast_reverted": "{key} tilbakestilt",
       "toast_save_failed": "Lagring mislyktes: {error}",
       "trend_duration_longer": "Varighet trender lengre ({pct} %/syklus) – nylig snitt {avg}",
       "trend_duration_shorter": "Varighet trender kortere ({pct} %/syklus) – nylig snitt {avg}",
@@ -32250,7 +32661,10 @@
       "pg_history_intro2": "Spill av de siste syklusene dine gjennom den ekte detektoren og gjenkjenningen med innstillingene ovenfor. Klikk på en rad for å laste inn den syklusen i grafen; endre en innstilling for å se en før/etter-sammenligning.",
       "pg_simulating": "Simulerer syklus…",
       "pg_canvas_empty2": "Velg en syklus ovenfor og trykk på Kjør for å simulere den. Hold deretter pekeren over for å lese av verdier, rull for å zoome, og dra for å panorere.",
-      "pg_apply_settings_confirm": "Lagre disse {n} innstilling(er) på denne enheten? {list}"
+      "pg_apply_settings_confirm": "Lagre disse {n} innstilling(er) på denne enheten? {list}",
+      "no_logs_match": "Ingen loggoppføringer samsvarer med disse filtrene.",
+      "pg_analysis_hint2": "Velg en syklus og trykk Kjør for å laste inn treffanalysen.",
+      "pg_analysis_empty2": "Trykk Kjør for å se treffanalysen."
     },
     "pg_desc": {
       "abrupt_drop_watts": "Plutselig fall behandlet som umiddelbar slutt",
@@ -32993,7 +33407,13 @@
       "reminders_saved": "Servicepåminnelser lagret",
       "pause_no_cycle": "Ingen aktiv syklus å sette på pause",
       "resume_no_cycle": "Ingen pauset syklus å gjenoppta",
-      "delete_partial_failed": "Noen elementer kunne ikke slettes og ble gjenopprettet"
+      "delete_partial_failed": "Noen elementer kunne ikke slettes og ble gjenopprettet",
+      "pg_run_gone": "Den kjøringen er ikke lenger tilgjengelig.",
+      "task_cancelled": "Avbrutt.",
+      "processed": "Behandlet: {bits}",
+      "processed_cycles": "{n} sykluser",
+      "processed_suggestions": "{n} forslag",
+      "processed_models": "{n} modeller aktivert"
     },
     "trend": {
       "down": "Trender nedover",
@@ -33156,6 +33576,8 @@
       "revert_settings": "Wijzigingen ongedaan maken",
       "revert_settings_tip": "Instellingen herstellen naar de staat van vóór de laatste opslag",
       "revert_settings_tip_none": "Sla eerst op om ongedaan maken te activeren",
+      "revert": "Terugzetten",
+      "revert_to_previous": "Deze instelling terugzetten naar de vorige waarde",
       "review": "Beoordelen",
       "run": "Uitvoeren",
       "run_analysis": "🔍 Voer suggestieanalyse uit",
@@ -33563,10 +33985,18 @@
       "task_reprocess": "Opnieuw verwerken",
       "task_ml_training": "Leren",
       "eta_secs": "nog ~{n} s",
-      "eta_mins": "nog ~{n} min"
+      "eta_mins": "nog ~{n} min",
+      "pg_recent_runs": "Recente uitvoeringen",
+      "pg_load_run": "Deze uitvoering opnieuw laden",
+      "pg_match_confidence": "Matchbetrouwbaarheid",
+      "pg_envelope_fit": "Envelop-passing",
+      "pg_envelope_fit_tip": "Hoe strak de cyclus binnen de opgeslagen vermogensenvelop van dit profiel blijft, een andere invalshoek dan matchbetrouwbaarheid."
     },
     "log": {
-      "all_levels": "Alle niveaus"
+      "all_levels": "Alle niveaus",
+      "all_devices": "Alle apparaten",
+      "all_components": "Alle componenten",
+      "search_ph": "Logboeken doorzoeken…"
     },
     "ml": {
       "builtin_models": "● Ingebouwde modellen gebruiken",
@@ -33783,6 +34213,7 @@
       "toast_rebuild_failed": "Herbouwen mislukt: {error}",
       "toast_resume_failed": "Hervatten mislukt: {error}",
       "toast_revert_failed": "Terugzetten mislukt: {error}",
+      "toast_reverted": "{key} teruggezet",
       "toast_save_failed": "Opslaan mislukt: {error}",
       "trend_duration_longer": "Duur trending langer ({pct}%/cyclus) — recent gemiddelde {avg}",
       "trend_duration_shorter": "Duur trending korter ({pct}%/cyclus) — recent gemiddelde {avg}",
@@ -33826,7 +34257,10 @@
       "pg_history_intro2": "Laat je recente cycli opnieuw door de echte detector en herkenning lopen met de bovenstaande instellingen. Klik op een rij om die cyclus in de grafiek te laden; wijzig een instelling om een voor/na-vergelijking te zien.",
       "pg_simulating": "Cyclus simuleren…",
       "pg_canvas_empty2": "Kies hierboven een cyclus en druk op Uitvoeren om deze te simuleren. Beweeg vervolgens de muis erover om waarden af te lezen, scroll om te zoomen en sleep om te verschuiven.",
-      "pg_apply_settings_confirm": "Deze {n} instelling(en) opslaan voor dit apparaat? {list}"
+      "pg_apply_settings_confirm": "Deze {n} instelling(en) opslaan voor dit apparaat? {list}",
+      "no_logs_match": "Geen logrecords komen overeen met deze filters.",
+      "pg_analysis_hint2": "Kies een cyclus en druk op Uitvoeren om de matchanalyse te laden.",
+      "pg_analysis_empty2": "Druk op Uitvoeren om de matchanalyse te zien."
     },
     "pg_desc": {
       "abrupt_drop_watts": "Plotselinge daling behandeld als onmiddellijk einde",
@@ -34569,7 +35003,13 @@
       "reminders_saved": "Serviceherinneringen opgeslagen",
       "pause_no_cycle": "Geen actieve cyclus om te pauzeren",
       "resume_no_cycle": "Geen gepauzeerde cyclus om te hervatten",
-      "delete_partial_failed": "Sommige items konden niet worden verwijderd en zijn hersteld"
+      "delete_partial_failed": "Sommige items konden niet worden verwijderd en zijn hersteld",
+      "pg_run_gone": "Die uitvoering is niet meer beschikbaar.",
+      "task_cancelled": "Geannuleerd.",
+      "processed": "Verwerkt: {bits}",
+      "processed_cycles": "{n} cycli",
+      "processed_suggestions": "{n} suggesties",
+      "processed_models": "{n} modellen geactiveerd"
     },
     "trend": {
       "down": "Trend naar beneden",
@@ -34732,6 +35172,8 @@
       "revert_settings": "Odrzuć zmiany",
       "revert_settings_tip": "Przywróć ustawienia sprzed ostatniego zapisu",
       "revert_settings_tip_none": "Najpierw zapisz, aby włączyć cofanie",
+      "revert": "Cofnij",
+      "revert_to_previous": "Przywróć to ustawienie do poprzedniej wartości",
       "review": "Sprawdź",
       "run": "Uruchom",
       "run_analysis": "🔍 Przeprowadź analizę sugestii",
@@ -35139,10 +35581,18 @@
       "task_reprocess": "Ponowne przetwarzanie",
       "task_ml_training": "Uczenie",
       "eta_secs": "pozostało ~{n} s",
-      "eta_mins": "pozostało ~{n} min"
+      "eta_mins": "pozostało ~{n} min",
+      "pg_recent_runs": "Ostatnie uruchomienia",
+      "pg_load_run": "Wczytaj ponownie to uruchomienie",
+      "pg_match_confidence": "Pewność dopasowania",
+      "pg_envelope_fit": "Zgodność z obwiednią",
+      "pg_envelope_fit_tip": "Jak dokładnie cykl mieści się w zapisanej obwiedni mocy tego profilu, inne spojrzenie niż pewność dopasowania."
     },
     "log": {
-      "all_levels": "Wszystkie poziomy"
+      "all_levels": "Wszystkie poziomy",
+      "all_devices": "Wszystkie urządzenia",
+      "all_components": "Wszystkie komponenty",
+      "search_ph": "Szukaj w dziennikach…"
     },
     "ml": {
       "builtin_models": "● Korzystanie z wbudowanych modeli",
@@ -35359,6 +35809,7 @@
       "toast_rebuild_failed": "Odbudowanie nie powiodło się: {error}",
       "toast_resume_failed": "Wznowienie nie powiodło się: {error}",
       "toast_revert_failed": "Przywracanie nie powiodło się: {error}",
+      "toast_reverted": "Cofnięto: {key}",
       "toast_save_failed": "Zapisywanie nie powiodło się: {error}",
       "trend_duration_longer": "Trwanie w trendzie dłuższym ({pct}%/cykl) — ostatnia średnia {avg}",
       "trend_duration_shorter": "Trwanie w trendzie krótszym ({pct}%/cykl) — ostatnia średnia {avg}",
@@ -35402,7 +35853,10 @@
       "pg_history_intro2": "Odtwórz swoje ostatnie cykle przez rzeczywisty detektor i mechanizm dopasowywania programów z ustawieniami powyżej. Kliknij dowolny wiersz, aby wczytać dany cykl na wykresie; zmień ustawienie, aby zobaczyć porównanie przed zmianą i po niej.",
       "pg_simulating": "Symulowanie cyklu…",
       "pg_canvas_empty2": "Wybierz cykl powyżej i naciśnij Uruchom, aby go zasymulować. Następnie najedź, aby odczytać wartości, przewiń, aby powiększyć, i przeciągnij, aby przesunąć.",
-      "pg_apply_settings_confirm": "Zapisać te ustawienia ({n}) w tym urządzeniu? {list}"
+      "pg_apply_settings_confirm": "Zapisać te ustawienia ({n}) w tym urządzeniu? {list}",
+      "no_logs_match": "Żadne wpisy dziennika nie pasują do tych filtrów.",
+      "pg_analysis_hint2": "Wybierz cykl i naciśnij Uruchom, aby wczytać analizę dopasowania.",
+      "pg_analysis_empty2": "Naciśnij Uruchom, aby zobaczyć analizę dopasowania."
     },
     "phase_desc": {
       "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -36128,7 +36582,13 @@
       "reminders_saved": "Zapisano przypomnienia serwisowe",
       "pause_no_cycle": "Brak aktywnego cyklu do wstrzymania",
       "resume_no_cycle": "Brak wstrzymanego cyklu do wznowienia",
-      "delete_partial_failed": "Nie można było usunąć niektórych elementów i zostały one przywrócone"
+      "delete_partial_failed": "Nie można było usunąć niektórych elementów i zostały one przywrócone",
+      "pg_run_gone": "To uruchomienie nie jest już dostępne.",
+      "task_cancelled": "Anulowano.",
+      "processed": "Przetworzono {bits}",
+      "processed_cycles": "{n} cykli",
+      "processed_suggestions": "{n} sugestii",
+      "processed_models": "{n} aktywowanych modeli"
     },
     "trend": {
       "down": "Trend w dół",
@@ -36308,6 +36768,8 @@
       "revert_settings": "Descartar alterações",
       "revert_settings_tip": "Restaurar as configurações anteriores ao último salvamento",
       "revert_settings_tip_none": "Salve primeiro para ativar a opção de desfazer",
+      "revert": "Reverter",
+      "revert_to_previous": "Reverter esta configuração para o valor anterior",
       "review": "Avaliar",
       "run": "Executar",
       "run_analysis": "🔍 Executar análise de sugestões",
@@ -36715,10 +37177,18 @@
       "task_reprocess": "Reprocessamento",
       "task_ml_training": "Aprendizado",
       "eta_secs": "~{n} s restantes",
-      "eta_mins": "~{n} min restantes"
+      "eta_mins": "~{n} min restantes",
+      "pg_recent_runs": "Execuções recentes",
+      "pg_load_run": "Recarregar esta execução",
+      "pg_match_confidence": "Confiança da correspondência",
+      "pg_envelope_fit": "Ajuste ao envelope",
+      "pg_envelope_fit_tip": "O quanto o ciclo permanece dentro do envelope de potência salvo deste perfil, uma perspectiva diferente da confiança da correspondência."
     },
     "log": {
-      "all_levels": "Todos os níveis"
+      "all_levels": "Todos os níveis",
+      "all_devices": "Todos os dispositivos",
+      "all_components": "Todos os componentes",
+      "search_ph": "Pesquisar registros…"
     },
     "ml": {
       "builtin_models": "● Usando modelos integrados",
@@ -36935,6 +37405,7 @@
       "toast_rebuild_failed": "Reconstrução falhou: {error}",
       "toast_resume_failed": "Retomada falhou: {error}",
       "toast_revert_failed": "Reversão falhou: {error}",
+      "toast_reverted": "{key} revertido",
       "toast_save_failed": "Salvamento falhou: {error}",
       "trend_duration_longer": "Duração com tendência crescente ({pct}%/ciclo) — média recente {avg}",
       "trend_duration_shorter": "Duração com tendência decrescente ({pct}%/ciclo) — média recente {avg}",
@@ -36978,7 +37449,10 @@
       "pg_history_intro2": "Reproduza seus ciclos recentes pelo detector e pelo sistema de correspondência reais com as configurações acima. Clique em qualquer linha para carregar esse ciclo no gráfico; edite uma configuração para ver uma comparação antes/depois.",
       "pg_simulating": "Simulando o ciclo…",
       "pg_canvas_empty2": "Escolha um ciclo acima e pressione Executar para simulá-lo. Depois passe o cursor para ler os valores, role para ampliar e arraste para deslocar.",
-      "pg_apply_settings_confirm": "Salvar estas {n} configuração(ões) neste dispositivo? {list}"
+      "pg_apply_settings_confirm": "Salvar estas {n} configuração(ões) neste dispositivo? {list}",
+      "no_logs_match": "Nenhum registro corresponde a estes filtros.",
+      "pg_analysis_hint2": "Selecione um ciclo e pressione Executar para carregar a análise de correspondência.",
+      "pg_analysis_empty2": "Pressione Executar para ver a análise de correspondência."
     },
     "phase_desc": {
       "anti_crease": "Giros curtos ocasionais após a conclusão para reduzir amassados.",
@@ -37583,6 +38057,10 @@
       "phase_updated": "Fase atualizada",
       "phases_saved": "Fases salvas",
       "preferences_saved": "Preferências salvas",
+      "processed": "Processado {bits}",
+      "processed_cycles": "{n} ciclos",
+      "processed_models": "{n} modelos promovidos",
+      "processed_suggestions": "{n} sugestões",
       "profile_name_required": "O nome do perfil é obrigatório",
       "profile_renamed": "Perfil renomeado",
       "recording_discarded": "Gravação descartada",
@@ -37608,7 +38086,9 @@
       "reminders_saved": "Lembretes de manutenção salvos",
       "pause_no_cycle": "Nenhum ciclo ativo para pausar",
       "resume_no_cycle": "Nenhum ciclo em pausa para retomar",
-      "delete_partial_failed": "Não foi possível excluir alguns itens e eles foram restaurados"
+      "delete_partial_failed": "Não foi possível excluir alguns itens e eles foram restaurados",
+      "pg_run_gone": "Essa execução não está mais disponível.",
+      "task_cancelled": "Cancelado."
     },
     "suggestion": {
       "both_agree": "WashData recomenda",
@@ -37884,6 +38364,8 @@
       "revert_settings": "Descartar alterações",
       "revert_settings_tip": "Restaurar as definições anteriores ao último guardado",
       "revert_settings_tip_none": "Guarde primeiro para ativar a opção de desfazer",
+      "revert": "Reverter",
+      "revert_to_previous": "Reverter esta definição para o valor anterior",
       "review": "Avaliar",
       "run": "Executar",
       "run_analysis": "🔍 Executar análise de sugestões",
@@ -38291,10 +38773,18 @@
       "task_reprocess": "Reprocessamento",
       "task_ml_training": "Aprendizagem",
       "eta_secs": "~{n} s restantes",
-      "eta_mins": "~{n} min restantes"
+      "eta_mins": "~{n} min restantes",
+      "pg_recent_runs": "Execuções recentes",
+      "pg_load_run": "Recarregar esta execução",
+      "pg_match_confidence": "Confiança da correspondência",
+      "pg_envelope_fit": "Ajuste ao envelope",
+      "pg_envelope_fit_tip": "Até que ponto o ciclo se mantém dentro do envelope de potência guardado deste perfil, uma perspetiva diferente da confiança da correspondência."
     },
     "log": {
-      "all_levels": "Todos os níveis"
+      "all_levels": "Todos os níveis",
+      "all_devices": "Todos os dispositivos",
+      "all_components": "Todos os componentes",
+      "search_ph": "Pesquisar registos…"
     },
     "ml": {
       "builtin_models": "● A usar modelos incorporados",
@@ -38511,6 +39001,7 @@
       "toast_rebuild_failed": "Reconstrução falhou: {error}",
       "toast_resume_failed": "Retomar falhou: {error}",
       "toast_revert_failed": "Reversão falhou: {error}",
+      "toast_reverted": "{key} revertido",
       "toast_save_failed": "Guardar falhou: {error}",
       "trend_duration_longer": "Duração com tendência crescente ({pct}%/ciclo) — média recente {avg}",
       "trend_duration_shorter": "Duração com tendência decrescente ({pct}%/ciclo) — média recente {avg}",
@@ -38554,7 +39045,10 @@
       "pg_history_intro2": "Reproduza os seus ciclos recentes através do detetor e do sistema de correspondência reais com as definições acima. Clique numa linha para carregar esse ciclo no gráfico; edite uma definição para ver uma comparação antes/depois.",
       "pg_simulating": "A simular o ciclo…",
       "pg_canvas_empty2": "Escolha um ciclo acima e prima Executar para o simular. Depois passe o cursor para ler os valores, percorra para ampliar e arraste para deslocar.",
-      "pg_apply_settings_confirm": "Guardar estas {n} definição(ões) neste dispositivo? {list}"
+      "pg_apply_settings_confirm": "Guardar estas {n} definição(ões) neste dispositivo? {list}",
+      "no_logs_match": "Nenhum registo corresponde a estes filtros.",
+      "pg_analysis_hint2": "Selecione um ciclo e prima Executar para carregar a análise de correspondência.",
+      "pg_analysis_empty2": "Prima Executar para ver a análise de correspondência."
     },
     "pg_desc": {
       "abrupt_drop_watts": "Queda repentina tratada como fim imediato",
@@ -39176,6 +39670,10 @@
       "phase_updated": "Fase actualizada",
       "phases_saved": "Fases guardadas",
       "preferences_saved": "Preferências guardadas",
+      "processed": "Processado {bits}",
+      "processed_cycles": "{n} ciclos",
+      "processed_models": "{n} modelos promovidos",
+      "processed_suggestions": "{n} sugestões",
       "profile_name_required": "O nome do perfil é obrigatório",
       "profile_renamed": "Perfil renomeado",
       "recording_discarded": "Gravação descartada",
@@ -39201,7 +39699,9 @@
       "reminders_saved": "Lembretes de manutenção guardados",
       "pause_no_cycle": "Nenhum ciclo ativo para pausar",
       "resume_no_cycle": "Nenhum ciclo em pausa para retomar",
-      "delete_partial_failed": "Não foi possível eliminar alguns itens e foram restaurados"
+      "delete_partial_failed": "Não foi possível eliminar alguns itens e foram restaurados",
+      "pg_run_gone": "Essa execução já não está disponível.",
+      "task_cancelled": "Cancelado."
     },
     "suggestion": {
       "both_agree": "WashData recomenda",
@@ -39460,6 +39960,8 @@
       "revert_settings": "Renunță la modificări",
       "revert_settings_tip": "Restaurați setările de dinainte de ultima salvare",
       "revert_settings_tip_none": "Salvați mai întâi pentru a activa anularea",
+      "revert": "Restaurează",
+      "revert_to_previous": "Restaurați această setare la valoarea anterioară",
       "review": "Evaluează",
       "run": "Rulați",
       "run_analysis": "🔍 Rulați analiza sugestiilor",
@@ -39867,10 +40369,18 @@
       "task_reprocess": "Reprocesare",
       "task_ml_training": "Învățare",
       "eta_secs": "~{n} s rămase",
-      "eta_mins": "~{n} min rămase"
+      "eta_mins": "~{n} min rămase",
+      "pg_recent_runs": "Rulări recente",
+      "pg_load_run": "Reîncarcă această rulare",
+      "pg_match_confidence": "Încrederea în potrivire",
+      "pg_envelope_fit": "Încadrarea în anvelopă",
+      "pg_envelope_fit_tip": "Cât de bine se încadrează ciclul în anvelopa de putere salvată a acestui profil, o altă perspectivă decât încrederea în potrivire."
     },
     "log": {
-      "all_levels": "Toate nivelurile"
+      "all_levels": "Toate nivelurile",
+      "all_devices": "Toate dispozitivele",
+      "all_components": "Toate componentele",
+      "search_ph": "Căutare în jurnale…"
     },
     "ml": {
       "builtin_models": "● Folosind modele integrate",
@@ -40087,6 +40597,7 @@
       "toast_rebuild_failed": "Reconstruire eșuată: {error}",
       "toast_resume_failed": "Reluare eșuată: {error}",
       "toast_revert_failed": "Revenire eșuată: {error}",
+      "toast_reverted": "{key} a revenit la valoarea anterioară",
       "toast_save_failed": "Salvare eșuată: {error}",
       "trend_duration_longer": "Durata este în creștere ({pct}%/ciclu) — medie recentă {avg}",
       "trend_duration_shorter": "Durata este în scădere ({pct}%/ciclu) — medie recentă {avg}",
@@ -40130,7 +40641,10 @@
       "pg_history_intro2": "Reia ciclurile tale recente prin detectorul și sistemul de potrivire reale, cu setările de mai sus. Fă clic pe orice rând pentru a încărca acel ciclu în grafic; modifică o setare pentru a vedea o comparație înainte/după.",
       "pg_simulating": "Se simulează ciclul…",
       "pg_canvas_empty2": "Alege un ciclu de mai sus și apasă Rulează pentru a-l simula. Apoi treci cu cursorul pentru a citi valorile, derulează pentru a mări și trage pentru a te deplasa.",
-      "pg_apply_settings_confirm": "Salvezi aceste {n} setări pe acest dispozitiv? {list}"
+      "pg_apply_settings_confirm": "Salvezi aceste {n} setări pe acest dispozitiv? {list}",
+      "no_logs_match": "Nicio înregistrare din jurnal nu corespunde acestor filtre.",
+      "pg_analysis_hint2": "Selectați un ciclu și apăsați Rulați pentru a încărca analiza potrivirii.",
+      "pg_analysis_empty2": "Apăsați Rulați pentru a vedea analiza potrivirii."
     },
     "phase_desc": {
       "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -40735,6 +41249,10 @@
       "phase_updated": "Fază actualizată",
       "phases_saved": "Faze salvate",
       "preferences_saved": "Preferințe salvate",
+      "processed": "Procesat {bits}",
+      "processed_cycles": "{n} cicluri",
+      "processed_models": "{n} modele promovate",
+      "processed_suggestions": "{n} sugestii",
       "profile_name_required": "Numele profilului este obligatoriu",
       "profile_renamed": "Profil redenumit",
       "recording_discarded": "Înregistrare anulată",
@@ -40760,7 +41278,9 @@
       "reminders_saved": "Mementouri de service salvate",
       "pause_no_cycle": "Niciun ciclu activ de pus în pauză",
       "resume_no_cycle": "Niciun ciclu în pauză de reluat",
-      "delete_partial_failed": "Unele elemente nu au putut fi șterse și au fost restaurate"
+      "delete_partial_failed": "Unele elemente nu au putut fi șterse și au fost restaurate",
+      "pg_run_gone": "Această rulare nu mai este disponibilă.",
+      "task_cancelled": "Anulat."
     },
     "suggestion": {
       "both_agree": "WashData recomandă",
@@ -41036,6 +41556,8 @@
       "revert_settings": "Отменить изменения",
       "revert_settings_tip": "Восстановить настройки до последнего сохранения",
       "revert_settings_tip_none": "Сначала сохраните, чтобы активировать отмену",
+      "revert": "Вернуть",
+      "revert_to_previous": "Восстановить прежнее значение этой настройки",
       "review": "Оценить",
       "run": "Запустить",
       "run_analysis": "🔍 Запустить анализ предложений",
@@ -41443,10 +41965,18 @@
       "task_reprocess": "Повторная обработка",
       "task_ml_training": "Обучение",
       "eta_secs": "осталось ~{n} с",
-      "eta_mins": "осталось ~{n} мин"
+      "eta_mins": "осталось ~{n} мин",
+      "pg_recent_runs": "Недавние запуски",
+      "pg_load_run": "Перезагрузить этот запуск",
+      "pg_match_confidence": "Достоверность совпадения",
+      "pg_envelope_fit": "Соответствие огибающей",
+      "pg_envelope_fit_tip": "Насколько точно цикл вписывается в сохранённую огибающую мощности этого профиля, иной взгляд, чем достоверность совпадения."
     },
     "log": {
-      "all_levels": "Все уровни"
+      "all_levels": "Все уровни",
+      "all_devices": "Все устройства",
+      "all_components": "Все компоненты",
+      "search_ph": "Поиск в журналах…"
     },
     "ml": {
       "builtin_models": "● Использует встроенные модели",
@@ -41663,6 +42193,7 @@
       "toast_rebuild_failed": "Перестройка не выполнена: {error}",
       "toast_resume_failed": "Возобновление не выполнено: {error}",
       "toast_revert_failed": "Откат не выполнен: {error}",
+      "toast_reverted": "Возвращено: {key}",
       "toast_save_failed": "Сохранение не выполнено: {error}",
       "trend_duration_longer": "Тенденция увеличения продолжительности ({pct}%/цикл) — среднее значение за последнее время {avg}",
       "trend_duration_shorter": "Тенденция к сокращению продолжительности ({pct}%/цикл) — среднее значение за последнее время {avg}",
@@ -41706,7 +42237,10 @@
       "pg_history_intro2": "Воспроизведите недавние циклы через настоящий детектор и модуль сопоставления с указанными выше настройками. Нажмите на любую строку, чтобы загрузить этот цикл на график; измените настройку, чтобы увидеть сравнение до и после.",
       "pg_simulating": "Моделирование цикла…",
       "pg_canvas_empty2": "Выберите цикл выше и нажмите «Запустить», чтобы смоделировать его. Затем наведите указатель, чтобы увидеть значения, прокрутите для масштабирования и перетащите для панорамирования.",
-      "pg_apply_settings_confirm": "Сохранить эти настройки ({n}) в это устройство? {list}"
+      "pg_apply_settings_confirm": "Сохранить эти настройки ({n}) в это устройство? {list}",
+      "no_logs_match": "Нет записей журнала, соответствующих этим фильтрам.",
+      "pg_analysis_hint2": "Выберите цикл и нажмите Запустить, чтобы загрузить анализ совпадения.",
+      "pg_analysis_empty2": "Нажмите Запустить, чтобы увидеть анализ совпадения."
     },
     "phase_desc": {
       "anti_crease": "Периодические короткие вращения барабана после завершения для уменьшения складок.",
@@ -42336,7 +42870,13 @@
       "reminders_saved": "Напоминания об обслуживании сохранены",
       "pause_no_cycle": "Нет активного цикла для паузы",
       "resume_no_cycle": "Нет приостановленного цикла для возобновления",
-      "delete_partial_failed": "Некоторые элементы не удалось удалить, и они были восстановлены"
+      "delete_partial_failed": "Некоторые элементы не удалось удалить, и они были восстановлены",
+      "pg_run_gone": "Этот запуск больше недоступен.",
+      "task_cancelled": "Отменено.",
+      "processed": "Обработано {bits}",
+      "processed_cycles": "{n} циклов",
+      "processed_suggestions": "{n} предложений",
+      "processed_models": "{n} активированных моделей"
     },
     "suggestion": {
       "both_agree": "WashData рекомендует",
@@ -42612,6 +43152,8 @@
       "revert_settings": "Zahodiť zmeny",
       "revert_settings_tip": "Obnoviť nastavenia z doby pred posledným uložením",
       "revert_settings_tip_none": "Najprv uložte, aby ste aktivovali funkciu späť",
+      "revert": "Vrátiť späť",
+      "revert_to_previous": "Obnoviť toto nastavenie na predchádzajúcu hodnotu",
       "review": "Skontrolovať",
       "run": "Spustiť",
       "run_analysis": "🔍 Spustiť analýzu návrhov",
@@ -43019,10 +43561,18 @@
       "task_reprocess": "Opätovné spracovanie",
       "task_ml_training": "Učenie",
       "eta_secs": "zostáva ~{n} s",
-      "eta_mins": "zostáva ~{n} min"
+      "eta_mins": "zostáva ~{n} min",
+      "pg_recent_runs": "Nedávne spustenia",
+      "pg_load_run": "Znovu načítať toto spustenie",
+      "pg_match_confidence": "Spoľahlivosť zhody",
+      "pg_envelope_fit": "Súlad s obálkou",
+      "pg_envelope_fit_tip": "Ako presne cyklus zapadá do uloženej výkonovej obálky tohto profilu, iný pohľad než spoľahlivosť zhody."
     },
     "log": {
-      "all_levels": "Všetky úrovne"
+      "all_levels": "Všetky úrovne",
+      "all_devices": "Všetky zariadenia",
+      "all_components": "Všetky komponenty",
+      "search_ph": "Hľadať v protokoloch…"
     },
     "ml": {
       "builtin_models": "● Používa vstavané modely",
@@ -43239,6 +43789,7 @@
       "toast_rebuild_failed": "Prebudovanie zlyhalo: {error}",
       "toast_resume_failed": "Pokračovanie zlyhalo: {error}",
       "toast_revert_failed": "Vrátenie zmien zlyhalo: {error}",
+      "toast_reverted": "{key} vrátené späť",
       "toast_save_failed": "Uloženie zlyhalo: {error}",
       "trend_duration_longer": "Trvanie je dlhšie trendy ({pct} %/cyklus) — posledný priemer {avg}",
       "trend_duration_shorter": "Trvanie je kratšie ({pct} %/cyklus) — posledný priemer {avg}",
@@ -43282,7 +43833,10 @@
       "pg_history_intro2": "Prehrajte svoje nedávne cykly cez skutočný detektor a nástroj na priraďovanie programov s nastaveniami vyššie. Kliknutím na ľubovoľný riadok načítate daný cyklus do grafu; úpravou nastavenia zobrazíte porovnanie pred úpravou a po nej.",
       "pg_simulating": "Simulácia cyklu…",
       "pg_canvas_empty2": "Vyberte cyklus vyššie a stlačením Spustiť ho nasimulujte. Potom prejdením myšou zobrazíte hodnoty, kolieskom priblížite a ťahaním posuniete.",
-      "pg_apply_settings_confirm": "Uložiť týchto {n} nastavení do tohto zariadenia? {list}"
+      "pg_apply_settings_confirm": "Uložiť týchto {n} nastavení do tohto zariadenia? {list}",
+      "no_logs_match": "Týmto filtrom nezodpovedajú žiadne záznamy protokolu.",
+      "pg_analysis_hint2": "Vyberte cyklus a stlačte Spustiť na načítanie analýzy zhody.",
+      "pg_analysis_empty2": "Stlačte Spustiť na zobrazenie analýzy zhody."
     },
     "phase_desc": {
       "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",
@@ -44008,7 +44562,13 @@
       "reminders_saved": "Pripomienky servisu uložené",
       "pause_no_cycle": "Žiadny aktívny cyklus na pozastavenie",
       "resume_no_cycle": "Žiadny pozastavený cyklus na obnovenie",
-      "delete_partial_failed": "Niektoré položky sa nepodarilo odstrániť a boli obnovené"
+      "delete_partial_failed": "Niektoré položky sa nepodarilo odstrániť a boli obnovené",
+      "pg_run_gone": "Toto spustenie už nie je k dispozícii.",
+      "task_cancelled": "Zrušené.",
+      "processed": "Spracované {bits}",
+      "processed_cycles": "{n} cyklov",
+      "processed_suggestions": "{n} návrhov",
+      "processed_models": "{n} aktivovaných modelov"
     },
     "trend": {
       "down": "Klesajúci trend",
@@ -44188,6 +44748,8 @@
       "revert_settings": "Zavrži spremembe",
       "revert_settings_tip": "Obnovi nastavitve iz stanja pred zadnjim shranjevanjem",
       "revert_settings_tip_none": "Najprej shranite, da omogočite razveljavitev",
+      "revert": "Povrni",
+      "revert_to_previous": "Povrni to nastavitev na prejšnjo vrednost",
       "review": "Oceni",
       "run": "Zaženi",
       "run_analysis": "🔍 Zaženi analizo predlogov",
@@ -44595,10 +45157,18 @@
       "task_reprocess": "Ponovna obdelava",
       "task_ml_training": "Učenje",
       "eta_secs": "še ~{n} s",
-      "eta_mins": "še ~{n} min"
+      "eta_mins": "še ~{n} min",
+      "pg_recent_runs": "Nedavni zagoni",
+      "pg_load_run": "Znova naloži ta zagon",
+      "pg_match_confidence": "Zanesljivost ujemanja",
+      "pg_envelope_fit": "Prileganje ovojnici",
+      "pg_envelope_fit_tip": "Kako natančno cikel ostane znotraj shranjene ovojnice moči tega profila, drugačen pogled kot zanesljivost ujemanja."
     },
     "log": {
-      "all_levels": "Vse ravni"
+      "all_levels": "Vse ravni",
+      "all_devices": "Vse naprave",
+      "all_components": "Vse komponente",
+      "search_ph": "Iskanje po dnevnikih…"
     },
     "ml": {
       "builtin_models": "● Uporablja vgrajene modele",
@@ -44815,6 +45385,7 @@
       "toast_rebuild_failed": "Obnova ni uspela: {error}",
       "toast_resume_failed": "Nadaljevanje ni uspelo: {error}",
       "toast_revert_failed": "Razveljavitev ni uspela: {error}",
+      "toast_reverted": "{key} povrnjeno",
       "toast_save_failed": "Shranjevanje ni uspelo: {error}",
       "trend_duration_longer": "Trajanje se povečuje ({pct}%/cikel) — zadnje povprečje {avg}",
       "trend_duration_shorter": "Trajanje se skrajšuje ({pct}%/cikel) — zadnje povprečje {avg}",
@@ -44858,7 +45429,10 @@
       "pg_history_intro2": "Znova predvajajte svoje nedavne cikle skozi pravi detektor in modul za ujemanje z zgornjimi nastavitvami. Kliknite poljubno vrstico, da naložite ta cikel v graf; spremenite nastavitev za prikaz primerjave pred in po.",
       "pg_simulating": "Simuliranje cikla…",
       "pg_canvas_empty2": "Izberite cikel zgoraj in pritisnite Zaženi za simulacijo. Nato pomaknite kazalec za prikaz vrednosti, drsajte za povečavo in povlecite za premikanje.",
-      "pg_apply_settings_confirm": "Shrani teh {n} nastavitev v to napravo? {list}"
+      "pg_apply_settings_confirm": "Shrani teh {n} nastavitev v to napravo? {list}",
+      "no_logs_match": "Noben zapis dnevnika ne ustreza tem filtrom.",
+      "pg_analysis_hint2": "Izberite cikel in pritisnite Zaženi za nalaganje analize ujemanja.",
+      "pg_analysis_empty2": "Pritisnite Zaženi za prikaz analize ujemanja."
     },
     "phase_desc": {
       "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",
@@ -45584,7 +46158,13 @@
       "reminders_saved": "Opomniki za servis shranjeni",
       "pause_no_cycle": "Ni aktivnega cikla za začasno zaustavitev",
       "resume_no_cycle": "Ni začasno zaustavljenega cikla za nadaljevanje",
-      "delete_partial_failed": "Nekaterih elementov ni bilo mogoče izbrisati in so bili obnovljeni"
+      "delete_partial_failed": "Nekaterih elementov ni bilo mogoče izbrisati in so bili obnovljeni",
+      "pg_run_gone": "Ta zagon ni več na voljo.",
+      "task_cancelled": "Preklicano.",
+      "processed": "Obdelano {bits}",
+      "processed_cycles": "{n} ciklov",
+      "processed_suggestions": "{n} predlogov",
+      "processed_models": "{n} aktiviranih modelov"
     },
     "trend": {
       "down": "Padajoči trend",
@@ -45764,6 +46344,8 @@
       "revert_settings": "Hiq ndryshimet",
       "revert_settings_tip": "Rivendos cilësimet nga para ruajtjes suaj të fundit",
       "revert_settings_tip_none": "Ruani fillimisht për të aktivizuar zhbërjen",
+      "revert": "Rikthe",
+      "revert_to_previous": "Rikthe këtë cilësim në vlerën e tij të mëparshme",
       "review": "Rishiko",
       "run": "Ekzekuto",
       "run_analysis": "🔍 Ekzekuto analizën e sugjerimeve",
@@ -46171,10 +46753,18 @@
       "task_reprocess": "Ripërpunim",
       "task_ml_training": "Mësim",
       "eta_secs": "edhe ~{n} s",
-      "eta_mins": "edhe ~{n} min"
+      "eta_mins": "edhe ~{n} min",
+      "pg_recent_runs": "Ekzekutimet e fundit",
+      "pg_load_run": "Ringarko këtë ekzekutim",
+      "pg_match_confidence": "Besueshmëria e përputhjes",
+      "pg_envelope_fit": "Përshtatja me zarfin",
+      "pg_envelope_fit_tip": "Sa mirë cikli qëndron brenda zarfit të ruajtur të fuqisë së këtij profili, një këndvështrim tjetër nga besueshmëria e përputhjes."
     },
     "log": {
-      "all_levels": "Të gjitha nivelet"
+      "all_levels": "Të gjitha nivelet",
+      "all_devices": "Të gjitha pajisjet",
+      "all_components": "Të gjithë komponentët",
+      "search_ph": "Kërko në regjistra…"
     },
     "ml": {
       "builtin_models": "● Duke përdorur modelet e integruara",
@@ -46391,6 +46981,7 @@
       "toast_rebuild_failed": "Rindërtimi dështoi: {error}",
       "toast_resume_failed": "Rifillimi dështoi: {error}",
       "toast_revert_failed": "Kthimi prapa dështoi: {error}",
+      "toast_reverted": "{key} u rikthye",
       "toast_save_failed": "Ruajtja dështoi: {error}",
       "trend_duration_longer": "Kohëzgjatja në tendencë më e gjatë ({pct}%/cikël) — mesatare e fundit {avg}",
       "trend_duration_shorter": "Kohëzgjatja në tendencë më e shkurtër ({pct}%/cikël) - mesatare e fundit {avg}",
@@ -46434,7 +47025,10 @@
       "pg_history_intro2": "Riluajini ciklet tuaja të fundit përmes detektorit dhe përputhësit real me cilësimet e mësipërme. Klikoni çdo rresht për të ngarkuar atë cikël në grafik; ndryshoni një cilësim për të parë një krahasim para/pas.",
       "pg_simulating": "Po simulohet cikli…",
       "pg_canvas_empty2": "Zgjidhni një cikël më sipër dhe shtypni Ekzekuto për ta simuluar. Pastaj kaloni kursorin për të lexuar vlerat, rrëshqitni për të zmadhuar dhe tërhiqni për të lëvizur.",
-      "pg_apply_settings_confirm": "Të ruhen këto {n} cilësime në këtë pajisje? {list}"
+      "pg_apply_settings_confirm": "Të ruhen këto {n} cilësime në këtë pajisje? {list}",
+      "no_logs_match": "Asnjë regjistrim nuk përputhet me këta filtra.",
+      "pg_analysis_hint2": "Zgjidhni një cikël dhe shtypni Ekzekuto për të ngarkuar analizën e përputhjes.",
+      "pg_analysis_empty2": "Shtypni Ekzekuto për të parë analizën e përputhjes."
     },
     "phase_desc": {
       "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -47064,7 +47658,13 @@
       "reminders_saved": "Kujtesat e servisit u ruajtën",
       "pause_no_cycle": "Nuk ka cikël aktiv për të ndalur",
       "resume_no_cycle": "Nuk ka cikël të ndalur për të vazhduar",
-      "delete_partial_failed": "Disa artikuj nuk mund të fshiheshin dhe u rikthyen"
+      "delete_partial_failed": "Disa artikuj nuk mund të fshiheshin dhe u rikthyen",
+      "pg_run_gone": "Ai ekzekutim nuk është më i disponueshëm.",
+      "task_cancelled": "U anulua.",
+      "processed": "U përpunuan {bits}",
+      "processed_cycles": "{n} cikël(e)",
+      "processed_suggestions": "{n} sugjerim(e)",
+      "processed_models": "{n} model(e) të promovuar"
     },
     "suggestion": {
       "both_agree": "WashData rekomandon",
@@ -47340,6 +47940,8 @@
       "revert_settings": "Odbaci izmjene",
       "revert_settings_tip": "Vrati podešavanja na stanje pre poslednjeg čuvanja",
       "revert_settings_tip_none": "Sačuvaj prvo da bi se aktiviralo poništavanje",
+      "revert": "Vrati",
+      "revert_to_previous": "Vrati ovo podešavanje na prethodnu vrednost",
       "review": "Oceni",
       "run": "Pokreni",
       "run_analysis": "🔍 Pokreni analizu prijedloga",
@@ -47747,10 +48349,18 @@
       "task_reprocess": "Ponovna obrada",
       "task_ml_training": "Učenje",
       "eta_secs": "još ~{n} s",
-      "eta_mins": "još ~{n} min"
+      "eta_mins": "još ~{n} min",
+      "pg_recent_runs": "Nedavna pokretanja",
+      "pg_load_run": "Ponovo učitaj ovo pokretanje",
+      "pg_match_confidence": "Pouzdanost poklapanja",
+      "pg_envelope_fit": "Uklapanje u omotač",
+      "pg_envelope_fit_tip": "Koliko dobro ciklus ostaje unutar sačuvanog omotača snage ovog profila, drugačiji ugao od pouzdanosti poklapanja."
     },
     "log": {
-      "all_levels": "Svi nivoi"
+      "all_levels": "Svi nivoi",
+      "all_devices": "Svi uređaji",
+      "all_components": "Sve komponente",
+      "search_ph": "Pretraži logove…"
     },
     "ml": {
       "builtin_models": "● Koriste se ugrađeni modeli",
@@ -47967,6 +48577,7 @@
       "toast_rebuild_failed": "Obnova nije uspela: {error}",
       "toast_resume_failed": "Nastavak nije uspeo: {error}",
       "toast_revert_failed": "Povrat nije uspeo: {error}",
+      "toast_reverted": "{key} vraćeno",
       "toast_save_failed": "Čuvanje nije uspelo: {error}",
       "trend_duration_longer": "Trajanje je u trendu duže ({pct}%/ciklus) — nedavno u proseku {avg}",
       "trend_duration_shorter": "Trajanje u trendu kraće ({pct}%/ciklus) — nedavno u proseku {avg}",
@@ -48010,7 +48621,10 @@
       "pg_history_intro2": "Ponovo izvedite svoje nedavne cikluse kroz stvarni detektor i modul za podudaranje sa postavkama iznad. Kliknite bilo koji red da učitate taj ciklus u grafikon; izmenite postavku da vidite poređenje pre i posle.",
       "pg_simulating": "Simuliranje ciklusa…",
       "pg_canvas_empty2": "Izaberite ciklus iznad i pritisnite Pokreni da ga simulirate. Zatim pređite mišem za prikaz vrednosti, pomerajte točkić za zumiranje i prevucite za pomeranje.",
-      "pg_apply_settings_confirm": "Sačuvati ovih {n} podešavanja na ovaj uređaj? {list}"
+      "pg_apply_settings_confirm": "Sačuvati ovih {n} podešavanja na ovaj uređaj? {list}",
+      "no_logs_match": "Nijedan zapis dnevnika ne odgovara ovim filterima.",
+      "pg_analysis_hint2": "Izaberite ciklus i pritisnite Pokreni da učitate analizu poklapanja.",
+      "pg_analysis_empty2": "Pritisnite Pokreni da vidite analizu poklapanja."
     },
     "phase_desc": {
       "anti_crease": "Povremena kratka okretanja nakon završetka radi smanjenja gužvanja.",
@@ -48736,7 +49350,13 @@
       "reminders_saved": "Podsetnici za servis sačuvani",
       "pause_no_cycle": "Nema aktivnog ciklusa za pauziranje",
       "resume_no_cycle": "Nema pauziranog ciklusa za nastavak",
-      "delete_partial_failed": "Neke stavke nije bilo moguće obrisati i vraćene su"
+      "delete_partial_failed": "Neke stavke nije bilo moguće obrisati i vraćene su",
+      "pg_run_gone": "To pokretanje više nije dostupno.",
+      "task_cancelled": "Otkazano.",
+      "processed": "Obrađeno {bits}",
+      "processed_cycles": "{n} ciklusa",
+      "processed_suggestions": "{n} prijedloga",
+      "processed_models": "{n} aktiviranih modela"
     },
     "trend": {
       "down": "Opadajući trend",
@@ -48916,6 +49536,8 @@
       "revert_settings": "Ångra ändringar",
       "revert_settings_tip": "Återställ inställningar från innan den senaste sparningen",
       "revert_settings_tip_none": "Spara först för att aktivera ångra",
+      "revert": "Återställ",
+      "revert_to_previous": "Återställ den här inställningen till dess tidigare värde",
       "review": "Granska",
       "run": "Kör",
       "run_analysis": "🔍 Kör förslagsanalys",
@@ -49323,10 +49945,18 @@
       "task_reprocess": "Bearbetar igen",
       "task_ml_training": "Inlärning",
       "eta_secs": "~{n} s kvar",
-      "eta_mins": "~{n} min kvar"
+      "eta_mins": "~{n} min kvar",
+      "pg_recent_runs": "Senaste körningar",
+      "pg_load_run": "Ladda om den här körningen",
+      "pg_match_confidence": "Matchningssäkerhet",
+      "pg_envelope_fit": "Anpassning till envelopp",
+      "pg_envelope_fit_tip": "Hur väl cykeln håller sig inom den här profilens sparade effektenvelopp, ett annat perspektiv än matchningssäkerhet."
     },
     "log": {
-      "all_levels": "Alla nivåer"
+      "all_levels": "Alla nivåer",
+      "all_devices": "Alla enheter",
+      "all_components": "Alla komponenter",
+      "search_ph": "Sök i loggar…"
     },
     "ml": {
       "builtin_models": "● Använder inbyggda modeller",
@@ -49543,6 +50173,7 @@
       "toast_rebuild_failed": "Ombyggnad misslyckades: {error}",
       "toast_resume_failed": "Återupptagning misslyckades: {error}",
       "toast_revert_failed": "Återställning misslyckades: {error}",
+      "toast_reverted": "{key} återställd",
       "toast_save_failed": "Sparning misslyckades: {error}",
       "trend_duration_longer": "Varaktighet trendar längre ({pct}%/cykel) — senaste medelvärde {avg}",
       "trend_duration_shorter": "Varaktighet trendar kortare ({pct}%/cykel) — senaste medelvärde {avg}",
@@ -49586,7 +50217,10 @@
       "pg_history_intro2": "Spela upp dina senaste cykler genom den riktiga detektorn och matchningen med inställningarna ovan. Klicka på en rad för att ladda den cykeln i grafen; ändra en inställning för att se en före/efter-jämförelse.",
       "pg_simulating": "Simulerar cykel…",
       "pg_canvas_empty2": "Välj en cykel ovan och tryck på Kör för att simulera den. Hovra sedan för att avläsa värden, skrolla för att zooma och dra för att panorera.",
-      "pg_apply_settings_confirm": "Spara dessa {n} inställning(ar) till den här enheten? {list}"
+      "pg_apply_settings_confirm": "Spara dessa {n} inställning(ar) till den här enheten? {list}",
+      "no_logs_match": "Inga loggposter matchar dessa filter.",
+      "pg_analysis_hint2": "Välj en cykel och tryck på Kör för att läsa in matchningsanalysen.",
+      "pg_analysis_empty2": "Tryck på Kör för att se matchningsanalysen."
     },
     "pg_desc": {
       "abrupt_drop_watts": "Plötsligt fall som tolkas som omedelbart slut",
@@ -50329,7 +50963,13 @@
       "reminders_saved": "Servicepåminnelser sparade",
       "pause_no_cycle": "Ingen aktiv cykel att pausa",
       "resume_no_cycle": "Ingen pausad cykel att återuppta",
-      "delete_partial_failed": "Vissa objekt kunde inte tas bort och återställdes"
+      "delete_partial_failed": "Vissa objekt kunde inte tas bort och återställdes",
+      "pg_run_gone": "Den körningen är inte längre tillgänglig.",
+      "task_cancelled": "Avbruten.",
+      "processed": "Bearbetat: {bits}",
+      "processed_cycles": "{n} cykler",
+      "processed_suggestions": "{n} förslag",
+      "processed_models": "{n} modeller aktiverade"
     },
     "trend": {
       "down": "Nedåtgående trend",
@@ -50492,6 +51132,8 @@
       "revert_settings": "Değişiklikleri geri al",
       "revert_settings_tip": "Son kaydetmeden önceki ayarları geri yükle",
       "revert_settings_tip_none": "Geri almayı etkinleştirmek için önce kaydet",
+      "revert": "Geri al",
+      "revert_to_previous": "Bu ayarı önceki değerine geri yükle",
       "review": "İncele",
       "run": "Çalıştır",
       "run_analysis": "🔍 Öneri analizi çalıştır",
@@ -50899,10 +51541,18 @@
       "task_reprocess": "Yeniden işleme",
       "task_ml_training": "Öğrenme",
       "eta_secs": "~{n} sn kaldı",
-      "eta_mins": "~{n} dk kaldı"
+      "eta_mins": "~{n} dk kaldı",
+      "pg_recent_runs": "Son çalıştırmalar",
+      "pg_load_run": "Bu çalıştırmayı yeniden yükle",
+      "pg_match_confidence": "Eşleşme güveni",
+      "pg_envelope_fit": "Zarfa uyum",
+      "pg_envelope_fit_tip": "Döngünün bu profilin kaydedilmiş güç zarfının içinde ne kadar iyi kaldığı, eşleşme güveninden farklı bir bakış açısı."
     },
     "log": {
-      "all_levels": "Tüm seviyeler"
+      "all_levels": "Tüm seviyeler",
+      "all_devices": "Tüm cihazlar",
+      "all_components": "Tüm bileşenler",
+      "search_ph": "Günlüklerde ara…"
     },
     "ml": {
       "builtin_models": "● Yerleşik modeller kullanılıyor",
@@ -51119,6 +51769,7 @@
       "toast_rebuild_failed": "Yeniden oluşturma başarısız: {error}",
       "toast_resume_failed": "Devam ettirme başarısız: {error}",
       "toast_revert_failed": "Geri alma başarısız: {error}",
+      "toast_reverted": "{key} geri alındı",
       "toast_save_failed": "Kaydetme başarısız: {error}",
       "trend_duration_longer": "Süre trendi daha uzun (%{pct}/döngü) — son ortalama {avg}",
       "trend_duration_shorter": "Süre eğilimi daha kısa (%{pct}/döngü) — son ortalama {avg}",
@@ -51162,7 +51813,10 @@
       "pg_history_intro2": "Son döngülerinizi yukarıdaki ayarlarla gerçek algılayıcı ve eşleştiriciden geçirerek yeniden oynatın. Bir döngüyü grafiğe yüklemek için herhangi bir satıra tıklayın; öncesi/sonrası karşılaştırması görmek için bir ayarı değiştirin.",
       "pg_simulating": "Döngü simüle ediliyor…",
       "pg_canvas_empty2": "Yukarıdan bir döngü seçin ve simüle etmek için Çalıştır'a basın. Ardından değerleri okumak için üzerine gelin, yakınlaştırmak için kaydırın ve kaydırmak için sürükleyin.",
-      "pg_apply_settings_confirm": "Bu {n} ayar bu cihaza kaydedilsin mi? {list}"
+      "pg_apply_settings_confirm": "Bu {n} ayar bu cihaza kaydedilsin mi? {list}",
+      "no_logs_match": "Bu filtrelerle eşleşen günlük kaydı yok.",
+      "pg_analysis_hint2": "Bir döngü seçin ve eşleşme analizini yüklemek için Çalıştır'a basın.",
+      "pg_analysis_empty2": "Eşleşme analizini görmek için Çalıştır'a basın."
     },
     "pg_desc": {
       "abrupt_drop_watts": "Ani düşüş anında bitiş sayılır",
@@ -51809,7 +52463,13 @@
       "reminders_saved": "Servis hatırlatıcıları kaydedildi",
       "pause_no_cycle": "Duraklatılacak etkin döngü yok",
       "resume_no_cycle": "Sürdürülecek duraklatılmış döngü yok",
-      "delete_partial_failed": "Bazı öğeler silinemedi ve geri yüklendi"
+      "delete_partial_failed": "Bazı öğeler silinemedi ve geri yüklendi",
+      "pg_run_gone": "Bu çalıştırma artık mevcut değil.",
+      "task_cancelled": "İptal edildi.",
+      "processed": "{bits} işlendi",
+      "processed_cycles": "{n} döngü",
+      "processed_suggestions": "{n} öneri",
+      "processed_models": "{n} yükseltilmiş model"
     },
     "suggestion": {
       "both_agree": "WashData öneriyor",
@@ -52068,6 +52728,8 @@
       "revert_settings": "Скасувати зміни",
       "revert_settings_tip": "Відновити налаштування до останнього збереження",
       "revert_settings_tip_none": "Спочатку збережіть, щоб активувати скасування",
+      "revert": "Повернути",
+      "revert_to_previous": "Відновити попереднє значення цього налаштування",
       "review": "Переглянути",
       "run": "Запустити",
       "run_analysis": "🔍 Запустити аналіз пропозицій",
@@ -52475,10 +53137,18 @@
       "task_reprocess": "Повторна обробка",
       "task_ml_training": "Навчання",
       "eta_secs": "залишилось ~{n} с",
-      "eta_mins": "залишилось ~{n} хв"
+      "eta_mins": "залишилось ~{n} хв",
+      "pg_recent_runs": "Останні запуски",
+      "pg_load_run": "Перезавантажити цей запуск",
+      "pg_match_confidence": "Достовірність збігу",
+      "pg_envelope_fit": "Відповідність обвідній",
+      "pg_envelope_fit_tip": "Наскільки точно цикл вписується в збережену обвідну потужності цього профілю, інший погляд, ніж достовірність збігу."
     },
     "log": {
-      "all_levels": "Усі рівні"
+      "all_levels": "Усі рівні",
+      "all_devices": "Усі пристрої",
+      "all_components": "Усі компоненти",
+      "search_ph": "Пошук у журналах…"
     },
     "ml": {
       "builtin_models": "● Використовуються вбудовані моделі",
@@ -52695,6 +53365,7 @@
       "toast_rebuild_failed": "Перебудову не виконано: {error}",
       "toast_resume_failed": "Відновлення не виконано: {error}",
       "toast_revert_failed": "Відкат не виконано: {error}",
+      "toast_reverted": "Повернено: {key}",
       "toast_save_failed": "Збереження не виконано: {error}",
       "trend_duration_longer": "Тривалість збільшується ({pct}%/цикл) — останній середній показник {avg}",
       "trend_duration_shorter": "Тривалість скорочується ({pct}%/цикл) — останній середній показник {avg}",
@@ -52738,7 +53409,10 @@
       "pg_history_intro2": "Відтворіть недавні цикли через справжній детектор і модуль зіставлення з наведеними вище налаштуваннями. Натисніть будь-який рядок, щоб завантажити цей цикл на графік; змініть налаштування, щоб побачити порівняння до і після.",
       "pg_simulating": "Моделювання циклу…",
       "pg_canvas_empty2": "Виберіть цикл вище й натисніть «Запустити», щоб змоделювати його. Потім наведіть, щоб побачити значення, прокрутіть для масштабування та перетягніть для панорамування.",
-      "pg_apply_settings_confirm": "Зберегти ці налаштування ({n}) на цей пристрій? {list}"
+      "pg_apply_settings_confirm": "Зберегти ці налаштування ({n}) на цей пристрій? {list}",
+      "no_logs_match": "Немає записів журналу, що відповідають цим фільтрам.",
+      "pg_analysis_hint2": "Виберіть цикл і натисніть Запустити, щоб завантажити аналіз збігу.",
+      "pg_analysis_empty2": "Натисніть Запустити, щоб побачити аналіз збігу."
     },
     "phase_desc": {
       "anti_crease": "Час від часу короткі оберти після завершення для зменшення зморшок.",
@@ -53368,7 +54042,13 @@
       "reminders_saved": "Нагадування про обслуговування збережено",
       "pause_no_cycle": "Немає активного циклу для паузи",
       "resume_no_cycle": "Немає призупиненого циклу для продовження",
-      "delete_partial_failed": "Деякі елементи не вдалося видалити, і їх було відновлено"
+      "delete_partial_failed": "Деякі елементи не вдалося видалити, і їх було відновлено",
+      "pg_run_gone": "Цей запуск більше недоступний.",
+      "task_cancelled": "Скасовано.",
+      "processed": "Оброблено {bits}",
+      "processed_cycles": "{n} циклів",
+      "processed_suggestions": "{n} пропозицій",
+      "processed_models": "{n} активованих моделей"
     },
     "suggestion": {
       "both_agree": "WashData рекомендує",
@@ -53644,6 +54324,8 @@
       "revert_settings": "放弃更改",
       "revert_settings_tip": "恢复上次保存前的设置",
       "revert_settings_tip_none": "请先保存以启用撤销功能",
+      "revert": "还原",
+      "revert_to_previous": "将此设置还原为先前的值",
       "review": "审查",
       "run": "运行",
       "run_analysis": "🔍 运行建议分析",
@@ -54051,10 +54733,18 @@
       "task_reprocess": "重新处理",
       "task_ml_training": "学习",
       "eta_secs": "剩~{n}秒",
-      "eta_mins": "剩~{n}分"
+      "eta_mins": "剩~{n}分",
+      "pg_recent_runs": "最近的运行",
+      "pg_load_run": "重新加载此运行",
+      "pg_match_confidence": "匹配置信度",
+      "pg_envelope_fit": "包络拟合度",
+      "pg_envelope_fit_tip": "周期与此配置文件已保存的功率包络的贴合程度，与匹配置信度不同的视角。"
     },
     "log": {
-      "all_levels": "所有级别"
+      "all_levels": "所有级别",
+      "all_devices": "所有设备",
+      "all_components": "所有组件",
+      "search_ph": "搜索日志…"
     },
     "ml": {
       "builtin_models": "● 使用内置模型",
@@ -54271,6 +54961,7 @@
       "toast_rebuild_failed": "重建失败：{error}",
       "toast_resume_failed": "恢复失败：{error}",
       "toast_revert_failed": "还原失败：{error}",
+      "toast_reverted": "已还原 {key}",
       "toast_save_failed": "保存失败：{error}",
       "trend_duration_longer": "时长趋势增长（{pct}%/周期）— 近期平均 {avg}",
       "trend_duration_shorter": "时长趋势缩短（{pct}%/周期）— 近期平均 {avg}",
@@ -54314,7 +55005,10 @@
       "pg_history_intro2": "使用上方设置，将您最近的周期通过真实的检测器和匹配器重新运行。点击任意行可在图表中加载该周期；修改设置可查看修改前后的对比。",
       "pg_simulating": "正在模拟周期…",
       "pg_canvas_empty2": "在上方选择一个周期并按“运行”进行模拟。然后悬停查看数值，滚动缩放，拖动平移。",
-      "pg_apply_settings_confirm": "将这 {n} 项设置保存到该设备吗？ {list}"
+      "pg_apply_settings_confirm": "将这 {n} 项设置保存到该设备吗？ {list}",
+      "no_logs_match": "没有日志记录符合这些筛选条件。",
+      "pg_analysis_hint2": "选择一个周期并点击运行以加载匹配分析。",
+      "pg_analysis_empty2": "点击运行以查看匹配分析。"
     },
     "pg_desc": {
       "abrupt_drop_watts": "骤降视为立即结束",
@@ -54961,7 +55655,13 @@
       "reminders_saved": "已保存保养提醒",
       "pause_no_cycle": "没有可暂停的运行周期",
       "resume_no_cycle": "没有可恢复的已暂停周期",
-      "delete_partial_failed": "部分项目无法删除，已恢复"
+      "delete_partial_failed": "部分项目无法删除，已恢复",
+      "pg_run_gone": "该运行已不可用。",
+      "task_cancelled": "已取消。",
+      "processed": "已处理 {bits}",
+      "processed_cycles": "{n} 个周期",
+      "processed_suggestions": "{n} 条建议",
+      "processed_models": "{n} 个模型升级"
     },
     "suggestion": {
       "both_agree": "WashData建议",

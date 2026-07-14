@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "Atsākt ciklu"
+      },
+      "record_start": {
+        "name": "Sākt cikla ierakstīšanu"
+      },
+      "record_stop": {
+        "name": "Beigt cikla ierakstīšanu"
       }
     }
   },

@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "Obnovit cyklus"
+      },
+      "record_start": {
+        "name": "Spustit záznam cyklu"
+      },
+      "record_stop": {
+        "name": "Zastavit záznam cyklu"
       }
     }
   },

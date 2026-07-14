@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "Genoptag cyklus"
+      },
+      "record_start": {
+        "name": "Start cyklusoptagelse"
+      },
+      "record_stop": {
+        "name": "Stop cyklusoptagelse"
       }
     }
   },

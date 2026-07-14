@@ -140,15 +140,9 @@ check('_htmlPlayground (drawer: history)', () => {
   return el._htmlPlayground();
 });
 check('_htmlPlayground (drawer: sweep 1D)', () => {
-  el._pgAnalysisTab = 'sweep'; el._pgSweep2D = false;
+  el._pgAnalysisTab = 'sweep';
   el._pgSweepNew = { param: 'off_delay', objective: 'match_accuracy', current_value: 180, best_value: 120, best_metric: 0.9,
     points: [{ value: 120, metric: 0.9, summary: {} }, { value: 180, metric: 0.8, summary: {} }, { value: 240, metric: 0.7, summary: {} }] };
-  return el._htmlPlayground();
-});
-check('_htmlPlayground (drawer: sweep 2D heatmap)', () => {
-  el._pgAnalysisTab = 'sweep'; el._pgSweep2D = true;
-  el._pgSweepNew = { param_x: 'off_delay', param_y: 'min_off_gap', objective: 'match_accuracy',
-    x_values: [120, 180], y_values: [1999, 3600], grid: [[0.8, 0.9], [0.7, 0.85]], best: { x: 180, y: 1999, metric: 0.9 }, current: { x: 180, y: 1999 } };
   return el._htmlPlayground();
 });
 el._pgAnalysisTab = 'history';

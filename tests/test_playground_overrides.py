@@ -58,6 +58,56 @@ def test_apply_match_overrides_noop_without_matching_keys():
     assert playground.apply_match_overrides(mc, None) is mc
 
 
+def test_decide_commit_persistence_and_hold():
+    """The Playground match report mirrors the manager: commit only after N
+    consecutive non-ambiguous top-1s, then HOLD through a one-off wobble."""
+    st = {"candidate": None, "count": 0, "name": None}
+    # Persistence 3: two hits don't commit, the third does (as "match_commit").
+    assert playground.decide_commit("A", False, st, 3) is None
+    assert playground.decide_commit("A", False, st, 3) is None
+    assert playground.decide_commit("A", False, st, 3) == "match_commit"
+    assert st["name"] == "A"
+    # Ambiguous / empty candidates never advance and never emit.
+    assert playground.decide_commit("A", True, st, 3) is None
+    assert playground.decide_commit(None, False, st, 3) is None
+    # A single wobble to B resets the streak but does NOT switch the commit …
+    assert playground.decide_commit("B", False, st, 3) is None
+    assert st["name"] == "A"
+    # … and going back to A doesn't re-emit (already committed to A).
+    for _ in range(3):
+        assert playground.decide_commit("A", False, st, 3) is None
+    # A genuine sustained switch to B emits "match_changed".
+    assert playground.decide_commit("B", False, st, 3) is None
+    assert playground.decide_commit("B", False, st, 3) is None
+    assert playground.decide_commit("B", False, st, 3) == "match_changed"
+    assert st["name"] == "B"
+
+
+def test_decide_commit_persistence_one_commits_immediately():
+    st = {"candidate": None, "count": 0, "name": None}
+    assert playground.decide_commit("X", False, st, 1) == "match_commit"
+
+
+def test_decide_commit_ambiguous_and_falsy_dont_disrupt_streak():
+    """During an UNcommitted streak, an ambiguous or empty candidate must neither
+    reset nor advance the count - it is simply ignored, so an intermittent wobble
+    doesn't stop a genuine candidate from reaching the persistence threshold."""
+    st = {"candidate": None, "count": 0, "name": None}
+    # A builds one count …
+    assert playground.decide_commit("A", False, st, 3) is None
+    assert st["candidate"] == "A" and st["count"] == 1
+    # … an ambiguous A (same name) leaves candidate/count untouched (not advanced) …
+    assert playground.decide_commit("A", True, st, 3) is None
+    assert st["candidate"] == "A" and st["count"] == 1
+    # … an empty candidate likewise leaves the streak intact (not reset) …
+    assert playground.decide_commit(None, False, st, 3) is None
+    assert st["candidate"] == "A" and st["count"] == 1
+    # … so two more clean A hits still complete the threshold and commit.
+    assert playground.decide_commit("A", False, st, 3) is None
+    assert playground.decide_commit("A", False, st, 3) == "match_commit"
+    assert st["name"] == "A"
+
+
 def test_finalize_history_aggregates_rows_and_diff():
     rows = [
         {"cycle_id": "a", "label": "X", "detected": True, "detected_count": 1, "matched_profile": "X", "match_correct": True, "termination_reason": "smart", "duration_s": 1000},

@@ -23,20 +23,25 @@ test('settings tab fetches options on navigation', async ({ page }) => {
 });
 
 test('settings tab shows Basic/Advanced toggle', async ({ page }) => {
-  const toggle = page.locator('.wd-level-toggle, [data-action="set-settings-level"], button[data-slevel]').first();
+  // The Basic/Advanced buttons were replaced by a slide toggle (a checkbox
+  // wrapped in a .wd-mode-switch label).
+  const toggle = page.locator('.wd-mode-switch').first();
   await expect(toggle).toBeVisible({ timeout: 5_000 });
 });
 
 test('advanced mode shows more fields than basic mode', async ({ page }) => {
-  // Switch to basic mode
-  const basicBtn = page.locator('button[data-slevel="basic"]').first();
-  await expect(basicBtn).toBeVisible({ timeout: 5_000 });
-  await basicBtn.click();
+  const chk = page.locator('#wd-settings-level-chk');
+  await expect(chk).toHaveCount(1, { timeout: 5_000 });
+  // Ensure we start in basic mode (checkbox unchecked).
+  if (await chk.isChecked()) {
+    await page.locator('.wd-mode-switch').first().click();
+    await expect(chk).not.toBeChecked();
+  }
   const basicCount = await page.locator('.wd-field').count();
 
-  // Switch to advanced mode
-  const advBtn = page.locator('button[data-slevel="advanced"]').first();
-  await advBtn.click();
+  // Flip the toggle to advanced by clicking the slider track.
+  await page.locator('.wd-mode-switch .wd-toggle-track').first().click();
+  await expect(chk).toBeChecked();
   const advCount = await page.locator('.wd-field').count();
 
   expect(advCount).toBeGreaterThan(basicCount);

@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "Jatka sykliä"
+      },
+      "record_start": {
+        "name": "Aloita syklin tallennus"
+      },
+      "record_stop": {
+        "name": "Lopeta syklin tallennus"
       }
     }
   },

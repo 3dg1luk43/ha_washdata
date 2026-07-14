@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "Retomar ciclo"
+      },
+      "record_start": {
+        "name": "Iniciar gravação do ciclo"
+      },
+      "record_stop": {
+        "name": "Parar gravação do ciclo"
       }
     }
   },

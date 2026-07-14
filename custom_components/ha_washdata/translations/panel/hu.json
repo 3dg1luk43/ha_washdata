@@ -113,6 +113,8 @@
     "revert_settings": "Változtatások elvetése",
     "revert_settings_tip": "Állítsa vissza az utolsó mentés előtti beállításokat",
     "revert_settings_tip_none": "Először mentsen a visszavonás engedélyezéséhez",
+    "revert": "Visszaállítás",
+    "revert_to_previous": "Állítsa vissza ezt a beállítást az előző értékére",
     "review": "Értékel",
     "run": "Futtatás",
     "run_analysis": "🔍 Javaslatelemzés futtatása",
@@ -520,10 +522,18 @@
     "task_reprocess": "Újrafeldolgozás",
     "task_ml_training": "Tanulás",
     "eta_secs": "még ~{n} mp",
-    "eta_mins": "még ~{n} perc"
+    "eta_mins": "még ~{n} perc",
+    "pg_recent_runs": "Legutóbbi futtatások",
+    "pg_load_run": "Futtatás újratöltése",
+    "pg_match_confidence": "Egyezés megbízhatósága",
+    "pg_envelope_fit": "Illeszkedés a burkológörbéhez",
+    "pg_envelope_fit_tip": "Mennyire pontosan marad a ciklus a profil mentett teljesítmény-burkológörbéjén belül, más nézőpont, mint az egyezés megbízhatósága."
   },
   "log": {
-    "all_levels": "Minden szinten"
+    "all_levels": "Minden szinten",
+    "all_devices": "Minden eszköz",
+    "all_components": "Minden komponens",
+    "search_ph": "Keresés a naplókban…"
   },
   "ml": {
     "builtin_models": "● Beépített modellek használata",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Újraépítés sikertelen: {error}",
     "toast_resume_failed": "Folytatás sikertelen: {error}",
     "toast_revert_failed": "Visszaállítás sikertelen: {error}",
+    "toast_reverted": "{key} visszaállítva",
     "toast_save_failed": "Mentés sikertelen: {error}",
     "trend_duration_longer": "Az időtartam egyre hosszabb ({pct}%/ciklus) – legutóbbi átlag: {avg}",
     "trend_duration_shorter": "Az időtartam egyre rövidebb ({pct}%/ciklus) – legutóbbi átlag: {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Játszd vissza a legutóbbi ciklusaidat a valódi érzékelőn és illesztőn keresztül a fenti beállításokkal. Kattints bármely sorra a ciklus grafikonba töltéséhez; módosíts egy beállítást az előtte/utána összehasonlításhoz.",
     "pg_simulating": "Ciklus szimulálása…",
     "pg_canvas_empty2": "Válassz ki egy ciklust fent, és nyomd meg a Futtatás gombot a szimulációhoz. Ezután vidd rá a mutatót az értékek leolvasásához, görgess a nagyításhoz, és húzd az eltoláshoz.",
-    "pg_apply_settings_confirm": "Elmenti ezt a(z) {n} beállítást erre az eszközre? {list}"
+    "pg_apply_settings_confirm": "Elmenti ezt a(z) {n} beállítást erre az eszközre? {list}",
+    "no_logs_match": "Egyetlen naplóbejegyzés sem felel meg ezeknek a szűrőknek.",
+    "pg_analysis_hint2": "Válasszon egy ciklust, és nyomja meg a Futtatás gombot az egyezéselemzés betöltéséhez.",
+    "pg_analysis_empty2": "Nyomja meg a Futtatás gombot az egyezéselemzés megtekintéséhez."
   },
   "phase_desc": {
     "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -1413,7 +1427,13 @@
     "reminders_saved": "Szerviz emlékeztetők mentve",
     "pause_no_cycle": "Nincs szüneteltethető aktív ciklus",
     "resume_no_cycle": "Nincs folytatható szüneteltetett ciklus",
-    "delete_partial_failed": "Egyes elemeket nem sikerült törölni, ezért visszaállításra kerültek"
+    "delete_partial_failed": "Egyes elemeket nem sikerült törölni, ezért visszaállításra kerültek",
+    "pg_run_gone": "Ez a futtatás már nem érhető el.",
+    "task_cancelled": "Megszakítva.",
+    "processed": "Feldolgozva: {bits}",
+    "processed_cycles": "{n} ciklus",
+    "processed_suggestions": "{n} javaslat",
+    "processed_models": "{n} modell előléptetve"
   },
   "suggestion": {
     "both_agree": "A WashData javasolja",

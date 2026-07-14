@@ -393,6 +393,12 @@
       },
       "resume_cycle": {
         "name": "Återuppta cykeln"
+      },
+      "record_start": {
+        "name": "Starta cykelinspelning"
+      },
+      "record_stop": {
+        "name": "Stoppa cykelinspelning"
       }
     }
   },

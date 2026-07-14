@@ -113,6 +113,8 @@
     "revert_settings": "Hülga muudatused",
     "revert_settings_tip": "Taasta viimase salvestuse eelsed seaded",
     "revert_settings_tip_none": "Salvestage esmalt tagasivõtmise lubamiseks",
+    "revert": "Taasta",
+    "revert_to_previous": "Taasta selle sätte eelmine väärtus",
     "review": "Ülevaade",
     "run": "Käivita",
     "run_analysis": "🔍 Käivitage soovituste analüüs",
@@ -520,10 +522,18 @@
     "task_reprocess": "Uuesti töötlemine",
     "task_ml_training": "Õppimine",
     "eta_secs": "~{n} s jäänud",
-    "eta_mins": "~{n} min jäänud"
+    "eta_mins": "~{n} min jäänud",
+    "pg_recent_runs": "Hiljutised käitused",
+    "pg_load_run": "Laadi see käitus uuesti",
+    "pg_match_confidence": "Vaste kindlus",
+    "pg_envelope_fit": "Sobivus mähisjoonega",
+    "pg_envelope_fit_tip": "Kui täpselt tsükkel püsib selle profiili salvestatud võimsuse mähisjoone sees, teistsugune vaatenurk kui vaste kindlus."
   },
   "log": {
-    "all_levels": "Kõik tasemed"
+    "all_levels": "Kõik tasemed",
+    "all_devices": "Kõik seadmed",
+    "all_components": "Kõik komponendid",
+    "search_ph": "Otsi logidest…"
   },
   "ml": {
     "builtin_models": "● Sisseehitatud mudelite kasutamine",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Ülesehitamine ebaõnnestus: {error}",
     "toast_resume_failed": "Jätkamine ebaõnnestus: {error}",
     "toast_revert_failed": "Tagasipööramine ebaõnnestus: {error}",
+    "toast_reverted": "{key} taastatud",
     "toast_save_failed": "Salvestamine ebaõnnestus: {error}",
     "trend_duration_longer": "Kestus on pikem ({pct}%/tsükkel) – hiljutine keskmine {avg}",
     "trend_duration_shorter": "Kestus on lühem ({pct}%/tsükkel) – hiljutine keskmine {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Taasesita oma hiljutised tsüklid läbi tegeliku tuvastaja ja sobitaja ülaltoodud sätetega. Klõpsa mis tahes real, et laadida see tsükkel graafikule; muuda sätet, et näha enne/pärast võrdlust.",
     "pg_simulating": "Tsükli simuleerimine…",
     "pg_canvas_empty2": "Vali ülalt tsükkel ja vajuta Käivita, et seda simuleerida. Seejärel hõljuta väärtuste lugemiseks, keri suumimiseks ja lohista liigutamiseks.",
-    "pg_apply_settings_confirm": "Kas salvestada need {n} sätet sellesse seadmesse? {list}"
+    "pg_apply_settings_confirm": "Kas salvestada need {n} sätet sellesse seadmesse? {list}",
+    "no_logs_match": "Ükski logikirje ei vasta nendele filtritele.",
+    "pg_analysis_hint2": "Vali tsükkel ja vajuta Käivita, et laadida vaste analüüs.",
+    "pg_analysis_empty2": "Vajuta Käivita, et näha vaste analüüsi."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Järsk langus käsitletakse kohese lõpuna",
@@ -1430,7 +1444,13 @@
     "reminders_saved": "Hoolduse meeldetuletused salvestatud",
     "pause_no_cycle": "Pole aktiivset tsüklit, mida peatada",
     "resume_no_cycle": "Pole peatatud tsüklit, mida jätkata",
-    "delete_partial_failed": "Mõnda üksust ei õnnestunud kustutada ja need taastati"
+    "delete_partial_failed": "Mõnda üksust ei õnnestunud kustutada ja need taastati",
+    "pg_run_gone": "See käitus pole enam saadaval.",
+    "task_cancelled": "Tühistatud.",
+    "processed": "Töödeldud {bits}",
+    "processed_cycles": "{n} tsüklit",
+    "processed_suggestions": "{n} soovitust",
+    "processed_models": "{n} mudelit edutatud"
   },
   "suggestion": {
     "both_agree": "WashData soovitab",

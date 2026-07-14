@@ -113,6 +113,8 @@
     "revert_settings": "Ångra ändringar",
     "revert_settings_tip": "Återställ inställningar från innan den senaste sparningen",
     "revert_settings_tip_none": "Spara först för att aktivera ångra",
+    "revert": "Återställ",
+    "revert_to_previous": "Återställ den här inställningen till dess tidigare värde",
     "review": "Granska",
     "run": "Kör",
     "run_analysis": "🔍 Kör förslagsanalys",
@@ -520,10 +522,18 @@
     "task_reprocess": "Bearbetar igen",
     "task_ml_training": "Inlärning",
     "eta_secs": "~{n} s kvar",
-    "eta_mins": "~{n} min kvar"
+    "eta_mins": "~{n} min kvar",
+    "pg_recent_runs": "Senaste körningar",
+    "pg_load_run": "Ladda om den här körningen",
+    "pg_match_confidence": "Matchningssäkerhet",
+    "pg_envelope_fit": "Anpassning till envelopp",
+    "pg_envelope_fit_tip": "Hur väl cykeln håller sig inom den här profilens sparade effektenvelopp, ett annat perspektiv än matchningssäkerhet."
   },
   "log": {
-    "all_levels": "Alla nivåer"
+    "all_levels": "Alla nivåer",
+    "all_devices": "Alla enheter",
+    "all_components": "Alla komponenter",
+    "search_ph": "Sök i loggar…"
   },
   "ml": {
     "builtin_models": "● Använder inbyggda modeller",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Ombyggnad misslyckades: {error}",
     "toast_resume_failed": "Återupptagning misslyckades: {error}",
     "toast_revert_failed": "Återställning misslyckades: {error}",
+    "toast_reverted": "{key} återställd",
     "toast_save_failed": "Sparning misslyckades: {error}",
     "trend_duration_longer": "Varaktighet trendar längre ({pct}%/cykel) — senaste medelvärde {avg}",
     "trend_duration_shorter": "Varaktighet trendar kortare ({pct}%/cykel) — senaste medelvärde {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Spela upp dina senaste cykler genom den riktiga detektorn och matchningen med inställningarna ovan. Klicka på en rad för att ladda den cykeln i grafen; ändra en inställning för att se en före/efter-jämförelse.",
     "pg_simulating": "Simulerar cykel…",
     "pg_canvas_empty2": "Välj en cykel ovan och tryck på Kör för att simulera den. Hovra sedan för att avläsa värden, skrolla för att zooma och dra för att panorera.",
-    "pg_apply_settings_confirm": "Spara dessa {n} inställning(ar) till den här enheten? {list}"
+    "pg_apply_settings_confirm": "Spara dessa {n} inställning(ar) till den här enheten? {list}",
+    "no_logs_match": "Inga loggposter matchar dessa filter.",
+    "pg_analysis_hint2": "Välj en cykel och tryck på Kör för att läsa in matchningsanalysen.",
+    "pg_analysis_empty2": "Tryck på Kör för att se matchningsanalysen."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plötsligt fall som tolkas som omedelbart slut",
@@ -1526,7 +1540,13 @@
     "reminders_saved": "Servicepåminnelser sparade",
     "pause_no_cycle": "Ingen aktiv cykel att pausa",
     "resume_no_cycle": "Ingen pausad cykel att återuppta",
-    "delete_partial_failed": "Vissa objekt kunde inte tas bort och återställdes"
+    "delete_partial_failed": "Vissa objekt kunde inte tas bort och återställdes",
+    "pg_run_gone": "Den körningen är inte längre tillgänglig.",
+    "task_cancelled": "Avbruten.",
+    "processed": "Bearbetat: {bits}",
+    "processed_cycles": "{n} cykler",
+    "processed_suggestions": "{n} förslag",
+    "processed_models": "{n} modeller aktiverade"
   },
   "trend": {
     "down": "Nedåtgående trend",

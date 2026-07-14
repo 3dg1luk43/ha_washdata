@@ -113,6 +113,8 @@
     "revert_settings": "Hafa breytingar niður",
     "revert_settings_tip": "Endurheimtu stillingar frá tíma fyrir síðustu vistun þína",
     "revert_settings_tip_none": "Vistaðu fyrst til að virkja afturköllunareiginleikann",
+    "revert": "Afturkalla",
+    "revert_to_previous": "Endurheimta þessa stillingu í fyrra gildi",
     "review": "Upprifjun",
     "run": "Keyra",
     "run_analysis": "🔍 Keyra tillögugreiningu",
@@ -520,10 +522,18 @@
     "task_reprocess": "Endurvinnsla",
     "task_ml_training": "Nám",
     "eta_secs": "~{n} s eftir",
-    "eta_mins": "~{n} mín eftir"
+    "eta_mins": "~{n} mín eftir",
+    "pg_recent_runs": "Nýlegar keyrslur",
+    "pg_load_run": "Endurhlaða þessa keyrslu",
+    "pg_match_confidence": "Áreiðanleiki samsvörunar",
+    "pg_envelope_fit": "Samræmi við hjúpferil",
+    "pg_envelope_fit_tip": "Hversu vel lotan helst innan vistaðs afl-hjúpferils þessa sniðs, önnur sýn en áreiðanleiki samsvörunar."
   },
   "log": {
-    "all_levels": "Öll stig"
+    "all_levels": "Öll stig",
+    "all_devices": "Öll tæki",
+    "all_components": "Allar einingar",
+    "search_ph": "Leita í annálum…"
   },
   "ml": {
     "builtin_models": "● Að nota innbyggðar gerðir",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Endurgerð mistókst: {error}",
     "toast_resume_failed": "Haldið áfram mistókst: {error}",
     "toast_revert_failed": "Endurstilling mistókst: {error}",
+    "toast_reverted": "{key} afturkallað",
     "toast_save_failed": "Vistun mistókst: {error}",
     "trend_duration_longer": "Tímalengd í vændum lengri ({pct}%/lotu) — nýleg meðaltal {avg}",
     "trend_duration_shorter": "Tímalengd styttist ({pct}%/lotu) — nýleg meðaltal {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Endurspilaðu nýlegar lotur í gegnum raunverulegu greininguna og samsvörunina með stillingunum að ofan. Smelltu á línu til að hlaða þeirri lotu í ritið; breyttu stillingu til að sjá samanburð fyrir og eftir.",
     "pg_simulating": "Hermir lotu…",
     "pg_canvas_empty2": "Veldu lotu að ofan og ýttu á Keyra til að herma hana. Haltu svo bendlinum yfir til að lesa gildi, skrunaðu til að þysja og dragðu til að hliðra.",
-    "pg_apply_settings_confirm": "Vista þessar {n} stilling(ar) á þetta tæki? {list}"
+    "pg_apply_settings_confirm": "Vista þessar {n} stilling(ar) á þetta tæki? {list}",
+    "no_logs_match": "Engar annálafærslur passa við þessar síur.",
+    "pg_analysis_hint2": "Veldu lotu og ýttu á Keyra til að hlaða samsvörunargreiningu.",
+    "pg_analysis_empty2": "Ýttu á Keyra til að sjá samsvörunargreiningu."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Skyndilegt fall meðhöndlað sem tafarlaus endir",
@@ -1526,7 +1540,13 @@
     "reminders_saved": "Þjónustuáminningar vistaðar",
     "pause_no_cycle": "Engin virk lota til að gera hlé á",
     "resume_no_cycle": "Engin lota í hléi til að halda áfram",
-    "delete_partial_failed": "Ekki tókst að eyða sumum atriðum og þau voru endurheimt"
+    "delete_partial_failed": "Ekki tókst að eyða sumum atriðum og þau voru endurheimt",
+    "pg_run_gone": "Þessi keyrsla er ekki lengur tiltæk.",
+    "task_cancelled": "Hætt við.",
+    "processed": "Vinnslu lokið: {bits}",
+    "processed_cycles": "{n} hringrásir",
+    "processed_suggestions": "{n} tillögur",
+    "processed_models": "{n} líkön virkjuð"
   },
   "trend": {
     "down": "Stefnir niður",

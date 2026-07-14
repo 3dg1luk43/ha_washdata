@@ -113,6 +113,8 @@
     "revert_settings": "Değişiklikleri geri al",
     "revert_settings_tip": "Son kaydetmeden önceki ayarları geri yükle",
     "revert_settings_tip_none": "Geri almayı etkinleştirmek için önce kaydet",
+    "revert": "Geri al",
+    "revert_to_previous": "Bu ayarı önceki değerine geri yükle",
     "review": "İncele",
     "run": "Çalıştır",
     "run_analysis": "🔍 Öneri analizi çalıştır",
@@ -520,10 +522,18 @@
     "task_reprocess": "Yeniden işleme",
     "task_ml_training": "Öğrenme",
     "eta_secs": "~{n} sn kaldı",
-    "eta_mins": "~{n} dk kaldı"
+    "eta_mins": "~{n} dk kaldı",
+    "pg_recent_runs": "Son çalıştırmalar",
+    "pg_load_run": "Bu çalıştırmayı yeniden yükle",
+    "pg_match_confidence": "Eşleşme güveni",
+    "pg_envelope_fit": "Zarfa uyum",
+    "pg_envelope_fit_tip": "Döngünün bu profilin kaydedilmiş güç zarfının içinde ne kadar iyi kaldığı, eşleşme güveninden farklı bir bakış açısı."
   },
   "log": {
-    "all_levels": "Tüm seviyeler"
+    "all_levels": "Tüm seviyeler",
+    "all_devices": "Tüm cihazlar",
+    "all_components": "Tüm bileşenler",
+    "search_ph": "Günlüklerde ara…"
   },
   "ml": {
     "builtin_models": "● Yerleşik modeller kullanılıyor",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Yeniden oluşturma başarısız: {error}",
     "toast_resume_failed": "Devam ettirme başarısız: {error}",
     "toast_revert_failed": "Geri alma başarısız: {error}",
+    "toast_reverted": "{key} geri alındı",
     "toast_save_failed": "Kaydetme başarısız: {error}",
     "trend_duration_longer": "Süre trendi daha uzun (%{pct}/döngü) — son ortalama {avg}",
     "trend_duration_shorter": "Süre eğilimi daha kısa (%{pct}/döngü) — son ortalama {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Son döngülerinizi yukarıdaki ayarlarla gerçek algılayıcı ve eşleştiriciden geçirerek yeniden oynatın. Bir döngüyü grafiğe yüklemek için herhangi bir satıra tıklayın; öncesi/sonrası karşılaştırması görmek için bir ayarı değiştirin.",
     "pg_simulating": "Döngü simüle ediliyor…",
     "pg_canvas_empty2": "Yukarıdan bir döngü seçin ve simüle etmek için Çalıştır'a basın. Ardından değerleri okumak için üzerine gelin, yakınlaştırmak için kaydırın ve kaydırmak için sürükleyin.",
-    "pg_apply_settings_confirm": "Bu {n} ayar bu cihaza kaydedilsin mi? {list}"
+    "pg_apply_settings_confirm": "Bu {n} ayar bu cihaza kaydedilsin mi? {list}",
+    "no_logs_match": "Bu filtrelerle eşleşen günlük kaydı yok.",
+    "pg_analysis_hint2": "Bir döngü seçin ve eşleşme analizini yüklemek için Çalıştır'a basın.",
+    "pg_analysis_empty2": "Eşleşme analizini görmek için Çalıştır'a basın."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Ani düşüş anında bitiş sayılır",
@@ -1430,7 +1444,13 @@
     "reminders_saved": "Servis hatırlatıcıları kaydedildi",
     "pause_no_cycle": "Duraklatılacak etkin döngü yok",
     "resume_no_cycle": "Sürdürülecek duraklatılmış döngü yok",
-    "delete_partial_failed": "Bazı öğeler silinemedi ve geri yüklendi"
+    "delete_partial_failed": "Bazı öğeler silinemedi ve geri yüklendi",
+    "pg_run_gone": "Bu çalıştırma artık mevcut değil.",
+    "task_cancelled": "İptal edildi.",
+    "processed": "{bits} işlendi",
+    "processed_cycles": "{n} döngü",
+    "processed_suggestions": "{n} öneri",
+    "processed_models": "{n} yükseltilmiş model"
   },
   "suggestion": {
     "both_agree": "WashData öneriyor",

@@ -143,13 +143,6 @@ test('drawer/optimize: running a 1D sweep starts a sweep task', async ({ page })
   await assertWsCalled(page, 'ha_washdata/start_playground_sweep');
 });
 
-test('drawer/optimize: 2D toggle reveals the second-parameter selector', async ({ page }) => {
-  await clickTab(page, 'playground');
-  await page.locator('.wd-pg-subtabs button[data-subtab="sweep"]').click();
-  await page.locator('input[data-action="pg-sweep-2d"]').click();
-  await expect(page.locator('#wd-pg-sw-paramy')).toBeVisible({ timeout: 5_000 });
-});
-
 // ─── Mobile ──────────────────────────────────────────────────────────────────
 
 test('playground tab renders without overflow on mobile', async ({ page }) => {

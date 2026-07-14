@@ -314,6 +314,11 @@ class WasherStateSensor(WasherBaseSensor):
 class WasherProgramSensor(WasherBaseSensor):
     """Sensor for the current program."""
 
+    # The reference-profile curve is a live forecast for energy managers; it is
+    # static per profile and has no historical value, so keep it out of the
+    # recorder database (still available live via state/templates/WebSocket).
+    _unrecorded_attributes = frozenset({"reference_profile"})
+
     def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize the program sensor."""
         self.entity_description = SensorEntityDescription(
@@ -373,6 +378,14 @@ class WasherProgramSensor(WasherBaseSensor):
             "phase_catalog": catalog_view,
             "phase_ranges": assigned,
         }
+        # Forward-looking reference power curve of the matched profile (issue
+        # #304): a compact `[[offset_s, watts], ...]` shape energy managers can
+        # slice by the live progress position to anticipate later load (e.g. a
+        # heating spike). Only present once a real profile is matched - the
+        # guard above already returns None while detecting/unmatched/off.
+        reference = self._manager.profile_store.reference_curve(profile_name)
+        if reference:
+            attrs["reference_profile"] = reference
         return attrs
 
 

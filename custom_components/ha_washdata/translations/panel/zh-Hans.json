@@ -113,6 +113,8 @@
     "revert_settings": "放弃更改",
     "revert_settings_tip": "恢复上次保存前的设置",
     "revert_settings_tip_none": "请先保存以启用撤销功能",
+    "revert": "还原",
+    "revert_to_previous": "将此设置还原为先前的值",
     "review": "审查",
     "run": "运行",
     "run_analysis": "🔍 运行建议分析",
@@ -520,10 +522,18 @@
     "task_reprocess": "重新处理",
     "task_ml_training": "学习",
     "eta_secs": "剩~{n}秒",
-    "eta_mins": "剩~{n}分"
+    "eta_mins": "剩~{n}分",
+    "pg_recent_runs": "最近的运行",
+    "pg_load_run": "重新加载此运行",
+    "pg_match_confidence": "匹配置信度",
+    "pg_envelope_fit": "包络拟合度",
+    "pg_envelope_fit_tip": "周期与此配置文件已保存的功率包络的贴合程度，与匹配置信度不同的视角。"
   },
   "log": {
-    "all_levels": "所有级别"
+    "all_levels": "所有级别",
+    "all_devices": "所有设备",
+    "all_components": "所有组件",
+    "search_ph": "搜索日志…"
   },
   "ml": {
     "builtin_models": "● 使用内置模型",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "重建失败：{error}",
     "toast_resume_failed": "恢复失败：{error}",
     "toast_revert_failed": "还原失败：{error}",
+    "toast_reverted": "已还原 {key}",
     "toast_save_failed": "保存失败：{error}",
     "trend_duration_longer": "时长趋势增长（{pct}%/周期）— 近期平均 {avg}",
     "trend_duration_shorter": "时长趋势缩短（{pct}%/周期）— 近期平均 {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "使用上方设置，将您最近的周期通过真实的检测器和匹配器重新运行。点击任意行可在图表中加载该周期；修改设置可查看修改前后的对比。",
     "pg_simulating": "正在模拟周期…",
     "pg_canvas_empty2": "在上方选择一个周期并按“运行”进行模拟。然后悬停查看数值，滚动缩放，拖动平移。",
-    "pg_apply_settings_confirm": "将这 {n} 项设置保存到该设备吗？ {list}"
+    "pg_apply_settings_confirm": "将这 {n} 项设置保存到该设备吗？ {list}",
+    "no_logs_match": "没有日志记录符合这些筛选条件。",
+    "pg_analysis_hint2": "选择一个周期并点击运行以加载匹配分析。",
+    "pg_analysis_empty2": "点击运行以查看匹配分析。"
   },
   "pg_desc": {
     "abrupt_drop_watts": "骤降视为立即结束",
@@ -1430,7 +1444,13 @@
     "reminders_saved": "已保存保养提醒",
     "pause_no_cycle": "没有可暂停的运行周期",
     "resume_no_cycle": "没有可恢复的已暂停周期",
-    "delete_partial_failed": "部分项目无法删除，已恢复"
+    "delete_partial_failed": "部分项目无法删除，已恢复",
+    "pg_run_gone": "该运行已不可用。",
+    "task_cancelled": "已取消。",
+    "processed": "已处理 {bits}",
+    "processed_cycles": "{n} 个周期",
+    "processed_suggestions": "{n} 条建议",
+    "processed_models": "{n} 个模型升级"
   },
   "suggestion": {
     "both_agree": "WashData建议",

@@ -113,6 +113,8 @@
     "revert_settings": "Forkast endringer",
     "revert_settings_tip": "Gjenopprett innstillinger fra før siste lagring",
     "revert_settings_tip_none": "Lagre først for å aktivere angre",
+    "revert": "Tilbakestill",
+    "revert_to_previous": "Gjenopprett denne innstillingen til forrige verdi",
     "review": "Gjennomgå",
     "run": "Kjør",
     "run_analysis": "🔍 Kjør forslagsanalyse",
@@ -520,10 +522,18 @@
     "task_reprocess": "Behandler på nytt",
     "task_ml_training": "Læring",
     "eta_secs": "~{n} s igjen",
-    "eta_mins": "~{n} min igjen"
+    "eta_mins": "~{n} min igjen",
+    "pg_recent_runs": "Nylige kjøringer",
+    "pg_load_run": "Last inn denne kjøringen på nytt",
+    "pg_match_confidence": "Treffsikkerhet",
+    "pg_envelope_fit": "Envelope-tilpasning",
+    "pg_envelope_fit_tip": "Hvor tett syklusen holder seg innenfor denne profilens lagrede effekt-envelope, en annen innfallsvinkel enn treffsikkerhet."
   },
   "log": {
-    "all_levels": "Alle nivåer"
+    "all_levels": "Alle nivåer",
+    "all_devices": "Alle enheter",
+    "all_components": "Alle komponenter",
+    "search_ph": "Søk i logger…"
   },
   "ml": {
     "builtin_models": "● Bruke innebygde modeller",
@@ -740,6 +750,7 @@
     "toast_rebuild_failed": "Gjenoppbygging mislyktes: {error}",
     "toast_resume_failed": "Gjenopptaking mislyktes: {error}",
     "toast_revert_failed": "Tilbakestilling mislyktes: {error}",
+    "toast_reverted": "{key} tilbakestilt",
     "toast_save_failed": "Lagring mislyktes: {error}",
     "trend_duration_longer": "Varighet trender lengre ({pct} %/syklus) – nylig snitt {avg}",
     "trend_duration_shorter": "Varighet trender kortere ({pct} %/syklus) – nylig snitt {avg}",
@@ -783,7 +794,10 @@
     "pg_history_intro2": "Spill av de siste syklusene dine gjennom den ekte detektoren og gjenkjenningen med innstillingene ovenfor. Klikk på en rad for å laste inn den syklusen i grafen; endre en innstilling for å se en før/etter-sammenligning.",
     "pg_simulating": "Simulerer syklus…",
     "pg_canvas_empty2": "Velg en syklus ovenfor og trykk på Kjør for å simulere den. Hold deretter pekeren over for å lese av verdier, rull for å zoome, og dra for å panorere.",
-    "pg_apply_settings_confirm": "Lagre disse {n} innstilling(er) på denne enheten? {list}"
+    "pg_apply_settings_confirm": "Lagre disse {n} innstilling(er) på denne enheten? {list}",
+    "no_logs_match": "Ingen loggoppføringer samsvarer med disse filtrene.",
+    "pg_analysis_hint2": "Velg en syklus og trykk Kjør for å laste inn treffanalysen.",
+    "pg_analysis_empty2": "Trykk Kjør for å se treffanalysen."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plutselig fall behandlet som umiddelbar slutt",
@@ -1526,7 +1540,13 @@
     "reminders_saved": "Servicepåminnelser lagret",
     "pause_no_cycle": "Ingen aktiv syklus å sette på pause",
     "resume_no_cycle": "Ingen pauset syklus å gjenoppta",
-    "delete_partial_failed": "Noen elementer kunne ikke slettes og ble gjenopprettet"
+    "delete_partial_failed": "Noen elementer kunne ikke slettes og ble gjenopprettet",
+    "pg_run_gone": "Den kjøringen er ikke lenger tilgjengelig.",
+    "task_cancelled": "Avbrutt.",
+    "processed": "Behandlet: {bits}",
+    "processed_cycles": "{n} sykluser",
+    "processed_suggestions": "{n} forslag",
+    "processed_models": "{n} modeller aktivert"
   },
   "trend": {
     "down": "Trender nedover",
