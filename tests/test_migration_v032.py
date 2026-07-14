@@ -413,6 +413,25 @@ async def test_v8_init_additive_keys_idempotent():
     assert result["maintenance_log"] == []
 
 
+@pytest.mark.asyncio
+async def test_v9_to_v10_adds_reference_cycles():
+    """v9 → v10: reference_cycles list is created; past_cycles untouched."""
+    store = _make_store()
+    data: dict[str, Any] = {"past_cycles": [{"id": "a"}], "profiles": {}}
+    result = await store._async_migrate_func(9, 1, data)
+    assert result["reference_cycles"] == []
+    assert result["past_cycles"] == [{"id": "a"}]
+
+
+@pytest.mark.asyncio
+async def test_v9_to_v10_idempotent():
+    """v9 → v10: existing reference_cycles preserved (idempotent)."""
+    store = _make_store()
+    data: dict[str, Any] = {"past_cycles": [], "profiles": {}, "reference_cycles": [{"id": "r"}]}
+    result = await store._async_migrate_func(9, 1, data)
+    assert result["reference_cycles"] == [{"id": "r"}]
+
+
 # ---------------------------------------------------------------------------
 # Full chain v1 → current: end-to-end through all migration steps
 # ---------------------------------------------------------------------------

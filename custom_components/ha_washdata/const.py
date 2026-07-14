@@ -658,7 +658,7 @@ GROUP_MIN_COHESION = 0.80
 # v9: pre-initialize additive top-level keys (lifetime_energy_wh,
 # settings_changelog, maintenance_log) so they are present from first load
 # rather than only appearing lazily on first use.
-STORAGE_VERSION = 9
+STORAGE_VERSION = 10
 STORAGE_KEY = "ha_washdata"
 
 # Notification events

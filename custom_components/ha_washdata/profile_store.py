@@ -753,6 +753,13 @@ class WashDataStore(Store[JSONDict]):
             old_data.setdefault("settings_changelog", [])
             old_data.setdefault("maintenance_log", [])
 
+        if old_major_version < 10:
+            # Reference cycles imported from the community store live in their own list,
+            # never in past_cycles, so they can feed the envelope/matcher but can never
+            # touch usage/energy stats. Additive + idempotent.
+            _LOGGER.info("Migrating storage from v%s to v10", old_major_version)
+            old_data.setdefault("reference_cycles", [])
+
         return old_data
 
     async def get_storage_stats(self) -> dict[str, Any]:
@@ -864,6 +871,7 @@ class ProfileStore:
         self._data: JSONDict = {
             "profiles": {},
             "past_cycles": [],
+            "reference_cycles": [],  # Imported store cycles: envelope/matcher only, never usage stats
             "envelopes": {},  # Cached statistical envelopes per profile
             "auto_adjustments": [],  # Log of automatic setting changes
             "suggestions": {},  # Suggested settings (do NOT change user options)
@@ -1251,6 +1259,58 @@ class ProfileStore:
         if isinstance(raw, list):
             return cast(list[CycleDict], raw)
         return []
+
+    def get_reference_cycles(self) -> list[CycleDict]:
+        """Return the imported-store reference cycles.
+
+        These are NOT in ``past_cycles``: they feed only the envelope shape and the
+        matcher template, never usage/energy/count/trend stats.
+        """
+        raw = self._data.setdefault("reference_cycles", [])
+        if isinstance(raw, list):
+            return cast(list[CycleDict], raw)
+        return []
+
+    async def add_reference_cycle(
+        self, profile_name: str, points: list[list[float]], meta: dict[str, Any]
+    ) -> str:
+        """Import a reference cycle downloaded from the store into ``reference_cycles``.
+
+        ``points`` is a raw trace of ``[offset_seconds, watts]`` pairs. ``meta`` may carry
+        ``store_cycle_id`` (-> ``meta.source = "store:<id>"``), ``store_uploaded_at`` and
+        ``sampling_interval``. The cycle is stamped with import-time timestamps (its real
+        run time is meaningless locally), forced ``status="completed"`` and
+        ``ml_review.golden=True`` so it seeds the envelope shape, then the envelope is
+        rebuilt. Never accumulates lifetime energy or touches ``past_cycles``.
+        """
+        pairs = [[float(p[0]), float(p[1])] for p in (points or []) if len(p) >= 2]
+        duration = float(pairs[-1][0] - pairs[0][0]) if len(pairs) >= 2 else 0.0
+        now = dt_util.now()
+        store_id = str(meta.get("store_cycle_id") or "")
+        cycle: CycleDict = {
+            "profile_name": profile_name,
+            "power_data": pairs,
+            "start_time": now.isoformat(),
+            "end_time": (now).isoformat(),
+            "duration": duration,
+            "status": "completed",
+            "ml_review": {"golden": True},
+            "meta": {
+                "source": f"store:{store_id}" if store_id else "store",
+                "store_uploaded_at": meta.get("store_uploaded_at"),
+            },
+        }
+        if meta.get("sampling_interval"):
+            cycle["sampling_interval"] = float(meta["sampling_interval"])
+        # A reference cycle implies its program exists locally; create a minimal profile
+        # entry if absent so the matcher iterates it and the rebuild can set its template.
+        profiles = self._data.setdefault("profiles", {})
+        if profile_name not in profiles:
+            profiles[profile_name] = {"avg_duration": duration}
+        self._add_cycle_data(cycle, target=self._data.setdefault("reference_cycles", []))
+        await self.async_rebuild_envelope(profile_name)
+        await self.async_save()
+        return str(cycle.get("id", ""))
 
     # ── Profile groups (Stage 5: near-duplicate variants) ──────────────────────
 
@@ -2787,8 +2847,13 @@ class ProfileStore:
         self._add_cycle_data(cycle_data)
         await self.async_enforce_retention()
 
-    def _add_cycle_data(self, cycle_data: CycleDict) -> None:
-        """Internal logic to add cycle data to storage."""
+    def _add_cycle_data(self, cycle_data: CycleDict, target: list[CycleDict] | None = None) -> None:
+        """Internal logic to add cycle data to storage.
+
+        ``target`` defaults to ``past_cycles``; ``add_reference_cycle`` passes the
+        separate ``reference_cycles`` list so imported cycles never enter usage stats.
+        """
+        dest = self._data["past_cycles"] if target is None else target
         # Generate SHA256 ID
         unique_str = f"{cycle_data['start_time']}_{cycle_data['duration']}"
         cycle_data["id"] = hashlib.sha256(unique_str.encode()).hexdigest()[:12]
@@ -2835,7 +2900,7 @@ class ProfileStore:
                 self._logger.debug("add_cycle: invalid start_time %r, skipping power_data normalization", start_time_raw)
                 if hasattr(self, "_save_debug_traces") and not self._save_debug_traces:
                     cycle_data.pop("debug_data", None)
-                self._data["past_cycles"].append(cycle_data)
+                dest.append(cycle_data)
                 return
 
             # Use unified normalizer: handles offset, ISO-string, and datetime formats
@@ -2901,7 +2966,7 @@ class ProfileStore:
             if "debug_data" in cycle_data:
                 del cycle_data["debug_data"]
 
-        self._data["past_cycles"].append(cycle_data)
+        dest.append(cycle_data)
         # Apply retention after adding
 
 
@@ -3368,7 +3433,7 @@ class ProfileStore:
         not chosen). Returns a cycle id, or None if there are no usable cycles.
         """
         cands = [
-            c for c in self._data.get("past_cycles", [])
+            c for c in list(self._data.get("past_cycles", [])) + list(self._data.get("reference_cycles", []))
             if c.get("profile_name") == profile_name
             and c.get("status") in ("completed", "force_stopped")
             and isinstance(c.get("power_data"), list) and len(c["power_data"]) >= 3
@@ -3482,23 +3547,34 @@ class ProfileStore:
         # cohesion approving/rejecting a collapse against outdated shapes.
         self._cohesion_cache_generation += 1
         # 1. Gather Data (Main Thread)
-        labeled_cycles = [
-            c
-            for c in self._data["past_cycles"]
-            if c.get("profile_name") == profile_name
-            and c.get("status") in ("completed", "force_stopped")
-            and c.get("duration", 0) > 60
-        ]
+        def _eligible(seq: list[CycleDict]) -> list[CycleDict]:
+            return [
+                c
+                for c in seq
+                if c.get("profile_name") == profile_name
+                and c.get("status") in ("completed", "force_stopped")
+                and c.get("duration", 0) > 60
+            ]
 
-        if not labeled_cycles:
+        # Real cycles drive usage stats (energy/count). Imported reference cycles
+        # additionally shape the curves + matching duration, but never usage stats.
+        real_cycles = _eligible(self._data["past_cycles"])
+        ref_cycles = _eligible(self._data.get("reference_cycles", []))
+        shape_cycles = real_cycles + ref_cycles
+
+        if not shape_cycles:
             if profile_name in self._data.get("envelopes", {}):
                 del self._data["envelopes"][profile_name]
             return False
 
+        # Kept for the fallback path + duration-stat code below (behaviour is
+        # byte-identical to before when there are no reference cycles).
+        labeled_cycles = shape_cycles
+
         # 2. Run Heavy Computation in Executor (Parsing + DTW)
         result_pkg = await self.hass.async_add_executor_job(
             self._rebuild_envelope_sync,
-            labeled_cycles
+            shape_cycles
         )
 
         if not result_pkg:
@@ -3562,9 +3638,23 @@ class ProfileStore:
         # Calculate scalar stats
         duration_std_dev = float(np.std(durations)) if durations else 0.0
 
-        # Average-curve energy (kWh) via the shared trapezoidal integrator.
-        # avg_curve is in Watts, time_grid in seconds; integrate_wh returns Wh.
-        avg_energy = integrate_wh(time_grid, avg_curve) / 1000.0
+        # Usage stats (avg_energy, cycle_count) come from REAL cycles only, so imported
+        # reference cycles can shape the curve without ever inflating energy/count.
+        # When there are no reference cycles this is byte-identical to the prior behaviour
+        # (avg_energy from the avg curve, cycle_count = len(durations)).
+        if ref_cycles:
+            real_energies = [
+                float(c["energy_wh"])
+                for c in real_cycles
+                if isinstance(c.get("energy_wh"), (int, float))
+            ]
+            avg_energy = (sum(real_energies) / len(real_energies) / 1000.0) if real_energies else 0.0
+            cycle_count = len(real_cycles)
+        else:
+            # Average-curve energy (kWh) via the shared trapezoidal integrator.
+            # avg_curve is in Watts, time_grid in seconds; integrate_wh returns Wh.
+            avg_energy = integrate_wh(time_grid, avg_curve) / 1000.0
+            cycle_count = len(durations)
 
         envelope_data: dict[str, Any] = {
             "time_grid": time_grid,  # Time grid used by manager for phase estimation
@@ -3573,7 +3663,7 @@ class ProfileStore:
             "max": to_points(max_curve),
             "avg": to_points(avg_curve),
             "std": to_points(std_curve),
-            "cycle_count": len(durations),
+            "cycle_count": cycle_count,
             "avg_energy": avg_energy,
             "duration_std_dev": duration_std_dev,
             "updated": dt_util.now().isoformat(),
@@ -3996,7 +4086,9 @@ class ProfileStore:
 
             current_power_list = current_seg.power.tolist()
 
-            # Prepare Snapshots
+            # Prepare Snapshots. Imported reference cycles are eligible as matching
+            # templates alongside real cycles (so an import-only profile can match).
+            all_cycles = list(self._data["past_cycles"]) + list(self._data.get("reference_cycles", []))
             snapshots: list[dict[str, Any]] = []
             skipped_profiles: list[str] = []
             for name, profile in self._data["profiles"].items():
@@ -4005,13 +4097,13 @@ class ProfileStore:
                 sample_cycle = None
                 if sample_id:
                     sample_cycle = next(
-                        (c for c in self._data["past_cycles"] if c["id"] == sample_id),
+                        (c for c in all_cycles if c["id"] == sample_id),
                         None
                     )
                 # Fallback: find ANY completed cycle labeled with this profile
                 if not sample_cycle:
                     sample_cycle = next(
-                        (c for c in self._data["past_cycles"]
+                        (c for c in all_cycles
                           if c.get("profile_name") == name
                           and c.get("status") in ("completed", "force_stopped")
                           and c.get("power_data")),
@@ -4028,7 +4120,7 @@ class ProfileStore:
                     and isinstance(c.get("ml_review"), dict)
                     and c["ml_review"].get("golden")
                     and c.get("power_data")
-                    for c in self._data["past_cycles"]
+                    for c in all_cycles
                 )
 
                 # Prefer envelope avg curve when ≥2 labeled cycles have been
@@ -4605,6 +4697,7 @@ class ProfileStore:
     async def clear_all_data(self) -> None:
         """Clear all profiles, cycle data, and derived state."""
         self._data["past_cycles"] = []
+        self._data["reference_cycles"] = []
         self._data["profiles"] = {}
         self._data["envelopes"] = {}
         self._data["suggestions"] = {}
@@ -4944,6 +5037,8 @@ class ProfileStore:
             data_dict["profiles"] = {}
         if not isinstance(data_dict.get("past_cycles"), list):
             data_dict["past_cycles"] = []
+        if not isinstance(data_dict.get("reference_cycles"), list):
+            data_dict["reference_cycles"] = []
         data_dict.setdefault("envelopes", {})
 
         if not data_dict.get("profiles") and not data_dict.get("past_cycles"):
