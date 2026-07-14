@@ -22,6 +22,10 @@ _SENSITIVE_KEYS = {
     "title",
     "unique_id",
     "user_id",
+    # Community-store account credentials / identifiers.
+    "refresh_token",
+    "id_token",
+    "uid",
     # HA entity / service references that reveal home topology.
     "notify_service",
     "notify_start_services",

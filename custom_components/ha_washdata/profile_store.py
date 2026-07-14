@@ -1260,6 +1260,34 @@ class ProfileStore:
             return cast(list[CycleDict], raw)
         return []
 
+    # ── Community-store account (connect handoff) ─────────────────────────────
+    def get_store_account(self) -> dict[str, Any]:
+        """Full persisted store account incl. the refresh token (credential)."""
+        raw = self._data.get("store_account")
+        return dict(raw) if isinstance(raw, dict) else {}
+
+    def get_store_identity(self) -> dict[str, Any]:
+        """Safe account view for status/UI - never includes the refresh token."""
+        a = self.get_store_account()
+        return {
+            "connected": bool(a.get("refresh_token")),
+            "uid": a.get("uid"),
+            "name": a.get("name"),
+            "brand": a.get("brand"),
+            "model": a.get("model"),
+        }
+
+    async def set_store_account(self, account: dict[str, Any]) -> None:
+        """Persist/merge the store account (refresh_token, uid, name, brand, model)."""
+        cur = self.get_store_account()
+        cur.update({k: v for k, v in account.items() if v is not None})
+        self._data["store_account"] = cur
+        await self.async_save()
+
+    async def clear_store_account(self) -> None:
+        self._data.pop("store_account", None)
+        await self.async_save()
+
     def get_reference_cycles(self) -> list[CycleDict]:
         """Return the imported-store reference cycles.
 
