@@ -5095,7 +5095,9 @@ class ProfileStore:
         initial_len = len(cycles)
         cycle_to_delete = next((c for c in cycles if c.get("id") == cycle_id), None)
         if not cycle_to_delete:
-            return False
+            # Not a real cycle -- it may be an imported store recording, which
+            # lives in the separate reference_cycles list (never in usage stats).
+            return await self._delete_reference_cycle(cycle_id)
 
         profile_name = cycle_to_delete.get("profile_name")
         self._data["past_cycles"] = [c for c in cycles if c.get("id") != cycle_id]
@@ -5114,6 +5116,24 @@ class ProfileStore:
             return True
         return False
 
+    async def _delete_reference_cycle(self, cycle_id: str) -> bool:
+        """Delete a single imported store recording from ``reference_cycles``.
+
+        Rebuilds the affected profile's envelope so removing a bad import
+        immediately stops influencing the matcher template. Returns False when
+        no reference cycle carries that id.
+        """
+        refs = cast(list[CycleDict], self._data.get("reference_cycles", []))
+        cycle = next((c for c in refs if c.get("id") == cycle_id), None)
+        if cycle is None:
+            return False
+        profile_name = cycle.get("profile_name")
+        self._data["reference_cycles"] = [c for c in refs if c.get("id") != cycle_id]
+        if profile_name:
+            await self.async_rebuild_envelope(profile_name)
+        await self.async_save()
+        return True
+
     def get_cycle_power_data(self, cycle_id: str) -> list[tuple[float, float]]:
         """Return decompressed power data for a cycle as [(offset_s, watts), ...].
 
@@ -5122,6 +5142,13 @@ class ProfileStore:
         cycle = next(
             (c for c in self.get_past_cycles() if c.get("id") == cycle_id), None
         )
+        if cycle is None:
+            # Imported store recordings live in a separate list; the panel opens
+            # them from the same Cycles table, so look them up here too.
+            cycle = next(
+                (c for c in self.get_reference_cycles() if c.get("id") == cycle_id),
+                None,
+            )
         if cycle is None:
             return []
         return decompress_power_data(cycle)

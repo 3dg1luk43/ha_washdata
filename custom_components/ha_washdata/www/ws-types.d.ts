@@ -125,6 +125,7 @@ export interface GetCyclePowerDataResponse {
 export interface GetDeviceCyclesResponse {
   entry_id: string;
   cycles: Record<string, unknown>[];
+  reference_cycles: Record<string, unknown>[];
   total: number;
   has_more: boolean;
 }

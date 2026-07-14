@@ -27,7 +27,8 @@
     "awaiting_tip": "Awaiting community approval",
     "awaiting_n": "Awaiting approval · {n} confirmed",
     "approved": "Approved",
-    "awaiting": "Awaiting approval"
+    "awaiting": "Awaiting approval",
+    "imported_tip": "Imported from the community store. Used for matching only, not counted in stats."
   },
   "btn": {
     "add_device": "+ Add device",
@@ -476,6 +477,7 @@
     "duration_avg": "~{v}m avg",
     "name_placeholder": "(name)",
     "n_shown": ", {n} shown",
+    "n_imported_note": ", {n} imported",
     "cycles_title": "Cycles ({n})",
     "pg_detecting": "Detecting",
     "pg_best_marker": "Best: {v}",
@@ -639,6 +641,7 @@
     "no_cycles_profile": "No cycles for this profile.",
     "no_cycles_selected": "Select at least one cycle first.",
     "no_cycles_yet": "No cycles recorded yet.",
+    "imported_readonly": "Imported from the community store. Shown for reference and matching. It is not counted in your stats and cannot be edited.",
     "no_device_selected": "No device selected.",
     "no_devices": "No WashData devices configured yet.",
     "no_envelope": "No envelope yet - rebuild after labelling cycles.",
@@ -1355,7 +1358,8 @@
     "reverting": "Reverting…",
     "trimming": "Trimming…",
     "splitting": "Splitting…",
-    "deleting": "Deleting…"
+    "deleting": "Deleting…",
+    "imported": "Imported"
   },
   "suggestion": {
     "both_agree": "WashData recommends",

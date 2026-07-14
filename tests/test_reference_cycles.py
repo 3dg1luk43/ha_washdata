@@ -135,3 +135,38 @@ async def test_export_import_round_trips_reference_cycles(store):
         await ps2.async_import_data(payload)
     assert len(ps2.get_reference_cycles()) == 1
     assert ps2.get_reference_cycles()[0]["meta"]["source"] == "store:r4"
+
+
+# --- Panel Cycles-tab exposure (view + delete a bad import) ------------------
+
+@pytest.mark.asyncio
+async def test_get_cycle_power_data_finds_reference_cycle(store):
+    cid = await store.add_reference_cycle("Cotton 40", _offset_trace(2000), {"store_cycle_id": "v1"})
+    # Not in past_cycles, but the inspector must still be able to load its curve.
+    assert store.get_past_cycles() == []
+    samples = store.get_cycle_power_data(cid)
+    assert samples and len(samples) > 1
+    assert all(len(p) == 2 for p in samples)
+
+
+@pytest.mark.asyncio
+async def test_delete_cycle_removes_reference_cycle_and_rebuilds(store):
+    # A real cycle plus an imported one on the same profile.
+    await _add_real(store, "Cotton 40", 1000)
+    await store.async_rebuild_envelope("Cotton 40")
+    cid = await store.add_reference_cycle("Cotton 40", _offset_trace(3000), {"store_cycle_id": "d1"})
+    env_before = store.get_envelope("Cotton 40")["avg"]
+    assert len(store.get_reference_cycles()) == 1
+
+    # delete_cycle routes an unknown id to the reference list.
+    ok = await store.delete_cycle(cid)
+    assert ok is True
+    assert store.get_reference_cycles() == []
+    # Real cycle untouched; envelope rebuilt back toward the real-only shape.
+    assert len(store.get_past_cycles()) == 1
+    assert store.get_envelope("Cotton 40")["avg"] != env_before
+
+
+@pytest.mark.asyncio
+async def test_delete_cycle_unknown_id_returns_false(store):
+    assert await store.delete_cycle("nope-not-here") is False

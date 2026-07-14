@@ -130,6 +130,7 @@ _None._
 | --- | --- | --- |
 | `entry_id` | yes | str |
 | `cycles` | yes | list[dict[str, any]] |
+| `reference_cycles` | yes | list[dict[str, any]] |
 | `total` | yes | number |
 | `has_more` | yes | bool |
 

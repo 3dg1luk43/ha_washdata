@@ -130,6 +130,56 @@ test('multi-select mode activates on select button click', async ({ page }) => {
   await expect(checkboxes.first()).toBeVisible({ timeout: 3_000 });
 });
 
+test('imported reference cycles appear in the Cycles list with a badge and filter', async ({ page }) => {
+  // Backend returns imported store recordings in a separate `reference_cycles`
+  // array (kept out of pagination). The panel merges them into the same table,
+  // tagged is_reference, with an Imported badge + filter.
+  await setHandler(page, 'ha_washdata/get_device_cycles', {
+    ...cyclesData,
+    reference_cycles: [
+      {
+        id: 'ref-e2e-1',
+        start_time: '2026-07-14T09:00:00+00:00',
+        end_time: '2026-07-14T10:00:00+00:00',
+        duration: 3600,
+        profile_name: 'Imported Eco',
+        status: 'completed',
+        is_reference: true,
+        meta: { source: 'store:e2e1' },
+      },
+    ],
+  });
+  await clickTab(page, 'history');
+
+  // 5 real cycles + 1 imported = 6 rows.
+  await expect(page.locator('tr[data-cid]')).toHaveCount(6, { timeout: 8_000 });
+  const importedRow = page.locator('tr[data-cid]').filter({ hasText: 'Imported Eco' });
+  await expect(importedRow).toHaveCount(1);
+  await expect(importedRow).toContainText('📥');
+
+  // The status filter gains an "Imported" option; picking it narrows to just it.
+  const statusSel = page.locator('#wd-cyc-filter-status');
+  await expect(statusSel.locator('option[value="imported"]')).toHaveCount(1);
+  await statusSel.selectOption('imported');
+  await expect(page.locator('tr[data-cid]')).toHaveCount(1);
+  await expect(page.locator('tr[data-cid]').first()).toContainText('Imported Eco');
+});
+
+test('imported cycles are not bulk-selectable', async ({ page }) => {
+  await setHandler(page, 'ha_washdata/get_device_cycles', {
+    ...cyclesData,
+    reference_cycles: [
+      { id: 'ref-e2e-2', start_time: '2026-07-14T09:00:00+00:00', duration: 3600, profile_name: 'Imported Eco', status: 'completed', is_reference: true, meta: { source: 'store:e2e2' } },
+    ],
+  });
+  await clickTab(page, 'history');
+  await page.locator('button[data-action="cyc-select-toggle"]').first().click();
+  // Real cycles get a checkbox; the imported row keeps its status dot (no checkbox).
+  await expect(page.locator('tr[data-cid] input[type="checkbox"]')).toHaveCount(5, { timeout: 3_000 });
+  const importedRow = page.locator('tr[data-cid]').filter({ hasText: 'Imported Eco' });
+  await expect(importedRow.locator('input[type="checkbox"]')).toHaveCount(0);
+});
+
 test('cycles tab renders without overflow on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await clickTab(page, 'history');

@@ -78,6 +78,7 @@ class GetDevicesResponse(TypedDict):
 class GetDeviceCyclesResponse(TypedDict):
     entry_id: str
     cycles: list[dict[str, Any]]
+    reference_cycles: list[dict[str, Any]]
     total: int
     has_more: bool
 

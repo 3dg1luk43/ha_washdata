@@ -1536,6 +1536,7 @@ class HaWashdataPanel extends HTMLElement {
     this._constantsLoaded = false;
     this._devices = [];
     this._cycles = [];
+    this._refCycles = [];  // imported store recordings (shown alongside real cycles)
     this._selectMode = false;
     this._cycleSel = new Set();
     this._profiles = [];
@@ -2230,10 +2231,13 @@ class HaWashdataPanel extends HTMLElement {
     try {
       const res = await this._ws({ type: `${_DOMAIN}/get_device_cycles`, entry_id: entryId, limit: 100, offset: 0 });
       this._cycles = res.cycles || [];
+      // Imported store recordings are returned once (first page) and kept out of
+      // the paginated `cycles`/offset math so "Load more" stays correct.
+      this._refCycles = res.reference_cycles || [];
       this._cycleOffset = this._cycles.length;
       this._cyclesTotal = (res.total != null) ? res.total : this._cycles.length;
       this._cyclesHasMore = (res.has_more != null) ? !!res.has_more : false;
-    } catch (_) { this._cyclesError = true; this._cycles = []; this._cycleOffset = 0; this._cyclesTotal = 0; this._cyclesHasMore = false; }
+    } catch (_) { this._cyclesError = true; this._cycles = []; this._refCycles = []; this._cycleOffset = 0; this._cyclesTotal = 0; this._cyclesHasMore = false; }
   }
 
   // D3: fetch the next page and append (deduping by id so optimistic removals or
@@ -2345,7 +2349,14 @@ class HaWashdataPanel extends HTMLElement {
     const idset = new Set(ids);
     const removed = [];
     this._cycles = (this._cycles || []).filter((c, idx) => {
-      if (idset.has(c.id)) { removed.push({ idx, rec: c }); return false; }
+      if (idset.has(c.id)) { removed.push({ idx, rec: c, ref: false }); return false; }
+      return true;
+    });
+    // Imported store recordings live in a separate list but delete through the
+    // same WS command; track which array each removed row came from so Undo
+    // re-inserts it in the right place.
+    this._refCycles = (this._refCycles || []).filter((c, idx) => {
+      if (idset.has(c.id)) { removed.push({ idx, rec: c, ref: true }); return false; }
       return true;
     });
     if (!removed.length) return;
@@ -2355,9 +2366,13 @@ class HaWashdataPanel extends HTMLElement {
     // the subset whose backend delete failed (partial-failure recovery).
     const restore = (subset) => {
       const items = (subset && subset.length) ? subset : removed;
-      const arr = this._cycles.slice();
-      items.slice().sort((a, b) => a.idx - b.idx).forEach(({ idx, rec }) => arr.splice(Math.min(idx, arr.length), 0, rec));
-      this._cycles = arr;
+      const real = this._cycles.slice();
+      const ref = this._refCycles.slice();
+      items.slice().sort((a, b) => a.idx - b.idx).forEach(({ idx, rec, ref: isRef }) => {
+        const arr = isRef ? ref : real;
+        arr.splice(Math.min(idx, arr.length), 0, rec);
+      });
+      this._cycles = real; this._refCycles = ref;
     };
     // commit(): delete each record, tracking only the ones that actually failed
     // so a mid-batch failure never resurrects successfully-deleted cycles.
@@ -2582,7 +2597,7 @@ class HaWashdataPanel extends HTMLElement {
     this._powerData = { live: [], raw: [], cycle_active: false, cycle_elapsed_s: 0 };
     this._matchDebug = null;
     this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._opts = {}; this._suggestions = [];
-    this._cycles = []; this._recState = null; this._diag = null; this._maintenance = null; this._phases = [];
+    this._cycles = []; this._refCycles = []; this._recState = null; this._diag = null; this._maintenance = null; this._phases = [];
     this._mlTrainingStatus = null;  // per-device; re-fetched by _fetchTabData
     this._deviceAutomations = [];   // per-device; re-fetched on the settings tab
     this._selectMode = false; this._cycleSel = new Set();
@@ -3511,7 +3526,13 @@ class HaWashdataPanel extends HTMLElement {
   // ── History tab ───────────────────────────────────────────────────────────
 
   _htmlHistory() {
-    const allCycles = this._cycles || [];
+    const realCycles = this._cycles || [];
+    const refCycles = this._refCycles || [];
+    // Imported store recordings share this table (tagged is_reference). They are
+    // kept out of usage stats, so they carry no ML health/review and cannot be
+    // bulk-selected -- but they open the same interactive graph and can be
+    // removed one-by-one from the inspector.
+    const allCycles = refCycles.concat(realCycles);
     const canEdit = this._canEdit();
     const selMode = this._selectMode && canEdit;
     const sel = this._cycleSel;
@@ -3544,6 +3565,8 @@ class HaWashdataPanel extends HTMLElement {
       cycles = cycles.filter(c => !c.profile_name && !c.matched_profile);
     } else if (fStatus === 'needs_review') {
       cycles = cycles.filter(needsReview);
+    } else if (fStatus === 'imported') {
+      cycles = cycles.filter(c => c.is_reference);
     } else if (fStatus) {
       cycles = cycles.filter(c => (c.status || 'completed') === fStatus);
     }
@@ -3574,6 +3597,9 @@ class HaWashdataPanel extends HTMLElement {
       }
       return this._mlLoading ? '<span style="color:var(--secondary-text-color)">…</span>' : '<span style="color:var(--secondary-text-color)">-</span>';
     };
+    const importedBadge = c => c.is_reference
+      ? ` <span title="${_esc(this._t('badge.imported_tip', {}, 'Imported from the community store. Used for matching only, not counted in stats.'))}" style="color:var(--info-color,#2196f3)">📥</span>`
+      : '';
     const reviewBadge = c => {
       if (isGolden(c)) return ' <span title="' + _esc(this._t('badge.golden_cycle', {}, 'Recorded reference cycle')) + '" style="color:var(--warning-color,#ff9800)">⭐</span>';
       if (isReviewed(c)) return ' <span title="' + _esc(this._t('badge.reviewed', {}, 'Reviewed')) + '" style="color:var(--success-color,#4caf50)">✓</span>';
@@ -3619,13 +3645,14 @@ class HaWashdataPanel extends HTMLElement {
       const conf = c.match_confidence != null ? c.match_confidence * 100 : null;
       const st = c.status || 'completed';
       const kwh = c.energy_kwh != null ? c.energy_kwh : (c.energy_wh != null ? c.energy_wh / 1000 : null);
-      const check = selMode
+      const rowSel = selMode && !c.is_reference;  // imported cycles aren't bulk-selectable
+      const check = rowSel
         ? `<input type="checkbox" class="wd-csel" ${sel.has(c.id) ? 'checked' : ''} style="width:auto;margin:0">`
         : `<span class="wd-devdot" style="background:${statusDotColor(st)}" title="${_esc(st)}"></span>`;
       const stLabel = { completed: this._t('status.completed',{},'Completed'), interrupted: this._t('status.interrupted',{},'Interrupted'), force_stopped: this._t('status.force_stopped',{},'Force stopped'), active: this._t('status.active',{},'Active') }[st] || st;
-      return `<tr data-cid="${_esc(c.id)}" data-selmode="${selMode ? 1 : 0}" style="cursor:pointer">
+      return `<tr data-cid="${_esc(c.id)}" data-selmode="${rowSel ? 1 : 0}" style="cursor:pointer">
         <td style="width:26px;padding:6px 4px 6px 8px">${check}</td>
-        <td>${prog ? _esc(prog) : `<span style="color:var(--secondary-text-color)">${this._t('lbl.unlabelled', {}, 'Unlabelled')}</span>`}${reviewBadge(c)}${overrunBadge(c)}${underrunBadge(c)}${energyAnomalyBadge(c)}${artifactBadge(c)}${restartGapBadge(c)}</td>
+        <td>${prog ? _esc(prog) : `<span style="color:var(--secondary-text-color)">${this._t('lbl.unlabelled', {}, 'Unlabelled')}</span>`}${importedBadge(c)}${reviewBadge(c)}${overrunBadge(c)}${underrunBadge(c)}${energyAnomalyBadge(c)}${artifactBadge(c)}${restartGapBadge(c)}</td>
         <td><span style="color:${statusDotColor(st)};font-size:.9em">${_esc(stLabel)}</span></td>
         <td class="wd-tc-date">${_fmtDate(c.start_time)}</td>
         <td class="wd-tc-num">${_fmtDuration(c.duration)}</td>
@@ -3657,11 +3684,15 @@ class HaWashdataPanel extends HTMLElement {
         <option value="interrupted" ${fStatus === 'interrupted' ? 'selected' : ''}>${this._t('status.interrupted', {}, 'Interrupted')}</option>
         <option value="force_stopped" ${fStatus === 'force_stopped' ? 'selected' : ''}>${this._t('status.force_stopped', {}, 'Force stopped')}</option>
         <option value="unlabelled" ${fStatus === 'unlabelled' ? 'selected' : ''}>${this._t('lbl.unlabelled', {}, 'Unlabelled')}</option>
+        ${refCycles.length ? `<option value="imported" ${fStatus === 'imported' ? 'selected' : ''}>${this._t('status.imported', {}, 'Imported')} (${refCycles.length})</option>` : ''}
       </select>
     </div>`;
 
     const shown = cycles.length !== allCycles.length ? this._t('lbl.n_shown', {n: cycles.length}, `, ${cycles.length} shown`) : '';
-    const title = this._t('lbl.cycles_title', {n: `${allCycles.length}${shown}`}, `Cycles (${allCycles.length}${shown})`);
+    // Headline counts real cycles; imported recordings are called out separately
+    // so the number the user recognises (their own runs) stays honest.
+    const impNote = refCycles.length ? this._t('lbl.n_imported_note', {n: refCycles.length}, `, ${refCycles.length} imported`) : '';
+    const title = this._t('lbl.cycles_title', {n: `${realCycles.length}${impNote}${shown}`}, `Cycles (${realCycles.length}${impNote}${shown})`);
 
     const toolbar = canEdit ? `<div class="wd-card-actions" style="margin:0 0 4px;justify-content:flex-end">
       <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-auto-open" title="${_esc(this._t('btn.auto_label_cycles_tip', {}, 'Automatically assign profile names to unlabelled cycles whose match confidence clears the threshold'))}">${this._t('btn.auto_label_cycles', {}, 'Auto-label cycles')}</button>
@@ -7075,6 +7106,7 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button></div>`;
     }
     const cur = m.curve || {};
+    const isRef = !!cur.is_reference;  // imported store recording: read-only except delete
     const full = cur.full_duration_s || cur.duration || 0;
     const kwh = cur.energy_kwh != null ? cur.energy_kwh : null;
     // ML health chip (higher = better) shown when an ML assessment is attached.
@@ -7106,12 +7138,14 @@ class HaWashdataPanel extends HTMLElement {
     const reviewDot = (needsReview && m.mode !== 'review')
       ? ` <span title="${this._t('hdr.automation_needs_review', {}, 'This cycle needs review')}" style="color:var(--warning-color,#ff9800);font-size:1.1em;line-height:0">●</span>`
       : '';
-    const modeBar = this._canEdit() ? `<div class="wd-mode-bar">
+    // Imported recordings are read-only (they seed matching templates only), so
+    // the edit mode-bar is hidden and a short note explains why.
+    const modeBar = (this._canEdit() && !isRef) ? `<div class="wd-mode-bar">
       <button class="wd-btn wd-btn-sm ${m.mode === 'view' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-view">${this._t('btn.inspect', {}, 'Inspect')}</button>
       <button class="wd-btn wd-btn-sm ${m.mode === 'trim' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-trim">${this._t('btn.trim', {}, 'Trim')}</button>
       <button class="wd-btn wd-btn-sm ${m.mode === 'split' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-split">${this._t('btn.split', {}, 'Split')}</button>
       <button class="wd-btn wd-btn-sm ${m.mode === 'review' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-review" title="${needsReview ? this._t('hdr.automation_needs_review', {}, 'This cycle needs review') : this._t('hdr.automation_review_this_cycle', {}, 'Review this cycle')}">${this._t('btn.review', {}, 'Review')}${reviewDot}</button>
-    </div>` : '';
+    </div>` : (isRef ? `<div class="wd-info" style="margin:0 0 8px"><span style="color:var(--info-color,#2196f3)">📥</span> ${this._t('msg.imported_readonly', {}, 'Imported from the community store. Shown for reference and matching. It is not counted in your stats and cannot be edited.')}</div>` : '');
 
     let controls = '';
     if (m.mode === 'view') {
@@ -7122,11 +7156,16 @@ class HaWashdataPanel extends HTMLElement {
       const shareBtn = canShare
         ? `<button class="wd-btn wd-btn-secondary" data-action="store-share-cycle" data-cid="${_esc(m.cycleId)}" data-prof="${_esc(cur.profile_name || '')}">${this._t('btn.share_to_store', {}, 'Share to store')}</button>`
         : '';
+      // Imported recordings support Delete (remove a bad import) but not Label
+      // (relabelling only applies to real cycles that feed usage stats).
+      const editBtns = !this._canEdit() ? ''
+        : isRef ? `<button class="wd-btn wd-btn-danger" data-maction="cyc-delete">${this._t('btn.delete', {}, 'Delete')}</button>`
+        : `<button class="wd-btn wd-btn-danger" data-maction="cyc-delete">${this._t('btn.delete', {}, 'Delete')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="cyc-label">${this._t('btn.label', {}, 'Label')}</button>`;
       controls = `<div class="wd-modal-actions">
         <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
         ${shareBtn}
-        ${this._canEdit() ? `<button class="wd-btn wd-btn-danger" data-maction="cyc-delete">${this._t('btn.delete', {}, 'Delete')}</button>
-        <button class="wd-btn wd-btn-primary" data-maction="cyc-label">${this._t('btn.label', {}, 'Label')}</button>` : ''}</div>`;
+        ${editBtns}</div>`;
     } else if (m.mode === 'trim') {
       const busy = this._busy.has('cyc-trim-apply');
       const tm = m.timeMode || 's';

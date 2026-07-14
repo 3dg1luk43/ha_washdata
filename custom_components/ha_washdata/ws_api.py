@@ -1069,6 +1069,7 @@ def ws_get_device_cycles(
         return
 
     cycles: list[dict[str, Any]] = []
+    reference_cycles: list[dict[str, Any]] = []
     total = 0
     try:
         store = getattr(manager, "profile_store", None)
@@ -1082,6 +1083,15 @@ def ws_get_device_cycles(
             window = ordered[offset:offset + limit]
             for c in window:
                 cycles.append(_strip_cycle(c))
+            # Imported store recordings are a small, bounded set kept out of the
+            # paginated `cycles`/`total` (they never enter usage stats). Return
+            # them once, on the first page, tagged so the panel can badge them
+            # and route edits/deletes correctly.
+            if offset == 0:
+                for c in reversed(store.get_reference_cycles()):
+                    ref = _strip_cycle(c)
+                    ref["is_reference"] = True
+                    reference_cycles.append(ref)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error fetching cycles for entry %s: %s", entry_id, exc)
 
@@ -1089,6 +1099,7 @@ def ws_get_device_cycles(
     _send_result(connection, msg["id"], "get_device_cycles", {
             "entry_id": entry_id,
             "cycles": cycles,
+            "reference_cycles": reference_cycles,
             "total": total,
             "has_more": has_more,
         },
@@ -2842,6 +2853,12 @@ async def ws_get_cycle_power_data(
         cycle = next(
             (c for c in store.get_past_cycles() if c.get("id") == cycle_id), None
         )
+        if cycle is None:
+            # Imported store recordings live in a separate list.
+            cycle = next(
+                (c for c in store.get_reference_cycles() if c.get("id") == cycle_id),
+                None,
+            )
         if cycle:
             meta = {
                 "start_time": cycle.get("start_time"),
@@ -2850,6 +2867,9 @@ async def ws_get_cycle_power_data(
                 "profile_name": cycle.get("profile_name"),
                 "status": cycle.get("status"),
                 "energy_kwh": _cycle_kwh(cycle),
+                # Imported store recordings are read-only in the inspector (no
+                # trim/relabel/review -- they never enter usage stats).
+                "is_reference": str(cycle.get("meta", {}).get("source", "")).startswith("store"),
             }
             # Transient artifacts (door-open pauses, out-of-band dips/spikes) for
             # graph markers. Prefer the value frozen at cycle end; compute on the
