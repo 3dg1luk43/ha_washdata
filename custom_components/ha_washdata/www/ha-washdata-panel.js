@@ -4195,8 +4195,13 @@ class HaWashdataPanel extends HTMLElement {
 
   _statusTag(rec) {
     if (rec && rec.status === 'pending') {
-      const n = rec.confirmCount || 0;
-      return `<span class="wd-tag wd-tag-pending" title="${_esc(this._t('badge.awaiting_tip', {}, 'Awaiting community approval'))}">${this._t('badge.awaiting_n', {n}, `Awaiting approval · ${n} confirmed`)}</span>`;
+      // Only devices auto-promote via confirmations; brands are admin-approved, so
+      // only show the N-confirmed progress when a confirm count actually applies.
+      const tip = _esc(this._t('badge.awaiting_tip', {}, 'Awaiting community approval'));
+      const label = (typeof rec.confirmCount === 'number')
+        ? this._t('badge.awaiting_n', {n: rec.confirmCount}, `Awaiting approval · ${rec.confirmCount} confirmed`)
+        : this._t('badge.awaiting', {}, 'Awaiting approval');
+      return `<span class="wd-tag wd-tag-pending" title="${tip}">${label}</span>`;
     }
     if (rec && rec.status === 'approved') return `<span class="wd-tag wd-tag-approved">${this._t('badge.approved', {}, 'Approved')}</span>`;
     return '';
@@ -4205,13 +4210,18 @@ class HaWashdataPanel extends HTMLElement {
   _renderBrandPicker(key, val, label, doc, ph) {
     if (this._catalog.brands === undefined) { this._catalog.brands = null; this._loadCatalogBrands(); }
     const brands = Array.isArray(this._catalog.brands) ? this._catalog.brands : [];
-    const dl = brands.map(b => `<option value="${_esc(b.brand)}"></option>`).join('');
+    // Feed the shared custom combobox (works in the shadow DOM, unlike a native
+    // <datalist>). The combo reads this cache live, so async loads appear.
+    this._entityListCache = this._entityListCache || {};
+    this._entityListCache[key] = brands.map(b => b.brand).filter(Boolean);
     const match = brands.find(b => String(b.brand || '').toLowerCase() === val.toLowerCase());
     const tag = this._statusTag(match);
     const loading = this._catalog.brands === null ? ` <span class="wd-info" style="font-size:.85em">${this._t('msg.loading', {}, 'Loading…')}</span>` : '';
     return `<div class="wd-field"><label>${_esc(label)} ${tag}${loading}</label>
-      <input type="text" id="wd-store-brand" data-opt="${key}" data-ftype="text" list="wd-brand-dl" value="${_esc(val)}" placeholder="${ph}" autocomplete="off">
-      <datalist id="wd-brand-dl">${dl}</datalist>
+      <div class="wd-combo">
+        <input type="text" id="wd-store-brand" class="wd-combo-inp" data-opt="${key}" data-ftype="text" value="${_esc(val)}" placeholder="${ph}" autocomplete="off" spellcheck="false">
+        <div class="wd-combo-drop" hidden></div>
+      </div>
       <div class="wd-field-hint">${_esc(doc)}</div></div>`;
   }
 
@@ -4224,7 +4234,8 @@ class HaWashdataPanel extends HTMLElement {
     }
     if (this._catalog.forBrand !== brand) { this._catalog.forBrand = brand; this._catalog.devices = null; this._loadCatalogDevices(brand); }
     const devices = Array.isArray(this._catalog.devices) ? this._catalog.devices : [];
-    const dl = devices.map(d => `<option value="${_esc(d.model)}"></option>`).join('');
+    this._entityListCache = this._entityListCache || {};
+    this._entityListCache[key] = devices.map(d => d.model).filter(Boolean);
     const match = devices.find(d => String(d.model || '').toLowerCase() === val.toLowerCase());
     const tag = this._statusTag(match);
     const loading = this._catalog.devices === null ? ` <span class="wd-info" style="font-size:.85em">${this._t('msg.loading', {}, 'Loading…')}</span>` : '';
@@ -4248,8 +4259,10 @@ class HaWashdataPanel extends HTMLElement {
       extra = `<div class="wd-field-hint">${this._t('msg.model_not_found', {}, "Not in the catalog yet.")} <button type="button" class="wd-linkbtn" data-action="store-add-appliance">${this._t('link.add_appliance', {}, 'Add your appliance')}</button></div>`;
     }
     return `<div class="wd-field"><label>${_esc(label)} ${tag}${loading}</label>
-      <input type="text" id="wd-store-model" data-opt="${key}" data-ftype="text" list="wd-model-dl" value="${_esc(val)}" placeholder="${ph}" autocomplete="off">
-      <datalist id="wd-model-dl">${dl}</datalist>
+      <div class="wd-combo">
+        <input type="text" id="wd-store-model" class="wd-combo-inp" data-opt="${key}" data-ftype="text" value="${_esc(val)}" placeholder="${ph}" autocomplete="off" spellcheck="false">
+        <div class="wd-combo-drop" hidden></div>
+      </div>
       <label class="wd-check-row" style="font-size:.85em;margin-top:4px"><input type="checkbox" data-action="store-approved-filter" ${this._catalog.approvedOnly ? 'checked' : ''}> ${this._t('lbl.approved_only', {}, 'Approved only')}</label>
       <div class="wd-field-hint">${_esc(doc)}</div>
       ${extra}</div>`;
@@ -4263,34 +4276,28 @@ class HaWashdataPanel extends HTMLElement {
     return map[this._opts.device_type] || '';
   }
 
-  // Patch a <datalist>'s options in place (no full re-render), so populating the
-  // catalog never destroys the input the user is typing in / picking from.
-  _patchDatalist(id, items, field) {
-    const sr = this.shadowRoot; if (!sr) return;
-    const dl = sr.getElementById(id);
-    if (dl) dl.innerHTML = (items || []).map(x => `<option value="${_esc(x[field] || '')}"></option>`).join('');
-  }
-
+  // Feed the combobox candidate cache directly (no re-render): the combo reads it
+  // live, so options appear without rebuilding the input the user is typing in.
   async _loadCatalogBrands() {
+    this._entityListCache = this._entityListCache || {};
     const dev = this._devices[this._selIdx];
-    if (!dev || !this._onlineEnabled()) { this._catalog.brands = []; return; }
+    if (!dev || !this._onlineEnabled()) { this._catalog.brands = []; this._entityListCache.store_brand = []; return; }
     try {
       const r = await this._ws({ type: `${_DOMAIN}/store_list_brands`, entry_id: dev.entry_id, include_pending: !this._catalog.approvedOnly });
       this._catalog.brands = (r && r.items) || [];
     } catch (_) { this._catalog.brands = []; }
-    // Patch the datalist in place rather than re-rendering (a render mid-typing
-    // closes the dropdown and wipes the field).
-    this._patchDatalist('wd-brand-dl', this._catalog.brands, 'brand');
+    this._entityListCache.store_brand = (this._catalog.brands || []).map(b => b.brand).filter(Boolean);
   }
 
   async _loadCatalogDevices(brand) {
+    this._entityListCache = this._entityListCache || {};
     const dev = this._devices[this._selIdx];
-    if (!dev || !this._onlineEnabled() || !brand) { this._catalog.devices = []; return; }
+    if (!dev || !this._onlineEnabled() || !brand) { this._catalog.devices = []; this._entityListCache.store_model = []; return; }
     try {
       const r = await this._ws({ type: `${_DOMAIN}/store_search_devices`, entry_id: dev.entry_id, query: brand, appliance_type: this._storeApplianceType(), include_pending: !this._catalog.approvedOnly });
       if (this._catalog.forBrand === brand) this._catalog.devices = (r && r.items) || [];
     } catch (_) { if (this._catalog.forBrand === brand) this._catalog.devices = []; }
-    this._patchDatalist('wd-model-dl', this._catalog.devices || [], 'model');
+    this._entityListCache.store_model = (this._catalog.devices || []).map(d => d.model).filter(Boolean);
   }
 
   // Automations subcategory at the top of Notifications. Replaces the old custom
@@ -7851,9 +7858,11 @@ class HaWashdataPanel extends HTMLElement {
       if (!inp || !drop) return;
       const isPill = combo.classList.contains('wd-combo-pill');
       const optKey = inp.dataset.opt || combo.closest('[data-opt]')?.dataset.opt;
-      const entities = (this._entityListCache || {})[optKey] || [];
 
       const showDrop = (q) => {
+        // Read the candidate list live so async-loaded options (e.g. the store
+        // brand/model catalog) appear without re-wiring the combobox.
+        const entities = (this._entityListCache || {})[optKey] || [];
         const lq = (q || '').toLowerCase();
         const hits = lq ? entities.filter(e => e.toLowerCase().includes(lq)).slice(0, 40)
                         : entities.slice(0, 20);

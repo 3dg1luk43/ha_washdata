@@ -26,7 +26,8 @@
     "underrun_ratio": "({pct}% of expected)",
     "awaiting_tip": "Awaiting community approval",
     "awaiting_n": "Awaiting approval · {n} confirmed",
-    "approved": "Approved"
+    "approved": "Approved",
+    "awaiting": "Awaiting approval"
   },
   "btn": {
     "add_device": "+ Add device",
