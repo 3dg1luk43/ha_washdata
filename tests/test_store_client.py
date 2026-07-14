@@ -1,0 +1,154 @@
+"""Phase C: store_client - id parity, decode, token exchange, reads, upload shape."""
+import json
+from unittest.mock import MagicMock
+
+import pytest
+
+from custom_components.ha_washdata import store_client as sc
+from custom_components.ha_washdata.store_client import StoreClient
+
+
+# ── fake aiohttp session ───────────────────────────────────────────────────────
+
+class _Resp:
+    def __init__(self, status=200, body=None):
+        self.status = status
+        self._body = body if body is not None else {}
+    async def __aenter__(self):
+        return self
+    async def __aexit__(self, *a):
+        return False
+    async def json(self):
+        return self._body
+    async def text(self):
+        return json.dumps(self._body) if not isinstance(self._body, str) else self._body
+
+
+class _Session:
+    def __init__(self):
+        self.posts = []  # (url, kwargs)
+        self.gets = []
+        self._post_queue = []
+        self._get_queue = []
+    def queue_post(self, resp):
+        self._post_queue.append(resp)
+    def queue_get(self, resp):
+        self._get_queue.append(resp)
+    def post(self, url, **kw):
+        self.posts.append((url, kw))
+        return self._post_queue.pop(0) if self._post_queue else _Resp(200, {})
+    def get(self, url, **kw):
+        self.gets.append((url, kw))
+        return self._get_queue.pop(0) if self._get_queue else _Resp(200, {})
+
+
+def _client(session):
+    return StoreClient(MagicMock(), project_id="washdata-store", api_key="KEY", session=session)
+
+
+# ── id parity with lib/ids.js ──────────────────────────────────────────────────
+
+def test_normalize_token_parity():
+    assert sc.normalize_token("  Serie 6  WAT28660GB/01 ") == "serie-6-wat28660gb-01"
+    assert sc.normalize_token("Bosch") == "bosch"
+
+
+def test_device_and_profile_id_parity():
+    d = sc.device_id("washer", "Bosch", "WAT 28660")
+    assert d == "washer__bosch__wat-28660"
+    assert sc.profile_id(d, "Cotton 40") == "washer__bosch__wat-28660__cotton-40"
+    assert sc.brand_id("Bosch") == "bosch"
+
+
+def test_typed_decode():
+    doc = {"name": "projects/p/databases/(default)/documents/cycles/abc",
+           "fields": {"qc": {"integerValue": "2"}, "brand_lc": {"stringValue": "bosch"},
+                      "trace": {"mapValue": {"fields": {"points": {"arrayValue": {"values": [
+                          {"arrayValue": {"values": [{"integerValue": "0"}, {"doubleValue": 5.0}]}}]}}}}}}}
+    out = sc._decode_doc(doc)
+    assert out["id"] == "abc" and out["qc"] == 2 and out["brand_lc"] == "bosch"
+    assert out["trace"]["points"] == [[0, 5.0]]
+
+
+# ── token exchange ─────────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_token_exchange_and_cache():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "TОK", "expires_in": "3600"}))
+    c = _client(s)
+    tok = await c.ensure_id_token("refresh123")
+    assert tok == "TОK"
+    # cached: no second network call
+    tok2 = await c.ensure_id_token("refresh123")
+    assert tok2 == "TОK" and len(s.posts) == 1
+    assert "securetoken" in s.posts[0][0] and "key=KEY" in s.posts[0][0]
+
+
+# ── reads ────────────────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_search_devices_decodes():
+    s = _Session()
+    s.queue_post(_Resp(200, [{"document": {"name": ".../devices/d1", "fields": {
+        "brand": {"stringValue": "Bosch"}, "status": {"stringValue": "approved"}}}}]))
+    c = _client(s)
+    items = await c.search_devices(brand="Bosch")
+    assert items == [{"brand": "Bosch", "status": "approved", "id": "d1"}]
+
+
+@pytest.mark.asyncio
+async def test_get_cycle_skips_unsupported_schema():
+    s = _Session()
+    s.queue_get(_Resp(200, {"name": ".../cycles/c9", "fields": {
+        "cycleSchemaVersion": {"integerValue": "99"},
+        "trace": {"mapValue": {"fields": {"points": {"arrayValue": {"values": []}}}}}}}))
+    c = _client(s)
+    cyc = await c.get_cycle("c9")
+    assert cyc["importable"] is None  # unknown schema -> not importable
+
+
+@pytest.mark.asyncio
+async def test_get_cycle_v1_importable():
+    s = _Session()
+    s.queue_get(_Resp(200, {"name": ".../cycles/c1", "fields": {
+        "cycleSchemaVersion": {"integerValue": "1"},
+        "trace": {"mapValue": {"fields": {"points": {"arrayValue": {"values": [
+            {"arrayValue": {"values": [{"integerValue": "0"}, {"integerValue": "100"}]}}]}}}}}}}))
+    c = _client(s)
+    cyc = await c.get_cycle("c1")
+    assert cyc["importable"] == [[0, 100]]
+
+
+# ── upload shape ───────────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_upload_reference_cycle_shape():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))  # token exchange
+    for _ in range(4):  # brand, device, profile, cycle commits
+        s.queue_post(_Resp(200, {}))
+    c = _client(s)
+    cid = await c.upload_reference_cycle(
+        "refresh", "uid42", "Alice",
+        {"applianceType": "washer", "brand": "Bosch", "model": "WAT28660",
+         "program": "Cotton 40", "sampleIntervalSec": 60, "description": "eco"},
+        [[0, 2000], [60, 100], [120, 0]],
+        {"duration": 3600, "energy_wh": 800, "peak_w": 2000, "mean_w": 200, "signature": {}},
+        2,
+    )
+    assert cid and isinstance(cid, str)
+    # The cycle commit is the last POST; assert its write shape.
+    _, kw = s.posts[-1]
+    write = kw["json"]["writes"][0]
+    assert kw["headers"]["Authorization"] == "Bearer T"
+    assert write["currentDocument"] == {"exists": False}
+    assert {"fieldPath": "createdAt", "setToServerValue": "REQUEST_TIME"} in write["updateTransforms"]
+    fields = write["update"]["fields"]
+    assert fields["qc"] == {"integerValue": "2"}
+    assert fields["status"] == {"stringValue": "pending"}
+    assert fields["uploaderUid"] == {"stringValue": "uid42"}
+    assert fields["deviceId"] == {"stringValue": "washer__bosch__wat28660"}
+    # points encoded as array-of-arrays
+    pts = fields["trace"]["mapValue"]["fields"]["points"]["arrayValue"]["values"]
+    assert len(pts) == 3
