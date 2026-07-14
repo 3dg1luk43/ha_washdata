@@ -23,7 +23,10 @@
     "using_defaults": "Using shipped defaults",
     "using_tuned": "Using tuned weights",
     "overrun_ratio": "({x}x expected)",
-    "underrun_ratio": "({pct}% of expected)"
+    "underrun_ratio": "({pct}% of expected)",
+    "awaiting_tip": "Awaiting community approval",
+    "awaiting_n": "Awaiting approval · {n} confirmed",
+    "approved": "Approved"
   },
   "btn": {
     "add_device": "+ Add device",
@@ -156,7 +159,9 @@
     "connect_github": "Connect GitHub",
     "save_appliance": "Save appliance",
     "share_to_store": "Share to store",
-    "share": "Share"
+    "share": "Share",
+    "confirm_appliance": "Confirm this appliance",
+    "confirmed": "Confirmed"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -492,7 +497,11 @@
     "pg_envelope_fit_tip": "How closely the cycle sits inside this profile's saved power envelope - a different lens than match confidence.",
     "enable_online": "Enable online features",
     "store_brand": "Appliance brand",
-    "store_model": "Appliance model"
+    "store_model": "Appliance model",
+    "anonymous": "Anonymous",
+    "rate_quality": "Rate quality",
+    "rate_n": "{n} stars",
+    "approved_only": "Approved only"
   },
   "log": {
     "all_levels": "All levels",
@@ -767,7 +776,13 @@
     "pg_analysis_empty2": "Press Run to see match analysis.",
     "store_enable_hint": "Enable online features in Settings to browse and import community reference cycles.",
     "online_intro": "Share and download reference cycles with other WashData users. All online features are opt-in and off by default.",
-    "store_share_intro": "Upload this reference cycle so others with the same appliance can use it. It is reviewed before appearing publicly."
+    "store_share_intro": "Upload this reference cycle so others with the same appliance can use it. It is reviewed before appearing publicly.",
+    "online_intro_global": "Browse and share reference recordings with other WashData users, and confirm appliance entries. One connection applies to your whole WashData integration; appliance brand and model are set per device under Basic. All online features are opt-in and off by default.",
+    "online_unavailable": "Online features are not available on this server.",
+    "store_picker_offline": "Enable online features in the settings gear to pick from the community catalog.",
+    "pick_brand_first": "Pick an appliance brand first.",
+    "model_not_found": "Not in the catalog yet.",
+    "connect_to_confirm": "Connect in the settings gear to confirm or rate."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Sudden drop treated as immediate end",
@@ -1225,6 +1240,14 @@
     "energy_weight": {
       "label": "Energy Weight",
       "doc": "How strongly a program whose typical energy use matches this cycle is preferred."
+    },
+    "store_brand": {
+      "label": "Appliance Brand",
+      "doc": "Optional. The appliance brand, picked from the community catalog. Used to find and share matching reference recordings. Leave blank if you are not using online features."
+    },
+    "store_model": {
+      "label": "Appliance Model",
+      "doc": "Optional. The appliance model, picked from the community catalog once a brand is set. If your model is not listed you can add it to the catalog."
     }
   },
   "setting_group": {
@@ -1302,6 +1325,12 @@
     },
     "watchdog": {
       "label": "Watchdog"
+    },
+    "device_info": {
+      "label": "Device info"
+    },
+    "basic_configuration": {
+      "label": "Basic configuration"
     }
   },
   "status": {
@@ -1533,7 +1562,11 @@
     "store_program_required": "Enter a program name",
     "store_no_appliance": "Set your appliance brand and model in Settings first.",
     "store_share_failed": "Share failed: {error}",
-    "store_shared": "Shared to the community store - pending review."
+    "store_shared": "Shared to the community store - pending review.",
+    "appliance_added": "Appliance added - awaiting approval",
+    "thanks_confirming": "Thanks for confirming",
+    "device_approved": "Approved by the community",
+    "rating_saved": "Quality rating saved"
   },
   "trend": {
     "down": "Trending down",
@@ -1590,6 +1623,16 @@
     "import_new": "New profile",
     "import_merge": "Merge into existing",
     "merge_target": "Merge into profile",
-    "description": "Description (optional)"
+    "description": "Description (optional)",
+    "contributed_by": "by {name}"
+  },
+  "settings": {
+    "gear": {
+      "title": "Settings"
+    }
+  },
+  "link": {
+    "manual": "Manual ↗",
+    "add_appliance": "Add your appliance"
   }
 }

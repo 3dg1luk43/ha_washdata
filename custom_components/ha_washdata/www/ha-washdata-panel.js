@@ -43,19 +43,27 @@ const _PALETTE = [
 // Defined before _SETTINGS_SECTIONS because notification field docs reference it.
 const _NOTIFY_VARS = '{device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}';
 const _SETTINGS_SECTIONS = [
-  { id: 'basic', label: 'Basic', intro: 'Core identity and the essentials most setups need.', fields: [
-    { key: 'name', label: 'Device Name', type: 'text',
-      doc: 'Display name shown in the HA integrations list and device registry.' },
-    { key: 'device_type', label: 'Device Type', type: 'devicetype',
-      doc: 'Appliance class. Sets sensible detection defaults (thresholds, off-delay, end handling) tuned for that appliance type; change it only if the device was originally set up as the wrong type.' },
-    { key: 'power_sensor', label: 'Power Sensor', type: 'entity', domain: 'sensor',
-      doc: 'The sensor entity reporting live power in watts for this appliance (e.g. sensor.washer_power). All cycle detection is based on this signal.' },
-    { key: 'min_power', label: 'Minimum Power', unit: 'W', type: 'number', step: 0.1, min: 0, def: 2.0, basic: true,
-      doc: 'Absolute minimum power considered active. Readings below this are treated as 0 W (standby), filtering out the phantom load of smart plugs and standby LEDs.' },
-    { key: 'off_delay', label: 'Off Delay', unit: 's', type: 'number', min: 0, def: 180, basic: true,
-      doc: 'Time to wait after power drops before declaring the cycle finished. If power resumes within this window the cycle continues seamlessly - this bridges pauses between wash stages. Dishwashers have long drying phases (power off for 20-60 min) so the off-delay must exceed that to keep the whole wash+dry as one cycle.' },
-    { key: 'linked_device', label: 'Group Under Device', type: 'device',
-      doc: 'Optionally nest this WashData device under another device (e.g. the smart plug) in the HA device registry, shown as "Connected via ...".' },
+  { id: 'basic', label: 'Basic', intro: 'Core identity and the essentials most setups need.', groups: [
+    { sub: 'Device info', fields: [
+      { key: 'name', label: 'Device Name', type: 'text',
+        doc: 'Display name shown in the HA integrations list and device registry.' },
+      { key: 'device_type', label: 'Device Type', type: 'devicetype',
+        doc: 'Appliance class. Sets sensible detection defaults (thresholds, off-delay, end handling) tuned for that appliance type; change it only if the device was originally set up as the wrong type.' },
+      { key: 'store_brand', label: 'Appliance Brand', type: 'storebrand', optional: true,
+        doc: 'Optional. The appliance brand, picked from the community catalog. Used to find and share matching reference recordings. Leave blank if you are not using online features.' },
+      { key: 'store_model', label: 'Appliance Model', type: 'storemodel', optional: true,
+        doc: 'Optional. The appliance model, picked from the community catalog once a brand is set. If your model is not listed you can add it to the catalog.' },
+    ] },
+    { sub: 'Basic configuration', fields: [
+      { key: 'power_sensor', label: 'Power Sensor', type: 'entity', domain: 'sensor',
+        doc: 'The sensor entity reporting live power in watts for this appliance (e.g. sensor.washer_power). All cycle detection is based on this signal.' },
+      { key: 'min_power', label: 'Minimum Power', unit: 'W', type: 'number', step: 0.1, min: 0, def: 2.0, basic: true,
+        doc: 'Absolute minimum power considered active. Readings below this are treated as 0 W (standby), filtering out the phantom load of smart plugs and standby LEDs.' },
+      { key: 'off_delay', label: 'Off Delay', unit: 's', type: 'number', min: 0, def: 180, basic: true,
+        doc: 'Time to wait after power drops before declaring the cycle finished. If power resumes within this window the cycle continues seamlessly - this bridges pauses between wash stages. Dishwashers have long drying phases (power off for 20-60 min) so the off-delay must exceed that to keep the whole wash+dry as one cycle.' },
+      { key: 'linked_device', label: 'Group Under Device', type: 'device',
+        doc: 'Optionally nest this WashData device under another device (e.g. the smart plug) in the HA device registry, shown as "Connected via ...".' },
+    ] },
   ] },
   { id: 'detection', label: 'Detection', intro: 'How a cycle is detected as starting, running and finishing.', groups: [
     { sub: 'Thresholds & Gap', fields: [
@@ -761,6 +769,15 @@ button.wd-profile-card { display: block; }
 .wd-store-cycle-stats { flex: 1; min-width: 0; }
 .wd-store-spark { width: 120px; height: 36px; flex-shrink: 0; display: block; background: var(--secondary-background-color); border-radius: 6px; }
 .wd-store-conn { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.wd-tag-pending { background: rgba(56,139,253,.18); color: var(--info-color, #58a6ff); }
+.wd-tag-approved { background: rgba(63,185,80,.18); color: var(--success-color, #3fb950); }
+.wd-store-picker-detail { margin-top: 6px; font-size: .85em; color: var(--secondary-text-color); display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.wd-store-picker-actions { display: flex; align-items: center; gap: 8px; flex-basis: 100%; margin-top: 4px; flex-wrap: wrap; }
+.wd-star-row { display: inline-flex; gap: 2px; }
+.wd-star-btn { background: none; border: none; cursor: pointer; color: var(--warning-color, #f0b429); font-size: 1.1em; padding: 0 1px; line-height: 1; }
+.wd-star-btn:hover { transform: scale(1.15); }
+.wd-linkbtn { background: none; border: none; padding: 0; color: var(--primary-color); cursor: pointer; font: inherit; text-decoration: underline; }
+.wd-gear-body { margin-top: 12px; }
 .wd-empty { text-align: center; padding: 48px 24px; color: var(--secondary-text-color); }
 .wd-empty .wd-icon { font-size: 3em; margin-bottom: 10px; }
 .wd-error-state { display: flex; align-items: center; gap: 10px; padding: 10px 14px; margin-bottom: 10px; border-radius: var(--wd-radius-md); background: var(--secondary-background-color); border: 1px solid var(--divider-color); color: var(--error-color, #b71c1c); font-size: .9em; }
@@ -1511,7 +1528,7 @@ class HaWashdataPanel extends HTMLElement {
     this._hassUpdateThrottle = null;
     this._evtUnsubs = [];
     // Data
-    this._constants = { stateColors: {}, deviceTypes: [], mlLabEnabled: false, mlSuggestionsEnabled: false, mlTrainingAvailable: false, storeOnlineAvailable: false, storeWebOrigin: '' };
+    this._constants = { stateColors: {}, deviceTypes: [], mlLabEnabled: false, mlSuggestionsEnabled: false, mlTrainingAvailable: false, storeOnlineAvailable: false, storeOnlineEnabled: false, storeWebOrigin: '' };
     this._constantsLoaded = false;
     this._devices = [];
     this._cycles = [];
@@ -1560,7 +1577,10 @@ class HaWashdataPanel extends HTMLElement {
     this._panelCfg = null;             // panel settings + RBAC + current-user info
     this._panelTrans = null;           // { [lang]: dict } loaded on demand from /ha_washdata/panel-translations/{lang}.json
     this._pollMs = _POLL_MS;
-    this._panelSubtab = 'prefs';
+    this._panelSubtab = 'maintenance';
+    this._gearTab = 'prefs';
+    // Store-backed brand/model picker cache (Basic > Device info).
+    this._catalog = { brands: undefined, devices: undefined, forBrand: null, approvedOnly: false };
     this._maintenance = null;          // cached maintenance log/reminders (Advanced → Maintenance)
     this._logs = [];
     this._logLevel = '';
@@ -2104,7 +2124,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._constantsLoaded) {
         try {
           const c = await this._ws({ type: `${_DOMAIN}/get_constants` });
-          this._constants = { stateColors: c.state_colors || {}, deviceTypes: c.device_types || [], mlLabEnabled: !!(c.ml_lab_enabled), mlSuggestionsEnabled: !!(c.ml_suggestions_enabled), mlTrainingAvailable: !!(c.ml_training_available), storeOnlineAvailable: !!(c.store_online_available), storeWebOrigin: c.store_web_origin || '' };
+          this._constants = { stateColors: c.state_colors || {}, deviceTypes: c.device_types || [], mlLabEnabled: !!(c.ml_lab_enabled), mlSuggestionsEnabled: !!(c.ml_suggestions_enabled), mlTrainingAvailable: !!(c.ml_training_available), storeOnlineAvailable: !!(c.store_online_available), storeOnlineEnabled: !!(c.store_online_enabled), storeWebOrigin: c.store_web_origin || '' };
         } catch (_) { /* fall back to humanized labels */ }
         try {
           this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
@@ -2160,14 +2180,14 @@ class HaWashdataPanel extends HTMLElement {
         await this._fetchCycles(dev.entry_id);
         await this._fetchSuggestions(dev.entry_id);
         await this._fetchProfiles(dev.entry_id);
-        // The Store tab's visibility depends on this._opts.enable_online_features,
+        // The Store tab's visibility depends on this._onlineEnabled(),
         // which is normally loaded per-tab. Prime it at boot ONLY when the backend
         // exposes online features, so the tab can appear without visiting Settings.
         // Also cache store connection state so the "Share to store" cycle action
         // knows whether an account is connected regardless of the current tab.
         if (this._constants.storeOnlineAvailable) {
           try { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: dev.entry_id }); if (this._isActiveEntry(dev.entry_id)) this._opts = r.options || {}; } catch (_) {}
-          if (this._opts.enable_online_features) await this._loadStoreStatus(dev.entry_id);
+          if (this._onlineEnabled()) await this._loadStoreStatus(dev.entry_id);
         }
       }
       // Log drawer: fetch asynchronously so it never delays the main poll;
@@ -2663,7 +2683,7 @@ class HaWashdataPanel extends HTMLElement {
         try { const r = await this._ws({ type: `${_DOMAIN}/get_feedbacks`, entry_id: eid }); this._feedbacks = r.feedbacks || []; } catch (_) {}
         // Refresh store connection state so the golden-cycle "Share to store"
         // action reflects the current account (background; online features only).
-        if (this._constants.storeOnlineAvailable && this._opts.enable_online_features) {
+        if (this._constants.storeOnlineAvailable && this._onlineEnabled()) {
           this._loadStoreStatus(eid).then(() => { if (this._tab === 'history') this._render(); });
         }
         // Attach ML assessment (health / review / events) to cycles so the
@@ -2731,7 +2751,7 @@ class HaWashdataPanel extends HTMLElement {
         if (!this._isActiveEntry(eid)) return;
         this._ensureStoreConnectListener();
         // Kick off the initial browse in the background (renders its own spinner).
-        if (this._opts.enable_online_features) this._storeSearch(this._storeQuery);
+        if (this._onlineEnabled()) this._storeSearch(this._storeQuery);
       } else if (this._tab === 'advanced' && this._panelSubtab === 'ml') {
         const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
         if (!this._isActiveEntry(eid)) return;  // device switched mid-flight — drop stale response
@@ -2984,20 +3004,24 @@ class HaWashdataPanel extends HTMLElement {
   _canEdit() { const p = this._curPerm(); return this._isAdmin() || p === 'edit' || p === 'full'; }
   _canFull() { const p = this._curPerm(); return this._isAdmin() || p === 'full'; }
 
+  // Online features are integration-wide (device-agnostic): the switch + the GitHub
+  // connection live in the header gear's "Online & Community" pane, not per device.
+  _onlineEnabled() {
+    return !!(this._constants && this._constants.storeOnlineAvailable && this._constants.storeOnlineEnabled);
+  }
+
   _visibleTabIds() {
-    // Primary tabs. Diagnostics, Logs and Panel settings are folded into the
-    // "Advanced" drawer (the header gear button). All ML management (on-device
-    // training, matcher tuning, runtime-model opt-in) lives in the "ML Training"
-    // tab; per-cycle ML health/review stays inline in the Cycles tab as cycle
-    // metadata.
+    // Primary tabs. My Preferences, Panel Settings, Access Control and Online &
+    // Community live in the header gear; Maintenance / Diagnostics / ML Training
+    // stay in the "Advanced" tab. Per-cycle ML health/review stays inline in Cycles.
     const admin = this._isAdmin();
     const hidden = (!admin && this._panelCfg && this._panelCfg.panel && this._panelCfg.panel.hidden_tabs) || [];
     const ids = ['status', 'history', 'profiles'];
     if (this._canEdit()) ids.push('settings');
     // F3: Playground (what-if simulator / A-B / DTW inspector) — edit access only.
     if (this._canEdit()) ids.push('playground');
-    // Community Store — only when the backend exposes it AND the user opted in.
-    if (this._canEdit() && this._constants.storeOnlineAvailable && this._opts.enable_online_features) ids.push('store');
+    // Community Store — only when the backend exposes it AND online features are on.
+    if (this._canEdit() && this._onlineEnabled()) ids.push('store');
     // Advanced is also reachable from the header gear; expose it as a tab too.
     ids.push('advanced');
     return ids.filter(id => admin || !hidden.includes(id));
@@ -3151,7 +3175,7 @@ class HaWashdataPanel extends HTMLElement {
                 : this._htmlBody()}
             </div>
           </div>
-          ${this._logOpen && this._isAdmin() ? this._htmlLogDrawer() : `<div class="wd-log-drawer"></div>`}
+          <div class="wd-log-drawer"></div>
         </div>
       </div>
       ${this._modal ? this._htmlModal() : ''}
@@ -3186,7 +3210,7 @@ class HaWashdataPanel extends HTMLElement {
         ${working}
         <span class="wd-task-pills" id="wd-task-pills">${this._htmlTaskPills()}</span>
         <span style="flex:1"></span>
-        ${this._isAdmin() ? `<button class="wd-gear-btn${this._logOpen ? ' log-active' : ''}" data-action="toggle-log-drawer" title="${_esc(this._t('hdr.logs', {}, 'Logs'))}" aria-label="Logs" aria-pressed="${this._logOpen}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16"/><path d="M4 10h16"/><path d="M4 15h10"/><path d="M4 20h7"/></svg></button>` : ''}
+        <button class="wd-gear-btn" id="wd-settings-btn" data-action="open-settings" title="${_esc(this._t('settings.gear.title', {}, 'Settings'))}" aria-label="${_esc(this._t('settings.gear.title', {}, 'Settings'))}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
       </div>
     `;
   }
@@ -4033,7 +4057,7 @@ class HaWashdataPanel extends HTMLElement {
 
     const search = this._settingsSearch || '';
     const q = search.trim().toLowerCase();
-    const searchInput = `<input type="text" id="wd-settings-search" class="wd-filter-input" placeholder="${this._t('msg.search_placeholder', {}, 'Search settings…')}" value="${_esc(search)}" autocomplete="off" style="max-width:240px">`;
+    const searchInput = `<input type="text" id="wd-settings-search" class="wd-filter-input" placeholder="${this._t('msg.search_placeholder', {}, 'Search settings…')}" value="${_esc(search)}" autocomplete="off" style="flex:0 1 34%;min-width:180px;max-width:360px">`;
 
     const formContent = q ? this._htmlSettingsSearch(o, q) : (sugOnly ? this._htmlSettingsSugOnly(o) : this._htmlSettingsSection(o));
 
@@ -4059,7 +4083,6 @@ class HaWashdataPanel extends HTMLElement {
         <p class="wd-info" style="margin-top:12px;font-size:.78em">${this._t('msg.saving_triggers_reload', {}, 'Saving triggers an integration reload. HA entities may briefly show as unavailable.')}</p>
       </div>
       ${this._htmlSettingsHistory()}
-      ${this._htmlStoreAccount()}
     `;
   }
 
@@ -4098,6 +4121,7 @@ class HaWashdataPanel extends HTMLElement {
   // then render it. Returns '' for fields hidden by device-type gating.
   _renderField(f, o) {
     if (f.onlyDeviceType && (o.device_type || 'washing_machine') !== f.onlyDeviceType) return '';
+    if (f.type === 'storebrand' || f.type === 'storemodel') return this._renderStorePicker(f, o);
     let value = o[f.key];
     if (value === undefined) value = f.def;
     const extra = {};
@@ -4147,6 +4171,107 @@ class HaWashdataPanel extends HTMLElement {
     }
     const tf = Object.assign({}, f, { label: this._t('setting.' + f.key + '.label', {}, f.label || ''), doc: f.doc != null ? this._t('setting.' + f.key + '.doc', {}, f.doc) : f.doc });
     return _field(tf, value, extra);
+  }
+
+  // ── Store-backed appliance brand/model pickers (Basic > Device info) ─────────
+  // Type to search the community catalog; pick from a datalist; pending entries
+  // carry an "awaiting approval" tag. Not found -> add it on the website. When
+  // connected, the selected pending device can be confirmed / quality-rated.
+  _renderStorePicker(f, o) {
+    const isBrand = f.type === 'storebrand';
+    const key = f.key;
+    const val = String(o[key] == null ? '' : o[key]);
+    const label = this._t('setting.' + key + '.label', {}, f.label || '');
+    const doc = this._t('setting.' + key + '.doc', {}, f.doc || '');
+    const ph = _esc(this._t('placeholder.' + key, {}, isBrand ? 'e.g. Bosch' : 'e.g. WAT28660'));
+    if (!this._onlineEnabled()) {
+      return `<div class="wd-field"><label>${_esc(label)}</label>
+        <input type="text" data-opt="${key}" data-ftype="text" value="${_esc(val)}" placeholder="${ph}">
+        <div class="wd-field-hint">${_esc(this._t('msg.store_picker_offline', {}, 'Enable online features in the settings gear to pick from the community catalog.'))}</div></div>`;
+    }
+    return isBrand ? this._renderBrandPicker(key, val, label, doc, ph) : this._renderModelPicker(key, o, val, label, doc, ph);
+  }
+
+  _statusTag(rec) {
+    if (rec && rec.status === 'pending') {
+      const n = rec.confirmCount || 0;
+      return `<span class="wd-tag wd-tag-pending" title="${_esc(this._t('badge.awaiting_tip', {}, 'Awaiting community approval'))}">${this._t('badge.awaiting_n', {n}, `Awaiting approval · ${n} confirmed`)}</span>`;
+    }
+    if (rec && rec.status === 'approved') return `<span class="wd-tag wd-tag-approved">${this._t('badge.approved', {}, 'Approved')}</span>`;
+    return '';
+  }
+
+  _renderBrandPicker(key, val, label, doc, ph) {
+    if (this._catalog.brands === undefined) { this._catalog.brands = null; this._loadCatalogBrands(); }
+    const brands = Array.isArray(this._catalog.brands) ? this._catalog.brands : [];
+    const dl = brands.map(b => `<option value="${_esc(b.brand)}"></option>`).join('');
+    const match = brands.find(b => String(b.brand || '').toLowerCase() === val.toLowerCase());
+    const tag = this._statusTag(match);
+    const loading = this._catalog.brands === null ? ` <span class="wd-info" style="font-size:.85em">${this._t('msg.loading', {}, 'Loading…')}</span>` : '';
+    return `<div class="wd-field"><label>${_esc(label)} ${tag}${loading}</label>
+      <input type="text" id="wd-store-brand" data-opt="${key}" data-ftype="text" list="wd-brand-dl" value="${_esc(val)}" placeholder="${ph}" autocomplete="off">
+      <datalist id="wd-brand-dl">${dl}</datalist>
+      <div class="wd-field-hint">${_esc(doc)}</div></div>`;
+  }
+
+  _renderModelPicker(key, o, val, label, doc, ph) {
+    const brand = String(o.store_brand || '');
+    if (!brand) {
+      return `<div class="wd-field"><label>${_esc(label)}</label>
+        <input type="text" id="wd-store-model" data-opt="${key}" data-ftype="text" value="${_esc(val)}" placeholder="${ph}" disabled>
+        <div class="wd-field-hint">${_esc(this._t('msg.pick_brand_first', {}, 'Pick an appliance brand first.'))}</div></div>`;
+    }
+    if (this._catalog.forBrand !== brand) { this._catalog.forBrand = brand; this._catalog.devices = null; this._loadCatalogDevices(brand); }
+    const devices = Array.isArray(this._catalog.devices) ? this._catalog.devices : [];
+    const dl = devices.map(d => `<option value="${_esc(d.model)}"></option>`).join('');
+    const match = devices.find(d => String(d.model || '').toLowerCase() === val.toLowerCase());
+    const tag = this._statusTag(match);
+    const loading = this._catalog.devices === null ? ` <span class="wd-info" style="font-size:.85em">${this._t('msg.loading', {}, 'Loading…')}</span>` : '';
+    // Details + community actions for the resolved device.
+    let extra = '';
+    if (match) {
+      const bits = [];
+      if (match.manualUrl) bits.push(`<a href="${_esc(match.manualUrl)}" target="_blank" rel="noopener noreferrer nofollow">${this._t('link.manual', {}, 'Manual ↗')}</a>`);
+      bits.push(this._t('store.contributed_by', {name: _esc(match.createdByName || this._t('lbl.anonymous', {}, 'Anonymous'))}, `by ${_esc(match.createdByName || 'Anonymous')}`));
+      const connected = !!(this._storeStatus && this._storeStatus.connected);
+      let actions = '';
+      if (connected) {
+        const stars = [1, 2, 3, 4, 5].map(n => `<button type="button" class="wd-star-btn" data-action="store-rate-device" data-device-id="${_esc(match.id)}" data-rating="${n}" aria-label="${this._t('lbl.rate_n', {n}, `${n} stars`)}">★</button>`).join('');
+        actions = `<button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="store-confirm-device" data-device-id="${_esc(match.id)}" ${match.status !== 'pending' ? 'disabled' : ''}>${match.status === 'pending' ? this._t('btn.confirm_appliance', {}, 'Confirm this appliance') : this._t('btn.confirmed', {}, 'Confirmed')}</button>
+          <span class="wd-star-row" title="${_esc(this._t('lbl.rate_quality', {}, 'Rate quality'))}">${stars}</span>`;
+      } else {
+        actions = `<span class="wd-info" style="font-size:.85em">${this._t('msg.connect_to_confirm', {}, 'Connect in the settings gear to confirm or rate.')}</span>`;
+      }
+      extra = `<div class="wd-store-picker-detail">${bits.join(' · ')}<div class="wd-store-picker-actions">${actions}</div></div>`;
+    } else if (val) {
+      extra = `<div class="wd-field-hint">${this._t('msg.model_not_found', {}, "Not in the catalog yet.")} <button type="button" class="wd-linkbtn" data-action="store-add-appliance">${this._t('link.add_appliance', {}, 'Add your appliance')}</button></div>`;
+    }
+    return `<div class="wd-field"><label>${_esc(label)} ${tag}${loading}</label>
+      <input type="text" id="wd-store-model" data-opt="${key}" data-ftype="text" list="wd-model-dl" value="${_esc(val)}" placeholder="${ph}" autocomplete="off">
+      <datalist id="wd-model-dl">${dl}</datalist>
+      <label class="wd-check-row" style="font-size:.85em;margin-top:4px"><input type="checkbox" data-action="store-approved-filter" ${this._catalog.approvedOnly ? 'checked' : ''}> ${this._t('lbl.approved_only', {}, 'Approved only')}</label>
+      <div class="wd-field-hint">${_esc(doc)}</div>
+      ${extra}</div>`;
+  }
+
+  async _loadCatalogBrands() {
+    const dev = this._devices[this._selIdx];
+    if (!dev || !this._onlineEnabled()) { this._catalog.brands = []; return; }
+    try {
+      const r = await this._ws({ type: `${_DOMAIN}/store_list_brands`, entry_id: dev.entry_id, include_pending: !this._catalog.approvedOnly });
+      this._catalog.brands = (r && r.items) || [];
+    } catch (_) { this._catalog.brands = []; }
+    if (this._tab === 'settings') this._render();
+  }
+
+  async _loadCatalogDevices(brand) {
+    const dev = this._devices[this._selIdx];
+    if (!dev || !this._onlineEnabled() || !brand) { this._catalog.devices = []; return; }
+    try {
+      const r = await this._ws({ type: `${_DOMAIN}/store_search_devices`, entry_id: dev.entry_id, query: brand, appliance_type: this._opts.device_type || '', include_pending: !this._catalog.approvedOnly });
+      if (this._catalog.forBrand === brand) this._catalog.devices = (r && r.items) || [];
+    } catch (_) { if (this._catalog.forBrand === brand) this._catalog.devices = []; }
+    if (this._tab === 'settings') this._render();
   }
 
   // Automations subcategory at the top of Notifications. Replaces the old custom
@@ -6006,30 +6131,23 @@ class HaWashdataPanel extends HTMLElement {
   // ── Panel tab (preferences + admin settings + RBAC) ─────────────────────────
 
   _htmlPanel() {
-    const admin = this._isAdmin();
     const canEdit = this._canEdit();
-    // Subtabs allowed for the current permission level. Diagnostics folds the
-    // old Diagnostics tab (storage stats + maintenance); Logs folds the old
-    // Logs tab (admin only); Panel Settings + Access Control are admin-only.
+    // Advanced holds only device-scoped tools now: Maintenance, Diagnostics and
+    // ML Training. The integration-wide sections (My Preferences, Panel Settings,
+    // Access Control, Online & Community) moved to the header gear (_htmlGearModal).
     const mlAvail = canEdit && this._constants && this._constants.mlTrainingAvailable;
-    const allowed = new Set(['prefs', 'maintenance']);
+    const allowed = new Set(['maintenance']);
     if (canEdit) allowed.add('diagnostics');
     if (mlAvail) allowed.add('ml');
-    if (admin) { allowed.add('logs'); allowed.add('settings'); allowed.add('access'); }
     let sub = this._panelSubtab;
-    if (!allowed.has(sub)) sub = this._panelSubtab = 'prefs';
-    const subtabs = [['prefs', this._t('hdr.my_preferences', {}, 'My Preferences')], ['maintenance', this._t('tab.maintenance', {}, 'Maintenance')]];
+    if (!allowed.has(sub)) sub = this._panelSubtab = 'maintenance';
+    const subtabs = [['maintenance', this._t('tab.maintenance', {}, 'Maintenance')]];
     if (canEdit) subtabs.push(['diagnostics', this._t('tab.diagnostics', {}, 'Diagnostics')]);
     if (mlAvail) subtabs.push(['ml', this._t('tab.ml', {}, 'ML Training')]);
-    if (admin) subtabs.push(['logs', this._t('hdr.logs', {}, 'Logs')], ['settings', this._t('hdr.panel_settings', {}, 'Panel Settings')], ['access', this._t('hdr.access_control', {}, 'Access Control')]);
     const stBtns = subtabs.map(([id, lbl]) => `<button class="wd-subtab ${sub === id ? 'active' : ''}" data-ptab="${id}">${lbl}</button>`).join('');
-    const body = sub === 'maintenance' ? this._htmlMaintenance()
-      : sub === 'diagnostics' && canEdit ? this._htmlDiagnostics()
+    const body = sub === 'diagnostics' && canEdit ? this._htmlDiagnostics()
       : sub === 'ml' && mlAvail ? this._htmlMlTab()
-      : sub === 'logs' && admin ? this._htmlLogs()
-      : sub === 'settings' && admin ? this._htmlPanelSettings()
-      : sub === 'access' && admin ? this._htmlPanelAccess()
-      : this._htmlPanelPrefs();
+      : this._htmlMaintenance();
     return `<div class="wd-subtabs">${stBtns}</div>${body}`;
   }
 
@@ -6137,7 +6255,7 @@ class HaWashdataPanel extends HTMLElement {
     // Defensive: the tab is only shown when the option is on, but the store_status
     // fetch (or the option itself) may say otherwise — show the enable hint.
     const st = this._storeStatus;
-    if (!this._opts.enable_online_features || (st && st.enabled === false)) {
+    if (!this._onlineEnabled() || (st && st.enabled === false)) {
       return `<div class="wd-card"><div class="wd-card-title">${this._t('hdr.community_store', {}, 'Community Store')}</div>
         <p class="wd-info">${this._t('msg.store_enable_hint', {}, 'Enable online features in Settings to browse and import community reference cycles.')}</p></div>`;
     }
@@ -6250,12 +6368,35 @@ class HaWashdataPanel extends HTMLElement {
     return `<svg class="wd-store-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="var(--primary-color)" stroke-width="1.5" points="${poly}"/></svg>`;
   }
 
-  // Community-store account card (enable toggle + declared appliance + GitHub
-  // connect/disconnect). Device-scoped options saved via set_options; rendered
-  // in the Settings tab where this._opts is freshly loaded.
-  _htmlStoreAccount() {
-    if (!this._canEdit() || !(this._constants && this._constants.storeOnlineAvailable)) return '';
-    const on = !!this._opts.enable_online_features;
+  // Header gear "Settings" overlay: integration-wide (device-agnostic) sections.
+  // My Preferences (per HA user) is always available; Panel Settings, Access
+  // Control and Online & Community are admin-only. Sub-nav uses data-gtab so it
+  // never collides with the main tab router (data-tab) or Advanced (data-ptab).
+  _htmlGearModal(m) {
+    const admin = this._isAdmin();
+    const tabs = [['prefs', this._t('hdr.my_preferences', {}, 'My Preferences')]];
+    if (admin) tabs.push(['panel', this._t('hdr.panel_settings', {}, 'Panel Settings')], ['access', this._t('hdr.access_control', {}, 'Access Control')]);
+    if (admin && this._constants && this._constants.storeOnlineAvailable) tabs.push(['online', this._t('hdr.online_account', {}, 'Online & Community')]);
+    let tab = m.tab;
+    if (!tabs.some(([id]) => id === tab)) tab = m.tab = 'prefs';
+    const nav = tabs.map(([id, lbl]) => `<button class="wd-subtab ${tab === id ? 'active' : ''}" data-gtab="${id}">${lbl}</button>`).join('');
+    const body = tab === 'panel' && admin ? this._htmlPanelSettings()
+      : tab === 'access' && admin ? this._htmlPanelAccess()
+      : tab === 'online' && admin ? this._htmlOnlineSettings()
+      : this._htmlPanelPrefs();
+    return `<h2 id="wd-modal-title"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>${this._t('settings.gear.title', {}, 'Settings')}<button class="wd-btn wd-btn-secondary wd-btn-sm" data-maction="cancel" aria-label="${_esc(this._t('btn.close', {}, 'Close'))}" style="margin-left:auto">✕</button></h2>
+      <div class="wd-subtabs">${nav}</div>
+      <div class="wd-gear-body">${body}</div>`;
+  }
+
+  // "Online & Community" pane (inside the gear). One integration-wide toggle +
+  // one GitHub connection for the whole install. Appliance brand/model are NOT
+  // here - they are per-device settings under Basic > Device info.
+  _htmlOnlineSettings() {
+    if (!(this._constants && this._constants.storeOnlineAvailable)) {
+      return `<p class="wd-info">${this._t('msg.online_unavailable', {}, 'Online features are not available on this server.')}</p>`;
+    }
+    const on = this._onlineEnabled();
     const st = this._storeStatus || {};
     const connected = !!(on && st.connected);
     const busy = this._busy.has('store-account');
@@ -6265,28 +6406,21 @@ class HaWashdataPanel extends HTMLElement {
           <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="store-disconnect" ${busy ? 'disabled' : ''}>${this._t('btn.disconnect', {}, 'Disconnect')}</button>
         </div>`
       : `<div class="wd-store-conn">
-          <span class="wd-info">${this._t('store.not_connected', {}, 'Not connected. Connect a GitHub account to share your own cycles.')}</span>
+          <span class="wd-info">${this._t('store.not_connected', {}, 'Not connected. Connect a GitHub account to confirm appliances and share your own cycles.')}</span>
           <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-connect">${this._t('btn.connect_github', {}, 'Connect GitHub')}</button>
         </div>`);
     return `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.online_account', {}, 'Community Store & online features')}</div>
-      <p class="wd-info" style="margin-bottom:12px">${this._t('msg.online_intro', {}, 'Share and download reference cycles with other WashData users. All online features are opt-in and off by default.')}</p>
+      <p class="wd-info" style="margin-bottom:12px">${this._t('msg.online_intro_global', {}, 'Browse and share reference recordings with other WashData users, and confirm appliance entries. One connection applies to your whole WashData integration; appliance brand and model are set per device under Basic. All online features are opt-in and off by default.')}</p>
       <div class="wd-field"><label class="wd-check-row"><input type="checkbox" data-action="store-toggle-online" ${on ? 'checked' : ''} ${busy ? 'disabled' : ''}> ${this._t('lbl.enable_online', {}, 'Enable online features')}</label></div>
-      ${on ? `
-        <div class="wd-form-grid">
-          <div class="wd-field"><label>${this._t('lbl.store_brand', {}, 'Appliance brand')}</label><input type="text" id="wd-store-brand" value="${_esc(this._opts.store_brand || '')}" placeholder="${_esc(this._t('placeholder.store_brand', {}, 'e.g. Bosch'))}"></div>
-          <div class="wd-field"><label>${this._t('lbl.store_model', {}, 'Appliance model')}</label><input type="text" id="wd-store-model" value="${_esc(this._opts.store_model || '')}" placeholder="${_esc(this._t('placeholder.store_model', {}, 'e.g. WAT28401'))}"></div>
-        </div>
-        <div class="wd-card-actions"><button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-save-appliance" ${busy ? 'disabled' : ''}>${this._t('btn.save_appliance', {}, 'Save appliance')}</button></div>
-        ${connBlock}
-      ` : ''}
+      ${on ? connBlock : ''}
     </div>`;
   }
 
   // ── Community Store data ─────────────────────────────────────────────────────
 
   async _loadStoreStatus(eid) {
-    if (!this._opts.enable_online_features) { this._storeStatus = { enabled: false }; this._storeConnected = false; return; }
+    if (!this._onlineEnabled()) { this._storeStatus = { enabled: false }; this._storeConnected = false; return; }
     try {
       const r = await this._ws({ type: `${_DOMAIN}/store_status`, entry_id: eid });
       if (!this._isActiveEntry(eid)) return;  // device switched mid-flight
@@ -6327,10 +6461,22 @@ class HaWashdataPanel extends HTMLElement {
     this._storeConnectListener = async (e) => {
       if (e.origin !== expectedOrigin) return;
       const d = e.data;
-      if (!d || d.type !== 'washdata-connect') return;
+      if (!d) return;
       const dev = this._devices[this._selIdx];
       if (!dev) return;
       const eid = dev.entry_id;
+      // A brand/device just created on the contribute page: preselect it + refresh.
+      if (d.type === 'washdata-device-created') {
+        const patch = {};
+        if (d.brand) patch.store_brand = d.brand;
+        if (d.model) patch.store_model = d.model;
+        this._opts = { ...this._opts, ...patch };
+        this._catalog.brands = undefined; this._catalog.devices = undefined; this._catalog.forBrand = null;
+        this._showToast(this._t('toast.appliance_added', {}, 'Appliance added - awaiting approval'));
+        this._render();
+        return;
+      }
+      if (d.type !== 'washdata-connect') return;
       try {
         const r = await this._ws({ type: `${_DOMAIN}/store_connect`, entry_id: eid, refresh_token: d.refreshToken, uid: d.uid, name: d.displayName });
         if (r && r.error) { this._showToast(this._t('toast.store_connect_failed', {error: r.error}, 'Connect failed: ' + r.error), 'error'); return; }
@@ -6743,6 +6889,7 @@ class HaWashdataPanel extends HTMLElement {
     if (m.type === 'profile-panel') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlProfilePanel(m)}</div></div>`;
     if (m.type === 'profile-group') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlProfileGroupModal(m)}</div></div>`;
     if (m.type === 'compare-cycles') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlCompareModal(m)}</div></div>`;
+    if (m.type === 'gear-settings') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlGearModal(m)}</div></div>`;
 
     let body = '';
     if (m.type === 'confirm') {
@@ -6899,7 +7046,7 @@ class HaWashdataPanel extends HTMLElement {
       // Share to community store: only for recorded/golden reference cycles, and
       // only when online features are enabled AND a store account is connected.
       const isGolden = !!(ml && ml.ml_review && ml.ml_review.golden);
-      const canShare = this._canEdit() && this._opts.enable_online_features && this._storeConnected && isGolden;
+      const canShare = this._canEdit() && this._onlineEnabled() && this._storeConnected && isGolden;
       const shareBtn = canShare
         ? `<button class="wd-btn wd-btn-secondary" data-action="store-share-cycle" data-cid="${_esc(m.cycleId)}" data-prof="${_esc(cur.profile_name || '')}">${this._t('btn.share_to_store', {}, 'Share to store')}</button>`
         : '';
@@ -7419,6 +7566,33 @@ class HaWashdataPanel extends HTMLElement {
       else if (sub === 'maintenance') this._fetchMaintenance(dev.entry_id).then(() => { if (this._panelSubtab === 'maintenance') this._render(); });
       else if (sub === 'ml') this._fetchTabData();
     }));
+
+    // Header gear overlay sub-nav (My Preferences / Panel Settings / Access /
+    // Online). Uses data-gtab so it never collides with the main tab router.
+    sr.querySelectorAll('[data-gtab]').forEach(btn => btn.addEventListener('click', () => {
+      this._gearTab = btn.dataset.gtab;
+      if (this._modal && this._modal.type === 'gear-settings') this._modal.tab = this._gearTab;
+      const dev = this._devices[this._selIdx];
+      if (this._gearTab === 'online' && dev && this._onlineEnabled()) {
+        this._ensureStoreConnectListener();
+        this._loadStoreStatus(dev.entry_id).then(() => { if (this._modal && this._modal.type === 'gear-settings') this._render(); });
+      }
+      this._render();
+    }));
+
+    // Store-backed brand/model picker inputs (Basic > Device info). Changing the
+    // brand reloads the model catalog; changing the model re-resolves its tag.
+    const brandInput = sr.getElementById('wd-store-brand');
+    if (brandInput) brandInput.addEventListener('change', () => {
+      this._opts = { ...this._opts, store_brand: brandInput.value.trim() };
+      this._catalog.forBrand = null; this._catalog.devices = undefined;
+      this._render();
+    });
+    const modelInput = sr.getElementById('wd-store-model');
+    if (modelInput) modelInput.addEventListener('change', () => {
+      this._opts = { ...this._opts, store_model: modelInput.value.trim() };
+      this._render();
+    });
 
     // F3: Playground canvas pointer interaction (threshold drag + scrub)
     const pgCanvas = sr.getElementById('wd-pg-canvas');
@@ -8389,18 +8563,23 @@ class HaWashdataPanel extends HTMLElement {
       });
 
     // ── Community Store ──────────────────────────────────────────────────────
+    } else if (a === 'open-settings') {
+      this._modal = { type: 'gear-settings', tab: this._gearTab || 'prefs' };
+      this._render();
+
     } else if (a === 'store-toggle-online') {
+      // Online features are integration-wide: persist via the global store_set_online.
       const on = !!btn.checked;
       this._busyRun('store-account', async () => {
-        const ok = await this._saveStoreOptions({ enable_online_features: on });
-        if (ok && on) { await this._loadStoreStatus(eid); this._ensureStoreConnectListener(); }
-        else if (ok) { this._storeStatus = { enabled: false }; this._storeConnected = false; }
+        try {
+          const r = await this._ws({ type: `${_DOMAIN}/store_set_online`, entry_id: eid, enabled: on });
+          this._constants.storeOnlineEnabled = !!(r && r.enabled);
+          if (this._constants.storeOnlineEnabled) { await this._loadStoreStatus(eid); this._ensureStoreConnectListener(); }
+          else { this._storeStatus = { enabled: false }; this._storeConnected = false; }
+        } catch (e) {
+          this._showToast(this._t('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+        }
       });
-
-    } else if (a === 'store-save-appliance') {
-      const brand = (sr.getElementById('wd-store-brand')?.value || '').trim();
-      const model = (sr.getElementById('wd-store-model')?.value || '').trim();
-      this._busyRun('store-account', async () => { await this._saveStoreOptions({ store_brand: brand, store_model: model }); });
 
     } else if (a === 'store-connect') {
       const origin = this._constants.storeWebOrigin;
@@ -8415,6 +8594,47 @@ class HaWashdataPanel extends HTMLElement {
           await this._loadStoreStatus(eid);
           this._showToast(this._t('toast.store_disconnected', {}, 'Disconnected from the community store'));
         } catch (e) { this._showToast(this._t('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
+      });
+
+    } else if (a === 'store-approved-filter') {
+      this._catalog.approvedOnly = !!btn.checked;
+      this._catalog.brands = undefined; this._catalog.devices = undefined; this._catalog.forBrand = null;
+      this._render();
+
+    } else if (a === 'store-add-appliance') {
+      const origin = this._constants.storeWebOrigin;
+      if (!origin) { this._showToast(this._t('toast.store_unavailable', {}, 'The community store is not available.'), 'error'); return; }
+      this._ensureStoreConnectListener();
+      const modelEl = sr.getElementById('wd-store-model');
+      const q = new URLSearchParams({
+        type: this._opts.device_type || '', brand: this._opts.store_brand || '',
+        model: (modelEl && modelEl.value) || this._opts.store_model || '', origin: location.origin,
+      }).toString();
+      window.open(origin + '/create.html?' + q, 'washdata_create', 'width=560,height=760');
+
+    } else if (a === 'store-confirm-device') {
+      const did = btn.dataset.deviceId;
+      this._busyRun('store-account', async () => {
+        try {
+          const r = await this._ws({ type: `${_DOMAIN}/store_confirm_device`, entry_id: eid, device_id: did });
+          if (r && r.error) { this._showToast(this._t('toast.store_error', {error: r.error}, 'Error: ' + r.error), 'error'); return; }
+          const d = (this._catalog.devices || []).find(x => String(x.id) === String(did));
+          if (d && r) { d.confirmCount = r.confirmCount; d.status = r.status; }
+          this._showToast(r && r.status === 'approved' ? this._t('toast.device_approved', {}, 'Approved by the community') : this._t('toast.thanks_confirming', {}, 'Thanks for confirming'));
+          this._render();
+        } catch (e2) { this._showToast(this._t('toast.store_error', {error: e2.message || e2}, 'Error: ' + (e2.message || e2)), 'error'); }
+      });
+
+    } else if (a === 'store-rate-device') {
+      const did = btn.dataset.deviceId;
+      const rating = parseInt(btn.dataset.rating, 10);
+      if (!(rating >= 1 && rating <= 5)) return;
+      this._busyRun('store-account', async () => {
+        try {
+          const r = await this._ws({ type: `${_DOMAIN}/store_rate_device`, entry_id: eid, device_id: did, rating });
+          if (r && r.error) { this._showToast(this._t('toast.store_error', {error: r.error}, 'Error: ' + r.error), 'error'); return; }
+          this._showToast(this._t('toast.rating_saved', {}, 'Quality rating saved'));
+        } catch (e2) { this._showToast(this._t('toast.store_error', {error: e2.message || e2}, 'Error: ' + (e2.message || e2)), 'error'); }
       });
 
     } else if (a === 'store-search') {

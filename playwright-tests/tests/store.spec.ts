@@ -12,16 +12,19 @@ import { bootPanel, clickTab, assertWsCalled } from '../helpers/panel';
 import constants from '../fixtures/mock-data/constants.json';
 import optionsData from '../fixtures/mock-data/options.json';
 
-// Constants with the community store advertised as available.
+// Constants with the community store advertised as available AND enabled.
+// Online features are now integration-wide (device-agnostic): the panel reads
+// store_online_enabled from constants, not a per-device option.
 const STORE_CONSTANTS = {
   ...constants,
   store_online_available: true,
+  store_online_enabled: true,
   store_web_origin: 'http://localhost:4567',
 };
 
-// Device options with online features opted in + a declared appliance.
+// Device options with a declared appliance (brand/model are still per-device).
 function storeOptions(extra: Record<string, unknown> = {}) {
-  return { options: { ...optionsData, enable_online_features: true, store_brand: 'Bosch', store_model: 'WAT28401', ...extra } };
+  return { options: { ...optionsData, store_brand: 'Bosch', store_model: 'WAT28401', ...extra } };
 }
 
 const SEARCH_RESULTS = {
@@ -68,8 +71,8 @@ function storeHandlers(extra: Record<string, unknown> = {}) {
 test('store tab is hidden when online features are disabled', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, {
-    'ha_washdata/get_constants': STORE_CONSTANTS,
-    'ha_washdata/get_options': storeOptions({ enable_online_features: false }),
+    'ha_washdata/get_constants': { ...STORE_CONSTANTS, store_online_enabled: false },
+    'ha_washdata/get_options': storeOptions(),
   });
   await expect(page.locator('button.wd-tab[data-tab="store"]')).toHaveCount(0);
 });
@@ -145,12 +148,28 @@ test('importing a reference cycle calls store_import_cycle', async ({ page }) =>
   expect(calls[0]).toHaveProperty('new_profile_name', 'Cotton 40°C');
 });
 
-test('settings tab shows the connected community-store account with a disconnect action', async ({ page }) => {
+test('gear "Online & Community" shows the connected account with a disconnect action', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, storeHandlers());
-  await clickTab(page, 'settings');
+  // Online features + the GitHub connection now live in the header gear overlay.
+  await page.locator('[data-action="open-settings"]').click();
+  await page.locator('[data-gtab="online"]').click();
   const disconnect = page.locator('[data-action="store-disconnect"]');
   await expect(disconnect).toBeVisible({ timeout: 8_000 });
   await disconnect.click();
   await assertWsCalled(page, 'ha_washdata/store_disconnect');
+});
+
+test('gear online toggle persists via the global store_set_online command', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    ...storeHandlers(),
+    'ha_washdata/get_constants': { ...STORE_CONSTANTS, store_online_enabled: false },
+    'ha_washdata/store_set_online': { enabled: true },
+  });
+  await page.locator('[data-action="open-settings"]').click();
+  await page.locator('[data-gtab="online"]').click();
+  await page.locator('input[data-action="store-toggle-online"]').click();
+  const calls = await assertWsCalled(page, 'ha_washdata/store_set_online');
+  expect(calls[0]).toHaveProperty('enabled', true);
 });

@@ -1,28 +1,40 @@
 /**
- * Advanced / Maintenance / Logs tab tests.
- * Covers: diagnostics section, log viewer, preferences, CRUD operations on maintenance items.
+ * Advanced tab tests (device-scoped tools only: Maintenance, Diagnostics, ML).
+ * My Preferences / Panel Settings / Access Control / Online moved to the header
+ * gear (see gear.spec.ts). Logs were removed entirely.
  */
 
 import { test, expect } from '@playwright/test';
-import { bootPanel, clickTab, assertWsCalled, setHandler } from '../helpers/panel';
+import { bootPanel, clickTab, assertWsCalled } from '../helpers/panel';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
   await bootPanel(page);
 });
 
-// ─── Diagnostics ────────────────────────────────────────────────────────────
+// ─── Default subtab ───────────────────────────────────────────────────────────
 
-test('advanced tab renders Preferences section by default', async ({ page }) => {
+test('advanced tab renders Maintenance by default', async ({ page }) => {
   await clickTab(page, 'advanced');
-  // The default subtab in the Advanced panel is "My Preferences"
-  const prefsTitle = page.locator('.wd-card-title').filter({ hasText: /Preferences/i }).first();
-  await expect(prefsTitle).toBeVisible({ timeout: 8_000 });
+  const maintTab = page.locator('[data-ptab="maintenance"]').first();
+  await expect(maintTab).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('button[data-action="maint-add"]').first()).toBeVisible({ timeout: 8_000 });
 });
+
+test('Logs subtab is gone from Advanced', async ({ page }) => {
+  await clickTab(page, 'advanced');
+  await expect(page.locator('[data-ptab="logs"]')).toHaveCount(0);
+});
+
+test('Logs header button is gone (replaced by the settings gear)', async ({ page }) => {
+  await expect(page.locator('[data-action="toggle-log-drawer"]')).toHaveCount(0);
+  await expect(page.locator('[data-action="open-settings"]')).toBeVisible();
+});
+
+// ─── Diagnostics ────────────────────────────────────────────────────────────
 
 test('diagnostics section fetches diagnostics data', async ({ page }) => {
   await clickTab(page, 'advanced');
-  // Navigate to the diagnostics subtab
   const diagTab = page.locator('[data-ptab="diagnostics"]').first();
   await expect(diagTab).toBeVisible({ timeout: 5_000 });
   await diagTab.click();
@@ -32,94 +44,14 @@ test('diagnostics section fetches diagnostics data', async ({ page }) => {
 test('diagnostics shows storage statistics', async ({ page }) => {
   await page.evaluate(() => {
     window.__ws_handlers['ha_washdata/get_diagnostics'] = () => ({
-      stats: {
-        file_size_kb: 200,
-        total_cycles: 42,
-        total_profiles: 3,
-        debug_traces_count: 0,
-      },
+      stats: { file_size_kb: 200, total_cycles: 42, total_profiles: 3, debug_traces_count: 0 },
     });
   });
   await clickTab(page, 'advanced');
   const diagTab = page.locator('[data-ptab="diagnostics"]').first();
   await expect(diagTab).toBeVisible({ timeout: 5_000 });
   await diagTab.click();
-  // 42 cycles should appear somewhere in the diagnostics section
   await expect(page.locator('text=42').first()).toBeVisible({ timeout: 8_000 });
-});
-
-// ─── Logs ───────────────────────────────────────────────────────────────────
-
-test('log viewer fetches logs on navigation (admin only subtab)', async ({ page }) => {
-  await clickTab(page, 'advanced');
-  // Logs subtab is admin-only (data-ptab="logs")
-  const logsSubtab = page.locator('[data-ptab="logs"]').first();
-  await expect(logsSubtab).toBeVisible({ timeout: 5_000 });
-  await logsSubtab.click();
-  await assertWsCalled(page, 'ha_washdata/get_logs');
-});
-
-test('log entries render in the log viewer', async ({ page }) => {
-  await page.evaluate(() => {
-    window.__ws_handlers['ha_washdata/get_logs'] = () => ({
-      logs: [
-        { ts: '2026-07-11T09:00:00+00:00', level: 'info', msg: 'Cycle started' },
-        { ts: '2026-07-11T09:01:00+00:00', level: 'debug', msg: 'Power reading: 820W' },
-        { ts: '2026-07-11T09:05:00+00:00', level: 'info', msg: 'Matched profile: Cotton 40°C' },
-      ],
-    });
-  });
-  await clickTab(page, 'advanced');
-  const logsSubtab = page.locator('[data-ptab="logs"]').first();
-  await expect(logsSubtab).toBeVisible({ timeout: 5_000 });
-  await logsSubtab.click();
-  await expect(page.locator('text=Cycle started').first()).toBeVisible({ timeout: 8_000 });
-});
-
-test('log viewer filters by component and search (client-side)', async ({ page }) => {
-  await page.evaluate(() => {
-    window.__ws_handlers['ha_washdata/get_logs'] = () => ({
-      logs: [
-        { ts: 1752200000, level: 'INFO', logger: 'manager', device: 'Dishwasher', msg: 'Cycle started' },
-        { ts: 1752200100, level: 'INFO', logger: 'playground', device: 'Dishwasher', msg: 'Optimize sweep value 120' },
-      ],
-    });
-  });
-  await clickTab(page, 'advanced');
-  await page.locator('[data-ptab="logs"]').first().click();
-  await expect(page.locator('text=Cycle started').first()).toBeVisible({ timeout: 8_000 });
-  // Component filter -> only playground records remain.
-  await page.locator('.wd-log-filter[data-logfilter="component"][data-ctx="page"]').selectOption('playground');
-  await expect(page.locator('text=Optimize sweep value 120').first()).toBeVisible();
-  await expect(page.locator('text=Cycle started')).toHaveCount(0);
-  // Reset component; search narrows instead.
-  await page.locator('.wd-log-filter[data-logfilter="component"][data-ctx="page"]').selectOption('');
-  await page.locator('.wd-log-filter[data-logfilter="search"][data-ctx="page"]').fill('sweep');
-  await expect(page.locator('text=Optimize sweep value 120').first()).toBeVisible();
-  await expect(page.locator('text=Cycle started')).toHaveCount(0);
-});
-
-// ─── Preferences / Panel Config ─────────────────────────────────────────────
-
-test('preferences section renders by default', async ({ page }) => {
-  await clickTab(page, 'advanced');
-  // "My Preferences" is the default subtab content
-  const prefsSection = page.locator('text=My Preferences').first();
-  await expect(prefsSection).toBeVisible({ timeout: 8_000 });
-});
-
-test('preferences fetches panel config', async ({ page }) => {
-  await clickTab(page, 'advanced');
-  await assertWsCalled(page, 'ha_washdata/get_panel_config');
-});
-
-test('saving preferences calls set_user_prefs WS command', async ({ page }) => {
-  await clickTab(page, 'advanced');
-  // Preferences are the default subtab; save button uses data-action="save-prefs"
-  const saveBtn = page.locator('button[data-action="save-prefs"]').first();
-  await expect(saveBtn).toBeVisible({ timeout: 8_000 });
-  await saveBtn.click();
-  await assertWsCalled(page, 'ha_washdata/set_user_prefs');
 });
 
 // ─── Export / Import ────────────────────────────────────────────────────────
@@ -142,14 +74,13 @@ test('import config button is present in diagnostics subtab', async ({ page }) =
   await expect(importBtn).toBeVisible({ timeout: 8_000 });
 });
 
-// ─── Recorded / Manual Recording ────────────────────────────────────────────
+// ─── Maintenance ──────────────────────────────────────────────────────────────
 
 test('maintenance subtab is visible in advanced tab', async ({ page }) => {
   await clickTab(page, 'advanced');
   const maintTab = page.locator('[data-ptab="maintenance"]').first();
   await expect(maintTab).toBeVisible({ timeout: 8_000 });
   await maintTab.click();
-  // Maintenance section renders an "Add maintenance event" button
   const maintContent = page.locator('button[data-action="maint-add"]').first();
   await expect(maintContent).toBeVisible({ timeout: 5_000 });
 });
