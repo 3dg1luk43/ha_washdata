@@ -149,7 +149,14 @@
     "delete_selected": "Delete selected ({n})",
     "group_suggest": "Group {n}: {members}",
     "pg_apply_to_settings": "Save to settings",
-    "pg_apply_to_settings_tip": "Copy the values you edited here into this device's live settings"
+    "pg_apply_to_settings_tip": "Copy the values you edited here into this device's live settings",
+    "search": "Search",
+    "import": "Import",
+    "disconnect": "Disconnect",
+    "connect_github": "Connect GitHub",
+    "save_appliance": "Save appliance",
+    "share_to_store": "Share to store",
+    "share": "Share"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -258,7 +265,9 @@
     "tools_and_data": "Tools & Data",
     "wipe_history": "Wipe History",
     "recommendations": "Recommendations ({n})",
-    "pg_across_cycles": "Across your cycles"
+    "pg_across_cycles": "Across your cycles",
+    "community_store": "Community Store",
+    "online_account": "Community Store & online features"
   },
   "health": {
     "fair": "Acceptable profile quality",
@@ -480,7 +489,10 @@
     "pg_load_run": "Reload this run",
     "pg_match_confidence": "Match confidence",
     "pg_envelope_fit": "Envelope fit",
-    "pg_envelope_fit_tip": "How closely the cycle sits inside this profile's saved power envelope - a different lens than match confidence."
+    "pg_envelope_fit_tip": "How closely the cycle sits inside this profile's saved power envelope - a different lens than match confidence.",
+    "enable_online": "Enable online features",
+    "store_brand": "Appliance brand",
+    "store_model": "Appliance model"
   },
   "log": {
     "all_levels": "All levels",
@@ -561,7 +573,9 @@
     "wipe_all_msg": "⚠️ This permanently deletes ALL cycles and profiles. This cannot be undone.",
     "wipe_all_ok": "Wipe Everything",
     "force_stop_title": "Force Stop Cycle",
-    "force_stop_msg": "Force-stop the active cycle now? The cycle will be saved as interrupted."
+    "force_stop_msg": "Force-stop the active cycle now? The cycle will be saved as interrupted.",
+    "store_import": "Import reference cycle",
+    "store_share": "Share to community store"
   },
   "msg": {
     "appliance_monitor": "Appliance monitor",
@@ -750,7 +764,10 @@
     "pg_apply_settings_confirm": "Save these {n} setting(s) to this device? {list}",
     "no_logs_match": "No log records match these filters.",
     "pg_analysis_hint2": "Pick a cycle and press Run to load match analysis.",
-    "pg_analysis_empty2": "Press Run to see match analysis."
+    "pg_analysis_empty2": "Press Run to see match analysis.",
+    "store_enable_hint": "Enable online features in Settings to browse and import community reference cycles.",
+    "online_intro": "Share and download reference cycles with other WashData users. All online features are opt-in and off by default.",
+    "store_share_intro": "Upload this reference cycle so others with the same appliance can use it. It is reviewed before appearing publicly."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Sudden drop treated as immediate end",
@@ -798,7 +815,9 @@
     "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "add a person…",
     "phase_name": "e.g. Pre-wash",
-    "profile_name": "e.g. Cotton 40°C"
+    "profile_name": "e.g. Cotton 40°C",
+    "store_brand": "e.g. Bosch",
+    "store_model": "e.g. WAT28401"
   },
   "pref": {
     "date_absolute": "Absolute (e.g. 14:32 on 2 Jul)",
@@ -1419,7 +1438,8 @@
     "settings": "Settings",
     "status": "Overview",
     "subtab_phase_catalog": "Phase Catalog",
-    "subtab_profiles": "Profiles"
+    "subtab_profiles": "Profiles",
+    "store": "Store"
   },
   "tag": {
     "early_end": "Early end",
@@ -1499,7 +1519,21 @@
     "processed": "Processed {bits}",
     "processed_cycles": "{n} cycles",
     "processed_suggestions": "{n} suggestion(s)",
-    "processed_models": "{n} model(s) promoted"
+    "processed_models": "{n} model(s) promoted",
+    "store_search_failed": "Search failed: {error}",
+    "store_connect_failed": "Connect failed: {error}",
+    "store_connected": "Connected to the community store",
+    "store_disconnected": "Disconnected from the community store",
+    "store_error": "Error: {error}",
+    "store_unavailable": "The community store is not available.",
+    "store_pick_profile": "Pick a profile to merge into",
+    "store_name_required": "Enter a profile name",
+    "store_import_failed": "Import failed: {error}",
+    "store_imported": "Imported into {profile}",
+    "store_program_required": "Enter a program name",
+    "store_no_appliance": "Set your appliance brand and model in Settings first.",
+    "store_share_failed": "Share failed: {error}",
+    "store_shared": "Shared to the community store - pending review."
   },
   "trend": {
     "down": "Trending down",
@@ -1538,5 +1572,24 @@
     "notify_milestone": "A milestone notification would be sent.",
     "notify_held": "A notification was held back for quiet hours.",
     "finished": "The cycle reached a terminal state and ended."
+  },
+  "store": {
+    "browse": "Browse",
+    "device": "Device",
+    "favorites": "Favourites",
+    "search_ph": "Search by brand or model…",
+    "no_results": "No matching appliances found. Try a different search.",
+    "n_programs": "{n} programs",
+    "n_cycles": "{n} cycles",
+    "no_programs": "No shared programs for this appliance yet.",
+    "no_cycles": "No reference cycles shared for this program yet.",
+    "anon": "anonymous",
+    "uploaded_by": "Shared by {name}",
+    "connected_as": "Connected as {name}",
+    "not_connected": "Not connected. Connect a GitHub account to share your own cycles.",
+    "import_new": "New profile",
+    "import_merge": "Merge into existing",
+    "merge_target": "Merge into profile",
+    "description": "Description (optional)"
   }
 }

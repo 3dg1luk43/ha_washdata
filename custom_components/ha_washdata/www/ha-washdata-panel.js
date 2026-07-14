@@ -745,6 +745,22 @@ button.wd-profile-card { display: block; }
 /* D2: mini duration sparkline on profile cards */
 .wd-profile-name { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .wd-prof-spark { margin-left: auto; width: 64px; height: 20px; display: block; flex-shrink: 0; }
+/* Community Store */
+.wd-store-crumbs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; font-size: .85em; }
+.wd-crumb { background: none; border: none; color: var(--primary-color); cursor: pointer; padding: 2px 4px; font: inherit; }
+.wd-crumb:hover { text-decoration: underline; }
+.wd-crumb.active { color: var(--primary-text-color); font-weight: 700; cursor: default; }
+.wd-crumb-sep { color: var(--secondary-text-color); }
+.wd-store-search { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.wd-store-search input { flex: 1; min-width: 180px; padding: 8px 11px; border-radius: 6px; border: 1px solid var(--divider-color); background: var(--secondary-background-color); color: var(--primary-text-color); font-size: .9em; }
+.wd-store-list { display: flex; flex-direction: column; gap: 8px; }
+.wd-store-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; width: 100%; cursor: pointer; padding: 12px 14px; }
+.wd-store-item-title { font-weight: 600; }
+.wd-store-item-meta { display: flex; gap: 12px; font-size: .8em; color: var(--secondary-text-color); flex-shrink: 0; }
+.wd-store-cycle-top { display: flex; align-items: center; gap: 12px; }
+.wd-store-cycle-stats { flex: 1; min-width: 0; }
+.wd-store-spark { width: 120px; height: 36px; flex-shrink: 0; display: block; background: var(--secondary-background-color); border-radius: 6px; }
+.wd-store-conn { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
 .wd-empty { text-align: center; padding: 48px 24px; color: var(--secondary-text-color); }
 .wd-empty .wd-icon { font-size: 3em; margin-bottom: 10px; }
 .wd-error-state { display: flex; align-items: center; gap: 10px; padding: 10px 14px; margin-bottom: 10px; border-radius: var(--wd-radius-md); background: var(--secondary-background-color); border: 1px solid var(--divider-color); color: var(--error-color, #b71c1c); font-size: .9em; }
@@ -1495,7 +1511,7 @@ class HaWashdataPanel extends HTMLElement {
     this._hassUpdateThrottle = null;
     this._evtUnsubs = [];
     // Data
-    this._constants = { stateColors: {}, deviceTypes: [], mlLabEnabled: false, mlSuggestionsEnabled: false, mlTrainingAvailable: false };
+    this._constants = { stateColors: {}, deviceTypes: [], mlLabEnabled: false, mlSuggestionsEnabled: false, mlTrainingAvailable: false, storeOnlineAvailable: false, storeWebOrigin: '' };
     this._constantsLoaded = false;
     this._devices = [];
     this._cycles = [];
@@ -1614,6 +1630,18 @@ class HaWashdataPanel extends HTMLElement {
     this._pgSweepTo = '';
     this._pgSweepSteps = 5;
     this._pgLoading = false;        // data load in progress
+    // Community Store (online features) — breadcrumb browse state
+    this._storeView = 'brands';     // 'brands' | 'device' | 'profile'
+    this._storeQuery = '';          // brand/model search box text
+    this._storeDevices = [];        // store_search_devices results
+    this._storeDevice = null;       // selected store device {id, brand, model, ...}
+    this._storeProfiles = [];       // store_get_profiles items for the selected device
+    this._storeProfile = null;      // selected store profile {id, program, cycleCount}
+    this._storeCycles = [];         // store_get_cycles items for the selected profile
+    this._storeStatus = null;       // store_status response (null = not yet fetched)
+    this._storeConnected = false;   // convenience flag mirrored from store_status
+    this._storeLoading = false;     // a store list fetch is in flight
+    this._storeConnectListener = null; // bound window 'message' handler (attached once)
   }
 
   set hass(hass) {
@@ -1652,6 +1680,8 @@ class HaWashdataPanel extends HTMLElement {
     this._flushPendingDeletes();
     // Remove the modal keydown listener.
     if (this._kbdHandler && this.shadowRoot) { this.shadowRoot.removeEventListener('keydown', this._kbdHandler); this._kbdHandler = null; }
+    // Remove the community-store OAuth message listener.
+    if (this._storeConnectListener) { window.removeEventListener('message', this._storeConnectListener); this._storeConnectListener = null; }
   }
 
   // ── Init ─────────────────────────────────────────────────────────────────
@@ -2074,7 +2104,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._constantsLoaded) {
         try {
           const c = await this._ws({ type: `${_DOMAIN}/get_constants` });
-          this._constants = { stateColors: c.state_colors || {}, deviceTypes: c.device_types || [], mlLabEnabled: !!(c.ml_lab_enabled), mlSuggestionsEnabled: !!(c.ml_suggestions_enabled), mlTrainingAvailable: !!(c.ml_training_available) };
+          this._constants = { stateColors: c.state_colors || {}, deviceTypes: c.device_types || [], mlLabEnabled: !!(c.ml_lab_enabled), mlSuggestionsEnabled: !!(c.ml_suggestions_enabled), mlTrainingAvailable: !!(c.ml_training_available), storeOnlineAvailable: !!(c.store_online_available), storeWebOrigin: c.store_web_origin || '' };
         } catch (_) { /* fall back to humanized labels */ }
         try {
           this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
@@ -2130,6 +2160,15 @@ class HaWashdataPanel extends HTMLElement {
         await this._fetchCycles(dev.entry_id);
         await this._fetchSuggestions(dev.entry_id);
         await this._fetchProfiles(dev.entry_id);
+        // The Store tab's visibility depends on this._opts.enable_online_features,
+        // which is normally loaded per-tab. Prime it at boot ONLY when the backend
+        // exposes online features, so the tab can appear without visiting Settings.
+        // Also cache store connection state so the "Share to store" cycle action
+        // knows whether an account is connected regardless of the current tab.
+        if (this._constants.storeOnlineAvailable) {
+          try { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: dev.entry_id }); if (this._isActiveEntry(dev.entry_id)) this._opts = r.options || {}; } catch (_) {}
+          if (this._opts.enable_online_features) await this._loadStoreStatus(dev.entry_id);
+        }
       }
       // Log drawer: fetch asynchronously so it never delays the main poll;
       // _refreshLogDrawer patches just the drawer body when the fetch resolves.
@@ -2538,6 +2577,10 @@ class HaWashdataPanel extends HTMLElement {
     this._busy.delete('pg-history'); this._busy.delete('pg-sweep'); this._pgBatchProgress = null;
     // Cancel any pending detail re-run so it can't repopulate the outgoing device.
     if (this._pgDetailDebounceTimer) { clearTimeout(this._pgDetailDebounceTimer); this._pgDetailDebounceTimer = null; }
+    // Reset the Community Store browse on device change (status re-fetched per-tab).
+    this._storeView = 'brands'; this._storeDevice = null; this._storeProfile = null; this._storeQuery = '';
+    this._storeDevices = []; this._storeProfiles = []; this._storeCycles = [];
+    this._storeStatus = null; this._storeConnected = false; this._storeLoading = false;
     const dev = this._devices[this._selIdx];
     if (dev) await this._fetchSuggestions(dev.entry_id);
     this._fetchTabData();  // loads tab data incl. Status power-history + profiles
@@ -2618,6 +2661,11 @@ class HaWashdataPanel extends HTMLElement {
         // Always load pending feedbacks (cheap) so the merged "needs review"
         // queue in the Cycles list can flag them.
         try { const r = await this._ws({ type: `${_DOMAIN}/get_feedbacks`, entry_id: eid }); this._feedbacks = r.feedbacks || []; } catch (_) {}
+        // Refresh store connection state so the golden-cycle "Share to store"
+        // action reflects the current account (background; online features only).
+        if (this._constants.storeOnlineAvailable && this._opts.enable_online_features) {
+          this._loadStoreStatus(eid).then(() => { if (this._tab === 'history') this._render(); });
+        }
         // Attach ML assessment (health / review / events) to cycles so the
         // unified cycle modal can inspect + review from one place. This is the
         // slowest fetch (it scores every cycle), so load it in the BACKGROUND:
@@ -2671,6 +2719,19 @@ class HaWashdataPanel extends HTMLElement {
           this._autoLoading = false;
           if (this._tab === 'settings') this._renderPreservingFormEdits();
         });
+        // Community-store account card lives at the bottom of the Settings tab;
+        // load the connection status in the background so it fills in when ready.
+        if (this._constants.storeOnlineAvailable) {
+          this._loadStoreStatus(eid).finally(() => { if (this._tab === 'settings') this._renderPreservingFormEdits(); });
+        }
+      } else if (this._tab === 'store') {
+        try { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }); if (!this._isActiveEntry(eid)) return; this._opts = r.options || {}; } catch (_) {}
+        if (!this._profiles.length) this._fetchProfiles(eid);  // needed for the import "merge into existing" dropdown
+        await this._loadStoreStatus(eid);
+        if (!this._isActiveEntry(eid)) return;
+        this._ensureStoreConnectListener();
+        // Kick off the initial browse in the background (renders its own spinner).
+        if (this._opts.enable_online_features) this._storeSearch(this._storeQuery);
       } else if (this._tab === 'advanced' && this._panelSubtab === 'ml') {
         const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
         if (!this._isActiveEntry(eid)) return;  // device switched mid-flight — drop stale response
@@ -2935,6 +2996,8 @@ class HaWashdataPanel extends HTMLElement {
     if (this._canEdit()) ids.push('settings');
     // F3: Playground (what-if simulator / A-B / DTW inspector) — edit access only.
     if (this._canEdit()) ids.push('playground');
+    // Community Store — only when the backend exposes it AND the user opted in.
+    if (this._canEdit() && this._constants.storeOnlineAvailable && this._opts.enable_online_features) ids.push('store');
     // Advanced is also reachable from the header gear; expose it as a tab too.
     ids.push('advanced');
     return ids.filter(id => admin || !hidden.includes(id));
@@ -3138,7 +3201,7 @@ class HaWashdataPanel extends HTMLElement {
     const confIndicator = this._conflictKeysFromOpts().size > 0 ? ' ⚠' : '';
     const pgBusy = this._busy.has('pg-sim') || this._busy.has('pg-sweep');
     const pgSpinner = pgBusy ? `<span class="wd-spin" style="margin-left:4px;vertical-align:middle"></span>` : '';
-    const labels = { status: this._t('tab.status',{},'Overview'), history: this._t('tab.history',{},'Cycles'), profiles: this._t('tab.profiles',{},'Profiles'), settings: this._t('tab.settings',{},'Settings') + confIndicator + sugDot, playground: this._t('tab.playground',{},'Playground') + pgSpinner, advanced: this._t('tab.advanced',{},'Advanced') };
+    const labels = { status: this._t('tab.status',{},'Overview'), history: this._t('tab.history',{},'Cycles'), profiles: this._t('tab.profiles',{},'Profiles'), settings: this._t('tab.settings',{},'Settings') + confIndicator + sugDot, playground: this._t('tab.playground',{},'Playground') + pgSpinner, store: this._t('tab.store',{},'Store'), advanced: this._t('tab.advanced',{},'Advanced') };
     const visible = this._visibleTabIds();
     if (!visible.includes(this._tab)) this._tab = 'status';
     const tabBtns = visible.map(id =>
@@ -3155,6 +3218,7 @@ class HaWashdataPanel extends HTMLElement {
       ${pane('profiles', this._htmlProfiles())}
       ${pane('settings', this._htmlSettings())}
       ${pane('playground', this._htmlPlayground())}
+      ${pane('store', this._htmlStore())}
       ${pane('advanced', this._htmlPanel())}
     `;
   }
@@ -3995,6 +4059,7 @@ class HaWashdataPanel extends HTMLElement {
         <p class="wd-info" style="margin-top:12px;font-size:.78em">${this._t('msg.saving_triggers_reload', {}, 'Saving triggers an integration reload. HA entities may briefly show as unavailable.')}</p>
       </div>
       ${this._htmlSettingsHistory()}
+      ${this._htmlStoreAccount()}
     `;
   }
 
@@ -6061,6 +6126,242 @@ class HaWashdataPanel extends HTMLElement {
     ${userCards || `<div class="wd-card"><p class="wd-info">${this._t('msg.no_other_users', {}, 'No other Home Assistant users found.')}</p></div>`}`;
   }
 
+  // ── Community Store tab ──────────────────────────────────────────────────────
+  // Breadcrumb browse: Brands/search → Device (its programs) → Program (its
+  // reference cycles). Every list is fetched via the store_* WS commands; the
+  // backend returns {disabled:true} when online features are off, which we
+  // surface as a friendly "enable it in Settings" note.
+
+  _htmlStore() {
+    if (!this._canEdit()) return `<div class="wd-empty">${this._t('msg.no_device_selected', {}, 'No device selected.')}</div>`;
+    // Defensive: the tab is only shown when the option is on, but the store_status
+    // fetch (or the option itself) may say otherwise — show the enable hint.
+    const st = this._storeStatus;
+    if (!this._opts.enable_online_features || (st && st.enabled === false)) {
+      return `<div class="wd-card"><div class="wd-card-title">${this._t('hdr.community_store', {}, 'Community Store')}</div>
+        <p class="wd-info">${this._t('msg.store_enable_hint', {}, 'Enable online features in Settings to browse and import community reference cycles.')}</p></div>`;
+    }
+    let body;
+    if (this._storeView === 'device') body = this._htmlStoreDevice();
+    else if (this._storeView === 'profile') body = this._htmlStoreProfile();
+    else body = this._htmlStoreBrands();
+    return `<div class="wd-card">
+      <div class="wd-card-title">${this._t('hdr.community_store', {}, 'Community Store')}</div>
+      ${this._htmlStoreCrumbs()}
+      ${body}
+    </div>`;
+  }
+
+  _htmlStoreCrumbs() {
+    const parts = [`<button class="wd-crumb ${this._storeView === 'brands' ? 'active' : ''}" data-action="store-nav" data-view="brands">${this._t('store.browse', {}, 'Browse')}</button>`];
+    if (this._storeDevice) {
+      const d = this._storeDevice;
+      const lbl = `${d.brand || ''} ${d.model || ''}`.trim() || this._t('store.device', {}, 'Device');
+      parts.push(`<span class="wd-crumb-sep">›</span>`);
+      parts.push(this._storeView === 'device'
+        ? `<span class="wd-crumb active">${_esc(lbl)}</span>`
+        : `<button class="wd-crumb" data-action="store-nav" data-view="device">${_esc(lbl)}</button>`);
+    }
+    if (this._storeProfile && this._storeView === 'profile') {
+      parts.push(`<span class="wd-crumb-sep">›</span>`);
+      parts.push(`<span class="wd-crumb active">${_esc(this._storeProfile.program || '')}</span>`);
+    }
+    return `<div class="wd-store-crumbs">${parts.join('')}</div>`;
+  }
+
+  _htmlStoreLoading() {
+    return `<div class="wd-empty" style="padding:24px"><div class="wd-icon">⏳</div>${this._t('msg.loading', {}, 'Loading…')}</div>`;
+  }
+
+  _htmlStoreBrands() {
+    const items = this._storeDevices || [];
+    const rows = items.map(d => {
+      const title = `${_esc(d.brand || '')} ${_esc(d.model || '')}`.trim() || this._t('store.device', {}, 'Device');
+      return `<button class="wd-card wd-store-item" data-action="store-open-device" data-device-id="${_esc(d.id)}">
+        <span class="wd-store-item-main">
+          <span class="wd-store-item-title">${title}</span>
+          ${d.applianceType ? `<span class="wd-info" style="display:block">${_esc(d.applianceType)}</span>` : ''}
+        </span>
+        <span class="wd-store-item-meta">
+          <span>${this._t('store.n_programs', {n: d.profileCount || 0}, `${d.profileCount || 0} programs`)}</span>
+          <span title="${_esc(this._t('store.favorites', {}, 'Favourites'))}">★ ${d.favoriteCount || 0}</span>
+        </span>
+      </button>`;
+    }).join('');
+    const list = this._storeLoading ? this._htmlStoreLoading()
+      : (items.length ? rows : `<p class="wd-info">${this._t('store.no_results', {}, 'No matching appliances found. Try a different search.')}</p>`);
+    return `
+      <div class="wd-store-search">
+        <input type="text" id="wd-store-q" placeholder="${_esc(this._t('store.search_ph', {}, 'Search by brand or model…'))}" value="${_esc(this._storeQuery)}" autocomplete="off" spellcheck="false">
+        <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-search">${this._t('btn.search', {}, 'Search')}</button>
+      </div>
+      <div class="wd-store-list">${list}</div>`;
+  }
+
+  _htmlStoreDevice() {
+    const items = this._storeProfiles || [];
+    const rows = items.map(p => `<button class="wd-card wd-store-item" data-action="store-open-profile" data-profile-id="${_esc(p.id)}">
+      <span class="wd-store-item-title">${_esc(p.program || '')}</span>
+      <span class="wd-store-item-meta"><span>${this._t('store.n_cycles', {n: p.cycleCount || 0}, `${p.cycleCount || 0} cycles`)}</span></span>
+    </button>`).join('');
+    const list = this._storeLoading ? this._htmlStoreLoading()
+      : (items.length ? rows : `<p class="wd-info">${this._t('store.no_programs', {}, 'No shared programs for this appliance yet.')}</p>`);
+    return `<div class="wd-store-list">${list}</div>`;
+  }
+
+  _htmlStoreProfile() {
+    const items = this._storeCycles || [];
+    const rows = items.map(c => {
+      const stats = c.stats || {};
+      const spark = this._storeSparkline((c.trace && c.trace.points) || []);
+      const dur = stats.duration != null ? _fmtDuration(stats.duration) : '-';
+      const energy = stats.energy_wh != null ? _fmtEnergy(stats.energy_wh / 1000) : '-';
+      const peak = stats.peak_w != null ? _fmtPower(stats.peak_w) : '-';
+      const uploader = _esc(c.uploaderName || this._t('store.anon', {}, 'anonymous'));
+      return `<div class="wd-card">
+        <div class="wd-store-cycle-top">
+          ${spark}
+          <div class="wd-store-cycle-stats">
+            <div><b>${dur}</b> · ${energy} · ${peak}</div>
+            <div class="wd-info">${this._t('store.uploaded_by', {name: uploader}, `Shared by ${uploader}`)} · ⬇ ${c.downloads || 0}</div>
+          </div>
+          <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-import" data-cycle-id="${_esc(c.id)}">${this._t('btn.import', {}, 'Import')}</button>
+        </div>
+      </div>`;
+    }).join('');
+    const list = this._storeLoading ? this._htmlStoreLoading()
+      : (items.length ? rows : `<p class="wd-info">${this._t('store.no_cycles', {}, 'No reference cycles shared for this program yet.')}</p>`);
+    return `<div class="wd-store-list">${list}</div>`;
+  }
+
+  // Minimal inline SVG sparkline from a [[t, w], ...] trace (no canvas needed for
+  // a static thumbnail). Scales time to width and power to height.
+  _storeSparkline(points) {
+    const pts = Array.isArray(points) ? points.filter(p => Array.isArray(p) && p.length >= 2) : [];
+    if (pts.length < 2) return `<svg class="wd-store-spark" viewBox="0 0 120 36" preserveAspectRatio="none" aria-hidden="true"></svg>`;
+    const ts = pts.map(p => p[0]);
+    const ws = pts.map(p => p[1]);
+    const tMin = Math.min(...ts), tMax = Math.max(...ts);
+    const wMax = Math.max(1, ...ws);
+    const W = 120, H = 36, pad = 2;
+    const xs = t => pad + (tMax > tMin ? (t - tMin) / (tMax - tMin) : 0) * (W - 2 * pad);
+    const ys = w => H - pad - (Math.max(0, w) / wMax) * (H - 2 * pad);
+    const poly = pts.map(p => `${xs(p[0]).toFixed(1)},${ys(p[1]).toFixed(1)}`).join(' ');
+    return `<svg class="wd-store-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="var(--primary-color)" stroke-width="1.5" points="${poly}"/></svg>`;
+  }
+
+  // Community-store account card (enable toggle + declared appliance + GitHub
+  // connect/disconnect). Device-scoped options saved via set_options; rendered
+  // in the Settings tab where this._opts is freshly loaded.
+  _htmlStoreAccount() {
+    if (!this._canEdit() || !(this._constants && this._constants.storeOnlineAvailable)) return '';
+    const on = !!this._opts.enable_online_features;
+    const st = this._storeStatus || {};
+    const connected = !!(on && st.connected);
+    const busy = this._busy.has('store-account');
+    const connBlock = !on ? '' : (connected
+      ? `<div class="wd-store-conn">
+          <span class="wd-info">${this._t('store.connected_as', {name: _esc(st.name || st.uid || '')}, `Connected as ${_esc(st.name || st.uid || '')}`)}</span>
+          <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="store-disconnect" ${busy ? 'disabled' : ''}>${this._t('btn.disconnect', {}, 'Disconnect')}</button>
+        </div>`
+      : `<div class="wd-store-conn">
+          <span class="wd-info">${this._t('store.not_connected', {}, 'Not connected. Connect a GitHub account to share your own cycles.')}</span>
+          <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-connect">${this._t('btn.connect_github', {}, 'Connect GitHub')}</button>
+        </div>`);
+    return `<div class="wd-card">
+      <div class="wd-card-title">${this._t('hdr.online_account', {}, 'Community Store & online features')}</div>
+      <p class="wd-info" style="margin-bottom:12px">${this._t('msg.online_intro', {}, 'Share and download reference cycles with other WashData users. All online features are opt-in and off by default.')}</p>
+      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" data-action="store-toggle-online" ${on ? 'checked' : ''} ${busy ? 'disabled' : ''}> ${this._t('lbl.enable_online', {}, 'Enable online features')}</label></div>
+      ${on ? `
+        <div class="wd-form-grid">
+          <div class="wd-field"><label>${this._t('lbl.store_brand', {}, 'Appliance brand')}</label><input type="text" id="wd-store-brand" value="${_esc(this._opts.store_brand || '')}" placeholder="${_esc(this._t('placeholder.store_brand', {}, 'e.g. Bosch'))}"></div>
+          <div class="wd-field"><label>${this._t('lbl.store_model', {}, 'Appliance model')}</label><input type="text" id="wd-store-model" value="${_esc(this._opts.store_model || '')}" placeholder="${_esc(this._t('placeholder.store_model', {}, 'e.g. WAT28401'))}"></div>
+        </div>
+        <div class="wd-card-actions"><button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-save-appliance" ${busy ? 'disabled' : ''}>${this._t('btn.save_appliance', {}, 'Save appliance')}</button></div>
+        ${connBlock}
+      ` : ''}
+    </div>`;
+  }
+
+  // ── Community Store data ─────────────────────────────────────────────────────
+
+  async _loadStoreStatus(eid) {
+    if (!this._opts.enable_online_features) { this._storeStatus = { enabled: false }; this._storeConnected = false; return; }
+    try {
+      const r = await this._ws({ type: `${_DOMAIN}/store_status`, entry_id: eid });
+      if (!this._isActiveEntry(eid)) return;  // device switched mid-flight
+      this._storeStatus = r || null;
+      this._storeConnected = !!(r && r.connected);
+    } catch (_) { /* leave prior status */ }
+  }
+
+  async _storeSearch(query) {
+    const dev = this._devices[this._selIdx];
+    if (!dev) return;
+    const eid = dev.entry_id;
+    this._storeQuery = query || '';
+    this._storeView = 'brands'; this._storeDevice = null; this._storeProfile = null;
+    this._storeProfiles = []; this._storeCycles = [];
+    this._storeLoading = true; this._render();
+    try {
+      const r = await this._ws({ type: `${_DOMAIN}/store_search_devices`, entry_id: eid, query: this._storeQuery, appliance_type: this._opts.device_type || '' });
+      if (!this._isActiveEntry(eid)) return;
+      if (r && r.disabled) { this._storeStatus = { enabled: false }; this._storeDevices = []; }
+      else this._storeDevices = (r && r.items) || [];
+    } catch (e) {
+      if (this._isActiveEntry(eid)) { this._storeDevices = []; this._showToast(this._t('toast.store_search_failed', {error: e.message || e}, 'Search failed: ' + (e.message || e)), 'error'); }
+    } finally {
+      if (this._isActiveEntry(eid)) { this._storeLoading = false; this._render(); }
+    }
+  }
+
+  // Attach the GitHub-connect popup message listener exactly once. The popup
+  // (served from the store web origin) posts {type:'washdata-connect', ...}; we
+  // validate the origin strictly against the configured store web origin.
+  _ensureStoreConnectListener() {
+    if (this._storeConnectListener) return;
+    const origin = this._constants.storeWebOrigin;
+    if (!origin) return;
+    let expectedOrigin;
+    try { expectedOrigin = new URL(origin).origin; } catch (_) { return; }
+    this._storeConnectListener = async (e) => {
+      if (e.origin !== expectedOrigin) return;
+      const d = e.data;
+      if (!d || d.type !== 'washdata-connect') return;
+      const dev = this._devices[this._selIdx];
+      if (!dev) return;
+      const eid = dev.entry_id;
+      try {
+        const r = await this._ws({ type: `${_DOMAIN}/store_connect`, entry_id: eid, refresh_token: d.refreshToken, uid: d.uid, name: d.displayName });
+        if (r && r.error) { this._showToast(this._t('toast.store_connect_failed', {error: r.error}, 'Connect failed: ' + r.error), 'error'); return; }
+        await this._loadStoreStatus(eid);
+        if (!this._isActiveEntry(eid)) return;
+        this._showToast(this._t('toast.store_connected', {}, 'Connected to the community store'));
+        this._render();
+      } catch (err) {
+        this._showToast(this._t('toast.store_connect_failed', {error: err.message || err}, 'Connect failed: ' + (err.message || err)), 'error');
+      }
+    };
+    window.addEventListener('message', this._storeConnectListener);
+  }
+
+  // Persist a partial set of device options via the shared set_options command
+  // (same path the Settings tab uses). Merges the patch into this._opts locally.
+  async _saveStoreOptions(patch) {
+    const dev = this._devices[this._selIdx];
+    if (!dev) return false;
+    const eid = dev.entry_id;
+    try {
+      await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: patch });
+      this._opts = { ...this._opts, ...patch };
+      this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
+      return true;
+    } catch (e) {
+      this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
+      return false;
+    }
+  }
+
   // ── Log drawer (slide-in side panel) ────────────────────────────────────────
 
   _htmlLogDrawer() {
@@ -6522,6 +6823,28 @@ class HaWashdataPanel extends HTMLElement {
           <select id="wd-relabel-profile"><option value="">${this._t('lbl.remove_label', {}, '- Remove label -')}</option>${this._profileOptions()}</select></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="bulk-relabel-ok">${this._t('btn.apply_label', {}, 'Apply Label')}</button></div>`;
+    } else if (m.type === 'store-import') {
+      // Choice: create a new local profile named after the store program, or
+      // merge the imported reference cycle into an existing local profile.
+      const newActive = m.mode !== 'merge';
+      const targetSel = `<select id="wd-store-import-target"><option value="">${this._t('lbl.select_profile', {}, 'Select Profile')}</option>${this._profileOptions()}</select>`;
+      body = `<h2>${this._t('modal.store_import', {}, 'Import reference cycle')}</h2>
+        <div class="wd-mode-bar">
+          <button class="wd-btn wd-btn-sm ${newActive ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="store-import-mode-new">${this._t('store.import_new', {}, 'New profile')}</button>
+          <button class="wd-btn wd-btn-sm ${!newActive ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="store-import-mode-merge">${this._t('store.import_merge', {}, 'Merge into existing')}</button>
+        </div>
+        ${newActive
+          ? `<div class="wd-field"><label>${this._t('lbl.new_profile_name', {}, 'New Profile Name')}</label><input type="text" id="wd-store-import-name" value="${_esc(m.program || '')}"></div>`
+          : `<div class="wd-field"><label>${this._t('store.merge_target', {}, 'Merge into profile')}</label>${targetSel}</div>`}
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="store-import-ok">${this._t('btn.import', {}, 'Import')}</button></div>`;
+    } else if (m.type === 'store-share') {
+      body = `<h2>${this._t('modal.store_share', {}, 'Share to community store')}</h2>
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.store_share_intro', {}, 'Upload this reference cycle so others with the same appliance can use it. It is reviewed before appearing publicly.')}</p>
+        <div class="wd-field"><label>${this._t('lbl.program', {}, 'Program')}</label><input type="text" id="wd-store-share-prog" value="${_esc(m.program || '')}"></div>
+        <div class="wd-field"><label>${this._t('store.description', {}, 'Description (optional)')}</label><textarea id="wd-store-share-desc" rows="2"></textarea></div>
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="store-share-ok">${this._t('btn.share', {}, 'Share')}</button></div>`;
     }
     return `<div class="wd-overlay"><div class="wd-modal" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${body}</div></div>`;
   }
@@ -6573,8 +6896,16 @@ class HaWashdataPanel extends HTMLElement {
 
     let controls = '';
     if (m.mode === 'view') {
+      // Share to community store: only for recorded/golden reference cycles, and
+      // only when online features are enabled AND a store account is connected.
+      const isGolden = !!(ml && ml.ml_review && ml.ml_review.golden);
+      const canShare = this._canEdit() && this._opts.enable_online_features && this._storeConnected && isGolden;
+      const shareBtn = canShare
+        ? `<button class="wd-btn wd-btn-secondary" data-action="store-share-cycle" data-cid="${_esc(m.cycleId)}" data-prof="${_esc(cur.profile_name || '')}">${this._t('btn.share_to_store', {}, 'Share to store')}</button>`
+        : '';
       controls = `<div class="wd-modal-actions">
         <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
+        ${shareBtn}
         ${this._canEdit() ? `<button class="wd-btn wd-btn-danger" data-maction="cyc-delete">${this._t('btn.delete', {}, 'Delete')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="cyc-label">${this._t('btn.label', {}, 'Label')}</button>` : ''}</div>`;
     } else if (m.mode === 'trim') {
@@ -8057,6 +8388,78 @@ class HaWashdataPanel extends HTMLElement {
         } catch (e) { this._showToast(this._t('msg.toast_revert_failed', {error: e.message || e}, 'Revert failed: ' + (e.message || e)), 'error'); }
       });
 
+    // ── Community Store ──────────────────────────────────────────────────────
+    } else if (a === 'store-toggle-online') {
+      const on = !!btn.checked;
+      this._busyRun('store-account', async () => {
+        const ok = await this._saveStoreOptions({ enable_online_features: on });
+        if (ok && on) { await this._loadStoreStatus(eid); this._ensureStoreConnectListener(); }
+        else if (ok) { this._storeStatus = { enabled: false }; this._storeConnected = false; }
+      });
+
+    } else if (a === 'store-save-appliance') {
+      const brand = (sr.getElementById('wd-store-brand')?.value || '').trim();
+      const model = (sr.getElementById('wd-store-model')?.value || '').trim();
+      this._busyRun('store-account', async () => { await this._saveStoreOptions({ store_brand: brand, store_model: model }); });
+
+    } else if (a === 'store-connect') {
+      const origin = this._constants.storeWebOrigin;
+      if (!origin) { this._showToast(this._t('toast.store_unavailable', {}, 'The community store is not available.'), 'error'); return; }
+      this._ensureStoreConnectListener();
+      window.open(origin + '/connect.html?origin=' + encodeURIComponent(location.origin), 'washdata_connect', 'width=480,height=640');
+
+    } else if (a === 'store-disconnect') {
+      this._busyRun('store-account', async () => {
+        try {
+          await this._ws({ type: `${_DOMAIN}/store_disconnect`, entry_id: eid });
+          await this._loadStoreStatus(eid);
+          this._showToast(this._t('toast.store_disconnected', {}, 'Disconnected from the community store'));
+        } catch (e) { this._showToast(this._t('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
+      });
+
+    } else if (a === 'store-search') {
+      const inp = sr.getElementById('wd-store-q');
+      this._storeSearch(inp ? inp.value : '');
+
+    } else if (a === 'store-nav') {
+      const view = btn.dataset.view;
+      if (view === 'brands') { this._storeView = 'brands'; this._storeDevice = null; this._storeProfile = null; this._render(); }
+      else if (view === 'device') { this._storeView = 'device'; this._storeProfile = null; this._render(); }
+
+    } else if (a === 'store-open-device') {
+      const id = btn.dataset.deviceId;
+      const d = (this._storeDevices || []).find(x => String(x.id) === String(id));
+      if (!d) return;
+      this._storeDevice = d; this._storeProfile = null; this._storeView = 'device';
+      this._storeProfiles = []; this._storeCycles = []; this._storeLoading = true; this._render();
+      this._ws({ type: `${_DOMAIN}/store_get_profiles`, entry_id: eid, device_id: d.id })
+        .then(r => { if (!this._isActiveEntry(eid) || this._storeView !== 'device') return; this._storeProfiles = (r && r.items) || []; })
+        .catch(() => { if (this._isActiveEntry(eid)) this._storeProfiles = []; })
+        .finally(() => { if (this._isActiveEntry(eid)) { this._storeLoading = false; this._render(); } });
+
+    } else if (a === 'store-open-profile') {
+      const id = btn.dataset.profileId;
+      const p = (this._storeProfiles || []).find(x => String(x.id) === String(id));
+      if (!p) return;
+      this._storeProfile = p; this._storeView = 'profile';
+      this._storeCycles = []; this._storeLoading = true; this._render();
+      this._ws({ type: `${_DOMAIN}/store_get_cycles`, entry_id: eid, profile_id: p.id })
+        .then(r => { if (!this._isActiveEntry(eid) || this._storeView !== 'profile') return; this._storeCycles = (r && r.items) || []; })
+        .catch(() => { if (this._isActiveEntry(eid)) this._storeCycles = []; })
+        .finally(() => { if (this._isActiveEntry(eid)) { this._storeLoading = false; this._render(); } });
+
+    } else if (a === 'store-import') {
+      const cid = btn.dataset.cycleId;
+      const program = (this._storeProfile && this._storeProfile.program) || '';
+      this._modal = { type: 'store-import', cycleId: cid, program, mode: 'new' };
+      this._render();
+
+    } else if (a === 'store-share-cycle') {
+      const cid = btn.dataset.cid;
+      const program = btn.dataset.prof || '';
+      this._modal = { type: 'store-share', cycleId: cid, program };
+      this._render();
+
     } else if (a === 'auto-new') {
       this._navigate('/config/automation/edit/new');
 
@@ -8540,6 +8943,56 @@ class HaWashdataPanel extends HTMLElement {
             this._showToast(this._t('toast.group_deleted', {}, 'Group deleted')); this._modal = null;
             await this._fetchProfileGroups(eid);
           } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+    }
+
+    // ---- Community Store: import a reference cycle ----
+    if (m && m.type === 'store-import') {
+      if (action === 'store-import-mode-new') { m.mode = 'new'; this._render(); return; }
+      if (action === 'store-import-mode-merge') { m.mode = 'merge'; this._render(); return; }
+      if (action === 'store-import-ok') {
+        const msg = { type: `${_DOMAIN}/store_import_cycle`, entry_id: eid, cycle_id: m.cycleId };
+        if (m.mode === 'merge') {
+          const target = sr.getElementById('wd-store-import-target')?.value || '';
+          if (!target) { this._showToast(this._t('toast.store_pick_profile', {}, 'Pick a profile to merge into'), 'error'); return; }
+          msg.target_profile = target;
+        } else {
+          const name = (sr.getElementById('wd-store-import-name')?.value || '').trim() || m.program;
+          if (!name) { this._showToast(this._t('toast.store_name_required', {}, 'Enter a profile name'), 'error'); return; }
+          msg.new_profile_name = name;
+        }
+        await this._busyRun('store-import', async () => {
+          try {
+            const r = await this._ws(msg);
+            if (r && r.error) { this._showToast(this._t('toast.store_import_failed', {error: r.error}, 'Import failed: ' + r.error), 'error'); return; }
+            this._modal = null;
+            this._showToast(this._t('toast.store_imported', {profile: (r && r.profile) || ''}, `Imported into ${(r && r.profile) || 'profile'}`));
+            await this._fetchProfiles(eid);
+          } catch (e) { this._showToast(this._t('toast.store_import_failed', {error: e.message || e}, 'Import failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+    }
+
+    // ---- Community Store: share a golden cycle ----
+    if (m && m.type === 'store-share') {
+      if (action === 'store-share-ok') {
+        const program = (sr.getElementById('wd-store-share-prog')?.value || '').trim();
+        const description = (sr.getElementById('wd-store-share-desc')?.value || '').trim();
+        if (!program) { this._showToast(this._t('toast.store_program_required', {}, 'Enter a program name'), 'error'); return; }
+        await this._busyRun('store-share', async () => {
+          try {
+            const r = await this._ws({ type: `${_DOMAIN}/store_upload_cycle`, entry_id: eid, local_cycle_id: m.cycleId, program, description });
+            if (r && r.error) {
+              if (r.error === 'no_appliance_declared') this._showToast(this._t('toast.store_no_appliance', {}, 'Set your appliance brand and model in Settings first.'), 'error');
+              else this._showToast(this._t('toast.store_share_failed', {error: r.error}, 'Share failed: ' + r.error), 'error');
+              return;
+            }
+            this._modal = null;
+            this._showToast(this._t('toast.store_shared', {}, 'Shared to the community store - pending review.'));
+          } catch (e) { this._showToast(this._t('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
