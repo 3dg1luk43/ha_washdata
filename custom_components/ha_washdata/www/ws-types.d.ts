@@ -103,6 +103,8 @@ export interface GetConstantsResponse {
   ml_suggestions_enabled: boolean;
   ml_training_available: boolean;
   PROFILE_MIN_WARMUP_CYCLES: unknown;
+  store_online_available: boolean;
+  store_web_origin: string;
 }
 
 export interface GetCyclePowerDataResponse {

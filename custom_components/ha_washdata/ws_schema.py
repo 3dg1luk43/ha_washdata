@@ -192,6 +192,8 @@ class GetConstantsResponse(TypedDict):
     ml_suggestions_enabled: bool
     ml_training_available: bool
     PROFILE_MIN_WARMUP_CYCLES: Any
+    store_online_available: bool
+    store_web_origin: str
 
 
 # ─── Suggestions ───────────────────────────────────────────────────────────────

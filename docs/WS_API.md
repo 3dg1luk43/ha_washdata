@@ -736,6 +736,8 @@ _None._
 | `ml_suggestions_enabled` | yes | bool |
 | `ml_training_available` | yes | bool |
 | `PROFILE_MIN_WARMUP_CYCLES` | yes | any |
+| `store_online_available` | yes | bool |
+| `store_web_origin` | yes | str |
 
 ## `ha_washdata/get_suggestions`
 

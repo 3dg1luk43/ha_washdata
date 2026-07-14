@@ -2535,6 +2535,7 @@ def ws_get_constants(
         {"id": key, "label": label}
         for key, label in DEVICE_TYPES.items()
     ]
+    from .const import STORE_WEB_ORIGIN
     _send_result(connection, msg["id"], "get_constants", {
             "device_types": device_types,
             "state_colors": dict(STATE_COLORS),
@@ -2542,6 +2543,10 @@ def ws_get_constants(
             "ml_suggestions_enabled": ENABLE_ML_SUGGESTIONS,
             "ml_training_available": ENABLE_ML_TRAINING,
             "PROFILE_MIN_WARMUP_CYCLES": CONF_PROFILE_MIN_WARMUP_CYCLES,
+            # Community store: the panel opens <origin>/connect.html for the GitHub
+            # handoff and validates postMessage against new URL(origin).origin.
+            "store_online_available": True,
+            "store_web_origin": STORE_WEB_ORIGIN,
         },
     )
 
