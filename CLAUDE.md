@@ -172,9 +172,7 @@ The `ml/` package adds ML *alongside* the proven detection/matching code — it 
 
 **Source of truth:** `strings.json` ≡ `translations/en.json` (kept identical for all HA keys).
 
-**Panel translations** (the panel's `_t()` function) live in TWO places:
-1. `translations/panel/{lang}.json` — one JSON file per language (the panel section, NOT in the main `translations/{lang}.json` to avoid hassfest validation errors)
-2. `custom_components/ha_washdata/www/panel-translations.json` — client-side bundle served to browsers, built from `translations/panel/` by `build_panel_translations.py`
+**Panel translations** (the panel's `_t()` function) live in `translations/panel/{lang}.json` — one JSON file per language (the panel section, kept out of the main `translations/{lang}.json` to avoid hassfest validation errors). The integration serves this directory directly at `/ha_washdata/panel-translations/{lang}.json` (see `frontend.py`), and the panel fetches only the user's language + the `en` fallback on demand — there is **no build step and no bundle** to regenerate. (Previously these were concatenated into `www/panel-translations.json` by `build_panel_translations.py`; both are gone as of 0.5.0.)
 
 Both `translations/panel/en.json` AND `translations/en.json` (HA-layer) are English sources. **Every** other `{lang}.json` file — panel and HA-layer alike — is maintained by Claude subagents (never the machine translator).
 
@@ -182,19 +180,16 @@ Both `translations/panel/en.json` AND `translations/en.json` (HA-layer) are Engl
 
 ```bash
 # 1. Sync structure: remove deprecated keys from all HA-layer language files (aligns them
-#    to strings.json). Also rebuilds panel-translations.json. Safe, no network. Does NOT
-#    add or machine-translate new keys, and does NOT touch translations/panel/.
+#    to strings.json). Safe, no network. Does NOT add or machine-translate new keys, and
+#    does NOT touch translations/panel/.
 python3 devtools/sync_translations.py
 
 # 2. Translate the NEW keys (HA-layer AND panel) into every language via Claude subagents
 #    with domain context (grouped by language family; deep-merge into each {lang}.json;
 #    preserve placeholders; no em-dash). NEVER run translate.py / any machine translator.
-
-# 3. Rebuild panel-translations.json after any panel/*.json changes.
-python3 devtools/build_panel_translations.py
 ```
 
-Steps 1 and 3 are fast and network-free. **Step 2 is subagents only — for HA-layer keys too.** The machine translator (`translate.py`) is banned; it has corrupted the files and produces domain-wrong output. If new HA-layer keys are English-only in other languages temporarily, that is hassfest-safe (English fallback) — fix it with subagents, not the machine translator.
+Panel `{lang}.json` files are served as-is (no rebuild). Step 1 is fast and network-free. **Step 2 is subagents only — for HA-layer keys too.** The machine translator (`translate.py`) is banned; it has corrupted the files and produces domain-wrong output. If new HA-layer keys are English-only in other languages temporarily, that is hassfest-safe (English fallback) — fix it with subagents, not the machine translator.
 
 ### Home Assistant Patterns
 - Use `async_update_entry` for config entry modifications

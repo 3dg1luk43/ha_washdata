@@ -18,8 +18,9 @@ export type Handlers = Record<string, unknown>;
  * @param overrides  WS handler overrides merged on top of DEFAULT_HANDLERS
  */
 export async function bootPanel(page: Page, overrides: Handlers = {}): Promise<void> {
-  // Intercept the translations fetch so tests don't need network.
-  await page.route('**panel-translations.json**', (route) =>
+  // Intercept the per-language translation fetches so tests don't need network.
+  // Returning an empty dict makes _t() fall back to the JS-embedded English.
+  await page.route('**/panel-translations/**', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }),
   );
 

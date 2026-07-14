@@ -403,7 +403,7 @@ _PANEL_TABS = ("status", "history", "profiles", "settings", "tools", "panel", "m
 _PREF_DATE_FORMATS = ("relative", "absolute")
 # lang_override: empty string clears it (fall back to system language); otherwise a
 # BCP-47-ish tag (e.g. "en", "pt-BR", "sr-Latn"). Kept as a bounded pattern rather
-# than coupling the WS handler to the www/panel-translations.json language list —
+# than coupling the WS handler to the translations/panel/ language file list —
 # the panel already falls back to system language for any tag it can't load.
 _PREF_LANG_TAG_RE = re.compile(r"^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$")
 

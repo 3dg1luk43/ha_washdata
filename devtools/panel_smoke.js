@@ -9,6 +9,7 @@
  */
 'use strict';
 const path = require('path');
+const { pathToFileURL } = require('url');
 
 function fakeEl() {
   const el = {
@@ -38,10 +39,13 @@ function check(label, fn) {
   catch (e) { failures++; console.log('  FAIL ' + label + ' -> ' + e.message); }
 }
 
+// Load the panel as an ES module (matching production, where HA imports it via
+// import()), so import.meta.url resolves. Wrap the rest in an async IIFE.
+(async () => {
 // 1. Module load (top-level init / TDZ).
 let Panel;
 try {
-  require(path.resolve(__dirname, '../custom_components/ha_washdata/www/ha-washdata-panel.js'));
+  await import(pathToFileURL(path.resolve(__dirname, '../custom_components/ha_washdata/www/ha-washdata-panel.js')).href);
   Panel = global.customElements._cls;
   if (!Panel) throw new Error('customElements.define was not called');
   console.log('module load: ok');
@@ -171,3 +175,4 @@ el._modal = null;
 
 console.log(failures ? `\nSMOKE FAILED (${failures})` : '\nSMOKE OK');
 process.exit(failures ? 1 : 0);
+})();

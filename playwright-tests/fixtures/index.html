@@ -33,6 +33,8 @@
 </head>
 <body>
   <script src="/mock-hass.js"></script>
-  <script src="/panel.js"></script>
+  <!-- Loaded as a module to match production (HA imports the panel via import()),
+       so import.meta.url is valid inside panel.js. -->
+  <script type="module" src="/panel.js"></script>
 </body>
 </html>

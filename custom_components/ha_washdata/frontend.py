@@ -21,8 +21,11 @@ PANEL_ELEMENT = "ha-washdata-panel"
 PANEL_URL_PATH = "ha-washdata"
 PANEL_REGISTERED_KEY = "ha_washdata_panel_registered"
 PANEL_STATIC_REGISTERED = "ha_washdata_panel_static_registered"
-PANEL_TRANSLATIONS_NAME = "panel-translations.json"
-PANEL_TRANSLATIONS_URL = f"/{LOCAL_SUBDIR}/{PANEL_TRANSLATIONS_NAME}"
+# Per-language panel translations are served straight from the integration's
+# translations/panel/ directory (one {lang}.json per language). The panel fetches
+# only the user's language + en fallback, instead of one monolithic bundle.
+PANEL_TRANSLATIONS_DIRNAME = "panel"
+PANEL_TRANSLATIONS_URL = f"/{LOCAL_SUBDIR}/panel-translations"
 CARD_DEFERRED = "deferred"
 CARD_FAILED = "failed"
 CardRegisterResult = Literal["registered", "deferred", "failed"]
@@ -270,10 +273,13 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
             _LOGGER.debug("Panel static path registration failed, falling back: %s", exc)
             _register_static_path(hass, PANEL_JS_URL, str(src))
 
-        # Register panel-translations.json for explicit per-user-language loading.
-        trans_src = Path(__file__).parent / "www" / PANEL_TRANSLATIONS_NAME
+        # Serve the translations/panel/ directory for per-user-language loading.
+        # The panel fetches /ha_washdata/panel-translations/{lang}.json (+ en.json
+        # fallback) on demand, so browsers only download the language(s) in use
+        # rather than a monolithic all-languages bundle.
+        trans_src = Path(__file__).parent / "translations" / PANEL_TRANSLATIONS_DIRNAME
         # Filesystem check offloaded to the executor (see note above).
-        if await hass.async_add_executor_job(trans_src.exists):
+        if await hass.async_add_executor_job(trans_src.is_dir):
             try:
                 from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
 

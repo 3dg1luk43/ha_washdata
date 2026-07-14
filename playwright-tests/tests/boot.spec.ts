@@ -25,7 +25,7 @@ test('shows device name in device bar', async ({ page }) => {
 
 test('shows empty state when no devices returned', async ({ page }) => {
   // Route translations before boot — bootPanel would normally do this
-  await page.route('**panel-translations.json**', (route) =>
+  await page.route('**/panel-translations/**', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }),
   );
   // Boot with no devices — the panel skips the tab bar and shows a .wd-empty message

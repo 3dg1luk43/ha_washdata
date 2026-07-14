@@ -7,8 +7,8 @@ from strings.json are removed. Keys present in strings.json but absent from a
 language file are left missing (the translator adds them).
 
 Panel translations live in translations/panel/{lang}.json and are not touched
-by this script. build_panel_translations.py is called at the end to rebuild
-panel-translations.json.
+by this script; the panel serves those files directly (one per language), so
+there is no bundle to rebuild.
 
 Usage:
     python3 devtools/sync_translations.py
@@ -18,10 +18,6 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-
-# Import build step so panel-translations.json is always rebuilt after a sync.
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-import build_panel_translations
 
 
 def _sync(source: dict, target: dict) -> tuple[dict, int]:
@@ -78,8 +74,6 @@ def main() -> None:
             print(f"  {lang_file.name}: removed {removed} deprecated key(s)")
 
     print(f"\nDone: {modified} files updated, {total_removed} deprecated keys removed.")
-    print("\nRebuilding panel-translations.json...")
-    build_panel_translations.main()
 
 
 if __name__ == "__main__":

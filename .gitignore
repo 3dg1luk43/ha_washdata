@@ -48,3 +48,4 @@ playwright-tests/package-lock.json
 playwright-tests/node_modules
 IMPROVEMENT_PLAN.md
 docs/superpowers
+re/SETUP.md

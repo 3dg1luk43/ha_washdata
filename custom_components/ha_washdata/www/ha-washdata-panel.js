@@ -8,6 +8,14 @@
 'use strict';
 
 const _DOMAIN = 'ha_washdata';
+// Cache-buster for on-demand asset fetches (per-language translation files). The
+// panel module is imported as ha-washdata-panel.js?v=<mtime>, so reuse that same
+// version: translation files are then cached per release and busted on upgrade.
+// Empty when unavailable (e.g. loaded without a query) — we simply omit ?v=.
+const _PANEL_VERSION = (() => {
+  try { return new URL(import.meta.url).searchParams.get('v') || ''; }
+  catch (_) { return ''; }
+})();
 // The panel is push-driven: HA calls set hass() on every entity state change
 // (realtime), and subscribe_events / subscribe_tasks push cycle + task updates.
 // So the interval poll is only a slow SAFETY heartbeat for store-derived data
@@ -1534,7 +1542,7 @@ class HaWashdataPanel extends HTMLElement {
     this._pgHistoryTaskId = null;      // active Test-on-history task id
     this._pgSweepTaskId = null;        // active Optimize task id
     this._panelCfg = null;             // panel settings + RBAC + current-user info
-    this._panelTrans = null;           // loaded from /ha_washdata/panel-translations.json
+    this._panelTrans = null;           // { [lang]: dict } loaded on demand from /ha_washdata/panel-translations/{lang}.json
     this._pollMs = _POLL_MS;
     this._panelSubtab = 'prefs';
     this._maintenance = null;          // cached maintenance log/reminders (Advanced → Maintenance)
@@ -2003,11 +2011,53 @@ class HaWashdataPanel extends HTMLElement {
     }
   }
 
+  _panelTransUrl(lang) {
+    const base = `/ha_washdata/panel-translations/${encodeURIComponent(lang)}.json`;
+    return _PANEL_VERSION ? `${base}?v=${encodeURIComponent(_PANEL_VERSION)}` : base;
+  }
+
+  // Fetch one language's panel dict. Tries the exact tag, then the base language
+  // (e.g. "pt-BR" -> "pt"). Returns the parsed dict or null if unavailable.
+  async _fetchPanelLang(lang) {
+    if (!lang) return null;
+    const candidates = [lang];
+    const dash = lang.indexOf('-');
+    if (dash > 0) candidates.push(lang.slice(0, dash));
+    for (const cand of candidates) {
+      try {
+        const r = await fetch(this._panelTransUrl(cand));
+        if (r.ok) {
+          const j = await r.json();
+          if (j && typeof j === 'object') return j;
+        }
+      } catch (_) { /* try next candidate */ }
+    }
+    return null;
+  }
+
+  // Ensure `lang` is present in this._panelTrans (keyed by the requested tag so
+  // _t()'s lookup finds it). No-ops if already loaded or on fetch failure.
+  async _loadPanelLang(lang) {
+    if (!lang) return;
+    if (this._panelTrans && this._panelTrans[lang]) return;
+    const dict = await this._fetchPanelLang(lang);
+    if (dict) {
+      // Only materialize _panelTrans once we actually have a dict, so a total
+      // fetch failure leaves it null and _t() falls back to _localize as before.
+      if (!this._panelTrans) this._panelTrans = {};
+      this._panelTrans[lang] = dict;
+    }
+  }
+
+  // Load only the user's language + the `en` fallback, on demand, instead of a
+  // monolithic all-languages bundle. lang_override isn't known yet at boot (it
+  // arrives with get_panel_config), so _applyPanelConfig lazy-loads it later.
   async _loadPanelTranslations() {
-    try {
-      const r = await fetch(`/ha_washdata/panel-translations.json?v=${this._panelVersion || Date.now()}`);
-      if (r.ok) this._panelTrans = await r.json();
-    } catch (_) { /* non-fatal — fall back to JS-embedded strings */ }
+    const sysLang = this._hass && this._hass.locale && this._hass.locale.language;
+    await Promise.all([
+      this._loadPanelLang('en'),
+      sysLang && sysLang !== 'en' ? this._loadPanelLang(sysLang) : Promise.resolve(),
+    ]);
   }
 
   _startPoll() { this._stopPoll(); this._pollTimer = setInterval(() => this._fetchAll(), this._pollMs); }
@@ -2854,6 +2904,12 @@ class HaWashdataPanel extends HTMLElement {
   _applyPanelConfig() {
     const cfg = this._panelCfg;
     if (!cfg) return;
+    // lang_override arrives here (not at boot). If the user picked a language we
+    // didn't eagerly load, fetch it now and re-render once it lands.
+    const override = cfg.prefs && cfg.prefs.lang_override;
+    if (override && !(this._panelTrans && this._panelTrans[override])) {
+      this._loadPanelLang(override).then(() => this._render()).catch(() => {});
+    }
     const panel = cfg.panel || {};
     if (!this._tabInitialized) {
       const dt = (cfg.prefs && cfg.prefs.default_tab) || panel.default_tab;
@@ -8363,6 +8419,11 @@ class HaWashdataPanel extends HTMLElement {
         try {
           await this._ws({ type: `${_DOMAIN}/set_user_prefs`, prefs });
           if (this._panelCfg) this._panelCfg.prefs = { ...(this._panelCfg.prefs || {}), ...prefs };
+          // Language may have changed: ensure the (now effective) language file is
+          // loaded, then re-render so the new strings take effect immediately.
+          const effLang = langOverrideSave || (this._hass && this._hass.locale && this._hass.locale.language);
+          await this._loadPanelLang(effLang);
+          this._render();
           this._showToast(this._t('toast.preferences_saved', {}, 'Preferences saved'));
         } catch (e) { this._showToast(this._t('toast.save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
       });

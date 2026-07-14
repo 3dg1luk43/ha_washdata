@@ -14,9 +14,12 @@ const PANEL_SRC = path.join(
   __dirname,
   '../custom_components/ha_washdata/www/ha-washdata-panel.js',
 );
-const TRANSLATIONS_SRC = path.join(
+// Per-language panel translations are served straight from the integration's
+// translations/panel/ directory (one {lang}.json per language), matching how
+// the integration registers them at runtime.
+const TRANSLATIONS_DIR = path.join(
   __dirname,
-  '../custom_components/ha_washdata/www/panel-translations.json',
+  '../custom_components/ha_washdata/translations/panel',
 );
 const PORT = 4567;
 
@@ -33,8 +36,10 @@ const server = http.createServer((req, res) => {
 
   if (url.pathname === '/panel.js') {
     filePath = PANEL_SRC;
-  } else if (url.pathname === '/ha_washdata/panel-translations.json') {
-    filePath = TRANSLATIONS_SRC;
+  } else if (url.pathname.startsWith('/ha_washdata/panel-translations/')) {
+    // /ha_washdata/panel-translations/{lang}.json -> translations/panel/{lang}.json
+    const name = path.basename(url.pathname);
+    filePath = path.join(TRANSLATIONS_DIR, name);
   } else {
     // Serve from fixtures/; default to index.html
     const rel = url.pathname === '/' ? 'index.html' : url.pathname.slice(1);
