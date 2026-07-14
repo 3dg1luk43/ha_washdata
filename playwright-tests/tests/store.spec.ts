@@ -152,7 +152,7 @@ test('gear "Online & Community" shows the connected account with a disconnect ac
   await page.goto('/');
   await bootPanel(page, storeHandlers());
   // Online features + the GitHub connection now live in the header gear overlay.
-  await page.locator('[data-action="open-settings"]').click();
+  await page.locator('#wd-settings-btn').click();
   await page.locator('[data-gtab="online"]').click();
   const disconnect = page.locator('[data-action="store-disconnect"]');
   await expect(disconnect).toBeVisible({ timeout: 8_000 });
@@ -167,7 +167,7 @@ test('gear online toggle persists via the global store_set_online command', asyn
     'ha_washdata/get_constants': { ...STORE_CONSTANTS, store_online_enabled: false },
     'ha_washdata/store_set_online': { enabled: true },
   });
-  await page.locator('[data-action="open-settings"]').click();
+  await page.locator('#wd-settings-btn').click();
   await page.locator('[data-gtab="online"]').click();
   await page.locator('input[data-action="store-toggle-online"]').click();
   const calls = await assertWsCalled(page, 'ha_washdata/store_set_online');

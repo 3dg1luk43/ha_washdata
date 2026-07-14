@@ -26,9 +26,13 @@ test('Logs subtab is gone from Advanced', async ({ page }) => {
   await expect(page.locator('[data-ptab="logs"]')).toHaveCount(0);
 });
 
-test('Logs header button is gone (replaced by the settings gear)', async ({ page }) => {
-  await expect(page.locator('[data-action="toggle-log-drawer"]')).toHaveCount(0);
-  await expect(page.locator('[data-action="open-settings"]')).toBeVisible();
+test('Logs side drawer button is kept in the header alongside the gear', async ({ page }) => {
+  // Logs moved out of the Advanced tab but stays as the header side drawer.
+  const logsBtn = page.locator('[data-action="toggle-log-drawer"]');
+  await expect(logsBtn.first()).toBeVisible();
+  await expect(page.locator('#wd-settings-btn')).toBeVisible();
+  await logsBtn.first().click();
+  await expect(page.locator('.wd-log-drawer.open')).toBeVisible({ timeout: 5_000 });
 });
 
 // ─── Diagnostics ────────────────────────────────────────────────────────────

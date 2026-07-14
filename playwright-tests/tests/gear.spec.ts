@@ -8,7 +8,7 @@ import { bootPanel, assertWsCalled } from '../helpers/panel';
 import constants from '../fixtures/mock-data/constants.json';
 
 async function openGear(page) {
-  await page.locator('[data-action="open-settings"]').click();
+  await page.locator('#wd-settings-btn').click();
   await expect(page.locator('.wd-modal [data-gtab="prefs"]')).toBeVisible({ timeout: 8_000 });
 }
 

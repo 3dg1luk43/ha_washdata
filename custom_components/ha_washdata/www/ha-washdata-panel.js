@@ -3175,7 +3175,7 @@ class HaWashdataPanel extends HTMLElement {
                 : this._htmlBody()}
             </div>
           </div>
-          <div class="wd-log-drawer"></div>
+          ${this._logOpen && this._isAdmin() ? this._htmlLogDrawer() : `<div class="wd-log-drawer"></div>`}
         </div>
       </div>
       ${this._modal ? this._htmlModal() : ''}
@@ -3211,6 +3211,7 @@ class HaWashdataPanel extends HTMLElement {
         <span class="wd-task-pills" id="wd-task-pills">${this._htmlTaskPills()}</span>
         <span style="flex:1"></span>
         <button class="wd-gear-btn" id="wd-settings-btn" data-action="open-settings" title="${_esc(this._t('settings.gear.title', {}, 'Settings'))}" aria-label="${_esc(this._t('settings.gear.title', {}, 'Settings'))}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        ${this._isAdmin() ? `<button class="wd-gear-btn${this._logOpen ? ' log-active' : ''}" data-action="toggle-log-drawer" title="${_esc(this._t('hdr.logs', {}, 'Logs'))}" aria-label="${_esc(this._t('hdr.logs', {}, 'Logs'))}" aria-pressed="${this._logOpen}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16"/><path d="M4 10h16"/><path d="M4 15h10"/><path d="M4 20h7"/></svg></button>` : ''}
       </div>
     `;
   }
@@ -3370,7 +3371,7 @@ class HaWashdataPanel extends HTMLElement {
     // the relevant subtab so the merged 4-tab layout stays discoverable.
     const advCards = [];
     if (this._canEdit()) advCards.push(`<button class="wd-attn-card" type="button" data-action="open-advanced" data-sub="diagnostics"><span class="wd-attn-icon">🩺</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('hdr.logs_diagnostics', {}, 'Diagnostics')}</div><div class="wd-attn-sub">${this._t('msg.storage_diagnostics', {}, 'Storage stats, maintenance, export/import')}</div></div></button>`);
-    advCards.push(`<button class="wd-attn-card" type="button" data-action="open-advanced" data-sub="prefs"><span class="wd-attn-icon">⚙️</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('tab.advanced', {}, 'Advanced')}</div><div class="wd-attn-sub">${this._isAdmin() ? this._t('msg.preferences_admin', {}, 'Preferences, panel & access control') : this._t('msg.preferences_adv', {}, 'Preferences')}</div></div></button>`);
+    advCards.push(`<button class="wd-attn-card" type="button" data-action="open-settings"><span class="wd-attn-icon">⚙️</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('settings.gear.title', {}, 'Settings')}</div><div class="wd-attn-sub">${this._isAdmin() ? this._t('msg.preferences_admin', {}, 'Preferences, panel & access control') : this._t('msg.preferences_adv', {}, 'Preferences')}</div></div></button>`);
     const advHtml = `<div class="wd-card"><div class="wd-card-title">${this._t('hdr.tools_and_data', {}, 'Tools & Data')}</div><div class="wd-attn" style="margin-bottom:0;margin-top:12px">${advCards.join('')}</div></div>`;
 
     const cycleCtrlHtml = (() => {
@@ -6525,21 +6526,6 @@ class HaWashdataPanel extends HTMLElement {
         <p class="wd-info" style="margin:0 0 8px;font-size:.78em">${this._t('msg.log_buffer_hint', {}, 'Newest first · buffers the last 500 ha_washdata records since restart · drag the left edge to resize.')}</p>
         <div class="wd-logs" id="wd-log-lines-drawer" style="max-height:none;resize:none">${this._logLinesHtml()}</div>
       </div>
-    </div>`;
-  }
-
-  // ── Logs page ───────────────────────────────────────────────────────────────
-
-  _htmlLogs() {
-    return `<div class="wd-card">
-      <div class="wd-card-title">${this._t('hdr.logs', {}, 'Logs')}</div>
-      <div class="wd-logbar" style="flex-wrap:wrap">
-        ${this._htmlLogFilters('page')}
-        <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="logs-refresh" title="${_esc(this._t('btn.refresh_logs_tip', {}, 'Reload the latest log records'))}">${this._t('btn.refresh', {}, 'Refresh')}</button>
-        <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="logs-export">${this._t('btn.export', {}, 'Export')}</button>
-        <span class="wd-field-hint" style="margin:0">${this._t('msg.log_buffer_hint', {}, 'Newest first · buffers the last 500 ha_washdata records since restart.')}</span>
-      </div>
-      <div class="wd-logs" id="wd-log-lines-page">${this._logLinesHtml()}</div>
     </div>`;
   }
 
