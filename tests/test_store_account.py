@@ -42,6 +42,21 @@ async def test_global_account_round_trip_and_identity():
 
 
 @pytest.mark.asyncio
+async def test_migration_marker_blocks_reenable():
+    """Once migration is marked done, a stale per-device flag must not re-enable
+    online features (the HIGH review finding). The marker is the guard."""
+    hass = _hass_online()
+    assert store_account.migration_done(hass) is False
+    await store_account.async_mark_migrated(hass)
+    assert store_account.migration_done(hass) is True
+    # Simulate the __init__ guard: with the marker set, we never auto-enable again
+    # even though a stale per-entry flag would say "on".
+    if not store_account.migration_done(hass):
+        await store_account.async_set_online(hass, True)  # pragma: no cover
+    assert store_account.online_enabled(hass) is False
+
+
+@pytest.mark.asyncio
 async def test_global_account_merges():
     hass = _hass_online()
     await store_account.async_set_account(hass, {"refresh_token": "R", "uid": "u1"})

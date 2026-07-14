@@ -24,6 +24,16 @@ def online_features_enabled(hass: HomeAssistant) -> bool:
     return store_account.online_enabled(hass)
 
 
+# The community catalog only knows washer/dryer/dishwasher/washer_dryer; HA's
+# washing_machine device type maps to washer. Keep this in sync with the panel's
+# _storeApplianceType() so search, create and share all resolve the same deviceId.
+_STORE_APPLIANCE_TYPE = {"washing_machine": "washer"}
+
+
+def store_appliance_type(device_type: str) -> str:
+    return _STORE_APPLIANCE_TYPE.get(device_type, device_type)
+
+
 def derive_qc(cycle: dict[str, Any]) -> int:
     """Derive the obfuscated provenance code for a cycle being uploaded.
 
@@ -153,7 +163,7 @@ class StoreBridge:
             "signature": cyc.get("signature") if isinstance(cyc.get("signature"), dict) else {},
         }
         meta = {
-            "applianceType": appliance_type, "brand": brand, "model": model, "program": program,
+            "applianceType": store_appliance_type(appliance_type), "brand": brand, "model": model, "program": program,
             "sampleIntervalSec": float(sample_interval_sec or cyc.get("sampling_interval") or 0.0),
             "description": description,
         }

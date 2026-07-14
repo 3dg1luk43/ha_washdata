@@ -160,6 +160,21 @@ async def test_share_cycle_requires_connection(bridge):
 
 
 @pytest.mark.asyncio
+async def test_share_cycle_maps_washing_machine_to_washer(bridge):
+    br, ps, hass = bridge
+    await br.connect("refresh", "u1", "Alice")
+    await ps.async_add_cycle({
+        "start_time": BASE.isoformat(), "duration": 3600, "status": "completed",
+        "profile_name": "Cotton 40",
+        "power_data": [((BASE + timedelta(seconds=i * 60)).isoformat(), 1000.0) for i in range(61)],
+    })
+    local_id = ps.get_past_cycles()[0]["id"]
+    # HA device type is washing_machine; the catalog only knows washer.
+    await br.share_cycle(local_id, "Cotton 40", "Bosch", "WAT", "washing_machine", sample_interval_sec=60)
+    assert br._client.uploaded["meta"]["applianceType"] == "washer"
+
+
+@pytest.mark.asyncio
 async def test_share_cycle_uploads_with_derived_qc(bridge):
     br, ps, hass = bridge
     await br.connect("refresh", "u1", "Alice")

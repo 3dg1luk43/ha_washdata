@@ -269,13 +269,25 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def _migrate_online_to_global(hass: HomeAssistant, entry: ConfigEntry, manager: Any) -> None:
     """Hoist the (formerly per-device) online-features flag + store account to the
-    integration-wide store. Idempotent; safe on every setup. Pre-release cleanup."""
+    integration-wide store. Pre-release cleanup.
+
+    The enable flag is hoisted exactly ONCE (guarded by a marker in the global store):
+    the stale per-entry option is never cleared, so without the marker a user who later
+    turns online off would have it silently re-enabled on the next restart. The account
+    hoist stays idempotent (it clears the per-entry copy after moving it)."""
     from . import store_account  # pylint: disable=import-outside-toplevel
     from .const import CONF_ENABLE_ONLINE_FEATURES  # pylint: disable=import-outside-toplevel
 
     await store_account.async_load(hass)
-    if entry.options.get(CONF_ENABLE_ONLINE_FEATURES) and not store_account.online_enabled(hass):
-        await store_account.async_set_online(hass, True)
+    if not store_account.migration_done(hass):
+        any_on = any(
+            e.options.get(CONF_ENABLE_ONLINE_FEATURES)
+            for e in hass.config_entries.async_entries(DOMAIN)
+        )
+        if any_on and not store_account.online_enabled(hass):
+            await store_account.async_set_online(hass, True)
+        await store_account.async_mark_migrated(hass)
+
     try:
         acct = manager.profile_store.get_store_account()
     except Exception:  # pylint: disable=broad-exception-caught

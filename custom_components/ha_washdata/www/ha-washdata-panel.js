@@ -4058,7 +4058,7 @@ class HaWashdataPanel extends HTMLElement {
 
     const search = this._settingsSearch || '';
     const q = search.trim().toLowerCase();
-    const searchInput = `<input type="text" id="wd-settings-search" class="wd-filter-input" placeholder="${this._t('msg.search_placeholder', {}, 'Search settings…')}" value="${_esc(search)}" autocomplete="off" style="flex:0 1 34%;min-width:180px;max-width:360px">`;
+    const searchInput = `<input type="text" id="wd-settings-search" class="wd-filter-input" placeholder="${this._t('msg.search_placeholder', {}, 'Search settings…')}" value="${_esc(search)}" autocomplete="off" style="flex:0 0 auto;width:200px;max-width:40%">`;
 
     const formContent = q ? this._htmlSettingsSearch(o, q) : (sugOnly ? this._htmlSettingsSugOnly(o) : this._htmlSettingsSection(o));
 
@@ -4255,6 +4255,22 @@ class HaWashdataPanel extends HTMLElement {
       ${extra}</div>`;
   }
 
+  // The community catalog only knows washer/dryer/dishwasher/washer_dryer; HA's
+  // washing_machine maps to washer. Other device types have no catalog equivalent
+  // (return '' so the search is by brand only, unfiltered by type).
+  _storeApplianceType() {
+    const map = { washing_machine: 'washer', washer: 'washer', dryer: 'dryer', dishwasher: 'dishwasher', washer_dryer: 'washer_dryer' };
+    return map[this._opts.device_type] || '';
+  }
+
+  // Patch a <datalist>'s options in place (no full re-render), so populating the
+  // catalog never destroys the input the user is typing in / picking from.
+  _patchDatalist(id, items, field) {
+    const sr = this.shadowRoot; if (!sr) return;
+    const dl = sr.getElementById(id);
+    if (dl) dl.innerHTML = (items || []).map(x => `<option value="${_esc(x[field] || '')}"></option>`).join('');
+  }
+
   async _loadCatalogBrands() {
     const dev = this._devices[this._selIdx];
     if (!dev || !this._onlineEnabled()) { this._catalog.brands = []; return; }
@@ -4262,17 +4278,19 @@ class HaWashdataPanel extends HTMLElement {
       const r = await this._ws({ type: `${_DOMAIN}/store_list_brands`, entry_id: dev.entry_id, include_pending: !this._catalog.approvedOnly });
       this._catalog.brands = (r && r.items) || [];
     } catch (_) { this._catalog.brands = []; }
-    if (this._tab === 'settings') this._render();
+    // Patch the datalist in place rather than re-rendering (a render mid-typing
+    // closes the dropdown and wipes the field).
+    this._patchDatalist('wd-brand-dl', this._catalog.brands, 'brand');
   }
 
   async _loadCatalogDevices(brand) {
     const dev = this._devices[this._selIdx];
     if (!dev || !this._onlineEnabled() || !brand) { this._catalog.devices = []; return; }
     try {
-      const r = await this._ws({ type: `${_DOMAIN}/store_search_devices`, entry_id: dev.entry_id, query: brand, appliance_type: this._opts.device_type || '', include_pending: !this._catalog.approvedOnly });
+      const r = await this._ws({ type: `${_DOMAIN}/store_search_devices`, entry_id: dev.entry_id, query: brand, appliance_type: this._storeApplianceType(), include_pending: !this._catalog.approvedOnly });
       if (this._catalog.forBrand === brand) this._catalog.devices = (r && r.items) || [];
     } catch (_) { if (this._catalog.forBrand === brand) this._catalog.devices = []; }
-    if (this._tab === 'settings') this._render();
+    this._patchDatalist('wd-model-dl', this._catalog.devices || [], 'model');
   }
 
   // Automations subcategory at the top of Notifications. Replaces the old custom
@@ -6439,7 +6457,7 @@ class HaWashdataPanel extends HTMLElement {
     this._storeProfiles = []; this._storeCycles = [];
     this._storeLoading = true; this._render();
     try {
-      const r = await this._ws({ type: `${_DOMAIN}/store_search_devices`, entry_id: eid, query: this._storeQuery, appliance_type: this._opts.device_type || '' });
+      const r = await this._ws({ type: `${_DOMAIN}/store_search_devices`, entry_id: eid, query: this._storeQuery, appliance_type: this._storeApplianceType() });
       if (!this._isActiveEntry(eid)) return;
       if (r && r.disabled) { this._storeStatus = { enabled: false }; this._storeDevices = []; }
       else this._storeDevices = (r && r.items) || [];
@@ -7566,13 +7584,17 @@ class HaWashdataPanel extends HTMLElement {
       this._render();
     }));
 
-    // Store-backed brand/model picker inputs (Basic > Device info). Changing the
-    // brand reloads the model catalog; changing the model re-resolves its tag.
+    // Store-backed brand/model picker inputs (Basic > Device info). Listeners fire
+    // on 'change' (blur / datalist pick) only, never mid-typing; the catalog loaders
+    // patch the datalists in place so the dropdown is never rebuilt out from under
+    // the user. Changing the brand reloads + enables the model field.
     const brandInput = sr.getElementById('wd-store-brand');
     if (brandInput) brandInput.addEventListener('change', () => {
-      this._opts = { ...this._opts, store_brand: brandInput.value.trim() };
-      this._catalog.forBrand = null; this._catalog.devices = undefined;
-      this._render();
+      const v = brandInput.value.trim();
+      this._opts = { ...this._opts, store_brand: v };
+      this._catalog.forBrand = v; this._catalog.devices = null;
+      this._render();                 // enable + reset the model field (input has blurred)
+      this._loadCatalogDevices(v);    // patches #wd-model-dl in place, no re-render
     });
     const modelInput = sr.getElementById('wd-store-model');
     if (modelInput) modelInput.addEventListener('change', () => {
@@ -8593,7 +8615,7 @@ class HaWashdataPanel extends HTMLElement {
       this._ensureStoreConnectListener();
       const modelEl = sr.getElementById('wd-store-model');
       const q = new URLSearchParams({
-        type: this._opts.device_type || '', brand: this._opts.store_brand || '',
+        type: this._storeApplianceType(), brand: this._opts.store_brand || '',
         model: (modelEl && modelEl.value) || this._opts.store_model || '', origin: location.origin,
       }).toString();
       window.open(origin + '/create.html?' + q, 'washdata_create', 'width=560,height=760');

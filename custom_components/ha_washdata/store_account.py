@@ -23,7 +23,7 @@ _DATA_KEY = f"{DOMAIN}_online_cfg"
 
 
 def _default() -> dict[str, Any]:
-    return {"online_enabled": DEFAULT_ENABLE_ONLINE_FEATURES, "account": {}}
+    return {"online_enabled": DEFAULT_ENABLE_ONLINE_FEATURES, "account": {}, "migrated": False}
 
 
 async def async_load(hass: HomeAssistant) -> None:
@@ -36,6 +36,7 @@ async def async_load(hass: HomeAssistant) -> None:
         loaded = await store.async_load()
         if isinstance(loaded, dict):
             data["online_enabled"] = bool(loaded.get("online_enabled", DEFAULT_ENABLE_ONLINE_FEATURES))
+            data["migrated"] = bool(loaded.get("migrated", False))
             if isinstance(loaded.get("account"), dict):
                 data["account"] = dict(loaded["account"])
     except Exception as exc:  # noqa: BLE001 - never fail setup over this
@@ -62,6 +63,17 @@ def online_enabled(hass: HomeAssistant) -> bool:
 async def async_set_online(hass: HomeAssistant, on: bool) -> None:
     await async_load(hass)
     _data(hass)["online_enabled"] = bool(on)
+    await _save(hass)
+
+
+def migration_done(hass: HomeAssistant) -> bool:
+    """True once the one-time per-device -> global online migration has run."""
+    return bool(_data(hass).get("migrated", False))
+
+
+async def async_mark_migrated(hass: HomeAssistant) -> None:
+    await async_load(hass)
+    _data(hass)["migrated"] = True
     await _save(hass)
 
 
