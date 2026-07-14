@@ -5174,8 +5174,25 @@ class ProfileStore:
             return False
         profile_name = cycle.get("profile_name")
         self._data["reference_cycles"] = [c for c in refs if c.get("id") != cycle_id]
+        # Clear any profile that sampled this now-deleted reference cycle, mirroring
+        # the real-cycle path in delete_cycle, so no sample id is left dangling.
+        for _p_name, p_data in self.get_profiles().items():
+            if p_data.get("sample_cycle_id") == cycle_id:
+                p_data["sample_cycle_id"] = None
         if profile_name:
-            await self.async_rebuild_envelope(profile_name)
+            # If removing this recording leaves the profile with no cycles at all
+            # (no real, no imported), drop the now-empty profile. Otherwise a
+            # sampleless import-only profile would be re-populated by
+            # async_repair_profile_samples stealing an unlabeled real cycle into it.
+            remaining = any(
+                c.get("profile_name") == profile_name
+                for c in list(self._data.get("past_cycles", []))
+                + list(self._data.get("reference_cycles", []))
+            )
+            if remaining:
+                await self.async_rebuild_envelope(profile_name)
+            else:
+                self._data.get("profiles", {}).pop(profile_name, None)
         await self.async_save()
         return True
 

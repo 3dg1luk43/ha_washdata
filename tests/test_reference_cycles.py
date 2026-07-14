@@ -223,3 +223,34 @@ async def test_cleanup_keeps_import_only_profile(store):
     # Import-only profile's sample is a reference cycle -> not an orphan.
     assert store.cleanup_orphaned_profiles() == 0
     assert "Eco 50" in store.get_profiles()
+
+
+@pytest.mark.asyncio
+async def test_delete_last_reference_cycle_removes_empty_profile_no_theft(store):
+    # Unlabeled real cycle + an import-only profile whose ONLY cycle is the ref.
+    await store.async_add_cycle({
+        "start_time": BASE.isoformat(), "duration": 3600, "status": "completed",
+        "power_data": _iso_trace(1000),
+    })
+    cid = await store.add_reference_cycle("Eco 50", _offset_trace(2000), {"store_cycle_id": "d2"})
+    assert "Eco 50" in store.get_profiles()
+
+    # Deleting the last (imported) cycle removes the now-empty profile outright,
+    # so no dangling sample survives for maintenance to mishandle.
+    assert await store.delete_cycle(cid) is True
+    assert "Eco 50" not in store.get_profiles()
+
+    # And repair can no longer steal the unlabeled real cycle into a phantom profile.
+    stats = await store.async_repair_profile_samples()
+    assert store.get_past_cycles()[0].get("profile_name") in (None, "")
+    assert stats["cycles_labeled_as_sample"] == 0
+
+
+@pytest.mark.asyncio
+async def test_delete_reference_cycle_keeps_profile_with_other_cycles(store):
+    # Profile has a real cycle AND an imported one; deleting the import keeps it.
+    await _add_real(store, "Cotton 40", 1000)
+    cid = await store.add_reference_cycle("Cotton 40", _offset_trace(3000), {"store_cycle_id": "d3"})
+    assert await store.delete_cycle(cid) is True
+    assert "Cotton 40" in store.get_profiles()
+    assert store.get_reference_cycles() == []
