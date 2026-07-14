@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**79 commands.**
+**87 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -87,6 +87,14 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `get_task_result` | task_id | `TaskSnapshot` |
 | `start_playground_history` | entry_id, cycle_ids?, settings_override? | `StartTaskResponse` |
 | `start_playground_sweep` | entry_id, param, values, objective, param_y?, values_y? | `StartTaskResponse` |
+| `store_status` | entry_id | `StoreStatusResponse` |
+| `store_connect` | entry_id, refresh_token, uid, name? | `StoreSimpleResponse` |
+| `store_disconnect` | entry_id | `StoreSimpleResponse` |
+| `store_search_devices` | entry_id, query?, appliance_type? | `StoreItemsResponse` |
+| `store_get_profiles` | entry_id, device_id | `StoreItemsResponse` |
+| `store_get_cycles` | entry_id, profile_id | `StoreItemsResponse` |
+| `store_import_cycle` | entry_id, cycle_id, target_profile?, new_profile_name? | `StoreImportResponse` |
+| `store_upload_cycle` | entry_id, local_cycle_id, program, description? | `StoreUploadResponse` |
 
 ## `ha_washdata/get_devices`
 
@@ -1411,3 +1419,154 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `task_id` | yes | str |
+
+## `ha_washdata/store_status`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+
+**Response** (`StoreStatusResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `enabled` | no | bool |
+| `connected` | no | bool |
+| `uid` | no | str \| null |
+| `name` | no | str \| null |
+| `brand` | no | str \| null |
+| `model` | no | str \| null |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_connect`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `refresh_token` | yes | str |
+| `uid` | yes | str |
+| `name` | no | str\|null |
+
+**Response** (`StoreSimpleResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `connected` | no | bool |
+| `uid` | no | str \| null |
+| `name` | no | str \| null |
+| `brand` | no | str \| null |
+| `model` | no | str \| null |
+| `error` | no | str |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_disconnect`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+
+**Response** (`StoreSimpleResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `connected` | no | bool |
+| `uid` | no | str \| null |
+| `name` | no | str \| null |
+| `brand` | no | str \| null |
+| `model` | no | str \| null |
+| `error` | no | str |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_search_devices`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `query` | no | str\|null |
+| `appliance_type` | no | str\|null |
+
+**Response** (`StoreItemsResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `items` | no | list |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_get_profiles`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `device_id` | yes | str |
+
+**Response** (`StoreItemsResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `items` | no | list |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_get_cycles`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `profile_id` | yes | str |
+
+**Response** (`StoreItemsResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `items` | no | list |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_import_cycle`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `cycle_id` | yes | str |
+| `target_profile` | no | str\|null |
+| `new_profile_name` | no | str\|null |
+
+**Response** (`StoreImportResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `profile` | no | str |
+| `cycle_id` | no | str |
+| `error` | no | str |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_upload_cycle`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `local_cycle_id` | yes | str |
+| `program` | yes | str |
+| `description` | no | str\|null |
+
+**Response** (`StoreUploadResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `store_cycle_id` | no | str |
+| `error` | no | str |
+| `disabled` | no | bool |

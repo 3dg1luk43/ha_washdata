@@ -324,6 +324,14 @@ def _pn_dismiss(hass: HomeAssistant, notification_id: str) -> None:
 class WashDataManager:
     """Manages a single washing machine instance."""
 
+    @property
+    def store_bridge(self) -> Any:
+        """Lazy community-store bridge (kept for the entry so the token cache persists)."""
+        if self._store_bridge is None:
+            from .store import StoreBridge
+            self._store_bridge = StoreBridge(self.hass, self.profile_store)
+        return self._store_bridge
+
     def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
         """Initialize the manager."""
         self.hass = hass
@@ -486,6 +494,7 @@ class WashDataManager:
             device_name=config_entry.title,
         )
         self.recorder = CycleRecorder(hass, self.entry_id, device_name=config_entry.title)
+        self._store_bridge: Any = None  # lazy community-store bridge (online features)
 
         # Priority: Options > Data > Default
         min_power = config_entry.options.get(

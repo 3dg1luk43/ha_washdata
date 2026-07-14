@@ -352,6 +352,44 @@ export interface StartTaskResponse {
   task_id: string;
 }
 
+export interface StoreImportResponse {
+  profile?: string;
+  cycle_id?: string;
+  error?: string;
+  disabled?: boolean;
+}
+
+export interface StoreItemsResponse {
+  items?: unknown[];
+  disabled?: boolean;
+}
+
+export interface StoreSimpleResponse {
+  connected?: boolean;
+  uid?: string | null;
+  name?: string | null;
+  brand?: string | null;
+  model?: string | null;
+  error?: string;
+  disabled?: boolean;
+}
+
+export interface StoreStatusResponse {
+  enabled?: boolean;
+  connected?: boolean;
+  uid?: string | null;
+  name?: string | null;
+  brand?: string | null;
+  model?: string | null;
+  disabled?: boolean;
+}
+
+export interface StoreUploadResponse {
+  store_cycle_id?: string;
+  error?: string;
+  disabled?: boolean;
+}
+
 export interface SubscribeTasksResponse {
 }
 
@@ -786,6 +824,51 @@ export interface StartPlaygroundSweepRequest {
   values_y?: number[];
 }
 
+export interface StoreStatusRequest {
+  entry_id: string;
+}
+
+export interface StoreConnectRequest {
+  entry_id: string;
+  refresh_token: string;
+  uid: string;
+  name?: string | null;
+}
+
+export interface StoreDisconnectRequest {
+  entry_id: string;
+}
+
+export interface StoreSearchDevicesRequest {
+  entry_id: string;
+  query?: string | null;
+  appliance_type?: string | null;
+}
+
+export interface StoreGetProfilesRequest {
+  entry_id: string;
+  device_id: string;
+}
+
+export interface StoreGetCyclesRequest {
+  entry_id: string;
+  profile_id: string;
+}
+
+export interface StoreImportCycleRequest {
+  entry_id: string;
+  cycle_id: string;
+  target_profile?: string | null;
+  new_profile_name?: string | null;
+}
+
+export interface StoreUploadCycleRequest {
+  entry_id: string;
+  local_cycle_id: string;
+  program: string;
+  description?: string | null;
+}
+
 // ── Command maps ───────────────────────────────────────────────────────────
 
 export interface WashDataWsRequests {
@@ -868,6 +951,14 @@ export interface WashDataWsRequests {
   "ha_washdata/get_task_result": GetTaskResultRequest;
   "ha_washdata/start_playground_history": StartPlaygroundHistoryRequest;
   "ha_washdata/start_playground_sweep": StartPlaygroundSweepRequest;
+  "ha_washdata/store_status": StoreStatusRequest;
+  "ha_washdata/store_connect": StoreConnectRequest;
+  "ha_washdata/store_disconnect": StoreDisconnectRequest;
+  "ha_washdata/store_search_devices": StoreSearchDevicesRequest;
+  "ha_washdata/store_get_profiles": StoreGetProfilesRequest;
+  "ha_washdata/store_get_cycles": StoreGetCyclesRequest;
+  "ha_washdata/store_import_cycle": StoreImportCycleRequest;
+  "ha_washdata/store_upload_cycle": StoreUploadCycleRequest;
 }
 
 export interface WashDataWsResponses {
@@ -950,4 +1041,12 @@ export interface WashDataWsResponses {
   "ha_washdata/get_task_result": TaskSnapshot;
   "ha_washdata/start_playground_history": StartTaskResponse;
   "ha_washdata/start_playground_sweep": StartTaskResponse;
+  "ha_washdata/store_status": StoreStatusResponse;
+  "ha_washdata/store_connect": StoreSimpleResponse;
+  "ha_washdata/store_disconnect": StoreSimpleResponse;
+  "ha_washdata/store_search_devices": StoreItemsResponse;
+  "ha_washdata/store_get_profiles": StoreItemsResponse;
+  "ha_washdata/store_get_cycles": StoreItemsResponse;
+  "ha_washdata/store_import_cycle": StoreImportResponse;
+  "ha_washdata/store_upload_cycle": StoreUploadResponse;
 }

@@ -451,6 +451,11 @@ _READ_WRITE_COMMANDS = frozenset({
     "get_task_result",
     "start_playground_history",
     "start_playground_sweep",
+    # Community store: read-only browse is read-level (writes below default to 'edit').
+    "store_status",
+    "store_search_devices",
+    "store_get_profiles",
+    "store_get_cycles",
 })
 
 _LOG_BUFFER_KEY = "ha_washdata_log_buffer"
@@ -630,6 +635,153 @@ def _sanitize_rbac(r: dict[str, Any]) -> dict[str, Any]:
 # ─── Registration ─────────────────────────────────────────────────────────────
 
 @callback
+# ─── Community store (online features) ─────────────────────────────────────────
+
+def _store_ctx(hass: HomeAssistant, entry_id: str) -> tuple[Any, dict[str, Any]] | None:
+    """Return (manager, options) when online features are enabled, else None."""
+    from .store import online_features_enabled
+    entry = _get_entry(hass, entry_id)
+    manager = _get_manager(hass, entry_id)
+    if entry is None or manager is None:
+        return None
+    opts = dict(entry.options)
+    if not online_features_enabled(opts):
+        return None
+    return manager, opts
+
+
+@websocket_api.websocket_command({vol.Required("type"): "ha_washdata/store_status", vol.Required("entry_id"): str})
+@websocket_api.async_response
+async def ws_store_status(hass, connection, msg):
+    from .store import online_features_enabled
+    entry = _get_entry(hass, msg["entry_id"])
+    manager = _get_manager(hass, msg["entry_id"])
+    if entry is None or manager is None:
+        _err_not_found(connection, msg["id"], msg["entry_id"])
+        return
+    opts = dict(entry.options)
+    if not online_features_enabled(opts):
+        _send_result(connection, msg["id"], "store_status", {"enabled": False})
+        return
+    _send_result(connection, msg["id"], "store_status", manager.store_bridge.status(opts))
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/store_connect", vol.Required("entry_id"): str,
+    vol.Required("refresh_token"): str, vol.Required("uid"): str, vol.Optional("name"): vol.Any(str, None),
+})
+@websocket_api.async_response
+async def ws_store_connect(hass, connection, msg):
+    ctx = _store_ctx(hass, msg["entry_id"])
+    if ctx is None:
+        _send_result(connection, msg["id"], "store_connect", {"disabled": True})
+        return
+    manager, _ = ctx
+    res = await manager.store_bridge.connect(msg["refresh_token"], msg["uid"], msg.get("name"))
+    _send_result(connection, msg["id"], "store_connect", res)
+
+
+@websocket_api.websocket_command({vol.Required("type"): "ha_washdata/store_disconnect", vol.Required("entry_id"): str})
+@websocket_api.async_response
+async def ws_store_disconnect(hass, connection, msg):
+    ctx = _store_ctx(hass, msg["entry_id"])
+    if ctx is None:
+        _send_result(connection, msg["id"], "store_disconnect", {"disabled": True})
+        return
+    manager, _ = ctx
+    _send_result(connection, msg["id"], "store_disconnect", await manager.store_bridge.disconnect())
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/store_search_devices", vol.Required("entry_id"): str,
+    vol.Optional("query"): vol.Any(str, None), vol.Optional("appliance_type"): vol.Any(str, None),
+})
+@websocket_api.async_response
+async def ws_store_search_devices(hass, connection, msg):
+    ctx = _store_ctx(hass, msg["entry_id"])
+    if ctx is None:
+        _send_result(connection, msg["id"], "store_search_devices", {"disabled": True})
+        return
+    manager, _ = ctx
+    items = await manager.store_bridge.search_devices(msg.get("query"), msg.get("appliance_type"))
+    _send_result(connection, msg["id"], "store_search_devices", {"items": items})
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/store_get_profiles", vol.Required("entry_id"): str,
+    vol.Required("device_id"): str,
+})
+@websocket_api.async_response
+async def ws_store_get_profiles(hass, connection, msg):
+    ctx = _store_ctx(hass, msg["entry_id"])
+    if ctx is None:
+        _send_result(connection, msg["id"], "store_get_profiles", {"disabled": True})
+        return
+    manager, _ = ctx
+    items = await manager.store_bridge.get_profiles(msg["device_id"])
+    _send_result(connection, msg["id"], "store_get_profiles", {"items": items})
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/store_get_cycles", vol.Required("entry_id"): str,
+    vol.Required("profile_id"): str,
+})
+@websocket_api.async_response
+async def ws_store_get_cycles(hass, connection, msg):
+    ctx = _store_ctx(hass, msg["entry_id"])
+    if ctx is None:
+        _send_result(connection, msg["id"], "store_get_cycles", {"disabled": True})
+        return
+    manager, _ = ctx
+    items = await manager.store_bridge.get_cycles(msg["profile_id"])
+    _send_result(connection, msg["id"], "store_get_cycles", {"items": items})
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/store_import_cycle", vol.Required("entry_id"): str,
+    vol.Required("cycle_id"): str,
+    vol.Optional("target_profile"): vol.Any(str, None), vol.Optional("new_profile_name"): vol.Any(str, None),
+})
+@websocket_api.async_response
+async def ws_store_import_cycle(hass, connection, msg):
+    ctx = _store_ctx(hass, msg["entry_id"])
+    if ctx is None:
+        _send_result(connection, msg["id"], "store_import_cycle", {"disabled": True})
+        return
+    manager, _ = ctx
+    res = await manager.store_bridge.import_cycle(
+        msg["cycle_id"], msg.get("target_profile"), msg.get("new_profile_name")
+    )
+    manager.notify_update()
+    _send_result(connection, msg["id"], "store_import_cycle", res)
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/store_upload_cycle", vol.Required("entry_id"): str,
+    vol.Required("local_cycle_id"): str, vol.Required("program"): str,
+    vol.Optional("description"): vol.Any(str, None),
+})
+@websocket_api.async_response
+async def ws_store_upload_cycle(hass, connection, msg):
+    from .const import CONF_STORE_BRAND, CONF_STORE_MODEL, CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE
+    ctx = _store_ctx(hass, msg["entry_id"])
+    if ctx is None:
+        _send_result(connection, msg["id"], "store_upload_cycle", {"disabled": True})
+        return
+    manager, opts = ctx
+    brand = str(opts.get(CONF_STORE_BRAND) or "").strip()
+    model = str(opts.get(CONF_STORE_MODEL) or "").strip()
+    if not brand or not model:
+        _send_result(connection, msg["id"], "store_upload_cycle", {"error": "no_appliance_declared"})
+        return
+    appliance = opts.get(CONF_DEVICE_TYPE, manager.config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
+    res = await manager.store_bridge.share_cycle(
+        msg["local_cycle_id"], msg["program"], brand, model, appliance,
+        description=msg.get("description") or "",
+    )
+    _send_result(connection, msg["id"], "store_upload_cycle", res)
+
+
 def async_register_commands(hass: HomeAssistant) -> None:
     """Register all WebSocket commands for the WashData panel.
 
@@ -695,6 +847,10 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_list_tasks, ws_subscribe_tasks, ws_cancel_task, ws_get_task_result,
         # Playground batch/sweep as detached registry-tracked tasks
         ws_start_playground_history, ws_start_playground_sweep,
+        # Community store (online features): status/connect/disconnect/browse/import/upload
+        ws_store_status, ws_store_connect, ws_store_disconnect,
+        ws_store_search_devices, ws_store_get_profiles, ws_store_get_cycles,
+        ws_store_import_cycle, ws_store_upload_cycle,
     ]
     for handler in handlers:
         websocket_api.async_register_command(hass, _guard(handler))

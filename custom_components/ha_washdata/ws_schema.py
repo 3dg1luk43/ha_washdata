@@ -473,6 +473,49 @@ class SubscribeTasksResponse(TypedDict, total=False):
 #: Map ``<command>`` (the string after ``ha_washdata/``) -> its response TypedDict.
 #: Commands whose response is the trivial ``{"success": True}`` share
 #: :class:`SuccessResponse`; the cycle-control commands share :class:`OkResponse`.
+class StoreStatusResponse(TypedDict, total=False):
+    """Community-store status / identity (no refresh token)."""
+    enabled: bool
+    connected: bool
+    uid: str | None
+    name: str | None
+    brand: str | None
+    model: str | None
+    disabled: bool
+
+
+class StoreItemsResponse(TypedDict, total=False):
+    """A list of store docs (devices / profiles / cycles)."""
+    items: list
+    disabled: bool
+
+
+class StoreImportResponse(TypedDict, total=False):
+    """Result of importing a reference cycle."""
+    profile: str
+    cycle_id: str
+    error: str
+    disabled: bool
+
+
+class StoreUploadResponse(TypedDict, total=False):
+    """Result of sharing (uploading) a local cycle."""
+    store_cycle_id: str
+    error: str
+    disabled: bool
+
+
+class StoreSimpleResponse(TypedDict, total=False):
+    """Connect/disconnect acknowledgement + identity/error markers."""
+    connected: bool
+    uid: str | None
+    name: str | None
+    brand: str | None
+    model: str | None
+    error: str
+    disabled: bool
+
+
 WS_RESPONSE_TYPES: dict[str, type] = {
     "get_devices": GetDevicesResponse,
     "get_device_cycles": GetDeviceCyclesResponse,
@@ -553,6 +596,14 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "get_task_result": TaskSnapshot,
     "start_playground_history": StartTaskResponse,
     "start_playground_sweep": StartTaskResponse,
+    "store_status": StoreStatusResponse,
+    "store_connect": StoreSimpleResponse,
+    "store_disconnect": StoreSimpleResponse,
+    "store_search_devices": StoreItemsResponse,
+    "store_get_profiles": StoreItemsResponse,
+    "store_get_cycles": StoreItemsResponse,
+    "store_import_cycle": StoreImportResponse,
+    "store_upload_cycle": StoreUploadResponse,
 }
 
 #: Commands whose response splats an upstream summary dict and therefore has an
@@ -812,6 +863,24 @@ WS_COMMANDS: dict[str, dict] = {
         _p("objective", "str"),
         _p("param_y", "str|null", False),
         _p("values_y", "list[float]", False),
+    ]},
+    # Community store (online features)
+    "store_status": {"params": [_entry()]},
+    "store_connect": {"params": [
+        _entry(), _p("refresh_token", "str"), _p("uid", "str"), _p("name", "str|null", False),
+    ]},
+    "store_disconnect": {"params": [_entry()]},
+    "store_search_devices": {"params": [
+        _entry(), _p("query", "str|null", False), _p("appliance_type", "str|null", False),
+    ]},
+    "store_get_profiles": {"params": [_entry(), _p("device_id", "str")]},
+    "store_get_cycles": {"params": [_entry(), _p("profile_id", "str")]},
+    "store_import_cycle": {"params": [
+        _entry(), _p("cycle_id", "str"),
+        _p("target_profile", "str|null", False), _p("new_profile_name", "str|null", False),
+    ]},
+    "store_upload_cycle": {"params": [
+        _entry(), _p("local_cycle_id", "str"), _p("program", "str"), _p("description", "str|null", False),
     ]},
 }
 
