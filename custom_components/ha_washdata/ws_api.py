@@ -458,6 +458,7 @@ _READ_WRITE_COMMANDS = frozenset({
     "store_get_profiles",
     "store_get_cycles",
     "store_get_device_quality",
+    "store_get_device_profiles",
 })
 
 _LOG_BUFFER_KEY = "ha_washdata_log_buffer"
@@ -740,6 +741,21 @@ async def ws_store_get_device_quality(hass, connection, msg):
 
 
 @websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/store_get_device_profiles", vol.Required("entry_id"): str,
+    vol.Required("brand"): str, vol.Required("model"): str, vol.Required("appliance_type"): str,
+})
+@websocket_api.async_response
+async def ws_store_get_device_profiles(hass, connection, msg):
+    ctx = _store_ctx(hass, msg["entry_id"])
+    if ctx is None:
+        _send_result(connection, msg["id"], "store_get_device_profiles", {"disabled": True})
+        return
+    manager, _ = ctx
+    res = await manager.store_bridge.device_profiles(msg["brand"], msg["model"], msg["appliance_type"])
+    _send_result(connection, msg["id"], "store_get_device_profiles", res)
+
+
+@websocket_api.websocket_command({
     vol.Required("type"): "ha_washdata/store_confirm_device", vol.Required("entry_id"): str,
     vol.Required("device_id"): str,
 })
@@ -927,7 +943,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_store_search_devices, ws_store_get_profiles, ws_store_get_cycles,
         ws_store_import_cycle, ws_store_upload_cycle,
         # Community catalog: brand list, device quality, confirm/rate, global online toggle
-        ws_store_list_brands, ws_store_get_device_quality,
+        ws_store_list_brands, ws_store_get_device_quality, ws_store_get_device_profiles,
         ws_store_confirm_device, ws_store_rate_device, ws_store_set_online,
     ]
     for handler in handlers:

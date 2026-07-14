@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**92 commands.**
+**93 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -95,6 +95,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `store_get_profiles` | entry_id, device_id | `StoreItemsResponse` |
 | `store_get_cycles` | entry_id, profile_id | `StoreItemsResponse` |
 | `store_get_device_quality` | entry_id, device_id | `StoreQualityResponse` |
+| `store_get_device_profiles` | entry_id, brand, model, appliance_type | `StoreDeviceProfilesResponse` |
 | `store_confirm_device` | entry_id, device_id | `StoreConfirmResponse` |
 | `store_rate_device` | entry_id, device_id, rating | `StoreOnlineResponse` |
 | `store_set_online` | entry_id, enabled | `StoreOnlineResponse` |
@@ -1574,6 +1575,25 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | --- | --- | --- |
 | `avg` | no | number \| null |
 | `count` | no | number |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_get_device_profiles`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `brand` | yes | str |
+| `model` | yes | str |
+| `appliance_type` | yes | str |
+
+**Response** (`StoreDeviceProfilesResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `device_id` | no | str |
+| `items` | no | list |
 | `disabled` | no | bool |
 
 ## `ha_washdata/store_confirm_device`

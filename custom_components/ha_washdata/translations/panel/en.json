@@ -1567,7 +1567,9 @@
     "appliance_added": "Appliance added - awaiting approval",
     "thanks_confirming": "Thanks for confirming",
     "device_approved": "Approved by the community",
-    "rating_saved": "Quality rating saved"
+    "rating_saved": "Quality rating saved",
+    "brand_added": "Brand added - awaiting approval",
+    "profile_added": "Profile added - awaiting approval"
   },
   "trend": {
     "down": "Trending down",
@@ -1635,5 +1637,10 @@
   "link": {
     "manual": "Manual ↗",
     "add_appliance": "Add your appliance"
+  },
+  "tip": {
+    "add_brand": "Brand not listed? Add it to the community catalog",
+    "add_appliance": "Model not listed? Add your appliance to the community catalog",
+    "add_profile": "Add a profile for this appliance on the community site"
   }
 }

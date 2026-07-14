@@ -266,17 +266,24 @@ class StoreClient:
         avg = _decode(agg["avg"]) if ("avg" in agg and "nullValue" not in agg["avg"]) else None
         return {"avg": avg if (cnt and avg is not None) else None, "count": cnt or 0}
 
-    async def get_profiles(self, dev_id: str, page_size: int = 100) -> list[dict[str, Any]]:
+    async def get_profiles(self, dev_id: str, include_pending: bool = False, page_size: int = 100) -> list[dict[str, Any]]:
         sq = {
             "from": [{"collectionId": "profiles"}],
             "where": self._where([
                 self._field_filter("deviceId", "EQUAL", dev_id),
-                self._field_filter("status", "EQUAL", "approved"),
+                self._status_filter(include_pending),
             ]),
             "orderBy": [{"field": {"fieldPath": "createdAt"}, "direction": "DESCENDING"}],
             "limit": page_size,
         }
         return await self._run_query(sq)
+
+    async def device_profiles(self, brand: str, model: str, appliance_type: str) -> dict[str, Any]:
+        """Resolve the store deviceId from brand/model/type and return its profiles
+        (approved + the caller's own pending), for the Share dialog's profile picker."""
+        dev_id = device_id(appliance_type, brand, model)
+        items = await self.get_profiles(dev_id, include_pending=True)
+        return {"device_id": dev_id, "items": items}
 
     async def get_cycles(self, prof_id: str, page_size: int = 50) -> list[dict[str, Any]]:
         sq = {

@@ -32,6 +32,9 @@ class FakeClient:
         return [{"id": "bosch", "brand": "Bosch", "status": "approved"}]
     async def get_profiles(self, did):
         return [{"id": "p1", "program": "Cotton 40"}]
+    async def device_profiles(self, brand, model, appliance_type):
+        self.last_device_profiles = {"brand": brand, "model": model, "appliance_type": appliance_type}
+        return {"device_id": f"{appliance_type}__{brand.lower()}__{model.lower()}", "items": [{"id": "p1", "program": "Cotton 40"}]}
     async def get_cycles(self, pid):
         return [{"id": "c1"}]
     async def get_device_quality(self, did):
@@ -127,6 +130,15 @@ async def test_confirm_and_rate_when_connected(bridge):
 async def test_get_device_quality(bridge):
     br, ps, hass = bridge
     assert await br.get_device_quality("d1") == {"avg": 4.5, "count": 2}
+
+
+@pytest.mark.asyncio
+async def test_device_profiles_maps_type(bridge):
+    br, ps, hass = bridge
+    res = await br.device_profiles("Bosch", "WAT", "washing_machine")
+    # HA washing_machine -> catalog washer before resolving the deviceId.
+    assert br._client.last_device_profiles["appliance_type"] == "washer"
+    assert res["device_id"].startswith("washer__") and res["items"][0]["program"] == "Cotton 40"
 
 
 @pytest.mark.asyncio

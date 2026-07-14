@@ -363,6 +363,12 @@ export interface StoreConfirmResponse {
   disabled?: boolean;
 }
 
+export interface StoreDeviceProfilesResponse {
+  device_id?: string;
+  items?: unknown[];
+  disabled?: boolean;
+}
+
 export interface StoreImportResponse {
   profile?: string;
   cycle_id?: string;
@@ -892,6 +898,13 @@ export interface StoreGetDeviceQualityRequest {
   device_id: string;
 }
 
+export interface StoreGetDeviceProfilesRequest {
+  entry_id: string;
+  brand: string;
+  model: string;
+  appliance_type: string;
+}
+
 export interface StoreConfirmDeviceRequest {
   entry_id: string;
   device_id: string;
@@ -1012,6 +1025,7 @@ export interface WashDataWsRequests {
   "ha_washdata/store_get_profiles": StoreGetProfilesRequest;
   "ha_washdata/store_get_cycles": StoreGetCyclesRequest;
   "ha_washdata/store_get_device_quality": StoreGetDeviceQualityRequest;
+  "ha_washdata/store_get_device_profiles": StoreGetDeviceProfilesRequest;
   "ha_washdata/store_confirm_device": StoreConfirmDeviceRequest;
   "ha_washdata/store_rate_device": StoreRateDeviceRequest;
   "ha_washdata/store_set_online": StoreSetOnlineRequest;
@@ -1112,4 +1126,5 @@ export interface WashDataWsResponses {
   "ha_washdata/store_confirm_device": StoreConfirmResponse;
   "ha_washdata/store_rate_device": StoreOnlineResponse;
   "ha_washdata/store_set_online": StoreOnlineResponse;
+  "ha_washdata/store_get_device_profiles": StoreDeviceProfilesResponse;
 }

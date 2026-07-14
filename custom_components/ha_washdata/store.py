@@ -102,6 +102,11 @@ class StoreBridge:
     async def get_profiles(self, device_id: str) -> list[dict[str, Any]]:
         return await self._client.get_profiles(device_id)
 
+    async def device_profiles(self, brand: str, model: str, appliance_type: str) -> dict[str, Any]:
+        """Profiles for the appliance identified by brand/model/type (for the Share
+        dialog's profile picker). Maps the HA device type to the catalog type first."""
+        return await self._client.device_profiles(brand, model, store_appliance_type(appliance_type))
+
     async def get_cycles(self, profile_id: str) -> list[dict[str, Any]]:
         return await self._client.get_cycles(profile_id)
 

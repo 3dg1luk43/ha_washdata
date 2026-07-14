@@ -889,6 +889,10 @@ button.wd-profile-card { display: block; }
 .wd-combo-item { padding: 7px 12px; cursor: pointer; font-size: .86em; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis; }
 .wd-combo-item:hover, .wd-combo-item.kbd { background: var(--secondary-background-color); }
+.wd-combo-row { display: flex; gap: 6px; align-items: center; }
+.wd-combo-row .wd-combo { flex: 1 1 auto; }
+.wd-addbtn { flex: 0 0 auto; width: 34px; height: 34px; border-radius: var(--wd-radius-md); border: 1px solid var(--divider-color); background: var(--secondary-background-color); color: var(--primary-text-color); font-size: 1.25em; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.wd-addbtn:hover { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
 .wd-loglvl { font-weight: 700; margin-right: 6px; }
 .wd-logcomp { display: inline-block; font-size: .72em; color: var(--secondary-text-color); background: var(--secondary-background-color); border-radius: 4px; padding: 0 5px; margin-right: 6px; }
 .wd-logdev { display: inline-block; font-size: .72em; color: var(--primary-color); margin-right: 6px; }
@@ -4218,9 +4222,12 @@ class HaWashdataPanel extends HTMLElement {
     const tag = this._statusTag(match);
     const loading = this._catalog.brands === null ? ` <span class="wd-info" style="font-size:.85em">${this._t('msg.loading', {}, 'Loading…')}</span>` : '';
     return `<div class="wd-field"><label>${_esc(label)} ${tag}${loading}</label>
-      <div class="wd-combo">
-        <input type="text" id="wd-store-brand" class="wd-combo-inp" data-opt="${key}" data-ftype="text" value="${_esc(val)}" placeholder="${ph}" autocomplete="off" spellcheck="false">
-        <div class="wd-combo-drop" hidden></div>
+      <div class="wd-combo-row">
+        <div class="wd-combo">
+          <input type="text" id="wd-store-brand" class="wd-combo-inp" data-opt="${key}" data-ftype="text" value="${_esc(val)}" placeholder="${ph}" autocomplete="off" spellcheck="false">
+          <div class="wd-combo-drop" hidden></div>
+        </div>
+        <button type="button" class="wd-addbtn" data-action="store-add-brand" title="${_esc(this._t('tip.add_brand', {}, 'Brand not listed? Add it to the community catalog'))}" aria-label="${_esc(this._t('tip.add_brand', {}, 'Add brand'))}">+</button>
       </div>
       <div class="wd-field-hint">${_esc(doc)}</div></div>`;
   }
@@ -4259,9 +4266,12 @@ class HaWashdataPanel extends HTMLElement {
       extra = `<div class="wd-field-hint">${this._t('msg.model_not_found', {}, "Not in the catalog yet.")} <button type="button" class="wd-linkbtn" data-action="store-add-appliance">${this._t('link.add_appliance', {}, 'Add your appliance')}</button></div>`;
     }
     return `<div class="wd-field"><label>${_esc(label)} ${tag}${loading}</label>
-      <div class="wd-combo">
-        <input type="text" id="wd-store-model" class="wd-combo-inp" data-opt="${key}" data-ftype="text" value="${_esc(val)}" placeholder="${ph}" autocomplete="off" spellcheck="false">
-        <div class="wd-combo-drop" hidden></div>
+      <div class="wd-combo-row">
+        <div class="wd-combo">
+          <input type="text" id="wd-store-model" class="wd-combo-inp" data-opt="${key}" data-ftype="text" value="${_esc(val)}" placeholder="${ph}" autocomplete="off" spellcheck="false">
+          <div class="wd-combo-drop" hidden></div>
+        </div>
+        <button type="button" class="wd-addbtn" data-action="store-add-appliance" title="${_esc(this._t('tip.add_appliance', {}, 'Model not listed? Add your appliance to the community catalog'))}" aria-label="${_esc(this._t('tip.add_appliance', {}, 'Add appliance'))}">+</button>
       </div>
       <label class="wd-check-row" style="font-size:.85em;margin-top:4px"><input type="checkbox" data-action="store-approved-filter" ${this._catalog.approvedOnly ? 'checked' : ''}> ${this._t('lbl.approved_only', {}, 'Approved only')}</label>
       <div class="wd-field-hint">${_esc(doc)}</div>
@@ -4298,6 +4308,24 @@ class HaWashdataPanel extends HTMLElement {
       if (this._catalog.forBrand === brand) this._catalog.devices = (r && r.items) || [];
     } catch (_) { if (this._catalog.forBrand === brand) this._catalog.devices = []; }
     this._entityListCache.store_model = (this._catalog.devices || []).map(d => d.model).filter(Boolean);
+  }
+
+  // Load the appliance's profiles into the open Share dialog (dropdown + resolved
+  // deviceId for the "+ add profile" link).
+  async _loadShareProfiles() {
+    const dev = this._devices[this._selIdx];
+    const m = this._modal;
+    if (!dev || !m || m.type !== 'store-share') return;
+    const brand = (this._opts.store_brand || '').trim();
+    const model = (this._opts.store_model || '').trim();
+    if (!brand || !model) { m.profiles = []; if (this._modal === m) this._render(); return; }
+    try {
+      const r = await this._ws({ type: `${_DOMAIN}/store_get_device_profiles`, entry_id: dev.entry_id, brand, model, appliance_type: this._opts.device_type || '' });
+      if (this._modal !== m) return;
+      m.profiles = (r && r.items) || [];
+      m.deviceId = (r && r.device_id) || null;
+    } catch (_) { if (this._modal === m) m.profiles = []; }
+    if (this._modal === m) this._render();
   }
 
   // Automations subcategory at the top of Notifications. Replaces the old custom
@@ -6502,6 +6530,23 @@ class HaWashdataPanel extends HTMLElement {
         this._render();
         return;
       }
+      if (d.type === 'washdata-brand-created') {
+        if (d.brand) this._opts = { ...this._opts, store_brand: d.brand };
+        this._catalog.brands = undefined;  // reload the brand catalog so it is pickable
+        this._showToast(this._t('toast.brand_added', {}, 'Brand added - awaiting approval'));
+        this._render();
+        return;
+      }
+      if (d.type === 'washdata-profile-created') {
+        // If the Share dialog is open, preselect the new profile + refresh its list.
+        const m = this._modal;
+        if (m && m.type === 'store-share') {
+          m.program = d.program || m.program;
+          this._loadShareProfiles();
+        }
+        this._showToast(this._t('toast.profile_added', {}, 'Profile added - awaiting approval'));
+        return;
+      }
       if (d.type !== 'washdata-connect') return;
       try {
         const r = await this._ws({ type: `${_DOMAIN}/store_connect`, entry_id: eid, refresh_token: d.refreshToken, uid: d.uid, name: d.displayName });
@@ -6997,9 +7042,25 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="store-import-ok">${this._t('btn.import', {}, 'Import')}</button></div>`;
     } else if (m.type === 'store-share') {
+      // Profile picker: a dropdown of the appliance's existing profiles + a "+" to
+      // add a new one on the site. Falls back to the cycle's own label as an option.
+      const profiles = Array.isArray(m.profiles) ? m.profiles : [];
+      const names = [];
+      const seen = new Set();
+      const add = (n) => { const k = (n || '').toLowerCase(); if (n && !seen.has(k)) { seen.add(k); names.push(n); } };
+      add(m.program);
+      profiles.forEach(p => add(p.program));
+      const loading = m.profiles == null ? ` <span class="wd-info" style="font-size:.85em">${this._t('msg.loading', {}, 'Loading…')}</span>` : '';
+      const opts = names.length
+        ? names.map(n => `<option value="${_esc(n)}" ${n === m.program ? 'selected' : ''}>${_esc(n)}</option>`).join('')
+        : `<option value="">${this._t('msg.no_profiles_yet', {}, '(no profiles yet - add one)')}</option>`;
       body = `<h2>${this._t('modal.store_share', {}, 'Share to community store')}</h2>
         <p class="wd-info" style="margin-bottom:12px">${this._t('msg.store_share_intro', {}, 'Upload this reference cycle so others with the same appliance can use it. It is reviewed before appearing publicly.')}</p>
-        <div class="wd-field"><label>${this._t('lbl.program', {}, 'Program')}</label><input type="text" id="wd-store-share-prog" value="${_esc(m.program || '')}"></div>
+        <div class="wd-field"><label>${this._t('lbl.profile', {}, 'Profile')}${loading}</label>
+          <div class="wd-combo-row">
+            <select id="wd-store-share-prog">${opts}</select>
+            <button type="button" class="wd-addbtn" data-action="store-share-add-profile" title="${_esc(this._t('tip.add_profile', {}, 'Add a profile for this appliance on the community site'))}">+</button>
+          </div></div>
         <div class="wd-field"><label>${this._t('store.description', {}, 'Description (optional)')}</label><textarea id="wd-store-share-desc" rows="2"></textarea></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="store-share-ok">${this._t('btn.share', {}, 'Share')}</button></div>`;
@@ -7890,6 +7951,9 @@ class HaWashdataPanel extends HTMLElement {
           inp.value = '';
         } else {
           inp.value = val;
+          // Fire change so reactive consumers (e.g. the store brand picker, which
+          // must load the model catalog) react immediately on pick, not only on blur.
+          inp.dispatchEvent(new Event('change', { bubbles: true }));
         }
         drop.hidden = true;
       };
@@ -8623,9 +8687,21 @@ class HaWashdataPanel extends HTMLElement {
       if (!origin) { this._showToast(this._t('toast.store_unavailable', {}, 'The community store is not available.'), 'error'); return; }
       this._ensureStoreConnectListener();
       const modelEl = sr.getElementById('wd-store-model');
+      const brandEl = sr.getElementById('wd-store-brand');
       const q = new URLSearchParams({
-        type: this._storeApplianceType(), brand: this._opts.store_brand || '',
+        mode: 'device', type: this._storeApplianceType(),
+        brand: (brandEl && brandEl.value) || this._opts.store_brand || '',
         model: (modelEl && modelEl.value) || this._opts.store_model || '', origin: location.origin,
+      }).toString();
+      window.open(origin + '/create.html?' + q, 'washdata_create', 'width=560,height=760');
+
+    } else if (a === 'store-add-brand') {
+      const origin = this._constants.storeWebOrigin;
+      if (!origin) { this._showToast(this._t('toast.store_unavailable', {}, 'The community store is not available.'), 'error'); return; }
+      this._ensureStoreConnectListener();
+      const brandEl = sr.getElementById('wd-store-brand');
+      const q = new URLSearchParams({
+        mode: 'brand', brand: (brandEl && brandEl.value) || this._opts.store_brand || '', origin: location.origin,
       }).toString();
       window.open(origin + '/create.html?' + q, 'washdata_create', 'width=560,height=760');
 
@@ -8694,8 +8770,20 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'store-share-cycle') {
       const cid = btn.dataset.cid;
       const program = btn.dataset.prof || '';
-      this._modal = { type: 'store-share', cycleId: cid, program };
+      this._modal = { type: 'store-share', cycleId: cid, program, profiles: null, deviceId: null };
       this._render();
+      this._loadShareProfiles();
+
+    } else if (a === 'store-share-add-profile') {
+      const m = this._modal;
+      const origin = this._constants.storeWebOrigin;
+      if (!origin || !m) { if (!origin) this._showToast(this._t('toast.store_unavailable', {}, 'The community store is not available.'), 'error'); return; }
+      this._ensureStoreConnectListener();
+      const q = new URLSearchParams({
+        mode: 'profile', device: m.deviceId || '', type: this._storeApplianceType(),
+        brand: this._opts.store_brand || '', model: this._opts.store_model || '', origin: location.origin,
+      }).toString();
+      window.open(origin + '/create.html?' + q, 'washdata_create', 'width=560,height=760');
 
     } else if (a === 'auto-new') {
       this._navigate('/config/automation/edit/new');

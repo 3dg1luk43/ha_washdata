@@ -138,6 +138,22 @@ async def test_list_brands_prefix_filter():
 
 
 @pytest.mark.asyncio
+async def test_device_profiles_resolves_id_and_includes_pending():
+    s = _Session()
+    s.queue_post(_Resp(200, [
+        {"document": {"name": ".../profiles/p1", "fields": {"program": {"stringValue": "Cotton 40"}, "status": {"stringValue": "pending"}}}},
+    ]))
+    c = _client(s)
+    res = await c.device_profiles("Bosch", "WAT 28660", "washer")
+    assert res["device_id"] == "washer__bosch__wat-28660"
+    assert res["items"][0]["program"] == "Cotton 40"
+    # include_pending -> status IN [approved, pending]
+    clauses = s.posts[-1][1]["json"]["structuredQuery"]["where"]["compositeFilter"]["filters"]
+    status = next(f for f in clauses if f["fieldFilter"]["field"]["fieldPath"] == "status")
+    assert status["fieldFilter"]["op"] == "IN"
+
+
+@pytest.mark.asyncio
 async def test_get_device_quality_decodes_aggregation():
     s = _Session()
     s.queue_post(_Resp(200, [{"result": {"aggregateFields": {

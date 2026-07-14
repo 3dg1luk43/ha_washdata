@@ -543,6 +543,13 @@ class StoreOnlineResponse(TypedDict, total=False):
     disabled: bool
 
 
+class StoreDeviceProfilesResponse(TypedDict, total=False):
+    """Resolved store deviceId + its profiles (for the Share dialog picker)."""
+    device_id: str
+    items: list
+    disabled: bool
+
+
 WS_RESPONSE_TYPES: dict[str, type] = {
     "get_devices": GetDevicesResponse,
     "get_device_cycles": GetDeviceCyclesResponse,
@@ -636,6 +643,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "store_confirm_device": StoreConfirmResponse,
     "store_rate_device": StoreOnlineResponse,
     "store_set_online": StoreOnlineResponse,
+    "store_get_device_profiles": StoreDeviceProfilesResponse,
 }
 
 #: Commands whose response splats an upstream summary dict and therefore has an
@@ -912,6 +920,7 @@ WS_COMMANDS: dict[str, dict] = {
     "store_get_profiles": {"params": [_entry(), _p("device_id", "str")]},
     "store_get_cycles": {"params": [_entry(), _p("profile_id", "str")]},
     "store_get_device_quality": {"params": [_entry(), _p("device_id", "str")]},
+    "store_get_device_profiles": {"params": [_entry(), _p("brand", "str"), _p("model", "str"), _p("appliance_type", "str")]},
     "store_confirm_device": {"params": [_entry(), _p("device_id", "str")]},
     "store_rate_device": {"params": [_entry(), _p("device_id", "str"), _p("rating", "int")]},
     "store_set_online": {"params": [_entry(), _p("enabled", "bool")]},
