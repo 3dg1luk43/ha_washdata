@@ -1099,6 +1099,13 @@ function _fmtDate(ts, mode) {
 function _esc(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+// Allow only http(s) links. Community-supplied URLs (e.g. a device's manualUrl)
+// must never render a `javascript:`/`data:` href, which _esc does not neutralise.
+// Returns '' for anything that is not an absolute http(s) URL.
+function _safeHttpUrl(u) {
+  const s = String(u == null ? '' : u).trim();
+  return /^https?:\/\//i.test(s) ? s : '';
+}
 function _num(v, def) { const n = parseFloat(v); return isNaN(n) ? def : n; }
 // Visible, keyboard-focusable descendants of `root` (for modal focus trapping).
 function _focusableEls(root) {
@@ -4286,7 +4293,8 @@ class HaWashdataPanel extends HTMLElement {
     let extra = '';
     if (match) {
       const bits = [];
-      if (match.manualUrl) bits.push(`<a href="${_esc(match.manualUrl)}" target="_blank" rel="noopener noreferrer nofollow">${this._t('link.manual', {}, 'Manual ↗')}</a>`);
+      const manualUrl = _safeHttpUrl(match.manualUrl);
+      if (manualUrl) bits.push(`<a href="${_esc(manualUrl)}" target="_blank" rel="noopener noreferrer nofollow">${this._t('link.manual', {}, 'Manual ↗')}</a>`);
       bits.push(this._t('store.contributed_by', {name: _esc(match.createdByName || this._t('lbl.anonymous', {}, 'Anonymous'))}, `by ${_esc(match.createdByName || 'Anonymous')}`));
       const connected = !!(this._storeStatus && this._storeStatus.connected);
       let actions = '';

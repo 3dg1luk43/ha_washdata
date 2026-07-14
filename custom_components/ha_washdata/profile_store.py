@@ -2770,10 +2770,17 @@ class ProfileStore:
 
         profiles: dict[str, dict[str, Any]] = self._data.get("profiles", {}) or {}
         cycles: list[dict[str, Any]] = self._data.get("past_cycles", []) or []
+        ref_cycles: list[dict[str, Any]] = self._data.get("reference_cycles", []) or []
         if not profiles or not cycles:
             return stats
 
-        by_id: dict[str, dict[str, Any]] = {c["id"]: c for c in cycles if c.get("id")}
+        # Sample validity must recognise imported reference cycles: an import-only
+        # profile legitimately points its sample at a reference cycle. Without this,
+        # such a sample looks "missing" and the repair below would steal an unrelated
+        # unlabeled real cycle into the imported profile.
+        by_id: dict[str, dict[str, Any]] = {
+            c["id"]: c for c in list(cycles) + list(ref_cycles) if c.get("id")
+        }
 
         def newest_unlabeled_with_power_data() -> dict[str, Any] | None:
             candidates: list[dict[str, Any]] = [
@@ -3129,7 +3136,13 @@ class ProfileStore:
     def cleanup_orphaned_profiles(self) -> int:
         """Remove profiles that reference non-existent cycles.
         Returns number of profiles removed."""
+        # Imported reference cycles are valid sample targets too (an import-only
+        # profile points its sample there), so include them or such profiles would
+        # be wrongly deleted as orphans.
         cycle_ids = {c["id"] for c in self._data.get("past_cycles", [])}
+        cycle_ids |= {
+            c["id"] for c in self._data.get("reference_cycles", []) if c.get("id")
+        }
         orphaned: list[str] = []
         for name, profile in self._data["profiles"].items():
             ref = profile.get("sample_cycle_id")

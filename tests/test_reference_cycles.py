@@ -194,3 +194,32 @@ async def test_relabel_reference_cycle_unknown_profile_raises(store):
     cid = await store.add_reference_cycle("Cotton 40", _offset_trace(2000), {"store_cycle_id": "l2"})
     with pytest.raises(ValueError):
         await store.assign_profile_to_cycle(cid, "Does Not Exist")
+
+
+# --- Maintenance must not corrupt import-only profiles (review findings #1/#2) ---
+
+@pytest.mark.asyncio
+async def test_repair_does_not_steal_real_cycle_into_import_only_profile(store):
+    # An UNLABELED real cycle plus an import-only profile seeded from a reference cycle.
+    await store.async_add_cycle({
+        "start_time": BASE.isoformat(), "duration": 3600, "status": "completed",
+        "power_data": _iso_trace(1000),
+    })
+    await store.add_reference_cycle("Eco 50", _offset_trace(2000), {"store_cycle_id": "rr1"})
+    assert store.get_past_cycles()[0].get("profile_name") in (None, "")
+    assert store.get_profiles()["Eco 50"].get("sample_cycle_id")  # sample points at the ref cycle
+
+    stats = await store.async_repair_profile_samples()
+    # The imported profile's sample resolves in reference_cycles, so repair leaves the
+    # unlabeled real cycle untouched (previously it was stolen into "Eco 50").
+    assert store.get_past_cycles()[0].get("profile_name") in (None, "")
+    assert stats["cycles_labeled_as_sample"] == 0
+
+
+@pytest.mark.asyncio
+async def test_cleanup_keeps_import_only_profile(store):
+    await store.add_reference_cycle("Eco 50", _offset_trace(2000), {"store_cycle_id": "rr2"})
+    assert "Eco 50" in store.get_profiles()
+    # Import-only profile's sample is a reference cycle -> not an orphan.
+    assert store.cleanup_orphaned_profiles() == 0
+    assert "Eco 50" in store.get_profiles()
