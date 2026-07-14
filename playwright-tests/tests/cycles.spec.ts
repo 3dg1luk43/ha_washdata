@@ -165,7 +165,7 @@ test('imported reference cycles appear in the Cycles list with a badge and filte
   await expect(page.locator('tr[data-cid]').first()).toContainText('Imported Eco');
 });
 
-test('imported cycles are not bulk-selectable', async ({ page }) => {
+test('imported cycles are bulk-selectable; Merge is blocked when an import is selected', async ({ page }) => {
   await setHandler(page, 'ha_washdata/get_device_cycles', {
     ...cyclesData,
     reference_cycles: [
@@ -174,10 +174,18 @@ test('imported cycles are not bulk-selectable', async ({ page }) => {
   });
   await clickTab(page, 'history');
   await page.locator('button[data-action="cyc-select-toggle"]').first().click();
-  // Real cycles get a checkbox; the imported row keeps its status dot (no checkbox).
-  await expect(page.locator('tr[data-cid] input[type="checkbox"]')).toHaveCount(5, { timeout: 3_000 });
+  // Every row (real + imported) gets a checkbox in select mode.
+  await expect(page.locator('tr[data-cid] input[type="checkbox"]')).toHaveCount(6, { timeout: 3_000 });
   const importedRow = page.locator('tr[data-cid]').filter({ hasText: 'Imported Eco' });
-  await expect(importedRow.locator('input[type="checkbox"]')).toHaveCount(0);
+  await expect(importedRow.locator('input[type="checkbox"]')).toHaveCount(1);
+
+  // Select the import + one real cycle: Delete/Compare/Relabel stay enabled, Merge is disabled.
+  await importedRow.locator('input[type="checkbox"]').check();
+  await page.locator('tr[data-cid]').filter({ hasText: 'Cotton 40°C' }).first().locator('input[type="checkbox"]').check();
+  await expect(page.locator('button[data-action="cyc-merge"]')).toBeDisabled();
+  await expect(page.locator('button[data-action="cyc-bulk-del"]')).toBeEnabled();
+  await expect(page.locator('button[data-action="cyc-compare"]')).toBeEnabled();
+  await expect(page.locator('button[data-action="cyc-relabel"]')).toBeEnabled();
 });
 
 test('cycles tab renders without overflow on mobile', async ({ page }) => {

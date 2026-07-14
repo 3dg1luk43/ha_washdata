@@ -170,3 +170,27 @@ async def test_delete_cycle_removes_reference_cycle_and_rebuilds(store):
 @pytest.mark.asyncio
 async def test_delete_cycle_unknown_id_returns_false(store):
     assert await store.delete_cycle("nope-not-here") is False
+
+
+@pytest.mark.asyncio
+async def test_relabel_reference_cycle_moves_template_and_stays_isolated(store):
+    # Two profiles exist (add_reference_cycle auto-creates the profile entry).
+    await store.add_reference_cycle("Eco 50", _offset_trace(900), {"store_cycle_id": "l0"})
+    cid = await store.add_reference_cycle("Cotton 40", _offset_trace(2000), {"store_cycle_id": "l1"})
+    moved = next(c for c in store.get_reference_cycles() if c["id"] == cid)
+    assert moved["profile_name"] == "Cotton 40"
+
+    # Bulk relabel routes through assign_profile_to_cycle; reference cycles move too.
+    await store.assign_profile_to_cycle(cid, "Eco 50")
+    refs = store.get_reference_cycles()
+    assert len(refs) == 2                          # still reference cycles, none promoted
+    moved = next(c for c in refs if c["id"] == cid)
+    assert moved["profile_name"] == "Eco 50"       # moved to the new profile
+    assert all(c["id"] != cid for c in store.get_past_cycles())  # never in past_cycles
+
+
+@pytest.mark.asyncio
+async def test_relabel_reference_cycle_unknown_profile_raises(store):
+    cid = await store.add_reference_cycle("Cotton 40", _offset_trace(2000), {"store_cycle_id": "l2"})
+    with pytest.raises(ValueError):
+        await store.assign_profile_to_cycle(cid, "Does Not Exist")

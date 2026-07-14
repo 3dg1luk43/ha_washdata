@@ -3645,7 +3645,7 @@ class HaWashdataPanel extends HTMLElement {
       const conf = c.match_confidence != null ? c.match_confidence * 100 : null;
       const st = c.status || 'completed';
       const kwh = c.energy_kwh != null ? c.energy_kwh : (c.energy_wh != null ? c.energy_wh / 1000 : null);
-      const rowSel = selMode && !c.is_reference;  // imported cycles aren't bulk-selectable
+      const rowSel = selMode;  // imported cycles are selectable too (delete/compare/relabel)
       const check = rowSel
         ? `<input type="checkbox" class="wd-csel" ${sel.has(c.id) ? 'checked' : ''} style="width:auto;margin:0">`
         : `<span class="wd-devdot" style="background:${statusDotColor(st)}" title="${_esc(st)}"></span>`;
@@ -3699,10 +3699,15 @@ class HaWashdataPanel extends HTMLElement {
       <button class="wd-btn ${selMode ? 'wd-btn-primary' : 'wd-btn-secondary'} wd-btn-sm" data-action="cyc-select-toggle">${selMode ? this._t('btn.done', {}, 'Done') : this._t('btn.select', {}, 'Select')}</button>
     </div>` : '';
 
+    // Merge folds selected cycles into one real cycle, so it can't include an
+    // imported recording (that would pull its trace into usage stats). The other
+    // bulk actions (compare/relabel/delete) work on imports too.
+    const refIds = new Set(refCycles.map(c => c.id));
+    const selHasRef = [...sel].some(id => refIds.has(id));
     const bulk = selMode ? `<div class="wd-card-actions" style="margin:0 0 10px">
       <span class="wd-info" style="margin:0">${this._t('lbl.n_selected', {n: sel.size}, `${sel.size} selected`)}</span>
       <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-compare" ${sel.size < 2 ? 'disabled' : ''}>${this._t('btn.compare', {}, 'Compare')}${sel.size >= 2 ? ` (${sel.size})` : ''}</button>
-      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-merge" ${sel.size < 2 ? 'disabled' : ''}>${this._t('btn.merge', {}, 'Merge')}${sel.size >= 2 ? ` (${sel.size})` : ''}</button>
+      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-merge" ${(sel.size < 2 || selHasRef) ? 'disabled' : ''}${selHasRef ? ` title="${_esc(this._t('msg.merge_no_imports', {}, 'Imported recordings cannot be merged into a real cycle. Deselect them to merge.'))}"` : ''}>${this._t('btn.merge', {}, 'Merge')}${sel.size >= 2 ? ` (${sel.size})` : ''}</button>
       <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-relabel" ${sel.size < 1 ? 'disabled' : ''}>${this._t('btn.relabel', {count: sel.size}, `Relabel (${sel.size})`)}</button>
       <button class="wd-btn wd-btn-danger wd-btn-sm" data-action="cyc-bulk-del" ${sel.size < 1 ? 'disabled' : ''}>${this._t('btn.delete', {}, 'Delete')}${sel.size >= 1 ? ` (${sel.size})` : ''}</button>
     </div>` : '';

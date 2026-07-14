@@ -4763,6 +4763,15 @@ class ProfileStore:
             (c for c in self._data["past_cycles"] if c["id"] == cycle_id), None
         )
         if not cycle:
+            # Imported reference recording (separate list, never in usage stats):
+            # relabelling just moves which profile's template it seeds.
+            ref = next(
+                (c for c in self.get_reference_cycles() if c.get("id") == cycle_id),
+                None,
+            )
+            if ref is not None:
+                await self._assign_reference_cycle_profile(ref, profile_name)
+                return
             raise ValueError(f"Cycle {cycle_id} not found")
 
         # Track old profile for envelope rebuild
@@ -4800,6 +4809,29 @@ class ProfileStore:
         self._logger.info("Assigned profile '%s' to cycle %s", profile_name, cycle_id)
         # Trigger smart processing to potentially merge now-labeled cycle
         await self.async_smart_process_history()
+
+    async def _assign_reference_cycle_profile(
+        self, ref: CycleDict, profile_name: str | None
+    ) -> None:
+        """Reassign an imported reference recording to a different profile.
+
+        The cycle stays in ``reference_cycles`` (out of usage stats); only which
+        profile envelope it seeds changes. Rebuilds the old and new envelopes.
+        ``profile_name=None`` clears the label (the recording then seeds nothing).
+        """
+        if profile_name and profile_name not in self._data.get("profiles", {}):
+            raise ValueError(f"Profile '{profile_name}' not found. Create it first.")
+        old_profile = ref.get("profile_name")
+        ref["profile_name"] = profile_name if profile_name else None
+        if old_profile and old_profile != profile_name:
+            await self.async_rebuild_envelope(old_profile)
+        if profile_name:
+            await self.async_rebuild_envelope(profile_name)
+        await self.async_save()
+        self._logger.info(
+            "Reassigned imported reference cycle %s to profile '%s'",
+            ref.get("id"), profile_name,
+        )
 
     async def auto_label_cycles(
         self, confidence_threshold: float = 0.75, overwrite: bool = False
