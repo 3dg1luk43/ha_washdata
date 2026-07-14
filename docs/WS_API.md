@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**87 commands.**
+**92 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -90,9 +90,14 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `store_status` | entry_id | `StoreStatusResponse` |
 | `store_connect` | entry_id, refresh_token, uid, name? | `StoreSimpleResponse` |
 | `store_disconnect` | entry_id | `StoreSimpleResponse` |
-| `store_search_devices` | entry_id, query?, appliance_type? | `StoreItemsResponse` |
+| `store_search_devices` | entry_id, query?, appliance_type?, model_query?, include_pending? | `StoreItemsResponse` |
+| `store_list_brands` | entry_id, query?, include_pending? | `StoreItemsResponse` |
 | `store_get_profiles` | entry_id, device_id | `StoreItemsResponse` |
 | `store_get_cycles` | entry_id, profile_id | `StoreItemsResponse` |
+| `store_get_device_quality` | entry_id, device_id | `StoreQualityResponse` |
+| `store_confirm_device` | entry_id, device_id | `StoreConfirmResponse` |
+| `store_rate_device` | entry_id, device_id, rating | `StoreOnlineResponse` |
+| `store_set_online` | entry_id, enabled | `StoreOnlineResponse` |
 | `store_import_cycle` | entry_id, cycle_id, target_profile?, new_profile_name? | `StoreImportResponse` |
 | `store_upload_cycle` | entry_id, local_cycle_id, program, description? | `StoreUploadResponse` |
 
@@ -737,6 +742,7 @@ _None._
 | `ml_training_available` | yes | bool |
 | `PROFILE_MIN_WARMUP_CYCLES` | yes | any |
 | `store_online_available` | yes | bool |
+| `store_online_enabled` | yes | bool |
 | `store_web_origin` | yes | str |
 
 ## `ha_washdata/get_suggestions`
@@ -1494,6 +1500,25 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `entry_id` | yes | str |
 | `query` | no | str\|null |
 | `appliance_type` | no | str\|null |
+| `model_query` | no | str\|null |
+| `include_pending` | no | bool |
+
+**Response** (`StoreItemsResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `items` | no | list |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_list_brands`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `query` | no | str\|null |
+| `include_pending` | no | bool |
 
 **Response** (`StoreItemsResponse`)
 
@@ -1532,6 +1557,79 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `items` | no | list |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_get_device_quality`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `device_id` | yes | str |
+
+**Response** (`StoreQualityResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `avg` | no | number \| null |
+| `count` | no | number |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_confirm_device`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `device_id` | yes | str |
+
+**Response** (`StoreConfirmResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `confirmed` | no | bool |
+| `confirmCount` | no | number |
+| `status` | no | str \| null |
+| `error` | no | str |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_rate_device`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `device_id` | yes | str |
+| `rating` | yes | int |
+
+**Response** (`StoreOnlineResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `enabled` | no | bool |
+| `ok` | no | bool |
+| `error` | no | str |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_set_online`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `enabled` | yes | bool |
+
+**Response** (`StoreOnlineResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `enabled` | no | bool |
+| `ok` | no | bool |
+| `error` | no | str |
 | `disabled` | no | bool |
 
 ## `ha_washdata/store_import_cycle`

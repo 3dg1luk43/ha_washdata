@@ -171,8 +171,21 @@ class StoreClient:
             return filters[0]
         return {"compositeFilter": {"op": "AND", "filters": filters}}
 
-    async def search_devices(self, brand: str | None = None, appliance_type: str | None = None, page_size: int = 60) -> list[dict[str, Any]]:
-        filters = [self._field_filter("status", "EQUAL", "approved")]
+    def _status_filter(self, include_pending: bool) -> dict[str, Any]:
+        """status == approved, or status IN [approved, pending] when browsing the
+        community catalog (pending entries are publicly readable, shown with a tag)."""
+        if include_pending:
+            return {"fieldFilter": {
+                "field": {"fieldPath": "status"}, "op": "IN",
+                "value": _encode(["approved", "pending"]),
+            }}
+        return self._field_filter("status", "EQUAL", "approved")
+
+    async def search_devices(
+        self, brand: str | None = None, appliance_type: str | None = None,
+        model_query: str | None = None, include_pending: bool = False, page_size: int = 60,
+    ) -> list[dict[str, Any]]:
+        filters = [self._status_filter(include_pending)]
         if appliance_type:
             filters.append(self._field_filter("applianceType", "EQUAL", appliance_type))
         if brand:
@@ -183,7 +196,75 @@ class StoreClient:
             "orderBy": [{"field": {"fieldPath": "favoriteCount"}, "direction": "DESCENDING"}],
             "limit": page_size,
         }
-        return await self._run_query(sq)
+        rows = await self._run_query(sq)
+        if model_query:
+            p = model_query.lower()
+            rows = [r for r in rows if str(r.get("model_lc", "")).startswith(p)]
+        return rows
+
+    async def list_brands(self, q: str | None = None, include_pending: bool = True, page_size: int = 60) -> list[dict[str, Any]]:
+        sq = {
+            "from": [{"collectionId": "brands"}],
+            "where": self._where([self._status_filter(include_pending)]),
+            "orderBy": [{"field": {"fieldPath": "brand_lc"}, "direction": "ASCENDING"}],
+            "limit": page_size,
+        }
+        rows = await self._run_query(sq)
+        if q:
+            p = q.lower()
+            rows = [r for r in rows if str(r.get("brand_lc", "")).startswith(p)]
+        return rows
+
+    async def get_device(self, device_id: str) -> dict[str, Any] | None:
+        try:
+            async with self._sess().get(f"{self._base}/devices/{device_id}", timeout=15) as resp:
+                if resp.status in (403, 404):
+                    return None
+                if resp.status != 200:
+                    return None
+                doc = await resp.json()
+        except Exception as exc:  # noqa: BLE001
+            _LOGGER.debug("Store get_device error: %s", exc)
+            return None
+        return _decode_doc(doc)
+
+    async def get_config(self) -> dict[str, Any]:
+        """Public config/site (maintenance flag + confirmThreshold). {} on failure."""
+        try:
+            async with self._sess().get(f"{self._base}/config/site", timeout=15) as resp:
+                if resp.status != 200:
+                    return {}
+                return _decode_doc(await resp.json())
+        except Exception as exc:  # noqa: BLE001
+            _LOGGER.debug("Store get_config error: %s", exc)
+            return {}
+
+    async def get_device_quality(self, device_id: str) -> dict[str, Any]:
+        """count + average of the device's 5-star quality ratings (info only)."""
+        body = {"structuredAggregationQuery": {
+            "structuredQuery": {"from": [{"collectionId": "ratings"}]},
+            "aggregations": [
+                {"alias": "cnt", "count": {}},
+                {"alias": "avg", "average": {"field": {"fieldPath": "rating"}}},
+            ],
+        }}
+        try:
+            async with self._sess().post(
+                f"{self._base}/devices/{device_id}:runAggregationQuery",
+                json=body, timeout=15,
+            ) as resp:
+                if resp.status != 200:
+                    return {"avg": None, "count": 0}
+                rows = await resp.json()
+        except Exception as exc:  # noqa: BLE001
+            _LOGGER.debug("Store get_device_quality error: %s", exc)
+            return {"avg": None, "count": 0}
+        agg = next((r["result"]["aggregateFields"] for r in rows if isinstance(r, dict) and "result" in r), None)
+        if not agg:
+            return {"avg": None, "count": 0}
+        cnt = _decode(agg["cnt"]) if "cnt" in agg else 0
+        avg = _decode(agg["avg"]) if ("avg" in agg and "nullValue" not in agg["avg"]) else None
+        return {"avg": avg if (cnt and avg is not None) else None, "count": cnt or 0}
 
     async def get_profiles(self, dev_id: str, page_size: int = 100) -> list[dict[str, Any]]:
         sq = {
@@ -303,7 +384,8 @@ class StoreClient:
         ok = ok and await self._commit_create(token, f"devices/{d_id}", {
             "applianceType": appliance, "brand": brand, "brand_lc": b_id,
             "model": model, "model_lc": model.lower(), "status": "pending",
-            "createdByUid": uid, "profileCount": 0, "favoriteCount": 0,
+            "createdByUid": uid, "createdByName": None, "manualUrl": None,
+            "profileCount": 0, "favoriteCount": 0, "confirmCount": 0,
         })
         ok = ok and await self._commit_create(token, f"profiles/{p_id}", {
             "deviceId": d_id, "applianceType": appliance, "program": program,
@@ -327,3 +409,83 @@ class StoreClient:
         if not await self._commit_create(token, f"cycles/{cyc_id}", cycle_fields):
             return None
         return cyc_id
+
+    # ── community catalog: confirm + rate a device (authed) ──────────────────────
+
+    async def _commit(self, id_token: str, writes: list[dict[str, Any]]) -> tuple[bool, str]:
+        """Post a batched :commit. Returns (ok, response_body_text)."""
+        try:
+            async with self._sess().post(
+                f"{self._base}:commit",
+                json={"writes": writes},
+                headers={"Authorization": f"Bearer {id_token}"},
+                timeout=15,
+            ) as resp:
+                return (resp.status == 200, await resp.text())
+        except Exception as exc:  # noqa: BLE001
+            _LOGGER.warning("Store commit error: %s", exc)
+            return (False, str(exc))
+
+    def _doc_path(self, rel: str) -> str:
+        return f"projects/{self._pid}/databases/(default)/documents/{rel}"
+
+    async def confirm_device(self, refresh_token: str, uid: str, device_id: str) -> dict[str, Any] | None:
+        """Confirm a device (one per user). Bumps the honest confirmCount in the same
+        batch that creates confirmations/{uid}, then best-effort promotes to approved
+        once the threshold is reached (the rule is the real guard). Returns state."""
+        token = await self.ensure_id_token(refresh_token)
+        if not token:
+            return None
+        dev_path = self._doc_path(f"devices/{device_id}")
+        conf_path = self._doc_path(f"devices/{device_id}/confirmations/{uid}")
+        writes = [
+            {
+                "update": {"name": conf_path, "fields": {"uid": _encode(uid)}},
+                "currentDocument": {"exists": False},
+                "updateTransforms": [{"fieldPath": "createdAt", "setToServerValue": "REQUEST_TIME"}],
+            },
+            {
+                "transform": {
+                    "document": dev_path,
+                    "fieldTransforms": [{"fieldPath": "confirmCount", "increment": _encode(1)}],
+                },
+            },
+        ]
+        ok, body = await self._commit(token, writes)
+        # A precondition failure means this user already confirmed - not an error.
+        if not ok and "ALREADY_EXISTS" not in body and "FAILED_PRECONDITION" not in body:
+            _LOGGER.warning("Store confirm_device failed: %s", body[:200])
+            return None
+        dev = await self.get_device(device_id) or {}
+        count = int(dev.get("confirmCount") or 0)
+        status = dev.get("status")
+        try:
+            threshold = int((await self.get_config()).get("confirmThreshold") or 5)
+        except (TypeError, ValueError):
+            threshold = 5
+        if status == "pending" and count >= threshold:
+            promote = [{
+                "update": {"name": dev_path, "fields": {"status": _encode("approved")}},
+                "updateMask": {"fieldPaths": ["status"]},
+                "currentDocument": {"exists": True},
+            }]
+            if (await self._commit(token, promote))[0]:
+                status = "approved"
+        return {"confirmed": True, "confirmCount": count, "status": status}
+
+    async def rate_device(self, refresh_token: str, uid: str, device_id: str, rating: int) -> bool:
+        """Set this user's 5-star quality rating for a device (info only)."""
+        if rating not in (1, 2, 3, 4, 5):
+            return False
+        token = await self.ensure_id_token(refresh_token)
+        if not token:
+            return False
+        path = self._doc_path(f"devices/{device_id}/ratings/{uid}")
+        writes = [{
+            "update": {"name": path, "fields": {"uid": _encode(uid), "rating": _encode(rating)}},
+            "updateTransforms": [{"fieldPath": "updatedAt", "setToServerValue": "REQUEST_TIME"}],
+        }]
+        ok, body = await self._commit(token, writes)
+        if not ok:
+            _LOGGER.warning("Store rate_device failed: %s", body[:200])
+        return ok

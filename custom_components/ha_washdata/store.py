@@ -1,30 +1,27 @@
-"""Community-store bridge: gating + provenance + import/share orchestration.
+"""Community-store bridge: gating + provenance + import/share/catalog orchestration.
 
-Pure/near-pure glue between ``store_client`` (network) and ``profile_store`` (local).
-Nothing here runs unless online features are enabled.
+Pure/near-pure glue between ``store_client`` (network) and ``profile_store`` (local),
+plus the integration-wide account/online flag in ``store_account``. The GitHub
+connection and the online-features switch are device-agnostic (one per HA install);
+brand/model stay per-device. Nothing here runs unless online features are enabled.
 """
 from __future__ import annotations
 
 import logging
 from typing import Any
 
-from .const import (
-    CONF_ENABLE_ONLINE_FEATURES,
-    DEFAULT_ENABLE_ONLINE_FEATURES,
-    QC_EDITED,
-    QC_MANUAL,
-    QC_RECORDING,
-)
+from homeassistant.core import HomeAssistant
+
+from . import store_account
+from .const import QC_EDITED, QC_MANUAL, QC_RECORDING
 from .store_client import StoreClient
 
 _LOGGER = logging.getLogger(__name__)
 
 
-def online_features_enabled(options: dict[str, Any] | None) -> bool:
-    """True when the user has opted into online store features (default off)."""
-    if not options:
-        return DEFAULT_ENABLE_ONLINE_FEATURES
-    return bool(options.get(CONF_ENABLE_ONLINE_FEATURES, DEFAULT_ENABLE_ONLINE_FEATURES))
+def online_features_enabled(hass: HomeAssistant) -> bool:
+    """True when online store features are enabled integration-wide (default off)."""
+    return store_account.online_enabled(hass)
 
 
 def derive_qc(cycle: dict[str, Any]) -> int:
@@ -51,10 +48,11 @@ def _downsample(points: list[list[float]], max_n: int = 3000) -> list[list[float
 
 
 class StoreBridge:
-    """Orchestrates store browse/import/share against a ProfileStore.
+    """Orchestrates store browse/import/share/catalog against a ProfileStore.
 
     All methods no-op-safe: they return an ``{"error": ...}`` marker rather than raising.
-    Callers must gate on ``online_features_enabled`` first.
+    Callers must gate on ``online_features_enabled`` first. The account/online flag are
+    global (via ``store_account``); import/share target this bridge's ProfileStore.
     """
 
     def __init__(self, hass: Any, profile_store: Any) -> None:
@@ -62,28 +60,61 @@ class StoreBridge:
         self._ps = profile_store
         self._client = StoreClient(hass)
 
-    def status(self, options: dict[str, Any] | None) -> dict[str, Any]:
-        return {"enabled": online_features_enabled(options), **self._ps.get_store_identity()}
+    # ── account / status (global) ───────────────────────────────────────────────
+
+    def status(self) -> dict[str, Any]:
+        return {"enabled": store_account.online_enabled(self._hass), **store_account.get_identity(self._hass)}
 
     async def connect(self, refresh_token: str, uid: str, name: str | None) -> dict[str, Any]:
         # Validate the refresh token by exchanging it once before persisting.
         if not await self._client.ensure_id_token(refresh_token):
             return {"error": "token_invalid"}
-        await self._ps.set_store_account({"refresh_token": refresh_token, "uid": uid, "name": name})
-        return self._ps.get_store_identity()
+        await store_account.async_set_account(self._hass, {"refresh_token": refresh_token, "uid": uid, "name": name})
+        return store_account.get_identity(self._hass)
 
     async def disconnect(self) -> dict[str, Any]:
-        await self._ps.clear_store_account()
+        await store_account.async_clear_account(self._hass)
         return {"connected": False}
 
-    async def search_devices(self, brand: str | None, appliance_type: str | None) -> list[dict[str, Any]]:
-        return await self._client.search_devices(brand, appliance_type)
+    # ── catalog browse (reads) ───────────────────────────────────────────────────
+
+    async def list_brands(self, query: str | None = None, include_pending: bool = True) -> list[dict[str, Any]]:
+        return await self._client.list_brands(query, include_pending=include_pending)
+
+    async def search_devices(
+        self, brand: str | None, appliance_type: str | None,
+        model_query: str | None = None, include_pending: bool = False,
+    ) -> list[dict[str, Any]]:
+        return await self._client.search_devices(
+            brand, appliance_type, model_query=model_query, include_pending=include_pending,
+        )
 
     async def get_profiles(self, device_id: str) -> list[dict[str, Any]]:
         return await self._client.get_profiles(device_id)
 
     async def get_cycles(self, profile_id: str) -> list[dict[str, Any]]:
         return await self._client.get_cycles(profile_id)
+
+    async def get_device_quality(self, device_id: str) -> dict[str, Any]:
+        return await self._client.get_device_quality(device_id)
+
+    # ── community actions (authed writes) ────────────────────────────────────────
+
+    async def confirm_device(self, device_id: str) -> dict[str, Any]:
+        acct = store_account.get_account(self._hass)
+        if not acct.get("refresh_token"):
+            return {"error": "not_connected"}
+        res = await self._client.confirm_device(acct["refresh_token"], acct.get("uid", ""), device_id)
+        return res if res else {"error": "confirm_failed"}
+
+    async def rate_device(self, device_id: str, rating: int) -> dict[str, Any]:
+        acct = store_account.get_account(self._hass)
+        if not acct.get("refresh_token"):
+            return {"error": "not_connected"}
+        ok = await self._client.rate_device(acct["refresh_token"], acct.get("uid", ""), device_id, rating)
+        return {"ok": True} if ok else {"error": "rate_failed"}
+
+    # ── import / share (target this device's ProfileStore) ───────────────────────
 
     async def import_cycle(
         self, cycle_id: str, target_profile: str | None = None, new_profile_name: str | None = None
@@ -106,7 +137,7 @@ class StoreBridge:
         self, local_cycle_id: str, program: str, brand: str, model: str, appliance_type: str,
         sample_interval_sec: float = 0.0, description: str = "",
     ) -> dict[str, Any]:
-        acct = self._ps.get_store_account()
+        acct = store_account.get_account(self._hass)
         if not acct.get("refresh_token"):
             return {"error": "not_connected"}
         pts = self._ps.get_cycle_power_data(local_cycle_id)

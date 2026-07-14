@@ -98,6 +98,122 @@ async def test_search_devices_decodes():
 
 
 @pytest.mark.asyncio
+async def test_search_devices_include_pending_uses_in_filter():
+    s = _Session()
+    s.queue_post(_Resp(200, []))
+    c = _client(s)
+    await c.search_devices(brand="Bosch", include_pending=True)
+    where = s.posts[-1][1]["json"]["structuredQuery"]["where"]
+    # First AND clause is the status filter, now an IN over [approved, pending].
+    clauses = where["compositeFilter"]["filters"]
+    status = next(f for f in clauses if f["fieldFilter"]["field"]["fieldPath"] == "status")
+    assert status["fieldFilter"]["op"] == "IN"
+    vals = status["fieldFilter"]["value"]["arrayValue"]["values"]
+    assert {v["stringValue"] for v in vals} == {"approved", "pending"}
+
+
+@pytest.mark.asyncio
+async def test_search_devices_model_query_filters_client_side():
+    s = _Session()
+    s.queue_post(_Resp(200, [
+        {"document": {"name": ".../devices/d1", "fields": {"model_lc": {"stringValue": "wat28"}}}},
+        {"document": {"name": ".../devices/d2", "fields": {"model_lc": {"stringValue": "smv"}}}},
+    ]))
+    c = _client(s)
+    items = await c.search_devices(brand="Bosch", model_query="wat")
+    assert [i["id"] for i in items] == ["d1"]
+
+
+@pytest.mark.asyncio
+async def test_list_brands_prefix_filter():
+    s = _Session()
+    s.queue_post(_Resp(200, [
+        {"document": {"name": ".../brands/bosch", "fields": {"brand_lc": {"stringValue": "bosch"}}}},
+        {"document": {"name": ".../brands/miele", "fields": {"brand_lc": {"stringValue": "miele"}}}},
+    ]))
+    c = _client(s)
+    items = await c.list_brands(q="bo")
+    assert [i["id"] for i in items] == ["bosch"]
+    assert s.posts[-1][1]["json"]["structuredQuery"]["from"] == [{"collectionId": "brands"}]
+
+
+@pytest.mark.asyncio
+async def test_get_device_quality_decodes_aggregation():
+    s = _Session()
+    s.queue_post(_Resp(200, [{"result": {"aggregateFields": {
+        "cnt": {"integerValue": "3"}, "avg": {"doubleValue": 4.25}}}}]))
+    c = _client(s)
+    q = await c.get_device_quality("washer__bosch__wat")
+    assert q == {"avg": 4.25, "count": 3}
+
+
+@pytest.mark.asyncio
+async def test_confirm_device_batch_shape_no_promote():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))  # token
+    s.queue_post(_Resp(200, {}))                                        # commit (confirm)
+    s.queue_get(_Resp(200, {"name": ".../devices/d1", "fields": {
+        "confirmCount": {"integerValue": "3"}, "status": {"stringValue": "pending"}}}))
+    s.queue_get(_Resp(200, {"name": ".../config/site", "fields": {"confirmThreshold": {"integerValue": "5"}}}))
+    c = _client(s)
+    res = await c.confirm_device("refresh", "u1", "d1")
+    assert res == {"confirmed": True, "confirmCount": 3, "status": "pending"}
+    writes = s.posts[-1][1]["json"]["writes"]  # the confirm commit
+    assert writes[0]["currentDocument"] == {"exists": False}
+    assert writes[0]["update"]["fields"]["uid"] == {"stringValue": "u1"}
+    assert writes[1]["transform"]["fieldTransforms"][0]["fieldPath"] == "confirmCount"
+    assert writes[1]["transform"]["fieldTransforms"][0]["increment"] == {"integerValue": "1"}
+
+
+@pytest.mark.asyncio
+async def test_confirm_device_promotes_at_threshold():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))  # token
+    s.queue_post(_Resp(200, {}))                                        # commit (confirm)
+    s.queue_get(_Resp(200, {"name": ".../devices/d1", "fields": {
+        "confirmCount": {"integerValue": "5"}, "status": {"stringValue": "pending"}}}))
+    s.queue_get(_Resp(200, {"name": ".../config/site", "fields": {"confirmThreshold": {"integerValue": "5"}}}))
+    s.queue_post(_Resp(200, {}))                                        # commit (promote)
+    c = _client(s)
+    res = await c.confirm_device("refresh", "u1", "d1")
+    assert res["status"] == "approved"
+    promote = s.posts[-1][1]["json"]["writes"][0]
+    assert promote["updateMask"] == {"fieldPaths": ["status"]}
+    assert promote["update"]["fields"]["status"] == {"stringValue": "approved"}
+
+
+@pytest.mark.asyncio
+async def test_rate_device_shape():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))  # token
+    s.queue_post(_Resp(200, {}))                                        # commit
+    c = _client(s)
+    ok = await c.rate_device("refresh", "u1", "d1", 4)
+    assert ok is True
+    write = s.posts[-1][1]["json"]["writes"][0]
+    assert write["update"]["fields"]["rating"] == {"integerValue": "4"}
+    assert {"fieldPath": "updatedAt", "setToServerValue": "REQUEST_TIME"} in write["updateTransforms"]
+
+
+@pytest.mark.asyncio
+async def test_rate_device_rejects_out_of_range():
+    s = _Session()
+    c = _client(s)
+    assert await c.rate_device("refresh", "u1", "d1", 9) is False
+    assert len(s.posts) == 0  # no network for an invalid rating
+
+
+@pytest.mark.asyncio
+async def test_get_config_decodes():
+    s = _Session()
+    s.queue_get(_Resp(200, {"name": ".../config/site", "fields": {
+        "maintenance": {"booleanValue": False}, "confirmThreshold": {"integerValue": "7"}}}))
+    c = _client(s)
+    cfg = await c.get_config()
+    assert cfg["confirmThreshold"] == 7 and cfg["maintenance"] is False
+
+
+@pytest.mark.asyncio
 async def test_get_cycle_skips_unsupported_schema():
     s = _Session()
     s.queue_get(_Resp(200, {"name": ".../cycles/c9", "fields": {

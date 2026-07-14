@@ -5,8 +5,49 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from custom_components.ha_washdata import store_account
 from custom_components.ha_washdata.diagnostics import _redact
 from custom_components.ha_washdata.profile_store import ProfileStore
+
+
+def _hass_online():
+    """A hass whose global online store is pre-seeded (no file I/O)."""
+    hass = MagicMock()
+    hass.data = {}
+    fake = MagicMock()
+    fake.async_save = AsyncMock()
+    hass.data[store_account._DATA_KEY] = {"store": fake, "data": {"online_enabled": False, "account": {}}}
+    return hass
+
+
+@pytest.mark.asyncio
+async def test_global_online_flag_toggles():
+    hass = _hass_online()
+    assert store_account.online_enabled(hass) is False
+    await store_account.async_set_online(hass, True)
+    assert store_account.online_enabled(hass) is True
+
+
+@pytest.mark.asyncio
+async def test_global_account_round_trip_and_identity():
+    hass = _hass_online()
+    await store_account.async_set_account(hass, {"refresh_token": "SECRET", "uid": "u1", "name": "Alice"})
+    assert store_account.get_account(hass)["refresh_token"] == "SECRET"
+    ident = store_account.get_identity(hass)
+    assert ident == {"connected": True, "uid": "u1", "name": "Alice"}
+    assert "refresh_token" not in ident
+    await store_account.async_clear_account(hass)
+    assert store_account.get_account(hass) == {}
+    assert store_account.get_identity(hass)["connected"] is False
+
+
+@pytest.mark.asyncio
+async def test_global_account_merges():
+    hass = _hass_online()
+    await store_account.async_set_account(hass, {"refresh_token": "R", "uid": "u1"})
+    await store_account.async_set_account(hass, {"name": "Alice"})
+    acct = store_account.get_account(hass)
+    assert acct["refresh_token"] == "R" and acct["uid"] == "u1" and acct["name"] == "Alice"
 
 
 @pytest.fixture

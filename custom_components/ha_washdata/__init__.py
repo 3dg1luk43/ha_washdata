@@ -267,6 +267,31 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
+async def _migrate_online_to_global(hass: HomeAssistant, entry: ConfigEntry, manager: Any) -> None:
+    """Hoist the (formerly per-device) online-features flag + store account to the
+    integration-wide store. Idempotent; safe on every setup. Pre-release cleanup."""
+    from . import store_account  # pylint: disable=import-outside-toplevel
+    from .const import CONF_ENABLE_ONLINE_FEATURES  # pylint: disable=import-outside-toplevel
+
+    await store_account.async_load(hass)
+    if entry.options.get(CONF_ENABLE_ONLINE_FEATURES) and not store_account.online_enabled(hass):
+        await store_account.async_set_online(hass, True)
+    try:
+        acct = manager.profile_store.get_store_account()
+    except Exception:  # pylint: disable=broad-exception-caught
+        acct = {}
+    if acct:
+        if acct.get("refresh_token") and not store_account.get_account(hass).get("refresh_token"):
+            await store_account.async_set_account(hass, {
+                "refresh_token": acct.get("refresh_token"),
+                "uid": acct.get("uid"), "name": acct.get("name"),
+            })
+        try:
+            await manager.profile_store.clear_store_account()
+        except Exception:  # pylint: disable=broad-exception-caught
+            pass
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up WashData from a config entry."""
     _log = DeviceLoggerAdapter(_LOGGER, entry.title)
@@ -299,6 +324,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][entry.entry_id] = manager
 
     await manager.async_setup()
+    await _migrate_online_to_global(hass, entry, manager)
 
     # Check for initial profile from onboarding
     if "initial_profile" in entry.data:
@@ -571,6 +597,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
 
     await async_load_panel_config(hass)  # self-guards; safe to call repeatedly
+    from . import store_account  # pylint: disable=import-outside-toplevel
+    await store_account.async_load(hass)  # integration-wide online flag + account
     async_register_commands(hass)
     hass.data["ha_washdata_ws_registered"] = True
 

@@ -193,6 +193,7 @@ class GetConstantsResponse(TypedDict):
     ml_training_available: bool
     PROFILE_MIN_WARMUP_CYCLES: Any
     store_online_available: bool
+    store_online_enabled: bool
     store_web_origin: str
 
 
@@ -518,6 +519,30 @@ class StoreSimpleResponse(TypedDict, total=False):
     disabled: bool
 
 
+class StoreQualityResponse(TypedDict, total=False):
+    """Device 5-star quality summary (count + average)."""
+    avg: float | None
+    count: int
+    disabled: bool
+
+
+class StoreConfirmResponse(TypedDict, total=False):
+    """Result of confirming a device (drives community auto-approval)."""
+    confirmed: bool
+    confirmCount: int
+    status: str | None
+    error: str
+    disabled: bool
+
+
+class StoreOnlineResponse(TypedDict, total=False):
+    """Result of toggling integration-wide online features."""
+    enabled: bool
+    ok: bool
+    error: str
+    disabled: bool
+
+
 WS_RESPONSE_TYPES: dict[str, type] = {
     "get_devices": GetDevicesResponse,
     "get_device_cycles": GetDeviceCyclesResponse,
@@ -606,6 +631,11 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "store_get_cycles": StoreItemsResponse,
     "store_import_cycle": StoreImportResponse,
     "store_upload_cycle": StoreUploadResponse,
+    "store_list_brands": StoreItemsResponse,
+    "store_get_device_quality": StoreQualityResponse,
+    "store_confirm_device": StoreConfirmResponse,
+    "store_rate_device": StoreOnlineResponse,
+    "store_set_online": StoreOnlineResponse,
 }
 
 #: Commands whose response splats an upstream summary dict and therefore has an
@@ -874,9 +904,17 @@ WS_COMMANDS: dict[str, dict] = {
     "store_disconnect": {"params": [_entry()]},
     "store_search_devices": {"params": [
         _entry(), _p("query", "str|null", False), _p("appliance_type", "str|null", False),
+        _p("model_query", "str|null", False), _p("include_pending", "bool", False),
+    ]},
+    "store_list_brands": {"params": [
+        _entry(), _p("query", "str|null", False), _p("include_pending", "bool", False),
     ]},
     "store_get_profiles": {"params": [_entry(), _p("device_id", "str")]},
     "store_get_cycles": {"params": [_entry(), _p("profile_id", "str")]},
+    "store_get_device_quality": {"params": [_entry(), _p("device_id", "str")]},
+    "store_confirm_device": {"params": [_entry(), _p("device_id", "str")]},
+    "store_rate_device": {"params": [_entry(), _p("device_id", "str"), _p("rating", "int")]},
+    "store_set_online": {"params": [_entry(), _p("enabled", "bool")]},
     "store_import_cycle": {"params": [
         _entry(), _p("cycle_id", "str"),
         _p("target_profile", "str|null", False), _p("new_profile_name", "str|null", False),

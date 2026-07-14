@@ -104,6 +104,7 @@ export interface GetConstantsResponse {
   ml_training_available: boolean;
   PROFILE_MIN_WARMUP_CYCLES: unknown;
   store_online_available: boolean;
+  store_online_enabled: boolean;
   store_web_origin: string;
 }
 
@@ -354,6 +355,14 @@ export interface StartTaskResponse {
   task_id: string;
 }
 
+export interface StoreConfirmResponse {
+  confirmed?: boolean;
+  confirmCount?: number;
+  status?: string | null;
+  error?: string;
+  disabled?: boolean;
+}
+
 export interface StoreImportResponse {
   profile?: string;
   cycle_id?: string;
@@ -363,6 +372,19 @@ export interface StoreImportResponse {
 
 export interface StoreItemsResponse {
   items?: unknown[];
+  disabled?: boolean;
+}
+
+export interface StoreOnlineResponse {
+  enabled?: boolean;
+  ok?: boolean;
+  error?: string;
+  disabled?: boolean;
+}
+
+export interface StoreQualityResponse {
+  avg?: number | null;
+  count?: number;
   disabled?: boolean;
 }
 
@@ -845,6 +867,14 @@ export interface StoreSearchDevicesRequest {
   entry_id: string;
   query?: string | null;
   appliance_type?: string | null;
+  model_query?: string | null;
+  include_pending?: boolean;
+}
+
+export interface StoreListBrandsRequest {
+  entry_id: string;
+  query?: string | null;
+  include_pending?: boolean;
 }
 
 export interface StoreGetProfilesRequest {
@@ -855,6 +885,27 @@ export interface StoreGetProfilesRequest {
 export interface StoreGetCyclesRequest {
   entry_id: string;
   profile_id: string;
+}
+
+export interface StoreGetDeviceQualityRequest {
+  entry_id: string;
+  device_id: string;
+}
+
+export interface StoreConfirmDeviceRequest {
+  entry_id: string;
+  device_id: string;
+}
+
+export interface StoreRateDeviceRequest {
+  entry_id: string;
+  device_id: string;
+  rating: number;
+}
+
+export interface StoreSetOnlineRequest {
+  entry_id: string;
+  enabled: boolean;
 }
 
 export interface StoreImportCycleRequest {
@@ -957,8 +1008,13 @@ export interface WashDataWsRequests {
   "ha_washdata/store_connect": StoreConnectRequest;
   "ha_washdata/store_disconnect": StoreDisconnectRequest;
   "ha_washdata/store_search_devices": StoreSearchDevicesRequest;
+  "ha_washdata/store_list_brands": StoreListBrandsRequest;
   "ha_washdata/store_get_profiles": StoreGetProfilesRequest;
   "ha_washdata/store_get_cycles": StoreGetCyclesRequest;
+  "ha_washdata/store_get_device_quality": StoreGetDeviceQualityRequest;
+  "ha_washdata/store_confirm_device": StoreConfirmDeviceRequest;
+  "ha_washdata/store_rate_device": StoreRateDeviceRequest;
+  "ha_washdata/store_set_online": StoreSetOnlineRequest;
   "ha_washdata/store_import_cycle": StoreImportCycleRequest;
   "ha_washdata/store_upload_cycle": StoreUploadCycleRequest;
 }
@@ -1051,4 +1107,9 @@ export interface WashDataWsResponses {
   "ha_washdata/store_get_cycles": StoreItemsResponse;
   "ha_washdata/store_import_cycle": StoreImportResponse;
   "ha_washdata/store_upload_cycle": StoreUploadResponse;
+  "ha_washdata/store_list_brands": StoreItemsResponse;
+  "ha_washdata/store_get_device_quality": StoreQualityResponse;
+  "ha_washdata/store_confirm_device": StoreConfirmResponse;
+  "ha_washdata/store_rate_device": StoreOnlineResponse;
+  "ha_washdata/store_set_online": StoreOnlineResponse;
 }
