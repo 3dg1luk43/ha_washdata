@@ -49,6 +49,9 @@ const STORE_CYCLES = {
       trace: { points: [[0, 3], [600, 900], [1800, 1500], [3000, 700], [3600, 3]] },
       uploaderName: 'octocat',
       downloads: 7,
+      status: 'pending',
+      confirmCount: 2,
+      rating: { avg: 4.5, count: 3 },
     },
   ],
 };
@@ -129,6 +132,20 @@ test('clicking a program loads its reference cycles with a sparkline', async ({ 
   await expect(page.locator('svg.wd-store-spark').first()).toBeVisible();
   // uploader + download count surfaced on the reference-cycle card
   await expect(page.locator('.wd-store-cycle-stats').filter({ hasText: 'octocat' }).first()).toBeVisible();
+});
+
+test('reference-cycle card shows the approval pill, downloads and rating', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, storeHandlers());
+  await clickTab(page, 'store');
+  await page.locator('[data-action="store-open-device"]').first().click();
+  await page.locator('[data-action="store-open-profile"]').first().click();
+  const stats = page.locator('.wd-store-cycle-stats').first();
+  await expect(stats).toBeVisible({ timeout: 8_000 });
+  // Awaiting-approval pill (pending + confirmCount), download count, and rating summary.
+  await expect(stats.locator('.wd-tag-pending')).toBeVisible();
+  await expect(stats).toContainText('7');            // downloads
+  await expect(stats).toContainText('4.5');          // rating avg
 });
 
 test('importing a reference cycle calls store_import_cycle', async ({ page }) => {

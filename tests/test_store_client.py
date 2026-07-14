@@ -47,7 +47,7 @@ def _client(session):
 
 
 def _cycle_write(session):
-    """Find the cycle-create commit write (upload also fires a cycleCount-bump commit)."""
+    """Find the cycle-create commit write among the upload's :commit posts."""
     for url, kw in session.posts:
         if not url.endswith(":commit"):
             continue
@@ -172,6 +172,37 @@ async def test_get_device_quality_decodes_aggregation():
     c = _client(s)
     q = await c.get_device_quality("washer__bosch__wat")
     assert q == {"avg": 4.25, "count": 3}
+
+
+@pytest.mark.asyncio
+async def test_get_cycles_includes_pending_and_attaches_rating():
+    s = _Session()
+    # 1: the cycles list query (one v1 cycle so it hydrates an importable trace).
+    s.queue_post(_Resp(200, [
+        {"document": {"name": ".../cycles/c1", "fields": {
+            "status": {"stringValue": "pending"},
+            "downloads": {"integerValue": "4"},
+            "confirmCount": {"integerValue": "1"},
+            "cycleSchemaVersion": {"integerValue": "1"},
+            "trace": {"mapValue": {"fields": {"points": {"arrayValue": {"values": [
+                {"mapValue": {"fields": {"o": {"integerValue": "0"}, "w": {"doubleValue": 5.0}}}},
+                {"mapValue": {"fields": {"o": {"integerValue": "60"}, "w": {"doubleValue": 0.0}}}},
+            ]}}}}},
+        }}},
+    ]))
+    # 2: the per-cycle rating aggregation.
+    s.queue_post(_Resp(200, [{"result": {"aggregateFields": {
+        "cnt": {"integerValue": "2"}, "avg": {"doubleValue": 4.5}}}}]))
+    c = _client(s)
+    items = await c.get_cycles("washer__bosch__wat__cotton-40")
+    assert len(items) == 1
+    # include_pending default -> status IN [approved, pending]
+    clauses = s.posts[0][1]["json"]["structuredQuery"]["where"]["compositeFilter"]["filters"]
+    status = next(f for f in clauses if f["fieldFilter"]["field"]["fieldPath"] == "status")
+    assert status["fieldFilter"]["op"] == "IN"
+    # rating summary attached + map points hydrated to [[o, w]] pairs
+    assert items[0]["rating"] == {"avg": 4.5, "count": 2}
+    assert items[0]["importable"] == [[0, 5.0], [60, 0.0]]
 
 
 @pytest.mark.asyncio
@@ -318,7 +349,7 @@ async def test_upload_reference_cycle_shape():
         2,
     )
     assert cid and isinstance(cid, str)
-    # Locate the cycle-create commit (upload also fires a cycleCount-bump commit).
+    # Locate the cycle-create commit among the upload's :commit posts.
     cyc_post = next(p for p in s.posts if p[0].endswith(":commit")
                     and any("/cycles/" in w.get("update", {}).get("name", "") for w in p[1]["json"]["writes"]))
     kw = cyc_post[1]

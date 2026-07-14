@@ -9,6 +9,7 @@ Never raises into the event loop - failures return ``None``/empty and are logged
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 import secrets
@@ -264,8 +265,12 @@ class StoreClient:
             _LOGGER.debug("Store get_config error: %s", exc)
             return {}
 
-    async def get_device_quality(self, device_id: str) -> dict[str, Any]:
-        """count + average of the device's 5-star quality ratings (info only)."""
+    async def _rating_agg(self, parent_path: str) -> dict[str, Any]:
+        """count + average over the `ratings` subcollection under ``parent_path``.
+
+        Public (unauthenticated) aggregation -- ratings are world-readable. Returns
+        ``{"avg": float|None, "count": int}`` and never raises.
+        """
         body = {"structuredAggregationQuery": {
             "structuredQuery": {"from": [{"collectionId": "ratings"}]},
             "aggregations": [
@@ -275,14 +280,14 @@ class StoreClient:
         }}
         try:
             async with self._sess().post(
-                f"{self._base}/devices/{device_id}:runAggregationQuery",
+                f"{self._base}/{parent_path}:runAggregationQuery",
                 json=body, timeout=15,
             ) as resp:
                 if resp.status != 200:
                     return {"avg": None, "count": 0}
                 rows = await resp.json()
         except Exception as exc:  # noqa: BLE001
-            _LOGGER.debug("Store get_device_quality error: %s", exc)
+            _LOGGER.debug("Store rating aggregation error (%s): %s", parent_path, exc)
             return {"avg": None, "count": 0}
         agg = next((r["result"]["aggregateFields"] for r in rows if isinstance(r, dict) and "result" in r), None)
         if not agg:
@@ -290,6 +295,14 @@ class StoreClient:
         cnt = _decode(agg["cnt"]) if "cnt" in agg else 0
         avg = _decode(agg["avg"]) if ("avg" in agg and "nullValue" not in agg["avg"]) else None
         return {"avg": avg if (cnt and avg is not None) else None, "count": cnt or 0}
+
+    async def get_device_quality(self, device_id: str) -> dict[str, Any]:
+        """count + average of the device's 5-star quality ratings (info only)."""
+        return await self._rating_agg(f"devices/{device_id}")
+
+    async def cycle_rating(self, cycle_id: str) -> dict[str, Any]:
+        """count + average of a reference cycle's 5-star ratings (info only)."""
+        return await self._rating_agg(f"cycles/{cycle_id}")
 
     async def get_profiles(self, dev_id: str, include_pending: bool = False, page_size: int = 100) -> list[dict[str, Any]]:
         sq = {
@@ -310,17 +323,35 @@ class StoreClient:
         items = await self.get_profiles(dev_id, include_pending=True)
         return {"device_id": dev_id, "items": items}
 
-    async def get_cycles(self, prof_id: str, page_size: int = 50) -> list[dict[str, Any]]:
+    async def get_cycles(
+        self, prof_id: str, include_pending: bool = True, page_size: int = 50
+    ) -> list[dict[str, Any]]:
+        """Reference cycles for a profile, most-recent-first.
+
+        ``include_pending`` (default True) also returns still-awaiting-approval
+        recordings so they can be browsed/imported before the community votes them
+        in (they are publicly readable, shown with an "awaiting approval" tag).
+        Each cycle gets a ``rating`` = ``{"avg", "count"}`` summary attached.
+        """
         sq = {
             "from": [{"collectionId": "cycles"}],
             "where": self._where([
                 self._field_filter("profileId", "EQUAL", prof_id),
-                self._field_filter("status", "EQUAL", "approved"),
+                self._status_filter(include_pending),
             ]),
             "orderBy": [{"field": {"fieldPath": "createdAt"}, "direction": "DESCENDING"}],
             "limit": page_size,
         }
-        return [self._with_decoded_trace(c) for c in await self._run_query(sq)]
+        cycles = [self._with_decoded_trace(c) for c in await self._run_query(sq)]
+        # Attach each cycle's 5-star rating summary in parallel (info-only; the
+        # aggregation lives in a subcollection so it can't ride the list query).
+        async def _rate(cyc: dict[str, Any]) -> dict[str, Any]:
+            cid = cyc.get("id")
+            return await self.cycle_rating(cid) if cid else {"avg": None, "count": 0}
+        summaries = await asyncio.gather(*(_rate(c) for c in cycles), return_exceptions=True)
+        for cyc, summary in zip(cycles, summaries):
+            cyc["rating"] = summary if isinstance(summary, dict) else {"avg": None, "count": 0}
+        return cycles
 
     async def get_cycle(self, cycle_id: str) -> dict[str, Any] | None:
         try:
@@ -427,12 +458,12 @@ class StoreClient:
             "applianceType": appliance, "brand": brand, "brand_lc": b_id,
             "model": model, "model_lc": model.lower(), "status": "pending",
             "createdByUid": uid, "createdByName": None, "manualUrl": None,
-            "profileCount": 0, "favoriteCount": 0, "confirmCount": 0,
+            "favoriteCount": 0, "confirmCount": 0,
         })
         ok = ok and await self._commit_create(token, f"profiles/{p_id}", {
             "deviceId": d_id, "applianceType": appliance, "program": program,
             "program_lc": program.lower(), "description": meta.get("description", ""),
-            "status": "pending", "createdByUid": uid, "cycleCount": 0,
+            "status": "pending", "createdByUid": uid,
         })
         if not ok:
             return None
@@ -451,16 +482,9 @@ class StoreClient:
         }
         if not await self._commit_create(token, f"cycles/{cyc_id}", cycle_fields):
             return None
-        # Bump the profile's cycleCount for the browse count (best-effort).
-        try:
-            await self._commit(token, [{
-                "transform": {
-                    "document": self._doc_path(f"profiles/{p_id}"),
-                    "fieldTransforms": [{"fieldPath": "cycleCount", "increment": _encode(1)}],
-                },
-            }])
-        except Exception:  # noqa: BLE001 - counter is best-effort
-            pass
+        # NB: cycle/profile counts are CALCULATED on the store (COUNT aggregation over
+        # approved+pending), not maintained as a running total here -- a best-effort
+        # increment that a rule denied is what left the browse counters stuck at 0.
         return cyc_id
 
     # ── community catalog: confirm + rate a device (authed) ──────────────────────

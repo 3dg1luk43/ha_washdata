@@ -6426,12 +6426,17 @@ class HaWashdataPanel extends HTMLElement {
       const energy = stats.energy_wh != null ? _fmtEnergy(stats.energy_wh / 1000) : '-';
       const peak = stats.peak_w != null ? _fmtPower(stats.peak_w) : '-';
       const uploader = _esc(c.uploaderName || this._t('store.anon', {}, 'anonymous'));
+      const tag = this._statusTag(c);  // awaiting-approval / approved pill (cycles carry confirmCount)
+      const rat = c.rating || {};
+      const rating = (rat.avg != null && rat.count)
+        ? this._t('store.rating_summary', {avg: Number(rat.avg).toFixed(1), n: rat.count}, `★ ${Number(rat.avg).toFixed(1)} (${rat.count})`)
+        : this._t('store.no_ratings', {}, 'No ratings yet');
       return `<div class="wd-card">
         <div class="wd-store-cycle-top">
           ${spark}
           <div class="wd-store-cycle-stats">
-            <div><b>${dur}</b> · ${energy} · ${peak}</div>
-            <div class="wd-info">${this._t('store.uploaded_by', {name: uploader}, `Shared by ${uploader}`)} · ⬇ ${c.downloads || 0}</div>
+            <div><b>${dur}</b> · ${energy} · ${peak} ${tag}</div>
+            <div class="wd-info">${this._t('store.uploaded_by', {name: uploader}, `Shared by ${uploader}`)} · ⬇ ${c.downloads || 0} · ${rating}</div>
           </div>
           <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-import" data-cycle-id="${_esc(c.id)}">${this._t('btn.import', {}, 'Import')}</button>
         </div>

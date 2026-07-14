@@ -1632,7 +1632,9 @@
     "import_merge": "Merge into existing",
     "merge_target": "Merge into profile",
     "description": "Description (optional)",
-    "contributed_by": "by {name}"
+    "contributed_by": "by {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "No ratings yet"
   },
   "settings": {
     "gear": {
