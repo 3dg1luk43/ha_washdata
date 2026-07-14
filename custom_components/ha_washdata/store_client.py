@@ -94,6 +94,25 @@ def _decode_doc(doc: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+# Firestore forbids directly-nested arrays, so a trace can't be stored as
+# [[offset, watts], ...]. On the wire we store an array of {o, w} maps and convert
+# to/from [[offset, watts], ...] pairs at the boundary (matches lib/trace.js).
+def pack_points(pairs: list[list[float]]) -> list[dict[str, float]]:
+    return [{"o": float(p[0]), "w": float(p[1])} for p in pairs if len(p) >= 2]
+
+
+def unpack_points(points: Any) -> list[list[float]]:
+    out: list[list[float]] = []
+    if not isinstance(points, list):
+        return out
+    for p in points:
+        if isinstance(p, dict):
+            out.append([p.get("o", 0), p.get("w", 0)])
+        elif isinstance(p, (list, tuple)) and len(p) >= 2:
+            out.append([p[0], p[1]])
+    return out
+
+
 class StoreClient:
     """Read/write client for the store. One per manager; safe to keep for the entry."""
 
@@ -323,7 +342,9 @@ class StoreClient:
         ver = cycle.get("cycleSchemaVersion", 1)
         trace = cycle.get("trace")
         if ver in SUPPORTED_CYCLE_SCHEMA_VERSIONS and isinstance(trace, dict) and isinstance(trace.get("points"), list):
-            cycle["importable"] = trace["points"]
+            pairs = unpack_points(trace["points"])
+            trace["points"] = pairs  # hydrate to [[offset, watts]] for the panel sparkline
+            cycle["importable"] = pairs
         else:
             cycle["importable"] = None
         return cycle
@@ -423,7 +444,8 @@ class StoreClient:
             "program_lc": program.lower(), "applianceType": appliance,
             "uploaderUid": uid, "uploaderName": uploader_name,
             "status": "pending", "rejectionReason": None,
-            "trace": {"points": pts, "sampleIntervalSec": interval},
+            # Firestore rejects nested arrays -> store points as {o,w} maps.
+            "trace": {"points": pack_points(pts), "sampleIntervalSec": interval},
             "stats": stats if isinstance(stats, dict) else {},
             "cycleSchemaVersion": 1, "downloads": 0, "commentCount": 0, "qc": qc_code,
         }

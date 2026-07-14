@@ -230,6 +230,43 @@ async def test_get_config_decodes():
 
 
 @pytest.mark.asyncio
+async def test_upload_encodes_points_as_maps_not_nested_arrays():
+    # Firestore forbids directly-nested arrays; trace.points must be an array of maps.
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))
+    for _ in range(4):
+        s.queue_post(_Resp(200, {}))
+    c = _client(s)
+    await c.upload_reference_cycle(
+        "refresh", "uid", "Alice",
+        {"applianceType": "washer", "brand": "Bosch", "model": "WAT", "program": "Cotton 40", "sampleIntervalSec": 60},
+        [[0, 2000], [60, 100], [120, 0]],
+        {"duration": 3600}, 3,
+    )
+    write = s.posts[-1][1]["json"]["writes"][0]
+    vals = write["update"]["fields"]["trace"]["mapValue"]["fields"]["points"]["arrayValue"]["values"]
+    assert len(vals) == 3
+    assert all("mapValue" in v for v in vals), "points must be maps, not nested arrays"
+    f0 = vals[0]["mapValue"]["fields"]
+    assert "o" in f0 and "w" in f0 and "arrayValue" not in f0["o"]
+
+
+@pytest.mark.asyncio
+async def test_get_cycle_unpacks_map_points_to_pairs():
+    s = _Session()
+    s.queue_get(_Resp(200, {"name": ".../cycles/c1", "fields": {
+        "cycleSchemaVersion": {"integerValue": "1"},
+        "trace": {"mapValue": {"fields": {"points": {"arrayValue": {"values": [
+            {"mapValue": {"fields": {"o": {"integerValue": "0"}, "w": {"integerValue": "2000"}}}},
+            {"mapValue": {"fields": {"o": {"integerValue": "60"}, "w": {"integerValue": "100"}}}},
+        ]}}}}}}}))
+    c = _client(s)
+    cyc = await c.get_cycle("c1")
+    assert cyc["importable"] == [[0, 2000], [60, 100]]
+    assert cyc["trace"]["points"] == [[0, 2000], [60, 100]]
+
+
+@pytest.mark.asyncio
 async def test_get_cycle_skips_unsupported_schema():
     s = _Session()
     s.queue_get(_Resp(200, {"name": ".../cycles/c9", "fields": {
