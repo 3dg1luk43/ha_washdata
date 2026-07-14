@@ -692,6 +692,28 @@ SHOW_ML_LAB = True
 ENABLE_ML_SUGGESTIONS = True
 ENABLE_ML_TRAINING = True
 
+# ─── Community store (online features) ────────────────────────────────────────
+# Opt-in browsing/importing/sharing of reference cycles via the WashData Store.
+# When the option is off the Store tab and all network calls stay inert.
+CONF_ENABLE_ONLINE_FEATURES = "enable_online_features"   # master gate, default False
+CONF_STORE_BRAND = "store_brand"                          # declared appliance brand
+CONF_STORE_MODEL = "store_model"                          # declared appliance model
+DEFAULT_ENABLE_ONLINE_FEATURES = False
+
+# Public Firebase web config for the community store (NOT secret - identifies the
+# project; access is enforced by the store's Firestore rules).
+STORE_PROJECT_ID = "washdata-store"
+STORE_API_KEY = "AIzaSyDzq0MoWdU_21CSohZUhIIV7ZwfWppjcAk"
+STORE_WEB_ORIGIN = "https://3dg1luk43.github.io/washdata-store"
+
+# Reference-cycle trace format versions this integration can import.
+SUPPORTED_CYCLE_SCHEMA_VERSIONS = {1}
+
+# Obfuscated provenance codes stamped on an uploaded cycle (see store.derive_qc).
+QC_RECORDING = 1   # pure recorder capture
+QC_EDITED = 2      # trimmed/edited from a detected cycle
+QC_MANUAL = 3      # a plain detected cycle flagged golden by hand
+
 # ─── On-device ML training (Stage 4) ──────────────────────────────────────────
 # Config keys for the scheduled, opt-in retraining loop. All gated behind
 # ENABLE_ML_TRAINING; nothing runs and no options render when that flag is False.

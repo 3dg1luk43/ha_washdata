@@ -5183,6 +5183,13 @@ class ProfileStore:
         # Clear manual_duration override - trimmed duration is now authoritative
         cycle.pop("manual_duration", None)
 
+        # Mark the cycle as edited so store-upload provenance (qc) can distinguish a
+        # trimmed cycle from a plain detected one.
+        meta = cycle.setdefault("meta", {})
+        if isinstance(meta, dict):
+            meta["edited"] = True
+            meta["trim"] = [round(new_start_s, 1), round(new_end_s, 1)]
+
         # Invalidate cached sample segments for this cycle so future lookups
         # are recomputed from the trimmed data
         stale_keys = [k for k in self._cached_sample_segments if k[0] == cycle_id]
