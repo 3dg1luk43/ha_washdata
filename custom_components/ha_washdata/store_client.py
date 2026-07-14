@@ -26,6 +26,9 @@ _LOGGER = logging.getLogger(__name__)
 
 _APPLIANCE_TYPES = {"washer", "dryer", "dishwasher", "washer_dryer"}
 
+# Max concurrent per-cycle rating aggregations when listing a profile's cycles.
+_RATING_FANOUT_LIMIT = 8
+
 
 # ── deterministic ids (must match the store's lib/ids.js exactly) ──────────────
 
@@ -343,11 +346,17 @@ class StoreClient:
             "limit": page_size,
         }
         cycles = [self._with_decoded_trace(c) for c in await self._run_query(sq)]
-        # Attach each cycle's 5-star rating summary in parallel (info-only; the
-        # aggregation lives in a subcollection so it can't ride the list query).
+        # Attach each cycle's 5-star rating summary (info-only; the aggregation lives
+        # in a subcollection so it can't ride the list query). Bound concurrency with
+        # a semaphore so a large page can't fan out into dozens of simultaneous
+        # aggregation requests.
+        sem = asyncio.Semaphore(_RATING_FANOUT_LIMIT)
         async def _rate(cyc: dict[str, Any]) -> dict[str, Any]:
             cid = cyc.get("id")
-            return await self.cycle_rating(cid) if cid else {"avg": None, "count": 0}
+            if not cid:
+                return {"avg": None, "count": 0}
+            async with sem:
+                return await self.cycle_rating(cid)
         summaries = await asyncio.gather(*(_rate(c) for c in cycles), return_exceptions=True)
         for cyc, summary in zip(cycles, summaries):
             cyc["rating"] = summary if isinstance(summary, dict) else {"avg": None, "count": 0}

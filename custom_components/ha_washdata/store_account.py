@@ -7,6 +7,7 @@ in diagnostics (see ``diagnostics._SENSITIVE_KEYS``).
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any
 
@@ -20,6 +21,7 @@ _LOGGER = logging.getLogger(__name__)
 _STORE_VERSION = 1
 _STORE_FILE = f"{DOMAIN}_online"
 _DATA_KEY = f"{DOMAIN}_online_cfg"
+_LOAD_LOCK_KEY = f"{DOMAIN}_online_load_lock"
 
 
 def _default() -> dict[str, Any]:
@@ -27,21 +29,31 @@ def _default() -> dict[str, Any]:
 
 
 async def async_load(hass: HomeAssistant) -> None:
-    """Load (once) the global online config + account into hass.data."""
+    """Load (once) the global online config + account into hass.data.
+
+    Several device config entries set up concurrently at HA startup and each
+    calls this, so the load is serialized under a lock with a second check
+    inside it -- otherwise two callers could both pass the guard across the
+    ``await`` and the later one would clobber the first's bucket.
+    """
     if _DATA_KEY in hass.data:
         return
-    store = Store(hass, _STORE_VERSION, _STORE_FILE)
-    data = _default()
-    try:
-        loaded = await store.async_load()
-        if isinstance(loaded, dict):
-            data["online_enabled"] = bool(loaded.get("online_enabled", DEFAULT_ENABLE_ONLINE_FEATURES))
-            data["migrated"] = bool(loaded.get("migrated", False))
-            if isinstance(loaded.get("account"), dict):
-                data["account"] = dict(loaded["account"])
-    except Exception as exc:  # noqa: BLE001 - never fail setup over this
-        _LOGGER.warning("Failed to load online config, using defaults: %s", exc)
-    hass.data[_DATA_KEY] = {"store": store, "data": data}
+    lock = hass.data.setdefault(_LOAD_LOCK_KEY, asyncio.Lock())
+    async with lock:
+        if _DATA_KEY in hass.data:
+            return
+        store = Store(hass, _STORE_VERSION, _STORE_FILE)
+        data = _default()
+        try:
+            loaded = await store.async_load()
+            if isinstance(loaded, dict):
+                data["online_enabled"] = bool(loaded.get("online_enabled", DEFAULT_ENABLE_ONLINE_FEATURES))
+                data["migrated"] = bool(loaded.get("migrated", False))
+                if isinstance(loaded.get("account"), dict):
+                    data["account"] = dict(loaded["account"])
+        except Exception as exc:  # noqa: BLE001 - never fail setup over this
+            _LOGGER.warning("Failed to load online config, using defaults: %s", exc)
+        hass.data[_DATA_KEY] = {"store": store, "data": data}
 
 
 def _data(hass: HomeAssistant) -> dict[str, Any]:

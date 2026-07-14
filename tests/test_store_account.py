@@ -41,19 +41,64 @@ async def test_global_account_round_trip_and_identity():
     assert store_account.get_identity(hass)["connected"] is False
 
 
+def _hass_with_entries(entry_options, seed=None):
+    """A hass with a pre-seeded online store AND fake config entries carrying the
+    (legacy) per-device online flag, for exercising the real migration guard."""
+    hass = MagicMock()
+    hass.data = {}
+    fake = MagicMock()
+    fake.async_save = AsyncMock()
+    hass.data[store_account._DATA_KEY] = {
+        "store": fake,
+        "data": dict(seed or {"online_enabled": False, "account": {}, "migrated": False}),
+    }
+    entries = []
+    for opts in entry_options:
+        e = MagicMock()
+        e.options = opts
+        entries.append(e)
+    hass.config_entries.async_entries = MagicMock(return_value=entries)
+    return hass
+
+
+def _fake_manager():
+    m = MagicMock()
+    m.profile_store.get_store_account = MagicMock(return_value={})  # skip account hoist
+    m.profile_store.clear_store_account = AsyncMock()
+    return m
+
+
+@pytest.mark.asyncio
+async def test_migration_enables_online_from_stale_per_device_flag():
+    """First migration: a device with the legacy online flag on hoists it to the
+    global store and stamps the marker. Exercises the real _migrate_online_to_global."""
+    from custom_components.ha_washdata import _migrate_online_to_global
+    from custom_components.ha_washdata.const import CONF_ENABLE_ONLINE_FEATURES
+
+    hass = _hass_with_entries([{CONF_ENABLE_ONLINE_FEATURES: True}])
+    entry = hass.config_entries.async_entries()[0]
+    await _migrate_online_to_global(hass, entry, _fake_manager())
+    assert store_account.online_enabled(hass) is True
+    assert store_account.migration_done(hass) is True
+
+
 @pytest.mark.asyncio
 async def test_migration_marker_blocks_reenable():
-    """Once migration is marked done, a stale per-device flag must not re-enable
-    online features (the HIGH review finding). The marker is the guard."""
-    hass = _hass_online()
-    assert store_account.migration_done(hass) is False
-    await store_account.async_mark_migrated(hass)
-    assert store_account.migration_done(hass) is True
-    # Simulate the __init__ guard: with the marker set, we never auto-enable again
-    # even though a stale per-entry flag would say "on".
-    if not store_account.migration_done(hass):
-        await store_account.async_set_online(hass, True)  # pragma: no cover
+    """Regression (HIGH finding): once migration is done and the user has turned
+    online OFF, a stale per-device flag must NOT silently re-enable it on the next
+    restart. Runs the real _migrate_online_to_global, not a reimplementation."""
+    from custom_components.ha_washdata import _migrate_online_to_global
+    from custom_components.ha_washdata.const import CONF_ENABLE_ONLINE_FEATURES
+
+    # Migration already stamped; online currently off; a stale per-entry flag is still on.
+    hass = _hass_with_entries(
+        [{CONF_ENABLE_ONLINE_FEATURES: True}],
+        seed={"online_enabled": False, "account": {}, "migrated": True},
+    )
+    entry = hass.config_entries.async_entries()[0]
+    await _migrate_online_to_global(hass, entry, _fake_manager())
     assert store_account.online_enabled(hass) is False
+    assert store_account.migration_done(hass) is True
 
 
 @pytest.mark.asyncio

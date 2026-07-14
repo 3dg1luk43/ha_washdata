@@ -11,8 +11,11 @@ import math
 import uuid
 from asyncio import Task
 from datetime import datetime, timedelta
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 import numpy as np
+
+if TYPE_CHECKING:
+    from .store import StoreBridge
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Context, Event, HomeAssistant, State, callback
@@ -325,7 +328,7 @@ class WashDataManager:
     """Manages a single washing machine instance."""
 
     @property
-    def store_bridge(self) -> Any:
+    def store_bridge(self) -> "StoreBridge":
         """Lazy community-store bridge (kept for the entry so the token cache persists)."""
         if self._store_bridge is None:
             from .store import StoreBridge
