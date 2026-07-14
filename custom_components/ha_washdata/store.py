@@ -177,5 +177,5 @@ class StoreBridge:
             meta, _downsample([[p[0], p[1]] for p in pts]), stats, derive_qc(cyc),
         )
         if not new_id:
-            return {"error": "upload_failed"}
+            return {"error": "upload_failed", "detail": self._client.last_error()}
         return {"store_cycle_id": new_id}

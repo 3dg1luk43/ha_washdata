@@ -1689,4 +1689,5 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | --- | --- | --- |
 | `store_cycle_id` | no | str |
 | `error` | no | str |
+| `detail` | no | str \| null |
 | `disabled` | no | bool |

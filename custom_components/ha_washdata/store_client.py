@@ -113,7 +113,11 @@ class StoreClient:
         self._session = session
         self._id_token: str | None = None
         self._id_token_exp: float = 0.0
+        self._last_error: str | None = None  # short reason for the last failed write, for the UI
         self._base = f"{self._FS}/projects/{project_id}/databases/(default)/documents"
+
+    def last_error(self) -> str | None:
+        return self._last_error
 
     def _sess(self) -> Any:
         if self._session is None:
@@ -135,10 +139,12 @@ class StoreClient:
             ) as resp:
                 if resp.status != 200:
                     _LOGGER.warning("Store token exchange failed: HTTP %s", resp.status)
+                    self._last_error = f"sign-in expired (HTTP {resp.status}) - reconnect GitHub in the gear"
                     return None
                 body = await resp.json()
         except Exception as exc:  # noqa: BLE001 - never raise into the loop
             _LOGGER.warning("Store token exchange error: %s", exc)
+            self._last_error = "could not reach the sign-in service"
             return None
         self._id_token = body.get("id_token")
         try:
@@ -352,10 +358,16 @@ class StoreClient:
                 # Precondition failure => the doc already exists; that is fine.
                 if resp.status == 409 or "ALREADY_EXISTS" in body or "FAILED_PRECONDITION" in body:
                     return True
-                _LOGGER.warning("Store create %s failed: HTTP %s %s", path, resp.status, body[:200])
+                _LOGGER.warning("Store create %s failed: HTTP %s %s", path, resp.status, body[:300])
+                coll = path.split("/", 1)[0]
+                if resp.status == 403 or "PERMISSION_DENIED" in body:
+                    self._last_error = f"{coll} rejected by the store rules (HTTP 403) - the community catalog rules may be out of date"
+                else:
+                    self._last_error = f"{coll} create failed (HTTP {resp.status})"
                 return False
         except Exception as exc:  # noqa: BLE001
             _LOGGER.warning("Store create %s error: %s", path, exc)
+            self._last_error = f"{path.split('/', 1)[0]} create error: {exc}"
             return False
 
     async def upload_reference_cycle(
@@ -365,6 +377,7 @@ class StoreClient:
         """Ensure brand/device/profile docs exist, then create the reference cycle.
         Returns the new cycle id, or None on failure. All writes are authed.
         """
+        self._last_error = None
         token = await self.ensure_id_token(refresh_token)
         if not token:
             return None
@@ -376,6 +389,7 @@ class StoreClient:
         interval = float(meta.get("sampleIntervalSec") or 0)
         if appliance not in _APPLIANCE_TYPES:
             _LOGGER.warning("Store upload: invalid applianceType %r", appliance)
+            self._last_error = f"unsupported appliance type {appliance!r} (only washer/dryer/dishwasher/washer_dryer)"
             return None
 
         b_id = brand_id(brand)

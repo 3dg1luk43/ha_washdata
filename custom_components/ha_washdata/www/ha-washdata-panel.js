@@ -9306,13 +9306,13 @@ class HaWashdataPanel extends HTMLElement {
       if (action === 'store-share-ok') {
         const program = (sr.getElementById('wd-store-share-prog')?.value || '').trim();
         const description = (sr.getElementById('wd-store-share-desc')?.value || '').trim();
-        if (!program) { this._showToast(this._t('toast.store_program_required', {}, 'Enter a program name'), 'error'); return; }
+        if (!program) { this._showToast(this._t('toast.store_pick_profile', {}, 'Pick a profile to share into'), 'error'); return; }
         await this._busyRun('store-share', async () => {
           try {
             const r = await this._ws({ type: `${_DOMAIN}/store_upload_cycle`, entry_id: eid, local_cycle_id: m.cycleId, program, description });
             if (r && r.error) {
               if (r.error === 'no_appliance_declared') this._showToast(this._t('toast.store_no_appliance', {}, 'Set your appliance brand and model in Settings first.'), 'error');
-              else this._showToast(this._t('toast.store_share_failed', {error: r.error}, 'Share failed: ' + r.error), 'error');
+              else { const why = r.detail ? `${r.error} - ${r.detail}` : r.error; this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error'); }
               return;
             }
             this._modal = null;

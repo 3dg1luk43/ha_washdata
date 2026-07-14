@@ -417,6 +417,7 @@ export interface StoreStatusResponse {
 export interface StoreUploadResponse {
   store_cycle_id?: string;
   error?: string;
+  detail?: string | null;
   disabled?: boolean;
 }
 

@@ -505,6 +505,7 @@ class StoreUploadResponse(TypedDict, total=False):
     """Result of sharing (uploading) a local cycle."""
     store_cycle_id: str
     error: str
+    detail: str | None
     disabled: bool
 
 
