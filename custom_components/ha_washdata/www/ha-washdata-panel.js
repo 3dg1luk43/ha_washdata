@@ -7898,6 +7898,10 @@ class HaWashdataPanel extends HTMLElement {
     if (brandInput) brandInput.addEventListener('change', () => {
       const v = brandInput.value.trim();
       this._opts = { ...this._opts, store_brand: v };
+      // _pendingSettings may hold a stale snapshot of store_brand from an earlier
+      // _snapshotFormToPending call; it would override _opts in the render since
+      // Object.assign merges pending last. Clear it so _opts wins.
+      delete this._pendingSettings.store_brand;
       this._catalog.forBrand = v; this._catalog.devices = null;
       this._render();                 // enable + reset the model field (input has blurred)
       this._loadCatalogDevices(v);    // patches #wd-model-dl in place, no re-render
@@ -7905,6 +7909,7 @@ class HaWashdataPanel extends HTMLElement {
     const modelInput = sr.getElementById('wd-store-model');
     if (modelInput) modelInput.addEventListener('change', () => {
       this._opts = { ...this._opts, store_model: modelInput.value.trim() };
+      delete this._pendingSettings.store_model;
       this._render();
     });
 

@@ -208,11 +208,15 @@ class StoreClient:
         try:
             async with self._sess().post(url, json={"structuredQuery": sq}, timeout=15) as resp:
                 if resp.status != 200:
-                    _LOGGER.debug("Store query HTTP %s", resp.status)
+                    try:
+                        body = await resp.json()
+                        _LOGGER.warning("Store query HTTP %s: %s", resp.status, body)
+                    except Exception:
+                        _LOGGER.warning("Store query HTTP %s (no body)", resp.status)
                     return []
                 rows = await resp.json()
         except Exception as exc:  # noqa: BLE001
-            _LOGGER.debug("Store query error: %s", exc)
+            _LOGGER.warning("Store query error: %s", exc)
             return []
         return [_decode_doc(r["document"]) for r in rows if isinstance(r, dict) and "document" in r]
 
