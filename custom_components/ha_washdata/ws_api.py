@@ -1317,6 +1317,21 @@ async def ws_set_options(
             "Settings changelog recording failed for %s: %s", msg["entry_id"], exc
         )
 
+    # When online features are disabled, clear the persisted store account so the
+    # user's identity isn't silently retained after they opt out.
+    from .const import CONF_ENABLE_ONLINE_FEATURES  # pylint: disable=import-outside-toplevel
+    was_online = bool(entry.options.get(CONF_ENABLE_ONLINE_FEATURES, False))
+    now_online = bool(new_options.get(CONF_ENABLE_ONLINE_FEATURES, False))
+    if was_online and not now_online:
+        try:
+            manager = _get_manager(hass, msg["entry_id"])
+            store = getattr(manager, "profile_store", None) if manager else None
+            if store is not None:
+                await store.clear_store_account()
+                await store.async_save()
+        except Exception:  # pylint: disable=broad-exception-caught
+            pass
+
     hass.config_entries.async_update_entry(entry, **update_kwargs)
     _send_result(connection, msg["id"], "set_options", {"success": True})
 

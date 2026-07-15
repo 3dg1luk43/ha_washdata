@@ -763,8 +763,6 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
 button.wd-attn-card, button.wd-profile-card { appearance: none; font: inherit; text-align: left; width: 100%; }
 button.wd-profile-card { display: block; }
 .wd-prof-wrap { position: relative; }
-.wd-prof-share-btn { position: absolute; bottom: 8px; right: 8px; opacity: .65; padding: 2px 7px; }
-.wd-prof-share-btn:hover { opacity: 1; }
 .wd-profile-name { font-weight: 600; font-size: 1em; margin-bottom: 6px; }
 .wd-profile-meta { font-size: .8em; color: var(--secondary-text-color); }
 /* D2: mini duration sparkline on profile cards */
@@ -3859,16 +3857,12 @@ class HaWashdataPanel extends HTMLElement {
     const spark = (Array.isArray(p.signature_curve) && p.signature_curve.length >= 3)
       ? `<canvas class="wd-prof-spark" data-spark-prof="${_esc(p.name)}" width="64" height="20" aria-label="${_esc(this._t('lbl.sparkline', { name: p.name }, 'Average power curve'))}"></canvas>`
       : '';
-    const shareBtn = (this._onlineEnabled() && this._storeDeviceDeclared())
-      ? `<button class="wd-btn wd-btn-ghost wd-btn-sm wd-prof-share-btn" type="button" data-action="store-share-profile" data-prog="${_esc(p.name)}" title="${_esc(this._t('btn.share_device_tip', {}, 'Share this appliance and its recorded reference cycles to the community store so others with the same machine can adopt them'))}">⬆</button>`
-      : '';
     return `
       <div class="wd-prof-wrap">
         <button class="wd-profile-card" type="button" data-action="open-profile" data-pname="${_esc(p.name)}">
           <div class="wd-profile-name">${_esc(p.name)}${badges ? ' ' + badges : ''}${spark}</div>
           <div class="wd-profile-meta">${p.cycle_count || 0} cycles · ${dur}${energy}${total}${cost}</div>
         </button>
-        ${shareBtn}
       </div>`;
   }
 
@@ -7664,10 +7658,16 @@ class HaWashdataPanel extends HTMLElement {
         </div>`;
     }
 
+    const shareProfileBtn = (this._onlineEnabled() && this._storeDeviceDeclared())
+      ? `<button class="wd-btn wd-btn-ghost wd-btn-sm" type="button" data-action="store-share-profile" data-prog="${_esc(m.name)}" title="${_esc(this._t('btn.share_device_tip', {}, 'Share this appliance and its recorded reference cycles to the community store so others with the same machine can adopt them'))}">⬆ ${this._t('btn.share_to_store', {}, 'Share to store')}</button>`
+      : '';
     return `<h2>Profile · ${_esc(m.name)}</h2>
       <div class="wd-mini-tabs">${tabBar}</div>
       ${body}
-      <div class="wd-modal-actions" style="margin-top:14px"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button></div>`;
+      <div class="wd-modal-actions" style="margin-top:14px">
+        <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
+        ${shareProfileBtn}
+      </div>`;
   }
 
   _drawCycleEditor() {
