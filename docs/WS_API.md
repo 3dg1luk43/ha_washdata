@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**93 commands.**
+**94 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -99,6 +99,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `store_confirm_device` | entry_id, device_id | `StoreConfirmResponse` |
 | `store_rate_device` | entry_id, device_id, rating | `StoreOnlineResponse` |
 | `store_set_online` | entry_id, enabled | `StoreOnlineResponse` |
+| `store_set_prefs` | entry_id, prefs | `StorePrefsResponse` |
 | `store_import_cycle` | entry_id, cycle_id, target_profile?, new_profile_name? | `StoreImportResponse` |
 | `store_upload_cycle` | entry_id, local_cycle_id, program, description? | `StoreUploadResponse` |
 
@@ -1650,6 +1651,23 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | --- | --- | --- |
 | `enabled` | no | bool |
 | `ok` | no | bool |
+| `error` | no | str |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_set_prefs`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `prefs` | yes | dict |
+
+**Response** (`StorePrefsResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `prefs` | no | dict[str, any] |
 | `error` | no | str |
 | `disabled` | no | bool |
 

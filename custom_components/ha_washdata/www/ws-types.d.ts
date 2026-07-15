@@ -389,6 +389,12 @@ export interface StoreOnlineResponse {
   disabled?: boolean;
 }
 
+export interface StorePrefsResponse {
+  prefs?: Record<string, unknown>;
+  error?: string;
+  disabled?: boolean;
+}
+
 export interface StoreQualityResponse {
   avg?: number | null;
   count?: number;
@@ -923,6 +929,11 @@ export interface StoreSetOnlineRequest {
   enabled: boolean;
 }
 
+export interface StoreSetPrefsRequest {
+  entry_id: string;
+  prefs: Record<string, unknown>;
+}
+
 export interface StoreImportCycleRequest {
   entry_id: string;
   cycle_id: string;
@@ -1031,6 +1042,7 @@ export interface WashDataWsRequests {
   "ha_washdata/store_confirm_device": StoreConfirmDeviceRequest;
   "ha_washdata/store_rate_device": StoreRateDeviceRequest;
   "ha_washdata/store_set_online": StoreSetOnlineRequest;
+  "ha_washdata/store_set_prefs": StoreSetPrefsRequest;
   "ha_washdata/store_import_cycle": StoreImportCycleRequest;
   "ha_washdata/store_upload_cycle": StoreUploadCycleRequest;
 }
@@ -1128,5 +1140,6 @@ export interface WashDataWsResponses {
   "ha_washdata/store_confirm_device": StoreConfirmResponse;
   "ha_washdata/store_rate_device": StoreOnlineResponse;
   "ha_washdata/store_set_online": StoreOnlineResponse;
+  "ha_washdata/store_set_prefs": StorePrefsResponse;
   "ha_washdata/store_get_device_profiles": StoreDeviceProfilesResponse;
 }

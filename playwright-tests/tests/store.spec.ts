@@ -190,3 +190,19 @@ test('gear online toggle persists via the global store_set_online command', asyn
   const calls = await assertWsCalled(page, 'ha_washdata/store_set_online');
   expect(calls[0]).toHaveProperty('enabled', true);
 });
+
+test('gear "Show contributor names" toggle persists via store_set_prefs', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    ...storeHandlers(),
+    'ha_washdata/get_constants': { ...STORE_CONSTANTS, store_prefs: { show_contributor: true } },
+    'ha_washdata/store_set_prefs': { prefs: { show_contributor: false } },
+  });
+  await page.locator('#wd-settings-btn').click();
+  await page.locator('[data-gtab="online"]').click();
+  const pref = page.locator('input[data-action="store-toggle-pref"][data-pref="show_contributor"]');
+  await expect(pref).toBeVisible({ timeout: 8_000 });
+  await pref.click();
+  const calls = await assertWsCalled(page, 'ha_washdata/store_set_prefs');
+  expect(calls[0].prefs).toHaveProperty('show_contributor', false);
+});

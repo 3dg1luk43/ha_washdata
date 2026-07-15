@@ -247,6 +247,18 @@ async def test_delete_last_reference_cycle_removes_empty_profile_no_theft(store)
 
 
 @pytest.mark.asyncio
+async def test_playground_snapshots_include_imported_profile(store):
+    # An import-only profile must be a Playground match candidate, else auto-detect
+    # replays never match a downloaded profile (issue: _build_match_snapshots resolved
+    # sample_cycle_id against past_cycles only).
+    from custom_components.ha_washdata import playground
+    await store.add_reference_cycle("Eco 50", _offset_trace(2000), {"store_cycle_id": "pg1"})
+    assert store.get_past_cycles() == []
+    snaps, _cfg, _gm, _ms = playground._build_match_snapshots(store)
+    assert "Eco 50" in {s["name"] for s in snaps}
+
+
+@pytest.mark.asyncio
 async def test_delete_reference_cycle_keeps_profile_with_other_cycles(store):
     # Profile has a real cycle AND an imported one; deleting the import keeps it.
     await _add_real(store, "Cotton 40", 1000)

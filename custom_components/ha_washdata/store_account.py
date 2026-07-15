@@ -24,8 +24,22 @@ _DATA_KEY = f"{DOMAIN}_online_cfg"
 _LOAD_LOCK_KEY = f"{DOMAIN}_online_load_lock"
 
 
+# Integration-wide community-store display/behaviour preferences. To add a new
+# online setting, add one entry here (key -> default) and one declarative row in the
+# panel's _STORE_PREFS list; the generic get_prefs / async_set_prefs / store_set_prefs
+# plumbing carries it end-to-end with no further wiring.
+_DEFAULT_PREFS: dict[str, Any] = {
+    "show_contributor": True,   # show "by <contributor>" attribution in the pickers
+}
+
+
 def _default() -> dict[str, Any]:
-    return {"online_enabled": DEFAULT_ENABLE_ONLINE_FEATURES, "account": {}, "migrated": False}
+    return {
+        "online_enabled": DEFAULT_ENABLE_ONLINE_FEATURES,
+        "account": {},
+        "migrated": False,
+        "prefs": dict(_DEFAULT_PREFS),
+    }
 
 
 async def async_load(hass: HomeAssistant) -> None:
@@ -51,6 +65,12 @@ async def async_load(hass: HomeAssistant) -> None:
                 data["migrated"] = bool(loaded.get("migrated", False))
                 if isinstance(loaded.get("account"), dict):
                     data["account"] = dict(loaded["account"])
+                # Merge persisted prefs over the defaults, keeping only known keys so
+                # a stale/removed pref can never linger.
+                if isinstance(loaded.get("prefs"), dict):
+                    data["prefs"] = {
+                        k: loaded["prefs"].get(k, _DEFAULT_PREFS[k]) for k in _DEFAULT_PREFS
+                    }
         except Exception as exc:  # noqa: BLE001 - never fail setup over this
             _LOGGER.warning("Failed to load online config, using defaults: %s", exc)
         hass.data[_DATA_KEY] = {"store": store, "data": data}
@@ -76,6 +96,32 @@ async def async_set_online(hass: HomeAssistant, on: bool) -> None:
     await async_load(hass)
     _data(hass)["online_enabled"] = bool(on)
     await _save(hass)
+
+
+def get_prefs(hass: HomeAssistant) -> dict[str, Any]:
+    """Integration-wide community-store preferences, defaults filled in."""
+    stored = _data(hass).get("prefs")
+    stored = stored if isinstance(stored, dict) else {}
+    return {k: stored.get(k, _DEFAULT_PREFS[k]) for k in _DEFAULT_PREFS}
+
+
+def get_pref(hass: HomeAssistant, key: str) -> Any:
+    """A single store preference (default if unknown/unset)."""
+    return get_prefs(hass).get(key, _DEFAULT_PREFS.get(key))
+
+
+async def async_set_prefs(hass: HomeAssistant, patch: dict[str, Any]) -> dict[str, Any]:
+    """Merge a subset of store preferences (only known keys) and persist."""
+    await async_load(hass)
+    data = _data(hass)
+    prefs = data.get("prefs")
+    prefs = dict(prefs) if isinstance(prefs, dict) else dict(_DEFAULT_PREFS)
+    for k, v in (patch or {}).items():
+        if k in _DEFAULT_PREFS:
+            prefs[k] = bool(v) if isinstance(_DEFAULT_PREFS[k], bool) else v
+    data["prefs"] = prefs
+    await _save(hass)
+    return get_prefs(hass)
 
 
 def migration_done(hass: HomeAssistant) -> bool:

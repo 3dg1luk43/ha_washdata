@@ -545,6 +545,13 @@ class StoreOnlineResponse(TypedDict, total=False):
     disabled: bool
 
 
+class StorePrefsResponse(TypedDict, total=False):
+    """Result of setting integration-wide community-store preferences."""
+    prefs: dict[str, Any]
+    error: str
+    disabled: bool
+
+
 class StoreDeviceProfilesResponse(TypedDict, total=False):
     """Resolved store deviceId + its profiles (for the Share dialog picker)."""
     device_id: str
@@ -645,6 +652,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "store_confirm_device": StoreConfirmResponse,
     "store_rate_device": StoreOnlineResponse,
     "store_set_online": StoreOnlineResponse,
+    "store_set_prefs": StorePrefsResponse,
     "store_get_device_profiles": StoreDeviceProfilesResponse,
 }
 
@@ -926,6 +934,7 @@ WS_COMMANDS: dict[str, dict] = {
     "store_confirm_device": {"params": [_entry(), _p("device_id", "str")]},
     "store_rate_device": {"params": [_entry(), _p("device_id", "str"), _p("rating", "int")]},
     "store_set_online": {"params": [_entry(), _p("enabled", "bool")]},
+    "store_set_prefs": {"params": [_entry(), _p("prefs", "dict")]},
     "store_import_cycle": {"params": [
         _entry(), _p("cycle_id", "str"),
         _p("target_profile", "str|null", False), _p("new_profile_name", "str|null", False),

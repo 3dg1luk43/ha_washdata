@@ -27,6 +27,15 @@ const _HASS_REFRESH_MS = 6000;
 // Cycles-tab page size. Kept modest so the "Load more" control actually engages
 // for typical histories instead of loading everything in one page.
 const _CYCLE_PAGE_SIZE = 25;
+
+// Declarative community-store preference toggles, rendered in the gear's Online &
+// Community pane. To ship a new online setting: add one row here AND one default in
+// store_account._DEFAULT_PREFS -- the generic get_prefs / store_set_prefs plumbing
+// carries it end-to-end (no per-setting wiring). All are booleans.
+const _STORE_PREFS = [
+  { key: 'show_contributor', labelKey: 'lbl.show_contributor', labelFb: 'Show contributor names',
+    docKey: 'setting.show_contributor.doc', docFb: 'Show the "by <contributor>" attribution on community appliances and reference cycles.' },
+];
 // Height (CSS px) of the band above the Playground plot where event pin heads
 // sit, out of the busy curve area. Shared by _pgDrawCanvas and the pointer
 // layout() closure so threshold-drag math stays aligned with the drawn plot.
@@ -1552,7 +1561,7 @@ class HaWashdataPanel extends HTMLElement {
     this._hassUpdateThrottle = null;
     this._evtUnsubs = [];
     // Data
-    this._constants = { stateColors: {}, deviceTypes: [], mlLabEnabled: false, mlSuggestionsEnabled: false, mlTrainingAvailable: false, storeOnlineAvailable: false, storeOnlineEnabled: false, storeWebOrigin: '' };
+    this._constants = { stateColors: {}, deviceTypes: [], mlLabEnabled: false, mlSuggestionsEnabled: false, mlTrainingAvailable: false, storeOnlineAvailable: false, storeOnlineEnabled: false, storeWebOrigin: '', storePrefs: {} };
     this._constantsLoaded = false;
     this._devices = [];
     this._cycles = [];
@@ -2149,7 +2158,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._constantsLoaded) {
         try {
           const c = await this._ws({ type: `${_DOMAIN}/get_constants` });
-          this._constants = { stateColors: c.state_colors || {}, deviceTypes: c.device_types || [], mlLabEnabled: !!(c.ml_lab_enabled), mlSuggestionsEnabled: !!(c.ml_suggestions_enabled), mlTrainingAvailable: !!(c.ml_training_available), storeOnlineAvailable: !!(c.store_online_available), storeOnlineEnabled: !!(c.store_online_enabled), storeWebOrigin: c.store_web_origin || '' };
+          this._constants = { stateColors: c.state_colors || {}, deviceTypes: c.device_types || [], mlLabEnabled: !!(c.ml_lab_enabled), mlSuggestionsEnabled: !!(c.ml_suggestions_enabled), mlTrainingAvailable: !!(c.ml_training_available), storeOnlineAvailable: !!(c.store_online_available), storeOnlineEnabled: !!(c.store_online_enabled), storeWebOrigin: c.store_web_origin || '', storePrefs: c.store_prefs || {} };
         } catch (_) { /* fall back to humanized labels */ }
         try {
           this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
@@ -4299,7 +4308,10 @@ class HaWashdataPanel extends HTMLElement {
       const bits = [];
       const manualUrl = _safeHttpUrl(match.manualUrl);
       if (manualUrl) bits.push(`<a href="${_esc(manualUrl)}" target="_blank" rel="noopener noreferrer nofollow">${this._t('link.manual', {}, 'Manual ↗')}</a>`);
-      bits.push(this._t('store.contributed_by', {name: _esc(match.createdByName || this._t('lbl.anonymous', {}, 'Anonymous'))}, `by ${_esc(match.createdByName || 'Anonymous')}`));
+      // "by <contributor>" attribution is optional (Online & Community pref).
+      if (((this._constants && this._constants.storePrefs) || {}).show_contributor !== false) {
+        bits.push(this._t('store.contributed_by', {name: _esc(match.createdByName || this._t('lbl.anonymous', {}, 'Anonymous'))}, `by ${_esc(match.createdByName || 'Anonymous')}`));
+      }
       const connected = !!(this._storeStatus && this._storeStatus.connected);
       let actions = '';
       if (connected) {
@@ -6521,8 +6533,19 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-card-title">${this._t('hdr.online_account', {}, 'Community Store & online features')}</div>
       <p class="wd-info" style="margin-bottom:12px">${this._t('msg.online_intro_global', {}, 'Browse and share reference recordings with other WashData users, and confirm appliance entries. One connection applies to your whole WashData integration; appliance brand and model are set per device under Basic. All online features are opt-in and off by default.')}</p>
       <div class="wd-field"><label class="wd-check-row"><input type="checkbox" data-action="store-toggle-online" ${on ? 'checked' : ''} ${busy ? 'disabled' : ''}> ${this._t('lbl.enable_online', {}, 'Enable online features')}</label></div>
+      ${on ? this._htmlStorePrefs(busy) : ''}
       ${on ? connBlock : ''}
     </div>`;
+  }
+
+  // Declarative store-preference toggles (see _STORE_PREFS). Adding a setting is a
+  // one-line list entry + a store_account default; no bespoke handler needed.
+  _htmlStorePrefs(busy) {
+    const prefs = (this._constants && this._constants.storePrefs) || {};
+    return _STORE_PREFS.map(p => {
+      const checked = prefs[p.key] !== false;  // defaults on; get_constants sends the full set
+      return `<div class="wd-field"><label class="wd-check-row"><input type="checkbox" data-action="store-toggle-pref" data-pref="${_esc(p.key)}" ${checked ? 'checked' : ''} ${busy ? 'disabled' : ''}> ${this._t(p.labelKey, {}, p.labelFb)}</label> ${_tip(this._t(p.docKey, {}, p.docFb))}</div>`;
+    }).join('');
   }
 
   // ── Community Store data ─────────────────────────────────────────────────────
@@ -8701,6 +8724,20 @@ class HaWashdataPanel extends HTMLElement {
         }
       });
 
+    } else if (a === 'store-toggle-pref') {
+      // Generic community-store preference toggle (declarative _STORE_PREFS).
+      const key = btn.dataset.pref;
+      const val = !!btn.checked;
+      if (!key) return;
+      this._busyRun('store-account', async () => {
+        try {
+          const r = await this._ws({ type: `${_DOMAIN}/store_set_prefs`, entry_id: eid, prefs: { [key]: val } });
+          if (r && r.prefs) this._constants = { ...this._constants, storePrefs: r.prefs };
+        } catch (e) {
+          this._showToast(this._t('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+        }
+      });
+
     } else if (a === 'store-connect') {
       const origin = this._constants.storeWebOrigin;
       if (!origin) { this._showToast(this._t('toast.store_unavailable', {}, 'The community store is not available.'), 'error'); return; }
@@ -9836,8 +9873,30 @@ class HaWashdataPanel extends HTMLElement {
       return;
     }
     const conflicts = this._liveValidateSettings(sr);
-    if (Object.keys(conflicts).length > 0) {
-      this._showToast(this._t('toast.settings_conflicts', {}, 'Fix the highlighted setting conflicts before saving.'), 'error');
+    const conflictKeys = new Set(Object.keys(conflicts));
+    if (conflictKeys.size > 0) {
+      // Only the fields INVOLVED in a conflict are blocked. Everything else the user
+      // changed (identity + basic config: name, power sensor, min power, off delay,
+      // brand/model, group, ...) saves normally, since those aren't conflict-checked.
+      // Conflicting in-progress edits are kept in the pending buffer so the fields +
+      // banner survive the reload for the user to fix.
+      const safe = {}; const heldBack = {};
+      for (const [k, val] of Object.entries(updates)) {
+        if (conflictKeys.has(k)) { heldBack[k] = val; continue; }
+        if (JSON.stringify(val) !== JSON.stringify((this._opts || {})[k])) safe[k] = val;
+      }
+      this._pendingSettings = { ...this._pendingSettings, ...heldBack };
+      if (Object.keys(safe).length) {
+        await this._busyRun('save-settings', async () => {
+          try {
+            await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: safe });
+            this._opts = { ...this._opts, ...safe };
+            this._showToast(this._t('toast.saved_except_conflicts', {}, 'Saved. Fix the highlighted conflicts to save the rest.'), 'info');
+          } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+        });
+      } else {
+        this._showToast(this._t('toast.settings_conflicts', {}, 'Fix the highlighted setting conflicts before saving.'), 'error');
+      }
       return;
     }
     await this._busyRun('save-settings', async () => {

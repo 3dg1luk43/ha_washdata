@@ -223,8 +223,12 @@ def _build_match_snapshots(
     try:
         data = getattr(store, "_data", {}) or {}
         profiles = data.get("profiles", {}) or {}
+        # Include imported reference cycles: an import-only profile samples from
+        # reference_cycles, so without them it would be dropped as a candidate and
+        # the Playground auto-detect would never match a downloaded profile.
         past = data.get("past_cycles", []) or []
-        by_id = {c.get("id"): c for c in past if isinstance(c, dict)}
+        refs = data.get("reference_cycles", []) or []
+        by_id = {c.get("id"): c for c in (list(past) + list(refs)) if isinstance(c, dict)}
         for name, profile in profiles.items():
             if not isinstance(profile, dict):
                 continue
@@ -1534,11 +1538,13 @@ def _profile_trace(store: Any, profile_name: str) -> tuple[list[float], float] |
         profile = (data.get("profiles", {}) or {}).get(profile_name)
         if not isinstance(profile, dict):
             return None
-        past = data.get("past_cycles", []) or []
+        # past + imported reference cycles: an import-only profile's sample lives in
+        # reference_cycles, so resolve against both (mirrors _build_match_snapshots).
+        pool = (data.get("past_cycles", []) or []) + (data.get("reference_cycles", []) or [])
         sample = next(
             (
                 c
-                for c in past
+                for c in pool
                 if isinstance(c, dict) and c.get("id") == profile.get("sample_cycle_id")
             ),
             None,

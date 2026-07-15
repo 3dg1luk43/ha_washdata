@@ -500,6 +500,7 @@
     "pg_envelope_fit": "Envelope fit",
     "pg_envelope_fit_tip": "How closely the cycle sits inside this profile's saved power envelope - a different lens than match confidence.",
     "enable_online": "Enable online features",
+    "show_contributor": "Show contributor names",
     "store_brand": "Appliance brand",
     "store_model": "Appliance model",
     "anonymous": "Anonymous",
@@ -1254,6 +1255,9 @@
     "store_model": {
       "label": "Appliance Model",
       "doc": "Optional. The appliance model, picked from the community catalog once a brand is set. If your model is not listed you can add it to the catalog."
+    },
+    "show_contributor": {
+      "doc": "Show the \"by <contributor>\" attribution on community appliances and reference cycles."
     }
   },
   "setting_group": {
@@ -1544,6 +1548,7 @@
     "reminders_saved": "Service reminders saved",
     "review_saved": "Review saved",
     "settings_conflicts": "Fix the highlighted setting conflicts before saving.",
+    "saved_except_conflicts": "Saved. Fix the highlighted conflicts to save the rest.",
     "settings_reverted": "Settings reverted; integration reloading",
     "settings_saved": "Settings saved; integration reloading",
     "suggestions_applied": "Suggestions applied; integration reloading",

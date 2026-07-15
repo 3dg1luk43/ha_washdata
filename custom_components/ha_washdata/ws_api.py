@@ -793,6 +793,21 @@ async def ws_store_set_online(hass, connection, msg):
 
 
 @websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/store_set_prefs", vol.Required("entry_id"): str,
+    vol.Required("prefs"): dict,
+})
+@websocket_api.async_response
+async def ws_store_set_prefs(hass, connection, msg):
+    """Merge integration-wide community-store preferences (only known keys)."""
+    from . import store_account
+    prefs = await store_account.async_set_prefs(hass, msg.get("prefs") or {})
+    manager = _get_manager(hass, msg["entry_id"])
+    if manager is not None:
+        manager.notify_update()
+    _send_result(connection, msg["id"], "store_set_prefs", {"prefs": prefs})
+
+
+@websocket_api.websocket_command({
     vol.Required("type"): "ha_washdata/store_get_profiles", vol.Required("entry_id"): str,
     vol.Required("device_id"): str,
 })
@@ -939,6 +954,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         # Community catalog: brand list, device quality, confirm/rate, global online toggle
         ws_store_list_brands, ws_store_get_device_quality, ws_store_get_device_profiles,
         ws_store_confirm_device, ws_store_rate_device, ws_store_set_online,
+        ws_store_set_prefs,
     ]
     for handler in handlers:
         websocket_api.async_register_command(hass, _guard(handler))
@@ -2649,6 +2665,9 @@ def ws_get_constants(
             # Online features are integration-wide (device-agnostic), set in the gear menu.
             "store_online_enabled": store_account.online_enabled(hass),
             "store_web_origin": STORE_WEB_ORIGIN,
+            # Community-store display/behaviour preferences (declarative; see
+            # store_account._DEFAULT_PREFS + the panel's _STORE_PREFS list).
+            "store_prefs": store_account.get_prefs(hass),
         },
     )
 
