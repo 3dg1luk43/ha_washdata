@@ -546,6 +546,10 @@ const _CSS = `
 .wd-th-sort:hover { color: var(--primary-color); }
 .wd-tc-date { white-space: nowrap; color: var(--secondary-text-color); font-size: .82em; }
 .wd-tc-num { white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+/* Dedicated flags/icons column: keep every badge on one line so review/anomaly/source
+   icons never overwrite each other or spill into the profile name. */
+.wd-tc-flags { white-space: nowrap; font-size: .9em; }
+th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
 .wd-filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
 .wd-filter-input { flex: 1; min-width: 120px; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color); font-size: .84em; }
 .wd-filter-select { padding: 5px 8px; border-radius: 6px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color); font-size: .84em; }
@@ -3562,7 +3566,6 @@ class HaWashdataPanel extends HTMLElement {
     const mlById = this._mlById || {};
     const fbIds = new Set((this._feedbacks || []).map(f => f.cycle_id));
     const mlOf = c => mlById[c.id];
-    const healthOf = c => { const m = mlOf(c); return (m && m.ml_quality_score != null) ? (1 - m.ml_quality_score) : null; };
     const isReviewed = c => { const m = mlOf(c); return !!(m && m.ml_review && m.ml_review.reviewed_at); };
     const isGolden = c => { const m = mlOf(c); return !!(m && m.ml_review && m.ml_review.golden); };
     const needsReview = c => {
@@ -3599,7 +3602,6 @@ class HaWashdataPanel extends HTMLElement {
       cost: c => c.cost != null ? c.cost : -1,
       status: c => c.status || 'completed',
       profile: c => (c.profile_name || c.matched_profile || '￿').toLowerCase(),
-      health: c => { const h = healthOf(c); return h == null ? -1 : h; },
     };
     cycles = _sortBy(cycles, getterMap[col] || getterMap.date, dir);
 
@@ -3607,15 +3609,6 @@ class HaWashdataPanel extends HTMLElement {
       : s === 'interrupted' ? 'var(--error-color, #f44336)'
       : s === 'force_stopped' ? 'var(--warning-color, #ff9800)' : 'var(--secondary-text-color)';
 
-    const healthCell = c => {
-      const m = mlOf(c);
-      if (m && m.ml_quality_score != null) {
-        const lbl = m.ml_quality_label;
-        const col2 = lbl === 'ok' ? 'var(--success-color,#4caf50)' : lbl === 'uncertain' ? 'var(--warning-color,#ff9800)' : 'var(--error-color,#f44336)';
-        return `<span style="color:${col2};font-weight:600">${Math.round((1 - m.ml_quality_score) * 100)}%</span>`;
-      }
-      return this._mlLoading ? '<span style="color:var(--secondary-text-color)">…</span>' : '<span style="color:var(--secondary-text-color)">-</span>';
-    };
     const importedBadge = c => c.is_reference
       ? ` <span title="${_esc(this._t('badge.imported_tip', {}, 'Imported from the community store. Used for matching only, not counted in stats.'))}" style="color:var(--info-color,#2196f3)">📥</span>`
       : '';
@@ -3669,29 +3662,30 @@ class HaWashdataPanel extends HTMLElement {
         ? `<input type="checkbox" class="wd-csel" ${sel.has(c.id) ? 'checked' : ''} style="width:auto;margin:0">`
         : `<span class="wd-devdot" style="background:${statusDotColor(st)}" title="${_esc(st)}"></span>`;
       const stLabel = { completed: this._t('status.completed',{},'Completed'), interrupted: this._t('status.interrupted',{},'Interrupted'), force_stopped: this._t('status.force_stopped',{},'Force stopped'), active: this._t('status.active',{},'Active') }[st] || st;
+      const flags = `${importedBadge(c)}${reviewBadge(c)}${overrunBadge(c)}${underrunBadge(c)}${energyAnomalyBadge(c)}${artifactBadge(c)}${restartGapBadge(c)}`.trim();
       return `<tr data-cid="${_esc(c.id)}" data-selmode="${rowSel ? 1 : 0}" style="cursor:pointer">
         <td style="width:26px;padding:6px 4px 6px 8px">${check}</td>
-        <td>${prog ? _esc(prog) : `<span style="color:var(--secondary-text-color)">${this._t('lbl.unlabelled', {}, 'Unlabelled')}</span>`}${importedBadge(c)}${reviewBadge(c)}${overrunBadge(c)}${underrunBadge(c)}${energyAnomalyBadge(c)}${artifactBadge(c)}${restartGapBadge(c)}</td>
+        <td>${prog ? _esc(prog) : `<span style="color:var(--secondary-text-color)">${this._t('lbl.unlabelled', {}, 'Unlabelled')}</span>`}</td>
+        <td class="wd-tc-flags">${flags}</td>
         <td><span style="color:${statusDotColor(st)};font-size:.9em">${_esc(stLabel)}</span></td>
         <td class="wd-tc-date">${_fmtDate(c.start_time)}</td>
         <td class="wd-tc-num">${_fmtDuration(c.duration)}</td>
         <td class="wd-tc-num">${kwh != null ? _fmtEnergy(kwh) : '-'}</td>
         <td class="wd-tc-num">${costCell(c)}</td>
         <td class="wd-tc-num">${conf != null ? conf.toFixed(0) + '%' : '-'}</td>
-        <td class="wd-tc-num">${healthCell(c)}</td>
       </tr>`;
     }).join('');
 
     const thead = `<thead><tr>
       <th style="width:26px;padding:6px 4px 6px 8px"></th>
       ${_th(this._t('lbl.profile', {}, 'Profile'), 'profile', col === 'profile', dir, 'cycsort', '', this._t('col.profile_tip', {}, 'Matched program name. Unlabelled means no profile matched at end of cycle.'))}
+      <th class="wd-tc-flags" title="${_esc(this._t('col.flags_tip', {}, 'Review, anomaly and source flags for the cycle. Hover an icon for detail.'))}">${this._t('lbl.flags', {}, 'Flags')}</th>
       ${_th(this._t('lbl.status', {}, 'Status'), 'status', col === 'status', dir, 'cycsort', '', this._t('col.status_tip', {}, 'Cycle outcome: Completed (natural end), Interrupted (abrupt power drop), Force Stopped (manual), or Needs Review (feedback pending).'))}
       ${_th(this._t('lbl.date', {}, 'Date'), 'date', col === 'date', dir, 'cycsort', '', this._t('col.date_tip', {}, 'Date and time the cycle started.'))}
       ${_th(this._t('lbl.duration', {}, 'Duration'), 'duration', col === 'duration', dir, 'cycsort', 'right', this._t('col.duration_tip', {}, 'Total cycle run time from start to end.'))}
       ${_th(this._t('lbl.energy', {}, 'Energy'), 'energy', col === 'energy', dir, 'cycsort', 'right', this._t('col.energy_tip', {}, 'Total energy consumed (kWh). Computed by integrating power over time.'))}
       ${_th(this._t('lbl.cost', {}, 'Cost'), 'cost', col === 'cost', dir, 'cycsort', 'right', this._t('col.cost_tip', {}, 'Energy cost for this cycle, frozen at completion using the price in effect then (energy x price per kWh). Set a price under Settings to populate it.'))}
       ${_th(this._t('lbl.confidence', {}, 'Confidence'), 'confidence', col === 'confidence', dir, 'cycsort', 'right', this._t('col.confidence_tip', {}, 'Profile match confidence (0-100%). How closely the cycle power curve matched the identified program.'))}
-      ${_th(this._t('lbl.health', {}, 'Health'), 'health', col === 'health', dir, 'cycsort', 'right', this._t('col.health_tip', {}, 'ML cycle health (higher = better). Click a cycle to inspect and review it.'))}
     </tr></thead>`;
 
     const filterBar = `<div class="wd-filter-bar">

@@ -354,6 +354,7 @@
     "group_name": "Group name",
     "head_trim": "Head Trim (s)",
     "health": "Health",
+    "flags": "Flags",
     "hide_tabs": "Hide tabs for non-admins",
     "in_use": "In use",
     "json_data": "JSON Data",
@@ -1588,7 +1589,8 @@
     "energy_tip": "Total energy consumed (kWh). Computed by integrating power over time.",
     "cost_tip": "Energy cost for this cycle, frozen at completion using the price in effect then (energy x price per kWh). Set a price under Settings to populate it.",
     "confidence_tip": "Profile match confidence (0-100%). How closely the cycle power curve matched the identified program.",
-    "health_tip": "ML cycle health (higher = better). Click a cycle to inspect and review it."
+    "health_tip": "ML cycle health (higher = better). Click a cycle to inspect and review it.",
+    "flags_tip": "Review, anomaly and source flags for the cycle. Hover an icon for detail."
   },
   "stat": {
     "avg": "avg",
