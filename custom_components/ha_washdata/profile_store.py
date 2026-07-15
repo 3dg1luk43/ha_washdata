@@ -4881,6 +4881,7 @@ class ProfileStore:
                 await self.async_rebuild_envelope(old_profile)
             else:
                 self._data.get("profiles", {}).pop(old_profile, None)
+                self._data.get("envelopes", {}).pop(old_profile, None)
         if profile_name:
             await self.async_rebuild_envelope(profile_name)
         await self.async_save()
@@ -5242,6 +5243,7 @@ class ProfileStore:
                 await self.async_rebuild_envelope(profile_name)
             else:
                 self._data.get("profiles", {}).pop(profile_name, None)
+                self._data.get("envelopes", {}).pop(profile_name, None)
         await self.async_save()
         return True
 
