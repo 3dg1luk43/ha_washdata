@@ -808,6 +808,8 @@ button.wd-profile-card { display: block; }
 .wd-sd-cyc { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 28px; cursor: pointer; font-size: .9em; }
 .wd-sd-cyc:hover, .wd-sd-prof:hover { background: var(--card-background-color); }
 .wd-sd-cyc-meta { color: var(--secondary-text-color); }
+.wd-sd-phase { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-top: 1px solid var(--divider-color); cursor: pointer; font-size: .85em; color: var(--secondary-text-color); }
+.wd-sd-phase:hover { background: var(--card-background-color); }
 .wd-linkbtn { background: none; border: none; padding: 0; color: var(--primary-color); cursor: pointer; font: inherit; text-decoration: underline; }
 .wd-gear-body { margin-top: 12px; }
 .wd-empty { text-align: center; padding: 48px 24px; color: var(--secondary-text-color); }
@@ -1577,6 +1579,7 @@ class HaWashdataPanel extends HTMLElement {
     this._cycles = [];
     this._refCycles = [];  // imported store recordings (shown alongside real cycles)
     this._shareableCycles = [];  // get_shareable_cycles result for the share-device tree
+    this._sharePhasePrograms = [];  // programs (from get_shareable_cycles) with a local phase map
     this._selectMode = false;
     this._cycleSel = new Set();
     this._profiles = [];
@@ -7200,6 +7203,13 @@ class HaWashdataPanel extends HTMLElement {
             <span class="wd-sd-cyc-meta">${_esc(when)} · ${_esc(dur)} ⭐</span>
           </label>`;
         }).join('');
+        // Phase toggle: only for programs that carry a local phase map. Bundled by
+        // default; travels with (at least one of) the program's selected cycles.
+        const hasPhases = (this._sharePhasePrograms || []).includes(g.program);
+        const phaseRow = hasPhases ? `<label class="wd-sd-phase">
+            <input type="checkbox" data-maction="sd-toggle-phases" data-prog="${_esc(g.program)}" ${(m.includePhases && m.includePhases.has(g.program)) ? 'checked' : ''} ${busy ? 'disabled' : ''}>
+            <span>${this._t('lbl.include_phase_map', {}, 'Include phase map')}</span>
+          </label>` : '';
         return `<div class="wd-sd-group">
           <label class="wd-sd-prof">
             <input type="checkbox" data-maction="sd-toggle-prof" data-prog="${_esc(g.program)}" ${all ? 'checked' : ''} ${some ? 'data-indeterminate="1"' : ''} ${busy ? 'disabled' : ''}>
@@ -7207,6 +7217,7 @@ class HaWashdataPanel extends HTMLElement {
             <span class="wd-sd-count">${g.cycles.filter(c => sel.has(c.id)).length}/${g.cycles.length}</span>
           </label>
           <div class="wd-sd-cycles">${rows}</div>
+          ${phaseRow}
         </div>`;
       }).join('');
     }
@@ -8959,7 +8970,9 @@ class HaWashdataPanel extends HTMLElement {
           }
           await this._fetchProfiles(eid);
           await this._fetchCycles(eid);
-          this._showToast(this._t('toast.store_device_downloaded', {p, c}, `${p} program(s), ${c} recording(s) added`));
+          const ph = (r && r.phases_applied) || 0;
+          if (ph) this._showToast(this._t('toast.store_device_downloaded_phases', {p, c, ph}, `${p} program(s), ${c} recording(s), ${ph} phase map(s) added`));
+          else this._showToast(this._t('toast.store_device_downloaded', {p, c}, `${p} program(s), ${c} recording(s) added`));
         } catch (e) { this._showToast(this._t('toast.store_download_failed', {error: e.message || e}, 'Download failed: ' + (e.message || e)), 'error'); }
       });
 
@@ -8979,17 +8992,21 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'store-share-device') {
       // Open the device-bundle share tree. Fetch the FULL shareable set (all
       // recorded/golden reference cycles, every page) and default-check them all.
-      this._modal = { type: 'store-share-device', selected: new Set(), loading: true };
+      this._modal = { type: 'store-share-device', selected: new Set(), includePhases: new Set(), loading: true };
       this._render();
       (async () => {
         try {
           const r = await this._ws({ type: `${_DOMAIN}/get_shareable_cycles`, entry_id: eid });
           this._shareableCycles = (r && r.items) || [];
-        } catch (_) { this._shareableCycles = []; }
+          this._sharePhasePrograms = (r && r.phase_programs) || [];
+        } catch (_) { this._shareableCycles = []; this._sharePhasePrograms = []; }
         if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'store-share-device') return;
         const sel = new Set();
         this._shareableByProgram().forEach(g => g.cycles.forEach(c => sel.add(c.id)));
-        this._modal.selected = sel; this._modal.loading = false;
+        this._modal.selected = sel;
+        // Default: bundle the phase map for every program that has one.
+        this._modal.includePhases = new Set(this._sharePhasePrograms);
+        this._modal.loading = false;
         this._render();
       })();
 
@@ -9560,6 +9577,13 @@ class HaWashdataPanel extends HTMLElement {
         this._render();
         return;
       }
+      if (action === 'sd-toggle-phases') {
+        const prog = btn.dataset.prog;
+        if (!m.includePhases) m.includePhases = new Set();
+        if (m.includePhases.has(prog)) m.includePhases.delete(prog); else m.includePhases.add(prog);
+        this._render();
+        return;
+      }
       if (action === 'store-share-device-ok') {
         // Build the {local_cycle_id, program} items from the model selection,
         // resolving each cycle's program from the fetched shareable list.
@@ -9569,9 +9593,12 @@ class HaWashdataPanel extends HTMLElement {
           .map(cid => ({ local_cycle_id: cid, program: progById.get(cid) || '' }))
           .filter(it => it.program);
         if (!items.length) { this._showToast(this._t('toast.share_device_none_sel', {}, 'Select at least one cycle to share'), 'error'); return; }
+        // Only send phases for programs that both opted in AND have a selected cycle.
+        const selectedProgs = new Set(items.map(it => it.program));
+        const includePhases = Array.from(m.includePhases || []).filter(p => selectedProgs.has(p));
         await this._busyRun('store-share-device', async () => {
           try {
-            const r = await this._ws({ type: `${_DOMAIN}/store_upload_device`, entry_id: eid, items });
+            const r = await this._ws({ type: `${_DOMAIN}/store_upload_device`, entry_id: eid, items, include_phases: includePhases });
             // Pre-flight gate error (not connected / no appliance): keep the modal open.
             if (r && r.error) {
               if (r.error === 'no_appliance_declared') this._showToast(this._t('toast.store_no_appliance', {}, 'Set your appliance brand and model in Settings first.'), 'error');

@@ -511,7 +511,8 @@
     "anonymous": "Anonymous",
     "rate_quality": "Rate quality",
     "rate_n": "{n} stars",
-    "approved_only": "Approved only"
+    "approved_only": "Approved only",
+    "include_phase_map": "Include phase map"
   },
   "log": {
     "all_levels": "All levels",
@@ -1598,7 +1599,8 @@
     "store_device_shared_partial": "Shared {n} cycle(s); {failed} could not be uploaded.",
     "store_download_nothing": "Nothing new to download - this setup is already on your device.",
     "store_device_shared_all_dup": "All {n} cycle(s) were already in the community store.",
-    "store_device_shared_some_dup": "Shared {created} cycle(s); {dup} were already in the store."
+    "store_device_shared_some_dup": "Shared {created} cycle(s); {dup} were already in the store.",
+    "store_device_downloaded_phases": "{p} program(s), {c} recording(s), {ph} phase map(s) added"
   },
   "trend": {
     "down": "Trending down",

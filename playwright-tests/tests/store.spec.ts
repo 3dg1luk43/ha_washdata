@@ -218,6 +218,7 @@ const SHAREABLE = {
     { id: 'gcyc-2', profile_name: 'Cotton 40°C', start_time: '2026-05-02T08:15:00+00:00', duration: 3660, source: 'recorder' },
     { id: 'gcyc-3', profile_name: 'Eco 60°C', start_time: '2026-07-08T09:00:00+00:00', duration: 5700, source: 'recorder' },
   ],
+  phase_programs: ['Cotton 40°C'],  // only Cotton 40°C has a local phase map
 };
 
 test('Profiles tab shows "Share this device" when online + connected + declared', async ({ page }) => {
@@ -248,6 +249,27 @@ test('share-device tree enumerates all reference cycles and uploads the selectio
   const items = calls[0].items as Array<{ local_cycle_id: string; program: string }>;
   expect(items).toHaveLength(3);
   expect(items.every((i) => i.local_cycle_id && i.program)).toBe(true);
+  // The program with a local phase map bundles its phases by default.
+  expect(calls[0].include_phases).toEqual(['Cotton 40°C']);
+});
+
+test('phase-map toggle shows only for programs with phases and can be opted out', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    ...storeHandlers(),
+    'ha_washdata/get_shareable_cycles': SHAREABLE,
+    'ha_washdata/store_upload_device': { ok: true, cycle_ids: ['a', 'b', 'c'], created: 3, duplicates: 0, errors: [] },
+  });
+  await clickTab(page, 'profiles');
+  await page.locator('[data-action="store-share-device"]').click();
+  // Exactly one phase toggle (Cotton 40°C); Eco 60°C has no phase map.
+  const phaseToggles = page.locator('[data-maction="sd-toggle-phases"]');
+  await expect(phaseToggles).toHaveCount(1, { timeout: 8_000 });
+  // Opt out, then share -> include_phases must be empty.
+  await phaseToggles.first().click();
+  await page.locator('[data-maction="store-share-device-ok"]').click();
+  const calls = await assertWsCalled(page, 'ha_washdata/store_upload_device');
+  expect(calls[0].include_phases).toEqual([]);
 });
 
 test('share-device reports cycles already in the store as duplicates', async ({ page }) => {

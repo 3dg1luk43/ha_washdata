@@ -176,10 +176,11 @@ check('modal: store-share-device (tree)', () => {
     { id: 'g1', start_time: new Date().toISOString(), duration: 3600, profile_name: 'Cotton 60', source: 'recorder' },
     { id: 'g2', start_time: new Date().toISOString(), duration: 1800, profile_name: 'Eco 40', source: 'recorder' },
   ];
-  el._modal = { type: 'store-share-device', selected: new Set(['g1']) };
+  el._sharePhasePrograms = ['Cotton 60'];
+  el._modal = { type: 'store-share-device', selected: new Set(['g1']), includePhases: new Set(['Cotton 60']) };
   return el._htmlModal();
 });
-check('modal: store-share-device (empty)', () => { el._shareableCycles = []; el._modal = { type: 'store-share-device', selected: new Set() }; return el._htmlModal(); });
+check('modal: store-share-device (empty)', () => { el._shareableCycles = []; el._sharePhasePrograms = []; el._modal = { type: 'store-share-device', selected: new Set(), includePhases: new Set() }; return el._htmlModal(); });
 el._modal = null;
 
 console.log(failures ? `\nSMOKE FAILED (${failures})` : '\nSMOKE OK');
