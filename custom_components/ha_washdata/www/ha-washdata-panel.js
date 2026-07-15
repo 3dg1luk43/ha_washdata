@@ -1576,6 +1576,7 @@ class HaWashdataPanel extends HTMLElement {
     this._devices = [];
     this._cycles = [];
     this._refCycles = [];  // imported store recordings (shown alongside real cycles)
+    this._shareableCycles = [];  // get_shareable_cycles result for the share-device tree
     this._selectMode = false;
     this._cycleSel = new Set();
     this._profiles = [];
@@ -4372,24 +4373,14 @@ class HaWashdataPanel extends HTMLElement {
     return !!((this._opts.store_brand || '').trim() && (this._opts.store_model || '').trim());
   }
 
-  // A cycle worth sharing as a reference template: hand-flagged golden (ML review)
-  // or a manual recording. Works even when ML Lab is off (recordings carry
-  // meta.source='recorder'), which is the ML-independent golden signal.
-  _isGoldenCycle(c) {
-    const m = (this._mlById || {})[c && c.id];
-    if (m && m.ml_review && m.ml_review.golden) return true;
-    const meta = (c && c.meta) || {};
-    return meta.source === 'recorder';
-  }
-
-  // Group this device's shareable real cycles (golden/recorded, labelled) by
-  // program, most-recent-first. Imported reference cycles are excluded (you do not
-  // re-share what you downloaded). Returns [{program, cycles:[...]}] sorted by name.
+  // Group the device's shareable reference cycles (from get_shareable_cycles: all
+  // recorded/golden cycles, every page, imported excluded) by program, sorted by
+  // name. Returns [{program, cycles:[...]}].
   _shareableByProgram() {
     const byProg = new Map();
-    for (const c of (this._cycles || [])) {
+    for (const c of (this._shareableCycles || [])) {
       const prog = (c.profile_name || '').trim();
-      if (!prog || !this._isGoldenCycle(c)) continue;
+      if (!prog) continue;
       if (!byProg.has(prog)) byProg.set(prog, []);
       byProg.get(prog).push(c);
     }
@@ -7204,10 +7195,9 @@ class HaWashdataPanel extends HTMLElement {
         const rows = g.cycles.map(c => {
           const when = c.start_time ? _fmtDate(c.start_time) : '';
           const dur = c.duration != null ? _fmtDuration(c.duration) : '';
-          const star = this._isGoldenCycle(c) ? ' ⭐' : '';
           return `<label class="wd-sd-cyc">
             <input type="checkbox" data-maction="sd-toggle-cyc" data-cid="${_esc(c.id)}" ${sel.has(c.id) ? 'checked' : ''} ${busy ? 'disabled' : ''}>
-            <span class="wd-sd-cyc-meta">${_esc(when)} · ${_esc(dur)}${star}</span>
+            <span class="wd-sd-cyc-meta">${_esc(when)} · ${_esc(dur)} ⭐</span>
           </label>`;
         }).join('');
         return `<div class="wd-sd-group">
@@ -8987,14 +8977,15 @@ class HaWashdataPanel extends HTMLElement {
       this._loadShareProfiles();
 
     } else if (a === 'store-share-device') {
-      // Open the device-bundle share tree. Ensure cycles are loaded (the Profiles
-      // tab may not have fetched them) + the ML index (for golden detection), then
-      // default-check every shareable (golden/recorded) cycle.
+      // Open the device-bundle share tree. Fetch the FULL shareable set (all
+      // recorded/golden reference cycles, every page) and default-check them all.
       this._modal = { type: 'store-share-device', selected: new Set(), loading: true };
       this._render();
       (async () => {
-        if (!(this._cycles || []).length) { try { await this._fetchCycles(eid); } catch (_) {} }
-        try { await this._loadMlIndex(eid); } catch (_) {}
+        try {
+          const r = await this._ws({ type: `${_DOMAIN}/get_shareable_cycles`, entry_id: eid });
+          this._shareableCycles = (r && r.items) || [];
+        } catch (_) { this._shareableCycles = []; }
         if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'store-share-device') return;
         const sel = new Set();
         this._shareableByProgram().forEach(g => g.cycles.forEach(c => sel.add(c.id)));
@@ -9571,9 +9562,9 @@ class HaWashdataPanel extends HTMLElement {
       }
       if (action === 'store-share-device-ok') {
         // Build the {local_cycle_id, program} items from the model selection,
-        // resolving each cycle's program from the loaded cycle list.
+        // resolving each cycle's program from the fetched shareable list.
         const progById = new Map();
-        (this._cycles || []).forEach(c => progById.set(c.id, (c.profile_name || '').trim()));
+        (this._shareableCycles || []).forEach(c => progById.set(c.id, (c.profile_name || '').trim()));
         const items = Array.from(m.selected)
           .map(cid => ({ local_cycle_id: cid, program: progById.get(cid) || '' }))
           .filter(it => it.program);
@@ -9589,6 +9580,8 @@ class HaWashdataPanel extends HTMLElement {
             }
             const n = (r && r.cycle_ids && r.cycle_ids.length) || 0;
             const failed = (r && r.errors && r.errors.length) || 0;
+            const dup = (r && r.duplicates) || 0;
+            const created = (r && r.created != null) ? r.created : n;
             if (!n) {
               // Nothing uploaded: surface the first error and keep the modal for retry.
               const why = (r && r.errors && r.errors[0]) || (r && r.detail) || 'upload_failed';
@@ -9597,7 +9590,9 @@ class HaWashdataPanel extends HTMLElement {
             }
             this._modal = null;
             if (failed) this._showToast(this._t('toast.store_device_shared_partial', {n, failed}, `Shared ${n} cycle(s); ${failed} could not be uploaded.`), 'info');
-            else this._showToast(this._t('toast.store_device_shared', {n}, `Shared ${n} cycle(s) to the community store - pending review.`));
+            else if (dup && !created) this._showToast(this._t('toast.store_device_shared_all_dup', {n: dup}, `All ${dup} cycle(s) were already in the community store.`), 'info');
+            else if (dup) this._showToast(this._t('toast.store_device_shared_some_dup', {created, dup}, `Shared ${created} cycle(s); ${dup} were already in the store.`));
+            else this._showToast(this._t('toast.store_device_shared', {n: created}, `Shared ${created} cycle(s) to the community store - pending review.`));
           } catch (e) { this._showToast(this._t('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
         });
         return;

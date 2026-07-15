@@ -172,15 +172,14 @@ check('modal: compare-cycles (html + draw)', () => {
   const h = el._htmlModal(); el._drawCompareCanvas(); return h;
 });
 check('modal: store-share-device (tree)', () => {
-  el._mlById = { g1: { ml_review: { golden: true } } };
-  el._cycles = [
-    { id: 'g1', start_time: new Date().toISOString(), duration: 3600, profile_name: 'Cotton 60', meta: { source: 'recorder' } },
-    { id: 'p1', start_time: new Date().toISOString(), duration: 1800, profile_name: 'Eco 40', meta: null },
+  el._shareableCycles = [
+    { id: 'g1', start_time: new Date().toISOString(), duration: 3600, profile_name: 'Cotton 60', source: 'recorder' },
+    { id: 'g2', start_time: new Date().toISOString(), duration: 1800, profile_name: 'Eco 40', source: 'recorder' },
   ];
   el._modal = { type: 'store-share-device', selected: new Set(['g1']) };
   return el._htmlModal();
 });
-check('modal: store-share-device (empty)', () => { el._cycles = []; el._modal = { type: 'store-share-device', selected: new Set() }; return el._htmlModal(); });
+check('modal: store-share-device (empty)', () => { el._shareableCycles = []; el._modal = { type: 'store-share-device', selected: new Set() }; return el._htmlModal(); });
 el._modal = null;
 
 console.log(failures ? `\nSMOKE FAILED (${failures})` : '\nSMOKE OK');

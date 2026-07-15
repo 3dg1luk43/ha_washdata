@@ -209,51 +209,66 @@ test('gear "Show contributor names" toggle persists via store_set_prefs', async 
 
 // ── Device-bundle sharing (Stage 1) ─────────────────────────────────────────
 
-// A device whose loaded cycles include a recorded (golden) cycle labelled with a
-// program - the share-device tree only offers golden/recorded reference cycles.
-const GOLDEN_CYCLES = {
-  cycles: [
-    { id: 'gcyc-1', profile_name: 'Cotton 40°C', status: 'completed', duration: 3600, start_time: '2026-07-10T08:15:00+00:00', meta: { source: 'recorder' } },
-    { id: 'cyc-plain', profile_name: 'Eco 60°C', status: 'completed', duration: 5700, start_time: '2026-07-09T09:00:00+00:00', meta: null },
+// get_shareable_cycles returns the device's recorded/golden reference cycles
+// (the backend already filters + enumerates every page; imported are excluded).
+// Two programs, one with two recordings.
+const SHAREABLE = {
+  items: [
+    { id: 'gcyc-1', profile_name: 'Cotton 40°C', start_time: '2026-07-10T08:15:00+00:00', duration: 3600, source: 'recorder' },
+    { id: 'gcyc-2', profile_name: 'Cotton 40°C', start_time: '2026-05-02T08:15:00+00:00', duration: 3660, source: 'recorder' },
+    { id: 'gcyc-3', profile_name: 'Eco 60°C', start_time: '2026-07-08T09:00:00+00:00', duration: 5700, source: 'recorder' },
   ],
-  total: 2,
-  has_more: false,
 };
 
 test('Profiles tab shows "Share this device" when online + connected + declared', async ({ page }) => {
   await page.goto('/');
-  await bootPanel(page, { ...storeHandlers(), 'ha_washdata/get_device_cycles': GOLDEN_CYCLES });
+  await bootPanel(page, storeHandlers());
   await clickTab(page, 'profiles');
   await expect(page.locator('[data-action="store-share-device"]')).toBeVisible({ timeout: 8_000 });
 });
 
-test('share-device tree lists only golden/recorded cycles and uploads the selection', async ({ page }) => {
+test('share-device tree enumerates all reference cycles and uploads the selection', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, {
     ...storeHandlers(),
-    'ha_washdata/get_device_cycles': GOLDEN_CYCLES,
-    'ha_washdata/store_upload_device': { ok: true, cycle_ids: ['sc-1'], errors: [] },
+    'ha_washdata/get_shareable_cycles': SHAREABLE,
+    'ha_washdata/store_upload_device': { ok: true, cycle_ids: ['a', 'b', 'c'], created: 3, duplicates: 0, errors: [] },
   });
   await clickTab(page, 'profiles');
   await page.locator('[data-action="store-share-device"]').click();
-  // Tree renders one group (only the recorded Cotton 40°C cycle qualifies; the
-  // plain Eco 60°C cycle is not a reference cycle and is excluded).
+  // Two programs grouped; all three reference cycles listed (not just page 1).
   const groups = page.locator('.wd-sd-group');
-  await expect(groups).toHaveCount(1, { timeout: 8_000 });
-  await expect(page.locator('.wd-sd-prof-name')).toHaveText('Cotton 40°C');
-  await expect(page.locator('.wd-sd-cyc')).toHaveCount(1);
-  // The golden cycle is checked by default, so Share is enabled.
+  await expect(groups).toHaveCount(2, { timeout: 8_000 });
+  await expect(page.locator('.wd-sd-cyc')).toHaveCount(3);
+  // All checked by default -> Share enabled -> uploads every selected cycle.
   const shareBtn = page.locator('[data-maction="store-share-device-ok"]');
   await expect(shareBtn).toBeEnabled();
   await shareBtn.click();
   const calls = await assertWsCalled(page, 'ha_washdata/store_upload_device');
-  expect(calls[0].items).toEqual([{ local_cycle_id: 'gcyc-1', program: 'Cotton 40°C' }]);
+  const items = calls[0].items as Array<{ local_cycle_id: string; program: string }>;
+  expect(items).toHaveLength(3);
+  expect(items.every((i) => i.local_cycle_id && i.program)).toBe(true);
+});
+
+test('share-device reports cycles already in the store as duplicates', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    ...storeHandlers(),
+    'ha_washdata/get_shareable_cycles': SHAREABLE,
+    // Every selected cycle's trace was already uploaded -> all duplicates, none new.
+    'ha_washdata/store_upload_device': { ok: true, cycle_ids: ['a', 'b', 'c'], created: 0, duplicates: 3, errors: [] },
+  });
+  await clickTab(page, 'profiles');
+  await page.locator('[data-action="store-share-device"]').click();
+  await page.locator('[data-maction="store-share-device-ok"]').click();
+  await assertWsCalled(page, 'ha_washdata/store_upload_device');
+  // Neutral info toast (not a green "shared N" success).
+  await expect(page.locator('.wd-toast-info')).toBeVisible({ timeout: 5_000 });
 });
 
 test('share-device shows an empty state when there are no shareable cycles', async ({ page }) => {
   await page.goto('/');
-  // Default cycles fixture has no recorded/golden cycles.
-  await bootPanel(page, storeHandlers());
+  await bootPanel(page, { ...storeHandlers(), 'ha_washdata/get_shareable_cycles': { items: [] } });
   await clickTab(page, 'profiles');
   await page.locator('[data-action="store-share-device"]').click();
   await expect(page.locator('.wd-sd-group')).toHaveCount(0, { timeout: 8_000 });
@@ -295,9 +310,9 @@ test('partial device share reports how many uploaded and closes the tree', async
   await page.goto('/');
   await bootPanel(page, {
     ...storeHandlers(),
-    'ha_washdata/get_device_cycles': GOLDEN_CYCLES,
-    // One cycle uploaded, one failed -> panel must report partial success, not "failed".
-    'ha_washdata/store_upload_device': { ok: false, cycle_ids: ['sc-1'], errors: ['quota'] },
+    'ha_washdata/get_shareable_cycles': SHAREABLE,
+    // Some cycles uploaded, one failed -> panel must report partial success, not "failed".
+    'ha_washdata/store_upload_device': { ok: false, cycle_ids: ['a', 'b'], created: 2, duplicates: 0, errors: ['quota'] },
   });
   await clickTab(page, 'profiles');
   await page.locator('[data-action="store-share-device"]').click();
