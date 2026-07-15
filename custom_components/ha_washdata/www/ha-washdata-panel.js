@@ -2390,6 +2390,11 @@ class HaWashdataPanel extends HTMLElement {
         try { await this._ws({ type: `${_DOMAIN}/delete_cycle`, entry_id: eid, cycle_id: item.rec.id }); }
         catch (_) { failed.push(item); }
       }
+      // The server rebuilt affected envelopes on delete; refresh the profile list
+      // so the card power-signature curve reflects the removed cycle(s).
+      if (failed.length < removed.length && this._isActiveEntry(eid)) {
+        try { await this._fetchProfiles(eid); } catch (_) {}
+      }
       return failed;
     };
     const token = this._registerUndo({ eid, restore, commit });
@@ -3795,15 +3800,21 @@ class HaWashdataPanel extends HTMLElement {
     }
     const warmupThreshold = (this._constants && this._constants.PROFILE_MIN_WARMUP_CYCLES) || 5;
     const cycleCount = (h && h.cycle_count) || 0;
-    const isWarmup = cycleCount < warmupThreshold;
+    // Imported profiles are trusted downloaded templates: exempt from warm-up (they
+    // match immediately), shown with an "Imported" badge instead of "Still learning".
+    const isWarmup = cycleCount < warmupThreshold && !p.is_imported;
     const warmupBadge = isWarmup
       ? `<span class="wd-badge" title="${_esc(this._t('msg.warmup_detail', {needed: warmupThreshold}, `This profile needs ${warmupThreshold} labelled cycles before auto-matching begins. Every confirmed cycle helps it learn.`))}" style="background:var(--info-color,#2196f3);color:#fff;padding:2px 6px;border-radius:4px;font-size:.75em">${this._t('msg.warmup_badge', {done: cycleCount, needed: warmupThreshold}, `Still learning (${cycleCount}/${warmupThreshold} cycles)`)}</span>`
       : '';
-    const badges = [healthBadge, trendBadge, warmupBadge].filter(Boolean).join(' ');
-    // D2: mini duration sparkline (needs ≥3 recent cycles). The canvas is painted
-    // after render by _drawProfileSparklines.
-    const spark = this._profileRecentDurations(p.name).length >= 3
-      ? `<canvas class="wd-prof-spark" data-spark-prof="${_esc(p.name)}" width="64" height="20" aria-label="${_esc(this._t('lbl.sparkline', { name: p.name }, 'Recent cycle-duration trend'))}"></canvas>`
+    const importedBadge = p.is_imported
+      ? `<span class="wd-badge" title="${_esc(this._t('badge.imported_tip', {}, 'Imported from the community store. Used for matching only, not counted in stats.'))}" style="background:var(--info-color,#2196f3);color:#fff;padding:2px 6px;border-radius:4px;font-size:.75em">📥 ${this._t('status.imported', {}, 'Imported')}</span>`
+      : '';
+    const badges = [healthBadge, trendBadge, warmupBadge, importedBadge].filter(Boolean).join(' ');
+    // Mini power-signature curve: the profile's real average power shape (from its
+    // envelope), so the card thumbnail matches the actual cycle. Painted after
+    // render by _drawProfileSparklines. Needs ≥3 envelope points.
+    const spark = (Array.isArray(p.signature_curve) && p.signature_curve.length >= 3)
+      ? `<canvas class="wd-prof-spark" data-spark-prof="${_esc(p.name)}" width="64" height="20" aria-label="${_esc(this._t('lbl.sparkline', { name: p.name }, 'Average power curve'))}"></canvas>`
       : '';
     return `
       <button class="wd-profile-card" type="button" data-action="open-profile" data-pname="${_esc(p.name)}">
@@ -3812,17 +3823,6 @@ class HaWashdataPanel extends HTMLElement {
       </button>`;
   }
 
-  // D2: most-recent (≤10) cycle durations for a profile, oldest→newest (so the
-  // sparkline reads left-to-right with the newest point on the right).
-  _profileRecentDurations(name) {
-    const out = [];
-    for (const c of (this._cycles || [])) {
-      const nm = c.profile_name || c.matched_profile;
-      if (nm !== name || c.duration == null) continue;
-      out.push({ t: c.start_time ? new Date(c.start_time).getTime() : 0, d: c.duration });
-    }
-    return out.sort((a, b) => a.t - b.t).slice(-10).map(x => x.d);
-  }
 
   // D2: paint every profile-card sparkline after a render.
   _drawProfileSparklines() {
@@ -3830,30 +3830,26 @@ class HaWashdataPanel extends HTMLElement {
     if (!sr) return;
     const canvases = sr.querySelectorAll('canvas[data-spark-prof]');
     if (!canvases.length) return;
-    const secColor = (getComputedStyle(this).getPropertyValue('--secondary-text-color') || '#888').trim() || '#888';
+    const primary = (getComputedStyle(this).getPropertyValue('--primary-color') || '#03a9f4').trim() || '#03a9f4';
+    const byName = {};
+    for (const p of (this._profiles || [])) byName[p.name] = p;
     canvases.forEach(cv => {
       const name = cv.dataset.sparkProf;
-      const durs = this._profileRecentDurations(name);
-      if (durs.length < 3) return;
+      const curve = (byName[name] && byName[name].signature_curve) || [];
+      if (!Array.isArray(curve) || curve.length < 3) return;
       const dpr = window.devicePixelRatio || 1;
       const rect = cv.getBoundingClientRect();
       const w = cv.width = Math.max(1, Math.round((rect.width || 64) * dpr));
       const h = cv.height = Math.max(1, Math.round((rect.height || 20) * dpr));
       const ctx = cv.getContext('2d');
       ctx.clearRect(0, 0, w, h);
-      const min = Math.min(...durs), max = Math.max(...durs), span = (max - min) || 1;
-      const pad = 2 * dpr;
-      const trend = (this._profileTrends || {})[name];
-      const dir = trend ? trend.duration_trend : 'stable';
-      const color = dir === 'up' ? '#ff9800' : dir === 'down' ? '#2196f3' : secColor;
-      const X = i => pad + (durs.length === 1 ? 0 : (i / (durs.length - 1)) * (w - 2 * pad));
-      const Y = v => h - pad - ((v - min) / span) * (h - 2 * pad);
+      const max = Math.max(...curve, 1), pad = 2 * dpr;
+      const X = i => pad + (curve.length === 1 ? 0 : (i / (curve.length - 1)) * (w - 2 * pad));
+      const Y = v => h - pad - (Math.max(0, v) / max) * (h - 2 * pad);
+      // Filled area + line, matching the appliance's power signature.
       ctx.beginPath();
-      durs.forEach((v, i) => { const x = X(i), y = Y(v); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
-      ctx.strokeStyle = color; ctx.lineWidth = 1.5 * dpr; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
-      // last-point dot
-      const lx = X(durs.length - 1), ly = Y(durs[durs.length - 1]);
-      ctx.beginPath(); ctx.arc(lx, ly, 2 * dpr, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
+      curve.forEach((v, i) => { const x = X(i), y = Y(v); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+      ctx.strokeStyle = primary; ctx.lineWidth = 1.5 * dpr; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
     });
   }
 
@@ -4271,15 +4267,14 @@ class HaWashdataPanel extends HTMLElement {
     const match = brands.find(b => String(b.brand || '').toLowerCase() === val.toLowerCase());
     const tag = this._statusTag(match);
     const loading = this._catalog.brands === null ? ` <span class="wd-info" style="font-size:.85em">${this._t('msg.loading', {}, 'Loading…')}</span>` : '';
-    return `<div class="wd-field"><label>${_esc(label)} ${tag}${loading}</label>
+    return `<div class="wd-field"><label>${_esc(label)} ${doc ? _tip(doc) : ''}${tag}${loading}</label>
       <div class="wd-combo-row">
         <div class="wd-combo">
           <input type="text" id="wd-store-brand" class="wd-combo-inp" data-opt="${key}" data-ftype="text" value="${_esc(val)}" placeholder="${ph}" autocomplete="off" spellcheck="false">
           <div class="wd-combo-drop" hidden></div>
         </div>
         <button type="button" class="wd-addbtn" data-action="store-add-brand" title="${_esc(this._t('tip.add_brand', {}, 'Brand not listed? Add it to the community catalog'))}" aria-label="${_esc(this._t('tip.add_brand', {}, 'Add brand'))}">+</button>
-      </div>
-      <div class="wd-field-hint">${_esc(doc)}</div></div>`;
+      </div></div>`;
   }
 
   _renderModelPicker(key, o, val, label, doc, ph) {
@@ -4313,10 +4308,10 @@ class HaWashdataPanel extends HTMLElement {
         actions = `<span class="wd-info" style="font-size:.85em">${this._t('msg.connect_to_confirm', {}, 'Connect in the settings gear to confirm or rate.')}</span>`;
       }
       extra = `<div class="wd-store-picker-detail">${bits.join(' · ')}<div class="wd-store-picker-actions">${actions}</div></div>`;
-    } else if (val) {
-      extra = `<div class="wd-field-hint">${this._t('msg.model_not_found', {}, "Not in the catalog yet.")} <button type="button" class="wd-linkbtn" data-action="store-add-appliance">${this._t('link.add_appliance', {}, 'Add your appliance')}</button></div>`;
     }
-    return `<div class="wd-field"><label>${_esc(label)} ${tag}${loading}</label>
+    // The + button already covers "not in the catalog", and the approved-only
+    // toggle is intentionally gone: pending entries are shown with a tag.
+    return `<div class="wd-field"><label>${_esc(label)} ${doc ? _tip(doc) : ''}${tag}${loading}</label>
       <div class="wd-combo-row">
         <div class="wd-combo">
           <input type="text" id="wd-store-model" class="wd-combo-inp" data-opt="${key}" data-ftype="text" value="${_esc(val)}" placeholder="${ph}" autocomplete="off" spellcheck="false">
@@ -4324,8 +4319,6 @@ class HaWashdataPanel extends HTMLElement {
         </div>
         <button type="button" class="wd-addbtn" data-action="store-add-appliance" title="${_esc(this._t('tip.add_appliance', {}, 'Model not listed? Add your appliance to the community catalog'))}" aria-label="${_esc(this._t('tip.add_appliance', {}, 'Add appliance'))}">+</button>
       </div>
-      <label class="wd-check-row" style="font-size:.85em;margin-top:4px"><input type="checkbox" data-action="store-approved-filter" ${this._catalog.approvedOnly ? 'checked' : ''}> ${this._t('lbl.approved_only', {}, 'Approved only')}</label>
-      <div class="wd-field-hint">${_esc(doc)}</div>
       ${extra}</div>`;
   }
 
@@ -8722,11 +8715,6 @@ class HaWashdataPanel extends HTMLElement {
           this._showToast(this._t('toast.store_disconnected', {}, 'Disconnected from the community store'));
         } catch (e) { this._showToast(this._t('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
       });
-
-    } else if (a === 'store-approved-filter') {
-      this._catalog.approvedOnly = !!btn.checked;
-      this._catalog.brands = undefined; this._catalog.devices = undefined; this._catalog.forBrand = null;
-      this._render();
 
     } else if (a === 'store-add-appliance') {
       const origin = this._constants.storeWebOrigin;

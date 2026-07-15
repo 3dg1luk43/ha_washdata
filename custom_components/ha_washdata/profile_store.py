@@ -4630,6 +4630,25 @@ class ProfileStore:
                 avg_cost = None
                 total_cost = None
 
+            # Downsampled power signature (the profile's real average power curve),
+            # for the profile-card mini graph. Small (<=40 pts), power values only.
+            sig_curve: list[float] = []
+            try:
+                avg_pts = (envelope or {}).get("avg") or []
+                ps = [
+                    float(p[1]) for p in avg_pts
+                    if isinstance(p, (list, tuple)) and len(p) >= 2
+                ]
+                if not ps:  # legacy flat [p, ...] envelopes
+                    ps = [float(x) for x in avg_pts if isinstance(x, (int, float))]
+                if len(ps) > 40:
+                    step = (len(ps) - 1) / 39.0
+                    sig_curve = [ps[round(i * step)] for i in range(40)]
+                else:
+                    sig_curve = ps
+            except Exception:  # noqa: BLE001
+                sig_curve = []
+
             profiles.append(
                 {
                     "name": name,
@@ -4643,6 +4662,8 @@ class ProfileStore:
                     "duration_std_dev": duration_std_dev,
                     "avg_cost": avg_cost,
                     "total_cost": total_cost,
+                    "signature_curve": sig_curve,
+                    "is_imported": self.profile_has_reference_cycles(name),
                 }
             )
         return sorted(profiles, key=lambda p: profile_sort_key(p.get("name", "")))
