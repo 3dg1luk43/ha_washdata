@@ -373,3 +373,29 @@ async def test_upload_reference_cycle_shape():
     # points encoded as an array of {o,w} maps (Firestore forbids nested arrays)
     pts = fields["trace"]["mapValue"]["fields"]["points"]["arrayValue"]["values"]
     assert len(pts) == 3
+
+
+@pytest.mark.asyncio
+async def test_upload_device_bundle_uploads_each_cycle():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))  # token exchange (cached after)
+    c = _client(s)
+    device_meta = {"applianceType": "washer", "brand": "Bosch", "model": "WAT28660"}
+    items = [
+        {"program": "Cotton 40", "points": [[0, 2000], [60, 100], [120, 0]],
+         "stats": {"duration": 3600, "energy_wh": 800, "peak_w": 2000}, "qc": 2, "sampleIntervalSec": 60},
+        {"program": "Eco 50", "points": [[0, 1500], [60, 50], [120, 0]],
+         "stats": {"duration": 5400, "energy_wh": 600, "peak_w": 1500}, "qc": 2, "sampleIntervalSec": 60},
+    ]
+    res = await c.upload_device_bundle("refresh", "uid1", "Alice", device_meta, items)
+    assert res["ok"] is True
+    assert len(res["cycle_ids"]) == 2 and all(res["cycle_ids"])
+    commits = [w for (url, kw) in s.posts if url.endswith(":commit")
+               for w in kw.get("json", {}).get("writes", [])]
+    cyc = [w for w in commits if "/cycles/" in w.get("update", {}).get("name", "")]
+    prof_ids = {w["update"]["name"].rsplit("/", 1)[-1] for w in commits
+                if "/profiles/" in w.get("update", {}).get("name", "")}
+    assert len(cyc) == 2  # one reference cycle created per item
+    d = sc.device_id("washer", "Bosch", "WAT28660")
+    assert sc.profile_id(d, "Cotton 40") in prof_ids
+    assert sc.profile_id(d, "Eco 50") in prof_ids

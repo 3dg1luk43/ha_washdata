@@ -505,6 +505,41 @@ class StoreClient:
         # increment that a rule denied is what left the browse counters stuck at 0.
         return cyc_id
 
+    async def upload_device_bundle(
+        self, refresh_token: str, uid: str, uploader_name: str | None,
+        device_meta: dict[str, Any], items: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        """Upload a whole-device bundle: one item per selected reference cycle.
+
+        ``device_meta`` = ``{applianceType, brand, model}``; each ``item`` =
+        ``{program, points, stats, qc, sampleIntervalSec}``. Reuses
+        ``upload_reference_cycle`` per item, which idempotently upserts the
+        brand/device/profile chain (existing ancestors are treated as success) and
+        creates the cycle. Returns ``{ok, cycle_ids, errors}``. Never raises.
+        """
+        cycle_ids: list[str] = []
+        errors: list[str] = []
+        token = await self.ensure_id_token(refresh_token)
+        if not token:
+            return {"ok": False, "cycle_ids": [], "errors": [self._last_error or "not_connected"]}
+        for it in items or []:
+            meta = {
+                "applianceType": device_meta.get("applianceType"),
+                "brand": device_meta.get("brand"),
+                "model": device_meta.get("model"),
+                "program": it.get("program"),
+                "sampleIntervalSec": it.get("sampleIntervalSec"),
+            }
+            cid = await self.upload_reference_cycle(
+                refresh_token, uid, uploader_name, meta,
+                it.get("points") or [], it.get("stats") or {}, int(it.get("qc") or 3),
+            )
+            if cid:
+                cycle_ids.append(cid)
+            else:
+                errors.append(self._last_error or f"failed to upload {it.get('program')!r}")
+        return {"ok": not errors, "cycle_ids": cycle_ids, "errors": errors}
+
     # ── community catalog: confirm + rate a device (authed) ──────────────────────
 
     async def _commit(self, id_token: str, writes: list[dict[str, Any]]) -> tuple[bool, str]:
