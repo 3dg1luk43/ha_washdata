@@ -882,6 +882,47 @@ async def ws_store_upload_cycle(hass, connection, msg):
     _send_result(connection, msg["id"], "store_upload_cycle", res)
 
 
+@websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/store_upload_device", vol.Required("entry_id"): str,
+    vol.Required("items"): [dict],
+})
+@websocket_api.async_response
+async def ws_store_upload_device(hass, connection, msg):
+    """Share a whole-device bundle. Brand/model/type come from this device's options;
+    ``items`` = the panel's tree selection ``[{local_cycle_id, program}]``."""
+    from .const import CONF_STORE_BRAND, CONF_STORE_MODEL, CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE
+    ctx = _store_ctx(hass, msg["entry_id"])
+    if ctx is None:
+        _send_result(connection, msg["id"], "store_upload_device", {"disabled": True})
+        return
+    manager, opts = ctx
+    brand = str(opts.get(CONF_STORE_BRAND) or "").strip()
+    model = str(opts.get(CONF_STORE_MODEL) or "").strip()
+    if not brand or not model:
+        _send_result(connection, msg["id"], "store_upload_device", {"error": "no_appliance_declared"})
+        return
+    appliance = opts.get(CONF_DEVICE_TYPE, manager.config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
+    res = await manager.store_bridge.share_device(brand, model, appliance, msg["items"])
+    _send_result(connection, msg["id"], "store_upload_device", res)
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/store_download_device", vol.Required("entry_id"): str,
+    vol.Required("device_id"): str,
+})
+@websocket_api.async_response
+async def ws_store_download_device(hass, connection, msg):
+    """Adopt a whole-device bundle into this device's reference cycles (merge/upsert)."""
+    ctx = _store_ctx(hass, msg["entry_id"])
+    if ctx is None:
+        _send_result(connection, msg["id"], "store_download_device", {"disabled": True})
+        return
+    manager, _ = ctx
+    res = await manager.store_bridge.download_device(msg["device_id"])
+    manager.notify_update()
+    _send_result(connection, msg["id"], "store_download_device", res)
+
+
 def async_register_commands(hass: HomeAssistant) -> None:
     """Register all WebSocket commands for the WashData panel.
 
@@ -951,6 +992,8 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_store_status, ws_store_connect, ws_store_disconnect,
         ws_store_search_devices, ws_store_get_profiles, ws_store_get_cycles,
         ws_store_import_cycle, ws_store_upload_cycle,
+        # Device-bundle sharing (Stage 1): upload a whole device + adopt one
+        ws_store_upload_device, ws_store_download_device,
         # Community catalog: brand list, device quality, confirm/rate, global online toggle
         ws_store_list_brands, ws_store_get_device_quality, ws_store_get_device_profiles,
         ws_store_confirm_device, ws_store_rate_device, ws_store_set_online,

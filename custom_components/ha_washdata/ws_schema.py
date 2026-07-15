@@ -559,6 +559,24 @@ class StoreDeviceProfilesResponse(TypedDict, total=False):
     disabled: bool
 
 
+class StoreUploadDeviceResponse(TypedDict, total=False):
+    """Result of sharing a whole-device bundle (multi-profile, multi-cycle)."""
+    ok: bool
+    cycle_ids: list
+    errors: list
+    error: str
+    detail: str | None
+    disabled: bool
+
+
+class StoreDownloadDeviceResponse(TypedDict, total=False):
+    """Result of adopting a whole-device bundle into local reference cycles."""
+    profiles_adopted: int
+    cycles_imported: int
+    error: str
+    disabled: bool
+
+
 WS_RESPONSE_TYPES: dict[str, type] = {
     "get_devices": GetDevicesResponse,
     "get_device_cycles": GetDeviceCyclesResponse,
@@ -654,6 +672,8 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "store_set_online": StoreOnlineResponse,
     "store_set_prefs": StorePrefsResponse,
     "store_get_device_profiles": StoreDeviceProfilesResponse,
+    "store_upload_device": StoreUploadDeviceResponse,
+    "store_download_device": StoreDownloadDeviceResponse,
 }
 
 #: Commands whose response splats an upstream summary dict and therefore has an
@@ -942,6 +962,8 @@ WS_COMMANDS: dict[str, dict] = {
     "store_upload_cycle": {"params": [
         _entry(), _p("local_cycle_id", "str"), _p("program", "str"), _p("description", "str|null", False),
     ]},
+    "store_upload_device": {"params": [_entry(), _p("items", "list")]},
+    "store_download_device": {"params": [_entry(), _p("device_id", "str")]},
 }
 
 

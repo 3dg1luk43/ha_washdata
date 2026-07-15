@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**94 commands.**
+**96 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -102,6 +102,8 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `store_set_prefs` | entry_id, prefs | `StorePrefsResponse` |
 | `store_import_cycle` | entry_id, cycle_id, target_profile?, new_profile_name? | `StoreImportResponse` |
 | `store_upload_cycle` | entry_id, local_cycle_id, program, description? | `StoreUploadResponse` |
+| `store_upload_device` | entry_id, items | `StoreUploadDeviceResponse` |
+| `store_download_device` | entry_id, device_id | `StoreDownloadDeviceResponse` |
 
 ## `ha_washdata/get_devices`
 
@@ -1709,4 +1711,42 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `store_cycle_id` | no | str |
 | `error` | no | str |
 | `detail` | no | str \| null |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_upload_device`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `items` | yes | list |
+
+**Response** (`StoreUploadDeviceResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `ok` | no | bool |
+| `cycle_ids` | no | list |
+| `errors` | no | list |
+| `error` | no | str |
+| `detail` | no | str \| null |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_download_device`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `device_id` | yes | str |
+
+**Response** (`StoreDownloadDeviceResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `profiles_adopted` | no | number |
+| `cycles_imported` | no | number |
+| `error` | no | str |
 | `disabled` | no | bool |

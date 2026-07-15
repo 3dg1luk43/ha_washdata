@@ -370,6 +370,13 @@ export interface StoreDeviceProfilesResponse {
   disabled?: boolean;
 }
 
+export interface StoreDownloadDeviceResponse {
+  profiles_adopted?: number;
+  cycles_imported?: number;
+  error?: string;
+  disabled?: boolean;
+}
+
 export interface StoreImportResponse {
   profile?: string;
   cycle_id?: string;
@@ -418,6 +425,15 @@ export interface StoreStatusResponse {
   name?: string | null;
   brand?: string | null;
   model?: string | null;
+  disabled?: boolean;
+}
+
+export interface StoreUploadDeviceResponse {
+  ok?: boolean;
+  cycle_ids?: unknown[];
+  errors?: unknown[];
+  error?: string;
+  detail?: string | null;
   disabled?: boolean;
 }
 
@@ -948,6 +964,16 @@ export interface StoreUploadCycleRequest {
   description?: string | null;
 }
 
+export interface StoreUploadDeviceRequest {
+  entry_id: string;
+  items: unknown[];
+}
+
+export interface StoreDownloadDeviceRequest {
+  entry_id: string;
+  device_id: string;
+}
+
 // ── Command maps ───────────────────────────────────────────────────────────
 
 export interface WashDataWsRequests {
@@ -1045,6 +1071,8 @@ export interface WashDataWsRequests {
   "ha_washdata/store_set_prefs": StoreSetPrefsRequest;
   "ha_washdata/store_import_cycle": StoreImportCycleRequest;
   "ha_washdata/store_upload_cycle": StoreUploadCycleRequest;
+  "ha_washdata/store_upload_device": StoreUploadDeviceRequest;
+  "ha_washdata/store_download_device": StoreDownloadDeviceRequest;
 }
 
 export interface WashDataWsResponses {
@@ -1142,4 +1170,6 @@ export interface WashDataWsResponses {
   "ha_washdata/store_set_online": StoreOnlineResponse;
   "ha_washdata/store_set_prefs": StorePrefsResponse;
   "ha_washdata/store_get_device_profiles": StoreDeviceProfilesResponse;
+  "ha_washdata/store_upload_device": StoreUploadDeviceResponse;
+  "ha_washdata/store_download_device": StoreDownloadDeviceResponse;
 }
