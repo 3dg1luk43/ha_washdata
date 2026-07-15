@@ -10,9 +10,10 @@ Never raises into the event loop - failures return ``None``/empty and are logged
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import json
 import logging
 import re
-import secrets
 import time
 import unicodedata
 from typing import Any
@@ -115,6 +116,21 @@ def unpack_points(points: Any) -> list[list[float]]:
         elif isinstance(p, (list, tuple)) and len(p) >= 2:
             out.append([p[0], p[1]])
     return out
+
+
+def trace_hash(profile_id_: str, pts: list[list[float]]) -> str:
+    """Deterministic content hash for a reference-cycle trace, scoped to its profile.
+
+    Used as the store cycle's document id so an identical trace re-uploaded to the
+    same program collides on the same id and is refused server-side (the create
+    precondition), making share idempotent. Two DIFFERENT recordings of the same
+    program hash differently, so genuine multi-instance contributions are preserved.
+    Offsets are rounded to whole seconds and watts to 1 decimal so trivial float
+    formatting differences do not change the hash.
+    """
+    norm = [[int(round(float(p[0]))), round(float(p[1]), 1)] for p in pts if len(p) >= 2]
+    payload = f"{profile_id_}|{json.dumps(norm, separators=(',', ':'))}"
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 class StoreClient:
@@ -412,9 +428,20 @@ class StoreClient:
     # ── write: upload a reference cycle (authed) ────────────────────────────────
 
     async def _commit_create(self, id_token: str, path: str, fields: dict[str, Any], server_ts_field: str = "createdAt") -> bool:
+        """Create-if-missing. Returns True on create OR if it already exists; False on
+        real failure. Thin wrapper over :meth:`_commit_create_ex` (drops the created flag).
+        """
+        ok, _created = await self._commit_create_ex(id_token, path, fields, server_ts_field)
+        return ok
+
+    async def _commit_create_ex(
+        self, id_token: str, path: str, fields: dict[str, Any], server_ts_field: str = "createdAt"
+    ) -> tuple[bool, bool]:
         """Create a document if it does not already exist, stamping ``server_ts_field``
         with the server request time (so the store rules' ``createdAt == request.time``
-        holds). Returns True on create or if it already exists; False on real failure.
+        holds). Returns ``(ok, created)``: ``created=False`` means the doc already
+        existed (a benign no-op that supports idempotent re-upload); ``ok=False`` is a
+        real failure.
         """
         write: dict[str, Any] = {
             "update": {
@@ -434,34 +461,43 @@ class StoreClient:
                 timeout=15,
             ) as resp:
                 if resp.status == 200:
-                    return True
+                    return (True, True)
                 body = await resp.text()
-                # Precondition failure => the doc already exists; that is fine.
+                # Precondition failure => the doc already exists; that is fine (no-op).
                 if resp.status == 409 or "ALREADY_EXISTS" in body or "FAILED_PRECONDITION" in body:
-                    return True
+                    return (True, False)
                 _LOGGER.warning("Store create %s failed: HTTP %s %s", path, resp.status, body[:300])
                 coll = path.split("/", 1)[0]
                 if resp.status == 403 or "PERMISSION_DENIED" in body:
                     self._last_error = f"{coll} rejected by the store rules (HTTP 403) - the community catalog rules may be out of date"
                 else:
                     self._last_error = f"{coll} create failed (HTTP {resp.status})"
-                return False
+                return (False, False)
         except Exception as exc:  # noqa: BLE001
             _LOGGER.warning("Store create %s error: %s", path, exc)
             self._last_error = f"{path.split('/', 1)[0]} create error: {exc}"
-            return False
+            return (False, False)
 
     async def upload_reference_cycle(
         self, refresh_token: str, uid: str, uploader_name: str | None, meta: dict[str, Any],
-        points: list[list[float]], stats: dict[str, Any], qc: int,
-    ) -> str | None:
+        points: list[list[float]], stats: dict[str, Any], qc: int, return_status: bool = False,
+    ) -> str | None | dict[str, Any]:
         """Ensure brand/device/profile docs exist, then create the reference cycle.
-        Returns the new cycle id, or None on failure. All writes are authed.
+
+        The cycle's document id is a deterministic content hash of its trace (scoped
+        to the profile), so re-uploading an identical trace collides on the same id
+        and the create is refused server-side -- share is idempotent. Returns the
+        cycle id (on create OR already-exists), or None on real failure. With
+        ``return_status=True`` returns ``{"id": str|None, "created": bool}`` where
+        ``created=False`` means the trace was already in the store. All writes authed.
         """
+        def _out(cid: str | None, created: bool) -> str | None | dict[str, Any]:
+            return {"id": cid, "created": created} if return_status else cid
+
         self._last_error = None
         token = await self.ensure_id_token(refresh_token)
         if not token:
-            return None
+            return _out(None, False)
 
         appliance = meta["applianceType"]
         brand = meta["brand"]
@@ -471,7 +507,7 @@ class StoreClient:
         if appliance not in _APPLIANCE_TYPES:
             _LOGGER.warning("Store upload: invalid applianceType %r", appliance)
             self._last_error = f"unsupported appliance type {appliance!r} (only washer/dryer/dishwasher/washer_dryer)"
-            return None
+            return _out(None, False)
 
         b_id = brand_id(brand)
         d_id = device_id(appliance, brand, model)
@@ -495,26 +531,30 @@ class StoreClient:
             "status": "pending", "createdByUid": uid,
         })
         if not ok:
-            return None
+            return _out(None, False)
 
-        # 4: the reference cycle (client-generated id so it is a create).
-        cyc_id = secrets.token_hex(10)
+        # 4: the reference cycle. Its id is a deterministic content hash of the trace
+        # (scoped to the profile), so an identical re-upload collides on the same id
+        # and the create precondition refuses it -> idempotent share (no duplicate).
+        cyc_id = trace_hash(p_id, pts)
         cycle_fields = {
             "profileId": p_id, "deviceId": d_id, "brand_lc": b_id,
             "program_lc": program.lower(), "applianceType": appliance,
             "uploaderUid": uid, "uploaderName": uploader_name,
             "status": "pending", "rejectionReason": None,
+            "traceHash": cyc_id,
             # Firestore rejects nested arrays -> store points as {o,w} maps.
             "trace": {"points": pack_points(pts), "sampleIntervalSec": interval},
             "stats": stats if isinstance(stats, dict) else {},
             "cycleSchemaVersion": 1, "downloads": 0, "commentCount": 0, "confirmCount": 0, "qc": qc_code,
         }
-        if not await self._commit_create(token, f"cycles/{cyc_id}", cycle_fields):
-            return None
+        cyc_ok, created = await self._commit_create_ex(token, f"cycles/{cyc_id}", cycle_fields)
+        if not cyc_ok:
+            return _out(None, False)
         # NB: cycle/profile counts are CALCULATED on the store (COUNT aggregation over
         # approved+pending), not maintained as a running total here -- a best-effort
         # increment that a rule denied is what left the browse counters stuck at 0.
-        return cyc_id
+        return _out(cyc_id, created)
 
     async def upload_device_bundle(
         self, refresh_token: str, uid: str, uploader_name: str | None,
@@ -526,13 +566,19 @@ class StoreClient:
         ``{program, points, stats, qc, sampleIntervalSec}``. Reuses
         ``upload_reference_cycle`` per item, which idempotently upserts the
         brand/device/profile chain (existing ancestors are treated as success) and
-        creates the cycle. Returns ``{ok, cycle_ids, errors}``. Never raises.
+        creates the cycle. Returns ``{ok, cycle_ids, created, duplicates, errors}``:
+        ``created`` counts newly-uploaded cycles, ``duplicates`` counts ones whose
+        identical trace was already in the store (both still land in ``cycle_ids``).
+        Never raises.
         """
         cycle_ids: list[str] = []
         errors: list[str] = []
+        created = 0
+        duplicates = 0
         token = await self.ensure_id_token(refresh_token)
         if not token:
-            return {"ok": False, "cycle_ids": [], "errors": [self._last_error or "not_connected"]}
+            return {"ok": False, "cycle_ids": [], "created": 0, "duplicates": 0,
+                    "errors": [self._last_error or "not_connected"]}
         for it in items or []:
             meta = {
                 "applianceType": device_meta.get("applianceType"),
@@ -541,15 +587,22 @@ class StoreClient:
                 "program": it.get("program"),
                 "sampleIntervalSec": it.get("sampleIntervalSec"),
             }
-            cid = await self.upload_reference_cycle(
+            res = await self.upload_reference_cycle(
                 refresh_token, uid, uploader_name, meta,
                 it.get("points") or [], it.get("stats") or {}, int(it.get("qc") or 3),
+                return_status=True,
             )
+            cid = res.get("id") if isinstance(res, dict) else res
             if cid:
                 cycle_ids.append(cid)
+                if isinstance(res, dict) and res.get("created"):
+                    created += 1
+                else:
+                    duplicates += 1
             else:
                 errors.append(self._last_error or f"failed to upload {it.get('program')!r}")
-        return {"ok": not errors, "cycle_ids": cycle_ids, "errors": errors}
+        return {"ok": not errors, "cycle_ids": cycle_ids,
+                "created": created, "duplicates": duplicates, "errors": errors}
 
     # ── community catalog: confirm + rate a device (authed) ──────────────────────
 

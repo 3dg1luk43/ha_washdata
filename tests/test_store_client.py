@@ -431,3 +431,60 @@ async def test_get_device_bundle_groups_cycles_under_profiles():
     assert prof["program"] == "Cotton 40"
     assert len(prof["cycles"]) == 1
     assert prof["cycles"][0]["importable"] == [[0, 5.0], [60, 0.0]]
+
+
+@pytest.mark.asyncio
+async def test_upload_reference_cycle_is_idempotent():
+    """Same trace -> same deterministic id; a re-upload is refused server-side and
+    reported as created=False (not a new doc)."""
+    pts = [[0, 2000], [60, 100], [120, 0]]
+    meta = {"applianceType": "washer", "brand": "Bosch", "model": "WAT28660",
+            "program": "Cotton 40", "sampleIntervalSec": 60}
+    expected = sc.trace_hash(sc.profile_id(sc.device_id("washer", "Bosch", "WAT28660"), "Cotton 40"), pts)
+
+    # First upload: token + 4 creates (brand/device/profile/cycle) all 200.
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))
+    for _ in range(4):
+        s.queue_post(_Resp(200, {}))
+    c = _client(s)
+    r1 = await c.upload_reference_cycle("refresh", "u1", "Alice", meta, pts, {}, 2, return_status=True)
+    assert r1 == {"id": expected, "created": True}
+    cyc = _cycle_write(s)
+    assert cyc["update"]["name"].endswith(f"/cycles/{expected}")
+    assert cyc["update"]["fields"]["traceHash"] == {"stringValue": expected}
+
+    # Second upload of the SAME trace: cycle create returns ALREADY_EXISTS -> no new doc.
+    s2 = _Session()
+    s2.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))
+    for _ in range(3):
+        s2.queue_post(_Resp(200, {}))  # brand/device/profile upserts
+    s2.queue_post(_Resp(409, {"error": {"status": "ALREADY_EXISTS"}}))  # cycle already there
+    c2 = _client(s2)
+    r2 = await c2.upload_reference_cycle("refresh", "u1", "Alice", meta, pts, {}, 2, return_status=True)
+    assert r2 == {"id": expected, "created": False}
+    # Bare-id default return is preserved for the single-cycle share path.
+    assert isinstance(await c2.upload_reference_cycle("refresh", "u1", "Alice", meta, pts, {}, 2), str)
+
+
+@pytest.mark.asyncio
+async def test_upload_device_bundle_counts_new_vs_duplicate():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))  # token
+    # item 1: brand/device/profile + cycle all created (200)
+    for _ in range(4):
+        s.queue_post(_Resp(200, {}))
+    # item 2: brand/device/profile upserts (200) then the cycle already exists (409)
+    for _ in range(3):
+        s.queue_post(_Resp(200, {}))
+    s.queue_post(_Resp(409, {"error": {"status": "ALREADY_EXISTS"}}))
+    c = _client(s)
+    device_meta = {"applianceType": "washer", "brand": "Bosch", "model": "WAT28660"}
+    items = [
+        {"program": "Cotton 40", "points": [[0, 2000], [60, 100], [120, 0]], "stats": {}, "qc": 2, "sampleIntervalSec": 60},
+        {"program": "Eco 50", "points": [[0, 1500], [60, 50], [120, 0]], "stats": {}, "qc": 2, "sampleIntervalSec": 60},
+    ]
+    res = await c.upload_device_bundle("refresh", "u1", "Alice", device_meta, items)
+    assert res["ok"] is True
+    assert res["created"] == 1 and res["duplicates"] == 1
+    assert len(res["cycle_ids"]) == 2 and res["errors"] == []
