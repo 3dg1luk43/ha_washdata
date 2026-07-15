@@ -1319,6 +1319,37 @@ class ProfileStore:
             return cast(list[CycleDict], raw)
         return []
 
+    def get_shareable_cycles(self) -> list[dict[str, Any]]:
+        """Recorded/golden reference cycles eligible to share to the community store.
+
+        A cycle qualifies when it is hand-flagged golden (``ml_review.golden``) or a
+        manual recording (``meta.source == "recorder"``) and carries a program label.
+        Imported ``reference_cycles`` are intentionally excluded (you do not re-share
+        what you downloaded). Returns light summaries (no traces), most-recent-first;
+        the whole set (not a page) so the panel's share tree can offer all of them.
+        Never raises.
+        """
+        out: list[dict[str, Any]] = []
+        for c in self.get_past_cycles():
+            if not isinstance(c, dict):
+                continue
+            program = str(c.get("profile_name") or "").strip()
+            if not program:
+                continue
+            review = c.get("ml_review") if isinstance(c.get("ml_review"), dict) else {}
+            meta = c.get("meta") if isinstance(c.get("meta"), dict) else {}
+            if not (review.get("golden") or meta.get("source") == "recorder"):
+                continue
+            out.append({
+                "id": c.get("id"),
+                "profile_name": program,
+                "start_time": c.get("start_time"),
+                "duration": c.get("duration"),
+                "source": meta.get("source"),
+            })
+        out.sort(key=lambda r: r.get("start_time") or "", reverse=True)
+        return out
+
     async def add_reference_cycle(
         self, profile_name: str, points: list[list[float]], meta: dict[str, Any]
     ) -> str:

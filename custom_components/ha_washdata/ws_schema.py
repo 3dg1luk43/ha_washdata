@@ -577,6 +577,11 @@ class StoreDownloadDeviceResponse(TypedDict, total=False):
     disabled: bool
 
 
+class GetShareableCyclesResponse(TypedDict, total=False):
+    """Recorded/golden reference cycles eligible to share (share-device tree source)."""
+    items: list
+
+
 WS_RESPONSE_TYPES: dict[str, type] = {
     "get_devices": GetDevicesResponse,
     "get_device_cycles": GetDeviceCyclesResponse,
@@ -674,6 +679,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "store_get_device_profiles": StoreDeviceProfilesResponse,
     "store_upload_device": StoreUploadDeviceResponse,
     "store_download_device": StoreDownloadDeviceResponse,
+    "get_shareable_cycles": GetShareableCyclesResponse,
 }
 
 #: Commands whose response splats an upstream summary dict and therefore has an
@@ -964,6 +970,7 @@ WS_COMMANDS: dict[str, dict] = {
     ]},
     "store_upload_device": {"params": [_entry(), _p("items", "list")]},
     "store_download_device": {"params": [_entry(), _p("device_id", "str")]},
+    "get_shareable_cycles": {"params": [_entry()]},
 }
 
 

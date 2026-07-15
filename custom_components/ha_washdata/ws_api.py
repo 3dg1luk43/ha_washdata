@@ -923,6 +923,20 @@ async def ws_store_download_device(hass, connection, msg):
     _send_result(connection, msg["id"], "store_download_device", res)
 
 
+@websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/get_shareable_cycles", vol.Required("entry_id"): str,
+})
+@websocket_api.async_response
+async def ws_get_shareable_cycles(hass, connection, msg):
+    """All recorded/golden reference cycles eligible to share (the share-device tree)."""
+    manager = _get_manager(hass, msg["entry_id"])
+    if manager is None:
+        _err_not_found(connection, msg["id"], msg["entry_id"])
+        return
+    items = manager.profile_store.get_shareable_cycles()
+    _send_result(connection, msg["id"], "get_shareable_cycles", {"items": items})
+
+
 def async_register_commands(hass: HomeAssistant) -> None:
     """Register all WebSocket commands for the WashData panel.
 
@@ -994,6 +1008,8 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_store_import_cycle, ws_store_upload_cycle,
         # Device-bundle sharing (Stage 1): upload a whole device + adopt one
         ws_store_upload_device, ws_store_download_device,
+        # Local reference cycles eligible to share (share-device tree source)
+        ws_get_shareable_cycles,
         # Community catalog: brand list, device quality, confirm/rate, global online toggle
         ws_store_list_brands, ws_store_get_device_quality, ws_store_get_device_profiles,
         ws_store_confirm_device, ws_store_rate_device, ws_store_set_online,

@@ -263,6 +263,10 @@ export interface GetSettingsChangelogResponse {
   changelog: Record<string, unknown>[];
 }
 
+export interface GetShareableCyclesResponse {
+  items?: unknown[];
+}
+
 export interface GetSuggestionsResponse {
   suggestions: Record<string, unknown>[];
 }
@@ -974,6 +978,10 @@ export interface StoreDownloadDeviceRequest {
   device_id: string;
 }
 
+export interface GetShareableCyclesRequest {
+  entry_id: string;
+}
+
 // ── Command maps ───────────────────────────────────────────────────────────
 
 export interface WashDataWsRequests {
@@ -1073,6 +1081,7 @@ export interface WashDataWsRequests {
   "ha_washdata/store_upload_cycle": StoreUploadCycleRequest;
   "ha_washdata/store_upload_device": StoreUploadDeviceRequest;
   "ha_washdata/store_download_device": StoreDownloadDeviceRequest;
+  "ha_washdata/get_shareable_cycles": GetShareableCyclesRequest;
 }
 
 export interface WashDataWsResponses {
@@ -1172,4 +1181,5 @@ export interface WashDataWsResponses {
   "ha_washdata/store_get_device_profiles": StoreDeviceProfilesResponse;
   "ha_washdata/store_upload_device": StoreUploadDeviceResponse;
   "ha_washdata/store_download_device": StoreDownloadDeviceResponse;
+  "ha_washdata/get_shareable_cycles": GetShareableCyclesResponse;
 }

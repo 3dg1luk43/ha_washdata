@@ -266,3 +266,33 @@ async def test_delete_reference_cycle_keeps_profile_with_other_cycles(store):
     assert await store.delete_cycle(cid) is True
     assert "Cotton 40" in store.get_profiles()
     assert store.get_reference_cycles() == []
+
+
+# --- Addendum A: shareable-cycle enumeration -------------------------------
+
+@pytest.mark.asyncio
+async def test_get_shareable_cycles_only_golden(store):
+    # A recorder-golden cycle, a hand-flagged golden cycle, a plain cycle, and an
+    # imported reference cycle. Only the two golden PAST cycles are shareable.
+    await store.async_add_cycle({
+        "start_time": BASE.isoformat(), "duration": 3600, "status": "completed",
+        "profile_name": "Cotton 40", "power_data": _iso_trace(2000),
+        "meta": {"source": "recorder"},
+    })
+    await store.async_add_cycle({
+        "start_time": (BASE + timedelta(days=1)).isoformat(), "duration": 3600, "status": "completed",
+        "profile_name": "Eco 60", "power_data": _iso_trace(1800),
+        "ml_review": {"golden": True},
+    })
+    await store.async_add_cycle({
+        "start_time": (BASE + timedelta(days=2)).isoformat(), "duration": 2700, "status": "completed",
+        "profile_name": "Quick 30", "power_data": _iso_trace(1500),
+    })
+    await store.add_reference_cycle("Imported", _offset_trace(1200), {"store_cycle_id": "z1"})
+
+    items = store.get_shareable_cycles()
+    progs = {i["profile_name"] for i in items}
+    assert progs == {"Cotton 40", "Eco 60"}          # plain + imported excluded
+    assert all(i.get("id") for i in items)
+    # Most-recent-first ordering.
+    assert items[0]["profile_name"] == "Eco 60"

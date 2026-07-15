@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**96 commands.**
+**97 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -104,6 +104,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `store_upload_cycle` | entry_id, local_cycle_id, program, description? | `StoreUploadResponse` |
 | `store_upload_device` | entry_id, items | `StoreUploadDeviceResponse` |
 | `store_download_device` | entry_id, device_id | `StoreDownloadDeviceResponse` |
+| `get_shareable_cycles` | entry_id | `GetShareableCyclesResponse` |
 
 ## `ha_washdata/get_devices`
 
@@ -1750,3 +1751,17 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `cycles_imported` | no | number |
 | `error` | no | str |
 | `disabled` | no | bool |
+
+## `ha_washdata/get_shareable_cycles`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+
+**Response** (`GetShareableCyclesResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `items` | no | list |
