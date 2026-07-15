@@ -525,11 +525,24 @@ class StoreClient:
             "createdByUid": uid, "createdByName": None, "manualUrl": None,
             "favoriteCount": 0, "confirmCount": 0,
         })
-        ok = ok and await self._commit_create(token, f"profiles/{p_id}", {
+        profile_fields: dict[str, Any] = {
             "deviceId": d_id, "applianceType": appliance, "program": program,
             "program_lc": program.lower(), "description": meta.get("description", ""),
             "status": "pending", "createdByUid": uid,
-        })
+        }
+        # Stage 2: bundle the program's phase map onto the profile doc when the caller
+        # supplies it. The profile create rule allows extra fields, so this needs no
+        # rules change; phases attach at create time (updating an existing profile's
+        # phases is an owner action -> Stage 5).
+        phases = meta.get("phases")
+        if isinstance(phases, list) and phases:
+            profile_fields["phases"] = [
+                {"name": str(p.get("name", "")), "start": float(p.get("start", 0)), "end": float(p.get("end", 0))}
+                for p in phases if isinstance(p, dict)
+            ]
+            profile_fields["phaseSourceCycleId"] = str(meta.get("phaseSourceCycleId") or "")
+            profile_fields["phasesSchemaVersion"] = 1
+        ok = ok and await self._commit_create(token, f"profiles/{p_id}", profile_fields)
         if not ok:
             return _out(None, False)
 

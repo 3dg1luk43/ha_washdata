@@ -488,3 +488,40 @@ async def test_upload_device_bundle_counts_new_vs_duplicate():
     assert res["ok"] is True
     assert res["created"] == 1 and res["duplicates"] == 1
     assert len(res["cycle_ids"]) == 2 and res["errors"] == []
+
+
+@pytest.mark.asyncio
+async def test_upload_reference_cycle_attaches_phases():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))
+    for _ in range(4):  # brand/device/profile/cycle
+        s.queue_post(_Resp(200, {}))
+    c = _client(s)
+    meta = {"applianceType": "washer", "brand": "Bosch", "model": "WAT28660",
+            "program": "Cotton 40", "sampleIntervalSec": 60,
+            "phases": [{"name": "Wash", "start": 0, "end": 600}, {"name": "Spin", "start": 600, "end": 900}],
+            "phaseSourceCycleId": "abc123"}
+    await c.upload_reference_cycle("refresh", "u1", "Alice", meta, [[0, 2000], [60, 100]], {}, 2)
+    # Locate the profile-create commit.
+    prof = next(w for (url, kw) in s.posts if url.endswith(":commit")
+                for w in kw["json"]["writes"] if "/profiles/" in w.get("update", {}).get("name", ""))
+    fields = prof["update"]["fields"]
+    assert fields["phasesSchemaVersion"] == {"integerValue": "1"}
+    assert fields["phaseSourceCycleId"] == {"stringValue": "abc123"}
+    vals = fields["phases"]["arrayValue"]["values"]
+    assert len(vals) == 2
+    assert vals[0]["mapValue"]["fields"]["name"] == {"stringValue": "Wash"}
+
+
+@pytest.mark.asyncio
+async def test_upload_reference_cycle_no_phases_when_absent():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))
+    for _ in range(4):
+        s.queue_post(_Resp(200, {}))
+    c = _client(s)
+    meta = {"applianceType": "washer", "brand": "Bosch", "model": "WAT28660", "program": "Cotton 40"}
+    await c.upload_reference_cycle("refresh", "u1", "Alice", meta, [[0, 2000], [60, 100]], {}, 2)
+    prof = next(w for (url, kw) in s.posts if url.endswith(":commit")
+                for w in kw["json"]["writes"] if "/profiles/" in w.get("update", {}).get("name", ""))
+    assert "phases" not in prof["update"]["fields"]
