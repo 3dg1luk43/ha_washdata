@@ -335,6 +335,17 @@ class StoreClient:
         items = await self.get_profiles(dev_id, include_pending=True)
         return {"device_id": dev_id, "items": items}
 
+    async def get_device_bundle(self, dev_id: str, include_pending: bool = True) -> dict[str, Any]:
+        """Whole-device package for download: the device's profiles, each with its
+        reference cycles nested under ``cycles`` (hydrated + rating-summarised by
+        get_cycles). One profiles query + one cycles query per profile. Never raises.
+        """
+        profiles = await self.get_profiles(dev_id, include_pending=include_pending)
+        for p in profiles:
+            pid = p.get("id")
+            p["cycles"] = await self.get_cycles(pid, include_pending=include_pending) if pid else []
+        return {"device_id": dev_id, "profiles": profiles}
+
     async def get_cycles(
         self, prof_id: str, include_pending: bool = True, page_size: int = 50
     ) -> list[dict[str, Any]]:

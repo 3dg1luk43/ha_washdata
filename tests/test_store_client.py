@@ -399,3 +399,35 @@ async def test_upload_device_bundle_uploads_each_cycle():
     d = sc.device_id("washer", "Bosch", "WAT28660")
     assert sc.profile_id(d, "Cotton 40") in prof_ids
     assert sc.profile_id(d, "Eco 50") in prof_ids
+
+
+@pytest.mark.asyncio
+async def test_get_device_bundle_groups_cycles_under_profiles():
+    s = _Session()
+    d = sc.device_id("washer", "Bosch", "WAT28660")
+    p = sc.profile_id(d, "Cotton 40")
+    # 1: profiles query for the device
+    s.queue_post(_Resp(200, [
+        {"document": {"name": f".../profiles/{p}", "fields": {
+            "program": {"stringValue": "Cotton 40"}, "deviceId": {"stringValue": d},
+            "status": {"stringValue": "approved"}}}},
+    ]))
+    # 2: cycles query for that profile (one v1 cycle -> hydrates importable pairs)
+    s.queue_post(_Resp(200, [
+        {"document": {"name": ".../cycles/c1", "fields": {
+            "status": {"stringValue": "approved"}, "cycleSchemaVersion": {"integerValue": "1"},
+            "trace": {"mapValue": {"fields": {"points": {"arrayValue": {"values": [
+                {"mapValue": {"fields": {"o": {"integerValue": "0"}, "w": {"doubleValue": 5.0}}}},
+                {"mapValue": {"fields": {"o": {"integerValue": "60"}, "w": {"doubleValue": 0.0}}}},
+            ]}}}}}}}},
+    ]))
+    # 3: rating aggregation for c1
+    s.queue_post(_Resp(200, [{"result": {"aggregateFields": {"cnt": {"integerValue": "0"}}}}]))
+    c = _client(s)
+    bundle = await c.get_device_bundle(d)
+    assert bundle["device_id"] == d
+    assert len(bundle["profiles"]) == 1
+    prof = bundle["profiles"][0]
+    assert prof["program"] == "Cotton 40"
+    assert len(prof["cycles"]) == 1
+    assert prof["cycles"][0]["importable"] == [[0, 5.0], [60, 0.0]]
