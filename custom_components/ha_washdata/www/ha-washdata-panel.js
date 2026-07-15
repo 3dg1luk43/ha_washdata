@@ -810,6 +810,7 @@ button.wd-profile-card { display: block; }
 .wd-sd-cyc-meta { color: var(--secondary-text-color); }
 .wd-sd-phase { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-top: 1px solid var(--divider-color); cursor: pointer; font-size: .85em; color: var(--secondary-text-color); }
 .wd-sd-phase:hover { background: var(--card-background-color); }
+.wd-sd-settings { display: flex; align-items: center; gap: 8px; padding: 10px 2px 2px; cursor: pointer; font-size: .9em; }
 .wd-linkbtn { background: none; border: none; padding: 0; color: var(--primary-color); cursor: pointer; font: inherit; text-decoration: underline; }
 .wd-gear-body { margin-top: 12px; }
 .wd-empty { text-align: center; padding: 48px 24px; color: var(--secondary-text-color); }
@@ -1580,6 +1581,7 @@ class HaWashdataPanel extends HTMLElement {
     this._refCycles = [];  // imported store recordings (shown alongside real cycles)
     this._shareableCycles = [];  // get_shareable_cycles result for the share-device tree
     this._sharePhasePrograms = [];  // programs (from get_shareable_cycles) with a local phase map
+    this._dlSettings = false;       // "also adopt settings" toggle on the store device view
     this._selectMode = false;
     this._cycleSel = new Set();
     this._profiles = [];
@@ -6493,6 +6495,7 @@ class HaWashdataPanel extends HTMLElement {
     const dlBusy = this._busy.has('store-download-device');
     const dlHeader = (this._canEdit() && dev && items.length) ? `<div class="wd-card" style="margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <span class="wd-info" style="flex:1;min-width:180px">${this._t('msg.store_download_device_intro', {}, 'Adopt every shared program and its reference cycles onto your device. Your own recorded cycles and stats are not affected.')}</span>
+      <label class="wd-check-row" style="font-size:.85em">${this._t('lbl.adopt_settings', {}, 'Also adopt settings')} ${_tip(this._t('msg.adopt_settings_hint', {}, 'Overwrite this device\'s detection & matching thresholds with the shared ones. Your notifications, entities and energy price are never changed.'))}<input type="checkbox" data-action="store-toggle-dl-settings" ${this._dlSettings ? 'checked' : ''} ${dlBusy ? 'disabled' : ''}></label>
       <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-download-device" data-device-id="${_esc(dev.id)}" ${dlBusy ? 'disabled' : ''}>${dlBusy ? '<span class="wd-spin"></span> ' : '⬇ '}${this._t('btn.download_device', {}, 'Download this setup')}</button>
     </div>` : '';
     return dlHeader + list;
@@ -7223,9 +7226,16 @@ class HaWashdataPanel extends HTMLElement {
     }
     const brand = _esc((this._opts.store_brand || '').trim());
     const model = _esc((this._opts.store_model || '').trim());
+    // Device-level opt-in: bundle this device's recognition/matching settings.
+    const settingsRow = `<label class="wd-sd-settings">
+        <input type="checkbox" data-maction="sd-toggle-settings" ${m.includeSettings ? 'checked' : ''} ${busy ? 'disabled' : ''}>
+        <span>${this._t('lbl.include_settings', {}, 'Include detection & matching settings')}</span>
+        ${_tip(this._t('msg.include_settings_hint', {}, 'Share this device\'s recognition and matching thresholds (not your notifications, entities or energy price). Adopters choose whether to apply them.'))}
+      </label>`;
     return `<h2 id="wd-modal-title">${this._t('modal.store_share_device', {}, 'Share this device')}</h2>
       <p class="wd-info" style="margin-bottom:12px">${this._t('msg.store_share_device_intro', {brand, model}, `Upload ${brand} ${model} with the reference cycles you select. Others with the same appliance can adopt your programs. Entries are reviewed before appearing publicly.`)}</p>
       <div class="wd-sd-tree">${tree}</div>
+      ${groups.length ? settingsRow : ''}
       <div class="wd-modal-actions">
         <button class="wd-btn wd-btn-secondary" data-maction="cancel" ${busy ? 'disabled' : ''}>${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="store-share-device-ok" ${busy || !selCount ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.share_n', {n: selCount}, `Share ${selCount} cycle(s)`)}</button>
@@ -8955,15 +8965,20 @@ class HaWashdataPanel extends HTMLElement {
       this._storeView = 'brands'; this._storeDevice = null; this._storeProfile = null;
       this._tab = 'store'; this._fetchTabData();
 
+    } else if (a === 'store-toggle-dl-settings') {
+      this._dlSettings = !!btn.checked;
+
     } else if (a === 'store-download-device') {
       const did = btn.dataset.deviceId;
       if (!did) return;
+      const withSettings = !!this._dlSettings;
       this._busyRun('store-download-device', async () => {
         try {
-          const r = await this._ws({ type: `${_DOMAIN}/store_download_device`, entry_id: eid, device_id: did });
+          const r = await this._ws({ type: `${_DOMAIN}/store_download_device`, entry_id: eid, device_id: did, include_settings: withSettings });
           if (r && (r.error || r.disabled)) { const why = r.error || 'unavailable'; this._showToast(this._t('toast.store_download_failed', {error: why}, 'Download failed: ' + why), 'error'); return; }
           const p = (r && r.profiles_adopted) || 0, c = (r && r.cycles_imported) || 0;
-          if (!p && !c) {
+          const sa = (r && r.settings_applied) || 0;
+          if (!p && !c && !sa) {
             // Nothing adopted: either already imported, or the fetch came back empty.
             this._showToast(this._t('toast.store_download_nothing', {}, 'Nothing new to download - this setup is already on your device.'), 'info');
             return;
@@ -8971,7 +8986,8 @@ class HaWashdataPanel extends HTMLElement {
           await this._fetchProfiles(eid);
           await this._fetchCycles(eid);
           const ph = (r && r.phases_applied) || 0;
-          if (ph) this._showToast(this._t('toast.store_device_downloaded_phases', {p, c, ph}, `${p} program(s), ${c} recording(s), ${ph} phase map(s) added`));
+          if (sa) this._showToast(this._t('toast.store_device_downloaded_settings', {p, c, ph, s: sa}, `${p} program(s), ${c} recording(s), ${ph} phase map(s), ${sa} setting(s) added`));
+          else if (ph) this._showToast(this._t('toast.store_device_downloaded_phases', {p, c, ph}, `${p} program(s), ${c} recording(s), ${ph} phase map(s) added`));
           else this._showToast(this._t('toast.store_device_downloaded', {p, c}, `${p} program(s), ${c} recording(s) added`));
         } catch (e) { this._showToast(this._t('toast.store_download_failed', {error: e.message || e}, 'Download failed: ' + (e.message || e)), 'error'); }
       });
@@ -8992,7 +9008,7 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'store-share-device') {
       // Open the device-bundle share tree. Fetch the FULL shareable set (all
       // recorded/golden reference cycles, every page) and default-check them all.
-      this._modal = { type: 'store-share-device', selected: new Set(), includePhases: new Set(), loading: true };
+      this._modal = { type: 'store-share-device', selected: new Set(), includePhases: new Set(), includeSettings: false, loading: true };
       this._render();
       (async () => {
         try {
@@ -9584,6 +9600,7 @@ class HaWashdataPanel extends HTMLElement {
         this._render();
         return;
       }
+      if (action === 'sd-toggle-settings') { m.includeSettings = !m.includeSettings; this._render(); return; }
       if (action === 'store-share-device-ok') {
         // Build the {local_cycle_id, program} items from the model selection,
         // resolving each cycle's program from the fetched shareable list.
@@ -9598,7 +9615,7 @@ class HaWashdataPanel extends HTMLElement {
         const includePhases = Array.from(m.includePhases || []).filter(p => selectedProgs.has(p));
         await this._busyRun('store-share-device', async () => {
           try {
-            const r = await this._ws({ type: `${_DOMAIN}/store_upload_device`, entry_id: eid, items, include_phases: includePhases });
+            const r = await this._ws({ type: `${_DOMAIN}/store_upload_device`, entry_id: eid, items, include_phases: includePhases, include_settings: !!m.includeSettings });
             // Pre-flight gate error (not connected / no appliance): keep the modal open.
             if (r && r.error) {
               if (r.error === 'no_appliance_declared') this._showToast(this._t('toast.store_no_appliance', {}, 'Set your appliance brand and model in Settings first.'), 'error');

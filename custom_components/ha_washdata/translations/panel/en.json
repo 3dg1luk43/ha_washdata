@@ -512,7 +512,9 @@
     "rate_quality": "Rate quality",
     "rate_n": "{n} stars",
     "approved_only": "Approved only",
-    "include_phase_map": "Include phase map"
+    "include_phase_map": "Include phase map",
+    "include_settings": "Include detection & matching settings",
+    "adopt_settings": "Also adopt settings"
   },
   "log": {
     "all_levels": "All levels",
@@ -800,7 +802,9 @@
     "store_share_device_intro": "Upload {brand} {model} with the reference cycles you select. Others with the same appliance can adopt your programs. Entries are reviewed before appearing publicly.",
     "share_device_none": "No shareable cycles yet. Mark a recorded or hand-picked cycle as a reference cycle (⭐) in the Cycles tab first.",
     "store_download_device_intro": "Adopt every shared program and its reference cycles onto your device. Your own recorded cycles and stats are not affected.",
-    "onboard_download": "New device? Adopt a ready-made setup (programs, reference cycles and phases) from another WashData user with the same appliance."
+    "onboard_download": "New device? Adopt a ready-made setup (programs, reference cycles and phases) from another WashData user with the same appliance.",
+    "include_settings_hint": "Share this device's recognition and matching thresholds (not your notifications, entities or energy price). Adopters choose whether to apply them.",
+    "adopt_settings_hint": "Overwrite this device's detection & matching thresholds with the shared ones. Your notifications, entities and energy price are never changed."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Sudden drop treated as immediate end",
@@ -1600,7 +1604,8 @@
     "store_download_nothing": "Nothing new to download - this setup is already on your device.",
     "store_device_shared_all_dup": "All {n} cycle(s) were already in the community store.",
     "store_device_shared_some_dup": "Shared {created} cycle(s); {dup} were already in the store.",
-    "store_device_downloaded_phases": "{p} program(s), {c} recording(s), {ph} phase map(s) added"
+    "store_device_downloaded_phases": "{p} program(s), {c} recording(s), {ph} phase map(s) added",
+    "store_device_downloaded_settings": "{p} program(s), {c} recording(s), {ph} phase map(s), {s} setting(s) added"
   },
   "trend": {
     "down": "Trending down",

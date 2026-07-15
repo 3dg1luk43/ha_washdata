@@ -253,6 +253,40 @@ test('share-device tree enumerates all reference cycles and uploads the selectio
   expect(calls[0].include_phases).toEqual(['Cotton 40°C']);
 });
 
+test('share tree can bundle device settings via the include-settings toggle', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    ...storeHandlers(),
+    'ha_washdata/get_shareable_cycles': SHAREABLE,
+    'ha_washdata/store_upload_device': { ok: true, cycle_ids: ['a', 'b', 'c'], created: 3, duplicates: 0, errors: [] },
+  });
+  await clickTab(page, 'profiles');
+  await page.locator('[data-action="store-share-device"]').click();
+  const settingsToggle = page.locator('[data-maction="sd-toggle-settings"]');
+  await expect(settingsToggle).toBeVisible({ timeout: 8_000 });
+  await expect(settingsToggle).not.toBeChecked();  // off by default
+  await settingsToggle.click();
+  await page.locator('[data-maction="store-share-device-ok"]').click();
+  const calls = await assertWsCalled(page, 'ha_washdata/store_upload_device');
+  expect(calls[0].include_settings).toBe(true);
+});
+
+test('device download can adopt settings via the opt-in checkbox', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    ...storeHandlers(),
+    'ha_washdata/store_download_device': { profiles_adopted: 1, cycles_imported: 2, phases_applied: 0, settings_applied: 4 },
+  });
+  await clickTab(page, 'store');
+  await page.locator('[data-action="store-open-device"]').first().click();
+  const adopt = page.locator('[data-action="store-toggle-dl-settings"]');
+  await expect(adopt).toBeVisible({ timeout: 8_000 });
+  await adopt.click();
+  await page.locator('[data-action="store-download-device"]').click();
+  const calls = await assertWsCalled(page, 'ha_washdata/store_download_device');
+  expect(calls[0].include_settings).toBe(true);
+});
+
 test('phase-map toggle shows only for programs with phases and can be opted out', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, {
