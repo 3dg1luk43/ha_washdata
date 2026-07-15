@@ -191,3 +191,81 @@ class StoreBridge:
         if not new_id:
             return {"error": "upload_failed", "detail": self._client.last_error()}
         return {"store_cycle_id": new_id}
+
+    async def share_device(
+        self, brand: str, model: str, appliance_type: str, items: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        """Share a device bundle. ``items`` = ``[{local_cycle_id, program}]`` (the
+        panel's tree selection). Resolves each local cycle's trace + stats and uploads
+        the whole set via ``upload_device_bundle``. Returns ``{ok, cycle_ids, errors}``
+        or ``{error}``.
+        """
+        acct = store_account.get_account(self._hass)
+        if not acct.get("refresh_token"):
+            return {"error": "not_connected"}
+        by_id = {
+            c.get("id"): c
+            for c in (list(self._ps.get_past_cycles()) + list(self._ps.get_reference_cycles()))
+        }
+        bundle_items: list[dict[str, Any]] = []
+        for it in items or []:
+            cid = it.get("local_cycle_id")
+            program = str(it.get("program") or "").strip()
+            if not cid or not program:
+                continue
+            pts = self._ps.get_cycle_power_data(cid)
+            if not pts:
+                continue
+            cyc = by_id.get(cid, {})
+            vals = [float(p[1]) for p in pts]
+            bundle_items.append({
+                "program": program,
+                "points": _downsample([[p[0], p[1]] for p in pts]),
+                "stats": {
+                    "duration": float(cyc.get("duration") or (pts[-1][0] - pts[0][0])),
+                    "energy_wh": float(cyc.get("energy_wh") or 0.0),
+                    "peak_w": max(vals) if vals else 0.0,
+                    "mean_w": (sum(vals) / len(vals)) if vals else 0.0,
+                    "signature": cyc.get("signature") if isinstance(cyc.get("signature"), dict) else {},
+                },
+                "qc": derive_qc(cyc),
+                "sampleIntervalSec": float(cyc.get("sampling_interval") or 0.0),
+            })
+        if not bundle_items:
+            return {"error": "nothing_to_share"}
+        device_meta = {"applianceType": store_appliance_type(appliance_type), "brand": brand, "model": model}
+        res = await self._client.upload_device_bundle(
+            acct["refresh_token"], acct.get("uid", ""), acct.get("name"), device_meta, bundle_items,
+        )
+        if not res.get("ok"):
+            return {"error": "upload_failed", "detail": self._client.last_error(), **res}
+        return res
+
+    async def download_device(self, device_id: str) -> dict[str, Any]:
+        """Adopt a whole-device bundle: for each downloaded profile, import its
+        reference cycles into ``reference_cycles`` (merge/upsert; real past_cycles are
+        never touched). Returns ``{profiles_adopted, cycles_imported}``.
+        """
+        bundle = await self._client.get_device_bundle(device_id)
+        profiles_adopted = 0
+        cycles_imported = 0
+        for prof in bundle.get("profiles", []) or []:
+            program = str(prof.get("program") or prof.get("program_lc") or "").strip()
+            if not program:
+                continue
+            adopted_any = False
+            for cyc in prof.get("cycles", []) or []:
+                pts = cyc.get("importable")
+                if not pts:
+                    continue
+                local_id = await self._ps.add_reference_cycle(program, pts, {
+                    "store_cycle_id": cyc.get("id"),
+                    "store_uploaded_at": cyc.get("createdAt"),
+                    "sampling_interval": (cyc.get("trace") or {}).get("sampleIntervalSec"),
+                })
+                if local_id:
+                    cycles_imported += 1
+                    adopted_any = True
+            if adopted_any:
+                profiles_adopted += 1
+        return {"profiles_adopted": profiles_adopted, "cycles_imported": cycles_imported}

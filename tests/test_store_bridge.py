@@ -50,6 +50,11 @@ class FakeClient:
     async def upload_reference_cycle(self, rt, uid, name, meta, points, stats, qc):
         self.uploaded = {"uid": uid, "name": name, "meta": meta, "points": points, "stats": stats, "qc": qc}
         return "newcycle"
+    async def upload_device_bundle(self, rt, uid, name, device_meta, items):
+        self.uploaded_bundle = {"rt": rt, "uid": uid, "name": name, "device_meta": device_meta, "items": items}
+        return {"ok": True, "cycle_ids": [f"c{i}" for i in range(len(items))], "errors": []}
+    async def get_device_bundle(self, device_id, include_pending=True):
+        return getattr(self, "bundle", {"device_id": device_id, "profiles": []})
 
 
 @pytest.fixture
@@ -212,3 +217,52 @@ async def test_share_cycle_uploads_with_derived_qc(bridge):
     assert up["uid"] == "u1" and up["qc"] == 3  # plain detected golden -> manual
     assert up["meta"]["brand"] == "Bosch" and up["meta"]["program"] == "Cotton 40"
     assert len(up["points"]) >= 2
+
+
+@pytest.mark.asyncio
+async def test_share_device_forwards_items(bridge):
+    br, ps, hass = bridge
+    await br.connect("refresh", "u1", "Alice")  # sets the global account
+    await ps.async_add_cycle({
+        "start_time": BASE.isoformat(), "duration": 3600, "status": "completed",
+        "profile_name": "Cotton 40",
+        "power_data": [[i * 60.0, 1000.0] for i in range(61)],
+    })
+    cid = ps.get_past_cycles()[0]["id"]
+    res = await br.share_device(
+        "Bosch", "WAT28", "washing_machine",
+        [{"local_cycle_id": cid, "program": "Cotton 40"}],
+    )
+    assert res.get("ok") is True
+    up = br._client.uploaded_bundle
+    # HA washing_machine maps to the store's washer type; item carries the program + trace.
+    assert up["device_meta"] == {"applianceType": "washer", "brand": "Bosch", "model": "WAT28"}
+    assert len(up["items"]) == 1
+    assert up["items"][0]["program"] == "Cotton 40" and up["items"][0]["points"]
+
+
+@pytest.mark.asyncio
+async def test_share_device_requires_connection(bridge):
+    br, ps, hass = bridge
+    res = await br.share_device("Bosch", "WAT28", "washer", [{"local_cycle_id": "x", "program": "P"}])
+    assert res == {"error": "not_connected"}
+
+
+@pytest.mark.asyncio
+async def test_download_device_adopts_bundle(bridge):
+    br, ps, hass = bridge
+    br._client.bundle = {"device_id": "d1", "profiles": [
+        {"id": "p1", "program": "Cotton 40", "cycles": [
+            {"id": "c1", "importable": [[0, 2000], [60, 100], [120, 0]], "createdAt": "t",
+             "trace": {"sampleIntervalSec": 60}},
+        ]},
+        {"id": "p2", "program": "Eco 50", "cycles": [
+            {"id": "c2", "importable": [[0, 1500], [60, 50], [120, 0]], "createdAt": "t",
+             "trace": {"sampleIntervalSec": 60}},
+        ]},
+    ]}
+    res = await br.download_device("d1")
+    assert res == {"profiles_adopted": 2, "cycles_imported": 2}
+    refs = ps.get_reference_cycles()
+    assert {r["profile_name"] for r in refs} == {"Cotton 40", "Eco 50"}
+    assert ps.get_past_cycles() == []  # real data untouched
