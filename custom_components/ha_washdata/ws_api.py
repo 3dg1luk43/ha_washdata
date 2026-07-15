@@ -282,19 +282,6 @@ def _cycle_kwh(c: dict[str, Any]) -> float | None:
     return c.get("energy_kwh")
 
 
-class _RankingMatchResult:
-    """Minimal MatchResult-like wrapper around a stored feedback ranking.
-
-    get_match_candidates_summary only reads .ranking and .expected_duration, so
-    this lets us rebuild the candidates table from a pending feedback record
-    without re-running a live match (mirrors the OptionsFlow's _MatchResultLike).
-    """
-
-    def __init__(self, ranking: list[Any], expected_duration: float) -> None:
-        self.ranking = ranking or []
-        self.expected_duration = expected_duration or 0
-
-
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
 def _get_manager(hass: HomeAssistant, entry_id: str) -> Any | None:

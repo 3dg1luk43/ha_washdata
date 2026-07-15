@@ -528,8 +528,6 @@ const _CSS = `
 .wd-ptl-cursor { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--primary-text-color, #111); box-shadow: 0 0 0 1px rgba(255,255,255,.6); }
 .wd-ptl-cur { margin-top: 5px; font-size: .74em; color: var(--secondary-text-color); }
 .wd-cycle-ctrl { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
-.wd-spark-wrap { margin-top: 14px; }
-.wd-spark-wrap canvas { width: 100%; height: 70px; display: block; border-radius: 6px; background: var(--secondary-background-color); }
 .wd-table { width: 100%; border-collapse: collapse; font-size: .875em; }
 .wd-table th {
   text-align: left; padding: 8px 12px;
@@ -6654,32 +6652,6 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   // ── Canvas drawing ──────────────────────────────────────────────────────────
-
-  _drawSparkline() {
-    const canvas = this.shadowRoot && this.shadowRoot.getElementById('wd-spark');
-    if (!canvas || this._powerHistory.length < 2) return;
-    const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = Math.round(rect.width * dpr);
-    canvas.height = Math.round(rect.height * dpr);
-    const ctx = canvas.getContext('2d');
-    const w = canvas.width, h = canvas.height, data = this._powerHistory;
-    const max = Math.max(...data, 10), pad = 6 * dpr;
-    const primary = getComputedStyle(this).getPropertyValue('--primary-color').trim() || '#03a9f4';
-    ctx.clearRect(0, 0, w, h);
-    const plot = () => data.forEach((val, i) => {
-      const x = pad + (i / (data.length - 1)) * (w - 2 * pad);
-      const y = h - pad - ((val / max) * (h - 2 * pad));
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.beginPath(); plot();
-    const grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, primary + '80'); grad.addColorStop(1, primary + '08');
-    ctx.lineTo(w - pad, h - pad); ctx.lineTo(pad, h - pad); ctx.closePath();
-    ctx.fillStyle = grad; ctx.fill();
-    ctx.beginPath(); plot();
-    ctx.strokeStyle = primary; ctx.lineWidth = 2 * dpr; ctx.lineJoin = 'round'; ctx.stroke();
-  }
 
   // Shared multi-series curve renderer. Returns the canvas hit-test map.
   // Supports scroll-to-zoom (viewport stored in this._canvasZoom[canvasId]).

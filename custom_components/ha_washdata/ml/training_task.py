@@ -34,7 +34,6 @@ from ..const import (
     ML_TRAINING_MIN_REGRESSION_ROWS,
     ML_TRAINING_REGRESSION_MARGIN,
 )
-from ..time_utils import power_data_to_offsets
 from . import trainer as T
 
 # Capability -> (embedded module name, target label). Mirrors engine._MODEL_MODULES.
@@ -540,11 +539,6 @@ def _baseline_scores(capability: str, X_test: np.ndarray, columns: list[str]) ->
         )
     except Exception:  # pylint: disable=broad-exception-caught
         return None
-
-
-def _baseline_auc(capability: str, X_test: np.ndarray, y_test: np.ndarray, columns: list[str]) -> float | None:
-    scores = _baseline_scores(capability, X_test, columns)
-    return None if scores is None else T.auc(y_test, scores)
 
 
 def _baseline_threshold(capability: str, default: float) -> float:
