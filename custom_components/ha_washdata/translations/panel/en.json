@@ -1594,7 +1594,9 @@
     "store_device_shared": "Shared {n} cycle(s) to the community store - pending review.",
     "share_device_none_sel": "Select at least one cycle to share",
     "store_device_downloaded": "{p} program(s), {c} recording(s) added",
-    "store_download_failed": "Download failed: {error}"
+    "store_download_failed": "Download failed: {error}",
+    "store_device_shared_partial": "Shared {n} cycle(s); {failed} could not be uploaded.",
+    "store_download_nothing": "Nothing new to download - this setup is already on your device."
   },
   "trend": {
     "down": "Trending down",

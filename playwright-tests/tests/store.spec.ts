@@ -210,7 +210,7 @@ test('gear "Show contributor names" toggle persists via store_set_prefs', async 
 // ── Device-bundle sharing (Stage 1) ─────────────────────────────────────────
 
 // A device whose loaded cycles include a recorded (golden) cycle labelled with a
-// program — the share-device tree only offers golden/recorded reference cycles.
+// program - the share-device tree only offers golden/recorded reference cycles.
 const GOLDEN_CYCLES = {
   cycles: [
     { id: 'gcyc-1', profile_name: 'Cotton 40°C', status: 'completed', duration: 3600, start_time: '2026-07-10T08:15:00+00:00', meta: { source: 'recorder' } },
@@ -289,4 +289,36 @@ test('empty device shows the onboarding banner that jumps to the store', async (
   await expect(onboard).toBeVisible({ timeout: 8_000 });
   await onboard.click();
   await expect(page.locator('button.wd-tab[data-tab="store"].active')).toBeVisible({ timeout: 5_000 });
+});
+
+test('partial device share reports how many uploaded and closes the tree', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    ...storeHandlers(),
+    'ha_washdata/get_device_cycles': GOLDEN_CYCLES,
+    // One cycle uploaded, one failed -> panel must report partial success, not "failed".
+    'ha_washdata/store_upload_device': { ok: false, cycle_ids: ['sc-1'], errors: ['quota'] },
+  });
+  await clickTab(page, 'profiles');
+  await page.locator('[data-action="store-share-device"]').click();
+  await page.locator('[data-maction="store-share-device-ok"]').click();
+  await assertWsCalled(page, 'ha_washdata/store_upload_device');
+  // Tree closed (partial success is still success for the uploaded cycles).
+  await expect(page.locator('.wd-sd-tree')).toHaveCount(0, { timeout: 8_000 });
+});
+
+test('downloading a device with nothing new does not claim success', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    ...storeHandlers(),
+    'ha_washdata/store_download_device': { profiles_adopted: 0, cycles_imported: 0 },
+  });
+  await clickTab(page, 'store');
+  await page.locator('[data-action="store-open-device"]').first().click();
+  const dl = page.locator('[data-action="store-download-device"]');
+  await expect(dl).toBeVisible({ timeout: 8_000 });
+  await dl.click();
+  await assertWsCalled(page, 'ha_washdata/store_download_device');
+  // Neutral info toast, not the green "N added" success message.
+  await expect(page.locator('.wd-toast-info')).toBeVisible({ timeout: 5_000 });
 });

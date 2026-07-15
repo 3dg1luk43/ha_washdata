@@ -8960,10 +8960,15 @@ class HaWashdataPanel extends HTMLElement {
       this._busyRun('store-download-device', async () => {
         try {
           const r = await this._ws({ type: `${_DOMAIN}/store_download_device`, entry_id: eid, device_id: did });
-          if (r && r.error) { this._showToast(this._t('toast.store_download_failed', {error: r.error}, 'Download failed: ' + r.error), 'error'); return; }
+          if (r && (r.error || r.disabled)) { const why = r.error || 'unavailable'; this._showToast(this._t('toast.store_download_failed', {error: why}, 'Download failed: ' + why), 'error'); return; }
+          const p = (r && r.profiles_adopted) || 0, c = (r && r.cycles_imported) || 0;
+          if (!p && !c) {
+            // Nothing adopted: either already imported, or the fetch came back empty.
+            this._showToast(this._t('toast.store_download_nothing', {}, 'Nothing new to download - this setup is already on your device.'), 'info');
+            return;
+          }
           await this._fetchProfiles(eid);
           await this._fetchCycles(eid);
-          const p = (r && r.profiles_adopted) || 0, c = (r && r.cycles_imported) || 0;
           this._showToast(this._t('toast.store_device_downloaded', {p, c}, `${p} program(s), ${c} recording(s) added`));
         } catch (e) { this._showToast(this._t('toast.store_download_failed', {error: e.message || e}, 'Download failed: ' + (e.message || e)), 'error'); }
       });
@@ -9576,14 +9581,23 @@ class HaWashdataPanel extends HTMLElement {
         await this._busyRun('store-share-device', async () => {
           try {
             const r = await this._ws({ type: `${_DOMAIN}/store_upload_device`, entry_id: eid, items });
+            // Pre-flight gate error (not connected / no appliance): keep the modal open.
             if (r && r.error) {
               if (r.error === 'no_appliance_declared') this._showToast(this._t('toast.store_no_appliance', {}, 'Set your appliance brand and model in Settings first.'), 'error');
               else { const why = r.detail ? `${r.error} - ${r.detail}` : r.error; this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error'); }
               return;
             }
+            const n = (r && r.cycle_ids && r.cycle_ids.length) || 0;
+            const failed = (r && r.errors && r.errors.length) || 0;
+            if (!n) {
+              // Nothing uploaded: surface the first error and keep the modal for retry.
+              const why = (r && r.errors && r.errors[0]) || (r && r.detail) || 'upload_failed';
+              this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error');
+              return;
+            }
             this._modal = null;
-            const n = (r && r.cycle_ids && r.cycle_ids.length) || items.length;
-            this._showToast(this._t('toast.store_device_shared', {n}, `Shared ${n} cycle(s) to the community store - pending review.`));
+            if (failed) this._showToast(this._t('toast.store_device_shared_partial', {n, failed}, `Shared ${n} cycle(s); ${failed} could not be uploaded.`), 'info');
+            else this._showToast(this._t('toast.store_device_shared', {n}, `Shared ${n} cycle(s) to the community store - pending review.`));
           } catch (e) { this._showToast(this._t('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
         });
         return;

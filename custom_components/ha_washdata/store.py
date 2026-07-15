@@ -237,8 +237,11 @@ class StoreBridge:
         res = await self._client.upload_device_bundle(
             acct["refresh_token"], acct.get("uid", ""), acct.get("name"), device_meta, bundle_items,
         )
-        if not res.get("ok"):
-            return {"error": "upload_failed", "detail": self._client.last_error(), **res}
+        # Return the raw bundle result ({ok, cycle_ids, errors}) so the caller can
+        # tell a partial upload (some cycle_ids present) from a total failure.
+        # Only a pre-flight gate short-circuits with an {"error": ...} marker above.
+        if not res.get("ok") and not res.get("cycle_ids"):
+            res = {**res, "detail": self._client.last_error()}
         return res
 
     async def download_device(self, device_id: str) -> dict[str, Any]:
