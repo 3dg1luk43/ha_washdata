@@ -1146,10 +1146,13 @@ class WashDataManager:
             current_power = readings[-1][1] if readings else 0.0
 
             # --- Envelope Verification for Mismatches & Pauses ---
-            # ALWAYS check alignment if we have a match and power is low,
-            # to confirm if this is a legitimate pause or a mismatch.
+            # Check alignment if we have a match and power is low, to confirm if
+            # this is a legitimate (auto-detected) pause or a mismatch.  Skipped
+            # while the user has explicitly paused (issue #306): the user pause is
+            # authoritative and must not be re-judged by the envelope heuristic
+            # (see the verified_pause override below).
             stop_thresh = float(self.detector.config.stop_threshold_w)
-            if current_matched and current_power < stop_thresh:
+            if current_matched and current_power < stop_thresh and not self._is_user_paused:
                 formatted = power_data_to_offsets(cast(list[list[Any] | tuple[Any, ...]], readings))
                 try:
                     profile_store_any = cast(Any, self.profile_store)
@@ -1195,6 +1198,17 @@ class WashDataManager:
 
             if current_power > stop_threshold * 10:
                 verified_pause = False
+
+            # A user-initiated pause (Pause Cycle button, or the door-open soft
+            # pause) stays in force until the user resumes (issue #306).  The
+            # heuristics above only govern *auto-detected* low-power phases; without
+            # this override they clear verified_pause and the cycle is finalized
+            # (leaving the "Paused by user" state, e.g. a dishwasher closes at the
+            # 1 h min-off-gap timeout) instead of waiting for Resume.  Re-asserting
+            # here also repairs the flag after a restart, since the detector state
+            # snapshot does not persist _verified_pause.
+            if self._is_user_paused:
+                verified_pause = True
 
             # --- Consistency Override ---
             # If envelope verified or mismatched, ensure manager program matches
@@ -1559,6 +1573,12 @@ class WashDataManager:
                     self._total_user_paused_seconds = float(
                         active_snapshot_to_restore.get("total_user_paused_seconds", 0.0)
                     )
+                    # get_state_snapshot() does not persist the detector's
+                    # verified-pause flag, so a user-paused cycle would otherwise be
+                    # finalized on the first ENDING timeout after a restart (issue
+                    # #306).  Re-assert it so the pause survives the reload.
+                    if self._is_user_paused:
+                        self.detector.set_verified_pause(True)
 
                     # Record the restart gap so the Cycles tab can shade it and
                     # anomaly detection can surface it.  Only meaningful when
