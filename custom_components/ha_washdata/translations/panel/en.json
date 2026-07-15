@@ -804,7 +804,12 @@
     "store_download_device_intro": "Adopt every shared program and its reference cycles onto your device. Your own recorded cycles and stats are not affected.",
     "onboard_download": "New device? Adopt a ready-made setup (programs, reference cycles and phases) from another WashData user with the same appliance.",
     "include_settings_hint": "Share this device's recognition and matching thresholds (not your notifications, entities or energy price). Adopters choose whether to apply them.",
-    "adopt_settings_hint": "Overwrite this device's detection & matching thresholds with the shared ones. Your notifications, entities and energy price are never changed."
+    "adopt_settings_hint": "Overwrite this device's detection & matching thresholds with the shared ones. Your notifications, entities and energy price are never changed.",
+    "share_guidelines_title": "Before you share",
+    "share_guideline_naming": "Name each profile exactly as shown on the appliance dial or display (e.g. 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Only share cycles that completed normally -- no mid-cycle interruptions, door-open events, or power blips.",
+    "share_guideline_review": "Your upload starts as pending and appears publicly once enough community members confirm it.",
+    "share_consent": "I confirm these cycles ran to normal completion without interruption"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Sudden drop treated as immediate end",

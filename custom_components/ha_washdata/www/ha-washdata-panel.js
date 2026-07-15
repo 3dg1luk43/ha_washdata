@@ -811,6 +811,14 @@ button.wd-profile-card { display: block; }
 .wd-sd-phase { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-top: 1px solid var(--divider-color); cursor: pointer; font-size: .85em; color: var(--secondary-text-color); }
 .wd-sd-phase:hover { background: var(--card-background-color); }
 .wd-sd-settings { display: flex; align-items: center; gap: 8px; padding: 10px 2px 2px; cursor: pointer; font-size: .9em; }
+.wd-sd-consent { display: flex; align-items: flex-start; gap: 8px; padding: 10px 2px 2px; cursor: pointer; font-size: .9em; }
+.wd-share-guide { margin-bottom: 10px; border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); overflow: hidden; }
+.wd-share-guide > summary { padding: 8px 12px; cursor: pointer; font-size: .85em; font-weight: 600; color: var(--secondary-text-color); list-style: none; }
+.wd-share-guide > summary::-webkit-details-marker { display: none; }
+.wd-share-guide > summary::before { content: '▶ '; font-size: .7em; }
+.wd-share-guide[open] > summary::before { content: '▼ '; }
+.wd-share-guide-list { margin: 0; padding: 4px 12px 10px 28px; font-size: .85em; color: var(--secondary-text-color); line-height: 1.5; }
+.wd-share-guide-list li { margin-bottom: 4px; }
 .wd-linkbtn { background: none; border: none; padding: 0; color: var(--primary-color); cursor: pointer; font: inherit; text-decoration: underline; }
 .wd-gear-body { margin-top: 12px; }
 .wd-empty { text-align: center; padding: 48px 24px; color: var(--secondary-text-color); }
@@ -7188,6 +7196,7 @@ class HaWashdataPanel extends HTMLElement {
     const groups = this._shareableByProgram();
     const busy = this._busy.has('store-share-device');
     const sel = m.selected || new Set();
+    const consented = !!m.consented;
     const selCount = groups.reduce((n, g) => n + g.cycles.filter(c => sel.has(c.id)).length, 0);
     let tree;
     if (m.loading) {
@@ -7232,13 +7241,27 @@ class HaWashdataPanel extends HTMLElement {
         <span>${this._t('lbl.include_settings', {}, 'Include detection & matching settings')}</span>
         ${_tip(this._t('msg.include_settings_hint', {}, 'Share this device\'s recognition and matching thresholds (not your notifications, entities or energy price). Adopters choose whether to apply them.'))}
       </label>`;
+    const guideBlock = `<details class="wd-share-guide" ${m.guideOpen ? 'open' : ''}>
+      <summary data-maction="sd-toggle-guide">${this._t('msg.share_guidelines_title', {}, 'Before you share')}</summary>
+      <ul class="wd-share-guide-list">
+        <li>${this._t('msg.share_guideline_naming', {}, "Name each profile exactly as shown on the appliance dial or display (e.g. 'Cotton 40', 'Eco 60').")}</li>
+        <li>${this._t('msg.share_guideline_quality', {}, 'Only share cycles that completed normally -- no mid-cycle interruptions, door-open events, or power blips.')}</li>
+        <li>${this._t('msg.share_guideline_review', {}, 'Your upload starts as pending and appears publicly once enough community members confirm it.')}</li>
+      </ul>
+    </details>`;
+    const consentRow = groups.length ? `<label class="wd-sd-consent">
+      <input type="checkbox" data-maction="sd-toggle-consent" ${consented ? 'checked' : ''} ${busy ? 'disabled' : ''}>
+      <span>${this._t('lbl.share_consent', {}, 'I confirm these cycles ran to normal completion without interruption')}</span>
+    </label>` : '';
     return `<h2 id="wd-modal-title">${this._t('modal.store_share_device', {}, 'Share this device')}</h2>
       <p class="wd-info" style="margin-bottom:12px">${this._t('msg.store_share_device_intro', {brand, model}, `Upload ${brand} ${model} with the reference cycles you select. Others with the same appliance can adopt your programs. Entries are reviewed before appearing publicly.`)}</p>
+      ${guideBlock}
       <div class="wd-sd-tree">${tree}</div>
       ${groups.length ? settingsRow : ''}
+      ${consentRow}
       <div class="wd-modal-actions">
         <button class="wd-btn wd-btn-secondary" data-maction="cancel" ${busy ? 'disabled' : ''}>${this._t('btn.cancel', {}, 'Cancel')}</button>
-        <button class="wd-btn wd-btn-primary" data-maction="store-share-device-ok" ${busy || !selCount ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.share_n', {n: selCount}, `Share ${selCount} cycle(s)`)}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="store-share-device-ok" ${busy || !selCount || !consented ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.share_n', {n: selCount}, `Share ${selCount} cycle(s)`)}</button>
       </div>`;
   }
 
@@ -9601,6 +9624,8 @@ class HaWashdataPanel extends HTMLElement {
         return;
       }
       if (action === 'sd-toggle-settings') { m.includeSettings = !m.includeSettings; this._render(); return; }
+      if (action === 'sd-toggle-consent') { m.consented = !m.consented; this._render(); return; }
+      if (action === 'sd-toggle-guide') { m.guideOpen = !m.guideOpen; this._render(); return; }
       if (action === 'store-share-device-ok') {
         // Build the {local_cycle_id, program} items from the model selection,
         // resolving each cycle's program from the fetched shareable list.
