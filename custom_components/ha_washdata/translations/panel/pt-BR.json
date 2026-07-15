@@ -221,7 +221,7 @@
       "match": "Deve ser acima do Limiar de não correspondência ({un})",
       "unmatch": "Deve ser abaixo do Limiar de correspondência ({match}); caso contrário, uma correspondência confirmada é imediatamente desfeita"
     },
-    "cascade_toast": "Também foram ajustadas {n} configurações por consistência.",
+    "cascade_toast": "Também foram aplicados {n} ajuste{s} por consistência.",
     "suggestion_resolves": "Aplique a sugestão pendente ({val}) abaixo para corrigir este conflito",
     "use_fix": "Usar {val}",
     "watchdog": {
@@ -372,7 +372,7 @@
     "metric": "Métrica",
     "mode_existing_profile": "Adicionar a perfil existente",
     "mode_new_profile": "Criar novo perfil",
-    "models_fine_tuned": "({count} modelos ajustados)",
+    "models_fine_tuned": "({count} modelo{plural} ajustado{plural})",
     "n_classic_suggestions": "{n} clássico",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} selecionados",
@@ -640,7 +640,7 @@
     "automations_intro": "O WashData dispara eventos {start} / {end} e expõe entidades, portanto as notificações e ações são melhor criadas como automatizações normais do Home Assistant. As automatizações que usam este dispositivo aparecem abaixo.",
     "cleanup_intro": "Todos os ciclos rotulados sobrepostos. Marque os valores discrepantes e exclua para limpar o perfil.",
     "clear_debug_hint": "Remova os dados de depuração armazenados para liberar espaço.",
-    "collecting_data": "Coletando dados — {need} ciclos a mais antes que o ajuste fino possa começar ({current}/{min}).",
+    "collecting_data": "Coletando dados - {need} ciclo{plural} a mais antes que o ajuste fino possa começar ({current}/{min}).",
     "compare_overlay_profiles": "Sobrepor perfis (fraco)",
     "compare_profiles_tip": "Sobreponha outros envelopes de perfil no gráfico acima para ver qual deles melhor se adapta a este ciclo.",
     "compare_selected_cycles": "Ciclos selecionados (sólido) — mostrar / ocultar",

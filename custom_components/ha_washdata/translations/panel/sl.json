@@ -640,7 +640,7 @@
     "automations_intro": "WashData sproži dogodke {start} / {end} in razkrije entitete, zato je obvestila in dejanja najbolje graditi kot navadne avtomatizacije Home Assistant. Spodaj so prikazane avtomatizacije, ki uporabljajo to napravo.",
     "cleanup_intro": "Vsi označeni cikli naloženi. Označi odmike in briši za čiščenje profila.",
     "clear_debug_hint": "Odstranite shranjene podatke za odpravljanje napak, da sprostite prostor.",
-    "collecting_data": "Zbiranje podatkov — še {need} ciklov pred začetkom finega nastavljanja ({current}/{min}).",
+    "collecting_data": "Zbiranje podatkov: še {need} ciklov pred začetkom finega nastavljanja ({current}/{min}).",
     "compare_overlay_profiles": "Prekriti profili (bledi)",
     "compare_profiles_tip": "Prekrijte druge ovojnice profila na zgornji tabeli, da vidite, katera najbolj ustreza temu ciklu.",
     "compare_selected_cycles": "Izbrani cikli (polni) — prikaži / skrij",

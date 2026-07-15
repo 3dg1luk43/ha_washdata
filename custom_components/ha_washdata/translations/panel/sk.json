@@ -640,7 +640,7 @@
     "automations_intro": "WashData spúšťa udalosti {start} / {end} a sprístupňuje entity, takže notifikácie a akcie sa najlepšie vytvárajú ako bežné automatizácie Home Assistant. Automatizácie používajúce toto zariadenie sú zobrazené nižšie.",
     "cleanup_intro": "Všetky označené cykly naložené. Označte odchýlky a odstráňte pre vyčistenie profilu.",
     "clear_debug_hint": "Odstráňte uložené údaje ladenia, aby ste uvoľnili miesto.",
-    "collecting_data": "Zbieranie dát — ešte {need} cyklov do spustenia doladenia ({current}/{min}).",
+    "collecting_data": "Zbieranie dát: ešte {need} cyklov do spustenia doladenia ({current}/{min}).",
     "compare_overlay_profiles": "Prekryté profily (bledé)",
     "compare_profiles_tip": "Prekryte ostatné profilové obálky v tabuľke vyššie, aby ste videli, ktorá z nich najlepšie vyhovuje tomuto cyklu.",
     "compare_selected_cycles": "Vybraté cykly (tučné) — zobraziť / skryť",
