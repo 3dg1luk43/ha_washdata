@@ -164,7 +164,12 @@
     "share_to_store": "Mağazada paylaş",
     "share": "Paylaş",
     "confirm_appliance": "Bu cihazı onayla",
-    "confirmed": "Onaylandı"
+    "confirmed": "Onaylandı",
+    "browse_community_setups": "Topluluk kurulumlarına göz at",
+    "download_device": "Bu kurulumu indir",
+    "share_device": "⬆ Bu cihazı paylaş",
+    "share_device_tip": "Bu cihazı ve kayıtlı referans döngülerini topluluk mağazasına paylaşın; aynı makineye sahip diğer kullanıcılar bunları benimseyebilsin",
+    "share_n": "{n} döngü paylaş"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Anonim",
     "rate_quality": "Kaliteyi değerlendir",
     "rate_n": "{n} yıldız",
-    "approved_only": "Yalnızca onaylılar"
+    "approved_only": "Yalnızca onaylılar",
+    "adopt_settings": "Ayarları da benimse",
+    "flags": "İşaretler",
+    "include_phase_map": "Faz haritasını dahil et",
+    "include_settings": "Algılama ve eşleştirme ayarlarını dahil et",
+    "show_contributor": "Katkıda bulunanların adlarını göster"
   },
   "log": {
     "all_levels": "Tüm seviyeler",
@@ -627,7 +637,8 @@
     "force_stop_title": "Döngüyü Zorla Durdur",
     "force_stop_msg": "Etkin döngü şimdi zorla durdurulsun mu? Döngü, kesintiye uğramış olarak kaydedilecek.",
     "store_import": "Referans döngüyü içe aktar",
-    "store_share": "Topluluk mağazasında paylaş"
+    "store_share": "Topluluk mağazasında paylaş",
+    "store_share_device": "Bu cihazı paylaş"
   },
   "msg": {
     "appliance_monitor": "Cihaz monitörü",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Topluluk kataloğundan seçim yapmak için ayarlar dişlisinde çevrimiçi özellikleri etkinleştirin.",
     "pick_brand_first": "Önce bir cihaz markası seçin.",
     "model_not_found": "Henüz katalogda yok.",
-    "connect_to_confirm": "Onaylamak veya değerlendirmek için ayarlar dişlisinde bağlanın."
+    "connect_to_confirm": "Onaylamak veya değerlendirmek için ayarlar dişlisinde bağlanın.",
+    "adopt_settings_hint": "Bu cihazın algılama ve eşleştirme eşiklerini paylaşılanlarla üzerine yaz. Bildirimleriniz, varlıklarınız ve enerji fiyatınız hiçbir zaman değiştirilmez.",
+    "include_settings_hint": "Bu cihazın tanıma ve eşleştirme eşiklerini paylaşın (bildirimlerinizi, varlıklarınızı veya enerji fiyatınızı değil). Benimseyenler bunların uygulanıp uygulanmayacağını seçer.",
+    "onboard_download": "Yeni cihaz mı? Aynı cihaza sahip başka bir WashData kullanıcısından hazır bir kurulum (programlar, referans döngüleri ve fazlar) benimseyin.",
+    "share_consent": "Bu döngülerin kesintisiz normal şekilde tamamlandığını onaylıyorum",
+    "share_device_none": "Henüz paylaşılabilir döngü yok. Önce Döngüler sekmesinde kayıtlı veya el ile seçilen bir döngüyü referans döngüsü (⭐) olarak işaretleyin.",
+    "share_guideline_naming": "Her profili cihazın kadranında veya ekranında tam olarak gösterildiği gibi adlandırın (örn. 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Yalnızca normal şekilde tamamlanan döngüleri paylaşın -- döngü ortasında kesinti, kapı açma olayları veya güç kesintisi olmadan.",
+    "share_guideline_review": "Yüklemeniz beklemede olarak başlar ve yeterince topluluk üyesi onayladığında kamuya açılır.",
+    "share_guidelines_title": "Paylaşmadan önce",
+    "store_download_device_intro": "Her paylaşılan programı ve referans döngülerini cihazınıza benimseyin. Kendi kayıtlı döngüleriniz ve istatistikleriniz etkilenmez.",
+    "store_share_device_intro": "Seçtiğiniz referans döngüleriyle {brand} {model} cihazını yükleyin. Aynı cihaza sahip diğer kullanıcılar programlarınızı benimseyebilir. Girişler kamuya açılmadan önce incelenir.",
+    "share_profile_no_cycles": "Referans döngüsü yok -- bu profili dahil etmek için Döngüler sekmesinde bir döngüyü ⭐ olarak işaretleyin"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Ani düşüş anında bitiş sayılır",
@@ -1300,6 +1323,9 @@
     "store_model": {
       "label": "Cihaz Modeli",
       "doc": "İsteğe bağlı. Bir marka ayarlandığında topluluk kataloğundan seçilen cihaz modeli. Modeliniz listede yoksa kataloğa ekleyebilirsiniz."
+    },
+    "show_contributor": {
+      "doc": "Topluluk cihazlarında ve referans döngülerinde \"- <katkıda bulunan>\" özelliğini göster."
     }
   },
   "setting_group": {
@@ -1525,7 +1551,18 @@
     "device_approved": "Topluluk tarafından onaylandı",
     "rating_saved": "Kalite değerlendirmesi kaydedildi",
     "brand_added": "Marka eklendi, onay bekliyor",
-    "profile_added": "Profil eklendi, onay bekliyor"
+    "profile_added": "Profil eklendi, onay bekliyor",
+    "saved_except_conflicts": "Kaydedildi. Geri kalanı kaydetmek için vurgulanan çakışmaları düzeltin.",
+    "share_device_none_sel": "Paylaşmak için en az bir döngü seçin",
+    "store_device_downloaded": "{p} program, {c} kayıt eklendi",
+    "store_device_downloaded_phases": "{p} program, {c} kayıt, {ph} faz haritası eklendi",
+    "store_device_downloaded_settings": "{p} program, {c} kayıt, {ph} faz haritası, {s} ayar eklendi",
+    "store_device_shared": "{n} döngü topluluk mağazasına paylaşıldı - inceleme bekleniyor.",
+    "store_device_shared_all_dup": "{n} döngünün tamamı zaten topluluk mağazasındaydı.",
+    "store_device_shared_partial": "{n} döngü paylaşıldı; {failed} yüklenemedi.",
+    "store_device_shared_some_dup": "{created} döngü paylaşıldı; {dup} zaten mağazadaydı.",
+    "store_download_failed": "İndirme başarısız: {error}",
+    "store_download_nothing": "İndirilecek yeni bir şey yok - bu kurulum zaten cihazınızda."
   },
   "suggestion": {
     "both_agree": "WashData öneriyor",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Tüketilen toplam enerji (kWh). Gücün zamana göre integrali alınarak hesaplanır.",
     "cost_tip": "Bu döngünün enerji maliyeti; tamamlandığında o an geçerli olan fiyat kullanılarak sabitlenir (enerji x kWh başına fiyat). Doldurmak için Ayarlar altında bir fiyat belirleyin.",
     "confidence_tip": "Profil eşleşme güveni (0-100%). Döngünün güç eğrisinin, tanımlanan programla ne kadar yakından eşleştiği.",
-    "health_tip": "ML döngü sağlığı (yüksek = daha iyi). İncelemek ve gözden geçirmek için bir döngüye tıklayın."
+    "health_tip": "ML döngü sağlığı (yüksek = daha iyi). İncelemek ve gözden geçirmek için bir döngüye tıklayın.",
+    "flags_tip": "Döngü için inceleme, anomali ve kaynak işaretleri. Ayrıntı için bir simgenin üzerine gelin."
   },
   "stat": {
     "avg": "ort.",

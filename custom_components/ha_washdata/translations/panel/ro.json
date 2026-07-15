@@ -164,7 +164,12 @@
     "share_to_store": "Partajați în magazin",
     "share": "Partajați",
     "confirm_appliance": "Confirmați acest aparat",
-    "confirmed": "Confirmat"
+    "confirmed": "Confirmat",
+    "browse_community_setups": "Răsfoiți configurațiile comunității",
+    "download_device": "Descărcați această configurație",
+    "share_device": "⬆ Partajați acest dispozitiv",
+    "share_device_tip": "Partajați acest aparat și ciclurile sale de referință înregistrate în magazinul comunității, astfel încât alții cu același aparat să le poată adopta",
+    "share_n": "Partajați {n} ciclu(ri)"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Anonim",
     "rate_quality": "Evaluați calitatea",
     "rate_n": "{n} stele",
-    "approved_only": "Doar aprobate"
+    "approved_only": "Doar aprobate",
+    "adopt_settings": "Adoptați și setările",
+    "flags": "Semnale",
+    "include_phase_map": "Includeți harta fazelor",
+    "include_settings": "Includeți setările de detectare și potrivire",
+    "show_contributor": "Afișați numele contribuitorilor"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -627,7 +637,8 @@
     "force_stop_title": "Opriți forțat ciclul",
     "force_stop_msg": "Opriți forțat ciclul activ acum? Ciclul va fi salvat ca întrerupt.",
     "store_import": "Importați ciclu de referință",
-    "store_share": "Partajați în magazinul comunității"
+    "store_share": "Partajați în magazinul comunității",
+    "store_share_device": "Partajați acest dispozitiv"
   },
   "msg": {
     "appliance_monitor": "Monitor de aparate",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Activați funcțiile online din pictograma de setări pentru a alege din catalogul comunității.",
     "pick_brand_first": "Alegeți mai întâi o marcă de aparat.",
     "model_not_found": "Încă nu este în catalog.",
-    "connect_to_confirm": "Conectați-vă din pictograma de setări pentru a confirma sau a evalua."
+    "connect_to_confirm": "Conectați-vă din pictograma de setări pentru a confirma sau a evalua.",
+    "adopt_settings_hint": "Suprascrieți pragurile de detectare și potrivire ale acestui dispozitiv cu cele partajate. Notificările, entitățile și prețul energiei nu sunt niciodată modificate.",
+    "include_settings_hint": "Partajați pragurile de recunoaștere și potrivire ale acestui dispozitiv (nu notificările, entitățile sau prețul energiei). Cei care adoptă aleg dacă să le aplice.",
+    "onboard_download": "Dispozitiv nou? Adoptați o configurație gata pregătită (programe, cicluri de referință și faze) de la un alt utilizator WashData cu același aparat.",
+    "share_consent": "Confirm că aceste cicluri au rulat până la finalizare normală fără întreruperi",
+    "share_device_none": "Niciun ciclu de partajat încă. Marcați un ciclu înregistrat sau ales manual ca ciclu de referință (⭐) în fila Cicluri mai întâi.",
+    "share_guideline_naming": "Denumiți fiecare profil exact așa cum apare pe cadranul sau afișajul aparatului (de ex. 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Partajați doar cicluri care s-au finalizat normal -- fără întreruperi la mijlocul ciclului, fără deschideri de ușă sau fluctuații de curent.",
+    "share_guideline_review": "Încărcarea dvs. începe ca în așteptare și apare public odată ce suficienți membri ai comunității o confirmă.",
+    "share_guidelines_title": "Înainte de a partaja",
+    "store_download_device_intro": "Adoptați fiecare program partajat și ciclurile sale de referință pe dispozitivul dvs. Propriile cicluri înregistrate și statisticile nu sunt afectate.",
+    "store_share_device_intro": "Încărcați {brand} {model} cu ciclurile de referință pe care le selectați. Alții cu același aparat vă pot adopta programele. Intrările sunt revizuite înainte de a apărea public.",
+    "share_profile_no_cycles": "Niciun ciclu de referință -- marcați un ciclu ca ⭐ în fila Cicluri pentru a include acest profil"
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1283,6 +1306,9 @@
     "store_model": {
       "label": "Modelul aparatului",
       "doc": "Opțional. Modelul aparatului, ales din catalogul comunității după ce este stabilită marca. Dacă modelul dvs. nu este listat, îl puteți adăuga în catalog."
+    },
+    "show_contributor": {
+      "doc": "Afișați atribuirea \"de <contributor>\" pe aparatele și ciclurile de referință ale comunității."
     }
   },
   "setting_group": {
@@ -1508,7 +1534,18 @@
     "device_approved": "Aprobat de comunitate",
     "rating_saved": "Evaluarea calității a fost salvată",
     "brand_added": "Marcă adăugată, în așteptarea aprobării",
-    "profile_added": "Profil adăugat, în așteptarea aprobării"
+    "profile_added": "Profil adăugat, în așteptarea aprobării",
+    "saved_except_conflicts": "Salvat. Remediați conflictele evidențiate pentru a salva restul.",
+    "share_device_none_sel": "Selectați cel puțin un ciclu de partajat",
+    "store_device_downloaded": "{p} program(e), {c} înregistrare(i) adăugate",
+    "store_device_downloaded_phases": "{p} program(e), {c} înregistrare(i), {ph} hartă(i) de faze adăugate",
+    "store_device_downloaded_settings": "{p} program(e), {c} înregistrare(i), {ph} hartă(i) de faze, {s} setare(i) adăugate",
+    "store_device_shared": "{n} ciclu(ri) partajate în magazinul comunității - în așteptarea revizuirii.",
+    "store_device_shared_all_dup": "Toate cele {n} ciclu(ri) erau deja în magazinul comunității.",
+    "store_device_shared_partial": "{n} ciclu(ri) partajate; {failed} nu au putut fi încărcate.",
+    "store_device_shared_some_dup": "{created} ciclu(ri) partajate; {dup} erau deja în magazin.",
+    "store_download_failed": "Descărcare eșuată: {error}",
+    "store_download_nothing": "Nimic nou de descărcat - această configurație este deja pe dispozitivul dvs."
   },
   "suggestion": {
     "both_agree": "WashData recomandă",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Energia totală consumată (kWh). Calculată prin integrarea puterii în timp.",
     "cost_tip": "Costul energetic al acestui ciclu, fixat la finalizare folosind prețul în vigoare atunci (energie x preț pe kWh). Setați un preț în Setări pentru a-l completa.",
     "confidence_tip": "Încrederea de potrivire a profilului (0-100%). Cât de bine s-a potrivit curba de putere a ciclului cu programul identificat.",
-    "health_tip": "Starea ciclului prin ML (mai mare = mai bine). Faceți clic pe un ciclu pentru a-l inspecta și revizui."
+    "health_tip": "Starea ciclului prin ML (mai mare = mai bine). Faceți clic pe un ciclu pentru a-l inspecta și revizui.",
+    "flags_tip": "Semnale de revizuire, anomalie și sursă pentru ciclu. Treceți cu cursorul peste o pictogramă pentru detalii."
   },
   "stat": {
     "avg": "medie",

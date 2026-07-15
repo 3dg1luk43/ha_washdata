@@ -164,7 +164,12 @@
     "share_to_store": "Jaa kauppaan",
     "share": "Jaa",
     "confirm_appliance": "Vahvista tämä laite",
-    "confirmed": "Vahvistettu"
+    "confirmed": "Vahvistettu",
+    "browse_community_setups": "Selaa yhteisön asetuksia",
+    "download_device": "Lataa tämä asetus",
+    "share_device": "⬆ Jaa tämä laite",
+    "share_device_tip": "Jaa tämä laite ja sen tallennetut viitesyklit yhteisökauppaan, jotta muut saman koneen omistajat voivat ottaa ne käyttöön",
+    "share_n": "Jaa {n} sykli(ä)"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Anonyymi",
     "rate_quality": "Arvioi laatu",
     "rate_n": "{n} tähteä",
-    "approved_only": "Vain hyväksytyt"
+    "approved_only": "Vain hyväksytyt",
+    "adopt_settings": "Ota myös asetukset käyttöön",
+    "flags": "Liput",
+    "include_phase_map": "Sisällytä vaihdekartta",
+    "include_settings": "Sisällytä tunnistus- ja täsmäytysasetukset",
+    "show_contributor": "Näytä osallistujien nimet"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -627,7 +637,8 @@
     "force_stop_title": "Pakota sykli pysähtymään",
     "force_stop_msg": "Pakotetaanko aktiivinen sykli pysähtymään nyt? Sykli tallennetaan keskeytyneenä.",
     "store_import": "Tuo viitesykli",
-    "store_share": "Jaa yhteisökauppaan"
+    "store_share": "Jaa yhteisökauppaan",
+    "store_share_device": "Jaa tämä laite"
   },
   "msg": {
     "appliance_monitor": "Laitteen näyttö",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Ota verkkotoiminnot käyttöön asetusten rattaasta valitaksesi yhteisön luettelosta.",
     "pick_brand_first": "Valitse ensin laitteen merkki.",
     "model_not_found": "Ei vielä luettelossa.",
-    "connect_to_confirm": "Yhdistä asetusten rattaasta vahvistaaksesi tai arvioidaksesi."
+    "connect_to_confirm": "Yhdistä asetusten rattaasta vahvistaaksesi tai arvioidaksesi.",
+    "adopt_settings_hint": "Korvaa tämän laitteen tunnistus- ja täsmäytyskynnykset jaetuilla. Ilmoituksiasi, entiteettejäsi tai energiahintaasi ei koskaan muuteta.",
+    "include_settings_hint": "Jaa tämän laitteen tunnistus- ja täsmäytyskynnykset (ei ilmoituksiasi, entiteettejäsi tai energiahintaasi). Käyttöönottajat päättävät, otetaanko ne käyttöön.",
+    "onboard_download": "Uusi laite? Ota käyttöön valmis asetus (ohjelmat, viitesyklit ja vaiheet) toiselta WashData-käyttäjältä, jolla on sama laite.",
+    "share_consent": "Vahvistan, että nämä syklit suoritettiin normaalisti loppuun ilman keskeytystä",
+    "share_device_none": "Ei vielä jaettavia syklejä. Merkitse tallennettu tai käsin valittu sykli viitesykliksi (⭐) ensin Syklit-välilehdessä.",
+    "share_guideline_naming": "Nimeä kukin profiili täsmälleen kuten laitteen säätimessä tai näytössä näkyy (esim. 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Jaa vain syklit, jotka suorittivat normaalisti -- ei keskeytyksiä kesken syklin, oven avaustapahtumia tai tehohäiriöitä.",
+    "share_guideline_review": "Latauksesi alkaa odottavana ja tulee julkiseksi, kun riittävästi yhteisön jäseniä vahvistaa sen.",
+    "share_guidelines_title": "Ennen jakamista",
+    "store_download_device_intro": "Ota käyttöön jokainen jaettu ohjelma ja sen viitesyklit laitteellesi. Omat tallennetut syklisi ja tilastosi eivät vaikutu.",
+    "store_share_device_intro": "Lataa {brand} {model} valitsemiesi viitesyklien kanssa. Muut saman laitteen omistajat voivat ottaa ohjelmiasi käyttöön. Merkinnät tarkistetaan ennen julkaisua.",
+    "share_profile_no_cycles": "Ei viitesyklejä -- merkitse sykli ⭐:ksi Syklit-välilehdessä sisällyttääksesi tämän profiilin"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Äkillinen pudotus tulkitaan välittömäksi lopuksi",
@@ -1300,6 +1323,9 @@
     "store_model": {
       "label": "Laitteen malli",
       "doc": "Valinnainen. Laitteen malli, joka valitaan yhteisön luettelosta merkin asettamisen jälkeen. Jos malliasi ei ole luettelossa, voit lisätä sen luetteloon."
+    },
+    "show_contributor": {
+      "doc": "Näytä \"tekijä <osallistuja>\" -merkintä yhteisön laitteissa ja viitesykleissä."
     }
   },
   "setting_group": {
@@ -1621,7 +1647,18 @@
     "device_approved": "Yhteisö hyväksyi",
     "rating_saved": "Laatuarvio tallennettu",
     "brand_added": "Merkki lisätty - odottaa hyväksyntää",
-    "profile_added": "Profiili lisätty - odottaa hyväksyntää"
+    "profile_added": "Profiili lisätty - odottaa hyväksyntää",
+    "saved_except_conflicts": "Tallennettu. Korjaa korostetut ristiriidat tallentaaksesi loput.",
+    "share_device_none_sel": "Valitse vähintään yksi sykli jaettavaksi",
+    "store_device_downloaded": "{p} ohjelma(a), {c} tallennus(ta) lisätty",
+    "store_device_downloaded_phases": "{p} ohjelma(a), {c} tallennus(ta), {ph} vaihdekartta(a) lisätty",
+    "store_device_downloaded_settings": "{p} ohjelma(a), {c} tallennus(ta), {ph} vaihdekartta(a), {s} asetus(ta) lisätty",
+    "store_device_shared": "{n} sykli(ä) jaettu yhteisökauppaan - odottaa tarkistusta.",
+    "store_device_shared_all_dup": "Kaikki {n} sykli(ä) olivat jo yhteisökaupassa.",
+    "store_device_shared_partial": "{n} sykliä jaettu; {failed} ei voitu ladata.",
+    "store_device_shared_some_dup": "{created} sykliä jaettu; {dup} olivat jo kaupassa.",
+    "store_download_failed": "Lataus epäonnistui: {error}",
+    "store_download_nothing": "Ei uutta ladattavaa - tämä asetus on jo laitteellasi."
   },
   "trend": {
     "down": "Trendikäs alaspäin",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Kulutettu kokonaisenergia (kWh). Laskettu integroimalla teho ajan yli.",
     "cost_tip": "Tämän syklin energiakustannus, lukittu valmistuessa käyttäen silloin voimassa ollutta hintaa (energia x hinta per kWh). Aseta hinta Asetuksista täyttääksesi sen.",
     "confidence_tip": "Profiilin osumaluottamus (0-100%). Kuinka tarkasti syklin tehokäyrä osui tunnistettuun ohjelmaan.",
-    "health_tip": "ML-syklin kunto (korkeampi = parempi). Napsauta sykliä tarkastellaksesi ja arvioidaksesi sitä."
+    "health_tip": "ML-syklin kunto (korkeampi = parempi). Napsauta sykliä tarkastellaksesi ja arvioidaksesi sitä.",
+    "flags_tip": "Syklin tarkistus-, poikkeama- ja lähdeliput. Siirrä hiiri kuvakkeen päälle saadaksesi lisätiedot."
   },
   "stat": {
     "avg": "ka.",

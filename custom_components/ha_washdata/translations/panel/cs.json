@@ -164,7 +164,12 @@
     "share_to_store": "Sdílet do obchodu",
     "share": "Sdílet",
     "confirm_appliance": "Potvrdit tento spotřebič",
-    "confirmed": "Potvrzeno"
+    "confirmed": "Potvrzeno",
+    "browse_community_setups": "Procházet nastavení komunity",
+    "download_device": "Stáhnout nastavení zařízení",
+    "share_device": "Sdílet nastavení zařízení",
+    "share_device_tip": "Sdílet programy a nastavení tohoto zařízení s komunitou",
+    "share_n": "Sdílet {n} program{s}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Anonymní",
     "rate_quality": "Ohodnotit kvalitu",
     "rate_n": "{n} hvězdiček",
-    "approved_only": "Pouze schválené"
+    "approved_only": "Pouze schválené",
+    "adopt_settings": "Přijmout nastavení",
+    "flags": "Příznaky",
+    "include_phase_map": "Zahrnout mapu fází",
+    "include_settings": "Zahrnout nastavení",
+    "show_contributor": "Zobrazit přispěvatele"
   },
   "log": {
     "all_levels": "Všechny úrovně",
@@ -627,7 +637,8 @@
     "force_stop_title": "Vynutit zastavení cyklu",
     "force_stop_msg": "Vynutit nyní zastavení aktivního cyklu? Cyklus bude uložen jako přerušený.",
     "store_import": "Importovat referenční cyklus",
-    "store_share": "Sdílet do komunitního obchodu"
+    "store_share": "Sdílet do komunitního obchodu",
+    "store_share_device": "Sdílet nastavení zařízení"
   },
   "msg": {
     "appliance_monitor": "Monitor spotřebiče",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Povolte online funkce v ozubeném kolečku nastavení, abyste mohli vybírat z katalogu komunity.",
     "pick_brand_first": "Nejprve vyberte značku spotřebiče.",
     "model_not_found": "Zatím není v katalogu.",
-    "connect_to_confirm": "Připojte se v ozubeném kolečku nastavení pro potvrzení nebo hodnocení."
+    "connect_to_confirm": "Připojte se v ozubeném kolečku nastavení pro potvrzení nebo hodnocení.",
+    "adopt_settings_hint": "Použít nastavení detekce a porovnávání sdíleného zařízení na toto zařízení",
+    "include_settings_hint": "Zahrnout prahy detekce, váhy porovnávání a další parametry do sdíleného balíčku",
+    "onboard_download": "Stáhnout hotové nastavení z komunitního obchodu",
+    "share_consent": "Sdílíte skutečná data ze svého spotřebiče. Nesdílejte, pokud jsou vaše vzorce používání soukromé.",
+    "share_device_none": "Zatím nejsou nastavena žádná zařízení. Nejprve přidejte zařízení.",
+    "share_guideline_naming": "Používejte srozumitelné názvy programů (např. 'Cotton 40', 'Eco 60'), aby je ostatní mohli identifikovat",
+    "share_guideline_quality": "Sdílejte pouze profily s ⭐ referenčními cykly nebo alespoň {n} potvrzeného spuštění",
+    "share_guideline_review": "Před sdílením zkontrolujte své profily -- odstraňte ty, které vypadají špatně",
+    "share_guidelines_title": "Před sdílením",
+    "store_download_device_intro": "Stáhnout nastavení zařízení komunity a použít ho na nové nebo stávající zařízení",
+    "store_share_device_intro": "Sdílet programy vašeho zařízení (profily + referenční cykly) s komunitou. Nastavení jsou volitelná.",
+    "share_profile_no_cycles": "Profil '{p}' nemá žádné ⭐ referenční cykly -- bude přeskočen, pokud nemáte {n}+ potvrzených spuštění"
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -1283,6 +1306,9 @@
     "store_model": {
       "label": "Model spotřebiče",
       "doc": "Volitelné. Model spotřebiče vybraný z katalogu komunity po nastavení značky. Pokud váš model není uveden, můžete jej přidat do katalogu."
+    },
+    "show_contributor": {
+      "doc": "Zobrazit jméno přispěvatele u profilů stažených z komunitního obchodu"
     }
   },
   "setting_group": {
@@ -1604,7 +1630,18 @@
     "device_approved": "Schváleno komunitou",
     "rating_saved": "Hodnocení kvality uloženo",
     "brand_added": "Značka přidána, čeká na schválení",
-    "profile_added": "Profil přidán, čeká na schválení"
+    "profile_added": "Profil přidán, čeká na schválení",
+    "saved_except_conflicts": "Nastavení uložena -- {n} položka{s} přeskočena kvůli konfliktům",
+    "share_device_none_sel": "Vyberte alespoň jeden program ke sdílení",
+    "store_device_downloaded": "Nastavení zařízení staženo: {created} profil{c} vytvořen, {dup} již existovalo",
+    "store_device_downloaded_phases": "Nastavení zařízení staženo: {created} profil{c} vytvořen, {dup} již existovalo, mapa fází použita",
+    "store_device_downloaded_settings": "Nastavení zařízení staženo: {created} profil{c} vytvořen, {dup} již existovalo, nastavení použita",
+    "store_device_shared": "Nastavení zařízení sdíleno: {n} program{s} nahrán",
+    "store_device_shared_all_dup": "Nic nového ke sdílení -- všechny programy v obchodě již existují",
+    "store_device_shared_partial": "Částečné sdílení: {n} program{s} nahrán, {failed} přeskočeno",
+    "store_device_shared_some_dup": "Nastavení zařízení sdíleno: {n} program{s} nahrán ({dup} již existovalo)",
+    "store_download_failed": "Stahování selhalo: {error}",
+    "store_download_nothing": "Nic ke stažení -- všechny profily na tomto zařízení již existují"
   },
   "trend": {
     "down": "Klesající trend",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Celková spotřebovaná energie (kWh). Vypočteno integrací výkonu v čase.",
     "cost_tip": "Náklady na energii pro tento cyklus, zafixované při dokončení podle ceny platné v té době (energie x cena za kWh). Nastavte cenu v Nastavení, abyste ho vyplnili.",
     "confidence_tip": "Spolehlivost shody profilu (0-100%). Jak přesně křivka výkonu cyklu odpovídala identifikovanému programu.",
-    "health_tip": "Zdraví cyklu ML (vyšší = lepší). Kliknutím na cyklus jej prohlédnete a zhodnotíte."
+    "health_tip": "Zdraví cyklu ML (vyšší = lepší). Kliknutím na cyklus jej prohlédnete a zhodnotíte.",
+    "flags_tip": "Komunitní příznaky a indikátory kvality dat"
   },
   "stat": {
     "avg": "prům.",

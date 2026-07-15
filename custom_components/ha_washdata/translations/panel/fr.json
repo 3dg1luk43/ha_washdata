@@ -164,7 +164,12 @@
     "share_to_store": "Partager sur la boutique",
     "share": "Partager",
     "confirm_appliance": "Confirmer cet appareil",
-    "confirmed": "Confirmé"
+    "confirmed": "Confirmé",
+    "browse_community_setups": "Parcourir les configurations de la communauté",
+    "download_device": "Télécharger cette configuration",
+    "share_device": "⬆ Partager cet appareil",
+    "share_device_tip": "Partager cet appareil et ses cycles de référence enregistrés sur la boutique communautaire pour que d'autres utilisateurs du même modèle puissent les adopter",
+    "share_n": "Partager {n} cycle(s)"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Anonyme",
     "rate_quality": "Évaluer la qualité",
     "rate_n": "{n} étoiles",
-    "approved_only": "Approuvés uniquement"
+    "approved_only": "Approuvés uniquement",
+    "adopt_settings": "Adopter aussi les paramètres",
+    "flags": "Indicateurs",
+    "include_phase_map": "Inclure la carte des phases",
+    "include_settings": "Inclure les paramètres de détection et de reconnaissance",
+    "show_contributor": "Afficher les noms des contributeurs"
   },
   "log": {
     "all_levels": "Tous niveaux",
@@ -627,7 +637,8 @@
     "force_stop_title": "Forcer l'arrêt du cycle",
     "force_stop_msg": "Forcer l'arrêt du cycle actif maintenant ? Le cycle sera enregistré comme interrompu.",
     "store_import": "Importer un cycle de référence",
-    "store_share": "Partager sur la boutique communautaire"
+    "store_share": "Partager sur la boutique communautaire",
+    "store_share_device": "Partager cet appareil"
   },
   "msg": {
     "appliance_monitor": "Moniteur d'appareils",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Activez les fonctionnalités en ligne dans l'icône des paramètres pour choisir dans le catalogue de la communauté.",
     "pick_brand_first": "Choisissez d'abord une marque d'appareil.",
     "model_not_found": "Pas encore dans le catalogue.",
-    "connect_to_confirm": "Connectez-vous dans l'icône des paramètres pour confirmer ou évaluer."
+    "connect_to_confirm": "Connectez-vous dans l'icône des paramètres pour confirmer ou évaluer.",
+    "adopt_settings_hint": "Remplacer les seuils de détection et de reconnaissance de cet appareil par ceux partagés. Vos notifications, entités et prix de l'énergie ne sont jamais modifiés.",
+    "include_settings_hint": "Partager les seuils de reconnaissance et de correspondance de cet appareil (pas vos notifications, entités ou prix de l'énergie). Les adoptants choisissent s'ils souhaitent les appliquer.",
+    "onboard_download": "Nouvel appareil ? Adoptez une configuration prête à l'emploi (programmes, cycles de référence et phases) d'un autre utilisateur WashData avec le même appareil.",
+    "share_consent": "Je confirme que ces cycles se sont déroulés normalement jusqu'à la fin, sans interruption",
+    "share_device_none": "Aucun cycle partageable pour l'instant. Marquez d'abord un cycle enregistré ou sélectionné à la main comme cycle de référence (⭐) dans l'onglet Cycles.",
+    "share_guideline_naming": "Nommez chaque profil exactement comme indiqué sur le cadran ou l'afficheur de l'appareil (p. ex. 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Ne partagez que les cycles qui se sont terminés normalement -- sans interruptions en cours de cycle, ouvertures de porte ou micro-coupures de courant.",
+    "share_guideline_review": "Votre envoi commence en attente de validation et apparaît publiquement dès que suffisamment de membres de la communauté le confirment.",
+    "share_guidelines_title": "Avant de partager",
+    "store_download_device_intro": "Adoptez chaque programme partagé et ses cycles de référence sur votre appareil. Vos propres cycles enregistrés et statistiques ne sont pas affectés.",
+    "store_share_device_intro": "Envoyez {brand} {model} avec les cycles de référence que vous sélectionnez. D'autres utilisateurs du même appareil peuvent adopter vos programmes. Les entrées sont examinées avant d'apparaître publiquement.",
+    "share_profile_no_cycles": "Aucun cycle de référence -- marquez un cycle comme ⭐ dans l'onglet Cycles pour inclure ce profil"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Chute soudaine traitée comme une fin immédiate",
@@ -1300,6 +1323,10 @@
     "store_model": {
       "label": "Modèle de l'appareil",
       "doc": "Facultatif. Le modèle de l'appareil, choisi dans le catalogue de la communauté une fois la marque définie. Si votre modèle n'y figure pas, vous pouvez l'ajouter au catalogue."
+    },
+    "show_contributor": {
+      "label": "Afficher les noms des contributeurs",
+      "doc": "Afficher l'attribution « par <contributeur> » sur les appareils de la communauté et les cycles de référence."
     }
   },
   "setting_group": {
@@ -1525,7 +1552,18 @@
     "device_approved": "Approuvé par la communauté",
     "rating_saved": "Évaluation de la qualité enregistrée",
     "brand_added": "Marque ajoutée, en attente d'approbation",
-    "profile_added": "Profil ajouté, en attente d'approbation"
+    "profile_added": "Profil ajouté, en attente d'approbation",
+    "saved_except_conflicts": "Enregistré. Corrigez les conflits mis en évidence pour enregistrer le reste.",
+    "share_device_none_sel": "Sélectionnez au moins un cycle à partager",
+    "store_device_downloaded": "{p} programme(s), {c} enregistrement(s) ajouté(s)",
+    "store_device_downloaded_phases": "{p} programme(s), {c} enregistrement(s), {ph} carte(s) de phases ajoutée(s)",
+    "store_device_downloaded_settings": "{p} programme(s), {c} enregistrement(s), {ph} carte(s) de phases, {s} paramètre(s) ajouté(s)",
+    "store_device_shared": "{n} cycle(s) partagé(s) sur la boutique communautaire -- en attente de validation.",
+    "store_device_shared_all_dup": "Les {n} cycle(s) étaient déjà dans la boutique communautaire.",
+    "store_device_shared_partial": "{n} cycle(s) partagé(s) ; {failed} n'ont pas pu être envoyés.",
+    "store_device_shared_some_dup": "{created} cycle(s) partagé(s) ; {dup} étaient déjà dans la boutique.",
+    "store_download_failed": "Échec du téléchargement : {error}",
+    "store_download_nothing": "Rien de nouveau à télécharger -- cette configuration est déjà sur votre appareil."
   },
   "suggestion": {
     "both_agree": "WashData recommande",
@@ -1642,7 +1680,8 @@
     "energy_tip": "Énergie totale consommée (kWh). Calculée en intégrant la puissance dans le temps.",
     "cost_tip": "Coût énergétique de ce cycle, figé à la fin en utilisant le prix alors en vigueur (énergie x prix par kWh). Définissez un prix dans les Paramètres pour le renseigner.",
     "confidence_tip": "Confiance de correspondance du profil (0-100 %). À quel point la courbe de puissance du cycle correspondait au programme identifié.",
-    "health_tip": "Santé du cycle par ML (plus élevé = mieux). Cliquez sur un cycle pour l'inspecter et l'examiner."
+    "health_tip": "Santé du cycle par ML (plus élevé = mieux). Cliquez sur un cycle pour l'inspecter et l'examiner.",
+    "flags_tip": "Indicateurs de révision, d'anomalie et de source pour le cycle. Survolez une icône pour plus de détails."
   },
   "stat": {
     "avg": "moy.",

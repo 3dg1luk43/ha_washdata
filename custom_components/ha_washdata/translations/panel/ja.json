@@ -164,7 +164,12 @@
     "share_to_store": "ストアに共有",
     "share": "共有",
     "confirm_appliance": "この家電を確認",
-    "confirmed": "確認済み"
+    "confirmed": "確認済み",
+    "browse_community_setups": "コミュニティのセットアップを閲覧",
+    "download_device": "このセットアップをダウンロード",
+    "share_device": "⬆ このデバイスを共有",
+    "share_device_tip": "この機器と記録済みリファレンスサイクルをコミュニティストアに共有して、同じ機種を持つ他のユーザーが利用できるようにします",
+    "share_n": "{n}件のサイクルを共有"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "匿名",
     "rate_quality": "品質を評価",
     "rate_n": "星{n}つ",
-    "approved_only": "承認済みのみ"
+    "approved_only": "承認済みのみ",
+    "adopt_settings": "設定も引き継ぐ",
+    "flags": "フラグ",
+    "include_phase_map": "フェーズマップを含める",
+    "include_settings": "検出・マッチング設定を含める",
+    "show_contributor": "投稿者名を表示"
   },
   "log": {
     "all_levels": "すべてのレベル",
@@ -627,7 +637,8 @@
     "force_stop_title": "サイクルを強制停止",
     "force_stop_msg": "アクティブなサイクルを今すぐ強制停止しますか？サイクルは中断として保存されます。",
     "store_import": "基準サイクルをインポート",
-    "store_share": "コミュニティストアに共有"
+    "store_share": "コミュニティストアに共有",
+    "store_share_device": "このデバイスを共有"
   },
   "msg": {
     "appliance_monitor": "アプライアンスモニター",
@@ -834,7 +845,19 @@
     "store_picker_offline": "設定（歯車アイコン）でオンライン機能を有効にすると、コミュニティカタログから選択できます。",
     "pick_brand_first": "先に家電ブランドを選択してください。",
     "model_not_found": "まだカタログにありません。",
-    "connect_to_confirm": "確認や評価を行うには、設定（歯車アイコン）で接続してください。"
+    "connect_to_confirm": "確認や評価を行うには、設定（歯車アイコン）で接続してください。",
+    "adopt_settings_hint": "このデバイスの検出・マッチングしきい値を共有されたものに上書きします。通知、エンティティ、電力料金は変更されません。",
+    "include_settings_hint": "このデバイスの認識・マッチングしきい値を共有します（通知、エンティティ、電力料金は除く）。引き継ぐかどうかは引継ぎ側が選択します。",
+    "onboard_download": "新しいデバイスですか？同じ機器を持つ他のWashDataユーザーの既成セットアップ（プログラム、リファレンスサイクル、フェーズ）を引き継ぎましょう。",
+    "share_consent": "これらのサイクルが中断なく正常に完了したことを確認します",
+    "share_device_none": "まだ共有できるサイクルがありません。サイクルタブで記録または手動選択したサイクルをリファレンスサイクル（⭐）として先にマークしてください。",
+    "share_guideline_naming": "各プロファイルは機器のダイヤルやディスプレイに表示されている通りに名前を付けてください（例：'Cotton 40'、'Eco 60'）。",
+    "share_guideline_quality": "正常に完了したサイクルのみ共有してください -- サイクル途中の中断、ドア開放、電力の乱れがないものに限ります。",
+    "share_guideline_review": "アップロードは審査中として開始され、十分なコミュニティメンバーが確認すると公開されます。",
+    "share_guidelines_title": "共有前に",
+    "store_download_device_intro": "共有されたすべてのプログラムとそのリファレンスサイクルをデバイスに引き継ぎます。ご自身の記録済みサイクルと統計には影響しません。",
+    "store_share_device_intro": "選択したリファレンスサイクルとともに{brand} {model}をアップロードします。同じ機器を持つ他のユーザーがあなたのプログラムを引き継ぐことができます。エントリは公開前に審査されます。",
+    "share_profile_no_cycles": "リファレンスサイクルなし -- サイクルタブでサイクルを⭐としてマークしてこのプロファイルを含めてください"
   },
   "pg_desc": {
     "abrupt_drop_watts": "急激な低下は即時終了として扱う",
@@ -1300,6 +1323,9 @@
     "store_model": {
       "label": "家電モデル",
       "doc": "任意。ブランドを設定すると、コミュニティカタログから選択できる家電モデルです。お使いのモデルが一覧にない場合は、カタログに追加できます。"
+    },
+    "show_contributor": {
+      "doc": "コミュニティの家電および基準サイクルに「by <contributor>」のクレジット表示をします。"
     }
   },
   "setting_group": {
@@ -1525,7 +1551,18 @@
     "device_approved": "コミュニティによって承認されました",
     "rating_saved": "品質評価を保存しました",
     "brand_added": "ブランドを追加しました（承認待ち）",
-    "profile_added": "プロファイルを追加しました（承認待ち）"
+    "profile_added": "プロファイルを追加しました（承認待ち）",
+    "saved_except_conflicts": "保存しました。残りを保存するにはハイライトされた競合を修正してください。",
+    "share_device_none_sel": "共有するサイクルを少なくとも1つ選択してください",
+    "store_device_downloaded": "{p}件のプログラム、{c}件の記録を追加しました",
+    "store_device_downloaded_phases": "{p}件のプログラム、{c}件の記録、{ph}件のフェーズマップを追加しました",
+    "store_device_downloaded_settings": "{p}件のプログラム、{c}件の記録、{ph}件のフェーズマップ、{s}件の設定を追加しました",
+    "store_device_shared": "{n}件のサイクルをコミュニティストアに共有しました - 審査中。",
+    "store_device_shared_all_dup": "{n}件のサイクルはすべて既にコミュニティストアにありました。",
+    "store_device_shared_partial": "{n}件のサイクルを共有しました。{failed}件はアップロードできませんでした。",
+    "store_device_shared_some_dup": "{created}件のサイクルを共有しました。{dup}件は既にストアにありました。",
+    "store_download_failed": "ダウンロードに失敗しました: {error}",
+    "store_download_nothing": "ダウンロードする新しいものはありません - このセットアップは既にデバイスにあります。"
   },
   "suggestion": {
     "both_agree": "WashDataの推奨",
@@ -1642,7 +1679,8 @@
     "energy_tip": "消費された総エネルギー（kWh）。電力を時間で積分して計算されます。",
     "cost_tip": "このサイクルのエネルギー料金。完了時にその時点で有効な価格（エネルギー x kWh あたりの価格）で確定されます。設定で価格を指定すると入力されます。",
     "confidence_tip": "プロファイルのマッチ信頼度（0～100%）。サイクルの電力曲線が識別されたプログラムとどれだけ一致したか。",
-    "health_tip": "ML サイクルの健康度（高いほど良好）。サイクルをクリックして検査・レビューします。"
+    "health_tip": "ML サイクルの健康度（高いほど良好）。サイクルをクリックして検査・レビューします。",
+    "flags_tip": "サイクルのレビュー、異常、ソースフラグ。アイコンにカーソルを合わせると詳細が表示されます。"
   },
   "stat": {
     "avg": "平均",

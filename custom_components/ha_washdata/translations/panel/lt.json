@@ -164,7 +164,12 @@
     "share_to_store": "Bendrinti parduotuvėje",
     "share": "Bendrinti",
     "confirm_appliance": "Patvirtinti šį prietaisą",
-    "confirmed": "Patvirtinta"
+    "confirmed": "Patvirtinta",
+    "browse_community_setups": "Naršyti bendruomenės konfigūracijas",
+    "download_device": "Atsisiųsti šią konfigūraciją",
+    "share_device": "⬆ Dalintis šiuo įrenginiu",
+    "share_device_tip": "Bendrinkite šį prietaisą ir jo įrašytus etaloniniais ciklus bendruomenės parduotuvėje, kad kiti, turintys tą patį aparatą, galėtų juos perimti",
+    "share_n": "Bendrinti {n} ciklą(-us)"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Anonimas",
     "rate_quality": "Įvertinti kokybę",
     "rate_n": "{n} žvaigždutės",
-    "approved_only": "Tik patvirtinti"
+    "approved_only": "Tik patvirtinti",
+    "adopt_settings": "Taip pat perimti nustatymus",
+    "flags": "Žymės",
+    "include_phase_map": "Įtraukti fazių žemėlapį",
+    "include_settings": "Įtraukti aptikimo ir atitikties nustatymus",
+    "show_contributor": "Rodyti dalyvių vardus"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -627,7 +637,8 @@
     "force_stop_title": "Priverstinai sustabdyti ciklą",
     "force_stop_msg": "Priverstinai sustabdyti aktyvų ciklą dabar? Ciklas bus išsaugotas kaip nutrauktas.",
     "store_import": "Importuoti etaloninį ciklą",
-    "store_share": "Bendrinti bendruomenės parduotuvėje"
+    "store_share": "Bendrinti bendruomenės parduotuvėje",
+    "store_share_device": "Bendrinti šį įrenginį"
   },
   "msg": {
     "appliance_monitor": "Prietaisų monitorius",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Įjunkite interneto funkcijas nustatymų krumpliaratyje, kad galėtumėte rinktis iš bendruomenės katalogo.",
     "pick_brand_first": "Pirmiausia pasirinkite prietaiso prekės ženklą.",
     "model_not_found": "Kol kas nėra kataloge.",
-    "connect_to_confirm": "Prisijunkite nustatymų krumpliaratyje, kad galėtumėte patvirtinti ar įvertinti."
+    "connect_to_confirm": "Prisijunkite nustatymų krumpliaratyje, kad galėtumėte patvirtinti ar įvertinti.",
+    "adopt_settings_hint": "Perrašykite šio įrenginio aptikimo ir atitikties slenksčius bendrais. Jūsų pranešimai, esybės ir energijos kaina niekada nekeičiami.",
+    "include_settings_hint": "Bendrinkite šio įrenginio atpažinimo ir atitikties slenksčius (ne jūsų pranešimus, esybes ar energijos kainą). Perėmėjai pasirenka, ar juos taikyti.",
+    "onboard_download": "Naujas įrenginys? Perimkite paruoštą konfigūraciją (programas, etalonius ciklus ir fazes) iš kito WashData naudotojo, turinčio tą patį prietaisą.",
+    "share_consent": "Patvirtinu, kad šie ciklai vyko normaliai iki pabaigos be pertrūkių",
+    "share_device_none": "Dar nėra bendrintinų ciklų. Pirmiausia Ciklų skirtuke pažymėkite įrašytą arba rankiniu būdu pasirinktą ciklą kaip etaloninį ciklą (⭐).",
+    "share_guideline_naming": "Pavadinkite kiekvieną profilį tiksliai taip, kaip rodoma prietaiso reguliatoriuje ar ekrane (pvz., 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Bendrinkite tik ciklus, kurie baigėsi normaliai -- be pertrūkių ciklo viduryje, durų atidarymo įvykių ar galios sutrikimų.",
+    "share_guideline_review": "Jūsų įkėlimas pradedamas kaip laukiantis ir tampa viešas, kai pakankamai bendruomenės narių jį patvirtina.",
+    "share_guidelines_title": "Prieš dalijantis",
+    "store_download_device_intro": "Perimkite kiekvieną bendrą programą ir jos etalonius ciklus į savo įrenginį. Jūsų pačių įrašyti ciklai ir statistika neįtakojami.",
+    "store_share_device_intro": "Įkelkite {brand} {model} su pasirinktais etaloniniais ciklais. Kiti, turintys tą patį prietaisą, gali perimti jūsų programas. Įrašai peržiūrimi prieš viešinant.",
+    "share_profile_no_cycles": "Nėra etaloninių ciklų -- pažymėkite ciklą kaip ⭐ Ciklų skirtuke, kad įtrauktumėte šį profilį"
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1283,6 +1306,9 @@
     "store_model": {
       "label": "Prietaiso modelis",
       "doc": "Nebūtina. Prietaiso modelis, pasirenkamas iš bendruomenės katalogo, kai nustatytas prekės ženklas. Jei jūsų modelio sąraše nėra, galite jį įtraukti į katalogą."
+    },
+    "show_contributor": {
+      "doc": "Rodyti \"autorius: <dalyvis>\" priskyrimą bendruomenės prietaisuose ir etaloniniuose cikluose."
     }
   },
   "setting_group": {
@@ -1508,7 +1534,18 @@
     "device_approved": "Bendruomenė patvirtino",
     "rating_saved": "Kokybės įvertinimas išsaugotas",
     "brand_added": "Prekės ženklas pridėtas - laukiama patvirtinimo",
-    "profile_added": "Profilis pridėtas - laukiama patvirtinimo"
+    "profile_added": "Profilis pridėtas - laukiama patvirtinimo",
+    "saved_except_conflicts": "Išsaugota. Ištaisykite paryškintus konfliktus, kad išsaugotumėte likusį.",
+    "share_device_none_sel": "Pasirinkite bent vieną ciklą dalinimuisi",
+    "store_device_downloaded": "{p} programa(-ų), {c} įrašas(-ai) pridėta",
+    "store_device_downloaded_phases": "{p} programa(-ų), {c} įrašas(-ai), {ph} fazių žemėlapis(-iai) pridėta",
+    "store_device_downloaded_settings": "{p} programa(-ų), {c} įrašas(-ai), {ph} fazių žemėlapis(-iai), {s} nustatymas(-ai) pridėta",
+    "store_device_shared": "{n} ciklas(-ai) bendrinta(-a) bendruomenės parduotuvėje - laukiama peržiūros.",
+    "store_device_shared_all_dup": "Visi {n} ciklai jau buvo bendruomenės parduotuvėje.",
+    "store_device_shared_partial": "{n} ciklai bendrinti; {failed} nepavyko įkelti.",
+    "store_device_shared_some_dup": "{created} ciklai bendrinti; {dup} jau buvo parduotuvėje.",
+    "store_download_failed": "Atsisiuntimas nepavyko: {error}",
+    "store_download_nothing": "Nieko naujo atsisiųsti -- ši konfigūracija jau yra jūsų įrenginyje."
   },
   "suggestion": {
     "both_agree": "WashData rekomenduoja",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Bendras suvartotos energijos kiekis (kWh). Apskaičiuojamas integruojant galią laike.",
     "cost_tip": "Šio ciklo energijos kaina, užfiksuota jam pasibaigus pagal tuo metu galiojusią kainą (energija x kaina už kWh). Nustatykite kainą Nustatymuose, kad ji būtų užpildyta.",
     "confidence_tip": "Profilio atitikties pasitikėjimas (0–100 %). Kaip glaudžiai ciklo galios kreivė atitiko atpažintą programą.",
-    "health_tip": "ML ciklo būklė (daugiau = geriau). Spustelėkite ciklą, kad jį patikrintumėte ir peržiūrėtumėte."
+    "health_tip": "ML ciklo būklė (daugiau = geriau). Spustelėkite ciklą, kad jį patikrintumėte ir peržiūrėtumėte.",
+    "flags_tip": "Ciklo peržiūros, anomalijų ir šaltinio žymės. Užveskite pelę ant piktogramos, kad matytumėte detales."
   },
   "stat": {
     "avg": "vid.",

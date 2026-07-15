@@ -164,7 +164,12 @@
     "share_to_store": "Jaga poodi",
     "share": "Jaga",
     "confirm_appliance": "Kinnita see seade",
-    "confirmed": "Kinnitatud"
+    "confirmed": "Kinnitatud",
+    "browse_community_setups": "Sirvi kogukonna seadistusi",
+    "download_device": "Laadi see seadistus alla",
+    "share_device": "⬆ Jaga seda seadet",
+    "share_device_tip": "Jaga seda kodumasinat ja selle salvestatud võrdlustsükleid kogukonna poodi, et teised sama masina omanikud saaksid neid kasutusele võtta",
+    "share_n": "Jaga {n} tsüklit"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Anonüümne",
     "rate_quality": "Hinda kvaliteeti",
     "rate_n": "{n} tähte",
-    "approved_only": "Ainult heaks kiidetud"
+    "approved_only": "Ainult heaks kiidetud",
+    "adopt_settings": "Võta ka seaded kasutusele",
+    "flags": "Embleemid",
+    "include_phase_map": "Kaasa faasikaart",
+    "include_settings": "Kaasa tuvastus- ja sobitamisseaded",
+    "show_contributor": "Näita kaastöötajate nimesid"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -627,7 +637,8 @@
     "force_stop_title": "Peata tsükkel jõuga",
     "force_stop_msg": "Kas peatada aktiivne tsükkel kohe jõuga? Tsükkel salvestatakse katkestatuna.",
     "store_import": "Impordi võrdlustsükkel",
-    "store_share": "Jaga kogukonna poodi"
+    "store_share": "Jaga kogukonna poodi",
+    "store_share_device": "Jaga seda seadet"
   },
   "msg": {
     "appliance_monitor": "Seadmete monitor",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Luba veebifunktsioonid seadete hammasrattast, et valida kogukonna kataloogist.",
     "pick_brand_first": "Vali kõigepealt seadme bränd.",
     "model_not_found": "Pole veel kataloogis.",
-    "connect_to_confirm": "Ühenda seadete hammasrattast, et kinnitada või hinnata."
+    "connect_to_confirm": "Ühenda seadete hammasrattast, et kinnitada või hinnata.",
+    "adopt_settings_hint": "Kirjuta üle selle seadme tuvastus- ja sobitamislävede ühiskasutuses olevad. Teie teatisi, olemeid ja energiahinda ei muudeta kunagi.",
+    "include_settings_hint": "Jaga selle seadme tuvastus- ja sobitamislävesid (mitte teie teatisi, olemeid ega energiahinda). Kasutusele võtjad otsustavad, kas neid rakendada.",
+    "onboard_download": "Uus seade? Võtke kasutusele valmis seadistus (programmid, võrdlustsüklid ja faasid) teiselt WashData kasutajalt, kellel on sama kodumasin.",
+    "share_consent": "Kinnitan, et need tsüklid lõpetati normaalselt ilma katkestusteta",
+    "share_device_none": "Jagatavaid tsükleid pole veel. Märkige salvestatud või käsitsi valitud tsükkel esmalt Tsüklid-vahekaardil võrdlustsükliks (⭐).",
+    "share_guideline_naming": "Nimetage iga profiil täpselt nii, nagu on näidatud kodumasina nupp- või ekraanivaatest (nt 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Jagage ainult tsükleid, mis lõpetati normaalselt -- ei mingeid katkestusi tsükli keskel, ukse avamise sündmusi ega võimsuslünki.",
+    "share_guideline_review": "Teie üleslaadimine algab ootelolekuna ja muutub avalikuks, kui piisavalt kogukonna liikmeid selle kinnitab.",
+    "share_guidelines_title": "Enne jagamist",
+    "store_download_device_intro": "Võtke kasutusele iga jagatud programm ja selle võrdlustsüklid oma seadmel. Teie enda salvestatud tsükleid ja statistikat ei mõjutata.",
+    "store_share_device_intro": "Laadige {brand} {model} üles valitud võrdlustsüklitega. Teised sama kodumasina kasutajad saavad teie programme kasutusele võtta. Kirjeid vaadatakse üle enne avalikustamist.",
+    "share_profile_no_cycles": "Võrdlustsükleid pole -- märkige tsükkel ⭐-ks Tsüklid-vahekaardil, et lisada see profiil"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Järsk langus käsitletakse kohese lõpuna",
@@ -1300,6 +1323,9 @@
     "store_model": {
       "label": "Seadme mudel",
       "doc": "Valikuline. Seadme mudel, mis valitakse kogukonna kataloogist, kui bränd on määratud. Kui sinu mudelit pole loendis, saad selle kataloogi lisada."
+    },
+    "show_contributor": {
+      "doc": "Kuva \"<kaastöötaja> poolt\" omistamine kogukonna kodumasinate ja võrdlustsüklite juures."
     }
   },
   "setting_group": {
@@ -1525,7 +1551,18 @@
     "device_approved": "Kogukond kiitis heaks",
     "rating_saved": "Kvaliteedihinnang salvestatud",
     "brand_added": "Bränd lisatud - ootab heakskiitu",
-    "profile_added": "Profiil lisatud - ootab heakskiitu"
+    "profile_added": "Profiil lisatud - ootab heakskiitu",
+    "saved_except_conflicts": "Salvestatud. Parandage esiletõstetud konfliktid ülejäänud salvestamiseks.",
+    "share_device_none_sel": "Valige jagamiseks vähemalt üks tsükkel",
+    "store_device_downloaded": "{p} programmi, {c} salvestist lisatud",
+    "store_device_downloaded_phases": "{p} programmi, {c} salvestist, {ph} faasikaart(i) lisatud",
+    "store_device_downloaded_settings": "{p} programmi, {c} salvestist, {ph} faasikaart(i), {s} sätet lisatud",
+    "store_device_shared": "{n} tsüklit jagatud kogukonna poodi - ootab ülevaatamist.",
+    "store_device_shared_all_dup": "Kõik {n} tsüklit olid juba kogukonna poes.",
+    "store_device_shared_partial": "{n} tsüklit jagatud; {failed} ei saanud üles laadida.",
+    "store_device_shared_some_dup": "{created} tsüklit jagatud; {dup} olid juba poes.",
+    "store_download_failed": "Allalaadimine ebaõnnestus: {error}",
+    "store_download_nothing": "Midagi uut alla laadida pole - see seadistus on juba teie seadmel."
   },
   "suggestion": {
     "both_agree": "WashData soovitab",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Kokku tarbitud energia (kWh). Arvutatud võimsuse integreerimisel aja jooksul.",
     "cost_tip": "Selle tsükli energiakulu, fikseeritud lõpetamisel tollal kehtinud hinna järgi (energia x hind kWh kohta). Selle täitmiseks määra hind seadetes.",
     "confidence_tip": "Profiili vaste usaldus (0-100%). Kui täpselt tsükli võimsuskõver vastas tuvastatud programmile.",
-    "health_tip": "ML tsükli tervis (kõrgem = parem). Klõpsa tsüklil, et seda uurida ja üle vaadata."
+    "health_tip": "ML tsükli tervis (kõrgem = parem). Klõpsa tsüklil, et seda uurida ja üle vaadata.",
+    "flags_tip": "Tsükli ülevaatus-, anomaalia- ja allika embleemid. Hõljutage ikooni kohal üksikasja nägemiseks."
   },
   "stat": {
     "avg": "keskm.",

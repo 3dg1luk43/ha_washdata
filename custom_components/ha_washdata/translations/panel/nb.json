@@ -164,7 +164,12 @@
     "share_to_store": "Del i butikken",
     "share": "Del",
     "confirm_appliance": "Bekreft dette apparatet",
-    "confirmed": "Bekreftet"
+    "confirmed": "Bekreftet",
+    "browse_community_setups": "Se fellesskapsoppsett",
+    "download_device": "Last ned dette oppsettet",
+    "share_device": "⬆ Del dette apparatet",
+    "share_device_tip": "Del dette apparatet og dets innspilte referansesykluser til fellesskapsbutikken slik at andre med samme maskin kan ta dem i bruk",
+    "share_n": "Del {n} syklus/sykluser"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Anonym",
     "rate_quality": "Vurder kvalitet",
     "rate_n": "{n} stjerner",
-    "approved_only": "Kun godkjente"
+    "approved_only": "Kun godkjente",
+    "adopt_settings": "Ta også over innstillinger",
+    "flags": "Flagg",
+    "include_phase_map": "Inkluder fasekart",
+    "include_settings": "Inkluder deteksjons- og matchinnstillinger",
+    "show_contributor": "Vis bidragsyternavn"
   },
   "log": {
     "all_levels": "Alle nivåer",
@@ -627,7 +637,8 @@
     "force_stop_title": "Tvangsstopp av syklus",
     "force_stop_msg": "Tvangsstoppe den aktive syklusen nå? Syklusen lagres som avbrutt.",
     "store_import": "Importer referansesyklus",
-    "store_share": "Del i fellesskapsbutikken"
+    "store_share": "Del i fellesskapsbutikken",
+    "store_share_device": "Del dette apparatet"
   },
   "msg": {
     "appliance_monitor": "Apparatmonitor",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Aktiver nettfunksjoner i innstillingstannhjulet for å velge fra fellesskapskatalogen.",
     "pick_brand_first": "Velg et apparatmerke først.",
     "model_not_found": "Ikke i katalogen ennå.",
-    "connect_to_confirm": "Koble til i innstillingstannhjulet for å bekrefte eller vurdere."
+    "connect_to_confirm": "Koble til i innstillingstannhjulet for å bekrefte eller vurdere.",
+    "adopt_settings_hint": "Overskriver deteksjons- og matchgrensene for dette apparatet med de delte. Dine varslinger, entiteter og energipris endres aldri.",
+    "include_settings_hint": "Deler deteksjons- og matchgrensene for dette apparatet (ikke dine varslinger, entiteter eller energipris). Brukere velger selv om de vil bruke dem.",
+    "onboard_download": "Nytt apparat? Ta i bruk et ferdig oppsett (programmer, referansesykluser og faser) fra en annen WashData-bruker med samme apparat.",
+    "share_consent": "Jeg bekrefter at disse syklusene ble fullført normalt uten avbrudd",
+    "share_device_none": "Ingen delbare sykluser ennå. Marker en innspilt eller håndplukket syklus som referansesyklus (⭐) under fanen Sykluser først.",
+    "share_guideline_naming": "Gi hver profil nøyaktig det navnet som vises på apparatets dreieknapp eller display (f.eks. 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Del bare sykluser som ble fullført normalt -- ingen avbrudd midt i syklusen, åpning av dør eller strømbortfall.",
+    "share_guideline_review": "Din opplasting starter som ventende og vises offentlig når nok fellesskapsmedlemmer bekrefter den.",
+    "share_guidelines_title": "Før du deler",
+    "store_download_device_intro": "Ta over alle delte programmer og deres referansesykluser til apparatet ditt. Dine egne innspilte sykluser og statistikk påvirkes ikke.",
+    "store_share_device_intro": "Last opp {brand} {model} med referansesyklusene du velger. Andre med samme apparat kan ta i bruk programmene dine. Bidrag gjennomgås før de vises offentlig.",
+    "share_profile_no_cycles": "Ingen referansesykluser -- marker en syklus som ⭐ under fanen Sykluser for å inkludere denne profilen"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plutselig fall behandlet som umiddelbar slutt",
@@ -1300,6 +1323,9 @@
     "store_model": {
       "label": "Apparatets modell",
       "doc": "Valgfritt. Apparatets modell, valgt fra fellesskapskatalogen når et merke er angitt. Hvis modellen din ikke er oppført, kan du legge den til i katalogen."
+    },
+    "show_contributor": {
+      "doc": "Viser tilskrivningen 'av <contributor>' på fellesskapsapparater og referansesykluser."
     }
   },
   "setting_group": {
@@ -1621,7 +1647,18 @@
     "device_approved": "Godkjent av fellesskapet",
     "rating_saved": "Kvalitetsvurdering lagret",
     "brand_added": "Merke lagt til, venter på godkjenning",
-    "profile_added": "Profil lagt til, venter på godkjenning"
+    "profile_added": "Profil lagt til, venter på godkjenning",
+    "saved_except_conflicts": "Lagret. Løs de merkede konfliktene for å lagre resten.",
+    "share_device_none_sel": "Velg minst én syklus å dele",
+    "store_device_downloaded": "{p} program(mer), {c} opptak tilføyd",
+    "store_device_downloaded_phases": "{p} program(mer), {c} opptak, {ph} fasekart tilføyd",
+    "store_device_downloaded_settings": "{p} program(mer), {c} opptak, {ph} fasekart, {s} innstilling(er) tilføyd",
+    "store_device_shared": "{n} syklus/sykluser delt i fellesskapsbutikken -- venter på gjennomgang.",
+    "store_device_shared_all_dup": "Alle {n} syklus/sykluser var allerede i fellesskapsbutikken.",
+    "store_device_shared_partial": "{n} syklus/sykluser delt; {failed} kunne ikke lastes opp.",
+    "store_device_shared_some_dup": "{created} syklus/sykluser delt; {dup} var allerede i butikken.",
+    "store_download_failed": "Nedlasting mislyktes: {error}",
+    "store_download_nothing": "Ingenting nytt å laste ned -- dette oppsettet er allerede på apparatet ditt."
   },
   "trend": {
     "down": "Trender nedover",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Totalt forbrukt energi (kWh). Beregnet ved å integrere effekten over tid.",
     "cost_tip": "Energikostnad for denne syklusen, låst ved fullføring med prisen som gjaldt da (energi x pris per kWh). Angi en pris under Innstillinger for å fylle den ut.",
     "confidence_tip": "Profilmatchkonfidens (0-100 %). Hvor tett syklusens effektkurve matchet det identifiserte programmet.",
-    "health_tip": "ML-syklushelse (høyere = bedre). Klikk på en syklus for å inspisere og gjennomgå den."
+    "health_tip": "ML-syklushelse (høyere = bedre). Klikk på en syklus for å inspisere og gjennomgå den.",
+    "flags_tip": "Gjennomgangs-, anomali- og kildeflagg for syklusen. Hold musepekeren over et ikon for detaljer."
   },
   "stat": {
     "avg": "gj.sn.",

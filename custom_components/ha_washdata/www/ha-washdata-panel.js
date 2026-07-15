@@ -762,6 +762,9 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
 .wd-profile-card:hover { border-color: var(--primary-color); transform: translateY(-1px); }
 button.wd-attn-card, button.wd-profile-card { appearance: none; font: inherit; text-align: left; width: 100%; }
 button.wd-profile-card { display: block; }
+.wd-prof-wrap { position: relative; }
+.wd-prof-share-btn { position: absolute; bottom: 8px; right: 8px; opacity: .65; padding: 2px 7px; }
+.wd-prof-share-btn:hover { opacity: 1; }
 .wd-profile-name { font-weight: 600; font-size: 1em; margin-bottom: 6px; }
 .wd-profile-meta { font-size: .8em; color: var(--secondary-text-color); }
 /* D2: mini duration sparkline on profile cards */
@@ -791,6 +794,7 @@ button.wd-profile-card { display: block; }
 .wd-store-cycle-stats { flex: 1; min-width: 0; }
 .wd-store-spark { width: 120px; height: 36px; flex-shrink: 0; display: block; background: var(--secondary-background-color); border-radius: 6px; }
 .wd-store-conn { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.wd-store-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 .wd-tag-pending { background: rgba(56,139,253,.18); color: var(--info-color, #58a6ff); }
 .wd-tag-approved { background: rgba(63,185,80,.18); color: var(--success-color, #3fb950); }
 .wd-store-picker-detail { margin-top: 6px; font-size: .85em; color: var(--secondary-text-color); display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
@@ -3855,11 +3859,17 @@ class HaWashdataPanel extends HTMLElement {
     const spark = (Array.isArray(p.signature_curve) && p.signature_curve.length >= 3)
       ? `<canvas class="wd-prof-spark" data-spark-prof="${_esc(p.name)}" width="64" height="20" aria-label="${_esc(this._t('lbl.sparkline', { name: p.name }, 'Average power curve'))}"></canvas>`
       : '';
+    const shareBtn = (this._onlineEnabled() && this._storeDeviceDeclared())
+      ? `<button class="wd-btn wd-btn-ghost wd-btn-sm wd-prof-share-btn" type="button" data-action="store-share-profile" data-prog="${_esc(p.name)}" title="${_esc(this._t('btn.share_device_tip', {}, 'Share this appliance and its recorded reference cycles to the community store so others with the same machine can adopt them'))}">⬆</button>`
+      : '';
     return `
-      <button class="wd-profile-card" type="button" data-action="open-profile" data-pname="${_esc(p.name)}">
-        <div class="wd-profile-name">${_esc(p.name)}${badges ? ' ' + badges : ''}${spark}</div>
-        <div class="wd-profile-meta">${p.cycle_count || 0} cycles · ${dur}${energy}${total}${cost}</div>
-      </button>`;
+      <div class="wd-prof-wrap">
+        <button class="wd-profile-card" type="button" data-action="open-profile" data-pname="${_esc(p.name)}">
+          <div class="wd-profile-name">${_esc(p.name)}${badges ? ' ' + badges : ''}${spark}</div>
+          <div class="wd-profile-meta">${p.cycle_count || 0} cycles · ${dur}${energy}${total}${cost}</div>
+        </button>
+        ${shareBtn}
+      </div>`;
   }
 
 
@@ -3981,7 +3991,6 @@ class HaWashdataPanel extends HTMLElement {
           <button class="wd-btn wd-btn-primary" data-action="create-profile" title="${_esc(this._t('btn.new_profile_tip', {}, 'Create a new program profile from an existing labelled cycle or recording'))}">${this._t('btn.new_profile', {}, '+ New Profile')}</button>
           <button class="wd-btn wd-btn-secondary" data-action="pg-new" title="${_esc(this._t('btn.new_group_tip', {}, 'Group near-identical profiles (same shape/duration, different temperature or spin) so the matcher reliably picks between them'))}">${this._t('btn.new_group', {}, '+ New Group')}</button>
           <button class="wd-btn wd-btn-secondary" data-action="rebuild-envelopes" ${rebuildBusy ? 'disabled' : ''} title="${_esc(this._t('btn.rebuild_tip', {}, 'Recompute the expected power envelope (min/max band) for all profiles from their labelled cycles — run after labelling new cycles or correcting old ones'))}">${rebuildBusy ? ('<span class="wd-spin"></span> ' + this._t('status.rebuilding', {}, 'Rebuilding…')) : this._t('btn.rebuild', {}, 'Rebuild Envelopes')}</button>
-          ${(this._onlineEnabled() && this._storeConnected && this._storeDeviceDeclared()) ? `<button class="wd-btn wd-btn-secondary" data-action="store-share-device" title="${_esc(this._t('btn.share_device_tip', {}, 'Share this appliance and its recorded reference cycles to the community store so others with the same machine can adopt them'))}">${this._t('btn.share_device', {}, '⬆ Share this device')}</button>` : ''}
         </div>` : ''}
       </div>
       ${sugBanner}
@@ -4365,6 +4374,10 @@ class HaWashdataPanel extends HTMLElement {
     }
     // The + button already covers "not in the catalog", and the approved-only
     // toggle is intentionally gone: pending entries are shown with a tag.
+    const storeActions = (this._onlineEnabled() && this._storeDeviceDeclared()) ? `<div class="wd-store-actions">
+      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="store-share-device" title="${_esc(this._t('btn.share_device_tip', {}, 'Share this appliance and its recorded reference cycles to the community store so others with the same machine can adopt them'))}">${this._t('btn.share_device', {}, '⬆ Share this device')}</button>
+      <button class="wd-btn wd-btn-ghost wd-btn-sm" data-action="store-download-device" ${match ? `data-device-id="${_esc(match.id)}"` : ''} title="${_esc(this._t('msg.store_download_device_intro', {}, 'Adopt every shared program and its reference cycles onto your device.'))}">${this._t('btn.download_device', {}, 'Download this setup')}</button>
+    </div>` : '';
     return `<div class="wd-field"><label>${_esc(label)} ${doc ? _tip(doc) : ''}${tag}${loading}</label>
       <div class="wd-combo-row">
         <div class="wd-combo">
@@ -4373,7 +4386,7 @@ class HaWashdataPanel extends HTMLElement {
         </div>
         <button type="button" class="wd-addbtn" data-action="store-add-appliance" title="${_esc(this._t('tip.add_appliance', {}, 'Model not listed? Add your appliance to the community catalog'))}" aria-label="${_esc(this._t('tip.add_appliance', {}, 'Add appliance'))}">+</button>
       </div>
-      ${extra}</div>`;
+      ${extra}${storeActions}</div>`;
   }
 
   // The community catalog only knows washer/dryer/dishwasher/washer_dryer; HA's
@@ -9066,6 +9079,31 @@ class HaWashdataPanel extends HTMLElement {
         this._modal.selected = sel;
         // Default: bundle the phase map for every program that has one.
         this._modal.includePhases = new Set(this._sharePhasePrograms);
+        this._modal.loading = false;
+        this._render();
+      })();
+
+    } else if (a === 'store-share-profile') {
+      // Open the share modal pre-filtered to a single profile's cycles.
+      const prog = btn.dataset.prog || '';
+      this._modal = { type: 'store-share-device', selected: new Set(), includePhases: new Set(), includeSettings: false, loading: true, focusProfile: prog };
+      this._render();
+      (async () => {
+        try {
+          const r = await this._ws({ type: `${_DOMAIN}/get_shareable_cycles`, entry_id: eid });
+          this._shareableCycles = (r && r.items) || [];
+          this._sharePhasePrograms = (r && r.phase_programs) || [];
+          this._shareAllPrograms = (r && r.all_programs) || [];
+        } catch (_) { this._shareableCycles = []; this._sharePhasePrograms = []; this._shareAllPrograms = []; }
+        if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'store-share-device') return;
+        // Pre-select only cycles belonging to the chosen profile.
+        const sel = new Set();
+        this._shareableByProgram()
+          .filter(g => g.program === prog)
+          .forEach(g => g.cycles.forEach(c => sel.add(c.id)));
+        this._modal.selected = sel;
+        // Include the phase map for this profile if one exists.
+        this._modal.includePhases = new Set((this._sharePhasePrograms || []).filter(p => p === prog));
         this._modal.loading = false;
         this._render();
       })();

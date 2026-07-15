@@ -164,7 +164,12 @@
     "share_to_store": "Del i butikken",
     "share": "Del",
     "confirm_appliance": "Bekræft dette apparat",
-    "confirmed": "Bekræftet"
+    "confirmed": "Bekræftet",
+    "browse_community_setups": "Gennemse fællesskabsopsætninger",
+    "download_device": "Download denne opsætning",
+    "share_device": "⬆ Del dette apparat",
+    "share_device_tip": "Del dette apparat og dets optagede referencecyklusser til fællesskabsbutikken, så andre med samme maskine kan overtage dem",
+    "share_n": "Del {n} cyklus/cyklusser"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Anonym",
     "rate_quality": "Bedøm kvalitet",
     "rate_n": "{n} stjerner",
-    "approved_only": "Kun godkendte"
+    "approved_only": "Kun godkendte",
+    "adopt_settings": "Overtag også indstillinger",
+    "flags": "Flags",
+    "include_phase_map": "Inkludér fasekort",
+    "include_settings": "Inkludér detektions- og matchindstillinger",
+    "show_contributor": "Vis bidragydernes navne"
   },
   "log": {
     "all_levels": "Alle niveauer",
@@ -627,7 +637,8 @@
     "force_stop_title": "Tving stop af cyklus",
     "force_stop_msg": "Tving den aktive cyklus til at stoppe nu? Cyklussen gemmes som afbrudt.",
     "store_import": "Importér referencecyklus",
-    "store_share": "Del i fællesskabsbutikken"
+    "store_share": "Del i fællesskabsbutikken",
+    "store_share_device": "Del dette apparat"
   },
   "msg": {
     "appliance_monitor": "Apparat monitor",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Aktivér onlinefunktioner i indstillingstandhjulet for at vælge fra fællesskabskataloget.",
     "pick_brand_first": "Vælg først et apparatmærke.",
     "model_not_found": "Ikke i kataloget endnu.",
-    "connect_to_confirm": "Opret forbindelse i indstillingstandhjulet for at bekræfte eller bedømme."
+    "connect_to_confirm": "Opret forbindelse i indstillingstandhjulet for at bekræfte eller bedømme.",
+    "adopt_settings_hint": "Overskriver dette apparats detektions- og matchgrænser med de delte. Dine notifikationer, entiteter og energipris ændres aldrig.",
+    "include_settings_hint": "Deler dette apparats detektions- og matchgrænser (ikke dine notifikationer, entiteter eller energipris). Brugerne vælger selv, om de vil anvende dem.",
+    "onboard_download": "Nyt apparat? Overtag en klar opsætning (programmer, referencecyklusser og faser) fra en anden WashData-bruger med samme apparat.",
+    "share_consent": "Jeg bekræfter, at disse cyklusser er gennemført normalt uden afbrydelse",
+    "share_device_none": "Ingen delbare cyklusser endnu. Markér først en optaget eller håndplukket cyklus som referencecyklus (⭐) under fanen Cyklusser.",
+    "share_guideline_naming": "Navngiv hver profil præcis som vist på apparatets drejeknap eller display (f.eks. 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Del kun cyklusser, der er gennemført normalt -- ingen afbrydelser midt i cyklen, åbning af dør eller strømudfald.",
+    "share_guideline_review": "Din upload starter som afventende og vises offentligt, når nok fællesskabsmedlemmer bekræfter den.",
+    "share_guidelines_title": "Inden du deler",
+    "store_download_device_intro": "Overtag alle delte programmer og deres referencecyklusser til dit apparat. Dine egne optagede cyklusser og statistik påvirkes ikke.",
+    "store_share_device_intro": "Upload {brand} {model} med de referencecyklusser, du vælger. Andre med samme apparat kan overtage dine programmer. Bidrag gennemgås inden offentliggørelse.",
+    "share_profile_no_cycles": "Ingen referencecyklusser -- markér en cyklus som ⭐ under fanen Cyklusser for at inkludere denne profil"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Pludseligt fald behandlet som øjeblikkelig afslutning",
@@ -1300,6 +1323,9 @@
     "store_model": {
       "label": "Apparatets model",
       "doc": "Valgfrit. Apparatets model, valgt fra fællesskabskataloget, når et mærke er angivet. Hvis din model ikke er på listen, kan du tilføje den til kataloget."
+    },
+    "show_contributor": {
+      "doc": "Viser tilskrivningen 'af <contributor>' på fællesskabsapparater og referencecyklusser."
     }
   },
   "setting_group": {
@@ -1621,7 +1647,18 @@
     "device_approved": "Godkendt af fællesskabet",
     "rating_saved": "Kvalitetsbedømmelse gemt",
     "brand_added": "Mærke tilføjet, afventer godkendelse",
-    "profile_added": "Profil tilføjet, afventer godkendelse"
+    "profile_added": "Profil tilføjet, afventer godkendelse",
+    "saved_except_conflicts": "Gemt. Løs de markerede konflikter for at gemme resten.",
+    "share_device_none_sel": "Vælg mindst én cyklus at dele",
+    "store_device_downloaded": "{p} program(mer), {c} optagelse(r) tilføjet",
+    "store_device_downloaded_phases": "{p} program(mer), {c} optagelse(r), {ph} fasekort tilføjet",
+    "store_device_downloaded_settings": "{p} program(mer), {c} optagelse(r), {ph} fasekort, {s} indstilling(er) tilføjet",
+    "store_device_shared": "{n} cyklus/cyklusser delt i fællesskabsbutikken -- afventer gennemgang.",
+    "store_device_shared_all_dup": "Alle {n} cyklus/cyklusser var allerede i fællesskabsbutikken.",
+    "store_device_shared_partial": "{n} cyklus/cyklusser delt; {failed} kunne ikke uploades.",
+    "store_device_shared_some_dup": "{created} cyklus/cyklusser delt; {dup} var allerede i butikken.",
+    "store_download_failed": "Download mislykkedes: {error}",
+    "store_download_nothing": "Intet nyt at downloade -- denne opsætning er allerede på dit apparat."
   },
   "trend": {
     "down": "Trend nedad",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Samlet forbrugt energi (kWh). Beregnet ved at integrere effekten over tid.",
     "cost_tip": "Energiomkostning for denne cyklus, låst ved afslutningen ud fra den pris, der var gældende da (energi x pris pr. kWh). Angiv en pris under Indstillinger for at udfylde den.",
     "confidence_tip": "Profilmatchkonfidens (0-100 %). Hvor tæt cyklussens effektkurve matchede det identificerede program.",
-    "health_tip": "ML-cyklussundhed (højere = bedre). Klik på en cyklus for at inspicere og gennemgå den."
+    "health_tip": "ML-cyklussundhed (højere = bedre). Klik på en cyklus for at inspicere og gennemgå den.",
+    "flags_tip": "Gennemgangs-, anomali- og kildeflags for cyklussen. Hold musen over et ikon for detaljer."
   },
   "stat": {
     "avg": "gns.",

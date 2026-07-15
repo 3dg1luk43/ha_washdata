@@ -164,7 +164,12 @@
     "share_to_store": "Megosztás a boltban",
     "share": "Megosztás",
     "confirm_appliance": "Készülék megerősítése",
-    "confirmed": "Megerősítve"
+    "confirmed": "Megerősítve",
+    "browse_community_setups": "Közösségi beállítások böngészése",
+    "download_device": "Beállítás letöltése",
+    "share_device": "⬆ Eszköz megosztása",
+    "share_device_tip": "Ossza meg ezt a készüléket és a rögzített referenciaciklusait a közösségi boltban, hogy mások ugyanazzal a géppel magukévá tehessék",
+    "share_n": "{n} ciklus megosztása"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Névtelen",
     "rate_quality": "Minőség értékelése",
     "rate_n": "{n} csillag",
-    "approved_only": "Csak a jóváhagyottak"
+    "approved_only": "Csak a jóváhagyottak",
+    "adopt_settings": "Beállítások átvétele is",
+    "flags": "Jelzők",
+    "include_phase_map": "Fázistérkép belefoglalása",
+    "include_settings": "Érzékelési és párosítási beállítások belefoglalása",
+    "show_contributor": "Közreműködők nevének megjelenítése"
   },
   "log": {
     "all_levels": "Minden szinten",
@@ -627,7 +637,8 @@
     "force_stop_title": "Ciklus kényszerített leállítása",
     "force_stop_msg": "Kényszerítve leállítod most az aktív ciklust? A ciklus megszakítottként lesz elmentve.",
     "store_import": "Referenciaciklus importálása",
-    "store_share": "Megosztás a közösségi boltban"
+    "store_share": "Megosztás a közösségi boltban",
+    "store_share_device": "Eszköz megosztása"
   },
   "msg": {
     "appliance_monitor": "Készülék monitor",
@@ -834,7 +845,19 @@
     "store_picker_offline": "A közösségi katalógusból való választáshoz engedélyezze az online funkciókat a beállítások fogaskerekénél.",
     "pick_brand_first": "Először válasszon készülékmárkát.",
     "model_not_found": "Még nincs a katalógusban.",
-    "connect_to_confirm": "A megerősítéshez vagy értékeléshez csatlakozzon a beállítások fogaskerekénél."
+    "connect_to_confirm": "A megerősítéshez vagy értékeléshez csatlakozzon a beállítások fogaskerekénél.",
+    "adopt_settings_hint": "Felülírja az eszköz érzékelési és párosítási küszöbeit a megosztottakkal. Az értesítések, entitások és energiaár soha nem változnak.",
+    "include_settings_hint": "Ossza meg az eszköz felismerési és párosítási küszöbeit (nem az értesítéseit, entitásait vagy energiaárát). Az átvevők döntik el, hogy alkalmazzák-e.",
+    "onboard_download": "Új eszköz? Vegyen át egy kész beállítást (programok, referenciaciklusok és fázisok) egy másik WashData-felhasználótól, akinek ugyanolyan készüléke van.",
+    "share_consent": "Megerősítem, hogy ezek a ciklusok normálisan, megszakítás nélkül fejeződtek be",
+    "share_device_none": "Még nincsenek megosztható ciklusok. Először jelöljön meg egy rögzített vagy kézzel kiválasztott ciklust referenciaciklusként (⭐) a Ciklusok lapon.",
+    "share_guideline_naming": "Minden profilt pontosan úgy nevezzen el, ahogy a készülék tárcsáján vagy kijelzőjén megjelenik (pl. 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Csak normálisan befejezett ciklusokat osszon meg -- sem ciklus közbeni megszakítás, sem ajtónyitás, sem teljesítményhiba.",
+    "share_guideline_review": "A feltöltés függőben indul, és akkor válik nyilvánossá, ha elegendő közösségi tag megerősíti.",
+    "share_guidelines_title": "Megosztás előtt",
+    "store_download_device_intro": "Vegyen át minden megosztott programot és annak referenciaciklusait az eszközére. A saját rögzített ciklusait és statisztikáit nem érinti.",
+    "store_share_device_intro": "Töltse fel a(z) {brand} {model} eszközt a kiválasztott referenciaciklusokkal. Más, ugyanolyan készülékkel rendelkezők átvehetik programjait. A bejegyzések felülvizsgálatra kerülnek nyilvánossá válás előtt.",
+    "share_profile_no_cycles": "Nincsenek referenciaciklusok -- jelöljön meg egy ciklust ⭐-gal a Ciklusok lapon, hogy belefoglalhassa ezt a profilt"
   },
   "phase_desc": {
     "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -1283,6 +1306,9 @@
     "store_model": {
       "label": "Készülék modellje",
       "doc": "Opcionális. A készülék modellje a közösségi katalógusból kiválasztva, miután megadta a márkát. Ha a modellje nem szerepel a listában, hozzáadhatja a katalógushoz."
+    },
+    "show_contributor": {
+      "doc": "Jelenítse meg a \"<közreműködő> által\" jelölést a közösségi készülékeken és referenciaciklusokon."
     }
   },
   "setting_group": {
@@ -1508,7 +1534,18 @@
     "device_approved": "A közösség jóváhagyta",
     "rating_saved": "Minőségértékelés mentve",
     "brand_added": "Márka hozzáadva - jóváhagyásra vár",
-    "profile_added": "Profil hozzáadva - jóváhagyásra vár"
+    "profile_added": "Profil hozzáadva - jóváhagyásra vár",
+    "saved_except_conflicts": "Mentve. Javítsa ki a kijelölt ütközéseket a többi mentéséhez.",
+    "share_device_none_sel": "Válasszon legalább egy ciklust a megosztáshoz",
+    "store_device_downloaded": "{p} program, {c} felvétel hozzáadva",
+    "store_device_downloaded_phases": "{p} program, {c} felvétel, {ph} fázistérkép hozzáadva",
+    "store_device_downloaded_settings": "{p} program, {c} felvétel, {ph} fázistérkép, {s} beállítás hozzáadva",
+    "store_device_shared": "{n} ciklus megosztva a közösségi boltba - felülvizsgálatra vár.",
+    "store_device_shared_all_dup": "Mind a(z) {n} ciklus már a közösségi boltban volt.",
+    "store_device_shared_partial": "{n} ciklus megosztva; {failed} nem sikerült feltölteni.",
+    "store_device_shared_some_dup": "{created} ciklus megosztva; {dup} már a boltban volt.",
+    "store_download_failed": "Letöltés sikertelen: {error}",
+    "store_download_nothing": "Nincs új letöltendő - ez a beállítás már megvan az eszközön."
   },
   "suggestion": {
     "both_agree": "A WashData javasolja",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Az összes elfogyasztott energia (kWh). A teljesítmény idő szerinti integrálásával számítva.",
     "cost_tip": "A ciklus energiaköltsége, befejezéskor rögzítve az akkor érvényes árral (energia x kWh-ár). Állíts be egy árat a Beállításokban a kitöltéséhez.",
     "confidence_tip": "A profilegyezés bizalma (0-100%). Mennyire pontosan illeszkedett a ciklus teljesítménygörbéje az azonosított programhoz.",
-    "health_tip": "ML ciklusállapot (magasabb = jobb). Kattints egy ciklusra a vizsgálatához és áttekintéséhez."
+    "health_tip": "ML ciklusállapot (magasabb = jobb). Kattints egy ciklusra a vizsgálatához és áttekintéséhez.",
+    "flags_tip": "Felülvizsgálati, anomália- és forrásjelzők a ciklushoz. Vigye rá a mutatót az ikonra a részletekért."
   },
   "stat": {
     "avg": "átlag",

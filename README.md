@@ -29,6 +29,7 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Robust & self-correcting** - Energy-gated start/end detection, ghost-cycle suppression that persists across restarts, dishwasher end-spike handling, and learning feedback that refines estimates over time.
 - **Experimental on-device ML (opt-in, off by default)** - A gated, NumPy-only ML subsystem with a dedicated **ML Training** tab, running *alongside* the proven detection code and never replacing it.
 - **Local only** - No cloud, no external services; all data stays in your Home Assistant. An optional Lovelace **Tile Card** is included.
+- **Community Store (opt-in)** - Browse and adopt programs from other users with the same appliance at the WashData Community Store. Share your own recorded programs back. All online features are opt-in and disabled by default.
 
 ---
 
@@ -185,7 +186,7 @@ Everything is managed from the **WashData** panel in the Home Assistant sidebar.
 | **Settings** | All tunables (detection, matching, timing, notifications, energy price, ...), each with a tooltip and inline suggestions, behind a **Basic / Advanced** toggle. **Notifications** includes an **Automations** section (see below). |
 | **ML Training** | The opt-in, experimental ML subsystem: on-device training, matcher tuning, and the runtime-models toggle. (Shown only when ML training is available.) |
 | **Playground** | Power-user what-if tools, in three modes, all driven by the **real detection/matching/estimation engine** (not an approximation). **Simulate**: load a stored cycle and replay it exactly as the integration would run it - real detector state band, **model-estimated time-left** / progress / live match confidence / current phase updating as you scrub or play, a synchronized event timeline (detected → match committed → notification points → finished) and a side rail of alerts (overrun, did-not-finish, unmatched, …); drag the detection thresholds to re-run instantly. **Test on history**: replay your recent cycles into a per-cycle results table with drill-down and a before/after diff when you edit a setting. **Sweep**: find the setting value that best meets an objective (match accuracy, end-timing, false-end rate, duration off-target, ambiguity) as a 1D curve or a 2D heatmap, then apply the best. |
-| **Advanced** | Sub-tabs for **My Preferences**, **Diagnostics** (storage stats, maintenance, and config **export / import**), a **Maintenance** log with service reminders, **Logs**, **Panel Settings**, and **Access Control** (per-user RBAC). |
+| **Advanced** | Sub-tabs for **My Preferences**, **Diagnostics** (storage stats, maintenance, and config **export / import**), a **Maintenance** log with service reminders, **Logs**, **Panel Settings**, and **Access Control** (per-user RBAC). The gear icon in this tab controls **online features** (opt-in): enable to unlock the Community Store brand/model pickers, browse shared setups, and share your own programs. |
 
 The integration's **Configure** dialog ([Settings → Devices & Services → WashData](https://my.home-assistant.io/redirect/integration/?domain=ha_washdata)) is now a small stub with just device type, power sensor, and minimum power - everything else lives in the panel. (The panel itself is a custom sidebar entry at `/ha-washdata`; open it from the Home Assistant sidebar.)
 
@@ -433,6 +434,18 @@ If you'd like to help, you can submit a diagnostics export directly from Home As
 ➡️ **[Submit your data here](https://forms.gle/m6iGfP8QTasXWg5z7)**
 
 All contributions are used solely to improve the WashData integration.
+
+### 🏪 WashData Community Store
+
+The [WashData Community Store](https://3dg1luk43.github.io/washdata-store) is a free, community-run catalog where users share appliance setups -- programs, reference cycles, and optionally tuned detection settings -- organized by brand and model. If someone else with the same washing machine or dishwasher model has contributed their recorded programs, you can adopt that setup in seconds rather than recording and labelling everything from scratch.
+
+**Enabling it:** Open the WashData panel, go to the **Advanced** tab, click the **gear icon**, and toggle **Enable online features** on. Then use the Brand and Model pickers to declare which appliance you own. Online features are disabled by default and no data is sent or fetched until you opt in.
+
+**Adopting a setup:** Once your model is declared, a **Browse community setups** button appears on the onboarding card for new devices. Click it to see contributed programs for your model, preview their power-cycle waveforms, and import them with a single click. An optional checkbox lets you also adopt the contributor's detection and matching settings -- useful if your machine is the same model and the contributor has already tuned the thresholds.
+
+**Sharing your programs:** When you have programs with golden reference cycles (cycles marked ⭐ in the Cycles tab, or captured via Record Mode), the **Share this device** button uploads them to the store. Contributions are reviewed; once five distinct users confirm a setup works for their machine, it is auto-approved. Phase maps and detection settings can optionally be bundled with the share.
+
+See **[docs/STORE.md](docs/STORE.md)** for the full guide, including privacy details, contribution tips, and step-by-step instructions.
 
 ### Supported Languages
 🇦🇱 Shqip • 🇧🇦 Bosanski • 🇧🇬 Български • 🇭🇷 Hrvatski • 🇨🇿 Čeština • 🇩🇰 Dansk • 🇳🇱 Nederlands • 🇬🇧 English • 🇪🇪 Eesti • 🇫🇮 Suomi • 🇫🇷 Français • 🇩🇪 Deutsch • 🇬🇷 Ελληνικά • 🇭🇺 Magyar • 🇮🇸 Íslenska • 🇮🇹 Italiano • 🇯🇵 日本語 • 🇰🇷 한국어 • 🇱🇻 Latviešu • 🇱🇹 Lietuvių • 🇲🇰 Македонски • 🇳🇴 Norsk • 🇵🇱 Polski • 🇵🇹 Português • 🇧🇷 Português (BR) • 🇷🇴 Română • 🇷🇺 Русский • 🇷🇸 Srpski • 🇸🇰 Slovenčina • 🇸🇮 Slovenščina • 🇪🇸 Español • 🇸🇪 Svenska • 🇹🇷 Türkçe • 🇺🇦 Українська • 🇨🇳 简体中文

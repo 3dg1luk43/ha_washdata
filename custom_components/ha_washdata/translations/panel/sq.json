@@ -164,7 +164,12 @@
     "share_to_store": "Ndaj në dyqan",
     "share": "Ndaj",
     "confirm_appliance": "Konfirmo këtë pajisje",
-    "confirmed": "Konfirmuar"
+    "confirmed": "Konfirmuar",
+    "browse_community_setups": "Shfletoni konfigurimet e komunitetit",
+    "download_device": "Shkarko këtë konfigurim",
+    "share_device": "⬆ Ndaj këtë pajisje",
+    "share_device_tip": "Ndani këtë pajisje dhe ciklet e saj të referencës të regjistruara në dyqanin e komunitetit, që të tjerët me të njëjtën makinë t'i adoptojnë",
+    "share_n": "Ndaj {n} cikël(-ë)"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Anonim",
     "rate_quality": "Vlerëso cilësinë",
     "rate_n": "{n} yje",
-    "approved_only": "Vetëm të miratuara"
+    "approved_only": "Vetëm të miratuara",
+    "adopt_settings": "Adopto edhe cilësimet",
+    "flags": "Flamuj",
+    "include_phase_map": "Përfshi hartën e fazave",
+    "include_settings": "Përfshi cilësimet e zbulimit dhe përputhjes",
+    "show_contributor": "Trego emrat e kontribuesve"
   },
   "log": {
     "all_levels": "Të gjitha nivelet",
@@ -627,7 +637,8 @@
     "force_stop_title": "Ndalo me Forcë Ciklin",
     "force_stop_msg": "Të ndalohet me forcë cikli aktiv tani? Cikli do të ruhet si i ndërprerë.",
     "store_import": "Importo ciklin referues",
-    "store_share": "Ndaj në dyqanin e komunitetit"
+    "store_share": "Ndaj në dyqanin e komunitetit",
+    "store_share_device": "Ndaj këtë pajisje"
   },
   "msg": {
     "appliance_monitor": "Monitor i pajisjes",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Aktivizoni veçoritë online te ingranazhi i cilësimeve për të zgjedhur nga katalogu i komunitetit.",
     "pick_brand_first": "Zgjidhni së pari një markë pajisjeje.",
     "model_not_found": "Ende nuk është në katalog.",
-    "connect_to_confirm": "Lidhuni te ingranazhi i cilësimeve për të konfirmuar ose vlerësuar."
+    "connect_to_confirm": "Lidhuni te ingranazhi i cilësimeve për të konfirmuar ose vlerësuar.",
+    "adopt_settings_hint": "Mbishkruan pragun e zbulimit dhe përputhjes të kësaj pajisje me të ndarët. Njoftimet, entitetet dhe çmimi i energjisë nuk ndryshohen kurrë.",
+    "include_settings_hint": "Ndani pragjet e njohjes dhe përputhjes të kësaj pajisje (jo njoftimet, entitetet ose çmimin e energjisë). Adoptuesit zgjedhin nëse do t'i aplikojnë.",
+    "onboard_download": "Pajisje e re? Adoptoni një konfigurim të gatshëm (programe, cikle referimi dhe faza) nga një tjetër përdorues WashData me të njëjtën pajisje.",
+    "share_consent": "Konfirmoj se këto cikle u ekzekutuan normalisht deri në fund pa ndërprerje",
+    "share_device_none": "Nuk ka ende cikle të ndashme. Shënojeni një cikël të regjistruar ose të zgjedhur me dorë si cikël referimi (⭐) tek skeda Ciklet fillimisht.",
+    "share_guideline_naming": "Emërtoni çdo profil saktësisht siç tregohet në çezmën ose ekranin e pajisjes (p.sh. 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Ndani vetëm cikle që u kompletuan normalisht -- pa ndërprerje në mes të ciklit, ngjarje hapjeje dere, ose probleme me energji.",
+    "share_guideline_review": "Ngarkimi juaj fillon si në pritje dhe bëhet publik pasi anëtarë të mjaftueshëm të komunitetit e konfirmojnë.",
+    "share_guidelines_title": "Para se të ndani",
+    "store_download_device_intro": "Adoptoni çdo program të ndarë dhe ciklet e tij të referencës në pajisjen tuaj. Ciklet dhe statistikat tuaja të regjistruara nuk preken.",
+    "store_share_device_intro": "Ngarko {brand} {model} me ciklet e referencës që zgjidhni. Të tjerët me të njëjtën pajisje mund të adoptojnë programet tuaja. Hyrjet shqyrtohen para publikimit.",
+    "share_profile_no_cycles": "Nuk ka cikle referimi -- shënojeni një cikël si ⭐ tek skeda Ciklet për të përfshirë këtë profil"
   },
   "phase_desc": {
     "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1283,6 +1306,9 @@
     "store_model": {
       "label": "Modeli i Pajisjes",
       "doc": "Opsionale. Modeli i pajisjes, i zgjedhur nga katalogu i komunitetit sapo të caktohet një markë. Nëse modeli juaj nuk është në listë, mund ta shtoni në katalog."
+    },
+    "show_contributor": {
+      "doc": "Shfaq atribuimin \"nga <kontribuesi>\" në pajisjet dhe ciklet referuese të komunitetit."
     }
   },
   "setting_group": {
@@ -1508,7 +1534,18 @@
     "device_approved": "Miratuar nga komuniteti",
     "rating_saved": "Vlerësimi i cilësisë u ruajt",
     "brand_added": "Marka u shtua, në pritje të miratimit",
-    "profile_added": "Profili u shtua, në pritje të miratimit"
+    "profile_added": "Profili u shtua, në pritje të miratimit",
+    "saved_except_conflicts": "Ruajtur. Korrigjoni konfliktet e theksuara për të ruajtur pjesën tjetër.",
+    "share_device_none_sel": "Zgjidhni të paktën një cikël për të ndarë",
+    "store_device_downloaded": "{p} program(e), {c} regjistrim(e) shtuar",
+    "store_device_downloaded_phases": "{p} program(e), {c} regjistrim(e), {ph} hartë(a) fazash shtuar",
+    "store_device_downloaded_settings": "{p} program(e), {c} regjistrim(e), {ph} hartë(a) fazash, {s} cilësim(e) shtuar",
+    "store_device_shared": "{n} cikël(-ë) ndajur në dyqanin e komunitetit - në pritje të rishikimit.",
+    "store_device_shared_all_dup": "Të gjitha {n} ciklet ishin tashmë në dyqanin e komunitetit.",
+    "store_device_shared_partial": "{n} cikle ndajur; {failed} nuk u ngarkuan.",
+    "store_device_shared_some_dup": "{created} cikle ndajur; {dup} ishin tashmë në dyqan.",
+    "store_download_failed": "Shkarkimi dështoi: {error}",
+    "store_download_nothing": "Asgjë e re për të shkarkuar - ky konfigurim është tashmë në pajisjen tuaj."
   },
   "suggestion": {
     "both_agree": "WashData rekomandon",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Energjia e plotë e konsumuar (kWh). Llogaritur duke integruar fuqinë me kalimin e kohës.",
     "cost_tip": "Kostoja e energjisë për këtë cikël, e ngrirë në përfundim duke përdorur çmimin në fuqi atëherë (energjia x çmimi për kWh). Vendos një çmim te Cilësimet për ta plotësuar.",
     "confidence_tip": "Besueshmëria e përputhjes së profilit (0-100%). Sa afër përputhej kurba e fuqisë së ciklit me programin e identifikuar.",
-    "health_tip": "Shëndeti ML i ciklit (më lart = më mirë). Kliko një cikël për ta inspektuar dhe shqyrtuar."
+    "health_tip": "Shëndeti ML i ciklit (më lart = më mirë). Kliko një cikël për ta inspektuar dhe shqyrtuar.",
+    "flags_tip": "Flamujt e rishikimit, anomalive dhe burimit për ciklin. Vendosni miun mbi ikonë për detaje."
   },
   "stat": {
     "avg": "mesatare",

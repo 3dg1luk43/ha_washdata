@@ -164,7 +164,12 @@
     "share_to_store": "分享到商店",
     "share": "分享",
     "confirm_appliance": "确认此家电",
-    "confirmed": "已确认"
+    "confirmed": "已确认",
+    "browse_community_setups": "浏览社区配置",
+    "download_device": "下载此配置",
+    "share_device": "⬆ 分享此设备",
+    "share_device_tip": "将此设备及其录制的参考周期分享到社区商店，让拥有相同机器的其他用户可以采用",
+    "share_n": "分享 {n} 个周期"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "匿名",
     "rate_quality": "评价质量",
     "rate_n": "{n} 星",
-    "approved_only": "仅已批准"
+    "approved_only": "仅已批准",
+    "adopt_settings": "同时采用设置",
+    "flags": "标志",
+    "include_phase_map": "包含阶段图",
+    "include_settings": "包含检测与匹配设置",
+    "show_contributor": "显示贡献者名称"
   },
   "log": {
     "all_levels": "所有级别",
@@ -627,7 +637,8 @@
     "force_stop_title": "强制停止周期",
     "force_stop_msg": "立即强制停止当前周期吗？该周期将被保存为已中断。",
     "store_import": "导入参考周期",
-    "store_share": "分享到社区商店"
+    "store_share": "分享到社区商店",
+    "store_share_device": "分享此设备"
   },
   "msg": {
     "appliance_monitor": "设备监控",
@@ -834,7 +845,19 @@
     "store_picker_offline": "在设置齿轮中启用在线功能，即可从社区目录中选择。",
     "pick_brand_first": "请先选择家电品牌。",
     "model_not_found": "尚未收录在目录中。",
-    "connect_to_confirm": "在设置齿轮中连接以确认或评分。"
+    "connect_to_confirm": "在设置齿轮中连接以确认或评分。",
+    "adopt_settings_hint": "用共享的设置覆盖此设备的检测和匹配阈值。您的通知、实体和电价永远不会更改。",
+    "include_settings_hint": "分享此设备的识别和匹配阈值（不含通知、实体或电价）。采用者自行选择是否应用。",
+    "onboard_download": "新设备？从拥有相同设备的其他 WashData 用户处采用现成配置（程序、参考周期和阶段）。",
+    "share_consent": "我确认这些周期均正常完成，无中断",
+    "share_device_none": "暂无可分享的周期。请先在\"周期\"选项卡中将录制或手动选择的周期标记为参考周期（⭐）。",
+    "share_guideline_naming": "请按设备表盘或显示屏上显示的名称命名每个配置文件（例如：'Cotton 40'、'Eco 60'）。",
+    "share_guideline_quality": "仅分享正常完成的周期 -- 无周期中断、开门事件或电源波动。",
+    "share_guideline_review": "您的上传从待审核状态开始，待足够多的社区成员确认后将公开显示。",
+    "share_guidelines_title": "分享前须知",
+    "store_download_device_intro": "将所有共享程序及其参考周期采用到您的设备。您自己录制的周期和统计数据不受影响。",
+    "store_share_device_intro": "上传 {brand} {model} 及您选择的参考周期。拥有相同设备的其他用户可以采用您的程序。条目在公开前经过审核。",
+    "share_profile_no_cycles": "无参考周期 -- 请在\"周期\"选项卡中将周期标记为 ⭐ 以包含此配置文件"
   },
   "pg_desc": {
     "abrupt_drop_watts": "骤降视为立即结束",
@@ -1300,6 +1323,9 @@
     "store_model": {
       "label": "家电型号",
       "doc": "可选。设置品牌后，从社区目录中选择的家电型号。如果目录中没有您的型号，您可以将其添加到目录。"
+    },
+    "show_contributor": {
+      "doc": "在社区家电和参考周期上显示\"by <contributor>\"的贡献者署名。"
     }
   },
   "setting_group": {
@@ -1525,7 +1551,18 @@
     "device_approved": "已获社区批准",
     "rating_saved": "质量评分已保存",
     "brand_added": "已添加品牌（等待批准）",
-    "profile_added": "已添加配置文件（等待批准）"
+    "profile_added": "已添加配置文件（等待批准）",
+    "saved_except_conflicts": "已保存。请修复突出显示的冲突以保存其余内容。",
+    "share_device_none_sel": "请至少选择一个周期进行分享",
+    "store_device_downloaded": "已添加 {p} 个程序、{c} 个录制",
+    "store_device_downloaded_phases": "已添加 {p} 个程序、{c} 个录制、{ph} 个阶段图",
+    "store_device_downloaded_settings": "已添加 {p} 个程序、{c} 个录制、{ph} 个阶段图、{s} 个设置",
+    "store_device_shared": "已将 {n} 个周期分享到社区商店 - 待审核。",
+    "store_device_shared_all_dup": "{n} 个周期均已在社区商店中。",
+    "store_device_shared_partial": "已分享 {n} 个周期；{failed} 个无法上传。",
+    "store_device_shared_some_dup": "已分享 {created} 个周期；{dup} 个已在商店中。",
+    "store_download_failed": "下载失败：{error}",
+    "store_download_nothing": "没有新内容可下载 - 此配置已在您的设备上。"
   },
   "suggestion": {
     "both_agree": "WashData建议",
@@ -1642,7 +1679,8 @@
     "energy_tip": "消耗的总能量（kWh）。通过对功率随时间积分计算得出。",
     "cost_tip": "此周期的能耗成本，在完成时按当时生效的价格冻结（能量 x 每 kWh 价格）。在设置中设定价格以填充此项。",
     "confidence_tip": "配置文件匹配置信度（0-100%）。周期功率曲线与识别出的程序的匹配程度。",
-    "health_tip": "ML 周期健康（越高越好）。点击周期以检查并审查。"
+    "health_tip": "ML 周期健康（越高越好）。点击周期以检查并审查。",
+    "flags_tip": "周期的审核、异常和来源标志。将鼠标悬停在图标上可查看详细信息。"
   },
   "stat": {
     "avg": "平均",

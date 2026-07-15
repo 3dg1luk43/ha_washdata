@@ -964,11 +964,13 @@ async def ws_get_shareable_cycles(hass, connection, msg):
         return
     store = manager.profile_store
     items = store.get_shareable_cycles()
-    programs = {it.get("profile_name") for it in items if it.get("profile_name")}
-    phase_programs = sorted(p for p in programs if store.get_profile_phase_ranges(p))
     # All known profiles (not just those with shareable cycles) so the panel can show
     # profiles that exist but have no golden/recorded cycles yet, with guidance.
     all_programs = sorted(store.get_profiles().keys())
+    # Phase toggle covers ALL profiles that have a phase map, not just those with
+    # shareable cycles — so users with phases but no reference cycles yet still see
+    # the toggle (shown as a dimmed no-cycle row in the share tree).
+    phase_programs = sorted(p for p in all_programs if store.get_profile_phase_ranges(p))
     _send_result(connection, msg["id"], "get_shareable_cycles",
                  {"items": items, "phase_programs": phase_programs, "all_programs": all_programs})
 

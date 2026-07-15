@@ -164,7 +164,12 @@
     "share_to_store": "Deli v trgovino",
     "share": "Deli",
     "confirm_appliance": "Potrdi to napravo",
-    "confirmed": "Potrjeno"
+    "confirmed": "Potrjeno",
+    "browse_community_setups": "Brskaj po nastavitvah skupnosti",
+    "download_device": "Prenesi nastavitve naprave",
+    "share_device": "Deli nastavitve naprave",
+    "share_device_tip": "Deli programe in nastavitve te naprave s skupnostjo",
+    "share_n": "Deli {n} program{s}"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Anonimno",
     "rate_quality": "Oceni kakovost",
     "rate_n": "{n} zvezdic",
-    "approved_only": "Samo odobreno"
+    "approved_only": "Samo odobreno",
+    "adopt_settings": "Sprejmi nastavitve",
+    "flags": "Oznake",
+    "include_phase_map": "Vključi fazno karto",
+    "include_settings": "Vključi nastavitve",
+    "show_contributor": "Prikaži sodelavca"
   },
   "log": {
     "all_levels": "Vse ravni",
@@ -627,7 +637,8 @@
     "force_stop_title": "Prisilno ustavi cikel",
     "force_stop_msg": "Zdaj prisilno ustavim aktivni cikel? Cikel bo shranjen kot prekinjen.",
     "store_import": "Uvozi referenčni cikel",
-    "store_share": "Deli v skupnostno trgovino"
+    "store_share": "Deli v skupnostno trgovino",
+    "store_share_device": "Deli nastavitve naprave"
   },
   "msg": {
     "appliance_monitor": "Monitor naprave",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Omogočite spletne funkcije v zobniku nastavitev, da boste lahko izbirali iz kataloga skupnosti.",
     "pick_brand_first": "Najprej izberite znamko naprave.",
     "model_not_found": "Še ni v katalogu.",
-    "connect_to_confirm": "Povežite se v zobniku nastavitev za potrditev ali oceno."
+    "connect_to_confirm": "Povežite se v zobniku nastavitev za potrditev ali oceno.",
+    "adopt_settings_hint": "Uporabi nastavitve zaznavanja in ujemanja deljene naprave za to napravo",
+    "include_settings_hint": "Vključi pragove zaznavanja, uteži ujemanja in druge parametre v deljeni paket",
+    "onboard_download": "Prenesi vnaprej pripravljene nastavitve iz skupnostne trgovine",
+    "share_consent": "Delite dejanske podatke svojega aparata. Ne delite, če so vaši vzorci uporabe zasebni.",
+    "share_device_none": "Še ni nastavljenih naprav. Najprej dodajte napravo.",
+    "share_guideline_naming": "Uporabite jasna imena programov (npr. 'Cotton 40', 'Eco 60'), da jih drugi lažje prepoznajo",
+    "share_guideline_quality": "Delite samo profile z ⭐ referenčnimi cikli ali vsaj {n} potrjenimi zagoni",
+    "share_guideline_review": "Preglejte profile pred deljenjem -- odstranite tiste, ki izgledajo napačni",
+    "share_guidelines_title": "Pred deljenjem",
+    "store_download_device_intro": "Prenesi nastavitve skupnostne naprave in jih uporabi za novo ali obstoječo napravo",
+    "store_share_device_intro": "Deli programe svoje naprave (profile + referenčne cikle) s skupnostjo. Nastavitve so neobvezne.",
+    "share_profile_no_cycles": "Profil '{p}' nima ⭐ referenčnih ciklov -- preskočen bo, razen če imate {n}+ potrjenih zagonov"
   },
   "phase_desc": {
     "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",
@@ -1283,6 +1306,9 @@
     "store_model": {
       "label": "Model naprave",
       "doc": "Neobvezno. Model naprave, izbran iz kataloga skupnosti, ko je znamka nastavljena. Če vašega modela ni na seznamu, ga lahko dodate v katalog."
+    },
+    "show_contributor": {
+      "doc": "Prikaži ime sodelavca pri profilih, prenesenih iz skupnostne trgovine"
     }
   },
   "setting_group": {
@@ -1604,7 +1630,18 @@
     "device_approved": "Odobreno s strani skupnosti",
     "rating_saved": "Ocena kakovosti shranjena",
     "brand_added": "Znamka dodana, čaka na odobritev",
-    "profile_added": "Profil dodan, čaka na odobritev"
+    "profile_added": "Profil dodan, čaka na odobritev",
+    "saved_except_conflicts": "Nastavitve shranjene -- {n} nastavitev{s} preskočena zaradi konfliktov",
+    "share_device_none_sel": "Izberite vsaj en program za deljenje",
+    "store_device_downloaded": "Nastavitve naprave prenesene: {created} profil{c} ustvarjen, {dup} že obstaja",
+    "store_device_downloaded_phases": "Nastavitve naprave prenesene: {created} profil{c} ustvarjen, {dup} že obstaja, fazna karta uporabljena",
+    "store_device_downloaded_settings": "Nastavitve naprave prenesene: {created} profil{c} ustvarjen, {dup} že obstaja, nastavitve uporabljene",
+    "store_device_shared": "Nastavitve naprave deljene: {n} program{s} naložen",
+    "store_device_shared_all_dup": "Nič novega za deljenje -- vsi programi že obstajajo v trgovini",
+    "store_device_shared_partial": "Delno deljenje: {n} program{s} naložen, {failed} preskočenih",
+    "store_device_shared_some_dup": "Nastavitve naprave deljene: {n} program{s} naložen ({dup} že obstaja)",
+    "store_download_failed": "Prenos ni uspel: {error}",
+    "store_download_nothing": "Ni ničesar za prenos -- vsi profili že obstajajo na tej napravi"
   },
   "trend": {
     "down": "Padajoči trend",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Skupna porabljena energija (kWh). Izračunano z integracijo moči skozi čas.",
     "cost_tip": "Strošek energije za ta cikel, zamrznjen ob zaključku po takrat veljavni ceni (energija x cena na kWh). Nastavite ceno v Nastavitvah, da ga izpolnite.",
     "confidence_tip": "Zaupanje ujemanja profila (0-100%). Kako natančno se je krivulja moči cikla ujemala z določenim programom.",
-    "health_tip": "Zdravje cikla ML (višje = boljše). Kliknite cikel, da ga pregledate in ocenite."
+    "health_tip": "Zdravje cikla ML (višje = boljše). Kliknite cikel, da ga pregledate in ocenite.",
+    "flags_tip": "Oznake skupnosti in kazalniki kakovosti podatkov"
   },
   "stat": {
     "avg": "povpr.",

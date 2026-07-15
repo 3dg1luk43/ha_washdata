@@ -164,7 +164,12 @@
     "share_to_store": "Im Store teilen",
     "share": "Teilen",
     "confirm_appliance": "Dieses Gerät bestätigen",
-    "confirmed": "Bestätigt"
+    "confirmed": "Bestätigt",
+    "browse_community_setups": "Community-Setups durchsuchen",
+    "download_device": "Dieses Setup herunterladen",
+    "share_device": "⬆ Dieses Gerät teilen",
+    "share_device_tip": "Dieses Gerät und seine aufgezeichneten Referenzzyklen im Community-Store teilen, damit andere Nutzer mit demselben Gerät sie übernehmen können",
+    "share_n": "{n} Zyklen teilen"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Anonym",
     "rate_quality": "Qualität bewerten",
     "rate_n": "{n} Sterne",
-    "approved_only": "Nur freigegebene"
+    "approved_only": "Nur freigegebene",
+    "adopt_settings": "Einstellungen auch übernehmen",
+    "flags": "Flags",
+    "include_phase_map": "Phasenkarte einbeziehen",
+    "include_settings": "Erkennungs- und Abgleicheinstellungen einbeziehen",
+    "show_contributor": "Beiträgernamen anzeigen"
   },
   "log": {
     "all_levels": "Alle Ebenen",
@@ -627,7 +637,8 @@
     "force_stop_title": "Zyklus zwangsweise stoppen",
     "force_stop_msg": "Den aktiven Zyklus jetzt zwangsweise stoppen? Der Zyklus wird als unterbrochen gespeichert.",
     "store_import": "Referenzzyklus importieren",
-    "store_share": "Im Community-Store teilen"
+    "store_share": "Im Community-Store teilen",
+    "store_share_device": "Dieses Gerät teilen"
   },
   "msg": {
     "appliance_monitor": "Gerätemonitor",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Aktivieren Sie die Onlinefunktionen im Einstellungszahnrad, um aus dem Community-Katalog auszuwählen.",
     "pick_brand_first": "Wählen Sie zuerst eine Gerätemarke.",
     "model_not_found": "Noch nicht im Katalog.",
-    "connect_to_confirm": "Verbinden Sie sich im Einstellungszahnrad, um zu bestätigen oder zu bewerten."
+    "connect_to_confirm": "Verbinden Sie sich im Einstellungszahnrad, um zu bestätigen oder zu bewerten.",
+    "adopt_settings_hint": "Überschreibt die Erkennungs- und Abgleichschwellenwerte dieses Geräts mit den geteilten. Benachrichtigungen, Entitäten und der Energiepreis werden nie geändert.",
+    "include_settings_hint": "Teilt die Erkennungs- und Abgleichschwellenwerte dieses Geräts (nicht Benachrichtigungen, Entitäten oder Energiepreis). Übernehmende wählen selbst, ob sie diese anwenden.",
+    "onboard_download": "Neues Gerät? Übernehmen Sie ein fertiges Setup (Programme, Referenzzyklen und Phasen) von einem anderen WashData-Nutzer mit demselben Gerät.",
+    "share_consent": "Ich bestätige, dass diese Zyklen normal und ohne Unterbrechung abgeschlossen wurden",
+    "share_device_none": "Noch keine teilbaren Zyklen. Markieren Sie zuerst einen aufgezeichneten oder ausgewählten Zyklus im Tab Zyklen als Referenzzyklus (⭐).",
+    "share_guideline_naming": "Benennen Sie jedes Profil genau so, wie es auf dem Gerätewähler oder Display angezeigt wird (z. B. 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Teilen Sie nur Zyklen, die normal abgeschlossen wurden -- keine Unterbrechungen mitten im Zyklus, Türöffnungen oder Leistungsausfälle.",
+    "share_guideline_review": "Ihr Upload startet als ausstehend und erscheint öffentlich, sobald genug Community-Mitglieder ihn bestätigt haben.",
+    "share_guidelines_title": "Vor dem Teilen",
+    "store_download_device_intro": "Übernehmen Sie alle geteilten Programme und deren Referenzzyklen auf Ihr Gerät. Ihre eigenen aufgezeichneten Zyklen und Statistiken bleiben unberührt.",
+    "store_share_device_intro": "Laden Sie {brand} {model} mit den von Ihnen ausgewählten Referenzzyklen hoch. Andere mit demselben Gerät können Ihre Programme übernehmen. Einträge werden vor der öffentlichen Erscheinung geprüft.",
+    "share_profile_no_cycles": "Keine Referenzzyklen -- markieren Sie einen Zyklus als ⭐ im Tab Zyklen, um dieses Profil einzubeziehen"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plötzlicher Abfall gilt als sofortiges Ende",
@@ -1300,6 +1323,9 @@
     "store_model": {
       "label": "Gerätemodell",
       "doc": "Optional. Das Gerätemodell, ausgewählt aus dem Community-Katalog, sobald eine Marke festgelegt ist. Wenn Ihr Modell nicht aufgeführt ist, können Sie es zum Katalog hinzufügen."
+    },
+    "show_contributor": {
+      "doc": "Zeigt die Nennung 'von <contributor>' bei Community-Geräten und Referenzzyklen an."
     }
   },
   "setting_group": {
@@ -1621,7 +1647,18 @@
     "device_approved": "Von der Community freigegeben",
     "rating_saved": "Qualitätsbewertung gespeichert",
     "brand_added": "Marke hinzugefügt, Freigabe ausstehend",
-    "profile_added": "Profil hinzugefügt, Freigabe ausstehend"
+    "profile_added": "Profil hinzugefügt, Freigabe ausstehend",
+    "saved_except_conflicts": "Gespeichert. Beheben Sie die markierten Konflikte, um den Rest zu speichern.",
+    "share_device_none_sel": "Wählen Sie mindestens einen Zyklus zum Teilen aus",
+    "store_device_downloaded": "{p} Programm(e), {c} Aufnahme(n) hinzugefügt",
+    "store_device_downloaded_phases": "{p} Programm(e), {c} Aufnahme(n), {ph} Phasenkarte(n) hinzugefügt",
+    "store_device_downloaded_settings": "{p} Programm(e), {c} Aufnahme(n), {ph} Phasenkarte(n), {s} Einstellung(en) hinzugefügt",
+    "store_device_shared": "{n} Zyklus/Zyklen im Community-Store geteilt -- Prüfung ausstehend.",
+    "store_device_shared_all_dup": "Alle {n} Zyklus/Zyklen waren bereits im Community-Store.",
+    "store_device_shared_partial": "{n} Zyklus/Zyklen geteilt; {failed} konnten nicht hochgeladen werden.",
+    "store_device_shared_some_dup": "{created} Zyklus/Zyklen geteilt; {dup} waren bereits im Store.",
+    "store_download_failed": "Download fehlgeschlagen: {error}",
+    "store_download_nothing": "Nichts Neues zum Herunterladen -- dieses Setup ist bereits auf Ihrem Gerät."
   },
   "trend": {
     "down": "Abwärtstrend",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Insgesamt verbrauchte Energie (kWh). Berechnet durch Integration der Leistung über die Zeit.",
     "cost_tip": "Energiekosten für diesen Zyklus, beim Abschluss anhand des damals gültigen Preises festgeschrieben (Energie x Preis pro kWh). Legen Sie unter Einstellungen einen Preis fest, um sie anzuzeigen.",
     "confidence_tip": "Profilübereinstimmungskonfidenz (0-100 %). Wie genau die Leistungskurve des Zyklus mit dem identifizierten Programm übereinstimmte.",
-    "health_tip": "ML-Zyklusgesundheit (höher = besser). Klicken Sie auf einen Zyklus, um ihn zu prüfen und zu überprüfen."
+    "health_tip": "ML-Zyklusgesundheit (höher = besser). Klicken Sie auf einen Zyklus, um ihn zu prüfen und zu überprüfen.",
+    "flags_tip": "Überprüfungs-, Anomalie- und Quell-Flags für den Zyklus. Fahren Sie mit dem Zeiger über ein Symbol, um Details anzuzeigen."
   },
   "stat": {
     "avg": "Ø",

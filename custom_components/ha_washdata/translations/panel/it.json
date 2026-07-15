@@ -164,7 +164,12 @@
     "share_to_store": "Condividi nello store",
     "share": "Condividi",
     "confirm_appliance": "Conferma questo elettrodomestico",
-    "confirmed": "Confermato"
+    "confirmed": "Confermato",
+    "browse_community_setups": "Sfoglia le configurazioni della community",
+    "download_device": "Scarica questa configurazione",
+    "share_device": "⬆ Condividi questo dispositivo",
+    "share_device_tip": "Condividi questo elettrodomestico e i suoi cicli di riferimento registrati nello store della community così altri con lo stesso dispositivo possono adottarli",
+    "share_n": "Condividi {n} ciclo/i"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Anonimo",
     "rate_quality": "Valuta la qualità",
     "rate_n": "{n} stelle",
-    "approved_only": "Solo approvati"
+    "approved_only": "Solo approvati",
+    "adopt_settings": "Adotta anche le impostazioni",
+    "flags": "Indicatori",
+    "include_phase_map": "Includi mappa delle fasi",
+    "include_settings": "Includi impostazioni di rilevamento e riconoscimento",
+    "show_contributor": "Mostra i nomi dei collaboratori"
   },
   "log": {
     "all_levels": "Tutti i livelli",
@@ -627,7 +637,8 @@
     "force_stop_title": "Forza l'arresto del ciclo",
     "force_stop_msg": "Forzare l'arresto del ciclo attivo ora? Il ciclo verrà salvato come interrotto.",
     "store_import": "Importa ciclo di riferimento",
-    "store_share": "Condividi nello store della community"
+    "store_share": "Condividi nello store della community",
+    "store_share_device": "Condividi questo dispositivo"
   },
   "msg": {
     "appliance_monitor": "Monitor degli elettrodomestici",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Abilita le funzionalità online nell'icona delle impostazioni per scegliere dal catalogo della community.",
     "pick_brand_first": "Scegli prima una marca di elettrodomestico.",
     "model_not_found": "Non è ancora nel catalogo.",
-    "connect_to_confirm": "Connettiti nell'icona delle impostazioni per confermare o valutare."
+    "connect_to_confirm": "Connettiti nell'icona delle impostazioni per confermare o valutare.",
+    "adopt_settings_hint": "Sovrascrivi le soglie di rilevamento e riconoscimento di questo dispositivo con quelle condivise. Le notifiche, le entità e il prezzo dell'energia non vengono mai modificati.",
+    "include_settings_hint": "Condividi le soglie di riconoscimento e corrispondenza di questo dispositivo (non le notifiche, le entità o il prezzo dell'energia). Chi adotta sceglie se applicarle.",
+    "onboard_download": "Nuovo dispositivo? Adotta una configurazione pronta (programmi, cicli di riferimento e fasi) da un altro utente WashData con lo stesso elettrodomestico.",
+    "share_consent": "Confermo che questi cicli si sono conclusi normalmente senza interruzioni",
+    "share_device_none": "Nessun ciclo condivisibile ancora. Contrassegna prima un ciclo registrato o selezionato manualmente come ciclo di riferimento (⭐) nella scheda Cicli.",
+    "share_guideline_naming": "Assegna a ogni profilo esattamente il nome mostrato sulla manopola o sul display dell'elettrodomestico (ad es. 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Condividi solo i cicli completati normalmente -- senza interruzioni a metà ciclo, aperture di porta o anomalie di potenza.",
+    "share_guideline_review": "Il tuo caricamento inizia come in attesa di revisione e appare pubblicamente una volta che abbastanza membri della community lo confermano.",
+    "share_guidelines_title": "Prima di condividere",
+    "store_download_device_intro": "Adotta ogni programma condiviso e i suoi cicli di riferimento sul tuo dispositivo. I tuoi cicli registrati e le tue statistiche non vengono modificati.",
+    "store_share_device_intro": "Carica {brand} {model} con i cicli di riferimento che selezioni. Altri con lo stesso elettrodomestico possono adottare i tuoi programmi. Le voci vengono revisionate prima di apparire pubblicamente.",
+    "share_profile_no_cycles": "Nessun ciclo di riferimento -- contrassegna un ciclo come ⭐ nella scheda Cicli per includere questo profilo"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Calo improvviso trattato come fine immediata",
@@ -1300,6 +1323,9 @@
     "store_model": {
       "label": "Modello dell'elettrodomestico",
       "doc": "Facoltativo. Il modello dell'elettrodomestico, scelto dal catalogo della community una volta impostata la marca. Se il tuo modello non è elencato, puoi aggiungerlo al catalogo."
+    },
+    "show_contributor": {
+      "doc": "Mostra l'attribuzione \"di <collaboratore>\" sugli elettrodomestici della community e sui cicli di riferimento."
     }
   },
   "setting_group": {
@@ -1525,7 +1551,18 @@
     "device_approved": "Approvato dalla community",
     "rating_saved": "Valutazione della qualità salvata",
     "brand_added": "Marca aggiunta, in attesa di approvazione",
-    "profile_added": "Profilo aggiunto, in attesa di approvazione"
+    "profile_added": "Profilo aggiunto, in attesa di approvazione",
+    "saved_except_conflicts": "Salvato. Correggi i conflitti evidenziati per salvare il resto.",
+    "share_device_none_sel": "Seleziona almeno un ciclo da condividere",
+    "store_device_downloaded": "{p} programma/i, {c} registrazione/i aggiunti",
+    "store_device_downloaded_phases": "{p} programma/i, {c} registrazione/i, {ph} mappa/e delle fasi aggiunti",
+    "store_device_downloaded_settings": "{p} programma/i, {c} registrazione/i, {ph} mappa/e delle fasi, {s} impostazione/i aggiunti",
+    "store_device_shared": "Condiviso/i {n} ciclo/i nello store della community - in attesa di revisione.",
+    "store_device_shared_all_dup": "Tutti i {n} ciclo/i erano già nello store della community.",
+    "store_device_shared_partial": "Condiviso/i {n} ciclo/i; {failed} non è/sono stato/i caricato/i.",
+    "store_device_shared_some_dup": "Condiviso/i {created} ciclo/i; {dup} erano già nello store.",
+    "store_download_failed": "Download non riuscito: {error}",
+    "store_download_nothing": "Nulla di nuovo da scaricare - questa configurazione è già sul tuo dispositivo."
   },
   "suggestion": {
     "both_agree": "WashData consiglia",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Energia totale consumata (kWh). Calcolata integrando la potenza nel tempo.",
     "cost_tip": "Costo energetico di questo ciclo, fissato al completamento usando il prezzo allora in vigore (energia x prezzo per kWh). Imposta un prezzo nelle Impostazioni per popolarlo.",
     "confidence_tip": "Confidenza di corrispondenza del profilo (0-100%). Quanto la curva di potenza del ciclo corrispondeva al programma identificato.",
-    "health_tip": "Salute del ciclo tramite ML (più alto = migliore). Clicca su un ciclo per ispezionarlo e revisionarlo."
+    "health_tip": "Salute del ciclo tramite ML (più alto = migliore). Clicca su un ciclo per ispezionarlo e revisionarlo.",
+    "flags_tip": "Indicatori di revisione, anomalia e fonte per il ciclo. Passa il cursore su un'icona per i dettagli."
   },
   "stat": {
     "avg": "media",

@@ -164,7 +164,12 @@
     "share_to_store": "Deila í verslun",
     "share": "Deila",
     "confirm_appliance": "Staðfesta þetta tæki",
-    "confirmed": "Staðfest"
+    "confirmed": "Staðfest",
+    "browse_community_setups": "Skoða samfélagsuppsetningar",
+    "download_device": "Hlaða niður þessari uppsetningu",
+    "share_device": "⬆ Deila þessu tæki",
+    "share_device_tip": "Deila þessu tæki og uptökum viðmiðunarlota þess í samfélagsverslunina svo aðrir með sömu vél geti tekið þær yfir",
+    "share_n": "Deila {n} lotu/lotum"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Nafnlaus",
     "rate_quality": "Gefa gæðum einkunn",
     "rate_n": "{n} stjörnur",
-    "approved_only": "Aðeins samþykkt"
+    "approved_only": "Aðeins samþykkt",
+    "adopt_settings": "Taka einnig yfir stillingar",
+    "flags": "Flagg",
+    "include_phase_map": "Hafa fassakort með",
+    "include_settings": "Hafa greiningar- og samsvörunarstillingar með",
+    "show_contributor": "Sýna nöfn framleggjenda"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -627,7 +637,8 @@
     "force_stop_title": "Þvinga stöðvun lotu",
     "force_stop_msg": "Þvinga virku lotuna til að stöðvast núna? Lotan verður vistuð sem trufluð.",
     "store_import": "Flytja inn viðmiðunarlotu",
-    "store_share": "Deila í samfélagsverslun"
+    "store_share": "Deila í samfélagsverslun",
+    "store_share_device": "Deila þessu tæki"
   },
   "msg": {
     "appliance_monitor": "Vöktunartæki",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Virkjaðu nettengda eiginleika í stillingatannhjólinu til að velja úr samfélagsskránni.",
     "pick_brand_first": "Veldu fyrst vörumerki tækis.",
     "model_not_found": "Ekki enn í skránni.",
-    "connect_to_confirm": "Tengstu í stillingatannhjólinu til að staðfesta eða gefa einkunn."
+    "connect_to_confirm": "Tengstu í stillingatannhjólinu til að staðfesta eða gefa einkunn.",
+    "adopt_settings_hint": "Skrifar yfir greiningar- og samsvörunarmörk þessa tækis með deildum. Tilkynningar þínar, einingar og orkuverð breytast aldrei.",
+    "include_settings_hint": "Deilir greiningar- og samsvörunarmörkum þessa tækis (ekki tilkynningar, einingar eða orkuverð). Notendur velja sjálfir hvort þeir vilji nota þær.",
+    "onboard_download": "Nýtt tæki? Taktu yfir tilbúna uppsetningu (forrit, viðmiðunarlotir og fasar) frá öðrum WashData-notanda með sama tæki.",
+    "share_consent": "Ég staðfesti að þessar lotir voru kláraðar eðlilega án truflana",
+    "share_device_none": "Engar deilanlegar lotir enn. Merktu fyrst skráða eða handvalda lotu sem viðmiðunarlotu (⭐) í flipanum Lotir.",
+    "share_guideline_naming": "Gefðu hverjum prófíl nákvæmlega það nafn sem sést á hringtakkanum eða skjánum tækisins (t.d. 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Deildu aðeins lotum sem kláruðust eðlilega -- engar truflanir á miðjum lotu, opnaðar hurðir eða aflbrostir.",
+    "share_guideline_review": "Upphleðslan þín byrjar sem í bið og birtist opinberlega þegar nægilega margir samfélagsmeðlimir staðfesta hana.",
+    "share_guidelines_title": "Áður en þú deilir",
+    "store_download_device_intro": "Taktu yfir öll deildu forritin og viðmiðunarlotir þeirra á tækið þitt. Þínar eigin skráðar lotir og tölfræði eru ekki fyrir áhrifum.",
+    "store_share_device_intro": "Hlaðaðu upp {brand} {model} með viðmiðunarlotum sem þú velur. Aðrir með sama tæki geta tekið yfir forritin þín. Færslur eru yfirfarnar áður en þær birtast opinberlega.",
+    "share_profile_no_cycles": "Engar viðmiðunarlotir -- merktu lotu sem ⭐ í flipanum Lotir til að hafa þennan prófíl með"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Skyndilegt fall meðhöndlað sem tafarlaus endir",
@@ -1300,6 +1323,9 @@
     "store_model": {
       "label": "Gerð tækis",
       "doc": "Valfrjálst. Gerð tækisins, valin úr samfélagsskránni þegar vörumerki hefur verið sett. Ef gerðin þín er ekki á listanum geturðu bætt henni við skrána."
+    },
+    "show_contributor": {
+      "doc": "Sýnir tilvísunina 'eftir <contributor>' á samfélagstækjum og viðmiðunarlotum."
     }
   },
   "setting_group": {
@@ -1621,7 +1647,18 @@
     "device_approved": "Samþykkt af samfélaginu",
     "rating_saved": "Gæðaeinkunn vistuð",
     "brand_added": "Vörumerki bætt við, bíður samþykkis",
-    "profile_added": "Prófíl bætt við, bíður samþykkis"
+    "profile_added": "Prófíl bætt við, bíður samþykkis",
+    "saved_except_conflicts": "Vistað. Leggðu úr hófi merktu árekstrana til að vista afganginn.",
+    "share_device_none_sel": "Veldu að minnsta kosti eina lotu til að deila",
+    "store_device_downloaded": "{p} forrit, {c} upptöku/upptökur bætt við",
+    "store_device_downloaded_phases": "{p} forrit, {c} upptöku/upptökur, {ph} fassakort bætt við",
+    "store_device_downloaded_settings": "{p} forrit, {c} upptöku/upptökur, {ph} fassakort, {s} stilling(ar) bætt við",
+    "store_device_shared": "{n} lota/lotir deilt í samfélagsverslunina -- bíður yfirferðar.",
+    "store_device_shared_all_dup": "Allar {n} lota/lotir voru þegar í samfélagsverslunina.",
+    "store_device_shared_partial": "{n} lota/lotir deilt; {failed} tókst ekki að hlaða upp.",
+    "store_device_shared_some_dup": "{created} lota/lotir deilt; {dup} voru þegar í verslun.",
+    "store_download_failed": "Niðurhal mistókst: {error}",
+    "store_download_nothing": "Ekkert nýtt til að hlaða niður -- þessi uppsetning er þegar á tækinu þínu."
   },
   "trend": {
     "down": "Stefnir niður",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Heildarorka sem notuð er (kWh). Reiknuð með því að heilda afl yfir tíma.",
     "cost_tip": "Orkukostnaður fyrir þessa lotu, fastsettur við lok út frá verðinu sem var í gildi þá (orka x verð á kWh). Stilltu verð undir Stillingar til að fylla það út.",
     "confidence_tip": "Samsvörunaröryggi prófíls (0-100%). Hversu vel aflferill lotu samsvaraði auðkenndu forriti.",
-    "health_tip": "ML-heilsa lotu (hærra = betra). Smelltu á lotu til að skoða og fara yfir hana."
+    "health_tip": "ML-heilsa lotu (hærra = betra). Smelltu á lotu til að skoða og fara yfir hana.",
+    "flags_tip": "Yfirferðar-, frávik- og upprunaflagg fyrir lotuna. Haltu músarbendlinum yfir tákn til að sjá upplýsingar."
   },
   "stat": {
     "avg": "meðalt.",

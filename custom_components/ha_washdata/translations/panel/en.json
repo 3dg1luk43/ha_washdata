@@ -809,7 +809,8 @@
     "share_guideline_naming": "Name each profile exactly as shown on the appliance dial or display (e.g. 'Cotton 40', 'Eco 60').",
     "share_guideline_quality": "Only share cycles that completed normally -- no mid-cycle interruptions, door-open events, or power blips.",
     "share_guideline_review": "Your upload starts as pending and appears publicly once enough community members confirm it.",
-    "share_consent": "I confirm these cycles ran to normal completion without interruption"
+    "share_consent": "I confirm these cycles ran to normal completion without interruption",
+    "share_profile_no_cycles": "No reference cycles — mark a cycle as ⭐ in the Cycles tab to include this profile"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Sudden drop treated as immediate end",

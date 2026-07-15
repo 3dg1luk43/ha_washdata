@@ -164,7 +164,12 @@
     "share_to_store": "Dela till butiken",
     "share": "Dela",
     "confirm_appliance": "Bekräfta den här apparaten",
-    "confirmed": "Bekräftad"
+    "confirmed": "Bekräftad",
+    "browse_community_setups": "Bläddra bland gemenskapsinställningar",
+    "download_device": "Ladda ner denna inställning",
+    "share_device": "⬆ Dela den här apparaten",
+    "share_device_tip": "Dela denna apparat och dess inspelade referenscykler till gemenskapsbutiken så att andra med samma maskin kan ta över dem",
+    "share_n": "Dela {n} cykel/cyklar"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Anonym",
     "rate_quality": "Betygsätt kvalitet",
     "rate_n": "{n} stjärnor",
-    "approved_only": "Endast godkända"
+    "approved_only": "Endast godkända",
+    "adopt_settings": "Ta även över inställningar",
+    "flags": "Flaggor",
+    "include_phase_map": "Inkludera fasekarta",
+    "include_settings": "Inkludera identifierings- och matchningsinställningar",
+    "show_contributor": "Visa bidragsgivarnamn"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -627,7 +637,8 @@
     "force_stop_title": "Tvångsstoppa cykel",
     "force_stop_msg": "Tvångsstoppa den aktiva cykeln nu? Cykeln sparas som avbruten.",
     "store_import": "Importera referenscykel",
-    "store_share": "Dela till gemenskapsbutiken"
+    "store_share": "Dela till gemenskapsbutiken",
+    "store_share_device": "Dela den här apparaten"
   },
   "msg": {
     "appliance_monitor": "Apparatövervakning",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Aktivera onlinefunktioner i inställningskugghjulet för att välja från gemenskapskatalogen.",
     "pick_brand_first": "Välj ett apparatmärke först.",
     "model_not_found": "Inte i katalogen ännu.",
-    "connect_to_confirm": "Anslut i inställningskugghjulet för att bekräfta eller betygsätta."
+    "connect_to_confirm": "Anslut i inställningskugghjulet för att bekräfta eller betygsätta.",
+    "adopt_settings_hint": "Skriver över den här apparatens identifierings- och matchningsgränser med de delade. Dina aviseringar, entiteter och energipris ändras aldrig.",
+    "include_settings_hint": "Delar den här apparatens identifierings- och matchningsgränser (inte dina aviseringar, entiteter eller energipris). Användare väljer själva om de vill tillämpa dem.",
+    "onboard_download": "Ny apparat? Ta över en färdig inställning (program, referenscykler och faser) från en annan WashData-användare med samma apparat.",
+    "share_consent": "Jag bekräftar att dessa cykler slutfördes normalt utan avbrott",
+    "share_device_none": "Inga delbara cykler ännu. Markera en inspelad eller handplockat vald cykel som referenscykel (⭐) på fliken Cykler först.",
+    "share_guideline_naming": "Namnge varje profil exakt som det visas på apparatens ratt eller display (t.ex. 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Dela bara cykler som slutfördes normalt -- inga avbrott mitt i cykeln, öppnade dörrar eller strömavbrott.",
+    "share_guideline_review": "Din uppladdning börjar som väntande och visas offentligt när tillräckligt många gemenskapsmedlemmar bekräftar den.",
+    "share_guidelines_title": "Innan du delar",
+    "store_download_device_intro": "Ta över alla delade program och deras referenscykler till din apparat. Dina egna inspelade cykler och statistik påverkas inte.",
+    "store_share_device_intro": "Ladda upp {brand} {model} med de referenscykler du väljer. Andra med samma apparat kan ta över dina program. Poster granskas innan de visas offentligt.",
+    "share_profile_no_cycles": "Inga referenscykler -- markera en cykel som ⭐ på fliken Cykler för att inkludera den här profilen"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plötsligt fall som tolkas som omedelbart slut",
@@ -1300,6 +1323,9 @@
     "store_model": {
       "label": "Apparatens modell",
       "doc": "Valfritt. Apparatens modell, vald från gemenskapskatalogen när ett märke har angetts. Om din modell inte finns med kan du lägga till den i katalogen."
+    },
+    "show_contributor": {
+      "doc": "Visar tillskrivningen 'av <contributor>' på gemenskapsapparater och referenscykler."
     }
   },
   "setting_group": {
@@ -1621,7 +1647,18 @@
     "device_approved": "Godkänd av gemenskapen",
     "rating_saved": "Kvalitetsbetyg sparat",
     "brand_added": "Märke tillagt, väntar på godkännande",
-    "profile_added": "Profil tillagd, väntar på godkännande"
+    "profile_added": "Profil tillagd, väntar på godkännande",
+    "saved_except_conflicts": "Sparat. Åtgärda de markerade konflikterna för att spara resten.",
+    "share_device_none_sel": "Välj minst en cykel att dela",
+    "store_device_downloaded": "{p} program, {c} inspelning(ar) tillagda",
+    "store_device_downloaded_phases": "{p} program, {c} inspelning(ar), {ph} fasekarta/fasekartor tillagda",
+    "store_device_downloaded_settings": "{p} program, {c} inspelning(ar), {ph} fasekarta/fasekartor, {s} inställning(ar) tillagda",
+    "store_device_shared": "{n} cykel/cyklar delade i gemenskapsbutiken -- väntar på granskning.",
+    "store_device_shared_all_dup": "Alla {n} cykel/cyklar fanns redan i gemenskapsbutiken.",
+    "store_device_shared_partial": "{n} cykel/cyklar delade; {failed} kunde inte laddas upp.",
+    "store_device_shared_some_dup": "{created} cykel/cyklar delade; {dup} fanns redan i butiken.",
+    "store_download_failed": "Nedladdning misslyckades: {error}",
+    "store_download_nothing": "Inget nytt att ladda ner -- den här inställningen finns redan på din apparat."
   },
   "trend": {
     "down": "Nedåtgående trend",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Total förbrukad energi (kWh). Beräknad genom att integrera effekten över tid.",
     "cost_tip": "Energikostnad för denna cykel, låst vid slutförandet utifrån priset som gällde då (energi x pris per kWh). Ange ett pris under Inställningar för att fylla i den.",
     "confidence_tip": "Profilmatchkonfidens (0-100 %). Hur nära cykelns effektkurva matchade det identifierade programmet.",
-    "health_tip": "ML-cykelhälsa (högre = bättre). Klicka på en cykel för att inspektera och granska den."
+    "health_tip": "ML-cykelhälsa (högre = bättre). Klicka på en cykel för att inspektera och granska den.",
+    "flags_tip": "Gransknings-, anomali- och källflaggor för cykeln. Håll muspekaren över en ikon för detaljer."
   },
   "stat": {
     "avg": "snitt",

@@ -164,7 +164,12 @@
     "share_to_store": "Kopīgot veikalā",
     "share": "Kopīgot",
     "confirm_appliance": "Apstiprināt šo ierīci",
-    "confirmed": "Apstiprināts"
+    "confirmed": "Apstiprināts",
+    "browse_community_setups": "Pārlūkot kopienas iestatījumus",
+    "download_device": "Lejupielādēt šo iestatījumu",
+    "share_device": "⬆ Kopīgot šo ierīci",
+    "share_device_tip": "Kopīgojiet šo ierīci un tās reģistrētos atskaites ciklus kopienas veikalā, lai citi ar to pašu mašīnu varētu tos pieņemt",
+    "share_n": "Kopīgot {n} ciklu(-s)"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Anonīms",
     "rate_quality": "Novērtēt kvalitāti",
     "rate_n": "{n} zvaigznes",
-    "approved_only": "Tikai apstiprinātie"
+    "approved_only": "Tikai apstiprinātie",
+    "adopt_settings": "Pieņemt arī iestatījumus",
+    "flags": "Karodziņi",
+    "include_phase_map": "Iekļaut fāžu karti",
+    "include_settings": "Iekļaut noteikšanas un saskaņošanas iestatījumus",
+    "show_contributor": "Rādīt līdzautoru vārdus"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -627,7 +637,8 @@
     "force_stop_title": "Piespiedu kārtā apturēt ciklu",
     "force_stop_msg": "Piespiedu kārtā apturēt aktīvo ciklu tagad? Cikls tiks saglabāts kā pārtraukts.",
     "store_import": "Importēt atsauces ciklu",
-    "store_share": "Kopīgot kopienas veikalā"
+    "store_share": "Kopīgot kopienas veikalā",
+    "store_share_device": "Kopīgot šo ierīci"
   },
   "msg": {
     "appliance_monitor": "Ierīces monitors",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Iespējojiet tiešsaistes funkcijas iestatījumu zobratā, lai izvēlētos no kopienas kataloga.",
     "pick_brand_first": "Vispirms izvēlieties ierīces zīmolu.",
     "model_not_found": "Vēl nav katalogā.",
-    "connect_to_confirm": "Savienojiet iestatījumu zobratā, lai apstiprinātu vai novērtētu."
+    "connect_to_confirm": "Savienojiet iestatījumu zobratā, lai apstiprinātu vai novērtētu.",
+    "adopt_settings_hint": "Pārrakstīt šīs ierīces noteikšanas un saskaņošanas sliekšņus ar kopīgotajiem. Jūsu paziņojumi, entītijas un enerģijas cena netiek mainīti.",
+    "include_settings_hint": "Kopīgot šīs ierīces atpazīšanas un saskaņošanas sliekšņus (ne jūsu paziņojumus, entītijas vai enerģijas cenu). Pieņēmēji izvēlas, vai piemērot tos.",
+    "onboard_download": "Jauna ierīce? Pieņemiet gatavu iestatījumu (programmas, atskaites ciklus un fāzes) no cita WashData lietotāja ar to pašu ierīci.",
+    "share_consent": "Es apstiprinu, ka šie cikli noritēja normāli līdz galam bez pārtraukumiem",
+    "share_device_none": "Vēl nav kopīgojamu ciklu. Vispirms cilnē Cikli atzīmējiet ierakstītu vai roku izvēlētu ciklu kā atskaites ciklu (⭐).",
+    "share_guideline_naming": "Nosauciet katru profilu tieši tā, kā parādīts ierīces ciparnīcā vai displejā (piem., 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Kopīgojiet tikai ciklus, kas pabeidzās normāli -- bez pārtraukumiem cikla vidū, durvju atvēršanas notikumiem vai jaudas svārstībām.",
+    "share_guideline_review": "Jūsu augšupielāde sākas gaidīšanas statusā un kļūst publiska, kad pietiekams kopienas dalībnieku skaits to apstiprina.",
+    "share_guidelines_title": "Pirms kopīgošanas",
+    "store_download_device_intro": "Pieņemiet katru kopīgoto programmu un tās atskaites ciklus savā ierīcē. Jūsu pašu ierakstītie cikli un statistika netiek ietekmēti.",
+    "store_share_device_intro": "Augšupielādējiet {brand} {model} ar atlasītajiem atskaites cikliem. Citi ar to pašu ierīci var pieņemt jūsu programmas. Ieraksti tiek pārskatīti pirms publiskošanas.",
+    "share_profile_no_cycles": "Nav atskaites ciklu -- atzīmējiet ciklu kā ⭐ cilnē Cikli, lai iekļautu šo profilu"
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -1283,6 +1306,9 @@
     "store_model": {
       "label": "Ierīces modelis",
       "doc": "Neobligāti. Ierīces modelis, kas izvēlēts no kopienas kataloga, kad ir iestatīts zīmols. Ja jūsu modeļa sarakstā nav, varat to pievienot katalogam."
+    },
+    "show_contributor": {
+      "doc": "Rādīt \"autors: <līdzautors>\" attiecinājumu kopienas ierīcēs un atskaites ciklos."
     }
   },
   "setting_group": {
@@ -1508,7 +1534,18 @@
     "device_approved": "Kopiena apstiprināja",
     "rating_saved": "Kvalitātes vērtējums saglabāts",
     "brand_added": "Zīmols pievienots - gaida apstiprinājumu",
-    "profile_added": "Profils pievienots - gaida apstiprinājumu"
+    "profile_added": "Profils pievienots - gaida apstiprinājumu",
+    "saved_except_conflicts": "Saglabāts. Labojiet izceltās pretrunas, lai saglabātu pārējo.",
+    "share_device_none_sel": "Izvēlieties vismaz vienu ciklu kopīgošanai",
+    "store_device_downloaded": "{p} programma(-s), {c} ieraksts(-i) pievienoti",
+    "store_device_downloaded_phases": "{p} programma(-s), {c} ieraksts(-i), {ph} fāžu karte(-es) pievienoti",
+    "store_device_downloaded_settings": "{p} programma(-s), {c} ieraksts(-i), {ph} fāžu karte(-es), {s} iestatījums(-i) pievienoti",
+    "store_device_shared": "{n} cikls(-i) kopīgots(-i) kopienas veikalā - gaida pārskatīšanu.",
+    "store_device_shared_all_dup": "Visi {n} cikli jau bija kopienas veikalā.",
+    "store_device_shared_partial": "{n} cikli kopīgoti; {failed} neizdevās augšupielādēt.",
+    "store_device_shared_some_dup": "{created} cikli kopīgoti; {dup} jau bija veikalā.",
+    "store_download_failed": "Lejupielāde neizdevās: {error}",
+    "store_download_nothing": "Nav nekā jauna lejupielādei - šis iestatījums jau ir jūsų ierīcē."
   },
   "suggestion": {
     "both_agree": "WashData iesaka",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Kopējā patērētā enerģija (kWh). Aprēķināta, integrējot jaudu laikā.",
     "cost_tip": "Šā cikla enerģijas izmaksas, fiksētas pabeigšanas brīdī, izmantojot tobrīd spēkā esošo cenu (enerģija x cena par kWh). Iestatiet cenu sadaļā Iestatījumi, lai tās aizpildītu.",
     "confidence_tip": "Profila atbilstības pārliecība (0-100%). Cik cieši cikla jaudas līkne atbilda identificētajai programmai.",
-    "health_tip": "ML cikla veselība (augstāks = labāk). Noklikšķiniet uz cikla, lai to apskatītu un pārskatītu."
+    "health_tip": "ML cikla veselība (augstāks = labāk). Noklikšķiniet uz cikla, lai to apskatītu un pārskatītu.",
+    "flags_tip": "Cikla pārskatīšanas, anomāliju un avota karodziņi. Pārvietojiet peli virs ikonas, lai skatītu detaļas."
   },
   "stat": {
     "avg": "vidēji",

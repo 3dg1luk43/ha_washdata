@@ -164,7 +164,12 @@
     "share_to_store": "Delen in store",
     "share": "Delen",
     "confirm_appliance": "Dit apparaat bevestigen",
-    "confirmed": "Bevestigd"
+    "confirmed": "Bevestigd",
+    "browse_community_setups": "Community-setups doorzoeken",
+    "download_device": "Deze instelling downloaden",
+    "share_device": "⬆ Dit apparaat delen",
+    "share_device_tip": "Dit apparaat en zijn opgenomen referentiecycli delen in de communitystore, zodat andere gebruikers met hetzelfde apparaat ze kunnen overnemen",
+    "share_n": "{n} cyclus/cycli delen"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -551,7 +556,12 @@
     "anonymous": "Anoniem",
     "rate_quality": "Kwaliteit beoordelen",
     "rate_n": "{n} sterren",
-    "approved_only": "Alleen goedgekeurd"
+    "approved_only": "Alleen goedgekeurd",
+    "adopt_settings": "Instellingen ook overnemen",
+    "flags": "Vlaggen",
+    "include_phase_map": "Fasekaart opnemen",
+    "include_settings": "Detectie- en matchinstellingen opnemen",
+    "show_contributor": "Bijdragersnamen weergeven"
   },
   "log": {
     "all_levels": "Alle niveaus",
@@ -627,7 +637,8 @@
     "force_stop_title": "Cyclus geforceerd stoppen",
     "force_stop_msg": "De actieve cyclus nu geforceerd stoppen? De cyclus wordt opgeslagen als onderbroken.",
     "store_import": "Referentiecyclus importeren",
-    "store_share": "Delen in communitystore"
+    "store_share": "Delen in communitystore",
+    "store_share_device": "Dit apparaat delen"
   },
   "msg": {
     "appliance_monitor": "Apparaatmonitor",
@@ -834,7 +845,19 @@
     "store_picker_offline": "Schakel onlinefuncties in via het instellingentandwiel om te kiezen uit de communitycatalogus.",
     "pick_brand_first": "Kies eerst een merk van het apparaat.",
     "model_not_found": "Nog niet in de catalogus.",
-    "connect_to_confirm": "Verbind via het instellingentandwiel om te bevestigen of te beoordelen."
+    "connect_to_confirm": "Verbind via het instellingentandwiel om te bevestigen of te beoordelen.",
+    "adopt_settings_hint": "Overschrijft de detectie- en matchdrempels van dit apparaat met de gedeelde. Uw meldingen, entiteiten en energieprijs worden nooit gewijzigd.",
+    "include_settings_hint": "Deelt de detectie- en matchdrempels van dit apparaat (niet uw meldingen, entiteiten of energieprijs). Overnemers kiezen zelf of ze ze toepassen.",
+    "onboard_download": "Nieuw apparaat? Neem een kant-en-klare instelling (programma's, referentiecycli en fasen) over van een andere WashData-gebruiker met hetzelfde apparaat.",
+    "share_consent": "Ik bevestig dat deze cycli normaal zijn voltooid zonder onderbreking",
+    "share_device_none": "Nog geen deelbare cycli. Markeer eerst een opgenomen of handmatig geselecteerde cyclus als referentiecyclus (⭐) op het tabblad Cycli.",
+    "share_guideline_naming": "Geef elk profiel precies de naam zoals weergegeven op de kiesschijf of het display van het apparaat (bijv. 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Deel alleen cycli die normaal zijn voltooid -- geen onderbrekingen halverwege, deur geopend of stroomuitval.",
+    "share_guideline_review": "Uw upload begint als in behandeling en verschijnt openbaar zodra genoeg communityleden het bevestigen.",
+    "share_guidelines_title": "Voordat u deelt",
+    "store_download_device_intro": "Neem elk gedeeld programma en zijn referentiecycli over op uw apparaat. Uw eigen opgenomen cycli en statistieken worden niet beïnvloed.",
+    "store_share_device_intro": "Upload {brand} {model} met de referentiecycli die u selecteert. Anderen met hetzelfde apparaat kunnen uw programma's overnemen. Vermeldingen worden beoordeeld voordat ze openbaar verschijnen.",
+    "share_profile_no_cycles": "Geen referentiecycli -- markeer een cyclus als ⭐ op het tabblad Cycli om dit profiel op te nemen"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plotselinge daling behandeld als onmiddellijk einde",
@@ -1300,6 +1323,9 @@
     "store_model": {
       "label": "Model van apparaat",
       "doc": "Optioneel. Het model van het apparaat, gekozen uit de communitycatalogus zodra een merk is ingesteld. Als je model niet vermeld staat, kun je het toevoegen aan de catalogus."
+    },
+    "show_contributor": {
+      "doc": "Toont de vermelding 'door <contributor>' op community-apparaten en referentiecycli."
     }
   },
   "setting_group": {
@@ -1621,7 +1647,18 @@
     "device_approved": "Goedgekeurd door de community",
     "rating_saved": "Kwaliteitsbeoordeling opgeslagen",
     "brand_added": "Merk toegevoegd, wacht op goedkeuring",
-    "profile_added": "Profiel toegevoegd, wacht op goedkeuring"
+    "profile_added": "Profiel toegevoegd, wacht op goedkeuring",
+    "saved_except_conflicts": "Opgeslagen. Los de gemarkeerde conflicten op om de rest op te slaan.",
+    "share_device_none_sel": "Selecteer ten minste één cyclus om te delen",
+    "store_device_downloaded": "{p} programma('s), {c} opname(s) toegevoegd",
+    "store_device_downloaded_phases": "{p} programma('s), {c} opname(s), {ph} fasekaart(en) toegevoegd",
+    "store_device_downloaded_settings": "{p} programma('s), {c} opname(s), {ph} fasekaart(en), {s} instelling(en) toegevoegd",
+    "store_device_shared": "{n} cyclus/cycli gedeeld in de communitystore -- wacht op beoordeling.",
+    "store_device_shared_all_dup": "Alle {n} cyclus/cycli stonden al in de communitystore.",
+    "store_device_shared_partial": "{n} cyclus/cycli gedeeld; {failed} konden niet worden geüpload.",
+    "store_device_shared_some_dup": "{created} cyclus/cycli gedeeld; {dup} stonden al in de store.",
+    "store_download_failed": "Downloaden mislukt: {error}",
+    "store_download_nothing": "Niets nieuws te downloaden -- deze instelling staat al op uw apparaat."
   },
   "trend": {
     "down": "Trend naar beneden",
@@ -1642,7 +1679,8 @@
     "energy_tip": "Totaal verbruikte energie (kWh). Berekend door het vermogen over de tijd te integreren.",
     "cost_tip": "Energiekosten voor deze cyclus, vastgezet bij voltooiing met de op dat moment geldende prijs (energie x prijs per kWh). Stel een prijs in onder Instellingen om deze te vullen.",
     "confidence_tip": "Betrouwbaarheid van de profielovereenkomst (0-100%). Hoe nauwkeurig de vermogenscurve van de cyclus overeenkwam met het geïdentificeerde programma.",
-    "health_tip": "ML-cyclusgezondheid (hoger = beter). Klik op een cyclus om deze te inspecteren en te beoordelen."
+    "health_tip": "ML-cyclusgezondheid (hoger = beter). Klik op een cyclus om deze te inspecteren en te beoordelen.",
+    "flags_tip": "Beoordelings-, anomalie- en bronvlaggen voor de cyclus. Beweeg de muis over een pictogram voor details."
   },
   "stat": {
     "avg": "gem.",
