@@ -14,7 +14,7 @@ from homeassistant.core import HomeAssistant
 
 from . import store_account
 from .const import QC_EDITED, QC_MANUAL, QC_RECORDING
-from .store_client import StoreClient
+from .store_client import StoreClient, device_id, profile_id, trace_hash
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -194,15 +194,20 @@ class StoreBridge:
 
     async def share_device(
         self, brand: str, model: str, appliance_type: str, items: list[dict[str, Any]],
+        include_phases: list[str] | None = None,
     ) -> dict[str, Any]:
         """Share a device bundle. ``items`` = ``[{local_cycle_id, program}]`` (the
         panel's tree selection). Resolves each local cycle's trace + stats and uploads
-        the whole set via ``upload_device_bundle``. Returns ``{ok, cycle_ids, errors}``
-        or ``{error}``.
+        the whole set via ``upload_device_bundle``. For each program named in
+        ``include_phases`` that has local phase ranges, the phase map (seconds) is
+        attached to that program's bundle items so it lands on the store profile doc.
+        Returns ``{ok, cycle_ids, created, duplicates, errors}`` or ``{error}``.
         """
         acct = store_account.get_account(self._hass)
         if not acct.get("refresh_token"):
             return {"error": "not_connected"}
+        store_type = store_appliance_type(appliance_type)
+        want_phases = {str(p).strip() for p in (include_phases or []) if str(p).strip()}
         by_id = {
             c.get("id"): c
             for c in (list(self._ps.get_past_cycles()) + list(self._ps.get_reference_cycles()))
@@ -233,7 +238,23 @@ class StoreBridge:
             })
         if not bundle_items:
             return {"error": "nothing_to_share"}
-        device_meta = {"applianceType": store_appliance_type(appliance_type), "brand": brand, "model": model}
+        # Stage 2: attach each requested program's phase map to its items. The store
+        # cycle id is deterministic (trace_hash), so phaseSourceCycleId can point at
+        # the program's first shared cycle for the Stage-4 web editor.
+        d_id = device_id(store_type, brand, model)
+        for program in want_phases:
+            ranges = self._ps.get_profile_phase_ranges(program)
+            if not ranges:
+                continue
+            prog_items = [b for b in bundle_items if b["program"] == program]
+            if not prog_items:
+                continue
+            phases = [{"name": r["name"], "start": r["start"], "end": r["end"]} for r in ranges]
+            source_cid = trace_hash(profile_id(d_id, program), prog_items[0]["points"])
+            for b in prog_items:
+                b["phases"] = phases
+                b["phaseSourceCycleId"] = source_cid
+        device_meta = {"applianceType": store_type, "brand": brand, "model": model}
         res = await self._client.upload_device_bundle(
             acct["refresh_token"], acct.get("uid", ""), acct.get("name"), device_meta, bundle_items,
         )
@@ -244,23 +265,25 @@ class StoreBridge:
             res = {**res, "detail": self._client.last_error()}
         return res
 
-    async def download_device(self, device_id: str) -> dict[str, Any]:
+    async def download_device(self, device_id_: str, device_type: str = "") -> dict[str, Any]:
         """Adopt a whole-device bundle: for each downloaded profile, import its
         reference cycles into ``reference_cycles`` (merge/upsert; real past_cycles are
-        never touched). Returns ``{profiles_adopted, cycles_imported}``.
+        never touched) and, when the profile carries a phase map, replace the local
+        profile's phase ranges + reconcile any unknown phase labels into the catalog.
+        Returns ``{profiles_adopted, cycles_imported, phases_applied}``.
 
         Idempotent: a store cycle already imported locally (``meta.source ==
         "store:<id>"``) is skipped, so re-downloading the same device does not
-        accumulate duplicate reference cycles (a full clear-then-import lands with
-        phases in Stage 2).
+        accumulate duplicate reference cycles.
         """
-        bundle = await self._client.get_device_bundle(device_id)
+        bundle = await self._client.get_device_bundle(device_id_)
         already = {
             str((c.get("meta") or {}).get("source") or "")
             for c in self._ps.get_reference_cycles()
         }
         profiles_adopted = 0
         cycles_imported = 0
+        phases_applied = 0
         for prof in bundle.get("profiles", []) or []:
             program = str(prof.get("program") or prof.get("program_lc") or "").strip()
             if not program:
@@ -283,4 +306,52 @@ class StoreBridge:
                     adopted_any = True
             if adopted_any:
                 profiles_adopted += 1
-        return {"profiles_adopted": profiles_adopted, "cycles_imported": cycles_imported}
+            # Stage 2: apply the bundled phase map (replace) + reconcile labels. Never
+            # raises; a bad/overlapping range set is skipped rather than failing adopt.
+            if adopted_any and await self._apply_phases(program, prof.get("phases"), device_type):
+                phases_applied += 1
+        return {
+            "profiles_adopted": profiles_adopted,
+            "cycles_imported": cycles_imported,
+            "phases_applied": phases_applied,
+        }
+
+    async def _apply_phases(
+        self, program: str, phases: Any, device_type: str
+    ) -> bool:
+        """Replace ``program``'s local phase ranges with the bundled set and merge any
+        unknown phase labels into the custom-phase catalog. Returns True when a
+        non-empty phase map was applied. Never raises."""
+        if not isinstance(phases, list) or not phases:
+            return False
+        ranges: list[dict[str, Any]] = []
+        for p in phases:
+            if not isinstance(p, dict):
+                continue
+            name = str(p.get("name", "")).strip()
+            try:
+                start, end = float(p.get("start", 0)), float(p.get("end", 0))
+            except (TypeError, ValueError):
+                continue
+            if name and end > start:
+                ranges.append({"name": name, "start": start, "end": end})
+        if not ranges:
+            return False
+        try:
+            await self._ps.async_set_profile_phase_ranges(program, ranges)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("download_device: could not apply phases for %s: %s", program, exc)
+            return False
+        # Reconcile labels into the catalog so they carry a name/description in the UI.
+        try:
+            known = {str(p.get("name", "")).casefold() for p in self._ps.list_phase_catalog(device_type)}
+            for r in ranges:
+                if r["name"].casefold() not in known:
+                    try:
+                        await self._ps.async_create_custom_phase(device_type, r["name"])
+                        known.add(r["name"].casefold())
+                    except Exception:  # pylint: disable=broad-exception-caught
+                        pass  # duplicate / invalid label -> skip
+        except Exception:  # pylint: disable=broad-exception-caught
+            pass
+        return True

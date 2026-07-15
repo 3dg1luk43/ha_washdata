@@ -262,7 +262,7 @@ async def test_download_device_adopts_bundle(bridge):
         ]},
     ]}
     res = await br.download_device("d1")
-    assert res == {"profiles_adopted": 2, "cycles_imported": 2}
+    assert res == {"profiles_adopted": 2, "cycles_imported": 2, "phases_applied": 0}
     refs = ps.get_reference_cycles()
     assert {r["profile_name"] for r in refs} == {"Cotton 40", "Eco 50"}
     assert ps.get_past_cycles() == []  # real data untouched
@@ -278,8 +278,64 @@ async def test_download_device_is_idempotent(bridge):
         ]},
     ]}
     first = await br.download_device("d1")
-    assert first == {"profiles_adopted": 1, "cycles_imported": 1}
+    assert first == {"profiles_adopted": 1, "cycles_imported": 1, "phases_applied": 0}
     # Re-downloading the same device must not duplicate the already-imported cycle.
     second = await br.download_device("d1")
-    assert second == {"profiles_adopted": 0, "cycles_imported": 0}
+    assert second == {"profiles_adopted": 0, "cycles_imported": 0, "phases_applied": 0}
     assert len(ps.get_reference_cycles()) == 1
+
+
+@pytest.mark.asyncio
+async def test_share_device_attaches_phases(bridge):
+    br, ps, hass = bridge
+    await br.connect("refresh", "u1", "Alice")
+    await ps.async_add_cycle({
+        "start_time": BASE.isoformat(), "duration": 3600, "status": "completed",
+        "profile_name": "Cotton 40",
+        "power_data": [[i * 60.0, 1000.0] for i in range(61)],
+    })
+    cid = ps.get_past_cycles()[0]["id"]
+    ps._data.setdefault("profiles", {}).setdefault("Cotton 40", {})
+    await ps.async_set_profile_phase_ranges("Cotton 40", [{"name": "Wash", "start": 0, "end": 600}])
+    res = await br.share_device(
+        "Bosch", "WAT28", "washing_machine",
+        [{"local_cycle_id": cid, "program": "Cotton 40"}],
+        include_phases=["Cotton 40"],
+    )
+    assert res.get("ok") is True
+    item = br._client.uploaded_bundle["items"][0]
+    assert item["phases"] == [{"name": "Wash", "start": 0.0, "end": 600.0}]
+    assert item["phaseSourceCycleId"]  # non-empty deterministic id
+
+
+@pytest.mark.asyncio
+async def test_share_device_omits_phases_when_not_requested(bridge):
+    br, ps, hass = bridge
+    await br.connect("refresh", "u1", "Alice")
+    await ps.async_add_cycle({
+        "start_time": BASE.isoformat(), "duration": 3600, "status": "completed",
+        "profile_name": "Cotton 40", "power_data": [[i * 60.0, 1000.0] for i in range(61)],
+    })
+    cid = ps.get_past_cycles()[0]["id"]
+    ps._data.setdefault("profiles", {}).setdefault("Cotton 40", {})
+    await ps.async_set_profile_phase_ranges("Cotton 40", [{"name": "Wash", "start": 0, "end": 600}])
+    await br.share_device("Bosch", "WAT28", "washer", [{"local_cycle_id": cid, "program": "Cotton 40"}])
+    assert "phases" not in br._client.uploaded_bundle["items"][0]
+
+
+@pytest.mark.asyncio
+async def test_download_device_applies_phases(bridge):
+    br, ps, hass = bridge
+    br._client.bundle = {"device_id": "d1", "profiles": [
+        {"id": "p1", "program": "Cotton 40", "phases": [{"name": "Rinse", "start": 0, "end": 300}],
+         "cycles": [
+            {"id": "c1", "importable": [[0, 2000], [60, 100], [120, 0]], "createdAt": "t",
+             "trace": {"sampleIntervalSec": 60}},
+         ]},
+    ]}
+    res = await br.download_device("d1", "washer")
+    assert res["profiles_adopted"] == 1 and res["phases_applied"] == 1
+    ranges = ps.get_profile_phase_ranges("Cotton 40")
+    assert ranges == [{"name": "Rinse", "start": 0.0, "end": 300.0, "description": ""}]
+    # The label was reconciled into the custom-phase catalog.
+    assert any(p.get("name", "").casefold() == "rinse" for p in ps.list_phase_catalog("washer"))

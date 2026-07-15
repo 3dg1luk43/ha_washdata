@@ -599,6 +599,9 @@ class StoreClient:
                 "model": device_meta.get("model"),
                 "program": it.get("program"),
                 "sampleIntervalSec": it.get("sampleIntervalSec"),
+                # Stage 2: optional phase map for the profile doc (create-time).
+                "phases": it.get("phases"),
+                "phaseSourceCycleId": it.get("phaseSourceCycleId"),
             }
             res = await self.upload_reference_cycle(
                 refresh_token, uid, uploader_name, meta,
