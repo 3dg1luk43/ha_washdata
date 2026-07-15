@@ -261,3 +261,32 @@ test('share-device shows an empty state when there are no shareable cycles', asy
   // Nothing selectable -> Share is disabled.
   await expect(page.locator('[data-maction="store-share-device-ok"]')).toBeDisabled();
 });
+
+test('device view offers "Download this setup" and calls store_download_device', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    ...storeHandlers(),
+    'ha_washdata/store_download_device': { profiles_adopted: 2, cycles_imported: 5 },
+  });
+  await clickTab(page, 'store');
+  await page.locator('[data-action="store-open-device"]').first().click();
+  const dl = page.locator('[data-action="store-download-device"]');
+  await expect(dl).toBeVisible({ timeout: 8_000 });
+  await dl.click();
+  const calls = await assertWsCalled(page, 'ha_washdata/store_download_device');
+  expect(calls[0]).toHaveProperty('device_id', 'dev-1');
+});
+
+test('empty device shows the onboarding banner that jumps to the store', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    ...storeHandlers(),
+    'ha_washdata/get_profiles': { profiles: [] },
+    'ha_washdata/get_device_cycles': { cycles: [], total: 0, has_more: false },
+  });
+  await clickTab(page, 'profiles');
+  const onboard = page.locator('[data-action="store-onboard"]');
+  await expect(onboard).toBeVisible({ timeout: 8_000 });
+  await onboard.click();
+  await expect(page.locator('button.wd-tab[data-tab="store"].active')).toBeVisible({ timeout: 5_000 });
+});

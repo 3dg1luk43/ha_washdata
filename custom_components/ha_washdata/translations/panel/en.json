@@ -166,7 +166,9 @@
     "confirmed": "Confirmed",
     "share_device": "⬆ Share this device",
     "share_device_tip": "Share this appliance and its recorded reference cycles to the community store so others with the same machine can adopt them",
-    "share_n": "Share {n} cycle(s)"
+    "share_n": "Share {n} cycle(s)",
+    "download_device": "Download this setup",
+    "browse_community_setups": "Browse community setups"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -795,7 +797,9 @@
     "model_not_found": "Not in the catalog yet.",
     "connect_to_confirm": "Connect in the settings gear to confirm or rate.",
     "store_share_device_intro": "Upload {brand} {model} with the reference cycles you select. Others with the same appliance can adopt your programs. Entries are reviewed before appearing publicly.",
-    "share_device_none": "No shareable cycles yet. Mark a recorded or hand-picked cycle as a reference cycle (⭐) in the Cycles tab first."
+    "share_device_none": "No shareable cycles yet. Mark a recorded or hand-picked cycle as a reference cycle (⭐) in the Cycles tab first.",
+    "store_download_device_intro": "Adopt every shared program and its reference cycles onto your device. Your own recorded cycles and stats are not affected.",
+    "onboard_download": "New device? Adopt a ready-made setup (programs, reference cycles and phases) from another WashData user with the same appliance."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Sudden drop treated as immediate end",
@@ -1588,7 +1592,9 @@
     "brand_added": "Brand added - awaiting approval",
     "profile_added": "Profile added - awaiting approval",
     "store_device_shared": "Shared {n} cycle(s) to the community store - pending review.",
-    "share_device_none_sel": "Select at least one cycle to share"
+    "share_device_none_sel": "Select at least one cycle to share",
+    "store_device_downloaded": "{p} program(s), {c} recording(s) added",
+    "store_download_failed": "Download failed: {error}"
   },
   "trend": {
     "down": "Trending down",

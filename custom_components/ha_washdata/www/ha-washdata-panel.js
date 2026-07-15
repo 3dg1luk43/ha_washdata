@@ -3944,7 +3944,18 @@ class HaWashdataPanel extends HTMLElement {
     const ungrouped = this._profiles.filter(p => !groupedNames.has(p.name));
     const ungroupedCards = ungrouped.map(p => this._profileCardHtml(p)).join('');
 
-    const profilesHtml = `
+    // Post-create onboarding: a brand-new (empty) device with online enabled can
+    // adopt a whole community setup instead of starting from scratch. Shown only
+    // when there are no profiles AND no cycles at all.
+    const isEmptyDevice = this._profiles.length === 0
+      && !(this._cycles || []).length && !(this._refCycles || []).length;
+    const onboardBanner = (canEdit && this._onlineEnabled() && isEmptyDevice) ? `
+      <div class="wd-sug-banner" style="border-color:var(--primary-color);background:var(--accent-dim,rgba(0,180,216,.08))">
+        <span>📥 ${this._t('msg.onboard_download', {}, 'New device? Adopt a ready-made setup (programs, reference cycles and phases) from another WashData user with the same appliance.')}</span>
+        <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="store-onboard">${this._t('btn.browse_community_setups', {}, 'Browse community setups')}</button>
+      </div>` : '';
+
+    const profilesHtml = onboardBanner + `
       <div class="wd-card">
         <div class="wd-card-title">${this._t('tab.profiles', {}, 'Profiles')} (${this._profiles.length})</div>
         <p class="wd-info">${this._t('msg.profiles_intro', {}, 'Click a profile for stats, phases and cleanup. Group near-identical programs (same shape/duration, different temperature or spin) so matching reliably picks between them.')}</p>
@@ -6482,7 +6493,15 @@ class HaWashdataPanel extends HTMLElement {
     </button>`).join('');
     const list = this._storeLoading ? this._htmlStoreLoading()
       : (items.length ? `<div class="wd-store-rows">${rows}</div>` : `<p class="wd-info">${this._t('store.no_programs', {}, 'No shared programs for this appliance yet.')}</p>`);
-    return list;
+    // Adopt the whole device: import every program's reference cycles into this
+    // device in one action (merge/upsert; your real cycles are never touched).
+    const dev = this._storeDevice;
+    const dlBusy = this._busy.has('store-download-device');
+    const dlHeader = (this._canEdit() && dev && items.length) ? `<div class="wd-card" style="margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <span class="wd-info" style="flex:1;min-width:180px">${this._t('msg.store_download_device_intro', {}, 'Adopt every shared program and its reference cycles onto your device. Your own recorded cycles and stats are not affected.')}</span>
+      <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-download-device" data-device-id="${_esc(dev.id)}" ${dlBusy ? 'disabled' : ''}>${dlBusy ? '<span class="wd-spin"></span> ' : '⬇ '}${this._t('btn.download_device', {}, 'Download this setup')}</button>
+    </div>` : '';
+    return dlHeader + list;
   }
 
   _htmlStoreProfile() {
@@ -8927,6 +8946,27 @@ class HaWashdataPanel extends HTMLElement {
         .then(r => { if (!this._isActiveEntry(eid) || this._storeView !== 'profile') return; this._storeCycles = (r && r.items) || []; })
         .catch(() => { if (this._isActiveEntry(eid)) this._storeCycles = []; })
         .finally(() => { if (this._isActiveEntry(eid)) { this._storeLoading = false; this._render(); } });
+
+    } else if (a === 'store-onboard') {
+      // Onboarding jump: open the Store tab pre-filtered to this device's brand
+      // (when declared) so an empty device can adopt a community setup.
+      this._storeQuery = (this._opts.store_brand || '').trim();
+      this._storeView = 'brands'; this._storeDevice = null; this._storeProfile = null;
+      this._tab = 'store'; this._fetchTabData();
+
+    } else if (a === 'store-download-device') {
+      const did = btn.dataset.deviceId;
+      if (!did) return;
+      this._busyRun('store-download-device', async () => {
+        try {
+          const r = await this._ws({ type: `${_DOMAIN}/store_download_device`, entry_id: eid, device_id: did });
+          if (r && r.error) { this._showToast(this._t('toast.store_download_failed', {error: r.error}, 'Download failed: ' + r.error), 'error'); return; }
+          await this._fetchProfiles(eid);
+          await this._fetchCycles(eid);
+          const p = (r && r.profiles_adopted) || 0, c = (r && r.cycles_imported) || 0;
+          this._showToast(this._t('toast.store_device_downloaded', {p, c}, `${p} program(s), ${c} recording(s) added`));
+        } catch (e) { this._showToast(this._t('toast.store_download_failed', {error: e.message || e}, 'Download failed: ' + (e.message || e)), 'error'); }
+      });
 
     } else if (a === 'store-import') {
       const cid = btn.dataset.cycleId;
