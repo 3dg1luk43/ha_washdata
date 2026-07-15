@@ -573,13 +573,16 @@ class StoreDownloadDeviceResponse(TypedDict, total=False):
     """Result of adopting a whole-device bundle into local reference cycles."""
     profiles_adopted: int
     cycles_imported: int
+    phases_applied: int
     error: str
     disabled: bool
 
 
 class GetShareableCyclesResponse(TypedDict, total=False):
-    """Recorded/golden reference cycles eligible to share (share-device tree source)."""
+    """Recorded/golden reference cycles eligible to share (share-device tree source)
+    plus the programs that carry a local phase map."""
     items: list
+    phase_programs: list
 
 
 WS_RESPONSE_TYPES: dict[str, type] = {
@@ -968,7 +971,7 @@ WS_COMMANDS: dict[str, dict] = {
     "store_upload_cycle": {"params": [
         _entry(), _p("local_cycle_id", "str"), _p("program", "str"), _p("description", "str|null", False),
     ]},
-    "store_upload_device": {"params": [_entry(), _p("items", "list")]},
+    "store_upload_device": {"params": [_entry(), _p("items", "list"), _p("include_phases", "list", False)]},
     "store_download_device": {"params": [_entry(), _p("device_id", "str")]},
     "get_shareable_cycles": {"params": [_entry()]},
 }

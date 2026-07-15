@@ -265,6 +265,7 @@ export interface GetSettingsChangelogResponse {
 
 export interface GetShareableCyclesResponse {
   items?: unknown[];
+  phase_programs?: unknown[];
 }
 
 export interface GetSuggestionsResponse {
@@ -377,6 +378,7 @@ export interface StoreDeviceProfilesResponse {
 export interface StoreDownloadDeviceResponse {
   profiles_adopted?: number;
   cycles_imported?: number;
+  phases_applied?: number;
   error?: string;
   disabled?: boolean;
 }
@@ -971,6 +973,7 @@ export interface StoreUploadCycleRequest {
 export interface StoreUploadDeviceRequest {
   entry_id: string;
   items: unknown[];
+  include_phases?: unknown[];
 }
 
 export interface StoreDownloadDeviceRequest {
