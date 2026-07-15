@@ -767,9 +767,17 @@ button.wd-profile-card { display: block; }
 .wd-store-search { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
 .wd-store-search input { flex: 1; min-width: 180px; padding: 8px 11px; border-radius: 6px; border: 1px solid var(--divider-color); background: var(--secondary-background-color); color: var(--primary-text-color); font-size: .9em; }
 .wd-store-list { display: flex; flex-direction: column; gap: 8px; }
-.wd-store-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; width: 100%; cursor: pointer; padding: 12px 14px; }
-.wd-store-item-title { font-weight: 600; }
-.wd-store-item-meta { display: flex; gap: 12px; font-size: .8em; color: var(--secondary-text-color); flex-shrink: 0; }
+/* Browse rows (appliances / programs): tappable list rows with a hover affordance
+   and a chevron, instead of flat cards. */
+.wd-store-rows { display: flex; flex-direction: column; gap: 6px; }
+.wd-store-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; width: 100%; cursor: pointer; padding: 11px 14px; background: var(--secondary-background-color); border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); color: var(--primary-text-color); transition: border-color .12s ease, background .12s ease; }
+.wd-store-row:hover { border-color: var(--primary-color); background: var(--card-background-color); }
+.wd-store-row-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.wd-store-row-title { font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.wd-store-row-sub { display: flex; align-items: center; gap: 10px; font-size: .8em; color: var(--secondary-text-color); }
+.wd-store-chip { background: var(--accent-dim, rgba(0,180,216,.14)); color: var(--primary-color); border-radius: 999px; padding: 1px 8px; font-size: .92em; text-transform: capitalize; }
+.wd-store-fav { color: var(--warning-color, #f0b429); }
+.wd-store-row-arrow { color: var(--secondary-text-color); font-size: 1.3em; flex-shrink: 0; }
 .wd-store-cycle-top { display: flex; align-items: center; gap: 12px; }
 .wd-store-cycle-stats { flex: 1; min-width: 0; }
 .wd-store-spark { width: 120px; height: 36px; flex-shrink: 0; display: block; background: var(--secondary-background-color); border-radius: 6px; }
@@ -6392,36 +6400,34 @@ class HaWashdataPanel extends HTMLElement {
     const items = this._storeDevices || [];
     const rows = items.map(d => {
       const title = `${_esc(d.brand || '')} ${_esc(d.model || '')}`.trim() || this._t('store.device', {}, 'Device');
-      return `<button class="wd-card wd-store-item" data-action="store-open-device" data-device-id="${_esc(d.id)}">
-        <span class="wd-store-item-main">
-          <span class="wd-store-item-title">${title}</span>
-          ${d.applianceType ? `<span class="wd-info" style="display:block">${_esc(d.applianceType)}</span>` : ''}
+      const type = d.applianceType ? `<span class="wd-store-chip">${_esc(this._deviceTypeLabel(d.applianceType))}</span>` : '';
+      return `<button class="wd-store-row" data-action="store-open-device" data-device-id="${_esc(d.id)}">
+        <span class="wd-store-row-main">
+          <span class="wd-store-row-title">${title}${this._statusTag(d)}</span>
+          <span class="wd-store-row-sub">${type}<span class="wd-store-fav" title="${_esc(this._t('store.favorites', {}, 'Favourites'))}">★ ${d.favoriteCount || 0}</span></span>
         </span>
-        <span class="wd-store-item-meta">
-          <span>${this._t('store.n_programs', {n: d.profileCount || 0}, `${d.profileCount || 0} programs`)}</span>
-          <span title="${_esc(this._t('store.favorites', {}, 'Favourites'))}">★ ${d.favoriteCount || 0}</span>
-        </span>
+        <span class="wd-store-row-arrow" aria-hidden="true">›</span>
       </button>`;
     }).join('');
     const list = this._storeLoading ? this._htmlStoreLoading()
-      : (items.length ? rows : `<p class="wd-info">${this._t('store.no_results', {}, 'No matching appliances found. Try a different search.')}</p>`);
+      : (items.length ? `<div class="wd-store-rows">${rows}</div>` : `<p class="wd-info">${this._t('store.no_results', {}, 'No matching appliances found. Try a different search.')}</p>`);
     return `
       <div class="wd-store-search">
         <input type="text" id="wd-store-q" placeholder="${_esc(this._t('store.search_ph', {}, 'Search by brand or model…'))}" value="${_esc(this._storeQuery)}" autocomplete="off" spellcheck="false">
         <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-search">${this._t('btn.search', {}, 'Search')}</button>
       </div>
-      <div class="wd-store-list">${list}</div>`;
+      ${list}`;
   }
 
   _htmlStoreDevice() {
     const items = this._storeProfiles || [];
-    const rows = items.map(p => `<button class="wd-card wd-store-item" data-action="store-open-profile" data-profile-id="${_esc(p.id)}">
-      <span class="wd-store-item-title">${_esc(p.program || '')}</span>
-      <span class="wd-store-item-meta"><span>${this._t('store.n_cycles', {n: p.cycleCount || 0}, `${p.cycleCount || 0} cycles`)}</span></span>
+    const rows = items.map(p => `<button class="wd-store-row" data-action="store-open-profile" data-profile-id="${_esc(p.id)}">
+      <span class="wd-store-row-main"><span class="wd-store-row-title">${_esc(p.program || '')}${this._statusTag(p)}</span></span>
+      <span class="wd-store-row-arrow" aria-hidden="true">›</span>
     </button>`).join('');
     const list = this._storeLoading ? this._htmlStoreLoading()
-      : (items.length ? rows : `<p class="wd-info">${this._t('store.no_programs', {}, 'No shared programs for this appliance yet.')}</p>`);
-    return `<div class="wd-store-list">${list}</div>`;
+      : (items.length ? `<div class="wd-store-rows">${rows}</div>` : `<p class="wd-info">${this._t('store.no_programs', {}, 'No shared programs for this appliance yet.')}</p>`);
+    return list;
   }
 
   _htmlStoreProfile() {
@@ -7061,8 +7067,8 @@ class HaWashdataPanel extends HTMLElement {
         ${newActive
           ? `<div class="wd-field"><label>${this._t('lbl.new_profile_name', {}, 'New Profile Name')}</label><input type="text" id="wd-store-import-name" value="${_esc(m.program || '')}"></div>`
           : `<div class="wd-field"><label>${this._t('store.merge_target', {}, 'Merge into profile')}</label>${targetSel}</div>`}
-        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
-        <button class="wd-btn wd-btn-primary" data-maction="store-import-ok">${this._t('btn.import', {}, 'Import')}</button></div>`;
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel" ${this._busy.has('store-import') ? 'disabled' : ''}>${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="store-import-ok" ${this._busy.has('store-import') ? 'disabled' : ''}>${this._busy.has('store-import') ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.import', {}, 'Import')}</button></div>`;
     } else if (m.type === 'store-share') {
       // Profile picker: a dropdown of the appliance's existing profiles + a "+" to
       // add a new one on the site. Falls back to the cycle's own label as an option.
@@ -7084,8 +7090,8 @@ class HaWashdataPanel extends HTMLElement {
             <button type="button" class="wd-addbtn" data-action="store-share-add-profile" title="${_esc(this._t('tip.add_profile', {}, 'Add a profile for this appliance on the community site'))}">+</button>
           </div></div>
         <div class="wd-field"><label>${this._t('store.description', {}, 'Description (optional)')}</label><textarea id="wd-store-share-desc" rows="2"></textarea></div>
-        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
-        <button class="wd-btn wd-btn-primary" data-maction="store-share-ok">${this._t('btn.share', {}, 'Share')}</button></div>`;
+        <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel" ${this._busy.has('store-share') ? 'disabled' : ''}>${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="store-share-ok" ${this._busy.has('store-share') ? 'disabled' : ''}>${this._busy.has('store-share') ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.share', {}, 'Share')}</button></div>`;
     }
     return `<div class="wd-overlay"><div class="wd-modal" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${body}</div></div>`;
   }

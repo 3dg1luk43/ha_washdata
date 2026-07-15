@@ -94,7 +94,7 @@ test('store tab renders device search results', async ({ page }) => {
   const cards = page.locator('[data-action="store-open-device"]');
   await expect(cards.first()).toBeVisible({ timeout: 8_000 });
   await expect(cards).toHaveCount(2);
-  await expect(page.locator('.wd-store-item-title').filter({ hasText: 'Bosch WAT28401' })).toBeVisible();
+  await expect(page.locator('.wd-store-row-title').filter({ hasText: 'Bosch WAT28401' })).toBeVisible();
 });
 
 test('searching re-queries the store', async ({ page }) => {
@@ -118,7 +118,7 @@ test('clicking a device loads its programs', async ({ page }) => {
   await assertWsCalled(page, 'ha_washdata/store_get_profiles');
   const programs = page.locator('[data-action="store-open-profile"]');
   await expect(programs.first()).toBeVisible({ timeout: 8_000 });
-  await expect(page.locator('.wd-store-item-title').filter({ hasText: 'Cotton 40°C' })).toBeVisible();
+  await expect(page.locator('.wd-store-row-title').filter({ hasText: 'Cotton 40°C' })).toBeVisible();
 });
 
 test('clicking a program loads its reference cycles with a sparkline', async ({ page }) => {
