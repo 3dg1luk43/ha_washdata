@@ -102,8 +102,8 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `store_set_prefs` | entry_id, prefs | `StorePrefsResponse` |
 | `store_import_cycle` | entry_id, cycle_id, target_profile?, new_profile_name? | `StoreImportResponse` |
 | `store_upload_cycle` | entry_id, local_cycle_id, program, description? | `StoreUploadResponse` |
-| `store_upload_device` | entry_id, items, include_phases? | `StoreUploadDeviceResponse` |
-| `store_download_device` | entry_id, device_id | `StoreDownloadDeviceResponse` |
+| `store_upload_device` | entry_id, items, include_phases?, include_settings? | `StoreUploadDeviceResponse` |
+| `store_download_device` | entry_id, device_id, include_settings? | `StoreDownloadDeviceResponse` |
 | `get_shareable_cycles` | entry_id | `GetShareableCyclesResponse` |
 
 ## `ha_washdata/get_devices`
@@ -1723,6 +1723,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `entry_id` | yes | str |
 | `items` | yes | list |
 | `include_phases` | no | list |
+| `include_settings` | no | bool |
 
 **Response** (`StoreUploadDeviceResponse`)
 
@@ -1743,6 +1744,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | --- | --- | --- |
 | `entry_id` | yes | str |
 | `device_id` | yes | str |
+| `include_settings` | no | bool |
 
 **Response** (`StoreDownloadDeviceResponse`)
 
@@ -1751,6 +1753,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `profiles_adopted` | no | number |
 | `cycles_imported` | no | number |
 | `phases_applied` | no | number |
+| `settings_applied` | no | number |
 | `error` | no | str |
 | `disabled` | no | bool |
 

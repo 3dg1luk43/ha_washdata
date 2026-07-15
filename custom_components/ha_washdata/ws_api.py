@@ -885,13 +885,18 @@ async def ws_store_upload_cycle(hass, connection, msg):
 @websocket_api.websocket_command({
     vol.Required("type"): "ha_washdata/store_upload_device", vol.Required("entry_id"): str,
     vol.Required("items"): [dict], vol.Optional("include_phases"): [str],
+    vol.Optional("include_settings"): bool,
 })
 @websocket_api.async_response
 async def ws_store_upload_device(hass, connection, msg):
     """Share a whole-device bundle. Brand/model/type come from this device's options;
     ``items`` = the panel's tree selection ``[{local_cycle_id, program}]``;
-    ``include_phases`` = programs whose phase map should ride along."""
-    from .const import CONF_STORE_BRAND, CONF_STORE_MODEL, CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE
+    ``include_phases`` = programs whose phase map should ride along;
+    ``include_settings`` bundles the allow-listed recognition/matching settings."""
+    from .const import (
+        CONF_STORE_BRAND, CONF_STORE_MODEL, CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE,
+        SHAREABLE_SETTING_KEYS,
+    )
     ctx = _store_ctx(hass, msg["entry_id"])
     if ctx is None:
         _send_result(connection, msg["id"], "store_upload_device", {"disabled": True})
@@ -903,20 +908,27 @@ async def ws_store_upload_device(hass, connection, msg):
         _send_result(connection, msg["id"], "store_upload_device", {"error": "no_appliance_declared"})
         return
     appliance = opts.get(CONF_DEVICE_TYPE, manager.config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
+    settings = None
+    if msg.get("include_settings"):
+        # Only the allow-listed numeric thresholds; the WS layer owns entry.options.
+        settings = {k: opts[k] for k in SHAREABLE_SETTING_KEYS if k in opts}
     res = await manager.store_bridge.share_device(
-        brand, model, appliance, msg["items"], include_phases=msg.get("include_phases"),
+        brand, model, appliance, msg["items"],
+        include_phases=msg.get("include_phases"), settings=settings,
     )
     _send_result(connection, msg["id"], "store_upload_device", res)
 
 
 @websocket_api.websocket_command({
     vol.Required("type"): "ha_washdata/store_download_device", vol.Required("entry_id"): str,
-    vol.Required("device_id"): str,
+    vol.Required("device_id"): str, vol.Optional("include_settings"): bool,
 })
 @websocket_api.async_response
 async def ws_store_download_device(hass, connection, msg):
-    """Adopt a whole-device bundle into this device's reference cycles (merge/upsert)."""
-    from .const import CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE
+    """Adopt a whole-device bundle into this device's reference cycles (merge/upsert).
+    When ``include_settings`` is set, also apply the bundle's allow-listed
+    recognition/matching settings onto this device's options (overwrites live tuning)."""
+    from .const import CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE, SHAREABLE_SETTING_KEYS
     ctx = _store_ctx(hass, msg["entry_id"])
     if ctx is None:
         _send_result(connection, msg["id"], "store_download_device", {"disabled": True})
@@ -924,6 +936,17 @@ async def ws_store_download_device(hass, connection, msg):
     manager, opts = ctx
     device_type = opts.get(CONF_DEVICE_TYPE, manager.config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
     res = await manager.store_bridge.download_device(msg["device_id"], device_type)
+    settings_applied = 0
+    if msg.get("include_settings"):
+        bundle_settings = res.get("settings") if isinstance(res.get("settings"), dict) else {}
+        filtered = {
+            k: _json_safe(v) for k, v in bundle_settings.items() if k in SHAREABLE_SETTING_KEYS
+        }
+        entry = _get_entry(hass, msg["entry_id"])
+        if filtered and entry is not None:
+            hass.config_entries.async_update_entry(entry, options={**entry.options, **filtered})
+            settings_applied = len(filtered)
+    res = {**res, "settings_applied": settings_applied}
     manager.notify_update()
     _send_result(connection, msg["id"], "store_download_device", res)
 

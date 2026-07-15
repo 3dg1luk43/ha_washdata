@@ -379,6 +379,7 @@ export interface StoreDownloadDeviceResponse {
   profiles_adopted?: number;
   cycles_imported?: number;
   phases_applied?: number;
+  settings_applied?: number;
   error?: string;
   disabled?: boolean;
 }
@@ -974,11 +975,13 @@ export interface StoreUploadDeviceRequest {
   entry_id: string;
   items: unknown[];
   include_phases?: unknown[];
+  include_settings?: boolean;
 }
 
 export interface StoreDownloadDeviceRequest {
   entry_id: string;
   device_id: string;
+  include_settings?: boolean;
 }
 
 export interface GetShareableCyclesRequest {

@@ -574,6 +574,7 @@ class StoreDownloadDeviceResponse(TypedDict, total=False):
     profiles_adopted: int
     cycles_imported: int
     phases_applied: int
+    settings_applied: int
     error: str
     disabled: bool
 
@@ -971,8 +972,8 @@ WS_COMMANDS: dict[str, dict] = {
     "store_upload_cycle": {"params": [
         _entry(), _p("local_cycle_id", "str"), _p("program", "str"), _p("description", "str|null", False),
     ]},
-    "store_upload_device": {"params": [_entry(), _p("items", "list"), _p("include_phases", "list", False)]},
-    "store_download_device": {"params": [_entry(), _p("device_id", "str")]},
+    "store_upload_device": {"params": [_entry(), _p("items", "list"), _p("include_phases", "list", False), _p("include_settings", "bool", False)]},
+    "store_download_device": {"params": [_entry(), _p("device_id", "str"), _p("include_settings", "bool", False)]},
     "get_shareable_cycles": {"params": [_entry()]},
 }
 
