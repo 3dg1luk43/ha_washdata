@@ -95,7 +95,7 @@ check('_htmlAutomations (legacy actions)', () => { const o = el._opts; el._opts 
 check('_htmlSettings (notifications section)', () => { const s = el._settingsSec; el._settingsSec = 'notifications'; const h = el._htmlSettings(); el._settingsSec = s; return h; });
 check('_htmlPanel (advanced)', () => el._htmlPanel());
 check('_htmlDiagnostics', () => el._htmlDiagnostics());
-check('_htmlLogs', () => el._htmlLogs());
+check('_htmlLogDrawer', () => { const o = el._logOpen; el._logOpen = true; const h = el._htmlLogDrawer(); el._logOpen = o; return h; });
 check('_htmlMlTab', () => el._htmlMlTab());
 check('_htmlMlStatusSection', () => el._htmlMlStatusSection(el._mlTrainingStatus, 'entry-1'));
 check('_htmlMlLearnedSection', () => el._htmlMlLearnedSection(el._mlTrainingStatus));
@@ -171,6 +171,16 @@ check('modal: compare-cycles (html + draw)', () => {
   };
   const h = el._htmlModal(); el._drawCompareCanvas(); return h;
 });
+check('modal: store-share-device (tree)', () => {
+  el._mlById = { g1: { ml_review: { golden: true } } };
+  el._cycles = [
+    { id: 'g1', start_time: new Date().toISOString(), duration: 3600, profile_name: 'Cotton 60', meta: { source: 'recorder' } },
+    { id: 'p1', start_time: new Date().toISOString(), duration: 1800, profile_name: 'Eco 40', meta: null },
+  ];
+  el._modal = { type: 'store-share-device', selected: new Set(['g1']) };
+  return el._htmlModal();
+});
+check('modal: store-share-device (empty)', () => { el._cycles = []; el._modal = { type: 'store-share-device', selected: new Set() }; return el._htmlModal(); });
 el._modal = null;
 
 console.log(failures ? `\nSMOKE FAILED (${failures})` : '\nSMOKE OK');
