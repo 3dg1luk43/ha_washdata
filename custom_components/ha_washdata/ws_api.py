@@ -424,6 +424,7 @@ _ADMIN_COMMANDS = frozenset({
     "store_connect",
     "store_disconnect",
     "store_set_online",
+    "store_set_prefs",
 })
 # Mutating commands intentionally allowed at the 'read' level. Picking the live
 # program is a benign runtime action (it changes detection, not stored data), so
@@ -550,6 +551,10 @@ def _effective_level(hass: HomeAssistant, user: Any, entry_id: str | None) -> st
     return rbac.get("default_level", "none")
 
 
+# Background-task commands that may reference a task by id with no device context.
+_TASK_COMMANDS = frozenset({"list_tasks", "subscribe_tasks", "cancel_task", "get_task_result"})
+
+
 def _rbac_ok(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> bool:
     """Authorize a command for the calling user; sends an error and returns False if denied."""
     user = getattr(connection, "user", None)
@@ -565,6 +570,25 @@ def _rbac_ok(hass: HomeAssistant, connection: websocket_api.ActiveConnection, ms
     if cmd in _OPEN_COMMANDS:
         return True
     entry_id = msg.get("entry_id")
+    # Background-task commands can address a task by id without an entry_id. Under RBAC,
+    # a non-admin must not read/cancel a task on a device they aren't authorized for by
+    # simply omitting entry_id (which would otherwise fall through the allow-all below).
+    # When RBAC is disabled this block is skipped entirely, so default behavior is intact.
+    if not entry_id and cmd in _TASK_COMMANDS and _panel_data(hass).get("rbac", {}).get("enabled"):
+        task_id = msg.get("task_id")
+        if task_id:
+            from . import task_registry  # pylint: disable=import-outside-toplevel
+
+            task = task_registry.get_registry(hass).get(task_id)
+            entry_id = getattr(task, "entry_id", None) if task is not None else None
+            if not entry_id:
+                connection.send_error(msg["id"], "forbidden", "Task not found or not authorized")
+                return False
+        else:
+            # list_tasks / subscribe_tasks with no device context: require a device so
+            # the result set can be authorized (the panel passes entry_id per device).
+            connection.send_error(msg["id"], "forbidden", "You need to specify a device")
+            return False
     if not entry_id:
         return True  # no device context and not admin/open: harmless read-style command
     if cmd in _READ_WRITE_COMMANDS:

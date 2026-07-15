@@ -287,6 +287,10 @@ def reconcile_suggestions(
         k for k, v in out.items() if isinstance(v, dict) and v.get("value") is not None
     )
     all_changed: set[str] = set()
+    # Counts EVERY actual value change (not just distinct keys) so the fixpoint loop
+    # below keeps iterating when an already-changed key is adjusted again -- len(all_changed)
+    # alone would stall and break early on a repeated change to an existing key.
+    change_count = [0]
 
     def eff(key: str) -> float | None:
         entry = out.get(key)
@@ -327,9 +331,10 @@ def reconcile_suggestions(
         else:
             return
         all_changed.add(key)
+        change_count[0] += 1
 
     for _iteration in range(8):
-        prev_size = len(all_changed)
+        prev_count = change_count[0]
 
         # ── Rule 1a: stop_threshold_w < start_threshold_w ─────────────────────
         # start is more fundamental (the detection trigger); stop is derived.
@@ -438,7 +443,7 @@ def reconcile_suggestions(
             else:
                 adjust(CONF_PROFILE_MATCH_MIN_DURATION_RATIO, round(max_r * 0.5, 2), "the max duration ratio")
 
-        if len(all_changed) == prev_size:
+        if change_count[0] == prev_count:
             break
 
     return out, all_changed

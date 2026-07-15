@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "サイクルが一時停止中です。再開するには WashData パネルを開いてください。",
       "notify_live_waiting_message": "{device}: まだ一致するプロファイルがありません。",
       "vs_typical_longer": "通常より {pct}% 長い",
-      "vs_typical_shorter": "通常より {pct}% 短い"
+      "vs_typical_shorter": "通常より {pct}% 短い",
+      "invalid_power": "Power threshold must be greater than 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "エクスポートを{path}に書き込めませんでした：{error}"
+    },
+    "assign_profile_failed": {
+      "message": "プロファイルを割り当てできませんでした：{error}"
     }
   },
   "intent": {

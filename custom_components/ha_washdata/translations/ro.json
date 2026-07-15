@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Ciclul este în pauză. Deschideți panoul WashData pentru a relua.",
       "notify_live_waiting_message": "{device}: Niciun profil nu a fost recunoscut încă.",
       "vs_typical_longer": "cu {pct}% mai mult decât de obicei",
-      "vs_typical_shorter": "cu {pct}% mai puțin decât de obicei"
+      "vs_typical_shorter": "cu {pct}% mai puțin decât de obicei",
+      "invalid_power": "Power threshold must be greater than 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Nu s-a putut scrie exportul în {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Nu s-a putut atribui profilul: {error}"
     }
   },
   "intent": {

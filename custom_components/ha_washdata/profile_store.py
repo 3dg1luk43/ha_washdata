@@ -750,6 +750,12 @@ class WashDataStore(Store[JSONDict]):
             # setdefault leaves existing values untouched.
             _LOGGER.info("Migrating storage from v%s to v9", old_major_version)
             old_data.setdefault("lifetime_energy_wh", 0.0)
+            # Seed the monotonic lifetime cycle counter from the retained history so an
+            # existing install does not start at 0 and re-fire past milestones (50/100/...)
+            # on cycles it already completed. Matches the cycle_count fallback semantics.
+            old_data.setdefault(
+                "lifetime_cycle_count", len(old_data.get("past_cycles") or [])
+            )
             old_data.setdefault("settings_changelog", [])
             old_data.setdefault("maintenance_log", [])
 

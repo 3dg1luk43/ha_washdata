@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Цикл на паузе. Откройте панель WashData для возобновления.",
       "notify_live_waiting_message": "{device}: Профиль пока не распознан.",
       "vs_typical_longer": "на {pct}% дольше обычного",
-      "vs_typical_shorter": "на {pct}% короче обычного"
+      "vs_typical_shorter": "на {pct}% короче обычного",
+      "invalid_power": "Power threshold must be greater than 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Не удалось записать экспорт в {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Не удалось назначить профиль: {error}"
     }
   },
   "intent": {

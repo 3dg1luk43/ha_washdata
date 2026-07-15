@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Sykli on keskeytetty. Avaa WashData-paneeli jatkaaksesi.",
       "notify_live_waiting_message": "{device}: Yhtään profiilia ei ole vielä tunnistettu.",
       "vs_typical_longer": "{pct}% tavallista pidempi",
-      "vs_typical_shorter": "{pct}% tavallista lyhyempi"
+      "vs_typical_shorter": "{pct}% tavallista lyhyempi",
+      "invalid_power": "Tehokynnyksen on oltava suurempi kuin 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Viennin kirjoittaminen kohteeseen {path} epäonnistui: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Profiilin määrittäminen epäonnistui: {error}"
     }
   },
   "intent": {

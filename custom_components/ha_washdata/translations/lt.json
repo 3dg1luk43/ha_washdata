@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Ciklas pristabdytas. Atidarykite WashData skydelį, kad tęstumėte.",
       "notify_live_waiting_message": "{device}: Kol kas neatpažintas joks profilis.",
       "vs_typical_longer": "{pct}% ilgiau nei įprastai",
-      "vs_typical_shorter": "{pct}% trumpiau nei įprastai"
+      "vs_typical_shorter": "{pct}% trumpiau nei įprastai",
+      "invalid_power": "Galios slenkstis turi būti didesnis nei 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Nepavyko įrašyti eksporto į {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Nepavyko priskirti profilio: {error}"
     }
   },
   "intent": {

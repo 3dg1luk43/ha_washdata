@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Tsükkel on peatatud. Jätkamiseks avage WashData paneel.",
       "notify_live_waiting_message": "{device}: Ühtki profiili pole veel tuvastatud.",
       "vs_typical_longer": "{pct}% tavapärasest pikem",
-      "vs_typical_shorter": "{pct}% tavapärasest lühem"
+      "vs_typical_shorter": "{pct}% tavapärasest lühem",
+      "invalid_power": "Võimsuslävi peab olema suurem kui 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Ekspordi kirjutamine faili {path} ebaõnnestus: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Profiili määramine ebaõnnestus: {error}"
     }
   },
   "intent": {

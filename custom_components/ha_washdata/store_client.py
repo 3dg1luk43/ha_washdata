@@ -21,7 +21,12 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import STORE_API_KEY, STORE_PROJECT_ID, SUPPORTED_CYCLE_SCHEMA_VERSIONS
+from .const import (
+    SHAREABLE_SETTING_KEYS,
+    STORE_API_KEY,
+    STORE_PROJECT_ID,
+    SUPPORTED_CYCLE_SCHEMA_VERSIONS,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -364,9 +369,15 @@ class StoreClient:
         device = await self.get_device(dev_id) or {}
         settings = device.get("settings") if isinstance(device.get("settings"), dict) else {}
         profiles = await self.get_profiles(dev_id, include_pending=include_pending)
-        for p in profiles:
+
+        async def _cycles_for(p: dict[str, Any]) -> list[dict[str, Any]]:
             pid = p.get("id")
-            p["cycles"] = await self.get_cycles(pid, include_pending=include_pending) if pid else []
+            return await self.get_cycles(pid, include_pending=include_pending) if pid else []
+
+        # Fetch every profile's cycles concurrently rather than one query at a time.
+        cycle_lists = await asyncio.gather(*(_cycles_for(p) for p in profiles))
+        for p, cycles in zip(profiles, cycle_lists):
+            p["cycles"] = cycles
         return {"device_id": dev_id, "settings": settings, "profiles": profiles}
 
     async def get_cycles(
@@ -538,7 +549,16 @@ class StoreClient:
         # Stage 5).
         settings = meta.get("settings")
         if isinstance(settings, dict) and settings:
-            device_fields["settings"] = {str(k): v for k, v in settings.items()}
+            # Defense in depth at the store boundary: keep only allow-listed, numeric
+            # settings (never trust the caller to have filtered) so nothing arbitrary is
+            # ever written to the shared device doc.
+            filtered = {
+                str(k): v for k, v in settings.items()
+                if k in SHAREABLE_SETTING_KEYS
+                and isinstance(v, (int, float)) and not isinstance(v, bool)
+            }
+            if filtered:
+                device_fields["settings"] = filtered
         ok = ok and await self._commit_create(token, f"devices/{d_id}", device_fields)
         profile_fields: dict[str, Any] = {
             "deviceId": d_id, "applianceType": appliance, "program": program,

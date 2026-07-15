@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Döngü duraklatıldı. Devam ettirmek için WashData panelini açın.",
       "notify_live_waiting_message": "{device}: Henüz eşleşen profil yok.",
       "vs_typical_longer": "olağandan %{pct} daha uzun",
-      "vs_typical_shorter": "olağandan %{pct} daha kısa"
+      "vs_typical_shorter": "olağandan %{pct} daha kısa",
+      "invalid_power": "Power threshold must be greater than 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Dışa aktarma {path} konumuna yazılamadı: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Profil atanamadı: {error}"
     }
   },
   "intent": {

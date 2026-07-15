@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Cikls ir apturēts. Atveriet WashData paneli, lai atsāktu.",
       "notify_live_waiting_message": "{device}: Vēl nav atpazīts neviens profils.",
       "vs_typical_longer": "{pct}% ilgāk nekā parasti",
-      "vs_typical_shorter": "{pct}% īsāk nekā parasti"
+      "vs_typical_shorter": "{pct}% īsāk nekā parasti",
+      "invalid_power": "Jaudas slieksnim jābūt lielākam par 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Neizdevās ierakstīt eksportu uz {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Neizdevās piešķirt profilu: {error}"
     }
   },
   "intent": {

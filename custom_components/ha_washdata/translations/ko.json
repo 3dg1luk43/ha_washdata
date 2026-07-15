@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "사이클이 일시 정지되었습니다. 재개하려면 WashData 패널을 여세요.",
       "notify_live_waiting_message": "{device}: 아직 일치하는 프로필이 없습니다.",
       "vs_typical_longer": "평소보다 {pct}% 더 김",
-      "vs_typical_shorter": "평소보다 {pct}% 더 짧음"
+      "vs_typical_shorter": "평소보다 {pct}% 더 짧음",
+      "invalid_power": "전력 임계값은 0보다 커야 합니다"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "내보내기를 {path}에 쓸 수 없습니다: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "프로필을 할당할 수 없습니다: {error}"
     }
   },
   "intent": {

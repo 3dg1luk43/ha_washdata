@@ -64,6 +64,48 @@ def _merge_structural_options(
     }
 
 
+def _structural_schema(entry: config_entries.ConfigEntry) -> vol.Schema:
+    """Shared structural form (name, device type, power sensor, min power) for the
+    reconfigure and options flows.
+
+    Resolves options-first to mirror WashDataManager (which reads
+    ``options.get(..., data.get(...))``). Reading data-first would show the
+    creation-time value and, after the 3.6 device-type remap (which updates only
+    options), a value no longer in DEVICE_TYPES.
+    """
+    current_device_type = _resolve_options_first(
+        entry, CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE
+    )
+    return vol.Schema(
+        {
+            vol.Required(
+                CONF_NAME,
+                default=entry.title,
+            ): str,
+            vol.Required(
+                CONF_DEVICE_TYPE,
+                default=current_device_type,
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=_device_type_options(current_device_type),
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                    translation_key="device_type",
+                )
+            ),
+            vol.Required(
+                CONF_POWER_SENSOR,
+                default=_resolve_options_first(entry, CONF_POWER_SENSOR, ""),
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor"),
+            ),
+            vol.Optional(
+                CONF_MIN_POWER,
+                default=_resolve_options_first(entry, CONF_MIN_POWER, DEFAULT_MIN_POWER),
+            ): vol.Coerce(float),
+        }
+    )
+
+
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
@@ -187,41 +229,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
                     options=new_options,
                 )
 
-        # Resolve options-first to mirror WashDataManager (which reads
-        # options.get(..., data.get(...))). Reading data-first here would show the
-        # creation-time value and, after the 3.6 device-type remap (which updates
-        # only options), a value no longer in DEVICE_TYPES.
-        current_device_type = _resolve_options_first(
-            entry, CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE
-        )
-        schema = vol.Schema(
-            {
-                vol.Required(
-                    CONF_NAME,
-                    default=entry.title,
-                ): str,
-                vol.Required(
-                    CONF_DEVICE_TYPE,
-                    default=current_device_type,
-                ): selector.SelectSelector(
-                    selector.SelectSelectorConfig(
-                        options=_device_type_options(current_device_type),
-                        mode=selector.SelectSelectorMode.DROPDOWN,
-                        translation_key="device_type",
-                    )
-                ),
-                vol.Required(
-                    CONF_POWER_SENSOR,
-                    default=_resolve_options_first(entry, CONF_POWER_SENSOR, ""),
-                ): selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain="sensor"),
-                ),
-                vol.Optional(
-                    CONF_MIN_POWER,
-                    default=_resolve_options_first(entry, CONF_MIN_POWER, DEFAULT_MIN_POWER),
-                ): vol.Coerce(float),
-            }
-        )
+        schema = _structural_schema(entry)
 
         return self.async_show_form(
             step_id="reconfigure",
@@ -255,14 +263,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Show the minimal options form."""
         entry = self._config_entry
-        # Resolve options-first to mirror WashDataManager (which reads
-        # options.get(..., data.get(...))). Reading data-first here would show the
-        # creation-time value and, after the 3.6 device-type remap (which updates
-        # only options), a value no longer in DEVICE_TYPES.
-        current_device_type = _resolve_options_first(
-            entry, CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE
-        )
-
         errors: dict[str, str] = {}
 
         if user_input is not None:
@@ -277,33 +277,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     self.hass.config_entries.async_update_entry(entry, title=new_name)
                 return self.async_create_entry(title="", data=new_options)
 
-        schema = vol.Schema(
-            {
-                vol.Required(
-                    CONF_NAME,
-                    default=entry.title,
-                ): str,
-                vol.Required(
-                    CONF_DEVICE_TYPE,
-                    default=current_device_type,
-                ): selector.SelectSelector(
-                    selector.SelectSelectorConfig(
-                        options=_device_type_options(current_device_type),
-                        mode=selector.SelectSelectorMode.DROPDOWN,
-                        translation_key="device_type",
-                    )
-                ),
-                vol.Required(
-                    CONF_POWER_SENSOR,
-                    default=_resolve_options_first(entry, CONF_POWER_SENSOR, ""),
-                ): selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain="sensor"),
-                ),
-                vol.Optional(
-                    CONF_MIN_POWER,
-                    default=_resolve_options_first(entry, CONF_MIN_POWER, DEFAULT_MIN_POWER),
-                ): vol.Coerce(float),
-            }
-        )
+        schema = _structural_schema(entry)
 
         return self.async_show_form(step_id="init", data_schema=schema, errors=errors)

@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Ciklus je pauziran. Otvorite WashData panel da biste nastavili.",
       "notify_live_waiting_message": "{device}: Nijedan profil još nije podudaran.",
       "vs_typical_longer": "{pct}% duže nego obično",
-      "vs_typical_shorter": "{pct}% kraće nego obično"
+      "vs_typical_shorter": "{pct}% kraće nego obično",
+      "invalid_power": "Prag snage mora biti veći od 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Nije moguće zapisati izvoz u {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Nije moguće dodijeliti profil: {error}"
     }
   },
   "intent": {

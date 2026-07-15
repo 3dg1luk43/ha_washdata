@@ -170,7 +170,14 @@ class StoreBridge:
         pts = self._ps.get_cycle_power_data(local_cycle_id)
         if not pts:
             return {"error": "cycle_not_found"}
-        cyc = next((c for c in self._ps.get_past_cycles() if c.get("id") == local_cycle_id), {})
+        # Look up metadata in BOTH real past_cycles and imported reference_cycles
+        # (same by_id behavior as share_device) so an imported/reference cycle keeps
+        # its stored duration/energy/signature instead of falling back to trace-derived.
+        by_id = {
+            c.get("id"): c
+            for c in (list(self._ps.get_reference_cycles()) + list(self._ps.get_past_cycles()))
+        }
+        cyc = by_id.get(local_cycle_id, {})
         vals = [float(p[1]) for p in pts]
         stats = {
             "duration": float(cyc.get("duration") or (pts[-1][0] - pts[0][0])),
@@ -314,7 +321,9 @@ class StoreBridge:
                 profiles_adopted += 1
             # Stage 2: apply the bundled phase map (replace) + reconcile labels. Never
             # raises; a bad/overlapping range set is skipped rather than failing adopt.
-            if adopted_any and await self._apply_phases(program, prof.get("phases"), device_type):
+            # Run whenever the profile carries phases -- not gated on new cycles -- so a
+            # re-download with no new cycles still reconciles updated phase ranges.
+            if prof.get("phases") and await self._apply_phases(program, prof.get("phases"), device_type):
                 phases_applied += 1
         settings = bundle.get("settings") if isinstance(bundle.get("settings"), dict) else {}
         return {

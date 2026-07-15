@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Cykeln är pausad. Öppna WashData-panelen för att fortsätta.",
       "notify_live_waiting_message": "{device}: Ingen profil matchad ännu.",
       "vs_typical_longer": "{pct}% längre än vanligt",
-      "vs_typical_shorter": "{pct}% kortare än vanligt"
+      "vs_typical_shorter": "{pct}% kortare än vanligt",
+      "invalid_power": "Effekttröskeln måste vara större än 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Det gick inte att skriva exporten till {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Det gick inte att tilldela profilen: {error}"
     }
   },
   "intent": {

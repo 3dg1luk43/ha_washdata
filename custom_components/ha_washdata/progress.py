@@ -282,6 +282,9 @@ def estimate_phase_progress(
     )
     current_offsets = np.array([o for o, _ in current_offsets_list])
     current_values = np.array([p for _, p in current_offsets_list])
+    if current_offsets.size == 0:
+        logger.debug("No valid current power offsets, cannot estimate phase")
+        return None
 
     # Use sliding window on TIME, not sample count
     window_duration = min(60.0, target_duration * 0.25)
@@ -592,7 +595,13 @@ def projected_energy(
         if projected_wh is None:
             projected_wh = energy_so_far / (progress / 100.0)
         projected_wh = max(projected_wh, energy_so_far)
-        cost = (projected_wh / 1000.0) * float(price) if price else None
+        # A valid price of 0 (free/zero tariff) must yield cost 0.0, not None; only an
+        # absent or non-numeric price is "unknown".
+        try:
+            price_val = float(price)
+        except (TypeError, ValueError):
+            price_val = None
+        cost = (projected_wh / 1000.0) * price_val if price_val is not None else None
         return projected_wh, cost
     except Exception:  # noqa: BLE001 - projection must never break estimates
         return None, None

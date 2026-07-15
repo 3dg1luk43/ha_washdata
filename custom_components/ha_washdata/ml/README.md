@@ -28,24 +28,39 @@ detection/matching/ETA code paths are unchanged by default.
   (`latest_end_event_features`, `live_match_features`, `quality_features`,
   `profile_expectation`, energy integration) matching the models' `FEATURE_COLUMNS`.
 - `engine.py` - `resolve_scorer(capability, store)`, the single bridge that
-  returns a scoring callable preferring an on-device trained spec over the
-  embedded baseline (`"on_device"` vs `"baseline"`), plus `ml_models_enabled`
-  (opt-in gate) and `available_models` (manifest provenance).
-- `trainer.py` - NumPy-only logistic training: `fit_logistic`, `select_threshold`,
-  `binary_metrics`, `auc`, and `build_spec`/`score_spec` (byte-compatible with the
-  embedded `score()` math).
+  returns a **classifier** scoring callable preferring an on-device trained spec
+  over the embedded baseline (`"on_device"` vs `"baseline"`); `resolve_regressor(
+  capability, store)` is its **regression** twin for `standardized_linear` heads
+  that have no shipped baseline (returns `(None, None)` until one is promoted),
+  plus `ml_models_enabled` (opt-in gate) and `available_models` (manifest provenance).
+- `trainer.py` - NumPy-only training for two spec kinds: logistic classifiers
+  (`fit_logistic`, `select_threshold`, `binary_metrics`, `auc`, `build_spec`/
+  `score_spec` - byte-compatible with the embedded `score()` math) and ridge
+  **regressors** (`fit_ridge`, `regression_metrics`, `build_regression_spec`/
+  `predict_value_spec` - standardized features + standardized target).
 - `training_task.py` - on-device orchestration: derives labels from the device's
   own cycles (end events from trace geometry; quality from status + ML-Lab review
-  labels), trains, and promotes a model only when it beats the embedded baseline
-  on a held-out split.
+  labels; live_match from match-ranking-history snapshots), synthesises
+  completion-fraction examples for the regression capabilities, trains, and
+  promotes a classifier only when its held-out AUC is within margin of the
+  baseline (a regressor only when its held-out MAE beats the naive elapsed/
+  expected projection).
+- `matching_tuner.py` - `tune_matching_config(cycles)`: NumPy-only, executor-safe
+  leave-one-out tuning of the matcher's bounded scoring weights (`corr_weight`,
+  `duration_weight`, `energy_weight`, `dtw_ensemble_w`) over the device's own
+  labelled cycles. Same promotion discipline as the models (gate on a held-out
+  split by a margin); it only ever changes the emphasis between shape/level/energy,
+  never structural matching behaviour.
 
 Models (all standardized-logistic; only models that beat their baseline are shipped):
 - `hybrid_curve_quality_model` - P(finished cycle is a problem).
 - `live_match_commit_model` - P(top-1 live program match is correct).
 - `cycle_end_detector_model` - P(a low-power event is the true end vs a pause).
 
-(A time-remaining model is intentionally not shipped: it did not beat the
-`expected_duration - elapsed` heuristic on held-out users.)
+(No regression baseline is shipped: the `remaining_time` and `total_energy`
+completion-fraction regressors did not beat the `expected_duration - elapsed`
+heuristic on the broad corpus, so they stay inert until on-device training
+promotes a per-device spec that beats that naive projection.)
 
 ## How trained models reach inference
 

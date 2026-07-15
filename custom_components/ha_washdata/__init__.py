@@ -278,26 +278,34 @@ async def _migrate_online_to_global(hass: HomeAssistant, entry: ConfigEntry, man
     from . import store_account  # pylint: disable=import-outside-toplevel
     from .const import CONF_ENABLE_ONLINE_FEATURES  # pylint: disable=import-outside-toplevel
 
-    await store_account.async_load(hass)
-    if not store_account.migration_done(hass):
-        any_on = any(
-            e.options.get(CONF_ENABLE_ONLINE_FEATURES)
-            for e in hass.config_entries.async_entries(DOMAIN)
-        )
-        if any_on and not store_account.online_enabled(hass):
-            await store_account.async_set_online(hass, True)
-        await store_account.async_mark_migrated(hass)
+    # Best-effort, pre-release migration: a transient store write failure here must
+    # never propagate and abort async_setup_entry (it retries on the next restart).
+    try:
+        await store_account.async_load(hass)
+        if not store_account.migration_done(hass):
+            any_on = any(
+                e.options.get(CONF_ENABLE_ONLINE_FEATURES)
+                for e in hass.config_entries.async_entries(DOMAIN)
+            )
+            if any_on and not store_account.online_enabled(hass):
+                await store_account.async_set_online(hass, True)
+            await store_account.async_mark_migrated(hass)
+    except Exception:  # pylint: disable=broad-exception-caught
+        _LOGGER.warning("Online-features migration to global store failed", exc_info=True)
 
     try:
         acct = manager.profile_store.get_store_account()
     except Exception:  # pylint: disable=broad-exception-caught
         acct = {}
     if acct:
-        if acct.get("refresh_token") and not store_account.get_account(hass).get("refresh_token"):
-            await store_account.async_set_account(hass, {
-                "refresh_token": acct.get("refresh_token"),
-                "uid": acct.get("uid"), "name": acct.get("name"),
-            })
+        try:
+            if acct.get("refresh_token") and not store_account.get_account(hass).get("refresh_token"):
+                await store_account.async_set_account(hass, {
+                    "refresh_token": acct.get("refresh_token"),
+                    "uid": acct.get("uid"), "name": acct.get("name"),
+                })
+        except Exception:  # pylint: disable=broad-exception-caught
+            _LOGGER.warning("Store-account hoist to global store failed", exc_info=True)
         try:
             await manager.profile_store.clear_store_account()
         except Exception:  # pylint: disable=broad-exception-caught
@@ -399,7 +407,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             except ValueError as exc:
                 raise ServiceValidationError(
                     translation_domain=DOMAIN,
-                    translation_key="cycle_not_found_or_no_power",
+                    translation_key="assign_profile_failed",
+                    translation_placeholders={"error": str(exc)},
                 ) from exc
 
             manager.notify_update()
@@ -794,7 +803,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             if entry is None:
                 raise ValueError(f"Config entry not found: {entry_id}")
 
-            source = Path(file_path).resolve()
+            # resolve()/exists() hit the filesystem; offload so the event loop is not
+            # blocked on I/O during the import service call.
+            source = await hass.async_add_executor_job(
+                lambda: Path(file_path).resolve()
+            )
             # Restrict reads to HA-allowed dirs (path-traversal / arbitrary-read guard).
             if not hass.config.is_allowed_path(str(source)):
                 raise ServiceValidationError(
@@ -802,7 +815,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_key="path_not_allowed",
                     translation_placeholders={"path": str(source)},
                 )
-            if not source.exists():
+            if not await hass.async_add_executor_job(source.exists):
                 raise ValueError(f"File not found: {source}")
 
             try:

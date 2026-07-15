@@ -290,14 +290,15 @@ class WasherStateSensor(WasherBaseSensor):
             attrs["overrun_ratio"] = round(self._manager.overrun_ratio, 2)
         # Post-cycle anomaly data (underrun, energy spike/low) from last completed cycle.
         last_post = self._manager.last_cycle_post_anomaly
-        if last_post.get("anomaly") == "underrun":
-            attrs["last_cycle_anomaly"] = "underrun"
-            if "underrun_ratio" in last_post:
-                attrs["last_cycle_underrun_ratio"] = last_post["underrun_ratio"]
-        if "energy_anomaly" in last_post:
-            attrs["last_cycle_energy_anomaly"] = last_post["energy_anomaly"]
-        if "energy_z_score" in last_post:
-            attrs["last_cycle_energy_z_score"] = last_post["energy_z_score"]
+        if isinstance(last_post, dict):
+            if last_post.get("anomaly") == "underrun":
+                attrs["last_cycle_anomaly"] = "underrun"
+                if "underrun_ratio" in last_post:
+                    attrs["last_cycle_underrun_ratio"] = last_post["underrun_ratio"]
+            if "energy_anomaly" in last_post:
+                attrs["last_cycle_energy_anomaly"] = last_post["energy_anomaly"]
+            if "energy_z_score" in last_post:
+                attrs["last_cycle_energy_z_score"] = last_post["energy_z_score"]
         # Surface HA restart gaps recorded during the current cycle so automations
         # can see that the power trace has holes (pure metadata, never a notification).
         gaps = self._manager.restart_gaps

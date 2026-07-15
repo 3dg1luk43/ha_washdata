@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "周期已暂停。打开 WashData 面板以恢复。",
       "notify_live_waiting_message": "{device}：尚未匹配到配置文件。",
       "vs_typical_longer": "比平常长 {pct}%",
-      "vs_typical_shorter": "比平常短 {pct}%"
+      "vs_typical_shorter": "比平常短 {pct}%",
+      "invalid_power": "功率阈值必须大于 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "无法将导出写入 {path}：{error}"
+    },
+    "assign_profile_failed": {
+      "message": "无法分配配置文件：{error}"
     }
   },
   "intent": {

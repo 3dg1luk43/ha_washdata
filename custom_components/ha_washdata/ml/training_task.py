@@ -12,7 +12,9 @@ Label sources (no manual labelling required to start):
   * quality model - from cycle status + optional ML-Lab review labels: clean
     completed / "good" / "golden" -> not a problem; force_stopped / interrupted
     / "bad" / "unusable" -> a problem.
-  * live_match    - deferred: needs per-prefix ranking history to accumulate.
+  * live_match    - from match-ranking-history snapshots: :func:`_live_match_dataset`
+    labels each snapshot 1/0 by comparing its top-1 candidate to the confirmed
+    profile (wired into :func:`train_from_cycles` via ``ranking_history``).
 """
 from __future__ import annotations
 
@@ -37,10 +39,13 @@ from ..const import (
 from . import trainer as T
 
 # Capability -> (embedded module name, target label). Mirrors engine._MODEL_MODULES.
+# The target label MUST match each baseline module's MODEL_TARGET (and
+# promoted_manifest.json) so a promoted on-device spec records the same target as the
+# shipped baseline it replaces.
 _CAPABILITIES = {
-    "end": ("cycle_end_detector_model", "cycle_end"),
-    "quality": ("hybrid_curve_quality_model", "cycle_quality"),
-    "live_match": ("live_match_commit_model", "match_correct"),
+    "end": ("cycle_end_detector_model", "cycle_truly_ended"),
+    "quality": ("hybrid_curve_quality_model", "problem_cycle"),
+    "live_match": ("live_match_commit_model", "match_top1_correct"),
 }
 
 # The FIXED probability cutoff each live consumer applies to this capability's

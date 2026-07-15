@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Cykl jest wstrzymany. Otwórz panel WashData, aby wznowić.",
       "notify_live_waiting_message": "{device}: Nie rozpoznano jeszcze żadnego profilu.",
       "vs_typical_longer": "o {pct}% dłużej niż zwykle",
-      "vs_typical_shorter": "o {pct}% krócej niż zwykle"
+      "vs_typical_shorter": "o {pct}% krócej niż zwykle",
+      "invalid_power": "Próg mocy musi być większy niż 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Nie można zapisać eksportu do {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Nie można przypisać profilu: {error}"
     }
   },
   "intent": {

@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Цикълът е на пауза. Отворете панела на WashData, за да го възобновите.",
       "notify_live_waiting_message": "{device}: Все още няма съвпадащ профил.",
       "vs_typical_longer": "{pct}% по-дълго от обичайното",
-      "vs_typical_shorter": "{pct}% по-кратко от обичайното"
+      "vs_typical_shorter": "{pct}% по-кратко от обичайното",
+      "invalid_power": "Power threshold must be greater than 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Неуспешно записване на експорта в {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Неуспешно присвояване на профил: {error}"
     }
   },
   "intent": {

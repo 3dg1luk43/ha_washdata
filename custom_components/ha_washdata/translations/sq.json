@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Cikli është në pauzë. Hapni panelin WashData për të vazhduar.",
       "notify_live_waiting_message": "{device}: Ende nuk është njohur asnjë profil.",
       "vs_typical_longer": "{pct}% më gjatë se zakonisht",
-      "vs_typical_shorter": "{pct}% më shkurt se zakonisht"
+      "vs_typical_shorter": "{pct}% më shkurt se zakonisht",
+      "invalid_power": "Pragu i fuqisë duhet të jetë më i madh se 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Eksportimi nuk mund të shkruhej në {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Profili nuk mund të caktohej: {error}"
     }
   },
   "intent": {

@@ -637,7 +637,7 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
 .wd-pillbox { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; padding: 5px 6px; min-height: 34px;
   border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); background: var(--card-background-color); }
 .wd-pillbox:focus-within { border-color: var(--primary-color); }
-.wd-pill { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 2px 4px 2px 9px;
+.wd-pillbox .wd-pill { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 2px 4px 2px 9px;
   font-size: .82em; line-height: 1.4; border-radius: var(--wd-radius-lg); background: var(--primary-color); color: var(--wd-white);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .wd-pill-x { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; padding: 0;
@@ -5374,7 +5374,7 @@ class HaWashdataPanel extends HTMLElement {
       this._pgSweepTaskId = r && r.task_id;
       this._pgNeedsRestart = false;
       if (!this._pgSweepTaskId) throw new Error('no task id');
-      this._addProvisionalTask(this._pgSweepTaskId, 'pg_sweep', dev.entry_id, total);
+      this._addProvisionalTask(this._pgSweepTaskId, 'pg_sweep', dev.entry_id, values.length);
       if (!this._tasksSubscribed) this._pgPollTask(this._pgSweepTaskId);
     } catch (e) {
       this._busy.delete('pg-sweep'); this._pgBatchProgress = null;

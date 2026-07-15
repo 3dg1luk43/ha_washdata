@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "De cyclus is gepauzeerd. Open het WashData-paneel om te hervatten.",
       "notify_live_waiting_message": "{device}: nog geen profiel herkend.",
       "vs_typical_longer": "{pct}% langer dan gebruikelijk",
-      "vs_typical_shorter": "{pct}% korter dan gebruikelijk"
+      "vs_typical_shorter": "{pct}% korter dan gebruikelijk",
+      "invalid_power": "Vermogensdrempel moet groter zijn dan 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Kan de export niet naar {path} schrijven: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Kan profiel niet toewijzen: {error}"
     }
   },
   "intent": {

@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Циклусот е паузиран. Отворете го WashData панелот за да продолжите.",
       "notify_live_waiting_message": "{device}: Сè уште нема совпаднат профил.",
       "vs_typical_longer": "{pct}% подолго од вообичаено",
-      "vs_typical_shorter": "{pct}% пократко од вообичаено"
+      "vs_typical_shorter": "{pct}% пократко од вообичаено",
+      "invalid_power": "Прагот на моќност мора да биде поголем од 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Не може да се запише извозот во {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Не може да се додели профил: {error}"
     }
   },
   "intent": {

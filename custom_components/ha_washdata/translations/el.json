@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Ο κύκλος είναι σε παύση. Ανοίξτε τον πίνακα WashData για να συνεχίσετε.",
       "notify_live_waiting_message": "{device}: Δεν έχει αναγνωριστεί ακόμη κανένα προφίλ.",
       "vs_typical_longer": "{pct}% περισσότερο από το συνηθισμένο",
-      "vs_typical_shorter": "{pct}% λιγότερο από το συνηθισμένο"
+      "vs_typical_shorter": "{pct}% λιγότερο από το συνηθισμένο",
+      "invalid_power": "Power threshold must be greater than 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Δεν ήταν δυνατή η εγγραφή της εξαγωγής στο {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Δεν ήταν δυνατή η ανάθεση προφίλ: {error}"
     }
   },
   "intent": {

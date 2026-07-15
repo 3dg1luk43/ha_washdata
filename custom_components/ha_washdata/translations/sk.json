@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Cyklus je pozastavený. Otvorte panel WashData na obnovenie.",
       "notify_live_waiting_message": "{device}: Zatiaľ nebol rozpoznaný žiadny profil.",
       "vs_typical_longer": "o {pct}% dlhšie než zvyčajne",
-      "vs_typical_shorter": "o {pct}% kratšie než zvyčajne"
+      "vs_typical_shorter": "o {pct}% kratšie než zvyčajne",
+      "invalid_power": "Power threshold must be greater than 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Nepodarilo sa zapísať export do {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Nepodarilo sa priradiť profil: {error}"
     }
   },
   "intent": {

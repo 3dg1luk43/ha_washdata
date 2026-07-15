@@ -260,38 +260,45 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
     # log a benign "method GET is already registered" debug line.
     if not hass.data.get(PANEL_STATIC_REGISTERED):
         hass.data[PANEL_STATIC_REGISTERED] = True
+        # Outer guard: a static-path registration failure (including a raising
+        # fallback) must not escape and abort setup -- degrade gracefully like the
+        # sidebar-registration section below.
         try:
-            from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
-
-            if hasattr(hass.http, "async_register_static_paths"):
-                await hass.http.async_register_static_paths(
-                    [StaticPathConfig(PANEL_JS_URL, str(src), True)]
-                )
-            else:
-                _register_static_path(hass, PANEL_JS_URL, str(src))
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug("Panel static path registration failed, falling back: %s", exc)
-            _register_static_path(hass, PANEL_JS_URL, str(src))
-
-        # Serve the translations/panel/ directory for per-user-language loading.
-        # The panel fetches /ha_washdata/panel-translations/{lang}.json (+ en.json
-        # fallback) on demand, so browsers only download the language(s) in use
-        # rather than a monolithic all-languages bundle.
-        trans_src = Path(__file__).parent / "translations" / PANEL_TRANSLATIONS_DIRNAME
-        # Filesystem check offloaded to the executor (see note above).
-        if await hass.async_add_executor_job(trans_src.is_dir):
             try:
                 from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
 
                 if hasattr(hass.http, "async_register_static_paths"):
                     await hass.http.async_register_static_paths(
-                        [StaticPathConfig(PANEL_TRANSLATIONS_URL, str(trans_src), True)]
+                        [StaticPathConfig(PANEL_JS_URL, str(src), True)]
                     )
                 else:
-                    _register_static_path(hass, PANEL_TRANSLATIONS_URL, str(trans_src))
+                    _register_static_path(hass, PANEL_JS_URL, str(src))
             except Exception as exc:  # pylint: disable=broad-exception-caught
-                _LOGGER.debug("Panel translations path registration failed: %s", exc)
-                _register_static_path(hass, PANEL_TRANSLATIONS_URL, str(trans_src))
+                _LOGGER.debug("Panel static path registration failed, falling back: %s", exc)
+                _register_static_path(hass, PANEL_JS_URL, str(src))
+
+            # Serve the translations/panel/ directory for per-user-language loading.
+            # The panel fetches /ha_washdata/panel-translations/{lang}.json (+ en.json
+            # fallback) on demand, so browsers only download the language(s) in use
+            # rather than a monolithic all-languages bundle.
+            trans_src = Path(__file__).parent / "translations" / PANEL_TRANSLATIONS_DIRNAME
+            # Filesystem check offloaded to the executor (see note above).
+            if await hass.async_add_executor_job(trans_src.is_dir):
+                try:
+                    from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
+
+                    if hasattr(hass.http, "async_register_static_paths"):
+                        await hass.http.async_register_static_paths(
+                            [StaticPathConfig(PANEL_TRANSLATIONS_URL, str(trans_src), True)]
+                        )
+                    else:
+                        _register_static_path(hass, PANEL_TRANSLATIONS_URL, str(trans_src))
+                except Exception as exc:  # pylint: disable=broad-exception-caught
+                    _LOGGER.debug("Panel translations path registration failed: %s", exc)
+                    _register_static_path(hass, PANEL_TRANSLATIONS_URL, str(trans_src))
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.warning("WashData panel static path registration failed: %s", exc)
+            return False
 
     # Re-check after the await: with multiple WashData devices, all concurrent
     # setup_entry calls pass the initial guard before any one of them sets the

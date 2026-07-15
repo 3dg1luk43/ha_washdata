@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Cyklus je pozastaven. Pro pokračování otevřete panel WashData.",
       "notify_live_waiting_message": "{device}: Zatím nebyl rozpoznán žádný profil.",
       "vs_typical_longer": "o {pct}% déle než obvykle",
-      "vs_typical_shorter": "o {pct}% kratší než obvykle"
+      "vs_typical_shorter": "o {pct}% kratší než obvykle",
+      "invalid_power": "Práh výkonu musí být větší než 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Export se nepodařilo zapsat do {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Profil se nepodařilo přiřadit: {error}"
     }
   },
   "intent": {

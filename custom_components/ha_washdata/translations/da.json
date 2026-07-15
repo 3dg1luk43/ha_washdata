@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "Cyklussen er sat på pause. Åbn WashData-panelet for at genoptage.",
       "notify_live_waiting_message": "{device}: Ingen profil genkendt endnu.",
       "vs_typical_longer": "{pct}% længere end normalt",
-      "vs_typical_shorter": "{pct}% kortere end normalt"
+      "vs_typical_shorter": "{pct}% kortere end normalt",
+      "invalid_power": "Power threshold must be greater than 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "Kunne ikke skrive eksporten til {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Kunne ikke tildele profil: {error}"
     }
   },
   "intent": {

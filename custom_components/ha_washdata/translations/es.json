@@ -71,7 +71,8 @@
       "timer_pause_body_suffix": "El ciclo está en pausa. Abre el panel de WashData para reanudarlo.",
       "notify_live_waiting_message": "{device}: todavía no se ha reconocido ningún perfil.",
       "vs_typical_longer": "{pct}% más largo de lo habitual",
-      "vs_typical_shorter": "{pct}% más corto de lo habitual"
+      "vs_typical_shorter": "{pct}% más corto de lo habitual",
+      "invalid_power": "El umbral de potencia debe ser mayor que 0"
     }
   },
   "selector": {
@@ -444,6 +445,9 @@
     },
     "export_write_failed": {
       "message": "No se pudo escribir la exportación en {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "No se pudo asignar el perfil: {error}"
     }
   },
   "intent": {
