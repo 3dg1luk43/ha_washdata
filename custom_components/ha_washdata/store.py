@@ -194,7 +194,7 @@ class StoreBridge:
 
     async def share_device(
         self, brand: str, model: str, appliance_type: str, items: list[dict[str, Any]],
-        include_phases: list[str] | None = None,
+        include_phases: list[str] | None = None, settings: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Share a device bundle. ``items`` = ``[{local_cycle_id, program}]`` (the
         panel's tree selection). Resolves each local cycle's trace + stats and uploads
@@ -254,7 +254,11 @@ class StoreBridge:
             for b in prog_items:
                 b["phases"] = phases
                 b["phaseSourceCycleId"] = source_cid
-        device_meta = {"applianceType": store_type, "brand": brand, "model": model}
+        device_meta: dict[str, Any] = {"applianceType": store_type, "brand": brand, "model": model}
+        # Stage 3: attach the device's recognition/matching settings (already filtered
+        # to the allow-list by the WS layer, which owns entry.options).
+        if isinstance(settings, dict) and settings:
+            device_meta["settings"] = dict(settings)
         res = await self._client.upload_device_bundle(
             acct["refresh_token"], acct.get("uid", ""), acct.get("name"), device_meta, bundle_items,
         )
@@ -270,7 +274,9 @@ class StoreBridge:
         reference cycles into ``reference_cycles`` (merge/upsert; real past_cycles are
         never touched) and, when the profile carries a phase map, replace the local
         profile's phase ranges + reconcile any unknown phase labels into the catalog.
-        Returns ``{profiles_adopted, cycles_imported, phases_applied}``.
+        Returns ``{profiles_adopted, cycles_imported, phases_applied, settings}`` where
+        ``settings`` is the bundle's device settings map (the WS layer applies it to
+        entry.options only when the user opts in; the bridge never touches options).
 
         Idempotent: a store cycle already imported locally (``meta.source ==
         "store:<id>"``) is skipped, so re-downloading the same device does not
@@ -310,10 +316,12 @@ class StoreBridge:
             # raises; a bad/overlapping range set is skipped rather than failing adopt.
             if adopted_any and await self._apply_phases(program, prof.get("phases"), device_type):
                 phases_applied += 1
+        settings = bundle.get("settings") if isinstance(bundle.get("settings"), dict) else {}
         return {
             "profiles_adopted": profiles_adopted,
             "cycles_imported": cycles_imported,
             "phases_applied": phases_applied,
+            "settings": settings,
         }
 
     async def _apply_phases(
