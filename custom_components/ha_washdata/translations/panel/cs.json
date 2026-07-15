@@ -23,7 +23,12 @@
     "using_defaults": "Pomocí dodaných výchozích nastavení",
     "using_tuned": "Použití vyladěných závaží",
     "overrun_ratio": "({x}x očekávaného)",
-    "underrun_ratio": "({pct}% očekávaného)"
+    "underrun_ratio": "({pct}% očekávaného)",
+    "awaiting_tip": "Čeká na schválení komunitou",
+    "awaiting_n": "Čeká na schválení · potvrzeno {n}",
+    "approved": "Schváleno",
+    "awaiting": "Čeká na schválení",
+    "imported_tip": "Importováno z komunitního obchodu. Používá se pouze pro porovnávání, nezapočítává se do statistik."
   },
   "btn": {
     "add_device": "+ Přidat zařízení",
@@ -150,7 +155,16 @@
     "group_suggest": "Skupina {n}: {members}",
     "pg_apply_best": "Použít nejlepší",
     "pg_apply_to_settings": "Uložit do nastavení",
-    "pg_apply_to_settings_tip": "Zkopírovat hodnoty, které jste zde upravili, do aktivního nastavení tohoto zařízení"
+    "pg_apply_to_settings_tip": "Zkopírovat hodnoty, které jste zde upravili, do aktivního nastavení tohoto zařízení",
+    "search": "Hledat",
+    "import": "Importovat",
+    "disconnect": "Odpojit",
+    "connect_github": "Připojit GitHub",
+    "save_appliance": "Uložit spotřebič",
+    "share_to_store": "Sdílet do obchodu",
+    "share": "Sdílet",
+    "confirm_appliance": "Potvrdit tento spotřebič",
+    "confirmed": "Potvrzeno"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Nastavení detekce",
     "pg_timeline": "Časová osa událostí",
     "pg_outcome": "Výsledek simulace",
-    "pg_across_cycles": "Napříč vašimi cykly"
+    "pg_across_cycles": "Napříč vašimi cykly",
+    "community_store": "Komunitní obchod",
+    "online_account": "Komunitní obchod a online funkce"
   },
   "health": {
     "fair": "Přijatelná shoda",
@@ -527,7 +543,15 @@
     "pg_load_run": "Znovu načíst tento běh",
     "pg_match_confidence": "Spolehlivost shody",
     "pg_envelope_fit": "Soulad s obálkou",
-    "pg_envelope_fit_tip": "Jak přesně cyklus zapadá do uložené výkonové obálky tohoto profilu, jiný pohled než spolehlivost shody."
+    "pg_envelope_fit_tip": "Jak přesně cyklus zapadá do uložené výkonové obálky tohoto profilu, jiný pohled než spolehlivost shody.",
+    "n_imported_note": ", {n} importováno",
+    "enable_online": "Povolit online funkce",
+    "store_brand": "Značka spotřebiče",
+    "store_model": "Model spotřebiče",
+    "anonymous": "Anonymní",
+    "rate_quality": "Ohodnotit kvalitu",
+    "rate_n": "{n} hvězdiček",
+    "approved_only": "Pouze schválené"
   },
   "log": {
     "all_levels": "Všechny úrovně",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ Tímto trvale smažete VŠECHNY cykly a profily. Tuto akci nelze vrátit zpět.",
     "wipe_all_ok": "Vymazat vše",
     "force_stop_title": "Vynutit zastavení cyklu",
-    "force_stop_msg": "Vynutit nyní zastavení aktivního cyklu? Cyklus bude uložen jako přerušený."
+    "force_stop_msg": "Vynutit nyní zastavení aktivního cyklu? Cyklus bude uložen jako přerušený.",
+    "store_import": "Importovat referenční cyklus",
+    "store_share": "Sdílet do komunitního obchodu"
   },
   "msg": {
     "appliance_monitor": "Monitor spotřebiče",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Uložit těchto {n} nastavení do tohoto zařízení? {list}",
     "no_logs_match": "Těmto filtrům neodpovídají žádné záznamy protokolu.",
     "pg_analysis_hint2": "Vyberte cyklus a stiskněte Spustit pro načtení analýzy shody.",
-    "pg_analysis_empty2": "Stiskněte Spustit pro zobrazení analýzy shody."
+    "pg_analysis_empty2": "Stiskněte Spustit pro zobrazení analýzy shody.",
+    "imported_readonly": "Importováno z komunitního obchodu. Zobrazuje se pro referenci a porovnávání. Nezapočítává se do vašich statistik a nelze jej upravovat.",
+    "merge_no_imports": "Importované záznamy nelze sloučit se skutečným cyklem. Zrušte jejich výběr pro sloučení.",
+    "store_enable_hint": "Povolte online funkce v Nastavení, abyste mohli procházet a importovat referenční cykly komunity.",
+    "online_intro": "Sdílejte a stahujte referenční cykly s ostatními uživateli WashData. Všechny online funkce jsou dobrovolné a ve výchozím nastavení vypnuté.",
+    "store_share_intro": "Nahrajte tento referenční cyklus, aby jej mohli používat ostatní se stejným spotřebičem. Před zveřejněním bude zkontrolován.",
+    "online_intro_global": "Procházejte a sdílejte referenční záznamy s ostatními uživateli WashData a potvrzujte záznamy spotřebičů. Jedno připojení platí pro celou vaši integraci WashData; značka a model spotřebiče se nastavují pro každé zařízení v sekci Základní. Všechny online funkce jsou dobrovolné a ve výchozím nastavení vypnuté.",
+    "online_unavailable": "Online funkce nejsou na tomto serveru dostupné.",
+    "store_picker_offline": "Povolte online funkce v ozubeném kolečku nastavení, abyste mohli vybírat z katalogu komunity.",
+    "pick_brand_first": "Nejprve vyberte značku spotřebiče.",
+    "model_not_found": "Zatím není v katalogu.",
+    "connect_to_confirm": "Připojte se v ozubeném kolečku nastavení pro potvrzení nebo hodnocení."
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -828,7 +865,9 @@
     "person": "přidat osobu…",
     "phase_name": "např. Předpírka",
     "profile_name": "např. Bavlna 40 °C",
-    "maintenance_notes": "např. vyměněn filtr, vyčištěno těsnění dvířek"
+    "maintenance_notes": "např. vyměněn filtr, vyčištěno těsnění dvířek",
+    "store_brand": "např. Bosch",
+    "store_model": "např. WAT28401"
   },
   "pref": {
     "date_absolute": "Absolutní (např. 2. července 14:32)",
@@ -1236,6 +1275,14 @@
     "energy_weight": {
       "label": "Váha spotřeby energie",
       "doc": "Jak silně je upřednostněn program, jehož typická spotřeba energie odpovídá tomuto cyklu."
+    },
+    "store_brand": {
+      "label": "Značka spotřebiče",
+      "doc": "Volitelné. Značka spotřebiče vybraná z katalogu komunity. Používá se k vyhledávání a sdílení odpovídajících referenčních záznamů. Ponechte prázdné, pokud nepoužíváte online funkce."
+    },
+    "store_model": {
+      "label": "Model spotřebiče",
+      "doc": "Volitelné. Model spotřebiče vybraný z katalogu komunity po nastavení značky. Pokud váš model není uveden, můžete jej přidat do katalogu."
     }
   },
   "setting_group": {
@@ -1313,6 +1360,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Tiché hodiny a milníky"
+    },
+    "device_info": {
+      "label": "Informace o zařízení"
+    },
+    "basic_configuration": {
+      "label": "Základní konfigurace"
     }
   },
   "status": {
@@ -1336,7 +1389,8 @@
     "reverting": "Vracení zpět…",
     "trimming": "Ořezávání…",
     "splitting": "Rozdělování…",
-    "deleting": "Mazání…"
+    "deleting": "Mazání…",
+    "imported": "Importováno"
   },
   "suggestion": {
     "both_agree": "WashData doporučuje",
@@ -1449,7 +1503,8 @@
     "subtab_phase_catalog": "Katalog fází",
     "subtab_profiles": "Profily",
     "maintenance": "Údržba",
-    "playground": "Testovací prostředí"
+    "playground": "Testovací prostředí",
+    "store": "Obchod"
   },
   "tag": {
     "early_end": "Předčasný konec",
@@ -1529,7 +1584,27 @@
     "processed": "Zpracováno {bits}",
     "processed_cycles": "{n} cyklů",
     "processed_suggestions": "{n} návrhů",
-    "processed_models": "{n} aktivovaných modelů"
+    "processed_models": "{n} aktivovaných modelů",
+    "store_search_failed": "Hledání selhalo: {error}",
+    "store_connect_failed": "Připojení selhalo: {error}",
+    "store_connected": "Připojeno ke komunitnímu obchodu",
+    "store_disconnected": "Odpojeno od komunitního obchodu",
+    "store_error": "Chyba: {error}",
+    "store_unavailable": "Komunitní obchod není dostupný.",
+    "store_pick_profile": "Vyberte profil pro sloučení",
+    "store_name_required": "Zadejte název profilu",
+    "store_import_failed": "Import selhal: {error}",
+    "store_imported": "Importováno do {profile}",
+    "store_program_required": "Zadejte název programu",
+    "store_no_appliance": "Nejprve nastavte značku a model spotřebiče v Nastavení.",
+    "store_share_failed": "Sdílení selhalo: {error}",
+    "store_shared": "Sdíleno do komunitního obchodu, čeká na kontrolu.",
+    "appliance_added": "Spotřebič přidán, čeká na schválení",
+    "thanks_confirming": "Děkujeme za potvrzení",
+    "device_approved": "Schváleno komunitou",
+    "rating_saved": "Hodnocení kvality uloženo",
+    "brand_added": "Značka přidána, čeká na schválení",
+    "profile_added": "Profil přidán, čeká na schválení"
   },
   "trend": {
     "down": "Klesající trend",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "Bylo by odesláno oznámení o milníku.",
     "notify_held": "Oznámení bylo zadrženo kvůli tichým hodinám.",
     "finished": "Cyklus dosáhl koncového stavu a skončil."
+  },
+  "store": {
+    "browse": "Procházet",
+    "device": "Zařízení",
+    "favorites": "Oblíbené",
+    "search_ph": "Hledat podle značky nebo modelu…",
+    "no_results": "Nebyly nalezeny žádné odpovídající spotřebiče. Zkuste jiné vyhledávání.",
+    "n_programs": "{n} programů",
+    "n_cycles": "{n} cyklů",
+    "no_programs": "Pro tento spotřebič zatím nejsou sdíleny žádné programy.",
+    "no_cycles": "Pro tento program zatím nejsou sdíleny žádné referenční cykly.",
+    "anon": "anonymní",
+    "uploaded_by": "Sdílel {name}",
+    "connected_as": "Připojeno jako {name}",
+    "not_connected": "Nepřipojeno. Připojte účet GitHub pro sdílení vlastních cyklů.",
+    "import_new": "Nový profil",
+    "import_merge": "Sloučit s existujícím",
+    "merge_target": "Sloučit do profilu",
+    "description": "Popis (volitelné)",
+    "contributed_by": "od {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Zatím žádná hodnocení"
+  },
+  "settings": {
+    "gear": {
+      "title": "Nastavení"
+    }
+  },
+  "link": {
+    "manual": "Příručka ↗",
+    "add_appliance": "Přidejte svůj spotřebič"
+  },
+  "tip": {
+    "add_brand": "Značka není uvedena? Přidejte ji do katalogu komunity",
+    "add_appliance": "Model není uveden? Přidejte svůj spotřebič do katalogu komunity",
+    "add_profile": "Přidejte profil pro tento spotřebič na komunitním webu"
   }
 }

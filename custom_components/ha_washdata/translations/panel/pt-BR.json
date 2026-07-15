@@ -23,7 +23,12 @@
     "using_defaults": "Usando configurações padrão",
     "using_tuned": "Usando pesos ajustados",
     "overrun_ratio": "({x}x o esperado)",
-    "underrun_ratio": "({pct}% do esperado)"
+    "underrun_ratio": "({pct}% do esperado)",
+    "awaiting_tip": "Aguardando aprovação da comunidade",
+    "awaiting_n": "Aguardando aprovação · {n} confirmados",
+    "approved": "Aprovado",
+    "awaiting": "Aguardando aprovação",
+    "imported_tip": "Importado da loja da comunidade. Usado apenas para correspondência, não contabilizado nas estatísticas."
   },
   "btn": {
     "add_device": "+ Adicionar dispositivo",
@@ -150,7 +155,16 @@
     "group_suggest": "Grupo {n}: {members}",
     "pg_apply_best": "Aplicar melhor",
     "pg_apply_to_settings": "Salvar nas configurações",
-    "pg_apply_to_settings_tip": "Copiar os valores que você editou aqui para as configurações ativas deste dispositivo"
+    "pg_apply_to_settings_tip": "Copiar os valores que você editou aqui para as configurações ativas deste dispositivo",
+    "search": "Pesquisar",
+    "import": "Importar",
+    "disconnect": "Desconectar",
+    "connect_github": "Conectar GitHub",
+    "save_appliance": "Salvar eletrodoméstico",
+    "share_to_store": "Compartilhar na loja",
+    "share": "Compartilhar",
+    "confirm_appliance": "Confirmar este eletrodoméstico",
+    "confirmed": "Confirmado"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Configurações de detecção",
     "pg_timeline": "Linha do tempo de eventos",
     "pg_outcome": "Resultado da simulação",
-    "pg_across_cycles": "Em todos os seus ciclos"
+    "pg_across_cycles": "Em todos os seus ciclos",
+    "community_store": "Loja da comunidade",
+    "online_account": "Loja da comunidade e recursos online"
   },
   "health": {
     "fair": "Qualidade de perfil aceitável",
@@ -527,7 +543,15 @@
     "pg_load_run": "Recarregar esta execução",
     "pg_match_confidence": "Confiança da correspondência",
     "pg_envelope_fit": "Ajuste ao envelope",
-    "pg_envelope_fit_tip": "O quanto o ciclo permanece dentro do envelope de potência salvo deste perfil, uma perspectiva diferente da confiança da correspondência."
+    "pg_envelope_fit_tip": "O quanto o ciclo permanece dentro do envelope de potência salvo deste perfil, uma perspectiva diferente da confiança da correspondência.",
+    "n_imported_note": ", {n} importados",
+    "enable_online": "Ativar recursos online",
+    "store_brand": "Marca do eletrodoméstico",
+    "store_model": "Modelo do eletrodoméstico",
+    "anonymous": "Anônimo",
+    "rate_quality": "Avaliar a qualidade",
+    "rate_n": "{n} estrelas",
+    "approved_only": "Apenas aprovados"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ Isto exclui permanentemente TODOS os ciclos e perfis. Esta ação não pode ser desfeita.",
     "wipe_all_ok": "Apagar tudo",
     "force_stop_title": "Forçar parada do ciclo",
-    "force_stop_msg": "Forçar a parada do ciclo ativo agora? O ciclo será salvo como interrompido."
+    "force_stop_msg": "Forçar a parada do ciclo ativo agora? O ciclo será salvo como interrompido.",
+    "store_import": "Importar ciclo de referência",
+    "store_share": "Compartilhar na loja da comunidade"
   },
   "msg": {
     "appliance_monitor": "Monitor de eletrodoméstico",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Salvar estas {n} configuração(ões) neste dispositivo? {list}",
     "no_logs_match": "Nenhum registro corresponde a estes filtros.",
     "pg_analysis_hint2": "Selecione um ciclo e pressione Executar para carregar a análise de correspondência.",
-    "pg_analysis_empty2": "Pressione Executar para ver a análise de correspondência."
+    "pg_analysis_empty2": "Pressione Executar para ver a análise de correspondência.",
+    "imported_readonly": "Importado da loja da comunidade. Exibido para referência e correspondência. Não é contabilizado nas suas estatísticas e não pode ser editado.",
+    "merge_no_imports": "As gravações importadas não podem ser mescladas em um ciclo real. Desmarque-as para mesclar.",
+    "store_enable_hint": "Ative os recursos online em Configurações para navegar e importar ciclos de referência da comunidade.",
+    "online_intro": "Compartilhe e baixe ciclos de referência com outros usuários do WashData. Todos os recursos online são opcionais e ficam desativados por padrão.",
+    "store_share_intro": "Envie este ciclo de referência para que outras pessoas com o mesmo eletrodoméstico possam usá-lo. Ele é revisado antes de aparecer publicamente.",
+    "online_intro_global": "Navegue e compartilhe gravações de referência com outros usuários do WashData e confirme entradas de eletrodomésticos. Uma única conexão se aplica a toda a sua integração WashData; a marca e o modelo do eletrodoméstico são definidos por dispositivo em Básico. Todos os recursos online são opcionais e ficam desativados por padrão.",
+    "online_unavailable": "Os recursos online não estão disponíveis neste servidor.",
+    "store_picker_offline": "Ative os recursos online no ícone de configurações para escolher no catálogo da comunidade.",
+    "pick_brand_first": "Escolha primeiro uma marca de eletrodoméstico.",
+    "model_not_found": "Ainda não está no catálogo.",
+    "connect_to_confirm": "Conecte-se no ícone de configurações para confirmar ou avaliar."
   },
   "phase_desc": {
     "anti_crease": "Giros curtos ocasionais após a conclusão para reduzir amassados.",
@@ -828,7 +865,9 @@
     "person": "adicionar uma pessoa…",
     "phase_name": "ex. Pré-lavagem",
     "profile_name": "ex. Algodão 40°C",
-    "maintenance_notes": "ex. filtro substituído, borracha da porta limpa"
+    "maintenance_notes": "ex. filtro substituído, borracha da porta limpa",
+    "store_brand": "ex.: Bosch",
+    "store_model": "ex.: WAT28401"
   },
   "pref": {
     "date_absolute": "Absoluta (ex.: 14:32 em 2 de Jul)",
@@ -1236,6 +1275,14 @@
     "energy_weight": {
       "label": "Peso da energia",
       "doc": "O quanto é preferido um programa cujo consumo de energia típico corresponde a este ciclo."
+    },
+    "store_brand": {
+      "label": "Marca do eletrodoméstico",
+      "doc": "Opcional. A marca do eletrodoméstico, escolhida no catálogo da comunidade. Usada para encontrar e compartilhar gravações de referência correspondentes. Deixe em branco se não usar os recursos online."
+    },
+    "store_model": {
+      "label": "Modelo do eletrodoméstico",
+      "doc": "Opcional. O modelo do eletrodoméstico, escolhido no catálogo da comunidade depois de definida a marca. Se o seu modelo não estiver na lista, você pode adicioná-lo ao catálogo."
     }
   },
   "setting_group": {
@@ -1313,6 +1360,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Horário silencioso e marcos"
+    },
+    "device_info": {
+      "label": "Informações do dispositivo"
+    },
+    "basic_configuration": {
+      "label": "Configuração básica"
     }
   },
   "status": {
@@ -1336,7 +1389,8 @@
     "reverting": "Revertendo…",
     "trimming": "Recortando…",
     "splitting": "Dividindo…",
-    "deleting": "Excluindo…"
+    "deleting": "Excluindo…",
+    "imported": "Importado"
   },
   "tab": {
     "advanced": "Avançado",
@@ -1353,7 +1407,8 @@
     "subtab_phase_catalog": "Catálogo de fases",
     "subtab_profiles": "Perfis",
     "maintenance": "Manutenção",
-    "playground": "Área de testes"
+    "playground": "Área de testes",
+    "store": "Loja"
   },
   "tag": {
     "early_end": "Fim antecipado",
@@ -1433,7 +1488,27 @@
     "resume_no_cycle": "Nenhum ciclo em pausa para retomar",
     "delete_partial_failed": "Não foi possível excluir alguns itens e eles foram restaurados",
     "pg_run_gone": "Essa execução não está mais disponível.",
-    "task_cancelled": "Cancelado."
+    "task_cancelled": "Cancelado.",
+    "store_search_failed": "Falha na pesquisa: {error}",
+    "store_connect_failed": "Falha ao conectar: {error}",
+    "store_connected": "Conectado à loja da comunidade",
+    "store_disconnected": "Desconectado da loja da comunidade",
+    "store_error": "Erro: {error}",
+    "store_unavailable": "A loja da comunidade não está disponível.",
+    "store_pick_profile": "Escolha um perfil no qual mesclar",
+    "store_name_required": "Digite um nome de perfil",
+    "store_import_failed": "Falha na importação: {error}",
+    "store_imported": "Importado para {profile}",
+    "store_program_required": "Digite um nome de programa",
+    "store_no_appliance": "Defina primeiro a marca e o modelo do seu eletrodoméstico em Configurações.",
+    "store_share_failed": "Falha no compartilhamento: {error}",
+    "store_shared": "Compartilhado na loja da comunidade, aguardando revisão.",
+    "appliance_added": "Eletrodoméstico adicionado, aguardando aprovação",
+    "thanks_confirming": "Obrigado por confirmar",
+    "device_approved": "Aprovado pela comunidade",
+    "rating_saved": "Avaliação de qualidade salva",
+    "brand_added": "Marca adicionada, aguardando aprovação",
+    "profile_added": "Perfil adicionado, aguardando aprovação"
   },
   "suggestion": {
     "both_agree": "WashData recomenda",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "Uma notificação de etapa seria enviada.",
     "notify_held": "Uma notificação foi retida durante o horário de silêncio.",
     "finished": "O ciclo atingiu um estado final e foi encerrado."
+  },
+  "store": {
+    "browse": "Navegar",
+    "device": "Dispositivo",
+    "favorites": "Favoritos",
+    "search_ph": "Pesquisar por marca ou modelo…",
+    "no_results": "Nenhum eletrodoméstico correspondente encontrado. Tente outra pesquisa.",
+    "n_programs": "{n} programas",
+    "n_cycles": "{n} ciclos",
+    "no_programs": "Ainda não há programas compartilhados para este eletrodoméstico.",
+    "no_cycles": "Ainda não há ciclos de referência compartilhados para este programa.",
+    "anon": "anônimo",
+    "uploaded_by": "Compartilhado por {name}",
+    "connected_as": "Conectado como {name}",
+    "not_connected": "Não conectado. Conecte uma conta GitHub para compartilhar seus próprios ciclos.",
+    "import_new": "Novo perfil",
+    "import_merge": "Mesclar em existente",
+    "merge_target": "Mesclar no perfil",
+    "description": "Descrição (opcional)",
+    "contributed_by": "por {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Ainda sem avaliações"
+  },
+  "settings": {
+    "gear": {
+      "title": "Configurações"
+    }
+  },
+  "link": {
+    "manual": "Manual ↗",
+    "add_appliance": "Adicione seu eletrodoméstico"
+  },
+  "tip": {
+    "add_brand": "Marca não listada? Adicione-a ao catálogo da comunidade",
+    "add_appliance": "Modelo não listado? Adicione seu eletrodoméstico ao catálogo da comunidade",
+    "add_profile": "Adicione um perfil para este eletrodoméstico no site da comunidade"
   }
 }

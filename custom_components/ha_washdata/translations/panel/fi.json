@@ -23,7 +23,12 @@
     "using_defaults": "Toimitettujen oletusarvojen käyttäminen",
     "using_tuned": "Käyttämällä viritettyjä painoja",
     "overrun_ratio": "({x}x odotetusta)",
-    "underrun_ratio": "({pct}% odotetusta)"
+    "underrun_ratio": "({pct}% odotetusta)",
+    "awaiting_tip": "Odottaa yhteisön hyväksyntää",
+    "awaiting_n": "Odottaa hyväksyntää · {n} vahvistusta",
+    "approved": "Hyväksytty",
+    "awaiting": "Odottaa hyväksyntää",
+    "imported_tip": "Tuotu yhteisökaupasta. Käytetään vain täsmäytykseen, ei lasketa tilastoihin."
   },
   "btn": {
     "add_device": "+ Lisää laite",
@@ -150,7 +155,16 @@
     "group_suggest": "Ryhmä {n}: {members}",
     "pg_apply_best": "Käytä parasta",
     "pg_apply_to_settings": "Tallenna asetuksiin",
-    "pg_apply_to_settings_tip": "Kopioi tässä muokkaamasi arvot tämän laitteen aktiivisiin asetuksiin"
+    "pg_apply_to_settings_tip": "Kopioi tässä muokkaamasi arvot tämän laitteen aktiivisiin asetuksiin",
+    "search": "Hae",
+    "import": "Tuo",
+    "disconnect": "Katkaise yhteys",
+    "connect_github": "Yhdistä GitHub",
+    "save_appliance": "Tallenna laite",
+    "share_to_store": "Jaa kauppaan",
+    "share": "Jaa",
+    "confirm_appliance": "Vahvista tämä laite",
+    "confirmed": "Vahvistettu"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Tunnistusasetukset",
     "pg_timeline": "Tapahtuma-aikajana",
     "pg_outcome": "Simulaation tulos",
-    "pg_across_cycles": "Kaikissa jaksoissasi"
+    "pg_across_cycles": "Kaikissa jaksoissasi",
+    "community_store": "Yhteisökauppa",
+    "online_account": "Yhteisökauppa ja verkkotoiminnot"
   },
   "health": {
     "fair": "Tyydyttävä profiililaatu",
@@ -527,7 +543,15 @@
     "pg_load_run": "Lataa tämä ajo uudelleen",
     "pg_match_confidence": "Osuman varmuus",
     "pg_envelope_fit": "Verhokäyrän sopivuus",
-    "pg_envelope_fit_tip": "Kuinka tarkasti sykli pysyy tämän profiilin tallennetun tehon verhokäyrän sisällä, eri näkökulma kuin osuman varmuus."
+    "pg_envelope_fit_tip": "Kuinka tarkasti sykli pysyy tämän profiilin tallennetun tehon verhokäyrän sisällä, eri näkökulma kuin osuman varmuus.",
+    "n_imported_note": ", {n} tuotua",
+    "enable_online": "Ota verkkotoiminnot käyttöön",
+    "store_brand": "Laitteen merkki",
+    "store_model": "Laitteen malli",
+    "anonymous": "Anonyymi",
+    "rate_quality": "Arvioi laatu",
+    "rate_n": "{n} tähteä",
+    "approved_only": "Vain hyväksytyt"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ Tämä poistaa pysyvästi KAIKKI syklit ja profiilit. Tätä ei voi kumota.",
     "wipe_all_ok": "Pyyhi kaikki",
     "force_stop_title": "Pakota sykli pysähtymään",
-    "force_stop_msg": "Pakotetaanko aktiivinen sykli pysähtymään nyt? Sykli tallennetaan keskeytyneenä."
+    "force_stop_msg": "Pakotetaanko aktiivinen sykli pysähtymään nyt? Sykli tallennetaan keskeytyneenä.",
+    "store_import": "Tuo viitesykli",
+    "store_share": "Jaa yhteisökauppaan"
   },
   "msg": {
     "appliance_monitor": "Laitteen näyttö",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Tallennetaanko nämä {n} asetusta tähän laitteeseen? {list}",
     "no_logs_match": "Mikään lokitietue ei vastaa näitä suodattimia.",
     "pg_analysis_hint2": "Valitse sykli ja paina Aja-painiketta ladataksesi osuma-analyysin.",
-    "pg_analysis_empty2": "Paina Aja-painiketta nähdäksesi osuma-analyysin."
+    "pg_analysis_empty2": "Paina Aja-painiketta nähdäksesi osuma-analyysin.",
+    "imported_readonly": "Tuotu yhteisökaupasta. Näytetään viitteeksi ja täsmäytystä varten. Sitä ei lasketa tilastoihisi eikä sitä voi muokata.",
+    "merge_no_imports": "Tuotuja tallennuksia ei voi yhdistää oikeaan sykliin. Poista niiden valinta yhdistääksesi.",
+    "store_enable_hint": "Ota verkkotoiminnot käyttöön asetuksista selataksesi ja tuodaksesi yhteisön viitesyklejä.",
+    "online_intro": "Jaa ja lataa viitesyklejä muiden WashData-käyttäjien kanssa. Kaikki verkkotoiminnot ovat vapaaehtoisia ja oletuksena pois päältä.",
+    "store_share_intro": "Lataa tämä viitesykli, jotta muut samaa laitetta käyttävät voivat hyödyntää sitä. Se tarkistetaan ennen julkaisua.",
+    "online_intro_global": "Selaa ja jaa viitetallennuksia muiden WashData-käyttäjien kanssa ja vahvista laitemerkintöjä. Yksi yhteys koskee koko WashData-integraatiotasi; laitteen merkki ja malli asetetaan laitekohtaisesti Perusmääritykset-osiossa. Kaikki verkkotoiminnot ovat vapaaehtoisia ja oletuksena pois päältä.",
+    "online_unavailable": "Verkkotoiminnot eivät ole käytettävissä tällä palvelimella.",
+    "store_picker_offline": "Ota verkkotoiminnot käyttöön asetusten rattaasta valitaksesi yhteisön luettelosta.",
+    "pick_brand_first": "Valitse ensin laitteen merkki.",
+    "model_not_found": "Ei vielä luettelossa.",
+    "connect_to_confirm": "Yhdistä asetusten rattaasta vahvistaaksesi tai arvioidaksesi."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Äkillinen pudotus tulkitaan välittömäksi lopuksi",
@@ -845,7 +882,9 @@
     "person": "lisää henkilö…",
     "phase_name": "esim. Esipesu",
     "profile_name": "esim. Puuvilla 40°C",
-    "maintenance_notes": "esim. suodatin vaihdettu, luukun tiiviste puhdistettu"
+    "maintenance_notes": "esim. suodatin vaihdettu, luukun tiiviste puhdistettu",
+    "store_brand": "esim. Bosch",
+    "store_model": "esim. WAT28401"
   },
   "pref": {
     "date_absolute": "Absoluuttinen (esim. 14:32 2. heinäkuuta)",
@@ -1253,6 +1292,14 @@
     "energy_weight": {
       "label": "Energian painotus",
       "doc": "Kuinka voimakkaasti suositaan ohjelmaa, jonka tyypillinen energiankulutus vastaa tätä jaksoa."
+    },
+    "store_brand": {
+      "label": "Laitteen merkki",
+      "doc": "Valinnainen. Laitteen merkki, joka valitaan yhteisön luettelosta. Käytetään vastaavien viitetallennusten löytämiseen ja jakamiseen. Jätä tyhjäksi, jos et käytä verkkotoimintoja."
+    },
+    "store_model": {
+      "label": "Laitteen malli",
+      "doc": "Valinnainen. Laitteen malli, joka valitaan yhteisön luettelosta merkin asettamisen jälkeen. Jos malliasi ei ole luettelossa, voit lisätä sen luetteloon."
     }
   },
   "setting_group": {
@@ -1330,6 +1377,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Hiljaiset tunnit ja virstanpylväät"
+    },
+    "device_info": {
+      "label": "Laitteen tiedot"
+    },
+    "basic_configuration": {
+      "label": "Perusmääritykset"
     }
   },
   "status": {
@@ -1353,7 +1406,8 @@
     "reverting": "Palautetaan…",
     "trimming": "Leikataan…",
     "splitting": "Jaetaan…",
-    "deleting": "Poistetaan…"
+    "deleting": "Poistetaan…",
+    "imported": "Tuotu"
   },
   "suggestion": {
     "both_agree": "WashData suosittelee",
@@ -1466,7 +1520,8 @@
     "subtab_phase_catalog": "Vaiheen katalogi",
     "subtab_profiles": "Profiilit",
     "maintenance": "Huolto",
-    "playground": "Hiekkalaatikko"
+    "playground": "Hiekkalaatikko",
+    "store": "Kauppa"
   },
   "tag": {
     "early_end": "Varhainen loppu",
@@ -1546,7 +1601,27 @@
     "processed": "Käsitelty {bits}",
     "processed_cycles": "{n} sykliä",
     "processed_suggestions": "{n} ehdotusta",
-    "processed_models": "{n} mallia otettu käyttöön"
+    "processed_models": "{n} mallia otettu käyttöön",
+    "store_search_failed": "Haku epäonnistui: {error}",
+    "store_connect_failed": "Yhdistäminen epäonnistui: {error}",
+    "store_connected": "Yhdistetty yhteisökauppaan",
+    "store_disconnected": "Yhteys yhteisökauppaan katkaistu",
+    "store_error": "Virhe: {error}",
+    "store_unavailable": "Yhteisökauppa ei ole käytettävissä.",
+    "store_pick_profile": "Valitse profiili, johon yhdistetään",
+    "store_name_required": "Anna profiilin nimi",
+    "store_import_failed": "Tuonti epäonnistui: {error}",
+    "store_imported": "Tuotu profiiliin {profile}",
+    "store_program_required": "Anna ohjelman nimi",
+    "store_no_appliance": "Aseta ensin laitteen merkki ja malli asetuksista.",
+    "store_share_failed": "Jakaminen epäonnistui: {error}",
+    "store_shared": "Jaettu yhteisökauppaan - odottaa tarkistusta.",
+    "appliance_added": "Laite lisätty - odottaa hyväksyntää",
+    "thanks_confirming": "Kiitos vahvistuksesta",
+    "device_approved": "Yhteisö hyväksyi",
+    "rating_saved": "Laatuarvio tallennettu",
+    "brand_added": "Merkki lisätty - odottaa hyväksyntää",
+    "profile_added": "Profiili lisätty - odottaa hyväksyntää"
   },
   "trend": {
     "down": "Trendikäs alaspäin",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "Lähetettäisiin välitavoiteilmoitus.",
     "notify_held": "Ilmoitus pidätettiin hiljaisten tuntien vuoksi.",
     "finished": "Jakso saavutti lopputilan ja päättyi."
+  },
+  "store": {
+    "browse": "Selaa",
+    "device": "Laite",
+    "favorites": "Suosikit",
+    "search_ph": "Hae merkin tai mallin mukaan…",
+    "no_results": "Vastaavia laitteita ei löytynyt. Kokeile toista hakua.",
+    "n_programs": "{n} ohjelmaa",
+    "n_cycles": "{n} sykliä",
+    "no_programs": "Tälle laitteelle ei ole vielä jaettuja ohjelmia.",
+    "no_cycles": "Tälle ohjelmalle ei ole vielä jaettu viitesyklejä.",
+    "anon": "anonyymi",
+    "uploaded_by": "Jakanut {name}",
+    "connected_as": "Yhdistetty käyttäjänä {name}",
+    "not_connected": "Ei yhdistetty. Yhdistä GitHub-tili jakaaksesi omia syklejäsi.",
+    "import_new": "Uusi profiili",
+    "import_merge": "Yhdistä olemassa olevaan",
+    "merge_target": "Yhdistä profiiliin",
+    "description": "Kuvaus (valinnainen)",
+    "contributed_by": "tekijä {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Ei vielä arvioita"
+  },
+  "settings": {
+    "gear": {
+      "title": "Asetukset"
+    }
+  },
+  "link": {
+    "manual": "Käyttöohje ↗",
+    "add_appliance": "Lisää laitteesi"
+  },
+  "tip": {
+    "add_brand": "Merkkiä ei ole listalla? Lisää se yhteisön luetteloon",
+    "add_appliance": "Mallia ei ole listalla? Lisää laitteesi yhteisön luetteloon",
+    "add_profile": "Lisää profiili tälle laitteelle yhteisösivustolla"
   }
 }

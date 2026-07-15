@@ -23,7 +23,12 @@
     "using_defaults": "Korištenje isporučenih zadanih postavki",
     "using_tuned": "Korištenje podešenih utega",
     "overrun_ratio": "({x}x očekivanog)",
-    "underrun_ratio": "({pct}% očekivanog)"
+    "underrun_ratio": "({pct}% očekivanog)",
+    "awaiting_tip": "Čeka odobrenje zajednice",
+    "awaiting_n": "Čeka odobrenje · potvrđeno {n}",
+    "approved": "Odobreno",
+    "awaiting": "Čeka odobrenje",
+    "imported_tip": "Uvezeno iz zajedničke trgovine. Koristi se samo za podudaranje, ne broji se u statistiku."
   },
   "btn": {
     "add_device": "+ Dodaj uređaj",
@@ -150,7 +155,16 @@
     "group_suggest": "Grupa {n}: {members}",
     "pg_apply_best": "Primijeni najbolje",
     "pg_apply_to_settings": "Sačuvaj u postavke",
-    "pg_apply_to_settings_tip": "Kopiraj ovdje uređene vrijednosti u aktivne postavke ovog uređaja"
+    "pg_apply_to_settings_tip": "Kopiraj ovdje uređene vrijednosti u aktivne postavke ovog uređaja",
+    "search": "Pretraži",
+    "import": "Uvezi",
+    "disconnect": "Prekini vezu",
+    "connect_github": "Poveži GitHub",
+    "save_appliance": "Sačuvaj uređaj",
+    "share_to_store": "Podijeli u trgovinu",
+    "share": "Podijeli",
+    "confirm_appliance": "Potvrdi ovaj uređaj",
+    "confirmed": "Potvrđeno"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Postavke detekcije",
     "pg_timeline": "Vremenska linija događaja",
     "pg_outcome": "Ishod simulacije",
-    "pg_across_cycles": "Kroz sve vaše cikluse"
+    "pg_across_cycles": "Kroz sve vaše cikluse",
+    "community_store": "Zajednička trgovina",
+    "online_account": "Zajednička trgovina i online funkcije"
   },
   "health": {
     "fair": "Prihvatljiva kvaliteta podudaranja",
@@ -527,7 +543,15 @@
     "pg_load_run": "Ponovo učitaj ovo pokretanje",
     "pg_match_confidence": "Pouzdanost podudaranja",
     "pg_envelope_fit": "Uklapanje u omotač",
-    "pg_envelope_fit_tip": "Koliko dobro ciklus ostaje unutar sačuvanog omotača snage ovog profila, drugačiji pogled od pouzdanosti podudaranja."
+    "pg_envelope_fit_tip": "Koliko dobro ciklus ostaje unutar sačuvanog omotača snage ovog profila, drugačiji pogled od pouzdanosti podudaranja.",
+    "n_imported_note": ", {n} uvezeno",
+    "enable_online": "Omogući online funkcije",
+    "store_brand": "Marka uređaja",
+    "store_model": "Model uređaja",
+    "anonymous": "Anonimno",
+    "rate_quality": "Ocijeni kvalitet",
+    "rate_n": "{n} zvjezdica",
+    "approved_only": "Samo odobreno"
   },
   "log": {
     "all_levels": "Svi nivoi",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ Ovo trajno briše SVE cikluse i profile. Ovo se ne može poništiti.",
     "wipe_all_ok": "Obriši sve",
     "force_stop_title": "Prisilno zaustavi ciklus",
-    "force_stop_msg": "Prisilno zaustaviti aktivni ciklus sada? Ciklus će biti sačuvan kao prekinut."
+    "force_stop_msg": "Prisilno zaustaviti aktivni ciklus sada? Ciklus će biti sačuvan kao prekinut.",
+    "store_import": "Uvezi referentni ciklus",
+    "store_share": "Podijeli u zajedničku trgovinu"
   },
   "msg": {
     "appliance_monitor": "Monitor uređaja",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Sačuvati ovih {n} postavki na ovaj uređaj? {list}",
     "no_logs_match": "Nijedan zapis dnevnika ne odgovara ovim filterima.",
     "pg_analysis_hint2": "Odaberite ciklus i pritisnite Pokreni za učitavanje analize podudaranja.",
-    "pg_analysis_empty2": "Pritisnite Pokreni za prikaz analize podudaranja."
+    "pg_analysis_empty2": "Pritisnite Pokreni za prikaz analize podudaranja.",
+    "imported_readonly": "Uvezeno iz zajedničke trgovine. Prikazano za referencu i podudaranje. Ne broji se u vašu statistiku i ne može se uređivati.",
+    "merge_no_imports": "Uvezene snimke ne mogu se spojiti sa stvarnim ciklusom. Poništite njihov odabir da biste ih spojili.",
+    "store_enable_hint": "Omogućite online funkcije u Postavkama da biste mogli pregledavati i uvoziti referentne cikluse zajednice.",
+    "online_intro": "Dijelite i preuzimajte referentne cikluse s drugim korisnicima WashData. Sve online funkcije su dobrovoljne i podrazumijevano isključene.",
+    "store_share_intro": "Otpremite ovaj referentni ciklus kako bi ga mogli koristiti drugi s istim uređajem. Pregleda se prije nego što postane javno dostupan.",
+    "online_intro_global": "Pregledavajte i dijelite referentne snimke s drugim korisnicima WashData te potvrđujte unose uređaja. Jedna veza vrijedi za cijelu vašu WashData integraciju; marka i model uređaja postavljaju se za svaki uređaj u odjeljku Osnovno. Sve online funkcije su dobrovoljne i podrazumijevano isključene.",
+    "online_unavailable": "Online funkcije nisu dostupne na ovom serveru.",
+    "store_picker_offline": "Omogućite online funkcije u zupčaniku postavki da biste birali iz kataloga zajednice.",
+    "pick_brand_first": "Prvo odaberite marku uređaja.",
+    "model_not_found": "Još nije u katalogu.",
+    "connect_to_confirm": "Povežite se u zupčaniku postavki da biste potvrdili ili ocijenili."
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka spuštanja nakon završetka za smanjenje bora.",
@@ -828,7 +865,9 @@
     "person": "dodaj osobu…",
     "phase_name": "npr. Pranje",
     "profile_name": "npr. Pamuk 40°C",
-    "maintenance_notes": "npr. zamijenjen filter, očišćena brtva vrata"
+    "maintenance_notes": "npr. zamijenjen filter, očišćena brtva vrata",
+    "store_brand": "npr. Bosch",
+    "store_model": "npr. WAT28401"
   },
   "pref": {
     "date_absolute": "Apsolutno (npr. 14:32 2. jula)",
@@ -1236,6 +1275,14 @@
     "energy_weight": {
       "label": "Težina energije",
       "doc": "Koliko snažno se daje prednost programu čija se tipična potrošnja energije podudara s ovim ciklusom."
+    },
+    "store_brand": {
+      "label": "Marka uređaja",
+      "doc": "Opcionalno. Marka uređaja odabrana iz kataloga zajednice. Koristi se za pronalaženje i dijeljenje odgovarajućih referentnih snimki. Ostavite prazno ako ne koristite online funkcije."
+    },
+    "store_model": {
+      "label": "Model uređaja",
+      "doc": "Opcionalno. Model uređaja odabran iz kataloga zajednice nakon što je marka postavljena. Ako vaš model nije na spisku, možete ga dodati u katalog."
     }
   },
   "setting_group": {
@@ -1313,6 +1360,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Tihi sati i prekretnice"
+    },
+    "device_info": {
+      "label": "Podaci o uređaju"
+    },
+    "basic_configuration": {
+      "label": "Osnovna konfiguracija"
     }
   },
   "status": {
@@ -1336,7 +1389,8 @@
     "reverting": "Vraćanje…",
     "trimming": "Obrezivanje…",
     "splitting": "Dijeljenje…",
-    "deleting": "Brisanje…"
+    "deleting": "Brisanje…",
+    "imported": "Uvezeno"
   },
   "suggestion": {
     "both_agree": "WashData preporučuje",
@@ -1449,7 +1503,8 @@
     "subtab_phase_catalog": "Katalog faza",
     "subtab_profiles": "Profili",
     "maintenance": "Održavanje",
-    "playground": "Testno okruženje"
+    "playground": "Testno okruženje",
+    "store": "Trgovina"
   },
   "tag": {
     "early_end": "Rani kraj",
@@ -1529,7 +1584,27 @@
     "processed": "Obrađeno {bits}",
     "processed_cycles": "{n} ciklusa",
     "processed_suggestions": "{n} prijedloga",
-    "processed_models": "{n} aktiviranih modela"
+    "processed_models": "{n} aktiviranih modela",
+    "store_search_failed": "Pretraga nije uspjela: {error}",
+    "store_connect_failed": "Povezivanje nije uspjelo: {error}",
+    "store_connected": "Povezano sa zajedničkom trgovinom",
+    "store_disconnected": "Veza sa zajedničkom trgovinom prekinuta",
+    "store_error": "Greška: {error}",
+    "store_unavailable": "Zajednička trgovina nije dostupna.",
+    "store_pick_profile": "Odaberite profil za spajanje",
+    "store_name_required": "Unesite naziv profila",
+    "store_import_failed": "Uvoz nije uspio: {error}",
+    "store_imported": "Uvezeno u {profile}",
+    "store_program_required": "Unesite naziv programa",
+    "store_no_appliance": "Prvo postavite marku i model uređaja u Postavkama.",
+    "store_share_failed": "Dijeljenje nije uspjelo: {error}",
+    "store_shared": "Podijeljeno u zajedničku trgovinu, čeka pregled.",
+    "appliance_added": "Uređaj dodan, čeka odobrenje",
+    "thanks_confirming": "Hvala na potvrdi",
+    "device_approved": "Odobreno od strane zajednice",
+    "rating_saved": "Ocjena kvaliteta sačuvana",
+    "brand_added": "Marka dodana, čeka odobrenje",
+    "profile_added": "Profil dodan, čeka odobrenje"
   },
   "trend": {
     "down": "Opadajući trend",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "Bila bi poslana obavijest o prekretnici.",
     "notify_held": "Obavijest je zadržana zbog tihih sati.",
     "finished": "Ciklus je dostigao završno stanje i završio."
+  },
+  "store": {
+    "browse": "Pregledaj",
+    "device": "Uređaj",
+    "favorites": "Favoriti",
+    "search_ph": "Pretraži po marki ili modelu…",
+    "no_results": "Nisu pronađeni odgovarajući uređaji. Pokušajte s drugom pretragom.",
+    "n_programs": "{n} programa",
+    "n_cycles": "{n} ciklusa",
+    "no_programs": "Za ovaj uređaj još nema podijeljenih programa.",
+    "no_cycles": "Za ovaj program još nema podijeljenih referentnih ciklusa.",
+    "anon": "anonimno",
+    "uploaded_by": "Podijelio {name}",
+    "connected_as": "Povezan kao {name}",
+    "not_connected": "Nije povezano. Povežite GitHub nalog da biste dijelili vlastite cikluse.",
+    "import_new": "Novi profil",
+    "import_merge": "Spoji s postojećim",
+    "merge_target": "Spoji u profil",
+    "description": "Opis (opcionalno)",
+    "contributed_by": "od {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Još nema ocjena"
+  },
+  "settings": {
+    "gear": {
+      "title": "Postavke"
+    }
+  },
+  "link": {
+    "manual": "Priručnik ↗",
+    "add_appliance": "Dodajte svoj uređaj"
+  },
+  "tip": {
+    "add_brand": "Marke nema na spisku? Dodajte je u katalog zajednice",
+    "add_appliance": "Modela nema na spisku? Dodajte svoj uređaj u katalog zajednice",
+    "add_profile": "Dodajte profil za ovaj uređaj na web-stranici zajednice"
   }
 }

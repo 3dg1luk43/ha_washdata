@@ -23,7 +23,12 @@
     "using_defaults": "Tiek izmantoti piegādātie noklusējuma iestatījumi",
     "using_tuned": "Izmantojot noregulētus svarus",
     "overrun_ratio": "({x}x paredzētā)",
-    "underrun_ratio": "({pct}% no paredzētā)"
+    "underrun_ratio": "({pct}% no paredzētā)",
+    "awaiting_tip": "Gaida kopienas apstiprinājumu",
+    "awaiting_n": "Gaida apstiprinājumu · {n} apstiprinājumi",
+    "approved": "Apstiprināts",
+    "awaiting": "Gaida apstiprinājumu",
+    "imported_tip": "Importēts no kopienas veikala. Izmanto tikai saskaņošanai, netiek ieskaitīts statistikā."
   },
   "btn": {
     "add_device": "+ Pievienot ierīci",
@@ -150,7 +155,16 @@
     "group_suggest": "Grupa {n}: {members}",
     "pg_apply_best": "Lietot labāko",
     "pg_apply_to_settings": "Saglabāt iestatījumos",
-    "pg_apply_to_settings_tip": "Kopēt šeit rediģētās vērtības šīs ierīces aktīvajos iestatījumos"
+    "pg_apply_to_settings_tip": "Kopēt šeit rediģētās vērtības šīs ierīces aktīvajos iestatījumos",
+    "search": "Meklēt",
+    "import": "Importēt",
+    "disconnect": "Atvienot",
+    "connect_github": "Savienot GitHub",
+    "save_appliance": "Saglabāt ierīci",
+    "share_to_store": "Kopīgot veikalā",
+    "share": "Kopīgot",
+    "confirm_appliance": "Apstiprināt šo ierīci",
+    "confirmed": "Apstiprināts"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Noteikšanas iestatījumi",
     "pg_timeline": "Notikumu laika josla",
     "pg_outcome": "Simulācijas rezultāts",
-    "pg_across_cycles": "Pa visiem jūsu cikliem"
+    "pg_across_cycles": "Pa visiem jūsu cikliem",
+    "community_store": "Kopienas veikals",
+    "online_account": "Kopienas veikals un tiešsaistes funkcijas"
   },
   "health": {
     "fair": "Pieņemama profila kvalitāte",
@@ -527,7 +543,15 @@
     "pg_load_run": "Pārlādēt šo palaišanu",
     "pg_match_confidence": "Atbilstības ticamība",
     "pg_envelope_fit": "Iekļaušanās apvalklīknē",
-    "pg_envelope_fit_tip": "Cik precīzi cikls iekļaujas šī profila saglabātajā jaudas apvalklīknē, cits skatījums nekā atbilstības ticamība."
+    "pg_envelope_fit_tip": "Cik precīzi cikls iekļaujas šī profila saglabātajā jaudas apvalklīknē, cits skatījums nekā atbilstības ticamība.",
+    "n_imported_note": ", {n} importēti",
+    "enable_online": "Iespējot tiešsaistes funkcijas",
+    "store_brand": "Ierīces zīmols",
+    "store_model": "Ierīces modelis",
+    "anonymous": "Anonīms",
+    "rate_quality": "Novērtēt kvalitāti",
+    "rate_n": "{n} zvaigznes",
+    "approved_only": "Tikai apstiprinātie"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ Tas neatgriezeniski dzēš VISUS ciklus un profilus. Šo nevar atsaukt.",
     "wipe_all_ok": "Dzēst visu",
     "force_stop_title": "Piespiedu kārtā apturēt ciklu",
-    "force_stop_msg": "Piespiedu kārtā apturēt aktīvo ciklu tagad? Cikls tiks saglabāts kā pārtraukts."
+    "force_stop_msg": "Piespiedu kārtā apturēt aktīvo ciklu tagad? Cikls tiks saglabāts kā pārtraukts.",
+    "store_import": "Importēt atsauces ciklu",
+    "store_share": "Kopīgot kopienas veikalā"
   },
   "msg": {
     "appliance_monitor": "Ierīces monitors",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Vai saglabāt šos {n} iestatījumus šajā ierīcē? {list}",
     "no_logs_match": "Neviens žurnāla ieraksts neatbilst šiem filtriem.",
     "pg_analysis_hint2": "Atlasiet ciklu un nospiediet Palaist, lai ielādētu atbilstības analīzi.",
-    "pg_analysis_empty2": "Nospiediet Palaist, lai skatītu atbilstības analīzi."
+    "pg_analysis_empty2": "Nospiediet Palaist, lai skatītu atbilstības analīzi.",
+    "imported_readonly": "Importēts no kopienas veikala. Tiek rādīts atsaucei un saskaņošanai. Tas netiek ieskaitīts jūsu statistikā, un to nevar rediģēt.",
+    "merge_no_imports": "Importētos ierakstus nevar sapludināt ar īstu ciklu. Noņemiet to atzīmi, lai sapludinātu.",
+    "store_enable_hint": "Iestatījumos iespējojiet tiešsaistes funkcijas, lai pārlūkotu un importētu kopienas atsauces ciklus.",
+    "online_intro": "Kopīgojiet un lejupielādējiet atsauces ciklus ar citiem WashData lietotājiem. Visas tiešsaistes funkcijas ir brīvprātīgas un pēc noklusējuma izslēgtas.",
+    "store_share_intro": "Augšupielādējiet šo atsauces ciklu, lai to varētu izmantot citi ar to pašu ierīci. Pirms publiskošanas tas tiek pārskatīts.",
+    "online_intro_global": "Pārlūkojiet un kopīgojiet atsauces ierakstus ar citiem WashData lietotājiem un apstipriniet ierīču ierakstus. Viens savienojums attiecas uz visu jūsu WashData integrāciju; ierīces zīmols un modelis tiek iestatīts katrai ierīcei atsevišķi sadaļā Pamatkonfigurācija. Visas tiešsaistes funkcijas ir brīvprātīgas un pēc noklusējuma izslēgtas.",
+    "online_unavailable": "Tiešsaistes funkcijas šajā serverī nav pieejamas.",
+    "store_picker_offline": "Iespējojiet tiešsaistes funkcijas iestatījumu zobratā, lai izvēlētos no kopienas kataloga.",
+    "pick_brand_first": "Vispirms izvēlieties ierīces zīmolu.",
+    "model_not_found": "Vēl nav katalogā.",
+    "connect_to_confirm": "Savienojiet iestatījumu zobratā, lai apstiprinātu vai novērtētu."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -828,7 +865,9 @@
     "person": "pievienot personu…",
     "phase_name": "piem. Priekšmazgāšana",
     "profile_name": "piem. Kokvilna 40°C",
-    "maintenance_notes": "piem., nomainīts filtrs, iztīrīts durvju blīvējums"
+    "maintenance_notes": "piem., nomainīts filtrs, iztīrīts durvju blīvējums",
+    "store_brand": "piem., Bosch",
+    "store_model": "piem., WAT28401"
   },
   "pref": {
     "date_absolute": "Absolūtais (piemēram, 14:32 2. jūlijā)",
@@ -1236,6 +1275,14 @@
     "energy_weight": {
       "label": "Enerģijas svars",
       "doc": "Cik stipri tiek dota priekšroka programmai, kuras tipiskais enerģijas patēriņš atbilst šim ciklam."
+    },
+    "store_brand": {
+      "label": "Ierīces zīmols",
+      "doc": "Neobligāti. Ierīces zīmols, kas izvēlēts no kopienas kataloga. Izmanto atbilstošu atsauces ierakstu atrašanai un kopīgošanai. Atstājiet tukšu, ja neizmantojat tiešsaistes funkcijas."
+    },
+    "store_model": {
+      "label": "Ierīces modelis",
+      "doc": "Neobligāti. Ierīces modelis, kas izvēlēts no kopienas kataloga, kad ir iestatīts zīmols. Ja jūsu modeļa sarakstā nav, varat to pievienot katalogam."
     }
   },
   "setting_group": {
@@ -1313,6 +1360,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Klusās stundas un atskaites punkti"
+    },
+    "device_info": {
+      "label": "Ierīces informācija"
+    },
+    "basic_configuration": {
+      "label": "Pamatkonfigurācija"
     }
   },
   "status": {
@@ -1336,7 +1389,8 @@
     "reverting": "Atgriež…",
     "trimming": "Apgriež…",
     "splitting": "Sadala…",
-    "deleting": "Dzēš…"
+    "deleting": "Dzēš…",
+    "imported": "Importēts"
   },
   "tab": {
     "advanced": "Papildu",
@@ -1353,7 +1407,8 @@
     "subtab_phase_catalog": "Fāzes katalogs",
     "subtab_profiles": "Profili",
     "maintenance": "Apkope",
-    "playground": "Izmēģinājumu laukums"
+    "playground": "Izmēģinājumu laukums",
+    "store": "Veikals"
   },
   "tag": {
     "early_end": "Agrās beigas",
@@ -1433,7 +1488,27 @@
     "processed": "Apstrādāts {bits}",
     "processed_cycles": "{n} cikli",
     "processed_suggestions": "{n} ieteikumi",
-    "processed_models": "{n} modeļi paaugstināti"
+    "processed_models": "{n} modeļi paaugstināti",
+    "store_search_failed": "Meklēšana neizdevās: {error}",
+    "store_connect_failed": "Savienošana neizdevās: {error}",
+    "store_connected": "Savienots ar kopienas veikalu",
+    "store_disconnected": "Atvienots no kopienas veikala",
+    "store_error": "Kļūda: {error}",
+    "store_unavailable": "Kopienas veikals nav pieejams.",
+    "store_pick_profile": "Izvēlieties profilu, kurā sapludināt",
+    "store_name_required": "Ievadiet profila nosaukumu",
+    "store_import_failed": "Importēšana neizdevās: {error}",
+    "store_imported": "Importēts profilā {profile}",
+    "store_program_required": "Ievadiet programmas nosaukumu",
+    "store_no_appliance": "Vispirms iestatījumos norādiet ierīces zīmolu un modeli.",
+    "store_share_failed": "Kopīgošana neizdevās: {error}",
+    "store_shared": "Kopīgots kopienas veikalā - gaida pārskatīšanu.",
+    "appliance_added": "Ierīce pievienota - gaida apstiprinājumu",
+    "thanks_confirming": "Paldies par apstiprinājumu",
+    "device_approved": "Kopiena apstiprināja",
+    "rating_saved": "Kvalitātes vērtējums saglabāts",
+    "brand_added": "Zīmols pievienots - gaida apstiprinājumu",
+    "profile_added": "Profils pievienots - gaida apstiprinājumu"
   },
   "suggestion": {
     "both_agree": "WashData iesaka",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "Tiktu nosūtīts atskaites punkta paziņojums.",
     "notify_held": "Paziņojums tika aizturēts klusuma stundu dēļ.",
     "finished": "Cikls sasniedza gala stāvokli un beidzās."
+  },
+  "store": {
+    "browse": "Pārlūkot",
+    "device": "Ierīce",
+    "favorites": "Izlase",
+    "search_ph": "Meklēt pēc zīmola vai modeļa…",
+    "no_results": "Atbilstošas ierīces nav atrastas. Izmēģiniet citu meklēšanu.",
+    "n_programs": "{n} programmas",
+    "n_cycles": "{n} cikli",
+    "no_programs": "Šai ierīcei vēl nav kopīgotu programmu.",
+    "no_cycles": "Šai programmai vēl nav kopīgotu atsauces ciklu.",
+    "anon": "anonīms",
+    "uploaded_by": "Kopīgoja {name}",
+    "connected_as": "Savienots kā {name}",
+    "not_connected": "Nav savienots. Savienojiet GitHub kontu, lai kopīgotu savus ciklus.",
+    "import_new": "Jauns profils",
+    "import_merge": "Sapludināt ar esošu",
+    "merge_target": "Sapludināt ar profilu",
+    "description": "Apraksts (neobligāti)",
+    "contributed_by": "autors {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Vēl nav vērtējumu"
+  },
+  "settings": {
+    "gear": {
+      "title": "Iestatījumi"
+    }
+  },
+  "link": {
+    "manual": "Rokasgrāmata ↗",
+    "add_appliance": "Pievienojiet savu ierīci"
+  },
+  "tip": {
+    "add_brand": "Zīmola nav sarakstā? Pievienojiet to kopienas katalogam",
+    "add_appliance": "Modeļa nav sarakstā? Pievienojiet savu ierīci kopienas katalogam",
+    "add_profile": "Pievienojiet šīs ierīces profilu kopienas vietnē"
   }
 }

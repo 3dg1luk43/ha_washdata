@@ -23,7 +23,12 @@
     "using_defaults": "Duke përdorur vlerat e parazgjedhura",
     "using_tuned": "Duke përdorur peshat e rregulluara",
     "overrun_ratio": "({x}x e pritur)",
-    "underrun_ratio": "({pct}% e pritur)"
+    "underrun_ratio": "({pct}% e pritur)",
+    "awaiting_tip": "Në pritje të miratimit nga komuniteti",
+    "awaiting_n": "Në pritje të miratimit · {n} të konfirmuara",
+    "approved": "Miratuar",
+    "awaiting": "Në pritje të miratimit",
+    "imported_tip": "Importuar nga dyqani i komunitetit. Përdoret vetëm për përputhje, nuk llogaritet në statistika."
   },
   "btn": {
     "add_device": "+ Shto pajisje",
@@ -150,7 +155,16 @@
     "group_suggest": "Grupi {n}: {members}",
     "pg_apply_best": "Zbato më të mirën",
     "pg_apply_to_settings": "Ruaj te cilësimet",
-    "pg_apply_to_settings_tip": "Kopjo vlerat që redaktove këtu te cilësimet aktive të kësaj pajisjeje"
+    "pg_apply_to_settings_tip": "Kopjo vlerat që redaktove këtu te cilësimet aktive të kësaj pajisjeje",
+    "search": "Kërko",
+    "import": "Importo",
+    "disconnect": "Shkëput",
+    "connect_github": "Lidh GitHub",
+    "save_appliance": "Ruaj pajisjen",
+    "share_to_store": "Ndaj në dyqan",
+    "share": "Ndaj",
+    "confirm_appliance": "Konfirmo këtë pajisje",
+    "confirmed": "Konfirmuar"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Cilësimet e zbulimit",
     "pg_timeline": "Kronologjia e ngjarjeve",
     "pg_outcome": "Rezultati i simulimit",
-    "pg_across_cycles": "Në të gjithë ciklet tuaja"
+    "pg_across_cycles": "Në të gjithë ciklet tuaja",
+    "community_store": "Dyqani i Komunitetit",
+    "online_account": "Dyqani i Komunitetit dhe veçoritë online"
   },
   "health": {
     "fair": "Cilësi e pranueshme e profilit",
@@ -527,7 +543,15 @@
     "pg_load_run": "Ringarko këtë ekzekutim",
     "pg_match_confidence": "Besueshmëria e përputhjes",
     "pg_envelope_fit": "Përshtatja me zarfin",
-    "pg_envelope_fit_tip": "Sa mirë cikli qëndron brenda zarfit të ruajtur të fuqisë së këtij profili, një këndvështrim tjetër nga besueshmëria e përputhjes."
+    "pg_envelope_fit_tip": "Sa mirë cikli qëndron brenda zarfit të ruajtur të fuqisë së këtij profili, një këndvështrim tjetër nga besueshmëria e përputhjes.",
+    "n_imported_note": ", {n} të importuar",
+    "enable_online": "Aktivizo veçoritë online",
+    "store_brand": "Marka e pajisjes",
+    "store_model": "Modeli i pajisjes",
+    "anonymous": "Anonim",
+    "rate_quality": "Vlerëso cilësinë",
+    "rate_n": "{n} yje",
+    "approved_only": "Vetëm të miratuara"
   },
   "log": {
     "all_levels": "Të gjitha nivelet",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ Kjo fshin përgjithmonë TË GJITHA ciklet dhe profilet. Kjo nuk mund të zhbëhet.",
     "wipe_all_ok": "Fshi Gjithçka",
     "force_stop_title": "Ndalo me Forcë Ciklin",
-    "force_stop_msg": "Të ndalohet me forcë cikli aktiv tani? Cikli do të ruhet si i ndërprerë."
+    "force_stop_msg": "Të ndalohet me forcë cikli aktiv tani? Cikli do të ruhet si i ndërprerë.",
+    "store_import": "Importo ciklin referues",
+    "store_share": "Ndaj në dyqanin e komunitetit"
   },
   "msg": {
     "appliance_monitor": "Monitor i pajisjes",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Të ruhen këto {n} cilësime në këtë pajisje? {list}",
     "no_logs_match": "Asnjë regjistrim nuk përputhet me këta filtra.",
     "pg_analysis_hint2": "Zgjidhni një cikël dhe shtypni Ekzekuto për të ngarkuar analizën e përputhjes.",
-    "pg_analysis_empty2": "Shtypni Ekzekuto për të parë analizën e përputhjes."
+    "pg_analysis_empty2": "Shtypni Ekzekuto për të parë analizën e përputhjes.",
+    "imported_readonly": "Importuar nga dyqani i komunitetit. Shfaqet për referencë dhe përputhje. Nuk llogaritet në statistikat tuaja dhe nuk mund të redaktohet.",
+    "merge_no_imports": "Regjistrimet e importuara nuk mund të bashkohen në një cikël real. Çzgjidhni ato për t'i bashkuar.",
+    "store_enable_hint": "Aktivizoni veçoritë online te Cilësimet për të shfletuar dhe importuar ciklet referuese të komunitetit.",
+    "online_intro": "Ndani dhe shkarkoni cikle referuese me përdorues të tjerë të WashData. Të gjitha veçoritë online janë me zgjedhje dhe të çaktivizuara si parazgjedhje.",
+    "store_share_intro": "Ngarkoni këtë cikël referues që të tjerët me të njëjtën pajisje ta përdorin. Ai rishikohet para se të shfaqet publikisht.",
+    "online_intro_global": "Shfletoni dhe ndani regjistrime referuese me përdorues të tjerë të WashData dhe konfirmoni hyrjet e pajisjeve. Një lidhje vlen për të gjithë integrimin tuaj WashData; marka dhe modeli i pajisjes caktohen për çdo pajisje te seksioni Bazë. Të gjitha veçoritë online janë me zgjedhje dhe të çaktivizuara si parazgjedhje.",
+    "online_unavailable": "Veçoritë online nuk janë të disponueshme në këtë server.",
+    "store_picker_offline": "Aktivizoni veçoritë online te ingranazhi i cilësimeve për të zgjedhur nga katalogu i komunitetit.",
+    "pick_brand_first": "Zgjidhni së pari një markë pajisjeje.",
+    "model_not_found": "Ende nuk është në katalog.",
+    "connect_to_confirm": "Lidhuni te ingranazhi i cilësimeve për të konfirmuar ose vlerësuar."
   },
   "phase_desc": {
     "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -828,7 +865,9 @@
     "person": "shto një person…",
     "phase_name": "p.sh. Paralandje",
     "profile_name": "p.sh. Pambuk 40°C",
-    "maintenance_notes": "p.sh. u ndërrua filtri, u pastrua guarnicioni i derës"
+    "maintenance_notes": "p.sh. u ndërrua filtri, u pastrua guarnicioni i derës",
+    "store_brand": "p.sh. Bosch",
+    "store_model": "p.sh. WAT28401"
   },
   "pref": {
     "date_absolute": "Absolute (p.sh. 14:32 më 2 Korrik)",
@@ -1236,6 +1275,14 @@
     "energy_weight": {
       "label": "Pesha e energjisë",
       "doc": "Sa fort preferohet një program, konsumi tipik i energjisë i të cilit përputhet me këtë cikël."
+    },
+    "store_brand": {
+      "label": "Marka e Pajisjes",
+      "doc": "Opsionale. Marka e pajisjes, e zgjedhur nga katalogu i komunitetit. Përdoret për të gjetur dhe ndarë regjistrime referuese përkatëse. Lëreni bosh nëse nuk përdorni veçoritë online."
+    },
+    "store_model": {
+      "label": "Modeli i Pajisjes",
+      "doc": "Opsionale. Modeli i pajisjes, i zgjedhur nga katalogu i komunitetit sapo të caktohet një markë. Nëse modeli juaj nuk është në listë, mund ta shtoni në katalog."
     }
   },
   "setting_group": {
@@ -1313,6 +1360,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Orët e qeta dhe piketat"
+    },
+    "device_info": {
+      "label": "Informacioni i pajisjes"
+    },
+    "basic_configuration": {
+      "label": "Konfigurimi bazë"
     }
   },
   "status": {
@@ -1336,7 +1389,8 @@
     "reverting": "Po kthehet…",
     "trimming": "Po pritet…",
     "splitting": "Po ndahet…",
-    "deleting": "Po fshihet…"
+    "deleting": "Po fshihet…",
+    "imported": "Importuar"
   },
   "tab": {
     "advanced": "I avancuar",
@@ -1353,7 +1407,8 @@
     "subtab_phase_catalog": "Katalog fazash",
     "subtab_profiles": "Profile",
     "maintenance": "Mirëmbajtja",
-    "playground": "Zona e provave"
+    "playground": "Zona e provave",
+    "store": "Dyqani"
   },
   "tag": {
     "early_end": "Fund i hershëm",
@@ -1433,7 +1488,27 @@
     "processed": "U përpunuan {bits}",
     "processed_cycles": "{n} cikël(e)",
     "processed_suggestions": "{n} sugjerim(e)",
-    "processed_models": "{n} model(e) të promovuar"
+    "processed_models": "{n} model(e) të promovuar",
+    "store_search_failed": "Kërkimi dështoi: {error}",
+    "store_connect_failed": "Lidhja dështoi: {error}",
+    "store_connected": "U lidh me dyqanin e komunitetit",
+    "store_disconnected": "U shkëput nga dyqani i komunitetit",
+    "store_error": "Gabim: {error}",
+    "store_unavailable": "Dyqani i komunitetit nuk është i disponueshëm.",
+    "store_pick_profile": "Zgjidhni një profil për t'u bashkuar",
+    "store_name_required": "Shkruani një emër profili",
+    "store_import_failed": "Importimi dështoi: {error}",
+    "store_imported": "Importuar në {profile}",
+    "store_program_required": "Shkruani një emër programi",
+    "store_no_appliance": "Vendosni së pari markën dhe modelin e pajisjes suaj te Cilësimet.",
+    "store_share_failed": "Ndarja dështoi: {error}",
+    "store_shared": "U nda në dyqanin e komunitetit, në pritje të rishikimit.",
+    "appliance_added": "Pajisja u shtua, në pritje të miratimit",
+    "thanks_confirming": "Faleminderit që konfirmuat",
+    "device_approved": "Miratuar nga komuniteti",
+    "rating_saved": "Vlerësimi i cilësisë u ruajt",
+    "brand_added": "Marka u shtua, në pritje të miratimit",
+    "profile_added": "Profili u shtua, në pritje të miratimit"
   },
   "suggestion": {
     "both_agree": "WashData rekomandon",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "Do të dërgohej një njoftim për një moment kyç.",
     "notify_held": "Një njoftim u mbajt për shkak të orëve të qeta.",
     "finished": "Cikli arriti gjendjen përfundimtare dhe përfundoi."
+  },
+  "store": {
+    "browse": "Shfleto",
+    "device": "Pajisja",
+    "favorites": "Të preferuarat",
+    "search_ph": "Kërko sipas markës ose modelit…",
+    "no_results": "Nuk u gjetën pajisje përkatëse. Provoni një kërkim tjetër.",
+    "n_programs": "{n} programe",
+    "n_cycles": "{n} cikle",
+    "no_programs": "Ende nuk ka programe të ndara për këtë pajisje.",
+    "no_cycles": "Ende nuk janë ndarë cikle referuese për këtë program.",
+    "anon": "anonim",
+    "uploaded_by": "Ndarë nga {name}",
+    "connected_as": "Lidhur si {name}",
+    "not_connected": "I palidhur. Lidhni një llogari GitHub për të ndarë ciklet tuaja.",
+    "import_new": "Profil i ri",
+    "import_merge": "Bashko me ekzistuesin",
+    "merge_target": "Bashko në profil",
+    "description": "Përshkrimi (opsionale)",
+    "contributed_by": "nga {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Ende pa vlerësime"
+  },
+  "settings": {
+    "gear": {
+      "title": "Cilësimet"
+    }
+  },
+  "link": {
+    "manual": "Manuali ↗",
+    "add_appliance": "Shtoni pajisjen tuaj"
+  },
+  "tip": {
+    "add_brand": "Marka nuk është në listë? Shtojeni në katalogun e komunitetit",
+    "add_appliance": "Modeli nuk është në listë? Shtoni pajisjen tuaj në katalogun e komunitetit",
+    "add_profile": "Shtoni një profil për këtë pajisje në sitin e komunitetit"
   }
 }

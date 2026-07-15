@@ -23,7 +23,12 @@
     "using_defaults": "出荷時のデフォルトを使用する",
     "using_tuned": "調整された重みの使用",
     "overrun_ratio": "（予想の{x}倍）",
-    "underrun_ratio": "（予想の{pct}%）"
+    "underrun_ratio": "（予想の{pct}%）",
+    "awaiting_tip": "コミュニティの承認待ち",
+    "awaiting_n": "承認待ち · {n} 件確認済み",
+    "approved": "承認済み",
+    "awaiting": "承認待ち",
+    "imported_tip": "コミュニティストアからインポートしました。マッチングにのみ使用され、統計には含まれません。"
   },
   "btn": {
     "add_device": "+ デバイスを追加",
@@ -150,7 +155,16 @@
     "group_suggest": "グループ {n}：{members}",
     "pg_apply_best": "最適値を適用",
     "pg_apply_to_settings": "設定に保存",
-    "pg_apply_to_settings_tip": "ここで編集した値をこのデバイスの現在有効な設定にコピーします"
+    "pg_apply_to_settings_tip": "ここで編集した値をこのデバイスの現在有効な設定にコピーします",
+    "search": "検索",
+    "import": "インポート",
+    "disconnect": "切断",
+    "connect_github": "GitHub に接続",
+    "save_appliance": "家電を保存",
+    "share_to_store": "ストアに共有",
+    "share": "共有",
+    "confirm_appliance": "この家電を確認",
+    "confirmed": "確認済み"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "検出設定",
     "pg_timeline": "イベントタイムライン",
     "pg_outcome": "シミュレーション結果",
-    "pg_across_cycles": "全サイクルにわたって"
+    "pg_across_cycles": "全サイクルにわたって",
+    "community_store": "コミュニティストア",
+    "online_account": "コミュニティストアとオンライン機能"
   },
   "health": {
     "fair": "プロファイル品質: 普通",
@@ -527,7 +543,15 @@
     "pg_load_run": "この実行を再読み込み",
     "pg_match_confidence": "マッチ信頼度",
     "pg_envelope_fit": "エンベロープ適合度",
-    "pg_envelope_fit_tip": "このプロフィールの保存された電力エンベロープ内にサイクルがどれだけ収まっているか。マッチ信頼度とは異なる視点です。"
+    "pg_envelope_fit_tip": "このプロフィールの保存された電力エンベロープ内にサイクルがどれだけ収まっているか。マッチ信頼度とは異なる視点です。",
+    "n_imported_note": "、{n} 件インポート済み",
+    "enable_online": "オンライン機能を有効化",
+    "store_brand": "家電ブランド",
+    "store_model": "家電モデル",
+    "anonymous": "匿名",
+    "rate_quality": "品質を評価",
+    "rate_n": "星{n}つ",
+    "approved_only": "承認済みのみ"
   },
   "log": {
     "all_levels": "すべてのレベル",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ すべてのサイクルとプロファイルを完全に削除します。この操作は元に戻せません。",
     "wipe_all_ok": "すべて消去",
     "force_stop_title": "サイクルを強制停止",
-    "force_stop_msg": "アクティブなサイクルを今すぐ強制停止しますか？サイクルは中断として保存されます。"
+    "force_stop_msg": "アクティブなサイクルを今すぐ強制停止しますか？サイクルは中断として保存されます。",
+    "store_import": "基準サイクルをインポート",
+    "store_share": "コミュニティストアに共有"
   },
   "msg": {
     "appliance_monitor": "アプライアンスモニター",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "これら {n} 件の設定をこのデバイスに保存しますか？ {list}",
     "no_logs_match": "これらのフィルターに一致するログレコードはありません。",
     "pg_analysis_hint2": "サイクルを選択して「実行」を押すと、マッチ分析が読み込まれます。",
-    "pg_analysis_empty2": "「実行」を押すとマッチ分析が表示されます。"
+    "pg_analysis_empty2": "「実行」を押すとマッチ分析が表示されます。",
+    "imported_readonly": "コミュニティストアからインポートしました。参照とマッチングのために表示されます。統計には含まれず、編集できません。",
+    "merge_no_imports": "インポートした録音は実際のサイクルに統合できません。統合するには選択を解除してください。",
+    "store_enable_hint": "設定でオンライン機能を有効にすると、コミュニティの基準サイクルを閲覧・インポートできます。",
+    "online_intro": "他の WashData ユーザーと基準サイクルを共有・ダウンロードできます。すべてのオンライン機能はオプトインで、デフォルトではオフです。",
+    "store_share_intro": "この基準サイクルをアップロードすると、同じ家電を持つ他のユーザーが利用できます。公開前に審査されます。",
+    "online_intro_global": "他の WashData ユーザーと基準録音を閲覧・共有し、家電エントリを確認できます。1 つの接続が WashData 統合全体に適用されます。家電のブランドとモデルは「基本設定」でデバイスごとに設定します。すべてのオンライン機能はオプトインで、デフォルトではオフです。",
+    "online_unavailable": "このサーバーではオンライン機能を利用できません。",
+    "store_picker_offline": "設定（歯車アイコン）でオンライン機能を有効にすると、コミュニティカタログから選択できます。",
+    "pick_brand_first": "先に家電ブランドを選択してください。",
+    "model_not_found": "まだカタログにありません。",
+    "connect_to_confirm": "確認や評価を行うには、設定（歯車アイコン）で接続してください。"
   },
   "pg_desc": {
     "abrupt_drop_watts": "急激な低下は即時終了として扱う",
@@ -845,7 +882,9 @@
     "person": "人を追加…",
     "phase_name": "例：予洗い",
     "profile_name": "例：綿 40°C",
-    "maintenance_notes": "例: フィルター交換、ドアパッキンの清掃"
+    "maintenance_notes": "例: フィルター交換、ドアパッキンの清掃",
+    "store_brand": "例: Bosch",
+    "store_model": "例: WAT28401"
   },
   "pref": {
     "date_absolute": "絶対 (例: 7 月 2 日 14:32)",
@@ -1253,6 +1292,14 @@
     "energy_weight": {
       "label": "エネルギーの重み",
       "doc": "一般的な消費電力量がこのサイクルと一致するプログラムを、どれだけ優先するかを決めます。"
+    },
+    "store_brand": {
+      "label": "家電ブランド",
+      "doc": "任意。コミュニティカタログから選択した家電ブランドです。一致する基準録音の検索と共有に使用されます。オンライン機能を使用しない場合は空欄のままにしてください。"
+    },
+    "store_model": {
+      "label": "家電モデル",
+      "doc": "任意。ブランドを設定すると、コミュニティカタログから選択できる家電モデルです。お使いのモデルが一覧にない場合は、カタログに追加できます。"
     }
   },
   "setting_group": {
@@ -1330,6 +1377,12 @@
     },
     "quiet_hours_milestones": {
       "label": "サイレント時間とマイルストーン"
+    },
+    "device_info": {
+      "label": "デバイス情報"
+    },
+    "basic_configuration": {
+      "label": "基本設定"
     }
   },
   "status": {
@@ -1353,7 +1406,8 @@
     "reverting": "元に戻しています…",
     "trimming": "トリム中…",
     "splitting": "分割中…",
-    "deleting": "削除中…"
+    "deleting": "削除中…",
+    "imported": "インポート済み"
   },
   "tab": {
     "advanced": "高度な",
@@ -1370,7 +1424,8 @@
     "subtab_phase_catalog": "フェーズカタログ",
     "subtab_profiles": "プロフィール",
     "maintenance": "メンテナンス",
-    "playground": "プレイグラウンド"
+    "playground": "プレイグラウンド",
+    "store": "ストア"
   },
   "tag": {
     "early_end": "早期終了",
@@ -1450,7 +1505,27 @@
     "processed": "{bits} を処理しました",
     "processed_cycles": "{n} 件のサイクル",
     "processed_suggestions": "{n} 件の提案",
-    "processed_models": "{n} 件のモデル昇格"
+    "processed_models": "{n} 件のモデル昇格",
+    "store_search_failed": "検索に失敗しました: {error}",
+    "store_connect_failed": "接続に失敗しました: {error}",
+    "store_connected": "コミュニティストアに接続しました",
+    "store_disconnected": "コミュニティストアから切断しました",
+    "store_error": "エラー: {error}",
+    "store_unavailable": "コミュニティストアは利用できません。",
+    "store_pick_profile": "統合先のプロファイルを選択してください",
+    "store_name_required": "プロファイル名を入力してください",
+    "store_import_failed": "インポートに失敗しました: {error}",
+    "store_imported": "{profile} にインポートしました",
+    "store_program_required": "プログラム名を入力してください",
+    "store_no_appliance": "先に設定で家電のブランドとモデルを設定してください。",
+    "store_share_failed": "共有に失敗しました: {error}",
+    "store_shared": "コミュニティストアに共有しました（審査待ち）",
+    "appliance_added": "家電を追加しました（承認待ち）",
+    "thanks_confirming": "確認していただきありがとうございます",
+    "device_approved": "コミュニティによって承認されました",
+    "rating_saved": "品質評価を保存しました",
+    "brand_added": "ブランドを追加しました（承認待ち）",
+    "profile_added": "プロファイルを追加しました（承認待ち）"
   },
   "suggestion": {
     "both_agree": "WashDataの推奨",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "マイルストーン通知が送信されます。",
     "notify_held": "サイレント時間帯のため、通知が保留されました。",
     "finished": "サイクルが終了状態に達して終了しました。"
+  },
+  "store": {
+    "browse": "閲覧",
+    "device": "デバイス",
+    "favorites": "お気に入り",
+    "search_ph": "ブランドまたはモデルで検索…",
+    "no_results": "一致する家電が見つかりません。別の検索をお試しください。",
+    "n_programs": "{n} 個のプログラム",
+    "n_cycles": "{n} 個のサイクル",
+    "no_programs": "この家電にはまだ共有されたプログラムがありません。",
+    "no_cycles": "このプログラムにはまだ共有された基準サイクルがありません。",
+    "anon": "匿名",
+    "uploaded_by": "{name} が共有",
+    "connected_as": "{name} として接続中",
+    "not_connected": "未接続です。自分のサイクルを共有するには GitHub アカウントを接続してください。",
+    "import_new": "新しいプロファイル",
+    "import_merge": "既存に統合",
+    "merge_target": "統合先プロファイル",
+    "description": "説明（任意）",
+    "contributed_by": "提供: {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "まだ評価がありません"
+  },
+  "settings": {
+    "gear": {
+      "title": "設定"
+    }
+  },
+  "link": {
+    "manual": "マニュアル ↗",
+    "add_appliance": "家電を追加"
+  },
+  "tip": {
+    "add_brand": "ブランドが一覧にありませんか？コミュニティカタログに追加してください",
+    "add_appliance": "モデルが一覧にありませんか？お使いの家電をコミュニティカタログに追加してください",
+    "add_profile": "コミュニティサイトでこの家電のプロファイルを追加してください"
   }
 }

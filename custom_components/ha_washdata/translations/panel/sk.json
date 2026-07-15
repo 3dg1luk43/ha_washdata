@@ -23,7 +23,12 @@
     "using_defaults": "Používa predvolené nastavenia",
     "using_tuned": "Používa vyladené váhy",
     "overrun_ratio": "({x}x očakávaného)",
-    "underrun_ratio": "({pct}% očakávaného)"
+    "underrun_ratio": "({pct}% očakávaného)",
+    "awaiting_tip": "Čaká na schválenie komunitou",
+    "awaiting_n": "Čaká na schválenie · potvrdené {n}",
+    "approved": "Schválené",
+    "awaiting": "Čaká na schválenie",
+    "imported_tip": "Importované z komunitného obchodu. Používa sa iba na porovnávanie, nezapočítava sa do štatistík."
   },
   "btn": {
     "add_device": "+ Pridať zariadenie",
@@ -150,7 +155,16 @@
     "group_suggest": "Skupina {n}: {members}",
     "pg_apply_best": "Použiť najlepšie",
     "pg_apply_to_settings": "Uložiť do nastavení",
-    "pg_apply_to_settings_tip": "Skopírovať hodnoty, ktoré ste tu upravili, do aktívnych nastavení tohto zariadenia"
+    "pg_apply_to_settings_tip": "Skopírovať hodnoty, ktoré ste tu upravili, do aktívnych nastavení tohto zariadenia",
+    "search": "Hľadať",
+    "import": "Importovať",
+    "disconnect": "Odpojiť",
+    "connect_github": "Pripojiť GitHub",
+    "save_appliance": "Uložiť spotrebič",
+    "share_to_store": "Zdieľať do obchodu",
+    "share": "Zdieľať",
+    "confirm_appliance": "Potvrdiť tento spotrebič",
+    "confirmed": "Potvrdené"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Nastavenia detekcie",
     "pg_timeline": "Časová os udalostí",
     "pg_outcome": "Výsledok simulácie",
-    "pg_across_cycles": "Naprieč vašimi cyklami"
+    "pg_across_cycles": "Naprieč vašimi cyklami",
+    "community_store": "Komunitný obchod",
+    "online_account": "Komunitný obchod a online funkcie"
   },
   "health": {
     "fair": "Prijateľná kvalita profilu",
@@ -527,7 +543,15 @@
     "pg_load_run": "Znovu načítať toto spustenie",
     "pg_match_confidence": "Spoľahlivosť zhody",
     "pg_envelope_fit": "Súlad s obálkou",
-    "pg_envelope_fit_tip": "Ako presne cyklus zapadá do uloženej výkonovej obálky tohto profilu, iný pohľad než spoľahlivosť zhody."
+    "pg_envelope_fit_tip": "Ako presne cyklus zapadá do uloženej výkonovej obálky tohto profilu, iný pohľad než spoľahlivosť zhody.",
+    "n_imported_note": ", {n} importované",
+    "enable_online": "Povoliť online funkcie",
+    "store_brand": "Značka spotrebiča",
+    "store_model": "Model spotrebiča",
+    "anonymous": "Anonymný",
+    "rate_quality": "Ohodnotiť kvalitu",
+    "rate_n": "{n} hviezdičiek",
+    "approved_only": "Iba schválené"
   },
   "log": {
     "all_levels": "Všetky úrovne",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ Týmto trvalo odstránite VŠETKY cykly a profily. Túto akciu nie je možné vrátiť späť.",
     "wipe_all_ok": "Vymazať všetko",
     "force_stop_title": "Vynútiť zastavenie cyklu",
-    "force_stop_msg": "Vynútiť teraz zastavenie aktívneho cyklu? Cyklus sa uloží ako prerušený."
+    "force_stop_msg": "Vynútiť teraz zastavenie aktívneho cyklu? Cyklus sa uloží ako prerušený.",
+    "store_import": "Importovať referenčný cyklus",
+    "store_share": "Zdieľať do komunitného obchodu"
   },
   "msg": {
     "appliance_monitor": "Monitor spotrebiča",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Uložiť týchto {n} nastavení do tohto zariadenia? {list}",
     "no_logs_match": "Týmto filtrom nezodpovedajú žiadne záznamy protokolu.",
     "pg_analysis_hint2": "Vyberte cyklus a stlačte Spustiť na načítanie analýzy zhody.",
-    "pg_analysis_empty2": "Stlačte Spustiť na zobrazenie analýzy zhody."
+    "pg_analysis_empty2": "Stlačte Spustiť na zobrazenie analýzy zhody.",
+    "imported_readonly": "Importované z komunitného obchodu. Zobrazuje sa pre referenciu a porovnávanie. Nezapočítava sa do vašich štatistík a nedá sa upravovať.",
+    "merge_no_imports": "Importované záznamy nemožno zlúčiť so skutočným cyklom. Zrušte ich výber, aby ste ich mohli zlúčiť.",
+    "store_enable_hint": "Povoľte online funkcie v Nastaveniach, aby ste mohli prehliadať a importovať referenčné cykly komunity.",
+    "online_intro": "Zdieľajte a sťahujte referenčné cykly s ostatnými používateľmi WashData. Všetky online funkcie sú dobrovoľné a predvolene vypnuté.",
+    "store_share_intro": "Nahrajte tento referenčný cyklus, aby ho mohli používať ostatní s rovnakým spotrebičom. Pred zverejnením bude skontrolovaný.",
+    "online_intro_global": "Prehliadajte a zdieľajte referenčné záznamy s ostatnými používateľmi WashData a potvrdzujte záznamy spotrebičov. Jedno pripojenie platí pre celú vašu integráciu WashData; značka a model spotrebiča sa nastavujú pre každé zariadenie v sekcii Základné. Všetky online funkcie sú dobrovoľné a predvolene vypnuté.",
+    "online_unavailable": "Online funkcie nie sú na tomto serveri dostupné.",
+    "store_picker_offline": "Povoľte online funkcie v ozubenom koliesku nastavení, aby ste mohli vyberať z katalógu komunity.",
+    "pick_brand_first": "Najprv vyberte značku spotrebiča.",
+    "model_not_found": "Zatiaľ nie je v katalógu.",
+    "connect_to_confirm": "Pripojte sa v ozubenom koliesku nastavení na potvrdenie alebo hodnotenie."
   },
   "phase_desc": {
     "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",
@@ -828,7 +865,9 @@
     "person": "pridať osobu…",
     "phase_name": "napr. Predpierka",
     "profile_name": "napr. Bavlna 40°C",
-    "maintenance_notes": "napr. vymenený filter, vyčistené tesnenie dvierok"
+    "maintenance_notes": "napr. vymenený filter, vyčistené tesnenie dvierok",
+    "store_brand": "napr. Bosch",
+    "store_model": "napr. WAT28401"
   },
   "pref": {
     "date_absolute": "Absolútny (napr. 14:32 dňa 2. júla)",
@@ -1236,6 +1275,14 @@
     "energy_weight": {
       "label": "Váha spotreby energie",
       "doc": "Ako silno je uprednostnený program, ktorého typická spotreba energie zodpovedá tomuto cyklu."
+    },
+    "store_brand": {
+      "label": "Značka spotrebiča",
+      "doc": "Voliteľné. Značka spotrebiča vybraná z katalógu komunity. Používa sa na vyhľadávanie a zdieľanie zodpovedajúcich referenčných záznamov. Ponechajte prázdne, ak nepoužívate online funkcie."
+    },
+    "store_model": {
+      "label": "Model spotrebiča",
+      "doc": "Voliteľné. Model spotrebiča vybraný z katalógu komunity po nastavení značky. Ak váš model nie je uvedený, môžete ho pridať do katalógu."
     }
   },
   "setting_group": {
@@ -1313,6 +1360,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Tiché hodiny a míľniky"
+    },
+    "device_info": {
+      "label": "Informácie o zariadení"
+    },
+    "basic_configuration": {
+      "label": "Základná konfigurácia"
     }
   },
   "status": {
@@ -1336,7 +1389,8 @@
     "reverting": "Vracanie späť…",
     "trimming": "Orezávanie…",
     "splitting": "Rozdeľovanie…",
-    "deleting": "Odstraňovanie…"
+    "deleting": "Odstraňovanie…",
+    "imported": "Importované"
   },
   "suggestion": {
     "both_agree": "WashData odporúča",
@@ -1449,7 +1503,8 @@
     "subtab_phase_catalog": "Katalóg fáz",
     "subtab_profiles": "Profily",
     "maintenance": "Údržba",
-    "playground": "Testovacie prostredie"
+    "playground": "Testovacie prostredie",
+    "store": "Obchod"
   },
   "tag": {
     "early_end": "Predčasné ukončenie",
@@ -1529,7 +1584,27 @@
     "processed": "Spracované {bits}",
     "processed_cycles": "{n} cyklov",
     "processed_suggestions": "{n} návrhov",
-    "processed_models": "{n} aktivovaných modelov"
+    "processed_models": "{n} aktivovaných modelov",
+    "store_search_failed": "Hľadanie zlyhalo: {error}",
+    "store_connect_failed": "Pripojenie zlyhalo: {error}",
+    "store_connected": "Pripojené ku komunitnému obchodu",
+    "store_disconnected": "Odpojené od komunitného obchodu",
+    "store_error": "Chyba: {error}",
+    "store_unavailable": "Komunitný obchod nie je dostupný.",
+    "store_pick_profile": "Vyberte profil na zlúčenie",
+    "store_name_required": "Zadajte názov profilu",
+    "store_import_failed": "Import zlyhal: {error}",
+    "store_imported": "Importované do {profile}",
+    "store_program_required": "Zadajte názov programu",
+    "store_no_appliance": "Najprv nastavte značku a model spotrebiča v Nastaveniach.",
+    "store_share_failed": "Zdieľanie zlyhalo: {error}",
+    "store_shared": "Zdieľané do komunitného obchodu, čaká na kontrolu.",
+    "appliance_added": "Spotrebič pridaný, čaká na schválenie",
+    "thanks_confirming": "Ďakujeme za potvrdenie",
+    "device_approved": "Schválené komunitou",
+    "rating_saved": "Hodnotenie kvality uložené",
+    "brand_added": "Značka pridaná, čaká na schválenie",
+    "profile_added": "Profil pridaný, čaká na schválenie"
   },
   "trend": {
     "down": "Klesajúci trend",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "Odoslalo by sa oznámenie o míľniku.",
     "notify_held": "Oznámenie bolo pozdržané pre tiché hodiny.",
     "finished": "Cyklus dosiahol koncový stav a skončil."
+  },
+  "store": {
+    "browse": "Prehliadať",
+    "device": "Zariadenie",
+    "favorites": "Obľúbené",
+    "search_ph": "Hľadať podľa značky alebo modelu…",
+    "no_results": "Nenašli sa žiadne zodpovedajúce spotrebiče. Skúste iné vyhľadávanie.",
+    "n_programs": "{n} programov",
+    "n_cycles": "{n} cyklov",
+    "no_programs": "Pre tento spotrebič zatiaľ nie sú zdieľané žiadne programy.",
+    "no_cycles": "Pre tento program zatiaľ nie sú zdieľané žiadne referenčné cykly.",
+    "anon": "anonymný",
+    "uploaded_by": "Zdieľal {name}",
+    "connected_as": "Pripojené ako {name}",
+    "not_connected": "Nepripojené. Pripojte účet GitHub na zdieľanie vlastných cyklov.",
+    "import_new": "Nový profil",
+    "import_merge": "Zlúčiť s existujúcim",
+    "merge_target": "Zlúčiť do profilu",
+    "description": "Popis (voliteľné)",
+    "contributed_by": "od {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Zatiaľ žiadne hodnotenia"
+  },
+  "settings": {
+    "gear": {
+      "title": "Nastavenia"
+    }
+  },
+  "link": {
+    "manual": "Príručka ↗",
+    "add_appliance": "Pridajte svoj spotrebič"
+  },
+  "tip": {
+    "add_brand": "Značka nie je uvedená? Pridajte ju do katalógu komunity",
+    "add_appliance": "Model nie je uvedený? Pridajte svoj spotrebič do katalógu komunity",
+    "add_profile": "Pridajte profil pre tento spotrebič na komunitnom webe"
   }
 }

@@ -23,7 +23,12 @@
     "using_defaults": "Använder standardinställningar",
     "using_tuned": "Använder finjusterade vikter",
     "overrun_ratio": "({x}x förväntat)",
-    "underrun_ratio": "({pct}% av förväntat)"
+    "underrun_ratio": "({pct}% av förväntat)",
+    "awaiting_tip": "Väntar på godkännande från gemenskapen",
+    "awaiting_n": "Väntar på godkännande · {n} bekräftade",
+    "approved": "Godkänd",
+    "awaiting": "Väntar på godkännande",
+    "imported_tip": "Importerad från gemenskapsbutiken. Används endast för matchning, räknas inte in i statistiken."
   },
   "btn": {
     "add_device": "+ Lägg till enhet",
@@ -150,7 +155,16 @@
     "group_suggest": "Grupp {n}: {members}",
     "pg_apply_best": "Använd bästa",
     "pg_apply_to_settings": "Spara till inställningar",
-    "pg_apply_to_settings_tip": "Kopiera värdena du redigerade här till den här enhetens aktiva inställningar"
+    "pg_apply_to_settings_tip": "Kopiera värdena du redigerade här till den här enhetens aktiva inställningar",
+    "search": "Sök",
+    "import": "Importera",
+    "disconnect": "Koppla från",
+    "connect_github": "Anslut GitHub",
+    "save_appliance": "Spara apparat",
+    "share_to_store": "Dela till butiken",
+    "share": "Dela",
+    "confirm_appliance": "Bekräfta den här apparaten",
+    "confirmed": "Bekräftad"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Detekteringsinställningar",
     "pg_timeline": "Händelsetidslinje",
     "pg_outcome": "Simuleringsresultat",
-    "pg_across_cycles": "Över dina cykler"
+    "pg_across_cycles": "Över dina cykler",
+    "community_store": "Gemenskapsbutik",
+    "online_account": "Gemenskapsbutik och onlinefunktioner"
   },
   "health": {
     "fair": "Acceptabel profilkvalitet",
@@ -527,7 +543,15 @@
     "pg_load_run": "Ladda om den här körningen",
     "pg_match_confidence": "Matchningssäkerhet",
     "pg_envelope_fit": "Anpassning till envelopp",
-    "pg_envelope_fit_tip": "Hur väl cykeln håller sig inom den här profilens sparade effektenvelopp, ett annat perspektiv än matchningssäkerhet."
+    "pg_envelope_fit_tip": "Hur väl cykeln håller sig inom den här profilens sparade effektenvelopp, ett annat perspektiv än matchningssäkerhet.",
+    "n_imported_note": ", {n} importerade",
+    "enable_online": "Aktivera onlinefunktioner",
+    "store_brand": "Apparatens märke",
+    "store_model": "Apparatens modell",
+    "anonymous": "Anonym",
+    "rate_quality": "Betygsätt kvalitet",
+    "rate_n": "{n} stjärnor",
+    "approved_only": "Endast godkända"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ Detta raderar permanent ALLA cykler och profiler. Detta kan inte ångras.",
     "wipe_all_ok": "Radera allt",
     "force_stop_title": "Tvångsstoppa cykel",
-    "force_stop_msg": "Tvångsstoppa den aktiva cykeln nu? Cykeln sparas som avbruten."
+    "force_stop_msg": "Tvångsstoppa den aktiva cykeln nu? Cykeln sparas som avbruten.",
+    "store_import": "Importera referenscykel",
+    "store_share": "Dela till gemenskapsbutiken"
   },
   "msg": {
     "appliance_monitor": "Apparatövervakning",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Spara dessa {n} inställning(ar) till den här enheten? {list}",
     "no_logs_match": "Inga loggposter matchar dessa filter.",
     "pg_analysis_hint2": "Välj en cykel och tryck på Kör för att läsa in matchningsanalysen.",
-    "pg_analysis_empty2": "Tryck på Kör för att se matchningsanalysen."
+    "pg_analysis_empty2": "Tryck på Kör för att se matchningsanalysen.",
+    "imported_readonly": "Importerad från gemenskapsbutiken. Visas för referens och matchning. Räknas inte in i din statistik och kan inte redigeras.",
+    "merge_no_imports": "Importerade inspelningar kan inte slås samman med en riktig cykel. Avmarkera dem för att slå samman.",
+    "store_enable_hint": "Aktivera onlinefunktioner i Inställningar för att bläddra bland och importera gemenskapens referenscykler.",
+    "online_intro": "Dela referenscykler med andra WashData-användare och ladda ner dem. Alla onlinefunktioner är frivilliga och avstängda som standard.",
+    "store_share_intro": "Ladda upp den här referenscykeln så att andra med samma apparat kan använda den. Den granskas innan den visas offentligt.",
+    "online_intro_global": "Bläddra bland och dela referensinspelningar med andra WashData-användare, och bekräfta apparatposter. En anslutning gäller för hela din WashData-integration; apparatens märke och modell anges per enhet under Grundläggande. Alla onlinefunktioner är frivilliga och avstängda som standard.",
+    "online_unavailable": "Onlinefunktioner är inte tillgängliga på den här servern.",
+    "store_picker_offline": "Aktivera onlinefunktioner i inställningskugghjulet för att välja från gemenskapskatalogen.",
+    "pick_brand_first": "Välj ett apparatmärke först.",
+    "model_not_found": "Inte i katalogen ännu.",
+    "connect_to_confirm": "Anslut i inställningskugghjulet för att bekräfta eller betygsätta."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plötsligt fall som tolkas som omedelbart slut",
@@ -845,7 +882,9 @@
     "person": "lägg till en person…",
     "phase_name": "t.ex. Förtvättning",
     "profile_name": "t.ex. Bomull 40°C",
-    "maintenance_notes": "t.ex. bytte filter, rengjorde dörrtätning"
+    "maintenance_notes": "t.ex. bytte filter, rengjorde dörrtätning",
+    "store_brand": "t.ex. Bosch",
+    "store_model": "t.ex. WAT28401"
   },
   "pref": {
     "date_absolute": "Absolut (t.ex. 14:32 den 2 jul)",
@@ -1253,6 +1292,14 @@
     "energy_weight": {
       "label": "Vikt på energi",
       "doc": "Hur starkt ett program vars typiska energiförbrukning stämmer med den här cykeln föredras."
+    },
+    "store_brand": {
+      "label": "Apparatens märke",
+      "doc": "Valfritt. Apparatens märke, valt från gemenskapskatalogen. Används för att hitta och dela matchande referensinspelningar. Lämna tomt om du inte använder onlinefunktioner."
+    },
+    "store_model": {
+      "label": "Apparatens modell",
+      "doc": "Valfritt. Apparatens modell, vald från gemenskapskatalogen när ett märke har angetts. Om din modell inte finns med kan du lägga till den i katalogen."
     }
   },
   "setting_group": {
@@ -1330,6 +1377,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Tystnadstimmar och milstolpar"
+    },
+    "device_info": {
+      "label": "Enhetsinformation"
+    },
+    "basic_configuration": {
+      "label": "Grundkonfiguration"
     }
   },
   "status": {
@@ -1353,7 +1406,8 @@
     "reverting": "Återgår…",
     "trimming": "Beskär…",
     "splitting": "Delar upp…",
-    "deleting": "Raderar…"
+    "deleting": "Raderar…",
+    "imported": "Importerad"
   },
   "suggestion": {
     "both_agree": "WashData rekommenderar",
@@ -1466,7 +1520,8 @@
     "subtab_phase_catalog": "Faskatalog",
     "subtab_profiles": "Profiler",
     "maintenance": "Underhåll",
-    "playground": "Testyta"
+    "playground": "Testyta",
+    "store": "Butik"
   },
   "tag": {
     "early_end": "Tidigt slut",
@@ -1546,7 +1601,27 @@
     "processed": "Bearbetat: {bits}",
     "processed_cycles": "{n} cykler",
     "processed_suggestions": "{n} förslag",
-    "processed_models": "{n} modeller aktiverade"
+    "processed_models": "{n} modeller aktiverade",
+    "store_search_failed": "Sökningen misslyckades: {error}",
+    "store_connect_failed": "Anslutningen misslyckades: {error}",
+    "store_connected": "Ansluten till gemenskapsbutiken",
+    "store_disconnected": "Frånkopplad från gemenskapsbutiken",
+    "store_error": "Fel: {error}",
+    "store_unavailable": "Gemenskapsbutiken är inte tillgänglig.",
+    "store_pick_profile": "Välj en profil att slå samman med",
+    "store_name_required": "Ange ett profilnamn",
+    "store_import_failed": "Importen misslyckades: {error}",
+    "store_imported": "Importerad till {profile}",
+    "store_program_required": "Ange ett programnamn",
+    "store_no_appliance": "Ange apparatens märke och modell i Inställningar först.",
+    "store_share_failed": "Delningen misslyckades: {error}",
+    "store_shared": "Delad till gemenskapsbutiken, väntar på granskning.",
+    "appliance_added": "Apparat tillagd, väntar på godkännande",
+    "thanks_confirming": "Tack för bekräftelsen",
+    "device_approved": "Godkänd av gemenskapen",
+    "rating_saved": "Kvalitetsbetyg sparat",
+    "brand_added": "Märke tillagt, väntar på godkännande",
+    "profile_added": "Profil tillagd, väntar på godkännande"
   },
   "trend": {
     "down": "Nedåtgående trend",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "En milstolpsavisering skulle skickas.",
     "notify_held": "En avisering hölls tillbaka på grund av tysta timmar.",
     "finished": "Cykeln nådde ett sluttillstånd och avslutades."
+  },
+  "store": {
+    "browse": "Bläddra",
+    "device": "Enhet",
+    "favorites": "Favoriter",
+    "search_ph": "Sök efter märke eller modell…",
+    "no_results": "Inga matchande apparater hittades. Prova en annan sökning.",
+    "n_programs": "{n} program",
+    "n_cycles": "{n} cykler",
+    "no_programs": "Inga delade program för den här apparaten ännu.",
+    "no_cycles": "Inga referenscykler delade för det här programmet ännu.",
+    "anon": "anonym",
+    "uploaded_by": "Delad av {name}",
+    "connected_as": "Ansluten som {name}",
+    "not_connected": "Inte ansluten. Anslut ett GitHub-konto för att dela dina egna cykler.",
+    "import_new": "Ny profil",
+    "import_merge": "Slå samman med befintlig",
+    "merge_target": "Slå samman med profil",
+    "description": "Beskrivning (valfritt)",
+    "contributed_by": "av {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Inga betyg ännu"
+  },
+  "settings": {
+    "gear": {
+      "title": "Inställningar"
+    }
+  },
+  "link": {
+    "manual": "Manual ↗",
+    "add_appliance": "Lägg till din apparat"
+  },
+  "tip": {
+    "add_brand": "Märke inte med i listan? Lägg till det i gemenskapskatalogen",
+    "add_appliance": "Modell inte med i listan? Lägg till din apparat i gemenskapskatalogen",
+    "add_profile": "Lägg till en profil för den här apparaten på gemenskapssidan"
   }
 }

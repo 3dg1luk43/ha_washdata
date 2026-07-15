@@ -23,7 +23,12 @@
     "using_defaults": "Varsayılan değerler kullanılıyor",
     "using_tuned": "Ayarlanmış ağırlıklar kullanılıyor",
     "overrun_ratio": "({x}x beklenen)",
-    "underrun_ratio": "(beklenenin %{pct}'i)"
+    "underrun_ratio": "(beklenenin %{pct}'i)",
+    "awaiting_tip": "Topluluk onayı bekleniyor",
+    "awaiting_n": "Onay bekleniyor · {n} onaylandı",
+    "approved": "Onaylandı",
+    "awaiting": "Onay bekleniyor",
+    "imported_tip": "Topluluk mağazasından içe aktarıldı. Yalnızca eşleştirme için kullanılır, istatistiklere sayılmaz."
   },
   "btn": {
     "add_device": "+ Cihaz ekle",
@@ -150,7 +155,16 @@
     "group_suggest": "Grup {n}: {members}",
     "pg_apply_best": "En iyisini uygula",
     "pg_apply_to_settings": "Ayarlara kaydet",
-    "pg_apply_to_settings_tip": "Burada düzenlediğiniz değerleri bu cihazın etkin ayarlarına kopyalayın"
+    "pg_apply_to_settings_tip": "Burada düzenlediğiniz değerleri bu cihazın etkin ayarlarına kopyalayın",
+    "search": "Ara",
+    "import": "İçe aktar",
+    "disconnect": "Bağlantıyı kes",
+    "connect_github": "GitHub'a bağlan",
+    "save_appliance": "Cihazı kaydet",
+    "share_to_store": "Mağazada paylaş",
+    "share": "Paylaş",
+    "confirm_appliance": "Bu cihazı onayla",
+    "confirmed": "Onaylandı"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Algılama ayarları",
     "pg_timeline": "Olay zaman çizelgesi",
     "pg_outcome": "Simülasyon sonucu",
-    "pg_across_cycles": "Tüm döngülerinizde"
+    "pg_across_cycles": "Tüm döngülerinizde",
+    "community_store": "Topluluk Mağazası",
+    "online_account": "Topluluk Mağazası ve çevrimiçi özellikler"
   },
   "health": {
     "fair": "Kabul edilebilir profil kalitesi",
@@ -527,7 +543,15 @@
     "pg_load_run": "Bu çalıştırmayı yeniden yükle",
     "pg_match_confidence": "Eşleşme güveni",
     "pg_envelope_fit": "Zarfa uyum",
-    "pg_envelope_fit_tip": "Döngünün bu profilin kaydedilmiş güç zarfının içinde ne kadar iyi kaldığı, eşleşme güveninden farklı bir bakış açısı."
+    "pg_envelope_fit_tip": "Döngünün bu profilin kaydedilmiş güç zarfının içinde ne kadar iyi kaldığı, eşleşme güveninden farklı bir bakış açısı.",
+    "n_imported_note": ", {n} içe aktarıldı",
+    "enable_online": "Çevrimiçi özellikleri etkinleştir",
+    "store_brand": "Cihaz markası",
+    "store_model": "Cihaz modeli",
+    "anonymous": "Anonim",
+    "rate_quality": "Kaliteyi değerlendir",
+    "rate_n": "{n} yıldız",
+    "approved_only": "Yalnızca onaylılar"
   },
   "log": {
     "all_levels": "Tüm seviyeler",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ Bu, TÜM döngüleri ve profilleri kalıcı olarak siler. Bu işlem geri alınamaz.",
     "wipe_all_ok": "Her Şeyi Sil",
     "force_stop_title": "Döngüyü Zorla Durdur",
-    "force_stop_msg": "Etkin döngü şimdi zorla durdurulsun mu? Döngü, kesintiye uğramış olarak kaydedilecek."
+    "force_stop_msg": "Etkin döngü şimdi zorla durdurulsun mu? Döngü, kesintiye uğramış olarak kaydedilecek.",
+    "store_import": "Referans döngüyü içe aktar",
+    "store_share": "Topluluk mağazasında paylaş"
   },
   "msg": {
     "appliance_monitor": "Cihaz monitörü",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Bu {n} ayar bu cihaza kaydedilsin mi? {list}",
     "no_logs_match": "Bu filtrelerle eşleşen günlük kaydı yok.",
     "pg_analysis_hint2": "Bir döngü seçin ve eşleşme analizini yüklemek için Çalıştır'a basın.",
-    "pg_analysis_empty2": "Eşleşme analizini görmek için Çalıştır'a basın."
+    "pg_analysis_empty2": "Eşleşme analizini görmek için Çalıştır'a basın.",
+    "imported_readonly": "Topluluk mağazasından içe aktarıldı. Referans ve eşleştirme için gösterilir. İstatistiklerinize sayılmaz ve düzenlenemez.",
+    "merge_no_imports": "İçe aktarılan kayıtlar gerçek bir döngüye birleştirilemez. Birleştirmek için seçimlerini kaldırın.",
+    "store_enable_hint": "Topluluk referans döngülerine göz atmak ve içe aktarmak için Ayarlar'da çevrimiçi özellikleri etkinleştirin.",
+    "online_intro": "Diğer WashData kullanıcılarıyla referans döngüleri paylaşın ve indirin. Tüm çevrimiçi özellikler isteğe bağlıdır ve varsayılan olarak kapalıdır.",
+    "store_share_intro": "Aynı cihaza sahip diğerlerinin kullanabilmesi için bu referans döngüyü yükleyin. Herkese açık olmadan önce incelenir.",
+    "online_intro_global": "Diğer WashData kullanıcılarıyla referans kayıtlarına göz atın ve paylaşın, cihaz girişlerini onaylayın. Tek bir bağlantı tüm WashData entegrasyonunuz için geçerlidir; cihaz markası ve modeli her cihaz için Temel bölümünde ayarlanır. Tüm çevrimiçi özellikler isteğe bağlıdır ve varsayılan olarak kapalıdır.",
+    "online_unavailable": "Çevrimiçi özellikler bu sunucuda kullanılamıyor.",
+    "store_picker_offline": "Topluluk kataloğundan seçim yapmak için ayarlar dişlisinde çevrimiçi özellikleri etkinleştirin.",
+    "pick_brand_first": "Önce bir cihaz markası seçin.",
+    "model_not_found": "Henüz katalogda yok.",
+    "connect_to_confirm": "Onaylamak veya değerlendirmek için ayarlar dişlisinde bağlanın."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Ani düşüş anında bitiş sayılır",
@@ -845,7 +882,9 @@
     "person": "bir kişi ekle…",
     "phase_name": "örn. Ön yıkama",
     "profile_name": "örn. Pamuk 40°C",
-    "maintenance_notes": "örn. filtre değiştirildi, kapı contası temizlendi"
+    "maintenance_notes": "örn. filtre değiştirildi, kapı contası temizlendi",
+    "store_brand": "örn. Bosch",
+    "store_model": "örn. WAT28401"
   },
   "pref": {
     "date_absolute": "Mutlak (ör. 2 Tem 14:32)",
@@ -1253,6 +1292,14 @@
     "energy_weight": {
       "label": "Enerji ağırlığı",
       "doc": "Tipik enerji tüketimi bu döngüyle eşleşen bir programın ne kadar güçlü tercih edileceği."
+    },
+    "store_brand": {
+      "label": "Cihaz Markası",
+      "doc": "İsteğe bağlı. Topluluk kataloğundan seçilen cihaz markası. Eşleşen referans kayıtlarını bulmak ve paylaşmak için kullanılır. Çevrimiçi özellikleri kullanmıyorsanız boş bırakın."
+    },
+    "store_model": {
+      "label": "Cihaz Modeli",
+      "doc": "İsteğe bağlı. Bir marka ayarlandığında topluluk kataloğundan seçilen cihaz modeli. Modeliniz listede yoksa kataloğa ekleyebilirsiniz."
     }
   },
   "setting_group": {
@@ -1330,6 +1377,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Sessiz Saatler ve Kilometre Taşları"
+    },
+    "device_info": {
+      "label": "Cihaz bilgileri"
+    },
+    "basic_configuration": {
+      "label": "Temel yapılandırma"
     }
   },
   "status": {
@@ -1353,7 +1406,8 @@
     "reverting": "Geri alınıyor…",
     "trimming": "Kırpılıyor…",
     "splitting": "Bölünüyor…",
-    "deleting": "Siliniyor…"
+    "deleting": "Siliniyor…",
+    "imported": "İçe aktarıldı"
   },
   "tab": {
     "advanced": "Gelişmiş",
@@ -1370,7 +1424,8 @@
     "subtab_phase_catalog": "Aşama Kataloğu",
     "subtab_profiles": "Profiller",
     "maintenance": "Bakım",
-    "playground": "Test Alanı"
+    "playground": "Test Alanı",
+    "store": "Mağaza"
   },
   "tag": {
     "early_end": "Erken bitiş",
@@ -1450,7 +1505,27 @@
     "processed": "{bits} işlendi",
     "processed_cycles": "{n} döngü",
     "processed_suggestions": "{n} öneri",
-    "processed_models": "{n} yükseltilmiş model"
+    "processed_models": "{n} yükseltilmiş model",
+    "store_search_failed": "Arama başarısız: {error}",
+    "store_connect_failed": "Bağlantı başarısız: {error}",
+    "store_connected": "Topluluk mağazasına bağlanıldı",
+    "store_disconnected": "Topluluk mağazasıyla bağlantı kesildi",
+    "store_error": "Hata: {error}",
+    "store_unavailable": "Topluluk mağazası kullanılamıyor.",
+    "store_pick_profile": "Birleştirilecek bir profil seçin",
+    "store_name_required": "Bir profil adı girin",
+    "store_import_failed": "İçe aktarma başarısız: {error}",
+    "store_imported": "{profile} içine aktarıldı",
+    "store_program_required": "Bir program adı girin",
+    "store_no_appliance": "Önce cihaz markanızı ve modelinizi Ayarlar'da belirleyin.",
+    "store_share_failed": "Paylaşım başarısız: {error}",
+    "store_shared": "Topluluk mağazasında paylaşıldı, inceleme bekliyor.",
+    "appliance_added": "Cihaz eklendi, onay bekliyor",
+    "thanks_confirming": "Onayladığınız için teşekkürler",
+    "device_approved": "Topluluk tarafından onaylandı",
+    "rating_saved": "Kalite değerlendirmesi kaydedildi",
+    "brand_added": "Marka eklendi, onay bekliyor",
+    "profile_added": "Profil eklendi, onay bekliyor"
   },
   "suggestion": {
     "both_agree": "WashData öneriyor",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "Bir kilometre taşı bildirimi gönderilirdi.",
     "notify_held": "Bir bildirim, sessiz saatler nedeniyle bekletildi.",
     "finished": "Döngü, son duruma ulaştı ve sona erdi."
+  },
+  "store": {
+    "browse": "Göz at",
+    "device": "Cihaz",
+    "favorites": "Favoriler",
+    "search_ph": "Marka veya modele göre ara…",
+    "no_results": "Eşleşen cihaz bulunamadı. Farklı bir arama deneyin.",
+    "n_programs": "{n} program",
+    "n_cycles": "{n} döngü",
+    "no_programs": "Bu cihaz için henüz paylaşılan program yok.",
+    "no_cycles": "Bu program için henüz paylaşılan referans döngü yok.",
+    "anon": "anonim",
+    "uploaded_by": "{name} tarafından paylaşıldı",
+    "connected_as": "{name} olarak bağlanıldı",
+    "not_connected": "Bağlı değil. Kendi döngülerinizi paylaşmak için bir GitHub hesabı bağlayın.",
+    "import_new": "Yeni profil",
+    "import_merge": "Mevcut olana birleştir",
+    "merge_target": "Profile birleştir",
+    "description": "Açıklama (isteğe bağlı)",
+    "contributed_by": "{name} tarafından",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Henüz değerlendirme yok"
+  },
+  "settings": {
+    "gear": {
+      "title": "Ayarlar"
+    }
+  },
+  "link": {
+    "manual": "Kılavuz ↗",
+    "add_appliance": "Cihazınızı ekleyin"
+  },
+  "tip": {
+    "add_brand": "Marka listede yok mu? Topluluk kataloğuna ekleyin",
+    "add_appliance": "Model listede yok mu? Cihazınızı topluluk kataloğuna ekleyin",
+    "add_profile": "Bu cihaz için topluluk sitesinde bir profil ekleyin"
   }
 }

@@ -23,7 +23,12 @@
     "using_defaults": "A szállított alapértelmezett értékek használata",
     "using_tuned": "Hangolt súlyok használata",
     "overrun_ratio": "(a várt {x}-szerese)",
-    "underrun_ratio": "(a várt {pct}%-a)"
+    "underrun_ratio": "(a várt {pct}%-a)",
+    "awaiting_tip": "Közösségi jóváhagyásra vár",
+    "awaiting_n": "Jóváhagyásra vár · {n} megerősítés",
+    "approved": "Jóváhagyva",
+    "awaiting": "Jóváhagyásra vár",
+    "imported_tip": "A közösségi boltból importálva. Csak egyeztetéshez használatos, a statisztikába nem számít bele."
   },
   "btn": {
     "add_device": "+ Eszköz hozzáadása",
@@ -150,7 +155,16 @@
     "group_suggest": "{n}. csoport: {members}",
     "pg_apply_best": "Legjobb alkalmazása",
     "pg_apply_to_settings": "Mentés a beállításokba",
-    "pg_apply_to_settings_tip": "Az itt szerkesztett értékek másolása az eszköz aktív beállításaiba"
+    "pg_apply_to_settings_tip": "Az itt szerkesztett értékek másolása az eszköz aktív beállításaiba",
+    "search": "Keresés",
+    "import": "Importálás",
+    "disconnect": "Leválasztás",
+    "connect_github": "GitHub összekapcsolása",
+    "save_appliance": "Készülék mentése",
+    "share_to_store": "Megosztás a boltban",
+    "share": "Megosztás",
+    "confirm_appliance": "Készülék megerősítése",
+    "confirmed": "Megerősítve"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Érzékelési beállítások",
     "pg_timeline": "Események idővonala",
     "pg_outcome": "Szimuláció eredménye",
-    "pg_across_cycles": "Az összes ciklusban"
+    "pg_across_cycles": "Az összes ciklusban",
+    "community_store": "Közösségi bolt",
+    "online_account": "Közösségi bolt és online funkciók"
   },
   "health": {
     "fair": "Elfogadható profilminőség",
@@ -527,7 +543,15 @@
     "pg_load_run": "Futtatás újratöltése",
     "pg_match_confidence": "Egyezés megbízhatósága",
     "pg_envelope_fit": "Illeszkedés a burkológörbéhez",
-    "pg_envelope_fit_tip": "Mennyire pontosan marad a ciklus a profil mentett teljesítmény-burkológörbéjén belül, más nézőpont, mint az egyezés megbízhatósága."
+    "pg_envelope_fit_tip": "Mennyire pontosan marad a ciklus a profil mentett teljesítmény-burkológörbéjén belül, más nézőpont, mint az egyezés megbízhatósága.",
+    "n_imported_note": ", {n} importált",
+    "enable_online": "Online funkciók engedélyezése",
+    "store_brand": "Készülék márkája",
+    "store_model": "Készülék modellje",
+    "anonymous": "Névtelen",
+    "rate_quality": "Minőség értékelése",
+    "rate_n": "{n} csillag",
+    "approved_only": "Csak a jóváhagyottak"
   },
   "log": {
     "all_levels": "Minden szinten",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ Ez véglegesen törli az ÖSSZES ciklust és profilt. Ez nem vonható vissza.",
     "wipe_all_ok": "Minden törlése",
     "force_stop_title": "Ciklus kényszerített leállítása",
-    "force_stop_msg": "Kényszerítve leállítod most az aktív ciklust? A ciklus megszakítottként lesz elmentve."
+    "force_stop_msg": "Kényszerítve leállítod most az aktív ciklust? A ciklus megszakítottként lesz elmentve.",
+    "store_import": "Referenciaciklus importálása",
+    "store_share": "Megosztás a közösségi boltban"
   },
   "msg": {
     "appliance_monitor": "Készülék monitor",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Elmenti ezt a(z) {n} beállítást erre az eszközre? {list}",
     "no_logs_match": "Egyetlen naplóbejegyzés sem felel meg ezeknek a szűrőknek.",
     "pg_analysis_hint2": "Válasszon egy ciklust, és nyomja meg a Futtatás gombot az egyezéselemzés betöltéséhez.",
-    "pg_analysis_empty2": "Nyomja meg a Futtatás gombot az egyezéselemzés megtekintéséhez."
+    "pg_analysis_empty2": "Nyomja meg a Futtatás gombot az egyezéselemzés megtekintéséhez.",
+    "imported_readonly": "A közösségi boltból importálva. Referenciaként és egyeztetéshez jelenik meg. Nem számít bele a statisztikákba, és nem szerkeszthető.",
+    "merge_no_imports": "Az importált felvételek nem egyesíthetők valódi ciklussal. Az egyesítéshez szüntesse meg a kijelölésüket.",
+    "store_enable_hint": "A közösségi referenciaciklusok böngészéséhez és importálásához engedélyezze az online funkciókat a Beállításokban.",
+    "online_intro": "Ossza meg és töltsön le referenciaciklusokat más WashData-felhasználókkal. Minden online funkció opcionális és alapértelmezés szerint ki van kapcsolva.",
+    "store_share_intro": "Töltse fel ezt a referenciaciklust, hogy az azonos készülékkel rendelkezők is használhassák. Nyilvános megjelenés előtt ellenőrzésre kerül.",
+    "online_intro_global": "Böngésszen és osszon meg referenciafelvételeket más WashData-felhasználókkal, és erősítsen meg készülékbejegyzéseket. Egyetlen kapcsolat a teljes WashData-integrációra vonatkozik; a készülék márkája és modellje eszközönként, az Alapkonfiguráció szakaszban állítható be. Minden online funkció opcionális és alapértelmezés szerint ki van kapcsolva.",
+    "online_unavailable": "Az online funkciók nem érhetők el ezen a szerveren.",
+    "store_picker_offline": "A közösségi katalógusból való választáshoz engedélyezze az online funkciókat a beállítások fogaskerekénél.",
+    "pick_brand_first": "Először válasszon készülékmárkát.",
+    "model_not_found": "Még nincs a katalógusban.",
+    "connect_to_confirm": "A megerősítéshez vagy értékeléshez csatlakozzon a beállítások fogaskerekénél."
   },
   "phase_desc": {
     "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -828,7 +865,9 @@
     "person": "személy hozzáadása…",
     "phase_name": "pl. Előmosás",
     "profile_name": "pl. Pamut 40°C",
-    "maintenance_notes": "pl. szűrő cserélve, ajtótömítés tisztítva"
+    "maintenance_notes": "pl. szűrő cserélve, ajtótömítés tisztítva",
+    "store_brand": "pl. Bosch",
+    "store_model": "pl. WAT28401"
   },
   "pref": {
     "date_absolute": "Abszolút (pl. július 2-án 14:32)",
@@ -1236,6 +1275,14 @@
     "energy_weight": {
       "label": "Energia súlya",
       "doc": "Mennyire részesül előnyben az a program, amelynek tipikus energiafogyasztása illeszkedik ehhez a ciklushoz."
+    },
+    "store_brand": {
+      "label": "Készülék márkája",
+      "doc": "Opcionális. A készülék márkája a közösségi katalógusból kiválasztva. A megfelelő referenciafelvételek megkeresésére és megosztására szolgál. Hagyja üresen, ha nem használja az online funkciókat."
+    },
+    "store_model": {
+      "label": "Készülék modellje",
+      "doc": "Opcionális. A készülék modellje a közösségi katalógusból kiválasztva, miután megadta a márkát. Ha a modellje nem szerepel a listában, hozzáadhatja a katalógushoz."
     }
   },
   "setting_group": {
@@ -1313,6 +1360,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Csendes órák és mérföldkövek"
+    },
+    "device_info": {
+      "label": "Eszközadatok"
+    },
+    "basic_configuration": {
+      "label": "Alapkonfiguráció"
     }
   },
   "status": {
@@ -1336,7 +1389,8 @@
     "reverting": "Visszavonás…",
     "trimming": "Vágás…",
     "splitting": "Felosztás…",
-    "deleting": "Törlés…"
+    "deleting": "Törlés…",
+    "imported": "Importált"
   },
   "tab": {
     "advanced": "Fejlett",
@@ -1353,7 +1407,8 @@
     "subtab_phase_catalog": "Fázis katalógus",
     "subtab_profiles": "Profilok",
     "maintenance": "Karbantartás",
-    "playground": "Homokozó"
+    "playground": "Homokozó",
+    "store": "Bolt"
   },
   "tag": {
     "early_end": "Korai vége",
@@ -1433,7 +1488,27 @@
     "processed": "Feldolgozva: {bits}",
     "processed_cycles": "{n} ciklus",
     "processed_suggestions": "{n} javaslat",
-    "processed_models": "{n} modell előléptetve"
+    "processed_models": "{n} modell előléptetve",
+    "store_search_failed": "A keresés sikertelen: {error}",
+    "store_connect_failed": "A csatlakozás sikertelen: {error}",
+    "store_connected": "Csatlakozva a közösségi bolthoz",
+    "store_disconnected": "Leválasztva a közösségi boltról",
+    "store_error": "Hiba: {error}",
+    "store_unavailable": "A közösségi bolt nem érhető el.",
+    "store_pick_profile": "Válassza ki a profilt, amelybe egyesíti",
+    "store_name_required": "Adjon meg egy profilnevet",
+    "store_import_failed": "Az importálás sikertelen: {error}",
+    "store_imported": "Importálva ide: {profile}",
+    "store_program_required": "Adjon meg egy programnevet",
+    "store_no_appliance": "Először adja meg a készülék márkáját és modelljét a Beállításokban.",
+    "store_share_failed": "A megosztás sikertelen: {error}",
+    "store_shared": "Megosztva a közösségi boltban - felülvizsgálatra vár.",
+    "appliance_added": "Készülék hozzáadva - jóváhagyásra vár",
+    "thanks_confirming": "Köszönjük a megerősítést",
+    "device_approved": "A közösség jóváhagyta",
+    "rating_saved": "Minőségértékelés mentve",
+    "brand_added": "Márka hozzáadva - jóváhagyásra vár",
+    "profile_added": "Profil hozzáadva - jóváhagyásra vár"
   },
   "suggestion": {
     "both_agree": "A WashData javasolja",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "Egy mérföldkő-értesítés kerülne elküldésre.",
     "notify_held": "Egy értesítés visszatartásra került a csendes órák miatt.",
     "finished": "A ciklus elérte a végállapotot és befejeződött."
+  },
+  "store": {
+    "browse": "Böngészés",
+    "device": "Készülék",
+    "favorites": "Kedvencek",
+    "search_ph": "Keresés márka vagy modell szerint…",
+    "no_results": "Nem található megfelelő készülék. Próbáljon másképp keresni.",
+    "n_programs": "{n} program",
+    "n_cycles": "{n} ciklus",
+    "no_programs": "Ehhez a készülékhez még nincsenek megosztott programok.",
+    "no_cycles": "Ehhez a programhoz még nincsenek megosztott referenciaciklusok.",
+    "anon": "névtelen",
+    "uploaded_by": "Megosztotta: {name}",
+    "connected_as": "Csatlakozva {name} néven",
+    "not_connected": "Nincs csatlakozva. Csatlakoztasson egy GitHub-fiókot a saját ciklusai megosztásához.",
+    "import_new": "Új profil",
+    "import_merge": "Egyesítés meglévővel",
+    "merge_target": "Egyesítés a profilba",
+    "description": "Leírás (opcionális)",
+    "contributed_by": "szerző: {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Még nincsenek értékelések"
+  },
+  "settings": {
+    "gear": {
+      "title": "Beállítások"
+    }
+  },
+  "link": {
+    "manual": "Kézikönyv ↗",
+    "add_appliance": "Készülék hozzáadása"
+  },
+  "tip": {
+    "add_brand": "A márka nem szerepel a listában? Adja hozzá a közösségi katalógushoz",
+    "add_appliance": "A modell nem szerepel a listában? Adja hozzá készülékét a közösségi katalógushoz",
+    "add_profile": "Adjon hozzá profilt ehhez a készülékhez a közösségi oldalon"
   }
 }

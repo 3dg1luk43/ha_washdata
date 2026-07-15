@@ -23,7 +23,12 @@
     "using_defaults": "Notar sjálfgefnar sendingar",
     "using_tuned": "Notaðu stilltar lóðir",
     "overrun_ratio": "({x}x áætlað)",
-    "underrun_ratio": "({pct}% af áætluðu)"
+    "underrun_ratio": "({pct}% af áætluðu)",
+    "awaiting_tip": "Bíður samþykkis samfélagsins",
+    "awaiting_n": "Bíður samþykkis · {n} staðfestingar",
+    "approved": "Samþykkt",
+    "awaiting": "Bíður samþykkis",
+    "imported_tip": "Flutt inn úr samfélagsversluninni. Aðeins notað til samsvörunar, ekki talið með í tölfræði."
   },
   "btn": {
     "add_device": "+ Bæta við tæki",
@@ -150,7 +155,16 @@
     "group_suggest": "Hópur {n}: {members}",
     "pg_apply_best": "Nota besta",
     "pg_apply_to_settings": "Vista í stillingar",
-    "pg_apply_to_settings_tip": "Afrita gildin sem þú breyttir hér yfir í virkar stillingar þessa tækis"
+    "pg_apply_to_settings_tip": "Afrita gildin sem þú breyttir hér yfir í virkar stillingar þessa tækis",
+    "search": "Leita",
+    "import": "Flytja inn",
+    "disconnect": "Aftengja",
+    "connect_github": "Tengja GitHub",
+    "save_appliance": "Vista tæki",
+    "share_to_store": "Deila í verslun",
+    "share": "Deila",
+    "confirm_appliance": "Staðfesta þetta tæki",
+    "confirmed": "Staðfest"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Greiningarstillingar",
     "pg_timeline": "Tímalína atburða",
     "pg_outcome": "Niðurstaða hermunar",
-    "pg_across_cycles": "Yfir lotur þínar"
+    "pg_across_cycles": "Yfir lotur þínar",
+    "community_store": "Samfélagsverslun",
+    "online_account": "Samfélagsverslun og nettengdir eiginleikar"
   },
   "health": {
     "fair": "Viðunanlegt prófíl",
@@ -527,7 +543,15 @@
     "pg_load_run": "Endurhlaða þessa keyrslu",
     "pg_match_confidence": "Áreiðanleiki samsvörunar",
     "pg_envelope_fit": "Samræmi við hjúpferil",
-    "pg_envelope_fit_tip": "Hversu vel lotan helst innan vistaðs afl-hjúpferils þessa sniðs, önnur sýn en áreiðanleiki samsvörunar."
+    "pg_envelope_fit_tip": "Hversu vel lotan helst innan vistaðs afl-hjúpferils þessa sniðs, önnur sýn en áreiðanleiki samsvörunar.",
+    "n_imported_note": ", {n} fluttar inn",
+    "enable_online": "Virkja nettengda eiginleika",
+    "store_brand": "Vörumerki tækis",
+    "store_model": "Gerð tækis",
+    "anonymous": "Nafnlaus",
+    "rate_quality": "Gefa gæðum einkunn",
+    "rate_n": "{n} stjörnur",
+    "approved_only": "Aðeins samþykkt"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ Þetta eyðir varanlega ÖLLUM lotum og prófílum. Þetta er ekki hægt að afturkalla.",
     "wipe_all_ok": "Þurrka út allt",
     "force_stop_title": "Þvinga stöðvun lotu",
-    "force_stop_msg": "Þvinga virku lotuna til að stöðvast núna? Lotan verður vistuð sem trufluð."
+    "force_stop_msg": "Þvinga virku lotuna til að stöðvast núna? Lotan verður vistuð sem trufluð.",
+    "store_import": "Flytja inn viðmiðunarlotu",
+    "store_share": "Deila í samfélagsverslun"
   },
   "msg": {
     "appliance_monitor": "Vöktunartæki",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Vista þessar {n} stilling(ar) á þetta tæki? {list}",
     "no_logs_match": "Engar annálafærslur passa við þessar síur.",
     "pg_analysis_hint2": "Veldu lotu og ýttu á Keyra til að hlaða samsvörunargreiningu.",
-    "pg_analysis_empty2": "Ýttu á Keyra til að sjá samsvörunargreiningu."
+    "pg_analysis_empty2": "Ýttu á Keyra til að sjá samsvörunargreiningu.",
+    "imported_readonly": "Flutt inn úr samfélagsversluninni. Sýnt til viðmiðunar og samsvörunar. Það er ekki talið með í tölfræðinni þinni og ekki hægt að breyta því.",
+    "merge_no_imports": "Ekki er hægt að sameina innfluttar upptökur við raunverulega lotu. Afveldu þær til að sameina.",
+    "store_enable_hint": "Virkjaðu nettengda eiginleika í Stillingum til að skoða og flytja inn viðmiðunarlotur samfélagsins.",
+    "online_intro": "Deildu viðmiðunarlotum með öðrum WashData-notendum og halaðu þeim niður. Allir nettengdir eiginleikar eru valfrjálsir og sjálfgefið óvirkir.",
+    "store_share_intro": "Hladdu þessari viðmiðunarlotu upp svo aðrir með sama tæki geti notað hana. Hún er yfirfarin áður en hún birtist opinberlega.",
+    "online_intro_global": "Skoðaðu og deildu viðmiðunarupptökum með öðrum WashData-notendum og staðfestu tækjafærslur. Ein tenging gildir fyrir alla WashData-samþættinguna þína; vörumerki og gerð tækis eru stillt fyrir hvert tæki undir Grunnstillingum. Allir nettengdir eiginleikar eru valfrjálsir og sjálfgefið óvirkir.",
+    "online_unavailable": "Nettengdir eiginleikar eru ekki í boði á þessum netþjóni.",
+    "store_picker_offline": "Virkjaðu nettengda eiginleika í stillingatannhjólinu til að velja úr samfélagsskránni.",
+    "pick_brand_first": "Veldu fyrst vörumerki tækis.",
+    "model_not_found": "Ekki enn í skránni.",
+    "connect_to_confirm": "Tengstu í stillingatannhjólinu til að staðfesta eða gefa einkunn."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Skyndilegt fall meðhöndlað sem tafarlaus endir",
@@ -845,7 +882,9 @@
     "person": "bæta við einstakling…",
     "phase_name": "t.d. Forþvottur",
     "profile_name": "t.d. Bómull 40°C",
-    "maintenance_notes": "t.d. skipti um síu, hreinsaði hurðarþéttingu"
+    "maintenance_notes": "t.d. skipti um síu, hreinsaði hurðarþéttingu",
+    "store_brand": "t.d. Bosch",
+    "store_model": "t.d. WAT28401"
   },
   "pref": {
     "date_absolute": "Algjört (t.d. 14:32 þann 2. júlí)",
@@ -1253,6 +1292,14 @@
     "energy_weight": {
       "label": "Vægi orku",
       "doc": "Hversu sterkt kerfi, sem hefur dæmigerða orkunotkun sem passar við þessa lotu, er tekið fram yfir önnur."
+    },
+    "store_brand": {
+      "label": "Vörumerki tækis",
+      "doc": "Valfrjálst. Vörumerki tækisins, valið úr samfélagsskránni. Notað til að finna og deila samsvarandi viðmiðunarupptökum. Skildu eftir autt ef þú notar ekki nettengda eiginleika."
+    },
+    "store_model": {
+      "label": "Gerð tækis",
+      "doc": "Valfrjálst. Gerð tækisins, valin úr samfélagsskránni þegar vörumerki hefur verið sett. Ef gerðin þín er ekki á listanum geturðu bætt henni við skrána."
     }
   },
   "setting_group": {
@@ -1330,6 +1377,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Hljóðlátur tími og áfangar"
+    },
+    "device_info": {
+      "label": "Upplýsingar um tæki"
+    },
+    "basic_configuration": {
+      "label": "Grunnstillingar"
     }
   },
   "status": {
@@ -1353,7 +1406,8 @@
     "reverting": "Afturkalla…",
     "trimming": "Klippi til…",
     "splitting": "Skipti…",
-    "deleting": "Eyði…"
+    "deleting": "Eyði…",
+    "imported": "Flutt inn"
   },
   "suggestion": {
     "both_agree": "WashData mælir með",
@@ -1466,7 +1520,8 @@
     "subtab_phase_catalog": "Áfangaskrá",
     "subtab_profiles": "Snið",
     "maintenance": "Viðhald",
-    "playground": "Leiksvæði"
+    "playground": "Leiksvæði",
+    "store": "Verslun"
   },
   "tag": {
     "early_end": "Snemma enda",
@@ -1546,7 +1601,27 @@
     "processed": "Vinnslu lokið: {bits}",
     "processed_cycles": "{n} hringrásir",
     "processed_suggestions": "{n} tillögur",
-    "processed_models": "{n} líkön virkjuð"
+    "processed_models": "{n} líkön virkjuð",
+    "store_search_failed": "Leit mistókst: {error}",
+    "store_connect_failed": "Tenging mistókst: {error}",
+    "store_connected": "Tengt við samfélagsverslunina",
+    "store_disconnected": "Aftengt frá samfélagsversluninni",
+    "store_error": "Villa: {error}",
+    "store_unavailable": "Samfélagsverslunin er ekki tiltæk.",
+    "store_pick_profile": "Veldu prófíl til að sameina við",
+    "store_name_required": "Sláðu inn heiti prófíls",
+    "store_import_failed": "Innflutningur mistókst: {error}",
+    "store_imported": "Flutt inn í {profile}",
+    "store_program_required": "Sláðu inn heiti forrits",
+    "store_no_appliance": "Stilltu fyrst vörumerki og gerð tækisins í Stillingum.",
+    "store_share_failed": "Deiling mistókst: {error}",
+    "store_shared": "Deilt í samfélagsversluninni, bíður yfirferðar.",
+    "appliance_added": "Tæki bætt við, bíður samþykkis",
+    "thanks_confirming": "Takk fyrir staðfestinguna",
+    "device_approved": "Samþykkt af samfélaginu",
+    "rating_saved": "Gæðaeinkunn vistuð",
+    "brand_added": "Vörumerki bætt við, bíður samþykkis",
+    "profile_added": "Prófíl bætt við, bíður samþykkis"
   },
   "trend": {
     "down": "Stefnir niður",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "Áfangatilkynning yrði send.",
     "notify_held": "Tilkynningu var haldið eftir vegna hljóðlátra stunda.",
     "finished": "Lotan náði lokastöðu og endaði."
+  },
+  "store": {
+    "browse": "Skoða",
+    "device": "Tæki",
+    "favorites": "Uppáhald",
+    "search_ph": "Leita eftir vörumerki eða gerð…",
+    "no_results": "Engin samsvarandi tæki fundust. Prófaðu aðra leit.",
+    "n_programs": "{n} forrit",
+    "n_cycles": "{n} lotur",
+    "no_programs": "Engin deild forrit fyrir þetta tæki enn.",
+    "no_cycles": "Engum viðmiðunarlotum deilt fyrir þetta forrit enn.",
+    "anon": "nafnlaus",
+    "uploaded_by": "Deilt af {name}",
+    "connected_as": "Tengt sem {name}",
+    "not_connected": "Ekki tengt. Tengdu GitHub-reikning til að deila þínum eigin lotum.",
+    "import_new": "Nýr prófíll",
+    "import_merge": "Sameina við núverandi",
+    "merge_target": "Sameina við prófíl",
+    "description": "Lýsing (valfrjálst)",
+    "contributed_by": "eftir {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Engar einkunnir enn"
+  },
+  "settings": {
+    "gear": {
+      "title": "Stillingar"
+    }
+  },
+  "link": {
+    "manual": "Handbók ↗",
+    "add_appliance": "Bæta við tækinu þínu"
+  },
+  "tip": {
+    "add_brand": "Vörumerki ekki á listanum? Bættu því við samfélagsskrána",
+    "add_appliance": "Gerð ekki á listanum? Bættu tækinu þínu við samfélagsskrána",
+    "add_profile": "Bættu við prófíl fyrir þetta tæki á samfélagssíðunni"
   }
 }

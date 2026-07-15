@@ -23,7 +23,12 @@
     "using_defaults": "使用出厂默认值",
     "using_tuned": "使用已调整的权重",
     "overrun_ratio": "（预期的 {x} 倍）",
-    "underrun_ratio": "（预期的 {pct}%）"
+    "underrun_ratio": "（预期的 {pct}%）",
+    "awaiting_tip": "等待社区批准",
+    "awaiting_n": "等待批准 · 已确认 {n} 个",
+    "approved": "已批准",
+    "awaiting": "等待批准",
+    "imported_tip": "从社区商店导入。仅用于匹配，不计入统计。"
   },
   "btn": {
     "add_device": "+ 添加设备",
@@ -150,7 +155,16 @@
     "group_suggest": "组 {n}：{members}",
     "pg_apply_best": "应用最佳值",
     "pg_apply_to_settings": "保存到设置",
-    "pg_apply_to_settings_tip": "将您在此处编辑的值复制到该设备当前生效的设置中"
+    "pg_apply_to_settings_tip": "将您在此处编辑的值复制到该设备当前生效的设置中",
+    "search": "搜索",
+    "import": "导入",
+    "disconnect": "断开连接",
+    "connect_github": "连接 GitHub",
+    "save_appliance": "保存家电",
+    "share_to_store": "分享到商店",
+    "share": "分享",
+    "confirm_appliance": "确认此家电",
+    "confirmed": "已确认"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "检测设置",
     "pg_timeline": "事件时间线",
     "pg_outcome": "模拟结果",
-    "pg_across_cycles": "所有周期综合"
+    "pg_across_cycles": "所有周期综合",
+    "community_store": "社区商店",
+    "online_account": "社区商店与在线功能"
   },
   "health": {
     "fair": "配置文件质量尚可",
@@ -527,7 +543,15 @@
     "pg_load_run": "重新加载此运行",
     "pg_match_confidence": "匹配置信度",
     "pg_envelope_fit": "包络拟合度",
-    "pg_envelope_fit_tip": "周期与此配置文件已保存的功率包络的贴合程度，与匹配置信度不同的视角。"
+    "pg_envelope_fit_tip": "周期与此配置文件已保存的功率包络的贴合程度，与匹配置信度不同的视角。",
+    "n_imported_note": "，已导入 {n} 个",
+    "enable_online": "启用在线功能",
+    "store_brand": "家电品牌",
+    "store_model": "家电型号",
+    "anonymous": "匿名",
+    "rate_quality": "评价质量",
+    "rate_n": "{n} 星",
+    "approved_only": "仅已批准"
   },
   "log": {
     "all_levels": "所有级别",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ 这将永久删除所有周期和配置文件。此操作无法撤销。",
     "wipe_all_ok": "清除全部",
     "force_stop_title": "强制停止周期",
-    "force_stop_msg": "立即强制停止当前周期吗？该周期将被保存为已中断。"
+    "force_stop_msg": "立即强制停止当前周期吗？该周期将被保存为已中断。",
+    "store_import": "导入参考周期",
+    "store_share": "分享到社区商店"
   },
   "msg": {
     "appliance_monitor": "设备监控",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "将这 {n} 项设置保存到该设备吗？ {list}",
     "no_logs_match": "没有日志记录符合这些筛选条件。",
     "pg_analysis_hint2": "选择一个周期并点击运行以加载匹配分析。",
-    "pg_analysis_empty2": "点击运行以查看匹配分析。"
+    "pg_analysis_empty2": "点击运行以查看匹配分析。",
+    "imported_readonly": "从社区商店导入。用于参考和匹配。不计入您的统计，且无法编辑。",
+    "merge_no_imports": "导入的录制无法合并到真实周期中。取消选择它们以进行合并。",
+    "store_enable_hint": "在设置中启用在线功能，以浏览和导入社区参考周期。",
+    "online_intro": "与其他 WashData 用户分享和下载参考周期。所有在线功能均为自愿加入，默认关闭。",
+    "store_share_intro": "上传此参考周期，以便拥有相同家电的其他人使用。它会经过审核后才公开显示。",
+    "online_intro_global": "与其他 WashData 用户浏览和分享参考录制，并确认家电条目。一次连接适用于您的整个 WashData 集成；家电品牌和型号在“基本配置”下按设备设置。所有在线功能均为自愿加入，默认关闭。",
+    "online_unavailable": "此服务器不支持在线功能。",
+    "store_picker_offline": "在设置齿轮中启用在线功能，即可从社区目录中选择。",
+    "pick_brand_first": "请先选择家电品牌。",
+    "model_not_found": "尚未收录在目录中。",
+    "connect_to_confirm": "在设置齿轮中连接以确认或评分。"
   },
   "pg_desc": {
     "abrupt_drop_watts": "骤降视为立即结束",
@@ -845,7 +882,9 @@
     "person": "添加人员…",
     "phase_name": "例如 预洗",
     "profile_name": "例如 棉布 40°C",
-    "maintenance_notes": "例如：更换了过滤器、清洁了门封"
+    "maintenance_notes": "例如：更换了过滤器、清洁了门封",
+    "store_brand": "例如 Bosch",
+    "store_model": "例如 WAT28401"
   },
   "pref": {
     "date_absolute": "绝对时间（例如：7月2日 14:32）",
@@ -1253,6 +1292,14 @@
     "energy_weight": {
       "label": "能耗权重",
       "doc": "典型能耗与此周期吻合的程序会被优先选择的程度。"
+    },
+    "store_brand": {
+      "label": "家电品牌",
+      "doc": "可选。从社区目录中选择的家电品牌。用于查找和分享匹配的参考录制。如果您不使用在线功能，请留空。"
+    },
+    "store_model": {
+      "label": "家电型号",
+      "doc": "可选。设置品牌后，从社区目录中选择的家电型号。如果目录中没有您的型号，您可以将其添加到目录。"
     }
   },
   "setting_group": {
@@ -1330,6 +1377,12 @@
     },
     "quiet_hours_milestones": {
       "label": "免打扰时段与里程碑"
+    },
+    "device_info": {
+      "label": "设备信息"
+    },
+    "basic_configuration": {
+      "label": "基本配置"
     }
   },
   "status": {
@@ -1353,7 +1406,8 @@
     "reverting": "还原中…",
     "trimming": "裁剪中…",
     "splitting": "拆分中…",
-    "deleting": "删除中…"
+    "deleting": "删除中…",
+    "imported": "已导入"
   },
   "tab": {
     "advanced": "高级",
@@ -1370,7 +1424,8 @@
     "subtab_phase_catalog": "阶段目录",
     "subtab_profiles": "配置文件",
     "maintenance": "维护",
-    "playground": "试验场"
+    "playground": "试验场",
+    "store": "商店"
   },
   "tag": {
     "early_end": "提前结束",
@@ -1450,7 +1505,27 @@
     "processed": "已处理 {bits}",
     "processed_cycles": "{n} 个周期",
     "processed_suggestions": "{n} 条建议",
-    "processed_models": "{n} 个模型升级"
+    "processed_models": "{n} 个模型升级",
+    "store_search_failed": "搜索失败：{error}",
+    "store_connect_failed": "连接失败：{error}",
+    "store_connected": "已连接到社区商店",
+    "store_disconnected": "已断开与社区商店的连接",
+    "store_error": "错误：{error}",
+    "store_unavailable": "社区商店不可用。",
+    "store_pick_profile": "请选择要合并到的配置文件",
+    "store_name_required": "请输入配置文件名称",
+    "store_import_failed": "导入失败：{error}",
+    "store_imported": "已导入到 {profile}",
+    "store_program_required": "请输入程序名称",
+    "store_no_appliance": "请先在设置中设置您的家电品牌和型号。",
+    "store_share_failed": "分享失败：{error}",
+    "store_shared": "已分享到社区商店（等待审核）",
+    "appliance_added": "已添加家电（等待批准）",
+    "thanks_confirming": "感谢您的确认",
+    "device_approved": "已获社区批准",
+    "rating_saved": "质量评分已保存",
+    "brand_added": "已添加品牌（等待批准）",
+    "profile_added": "已添加配置文件（等待批准）"
   },
   "suggestion": {
     "both_agree": "WashData建议",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "将发送里程碑通知。",
     "notify_held": "由于处于免打扰时段，通知已被暂缓。",
     "finished": "循环到达终止状态并已结束。"
+  },
+  "store": {
+    "browse": "浏览",
+    "device": "设备",
+    "favorites": "收藏",
+    "search_ph": "按品牌或型号搜索…",
+    "no_results": "未找到匹配的家电。请尝试其他搜索。",
+    "n_programs": "{n} 个程序",
+    "n_cycles": "{n} 个周期",
+    "no_programs": "此家电尚无共享的程序。",
+    "no_cycles": "此程序尚无共享的参考周期。",
+    "anon": "匿名",
+    "uploaded_by": "由 {name} 分享",
+    "connected_as": "已以 {name} 身份连接",
+    "not_connected": "未连接。连接 GitHub 账户以分享您自己的周期。",
+    "import_new": "新建配置文件",
+    "import_merge": "合并到现有",
+    "merge_target": "合并到配置文件",
+    "description": "描述（可选）",
+    "contributed_by": "由 {name} 提供",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "暂无评分"
+  },
+  "settings": {
+    "gear": {
+      "title": "设置"
+    }
+  },
+  "link": {
+    "manual": "手册 ↗",
+    "add_appliance": "添加您的家电"
+  },
+  "tip": {
+    "add_brand": "品牌未收录？将其添加到社区目录",
+    "add_appliance": "型号未收录？将您的家电添加到社区目录",
+    "add_profile": "在社区网站上为此家电添加配置文件"
   }
 }

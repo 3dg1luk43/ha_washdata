@@ -23,7 +23,12 @@
     "using_defaults": "Naudojami pristatyti numatytieji nustatymai",
     "using_tuned": "Naudojant suderintus svorius",
     "overrun_ratio": "({x}x tikėtino)",
-    "underrun_ratio": "({pct}% tikėtino)"
+    "underrun_ratio": "({pct}% tikėtino)",
+    "awaiting_tip": "Laukiama bendruomenės patvirtinimo",
+    "awaiting_n": "Laukiama patvirtinimo · {n} patvirtinimai",
+    "approved": "Patvirtinta",
+    "awaiting": "Laukiama patvirtinimo",
+    "imported_tip": "Importuota iš bendruomenės parduotuvės. Naudojama tik atitikčiai, neįskaičiuojama į statistiką."
   },
   "btn": {
     "add_device": "+ Pridėti įrenginį",
@@ -150,7 +155,16 @@
     "group_suggest": "Grupė {n}: {members}",
     "pg_apply_best": "Taikyti geriausią",
     "pg_apply_to_settings": "Įrašyti į nustatymus",
-    "pg_apply_to_settings_tip": "Kopijuoti čia redaguotas reikšmes į aktyvius šio įrenginio nustatymus"
+    "pg_apply_to_settings_tip": "Kopijuoti čia redaguotas reikšmes į aktyvius šio įrenginio nustatymus",
+    "search": "Ieškoti",
+    "import": "Importuoti",
+    "disconnect": "Atjungti",
+    "connect_github": "Prijungti GitHub",
+    "save_appliance": "Išsaugoti prietaisą",
+    "share_to_store": "Bendrinti parduotuvėje",
+    "share": "Bendrinti",
+    "confirm_appliance": "Patvirtinti šį prietaisą",
+    "confirmed": "Patvirtinta"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Aptikimo nustatymai",
     "pg_timeline": "Įvykių chronologija",
     "pg_outcome": "Simuliacijos rezultatas",
-    "pg_across_cycles": "Per visus jūsų ciklus"
+    "pg_across_cycles": "Per visus jūsų ciklus",
+    "community_store": "Bendruomenės parduotuvė",
+    "online_account": "Bendruomenės parduotuvė ir interneto funkcijos"
   },
   "health": {
     "fair": "Priimtina profilio kokybė",
@@ -527,7 +543,15 @@
     "pg_load_run": "Iš naujo įkelti šį vykdymą",
     "pg_match_confidence": "Atitikties patikimumas",
     "pg_envelope_fit": "Atitikimas gaubtinei",
-    "pg_envelope_fit_tip": "Kaip tiksliai ciklas telpa šio profilio išsaugotoje galios gaubtinėje, kitoks požiūris nei atitikties patikimumas."
+    "pg_envelope_fit_tip": "Kaip tiksliai ciklas telpa šio profilio išsaugotoje galios gaubtinėje, kitoks požiūris nei atitikties patikimumas.",
+    "n_imported_note": ", {n} importuota",
+    "enable_online": "Įjungti interneto funkcijas",
+    "store_brand": "Prietaiso prekės ženklas",
+    "store_model": "Prietaiso modelis",
+    "anonymous": "Anonimas",
+    "rate_quality": "Įvertinti kokybę",
+    "rate_n": "{n} žvaigždutės",
+    "approved_only": "Tik patvirtinti"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ Tai visam laikui ištrina VISUS ciklus ir profilius. To nebus galima atšaukti.",
     "wipe_all_ok": "Ištrinti viską",
     "force_stop_title": "Priverstinai sustabdyti ciklą",
-    "force_stop_msg": "Priverstinai sustabdyti aktyvų ciklą dabar? Ciklas bus išsaugotas kaip nutrauktas."
+    "force_stop_msg": "Priverstinai sustabdyti aktyvų ciklą dabar? Ciklas bus išsaugotas kaip nutrauktas.",
+    "store_import": "Importuoti etaloninį ciklą",
+    "store_share": "Bendrinti bendruomenės parduotuvėje"
   },
   "msg": {
     "appliance_monitor": "Prietaisų monitorius",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Ar išsaugoti šiuos {n} nustatymus šiame įrenginyje? {list}",
     "no_logs_match": "Nė vienas žurnalo įrašas neatitinka šių filtrų.",
     "pg_analysis_hint2": "Pasirinkite ciklą ir paspauskite Vykdyti, kad įkeltumėte atitikties analizę.",
-    "pg_analysis_empty2": "Paspauskite Vykdyti, kad pamatytumėte atitikties analizę."
+    "pg_analysis_empty2": "Paspauskite Vykdyti, kad pamatytumėte atitikties analizę.",
+    "imported_readonly": "Importuota iš bendruomenės parduotuvės. Rodoma kaip nuoroda ir atitikčiai nustatyti. Ji neįskaičiuojama į jūsų statistiką ir jos negalima redaguoti.",
+    "merge_no_imports": "Importuotų įrašų negalima sujungti su tikru ciklu. Panaikinkite jų žymėjimą, kad galėtumėte sujungti.",
+    "store_enable_hint": "Įjunkite interneto funkcijas nustatymuose, kad galėtumėte naršyti ir importuoti bendruomenės etaloninius ciklus.",
+    "online_intro": "Dalykitės ir atsisiųskite etaloninius ciklus su kitais WashData naudotojais. Visos interneto funkcijos yra pasirenkamos ir pagal numatytuosius nustatymus išjungtos.",
+    "store_share_intro": "Įkelkite šį etaloninį ciklą, kad juo galėtų naudotis kiti tą patį prietaisą turintys naudotojai. Prieš paskelbiant viešai jis peržiūrimas.",
+    "online_intro_global": "Naršykite ir bendrinkite etaloninius įrašus su kitais WashData naudotojais bei patvirtinkite prietaisų įrašus. Vienas prisijungimas taikomas visai jūsų WashData integracijai; prietaiso prekės ženklas ir modelis nustatomi kiekvienam prietaisui atskirai skiltyje Pagrindinė konfigūracija. Visos interneto funkcijos yra pasirenkamos ir pagal numatytuosius nustatymus išjungtos.",
+    "online_unavailable": "Interneto funkcijos šiame serveryje nepasiekiamos.",
+    "store_picker_offline": "Įjunkite interneto funkcijas nustatymų krumpliaratyje, kad galėtumėte rinktis iš bendruomenės katalogo.",
+    "pick_brand_first": "Pirmiausia pasirinkite prietaiso prekės ženklą.",
+    "model_not_found": "Kol kas nėra kataloge.",
+    "connect_to_confirm": "Prisijunkite nustatymų krumpliaratyje, kad galėtumėte patvirtinti ar įvertinti."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -828,7 +865,9 @@
     "person": "pridėti asmenį…",
     "phase_name": "pvz. Išankstinis skalbimas",
     "profile_name": "pvz. Medvilnė 40°C",
-    "maintenance_notes": "pvz., pakeistas filtras, išvalytas durelių sandariklis"
+    "maintenance_notes": "pvz., pakeistas filtras, išvalytas durelių sandariklis",
+    "store_brand": "pvz., Bosch",
+    "store_model": "pvz., WAT28401"
   },
   "pref": {
     "date_absolute": "Absoliutus (pvz., liepos 2 d. 14:32)",
@@ -1236,6 +1275,14 @@
     "energy_weight": {
       "label": "Energijos svoris",
       "doc": "Kaip stipriai teikiama pirmenybė programai, kurios tipinės energijos sąnaudos atitinka šį ciklą."
+    },
+    "store_brand": {
+      "label": "Prietaiso prekės ženklas",
+      "doc": "Nebūtina. Prietaiso prekės ženklas, pasirenkamas iš bendruomenės katalogo. Naudojamas atitinkamiems etaloniniams įrašams rasti ir bendrinti. Palikite tuščią, jei nenaudojate interneto funkcijų."
+    },
+    "store_model": {
+      "label": "Prietaiso modelis",
+      "doc": "Nebūtina. Prietaiso modelis, pasirenkamas iš bendruomenės katalogo, kai nustatytas prekės ženklas. Jei jūsų modelio sąraše nėra, galite jį įtraukti į katalogą."
     }
   },
   "setting_group": {
@@ -1313,6 +1360,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Tylos valandos ir etapai"
+    },
+    "device_info": {
+      "label": "Prietaiso informacija"
+    },
+    "basic_configuration": {
+      "label": "Pagrindinė konfigūracija"
     }
   },
   "status": {
@@ -1336,7 +1389,8 @@
     "reverting": "Grąžinama…",
     "trimming": "Apkarpoma…",
     "splitting": "Padalijama…",
-    "deleting": "Trinama…"
+    "deleting": "Trinama…",
+    "imported": "Importuota"
   },
   "tab": {
     "advanced": "Išplėstinė",
@@ -1353,7 +1407,8 @@
     "subtab_phase_catalog": "Fazių katalogas",
     "subtab_profiles": "Profiliai",
     "maintenance": "Priežiūra",
-    "playground": "Bandymų aikštelė"
+    "playground": "Bandymų aikštelė",
+    "store": "Parduotuvė"
   },
   "tag": {
     "early_end": "Ankstyva pabaiga",
@@ -1433,7 +1488,27 @@
     "processed": "Apdorota {bits}",
     "processed_cycles": "{n} ciklų",
     "processed_suggestions": "{n} pasiūlymų",
-    "processed_models": "{n} modelių paaukštinta"
+    "processed_models": "{n} modelių paaukštinta",
+    "store_search_failed": "Paieška nepavyko: {error}",
+    "store_connect_failed": "Nepavyko prisijungti: {error}",
+    "store_connected": "Prisijungta prie bendruomenės parduotuvės",
+    "store_disconnected": "Atsijungta nuo bendruomenės parduotuvės",
+    "store_error": "Klaida: {error}",
+    "store_unavailable": "Bendruomenės parduotuvė nepasiekiama.",
+    "store_pick_profile": "Pasirinkite profilį, į kurį sujungti",
+    "store_name_required": "Įveskite profilio pavadinimą",
+    "store_import_failed": "Nepavyko importuoti: {error}",
+    "store_imported": "Importuota į {profile}",
+    "store_program_required": "Įveskite programos pavadinimą",
+    "store_no_appliance": "Pirmiausia nustatymuose nurodykite prietaiso prekės ženklą ir modelį.",
+    "store_share_failed": "Nepavyko bendrinti: {error}",
+    "store_shared": "Bendrinta bendruomenės parduotuvėje - laukiama peržiūros.",
+    "appliance_added": "Prietaisas pridėtas - laukiama patvirtinimo",
+    "thanks_confirming": "Ačiū už patvirtinimą",
+    "device_approved": "Bendruomenė patvirtino",
+    "rating_saved": "Kokybės įvertinimas išsaugotas",
+    "brand_added": "Prekės ženklas pridėtas - laukiama patvirtinimo",
+    "profile_added": "Profilis pridėtas - laukiama patvirtinimo"
   },
   "suggestion": {
     "both_agree": "WashData rekomenduoja",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "Būtų išsiųstas svarbaus etapo pranešimas.",
     "notify_held": "Pranešimas buvo sulaikytas dėl tylos valandų.",
     "finished": "Ciklas pasiekė galutinę būseną ir baigėsi."
+  },
+  "store": {
+    "browse": "Naršyti",
+    "device": "Prietaisas",
+    "favorites": "Mėgstamiausi",
+    "search_ph": "Ieškoti pagal prekės ženklą ar modelį…",
+    "no_results": "Atitinkančių prietaisų nerasta. Bandykite kitą paiešką.",
+    "n_programs": "{n} programos",
+    "n_cycles": "{n} ciklai",
+    "no_programs": "Šiam prietaisui dar nėra bendrintų programų.",
+    "no_cycles": "Šiai programai dar nėra bendrintų etaloninių ciklų.",
+    "anon": "anonimas",
+    "uploaded_by": "Bendrino {name}",
+    "connected_as": "Prisijungta kaip {name}",
+    "not_connected": "Neprisijungta. Prijunkite GitHub paskyrą, kad galėtumėte bendrinti savo ciklus.",
+    "import_new": "Naujas profilis",
+    "import_merge": "Sujungti su esamu",
+    "merge_target": "Sujungti su profiliu",
+    "description": "Aprašymas (nebūtina)",
+    "contributed_by": "autorius {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Kol kas nėra įvertinimų"
+  },
+  "settings": {
+    "gear": {
+      "title": "Nustatymai"
+    }
+  },
+  "link": {
+    "manual": "Vadovas ↗",
+    "add_appliance": "Pridėkite savo prietaisą"
+  },
+  "tip": {
+    "add_brand": "Prekės ženklo nėra sąraše? Pridėkite jį į bendruomenės katalogą",
+    "add_appliance": "Modelio nėra sąraše? Pridėkite savo prietaisą į bendruomenės katalogą",
+    "add_profile": "Pridėkite šio prietaiso profilį bendruomenės svetainėje"
   }
 }

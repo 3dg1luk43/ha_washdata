@@ -23,7 +23,12 @@
     "using_defaults": "Utilisation des valeurs par défaut expédiées",
     "using_tuned": "Utiliser des poids adaptés",
     "overrun_ratio": "({x}x le temps prévu)",
-    "underrun_ratio": "({pct} % du temps prévu)"
+    "underrun_ratio": "({pct} % du temps prévu)",
+    "awaiting_tip": "En attente de l'approbation de la communauté",
+    "awaiting_n": "En attente d'approbation · {n} confirmés",
+    "approved": "Approuvé",
+    "awaiting": "En attente d'approbation",
+    "imported_tip": "Importé depuis la boutique communautaire. Utilisé uniquement pour la correspondance, non compté dans les statistiques."
   },
   "btn": {
     "add_device": "+ Ajouter un appareil",
@@ -150,7 +155,16 @@
     "group_suggest": "Groupe {n} : {members}",
     "pg_apply_best": "Appliquer le meilleur",
     "pg_apply_to_settings": "Enregistrer dans les réglages",
-    "pg_apply_to_settings_tip": "Copier les valeurs que vous avez modifiées ici dans les réglages actifs de cet appareil"
+    "pg_apply_to_settings_tip": "Copier les valeurs que vous avez modifiées ici dans les réglages actifs de cet appareil",
+    "search": "Rechercher",
+    "import": "Importer",
+    "disconnect": "Déconnecter",
+    "connect_github": "Connecter GitHub",
+    "save_appliance": "Enregistrer l'appareil",
+    "share_to_store": "Partager sur la boutique",
+    "share": "Partager",
+    "confirm_appliance": "Confirmer cet appareil",
+    "confirmed": "Confirmé"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Paramètres de détection",
     "pg_timeline": "Chronologie des événements",
     "pg_outcome": "Résultat de la simulation",
-    "pg_across_cycles": "Sur l'ensemble de vos cycles"
+    "pg_across_cycles": "Sur l'ensemble de vos cycles",
+    "community_store": "Boutique communautaire",
+    "online_account": "Boutique communautaire et fonctionnalités en ligne"
   },
   "health": {
     "fair": "Qualité de profil acceptable",
@@ -527,7 +543,15 @@
     "pg_load_run": "Recharger cette exécution",
     "pg_match_confidence": "Confiance de correspondance",
     "pg_envelope_fit": "Conformité à l'enveloppe",
-    "pg_envelope_fit_tip": "Dans quelle mesure le cycle reste à l'intérieur de l'enveloppe de puissance enregistrée de ce profil, un autre angle que la confiance de correspondance."
+    "pg_envelope_fit_tip": "Dans quelle mesure le cycle reste à l'intérieur de l'enveloppe de puissance enregistrée de ce profil, un autre angle que la confiance de correspondance.",
+    "n_imported_note": ", {n} importés",
+    "enable_online": "Activer les fonctionnalités en ligne",
+    "store_brand": "Marque de l'appareil",
+    "store_model": "Modèle de l'appareil",
+    "anonymous": "Anonyme",
+    "rate_quality": "Évaluer la qualité",
+    "rate_n": "{n} étoiles",
+    "approved_only": "Approuvés uniquement"
   },
   "log": {
     "all_levels": "Tous niveaux",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ Cela supprime définitivement TOUS les cycles et profils. Cette action est irréversible.",
     "wipe_all_ok": "Tout effacer",
     "force_stop_title": "Forcer l'arrêt du cycle",
-    "force_stop_msg": "Forcer l'arrêt du cycle actif maintenant ? Le cycle sera enregistré comme interrompu."
+    "force_stop_msg": "Forcer l'arrêt du cycle actif maintenant ? Le cycle sera enregistré comme interrompu.",
+    "store_import": "Importer un cycle de référence",
+    "store_share": "Partager sur la boutique communautaire"
   },
   "msg": {
     "appliance_monitor": "Moniteur d'appareils",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Enregistrer ces {n} réglage(s) sur cet appareil ? {list}",
     "no_logs_match": "Aucun enregistrement de journal ne correspond à ces filtres.",
     "pg_analysis_hint2": "Sélectionnez un cycle et cliquez sur Exécuter pour charger l'analyse de correspondance.",
-    "pg_analysis_empty2": "Cliquez sur Exécuter pour voir l'analyse de correspondance."
+    "pg_analysis_empty2": "Cliquez sur Exécuter pour voir l'analyse de correspondance.",
+    "imported_readonly": "Importé depuis la boutique communautaire. Affiché à titre de référence et pour la correspondance. Il n'est pas compté dans vos statistiques et ne peut pas être modifié.",
+    "merge_no_imports": "Les enregistrements importés ne peuvent pas être fusionnés dans un cycle réel. Désélectionnez-les pour fusionner.",
+    "store_enable_hint": "Activez les fonctionnalités en ligne dans les Paramètres pour parcourir et importer les cycles de référence de la communauté.",
+    "online_intro": "Partagez et téléchargez des cycles de référence avec d'autres utilisateurs de WashData. Toutes les fonctionnalités en ligne sont facultatives et désactivées par défaut.",
+    "store_share_intro": "Téléversez ce cycle de référence pour que d'autres personnes possédant le même appareil puissent l'utiliser. Il est examiné avant d'apparaître publiquement.",
+    "online_intro_global": "Parcourez et partagez des enregistrements de référence avec d'autres utilisateurs de WashData, et confirmez les fiches d'appareils. Une seule connexion s'applique à toute votre intégration WashData ; la marque et le modèle de l'appareil se définissent par appareil dans Général. Toutes les fonctionnalités en ligne sont facultatives et désactivées par défaut.",
+    "online_unavailable": "Les fonctionnalités en ligne ne sont pas disponibles sur ce serveur.",
+    "store_picker_offline": "Activez les fonctionnalités en ligne dans l'icône des paramètres pour choisir dans le catalogue de la communauté.",
+    "pick_brand_first": "Choisissez d'abord une marque d'appareil.",
+    "model_not_found": "Pas encore dans le catalogue.",
+    "connect_to_confirm": "Connectez-vous dans l'icône des paramètres pour confirmer ou évaluer."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Chute soudaine traitée comme une fin immédiate",
@@ -845,7 +882,9 @@
     "person": "ajouter une personne…",
     "phase_name": "ex. Prélavage",
     "profile_name": "ex. Coton 40°C",
-    "maintenance_notes": "p. ex. filtre remplacé, joint de porte nettoyé"
+    "maintenance_notes": "p. ex. filtre remplacé, joint de porte nettoyé",
+    "store_brand": "p. ex. Bosch",
+    "store_model": "p. ex. WAT28401"
   },
   "pref": {
     "date_absolute": "Absolu (par exemple, 14 h 32 le 2 juillet)",
@@ -1253,6 +1292,14 @@
     "energy_weight": {
       "label": "Poids de l'énergie",
       "doc": "À quel point un programme dont la consommation d'énergie habituelle correspond à ce cycle est privilégié."
+    },
+    "store_brand": {
+      "label": "Marque de l'appareil",
+      "doc": "Facultatif. La marque de l'appareil, choisie dans le catalogue de la communauté. Utilisée pour trouver et partager des enregistrements de référence correspondants. Laissez vide si vous n'utilisez pas les fonctionnalités en ligne."
+    },
+    "store_model": {
+      "label": "Modèle de l'appareil",
+      "doc": "Facultatif. Le modèle de l'appareil, choisi dans le catalogue de la communauté une fois la marque définie. Si votre modèle n'y figure pas, vous pouvez l'ajouter au catalogue."
     }
   },
   "setting_group": {
@@ -1330,6 +1377,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Heures silencieuses et jalons"
+    },
+    "device_info": {
+      "label": "Informations sur l'appareil"
+    },
+    "basic_configuration": {
+      "label": "Configuration de base"
     }
   },
   "status": {
@@ -1353,7 +1406,8 @@
     "reverting": "Annulation…",
     "trimming": "Rognage…",
     "splitting": "Fractionnement…",
-    "deleting": "Suppression…"
+    "deleting": "Suppression…",
+    "imported": "Importé"
   },
   "tab": {
     "advanced": "Avancé",
@@ -1370,7 +1424,8 @@
     "subtab_phase_catalog": "Catalogue de phases",
     "subtab_profiles": "Profils",
     "maintenance": "Maintenance",
-    "playground": "Bac à sable"
+    "playground": "Bac à sable",
+    "store": "Boutique"
   },
   "tag": {
     "early_end": "Fin anticipée",
@@ -1450,7 +1505,27 @@
     "resume_no_cycle": "Aucun cycle en pause à reprendre",
     "delete_partial_failed": "Certains éléments n'ont pas pu être supprimés et ont été restaurés",
     "pg_run_gone": "Cette exécution n'est plus disponible.",
-    "task_cancelled": "Annulé."
+    "task_cancelled": "Annulé.",
+    "store_search_failed": "Échec de la recherche : {error}",
+    "store_connect_failed": "Échec de la connexion : {error}",
+    "store_connected": "Connecté à la boutique communautaire",
+    "store_disconnected": "Déconnecté de la boutique communautaire",
+    "store_error": "Erreur : {error}",
+    "store_unavailable": "La boutique communautaire n'est pas disponible.",
+    "store_pick_profile": "Choisissez un profil dans lequel fusionner",
+    "store_name_required": "Saisissez un nom de profil",
+    "store_import_failed": "Échec de l'importation : {error}",
+    "store_imported": "Importé dans {profile}",
+    "store_program_required": "Saisissez un nom de programme",
+    "store_no_appliance": "Définissez d'abord la marque et le modèle de votre appareil dans les Paramètres.",
+    "store_share_failed": "Échec du partage : {error}",
+    "store_shared": "Partagé sur la boutique communautaire, en attente de révision.",
+    "appliance_added": "Appareil ajouté, en attente d'approbation",
+    "thanks_confirming": "Merci d'avoir confirmé",
+    "device_approved": "Approuvé par la communauté",
+    "rating_saved": "Évaluation de la qualité enregistrée",
+    "brand_added": "Marque ajoutée, en attente d'approbation",
+    "profile_added": "Profil ajouté, en attente d'approbation"
   },
   "suggestion": {
     "both_agree": "WashData recommande",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "Une notification d'étape serait envoyée.",
     "notify_held": "Une notification a été différée pour les heures silencieuses.",
     "finished": "Le cycle a atteint son état final et s'est terminé."
+  },
+  "store": {
+    "browse": "Parcourir",
+    "device": "Appareil",
+    "favorites": "Favoris",
+    "search_ph": "Rechercher par marque ou modèle…",
+    "no_results": "Aucun appareil correspondant trouvé. Essayez une autre recherche.",
+    "n_programs": "{n} programmes",
+    "n_cycles": "{n} cycles",
+    "no_programs": "Aucun programme partagé pour cet appareil pour le moment.",
+    "no_cycles": "Aucun cycle de référence partagé pour ce programme pour le moment.",
+    "anon": "anonyme",
+    "uploaded_by": "Partagé par {name}",
+    "connected_as": "Connecté en tant que {name}",
+    "not_connected": "Non connecté. Connectez un compte GitHub pour partager vos propres cycles.",
+    "import_new": "Nouveau profil",
+    "import_merge": "Fusionner dans un profil existant",
+    "merge_target": "Fusionner dans le profil",
+    "description": "Description (facultatif)",
+    "contributed_by": "par {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Aucune évaluation pour le moment"
+  },
+  "settings": {
+    "gear": {
+      "title": "Paramètres"
+    }
+  },
+  "link": {
+    "manual": "Manuel ↗",
+    "add_appliance": "Ajouter votre appareil"
+  },
+  "tip": {
+    "add_brand": "Marque absente de la liste ? Ajoutez-la au catalogue de la communauté",
+    "add_appliance": "Modèle absent de la liste ? Ajoutez votre appareil au catalogue de la communauté",
+    "add_profile": "Ajoutez un profil pour cet appareil sur le site de la communauté"
   }
 }

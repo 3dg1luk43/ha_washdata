@@ -23,7 +23,12 @@
     "using_defaults": "Standaardwaarden voor verzending gebruiken",
     "using_tuned": "Gebruik van afgestemde gewichten",
     "overrun_ratio": "({x}x verwacht)",
-    "underrun_ratio": "({pct}% van verwacht)"
+    "underrun_ratio": "({pct}% van verwacht)",
+    "awaiting_tip": "Wacht op goedkeuring door de community",
+    "awaiting_n": "Wacht op goedkeuring · {n} bevestigd",
+    "approved": "Goedgekeurd",
+    "awaiting": "Wacht op goedkeuring",
+    "imported_tip": "Geïmporteerd uit de communitystore. Alleen gebruikt voor matchen, telt niet mee in statistieken."
   },
   "btn": {
     "add_device": "+ Apparaat toevoegen",
@@ -150,7 +155,16 @@
     "group_suggest": "Groep {n}: {members}",
     "pg_apply_best": "Beste toepassen",
     "pg_apply_to_settings": "Opslaan in instellingen",
-    "pg_apply_to_settings_tip": "De hier bewerkte waarden kopiëren naar de actieve instellingen van dit apparaat"
+    "pg_apply_to_settings_tip": "De hier bewerkte waarden kopiëren naar de actieve instellingen van dit apparaat",
+    "search": "Zoeken",
+    "import": "Importeren",
+    "disconnect": "Verbinding verbreken",
+    "connect_github": "Verbinden met GitHub",
+    "save_appliance": "Apparaat opslaan",
+    "share_to_store": "Delen in store",
+    "share": "Delen",
+    "confirm_appliance": "Dit apparaat bevestigen",
+    "confirmed": "Bevestigd"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Detectie-instellingen",
     "pg_timeline": "Gebeurtenistijdlijn",
     "pg_outcome": "Simulatieresultaat",
-    "pg_across_cycles": "Over al je cycli"
+    "pg_across_cycles": "Over al je cycli",
+    "community_store": "Communitystore",
+    "online_account": "Communitystore en onlinefuncties"
   },
   "health": {
     "fair": "Acceptabele profielkwaliteit",
@@ -527,7 +543,15 @@
     "pg_load_run": "Deze uitvoering opnieuw laden",
     "pg_match_confidence": "Matchbetrouwbaarheid",
     "pg_envelope_fit": "Envelop-passing",
-    "pg_envelope_fit_tip": "Hoe strak de cyclus binnen de opgeslagen vermogensenvelop van dit profiel blijft, een andere invalshoek dan matchbetrouwbaarheid."
+    "pg_envelope_fit_tip": "Hoe strak de cyclus binnen de opgeslagen vermogensenvelop van dit profiel blijft, een andere invalshoek dan matchbetrouwbaarheid.",
+    "n_imported_note": ", {n} geïmporteerd",
+    "enable_online": "Onlinefuncties inschakelen",
+    "store_brand": "Merk van apparaat",
+    "store_model": "Model van apparaat",
+    "anonymous": "Anoniem",
+    "rate_quality": "Kwaliteit beoordelen",
+    "rate_n": "{n} sterren",
+    "approved_only": "Alleen goedgekeurd"
   },
   "log": {
     "all_levels": "Alle niveaus",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ Hiermee worden ALLE cycli en profielen permanent verwijderd. Dit kan niet ongedaan worden gemaakt.",
     "wipe_all_ok": "Alles wissen",
     "force_stop_title": "Cyclus geforceerd stoppen",
-    "force_stop_msg": "De actieve cyclus nu geforceerd stoppen? De cyclus wordt opgeslagen als onderbroken."
+    "force_stop_msg": "De actieve cyclus nu geforceerd stoppen? De cyclus wordt opgeslagen als onderbroken.",
+    "store_import": "Referentiecyclus importeren",
+    "store_share": "Delen in communitystore"
   },
   "msg": {
     "appliance_monitor": "Apparaatmonitor",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Deze {n} instelling(en) opslaan voor dit apparaat? {list}",
     "no_logs_match": "Geen logrecords komen overeen met deze filters.",
     "pg_analysis_hint2": "Kies een cyclus en druk op Uitvoeren om de matchanalyse te laden.",
-    "pg_analysis_empty2": "Druk op Uitvoeren om de matchanalyse te zien."
+    "pg_analysis_empty2": "Druk op Uitvoeren om de matchanalyse te zien.",
+    "imported_readonly": "Geïmporteerd uit de communitystore. Weergegeven ter referentie en voor matchen. Telt niet mee in je statistieken en kan niet worden bewerkt.",
+    "merge_no_imports": "Geïmporteerde opnamen kunnen niet worden samengevoegd met een echte cyclus. Deselecteer ze om samen te voegen.",
+    "store_enable_hint": "Schakel onlinefuncties in bij Instellingen om referentiecycli van de community te bekijken en te importeren.",
+    "online_intro": "Deel referentiecycli met andere WashData-gebruikers en download ze. Alle onlinefuncties zijn optioneel en standaard uitgeschakeld.",
+    "store_share_intro": "Upload deze referentiecyclus zodat anderen met hetzelfde apparaat hem kunnen gebruiken. Hij wordt beoordeeld voordat hij openbaar verschijnt.",
+    "online_intro_global": "Bekijk en deel referentieopnamen met andere WashData-gebruikers en bevestig apparaatvermeldingen. Eén verbinding geldt voor je hele WashData-integratie; merk en model van het apparaat worden per apparaat ingesteld onder Basis. Alle onlinefuncties zijn optioneel en standaard uitgeschakeld.",
+    "online_unavailable": "Onlinefuncties zijn niet beschikbaar op deze server.",
+    "store_picker_offline": "Schakel onlinefuncties in via het instellingentandwiel om te kiezen uit de communitycatalogus.",
+    "pick_brand_first": "Kies eerst een merk van het apparaat.",
+    "model_not_found": "Nog niet in de catalogus.",
+    "connect_to_confirm": "Verbind via het instellingentandwiel om te bevestigen of te beoordelen."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plotselinge daling behandeld als onmiddellijk einde",
@@ -845,7 +882,9 @@
     "person": "voeg een persoon toe…",
     "phase_name": "bijv. Voorwas",
     "profile_name": "bijv. Katoen 40°C",
-    "maintenance_notes": "bijv. filter vervangen, deurrubber gereinigd"
+    "maintenance_notes": "bijv. filter vervangen, deurrubber gereinigd",
+    "store_brand": "bijv. Bosch",
+    "store_model": "bijv. WAT28401"
   },
   "pref": {
     "date_absolute": "Absoluut (bijv. 14:32 op 2 juli)",
@@ -1253,6 +1292,14 @@
     "energy_weight": {
       "label": "Gewicht van energie",
       "doc": "Hoe sterk de voorkeur uitgaat naar een programma waarvan het typische energieverbruik bij deze cyclus past."
+    },
+    "store_brand": {
+      "label": "Merk van apparaat",
+      "doc": "Optioneel. Het merk van het apparaat, gekozen uit de communitycatalogus. Wordt gebruikt om passende referentieopnamen te vinden en te delen. Laat leeg als je geen onlinefuncties gebruikt."
+    },
+    "store_model": {
+      "label": "Model van apparaat",
+      "doc": "Optioneel. Het model van het apparaat, gekozen uit de communitycatalogus zodra een merk is ingesteld. Als je model niet vermeld staat, kun je het toevoegen aan de catalogus."
     }
   },
   "setting_group": {
@@ -1330,6 +1377,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Stille uren en mijlpalen"
+    },
+    "device_info": {
+      "label": "Apparaatinfo"
+    },
+    "basic_configuration": {
+      "label": "Basisconfiguratie"
     }
   },
   "status": {
@@ -1353,7 +1406,8 @@
     "reverting": "Terugzetten…",
     "trimming": "Bijsnijden…",
     "splitting": "Splitsen…",
-    "deleting": "Verwijderen…"
+    "deleting": "Verwijderen…",
+    "imported": "Geïmporteerd"
   },
   "suggestion": {
     "both_agree": "WashData raadt aan",
@@ -1466,7 +1520,8 @@
     "subtab_phase_catalog": "Fasecatalogus",
     "subtab_profiles": "Profielen",
     "maintenance": "Onderhoud",
-    "playground": "Speeltuin"
+    "playground": "Speeltuin",
+    "store": "Store"
   },
   "tag": {
     "early_end": "Vroeg einde",
@@ -1546,7 +1601,27 @@
     "processed": "Verwerkt: {bits}",
     "processed_cycles": "{n} cycli",
     "processed_suggestions": "{n} suggesties",
-    "processed_models": "{n} modellen geactiveerd"
+    "processed_models": "{n} modellen geactiveerd",
+    "store_search_failed": "Zoeken mislukt: {error}",
+    "store_connect_failed": "Verbinden mislukt: {error}",
+    "store_connected": "Verbonden met de communitystore",
+    "store_disconnected": "Verbinding met de communitystore verbroken",
+    "store_error": "Fout: {error}",
+    "store_unavailable": "De communitystore is niet beschikbaar.",
+    "store_pick_profile": "Kies een profiel om in samen te voegen",
+    "store_name_required": "Voer een profielnaam in",
+    "store_import_failed": "Importeren mislukt: {error}",
+    "store_imported": "Geïmporteerd in {profile}",
+    "store_program_required": "Voer een programmanaam in",
+    "store_no_appliance": "Stel eerst het merk en model van je apparaat in bij Instellingen.",
+    "store_share_failed": "Delen mislukt: {error}",
+    "store_shared": "Gedeeld in de communitystore, in afwachting van beoordeling.",
+    "appliance_added": "Apparaat toegevoegd, wacht op goedkeuring",
+    "thanks_confirming": "Bedankt voor het bevestigen",
+    "device_approved": "Goedgekeurd door de community",
+    "rating_saved": "Kwaliteitsbeoordeling opgeslagen",
+    "brand_added": "Merk toegevoegd, wacht op goedkeuring",
+    "profile_added": "Profiel toegevoegd, wacht op goedkeuring"
   },
   "trend": {
     "down": "Trend naar beneden",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "Er zou een mijlpaalmelding worden verzonden.",
     "notify_held": "Een melding werd vastgehouden vanwege de stille uren.",
     "finished": "De cyclus bereikte een eindtoestand en stopte."
+  },
+  "store": {
+    "browse": "Bladeren",
+    "device": "Apparaat",
+    "favorites": "Favorieten",
+    "search_ph": "Zoeken op merk of model…",
+    "no_results": "Geen passende apparaten gevonden. Probeer een andere zoekopdracht.",
+    "n_programs": "{n} programma's",
+    "n_cycles": "{n} cycli",
+    "no_programs": "Nog geen gedeelde programma's voor dit apparaat.",
+    "no_cycles": "Nog geen referentiecycli gedeeld voor dit programma.",
+    "anon": "anoniem",
+    "uploaded_by": "Gedeeld door {name}",
+    "connected_as": "Verbonden als {name}",
+    "not_connected": "Niet verbonden. Verbind een GitHub-account om je eigen cycli te delen.",
+    "import_new": "Nieuw profiel",
+    "import_merge": "Samenvoegen met bestaand",
+    "merge_target": "Samenvoegen in profiel",
+    "description": "Beschrijving (optioneel)",
+    "contributed_by": "door {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Nog geen beoordelingen"
+  },
+  "settings": {
+    "gear": {
+      "title": "Instellingen"
+    }
+  },
+  "link": {
+    "manual": "Handleiding ↗",
+    "add_appliance": "Je apparaat toevoegen"
+  },
+  "tip": {
+    "add_brand": "Merk niet vermeld? Voeg het toe aan de communitycatalogus",
+    "add_appliance": "Model niet vermeld? Voeg je apparaat toe aan de communitycatalogus",
+    "add_profile": "Voeg op de communitysite een profiel toe voor dit apparaat"
   }
 }

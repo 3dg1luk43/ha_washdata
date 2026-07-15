@@ -23,7 +23,12 @@
     "using_defaults": "Folosind setările implicite",
     "using_tuned": "Folosind ponderi ajustate",
     "overrun_ratio": "({x}x față de estimat)",
-    "underrun_ratio": "({pct}% din estimat)"
+    "underrun_ratio": "({pct}% din estimat)",
+    "awaiting_tip": "În așteptarea aprobării comunității",
+    "awaiting_n": "În așteptarea aprobării · {n} confirmate",
+    "approved": "Aprobat",
+    "awaiting": "În așteptarea aprobării",
+    "imported_tip": "Importat din magazinul comunității. Folosit doar pentru potrivire, necontabilizat în statistici."
   },
   "btn": {
     "add_device": "+ Adăugați dispozitiv",
@@ -150,7 +155,16 @@
     "group_suggest": "Grup {n}: {members}",
     "pg_apply_best": "Aplică cel mai bun",
     "pg_apply_to_settings": "Salvează în setări",
-    "pg_apply_to_settings_tip": "Copiază valorile pe care le-ai modificat aici în setările active ale acestui dispozitiv"
+    "pg_apply_to_settings_tip": "Copiază valorile pe care le-ai modificat aici în setările active ale acestui dispozitiv",
+    "search": "Căutați",
+    "import": "Importați",
+    "disconnect": "Deconectați",
+    "connect_github": "Conectați GitHub",
+    "save_appliance": "Salvați aparatul",
+    "share_to_store": "Partajați în magazin",
+    "share": "Partajați",
+    "confirm_appliance": "Confirmați acest aparat",
+    "confirmed": "Confirmat"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Setări de detectare",
     "pg_timeline": "Cronologia evenimentelor",
     "pg_outcome": "Rezultatul simulării",
-    "pg_across_cycles": "În toate ciclurile tale"
+    "pg_across_cycles": "În toate ciclurile tale",
+    "community_store": "Magazinul comunității",
+    "online_account": "Magazinul comunității și funcții online"
   },
   "health": {
     "fair": "Calitate acceptabilă a profilului",
@@ -527,7 +543,15 @@
     "pg_load_run": "Reîncarcă această rulare",
     "pg_match_confidence": "Încrederea în potrivire",
     "pg_envelope_fit": "Încadrarea în anvelopă",
-    "pg_envelope_fit_tip": "Cât de bine se încadrează ciclul în anvelopa de putere salvată a acestui profil, o altă perspectivă decât încrederea în potrivire."
+    "pg_envelope_fit_tip": "Cât de bine se încadrează ciclul în anvelopa de putere salvată a acestui profil, o altă perspectivă decât încrederea în potrivire.",
+    "n_imported_note": ", {n} importate",
+    "enable_online": "Activați funcțiile online",
+    "store_brand": "Marca aparatului",
+    "store_model": "Modelul aparatului",
+    "anonymous": "Anonim",
+    "rate_quality": "Evaluați calitatea",
+    "rate_n": "{n} stele",
+    "approved_only": "Doar aprobate"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ Aceasta șterge definitiv TOATE ciclurile și profilurile. Această acțiune nu poate fi anulată.",
     "wipe_all_ok": "Ștergeți tot",
     "force_stop_title": "Opriți forțat ciclul",
-    "force_stop_msg": "Opriți forțat ciclul activ acum? Ciclul va fi salvat ca întrerupt."
+    "force_stop_msg": "Opriți forțat ciclul activ acum? Ciclul va fi salvat ca întrerupt.",
+    "store_import": "Importați ciclu de referință",
+    "store_share": "Partajați în magazinul comunității"
   },
   "msg": {
     "appliance_monitor": "Monitor de aparate",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Salvezi aceste {n} setări pe acest dispozitiv? {list}",
     "no_logs_match": "Nicio înregistrare din jurnal nu corespunde acestor filtre.",
     "pg_analysis_hint2": "Selectați un ciclu și apăsați Rulați pentru a încărca analiza potrivirii.",
-    "pg_analysis_empty2": "Apăsați Rulați pentru a vedea analiza potrivirii."
+    "pg_analysis_empty2": "Apăsați Rulați pentru a vedea analiza potrivirii.",
+    "imported_readonly": "Importat din magazinul comunității. Afișat pentru referință și potrivire. Nu este contabilizat în statisticile dvs. și nu poate fi editat.",
+    "merge_no_imports": "Înregistrările importate nu pot fi îmbinate într-un ciclu real. Deselectați-le pentru a le îmbina.",
+    "store_enable_hint": "Activați funcțiile online în Setări pentru a răsfoi și importa cicluri de referință ale comunității.",
+    "online_intro": "Partajați și descărcați cicluri de referință cu alți utilizatori WashData. Toate funcțiile online sunt opționale și dezactivate în mod implicit.",
+    "store_share_intro": "Încărcați acest ciclu de referință pentru ca alți utilizatori cu același aparat să îl poată folosi. Este examinat înainte de a apărea public.",
+    "online_intro_global": "Răsfoiți și partajați înregistrări de referință cu alți utilizatori WashData și confirmați intrările de aparate. O singură conexiune se aplică întregii dvs. integrări WashData; marca și modelul aparatului se stabilesc per dispozitiv în De bază. Toate funcțiile online sunt opționale și dezactivate în mod implicit.",
+    "online_unavailable": "Funcțiile online nu sunt disponibile pe acest server.",
+    "store_picker_offline": "Activați funcțiile online din pictograma de setări pentru a alege din catalogul comunității.",
+    "pick_brand_first": "Alegeți mai întâi o marcă de aparat.",
+    "model_not_found": "Încă nu este în catalog.",
+    "connect_to_confirm": "Conectați-vă din pictograma de setări pentru a confirma sau a evalua."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -828,7 +865,9 @@
     "person": "adaugă o persoană…",
     "phase_name": "ex. Preclătire",
     "profile_name": "ex. Bumbac 40°C",
-    "maintenance_notes": "de exemplu, filtru înlocuit, garnitura ușii curățată"
+    "maintenance_notes": "de exemplu, filtru înlocuit, garnitura ușii curățată",
+    "store_brand": "de ex. Bosch",
+    "store_model": "de ex. WAT28401"
   },
   "pref": {
     "date_absolute": "Absolut (ex.: 14:32 pe 2 iul.)",
@@ -1236,6 +1275,14 @@
     "energy_weight": {
       "label": "Ponderea energiei",
       "doc": "Cât de puternic este preferat un program al cărui consum obișnuit de energie corespunde acestui ciclu."
+    },
+    "store_brand": {
+      "label": "Marca aparatului",
+      "doc": "Opțional. Marca aparatului, aleasă din catalogul comunității. Folosită pentru a găsi și partaja înregistrări de referință corespunzătoare. Lăsați necompletat dacă nu folosiți funcțiile online."
+    },
+    "store_model": {
+      "label": "Modelul aparatului",
+      "doc": "Opțional. Modelul aparatului, ales din catalogul comunității după ce este stabilită marca. Dacă modelul dvs. nu este listat, îl puteți adăuga în catalog."
     }
   },
   "setting_group": {
@@ -1313,6 +1360,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Ore de liniște și etape"
+    },
+    "device_info": {
+      "label": "Informații despre dispozitiv"
+    },
+    "basic_configuration": {
+      "label": "Configurație de bază"
     }
   },
   "status": {
@@ -1336,7 +1389,8 @@
     "reverting": "Se revine…",
     "trimming": "Se taie…",
     "splitting": "Se divide…",
-    "deleting": "Se șterge…"
+    "deleting": "Se șterge…",
+    "imported": "Importat"
   },
   "tab": {
     "advanced": "Avansat",
@@ -1353,7 +1407,8 @@
     "subtab_phase_catalog": "Catalog de faze",
     "subtab_profiles": "Profiluri",
     "maintenance": "Întreținere",
-    "playground": "Zonă de test"
+    "playground": "Zonă de test",
+    "store": "Magazin"
   },
   "tag": {
     "early_end": "Sfârșit anticipat",
@@ -1433,7 +1488,27 @@
     "resume_no_cycle": "Niciun ciclu în pauză de reluat",
     "delete_partial_failed": "Unele elemente nu au putut fi șterse și au fost restaurate",
     "pg_run_gone": "Această rulare nu mai este disponibilă.",
-    "task_cancelled": "Anulat."
+    "task_cancelled": "Anulat.",
+    "store_search_failed": "Căutarea a eșuat: {error}",
+    "store_connect_failed": "Conectarea a eșuat: {error}",
+    "store_connected": "Conectat la magazinul comunității",
+    "store_disconnected": "Deconectat de la magazinul comunității",
+    "store_error": "Eroare: {error}",
+    "store_unavailable": "Magazinul comunității nu este disponibil.",
+    "store_pick_profile": "Alegeți un profil în care să îmbinați",
+    "store_name_required": "Introduceți un nume de profil",
+    "store_import_failed": "Importul a eșuat: {error}",
+    "store_imported": "Importat în {profile}",
+    "store_program_required": "Introduceți un nume de program",
+    "store_no_appliance": "Stabiliți mai întâi marca și modelul aparatului dvs. în Setări.",
+    "store_share_failed": "Partajarea a eșuat: {error}",
+    "store_shared": "Partajat în magazinul comunității, în așteptarea examinării.",
+    "appliance_added": "Aparat adăugat, în așteptarea aprobării",
+    "thanks_confirming": "Vă mulțumim pentru confirmare",
+    "device_approved": "Aprobat de comunitate",
+    "rating_saved": "Evaluarea calității a fost salvată",
+    "brand_added": "Marcă adăugată, în așteptarea aprobării",
+    "profile_added": "Profil adăugat, în așteptarea aprobării"
   },
   "suggestion": {
     "both_agree": "WashData recomandă",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "Ar fi trimisă o notificare de etapă.",
     "notify_held": "O notificare a fost reținută pentru orele de liniște.",
     "finished": "Ciclul a ajuns într-o stare finală și s-a încheiat."
+  },
+  "store": {
+    "browse": "Răsfoiți",
+    "device": "Dispozitiv",
+    "favorites": "Favorite",
+    "search_ph": "Căutați după marcă sau model…",
+    "no_results": "Nu s-au găsit aparate corespunzătoare. Încercați o altă căutare.",
+    "n_programs": "{n} programe",
+    "n_cycles": "{n} cicluri",
+    "no_programs": "Încă nu există programe partajate pentru acest aparat.",
+    "no_cycles": "Încă nu au fost partajate cicluri de referință pentru acest program.",
+    "anon": "anonim",
+    "uploaded_by": "Partajat de {name}",
+    "connected_as": "Conectat ca {name}",
+    "not_connected": "Neconectat. Conectați un cont GitHub pentru a partaja propriile cicluri.",
+    "import_new": "Profil nou",
+    "import_merge": "Îmbinați într-unul existent",
+    "merge_target": "Îmbinați în profilul",
+    "description": "Descriere (opțional)",
+    "contributed_by": "de {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Încă nicio evaluare"
+  },
+  "settings": {
+    "gear": {
+      "title": "Setări"
+    }
+  },
+  "link": {
+    "manual": "Manual ↗",
+    "add_appliance": "Adăugați aparatul dvs."
+  },
+  "tip": {
+    "add_brand": "Marca nu este listată? Adăugați-o în catalogul comunității",
+    "add_appliance": "Modelul nu este listat? Adăugați aparatul dvs. în catalogul comunității",
+    "add_profile": "Adăugați un profil pentru acest aparat pe site-ul comunității"
   }
 }

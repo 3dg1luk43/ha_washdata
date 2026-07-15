@@ -23,7 +23,12 @@
     "using_defaults": "Brug af afsendte standardindstillinger",
     "using_tuned": "Brug af indstillede vægte",
     "overrun_ratio": "({x}x forventet)",
-    "underrun_ratio": "({pct}% af forventet)"
+    "underrun_ratio": "({pct}% af forventet)",
+    "awaiting_tip": "Afventer godkendelse fra fællesskabet",
+    "awaiting_n": "Afventer godkendelse · {n} bekræftet",
+    "approved": "Godkendt",
+    "awaiting": "Afventer godkendelse",
+    "imported_tip": "Importeret fra fællesskabsbutikken. Bruges kun til matchning, tælles ikke med i statistikken."
   },
   "btn": {
     "add_device": "+ Tilføj enhed",
@@ -150,7 +155,16 @@
     "group_suggest": "Gruppe {n}: {members}",
     "pg_apply_best": "Anvend bedste",
     "pg_apply_to_settings": "Gem i indstillinger",
-    "pg_apply_to_settings_tip": "Kopiér de værdier, du har redigeret her, til denne enheds aktive indstillinger"
+    "pg_apply_to_settings_tip": "Kopiér de værdier, du har redigeret her, til denne enheds aktive indstillinger",
+    "search": "Søg",
+    "import": "Importér",
+    "disconnect": "Afbryd forbindelse",
+    "connect_github": "Forbind GitHub",
+    "save_appliance": "Gem apparat",
+    "share_to_store": "Del i butikken",
+    "share": "Del",
+    "confirm_appliance": "Bekræft dette apparat",
+    "confirmed": "Bekræftet"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Registreringsindstillinger",
     "pg_timeline": "Hændelsestidslinje",
     "pg_outcome": "Simuleringsresultat",
-    "pg_across_cycles": "På tværs af dine cyklusser"
+    "pg_across_cycles": "På tværs af dine cyklusser",
+    "community_store": "Fællesskabsbutik",
+    "online_account": "Fællesskabsbutik og onlinefunktioner"
   },
   "health": {
     "fair": "Acceptabel matchkvalitet",
@@ -527,7 +543,15 @@
     "pg_load_run": "Genindlæs denne kørsel",
     "pg_match_confidence": "Matchsikkerhed",
     "pg_envelope_fit": "Envelope-tilpasning",
-    "pg_envelope_fit_tip": "Hvor tæt cyklussen holder sig inden for denne profils gemte effekt-envelope, en anden vinkel end matchsikkerhed."
+    "pg_envelope_fit_tip": "Hvor tæt cyklussen holder sig inden for denne profils gemte effekt-envelope, en anden vinkel end matchsikkerhed.",
+    "n_imported_note": ", {n} importeret",
+    "enable_online": "Aktivér onlinefunktioner",
+    "store_brand": "Apparatets mærke",
+    "store_model": "Apparatets model",
+    "anonymous": "Anonym",
+    "rate_quality": "Bedøm kvalitet",
+    "rate_n": "{n} stjerner",
+    "approved_only": "Kun godkendte"
   },
   "log": {
     "all_levels": "Alle niveauer",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ Dette sletter permanent ALLE cyklusser og profiler. Dette kan ikke fortrydes.",
     "wipe_all_ok": "Slet alt",
     "force_stop_title": "Tving stop af cyklus",
-    "force_stop_msg": "Tving den aktive cyklus til at stoppe nu? Cyklussen gemmes som afbrudt."
+    "force_stop_msg": "Tving den aktive cyklus til at stoppe nu? Cyklussen gemmes som afbrudt.",
+    "store_import": "Importér referencecyklus",
+    "store_share": "Del i fællesskabsbutikken"
   },
   "msg": {
     "appliance_monitor": "Apparat monitor",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Gem disse {n} indstilling(er) på denne enhed? {list}",
     "no_logs_match": "Ingen logposter matcher disse filtre.",
     "pg_analysis_hint2": "Vælg en cyklus, og tryk på Kør for at indlæse matchanalysen.",
-    "pg_analysis_empty2": "Tryk på Kør for at se matchanalysen."
+    "pg_analysis_empty2": "Tryk på Kør for at se matchanalysen.",
+    "imported_readonly": "Importeret fra fællesskabsbutikken. Vises til reference og matchning. Tælles ikke med i din statistik og kan ikke redigeres.",
+    "merge_no_imports": "Importerede optagelser kan ikke flettes ind i en rigtig cyklus. Fravælg dem for at flette.",
+    "store_enable_hint": "Aktivér onlinefunktioner i Indstillinger for at gennemse og importere fællesskabets referencecyklusser.",
+    "online_intro": "Del referencecyklusser med andre WashData-brugere, og download dem. Alle onlinefunktioner er valgfrie og slået fra som standard.",
+    "store_share_intro": "Upload denne referencecyklus, så andre med samme apparat kan bruge den. Den gennemgås, før den vises offentligt.",
+    "online_intro_global": "Gennemse og del referenceoptagelser med andre WashData-brugere, og bekræft apparatposter. Én forbindelse gælder for hele din WashData-integration; apparatets mærke og model angives pr. enhed under Grundlæggende. Alle onlinefunktioner er valgfrie og slået fra som standard.",
+    "online_unavailable": "Onlinefunktioner er ikke tilgængelige på denne server.",
+    "store_picker_offline": "Aktivér onlinefunktioner i indstillingstandhjulet for at vælge fra fællesskabskataloget.",
+    "pick_brand_first": "Vælg først et apparatmærke.",
+    "model_not_found": "Ikke i kataloget endnu.",
+    "connect_to_confirm": "Opret forbindelse i indstillingstandhjulet for at bekræfte eller bedømme."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Pludseligt fald behandlet som øjeblikkelig afslutning",
@@ -845,7 +882,9 @@
     "person": "tilføj en person…",
     "phase_name": "f.eks. Forsk",
     "profile_name": "f.eks. Bomuld 40°C",
-    "maintenance_notes": "f.eks. udskiftede filter, rensede dørpakning"
+    "maintenance_notes": "f.eks. udskiftede filter, rensede dørpakning",
+    "store_brand": "f.eks. Bosch",
+    "store_model": "f.eks. WAT28401"
   },
   "pref": {
     "date_absolute": "Absolut (f.eks. 14:32 den 2. juli)",
@@ -1253,6 +1292,14 @@
     "energy_weight": {
       "label": "Vægt på energi",
       "doc": "Hvor stærkt et program, hvis typiske energiforbrug passer til denne cyklus, foretrækkes."
+    },
+    "store_brand": {
+      "label": "Apparatets mærke",
+      "doc": "Valgfrit. Apparatets mærke, valgt fra fællesskabskataloget. Bruges til at finde og dele matchende referenceoptagelser. Lad stå tomt, hvis du ikke bruger onlinefunktioner."
+    },
+    "store_model": {
+      "label": "Apparatets model",
+      "doc": "Valgfrit. Apparatets model, valgt fra fællesskabskataloget, når et mærke er angivet. Hvis din model ikke er på listen, kan du tilføje den til kataloget."
     }
   },
   "setting_group": {
@@ -1330,6 +1377,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Stilletimer og milepæle"
+    },
+    "device_info": {
+      "label": "Enhedsoplysninger"
+    },
+    "basic_configuration": {
+      "label": "Grundlæggende konfiguration"
     }
   },
   "status": {
@@ -1353,7 +1406,8 @@
     "reverting": "Tilbagefører…",
     "trimming": "Beskærer…",
     "splitting": "Opdeler…",
-    "deleting": "Sletter…"
+    "deleting": "Sletter…",
+    "imported": "Importeret"
   },
   "suggestion": {
     "both_agree": "WashData anbefaler",
@@ -1466,7 +1520,8 @@
     "subtab_phase_catalog": "Fasekatalog",
     "subtab_profiles": "Profiler",
     "maintenance": "Vedligeholdelse",
-    "playground": "Legeplads"
+    "playground": "Legeplads",
+    "store": "Butik"
   },
   "tag": {
     "early_end": "Tidlig slutning",
@@ -1546,7 +1601,27 @@
     "processed": "Behandlet: {bits}",
     "processed_cycles": "{n} cykler",
     "processed_suggestions": "{n} forslag",
-    "processed_models": "{n} modeller aktiveret"
+    "processed_models": "{n} modeller aktiveret",
+    "store_search_failed": "Søgning mislykkedes: {error}",
+    "store_connect_failed": "Forbindelse mislykkedes: {error}",
+    "store_connected": "Forbundet til fællesskabsbutikken",
+    "store_disconnected": "Forbindelsen til fællesskabsbutikken er afbrudt",
+    "store_error": "Fejl: {error}",
+    "store_unavailable": "Fællesskabsbutikken er ikke tilgængelig.",
+    "store_pick_profile": "Vælg en profil at flette ind i",
+    "store_name_required": "Indtast et profilnavn",
+    "store_import_failed": "Import mislykkedes: {error}",
+    "store_imported": "Importeret til {profile}",
+    "store_program_required": "Indtast et programnavn",
+    "store_no_appliance": "Angiv først dit apparats mærke og model i Indstillinger.",
+    "store_share_failed": "Deling mislykkedes: {error}",
+    "store_shared": "Delt i fællesskabsbutikken, afventer gennemgang.",
+    "appliance_added": "Apparat tilføjet, afventer godkendelse",
+    "thanks_confirming": "Tak for bekræftelsen",
+    "device_approved": "Godkendt af fællesskabet",
+    "rating_saved": "Kvalitetsbedømmelse gemt",
+    "brand_added": "Mærke tilføjet, afventer godkendelse",
+    "profile_added": "Profil tilføjet, afventer godkendelse"
   },
   "trend": {
     "down": "Trend nedad",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "Der ville blive sendt en milepælsnotifikation.",
     "notify_held": "En notifikation blev holdt tilbage på grund af stilletimer.",
     "finished": "Cyklussen nåede en sluttilstand og stoppede."
+  },
+  "store": {
+    "browse": "Gennemse",
+    "device": "Enhed",
+    "favorites": "Favoritter",
+    "search_ph": "Søg efter mærke eller model…",
+    "no_results": "Ingen matchende apparater fundet. Prøv en anden søgning.",
+    "n_programs": "{n} programmer",
+    "n_cycles": "{n} cyklusser",
+    "no_programs": "Ingen delte programmer for dette apparat endnu.",
+    "no_cycles": "Ingen referencecyklusser delt for dette program endnu.",
+    "anon": "anonym",
+    "uploaded_by": "Delt af {name}",
+    "connected_as": "Forbundet som {name}",
+    "not_connected": "Ikke forbundet. Forbind en GitHub-konto for at dele dine egne cyklusser.",
+    "import_new": "Ny profil",
+    "import_merge": "Flet ind i eksisterende",
+    "merge_target": "Flet ind i profil",
+    "description": "Beskrivelse (valgfrit)",
+    "contributed_by": "af {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Ingen bedømmelser endnu"
+  },
+  "settings": {
+    "gear": {
+      "title": "Indstillinger"
+    }
+  },
+  "link": {
+    "manual": "Manual ↗",
+    "add_appliance": "Tilføj dit apparat"
+  },
+  "tip": {
+    "add_brand": "Mærke ikke på listen? Tilføj det til fællesskabskataloget",
+    "add_appliance": "Model ikke på listen? Tilføj dit apparat til fællesskabskataloget",
+    "add_profile": "Tilføj en profil for dette apparat på fællesskabssiden"
   }
 }

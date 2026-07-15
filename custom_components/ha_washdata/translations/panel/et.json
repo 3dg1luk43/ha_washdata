@@ -23,7 +23,12 @@
     "using_defaults": "Tarnitud vaikeseadete kasutamine",
     "using_tuned": "Häälestatud raskuste kasutamine",
     "overrun_ratio": "({x}x oodatust)",
-    "underrun_ratio": "({pct}% oodatust)"
+    "underrun_ratio": "({pct}% oodatust)",
+    "awaiting_tip": "Ootab kogukonna heakskiitu",
+    "awaiting_n": "Ootab heakskiitu · {n} kinnitust",
+    "approved": "Heaks kiidetud",
+    "awaiting": "Ootab heakskiitu",
+    "imported_tip": "Imporditud kogukonna poest. Kasutatakse ainult sobitamiseks, ei arvestata statistikas."
   },
   "btn": {
     "add_device": "+ Lisa seade",
@@ -150,7 +155,16 @@
     "group_suggest": "Rühm {n}: {members}",
     "pg_apply_best": "Rakenda parim",
     "pg_apply_to_settings": "Salvesta sätetesse",
-    "pg_apply_to_settings_tip": "Kopeeri siin muudetud väärtused selle seadme aktiivsetesse sätetesse"
+    "pg_apply_to_settings_tip": "Kopeeri siin muudetud väärtused selle seadme aktiivsetesse sätetesse",
+    "search": "Otsi",
+    "import": "Impordi",
+    "disconnect": "Katkesta ühendus",
+    "connect_github": "Ühenda GitHub",
+    "save_appliance": "Salvesta seade",
+    "share_to_store": "Jaga poodi",
+    "share": "Jaga",
+    "confirm_appliance": "Kinnita see seade",
+    "confirmed": "Kinnitatud"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -262,7 +276,9 @@
     "pg_detection_params": "Tuvastuse seaded",
     "pg_timeline": "Sündmuste ajajoon",
     "pg_outcome": "Simulatsiooni tulemus",
-    "pg_across_cycles": "Sinu tsüklite lõikes"
+    "pg_across_cycles": "Sinu tsüklite lõikes",
+    "community_store": "Kogukonna pood",
+    "online_account": "Kogukonna pood ja veebifunktsioonid"
   },
   "health": {
     "fair": "Rahuldav profiili kvaliteet",
@@ -527,7 +543,15 @@
     "pg_load_run": "Laadi see käitus uuesti",
     "pg_match_confidence": "Vaste kindlus",
     "pg_envelope_fit": "Sobivus mähisjoonega",
-    "pg_envelope_fit_tip": "Kui täpselt tsükkel püsib selle profiili salvestatud võimsuse mähisjoone sees, teistsugune vaatenurk kui vaste kindlus."
+    "pg_envelope_fit_tip": "Kui täpselt tsükkel püsib selle profiili salvestatud võimsuse mähisjoone sees, teistsugune vaatenurk kui vaste kindlus.",
+    "n_imported_note": ", {n} imporditud",
+    "enable_online": "Luba veebifunktsioonid",
+    "store_brand": "Seadme bränd",
+    "store_model": "Seadme mudel",
+    "anonymous": "Anonüümne",
+    "rate_quality": "Hinda kvaliteeti",
+    "rate_n": "{n} tähte",
+    "approved_only": "Ainult heaks kiidetud"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -601,7 +625,9 @@
     "wipe_all_msg": "⚠️ See kustutab jäädavalt KÕIK tsüklid ja profiilid. Seda ei saa tagasi võtta.",
     "wipe_all_ok": "Pühi kõik",
     "force_stop_title": "Peata tsükkel jõuga",
-    "force_stop_msg": "Kas peatada aktiivne tsükkel kohe jõuga? Tsükkel salvestatakse katkestatuna."
+    "force_stop_msg": "Kas peatada aktiivne tsükkel kohe jõuga? Tsükkel salvestatakse katkestatuna.",
+    "store_import": "Impordi võrdlustsükkel",
+    "store_share": "Jaga kogukonna poodi"
   },
   "msg": {
     "appliance_monitor": "Seadmete monitor",
@@ -797,7 +823,18 @@
     "pg_apply_settings_confirm": "Kas salvestada need {n} sätet sellesse seadmesse? {list}",
     "no_logs_match": "Ükski logikirje ei vasta nendele filtritele.",
     "pg_analysis_hint2": "Vali tsükkel ja vajuta Käivita, et laadida vaste analüüs.",
-    "pg_analysis_empty2": "Vajuta Käivita, et näha vaste analüüsi."
+    "pg_analysis_empty2": "Vajuta Käivita, et näha vaste analüüsi.",
+    "imported_readonly": "Imporditud kogukonna poest. Kuvatakse viitena ja sobitamiseks. Seda ei arvestata sinu statistikas ega saa muuta.",
+    "merge_no_imports": "Imporditud salvestisi ei saa päris tsükliga liita. Tühista nende valik, et liitmine õnnestuks.",
+    "store_enable_hint": "Luba seadetes veebifunktsioonid, et sirvida ja importida kogukonna võrdlustsükleid.",
+    "online_intro": "Jaga ja laadi alla võrdlustsükleid teiste WashData kasutajatega. Kõik veebifunktsioonid on vabatahtlikud ja vaikimisi välja lülitatud.",
+    "store_share_intro": "Laadi see võrdlustsükkel üles, et teised sama seadmega kasutajad saaksid seda kasutada. See vaadatakse üle enne avalikuks muutumist.",
+    "online_intro_global": "Sirvi ja jaga võrdlussalvestisi teiste WashData kasutajatega ning kinnita seadmekirjeid. Üks ühendus kehtib kogu su WashData integratsioonile; seadme bränd ja mudel määratakse seadmepõhiselt jaotises Põhiseaded. Kõik veebifunktsioonid on vabatahtlikud ja vaikimisi välja lülitatud.",
+    "online_unavailable": "Veebifunktsioonid ei ole selles serveris saadaval.",
+    "store_picker_offline": "Luba veebifunktsioonid seadete hammasrattast, et valida kogukonna kataloogist.",
+    "pick_brand_first": "Vali kõigepealt seadme bränd.",
+    "model_not_found": "Pole veel kataloogis.",
+    "connect_to_confirm": "Ühenda seadete hammasrattast, et kinnitada või hinnata."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Järsk langus käsitletakse kohese lõpuna",
@@ -845,7 +882,9 @@
     "person": "lisa isik…",
     "phase_name": "nt. Eelpesemine",
     "profile_name": "nt. Puuvill 40°C",
-    "maintenance_notes": "nt filter vahetatud, ukse tihend puhastatud"
+    "maintenance_notes": "nt filter vahetatud, ukse tihend puhastatud",
+    "store_brand": "nt Bosch",
+    "store_model": "nt WAT28401"
   },
   "pref": {
     "date_absolute": "Absoluutne (nt 2. juulil 14:32)",
@@ -1253,6 +1292,14 @@
     "energy_weight": {
       "label": "Energia kaal",
       "doc": "Kui tugevalt eelistatakse programmi, mille tüüpiline energiakulu selle tsükliga sobib."
+    },
+    "store_brand": {
+      "label": "Seadme bränd",
+      "doc": "Valikuline. Seadme bränd, mis valitakse kogukonna kataloogist. Kasutatakse sobivate võrdlussalvestiste leidmiseks ja jagamiseks. Jäta tühjaks, kui sa veebifunktsioone ei kasuta."
+    },
+    "store_model": {
+      "label": "Seadme mudel",
+      "doc": "Valikuline. Seadme mudel, mis valitakse kogukonna kataloogist, kui bränd on määratud. Kui sinu mudelit pole loendis, saad selle kataloogi lisada."
     }
   },
   "setting_group": {
@@ -1330,6 +1377,12 @@
     },
     "quiet_hours_milestones": {
       "label": "Vaikuse tunnid ja verstapostid"
+    },
+    "device_info": {
+      "label": "Seadme teave"
+    },
+    "basic_configuration": {
+      "label": "Põhiseaded"
     }
   },
   "status": {
@@ -1353,7 +1406,8 @@
     "reverting": "Taastamine…",
     "trimming": "Kärpimine…",
     "splitting": "Lõhestamine…",
-    "deleting": "Kustutamine…"
+    "deleting": "Kustutamine…",
+    "imported": "Imporditud"
   },
   "tab": {
     "advanced": "Täpsemalt",
@@ -1370,7 +1424,8 @@
     "subtab_phase_catalog": "Faaside kataloog",
     "subtab_profiles": "Profiilid",
     "maintenance": "Hooldus",
-    "playground": "Katseala"
+    "playground": "Katseala",
+    "store": "Pood"
   },
   "tag": {
     "early_end": "Varajane lõpp",
@@ -1450,7 +1505,27 @@
     "processed": "Töödeldud {bits}",
     "processed_cycles": "{n} tsüklit",
     "processed_suggestions": "{n} soovitust",
-    "processed_models": "{n} mudelit edutatud"
+    "processed_models": "{n} mudelit edutatud",
+    "store_search_failed": "Otsing ebaõnnestus: {error}",
+    "store_connect_failed": "Ühendamine ebaõnnestus: {error}",
+    "store_connected": "Ühendatud kogukonna poega",
+    "store_disconnected": "Ühendus kogukonna poega katkestatud",
+    "store_error": "Viga: {error}",
+    "store_unavailable": "Kogukonna pood ei ole saadaval.",
+    "store_pick_profile": "Vali profiil, millega liita",
+    "store_name_required": "Sisesta profiili nimi",
+    "store_import_failed": "Import ebaõnnestus: {error}",
+    "store_imported": "Imporditud profiili {profile}",
+    "store_program_required": "Sisesta programmi nimi",
+    "store_no_appliance": "Määra kõigepealt seadetes seadme bränd ja mudel.",
+    "store_share_failed": "Jagamine ebaõnnestus: {error}",
+    "store_shared": "Jagatud kogukonna poodi - ootab ülevaatust.",
+    "appliance_added": "Seade lisatud - ootab heakskiitu",
+    "thanks_confirming": "Aitäh kinnitamast",
+    "device_approved": "Kogukond kiitis heaks",
+    "rating_saved": "Kvaliteedihinnang salvestatud",
+    "brand_added": "Bränd lisatud - ootab heakskiitu",
+    "profile_added": "Profiil lisatud - ootab heakskiitu"
   },
   "suggestion": {
     "both_agree": "WashData soovitab",
@@ -1592,5 +1667,41 @@
     "notify_milestone": "Saadetaks verstaposti teavitus.",
     "notify_held": "Teavitus peeti vaikse aja tõttu kinni.",
     "finished": "Tsükkel jõudis lõppolekusse ja lõppes."
+  },
+  "store": {
+    "browse": "Sirvi",
+    "device": "Seade",
+    "favorites": "Lemmikud",
+    "search_ph": "Otsi brändi või mudeli järgi…",
+    "no_results": "Sobivaid seadmeid ei leitud. Proovi teistsugust otsingut.",
+    "n_programs": "{n} programmi",
+    "n_cycles": "{n} tsüklit",
+    "no_programs": "Sellele seadmele pole veel programme jagatud.",
+    "no_cycles": "Selle programmi jaoks pole veel võrdlustsükleid jagatud.",
+    "anon": "anonüümne",
+    "uploaded_by": "Jagas {name}",
+    "connected_as": "Ühendatud kasutajana {name}",
+    "not_connected": "Pole ühendatud. Ühenda GitHubi konto, et jagada oma tsükleid.",
+    "import_new": "Uus profiil",
+    "import_merge": "Liida olemasolevaga",
+    "merge_target": "Liida profiiliga",
+    "description": "Kirjeldus (valikuline)",
+    "contributed_by": "autor {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Hinnanguid veel pole"
+  },
+  "settings": {
+    "gear": {
+      "title": "Seaded"
+    }
+  },
+  "link": {
+    "manual": "Juhend ↗",
+    "add_appliance": "Lisa oma seade"
+  },
+  "tip": {
+    "add_brand": "Brändi pole loendis? Lisa see kogukonna kataloogi",
+    "add_appliance": "Mudelit pole loendis? Lisa oma seade kogukonna kataloogi",
+    "add_profile": "Lisa sellele seadmele profiil kogukonna saidil"
   }
 }
