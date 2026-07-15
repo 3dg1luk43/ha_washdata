@@ -1239,6 +1239,26 @@ class ProfileStore:
         feedbacks[cycle_id] = request_data
         # Caller must ensure save is called eventually
 
+    def prune_orphaned_feedback(self) -> int:
+        """Drop pending-feedback entries whose cycle no longer exists.
+
+        A cycle that was deleted/merged/trimmed can leave its pending feedback
+        behind, so the device's "needs review" count stays >0 while the Cycles
+        review filter (which matches feedback ids against real cycles) shows
+        nothing. Returns the number pruned; never raises. Caller saves.
+        """
+        try:
+            pending = self._data.get("pending_feedback")
+            if not isinstance(pending, dict) or not pending:
+                return 0
+            live_ids = {c.get("id") for c in self.get_past_cycles()}
+            orphans = [cid for cid in list(pending) if cid not in live_ids]
+            for cid in orphans:
+                pending.pop(cid, None)
+            return len(orphans)
+        except Exception:  # noqa: BLE001
+            return 0
+
 
     def get_profile(self, name: str) -> JSONDict | None:
         """Return a single profile by name with calculated stats (via list_profiles)."""
@@ -1722,6 +1742,21 @@ class ProfileStore:
             return sum(1 for c in self.get_past_cycles() if c.get("profile_name") == profile_name)
         except Exception:  # noqa: BLE001
             return 0
+
+    def profile_has_reference_cycles(self, profile_name: str) -> bool:
+        """True if this profile was seeded from imported store reference cycle(s).
+
+        Such a profile is a trusted, community-shared template that the user
+        downloaded to match immediately, so it is exempt from the local warm-up
+        gate (which exists to stabilise profiles built from a few local cycles).
+        """
+        try:
+            return any(
+                c.get("profile_name") == profile_name
+                for c in self.get_reference_cycles()
+            )
+        except Exception:  # noqa: BLE001
+            return False
 
     # ------------------------------------------------------------------
     # B1: Lifetime energy accumulator (HA Energy dashboard)
@@ -2767,6 +2802,10 @@ class ProfileStore:
         if self.repair_corrupted_power_data():
             await self.async_save()
             await self.async_rebuild_all_envelopes()
+            await self.async_save()
+        # Prune pending feedback whose cycle no longer exists, so the device's
+        # "needs review" count can't disagree with the Cycles review filter.
+        if self.prune_orphaned_feedback():
             await self.async_save()
 
     # _migrate_v1_to_v2 and _decompress_power_from_raw removed; logic moved to WashDataStore
@@ -5202,6 +5241,10 @@ class ProfileStore:
             for _p_name, p_data in self.get_profiles().items():
                 if p_data.get("sample_cycle_id") == cycle_id:
                     p_data["sample_cycle_id"] = None
+
+            # Drop any pending feedback for this cycle so it can't orphan the
+            # "needs review" count (the count would say 1 while the cycle is gone).
+            self._data.get("pending_feedback", {}).pop(cycle_id, None)
 
             # Rebuild envelope if cycle belonged to a profile
             if profile_name:

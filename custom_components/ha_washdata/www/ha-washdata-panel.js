@@ -24,6 +24,9 @@ const _PANEL_VERSION = (() => {
 // refetch-on-every-global-change, which did ~30 full refetches/min for nothing.
 const _POLL_MS = 20000;
 const _HASS_REFRESH_MS = 6000;
+// Cycles-tab page size. Kept modest so the "Load more" control actually engages
+// for typical histories instead of loading everything in one page.
+const _CYCLE_PAGE_SIZE = 25;
 // Height (CSS px) of the band above the Playground plot where event pin heads
 // sit, out of the busy curve area. Shared by _pgDrawCanvas and the pointer
 // layout() closure so threshold-drag math stays aligned with the drawn plot.
@@ -2234,7 +2237,7 @@ class HaWashdataPanel extends HTMLElement {
     // case pagination degrades gracefully (no "Load more" button).
     this._cyclesError = false;
     try {
-      const res = await this._ws({ type: `${_DOMAIN}/get_device_cycles`, entry_id: entryId, limit: 100, offset: 0 });
+      const res = await this._ws({ type: `${_DOMAIN}/get_device_cycles`, entry_id: entryId, limit: _CYCLE_PAGE_SIZE, offset: 0 });
       this._cycles = res.cycles || [];
       // Imported store recordings are returned once (first page) and kept out of
       // the paginated `cycles`/offset math so "Load more" stays correct.
@@ -2248,13 +2251,13 @@ class HaWashdataPanel extends HTMLElement {
   // D3: fetch the next page and append (deduping by id so optimistic removals or
   // overlaps never double up). Preserves the current client-side sort/filter.
   async _loadMoreCycles(entryId) {
-    const res = await this._ws({ type: `${_DOMAIN}/get_device_cycles`, entry_id: entryId, limit: 100, offset: this._cycleOffset });
+    const res = await this._ws({ type: `${_DOMAIN}/get_device_cycles`, entry_id: entryId, limit: _CYCLE_PAGE_SIZE, offset: this._cycleOffset });
     const more = res.cycles || [];
     const have = new Set(this._cycles.map(c => c.id));
     for (const c of more) if (!have.has(c.id)) this._cycles.push(c);
     this._cycleOffset += more.length;
     this._cyclesTotal = (res.total != null) ? res.total : this._cyclesTotal;
-    this._cyclesHasMore = (res.has_more != null) ? !!res.has_more : (more.length >= 100);
+    this._cyclesHasMore = (res.has_more != null) ? !!res.has_more : (more.length >= _CYCLE_PAGE_SIZE);
   }
 
   // D1: cache the matched profile's phase ranges (start/end in seconds) for the
@@ -2625,10 +2628,11 @@ class HaWashdataPanel extends HTMLElement {
     this._storeView = 'brands'; this._storeDevice = null; this._storeProfile = null; this._storeQuery = '';
     this._storeDevices = []; this._storeProfiles = []; this._storeCycles = [];
     this._storeStatus = null; this._storeConnected = false; this._storeLoading = false;
-    // Reset the brand/model catalog too: it is filtered by the previous device's
-    // appliance type, so switching device types with the same brand would otherwise
-    // reuse stale models and could save an invalid brand/model combination.
-    this._catalog = { brands: undefined, devices: undefined, forBrand: null, approvedOnly: this._catalog.approvedOnly };
+    // Reset only the MODEL catalog on device switch: models are filtered by the
+    // previous device's appliance type, so reusing them could save an invalid
+    // brand/model combo. Brands are type-agnostic, so keep them loaded (reloading
+    // them without a re-render is what left the brand dropdown empty).
+    this._catalog = { brands: this._catalog.brands, devices: undefined, forBrand: null, approvedOnly: this._catalog.approvedOnly };
     if (this._entityListCache) delete this._entityListCache.store_model;
     const dev = this._devices[this._selIdx];
     if (dev) await this._fetchSuggestions(dev.entry_id);
@@ -4344,6 +4348,10 @@ class HaWashdataPanel extends HTMLElement {
       this._catalog.brands = (r && r.items) || [];
     } catch (_) { this._catalog.brands = []; }
     this._entityListCache.store_brand = (this._catalog.brands || []).map(b => b.brand).filter(Boolean);
+    // Re-render so the picker shows the loaded brands + clears the "Loading…" hint
+    // (the combo also reads the cache live on focus, but a stale device switch left
+    // it looking empty until the next paint).
+    if (this._isActiveEntry(dev.entry_id)) this._render();
   }
 
   async _loadCatalogDevices(brand) {
@@ -4355,6 +4363,7 @@ class HaWashdataPanel extends HTMLElement {
       if (this._catalog.forBrand === brand) this._catalog.devices = (r && r.items) || [];
     } catch (_) { if (this._catalog.forBrand === brand) this._catalog.devices = []; }
     this._entityListCache.store_model = (this._catalog.devices || []).map(d => d.model).filter(Boolean);
+    if (this._isActiveEntry(dev.entry_id)) this._render();
   }
 
   // Load the appliance's profiles into the open Share dialog (dropdown + resolved

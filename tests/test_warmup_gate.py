@@ -22,12 +22,13 @@ _CYCLE_ID = "cyc_warmup"
 
 
 class _MockStore:
-    def __init__(self, labeled_count: int):
+    def __init__(self, labeled_count: int, has_reference: bool = False):
         self.pending: dict = {}
         self.past_cycles: list = []
         self.profiles: dict = {}
         self.suggestions: dict = {}
         self._labeled_count = labeled_count
+        self._has_reference = has_reference
 
     def get_feedback_history(self):
         return {}
@@ -56,6 +57,9 @@ class _MockStore:
     def get_profile_labeled_count(self, profile_name: str) -> int:
         return self._labeled_count
 
+    def profile_has_reference_cycles(self, profile_name: str) -> bool:
+        return self._has_reference
+
     async def async_save(self):
         pass
 
@@ -63,13 +67,14 @@ class _MockStore:
         pass
 
 
-def _lm(labeled_count: int, *, auto_label_conf: float = 0.9, learning_conf: float = 0.6):
+def _lm(labeled_count: int, *, auto_label_conf: float = 0.9, learning_conf: float = 0.6,
+        has_reference: bool = False):
     hass = MagicMock()
     hass.data = {}
     hass.async_create_task = MagicMock(
         side_effect=lambda coro: getattr(coro, "close", lambda: None)()
     )
-    store = _MockStore(labeled_count)
+    store = _MockStore(labeled_count, has_reference=has_reference)
     entry = MagicMock()
     entry.options = {
         CONF_AUTO_LABEL_CONFIDENCE: auto_label_conf,
@@ -119,6 +124,19 @@ def test_warmup_inverted_thresholds_still_requests():
     )
     assert _CYCLE_ID in store.pending, "warmup must request even under inverted thresholds"
     assert cd.get("auto_labeled") is not True
+
+
+def test_imported_profile_skips_warmup():
+    """An imported reference profile (0 local cycles) is a trusted template: it must
+    auto-label immediately, not sit in warm-up requesting confirmation."""
+    lm, store = _lm(labeled_count=0, has_reference=True)
+    cd = _cd()
+    store.past_cycles.append(cd)
+    lm._maybe_request_feedback(
+        cycle_data=cd, detected_profile=_PROFILE, confidence=0.95, predicted_duration=3600.0
+    )
+    assert _CYCLE_ID not in store.pending, "imported profile must not request warm-up feedback"
+    assert cd.get("auto_labeled") is True, "imported profile must auto-label on high confidence"
 
 
 def test_mature_profile_autolabels():

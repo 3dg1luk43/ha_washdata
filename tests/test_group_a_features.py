@@ -431,6 +431,9 @@ class _MockProfileStoreForLearning:
     def get_profile_labeled_count(self, profile_name: str) -> int:
         return self._labeled_count
 
+    def profile_has_reference_cycles(self, profile_name: str) -> bool:
+        return False
+
     def add_pending_feedback(self, cycle_id, data):
         self.pending[cycle_id] = data
 

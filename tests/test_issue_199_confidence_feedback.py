@@ -208,9 +208,10 @@ async def test_sample_cycle_used_when_envelope_has_only_one_cycle(store):
 # Test 2: suppress_feedback_notifications suppresses notification only
 # ---------------------------------------------------------------------------
 
-def test_suppress_notification_flag_default_is_false():
-    """The default for suppress_feedback_notifications is False (notifications on)."""
-    assert DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS is False
+def test_suppress_notification_flag_default_is_true():
+    """The default for suppress_feedback_notifications is True: feedback stays in the
+    panel and no persistent HA notification is created unless the user opts in."""
+    assert DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS is True
 
 
 def test_maybe_request_feedback_suppressed(learning_manager, mock_hass):

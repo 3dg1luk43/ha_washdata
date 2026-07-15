@@ -424,7 +424,7 @@ MATCH_DURATION_SCALE = 0.175       # ~ln ratio at which duration agreement halve
 MATCH_ENERGY_SCALE = 0.25          # ~ln ratio at which energy agreement halves
 
 CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS = "suppress_feedback_notifications"
-DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS = False  # Show persistent notifications by default
+DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS = True  # Feedback stays in-panel by default; no persistent notifications
 
 # States
 STATE_OFF = "off"

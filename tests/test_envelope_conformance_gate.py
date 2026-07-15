@@ -59,6 +59,9 @@ class _MockStore:
         # Return a high count so warmup mode never fires in these tests
         return 100
 
+    def profile_has_reference_cycles(self, profile_name: str) -> bool:
+        return False
+
     async def async_save(self):
         pass
 

@@ -473,7 +473,14 @@ class LearningManager:
         route_conf = confidence
         if confidence >= auto_label_conf:
             _wm_count = self.profile_store.get_profile_labeled_count(detected_profile)
-            _is_warmup = isinstance(_wm_count, int) and _wm_count < CONF_PROFILE_MIN_WARMUP_CYCLES
+            # Imported reference profiles are trusted downloaded templates: the user
+            # expects to match immediately, so they skip the local warm-up gate.
+            _imported = self.profile_store.profile_has_reference_cycles(detected_profile)
+            _is_warmup = (
+                not _imported
+                and isinstance(_wm_count, int)
+                and _wm_count < CONF_PROFILE_MIN_WARMUP_CYCLES
+            )
             if _is_warmup:
                 self._logger.info(
                     "Profile '%s' in warmup mode (%d/%d cycles); requiring manual confirmation.",
