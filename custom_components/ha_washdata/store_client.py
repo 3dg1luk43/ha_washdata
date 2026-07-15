@@ -136,6 +136,7 @@ class StoreClient:
         self._session = session
         self._id_token: str | None = None
         self._id_token_exp: float = 0.0
+        self._id_token_rt: str | None = None  # refresh token that produced the cached id_token
         self._last_error: str | None = None  # short reason for the last failed write, for the UI
         self._base = f"{self._FS}/projects/{project_id}/databases/(default)/documents"
 
@@ -152,7 +153,14 @@ class StoreClient:
     async def ensure_id_token(self, refresh_token: str) -> str | None:
         """Exchange the refresh token for a (cached) Firebase ID token."""
         now = time.time()
-        if self._id_token and now < self._id_token_exp - 60:
+        # The cache is only valid for the same refresh token that produced it -- after
+        # a disconnect/reconnect (or a different global account) the previous account's
+        # token must not be returned even if it is still unexpired.
+        if (
+            self._id_token
+            and self._id_token_rt == refresh_token
+            and now < self._id_token_exp - 60
+        ):
             return self._id_token
         try:
             async with self._sess().post(
@@ -170,6 +178,7 @@ class StoreClient:
             self._last_error = "could not reach the sign-in service"
             return None
         self._id_token = body.get("id_token")
+        self._id_token_rt = refresh_token
         try:
             self._id_token_exp = now + float(body.get("expires_in", 3600))
         except (TypeError, ValueError):

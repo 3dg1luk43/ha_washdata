@@ -431,6 +431,12 @@ _ADMIN_COMMANDS = frozenset({
     "export_config",
     "reprocess_history",
     "clear_debug_data",
+    # Global community-store mutations: these change the ONE integration-wide GitHub
+    # connection / online flag shared by every entry, so an editor of a single device
+    # must not be able to connect, disconnect, or toggle online for the whole install.
+    "store_connect",
+    "store_disconnect",
+    "store_set_online",
 })
 # Mutating commands intentionally allowed at the 'read' level. Picking the live
 # program is a benign runtime action (it changes detection, not stored data), so
@@ -771,7 +777,8 @@ async def ws_store_confirm_device(hass, connection, msg):
 
 @websocket_api.websocket_command({
     vol.Required("type"): "ha_washdata/store_rate_device", vol.Required("entry_id"): str,
-    vol.Required("device_id"): str, vol.Required("rating"): int,
+    vol.Required("device_id"): str,
+    vol.Required("rating"): vol.All(int, vol.Range(min=1, max=5)),
 })
 @websocket_api.async_response
 async def ws_store_rate_device(hass, connection, msg):

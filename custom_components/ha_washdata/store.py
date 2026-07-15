@@ -53,8 +53,13 @@ def derive_qc(cycle: dict[str, Any]) -> int:
 def _downsample(points: list[list[float]], max_n: int = 3000) -> list[list[float]]:
     if len(points) <= max_n:
         return [[float(p[0]), float(p[1])] for p in points]
-    step = len(points) / max_n
-    return [[float(points[int(i * step)][0]), float(points[int(i * step)][1])] for i in range(max_n)]
+    # Evenly spaced indices INCLUDING the last sample, so the uploaded trace keeps
+    # its terminal transition (the old int(i*step) never reached points[-1]).
+    n = len(points)
+    return [
+        [float(points[j][0]), float(points[j][1])]
+        for j in (round(i * (n - 1) / (max_n - 1)) for i in range(max_n))
+    ]
 
 
 class StoreBridge:
@@ -140,12 +145,19 @@ class StoreBridge:
         pts = cyc.get("importable")
         if not pts:
             return {"error": "unsupported_schema"}
-        profile = (new_profile_name or target_profile or cyc.get("program_lc") or "Imported").strip()
+        # The name comes from the caller (localized) or the store's program label;
+        # never fall back to an inline English string. Require a non-empty name.
+        raw_profile = new_profile_name or target_profile or cyc.get("program_lc")
+        profile = raw_profile.strip() if isinstance(raw_profile, str) else ""
+        if not profile:
+            return {"error": "profile_name_required"}
         local_id = await self._ps.add_reference_cycle(profile, pts, {
             "store_cycle_id": cyc.get("id"),
             "store_uploaded_at": cyc.get("createdAt"),
             "sampling_interval": (cyc.get("trace") or {}).get("sampleIntervalSec"),
         })
+        if not local_id:  # trace failed validation in add_reference_cycle
+            return {"error": "invalid_trace"}
         return {"profile": profile, "cycle_id": local_id}
 
     async def share_cycle(

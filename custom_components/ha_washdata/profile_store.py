@@ -1311,15 +1311,34 @@ class ProfileStore:
         ``ml_review.golden=True`` so it seeds the envelope shape, then the envelope is
         rebuilt. Never accumulates lifetime energy or touches ``past_cycles``.
         """
-        pairs = [[float(p[0]), float(p[1])] for p in (points or []) if len(p) >= 2]
-        duration = float(pairs[-1][0] - pairs[0][0]) if len(pairs) >= 2 else 0.0
+        # Validate the trace BEFORE creating any persistent state (profile entry /
+        # reference cycle): drop non-finite/non-numeric samples, require >= 2 points
+        # and a positive time span. A garbage trace returns "" and mutates nothing.
+        pairs: list[list[float]] = []
+        for p in (points or []):
+            if len(p) < 2:
+                continue
+            try:
+                x, y = float(p[0]), float(p[1])
+            except (TypeError, ValueError):
+                continue
+            if math.isfinite(x) and math.isfinite(y):
+                pairs.append([x, y])
+        if len(pairs) < 2:
+            return ""
+        pairs.sort(key=lambda q: q[0])  # defensive: normalize any out-of-order offsets
+        duration = float(pairs[-1][0] - pairs[0][0])
+        if duration <= 0:
+            return ""
         now = dt_util.now()
         store_id = str(meta.get("store_cycle_id") or "")
         cycle: CycleDict = {
             "profile_name": profile_name,
             "power_data": pairs,
             "start_time": now.isoformat(),
-            "end_time": (now).isoformat(),
+            # Keep the timestamp interval consistent with the imported duration
+            # (both were previously "now", giving a zero-length interval).
+            "end_time": (now + timedelta(seconds=duration)).isoformat(),
             "duration": duration,
             "status": "completed",
             "ml_review": {"golden": True},
@@ -4675,8 +4694,12 @@ class ProfileStore:
         # Update cycles and feedback if renamed
         count = 0
         if renamed:
-            # 1. Update past cycles
-            for cycle in self._data.get("past_cycles", []):
+            # 1. Update past + imported reference cycles (imports carry profile_name
+            #    too; leaving them under the old name orphans them from the matcher).
+            for cycle in (
+                list(self._data.get("past_cycles", []))
+                + list(self._data.get("reference_cycles", []))
+            ):
                 if cycle.get("profile_name") == old_name:
                     cycle["profile_name"] = new_name
                     count += 1
@@ -4722,9 +4745,13 @@ class ProfileStore:
         # Delete profile
         del self._data["profiles"][name]
 
-        # Handle cycles
+        # Handle cycles (past + imported reference; both carry profile_name, so an
+        # imported cycle would otherwise keep a dangling label for a deleted profile).
         count = 0
-        for cycle in self._data.get("past_cycles", []):
+        for cycle in (
+            list(self._data.get("past_cycles", []))
+            + list(self._data.get("reference_cycles", []))
+        ):
             if cycle.get("profile_name") == name:
                 if unlabel_cycles:
                     cycle["profile_name"] = None
@@ -4835,9 +4862,25 @@ class ProfileStore:
         if profile_name and profile_name not in self._data.get("profiles", {}):
             raise ValueError(f"Profile '{profile_name}' not found. Create it first.")
         old_profile = ref.get("profile_name")
+        ref_id = ref.get("id")
         ref["profile_name"] = profile_name if profile_name else None
         if old_profile and old_profile != profile_name:
-            await self.async_rebuild_envelope(old_profile)
+            # The moved cycle may have been the old profile's sample. Clear that
+            # stale pointer so the old profile can't resolve the moved trace (now
+            # another profile's) by id, and drop the old profile if it is now empty
+            # (mirrors _delete_reference_cycle; prevents repair adopting a real cycle).
+            op = self._data.get("profiles", {}).get(old_profile)
+            if op is not None and op.get("sample_cycle_id") == ref_id:
+                op["sample_cycle_id"] = None
+            old_has_cycles = any(
+                c.get("profile_name") == old_profile
+                for c in list(self._data.get("past_cycles", []))
+                + list(self._data.get("reference_cycles", []))
+            )
+            if old_has_cycles:
+                await self.async_rebuild_envelope(old_profile)
+            else:
+                self._data.get("profiles", {}).pop(old_profile, None)
         if profile_name:
             await self.async_rebuild_envelope(profile_name)
         await self.async_save()
@@ -5058,12 +5101,18 @@ class ProfileStore:
         for key in _FINGERPRINT_KEYS:
             if key in opts:
                 device_fingerprint[key] = opts[key]
+        # Never let a backup/diagnostics export carry the GitHub refresh token: the
+        # (legacy, now-global) per-device store account may still hold it. Shallow-copy
+        # so we can drop the credential without mutating live state, and so a caller
+        # can't alias-mutate self._data through the returned snapshot.
+        export_store = dict(self._data)
+        export_store.pop("store_account", None)
         return {
             "version": STORAGE_VERSION,
             "entry_id": self.entry_id,
             "exported_at": dt_util.now().isoformat(),
             "device_fingerprint": device_fingerprint,
-            "data": self._data,
+            "data": export_store,
             "entry_data": data,
             "entry_options": opts,
         }

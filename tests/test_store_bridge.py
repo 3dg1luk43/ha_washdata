@@ -20,7 +20,9 @@ class FakeClient:
         self.cycle = None
         self.confirmed = None
         self.rated = None
+        self.last_refresh_token = None
     async def ensure_id_token(self, rt):
+        self.last_refresh_token = rt  # record so tests can assert the token is forwarded
         return self.token
     async def get_cycle(self, cid):
         return self.cycle
@@ -77,6 +79,8 @@ async def test_connect_persists_account_globally(bridge):
     br, ps, hass = bridge
     res = await br.connect("refresh", "u1", "Alice")
     assert res["connected"] is True and res["uid"] == "u1"
+    # connect() must forward the SUPPLIED refresh token to the client for validation.
+    assert br._client.last_refresh_token == "refresh"
     # Account lives in the integration-wide store, NOT the per-device ProfileStore.
     assert store_account.get_account(hass)["refresh_token"] == "refresh"
     assert ps.get_store_account() == {}
@@ -154,6 +158,10 @@ async def test_import_cycle_adds_reference(bridge):
     refs = ps.get_reference_cycles()
     assert len(refs) == 1 and refs[0]["meta"]["source"] == "store:storecyc"
     assert ps.get_past_cycles() == []  # isolation preserved
+    # The full importable waveform must be persisted (not truncated/wrong): all three
+    # samples survive the store round-trip.
+    stored = ps.get_cycle_power_data(refs[0]["id"])
+    assert [[round(o), round(w)] for o, w in stored] == [[0, 2000], [60, 100], [120, 0]]
 
 
 @pytest.mark.asyncio

@@ -2627,6 +2627,11 @@ class HaWashdataPanel extends HTMLElement {
     this._storeView = 'brands'; this._storeDevice = null; this._storeProfile = null; this._storeQuery = '';
     this._storeDevices = []; this._storeProfiles = []; this._storeCycles = [];
     this._storeStatus = null; this._storeConnected = false; this._storeLoading = false;
+    // Reset the brand/model catalog too: it is filtered by the previous device's
+    // appliance type, so switching device types with the same brand would otherwise
+    // reuse stale models and could save an invalid brand/model combination.
+    this._catalog = { brands: undefined, devices: undefined, forBrand: null, approvedOnly: this._catalog.approvedOnly };
+    if (this._entityListCache) delete this._entityListCache.store_model;
     const dev = this._devices[this._selIdx];
     if (dev) await this._fetchSuggestions(dev.entry_id);
     this._fetchTabData();  // loads tab data incl. Status power-history + profiles
@@ -8590,6 +8595,13 @@ class HaWashdataPanel extends HTMLElement {
   _onAction(btn) {
     const a = btn.dataset.action;
     const sr = this.shadowRoot;
+    // The header gear is integration-wide and always visible (incl. first-run when
+    // no device exists yet), so route it BEFORE the device guard below.
+    if (a === 'open-settings') {
+      this._modal = { type: 'gear-settings', tab: this._gearTab || 'prefs' };
+      this._render();
+      return;
+    }
     const dev = this._devices[this._selIdx];
     if (!dev) return;
     const eid = dev.entry_id;
@@ -8701,10 +8713,6 @@ class HaWashdataPanel extends HTMLElement {
       });
 
     // ── Community Store ──────────────────────────────────────────────────────
-    } else if (a === 'open-settings') {
-      this._modal = { type: 'gear-settings', tab: this._gearTab || 'prefs' };
-      this._render();
-
     } else if (a === 'store-toggle-online') {
       // Online features are integration-wide: persist via the global store_set_online.
       const on = !!btn.checked;

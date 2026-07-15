@@ -94,6 +94,14 @@ async def test_token_exchange_and_cache():
     tok2 = await c.ensure_id_token("refresh123")
     assert tok2 == "TОK" and len(s.posts) == 1
     assert "securetoken" in s.posts[0][0] and "key=KEY" in s.posts[0][0]
+    # the exchange must send the refresh-token grant with the supplied token
+    assert s.posts[0][1]["data"]["grant_type"] == "refresh_token"
+    assert s.posts[0][1]["data"]["refresh_token"] == "refresh123"
+    # a DIFFERENT refresh token must not reuse the cached id_token (issue: cache
+    # was not keyed to the token that produced it)
+    s.queue_post(_Resp(200, {"id_token": "TOK2", "expires_in": "3600"}))
+    tok3 = await c.ensure_id_token("other-refresh")
+    assert tok3 == "TOK2" and len(s.posts) == 2
 
 
 # ── reads ────────────────────────────────────────────────────────────────────
