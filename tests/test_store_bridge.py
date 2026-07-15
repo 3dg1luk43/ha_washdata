@@ -266,3 +266,20 @@ async def test_download_device_adopts_bundle(bridge):
     refs = ps.get_reference_cycles()
     assert {r["profile_name"] for r in refs} == {"Cotton 40", "Eco 50"}
     assert ps.get_past_cycles() == []  # real data untouched
+
+
+@pytest.mark.asyncio
+async def test_download_device_is_idempotent(bridge):
+    br, ps, hass = bridge
+    br._client.bundle = {"device_id": "d1", "profiles": [
+        {"id": "p1", "program": "Cotton 40", "cycles": [
+            {"id": "c1", "importable": [[0, 2000], [60, 100], [120, 0]], "createdAt": "t",
+             "trace": {"sampleIntervalSec": 60}},
+        ]},
+    ]}
+    first = await br.download_device("d1")
+    assert first == {"profiles_adopted": 1, "cycles_imported": 1}
+    # Re-downloading the same device must not duplicate the already-imported cycle.
+    second = await br.download_device("d1")
+    assert second == {"profiles_adopted": 0, "cycles_imported": 0}
+    assert len(ps.get_reference_cycles()) == 1

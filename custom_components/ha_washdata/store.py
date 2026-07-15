@@ -245,8 +245,17 @@ class StoreBridge:
         """Adopt a whole-device bundle: for each downloaded profile, import its
         reference cycles into ``reference_cycles`` (merge/upsert; real past_cycles are
         never touched). Returns ``{profiles_adopted, cycles_imported}``.
+
+        Idempotent: a store cycle already imported locally (``meta.source ==
+        "store:<id>"``) is skipped, so re-downloading the same device does not
+        accumulate duplicate reference cycles (a full clear-then-import lands with
+        phases in Stage 2).
         """
         bundle = await self._client.get_device_bundle(device_id)
+        already = {
+            str((c.get("meta") or {}).get("source") or "")
+            for c in self._ps.get_reference_cycles()
+        }
         profiles_adopted = 0
         cycles_imported = 0
         for prof in bundle.get("profiles", []) or []:
@@ -258,8 +267,11 @@ class StoreBridge:
                 pts = cyc.get("importable")
                 if not pts:
                     continue
+                store_cid = cyc.get("id")
+                if store_cid and f"store:{store_cid}" in already:
+                    continue  # already imported on a previous download
                 local_id = await self._ps.add_reference_cycle(program, pts, {
-                    "store_cycle_id": cyc.get("id"),
+                    "store_cycle_id": store_cid,
                     "store_uploaded_at": cyc.get("createdAt"),
                     "sampling_interval": (cyc.get("trace") or {}).get("sampleIntervalSec"),
                 })
