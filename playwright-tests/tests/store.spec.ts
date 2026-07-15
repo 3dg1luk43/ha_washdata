@@ -206,3 +206,58 @@ test('gear "Show contributor names" toggle persists via store_set_prefs', async 
   const calls = await assertWsCalled(page, 'ha_washdata/store_set_prefs');
   expect(calls[0].prefs).toHaveProperty('show_contributor', false);
 });
+
+// ── Device-bundle sharing (Stage 1) ─────────────────────────────────────────
+
+// A device whose loaded cycles include a recorded (golden) cycle labelled with a
+// program — the share-device tree only offers golden/recorded reference cycles.
+const GOLDEN_CYCLES = {
+  cycles: [
+    { id: 'gcyc-1', profile_name: 'Cotton 40°C', status: 'completed', duration: 3600, start_time: '2026-07-10T08:15:00+00:00', meta: { source: 'recorder' } },
+    { id: 'cyc-plain', profile_name: 'Eco 60°C', status: 'completed', duration: 5700, start_time: '2026-07-09T09:00:00+00:00', meta: null },
+  ],
+  total: 2,
+  has_more: false,
+};
+
+test('Profiles tab shows "Share this device" when online + connected + declared', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, { ...storeHandlers(), 'ha_washdata/get_device_cycles': GOLDEN_CYCLES });
+  await clickTab(page, 'profiles');
+  await expect(page.locator('[data-action="store-share-device"]')).toBeVisible({ timeout: 8_000 });
+});
+
+test('share-device tree lists only golden/recorded cycles and uploads the selection', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    ...storeHandlers(),
+    'ha_washdata/get_device_cycles': GOLDEN_CYCLES,
+    'ha_washdata/store_upload_device': { ok: true, cycle_ids: ['sc-1'], errors: [] },
+  });
+  await clickTab(page, 'profiles');
+  await page.locator('[data-action="store-share-device"]').click();
+  // Tree renders one group (only the recorded Cotton 40°C cycle qualifies; the
+  // plain Eco 60°C cycle is not a reference cycle and is excluded).
+  const groups = page.locator('.wd-sd-group');
+  await expect(groups).toHaveCount(1, { timeout: 8_000 });
+  await expect(page.locator('.wd-sd-prof-name')).toHaveText('Cotton 40°C');
+  await expect(page.locator('.wd-sd-cyc')).toHaveCount(1);
+  // The golden cycle is checked by default, so Share is enabled.
+  const shareBtn = page.locator('[data-maction="store-share-device-ok"]');
+  await expect(shareBtn).toBeEnabled();
+  await shareBtn.click();
+  const calls = await assertWsCalled(page, 'ha_washdata/store_upload_device');
+  expect(calls[0].items).toEqual([{ local_cycle_id: 'gcyc-1', program: 'Cotton 40°C' }]);
+});
+
+test('share-device shows an empty state when there are no shareable cycles', async ({ page }) => {
+  await page.goto('/');
+  // Default cycles fixture has no recorded/golden cycles.
+  await bootPanel(page, storeHandlers());
+  await clickTab(page, 'profiles');
+  await page.locator('[data-action="store-share-device"]').click();
+  await expect(page.locator('.wd-sd-group')).toHaveCount(0, { timeout: 8_000 });
+  await expect(page.locator('.wd-modal .wd-empty')).toBeVisible();
+  // Nothing selectable -> Share is disabled.
+  await expect(page.locator('[data-maction="store-share-device-ok"]')).toBeDisabled();
+});

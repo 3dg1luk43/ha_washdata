@@ -798,6 +798,16 @@ button.wd-profile-card { display: block; }
 .wd-star-row { display: inline-flex; gap: 2px; }
 .wd-star-btn { background: none; border: none; cursor: pointer; color: var(--warning-color, #f0b429); font-size: 1.1em; padding: 0 1px; line-height: 1; }
 .wd-star-btn:hover { transform: scale(1.15); }
+/* Share-device selection tree (profile -> its reference cycles). */
+.wd-sd-tree { display: flex; flex-direction: column; gap: 8px; max-height: 44vh; overflow-y: auto; margin-bottom: 16px; }
+.wd-sd-group { border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); background: var(--secondary-background-color); overflow: hidden; }
+.wd-sd-prof { display: flex; align-items: center; gap: 8px; padding: 9px 12px; cursor: pointer; font-weight: 600; }
+.wd-sd-prof-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wd-sd-count { font-size: .8em; font-weight: 400; color: var(--secondary-text-color); }
+.wd-sd-cycles { display: flex; flex-direction: column; border-top: 1px solid var(--divider-color); }
+.wd-sd-cyc { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 28px; cursor: pointer; font-size: .9em; }
+.wd-sd-cyc:hover, .wd-sd-prof:hover { background: var(--card-background-color); }
+.wd-sd-cyc-meta { color: var(--secondary-text-color); }
 .wd-linkbtn { background: none; border: none; padding: 0; color: var(--primary-color); cursor: pointer; font: inherit; text-decoration: underline; }
 .wd-gear-body { margin-top: 12px; }
 .wd-empty { text-align: center; padding: 48px 24px; color: var(--secondary-text-color); }
@@ -3942,6 +3952,7 @@ class HaWashdataPanel extends HTMLElement {
           <button class="wd-btn wd-btn-primary" data-action="create-profile" title="${_esc(this._t('btn.new_profile_tip', {}, 'Create a new program profile from an existing labelled cycle or recording'))}">${this._t('btn.new_profile', {}, '+ New Profile')}</button>
           <button class="wd-btn wd-btn-secondary" data-action="pg-new" title="${_esc(this._t('btn.new_group_tip', {}, 'Group near-identical profiles (same shape/duration, different temperature or spin) so the matcher reliably picks between them'))}">${this._t('btn.new_group', {}, '+ New Group')}</button>
           <button class="wd-btn wd-btn-secondary" data-action="rebuild-envelopes" ${rebuildBusy ? 'disabled' : ''} title="${_esc(this._t('btn.rebuild_tip', {}, 'Recompute the expected power envelope (min/max band) for all profiles from their labelled cycles — run after labelling new cycles or correcting old ones'))}">${rebuildBusy ? ('<span class="wd-spin"></span> ' + this._t('status.rebuilding', {}, 'Rebuilding…')) : this._t('btn.rebuild', {}, 'Rebuild Envelopes')}</button>
+          ${(this._onlineEnabled() && this._storeConnected && this._storeDeviceDeclared()) ? `<button class="wd-btn wd-btn-secondary" data-action="store-share-device" title="${_esc(this._t('btn.share_device_tip', {}, 'Share this appliance and its recorded reference cycles to the community store so others with the same machine can adopt them'))}">${this._t('btn.share_device', {}, '⬆ Share this device')}</button>` : ''}
         </div>` : ''}
       </div>
       ${sugBanner}
@@ -4342,6 +4353,38 @@ class HaWashdataPanel extends HTMLElement {
   _storeApplianceType() {
     const map = { washing_machine: 'washer', washer: 'washer', dryer: 'dryer', dishwasher: 'dishwasher', washer_dryer: 'washer_dryer' };
     return map[this._opts.device_type] || '';
+  }
+
+  // True when this device has a brand + model declared, so it can be resolved to a
+  // catalog deviceId for sharing/downloading a whole-device bundle.
+  _storeDeviceDeclared() {
+    return !!((this._opts.store_brand || '').trim() && (this._opts.store_model || '').trim());
+  }
+
+  // A cycle worth sharing as a reference template: hand-flagged golden (ML review)
+  // or a manual recording. Works even when ML Lab is off (recordings carry
+  // meta.source='recorder'), which is the ML-independent golden signal.
+  _isGoldenCycle(c) {
+    const m = (this._mlById || {})[c && c.id];
+    if (m && m.ml_review && m.ml_review.golden) return true;
+    const meta = (c && c.meta) || {};
+    return meta.source === 'recorder';
+  }
+
+  // Group this device's shareable real cycles (golden/recorded, labelled) by
+  // program, most-recent-first. Imported reference cycles are excluded (you do not
+  // re-share what you downloaded). Returns [{program, cycles:[...]}] sorted by name.
+  _shareableByProgram() {
+    const byProg = new Map();
+    for (const c of (this._cycles || [])) {
+      const prog = (c.profile_name || '').trim();
+      if (!prog || !this._isGoldenCycle(c)) continue;
+      if (!byProg.has(prog)) byProg.set(prog, []);
+      byProg.get(prog).push(c);
+    }
+    return Array.from(byProg.entries())
+      .map(([program, cycles]) => ({ program, cycles }))
+      .sort((a, b) => a.program.localeCompare(b.program));
   }
 
   // Feed the combobox candidate cache directly (no re-render): the combo reads it
@@ -7115,8 +7158,58 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-field"><label>${this._t('store.description', {}, 'Description (optional)')}</label><textarea id="wd-store-share-desc" rows="2"></textarea></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel" ${this._busy.has('store-share') ? 'disabled' : ''}>${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="store-share-ok" ${this._busy.has('store-share') ? 'disabled' : ''}>${this._busy.has('store-share') ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.share', {}, 'Share')}</button></div>`;
+    } else if (m.type === 'store-share-device') {
+      body = this._htmlShareDeviceModal(m);
     }
     return `<div class="wd-overlay"><div class="wd-modal" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${body}</div></div>`;
+  }
+
+  // Share-device selection tree: pick which programs + reference cycles to upload
+  // as one device bundle. Selection is model-driven (m.selected is the source of
+  // truth) so the tree survives re-renders. Only golden/recorded real cycles are
+  // offered (they are the templates worth sharing); imported cycles are excluded.
+  _htmlShareDeviceModal(m) {
+    const groups = this._shareableByProgram();
+    const busy = this._busy.has('store-share-device');
+    const sel = m.selected || new Set();
+    const selCount = groups.reduce((n, g) => n + g.cycles.filter(c => sel.has(c.id)).length, 0);
+    let tree;
+    if (m.loading) {
+      tree = `<div class="wd-empty" style="padding:24px"><div class="wd-icon">⏳</div>${this._t('msg.loading', {}, 'Loading…')}</div>`;
+    } else if (!groups.length) {
+      tree = `<div class="wd-empty" style="padding:24px"><div class="wd-icon">📤</div>${this._t('msg.share_device_none', {}, 'No shareable cycles yet. Mark a recorded or hand-picked cycle as a reference cycle (⭐) in the Cycles tab first.')}</div>`;
+    } else {
+      tree = groups.map(g => {
+        const all = g.cycles.every(c => sel.has(c.id));
+        const some = !all && g.cycles.some(c => sel.has(c.id));
+        const rows = g.cycles.map(c => {
+          const when = c.start_time ? _fmtDate(c.start_time) : '';
+          const dur = c.duration != null ? _fmtDuration(c.duration) : '';
+          const star = this._isGoldenCycle(c) ? ' ⭐' : '';
+          return `<label class="wd-sd-cyc">
+            <input type="checkbox" data-maction="sd-toggle-cyc" data-cid="${_esc(c.id)}" ${sel.has(c.id) ? 'checked' : ''} ${busy ? 'disabled' : ''}>
+            <span class="wd-sd-cyc-meta">${_esc(when)} · ${_esc(dur)}${star}</span>
+          </label>`;
+        }).join('');
+        return `<div class="wd-sd-group">
+          <label class="wd-sd-prof">
+            <input type="checkbox" data-maction="sd-toggle-prof" data-prog="${_esc(g.program)}" ${all ? 'checked' : ''} ${some ? 'data-indeterminate="1"' : ''} ${busy ? 'disabled' : ''}>
+            <span class="wd-sd-prof-name">${_esc(g.program)}</span>
+            <span class="wd-sd-count">${g.cycles.filter(c => sel.has(c.id)).length}/${g.cycles.length}</span>
+          </label>
+          <div class="wd-sd-cycles">${rows}</div>
+        </div>`;
+      }).join('');
+    }
+    const brand = _esc((this._opts.store_brand || '').trim());
+    const model = _esc((this._opts.store_model || '').trim());
+    return `<h2 id="wd-modal-title">${this._t('modal.store_share_device', {}, 'Share this device')}</h2>
+      <p class="wd-info" style="margin-bottom:12px">${this._t('msg.store_share_device_intro', {brand, model}, `Upload ${brand} ${model} with the reference cycles you select. Others with the same appliance can adopt your programs. Entries are reviewed before appearing publicly.`)}</p>
+      <div class="wd-sd-tree">${tree}</div>
+      <div class="wd-modal-actions">
+        <button class="wd-btn wd-btn-secondary" data-maction="cancel" ${busy ? 'disabled' : ''}>${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="store-share-device-ok" ${busy || !selCount ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.share_n', {n: selCount}, `Share ${selCount} cycle(s)`)}</button>
+      </div>`;
   }
 
   // Interactive cycle inspector: view / trim / split.
@@ -8329,6 +8422,9 @@ class HaWashdataPanel extends HTMLElement {
 
     sr.querySelectorAll('[data-action]').forEach(btn => btn.addEventListener('click', e => this._onAction(e.currentTarget)));
     sr.querySelectorAll('[data-maction]').forEach(btn => btn.addEventListener('click', e => this._onModalAction(e.currentTarget.dataset.maction, e.currentTarget)));
+    // indeterminate is a JS property (no HTML attribute); apply it after render for
+    // the share-device tree's partially-selected profile checkboxes.
+    sr.querySelectorAll('input[data-indeterminate]').forEach(cb => { cb.indeterminate = true; });
 
     // D4: Undo action inside the delete toast.
     const toastUndo = sr.querySelector('[data-toast-undo]');
@@ -8844,6 +8940,22 @@ class HaWashdataPanel extends HTMLElement {
       this._modal = { type: 'store-share', cycleId: cid, program, profiles: null, deviceId: null };
       this._render();
       this._loadShareProfiles();
+
+    } else if (a === 'store-share-device') {
+      // Open the device-bundle share tree. Ensure cycles are loaded (the Profiles
+      // tab may not have fetched them) + the ML index (for golden detection), then
+      // default-check every shareable (golden/recorded) cycle.
+      this._modal = { type: 'store-share-device', selected: new Set(), loading: true };
+      this._render();
+      (async () => {
+        if (!(this._cycles || []).length) { try { await this._fetchCycles(eid); } catch (_) {} }
+        try { await this._loadMlIndex(eid); } catch (_) {}
+        if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'store-share-device') return;
+        const sel = new Set();
+        this._shareableByProgram().forEach(g => g.cycles.forEach(c => sel.add(c.id)));
+        this._modal.selected = sel; this._modal.loading = false;
+        this._render();
+      })();
 
     } else if (a === 'store-share-add-profile') {
       const m = this._modal;
@@ -9388,6 +9500,50 @@ class HaWashdataPanel extends HTMLElement {
             }
             this._modal = null;
             this._showToast(this._t('toast.store_shared', {}, 'Shared to the community store - pending review.'));
+          } catch (e) { this._showToast(this._t('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+    }
+
+    // ---- Community Store: share a whole device bundle ----
+    if (m && m.type === 'store-share-device') {
+      if (action === 'sd-toggle-cyc') {
+        const cid = btn.dataset.cid;
+        if (m.selected.has(cid)) m.selected.delete(cid); else m.selected.add(cid);
+        this._render();
+        return;
+      }
+      if (action === 'sd-toggle-prof') {
+        const prog = btn.dataset.prog;
+        const grp = this._shareableByProgram().find(g => g.program === prog);
+        if (grp) {
+          const all = grp.cycles.every(c => m.selected.has(c.id));
+          grp.cycles.forEach(c => { if (all) m.selected.delete(c.id); else m.selected.add(c.id); });
+        }
+        this._render();
+        return;
+      }
+      if (action === 'store-share-device-ok') {
+        // Build the {local_cycle_id, program} items from the model selection,
+        // resolving each cycle's program from the loaded cycle list.
+        const progById = new Map();
+        (this._cycles || []).forEach(c => progById.set(c.id, (c.profile_name || '').trim()));
+        const items = Array.from(m.selected)
+          .map(cid => ({ local_cycle_id: cid, program: progById.get(cid) || '' }))
+          .filter(it => it.program);
+        if (!items.length) { this._showToast(this._t('toast.share_device_none_sel', {}, 'Select at least one cycle to share'), 'error'); return; }
+        await this._busyRun('store-share-device', async () => {
+          try {
+            const r = await this._ws({ type: `${_DOMAIN}/store_upload_device`, entry_id: eid, items });
+            if (r && r.error) {
+              if (r.error === 'no_appliance_declared') this._showToast(this._t('toast.store_no_appliance', {}, 'Set your appliance brand and model in Settings first.'), 'error');
+              else { const why = r.detail ? `${r.error} - ${r.detail}` : r.error; this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error'); }
+              return;
+            }
+            this._modal = null;
+            const n = (r && r.cycle_ids && r.cycle_ids.length) || items.length;
+            this._showToast(this._t('toast.store_device_shared', {n}, `Shared ${n} cycle(s) to the community store - pending review.`));
           } catch (e) { this._showToast(this._t('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
         });
         return;
