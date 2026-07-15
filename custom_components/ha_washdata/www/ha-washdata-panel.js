@@ -812,6 +812,9 @@ button.wd-profile-card { display: block; }
 .wd-sd-phase:hover { background: var(--card-background-color); }
 .wd-sd-settings { display: flex; align-items: center; gap: 8px; padding: 10px 2px 2px; cursor: pointer; font-size: .9em; }
 .wd-sd-consent { display: flex; align-items: flex-start; gap: 8px; padding: 10px 2px 2px; cursor: pointer; font-size: .9em; }
+.wd-sd-group-nocyc { opacity: .65; }
+.wd-sd-prof-disabled { display: flex; align-items: baseline; gap: 8px; padding: 9px 12px; font-weight: 600; flex-wrap: wrap; }
+.wd-sd-nocyc-note { font-size: .8em; font-weight: 400; color: var(--secondary-text-color); }
 .wd-share-guide { margin-bottom: 10px; border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); overflow: hidden; }
 .wd-share-guide > summary { padding: 8px 12px; cursor: pointer; font-size: .85em; font-weight: 600; color: var(--secondary-text-color); list-style: none; }
 .wd-share-guide > summary::-webkit-details-marker { display: none; }
@@ -1589,6 +1592,7 @@ class HaWashdataPanel extends HTMLElement {
     this._refCycles = [];  // imported store recordings (shown alongside real cycles)
     this._shareableCycles = [];  // get_shareable_cycles result for the share-device tree
     this._sharePhasePrograms = [];  // programs (from get_shareable_cycles) with a local phase map
+    this._shareAllPrograms = [];   // all known profile names (including those without shareable cycles)
     this._dlSettings = false;       // "also adopt settings" toggle on the store device view
     this._selectMode = false;
     this._cycleSel = new Set();
@@ -4388,7 +4392,9 @@ class HaWashdataPanel extends HTMLElement {
 
   // Group the device's shareable reference cycles (from get_shareable_cycles: all
   // recorded/golden cycles, every page, imported excluded) by program, sorted by
-  // name. Returns [{program, cycles:[...]}].
+  // name. Profiles with no shareable cycles are appended with noCycles:true so
+  // the share modal can show them with an explanatory note.
+  // Returns [{program, cycles:[...]}, ..., {program, cycles:[], noCycles:true}, ...]
   _shareableByProgram() {
     const byProg = new Map();
     for (const c of (this._shareableCycles || [])) {
@@ -4397,9 +4403,14 @@ class HaWashdataPanel extends HTMLElement {
       if (!byProg.has(prog)) byProg.set(prog, []);
       byProg.get(prog).push(c);
     }
-    return Array.from(byProg.entries())
+    const groups = Array.from(byProg.entries())
       .map(([program, cycles]) => ({ program, cycles }))
       .sort((a, b) => a.program.localeCompare(b.program));
+    // Append profiles that exist but have no shareable cycles yet
+    for (const prog of (this._shareAllPrograms || [])) {
+      if (!byProg.has(prog)) groups.push({ program: prog, cycles: [], noCycles: true });
+    }
+    return groups;
   }
 
   // Feed the combobox candidate cache directly (no re-render): the combo reads it
@@ -7198,6 +7209,7 @@ class HaWashdataPanel extends HTMLElement {
     const sel = m.selected || new Set();
     const consented = !!m.consented;
     const selCount = groups.reduce((n, g) => n + g.cycles.filter(c => sel.has(c.id)).length, 0);
+    const hasShareableGroups = groups.some(g => !g.noCycles);
     let tree;
     if (m.loading) {
       tree = `<div class="wd-empty" style="padding:24px"><div class="wd-icon">⏳</div>${this._t('msg.loading', {}, 'Loading…')}</div>`;
@@ -7205,6 +7217,14 @@ class HaWashdataPanel extends HTMLElement {
       tree = `<div class="wd-empty" style="padding:24px"><div class="wd-icon">📤</div>${this._t('msg.share_device_none', {}, 'No shareable cycles yet. Mark a recorded or hand-picked cycle as a reference cycle (⭐) in the Cycles tab first.')}</div>`;
     } else {
       tree = groups.map(g => {
+        if (g.noCycles) {
+          return `<div class="wd-sd-group wd-sd-group-nocyc">
+            <div class="wd-sd-prof wd-sd-prof-disabled">
+              <span class="wd-sd-prof-name">${_esc(g.program)}</span>
+              <span class="wd-sd-nocyc-note">${this._t('msg.share_profile_no_cycles', {}, 'No reference cycles — mark a cycle as ⭐ in the Cycles tab to include this profile')}</span>
+            </div>
+          </div>`;
+        }
         const all = g.cycles.every(c => sel.has(c.id));
         const some = !all && g.cycles.some(c => sel.has(c.id));
         const rows = g.cycles.map(c => {
@@ -7249,7 +7269,7 @@ class HaWashdataPanel extends HTMLElement {
         <li>${this._t('msg.share_guideline_review', {}, 'Your upload starts as pending and appears publicly once enough community members confirm it.')}</li>
       </ul>
     </details>`;
-    const consentRow = groups.length ? `<label class="wd-sd-consent">
+    const consentRow = hasShareableGroups ? `<label class="wd-sd-consent">
       <input type="checkbox" data-maction="sd-toggle-consent" ${consented ? 'checked' : ''} ${busy ? 'disabled' : ''}>
       <span>${this._t('lbl.share_consent', {}, 'I confirm these cycles ran to normal completion without interruption')}</span>
     </label>` : '';
@@ -7257,7 +7277,7 @@ class HaWashdataPanel extends HTMLElement {
       <p class="wd-info" style="margin-bottom:12px">${this._t('msg.store_share_device_intro', {brand, model}, `Upload ${brand} ${model} with the reference cycles you select. Others with the same appliance can adopt your programs. Entries are reviewed before appearing publicly.`)}</p>
       ${guideBlock}
       <div class="wd-sd-tree">${tree}</div>
-      ${groups.length ? settingsRow : ''}
+      ${hasShareableGroups ? settingsRow : ''}
       ${consentRow}
       <div class="wd-modal-actions">
         <button class="wd-btn wd-btn-secondary" data-maction="cancel" ${busy ? 'disabled' : ''}>${this._t('btn.cancel', {}, 'Cancel')}</button>
@@ -9038,7 +9058,8 @@ class HaWashdataPanel extends HTMLElement {
           const r = await this._ws({ type: `${_DOMAIN}/get_shareable_cycles`, entry_id: eid });
           this._shareableCycles = (r && r.items) || [];
           this._sharePhasePrograms = (r && r.phase_programs) || [];
-        } catch (_) { this._shareableCycles = []; this._sharePhasePrograms = []; }
+          this._shareAllPrograms = (r && r.all_programs) || [];
+        } catch (_) { this._shareableCycles = []; this._sharePhasePrograms = []; this._shareAllPrograms = []; }
         if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'store-share-device') return;
         const sel = new Set();
         this._shareableByProgram().forEach(g => g.cycles.forEach(c => sel.add(c.id)));

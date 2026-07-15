@@ -966,8 +966,11 @@ async def ws_get_shareable_cycles(hass, connection, msg):
     items = store.get_shareable_cycles()
     programs = {it.get("profile_name") for it in items if it.get("profile_name")}
     phase_programs = sorted(p for p in programs if store.get_profile_phase_ranges(p))
+    # All known profiles (not just those with shareable cycles) so the panel can show
+    # profiles that exist but have no golden/recorded cycles yet, with guidance.
+    all_programs = sorted(store.get_profiles().keys())
     _send_result(connection, msg["id"], "get_shareable_cycles",
-                 {"items": items, "phase_programs": phase_programs})
+                 {"items": items, "phase_programs": phase_programs, "all_programs": all_programs})
 
 
 def async_register_commands(hass: HomeAssistant) -> None:
