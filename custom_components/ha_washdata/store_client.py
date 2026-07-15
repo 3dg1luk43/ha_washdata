@@ -352,15 +352,18 @@ class StoreClient:
         return {"device_id": dev_id, "items": items}
 
     async def get_device_bundle(self, dev_id: str, include_pending: bool = True) -> dict[str, Any]:
-        """Whole-device package for download: the device's profiles, each with its
-        reference cycles nested under ``cycles`` (hydrated + rating-summarised by
-        get_cycles). One profiles query + one cycles query per profile. Never raises.
+        """Whole-device package for download: the device's shareable ``settings`` (from
+        the device doc) + its profiles, each with its reference cycles nested under
+        ``cycles`` (hydrated + rating-summarised by get_cycles). One device GET + one
+        profiles query + one cycles query per profile. Never raises.
         """
+        device = await self.get_device(dev_id) or {}
+        settings = device.get("settings") if isinstance(device.get("settings"), dict) else {}
         profiles = await self.get_profiles(dev_id, include_pending=include_pending)
         for p in profiles:
             pid = p.get("id")
             p["cycles"] = await self.get_cycles(pid, include_pending=include_pending) if pid else []
-        return {"device_id": dev_id, "profiles": profiles}
+        return {"device_id": dev_id, "settings": settings, "profiles": profiles}
 
     async def get_cycles(
         self, prof_id: str, include_pending: bool = True, page_size: int = 50
@@ -519,12 +522,20 @@ class StoreClient:
         ok = await self._commit_create(token, f"brands/{b_id}", {
             "brand": brand, "brand_lc": b_id, "status": "pending", "createdByUid": uid,
         })
-        ok = ok and await self._commit_create(token, f"devices/{d_id}", {
+        device_fields: dict[str, Any] = {
             "applianceType": appliance, "brand": brand, "brand_lc": b_id,
             "model": model, "model_lc": model.lower(), "status": "pending",
             "createdByUid": uid, "createdByName": None, "manualUrl": None,
             "favoriteCount": 0, "confirmCount": 0,
-        })
+        }
+        # Stage 3: bundle the device's recognition/matching settings (allow-listed,
+        # numeric only) onto the device doc when supplied. Create rule allows extra
+        # fields, so no rules change; settings attach at create time (owner update is
+        # Stage 5).
+        settings = meta.get("settings")
+        if isinstance(settings, dict) and settings:
+            device_fields["settings"] = {str(k): v for k, v in settings.items()}
+        ok = ok and await self._commit_create(token, f"devices/{d_id}", device_fields)
         profile_fields: dict[str, Any] = {
             "deviceId": d_id, "applianceType": appliance, "program": program,
             "program_lc": program.lower(), "description": meta.get("description", ""),
@@ -602,6 +613,8 @@ class StoreClient:
                 # Stage 2: optional phase map for the profile doc (create-time).
                 "phases": it.get("phases"),
                 "phaseSourceCycleId": it.get("phaseSourceCycleId"),
+                # Stage 3: optional device-level settings (attach to the device doc).
+                "settings": device_meta.get("settings"),
             }
             res = await self.upload_reference_cycle(
                 refresh_token, uid, uploader_name, meta,

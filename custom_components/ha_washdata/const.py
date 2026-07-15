@@ -700,6 +700,40 @@ CONF_STORE_BRAND = "store_brand"                          # declared appliance b
 CONF_STORE_MODEL = "store_model"                          # declared appliance model
 DEFAULT_ENABLE_ONLINE_FEATURES = False
 
+# Device-level settings that may be shared/adopted with a device bundle (Stage 3).
+# These are recognition/matching thresholds intrinsic to the appliance MODEL (the
+# same for everyone with that machine), never environment/plug/identity settings:
+# no entity ids, notify services, energy price, sampling cadence, smoothing,
+# housekeeping timers, plug-robustness (end_repeat_count) or device-behaviour
+# toggles (anti-wrinkle, delay-start). Kept as one editable allow-list so share and
+# adopt agree on exactly what travels. All values are plain numbers -> nothing here
+# can leak PII or a user's HA topology.
+SHAREABLE_SETTING_KEYS: tuple[str, ...] = (
+    # Detection / recognition
+    CONF_MIN_POWER,
+    CONF_OFF_DELAY,
+    CONF_START_THRESHOLD_W,
+    CONF_STOP_THRESHOLD_W,
+    CONF_START_DURATION_THRESHOLD,
+    CONF_START_ENERGY_THRESHOLD,
+    CONF_COMPLETION_MIN_SECONDS,
+    CONF_RUNNING_DEAD_ZONE,
+    CONF_MIN_OFF_GAP,
+    CONF_END_ENERGY_THRESHOLD,
+    CONF_POWER_OFF_THRESHOLD_W,
+    CONF_POWER_OFF_DELAY,
+    # Matching
+    CONF_PROFILE_MATCH_THRESHOLD,
+    CONF_PROFILE_UNMATCH_THRESHOLD,
+    CONF_PROFILE_MATCH_INTERVAL,
+    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+    CONF_PROFILE_DURATION_TOLERANCE,
+    CONF_DURATION_TOLERANCE,
+    CONF_AUTO_LABEL_CONFIDENCE,
+    CONF_LEARNING_CONFIDENCE,
+)
+
 # Public Firebase web config for the community store (NOT secret - identifies the
 # project; access is enforced by the store's Firestore rules).
 STORE_PROJECT_ID = "washdata-store"

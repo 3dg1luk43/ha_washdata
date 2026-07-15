@@ -525,3 +525,42 @@ async def test_upload_reference_cycle_no_phases_when_absent():
     prof = next(w for (url, kw) in s.posts if url.endswith(":commit")
                 for w in kw["json"]["writes"] if "/profiles/" in w.get("update", {}).get("name", ""))
     assert "phases" not in prof["update"]["fields"]
+
+
+@pytest.mark.asyncio
+async def test_upload_reference_cycle_attaches_settings():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))
+    for _ in range(4):
+        s.queue_post(_Resp(200, {}))
+    c = _client(s)
+    meta = {"applianceType": "washer", "brand": "Bosch", "model": "WAT28660", "program": "Cotton 40",
+            "settings": {"start_threshold_w": 12.0, "off_delay": 180}}
+    await c.upload_reference_cycle("refresh", "u1", "Alice", meta, [[0, 2000], [60, 100]], {}, 2)
+    dev = next(w for (url, kw) in s.posts if url.endswith(":commit")
+               for w in kw["json"]["writes"] if "/devices/" in w.get("update", {}).get("name", ""))
+    setmap = dev["update"]["fields"]["settings"]["mapValue"]["fields"]
+    assert setmap["start_threshold_w"] == {"doubleValue": 12.0}
+    assert setmap["off_delay"] == {"integerValue": "180"}
+
+
+@pytest.mark.asyncio
+async def test_get_device_bundle_includes_settings():
+    s = _Session()
+    d = sc.device_id("washer", "Bosch", "WAT28660")
+    p = sc.profile_id(d, "Cotton 40")
+    # 1: device GET (carries settings)
+    s.queue_get(_Resp(200, {"name": f".../devices/{d}", "fields": {
+        "settings": {"mapValue": {"fields": {"start_threshold_w": {"doubleValue": 12.0}}}}}}))
+    # 2: profiles query
+    s.queue_post(_Resp(200, [
+        {"document": {"name": f".../profiles/{p}", "fields": {
+            "program": {"stringValue": "Cotton 40"}, "deviceId": {"stringValue": d},
+            "status": {"stringValue": "approved"}}}},
+    ]))
+    # 3: cycles query for that profile
+    s.queue_post(_Resp(200, []))
+    c = _client(s)
+    bundle = await c.get_device_bundle(d)
+    assert bundle["settings"] == {"start_threshold_w": 12.0}
+    assert bundle["profiles"][0]["program"] == "Cotton 40"
