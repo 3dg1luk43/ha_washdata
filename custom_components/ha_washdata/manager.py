@@ -311,8 +311,12 @@ def _pn_create(
 ) -> None:
     """Best-effort persistent notification creation.
 
-    Tests stub out the entire `homeassistant` module, so we can't import
-    `homeassistant.components.persistent_notification` here.
+    Deliberately goes through ``hass.components.persistent_notification`` rather than
+    a direct ``homeassistant.components.persistent_notification`` import: the test
+    suite stubs out the whole ``homeassistant`` module and mocks this dynamic
+    attribute, so a direct import would both fail under test and bypass those mocks.
+    Failures are logged at debug (not silently swallowed) so a stuck notification is
+    at least visible in the logs.
     """
     try:
         components = getattr(cast(Any, hass), "components", None)
@@ -322,12 +326,16 @@ def _pn_create(
         result = pn.async_create(message, title=title, notification_id=notification_id)
         if inspect.iscoroutine(result):
             hass.async_create_task(result)
-    except Exception:
-        return
+    except Exception:  # noqa: BLE001 - best-effort; surface the failure in logs
+        _LOGGER.debug("persistent_notification create failed (id=%s)", notification_id, exc_info=True)
 
 
 def _pn_dismiss(hass: HomeAssistant, notification_id: str) -> None:
-    """Best-effort persistent notification dismissal."""
+    """Best-effort persistent notification dismissal.
+
+    Uses the ``hass.components`` accessor for the same test-mocking reason as
+    :func:`_pn_create`; failures are logged at debug rather than swallowed.
+    """
     try:
         components = getattr(cast(Any, hass), "components", None)
         pn = getattr(cast(Any, components), "persistent_notification", None)
@@ -336,8 +344,8 @@ def _pn_dismiss(hass: HomeAssistant, notification_id: str) -> None:
         result = pn.async_dismiss(notification_id)
         if inspect.iscoroutine(result):
             hass.async_create_task(result)
-    except Exception:
-        return
+    except Exception:  # noqa: BLE001 - best-effort; surface the failure in logs
+        _LOGGER.debug("persistent_notification dismiss failed (id=%s)", notification_id, exc_info=True)
 
 
 class WashDataManager:
@@ -4189,7 +4197,8 @@ class WashDataManager:
             try:
                 prev_lifetime_count = self._lifetime_cycle_count()
                 cur_lifetime_count = prev_lifetime_count + 1
-                self.profile_store._data["lifetime_cycle_count"] = cur_lifetime_count
+                # In-memory only; persisted by the batched lifetime-energy save below.
+                self.profile_store.set_lifetime_cycle_count(cur_lifetime_count)
             except Exception:  # noqa: BLE001 - counter must never break cycle end
                 prev_lifetime_count = None
                 cur_lifetime_count = None
@@ -4534,7 +4543,7 @@ class WashDataManager:
         is unavailable. Never raises.
         """
         try:
-            return int(self.profile_store._data.get("lifetime_cycle_count", 0) or 0)
+            return self.profile_store.get_lifetime_cycle_count()
         except Exception:  # noqa: BLE001
             try:
                 return int(self.cycle_count)

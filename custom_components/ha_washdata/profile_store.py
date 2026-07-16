@@ -1848,6 +1848,31 @@ class ProfileStore:
         self._data["lifetime_energy_wh"] = round(base + add, 3)
         await self.async_save()
 
+    def get_lifetime_cycle_count(self) -> int:
+        """Persisted monotonic lifetime completed-cycle count.
+
+        Only ever increments (never regresses when history is trimmed/merged), so it
+        is the correct basis for milestone crossings. Pure getter - never persists.
+        Never raises; returns 0 when unset.
+        """
+        try:
+            return int(self._data.get("lifetime_cycle_count", 0) or 0)
+        except Exception:  # noqa: BLE001
+            return 0
+
+    def set_lifetime_cycle_count(self, count: int) -> None:
+        """Set the lifetime cycle count in memory WITHOUT persisting.
+
+        The cycle-end path batches this with the immediately-following lifetime
+        energy save (:meth:`async_add_lifetime_energy_wh`) so the store is written
+        once per cycle. Encapsulates the storage key so callers need not touch
+        ``_data`` directly. Ignores non-integer input.
+        """
+        try:
+            self._data["lifetime_cycle_count"] = int(count)
+        except (TypeError, ValueError):
+            pass
+
     # ------------------------------------------------------------------
     # E1: Maintenance log & predictive-maintenance reminders (Group E)
     # ------------------------------------------------------------------
