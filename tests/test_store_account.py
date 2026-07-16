@@ -118,12 +118,39 @@ async def test_migration_marker_blocks_reenable():
 
 
 @pytest.mark.asyncio
-async def test_global_account_merges():
+async def test_global_account_replaces_on_set():
+    """async_set_account replaces the stored account (does not merge), so a fresh
+    login can never leave a stale field (e.g. a previous account's uid) behind."""
     hass = _hass_online()
-    await store_account.async_set_account(hass, {"refresh_token": "R", "uid": "u1"})
-    await store_account.async_set_account(hass, {"name": "Alice"})
+    await store_account.async_set_account(hass, {"refresh_token": "R", "uid": "u1", "name": "Alice"})
+    # A second login with a complete dict fully supersedes the first.
+    await store_account.async_set_account(hass, {"refresh_token": "R2", "uid": "u2", "name": "Bob"})
     acct = store_account.get_account(hass)
-    assert acct["refresh_token"] == "R" and acct["uid"] == "u1" and acct["name"] == "Alice"
+    assert acct == {"refresh_token": "R2", "uid": "u2", "name": "Bob"}
+    # A partial dict replaces too: fields absent from it do not persist.
+    await store_account.async_set_account(hass, {"name": "Carol"})
+    acct = store_account.get_account(hass)
+    assert acct == {"name": "Carol"}
+    assert "refresh_token" not in acct and "uid" not in acct
+    # None values are dropped rather than stored as null.
+    await store_account.async_set_account(hass, {"refresh_token": "R3", "uid": "u3", "name": None})
+    acct = store_account.get_account(hass)
+    assert acct == {"refresh_token": "R3", "uid": "u3"}
+
+
+@pytest.mark.asyncio
+async def test_disabling_online_clears_account():
+    """Turning online features off is a full opt-out: the stored refresh token is
+    dropped so a disabled install never leaves a live credential on disk."""
+    hass = _hass_online()
+    await store_account.async_set_account(hass, {"refresh_token": "SECRET", "uid": "u1", "name": "Alice"})
+    assert store_account.get_account(hass).get("refresh_token") == "SECRET"
+    await store_account.async_set_online(hass, False)
+    assert store_account.get_account(hass) == {}
+    assert store_account.get_identity(hass)["connected"] is False
+    # Re-enabling does not resurrect the cleared credential.
+    await store_account.async_set_online(hass, True)
+    assert store_account.get_account(hass) == {}
 
 
 @pytest.fixture

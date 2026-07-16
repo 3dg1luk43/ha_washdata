@@ -111,6 +111,11 @@ def online_enabled(hass: HomeAssistant) -> bool:
 async def async_set_online(hass: HomeAssistant, on: bool) -> None:
     await async_load(hass)
     _data(hass)["online_enabled"] = bool(on)
+    # Turning online features off is a full opt-out: drop the stored refresh token
+    # so a disabled install never leaves a live credential on disk (a later re-enable
+    # simply reconnects). Explicit disconnect clears it the same way.
+    if not on:
+        _data(hass)["account"] = {}
     await _save(hass)
 
 
@@ -164,10 +169,15 @@ def get_identity(hass: HomeAssistant) -> dict[str, Any]:
 
 
 async def async_set_account(hass: HomeAssistant, account: dict[str, Any]) -> None:
+    """Persist the account, replacing any previously stored one.
+
+    Both callers (connect / migration hoist) pass a complete account dict, so a
+    fresh login fully supersedes the old one -- no field from a previous account
+    (e.g. a stale ``uid``) can survive an account switch. ``None`` values are
+    dropped so an unset optional (``name``) doesn't overwrite with null.
+    """
     await async_load(hass)
-    cur = get_account(hass)
-    cur.update({k: v for k, v in account.items() if v is not None})
-    _data(hass)["account"] = cur
+    _data(hass)["account"] = {k: v for k, v in account.items() if v is not None}
     await _save(hass)
 
 

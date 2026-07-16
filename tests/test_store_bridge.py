@@ -24,9 +24,28 @@ import pytest
 
 from custom_components.ha_washdata import store_account
 from custom_components.ha_washdata.profile_store import ProfileStore
-from custom_components.ha_washdata.store import StoreBridge
+from custom_components.ha_washdata.store import StoreBridge, _cycle_upload_stats
 
 BASE = datetime(2023, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
+
+
+def test_cycle_upload_stats_omits_unknown_energy():
+    """energy_wh is uploaded only when known+positive so a missing/zero value can't
+    drag the community store's per-program energy average down (B8)."""
+    pts = [[0.0, 1000.0], [60.0, 1000.0]]
+    # Known positive energy -> present.
+    known = _cycle_upload_stats({"energy_wh": 800.0, "duration": 3600.0}, pts)
+    assert known["energy_wh"] == 800.0
+    assert known["duration"] == 3600.0 and known["peak_w"] == 1000.0
+    # Absent energy -> field omitted entirely (not sent as 0).
+    missing = _cycle_upload_stats({"duration": 3600.0}, pts)
+    assert "energy_wh" not in missing
+    # Explicit zero energy -> also omitted.
+    zero = _cycle_upload_stats({"energy_wh": 0.0}, pts)
+    assert "energy_wh" not in zero
+    # Non-numeric energy -> omitted, never raises.
+    bad = _cycle_upload_stats({"energy_wh": "oops"}, pts)
+    assert "energy_wh" not in bad
 
 
 class FakeClient:

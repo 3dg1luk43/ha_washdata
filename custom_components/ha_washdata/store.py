@@ -119,6 +119,31 @@ def _downsample(points: list[list[float]], max_n: int = 10000) -> list[list[floa
     return sampled
 
 
+def _cycle_upload_stats(cyc: dict[str, Any], pts: list[list[float]]) -> dict[str, Any]:
+    """Build the community-upload stats for a cycle from its stored metadata + trace.
+
+    ``energy_wh`` is emitted only when it is a known positive value: an older cycle
+    or a recording without energy data has no meaningful figure, and sending 0 would
+    drag the store's per-program energy average downward. Absent-when-unknown lets the
+    aggregate ignore it instead. Shared by share_cycle and share_device so both paths
+    serialize a cycle identically.
+    """
+    vals = [float(p[1]) for p in pts]
+    stats: dict[str, Any] = {
+        "duration": float(cyc.get("duration") or (pts[-1][0] - pts[0][0])),
+        "peak_w": max(vals) if vals else 0.0,
+        "mean_w": (sum(vals) / len(vals)) if vals else 0.0,
+        "signature": cyc.get("signature") if isinstance(cyc.get("signature"), dict) else {},
+    }
+    try:
+        energy = float(cyc.get("energy_wh"))
+    except (TypeError, ValueError):
+        energy = 0.0
+    if energy > 0:
+        stats["energy_wh"] = energy
+    return stats
+
+
 class StoreBridge:
     """Orchestrates store browse/import/share/catalog against a ProfileStore.
 
@@ -235,22 +260,20 @@ class StoreBridge:
             for c in (list(self._ps.get_reference_cycles()) + list(self._ps.get_past_cycles()))
         }
         cyc = by_id.get(local_cycle_id, {})
-        vals = [float(p[1]) for p in pts]
-        stats = {
-            "duration": float(cyc.get("duration") or (pts[-1][0] - pts[0][0])),
-            "energy_wh": float(cyc.get("energy_wh") or 0.0),
-            "peak_w": max(vals) if vals else 0.0,
-            "mean_w": (sum(vals) / len(vals)) if vals else 0.0,
-            "signature": cyc.get("signature") if isinstance(cyc.get("signature"), dict) else {},
-        }
+        stats = _cycle_upload_stats(cyc, pts)
         meta = {
             "applianceType": store_appliance_type(appliance_type), "brand": brand, "model": model, "program": program,
             "sampleIntervalSec": float(sample_interval_sec or cyc.get("sampling_interval") or 0.0),
             "description": description,
         }
+        # LTTB downsampling is O(N) pure Python; offload it so a long trace never
+        # blocks the event loop while a user shares a cycle.
+        downsampled = await self._hass.async_add_executor_job(
+            _downsample, [[p[0], p[1]] for p in pts]
+        )
         new_id = await self._client.upload_reference_cycle(
             acct["refresh_token"], acct.get("uid", ""), acct.get("name"),
-            meta, _downsample([[p[0], p[1]] for p in pts]), stats, derive_qc(cyc),
+            meta, downsampled, stats, derive_qc(cyc),
         )
         if not new_id:
             return {"error": "upload_failed", "detail": self._client.last_error()}
@@ -286,17 +309,15 @@ class StoreBridge:
             if not pts:
                 continue
             cyc = by_id.get(cid, {})
-            vals = [float(p[1]) for p in pts]
+            # Offload the O(N) LTTB pass per cycle so a large bundle never stalls
+            # the event loop while sharing.
+            downsampled = await self._hass.async_add_executor_job(
+                _downsample, [[p[0], p[1]] for p in pts]
+            )
             bundle_items.append({
                 "program": program,
-                "points": _downsample([[p[0], p[1]] for p in pts]),
-                "stats": {
-                    "duration": float(cyc.get("duration") or (pts[-1][0] - pts[0][0])),
-                    "energy_wh": float(cyc.get("energy_wh") or 0.0),
-                    "peak_w": max(vals) if vals else 0.0,
-                    "mean_w": (sum(vals) / len(vals)) if vals else 0.0,
-                    "signature": cyc.get("signature") if isinstance(cyc.get("signature"), dict) else {},
-                },
+                "points": downsampled,
+                "stats": _cycle_upload_stats(cyc, pts),
                 "qc": derive_qc(cyc),
                 "sampleIntervalSec": float(cyc.get("sampling_interval") or 0.0),
             })

@@ -51,6 +51,12 @@ _APPLIANCE_TYPES = {"washer", "dryer", "dishwasher", "washer_dryer"}
 # Max concurrent per-cycle rating aggregations when listing a profile's cycles.
 _RATING_FANOUT_LIMIT = 8
 
+# Max profiles hydrated concurrently when downloading a whole-device bundle. Each
+# profile's get_cycles adds its own (rating) fan-out, so the effective ceiling is
+# roughly this x (1 + _RATING_FANOUT_LIMIT); kept small to stay well under the
+# store's rate limiter on devices that carry many profiles.
+_BUNDLE_HYDRATE_LIMIT = 4
+
 
 # ── deterministic ids (must match the store's lib/ids.js exactly) ──────────────
 
@@ -386,11 +392,20 @@ class StoreClient:
         settings = device.get("settings") if isinstance(device.get("settings"), dict) else {}
         profiles = await self.get_profiles(dev_id, include_pending=include_pending)
 
+        # Bound the per-profile fan-out: each get_cycles issues one query plus a
+        # rating fan-out, so an unbounded gather over a device with many profiles
+        # could burst hundreds of concurrent requests and trip the store's rate
+        # limiter.  A shared semaphore caps how many profiles hydrate at once.
+        sem = asyncio.Semaphore(_BUNDLE_HYDRATE_LIMIT)
+
         async def _cycles_for(p: dict[str, Any]) -> list[dict[str, Any]]:
             pid = p.get("id")
-            return await self.get_cycles(pid, include_pending=include_pending) if pid else []
+            if not pid:
+                return []
+            async with sem:
+                return await self.get_cycles(pid, include_pending=include_pending)
 
-        # Fetch every profile's cycles concurrently rather than one query at a time.
+        # Fetch profiles' cycles concurrently (bounded) rather than one at a time.
         cycle_lists = await asyncio.gather(*(_cycles_for(p) for p in profiles))
         for p, cycles in zip(profiles, cycle_lists):
             p["cycles"] = cycles
