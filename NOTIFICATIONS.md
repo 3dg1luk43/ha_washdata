@@ -186,8 +186,8 @@ lifecycle tag) so it stays audible even if your status channel is silenced.
 ### A note on language
 
 Notification text is composed by WashData in Python, so any wording it generates
-(default message templates, the learning "verify cycle" / "suggested settings" prompts,
-and the auto-tune notice) follows the **server/instance language** set under
+(the default start/finish/timer message templates and the peak-rate start tip)
+follows the **server/instance language** set under
 **Settings > System > General** - not each individual user's profile language. This is a
 Home Assistant platform limitation: integrations are not told which user a notification is
 for, so there is no per-user language to translate into. (Config and options dialogs *are*

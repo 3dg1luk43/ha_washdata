@@ -1264,10 +1264,6 @@
       "doc": "Afl verður að falla niður fyrir þetta stig áður en niðurtalning frá töf hefst. Stilltu það undir Start Threshold - bilið á milli þeirra er hysteresis bandið sem kemur í veg fyrir flökt. Ef stillt er of hátt, ræsa lágt afl fasar (skolunartímar, hrukkuvörn) ranglega af stað lokaröðinni.",
       "label": "Stöðvunarþröskuldur"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Ekki gefa upp viðvarandi tilkynningu þegar lokið lotu þarfnast endurskoðunar; endurgjöfin birtist enn í Cycles review biðröðinni.",
-      "label": "Bæla endurgjöfartilkynningar"
-    },
     "switch_entity": {
       "doc": "Valfrjáls rofi slökkt á hléi og aftur kveikt á þegar haldið er áfram, notaður ásamt „Hlé slekkur líka á rafmagni“.",
       "label": "Rofaeining"

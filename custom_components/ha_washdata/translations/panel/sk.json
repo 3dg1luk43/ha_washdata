@@ -1247,10 +1247,6 @@
       "doc": "Výkon musí klesnúť pod túto úroveň pred začiatkom odpočítavania oneskorenia. Nastavte ho pod hodnotu Start Threshold - medzera medzi nimi je pásmo hysterézie, ktoré zabraňuje blikaniu. Ak je nastavenie príliš vysoké, fázy s nízkym výkonom (zastavenie plákania, ochrana proti pokrčeniu) falošne spúšťajú koncovú sekvenciu.",
       "label": "Prah zastavenia"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Nevyvolávajte trvalé upozornenie, keď je potrebné skontrolovať dokončený cyklus; spätná väzba sa stále zobrazuje vo fronte kontroly cyklov.",
-      "label": "Potlačiť upozornenia na spätnú väzbu"
-    },
     "switch_entity": {
       "doc": "Voliteľný prepínač vypnutý pri pauze a opätovnom zapnutí pri opätovnom spustení, ktorý sa používa spolu s funkciou „Pauza tiež znižuje napájanie“.",
       "label": "Entita prepínača"

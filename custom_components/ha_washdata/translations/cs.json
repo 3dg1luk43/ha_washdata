@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: Ověřit cyklus ({device})",
-      "feedback_notification_message": "**Zařízení**: {device}\n**Program**: {program} (spolehlivost {confidence} %)\n**Čas**: {time}\n\nWashData potřebuje vaši pomoc k ověření tohoto zjištěného cyklu.\n\nPřejděte do **Nastavení > Zařízení a služby > WashData > Konfigurovat > Zpětná vazba učení** a potvrďte nebo opravte tento výsledek.",
-      "auto_tune_suggestion": "{device_type} {device_title} detekovaných cyklů duchů. Navrhovaná změna min_power: {current_min}W -> {new_min}W (nepoužije se automaticky).",
-      "auto_tune_title": "WashData Auto-Tune",
-      "auto_tune_fallback": "{device_type} {device_title} detekovaných cyklů duchů. Navrhovaná změna min_power: {current_min}W -> {new_min}W (nepoužije se automaticky).",
       "timer_default_message": "{device}: {minutes} min časovač",
       "timer_pause_action_title": "Obnovit cyklus",
       "timer_pause_body_suffix": "Cyklus je pozastaven. Pro pokračování otevřete panel WashData.",

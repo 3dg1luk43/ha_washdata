@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: kontrolli tsükkel ({device})",
-      "feedback_notification_message": "**Seade**: {device}\n**Programm**: {program} ({confidence}% usaldusväärsus)\n**Aeg**: {time}\n\nWashData vajab tuvastatud tsükli kontrollimiseks teie abi.\n\nSelle tulemuse kinnitamiseks või parandamiseks minge jaotisse **Seaded > Seadmed ja teenused > WashData > Seadistamine > Tagasiside õppimine**.",
-      "auto_tune_suggestion": "{device_type} {device_title} tuvastas kummitustsüklit. Soovitatav min_võimsuse muutus: {current_min}W -> {new_min}W (ei rakendata automaatselt).",
-      "auto_tune_title": "WashData automaatne häälestus",
-      "auto_tune_fallback": "{device_type} {device_title} tuvastas kummitustsüklit. Soovitatav min_võimsuse muutus: {current_min}W -> {new_min}W (ei rakendata automaatselt).",
       "timer_default_message": "{device}: {minutes} min taimer",
       "timer_pause_action_title": "Tsükli jätkamine",
       "timer_pause_body_suffix": "Tsükkel on peatatud. Jätkamiseks avage WashData paneel.",

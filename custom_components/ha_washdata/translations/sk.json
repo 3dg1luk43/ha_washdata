@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: Overiť cyklus ({device})",
-      "feedback_notification_message": "**Zariadenie**: {device}\n**Program**: {program} (spoľahlivosť {confidence} %)\n**Čas**: {time}\n\nWashData potrebuje vašu pomoc na overenie tohto zisteného cyklu.\n\nAk chcete potvrdiť alebo opraviť tento výsledok, prejdite do časti **Nastavenia > Zariadenia a služby > WashData > Konfigurovať > Spätná väzba na učenie**.",
-      "auto_tune_suggestion": "{device_type} {device_title} zistilo cykly duchov. Navrhovaná zmena minimálneho výkonu: {current_min}W -> {new_min}W (neaplikuje sa automaticky).",
-      "auto_tune_title": "Automatické ladenie WashData",
-      "auto_tune_fallback": "{device_type} {device_title} zistilo cykly duchov. Navrhovaná zmena minimálneho výkonu: {current_min}W -> {new_min}W (neaplikuje sa automaticky).",
       "timer_default_message": "{device}: časovač {minutes} min",
       "timer_pause_action_title": "Obnoviť cyklus",
       "timer_pause_body_suffix": "Cyklus je pozastavený. Otvorte panel WashData na obnovenie.",

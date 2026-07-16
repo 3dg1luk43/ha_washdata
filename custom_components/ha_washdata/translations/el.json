@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: Επαλήθευση κύκλου ({device})",
-      "feedback_notification_message": "**Συσκευή**: {device}\n**Πρόγραμμα**: {program} ({confidence}% εμπιστοσύνη)\n**Ώρα**: {time}\n\nΤο WashData χρειάζεται τη βοήθειά σας για να επαληθεύσει τον εντοπισμένο κύκλο.\n\nΜεταβείτε στις **Ρυθμίσεις > Συσκευές και υπηρεσίες > WashData > Διαμόρφωση > Ανατροφοδοτήσεις μάθησης** για να επιβεβαιώσετε ή να διορθώσετε αυτό το αποτέλεσμα.",
-      "auto_tune_suggestion": "Η συσκευή {device_type} {device_title} εντόπισε κύκλους φαντασμάτων. Προτεινόμενη αλλαγή ελάχιστης ισχύος: {current_min}W -> {new_min}W (δεν εφαρμόζεται αυτόματα).",
-      "auto_tune_title": "Αυτόματος συντονισμός WashData",
-      "auto_tune_fallback": "Η συσκευή {device_type} {device_title} εντόπισε κύκλους φαντασμάτων. Προτεινόμενη αλλαγή ελάχιστης ισχύος: {current_min}W -> {new_min}W (δεν εφαρμόζεται αυτόματα).",
       "timer_default_message": "{device}: χρονόμετρο {minutes} λεπτών",
       "timer_pause_action_title": "Συνέχιση κύκλου",
       "timer_pause_body_suffix": "Ο κύκλος είναι σε παύση. Ανοίξτε τον πίνακα WashData για να συνεχίσετε.",

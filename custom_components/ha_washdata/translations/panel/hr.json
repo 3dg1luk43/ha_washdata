@@ -1247,10 +1247,6 @@
       "doc": "Snaga mora pasti ispod ove razine prije nego što počne odbrojavanje odgode isključivanja. Postavite ga ispod početnog praga - razmak između njih je pojas histereze koji sprječava treperenje. Ako su postavljene previsoko, faze niske snage (zaustavljanja ispiranja, protiv gužvanja) lažno pokreću završetak slijeda.",
       "label": "Prag zaustavljanja"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Nemojte pokretati stalnu obavijest kada je završeni ciklus potreban za pregled; povratne informacije i dalje se pojavljuju u redu čekanja za pregled ciklusa.",
-      "label": "Prigušivanje obavijesti o povratnim informacijama"
-    },
     "switch_entity": {
       "doc": "Dodatni prekidač koji se isključuje prilikom pauze i ponovno uključuje kada se nastavlja, koristi se zajedno s \"Pauza također prekida napajanje\".",
       "label": "Entitet prekidača"

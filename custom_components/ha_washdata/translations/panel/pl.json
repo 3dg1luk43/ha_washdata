@@ -1247,10 +1247,6 @@
       "doc": "Moc musi spaść poniżej tego poziomu, zanim rozpocznie się odliczanie opóźnienia wyłączenia. Ustaw go poniżej progu początkowego – odstęp między nimi to pasmo histerezy zapobiegające migotaniu. W przypadku ustawienia zbyt wysokiego, fazy o małej mocy (zatrzymanie płukania, zapobieganie zagnieceniom) błędnie uruchamiają sekwencję końcową.",
       "label": "Próg Zatrzymania"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Nie zgłaszaj ciągłego powiadomienia, gdy zakończony cykl wymaga przeglądu; informacja zwrotna nadal pojawia się w kolejce przeglądu cykli.",
-      "label": "Wycisz Powiadomienia o Opinii"
-    },
     "switch_entity": {
       "doc": "Opcjonalny przełącznik wyłączany podczas pauzy i włączany ponownie po wznowieniu, używany razem z opcją „Pauza powoduje również odcięcie zasilania”.",
       "label": "Encja Przełącznika"

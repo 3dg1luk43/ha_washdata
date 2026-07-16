@@ -1247,10 +1247,6 @@
       "doc": "Prieš prasidedant išjungimo delsos skaičiavimui, galia turi nukristi žemiau šio lygio. Nustatykite jį žemiau pradžios slenksčio – tarpas tarp jų yra histerezės juosta, kuri neleidžia mirgėti. Jei nustatyta per didelė, mažos galios fazės (skalavimo sulaikymo, glamžymo) klaidingai suaktyvina pabaigos seką.",
       "label": "Sustabdymo slenkstis"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Nekelkite nuolatinio pranešimo, kai reikia peržiūrėti baigtą ciklą; atsiliepimai vis tiek rodomi ciklų peržiūros eilėje.",
-      "label": "Slėpti grįžtamojo ryšio pranešimus"
-    },
     "switch_entity": {
       "doc": "Pasirenkamas jungiklis išjungiamas pristabdant ir vėl įjungiamas, kai tęsiamas, naudojamas kartu su „Pauzė taip pat atjungia maitinimą“.",
       "label": "Jungiklio objektas"

@@ -1247,10 +1247,6 @@
       "doc": "Pirms izslēgšanas aizkaves atpakaļskaitīšanas sākuma jaudai ir jāsamazinās zem šī līmeņa. Iestatiet to zem sākuma sliekšņa — atstarpe starp tām ir histerēzes josla, kas novērš mirgošanu. Ja iestatīts pārāk augsts, mazjaudas fāzes (skalošanas aizturēšana, pretburzīšanās) kļūdaini aktivizē beigu secību.",
       "label": "Apstāšanās slieksnis"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Nesniedziet pastāvīgu paziņojumu, kad pabeigts cikls ir jāpārskata; atsauksmes joprojām tiek rādītas ciklu pārskatīšanas rindā.",
-      "label": "Apturēt atsauksmju paziņojumus"
-    },
     "switch_entity": {
       "doc": "Papildu slēdzis tiek izslēgts pauzes laikā un atkal ieslēgts, kad tiek atsākts, un tiek izmantots kopā ar funkciju “Pauze arī pārtrauc strāvu”.",
       "label": "Slēdža entītija"

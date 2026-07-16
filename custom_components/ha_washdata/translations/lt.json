@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "„WashData”: patikrinti ciklą ({device})",
-      "feedback_notification_message": "**Įrenginys**: {device}\n**Programa**: {program} ({confidence}% patikimumas)\n**Laikas**: {time}\n\n„WashData” reikia jūsų pagalbos patikrinti šį aptiktą ciklą.\n\nEikite į **Nustatymai > Įrenginiai ir paslaugos > WashData > Konfigūruoti > Mokymosi atsiliepimai**, kad patvirtintumėte arba pataisytumėte šį rezultatą.",
-      "auto_tune_suggestion": "{device_type} {device_title} aptikta vaiduoklio ciklų. Siūlomas min_galios pokytis: {current_min}W -> {new_min}W (netaikomas automatiškai).",
-      "auto_tune_title": "„WashData“ automatinis derinimas",
-      "auto_tune_fallback": "{device_type} {device_title} aptikta vaiduoklio ciklų. Siūlomas min_galios pokytis: {current_min}W -> {new_min}W (netaikomas automatiškai).",
       "timer_default_message": "{device}: {minutes} min. laikmatis",
       "timer_pause_action_title": "Tęsti ciklą",
       "timer_pause_body_suffix": "Ciklas pristabdytas. Atidarykite WashData skydelį, kad tęstumėte.",

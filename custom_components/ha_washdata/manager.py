@@ -5078,44 +5078,15 @@ class WashDataManager:
             new_min,
         )
 
-        # Store a suggestion (do not mutate user-set options)
+        # Store a suggestion (do not mutate user-set options). The suggestion is
+        # surfaced in the panel (Settings suggestions banner / per-field pill);
+        # WashData intentionally does not raise a persistent notification here.
         self.profile_store.set_suggestion(
             CONF_MIN_POWER,
             float(new_min),
             f"Auto-tune: {len(self._noise_events)} ghost cycles detected in 24h",
         )
         await self.profile_store.async_save()
-
-        # Notify user - use finish services as the natural channel for device suggestions
-        _translations = await translation.async_get_translations(
-            self.hass, self.hass.config.language, "options", {DOMAIN}
-        )
-        _default_msg = (
-            "{device_type} {device_title} detected ghost cycles. "
-            "Suggested min_power change: {current_min}W -> {new_min}W "
-            "(not applied automatically)."
-        )
-        _default_title = "WashData Auto-Tune"
-        _msg_template = _translations.get(
-            f"component.{DOMAIN}.options.error.auto_tune_suggestion", _default_msg
-        )
-        _title = _translations.get(
-            f"component.{DOMAIN}.options.error.auto_tune_title", _default_title
-        )
-        message = _msg_template.format(
-            device_type=self.device_type,
-            device_title=self.config_entry.title,
-            current_min=f"{current_min:.1f}",
-            new_min=f"{new_min:.1f}",
-        )
-        if self._notify_finish_services or self._notify_start_services or self._notify_actions:
-            _event_type = (
-                NOTIFY_EVENT_FINISH if self._notify_finish_services
-                else NOTIFY_EVENT_START
-            )
-            self._dispatch_notification(message, title=_title, event_type=_event_type)
-        else:
-            _pn_create(self.hass, message, title=_title)
 
         # Reset trackers
         self._noise_events = []

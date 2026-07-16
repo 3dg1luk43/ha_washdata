@@ -1264,10 +1264,6 @@
       "doc": "La energía debe caer por debajo de este nivel antes de que comience la cuenta atrás del retraso de apagado. Configúrelo por debajo del umbral de inicio; el espacio entre ellos es la banda de histéresis que evita el parpadeo. Si se ajusta demasiado alto, las fases de baja potencia (paradas de aclarado, antiarrugas) activan erróneamente la secuencia final.",
       "label": "Umbral de parada"
     },
-    "suppress_feedback_notifications": {
-      "doc": "No generar una notificación persistente cuando un ciclo finalizado necesite revisión; los comentarios aún aparecen en la cola de revisión de Cycles.",
-      "label": "Suprimir notificaciones de retroalimentación"
-    },
     "switch_entity": {
       "doc": "El interruptor opcional se apaga en pausa y se vuelve a encender al reanudar, se usa junto con \"Pausa también corta la energía\".",
       "label": "Entidad interruptora"

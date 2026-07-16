@@ -1264,10 +1264,6 @@
       "doc": "Tehon on laskettava tämän tason alapuolelle ennen kuin poiskytkentäviiveen laskenta alkaa. Aseta se aloituskynnyksen alapuolelle - niiden välinen rako on hystereesinauha, joka estää välkkymisen. Jos asetettu liian korkeaksi, vähän tehoa käyttävät vaiheet (huuhteluesteet, rypistymisen esto) laukaisevat virheellisesti loppujakson.",
       "label": "Pysäytyskynnys"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Älä anna jatkuvaa ilmoitusta, kun valmis sykli on tarkistettava; palaute näkyy edelleen Cycles review -jonossa.",
-      "label": "Estä palauteilmoitukset"
-    },
     "switch_entity": {
       "doc": "Valinnainen kytkin kytketään pois päältä taukotilanteessa ja takaisin päälle, kun jatkat, käytetään yhdessä \"Tauko katkaisee myös virran\" kanssa.",
       "label": "Kytkimen entiteetti"

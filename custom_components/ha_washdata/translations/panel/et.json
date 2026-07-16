@@ -1264,10 +1264,6 @@
       "doc": "Võimsus peab langema allapoole seda taset enne väljalülitusviivituse loenduse algust. Seadke see stardiläve alla – vahe nende vahel on hüstereesiriba, mis väldib virvendust. Kui see on liiga kõrgeks seatud, käivitavad väikese võimsusega faasid (loputusjäägid, kortsumisvastane) lõppjada ekslikult.",
       "label": "Peatumise Lävi"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Ärge esitage püsivat märguannet, kui lõppenud tsükkel vajab ülevaatamist; tagasiside ilmub endiselt tsüklite ülevaatuse järjekorda.",
-      "label": "Tõkesta Tagasiside Teavitused"
-    },
     "switch_entity": {
       "doc": "Valikuline lüliti lülitatakse pausi korral välja ja jätkamisel uuesti sisse, kasutatakse koos funktsiooniga \"Paus katkestab ka toite\".",
       "label": "Lüliti Olem"

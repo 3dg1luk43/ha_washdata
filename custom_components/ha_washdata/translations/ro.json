@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: verificați ciclul ({device})",
-      "feedback_notification_message": "**Dispozitiv**: {device}\n**Program**: {program} ({confidence}% încredere)\n**Ora**: {time}\n\nWashData are nevoie de ajutorul dvs. pentru a verifica acest ciclu detectat.\n\nVă rugăm să accesați **Setări > Dispozitive și servicii > WashData > Configurare > Feedback-uri de învățare** pentru a confirma sau corecta acest rezultat.",
-      "auto_tune_suggestion": "{device_type} {device_title} cicluri fantomă detectate. Modificare sugerată de min_power: {current_min}W -> {new_min}W (nu se aplică automat).",
-      "auto_tune_title": "Auto-Tune WashData",
-      "auto_tune_fallback": "{device_type} {device_title} cicluri fantomă detectate. Modificare sugerată de min_power: {current_min}W -> {new_min}W (nu se aplică automat).",
       "timer_default_message": "{device}: cronometru de {minutes} min",
       "timer_pause_action_title": "Reluați ciclul",
       "timer_pause_body_suffix": "Ciclul este în pauză. Deschideți panoul WashData pentru a relua.",

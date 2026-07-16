@@ -25,7 +25,6 @@ from typing import Any, Callable, Optional, TYPE_CHECKING
 
 import numpy as np
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import translation
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 import homeassistant.util.dt as dt_util
 
@@ -34,12 +33,9 @@ from .const import (
     CONF_DURATION_TOLERANCE,
     CONF_LEARNING_CONFIDENCE,
     CONF_PROFILE_MIN_WARMUP_CYCLES,
-    CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
     DEFAULT_AUTO_LABEL_CONFIDENCE,
     DEFAULT_DURATION_TOLERANCE,
     DEFAULT_LEARNING_CONFIDENCE,
-    DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
-    DOMAIN,
     MIN_SUGGESTION_COOLDOWN_CYCLES,
     MIN_SUGGESTION_REL_DELTA,
     ML_QUALITY_SUSPICIOUS_THRESHOLD,
@@ -585,91 +581,10 @@ class LearningManager:
             match_result=match_result,
         )
 
-        # Persist pending feedback request so it survives restart
+        # Persist pending feedback request so it survives restart.
+        # The pending review is surfaced in the panel's Cycles review queue;
+        # WashData intentionally does not raise a persistent notification here.
         self.hass.async_create_task(self.profile_store.async_save())
-
-        # Create user-visible notification (skipped when suppressed via option).
-        # Use `is True` so that un-configured mock objects in tests don't
-        # accidentally suppress notifications by being truthy.
-        suppress = entry.options.get(
-            CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
-            DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
-        ) is True
-        if not suppress:
-            self.hass.async_create_task(
-                self._async_send_feedback_notification(
-                    entry.title, cycle_data, detected_profile, confidence
-                )
-            )
-
-    async def _async_send_feedback_notification(
-        self, device_title: str, cycle_data: dict[str, Any], profile: str, confidence: float
-    ) -> None:
-        """Send a persistent notification for feedback (Async with translation)."""
-        try:
-            cycle_id = cycle_data.get("id", "unknown")
-            start_ts = cycle_data.get("start_time")
-            end_ts = dt_util.now() # Approximate, or pass actual end time
-
-            # Format times
-            t_str = ""
-            if start_ts:
-                try:
-                    s_dt = datetime.fromisoformat(str(start_ts)) if isinstance(start_ts, str) else start_ts
-                    s_local = dt_util.as_local(s_dt)
-                    e_local = dt_util.as_local(end_ts)
-                    t_str = f"{s_local.strftime('%H:%M')} - {e_local.strftime('%H:%M')}"
-                except Exception:
-                    t_str = "Just now"
-
-            notification_id = f"ha_washdata_feedback_{self.entry_id}_{cycle_id}"
-
-            # Load translations (from en.json / localization files)
-            # We use "options" category to access the error keys where we stored these strings
-            translations = await translation.async_get_translations(
-                self.hass, self.hass.config.language, "options", {DOMAIN}
-            )
-
-            # Default templates
-            default_title = "WashData: Verify Cycle ({device})"
-            default_msg = (
-                 "**Device**: {device}\n"
-                 "**Program**: {program} ({confidence}% confidence)\n"
-                 "**Time**: {time}\n\n"
-                 "WashData needs your help to verify this detected cycle.\n\n"
-                 "Please go to **Settings > Devices & Services > WashData > Configure > Learning Feedbacks** to confirm or correct this result."
-            )
-
-            title_template = translations.get(
-                f"component.{DOMAIN}.options.error.feedback_notification_title", default_title
-            )
-            msg_template = translations.get(
-                f"component.{DOMAIN}.options.error.feedback_notification_message", default_msg
-            )
-
-            # Confidence as percentage
-            conf_pct = int(confidence * 100)
-
-            title = title_template.format(device=device_title)
-            message = msg_template.format(
-                device=device_title,
-                program=profile,
-                confidence=conf_pct,
-                time=t_str
-            )
-
-            # Use standard service call
-            await self.hass.services.async_call(
-                "persistent_notification",
-                "create",
-                {
-                    "message": message,
-                    "title": title,
-                    "notification_id": notification_id,
-                },
-            )
-        except Exception:  # pylint: disable=broad-exception-caught
-            self._logger.exception("Failed to create feedback notification")
 
     def request_cycle_verification(
         self,

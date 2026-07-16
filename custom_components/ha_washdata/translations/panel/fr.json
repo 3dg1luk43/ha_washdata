@@ -1264,10 +1264,6 @@
       "doc": "La puissance doit descendre en dessous de ce niveau avant que le compte à rebours ne commence. Réglez-le en dessous du seuil de démarrage - l'écart entre eux est la bande d'hystérésis qui empêche le scintillement. Si elles sont réglées trop haut, des phases de faible puissance (attentes de rinçage, anti-froissement) déclenchent faussement la séquence de fin.",
       "label": "Seuil d'arrêt"
     },
-    "suppress_feedback_notifications": {
-      "doc": "N'émettez pas de notification persistante lorsqu'un cycle terminé doit être révisé ; les commentaires apparaissent toujours dans la file d’attente de révision des cycles.",
-      "label": "Supprimer les notifications de retour"
-    },
     "switch_entity": {
       "doc": "Interrupteur optionnel désactivé en pause et réactivé lors de la reprise, utilisé avec \"La pause coupe également l'alimentation\".",
       "label": "Entité interrupteur"

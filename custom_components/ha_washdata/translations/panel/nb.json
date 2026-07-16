@@ -1264,10 +1264,6 @@
       "doc": "Strømmen må falle under dette nivået før nedtellingen starter. Sett den under startterskelen - gapet mellom dem er hysteresebåndet som forhindrer flimmer. Hvis satt for høyt, utløser laveffektfaser (skyllestopp, anti-krøll) sluttsekvensen feilaktig.",
       "label": "Stoppterskel"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Ikke oppgi et vedvarende varsel når en ferdig syklus trenger gjennomgang; tilbakemeldingen vises fortsatt i Cycles review-køen.",
-      "label": "Undertrykk tilbakemeldingsvarsler"
-    },
     "switch_entity": {
       "doc": "Valgfri bryter slått av på pause og på igjen når du fortsetter, brukt sammen med \"Pause kutter også strømmen\".",
       "label": "Bryterenhet"

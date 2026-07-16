@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: Bekræft cyklus ({device})",
-      "feedback_notification_message": "**Enhed**: {device}\n**Program**: {program} ({confidence} % konfidens)\n**Tid**: {time}\n\nWashData har brug for din hjælp til at verificere denne detekterede cyklus.\n\nGå til **Indstillinger > Enheder og tjenester > WashData > Konfigurer > Læringsfeedback** for at bekræfte eller rette dette resultat.",
-      "auto_tune_suggestion": "{device_type} {device_title} registrerede spøgelsescyklusser. Foreslået min_effektændring: {current_min}W -> {new_min}W (ikke anvendt automatisk).",
-      "auto_tune_title": "WashData Auto-Tune",
-      "auto_tune_fallback": "{device_type} {device_title} registrerede spøgelsescyklusser. Foreslået min_effektændring: {current_min}W -> {new_min}W (ikke anvendt automatisk).",
       "timer_default_message": "{device}: {minutes} min timer",
       "timer_pause_action_title": "Genoptag cyklus",
       "timer_pause_body_suffix": "Cyklussen er sat på pause. Åbn WashData-panelet for at genoptage.",

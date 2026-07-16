@@ -1264,10 +1264,6 @@
       "doc": "Strømmen skal falde til under dette niveau, før nedtællingen af ​​slukket forsinkelse begynder. Indstil den under starttærsklen - mellemrummet mellem dem er hysteresebåndet, der forhindrer flimmer. Hvis den er indstillet for højt, vil laveffektfaser (skyllestop, anti-krøl) fejlagtigt udløse slutsekvensen.",
       "label": "Stoptærskel"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Ret ikke en vedvarende meddelelse, når en afsluttet cyklus skal gennemgås; feedbacken vises stadig i køen for gennemgang af cyklusser.",
-      "label": "Undertryk feedbacknotifikationer"
-    },
     "switch_entity": {
       "doc": "Valgfri kontakt slås fra ved pause og tændes igen ved genoptagelse, bruges sammen med \"Pause afbryder også strømmen\".",
       "label": "Kontaktenhed"

@@ -1264,10 +1264,6 @@
       "doc": "Het vermogen moet onder dit niveau dalen voordat het aftellen van de uitschakelvertraging begint. Stel deze in onder de startdrempel. De ruimte daartussen is de hysteresisband die flikkering voorkomt. Als de fases met laag vermogen (spoelstops, anti-kreuk) te hoog zijn ingesteld, wordt ten onrechte de eindsequentie geactiveerd.",
       "label": "Stopdrempel"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Geef geen aanhoudende melding wanneer een voltooide cyclus moet worden herzien; de feedback verschijnt nog steeds in de wachtrij voor het beoordelen van cycli.",
-      "label": "Feedbackmeldingen onderdrukken"
-    },
     "switch_entity": {
       "doc": "Optionele schakelaar die wordt uitgeschakeld bij pauze en weer ingeschakeld bij hervatten, gebruikt in combinatie met \"Pauze schakelt ook de stroom uit\".",
       "label": "Schakelentiteit"

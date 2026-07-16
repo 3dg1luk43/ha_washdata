@@ -1264,10 +1264,6 @@
       "doc": "A energia deve cair abaixo deste nível antes que a contagem regressiva do atraso de desligamento comece. Defina-o abaixo do limite inicial - a lacuna entre eles é a banda de histerese que evita oscilações. Se definido para um valor demasiado elevado, as fases de baixa potência (paragens de enxaguamento, anti-rugas) acionam falsamente a sequência final.",
       "label": "Limiar de Paragem"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Não gere uma notificação persistente quando um ciclo concluído precisar de revisão; o feedback ainda aparece na fila de revisão dos Ciclos.",
-      "label": "Suprimir Notificações de Feedback"
-    },
     "switch_entity": {
       "doc": "Interruptor opcional desligado na pausa e ligado novamente ao reiniciar, usado junto com \"Pausa também corta energia\".",
       "label": "Entidade do Switch"

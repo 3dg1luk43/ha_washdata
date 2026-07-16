@@ -1264,10 +1264,6 @@
       "doc": "Die Leistung muss unter diesen Wert fallen, bevor der Countdown für die Ausschaltverzögerung beginnt. Stellen Sie ihn unterhalb des Startschwellenwerts ein – die Lücke dazwischen ist das Hystereseband, das ein Flackern verhindert. Bei einer zu hohen Einstellung lösen Phasen mit geringer Leistung (Spülstopps, Knitterschutz) fälschlicherweise die Endsequenz aus.",
       "label": "Stoppschwellenwert"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Lösen Sie keine dauerhafte Benachrichtigung aus, wenn ein abgeschlossener Zyklus überprüft werden muss. Das Feedback erscheint weiterhin in der Cycles-Überprüfungswarteschlange.",
-      "label": "Feedback-Benachrichtigungen unterdrücken"
-    },
     "switch_entity": {
       "doc": "Optionaler Schalter, der bei Pause aus- und beim Fortsetzen wieder einschaltet und zusammen mit „Pause unterbricht auch die Stromversorgung“ verwendet wird.",
       "label": "Schalter-Entität"

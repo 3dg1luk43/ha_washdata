@@ -1247,10 +1247,6 @@
       "doc": "A teljesítménynek e szint alá kell csökkennie, mielőtt a kikapcsolási késleltetés visszaszámlálása megkezdődik. Állítsa az indítási küszöb alá – a köztük lévő hézag a hiszterézis sáv, amely megakadályozza a villogást. Ha túl magasra van állítva, az alacsony teljesítményű fázisok (öblítőstop, gyűrődésgátló) hamisan elindítják a végsorozatot.",
       "label": "Leállítási küszöb"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Ne küldjön folyamatos értesítést, ha egy befejezett ciklus felülvizsgálatra szorul; a visszajelzés továbbra is megjelenik a Ciklusok áttekintési sorban.",
-      "label": "Visszajelzési értesítések elnyomása"
-    },
     "switch_entity": {
       "doc": "Az opcionális kapcsoló szüneteltetéskor kikapcsolható, majd újraindításkor visszakapcsolható, a „Szünet is leállítja az áramot” funkcióval együtt használható.",
       "label": "Kapcsoló entitás"

@@ -1264,10 +1264,6 @@
       "doc": "Düşmede gecikme geri sayımı başlamadan önce güç bu seviyenin altına düşmelidir. Bunu Başlangıç ​​Eşiğinin altına ayarlayın; aralarındaki boşluk, titremeyi önleyen histerezis bandıdır. Çok yükseğe ayarlanırsa, düşük güçlü fazlar (durulamada bekletme, kırışık önleme) hatalı şekilde bitiş sırasını tetikler.",
       "label": "Durdurma Eşiği"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Biten bir döngünün gözden geçirilmesi gerektiğinde kalıcı bir bildirimde bulunmayın; geri bildirim hâlâ Döngü inceleme kuyruğunda görünüyor.",
-      "label": "Geri Bildirim Bildirimlerini Gizle"
-    },
     "switch_entity": {
       "doc": "İsteğe bağlı anahtar, duraklatma durumunda kapatılır ve devam ederken tekrar açılır; \"Duraklatma aynı zamanda gücü de keser\" ile birlikte kullanılır.",
       "label": "Anahtar Varlığı"

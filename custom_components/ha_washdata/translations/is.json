@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: Staðfestu hringrás ({device})",
-      "feedback_notification_message": "**Tæki**: {device}\n**Prógramm**: {program} ({confidence}% sjálfstraust)\n**Tími**: {time}\n\nWashData þarf á aðstoð þinni að halda til að staðfesta þessa greindu lotu.\n\nVinsamlegast farðu í **Stillingar > Tæki og þjónusta > WashData > Stilla > Námsendurgjöf** til að staðfesta eða leiðrétta þessa niðurstöðu.",
-      "auto_tune_suggestion": "{device_type} {device_title} fundu draugalotur. Ráðlagður min_power breyting: {current_min}W -> {new_min}W (ekki beitt sjálfkrafa).",
-      "auto_tune_title": "WashData sjálfvirk stilling",
-      "auto_tune_fallback": "{device_type} {device_title} fundu draugalotur. Ráðlagður min_power breyting: {current_min}W -> {new_min}W (ekki beitt sjálfkrafa).",
       "timer_default_message": "{device}: {minutes} mín tímataki",
       "timer_pause_action_title": "Halda áfram hringrás",
       "timer_pause_body_suffix": "Hringrásin er í bið. Opnaðu WashData-gluggann til að halda áfram.",

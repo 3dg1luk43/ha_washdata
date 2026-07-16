@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: 사이클 확인 ({device})",
-      "feedback_notification_message": "**장치**: {device}\n**프로그램**: {program} ({confidence}% 신뢰도)\n**시간**: {time}\n\nWashData가 감지된 사이클을 확인하려면 귀하의 도움이 필요합니다.\n\n이 결과를 확인하거나 수정하려면 **설정 > 장치 및 서비스 > WashData > 구성 > 학습 피드백**으로 이동하세요.",
-      "auto_tune_suggestion": "{device_type} {device_title}이(가) 고스트 사이클을 감지했습니다. 권장되는 min_power 변경: {current_min}W -> {new_min}W(자동으로 적용되지 않음).",
-      "auto_tune_title": "WashData 자동 조정",
-      "auto_tune_fallback": "{device_type} {device_title}이(가) 고스트 사이클을 감지했습니다. 권장되는 min_power 변경: {current_min}W -> {new_min}W(자동으로 적용되지 않음).",
       "timer_default_message": "{device}: {minutes}분 타이머",
       "timer_pause_action_title": "사이클 재개",
       "timer_pause_body_suffix": "사이클이 일시 정지되었습니다. 재개하려면 WashData 패널을 여세요.",

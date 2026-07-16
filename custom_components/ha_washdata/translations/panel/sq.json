@@ -1247,10 +1247,6 @@
       "doc": "Fuqia duhet të bjerë nën këtë nivel përpara se të fillojë numërimi mbrapsht i vonesës. Vendoseni atë nën pragun e fillimit - hendeku midis tyre është brezi i histerezës që parandalon dridhjen. Nëse vendoset shumë lart, fazat me fuqi të ulët (mbajtjet e shpëlarjes, kundër rrudhave) shkaktojnë gabimisht sekuencën përfundimtare.",
       "label": "Pragu i ndalimit"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Mos bëni një njoftim të vazhdueshëm kur një cikël i përfunduar ka nevojë për rishikim; komentet ende shfaqen në radhën e rishikimit të cikleve.",
-      "label": "Mbylli njoftimet e komenteve"
-    },
     "switch_entity": {
       "doc": "Çelësi opsional i çaktivizuar në pauzë dhe përsëri ndizet kur rifillon, përdoret së bashku me \"Pauza gjithashtu ndërpret energjinë\".",
       "label": "Entiteta e çelësit"

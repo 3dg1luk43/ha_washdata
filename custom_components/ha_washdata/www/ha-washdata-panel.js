@@ -158,9 +158,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'auto_label_confidence', label: 'Auto-Label Confidence', type: 'number', step: 0.01, min: 0, max: 1, def: 0.9,
         doc: 'If the match score at cycle end is at or above this, the program is labeled automatically without any confirmation prompt. Raise it to require higher certainty before auto-labeling; lower it to automate more. Works in conjunction with Learning Confidence below it.' },
       { key: 'learning_confidence', label: 'Learning Confidence', type: 'number', step: 0.01, min: 0, max: 1, def: 0.6,
-        doc: 'If the match score falls between this and Auto-Label Confidence, a feedback notification asks you to verify the identified program. Below this score the match is too uncertain to surface. Must be kept below Auto-Label Confidence.' },
-      { key: 'suppress_feedback_notifications', label: 'Suppress Feedback Notifications', type: 'checkbox',
-        doc: 'Do not raise a persistent notification when a finished cycle needs review; the feedback still appears in the Cycles review queue.' },
+        doc: 'If the match score falls between this and Auto-Label Confidence, WashData flags the finished cycle for review in the Cycles queue so you can verify the identified program. Below this score the match is too uncertain to surface. Must be kept below Auto-Label Confidence.' },
     ] },
   ] },
   { id: 'timing', label: 'Timing & Watchdog', intro: 'Background cadence, the offline watchdog and housekeeping.', groups: [

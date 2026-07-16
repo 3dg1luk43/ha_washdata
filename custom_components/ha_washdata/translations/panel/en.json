@@ -1241,10 +1241,6 @@
       "doc": "Power must fall below this level before the off-delay countdown begins. Set it below the Start Threshold - the gap between them is the hysteresis band that prevents flicker. If set too high, low-power phases (rinse holds, anti-crease) falsely trigger the end sequence.",
       "label": "Stop Threshold"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Do not raise a persistent notification when a finished cycle needs review; the feedback still appears in the Cycles review queue.",
-      "label": "Suppress Feedback Notifications"
-    },
     "switch_entity": {
       "doc": "Optional switch toggled off on pause and back on when resuming, used together with \"Pause also cuts power\".",
       "label": "Switch Entity"

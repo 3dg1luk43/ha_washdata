@@ -202,3 +202,37 @@ async def test_migration_keeps_supported_device_type(hass: HomeAssistant) -> Non
     await async_migrate_entry(hass, entry)
 
     assert entry.options[CONF_DEVICE_TYPE] == "dishwasher"
+
+
+@pytest.mark.asyncio
+async def test_migration_strips_suppress_feedback_notifications(
+    hass: HomeAssistant,
+) -> None:
+    """The removed 'suppress_feedback_notifications' option is stripped on migration,
+    while other tuned options are preserved."""
+
+    def _apply_update(entry: DummyEntry, **kwargs: Any) -> None:
+        entry.data = kwargs["data"]
+        entry.options = kwargs["options"]
+        entry.version = kwargs["version"]
+        entry.minor_version = kwargs["minor_version"]
+
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_update)
+    entry = DummyEntry(
+        version=3, minor_version=5,
+        data={},
+        options={
+            "suppress_feedback_notifications": False,
+            CONF_DEVICE_TYPE: "dishwasher",
+            CONF_MIN_POWER: 9.0,
+        },
+    )
+
+    migrated = await async_migrate_entry(hass, entry)
+
+    assert migrated is True
+    assert "suppress_feedback_notifications" not in entry.options
+    # Unrelated tuned options survive the strip.
+    assert entry.options[CONF_DEVICE_TYPE] == "dishwasher"
+    assert entry.options[CONF_MIN_POWER] == 9.0
+    assert entry.minor_version == 6

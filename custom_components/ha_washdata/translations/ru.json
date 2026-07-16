@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: проверка цикла ({device})",
-      "feedback_notification_message": "**Устройство**: {device}\n**Программа**: {program} (уверенность {confidence}%)\n**Время**: {time}\n\nWashData нуждается в вашей помощи для проверки обнаруженного цикла.\n\nОткройте **Настройки > Устройства и службы > WashData > Настройка > Отзывы об обучении**, чтобы подтвердить или исправить этот результат.",
-      "auto_tune_suggestion": "{device_type} {device_title} обнаружил ложные циклы. Рекомендуемое изменение min_power: {current_min}Вт -> {new_min}Вт (не применяется автоматически).",
-      "auto_tune_title": "Автоматическая настройка WashData",
-      "auto_tune_fallback": "{device_type} {device_title} обнаружил ложные циклы. Рекомендуемое изменение min_power: {current_min}Вт -> {new_min}Вт (не применяется автоматически).",
       "timer_default_message": "{device}: таймер {minutes} мин",
       "timer_pause_action_title": "Возобновить цикл",
       "timer_pause_body_suffix": "Цикл на паузе. Откройте панель WashData для возобновления.",

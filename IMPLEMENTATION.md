@@ -1066,9 +1066,15 @@ This mechanism fixes two related bugs: (1) values typed in a section were discar
 
 **Conflict banner**: `_htmlSettings()` calls `_conflictKeysFromOpts()` and, when any conflicts are active, prepends a styled red banner above the section switcher. The banner text is `_t('conflict.settings_banner', {count: conflictKeys.size}, ...)` and a **Go to first** button fires the `conf-goto-section` action. The handler iterates `_SETTINGS_SECTIONS` in order, tests whether any field in each section appears in the conflict key set, and switches the section tab to the first match. Translation keys: `conflict.settings_banner` (with `{count}` placeholder), `conflict.settings_banner_btn`. Both keys are translated across all 35 supported panel languages.
 
-#### Suggestion-ready notification removed
+#### WashData-initiated persistent notifications removed
 
-`_async_send_suggestions_ready_notification()` and its call site in `_apply_suggestions_and_notify()` have been removed from `learning.py`. WashData no longer posts a Home Assistant persistent notification when tuning suggestions first appear for a device. Suggestions are surfaced exclusively through the panel: the yellow banner in the Settings tab, section-dot indicators, and per-field pill widgets. The `suggestions_ready_notification_title` and `suggestions_ready_notification_message` keys were removed from `strings.json`, `translations/en.json`, and all other supported language files.
+WashData no longer posts unsolicited Home Assistant persistent notifications for its own learning/tuning activity. Three separate paths were removed:
+
+1. **Suggestion-ready notification** — `_async_send_suggestions_ready_notification()` and its call site in `_apply_suggestions_and_notify()` were removed from `learning.py`.
+2. **Cycle-verification feedback notification** — `_async_send_feedback_notification()` and its call site in `learning._maybe_request_feedback()` were removed. This was previously gated by the `suppress_feedback_notifications` option, which is now also gone: the constant (`CONF_/DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS`) was removed from `const.py`, the field was removed from the panel Settings schema, and the key is stripped from existing config entries by `async_migrate_entry` (no data lost). Cycles needing verification are surfaced in the panel's **Cycles review queue** via `request_cycle_verification`.
+3. **Ghost-cycle auto-tune notification** — the notification dispatch in `manager._auto_tune_min_power` (the "detected ghost cycles / suggested min_power change" message, sent via user notify channels or `_pn_create`) was removed. The `min_power` suggestion is still stored via `profile_store.set_suggestion` and surfaced in the panel's Settings suggestions banner / per-field pill.
+
+The corresponding translation keys — `suggestions_ready_notification_title/message`, `feedback_notification_title/message`, and `auto_tune_suggestion`/`auto_tune_title`/`auto_tune_fallback` — were removed from `strings.json`, `translations/en.json`, and all other supported language files, and `suppress_feedback_notifications` was removed from every `translations/panel/*.json`. The user-configured start/finish/live/timer notification channels (and the peak-rate start tip) are unaffected.
 
 ---
 

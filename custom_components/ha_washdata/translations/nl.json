@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: cyclus verifiëren ({device})",
-      "feedback_notification_message": "**Apparaat**: {device}\n**Programma**: {program} ({confidence}% betrouwbaarheid)\n**Tijd**: {time}\n\nWashData heeft uw hulp nodig om deze gedetecteerde cyclus te verifiëren.\n\nGa naar **Instellingen > Apparaten en services > WashData > Configureren > Leerfeedback** om dit resultaat te bevestigen of te corrigeren.",
-      "auto_tune_suggestion": "{device_type} {device_title} heeft spookcycli gedetecteerd. Voorgestelde min_power wijziging: {current_min}W -> {new_min}W (niet automatisch toegepast).",
-      "auto_tune_title": "WashData automatisch afstemmen",
-      "auto_tune_fallback": "{device_type} {device_title} heeft spookcycli gedetecteerd. Voorgestelde min_power wijziging: {current_min}W -> {new_min}W (niet automatisch toegepast).",
       "timer_default_message": "{device}: timer van {minutes} min.",
       "timer_pause_action_title": "Hervat cyclus",
       "timer_pause_body_suffix": "De cyclus is gepauzeerd. Open het WashData-paneel om te hervatten.",

@@ -1247,10 +1247,6 @@
       "doc": "Puterea trebuie să scadă sub acest nivel înainte să înceapă numărătoarea inversă pentru întârzierea opririi. Setați-l sub pragul de pornire - decalajul dintre ele este banda de histerezis care previne pâlpâirea. Dacă se setează prea mult, fazele de putere scăzută (reținere de clătire, anti-încredere) declanșează în mod fals secvența de final.",
       "label": "Prag de Oprire"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Nu trimiteți o notificare persistentă atunci când un ciclu terminat necesită revizuire; feedback-ul apare în continuare în coada de examinare a ciclurilor.",
-      "label": "Suprimați Notificările de Feedback"
-    },
     "switch_entity": {
       "doc": "Comutator opțional dezactivat în pauză și reactivat la reluare, utilizat împreună cu „Pauză întrerupe și alimentarea”.",
       "label": "Entitate Switch"

@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: Проверете цикъл ({device})",
-      "feedback_notification_message": "**Устройство**: {device}\n**Програма**: {program} ({confidence}% увереност)\n**Време**: {time}\n\nWashData се нуждае от вашата помощ, за да провери този открит цикъл.\n\nМоля, отидете на **Настройки > Устройства и услуги > WashData > Конфигуриране > Отзиви за обучение**, за да потвърдите или коригирате този резултат.",
-      "auto_tune_suggestion": "{device_type} {device_title} открити призрачни цикли. Предложена промяна на min_power: {current_min}W -> {new_min}W (не се прилага автоматично).",
-      "auto_tune_title": "Автоматична настройка на WashData",
-      "auto_tune_fallback": "{device_type} {device_title} открити призрачни цикли. Предложена промяна на min_power: {current_min}W -> {new_min}W (не се прилага автоматично).",
       "timer_default_message": "{device}: таймер за {minutes} мин",
       "timer_pause_action_title": "Възобновяване на цикъла",
       "timer_pause_body_suffix": "Цикълът е на пауза. Отворете панела на WashData, за да го възобновите.",

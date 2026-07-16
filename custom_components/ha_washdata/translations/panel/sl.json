@@ -1247,10 +1247,6 @@
       "doc": "Moč mora pasti pod to raven, preden se začne odštevanje zakasnitve izklopa. Nastavite ga pod začetnim pragom - vrzel med njima je pas histereze, ki preprečuje utripanje. Če je nastavljeno previsoko, faze z nizko močjo (zadrževanje izpiranja, proti mečkanju) lažno sprožijo končno zaporedje.",
       "label": "Prag zaustavitve"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Ne oddajte trajnega obvestila, ko je treba pregledati končani cikel; povratne informacije so še vedno prikazane v čakalni vrsti za pregled ciklov.",
-      "label": "Potlači obvestila o povratnih informacijah"
-    },
     "switch_entity": {
       "doc": "Izbirno stikalo, ki se izklopi ob premoru in se ponovno vklopi ob nadaljevanju, uporablja se skupaj s \"Premor tudi prekine napajanje\".",
       "label": "Entiteta stikala"

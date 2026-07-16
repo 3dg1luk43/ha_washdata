@@ -176,7 +176,7 @@ Exit power for anti-wrinkle / anti-crease mode.
 ### `auto_tune_noise_events_threshold`
 Self-Learning Trigger.
 - The system counts how many "Ghost Cycles" (too short to be real) happen in 24 hours.
-- If this count exceeds the threshold (e.g. 3), it assumes your `min_power` is too low (picking up noise) and suggests a new, higher threshold.
+- If this count exceeds the threshold (e.g. 3), it assumes your `min_power` is too low (picking up noise) and suggests a new, higher threshold. The suggestion appears in the panel's Settings suggestions banner / per-field pill; it is not applied automatically and does not raise a persistent notification.
 
 ![Auto Tune](doc/images/suggest/param_auto_tune.png)
 
@@ -233,7 +233,7 @@ Tolerance for time-remaining estimates during a running cycle.
 
 ### `learning_confidence`
 Minimum confidence to trigger a user verification request.
-- When a cycle ends, if the match confidence is **above** this threshold, a persistent notification is created asking for feedback.
+- When a cycle ends, if the match confidence is **above** this threshold (but below `auto_label_confidence`), the finished cycle is flagged for review in the panel's Cycles queue so you can verify or correct the identified program. WashData does not raise a persistent notification for this.
 - **Default: 0.6 (60%)**
 
 ### `auto_label_confidence`

@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: Verifica ciclo ({device})",
-      "feedback_notification_message": "**Dispositivo**: {device}\n**Programma**: {program} ({confidence}% di confidenza)\n**Ora**: {time}\n\nWashData ha bisogno del tuo aiuto per verificare questo ciclo rilevato.\n\nVai su **Impostazioni > Dispositivi e servizi > WashData > Configura > Feedback di apprendimento** per confermare o correggere questo risultato.",
-      "auto_tune_suggestion": "{device_type} {device_title} ha rilevato cicli fantasma. Modifica min_power suggerita: {current_min}W -> {new_min}W (non applicata automaticamente).",
-      "auto_tune_title": "Sintonizzazione automatica WashData",
-      "auto_tune_fallback": "{device_type} {device_title} ha rilevato cicli fantasma. Modifica min_power suggerita: {current_min}W -> {new_min}W (non applicata automaticamente).",
       "timer_default_message": "{device}: timer di {minutes} min",
       "timer_pause_action_title": "Riprendi ciclo",
       "timer_pause_body_suffix": "Il ciclo è in pausa. Apri il pannello WashData per riprendere.",

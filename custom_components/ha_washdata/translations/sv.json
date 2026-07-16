@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: Verifiera cykel ({device})",
-      "feedback_notification_message": "**Enhet**: {device}\n**Program**: {program} ({confidence}% konfidens)\n**Tid**: {time}\n\nWashData behöver din hjälp för att verifiera denna identifierade cykel.\n\nGå till **Inställningar > Enheter och tjänster > WashData > Konfigurera > Inlärningsfeedback** för att bekräfta eller korrigera detta resultat.",
-      "auto_tune_suggestion": "{device_type} {device_title} upptäckte spökcykler. Föreslagen min_effektändring: {current_min}W -> {new_min}W (tillämpas inte automatiskt).",
-      "auto_tune_title": "WashData Auto-Tune",
-      "auto_tune_fallback": "{device_type} {device_title} upptäckte spökcykler. Föreslagen min_effektändring: {current_min}W -> {new_min}W (tillämpas inte automatiskt).",
       "timer_default_message": "{device}: timer {minutes} min",
       "timer_pause_action_title": "Återuppta cykeln",
       "timer_pause_body_suffix": "Cykeln är pausad. Öppna WashData-panelen för att fortsätta.",

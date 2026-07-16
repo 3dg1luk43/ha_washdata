@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData：验证周期 ({device})",
-      "feedback_notification_message": "**设备**：{device}\n**程序**：{program}（{confidence}% 置信度）\n**时间**：{time}\n\nWashData 需要您的帮助来验证检测到的此周期。\n\n请转至 **设置 > 设备和服务 > WashData > 配置 > 学习反馈** 以确认或更正此结果。",
-      "auto_tune_suggestion": "{device_type} {device_title} 检测到幽灵周期。建议的 min_power 更改：{current_min}W -> {new_min}W（不会自动应用）。",
-      "auto_tune_title": "WashData 自动调整",
-      "auto_tune_fallback": "{device_type} {device_title} 检测到幽灵周期。建议的 min_power 更改：{current_min}W -> {new_min}W（不会自动应用）。",
       "timer_default_message": "{device}：{minutes} 分钟定时器",
       "timer_pause_action_title": "恢复周期",
       "timer_pause_body_suffix": "周期已暂停。打开 WashData 面板以恢复。",

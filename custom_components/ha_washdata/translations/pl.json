@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: sprawdź cykl ({device})",
-      "feedback_notification_message": "**Urządzenie**: {device}\n**Program**: {program} ({confidence}% pewności)\n**Czas**: {time}\n\nWashData potrzebuje Twojej pomocy, aby zweryfikować wykryty cykl.\n\nPrzejdź do **Ustawienia > Urządzenia i usługi > WashData > Konfiguruj > Opinie dotyczące uczenia**, aby potwierdzić lub poprawić ten wynik.",
-      "auto_tune_suggestion": "{device_type} {device_title} wykrył cykle duchów. Sugerowana zmiana min_power: {current_min}W -> {new_min}W (nie stosowana automatycznie).",
-      "auto_tune_title": "Automatyczne dostrajanie WashData",
-      "auto_tune_fallback": "{device_type} {device_title} wykrył cykle duchów. Sugerowana zmiana min_power: {current_min}W -> {new_min}W (nie stosowana automatycznie).",
       "timer_default_message": "{device}: timer {minutes} min",
       "timer_pause_action_title": "Wznów cykl",
       "timer_pause_body_suffix": "Cykl jest wstrzymany. Otwórz panel WashData, aby wznowić.",

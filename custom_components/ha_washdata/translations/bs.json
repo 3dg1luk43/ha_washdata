@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: Potvrda ciklusa ({device})",
-      "feedback_notification_message": "**Uređaj**: {device}\n**Program**: {program} ({confidence}% povjerenja)\n**Vrijeme**: {time}\n\nWashData treba vašu pomoć da potvrdi ovaj otkriveni ciklus.\n\nMolimo idite na **Postavke > Uređaji i usluge > WashData > Konfiguriši > Povratne informacije o učenju** da potvrdite ili ispravite ovaj rezultat.",
-      "auto_tune_suggestion": "{device_type} {device_title} je otkrio cikluse duhova. Predložena promjena min_power: {current_min}W -> {new_min}W (ne primjenjuje se automatski).",
-      "auto_tune_title": "WashData Auto-Tune",
-      "auto_tune_fallback": "{device_type} {device_title} je otkrio cikluse duhova. Predložena promjena min_power: {current_min}W -> {new_min}W (ne primjenjuje se automatski).",
       "timer_default_message": "{device}: tajmer od {minutes} min",
       "timer_pause_action_title": "Nastavi ciklus",
       "timer_pause_body_suffix": "Ciklus je pauziran. Otvorite WashData panel da biste nastavili.",

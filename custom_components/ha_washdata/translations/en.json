@@ -75,11 +75,6 @@
     },
     "error": {
       "invalid_power": "Power threshold must be greater than 0",
-      "feedback_notification_title": "WashData: Verify Cycle ({device})",
-      "feedback_notification_message": "**Device**: {device}\n**Program**: {program} ({confidence}% confidence)\n**Time**: {time}\n\nWashData needs your help to verify this detected cycle.\n\nPlease go to **Settings > Devices & Services > WashData > Configure > Learning Feedbacks** to confirm or correct this result.",
-      "auto_tune_suggestion": "{device_type} {device_title} detected ghost cycles. Suggested min_power change: {current_min}W -> {new_min}W (not applied automatically).",
-      "auto_tune_title": "WashData Auto-Tune",
-      "auto_tune_fallback": "{device_type} {device_title} detected ghost cycles. Suggested min_power change: {current_min}W -> {new_min}W (not applied automatically).",
       "timer_default_message": "{device}: {minutes} min timer",
       "timer_pause_action_title": "Resume Cycle",
       "timer_pause_body_suffix": "The cycle is paused. Open the WashData panel to resume.",

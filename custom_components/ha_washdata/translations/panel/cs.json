@@ -1247,10 +1247,6 @@
       "doc": "Příkon musí klesnout pod tuto úroveň před zahájením odpočtu zpozdění vypnutí. Nastavte pod Práh spouštění – mezera mezi nimi je hysterezní pásmo bránící mihoťání. Příliš vysoké nastavení způsobí, že nízkoenergetické fáze (přidržení oplachu, ochrana před mačkáním) falešně spustí sekvenci ukončení.",
       "label": "Práh zastavení"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Nevyvolává trvalé oznámení, když dokončený cyklus potřebuje přezkoumání; zpětná vazba se stále zobrazuje ve frontě recenze cyklů.",
-      "label": "Potlačit zpětnovazební oznámení"
-    },
     "switch_entity": {
       "doc": "Volitelný spínač vypnutý při pozastavení a znovu zapnutý při obnovení, používaný společně s \"Pauza také přeruší napájení\".",
       "label": "Entita spínače"

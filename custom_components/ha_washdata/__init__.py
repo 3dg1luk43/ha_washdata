@@ -256,6 +256,11 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     ):
         options.pop(k, None)
 
+    # 3.6: the feedback/verify-cycle and ghost-cycle persistent notifications
+    # were removed (suggestions and pending reviews are surfaced in the panel),
+    # so the now-inert "suppress feedback notifications" toggle is stripped.
+    options.pop("suppress_feedback_notifications", None)
+
     # 3.6: coffee_machine / ev / heat_pump / oven device types were removed.
     # Remap any entry still on one of them to DEVICE_TYPE_OTHER (Threshold Device),
     # preserving all tuned options so no user data is lost.

@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: verifiko ciklin ({device})",
-      "feedback_notification_message": "**Pajisja**: {device}\n**Programi**: {program} ({confidence}% besueshmëri)\n**Koha**: {time}\n\nWashData ka nevojë për ndihmën tuaj për të verifikuar këtë cikël të zbuluar.\n\nJu lutemi, shkoni te **Cilësimet > Pajisjet dhe shërbimet > WashData > Konfiguro > Reagimet e të mësuarit** për të konfirmuar ose korrigjuar këtë rezultat.",
-      "auto_tune_suggestion": "{device_type} {device_title} zbuloi cikle fantazmë. Ndryshimi i sugjeruar min_fuqi: {current_min}W -> {new_min}W (nuk zbatohet automatikisht).",
-      "auto_tune_title": "Rregullimi automatik WashData",
-      "auto_tune_fallback": "{device_type} {device_title} zbuloi cikle fantazmë. Ndryshimi i sugjeruar min_fuqi: {current_min}W -> {new_min}W (nuk zbatohet automatikisht).",
       "timer_default_message": "{device}: kohëmatës {minutes} min",
       "timer_pause_action_title": "Rifillo ciklin",
       "timer_pause_body_suffix": "Cikli është në pauzë. Hapni panelin WashData për të vazhduar.",

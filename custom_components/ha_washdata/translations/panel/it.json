@@ -1264,10 +1264,6 @@
       "doc": "La potenza deve scendere al di sotto di questo livello prima che inizi il conto alla rovescia del ritardo di disattivazione. Impostalo al di sotto della Soglia iniziale: lo spazio tra loro è la banda di isteresi che impedisce lo sfarfallio. Se impostato su un valore troppo alto, le fasi a basso consumo (trattenimento risciacquo, antipiega) attivano erroneamente la sequenza finale.",
       "label": "Soglia di arresto"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Non inviare una notifica persistente quando un ciclo finito necessita di revisione; il feedback appare ancora nella coda di revisione di Cicli.",
-      "label": "Sopprimi notifiche feedback"
-    },
     "switch_entity": {
       "doc": "L'interruttore opzionale può essere disattivato durante la pausa e riattivato alla ripresa, utilizzato insieme a \"La pausa interrompe anche l'alimentazione\".",
       "label": "Entità interruttore"

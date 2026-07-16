@@ -1264,10 +1264,6 @@
       "doc": "Effekten måste sjunka under denna nivå innan nedräkningen av avstängningsfördröjningen börjar. Ställ in den under starttröskeln - gapet mellan dem är hysteresbandet som förhindrar flimmer. Om inställningen är för hög, utlöser lågeffektfaser (sköljstopp, skrynkelskydd) felaktigt slutsekvensen.",
       "label": "Stopptröskel"
     },
-    "suppress_feedback_notifications": {
-      "doc": "Ge inte ett ihållande meddelande när en avslutad cykel behöver granskas; feedbacken visas fortfarande i kön för cyklergranskning.",
-      "label": "Undertryck feedbackmeddelanden"
-    },
     "switch_entity": {
       "doc": "Valfri strömbrytare slås av vid paus och på igen vid återupptagning, används tillsammans med \"Pausen bryter också strömmen\".",
       "label": "Switchentitet"

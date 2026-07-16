@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: Tarkista sykli ({device})",
-      "feedback_notification_message": "**Laite**: {device}\n**Ohjelma**: {program} ({confidence} %:n luottamus)\n**Aika**: {time}\n\nWashData tarvitsee apuasi tämän havaitun jakson vahvistamiseksi.\n\nSiirry kohtaan **Asetukset > Laitteet ja palvelut > WashData > Configure > Learning Feedbacks** vahvistaaksesi tai korjataksesi tämän tuloksen.",
-      "auto_tune_suggestion": "{device_type} {device_title} havaitsi haamujaksoja. Ehdotettu minimitehon muutos: {current_min}W -> {new_min}W (ei käytössä automaattisesti).",
-      "auto_tune_title": "WashData automaattinen viritys",
-      "auto_tune_fallback": "{device_type} {device_title} havaitsi haamujaksoja. Ehdotettu minimitehon muutos: {current_min}W -> {new_min}W (ei käytössä automaattisesti).",
       "timer_default_message": "{device}: {minutes} min ajastin",
       "timer_pause_action_title": "Jatka sykliä",
       "timer_pause_body_suffix": "Sykli on keskeytetty. Avaa WashData-paneeli jatkaaksesi.",

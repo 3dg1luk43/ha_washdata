@@ -123,7 +123,7 @@ Start with a small set of your most-used and most-different programs, then add t
 
 ### 4. Verification & Learning
 Once profiles are created, WashData starts **matching** new cycles automatically.
-- **Feedback**: If a match is found but confidence is moderate, you may get a "Verify Cycle" notification, and the panel's **Status** tab surfaces it as an attention card.
+- **Feedback**: If a match is found but confidence is moderate, the finished cycle is flagged for review - the panel's **Overview** tab surfaces it as an attention card and it appears in the Cycles review queue (WashData does not raise a persistent notification for this).
 - **Refinement**: Confirm or correct the detection from that attention card on **Overview**.
 - **Self-Improving**: Confirming a cycle helps the system refine its duration models.
 

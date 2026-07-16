@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData：サイクルの確認（{device}）",
-      "feedback_notification_message": "**デバイス**：{device}\n**プログラム**：{program}（信頼度 {confidence}%）\n**時刻**：{time}\n\nWashData は検出されたこのサイクルの確認にあなたの助けを必要としています。\n\n**設定 > デバイスとサービス > WashData > 設定 > 学習フィードバック** で結果を確認または修正してください。",
-      "auto_tune_suggestion": "{device_type} {device_title} がゴースト サイクルを検出しました。推奨される min_power の変更: {current_min}W -> {new_min}W (自動的には適用されません)。",
-      "auto_tune_title": "WashData 自動調整",
-      "auto_tune_fallback": "{device_type} {device_title} がゴースト サイクルを検出しました。推奨される min_power の変更: {current_min}W -> {new_min}W (自動的には適用されません)。",
       "timer_default_message": "{device}: {minutes} 分タイマー",
       "timer_pause_action_title": "サイクルを再開する",
       "timer_pause_body_suffix": "サイクルが一時停止中です。再開するには WashData パネルを開いてください。",

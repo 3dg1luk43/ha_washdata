@@ -61,11 +61,6 @@
       }
     },
     "error": {
-      "feedback_notification_title": "WashData: preveritev cikla ({device})",
-      "feedback_notification_message": "**Naprava**: {device}\n**Program**: {program} ({confidence} % zaupanja)\n**Čas**: {time}\n\nWashData potrebuje vašo pomoč, da preveri ta zaznani cikel.\n\nPojdite na **Nastavitve > Naprave in storitve > WashData > Konfiguracija > Povratne informacije o učenju**, da potrdite ali popravite ta rezultat.",
-      "auto_tune_suggestion": "{device_type} {device_title} zaznanih ciklov duhov. Predlagana sprememba najmanjše moči: {current_min}W -> {new_min}W (se ne uporabi samodejno).",
-      "auto_tune_title": "Samodejna nastavitev WashData",
-      "auto_tune_fallback": "{device_type} {device_title} zaznanih ciklov duhov. Predlagana sprememba najmanjše moči: {current_min}W -> {new_min}W (se ne uporabi samodejno).",
       "timer_default_message": "{device}: časovnik {minutes} min",
       "timer_pause_action_title": "Nadaljuj cikel",
       "timer_pause_body_suffix": "Cikel je zaustavljen. Odprite ploščo WashData za nadaljevanje.",
