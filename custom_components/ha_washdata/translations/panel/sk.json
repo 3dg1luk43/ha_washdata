@@ -1722,7 +1722,9 @@
     "description": "Popis (voliteľné)",
     "contributed_by": "od {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Zatiaľ žiadne hodnotenia"
+    "no_ratings": "Zatiaľ žiadne hodnotenia",
+    "website": "Web obchodu ↗",
+    "website_tip": "Otvoriť webovú stránku komunitného obchodu"
   },
   "settings": {
     "gear": {

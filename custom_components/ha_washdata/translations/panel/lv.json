@@ -1722,7 +1722,9 @@
     "description": "Apraksts (neobligāti)",
     "contributed_by": "autors {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Vēl nav vērtējumu"
+    "no_ratings": "Vēl nav vērtējumu",
+    "website": "Veikala vietne ↗",
+    "website_tip": "Atvērt kopienas veikala vietni"
   },
   "settings": {
     "gear": {

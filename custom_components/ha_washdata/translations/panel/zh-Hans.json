@@ -1722,7 +1722,9 @@
     "description": "描述（可选）",
     "contributed_by": "由 {name} 提供",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "暂无评分"
+    "no_ratings": "暂无评分",
+    "website": "商店网站 ↗",
+    "website_tip": "打开社区商店网站"
   },
   "settings": {
     "gear": {

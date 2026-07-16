@@ -1722,7 +1722,9 @@
     "description": "Descripción (opcional)",
     "contributed_by": "por {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Aún no hay valoraciones"
+    "no_ratings": "Aún no hay valoraciones",
+    "website": "Sitio web de la tienda ↗",
+    "website_tip": "Abrir el sitio web de la tienda de la comunidad"
   },
   "settings": {
     "gear": {

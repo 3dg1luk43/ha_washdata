@@ -1722,7 +1722,9 @@
     "description": "설명(선택 사항)",
     "contributed_by": "{name} 제공",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "아직 평가 없음"
+    "no_ratings": "아직 평가 없음",
+    "website": "스토어 웹사이트 ↗",
+    "website_tip": "커뮤니티 스토어 웹사이트 열기"
   },
   "settings": {
     "gear": {

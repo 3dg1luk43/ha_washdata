@@ -1722,7 +1722,9 @@
     "description": "Beschreibung (optional)",
     "contributed_by": "von {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Noch keine Bewertungen"
+    "no_ratings": "Noch keine Bewertungen",
+    "website": "Community-Store-Website ↗",
+    "website_tip": "Community-Store-Website öffnen"
   },
   "settings": {
     "gear": {

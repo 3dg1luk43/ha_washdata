@@ -1722,7 +1722,9 @@
     "description": "Popis (volitelné)",
     "contributed_by": "od {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Zatím žádná hodnocení"
+    "no_ratings": "Zatím žádná hodnocení",
+    "website": "Web obchodu ↗",
+    "website_tip": "Otevřít web komunitního obchodu"
   },
   "settings": {
     "gear": {

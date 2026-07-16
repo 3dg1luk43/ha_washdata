@@ -1722,7 +1722,9 @@
     "description": "Beskrivelse (valgfritt)",
     "contributed_by": "av {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Ingen vurderinger ennå"
+    "no_ratings": "Ingen vurderinger ennå",
+    "website": "Fellesskapsbutikkens nettsted ↗",
+    "website_tip": "Åpne fellesskapsbutikkens nettsted"
   },
   "settings": {
     "gear": {

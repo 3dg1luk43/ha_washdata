@@ -6462,8 +6462,10 @@ class HaWashdataPanel extends HTMLElement {
     // Defensive: the tab is only shown when the option is on, but the store_status
     // fetch (or the option itself) may say otherwise — show the enable hint.
     const st = this._storeStatus;
+    const storeLink = `<a href="https://3dg1luk43.github.io/washdata-store" target="_blank" rel="noopener noreferrer" style="font-size:.8em;font-weight:400;color:var(--primary-color);text-decoration:none;white-space:nowrap" title="${_esc(this._t('store.website_tip', {}, 'Open the community store website'))}">${this._t('store.website', {}, 'Store website ↗')}</a>`;
+    const storeHeader = `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div class="wd-card-title" style="margin:0">${this._t('hdr.community_store', {}, 'Community Store')}</div>${storeLink}</div>`;
     if (!this._onlineEnabled() || (st && st.enabled === false)) {
-      return `<div class="wd-card"><div class="wd-card-title">${this._t('hdr.community_store', {}, 'Community Store')}</div>
+      return `<div class="wd-card">${storeHeader}
         <p class="wd-info">${this._t('msg.store_enable_hint', {}, 'Enable online features in Settings to browse and import community reference cycles.')}</p></div>`;
     }
     let body;
@@ -6471,7 +6473,7 @@ class HaWashdataPanel extends HTMLElement {
     else if (this._storeView === 'profile') body = this._htmlStoreProfile();
     else body = this._htmlStoreBrands();
     return `<div class="wd-card">
-      <div class="wd-card-title">${this._t('hdr.community_store', {}, 'Community Store')}</div>
+      ${storeHeader}
       ${this._htmlStoreCrumbs()}
       ${body}
     </div>`;

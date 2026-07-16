@@ -1722,7 +1722,9 @@
     "description": "Kuvaus (valinnainen)",
     "contributed_by": "tekijä {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Ei vielä arvioita"
+    "no_ratings": "Ei vielä arvioita",
+    "website": "Kaupan sivusto ↗",
+    "website_tip": "Avaa yhteisökaupan verkkosivusto"
   },
   "settings": {
     "gear": {

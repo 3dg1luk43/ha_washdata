@@ -1722,7 +1722,9 @@
     "description": "Përshkrimi (opsionale)",
     "contributed_by": "nga {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Ende pa vlerësime"
+    "no_ratings": "Ende pa vlerësime",
+    "website": "Faqja e dyqanit ↗",
+    "website_tip": "Hapni faqen e dyqanit komunitar"
   },
   "settings": {
     "gear": {

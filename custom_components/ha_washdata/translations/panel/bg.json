@@ -1722,7 +1722,9 @@
     "description": "Описание (по желание)",
     "contributed_by": "от {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Все още няма оценки"
+    "no_ratings": "Все още няма оценки",
+    "website": "Уебсайт на магазина ↗",
+    "website_tip": "Отворете уебсайта на магазина на общността"
   },
   "settings": {
     "gear": {

@@ -1722,7 +1722,9 @@
     "description": "Opis (neobavezno)",
     "contributed_by": "od {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Još nema ocjena"
+    "no_ratings": "Još nema ocjena",
+    "website": "Web-stranica trgovine ↗",
+    "website_tip": "Otvorite web-stranicu zajedničke trgovine"
   },
   "settings": {
     "gear": {

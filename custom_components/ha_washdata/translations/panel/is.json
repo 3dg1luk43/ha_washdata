@@ -1722,7 +1722,9 @@
     "description": "Lýsing (valfrjálst)",
     "contributed_by": "eftir {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Engar einkunnir enn"
+    "no_ratings": "Engar einkunnir enn",
+    "website": "Vefur samfélagsverslunar ↗",
+    "website_tip": "Opna vef samfélagsverslunar"
   },
   "settings": {
     "gear": {

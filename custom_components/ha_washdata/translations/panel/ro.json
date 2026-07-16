@@ -1722,7 +1722,9 @@
     "description": "Descriere (opțional)",
     "contributed_by": "de {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Încă nicio evaluare"
+    "no_ratings": "Încă nicio evaluare",
+    "website": "Site-ul magazinului ↗",
+    "website_tip": "Deschide site-ul magazinului comunității"
   },
   "settings": {
     "gear": {

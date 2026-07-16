@@ -1722,7 +1722,9 @@
     "description": "Descrizione (facoltativa)",
     "contributed_by": "di {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Ancora nessuna valutazione"
+    "no_ratings": "Ancora nessuna valutazione",
+    "website": "Sito dello store ↗",
+    "website_tip": "Apri il sito dello store della community"
   },
   "settings": {
     "gear": {

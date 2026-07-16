@@ -1722,7 +1722,9 @@
     "description": "Leírás (opcionális)",
     "contributed_by": "szerző: {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Még nincsenek értékelések"
+    "no_ratings": "Még nincsenek értékelések",
+    "website": "Bolt weboldala ↗",
+    "website_tip": "A közösségi bolt weboldalának megnyitása"
   },
   "settings": {
     "gear": {

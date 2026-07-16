@@ -1722,7 +1722,9 @@
     "description": "Beschrijving (optioneel)",
     "contributed_by": "door {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Nog geen beoordelingen"
+    "no_ratings": "Nog geen beoordelingen",
+    "website": "Communitystore-website ↗",
+    "website_tip": "Open de communitystore-website"
   },
   "settings": {
     "gear": {

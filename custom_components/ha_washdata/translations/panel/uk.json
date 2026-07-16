@@ -1722,7 +1722,9 @@
     "description": "Опис (необов'язково)",
     "contributed_by": "від {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Оцінок ще немає"
+    "no_ratings": "Оцінок ще немає",
+    "website": "Сайт магазину ↗",
+    "website_tip": "Відкрити сайт магазину спільноти"
   },
   "settings": {
     "gear": {

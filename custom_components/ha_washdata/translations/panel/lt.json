@@ -1722,7 +1722,9 @@
     "description": "Aprašymas (nebūtina)",
     "contributed_by": "autorius {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Kol kas nėra įvertinimų"
+    "no_ratings": "Kol kas nėra įvertinimų",
+    "website": "Parduotuvės svetainė ↗",
+    "website_tip": "Atidaryti bendruomenės parduotuvės svetainę"
   },
   "settings": {
     "gear": {

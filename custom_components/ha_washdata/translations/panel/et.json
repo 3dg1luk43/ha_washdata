@@ -1722,7 +1722,9 @@
     "description": "Kirjeldus (valikuline)",
     "contributed_by": "autor {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Hinnanguid veel pole"
+    "no_ratings": "Hinnanguid veel pole",
+    "website": "Poe veebisait ↗",
+    "website_tip": "Ava kogukonna poe veebisait"
   },
   "settings": {
     "gear": {

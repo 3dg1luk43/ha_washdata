@@ -1722,7 +1722,9 @@
     "description": "Açıklama (isteğe bağlı)",
     "contributed_by": "{name} tarafından",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Henüz değerlendirme yok"
+    "no_ratings": "Henüz değerlendirme yok",
+    "website": "Mağaza web sitesi ↗",
+    "website_tip": "Topluluk mağazasının web sitesini aç"
   },
   "settings": {
     "gear": {

@@ -1723,7 +1723,9 @@
     "description": "Description (facultatif)",
     "contributed_by": "par {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Aucune évaluation pour le moment"
+    "no_ratings": "Aucune évaluation pour le moment",
+    "website": "Site de la boutique ↗",
+    "website_tip": "Ouvrir le site de la boutique communautaire"
   },
   "settings": {
     "gear": {

@@ -1722,7 +1722,9 @@
     "description": "Beskrivelse (valgfrit)",
     "contributed_by": "af {name}",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Ingen bedømmelser endnu"
+    "no_ratings": "Ingen bedømmelser endnu",
+    "website": "Fællesskabsbutikkens websted ↗",
+    "website_tip": "Åbn fællesskabsbutikkens websted"
   },
   "settings": {
     "gear": {
