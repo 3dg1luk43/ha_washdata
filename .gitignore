@@ -44,7 +44,6 @@ custom_components/ha_washdata/ml/__pycache__
 ROADMAP.md
 playwright-tests/test-results
 playwright-tests/playwright-report
-playwright-tests/package-lock.json
 playwright-tests/node_modules
 IMPROVEMENT_PLAN.md
 docs/superpowers
@@ -52,3 +51,4 @@ re/SETUP.md
 reddit_post_draft.md
 doc/plans
 docs/STORE.md
+coderabbit_unfixed_findings.md

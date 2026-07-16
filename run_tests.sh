@@ -53,27 +53,27 @@ mode="${1:-fast}"
 
 case "$mode" in
     --fast|fast)
-        shift
+        [ "$#" -gt 0 ] && shift
         js_check
         echo "Running FAST tests (skipping slow + benchmark)..."
         exec "$VENV_PYTHON" -m pytest tests/ "$@"
         ;;
     --slow|slow)
-        shift
+        [ "$#" -gt 0 ] && shift
         echo "Running SLOW tests only..."
         exec "$VENV_PYTHON" -m pytest tests/ -m slow "$@"
         ;;
     --bench|--benchmark|bench)
-        shift
+        [ "$#" -gt 0 ] && shift
         echo "Running BENCHMARK tests only..."
         exec "$VENV_PYTHON" -m pytest tests/ -m benchmark "$@"
         ;;
     --e2e|e2e)
-        shift
+        [ "$#" -gt 0 ] && shift
         e2e_check "$@"
         ;;
     --all|all)
-        shift
+        [ "$#" -gt 0 ] && shift
         js_check
         echo "Running ALL tests (fast + slow + benchmark + E2E)..."
         "$VENV_PYTHON" -m pytest tests/ -m "" "$@"

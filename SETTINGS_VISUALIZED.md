@@ -143,7 +143,7 @@ Defines the acceptable "Length" of a cycle relative to the profile.
 ![Match Ratios](doc/images/suggest/param_match_ratios.png)
 
 ### `start_duration_threshold` (Debounce)
-A time-based filter complimenting `start_energy_threshold`.
+A time-based filter complementing `start_energy_threshold`.
 - Even if power is high, it must stay high for this many seconds to be valid.
 - Prevents split-second "On/Off" toggles from starting a cycle.
 
