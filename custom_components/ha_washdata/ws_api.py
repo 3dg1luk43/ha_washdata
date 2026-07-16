@@ -2561,16 +2561,19 @@ async def _reprocess_task(hass: HomeAssistant, task: Any, entry_id: str) -> None
     lock = _entry_write_lock(hass, entry_id)
     await lock.acquire()
     try:
-        reg.update(task, total=5, done=0, label="Reprocessing: matching cycles")
+        reg.update(task, total=5, done=0, label="Reprocessing: matching cycles",
+                   label_key="task.reprocess.matching")
         summary["count"] = await store.async_reprocess_all_data()
 
-        reg.update(task, done=1, label="Reprocessing: backfilling golden")
+        reg.update(task, done=1, label="Reprocessing: backfilling golden",
+                   label_key="task.reprocess.golden")
         try:
             summary["golden_backfilled"] = await store.async_backfill_recorded_golden()
         except Exception as exc:  # pylint: disable=broad-exception-caught
             _LOGGER.debug("golden backfill failed for %s: %s", entry_id, exc)
 
-        reg.update(task, done=2, label="Reprocessing: suggestions")
+        reg.update(task, done=2, label="Reprocessing: suggestions",
+                   label_key="task.reprocess.suggestions")
         learning = getattr(manager, "learning_manager", None)
         if learning is not None and hasattr(learning, "async_run_full_analysis"):
             try:
@@ -2579,7 +2582,8 @@ async def _reprocess_task(hass: HomeAssistant, task: Any, entry_id: str) -> None
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 _LOGGER.debug("suggestion analysis failed for %s: %s", entry_id, exc)
 
-        reg.update(task, done=3, label="Reprocessing: ML training")
+        reg.update(task, done=3, label="Reprocessing: ML training",
+                   label_key="task.reprocess.ml_training")
         if ENABLE_ML_TRAINING and not task.cancel_requested:
             try:
                 tr = await manager.async_run_ml_training(force=True)
@@ -2591,7 +2595,8 @@ async def _reprocess_task(hass: HomeAssistant, task: Any, entry_id: str) -> None
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 _LOGGER.debug("ML training failed for %s: %s", entry_id, exc)
 
-        reg.update(task, done=4, label="Reprocessing: cycle health")
+        reg.update(task, done=4, label="Reprocessing: cycle health",
+                   label_key="task.reprocess.health")
         # Recompute per-cycle health against the (possibly retrained) model.
         # Skip when training already recomputed it (a promotion refreshes health).
         if not (summary.get("ml_training", {}) or {}).get("promoted"):
@@ -2869,6 +2874,9 @@ def ws_get_suggestions(
                     # reason_params, reason). Absent on old/reconciled entries.
                     "reason_key": item.get("reason_key"),
                     "reason_params": item.get("reason_params"),
+                    # Structured excluded-cycle summary; the panel renders it as a
+                    # localized note appended to the reason. Absent/empty on most.
+                    "exclusions": item.get("exclusions"),
                     "current": current,
                     "updated": item.get("updated"),
                 }
@@ -5086,7 +5094,10 @@ def ws_start_playground_sweep(
         connection.send_error(msg["id"], "invalid_format", "param_y and values_y must be set together")
         return
     reg = task_registry.get_registry(hass)
-    task = reg.create(entry_id, "pg_sweep", f"Optimize: {msg['param']}")
+    task = reg.create(
+        entry_id, "pg_sweep", f"Optimize: {msg['param']}",
+        label_key="task.pg_sweep.optimize", label_params={"param": msg["param"]},
+    )
     hass.async_create_task(_pg_sweep_task(
         hass, task, entry_id, msg["param"], list(msg.get("values") or []),
         msg["objective"], param_y, list(values_y) if values_y else None,

@@ -1637,6 +1637,22 @@
       "tol_per_profile": "p75 no katra profila ilguma dispersijas {profiles} profilos ({cycles} cikli); stabili profili netiek sodīti.",
       "tol_pooled": "Pamatots ar apvienoto ilguma dispersiju {cycles} nesen marķētiem cikliem (p95 novirze={dev}).",
       "watchdog": "Saglabāts pēc iespējas zemāks, cik droši (3x p95 atjaunināšanas intervāls {p95}s, min. 30s), lai apstāšanās tiktu atklāta ātri bez viltus apturēšanas."
+    },
+    "exclusions": {
+      "summary": "Izslēgti {total} kļūdaini atpazīti cikli: {parts}.",
+      "reason": {
+        "force_stopped": "piespiedu kārtā apturēti",
+        "interrupted": "pārtraukti",
+        "incomplete": "nepabeigti",
+        "noise": "troksnis",
+        "unlabeled": "bez marķējuma",
+        "no_trace_short": "pārāk īsi, lai pārbaudītu",
+        "high_start": "sākās ar lielu jaudu",
+        "abrupt_end": "beidzās pēkšņi",
+        "mid_restart": "restartēti cikla vidū",
+        "no_power": "nav jaudas",
+        "no_active_power": "nav aktīvas jaudas"
+      }
     }
   },
   "trend": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Zīmola nav sarakstā? Pievienojiet to kopienas katalogam",
     "add_appliance": "Modeļa nav sarakstā? Pievienojiet savu ierīci kopienas katalogam",
     "add_profile": "Pievienojiet šīs ierīces profilu kopienas vietnē"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Atkārtota apstrāde: ciklu saskaņošana",
+      "golden": "Atkārtota apstrāde: atskaites ciklu atzīmēšana",
+      "suggestions": "Atkārtota apstrāde: ieteikumi",
+      "ml_training": "Atkārtota apstrāde: ML apmācība",
+      "health": "Atkārtota apstrāde: ciklu veselība"
+    },
+    "pg_sweep": {
+      "optimize": "Optimizēšana: {param}"
+    }
   }
 }

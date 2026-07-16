@@ -1637,6 +1637,22 @@
       "tol_per_profile": "p75 al varianței duratei per profil pe {profiles} profiluri ({cycles} cicluri); profilurile stabile nu sunt penalizate.",
       "tol_pooled": "Pe baza varianței combinate a duratei a {cycles} cicluri recente etichetate (deviație p95={dev}).",
       "watchdog": "Păstrat cât mai mic în siguranță (de 3x intervalul de actualizare p95 de {p95}s, min. 30s), astfel încât blocajele să fie surprinse rapid fără opriri false."
+    },
+    "exclusions": {
+      "summary": "Excluse {total} cicluri detectate greșit: {parts}.",
+      "reason": {
+        "force_stopped": "oprite forțat",
+        "interrupted": "întrerupte",
+        "incomplete": "incomplete",
+        "noise": "zgomot",
+        "unlabeled": "neetichetate",
+        "no_trace_short": "prea scurte pentru inspectare",
+        "high_start": "pornite la putere mare",
+        "abrupt_end": "terminate brusc",
+        "mid_restart": "repornire la mijlocul ciclului",
+        "no_power": "fără putere",
+        "no_active_power": "fără putere activă"
+      }
     }
   },
   "trend": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Marca nu este listată? Adăugați-o în catalogul comunității",
     "add_appliance": "Modelul nu este listat? Adăugați aparatul dvs. în catalogul comunității",
     "add_profile": "Adăugați un profil pentru acest aparat pe site-ul comunității"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Reprocesare: potrivirea ciclurilor",
+      "golden": "Reprocesare: marcarea ciclurilor de referință",
+      "suggestions": "Reprocesare: sugestii",
+      "ml_training": "Reprocesare: antrenare ML",
+      "health": "Reprocesare: sănătatea ciclurilor"
+    },
+    "pg_sweep": {
+      "optimize": "Optimizează: {param}"
+    }
   }
 }

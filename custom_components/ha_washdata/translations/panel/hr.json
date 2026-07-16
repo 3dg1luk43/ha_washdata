@@ -1508,6 +1508,22 @@
       "tol_per_profile": "p75 varijance trajanja po profilu kroz {profiles} profila ({cycles} ciklusa); dosljedni profili nisu kažnjeni.",
       "tol_pooled": "Na temelju objedinjene varijance trajanja {cycles} novijih označenih ciklusa (p95 odstupanje={dev}).",
       "watchdog": "Zadržano što nižim uz sigurnost (3x razmak ažuriranja p95 od {p95}s, najmanje 30s) kako bi se zastoji brzo uhvatili bez lažnih zaustavljanja."
+    },
+    "exclusions": {
+      "summary": "Isključeno {total} pogrešno otkrivenih ciklusa: {parts}.",
+      "reason": {
+        "force_stopped": "prisilno zaustavljeni",
+        "interrupted": "prekinuti",
+        "incomplete": "nepotpuni",
+        "noise": "buka",
+        "unlabeled": "bez oznake",
+        "no_trace_short": "prekratki za analizu",
+        "high_start": "počeli pri visokoj snazi",
+        "abrupt_end": "naglo završeni",
+        "mid_restart": "restart usred ciklusa",
+        "no_power": "bez snage",
+        "no_active_power": "bez aktivne snage"
+      }
     }
   },
   "tab": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Marke nema na popisu? Dodajte je u katalog zajednice",
     "add_appliance": "Modela nema na popisu? Dodajte svoj uređaj u katalog zajednice",
     "add_profile": "Dodajte profil za ovaj uređaj na web-mjestu zajednice"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Ponovna obrada: podudaranje ciklusa",
+      "golden": "Ponovna obrada: popunjavanje referentnih",
+      "suggestions": "Ponovna obrada: prijedlozi",
+      "ml_training": "Ponovna obrada: ML obuka",
+      "health": "Ponovna obrada: zdravlje ciklusa"
+    },
+    "pg_sweep": {
+      "optimize": "Optimizacija: {param}"
+    }
   }
 }

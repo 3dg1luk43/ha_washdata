@@ -1637,6 +1637,22 @@
       "tol_per_profile": "p75 kiekvieno profilio trukmės dispersijos per {profiles} profilius ({cycles} ciklai); stabilūs profiliai nebaudžiami.",
       "tol_pooled": "Pagrįsta sujungta {cycles} naujausių pažymėtų ciklų trukmės dispersija (p95 nuokrypis={dev}).",
       "watchdog": "Paliktas kuo mažesnis, kiek saugu (3x p95 atnaujinimo tarpas {p95}s, min. 30s), kad strigtys būtų aptiktos greitai be klaidingų sustabdymų."
+    },
+    "exclusions": {
+      "summary": "Neįtraukta {total} klaidingai aptiktų ciklų: {parts}.",
+      "reason": {
+        "force_stopped": "priverstinai sustabdyti",
+        "interrupted": "nutraukti",
+        "incomplete": "nebaigti",
+        "noise": "triukšmas",
+        "unlabeled": "nepažymėti",
+        "no_trace_short": "per trumpi patikrinti",
+        "high_start": "prasidėjo su didele galia",
+        "abrupt_end": "staigiai baigėsi",
+        "mid_restart": "paleisti iš naujo viduryje",
+        "no_power": "nėra galios",
+        "no_active_power": "nėra aktyvios galios"
+      }
     }
   },
   "trend": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Prekės ženklo nėra sąraše? Pridėkite jį į bendruomenės katalogą",
     "add_appliance": "Modelio nėra sąraše? Pridėkite savo prietaisą į bendruomenės katalogą",
     "add_profile": "Pridėkite šio prietaiso profilį bendruomenės svetainėje"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Pakartotinis apdorojimas: ciklų atitikimas",
+      "golden": "Pakartotinis apdorojimas: atskaitos ciklų žymėjimas",
+      "suggestions": "Pakartotinis apdorojimas: pasiūlymai",
+      "ml_training": "Pakartotinis apdorojimas: ML mokymas",
+      "health": "Pakartotinis apdorojimas: ciklų sveikata"
+    },
+    "pg_sweep": {
+      "optimize": "Optimizavimas: {param}"
+    }
   }
 }

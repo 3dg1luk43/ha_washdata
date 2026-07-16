@@ -1654,6 +1654,22 @@
       "tol_per_profile": "{profiles}개 프로필({cycles} 사이클)의 프로필별 시간 분산 p75. 편차가 작은 프로필은 불이익을 받지 않습니다.",
       "tol_pooled": "{cycles}개 최근 라벨 사이클의 통합 시간 분산 기반(p95 편차={dev}).",
       "watchdog": "안전한 범위에서 최대한 낮게 유지(p95 업데이트 간격 {p95}s의 3배, 최소 30s). 잘못된 정지 없이 멈춤을 빠르게 감지합니다."
+    },
+    "exclusions": {
+      "summary": "잘못 감지된 사이클 {total}개를 제외했습니다: {parts}.",
+      "reason": {
+        "force_stopped": "강제 정지",
+        "interrupted": "중단",
+        "incomplete": "미완료",
+        "noise": "노이즈",
+        "unlabeled": "라벨 없음",
+        "no_trace_short": "너무 짧아 검사 불가",
+        "high_start": "고전력에서 시작",
+        "abrupt_end": "갑작스러운 종료",
+        "mid_restart": "사이클 중간 재시작",
+        "no_power": "전력 없음",
+        "no_active_power": "활성 전력 없음"
+      }
     }
   },
   "trend": {
@@ -1739,5 +1755,17 @@
     "add_brand": "브랜드가 목록에 없나요? 커뮤니티 카탈로그에 추가하세요",
     "add_appliance": "모델이 목록에 없나요? 가전제품을 커뮤니티 카탈로그에 추가하세요",
     "add_profile": "커뮤니티 사이트에서 이 가전제품의 프로필을 추가하세요"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "재처리: 사이클 매칭",
+      "golden": "재처리: 참조 사이클 보완",
+      "suggestions": "재처리: 제안",
+      "ml_training": "재처리: ML 훈련",
+      "health": "재처리: 사이클 건강"
+    },
+    "pg_sweep": {
+      "optimize": "최적화: {param}"
+    }
   }
 }

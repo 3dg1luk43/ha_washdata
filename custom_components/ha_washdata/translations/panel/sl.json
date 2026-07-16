@@ -1508,6 +1508,22 @@
       "tol_per_profile": "p75 variance trajanja po posameznih profilih čez {profiles} profilov ({cycles} ciklov); dosledni profili niso kaznovani.",
       "tol_pooled": "Na podlagi združene variance trajanja {cycles} nedavnih označenih ciklov (p95 odklon={dev}).",
       "watchdog": "Ohranjeno tako nizko, kot je varno (3x vrzel posodobitve p95 {p95}s, najmanj 30s), da se zastoji hitro zaznajo brez lažnih ustavitev."
+    },
+    "exclusions": {
+      "summary": "Izključeno {total} napačno zaznanih ciklov: {parts}.",
+      "reason": {
+        "force_stopped": "prisilno ustavljeni",
+        "interrupted": "prekinjeni",
+        "incomplete": "nepopolni",
+        "noise": "šum",
+        "unlabeled": "brez oznake",
+        "no_trace_short": "prekratki za pregled",
+        "high_start": "začeti pri visoki moči",
+        "abrupt_end": "nenadoma končani",
+        "mid_restart": "ponovni zagon sredi cikla",
+        "no_power": "brez moči",
+        "no_active_power": "brez aktivne moči"
+      }
     }
   },
   "tab": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Znamke ni na seznamu? Dodajte jo v katalog skupnosti",
     "add_appliance": "Modela ni na seznamu? Dodajte svojo napravo v katalog skupnosti",
     "add_profile": "Dodajte profil za to napravo na spletnem mestu skupnosti"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Ponovna obdelava: ujemanje ciklov",
+      "golden": "Ponovna obdelava: dopolnjevanje referenčnih",
+      "suggestions": "Ponovna obdelava: predlogi",
+      "ml_training": "Ponovna obdelava: usposabljanje ML",
+      "health": "Ponovna obdelava: kakovost ciklov"
+    },
+    "pg_sweep": {
+      "optimize": "Optimizacija: {param}"
+    }
   }
 }

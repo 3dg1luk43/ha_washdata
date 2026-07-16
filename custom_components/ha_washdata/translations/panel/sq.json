@@ -1637,6 +1637,22 @@
       "tol_per_profile": "p75 e variancës së kohëzgjatjes për profil në {profiles} profile ({cycles} cikle); profilet e qëndrueshme nuk penalizohen.",
       "tol_pooled": "Bazuar në variancën e bashkuar të kohëzgjatjes së {cycles} cikleve të fundit të etiketuara (devijimi p95={dev}).",
       "watchdog": "Mbahet sa më i ulët në mënyrë të sigurt (3x boshllëku i përditësimit p95 prej {p95}s, min. 30s) që bllokimet të kapen shpejt pa ndalime të rreme."
+    },
+    "exclusions": {
+      "summary": "U përjashtuan {total} cikle të zbuluar gabimisht: {parts}.",
+      "reason": {
+        "force_stopped": "të ndalur me forcë",
+        "interrupted": "të ndërprerë",
+        "incomplete": "të papërfunduar",
+        "noise": "zhurmë",
+        "unlabeled": "pa etiketë",
+        "no_trace_short": "shumë të shkurtër për t'u inspektuar",
+        "high_start": "të nisur me fuqi të lartë",
+        "abrupt_end": "të përfunduar papritur",
+        "mid_restart": "të rinisur në mes të ciklit",
+        "no_power": "pa fuqi",
+        "no_active_power": "pa fuqi aktive"
+      }
     }
   },
   "trend": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Marka nuk është në listë? Shtojeni në katalogun e komunitetit",
     "add_appliance": "Modeli nuk është në listë? Shtoni pajisjen tuaj në katalogun e komunitetit",
     "add_profile": "Shtoni një profil për këtë pajisje në sitin e komunitetit"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Ripërpunim: përputhja e cikleve",
+      "golden": "Ripërpunim: shënimi i cikleve referues",
+      "suggestions": "Ripërpunim: sugjerime",
+      "ml_training": "Ripërpunim: trajnimi i ML-së",
+      "health": "Ripërpunim: shëndeti i cikleve"
+    },
+    "pg_sweep": {
+      "optimize": "Optimizim: {param}"
+    }
   }
 }

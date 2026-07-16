@@ -1637,6 +1637,22 @@
       "tol_per_profile": "A profilonkénti időtartam-szórás p75 értéke {profiles} profilon át ({cycles} ciklus); a stabil profilok nem kapnak büntetést.",
       "tol_pooled": "{cycles} legutóbbi címkézett ciklus összevont időtartam-szórása alapján (p95 szórás={dev}).",
       "watchdog": "A biztonságosan lehető legalacsonyabbra állítva (a p95 frissítési szünet 3-szorosa, {p95}s, min. 30s), hogy az elakadások gyorsan észlelhetők legyenek téves leállítások nélkül."
+    },
+    "exclusions": {
+      "summary": "{total} tévesen észlelt ciklus kizárva: {parts}.",
+      "reason": {
+        "force_stopped": "kényszerrel leállított",
+        "interrupted": "megszakított",
+        "incomplete": "befejezetlen",
+        "noise": "zaj",
+        "unlabeled": "címkézetlen",
+        "no_trace_short": "vizsgálathoz túl rövid",
+        "high_start": "magas teljesítménnyel indult",
+        "abrupt_end": "hirtelen véget ért",
+        "mid_restart": "ciklus közbeni újraindítás",
+        "no_power": "nincs teljesítmény",
+        "no_active_power": "nincs aktív teljesítmény"
+      }
     }
   },
   "trend": {
@@ -1739,5 +1755,17 @@
     "add_brand": "A márka nem szerepel a listában? Adja hozzá a közösségi katalógushoz",
     "add_appliance": "A modell nem szerepel a listában? Adja hozzá készülékét a közösségi katalógushoz",
     "add_profile": "Adjon hozzá profilt ehhez a készülékhez a közösségi oldalon"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Újrafeldolgozás: ciklusok egyeztetése",
+      "golden": "Újrafeldolgozás: referenciaciklusok pótlása",
+      "suggestions": "Újrafeldolgozás: javaslatok",
+      "ml_training": "Újrafeldolgozás: ML-tanítás",
+      "health": "Újrafeldolgozás: ciklusok egészsége"
+    },
+    "pg_sweep": {
+      "optimize": "Optimalizálás: {param}"
+    }
   }
 }

@@ -1654,6 +1654,22 @@
       "tol_per_profile": "{profiles} 个配置文件（{cycles} 个周期）中每个配置文件时长方差的 p75；波动小的配置文件不受惩罚。",
       "tol_pooled": "基于 {cycles} 个近期已标注周期的合并时长方差（p95 偏差={dev}）。",
       "watchdog": "在安全范围内保持尽可能低（p95 更新间隔 {p95}s 的 3 倍，最小 30s），以便快速捕捉到停滞而不产生误停止。"
+    },
+    "exclusions": {
+      "summary": "已排除 {total} 个误检测周期：{parts}。",
+      "reason": {
+        "force_stopped": "强制停止",
+        "interrupted": "中断",
+        "incomplete": "未完成",
+        "noise": "噪声",
+        "unlabeled": "未标记",
+        "no_trace_short": "太短无法检查",
+        "high_start": "高功率启动",
+        "abrupt_end": "突然结束",
+        "mid_restart": "周期中途重启",
+        "no_power": "无功率",
+        "no_active_power": "无工作功率"
+      }
     }
   },
   "trend": {
@@ -1739,5 +1755,17 @@
     "add_brand": "品牌未收录？将其添加到社区目录",
     "add_appliance": "型号未收录？将您的家电添加到社区目录",
     "add_profile": "在社区网站上为此家电添加配置文件"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "重新处理：匹配周期",
+      "golden": "重新处理：补全参考周期",
+      "suggestions": "重新处理：建议",
+      "ml_training": "重新处理：ML 训练",
+      "health": "重新处理：周期健康"
+    },
+    "pg_sweep": {
+      "optimize": "优化：{param}"
+    }
   }
 }

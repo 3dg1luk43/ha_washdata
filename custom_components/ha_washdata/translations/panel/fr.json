@@ -1655,6 +1655,22 @@
       "tol_per_profile": "p75 de la variance de durée par profil sur {profiles} profils ({cycles} cycles) ; les profils resserrés ne sont pas pénalisés.",
       "tol_pooled": "D'après la variance de durée regroupée de {cycles} cycles récemment étiquetés (écart p95={dev}).",
       "watchdog": "Maintenu aussi bas que possible en toute sécurité (3x l'écart de mise à jour p95 de {p95}s, min 30s) pour détecter rapidement les blocages sans faux arrêts."
+    },
+    "exclusions": {
+      "summary": "{total} cycle(s) mal détecté(s) exclu(s) : {parts}.",
+      "reason": {
+        "force_stopped": "arrêtés de force",
+        "interrupted": "interrompus",
+        "incomplete": "incomplets",
+        "noise": "bruit",
+        "unlabeled": "sans étiquette",
+        "no_trace_short": "trop courts à inspecter",
+        "high_start": "démarrés à puissance élevée",
+        "abrupt_end": "terminés brusquement",
+        "mid_restart": "redémarrage en milieu de cycle",
+        "no_power": "sans puissance",
+        "no_active_power": "sans puissance active"
+      }
     }
   },
   "trend": {
@@ -1740,5 +1756,17 @@
     "add_brand": "Marque absente de la liste ? Ajoutez-la au catalogue de la communauté",
     "add_appliance": "Modèle absent de la liste ? Ajoutez votre appareil au catalogue de la communauté",
     "add_profile": "Ajoutez un profil pour cet appareil sur le site de la communauté"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Retraitement : correspondance des cycles",
+      "golden": "Retraitement : marquage des cycles de référence",
+      "suggestions": "Retraitement : suggestions",
+      "ml_training": "Retraitement : entraînement ML",
+      "health": "Retraitement : santé des cycles"
+    },
+    "pg_sweep": {
+      "optimize": "Optimiser : {param}"
+    }
   }
 }

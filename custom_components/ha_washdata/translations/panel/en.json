@@ -1478,6 +1478,22 @@
       "ml_off_delay": "End-detector-confirmed pauses: p95 {p95}s + 60s buffer, from {pauses} model-verified pauses across {cycles} cycles (floor {floor}s).",
       "ml_end_repeat": "{false}/{total} cycles ({pct}%) had a pause the end-detector scored >50%; require {val} end confirmation(s).",
       "ml_auto_label": "Lowest confidence the quality model still rated clean (p10 of {cycles} clean cycles = {p10})."
+    },
+    "exclusions": {
+      "summary": "Excluded {total} mis-detected cycle(s): {parts}.",
+      "reason": {
+        "force_stopped": "force-stopped",
+        "interrupted": "interrupted",
+        "incomplete": "incomplete",
+        "noise": "noise",
+        "unlabeled": "unlabeled",
+        "no_trace_short": "too short to inspect",
+        "high_start": "started at high power",
+        "abrupt_end": "ended abruptly",
+        "mid_restart": "mid-cycle restart",
+        "no_power": "no power",
+        "no_active_power": "no active power"
+      }
     }
   },
   "tab": {
@@ -1685,5 +1701,17 @@
     "add_brand": "Brand not listed? Add it to the community catalog",
     "add_appliance": "Model not listed? Add your appliance to the community catalog",
     "add_profile": "Add a profile for this appliance on the community site"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Reprocessing: matching cycles",
+      "golden": "Reprocessing: backfilling golden",
+      "suggestions": "Reprocessing: suggestions",
+      "ml_training": "Reprocessing: ML training",
+      "health": "Reprocessing: cycle health"
+    },
+    "pg_sweep": {
+      "optimize": "Optimize: {param}"
+    }
   }
 }

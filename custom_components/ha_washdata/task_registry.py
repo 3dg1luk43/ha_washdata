@@ -28,13 +28,14 @@ listener to push updates and calls :func:`get_registry` to read/kick/cancel.
 """
 from __future__ import annotations
 
-import time
+import logging
 import uuid
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
 
@@ -57,13 +58,18 @@ class Task:
     id: str
     entry_id: str
     kind: str          # 'reprocess' | 'ml_training' | 'pg_history' | 'pg_sweep'
-    label: str
+    label: str         # English fallback shown only if no label_key resolves
+    # Panel-localizable label: the pill renders _t(label_key, label_params, label)
+    # so per-step progress text is translated. When label_key is None the pill
+    # falls back to a per-kind translated action label.
+    label_key: str | None = None
+    label_params: dict[str, Any] = field(default_factory=dict)
     total: int = 0
     done: int = 0
     state: str = STATE_RUNNING
     error: str | None = None
-    started_at: float = field(default_factory=time.time)
-    updated_at: float = field(default_factory=time.time)
+    started_at: float = field(default_factory=lambda: dt_util.now().timestamp())
+    updated_at: float = field(default_factory=lambda: dt_util.now().timestamp())
     finished_at: float | None = None
     result: Any = None
     _cancelled: bool = False
@@ -95,6 +101,8 @@ class Task:
             "entry_id": self.entry_id,
             "kind": self.kind,
             "label": self.label,
+            "label_key": self.label_key,
+            "label_params": self.label_params,
             "state": self.state,
             "done": self.done,
             "total": self.total,
@@ -130,16 +138,26 @@ class TaskRegistry:
             try:
                 cb(snap)
             except Exception:  # pylint: disable=broad-exception-caught
-                # A misbehaving listener must never break task bookkeeping.
-                pass
+                logging.getLogger(__name__).debug("Task registry listener error", exc_info=True)
 
     # -- lifecycle -----------------------------------------------------------
-    def create(self, entry_id: str, kind: str, label: str, total: int = 0) -> Task:
+    def create(
+        self,
+        entry_id: str,
+        kind: str,
+        label: str,
+        total: int = 0,
+        *,
+        label_key: str | None = None,
+        label_params: dict[str, Any] | None = None,
+    ) -> Task:
         task = Task(
             id=uuid.uuid4().hex[:12],
             entry_id=entry_id,
             kind=kind,
             label=label,
+            label_key=label_key,
+            label_params=dict(label_params) if label_params else {},
             total=max(0, int(total or 0)),
         )
         self._tasks[task.id] = task
@@ -154,6 +172,8 @@ class TaskRegistry:
         done: int | None = None,
         total: int | None = None,
         label: str | None = None,
+        label_key: str | None = None,
+        label_params: dict[str, Any] | None = None,
     ) -> None:
         if done is not None:
             task.done = done
@@ -161,7 +181,12 @@ class TaskRegistry:
             task.total = total
         if label is not None:
             task.label = label
-        task.updated_at = time.time()
+        # A supplied label_key replaces the localized label; passing label without
+        # label_key (legacy callers) clears any stale key so the fallback shows.
+        if label_key is not None or label is not None:
+            task.label_key = label_key
+            task.label_params = dict(label_params) if label_params else {}
+        task.updated_at = dt_util.now().timestamp()
         self._notify(task)
 
     def finish(
@@ -176,7 +201,7 @@ class TaskRegistry:
         task.error = error
         if result is not None:
             task.result = result
-        task.finished_at = task.updated_at = time.time()
+        task.finished_at = task.updated_at = dt_util.now().timestamp()
         self._notify(task)
         self._evict()
 
@@ -202,9 +227,12 @@ class TaskRegistry:
         ]
 
     def _evict(self) -> None:
-        finished = [tid for tid, t in self._tasks.items() if t.state != STATE_RUNNING]
+        finished = sorted(
+            [t for t in self._tasks.values() if t.state != STATE_RUNNING],
+            key=lambda t: t.finished_at or 0.0,
+        )
         while len(finished) > _MAX_FINISHED:
-            self._tasks.pop(finished.pop(0), None)
+            self._tasks.pop(finished.pop(0).id, None)
 
 
 def get_registry(hass: HomeAssistant) -> TaskRegistry:

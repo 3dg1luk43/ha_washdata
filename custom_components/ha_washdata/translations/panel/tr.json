@@ -1654,6 +1654,22 @@
       "tol_per_profile": "{profiles} profil boyunca ({cycles} çevrim) profil başına süre varyansının p75'i; tutarlı profiller cezalandırılmaz.",
       "tol_pooled": "{cycles} son etiketli çevrimin birleştirilmiş süre varyansına dayalı (p95 sapma={dev}).",
       "watchdog": "Güvenli olduğu kadar düşük tutuldu ({p95}s'lik p95 güncelleme boşluğunun 3 katı, en az 30s); böylece takılmalar yanlış durdurmalar olmadan hızlıca yakalanır."
+    },
+    "exclusions": {
+      "summary": "{total} yanlış algılanan döngü hariç tutuldu: {parts}.",
+      "reason": {
+        "force_stopped": "zorla durdurulmuş",
+        "interrupted": "kesintiye uğramış",
+        "incomplete": "tamamlanmamış",
+        "noise": "gürültü",
+        "unlabeled": "etiketsiz",
+        "no_trace_short": "incelenemeyecek kadar kısa",
+        "high_start": "yüksek güçte başlamış",
+        "abrupt_end": "aniden sona ermiş",
+        "mid_restart": "döngü ortasında yeniden başlamış",
+        "no_power": "güç yok",
+        "no_active_power": "aktif güç yok"
+      }
     }
   },
   "trend": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Marka listede yok mu? Topluluk kataloğuna ekleyin",
     "add_appliance": "Model listede yok mu? Cihazınızı topluluk kataloğuna ekleyin",
     "add_profile": "Bu cihaz için topluluk sitesinde bir profil ekleyin"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Yeniden işleme: döngü eşleştirme",
+      "golden": "Yeniden işleme: referans döngülerini işaretleme",
+      "suggestions": "Yeniden işleme: öneriler",
+      "ml_training": "Yeniden işleme: ML eğitimi",
+      "health": "Yeniden işleme: döngü sağlığı"
+    },
+    "pg_sweep": {
+      "optimize": "Optimizasyon: {param}"
+    }
   }
 }

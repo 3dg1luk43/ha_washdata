@@ -1508,6 +1508,22 @@
       "tol_per_profile": "p75 wariancji czasu trwania na profil w {profiles} profilach ({cycles} cykli); spójne profile nie są karane.",
       "tol_pooled": "Na podstawie łącznej wariancji czasu trwania {cycles} ostatnich oznaczonych cykli (odchylenie p95={dev}).",
       "watchdog": "Utrzymane tak nisko, jak to bezpieczne (3x przerwa aktualizacji p95 wynosząca {p95}s, min. 30s), aby zawieszenia były szybko wykrywane bez fałszywych zatrzymań."
+    },
+    "exclusions": {
+      "summary": "Wykluczono {total} błędnie wykrytych cykli: {parts}.",
+      "reason": {
+        "force_stopped": "zatrzymane przymusowo",
+        "interrupted": "przerwane",
+        "incomplete": "niekompletne",
+        "noise": "hałas",
+        "unlabeled": "bez etykiety",
+        "no_trace_short": "zbyt krótkie do analizy",
+        "high_start": "rozpoczęte przy wysokiej mocy",
+        "abrupt_end": "gwałtownie zakończone",
+        "mid_restart": "restart w połowie cyklu",
+        "no_power": "bez mocy",
+        "no_active_power": "bez aktywnej mocy"
+      }
     }
   },
   "tab": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Marki nie ma na liście? Dodaj ją do katalogu społeczności",
     "add_appliance": "Modelu nie ma na liście? Dodaj swoje urządzenie do katalogu społeczności",
     "add_profile": "Dodaj profil dla tego urządzenia w witrynie społeczności"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Ponowne przetwarzanie: dopasowywanie cykli",
+      "golden": "Ponowne przetwarzanie: uzupełnianie referencyjnych",
+      "suggestions": "Ponowne przetwarzanie: sugestie",
+      "ml_training": "Ponowne przetwarzanie: trenowanie ML",
+      "health": "Ponowne przetwarzanie: zdrowie cykli"
+    },
+    "pg_sweep": {
+      "optimize": "Optymalizacja: {param}"
+    }
   }
 }

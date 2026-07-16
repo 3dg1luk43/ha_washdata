@@ -1654,6 +1654,22 @@
       "tol_per_profile": "p75 profiilipõhisest kestuse dispersioonist {profiles} profiili lõikes ({cycles} tsüklit); kitsaid profiile ei karistata.",
       "tol_pooled": "Põhineb {cycles} viimase märgistatud tsükli koondkestuse dispersioonil (p95 hälve={dev}).",
       "watchdog": "Hoitakse nii madal kui ohutu (3x p95 uuendusintervall {p95}s, min 30s), et seiskumised tuvastataks kiiresti ilma valeseisakuteta."
+    },
+    "exclusions": {
+      "summary": "Välja jäetud {total} valesti tuvastatud tsüklit: {parts}.",
+      "reason": {
+        "force_stopped": "jõuga peatatud",
+        "interrupted": "katkestatud",
+        "incomplete": "lõpetamata",
+        "noise": "müra",
+        "unlabeled": "sildistamata",
+        "no_trace_short": "kontrollimiseks liiga lühike",
+        "high_start": "algas suure võimsusega",
+        "abrupt_end": "lõppes järsult",
+        "mid_restart": "taaskäivitus keset tsüklit",
+        "no_power": "võimsus puudub",
+        "no_active_power": "aktiivne võimsus puudub"
+      }
     }
   },
   "trend": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Brändi pole loendis? Lisa see kogukonna kataloogi",
     "add_appliance": "Mudelit pole loendis? Lisa oma seade kogukonna kataloogi",
     "add_profile": "Lisa sellele seadmele profiil kogukonna saidil"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Uuesti töötlemine: tsüklite sobitamine",
+      "golden": "Uuesti töötlemine: võrdlustsüklite märkimine",
+      "suggestions": "Uuesti töötlemine: soovitused",
+      "ml_training": "Uuesti töötlemine: ML-i treenimine",
+      "health": "Uuesti töötlemine: tsüklite tervis"
+    },
+    "pg_sweep": {
+      "optimize": "Optimeerimine: {param}"
+    }
   }
 }

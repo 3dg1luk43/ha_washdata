@@ -2048,13 +2048,26 @@ class HaWashdataPanel extends HTMLElement {
     return this._t('lbl.eta_mins', {n: Math.round(s / 60)}, `~${Math.round(s / 60)}m left`);
   }
 
+  // Localized "Excluded N mis-detected cycle(s): ..." note for a suggestion, from
+  // the structured {total, items:[[reason_code, count]]} the server provides. Each
+  // reason code is translated on its own; leading space matches the ".{excl}" slot.
+  _exclNote(ex) {
+    if (!ex || !ex.total) return '';
+    const parts = (ex.items || []).map(([code, n]) =>
+      `${n} ${this._t('suggestion.exclusions.reason.' + code, {}, String(code).replace(/_/g, ' '))}`
+    ).join(', ');
+    return ' ' + this._t('suggestion.exclusions.summary', { total: ex.total, parts },
+      `Excluded ${ex.total} mis-detected cycle(s): ${parts}.`);
+  }
+
   // Header activity cluster: one pill per running task (device · action · % · ✕).
   _htmlTaskPills() {
     const running = Object.values(this._tasks || {}).filter(t => t.state === 'running');
     if (!running.length) return '';
     return running.map(t => {
       const dev = this._deviceName(t.entry_id);
-      const label = (dev ? dev + ' · ' : '') + this._taskActionLabel(t.kind);
+      const action = t.label_key ? this._t(t.label_key, t.label_params || {}, t.label || this._taskActionLabel(t.kind)) : this._taskActionLabel(t.kind);
+      const label = (dev ? dev + ' · ' : '') + action;
       const pct = t.progress != null ? Math.round(t.progress * 100) + '%' : '';
       const eta = (t.eta_s != null && t.eta_s > 0) ? this._fmtEta(t.eta_s) : '';
       return `<span class="wd-task-pill" title="${_esc(label + (pct ? ' ' + pct : ''))}">`
@@ -4273,7 +4286,13 @@ class HaWashdataPanel extends HTMLElement {
     }
 
     const sug = this._suggestions.find(s => s.key === f.key);
-    if (sug) extra.suggestion = { suggested: sug.suggested, current: sug.current, reason: sug.reason, reason_key: sug.reason_key, reason_params: sug.reason_params };
+    if (sug) {
+      // Localize the excluded-cycle note (reason codes + summary) client-side and
+      // substitute it for the server's English {excl} placeholder before rendering.
+      const rp = Object.assign({}, sug.reason_params || {});
+      if (sug.exclusions && sug.exclusions.total) rp.excl = this._exclNote(sug.exclusions);
+      extra.suggestion = { suggested: sug.suggested, current: sug.current, reason: sug.reason, reason_key: sug.reason_key, reason_params: rp };
+    }
 
     const mlc = (this._mlSettings || {})[f.key];
     if (mlc && mlc.ml_value != null) extra.mlSuggestion = { value: mlc.ml_value, reason: mlc.ml_reason, reason_key: mlc.ml_reason_key, reason_params: mlc.ml_reason_params };

@@ -1654,6 +1654,22 @@
       "tol_per_profile": "p75 da variância de duração por perfil em {profiles} perfis ({cycles} ciclos); os perfis restritos não são penalizados.",
       "tol_pooled": "Com base na variância de duração agrupada de {cycles} ciclos rotulados recentes (desvio p95={dev}).",
       "watchdog": "Mantido o mais baixo que é seguro (3x o intervalo de atualização p95 de {p95}s, mín. 30s) para detetar rapidamente os bloqueios sem paragens falsas."
+    },
+    "exclusions": {
+      "summary": "Excluído(s) {total} ciclo(s) mal detetado(s): {parts}.",
+      "reason": {
+        "force_stopped": "parados forçosamente",
+        "interrupted": "interrompidos",
+        "incomplete": "incompletos",
+        "noise": "ruído",
+        "unlabeled": "sem etiqueta",
+        "no_trace_short": "demasiado curtos para inspecionar",
+        "high_start": "iniciados com potência elevada",
+        "abrupt_end": "terminados abruptamente",
+        "mid_restart": "reinício a meio do ciclo",
+        "no_power": "sem energia",
+        "no_active_power": "sem energia ativa"
+      }
     }
   },
   "trend": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Marca não listada? Adicione-a ao catálogo da comunidade",
     "add_appliance": "Modelo não listado? Adicione o seu electrodoméstico ao catálogo da comunidade",
     "add_profile": "Adicione um perfil para este electrodoméstico no site da comunidade"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Reprocessamento: correspondência de ciclos",
+      "golden": "Reprocessamento: marcação de ciclos de referência",
+      "suggestions": "Reprocessamento: sugestões",
+      "ml_training": "Reprocessamento: treino de ML",
+      "health": "Reprocessamento: saúde dos ciclos"
+    },
+    "pg_sweep": {
+      "optimize": "Otimizar: {param}"
+    }
   }
 }

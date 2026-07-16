@@ -1525,6 +1525,22 @@
       "tol_per_profile": "p75 för varaktighetsvariansen per profil över {profiles} profiler ({cycles} cykler); snäva profiler bestraffas inte.",
       "tol_pooled": "Baserat på sammanslagen varaktighetsvarians för {cycles} senaste märkta cykler (p95 avvikelse={dev}).",
       "watchdog": "Hålls så lågt som är säkert (3x p95-uppdateringsmellanrummet på {p95}s, min 30s) så att stillestånd upptäcks snabbt utan falska stopp."
+    },
+    "exclusions": {
+      "summary": "Uteslöt {total} feldetekterade cykler: {parts}.",
+      "reason": {
+        "force_stopped": "tvångsstoppad",
+        "interrupted": "avbruten",
+        "incomplete": "ofullständig",
+        "noise": "brus",
+        "unlabeled": "utan etikett",
+        "no_trace_short": "för kort för att granska",
+        "high_start": "startade vid hög effekt",
+        "abrupt_end": "avslutades abrupt",
+        "mid_restart": "omstart mitt i cykeln",
+        "no_power": "ingen effekt",
+        "no_active_power": "ingen aktiv effekt"
+      }
     }
   },
   "tab": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Märke inte med i listan? Lägg till det i gemenskapskatalogen",
     "add_appliance": "Modell inte med i listan? Lägg till din apparat i gemenskapskatalogen",
     "add_profile": "Lägg till en profil för den här apparaten på gemenskapssidan"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Bearbetar igen: matchar cykler",
+      "golden": "Bearbetar igen: fyller i referenscykler",
+      "suggestions": "Bearbetar igen: förslag",
+      "ml_training": "Bearbetar igen: ML-träning",
+      "health": "Bearbetar igen: cykelhälsa"
+    },
+    "pg_sweep": {
+      "optimize": "Optimera: {param}"
+    }
   }
 }

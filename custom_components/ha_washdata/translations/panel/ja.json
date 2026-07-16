@@ -1654,6 +1654,22 @@
       "tol_per_profile": "{profiles} 件のプロファイル（{cycles} サイクル）にわたるプロファイルごとの時間分散の p75。ばらつきの小さいプロファイルは不利になりません。",
       "tol_pooled": "{cycles} 件の直近のラベル付きサイクルの統合時間分散に基づく（p95 偏差={dev}）。",
       "watchdog": "安全な範囲でできるだけ低く設定（p95 の更新間隔 {p95}s の 3 倍、最小 30s）。誤った停止なしに停滞を素早く検出します。"
+    },
+    "exclusions": {
+      "summary": "{total} 件の誤検出サイクルを除外しました: {parts}。",
+      "reason": {
+        "force_stopped": "強制停止",
+        "interrupted": "中断",
+        "incomplete": "未完了",
+        "noise": "ノイズ",
+        "unlabeled": "ラベルなし",
+        "no_trace_short": "短すぎて検査不可",
+        "high_start": "高電力で開始",
+        "abrupt_end": "突然終了",
+        "mid_restart": "サイクル途中で再開",
+        "no_power": "電力なし",
+        "no_active_power": "稼働電力なし"
+      }
     }
   },
   "trend": {
@@ -1739,5 +1755,17 @@
     "add_brand": "ブランドが一覧にありませんか？コミュニティカタログに追加してください",
     "add_appliance": "モデルが一覧にありませんか？お使いの家電をコミュニティカタログに追加してください",
     "add_profile": "コミュニティサイトでこの家電のプロファイルを追加してください"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "再処理: サイクルのマッチング",
+      "golden": "再処理: 基準サイクルの補完",
+      "suggestions": "再処理: 提案",
+      "ml_training": "再処理: MLトレーニング",
+      "health": "再処理: サイクルの健康"
+    },
+    "pg_sweep": {
+      "optimize": "最適化: {param}"
+    }
   }
 }

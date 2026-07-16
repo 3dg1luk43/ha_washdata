@@ -1525,6 +1525,22 @@
       "tol_per_profile": "p75 van de duurvariantie per profiel over {profiles} profielen ({cycles} cycli); strakke profielen worden niet benadeeld.",
       "tol_pooled": "Op basis van de gebundelde duurvariantie van {cycles} recent gelabelde cycli (p95-afwijking={dev}).",
       "watchdog": "Zo laag als veilig gehouden (3x de p95-updatekloof van {p95}s, min. 30s) zodat vastlopers snel worden opgemerkt zonder valse stops."
+    },
+    "exclusions": {
+      "summary": "{total} verkeerd gedetecteerde cyclus(sen) uitgesloten: {parts}.",
+      "reason": {
+        "force_stopped": "geforceerd gestopt",
+        "interrupted": "onderbroken",
+        "incomplete": "onvolledig",
+        "noise": "ruis",
+        "unlabeled": "zonder label",
+        "no_trace_short": "te kort om te inspecteren",
+        "high_start": "gestart op hoog vermogen",
+        "abrupt_end": "abrupt beëindigd",
+        "mid_restart": "herstart midden in de cyclus",
+        "no_power": "geen vermogen",
+        "no_active_power": "geen actief vermogen"
+      }
     }
   },
   "tab": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Merk niet vermeld? Voeg het toe aan de communitycatalogus",
     "add_appliance": "Model niet vermeld? Voeg je apparaat toe aan de communitycatalogus",
     "add_profile": "Voeg op de communitysite een profiel toe voor dit apparaat"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Opnieuw verwerken: cycli matchen",
+      "golden": "Opnieuw verwerken: referentiecycli aanvullen",
+      "suggestions": "Opnieuw verwerken: suggesties",
+      "ml_training": "Opnieuw verwerken: ML-training",
+      "health": "Opnieuw verwerken: cyclusgezondheid"
+    },
+    "pg_sweep": {
+      "optimize": "Optimaliseren: {param}"
+    }
   }
 }

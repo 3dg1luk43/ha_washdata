@@ -1525,6 +1525,22 @@
       "tol_per_profile": "p75 der Dauervarianz pro Profil über {profiles} Profile ({cycles} Zyklen); enge Profile werden nicht benachteiligt.",
       "tol_pooled": "Basierend auf der zusammengefassten Dauervarianz von {cycles} kürzlich gelabelten Zyklen (p95-Abweichung={dev}).",
       "watchdog": "So niedrig wie sicher gehalten (3x die p95-Aktualisierungslücke von {p95}s, min 30s), damit Hänger schnell erkannt werden, ohne Fehl-Stopps auszulösen."
+    },
+    "exclusions": {
+      "summary": "{total} falsch erkannte Zyklen ausgeschlossen: {parts}.",
+      "reason": {
+        "force_stopped": "zwangsgestoppt",
+        "interrupted": "unterbrochen",
+        "incomplete": "unvollständig",
+        "noise": "Rauschen",
+        "unlabeled": "ohne Label",
+        "no_trace_short": "zu kurz zum Prüfen",
+        "high_start": "mit hoher Startleistung",
+        "abrupt_end": "abrupt beendet",
+        "mid_restart": "Neustart mitten im Zyklus",
+        "no_power": "ohne Leistung",
+        "no_active_power": "ohne aktive Leistung"
+      }
     }
   },
   "tab": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Marke nicht aufgeführt? Fügen Sie sie zum Community-Katalog hinzu",
     "add_appliance": "Modell nicht aufgeführt? Fügen Sie Ihr Gerät zum Community-Katalog hinzu",
     "add_profile": "Fügen Sie auf der Community-Website ein Profil für dieses Gerät hinzu"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Neuverarbeitung: Zyklen abgleichen",
+      "golden": "Neuverarbeitung: Referenzzyklen nachtragen",
+      "suggestions": "Neuverarbeitung: Vorschläge",
+      "ml_training": "Neuverarbeitung: ML-Training",
+      "health": "Neuverarbeitung: Zyklusgesundheit"
+    },
+    "pg_sweep": {
+      "optimize": "Optimieren: {param}"
+    }
   }
 }

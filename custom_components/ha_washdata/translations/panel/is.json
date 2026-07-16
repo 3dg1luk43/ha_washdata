@@ -1525,6 +1525,22 @@
       "tol_per_profile": "p75 af dreifni lengdar á hvert snið yfir {profiles} snið ({cycles} lotur); þröngum sniðum er ekki refsað.",
       "tol_pooled": "Byggt á sameinaðri dreifni lengdar {cycles} nýjustu merktu lota (p95 frávik={dev}).",
       "watchdog": "Haldið eins lágu og óhætt er (3x p95-uppfærslubilið {p95}s, lágm. 30s) svo að stöðnun greinist fljótt án falskra stöðvana."
+    },
+    "exclusions": {
+      "summary": "Útilokaði {total} ranggreindar lotur: {parts}.",
+      "reason": {
+        "force_stopped": "þvingað stöðvaðar",
+        "interrupted": "rofnar",
+        "incomplete": "ókláraðar",
+        "noise": "suð",
+        "unlabeled": "án merkingar",
+        "no_trace_short": "of stuttar til að skoða",
+        "high_start": "hófust á háu afli",
+        "abrupt_end": "enduðu snögglega",
+        "mid_restart": "endurræsing í miðri lotu",
+        "no_power": "ekkert afl",
+        "no_active_power": "ekkert virkt afl"
+      }
     }
   },
   "tab": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Vörumerki ekki á listanum? Bættu því við samfélagsskrána",
     "add_appliance": "Gerð ekki á listanum? Bættu tækinu þínu við samfélagsskrána",
     "add_profile": "Bættu við prófíl fyrir þetta tæki á samfélagssíðunni"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Endurvinnsla: samsvara lotur",
+      "golden": "Endurvinnsla: fylli inn viðmiðunarlotur",
+      "suggestions": "Endurvinnsla: tillögur",
+      "ml_training": "Endurvinnsla: ML-þjálfun",
+      "health": "Endurvinnsla: heilsa lotu"
+    },
+    "pg_sweep": {
+      "optimize": "Bestun: {param}"
+    }
   }
 }

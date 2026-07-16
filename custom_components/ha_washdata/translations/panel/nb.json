@@ -1525,6 +1525,22 @@
       "tol_per_profile": "p75 for varighetsvariansen per profil på tvers av {profiles} profiler ({cycles} sykluser); stramme profiler straffes ikke.",
       "tol_pooled": "Basert på samlet varighetsvarians for {cycles} nyeste merkede sykluser (p95 avvik={dev}).",
       "watchdog": "Holdt så lavt som forsvarlig (3x p95-oppdateringsmellomrommet på {p95}s, min 30s) slik at stans fanges raskt uten falske stopp."
+    },
+    "exclusions": {
+      "summary": "Ekskluderte {total} feildetekterte syklus(er): {parts}.",
+      "reason": {
+        "force_stopped": "tvangsstoppet",
+        "interrupted": "avbrutt",
+        "incomplete": "ufullstendig",
+        "noise": "støy",
+        "unlabeled": "uten etikett",
+        "no_trace_short": "for kort til å inspisere",
+        "high_start": "startet ved høy effekt",
+        "abrupt_end": "avsluttet brått",
+        "mid_restart": "omstart midt i syklusen",
+        "no_power": "ingen effekt",
+        "no_active_power": "ingen aktiv effekt"
+      }
     }
   },
   "tab": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Merke ikke oppført? Legg det til i fellesskapskatalogen",
     "add_appliance": "Modell ikke oppført? Legg apparatet ditt til i fellesskapskatalogen",
     "add_profile": "Legg til en profil for dette apparatet på fellesskapssiden"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Behandler på nytt: matcher sykluser",
+      "golden": "Behandler på nytt: fyller ut referansesykluser",
+      "suggestions": "Behandler på nytt: forslag",
+      "ml_training": "Behandler på nytt: ML-opplæring",
+      "health": "Behandler på nytt: syklushelse"
+    },
+    "pg_sweep": {
+      "optimize": "Optimaliser: {param}"
+    }
   }
 }

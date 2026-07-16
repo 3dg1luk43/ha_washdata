@@ -1508,6 +1508,22 @@
       "tol_per_profile": "p75 rozptylu dĺžky podľa profilu naprieč {profiles} profilmi ({cycles} cyklov); konzistentné profily nie sú penalizované.",
       "tol_pooled": "Na základe zlúčeného rozptylu dĺžky {cycles} nedávnych označených cyklov (odchýlka p95={dev}).",
       "watchdog": "Ponechané čo najnižšie pri zachovaní bezpečnosti (3x interval aktualizácie p95 vo výške {p95}s, min. 30s), aby sa zaseknutia rýchlo odhalili bez falošných zastavení."
+    },
+    "exclusions": {
+      "summary": "Vylúčených {total} chybne zistených cyklov: {parts}.",
+      "reason": {
+        "force_stopped": "nútene zastavené",
+        "interrupted": "prerušené",
+        "incomplete": "neúplné",
+        "noise": "šum",
+        "unlabeled": "bez štítka",
+        "no_trace_short": "príliš krátke na analýzu",
+        "high_start": "spustené pri vysokom výkone",
+        "abrupt_end": "náhle ukončené",
+        "mid_restart": "reštart v strede cyklu",
+        "no_power": "bez výkonu",
+        "no_active_power": "bez aktívneho výkonu"
+      }
     }
   },
   "tab": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Značka nie je uvedená? Pridajte ju do katalógu komunity",
     "add_appliance": "Model nie je uvedený? Pridajte svoj spotrebič do katalógu komunity",
     "add_profile": "Pridajte profil pre tento spotrebič na komunitnom webe"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Opätovné spracovanie: porovnávanie cyklov",
+      "golden": "Opätovné spracovanie: dopĺňanie referenčných",
+      "suggestions": "Opätovné spracovanie: návrhy",
+      "ml_training": "Opätovné spracovanie: tréning ML",
+      "health": "Opätovné spracovanie: kvalita cyklov"
+    },
+    "pg_sweep": {
+      "optimize": "Optimalizácia: {param}"
+    }
   }
 }

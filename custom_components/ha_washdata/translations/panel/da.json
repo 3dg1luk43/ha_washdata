@@ -1525,6 +1525,22 @@
       "tol_per_profile": "p75 for varighedsvariansen pr. profil på tværs af {profiles} profiler ({cycles} cyklusser); stramme profiler straffes ikke.",
       "tol_pooled": "Baseret på samlet varighedsvarians for {cycles} seneste mærkede cyklusser (p95 afvigelse={dev}).",
       "watchdog": "Holdt så lavt som forsvarligt (3x p95-opdateringsmellemrummet på {p95}s, min 30s), så stilstande fanges hurtigt uden falske stop."
+    },
+    "exclusions": {
+      "summary": "{total} fejldetekterede cyklus(ser) udelukket: {parts}.",
+      "reason": {
+        "force_stopped": "tvangsstoppet",
+        "interrupted": "afbrudt",
+        "incomplete": "ufuldstændig",
+        "noise": "støj",
+        "unlabeled": "uden etiket",
+        "no_trace_short": "for kort til at inspicere",
+        "high_start": "startede ved høj effekt",
+        "abrupt_end": "sluttede brat",
+        "mid_restart": "genstart midt i cyklussen",
+        "no_power": "ingen effekt",
+        "no_active_power": "ingen aktiv effekt"
+      }
     }
   },
   "tab": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Mærke ikke på listen? Tilføj det til fællesskabskataloget",
     "add_appliance": "Model ikke på listen? Tilføj dit apparat til fællesskabskataloget",
     "add_profile": "Tilføj en profil for dette apparat på fællesskabssiden"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Genbehandling: matcher cyklusser",
+      "golden": "Genbehandling: udfylder referencecyklusser",
+      "suggestions": "Genbehandling: forslag",
+      "ml_training": "Genbehandling: ML-træning",
+      "health": "Genbehandling: cyklussundhed"
+    },
+    "pg_sweep": {
+      "optimize": "Optimér: {param}"
+    }
   }
 }

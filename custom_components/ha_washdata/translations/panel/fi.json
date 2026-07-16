@@ -1525,6 +1525,22 @@
       "tol_per_profile": "p75 profiilikohtaisesta keston varianssista {profiles} profiilin joukossa ({cycles} jaksoa); tiiviitä profiileja ei rangaista.",
       "tol_pooled": "Perustuu {cycles} viimeisimmän merkityn jakson yhdistettyyn keston varianssiin (p95 poikkeama={dev}).",
       "watchdog": "Pidetään niin matalana kuin on turvallista (3x p95-päivitysväli {p95}s, väh. 30s), jotta pysähdykset havaitaan nopeasti ilman vääriä pysäytyksiä."
+    },
+    "exclusions": {
+      "summary": "Suljettu pois {total} väärin tunnistettua sykliä: {parts}.",
+      "reason": {
+        "force_stopped": "pakotetusti pysäytettyä",
+        "interrupted": "keskeytettyä",
+        "incomplete": "keskeneräistä",
+        "noise": "kohinaa",
+        "unlabeled": "merkitsemätöntä",
+        "no_trace_short": "tarkastukseen liian lyhyttä",
+        "high_start": "korkealla teholla alkanutta",
+        "abrupt_end": "äkillisesti päättynyttä",
+        "mid_restart": "kesken uudelleenkäynnistynyttä",
+        "no_power": "ilman tehoa",
+        "no_active_power": "ilman aktiivista tehoa"
+      }
     }
   },
   "tab": {
@@ -1739,5 +1755,17 @@
     "add_brand": "Merkkiä ei ole listalla? Lisää se yhteisön luetteloon",
     "add_appliance": "Mallia ei ole listalla? Lisää laitteesi yhteisön luetteloon",
     "add_profile": "Lisää profiili tälle laitteelle yhteisösivustolla"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Uudelleenkäsittely: syklien täsmäytys",
+      "golden": "Uudelleenkäsittely: vertailujaksojen täydennys",
+      "suggestions": "Uudelleenkäsittely: ehdotukset",
+      "ml_training": "Uudelleenkäsittely: ML-koulutus",
+      "health": "Uudelleenkäsittely: syklien kunto"
+    },
+    "pg_sweep": {
+      "optimize": "Optimointi: {param}"
+    }
   }
 }
