@@ -650,8 +650,7 @@ class WasherAmbiguitySensor(WasherBaseSensor):
 
     @property
     def native_value(self):  # type: ignore[override]
-        result = getattr(self._manager, "_last_match_result", None)
-        margin = getattr(result, "ambiguity_margin", None) if result is not None else None
+        margin = self._manager.last_ambiguity_margin
         if margin is None:
             return None
         return round(float(margin) * 100, 1)

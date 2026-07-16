@@ -167,6 +167,6 @@ def score(features: Mapping[str, float]) -> float:
     return 1.0 / (1.0 + np.exp(-logit))
 
 
-def predict(features: Mapping[str, float]) -> float:
+def predict(features: Mapping[str, float]) -> bool:
     """True when the example crosses the embedded decision threshold."""
     return score(features) >= _load()["threshold"]

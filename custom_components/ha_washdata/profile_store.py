@@ -24,6 +24,7 @@ import logging
 import math
 import os
 import re
+import threading
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, TypeAlias, cast
@@ -879,6 +880,11 @@ class ProfileStore:
         self._cohesion_cache: dict[tuple[str, ...], float] = {}
         self._cohesion_cache_generation: int = 0
         self._cohesion_cache_generation_checked: int = -1
+        # group_cohesion runs in executor threads (live matching + Playground can
+        # touch the same store concurrently); serialize the read-clear-compute-store
+        # sequence so a concurrent call can't clear a half-populated cache or
+        # duplicate the DTW work.  A plain thread lock, never held across an await.
+        self._cohesion_cache_lock = threading.Lock()
         # Profile duration tolerance (set by manager; reserved for duration-based heuristics)
         self._duration_tolerance: float = 0.25
         # Retention policy: cap total cycles and number of full-resolution traces per profile
@@ -1403,6 +1409,10 @@ class ProfileStore:
         duration = float(pairs[-1][0] - pairs[0][0])
         if duration <= 0:
             return ""
+        # Re-base to offset 0 so envelope reconstruction and DTW work correctly.
+        if pairs[0][0] != 0.0:
+            origin = pairs[0][0]
+            pairs = [[p[0] - origin, p[1]] for p in pairs]
         now = dt_util.now()
         store_id = str(meta.get("store_cycle_id") or "")
         cycle: CycleDict = {
@@ -1568,27 +1578,28 @@ class ProfileStore:
         the DTW pairwise comparison does not run on the event loop every 5 minutes.
         """
         key = tuple(sorted(members))
-        if self._cohesion_cache_generation != self._cohesion_cache_generation_checked:
-            self._cohesion_cache.clear()
-            self._cohesion_cache_generation_checked = self._cohesion_cache_generation
-        if key in self._cohesion_cache:
-            return self._cohesion_cache[key]
-        curves = [c for c in (self._profile_curve(m) for m in members) if c is not None]
-        if len(members) < 2:
-            # A genuinely single-member group is trivially cohesive (and is never
-            # collapsed anyway — nothing to aggregate).
-            result = 1.0
-        elif len(curves) < 2:
-            # Multi-member but too few built curves -> insufficient evidence, treat as
-            # NOT cohesive so the group isn't collapsed into a blurry aggregate yet.
-            result = 0.0
-        else:
-            result = 1.0
-            for i in range(len(curves)):
-                for j in range(i + 1, len(curves)):
-                    result = min(result, self._shape_similarity(curves[i], curves[j]))
-        self._cohesion_cache[key] = result
-        return result
+        with self._cohesion_cache_lock:
+            if self._cohesion_cache_generation != self._cohesion_cache_generation_checked:
+                self._cohesion_cache.clear()
+                self._cohesion_cache_generation_checked = self._cohesion_cache_generation
+            if key in self._cohesion_cache:
+                return self._cohesion_cache[key]
+            curves = [c for c in (self._profile_curve(m) for m in members) if c is not None]
+            if len(members) < 2:
+                # A genuinely single-member group is trivially cohesive (and is never
+                # collapsed anyway — nothing to aggregate).
+                result = 1.0
+            elif len(curves) < 2:
+                # Multi-member but too few built curves -> insufficient evidence, treat as
+                # NOT cohesive so the group isn't collapsed into a blurry aggregate yet.
+                result = 0.0
+            else:
+                result = 1.0
+                for i in range(len(curves)):
+                    for j in range(i + 1, len(curves)):
+                        result = min(result, self._shape_similarity(curves[i], curves[j]))
+            self._cohesion_cache[key] = result
+            return result
 
     def _grouped_snapshots(
         self, snapshots: list[dict[str, Any]]

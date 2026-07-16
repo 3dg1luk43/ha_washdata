@@ -243,7 +243,7 @@ def get_shared_default_phase_catalog() -> list[PhaseItem]:
             if existing is None:
                 entry: PhaseItem = {
                     "id": _builtin_phase_id(device_type, name),
-                    "device_type": device_type,
+                    "device_type": "",
                     "name": name,
                     "description": str(item.get("description", "")).strip(),
                     "is_default": True,

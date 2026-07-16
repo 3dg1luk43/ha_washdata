@@ -196,8 +196,11 @@ class WashDataRecordStartButton(ButtonEntity):
 
     @property
     def available(self) -> bool:
-        """Only available when not already recording."""
-        return not self._manager.recorder.is_recording
+        """Only available when not already recording and no active cycle is running."""
+        return (
+            not self._manager.recorder.is_recording
+            and self._manager.detector.state == "off"
+        )
 
     async def async_press(self) -> None:
         """Handle the button press."""

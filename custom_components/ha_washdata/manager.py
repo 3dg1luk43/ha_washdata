@@ -1384,6 +1384,14 @@ class WashDataManager:
             return self._last_match_result.is_ambiguous
         return False
 
+    @property
+    def last_ambiguity_margin(self) -> float | None:
+        """Return the score margin between top-1 and top-2 candidates, or None."""
+        result = self._last_match_result
+        if result is None:
+            return None
+        return getattr(result, "ambiguity_margin", None)
+
     # Note: last_match_details property is defined later in the class
     # It returns MatchResult from _last_match_result
     async def _attempt_state_restoration(self) -> None:
@@ -4135,7 +4143,18 @@ class WashDataManager:
         # stored on the cycle record and available to the learning manager immediately.
         # Must run BEFORE async_add_cycle so get_past_cycles() inside the scorer does
         # not yet include the current cycle, keeping reference statistics uncontaminated.
-        self._compute_cycle_quality_score(cycle_data)
+        # Only opted-in devices reach the scorer, and only then is it offloaded to the
+        # executor: on a long trace its NumPy feature extraction is O(N) and must not
+        # block the event loop (mirrors the profile matcher). Gating here avoids a
+        # pointless thread-hop for the default (ML-off) case where the scorer no-ops.
+        # The scorer mutates only cycle_data (nothing else touches it here) and never
+        # raises, so this is executor-safe.
+        from .ml.engine import ml_models_enabled  # noqa: PLC0415
+
+        if ml_models_enabled(self.config_entry.options):
+            await self.hass.async_add_executor_job(
+                self._compute_cycle_quality_score, cycle_data
+            )
 
         # Add cycle to store immediately (still sync but offloadable parts optimized
         # internally if possible)

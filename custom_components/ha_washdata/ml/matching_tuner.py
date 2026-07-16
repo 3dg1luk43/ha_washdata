@@ -86,7 +86,8 @@ def _snaps(by_profile: dict[str, list[dict]], exclude: tuple[str, int] | None) -
         for idx, it in enumerate(items):
             if exclude is not None and (name, idx) == exclude:
                 continue
-            curves.append(it["rs"]); durs.append(it["dur"])
+            curves.append(it["rs"])
+            durs.append(it["dur"])
         if curves:
             snaps.append({
                 "name": name,

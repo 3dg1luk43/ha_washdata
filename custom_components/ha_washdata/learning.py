@@ -58,7 +58,7 @@ def _suggestion_min_abs_delta(key: str) -> float:
     """
     if key.endswith(("_w", "_power")):
         return 0.3      # Watts: sub-0.3 W changes are below sensor noise
-    if key.endswith(("_interval", "_timeout", "_delay", "_gap", "_duration", "_seconds")):
+    if key.endswith(("_interval", "_timeout", "_delay", "_gap", "_duration", "_seconds", "_duration_threshold")):
         return 5.0      # Seconds: 5 s is imperceptible to the detector
     if key.endswith(("_ratio", "_tolerance")):
         return 0.02     # Unitless ratio: 0.02 is the minimum meaningful step

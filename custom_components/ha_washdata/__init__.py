@@ -319,18 +319,21 @@ async def _migrate_online_to_global(hass: HomeAssistant, entry: ConfigEntry, man
     except Exception:  # pylint: disable=broad-exception-caught
         acct = {}
     if acct:
+        _account_preserved = False
         try:
             if acct.get("refresh_token") and not store_account.get_account(hass).get("refresh_token"):
                 await store_account.async_set_account(hass, {
                     "refresh_token": acct.get("refresh_token"),
                     "uid": acct.get("uid"), "name": acct.get("name"),
                 })
+            _account_preserved = True
         except Exception:  # pylint: disable=broad-exception-caught
             _LOGGER.warning("Store-account hoist to global store failed", exc_info=True)
-        try:
-            await manager.profile_store.clear_store_account()
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass
+        if _account_preserved:
+            try:
+                await manager.profile_store.clear_store_account()
+            except Exception:  # pylint: disable=broad-exception-caught
+                pass
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

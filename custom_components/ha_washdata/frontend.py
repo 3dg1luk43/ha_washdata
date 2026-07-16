@@ -314,6 +314,7 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
                     _register_static_path(hass, PANEL_TRANSLATIONS_URL, str(trans_src))
         except Exception as exc:  # pylint: disable=broad-exception-caught
             _LOGGER.warning("WashData panel static path registration failed: %s", exc)
+            hass.data.pop(PANEL_STATIC_REGISTERED, None)
             return False
 
     # Re-check after the await: with multiple WashData devices, all concurrent

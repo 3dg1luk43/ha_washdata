@@ -48,8 +48,12 @@ def quiet_hours_bounds(options: Any) -> tuple[int, int] | None:
     if raw_start is None or raw_end is None:
         return None
     try:
+        if isinstance(raw_start, bool) or isinstance(raw_end, bool):
+            return None
         start = int(raw_start)
         end = int(raw_end)
+        if start != raw_start or end != raw_end:
+            return None
     except (TypeError, ValueError):
         return None
     if not (0 <= start <= 23) or not (0 <= end <= 23):
@@ -105,7 +109,7 @@ def milestone_crossed(prev_count: int, cur_count: int, milestones: Any) -> int |
     malformed ``milestones`` is a no-op. If several are crossed in one step the
     largest is returned so a single, most-significant notification fires.
     """
-    if not milestones:
+    if not milestones or isinstance(milestones, (str, bytes)):
         return None
     try:
         iterator = list(milestones)
