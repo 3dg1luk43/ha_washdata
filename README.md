@@ -5,6 +5,7 @@
 [![](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://ko-fi.com/3dg1luk43)
 [![Contribute Data](https://img.shields.io/badge/Contribute-Training%20Data-7B2FBE?style=flat&logo=googleforms&logoColor=white)](https://forms.gle/m6iGfP8QTasXWg5z7)
 [![Translations](https://gitlocalize.com/repo/10819/whole_project/badge.svg)](https://gitlocalize.com/repo/10819?utm_source=badge)
+![GitHub License](https://img.shields.io/github/license/3dg1luk43/ha_washdata)
 
 # WashData Integration
 

@@ -128,7 +128,16 @@ def _resumed_low_runs(
             cand_idx = None
             active_accum = 0.0
         if p >= active_thr:
-            if low_start is not None and seen_active:
+            if not seen_active:
+                # First activity begins here: any preceding low run is the cycle's
+                # leading lead-in (below-active idle before it truly started), never
+                # an intra-cycle pause -> discard it so it can't be mis-counted as a
+                # resumed pause (the docstring invariant; matches the pre-refactor
+                # unconditional clear on the first low->active transition).
+                low_start = None
+                cand_idx = None
+                active_accum = 0.0
+            elif low_start is not None:
                 if cand_idx is None:
                     cand_idx = i
                     active_accum = 0.0

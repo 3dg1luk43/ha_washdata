@@ -221,10 +221,12 @@ const SHAREABLE = {
   phase_programs: ['Cotton 40°C'],  // only Cotton 40°C has a local phase map
 };
 
-test('Profiles tab shows "Share this device" when online + connected + declared', async ({ page }) => {
+test('Settings > Device info shows "Share this device" when online + connected + declared', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, storeHandlers());
-  await clickTab(page, 'profiles');
+  // The whole-device share action lives in Settings > Basic > Device info
+  // (the store brand/model declaration field), not the Profiles tab.
+  await clickTab(page, 'settings');
   await expect(page.locator('[data-action="store-share-device"]')).toBeVisible({ timeout: 8_000 });
 });
 
@@ -235,13 +237,15 @@ test('share-device tree enumerates all reference cycles and uploads the selectio
     'ha_washdata/get_shareable_cycles': SHAREABLE,
     'ha_washdata/store_upload_device': { ok: true, cycle_ids: ['a', 'b', 'c'], created: 3, duplicates: 0, errors: [] },
   });
-  await clickTab(page, 'profiles');
+  await clickTab(page, 'settings');
   await page.locator('[data-action="store-share-device"]').click();
   // Two programs grouped; all three reference cycles listed (not just page 1).
   const groups = page.locator('.wd-sd-group');
   await expect(groups).toHaveCount(2, { timeout: 8_000 });
   await expect(page.locator('.wd-sd-cyc')).toHaveCount(3);
-  // All checked by default -> Share enabled -> uploads every selected cycle.
+  // All cycles checked by default; confirming the consent checkbox enables
+  // Share, which then uploads every selected cycle.
+  await page.locator('[data-maction="sd-toggle-consent"]').click();
   const shareBtn = page.locator('[data-maction="store-share-device-ok"]');
   await expect(shareBtn).toBeEnabled();
   await shareBtn.click();
@@ -260,12 +264,13 @@ test('share tree can bundle device settings via the include-settings toggle', as
     'ha_washdata/get_shareable_cycles': SHAREABLE,
     'ha_washdata/store_upload_device': { ok: true, cycle_ids: ['a', 'b', 'c'], created: 3, duplicates: 0, errors: [] },
   });
-  await clickTab(page, 'profiles');
+  await clickTab(page, 'settings');
   await page.locator('[data-action="store-share-device"]').click();
   const settingsToggle = page.locator('[data-maction="sd-toggle-settings"]');
   await expect(settingsToggle).toBeVisible({ timeout: 8_000 });
   await expect(settingsToggle).not.toBeChecked();  // off by default
   await settingsToggle.click();
+  await page.locator('[data-maction="sd-toggle-consent"]').click();
   await page.locator('[data-maction="store-share-device-ok"]').click();
   const calls = await assertWsCalled(page, 'ha_washdata/store_upload_device');
   expect(calls[0].include_settings).toBe(true);
@@ -282,7 +287,13 @@ test('device download can adopt settings via the opt-in checkbox', async ({ page
   const adopt = page.locator('[data-action="store-toggle-dl-settings"]');
   await expect(adopt).toBeVisible({ timeout: 8_000 });
   await adopt.click();
-  await page.locator('[data-action="store-download-device"]').click();
+  // The store device-detail header hosts the primary "Download this setup"
+  // button (the identically-actioned ghost button lives in Settings > Device
+  // info); scope to the card that carries the adopt-settings toggle.
+  await page.locator('.wd-card')
+    .filter({ has: page.locator('[data-action="store-toggle-dl-settings"]') })
+    .locator('[data-action="store-download-device"]')
+    .click();
   const calls = await assertWsCalled(page, 'ha_washdata/store_download_device');
   expect(calls[0].include_settings).toBe(true);
 });
@@ -294,13 +305,14 @@ test('phase-map toggle shows only for programs with phases and can be opted out'
     'ha_washdata/get_shareable_cycles': SHAREABLE,
     'ha_washdata/store_upload_device': { ok: true, cycle_ids: ['a', 'b', 'c'], created: 3, duplicates: 0, errors: [] },
   });
-  await clickTab(page, 'profiles');
+  await clickTab(page, 'settings');
   await page.locator('[data-action="store-share-device"]').click();
   // Exactly one phase toggle (Cotton 40°C); Eco 60°C has no phase map.
   const phaseToggles = page.locator('[data-maction="sd-toggle-phases"]');
   await expect(phaseToggles).toHaveCount(1, { timeout: 8_000 });
   // Opt out, then share -> include_phases must be empty.
   await phaseToggles.first().click();
+  await page.locator('[data-maction="sd-toggle-consent"]').click();
   await page.locator('[data-maction="store-share-device-ok"]').click();
   const calls = await assertWsCalled(page, 'ha_washdata/store_upload_device');
   expect(calls[0].include_phases).toEqual([]);
@@ -314,8 +326,9 @@ test('share-device reports cycles already in the store as duplicates', async ({ 
     // Every selected cycle's trace was already uploaded -> all duplicates, none new.
     'ha_washdata/store_upload_device': { ok: true, cycle_ids: ['a', 'b', 'c'], created: 0, duplicates: 3, errors: [] },
   });
-  await clickTab(page, 'profiles');
+  await clickTab(page, 'settings');
   await page.locator('[data-action="store-share-device"]').click();
+  await page.locator('[data-maction="sd-toggle-consent"]').click();
   await page.locator('[data-maction="store-share-device-ok"]').click();
   await assertWsCalled(page, 'ha_washdata/store_upload_device');
   // Neutral info toast (not a green "shared N" success).
@@ -325,7 +338,7 @@ test('share-device reports cycles already in the store as duplicates', async ({ 
 test('share-device shows an empty state when there are no shareable cycles', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, { ...storeHandlers(), 'ha_washdata/get_shareable_cycles': { items: [] } });
-  await clickTab(page, 'profiles');
+  await clickTab(page, 'settings');
   await page.locator('[data-action="store-share-device"]').click();
   await expect(page.locator('.wd-sd-group')).toHaveCount(0, { timeout: 8_000 });
   await expect(page.locator('.wd-modal .wd-empty')).toBeVisible();
@@ -341,7 +354,11 @@ test('device view offers "Download this setup" and calls store_download_device',
   });
   await clickTab(page, 'store');
   await page.locator('[data-action="store-open-device"]').first().click();
-  const dl = page.locator('[data-action="store-download-device"]');
+  // Primary download button in the device-detail header (scoped away from the
+  // identically-actioned ghost button in Settings > Device info).
+  const dl = page.locator('.wd-card')
+    .filter({ has: page.locator('[data-action="store-toggle-dl-settings"]') })
+    .locator('[data-action="store-download-device"]');
   await expect(dl).toBeVisible({ timeout: 8_000 });
   await dl.click();
   const calls = await assertWsCalled(page, 'ha_washdata/store_download_device');
@@ -370,8 +387,9 @@ test('partial device share reports how many uploaded and closes the tree', async
     // Some cycles uploaded, one failed -> panel must report partial success, not "failed".
     'ha_washdata/store_upload_device': { ok: false, cycle_ids: ['a', 'b'], created: 2, duplicates: 0, errors: ['quota'] },
   });
-  await clickTab(page, 'profiles');
+  await clickTab(page, 'settings');
   await page.locator('[data-action="store-share-device"]').click();
+  await page.locator('[data-maction="sd-toggle-consent"]').click();
   await page.locator('[data-maction="store-share-device-ok"]').click();
   await assertWsCalled(page, 'ha_washdata/store_upload_device');
   // Tree closed (partial success is still success for the uploaded cycles).
@@ -386,7 +404,11 @@ test('downloading a device with nothing new does not claim success', async ({ pa
   });
   await clickTab(page, 'store');
   await page.locator('[data-action="store-open-device"]').first().click();
-  const dl = page.locator('[data-action="store-download-device"]');
+  // Primary download button in the device-detail header (scoped away from the
+  // identically-actioned ghost button in Settings > Device info).
+  const dl = page.locator('.wd-card')
+    .filter({ has: page.locator('[data-action="store-toggle-dl-settings"]') })
+    .locator('[data-action="store-download-device"]');
   await expect(dl).toBeVisible({ timeout: 8_000 });
   await dl.click();
   await assertWsCalled(page, 'ha_washdata/store_download_device');

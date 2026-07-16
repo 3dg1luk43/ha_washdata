@@ -5,7 +5,7 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.5.0 - "Goodbye OptionsFlow, Hello Panel (Oh, and hi WashData Community Store)" - 2026-07-09
+## 0.5.0 - "Goodbye OptionsFlow, Hello Panel (Oh, and hi WashData Community Store)" - 2026-07-16
 
 The biggest release in WashData's history. It retires the 180-plus-tunable options dialog in favour of a full-screen management panel, overhauls matching accuracy, rebuilds actions on native Home Assistant automations, and adds an experimental, fully-gated, NumPy-only ML subsystem that runs *alongside* the proven detection/matching engine. On top of that panel it also sharpens what WashData notices and how it talks to you: detection flags cycles that finish suspiciously early or draw unusual energy, energy tracking grows into a full Home Assistant Energy dashboard sensor with per-profile cost, notifications gain quiet hours and celebration milestones, the panel picks up a phase timeline and a genuine power-user **Playground**, and you can now simply ask your voice assistant whether the washer is done. It also opens WashData up to the community for the first time with the optional, off-by-default **WashData Store**: adopt program profiles and reference cycles that other owners of your exact appliance have already recorded, and share your own back, so you no longer have to teach every program from scratch.
 

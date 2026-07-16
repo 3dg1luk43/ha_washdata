@@ -203,6 +203,31 @@ def test_short_resume_below_threshold_does_not_split_pause() -> None:
     assert len(runs) == 1, f"brief blip must not split the quiet region: {runs}"
 
 
+def test_leading_leadin_is_not_a_resumed_pause() -> None:
+    """A below-active lead-in at the very start of a cycle (a low fill / standby
+    draw before the machine truly gets going) must NOT be mis-counted as a resumed
+    intra-cycle pause once sustained activity begins. Regression: the lead-in
+    exclusion was lost when the two inline pause loops were refactored into
+    ``_resumed_low_runs``, which re-inflated off_delay suggestions."""
+    # A low 20 W lead-in, then a long sustained wash, then it ends.
+    pts = _trace([(0, 120, 20.0), (150, 8000, 2000.0)])
+    peak = max(p for _, p in pts)
+    active_thr = max(2.0, 0.02 * peak)  # ~40 W, above the 20 W lead-in
+    runs = _resumed_low_runs(pts, active_thr, max_gap_s=3600.0)
+    assert runs == [], (
+        "the leading below-active lead-in must be excluded, not counted as a "
+        f"resumed pause; got {runs}"
+    )
+
+
+def test_single_sample_leadin_is_not_a_resumed_pause() -> None:
+    """Minimal reproducer: a single below-active sample before the first active
+    sample must not open a phantom pause anchored at offset 0."""
+    pts = [(0.0, 20.0)] + [(float(t), 2000.0) for t in range(30, 8001, 30)]
+    runs = _resumed_low_runs(pts, active_thr=40.0, max_gap_s=3600.0)
+    assert runs == [], f"a single leading low sample must not be a pause; got {runs}"
+
+
 # --------------------------------------------------------------------------
 # High-fidelity replay of the three real exports that surfaced the bug.
 # Local-only: the cycle_data/me/ tree is gitignored, so this skips in CI (same
