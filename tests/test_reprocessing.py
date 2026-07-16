@@ -16,7 +16,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """Persistent test for reprocessing historical data using real user dumps."""
-import asyncio
 import json
 import os
 import sys
@@ -35,47 +34,59 @@ from custom_components.ha_washdata.const import STORAGE_VERSION
 logging.basicConfig(level=logging.INFO)
 _LOGGER = logging.getLogger(__name__)
 
-@pytest.mark.skip(reason="Data-dependent integration test, run manually")
+@pytest.mark.slow
 @pytest.mark.asyncio
 async def test_reprocess_user_data(mock_hass):
-    """Load user data dumps and verify reprocessing rebuilds envelopes correctly."""
-    
-    base_path = "/root/ha_washdata/cycle_data"
-    if not os.path.exists(base_path):
-        pytest.skip("Cycle data directory not found")
+    """Load user JSON exports and verify reprocessing rebuilds envelopes correctly.
 
-    # Walk through cycle_data to find json dumps
-    dump_files = []
+    Local-only: the cycle_data/ tree is gitignored, so this skips cleanly in CI and
+    runs against the maintainer's real JSON exports when they are present.
+    """
+    base_path = os.path.join(os.path.dirname(__file__), "..", "cycle_data")
+    if not os.path.exists(base_path):
+        pytest.skip("cycle_data directory not present (local-only)")
+
+    def _extract_store(blob):
+        """Return the store payload ({past_cycles, profiles, ...}) across the known
+        export shapes: WashData config export (``data`` *is* the store), legacy
+        diagnostics dump (``data.store_data``), or a raw store dump (store at the
+        top level). Returns None when the file isn't a store export."""
+        if not isinstance(blob, dict):
+            return None
+        data = blob.get("data") if isinstance(blob.get("data"), dict) else {}
+        if isinstance(data.get("store_data"), dict) and data["store_data"]:
+            return data["store_data"]
+        if "past_cycles" in data or "profiles" in data:
+            return data
+        if isinstance(blob.get("store_data"), dict) and blob["store_data"]:
+            return blob["store_data"]
+        if "past_cycles" in blob or "profiles" in blob:
+            return blob
+        return None
+
+    # Walk cycle_data for every JSON file; the loop extracts the store payload and
+    # ignores files that aren't store exports (settings-only, diagnostics, etc.).
+    json_files = []
     for root, _, files in os.walk(base_path):
         for file in files:
-            if file.endswith(".json") and "dump" in file:
-                 dump_files.append(os.path.join(root, file))
-            # Also check for other json files that look like store dumps (e.g. test-mock-socket.json)
-            elif file.endswith(".json") and "store_data" in open(os.path.join(root, file)).read(1000):
-                 dump_files.append(os.path.join(root, file))
+            if file.endswith(".json"):
+                json_files.append(os.path.join(root, file))
 
-    if not dump_files:
-        _LOGGER.warning("No JSON dump files found in cycle_data for testing.")
-        return
+    tested = 0
+    for dump_file in json_files:
+        try:
+            with open(dump_file, "r", encoding="utf-8") as f:
+                full_dump = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            continue
 
-    for dump_file in dump_files:
+        store_data = _extract_store(full_dump)
+        if store_data is None or not store_data.get("past_cycles"):
+            continue
+
+        tested += 1
         _LOGGER.info(f"Testing reprocessing with dump: {dump_file}")
-        
-        with open(dump_file, "r") as f:
-            full_dump = json.load(f)
-        
-        # Extract store data part
-        # Check if it's a HA Diagnostics dump
-        if "data" in full_dump and "store_data" in full_dump["data"]:
-            store_data = full_dump["data"]["store_data"]
-        elif "store_data" in full_dump:
-            store_data = full_dump["store_data"]
-        elif "past_cycles" in full_dump:
-             store_data = full_dump
-        else:
-             _LOGGER.warning(f"Skipping {dump_file}: No 'store_data' or 'past_cycles' found")
-             continue
-        
+
         # Use fixture
         hass = mock_hass
         
@@ -121,8 +132,10 @@ async def test_reprocess_user_data(mock_hass):
             envelopes_after = len(ps._data.get("envelopes", {}))
             
             assert cycles_after == cycles_before, "Cycle count should remain unchanged (non-destructive)"
-            # Reprocessing may skip some cycles (e.g., those with insufficient power data)
-            assert count <= cycles_after, f"Processed count ({count}) should not exceed cycle count ({cycles_after})"
+            # `count` is the number of reprocess *operations* (per cycle: a signature
+            # rebuild, plus optionally a leading-zero trim and/or a duration/end_time
+            # self-heal), so it legitimately exceeds the cycle count - each cycle
+            # contributes at least its signature. Assert work happened, not a bound.
             assert count > 0 or cycles_after == 0, "Should have processed at least some cycles if any exist"
             
             # Verify signatures are back
@@ -145,6 +158,9 @@ async def test_reprocess_user_data(mock_hass):
                 assert "avg" in env
                 assert "cycle_count" in env
                 assert env["cycle_count"] > 0
+
+    if tested == 0:
+        pytest.skip("No JSON store exports with cycles found under cycle_data/")
 
 def _make_store() -> ProfileStore:
     s = ProfileStore(MagicMock(), "selfheal")
@@ -221,10 +237,3 @@ def test_reprocess_preserves_healthy_dishwasher_drying_tail() -> None:
     assert healed["duration"] == pytest.approx(dur, abs=1.0)  # unchanged
     assert healed["power_data"][-1][0] >= 8000  # drying tail still present
     assert _span(healed) == pytest.approx(healed["duration"], abs=1.0)
-
-
-if __name__ == "__main__":
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(test_reprocess_user_data())
-    loop.close()

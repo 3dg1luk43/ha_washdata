@@ -21,7 +21,7 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 
 - **Automatic detection & program matching** - Detects cycle start/stop from the power trace and identifies *which program* ran by curve shape, duration, and energy. You teach it your programs once (it never auto-creates profiles); it recognises them thereafter and gives phase-aware time-remaining estimates.
 - **Full-screen management panel** - A **WashData** sidebar entry for live status, cycle and profile management, settings, diagnostics, and logs. Replaces the old multi-screen options flow.
-- **Many appliance types** - Washing machines, dryers, washer-dryer combos, dishwashers, air fryers, bread makers, and pumps/sump pumps, each with tuned defaults; plus an **Other (Advanced)** bucket you tune yourself. (Coffee machines, EVs, heat pumps, and ovens remain as deprecated types, scheduled for removal in 0.6.0.)
+- **Many appliance types** - Washing machines, dryers, washer-dryer combos, dishwashers, air fryers, bread makers, and pumps/sump pumps, each with tuned defaults; plus two catch-all buckets you tune yourself: **Other (Advanced)** (full profile matching and learning with neutral defaults) and **Threshold Device** (threshold-only detection, no profile matching).
 - **Per-cycle energy & cost** - Energy and cost tracked for every cycle; cost is frozen at the price in effect when the cycle finished, so later price changes don't rewrite history. Per-profile **average cost** and a lifetime **Energy dashboard** sensor (`sensor.<name>_energy_total`) come built in.
 - **Automation-first notifications** - Ready-made per-event push alerts, or your own Home Assistant automations driven by WashData's cycle events - found and created from the panel. **Quiet hours**, **cycle milestones**, and richer finish-message variables included. See [NOTIFICATIONS.md](NOTIFICATIONS.md).
 - **Ask your assistant** - "Is my washer done?" / "How long until the dryer finishes?" answered through Home Assistant's voice/text Assist. See [Ask Home Assistant](#ask-home-assistant).
@@ -142,9 +142,9 @@ If "Auto-Detect" isn't working perfectly, use the panel's **Settings** tab to tu
 | **False "Ghost" Cycles** | High-power usage at the very end (e.g. anti-crease or pump-out) triggers a new start. | **Increase `Minimum Off Gap`** (e.g. to `120s`). Forces a mandatory cooldown period between cycles. |
 | **"Unknown" Matches** | Your profiles are too strict or variance is high. | **Increase `Duration Tolerance`** (e.g. `0.25`). Allows ±25% duration difference when matching. |
 | **Notifications Too Late** | You want to know *before* it finishes. | **Set `Notify Before End Minutes`** (e.g. `5`). Get an alert 5 minutes before the estimated finish time. |
-| **Persistent 'Running' State** | Integration stays locked to a long profile after a short cycle diverged. | **Adjust Matching Stability Thresholds** in `const.py`. Divergence detection now automatically reverts to "Detecting..." if confidence drops below 60% of the peak score. |
+| **Persistent 'Running' State** | Integration stays locked to a long profile after a short cycle diverged. | Handled automatically: divergence detection reverts to **Detecting...** once match confidence drops below 60% of its peak score, so a mis-matched long profile no longer keeps the state locked. |
 
-> **Pro Tip**: Use the **Apply Suggestions** button in Settings. It analyzes your history and calculates the perfect text-book values for your specific machine.
+> **Pro Tip**: Once WashData has analysed enough of your history, tuning suggestions appear **inline in Settings** next to each affected field - click **Use** to accept one, or **Apply all** in the banner to take them together. Nothing is ever applied automatically.
 
 ### Suggested Settings Sensor: What To Do
 

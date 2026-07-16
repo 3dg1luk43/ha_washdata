@@ -25,8 +25,10 @@ from custom_components.ha_washdata.profile_store import ProfileStore, MatchResul
 
 pytestmark = pytest.mark.benchmark
 
-# Path to real data
-REAL_DATA_PATH = "/root/ha_washdata/cycle_data/me/washing_machine/real_export.json"
+# Path to real data (repo-relative; cycle_data/ is gitignored, so this skips in CI)
+REAL_DATA_PATH = os.path.join(
+    os.path.dirname(__file__), "..", "cycle_data", "me", "washing_machine", "real_export.json"
+)
 
 def load_real_data():
     """Load real data from JSON export."""

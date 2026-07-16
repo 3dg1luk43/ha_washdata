@@ -21,7 +21,7 @@ import sys
 import os
 
 # Ensure the custom_components directory is in the path
-sys.path.append(os.path.abspath("/root/ha_washdata/custom_components"))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "custom_components")))
 
 from ha_washdata.manager import WashDataManager
 from ha_washdata.const import (
