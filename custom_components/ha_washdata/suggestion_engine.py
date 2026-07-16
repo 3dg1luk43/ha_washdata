@@ -230,9 +230,18 @@ def _classify_cycle_health(
         return "abrupt_end"
 
     # Mid-cycle restart / fragmentation: a long internal near-zero run that
-    # resumes before the tail indicates two cycles merged into one.
+    # resumes before the tail indicates two cycles merged into one.  A sampling
+    # gap larger than the outage ceiling is a sensor dropout, not a genuine dead
+    # run, so the in-progress low run is abandoned across it -- otherwise a valid
+    # cycle that merely lost its plug for a while gets mis-flagged as a merged
+    # restart (mirrors the outage guard in _suggest_end_repeat_count).
+    max_gap_s = _MAX_PAUSE_GAP_H * 3600
     dead_start: float | None = None
+    prev_t: float | None = None
     for t, p in readings:
+        if prev_t is not None and (t - prev_t) > max_gap_s:
+            dead_start = None
+        prev_t = t
         if p < active_thr:
             if dead_start is None:
                 dead_start = t
@@ -321,13 +330,32 @@ def select_clean_cycles(
 
 
 def _format_exclusions(excluded: dict[str, int]) -> str:
-    """Human-readable summary of excluded cycles for suggestion reason strings."""
+    """English exclusion note for the suggestion ``reason`` fallback string.
+
+    The localized rendering is done client-side from :func:`_exclusion_summary`
+    (the reason *codes* are translated in the panel); this English text is only the
+    fallback shown when a translation is unavailable.
+    """
     total = sum(excluded.values())
     if not total:
         return ""
     top = sorted(excluded.items(), key=lambda kv: -kv[1])[:3]
     parts = ", ".join(f"{n} {reason.replace('_', ' ')}" for reason, n in top)
     return f" Excluded {total} mis-detected cycle(s): {parts}."
+
+
+def _exclusion_summary(excluded: dict[str, int]) -> dict[str, Any]:
+    """Structured counterpart of :func:`_format_exclusions` for client localization.
+
+    Returns ``{"total": int, "items": [[reason_code, count], ...]}`` (top 3 reasons,
+    most-frequent first) so the panel can translate each reason code and assemble a
+    localized note. Empty dict when nothing was excluded.
+    """
+    total = sum(excluded.values())
+    if not total:
+        return {}
+    top = sorted(excluded.items(), key=lambda kv: -kv[1])[:3]
+    return {"total": total, "items": [[reason, int(n)] for reason, n in top]}
 
 
 # ─── Parameter interdependency reconciliation (Stage 5g) ──────────────────────
@@ -808,6 +836,7 @@ class SuggestionEngine:
         if len(clean) < 5:
             return {}
         excl_note = _format_exclusions(excluded)
+        excl_summary = _exclusion_summary(excluded)
 
         suggestions: dict[str, dict[str, Any]] = {}
 
@@ -835,6 +864,7 @@ class SuggestionEngine:
                     "si": f"{observed_si:.1f}",
                     "excl": excl_note,
                 },
+                "exclusions": excl_summary,
             }
 
         si_for_calc = observed_si if observed_si else DEFAULT_SAMPLING_INTERVAL
@@ -891,6 +921,7 @@ class SuggestionEngine:
                     "cycles": len(lowest_active),
                     "excl": excl_note,
                 },
+                "exclusions": excl_summary,
             }
 
         # --- completion_min_seconds: filter ghosts below half the shortest run ---
@@ -916,6 +947,7 @@ class SuggestionEngine:
                     "cycles": len(durations),
                     "excl": excl_note,
                 },
+                "exclusions": excl_summary,
             }
 
         # --- Confidence-calibrated thresholds (labeled clean cycles only) ---
@@ -1012,28 +1044,16 @@ class SuggestionEngine:
                 continue
             active_thr = max(stop_threshold_w, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
             max_gap_s = _MAX_PAUSE_GAP_H * 3600
-            dead_start: float | None = None
-            seen_active = False
-            prev_t: float | None = None
-            for t, p in readings:
-                # A gap larger than the outage ceiling is a sensor dropout, not a
-                # pause: abandon the current low run so its untrustworthy span is
-                # not miscounted as a >60s false end.
-                if prev_t is not None and (t - prev_t) > max_gap_s:
-                    dead_start = None
-                prev_t = t
-                if p >= active_thr:
-                    seen_active = True
-                if not seen_active:
-                    continue
-                if p < active_thr:
-                    if dead_start is None:
-                        dead_start = t
-                elif dead_start is not None:
-                    if (t - dead_start) >= 60.0:
-                        n_false_end += 1
-                        break
-                    dead_start = None
+            # A "false end" is a >=60 s internal quiet run that resumed into
+            # *sustained* activity. Reuse the shared pause locator so a brief
+            # terminal blip (a pump-out / drying tick after a soak) is absorbed
+            # back into the quiet tail rather than mis-counted as a resume -- the
+            # same sustained-resume + outage-gap gate used by the off_delay
+            # heuristics (_suggest_off_delay_from_pauses / _scored_pauses).
+            for low_start_s, resume_idx in _resumed_low_runs(readings, active_thr, max_gap_s):
+                if readings[resume_idx][0] - low_start_s >= 60.0:
+                    n_false_end += 1
+                    break
 
         if n_total < 15:
             return None
