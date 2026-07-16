@@ -146,6 +146,83 @@ async def test_reprocess_user_data(mock_hass):
                 assert "cycle_count" in env
                 assert env["cycle_count"] > 0
 
+def _make_store() -> ProfileStore:
+    s = ProfileStore(MagicMock(), "selfheal")
+    s._data = {"past_cycles": [], "profiles": {}, "envelopes": {}}
+    s._save_debug_traces = False
+    return s
+
+
+def _span(cycle: dict) -> float:
+    st = datetime.fromisoformat(cycle["start_time"])
+    et = datetime.fromisoformat(cycle["end_time"])
+    return (et - st).total_seconds()
+
+
+def test_reprocess_self_heals_duration_endtime_drift() -> None:
+    """A legacy/edited record whose trace was trimmed without updating duration +
+    end_time (duration says 8820s but the trace and end_time end at 6845s) is
+    snapped back to the trace by Reprocess, so duration == end_time-start ==
+    last trace offset again."""
+    from datetime import timedelta, timezone
+
+    base = datetime(2026, 7, 15, 15, 47, 15, tzinfo=timezone.utc)
+    pd = [[float(t), 2000.0] for t in range(0, 6601, 30)]
+    pd.append([6844.6, 24.0])  # last real activity; trace ends here
+    cycle = {
+        "id": "drift",
+        "start_time": base.isoformat(),
+        "end_time": (base + timedelta(seconds=6844.6)).isoformat(),
+        "duration": 8820.0,  # stale, pre-trim value (inconsistent with the trace)
+        "power_data": pd,
+        "status": "completed",
+        "termination_reason": "timeout",
+        "sampling_interval": 30.0,
+        "profile_name": "50 full",
+    }
+    store = _make_store()
+    store._data["past_cycles"] = [cycle]
+    assert abs(_span(cycle) - cycle["duration"]) > 100  # drifted before
+
+    store._reprocess_all_data_sync()
+
+    healed = store._data["past_cycles"][0]
+    trace_end = healed["power_data"][-1][0]
+    assert healed["duration"] == pytest.approx(trace_end, abs=1.0)
+    assert _span(healed) == pytest.approx(healed["duration"], abs=1.0)
+    assert healed["duration"] == pytest.approx(6844.6, abs=1.0)
+
+
+def test_reprocess_preserves_healthy_dishwasher_drying_tail() -> None:
+    """A healthy dishwasher cycle that keeps its near-zero drying tail (keep_tail)
+    is left untouched by the self-heal - the tail and duration are preserved."""
+    from datetime import timedelta, timezone
+
+    base = datetime(2026, 7, 15, 15, 47, 15, tzinfo=timezone.utc)
+    pd = [[float(t), 2000.0] for t in range(0, 6601, 30)]
+    pd += [[float(t), 0.0] for t in range(6630, 8901, 180)]  # drying tail kept
+    dur = pd[-1][0]
+    cycle = {
+        "id": "healthy",
+        "start_time": base.isoformat(),
+        "end_time": (base + timedelta(seconds=dur)).isoformat(),
+        "duration": dur,
+        "power_data": pd,
+        "status": "completed",
+        "termination_reason": "smart",
+        "sampling_interval": 30.0,
+        "profile_name": "50 full",
+    }
+    store = _make_store()
+    store._data["past_cycles"] = [cycle]
+    store._reprocess_all_data_sync()
+
+    healed = store._data["past_cycles"][0]
+    assert healed["duration"] == pytest.approx(dur, abs=1.0)  # unchanged
+    assert healed["power_data"][-1][0] >= 8000  # drying tail still present
+    assert _span(healed) == pytest.approx(healed["duration"], abs=1.0)
+
+
 if __name__ == "__main__":
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)

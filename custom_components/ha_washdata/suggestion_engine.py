@@ -78,6 +78,78 @@ _CLEAN_MID_RESTART_MIN_S = 600.0       # internal near-zero run >= this => merge
 _CLEAN_MID_RESTART_END_GUARD = 0.90    # ... and ending before this fraction (not the tail)
 _CLEAN_ACTIVE_FLOOR_RATIO = 0.02       # "active" means power above max(stop_thr, this*peak)
 _MAX_PAUSE_GAP_H = 1.0                  # a gap > this (hours) between samples is a data outage, not a pause
+# A low run only counts as a genuine intra-cycle pause if activity RESUMES and is
+# then sustained for at least this long.  A dishwasher's terminal pump-out / vent
+# tick (tens of watts, a sample or two) at the very end of the cycle would
+# otherwise convert the whole trailing drying tail into a huge "resumed pause",
+# inflating the p95 that sizes off_delay (observed: a lone 64 W blip at 99.7 % of
+# a 50 degC cycle turned the ~35 min drying tail into a 2078 s "pause", driving
+# off_delay to 1999 s).  A genuine mid-cycle pause is followed by minutes of real
+# washing; a terminal blip is followed by the cycle ending.
+_MIN_RESUME_ACTIVE_S = 120.0
+
+
+def _resumed_low_runs(
+    points: list[tuple[float, float]],
+    active_thr: float,
+    max_gap_s: float,
+    min_resume_active_s: float = _MIN_RESUME_ACTIVE_S,
+) -> list[tuple[float, int]]:
+    """Locate genuine intra-cycle pauses in a power trace.
+
+    Returns ``(low_start_s, resume_idx)`` for each low run (power below
+    ``active_thr``) that *resumed into sustained activity* - i.e. after the run
+    ends, the appliance draws active power for at least ``min_resume_active_s``
+    contiguous seconds.  ``resume_idx`` indexes the first active sample of that
+    sustained resume.
+
+    A low run that is only followed by a brief blip (e.g. a terminal drying /
+    pump-out tick) and then the cycle's end is NOT a pause: the blip is absorbed
+    back into the quiet run so the trailing dead tail is never mis-counted as a
+    resumed pause.  Leading below-active idle (before the cycle first became
+    active) is excluded, and a low run straddling a data-outage-sized sampling
+    gap is abandoned (its span is a dropout, not a pause).
+
+    Shared by both the classic (:meth:`_suggest_off_delay_from_pauses`) and the
+    ML-calibrated (:meth:`_scored_pauses`) off-delay heuristics so they detect
+    the same pauses.
+    """
+    out: list[tuple[float, int]] = []
+    low_start: float | None = None
+    cand_idx: int | None = None   # first active sample of an unconfirmed resume
+    active_accum = 0.0            # contiguous active seconds since cand_idx
+    seen_active = False
+    prev_t: float | None = None
+    for i, (t, p) in enumerate(points):
+        # A gap larger than the outage ceiling is a sensor dropout / restart, not
+        # a pause: abandon any in-progress low run and pending resume.
+        if prev_t is not None and (t - prev_t) > max_gap_s:
+            low_start = None
+            cand_idx = None
+            active_accum = 0.0
+        if p >= active_thr:
+            if low_start is not None and seen_active:
+                if cand_idx is None:
+                    cand_idx = i
+                    active_accum = 0.0
+                elif prev_t is not None:
+                    active_accum += t - prev_t
+                if active_accum >= min_resume_active_s:
+                    out.append((low_start, cand_idx))
+                    low_start = None
+                    cand_idx = None
+                    active_accum = 0.0
+            seen_active = True
+        else:
+            if cand_idx is not None:
+                # The candidate resume did not sustain - it was a blip.  Absorb it
+                # back into the ongoing quiet run (keep the original low_start).
+                cand_idx = None
+                active_accum = 0.0
+            elif low_start is None:
+                low_start = t
+        prev_t = t
+    return out
 
 
 def _cycle_readings(cycle: dict[str, Any]) -> list[tuple[float, float]]:
@@ -994,6 +1066,7 @@ class SuggestionEngine:
         """
         pause_durations: list[float] = []
         n_traced = 0
+        max_gap_s = _MAX_PAUSE_GAP_H * 3600
         for c in cycles:
             readings = _cycle_readings(c)
             if len(readings) < 10:
@@ -1004,28 +1077,14 @@ class SuggestionEngine:
             if peak <= 0:
                 continue
             active_thr = max(stop_threshold_w, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
-            max_gap_s = _MAX_PAUSE_GAP_H * 3600
-            dead_start: float | None = None
-            seen_active = False
-            prev_t: float | None = None
-            for t, p in readings:
-                # An outage-sized gap between samples is a dropout, not a pause:
-                # abandon the current low run so its span never inflates the p95.
-                if prev_t is not None and (t - prev_t) > max_gap_s:
-                    dead_start = None
-                prev_t = t
-                if p < active_thr:
-                    if dead_start is None:
-                        dead_start = t
-                else:
-                    if dead_start is not None:
-                        if seen_active:
-                            run = t - dead_start  # a pause that resumed (not the tail)
-                            if run > 0:
-                                pause_durations.append(run)
-                        dead_start = None
-                    seen_active = True
-            # A trailing dead run is the natural cycle end -> intentionally skipped.
+            # Genuine intra-cycle pauses only: a low run that resumed into
+            # sustained activity.  A terminal drying/pump-out blip that does not
+            # sustain is absorbed, and the trailing dead tail is skipped - so the
+            # drying phase never inflates the p95 (see _resumed_low_runs).
+            for low_start, resume_idx in _resumed_low_runs(readings, active_thr, max_gap_s):
+                run = readings[resume_idx][0] - low_start
+                if run > 0:
+                    pause_durations.append(run)
 
         if n_traced < 5 or len(pause_durations) < 3:
             return None
@@ -1522,35 +1581,22 @@ class MLSuggestionEngine:
         # dur and, downstream, the p95 that sizes _ml_off_delay / off_delay_pauses).
         max_gap_s = _MAX_PAUSE_GAP_H * 3600
         out: list[tuple[float, float | None]] = []
-        in_low = False
-        seen_active = False
-        low_start_s = 0.0
-        for i, (t, p) in enumerate(points):
-            # Abandon a low run that straddles an outage: its duration is untrustworthy.
-            if i > 0 and (t - points[i - 1][0]) > max_gap_s:
-                in_low = False
-            if not in_low and p < active_thr:
-                in_low = True
-                low_start_s = t
-            elif in_low and p >= active_thr:
-                # Only score a low run that resumed *after* the cycle became
-                # active. A leading below-active stretch is baseline idle (the
-                # appliance had not started yet), not an intra-cycle pause, so it
-                # must not be counted as a resumed low run / false end.
-                if seen_active:
-                    dur = points[i - 1][0] - low_start_s
-                    if dur >= 30.0:  # ignore motor micro-dips
-                        score: float | None = None
-                        try:
-                            feat = end_feat_fn(points[:i], expectation)  # tail is the low run
-                            if feat is not None:
-                                score = float(end_score_fn(feat))
-                        except Exception:  # pylint: disable=broad-exception-caught
-                            pass
-                        out.append((dur, score))
-                in_low = False
-            if p >= active_thr:
-                seen_active = True
+        # Same pause detector as the classic off_delay heuristic: a low run that
+        # resumed into sustained activity (a terminal drying/pump-out blip that does
+        # not sustain is not a pause).  ``resume_idx`` is the first active sample of
+        # the resume, so the tail prefix ``points[:resume_idx]`` ends in the low run.
+        for low_start_s, resume_idx in _resumed_low_runs(points, active_thr, max_gap_s):
+            dur = points[resume_idx - 1][0] - low_start_s
+            if dur < 30.0:  # ignore motor micro-dips
+                continue
+            score: float | None = None
+            try:
+                feat = end_feat_fn(points[:resume_idx], expectation)  # tail is the low run
+                if feat is not None:
+                    score = float(end_score_fn(feat))
+            except Exception:  # pylint: disable=broad-exception-caught
+                pass
+            out.append((dur, score))
         return out
 
     def generate_ml_suggestions(self) -> dict[str, Any]:

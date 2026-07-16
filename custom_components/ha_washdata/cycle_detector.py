@@ -50,6 +50,7 @@ from .const import (
     DISHWASHER_END_SPIKE_MIN_PROGRESS,
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     DISHWASHER_END_SPIKE_WAIT_SECONDS,
+    DISHWASHER_SMART_TERMINATION_DEBOUNCE_SECONDS,
     DISHWASHER_MATCH_FREEZE_QUIET_SECONDS,
     DISHWASHER_MIN_CYCLE_DURATION_S,
     TERMINAL_DROP_OFF_DELAY_SECONDS,
@@ -982,18 +983,24 @@ class CycleDetector:
                 if self._energy_since_idle_wh >= self._config.start_energy_threshold:
                     self._transition_to(STATE_RUNNING, timestamp)
 
-            # Abort if power drops below threshold before confirmation
+            # Abort if power drops below threshold before confirmation.
+            # Skip the abort when the user has explicitly paused the cycle
+            # (issue #306): a user pause sets verified_pause=True, which signals
+            # that the low power is intentional, not a false start.
             if not is_high and self._time_below_threshold > 1.0:  # 1s grace period
-                # False start
-                self._logger.debug(
-                    "False start detected: power dropped after %.2fs",
-                    self._time_above_threshold,
-                )
-                # Do NOT reset _delay_band_* here — _transition_to(STATE_OFF) will
-                # preserve the band via _preserve_delay_band_on_off if it was set
-                # at STARTING entry (line 838), so a brief high-power peak (menu
-                # navigation) doesn't restart the delayed-start accumulation from zero.
-                self._transition_to(STATE_OFF, timestamp)
+                if getattr(self, "_verified_pause", False):
+                    pass  # user pause holds; wait for Resume Cycle
+                else:
+                    # False start
+                    self._logger.debug(
+                        "False start detected: power dropped after %.2fs",
+                        self._time_above_threshold,
+                    )
+                    # Do NOT reset _delay_band_* here — _transition_to(STATE_OFF) will
+                    # preserve the band via _preserve_delay_band_on_off if it was set
+                    # at STARTING entry (line 838), so a brief high-power peak (menu
+                    # navigation) doesn't restart the delayed-start accumulation from zero.
+                    self._transition_to(STATE_OFF, timestamp)
 
         elif self._state == STATE_RUNNING:
             self._power_readings.append((timestamp, power))
@@ -1182,7 +1189,10 @@ class CycleDetector:
                     ):
                         # Dynamic confirmation window
                         if self._config.device_type == "dishwasher":
-                            smart_debounce = max(300.0, self._config.off_delay * 0.25)
+                            # Fixed - NOT off_delay-derived.  off_delay is sized to
+                            # bridge the long drying "pause", but must not delay the
+                            # end; see DISHWASHER_SMART_TERMINATION_DEBOUNCE_SECONDS.
+                            smart_debounce = DISHWASHER_SMART_TERMINATION_DEBOUNCE_SECONDS
                         elif self._config.device_type in (
                             DEVICE_TYPE_WASHING_MACHINE,
                             DEVICE_TYPE_WASHER_DRYER,

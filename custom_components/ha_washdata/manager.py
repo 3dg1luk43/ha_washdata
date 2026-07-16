@@ -1538,6 +1538,20 @@ class WashDataManager:
 
         if should_restore and active_snapshot_to_restore:
             try:
+                # A cycle paused by the user while still in STARTING is promoted
+                # to PAUSED before restoration so that (a) the false-start abort
+                # cannot fire on the first low-power reading, and (b) the PAUSED
+                # branch of the restore block below re-applies the user-pause state
+                # and re-asserts verified_pause (issue #306).
+                if (
+                    active_snapshot_to_restore.get("state") == STATE_STARTING
+                    and active_snapshot_to_restore.get("is_user_paused")
+                ):
+                    active_snapshot_to_restore = {
+                        **active_snapshot_to_restore,
+                        "state": STATE_PAUSED,
+                    }
+
                 self.detector.restore_state_snapshot(active_snapshot_to_restore)
 
                 # Restore if in any active state (Running, Paused, Ending)

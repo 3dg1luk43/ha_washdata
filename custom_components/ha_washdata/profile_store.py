@@ -3399,6 +3399,44 @@ class ProfileStore:
                                 if len(trimmed) < original_len:
                                     cycle["duration"] = cycle["power_data"][-1][0]
 
+                    # Self-heal duration/end_time drift.  A freshly-finalized cycle
+                    # always has last_offset == duration (the finalizer appends a
+                    # terminal point at end_time, and add_cycle keeps the tail for
+                    # completed cycles), so this is a no-op for healthy records.  It
+                    # repairs older / manually-edited cycles whose trace was trimmed
+                    # without updating duration + end_time - e.g. a legacy record
+                    # whose drying tail was dropped while duration kept the pre-trim
+                    # value (duration says 8820s but the trace and end_time end at
+                    # 6845s).  Snap both to the trace so the three always agree.
+                    pd_now = cycle.get("power_data")
+                    if (
+                        isinstance(pd_now, list)
+                        and pd_now
+                        and isinstance(pd_now[-1], (list, tuple))
+                        and len(pd_now[-1]) == 2
+                    ):
+                        trace_end = float(pd_now[-1][0])
+                        stored_dur = float(cycle.get("duration", 0.0) or 0.0)
+                        si = float(cycle.get("sampling_interval", 0.0) or 0.0)
+                        # Tolerance above rounding + one sampling gap; the drifts we
+                        # repair are large (minutes), so this never churns healthy data.
+                        tol = max(5.0, 2.0 * si)
+                        if trace_end > 0 and abs(stored_dur - trace_end) > tol:
+                            cycle["duration"] = round(trace_end, 1)
+                            start_ts = _value_to_timestamp(cycle.get("start_time"))
+                            if start_ts is not None:
+                                cycle["end_time"] = dt_util.utc_from_timestamp(
+                                    start_ts + trace_end
+                                ).isoformat()
+                            processed_count += 1
+                            self._logger.info(
+                                "Reprocess self-heal: cycle %s duration %.0fs -> %.0fs "
+                                "(snapped to trace; end_time realigned)",
+                                cycle.get("id"),
+                                stored_dur,
+                                trace_end,
+                            )
+
             if cycle.get("power_data"):
                 try:
                     tuples = decompress_power_data(cycle)

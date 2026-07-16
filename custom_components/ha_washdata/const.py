@@ -578,6 +578,23 @@ DISHWASHER_MATCH_FREEZE_QUIET_SECONDS = 300.0
 # to confirm a terminal tail rather than an inter-phase gap.
 DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS = 600.0
 
+# Confirmation window a dishwasher must spend in ENDING before Smart Termination
+# fires.  This is deliberately a FIXED constant and NOT derived from off_delay:
+# off_delay must be large (up to ~30 min) to bridge a dishwasher's long passive
+# drying "pause" so a single cycle is not split by the fallback timeout, but that
+# large value must NOT delay Smart Termination - which ends the cycle near the
+# matched profile's expected duration so the finish notification is timely.  A
+# previous formula (max(300, off_delay*0.25)) coupled the two: a suggested
+# off_delay of 1800-1999 s inflated this window to 450-500 s, and on the sparsely
+# sampled near-zero drying tail the eligibility instant could fall in a gap
+# between samples, slipping the cycle's end by 20+ min or leaving it to only end
+# via the fallback timeout (which snaps the trace back and drops the drying tail)
+# or a manual stop.  300 s (the old floor, proven on a hand-tuned production
+# dishwasher running off_delay=180) settles transient dips without starving the
+# end.  Smart Termination is independently gated on duration >= expected*ratio, so
+# a shorter window can never fire it mid-cycle.
+DISHWASHER_SMART_TERMINATION_DEBOUNCE_SECONDS = 300.0
+
 DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 1800,  # 30 min (Drying)
     DEVICE_TYPE_BREAD_MAKER: 300,  # 5 min (Keep-warm phase after baking)
