@@ -547,7 +547,7 @@ class StoreClient:
         d_id = device_id(appliance, brand, model)
         p_id = profile_id(d_id, program)
         qc_code = qc if qc in (1, 2, 3) else 3
-        pts = [[float(p[0]), float(p[1])] for p in points[:3000] if len(p) >= 2]
+        pts = [[float(p[0]), float(p[1])] for p in points[:10000] if len(p) >= 2]
 
         # 1-3: brand/device/profile (create-if-missing; rules deny updating existing).
         ok = await self._commit_create(token, f"brands/{b_id}", {

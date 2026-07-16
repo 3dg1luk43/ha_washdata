@@ -66,16 +66,57 @@ def derive_qc(cycle: dict[str, Any]) -> int:
     return QC_MANUAL
 
 
-def _downsample(points: list[list[float]], max_n: int = 3000) -> list[list[float]]:
-    if len(points) <= max_n:
-        return [[float(p[0]), float(p[1])] for p in points]
-    # Evenly spaced indices INCLUDING the last sample, so the uploaded trace keeps
-    # its terminal transition (the old int(i*step) never reached points[-1]).
+def _downsample(points: list[list[float]], max_n: int = 10000) -> list[list[float]]:
+    """Downsample a power trace to at most max_n points using LTTB.
+
+    LTTB (Largest Triangle Three Buckets) selects the sample in each bucket that
+    maximises the triangle area formed by the previously-selected point and the
+    centroid of the next bucket.  This preserves peaks and troughs (heater pulses,
+    pump-out spikes, spin transients) that nearest-index selection can silently drop
+    when the step size straddles a narrow transient.
+    """
     n = len(points)
-    return [
-        [float(points[j][0]), float(points[j][1])]
-        for j in (round(i * (n - 1) / (max_n - 1)) for i in range(max_n))
-    ]
+    if n <= max_n:
+        return [[float(p[0]), float(p[1])] for p in points]
+    if max_n <= 2:
+        return [[float(points[0][0]), float(points[0][1])],
+                [float(points[-1][0]), float(points[-1][1])]]
+
+    sampled: list[list[float]] = [[float(points[0][0]), float(points[0][1])]]
+    bucket_count = max_n - 2
+    bucket_size = (n - 2) / bucket_count
+    prev_idx = 0
+
+    for i in range(bucket_count):
+        # Current bucket [a, b)
+        a = int(i * bucket_size) + 1
+        b = min(int((i + 1) * bucket_size) + 1, n - 1)
+        # Next bucket centroid (triangle's third vertex)
+        c = b
+        d = min(int((i + 2) * bucket_size) + 1, n - 1)
+        cnt = d - c
+        if cnt > 0:
+            avg_x = sum(points[j][0] for j in range(c, d)) / cnt
+            avg_y = sum(points[j][1] for j in range(c, d)) / cnt
+        else:
+            avg_x, avg_y = float(points[-1][0]), float(points[-1][1])
+        # Select point in [a, b) with the largest triangle area
+        prev = points[prev_idx]
+        max_area = -1.0
+        max_idx = a
+        for j in range(a, b):
+            area = abs(
+                (prev[0] - avg_x) * (points[j][1] - prev[1]) -
+                (prev[0] - points[j][0]) * (avg_y - prev[1])
+            ) * 0.5
+            if area > max_area:
+                max_area = area
+                max_idx = j
+        sampled.append([float(points[max_idx][0]), float(points[max_idx][1])])
+        prev_idx = max_idx
+
+    sampled.append([float(points[-1][0]), float(points[-1][1])])
+    return sampled
 
 
 class StoreBridge:
