@@ -86,9 +86,13 @@ def compute_signature(
     # Time in high / total time
     # Check dt where high_mask holds
     if len(dt) > 0:
-        # Align mask with intervals
-        # mask[i] corresponds to interval i? roughly
-        high_dur = np.sum(dt[high_mask[:-1]])
+        # Align mask with intervals; mask[i] corresponds to interval i.
+        # Exclude sensor-outage gaps: a long gap after a high-power sample is a data
+        # dropout, not high-phase time, so cap those intervals to 0 (mirrors the energy
+        # integrator's gap handling via energy_gap_threshold_s).
+        max_gap = energy_gap_threshold_s(timestamps)
+        capped_dt = np.where(dt > max_gap, 0.0, dt)
+        high_dur = np.sum(capped_dt[high_mask[:-1]])
         high_phase_ratio = high_dur / duration if duration > 0 else 0
     else:
         high_phase_ratio = 0.0

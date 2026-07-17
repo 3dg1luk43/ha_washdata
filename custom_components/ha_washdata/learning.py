@@ -21,7 +21,8 @@ from __future__ import annotations
 import asyncio
 import logging
 from datetime import datetime
-from typing import Any, Callable, Optional, TYPE_CHECKING
+from collections.abc import Callable
+from typing import Any, Optional, TYPE_CHECKING
 
 import numpy as np
 from homeassistant.core import HomeAssistant
@@ -242,7 +243,7 @@ class LearningManager:
         )
 
         # 3. Update model-based suggestions (durations etc)
-        self._update_model_suggestions(dt_util.now())
+        self._update_model_suggestions()
 
         # 3b. Update statistical detection suggestions (thresholds, gates, etc.)
         self._update_detection_suggestions()
@@ -328,7 +329,7 @@ class LearningManager:
             "Operational",
         )
 
-    def _update_model_suggestions(self, now: datetime) -> None:
+    def _update_model_suggestions(self) -> None:
         """Generate suggestions for model parameters (tolerances, ratios).
 
         The historical-cycle scan inside ``generate_model_suggestions`` is

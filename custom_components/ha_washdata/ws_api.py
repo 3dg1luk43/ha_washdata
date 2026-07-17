@@ -979,8 +979,13 @@ async def ws_store_download_device(hass, connection, msg):
     settings_applied = 0
     if msg.get("include_settings"):
         bundle_settings = res.get("settings") if isinstance(res.get("settings"), dict) else {}
+        # Accept only allow-listed, numeric (non-bool) values - matching what the
+        # upload side ever writes - so a malformed/hostile bundle can't inject a
+        # string/list/bool into this device's live options.
         filtered = {
-            k: _json_safe(v) for k, v in bundle_settings.items() if k in SHAREABLE_SETTING_KEYS
+            k: v for k, v in bundle_settings.items()
+            if k in SHAREABLE_SETTING_KEYS
+            and isinstance(v, (int, float)) and not isinstance(v, bool)
         }
         entry = _get_entry(hass, msg["entry_id"])
         if filtered and entry is not None:

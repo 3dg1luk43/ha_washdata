@@ -153,7 +153,7 @@ def test_duration_learning(learning_manager):
             "status": "completed"
         })
         
-    learning_manager._update_model_suggestions(datetime.now(timezone.utc))
+    learning_manager._update_model_suggestions()
     sugg = learning_manager.profile_store.get_suggestions()
     assert CONF_PROFILE_DURATION_TOLERANCE in sugg
 
