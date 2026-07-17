@@ -895,6 +895,11 @@ class WashDataManager:
                 self._logger.debug("Matching skipped: no readings")
                 return
 
+            # Skip match entirely when no real profiles exist — nothing to match against.
+            if not self.profile_store.has_real_profiles:
+                self._logger.debug("Matching skipped: no real profiles configured yet")
+                return
+
             self._matching_task = self.hass.async_create_task(self._async_do_perform_matching(readings))
         except Exception as e:
             self._logger.error("Perform combined matching trigger failed: %s", e)
@@ -5252,6 +5257,10 @@ class WashDataManager:
             # the waiting message again.
             self._live_waiting_notification_sent = False
         if not has_profile_match:
+            # Suppress the waiting notification when no profiles exist at all —
+            # the setup card explains the state instead.
+            if not self.profile_store.has_real_profiles:
+                return
             if self._live_waiting_notification_sent:
                 return
 

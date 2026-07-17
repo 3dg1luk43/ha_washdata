@@ -291,3 +291,17 @@ def test_phase4_all_clear():
     )
     assert r.phase == "phase4"
     assert r.dismissible is True
+
+
+# ── _real_profile_names ───────────────────────────────────────────────────────
+
+def test_has_real_profiles_false_for_stub():
+    """Smoke test: stub profile with no past_cycles -> not real."""
+    from custom_components.ha_washdata.setup_advisor import _real_profile_names
+    assert _real_profile_names(["Cotton 60°"], []) == set()
+
+
+def test_has_real_profiles_true_with_cycle():
+    from custom_components.ha_washdata.setup_advisor import _real_profile_names
+    cycles = [{"profile_name": "Cotton 60°", "meta": {}}]
+    assert _real_profile_names(["Cotton 60°"], cycles) == {"Cotton 60°"}

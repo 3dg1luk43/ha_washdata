@@ -4717,6 +4717,18 @@ class ProfileStore:
         # Save to persist the label
         await self.async_save()
 
+    @property
+    def has_real_profiles(self) -> bool:
+        """True if at least one stored profile has a cycle in past_cycles."""
+        assigned = {
+            c.get("profile_name")
+            for c in self._data.get("past_cycles", [])
+            if c.get("profile_name")
+        }
+        return bool(
+            assigned.intersection(self._data.get("profiles", {}).keys())
+        )
+
     def list_profiles(self) -> list[dict[str, Any]]:
         """List all profiles with metadata."""
         profiles: list[JSONDict] = []
