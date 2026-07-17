@@ -142,7 +142,19 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         return False
 
-    if version == 3 and minor_version >= 6:
+    if version == 3 and minor_version >= 7:
+        return True
+
+    # 3.6 → 3.7: remove initial_profile stub key from entry.data.
+    if version == 3 and minor_version == 6:
+        new_data = {k: v for k, v in entry.data.items() if k != "initial_profile"}
+        hass.config_entries.async_update_entry(
+            entry, data=new_data, minor_version=7
+        )
+        minor_version = 7
+        _LOGGER.debug("Migrated WashData entry from 3.6 to 3.7")
+
+    if version == 3 and minor_version >= 7:
         return True
 
     data: dict[str, Any] = dict(entry.data)
@@ -280,10 +292,10 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         data=data,
         options=options,
         version=3,
-        minor_version=6,
+        minor_version=7,
     )
     _log.info(
-        "Migrated WashData entry from version %s.%s to 3.6", version, minor_version
+        "Migrated WashData entry from version %s.%s to 3.7", version, minor_version
     )
     return True
 
@@ -369,28 +381,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await manager.async_setup()
     await _migrate_online_to_global(hass, entry, manager)
-
-    # Check for initial profile from onboarding
-    if "initial_profile" in entry.data:
-        init_prof = entry.data["initial_profile"]
-        name = init_prof.get("name")
-        duration = init_prof.get("avg_duration")
-        if name:
-            try:
-                # Create the profile immediately
-                await manager.profile_store.create_profile_standalone(
-                    name, avg_duration=duration
-                )
-                manager._logger.info("Created initial profile '%s' from onboarding", name)
-
-                # Clean up config entry (remove initial_profile to avoid re-creation or cruft)
-                new_data = {
-                    k: v for k, v in entry.data.items() if k != "initial_profile"
-                }
-                hass.config_entries.async_update_entry(entry, data=new_data)
-
-            except Exception as e:  # pylint: disable=broad-exception-caught
-                manager._logger.error("Failed to create initial profile: %s", e)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 

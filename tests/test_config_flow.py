@@ -16,13 +16,13 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Tests for the slimmed config_flow.py.
 
-Covers: initial setup flow (async_step_user + async_step_first_profile),
+Covers: initial setup flow (async_step_user),
 reconfigure step, slim options stub, and the ws_set_options title-update
 logic in ws_api.py.
 """
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -194,78 +194,20 @@ async def test_step_user_rejects_negative_min_power():
 
 
 @pytest.mark.asyncio
-async def test_step_user_valid_input_advances_to_first_profile():
+async def test_step_user_valid_input_creates_entry_directly():
     flow = _make_config_flow()
-    # first_profile step returns a form (no profile_name provided)
-    flow.async_step_first_profile = AsyncMock(return_value={"type": "form"})
     result = await flow.async_step_user({
         CONF_NAME: "My Washer",
         CONF_DEVICE_TYPE: "washing_machine",
         CONF_POWER_SENSOR: "sensor.washer_power",
         CONF_MIN_POWER: 5.0,
     })
-    flow.async_step_first_profile.assert_called_once()
-    # user_input is stored for the next step
-    assert flow._user_input[CONF_NAME] == "My Washer"
-    assert flow._user_input[CONF_POWER_SENSOR] == "sensor.washer_power"
-
-
-# ---------------------------------------------------------------------------
-# ConfigFlow.async_step_first_profile
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.asyncio
-async def test_first_profile_shows_form_when_no_input():
-    flow = _make_config_flow()
-    result = await flow.async_step_first_profile(None)
-    assert flow.async_show_form.called
-    assert flow.async_show_form.call_args[1]["step_id"] == "first_profile"
-
-
-@pytest.mark.asyncio
-async def test_first_profile_creates_entry_without_profile():
-    flow = _make_config_flow()
-    flow._user_input = {
-        CONF_NAME: "My Washer",
-        CONF_DEVICE_TYPE: "washing_machine",
-        CONF_POWER_SENSOR: "sensor.power",
-        CONF_MIN_POWER: 5.0,
-    }
-    result = await flow.async_step_first_profile({"profile_name": ""})
     assert flow.async_create_entry.called
     call_kwargs = flow.async_create_entry.call_args[1]
     assert call_kwargs["title"] == "My Washer"
+    assert call_kwargs["data"][CONF_NAME] == "My Washer"
+    assert call_kwargs["data"][CONF_POWER_SENSOR] == "sensor.washer_power"
     assert "initial_profile" not in call_kwargs["data"]
-
-
-@pytest.mark.asyncio
-async def test_first_profile_creates_entry_with_profile_name_and_duration():
-    flow = _make_config_flow()
-    flow._user_input = {
-        CONF_NAME: "My Washer",
-        CONF_DEVICE_TYPE: "washing_machine",
-        CONF_POWER_SENSOR: "sensor.power",
-        CONF_MIN_POWER: 5.0,
-    }
-    result = await flow.async_step_first_profile({
-        "profile_name": "Cotton 40",
-        "manual_duration": 90,
-    })
-    assert flow.async_create_entry.called
-    data = flow.async_create_entry.call_args[1]["data"]
-    profile = data["initial_profile"]
-    assert profile["name"] == "Cotton 40"
-    assert profile["avg_duration"] == pytest.approx(90 * 60.0)
-
-
-@pytest.mark.asyncio
-async def test_first_profile_stores_none_duration_when_omitted():
-    flow = _make_config_flow()
-    flow._user_input = {CONF_NAME: "Dryer", CONF_POWER_SENSOR: "sensor.p", CONF_MIN_POWER: 3.0}
-    result = await flow.async_step_first_profile({"profile_name": "Normal"})
-    data = flow.async_create_entry.call_args[1]["data"]
-    assert data["initial_profile"]["avg_duration"] is None
 
 
 # ---------------------------------------------------------------------------

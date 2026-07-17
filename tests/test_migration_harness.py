@@ -91,7 +91,7 @@ async def test_migration_with_harness_moves_and_preserves_fields(
     hass.config_entries.async_update_entry.assert_called_once()
 
     assert legacy_entry.version == 3
-    assert legacy_entry.minor_version == 6
+    assert legacy_entry.minor_version == 7
 
     assert legacy_entry.options[CONF_MIN_POWER] == 5.0
     assert legacy_entry.options[CONF_OFF_DELAY] == 120
@@ -146,8 +146,8 @@ async def test_migration_is_idempotent_after_first_run(
 
 @pytest.mark.asyncio
 async def test_migration_latest_version_is_noop(hass: HomeAssistant) -> None:
-    """Entries already at 3.6 should not trigger updates."""
-    entry = DummyEntry(version=3, minor_version=6, data={}, options={})
+    """Entries already at 3.7 should not trigger updates."""
+    entry = DummyEntry(version=3, minor_version=7, data={}, options={})
     hass.config_entries.async_update_entry = MagicMock()
 
     migrated = await async_migrate_entry(hass, entry)
@@ -181,7 +181,7 @@ async def test_migration_remaps_removed_device_types_to_other(
     assert entry.options[CONF_DEVICE_TYPE] == "other"
     # Tuned options are preserved through the remap.
     assert entry.options[CONF_MIN_POWER] == 7.0
-    assert entry.minor_version == 6
+    assert entry.minor_version == 7
 
 
 @pytest.mark.asyncio
@@ -235,4 +235,64 @@ async def test_migration_strips_suppress_feedback_notifications(
     # Unrelated tuned options survive the strip.
     assert entry.options[CONF_DEVICE_TYPE] == "dishwasher"
     assert entry.options[CONF_MIN_POWER] == 9.0
-    assert entry.minor_version == 6
+    assert entry.minor_version == 7
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_6_to_3_7_removes_initial_profile(hass: HomeAssistant) -> None:
+    """initial_profile in entry.data must be stripped on 3.6 to 3.7 migration."""
+    entry = DummyEntry(
+        version=3,
+        minor_version=6,
+        data={
+            "name": "Washer",
+            "power_sensor": "sensor.power",
+            "initial_profile": {"name": "Cotton 60", "avg_duration": 7200},
+        },
+        options={},
+    )
+
+    def _apply_update(e: DummyEntry, **kwargs: Any) -> None:
+        if "data" in kwargs:
+            e.data = kwargs["data"]
+        if "minor_version" in kwargs:
+            e.minor_version = kwargs["minor_version"]
+
+    hass.config_entries.async_update_entry = MagicMock(
+        side_effect=lambda *a, **kw: _apply_update(*a, **kw)
+    )
+
+    result = await async_migrate_entry(hass, entry)
+    assert result is True
+    assert "initial_profile" not in entry.data
+    assert entry.data["name"] == "Washer"
+    assert entry.data["power_sensor"] == "sensor.power"
+    assert entry.version == 3
+    assert entry.minor_version == 7
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_6_to_3_7_no_initial_profile_is_noop(hass: HomeAssistant) -> None:
+    """Entries at 3.6 without initial_profile are bumped to 3.7 with data intact."""
+    entry = DummyEntry(
+        version=3,
+        minor_version=6,
+        data={"name": "Washer", "power_sensor": "sensor.power"},
+        options={},
+    )
+
+    def _apply_update(e: DummyEntry, **kwargs: Any) -> None:
+        if "data" in kwargs:
+            e.data = kwargs["data"]
+        if "minor_version" in kwargs:
+            e.minor_version = kwargs["minor_version"]
+
+    hass.config_entries.async_update_entry = MagicMock(
+        side_effect=lambda *a, **kw: _apply_update(*a, **kw)
+    )
+
+    result = await async_migrate_entry(hass, entry)
+    assert result is True
+    assert entry.minor_version == 7
+    assert entry.data["name"] == "Washer"
+    assert entry.data["power_sensor"] == "sensor.power"
