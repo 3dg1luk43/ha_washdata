@@ -45,12 +45,11 @@ Key behaviours:
 - Each list accepts both **notify services** (e.g. `notify.mobile_app_pixel`) and
   **notify entities** (e.g. those exposed by `telegram_bot`). Notify entities are
   delivered through the universal `notify.send_message` action automatically.
-- **Safety net:** if a notification *is* produced but the relevant list is empty
-  **and** you have no automation handling that event, it still surfaces as a Home
-  Assistant **persistent notification** (the bell icon) rather than being lost. This
-  does not override the rule above - a plainly empty list with no automations means
-  that kind is not sent to any target; the bell is only a last resort so a message is
-  never silently dropped.
+
+An empty list therefore disables that kind of notification entirely: WashData does not
+dispatch it and does not fall back to a persistent notification for it. (The
+sidebar **bell** is used only for interactive/system prompts such as the pause-timer
+control, not as a fallback for an empty per-event list.)
 
 ### 2. Automations (the powerful path)
 

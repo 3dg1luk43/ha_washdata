@@ -76,7 +76,10 @@ case "$mode" in
         [ "$#" -gt 0 ] && shift
         js_check
         echo "Running ALL tests (fast + slow + benchmark + E2E)..."
-        "$VENV_PYTHON" -m pytest tests/ -m "" "$@"
+        # Explicit halt on pytest failure so E2E success can never mask a Python
+        # failure (belt-and-suspenders on top of `set -e`, since this branch does
+        # not `exec` and continues to e2e_check).
+        "$VENV_PYTHON" -m pytest tests/ -m "" "$@" || exit 1
         e2e_check
         ;;
     -h|--help)
