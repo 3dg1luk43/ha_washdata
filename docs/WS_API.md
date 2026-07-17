@@ -22,7 +22,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `save_profile_group` | entry_id, name, members | `SuccessResponse` |
 | `rename_profile_group` | entry_id, name, new_name | `SuccessResponse` |
 | `delete_profile_group` | entry_id, name | `SuccessResponse` |
-| `rebuild_envelopes` | entry_id | `SuccessResponse` |
+| `rebuild_envelopes` | entry_id | `StartTaskResponse` |
 | `get_profile_phases` | entry_id, profile_name | `GetProfilePhasesResponse` |
 | `set_profile_phases` | entry_id, profile_name, phases | `SuccessResponse` |
 | `get_maintenance_log` | entry_id | `GetMaintenanceLogResponse` |
@@ -58,7 +58,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `trim_cycle` | entry_id, cycle_id, start_s, end_s | `StartTaskResponse` |
 | `analyze_split` | entry_id, cycle_id, gap_seconds? | `AnalyzeSplitResponse` |
 | `apply_split` | entry_id, cycle_id, split_offsets, segment_profiles? | `StartTaskResponse` |
-| `apply_merge` | entry_id, cycle_ids, target_profile?, new_profile_name? | `ApplyMergeResponse` |
+| `apply_merge` | entry_id, cycle_ids, target_profile?, new_profile_name? | `StartTaskResponse` |
 | `get_profile_envelope` | entry_id, profile_name | `GetProfileEnvelopeResponse` |
 | `get_profile_cycles` | entry_id, profile_name, limit? | `GetProfileCyclesResponse` |
 | `get_panel_config` | — | `GetPanelConfigResponse` |
@@ -346,11 +346,11 @@ _None._
 | --- | --- | --- |
 | `entry_id` | yes | str |
 
-**Response** (`SuccessResponse`)
+**Response** (`StartTaskResponse`)
 
 | Field | Always present | Type |
 | --- | --- | --- |
-| `success` | yes | bool |
+| `task_id` | yes | str |
 
 ## `ha_washdata/get_profile_phases`
 
@@ -926,12 +926,11 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `target_profile` | no | str\|null |
 | `new_profile_name` | no | str\|null |
 
-**Response** (`ApplyMergeResponse`)
+**Response** (`StartTaskResponse`)
 
 | Field | Always present | Type |
 | --- | --- | --- |
-| `success` | yes | bool |
-| `new_id` | yes | str |
+| `task_id` | yes | str |
 
 ## `ha_washdata/get_profile_envelope`
 

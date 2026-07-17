@@ -561,7 +561,12 @@
     "flags": "Flagg",
     "include_phase_map": "Hafa fassakort með",
     "include_settings": "Hafa greiningar- og samsvörunarstillingar með",
-    "show_contributor": "Sýna nöfn framleggjenda"
+    "show_contributor": "Sýna nöfn framleggjenda",
+    "task_pg_detail": "Herma eftir lotu",
+    "task_split": "Skipti lotu upp",
+    "task_trim": "Klippi lotu til",
+    "task_merge": "Sameina lotur",
+    "task_rebuild": "Endurreikna aflhjúpa"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Bestun: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Herma eftir lotu"
+    },
+    "split": {
+      "apply": "Skipti lotu upp"
+    },
+    "trim": {
+      "apply": "Klippi lotu til"
+    },
+    "merge": {
+      "apply": "Sameina lotur"
+    },
+    "rebuild": {
+      "envelopes": "Endurreikna aflhjúpa"
     }
   },
   "setup": {

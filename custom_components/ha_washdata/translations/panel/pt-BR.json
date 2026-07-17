@@ -561,7 +561,12 @@
     "flags": "Sinalizadores",
     "include_phase_map": "Incluir mapa de fases",
     "include_settings": "Incluir configurações de detecção e reconhecimento",
-    "show_contributor": "Mostrar nomes dos contribuidores"
+    "show_contributor": "Mostrar nomes dos contribuidores",
+    "task_pg_detail": "Simular ciclo",
+    "task_split": "Dividindo o ciclo",
+    "task_trim": "Recortando o ciclo",
+    "task_merge": "Combinando ciclos",
+    "task_rebuild": "Reconstruindo envelopes"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Otimizar: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simular ciclo"
+    },
+    "split": {
+      "apply": "Dividindo o ciclo"
+    },
+    "trim": {
+      "apply": "Recortando o ciclo"
+    },
+    "merge": {
+      "apply": "Combinando ciclos"
+    },
+    "rebuild": {
+      "envelopes": "Reconstruindo envelopes"
     }
   },
   "setup": {

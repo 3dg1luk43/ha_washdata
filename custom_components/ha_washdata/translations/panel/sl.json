@@ -561,7 +561,12 @@
     "flags": "Oznake",
     "include_phase_map": "Vključi fazno karto",
     "include_settings": "Vključi nastavitve",
-    "show_contributor": "Prikaži sodelavca"
+    "show_contributor": "Prikaži sodelavca",
+    "task_pg_detail": "Simuliraj cikel",
+    "task_split": "Deljenje cikla",
+    "task_trim": "Obrezovanje cikla",
+    "task_merge": "Združevanje ciklov",
+    "task_rebuild": "Ponovni izračun ovojnic"
   },
   "log": {
     "all_levels": "Vse ravni",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimizacija: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simuliraj cikel"
+    },
+    "split": {
+      "apply": "Deljenje cikla"
+    },
+    "trim": {
+      "apply": "Obrezovanje cikla"
+    },
+    "merge": {
+      "apply": "Združevanje ciklov"
+    },
+    "rebuild": {
+      "envelopes": "Ponovni izračun ovojnic"
     }
   },
   "setup": {

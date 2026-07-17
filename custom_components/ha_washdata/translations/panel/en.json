@@ -498,6 +498,8 @@
     "task_pg_detail": "Simulate cycle",
     "task_split": "Splitting cycle",
     "task_trim": "Trimming cycle",
+    "task_merge": "Merging cycles",
+    "task_rebuild": "Rebuilding envelopes",
     "task_reprocess": "Reprocessing",
     "task_ml_training": "Learning",
     "eta_secs": "~{n}s left",
@@ -1724,6 +1726,12 @@
     },
     "trim": {
       "apply": "Trimming cycle"
+    },
+    "merge": {
+      "apply": "Merging cycles"
+    },
+    "rebuild": {
+      "envelopes": "Rebuilding envelopes"
     }
   },
   "setup": {

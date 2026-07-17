@@ -561,7 +561,12 @@
     "flags": "标志",
     "include_phase_map": "包含阶段图",
     "include_settings": "包含检测与匹配设置",
-    "show_contributor": "显示贡献者名称"
+    "show_contributor": "显示贡献者名称",
+    "task_pg_detail": "模拟周期",
+    "task_split": "正在拆分周期",
+    "task_trim": "正在裁剪周期",
+    "task_merge": "正在合并周期",
+    "task_rebuild": "正在重建包络"
   },
   "log": {
     "all_levels": "所有级别",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "优化：{param}"
+    },
+    "pg_detail": {
+      "simulate": "模拟周期"
+    },
+    "split": {
+      "apply": "正在拆分周期"
+    },
+    "trim": {
+      "apply": "正在裁剪周期"
+    },
+    "merge": {
+      "apply": "正在合并周期"
+    },
+    "rebuild": {
+      "envelopes": "正在重建包络"
     }
   },
   "setup": {

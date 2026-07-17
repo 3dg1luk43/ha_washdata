@@ -249,9 +249,8 @@ from .learning import LearningManager
 from .profile_store import (
     ProfileStore,
     decompress_power_data,
-    device_active_peak_range,
-    earliest_sustained_quiet_offset,
     is_terminal_drop,
+    terminal_drop_baseline,
 )
 from .signal_processing import integrate_wh, energy_gap_threshold_s
 from .recorder import CycleRecorder
@@ -796,6 +795,9 @@ class WashDataManager:
         self._terminal_drop_cache: (
             tuple[int, float | None, tuple[float, float] | None] | None
         ) = None
+        # Cycle count an executor refresh of the baseline is in-flight/done for, so
+        # the loop never recomputes it (issue #311) and never double-schedules.
+        self._terminal_drop_refresh_n: int | None = None
 
         self._remove_listener = None
         self._remove_external_trigger_listener = None  # External cycle end trigger
@@ -3741,23 +3743,53 @@ class WashDataManager:
 
         Both are learned from the device's completed cycles and used by the
         terminal-drop detector (anomaly + familiarity gates).  Keyed by cycle
-        count so it refreshes as history grows without re-decompressing every
-        trace on each low-power reading."""
+        count so it refreshes as history grows.
+
+        The recompute decompresses every completed trace, which is too heavy to run
+        on the event loop inside the detector's reading path (issue #311). So this
+        NEVER recomputes synchronously: on a miss/stale cache it schedules an
+        executor refresh and serves the last known baseline in the meantime (one
+        cycle stale is harmless for an anomaly heuristic). Until the first refresh
+        lands there is no baseline, so it returns ``(None, None)`` and
+        ``is_terminal_drop`` defers to the proven slow end-detection."""
         cycles = self.profile_store.get_past_cycles()
         n = len(cycles)
         cache = self._terminal_drop_cache
         if cache is not None and cache[0] == n:
             return cache[1], cache[2]
-        stop_threshold = float(self.detector.config.stop_threshold_w)
-        earliest = earliest_sustained_quiet_offset(
-            cycles,
-            stop_threshold,
-            TERMINAL_DROP_MIN_QUIET_SPAN_S,
-            TERMINAL_DROP_MIN_CLEAN_CYCLES,
-        )
-        peak_range = device_active_peak_range(cycles, TERMINAL_DROP_MIN_CLEAN_CYCLES)
-        self._terminal_drop_cache = (n, earliest, peak_range)
-        return earliest, peak_range
+        self._schedule_terminal_drop_refresh(n)
+        if cache is not None:
+            return cache[1], cache[2]
+        return None, None
+
+    def _schedule_terminal_drop_refresh(self, n: int) -> None:
+        """Kick a one-shot executor refresh of the terminal-drop baseline for the
+        current cycle count, unless one is already in-flight/done for it."""
+        if self._terminal_drop_refresh_n == n:
+            return
+        self._terminal_drop_refresh_n = n
+        self.hass.async_create_task(self._async_refresh_terminal_drop_baseline(n))
+
+    async def _async_refresh_terminal_drop_baseline(self, n: int) -> None:
+        """Recompute the baseline off the event loop and cache it. Never raises -
+        the anomaly signal must never break detection."""
+        try:
+            # Snapshot the list on the loop before handing it to the executor.
+            cycles = list(self.profile_store.get_past_cycles())
+            stop_threshold = float(self.detector.config.stop_threshold_w)
+            earliest, peak_range = await self.hass.async_add_executor_job(
+                terminal_drop_baseline,
+                cycles,
+                stop_threshold,
+                TERMINAL_DROP_MIN_QUIET_SPAN_S,
+                TERMINAL_DROP_MIN_CLEAN_CYCLES,
+            )
+            self._terminal_drop_cache = (len(cycles), earliest, peak_range)
+        except Exception as err:  # noqa: BLE001 - anomaly signal must never break detection
+            self._logger.debug("Terminal-drop baseline refresh failed: %s", err)
+            # Allow a later reading to retry the refresh for this count.
+            if self._terminal_drop_refresh_n == n:
+                self._terminal_drop_refresh_n = None
 
     def _ml_progress_percent(
         self,

@@ -561,7 +561,12 @@
     "flags": "Метки",
     "include_phase_map": "Включить карту фаз",
     "include_settings": "Включить настройки",
-    "show_contributor": "Показать автора"
+    "show_contributor": "Показать автора",
+    "task_pg_detail": "Смоделировать цикл",
+    "task_split": "Разделение цикла",
+    "task_trim": "Обрезка цикла",
+    "task_merge": "Объединение циклов",
+    "task_rebuild": "Пересчёт огибающих"
   },
   "log": {
     "all_levels": "Все уровни",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Оптимизация: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Смоделировать цикл"
+    },
+    "split": {
+      "apply": "Разделение цикла"
+    },
+    "trim": {
+      "apply": "Обрезка цикла"
+    },
+    "merge": {
+      "apply": "Объединение циклов"
+    },
+    "rebuild": {
+      "envelopes": "Пересчёт огибающих"
     }
   },
   "setup": {

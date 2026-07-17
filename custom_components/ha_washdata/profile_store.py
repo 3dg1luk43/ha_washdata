@@ -461,6 +461,24 @@ def device_active_peak_range(
     return (min(peaks), max(peaks))
 
 
+def terminal_drop_baseline(
+    cycles: list[CycleDict],
+    stop_threshold_w: float,
+    min_quiet_span_s: float,
+    min_clean_cycles: int,
+) -> tuple[float | None, tuple[float, float] | None]:
+    """Combined ``(earliest_quiet_offset, peak_range)`` baseline.
+
+    Pure (no store / no I/O beyond decompressing the passed-in cycle traces), so
+    the manager can offload the whole per-cycle scan to an executor thread in one
+    hop instead of decompressing every trace on the event loop (issue #311)."""
+    earliest = earliest_sustained_quiet_offset(
+        cycles, stop_threshold_w, min_quiet_span_s, min_clean_cycles
+    )
+    peak_range = device_active_peak_range(cycles, min_clean_cycles)
+    return earliest, peak_range
+
+
 def is_terminal_drop(
     points: list[tuple[float, float]],
     earliest_quiet: float | None,
@@ -4315,39 +4333,48 @@ class ProfileStore:
             # Prepare Snapshots. Imported reference cycles are eligible as matching
             # templates alongside real cycles (so an import-only profile can match).
             all_cycles = list(self._data["past_cycles"]) + list(self._data.get("reference_cycles", []))
+            # Precompute per-profile lookups ONCE so the loop below is O(profiles),
+            # not O(profiles x cycles). Rescanning all_cycles with next()/any() for
+            # every profile made matching quadratic and stalled low-power hosts on
+            # auto-label (many matches x many cycles) - issue #311. Selections are
+            # byte-identical: cycles_by_id keeps the FIRST occurrence (== next()),
+            # labeled_by_profile keeps the first eligible cycle in all_cycles order,
+            # and golden_profiles mirrors the any(...) golden test.
+            cycles_by_id: dict[str, CycleDict] = {}
+            labeled_by_profile: dict[str, CycleDict] = {}
+            golden_profiles: set[str] = set()
+            for c in all_cycles:
+                cid = c.get("id")
+                if cid is not None and cid not in cycles_by_id:
+                    cycles_by_id[cid] = c
+                pname = c.get("profile_name")
+                if not pname or not c.get("power_data"):
+                    continue
+                if (
+                    pname not in labeled_by_profile
+                    and c.get("status") in ("completed", "force_stopped")
+                ):
+                    labeled_by_profile[pname] = c
+                rev = c.get("ml_review")
+                if isinstance(rev, dict) and rev.get("golden"):
+                    golden_profiles.add(pname)
+
             snapshots: list[dict[str, Any]] = []
             skipped_profiles: list[str] = []
             for name, profile in self._data["profiles"].items():
                 # Try sample_cycle_id first, fall back to any labeled cycle
                 sample_id = profile.get("sample_cycle_id")
-                sample_cycle = None
-                if sample_id:
-                    sample_cycle = next(
-                        (c for c in all_cycles if c["id"] == sample_id),
-                        None
-                    )
+                sample_cycle = cycles_by_id.get(sample_id) if sample_id else None
                 # Fallback: find ANY completed cycle labeled with this profile
                 if not sample_cycle:
-                    sample_cycle = next(
-                        (c for c in all_cycles
-                          if c.get("profile_name") == name
-                          and c.get("status") in ("completed", "force_stopped")
-                          and c.get("power_data")),
-                        None
-                    )
+                    sample_cycle = labeled_by_profile.get(name)
                 # Boost user-pinned "golden" cycles: when a profile has one, use
                 # its sharp single-cycle trace as the matching template instead
                 # of the envelope average. The envelope average smears the
                 # wash-phase peaks (each cycle's spikes land at slightly
                 # different times), which hurts correlation for sharply-shaped
                 # programs; a trusted golden cycle preserves that shape.
-                has_golden = any(
-                    c.get("profile_name") == name
-                    and isinstance(c.get("ml_review"), dict)
-                    and c["ml_review"].get("golden")
-                    and c.get("power_data")
-                    for c in all_cycles
-                )
+                has_golden = name in golden_profiles
 
                 # Prefer envelope avg curve when ≥2 labeled cycles have been
                 # confirmed - it gives a more representative reference signal

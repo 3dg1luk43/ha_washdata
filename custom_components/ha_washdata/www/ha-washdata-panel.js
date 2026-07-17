@@ -1961,7 +1961,9 @@ class HaWashdataPanel extends HTMLElement {
       const kind = String(msg.type || '').endsWith('reprocess_history') ? 'reprocess'
         : String(msg.type || '').endsWith('trigger_ml_training') ? 'ml_training'
         : String(msg.type || '').endsWith('apply_split') ? 'split'
-        : String(msg.type || '').endsWith('trim_cycle') ? 'trim' : 'task';
+        : String(msg.type || '').endsWith('trim_cycle') ? 'trim'
+        : String(msg.type || '').endsWith('apply_merge') ? 'merge'
+        : String(msg.type || '').endsWith('rebuild_envelopes') ? 'rebuild' : 'task';
       this._addProvisionalTask(tid, kind, msg.entry_id, 0);
     } catch (e) {
       this._busy.delete(busyKey);
@@ -2051,6 +2053,8 @@ class HaWashdataPanel extends HTMLElement {
       pg_detail: this._t('lbl.task_pg_detail', {}, 'Simulate cycle'),
       split: this._t('lbl.task_split', {}, 'Splitting cycle'),
       trim: this._t('lbl.task_trim', {}, 'Trimming cycle'),
+      merge: this._t('lbl.task_merge', {}, 'Merging cycles'),
+      rebuild: this._t('lbl.task_rebuild', {}, 'Rebuilding envelopes'),
       reprocess: this._t('lbl.task_reprocess', {}, 'Reprocessing'),
       ml_training: this._t('lbl.task_ml_training', {}, 'Learning'),
     };
@@ -9372,10 +9376,13 @@ class HaWashdataPanel extends HTMLElement {
       });
 
     } else if (a === 'rebuild-envelopes') {
-      this._busyRun('rebuild-envelopes', async () => {
-        try { await this._ws({ type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid }); this._showToast(this._t('toast.envelopes_rebuilt', {}, 'Envelopes rebuilt')); await this._fetchProfiles(eid); }
-        catch (e) { this._showToast(this._t('toast.rebuild_failed', {error: e.message || e}, 'Rebuild failed: ' + (e.message || e)), 'error'); }
-      });
+      // Backgrounded task (issue #311): rebuilding every profile serially can
+      // stall a low-power host, so run it via the registry with a header pill.
+      this._kickAndTrack(
+        { type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid },
+        'rebuild-envelopes',
+        async () => { this._showToast(this._t('toast.envelopes_rebuilt', {}, 'Envelopes rebuilt')); await this._fetchProfiles(eid); },
+      );
 
     } else if (a === 'rec-start') {
       this._ws({ type: `${_DOMAIN}/start_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_started', {}, 'Recording started')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('toast.start_failed', {error: e.message || e}, 'Start failed: ' + (e.message || e)), 'error'));
@@ -10037,10 +10044,19 @@ class HaWashdataPanel extends HTMLElement {
         return;
       }
       if (action === 'pp-rebuild') {
-        await this._busyRun('pp-rebuild', async () => {
-          try { await this._ws({ type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid }); const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: eid, profile_name: m.name }); if (this._modal) this._modal.env = r.envelope; this._showToast(this._t('toast.envelope_rebuilt', {}, 'Envelope rebuilt')); }
-          catch (e) { this._showToast(this._t('msg.toast_rebuild_failed', {error: e.message || e}, 'Rebuild failed: ' + (e.message || e)), 'error'); }
-        });
+        // Backgrounded task (issue #311): rebuild runs via the registry; the
+        // profile's fresh envelope is fetched only once the task has settled.
+        this._kickAndTrack(
+          { type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid },
+          'pp-rebuild',
+          async () => {
+            try {
+              const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: eid, profile_name: m.name });
+              if (this._modal) this._modal.env = r.envelope;
+            } catch (_) { /* modal may have closed */ }
+            this._showToast(this._t('toast.envelope_rebuilt', {}, 'Envelope rebuilt'));
+          },
+        );
         return;
       }
       if (action === 'pp-delete') {
@@ -10130,14 +10146,17 @@ class HaWashdataPanel extends HTMLElement {
       const newName = sr.getElementById('wd-merge-newname')?.value?.trim() || null;
       const ids = m.ids || [];
       this._modal = null; this._render();
-      await this._busyRun('cyc-merge', async () => {
-        try {
-          await this._ws({ type: `${_DOMAIN}/apply_merge`, entry_id: eid, cycle_ids: ids, target_profile: target || null, new_profile_name: newName });
+      // Backgrounded task (issue #311): gap-fill + affected envelope rebuilds can
+      // stall a low-power host, so run it via the registry with a header pill.
+      this._kickAndTrack(
+        { type: `${_DOMAIN}/apply_merge`, entry_id: eid, cycle_ids: ids, target_profile: target || null, new_profile_name: newName },
+        'cyc-merge',
+        async () => {
           this._showToast(this._t('toast.cycles_merged', {}, 'Cycles merged'));
           this._cycleSel.clear(); this._selectMode = false;
           await this._fetchCycles(eid); await this._fetchProfiles(eid);
-        } catch (e) { this._showToast(this._t('toast.merge_failed', {error: e.message || e}, 'Merge failed: ' + (e.message || e)), 'error'); }
-      });
+        },
+      );
     } else if (action === 'bulk-relabel-ok' && eid) {
       // D6: apply the chosen label to every selected cycle via label_cycle.
       const profileName = sr.getElementById('wd-relabel-profile')?.value || '';

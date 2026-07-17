@@ -561,7 +561,12 @@
     "flags": "Flagg",
     "include_phase_map": "Inkluder fasekart",
     "include_settings": "Inkluder deteksjons- og matchinnstillinger",
-    "show_contributor": "Vis bidragsyternavn"
+    "show_contributor": "Vis bidragsyternavn",
+    "task_pg_detail": "Simuler syklus",
+    "task_split": "Deler opp syklus",
+    "task_trim": "Beskjærer syklus",
+    "task_merge": "Slår sammen sykluser",
+    "task_rebuild": "Bygger opp envelopes på nytt"
   },
   "log": {
     "all_levels": "Alle nivåer",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimaliser: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simuler syklus"
+    },
+    "split": {
+      "apply": "Deler opp syklus"
+    },
+    "trim": {
+      "apply": "Beskjærer syklus"
+    },
+    "merge": {
+      "apply": "Slår sammen sykluser"
+    },
+    "rebuild": {
+      "envelopes": "Bygger opp envelopes på nytt"
     }
   },
   "setup": {

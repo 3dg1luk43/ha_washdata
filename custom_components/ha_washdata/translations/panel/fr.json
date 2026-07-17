@@ -561,7 +561,12 @@
     "flags": "Indicateurs",
     "include_phase_map": "Inclure la carte des phases",
     "include_settings": "Inclure les paramètres de détection et de reconnaissance",
-    "show_contributor": "Afficher les noms des contributeurs"
+    "show_contributor": "Afficher les noms des contributeurs",
+    "task_pg_detail": "Simuler le cycle",
+    "task_split": "Division du cycle",
+    "task_trim": "Rognage du cycle",
+    "task_merge": "Fusion des cycles",
+    "task_rebuild": "Reconstruction des enveloppes"
   },
   "log": {
     "all_levels": "Tous niveaux",
@@ -1767,6 +1772,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimiser : {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simuler le cycle"
+    },
+    "split": {
+      "apply": "Division du cycle"
+    },
+    "trim": {
+      "apply": "Rognage du cycle"
+    },
+    "merge": {
+      "apply": "Fusion des cycles"
+    },
+    "rebuild": {
+      "envelopes": "Reconstruction des enveloppes"
     }
   },
   "setup": {

@@ -561,7 +561,12 @@
     "flags": "Flamuj",
     "include_phase_map": "Përfshi hartën e fazave",
     "include_settings": "Përfshi cilësimet e zbulimit dhe përputhjes",
-    "show_contributor": "Trego emrat e kontribuesve"
+    "show_contributor": "Trego emrat e kontribuesve",
+    "task_pg_detail": "Simulimi i ciklit",
+    "task_split": "Ndarja e ciklit",
+    "task_trim": "Prerja e ciklit",
+    "task_merge": "Bashkimi i cikleve",
+    "task_rebuild": "Rindërtimi i zarfave"
   },
   "log": {
     "all_levels": "Të gjitha nivelet",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimizim: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simulimi i ciklit"
+    },
+    "split": {
+      "apply": "Ndarja e ciklit"
+    },
+    "trim": {
+      "apply": "Prerja e ciklit"
+    },
+    "merge": {
+      "apply": "Bashkimi i cikleve"
+    },
+    "rebuild": {
+      "envelopes": "Rindërtimi i zarfave"
     }
   },
   "setup": {

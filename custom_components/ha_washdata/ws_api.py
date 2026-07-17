@@ -1798,24 +1798,67 @@ async def ws_delete_profile_group(
 @websocket_api.websocket_command(
     {vol.Required("type"): "ha_washdata/rebuild_envelopes", vol.Required("entry_id"): str}
 )
-@websocket_api.async_response
-async def ws_rebuild_envelopes(
+@callback
+def ws_rebuild_envelopes(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Rebuild power-profile envelopes for all profiles."""
+    """Rebuild power-profile envelopes for all profiles.
+
+    Runs as a detached, registry-tracked task that rebuilds one profile per step
+    (each DTW pass already offloads to the executor): rebuilding every profile
+    serially inside the WS request stalled low-power hosts for the whole run
+    (issue #311). Progress/result come via the task registry."""
     entry_id: str = msg["entry_id"]
-    manager = _get_manager(hass, entry_id)
-    if manager is None:
+    if _get_manager(hass, entry_id) is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
+    reg = task_registry.get_registry(hass)
+    task = reg.create(
+        entry_id, "rebuild", "Rebuilding envelopes",
+        label_key="task.rebuild.envelopes", label_params={},
+    )
+    hass.async_create_task(_rebuild_envelopes_task(hass, task, entry_id))
+    _send_result(connection, msg["id"], "rebuild_envelopes", {"task_id": task.id})
 
+
+async def _rebuild_envelopes_task(hass: HomeAssistant, task: Any, entry_id: str) -> None:
+    """Detached runner: rebuild every profile's envelope one at a time, reporting
+    progress and honouring cancel, so the loop breathes between profiles."""
+    reg = task_registry.get_registry(hass)
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+        return
+    store = manager.profile_store
+    lock = _entry_write_lock(hass, entry_id)
+    await lock.acquire()
     try:
-        await manager.profile_store.async_rebuild_all_envelopes()
-        _send_result(connection, msg["id"], "rebuild_envelopes", {"success": True})
+        names = list(store.get_profiles().keys())
+        reg.update(task, total=len(names), done=0)
+        rebuilt = 0
+        for i, name in enumerate(names):
+            if task.cancel_requested:
+                break
+            try:
+                if await store.async_rebuild_envelope(name):
+                    rebuilt += 1
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                _LOGGER.debug("Envelope rebuild failed for %s/%s: %s", entry_id, name, exc)
+            reg.update(task, done=i + 1)
+        if _get_manager(hass, entry_id) is manager:
+            manager.notify_update()
+        reg.finish(
+            task,
+            state=task_registry.STATE_CANCELLED if task.cancel_requested else task_registry.STATE_DONE,
+            result={"success": True, "rebuilt": rebuilt},
+        )
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        connection.send_error(msg["id"], "unknown_error", str(exc))
+        _LOGGER.warning("Rebuild-envelopes task failed for %s: %s", entry_id, exc)
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
+    finally:
+        lock.release()
 
 
 @websocket_api.websocket_command(
@@ -3374,20 +3417,24 @@ async def _apply_split_task(
         vol.Optional("new_profile_name"): vol.Any(str, None),
     }
 )
-@websocket_api.async_response
-async def ws_apply_merge(
+@callback
+def ws_apply_merge(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Merge two or more cycles into one, optionally labeling the result."""
+    """Merge two or more cycles into one, optionally labeling the result.
+
+    Cheap validation runs synchronously; the merge (gap-fill + signature recompute
+    + affected-profile envelope rebuilds + save) then runs as a detached,
+    registry-tracked task so it never holds the event loop for the whole request
+    on low-power hosts (issue #311). Progress/result via the task registry."""
     entry_id: str = msg["entry_id"]
     manager = _get_manager(hass, entry_id)
     if manager is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
 
-    store = manager.profile_store
     ids: list[str] = msg["cycle_ids"]
     if len(ids) < 2:
         connection.send_error(
@@ -3396,29 +3443,59 @@ async def ws_apply_merge(
         return
 
     target = msg.get("target_profile")
-    try:
-        if target == "__create_new__":
-            name = (msg.get("new_profile_name") or "").strip()
-            if not name:
-                connection.send_error(
-                    msg["id"], "invalid_format", "New profile name required"
-                )
-                return
-            await store.create_profile_standalone(name)
-            target = name
-        elif target in ("", "none", "__none__"):
-            target = None
-
-        new_id = await store.apply_merge_interactive(ids, target)
-        if not new_id:
-            connection.send_error(msg["id"], "merge_failed", "Cycles could not be merged")
+    new_name: str | None = None
+    if target == "__create_new__":
+        new_name = (msg.get("new_profile_name") or "").strip()
+        if not new_name:
+            connection.send_error(msg["id"], "invalid_format", "New profile name required")
             return
+    elif target in ("", "none", "__none__"):
+        target = None
 
-        await store.async_rebuild_all_envelopes()
-        manager.notify_update()
-        _send_result(connection, msg["id"], "apply_merge", {"success": True, "new_id": new_id})
+    reg = task_registry.get_registry(hass)
+    task = reg.create(
+        entry_id, "merge", "Merging cycles", label_key="task.merge.apply", label_params={},
+    )
+    hass.async_create_task(_apply_merge_task(hass, task, entry_id, ids, target, new_name))
+    _send_result(connection, msg["id"], "apply_merge", {"task_id": task.id})
+
+
+async def _apply_merge_task(
+    hass: HomeAssistant, task: Any, entry_id: str,
+    ids: list[str], target: str | None, new_name: str | None,
+) -> None:
+    """Detached runner for a cycle merge. Rebuilds only the affected profiles'
+    envelopes (done inside apply_merge_interactive). Serialized under the per-entry
+    write lock like reprocess."""
+    reg = task_registry.get_registry(hass)
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+        return
+    store = manager.profile_store
+    lock = _entry_write_lock(hass, entry_id)
+    await lock.acquire()
+    try:
+        reg.update(task, total=1, done=0)
+        if new_name:
+            await store.create_profile_standalone(new_name)
+            target = new_name
+        new_id = await store.apply_merge_interactive(ids, target)
+        reg.update(task, done=1)
+        if not new_id:
+            reg.finish(task, state=task_registry.STATE_ERROR, error="merge_failed")
+            return
+        if _get_manager(hass, entry_id) is manager:
+            manager.notify_update()
+        reg.finish(
+            task, state=task_registry.STATE_DONE,
+            result={"success": True, "new_id": new_id},
+        )
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        connection.send_error(msg["id"], "unknown_error", str(exc))
+        _LOGGER.warning("Apply-merge task failed for %s: %s", entry_id, exc)
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
+    finally:
+        lock.release()
 
 
 # ─── Profile envelope / member cycles ──────────────────────────────────────────

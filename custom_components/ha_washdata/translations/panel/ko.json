@@ -561,7 +561,12 @@
     "flags": "플래그",
     "include_phase_map": "페이즈 맵 포함",
     "include_settings": "감지 및 매칭 설정 포함",
-    "show_contributor": "기여자 이름 표시"
+    "show_contributor": "기여자 이름 표시",
+    "task_pg_detail": "사이클 시뮬레이션",
+    "task_split": "사이클 분할 중",
+    "task_trim": "사이클 트리밍 중",
+    "task_merge": "사이클 병합 중",
+    "task_rebuild": "엔벨로프 재구성 중"
   },
   "log": {
     "all_levels": "모든 레벨",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "최적화: {param}"
+    },
+    "pg_detail": {
+      "simulate": "사이클 시뮬레이션"
+    },
+    "split": {
+      "apply": "사이클 분할 중"
+    },
+    "trim": {
+      "apply": "사이클 트리밍 중"
+    },
+    "merge": {
+      "apply": "사이클 병합 중"
+    },
+    "rebuild": {
+      "envelopes": "엔벨로프 재구성 중"
     }
   },
   "setup": {

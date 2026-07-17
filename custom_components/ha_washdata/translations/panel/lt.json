@@ -561,7 +561,12 @@
     "flags": "Žymės",
     "include_phase_map": "Įtraukti fazių žemėlapį",
     "include_settings": "Įtraukti aptikimo ir atitikties nustatymus",
-    "show_contributor": "Rodyti dalyvių vardus"
+    "show_contributor": "Rodyti dalyvių vardus",
+    "task_pg_detail": "Simuliuojamas ciklas",
+    "task_split": "Padalijamas ciklas",
+    "task_trim": "Apkarpomas ciklas",
+    "task_merge": "Sujungiami ciklai",
+    "task_rebuild": "Perkuriamos gaubtinės"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimizavimas: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simuliuojamas ciklas"
+    },
+    "split": {
+      "apply": "Padalijamas ciklas"
+    },
+    "trim": {
+      "apply": "Apkarpomas ciklas"
+    },
+    "merge": {
+      "apply": "Sujungiami ciklai"
+    },
+    "rebuild": {
+      "envelopes": "Perkuriamos gaubtinės"
     }
   },
   "setup": {

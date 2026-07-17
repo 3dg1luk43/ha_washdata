@@ -561,7 +561,12 @@
     "flags": "Flags",
     "include_phase_map": "Phasenkarte einbeziehen",
     "include_settings": "Erkennungs- und Abgleicheinstellungen einbeziehen",
-    "show_contributor": "Beiträgernamen anzeigen"
+    "show_contributor": "Beiträgernamen anzeigen",
+    "task_pg_detail": "Zyklus simulieren",
+    "task_split": "Zyklus wird geteilt",
+    "task_trim": "Zyklus wird zugeschnitten",
+    "task_merge": "Zyklen werden zusammengeführt",
+    "task_rebuild": "Hüllkurven werden neu aufgebaut"
   },
   "log": {
     "all_levels": "Alle Ebenen",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimieren: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Zyklus simulieren"
+    },
+    "split": {
+      "apply": "Zyklus wird geteilt"
+    },
+    "trim": {
+      "apply": "Zyklus wird zugeschnitten"
+    },
+    "merge": {
+      "apply": "Zyklen werden zusammengeführt"
+    },
+    "rebuild": {
+      "envelopes": "Hüllkurven werden neu aufgebaut"
     }
   },
   "setup": {

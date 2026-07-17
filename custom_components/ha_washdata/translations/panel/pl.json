@@ -561,7 +561,12 @@
     "flags": "Flagi",
     "include_phase_map": "Dołącz mapę faz",
     "include_settings": "Dołącz ustawienia",
-    "show_contributor": "Pokaż współtwórcę"
+    "show_contributor": "Pokaż współtwórcę",
+    "task_pg_detail": "Symuluj cykl",
+    "task_split": "Dzielenie cyklu",
+    "task_trim": "Przycinanie cyklu",
+    "task_merge": "Scalanie cykli",
+    "task_rebuild": "Przeliczanie obwiedni"
   },
   "log": {
     "all_levels": "Wszystkie poziomy",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optymalizacja: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Symuluj cykl"
+    },
+    "split": {
+      "apply": "Dzielenie cyklu"
+    },
+    "trim": {
+      "apply": "Przycinanie cyklu"
+    },
+    "merge": {
+      "apply": "Scalanie cykli"
+    },
+    "rebuild": {
+      "envelopes": "Przeliczanie obwiedni"
     }
   },
   "setup": {

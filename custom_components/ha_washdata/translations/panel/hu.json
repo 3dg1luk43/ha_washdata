@@ -561,7 +561,12 @@
     "flags": "Jelzők",
     "include_phase_map": "Fázistérkép belefoglalása",
     "include_settings": "Érzékelési és párosítási beállítások belefoglalása",
-    "show_contributor": "Közreműködők nevének megjelenítése"
+    "show_contributor": "Közreműködők nevének megjelenítése",
+    "task_pg_detail": "Ciklus szimulálása",
+    "task_split": "Ciklus felosztása",
+    "task_trim": "Ciklus levágása",
+    "task_merge": "Ciklusok egyesítése",
+    "task_rebuild": "Burkológörbék újraépítése"
   },
   "log": {
     "all_levels": "Minden szinten",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimalizálás: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Ciklus szimulálása"
+    },
+    "split": {
+      "apply": "Ciklus felosztása"
+    },
+    "trim": {
+      "apply": "Ciklus levágása"
+    },
+    "merge": {
+      "apply": "Ciklusok egyesítése"
+    },
+    "rebuild": {
+      "envelopes": "Burkológörbék újraépítése"
     }
   },
   "setup": {

@@ -561,7 +561,12 @@
     "flags": "Karodziņi",
     "include_phase_map": "Iekļaut fāžu karti",
     "include_settings": "Iekļaut noteikšanas un saskaņošanas iestatījumus",
-    "show_contributor": "Rādīt līdzautoru vārdus"
+    "show_contributor": "Rādīt līdzautoru vārdus",
+    "task_pg_detail": "Cikla simulēšana",
+    "task_split": "Cikla sadalīšana",
+    "task_trim": "Cikla apgriešana",
+    "task_merge": "Ciklu apvienošana",
+    "task_rebuild": "Apvalklīkņu pārbūve"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimizēšana: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Cikla simulēšana"
+    },
+    "split": {
+      "apply": "Cikla sadalīšana"
+    },
+    "trim": {
+      "apply": "Cikla apgriešana"
+    },
+    "merge": {
+      "apply": "Ciklu apvienošana"
+    },
+    "rebuild": {
+      "envelopes": "Apvalklīkņu pārbūve"
     }
   },
   "setup": {

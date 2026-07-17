@@ -561,7 +561,12 @@
     "flags": "İşaretler",
     "include_phase_map": "Faz haritasını dahil et",
     "include_settings": "Algılama ve eşleştirme ayarlarını dahil et",
-    "show_contributor": "Katkıda bulunanların adlarını göster"
+    "show_contributor": "Katkıda bulunanların adlarını göster",
+    "task_pg_detail": "Döngü simülasyonu",
+    "task_split": "Döngü bölünüyor",
+    "task_trim": "Döngü kırpılıyor",
+    "task_merge": "Döngüler birleştiriliyor",
+    "task_rebuild": "Zarflar yeniden oluşturuluyor"
   },
   "log": {
     "all_levels": "Tüm seviyeler",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimizasyon: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Döngü simülasyonu"
+    },
+    "split": {
+      "apply": "Döngü bölünüyor"
+    },
+    "trim": {
+      "apply": "Döngü kırpılıyor"
+    },
+    "merge": {
+      "apply": "Döngüler birleştiriliyor"
+    },
+    "rebuild": {
+      "envelopes": "Zarflar yeniden oluşturuluyor"
     }
   },
   "setup": {

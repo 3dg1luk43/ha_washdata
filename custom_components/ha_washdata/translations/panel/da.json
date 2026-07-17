@@ -561,7 +561,12 @@
     "flags": "Flags",
     "include_phase_map": "Inkludér fasekort",
     "include_settings": "Inkludér detektions- og matchindstillinger",
-    "show_contributor": "Vis bidragydernes navne"
+    "show_contributor": "Vis bidragydernes navne",
+    "task_pg_detail": "Simulér cyklus",
+    "task_split": "Opdeler cyklus",
+    "task_trim": "Beskærer cyklus",
+    "task_merge": "Sammenfletter cyklusser",
+    "task_rebuild": "Genopbygger envelopes"
   },
   "log": {
     "all_levels": "Alle niveauer",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimér: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simulér cyklus"
+    },
+    "split": {
+      "apply": "Opdeler cyklus"
+    },
+    "trim": {
+      "apply": "Beskærer cyklus"
+    },
+    "merge": {
+      "apply": "Sammenfletter cyklusser"
+    },
+    "rebuild": {
+      "envelopes": "Genopbygger envelopes"
     }
   },
   "setup": {

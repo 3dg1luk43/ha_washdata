@@ -561,7 +561,12 @@
     "flags": "Príznaky",
     "include_phase_map": "Zahrnúť mapu fáz",
     "include_settings": "Zahrnúť nastavenia",
-    "show_contributor": "Zobraziť prispievateľa"
+    "show_contributor": "Zobraziť prispievateľa",
+    "task_pg_detail": "Simulovať cyklus",
+    "task_split": "Rozdeľovanie cyklu",
+    "task_trim": "Orezávanie cyklu",
+    "task_merge": "Zlučovanie cyklov",
+    "task_rebuild": "Prepočítavanie obálok"
   },
   "log": {
     "all_levels": "Všetky úrovne",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimalizácia: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simulovať cyklus"
+    },
+    "split": {
+      "apply": "Rozdeľovanie cyklu"
+    },
+    "trim": {
+      "apply": "Orezávanie cyklu"
+    },
+    "merge": {
+      "apply": "Zlučovanie cyklov"
+    },
+    "rebuild": {
+      "envelopes": "Prepočítavanie obálok"
     }
   },
   "setup": {

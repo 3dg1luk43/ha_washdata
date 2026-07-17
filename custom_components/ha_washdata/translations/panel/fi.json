@@ -561,7 +561,12 @@
     "flags": "Liput",
     "include_phase_map": "Sisällytä vaihdekartta",
     "include_settings": "Sisällytä tunnistus- ja täsmäytysasetukset",
-    "show_contributor": "Näytä osallistujien nimet"
+    "show_contributor": "Näytä osallistujien nimet",
+    "task_pg_detail": "Simuloidaan sykliä",
+    "task_split": "Jaetaan sykliä",
+    "task_trim": "Rajataan sykliä",
+    "task_merge": "Yhdistetään syklejä",
+    "task_rebuild": "Rakennetaan tehoalueita uudelleen"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimointi: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simuloidaan sykliä"
+    },
+    "split": {
+      "apply": "Jaetaan sykliä"
+    },
+    "trim": {
+      "apply": "Rajataan sykliä"
+    },
+    "merge": {
+      "apply": "Yhdistetään syklejä"
+    },
+    "rebuild": {
+      "envelopes": "Rakennetaan tehoalueita uudelleen"
     }
   },
   "setup": {

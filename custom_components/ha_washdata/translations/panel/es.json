@@ -561,7 +561,12 @@
     "flags": "Indicadores",
     "include_phase_map": "Incluir mapa de fases",
     "include_settings": "Incluir ajustes de detección y reconocimiento",
-    "show_contributor": "Mostrar nombres de colaboradores"
+    "show_contributor": "Mostrar nombres de colaboradores",
+    "task_pg_detail": "Simular ciclo",
+    "task_split": "Dividiendo el ciclo",
+    "task_trim": "Recortando el ciclo",
+    "task_merge": "Combinando ciclos",
+    "task_rebuild": "Reconstruyendo envolventes"
   },
   "log": {
     "all_levels": "Todos los niveles",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimizar: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simular ciclo"
+    },
+    "split": {
+      "apply": "Dividiendo el ciclo"
+    },
+    "trim": {
+      "apply": "Recortando el ciclo"
+    },
+    "merge": {
+      "apply": "Combinando ciclos"
+    },
+    "rebuild": {
+      "envelopes": "Reconstruyendo envolventes"
     }
   },
   "setup": {

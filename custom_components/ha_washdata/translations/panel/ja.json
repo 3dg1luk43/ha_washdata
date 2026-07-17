@@ -561,7 +561,12 @@
     "flags": "フラグ",
     "include_phase_map": "フェーズマップを含める",
     "include_settings": "検出・マッチング設定を含める",
-    "show_contributor": "投稿者名を表示"
+    "show_contributor": "投稿者名を表示",
+    "task_pg_detail": "サイクルをシミュレート",
+    "task_split": "サイクルを分割中",
+    "task_trim": "サイクルをトリミング中",
+    "task_merge": "サイクルを結合中",
+    "task_rebuild": "エンベロープを再構築中"
   },
   "log": {
     "all_levels": "すべてのレベル",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "最適化: {param}"
+    },
+    "pg_detail": {
+      "simulate": "サイクルをシミュレート"
+    },
+    "split": {
+      "apply": "サイクルを分割中"
+    },
+    "trim": {
+      "apply": "サイクルをトリミング中"
+    },
+    "merge": {
+      "apply": "サイクルを結合中"
+    },
+    "rebuild": {
+      "envelopes": "エンベロープを再構築中"
     }
   },
   "setup": {

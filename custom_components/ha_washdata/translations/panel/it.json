@@ -561,7 +561,12 @@
     "flags": "Indicatori",
     "include_phase_map": "Includi mappa delle fasi",
     "include_settings": "Includi impostazioni di rilevamento e riconoscimento",
-    "show_contributor": "Mostra i nomi dei collaboratori"
+    "show_contributor": "Mostra i nomi dei collaboratori",
+    "task_pg_detail": "Simula ciclo",
+    "task_split": "Divisione del ciclo",
+    "task_trim": "Ritaglio del ciclo",
+    "task_merge": "Unione dei cicli",
+    "task_rebuild": "Ricostruzione degli inviluppi"
   },
   "log": {
     "all_levels": "Tutti i livelli",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Ottimizza: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simula ciclo"
+    },
+    "split": {
+      "apply": "Divisione del ciclo"
+    },
+    "trim": {
+      "apply": "Ritaglio del ciclo"
+    },
+    "merge": {
+      "apply": "Unione dei cicli"
+    },
+    "rebuild": {
+      "envelopes": "Ricostruzione degli inviluppi"
     }
   },
   "setup": {

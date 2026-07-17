@@ -561,7 +561,12 @@
     "flags": "Embleemid",
     "include_phase_map": "Kaasa faasikaart",
     "include_settings": "Kaasa tuvastus- ja sobitamisseaded",
-    "show_contributor": "Näita kaastöötajate nimesid"
+    "show_contributor": "Näita kaastöötajate nimesid",
+    "task_pg_detail": "Tsükli simuleerimine",
+    "task_split": "Tsükli poolitamine",
+    "task_trim": "Tsükli kärpimine",
+    "task_merge": "Tsüklite ühendamine",
+    "task_rebuild": "Võimsusvahemike taasloomine"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimeerimine: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Tsükli simuleerimine"
+    },
+    "split": {
+      "apply": "Tsükli poolitamine"
+    },
+    "trim": {
+      "apply": "Tsükli kärpimine"
+    },
+    "merge": {
+      "apply": "Tsüklite ühendamine"
+    },
+    "rebuild": {
+      "envelopes": "Võimsusvahemike taasloomine"
     }
   },
   "setup": {

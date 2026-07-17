@@ -19,11 +19,6 @@ export interface AnalyzeSplitResponse {
   full_duration_s: number;
 }
 
-export interface ApplyMergeResponse {
-  success: boolean;
-  new_id: string;
-}
-
 export interface ApplySuggestionsResponse {
   success: boolean;
   applied: string[];
@@ -1125,7 +1120,7 @@ export interface WashDataWsResponses {
   "ha_washdata/save_profile_group": SuccessResponse;
   "ha_washdata/rename_profile_group": SuccessResponse;
   "ha_washdata/delete_profile_group": SuccessResponse;
-  "ha_washdata/rebuild_envelopes": SuccessResponse;
+  "ha_washdata/rebuild_envelopes": StartTaskResponse;
   "ha_washdata/get_profile_phases": GetProfilePhasesResponse;
   "ha_washdata/set_profile_phases": SuccessResponse;
   "ha_washdata/get_maintenance_log": GetMaintenanceLogResponse;
@@ -1161,7 +1156,7 @@ export interface WashDataWsResponses {
   "ha_washdata/trim_cycle": StartTaskResponse;
   "ha_washdata/analyze_split": AnalyzeSplitResponse;
   "ha_washdata/apply_split": StartTaskResponse;
-  "ha_washdata/apply_merge": ApplyMergeResponse;
+  "ha_washdata/apply_merge": StartTaskResponse;
   "ha_washdata/get_profile_envelope": GetProfileEnvelopeResponse;
   "ha_washdata/get_profile_cycles": GetProfileCyclesResponse;
   "ha_washdata/get_panel_config": GetPanelConfigResponse;

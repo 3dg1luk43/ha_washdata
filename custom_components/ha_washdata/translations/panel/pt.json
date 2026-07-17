@@ -561,7 +561,12 @@
     "flags": "Indicadores",
     "include_phase_map": "Incluir mapa de fases",
     "include_settings": "Incluir definições de deteção e reconhecimento",
-    "show_contributor": "Mostrar nomes dos colaboradores"
+    "show_contributor": "Mostrar nomes dos colaboradores",
+    "task_pg_detail": "Simular ciclo",
+    "task_split": "A dividir o ciclo",
+    "task_trim": "A recortar o ciclo",
+    "task_merge": "A combinar ciclos",
+    "task_rebuild": "A reconstruir envelopes"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Otimizar: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simular ciclo"
+    },
+    "split": {
+      "apply": "A dividir o ciclo"
+    },
+    "trim": {
+      "apply": "A recortar o ciclo"
+    },
+    "merge": {
+      "apply": "A combinar ciclos"
+    },
+    "rebuild": {
+      "envelopes": "A reconstruir envelopes"
     }
   },
   "setup": {

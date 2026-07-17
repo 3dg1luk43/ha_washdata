@@ -561,7 +561,12 @@
     "flags": "Flaggor",
     "include_phase_map": "Inkludera fasekarta",
     "include_settings": "Inkludera identifierings- och matchningsinställningar",
-    "show_contributor": "Visa bidragsgivarnamn"
+    "show_contributor": "Visa bidragsgivarnamn",
+    "task_pg_detail": "Simulera cykel",
+    "task_split": "Delar upp cykel",
+    "task_trim": "Beskär cykel",
+    "task_merge": "Slår ihop cykler",
+    "task_rebuild": "Bygger om enveloppar"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimera: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simulera cykel"
+    },
+    "split": {
+      "apply": "Delar upp cykel"
+    },
+    "trim": {
+      "apply": "Beskär cykel"
+    },
+    "merge": {
+      "apply": "Slår ihop cykler"
+    },
+    "rebuild": {
+      "envelopes": "Bygger om enveloppar"
     }
   },
   "setup": {

@@ -561,7 +561,12 @@
     "flags": "Vlaggen",
     "include_phase_map": "Fasekaart opnemen",
     "include_settings": "Detectie- en matchinstellingen opnemen",
-    "show_contributor": "Bijdragersnamen weergeven"
+    "show_contributor": "Bijdragersnamen weergeven",
+    "task_pg_detail": "Cyclus simuleren",
+    "task_split": "Cyclus splitsen",
+    "task_trim": "Cyclus bijsnijden",
+    "task_merge": "Cycli samenvoegen",
+    "task_rebuild": "Enveloppen opnieuw opbouwen"
   },
   "log": {
     "all_levels": "Alle niveaus",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimaliseren: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Cyclus simuleren"
+    },
+    "split": {
+      "apply": "Cyclus splitsen"
+    },
+    "trim": {
+      "apply": "Cyclus bijsnijden"
+    },
+    "merge": {
+      "apply": "Cycli samenvoegen"
+    },
+    "rebuild": {
+      "envelopes": "Enveloppen opnieuw opbouwen"
     }
   },
   "setup": {

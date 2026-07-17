@@ -61,6 +61,8 @@ window.__create_mock_hass = function (extra) {
           'ha_washdata/start_playground_cycle_detail': { kind: 'pg_detail', resKey: 'ha_washdata/run_playground_cycle_detail' },
           'ha_washdata/apply_split': { kind: 'split', resKey: 'ha_washdata/apply_split' },
           'ha_washdata/trim_cycle': { kind: 'trim', resKey: 'ha_washdata/trim_cycle' },
+          'ha_washdata/apply_merge': { kind: 'merge', resKey: 'ha_washdata/apply_merge' },
+          'ha_washdata/rebuild_envelopes': { kind: 'rebuild', resKey: 'ha_washdata/rebuild_envelopes' },
           'ha_washdata/reprocess_history': { kind: 'reprocess', resKey: 'ha_washdata/reprocess_history' },
           'ha_washdata/trigger_ml_training': { kind: 'ml_training', resKey: 'ha_washdata/trigger_ml_training' },
         };

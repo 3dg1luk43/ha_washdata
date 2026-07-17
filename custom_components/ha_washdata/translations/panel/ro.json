@@ -561,7 +561,12 @@
     "flags": "Semnale",
     "include_phase_map": "Includeți harta fazelor",
     "include_settings": "Includeți setările de detectare și potrivire",
-    "show_contributor": "Afișați numele contribuitorilor"
+    "show_contributor": "Afișați numele contribuitorilor",
+    "task_pg_detail": "Simulare ciclu",
+    "task_split": "Se divide ciclul",
+    "task_trim": "Se decupează ciclul",
+    "task_merge": "Se îmbină ciclurile",
+    "task_rebuild": "Se reconstruiesc anvelopele"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimizează: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simulare ciclu"
+    },
+    "split": {
+      "apply": "Se divide ciclul"
+    },
+    "trim": {
+      "apply": "Se decupează ciclul"
+    },
+    "merge": {
+      "apply": "Se îmbină ciclurile"
+    },
+    "rebuild": {
+      "envelopes": "Se reconstruiesc anvelopele"
     }
   },
   "setup": {

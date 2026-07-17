@@ -561,7 +561,12 @@
     "flags": "Oznake",
     "include_phase_map": "Uključi mapu faza",
     "include_settings": "Uključi podešavanja",
-    "show_contributor": "Prikaži saradnika"
+    "show_contributor": "Prikaži saradnika",
+    "task_pg_detail": "Simuliraj ciklus",
+    "task_split": "Deljenje ciklusa",
+    "task_trim": "Obrezivanje ciklusa",
+    "task_merge": "Spajanje ciklusa",
+    "task_rebuild": "Ponovna izgradnja omotača"
   },
   "log": {
     "all_levels": "Svi nivoi",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Optimizacija: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simuliraj ciklus"
+    },
+    "split": {
+      "apply": "Deljenje ciklusa"
+    },
+    "trim": {
+      "apply": "Obrezivanje ciklusa"
+    },
+    "merge": {
+      "apply": "Spajanje ciklusa"
+    },
+    "rebuild": {
+      "envelopes": "Ponovna izgradnja omotača"
     }
   },
   "setup": {

@@ -561,7 +561,12 @@
     "flags": "Мітки",
     "include_phase_map": "Включити карту фаз",
     "include_settings": "Включити налаштування",
-    "show_contributor": "Показати автора"
+    "show_contributor": "Показати автора",
+    "task_pg_detail": "Змоделювати цикл",
+    "task_split": "Розділення циклу",
+    "task_trim": "Обрізання циклу",
+    "task_merge": "Об'єднання циклів",
+    "task_rebuild": "Перерахунок обвідних"
   },
   "log": {
     "all_levels": "Усі рівні",
@@ -1766,6 +1771,21 @@
     },
     "pg_sweep": {
       "optimize": "Оптимізація: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Змоделювати цикл"
+    },
+    "split": {
+      "apply": "Розділення циклу"
+    },
+    "trim": {
+      "apply": "Обрізання циклу"
+    },
+    "merge": {
+      "apply": "Об'єднання циклів"
+    },
+    "rebuild": {
+      "envelopes": "Перерахунок обвідних"
     }
   },
   "setup": {

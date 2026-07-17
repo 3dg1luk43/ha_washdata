@@ -258,16 +258,6 @@ class AnalyzeSplitResponse(TypedDict):
     full_duration_s: float
 
 
-class ApplySplitResponse(TypedDict):
-    success: bool
-    new_ids: list[str]
-
-
-class ApplyMergeResponse(TypedDict):
-    success: bool
-    new_id: str
-
-
 # ─── Profile envelope / member cycles ──────────────────────────────────────────
 
 class ProfileEnvelope(TypedDict):
@@ -631,7 +621,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "save_profile_group": SuccessResponse,
     "rename_profile_group": SuccessResponse,
     "delete_profile_group": SuccessResponse,
-    "rebuild_envelopes": SuccessResponse,
+    "rebuild_envelopes": StartTaskResponse,
     "get_profile_phases": GetProfilePhasesResponse,
     "set_profile_phases": SuccessResponse,
     "get_maintenance_log": GetMaintenanceLogResponse,
@@ -667,7 +657,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "trim_cycle": StartTaskResponse,
     "analyze_split": AnalyzeSplitResponse,
     "apply_split": StartTaskResponse,
-    "apply_merge": ApplyMergeResponse,
+    "apply_merge": StartTaskResponse,
     "get_profile_envelope": GetProfileEnvelopeResponse,
     "get_profile_cycles": GetProfileCyclesResponse,
     "get_panel_config": GetPanelConfigResponse,
