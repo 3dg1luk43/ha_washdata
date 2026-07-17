@@ -22,11 +22,14 @@ from pathlib import Path
 
 import pytest
 
+from custom_components.ha_washdata.const import CONF_ENABLE_PHASE_MATCHING
 from custom_components.ha_washdata.phase_segmenter import (
     ROLE_HEATING,
     ROLE_IDLE,
     ROLE_SPIN,
     ROLE_WASH,
+    phase_matching_enabled,
+    phase_matching_live_supported,
     phase_model_for,
     segment_cycle,
 )
@@ -60,6 +63,27 @@ def test_model_lookup():
     assert phase_model_for("pump") is None
     assert phase_model_for(None) is None
     assert phase_model_for("air_fryer") is None
+
+
+def test_live_supported_excludes_dishwasher():
+    assert phase_matching_live_supported("washing_machine") is True
+    assert phase_matching_live_supported("washer_dryer") is True
+    # dishwasher has a model (offline harness) but is NOT live-supported
+    assert phase_matching_live_supported("dishwasher") is False
+    assert phase_matching_live_supported("pump") is False
+    assert phase_matching_live_supported(None) is False
+
+
+def test_phase_matching_enabled_gating():
+    on = {CONF_ENABLE_PHASE_MATCHING: True}
+    off = {CONF_ENABLE_PHASE_MATCHING: False}
+    # requires BOTH the opt-in flag AND a live-supported device type
+    assert phase_matching_enabled(on, "washing_machine") is True
+    assert phase_matching_enabled(off, "washing_machine") is False
+    assert phase_matching_enabled({}, "washing_machine") is False
+    assert phase_matching_enabled(None, "washing_machine") is False
+    assert phase_matching_enabled(on, "dishwasher") is False  # not live-supported
+    assert phase_matching_enabled(on, "pump") is False
 
 
 @pytest.mark.parametrize("bad", [[], [[0, 1]], None])

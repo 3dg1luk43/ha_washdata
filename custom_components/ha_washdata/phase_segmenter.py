@@ -32,7 +32,7 @@ tests can exercise the real segmentation logic before any live wiring. See
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Mapping, Optional
 
 import numpy as np
 
@@ -144,6 +144,22 @@ def phase_matching_live_supported(device_type: str | None) -> bool:
         device_type in LIVE_PHASE_DEVICE_TYPES
         and phase_model_for(device_type) is not None
     )
+
+
+def phase_matching_enabled(options: "Mapping[str, object] | None", device_type: str | None) -> bool:
+    """True when the user opted in AND the device type is live-supported.
+
+    The opt-in gate for the live phase-resolved ETA blend, mirroring
+    ``ml.engine.ml_models_enabled``. Both conditions are required: the per-device
+    ``enable_phase_matching`` option and a validated live phase model.
+    """
+    from .const import CONF_ENABLE_PHASE_MATCHING  # local: avoid import cycle at import time
+
+    if not options:
+        return False
+    if not bool(options.get(CONF_ENABLE_PHASE_MATCHING, False)):
+        return False
+    return phase_matching_live_supported(device_type)
 
 
 def _classify(power: np.ndarray, model: PhaseModel) -> tuple[np.ndarray, float]:

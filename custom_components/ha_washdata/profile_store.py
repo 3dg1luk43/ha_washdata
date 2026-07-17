@@ -70,7 +70,13 @@ from .phase_catalog import (
     normalize_phase_name,
 )
 from .phase_segmenter import phase_matching_live_supported, phase_model_for, segment_cycle
-from .phase_match import build_phase_profile, phase_profile_to_dict
+from .phase_match import (
+    build_phase_profile,
+    match_phase_profiles,
+    phase_eta,
+    phase_profile_from_dict,
+    phase_profile_to_dict,
+)
 from .log_utils import DeviceLoggerAdapter
 
 _LOGGER = logging.getLogger(__name__)
@@ -3974,6 +3980,68 @@ class ProfileStore:
             return phase_profile_to_dict(profile) if profile is not None else None
         except Exception:  # noqa: BLE001 - phase caching must never break rebuild
             self._logger.debug("phase-profile build failed for %s", profile_name, exc_info=True)
+            return None
+
+    def _candidate_phase_profiles(self) -> list:
+        """All cached per-profile PhaseProfiles (from envelope['phase_profile'])."""
+        out = []
+        for env in (self._data.get("envelopes") or {}).values():
+            if isinstance(env, dict):
+                pp = phase_profile_from_dict(env.get("phase_profile"))
+                if pp is not None:
+                    out.append(pp)
+        return out
+
+    def phase_remaining(
+        self,
+        power_data: list,
+        elapsed_s: float,
+        device_type: str,
+    ) -> dict[str, Any] | None:
+        """Phase-resolved remaining-time for a running cycle. Never raises.
+
+        Segments the observed-so-far trace, matches it against the device's cached
+        per-profile phase profiles, and returns the winning profile's per-role
+        budget remaining. Returns ``None`` (caller keeps the current estimate)
+        when phase matching is not live-supported for the device type, no phase
+        profiles are cached yet, or segmentation is degenerate.
+
+        This is the *phase* half of the blended ETA; the blend with the current
+        estimator lives in ``progress.compute_progress`` (single source of truth).
+        Pure and cheap (segmentation + per-role agreement, no DTW) - safe to call
+        inline from the async matching path.
+        """
+        try:
+            if not phase_matching_live_supported(device_type):
+                return None
+            model = phase_model_for(device_type)
+            if model is None:
+                return None
+            candidates = self._candidate_phase_profiles()
+            if not candidates:
+                return None
+            offsets = power_data_to_offsets(power_data or [])
+            if len(offsets) < 4:
+                return None
+            t = [float(o) for o, _ in offsets]
+            w = [float(p) for _, p in offsets]
+            segs = segment_cycle(t, w, model, partial=True)
+            if not segs:
+                return None
+            ranked = match_phase_profiles(segs, candidates, {})
+            if not ranked:
+                return None
+            best = next((c for c in candidates if c.name == ranked[0].name), None)
+            remaining = phase_eta(segs, best, elapsed_s) if best is not None else None
+            if remaining is None:
+                return None
+            return {
+                "remaining_s": float(remaining),
+                "matched": ranked[0].name,
+                "score": float(ranked[0].score),
+            }
+        except Exception:  # noqa: BLE001 - phase ETA must never break the estimate
+            self._logger.debug("phase_remaining failed", exc_info=True)
             return None
 
 

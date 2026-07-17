@@ -96,6 +96,11 @@ CONF_POWER_OFF_DELAY = (
     "power_off_delay"  # Seconds below the power-off threshold before Finished/Clean -> Off
 )
 CONF_EXPOSE_DEBUG_ENTITIES = "expose_debug_entities"  # Expose detailed debug sensors
+# Per-device opt-in: blend the phase-resolved (per-role budget) ETA into the
+# time-remaining estimate for phase-matching-supported device types (washing
+# machine, washer-dryer). Default off. Validated by the Phase-0 ETA gate; see
+# docs/superpowers/specs/2026-07-17-phase-segmented-matching-design.md.
+CONF_ENABLE_PHASE_MATCHING = "enable_phase_matching"
 CONF_SAVE_DEBUG_TRACES = (
     "save_debug_traces"  # Improve historical cycle data with rich debug info
 )

@@ -93,6 +93,42 @@ async def test_rebuild_skips_phase_profile_for_unsupported_device(store):
 
 
 @pytest.mark.asyncio
+async def test_phase_remaining_after_rebuild(store):
+    for i, heat in enumerate((1400, 1500, 1600)):
+        _add_cycle(store, "Cotton 40", f"c{i}", heat)
+    await store.async_rebuild_envelope("Cotton 40")
+
+    # observe a cycle 25% of the way in (idle lead + into heating)
+    pd, total = _cotton_power_data(1500)
+    elapsed = 0.25 * total
+    observed = [p for p in pd if p[0] <= elapsed]
+    res = store.phase_remaining(observed, elapsed, "washing_machine")
+    assert res is not None
+    assert res["matched"] == "Cotton 40"
+    assert res["remaining_s"] > 0
+    # remaining + elapsed should be in the right ballpark of the true total
+    assert 0.4 * total < res["remaining_s"] + elapsed < 1.8 * total
+
+
+@pytest.mark.asyncio
+async def test_phase_remaining_none_for_unsupported_device(store):
+    for i, heat in enumerate((1400, 1500, 1600)):
+        _add_cycle(store, "Eco 50", f"d{i}", heat, device_type="dishwasher")
+    await store.async_rebuild_envelope("Eco 50")
+    pd, total = _cotton_power_data(1500)
+    observed = [p for p in pd if p[0] <= 0.25 * total]
+    assert store.phase_remaining(observed, 0.25 * total, "dishwasher") is None
+
+
+@pytest.mark.asyncio
+async def test_phase_remaining_none_when_no_profiles(store):
+    # no envelopes cached yet
+    pd, total = _cotton_power_data(1500)
+    observed = [p for p in pd if p[0] <= 0.25 * total]
+    assert store.phase_remaining(observed, 0.25 * total, "washing_machine") is None
+
+
+@pytest.mark.asyncio
 async def test_rebuild_phase_profile_matches_temperature(store):
     """The cached heating duration must reflect the profile's real heating time."""
     for i, heat in enumerate((520, 560, 600)):   # ~9 min heat -> "30C"
