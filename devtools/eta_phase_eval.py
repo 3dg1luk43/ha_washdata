@@ -418,9 +418,21 @@ def _recommend(dt: str, pooled: dict) -> str:
 
 def main() -> None:
     root = Path(__file__).resolve().parent.parent / "cycle_data"
+    # Optional filters: --exclude=SUBSTR (drop source paths containing SUBSTR),
+    # --only=DEVICE_TYPE (evaluate a single device type).
+    exclude = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--exclude=")), None)
+    only = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--only=")), None)
     print("Phase-0 ETA harness — phase-segmented vs current pipeline")
+    if exclude:
+        print(f"  (excluding sources matching: {exclude!r})")
+    if only:
+        print(f"  (only device type: {only!r})")
     print(f"Loading {root} ...")
     sources = load_sources(root)
+    if exclude:
+        sources = {k: v for k, v in sources.items() if exclude not in k}
+    if only:
+        sources = {k: v for k, v in sources.items() if v["device_type"] == only}
     print(f"Loaded {len(sources)} usable device sources.")
     results = []
     for i, (name, src) in enumerate(sources.items(), 1):
