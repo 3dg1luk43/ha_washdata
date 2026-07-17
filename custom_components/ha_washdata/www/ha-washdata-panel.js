@@ -929,6 +929,15 @@ button.wd-profile-card { display: block; }
 .wd-onboard .wd-card-title { margin-top: 0; }
 .wd-onboard-skip { font-size: .8em; color: var(--secondary-text-color); text-decoration: underline; cursor: pointer; }
 .wd-onboard-skip:hover { color: var(--primary-color); }
+/* Setup card (replaces getting-started card, phases 0-3) and phase-4 chip */
+.wd-setup-card { margin-top: 12px; padding: 16px; border-radius: 10px; border: 1px solid var(--primary-color, #03a9f4); background: color-mix(in srgb, var(--primary-color, #03a9f4) 8%, var(--card-background-color, var(--ha-card-background))); }
+.wd-setup-card .wd-card-title { margin-top: 0; }
+.wd-setup-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: .82em; font-weight: 600; cursor: pointer; border: 1px solid var(--divider-color); background: var(--secondary-background-color); margin-top: 12px; }
+.wd-setup-chip--healthy { border-color: var(--success-color, #4caf50); background: color-mix(in srgb, var(--success-color, #4caf50) 10%, var(--card-background-color, transparent)); }
+.wd-setup-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.wd-setup-dot--green { background: var(--success-color, #4caf50); }
+.wd-link { background: none; border: none; padding: 0; color: var(--primary-color); cursor: pointer; font: inherit; text-decoration: underline; display: inline; }
+.wd-link:hover { opacity: .8; }
 /* Logs page */
 .wd-logbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
 .wd-logs { font-family: monospace; font-size: .76em; background: var(--secondary-background-color); border-radius: var(--wd-radius-md); padding: 10px; height: 56vh; min-height: 140px; overflow: auto; resize: vertical; }
@@ -1627,6 +1636,7 @@ class HaWashdataPanel extends HTMLElement {
     this._mlSettings = {};        // conf key -> {classic_value, ml_value, ml_reason, ...}
     this._mlSettingsLoading = false;
     this._mlTrainingStatus = null; // {enabled, running, last_trained, cycle_count, min_cycles, ...}
+    this._setupStatus = null;      // result of ws_get_setup_status
     // UI state
     this._selIdx = 0;
     this._tab = 'status';
@@ -2792,6 +2802,13 @@ class HaWashdataPanel extends HTMLElement {
           try { this._matchDebug = await this._ws({ type: `${_DOMAIN}/get_match_debug`, entry_id: eid }); } catch (_) { /* keep */ }
         }
         if (this._canEdit()) { try { this._recState = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: eid }); } catch (_) {} }
+        // Fetch setup guidance phase (always, not just when profileCount === 0)
+        try {
+          this._setupStatus = await this._ws({
+            type: `${_DOMAIN}/get_setup_status`,
+            entry_id: eid,
+          });
+        } catch (_) { this._setupStatus = null; }
       } else if (this._tab === 'history') {
         await this._fetchCycles(eid);
         if (!this._profiles.length) await this._fetchProfiles(eid);
@@ -3454,18 +3471,26 @@ class HaWashdataPanel extends HTMLElement {
       ${this._statusEnv ? `<label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_expected" ${showExpected ? 'checked' : ''}><span class="wd-leg-sw" style="background:#ff9800"></span> ${this._t('lbl.expected', {}, 'Expected')}</label>` : ''}
       ${this._pref('show_raw', false) ? `<label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_raw_active" ${showRawLeg ? 'checked' : ''}><span class="wd-leg-sw" style="background:#9e9e9e"></span> ${this._t('lbl.raw_socket', {}, 'Raw socket')}</label>` : ''}
     </div>`;
-    // F1 first-run wizard: on a fresh device (no profiles yet, onboarding not
-    // skipped) replace the empty chart placeholder with a getting-started card
-    // until enough cycles are observed. A live cycle (hasCurve) always wins so
-    // the user sees their appliance being watched in real time.
+    // Setup card: phase-aware guidance replacing the old getting-started card.
+    // A live cycle (hasCurve) always wins so the user sees their appliance.
     const cycleCount = this._cyclesTotal || 0;
     const profileCount = (this._profiles || []).length;
-    const showGettingStarted = !this._pref('onboarding_dismissed', false) && profileCount === 0 && !hasCurve;
+    const setupDismissed = this._pref('setup_card_dismissed', false);
+    const setupStatus = this._setupStatus;
+    const showSetupCard = setupStatus
+      && !(setupDismissed && setupStatus.phase === 'phase4')
+      && !hasCurve;
+    const setupCardHtml = showSetupCard ? this._htmlSetupCard(setupStatus) : '';
+    // F1 fallback: show the old getting-started card when setup status is not
+    // yet available (e.g. backend older than Task 4).
+    const showGettingStarted = !showSetupCard && !this._pref('onboarding_dismissed', false) && profileCount === 0 && !hasCurve;
     const curveHtml = hasCurve
       ? `<div class="wd-canvas-wrap" style="margin-top:14px"><canvas id="wd-status-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_power_chart', {}, 'Power consumption chart'))}" style="height:160px"></canvas></div>${legend}`
-      : (showGettingStarted
-          ? this._htmlGettingStarted(cycleCount)
-          : `<p class="wd-info" style="margin-top:12px">${this._t('msg.live_chart_loading', {}, 'Live power chart appears as readings arrive.')}</p>`);
+      : (showSetupCard
+          ? setupCardHtml
+          : (showGettingStarted
+              ? this._htmlGettingStarted(cycleCount)
+              : `<p class="wd-info" style="margin-top:12px">${this._t('msg.live_chart_loading', {}, 'Live power chart appears as readings arrive.')}</p>`));
 
     const showDebug = this._pref('show_debug', false);
     let debugHtml = '';
@@ -3525,7 +3550,7 @@ class HaWashdataPanel extends HTMLElement {
         </div>
         ${progressHtml}
         ${this._htmlPhaseTimeline(dev, prog, isRunning)}
-        ${showGettingStarted ? '' : `<div class="wd-card-title" style="margin-top:18px">${this._t('hdr.live_power', {}, 'Live Power')}</div>`}
+        ${(showSetupCard || showGettingStarted) ? '' : `<div class="wd-card-title" style="margin-top:18px">${this._t('hdr.live_power', {}, 'Live Power')}</div>`}
         ${curveHtml}
       </div>
       ${this._canEdit() ? this._htmlRecordingWidget() : ''}
@@ -3563,6 +3588,122 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-prog-row"><span>${this._t('msg.onboarding_progress', {n}, `${n} / 3 cycles observed`)}</span></div>
       ${skip}
     </div>`;
+  }
+
+  // Setup Card — phase-aware guidance for device onboarding. Replaces the old
+  // getting-started card for backends that support get_setup_status (Task 4).
+  // Phase 4 renders as a compact chip (device fully set up); phases 0–3 render
+  // the full guidance card with a primary CTA, optional secondary action, skip
+  // links, and a permanent-hide link when dismissible.
+  _htmlSetupCard(status) {
+    if (!status) return '';
+    const { phase, message_key, message_params, cta_label_key, cta_action,
+            secondary_label_key, secondary_action, skippable, dismissible,
+            step_key } = status;
+
+    // Phase 4: collapsed chip (setup complete).
+    if (phase === 'phase4') {
+      return `
+        <div class="wd-setup-chip wd-setup-chip--healthy" data-action="expand-setup" role="button" tabindex="0"
+             title="${_esc(this._t('setup.cta.show_guidance', {}, 'Show guidance'))}">
+          <span class="wd-setup-dot wd-setup-dot--green"></span>
+          <span>${this._t('setup.hdr.healthy_chip', {}, 'Setup complete')}</span>
+        </div>`;
+    }
+
+    const msg = this._t(message_key, message_params || {}, '');
+    const ctaLabel = this._t(cta_label_key, {}, 'Continue');
+    const secLabel = secondary_label_key
+      ? this._t(secondary_label_key, {}, '')
+      : null;
+
+    const skipHtml = skippable ? `
+      <span style="display:flex;gap:12px;margin-top:6px">
+        <a class="wd-link" data-action="setup-skip" data-step="${_esc(step_key || '')}" data-snooze="14d"
+           style="font-size:.85em">${this._t('setup.cta.skip_step', {}, 'Skip this step')}</a>
+        <a class="wd-link" data-action="setup-skip" data-step="${_esc(step_key || '')}" data-snooze="never"
+           style="font-size:.85em;opacity:.7">${this._t('setup.cta.skip_forever', {}, "Don't show again")}</a>
+      </span>` : '';
+
+    const hideHtml = dismissible ? `
+      <a class="wd-link" data-action="hide-setup-card" style="font-size:.8em;opacity:.6;margin-top:4px">
+        ${this._t('setup.cta.hide_guidance', {}, 'Hide guidance')}
+      </a>` : '';
+
+    return `
+      <div class="wd-setup-card" data-phase="${_esc(phase)}">
+        <div class="wd-card-title">${this._t('setup.hdr.card', {}, 'Device Setup')}</div>
+        <p style="margin:6px 0 12px">${_esc(msg)}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+          <button class="wd-btn wd-btn-primary" data-action="setup-cta"
+                  data-cta-action="${_esc(cta_action || '')}"
+                  data-cta-params="${_esc(JSON.stringify(message_params || {}))}">
+            ${_esc(ctaLabel)}
+          </button>
+          ${secLabel ? `<a class="wd-link" data-action="setup-cta"
+                           data-cta-action="${_esc(secondary_action || '')}"
+                           data-cta-params="${_esc(JSON.stringify(message_params || {}))}">
+            ${_esc(secLabel)}
+          </a>` : ''}
+        </div>
+        ${skipHtml}
+        ${hideHtml}
+      </div>`;
+  }
+
+  // Dispatch a setup card CTA action to the appropriate panel destination.
+  _dispatchSetupCta(ctaAction, params) {
+    if (!ctaAction) return;
+    if (ctaAction === 'open_recorder') {
+      // Scroll to recorder widget on the Status tab
+      this.shadowRoot.querySelector('.wd-rec-dot')?.closest('.wd-card')?.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+    if (ctaAction === 'open_cycles' || ctaAction === 'open_cycles_unlabeled') {
+      this._tab = 'history';
+      if (ctaAction === 'open_cycles_unlabeled') {
+        this._cycleFilter = { ...(this._cycleFilter || {}), status: 'unlabeled' };
+      }
+      this._fetchTabData();
+      return;
+    }
+    if (ctaAction === 'open_profiles' || ctaAction === 'open_profiles_groups') {
+      this._tab = 'profiles';
+      this._fetchTabData();
+      return;
+    }
+    if (ctaAction === 'open_suggestions') {
+      this._tab = 'settings';
+      this._settingsSugOnly = true;
+      this._fetchTabData();
+      return;
+    }
+    if (ctaAction === 'create_profile_from_cluster') {
+      // No modal shortcut yet — open the profiles tab where the user can create
+      // a profile; a future task may pre-populate from cluster cycle IDs.
+      this._tab = 'profiles';
+      this._fetchTabData();
+      return;
+    }
+    if (ctaAction && ctaAction.startsWith('open_cycle:')) {
+      // No direct cycle modal shortcut yet — open the history tab.
+      this._tab = 'history';
+      this._fetchTabData();
+      return;
+    }
+  }
+
+  // Reload the setup guidance phase from the backend and re-render.
+  async _reloadSetupStatus() {
+    const dev = this._devices[this._selIdx];
+    if (!dev) return;
+    try {
+      this._setupStatus = await this._ws({
+        type: `${_DOMAIN}/get_setup_status`,
+        entry_id: dev.entry_id,
+      });
+    } catch (_) { this._setupStatus = null; }
+    this._render();
   }
 
   // D1: compact horizontal phase timeline for the matched profile, drawn below
@@ -9231,6 +9372,41 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'skip-onboarding') {
       // F1: dismiss the first-run wizard permanently for this user.
       this._setPref('onboarding_dismissed', true);
+      this._render();
+
+    } else if (a === 'setup-cta') {
+      // Setup card primary / secondary CTA — navigate to the relevant panel section.
+      const ctaAction = btn.dataset.ctaAction || '';
+      let params = {};
+      try { params = JSON.parse(btn.dataset.ctaParams || '{}'); } catch (_) {}
+      this._dispatchSetupCta(ctaAction, params);
+
+    } else if (a === 'setup-skip') {
+      // Setup card step skip (snooze 14 days or never).
+      const stepKey = btn.dataset.step;
+      const snooze = btn.dataset.snooze; // "never" or "14d"
+      if (stepKey) {
+        let val;
+        if (snooze === 'never') {
+          val = 'never';
+        } else {
+          const until = new Date();
+          until.setDate(until.getDate() + 14);
+          val = until.toISOString();
+        }
+        this._setPref(stepKey, val);
+        this._reloadSetupStatus(); // async fire-and-forget; calls _render() when done
+      }
+
+    } else if (a === 'hide-setup-card') {
+      // Setup card permanent hide (only offered when dismissible, i.e. phase 3/4).
+      this._setPref('setup_card_dismissed', true);
+      this._setupStatus = null;
+      this._render();
+
+    } else if (a === 'expand-setup') {
+      // Phase-4 chip tapped — un-hide the card by clearing the dismissed pref.
+      this._setPref('setup_card_dismissed', false);
       this._render();
 
     } else if (a === 'set-settings-level') {
