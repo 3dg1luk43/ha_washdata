@@ -320,11 +320,14 @@ def evaluate_source(src: dict) -> dict | None:
                         prof_h = next((p for p in phase_cands if p.name == wc_name), None)
                         rem_h = phase_eta(segs, prof_h) if prof_h else None
 
-                # current (base) + blend_live = the EXACT shipped compute_progress
-                # blend, fed the SHIPPED (committed-program) phase remaining rem_h.
+                # current (base) + blend_live = the shipped compute_progress blend.
+                # Ungrouped profiles use the GLOBAL phase pick (rem_r) - the Phase-0
+                # gate showed constraining an ungrouped cycle to the (often-wrong)
+                # whole-cycle program regresses the ETA. Grouped profiles narrow
+                # within the family live (not modelled here; can only help).
                 rem_c, rem_live, _ = _current_remaining(
                     store, snapshots, avg_dur_by_label, device_type,
-                    t_offs, t_pws, elapsed, phase_remaining_s=rem_h,
+                    t_offs, t_pws, elapsed, phase_remaining_s=rem_r,
                 )
                 if rem_c is not None:
                     err["current"][f].append(abs(rem_c - actual))

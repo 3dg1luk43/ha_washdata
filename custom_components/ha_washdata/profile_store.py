@@ -4032,23 +4032,31 @@ class ProfileStore:
             self._logger.debug("phase-profile build failed for %s", profile_name, exc_info=True)
             return None
 
-    def _group_scope(self, program: str) -> set[str]:
-        """Profile names to consider for phase narrowing: the matched program plus
-        any of its group siblings (design §9 - narrow WITHIN the matched group).
+    def _group_scope(self, program: str) -> set[str] | None:
+        """Phase-narrowing scope for the matched ``program``:
 
-        Constraining to the group keeps the phase-resolved ETA coherent with the
-        displayed program (same program family) instead of budgeting from an
-        unrelated profile picked by a global phase match.
+        * If ``program`` is in a group with >= 2 members, return that group's
+          members - narrow WITHIN the family (design §9). This is both coherent
+          (same program family as the displayed program) and accurate (picks the
+          right temperature/spin variant among siblings).
+        * Otherwise return ``None`` = no scope filter (consider ALL of the
+          device's phase profiles). The Phase-0 gate showed that constraining an
+          UNGROUPED cycle to only the whole-cycle-matched program regresses the
+          ETA whenever that match is wrong (common on mislabeled data): the best
+          ETA comes from letting the phase matcher pick the best-fitting profile,
+          bounded by the ambiguity gate + cold-start floor. Grouping variants is
+          the recommended workflow and restores full coherence.
         """
-        scope = {program}
         try:
             for grp in self.get_profile_groups().values():
                 members = grp.get("members") if isinstance(grp, dict) else None
                 if isinstance(members, list) and program in members:
-                    scope.update(m for m in members if isinstance(m, str))
+                    sib = {m for m in members if isinstance(m, str)}
+                    if len(sib) >= 2:
+                        return sib
         except Exception:  # noqa: BLE001
             pass
-        return scope
+        return None
 
     def _candidate_phase_profiles(self, scope: set[str] | None = None) -> list:
         """Cached per-profile PhaseProfiles (from envelope['phase_profile']).
