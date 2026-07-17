@@ -7735,6 +7735,14 @@ class HaWashdataPanel extends HTMLElement {
             <span style="font-size:.82em;opacity:.75;display:block;margin-top:4px">${this._t('msg.shape_drift_detail', {}, 'The power pattern for this profile has shifted over time — possible appliance wear or maintenance needed (e.g. descaling, filter cleaning).')}</span>
           </div>`;
         })() : ''}
+        ${(() => {
+          const adv = (this._profileAdvisories || []).find(a => a && a.profile === m.name && a.code === 'phase_inconsistent');
+          if (!adv) return '';
+          return `<div style="margin-top:8px;padding:8px 10px;background:color-mix(in srgb, var(--warning-color,#ff9800) 9%, transparent);border-radius:6px;border-left:3px solid var(--warning-color,#ff9800)">
+            <span style="font-weight:600;color:var(--warning-color,#ff9800)">${this._t('msg.advisory_phase_inconsistent_title', {}, '⚠ Possibly mixed programs')}</span>
+            <span style="font-size:.82em;opacity:.85;display:block;margin-top:4px">${this._t(adv.message_key, adv.message_params, adv.message)}</span>
+          </div>`;
+        })()}
         ${env.avg && env.avg.length ? `<div class="wd-canvas-wrap"><canvas id="wd-env-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_envelope_chart', {}, 'Profile power envelope chart'))}"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_envelope', {}, 'No envelope yet - rebuild after labelling cycles.')}</p>`}`;
     } else if (m.tab === 'phases') {
       const cat = m.catalog || [];

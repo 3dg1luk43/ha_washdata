@@ -863,7 +863,8 @@
     "store_download_device_intro": "Adoptați fiecare program partajat și ciclurile sale de referință pe dispozitivul dvs. Propriile cicluri înregistrate și statisticile nu sunt afectate.",
     "store_share_device_intro": "Încărcați {brand} {model} cu ciclurile de referință pe care le selectați. Alții cu același aparat vă pot adopta programele. Intrările sunt revizuite înainte de a apărea public.",
     "share_profile_no_cycles": "Niciun ciclu de referință -- marcați un ciclu ca ⭐ în fila Cicluri pentru a include acest profil",
-    "advisory_phase_inconsistent": "'{name}' pare să amestece programe sau temperaturi diferite - ciclurile sale se încălzesc pe durate foarte diferite. Împărțirea sa în profiluri separate (de ex. pe temperatură) va îmbunătăți potrivirea și estimările de timp."
+    "advisory_phase_inconsistent": "'{name}' pare să amestece programe sau temperaturi diferite - ciclurile sale se încălzesc pe durate foarte diferite. Împărțirea sa în profiluri separate (de ex. pe temperatură) va îmbunătăți potrivirea și estimările de timp.",
+    "advisory_phase_inconsistent_title": "⚠ Posibil programe amestecate"
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",

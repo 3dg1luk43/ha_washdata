@@ -863,7 +863,8 @@
     "store_download_device_intro": "Perimkite kiekvieną bendrą programą ir jos etalonius ciklus į savo įrenginį. Jūsų pačių įrašyti ciklai ir statistika neįtakojami.",
     "store_share_device_intro": "Įkelkite {brand} {model} su pasirinktais etaloniniais ciklais. Kiti, turintys tą patį prietaisą, gali perimti jūsų programas. Įrašai peržiūrimi prieš viešinant.",
     "share_profile_no_cycles": "Nėra etaloninių ciklų -- pažymėkite ciklą kaip ⭐ Ciklų skirtuke, kad įtrauktumėte šį profilį",
-    "advisory_phase_inconsistent": "Atrodo, kad '{name}' maišo skirtingas programas ar temperatūras - jo ciklai kaista labai skirtingą laiką. Padalijus jį į atskirus profilius (pvz., pagal temperatūrą), pagerės atitikimas ir laiko įverčiai."
+    "advisory_phase_inconsistent": "Atrodo, kad '{name}' maišo skirtingas programas ar temperatūras - jo ciklai kaista labai skirtingą laiką. Padalijus jį į atskirus profilius (pvz., pagal temperatūrą), pagerės atitikimas ir laiko įverčiai.",
+    "advisory_phase_inconsistent_title": "⚠ Galimai sumaišytos programos"
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",

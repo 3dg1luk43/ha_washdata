@@ -863,7 +863,8 @@
     "store_download_device_intro": "Ta över alla delade program och deras referenscykler till din apparat. Dina egna inspelade cykler och statistik påverkas inte.",
     "store_share_device_intro": "Ladda upp {brand} {model} med de referenscykler du väljer. Andra med samma apparat kan ta över dina program. Poster granskas innan de visas offentligt.",
     "share_profile_no_cycles": "Inga referenscykler -- markera en cykel som ⭐ på fliken Cykler för att inkludera den här profilen",
-    "advisory_phase_inconsistent": "'{name}' verkar blanda olika program eller temperaturer - dess cykler värms upp under mycket olika lång tid. Om du delar upp den i separata profiler (t.ex. per temperatur) förbättras matchningen och tidsuppskattningarna."
+    "advisory_phase_inconsistent": "'{name}' verkar blanda olika program eller temperaturer - dess cykler värms upp under mycket olika lång tid. Om du delar upp den i separata profiler (t.ex. per temperatur) förbättras matchningen och tidsuppskattningarna.",
+    "advisory_phase_inconsistent_title": "⚠ Möjligen blandade program"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plötsligt fall som tolkas som omedelbart slut",

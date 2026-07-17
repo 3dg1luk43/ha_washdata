@@ -863,7 +863,8 @@
     "store_download_device_intro": "Overtag alle delte programmer og deres referencecyklusser til dit apparat. Dine egne optagede cyklusser og statistik påvirkes ikke.",
     "store_share_device_intro": "Upload {brand} {model} med de referencecyklusser, du vælger. Andre med samme apparat kan overtage dine programmer. Bidrag gennemgås inden offentliggørelse.",
     "share_profile_no_cycles": "Ingen referencecyklusser -- markér en cyklus som ⭐ under fanen Cyklusser for at inkludere denne profil",
-    "advisory_phase_inconsistent": "'{name}' ser ud til at blande forskellige programmer eller temperaturer - dens cyklusser varmer op i meget forskellige tidsrum. Hvis du deler den op i separate profiler (f.eks. pr. temperatur), forbedres matchningen og tidsestimaterne."
+    "advisory_phase_inconsistent": "'{name}' ser ud til at blande forskellige programmer eller temperaturer - dens cyklusser varmer op i meget forskellige tidsrum. Hvis du deler den op i separate profiler (f.eks. pr. temperatur), forbedres matchningen og tidsestimaterne.",
+    "advisory_phase_inconsistent_title": "⚠ Muligvis blandede programmer"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Pludseligt fald behandlet som øjeblikkelig afslutning",

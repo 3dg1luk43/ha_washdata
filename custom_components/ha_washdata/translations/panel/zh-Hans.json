@@ -863,7 +863,8 @@
     "store_download_device_intro": "将所有共享程序及其参考周期采用到您的设备。您自己录制的周期和统计数据不受影响。",
     "store_share_device_intro": "上传 {brand} {model} 及您选择的参考周期。拥有相同设备的其他用户可以采用您的程序。条目在公开前经过审核。",
     "share_profile_no_cycles": "无参考周期 -- 请在\"周期\"选项卡中将周期标记为 ⭐ 以包含此配置文件",
-    "advisory_phase_inconsistent": "'{name}' 似乎混合了不同的程序或温度，各周期的加热时长差异很大。将其拆分为独立的配置文件（例如按温度区分）可以改善匹配和时间估算。"
+    "advisory_phase_inconsistent": "'{name}' 似乎混合了不同的程序或温度，各周期的加热时长差异很大。将其拆分为独立的配置文件（例如按温度区分）可以改善匹配和时间估算。",
+    "advisory_phase_inconsistent_title": "⚠ 可能混合了不同程序"
   },
   "pg_desc": {
     "abrupt_drop_watts": "骤降视为立即结束",

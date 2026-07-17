@@ -5704,7 +5704,9 @@ class WashDataManager:
             and self._current_program not in ("detecting...", "off", None)
             and phase_matching_enabled(self.config_entry.options, self.device_type)
         ):
-            pr = self.profile_store.phase_remaining(trace, duration_so_far, self.device_type)
+            pr = self.profile_store.phase_remaining(
+                trace, self.device_type, self._current_program
+            )
             if pr is not None:
                 phase_remaining_s = pr.get("remaining_s")
 

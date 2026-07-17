@@ -24,9 +24,9 @@ driven by a per-device-type :class:`PhaseModel`.
 Constraint: NumPy only, no Home Assistant imports. Pure and executor-safe;
 ``segment_cycle`` never raises - it returns ``[]`` on malformed input.
 
-This module is INERT: nothing in the live integration imports it yet. It exists
-so the Phase-0 side-by-side harness (`devtools/eta_phase_eval.py`) and the unit
-tests can exercise the real segmentation logic before any live wiring. See
+Consumed live (behind the default-off ``enable_phase_matching`` per-device gate)
+by `profile_store.ProfileStore` (phase-profile cache + `phase_remaining`) and,
+offline, by the side-by-side harness (`devtools/eta_phase_eval.py`). See
 `docs/superpowers/specs/2026-07-17-phase-segmented-matching-design.md`.
 """
 from __future__ import annotations
@@ -36,6 +36,7 @@ from typing import Mapping, Optional
 
 import numpy as np
 
+from .const import CONF_ENABLE_PHASE_MATCHING
 from .signal_processing import energy_gap_threshold_s, integrate_wh
 
 # Regime tokens (internal, not user-facing).
@@ -153,8 +154,6 @@ def phase_matching_enabled(options: "Mapping[str, object] | None", device_type: 
     ``ml.engine.ml_models_enabled``. Both conditions are required: the per-device
     ``enable_phase_matching`` option and a validated live phase model.
     """
-    from .const import CONF_ENABLE_PHASE_MATCHING  # local: avoid import cycle at import time
-
     if not options:
         return False
     if not bool(options.get(CONF_ENABLE_PHASE_MATCHING, False)):
@@ -203,6 +202,13 @@ def _merge_short(runs: list[list[int]], t: np.ndarray, min_run_s: float) -> list
             merged[-1][2] = b  # extend previous run to absorb this short one
         else:
             merged.append([reg, a, b])
+    # A short LEADING run has no preceding run to absorb it, so it would survive
+    # as its own segment (e.g. a startup/inrush HIGH spike becoming a phantom
+    # heating block that pollutes the temperature prior). Fold it FORWARD into
+    # the following run, adopting that run's regime.
+    while len(merged) > 1 and float(t[merged[0][2]] - t[merged[0][1]]) < min_run_s:
+        merged[1][1] = merged[0][1]  # extend 2nd run's start back over the lead
+        merged.pop(0)
     return merged
 
 
@@ -224,13 +230,23 @@ def segment_cycle(
 
     Returns:
         List of :class:`PhaseSegment` in time order, or ``[]`` when the input is
-        too short/degenerate to segment.
+        too short/degenerate to segment. Any internal error also yields ``[]``.
     """
     try:
-        t = np.asarray(timestamps, dtype=float)
-        w = np.asarray(power, dtype=float)
-    except (TypeError, ValueError):
+        return _segment_impl(timestamps, power, model, partial=partial)
+    except Exception:  # noqa: BLE001 - segmentation must never break a live cycle
         return []
+
+
+def _segment_impl(
+    timestamps: "np.ndarray | list[float]",
+    power: "np.ndarray | list[float]",
+    model: PhaseModel,
+    *,
+    partial: bool = False,
+) -> list[PhaseSegment]:
+    t = np.asarray(timestamps, dtype=float)
+    w = np.asarray(power, dtype=float)
     if t.size < 4 or w.size != t.size:
         return []
     if not (np.all(np.isfinite(t)) and np.all(np.isfinite(w))):
@@ -239,7 +255,7 @@ def segment_cycle(
         if t.size < 4:
             return []
     # Enforce ascending time.
-    order = np.argsort(t)
+    order = np.argsort(t, kind="stable")
     t, w = t[order], w[order]
 
     reg, _peak = _classify(w, model)

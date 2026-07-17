@@ -863,7 +863,8 @@
     "store_download_device_intro": "Adote todos os programas compartilhados e seus ciclos de referência neste dispositivo. Seus próprios ciclos gravados e estatísticas não são afetados.",
     "store_share_device_intro": "Envie {brand} {model} com os ciclos de referência que você selecionar. Outros usuários com o mesmo eletrodoméstico podem adotar seus programas. As entradas são revisadas antes de aparecerem publicamente.",
     "share_profile_no_cycles": "Nenhum ciclo de referência -- marque um ciclo como ⭐ na aba Ciclos para incluir este perfil",
-    "advisory_phase_inconsistent": "'{name}' parece misturar diferentes programas ou temperaturas - seus ciclos aquecem por períodos de tempo muito diferentes. Dividi-lo em perfis separados (por ex. por temperatura) melhorará a correspondência e as estimativas de tempo."
+    "advisory_phase_inconsistent": "'{name}' parece misturar diferentes programas ou temperaturas - seus ciclos aquecem por períodos de tempo muito diferentes. Dividi-lo em perfis separados (por ex. por temperatura) melhorará a correspondência e as estimativas de tempo.",
+    "advisory_phase_inconsistent_title": "⚠ Possíveis programas misturados"
   },
   "phase_desc": {
     "anti_crease": "Giros curtos ocasionais após a conclusão para reduzir amassados.",

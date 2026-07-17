@@ -863,7 +863,8 @@
     "store_download_device_intro": "Adoptoni çdo program të ndarë dhe ciklet e tij të referencës në pajisjen tuaj. Ciklet dhe statistikat tuaja të regjistruara nuk preken.",
     "store_share_device_intro": "Ngarko {brand} {model} me ciklet e referencës që zgjidhni. Të tjerët me të njëjtën pajisje mund të adoptojnë programet tuaja. Hyrjet shqyrtohen para publikimit.",
     "share_profile_no_cycles": "Nuk ka cikle referimi -- shënojeni një cikël si ⭐ tek skeda Ciklet për të përfshirë këtë profil",
-    "advisory_phase_inconsistent": "'{name}' duket se përzien programe ose temperatura të ndryshme - ciklet e tij ngrohin për periudha shumë të ndryshme kohore. Ndarja e tij në profile të veçanta (p.sh. sipas temperaturës) do të përmirësojë përputhjen dhe vlerësimet e kohës."
+    "advisory_phase_inconsistent": "'{name}' duket se përzien programe ose temperatura të ndryshme - ciklet e tij ngrohin për periudha shumë të ndryshme kohore. Ndarja e tij në profile të veçanta (p.sh. sipas temperaturës) do të përmirësojë përputhjen dhe vlerësimet e kohës.",
+    "advisory_phase_inconsistent_title": "⚠ Ndoshta programe të përziera"
   },
   "phase_desc": {
     "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",

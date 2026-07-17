@@ -1075,10 +1075,10 @@ class _DetailSim:
             if (
                 self.store is not None
                 and len(trace) >= 10
-                and program != "detecting..."
+                and program not in ("detecting...", "off", None)
                 and phase_matching_enabled(self.options, self.device_type)
             ):
-                pr = self.store.phase_remaining(trace, offset, self.device_type)
+                pr = self.store.phase_remaining(trace, self.device_type, program)
                 if pr is not None:
                     phase_remaining_s = pr.get("remaining_s")
             result = progress_mod.compute_progress(

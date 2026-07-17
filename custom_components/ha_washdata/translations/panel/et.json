@@ -863,7 +863,8 @@
     "store_download_device_intro": "Võtke kasutusele iga jagatud programm ja selle võrdlustsüklid oma seadmel. Teie enda salvestatud tsükleid ja statistikat ei mõjutata.",
     "store_share_device_intro": "Laadige {brand} {model} üles valitud võrdlustsüklitega. Teised sama kodumasina kasutajad saavad teie programme kasutusele võtta. Kirjeid vaadatakse üle enne avalikustamist.",
     "share_profile_no_cycles": "Võrdlustsükleid pole -- märkige tsükkel ⭐-ks Tsüklid-vahekaardil, et lisada see profiil",
-    "advisory_phase_inconsistent": "'{name}' näib segavat erinevaid programme või temperatuure - selle tsüklid kuumutavad väga erineva aja jooksul. Selle jagamine eraldi profiilideks (nt temperatuuri järgi) parandab sobitamist ja ajahinnanguid."
+    "advisory_phase_inconsistent": "'{name}' näib segavat erinevaid programme või temperatuure - selle tsüklid kuumutavad väga erineva aja jooksul. Selle jagamine eraldi profiilideks (nt temperatuuri järgi) parandab sobitamist ja ajahinnanguid.",
+    "advisory_phase_inconsistent_title": "⚠ Võimalik programmide segu"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Järsk langus käsitletakse kohese lõpuna",

@@ -863,7 +863,8 @@
     "store_download_device_intro": "Stáhnout nastavení zařízení komunity a použít ho na nové nebo stávající zařízení",
     "store_share_device_intro": "Sdílet programy vašeho zařízení (profily + referenční cykly) s komunitou. Nastavení jsou volitelná.",
     "share_profile_no_cycles": "Profil '{p}' nemá žádné ⭐ referenční cykly -- bude přeskočen, pokud nemáte {n}+ potvrzených spuštění",
-    "advisory_phase_inconsistent": "Zdá se, že '{name}' míchá různé programy nebo teploty - jeho cykly se ohřívají po velmi různě dlouhou dobu. Rozdělení na samostatné profily (např. podle teploty) zlepší shodu i odhady času."
+    "advisory_phase_inconsistent": "Zdá se, že '{name}' míchá různé programy nebo teploty - jeho cykly se ohřívají po velmi různě dlouhou dobu. Rozdělení na samostatné profily (např. podle teploty) zlepší shodu i odhady času.",
+    "advisory_phase_inconsistent_title": "⚠ Možná smíšené programy"
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",

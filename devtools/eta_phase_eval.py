@@ -302,8 +302,11 @@ def evaluate_source(src: dict) -> dict | None:
                 if len(t_offs) < 4:
                     continue
 
-                # phase estimate first (feeds the shipped blend)
+                # Phase estimates. rem_r = GLOBAL phase-match pick (replace, upper
+                # bound). rem_h = the COMMITTED program's phase profile (whole-cycle
+                # match) = the SHIPPED behaviour (program-constrained, MAJOR-3).
                 rem_r = None
+                rem_h = None
                 segs = None
                 if model and phase_cands:
                     segs = segment_cycle(t_offs, t_pws, model, partial=True)
@@ -311,12 +314,17 @@ def evaluate_source(src: dict) -> dict | None:
                         mres = match_phase_profiles(segs, phase_cands, {})
                         if mres:
                             prof_r = next((p for p in phase_cands if p.name == mres[0].name), None)
-                            rem_r = phase_eta(segs, prof_r, elapsed) if prof_r else None
+                            rem_r = phase_eta(segs, prof_r) if prof_r else None
+                        cc2 = analysis.compute_matches_worker(t_pws, elapsed, snapshots, MATCH_CFG)
+                        wc_name = cc2[0]["name"] if cc2 else None
+                        prof_h = next((p for p in phase_cands if p.name == wc_name), None)
+                        rem_h = phase_eta(segs, prof_h) if prof_h else None
 
-                # current (base) + blend_live = EXACT shipped compute_progress blend
+                # current (base) + blend_live = the EXACT shipped compute_progress
+                # blend, fed the SHIPPED (committed-program) phase remaining rem_h.
                 rem_c, rem_live, _ = _current_remaining(
                     store, snapshots, avg_dur_by_label, device_type,
-                    t_offs, t_pws, elapsed, phase_remaining_s=rem_r,
+                    t_offs, t_pws, elapsed, phase_remaining_s=rem_h,
                 )
                 if rem_c is not None:
                     err["current"][f].append(abs(rem_c - actual))
@@ -324,24 +332,17 @@ def evaluate_source(src: dict) -> dict | None:
                 if rem_live is not None:
                     err["blend_live"][f].append(abs(rem_live - actual))
                     bias["blend_live"][f].append(rem_live - actual)
-
-                if segs and rem_r is not None:
-                    # replace: phase matcher picks the member
+                if rem_r is not None:
                     err["replace"][f].append(abs(rem_r - actual))
                     bias["replace"][f].append(rem_r - actual)
-                    # hybrid: whole-cycle picks program, phase-ETA refines
-                    cc2 = analysis.compute_matches_worker(t_pws, elapsed, snapshots, MATCH_CFG)
-                    wc_name = cc2[0]["name"] if cc2 else None
-                    prof_h = next((p for p in phase_cands if p.name == wc_name), None)
-                    rem_h = phase_eta(segs, prof_h, elapsed) if prof_h else rem_r
-                    if rem_h is not None:
-                        err["hybrid"][f].append(abs(rem_h - actual))
-                        bias["hybrid"][f].append(rem_h - actual)
-                    # blend (idealized f = true fraction, the Phase-0 PoC)
-                    if rem_c is not None:
-                        rem_b = (1.0 - f) * rem_r + f * rem_c
-                        err["blend"][f].append(abs(rem_b - actual))
-                        bias["blend"][f].append(rem_b - actual)
+                if rem_h is not None:
+                    err["hybrid"][f].append(abs(rem_h - actual))
+                    bias["hybrid"][f].append(rem_h - actual)
+                # blend (idealized f = true fraction, global pick — Phase-0 PoC ref)
+                if rem_r is not None and rem_c is not None:
+                    rem_b = (1.0 - f) * rem_r + f * rem_c
+                    err["blend"][f].append(abs(rem_b - actual))
+                    bias["blend"][f].append(rem_b - actual)
 
     def _mae(xs):
         return float(np.mean(xs)) if xs else float("nan")

@@ -102,7 +102,7 @@ async def test_phase_remaining_after_rebuild(store):
     pd, total = _cotton_power_data(1500)
     elapsed = 0.25 * total
     observed = [p for p in pd if p[0] <= elapsed]
-    res = store.phase_remaining(observed, elapsed, "washing_machine")
+    res = store.phase_remaining(observed, "washing_machine", "Cotton 40")
     assert res is not None
     assert res["matched"] == "Cotton 40"
     assert res["remaining_s"] > 0
@@ -117,7 +117,7 @@ async def test_phase_remaining_none_for_unsupported_device(store):
     await store.async_rebuild_envelope("Eco 50")
     pd, total = _cotton_power_data(1500)
     observed = [p for p in pd if p[0] <= 0.25 * total]
-    assert store.phase_remaining(observed, 0.25 * total, "dishwasher") is None
+    assert store.phase_remaining(observed, "dishwasher", "Eco 50") is None
 
 
 @pytest.mark.asyncio
@@ -125,7 +125,51 @@ async def test_phase_remaining_none_when_no_profiles(store):
     # no envelopes cached yet
     pd, total = _cotton_power_data(1500)
     observed = [p for p in pd if p[0] <= 0.25 * total]
-    assert store.phase_remaining(observed, 0.25 * total, "washing_machine") is None
+    assert store.phase_remaining(observed, "washing_machine", "Cotton 40") is None
+
+
+@pytest.mark.asyncio
+async def test_phase_remaining_cold_start_floor(store):
+    # a single-cycle profile has noisy (zero-variance) priors -> not trusted
+    _add_cycle(store, "Cotton 40", "only", 1500)
+    await store.async_rebuild_envelope("Cotton 40")
+    pd, total = _cotton_power_data(1500)
+    observed = [p for p in pd if p[0] <= 0.25 * total]
+    assert store.phase_remaining(observed, "washing_machine", "Cotton 40") is None
+
+
+@pytest.mark.asyncio
+async def test_phase_remaining_constrained_to_program_group(store):
+    # A (long heat) + its group sibling A2 (short heat, distinct); unrelated B has
+    # the SAME long heat as A. Without scope, A and B would tie (ambiguous -> None).
+    # Scope must exclude B so A wins the group unambiguously.
+    for i, h in enumerate((1450, 1500, 1550)):
+        _add_cycle(store, "A", f"a{i}", h)
+        _add_cycle(store, "B", f"b{i}", h)
+    for i, h in enumerate((560, 600, 640)):
+        _add_cycle(store, "A2", f"a2{i}", h)
+    for name in ("A", "A2", "B"):
+        await store.async_rebuild_envelope(name)
+    store._data["profile_groups"] = {"grp": {"members": ["A", "A2"]}}
+    pd, total = _cotton_power_data(1500)  # long-heat observed cycle
+    observed = [p for p in pd if p[0] <= 0.5 * total]
+    res = store.phase_remaining(observed, "washing_machine", "A")
+    assert res is not None  # would be None (A~B ambiguous) if B weren't excluded
+    assert res["matched"] == "A"
+
+
+@pytest.mark.asyncio
+async def test_phase_remaining_ambiguous_group_falls_back(store):
+    # two group members with identical phase structure -> ambiguous -> None
+    for i, h in enumerate((1500, 1500, 1500)):
+        _add_cycle(store, "G1", f"g1{i}", h)
+        _add_cycle(store, "G2", f"g2{i}", h)
+    await store.async_rebuild_envelope("G1")
+    await store.async_rebuild_envelope("G2")
+    store._data["profile_groups"] = {"grp": {"members": ["G1", "G2"]}}
+    pd, total = _cotton_power_data(1500)
+    observed = [p for p in pd if p[0] <= 0.5 * total]
+    assert store.phase_remaining(observed, "washing_machine", "G1") is None
 
 
 @pytest.mark.asyncio

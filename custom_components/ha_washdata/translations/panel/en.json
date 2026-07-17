@@ -786,6 +786,7 @@
     "advisory_duration_trend_up": "'{name}' cycles are running progressively longer (about +{pct}% per cycle). If the appliance's behaviour changed, re-record or rebuild this profile.",
     "advisory_energy_trend_up": "'{name}' is drawing progressively more energy (about +{pct}% per cycle) - worth checking the appliance if that is unexpected.",
     "advisory_phase_inconsistent": "'{name}' looks like it mixes different programs or temperatures - its cycles heat for very different lengths of time. Splitting it into separate profiles (e.g. per temperature) will improve matching and time estimates.",
+    "advisory_phase_inconsistent_title": "⚠ Possibly mixed programs",
     "pg_running_history": "Replaying your cycles…",
     "pg_running_sweep": "Testing values across your cycles…",
     "pg_row_load_hint": "Load this cycle in the graph above",

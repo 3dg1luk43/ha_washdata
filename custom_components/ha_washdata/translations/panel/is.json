@@ -863,7 +863,8 @@
     "store_download_device_intro": "Taktu yfir öll deildu forritin og viðmiðunarlotir þeirra á tækið þitt. Þínar eigin skráðar lotir og tölfræði eru ekki fyrir áhrifum.",
     "store_share_device_intro": "Hlaðaðu upp {brand} {model} með viðmiðunarlotum sem þú velur. Aðrir með sama tæki geta tekið yfir forritin þín. Færslur eru yfirfarnar áður en þær birtast opinberlega.",
     "share_profile_no_cycles": "Engar viðmiðunarlotir -- merktu lotu sem ⭐ í flipanum Lotir til að hafa þennan prófíl með",
-    "advisory_phase_inconsistent": "'{name}' virðist blanda saman ólíkum forritum eða hitastigum - lotur þess hita mislengi. Ef þú skiptir því upp í aðskilin snið (t.d. eftir hitastigi) batnar samsvörun og tímamat."
+    "advisory_phase_inconsistent": "'{name}' virðist blanda saman ólíkum forritum eða hitastigum - lotur þess hita mislengi. Ef þú skiptir því upp í aðskilin snið (t.d. eftir hitastigi) batnar samsvörun og tímamat.",
+    "advisory_phase_inconsistent_title": "⚠ Hugsanlega blönduð forrit"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Skyndilegt fall meðhöndlað sem tafarlaus endir",

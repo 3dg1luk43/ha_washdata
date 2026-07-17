@@ -41,25 +41,25 @@ def test_none_phase_remaining_is_byte_identical():
     )
 
 
-def test_blend_pulls_remaining_toward_phase_estimate_early():
+def test_blend_moves_estimate_toward_phase_early():
     a = _base()  # 10% in, linear base remaining = 5400s
-    base = _compute_progress_base(**a)
+    base = compute_progress(**a, phase_remaining_s=None)  # linear baseline
     # phase says much less time left than the linear base
     blended = compute_progress(**a, phase_remaining_s=3000.0)
     assert blended.source == "phase_blend"
-    # early (low progress) -> weighted heavily toward the phase estimate
+    # blend goes through the percent-domain smoothing: progress rises, remaining
+    # falls (toward the phase signal), but is re-scaled by matched_duration.
+    assert blended.progress > base.progress
     assert blended.remaining < base.remaining
-    assert 3000.0 <= blended.remaining < base.remaining
-    # progress/remaining stay consistent
     assert blended.total == pytest.approx(a["duration_so_far"] + blended.remaining)
 
 
 def test_blend_leans_on_base_late_in_cycle():
     a = _base(duration_so_far=5400.0)  # 90% in, base remaining = 600s
-    base = _compute_progress_base(**a)
+    base = compute_progress(**a, phase_remaining_s=None)
     # phase disagrees a lot, but late in the cycle the base should dominate
     blended = compute_progress(**a, phase_remaining_s=3000.0)
-    # blended remaining stays much closer to base than to the phase estimate
+    # blended remaining stays much closer to base than to the raw phase estimate
     assert abs(blended.remaining - base.remaining) < abs(blended.remaining - 3000.0)
 
 

@@ -561,47 +561,62 @@ def compute_progress(
 ) -> ProgressResult | None:
     """Progress/remaining estimate, optionally blended with a phase-resolved ETA.
 
-    Delegates to :func:`_compute_progress_base` (the proven, golden-locked EMA +
-    monotonicity + back-calculation body) and, when ``phase_remaining_s`` is
-    provided (opt-in phase matching for a supported device type), blends the
-    phase-resolved per-role budget remaining into the estimate:
+    When ``phase_remaining_s`` is provided (opt-in phase matching for a supported
+    device type), the phase-budget remaining is converted to a completion PERCENT
+    and blended into the phase-progress signal **before** delegating to
+    :func:`_compute_progress_base` - so the blend rides the proven, golden-locked
+    EMA + monotonicity + back-calculation guards (design §8, "one smoothing
+    implementation"), rather than re-deriving a raw, unsmoothed progress. The
+    blend leans on the phase budget early (low base progress) and on the proven
+    phase estimate late::
 
-        f = base_progress / 100                        # completion per the base est.
-        remaining = (1 - f) * phase_remaining_s + f * base_remaining
+        phase_pct = duration_so_far / (duration_so_far + phase_remaining_s) * 100
+        f = base_phase_progress / 100
+        blended = (1 - f) * phase_pct + f * base_phase_progress
 
-    i.e. lean on the phase budget early (when the base under/over-estimates most)
-    and on the proven estimator late (near completion). ``progress`` is re-derived
-    from the blended remaining so the two stay consistent; the base estimator's
-    EMA-smoothed ``base_progress`` supplies the (smooth) blend weight, so the
-    result inherits the base's smoothing rather than jittering per tick.
+    Because this feeds the percent-domain smoothing, the displayed progress stays
+    monotone/smoothed (no tick-to-tick jitter or collapse-to-99%), and remaining
+    is re-derived by the base from ``matched_duration``.
 
     Behaviour is BYTE-IDENTICAL to before when ``phase_remaining_s is None`` (the
     default) - the golden progress snapshot and every existing caller are
     unaffected. This is the single implementation of the blend; the manager and
     the Playground SimRunner both go through it.
     """
+    blended = False
+    if phase_remaining_s is not None and matched_duration and matched_duration > 0:
+        try:
+            pr = float(phase_remaining_s)
+        except (TypeError, ValueError):
+            pr = float("nan")
+        if math.isfinite(pr) and pr >= 0.0:
+            denom = duration_so_far + pr
+            phase_pct = (duration_so_far / denom * 100.0) if denom > 0 else 0.0
+            phase_pct = max(0.0, min(100.0, phase_pct))
+            if phase_result is not None:
+                base_pp, variance = phase_result
+                f = max(0.0, min(1.0, float(base_pp) / 100.0))
+                phase_result = ((1.0 - f) * phase_pct + f * float(base_pp), variance)
+            else:
+                # No envelope phase-progress: blend the phase budget's implied
+                # percent with the linear (elapsed/matched) percent, still leaning
+                # on the phase budget early and the linear estimate late.
+                lin_pct = max(0.0, min(100.0, duration_so_far / matched_duration * 100.0))
+                f = lin_pct / 100.0
+                phase_result = ((1.0 - f) * phase_pct + f * lin_pct, 0.0)
+            blended = True
+
     base = _compute_progress_base(
         device_type, matched_duration, duration_so_far, prev_smoothed,
         phase_result, ml_pct, logger,
     )
-    if base is None or phase_remaining_s is None:
+    if base is None or not blended:
         return base
-    try:
-        pr = float(phase_remaining_s)
-        if not math.isfinite(pr) or pr < 0.0:  # reject NaN / inf / negative
-            return base
-        f = max(0.0, min(1.0, base.progress / 100.0))
-        blended_remaining = max(0.0, (1.0 - f) * pr + f * base.remaining)
-        total = duration_so_far + blended_remaining
-        progress = base.progress
-        if total > 0.0:
-            progress = max(0.0, min(99.0, duration_so_far / total * 100.0))
-        return ProgressResult(
-            progress, base.smoothed, blended_remaining, total,
-            base.phase_progress, "phase_blend",
-        )
-    except (TypeError, ValueError):
-        return base
+    # Relabel the source for diagnostics; values already reflect the blend.
+    return ProgressResult(
+        base.progress, base.smoothed, base.remaining, base.total,
+        base.phase_progress, "phase_blend",
+    )
 
 
 def current_phase(

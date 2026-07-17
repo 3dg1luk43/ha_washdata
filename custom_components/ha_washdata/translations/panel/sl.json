@@ -863,7 +863,8 @@
     "store_download_device_intro": "Prenesi nastavitve skupnostne naprave in jih uporabi za novo ali obstoječo napravo",
     "store_share_device_intro": "Deli programe svoje naprave (profile + referenčne cikle) s skupnostjo. Nastavitve so neobvezne.",
     "share_profile_no_cycles": "Profil '{p}' nima ⭐ referenčnih ciklov -- preskočen bo, razen če imate {n}+ potrjenih zagonov",
-    "advisory_phase_inconsistent": "Videti je, da '{name}' meša različne programe ali temperature - njegovi cikli se segrevajo zelo različno dolgo. Če ga razdelite na ločene profile (npr. po temperaturi), boste izboljšali ujemanje in ocene časa."
+    "advisory_phase_inconsistent": "Videti je, da '{name}' meša različne programe ali temperature - njegovi cikli se segrevajo zelo različno dolgo. Če ga razdelite na ločene profile (npr. po temperaturi), boste izboljšali ujemanje in ocene časa.",
+    "advisory_phase_inconsistent_title": "⚠ Morda pomešani programi"
   },
   "phase_desc": {
     "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",

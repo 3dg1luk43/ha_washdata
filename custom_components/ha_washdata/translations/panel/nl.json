@@ -863,7 +863,8 @@
     "store_download_device_intro": "Neem elk gedeeld programma en zijn referentiecycli over op uw apparaat. Uw eigen opgenomen cycli en statistieken worden niet beïnvloed.",
     "store_share_device_intro": "Upload {brand} {model} met de referentiecycli die u selecteert. Anderen met hetzelfde apparaat kunnen uw programma's overnemen. Vermeldingen worden beoordeeld voordat ze openbaar verschijnen.",
     "share_profile_no_cycles": "Geen referentiecycli -- markeer een cyclus als ⭐ op het tabblad Cycli om dit profiel op te nemen",
-    "advisory_phase_inconsistent": "'{name}' lijkt verschillende programma's of temperaturen te combineren - de cycli verwarmen gedurende sterk uiteenlopende tijden. Door het op te splitsen in aparte profielen (bijv. per temperatuur) verbeteren de matching en tijdschattingen."
+    "advisory_phase_inconsistent": "'{name}' lijkt verschillende programma's of temperaturen te combineren - de cycli verwarmen gedurende sterk uiteenlopende tijden. Door het op te splitsen in aparte profielen (bijv. per temperatuur) verbeteren de matching en tijdschattingen.",
+    "advisory_phase_inconsistent_title": "⚠ Mogelijk gemengde programma's"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plotselinge daling behandeld als onmiddellijk einde",

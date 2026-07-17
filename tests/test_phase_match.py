@@ -99,21 +99,38 @@ def test_phase_eta_budget_decreases_and_tracks_variant():
     # near cycle start (only idle observed) -> remaining ~ full expected total
     t0, w0 = make_trace([(5, 120)])
     segs0 = segment_cycle(t0, w0, WM, partial=True)
-    rem0 = phase_eta(segs0, warm, elapsed_s=120)
+    rem0 = phase_eta(segs0, warm)
     assert rem0 is not None
     assert rem0 > 0.5 * total_expected
 
     # after heating + most of wash consumed -> remaining smaller
     t1, w1 = make_trace([(5, 300), (1600, 1500), (80, 4000)])
     segs1 = segment_cycle(t1, w1, WM, partial=True)
-    rem1 = phase_eta(segs1, warm, elapsed_s=t1[-1])
+    rem1 = phase_eta(segs1, warm)
     assert rem1 is not None
     assert rem1 < rem0
 
 
+def test_phase_eta_completed_role_that_ran_short_does_not_over_count():
+    # heating ran 15 min but the profile mean is ~25 min; once heating is done
+    # (a later WASH segment is open) it must contribute 0, not phantom remaining.
+    warm = _profile("40C", 1500)  # ~25 min heating mean
+    t, w = make_trace([(5, 300), (1600, 900), (80, 1200)])  # 15-min heat, now washing
+    segs = segment_cycle(t, w, WM, partial=True)
+    rem = phase_eta(segs, warm)
+    assert rem is not None
+    # remaining must not include the ~600s of "unspent" heating budget
+    heating_gap = warm.roles["heating"].dur_mean - 900
+    assert heating_gap > 200  # sanity: there IS an unspent gap to avoid counting
+    wash_open_budget = max(0.0, warm.roles["wash"].dur_mean - 1200)
+    spin_future = warm.roles["spin"].dur_mean * warm.roles["spin"].occurrence
+    # rem ~= wash-remaining + future spin, with NO heating contribution
+    assert rem < wash_open_budget + spin_future + 120
+
+
 def test_phase_eta_none_when_no_profile():
     obs = segment_cycle(*_cotton(1500), WM)
-    assert phase_eta(obs, None, 100.0) is None
+    assert phase_eta(obs, None) is None
 
 
 def test_match_empty_inputs():

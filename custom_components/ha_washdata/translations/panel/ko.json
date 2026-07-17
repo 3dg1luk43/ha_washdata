@@ -863,7 +863,8 @@
     "store_download_device_intro": "공유된 모든 프로그램과 해당 참조 사이클을 기기에 채택합니다. 직접 기록한 사이클과 통계는 영향을 받지 않습니다.",
     "store_share_device_intro": "선택한 참조 사이클과 함께 {brand} {model}을 업로드합니다. 같은 가전제품을 가진 다른 사용자가 프로그램을 채택할 수 있습니다. 항목은 공개 전에 검토됩니다.",
     "share_profile_no_cycles": "참조 사이클 없음 -- 이 프로파일을 포함하려면 사이클 탭에서 사이클을 ⭐로 표시하세요",
-    "advisory_phase_inconsistent": "'{name}'은(는) 서로 다른 프로그램이나 온도가 섞여 있는 것 같습니다. 사이클마다 가열 시간이 크게 다릅니다. 온도별 등으로 별도의 프로필로 나누면 매칭과 시간 추정이 개선됩니다."
+    "advisory_phase_inconsistent": "'{name}'은(는) 서로 다른 프로그램이나 온도가 섞여 있는 것 같습니다. 사이클마다 가열 시간이 크게 다릅니다. 온도별 등으로 별도의 프로필로 나누면 매칭과 시간 추정이 개선됩니다.",
+    "advisory_phase_inconsistent_title": "⚠ 프로그램이 섞였을 수 있음"
   },
   "pg_desc": {
     "abrupt_drop_watts": "급격한 강하는 즉시 종료로 처리",

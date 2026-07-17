@@ -108,6 +108,11 @@ CONF_ENABLE_PHASE_MATCHING = "enable_phase_matching"
 # (the "mixed labels" data-hygiene problem). Pure statistics from the cached
 # phase profile - no relabeling (phase matching does not label better than the
 # whole-cycle matcher; see the Phase-0 gate).
+# Minimum member cycles before a profile's cached phase profile is trusted to
+# drive the live phase-resolved ETA (mirrors the envelope's cycle_count>=2 gate);
+# below this the priors are too noisy (single-cycle -> zero variance) and the
+# estimate falls back to the classic one. Design §6 cold-start floor.
+PHASE_PROFILE_MIN_CYCLES = 2
 PHASE_CONSISTENCY_MIN_CYCLES = 4
 # Heating-time std/mean above this -> likely mixed temperatures under one label.
 # A clean single-temperature profile sits ~0.2 (load variation only); a profile

@@ -863,7 +863,8 @@
     "store_download_device_intro": "Ota käyttöön jokainen jaettu ohjelma ja sen viitesyklit laitteellesi. Omat tallennetut syklisi ja tilastosi eivät vaikutu.",
     "store_share_device_intro": "Lataa {brand} {model} valitsemiesi viitesyklien kanssa. Muut saman laitteen omistajat voivat ottaa ohjelmiasi käyttöön. Merkinnät tarkistetaan ennen julkaisua.",
     "share_profile_no_cycles": "Ei viitesyklejä -- merkitse sykli ⭐:ksi Syklit-välilehdessä sisällyttääksesi tämän profiilin",
-    "advisory_phase_inconsistent": "'{name}' vaikuttaa sekoittavan eri ohjelmia tai lämpötiloja - sen syklit lämmittävät hyvin eripituisia aikoja. Sen jakaminen erillisiin profiileihin (esim. lämpötilan mukaan) parantaa täsmäytystä ja aika-arvioita."
+    "advisory_phase_inconsistent": "'{name}' vaikuttaa sekoittavan eri ohjelmia tai lämpötiloja - sen syklit lämmittävät hyvin eripituisia aikoja. Sen jakaminen erillisiin profiileihin (esim. lämpötilan mukaan) parantaa täsmäytystä ja aika-arvioita.",
+    "advisory_phase_inconsistent_title": "⚠ Mahdollisesti sekoittuneet ohjelmat"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Äkillinen pudotus tulkitaan välittömäksi lopuksi",

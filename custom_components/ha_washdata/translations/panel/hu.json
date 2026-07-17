@@ -863,7 +863,8 @@
     "store_download_device_intro": "Vegyen át minden megosztott programot és annak referenciaciklusait az eszközére. A saját rögzített ciklusait és statisztikáit nem érinti.",
     "store_share_device_intro": "Töltse fel a(z) {brand} {model} eszközt a kiválasztott referenciaciklusokkal. Más, ugyanolyan készülékkel rendelkezők átvehetik programjait. A bejegyzések felülvizsgálatra kerülnek nyilvánossá válás előtt.",
     "share_profile_no_cycles": "Nincsenek referenciaciklusok -- jelöljön meg egy ciklust ⭐-gal a Ciklusok lapon, hogy belefoglalhassa ezt a profilt",
-    "advisory_phase_inconsistent": "Úgy tűnik, hogy a(z) '{name}' különböző programokat vagy hőmérsékleteket kever - ciklusai nagyon eltérő ideig fűtenek. Ha külön profilokra bontja (pl. hőmérsékletenként), az javítja a párosítást és az időbecsléseket."
+    "advisory_phase_inconsistent": "Úgy tűnik, hogy a(z) '{name}' különböző programokat vagy hőmérsékleteket kever - ciklusai nagyon eltérő ideig fűtenek. Ha külön profilokra bontja (pl. hőmérsékletenként), az javítja a párosítást és az időbecsléseket.",
+    "advisory_phase_inconsistent_title": "⚠ Esetleg kevert programok"
   },
   "phase_desc": {
     "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",

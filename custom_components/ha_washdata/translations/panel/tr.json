@@ -863,7 +863,8 @@
     "store_download_device_intro": "Her paylaşılan programı ve referans döngülerini cihazınıza benimseyin. Kendi kayıtlı döngüleriniz ve istatistikleriniz etkilenmez.",
     "store_share_device_intro": "Seçtiğiniz referans döngüleriyle {brand} {model} cihazını yükleyin. Aynı cihaza sahip diğer kullanıcılar programlarınızı benimseyebilir. Girişler kamuya açılmadan önce incelenir.",
     "share_profile_no_cycles": "Referans döngüsü yok -- bu profili dahil etmek için Döngüler sekmesinde bir döngüyü ⭐ olarak işaretleyin",
-    "advisory_phase_inconsistent": "'{name}' farklı programları veya sıcaklıkları karıştırıyor gibi görünüyor - çevrimleri çok farklı sürelerde ısıtma yapıyor. Bunu ayrı profillere bölmek (örneğin her sıcaklık için) eşleştirmeyi ve süre tahminlerini iyileştirir."
+    "advisory_phase_inconsistent": "'{name}' farklı programları veya sıcaklıkları karıştırıyor gibi görünüyor - çevrimleri çok farklı sürelerde ısıtma yapıyor. Bunu ayrı profillere bölmek (örneğin her sıcaklık için) eşleştirmeyi ve süre tahminlerini iyileştirir.",
+    "advisory_phase_inconsistent_title": "⚠ Karışık olabilecek programlar"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Ani düşüş anında bitiş sayılır",

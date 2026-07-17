@@ -863,7 +863,8 @@
     "store_download_device_intro": "Adoptez chaque programme partagé et ses cycles de référence sur votre appareil. Vos propres cycles enregistrés et statistiques ne sont pas affectés.",
     "store_share_device_intro": "Envoyez {brand} {model} avec les cycles de référence que vous sélectionnez. D'autres utilisateurs du même appareil peuvent adopter vos programmes. Les entrées sont examinées avant d'apparaître publiquement.",
     "share_profile_no_cycles": "Aucun cycle de référence -- marquez un cycle comme ⭐ dans l'onglet Cycles pour inclure ce profil",
-    "advisory_phase_inconsistent": "'{name}' semble mélanger différents programmes ou températures - ses cycles chauffent pendant des durées très variables. Le diviser en profils distincts (p. ex. par température) améliorera la reconnaissance et les estimations de temps."
+    "advisory_phase_inconsistent": "'{name}' semble mélanger différents programmes ou températures - ses cycles chauffent pendant des durées très variables. Le diviser en profils distincts (p. ex. par température) améliorera la reconnaissance et les estimations de temps.",
+    "advisory_phase_inconsistent_title": "⚠ Programmes peut-être mélangés"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Chute soudaine traitée comme une fin immédiate",

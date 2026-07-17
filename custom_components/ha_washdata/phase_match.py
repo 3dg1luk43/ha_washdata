@@ -32,8 +32,9 @@ one-sided (a candidate is only penalised if the observed duration already
 *exceeds* its expected total), so the correct larger-heating variant is not
 prematurely ruled out while heating is still in progress.
 
-Constraint: NumPy only, no Home Assistant imports. Pure and INERT (nothing in
-the live integration imports it yet). See
+Constraint: NumPy only, no Home Assistant imports. Pure and executor-safe;
+consumed live (behind the default-off ``enable_phase_matching`` per-device gate)
+by ``ProfileStore.phase_remaining`` and the progress blend. See
 `docs/superpowers/specs/2026-07-17-phase-segmented-matching-design.md`.
 """
 from __future__ import annotations
@@ -60,8 +61,11 @@ _ROLE_WEIGHTS: dict[str, float] = {
 }
 _DUR_SCALE = 0.35        # log-ratio agreement scale for per-role duration
 _EN_SCALE = 0.40         # ... and per-role energy
-_OCC_PENALTY = 0.5       # score multiplier when a completed role is present in
-                         # one side but absent in the other (structure mismatch)
+# Agreement score credited when a role is present on one side but absent on the
+# other (structural mismatch, e.g. a heating vs no-heating cycle). 0.0 = full
+# penalty (structural difference is a strong, wanted discriminator); raise toward
+# 1.0 to soften. Config-overridable via ``occ_penalty``.
+_OCC_PENALTY = 0.0
 
 
 @dataclass(frozen=True)
@@ -137,6 +141,7 @@ def _agree(observed: float, expected: float, scale: float) -> float:
     if observed <= 0.0 or expected <= 0.0:
         # Both ~zero → perfect agreement; one zero → no agreement.
         return 1.0 if observed <= 0.0 and expected <= 0.0 else 0.0
+    scale = scale if scale > 1e-9 else 1e-9  # avoid div-by-zero on a 0 config scale
     return 1.0 / (1.0 + abs(math.log(observed / expected)) / scale)
 
 
@@ -237,7 +242,7 @@ def match_phase_profiles(
             if stat is None:
                 # Observed a role the candidate never exhibits: structural miss.
                 if obs["dur"] > 0:
-                    num += w * occ_pen * 0.0
+                    num += w * occ_pen
                     den += w
                 continue
             if role not in totals:
@@ -245,16 +250,18 @@ def match_phase_profiles(
                 # partial cycle → neutral (skip). On a completed cycle →
                 # structural miss (candidate does a phase this cycle never had).
                 if not is_partial:
-                    num += w * occ_pen * 0.0
+                    num += w * occ_pen
                     den += w
                 continue
             if role == open_role:
-                # One-sided: only penalise if the in-progress duration already
-                # exceeds what this candidate expects for the whole role.
-                if obs["dur"] <= stat.dur_mean:
-                    agree = 1.0
-                else:
-                    agree = _agree(obs["dur"], stat.dur_mean, dur_scale)
+                # One-sided: only penalise if the in-progress duration/energy
+                # already EXCEEDS what this candidate expects for the whole role
+                # (a larger-budget candidate must not be ruled out mid-phase).
+                # Energy is the cleanest temperature discriminator, so score it
+                # one-sided too rather than dropping it (weaker narrowing).
+                da = 1.0 if obs["dur"] <= stat.dur_mean else _agree(obs["dur"], stat.dur_mean, dur_scale)
+                ea = 1.0 if obs["en"] <= stat.en_mean else _agree(obs["en"], stat.en_mean, en_scale)
+                agree = math.sqrt(da * ea)
             else:
                 da = _agree(obs["dur"], stat.dur_mean, dur_scale)
                 ea = _agree(obs["en"], stat.en_mean, en_scale)
@@ -271,24 +278,43 @@ def match_phase_profiles(
 def phase_eta(
     observed: list[PhaseSegment],
     profile: PhaseProfile,
-    elapsed_s: float,
 ) -> float | None:
     """Project remaining seconds as a per-role budget. Never raises.
 
-    ``remaining = Σ_role max(0, expected_role_total − consumed_role)``. For the
-    in-progress role this yields the remaining time in that phase; roles not yet
-    started contribute their full expected duration. Returns ``None`` when no
-    phase priors are available (caller falls back to the current estimator).
+    Classifies each profile role against the observed-so-far segments (design §8):
+
+      * **current** (the open, in-progress role): contribute
+        ``max(0, dur_mean − consumed)`` using the CONDITIONAL mean (the role is
+        known present, so no occurrence discount);
+      * **completed** (a role already observed but not the open one): contribute
+        **0** — it is done, even if it ran shorter than the profile mean (fixing
+        the "phantom remaining" over-count);
+      * **future** (a profile role not yet observed): contribute the
+        occurrence-weighted prior ``dur_mean × occurrence`` (we do not yet know
+        whether it will occur).
+
+    Returns ``None`` when no phase priors are available (caller falls back to the
+    current estimator).
     """
     if profile is None or not profile.roles:
         return None
     consumed = _role_totals(observed) if observed else {}
+    # The open (in-progress) role. If the caller did not mark one (e.g. a
+    # completed trace), treat the last observed role as current so completed
+    # roles still contribute 0 rather than a spurious prior.
+    open_role = next((s.role for s in (observed or []) if s.open), None)
+    if open_role is None and observed:
+        open_role = observed[-1].role
     remaining = 0.0
     for role, stat in profile.roles.items():
-        # Weight the expected total by how often the role actually occurs, so a
-        # rare reheat block does not inflate every ETA.
-        expected = stat.dur_mean * max(0.0, min(1.0, stat.occurrence))
         done = consumed.get(role, {}).get("dur", 0.0)
-        remaining += max(0.0, expected - done)
-    # Guard: never return a negative or absurdly small value once running.
+        if role == open_role:
+            # current: conditional mean (occurrence -> 1, role is present)
+            remaining += max(0.0, stat.dur_mean - done)
+        elif role in consumed:
+            # completed: nothing more to spend on it
+            continue
+        else:
+            # future: unconditional prior (may or may not occur)
+            remaining += stat.dur_mean * max(0.0, min(1.0, stat.occurrence))
     return float(max(0.0, remaining))

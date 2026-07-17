@@ -43,6 +43,7 @@ from .const import (
     MAINTENANCE_RECENT_SUPPRESS_DAYS,
     MATCH_AMBIGUITY_MARGIN,
     PHASE_CONSISTENCY_MIN_CYCLES,
+    PHASE_PROFILE_MIN_CYCLES,
     PHASE_HEAT_CV_WARN,
     PHASE_HEAT_OCC_MIXED_LO,
     PHASE_HEAT_OCC_MIXED_HI,
@@ -3984,7 +3985,11 @@ class ProfileStore:
         device_type = str(
             self._data.get("profiles", {}).get(profile_name, {}).get("device_type") or ""
         )
-        phase_profile = self._compute_phase_profile(profile_name, shape_cycles, device_type)
+        # Offload the per-cycle segmentation to the executor (it can be tens of ms
+        # for very long traces; keep it off the event loop, like the envelope DTW).
+        phase_profile = await self.hass.async_add_executor_job(
+            self._compute_phase_profile, profile_name, shape_cycles, device_type
+        )
         if phase_profile is not None:
             envelope_data["phase_profile"] = phase_profile
 
@@ -4027,29 +4032,57 @@ class ProfileStore:
             self._logger.debug("phase-profile build failed for %s", profile_name, exc_info=True)
             return None
 
-    def _candidate_phase_profiles(self) -> list:
-        """All cached per-profile PhaseProfiles (from envelope['phase_profile'])."""
+    def _group_scope(self, program: str) -> set[str]:
+        """Profile names to consider for phase narrowing: the matched program plus
+        any of its group siblings (design §9 - narrow WITHIN the matched group).
+
+        Constraining to the group keeps the phase-resolved ETA coherent with the
+        displayed program (same program family) instead of budgeting from an
+        unrelated profile picked by a global phase match.
+        """
+        scope = {program}
+        try:
+            for grp in self.get_profile_groups().values():
+                members = grp.get("members") if isinstance(grp, dict) else None
+                if isinstance(members, list) and program in members:
+                    scope.update(m for m in members if isinstance(m, str))
+        except Exception:  # noqa: BLE001
+            pass
+        return scope
+
+    def _candidate_phase_profiles(self, scope: set[str] | None = None) -> list:
+        """Cached per-profile PhaseProfiles (from envelope['phase_profile']).
+
+        Restricted to ``scope`` (profile names) when given, and always filtered to
+        profiles with >= ``PHASE_PROFILE_MIN_CYCLES`` member cycles so a noisy
+        single-cycle prior can't drive the ETA (cold-start floor).
+        """
         out = []
-        for env in (self._data.get("envelopes") or {}).values():
+        for name, env in (self._data.get("envelopes") or {}).items():
+            if scope is not None and name not in scope:
+                continue
             if isinstance(env, dict):
                 pp = phase_profile_from_dict(env.get("phase_profile"))
-                if pp is not None:
+                if pp is not None and pp.n_cycles >= PHASE_PROFILE_MIN_CYCLES:
                     out.append(pp)
         return out
 
     def phase_remaining(
         self,
         power_data: list,
-        elapsed_s: float,
         device_type: str,
+        program: str | None = None,
     ) -> dict[str, Any] | None:
         """Phase-resolved remaining-time for a running cycle. Never raises.
 
-        Segments the observed-so-far trace, matches it against the device's cached
-        per-profile phase profiles, and returns the winning profile's per-role
-        budget remaining. Returns ``None`` (caller keeps the current estimate)
-        when phase matching is not live-supported for the device type, no phase
-        profiles are cached yet, or segmentation is degenerate.
+        Segments the observed-so-far trace and matches it against the matched
+        ``program``'s phase profile (and its group siblings, design §9), returning
+        the winning member's per-role budget remaining. Returns ``None`` (caller
+        keeps the current estimate) when: phase matching is not live-supported for
+        the device type; ``program`` is unknown / has no cached phase profile
+        (or too few cycles - cold-start floor); segmentation is degenerate; or the
+        top two candidates are within ``MATCH_AMBIGUITY_MARGIN`` (ambiguous - do
+        not commit a variant, design §7).
 
         This is the *phase* half of the blended ETA; the blend with the current
         estimator lives in ``progress.compute_progress`` (single source of truth).
@@ -4060,9 +4093,9 @@ class ProfileStore:
             if not phase_matching_live_supported(device_type):
                 return None
             model = phase_model_for(device_type)
-            if model is None:
+            if model is None or not program:
                 return None
-            candidates = self._candidate_phase_profiles()
+            candidates = self._candidate_phase_profiles(self._group_scope(program))
             if not candidates:
                 return None
             offsets = power_data_to_offsets(power_data or [])
@@ -4076,8 +4109,13 @@ class ProfileStore:
             ranked = match_phase_profiles(segs, candidates, {})
             if not ranked:
                 return None
+            # Ambiguity gate: a near-tie among group members is not a confident
+            # variant call - fall back rather than swing the ETA between budgets.
+            if (len(ranked) >= 2
+                    and (ranked[0].score - ranked[1].score) < MATCH_AMBIGUITY_MARGIN):
+                return None
             best = next((c for c in candidates if c.name == ranked[0].name), None)
-            remaining = phase_eta(segs, best, elapsed_s) if best is not None else None
+            remaining = phase_eta(segs, best) if best is not None else None
             if remaining is None:
                 return None
             return {

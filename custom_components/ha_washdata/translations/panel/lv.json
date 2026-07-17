@@ -863,7 +863,8 @@
     "store_download_device_intro": "Pieņemiet katru kopīgoto programmu un tās atskaites ciklus savā ierīcē. Jūsu pašu ierakstītie cikli un statistika netiek ietekmēti.",
     "store_share_device_intro": "Augšupielādējiet {brand} {model} ar atlasītajiem atskaites cikliem. Citi ar to pašu ierīci var pieņemt jūsu programmas. Ieraksti tiek pārskatīti pirms publiskošanas.",
     "share_profile_no_cycles": "Nav atskaites ciklu -- atzīmējiet ciklu kā ⭐ cilnē Cikli, lai iekļautu šo profilu",
-    "advisory_phase_inconsistent": "Šķiet, ka '{name}' sajauc dažādas programmas vai temperatūras - tā cikli sildās ļoti atšķirīgu laiku. Sadalot to atsevišķos profilos (piemēram, pēc temperatūras), tiks uzlabota saskaņošana un laika aprēķini."
+    "advisory_phase_inconsistent": "Šķiet, ka '{name}' sajauc dažādas programmas vai temperatūras - tā cikli sildās ļoti atšķirīgu laiku. Sadalot to atsevišķos profilos (piemēram, pēc temperatūras), tiks uzlabota saskaņošana un laika aprēķini.",
+    "advisory_phase_inconsistent_title": "⚠ Iespējams, jauktas programmas"
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",

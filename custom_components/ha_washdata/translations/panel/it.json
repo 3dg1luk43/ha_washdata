@@ -863,7 +863,8 @@
     "store_download_device_intro": "Adotta ogni programma condiviso e i suoi cicli di riferimento sul tuo dispositivo. I tuoi cicli registrati e le tue statistiche non vengono modificati.",
     "store_share_device_intro": "Carica {brand} {model} con i cicli di riferimento che selezioni. Altri con lo stesso elettrodomestico possono adottare i tuoi programmi. Le voci vengono revisionate prima di apparire pubblicamente.",
     "share_profile_no_cycles": "Nessun ciclo di riferimento -- contrassegna un ciclo come ⭐ nella scheda Cicli per includere questo profilo",
-    "advisory_phase_inconsistent": "'{name}' sembra mescolare programmi o temperature diversi - i suoi cicli riscaldano per intervalli di tempo molto diversi. Dividerlo in profili separati (ad es. per temperatura) migliorerà la corrispondenza e le stime dei tempi."
+    "advisory_phase_inconsistent": "'{name}' sembra mescolare programmi o temperature diversi - i suoi cicli riscaldano per intervalli di tempo molto diversi. Dividerlo in profili separati (ad es. per temperatura) migliorerà la corrispondenza e le stime dei tempi.",
+    "advisory_phase_inconsistent_title": "⚠ Possibili programmi misti"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Calo improvviso trattato come fine immediata",
