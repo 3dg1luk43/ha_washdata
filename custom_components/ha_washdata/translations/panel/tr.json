@@ -1,13 +1,13 @@
 {
   "badge": {
-    "artifact_tip": "{n} anormallik algılandı (ör. döngünün ortasında kapının açılması) — bunları grafikte görmek için açın",
+    "artifact_tip": "{n} anormallik algılandı (ör. döngünün ortasında kapının açılması) – bunları grafikte görmek için açın",
     "auto": "(otomatik algılandı)",
     "built_in_tag": "yerleşik",
     "declining": "↘ düşüyor",
     "energy_low": "Normalden düşük enerji",
     "energy_spike": "Normalden yüksek enerji",
     "fair_fit": "kabul edilebilir kalite",
-    "fair_fit_tip": "Orta düzeyde eşleşme tutarlılığı — bu profile atanan bazı döngülerin güven puanları daha düşüktür. Doğruluğu artırmak için daha fazla döngü etiketleyin veya profili yeniden kaydedin.",
+    "fair_fit_tip": "Orta düzeyde eşleşme tutarlılığı – bu profile atanan bazı döngülerin güven puanları daha düşüktür. Doğruluğu artırmak için daha fazla döngü etiketleyin veya profili yeniden kaydedin.",
     "feedback_requested": "Geri bildirim istendi",
     "golden_cycle": "Kaydedilen referans döngüsü",
     "improving": "↗ iyileşiyor",
@@ -15,7 +15,7 @@
     "needs_review": "İncelenmesi gerekiyor",
     "overrun": "Normalden daha uzun sürdü",
     "poor_fit": "düşük kalite",
-    "poor_fit_tip": "Tutarsız eşleşme geçmişi — bu profili yeniden oluşturmayı düşünün",
+    "poor_fit_tip": "Tutarsız eşleşme geçmişi – bu profili yeniden oluşturmayı düşünün",
     "restart_gap_tip": "{n} HA yeniden başlatma boşluğu: güç izinde bir delik var",
     "reviewed": "İncelendi",
     "steady": "→ sabit",
@@ -87,7 +87,7 @@
     "on_cycle_finished": "Döngü bittiğinde",
     "on_cycle_started": "Döngü başladığında",
     "pause_cycle": "Duraklat",
-    "pause_cycle_tip": "Çalışan döngüyü duraklatın — cihaz kaldığı yerden devam edecek",
+    "pause_cycle_tip": "Çalışan döngüyü duraklatın – cihaz kaldığı yerden devam edecek",
     "pg_apply_device": "Cihaza uygula",
     "pg_autofill": "Otomatik doldur",
     "play": "Oynat",
@@ -97,8 +97,8 @@
     "process_tip": "Kaydedilen izi yeni veya mevcut bir profil olarak kaydedin",
     "rebuild": "Zarfları Yeniden Oluştur",
     "rebuild_envelope": "Zarfı Yeniden Oluştur",
-    "rebuild_tip": "Tüm profiller için etiketlenmiş döngülerinden beklenen güç zarfını (min/maks bandı) yeniden hesaplayın — yeni döngüler etiketledikten veya eskilerini düzelttikten sonra çalıştırın",
-    "rec_start_tip": "Cihazın güç izini kaydetmeye başlayın — döngü çalıştırmadan hemen önce başlatın",
+    "rebuild_tip": "Tüm profiller için etiketlenmiş döngülerinden beklenen güç zarfını (min/maks bandı) yeniden hesaplayın – yeni döngüler etiketledikten veya eskilerini düzelttikten sonra çalıştırın",
+    "rec_start_tip": "Cihazın güç izini kaydetmeye başlayın – döngü çalıştırmadan hemen önce başlatın",
     "rec_stop": "Durdur",
     "rec_stop_tip": "Kaydı durdurun ve yakalanan izi inceleme için saklayın",
     "record": "Kayda Başla",
@@ -182,7 +182,7 @@
     },
     "attn_sub": "Kaydetmeden önce çakışmaları düzeltin",
     "attn_title": "{n} ayar çakışması{s}",
-    "settings_banner": "{n} ayar çakışması{s} — vurgulanan bölümleri kontrol edin ve kaydetmeden önce düzeltin.",
+    "settings_banner": "{n} ayar çakışması{s} – vurgulanan bölümleri kontrol edin ve kaydetmeden önce düzeltin.",
     "settings_banner_btn": "İlkine git",
     "confidence": {
       "auto": "Eşleşme Eşiğinde veya üzerinde olmalıdır ({match})",
@@ -451,9 +451,9 @@
     "show_expected": "Beklenen eğri bindirmesini göster (eşleşen profil, turuncu)",
     "show_raw": "Canlı güç grafiğinde ham soket değiştiriciyi göster",
     "sparkline": "Son döngü süresi eğilimi",
-    "stage2": "Aşama 2 — çekirdek benzerlik",
-    "stage3": "Aşama 3 — DTW",
-    "stage4": "Aşama 4 — uyum",
+    "stage2": "Aşama 2 – çekirdek benzerlik",
+    "stage3": "Aşama 3 – DTW",
+    "stage4": "Aşama 4 – uyum",
     "status": "Durum",
     "tail_trim": "Kuyruk Kırpma (s)",
     "timer_auto_pause": "Otomatik duraklatma",
@@ -645,7 +645,7 @@
     "artifact_dip_detail": "Normal güç bandının altında yaklaşık ~{n} saniye sürdü.",
     "artifact_footer": "Yukarıdaki grafikte vurgulanmıştır. Bunlar geçici eserlerdir (örn. döngünün ortasında kapının açılması), mutlaka sorun teşkil etmez.",
     "artifact_header": "Bu döngü sırasında {n} anormallik algılandı",
-    "artifact_pause_detail": "Güç yaklaşık ~{n} saniye boyunca sıfıra yakın düştü, sonra devam etti — döngünün ortasında kapı açılmış veya döngü duraklatılmış olabilir.",
+    "artifact_pause_detail": "Güç yaklaşık ~{n} saniye boyunca sıfıra yakın düştü, sonra devam etti – döngünün ortasında kapı açılmış veya döngü duraklatılmış olabilir.",
     "artifact_spike_detail": "Normal güç bandının üzerinde yaklaşık ~{n} saniye sürdü.",
     "auto_label_intro": "Eşleşme güveni eşiği geçen etiketsiz döngülere profil atayın.",
     "automations_intro": "WashData, {start} / {end} olaylarını tetikler ve varlıkları gösterir; bu nedenle bildirimler ve eylemler en iyi şekilde normal Home Assistant otomasyonları olarak oluşturulur. Bu cihazı kullanan otomasyonlar aşağıda görünür.",
@@ -654,10 +654,10 @@
     "collecting_data": "Veri toplanıyor: ince ayar başlamadan önce {need} döngü{plural} daha gerekiyor ({current}/{min}).",
     "compare_overlay_profiles": "Profilleri üst üste bindirin (soluk)",
     "compare_profiles_tip": "Hangisinin bu döngüye en uygun olduğunu görmek için diğer profil zarflarını yukarıdaki tabloya yerleştirin.",
-    "compare_selected_cycles": "Seçili döngüler (katı) — göster / gizle",
+    "compare_selected_cycles": "Seçili döngüler (katı) – göster / gizle",
     "consider_new_profile": "Yeni bir profil oluşturmayı düşünün.",
     "coverage_gap": "son döngülerin eşleşen profili yok (son 30 döngünün %{pct}'i).",
-    "coverage_gap_similar_cycles": "{count} benzer etiketsiz döngü bulundu — bunları eşleştirmeye başlamak için bir profil oluşturun.",
+    "coverage_gap_similar_cycles": "{count} benzer etiketsiz döngü bulundu – bunları eşleştirmeye başlamak için bir profil oluşturun.",
     "cycles_deleted": "{count} döngü silindi",
     "enough_data": "Öğrenmek için yeterli veri ({current}/{min} döngü).",
     "export_description": "Tüm profilleri ve döngüleri JSON'a aktarın veya önceki bir dışa aktarma işleminden geri yükleyin.",
@@ -686,7 +686,7 @@
     "ml_learned_intro": "Bu makineye ince ayarlı modeller.",
     "ml_loading": "ML yükleniyor…",
     "ml_settings_intro": "İki bağımsız anahtar: biri döngü çalışırken modelleri uygular, diğeri WashData'nın zamanla makinenize ince ayar yapmasına izin verir.",
-    "name_first_program": "Yeterli döngünüz var — eşleştirmeye başlamak için ilk programınıza ad verin.",
+    "name_first_program": "Yeterli döngünüz var – eşleştirmeye başlamak için ilk programınıza ad verin.",
     "near_duplicate_cluster": "neredeyse yinelenen profil kümesi algılandı. Gruplandırma, eşleştirmenin benzerler arasında güvenilir bir şekilde seçim yapmasına olanak tanır (örneğin, farklı sıcaklıkta/döndürmede aynı program).",
     "no_cycles_match": "Mevcut filtreyle eşleşen döngü yok.",
     "no_cycles_profile": "Bu profil için döngü yok.",
@@ -696,7 +696,7 @@
     "no_devices": "Henüz WashData cihazı yapılandırılmamış.",
     "no_envelope": "Henüz zarf yok - döngüleri etiketledikten sonra yeniden oluşturun.",
     "no_envelope_overlay": "Üst üste bindirmek için zarf mevcut değil.",
-    "no_fine_tuned": "Henüz ince ayar yapılmadı — WashData yerleşik modellerini kullanıyor.",
+    "no_fine_tuned": "Henüz ince ayar yapılmadı – WashData yerleşik modellerini kullanıyor.",
     "no_logs": "Henüz günlük kaydı arabelleğe alınmadı.",
     "no_maintenance": "Henüz bakım kaydı yok.",
     "no_match_yet": "Henüz eşleşme denemesi yok - bu, çalışan bir döngü sırasında doldurulur.",
@@ -713,7 +713,7 @@
     "notify_services_hint": "{entity} hizmet kimliklerini kullanın (birden fazlası için virgülle ayrın). Şablon değişkenleri: {vars}.",
     "old_actions_warning": "Eski eylem düzenleyiciyle yapılandırılmıştır (artık kaldırılmıştır). Döngü etkinliklerinde hala tetikleniyorlar ancak artık burada düzenlenemezler. Bunları normal bir otomasyona dönüştürün veya kaldırın.",
     "onboarding_progress": "{n} / 3 döngü gözlemlendi",
-    "onboarding_watching": "Cihazınızı normal şekilde kullanın — WashData izliyor. 3 döngüden sonra program eşleştirmesi başlar.",
+    "onboarding_watching": "Cihazınızı normal şekilde kullanın – WashData izliyor. 3 döngüden sonra program eşleştirmesi başlar.",
     "pending_feedback": "Bekleyen algılama geri bildirimi",
     "performance_trend": "Performans trendi ({n} döngü)",
     "pg_analysis_empty": "Eşleşme analizini görmek için bir döngü yükleyin.",
@@ -763,7 +763,7 @@
     "setting_changed": "{date} tarihinde {old} değerinden {new} değerine değiştirildi",
     "settings_basic_note": "Temel ayarlar gösteriliyor. Tam liste için Gelişmiş'e geçin.",
     "shape_drift_advisory": "⚠ Şekil kayıyor",
-    "shape_drift_detail": "Bu profil için güç paterni zamanla kaymıştır — olası cihaz aşınması veya bakım gerekebilir (örn. kireç çözme, filtre temizliği).",
+    "shape_drift_detail": "Bu profil için güç paterni zamanla kaymıştır – olası cihaz aşınması veya bakım gerekebilir (örn. kireç çözme, filtre temizliği).",
     "show_all_settings": "Tüm ayarları göster",
     "showing_suggestions": "Önerilerle birlikte {count} ayarı gösteriliyor.",
     "split_intro": "Bölme noktası eklemek veya kaldırmak için grafiğe tıklayın veya boşta kalma aralıklarına göre otomatik algılayın. Her elde edilen bölüm kendi profilini alabilir.",
@@ -789,10 +789,10 @@
     "toast_revert_failed": "Geri alma başarısız: {error}",
     "toast_reverted": "{key} geri alındı",
     "toast_save_failed": "Kaydetme başarısız: {error}",
-    "trend_duration_longer": "Süre trendi daha uzun (%{pct}/döngü) — son ortalama {avg}",
-    "trend_duration_shorter": "Süre eğilimi daha kısa (%{pct}/döngü) — son ortalama {avg}",
+    "trend_duration_longer": "Süre trendi daha uzun (%{pct}/döngü) – son ortalama {avg}",
+    "trend_duration_shorter": "Süre eğilimi daha kısa (%{pct}/döngü) – son ortalama {avg}",
     "trend_energy_down": "Enerji düşüş eğiliminde (%{pct}/döngü)",
-    "trend_energy_up": "Enerji yükseliş eğiliminde (%{pct}/döngü) — son ortalama {avg}",
+    "trend_energy_up": "Enerji yükseliş eğiliminde (%{pct}/döngü) – son ortalama {avg}",
     "trim_intro": "Kırmızı tutamaçları sürükleyin veya değer girin. Pencerenin dışındaki her şey kaldırılır.",
     "tuning_suggestions_available": "Gözlemlenen döngülerden {count} ayarlama önerisi mevcut. İlgili alanların yanında görünürler.",
     "unsure_detected_prefix": "WashData algıladığından emin değil",
@@ -1570,24 +1570,24 @@
         "lower": "Daha fazla döngüyü otomatik etiketler; bazıları yanlış tanımlanabilir"
       },
       "duration_tolerance": {
-        "higher": "Daha geniş süre aralığı kabul eder — daha esnek eşleştirme",
-        "lower": "Daha yakın süre eşleşmesi gerektirir — daha katı ama alışılmadık döngüleri reddedebilir"
+        "higher": "Daha geniş süre aralığı kabul eder – daha esnek eşleştirme",
+        "lower": "Daha yakın süre eşleşmesi gerektirir – daha katı ama alışılmadık döngüleri reddedebilir"
       },
       "end_energy_threshold": {
         "higher": "Yalnızca önemli enerji kullanan döngüleri kapatır",
         "lower": "Daha kısa veya düşük enerjili döngüleri de kapatır"
       },
       "end_repeat_count": {
-        "higher": "Bitiş sinyalinin daha fazla tekrarlanmasını gerektirir — daha güvenilir, biraz daha yavaş",
-        "lower": "Daha az tekrardan sonra biter — daha hızlı algılama, daha yüksek yanlış bitiş riski"
+        "higher": "Bitiş sinyalinin daha fazla tekrarlanmasını gerektirir – daha güvenilir, biraz daha yavaş",
+        "lower": "Daha az tekrardan sonra biter – daha hızlı algılama, daha yüksek yanlış bitiş riski"
       },
       "learning_confidence": {
-        "higher": "Yalnızca çok güvenli eşleşmelerden öğrenir — daha yavaş ama daha güvenilir",
+        "higher": "Yalnızca çok güvenli eşleşmelerden öğrenir – daha yavaş ama daha güvenilir",
         "lower": "Daha fazla döngüden öğrenir; model daha gürültülü olabilir"
       },
       "min_off_gap": {
         "higher": "Yeni döngü başlamadan önce daha uzun boşta kalma süresi gerekir",
-        "lower": "Kısa boşta kalma yeni döngü başlatır — arka arkaya çalışmalar bölünebilir"
+        "lower": "Kısa boşta kalma yeni döngü başlatır – arka arkaya çalışmalar bölünebilir"
       },
       "min_power": {
         "higher": "Boşta güç çekimine daha az duyarlı; çok sessiz programları kaçırabilir",
@@ -1598,24 +1598,24 @@
         "lower": "Takılı döngüyü daha erken zorunlu durdurur"
       },
       "off_delay": {
-        "higher": "Cihaz duraklamaları için daha fazla süre — uzun ıslatma veya kurutma aşamalarını yönetir",
-        "lower": "Daha hızlı bitiş algılama — net açık/kapalı cihazlar için iyi çalışır"
+        "higher": "Cihaz duraklamaları için daha fazla süre – uzun ıslatma veya kurutma aşamalarını yönetir",
+        "lower": "Daha hızlı bitiş algılama – net açık/kapalı cihazlar için iyi çalışır"
       },
       "profile_match_threshold": {
         "higher": "Yalnızca yüksek güvenli eşleşmeleri onaylar; daha fazla döngü etiketsiz kalır",
         "lower": "Daha fazla döngüyle eşleşir; bazıları hafif hatalı olabilir"
       },
       "running_dead_zone": {
-        "higher": "Boşta kısa güç artışlarını yoksayar — gürültüye daha az duyarlı",
-        "lower": "Daha kısa güç patlamalarına yanıt verir — hızlı geçici etkinliği yakalar"
+        "higher": "Boşta kısa güç artışlarını yoksayar – gürültüye daha az duyarlı",
+        "lower": "Daha kısa güç patlamalarına yanıt verir – hızlı geçici etkinliği yakalar"
       },
       "start_threshold_w": {
         "higher": "Kısa güç artışlarından kaynaklanan yanlış başlatmaları önler",
         "lower": "Düşük güçlü programları yakalar; gürültüde tetiklenebilir"
       },
       "stop_threshold_w": {
-        "higher": "Döngüyü daha hızlı bitirir — duraklamada kapanabilir",
-        "lower": "Bitişi daha uzun bekler — daha az erken tamamlanma"
+        "higher": "Döngüyü daha hızlı bitirir – duraklamada kapanabilir",
+        "lower": "Bitişi daha uzun bekler – daha az erken tamamlanma"
       },
       "watchdog_interval": {
         "higher": "Daha uzun sessiz aşamalara izin verilir; daha az yanlış zorunlu durdurma",

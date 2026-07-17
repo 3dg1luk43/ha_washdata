@@ -87,7 +87,7 @@
     "on_cycle_finished": "Le cycle terminé",
     "on_cycle_started": "Le cycle a démarré",
     "pause_cycle": "Pause",
-    "pause_cycle_tip": "Mettre en pause le cycle en cours — l'appareil reprendra là où il s'est arrêté",
+    "pause_cycle_tip": "Mettre en pause le cycle en cours – l'appareil reprendra là où il s'est arrêté",
     "pg_apply_device": "Appliquer à l'appareil",
     "pg_autofill": "Remplissage automatique",
     "play": "Lire",
@@ -97,8 +97,8 @@
     "process_tip": "Enregistrer la trace capturée en tant que profil nouveau ou existant",
     "rebuild": "Reconstruire les enveloppes",
     "rebuild_envelope": "Reconstruire l'enveloppe",
-    "rebuild_tip": "Recalculer l'enveloppe de puissance attendue (bande min/max) pour tous les profils à partir de leurs cycles étiquetés — à exécuter après l'étiquetage de nouveaux cycles ou la correction d'anciens",
-    "rec_start_tip": "Commencer l'enregistrement de la trace de puissance de l'appareil — démarrer juste avant de lancer un cycle",
+    "rebuild_tip": "Recalculer l'enveloppe de puissance attendue (bande min/max) pour tous les profils à partir de leurs cycles étiquetés – à exécuter après l'étiquetage de nouveaux cycles ou la correction d'anciens",
+    "rec_start_tip": "Commencer l'enregistrement de la trace de puissance de l'appareil – démarrer juste avant de lancer un cycle",
     "rec_stop": "Arrêt",
     "rec_stop_tip": "Arrêter l'enregistrement et conserver la trace capturée pour révision",
     "record": "Commencer l'enregistrement",
@@ -182,7 +182,7 @@
     },
     "attn_sub": "Corriger les conflits avant d'enregistrer",
     "attn_title": "{n} conflit{s} de paramètres",
-    "settings_banner": "{n} conflit{s} de paramètres — vérifiez les sections surlignées et corrigez avant d'enregistrer.",
+    "settings_banner": "{n} conflit{s} de paramètres – vérifiez les sections surlignées et corrigez avant d'enregistrer.",
     "settings_banner_btn": "Aller au premier",
     "confidence": {
       "auto": "Doit être supérieur ou égal au Seuil de correspondance ({match})",
@@ -451,9 +451,9 @@
     "show_expected": "Afficher la superposition de courbe attendue (profil correspondant, orange)",
     "show_raw": "Afficher le commutateur de signal brut de la prise dans le graphique de puissance en direct",
     "sparkline": "Tendance récente de la durée des cycles",
-    "stage2": "Étape 2 — similarité principale",
-    "stage3": "Étape 3 — DTW",
-    "stage4": "Étape 4 — concordance",
+    "stage2": "Étape 2 – similarité principale",
+    "stage3": "Étape 3 – DTW",
+    "stage4": "Étape 4 – concordance",
     "status": "Statut",
     "tail_trim": "Rognage de fin (s)",
     "timer_auto_pause": "Pause automatique",
@@ -645,7 +645,7 @@
     "artifact_dip_detail": "Est tombé en dessous de la bande de puissance habituelle pendant environ {n} s.",
     "artifact_footer": "Mis en évidence sur le graphique ci-dessus. Il s’agit d’artefacts transitoires (par exemple la porte ouverte en cours de cycle), pas nécessairement de problèmes.",
     "artifact_header": "{n} anomalies détectées au cours de ce cycle",
-    "artifact_pause_detail": "La puissance a chuté près de zéro pendant environ {n} s puis a repris — la porte a probablement été ouverte en cours de cycle ou le cycle a été mis en pause.",
+    "artifact_pause_detail": "La puissance a chuté près de zéro pendant environ {n} s puis a repris – la porte a probablement été ouverte en cours de cycle ou le cycle a été mis en pause.",
     "artifact_spike_detail": "A dépassé la bande de puissance habituelle pendant environ {n} s.",
     "auto_label_intro": "Attribuez des profils à des cycles non étiquetés dont la confiance de correspondance efface le seuil.",
     "automations_intro": "WashData déclenche les événements {start} / {end} et expose des entités, les notifications et actions sont donc mieux construites comme des automatisations Home Assistant normales. Les automatisations utilisant cet appareil apparaissent ci-dessous.",
@@ -654,10 +654,10 @@
     "collecting_data": "Collecte de données - encore {need} cycle{plural} avant que l'affinage puisse commencer ({current}/{min}).",
     "compare_overlay_profiles": "Profils de superposition (faible)",
     "compare_profiles_tip": "Superposez d'autres enveloppes de profil sur le graphique ci-dessus pour voir laquelle correspond le mieux à ce cycle.",
-    "compare_selected_cycles": "Cycles sélectionnés (solides) — afficher/masquer",
+    "compare_selected_cycles": "Cycles sélectionnés (solides) – afficher/masquer",
     "consider_new_profile": "Pensez à créer un nouveau profil.",
     "coverage_gap": "les cycles récents n'ont pas de profil correspondant ({pct} % des 30 derniers).",
-    "coverage_gap_similar_cycles": "{count} cycles similaires non étiquetés trouvés — créez un profil pour commencer à les identifier.",
+    "coverage_gap_similar_cycles": "{count} cycles similaires non étiquetés trouvés – créez un profil pour commencer à les identifier.",
     "cycles_deleted": "{count} cycle(s) supprimé(s)",
     "enough_data": "Suffisamment de données pour apprendre ({current}/{min} cycles).",
     "export_description": "Exportez tous les profils et cycles vers JSON, ou restaurez à partir d'une exportation précédente.",
@@ -686,7 +686,7 @@
     "ml_learned_intro": "Modèles adaptés à cette machine.",
     "ml_loading": "chargement de ML…",
     "ml_settings_intro": "Deux commutateurs indépendants : l'un applique les modèles pendant l'exécution d'un cycle, l'autre permet à WashData de les ajuster avec précision à votre machine au fil du temps.",
-    "name_first_program": "Vous avez assez de cycles — nommez votre premier programme pour lancer la correspondance.",
+    "name_first_program": "Vous avez assez de cycles – nommez votre premier programme pour lancer la correspondance.",
     "near_duplicate_cluster": "Cluster de profils quasi-dupliqué détecté. Le regroupement permet de choisir de manière fiable entre des sosies (par exemple, le même programme à différentes températures/essorages).",
     "no_cycles_match": "Aucun cycle ne correspond au filtre actuel.",
     "no_cycles_profile": "Aucun cycle pour ce profil.",
@@ -713,7 +713,7 @@
     "notify_services_hint": "Utilisez les IDs de service {entity} (séparés par des virgules pour plusieurs). Variables de gabarit : {vars}.",
     "old_actions_warning": "Configuré avec l'ancien éditeur d'actions (maintenant supprimé). Ils se déclenchent toujours sur les événements du cycle mais ne peuvent plus être modifiés ici. Convertissez-les en une automatisation normale ou supprimez-les.",
     "onboarding_progress": "{n} / 3 cycles observés",
-    "onboarding_watching": "Utilisez votre appareil normalement — WashData observe. Après 3 cycles, la correspondance des programmes commencera.",
+    "onboarding_watching": "Utilisez votre appareil normalement – WashData observe. Après 3 cycles, la correspondance des programmes commencera.",
     "pending_feedback": "En attente de retour de détection",
     "performance_trend": "Tendance des performances ({n} cycles)",
     "pg_analysis_empty": "Chargez un cycle pour voir l'analyse de correspondance.",
@@ -763,7 +763,7 @@
     "setting_changed": "Modifié de {old} à {new} le {date}",
     "settings_basic_note": "Affichage des paramètres essentiels. Passez à Avancé pour la liste complète.",
     "shape_drift_advisory": "⚠ Dérive de forme",
-    "shape_drift_detail": "Le profil de puissance a évolué au fil du temps — usure possible de l'appareil ou entretien nécessaire (p. ex. détartrage, nettoyage du filtre).",
+    "shape_drift_detail": "Le profil de puissance a évolué au fil du temps – usure possible de l'appareil ou entretien nécessaire (p. ex. détartrage, nettoyage du filtre).",
     "show_all_settings": "Afficher tous les paramètres",
     "showing_suggestions": "Affichage du paramètre {count} avec des suggestions.",
     "split_intro": "Cliquez sur le graphique pour ajouter ou supprimer un point de partage, ou détecter automatiquement les espaces inactifs. Chaque segment résultant peut avoir son propre profil.",
@@ -1571,24 +1571,24 @@
         "lower": "Étiquette plus de cycles automatiquement ; certains peuvent être mal identifiés"
       },
       "duration_tolerance": {
-        "higher": "Accepte une plage de durée plus large — correspondance plus flexible",
-        "lower": "Exige une durée plus proche — plus strict, peut rejeter des cycles inhabituels"
+        "higher": "Accepte une plage de durée plus large – correspondance plus flexible",
+        "lower": "Exige une durée plus proche – plus strict, peut rejeter des cycles inhabituels"
       },
       "end_energy_threshold": {
         "higher": "Clôture uniquement les cycles ayant consommé une énergie significative",
         "lower": "Clôture aussi les cycles courts ou à faible consommation"
       },
       "end_repeat_count": {
-        "higher": "Exige que le signal de fin se répète davantage — plus robuste, légèrement plus lent",
-        "lower": "Termine après moins de répétitions — détection plus rapide, risque de fausse fin accru"
+        "higher": "Exige que le signal de fin se répète davantage – plus robuste, légèrement plus lent",
+        "lower": "Termine après moins de répétitions – détection plus rapide, risque de fausse fin accru"
       },
       "learning_confidence": {
-        "higher": "N'apprend que des correspondances très confiantes — plus lent mais plus fiable",
+        "higher": "N'apprend que des correspondances très confiantes – plus lent mais plus fiable",
         "lower": "Apprend à partir de plus de cycles ; le modèle peut être moins précis"
       },
       "min_off_gap": {
         "higher": "Repos plus long requis avant le démarrage d'un nouveau cycle",
-        "lower": "Un bref repos déclenche un nouveau cycle — des cycles successifs peuvent être scindés"
+        "lower": "Un bref repos déclenche un nouveau cycle – des cycles successifs peuvent être scindés"
       },
       "min_power": {
         "higher": "Moins sensible à la consommation au repos ; peut manquer des programmes très silencieux",
@@ -1599,24 +1599,24 @@
         "lower": "Arrête un cycle bloqué plus tôt"
       },
       "off_delay": {
-        "higher": "Plus de temps pour les pauses de l'appareil — gère les longues phases de trempage ou de séchage",
-        "lower": "Détection de fin plus rapide — adapté aux appareils marche/arrêt nets"
+        "higher": "Plus de temps pour les pauses de l'appareil – gère les longues phases de trempage ou de séchage",
+        "lower": "Détection de fin plus rapide – adapté aux appareils marche/arrêt nets"
       },
       "profile_match_threshold": {
         "higher": "Ne valide que les correspondances très confiantes ; plus de cycles restent non étiquetés",
         "lower": "Fait correspondre plus de cycles ; certains peuvent être légèrement erronés"
       },
       "running_dead_zone": {
-        "higher": "Ignore les brèves pointes de puissance au repos — moins sensible au bruit",
-        "lower": "Réagit à des impulsions plus courtes — capte les activités transitoires rapides"
+        "higher": "Ignore les brèves pointes de puissance au repos – moins sensible au bruit",
+        "lower": "Réagit à des impulsions plus courtes – capte les activités transitoires rapides"
       },
       "start_threshold_w": {
         "higher": "Évite les faux démarrages dus à de brèves pointes de puissance",
         "lower": "Capte les programmes à faible puissance ; peut se déclencher sur du bruit"
       },
       "stop_threshold_w": {
-        "higher": "Termine le cycle plus vite — peut se clôturer lors d'une pause",
-        "lower": "Attend plus longtemps pour terminer — moins de fins prématurées"
+        "higher": "Termine le cycle plus vite – peut se clôturer lors d'une pause",
+        "lower": "Attend plus longtemps pour terminer – moins de fins prématurées"
       },
       "watchdog_interval": {
         "higher": "Phases silencieuses plus longues autorisées ; moins de faux arrêts forcés",

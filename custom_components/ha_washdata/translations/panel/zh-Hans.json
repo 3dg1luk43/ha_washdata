@@ -1,13 +1,13 @@
 {
   "badge": {
-    "artifact_tip": "检测到 {n} 个异常（例如，门在周期中打开）— 打开以在图表上查看",
+    "artifact_tip": "检测到 {n} 个异常（例如，门在周期中打开）– 打开以在图表上查看",
     "auto": "（自动检测）",
     "built_in_tag": "内置",
     "declining": "↘ 下降中",
     "energy_low": "能耗低于正常水平",
     "energy_spike": "能耗高于正常水平",
     "fair_fit": "质量尚可",
-    "fair_fit_tip": "匹配一致性适中 — 分配给此配置文件的部分周期置信度较低。标记更多周期或重新录制配置文件以提高准确性。",
+    "fair_fit_tip": "匹配一致性适中 – 分配给此配置文件的部分周期置信度较低。标记更多周期或重新录制配置文件以提高准确性。",
     "feedback_requested": "已请求反馈",
     "golden_cycle": "记录参考周期",
     "improving": "↗ 提升中",
@@ -15,7 +15,7 @@
     "needs_review": "需要审查",
     "overrun": "运行时间超出正常",
     "poor_fit": "质量差",
-    "poor_fit_tip": "匹配历史不一致 — 考虑重建此配置文件",
+    "poor_fit_tip": "匹配历史不一致 – 考虑重建此配置文件",
     "restart_gap_tip": "{n} HA 重启间隙 - 电源跟踪有漏洞",
     "reviewed": "已审核",
     "steady": "→ 稳定",
@@ -57,7 +57,7 @@
     "create_profile": "+ 创建配置文件",
     "delete": "删除",
     "delete_group": "删除组",
-    "delete_group_tip": "仅删除此组 — 保留成员配置文件",
+    "delete_group_tip": "仅删除此组 – 保留成员配置文件",
     "delete_profile": "删除配置文件",
     "discard": "丢弃",
     "discard_tip": "丢弃录制的电力记录，不保存",
@@ -87,7 +87,7 @@
     "on_cycle_finished": "周期完成时",
     "on_cycle_started": "周期开始时",
     "pause_cycle": "暂停",
-    "pause_cycle_tip": "暂停正在运行的周期 — 设备将从中断处恢复",
+    "pause_cycle_tip": "暂停正在运行的周期 – 设备将从中断处恢复",
     "pg_apply_device": "应用到设备",
     "pg_autofill": "自动填充",
     "play": "播放",
@@ -97,8 +97,8 @@
     "process_tip": "将录制的电力记录保存为新的或现有的配置文件",
     "rebuild": "重建包络",
     "rebuild_envelope": "重建包络",
-    "rebuild_tip": "从已标记周期重新计算所有配置文件的预期功率包络（最小/最大范围）— 在标记新周期或修正旧周期后运行",
-    "rec_start_tip": "开始录制设备的电力轨迹 — 在运行周期之前立即开始",
+    "rebuild_tip": "从已标记周期重新计算所有配置文件的预期功率包络（最小/最大范围）– 在标记新周期或修正旧周期后运行",
+    "rec_start_tip": "开始录制设备的电力轨迹 – 在运行周期之前立即开始",
     "rec_stop": "停止",
     "rec_stop_tip": "停止录制并保留已捕获的电力记录以供审核",
     "record": "开始录制",
@@ -231,7 +231,7 @@
       "interval": "应至少为采样间隔 ({si} 秒) 的 2 倍",
       "sampling": "采样间隔应最多为看门狗间隔 ({wi} 秒) 的一半"
     },
-    "settings_banner": "{n} 个设置冲突{s} — 请检查高亮显示的部分，并在保存前修复。",
+    "settings_banner": "{n} 个设置冲突{s} – 请检查高亮显示的部分，并在保存前修复。",
     "settings_banner_btn": "前往第一处"
   },
   "hdr": {
@@ -451,9 +451,9 @@
     "show_expected": "显示预期曲线叠加（匹配配置文件，橙色）",
     "show_raw": "在实时功率图中显示原始插座切换开关",
     "sparkline": "近期周期时长趋势",
-    "stage2": "阶段 2 — 核心相似度",
-    "stage3": "阶段 3 — DTW",
-    "stage4": "阶段 4 — 一致度",
+    "stage2": "阶段 2 – 核心相似度",
+    "stage3": "阶段 3 – DTW",
+    "stage4": "阶段 4 – 一致度",
     "status": "状态",
     "tail_trim": "尾部裁剪（秒）",
     "timer_auto_pause": "自动暂停",
@@ -645,7 +645,7 @@
     "artifact_dip_detail": "跌破通常功率范围约 {n} 秒。",
     "artifact_footer": "在上图中高亮显示。这些是瞬态异常（例如门在周期中打开），不一定是问题。",
     "artifact_header": "此周期中检测到 {n} 个异常",
-    "artifact_pause_detail": "功率降至接近零约 {n} 秒后恢复 — 可能是周期中途开门或周期被暂停。",
+    "artifact_pause_detail": "功率降至接近零约 {n} 秒后恢复 – 可能是周期中途开门或周期被暂停。",
     "artifact_spike_detail": "超出通常功率范围约 {n} 秒。",
     "auto_label_intro": "为置信度达到阈值的未标记周期分配配置文件。",
     "automations_intro": "WashData 触发 {start} / {end} 事件并公开实体，因此通知和操作最好构建为常规 Home Assistant 自动化。使用此设备的自动化显示在下方。",
@@ -654,10 +654,10 @@
     "collecting_data": "正在收集数据，还需要 {need} 个周期{plural}才能开始微调（{current}/{min}）。",
     "compare_overlay_profiles": "叠加配置文件（浅色）",
     "compare_profiles_tip": "将其他配置文件包络叠加在上方图表上，看哪个最适合此周期。",
-    "compare_selected_cycles": "选中的周期（实线）— 显示/隐藏",
+    "compare_selected_cycles": "选中的周期（实线）– 显示/隐藏",
     "consider_new_profile": "考虑创建新配置文件。",
     "coverage_gap": "近期周期没有匹配的配置文件（最近 30 次的 {pct}%）。",
-    "coverage_gap_similar_cycles": "发现 {count} 个相似未标记周期 — 创建配置文件以开始匹配它们。",
+    "coverage_gap_similar_cycles": "发现 {count} 个相似未标记周期 – 创建配置文件以开始匹配它们。",
     "cycles_deleted": "已删除 {count} 个周期",
     "enough_data": "有足够数据可供学习（{current}/{min} 个循环）。",
     "export_description": "将所有配置文件和周期导出为 JSON，或从之前的导出中恢复。",
@@ -686,7 +686,7 @@
     "ml_learned_intro": "针对此机器微调的模型。",
     "ml_loading": "加载 ML 中…",
     "ml_settings_intro": "两个独立开关：一个在周期运行时应用模型，另一个让 WashData 随时间针对您的机器进行微调。",
-    "name_first_program": "您已有足够的周期 — 为您的第一个程序命名即可开始匹配。",
+    "name_first_program": "您已有足够的周期 – 为您的第一个程序命名即可开始匹配。",
     "near_duplicate_cluster": "检测到近似重复的配置文件群。分组可让匹配在相似项目间可靠地选择（例如同一程序在不同温度/转速下）。",
     "no_cycles_match": "没有与当前筛选条件匹配的周期。",
     "no_cycles_profile": "此配置文件没有周期。",
@@ -694,12 +694,12 @@
     "no_cycles_yet": "尚未记录任何周期。",
     "no_device_selected": "未选择设备。",
     "no_devices": "尚未配置 WashData 设备。",
-    "no_envelope": "还没有包络 — 标记周期后重建。",
+    "no_envelope": "还没有包络 – 标记周期后重建。",
     "no_envelope_overlay": "没有可叠加的包络。",
-    "no_fine_tuned": "尚未微调 — WashData 正在使用内置模型。",
+    "no_fine_tuned": "尚未微调 – WashData 正在使用内置模型。",
     "no_logs": "尚未缓冲任何日志记录。",
     "no_maintenance": "尚未记录任何维护。",
-    "no_match_yet": "尚未尝试匹配 — 此项在运行周期时填充。",
+    "no_match_yet": "尚未尝试匹配 – 此项在运行周期时填充。",
     "no_other_users": "未找到其他 Home Assistant 用户。",
     "no_phases": "未定义阶段。",
     "no_phases_assigned": "未分配阶段。",
@@ -713,7 +713,7 @@
     "notify_services_hint": "使用 {entity} 服务 ID（多个请用英文逗号分隔）。模板变量：{vars}。",
     "old_actions_warning": "使用旧版操作编辑器配置（现已移除）。它们仍会在周期事件上触发，但无法在此处编辑。将它们转换为普通自动化，或移除它们。",
     "onboarding_progress": "已观察 {n} / 3 个周期",
-    "onboarding_watching": "照常使用您的设备 — WashData 正在观察。3 个周期后将开始程序匹配。",
+    "onboarding_watching": "照常使用您的设备 – WashData 正在观察。3 个周期后将开始程序匹配。",
     "pending_feedback": "待处理的检测反馈",
     "performance_trend": "性能趋势（{n} 个周期）",
     "pg_analysis_empty": "加载一个周期以查看匹配分析。",
@@ -745,16 +745,16 @@
     "recent_logs": "最近的 ha_washdata 记录",
     "recording_in_progress": "录制进行中",
     "reminders_intro": "在上次保养后经过这么多个周期时在面板中显示提醒。留空或填 0 可关闭提醒。",
-    "restart_gap_footer": "在图表上突出显示。这些间隔的功率数据缺失——仅使用真实读数进行匹配。",
+    "restart_gap_footer": "在图表上突出显示。这些间隔的功率数据缺失––仅使用真实读数进行匹配。",
     "restart_gap_header": "{n} 此周期内的 HA 重新启动间隔",
     "restart_gap_item": "{dur}间隙",
-    "review_confirm_help": "确认此周期是否被正确检测。您的审查可在您的机器上训练模型 — 确认的周期越多，匹配和健康评分越好。快速的好/差就足够了。",
+    "review_confirm_help": "确认此周期是否被正确检测。您的审查可在您的机器上训练模型 – 确认的周期越多，匹配和健康评分越好。快速的好/差就足够了。",
     "review_in_settings": "在设置中审查",
     "review_notes_placeholder": "注释（可选）",
     "review_notes_tip": "供个人参考的自由文本注释。不用于匹配或训练。",
-    "review_profile_tip": "此周期标记的程序。如果自动检测的程序有误，请在此处修正 — 标记可帮助未来周期的匹配学习。",
+    "review_profile_tip": "此周期标记的程序。如果自动检测的程序有误，请在此处修正 – 标记可帮助未来周期的匹配学习。",
     "review_quality_tip": "此周期的质量。好 = 该程序的标准示例；差 = 已检测但有噪声或不典型；不可用 = 误检测（合并、截断或虚假）。影响健康评分及允许训练模型的周期。",
-    "review_recorded_tip": "将此标记为其程序的精选参考周期 — 与手动录制周期的作用相同。参考周期始终保留，为匹配模板提供种子，且不会被清理删除。（这是“黄金”/录制标志；两者是同一件事。）",
+    "review_recorded_tip": "将此标记为其程序的精选参考周期 – 与手动录制周期的作用相同。参考周期始终保留，为匹配模板提供种子，且不会被清理删除。（这是“黄金”/录制标志；两者是同一件事。）",
     "review_tags_tip": "描述此周期出现问题的可选标志，以便训练和清理可以考虑这些问题。",
     "review_to_cycles": "打开周期审查队列",
     "saving_triggers_reload": "保存会触发集成重载。HA 实体可能短暂显示为不可用。",
@@ -763,7 +763,7 @@
     "setting_changed": "于 {date} 从 {old} 更改为 {new}",
     "settings_basic_note": "正在显示基本设置。切换到高级可查看完整列表。",
     "shape_drift_advisory": "⚠ 形状偏移",
-    "shape_drift_detail": "此配置文件的功率模式随时间发生了变化 — 可能是设备磨损或需要维护（例如除垢、清洁滤网）。",
+    "shape_drift_detail": "此配置文件的功率模式随时间发生了变化 – 可能是设备磨损或需要维护（例如除垢、清洁滤网）。",
     "show_all_settings": "显示所有设置",
     "showing_suggestions": "显示 {count} 个有建议的设置。",
     "split_intro": "点击图表添加或删除分割点，或通过空闲间隔自动检测。每个结果片段可获得自己的配置文件。",
@@ -789,10 +789,10 @@
     "toast_revert_failed": "还原失败：{error}",
     "toast_reverted": "已还原 {key}",
     "toast_save_failed": "保存失败：{error}",
-    "trend_duration_longer": "时长趋势增长（{pct}%/周期）— 近期平均 {avg}",
-    "trend_duration_shorter": "时长趋势缩短（{pct}%/周期）— 近期平均 {avg}",
+    "trend_duration_longer": "时长趋势增长（{pct}%/周期）– 近期平均 {avg}",
+    "trend_duration_shorter": "时长趋势缩短（{pct}%/周期）– 近期平均 {avg}",
     "trend_energy_down": "能耗趋势下降（{pct}%/周期）",
-    "trend_energy_up": "能耗趋势上升（{pct}%/周期）— 近期平均 {avg}",
+    "trend_energy_up": "能耗趋势上升（{pct}%/周期）– 近期平均 {avg}",
     "trim_intro": "拖动红色控制柄，或输入值。窗口外的所有内容将被移除。",
     "tuning_suggestions_available": "来自观察周期的 {count} 个调整建议可用。它们显示在相关字段旁边。",
     "unsure_detected_prefix": "WashData 不确定是否检测到",
@@ -1073,7 +1073,7 @@
       "label": "最小功率"
     },
     "ml_training_enabled": {
-      "doc": "定期隔夜研究您审查的循环，并针对该特定机器微调模型。只有当改变在持续的周期中真正取得更好的成绩时，才会保留改变，因此这只能有所帮助或保持不变——永远不会倒退。",
+      "doc": "定期隔夜研究您审查的循环，并针对该特定机器微调模型。只有当改变在持续的周期中真正取得更好的成绩时，才会保留改变，因此这只能有所帮助或保持不变––永远不会倒退。",
       "label": "从此机器学习"
     },
     "ml_training_hour": {
@@ -1570,24 +1570,24 @@
         "lower": "自动标记更多循环，部分可能被误识别"
       },
       "duration_tolerance": {
-        "higher": "接受更宽的时长范围——匹配更灵活",
-        "lower": "要求时长更接近——更严格，但可能拒绝非常规循环"
+        "higher": "接受更宽的时长范围––匹配更灵活",
+        "lower": "要求时长更接近––更严格，但可能拒绝非常规循环"
       },
       "end_energy_threshold": {
         "higher": "仅关闭消耗大量能量的循环",
         "lower": "也关闭较短或低能耗的循环"
       },
       "end_repeat_count": {
-        "higher": "结束信号需重复更多次——更稳健，但略慢",
-        "lower": "更少重复后结束——检测更快，但误结束风险更高"
+        "higher": "结束信号需重复更多次––更稳健，但略慢",
+        "lower": "更少重复后结束––检测更快，但误结束风险更高"
       },
       "learning_confidence": {
-        "higher": "仅从高置信度匹配中学习——较慢但更可靠",
+        "higher": "仅从高置信度匹配中学习––较慢但更可靠",
         "lower": "从更多循环中学习，模型可能更嘈杂"
       },
       "min_off_gap": {
         "higher": "新循环开始前需要更长的空闲时间",
-        "lower": "短暂空闲即触发新循环——连续运行可能被拆分"
+        "lower": "短暂空闲即触发新循环––连续运行可能被拆分"
       },
       "min_power": {
         "higher": "对待机功耗不那么敏感，可能遗漏非常安静的程序",
@@ -1598,24 +1598,24 @@
         "lower": "更快地强制终止卡住的循环"
       },
       "off_delay": {
-        "higher": "为设备暂停留出更多时间——适合长时间浸泡或烘干阶段",
-        "lower": "更快检测结束——适合干净的开关设备"
+        "higher": "为设备暂停留出更多时间––适合长时间浸泡或烘干阶段",
+        "lower": "更快检测结束––适合干净的开关设备"
       },
       "profile_match_threshold": {
         "higher": "仅提交高置信度匹配，更多循环保持未标记",
         "lower": "匹配更多循环，部分可能略有偏差"
       },
       "running_dead_zone": {
-        "higher": "忽略待机时的短暂功率尖峰——对噪声不那么敏感",
-        "lower": "响应更短的功率突发——捕捉快速瞬态活动"
+        "higher": "忽略待机时的短暂功率尖峰––对噪声不那么敏感",
+        "lower": "响应更短的功率突发––捕捉快速瞬态活动"
       },
       "start_threshold_w": {
         "higher": "避免因短暂功率尖峰引起的误启动",
         "lower": "捕捉低功率程序，可能对噪声触发"
       },
       "stop_threshold_w": {
-        "higher": "更快结束循环——可能在暂停时关闭",
-        "lower": "等待更长时间结束——减少提前完成"
+        "higher": "更快结束循环––可能在暂停时关闭",
+        "lower": "等待更长时间结束––减少提前完成"
       },
       "watchdog_interval": {
         "higher": "允许更长的静默阶段，减少误强制停止",

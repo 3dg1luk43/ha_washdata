@@ -1,13 +1,13 @@
 {
   "badge": {
-    "artifact_tip": "U zbuluan {n} anomali (p.sh. dera e hapur në mes të ciklit) — hapeni për t'i parë ato në grafik",
+    "artifact_tip": "U zbuluan {n} anomali (p.sh. dera e hapur në mes të ciklit) – hapeni për t'i parë ato në grafik",
     "auto": "(zbuluar automatikisht)",
     "built_in_tag": "i integruar",
     "declining": "↘ në rënie",
     "energy_low": "Energji më e ulët se zakonisht",
     "energy_spike": "Energji më e lartë se zakonisht",
     "fair_fit": "cilësi e pranueshme",
-    "fair_fit_tip": "Konsistencë e moderuar e ndeshjes — disa cikle të caktuara për këtë profil kanë rezultate më të ulëta besimi. Etiketoni më shumë cikle ose riregjistroni profilin për të përmirësuar saktësinë.",
+    "fair_fit_tip": "Konsistencë e moderuar e ndeshjes – disa cikle të caktuara për këtë profil kanë rezultate më të ulëta besimi. Etiketoni më shumë cikle ose riregjistroni profilin për të përmirësuar saktësinë.",
     "feedback_requested": "Kërkohet koment",
     "golden_cycle": "Cikli referues i regjistruar",
     "improving": "↗ në rritje",
@@ -15,7 +15,7 @@
     "needs_review": "Ka nevojë për rishikim",
     "overrun": "Zgjati më shumë se zakonisht",
     "poor_fit": "cilësi e keqe",
-    "poor_fit_tip": "Histori jokonsistente e ndeshjeve — merrni parasysh rindërtimin e këtij profili",
+    "poor_fit_tip": "Histori jokonsistente e ndeshjeve – merrni parasysh rindërtimin e këtij profili",
     "restart_gap_tip": "{n} boshllëk rinisje të HA: gjurma e energjisë ka një vrimë",
     "reviewed": "Shqyrtuar",
     "steady": "→ i qëndrueshëm",
@@ -87,7 +87,7 @@
     "on_cycle_finished": "Kur cikli përfundon",
     "on_cycle_started": "Kur cikli fillon",
     "pause_cycle": "Ndalo",
-    "pause_cycle_tip": "Ndalo ciklin aktiv — pajisja do të vazhdojë nga aty ku kishte mbetur",
+    "pause_cycle_tip": "Ndalo ciklin aktiv – pajisja do të vazhdojë nga aty ku kishte mbetur",
     "pg_apply_device": "Apliko te pajisja",
     "pg_autofill": "Mbushje automatike",
     "play": "Luaj",
@@ -97,8 +97,8 @@
     "process_tip": "Ruaj gjurmën e regjistruar si profil të ri ose ekzistues",
     "rebuild": "Rindërto zarfet",
     "rebuild_envelope": "Rindërto zarfin",
-    "rebuild_tip": "Rillogaris zarfin e pritshmë të energjisë (brezin min/maks) për të gjitha profilet nga ciklet e tyre të etiketuara — ekzekuto pas etiketimit të cikleve të reja ose korrigjimit të tjerave",
-    "rec_start_tip": "Fillo regjistrimin e gjurmës së energjisë të pajisjes — fillo pak para ekzekutimit të një cikli",
+    "rebuild_tip": "Rillogaris zarfin e pritshmë të energjisë (brezin min/maks) për të gjitha profilet nga ciklet e tyre të etiketuara – ekzekuto pas etiketimit të cikleve të reja ose korrigjimit të tjerave",
+    "rec_start_tip": "Fillo regjistrimin e gjurmës së energjisë të pajisjes – fillo pak para ekzekutimit të një cikli",
     "rec_stop": "Ndalo",
     "rec_stop_tip": "Ndalo regjistrimin dhe mbaj gjurmën e kapur për shqyrtim",
     "record": "Fillo regjistrimin",
@@ -231,7 +231,7 @@
       "interval": "Duhet të jetë të paktën 2× Intervali i Kampionimit ({si} s)",
       "sampling": "Intervali i Kampionimit duhet të jetë të paktën gjysma e Intervalit të Rojtarit ({wi} s)"
     },
-    "settings_banner": "{n} konflikt{s} cilësimi — kontrolloni seksionet e theksuara dhe korrigjojini para ruajtjes.",
+    "settings_banner": "{n} konflikt{s} cilësimi – kontrolloni seksionet e theksuara dhe korrigjojini para ruajtjes.",
     "settings_banner_btn": "Shko te i pari"
   },
   "hdr": {
@@ -451,9 +451,9 @@
     "show_expected": "Shfaq mbivendosjen e kurbës së pritshme (profili i përputhshëm, portokalli)",
     "show_raw": "Shfaq çelësin e të dhënave bruto të prizës në grafikun e fuqisë në kohë reale",
     "sparkline": "Prirja e fundit e kohëzgjatjes së cikleve",
-    "stage2": "Etapa 2 — ngjashmëria bazë",
-    "stage3": "Etapa 3 — DTW",
-    "stage4": "Etapa 4 — përputhja",
+    "stage2": "Etapa 2 – ngjashmëria bazë",
+    "stage3": "Etapa 3 – DTW",
+    "stage4": "Etapa 4 – përputhja",
     "status": "Statusi",
     "tail_trim": "Prerja e fundit (s)",
     "timer_auto_pause": "Auto-pauzë",
@@ -645,7 +645,7 @@
     "artifact_dip_detail": "Ra nën brezin e zakonshëm të fuqisë për ~{n} s.",
     "artifact_footer": "E theksuar në grafikun e mësipërm. Këto janë objekte kalimtare (p.sh. dera e hapur në mes të ciklit), jo domosdoshmërisht probleme.",
     "artifact_header": "{n} anomali të zbuluara gjatë këtij cikli",
-    "artifact_pause_detail": "Fuqia ra pothuajse në zero për ~{n} s dhe u rikuperua — ndoshta dera u hap në mes të ciklit ose cikli u ndërpre.",
+    "artifact_pause_detail": "Fuqia ra pothuajse në zero për ~{n} s dhe u rikuperua – ndoshta dera u hap në mes të ciklit ose cikli u ndërpre.",
     "artifact_spike_detail": "Shkoi mbi brezin e zakonshëm të fuqisë për ~{n} s.",
     "auto_label_intro": "Cakto profile te ciklet e paetiketuara që besueshmëria e tyre e përputhjes tejkalon pragun.",
     "automations_intro": "WashData ndez ngjarje {start} / {end} dhe ekspozon entitete, kështu njoftimet dhe veprimet ndërtohen më mirë si automatizime normale të Home Assistant. Automatizimi që përdorin këtë pajisje shfaqen më poshtë.",
@@ -654,10 +654,10 @@
     "collecting_data": "Duke mbledhur të dhëna: nevojiten edhe {need} cikël{plural} para se të fillojë sintonizimi i imët ({current}/{min}).",
     "compare_overlay_profiles": "Mbivendos profilet (të zbetura)",
     "compare_profiles_tip": "Mbivendosni zarfat e tjerë të profileve në grafikun e mësipërm për të parë se cili i përshtatet më mirë këtij cikli.",
-    "compare_selected_cycles": "Ciklet e zgjedhura (solide) — shfaq / fshih",
+    "compare_selected_cycles": "Ciklet e zgjedhura (solide) – shfaq / fshih",
     "consider_new_profile": "Konsideroni krijimin e një profili të ri.",
     "coverage_gap": "ciklet e fundit nuk kanë asnjë profil që përputhet ({pct}% e 30 të fundit).",
-    "coverage_gap_similar_cycles": "U gjetën {count} cikle të ngjashme të paetiketuara — krijo një profil për të filluar përputhjen.",
+    "coverage_gap_similar_cycles": "U gjetën {count} cikle të ngjashme të paetiketuara – krijo një profil për të filluar përputhjen.",
     "cycles_deleted": "{count} cikël(e) u fshinë",
     "enough_data": "Të dhëna të mjaftueshme për të mësuar ({current}/{min} cikle).",
     "export_description": "Eksporto të gjitha profilet dhe ciklet në JSON ose rivendos nga një eksportim i mëparshëm.",
@@ -686,7 +686,7 @@
     "ml_learned_intro": "Modele të rregulluara mirë për këtë makinë.",
     "ml_loading": "duke ngarkuar ML…",
     "ml_settings_intro": "Dy çelësa të pavarur: njëri aplikon modelet ndërsa një cikël ekzekutohet, tjetri lejon WashData t'i rregullojë ato me kalimin e kohës.",
-    "name_first_program": "Keni cikle të mjaftueshme — emërtoni programin tuaj të parë për të nisur përputhjen.",
+    "name_first_program": "Keni cikle të mjaftueshme – emërtoni programin tuaj të parë për të nisur përputhjen.",
     "near_duplicate_cluster": "u zbulua grupi i profilit pothuajse dublikatë. Grupimi lejon që përputhja të zgjedhë në mënyrë të besueshme midis pamjeve të ngjashme (p.sh. i njëjti program në temperaturë/centrifugim të ndryshëm).",
     "no_cycles_match": "Asnjë cikël nuk përputhet me filtrin aktual.",
     "no_cycles_profile": "Asnjë cikël për këtë profil.",
@@ -696,7 +696,7 @@
     "no_devices": "Asnjë pajisje WashData e konfiguruar ende.",
     "no_envelope": "Asnjë zarf ende - rindërtoni pas etiketimit të cikleve.",
     "no_envelope_overlay": "Asnjë zarf i disponueshëm për mbivendosje.",
-    "no_fine_tuned": "Asgjë e rregulluar mirë ende — WashData po përdor modelet e integruara.",
+    "no_fine_tuned": "Asgjë e rregulluar mirë ende – WashData po përdor modelet e integruara.",
     "no_logs": "Asnjë regjistrim i mbajtur në bufer ende.",
     "no_maintenance": "Ende nuk është regjistruar asnjë mirëmbajtje.",
     "no_match_yet": "Asnjë tentativë përputhje ende - kjo plotësohet gjatë një cikli aktiv.",
@@ -713,7 +713,7 @@
     "notify_services_hint": "Përdorni ID-të e shërbimit {entity} (të ndara me presje për shumë). Variablat e shabllonit: {vars}.",
     "old_actions_warning": "Konfiguruar me redaktuesin e vjetër të veprimeve (tani i hequr). Ato ende ndezin në ngjarjet e ciklit, por nuk mund të modifikohen më këtu. Shndërrojini ato në një automatizim normal ose hiqni ato.",
     "onboarding_progress": "{n} / 3 cikle të vëzhguara",
-    "onboarding_watching": "Përdorni pajisjen normalisht — WashData po vëzhgon. Pas 3 cikleve, do të nisë përputhja e programeve.",
+    "onboarding_watching": "Përdorni pajisjen normalisht – WashData po vëzhgon. Pas 3 cikleve, do të nisë përputhja e programeve.",
     "pending_feedback": "Koment në pritje të zbulimit",
     "performance_trend": "Tendenca e performancës ({n} cikle)",
     "pg_analysis_empty": "Ngarkoni një cikël për të parë analizën e përputhjes.",
@@ -763,7 +763,7 @@
     "setting_changed": "Ndryshuar nga {old} në {new} më {date}",
     "settings_basic_note": "Po shfaqen cilësimet thelbësore. Kaloni te Të avancuara për listën e plotë.",
     "shape_drift_advisory": "⚠ Zhvendosje forme",
-    "shape_drift_detail": "Modeli i energjisë i këtij profili ka ndryshuar me kalimin e kohës — mundësi të konsumit të pajisjes ose nevojë mirëmbajtjeje (p.sh. heqja e gurëve, pastrimi i filtrit).",
+    "shape_drift_detail": "Modeli i energjisë i këtij profili ka ndryshuar me kalimin e kohës – mundësi të konsumit të pajisjes ose nevojë mirëmbajtjeje (p.sh. heqja e gurëve, pastrimi i filtrit).",
     "show_all_settings": "Shfaq të gjitha cilësimet",
     "showing_suggestions": "Po shfaq cilësimin e {count} me sugjerime.",
     "split_intro": "Kliko grafikun për të shtuar ose hequr një pikë ndarjeje, ose zbulo automatikisht sipas ndërprerjeve. Çdo segment që rezulton mund të ketë profilin e tij.",
@@ -789,7 +789,7 @@
     "toast_revert_failed": "Kthimi prapa dështoi: {error}",
     "toast_reverted": "{key} u rikthye",
     "toast_save_failed": "Ruajtja dështoi: {error}",
-    "trend_duration_longer": "Kohëzgjatja në tendencë më e gjatë ({pct}%/cikël) — mesatare e fundit {avg}",
+    "trend_duration_longer": "Kohëzgjatja në tendencë më e gjatë ({pct}%/cikël) – mesatare e fundit {avg}",
     "trend_duration_shorter": "Kohëzgjatja në tendencë më e shkurtër ({pct}%/cikël) - mesatare e fundit {avg}",
     "trend_energy_down": "Tendenca e energjisë në rënie ({pct}%/cikël)",
     "trend_energy_up": "Tendenca e energjisë në rritje ({pct}%/cikël) - mesatarisht kohët e fundit {avg}",
@@ -1553,24 +1553,24 @@
         "lower": "Etiketimet automatike rriten; disa mund të identifikohen gabim"
       },
       "duration_tolerance": {
-        "higher": "Pranon gamë më të gjerë kohëzgjatjeje — përputhje më fleksibël",
-        "lower": "Kërkon përputhje më të ngushtë kohëzgjatjeje — më rigoroze por mund të refuzojë cikle të pazakonshme"
+        "higher": "Pranon gamë më të gjerë kohëzgjatjeje – përputhje më fleksibël",
+        "lower": "Kërkon përputhje më të ngushtë kohëzgjatjeje – më rigoroze por mund të refuzojë cikle të pazakonshme"
       },
       "end_energy_threshold": {
         "higher": "Mbyll vetëm ciklet që kanë konsumuar energji të konsiderueshme",
         "lower": "Mbyll edhe ciklet e shkurtra ose me konsum të ulët energjie"
       },
       "end_repeat_count": {
-        "higher": "Kërkon që sinjali i fundit të përsëritet më shumë herë — më i qëndrueshëm, pak më i ngadaltë",
-        "lower": "Mbyllet pas përsëritjeve më të pakta — detektim më i shpejtë, rrezik më i lartë mbylljeje false"
+        "higher": "Kërkon që sinjali i fundit të përsëritet më shumë herë – më i qëndrueshëm, pak më i ngadaltë",
+        "lower": "Mbyllet pas përsëritjeve më të pakta – detektim më i shpejtë, rrezik më i lartë mbylljeje false"
       },
       "learning_confidence": {
-        "higher": "Mëson vetëm nga përputhjet me besueshmëri shumë të lartë — më e ngadaltë por më e besueshme",
+        "higher": "Mëson vetëm nga përputhjet me besueshmëri shumë të lartë – më e ngadaltë por më e besueshme",
         "lower": "Mëson nga më shumë cikle; modeli mund të jetë më i zhurmshëm"
       },
       "min_off_gap": {
         "higher": "Nevojitet pushim më i gjatë para se të fillojë një cikël i ri",
-        "lower": "Pushimi i shkurtër nis ciklin e ri — rrotullimet e njëpasnjëshme mund të ndahen"
+        "lower": "Pushimi i shkurtër nis ciklin e ri – rrotullimet e njëpasnjëshme mund të ndahen"
       },
       "min_power": {
         "higher": "Më pak e ndjeshme ndaj konsumit në gjendje pritjeje; mund të humbasë programe shumë të heshtura",
@@ -1581,24 +1581,24 @@
         "lower": "Ndërpret ciklin e bllokuar më shpejt"
       },
       "off_delay": {
-        "higher": "Më shumë kohë për pauza të pajisjes — trajton faza të gjata njomjeje ose tharjeje",
-        "lower": "Detektim më i shpejtë i fundit — i përshtatshëm për pajisje me ndezje/shuarje të qarta"
+        "higher": "Më shumë kohë për pauza të pajisjes – trajton faza të gjata njomjeje ose tharjeje",
+        "lower": "Detektim më i shpejtë i fundit – i përshtatshëm për pajisje me ndezje/shuarje të qarta"
       },
       "profile_match_threshold": {
         "higher": "Konfirmon vetëm përputhjet me besueshmëri të lartë; më shumë cikle mbeten pa etiketë",
         "lower": "Përputhet me më shumë cikle; disa mund të jenë paksa të gabuara"
       },
       "running_dead_zone": {
-        "higher": "Injoron kumbëzat e shkurtra të fuqisë gjatë pushimit — më pak e ndjeshme ndaj zhurmës",
-        "lower": "Reagron ndaj shpërthimeve më të shkurtra të fuqisë — kap aktivitetin kalimtar të shpejtë"
+        "higher": "Injoron kumbëzat e shkurtra të fuqisë gjatë pushimit – më pak e ndjeshme ndaj zhurmës",
+        "lower": "Reagron ndaj shpërthimeve më të shkurtra të fuqisë – kap aktivitetin kalimtar të shpejtë"
       },
       "start_threshold_w": {
         "higher": "Shmang startet false nga kumbëzat e shkurtra të fuqisë",
         "lower": "Kap programet me fuqi të ulët; mund të aktivizohet nga zhurma"
       },
       "stop_threshold_w": {
-        "higher": "Mbyll ciklin më shpejt — mund të mbyllet gjatë një pauze",
-        "lower": "Pret më gjatë para mbylljes — redukton përfundimet e parakohshme"
+        "higher": "Mbyll ciklin më shpejt – mund të mbyllet gjatë një pauze",
+        "lower": "Pret më gjatë para mbylljes – redukton përfundimet e parakohshme"
       },
       "watchdog_interval": {
         "higher": "Lejon faza më të gjata të heshtura; më pak ndërprerje false",

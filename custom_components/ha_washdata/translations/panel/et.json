@@ -87,7 +87,7 @@
     "on_cycle_finished": "Tsükkel lõppenud",
     "on_cycle_started": "Tsükkel algas",
     "pause_cycle": "Paus",
-    "pause_cycle_tip": "Peata käimasolev tsükkel — seade jätkab sealt, kus pooleli jäi",
+    "pause_cycle_tip": "Peata käimasolev tsükkel – seade jätkab sealt, kus pooleli jäi",
     "pg_apply_device": "Rakenda seadmele",
     "pg_autofill": "Täida automaatselt",
     "play": "Esita",
@@ -97,8 +97,8 @@
     "process_tip": "Salvesta salvestatud jälg uue või olemasoleva profiilina",
     "rebuild": "Ümbrikute ümberehitamine",
     "rebuild_envelope": "Ümberehitage ümbrik",
-    "rebuild_tip": "Arvuta uuesti kõigi profiilide eeldatav võimsusümbrik (min/max riba) nende märgistatud tsüklite põhjal — käivitage pärast uute tsüklite märgistamist või vanade parandamist",
-    "rec_start_tip": "Alusta seadme võimsusjälje salvestamist — käivita vahetult enne tsükli käivitamist",
+    "rebuild_tip": "Arvuta uuesti kõigi profiilide eeldatav võimsusümbrik (min/max riba) nende märgistatud tsüklite põhjal – käivitage pärast uute tsüklite märgistamist või vanade parandamist",
+    "rec_start_tip": "Alusta seadme võimsusjälje salvestamist – käivita vahetult enne tsükli käivitamist",
     "rec_stop": "Peatus",
     "rec_stop_tip": "Peata salvestamine ja hoia jäädvustatud jälg ülevaatamiseks",
     "record": "Alustage salvestamist",
@@ -182,7 +182,7 @@
     },
     "attn_sub": "Lahendage konfliktid enne salvestamist",
     "attn_title": "{n} seadete konflikt{s}",
-    "settings_banner": "{n} seadete konflikt{s} — kontrollige esile tõstetud sektsioone ja parandage enne salvestamist.",
+    "settings_banner": "{n} seadete konflikt{s} – kontrollige esile tõstetud sektsioone ja parandage enne salvestamist.",
     "settings_banner_btn": "Mine esimesele",
     "confidence": {
       "auto": "Peab olema vähemalt vaste läve tasemel ({match})",
@@ -451,9 +451,9 @@
     "show_expected": "Kuva eeldatav kõvera ülekate (sobiv profiil, oranž)",
     "show_raw": "Kuva töötlemata pistikupesa lülitit reaalajas võimsusgraafikus",
     "sparkline": "Hiljutine tsükli kestuse trend",
-    "stage2": "Etapp 2 — põhisarnasus",
-    "stage3": "Etapp 3 — DTW",
-    "stage4": "Etapp 4 — kokkulangevus",
+    "stage2": "Etapp 2 – põhisarnasus",
+    "stage3": "Etapp 3 – DTW",
+    "stage4": "Etapp 4 – kokkulangevus",
     "status": "Olek",
     "tail_trim": "Saba trimm (id)",
     "timer_auto_pause": "Automaatne paus",
@@ -645,7 +645,7 @@
     "artifact_dip_detail": "Langes alla tavapärase võimsusriba umbes {n}s jooksul.",
     "artifact_footer": "Ülaltoodud graafikul esile tõstetud. Need on mööduvad artefaktid (nt uks avati tsükli keskel), mitte tingimata probleemid.",
     "artifact_header": "Selle tsükli jooksul tuvastati {n} anomaaliat",
-    "artifact_pause_detail": "Võimsus langes peaaegu nulli umbes {n}s jooksul ja taastus seejärel — tõenäoliselt avati uks tsükli keskel või tsükkel peatati.",
+    "artifact_pause_detail": "Võimsus langes peaaegu nulli umbes {n}s jooksul ja taastus seejärel – tõenäoliselt avati uks tsükli keskel või tsükkel peatati.",
     "artifact_spike_detail": "Ületas tavapärase võimsusriba umbes {n}s jooksul.",
     "auto_label_intro": "Määrake profiilid märgistamata tsüklitele, mille sobivuse usaldus eemaldab läve.",
     "automations_intro": "WashData käivitab {start} / {end} sündmusi ja avaldab olemeid, seega on teated ja toimingud kõige paremini ehitada tavaliste Home Assistanti automaatikana. Seda seadet kasutavad automaatikad kuvatakse allpool.",
@@ -654,10 +654,10 @@
     "collecting_data": "Andmete kogumine - {need} tsüklit veel enne peenhäälestuse alustamist ({current}/{min}).",
     "compare_overlay_profiles": "Ülekatteprofiilid (nõrkjad)",
     "compare_profiles_tip": "Katke ülaltoodud diagrammil teised profiiliümbrikud, et näha, milline neist selle tsükliga kõige paremini sobib.",
-    "compare_selected_cycles": "Valitud tsüklid (tahked) — näita/peida",
+    "compare_selected_cycles": "Valitud tsüklid (tahked) – näita/peida",
     "consider_new_profile": "Kaaluge uue profiili loomist.",
     "coverage_gap": "viimastel tsüklitel pole sobivat profiili ({pct}% viimasest 30-st).",
-    "coverage_gap_similar_cycles": "{count} sarnast märgistamata tsüklit leitud — loo profiil, et neid sobitama hakata.",
+    "coverage_gap_similar_cycles": "{count} sarnast märgistamata tsüklit leitud – loo profiil, et neid sobitama hakata.",
     "cycles_deleted": "{count} tsüklit kustutatud",
     "enough_data": "Piisavalt andmeid õppimiseks ({current}/{min} tsüklit).",
     "export_description": "Eksportige kõik profiilid ja tsüklid JSON-i või taastage eelmisest ekspordist.",
@@ -686,7 +686,7 @@
     "ml_learned_intro": "Selle masina jaoks peenhäälestatud mudelid.",
     "ml_loading": "ML laadimine…",
     "ml_settings_intro": "Kaks sõltumatut lülitit: üks rakendab mudeleid tsükli töötamise ajal, teine ​​võimaldab WashDatal neid aja jooksul teie masinale täpselt häälestada.",
-    "name_first_program": "Sul on piisavalt tsükleid — pane oma esimesele programmile nimi, et alustada sobitamist.",
+    "name_first_program": "Sul on piisavalt tsükleid – pane oma esimesele programmile nimi, et alustada sobitamist.",
     "near_duplicate_cluster": "Tuvastati peaaegu duplikaatprofiili klaster. Rühmitamine võimaldab sobitamisel usaldusväärselt valida sarnasuste vahel (nt sama programm erineval temperatuuril/tsentrifuugimisel).",
     "no_cycles_match": "Ükski tsükkel ei vasta praegusele filtrile.",
     "no_cycles_profile": "Sellel profiilil pole tsükleid.",
@@ -713,7 +713,7 @@
     "notify_services_hint": "Kasutage {entity} teenuse ID-sid (mitme korral komadega eraldatult). Malli muutujad: {vars}.",
     "old_actions_warning": "Seadistatud vana toimingute redaktoriga (nüüd eemaldatud). Need käivituvad endiselt tsüklisündmustele, kuid neid ei saa siin enam redigeerida. Teisendage need tavaliseks automaatikaks või eemaldage need.",
     "onboarding_progress": "{n} / 3 tsüklit jälgitud",
-    "onboarding_watching": "Kasuta oma seadet tavapäraselt — WashData jälgib. Pärast 3 tsüklit algab programmide sobitamine.",
+    "onboarding_watching": "Kasuta oma seadet tavapäraselt – WashData jälgib. Pärast 3 tsüklit algab programmide sobitamine.",
     "pending_feedback": "Ootab tuvastamise tagasisidet",
     "performance_trend": "Toimivuse trend ({n} tsüklit)",
     "pg_analysis_empty": "Vaste analüüsi nägemiseks laadi tsükkel.",
@@ -763,7 +763,7 @@
     "setting_changed": "Muudetud {old} → {new} kuupäeval {date}",
     "settings_basic_note": "Kuvatakse olulisi seadeid. Täieliku loendi nägemiseks vali Täpsemalt.",
     "shape_drift_advisory": "⚠ Kuju triivib",
-    "shape_drift_detail": "Selle profiili võimsusstruktuur on aja jooksul muutunud — võimalik seadme kulumine või vajalik hooldus (nt katlakivi eemaldamine, filtri puhastamine).",
+    "shape_drift_detail": "Selle profiili võimsusstruktuur on aja jooksul muutunud – võimalik seadme kulumine või vajalik hooldus (nt katlakivi eemaldamine, filtri puhastamine).",
     "show_all_settings": "Kuva kõik seaded",
     "showing_suggestions": "Kuvatakse seade {count} koos soovitustega.",
     "split_intro": "Jaotuspunkti lisamiseks või eemaldamiseks või tühikäigu automaatseks tuvastamiseks klõpsake graafikul. Iga saadud segment võib saada oma profiili.",
@@ -1570,24 +1570,24 @@
         "lower": "Märgistab automaatselt rohkem tsükleid; mõnda võidakse valesti tuvastada"
       },
       "duration_tolerance": {
-        "higher": "Aktsepteerib laiemat kestuse vahemikku — paindlikum sobitamine",
-        "lower": "Nõuab täpsemat kestuse vastavust — rangem, kuid võib lükata tagasi ebatavalisi tsükleid"
+        "higher": "Aktsepteerib laiemat kestuse vahemikku – paindlikum sobitamine",
+        "lower": "Nõuab täpsemat kestuse vastavust – rangem, kuid võib lükata tagasi ebatavalisi tsükleid"
       },
       "end_energy_threshold": {
         "higher": "Sulgeb ainult tsüklid, mis kasutasid olulisel määral energiat",
         "lower": "Sulgeb ka lühemad või madalama energiatarbe tsüklid"
       },
       "end_repeat_count": {
-        "higher": "Nõuab lõpusignaali kordamist rohkem kordi — usaldusväärsem, pisut aeglasem",
-        "lower": "Lõpetab pärast vähemat kordust — kiirem tuvastamine, suurem vale lõpu oht"
+        "higher": "Nõuab lõpusignaali kordamist rohkem kordi – usaldusväärsem, pisut aeglasem",
+        "lower": "Lõpetab pärast vähemat kordust – kiirem tuvastamine, suurem vale lõpu oht"
       },
       "learning_confidence": {
-        "higher": "Õpib ainult väga kindlatest vastetest — aeglasem, kuid usaldusväärsem",
+        "higher": "Õpib ainult väga kindlatest vastetest – aeglasem, kuid usaldusväärsem",
         "lower": "Õpib rohkematest tsüklitest; mudel võib olla müraram"
       },
       "min_off_gap": {
         "higher": "Enne uue tsükli algust on vajalik pikem tegevusetus",
-        "lower": "Lühike tegevusetus käivitab uue tsükli — järjestikused käivitused võivad jaguneda"
+        "lower": "Lühike tegevusetus käivitab uue tsükli – järjestikused käivitused võivad jaguneda"
       },
       "min_power": {
         "higher": "Vähem tundlik ooterežiimi tarbimise suhtes; võib vahele jätta vaikse töörežiimi",
@@ -1598,24 +1598,24 @@
         "lower": "Jõudab kinni jäänud tsükli sundpeatamise kiiremini"
       },
       "off_delay": {
-        "higher": "Rohkem aega seadme paussideks — käsitleb pikka leotamist või kuivatamist",
-        "lower": "Kiirem lõpu tuvastamine — sobib hästi selge sisse/välja seadmetele"
+        "higher": "Rohkem aega seadme paussideks – käsitleb pikka leotamist või kuivatamist",
+        "lower": "Kiirem lõpu tuvastamine – sobib hästi selge sisse/välja seadmetele"
       },
       "profile_match_threshold": {
         "higher": "Kinnitab ainult suure kindlusega vasteid; rohkem tsükleid jääb märgistamata",
         "lower": "Sobib rohkema tsükliga; mõnda võib olla veidi vale"
       },
       "running_dead_zone": {
-        "higher": "Ignoreerib lühikesi voolutõuse jõudeolekus — vähem müra suhtes tundlik",
-        "lower": "Reageerib lühematele energiapursetele — tabab kiiret mööduvat aktiivsust"
+        "higher": "Ignoreerib lühikesi voolutõuse jõudeolekus – vähem müra suhtes tundlik",
+        "lower": "Reageerib lühematele energiapursetele – tabab kiiret mööduvat aktiivsust"
       },
       "start_threshold_w": {
         "higher": "Väldib lühikestest energiatõusudest tulenevaid valesid käivitusi",
         "lower": "Tabab madalvõimsusega programmid; võib käivituda müra peale"
       },
       "stop_threshold_w": {
-        "higher": "Lõpetab tsükli kiiremini — võib sulgeda pausi ajal",
-        "lower": "Ootab lõpetamisega kauem — vähem enneaegseid lõpetusi"
+        "higher": "Lõpetab tsükli kiiremini – võib sulgeda pausi ajal",
+        "lower": "Ootab lõpetamisega kauem – vähem enneaegseid lõpetusi"
       },
       "watchdog_interval": {
         "higher": "Lubatud pikemad vaiksed faasid; vähem valesid sundpeatusi",

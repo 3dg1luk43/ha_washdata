@@ -1,13 +1,13 @@
 {
   "badge": {
-    "artifact_tip": "Wykryto {n} anomalii (np. drzwi otwarte w połowie cyklu) — otwórz, aby zobaczyć je na wykresie",
+    "artifact_tip": "Wykryto {n} anomalii (np. drzwi otwarte w połowie cyklu) – otwórz, aby zobaczyć je na wykresie",
     "auto": "(automatycznie wykryty)",
     "built_in_tag": "wbudowany",
     "declining": "↘ maleje",
     "energy_low": "Niższe zużycie energii niż zwykle",
     "energy_spike": "Wyższe zużycie energii niż zwykle",
     "fair_fit": "akceptowalne dopasowanie",
-    "fair_fit_tip": "Umiarkowana spójność dopasowania — niektóre cykle przypisane do tego profilu mają niższy poziom pewności. Oznacz więcej cykli lub ponownie zapisz profil, aby poprawić dokładność.",
+    "fair_fit_tip": "Umiarkowana spójność dopasowania – niektóre cykle przypisane do tego profilu mają niższy poziom pewności. Oznacz więcej cykli lub ponownie zapisz profil, aby poprawić dokładność.",
     "feedback_requested": "Poproszono o opinię",
     "golden_cycle": "Zarejestrowany cykl referencyjny",
     "improving": "↗ poprawa",
@@ -57,7 +57,7 @@
     "create_profile": "+ Utwórz profil",
     "delete": "Usuń",
     "delete_group": "Usuń grupę",
-    "delete_group_tip": "Usuń tylko tę grupę — profile członków zostaną zachowane",
+    "delete_group_tip": "Usuń tylko tę grupę – profile członków zostaną zachowane",
     "delete_profile": "Usuń profil",
     "discard": "Odrzuć",
     "discard_tip": "Odrzuć nagranie bez zapisywania",
@@ -87,7 +87,7 @@
     "on_cycle_finished": "Po zakończeniu cyklu",
     "on_cycle_started": "Po rozpoczęciu cyklu",
     "pause_cycle": "Pauza",
-    "pause_cycle_tip": "Wstrzymaj bieżący cykl — urządzenie wznowi pracę od miejsca, w którym zostało zatrzymane",
+    "pause_cycle_tip": "Wstrzymaj bieżący cykl – urządzenie wznowi pracę od miejsca, w którym zostało zatrzymane",
     "pg_apply_device": "Zastosuj do urządzenia",
     "pg_autofill": "Wypełnij automatycznie",
     "play": "Odtwórz",
@@ -97,8 +97,8 @@
     "process_tip": "Zapisz zarejestrowany przebieg jako nowy lub istniejący profil",
     "rebuild": "Odbuduj koperty",
     "rebuild_envelope": "Odbuduj kopertę",
-    "rebuild_tip": "Przelicz oczekiwaną obwiednię mocy (pasmo min/maks) dla wszystkich profili z ich oznakowanych cykli — uruchom po oznaczeniu nowych cykli lub korekcie starych",
-    "rec_start_tip": "Rozpocznij rejestrowanie przebiegu mocy urządzenia — uruchom tuż przed rozpoczęciem cyklu",
+    "rebuild_tip": "Przelicz oczekiwaną obwiednię mocy (pasmo min/maks) dla wszystkich profili z ich oznakowanych cykli – uruchom po oznaczeniu nowych cykli lub korekcie starych",
+    "rec_start_tip": "Rozpocznij rejestrowanie przebiegu mocy urządzenia – uruchom tuż przed rozpoczęciem cyklu",
     "rec_stop": "Zatrzymaj",
     "rec_stop_tip": "Zatrzymaj nagrywanie i zachowaj zarejestrowany przebieg do przeglądu",
     "record": "Rozpocznij nagrywanie",
@@ -231,7 +231,7 @@
       "interval": "Powinien wynosić co najmniej 2× Interwał Próbkowania ({si} s)",
       "sampling": "Interwał Próbkowania powinien wynosić co najwyżej połowę Interwału Watchdog ({wi} s)"
     },
-    "settings_banner": "{n} konflikt{s} ustawień — sprawdź podświetlone sekcje i popraw przed zapisaniem.",
+    "settings_banner": "{n} konflikt{s} ustawień – sprawdź podświetlone sekcje i popraw przed zapisaniem.",
     "settings_banner_btn": "Przejdź do pierwszego"
   },
   "hdr": {
@@ -451,9 +451,9 @@
     "show_expected": "Pokaż oczekiwaną nakładkę krzywej (dopasowany profil, pomarańczowy)",
     "show_raw": "Pokaż przełącznik surowych odczytów gniazdka na wykresie mocy na żywo",
     "sparkline": "Ostatni trend czasu trwania cykli",
-    "stage2": "Etap 2 — podstawowe podobieństwo",
-    "stage3": "Etap 3 — DTW",
-    "stage4": "Etap 4 — zgodność",
+    "stage2": "Etap 2 – podstawowe podobieństwo",
+    "stage3": "Etap 3 – DTW",
+    "stage4": "Etap 4 – zgodność",
     "status": "Status",
     "tail_trim": "Trymowanie ogona",
     "timer_auto_pause": "Automatyczna pauza",
@@ -645,7 +645,7 @@
     "artifact_dip_detail": "Moc spadła poniżej normalnego zakresu przez ~{n}s.",
     "artifact_footer": "Zaznaczono na powyższym wykresie. Są to artefakty przejściowe (np. otwarcie drzwi w połowie cyklu), niekoniecznie problemy.",
     "artifact_header": "W tym cyklu wykryto {n} anomalii",
-    "artifact_pause_detail": "Moc spadła prawie do zera przez ~{n}s, a następnie wzrosła — prawdopodobnie drzwi zostały otwarte w trakcie cyklu lub cykl był wstrzymany.",
+    "artifact_pause_detail": "Moc spadła prawie do zera przez ~{n}s, a następnie wzrosła – prawdopodobnie drzwi zostały otwarte w trakcie cyklu lub cykl był wstrzymany.",
     "artifact_spike_detail": "Moc przekroczyła normalny zakres przez ~{n}s.",
     "auto_label_intro": "Przypisz profile do nieoznakowanych cykli, których pewność dopasowania przekracza próg.",
     "automations_intro": "WashData uruchamia zdarzenia {start} / {end} i udostępnia encje, więc powiadomienia i akcje najlepiej budować jako normalne automatyzacje Home Assistant. Automatyzacje korzystające z tego urządzenia są widoczne poniżej.",
@@ -654,10 +654,10 @@
     "collecting_data": "Zbieranie danych: jeszcze {need} cykli do rozpoczęcia dostrajania ({current}/{min}).",
     "compare_overlay_profiles": "Profile nakładkowe (słabe)",
     "compare_profiles_tip": "Nałóż inne koperty profili na powyższy wykres, aby zobaczyć, która z nich najlepiej pasuje do tego cyklu.",
-    "compare_selected_cycles": "Wybrane cykle (pełne) — pokaż / ukryj",
+    "compare_selected_cycles": "Wybrane cykle (pełne) – pokaż / ukryj",
     "consider_new_profile": "Rozważ utworzenie nowego profilu.",
     "coverage_gap": "ostatnie cykle nie mają pasującego profilu ({pct}% z ostatnich 30).",
-    "coverage_gap_similar_cycles": "Znaleziono {count} podobnych nieoznaczonych cykli — utwórz profil, aby zacząć je dopasowywać.",
+    "coverage_gap_similar_cycles": "Znaleziono {count} podobnych nieoznaczonych cykli – utwórz profil, aby zacząć je dopasowywać.",
     "cycles_deleted": "Usunięto cykle: {count}",
     "enough_data": "Wystarczająco danych do nauki ({current}/{min} cykli).",
     "export_description": "Eksportuj wszystkie profile i cykle do formatu JSON lub przywróć dane z poprzedniego eksportu.",
@@ -686,7 +686,7 @@
     "ml_learned_intro": "Modele dopasowane do tej maszyny.",
     "ml_loading": "ładowanie ML…",
     "ml_settings_intro": "Dwa niezależne przełączniki: jeden stosuje modele w trakcie trwania cyklu, drugi pozwala WashData dostosować je do Twojej maszyny w miarę upływu czasu.",
-    "name_first_program": "Masz wystarczająco dużo cykli — nadaj nazwę pierwszemu programowi, aby rozpocząć dopasowywanie.",
+    "name_first_program": "Masz wystarczająco dużo cykli – nadaj nazwę pierwszemu programowi, aby rozpocząć dopasowywanie.",
     "near_duplicate_cluster": "Wykryto prawie zduplikowany klaster profili. Grupowanie umożliwia niezawodne wybieranie podobnych programów (np. tego samego programu w innej temperaturze/wirowaniu).",
     "no_cycles_match": "Żaden cykl nie pasuje do bieżącego filtra.",
     "no_cycles_profile": "Brak cykli dla tego profilu.",
@@ -696,10 +696,10 @@
     "no_devices": "Nie skonfigurowano jeszcze żadnych urządzeń WashData.",
     "no_envelope": "Nie ma jeszcze koperty - odbuduj po cyklach etykietowania.",
     "no_envelope_overlay": "Brak koperty do nałożenia.",
-    "no_fine_tuned": "Nic jeszcze nie zostało dopracowane — WashData korzysta z wbudowanych modeli.",
+    "no_fine_tuned": "Nic jeszcze nie zostało dopracowane – WashData korzysta z wbudowanych modeli.",
     "no_logs": "Żadne rekordy dziennika nie zostały jeszcze zbuforowane.",
     "no_maintenance": "Nie zarejestrowano jeszcze żadnej konserwacji.",
-    "no_match_yet": "Brak jeszcze próby dopasowania — komunikat pojawia się podczas trwającego cyklu.",
+    "no_match_yet": "Brak jeszcze próby dopasowania – komunikat pojawia się podczas trwającego cyklu.",
     "no_other_users": "Nie znaleziono innych użytkowników Home Assistant.",
     "no_phases": "Nie zdefiniowano faz.",
     "no_phases_assigned": "Brak przypisanych faz.",
@@ -713,7 +713,7 @@
     "notify_services_hint": "Użyj identyfikatorów usług {entity} (oddzielonych przecinkami dla kilku). Zmienne szablonu: {vars}.",
     "old_actions_warning": "Skonfigurowano przy użyciu starego edytora akcji (teraz usuniętego). Nadal uruchamiają się w przypadku wydarzeń cyklicznych, ale nie można ich już tutaj edytować. Przekształć je w normalną automatyzację lub usuń.",
     "onboarding_progress": "Zaobserwowano {n} / 3 cykli",
-    "onboarding_watching": "Używaj urządzenia normalnie — WashData obserwuje. Po 3 cyklach rozpocznie się dopasowywanie programów.",
+    "onboarding_watching": "Używaj urządzenia normalnie – WashData obserwuje. Po 3 cyklach rozpocznie się dopasowywanie programów.",
     "pending_feedback": "Oczekuje na informację zwrotną dotyczącą wykrycia",
     "performance_trend": "Trend wydajności ({n} cykli)",
     "pg_analysis_empty": "Wczytaj cykl, aby zobaczyć analizę dopasowania.",
@@ -748,7 +748,7 @@
     "restart_gap_footer": "Zaznaczone na wykresie. Dane mocy są niedostępne dla tych przedziałów; dopasowanie używało tylko rzeczywistych odczytów.",
     "restart_gap_header": "{n} przerwa restartu HA podczas tego cyklu",
     "restart_gap_item": "{dur} przerwa",
-    "review_confirm_help": "Sprawdź, czy ten cykl został prawidłowo wykryty. Twoje recenzje szkolą model na Twojej maszynie — im więcej cykli potwierdzisz, tym lepsze dopasowanie i punktacja kondycji. Wystarczy szybkie dobre/złe.",
+    "review_confirm_help": "Sprawdź, czy ten cykl został prawidłowo wykryty. Twoje recenzje szkolą model na Twojej maszynie – im więcej cykli potwierdzisz, tym lepsze dopasowanie i punktacja kondycji. Wystarczy szybkie dobre/złe.",
     "review_in_settings": "Przejrzyj w Ustawieniach",
     "review_notes_placeholder": "Notatki (opcjonalnie)",
     "review_notes_tip": "Notatki tekstowe do własnego użytku. Nieużywane podczas dopasowywania lub treningu.",
@@ -763,7 +763,7 @@
     "setting_changed": "Zmieniono z {old} na {new} dnia {date}",
     "settings_basic_note": "Wyświetlane są podstawowe ustawienia. Przełącz na Zaawansowane, aby zobaczyć pełną listę.",
     "shape_drift_advisory": "⚠ Dryf kształtu",
-    "shape_drift_detail": "Wzorzec mocy dla tego profilu zmienił się z biegiem czasu — możliwe zużycie urządzenia lub konieczna konserwacja (np. odkamienianie, czyszczenie filtra).",
+    "shape_drift_detail": "Wzorzec mocy dla tego profilu zmienił się z biegiem czasu – możliwe zużycie urządzenia lub konieczna konserwacja (np. odkamienianie, czyszczenie filtra).",
     "show_all_settings": "Pokaż wszystkie ustawienia",
     "showing_suggestions": "Wyświetlam ustawienie {count} z sugestiami.",
     "split_intro": "Kliknij wykres, aby dodać lub usunąć punkt podziału albo automatycznie wykryć na podstawie pustych przerw. Każdy powstały segment może otrzymać swój własny profil.",
@@ -789,10 +789,10 @@
     "toast_revert_failed": "Przywracanie nie powiodło się: {error}",
     "toast_reverted": "Cofnięto: {key}",
     "toast_save_failed": "Zapisywanie nie powiodło się: {error}",
-    "trend_duration_longer": "Trwanie w trendzie dłuższym ({pct}%/cykl) — ostatnia średnia {avg}",
-    "trend_duration_shorter": "Trwanie w trendzie krótszym ({pct}%/cykl) — ostatnia średnia {avg}",
+    "trend_duration_longer": "Trwanie w trendzie dłuższym ({pct}%/cykl) – ostatnia średnia {avg}",
+    "trend_duration_shorter": "Trwanie w trendzie krótszym ({pct}%/cykl) – ostatnia średnia {avg}",
     "trend_energy_down": "Energia wykazuje tendencję spadkową ({pct}%/cykl)",
-    "trend_energy_up": "Trend wzrostowy w zakresie energii ({pct}%/cykl) — ostatnia średnia {avg}",
+    "trend_energy_up": "Trend wzrostowy w zakresie energii ({pct}%/cykl) – ostatnia średnia {avg}",
     "trim_intro": "Przeciągnij czerwone uchwyty lub wprowadź wartości. Wszystko za oknem jest usuwane.",
     "tuning_suggestions_available": "Sugestia dostrojenia {count} dostępna z obserwowanych cykli. Pojawiają się obok odpowiednich pól.",
     "unsure_detected_prefix": "WashData nie jest pewien, czy został wykryty",
@@ -1220,7 +1220,7 @@
       "label": "Strefa Martwa"
     },
     "sampling_interval": {
-      "doc": "Oczekiwany czas pomiędzy odczytami czujnika — używany do określenia rozmiaru okna wygładzającego i prawidłowego rozpoczęcia odbijania. Każda aktualizacja czujnika jest rejestrowana niezależnie od tej wartości; kalibruje jedynie dalsze obliczenia. Silnik sugestii mierzy rzeczywistą kadencję czujnika z poprzednich cykli i ustawia ją automatycznie.",
+      "doc": "Oczekiwany czas pomiędzy odczytami czujnika – używany do określenia rozmiaru okna wygładzającego i prawidłowego rozpoczęcia odbijania. Każda aktualizacja czujnika jest rejestrowana niezależnie od tej wartości; kalibruje jedynie dalsze obliczenia. Silnik sugestii mierzy rzeczywistą kadencję czujnika z poprzednich cykli i ustawia ją automatycznie.",
       "label": "Interwał Próbkowania"
     },
     "save_debug_traces": {
@@ -1424,24 +1424,24 @@
         "lower": "Więcej cykli jest oznaczanych automatycznie; niektóre mogą być błędnie zidentyfikowane"
       },
       "duration_tolerance": {
-        "higher": "Akceptuje szerszy zakres czasu trwania — bardziej elastyczne dopasowanie",
-        "lower": "Wymaga bliższego dopasowania czasu trwania — bardziej rygorystyczne, ale może odrzucić nietypowe cykle"
+        "higher": "Akceptuje szerszy zakres czasu trwania – bardziej elastyczne dopasowanie",
+        "lower": "Wymaga bliższego dopasowania czasu trwania – bardziej rygorystyczne, ale może odrzucić nietypowe cykle"
       },
       "end_energy_threshold": {
         "higher": "Zamyka tylko cykle o znacznym zużyciu energii",
         "lower": "Zamyka również krótsze lub mniej energochłonne cykle"
       },
       "end_repeat_count": {
-        "higher": "Wymaga więcej powtórzeń sygnału końca — bardziej niezawodne, nieco wolniejsze",
-        "lower": "Kończy po mniejszej liczbie powtórzeń — szybsze wykrywanie, większe ryzyko fałszywego zakończenia"
+        "higher": "Wymaga więcej powtórzeń sygnału końca – bardziej niezawodne, nieco wolniejsze",
+        "lower": "Kończy po mniejszej liczbie powtórzeń – szybsze wykrywanie, większe ryzyko fałszywego zakończenia"
       },
       "learning_confidence": {
-        "higher": "Uczy się tylko z bardzo pewnych dopasowań — wolniejsze, ale bardziej niezawodne",
+        "higher": "Uczy się tylko z bardzo pewnych dopasowań – wolniejsze, ale bardziej niezawodne",
         "lower": "Uczy się z większej liczby cykli; model może być mniej precyzyjny"
       },
       "min_off_gap": {
         "higher": "Potrzeba dłuższego spokoju przed rozpoczęciem nowego cyklu",
-        "lower": "Krótki spokój uruchamia nowy cykl — kolejne uruchomienia mogą się rozdzielić"
+        "lower": "Krótki spokój uruchamia nowy cykl – kolejne uruchomienia mogą się rozdzielić"
       },
       "min_power": {
         "higher": "Mniej wrażliwy na pobór mocy w stanie gotowości; może przeoczyć bardzo ciche programy",
@@ -1452,24 +1452,24 @@
         "lower": "Zablokowany cykl jest kończony wcześniej"
       },
       "off_delay": {
-        "higher": "Więcej czasu na przerwy urządzenia — dobre dla długich faz namaczania lub suszenia",
-        "lower": "Szybsze wykrywanie końca — działa dobrze dla urządzeń z czystym włączaniem/wyłączaniem"
+        "higher": "Więcej czasu na przerwy urządzenia – dobre dla długich faz namaczania lub suszenia",
+        "lower": "Szybsze wykrywanie końca – działa dobrze dla urządzeń z czystym włączaniem/wyłączaniem"
       },
       "profile_match_threshold": {
         "higher": "Zatwierdza tylko dopasowania o wysokiej pewności; więcej cykli pozostaje nieoznakowanych",
         "lower": "Dopasowuje więcej cykli; niektóre mogą być lekko błędne"
       },
       "running_dead_zone": {
-        "higher": "Ignoruje krótkie skoki mocy podczas bezczynności — mniej wrażliwy na zakłócenia",
-        "lower": "Reaguje na krótsze impulsy mocy — wykrywa szybką aktywność przejściową"
+        "higher": "Ignoruje krótkie skoki mocy podczas bezczynności – mniej wrażliwy na zakłócenia",
+        "lower": "Reaguje na krótsze impulsy mocy – wykrywa szybką aktywność przejściową"
       },
       "start_threshold_w": {
         "higher": "Zapobiega fałszywym startom z krótkich skoków mocy",
         "lower": "Wykrywa programy o niskiej mocy; może reagować na zakłócenia"
       },
       "stop_threshold_w": {
-        "higher": "Kończy cykl szybciej — może zamknąć w trakcie przerwy",
-        "lower": "Czeka dłużej na zakończenie — mniej przedwczesnych zakończeń"
+        "higher": "Kończy cykl szybciej – może zamknąć w trakcie przerwy",
+        "lower": "Czeka dłużej na zakończenie – mniej przedwczesnych zakończeń"
       },
       "watchdog_interval": {
         "higher": "Dopuszcza dłuższe ciche fazy; mniej fałszywych wymuszeń zatrzymania",

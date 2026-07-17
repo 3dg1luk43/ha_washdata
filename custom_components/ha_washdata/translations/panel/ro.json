@@ -1,13 +1,13 @@
 {
   "badge": {
-    "artifact_tip": "{n} anomalii detectate (de exemplu, ușa deschisă la jumătatea ciclului) — deschideți pentru a le vedea pe grafic",
+    "artifact_tip": "{n} anomalii detectate (de exemplu, ușa deschisă la jumătatea ciclului) – deschideți pentru a le vedea pe grafic",
     "auto": "(detectat automat)",
     "built_in_tag": "integrat",
     "declining": "↘ în scădere",
     "energy_low": "Energie mai mică decât de obicei",
     "energy_spike": "Energie mai mare decât de obicei",
     "fair_fit": "calitate acceptabilă",
-    "fair_fit_tip": "Consistență moderată a potrivirii — unele cicluri atribuite acestui profil au scoruri de încredere mai mici. Etichetați mai multe cicluri sau reînregistrați profilul pentru a îmbunătăți acuratețea.",
+    "fair_fit_tip": "Consistență moderată a potrivirii – unele cicluri atribuite acestui profil au scoruri de încredere mai mici. Etichetați mai multe cicluri sau reînregistrați profilul pentru a îmbunătăți acuratețea.",
     "feedback_requested": "S-a solicitat feedback",
     "golden_cycle": "Ciclu de referință înregistrat",
     "improving": "↗ în îmbunătățire",
@@ -15,7 +15,7 @@
     "needs_review": "Necesită revizuire",
     "overrun": "A durat mai mult decât de obicei",
     "poor_fit": "calitate slabă",
-    "poor_fit_tip": "Istoric de potrivire inconsecvent — luați în considerare reconstruirea acestui profil",
+    "poor_fit_tip": "Istoric de potrivire inconsecvent – luați în considerare reconstruirea acestui profil",
     "restart_gap_tip": "{n} gol la repornirea HA: traseul de putere are o lipsă",
     "reviewed": "Revizuit",
     "steady": "→ stabil",
@@ -57,7 +57,7 @@
     "create_profile": "+ Creați profil",
     "delete": "Ștergeți",
     "delete_group": "Ștergeți grupul",
-    "delete_group_tip": "Ștergeți numai acest grup — profilurile membrilor sunt păstrate",
+    "delete_group_tip": "Ștergeți numai acest grup – profilurile membrilor sunt păstrate",
     "delete_profile": "Ștergeți profilul",
     "discard": "Renunțați",
     "discard_tip": "Renunțați la urma înregistrată fără a salva",
@@ -87,7 +87,7 @@
     "on_cycle_finished": "La terminarea ciclului",
     "on_cycle_started": "La pornirea ciclului",
     "pause_cycle": "Pauză",
-    "pause_cycle_tip": "Puneți în pauză ciclul în curs — aparatul va relua de unde a rămas",
+    "pause_cycle_tip": "Puneți în pauză ciclul în curs – aparatul va relua de unde a rămas",
     "pg_apply_device": "Aplicați pe dispozitiv",
     "pg_autofill": "Completare automată",
     "play": "Redați",
@@ -97,8 +97,8 @@
     "process_tip": "Salvați urma înregistrată ca profil nou sau existent",
     "rebuild": "Reconstruiți plicurile",
     "rebuild_envelope": "Reconstruiți plicul",
-    "rebuild_tip": "Recalculați plicul de putere așteptat (banda min/max) pentru toate profilurile din ciclurile lor etichetate — rulați după etichetarea de noi cicluri sau corectarea celor vechi",
-    "rec_start_tip": "Porniți înregistrarea urmei de putere a aparatului — porniți imediat înainte de a rula un ciclu",
+    "rebuild_tip": "Recalculați plicul de putere așteptat (banda min/max) pentru toate profilurile din ciclurile lor etichetate – rulați după etichetarea de noi cicluri sau corectarea celor vechi",
+    "rec_start_tip": "Porniți înregistrarea urmei de putere a aparatului – porniți imediat înainte de a rula un ciclu",
     "rec_stop": "Opriți",
     "rec_stop_tip": "Opriți înregistrarea și păstrați urma capturată pentru revizuire",
     "record": "Porniți înregistrarea",
@@ -182,7 +182,7 @@
     },
     "attn_sub": "Rezolvați conflictele înainte de salvare",
     "attn_title": "{n} conflict{s} de setări",
-    "settings_banner": "{n} conflict{s} de setări — verificați secțiunile evidențiate și remediați înainte de salvare.",
+    "settings_banner": "{n} conflict{s} de setări – verificați secțiunile evidențiate și remediați înainte de salvare.",
     "settings_banner_btn": "Salt la primul",
     "confidence": {
       "auto": "Trebuie să fie cel puțin egal cu Pragul de potrivire ({match})",
@@ -451,9 +451,9 @@
     "show_expected": "Afișați suprapunerea curbei așteptate (profil potrivit, portocaliu)",
     "show_raw": "Afișați comutatorul pentru semnalul brut al prizei în graficul de putere în timp real",
     "sparkline": "Tendința recentă a duratei ciclurilor",
-    "stage2": "Etapa 2 — similaritate de bază",
-    "stage3": "Etapa 3 — DTW",
-    "stage4": "Etapa 4 — concordanță",
+    "stage2": "Etapa 2 – similaritate de bază",
+    "stage3": "Etapa 3 – DTW",
+    "stage4": "Etapa 4 – concordanță",
     "status": "Stare",
     "tail_trim": "Tăiere finală (s)",
     "timer_auto_pause": "Pauză automată",
@@ -645,7 +645,7 @@
     "artifact_dip_detail": "A scăzut sub banda de putere obișnuită timp de ~{n}s.",
     "artifact_footer": "Evidențiate în graficul de mai sus. Acestea sunt artefacte tranzitorii (de exemplu, ușa deschisă la jumătatea ciclului), nu neapărat probleme.",
     "artifact_header": "{n} anomalii detectate în timpul acestui ciclu",
-    "artifact_pause_detail": "Puterea a scăzut aproape la zero timp de ~{n}s, apoi a revenit — probabil ușa a fost deschisă în mijlocul ciclului sau ciclul a fost întrerupt.",
+    "artifact_pause_detail": "Puterea a scăzut aproape la zero timp de ~{n}s, apoi a revenit – probabil ușa a fost deschisă în mijlocul ciclului sau ciclul a fost întrerupt.",
     "artifact_spike_detail": "A depășit banda de putere obișnuită timp de ~{n}s.",
     "auto_label_intro": "Atribuiți profiluri ciclurilor neetichetate a căror încredere de potrivire depășește pragul.",
     "automations_intro": "WashData declanșează evenimente {start} / {end} și expune entități, astfel că notificările și acțiunile sunt cel mai bine construite ca automatizări normale Home Assistant. Automatizările care utilizează acest dispozitiv apar mai jos.",
@@ -654,10 +654,10 @@
     "collecting_data": "Se colectează date - mai sunt necesare {need} ciclu{plural} înainte ca reglajul fin să poată începe ({current}/{min}).",
     "compare_overlay_profiles": "Suprapuneți profiluri (estompat)",
     "compare_profiles_tip": "Suprapuneți alte plicuri de profil pe graficul de mai sus pentru a vedea care dintre ele se potrivește cel mai bine acestui ciclu.",
-    "compare_selected_cycles": "Cicluri selectate (solid) — afișați / ascundeți",
+    "compare_selected_cycles": "Cicluri selectate (solid) – afișați / ascundeți",
     "consider_new_profile": "Luați în considerare crearea unui profil nou.",
     "coverage_gap": "ciclurile recente nu au un profil corespunzător ({pct}% din ultimele 30).",
-    "coverage_gap_similar_cycles": "{count} cicluri similare neetichetate găsite — creați un profil pentru a începe potrivirea lor.",
+    "coverage_gap_similar_cycles": "{count} cicluri similare neetichetate găsite – creați un profil pentru a începe potrivirea lor.",
     "cycles_deleted": "{count} ciclu(ri) șterse",
     "enough_data": "Date suficiente pentru a învăța ({current}/{min} cicluri).",
     "export_description": "Exportați toate profilurile și ciclurile în JSON sau restaurați dintr-un export anterior.",
@@ -686,7 +686,7 @@
     "ml_learned_intro": "Modele ajustate la această mașină.",
     "ml_loading": "se încarcă ML…",
     "ml_settings_intro": "Două comutatoare independente: unul aplică modelele în timpul unui ciclu, celălalt permite WashData să le ajusteze la mașina dvs. în timp.",
-    "name_first_program": "Aveți suficiente cicluri — denumiți primul program pentru a începe potrivirea.",
+    "name_first_program": "Aveți suficiente cicluri – denumiți primul program pentru a începe potrivirea.",
     "near_duplicate_cluster": "cluster de profiluri aproape duplicate detectat. Gruparea permite potrivirii să aleagă în mod fiabil între profiluri similare (de exemplu, același program la temperaturi/viteze de centrifugare diferite).",
     "no_cycles_match": "Niciun ciclu nu corespunde filtrului curent.",
     "no_cycles_profile": "Niciun ciclu pentru acest profil.",
@@ -694,12 +694,12 @@
     "no_cycles_yet": "Niciun ciclu înregistrat încă.",
     "no_device_selected": "Niciun dispozitiv selectat.",
     "no_devices": "Niciun dispozitiv WashData configurat încă.",
-    "no_envelope": "Niciun plic încă — reconstruiți după etichetarea ciclurilor.",
+    "no_envelope": "Niciun plic încă – reconstruiți după etichetarea ciclurilor.",
     "no_envelope_overlay": "Niciun plic disponibil pentru suprapunere.",
-    "no_fine_tuned": "Nimic ajustat încă — WashData folosește modelele sale integrate.",
+    "no_fine_tuned": "Nimic ajustat încă – WashData folosește modelele sale integrate.",
     "no_logs": "Nicio înregistrare în memorie încă.",
     "no_maintenance": "Nicio întreținere înregistrată încă.",
-    "no_match_yet": "Nicio tentativă de potrivire încă — aceasta se completează în timpul unui ciclu activ.",
+    "no_match_yet": "Nicio tentativă de potrivire încă – aceasta se completează în timpul unui ciclu activ.",
     "no_other_users": "Niciun alt utilizator Home Assistant găsit.",
     "no_phases": "Nicio fază definită.",
     "no_phases_assigned": "Nicio fază atribuită.",
@@ -713,7 +713,7 @@
     "notify_services_hint": "Utilizați ID-urile de serviciu {entity} (separate prin virgulă pentru mai multe). Variabile șablon: {vars}.",
     "old_actions_warning": "Configurat cu vechiul editor de acțiuni (acum eliminat). Încă se declanșează la evenimentele de ciclu, dar nu mai pot fi editate aici. Convertiți-le într-o automatizare normală sau eliminați-le.",
     "onboarding_progress": "{n} / 3 cicluri observate",
-    "onboarding_watching": "Utilizați aparatul în mod normal — WashData monitorizează. După 3 cicluri, va începe potrivirea programelor.",
+    "onboarding_watching": "Utilizați aparatul în mod normal – WashData monitorizează. După 3 cicluri, va începe potrivirea programelor.",
     "pending_feedback": "Feedback de detecție în așteptare",
     "performance_trend": "Tendință de performanță ({n} cicluri)",
     "pg_analysis_empty": "Încărcați un ciclu pentru a vedea analiza potrivirii.",
@@ -748,13 +748,13 @@
     "restart_gap_footer": "Evidențiat pe grafic. Datele de putere lipsesc pentru aceste intervale; potrivirea a folosit numai citiri reale.",
     "restart_gap_header": "{n} gol la repornirea HA în timpul acestui ciclu",
     "restart_gap_item": "{dur} gol",
-    "review_confirm_help": "Confirmați dacă acest ciclu a fost detectat corect. Recenziile dvs. antrenează modelul pe mașina dvs. — cu cât confirmați mai multe cicluri, cu atât obțineți o potrivire mai bună și un scor de sănătate mai bun. Un Bine/Rău rapid este suficient.",
+    "review_confirm_help": "Confirmați dacă acest ciclu a fost detectat corect. Recenziile dvs. antrenează modelul pe mașina dvs. – cu cât confirmați mai multe cicluri, cu atât obțineți o potrivire mai bună și un scor de sănătate mai bun. Un Bine/Rău rapid este suficient.",
     "review_in_settings": "Revizuiți în Setări",
     "review_notes_placeholder": "Note (opțional)",
     "review_notes_tip": "Note cu text liber pentru referință proprie. Nu sunt folosite de potrivire sau antrenament.",
-    "review_profile_tip": "Programul cu care acest ciclu este etichetat. Dacă programul detectat automat a fost greșit, corectați-l aici — etichetarea învață potrivirea pentru ciclurile viitoare.",
+    "review_profile_tip": "Programul cu care acest ciclu este etichetat. Dacă programul detectat automat a fost greșit, corectați-l aici – etichetarea învață potrivirea pentru ciclurile viitoare.",
     "review_quality_tip": "Cât de curat este acest ciclu. Bine = un exemplu model al acestui program; Rău = detectat dar zgomotos sau atipic; Inutilizabil = detectat greșit (combinat, trunchiat sau fals). Determină scorul de sănătate și ce cicluri sunt permise pentru antrenarea modelului.",
-    "review_recorded_tip": "Marcați acest lucru ca un ciclu de referință ales manual pentru programul său — același rol ca un ciclu înregistrat manual. Ciclurile de referință sunt întotdeauna păstrate, generează șablonul de potrivire și nu sunt niciodată eliminate de curățare. (Acesta este steagul \"de aur\"/înregistrat; ambele sunt același lucru.)",
+    "review_recorded_tip": "Marcați acest lucru ca un ciclu de referință ales manual pentru programul său – același rol ca un ciclu înregistrat manual. Ciclurile de referință sunt întotdeauna păstrate, generează șablonul de potrivire și nu sunt niciodată eliminate de curățare. (Acesta este steagul \"de aur\"/înregistrat; ambele sunt același lucru.)",
     "review_tags_tip": "Semnale opționale care descriu ce a mers prost cu acest ciclu, astfel încât antrenamentul și curățarea pot ține cont de acest lucru.",
     "review_to_cycles": "Deschideți coada de revizuire a Ciclurilor",
     "saving_triggers_reload": "Salvarea declanșează o reîncărcare a integrării. Entitățile HA pot apărea pe scurt ca indisponibile.",
@@ -763,7 +763,7 @@
     "setting_changed": "Modificat de la {old} la {new} pe {date}",
     "settings_basic_note": "Se afișează setările esențiale. Comutați la Avansat pentru lista completă.",
     "shape_drift_advisory": "⚠ Deriva formei",
-    "shape_drift_detail": "Tiparul de putere al acestui profil s-a schimbat în timp — posibilă uzură a aparatului sau întreținere necesară (ex. detartrare, curățarea filtrului).",
+    "shape_drift_detail": "Tiparul de putere al acestui profil s-a schimbat în timp – posibilă uzură a aparatului sau întreținere necesară (ex. detartrare, curățarea filtrului).",
     "show_all_settings": "Afișați toate setările",
     "showing_suggestions": "Se afișează setarea {count} cu sugestii.",
     "split_intro": "Faceți clic pe grafic pentru a adăuga sau elimina un punct de divizare, sau detectați automat prin pauze de inactivitate. Fiecare segment rezultat poate primi propriul profil.",
@@ -789,10 +789,10 @@
     "toast_revert_failed": "Revenire eșuată: {error}",
     "toast_reverted": "{key} a revenit la valoarea anterioară",
     "toast_save_failed": "Salvare eșuată: {error}",
-    "trend_duration_longer": "Durata este în creștere ({pct}%/ciclu) — medie recentă {avg}",
-    "trend_duration_shorter": "Durata este în scădere ({pct}%/ciclu) — medie recentă {avg}",
+    "trend_duration_longer": "Durata este în creștere ({pct}%/ciclu) – medie recentă {avg}",
+    "trend_duration_shorter": "Durata este în scădere ({pct}%/ciclu) – medie recentă {avg}",
     "trend_energy_down": "Energia este în scădere ({pct}%/ciclu)",
-    "trend_energy_up": "Energia este în creștere ({pct}%/ciclu) — medie recentă {avg}",
+    "trend_energy_up": "Energia este în creștere ({pct}%/ciclu) – medie recentă {avg}",
     "trim_intro": "Trageți mânerele roșii sau introduceți valori. Tot ceea ce este în afara ferestrei este eliminat.",
     "tuning_suggestions_available": "{count} sugestie de ajustare disponibilă din ciclurile observate. Acestea apar lângă câmpurile relevante.",
     "unsure_detected_prefix": "WashData nu este sigur că a detectat",
@@ -1553,24 +1553,24 @@
         "lower": "Etichetează mai multe cicluri automat; unele pot fi identificate greșit"
       },
       "duration_tolerance": {
-        "higher": "Acceptă un interval de durată mai larg — potrivire mai flexibilă",
-        "lower": "Necesită durată mai apropiată — mai strict, poate respinge cicluri neobișnuite"
+        "higher": "Acceptă un interval de durată mai larg – potrivire mai flexibilă",
+        "lower": "Necesită durată mai apropiată – mai strict, poate respinge cicluri neobișnuite"
       },
       "end_energy_threshold": {
         "higher": "Închide doar ciclurile care au consumat energie substanțială",
         "lower": "Închide și cicluri scurte sau cu consum redus de energie"
       },
       "end_repeat_count": {
-        "higher": "Necesită repetarea semnalului de final de mai multe ori — mai robust, puțin mai lent",
-        "lower": "Se termină după mai puține repetări — detectare mai rapidă, risc mai mare de final fals"
+        "higher": "Necesită repetarea semnalului de final de mai multe ori – mai robust, puțin mai lent",
+        "lower": "Se termină după mai puține repetări – detectare mai rapidă, risc mai mare de final fals"
       },
       "learning_confidence": {
-        "higher": "Învață doar din potriviri foarte sigure — mai lent dar mai fiabil",
+        "higher": "Învață doar din potriviri foarte sigure – mai lent dar mai fiabil",
         "lower": "Învață din mai multe cicluri; modelul poate fi mai puțin precis"
       },
       "min_off_gap": {
         "higher": "Este nevoie de mai mult timp de inactivitate înainte de a începe un nou ciclu",
-        "lower": "O pauză scurtă declanșează un nou ciclu — rulările consecutive pot fi împărțite"
+        "lower": "O pauză scurtă declanșează un nou ciclu – rulările consecutive pot fi împărțite"
       },
       "min_power": {
         "higher": "Mai puțin sensibil la consumul de repaus; poate rata programe foarte silențioase",
@@ -1581,24 +1581,24 @@
         "lower": "Oprește mai devreme un ciclu blocat"
       },
       "off_delay": {
-        "higher": "Mai mult timp pentru pauzele aparatului — gestionează faze lungi de înmuiere sau uscare",
-        "lower": "Detectare mai rapidă a finalului — funcționează bine pentru aparate cu pornire/oprire clară"
+        "higher": "Mai mult timp pentru pauzele aparatului – gestionează faze lungi de înmuiere sau uscare",
+        "lower": "Detectare mai rapidă a finalului – funcționează bine pentru aparate cu pornire/oprire clară"
       },
       "profile_match_threshold": {
         "higher": "Confirmă doar potriviri de înaltă încredere; mai multe cicluri rămân neetichetate",
         "lower": "Potrivește mai multe cicluri; unele pot fi ușor greșite"
       },
       "running_dead_zone": {
-        "higher": "Ignoră scurte vârfuri de putere în repaus — mai puțin sensibil la zgomot",
-        "lower": "Răspunde la impulsuri mai scurte — detectează activitate tranzitorie rapidă"
+        "higher": "Ignoră scurte vârfuri de putere în repaus – mai puțin sensibil la zgomot",
+        "lower": "Răspunde la impulsuri mai scurte – detectează activitate tranzitorie rapidă"
       },
       "start_threshold_w": {
         "higher": "Evită pornirile false cauzate de scurte vârfuri de putere",
         "lower": "Detectează programe de putere redusă; poate fi declanșat de zgomot"
       },
       "stop_threshold_w": {
-        "higher": "Termină ciclul mai repede — se poate închide în timpul unei pauze",
-        "lower": "Așteaptă mai mult să termine — mai puține finalizări premature"
+        "higher": "Termină ciclul mai repede – se poate închide în timpul unei pauze",
+        "lower": "Așteaptă mai mult să termine – mai puține finalizări premature"
       },
       "watchdog_interval": {
         "higher": "Faze silențioase mai lungi permise; mai puține opriri forțate false",

@@ -87,7 +87,7 @@
     "on_cycle_finished": "A ciklus végén",
     "on_cycle_started": "Beindult a ciklus",
     "pause_cycle": "Szünet",
-    "pause_cycle_tip": "Szüneteltesse a futó ciklust — a készülék onnan folytatja, ahol abbahagyta",
+    "pause_cycle_tip": "Szüneteltesse a futó ciklust – a készülék onnan folytatja, ahol abbahagyta",
     "pg_apply_device": "Alkalmazás az eszközre",
     "pg_autofill": "Automatikus kitöltés",
     "play": "Lejátszás",
@@ -97,8 +97,8 @@
     "process_tip": "Mentse el a rögzített nyomot új vagy meglévő profilként",
     "rebuild": "Borítékok újjáépítése",
     "rebuild_envelope": "Boríték újraépítése",
-    "rebuild_tip": "Számítsa újra az elvárt energiaburkolót (min/max sáv) az összes profilhoz a felcímkézett ciklusaik alapján — futtassa új ciklusok felcímkézése vagy régiek javítása után",
-    "rec_start_tip": "Kezdje el rögzíteni a készülék teljesítménynyomát — indítsa közvetlenül a ciklus futtatása előtt",
+    "rebuild_tip": "Számítsa újra az elvárt energiaburkolót (min/max sáv) az összes profilhoz a felcímkézett ciklusaik alapján – futtassa új ciklusok felcímkézése vagy régiek javítása után",
+    "rec_start_tip": "Kezdje el rögzíteni a készülék teljesítménynyomát – indítsa közvetlenül a ciklus futtatása előtt",
     "rec_stop": "Leállítás",
     "rec_stop_tip": "Állítsa le a rögzítést, és tartsa fenn a rögzített nyomot áttekintésre",
     "record": "Indítsa el a Felvételt",
@@ -182,7 +182,7 @@
     },
     "attn_sub": "Mentés előtt javítsa az ütközéseket",
     "attn_title": "{n} beállítási ütközés{s}",
-    "settings_banner": "{n} beállítási ütközés{s} — ellenőrizze a kijelölt szakaszokat és javítsa ki mentés előtt.",
+    "settings_banner": "{n} beállítási ütközés{s} – ellenőrizze a kijelölt szakaszokat és javítsa ki mentés előtt.",
     "settings_banner_btn": "Ugrás az elsőhöz",
     "confidence": {
       "auto": "Legalább az Egyezési küszöb értékén kell lennie ({match})",
@@ -451,9 +451,9 @@
     "show_expected": "Várható görbefedvény megjelenítése (egyező profil, narancssárga)",
     "show_raw": "Nyers csatlakozó kapcsoló megjelenítése az élő teljesítménygrafikonon",
     "sparkline": "Legutóbbi ciklusidőtartam-trend",
-    "stage2": "2. szakasz — alapvető hasonlóság",
-    "stage3": "3. szakasz — DTW",
-    "stage4": "4. szakasz — egyezés",
+    "stage2": "2. szakasz – alapvető hasonlóság",
+    "stage3": "3. szakasz – DTW",
+    "stage4": "4. szakasz – egyezés",
     "status": "Állapot",
     "tail_trim": "Farokszegély(ek)",
     "timer_auto_pause": "Automatikus szünet",
@@ -645,7 +645,7 @@
     "artifact_dip_detail": "~{n}s-re a szokásos energiasáv alá esett.",
     "artifact_footer": "A fenti grafikonon kiemelve. Ezek átmeneti műtermékek (pl. a ciklus közepén kinyílt ajtó), nem feltétlenül problémák.",
     "artifact_header": "{n} rendellenesség észlelve ebben a ciklusban",
-    "artifact_pause_detail": "A teljesítmény ~{n}s-re közel nullára esett, majd visszatért — valószínűleg kinyílt az ajtó a ciklus közben, vagy a ciklus szünetelt.",
+    "artifact_pause_detail": "A teljesítmény ~{n}s-re közel nullára esett, majd visszatért – valószínűleg kinyílt az ajtó a ciklus közben, vagy a ciklus szünetelt.",
     "artifact_spike_detail": "~{n}s-re a szokásos energiasáv felett volt.",
     "auto_label_intro": "Rendeljen hozzá profilokat címkézetlen ciklusokhoz, amelyek egyezési megbízhatósága törli a küszöböt.",
     "automations_intro": "A WashData {start} / {end} eseményeket küld és entitásokat tesz elérhetővé, ezért az értesítések és műveletek legjobban normál Home Assistant automatizálásként építhetők fel. Az ezt az eszközt használó automatizálások alább jelennek meg.",
@@ -654,10 +654,10 @@
     "collecting_data": "Adatgyűjtés folyamatban - még {need} ciklus szükséges a finomhangolás megkezdéséhez ({current}/{min}).",
     "compare_overlay_profiles": "Fedőprofilok (halvány)",
     "compare_profiles_tip": "Fedjen rá más profilborítékokat a fenti diagramra, hogy megtudja, melyik illik legjobban ehhez a ciklushoz.",
-    "compare_selected_cycles": "Kiválasztott ciklusok (folytonos) — megjelenítés/elrejtés",
+    "compare_selected_cycles": "Kiválasztott ciklusok (folytonos) – megjelenítés/elrejtés",
     "consider_new_profile": "Fontolja meg egy új profil létrehozását.",
     "coverage_gap": "a legutóbbi ciklusoknak nincs megfelelő profilja (az utolsó 30 {pct}%-a).",
-    "coverage_gap_similar_cycles": "{count} hasonló felcímkézetlen ciklus található — hozzon létre egy profilt az egyeztetés megkezdéséhez.",
+    "coverage_gap_similar_cycles": "{count} hasonló felcímkézetlen ciklus található – hozzon létre egy profilt az egyeztetés megkezdéséhez.",
     "cycles_deleted": "{count} ciklus törölve",
     "enough_data": "Elegendő adat a tanuláshoz ({current}/{min} ciklus).",
     "export_description": "Exportálja az összes profilt és ciklust JSON-ba, vagy állítsa vissza az előző exportálásból.",
@@ -686,7 +686,7 @@
     "ml_learned_intro": "Ehhez a géphez finomhangolt modellek.",
     "ml_loading": "ML betöltése…",
     "ml_settings_intro": "Két független kapcsoló: az egyik a ciklus futása közben alkalmazza a modelleket, a másik lehetővé teszi, hogy a WashData idővel finomhangolja őket a gépére.",
-    "name_first_program": "Elég ciklusa van — nevezze el az első programját az egyeztetés elindításához.",
+    "name_first_program": "Elég ciklusa van – nevezze el az első programját az egyeztetés elindításához.",
     "near_duplicate_cluster": "majdnem ismétlődő profilfürt észlelve. A csoportosítás lehetővé teszi, hogy a párosítás megbízhatóan válasszon a hasonlók között (pl. ugyanaz a program különböző hőmérsékleten/centrifugáláson).",
     "no_cycles_match": "Egyetlen ciklus sem felel meg az aktuális szűrőnek.",
     "no_cycles_profile": "Nincs ciklus ehhez a profilhoz.",
@@ -713,7 +713,7 @@
     "notify_services_hint": "Használja a(z) {entity} szolgáltatásazonosítókat (több esetén vesszővel elválasztva). Sablonváltozók: {vars}.",
     "old_actions_warning": "A régi műveletszerkesztővel konfigurálva (most eltávolítva). Továbbra is aktiválják a cikluseseményeket, de már nem szerkeszthetők itt. Alakítsa át őket normál automatizálássá, vagy távolítsa el őket.",
     "onboarding_progress": "{n} / 3 ciklus megfigyelve",
-    "onboarding_watching": "Használja a készülékét a szokásos módon — a WashData figyel. 3 ciklus után elindul a programegyeztetés.",
+    "onboarding_watching": "Használja a készülékét a szokásos módon – a WashData figyel. 3 ciklus után elindul a programegyeztetés.",
     "pending_feedback": "Függőben lévő észlelési visszajelzés",
     "performance_trend": "Teljesítménytrend ({n} ciklus)",
     "pg_analysis_empty": "Töltsön be egy ciklust az egyezéselemzés megtekintéséhez.",
@@ -763,7 +763,7 @@
     "setting_changed": "Módosítva: {old} → {new} ekkor: {date}",
     "settings_basic_note": "Az alapvető beállítások láthatók. Váltson Fejlett nézetre a teljes listához.",
     "shape_drift_advisory": "⚠ Alakváltás",
-    "shape_drift_detail": "Ennek a profilnak a teljesítménymintázata idővel megváltozott — lehetséges készülékhasználat okozta kopás vagy szükséges karbantartás (pl. vízkőmentesítés, szűrőtisztítás).",
+    "shape_drift_detail": "Ennek a profilnak a teljesítménymintázata idővel megváltozott – lehetséges készülékhasználat okozta kopás vagy szükséges karbantartás (pl. vízkőmentesítés, szűrőtisztítás).",
     "show_all_settings": "Minden beállítás megjelenítése",
     "showing_suggestions": "{count} beállítás megjelenítése javaslatokkal.",
     "split_intro": "Kattintson a diagramra egy osztási pont hozzáadásához vagy eltávolításához, vagy az üresjárati hézagok automatikus észleléséhez. Minden eredményül kapott szegmens saját profilt kaphat.",
@@ -1553,24 +1553,24 @@
         "lower": "Automatikusan több ciklust jelöl; néhány félre lehet azonosítva"
       },
       "duration_tolerance": {
-        "higher": "Szélesebb időtartomány elfogadása — rugalmasabb egyeztetés",
-        "lower": "Pontosabb időtartam-egyezést igényel — szigorúbb, de szokatlan ciklusokat elutasíthat"
+        "higher": "Szélesebb időtartomány elfogadása – rugalmasabb egyeztetés",
+        "lower": "Pontosabb időtartam-egyezést igényel – szigorúbb, de szokatlan ciklusokat elutasíthat"
       },
       "end_energy_threshold": {
         "higher": "Csak jelentős energiát felhasználó ciklusokat zár be",
         "lower": "Rövidebb vagy alacsony energiájú ciklusokat is bezár"
       },
       "end_repeat_count": {
-        "higher": "A befejezési jelet több ismétlés után fogadja el — megbízhatóbb, kissé lassabb",
-        "lower": "Kevesebb ismétlés után ér véget — gyorsabb érzékelés, több hamis befejezési kockázat"
+        "higher": "A befejezési jelet több ismétlés után fogadja el – megbízhatóbb, kissé lassabb",
+        "lower": "Kevesebb ismétlés után ér véget – gyorsabb érzékelés, több hamis befejezési kockázat"
       },
       "learning_confidence": {
-        "higher": "Csak nagyon magabiztos egyezésekből tanul — lassabb, de megbízhatóbb",
+        "higher": "Csak nagyon magabiztos egyezésekből tanul – lassabb, de megbízhatóbb",
         "lower": "Több ciklusból tanul; a modell zajosabb lehet"
       },
       "min_off_gap": {
         "higher": "Hosszabb tétlenség szükséges az új ciklus indulása előtt",
-        "lower": "Rövid tétlenség új ciklust indít — egymást követő futások szétválhatnak"
+        "lower": "Rövid tétlenség új ciklust indít – egymást követő futások szétválhatnak"
       },
       "min_power": {
         "higher": "Kevésbé érzékeny a tétlenségi fogyasztásra; nagyon csendes programokat elszalaszthat",
@@ -1581,24 +1581,24 @@
         "lower": "Elakadt ciklust gyorsabban kényszerít leállítani"
       },
       "off_delay": {
-        "higher": "Több idő a készülék szüneteire — hosszú áztatás vagy szárítás kezelése",
-        "lower": "Gyorsabb vége érzékelés — egyértelmű be/ki készülékekhez jól működik"
+        "higher": "Több idő a készülék szüneteire – hosszú áztatás vagy szárítás kezelése",
+        "lower": "Gyorsabb vége érzékelés – egyértelmű be/ki készülékekhez jól működik"
       },
       "profile_match_threshold": {
         "higher": "Csak nagy magabiztosságú egyezéseket erősít meg; több ciklus marad jelöletlen",
         "lower": "Több ciklust egyeztet; néhány kissé helytelen lehet"
       },
       "running_dead_zone": {
-        "higher": "Figyelmen kívül hagyja a rövid teljesítménycsúcsokat tétlenség közben — zajra kevésbé érzékeny",
-        "lower": "Rövidebb teljesítménylökésekre reagál — gyors átmeneti aktivitást észlel"
+        "higher": "Figyelmen kívül hagyja a rövid teljesítménycsúcsokat tétlenség közben – zajra kevésbé érzékeny",
+        "lower": "Rövidebb teljesítménylökésekre reagál – gyors átmeneti aktivitást észlel"
       },
       "start_threshold_w": {
         "higher": "Elkerüli a rövid teljesítménycsúcsokból eredő hamis indításokat",
         "lower": "Kis teljesítményű programokat is érzékel; zajra is aktiválódhat"
       },
       "stop_threshold_w": {
-        "higher": "Gyorsabban fejezi be a ciklust — szünet közben is zárhat",
-        "lower": "Hosszabb ideig vár a befejezésre — kevesebb idő előtti befejezés"
+        "higher": "Gyorsabban fejezi be a ciklust – szünet közben is zárhat",
+        "lower": "Hosszabb ideig vár a befejezésre – kevesebb idő előtti befejezés"
       },
       "watchdog_interval": {
         "higher": "Hosszabb csendes fázisok megengedett; kevesebb hamis kényszeres leállítás",

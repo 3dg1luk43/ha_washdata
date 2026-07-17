@@ -87,7 +87,7 @@
     "on_cycle_finished": "En ciclo terminado",
     "on_cycle_started": "En ciclo iniciado",
     "pause_cycle": "Pausa",
-    "pause_cycle_tip": "Pausar el ciclo en curso — el electrodoméstico reanudará donde lo dejó",
+    "pause_cycle_tip": "Pausar el ciclo en curso – el electrodoméstico reanudará donde lo dejó",
     "pg_apply_device": "Aplicar al dispositivo",
     "pg_autofill": "Autocompletar",
     "play": "Reproducir",
@@ -97,8 +97,8 @@
     "process_tip": "Guardar la grabación capturada como un perfil nuevo o existente",
     "rebuild": "Reconstruir sobres",
     "rebuild_envelope": "Reconstruir envolvente",
-    "rebuild_tip": "Recalcular la envolvente de potencia esperada (banda mín/máx) para todos los perfiles a partir de sus ciclos etiquetados — ejecutar después de etiquetar nuevos ciclos o corregir los existentes",
-    "rec_start_tip": "Comenzar a grabar la traza de potencia del electrodoméstico — iniciar justo antes de ejecutar un ciclo",
+    "rebuild_tip": "Recalcular la envolvente de potencia esperada (banda mín/máx) para todos los perfiles a partir de sus ciclos etiquetados – ejecutar después de etiquetar nuevos ciclos o corregir los existentes",
+    "rec_start_tip": "Comenzar a grabar la traza de potencia del electrodoméstico – iniciar justo antes de ejecutar un ciclo",
     "rec_stop": "Detener",
     "rec_stop_tip": "Detener la grabación y retener la traza capturada para revisión",
     "record": "Iniciar grabación",
@@ -182,7 +182,7 @@
     },
     "attn_sub": "Corrige los conflictos antes de guardar",
     "attn_title": "{n} conflicto{s} de ajustes",
-    "settings_banner": "{n} conflicto{s} de ajustes — revisa las secciones resaltadas y corrígelos antes de guardar.",
+    "settings_banner": "{n} conflicto{s} de ajustes – revisa las secciones resaltadas y corrígelos antes de guardar.",
     "settings_banner_btn": "Ir al primero",
     "confidence": {
       "auto": "Debe ser mayor o igual al Umbral de coincidencia ({match})",
@@ -451,9 +451,9 @@
     "show_expected": "Mostrar superposición de curva esperada (perfil coincidente, naranja)",
     "show_raw": "Mostrar el interruptor de señal bruta del enchufe en el gráfico de potencia en vivo",
     "sparkline": "Tendencia reciente de duración de ciclos",
-    "stage2": "Etapa 2 — similitud principal",
-    "stage3": "Etapa 3 — DTW",
-    "stage4": "Etapa 4 — concordancia",
+    "stage2": "Etapa 2 – similitud principal",
+    "stage3": "Etapa 3 – DTW",
+    "stage4": "Etapa 4 – concordancia",
     "status": "Estado",
     "tail_trim": "Recorte de fin (s)",
     "timer_auto_pause": "Pausa automática",
@@ -645,7 +645,7 @@
     "artifact_dip_detail": "Cayó por debajo de la banda de potencia habitual durante ~{n}s.",
     "artifact_footer": "Destacado en el gráfico de arriba. Estos son artefactos transitorios (por ejemplo, la puerta se abrió a mitad del ciclo), no necesariamente problemas.",
     "artifact_header": "{n} anomalías detectadas durante este ciclo",
-    "artifact_pause_detail": "La potencia cayó a casi cero durante ~{n}s y luego se reanudó — probablemente la puerta se abrió a mitad del ciclo o el ciclo fue pausado.",
+    "artifact_pause_detail": "La potencia cayó a casi cero durante ~{n}s y luego se reanudó – probablemente la puerta se abrió a mitad del ciclo o el ciclo fue pausado.",
     "artifact_spike_detail": "Superó la banda de potencia habitual durante ~{n}s.",
     "auto_label_intro": "Asigne perfiles a ciclos sin etiquetar cuya confianza de coincidencia supere el umbral.",
     "automations_intro": "WashData dispara los eventos {start} / {end} y expone entidades, por lo que las notificaciones y acciones se construyen mejor como automatizaciones normales de Home Assistant. Las automatizaciones que usan este dispositivo aparecen a continuación.",
@@ -657,7 +657,7 @@
     "compare_selected_cycles": "Ciclos seleccionados (sólidos): mostrar/ocultar",
     "consider_new_profile": "Considere la posibilidad de crear un nuevo perfil.",
     "coverage_gap": "Los ciclos recientes no tienen ningún perfil coincidente ({pct}% de los últimos 30).",
-    "coverage_gap_similar_cycles": "{count} ciclos similares sin etiquetar encontrados — cree un perfil para comenzar a identificarlos.",
+    "coverage_gap_similar_cycles": "{count} ciclos similares sin etiquetar encontrados – cree un perfil para comenzar a identificarlos.",
     "cycles_deleted": "{count} ciclo(s) eliminado(s)",
     "enough_data": "Suficientes datos para aprender ({current}/{min} ciclos).",
     "export_description": "Exporte todos los perfiles y ciclos a JSON o restaure desde una exportación anterior.",
@@ -686,7 +686,7 @@
     "ml_learned_intro": "Modelos adaptados a esta máquina.",
     "ml_loading": "cargando ML...",
     "ml_settings_intro": "Dos interruptores independientes: uno aplica los modelos mientras se ejecuta un ciclo, el otro permite que WashData los ajuste a su máquina con el tiempo.",
-    "name_first_program": "Ya tiene suficientes ciclos — nombre su primer programa para empezar a hacer coincidencias.",
+    "name_first_program": "Ya tiene suficientes ciclos – nombre su primer programa para empezar a hacer coincidencias.",
     "near_duplicate_cluster": "Se detectó un grupo de perfiles casi duplicados. La agrupación permite elegir de manera confiable entre elementos similares (por ejemplo, el mismo programa a diferente temperatura/centrifugado).",
     "no_cycles_match": "Ningún ciclo coincide con el filtro actual.",
     "no_cycles_profile": "No hay ciclos para este perfil.",
@@ -713,7 +713,7 @@
     "notify_services_hint": "Use los IDs de servicio {entity} (separados por comas para varios). Variables de plantilla: {vars}.",
     "old_actions_warning": "Configurado con el antiguo editor de acciones (ahora eliminado). Todavía se activan en eventos de ciclo pero ya no se pueden editar aquí. Conviértalos en una automatización normal o elimínelos.",
     "onboarding_progress": "{n} / 3 ciclos observados",
-    "onboarding_watching": "Use su electrodoméstico con normalidad — WashData está observando. Después de 3 ciclos, comenzará la coincidencia de programas.",
+    "onboarding_watching": "Use su electrodoméstico con normalidad – WashData está observando. Después de 3 ciclos, comenzará la coincidencia de programas.",
     "pending_feedback": "Comentarios de detección pendientes",
     "performance_trend": "Tendencia de rendimiento ({n} ciclos)",
     "pg_analysis_empty": "Cargue un ciclo para ver el análisis de coincidencia.",
@@ -763,7 +763,7 @@
     "setting_changed": "Cambiado de {old} a {new} el {date}",
     "settings_basic_note": "Mostrando ajustes esenciales. Cambie a Avanzado para ver la lista completa.",
     "shape_drift_advisory": "⚠ Forma a la deriva",
-    "shape_drift_detail": "El patrón de potencia de este perfil ha cambiado con el tiempo — posible desgaste del electrodoméstico o mantenimiento necesario (p. ej., descalcificación, limpieza del filtro).",
+    "shape_drift_detail": "El patrón de potencia de este perfil ha cambiado con el tiempo – posible desgaste del electrodoméstico o mantenimiento necesario (p. ej., descalcificación, limpieza del filtro).",
     "show_all_settings": "Mostrar todas las configuraciones",
     "showing_suggestions": "Mostrando configuración {count} con sugerencias.",
     "split_intro": "Haga clic en el gráfico para agregar o eliminar un punto de división, o detectar automáticamente por espacios inactivos. Cada segmento resultante puede obtener su propio perfil.",
@@ -1570,24 +1570,24 @@
         "lower": "Etiqueta más ciclos automáticamente; algunos pueden ser mal identificados"
       },
       "duration_tolerance": {
-        "higher": "Acepta un rango de duración más amplio — correspondencia más flexible",
-        "lower": "Exige una duración más cercana — más estricto, puede rechazar ciclos inusuales"
+        "higher": "Acepta un rango de duración más amplio – correspondencia más flexible",
+        "lower": "Exige una duración más cercana – más estricto, puede rechazar ciclos inusuales"
       },
       "end_energy_threshold": {
         "higher": "Solo cierra ciclos que usaron energía significativa",
         "lower": "También cierra ciclos cortos o de baja energía"
       },
       "end_repeat_count": {
-        "higher": "Exige que la señal de fin se repita más veces — más robusto, ligeramente más lento",
-        "lower": "Termina tras menos repeticiones — detección más rápida, mayor riesgo de fin falso"
+        "higher": "Exige que la señal de fin se repita más veces – más robusto, ligeramente más lento",
+        "lower": "Termina tras menos repeticiones – detección más rápida, mayor riesgo de fin falso"
       },
       "learning_confidence": {
-        "higher": "Aprende solo de coincidencias muy confiables — más lento pero más fiable",
+        "higher": "Aprende solo de coincidencias muy confiables – más lento pero más fiable",
         "lower": "Aprende de más ciclos; el modelo puede ser menos preciso"
       },
       "min_off_gap": {
         "higher": "Se necesita más tiempo de inactividad antes de iniciar un nuevo ciclo",
-        "lower": "Un breve reposo inicia un nuevo ciclo — ejecuciones consecutivas pueden dividirse"
+        "lower": "Un breve reposo inicia un nuevo ciclo – ejecuciones consecutivas pueden dividirse"
       },
       "min_power": {
         "higher": "Menos sensible al consumo en reposo; puede perder programas muy silenciosos",
@@ -1598,24 +1598,24 @@
         "lower": "Detiene un ciclo atascado antes"
       },
       "off_delay": {
-        "higher": "Más tiempo para pausas del electrodoméstico — gestiona fases largas de remojo o secado",
-        "lower": "Detección de fin más rápida — ideal para electrodomésticos con encendido/apagado limpio"
+        "higher": "Más tiempo para pausas del electrodoméstico – gestiona fases largas de remojo o secado",
+        "lower": "Detección de fin más rápida – ideal para electrodomésticos con encendido/apagado limpio"
       },
       "profile_match_threshold": {
         "higher": "Solo confirma coincidencias de alta confianza; más ciclos quedan sin etiquetar",
         "lower": "Coincide con más ciclos; algunos pueden ser ligeramente incorrectos"
       },
       "running_dead_zone": {
-        "higher": "Ignora breves picos de potencia en reposo — menos sensible al ruido",
-        "lower": "Reacciona a impulsos más cortos — detecta actividad transitoria rápida"
+        "higher": "Ignora breves picos de potencia en reposo – menos sensible al ruido",
+        "lower": "Reacciona a impulsos más cortos – detecta actividad transitoria rápida"
       },
       "start_threshold_w": {
         "higher": "Evita arranques falsos por breves picos de potencia",
         "lower": "Detecta programas de baja potencia; puede activarse con ruido"
       },
       "stop_threshold_w": {
-        "higher": "Termina el ciclo antes — puede cerrarse durante una pausa",
-        "lower": "Espera más para terminar — menos finales prematuros"
+        "higher": "Termina el ciclo antes – puede cerrarse durante una pausa",
+        "lower": "Espera más para terminar – menos finales prematuros"
       },
       "watchdog_interval": {
         "higher": "Se permiten fases silenciosas más largas; menos paradas forzadas falsas",
