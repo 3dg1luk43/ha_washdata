@@ -1768,5 +1768,52 @@
     "pg_sweep": {
       "optimize": "Optimiser : {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Configuration de l'appareil",
+      "healthy_chip": "Configuration terminée"
+    },
+    "phase0": {
+      "washer": "WashData détecte déjà vos cycles. Enregistrez votre premier cycle pour activer les noms de programmes et les estimations de durée.",
+      "dishwasher": "WashData surveille. Les lave-vaisselle ont des cycles complexes – l'enregistrement du premier cycle est fortement recommandé. Si un cycle détecté dure trop longtemps, utilisez l'éditeur de cycles pour le rogner avant de l'enregistrer comme profil.",
+      "generic": "WashData surveille. Enregistrez ou étiquetez un cycle détecté pour commencer à créer des profils."
+    },
+    "phase1a": {
+      "labelled": "Bon début – votre premier programme est enregistré. Pour des données optimales, envisagez d'enregistrer votre prochain cycle avec le widget d'enregistrement."
+    },
+    "phase1b": {
+      "recorded": "Votre enregistrement a été sauvegardé sous {profile_name}. Enregistrez ou étiquetez maintenant vos autres programmes courants pour améliorer la couverture."
+    },
+    "phase1c": {
+      "verify": "Vous avez {count} programmes de la communauté. Lancez un cycle pour vérifier que WashData le reconnaît correctement – la correspondance s'améliorera au fil de l'historique de votre appareil."
+    },
+    "phase2": {
+      "cluster": "WashData a observé {count} cycles qui ne correspondent à aucun programme enregistré – ils se ressemblent entre eux. Voulez-vous créer un nouveau profil pour eux ?",
+      "unmatched": "Votre dernier cycle ne correspond à aucun programme enregistré. S'agit-il d'un nouveau programme ?"
+    },
+    "phase3": {
+      "suggestions": "WashData a des recommandations de paramètres basées sur votre historique de cycles – examinez-les pour améliorer la précision de détection.",
+      "groups": "Certains de vos profils ressemblent au même programme à différentes températures. Organisez-les en groupe pour une meilleure correspondance.",
+      "phases": "Ajoutez des phases de programme à {profile_name} pour des estimations de temps restant plus précises."
+    },
+    "phase4": {
+      "healthy": "Cet appareil est entièrement configuré ({profile_count} profils)."
+    },
+    "cta": {
+      "start_recording": "Démarrer l'enregistrement",
+      "label_detected_cycle": "J'ai déjà un cycle détecté – l'étiqueter à la place",
+      "browse_cycles": "Parcourir les cycles pour en étiqueter un autre",
+      "view_profiles": "Voir vos profils",
+      "create_from_cluster": "Créer un profil à partir de ces cycles",
+      "create_profile": "Créer un profil pour ce programme",
+      "review_suggestions": "Examiner les suggestions",
+      "organise_profiles": "Organiser les profils",
+      "configure_phases": "Configurer les phases",
+      "skip_step": "Ignorer cette étape",
+      "skip_forever": "Ne plus afficher",
+      "hide_guidance": "Masquer le guide",
+      "show_guidance": "Afficher le guide"
+    }
   }
 }

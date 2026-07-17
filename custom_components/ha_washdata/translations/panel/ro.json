@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optimizează: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Configurarea dispozitivului",
+      "healthy_chip": "Configurare finalizată"
+    },
+    "phase0": {
+      "washer": "WashData detectează deja ciclurile dvs. Înregistrați primul ciclu pentru a activa numele programelor și estimările de timp.",
+      "dishwasher": "WashData monitorizează. Mașinile de spălat vase au cicluri complexe – se recomandă insistent înregistrarea primului ciclu. Dacă un ciclu detectat durează prea mult, folosiți editorul de cicluri pentru a-l tăia înainte de a-l salva ca profil.",
+      "generic": "WashData monitorizează. Înregistrați sau etichetați un ciclu detectat pentru a începe să creați profiluri."
+    },
+    "phase1a": {
+      "labelled": "Început bun – primul dvs. program este salvat. Pentru date mai curate, luați în considerare înregistrarea următorului ciclu cu widgetul de înregistrare."
+    },
+    "phase1b": {
+      "recorded": "Înregistrarea dvs. a fost salvată ca {profile_name}. Acum înregistrați sau etichetați celelalte programe obișnuite pentru a extinde acoperirea."
+    },
+    "phase1c": {
+      "verify": "Aveți {count} programe din comunitate. Rulați un ciclu pentru a verifica dacă WashData îl recunoaște corect – potrivirea se va îmbunătăți pe măsură ce dispozitivul își construiește propriul istoric."
+    },
+    "phase2": {
+      "cluster": "WashData a observat {count} cicluri care nu corespund niciunui program salvat – acestea se aseamănă între ele. Doriți să creați un profil nou pentru ele?",
+      "unmatched": "Ultimul dvs. ciclu nu a corespuns niciunui program salvat. Este un program nou?"
+    },
+    "phase3": {
+      "suggestions": "WashData are recomandări de setări bazate pe istoricul ciclurilor – revizuiți-le pentru a îmbunătăți acuratețea detectării.",
+      "groups": "Unele profiluri ale dvs. seamănă cu același program la temperaturi diferite. Organizați-le într-un grup pentru o potrivire mai bună.",
+      "phases": "Adăugați faze de program la {profile_name} pentru estimări mai precise ale timpului rămas."
+    },
+    "phase4": {
+      "healthy": "Acest dispozitiv este complet configurat ({profile_count} profiluri)."
+    },
+    "cta": {
+      "start_recording": "Porniți înregistrarea",
+      "label_detected_cycle": "Am deja un ciclu detectat – etichetați-l în schimb",
+      "browse_cycles": "Răsfoiți ciclurile pentru a eticheta altul",
+      "view_profiles": "Vizualizați profilurile",
+      "create_from_cluster": "Creați profil din aceste cicluri",
+      "create_profile": "Creați un profil pentru acesta",
+      "review_suggestions": "Revizuiți sugestiile",
+      "organise_profiles": "Organizați profilurile",
+      "configure_phases": "Configurați fazele",
+      "skip_step": "Omiteți acest pas",
+      "skip_forever": "Nu mai afișa",
+      "hide_guidance": "Ascundeți ghidul",
+      "show_guidance": "Afișați ghidul"
+    }
   }
 }

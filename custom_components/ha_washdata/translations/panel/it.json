@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Ottimizza: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Configurazione dispositivo",
+      "healthy_chip": "Configurazione completata"
+    },
+    "phase0": {
+      "washer": "WashData sta già rilevando i tuoi cicli. Registra il tuo primo ciclo per abilitare i nomi dei programmi e le stime dei tempi.",
+      "dishwasher": "WashData sta monitorando. Le lavastoviglie hanno cicli complessi – è vivamente consigliato registrare il primo ciclo. Se un ciclo rilevato dura troppo a lungo, usa l'editor dei cicli per ritagliarlo prima di salvarlo come profilo.",
+      "generic": "WashData sta monitorando. Registra o etichetta un ciclo rilevato per iniziare a creare profili."
+    },
+    "phase1a": {
+      "labelled": "Buon inizio – il tuo primo programma è salvato. Per dati più precisi, considera di registrare il prossimo ciclo con il widget di registrazione."
+    },
+    "phase1b": {
+      "recorded": "La tua registrazione è stata salvata come {profile_name}. Ora registra o etichetta gli altri programmi che usi di solito per ampliare la copertura."
+    },
+    "phase1c": {
+      "verify": "Hai {count} programmi dalla community. Esegui un ciclo per verificare che WashData li riconosca correttamente – l'abbinamento migliorerà man mano che il dispositivo accumula il proprio storico."
+    },
+    "phase2": {
+      "cluster": "WashData ha rilevato {count} cicli che non corrispondono a nessun programma salvato – si assomigliano tra loro. Vuoi creare un nuovo profilo per essi?",
+      "unmatched": "L'ultimo ciclo non ha corrisposto a nessun programma salvato. È un nuovo programma?"
+    },
+    "phase3": {
+      "suggestions": "WashData ha raccomandazioni sulle impostazioni basate sulla cronologia dei cicli – revisionale per migliorare la precisione di rilevamento.",
+      "groups": "Alcuni dei tuoi profili sembrano lo stesso programma a temperature diverse. Organizzali in un gruppo per un abbinamento più affidabile.",
+      "phases": "Aggiungi le fasi del programma a {profile_name} per stime più accurate del tempo rimanente."
+    },
+    "phase4": {
+      "healthy": "Questo dispositivo è completamente configurato ({profile_count} profili)."
+    },
+    "cta": {
+      "start_recording": "Avvia registrazione",
+      "label_detected_cycle": "Ho già un ciclo rilevato – etichettalo invece",
+      "browse_cycles": "Sfoglia i cicli per etichettarne un altro",
+      "view_profiles": "Visualizza i tuoi profili",
+      "create_from_cluster": "Crea profilo da questi cicli",
+      "create_profile": "Crea un profilo per questo programma",
+      "review_suggestions": "Rivedi i suggerimenti",
+      "organise_profiles": "Organizza i profili",
+      "configure_phases": "Configura le fasi",
+      "skip_step": "Salta questo passaggio",
+      "skip_forever": "Non mostrare più",
+      "hide_guidance": "Nascondi guida",
+      "show_guidance": "Mostra guida"
+    }
   }
 }
