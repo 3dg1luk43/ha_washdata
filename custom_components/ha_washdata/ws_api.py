@@ -82,6 +82,7 @@ from .const import (
 from . import playground
 from . import task_registry
 from .cycle_detector import CycleDetectorConfig
+from .setup_advisor import compute_setup_phase
 from .ws_schema import WS_OPEN_RESPONSES, WS_RESPONSE_TYPES
 
 _LOGGER = logging.getLogger(__name__)
@@ -1031,6 +1032,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_get_devices, ws_get_device_cycles,
         # Settings
         ws_get_options, ws_set_options, ws_get_settings_changelog,
+        ws_get_setup_status,
         # Profiles
         ws_get_profiles, ws_create_profile, ws_rename_profile, ws_delete_profile,
         ws_rebuild_envelopes, ws_get_profile_phases, ws_set_profile_phases,
@@ -1413,6 +1415,78 @@ async def ws_get_settings_changelog(
         )
 
     _send_result(connection, msg["id"], "get_settings_changelog", {"changelog": changelog})
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/get_setup_status",
+        vol.Required("entry_id"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_get_setup_status(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Return the current setup phase for the adoption guidance card."""
+    manager = _get_manager(hass, msg["entry_id"])
+    if not manager:
+        connection.send_error(msg["id"], "not_found", "Device not found")
+        return
+
+    # Gather user's skipped steps from user prefs
+    skipped_steps: dict[str, str | None] = {}
+    user = getattr(connection, "user", None)
+    if user:
+        holder = hass.data.get(_PANEL_DATA_KEY)
+        if holder:
+            prefs = holder["data"].get("prefs", {}).get(user.id, {})
+            for k, v in prefs.items():
+                if k.startswith("setup_skip_"):
+                    skipped_steps[k] = v
+
+    # Gather store data (executor-safe reads)
+    store = manager.profile_store
+    profile_names = list(store._data.get("profiles", {}).keys())
+    past_cycles = store._data.get("past_cycles", [])
+    ref_names: set[str] = set()
+    for rc in store._data.get("reference_cycles", []):
+        if rc.get("profile_name"):
+            ref_names.add(rc["profile_name"])
+
+    coverage_gap = await hass.async_add_executor_job(store.suggest_coverage_gaps)
+    # suggestions: use cached if available, else empty (avoid heavy computation here)
+    suggestions = manager._last_suggestions if hasattr(manager, "_last_suggestions") else []
+    pg_data = store._data.get("profile_groups", {})
+    pending_groups = (pg_data.get("suggestions") or []) if isinstance(pg_data, dict) else []
+
+    device_type = manager.device_type
+
+    result = compute_setup_phase(
+        device_type=device_type,
+        profile_names=profile_names,
+        past_cycles=past_cycles,
+        ref_profile_names=ref_names,
+        coverage_gap=coverage_gap,
+        suggestions=suggestions,
+        profile_groups=pending_groups,
+        skipped_steps=skipped_steps,
+        now=dt_util.now(),
+    )
+
+    _send_result(connection, msg["id"], "get_setup_status", {
+        "phase": result.phase,
+        "message_key": result.message_key,
+        "message_params": result.message_params,
+        "cta_label_key": result.cta_label_key,
+        "cta_action": result.cta_action,
+        "secondary_label_key": result.secondary_label_key,
+        "secondary_action": result.secondary_action,
+        "skippable": result.skippable,
+        "dismissible": result.dismissible,
+        "step_key": result.step_key,
+    })
 
 
 # ─── Profiles ─────────────────────────────────────────────────────────────────
@@ -3494,6 +3568,13 @@ async def ws_set_user_prefs(
             cur.pop("lang_override", None)  # empty clears -> system default
         elif isinstance(lang, str) and _PREF_LANG_TAG_RE.match(lang):
             cur["lang_override"] = lang
+    # Allow setup guidance skip keys: setup_skip_<step_key> -> "never" | ISO timestamp
+    for k, v in p.items():
+        if isinstance(k, str) and k.startswith("setup_skip_"):
+            if v is None:
+                cur.pop(k, None)
+            elif v == "never" or (isinstance(v, str) and len(v) <= 40):
+                cur[k] = v
     prefs[user.id] = cur
     await _save_panel_data(hass)
     _send_result(connection, msg["id"], "set_user_prefs", {"success": True})

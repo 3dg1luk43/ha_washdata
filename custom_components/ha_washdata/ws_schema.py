@@ -602,12 +602,27 @@ class GetShareableCyclesResponse(TypedDict, total=False):
     phase_programs: list
 
 
+class GetSetupStatusResponse(TypedDict, total=False):
+    """Current adoption phase for the setup guidance card."""
+    phase: str
+    message_key: str
+    message_params: dict
+    cta_label_key: str
+    cta_action: str
+    secondary_label_key: str | None
+    secondary_action: str | None
+    skippable: bool
+    dismissible: bool
+    step_key: str | None
+
+
 WS_RESPONSE_TYPES: dict[str, type] = {
     "get_devices": GetDevicesResponse,
     "get_device_cycles": GetDeviceCyclesResponse,
     "get_options": GetOptionsResponse,
     "set_options": SuccessResponse,
     "get_settings_changelog": GetSettingsChangelogResponse,
+    "get_setup_status": GetSetupStatusResponse,
     "get_profiles": GetProfilesResponse,
     "create_profile": CreateProfileResponse,
     "rename_profile": SuccessResponse,
@@ -752,6 +767,7 @@ WS_COMMANDS: dict[str, dict] = {
     "get_options": {"params": [_entry()]},
     "set_options": {"params": [_entry(), _p("options", "dict")]},
     "get_settings_changelog": {"params": [_entry()]},
+    "get_setup_status": {"params": [_entry()]},
     "get_profiles": {"params": [_entry()]},
     "create_profile": {"params": [
         _entry(),

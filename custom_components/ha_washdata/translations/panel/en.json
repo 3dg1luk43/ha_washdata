@@ -1717,5 +1717,52 @@
     "pg_detail": {
       "simulate": "Simulate cycle"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Device Setup",
+      "healthy_chip": "Setup complete"
+    },
+    "phase0": {
+      "washer": "WashData is already detecting your cycles. Record your first cycle to enable program names and time estimates.",
+      "dishwasher": "WashData is watching. Dishwashers have complex cycles — recording your first cycle is strongly recommended. If a detected cycle runs too long, use the cycle editor to trim it before saving as a profile.",
+      "generic": "WashData is watching. Record or label a detected cycle to start building profiles."
+    },
+    "phase1a": {
+      "labelled": "Good start — your first program is saved. For the cleanest data, consider recording your next cycle with the recorder widget."
+    },
+    "phase1b": {
+      "recorded": "Your recording was saved as {profile_name}. Now record or label your other common programs to build coverage."
+    },
+    "phase1c": {
+      "verify": "You have {count} {count, plural, one {program} other {programs}} from the community. Run a cycle to verify WashData recognises it correctly — matching will improve as your device builds its own history."
+    },
+    "phase2": {
+      "cluster": "WashData has seen {count} {count, plural, one {cycle} other {cycles}} that don't match any saved program — they look similar to each other. Want to create a new profile for them?",
+      "unmatched": "Your last cycle didn't match any saved program. Is it a new program?"
+    },
+    "phase3": {
+      "suggestions": "WashData has settings recommendations based on your cycle history — review them to improve detection accuracy.",
+      "groups": "Some of your profiles look like the same program at different temperatures. Organise them into a group for better matching.",
+      "phases": "Add program phases to {profile_name} for more accurate time-remaining estimates."
+    },
+    "phase4": {
+      "healthy": "This device is fully set up ({profile_count} {profile_count, plural, one {profile} other {profiles}})."
+    },
+    "cta": {
+      "start_recording": "Start Recording",
+      "label_detected_cycle": "I already have a detected cycle — label it instead",
+      "browse_cycles": "Browse cycles to label another",
+      "view_profiles": "View your profiles",
+      "create_from_cluster": "Create profile from these cycles",
+      "create_profile": "Create a profile for it",
+      "review_suggestions": "Review suggestions",
+      "organise_profiles": "Organise profiles",
+      "configure_phases": "Configure phases",
+      "skip_step": "Skip this step",
+      "skip_forever": "Don't show again",
+      "hide_guidance": "Hide guidance",
+      "show_guidance": "Show guidance"
+    }
   }
 }

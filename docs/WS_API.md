@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**98 commands.**
+**99 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -13,6 +13,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `get_options` | entry_id | `GetOptionsResponse` |
 | `set_options` | entry_id, options | `SuccessResponse` |
 | `get_settings_changelog` | entry_id | `GetSettingsChangelogResponse` |
+| `get_setup_status` | entry_id | `GetSetupStatusResponse` |
 | `get_profiles` | entry_id | `GetProfilesResponse` |
 | `create_profile` | entry_id, name, reference_cycle?, manual_duration_min? | `CreateProfileResponse` |
 | `rename_profile` | entry_id, profile_name, new_name, manual_duration_min? | `SuccessResponse` |
@@ -181,6 +182,29 @@ _None._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `changelog` | yes | list[dict[str, any]] |
+
+## `ha_washdata/get_setup_status`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+
+**Response** (`GetSetupStatusResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `phase` | no | str |
+| `message_key` | no | str |
+| `message_params` | no | dict |
+| `cta_label_key` | no | str |
+| `cta_action` | no | str |
+| `secondary_label_key` | no | str \| null |
+| `secondary_action` | no | str \| null |
+| `skippable` | no | bool |
+| `dismissible` | no | bool |
+| `step_key` | no | str \| null |
 
 ## `ha_washdata/get_profiles`
 

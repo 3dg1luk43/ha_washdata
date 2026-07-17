@@ -263,6 +263,19 @@ export interface GetSettingsChangelogResponse {
   changelog: Record<string, unknown>[];
 }
 
+export interface GetSetupStatusResponse {
+  phase?: string;
+  message_key?: string;
+  message_params?: Record<string, unknown>;
+  cta_label_key?: string;
+  cta_action?: string;
+  secondary_label_key?: string | null;
+  secondary_action?: string | null;
+  skippable?: boolean;
+  dismissible?: boolean;
+  step_key?: string | null;
+}
+
 export interface GetShareableCyclesResponse {
   items?: unknown[];
   phase_programs?: unknown[];
@@ -497,6 +510,10 @@ export interface SetOptionsRequest {
 }
 
 export interface GetSettingsChangelogRequest {
+  entry_id: string;
+}
+
+export interface GetSetupStatusRequest {
   entry_id: string;
 }
 
@@ -1002,6 +1019,7 @@ export interface WashDataWsRequests {
   "ha_washdata/get_options": GetOptionsRequest;
   "ha_washdata/set_options": SetOptionsRequest;
   "ha_washdata/get_settings_changelog": GetSettingsChangelogRequest;
+  "ha_washdata/get_setup_status": GetSetupStatusRequest;
   "ha_washdata/get_profiles": GetProfilesRequest;
   "ha_washdata/create_profile": CreateProfileRequest;
   "ha_washdata/rename_profile": RenameProfileRequest;
@@ -1103,6 +1121,7 @@ export interface WashDataWsResponses {
   "ha_washdata/get_options": GetOptionsResponse;
   "ha_washdata/set_options": SuccessResponse;
   "ha_washdata/get_settings_changelog": GetSettingsChangelogResponse;
+  "ha_washdata/get_setup_status": GetSetupStatusResponse;
   "ha_washdata/get_profiles": GetProfilesResponse;
   "ha_washdata/create_profile": CreateProfileResponse;
   "ha_washdata/rename_profile": SuccessResponse;
