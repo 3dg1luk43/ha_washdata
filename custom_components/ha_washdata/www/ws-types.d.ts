@@ -885,6 +885,12 @@ export interface StartPlaygroundSweepRequest {
   values_y?: number[];
 }
 
+export interface StartPlaygroundCycleDetailRequest {
+  entry_id: string;
+  cycle_id: string;
+  settings_override?: Record<string, unknown>;
+}
+
 export interface StoreStatusRequest {
   entry_id: string;
 }
@@ -1070,6 +1076,7 @@ export interface WashDataWsRequests {
   "ha_washdata/get_task_result": GetTaskResultRequest;
   "ha_washdata/start_playground_history": StartPlaygroundHistoryRequest;
   "ha_washdata/start_playground_sweep": StartPlaygroundSweepRequest;
+  "ha_washdata/start_playground_cycle_detail": StartPlaygroundCycleDetailRequest;
   "ha_washdata/store_status": StoreStatusRequest;
   "ha_washdata/store_connect": StoreConnectRequest;
   "ha_washdata/store_disconnect": StoreDisconnectRequest;
@@ -1170,6 +1177,7 @@ export interface WashDataWsResponses {
   "ha_washdata/get_task_result": TaskSnapshot;
   "ha_washdata/start_playground_history": StartTaskResponse;
   "ha_washdata/start_playground_sweep": StartTaskResponse;
+  "ha_washdata/start_playground_cycle_detail": StartTaskResponse;
   "ha_washdata/store_status": StoreStatusResponse;
   "ha_washdata/store_connect": StoreSimpleResponse;
   "ha_washdata/store_disconnect": StoreSimpleResponse;

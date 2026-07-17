@@ -682,6 +682,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "get_task_result": TaskSnapshot,
     "start_playground_history": StartTaskResponse,
     "start_playground_sweep": StartTaskResponse,
+    "start_playground_cycle_detail": StartTaskResponse,
     "store_status": StoreStatusResponse,
     "store_connect": StoreSimpleResponse,
     "store_disconnect": StoreSimpleResponse,
@@ -959,6 +960,11 @@ WS_COMMANDS: dict[str, dict] = {
         _p("objective", "str"),
         _p("param_y", "str|null", False),
         _p("values_y", "list[float]", False),
+    ]},
+    "start_playground_cycle_detail": {"params": [
+        _entry(),
+        _p("cycle_id", "str"),
+        _p("settings_override", "dict", False),
     ]},
     # Community store (online features)
     "store_status": {"params": [_entry()]},

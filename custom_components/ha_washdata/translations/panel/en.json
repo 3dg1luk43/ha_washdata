@@ -495,6 +495,7 @@
     "pg_alert_indefinite": "Would run indefinitely",
     "task_pg_history": "Test on history",
     "task_pg_sweep": "Optimize",
+    "task_pg_detail": "Simulate cycle",
     "task_reprocess": "Reprocessing",
     "task_ml_training": "Learning",
     "eta_secs": "~{n}s left",
@@ -1712,6 +1713,9 @@
     },
     "pg_sweep": {
       "optimize": "Optimize: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simulate cycle"
     }
   }
 }

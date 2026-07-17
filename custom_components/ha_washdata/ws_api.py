@@ -461,6 +461,7 @@ _READ_WRITE_COMMANDS = frozenset({
     "get_task_result",
     "start_playground_history",
     "start_playground_sweep",
+    "start_playground_cycle_detail",
     # Community store: read-only browse is read-level (writes below default to 'edit').
     "store_status",
     "store_search_devices",
@@ -1085,6 +1086,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_list_tasks, ws_subscribe_tasks, ws_cancel_task, ws_get_task_result,
         # Playground batch/sweep as detached registry-tracked tasks
         ws_start_playground_history, ws_start_playground_sweep,
+        ws_start_playground_cycle_detail,
         # Community store (online features): status/connect/disconnect/browse/import/upload
         ws_store_status, ws_store_connect, ws_store_disconnect,
         ws_store_search_devices, ws_store_get_profiles, ws_store_get_cycles,
@@ -5108,3 +5110,88 @@ def ws_start_playground_sweep(
         msg["objective"], param_y, list(values_y) if values_y else None,
     ))
     _send_result(connection, msg["id"], "start_playground_sweep", {"task_id": task.id})
+
+
+# Readings replayed per executor job for the single-cycle detail sim. The event
+# loop breathes between chunks; a ~233min/5s dishwasher cycle (~2800 readings)
+# becomes ~11 short jobs instead of one multi-minute GIL-holding call (issue #311).
+_PG_DETAIL_CHUNK = 250
+
+
+async def _pg_detail_task(
+    hass: HomeAssistant, task: Any, entry_id: str,
+    cycle_id: str, override: dict[str, Any] | None,
+) -> None:
+    reg = task_registry.get_registry(hass)
+    ctx = _playground_context(hass, entry_id)
+    if ctx is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+        return
+    _manager, store, base_config, options, price = ctx
+    try:
+        sim = await hass.async_add_executor_job(
+            playground.build_cycle_detail_sim_by_id,
+            store, cycle_id, base_config, override, options, price,
+        )
+        if isinstance(sim, dict):  # {"error": ...} marker (not_found / build failure)
+            if sim.get("error") == "not_found":
+                reg.finish(task, state=task_registry.STATE_ERROR, error="not_found")
+            else:
+                reg.finish(task, state=task_registry.STATE_ERROR, error=str(sim.get("error")))
+            return
+        if not sim.ready:
+            reg.finish(task, state=task_registry.STATE_DONE, result=sim.empty_payload())
+            return
+        total = sim.n_readings
+        reg.update(task, total=total)
+        for i in range(0, total, _PG_DETAIL_CHUNK):
+            if task.cancel_requested:
+                break
+            await hass.async_add_executor_job(sim.step, i, i + _PG_DETAIL_CHUNK)
+            reg.update(task, done=min(total, i + _PG_DETAIL_CHUNK))
+        if not task.cancel_requested:
+            await hass.async_add_executor_job(sim.run_tail)
+        payload = await hass.async_add_executor_job(sim.finalize)
+        payload["partial"] = task.cancel_requested
+        reg.finish(
+            task,
+            state=task_registry.STATE_CANCELLED if task.cancel_requested else task_registry.STATE_DONE,
+            result=payload,
+        )
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Playground detail task failed for %s: %s", entry_id, exc)
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/start_playground_cycle_detail",
+        vol.Required("entry_id"): str,
+        vol.Required("cycle_id"): str,
+        vol.Optional("settings_override", default=dict): dict,
+    }
+)
+@callback
+def ws_start_playground_cycle_detail(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Kick off a detached, registry-tracked single-cycle "Simulate" replay;
+    returns the task id immediately. The heavy per-5s replay runs chunk-by-chunk
+    in the executor so a long cycle no longer stalls Home Assistant (issue #311).
+    Progress/result come via subscribe_tasks/get_task_result."""
+    entry_id = msg["entry_id"]
+    if _playground_context(hass, entry_id) is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    reg = task_registry.get_registry(hass)
+    task = reg.create(
+        entry_id, "pg_detail", "Simulate cycle",
+        label_key="task.pg_detail.simulate", label_params={},
+    )
+    override = dict(msg.get("settings_override") or {})
+    hass.async_create_task(
+        _pg_detail_task(hass, task, entry_id, msg["cycle_id"], override)
+    )
+    _send_result(connection, msg["id"], "start_playground_cycle_detail", {"task_id": task.id})

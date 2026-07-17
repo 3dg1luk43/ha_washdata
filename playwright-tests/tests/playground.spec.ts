@@ -50,7 +50,7 @@ test('workbench: Run calls the faithful backend sim', async ({ page }) => {
   const firstCycleOpt = page.locator('#wd-pg-cyc-sel option[value]:not([value=""])').first();
   await expect(firstCycleOpt).toBeAttached({ timeout: 8_000 });
   await page.locator('button[data-action="pg-run"]').click();
-  await assertWsCalled(page, 'ha_washdata/run_playground_cycle_detail');
+  await assertWsCalled(page, 'ha_washdata/start_playground_cycle_detail');
 });
 
 test('workbench: model time-left readout and phase field are present', async ({ page }) => {
@@ -121,7 +121,7 @@ test('drawer/history: clicking a row loads that cycle into the graph', async ({ 
   await firstRow.click();
   // Drilling a row re-runs the single-cycle sim (drives the graph above) rather
   // than switching to a separate page.
-  await assertWsCalled(page, 'ha_washdata/run_playground_cycle_detail');
+  await assertWsCalled(page, 'ha_washdata/start_playground_cycle_detail');
   await expect(page.locator('.wd-pg-drawer')).toBeVisible();
 });
 

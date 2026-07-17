@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**97 commands.**
+**98 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -87,6 +87,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `get_task_result` | task_id | `TaskSnapshot` |
 | `start_playground_history` | entry_id, cycle_ids?, settings_override? | `StartTaskResponse` |
 | `start_playground_sweep` | entry_id, param, values, objective, param_y?, values_y? | `StartTaskResponse` |
+| `start_playground_cycle_detail` | entry_id, cycle_id, settings_override? | `StartTaskResponse` |
 | `store_status` | entry_id | `StoreStatusResponse` |
 | `store_connect` | entry_id, refresh_token, uid, name? | `StoreSimpleResponse` |
 | `store_disconnect` | entry_id | `StoreSimpleResponse` |
@@ -1427,6 +1428,22 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `objective` | yes | str |
 | `param_y` | no | str\|null |
 | `values_y` | no | list[float] |
+
+**Response** (`StartTaskResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `task_id` | yes | str |
+
+## `ha_washdata/start_playground_cycle_detail`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `cycle_id` | yes | str |
+| `settings_override` | no | dict |
 
 **Response** (`StartTaskResponse`)
 

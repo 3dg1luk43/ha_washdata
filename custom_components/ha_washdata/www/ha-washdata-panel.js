@@ -2036,6 +2036,7 @@ class HaWashdataPanel extends HTMLElement {
     const m = {
       pg_history: this._t('lbl.task_pg_history', {}, 'Test on history'),
       pg_sweep: this._t('lbl.task_pg_sweep', {}, 'Optimize'),
+      pg_detail: this._t('lbl.task_pg_detail', {}, 'Simulate cycle'),
       reprocess: this._t('lbl.task_reprocess', {}, 'Reprocessing'),
       ml_training: this._t('lbl.task_ml_training', {}, 'Learning'),
     };
@@ -5668,10 +5669,33 @@ class HaWashdataPanel extends HTMLElement {
     const override = { ...this._pgParamOverrides };
     if (this._pgThreshStart != null) override.start_threshold_w = this._pgThreshStart;
     if (this._pgThreshStop != null) override.stop_threshold_w = this._pgThreshStop;
+    // Run the heavy per-5s replay as a detached, chunked background task so a long
+    // cycle no longer stalls Home Assistant (issue #311). We still await its
+    // completion here (the caller drives the busy spinner + redraw), but the
+    // backend yields the event loop between chunks. A header pill shows progress.
     try {
-      const d = await this._ws({ type: `${_DOMAIN}/run_playground_cycle_detail`, entry_id: entryId, cycle_id: cid, settings_override: override });
+      const r = await this._ws({ type: `${_DOMAIN}/start_playground_cycle_detail`, entry_id: entryId, cycle_id: cid, settings_override: override });
+      const tid = r && r.task_id;
+      if (!tid) throw new Error('no task id');
+      this._addProvisionalTask(tid, 'pg_detail', entryId, 0);
+      const result = await new Promise((resolve) => {
+        this._taskCallbacks[tid] = async (t) => {
+          if (t.state === 'done' || t.state === 'cancelled') {
+            try {
+              const rr = await this._ws({ type: `${_DOMAIN}/get_task_result`, task_id: t.id });
+              resolve(rr && rr.result);
+            } catch (_) { resolve(null); }
+          } else {
+            resolve(null);  // error / lost
+          }
+        };
+        // Race guard: task may have finished before the callback was registered.
+        const known = this._tasks[tid];
+        if (known && known.state !== 'running') this._settleTaskCallback(known);
+        else if (!this._tasksSubscribed) this._pollTaskGeneric(tid);
+      });
       if (!this._isActiveEntry(entryId)) return;  // device switched mid-flight - drop stale result
-      this._pgDetail = (d && !d.error) ? d : null;
+      this._pgDetail = (result && !result.error) ? result : null;
       this._pgNeedsRestart = false;
     } catch (e) {
       if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
