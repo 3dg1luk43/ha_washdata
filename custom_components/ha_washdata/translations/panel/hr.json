@@ -862,7 +862,8 @@
     "share_guidelines_title": "Prije dijeljenja",
     "store_download_device_intro": "Preuzmite postavke uređaja iz zajednice i primijenite ih na novi ili postojeći uređaj",
     "store_share_device_intro": "Podijelite programe svog uređaja (profile + referentne cikluse) sa zajednicom. Postavke su opcionalne.",
-    "share_profile_no_cycles": "Profil '{p}' nema ⭐ referentnih ciklusa -- bit će preskočen osim ako nemate {n}+ potvrđenih pokretanja"
+    "share_profile_no_cycles": "Profil '{p}' nema ⭐ referentnih ciklusa -- bit će preskočen osim ako nemate {n}+ potvrđenih pokretanja",
+    "advisory_phase_inconsistent": "Čini se da '{name}' miješa različite programe ili temperature - njegovi se ciklusi griju vrlo različito dugo. Podjela na zasebne profile (npr. po temperaturi) poboljšat će podudaranje i procjene vremena."
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka prevrtanja nakon završetka kako bi se smanjile bore.",
@@ -945,6 +946,10 @@
     "triggers": {
       "intro": "Neobavezni vanjski signali: okidač završetka, senzor vrata, prekidač za pauzu i podsjetnik za istovar.",
       "label": "Okidači i vrata"
+    },
+    "phase_eta": {
+      "label": "Preostalo vrijeme",
+      "intro": "Preostalo vrijeme koje uzima u obzir faze, za uređaje čija duljina ciklusa ovisi o temperaturi ili centrifugi."
     }
   },
   "setting": {
@@ -1310,6 +1315,10 @@
     },
     "show_contributor": {
       "doc": "Prikaži ime suradnika na profilima preuzetim iz trgovine zajednice"
+    },
+    "enable_phase_matching": {
+      "label": "Preostalo vrijeme prema fazama",
+      "doc": "Svaki aktivni ciklus dijeli na faze (grijanje, pranje, centrifuga) i raspoređuje preostalo vrijeme po fazama, spojeno s klasičnom procjenom - na početku ciklusa oslanja se na proračun faza, a pri kraju na klasičnu procjenu. To prilagođava odbrojavanje tome koliko se vaš uređaj stvarno grije i radi, što je najuočljivije u prvoj polovici ciklusa. Isključeno = samo klasična procjena. Utječe samo na prikaz preostalog vremena; podudaranje programa i otkrivanje ciklusa ostaju nepromijenjeni."
     }
   },
   "setting_group": {

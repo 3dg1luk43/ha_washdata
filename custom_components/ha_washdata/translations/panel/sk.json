@@ -862,7 +862,8 @@
     "share_guidelines_title": "Pred zdieľaním",
     "store_download_device_intro": "Stiahnuť nastavenie zariadenia komunity a použiť ho na nové alebo existujúce zariadenie",
     "store_share_device_intro": "Zdieľať programy vášho zariadenia (profily + referenčné cykly) s komunitou. Nastavenia sú voliteľné.",
-    "share_profile_no_cycles": "Profil '{p}' nemá žiadne ⭐ referenčné cykly -- bude preskočený, ak nemáte {n}+ potvrdených spustení"
+    "share_profile_no_cycles": "Profil '{p}' nemá žiadne ⭐ referenčné cykly -- bude preskočený, ak nemáte {n}+ potvrdených spustení",
+    "advisory_phase_inconsistent": "Zdá sa, že '{name}' mieša rôzne programy alebo teploty - jeho cykly sa ohrievajú veľmi rôzne dlho. Rozdelenie na samostatné profily (napr. podľa teploty) zlepší zhodu aj odhady času."
   },
   "phase_desc": {
     "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",
@@ -945,6 +946,10 @@
     "triggers": {
       "intro": "Voliteľné externé signály: spúšť ukončenia, senzor dverí, prepínač pauzy a pripomienka vyloženia.",
       "label": "Spúšte a dvere"
+    },
+    "phase_eta": {
+      "label": "Zostávajúci čas",
+      "intro": "Zostávajúci čas zohľadňujúci fázy, pre spotrebiče, ktorých dĺžka cyklu závisí od teploty alebo odstreďovania."
     }
   },
   "setting": {
@@ -1310,6 +1315,10 @@
     },
     "show_contributor": {
       "doc": "Zobraziť meno prispievateľa pri profiloch stiahnutých z obchodu komunity"
+    },
+    "enable_phase_matching": {
+      "label": "Zostávajúci čas zohľadňujúci fázy",
+      "doc": "Rozdelí každý bežiaci cyklus do fáz (ohrev, pranie, odstreďovanie) a rozpočíta zostávajúci čas na jednotlivé fázy, zmiešaný s klasickým odhadom - na začiatku cyklu sa opiera o rozpočet fáz a ku koncu o klasický odhad. Prispôsobí odpočet tomu, ako dlho sa váš spotrebič skutočne ohrieva a beží, čo je najviac badateľné v prvej polovici cyklu. Vypnuté = iba klasický odhad. Ovplyvnené je len zobrazenie zostávajúceho času; zhoda programov a detekcia cyklu sa nemenia."
     }
   },
   "setting_group": {

@@ -862,7 +862,8 @@
     "share_guidelines_title": "Avant de partager",
     "store_download_device_intro": "Adoptez chaque programme partagé et ses cycles de référence sur votre appareil. Vos propres cycles enregistrés et statistiques ne sont pas affectés.",
     "store_share_device_intro": "Envoyez {brand} {model} avec les cycles de référence que vous sélectionnez. D'autres utilisateurs du même appareil peuvent adopter vos programmes. Les entrées sont examinées avant d'apparaître publiquement.",
-    "share_profile_no_cycles": "Aucun cycle de référence -- marquez un cycle comme ⭐ dans l'onglet Cycles pour inclure ce profil"
+    "share_profile_no_cycles": "Aucun cycle de référence -- marquez un cycle comme ⭐ dans l'onglet Cycles pour inclure ce profil",
+    "advisory_phase_inconsistent": "'{name}' semble mélanger différents programmes ou températures - ses cycles chauffent pendant des durées très variables. Le diviser en profils distincts (p. ex. par température) améliorera la reconnaissance et les estimations de temps."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Chute soudaine traitée comme une fin immédiate",
@@ -962,6 +963,10 @@
     "triggers": {
       "intro": "Signaux externes optionnels : déclencheur de fin, capteur de porte, interrupteur de pause et rappel de déchargement.",
       "label": "Déclencheurs et portes"
+    },
+    "phase_eta": {
+      "label": "Temps restant",
+      "intro": "Temps restant tenant compte des phases, pour les machines dont la durée de cycle dépend de la température ou de l'essorage."
     }
   },
   "setting": {
@@ -1328,6 +1333,10 @@
     "show_contributor": {
       "label": "Afficher les noms des contributeurs",
       "doc": "Afficher l'attribution « par <contributeur> » sur les appareils de la communauté et les cycles de référence."
+    },
+    "enable_phase_matching": {
+      "label": "Temps restant tenant compte des phases",
+      "doc": "Découpe chaque cycle en cours en phases (chauffage, lavage, essorage) et répartit le temps restant par phase, mélangé à l'estimation classique - en s'appuyant sur la répartition par phases en début de cycle et sur l'estimation classique vers la fin. Cela personnalise le compte à rebours en fonction de la durée réelle de chauffage et de fonctionnement de votre machine, ce qui est le plus perceptible dans la première moitié du cycle. Désactivé = uniquement l'estimation classique. Seul l'affichage du temps restant est concerné ; la reconnaissance des programmes et la détection des cycles restent inchangées."
     }
   },
   "setting_group": {

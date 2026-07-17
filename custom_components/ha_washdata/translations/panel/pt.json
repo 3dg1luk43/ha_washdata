@@ -862,7 +862,8 @@
     "share_guidelines_title": "Antes de partilhar",
     "store_download_device_intro": "Adotar todos os programas partilhados e os seus ciclos de referência neste dispositivo. Os seus ciclos gravados e estatísticas não são afetados.",
     "store_share_device_intro": "Carregar {brand} {model} com os ciclos de referência que selecionar. Outros utilizadores com o mesmo electrodoméstico podem adotar os seus programas. As entradas são revistas antes de aparecerem publicamente.",
-    "share_profile_no_cycles": "Sem ciclos de referência -- marque um ciclo como ⭐ no separador Ciclos para incluir este perfil"
+    "share_profile_no_cycles": "Sem ciclos de referência -- marque um ciclo como ⭐ no separador Ciclos para incluir este perfil",
+    "advisory_phase_inconsistent": "'{name}' parece misturar diferentes programas ou temperaturas - os seus ciclos aquecem durante períodos de tempo muito diferentes. Dividi-lo em perfis separados (p. ex. por temperatura) melhorará a correspondência e as estimativas de tempo."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Queda repentina tratada como fim imediato",
@@ -962,6 +963,10 @@
     "triggers": {
       "intro": "Sinais externos opcionais: um gatilho de fim, um sensor de porta, um interruptor de pausa e o lembrete de descarga.",
       "label": "Gatilhos e Portas"
+    },
+    "phase_eta": {
+      "label": "Tempo restante",
+      "intro": "Tempo restante com base nas fases, para máquinas cuja duração do ciclo depende da temperatura ou da centrifugação."
     }
   },
   "setting": {
@@ -1327,6 +1332,10 @@
     },
     "show_contributor": {
       "doc": "Mostrar a atribuição \"por <colaborador>\" nos electrodomésticos da comunidade e nos ciclos de referência."
+    },
+    "enable_phase_matching": {
+      "label": "Tempo restante com base nas fases",
+      "doc": "Divide cada ciclo em curso em fases (aquecimento, lavagem, centrifugação) e distribui o tempo restante por fase, combinado com a estimativa clássica - apoiando-se na repartição por fases no início do ciclo e na estimativa clássica perto do fim. Isto personaliza a contagem decrescente de acordo com o tempo que a sua máquina realmente aquece e funciona, o que é mais percetível na primeira metade de um ciclo. Desativado = apenas a estimativa clássica. Apenas a apresentação do tempo restante é afetada; a correspondência de programas e a deteção de ciclos permanecem inalteradas."
     }
   },
   "setting_group": {

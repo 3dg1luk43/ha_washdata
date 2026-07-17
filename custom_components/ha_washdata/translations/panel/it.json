@@ -862,7 +862,8 @@
     "share_guidelines_title": "Prima di condividere",
     "store_download_device_intro": "Adotta ogni programma condiviso e i suoi cicli di riferimento sul tuo dispositivo. I tuoi cicli registrati e le tue statistiche non vengono modificati.",
     "store_share_device_intro": "Carica {brand} {model} con i cicli di riferimento che selezioni. Altri con lo stesso elettrodomestico possono adottare i tuoi programmi. Le voci vengono revisionate prima di apparire pubblicamente.",
-    "share_profile_no_cycles": "Nessun ciclo di riferimento -- contrassegna un ciclo come ⭐ nella scheda Cicli per includere questo profilo"
+    "share_profile_no_cycles": "Nessun ciclo di riferimento -- contrassegna un ciclo come ⭐ nella scheda Cicli per includere questo profilo",
+    "advisory_phase_inconsistent": "'{name}' sembra mescolare programmi o temperature diversi - i suoi cicli riscaldano per intervalli di tempo molto diversi. Dividerlo in profili separati (ad es. per temperatura) migliorerà la corrispondenza e le stime dei tempi."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Calo improvviso trattato come fine immediata",
@@ -962,6 +963,10 @@
     "triggers": {
       "intro": "Segnali esterni opzionali: un trigger di fine, un sensore di porta, un interruttore di pausa e il promemoria di scarico.",
       "label": "Trigger e porte"
+    },
+    "phase_eta": {
+      "label": "Tempo rimanente",
+      "intro": "Tempo rimanente in base alle fasi, per le macchine la cui durata del ciclo dipende dalla temperatura o dalla centrifuga."
     }
   },
   "setting": {
@@ -1327,6 +1332,10 @@
     },
     "show_contributor": {
       "doc": "Mostra l'attribuzione \"di <collaboratore>\" sugli elettrodomestici della community e sui cicli di riferimento."
+    },
+    "enable_phase_matching": {
+      "label": "Tempo rimanente in base alle fasi",
+      "doc": "Suddivide ogni ciclo in corso in fasi (riscaldamento, lavaggio, centrifuga) e distribuisce il tempo rimanente per fase, combinato con la stima classica - basandosi sulla ripartizione per fasi all'inizio del ciclo e sulla stima classica verso la fine. Questo personalizza il conto alla rovescia in base a quanto la tua macchina riscalda e funziona realmente, cosa più evidente nella prima metà di un ciclo. Disattivato = solo la stima classica. È interessata solo la visualizzazione del tempo rimanente; la corrispondenza dei programmi e il rilevamento dei cicli restano invariati."
     }
   },
   "setting_group": {

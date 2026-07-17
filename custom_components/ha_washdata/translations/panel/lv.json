@@ -862,7 +862,8 @@
     "share_guidelines_title": "Pirms kopīgošanas",
     "store_download_device_intro": "Pieņemiet katru kopīgoto programmu un tās atskaites ciklus savā ierīcē. Jūsu pašu ierakstītie cikli un statistika netiek ietekmēti.",
     "store_share_device_intro": "Augšupielādējiet {brand} {model} ar atlasītajiem atskaites cikliem. Citi ar to pašu ierīci var pieņemt jūsu programmas. Ieraksti tiek pārskatīti pirms publiskošanas.",
-    "share_profile_no_cycles": "Nav atskaites ciklu -- atzīmējiet ciklu kā ⭐ cilnē Cikli, lai iekļautu šo profilu"
+    "share_profile_no_cycles": "Nav atskaites ciklu -- atzīmējiet ciklu kā ⭐ cilnē Cikli, lai iekļautu šo profilu",
+    "advisory_phase_inconsistent": "Šķiet, ka '{name}' sajauc dažādas programmas vai temperatūras - tā cikli sildās ļoti atšķirīgu laiku. Sadalot to atsevišķos profilos (piemēram, pēc temperatūras), tiks uzlabota saskaņošana un laika aprēķini."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -945,6 +946,10 @@
     "triggers": {
       "intro": "Neobligātie ārējie signāli: beigu aktivators, durvju sensors, pauzes slēdzis un izkraušanas atgādinājums.",
       "label": "Aktivatori un durvis"
+    },
+    "phase_eta": {
+      "label": "Atlikušais laiks",
+      "intro": "Uz fāzēm balstīts atlikušais laiks mašīnām, kuru cikla ilgums ir atkarīgs no temperatūras vai izgriešanas."
     }
   },
   "setting": {
@@ -1310,6 +1315,10 @@
     },
     "show_contributor": {
       "doc": "Rādīt \"autors: <līdzautors>\" attiecinājumu kopienas ierīcēs un atskaites ciklos."
+    },
+    "enable_phase_matching": {
+      "label": "Uz fāzēm balstīts atlikušais laiks",
+      "doc": "Sadaliet katru notiekošo ciklu fāzēs (sildīšana, mazgāšana, izgriešana) un plānojiet atlikušo laiku katrai fāzei, sajaucot ar klasisko aprēķinu - cikla sākumā paļaujoties uz fāžu plānojumu, bet beigās uz klasisko aprēķinu. Tas pielāgo atpakaļskaitīšanu tam, cik ilgi jūsu mašīna patiešām sildās un darbojas, kas visvairāk pamanāms cikla pirmajā pusē. Izslēgts = tikai klasiskais aprēķins. Tiek ietekmēts tikai atlikušā laika attēlojums; programmu saskaņošana un ciklu noteikšana paliek nemainīga."
     }
   },
   "setting_group": {

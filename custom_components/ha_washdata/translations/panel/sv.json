@@ -862,7 +862,8 @@
     "share_guidelines_title": "Innan du delar",
     "store_download_device_intro": "Ta över alla delade program och deras referenscykler till din apparat. Dina egna inspelade cykler och statistik påverkas inte.",
     "store_share_device_intro": "Ladda upp {brand} {model} med de referenscykler du väljer. Andra med samma apparat kan ta över dina program. Poster granskas innan de visas offentligt.",
-    "share_profile_no_cycles": "Inga referenscykler -- markera en cykel som ⭐ på fliken Cykler för att inkludera den här profilen"
+    "share_profile_no_cycles": "Inga referenscykler -- markera en cykel som ⭐ på fliken Cykler för att inkludera den här profilen",
+    "advisory_phase_inconsistent": "'{name}' verkar blanda olika program eller temperaturer - dess cykler värms upp under mycket olika lång tid. Om du delar upp den i separata profiler (t.ex. per temperatur) förbättras matchningen och tidsuppskattningarna."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plötsligt fall som tolkas som omedelbart slut",
@@ -962,6 +963,10 @@
     "triggers": {
       "intro": "Valfria externa signaler: en slututlösare, en dörrsensor, en pausknapp och en lossningspåminnelse.",
       "label": "Utlösare och dörrar"
+    },
+    "phase_eta": {
+      "label": "Återstående tid",
+      "intro": "Fasmedveten återstående tid, för maskiner vars cykellängd beror på temperatur eller centrifugering."
     }
   },
   "setting": {
@@ -1327,6 +1332,10 @@
     },
     "show_contributor": {
       "doc": "Visar tillskrivningen 'av <contributor>' på gemenskapsapparater och referenscykler."
+    },
+    "enable_phase_matching": {
+      "label": "Fasmedveten återstående tid",
+      "doc": "Dela upp varje pågående cykel i faser (uppvärmning, tvätt, centrifugering) och budgetera den återstående tiden per fas, blandat med den klassiska uppskattningen - tidigt i cykeln lutar den sig mot fasbudgeten och mot slutet mot den klassiska uppskattningen. Detta anpassar nedräkningen efter hur länge din maskin faktiskt värms upp och körs, vilket märks tydligast under den första halvan av en cykel. Av = endast den klassiska uppskattningen. Endast visningen av återstående tid påverkas; programmatchning och cykeldetektering är oförändrade."
     }
   },
   "setting_group": {

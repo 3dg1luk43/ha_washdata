@@ -862,7 +862,8 @@
     "share_guidelines_title": "Prieš dalijantis",
     "store_download_device_intro": "Perimkite kiekvieną bendrą programą ir jos etalonius ciklus į savo įrenginį. Jūsų pačių įrašyti ciklai ir statistika neįtakojami.",
     "store_share_device_intro": "Įkelkite {brand} {model} su pasirinktais etaloniniais ciklais. Kiti, turintys tą patį prietaisą, gali perimti jūsų programas. Įrašai peržiūrimi prieš viešinant.",
-    "share_profile_no_cycles": "Nėra etaloninių ciklų -- pažymėkite ciklą kaip ⭐ Ciklų skirtuke, kad įtrauktumėte šį profilį"
+    "share_profile_no_cycles": "Nėra etaloninių ciklų -- pažymėkite ciklą kaip ⭐ Ciklų skirtuke, kad įtrauktumėte šį profilį",
+    "advisory_phase_inconsistent": "Atrodo, kad '{name}' maišo skirtingas programas ar temperatūras - jo ciklai kaista labai skirtingą laiką. Padalijus jį į atskirus profilius (pvz., pagal temperatūrą), pagerės atitikimas ir laiko įverčiai."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -945,6 +946,10 @@
     "triggers": {
       "intro": "Pasirenkami išoriniai signalai: pabaigos trigeris, durų jutiklis, pauzės jungiklis ir iškrovimo priminimas.",
       "label": "Trigeriai ir durys"
+    },
+    "phase_eta": {
+      "label": "Likęs laikas",
+      "intro": "Į fazes atsižvelgiantis likęs laikas mašinoms, kurių ciklo trukmė priklauso nuo temperatūros ar gręžimo."
     }
   },
   "setting": {
@@ -1310,6 +1315,10 @@
     },
     "show_contributor": {
       "doc": "Rodyti \"autorius: <dalyvis>\" priskyrimą bendruomenės prietaisuose ir etaloniniuose cikluose."
+    },
+    "enable_phase_matching": {
+      "label": "Į fazes atsižvelgiantis likęs laikas",
+      "doc": "Padalykite kiekvieną vykstantį ciklą į fazes (šildymas, plovimas, gręžimas) ir paskirstykite likusį laiką kiekvienai fazei, sumaišydami su klasikiniu įverčiu - ciklo pradžioje remdamiesi fazių paskirstymu, o pabaigoje - klasikiniu įverčiu. Tai pritaiko laikmatį prie to, kiek laiko jūsų mašina iš tikrųjų kaista ir veikia, o tai labiausiai pastebima pirmoje ciklo pusėje. Išjungta = tik klasikinis įvertis. Paveikiamas tik likusio laiko rodinys; programų atitikimas ir ciklų aptikimas nekeičiami."
     }
   },
   "setting_group": {

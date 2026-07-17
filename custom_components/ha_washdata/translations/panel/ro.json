@@ -862,7 +862,8 @@
     "share_guidelines_title": "Înainte de a partaja",
     "store_download_device_intro": "Adoptați fiecare program partajat și ciclurile sale de referință pe dispozitivul dvs. Propriile cicluri înregistrate și statisticile nu sunt afectate.",
     "store_share_device_intro": "Încărcați {brand} {model} cu ciclurile de referință pe care le selectați. Alții cu același aparat vă pot adopta programele. Intrările sunt revizuite înainte de a apărea public.",
-    "share_profile_no_cycles": "Niciun ciclu de referință -- marcați un ciclu ca ⭐ în fila Cicluri pentru a include acest profil"
+    "share_profile_no_cycles": "Niciun ciclu de referință -- marcați un ciclu ca ⭐ în fila Cicluri pentru a include acest profil",
+    "advisory_phase_inconsistent": "'{name}' pare să amestece programe sau temperaturi diferite - ciclurile sale se încălzesc pe durate foarte diferite. Împărțirea sa în profiluri separate (de ex. pe temperatură) va îmbunătăți potrivirea și estimările de timp."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -945,6 +946,10 @@
     "triggers": {
       "intro": "Semnale externe opționale: un declanșator de sfârșit, un senzor de ușă, un comutator de pauză și reamintirea de descărcare.",
       "label": "Declanșatoare și Uși"
+    },
+    "phase_eta": {
+      "label": "Timp rămas",
+      "intro": "Timp rămas ținând cont de faze, pentru mașinile a căror durată de ciclu depinde de temperatură sau de centrifugare."
     }
   },
   "setting": {
@@ -1310,6 +1315,10 @@
     },
     "show_contributor": {
       "doc": "Afișați atribuirea \"de <contributor>\" pe aparatele și ciclurile de referință ale comunității."
+    },
+    "enable_phase_matching": {
+      "label": "Timp rămas în funcție de faze",
+      "doc": "Împarte fiecare ciclu în curs în faze (încălzire, spălare, centrifugare) și repartizează timpul rămas pe fiecare fază, combinat cu estimarea clasică - bazându-se pe repartiția pe faze la începutul ciclului și pe estimarea clasică spre final. Acest lucru personalizează numărătoarea inversă în funcție de cât de mult încălzește și funcționează efectiv mașina, ceea ce se observă cel mai mult în prima jumătate a unui ciclu. Dezactivat = doar estimarea clasică. Este afectată doar afișarea timpului rămas; potrivirea programelor și detectarea ciclurilor rămân neschimbate."
     }
   },
   "setting_group": {

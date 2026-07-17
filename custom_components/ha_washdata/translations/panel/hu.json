@@ -862,7 +862,8 @@
     "share_guidelines_title": "Megosztás előtt",
     "store_download_device_intro": "Vegyen át minden megosztott programot és annak referenciaciklusait az eszközére. A saját rögzített ciklusait és statisztikáit nem érinti.",
     "store_share_device_intro": "Töltse fel a(z) {brand} {model} eszközt a kiválasztott referenciaciklusokkal. Más, ugyanolyan készülékkel rendelkezők átvehetik programjait. A bejegyzések felülvizsgálatra kerülnek nyilvánossá válás előtt.",
-    "share_profile_no_cycles": "Nincsenek referenciaciklusok -- jelöljön meg egy ciklust ⭐-gal a Ciklusok lapon, hogy belefoglalhassa ezt a profilt"
+    "share_profile_no_cycles": "Nincsenek referenciaciklusok -- jelöljön meg egy ciklust ⭐-gal a Ciklusok lapon, hogy belefoglalhassa ezt a profilt",
+    "advisory_phase_inconsistent": "Úgy tűnik, hogy a(z) '{name}' különböző programokat vagy hőmérsékleteket kever - ciklusai nagyon eltérő ideig fűtenek. Ha külön profilokra bontja (pl. hőmérsékletenként), az javítja a párosítást és az időbecsléseket."
   },
   "phase_desc": {
     "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -945,6 +946,10 @@
     "triggers": {
       "intro": "Opcionális külső jelek: záró trigger, ajtóérzékelő, szünetkapcsoló és a kirakodási emlékeztető.",
       "label": "Triggerek és ajtók"
+    },
+    "phase_eta": {
+      "label": "Hátralévő idő",
+      "intro": "Fázistudatos hátralévő idő olyan gépekhez, amelyek ciklushossza a hőmérséklettől vagy a centrifugálástól függ."
     }
   },
   "setting": {
@@ -1310,6 +1315,10 @@
     },
     "show_contributor": {
       "doc": "Jelenítse meg a \"<közreműködő> által\" jelölést a közösségi készülékeken és referenciaciklusokon."
+    },
+    "enable_phase_matching": {
+      "label": "Fázistudatos hátralévő idő",
+      "doc": "Bontsa minden futó ciklust fázisokra (fűtés, mosás, centrifugálás), és a hátralévő időt fázisonként ossza be, a klasszikus becsléssel keverve - a ciklus elején a fázisbeosztásra, a vége felé pedig a klasszikus becslésre támaszkodva. Ez a visszaszámlálót ahhoz igazítja, hogy a gépe ténylegesen mennyi ideig fűt és működik, ami leginkább a ciklus első felében figyelhető meg. Ki = csak a klasszikus becslés. Csak a hátralévő idő kijelzését érinti; a program párosítása és a ciklusérzékelés változatlan marad."
     }
   },
   "setting_group": {

@@ -862,7 +862,8 @@
     "share_guidelines_title": "Inden du deler",
     "store_download_device_intro": "Overtag alle delte programmer og deres referencecyklusser til dit apparat. Dine egne optagede cyklusser og statistik påvirkes ikke.",
     "store_share_device_intro": "Upload {brand} {model} med de referencecyklusser, du vælger. Andre med samme apparat kan overtage dine programmer. Bidrag gennemgås inden offentliggørelse.",
-    "share_profile_no_cycles": "Ingen referencecyklusser -- markér en cyklus som ⭐ under fanen Cyklusser for at inkludere denne profil"
+    "share_profile_no_cycles": "Ingen referencecyklusser -- markér en cyklus som ⭐ under fanen Cyklusser for at inkludere denne profil",
+    "advisory_phase_inconsistent": "'{name}' ser ud til at blande forskellige programmer eller temperaturer - dens cyklusser varmer op i meget forskellige tidsrum. Hvis du deler den op i separate profiler (f.eks. pr. temperatur), forbedres matchningen og tidsestimaterne."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Pludseligt fald behandlet som øjeblikkelig afslutning",
@@ -962,6 +963,10 @@
     "triggers": {
       "intro": "Valgfrie eksterne signaler: en slutudløser, en dørsensor, en pausekontakt og aflæsningspåmindelsen.",
       "label": "Udløsere og døre"
+    },
+    "phase_eta": {
+      "label": "Resterende tid",
+      "intro": "Fasebevidst resterende tid, til maskiner hvis cykluslængde afhænger af temperatur eller centrifugering."
     }
   },
   "setting": {
@@ -1327,6 +1332,10 @@
     },
     "show_contributor": {
       "doc": "Viser tilskrivningen 'af <contributor>' på fællesskabsapparater og referencecyklusser."
+    },
+    "enable_phase_matching": {
+      "label": "Fasebevidst resterende tid",
+      "doc": "Opdel hver kørende cyklus i faser (opvarmning, vask, centrifugering) og budgettér den resterende tid pr. fase, blandet med det klassiske estimat - tidligt i cyklussen læner den sig op ad fasebudgettet og mod slutningen op ad det klassiske estimat. Dette tilpasser nedtællingen til, hvor længe din maskine faktisk varmer op og kører, hvilket er mest mærkbart i den første halvdel af en cyklus. Fra = kun det klassiske estimat. Kun visningen af resterende tid påvirkes; programmatchning og cyklusregistrering er uændrede."
     }
   },
   "setting_group": {

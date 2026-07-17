@@ -862,7 +862,8 @@
     "share_guidelines_title": "Pred deljenjem",
     "store_download_device_intro": "Prenesi nastavitve skupnostne naprave in jih uporabi za novo ali obstoječo napravo",
     "store_share_device_intro": "Deli programe svoje naprave (profile + referenčne cikle) s skupnostjo. Nastavitve so neobvezne.",
-    "share_profile_no_cycles": "Profil '{p}' nima ⭐ referenčnih ciklov -- preskočen bo, razen če imate {n}+ potrjenih zagonov"
+    "share_profile_no_cycles": "Profil '{p}' nima ⭐ referenčnih ciklov -- preskočen bo, razen če imate {n}+ potrjenih zagonov",
+    "advisory_phase_inconsistent": "Videti je, da '{name}' meša različne programe ali temperature - njegovi cikli se segrevajo zelo različno dolgo. Če ga razdelite na ločene profile (npr. po temperaturi), boste izboljšali ujemanje in ocene časa."
   },
   "phase_desc": {
     "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",
@@ -945,6 +946,10 @@
     "triggers": {
       "intro": "Izbirni zunanji signali: sprožilec za konec, senzor vrat, stikalo za premor in opomnik za raztovarjanje.",
       "label": "Sprožilci in vrata"
+    },
+    "phase_eta": {
+      "label": "Preostali čas",
+      "intro": "Preostali čas z upoštevanjem faz, za naprave, katerih dolžina cikla je odvisna od temperature ali ožemanja."
     }
   },
   "setting": {
@@ -1310,6 +1315,10 @@
     },
     "show_contributor": {
       "doc": "Prikaži ime sodelavca pri profilih, prenesenih iz skupnostne trgovine"
+    },
+    "enable_phase_matching": {
+      "label": "Preostali čas z upoštevanjem faz",
+      "doc": "Vsak tekoči cikel razdeli na faze (ogrevanje, pranje, ožemanje) in razporedi preostali čas po fazah, združen s klasično oceno - na začetku cikla se opira na proračun faz, proti koncu pa na klasično oceno. To prilagodi odštevanje temu, kako dolgo se vaša naprava dejansko segreva in deluje, kar je najbolj opazno v prvi polovici cikla. Izklopljeno = samo klasična ocena. Vpliva le na prikaz preostalega časa; ujemanje programov in zaznavanje cikla ostaneta nespremenjena."
     }
   },
   "setting_group": {

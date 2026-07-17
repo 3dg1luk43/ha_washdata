@@ -862,7 +862,8 @@
     "share_guidelines_title": "Før du deler",
     "store_download_device_intro": "Ta over alle delte programmer og deres referansesykluser til apparatet ditt. Dine egne innspilte sykluser og statistikk påvirkes ikke.",
     "store_share_device_intro": "Last opp {brand} {model} med referansesyklusene du velger. Andre med samme apparat kan ta i bruk programmene dine. Bidrag gjennomgås før de vises offentlig.",
-    "share_profile_no_cycles": "Ingen referansesykluser -- marker en syklus som ⭐ under fanen Sykluser for å inkludere denne profilen"
+    "share_profile_no_cycles": "Ingen referansesykluser -- marker en syklus som ⭐ under fanen Sykluser for å inkludere denne profilen",
+    "advisory_phase_inconsistent": "'{name}' ser ut til å blande ulike programmer eller temperaturer - syklusene varmer opp i svært ulike tidsrom. Hvis du deler den opp i separate profiler (f.eks. per temperatur), blir samsvar og tidsestimater bedre."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plutselig fall behandlet som umiddelbar slutt",
@@ -962,6 +963,10 @@
     "triggers": {
       "intro": "Valgfrie eksterne signaler: en slutt-utløser, en dørensor, en pausebryter og utlastingspåminnelsen.",
       "label": "Utløsere og dører"
+    },
+    "phase_eta": {
+      "label": "Tid som gjenstår",
+      "intro": "Fasebevisst tid som gjenstår, for maskiner der syklusens lengde avhenger av temperatur eller sentrifugering."
     }
   },
   "setting": {
@@ -1327,6 +1332,10 @@
     },
     "show_contributor": {
       "doc": "Viser tilskrivningen 'av <contributor>' på fellesskapsapparater og referansesykluser."
+    },
+    "enable_phase_matching": {
+      "label": "Fasebevisst tid som gjenstår",
+      "doc": "Del hver pågående syklus inn i faser (oppvarming, vask, sentrifugering) og budsjetter tiden som gjenstår per fase, blandet med det klassiske estimatet - tidlig i syklusen støtter den seg på fasebudsjettet og mot slutten på det klassiske estimatet. Dette tilpasser nedtellingen til hvor lenge maskinen din faktisk varmer opp og kjører, noe som er mest merkbart i første halvdel av en syklus. Av = bare det klassiske estimatet. Bare visningen av tid som gjenstår påvirkes; programsamsvar og syklusdeteksjon er uendret."
     }
   },
   "setting_group": {

@@ -862,7 +862,8 @@
     "share_guidelines_title": "Voordat u deelt",
     "store_download_device_intro": "Neem elk gedeeld programma en zijn referentiecycli over op uw apparaat. Uw eigen opgenomen cycli en statistieken worden niet beïnvloed.",
     "store_share_device_intro": "Upload {brand} {model} met de referentiecycli die u selecteert. Anderen met hetzelfde apparaat kunnen uw programma's overnemen. Vermeldingen worden beoordeeld voordat ze openbaar verschijnen.",
-    "share_profile_no_cycles": "Geen referentiecycli -- markeer een cyclus als ⭐ op het tabblad Cycli om dit profiel op te nemen"
+    "share_profile_no_cycles": "Geen referentiecycli -- markeer een cyclus als ⭐ op het tabblad Cycli om dit profiel op te nemen",
+    "advisory_phase_inconsistent": "'{name}' lijkt verschillende programma's of temperaturen te combineren - de cycli verwarmen gedurende sterk uiteenlopende tijden. Door het op te splitsen in aparte profielen (bijv. per temperatuur) verbeteren de matching en tijdschattingen."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plotselinge daling behandeld als onmiddellijk einde",
@@ -962,6 +963,10 @@
     "triggers": {
       "intro": "Optionele externe signalen: een eindtrigger, een deursensor, een pauzeknop en de uitlaadherinnering.",
       "label": "Triggers & Deuren"
+    },
+    "phase_eta": {
+      "label": "Resterende tijd",
+      "intro": "Fasebewuste resterende tijd, voor machines waarvan de cyclusduur afhangt van temperatuur of centrifugeren."
     }
   },
   "setting": {
@@ -1327,6 +1332,10 @@
     },
     "show_contributor": {
       "doc": "Toont de vermelding 'door <contributor>' op community-apparaten en referentiecycli."
+    },
+    "enable_phase_matching": {
+      "label": "Fasebewuste resterende tijd",
+      "doc": "Verdeel elke lopende cyclus in fasen (verwarmen, wassen, centrifugeren) en begroot de resterende tijd per fase, gemengd met de klassieke schatting - vroeg in de cyclus leunend op het fasebudget en tegen het einde op de klassieke schatting. Dit stemt het aftellen af op hoe lang uw machine daadwerkelijk verwarmt en draait, wat het meest merkbaar is in de eerste helft van een cyclus. Uit = alleen de klassieke schatting. Alleen de weergave van de resterende tijd wordt beïnvloed; programma-matching en cyclusdetectie blijven ongewijzigd."
     }
   },
   "setting_group": {

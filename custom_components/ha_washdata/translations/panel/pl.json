@@ -862,7 +862,8 @@
     "share_guidelines_title": "Przed udostępnieniem",
     "store_download_device_intro": "Pobierz konfigurację urządzenia ze społeczności i zastosuj ją do nowego lub istniejącego urządzenia",
     "store_share_device_intro": "Udostępnij programy swojego urządzenia (profile + cykle referencyjne) społeczności. Ustawienia są opcjonalne.",
-    "share_profile_no_cycles": "Profil '{p}' nie ma ⭐ cykli referencyjnych -- zostanie pominięty, chyba że masz {n}+ potwierdzonych uruchomień"
+    "share_profile_no_cycles": "Profil '{p}' nie ma ⭐ cykli referencyjnych -- zostanie pominięty, chyba że masz {n}+ potwierdzonych uruchomień",
+    "advisory_phase_inconsistent": "Wygląda na to, że '{name}' miesza różne programy lub temperatury - jego cykle nagrzewają się przez bardzo różne czasy. Podzielenie go na osobne profile (np. dla każdej temperatury) poprawi dopasowanie i szacowanie czasu."
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -945,6 +946,10 @@
     "triggers": {
       "intro": "Opcjonalne zewnętrzne sygnały: wyzwalacz zakończenia, czujnik drzwi, przełącznik pauzy i przypomnienie o rozładunku.",
       "label": "Wyzwalacze i Drzwi"
+    },
+    "phase_eta": {
+      "label": "Pozostały czas",
+      "intro": "Pozostały czas uwzględniający fazy, dla urządzeń, których długość cyklu zależy od temperatury lub wirowania."
     }
   },
   "setting": {
@@ -1310,6 +1315,10 @@
     },
     "show_contributor": {
       "doc": "Pokaż nazwę współtwórcy na profilach pobranych ze sklepu społeczności"
+    },
+    "enable_phase_matching": {
+      "label": "Pozostały czas uwzględniający fazy",
+      "doc": "Dzieli każdy trwający cykl na fazy (podgrzewanie, pranie, wirowanie) i planuje pozostały czas dla każdej fazy, łącząc go z klasycznym szacowaniem - opierając się na budżecie faz na początku cyklu, a na klasycznym szacowaniu pod koniec. Personalizuje to odliczanie do tego, jak długo urządzenie faktycznie się nagrzewa i pracuje, co jest najbardziej zauważalne w pierwszej połowie cyklu. Wyłączone = tylko klasyczne szacowanie. Wpływa to wyłącznie na wyświetlanie pozostałego czasu; dopasowanie programów i wykrywanie cykli pozostają bez zmian."
     }
   },
   "setting_group": {

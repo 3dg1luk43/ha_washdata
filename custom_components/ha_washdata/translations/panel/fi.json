@@ -862,7 +862,8 @@
     "share_guidelines_title": "Ennen jakamista",
     "store_download_device_intro": "Ota käyttöön jokainen jaettu ohjelma ja sen viitesyklit laitteellesi. Omat tallennetut syklisi ja tilastosi eivät vaikutu.",
     "store_share_device_intro": "Lataa {brand} {model} valitsemiesi viitesyklien kanssa. Muut saman laitteen omistajat voivat ottaa ohjelmiasi käyttöön. Merkinnät tarkistetaan ennen julkaisua.",
-    "share_profile_no_cycles": "Ei viitesyklejä -- merkitse sykli ⭐:ksi Syklit-välilehdessä sisällyttääksesi tämän profiilin"
+    "share_profile_no_cycles": "Ei viitesyklejä -- merkitse sykli ⭐:ksi Syklit-välilehdessä sisällyttääksesi tämän profiilin",
+    "advisory_phase_inconsistent": "'{name}' vaikuttaa sekoittavan eri ohjelmia tai lämpötiloja - sen syklit lämmittävät hyvin eripituisia aikoja. Sen jakaminen erillisiin profiileihin (esim. lämpötilan mukaan) parantaa täsmäytystä ja aika-arvioita."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Äkillinen pudotus tulkitaan välittömäksi lopuksi",
@@ -962,6 +963,10 @@
     "triggers": {
       "intro": "Valinnaiset ulkoiset signaalit: päätyssignaali, ovianturi, taukokytkin ja purkamismuistutus.",
       "label": "Käynnistysimpulssit ja ovet"
+    },
+    "phase_eta": {
+      "label": "Jäljellä oleva aika",
+      "intro": "Vaihetietoinen jäljellä oleva aika koneille, joiden syklin pituus riippuu lämpötilasta tai linkouksesta."
     }
   },
   "setting": {
@@ -1327,6 +1332,10 @@
     },
     "show_contributor": {
       "doc": "Näytä \"tekijä <osallistuja>\" -merkintä yhteisön laitteissa ja viitesykleissä."
+    },
+    "enable_phase_matching": {
+      "label": "Vaihetietoinen jäljellä oleva aika",
+      "doc": "Jaa jokainen käynnissä oleva sykli vaiheisiin (lämmitys, pesu, linkous) ja budjetoi jäljellä oleva aika vaihekohtaisesti, yhdistettynä klassiseen arvioon - nojaten syklin alkuvaiheessa vaihebudjettiin ja lopussa klassiseen arvioon. Tämä mukauttaa laskurin siihen, kuinka kauan koneesi todella lämmittää ja käy, mikä näkyy selvimmin syklin alkupuoliskolla. Pois = vain klassinen arvio. Vaikuttaa vain jäljellä olevan ajan näyttöön; ohjelman täsmäytys ja syklin tunnistus pysyvät ennallaan."
     }
   },
   "setting_group": {

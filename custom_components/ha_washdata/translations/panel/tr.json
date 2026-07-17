@@ -862,7 +862,8 @@
     "share_guidelines_title": "Paylaşmadan önce",
     "store_download_device_intro": "Her paylaşılan programı ve referans döngülerini cihazınıza benimseyin. Kendi kayıtlı döngüleriniz ve istatistikleriniz etkilenmez.",
     "store_share_device_intro": "Seçtiğiniz referans döngüleriyle {brand} {model} cihazını yükleyin. Aynı cihaza sahip diğer kullanıcılar programlarınızı benimseyebilir. Girişler kamuya açılmadan önce incelenir.",
-    "share_profile_no_cycles": "Referans döngüsü yok -- bu profili dahil etmek için Döngüler sekmesinde bir döngüyü ⭐ olarak işaretleyin"
+    "share_profile_no_cycles": "Referans döngüsü yok -- bu profili dahil etmek için Döngüler sekmesinde bir döngüyü ⭐ olarak işaretleyin",
+    "advisory_phase_inconsistent": "'{name}' farklı programları veya sıcaklıkları karıştırıyor gibi görünüyor - çevrimleri çok farklı sürelerde ısıtma yapıyor. Bunu ayrı profillere bölmek (örneğin her sıcaklık için) eşleştirmeyi ve süre tahminlerini iyileştirir."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Ani düşüş anında bitiş sayılır",
@@ -962,6 +963,10 @@
     "triggers": {
       "intro": "İsteğe bağlı harici sinyaller: bitiş tetikleyicisi, kapı sensörü, duraklatma anahtarı ve boşaltma hatırlatıcısı.",
       "label": "Tetikleyiciler & Kapılar"
+    },
+    "phase_eta": {
+      "label": "Kalan Süre",
+      "intro": "Çevrim uzunluğu sıcaklığa veya sıkmaya bağlı olan makineler için aşama farkındalıklı kalan süre."
     }
   },
   "setting": {
@@ -1327,6 +1332,10 @@
     },
     "show_contributor": {
       "doc": "Topluluk cihazlarında ve referans döngülerinde \"- <katkıda bulunan>\" özelliğini göster."
+    },
+    "enable_phase_matching": {
+      "label": "Aşama farkındalıklı kalan süre",
+      "doc": "Çalışan her çevrimi aşamalara (ısıtma, yıkama, sıkma) böler ve kalan süreyi aşama başına ayırarak klasik tahminle harmanlar - çevrimin başında aşama bütçesine, sona yaklaşırken klasik tahmine ağırlık verir. Bu, geri sayımı makinenizin gerçekte ne kadar ısıttığına ve çalıştığına göre kişiselleştirir; en çok çevrimin ilk yarısında fark edilir. Kapalı = yalnızca klasik tahmin. Yalnızca kalan süre göstergesi etkilenir; program eşleştirme ve çevrim algılama değişmez."
     }
   },
   "setting_group": {

@@ -862,7 +862,8 @@
     "share_guidelines_title": "Enne jagamist",
     "store_download_device_intro": "Võtke kasutusele iga jagatud programm ja selle võrdlustsüklid oma seadmel. Teie enda salvestatud tsükleid ja statistikat ei mõjutata.",
     "store_share_device_intro": "Laadige {brand} {model} üles valitud võrdlustsüklitega. Teised sama kodumasina kasutajad saavad teie programme kasutusele võtta. Kirjeid vaadatakse üle enne avalikustamist.",
-    "share_profile_no_cycles": "Võrdlustsükleid pole -- märkige tsükkel ⭐-ks Tsüklid-vahekaardil, et lisada see profiil"
+    "share_profile_no_cycles": "Võrdlustsükleid pole -- märkige tsükkel ⭐-ks Tsüklid-vahekaardil, et lisada see profiil",
+    "advisory_phase_inconsistent": "'{name}' näib segavat erinevaid programme või temperatuure - selle tsüklid kuumutavad väga erineva aja jooksul. Selle jagamine eraldi profiilideks (nt temperatuuri järgi) parandab sobitamist ja ajahinnanguid."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Järsk langus käsitletakse kohese lõpuna",
@@ -962,6 +963,10 @@
     "triggers": {
       "intro": "Valikulised välised signaalid: lõpu päästik, ukse andur, pausi lüliti ja mahalaadimisel meeldetuletaja.",
       "label": "Päästikud ja Uksed"
+    },
+    "phase_eta": {
+      "label": "Järelejäänud aeg",
+      "intro": "Faasiteadlik järelejäänud aeg masinatele, mille tsükli pikkus sõltub temperatuurist või tsentrifuugimisest."
     }
   },
   "setting": {
@@ -1327,6 +1332,10 @@
     },
     "show_contributor": {
       "doc": "Kuva \"<kaastöötaja> poolt\" omistamine kogukonna kodumasinate ja võrdlustsüklite juures."
+    },
+    "enable_phase_matching": {
+      "label": "Faasiteadlik järelejäänud aeg",
+      "doc": "Jaga iga käimasolev tsükkel faasideks (kuumutamine, pesu, tsentrifuugimine) ja eelarvesta järelejäänud aeg faaside kaupa, segatuna klassikalise hinnanguga - toetudes tsükli alguses faasi eelarvele ja lõpu lähedal klassikalisele hinnangule. See kohandab loenduri sellele, kui kaua su masin tegelikult kuumutab ja töötab, mis on kõige märgatavam tsükli esimeses pooles. Väljas = ainult klassikaline hinnang. Mõjutab ainult järelejäänud aja kuva; programmi sobitamine ja tsükli tuvastamine jäävad muutmata."
     }
   },
   "setting_group": {

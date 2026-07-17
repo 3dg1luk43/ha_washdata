@@ -862,7 +862,8 @@
     "share_guidelines_title": "Vor dem Teilen",
     "store_download_device_intro": "Übernehmen Sie alle geteilten Programme und deren Referenzzyklen auf Ihr Gerät. Ihre eigenen aufgezeichneten Zyklen und Statistiken bleiben unberührt.",
     "store_share_device_intro": "Laden Sie {brand} {model} mit den von Ihnen ausgewählten Referenzzyklen hoch. Andere mit demselben Gerät können Ihre Programme übernehmen. Einträge werden vor der öffentlichen Erscheinung geprüft.",
-    "share_profile_no_cycles": "Keine Referenzzyklen -- markieren Sie einen Zyklus als ⭐ im Tab Zyklen, um dieses Profil einzubeziehen"
+    "share_profile_no_cycles": "Keine Referenzzyklen -- markieren Sie einen Zyklus als ⭐ im Tab Zyklen, um dieses Profil einzubeziehen",
+    "advisory_phase_inconsistent": "'{name}' scheint verschiedene Programme oder Temperaturen zu vermischen - seine Zyklen heizen unterschiedlich lange. Wenn Sie es in separate Profile aufteilen (z. B. pro Temperatur), verbessern sich Abgleich und Zeitschätzungen."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plötzlicher Abfall gilt als sofortiges Ende",
@@ -962,6 +963,10 @@
     "triggers": {
       "intro": "Optionale externe Signale: ein Endauslöser, ein Türsensor, ein Pause-Schalter und die Entladeerinnerung.",
       "label": "Auslöser & Türen"
+    },
+    "phase_eta": {
+      "label": "Verbleibende Zeit",
+      "intro": "Phasenbewusste Restzeit, für Maschinen, deren Zyklusdauer von Temperatur oder Schleuderdrehzahl abhängt."
     }
   },
   "setting": {
@@ -1327,6 +1332,10 @@
     },
     "show_contributor": {
       "doc": "Zeigt die Nennung 'von <contributor>' bei Community-Geräten und Referenzzyklen an."
+    },
+    "enable_phase_matching": {
+      "label": "Phasenbewusste Restzeit",
+      "doc": "Teilt jeden laufenden Zyklus in Phasen auf (Heizen, Waschen, Schleudern) und veranschlagt die verbleibende Zeit pro Phase, gemischt mit der klassischen Schätzung - zu Beginn des Zyklus stützt sie sich auf das Phasenbudget, gegen Ende auf die klassische Schätzung. Dadurch wird der Countdown darauf abgestimmt, wie lange Ihre Maschine tatsächlich heizt und läuft, was in der ersten Hälfte eines Zyklus am deutlichsten spürbar ist. Aus = nur die klassische Schätzung. Betroffen ist ausschließlich die Anzeige der verbleibenden Zeit; Programmabgleich und Zykluserkennung bleiben unverändert."
     }
   },
   "setting_group": {

@@ -862,7 +862,8 @@
     "share_guidelines_title": "Áður en þú deilir",
     "store_download_device_intro": "Taktu yfir öll deildu forritin og viðmiðunarlotir þeirra á tækið þitt. Þínar eigin skráðar lotir og tölfræði eru ekki fyrir áhrifum.",
     "store_share_device_intro": "Hlaðaðu upp {brand} {model} með viðmiðunarlotum sem þú velur. Aðrir með sama tæki geta tekið yfir forritin þín. Færslur eru yfirfarnar áður en þær birtast opinberlega.",
-    "share_profile_no_cycles": "Engar viðmiðunarlotir -- merktu lotu sem ⭐ í flipanum Lotir til að hafa þennan prófíl með"
+    "share_profile_no_cycles": "Engar viðmiðunarlotir -- merktu lotu sem ⭐ í flipanum Lotir til að hafa þennan prófíl með",
+    "advisory_phase_inconsistent": "'{name}' virðist blanda saman ólíkum forritum eða hitastigum - lotur þess hita mislengi. Ef þú skiptir því upp í aðskilin snið (t.d. eftir hitastigi) batnar samsvörun og tímamat."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Skyndilegt fall meðhöndlað sem tafarlaus endir",
@@ -962,6 +963,10 @@
     "triggers": {
       "intro": "Valfrjálsir ytri merkar: lokakveikin, dyraskynjari, hlébilaskipti og losunarminnir.",
       "label": "Kveikjar og dyr"
+    },
+    "phase_eta": {
+      "label": "Tími sem eftir er",
+      "intro": "Tími sem eftir er sem tekur mið af fösum, fyrir vélar þar sem lengd lotu ræðst af hitastigi eða vindingu."
     }
   },
   "setting": {
@@ -1327,6 +1332,10 @@
     },
     "show_contributor": {
       "doc": "Sýnir tilvísunina 'eftir <contributor>' á samfélagstækjum og viðmiðunarlotum."
+    },
+    "enable_phase_matching": {
+      "label": "Fasaskiptur tími sem eftir er",
+      "doc": "Skiptu hverri lotu í gangi upp í fasa (upphitun, þvottur, vinda) og áætlaðu tímann sem eftir er fyrir hvern fasa, blandað saman við klassíska matið - snemma í lotunni styðst það við fasaáætlunina og undir lokin við klassíska matið. Þetta sérsníður niðurtalninguna að því hversu lengi vélin þín hitar og gengur í raun, sem er mest áberandi í fyrri helmingi lotu. Slökkt = aðeins klassíska matið. Aðeins birting á tíma sem eftir er verður fyrir áhrifum; forritasamsvörun og lotugreining haldast óbreytt."
     }
   },
   "setting_group": {

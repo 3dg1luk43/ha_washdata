@@ -862,7 +862,8 @@
     "share_guidelines_title": "Antes de compartir",
     "store_download_device_intro": "Adopta todos los programas compartidos y sus ciclos de referencia en tu dispositivo. Tus propios ciclos grabados y estadísticas no se ven afectados.",
     "store_share_device_intro": "Sube {brand} {model} con los ciclos de referencia que selecciones. Otros con el mismo electrodoméstico podrán adoptar tus programas. Las entradas se revisan antes de aparecer públicamente.",
-    "share_profile_no_cycles": "Sin ciclos de referencia -- marca un ciclo como ⭐ en la pestaña Ciclos para incluir este perfil"
+    "share_profile_no_cycles": "Sin ciclos de referencia -- marca un ciclo como ⭐ en la pestaña Ciclos para incluir este perfil",
+    "advisory_phase_inconsistent": "'{name}' parece mezclar diferentes programas o temperaturas - sus ciclos calientan durante tiempos muy distintos. Dividirlo en perfiles separados (p. ej. por temperatura) mejorará la coincidencia y las estimaciones de tiempo."
   },
   "pg_desc": {
     "abrupt_drop_watts": "Caída repentina tratada como fin inmediato",
@@ -962,6 +963,10 @@
     "triggers": {
       "intro": "Señales externas opcionales: un disparador de fin, un sensor de puerta, un interruptor de pausa y el recordatorio de descarga.",
       "label": "Disparadores y puertas"
+    },
+    "phase_eta": {
+      "label": "Tiempo restante",
+      "intro": "Tiempo restante según las fases, para máquinas cuya duración de ciclo depende de la temperatura o el centrifugado."
     }
   },
   "setting": {
@@ -1327,6 +1332,10 @@
     },
     "show_contributor": {
       "doc": "Mostrar la atribución \"por <colaborador>\" en los electrodomésticos de la comunidad y los ciclos de referencia."
+    },
+    "enable_phase_matching": {
+      "label": "Tiempo restante según las fases",
+      "doc": "Divide cada ciclo en curso en fases (calentamiento, lavado, centrifugado) y reparte el tiempo restante por fase, combinado con la estimación clásica - apoyándose en el reparto por fases al principio del ciclo y en la estimación clásica cerca del final. Esto personaliza la cuenta atrás según cuánto calienta y funciona realmente tu máquina, lo que se nota más en la primera mitad del ciclo. Desactivado = solo la estimación clásica. Solo se ve afectada la visualización del tiempo restante; la coincidencia de programas y la detección de ciclos no cambian."
     }
   },
   "setting_group": {

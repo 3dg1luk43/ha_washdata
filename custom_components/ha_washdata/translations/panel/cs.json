@@ -862,7 +862,8 @@
     "share_guidelines_title": "Před sdílením",
     "store_download_device_intro": "Stáhnout nastavení zařízení komunity a použít ho na nové nebo stávající zařízení",
     "store_share_device_intro": "Sdílet programy vašeho zařízení (profily + referenční cykly) s komunitou. Nastavení jsou volitelná.",
-    "share_profile_no_cycles": "Profil '{p}' nemá žádné ⭐ referenční cykly -- bude přeskočen, pokud nemáte {n}+ potvrzených spuštění"
+    "share_profile_no_cycles": "Profil '{p}' nemá žádné ⭐ referenční cykly -- bude přeskočen, pokud nemáte {n}+ potvrzených spuštění",
+    "advisory_phase_inconsistent": "Zdá se, že '{name}' míchá různé programy nebo teploty - jeho cykly se ohřívají po velmi různě dlouhou dobu. Rozdělení na samostatné profily (např. podle teploty) zlepší shodu i odhady času."
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -945,6 +946,10 @@
     "triggers": {
       "intro": "Volitelné externí signály: spouštěč konce, senzor dveří, přepínač pauzy a připomínka vyložení.",
       "label": "Spouštěče a dveře"
+    },
+    "phase_eta": {
+      "label": "Zbývající čas",
+      "intro": "Zbývající čas zohledňující fáze, pro spotřebiče, jejichž délka cyklu závisí na teplotě nebo odstřeďování."
     }
   },
   "setting": {
@@ -1310,6 +1315,10 @@
     },
     "show_contributor": {
       "doc": "Zobrazit jméno přispěvatele u profilů stažených z komunitního obchodu"
+    },
+    "enable_phase_matching": {
+      "label": "Zbývající čas zohledňující fáze",
+      "doc": "Rozdělí každý běžící cyklus do fází (ohřev, praní, odstřeďování) a rozpočítá zbývající čas na jednotlivé fáze, smíchaný s klasickým odhadem - na začátku cyklu se opírá o rozpočet fází a ke konci o klasický odhad. Přizpůsobí odpočet tomu, jak dlouho se váš spotřebič skutečně ohřívá a běží, což je nejvíce patrné v první polovině cyklu. Vypnuto = pouze klasický odhad. Ovlivněno je jen zobrazení zbývajícího času; shoda programů a detekce cyklu se nemění."
     }
   },
   "setting_group": {
