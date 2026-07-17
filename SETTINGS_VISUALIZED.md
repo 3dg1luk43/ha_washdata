@@ -23,14 +23,14 @@ Controls how much the raw power signal is smoothed before processing.
 - **Low Value (e.g., 2)**: Responsive but susceptible to noise.
 - **High Value (e.g., 5)**: Smooths out spikes but introduces lag.
 
-![Smoothing Window](doc/images/suggest/param_smoothing_window.png)
+![Smoothing Window](docs/images/suggest/param_smoothing_window.png)
 
 ### `min_power`
 The absolute minimum power (Watts) considered "active".
 - Readings below this line are treated as **0 W** (Standby/Off).
 - It filters out the "phantom load" of smart plugs or standby LEDs.
 
-![Minimum Power](doc/images/suggest/param_min_power.png)
+![Minimum Power](docs/images/suggest/param_min_power.png)
 
 ---
 
@@ -43,14 +43,14 @@ By default, the system uses `min_power` for both starting and stopping.
 - **Stop Threshold (Red)**: Power must fall below this to become IDLE.
 - **Gray Zone**: If power is in between, the state doesn't change (it keeps doing whatever it was doing).
 
-![Hysteresis](doc/images/suggest/param_hysteresis.png)
+![Hysteresis](docs/images/suggest/param_hysteresis.png)
 
 ### `start_energy_threshold`
 Prevents false starts from brief power spikes (e.g., a pump check or accidental button press).
 - The appliance must consume a certain amount of **Energy (Wh)** (Power x Time) before the state changes to `RUNNING`.
 - A high-power spike that lasts a fraction of a second has very low energy and is ignored.
 
-![Start Energy Threshold](doc/images/suggest/param_start_energy.png)
+![Start Energy Threshold](docs/images/suggest/param_start_energy.png)
 
 ### `off_delay`
 The most critical parameter for **Dishwashers** and machines with pauses.
@@ -58,7 +58,7 @@ The most critical parameter for **Dishwashers** and machines with pauses.
 - If power resumes within this window, the cycle continues (bridges the gap).
 - If the window expires, the cycle ends.
 
-![Off Delay](doc/images/suggest/param_off_delay.png)
+![Off Delay](docs/images/suggest/param_off_delay.png)
 
 ---
 
@@ -71,7 +71,7 @@ Controls how "strict" the matching algorithm is regarding total duration.
     - Matches cycles between **45 mins** and **75 mins**.
     - If a cycle falls outside this band, it gets a lower score or is rejected.
 
-![Duration Tolerance](doc/images/suggest/param_duration_tolerance.png)
+![Duration Tolerance](docs/images/suggest/param_duration_tolerance.png)
 
 ---
 
@@ -82,14 +82,14 @@ Filters out short, invalid cycles that might be caused by test runs or accidents
 - If a cycle finishes (power drops to 0) but the total duration is less than this value, it is discarded as a "Ghost" cycle.
 - **Example**: Opening the door to add a sock might start a 1-minute "cycle", which we want to ignore.
 
-![Completion Min Seconds](doc/images/suggest/param_completion_min_seconds.png)
+![Completion Min Seconds](docs/images/suggest/param_completion_min_seconds.png)
 
 ### `min_off_gap`
 Prevents a single cycle from being split into two if there is a short pause.
 - If two detection events happen close together (gap < `min_off_gap`), the system treats them as one continuous session.
 - Useful for machines with very long soak times or drying pauses.
 
-![Min Off Gap](doc/images/suggest/param_min_off_gap.png)
+![Min Off Gap](docs/images/suggest/param_min_off_gap.png)
 
 
 
@@ -103,7 +103,7 @@ Detects if a cycle was manually cancelled or failed, rather than finishing natur
 - An "Interruption" happens when high power (e.g. 2000W heater) suddenly cuts to zero.
 - If the drop size > `abrupt_drop_watts`, the status is flagged as `Interrupted`.
 
-![Abrupt Drop](doc/images/suggest/param_abrupt_drop.png)
+![Abrupt Drop](docs/images/suggest/param_abrupt_drop.png)
 
 ## 6. Sensor Protection & Logic
 
@@ -112,7 +112,7 @@ Ignores sensor noise immediately after the cycle starts.
 - For the first few seconds (default 3s) after detection, any power dip to 0W is ignored.
 - Prevents immediate self-termination if the appliance cycles relays during boot.
 
-![Dead Zone](doc/images/suggest/param_dead_zone.png)
+![Dead Zone](docs/images/suggest/param_dead_zone.png)
 
 ### `no_update_active_timeout` (Watchdog)
 Failsafe for when your smart plug drops off the network.
@@ -120,7 +120,7 @@ Failsafe for when your smart plug drops off the network.
 - Default: **600s (10 minutes)** to allow for cloud/mesh network lag.
 - It will force-stop the cycle or flush the buffer to prevent a "Zombie Cycle" running forever.
 
-![Watchdog](doc/images/suggest/param_watchdog.png)
+![Watchdog](docs/images/suggest/param_watchdog.png)
 
 ---
 
@@ -131,7 +131,7 @@ Ensures a cycle doesn't end prematurely on a low-power "trickle".
 - Some machines spin down slowly or have an anti-crease mode that consumes small power (< min_power).
 - If the accumulated energy during the `off_delay` period exceeds this threshold, the system resets the timer, keeping the cycle alive.
 
-![End Energy](doc/images/suggest/param_end_energy.png)
+![End Energy](docs/images/suggest/param_end_energy.png)
 
 ### `profile_match_min_duration_ratio` / `max`
 Defines the acceptable "Length" of a cycle relative to the profile.
@@ -140,14 +140,14 @@ Defines the acceptable "Length" of a cycle relative to the profile.
     - Min Ratio 0.9 (90%) = Cycle must be > 54 mins.
     - Max Ratio 1.3 (130%) = Cycle must be < 78 mins.
 
-![Match Ratios](doc/images/suggest/param_match_ratios.png)
+![Match Ratios](docs/images/suggest/param_match_ratios.png)
 
 ### `start_duration_threshold` (Debounce)
 A time-based filter complementing `start_energy_threshold`.
 - Even if power is high, it must stay high for this many seconds to be valid.
 - Prevents split-second "On/Off" toggles from starting a cycle.
 
-![Start Duration](doc/images/suggest/param_start_duration.png)
+![Start Duration](docs/images/suggest/param_start_duration.png)
 
 ---
 
@@ -158,14 +158,14 @@ The "Almost Done" Alert.
 - Proactively notifies you when the estimated time remaining drops below this value.
 - Useful for getting ready to unload.
 
-![Pre-Complete Notify](doc/images/suggest/param_notify_pre.png)
+![Pre-Complete Notify](docs/images/suggest/param_notify_pre.png)
 
 ### `progress_reset_delay`
 The "Unloading Phase".
 - After a cycle finishes (Status: Completed), the progress stays at **100%**.
 - This timer holds that state (default **30 min / 1800 s**) to let you see "Completed" on dashboards before resetting to "Idle" (0%).
 
-![Progress Reset](doc/images/suggest/param_progress_reset.png)
+![Progress Reset](docs/images/suggest/param_progress_reset.png)
 
 ### `anti_wrinkle_exit_power`
 Exit power for anti-wrinkle / anti-crease mode.
@@ -178,7 +178,7 @@ Self-Learning Trigger.
 - The system counts how many "Ghost Cycles" (too short to be real) happen in 24 hours.
 - If this count exceeds the threshold (e.g. 3), it assumes your `min_power` is too low (picking up noise) and suggests a new, higher threshold. The suggestion appears in the panel's Settings suggestions banner / per-field pill; it is not applied automatically and does not raise a persistent notification.
 
-![Auto Tune](doc/images/suggest/param_auto_tune.png)
+![Auto Tune](docs/images/suggest/param_auto_tune.png)
 
 ---
 

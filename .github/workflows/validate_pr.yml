@@ -37,8 +37,9 @@ jobs:
             const prAuthor = pr.user.login;
             const prBody = pr.body || '';
 
-            if (prAuthor === owner) {
-              console.log(`Author is repo owner (${owner}), skipping completeness check.`);
+            const GITLOCALIZE_BOT = 'gitlocalize-app[bot]';
+            if (prAuthor === owner || prAuthor === GITLOCALIZE_BOT) {
+              console.log(`Author is repo owner or GitLocalize bot (${prAuthor}), skipping completeness check.`);
               return;
             }
 
@@ -125,8 +126,9 @@ jobs:
             const prAuthor = pr.user.login;
             const prBody = pr.body || '';
 
-            if (prAuthor === owner) {
-              console.log(`Author is repo owner (${owner}), skipping issue link check.`);
+            const GITLOCALIZE_BOT = 'gitlocalize-app[bot]';
+            if (prAuthor === owner || prAuthor === GITLOCALIZE_BOT) {
+              console.log(`Author is repo owner or GitLocalize bot (${prAuthor}), skipping issue link check.`);
               return;
             }
 
@@ -289,7 +291,7 @@ jobs:
               '2. **Indicate your intent** — check the box at the bottom of the issue form confirming you plan to submit a PR.',
               '3. **Reference it here** — edit this PR description to include `Closes #NNN`. The maintainer will then be pinged to review and approve.',
               '',
-              '> **Localization PRs** (files under `translations/` and `strings.json`) are exempt and can be opened directly.',
+              '> **Localization PRs** (files under `translations/` and `strings.json`) are exempt and can be opened directly. Prefer submitting translations via [GitLocalize](https://gitlocalize.com/repo/10819), which opens PRs automatically.',
               '',
               '> ⏳ This PR will be **automatically closed in 3 days** if no issue is linked. Linking an issue stops the timer.',
             ].join('\n'));

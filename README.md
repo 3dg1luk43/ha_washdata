@@ -204,7 +204,7 @@ Click a section to expand screenshots and descriptions.
 
 The device bar at the top shows all configured appliances at a glance - state badge, pending suggestions count, and review queue. Clicking any card switches the active device without leaving the panel.
 
-![Overview tab - dishwasher idle](doc/images/panel/overview_idle.png)
+![Overview tab - dishwasher idle](docs/images/panel/overview_idle.png)
 
 The Overview tab shows the current state (Off / Running / Detecting), a live power reading, and the progress and time-remaining estimates once a cycle is matched. Attention cards surface pending review items and tuning suggestions inline so you act without hunting through menus. **Manual Recording** lives here too - hit Start Recording before you run a new program to get a clean reference cycle.
 
@@ -217,37 +217,37 @@ The Overview tab shows the current state (Off / Running / Detecting), a live pow
 
 Every completed cycle is listed with profile, status, date, duration, energy, cost, match confidence, and cycle-health score. Sortable columns; filter by profile name or status (completed / interrupted / unknown / needs review).
 
-![Cycles tab - history list](doc/images/panel/cycles_list.png)
+![Cycles tab - history list](docs/images/panel/cycles_list.png)
 
 **Multi-select actions**
 
 Tick two or more cycles to reveal the bulk action bar: **Compare** overlays their power curves side by side, **Merge** fuses two mis-split runs into one, and **Delete** removes them permanently.
 
-![Cycles list - multi-select with Compare / Merge / Delete](doc/images/panel/cycles_multiselect.png)
+![Cycles list - multi-select with Compare / Merge / Delete](docs/images/panel/cycles_multiselect.png)
 
 **Inspect - power graph and anomaly report**
 
 Opening a cycle shows its power trace overlaid on the matched profile's envelope. Shaded regions highlight detected artifacts (door-open pauses, out-of-band spikes/dips). The anomaly list below the graph describes each event with its timestamp and duration so you can judge whether it was intentional (e.g. adding clothes mid-cycle) or a detection problem.
 
-![Cycle modal - Inspect tab with artifact shading and anomaly list](doc/images/panel/cycle_inspect.png)
+![Cycle modal - Inspect tab with artifact shading and anomaly list](docs/images/panel/cycle_inspect.png)
 
 **Trim - remove noise from cycle boundaries**
 
 Drag the red handles on the graph, or type exact offsets, to crop a late-detected start or an overrun tail. Everything outside the window is discarded when you hit **Apply Trim**.
 
-![Cycle modal - Trim tab](doc/images/panel/cycle_trim.png)
+![Cycle modal - Trim tab](docs/images/panel/cycle_trim.png)
 
 **Split - divide one run into separate cycles**
 
 Click on the graph to place split points, or use **Auto-detect** to find idle gaps automatically. Each resulting segment gets its own profile dropdown so you can label wash and dry phases of a combo cycle separately.
 
-![Cycle modal - Split tab](doc/images/panel/cycle_split.png)
+![Cycle modal - Split tab](docs/images/panel/cycle_split.png)
 
 **Review - confirm, tag, and teach the model**
 
 Set the correct profile and a quality rating (Good / Bad), tick issue tags (Late start, Noise, Wrong profile, …), compare against alternative profiles side by side, and add free-text notes. Saved reviews feed the on-device ML model and refine future matching.
 
-![Cycle modal - Review tab](doc/images/panel/cycle_review.png)
+![Cycle modal - Review tab](docs/images/panel/cycle_review.png)
 
 </details>
 
@@ -258,25 +258,25 @@ Set the correct profile and a quality rating (Good / Bad), tick issue tags (Late
 
 All learned programs are shown as cards with cycle count, average duration, per-cycle energy, and accumulated total. A quality badge ("acceptable quality") appears once enough cycles have been labelled. A yellow banner calls out near-duplicate clusters and invites you to group them so the matcher can reliably pick between look-alike programs (same shape, different temperature or spin speed).
 
-![Profiles tab - grouped and ungrouped profile cards](doc/images/panel/profiles_list.png)
+![Profiles tab - grouped and ungrouped profile cards](docs/images/panel/profiles_list.png)
 
 **Phases - visual phase-range editor**
 
 Open any profile and switch to the Phases tab to see every labelled cycle's average curve with coloured phase bands overlaid. Drag boundary values or type minute offsets to map Pre-Rinse, Wash, Rinse, Soak, Spin, Dry and other phases to time ranges. The live progress readout on the Overview tab uses these ranges to display the current phase name.
 
-![Profile modal - Phases tab with colour-coded phase bands](doc/images/panel/profile_phases.png)
+![Profile modal - Phases tab with colour-coded phase bands](docs/images/panel/profile_phases.png)
 
 **Cleanup - spot and remove outlier cycles**
 
 The Cleanup tab overlays every labelled cycle as a spaghetti graph. Hover a row in the table to highlight that cycle's curve; tick the checkbox to select it; hit **Delete selected** to remove outliers that are pulling the profile envelope out of shape. Scroll position is preserved while you tick boxes.
 
-![Profile modal - Cleanup tab with spaghetti graph and cycle checklist](doc/images/panel/profile_cleanup.png)
+![Profile modal - Cleanup tab with spaghetti graph and cycle checklist](docs/images/panel/profile_cleanup.png)
 
 **Manage - rename, retune, delete**
 
 Set the expected duration (used for time-remaining estimates before the cycle completes its first 50%), rebuild the envelope after cleanup, or delete the profile entirely.
 
-![Profile modal - Manage tab](doc/images/panel/profile_manage.png)
+![Profile modal - Manage tab](docs/images/panel/profile_manage.png)
 
 </details>
 
@@ -287,19 +287,19 @@ Set the expected duration (used for time-remaining estimates before the cycle co
 
 Device name, device type (sets detection defaults), power sensor entity, minimum power threshold, off delay, and HA device grouping. Inline suggestion chips appear when WashData's analysis finds a better value from your cycle history - click **Use** to accept or ignore them individually, or **Apply all** in the banner.
 
-![Settings - Basic section with inline ML and classic suggestions](doc/images/panel/settings_basic.png)
+![Settings - Basic section with inline ML and classic suggestions](docs/images/panel/settings_basic.png)
 
 **Notifications section - push alerts and automations**
 
 Configure push targets for cycle-start, finish, and live-progress events using a filterable entity picker (type to narrow the list). The **Automations** section links to the HA automations that already reference this device and lets you create new ones from a blank or prefilled template. Pre-end alert timing, live-update interval, and overrun threshold live here too.
 
-![Settings - Notifications section with pill pickers and automation links](doc/images/panel/settings_notifications.png)
+![Settings - Notifications section with pill pickers and automation links](docs/images/panel/settings_notifications.png)
 
 **Log drawer**
 
 The log panel slides in from the right edge of any Settings view. It streams the last 500 WashData log lines, filterable by level (Info / Warning / Error). Drag the left edge of the drawer to resize it; the width and open/closed state persist across page refreshes.
 
-![Settings with the Logs side drawer open and resizable](doc/images/panel/settings_logs.png)
+![Settings with the Logs side drawer open and resizable](docs/images/panel/settings_logs.png)
 
 </details>
 
@@ -312,7 +312,7 @@ The ML Training tab is the single home for all on-device learning. The **Status*
 
 The **Program-matching fine-tuning** table shows whether per-device matching weights (shape vs duration vs energy) have diverged from the shipped defaults after tuning against your labelled history.
 
-![ML Training tab - personalized status, model quality bars, matching tuning table](doc/images/panel/ml_training.png)
+![ML Training tab - personalized status, model quality bars, matching tuning table](docs/images/panel/ml_training.png)
 
 </details>
 
@@ -323,25 +323,25 @@ The **Program-matching fine-tuning** table shows whether per-device matching wei
 
 Per-HA-account display options: default landing tab, cycle date format (relative or absolute), whether to show the expected-curve overlay on the power graph, and the live match debug card visibility.
 
-![Advanced - My Preferences subtab](doc/images/panel/advanced_preferences.png)
+![Advanced - My Preferences subtab](docs/images/panel/advanced_preferences.png)
 
 **Diagnostics**
 
 Storage stats (cycle count, profile count, file size), and three maintenance actions: **Process History** re-runs matching and ML retraining on all stored cycles after a batch of reviews; **Clear Debug Traces** frees space; **Wipe All Data** is the nuclear option. **Export / Import** lets you back up the full profile and cycle database to JSON or restore from a previous export (also accepts HA diagnostics downloads).
 
-![Advanced - Diagnostics subtab with storage stats, maintenance actions, and export/import](doc/images/panel/advanced_diagnostics.png)
+![Advanced - Diagnostics subtab with storage stats, maintenance actions, and export/import](docs/images/panel/advanced_diagnostics.png)
 
 **Panel Settings**
 
 Admin-level defaults: which tab opens by default for all users, and which tabs (Cycles, Profiles, Settings) are hidden from non-admin users.
 
-![Advanced - Panel Settings subtab](doc/images/panel/advanced_panel_settings.png)
+![Advanced - Panel Settings subtab](docs/images/panel/advanced_panel_settings.png)
 
 **Access Control**
 
 Per-user RBAC. Enable per-user control, set the fallback level for unlisted users (View / Edit / None), and override per device for each HA account. Administrators always have full access and can manage everyone's permissions from this screen.
 
-![Advanced - Access Control subtab with per-user, per-device permission dropdowns](doc/images/panel/advanced_access_control.png)
+![Advanced - Access Control subtab with per-user, per-device permission dropdowns](docs/images/panel/advanced_access_control.png)
 
 </details>
 

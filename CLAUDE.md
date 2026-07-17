@@ -176,6 +176,8 @@ The `ml/` package adds ML *alongside* the proven detection/matching code — it 
 
 Both `translations/panel/en.json` AND `translations/en.json` (HA-layer) are English sources. **Every** other `{lang}.json` file — panel and HA-layer alike — is maintained by Claude subagents (never the machine translator).
 
+**Community-submitted corrections** (existing-key fixes, new languages) come in via [GitLocalize](https://gitlocalize.com/repo/10819), which opens PRs automatically — merge them like any other localization PR. The maintainer workflow below covers *new-key* translation only.
+
 **After adding or removing translation keys, you MUST:**
 
 ```bash

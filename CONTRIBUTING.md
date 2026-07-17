@@ -132,7 +132,7 @@ If you also want to implement it yourself, check the **"Contributing an Implemen
 
 ### 🌍 Translations
 
-**IMPORTANT**: Submit translations via Pull Request, not as issues.
+**Submit translations via GitLocalize** — no GitHub fork required.
 
 See [Localization & Translations](#localization--translations) section below.
 
@@ -152,7 +152,7 @@ Review open PRs and provide constructive feedback. Even experienced contributors
 
 ## Contributor PR Flow (Non-Translation PRs)
 
-**Translation PRs can be opened directly** — no issue required, no label needed. All other PRs must go through this flow:
+**Translation PRs (including those opened automatically by GitLocalize) are exempt** — no issue required, no label needed. All other PRs must go through this flow:
 
 1. **Open an issue** — create a [Bug Report](https://github.com/3dg1luk43/ha_washdata/issues/new?template=bug_report.yml) or [Feature Request](https://github.com/3dg1luk43/ha_washdata/issues/new?template=feature_request.yml) describing what you want to fix or build.
 2. **Indicate your intent** — check the "Contributing a Fix" / "Contributing an Implementation" checkbox at the bottom of the issue form.
@@ -267,7 +267,7 @@ See [copilot-instructions.md](.github/copilot-instructions.md) for full technica
 
 - New feature files go in `custom_components/ha_washdata/`
 - Tests go in `tests/` mirroring the module structure
-- Documentation additions go in `doc/` folder
+- Documentation additions go in `docs/` folder
 - Do NOT modify core architecture files without discussion
 
 ---
@@ -348,29 +348,34 @@ Fixes #123
 
 ## Localization & Translations
 
-### 🚨 CRITICAL: TRANSLATIONS VIA PR, NOT ISSUES
+### Submitting a translation via GitLocalize
 
-**Do NOT open an issue to report bad translations.** Instead:
+Translations are managed through **[GitLocalize](https://gitlocalize.com/repo/10819)** — a web-based translation platform where you can contribute without ever touching a fork or opening a PR manually.
 
-1. **Edit the translation file** for your language
-   - Location: `custom_components/ha_washdata/translations/[language-code].json`
-   - Example: `translations/ru.json`, `translations/es.json`
+1. **Visit the project on GitLocalize:** https://gitlocalize.com/repo/10819
+2. Select your language (or request a new one using the platform's "Add language" feature).
+3. Translate or correct strings in the browser editor — full context is shown alongside each key.
+4. Submit your changes; GitLocalize will open a PR to this repo automatically.
 
-2. **Submit a Pull Request** with your corrections
-   - Include a brief description of what was corrected
+> **Do NOT open a GitHub issue to report a bad translation** — go to GitLocalize and correct it there.
 
-> **Important:** Do **not** use `translate.py` or any automated machine-translation tool.
-> Machine translation produces domain-wrong output (e.g. "sports" for "match", "lumber" for "logs")
-> and has corrupted translation files in the past. All translation work must be done manually with
-> full context of what each term means in the WashData domain.
+### What to keep in mind when translating
 
-### Adding a New Language
+- **Preserve `{placeholder}` tokens exactly** — e.g. `{device}`, `{duration}` must appear verbatim in your translated string.
+- **Domain context matters** — "match" means a *detected program run*, not a sports match; "logs" means *diagnostic output*, not lumber. Translate with that context in mind.
+- **Do not use automated machine translation** — machine translators produce domain-wrong output and have corrupted WashData's translation files in the past. All work must be done by a fluent speaker who understands the appliance-monitoring domain.
 
-1. Copy `translations/en.json` to `translations/[new-language-code].json`
-2. Translate all values manually, keeping keys unchanged and preserving `{placeholder}` tokens exactly
-3. Submit PR with translations
+### Adding a brand-new language
 
-**Note**: Translations are validated automatically. Ensure JSON is valid before submitting.
+If your language is not yet listed on GitLocalize, use the platform's "Add language" feature to request it. Once set up, all subsequent work happens on GitLocalize — no manual file copying or forking required.
+
+### For maintainers: adding new translation keys
+
+When a new key is added to `en.json` / `strings.json`, GitLocalize automatically detects it and marks it as "needs translation" for every language on the platform — community translators pick it up from there.
+
+Maintainer steps after adding a key:
+1. Run `python3 devtools/sync_translations.py` — removes deprecated keys from all non-English HA-layer files (safe, no network).
+2. Translate the new keys into all languages via **Claude subagents with explicit domain context** — never via `translate.py` or any machine translator. See the "Translation maintenance" section of `CLAUDE.md` for the full procedure.
 
 ---
 

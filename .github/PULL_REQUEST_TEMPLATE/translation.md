@@ -1,5 +1,10 @@
 # Translation PR
 
+> **Prefer GitLocalize for new contributions.**
+> The recommended way to contribute translations is through [GitLocalize](https://gitlocalize.com/repo/10819),
+> which opens PRs automatically on your behalf. Use this template only if you are submitting
+> a manual translation PR (e.g. a hotfix that needs to land before the next GitLocalize sync).
+
 Thank you for contributing a translation to WashData!
 
 ## Checklist
