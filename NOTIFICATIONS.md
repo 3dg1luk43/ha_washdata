@@ -11,8 +11,10 @@ to build your own automations on top.
 >   cycle events. The panel's **Notifications → Automations** section finds and creates
 >   them for you. (This replaces the old built-in "custom actions" editor.)
 
-All of these are configured under **Settings -> Devices & Services -> WashData ->
-Configure -> Notifications**.
+All of these are configured in the **WashData panel** (sidebar) under
+**Settings -> Notifications**. The Home Assistant **Configure** dialog now only holds
+the core setup fields (device type, power sensor, minimum power); everything else -
+including notifications - lives in the panel.
 
 ---
 
@@ -43,8 +45,12 @@ Key behaviours:
 - Each list accepts both **notify services** (e.g. `notify.mobile_app_pixel`) and
   **notify entities** (e.g. those exposed by `telegram_bot`). Notify entities are
   delivered through the universal `notify.send_message` action automatically.
-- If **no** target is configured, the message falls back to a Home Assistant
-  **persistent notification** (the bell icon in the sidebar).
+- **Safety net:** if a notification *is* produced but the relevant list is empty
+  **and** you have no automation handling that event, it still surfaces as a Home
+  Assistant **persistent notification** (the bell icon) rather than being lost. This
+  does not override the rule above - a plainly empty list with no automations means
+  that kind is not sent to any target; the bell is only a last resort so a message is
+  never silently dropped.
 
 ### 2. Automations (the powerful path)
 

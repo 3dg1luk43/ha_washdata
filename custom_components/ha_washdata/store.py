@@ -53,7 +53,10 @@ def store_appliance_type(device_type: str) -> str:
 def derive_qc(cycle: dict[str, Any]) -> int:
     """Derive the obfuscated provenance code for a cycle being uploaded.
 
-    QC_RECORDING - a pure recorder capture.
+    QC_RECORDING - a recorder capture. Deliberately takes precedence over ``edited``
+                   (see test_store_provenance.test_recorder_precedence_over_edited): a
+                   trimmed recording is still classed as a recording, since it began as
+                   a clean manual capture.
     QC_EDITED    - trimmed/edited from a detected cycle.
     QC_MANUAL    - a plain detected cycle the user flagged golden by hand.
     Never raises.

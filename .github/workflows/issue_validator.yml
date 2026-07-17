@@ -163,8 +163,8 @@ jobs:
                 // A pre-release is only a valid upgrade target when it is numerically
                 // newer than the latest stable. If stable is ahead (or equal), it is
                 // always the one true latest and the pre-release is never suggested.
-                const alphaIsLatest = latestPre && latestStable
-                  ? isNewer(latestPre.tag_name, latestStable.tag_name)
+                const alphaIsLatest = latestPre
+                  ? (!latestStable || isNewer(latestPre.tag_name, latestStable.tag_name))
                   : false;
 
                 const suggestStable = latestStable && isNewer(latestStable.tag_name, version);

@@ -29,7 +29,7 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Pause/Resume, Door & Clean state** - Pause/resume active cycles (optionally cutting power), add-clothes support via a door sensor, and a "laundry still waiting" reminder after a cycle ends.
 - **Robust & self-correcting** - Energy-gated start/end detection, ghost-cycle suppression that persists across restarts, dishwasher end-spike handling, and learning feedback that refines estimates over time.
 - **Experimental on-device ML (opt-in, off by default)** - A gated, NumPy-only ML subsystem with a dedicated **ML Training** tab, running *alongside* the proven detection code and never replacing it.
-- **Local only** - No cloud, no external services; all data stays in your Home Assistant. An optional Lovelace **Tile Card** is included.
+- **Local-first** - Core cycle detection, matching, and estimation run entirely inside Home Assistant with no cloud dependency; the only network feature is the **opt-in, off-by-default** Community Store (below). An optional Lovelace **Tile Card** is included.
 - **Community Store (opt-in)** - Browse and adopt programs from other users with the same appliance at the WashData Community Store. Share your own recorded programs back. All online features are opt-in and disabled by default.
 
 ---
