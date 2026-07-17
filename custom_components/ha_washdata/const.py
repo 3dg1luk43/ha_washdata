@@ -688,7 +688,10 @@ GROUP_MIN_COHESION = 0.80
 # v9: pre-initialize additive top-level keys (lifetime_energy_wh,
 # settings_changelog, maintenance_log) so they are present from first load
 # rather than only appearing lazily on first use.
-STORAGE_VERSION = 10
+# v11 is a marker-only bump: per-phase profiles (envelope["phase_profile"]) are
+# derived cache populated by async_rebuild_envelope, so no data migration is
+# needed - they self-populate on the next envelope rebuild.
+STORAGE_VERSION = 11
 STORAGE_KEY = "ha_washdata"
 
 # Notification events

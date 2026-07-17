@@ -69,6 +69,8 @@ from .phase_catalog import (
     merge_phase_catalog,
     normalize_phase_name,
 )
+from .phase_segmenter import phase_matching_live_supported, phase_model_for, segment_cycle
+from .phase_match import build_phase_profile, phase_profile_to_dict
 from .log_utils import DeviceLoggerAdapter
 
 _LOGGER = logging.getLogger(__name__)
@@ -800,6 +802,17 @@ class WashDataStore(Store[JSONDict]):
             # touch usage/energy stats. Additive + idempotent.
             _LOGGER.info("Migrating storage from v%s to v10", old_major_version)
             old_data.setdefault("reference_cycles", [])
+
+        if old_major_version < 11:
+            # Marker-only bump. Per-phase profiles (envelope["phase_profile"], used
+            # by phase-segmented matching / phase-resolved ETA) are DERIVED CACHE
+            # built by async_rebuild_envelope, not stored data - so there is nothing
+            # to migrate. They self-populate on the next envelope rebuild (which
+            # runs on every cycle end / label change); until then consumers fall
+            # back to the existing estimator via lazy absent-key handling. No data
+            # is added, removed, or altered here.
+            _LOGGER.info("Migrating storage from v%s to v11 (phase-profile cache marker)",
+                         old_major_version)
 
         return old_data
 
@@ -3913,11 +3926,55 @@ class ProfileStore:
             "updated": dt_util.now().isoformat(),
         }
 
+        # Derived cache: per-phase profile (per-role duration/energy priors) used by
+        # phase-segmented matching / phase-resolved ETA. Built only for device types
+        # phase matching is live-supported for; absent otherwise (consumers fall back
+        # to the whole-cycle pipeline). Pure/cheap - segmentation is O(samples).
+        device_type = str(
+            self._data.get("profiles", {}).get(profile_name, {}).get("device_type") or ""
+        )
+        phase_profile = self._compute_phase_profile(profile_name, shape_cycles, device_type)
+        if phase_profile is not None:
+            envelope_data["phase_profile"] = phase_profile
+
         if "envelopes" not in self._data:
             self._data["envelopes"] = {}
         self._data["envelopes"][profile_name] = envelope_data
 
         return True
+
+    def _compute_phase_profile(
+        self, profile_name: str, cycles: list[CycleDict], device_type: str
+    ) -> dict[str, Any] | None:
+        """Segment each member cycle and aggregate a per-role phase profile.
+
+        Returns a JSON-safe dict for ``envelope["phase_profile"]`` or ``None`` when
+        phase matching is not live-supported for this device type or no cycle could
+        be segmented. Never raises (phase support must never break envelope rebuild).
+        """
+        try:
+            if not phase_matching_live_supported(device_type):
+                return None
+            model = phase_model_for(device_type)
+            if model is None:
+                return None
+            segmented: list = []
+            for cycle in cycles:
+                offsets = power_data_to_offsets(cycle.get("power_data") or [])
+                if len(offsets) < 4:
+                    continue
+                t = [float(o) for o, _ in offsets]
+                w = [float(p) for _, p in offsets]
+                segs = segment_cycle(t, w, model)
+                if segs:
+                    segmented.append(segs)
+            if not segmented:
+                return None
+            profile = build_phase_profile(profile_name, segmented)
+            return phase_profile_to_dict(profile) if profile is not None else None
+        except Exception:  # noqa: BLE001 - phase caching must never break rebuild
+            self._logger.debug("phase-profile build failed for %s", profile_name, exc_info=True)
+            return None
 
 
 

@@ -114,15 +114,36 @@ _MODELS: dict[str, PhaseModel] = {
 }
 
 
+# Device types phase matching is rolled out for LIVE (validated by the Phase-0
+# ETA gate). Dishwasher has a model for OFFLINE evaluation only (its ETA gate was
+# a no-go and its end-of-cycle logic is delicate), so it is deliberately excluded
+# here even though ``phase_model_for("dishwasher")`` returns a model.
+LIVE_PHASE_DEVICE_TYPES: tuple[str, ...] = ("washing_machine", "washer_dryer")
+
+
 def phase_model_for(device_type: str | None) -> PhaseModel | None:
     """Return the :class:`PhaseModel` for a device type, or ``None`` to fall back.
 
     ``None`` means the device type has no validated phase model and must use the
-    existing whole-cycle pipeline (zero-regression fallback).
+    existing whole-cycle pipeline (zero-regression fallback). Returns a model for
+    every type with one defined (incl. dishwasher, for the offline harness).
     """
     if not device_type:
         return None
     return _MODELS.get(str(device_type))
+
+
+def phase_matching_live_supported(device_type: str | None) -> bool:
+    """True when phase matching is enabled for LIVE use on this device type.
+
+    Stricter than ``phase_model_for`` - only the Phase-0-validated rollout types
+    (washing machine, washer-dryer). Used to gate phase-profile caching and the
+    live ETA path; the offline harness uses ``phase_model_for`` directly.
+    """
+    return (
+        device_type in LIVE_PHASE_DEVICE_TYPES
+        and phase_model_for(device_type) is not None
+    )
 
 
 def _classify(power: np.ndarray, model: PhaseModel) -> tuple[np.ndarray, float]:

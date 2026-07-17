@@ -39,7 +39,7 @@ the live integration imports it yet). See
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 from .phase_segmenter import (
     ROLE_HEATING,
@@ -90,6 +90,46 @@ class PhaseProfile:
 class PhaseMatchResult:
     name: str
     score: float
+
+
+def phase_profile_to_dict(profile: PhaseProfile) -> dict:
+    """Serialize a :class:`PhaseProfile` for storage (JSON-safe)."""
+    return {
+        "name": profile.name,
+        "n_cycles": profile.n_cycles,
+        "total_dur_mean": profile.total_dur_mean,
+        "total_dur_std": profile.total_dur_std,
+        "roles": {role: asdict(stat) for role, stat in profile.roles.items()},
+    }
+
+
+def phase_profile_from_dict(data: dict | None) -> PhaseProfile | None:
+    """Rebuild a :class:`PhaseProfile` from stored form. Never raises."""
+    if not isinstance(data, dict):
+        return None
+    try:
+        roles = {
+            str(role): RoleStat(
+                dur_mean=float(s.get("dur_mean", 0.0)),
+                dur_std=float(s.get("dur_std", 0.0)),
+                dur_p50=float(s.get("dur_p50", 0.0)),
+                en_mean=float(s.get("en_mean", 0.0)),
+                occurrence=float(s.get("occurrence", 0.0)),
+            )
+            for role, s in (data.get("roles") or {}).items()
+            if isinstance(s, dict)
+        }
+        if not roles:
+            return None
+        return PhaseProfile(
+            name=str(data.get("name", "")),
+            roles=roles,
+            total_dur_mean=float(data.get("total_dur_mean", 0.0)),
+            total_dur_std=float(data.get("total_dur_std", 0.0)),
+            n_cycles=int(data.get("n_cycles", 0)),
+        )
+    except (TypeError, ValueError, AttributeError):
+        return None
 
 
 def _agree(observed: float, expected: float, scale: float) -> float:

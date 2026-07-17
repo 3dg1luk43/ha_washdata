@@ -21,6 +21,8 @@ from custom_components.ha_washdata.phase_match import (
     build_phase_profile,
     match_phase_profiles,
     phase_eta,
+    phase_profile_from_dict,
+    phase_profile_to_dict,
 )
 from custom_components.ha_washdata.phase_segmenter import phase_model_for, segment_cycle
 
@@ -118,3 +120,27 @@ def test_match_empty_inputs():
     assert match_phase_profiles([], [_profile("x", 900)], {}) == []
     obs = segment_cycle(*_cotton(900), WM)
     assert match_phase_profiles(obs, [], {}) == []
+
+
+def test_profile_serialization_round_trip():
+    prof = _profile("40C", 1500)
+    d = phase_profile_to_dict(prof)
+    # JSON-safe
+    import json
+    d2 = json.loads(json.dumps(d))
+    back = phase_profile_from_dict(d2)
+    assert back is not None
+    assert back.name == prof.name
+    assert back.n_cycles == prof.n_cycles
+    assert set(back.roles) == set(prof.roles)
+    assert back.roles["heating"].dur_mean == prof.roles["heating"].dur_mean
+    # matching yields identical ranking with the rebuilt profile
+    obs = segment_cycle(*_cotton(1500), WM)
+    assert match_phase_profiles(obs, [back], {})[0].name == "40C"
+
+
+def test_profile_from_dict_bad_input():
+    assert phase_profile_from_dict(None) is None
+    assert phase_profile_from_dict({}) is None
+    assert phase_profile_from_dict({"roles": {}}) is None
+    assert phase_profile_from_dict("nonsense") is None

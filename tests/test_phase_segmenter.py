@@ -17,6 +17,9 @@
 """Unit tests for the unsupervised phase segmenter (Phase 0 prototype)."""
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pytest
 
 from custom_components.ha_washdata.phase_segmenter import (
@@ -133,3 +136,33 @@ def test_non_finite_filtered():
     w[5] = float("nan")
     segs = segment_cycle(t, w, WM)
     assert segs  # still segments after dropping the bad sample
+
+
+_WM_EXPORT = (
+    Path(__file__).resolve().parent.parent
+    / "cycle_data" / "me" / "washing_machine" / "washdata_export_01KBWSV8 (1).json"
+)
+
+
+@pytest.mark.slow
+@pytest.mark.skipif(not _WM_EXPORT.exists(), reason="real-data export not present")
+def test_real_cotton_cycles_have_heating_block():
+    """On real washing-machine cotton cycles the segmenter must isolate a
+    contiguous heating block carrying substantial energy (the signal the whole
+    temperature/ETA improvement rests on)."""
+    data = json.loads(_WM_EXPORT.read_text())
+    cycles = data["data"]["past_cycles"]
+    cotton = [c for c in cycles if "cotton" in (c.get("profile_name") or "").lower()
+              and (c.get("max_power") or 0) > 1000 and len(c.get("power_data") or []) >= 20]
+    assert cotton, "expected labelled cotton cycles in the export"
+    heated = 0
+    for c in cotton:
+        pd = c["power_data"]
+        t = [p[0] for p in pd]
+        w = [p[1] for p in pd]
+        segs = segment_cycle(t, w, WM)
+        heat = [s for s in segs if s.role == ROLE_HEATING]
+        if heat and max(h.energy_wh for h in heat) > 50:
+            heated += 1
+    # the vast majority of real cotton cycles must expose a heating block
+    assert heated >= 0.8 * len(cotton), f"only {heated}/{len(cotton)} had a heating block"
