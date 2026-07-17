@@ -1159,7 +1159,7 @@ function _fmtDate(ts, mode) {
   return (mode || _datePref) === 'relative' ? _relTime(ms) : _fmtAbsDate(ms);
 }
 function _esc(s) {
-  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 // Allow only http(s) links. Community-supplied URLs (e.g. a device's manualUrl)
 // must never render a `javascript:`/`data:` href, which _esc does not neutralise.

@@ -548,11 +548,21 @@ class StoreClient:
         if not token:
             return _out(None, False)
 
-        appliance = meta["applianceType"]
-        brand = meta["brand"]
-        model = meta["model"]
-        program = meta["program"]
-        interval = float(meta.get("sampleIntervalSec") or 0)
+        # Preserve the documented never-raise contract: malformed metadata/points must
+        # return a failure marker (with _last_error set), not propagate an exception to
+        # the no-raise StoreBridge caller.
+        if not isinstance(meta, dict):
+            self._last_error = "invalid upload metadata"
+            return _out(None, False)
+        try:
+            appliance = str(meta["applianceType"])
+            brand = str(meta["brand"])
+            model = str(meta["model"])
+            program = str(meta["program"])
+            interval = float(meta.get("sampleIntervalSec") or 0)
+        except (KeyError, TypeError, ValueError):
+            self._last_error = "invalid or missing upload metadata"
+            return _out(None, False)
         if appliance not in _APPLIANCE_TYPES:
             _LOGGER.warning("Store upload: invalid applianceType %r", appliance)
             self._last_error = f"unsupported appliance type {appliance!r} (only washer/dryer/dishwasher/washer_dryer)"
@@ -562,7 +572,11 @@ class StoreClient:
         d_id = device_id(appliance, brand, model)
         p_id = profile_id(d_id, program)
         qc_code = qc if qc in (1, 2, 3) else 3
-        pts = [[float(p[0]), float(p[1])] for p in points[:10000] if len(p) >= 2]
+        try:
+            pts = [[float(p[0]), float(p[1])] for p in (points or [])[:10000] if len(p) >= 2]
+        except (TypeError, ValueError):
+            self._last_error = "malformed trace points"
+            return _out(None, False)
 
         # 1-3: brand/device/profile (create-if-missing; rules deny updating existing).
         ok = await self._commit_create(token, f"brands/{b_id}", {
@@ -602,8 +616,13 @@ class StoreClient:
         # phases is an owner action -> Stage 5).
         phases = meta.get("phases")
         if isinstance(phases, list) and phases:
+            def _num(v: Any) -> float:
+                try:
+                    return float(v)
+                except (TypeError, ValueError):
+                    return 0.0
             profile_fields["phases"] = [
-                {"name": str(p.get("name", "")), "start": float(p.get("start", 0)), "end": float(p.get("end", 0))}
+                {"name": str(p.get("name", "")), "start": _num(p.get("start", 0)), "end": _num(p.get("end", 0))}
                 for p in phases if isinstance(p, dict)
             ]
             profile_fields["phaseSourceCycleId"] = str(meta.get("phaseSourceCycleId") or "")

@@ -117,11 +117,16 @@ def milestone_crossed(prev_count: int, cur_count: int, milestones: Any) -> int |
         return None
     crossed: int | None = None
     for raw in iterator:
+        # Accept genuine positive integers only: reject bool (True/False), fractional
+        # floats (50.5 -> 50), and int-like strings ("50") so a milestone the user
+        # never configured can't fire.
+        if isinstance(raw, bool):
+            continue
         try:
             m = int(raw)
         except (TypeError, ValueError):
             continue
-        if m <= 0:
+        if m != raw or m <= 0:
             continue
         if prev_count < m <= cur_count and (crossed is None or m > crossed):
             crossed = m

@@ -68,13 +68,18 @@ def _prep(cycles: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
         pw = _powers(c)
         if not name or len(pw) < 4:
             continue
-        dur = c.get("duration")
         try:
-            dur = float(dur)
+            dur = float(c.get("duration"))
         except (TypeError, ValueError):
-            dur = float(len(pw))
+            dur = 0.0
+        if dur <= 0:
+            # No reliable wall-clock duration: skip rather than fabricate one from the
+            # sample count (len(pw)), which distorts duration scoring on devices that
+            # sample every 30-60 s. Real cycles always carry a 'duration', so this only
+            # drops degenerate entries.
+            continue
         by_profile.setdefault(name, []).append(
-            {"pw": pw, "dur": dur if dur > 0 else float(len(pw)), "rs": _resample(pw, _RESAMPLE_L)}
+            {"pw": pw, "dur": dur, "rs": _resample(pw, _RESAMPLE_L)}
         )
     return by_profile
 
