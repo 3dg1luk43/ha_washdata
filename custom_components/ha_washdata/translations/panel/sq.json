@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optimizim: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Konfigurimi i pajisjes",
+      "healthy_chip": "Konfigurimi u kompletua"
+    },
+    "phase0": {
+      "washer": "WashData tashmë po zbulon ciklet tuaja. Regjistroni ciklin tuaj të parë për të aktivizuar emrat e programeve dhe vlerësimet e kohës.",
+      "dishwasher": "WashData po vëzhgon. Lavatriçet e enëve kanë cikle komplekse – regjistrimi i ciklit tuaj të parë rekomandohet fuqimisht. Nëse një cikël i zbuluar zgjat shumë, përdorni redaktuesin e ciklit për ta prerë para se ta ruani si profil.",
+      "generic": "WashData po vëzhgon. Regjistroni ose etiketoni një cikël të zbuluar për të filluar ndërtimin e profileve."
+    },
+    "phase1a": {
+      "labelled": "Fillim i mirë – programi juaj i parë është ruajtur. Për të dhëna sa më të pastra, merrni parasysh regjistrimin e ciklit tuaj të ardhshëm me veglën e regjistruesit."
+    },
+    "phase1b": {
+      "recorded": "Regjistrimi juaj u ruajt si {profile_name}. Tani regjistroni ose etiketoni programet tuaja të tjera të zakonshme për të ndërtuar mbulimin."
+    },
+    "phase1c": {
+      "verify": "Keni {count} programe nga komuniteti. Ekzekutoni një cikël për të verifikuar nëse WashData e njeh saktë – përputhja do të përmirësohet ndërsa pajisja juaj ndërton historinë e vet."
+    },
+    "phase2": {
+      "cluster": "WashData ka parë {count} cikle që nuk përputhen me asnjë program të ruajtur – ato duken të ngjashme me njëra-tjetrën. Dëshironi të krijoni një profil të ri për to?",
+      "unmatched": "Cikli juaj i fundit nuk u përputh me asnjë program të ruajtur. A është një program i ri?"
+    },
+    "phase3": {
+      "suggestions": "WashData ka rekomandime për cilësimet bazuar në historikun tuaj të cikleve – shqyrtojini ato për të përmirësuar saktësinë e zbulimit.",
+      "groups": "Disa nga profilet tuaja duken si i njëjti program në temperatura të ndryshme. Organizojini ato në një grup për përputhje më të mirë.",
+      "phases": "Shtoni faza programi te {profile_name} për vlerësime më të sakta të kohës së mbetur."
+    },
+    "phase4": {
+      "healthy": "Kjo pajisje është konfiguruar plotësisht ({profile_count} profile)."
+    },
+    "cta": {
+      "start_recording": "Fillo regjistrimin",
+      "label_detected_cycle": "Kam tashmë një cikël të zbuluar – etiketoje atë",
+      "browse_cycles": "Shfleto ciklet për të etiketuar një tjetër",
+      "view_profiles": "Shiko profilet tuaja",
+      "create_from_cluster": "Krijo profil nga këto cikle",
+      "create_profile": "Krijo një profil për të",
+      "review_suggestions": "Shqyrto sugjerimet",
+      "organise_profiles": "Organizo profilet",
+      "configure_phases": "Konfiguro fazat",
+      "skip_step": "Anashkalo këtë hap",
+      "skip_forever": "Mos shfaq më",
+      "hide_guidance": "Fshih udhëzuesin",
+      "show_guidance": "Shfaq udhëzuesin"
+    }
   }
 }

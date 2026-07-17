@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "优化：{param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "设备设置",
+      "healthy_chip": "设置完成"
+    },
+    "phase0": {
+      "washer": "WashData 已在检测您的周期。录制第一个周期以启用程序名称和时间估算。",
+      "dishwasher": "WashData 正在监视。洗碗机的周期较为复杂 – 强烈建议录制第一个周期。如果检测到的周期运行过长，请使用周期编辑器在保存为配置文件前进行裁剪。",
+      "generic": "WashData 正在监视。录制或标记检测到的周期，开始构建配置文件。"
+    },
+    "phase1a": {
+      "labelled": "良好的开始 – 您的第一个程序已保存。为获得最准确的数据，建议使用录制小部件录制下一个周期。"
+    },
+    "phase1b": {
+      "recorded": "您的录制已保存为 {profile_name}。现在录制或标记您的其他常用程序以建立覆盖范围。"
+    },
+    "phase1c": {
+      "verify": "您有来自社区的 {count} 个程序。运行一个周期以验证 WashData 是否正确识别 – 随着设备积累自己的历史记录，匹配将不断改善。"
+    },
+    "phase2": {
+      "cluster": "WashData 发现了 {count} 个与任何已保存程序不匹配的周期 – 它们彼此相似。想为这些周期创建新配置文件吗？",
+      "unmatched": "您的上一个周期与任何已保存的程序不匹配。是新程序吗？"
+    },
+    "phase3": {
+      "suggestions": "WashData 根据您的周期历史记录提供了设置建议 – 请查看以提高检测精度。",
+      "groups": "您的部分配置文件看起来像在不同温度下运行的同一程序。将它们整理成组以获得更好的匹配效果。",
+      "phases": "为 {profile_name} 添加程序阶段，以获得更准确的剩余时间估算。"
+    },
+    "phase4": {
+      "healthy": "此设备已完全设置好（{profile_count} 个配置文件）。"
+    },
+    "cta": {
+      "start_recording": "开始录制",
+      "label_detected_cycle": "我已有检测到的周期 – 直接标记",
+      "browse_cycles": "浏览周期以标记其他",
+      "view_profiles": "查看您的配置文件",
+      "create_from_cluster": "从这些周期创建配置文件",
+      "create_profile": "为此创建配置文件",
+      "review_suggestions": "查看建议",
+      "organise_profiles": "整理配置文件",
+      "configure_phases": "配置阶段",
+      "skip_step": "跳过此步骤",
+      "skip_forever": "不再显示",
+      "hide_guidance": "隐藏指南",
+      "show_guidance": "显示指南"
+    }
   }
 }

@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "최적화: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "기기 설정",
+      "healthy_chip": "설정 완료"
+    },
+    "phase0": {
+      "washer": "WashData가 이미 사이클을 감지하고 있습니다. 프로그램 이름과 시간 추정을 활성화하려면 첫 번째 사이클을 기록하세요.",
+      "dishwasher": "WashData가 관찰 중입니다. 식기세척기 사이클은 복잡합니다 – 첫 번째 사이클을 기록하는 것이 강력히 권장됩니다. 감지된 사이클이 너무 길게 실행되면 프로필로 저장하기 전에 사이클 편집기를 사용하여 다듬으세요.",
+      "generic": "WashData가 관찰 중입니다. 프로필 구축을 시작하려면 감지된 사이클을 기록하거나 라벨을 지정하세요."
+    },
+    "phase1a": {
+      "labelled": "좋은 시작입니다 – 첫 번째 프로그램이 저장되었습니다. 가장 정확한 데이터를 위해 녹음기 위젯으로 다음 사이클을 기록하는 것을 고려해 보세요."
+    },
+    "phase1b": {
+      "recorded": "녹음이 {profile_name}으로 저장되었습니다. 이제 다른 자주 사용하는 프로그램을 기록하거나 라벨을 지정하여 커버리지를 구축하세요."
+    },
+    "phase1c": {
+      "verify": "커뮤니티에서 {count}개의 프로그램이 있습니다. WashData가 올바르게 인식하는지 확인하기 위해 사이클을 실행하세요 – 기기가 자체 기록을 쌓으면서 매칭이 개선됩니다."
+    },
+    "phase2": {
+      "cluster": "WashData가 저장된 프로그램과 일치하지 않는 {count}개의 사이클을 발견했습니다 – 서로 비슷해 보입니다. 이를 위한 새 프로필을 만들고 싶으신가요?",
+      "unmatched": "마지막 사이클이 저장된 프로그램과 일치하지 않았습니다. 새 프로그램인가요?"
+    },
+    "phase3": {
+      "suggestions": "WashData가 사이클 기록을 기반으로 설정 권장 사항을 제안합니다 – 감지 정확도를 높이기 위해 검토하세요.",
+      "groups": "일부 프로필이 다른 온도의 동일한 프로그램처럼 보입니다. 더 나은 매칭을 위해 그룹으로 구성하세요.",
+      "phases": "더 정확한 잔여 시간 추정을 위해 {profile_name}에 프로그램 단계를 추가하세요."
+    },
+    "phase4": {
+      "healthy": "이 기기는 완전히 설정되었습니다 ({profile_count}개 프로필)."
+    },
+    "cta": {
+      "start_recording": "녹음 시작",
+      "label_detected_cycle": "이미 감지된 사이클이 있습니다 – 대신 라벨 지정",
+      "browse_cycles": "다른 사이클에 라벨을 지정하려면 찾아보기",
+      "view_profiles": "프로필 보기",
+      "create_from_cluster": "이 사이클들로 프로필 만들기",
+      "create_profile": "이를 위한 프로필 만들기",
+      "review_suggestions": "제안 검토",
+      "organise_profiles": "프로필 구성",
+      "configure_phases": "단계 구성",
+      "skip_step": "이 단계 건너뛰기",
+      "skip_forever": "다시 표시 안 함",
+      "hide_guidance": "안내 숨기기",
+      "show_guidance": "안내 표시"
+    }
   }
 }

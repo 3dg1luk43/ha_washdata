@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optimizasyon: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Cihaz Kurulumu",
+      "healthy_chip": "Kurulum tamamlandı"
+    },
+    "phase0": {
+      "washer": "WashData döngülerinizi zaten algılıyor. Program adlarını ve süre tahminlerini etkinleştirmek için ilk döngünüzü kaydedin.",
+      "dishwasher": "WashData izliyor. Bulaşık makinelerinin döngüleri karmaşıktır – ilk döngünüzü kaydetmeniz kesinlikle önerilir. Algılanan bir döngü çok uzun sürerse, profil olarak kaydetmeden önce döngü düzenleyicisini kullanarak kırpın.",
+      "generic": "WashData izliyor. Profil oluşturmaya başlamak için algılanan bir döngüyü kaydedin veya etiketleyin."
+    },
+    "phase1a": {
+      "labelled": "İyi bir başlangıç – ilk programınız kaydedildi. En temiz veri için bir sonraki döngünüzü kaydedici widget'ı ile kaydetmeyi düşünün."
+    },
+    "phase1b": {
+      "recorded": "Kaydınız {profile_name} olarak kaydedildi. Kapsama alanı oluşturmak için diğer yaygın programlarınızı kaydedin veya etiketleyin."
+    },
+    "phase1c": {
+      "verify": "Topluluktan {count} programınız var. WashData'nın doğru tanıyıp tanımadığını doğrulamak için bir döngü çalıştırın – cihazınız kendi geçmişini oluşturdukça eşleştirme iyileşecektir."
+    },
+    "phase2": {
+      "cluster": "WashData, kayıtlı hiçbir programla eşleşmeyen {count} döngü gördü – bunlar birbirlerine benziyor. Bunlar için yeni bir profil oluşturmak ister misiniz?",
+      "unmatched": "Son döngünüz kayıtlı hiçbir programla eşleşmedi. Yeni bir program mı?"
+    },
+    "phase3": {
+      "suggestions": "WashData, döngü geçmişinize göre ayar önerileri sunuyor – algılama doğruluğunu artırmak için bunları inceleyin.",
+      "groups": "Bazı profilleriniz farklı sıcaklıklardaki aynı programa benziyor. Daha iyi eşleştirme için bunları bir grupta düzenleyin.",
+      "phases": "Daha doğru kalan süre tahminleri için {profile_name} profiline program aşamaları ekleyin."
+    },
+    "phase4": {
+      "healthy": "Bu cihaz tamamen kuruldu ({profile_count} profil)."
+    },
+    "cta": {
+      "start_recording": "Kaydı Başlat",
+      "label_detected_cycle": "Zaten algılanmış bir döngüm var – bunun yerine etiketle",
+      "browse_cycles": "Başka birini etiketlemek için döngülere göz at",
+      "view_profiles": "Profillerinizi görüntüleyin",
+      "create_from_cluster": "Bu döngülerden profil oluştur",
+      "create_profile": "Bunun için bir profil oluştur",
+      "review_suggestions": "Önerileri incele",
+      "organise_profiles": "Profilleri düzenle",
+      "configure_phases": "Aşamaları yapılandır",
+      "skip_step": "Bu adımı atla",
+      "skip_forever": "Bir daha gösterme",
+      "hide_guidance": "Rehberi gizle",
+      "show_guidance": "Rehberi göster"
+    }
   }
 }
