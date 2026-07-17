@@ -52,6 +52,7 @@ from homeassistant.util import dt as dt_util
 from . import analysis
 from . import notification_rules as notif_rules
 from . import progress as progress_mod
+from .phase_segmenter import phase_matching_enabled
 from .const import (
     CONF_ABRUPT_DROP_WATTS,
     CONF_COMPLETION_MIN_SECONDS,
@@ -1068,8 +1069,21 @@ class _DetailSim:
             ml_pct = progress_mod.ml_progress_percent(
                 self.store, self.options, matched_dur, trace, program, self._end_exp_fn
             )
+            # Opt-in phase-resolved ETA blend - identical gating + call as the live
+            # manager, so the Playground stays a faithful mirror of the estimator.
+            phase_remaining_s = None
+            if (
+                self.store is not None
+                and len(trace) >= 10
+                and program != "detecting..."
+                and phase_matching_enabled(self.options, self.device_type)
+            ):
+                pr = self.store.phase_remaining(trace, offset, self.device_type)
+                if pr is not None:
+                    phase_remaining_s = pr.get("remaining_s")
             result = progress_mod.compute_progress(
-                self.device_type, matched_dur, offset, self.smoothed["v"], phase_result, ml_pct
+                self.device_type, matched_dur, offset, self.smoothed["v"], phase_result, ml_pct,
+                phase_remaining_s=phase_remaining_s,
             )
             if result is not None:
                 self.smoothed["v"] = result.smoothed

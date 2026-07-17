@@ -448,7 +448,7 @@ def estimate_phase_progress(
     return (best_progress, best_variance)
 
 
-def compute_progress(
+def _compute_progress_base(
     device_type: str,
     matched_duration: float,
     duration_so_far: float,
@@ -547,6 +547,61 @@ def compute_progress(
         progress,
     )
     return ProgressResult(progress, smoothed, remaining, total, None, "linear")
+
+
+def compute_progress(
+    device_type: str,
+    matched_duration: float,
+    duration_so_far: float,
+    prev_smoothed: float,
+    phase_result: tuple[float, float] | None,
+    ml_pct: float | None,
+    logger: logging.Logger | None = None,
+    phase_remaining_s: float | None = None,
+) -> ProgressResult | None:
+    """Progress/remaining estimate, optionally blended with a phase-resolved ETA.
+
+    Delegates to :func:`_compute_progress_base` (the proven, golden-locked EMA +
+    monotonicity + back-calculation body) and, when ``phase_remaining_s`` is
+    provided (opt-in phase matching for a supported device type), blends the
+    phase-resolved per-role budget remaining into the estimate:
+
+        f = base_progress / 100                        # completion per the base est.
+        remaining = (1 - f) * phase_remaining_s + f * base_remaining
+
+    i.e. lean on the phase budget early (when the base under/over-estimates most)
+    and on the proven estimator late (near completion). ``progress`` is re-derived
+    from the blended remaining so the two stay consistent; the base estimator's
+    EMA-smoothed ``base_progress`` supplies the (smooth) blend weight, so the
+    result inherits the base's smoothing rather than jittering per tick.
+
+    Behaviour is BYTE-IDENTICAL to before when ``phase_remaining_s is None`` (the
+    default) - the golden progress snapshot and every existing caller are
+    unaffected. This is the single implementation of the blend; the manager and
+    the Playground SimRunner both go through it.
+    """
+    base = _compute_progress_base(
+        device_type, matched_duration, duration_so_far, prev_smoothed,
+        phase_result, ml_pct, logger,
+    )
+    if base is None or phase_remaining_s is None:
+        return base
+    try:
+        pr = float(phase_remaining_s)
+        if not math.isfinite(pr) or pr < 0.0:  # reject NaN / inf / negative
+            return base
+        f = max(0.0, min(1.0, base.progress / 100.0))
+        blended_remaining = max(0.0, (1.0 - f) * pr + f * base.remaining)
+        total = duration_so_far + blended_remaining
+        progress = base.progress
+        if total > 0.0:
+            progress = max(0.0, min(99.0, duration_so_far / total * 100.0))
+        return ProgressResult(
+            progress, base.smoothed, blended_remaining, total,
+            base.phase_progress, "phase_blend",
+        )
+    except (TypeError, ValueError):
+        return base
 
 
 def current_phase(

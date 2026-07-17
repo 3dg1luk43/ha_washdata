@@ -195,24 +195,36 @@ def _truncate(cycle: dict, elapsed: float):
 
 
 def _current_remaining(store, snapshots, avg_dur_by_label, device_type,
-                       trunc_offs, trunc_pws, elapsed):
-    """Predicted remaining seconds from the real whole-cycle match + progress.py."""
+                       trunc_offs, trunc_pws, elapsed, phase_remaining_s=None):
+    """Predicted remaining (base) and, if phase_remaining_s given, the EXACT shipped
+    blended remaining (progress.compute_progress(..., phase_remaining_s=...)).
+
+    Returns ``(rem_base, rem_blend_live_or_None, matched_name)``."""
     cands = analysis.compute_matches_worker(trunc_pws, elapsed, snapshots, MATCH_CFG)
     if not cands:
-        return None, None
+        return None, None, None
     matched = cands[0]["name"]
     avg_dur = avg_dur_by_label.get(matched, 0.0)
     if avg_dur <= 0:
-        return None, matched
+        return None, None, matched
     pdata = [[o, p] for o, p in zip(trunc_offs, trunc_pws)]
     try:
         phase_result = progress.estimate_phase_progress(store, pdata, elapsed, matched)
-        pr = progress.compute_progress(device_type, avg_dur, elapsed, 0.0, phase_result, None)
-        if pr is not None:
-            return float(pr.remaining), matched
+        base = progress.compute_progress(device_type, avg_dur, elapsed, 0.0, phase_result, None)
+        rem_base = float(base.remaining) if base is not None else max(0.0, avg_dur - elapsed)
+        rem_live = None
+        if base is not None and phase_remaining_s is not None:
+            # EXACT shipped blend: compute_progress(..., phase_remaining_s=...)
+            blended = progress.compute_progress(
+                device_type, avg_dur, elapsed, 0.0, phase_result, None,
+                phase_remaining_s=phase_remaining_s,
+            )
+            if blended is not None:
+                rem_live = float(blended.remaining)
+        return rem_base, rem_live, matched
     except Exception:
         pass
-    return max(0.0, avg_dur - elapsed), matched
+    return max(0.0, avg_dur - elapsed), None, matched
 
 
 def evaluate_source(src: dict) -> dict | None:
@@ -237,7 +249,7 @@ def evaluate_source(src: dict) -> dict | None:
     )
     full_env = {l: build_envelope(by_label[l]) for l in by_label}
 
-    modes = ("current", "replace", "hybrid", "blend")
+    modes = ("current", "replace", "hybrid", "blend", "blend_live")
     err = {m: {f: [] for f in FRACTIONS} for m in modes}
     bias = {m: {f: [] for f in FRACTIONS} for m in modes}
     top1 = {"current": [0, 0], "phase": [0, 0]}  # [correct, total]
@@ -290,38 +302,46 @@ def evaluate_source(src: dict) -> dict | None:
                 if len(t_offs) < 4:
                     continue
 
-                # current
-                rem_c, _ = _current_remaining(store, snapshots, avg_dur_by_label,
-                                              device_type, t_offs, t_pws, elapsed)
-                if rem_c is not None:
-                    err["current"][f].append(abs(rem_c - actual))
-                    bias["current"][f].append(rem_c - actual)
-
+                # phase estimate first (feeds the shipped blend)
+                rem_r = None
+                segs = None
                 if model and phase_cands:
                     segs = segment_cycle(t_offs, t_pws, model, partial=True)
                     if segs:
                         mres = match_phase_profiles(segs, phase_cands, {})
                         if mres:
-                            # replace: phase matcher picks the member
                             prof_r = next((p for p in phase_cands if p.name == mres[0].name), None)
                             rem_r = phase_eta(segs, prof_r, elapsed) if prof_r else None
-                            if rem_r is not None:
-                                err["replace"][f].append(abs(rem_r - actual))
-                                bias["replace"][f].append(rem_r - actual)
-                            # hybrid: whole-cycle picks program, phase-ETA refines
-                            cc2 = analysis.compute_matches_worker(t_pws, elapsed, snapshots, MATCH_CFG)
-                            wc_name = cc2[0]["name"] if cc2 else None
-                            prof_h = next((p for p in phase_cands if p.name == wc_name), None)
-                            rem_h = phase_eta(segs, prof_h, elapsed) if prof_h else rem_r
-                            if rem_h is not None:
-                                err["hybrid"][f].append(abs(rem_h - actual))
-                                bias["hybrid"][f].append(rem_h - actual)
-                            # blend: lean on phase early, on current late (phase
-                            # wins mid-cycle, current wins near the end)
-                            if rem_r is not None and rem_c is not None:
-                                rem_b = (1.0 - f) * rem_r + f * rem_c
-                                err["blend"][f].append(abs(rem_b - actual))
-                                bias["blend"][f].append(rem_b - actual)
+
+                # current (base) + blend_live = EXACT shipped compute_progress blend
+                rem_c, rem_live, _ = _current_remaining(
+                    store, snapshots, avg_dur_by_label, device_type,
+                    t_offs, t_pws, elapsed, phase_remaining_s=rem_r,
+                )
+                if rem_c is not None:
+                    err["current"][f].append(abs(rem_c - actual))
+                    bias["current"][f].append(rem_c - actual)
+                if rem_live is not None:
+                    err["blend_live"][f].append(abs(rem_live - actual))
+                    bias["blend_live"][f].append(rem_live - actual)
+
+                if segs and rem_r is not None:
+                    # replace: phase matcher picks the member
+                    err["replace"][f].append(abs(rem_r - actual))
+                    bias["replace"][f].append(rem_r - actual)
+                    # hybrid: whole-cycle picks program, phase-ETA refines
+                    cc2 = analysis.compute_matches_worker(t_pws, elapsed, snapshots, MATCH_CFG)
+                    wc_name = cc2[0]["name"] if cc2 else None
+                    prof_h = next((p for p in phase_cands if p.name == wc_name), None)
+                    rem_h = phase_eta(segs, prof_h, elapsed) if prof_h else rem_r
+                    if rem_h is not None:
+                        err["hybrid"][f].append(abs(rem_h - actual))
+                        bias["hybrid"][f].append(rem_h - actual)
+                    # blend (idealized f = true fraction, the Phase-0 PoC)
+                    if rem_c is not None:
+                        rem_b = (1.0 - f) * rem_r + f * rem_c
+                        err["blend"][f].append(abs(rem_b - actual))
+                        bias["blend"][f].append(rem_b - actual)
 
     def _mae(xs):
         return float(np.mean(xs)) if xs else float("nan")
@@ -350,7 +370,7 @@ def report(results: list[dict]) -> None:
         if r:
             per_dt[r["device_type"]].append(r)
 
-    modes = ("current", "replace", "hybrid", "blend")
+    modes = ("current", "replace", "hybrid", "blend", "blend_live")
     for dt, rs in per_dt.items():
         has_model = any(r["has_model"] for r in rs)
 
@@ -401,7 +421,7 @@ def _recommend(dt: str, pooled: dict) -> str:
         return (c - v) / c  # positive = improvement
     lines = ["\nRECOMMENDATION (spec §2 bar: >=10% at 50%% AND not-worse (>=-2%) elsewhere):"]
     candidates = []
-    for mode in ("replace", "hybrid", "blend"):
+    for mode in ("replace", "hybrid", "blend", "blend_live"):
         r50 = rel(mode, 0.50)
         ok = (r50 is not None and r50 >= 0.10
               and all((rel(mode, f) or 0) >= -0.02 for f in FRACTIONS))

@@ -259,6 +259,7 @@ from .log_utils import DeviceLoggerAdapter
 from .time_utils import power_data_to_offsets
 from . import progress as progress_mod
 from . import notification_rules as notif_rules
+from .phase_segmenter import phase_matching_enabled
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -5691,6 +5692,22 @@ class WashDataManager:
                 trace, duration_so_far, self._current_program
             )
         ml_pct = self._ml_progress_percent(trace, self._current_program)
+
+        # Opt-in phase-resolved ETA (washing machine / washer-dryer only). Segment
+        # the observed-so-far trace, match against cached per-profile phase profiles,
+        # and blend the per-role budget remaining into the estimate (progress.py
+        # owns the blend). Gated + guarded: any failure leaves the proven estimate
+        # untouched (phase_remaining_s stays None -> byte-identical behaviour).
+        phase_remaining_s: float | None = None
+        if (
+            len(trace) >= 10
+            and self._current_program not in ("detecting...", "off", None)
+            and phase_matching_enabled(self.config_entry.options, self.device_type)
+        ):
+            pr = self.profile_store.phase_remaining(trace, duration_so_far, self.device_type)
+            if pr is not None:
+                phase_remaining_s = pr.get("remaining_s")
+
         result = progress_mod.compute_progress(
             self.device_type,
             float(self._matched_profile_duration),
@@ -5699,6 +5716,7 @@ class WashDataManager:
             phase_result,
             ml_pct,
             self._logger,
+            phase_remaining_s=phase_remaining_s,
         )
 
         self._cycle_progress = result.progress
