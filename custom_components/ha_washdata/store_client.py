@@ -554,15 +554,23 @@ class StoreClient:
         if not isinstance(meta, dict):
             self._last_error = "invalid upload metadata"
             return _out(None, False)
+        # Reject (don't coerce) missing/blank required metadata: str(None) -> "None"
+        # would otherwise pollute the catalog with a literal "None" brand/model/etc.
+        required: dict[str, str] = {}
+        for _key in ("applianceType", "brand", "model", "program"):
+            _val = meta.get(_key)
+            if not isinstance(_val, str) or not _val.strip():
+                self._last_error = f"invalid or missing upload metadata: {_key}"
+                return _out(None, False)
+            required[_key] = _val.strip()
+        appliance = required["applianceType"]
+        brand = required["brand"]
+        model = required["model"]
+        program = required["program"]
         try:
-            appliance = str(meta["applianceType"])
-            brand = str(meta["brand"])
-            model = str(meta["model"])
-            program = str(meta["program"])
             interval = float(meta.get("sampleIntervalSec") or 0)
-        except (KeyError, TypeError, ValueError):
-            self._last_error = "invalid or missing upload metadata"
-            return _out(None, False)
+        except (TypeError, ValueError):
+            interval = 0.0
         if appliance not in _APPLIANCE_TYPES:
             _LOGGER.warning("Store upload: invalid applianceType %r", appliance)
             self._last_error = f"unsupported appliance type {appliance!r} (only washer/dryer/dishwasher/washer_dryer)"
@@ -576,6 +584,9 @@ class StoreClient:
             pts = [[float(p[0]), float(p[1])] for p in (points or [])[:10000] if len(p) >= 2]
         except (TypeError, ValueError):
             self._last_error = "malformed trace points"
+            return _out(None, False)
+        if len(pts) < 2:
+            self._last_error = "empty or too-short trace"
             return _out(None, False)
 
         # 1-3: brand/device/profile (create-if-missing; rules deny updating existing).
@@ -616,17 +627,20 @@ class StoreClient:
         # phases is an owner action -> Stage 5).
         phases = meta.get("phases")
         if isinstance(phases, list) and phases:
-            def _num(v: Any) -> float:
+            def _valid_phase(p: Any) -> dict[str, Any] | None:
+                # Drop a phase with non-numeric start/end rather than coercing it to
+                # 0.0 (which would ship a bogus zero-length phase to the catalog).
                 try:
-                    return float(v)
-                except (TypeError, ValueError):
-                    return 0.0
-            profile_fields["phases"] = [
-                {"name": str(p.get("name", "")), "start": _num(p.get("start", 0)), "end": _num(p.get("end", 0))}
-                for p in phases if isinstance(p, dict)
+                    return {"name": str(p.get("name", "")), "start": float(p["start"]), "end": float(p["end"])}
+                except (KeyError, TypeError, ValueError):
+                    return None
+            valid_phases = [
+                vp for vp in (_valid_phase(p) for p in phases if isinstance(p, dict)) if vp is not None
             ]
-            profile_fields["phaseSourceCycleId"] = str(meta.get("phaseSourceCycleId") or "")
-            profile_fields["phasesSchemaVersion"] = 1
+            if valid_phases:
+                profile_fields["phases"] = valid_phases
+                profile_fields["phaseSourceCycleId"] = str(meta.get("phaseSourceCycleId") or "")
+                profile_fields["phasesSchemaVersion"] = 1
         ok = ok and await self._commit_create(token, f"profiles/{p_id}", profile_fields)
         if not ok:
             return _out(None, False)

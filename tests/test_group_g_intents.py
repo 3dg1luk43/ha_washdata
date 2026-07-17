@@ -226,6 +226,14 @@ async def test_translation_override_applied():
     assert speech == "Die Washer laeuft noch."
 
 
+def test_load_intent_file_rejects_path_traversal():
+    """A crafted language code must never escape the translations/intent directory."""
+    for bad in ("../../secrets", "..", "en/../../x", "a/b", "en\x00", "."):
+        assert intents._load_intent_file(bad) == {}
+    # A real language tag still loads (English base ships with the integration).
+    assert isinstance(intents._load_intent_file("en"), dict)
+
+
 # ---------------------------------------------------------------------------
 # Registration
 # ---------------------------------------------------------------------------

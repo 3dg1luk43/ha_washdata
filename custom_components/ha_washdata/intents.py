@@ -68,6 +68,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 from datetime import datetime
 from typing import Any
 
@@ -264,6 +265,12 @@ def _load_intent_file(language: str) -> dict[str, str]:
     """
     if language in _INTENT_TRANS_CACHE:
         return _INTENT_TRANS_CACHE[language]
+    # Sanitize before interpolating into a path: HA language tags are letters/digits/
+    # hyphen only, so reject anything else (defends against path traversal via a
+    # crafted language value).
+    if not re.fullmatch(r"[A-Za-z0-9_-]{1,20}", language or ""):
+        _INTENT_TRANS_CACHE[language] = {}
+        return {}
     result: dict[str, str] = {}
     try:
         path = os.path.join(

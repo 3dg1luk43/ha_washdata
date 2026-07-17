@@ -251,7 +251,7 @@ jobs:
                 });
 
                 const botComments = comments.data.filter(
-                  c => c.user.type === 'Bot' && c.body.includes('missing that we need before we can investigate')
+                  c => c.user.type === 'Bot' && (c.body || '').includes('missing that we need before we can investigate')
                 );
 
                 if (botComments.length === 0) {

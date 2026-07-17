@@ -421,7 +421,7 @@ If you'd like to help, you can submit a diagnostics export directly from Home As
 
 **How to export:**
 
-1. Open Home Assistant and go to** Settings → Devices & Services**
+1. Open Home Assistant and go to **Settings → Devices & Services**
 2. Find your **WashData** integration and click on it
 3. Open device you want to submit data for
 4. Navigate left, to **"Device info"** section
