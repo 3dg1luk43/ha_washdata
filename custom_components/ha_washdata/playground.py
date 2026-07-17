@@ -846,11 +846,9 @@ def _simulate_cycle_detail_inner(
             _emit("detected", "cycle detected (running)")
             if start_configured and not flags["start"]:
                 flags["start"] = True
-                held = _held(cursor["t"])
-                _emit(
-                    "notify_held" if held else "notify_start",
-                    "start notification" + (" (held: quiet hours)" if held else ""),
-                )
+                # Start notifications are never delayed by quiet hours (live contract),
+                # so the sim always emits them immediately.
+                _emit("notify_start", "start notification")
 
     def _on_cycle_end(cycle_data: dict[str, Any]) -> None:
         captured.append(cycle_data)
@@ -1062,7 +1060,7 @@ def _simulate_cycle_detail_inner(
             "finish notification" + (" (held: quiet hours)" if held else ""),
         )
         try:
-            prev_life = int((getattr(store, "_data", {}) or {}).get("lifetime_cycle_count", 0) or 0)
+            prev_life = int(store.get_lifetime_cycle_count())
         except Exception:  # pylint: disable=broad-exception-caught
             prev_life = 0
         crossed = notif_rules.milestone_crossed(
@@ -1070,7 +1068,12 @@ def _simulate_cycle_detail_inner(
             options.get(CONF_NOTIFY_MILESTONES, DEFAULT_NOTIFY_MILESTONES),
         )
         if crossed is not None:
-            _emit("notify_milestone", f"milestone {crossed} cycles")
+            # Milestone notifications are held during quiet hours (live contract).
+            m_held = _held(cursor["t"])
+            _emit(
+                "notify_held" if m_held else "notify_milestone",
+                f"milestone {crossed} cycles" + (" (held: quiet hours)" if m_held else ""),
+            )
 
     # --- alerts ---
     alerts: list[dict[str, Any]] = []
@@ -1380,16 +1383,19 @@ def objective_metric(rows: list[dict[str, Any]], objective: str) -> float | None
             return None
         return sum(1 for r in detected if "ambiguous" in (r["alerts"] or [])) / len(detected)
     if objective == "end_timing_accuracy":
-        # fraction of cycles whose detected duration is within 10% of expected
+        # Fraction of cycles whose *detected* end lands within 10% of that cycle's own
+        # recorded duration (its true end) - NOT the profile median. Scoring against
+        # the median would reward ending at the typical length even for a cycle that
+        # legitimately ran long or short, so the sweep must compare to stored_duration_s.
         ok = 0
         n = 0
         for r in detected:
-            exp = float(r.get("expected_s") or 0.0)
+            ref = float(r.get("stored_duration_s") or 0.0)
             dur = float(r.get("duration_s") or 0.0)
-            if exp <= 0 or dur <= 0:
+            if ref <= 0 or dur <= 0:
                 continue
             n += 1
-            if abs(dur - exp) <= 0.10 * exp:
+            if abs(dur - ref) <= 0.10 * ref:
                 ok += 1
         return (ok / n) if n else None
     if objective == "median_overrun":
