@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Bestun: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Uppsetning tækis",
+      "healthy_chip": "Uppsetningu lokið"
+    },
+    "phase0": {
+      "washer": "WashData greinir nú þegar lotur þínar. Taktu upp fyrstu lotuna til að virkja forritsheiti og tímamat.",
+      "dishwasher": "WashData fylgist með. Uppþvottavélar hafa flóknar lotur – mjög mælt er með að taka upp fyrstu lotuna. Ef greind lota keyrir of lengi skaltu nota lotu-ritilinn til að snyrta hana áður en hún er vistuð sem snið.",
+      "generic": "WashData fylgist með. Taktu upp eða merktu greinda lotu til að hefja uppbyggingu sniða."
+    },
+    "phase1a": {
+      "labelled": "Gott upphaf – fyrsta forritið þitt er vistað. Fyrir hreinustu gögn skaltu íhuga að taka upp næstu lotu með upptökugræjunni."
+    },
+    "phase1b": {
+      "recorded": "Upptakan þín var vistuð sem {profile_name}. Taktu nú upp eða merktu önnur algeng forrit þín til að byggja upp þekju."
+    },
+    "phase1c": {
+      "verify": "Þú ert með {count} forrit úr samfélaginu. Keyrðu lotu til að staðfesta að WashData þekki hana rétt – samsvörun batnar eftir því sem tækið byggir upp sína eigin sögu."
+    },
+    "phase2": {
+      "cluster": "WashData hefur séð {count} lotur sem samsvara ekki neinu vistuðu forriti – þær líkjast hvor annarri. Viltu búa til nýtt snið fyrir þær?",
+      "unmatched": "Síðasta lota þín samsvaraði ekki neinu vistuðu forriti. Er þetta nýtt forrit?"
+    },
+    "phase3": {
+      "suggestions": "WashData hefur stillingatillögur byggðar á lotuferli þínum – farðu yfir þær til að bæta nákvæmni greiningar.",
+      "groups": "Sum snið þín líkjast sama forriti við mismunandi hitastig. Skiptu þeim í hóp til að fá betri samsvörun.",
+      "phases": "Bættu forritsfasum við {profile_name} fyrir nákvæmara mat á tíma sem eftir er."
+    },
+    "phase4": {
+      "healthy": "Þetta tæki er að fullu sett upp ({profile_count} snið)."
+    },
+    "cta": {
+      "start_recording": "Byrjaðu upptöku",
+      "label_detected_cycle": "Ég er nú þegar með greinda lotu – merkja hana í staðinn",
+      "browse_cycles": "Skoðaðu lotur til að merkja aðra",
+      "view_profiles": "Skoðaðu snið þín",
+      "create_from_cluster": "Búa til snið úr þessum lotum",
+      "create_profile": "Búðu til snið fyrir hana",
+      "review_suggestions": "Yfirfara tillögur",
+      "organise_profiles": "Skipuleggja snið",
+      "configure_phases": "Stilla fasa",
+      "skip_step": "Sleppa þessu skrefi",
+      "skip_forever": "Sýna ekki aftur",
+      "hide_guidance": "Fela leiðbeiningar",
+      "show_guidance": "Sýna leiðbeiningar"
+    }
   }
 }

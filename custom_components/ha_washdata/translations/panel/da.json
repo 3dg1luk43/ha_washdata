@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optimér: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Apparatopsætning",
+      "healthy_chip": "Opsætning fuldført"
+    },
+    "phase0": {
+      "washer": "WashData registrerer allerede dine cyklusser. Optag din første cyklus for at aktivere programnavne og tidsestimater.",
+      "dishwasher": "WashData holder øje. Opvaskemaskiner har komplekse cyklusser – det anbefales stærkt at optage din første cyklus. Hvis en registreret cyklus kører for længe, brug cyklus-editoren til at beskære den, inden du gemmer den som en profil.",
+      "generic": "WashData holder øje. Optag eller mærk en registreret cyklus for at begynde at opbygge profiler."
+    },
+    "phase1a": {
+      "labelled": "Godt gået – dit første program er gemt. For de reneste data kan du overveje at optage din næste cyklus med optagelses-widgetten."
+    },
+    "phase1b": {
+      "recorded": "Din optagelse blev gemt som {profile_name}. Optag nu eller mærk dine andre hyppigt brugte programmer for at opbygge dækning."
+    },
+    "phase1c": {
+      "verify": "Du har {count} programmer fra fællesskabet. Kør en cyklus for at bekræfte, at WashData genkender den korrekt – matchningen forbedres, efterhånden som din enhed opbygger sin egen historik."
+    },
+    "phase2": {
+      "cluster": "WashData har set {count} cyklusser, der ikke matcher noget gemt program – de ligner hinanden. Vil du oprette en ny profil til dem?",
+      "unmatched": "Din seneste cyklus matchede ikke noget gemt program. Er det et nyt program?"
+    },
+    "phase3": {
+      "suggestions": "WashData har indstillingsanbefalinger baseret på din cyklushistorik – gennemgå dem for at forbedre registreringens nøjagtighed.",
+      "groups": "Nogle af dine profiler ligner det samme program ved forskellige temperaturer. Organiser dem i en gruppe for bedre matchning.",
+      "phases": "Tilføj programfaser til {profile_name} for mere præcise estimater af den resterende tid."
+    },
+    "phase4": {
+      "healthy": "Dette apparat er fuldt opsat ({profile_count} profiler)."
+    },
+    "cta": {
+      "start_recording": "Start optagelse",
+      "label_detected_cycle": "Jeg har allerede en registreret cyklus – mærk den i stedet",
+      "browse_cycles": "Gennemse cyklusser for at mærke en anden",
+      "view_profiles": "Se dine profiler",
+      "create_from_cluster": "Opret profil fra disse cyklusser",
+      "create_profile": "Opret en profil til den",
+      "review_suggestions": "Gennemgå anbefalinger",
+      "organise_profiles": "Organiser profiler",
+      "configure_phases": "Konfigurer faser",
+      "skip_step": "Spring dette trin over",
+      "skip_forever": "Vis ikke igen",
+      "hide_guidance": "Skjul vejledning",
+      "show_guidance": "Vis vejledning"
+    }
   }
 }

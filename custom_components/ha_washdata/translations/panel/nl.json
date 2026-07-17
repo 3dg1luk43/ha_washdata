@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optimaliseren: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Apparaat instellen",
+      "healthy_chip": "Instelling voltooid"
+    },
+    "phase0": {
+      "washer": "WashData detecteert uw cycli al. Neem uw eerste cyclus op om programmanamen en tijdschattingen in te schakelen.",
+      "dishwasher": "WashData kijkt mee. Vaatwassers hebben complexe cycli – het opnemen van uw eerste cyclus wordt sterk aanbevolen. Als een gedetecteerde cyclus te lang duurt, gebruik dan de cycluseditor om hem bij te snijden vóór het opslaan als profiel.",
+      "generic": "WashData kijkt mee. Neem een cyclus op of label een gedetecteerde cyclus om te beginnen met het opbouwen van profielen."
+    },
+    "phase1a": {
+      "labelled": "Goed begin – uw eerste programma is opgeslagen. Voor de zuiverste gegevens kunt u uw volgende cyclus opnemen met de recorder-widget."
+    },
+    "phase1b": {
+      "recorded": "Uw opname is opgeslagen als {profile_name}. Neem nu uw andere veelgebruikte programma's op of label ze om de dekking uit te breiden."
+    },
+    "phase1c": {
+      "verify": "U heeft {count} programma's van de community. Voer een cyclus uit om te verifiëren dat WashData deze correct herkent – de herkenning verbetert naarmate uw apparaat zijn eigen geschiedenis opbouwt."
+    },
+    "phase2": {
+      "cluster": "WashData heeft {count} cycli gezien die niet overeenkomen met een opgeslagen programma – ze lijken op elkaar. Wilt u een nieuw profiel voor ze aanmaken?",
+      "unmatched": "Uw laatste cyclus kwam niet overeen met een opgeslagen programma. Is het een nieuw programma?"
+    },
+    "phase3": {
+      "suggestions": "WashData heeft instellingsaanbevelingen op basis van uw cyclusgeschiedenis – bekijk ze om de detectienauwkeurigheid te verbeteren.",
+      "groups": "Sommige van uw profielen lijken op hetzelfde programma bij verschillende temperaturen. Organiseer ze in een groep voor betere herkenning.",
+      "phases": "Voeg programmasfases toe aan {profile_name} voor nauwkeurigere schattingen van de resterende tijd."
+    },
+    "phase4": {
+      "healthy": "Dit apparaat is volledig ingesteld ({profile_count} profielen)."
+    },
+    "cta": {
+      "start_recording": "Opname starten",
+      "label_detected_cycle": "Ik heb al een gedetecteerde cyclus – label die in plaats daarvan",
+      "browse_cycles": "Cycli bekijken om een andere te labelen",
+      "view_profiles": "Uw profielen bekijken",
+      "create_from_cluster": "Profiel maken van deze cycli",
+      "create_profile": "Maak er een profiel voor",
+      "review_suggestions": "Aanbevelingen bekijken",
+      "organise_profiles": "Profielen organiseren",
+      "configure_phases": "Fasen configureren",
+      "skip_step": "Sla deze stap over",
+      "skip_forever": "Niet meer weergeven",
+      "hide_guidance": "Begeleiding verbergen",
+      "show_guidance": "Begeleiding weergeven"
+    }
   }
 }

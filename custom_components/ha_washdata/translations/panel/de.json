@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optimieren: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Gerät einrichten",
+      "healthy_chip": "Einrichtung abgeschlossen"
+    },
+    "phase0": {
+      "washer": "WashData erkennt bereits Ihre Zyklen. Nehmen Sie Ihren ersten Zyklus auf, um Programmnamen und Zeitschätzungen zu aktivieren.",
+      "dishwasher": "WashData beobachtet. Geschirrspüler haben komplexe Zyklen – es wird dringend empfohlen, Ihren ersten Zyklus aufzunehmen. Falls ein erkannter Zyklus zu lang läuft, kürzen Sie ihn im Zyklus-Editor, bevor Sie ihn als Profil speichern.",
+      "generic": "WashData beobachtet. Nehmen Sie einen Zyklus auf oder beschriften Sie einen erkannten Zyklus, um mit dem Aufbau von Profilen zu beginnen."
+    },
+    "phase1a": {
+      "labelled": "Guter Start – Ihr erstes Programm ist gespeichert. Für die saubersten Daten empfiehlt es sich, den nächsten Zyklus mit dem Aufnahme-Widget aufzuzeichnen."
+    },
+    "phase1b": {
+      "recorded": "Ihre Aufnahme wurde als {profile_name} gespeichert. Nehmen Sie nun Ihre anderen häufig verwendeten Programme auf oder beschriften Sie sie, um die Abdeckung zu verbessern."
+    },
+    "phase1c": {
+      "verify": "Sie haben {count} Programme aus der Community. Führen Sie einen Zyklus durch, um zu überprüfen, ob WashData ihn korrekt erkennt – die Erkennung verbessert sich, je mehr Verlauf Ihr Gerät aufbaut."
+    },
+    "phase2": {
+      "cluster": "WashData hat {count} Zyklen gesehen, die keinem gespeicherten Programm entsprechen – sie sehen einander ähnlich aus. Möchten Sie ein neues Profil dafür erstellen?",
+      "unmatched": "Ihr letzter Zyklus hat keinem gespeicherten Programm entsprochen. Ist es ein neues Programm?"
+    },
+    "phase3": {
+      "suggestions": "WashData hat Einstellungsempfehlungen basierend auf Ihrem Zyklusverlauf – überprüfen Sie sie, um die Erkennungsgenauigkeit zu verbessern.",
+      "groups": "Einige Ihrer Profile sehen aus wie dasselbe Programm bei unterschiedlichen Temperaturen. Organisieren Sie sie in einer Gruppe für eine bessere Erkennung.",
+      "phases": "Fügen Sie {profile_name} Programmphasen hinzu, um genauere Schätzungen der verbleibenden Zeit zu erhalten."
+    },
+    "phase4": {
+      "healthy": "Dieses Gerät ist vollständig eingerichtet ({profile_count} Profile)."
+    },
+    "cta": {
+      "start_recording": "Aufnahme starten",
+      "label_detected_cycle": "Ich habe bereits einen erkannten Zyklus – stattdessen beschriften",
+      "browse_cycles": "Zyklen durchsuchen, um einen weiteren zu beschriften",
+      "view_profiles": "Ihre Profile anzeigen",
+      "create_from_cluster": "Profil aus diesen Zyklen erstellen",
+      "create_profile": "Ein Profil dafür erstellen",
+      "review_suggestions": "Empfehlungen überprüfen",
+      "organise_profiles": "Profile organisieren",
+      "configure_phases": "Phasen konfigurieren",
+      "skip_step": "Diesen Schritt überspringen",
+      "skip_forever": "Nicht mehr anzeigen",
+      "hide_guidance": "Anleitung ausblenden",
+      "show_guidance": "Anleitung einblenden"
+    }
   }
 }

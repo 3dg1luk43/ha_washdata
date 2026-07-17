@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optimera: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Enhetsinställning",
+      "healthy_chip": "Konfiguration klar"
+    },
+    "phase0": {
+      "washer": "WashData identifierar redan dina cykler. Spela in din första cykel för att aktivera programnamn och tidsuppskattningar.",
+      "dishwasher": "WashData observerar. Diskmaskiner har komplexa cykler – att spela in din första cykel rekommenderas starkt. Om en identifierad cykel körs för länge, använd cykeleditorn för att trimma den innan du sparar den som en profil.",
+      "generic": "WashData observerar. Spela in eller märk en identifierad cykel för att börja bygga profiler."
+    },
+    "phase1a": {
+      "labelled": "Bra start – ditt första program är sparat. För renast möjliga data kan du spela in din nästa cykel med inspelningswidgeten."
+    },
+    "phase1b": {
+      "recorded": "Din inspelning sparades som {profile_name}. Spela nu in eller märk dina andra vanliga program för att bygga upp täckning."
+    },
+    "phase1c": {
+      "verify": "Du har {count} program från gemenskapen. Kör en cykel för att verifiera att WashData identifierar den rätt – matchningen förbättras ju mer historik din enhet bygger upp."
+    },
+    "phase2": {
+      "cluster": "WashData har sett {count} cykler som inte matchar något sparat program – de liknar varandra. Vill du skapa en ny profil för dem?",
+      "unmatched": "Din senaste cykel matchade inget sparat program. Är det ett nytt program?"
+    },
+    "phase3": {
+      "suggestions": "WashData har inställningsrekommendationer baserade på din cykelhistorik – granska dem för att förbättra detekteringens noggrannhet.",
+      "groups": "Några av dina profiler ser ut som samma program vid olika temperaturer. Organisera dem i en grupp för bättre matchning.",
+      "phases": "Lägg till programfaser i {profile_name} för mer exakta uppskattningar av återstående tid."
+    },
+    "phase4": {
+      "healthy": "Den här enheten är helt konfigurerad ({profile_count} profiler)."
+    },
+    "cta": {
+      "start_recording": "Starta inspelning",
+      "label_detected_cycle": "Jag har redan en identifierad cykel – märk den istället",
+      "browse_cycles": "Bläddra bland cykler för att märka en till",
+      "view_profiles": "Visa dina profiler",
+      "create_from_cluster": "Skapa profil från dessa cykler",
+      "create_profile": "Skapa en profil för det",
+      "review_suggestions": "Granska förslag",
+      "organise_profiles": "Organisera profiler",
+      "configure_phases": "Konfigurera faser",
+      "skip_step": "Hoppa över det här steget",
+      "skip_forever": "Visa inte igen",
+      "hide_guidance": "Dölj vägledning",
+      "show_guidance": "Visa vägledning"
+    }
   }
 }

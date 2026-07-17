@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optimaliser: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Enhetsoppsett",
+      "healthy_chip": "Oppsett fullført"
+    },
+    "phase0": {
+      "washer": "WashData oppdager allerede syklusene dine. Spill inn den første syklusen for å aktivere programnavn og tidsanslag.",
+      "dishwasher": "WashData følger med. Oppvaskmaskiner har komplekse sykluser – det anbefales på det sterkeste å spille inn den første syklusen. Hvis en oppdaget syklus kjører for lenge, bruk syklusredigereren til å trimme den før du lagrer den som en profil.",
+      "generic": "WashData følger med. Spill inn eller merk en oppdaget syklus for å begynne å bygge opp profiler."
+    },
+    "phase1a": {
+      "labelled": "Bra start – det første programmet ditt er lagret. For de reneste dataene kan du vurdere å spille inn neste syklus med opptakswidgeten."
+    },
+    "phase1b": {
+      "recorded": "Opptaket ditt ble lagret som {profile_name}. Spill nå inn eller merk de andre vanlige programmene dine for å bygge opp dekning."
+    },
+    "phase1c": {
+      "verify": "Du har {count} programmer fra fellesskapet. Kjør en syklus for å bekrefte at WashData gjenkjenner den riktig – gjenkjenningen forbedres etter hvert som enheten bygger opp sin egen historikk."
+    },
+    "phase2": {
+      "cluster": "WashData har sett {count} sykluser som ikke samsvarer med noe lagret program – de ligner på hverandre. Vil du opprette en ny profil for dem?",
+      "unmatched": "Den siste syklusen din samsvarte ikke med noe lagret program. Er det et nytt program?"
+    },
+    "phase3": {
+      "suggestions": "WashData har innstillingsanbefalinger basert på syklushistorikken din – gå gjennom dem for å forbedre deteksjonsnøyaktigheten.",
+      "groups": "Noen av profilene dine ser ut som det samme programmet ved forskjellige temperaturer. Organiser dem i en gruppe for bedre gjenkjenning.",
+      "phases": "Legg til programfaser i {profile_name} for mer nøyaktige anslag på gjenværende tid."
+    },
+    "phase4": {
+      "healthy": "Denne enheten er fullt konfigurert ({profile_count} profiler)."
+    },
+    "cta": {
+      "start_recording": "Start opptak",
+      "label_detected_cycle": "Jeg har allerede en oppdaget syklus – merk den i stedet",
+      "browse_cycles": "Bla gjennom sykluser for å merke en til",
+      "view_profiles": "Vis profilene dine",
+      "create_from_cluster": "Opprett profil fra disse syklusene",
+      "create_profile": "Opprett en profil for den",
+      "review_suggestions": "Se gjennom anbefalinger",
+      "organise_profiles": "Organiser profiler",
+      "configure_phases": "Konfigurer faser",
+      "skip_step": "Hopp over dette trinnet",
+      "skip_forever": "Ikke vis igjen",
+      "hide_guidance": "Skjul veiledning",
+      "show_guidance": "Vis veiledning"
+    }
   }
 }
