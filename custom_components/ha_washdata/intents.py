@@ -65,14 +65,16 @@ called from ``async_setup_entry`` (guarded to run once per HA instance).
 
 from __future__ import annotations
 
+import json
 import logging
+import os
 from datetime import datetime
 from typing import Any
 
 import voluptuous as vol
 
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import config_validation as cv, intent, translation
+from homeassistant.helpers import config_validation as cv, intent
 from homeassistant.util import dt as dt_util
 
 from .const import (
@@ -246,25 +248,61 @@ def _build_speech(
     )
 
 
+# Cache of loaded intent-response templates per language ({} when the file is
+# absent/unreadable). Populated lazily by _load_intent_file.
+_INTENT_TRANS_CACHE: dict[str, dict[str, str]] = {}
+
+
+def _load_intent_file(language: str) -> dict[str, str]:
+    """Load the ``HaWashdataStatus`` response templates for *language* (sync, cached).
+
+    These live in ``translations/intent/{lang}.json`` rather than the HA-layer
+    ``translations/{lang}.json``: a top-level ``intent`` key is rejected by hassfest
+    (``extra keys not allowed``), so - exactly like the self-served panel translations
+    - the intent responses are kept in a sub-directory hassfest does not validate and
+    loaded directly. Returns ``{}`` on any failure. Never raises.
+    """
+    if language in _INTENT_TRANS_CACHE:
+        return _INTENT_TRANS_CACHE[language]
+    result: dict[str, str] = {}
+    try:
+        path = os.path.join(
+            os.path.dirname(__file__), "translations", "intent", f"{language}.json"
+        )
+        with open(path, encoding="utf-8") as fh:
+            data = json.load(fh)
+        block = data.get(INTENT_STATUS) if isinstance(data, dict) else None
+        if isinstance(block, dict):
+            result = {k: v for k, v in block.items() if isinstance(v, str) and v}
+    except Exception:  # noqa: BLE001 - missing/broken file -> English fallback
+        result = {}
+    _INTENT_TRANS_CACHE[language] = result
+    return result
+
+
 async def _localized_templates(
     hass: HomeAssistant, language: str | None
 ) -> dict[str, str]:
-    """Return response templates, overlaying translations onto the English base.
+    """Return response templates, overlaying localized values onto the English base.
 
-    Falls back to :data:`DEFAULT_TEMPLATES` on any failure so the handler stays
-    functional even without a warmed translation cache (e.g. under unit tests).
+    English base first, then the language's base subtag, then the full tag (so
+    ``pt-BR`` overrides ``pt`` overrides ``en``). File reads are offloaded to the
+    executor when the hass supports it, with a synchronous fallback (minimal test
+    hass). Falls back to :data:`DEFAULT_TEMPLATES` on any failure.
     """
     templates = dict(DEFAULT_TEMPLATES)
-    try:
-        flat = await translation.async_get_translations(
-            hass, language or "en", "intent", {DOMAIN}
-        )
-    except Exception:  # noqa: BLE001
-        return templates
-    prefix = f"component.{DOMAIN}.intent.{INTENT_STATUS}."
-    for full_key, value in flat.items():
-        if full_key.startswith(prefix) and isinstance(value, str) and value:
-            templates[full_key[len(prefix):]] = value
+    lang = language or "en"
+    order = list(dict.fromkeys(["en", lang.split("-")[0], lang]))
+    for lg in order:
+        if not lg:
+            continue
+        try:
+            loaded = await hass.async_add_executor_job(_load_intent_file, lg)
+        except Exception:  # noqa: BLE001 - minimal test hass has no executor
+            loaded = _load_intent_file(lg)
+        for key, value in (loaded or {}).items():
+            if isinstance(value, str) and value:
+                templates[key] = value
     return templates
 
 

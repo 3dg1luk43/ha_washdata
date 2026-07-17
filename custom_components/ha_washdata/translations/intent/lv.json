@@ -1,0 +1,13 @@
+{
+  "HaWashdataStatus": {
+    "running_with_estimate": "Jūsu {device} joprojām darbojas. Atlikušas apmēram {minutes} min.",
+    "running_no_estimate": "Jūsu {device} joprojām darbojas.",
+    "finished_recently": "Jūsu {device} pabeidza pirms {minutes} min.",
+    "just_finished": "Jūsu {device} tikko pabeidza.",
+    "not_running": "Jūsu {device} nedarbojas.",
+    "no_devices": "Neizdevās atrast nevienu WashData ierīci.",
+    "unknown_device": "Neizdevās atrast WashData ierīci ar nosaukumu {device}.",
+    "none_running": "Neviena no jūsu WashData ierīcēm nedarbojas.",
+    "error": "Atvainojiet, pašlaik neizdevās pārbaudīt jūsu ierīces."
+  }
+}

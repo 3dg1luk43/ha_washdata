@@ -444,18 +444,5 @@
     "assign_profile_failed": {
       "message": "Kunne ikke tildele profil: {error}"
     }
-  },
-  "intent": {
-    "HaWashdataStatus": {
-      "running_with_estimate": "{device} kører stadig. Der er cirka {minutes} minutter tilbage.",
-      "running_no_estimate": "{device} kører stadig.",
-      "finished_recently": "{device} blev færdig for {minutes} minutter siden.",
-      "just_finished": "{device} er lige blevet færdig.",
-      "not_running": "{device} kører ikke.",
-      "no_devices": "Jeg kunne ikke finde nogen WashData-apparater.",
-      "unknown_device": "Jeg kunne ikke finde et WashData-apparat ved navn {device}.",
-      "none_running": "Ingen af dine WashData-apparater kører.",
-      "error": "Beklager, jeg kunne ikke tjekke dine apparater lige nu."
-    }
   }
 }

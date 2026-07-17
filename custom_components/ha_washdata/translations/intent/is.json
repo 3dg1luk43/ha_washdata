@@ -1,0 +1,13 @@
+{
+  "HaWashdataStatus": {
+    "running_with_estimate": "{device} er enn í gangi. Um það bil {minutes} mínútur eftir.",
+    "running_no_estimate": "{device} er enn í gangi.",
+    "finished_recently": "{device} lauk fyrir {minutes} mínútum.",
+    "just_finished": "{device} lauk rétt í þessu.",
+    "not_running": "{device} er ekki í gangi.",
+    "no_devices": "Ég fann engin WashData-tæki.",
+    "unknown_device": "Ég fann ekkert WashData-tæki sem heitir {device}.",
+    "none_running": "Ekkert af WashData-tækjunum þínum er í gangi.",
+    "error": "Því miður gat ég ekki athugað tækin þín núna."
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "HaWashdataStatus": {
+    "running_with_estimate": "A(z) {device} még mindig működik. Körülbelül {minutes} perc van hátra.",
+    "running_no_estimate": "A(z) {device} még mindig működik.",
+    "finished_recently": "A(z) {device} {minutes} perccel ezelőtt végzett.",
+    "just_finished": "A(z) {device} épp most végzett.",
+    "not_running": "A(z) {device} nem működik.",
+    "no_devices": "Nem találtam egyetlen WashData készüléket sem.",
+    "unknown_device": "Nem találtam {device} nevű WashData készüléket.",
+    "none_running": "Egyik WashData készüléked sem működik.",
+    "error": "Sajnálom, most nem tudtam ellenőrizni a készülékeidet."
+  }
+}

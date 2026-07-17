@@ -444,18 +444,5 @@
     "assign_profile_failed": {
       "message": "Nie można przypisać profilu: {error}"
     }
-  },
-  "intent": {
-    "HaWashdataStatus": {
-      "running_with_estimate": "Twój {device} nadal działa. Pozostało około {minutes} min.",
-      "running_no_estimate": "Twój {device} nadal działa.",
-      "finished_recently": "Twój {device} zakończył pracę {minutes} min temu.",
-      "just_finished": "Twój {device} właśnie zakończył pracę.",
-      "not_running": "Twój {device} nie działa.",
-      "no_devices": "Nie znalazłem żadnych urządzeń WashData.",
-      "unknown_device": "Nie znalazłem urządzenia WashData o nazwie {device}.",
-      "none_running": "Żadne z Twoich urządzeń WashData nie działa.",
-      "error": "Przepraszam, w tej chwili nie mogłem sprawdzić Twoich urządzeń."
-    }
   }
 }

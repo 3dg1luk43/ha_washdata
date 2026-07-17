@@ -84,11 +84,13 @@ async def _run(hass, *, name=None, language="en", translations=None) -> str:
         language=language,
     )
     handler = WashDataStatusIntentHandler()
-    with patch.object(
-        intents.translation,
-        "async_get_translations",
-        AsyncMock(return_value=translations or {}),
-    ):
+
+    def _fake_load(lang):
+        # Inject the localized template map only for the requested language, mirroring
+        # the real per-language translations/intent/{lang}.json loader.
+        return dict(translations) if (translations and lang == language) else {}
+
+    with patch.object(intents, "_load_intent_file", side_effect=_fake_load):
         response = await handler.async_handle(intent_obj)
     return response.speech["plain"]["speech"]
 
@@ -219,11 +221,7 @@ async def test_handler_never_raises_on_broken_manager():
 async def test_translation_override_applied():
     """A localized template from the translation cache overrides the default."""
     hass = _FakeHass({"e1": _make_manager("Washer", STATE_RUNNING, time_remaining=None)})
-    flat = {
-        f"component.{DOMAIN}.intent.{INTENT_STATUS}.running_no_estimate": (
-            "Die {device} laeuft noch."
-        )
-    }
+    flat = {"running_no_estimate": "Die {device} laeuft noch."}
     speech = await _run(hass, language="de", translations=flat)
     assert speech == "Die Washer laeuft noch."
 

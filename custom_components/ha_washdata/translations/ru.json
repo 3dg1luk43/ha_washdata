@@ -444,18 +444,5 @@
     "assign_profile_failed": {
       "message": "Не удалось назначить профиль: {error}"
     }
-  },
-  "intent": {
-    "HaWashdataStatus": {
-      "running_with_estimate": "Ваш {device} всё ещё работает. Осталось около {minutes} минут.",
-      "running_no_estimate": "Ваш {device} всё ещё работает.",
-      "finished_recently": "Ваш {device} завершил работу {minutes} минут назад.",
-      "just_finished": "Ваш {device} только что завершил работу.",
-      "not_running": "Ваш {device} не работает.",
-      "no_devices": "Не удалось найти ни одного устройства WashData.",
-      "unknown_device": "Не удалось найти устройство WashData с именем {device}.",
-      "none_running": "Ни одно из ваших устройств WashData не работает.",
-      "error": "Извините, сейчас не удалось проверить ваши устройства."
-    }
   }
 }

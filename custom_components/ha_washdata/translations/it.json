@@ -444,18 +444,5 @@
     "assign_profile_failed": {
       "message": "Impossibile assegnare il profilo: {error}"
     }
-  },
-  "intent": {
-    "HaWashdataStatus": {
-      "running_with_estimate": "Il tuo {device} è ancora in funzione. Mancano circa {minutes} minuti.",
-      "running_no_estimate": "Il tuo {device} è ancora in funzione.",
-      "finished_recently": "Il tuo {device} ha finito {minutes} minuti fa.",
-      "just_finished": "Il tuo {device} ha appena finito.",
-      "not_running": "Il tuo {device} non è in funzione.",
-      "no_devices": "Non ho trovato nessun elettrodomestico WashData.",
-      "unknown_device": "Non ho trovato nessun elettrodomestico WashData chiamato {device}.",
-      "none_running": "Nessuno dei tuoi elettrodomestici WashData è in funzione.",
-      "error": "Spiacente, non sono riuscito a controllare i tuoi elettrodomestici in questo momento."
-    }
   }
 }

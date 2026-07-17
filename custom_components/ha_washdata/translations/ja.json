@@ -444,18 +444,5 @@
     "assign_profile_failed": {
       "message": "プロファイルを割り当てできませんでした：{error}"
     }
-  },
-  "intent": {
-    "HaWashdataStatus": {
-      "running_with_estimate": "{device}はまだ運転中です。残り約{minutes}分です。",
-      "running_no_estimate": "{device}はまだ運転中です。",
-      "finished_recently": "{device}は{minutes}分前に終了しました。",
-      "just_finished": "{device}はたった今終了しました。",
-      "not_running": "{device}は運転していません。",
-      "no_devices": "WashDataの家電が見つかりませんでした。",
-      "unknown_device": "{device}という名前のWashData家電が見つかりませんでした。",
-      "none_running": "稼働中のWashData家電はありません。",
-      "error": "申し訳ありません、今は家電を確認できませんでした。"
-    }
   }
 }

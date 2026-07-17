@@ -444,18 +444,5 @@
     "assign_profile_failed": {
       "message": "Не може да се додели профил: {error}"
     }
-  },
-  "intent": {
-    "HaWashdataStatus": {
-      "running_with_estimate": "Вашиот {device} сè уште работи. Преостануваат околу {minutes} минути.",
-      "running_no_estimate": "Вашиот {device} сè уште работи.",
-      "finished_recently": "Вашиот {device} заврши пред {minutes} минути.",
-      "just_finished": "Вашиот {device} штотуку заврши.",
-      "not_running": "Вашиот {device} не работи.",
-      "no_devices": "Не најдов ниту еден WashData уред.",
-      "unknown_device": "Не најдов WashData уред со име {device}.",
-      "none_running": "Ниту еден од вашите WashData уреди не работи.",
-      "error": "Жал ми е, во моментов не можев да ги проверам вашите уреди."
-    }
   }
 }

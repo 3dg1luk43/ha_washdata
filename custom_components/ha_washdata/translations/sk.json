@@ -444,18 +444,5 @@
     "assign_profile_failed": {
       "message": "Nepodarilo sa priradiť profil: {error}"
     }
-  },
-  "intent": {
-    "HaWashdataStatus": {
-      "running_with_estimate": "{device} stále beží. Zostáva približne {minutes} minút.",
-      "running_no_estimate": "{device} stále beží.",
-      "finished_recently": "{device} skončil pred {minutes} minútami.",
-      "just_finished": "{device} práve skončil.",
-      "not_running": "{device} nebeží.",
-      "no_devices": "Nenašiel som žiadne zariadenie WashData.",
-      "unknown_device": "Nenašiel som zariadenie WashData s názvom {device}.",
-      "none_running": "Žiadne z vašich zariadení WashData nebeží.",
-      "error": "Prepáčte, teraz sa mi nepodarilo skontrolovať vaše zariadenia."
-    }
   }
 }

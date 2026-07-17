@@ -444,18 +444,5 @@
     "assign_profile_failed": {
       "message": "Profiilin määrittäminen epäonnistui: {error}"
     }
-  },
-  "intent": {
-    "HaWashdataStatus": {
-      "running_with_estimate": "{device} on yhä käynnissä. Jäljellä on noin {minutes} minuuttia.",
-      "running_no_estimate": "{device} on yhä käynnissä.",
-      "finished_recently": "{device} päättyi {minutes} minuuttia sitten.",
-      "just_finished": "{device} on juuri päättynyt.",
-      "not_running": "{device} ei ole käynnissä.",
-      "no_devices": "En löytänyt yhtään WashData-laitetta.",
-      "unknown_device": "En löytänyt WashData-laitetta nimeltä {device}.",
-      "none_running": "Yksikään WashData-laitteistasi ei ole käynnissä.",
-      "error": "Pahoittelen, en pystynyt tarkistamaan laitteitasi juuri nyt."
-    }
   }
 }

@@ -444,18 +444,5 @@
     "assign_profile_failed": {
       "message": "无法分配配置文件：{error}"
     }
-  },
-  "intent": {
-    "HaWashdataStatus": {
-      "running_with_estimate": "您的 {device} 仍在运行，大约还剩 {minutes} 分钟。",
-      "running_no_estimate": "您的 {device} 仍在运行。",
-      "finished_recently": "您的 {device} 已在 {minutes} 分钟前结束。",
-      "just_finished": "您的 {device} 刚刚结束。",
-      "not_running": "您的 {device} 未在运行。",
-      "no_devices": "我找不到任何 WashData 设备。",
-      "unknown_device": "我找不到名为 {device} 的 WashData 设备。",
-      "none_running": "您的 WashData 设备均未在运行。",
-      "error": "抱歉，我现在无法检查您的设备。"
-    }
   }
 }

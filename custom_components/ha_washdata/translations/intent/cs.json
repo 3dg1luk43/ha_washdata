@@ -1,0 +1,13 @@
+{
+  "HaWashdataStatus": {
+    "running_with_estimate": "{device} stále běží. Zbývá přibližně {minutes} minut.",
+    "running_no_estimate": "{device} stále běží.",
+    "finished_recently": "{device} skončil před {minutes} minutami.",
+    "just_finished": "{device} právě skončil.",
+    "not_running": "{device} neběží.",
+    "no_devices": "Nenašel jsem žádné spotřebiče WashData.",
+    "unknown_device": "Nenašel jsem spotřebič WashData s názvem {device}.",
+    "none_running": "Žádný z vašich spotřebičů WashData neběží.",
+    "error": "Omlouvám se, momentálně nemohu zkontrolovat vaše spotřebiče."
+  }
+}

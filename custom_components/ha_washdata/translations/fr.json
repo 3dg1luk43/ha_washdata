@@ -444,18 +444,5 @@
     "assign_profile_failed": {
       "message": "Impossible d'attribuer le profil : {error}"
     }
-  },
-  "intent": {
-    "HaWashdataStatus": {
-      "running_with_estimate": "Votre {device} est encore en marche. Il reste environ {minutes} minutes.",
-      "running_no_estimate": "Votre {device} est encore en marche.",
-      "finished_recently": "Votre {device} a terminé il y a {minutes} minutes.",
-      "just_finished": "Votre {device} vient de terminer.",
-      "not_running": "Votre {device} n'est pas en marche.",
-      "no_devices": "Je n'ai trouvé aucun appareil WashData.",
-      "unknown_device": "Je n'ai trouvé aucun appareil WashData nommé {device}.",
-      "none_running": "Aucun de vos appareils WashData n'est en marche.",
-      "error": "Désolé, je n'ai pas pu vérifier vos appareils pour le moment."
-    }
   }
 }

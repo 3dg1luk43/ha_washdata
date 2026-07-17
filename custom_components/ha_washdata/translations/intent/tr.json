@@ -1,0 +1,13 @@
+{
+  "HaWashdataStatus": {
+    "running_with_estimate": "{device} hâlâ çalışıyor. Yaklaşık {minutes} dakika kaldı.",
+    "running_no_estimate": "{device} hâlâ çalışıyor.",
+    "finished_recently": "{device} {minutes} dakika önce bitti.",
+    "just_finished": "{device} az önce bitti.",
+    "not_running": "{device} çalışmıyor.",
+    "no_devices": "Hiç WashData cihazı bulamadım.",
+    "unknown_device": "{device} adında bir WashData cihazı bulamadım.",
+    "none_running": "WashData cihazlarınızın hiçbiri çalışmıyor.",
+    "error": "Üzgünüm, cihazlarınızı şu anda kontrol edemedim."
+  }
+}
