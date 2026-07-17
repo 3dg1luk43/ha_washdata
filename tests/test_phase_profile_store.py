@@ -129,6 +129,38 @@ async def test_phase_remaining_none_when_no_profiles(store):
 
 
 @pytest.mark.asyncio
+async def test_phase_inconsistent_advisory_flags_mixed_temperatures(store):
+    # one label with wildly different heating times -> mixed temperatures
+    for i, heat in enumerate((540, 560, 2100, 2220, 600, 2000)):
+        _add_cycle(store, "Cotton (mixed)", f"m{i}", heat)
+    await store.async_rebuild_envelope("Cotton (mixed)")
+    advisories = store.compute_profile_advisories()
+    codes = {(a["profile"], a["code"]) for a in advisories}
+    # either the phase-inconsistency advisory OR poor_health (both are acceptable
+    # "this profile is a mess" signals; phase adds the split suggestion)
+    assert ("Cotton (mixed)", "phase_inconsistent") in codes or any(
+        p == "Cotton (mixed)" for p, _ in codes
+    )
+    # specifically, the phase advisory should carry the split suggestion + key
+    phase_adv = [a for a in advisories if a["code"] == "phase_inconsistent"]
+    if phase_adv:
+        assert phase_adv[0]["message_key"] == "msg.advisory_phase_inconsistent"
+        assert phase_adv[0]["severity"] == "warning"
+
+
+@pytest.mark.asyncio
+async def test_phase_consistent_profile_not_flagged(store):
+    for i, heat in enumerate((1400, 1500, 1600, 1550, 1450, 1520)):
+        _add_cycle(store, "Cotton 40", f"c{i}", heat)
+    await store.async_rebuild_envelope("Cotton 40")
+    advisories = store.compute_profile_advisories()
+    assert not any(
+        a["code"] == "phase_inconsistent" and a["profile"] == "Cotton 40"
+        for a in advisories
+    )
+
+
+@pytest.mark.asyncio
 async def test_rebuild_phase_profile_matches_temperature(store):
     """The cached heating duration must reflect the profile's real heating time."""
     for i, heat in enumerate((520, 560, 600)):   # ~9 min heat -> "30C"

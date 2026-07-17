@@ -42,6 +42,10 @@ from .const import (
     MAINTENANCE_EVENT_TYPES,
     MAINTENANCE_RECENT_SUPPRESS_DAYS,
     MATCH_AMBIGUITY_MARGIN,
+    PHASE_CONSISTENCY_MIN_CYCLES,
+    PHASE_HEAT_CV_WARN,
+    PHASE_HEAT_OCC_MIXED_LO,
+    PHASE_HEAT_OCC_MIXED_HI,
     REFERENCE_PROFILE_CURVE_POINTS,
     SHAPE_DRIFT_MIN_CYCLES,
     SHAPE_DRIFT_RESAMPLE_N,
@@ -2474,6 +2478,47 @@ class ProfileStore:
                         "message_key": "msg.advisory_energy_trend_up",
                         "message_params": {"name": name, "pct": f"{pct:.0f}"},
                     })
+
+            # Phase-structure consistency (phase-matching device types only). Uses
+            # the cached per-role phase profile: a profile whose member cycles heat
+            # for wildly different times, or where only some cycles heat at all,
+            # most likely mixes different programs/temperatures under one label -
+            # which hurts both matching and the phase-resolved ETA. Advisory only
+            # (Profiles tab); no relabeling (phase matching does not label better).
+            _sd = getattr(self, "_data", None)
+            _envs = _sd.get("envelopes") if isinstance(_sd, dict) else None
+            for pname, penv in (_envs if isinstance(_envs, dict) else {}).items():
+                if health.get(pname, {}).get("health_status") == "poor":
+                    continue  # avoid double advice
+                pp = penv.get("phase_profile") if isinstance(penv, dict) else None
+                if not isinstance(pp, dict):
+                    continue
+                try:
+                    if int(pp.get("n_cycles") or 0) < PHASE_CONSISTENCY_MIN_CYCLES:
+                        continue
+                    heat = (pp.get("roles") or {}).get("heating") or {}
+                    heat_mean = float(heat.get("dur_mean") or 0.0)
+                    heat_std = float(heat.get("dur_std") or 0.0)
+                    heat_occ = float(heat.get("occurrence") or 0.0)
+                    heat_cv = (heat_std / heat_mean) if heat_mean > 60.0 else 0.0
+                    mixed_temp = heat_cv > PHASE_HEAT_CV_WARN
+                    mixed_prog = PHASE_HEAT_OCC_MIXED_LO <= heat_occ <= PHASE_HEAT_OCC_MIXED_HI
+                    if not (mixed_temp or mixed_prog):
+                        continue
+                    advisories.append({
+                        "profile": pname, "severity": "warning",
+                        "code": "phase_inconsistent",
+                        "message": (
+                            f"'{pname}' looks like it mixes different programs or "
+                            "temperatures - its cycles heat for very different lengths "
+                            "of time. Splitting it into separate profiles (e.g. per "
+                            "temperature) will improve matching and time estimates."
+                        ),
+                        "message_key": "msg.advisory_phase_inconsistent",
+                        "message_params": {"name": pname},
+                    })
+                except (TypeError, ValueError):
+                    continue
 
             # E1: suppress the "needs maintenance" nag (duration-trending-longer /
             # shape-drift/poor-fit) when the user recently logged a descale, filter

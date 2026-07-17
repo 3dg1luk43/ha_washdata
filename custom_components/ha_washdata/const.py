@@ -101,6 +101,20 @@ CONF_EXPOSE_DEBUG_ENTITIES = "expose_debug_entities"  # Expose detailed debug se
 # machine, washer-dryer). Default off. Validated by the Phase-0 ETA gate; see
 # docs/superpowers/specs/2026-07-17-phase-segmented-matching-design.md.
 CONF_ENABLE_PHASE_MATCHING = "enable_phase_matching"
+# Phase-structure consistency advisory (Profiles tab, never a notification).
+# A single-program/temperature profile should have a fairly consistent heating
+# block; wildly varying heating time or heating present in only some cycles
+# usually means different programs/temperatures were labelled under one profile
+# (the "mixed labels" data-hygiene problem). Pure statistics from the cached
+# phase profile - no relabeling (phase matching does not label better than the
+# whole-cycle matcher; see the Phase-0 gate).
+PHASE_CONSISTENCY_MIN_CYCLES = 4
+# Heating-time std/mean above this -> likely mixed temperatures under one label.
+# A clean single-temperature profile sits ~0.2 (load variation only); a profile
+# mixing 30/40/90C sits ~0.45-0.6, so 0.45 catches genuine mixing with margin.
+PHASE_HEAT_CV_WARN = 0.45
+PHASE_HEAT_OCC_MIXED_LO = 0.25    # heating present in only 25%-75% of cycles ->
+PHASE_HEAT_OCC_MIXED_HI = 0.75    #   mixed with a non-heating program
 CONF_SAVE_DEBUG_TRACES = (
     "save_debug_traces"  # Improve historical cycle data with rich debug info
 )
