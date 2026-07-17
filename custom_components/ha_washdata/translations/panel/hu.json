@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optimalizálás: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Eszköz beállítása",
+      "healthy_chip": "Beállítás kész"
+    },
+    "phase0": {
+      "washer": "A WashData már észleli a ciklusait. Rögzítse az első ciklust a programnevek és az időbecslések engedélyezéséhez.",
+      "dishwasher": "A WashData figyel. A mosogatógépek összetett ciklusokkal rendelkeznek – az első ciklus rögzítése erősen ajánlott. Ha egy észlelt ciklus túl hosszú ideig tart, a profilként való mentés előtt a ciklusszerkesztővel kurtítsa le.",
+      "generic": "A WashData figyel. Rögzítsen vagy jelöljön meg egy észlelt ciklust a profilok létrehozásának megkezdéséhez."
+    },
+    "phase1a": {
+      "labelled": "Jó kezdés – az első programja el van mentve. A legtisztább adatokhoz érdemes a következő ciklust a rögzítő widgettel felvenni."
+    },
+    "phase1b": {
+      "recorded": "A felvétele {profile_name} névvel lett elmentve. Most rögzítse vagy jelölje meg a többi gyakran használt programját a lefedettség növeléséhez."
+    },
+    "phase1c": {
+      "verify": "Önnek {count} program van a közösségtől. Futtasson egy ciklust, hogy ellenőrizze, a WashData helyesen ismeri-e fel – az egyeztetés javul, ahogy az eszköz saját előzményeket gyűjt."
+    },
+    "phase2": {
+      "cluster": "A WashData {count} ciklust látott, amelyek nem felelnek meg egyetlen mentett programnak sem – hasonlítanak egymásra. Szeretne létrehozni nekik egy új profilt?",
+      "unmatched": "Az utolsó ciklus nem felelt meg egyetlen mentett programnak sem. Ez egy új program?"
+    },
+    "phase3": {
+      "suggestions": "A WashData a ciklustörténete alapján beállítási javaslatokkal rendelkezik – tekintse át ezeket az észlelési pontosság javítása érdekében.",
+      "groups": "Néhány profilja ugyanolyannak tűnik, mint ugyanaz a program különböző hőmérsékleteken. Rendezze csoportba a jobb egyeztetés érdekében.",
+      "phases": "Adjon programfázisokat a(z) {profile_name} profilhoz a pontosabb hátralévő idő becslések érdekében."
+    },
+    "phase4": {
+      "healthy": "Ez az eszköz teljesen be van állítva ({profile_count} profil)."
+    },
+    "cta": {
+      "start_recording": "Felvétel indítása",
+      "label_detected_cycle": "Már van egy észlelt ciklusom – inkább jelöljük meg",
+      "browse_cycles": "Ciklusok böngészése egy másik megjelöléséhez",
+      "view_profiles": "Profilok megtekintése",
+      "create_from_cluster": "Profil létrehozása ezekből a ciklusokból",
+      "create_profile": "Profil létrehozása hozzá",
+      "review_suggestions": "Javaslatok áttekintése",
+      "organise_profiles": "Profilok rendezése",
+      "configure_phases": "Fázisok konfigurálása",
+      "skip_step": "Lépés kihagyása",
+      "skip_forever": "Ne mutasd újra",
+      "hide_guidance": "Útmutatás elrejtése",
+      "show_guidance": "Útmutatás megjelenítése"
+    }
   }
 }

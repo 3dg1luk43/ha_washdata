@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optimizavimas: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Įrenginio sąranka",
+      "healthy_chip": "Sąranka baigta"
+    },
+    "phase0": {
+      "washer": "WashData jau aptinka jūsų ciklus. Įrašykite pirmąjį ciklą, kad galėtumėte naudoti programų pavadinimus ir laiko įverčius.",
+      "dishwasher": "WashData stebi. Indaplovių ciklai yra sudėtingi – labai rekomenduojame įrašyti pirmąjį ciklą. Jei aptiktas ciklas trunka per ilgai, prieš išsaugant kaip profilį, apkarpykite jį ciklo redaktoriuje.",
+      "generic": "WashData stebi. Įrašykite arba pažymėkite aptiktą ciklą, kad pradėtumėte kurti profilius."
+    },
+    "phase1a": {
+      "labelled": "Gera pradžia – jūsų pirmoji programa išsaugota. Kad duomenys būtų kuo švaresni, apsvarstykite galimybę įrašyti kitą ciklą naudodami įrašymo valdiklį."
+    },
+    "phase1b": {
+      "recorded": "Jūsų įrašas išsaugotas kaip {profile_name}. Dabar įrašykite arba pažymėkite kitas dažniausiai naudojamas programas, kad padidintumėte aprėptį."
+    },
+    "phase1c": {
+      "verify": "Turite {count} bendruomenės programas. Paleiskite ciklą, kad patikrintumėte, ar WashData jas teisingai atpažįsta – atitikimas gerės, kai jūsų įrenginys sukaupia savo istoriją."
+    },
+    "phase2": {
+      "cluster": "WashData aptiko {count} ciklus, kurie neatitinka jokios išsaugotos programos – jie yra panašūs vienas į kitą. Ar norite sukurti jiems naują profilį?",
+      "unmatched": "Paskutinis ciklas neatitiko jokios išsaugotos programos. Ar tai nauja programa?"
+    },
+    "phase3": {
+      "suggestions": "WashData pateikia nustatymų rekomendacijas pagal jūsų ciklų istoriją – peržiūrėkite jas, kad pagerintumėte aptikimo tikslumą.",
+      "groups": "Kai kurie jūsų profiliai atrodo kaip ta pati programa skirtingose temperatūrose. Sugrupuokite juos, kad atitikimas būtų tikslesnis.",
+      "phases": "Pridėkite programų fazes prie {profile_name}, kad likusio laiko įverčiai būtų tikslesni."
+    },
+    "phase4": {
+      "healthy": "Šis įrenginys yra visiškai sukonfigūruotas ({profile_count} profiliai)."
+    },
+    "cta": {
+      "start_recording": "Pradėti įrašymą",
+      "label_detected_cycle": "Jau turiu aptiktą ciklą – vietoj to pažymėti jį",
+      "browse_cycles": "Naršyti ciklus, kad pažymėtumėte kitą",
+      "view_profiles": "Peržiūrėti profilius",
+      "create_from_cluster": "Sukurti profilį iš šių ciklų",
+      "create_profile": "Sukurti jam profilį",
+      "review_suggestions": "Peržiūrėti pasiūlymus",
+      "organise_profiles": "Tvarkyti profilius",
+      "configure_phases": "Konfigūruoti fazes",
+      "skip_step": "Praleisti šį žingsnį",
+      "skip_forever": "Daugiau nerodyti",
+      "hide_guidance": "Slėpti nurodymus",
+      "show_guidance": "Rodyti nurodymus"
+    }
   }
 }

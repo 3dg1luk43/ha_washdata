@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optimizēšana: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Ierīces iestatīšana",
+      "healthy_chip": "Iestatīšana pabeigta"
+    },
+    "phase0": {
+      "washer": "WashData jau konstatē jūsu ciklus. Ierakstiet pirmo ciklu, lai aktivizētu programmu nosaukumus un laika aprēķinus.",
+      "dishwasher": "WashData vēro. Trauku mazgājamām mašīnām ir sarežģīti cikli – ir ļoti ieteicams ierakstīt pirmo ciklu. Ja konstatētais cikls darbojas pārāk ilgi, pirms saglabāšanas kā profilu izmantojiet cikla redaktoru, lai to apgrieztu.",
+      "generic": "WashData vēro. Ierakstiet vai iezīmējiet konstatētu ciklu, lai sāktu veidot profilus."
+    },
+    "phase1a": {
+      "labelled": "Labs sākums – jūsu pirmā programma ir saglabāta. Lai iegūtu tīrākos datus, apsveriet iespēju ierakstīt nākamo ciklu ar ierakstīšanas logrīku."
+    },
+    "phase1b": {
+      "recorded": "Jūsu ieraksts ir saglabāts kā {profile_name}. Tagad ierakstiet vai iezīmējiet citas bieži izmantotās programmas, lai paplašinātu pārklājumu."
+    },
+    "phase1c": {
+      "verify": "Jums ir {count} programmas no kopienas. Palaidiet ciklu, lai pārbaudītu, vai WashData to pareizi atpazīst – atbilstība uzlabosies, kad jūsu ierīce veidos savu vēsturi."
+    },
+    "phase2": {
+      "cluster": "WashData ir konstatējis {count} ciklus, kas neatbilst nevienai saglabātai programmai – tie izskatās līdzīgi viens otram. Vai vēlaties tiem izveidot jaunu profilu?",
+      "unmatched": "Pēdējais cikls neatbilda nevienai saglabātai programmai. Vai tā ir jauna programma?"
+    },
+    "phase3": {
+      "suggestions": "WashData ir iestatījumu ieteikumi, pamatojoties uz jūsu ciklu vēsturi – pārskatiet tos, lai uzlabotu noteikšanas precizitāti.",
+      "groups": "Daži jūsu profili izskatās kā viena un tā pati programma dažādās temperatūrās. Sakārtojiet tos grupā labākai atbilstībai.",
+      "phases": "Pievienojiet programmas fāzes profilam {profile_name}, lai iegūtu precīzākus laika atlikuma aprēķinus."
+    },
+    "phase4": {
+      "healthy": "Šī ierīce ir pilnīgi iestatīta ({profile_count} profili)."
+    },
+    "cta": {
+      "start_recording": "Sākt ierakstīšanu",
+      "label_detected_cycle": "Man jau ir konstatēts cikls – iezīmēt to",
+      "browse_cycles": "Pārlūkot ciklus, lai iezīmētu citu",
+      "view_profiles": "Skatīt savus profilus",
+      "create_from_cluster": "Izveidot profilu no šiem cikliem",
+      "create_profile": "Izveidot tam profilu",
+      "review_suggestions": "Pārskatīt ieteikumus",
+      "organise_profiles": "Kārtot profilus",
+      "configure_phases": "Konfigurēt fāzes",
+      "skip_step": "Izlaist šo soli",
+      "skip_forever": "Vairs nerādīt",
+      "hide_guidance": "Slēpt norādījumus",
+      "show_guidance": "Rādīt norādījumus"
+    }
   }
 }

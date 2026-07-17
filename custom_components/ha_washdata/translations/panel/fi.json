@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optimointi: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Laitteen asetukset",
+      "healthy_chip": "Asetukset valmiit"
+    },
+    "phase0": {
+      "washer": "WashData tunnistaa jo syklisi. Tallenna ensimmäinen sykli ottaaksesi käyttöön ohjelmanimet ja aikaarviot.",
+      "dishwasher": "WashData tarkkailee. Astianpesukoneilla on monimutkaisia syklejä – ensimmäisen syklin tallentaminen on erittäin suositeltavaa. Jos tunnistettu sykli kestää liian kauan, käytä syklin editoria sen leikkaamiseen ennen profiilina tallentamista.",
+      "generic": "WashData tarkkailee. Tallenna tai merkitse tunnistettu sykli aloittaaksesi profiilien luomisen."
+    },
+    "phase1a": {
+      "labelled": "Hyvä alku – ensimmäinen ohjelmasi on tallennettu. Puhtaimman datan saamiseksi harkitse seuraavan syklin tallentamista tallennuswidgetillä."
+    },
+    "phase1b": {
+      "recorded": "Tallennuksesi on tallennettu nimellä {profile_name}. Tallenna tai merkitse nyt muut yleisimmät ohjelmasi kattavuuden rakentamiseksi."
+    },
+    "phase1c": {
+      "verify": "Sinulla on {count} ohjelmaa yhteisöltä. Suorita sykli tarkistaaksesi, tunnistaako WashData sen oikein – täsmäytys paranee laitteen kerätessä omaa historiaansa."
+    },
+    "phase2": {
+      "cluster": "WashData on havainnut {count} sykliä, jotka eivät täsmää mihinkään tallennettuun ohjelmaan – ne näyttävät samanlaisilta keskenään. Haluatko luoda niille uuden profiilin?",
+      "unmatched": "Viimeisin sykli ei täsmännyt mihinkään tallennettuun ohjelmaan. Onko se uusi ohjelma?"
+    },
+    "phase3": {
+      "suggestions": "WashDatalla on asetussuosituksia syklihistoriasi perusteella – tarkista ne tunnistustarkkuuden parantamiseksi.",
+      "groups": "Jotkut profiileistasi näyttävät samalta ohjelmalta eri lämpötiloissa. Järjestä ne ryhmään parempaa täsmäytystä varten.",
+      "phases": "Lisää ohjelman vaiheet profiiliin {profile_name} tarkempien jäljellä olevan ajan arvioiden saamiseksi."
+    },
+    "phase4": {
+      "healthy": "Tämä laite on täysin asennettu ({profile_count} profiilia)."
+    },
+    "cta": {
+      "start_recording": "Aloita tallennus",
+      "label_detected_cycle": "Minulla on jo tunnistettu sykli – merkitse se sen sijaan",
+      "browse_cycles": "Selaa syklejä merkitäksesi toisen",
+      "view_profiles": "Näytä profiilit",
+      "create_from_cluster": "Luo profiili näistä sykleistä",
+      "create_profile": "Luo sille profiili",
+      "review_suggestions": "Tarkista ehdotukset",
+      "organise_profiles": "Järjestä profiilit",
+      "configure_phases": "Määritä vaiheet",
+      "skip_step": "Ohita tämä vaihe",
+      "skip_forever": "Älä näytä enää",
+      "hide_guidance": "Piilota opastus",
+      "show_guidance": "Näytä opastus"
+    }
   }
 }

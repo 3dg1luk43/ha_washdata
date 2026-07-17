@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optimeerimine: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Seadme seadistus",
+      "healthy_chip": "Seadistus lõpetatud"
+    },
+    "phase0": {
+      "washer": "WashData tuvastab juba teie tsükleid. Salvestage esimene tsükkel, et lubada programmide nimed ja ajahinnangud.",
+      "dishwasher": "WashData jälgib. Nõudepesumasinatel on keerukad tsüklid – esimese tsükli salvestamine on tungivalt soovitatav. Kui tuvastatud tsükkel töötab liiga kaua, kasutage tsükli redaktorit selle kärpimiseks enne profiilina salvestamist.",
+      "generic": "WashData jälgib. Salvestage või märgistage tuvastatud tsükkel profiilide loomise alustamiseks."
+    },
+    "phase1a": {
+      "labelled": "Hea algus – teie esimene programm on salvestatud. Puhtaimate andmete saamiseks kaaluge järgmise tsükli salvestamist salvestusvidinaga."
+    },
+    "phase1b": {
+      "recorded": "Teie salvestus on salvestatud kui {profile_name}. Nüüd salvestage või märgistage oma teised sagedased programmid katvuse suurendamiseks."
+    },
+    "phase1c": {
+      "verify": "Teil on {count} programmi kogukonnast. Käivitage tsükkel, et kontrollida, kas WashData tunneb selle õigesti ära – sobitamine paraneb, kui teie seade koostab oma ajaloo."
+    },
+    "phase2": {
+      "cluster": "WashData on näinud {count} tsüklit, mis ei vasta ühelegi salvestatud programmile – need näevad sarnased välja. Kas soovite neile luua uue profiili?",
+      "unmatched": "Viimane tsükkel ei vastanud ühelegi salvestatud programmile. Kas see on uus programm?"
+    },
+    "phase3": {
+      "suggestions": "WashDatal on teie tsüklite ajaloo põhjal seadete soovitusi – vaadake need läbi tuvastustäpsuse parandamiseks.",
+      "groups": "Mõned teie profiilid näevad välja nagu sama programm erinevatel temperatuuridel. Korraldage need rühma parema sobitamise jaoks.",
+      "phases": "Lisage programmifaasid profiilile {profile_name} täpsemate järelejäänud aja hinnangute saamiseks."
+    },
+    "phase4": {
+      "healthy": "See seade on täielikult seadistatud ({profile_count} profiili)."
+    },
+    "cta": {
+      "start_recording": "Alusta salvestamist",
+      "label_detected_cycle": "Mul on juba tuvastatud tsükkel – märgista see",
+      "browse_cycles": "Sirvi tsükleid, et märgistada teine",
+      "view_profiles": "Vaata oma profiile",
+      "create_from_cluster": "Loo profiil nendest tsüklitest",
+      "create_profile": "Loo sellele profiil",
+      "review_suggestions": "Vaata soovitusi läbi",
+      "organise_profiles": "Korralda profiile",
+      "configure_phases": "Seadista faasid",
+      "skip_step": "Jäta see samm vahele",
+      "skip_forever": "Ära näita enam",
+      "hide_guidance": "Peida juhised",
+      "show_guidance": "Näita juhiseid"
+    }
   }
 }
