@@ -243,6 +243,11 @@ class StoreBridge:
         })
         if not local_id:  # trace failed validation in add_reference_cycle
             return {"error": "invalid_trace"}
+        # Credit the download on the source store cycle + record one community-wide
+        # adoption for the store's usage dashboard (the real "someone used it" metric).
+        if cyc.get("id"):
+            await self._client.bump_downloads([cyc.get("id")])
+        await self._client.bump_analytics("downloads", 1)
         return {"profile": profile, "cycle_id": local_id}
 
     async def share_cycle(
@@ -378,6 +383,7 @@ class StoreBridge:
         profiles_adopted = 0
         cycles_imported = 0
         phases_applied = 0
+        imported_store_ids: list[str] = []
         for prof in bundle.get("profiles", []) or []:
             program = str(prof.get("program") or prof.get("program_lc") or "").strip()
             if not program:
@@ -398,6 +404,8 @@ class StoreBridge:
                 if local_id:
                     cycles_imported += 1
                     adopted_any = True
+                    if store_cid:
+                        imported_store_ids.append(store_cid)
             if adopted_any:
                 profiles_adopted += 1
             # Stage 2: apply the bundled phase map (replace) + reconcile labels. Never
@@ -406,6 +414,14 @@ class StoreBridge:
             # re-download with no new cycles still reconciles updated phase ranges.
             if prof.get("phases") and await self._apply_phases(program, prof.get("phases"), device_type):
                 phases_applied += 1
+        # Credit a download on every reference cycle actually adopted this run (each
+        # underlying object, not just one). Skipped/duplicate cycles aren't re-counted,
+        # so re-downloading the same device doesn't inflate the counters. Also record one
+        # community-wide "download" (adoption) for the store's usage dashboard -- the real
+        # metric of how many people actually pulled this into their integration.
+        if imported_store_ids:
+            await self._client.bump_downloads(imported_store_ids)
+            await self._client.bump_analytics("downloads", 1)
         settings = bundle.get("settings") if isinstance(bundle.get("settings"), dict) else {}
         return {
             "profiles_adopted": profiles_adopted,
