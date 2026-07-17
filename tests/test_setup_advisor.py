@@ -286,7 +286,7 @@ def test_phase4_all_clear():
         coverage_gap=None,
         suggestions=[],
         profile_groups=[],
-        skipped_steps={},
+        skipped_steps={"setup_skip_phase1": "never"},
         now=_NOW,
     )
     assert r.phase == "phase4"

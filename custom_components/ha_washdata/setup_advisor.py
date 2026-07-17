@@ -122,7 +122,9 @@ def compute_setup_phase(
     # Only shown when coverage_gap is None: once the device has accumulated enough
     # cycles for the gap analyser to run (even if the nudge is suppressed), it has
     # advanced past the "first profile" guidance stage.
-    if has_real and coverage_gap is None:
+    # Also skipped once the user has permanently dismissed ("never") or snoozed the
+    # Phase 1 guidance via setup_skip_phase1.
+    if has_real and coverage_gap is None and not _is_step_suppressed("setup_skip_phase1", skipped_steps, now):
         if has_recorded:
             first_recorded_profile = _first_recorded_profile_name(past_cycles, real)
             return SetupPhaseResult(
