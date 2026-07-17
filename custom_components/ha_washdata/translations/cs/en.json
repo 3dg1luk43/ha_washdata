@@ -1,0 +1,448 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Nastavení WashData",
+        "description": "Nakonfigurujte si pračku nebo jiný spotřebič.\n\nJe vyžadován snímač napájení.\n\n**Dále budete dotázáni, zda chcete vytvořit svůj první profil.**",
+        "data": {
+          "name": "Název zařízení",
+          "device_type": "Typ zařízení",
+          "power_sensor": "Výkonový senzor",
+          "min_power": "Minimální práh výkonu (W)"
+        },
+        "data_description": {
+          "name": "Popisný název pro toto zařízení (např. 'Pračka', 'Myčka nádobí').",
+          "device_type": "O jaký typ spotřebiče se jedná? Pomáhá přizpůsobit detekci a označování.",
+          "power_sensor": "Entita senzoru, která hlásí spotřebu energie v reálném čase (ve wattech) z vaší chytré zástrčky.",
+          "min_power": "Údaje o výkonu nad touto prahovou hodnotou (ve wattech) indikují, že spotřebič běží. U většiny zařízení začněte s 2W."
+        }
+      },
+      "first_profile": {
+        "title": "Vytvořte první profil",
+        "description": "**Cyklus** je kompletní chod vašeho spotřebiče (např. dávka prádla). **Profil** seskupuje tyto cykly podle typu (např. 'Bavlna', 'Rychlé praní'). Vytvoření profilu nyní napomáhá okamžitému odhadu trvání integrace.\n\nPokud tento profil není detekován automaticky, můžete jej ručně vybrat v ovládacích prvcích zařízení.\n\n**Chcete-li tento krok přeskočit, ponechte pole Název profilu prázdné.**",
+        "data": {
+          "profile_name": "Název profilu (volitelné)",
+          "manual_duration": "Odhadovaná doba trvání (minuty)"
+        }
+      },
+      "reconfigure": {
+        "title": "Znovu nakonfigurujte WashData",
+        "description": "Aktualizujte název zařízení, typ spotřebiče nebo senzor napájení.",
+        "data": {
+          "name": "Název zařízení",
+          "device_type": "Typ zařízení",
+          "power_sensor": "Snímač výkonu",
+          "min_power": "Minimální prahová hodnota výkonu (W)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Připojení se nezdařilo",
+      "invalid_auth": "Neplatné ověření",
+      "unknown": "Neočekávaná chyba",
+      "invalid_power": "Prahová hodnota výkonu musí být větší než 0"
+    },
+    "abort": {
+      "already_configured": "Zařízení je již nakonfigurováno",
+      "reconfigure_successful": "Rekonfigurace byla úspěšná"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Nastavení dat praní",
+        "description": "Přejmenujte zařízení nebo změňte jeho základní hardwarová nastavení. Veškerá nastavení detekce, porovnávání a upozornění jsou v panelu WashData.",
+        "data": {
+          "name": "Název zařízení",
+          "device_type": "Typ zařízení",
+          "power_sensor": "Snímač výkonu",
+          "min_power": "Minimální prahová hodnota výkonu (W)"
+        }
+      }
+    },
+    "error": {
+      "invalid_power": "Prahová hodnota výkonu musí být větší než 0",
+      "timer_default_message": "{device}: Časovač {minutes} min",
+      "timer_pause_action_title": "Obnovit cyklus",
+      "timer_pause_body_suffix": "Cyklus je pozastaven. Otevřete panel WashData pro obnovení.",
+      "vs_typical_longer": "o {pct}% delší než obvykle",
+      "vs_typical_shorter": "o {pct}% kratší než obvykle",
+      "notify_live_waiting_message": "{device}: Zatím nenalezen žádný odpovídající profil."
+    }
+  },
+  "selector": {
+    "device_type": {
+      "options": {
+        "washing_machine": "Pračka",
+        "dryer": "Sušička",
+        "washer_dryer": "Kombinovaná pračka-sušička",
+        "dishwasher": "Myčka nádobí",
+        "air_fryer": "Vzduchová fritéza",
+        "bread_maker": "Pekárna na chleba",
+        "pump": "Pumpa / Kalová pumpa",
+        "generic": "Jiné (pokročilé)",
+        "other": "Prahové zařízení"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "Označit cyklus",
+      "description": "Přiřaďte existující profil k minulému cyklu nebo odeberte štítek.",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení pračky k označení."
+        },
+        "cycle_id": {
+          "name": "ID cyklu",
+          "description": "ID cyklu k označení."
+        },
+        "profile_name": {
+          "name": "Název profilu",
+          "description": "Název existujícího profilu (profily vytvořte v nabídce Správa profilů). Chcete-li štítek odstranit, ponechte prázdné."
+        }
+      }
+    },
+    "create_profile": {
+      "name": "Vytvořit profil",
+      "description": "Vytvořte nový profil (samostatný nebo založený na referenčním cyklu).",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení pračky."
+        },
+        "profile_name": {
+          "name": "Název profilu",
+          "description": "Název nového profilu (např. 'Heavy Duty', 'Delicates')."
+        },
+        "reference_cycle_id": {
+          "name": "ID referenčního cyklu",
+          "description": "Volitelné ID cyklu, na kterém je založen tento profil."
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "Smazat profil",
+      "description": "Smazat profil a volitelně zrušit označení cyklů pomocí něj.",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení pračky."
+        },
+        "profile_name": {
+          "name": "Název profilu",
+          "description": "Profil, který se má smazat."
+        },
+        "unlabel_cycles": {
+          "name": "Zrušte označení cyklů",
+          "description": "Odebrat štítek profilu z cyklů používajících tento profil."
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "Automatické označení starých cyklů",
+      "description": "Zpětně označte neoznačené cykly pomocí párování profilu.",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení pračky."
+        },
+        "confidence_threshold": {
+          "name": "Práh důvěry",
+          "description": "Minimální spolehlivost shody (0,50–0,95) pro použití štítků."
+        }
+      }
+    },
+    "export_config": {
+      "name": "Export konfigurace",
+      "description": "Exportujte profily, cykly a nastavení tohoto zařízení do souboru JSON (na zařízení).",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení pračky k exportu."
+        },
+        "path": {
+          "name": "Cesta",
+          "description": "Volitelná absolutní cesta k souboru k zápisu (výchozí je /config/ha_washdata_export_{entry}.json)."
+        }
+      }
+    },
+    "import_config": {
+      "name": "Importovat konfiguraci",
+      "description": "Importujte profily, cykly a nastavení pro toto zařízení z exportního souboru JSON (nastavení mohou být přepsána).",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení pračky, do kterého se má importovat."
+        },
+        "path": {
+          "name": "Cesta",
+          "description": "Absolutní cesta k exportovanému souboru JSON k importu."
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "Odeslat zpětnou vazbu k cyklu",
+      "description": "Po dokončení cyklu potvrďte nebo opravte automaticky detekovaný program. Zadejte buď `entry_id` (pokročilé) nebo `device_id` (doporučeno).",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení WashData (doporučeno místo entry_id)."
+        },
+        "entry_id": {
+          "name": "ID vstupu",
+          "description": "ID konfiguračního záznamu pro zařízení (alternativa k device_id)."
+        },
+        "cycle_id": {
+          "name": "ID cyklu",
+          "description": "ID cyklu zobrazené v upozornění / protokolech zpětné vazby."
+        },
+        "user_confirmed": {
+          "name": "Potvrďte zjištěný program",
+          "description": "Nastavte true, pokud je detekovaný program správný."
+        },
+        "corrected_profile": {
+          "name": "Opravený profil",
+          "description": "Pokud není potvrzeno, zadejte správný název profilu/programu."
+        },
+        "corrected_duration": {
+          "name": "Opravené trvání (sekundy)",
+          "description": "Volitelná opravená doba trvání v sekundách."
+        },
+        "notes": {
+          "name": "Poznámky",
+          "description": "Nepovinné poznámky k tomuto cyklu."
+        }
+      }
+    },
+    "record_start": {
+      "name": "Zahájení záznamu cyklu",
+      "description": "Spusťte ruční záznam čistého cyklu (obchází veškerou odpovídající logiku).",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení pračky pro záznam."
+        }
+      }
+    },
+    "record_stop": {
+      "name": "Zastavení cyklu záznamu",
+      "description": "Zastavte ruční nahrávání.",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení pračky pro zastavení nahrávání."
+        }
+      }
+    },
+    "trim_cycle": {
+      "name": "Ořezávací cyklus",
+      "description": "Ořízněte údaje o výkonu z minulého cyklu na konkrétní časové okno.",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení WashData."
+        },
+        "cycle_id": {
+          "name": "ID cyklu",
+          "description": "ID cyklu, který se má oříznout."
+        },
+        "trim_start_s": {
+          "name": "Počátek ořezu (sekundy)",
+          "description": "Uchovávejte data z tohoto offsetu během několika sekund. Výchozí 0."
+        },
+        "trim_end_s": {
+          "name": "Konec oříznutí (sekundy)",
+          "description": "Udržujte data až do tohoto posunu v sekundách. Výchozí = plné trvání."
+        }
+      }
+    },
+    "pause_cycle": {
+      "name": "Pozastavit cyklus",
+      "description": "Pozastavte aktivní cyklus pro zařízení WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Pozastavení zařízení WashData."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Obnovit cyklus",
+      "description": "Obnovte pozastavený cyklus pro zařízení WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení WashData pro obnovení."
+        }
+      }
+    },
+    "trigger_ml_training": {
+      "name": "Školení Trigger ML",
+      "description": "Ručně přetrénujte modely strojového učení na zařízení z vlastních označených cyklů tohoto zařízení (experimentální).",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení WashData pro přetrénování modelů."
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "Spuštěno"
+      },
+      "match_ambiguity": {
+        "name": "Nejednoznačnost shody"
+      }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "Stav",
+        "state": {
+          "off": "Vypnuto",
+          "idle": "Nečinný",
+          "starting": "Spouštění",
+          "running": "Probíhá",
+          "paused": "Pozastaveno",
+          "user_paused": "Pozastaveno uživatelem",
+          "ending": "Dokončování",
+          "finished": "Dokončeno",
+          "anti_wrinkle": "Proti pomačkání",
+          "interrupted": "Přerušeno",
+          "force_stopped": "Nuceně zastaveno",
+          "rinse": "Máchání",
+          "unknown": "Neznámý",
+          "clean": "Čistý",
+          "delay_wait": "Čekání na spuštění"
+        }
+      },
+      "washer_program": {
+        "name": "Program"
+      },
+      "time_remaining": {
+        "name": "Zbývající čas"
+      },
+      "total_duration": {
+        "name": "Celková délka"
+      },
+      "cycle_progress": {
+        "name": "Průběh"
+      },
+      "current_power": {
+        "name": "Aktuální výkon"
+      },
+      "elapsed_time": {
+        "name": "Uplynutý čas"
+      },
+      "debug_info": {
+        "name": "Informace o ladění"
+      },
+      "match_confidence": {
+        "name": "Spolehlivost shody"
+      },
+      "top_candidates": {
+        "name": "Nejlepší kandidáti",
+        "state": {
+          "none": "Žádní"
+        }
+      },
+      "ambiguity": {
+        "name": "Skóre nejednoznačnosti"
+      },
+      "current_phase": {
+        "name": "Aktuální fáze"
+      },
+      "profile_cycle_count": {
+        "name": "Počet cyklů profilu {profile_name}",
+        "unit_of_measurement": "cyklů"
+      },
+      "suggestions": {
+        "name": "Doporučená nastavení"
+      },
+      "pump_runs_today": {
+        "name": "Spuštění čerpadla (posledních 24 h)"
+      },
+      "cycle_count": {
+        "name": "Počet cyklů"
+      },
+      "energy_total": {
+        "name": "Celková energie"
+      }
+    },
+    "select": {
+      "program_select": {
+        "name": "Program cyklu",
+        "state": {
+          "auto_detect": "Automaticky"
+        }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "Nuceně ukončit cyklus"
+      },
+      "pause_cycle": {
+        "name": "Pozastavit cyklus"
+      },
+      "resume_cycle": {
+        "name": "Obnovit cyklus"
+      },
+      "record_start": {
+        "name": "Začátek cyklu záznamu"
+      },
+      "record_stop": {
+        "name": "Zastavení cyklu záznamu"
+      }
+    }
+  },
+  "exceptions": {
+    "device_id_required": {
+      "message": "Je vyžadováno platné device_id."
+    },
+    "cycle_id_required": {
+      "message": "Je vyžadován platný cycle_id."
+    },
+    "profile_name_required": {
+      "message": "Je vyžadován platný profile_name."
+    },
+    "device_not_found": {
+      "message": "Zařízení nenalezeno."
+    },
+    "no_config_entry": {
+      "message": "Pro zařízení nebyla nalezena žádná položka konfigurace."
+    },
+    "integration_not_loaded": {
+      "message": "Integrace pro toto zařízení není načtena."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Cyklus nebyl nalezen nebo nemá žádné údaje o napájení."
+    },
+    "trim_failed_empty_window": {
+      "message": "Oříznutí se nezdařilo – cyklus nebyl nalezen, nejsou žádná data o napájení nebo je výsledné okno prázdné."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s musí být větší než trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "Není aktivní cyklus k pozastavení nebo obnovení."
+    },
+    "path_not_allowed": {
+      "message": "Cesta není povolena: {path}. Přidejte její adresář do souboru 'allowlist_external_dirs' v souboru configuration.yaml."
+    },
+    "export_path_exists": {
+      "message": "Cíl exportu již existuje: {path}. Zvolte jinou cestu nebo nejprve odstraňte existující soubor."
+    },
+    "export_write_failed": {
+      "message": "Nelze zapsat export do {path}: {error}"
+    },
+    "create_profile_failed": {
+      "message": "Nepodařilo se vytvořit profil: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Nepodařilo se přiřadit profil: {error}"
+    }
+  }
+}
