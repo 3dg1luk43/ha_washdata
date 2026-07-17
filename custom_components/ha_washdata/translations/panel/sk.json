@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optimalizácia: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Nastavenie zariadenia",
+      "healthy_chip": "Nastavenie dokončené"
+    },
+    "phase0": {
+      "washer": "WashData už deteguje vaše cykly. Nahrajte prvý cyklus, aby ste povolili názvy programov a odhady doby trvania.",
+      "dishwasher": "WashData sleduje. Umývačky riadu majú zložité cykly – nahranie prvého cyklu je dôrazne odporúčané. Ak detegovaný cyklus trvá príliš dlho, orežte ho v editore cyklov pred uložením ako profil.",
+      "generic": "WashData sleduje. Nahrajte alebo označte detegovaný cyklus a začnite vytvárať profily."
+    },
+    "phase1a": {
+      "labelled": "Dobrý začiatok – váš prvý program je uložený. Pre najčistejšie dáta zvážte nahranie ďalšieho cyklu pomocou widgetu nahrávania."
+    },
+    "phase1b": {
+      "recorded": "Vaša nahrávka bola uložená ako {profile_name}. Teraz nahrajte alebo označte ďalšie bežné programy, aby ste rozšírili pokrytie."
+    },
+    "phase1c": {
+      "verify": "Máte {count} programov od komunity. Spustite cyklus, aby ste overili, že ich WashData správne rozoznáva – porovnávanie sa bude zlepšovať, ako zariadenie buduje vlastnú históriu."
+    },
+    "phase2": {
+      "cluster": "WashData zaznamenal {count} cyklov, ktoré nezodpovedajú žiadnemu uloženému programu – navzájom si podobajú. Chcete pre ne vytvoriť nový profil?",
+      "unmatched": "Váš posledný cyklus nezodpovedal žiadnemu uloženému programu. Je to nový program?"
+    },
+    "phase3": {
+      "suggestions": "WashData má odporúčania nastavení na základe vašej histórie cyklov – skontrolujte ich pre zlepšenie presnosti detekcie.",
+      "groups": "Niektoré vaše profily vyzerajú ako rovnaký program pri rôznych teplotách. Usporiadajte ich do skupiny pre lepšie porovnávanie.",
+      "phases": "Pridajte fázy programu k {profile_name} pre presnejšie odhady zostávajúceho času."
+    },
+    "phase4": {
+      "healthy": "Toto zariadenie je plne nastavené ({profile_count} profilov)."
+    },
+    "cta": {
+      "start_recording": "Spustiť nahrávanie",
+      "label_detected_cycle": "Už mám detegovaný cyklus – namiesto toho ho označte",
+      "browse_cycles": "Prechádzať cykly a označiť ďalší",
+      "view_profiles": "Zobraziť vaše profily",
+      "create_from_cluster": "Vytvoriť profil z týchto cyklov",
+      "create_profile": "Vytvoriť preňho profil",
+      "review_suggestions": "Skontrolovať návrhy",
+      "organise_profiles": "Usporiadať profily",
+      "configure_phases": "Nakonfigurovať fázy",
+      "skip_step": "Preskočiť tento krok",
+      "skip_forever": "Nezobrazovať znova",
+      "hide_guidance": "Skryť pokyny",
+      "show_guidance": "Zobraziť pokyny"
+    }
   }
 }

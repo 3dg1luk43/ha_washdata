@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optymalizacja: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Konfiguracja urządzenia",
+      "healthy_chip": "Konfiguracja ukończona"
+    },
+    "phase0": {
+      "washer": "WashData już wykrywa Twoje cykle. Nagraj pierwszy cykl, aby włączyć nazwy programów i szacunki czasu.",
+      "dishwasher": "WashData obserwuje. Zmywarki mają złożone cykle – nagranie pierwszego cyklu jest zdecydowanie zalecane. Jeśli wykryty cykl trwa zbyt długo, użyj edytora cyklu, aby go przyciąć przed zapisaniem jako profil.",
+      "generic": "WashData obserwuje. Nagraj lub oznacz wykryty cykl, aby zacząć tworzyć profile."
+    },
+    "phase1a": {
+      "labelled": "Dobry początek – Twój pierwszy program jest zapisany. Aby uzyskać najczystsze dane, rozważ nagranie następnego cyklu za pomocą widżetu rejestratora."
+    },
+    "phase1b": {
+      "recorded": "Nagranie zostało zapisane jako {profile_name}. Teraz nagraj lub oznacz inne popularne programy, aby rozszerzyć pokrycie."
+    },
+    "phase1c": {
+      "verify": "Masz {count} programów ze społeczności. Uruchom cykl, aby sprawdzić, czy WashData rozpoznaje go poprawnie – dopasowanie będzie się poprawiać w miarę jak urządzenie buduje własną historię."
+    },
+    "phase2": {
+      "cluster": "WashData zauważył {count} cykli, które nie pasują do żadnego zapisanego programu – wyglądają podobnie do siebie. Chcesz utworzyć dla nich nowy profil?",
+      "unmatched": "Twój ostatni cykl nie pasował do żadnego zapisanego programu. Czy to nowy program?"
+    },
+    "phase3": {
+      "suggestions": "WashData ma zalecenia dotyczące ustawień oparte na historii Twoich cykli – przejrzyj je, aby poprawić dokładność wykrywania.",
+      "groups": "Niektóre Twoje profile wyglądają jak ten sam program w różnych temperaturach. Zorganizuj je w grupę dla lepszego dopasowania.",
+      "phases": "Dodaj fazy programu do {profile_name} dla dokładniejszych szacunków pozostałego czasu."
+    },
+    "phase4": {
+      "healthy": "To urządzenie jest w pełni skonfigurowane ({profile_count} profili)."
+    },
+    "cta": {
+      "start_recording": "Rozpocznij nagrywanie",
+      "label_detected_cycle": "Mam już wykryty cykl – oznacz go zamiast tego",
+      "browse_cycles": "Przeglądaj cykle, aby oznaczyć kolejny",
+      "view_profiles": "Wyświetl swoje profile",
+      "create_from_cluster": "Utwórz profil z tych cykli",
+      "create_profile": "Utwórz dla niego profil",
+      "review_suggestions": "Przejrzyj sugestie",
+      "organise_profiles": "Zorganizuj profile",
+      "configure_phases": "Skonfiguruj fazy",
+      "skip_step": "Pomiń ten krok",
+      "skip_forever": "Nie pokazuj ponownie",
+      "hide_guidance": "Ukryj wskazówki",
+      "show_guidance": "Pokaż wskazówki"
+    }
   }
 }

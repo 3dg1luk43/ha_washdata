@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optimizacija: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Nastavitev naprave",
+      "healthy_chip": "Nastavitev dokončana"
+    },
+    "phase0": {
+      "washer": "WashData že zazna vaše cikle. Posnemite prvi cikel, da omogočite imena programov in ocene časa.",
+      "dishwasher": "WashData opazuje. Pomivalni stroji imajo zapletene cikle – snemanje prvega cikla je izrazito priporočeno. Če zaznani cikel teče predolgo, ga obrežite v urejevalniku ciklov, preden ga shranite kot profil.",
+      "generic": "WashData opazuje. Posnemite ali označite zaznani cikel in začnite graditi profile."
+    },
+    "phase1a": {
+      "labelled": "Dober začetek – vaš prvi program je shranjen. Za najčistejše podatke razmislite o snemanju naslednjega cikla s pripomočkom za snemanje."
+    },
+    "phase1b": {
+      "recorded": "Vaš posnetek je bil shranjen kot {profile_name}. Zdaj posnemite ali označite ostale pogoste programe, da razširite pokritost."
+    },
+    "phase1c": {
+      "verify": "Imate {count} programov od skupnosti. Zaženite cikel, da preverite, ali jih WashData pravilno prepozna – ujemanje se bo izboljšalo, ko naprava gradi lastno zgodovino."
+    },
+    "phase2": {
+      "cluster": "WashData je videl {count} ciklov, ki ne ustrezajo nobenemu shranjenemu programu – med seboj so si podobni. Ali želite zanje ustvariti nov profil?",
+      "unmatched": "Vaš zadnji cikel ni ustrezal nobenemu shranjenemu programu. Je to nov program?"
+    },
+    "phase3": {
+      "suggestions": "WashData ima priporočila za nastavitve na podlagi vaše zgodovine ciklov – preglejte jih za izboljšanje natančnosti zaznavanja.",
+      "groups": "Nekateri vaši profili izgledajo kot isti program pri različnih temperaturah. Organizirajte jih v skupino za boljše ujemanje.",
+      "phases": "Dodajte programske faze k {profile_name} za natančnejše ocene preostalega časa."
+    },
+    "phase4": {
+      "healthy": "Ta naprava je v celoti nastavljena ({profile_count} profilov)."
+    },
+    "cta": {
+      "start_recording": "Začni snemanje",
+      "label_detected_cycle": "Imam že zaznani cikel – namesto tega ga označi",
+      "browse_cycles": "Prebrskaj cikle za označevanje naslednjega",
+      "view_profiles": "Oglej si svoje profile",
+      "create_from_cluster": "Ustvari profil iz teh ciklov",
+      "create_profile": "Ustvari zanj profil",
+      "review_suggestions": "Preglej predloge",
+      "organise_profiles": "Organiziraj profile",
+      "configure_phases": "Nastavi faze",
+      "skip_step": "Preskoči ta korak",
+      "skip_forever": "Ne prikaži znova",
+      "hide_guidance": "Skrij navodila",
+      "show_guidance": "Prikaži navodila"
+    }
   }
 }

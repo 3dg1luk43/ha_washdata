@@ -1767,5 +1767,52 @@
     "pg_sweep": {
       "optimize": "Optimizacija: {param}"
     }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Postavljanje uređaja",
+      "healthy_chip": "Postavljanje dovršeno"
+    },
+    "phase0": {
+      "washer": "WashData već otkriva vaše cikluse. Snimite prvi ciklus kako biste omogućili nazive programa i procjene vremena.",
+      "dishwasher": "WashData prati. Mašine za pranje posuđa imaju složene cikluse – snimanje prvog ciklusa je izrazito preporučeno. Ako otkriveni ciklus traje predugo, koristite uređivač ciklusa za rezanje prije pohrane kao profila.",
+      "generic": "WashData prati. Snimite ili označite otkriveni ciklus kako biste počeli graditi profile."
+    },
+    "phase1a": {
+      "labelled": "Dobar početak – vaš prvi program je pohranjen. Za najčišće podatke razmislite o snimanju sljedećeg ciklusa pomoću widgeta snimača."
+    },
+    "phase1b": {
+      "recorded": "Vaša snimka pohranjena je kao {profile_name}. Sada snimite ili označite ostale uobičajene programe za izgradnju pokrivenosti."
+    },
+    "phase1c": {
+      "verify": "Imate {count} programa od zajednice. Pokrenite ciklus kako biste provjerili prepoznaje li ih WashData ispravno – podudaranje će se poboljšati kako vaš uređaj gradi vlastitu historiju."
+    },
+    "phase2": {
+      "cluster": "WashData je vidio {count} ciklusa koji ne odgovaraju nijednom pohranjenome programu – nalikuju jedni drugima. Želite li za njih stvoriti novi profil?",
+      "unmatched": "Vaš zadnji ciklus nije odgovarao nijednom pohranjenome programu. Je li to novi program?"
+    },
+    "phase3": {
+      "suggestions": "WashData ima preporuke postavki temeljene na vašoj historiji ciklusa – pregledajte ih kako biste poboljšali tačnost otkrivanja.",
+      "groups": "Neki vaši profili izgledaju kao isti program pri različitim temperaturama. Organizujte ih u grupu za bolje podudaranje.",
+      "phases": "Dodajte faze programa u {profile_name} za tačnije procjene preostalog vremena."
+    },
+    "phase4": {
+      "healthy": "Ovaj uređaj je u potpunosti postavljen ({profile_count} profila)."
+    },
+    "cta": {
+      "start_recording": "Pokreni snimanje",
+      "label_detected_cycle": "Već imam otkriven ciklus – umjesto toga ga označi",
+      "browse_cycles": "Pregledaj cikluse za označavanje sljedećeg",
+      "view_profiles": "Prikaži svoje profile",
+      "create_from_cluster": "Napravi profil od ovih ciklusa",
+      "create_profile": "Napravi za njega profil",
+      "review_suggestions": "Preglej prijedloge",
+      "organise_profiles": "Organizuj profile",
+      "configure_phases": "Konfiguriraj faze",
+      "skip_step": "Preskoči ovaj korak",
+      "skip_forever": "Ne prikazuj više",
+      "hide_guidance": "Sakrij upute",
+      "show_guidance": "Prikaži upute"
+    }
   }
 }
