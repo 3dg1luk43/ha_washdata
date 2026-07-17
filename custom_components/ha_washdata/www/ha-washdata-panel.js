@@ -161,6 +161,10 @@ const _SETTINGS_SECTIONS = [
         doc: 'If the match score falls between this and Auto-Label Confidence, WashData flags the finished cycle for review in the Cycles queue so you can verify the identified program. Below this score the match is too uncertain to surface. Must be kept below Auto-Label Confidence.' },
     ] },
   ] },
+  { id: 'phase_eta', label: 'Time Remaining', intro: 'Phase-aware time-remaining, for machines whose cycle length depends on temperature or spin.', onlyDeviceTypes: ['washing_machine', 'washer_dryer'], fields: [
+    { key: 'enable_phase_matching', label: 'Phase-aware time remaining', type: 'checkbox', def: false,
+      doc: 'Break each running cycle into phases (heating, wash, spin) and budget the time remaining per phase, blended with the classic estimate - leaning on the phase budget early in the cycle and the classic estimate near the end. This personalises the countdown to how long your machine actually heats and runs, which is most noticeable in the first half of a cycle. Off = the classic estimate only. Only the time-remaining display is affected; program matching and cycle detection are unchanged.' },
+  ] },
   { id: 'timing', label: 'Timing & Watchdog', intro: 'Background cadence, the offline watchdog and housekeeping.', groups: [
     { sub: 'Watchdog', fields: [
       { key: 'watchdog_interval', label: 'Watchdog Interval', unit: 's', type: 'number', min: 1, def: 30,

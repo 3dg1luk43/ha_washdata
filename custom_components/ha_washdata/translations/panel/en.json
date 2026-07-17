@@ -916,6 +916,10 @@
     "triggers": {
       "intro": "Optional external signals: an end trigger, a door sensor, a pause switch, and the unload reminder.",
       "label": "Triggers & Doors"
+    },
+    "phase_eta": {
+      "intro": "Phase-aware time-remaining, for machines whose cycle length depends on temperature or spin.",
+      "label": "Time Remaining"
     }
   },
   "setting": {
@@ -1281,6 +1285,10 @@
     },
     "show_contributor": {
       "doc": "Show the \"by <contributor>\" attribution on community appliances and reference cycles."
+    },
+    "enable_phase_matching": {
+      "doc": "Break each running cycle into phases (heating, wash, spin) and budget the time remaining per phase, blended with the classic estimate - leaning on the phase budget early in the cycle and the classic estimate near the end. This personalises the countdown to how long your machine actually heats and runs, which is most noticeable in the first half of a cycle. Off = the classic estimate only. Only the time-remaining display is affected; program matching and cycle detection are unchanged.",
+      "label": "Phase-aware time remaining"
     }
   },
   "setting_group": {
