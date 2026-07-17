@@ -3481,16 +3481,11 @@ class HaWashdataPanel extends HTMLElement {
       && !(setupDismissed && setupStatus.phase === 'phase4')
       && !hasCurve;
     const setupCardHtml = showSetupCard ? this._htmlSetupCard(setupStatus) : '';
-    // F1 fallback: show the old getting-started card when setup status is not
-    // yet available (e.g. backend older than Task 4).
-    const showGettingStarted = !showSetupCard && !this._pref('onboarding_dismissed', false) && profileCount === 0 && !hasCurve;
     const curveHtml = hasCurve
       ? `<div class="wd-canvas-wrap" style="margin-top:14px"><canvas id="wd-status-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_power_chart', {}, 'Power consumption chart'))}" style="height:160px"></canvas></div>${legend}`
       : (showSetupCard
           ? setupCardHtml
-          : (showGettingStarted
-              ? this._htmlGettingStarted(cycleCount)
-              : `<p class="wd-info" style="margin-top:12px">${this._t('msg.live_chart_loading', {}, 'Live power chart appears as readings arrive.')}</p>`));
+          : `<p class="wd-info" style="margin-top:12px">${this._t('msg.live_chart_loading', {}, 'Live power chart appears as readings arrive.')}</p>`);
 
     const showDebug = this._pref('show_debug', false);
     let debugHtml = '';
@@ -3550,44 +3545,13 @@ class HaWashdataPanel extends HTMLElement {
         </div>
         ${progressHtml}
         ${this._htmlPhaseTimeline(dev, prog, isRunning)}
-        ${(showSetupCard || showGettingStarted) ? '' : `<div class="wd-card-title" style="margin-top:18px">${this._t('hdr.live_power', {}, 'Live Power')}</div>`}
+        ${showSetupCard ? '' : `<div class="wd-card-title" style="margin-top:18px">${this._t('hdr.live_power', {}, 'Live Power')}</div>`}
         ${curveHtml}
       </div>
       ${this._canEdit() ? this._htmlRecordingWidget() : ''}
       ${debugHtml}
       ${advHtml}
     `;
-  }
-
-  // F1: first-run guided card shown in the Status power-chart area of a fresh
-  // device. Below 3 observed cycles it explains the "just run it" learning phase
-  // with a 0..3 progress meter; at 3+ it nudges toward creating the first
-  // profile (reusing the existing create-profile entry point). A "Skip setup"
-  // link dismisses it permanently via the onboarding_dismissed user pref.
-  _htmlGettingStarted(cycleCount) {
-    const n = Math.max(0, Math.min(3, cycleCount || 0));
-    const heading = `<div class="wd-card-title" style="margin:12px 0 4px">${this._t('hdr.getting_started', {}, 'Getting started')}</div>`;
-    const skip = `<div style="margin-top:14px"><span role="button" tabindex="0" data-action="skip-onboarding" class="wd-onboard-skip">${this._t('btn.skip_setup', {}, 'Skip setup')}</span></div>`;
-    if (cycleCount >= 3) {
-      // Enough cycles observed — point the user at naming their first program.
-      const createBtn = this._canEdit()
-        ? `<div style="margin-top:12px"><button class="wd-btn wd-btn-primary" data-action="create-profile">${this._t('btn.new_profile', {}, '+ New Profile')}</button></div>`
-        : '';
-      return `<div class="wd-onboard">
-        ${heading}
-        <p class="wd-info" style="margin:0">${this._t('msg.name_first_program', {}, 'You have enough cycles — name your first program to start matching.')}</p>
-        ${createBtn}
-        ${skip}
-      </div>`;
-    }
-    const pct = (n / 3) * 100;
-    return `<div class="wd-onboard">
-      ${heading}
-      <p class="wd-info" style="margin:0 0 12px">${this._t('msg.onboarding_watching', {}, 'Run your appliance normally — WashData is watching. After 3 cycles, program matching will begin.')}</p>
-      <div class="wd-prog-bg"><div class="wd-prog-fill" style="width:${pct.toFixed(0)}%"></div></div>
-      <div class="wd-prog-row"><span>${this._t('msg.onboarding_progress', {n}, `${n} / 3 cycles observed`)}</span></div>
-      ${skip}
-    </div>`;
   }
 
   // Setup Card — phase-aware guidance for device onboarding. Replaces the old
@@ -4074,42 +4038,6 @@ class HaWashdataPanel extends HTMLElement {
     const groupedNames = new Set();
     pg.groups.forEach(g => (g.members || []).forEach(m => groupedNames.add(m)));
 
-    // Suggestion banner: near-duplicate clusters the user can confirm as groups.
-    const sugBanner = (canEdit && (pg.suggestions || []).length) ? `
-      <div class="wd-sug-banner">
-        <span>🔗 <b>${pg.suggestions.length}</b> ${this._t('msg.near_duplicate_cluster', {}, 'near-duplicate profile cluster' + (pg.suggestions.length > 1 ? 's' : '') + ' detected. Grouping lets matching reliably pick between look-alikes (e.g. same program at different temperature/spin).')}</span>
-        ${pg.suggestions.map((s, i) => `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-suggest" data-idx="${i}">${this._t('btn.group_suggest', {n: s.members.length, members: _esc(s.members.join(', ').slice(0, 48))}, `Group ${s.members.length}: ${_esc(s.members.join(', ').slice(0, 48))}`)}</button>`).join('')}
-      </div>` : '';
-
-    // Coverage gap banner: unmatched cycles that might represent unknown programs.
-    const cg = this._coverageGaps || {};
-    const cgBanner = (canEdit && cg.suggest_create) ? (() => {
-      const clusters = (cg.duration_clusters || []).slice(0, 3);
-      const clusterHints = clusters.map(cl => `~${cl.duration_bucket_min}–${cl.duration_bucket_min + 15} min (${cl.count}×)`).join(', ');
-      const profileSuggestions = (cg.profile_suggestions || []).slice(0, 2);
-      const suggestionHtml = profileSuggestions.length > 0
-        ? profileSuggestions.map(ps => `
-            <div style="margin-top:6px;display:flex;align-items:center;gap:8px">
-              <span style="font-size:.9em">${this._t('msg.coverage_gap_similar_cycles', {count: ps.count}, `${ps.count} similar unlabelled cycles found — create a profile to start matching them.`)}</span>
-              <button class="wd-btn wd-btn-sm wd-btn-primary wd-create-cluster" data-cycle-ids="${_esc(JSON.stringify(ps.cycle_ids))}" data-name="${_esc(ps.suggested_name)}">${this._t('btn.create_from_cluster', {count: ps.count}, `Create profile from ${ps.count} cycles`)}</button>
-            </div>`).join('')
-        : '';
-      return `<div class="wd-sug-banner" style="border-color:var(--info-color,#2196f3);background:rgba(33,150,243,.07)">
-        <span>📂 <b>${cg.unmatched_count}</b> ${this._t('msg.coverage_gap', {pct: Math.round(cg.unmatched_rate * 100)}, `recent cycles have no matching profile (${Math.round(cg.unmatched_rate * 100)}% of last 30).`)}${clusterHints ? ` ${this._t('lbl.duration', {}, 'Duration')}: ${clusterHints}.` : ''} ${this._t('msg.consider_new_profile', {}, 'Consider creating a new profile.')}</span>
-        ${canEdit ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="create-profile">${this._t('btn.create_profile', {}, '+ Create profile')}</button>` : ''}
-        ${suggestionHtml}
-      </div>`;
-    })() : '';
-
-    // Recommendations: actionable maintenance advisories derived from the
-    // per-profile health/trend signals (drift, poor fit). Informational only.
-    const advisories = this._profileAdvisories || [];
-    const advBanner = advisories.length ? `
-      <div class="wd-sug-banner" style="border-color:var(--warning-color,#ff9800);background:rgba(255,152,0,.06);flex-direction:column;align-items:stretch;gap:6px">
-        <span style="font-weight:600">💡 ${this._t('hdr.recommendations', {n: advisories.length}, `Recommendations (${advisories.length})`)}</span>
-        ${advisories.slice(0, 5).map(a => `<div style="font-size:.9em">${a.severity === 'warning' ? '⚠' : 'ℹ️'} ${_esc(a.message_key ? this._t(a.message_key, a.message_params || {}, a.message || '') : (a.message || ''))}</div>`).join('')}
-      </div>` : '';
-
     // Group sections (with cohesion badge + low-cohesion warning).
     const groupSections = pg.groups.map(g => {
       const memCards = (g.members || []).map(m => byName[m] ? this._profileCardHtml(byName[m]) : '').join('');
@@ -4156,9 +4084,6 @@ class HaWashdataPanel extends HTMLElement {
           <button class="wd-btn wd-btn-secondary" data-action="rebuild-envelopes" ${rebuildBusy ? 'disabled' : ''} title="${_esc(this._t('btn.rebuild_tip', {}, 'Recompute the expected power envelope (min/max band) for all profiles from their labelled cycles — run after labelling new cycles or correcting old ones'))}">${rebuildBusy ? ('<span class="wd-spin"></span> ' + this._t('status.rebuilding', {}, 'Rebuilding…')) : this._t('btn.rebuild', {}, 'Rebuild Envelopes')}</button>
         </div>` : ''}
       </div>
-      ${sugBanner}
-      ${cgBanner}
-      ${advBanner}
       ${groupSections}
       ${this._profiles.length === 0
         ? `<div class="wd-empty"><div class="wd-icon">📊</div>${this._t('msg.no_profiles_yet', {}, 'No profiles yet. Create one from a labelled cycle.')}</div>`
@@ -9368,11 +9293,6 @@ class HaWashdataPanel extends HTMLElement {
 
     } else if (a === 'create-profile') {
       this._modal = { type: 'create-profile' }; this._render();
-
-    } else if (a === 'skip-onboarding') {
-      // F1: dismiss the first-run wizard permanently for this user.
-      this._setPref('onboarding_dismissed', true);
-      this._render();
 
     } else if (a === 'setup-cta') {
       // Setup card primary / secondary CTA — navigate to the relevant panel section.

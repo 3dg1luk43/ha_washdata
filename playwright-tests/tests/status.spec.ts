@@ -81,45 +81,6 @@ test('clicking the suggestion attention card switches to settings tab', async ({
   await expect(settingsTab).toBeVisible({ timeout: 5_000 });
 });
 
-test('onboarding card appears when no profiles exist and onboarding not dismissed', async ({ page }) => {
-  await bootPanel(page, {
-    'ha_washdata/get_profiles': { profiles: [], advisories: [], coverage_gap: null },
-    'ha_washdata/get_panel_config': {
-      ...require('../fixtures/mock-data/panel-config.json'),
-      prefs: { onboarding_dismissed: false },
-    },
-    'ha_washdata/get_devices': {
-      devices: [{
-        ...require('../fixtures/mock-data/device-idle.json').devices[0],
-        cycle_count: 1,
-      }],
-    },
-    'ha_washdata/get_power_history': { live: [], raw: [], cycle_active: false },
-  });
-  await expect(page.locator('.wd-onboard').first()).toBeVisible({ timeout: 5_000 });
-});
-
-test('skip setup button dismisses the onboarding card', async ({ page }) => {
-  await bootPanel(page, {
-    'ha_washdata/get_profiles': { profiles: [], advisories: [], coverage_gap: null },
-    'ha_washdata/get_panel_config': {
-      ...require('../fixtures/mock-data/panel-config.json'),
-      prefs: { onboarding_dismissed: false },
-    },
-    'ha_washdata/get_devices': {
-      devices: [{
-        ...require('../fixtures/mock-data/device-idle.json').devices[0],
-        cycle_count: 1,
-      }],
-    },
-    'ha_washdata/get_power_history': { live: [], raw: [], cycle_active: false },
-  });
-  const card = page.locator('.wd-onboard').first();
-  await expect(card).toBeVisible({ timeout: 5_000 });
-  await page.locator('[data-action="skip-onboarding"]').click();
-  await expect(card).not.toBeVisible({ timeout: 3_000 });
-});
-
 test('feedback attention card appears when device has pending feedbacks', async ({ page }) => {
   await bootPanel(page, {
     'ha_washdata/get_devices': {
